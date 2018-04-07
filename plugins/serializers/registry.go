@@ -9,6 +9,7 @@ import (
 	"github.com/masami10/rush/plugins/serializers/graphite"
 	"github.com/masami10/rush/plugins/serializers/influx"
 	"github.com/masami10/rush/plugins/serializers/json"
+	"github.com/masami10/rush/plugins/serializers/xml"
 )
 
 // SerializerOutput is an interface for output plugins that are able to
@@ -55,10 +56,16 @@ func NewSerializer(config *Config) (Serializer, error) {
 		serializer, err = NewGraphiteSerializer(config.Prefix, config.Template)
 	case "json":
 		serializer, err = NewJsonSerializer(config.TimestampUnits)
+	case "xml":
+		serializer, err = NewXmlSerializer(config.TimestampUnits)
 	default:
 		err = fmt.Errorf("Invalid data format: %s", config.DataFormat)
 	}
 	return serializer, err
+}
+
+func NewXmlSerializer(timestampUnits time.Duration) (Serializer, error) {
+	return &xml.XmlSerializer{TimestampUnits: timestampUnits}, nil
 }
 
 func NewJsonSerializer(timestampUnits time.Duration) (Serializer, error) {

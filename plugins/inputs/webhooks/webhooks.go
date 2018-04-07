@@ -17,6 +17,7 @@ import (
 	"github.com/masami10/rush/plugins/inputs/webhooks/papertrail"
 	"github.com/masami10/rush/plugins/inputs/webhooks/particle"
 	"github.com/masami10/rush/plugins/inputs/webhooks/rollbar"
+	"github.com/masami10/rush/plugins/inputs/webhooks/xboard"
 )
 
 type Webhook interface {
@@ -36,6 +37,7 @@ type Webhooks struct {
 	Rollbar    *rollbar.RollbarWebhook
 	Papertrail *papertrail.PapertrailWebhook
 	Particle   *particle.ParticleWebhook
+	Xboard 	   *xboard.XboardWebhook
 
 	srv *http.Server
 }
@@ -67,6 +69,10 @@ func (wb *Webhooks) SampleConfig() string {
 
   [inputs.webhooks.particle]
     path = "/particle"
+
+  [inputs.webhooks.xboard]
+	path = "/xboard"
+	# secret = ""
  `
 }
 

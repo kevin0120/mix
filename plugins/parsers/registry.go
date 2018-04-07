@@ -11,6 +11,7 @@ import (
 	"github.com/masami10/rush/plugins/parsers/json"
 	"github.com/masami10/rush/plugins/parsers/nagios"
 	"github.com/masami10/rush/plugins/parsers/value"
+	"github.com/masami10/rush/plugins/parsers/xml"
 )
 
 // ParserInput is an interface for input plugins that are able to parse
@@ -73,6 +74,9 @@ func NewParser(config *Config) (Parser, error) {
 	var err error
 	var parser Parser
 	switch config.DataFormat {
+	case "xml":
+		parser, err = NewXMLParser(config.MetricName,
+			config.TagKeys, config.DefaultTags)
 	case "json":
 		parser, err = NewJSONParser(config.MetricName,
 			config.TagKeys, config.DefaultTags)
@@ -93,6 +97,19 @@ func NewParser(config *Config) (Parser, error) {
 		err = fmt.Errorf("Invalid data format: %s", config.DataFormat)
 	}
 	return parser, err
+}
+
+func NewXMLParser(
+	metricName string,
+	tagKeys []string,
+	defaultTags map[string]string,
+) (Parser, error) {
+	parser := &xml.XMLParser{
+	MetricName:  metricName,
+	TagKeys:     tagKeys,
+	DefaultTags: defaultTags,
+	}
+	return parser, nil
 }
 
 func NewJSONParser(

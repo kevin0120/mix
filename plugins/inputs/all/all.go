@@ -15,6 +15,7 @@ import (
 	_ "github.com/masami10/rush/plugins/inputs/consul"
 	_ "github.com/masami10/rush/plugins/inputs/couchbase"
 	_ "github.com/masami10/rush/plugins/inputs/couchdb"
+	_ "github.com/masami10/rush/plugins/inputs/cvi_listener"
 	_ "github.com/masami10/rush/plugins/inputs/dcos"
 	_ "github.com/masami10/rush/plugins/inputs/disque"
 	_ "github.com/masami10/rush/plugins/inputs/dmcache"
