@@ -1,4 +1,4 @@
-# Telegraf plugin: Cassandra
+# Rush plugin: Cassandra
 
 #### Plugin arguments:
 - **context** string: Context root used for jolokia url

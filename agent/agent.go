@@ -8,14 +8,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/internal/config"
-	"github.com/influxdata/telegraf/internal/models"
-	"github.com/influxdata/telegraf/selfstat"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/internal/config"
+	"github.com/masami10/rush/internal/models"
+	"github.com/masami10/rush/selfstat"
 )
 
-// Agent runs telegraf and collects data based on the given config
+// Agent runs rush and collects data based on the given config
 type Agent struct {
 	Config *config.Config
 }
@@ -46,7 +46,7 @@ func NewAgent(config *config.Config) (*Agent, error) {
 func (a *Agent) Connect() error {
 	for _, o := range a.Config.Outputs {
 		switch ot := o.Output.(type) {
-		case telegraf.ServiceOutput:
+		case rush.ServiceOutput:
 			if err := ot.Start(); err != nil {
 				log.Printf("E! Service for output %s failed to start, exiting\n%s\n",
 					o.Name, err.Error())
@@ -76,7 +76,7 @@ func (a *Agent) Close() error {
 	for _, o := range a.Config.Outputs {
 		err = o.Output.Close()
 		switch ot := o.Output.(type) {
-		case telegraf.ServiceOutput:
+		case rush.ServiceOutput:
 			ot.Stop()
 		}
 	}
@@ -91,7 +91,7 @@ func panicRecover(input *models.RunningInput) {
 			input.Name(), err, trace)
 		log.Println("E! PLEASE REPORT THIS PANIC ON GITHUB with " +
 			"stack trace, configuration, and OS information: " +
-			"https://github.com/influxdata/telegraf/issues/new")
+			"https://github.com/masami10/rush/issues/new")
 	}
 }
 
@@ -101,7 +101,7 @@ func (a *Agent) gatherer(
 	shutdown chan struct{},
 	input *models.RunningInput,
 	interval time.Duration,
-	metricC chan telegraf.Metric,
+	metricC chan rush.Metric,
 ) {
 	defer panicRecover(input)
 
@@ -176,7 +176,7 @@ func gatherWithTimeout(
 func (a *Agent) Test() error {
 	shutdown := make(chan struct{})
 	defer close(shutdown)
-	metricC := make(chan telegraf.Metric)
+	metricC := make(chan rush.Metric)
 
 	// dummy receiver for the point channel
 	go func() {
@@ -191,7 +191,7 @@ func (a *Agent) Test() error {
 	}()
 
 	for _, input := range a.Config.Inputs {
-		if _, ok := input.Input.(telegraf.ServiceInput); ok {
+		if _, ok := input.Input.(rush.ServiceInput); ok {
 			fmt.Printf("\nWARNING: skipping plugin [[%s]]: service inputs not supported in --test mode\n",
 				input.Name())
 			continue
@@ -247,14 +247,14 @@ func (a *Agent) flush() {
 }
 
 // flusher monitors the metrics input channel and flushes on the minimum interval
-func (a *Agent) flusher(shutdown chan struct{}, metricC chan telegraf.Metric, aggC chan telegraf.Metric) error {
+func (a *Agent) flusher(shutdown chan struct{}, metricC chan rush.Metric, aggC chan rush.Metric) error {
 	// Inelegant, but this sleep is to allow the Gather threads to run, so that
 	// the flusher will flush after metrics are collected.
 	time.Sleep(time.Millisecond * 300)
 
 	// create an output metric channel and a gorouting that continuously passes
 	// each metric onto the output plugins & aggregators.
-	outMetricC := make(chan telegraf.Metric, 100)
+	outMetricC := make(chan rush.Metric, 100)
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
@@ -303,7 +303,7 @@ func (a *Agent) flusher(shutdown chan struct{}, metricC chan telegraf.Metric, ag
 				}
 				return
 			case metric := <-aggC:
-				metrics := []telegraf.Metric{metric}
+				metrics := []rush.Metric{metric}
 				for _, processor := range a.Config.Processors {
 					metrics = processor.Apply(metrics...)
 				}
@@ -346,7 +346,7 @@ func (a *Agent) flusher(shutdown chan struct{}, metricC chan telegraf.Metric, ag
 		case metric := <-metricC:
 			// NOTE potential bottleneck here as we put each metric through the
 			// processors serially.
-			mS := []telegraf.Metric{metric}
+			mS := []rush.Metric{metric}
 			for _, processor := range a.Config.Processors {
 				mS = processor.Apply(mS...)
 			}
@@ -367,14 +367,14 @@ func (a *Agent) Run(shutdown chan struct{}) error {
 		a.Config.Agent.Hostname, a.Config.Agent.FlushInterval.Duration)
 
 	// channel shared between all input threads for accumulating metrics
-	metricC := make(chan telegraf.Metric, 100)
-	aggC := make(chan telegraf.Metric, 100)
+	metricC := make(chan rush.Metric, 100)
+	aggC := make(chan rush.Metric, 100)
 
 	// Start all ServicePlugins
 	for _, input := range a.Config.Inputs {
 		input.SetDefaultTags(a.Config.Tags)
 		switch p := input.Input.(type) {
-		case telegraf.ServiceInput:
+		case rush.ServiceInput:
 			acc := NewAccumulator(input, metricC)
 			// Service input plugins should set their own precision of their
 			// metrics.

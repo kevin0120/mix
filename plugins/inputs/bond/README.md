@@ -12,7 +12,7 @@ The plugin collects these metrics from `/proc/net/bonding/*` files.
   ## If not specified, then default is /proc
   # host_proc = "/proc"
 
-  ## By default, telegraf gather stats for all bond interfaces
+  ## By default, rush gather stats for all bond interfaces
   ## Setting interfaces will restrict the stats to the specified
   ## bond interfaces.
   # bond_interfaces = ["bond0"]
@@ -60,7 +60,7 @@ Configuration:
   ## If not specified, then default is /proc
   host_proc = "/proc"
 
-  ## By default, telegraf gather stats for all bond interfaces
+  ## By default, rush gather stats for all bond interfaces
   ## Setting interfaces will restrict the stats to the specified
   ## bond interfaces.
   bond_interfaces = ["bond0", "bond1"]
@@ -69,7 +69,7 @@ Configuration:
 Run:
 
 ```
-telegraf --config telegraf.conf --input-filter bond --test
+rush --config rush.conf --input-filter bond --test
 ```
 
 Output:

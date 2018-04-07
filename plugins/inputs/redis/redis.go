@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 type Redis struct {
@@ -54,7 +54,7 @@ const defaultPort = "6379"
 
 // Reads stats from all configured servers accumulates stats.
 // Returns one of the errors encountered while gather stats (if any).
-func (r *Redis) Gather(acc telegraf.Accumulator) error {
+func (r *Redis) Gather(acc rush.Accumulator) error {
 	if len(r.Servers) == 0 {
 		url := &url.URL{
 			Scheme: "tcp",
@@ -98,7 +98,7 @@ func (r *Redis) Gather(acc telegraf.Accumulator) error {
 	return nil
 }
 
-func (r *Redis) gatherServer(addr *url.URL, acc telegraf.Accumulator) error {
+func (r *Redis) gatherServer(addr *url.URL, acc rush.Accumulator) error {
 	var address string
 
 	if addr.Scheme == "unix" {
@@ -153,7 +153,7 @@ func (r *Redis) gatherServer(addr *url.URL, acc telegraf.Accumulator) error {
 // gatherInfoOutput gathers
 func gatherInfoOutput(
 	rdr *bufio.Reader,
-	acc telegraf.Accumulator,
+	acc rush.Accumulator,
 	tags map[string]string,
 ) error {
 	var section string
@@ -259,7 +259,7 @@ func gatherInfoOutput(
 func gatherKeyspaceLine(
 	name string,
 	line string,
-	acc telegraf.Accumulator,
+	acc rush.Accumulator,
 	global_tags map[string]string,
 ) {
 	if strings.Contains(line, "keys=") {
@@ -282,7 +282,7 @@ func gatherKeyspaceLine(
 }
 
 func init() {
-	inputs.Add("redis", func() telegraf.Input {
+	inputs.Add("redis", func() rush.Input {
 		return &Redis{}
 	})
 }

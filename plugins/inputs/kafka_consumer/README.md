@@ -3,7 +3,7 @@
 The [Kafka](http://kafka.apache.org/) consumer plugin polls a specified Kafka
 topic and adds messages to InfluxDB. The plugin assumes messages follow the
 line protocol. [Consumer Group](http://godoc.org/github.com/wvanbergen/kafka/consumergroup)
-is used to talk to the Kafka cluster so multiple instances of telegraf can read
+is used to talk to the Kafka cluster so multiple instances of rush can read
 from the same topic in parallel.
 
 For old kafka version (< 0.8), please use the kafka_consumer_legacy input plugin
@@ -15,17 +15,17 @@ and use the old zookeeper connection method.
 # Read metrics from Kafka topic(s)
 [[inputs.kafka_consumer]]
   ## topic(s) to consume
-  topics = ["telegraf"]
+  topics = ["rush"]
   brokers = ["localhost:9092"]
   ## the name of the consumer group
-  consumer_group = "telegraf_metrics_consumers"
+  consumer_group = "rush_metrics_consumers"
   ## Offset (must be either "oldest" or "newest")
   offset = "oldest"
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 
@@ -36,7 +36,7 @@ and use the old zookeeper connection method.
   ## Data format to consume.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "influx"
 
   ## Maximum length of a message to consume, in bytes (default 0/unlimited);

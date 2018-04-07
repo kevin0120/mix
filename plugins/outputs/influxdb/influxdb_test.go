@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/influxdata/telegraf/plugins/outputs/influxdb/client"
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/plugins/outputs/influxdb/client"
+	"github.com/masami10/rush/testutil"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -70,7 +70,7 @@ func TestHTTPInflux(t *testing.T) {
 				w.Header().Set("Content-Type", "application/json")
 			}
 			// test that user agent is set properly
-			if r.UserAgent() != "telegraf" {
+			if r.UserAgent() != "rush" {
 				w.WriteHeader(http.StatusTeapot)
 				w.Header().Set("Content-Type", "application/json")
 			}
@@ -87,7 +87,7 @@ func TestHTTPInflux(t *testing.T) {
 	i := newInflux()
 	i.URLs = []string{ts.URL}
 	i.Database = "test"
-	i.UserAgent = "telegraf"
+	i.UserAgent = "rush"
 
 	err := i.Connect()
 	require.NoError(t, err)

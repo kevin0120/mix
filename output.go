@@ -1,4 +1,4 @@
-package telegraf
+package rush
 
 type Output interface {
 	// Connect to the Output

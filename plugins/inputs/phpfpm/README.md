@@ -1,4 +1,4 @@
-# Telegraf plugin: phpfpm
+# Rush plugin: phpfpm
 
 Get phpfpm stat using either HTTP status page or fpm socket.
 
@@ -47,7 +47,7 @@ Using this configuration:
 When run with:
 
 ```
-./telegraf --config telegraf.conf --input-filter phpfpm --test
+./rush --config rush.conf --input-filter phpfpm --test
 ```
 
 It produces:
@@ -61,5 +61,5 @@ It produces:
 
 ## Note
 
-When using `unixsocket`, you have to ensure that telegraf runs on same
-host, and socket path is accessible to telegraf user.
+When using `unixsocket`, you have to ensure that rush runs on same
+host, and socket path is accessible to rush user.

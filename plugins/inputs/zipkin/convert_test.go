@@ -5,15 +5,15 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs/zipkin/trace"
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs/zipkin/trace"
+	"github.com/masami10/rush/testutil"
 )
 
 func TestLineProtocolConverter_Record(t *testing.T) {
 	mockAcc := testutil.Accumulator{}
 	type fields struct {
-		acc telegraf.Accumulator
+		acc rush.Accumulator
 	}
 	type args struct {
 		t trace.Trace

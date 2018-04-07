@@ -13,11 +13,11 @@ import (
 
 	"github.com/kballard/go-shellquote"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
-	"github.com/influxdata/telegraf/plugins/parsers"
-	"github.com/influxdata/telegraf/plugins/parsers/nagios"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
+	"github.com/masami10/rush/plugins/parsers"
+	"github.com/masami10/rush/plugins/parsers/nagios"
 )
 
 const sampleConfig = `
@@ -37,7 +37,7 @@ const sampleConfig = `
   ## Data format to consume.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "influx"
 `
 
@@ -61,12 +61,12 @@ func NewExec() *Exec {
 }
 
 type Runner interface {
-	Run(*Exec, string, telegraf.Accumulator) ([]byte, error)
+	Run(*Exec, string, rush.Accumulator) ([]byte, error)
 }
 
 type CommandRunner struct{}
 
-func AddNagiosState(exitCode error, acc telegraf.Accumulator) error {
+func AddNagiosState(exitCode error, acc rush.Accumulator) error {
 	nagiosState := 0
 	if exitCode != nil {
 		exiterr, ok := exitCode.(*exec.ExitError)
@@ -89,7 +89,7 @@ func AddNagiosState(exitCode error, acc telegraf.Accumulator) error {
 func (c CommandRunner) Run(
 	e *Exec,
 	command string,
-	acc telegraf.Accumulator,
+	acc rush.Accumulator,
 ) ([]byte, error) {
 	split_cmd, err := shellquote.Split(command)
 	if err != nil || len(split_cmd) == 0 {
@@ -171,7 +171,7 @@ func removeCarriageReturns(b bytes.Buffer) bytes.Buffer {
 
 }
 
-func (e *Exec) ProcessCommand(command string, acc telegraf.Accumulator, wg *sync.WaitGroup) {
+func (e *Exec) ProcessCommand(command string, acc rush.Accumulator, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	out, err := e.runner.Run(e, command, acc)
@@ -202,7 +202,7 @@ func (e *Exec) SetParser(parser parsers.Parser) {
 	e.parser = parser
 }
 
-func (e *Exec) Gather(acc telegraf.Accumulator) error {
+func (e *Exec) Gather(acc rush.Accumulator) error {
 	var wg sync.WaitGroup
 	// Legacy single command support
 	if e.Command != "" {
@@ -250,7 +250,7 @@ func (e *Exec) Gather(acc telegraf.Accumulator) error {
 }
 
 func init() {
-	inputs.Add("exec", func() telegraf.Input {
+	inputs.Add("exec", func() rush.Input {
 		return NewExec()
 	})
 }

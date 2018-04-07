@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/outputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/outputs"
 	_ "github.com/jackc/pgx/stdlib"
 )
 
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS ` + c.Table + ` (
 	return nil
 }
 
-func (c *CrateDB) Write(metrics []telegraf.Metric) error {
+func (c *CrateDB) Write(metrics []rush.Metric) error {
 	ctx, cancel := context.WithTimeout(context.Background(), c.Timeout.Duration)
 	defer cancel()
 	if sql, err := insertSQL(c.Table, metrics); err != nil {
@@ -73,7 +73,7 @@ func (c *CrateDB) Write(metrics []telegraf.Metric) error {
 	return nil
 }
 
-func insertSQL(table string, metrics []telegraf.Metric) (string, error) {
+func insertSQL(table string, metrics []rush.Metric) (string, error) {
 	rows := make([]string, len(metrics))
 	for i, m := range metrics {
 
@@ -110,7 +110,7 @@ VALUES
 // plugin should probably refrain from using it in combination with untrusted
 // inputs.
 //
-// [1] https://github.com/influxdata/telegraf/pull/3210#issuecomment-339273371
+// [1] https://github.com/masami10/rush/pull/3210#issuecomment-339273371
 func escapeValue(val interface{}) (string, error) {
 	switch t := val.(type) {
 	case string:
@@ -129,7 +129,7 @@ func escapeValue(val interface{}) (string, error) {
 		return escapeObject(t)
 	default:
 		// This might be panic worthy under normal circumstances, but it's probably
-		// better to not shut down the entire telegraf process because of one
+		// better to not shut down the entire rush process because of one
 		// misbehaving plugin.
 		return "", fmt.Errorf("unexpected type: %T: %#v", t, t)
 	}
@@ -182,8 +182,8 @@ func escapeString(s string, quote string) string {
 // and tags. It's used instead of m.HashID() because it's not considered stable
 // and because a cryptogtaphic hash makes more sense for the use case of
 // deduplication.
-// [1] https://github.com/influxdata/telegraf/pull/3210#discussion_r148411201
-func hashID(m telegraf.Metric) int64 {
+// [1] https://github.com/masami10/rush/pull/3210#discussion_r148411201
+func hashID(m rush.Metric) int64 {
 	h := sha512.New()
 	h.Write([]byte(m.Name()))
 	tags := m.Tags()
@@ -222,7 +222,7 @@ func (c *CrateDB) Close() error {
 }
 
 func init() {
-	outputs.Add("cratedb", func() telegraf.Output {
+	outputs.Add("cratedb", func() rush.Output {
 		return &CrateDB{
 			Timeout: internal.Duration{Duration: time.Second * 5},
 		}

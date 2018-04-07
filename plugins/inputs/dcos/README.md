@@ -8,7 +8,7 @@ Depending on the work load of your DC/OS cluster, this plugin can quickly
 create a high number of series which, when unchecked, can cause high load on
 your database.
 
-- Use [measurement filtering](https://github.com/influxdata/telegraf/blob/master/docs/CONFIGURATION.md#measurement-filtering) liberally to exclude unneeded metrics as well as the node, container, and app inclue/exclude options.
+- Use [measurement filtering](https://github.com/masami10/rush/blob/master/docs/CONFIGURATION.md#measurement-filtering) liberally to exclude unneeded metrics as well as the node, container, and app inclue/exclude options.
 - Write to a database with an appropriate [retention policy](https://docs.influxdata.com/influxdb/v1.3/concepts/glossary/#retention-policy-rp).
 - Limit the number of series allowed in your database using the `max-series-per-database` and `max-values-per-tag` settings.
 - Consider enabling the [TSI](https://docs.influxdata.com/influxdb/v1.3/about_the_project/releasenotes-changelog/#release-notes-8) engine.
@@ -21,9 +21,9 @@ your database.
   cluster_url = "https://dcos-master-1"
 
   ## The ID of the service account.
-  service_account_id = "telegraf"
+  service_account_id = "rush"
   ## The private key file for the service account.
-  service_account_private_key = "/etc/telegraf/telegraf-sa-key.pem"
+  service_account_private_key = "/etc/rush/rush-sa-key.pem"
 
   ## Path containing login token.  If set, will read on every gather.
   # token_file = "/home/dcos/.dcos/token"
@@ -48,9 +48,9 @@ your database.
   # response_timeout = "20s"
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## If false, skip chain & host verification
   # insecure_skip_verify = true
 
@@ -74,10 +74,10 @@ Follow the directions to [create a service account and assign permissions](https
 
 Quick configuration using the Enterprise CLI:
 ```
-dcos security org service-accounts keypair telegraf-sa-key.pem telegraf-sa-cert.pem
-dcos security org service-accounts create -p telegraf-sa-cert.pem -d "Telegraf DC/OS input plugin" telegraf
-dcos security org users grant telegraf dcos:adminrouter:ops:system-metrics full
-dcos security org users grant telegraf dcos:adminrouter:ops:mesos full
+dcos security org service-accounts keypair rush-sa-key.pem rush-sa-cert.pem
+dcos security org service-accounts create -p rush-sa-cert.pem -d "Rush DC/OS input plugin" rush
+dcos security org users grant rush dcos:adminrouter:ops:system-metrics full
+dcos security org users grant rush dcos:adminrouter:ops:mesos full
 ```
 
 #### Open Source Authentication
@@ -203,7 +203,7 @@ dcos_app,cluster=enterprise,container_id=cbf19b77-3b8d-4bcf-b81f-824b67279629,ho
 dcos_container,cluster=enterprise,container_id=5725e219-f66e-40a8-b3ab-519d85f4c4dc,hostname=192.168.122.18,task_name=hello-world cpus_limit=0.6,cpus_system_time=25.6,cpus_throttled_time=327.977109217,cpus_user_time=566.54,disk_limit_bytes=0i,disk_used_bytes=0i,mem_limit_bytes=1107296256i,mem_total_bytes=335941632i,net_rx_bytes=0i,net_rx_dropped=0,net_rx_errors=0,net_rx_packets=0,net_tx_bytes=0i,net_tx_dropped=0,net_tx_errors=0,net_tx_packets=0 1511859222000000000
 dcos_app,cluster=enterprise,container_id=5725e219-f66e-40a8-b3ab-519d85f4c4dc,hostname=192.168.122.18 container_received_bytes_per_sec=0,container_throttled_bytes_per_sec=0 1511859222000000000
 dcos_app,cluster=enterprise,container_id=c76e1488-4fb7-4010-a4cf-25725f8173f9,hostname=192.168.122.18 container_received_bytes_per_sec=0,container_throttled_bytes_per_sec=0 1511859222000000000
-dcos_container,cluster=enterprise,container_id=cbe0b2f9-061f-44ac-8f15-4844229e8231,hostname=192.168.122.18,task_name=telegraf cpus_limit=0.2,cpus_system_time=8.109999999,cpus_throttled_time=93.183916045,cpus_user_time=17.97,disk_limit_bytes=0i,disk_used_bytes=0i,mem_limit_bytes=167772160i,mem_total_bytes=0i,net_rx_bytes=0i,net_rx_dropped=0,net_rx_errors=0,net_rx_packets=0,net_tx_bytes=0i,net_tx_dropped=0,net_tx_errors=0,net_tx_packets=0 1511859222000000000
+dcos_container,cluster=enterprise,container_id=cbe0b2f9-061f-44ac-8f15-4844229e8231,hostname=192.168.122.18,task_name=rush cpus_limit=0.2,cpus_system_time=8.109999999,cpus_throttled_time=93.183916045,cpus_user_time=17.97,disk_limit_bytes=0i,disk_used_bytes=0i,mem_limit_bytes=167772160i,mem_total_bytes=0i,net_rx_bytes=0i,net_rx_dropped=0,net_rx_errors=0,net_rx_packets=0,net_tx_bytes=0i,net_tx_dropped=0,net_tx_errors=0,net_tx_packets=0 1511859222000000000
 dcos_container,cluster=enterprise,container_id=b64115de-3d2a-431d-a805-76e7c46453f1,hostname=192.168.122.18 cpus_limit=0.2,cpus_system_time=2.69,cpus_throttled_time=20.064861214,cpus_user_time=6.56,disk_limit_bytes=268435456i,disk_used_bytes=29360128i,mem_limit_bytes=297795584i,mem_total_bytes=13733888i,net_rx_bytes=0i,net_rx_dropped=0,net_rx_errors=0,net_rx_packets=0,net_tx_bytes=0i,net_tx_dropped=0,net_tx_errors=0,net_tx_packets=0 1511859222000000000
 dcos_app,cluster=enterprise,container_id=b64115de-3d2a-431d-a805-76e7c46453f1,hostname=192.168.122.18 container_received_bytes_per_sec=0,container_throttled_bytes_per_sec=0 1511859222000000000
 ```

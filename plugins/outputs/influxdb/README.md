@@ -13,8 +13,8 @@ This plugin writes to [InfluxDB](https://www.influxdb.com) via HTTP or UDP.
   ## this means that only ONE of the urls will be written to each interval.
   # urls = ["udp://127.0.0.1:8089"] # UDP endpoint example
   urls = ["http://127.0.0.1:8086"] # required
-  ## The target database for metrics (telegraf will create it if not exists).
-  database = "telegraf" # required
+  ## The target database for metrics (rush will create it if not exists).
+  database = "rush" # required
 
   ## Name of existing retention policy to write to.  Empty string writes to
   ## the default retention policy.
@@ -25,17 +25,17 @@ This plugin writes to [InfluxDB](https://www.influxdb.com) via HTTP or UDP.
   ## Write timeout (for the InfluxDB client), formatted as a string.
   ## If not provided, will default to 5s. 0s means no timeout (not recommended).
   timeout = "5s"
-  # username = "telegraf"
+  # username = "rush"
   # password = "metricsmetricsmetricsmetrics"
   ## Set the user agent for HTTP POSTs (can be useful for log differentiation)
-  # user_agent = "telegraf"
+  # user_agent = "rush"
   ## Set UDP payload size, defaults to InfluxDB UDP Client default (512 bytes)
   # udp_payload = 512
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 
@@ -52,7 +52,7 @@ This plugin writes to [InfluxDB](https://www.influxdb.com) via HTTP or UDP.
 ### Required parameters:
 
 * `urls`: List of strings, this is for InfluxDB clustering
-support. On each flush interval, Telegraf will randomly choose one of the urls
+support. On each flush interval, Rush will randomly choose one of the urls
 to write to. Each URL should start with either `http://` or `udp://`
 * `database`: The name of the database to write to.
 

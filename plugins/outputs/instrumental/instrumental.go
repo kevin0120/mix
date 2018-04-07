@@ -9,12 +9,12 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/metric"
-	"github.com/influxdata/telegraf/plugins/outputs"
-	"github.com/influxdata/telegraf/plugins/serializers"
-	"github.com/influxdata/telegraf/plugins/serializers/graphite"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/metric"
+	"github.com/masami10/rush/plugins/outputs"
+	"github.com/masami10/rush/plugins/serializers"
+	"github.com/masami10/rush/plugins/serializers/graphite"
 )
 
 var (
@@ -36,7 +36,7 @@ type Instrumental struct {
 
 const (
 	DefaultHost     = "collector.instrumentalapp.com"
-	HelloMessage    = "hello version go/telegraf/1.1\n"
+	HelloMessage    = "hello version go/rush/1.1\n"
 	AuthFormat      = "authenticate %s\n"
 	HandshakeFormat = HelloMessage + AuthFormat
 )
@@ -47,7 +47,7 @@ var sampleConfig = `
   ## Prefix the metrics with a given name
   prefix = ""
   ## Stats output template (Graphite formatting)
-  ## see https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md#graphite
+  ## see https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_OUTPUT.md#graphite
   template = "host.tags.measurement.field"
   ## Timeout in seconds to connect
   timeout = "2s"
@@ -78,7 +78,7 @@ func (i *Instrumental) Close() error {
 	return nil
 }
 
-func (i *Instrumental) Write(metrics []telegraf.Metric) error {
+func (i *Instrumental) Write(metrics []rush.Metric) error {
 	if i.conn == nil {
 		err := i.Connect()
 		if err != nil {
@@ -93,7 +93,7 @@ func (i *Instrumental) Write(metrics []telegraf.Metric) error {
 
 	var points []string
 	var metricType string
-	var toSerialize telegraf.Metric
+	var toSerialize rush.Metric
 	var newTags map[string]string
 
 	for _, m := range metrics {
@@ -204,7 +204,7 @@ func (i *Instrumental) authenticate(conn net.Conn) error {
 }
 
 func init() {
-	outputs.Add("instrumental", func() telegraf.Output {
+	outputs.Add("instrumental", func() rush.Output {
 		return &Instrumental{
 			Host:     DefaultHost,
 			Template: graphite.DEFAULT_TEMPLATE,

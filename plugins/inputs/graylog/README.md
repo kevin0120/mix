@@ -45,9 +45,9 @@ Note: if namespace end point specified metrics array will be ignored for that ca
   password = ""
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 ```

@@ -17,7 +17,7 @@ regex patterns.
   files = ["/var/log/apache/access.log"]
 
   ## Read files that currently exist from the beginning. Files that are created
-  ## while telegraf is running (and that match the "files" globs) will always
+  ## while rush is running (and that match the "files" globs) will always
   ## be read from the beginning.
   from_beginning = false
 
@@ -25,7 +25,7 @@ regex patterns.
   # watch_method = "inotify"
 
   ## Parse logstash-style "grok" patterns:
-  ##   Telegraf built-in parsing patterns: https://goo.gl/dkay10
+  ##   Rush built-in parsing patterns: https://goo.gl/dkay10
   [inputs.logparser.grok]
     ## This is a list of patterns to check the given log file(s) for.
     ## Note that adding patterns here increases processing time. The most
@@ -63,7 +63,7 @@ The best way to get acquainted with grok patterns is to read the logstash docs,
 which are available here:
   https://www.elastic.co/guide/en/logstash/current/plugins-filters-grok.html
 
-The Telegraf grok parser uses a slightly modified version of logstash "grok"
+The Rush grok parser uses a slightly modified version of logstash "grok"
 patterns, with the format
 
 ```
@@ -108,7 +108,7 @@ CUSTOM time layouts must be within quotes and be the representation of the
 "reference time", which is `Mon Jan 2 15:04:05 -0700 MST 2006`
 See https://golang.org/pkg/time/#Parse for more details.
 
-Telegraf has many of its own
+Rush has many of its own
 [built-in patterns](./grok/patterns/influx-patterns),
 as well as supporting
 [logstash's builtin patterns](https://github.com/logstash-plugins/logstash-patterns-core/blob/master/patterns/grok-patterns).
@@ -176,7 +176,7 @@ syntax with `'''` may be useful.
 The following config examples will parse this input file:
 
 ```
-|42|\uD83D\uDC2F|'telegraf'|
+|42|\uD83D\uDC2F|'rush'|
 ```
 
 Since `|` is a special character in the grok language, we must escape it to
@@ -226,10 +226,10 @@ the file output will only print once per `flush_interval`.
 - Start with a file containing only a single line of your input.
 - Remove all but the first token or piece of the line.
 - Add the section of your pattern to match this piece to your configuration file.
-- Verify that the metric is parsed successfully by running Telegraf.
+- Verify that the metric is parsed successfully by running Rush.
 - If successful, add the next token, update the pattern and retest.
 - Continue one token at a time until the entire line is successfully parsed.
 
 ### Additional Resources
 
-- https://www.influxdata.com/telegraf-correlate-log-metrics-data-performance-bottlenecks/
+- https://www.influxdata.com/rush-correlate-log-metrics-data-performance-bottlenecks/

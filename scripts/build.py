@@ -13,39 +13,39 @@ import logging
 import argparse
 
 ################
-#### Telegraf Variables
+#### Rush Variables
 ################
 
 # Packaging variables
-PACKAGE_NAME = "telegraf"
+PACKAGE_NAME = "rush"
 INSTALL_ROOT_DIR = "/usr/bin"
-LOG_DIR = "/var/log/telegraf"
-SCRIPT_DIR = "/usr/lib/telegraf/scripts"
-CONFIG_DIR = "/etc/telegraf"
-CONFIG_DIR_D = "/etc/telegraf/telegraf.d"
+LOG_DIR = "/var/log/rush"
+SCRIPT_DIR = "/usr/lib/rush/scripts"
+CONFIG_DIR = "/etc/rush"
+CONFIG_DIR_D = "/etc/rush/rush.d"
 LOGROTATE_DIR = "/etc/logrotate.d"
 
 INIT_SCRIPT = "scripts/init.sh"
-SYSTEMD_SCRIPT = "scripts/telegraf.service"
-LOGROTATE_SCRIPT = "etc/logrotate.d/telegraf"
-DEFAULT_CONFIG = "etc/telegraf.conf"
-DEFAULT_WINDOWS_CONFIG = "etc/telegraf_windows.conf"
+SYSTEMD_SCRIPT = "scripts/rush.service"
+LOGROTATE_SCRIPT = "etc/logrotate.d/rush"
+DEFAULT_CONFIG = "etc/rush.conf"
+DEFAULT_WINDOWS_CONFIG = "etc/rush_windows.conf"
 POSTINST_SCRIPT = "scripts/post-install.sh"
 PREINST_SCRIPT = "scripts/pre-install.sh"
 POSTREMOVE_SCRIPT = "scripts/post-remove.sh"
 PREREMOVE_SCRIPT = "scripts/pre-remove.sh"
 
 # Default AWS S3 bucket for uploads
-DEFAULT_BUCKET = "dl.influxdata.com/telegraf/artifacts"
+DEFAULT_BUCKET = "dl.influxdata.com/rush/artifacts"
 
 CONFIGURATION_FILES = [
-    CONFIG_DIR + '/telegraf.conf',
-    LOGROTATE_DIR + '/telegraf',
+    CONFIG_DIR + '/rush.conf',
+    LOGROTATE_DIR + '/rush',
 ]
 
 # META-PACKAGE VARIABLES
 PACKAGE_LICENSE = "MIT"
-PACKAGE_URL = "https://github.com/influxdata/telegraf"
+PACKAGE_URL = "https://github.com/masami10/rush"
 MAINTAINER = "support@influxdb.com"
 VENDOR = "InfluxData"
 DESCRIPTION = "Plugin-driven server agent for reporting metrics into InfluxDB."
@@ -71,8 +71,8 @@ fpm_common_args = "-f -s dir --log error \
     PACKAGE_URL,
     PACKAGE_LICENSE,
     MAINTAINER,
-    CONFIG_DIR + '/telegraf.conf',
-    LOGROTATE_DIR + '/telegraf',
+    CONFIG_DIR + '/rush.conf',
+    LOGROTATE_DIR + '/rush',
     POSTINST_SCRIPT,
     PREINST_SCRIPT,
     POSTREMOVE_SCRIPT,
@@ -80,7 +80,7 @@ fpm_common_args = "-f -s dir --log error \
     DESCRIPTION)
 
 targets = {
-    'telegraf' : './cmd/telegraf',
+    'rush' : './cmd/rush',
 }
 
 supported_builds = {
@@ -98,7 +98,7 @@ supported_packages = {
 next_version = '1.5.0'
 
 ################
-#### Telegraf Functions
+#### Rush Functions
 ################
 
 def print_banner():
@@ -130,23 +130,23 @@ def package_scripts(build_root, config_only=False, windows=False):
     if config_only or windows:
         logging.info("Copying configuration to build directory")
         if windows:
-            shutil.copyfile(DEFAULT_WINDOWS_CONFIG, os.path.join(build_root, "telegraf.conf"))
+            shutil.copyfile(DEFAULT_WINDOWS_CONFIG, os.path.join(build_root, "rush.conf"))
         else:
-            shutil.copyfile(DEFAULT_CONFIG, os.path.join(build_root, "telegraf.conf"))
-        os.chmod(os.path.join(build_root, "telegraf.conf"), 0o644)
+            shutil.copyfile(DEFAULT_CONFIG, os.path.join(build_root, "rush.conf"))
+        os.chmod(os.path.join(build_root, "rush.conf"), 0o644)
     else:
         logging.info("Copying scripts and configuration to build directory")
         shutil.copyfile(INIT_SCRIPT, os.path.join(build_root, SCRIPT_DIR[1:], INIT_SCRIPT.split('/')[1]))
         os.chmod(os.path.join(build_root, SCRIPT_DIR[1:], INIT_SCRIPT.split('/')[1]), 0o644)
         shutil.copyfile(SYSTEMD_SCRIPT, os.path.join(build_root, SCRIPT_DIR[1:], SYSTEMD_SCRIPT.split('/')[1]))
         os.chmod(os.path.join(build_root, SCRIPT_DIR[1:], SYSTEMD_SCRIPT.split('/')[1]), 0o644)
-        shutil.copyfile(LOGROTATE_SCRIPT, os.path.join(build_root, LOGROTATE_DIR[1:], "telegraf"))
-        os.chmod(os.path.join(build_root, LOGROTATE_DIR[1:], "telegraf"), 0o644)
-        shutil.copyfile(DEFAULT_CONFIG, os.path.join(build_root, CONFIG_DIR[1:], "telegraf.conf"))
-        os.chmod(os.path.join(build_root, CONFIG_DIR[1:], "telegraf.conf"), 0o644)
+        shutil.copyfile(LOGROTATE_SCRIPT, os.path.join(build_root, LOGROTATE_DIR[1:], "rush"))
+        os.chmod(os.path.join(build_root, LOGROTATE_DIR[1:], "rush"), 0o644)
+        shutil.copyfile(DEFAULT_CONFIG, os.path.join(build_root, CONFIG_DIR[1:], "rush.conf"))
+        os.chmod(os.path.join(build_root, CONFIG_DIR[1:], "rush.conf"), 0o644)
 
 def run_generate():
-    # NOOP for Telegraf
+    # NOOP for Rush
     return True
 
 def go_get(branch, update=False, no_uncommitted=False):
@@ -165,11 +165,11 @@ def go_get(branch, update=False, no_uncommitted=False):
     return True
 
 def run_tests(race, parallel, timeout, no_vet):
-    # Currently a NOOP for Telegraf
+    # Currently a NOOP for Rush
     return True
 
 ################
-#### All Telegraf-specific content above this line
+#### All Rush-specific content above this line
 ################
 
 def run(command, allow_failure=False, shell=False):

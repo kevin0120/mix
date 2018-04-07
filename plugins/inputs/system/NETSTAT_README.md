@@ -1,4 +1,4 @@
-Telegraf plugin: NETSTAT
+Rush plugin: NETSTAT
 
 #### Description
 

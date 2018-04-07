@@ -1,15 +1,15 @@
 # rush
 MasterPC 控制器与后端数据接入层
-# Telegraf [![Circle CI](https://circleci.com/gh/influxdata/telegraf.svg?style=svg)](https://circleci.com/gh/influxdata/telegraf) [![Docker pulls](https://img.shields.io/docker/pulls/library/telegraf.svg)](https://hub.docker.com/_/telegraf/)
+# Rush [![Circle CI](https://circleci.com/gh/masami10/rush.svg?style=svg)](https://circleci.com/gh/masami10/rush) [![Docker pulls](https://img.shields.io/docker/pulls/library/rush.svg)](https://hub.docker.com/_/rush/)
 
-Telegraf is an agent written in Go for collecting, processing, aggregating,
+Rush is an agent written in Go for collecting, processing, aggregating,
 and writing metrics.
 
 Design goals are to have a minimal memory footprint with a plugin system so
 that developers in the community can easily add support for collecting metrics
 from local or remote services.
 
-Telegraf is plugin-driven and has the concept of 4 distinct plugins:
+Rush is plugin-driven and has the concept of 4 distinct plugins:
 
 1. [Input Plugins](#input-plugins) collect metrics from the system, services, or 3rd party APIs
 2. [Processor Plugins](#processor-plugins) transform, decorate, and/or filter metrics
@@ -20,102 +20,102 @@ For more information on Processor and Aggregator plugins please [read this](./do
 
 New plugins are designed to be easy to contribute,
 we'll eagerly accept pull
-requests and will manage the set of plugins that Telegraf supports.
+requests and will manage the set of plugins that Rush supports.
 
 ## Contributing
 
 There are many ways to contribute:
-- Fix and [report bugs](https://github.com/influxdata/telegraf/issues/new)
-- [Improve documentation](https://github.com/influxdata/telegraf/issues?q=is%3Aopen+label%3Adocumentation)
-- [Review code and feature proposals](https://github.com/influxdata/telegraf/pulls)
+- Fix and [report bugs](https://github.com/masami10/rush/issues/new)
+- [Improve documentation](https://github.com/masami10/rush/issues?q=is%3Aopen+label%3Adocumentation)
+- [Review code and feature proposals](https://github.com/masami10/rush/pulls)
 - Answer questions on github and on the [Community Site](https://community.influxdata.com/)
 - [Contribute plugins](CONTRIBUTING.md)
 
 ## Installation:
 
 You can download the binaries directly from the [downloads](https://www.influxdata.com/downloads) page
-or from the [releases](https://github.com/influxdata/telegraf/releases) section.
+or from the [releases](https://github.com/masami10/rush/releases) section.
 
 ### Ansible Role:
 
-Ansible role: https://github.com/rossmcdonald/telegraf
+Ansible role: https://github.com/rossmcdonald/rush
 
 ### From Source:
 
-Telegraf requires golang version 1.8+, the Makefile requires GNU make.
+Rush requires golang version 1.8+, the Makefile requires GNU make.
 
 Dependencies are managed with [gdm](https://github.com/sparrc/gdm),
 which is installed by the Makefile if you don't have it already.
 
 1. [Install Go](https://golang.org/doc/install)
 2. [Setup your GOPATH](https://golang.org/doc/code.html#GOPATH)
-3. Run `go get -d github.com/influxdata/telegraf`
-4. Run `cd $GOPATH/src/github.com/influxdata/telegraf`
+3. Run `go get -d github.com/masami10/rush`
+4. Run `cd $GOPATH/src/github.com/masami10/rush`
 5. Run `make`
 
 ### Nightly Builds
 
 These builds are generated from the master branch:
-- [telegraf_nightly_amd64.deb](https://dl.influxdata.com/telegraf/nightlies/telegraf_nightly_amd64.deb)
-- [telegraf_nightly_arm64.deb](https://dl.influxdata.com/telegraf/nightlies/telegraf_nightly_arm64.deb)
-- [telegraf-nightly.arm64.rpm](https://dl.influxdata.com/telegraf/nightlies/telegraf-nightly.arm64.rpm)
-- [telegraf_nightly_armel.deb](https://dl.influxdata.com/telegraf/nightlies/telegraf_nightly_armel.deb)
-- [telegraf-nightly.armel.rpm](https://dl.influxdata.com/telegraf/nightlies/telegraf-nightly.armel.rpm)
-- [telegraf_nightly_armhf.deb](https://dl.influxdata.com/telegraf/nightlies/telegraf_nightly_armhf.deb)
-- [telegraf-nightly.armv6hl.rpm](https://dl.influxdata.com/telegraf/nightlies/telegraf-nightly.armv6hl.rpm)
-- [telegraf-nightly_freebsd_amd64.tar.gz](https://dl.influxdata.com/telegraf/nightlies/telegraf-nightly_freebsd_amd64.tar.gz)
-- [telegraf-nightly_freebsd_i386.tar.gz](https://dl.influxdata.com/telegraf/nightlies/telegraf-nightly_freebsd_i386.tar.gz)
-- [telegraf_nightly_i386.deb](https://dl.influxdata.com/telegraf/nightlies/telegraf_nightly_i386.deb)
-- [telegraf-nightly.i386.rpm](https://dl.influxdata.com/telegraf/nightlies/telegraf-nightly.i386.rpm)
-- [telegraf-nightly_linux_amd64.tar.gz](https://dl.influxdata.com/telegraf/nightlies/telegraf-nightly_linux_amd64.tar.gz)
-- [telegraf-nightly_linux_arm64.tar.gz](https://dl.influxdata.com/telegraf/nightlies/telegraf-nightly_linux_arm64.tar.gz)
-- [telegraf-nightly_linux_armel.tar.gz](https://dl.influxdata.com/telegraf/nightlies/telegraf-nightly_linux_armel.tar.gz)
-- [telegraf-nightly_linux_armhf.tar.gz](https://dl.influxdata.com/telegraf/nightlies/telegraf-nightly_linux_armhf.tar.gz)
-- [telegraf-nightly_linux_i386.tar.gz](https://dl.influxdata.com/telegraf/nightlies/telegraf-nightly_linux_i386.tar.gz)
-- [telegraf-nightly_linux_s390x.tar.gz](https://dl.influxdata.com/telegraf/nightlies/telegraf-nightly_linux_s390x.tar.gz)
-- [telegraf_nightly_s390x.deb](https://dl.influxdata.com/telegraf/nightlies/telegraf_nightly_s390x.deb)
-- [telegraf-nightly.s390x.rpm](https://dl.influxdata.com/telegraf/nightlies/telegraf-nightly.s390x.rpm)
-- [telegraf-nightly_windows_amd64.zip](https://dl.influxdata.com/telegraf/nightlies/telegraf-nightly_windows_amd64.zip)
-- [telegraf-nightly_windows_i386.zip](https://dl.influxdata.com/telegraf/nightlies/telegraf-nightly_windows_i386.zip)
-- [telegraf-nightly.x86_64.rpm](https://dl.influxdata.com/telegraf/nightlies/telegraf-nightly.x86_64.rpm)
-- [telegraf-static-nightly_linux_amd64.tar.gz](https://dl.influxdata.com/telegraf/nightlies/telegraf-static-nightly_linux_amd64.tar.gz)
+- [rush_nightly_amd64.deb](https://dl.influxdata.com/rush/nightlies/rush_nightly_amd64.deb)
+- [rush_nightly_arm64.deb](https://dl.influxdata.com/rush/nightlies/rush_nightly_arm64.deb)
+- [rush-nightly.arm64.rpm](https://dl.influxdata.com/rush/nightlies/rush-nightly.arm64.rpm)
+- [rush_nightly_armel.deb](https://dl.influxdata.com/rush/nightlies/rush_nightly_armel.deb)
+- [rush-nightly.armel.rpm](https://dl.influxdata.com/rush/nightlies/rush-nightly.armel.rpm)
+- [rush_nightly_armhf.deb](https://dl.influxdata.com/rush/nightlies/rush_nightly_armhf.deb)
+- [rush-nightly.armv6hl.rpm](https://dl.influxdata.com/rush/nightlies/rush-nightly.armv6hl.rpm)
+- [rush-nightly_freebsd_amd64.tar.gz](https://dl.influxdata.com/rush/nightlies/rush-nightly_freebsd_amd64.tar.gz)
+- [rush-nightly_freebsd_i386.tar.gz](https://dl.influxdata.com/rush/nightlies/rush-nightly_freebsd_i386.tar.gz)
+- [rush_nightly_i386.deb](https://dl.influxdata.com/rush/nightlies/rush_nightly_i386.deb)
+- [rush-nightly.i386.rpm](https://dl.influxdata.com/rush/nightlies/rush-nightly.i386.rpm)
+- [rush-nightly_linux_amd64.tar.gz](https://dl.influxdata.com/rush/nightlies/rush-nightly_linux_amd64.tar.gz)
+- [rush-nightly_linux_arm64.tar.gz](https://dl.influxdata.com/rush/nightlies/rush-nightly_linux_arm64.tar.gz)
+- [rush-nightly_linux_armel.tar.gz](https://dl.influxdata.com/rush/nightlies/rush-nightly_linux_armel.tar.gz)
+- [rush-nightly_linux_armhf.tar.gz](https://dl.influxdata.com/rush/nightlies/rush-nightly_linux_armhf.tar.gz)
+- [rush-nightly_linux_i386.tar.gz](https://dl.influxdata.com/rush/nightlies/rush-nightly_linux_i386.tar.gz)
+- [rush-nightly_linux_s390x.tar.gz](https://dl.influxdata.com/rush/nightlies/rush-nightly_linux_s390x.tar.gz)
+- [rush_nightly_s390x.deb](https://dl.influxdata.com/rush/nightlies/rush_nightly_s390x.deb)
+- [rush-nightly.s390x.rpm](https://dl.influxdata.com/rush/nightlies/rush-nightly.s390x.rpm)
+- [rush-nightly_windows_amd64.zip](https://dl.influxdata.com/rush/nightlies/rush-nightly_windows_amd64.zip)
+- [rush-nightly_windows_i386.zip](https://dl.influxdata.com/rush/nightlies/rush-nightly_windows_i386.zip)
+- [rush-nightly.x86_64.rpm](https://dl.influxdata.com/rush/nightlies/rush-nightly.x86_64.rpm)
+- [rush-static-nightly_linux_amd64.tar.gz](https://dl.influxdata.com/rush/nightlies/rush-static-nightly_linux_amd64.tar.gz)
 
 ## How to use it:
 
 See usage with:
 
 ```
-./telegraf --help
+./rush --help
 ```
 
-#### Generate a telegraf config file:
+#### Generate a rush config file:
 
 ```
-./telegraf config > telegraf.conf
+./rush config > rush.conf
 ```
 
 #### Generate config with only cpu input & influxdb output plugins defined:
 
 ```
-./telegraf --input-filter cpu --output-filter influxdb config
+./rush --input-filter cpu --output-filter influxdb config
 ```
 
-#### Run a single telegraf collection, outputing metrics to stdout:
+#### Run a single rush collection, outputing metrics to stdout:
 
 ```
-./telegraf --config telegraf.conf --test
+./rush --config rush.conf --test
 ```
 
-#### Run telegraf with all plugins defined in config file:
+#### Run rush with all plugins defined in config file:
 
 ```
-./telegraf --config telegraf.conf
+./rush --config rush.conf
 ```
 
-#### Run telegraf, enabling the cpu & memory input, and influxdb output plugins:
+#### Run rush, enabling the cpu & memory input, and influxdb output plugins:
 
 ```
-./telegraf --config telegraf.conf --input-filter cpu:mem --output-filter influxdb
+./rush --config rush.conf --input-filter cpu:mem --output-filter influxdb
 ```
 
 
@@ -227,7 +227,7 @@ configuration options.
     * kernel (/proc/vmstat)
     * linux_sysctl_fs (/proc/sys/fs)
 
-Telegraf can also collect metrics via the following service plugins:
+Rush can also collect metrics via the following service plugins:
 
 * [http_listener](./plugins/inputs/http_listener)
 * [kafka_consumer](./plugins/inputs/kafka_consumer)
@@ -249,7 +249,7 @@ Telegraf can also collect metrics via the following service plugins:
   * [rollbar](./plugins/inputs/webhooks/rollbar)
 * [zipkin](./plugins/inputs/zipkin)
 
-Telegraf is able to parse the following input data formats into metrics, these
+Rush is able to parse the following input data formats into metrics, these
 formats may be used with input plugins supporting the `data_format` option:
 
 * [InfluxDB Line Protocol](./docs/DATA_FORMATS_INPUT.md#influx)

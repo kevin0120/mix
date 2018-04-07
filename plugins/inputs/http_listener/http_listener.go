@@ -13,11 +13,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
-	"github.com/influxdata/telegraf/plugins/parsers/influx"
-	"github.com/influxdata/telegraf/selfstat"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
+	"github.com/masami10/rush/plugins/parsers/influx"
+	"github.com/masami10/rush/selfstat"
 )
 
 const (
@@ -50,7 +50,7 @@ type HTTPListener struct {
 	listener net.Listener
 
 	parser influx.InfluxParser
-	acc    telegraf.Accumulator
+	acc    rush.Accumulator
 	pool   *pool
 
 	BytesRecv       selfstat.Stat
@@ -85,11 +85,11 @@ const sampleConfig = `
 
   ## Set one or more allowed client CA certificate file names to 
   ## enable mutually authenticated TLS connections
-  tls_allowed_cacerts = ["/etc/telegraf/clientca.pem"]
+  tls_allowed_cacerts = ["/etc/rush/clientca.pem"]
 
   ## Add service certificate and key
-  tls_cert = "/etc/telegraf/cert.pem"
-  tls_key = "/etc/telegraf/key.pem"
+  tls_cert = "/etc/rush/cert.pem"
+  tls_key = "/etc/rush/key.pem"
 `
 
 func (h *HTTPListener) SampleConfig() string {
@@ -100,13 +100,13 @@ func (h *HTTPListener) Description() string {
 	return "Influx HTTP write listener"
 }
 
-func (h *HTTPListener) Gather(_ telegraf.Accumulator) error {
+func (h *HTTPListener) Gather(_ rush.Accumulator) error {
 	h.BuffersCreated.Set(h.pool.ncreated())
 	return nil
 }
 
 // Start starts the http listener service.
-func (h *HTTPListener) Start(acc telegraf.Accumulator) error {
+func (h *HTTPListener) Start(acc rush.Accumulator) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
@@ -377,7 +377,7 @@ func (h *HTTPListener) getTLSConfig() *tls.Config {
 }
 
 func init() {
-	inputs.Add("http_listener", func() telegraf.Input {
+	inputs.Add("http_listener", func() rush.Input {
 		return &HTTPListener{
 			ServiceAddress: ":8186",
 		}

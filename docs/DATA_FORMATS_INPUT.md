@@ -1,15 +1,15 @@
-# Telegraf Input Data Formats
+# Rush Input Data Formats
 
-Telegraf is able to parse the following input data formats into metrics:
+Rush is able to parse the following input data formats into metrics:
 
-1. [InfluxDB Line Protocol](https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md#influx)
-1. [JSON](https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md#json)
-1. [Graphite](https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md#graphite)
-1. [Value](https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md#value), ie: 45 or "booyah"
-1. [Nagios](https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md#nagios) (exec input only)
-1. [Collectd](https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md#collectd)
+1. [InfluxDB Line Protocol](https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md#influx)
+1. [JSON](https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md#json)
+1. [Graphite](https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md#graphite)
+1. [Value](https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md#value), ie: 45 or "booyah"
+1. [Nagios](https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md#nagios) (exec input only)
+1. [Collectd](https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md#collectd)
 
-Telegraf metrics, like InfluxDB
+Rush metrics, like InfluxDB
 [points](https://docs.influxdata.com/influxdb/v0.10/write_protocols/line/),
 are a combination of four basic parts:
 
@@ -20,7 +20,7 @@ are a combination of four basic parts:
 
 These four parts are easily defined when using InfluxDB line-protocol as a
 data format. But there are other data formats that users may want to use which
-require more advanced configuration to create usable Telegraf metrics.
+require more advanced configuration to create usable Rush metrics.
 
 Plugins such as `exec` and `kafka_consumer` parse textual data. Up until now,
 these plugins were statically configured to parse just a single
@@ -43,7 +43,7 @@ example, in the exec plugin:
   ## Data format to consume.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "json"
 
   ## Additional configuration options go here
@@ -55,7 +55,7 @@ I'll go over below.
 # Influx:
 
 There are no additional configuration options for InfluxDB line-protocol. The
-metrics are parsed directly into Telegraf metrics.
+metrics are parsed directly into Rush metrics.
 
 #### Influx Configuration:
 
@@ -70,7 +70,7 @@ metrics are parsed directly into Telegraf metrics.
   ## Data format to consume.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "influx"
 ```
 
@@ -105,7 +105,7 @@ but can be overridden using the `name_override` config option.
 
 The JSON data format supports specifying "tag keys". If specified, keys
 will be searched for in the root-level of the JSON blob. If the key(s) exist,
-they will be applied as tags to the Telegraf metrics.
+they will be applied as tags to the Rush metrics.
 
 For example, if you had this configuration:
 
@@ -120,7 +120,7 @@ For example, if you had this configuration:
   ## Data format to consume.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "json"
 
   ## List of tag names to extract from top-level of JSON server response
@@ -142,7 +142,7 @@ with this JSON output from a command:
 }
 ```
 
-Your Telegraf metrics would get tagged with "my_tag_1"
+Your Rush metrics would get tagged with "my_tag_1"
 
 ```
 exec_mycollector,my_tag_1=foo a=5,b_c=6
@@ -164,7 +164,7 @@ For example, if the following configuration:
   ## Data format to consume.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "json"
 
   ## List of tag names to extract from top-level of JSON server response
@@ -197,7 +197,7 @@ with this JSON output from a command:
 ]
 ```
 
-Your Telegraf metrics would get tagged with "my_tag_1" and "my_tag_2"
+Your Rush metrics would get tagged with "my_tag_1" and "my_tag_2"
 
 ```
 exec_mycollector,my_tag_1=foo,my_tag_2=baz a=5,b_c=6
@@ -206,13 +206,13 @@ exec_mycollector,my_tag_1=bar,my_tag_2=baz a=7,b_c=8
 
 # Value:
 
-The "value" data format translates single values into Telegraf metrics. This
+The "value" data format translates single values into Rush metrics. This
 is done by assigning a measurement name and setting a single field ("value")
 as the parsed metric.
 
 #### Value Configuration:
 
-You **must** tell Telegraf what type of metric to collect by using the
+You **must** tell Rush what type of metric to collect by using the
 `data_type` configuration option. Available options are:
 
 1. integer
@@ -235,7 +235,7 @@ name of the plugin.
   ## Data format to consume.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "value"
   data_type = "integer" # required
 ```
@@ -243,11 +243,11 @@ name of the plugin.
 # Graphite:
 
 The Graphite data format translates graphite _dot_ buckets directly into
-telegraf measurement names, with a single value field, and without any tags.
+rush measurement names, with a single value field, and without any tags.
 By default, the separator is left as ".", but this can be changed using the
 "separator" argument. For more advanced options,
-Telegraf supports specifying "templates" to translate
-graphite buckets into Telegraf metrics.
+Rush supports specifying "templates" to translate
+graphite buckets into Rush metrics.
 
 Templates are of the form:
 
@@ -282,7 +282,7 @@ templates = [
 ]
 ```
 
-would result in the following Graphite -> Telegraf transformation.
+would result in the following Graphite -> Rush transformation.
 
 ```
 us.west.cpu.load 100
@@ -301,7 +301,7 @@ templates = [
 
 #### Field Templates:
 
-The field keyword tells Telegraf to give the metric that field name.
+The field keyword tells Rush to give the metric that field name.
 So the following template:
 
 ```toml
@@ -311,7 +311,7 @@ templates = [
 ]
 ```
 
-would result in the following Graphite -> Telegraf transformation.
+would result in the following Graphite -> Rush transformation.
 
 ```
 cpu.usage.idle.percent.eu-east 100
@@ -328,7 +328,7 @@ templates = [
 ]
 ```
 
-which would result in the following Graphite -> Telegraf transformation.
+which would result in the following Graphite -> Rush transformation.
 
 ```
 cpu.usage.eu-east.idle.percentage 100
@@ -370,7 +370,7 @@ templates = [
 ]
 ```
 
-would result in the following Graphite -> Telegraf transformation.
+would result in the following Graphite -> Rush transformation.
 
 ```
 cpu.usage.idle.eu-east 100
@@ -393,7 +393,7 @@ There are many more options available,
   ## Data format to consume.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "graphite"
 
   ## This string will be used to join the matched values.
@@ -419,7 +419,7 @@ There are many more options available,
 # Nagios:
 
 There are no additional configuration options for Nagios line-protocol. The
-metrics are parsed directly into Telegraf metrics.
+metrics are parsed directly into Rush metrics.
 
 Note: Nagios Input Data Formats is only supported in `exec` input plugin.
 
@@ -436,7 +436,7 @@ Note: Nagios Input Data Formats is only supported in `exec` input plugin.
   ## Data format to consume.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "nagios"
 ```
 
@@ -469,7 +469,7 @@ You can also change the path to the typesdb or add additional typesdb using
   ## Data format to consume.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "collectd"
 
   ## Authentication file for cryptographic security levels

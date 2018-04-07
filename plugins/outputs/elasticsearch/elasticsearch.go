@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/outputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/outputs"
 	"gopkg.in/olivere/elastic.v5"
 )
 
@@ -49,7 +49,7 @@ var sampleConfig = `
   ## Setting to "0s" will disable the health check (not recommended in production)
   health_check_interval = "10s"
   ## HTTP basic authentication details (eg. when using Shield)
-  # username = "telegraf"
+  # username = "rush"
   # password = "mypassword"
 
   ## Index Config
@@ -65,24 +65,24 @@ var sampleConfig = `
   ## Additionally, you can specify a tag name using the notation {{tag_name}}
   ## which will be used as part of the index name. If the tag does not exist,
   ## the default tag value will be used.
-  # index_name = "telegraf-{{host}}-%Y.%m.%d"
+  # index_name = "rush-{{host}}-%Y.%m.%d"
   # default_tag_value = "none"
-  index_name = "telegraf-%Y.%m.%d" # required.
+  index_name = "rush-%Y.%m.%d" # required.
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 
   ## Template Config
-  ## Set to true if you want telegraf to manage its index template.
-  ## If enabled it will create a recommended index template for telegraf indexes
+  ## Set to true if you want rush to manage its index template.
+  ## If enabled it will create a recommended index template for rush indexes
   manage_template = true
-  ## The template name used for telegraf indexes
-  template_name = "telegraf"
-  ## Set to true if you want telegraf to overwrite an existing template
+  ## The template name used for rush indexes
+  template_name = "rush"
+  ## Set to true if you want rush to overwrite an existing template
   overwrite_template = false
 `
 
@@ -164,7 +164,7 @@ func (a *Elasticsearch) Connect() error {
 	return nil
 }
 
-func (a *Elasticsearch) Write(metrics []telegraf.Metric) error {
+func (a *Elasticsearch) Write(metrics []rush.Metric) error {
 	if len(metrics) == 0 {
 		return nil
 	}
@@ -174,7 +174,7 @@ func (a *Elasticsearch) Write(metrics []telegraf.Metric) error {
 	for _, metric := range metrics {
 		var name = metric.Name()
 
-		// index name has to be re-evaluated each time for telegraf
+		// index name has to be re-evaluated each time for rush
 		// to send the metric to the correct time-based index
 		indexName := a.GetIndexName(a.IndexName, metric.Time(), a.TagKeys, metric.Tags())
 
@@ -388,7 +388,7 @@ func (a *Elasticsearch) Close() error {
 }
 
 func init() {
-	outputs.Add("elasticsearch", func() telegraf.Output {
+	outputs.Add("elasticsearch", func() rush.Output {
 		return &Elasticsearch{
 			Timeout:             internal.Duration{Duration: time.Second * 5},
 			HealthCheckInterval: internal.Duration{Duration: time.Second * 10},

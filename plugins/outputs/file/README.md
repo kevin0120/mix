@@ -1,6 +1,6 @@
 # file Output Plugin
 
-This plugin writes telegraf metrics to files
+This plugin writes rush metrics to files
 
 ### Configuration
 ```
@@ -11,6 +11,6 @@ This plugin writes telegraf metrics to files
   ## Data format to output.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_OUTPUT.md
   data_format = "influx"
 ```

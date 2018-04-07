@@ -10,7 +10,7 @@ import (
 	"path"
 	"time"
 
-	"github.com/influxdata/telegraf/internal"
+	"github.com/masami10/rush/internal"
 )
 
 type Client struct {

@@ -1,4 +1,4 @@
-package telegraf
+package rush
 
 type Processor interface {
 	// SampleConfig returns the default configuration of the Input

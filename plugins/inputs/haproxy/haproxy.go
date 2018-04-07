@@ -13,9 +13,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 //CSV format: https://cbonte.github.io/haproxy-dconv/1.5/configuration.html#9.1
@@ -57,9 +57,9 @@ var sampleConfig = `
   # keep_field_names = true
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 `
@@ -74,7 +74,7 @@ func (r *haproxy) Description() string {
 
 // Reads stats from all configured servers accumulates stats.
 // Returns one of the errors encountered while gather stats (if any).
-func (g *haproxy) Gather(acc telegraf.Accumulator) error {
+func (g *haproxy) Gather(acc rush.Accumulator) error {
 	if len(g.Servers) == 0 {
 		return g.gatherServer("http://127.0.0.1:1936/haproxy?stats", acc)
 	}
@@ -120,7 +120,7 @@ func (g *haproxy) Gather(acc telegraf.Accumulator) error {
 	return nil
 }
 
-func (g *haproxy) gatherServerSocket(addr string, acc telegraf.Accumulator) error {
+func (g *haproxy) gatherServerSocket(addr string, acc rush.Accumulator) error {
 	socketPath := getSocketAddr(addr)
 
 	c, err := net.Dial("unix", socketPath)
@@ -138,7 +138,7 @@ func (g *haproxy) gatherServerSocket(addr string, acc telegraf.Accumulator) erro
 	return g.importCsvResult(c, acc, socketPath)
 }
 
-func (g *haproxy) gatherServer(addr string, acc telegraf.Accumulator) error {
+func (g *haproxy) gatherServer(addr string, acc rush.Accumulator) error {
 	if !strings.HasPrefix(addr, "http") {
 		return g.gatherServerSocket(addr, acc)
 	}
@@ -217,7 +217,7 @@ var fieldRenames = map[string]string{
 	"hrsp_other": "http_response.other",
 }
 
-func (g *haproxy) importCsvResult(r io.Reader, acc telegraf.Accumulator, host string) error {
+func (g *haproxy) importCsvResult(r io.Reader, acc rush.Accumulator, host string) error {
 	csvr := csv.NewReader(r)
 	now := time.Now()
 
@@ -299,7 +299,7 @@ func (g *haproxy) importCsvResult(r io.Reader, acc telegraf.Accumulator, host st
 }
 
 func init() {
-	inputs.Add("haproxy", func() telegraf.Input {
+	inputs.Add("haproxy", func() rush.Input {
 		return &haproxy{}
 	})
 }

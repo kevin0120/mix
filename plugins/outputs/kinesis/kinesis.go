@@ -9,10 +9,10 @@ import (
 	"github.com/aws/aws-sdk-go/service/kinesis"
 	"github.com/satori/go.uuid"
 
-	"github.com/influxdata/telegraf"
-	internalaws "github.com/influxdata/telegraf/internal/config/aws"
-	"github.com/influxdata/telegraf/plugins/outputs"
-	"github.com/influxdata/telegraf/plugins/serializers"
+	"github.com/masami10/rush"
+	internalaws "github.com/masami10/rush/internal/config/aws"
+	"github.com/masami10/rush/plugins/outputs"
+	"github.com/masami10/rush/plugins/serializers"
 )
 
 type (
@@ -60,7 +60,7 @@ var sampleConfig = `
   #profile = ""
   #shared_credential_file = ""
 
-  ## Kinesis StreamName must exist prior to starting telegraf.
+  ## Kinesis StreamName must exist prior to starting rush.
   streamname = "StreamName"
   ## DEPRECATED: PartitionKey as used for sharding data.
   partitionkey = "PartitionKey"
@@ -93,7 +93,7 @@ var sampleConfig = `
   ## Data format to output.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_OUTPUT.md
   data_format = "influx"
 
   ## debug will show upstream aws messages.
@@ -194,7 +194,7 @@ func writekinesis(k *KinesisOutput, r []*kinesis.PutRecordsRequestEntry) time.Du
 	return time.Since(start)
 }
 
-func (k *KinesisOutput) getPartitionKey(metric telegraf.Metric) string {
+func (k *KinesisOutput) getPartitionKey(metric rush.Metric) string {
 	if k.Partition != nil {
 		switch k.Partition.Method {
 		case "static":
@@ -220,7 +220,7 @@ func (k *KinesisOutput) getPartitionKey(metric telegraf.Metric) string {
 	return k.PartitionKey
 }
 
-func (k *KinesisOutput) Write(metrics []telegraf.Metric) error {
+func (k *KinesisOutput) Write(metrics []rush.Metric) error {
 	var sz uint32
 
 	if len(metrics) == 0 {
@@ -264,7 +264,7 @@ func (k *KinesisOutput) Write(metrics []telegraf.Metric) error {
 }
 
 func init() {
-	outputs.Add("kinesis", func() telegraf.Output {
+	outputs.Add("kinesis", func() rush.Output {
 		return &KinesisOutput{}
 	})
 }

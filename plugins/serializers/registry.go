@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/influxdata/telegraf"
+	"github.com/masami10/rush"
 
-	"github.com/influxdata/telegraf/plugins/serializers/graphite"
-	"github.com/influxdata/telegraf/plugins/serializers/influx"
-	"github.com/influxdata/telegraf/plugins/serializers/json"
+	"github.com/masami10/rush/plugins/serializers/graphite"
+	"github.com/masami10/rush/plugins/serializers/influx"
+	"github.com/masami10/rush/plugins/serializers/json"
 )
 
 // SerializerOutput is an interface for output plugins that are able to
-// serialize telegraf metrics into arbitrary data formats.
+// serialize rush metrics into arbitrary data formats.
 type SerializerOutput interface {
 	// SetSerializer sets the serializer function for the interface.
 	SetSerializer(serializer Serializer)
@@ -21,10 +21,10 @@ type SerializerOutput interface {
 // Serializer is an interface defining functions that a serializer plugin must
 // satisfy.
 type Serializer interface {
-	// Serialize takes a single telegraf metric and turns it into a byte buffer.
+	// Serialize takes a single rush metric and turns it into a byte buffer.
 	// separate metrics should be separated by a newline, and there should be
 	// a newline at the end of the buffer.
-	Serialize(metric telegraf.Metric) ([]byte, error)
+	Serialize(metric rush.Metric) ([]byte, error)
 }
 
 // Config is a struct that covers the data types needed for all serializer types,
@@ -36,7 +36,7 @@ type Config struct {
 	// Prefix to add to all measurements, only supports Graphite
 	Prefix string
 
-	// Template for converting telegraf metrics into Graphite
+	// Template for converting rush metrics into Graphite
 	// only supports Graphite
 	Template string
 

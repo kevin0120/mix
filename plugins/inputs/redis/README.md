@@ -1,4 +1,4 @@
-# Telegraf Plugin: Redis
+# Rush Plugin: Redis
 
 ### Configuration:
 
@@ -136,7 +136,7 @@ Using this configuration:
 
 When run with:
 ```
-./telegraf --config telegraf.conf --input-filter redis --test
+./rush --config rush.conf --input-filter redis --test
 ```
 
 It produces:

@@ -25,7 +25,7 @@ type UDPConfig struct {
 	PayloadSize int
 }
 
-// NewUDP will return an instance of the telegraf UDP output plugin for influxdb
+// NewUDP will return an instance of the rush UDP output plugin for influxdb
 func NewUDP(config UDPConfig) (Client, error) {
 	p, err := url.Parse(config.URL)
 	if err != nil {

@@ -3,23 +3,23 @@ package internal
 import (
 	"runtime"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
-	"github.com/influxdata/telegraf/selfstat"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
+	"github.com/masami10/rush/selfstat"
 )
 
 type Self struct {
 	CollectMemstats bool
 }
 
-func NewSelf() telegraf.Input {
+func NewSelf() rush.Input {
 	return &Self{
 		CollectMemstats: true,
 	}
 }
 
 var sampleConfig = `
-  ## If true, collect telegraf memory stats.
+  ## If true, collect rush memory stats.
   # collect_memstats = true
 `
 
@@ -31,7 +31,7 @@ func (s *Self) SampleConfig() string {
 	return sampleConfig
 }
 
-func (s *Self) Gather(acc telegraf.Accumulator) error {
+func (s *Self) Gather(acc rush.Accumulator) error {
 	if s.CollectMemstats {
 		m := &runtime.MemStats{}
 		runtime.ReadMemStats(m)

@@ -11,9 +11,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 type Apache struct {
@@ -47,9 +47,9 @@ var sampleConfig = `
   # response_timeout = "5s"
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 `
@@ -62,7 +62,7 @@ func (n *Apache) Description() string {
 	return "Read Apache status information (mod_status)"
 }
 
-func (n *Apache) Gather(acc telegraf.Accumulator) error {
+func (n *Apache) Gather(acc rush.Accumulator) error {
 	if len(n.Urls) == 0 {
 		n.Urls = []string{"http://localhost/server-status?auto"}
 	}
@@ -114,7 +114,7 @@ func (n *Apache) createHttpClient() (*http.Client, error) {
 	return client, nil
 }
 
-func (n *Apache) gatherUrl(addr *url.URL, acc telegraf.Accumulator) error {
+func (n *Apache) gatherUrl(addr *url.URL, acc rush.Accumulator) error {
 	req, err := http.NewRequest("GET", addr.String(), nil)
 	if err != nil {
 		return fmt.Errorf("error on new request to %s : %s\n", addr.String(), err)
@@ -229,7 +229,7 @@ func getTags(addr *url.URL) map[string]string {
 }
 
 func init() {
-	inputs.Add("apache", func() telegraf.Input {
+	inputs.Add("apache", func() rush.Input {
 		return &Apache{}
 	})
 }

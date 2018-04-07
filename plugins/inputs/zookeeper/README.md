@@ -1,4 +1,4 @@
-## Telegraf Plugin: Zookeeper
+## Rush Plugin: Zookeeper
 
 #### Description
 

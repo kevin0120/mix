@@ -8,8 +8,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -44,13 +44,13 @@ func TestSocketWriter_udp(t *testing.T) {
 }
 
 func TestSocketWriter_unix(t *testing.T) {
-	os.Remove("/tmp/telegraf_test.sock")
-	defer os.Remove("/tmp/telegraf_test.sock")
-	listener, err := net.Listen("unix", "/tmp/telegraf_test.sock")
+	os.Remove("/tmp/rush_test.sock")
+	defer os.Remove("/tmp/rush_test.sock")
+	listener, err := net.Listen("unix", "/tmp/rush_test.sock")
 	require.NoError(t, err)
 
 	sw := newSocketWriter()
-	sw.Address = "unix:///tmp/telegraf_test.sock"
+	sw.Address = "unix:///tmp/rush_test.sock"
 
 	err = sw.Connect()
 	require.NoError(t, err)
@@ -62,13 +62,13 @@ func TestSocketWriter_unix(t *testing.T) {
 }
 
 func TestSocketWriter_unixgram(t *testing.T) {
-	os.Remove("/tmp/telegraf_test.sock")
-	defer os.Remove("/tmp/telegraf_test.sock")
-	listener, err := net.ListenPacket("unixgram", "/tmp/telegraf_test.sock")
+	os.Remove("/tmp/rush_test.sock")
+	defer os.Remove("/tmp/rush_test.sock")
+	listener, err := net.ListenPacket("unixgram", "/tmp/rush_test.sock")
 	require.NoError(t, err)
 
 	sw := newSocketWriter()
-	sw.Address = "unixgram:///tmp/telegraf_test.sock"
+	sw.Address = "unixgram:///tmp/rush_test.sock"
 
 	err = sw.Connect()
 	require.NoError(t, err)
@@ -77,7 +77,7 @@ func TestSocketWriter_unixgram(t *testing.T) {
 }
 
 func testSocketWriter_stream(t *testing.T, sw *SocketWriter, lconn net.Conn) {
-	metrics := []telegraf.Metric{}
+	metrics := []rush.Metric{}
 	metrics = append(metrics, testutil.TestMetric(1, "test"))
 	mbs1out, _ := sw.Serialize(metrics[0])
 	metrics = append(metrics, testutil.TestMetric(2, "test"))
@@ -97,7 +97,7 @@ func testSocketWriter_stream(t *testing.T, sw *SocketWriter, lconn net.Conn) {
 }
 
 func testSocketWriter_packet(t *testing.T, sw *SocketWriter, lconn net.PacketConn) {
-	metrics := []telegraf.Metric{}
+	metrics := []rush.Metric{}
 	metrics = append(metrics, testutil.TestMetric(1, "test"))
 	mbs1out, _ := sw.Serialize(metrics[0])
 	metrics = append(metrics, testutil.TestMetric(2, "test"))
@@ -139,7 +139,7 @@ func TestSocketWriter_Write_err(t *testing.T) {
 	require.NoError(t, err)
 	lconn.(*net.TCPConn).SetWriteBuffer(256)
 
-	metrics := []telegraf.Metric{testutil.TestMetric(1, "testerr")}
+	metrics := []rush.Metric{testutil.TestMetric(1, "testerr")}
 
 	// close the socket to generate an error
 	lconn.Close()
@@ -174,7 +174,7 @@ func TestSocketWriter_Write_reconnect(t *testing.T) {
 		wg.Done()
 	}()
 
-	metrics := []telegraf.Metric{testutil.TestMetric(1, "testerr")}
+	metrics := []rush.Metric{testutil.TestMetric(1, "testerr")}
 	err = sw.Write(metrics)
 	require.NoError(t, err)
 

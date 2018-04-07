@@ -5,10 +5,10 @@ import (
 
 	nats_client "github.com/nats-io/nats"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/outputs"
-	"github.com/influxdata/telegraf/plugins/serializers"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/outputs"
+	"github.com/masami10/rush/plugins/serializers"
 )
 
 type NATS struct {
@@ -40,19 +40,19 @@ var sampleConfig = `
   # username = ""
   # password = ""
   ## NATS subject for producer messages
-  subject = "telegraf"
+  subject = "rush"
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 
   ## Data format to output.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_OUTPUT.md
   data_format = "influx"
 `
 
@@ -106,10 +106,10 @@ func (n *NATS) SampleConfig() string {
 }
 
 func (n *NATS) Description() string {
-	return "Send telegraf measurements to NATS"
+	return "Send rush measurements to NATS"
 }
 
-func (n *NATS) Write(metrics []telegraf.Metric) error {
+func (n *NATS) Write(metrics []rush.Metric) error {
 	if len(metrics) == 0 {
 		return nil
 	}
@@ -129,7 +129,7 @@ func (n *NATS) Write(metrics []telegraf.Metric) error {
 }
 
 func init() {
-	outputs.Add("nats", func() telegraf.Output {
+	outputs.Add("nats", func() rush.Output {
 		return &NATS{}
 	})
 }

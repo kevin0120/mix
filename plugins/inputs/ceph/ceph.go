@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 const (
@@ -76,7 +76,7 @@ func (c *Ceph) SampleConfig() string {
 	return sampleConfig
 }
 
-func (c *Ceph) Gather(acc telegraf.Accumulator) error {
+func (c *Ceph) Gather(acc rush.Accumulator) error {
 	if c.GatherAdminSocketStats {
 		if err := c.gatherAdminSocketStats(acc); err != nil {
 			return err
@@ -92,7 +92,7 @@ func (c *Ceph) Gather(acc telegraf.Accumulator) error {
 	return nil
 }
 
-func (c *Ceph) gatherAdminSocketStats(acc telegraf.Accumulator) error {
+func (c *Ceph) gatherAdminSocketStats(acc rush.Accumulator) error {
 	sockets, err := findSockets(c)
 	if err != nil {
 		return fmt.Errorf("failed to find sockets at path '%s': %v", c.SocketDir, err)
@@ -118,10 +118,10 @@ func (c *Ceph) gatherAdminSocketStats(acc telegraf.Accumulator) error {
 	return nil
 }
 
-func (c *Ceph) gatherClusterStats(acc telegraf.Accumulator) error {
+func (c *Ceph) gatherClusterStats(acc rush.Accumulator) error {
 	jobs := []struct {
 		command string
-		parser  func(telegraf.Accumulator, string) error
+		parser  func(rush.Accumulator, string) error
 	}{
 		{"status", decodeStatus},
 		{"df", decodeDf},
@@ -156,7 +156,7 @@ func init() {
 		GatherClusterStats:     false,
 	}
 
-	inputs.Add(measurement, func() telegraf.Input { return &c })
+	inputs.Add(measurement, func() rush.Input { return &c })
 
 }
 
@@ -317,7 +317,7 @@ func (c *Ceph) exec(command string) (string, error) {
 	return output, nil
 }
 
-func decodeStatus(acc telegraf.Accumulator, input string) error {
+func decodeStatus(acc rush.Accumulator, input string) error {
 	data := make(map[string]interface{})
 	err := json.Unmarshal([]byte(input), &data)
 	if err != nil {
@@ -342,7 +342,7 @@ func decodeStatus(acc telegraf.Accumulator, input string) error {
 	return nil
 }
 
-func decodeStatusOsdmap(acc telegraf.Accumulator, data map[string]interface{}) error {
+func decodeStatusOsdmap(acc rush.Accumulator, data map[string]interface{}) error {
 	osdmap, ok := data["osdmap"].(map[string]interface{})
 	if !ok {
 		return fmt.Errorf("WARNING %s - unable to decode osdmap", measurement)
@@ -355,7 +355,7 @@ func decodeStatusOsdmap(acc telegraf.Accumulator, data map[string]interface{}) e
 	return nil
 }
 
-func decodeStatusPgmap(acc telegraf.Accumulator, data map[string]interface{}) error {
+func decodeStatusPgmap(acc rush.Accumulator, data map[string]interface{}) error {
 	pgmap, ok := data["pgmap"].(map[string]interface{})
 	if !ok {
 		return fmt.Errorf("WARNING %s - unable to decode pgmap", measurement)
@@ -391,7 +391,7 @@ func extractPgmapStates(data map[string]interface{}) ([]interface{}, error) {
 	return states, nil
 }
 
-func decodeStatusPgmapState(acc telegraf.Accumulator, data map[string]interface{}) error {
+func decodeStatusPgmapState(acc rush.Accumulator, data map[string]interface{}) error {
 	states, err := extractPgmapStates(data)
 	if err != nil {
 		return err
@@ -421,7 +421,7 @@ func decodeStatusPgmapState(acc telegraf.Accumulator, data map[string]interface{
 	return nil
 }
 
-func decodeDf(acc telegraf.Accumulator, input string) error {
+func decodeDf(acc rush.Accumulator, input string) error {
 	data := make(map[string]interface{})
 	err := json.Unmarshal([]byte(input), &data)
 	if err != nil {
@@ -463,7 +463,7 @@ func decodeDf(acc telegraf.Accumulator, input string) error {
 	return nil
 }
 
-func decodeOsdPoolStats(acc telegraf.Accumulator, input string) error {
+func decodeOsdPoolStats(acc rush.Accumulator, input string) error {
 	data := make([]map[string]interface{}, 0)
 	err := json.Unmarshal([]byte(input), &data)
 	if err != nil {

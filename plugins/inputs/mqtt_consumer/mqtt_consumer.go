@@ -7,10 +7,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
-	"github.com/influxdata/telegraf/plugins/parsers"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
+	"github.com/masami10/rush/plugins/parsers"
 
 	"github.com/eclipse/paho.mqtt.golang"
 )
@@ -50,7 +50,7 @@ type MQTTConsumer struct {
 	done chan struct{}
 
 	// keep the accumulator internally:
-	acc telegraf.Accumulator
+	acc rush.Accumulator
 
 	connected bool
 }
@@ -67,8 +67,8 @@ var sampleConfig = `
 
   ## Topics to subscribe to
   topics = [
-    "telegraf/host01/cpu",
-    "telegraf/+/mem",
+    "rush/host01/cpu",
+    "rush/+/mem",
     "sensors/#",
   ]
 
@@ -80,20 +80,20 @@ var sampleConfig = `
   client_id = ""
 
   ## username and password to connect MQTT server.
-  # username = "telegraf"
+  # username = "rush"
   # password = "metricsmetricsmetricsmetrics"
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 
   ## Data format to consume.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "influx"
 `
 
@@ -109,7 +109,7 @@ func (m *MQTTConsumer) SetParser(parser parsers.Parser) {
 	m.parser = parser
 }
 
-func (m *MQTTConsumer) Start(acc telegraf.Accumulator) error {
+func (m *MQTTConsumer) Start(acc rush.Accumulator) error {
 	m.Lock()
 	defer m.Unlock()
 	m.connected = false
@@ -217,7 +217,7 @@ func (m *MQTTConsumer) Stop() {
 	}
 }
 
-func (m *MQTTConsumer) Gather(acc telegraf.Accumulator) error {
+func (m *MQTTConsumer) Gather(acc rush.Accumulator) error {
 	if !m.connected {
 		m.connect()
 	}
@@ -231,7 +231,7 @@ func (m *MQTTConsumer) createOpts() (*mqtt.ClientOptions, error) {
 	opts.ConnectTimeout = m.ConnectionTimeout.Duration
 
 	if m.ClientID == "" {
-		opts.SetClientID("Telegraf-Consumer-" + internal.RandomString(5))
+		opts.SetClientID("Rush-Consumer-" + internal.RandomString(5))
 	} else {
 		opts.SetClientID(m.ClientID)
 	}
@@ -260,7 +260,7 @@ func (m *MQTTConsumer) createOpts() (*mqtt.ClientOptions, error) {
 	}
 
 	for _, server := range m.Servers {
-		// Preserve support for host:port style servers; deprecated in Telegraf 1.4.4
+		// Preserve support for host:port style servers; deprecated in Rush 1.4.4
 		if !strings.Contains(server, "://") {
 			log.Printf("W! mqtt_consumer server %q should be updated to use `scheme://host:port` format", server)
 			if tlsCfg == nil {
@@ -282,7 +282,7 @@ func (m *MQTTConsumer) createOpts() (*mqtt.ClientOptions, error) {
 }
 
 func init() {
-	inputs.Add("mqtt_consumer", func() telegraf.Input {
+	inputs.Add("mqtt_consumer", func() rush.Input {
 		return &MQTTConsumer{
 			ConnectionTimeout: defaultConnectionTimeout,
 		}

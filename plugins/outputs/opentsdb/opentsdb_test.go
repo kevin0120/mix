@@ -12,8 +12,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/testutil"
 )
 
 func TestCleanTags(t *testing.T) {
@@ -128,7 +128,7 @@ func TestSanitize(t *testing.T) {
 func BenchmarkHttpSend(b *testing.B) {
 	const BatchSize = 50
 	const MetricsCount = 4 * BatchSize
-	metrics := make([]telegraf.Metric, MetricsCount)
+	metrics := make([]rush.Metric, MetricsCount)
 	for i := 0; i < MetricsCount; i++ {
 		metrics[i] = testutil.TestMetric(1.0)
 	}

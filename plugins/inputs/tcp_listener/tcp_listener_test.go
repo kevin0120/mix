@@ -11,8 +11,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/influxdata/telegraf/plugins/parsers"
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/plugins/parsers"
+	"github.com/masami10/rush/testutil"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -163,9 +163,9 @@ func TestConcurrentConns(t *testing.T) {
 	n, err := conn.Read(buf)
 	assert.NoError(t, err)
 	assert.Equal(t,
-		"Telegraf maximum concurrent TCP connections (2) reached, closing.\n"+
+		"Rush maximum concurrent TCP connections (2) reached, closing.\n"+
 			"You may want to increase max_tcp_connections in"+
-			" the Telegraf tcp listener configuration.\n",
+			" the Rush tcp listener configuration.\n",
 		string(buf[:n]))
 
 	_, err = conn.Read(buf)
@@ -196,9 +196,9 @@ func TestConcurrentConns1(t *testing.T) {
 	n, err := conn.Read(buf)
 	assert.NoError(t, err)
 	assert.Equal(t,
-		"Telegraf maximum concurrent TCP connections (1) reached, closing.\n"+
+		"Rush maximum concurrent TCP connections (1) reached, closing.\n"+
 			"You may want to increase max_tcp_connections in"+
-			" the Telegraf tcp listener configuration.\n",
+			" the Rush tcp listener configuration.\n",
 		string(buf[:n]))
 
 	_, err = conn.Read(buf)

@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/filter"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/filter"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 type runner func(cmdName string, Timeout internal.Duration, UseSudo bool) (*bytes.Buffer, error)
@@ -75,7 +75,7 @@ func opensmtpdRunner(cmdName string, Timeout internal.Duration, UseSudo bool) (*
 // Accumulator
 //
 // All the dots in stat name will replaced by underscores. Histogram statistics will not be collected.
-func (s *Opensmtpd) Gather(acc telegraf.Accumulator) error {
+func (s *Opensmtpd) Gather(acc rush.Accumulator) error {
 	// Always exclude uptime.human statistics
 	stat_excluded := []string{"uptime.human"}
 	filter_excluded, err := filter.Compile(stat_excluded)
@@ -123,7 +123,7 @@ func (s *Opensmtpd) Gather(acc telegraf.Accumulator) error {
 }
 
 func init() {
-	inputs.Add("opensmtpd", func() telegraf.Input {
+	inputs.Add("opensmtpd", func() rush.Input {
 		return &Opensmtpd{
 			run:     opensmtpdRunner,
 			Binary:  defaultBinary,

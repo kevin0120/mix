@@ -7,7 +7,7 @@ additional information can be found.
 ### Configuration:
 
 This section contains the default TOML to configure the plugin.  You can
-generate it using `telegraf --usage <plugin-name>`.
+generate it using `rush --usage <plugin-name>`.
 
 ```toml
 # Description
@@ -52,7 +52,7 @@ SELECT max(field1), mean(field1), min(field1) FROM measurement1 WHERE tag1=bar A
 ### Example Output:
 
 This section shows example output in Line Protocol format.  You can often use
-`telegraf --input-filter <plugin-name> --test` or use the `file` output to get
+`rush --input-filter <plugin-name> --test` or use the `file` output to get
 this information.
 
 ```

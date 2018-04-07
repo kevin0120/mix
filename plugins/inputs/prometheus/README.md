@@ -50,7 +50,7 @@ If you want to monitor Caddy, you need to use Caddy with its Prometheus plugin:
 * Download Caddy+Prometheus plugin [here](https://caddyserver.com/download/linux/amd64?plugins=http.prometheus)
 * Add the `prometheus` directive in your `CaddyFile`
 * Restart Caddy
-* Configure Telegraf to fetch metrics on it:
+* Configure Rush to fetch metrics on it:
 
 ```
 [[inputs.prometheus]]
@@ -67,7 +67,7 @@ Measurement names are based on the Metric Family and tags are created for each
 label.  The value is added to a field named based on the metric type.
 
 All metrics receive the `url` tag indicating the related URL specified in the
-Telegraf configuration. If using Kubernetes service discovery the `address`
+Rush configuration. If using Kubernetes service discovery the `address`
 tag is also added indicating the discovered ip address.
 
 ### Example Output:
@@ -86,7 +86,7 @@ go_gc_duration_seconds_count 4
 # HELP go_goroutines Number of goroutines that currently exist.
 # TYPE go_goroutines gauge
 go_goroutines 15
-# HELP cpu_usage_user Telegraf collected metric
+# HELP cpu_usage_user Rush collected metric
 # TYPE cpu_usage_user gauge
 cpu_usage_user{cpu="cpu0"} 1.4112903225816156
 cpu_usage_user{cpu="cpu1"} 0.702106318955865

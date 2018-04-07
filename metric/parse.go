@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/influxdata/telegraf"
+	"github.com/masami10/rush"
 )
 
 var (
@@ -40,11 +40,11 @@ const (
 	fieldsState
 )
 
-func Parse(buf []byte) ([]telegraf.Metric, error) {
+func Parse(buf []byte) ([]rush.Metric, error) {
 	return ParseWithDefaultTimePrecision(buf, time.Now(), "")
 }
 
-func ParseWithDefaultTime(buf []byte, t time.Time) ([]telegraf.Metric, error) {
+func ParseWithDefaultTime(buf []byte, t time.Time) ([]rush.Metric, error) {
 	return ParseWithDefaultTimePrecision(buf, t, "")
 }
 
@@ -52,14 +52,14 @@ func ParseWithDefaultTimePrecision(
 	buf []byte,
 	t time.Time,
 	precision string,
-) ([]telegraf.Metric, error) {
+) ([]rush.Metric, error) {
 	if len(buf) == 0 {
-		return []telegraf.Metric{}, nil
+		return []rush.Metric{}, nil
 	}
 	if len(buf) <= 6 {
-		return []telegraf.Metric{}, makeError("buffer too short", buf, 0)
+		return []rush.Metric{}, makeError("buffer too short", buf, 0)
 	}
-	metrics := make([]telegraf.Metric, 0, bytes.Count(buf, []byte("\n"))+1)
+	metrics := make([]rush.Metric, 0, bytes.Count(buf, []byte("\n"))+1)
 	var errStr string
 	i := 0
 	for {
@@ -92,7 +92,7 @@ func ParseWithDefaultTimePrecision(
 func parseMetric(buf []byte,
 	defaultTime time.Time,
 	precision string,
-) (telegraf.Metric, error) {
+) (rush.Metric, error) {
 	var dTime string
 	// scan the first block which is measurement[,tag1=value1,tag2=value=2...]
 	pos, key, err := scanKey(buf, 0)

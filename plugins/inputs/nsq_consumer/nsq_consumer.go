@@ -3,9 +3,9 @@ package nsq_consumer
 import (
 	"fmt"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
-	"github.com/influxdata/telegraf/plugins/parsers"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
+	"github.com/masami10/rush/plugins/parsers"
 	nsq "github.com/nsqio/go-nsq"
 )
 
@@ -19,7 +19,7 @@ type NSQConsumer struct {
 	MaxInFlight int
 	parser      parsers.Parser
 	consumer    *nsq.Consumer
-	acc         telegraf.Accumulator
+	acc         rush.Accumulator
 }
 
 var sampleConfig = `
@@ -29,19 +29,19 @@ var sampleConfig = `
   nsqd = ["localhost:4150"]
   ## An array representing the NSQLookupd HTTP Endpoints
   nsqlookupd = ["localhost:4161"]
-  topic = "telegraf"
+  topic = "rush"
   channel = "consumer"
   max_in_flight = 100
 
   ## Data format to consume.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "influx"
 `
 
 func init() {
-	inputs.Add("nsq_consumer", func() telegraf.Input {
+	inputs.Add("nsq_consumer", func() rush.Input {
 		return &NSQConsumer{}
 	})
 }
@@ -62,7 +62,7 @@ func (n *NSQConsumer) Description() string {
 }
 
 // Start pulls data from nsq
-func (n *NSQConsumer) Start(acc telegraf.Accumulator) error {
+func (n *NSQConsumer) Start(acc rush.Accumulator) error {
 	n.acc = acc
 	n.connect()
 	n.consumer.AddConcurrentHandlers(nsq.HandlerFunc(func(message *nsq.Message) error {
@@ -91,7 +91,7 @@ func (n *NSQConsumer) Stop() {
 }
 
 // Gather is a noop
-func (n *NSQConsumer) Gather(acc telegraf.Accumulator) error {
+func (n *NSQConsumer) Gather(acc rush.Accumulator) error {
 	return nil
 }
 

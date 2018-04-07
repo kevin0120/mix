@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/metric"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/metric"
 )
 
 // InfluxParser is an object for Parsing incoming metrics.
@@ -15,7 +15,7 @@ type InfluxParser struct {
 	DefaultTags map[string]string
 }
 
-func (p *InfluxParser) ParseWithDefaultTimePrecision(buf []byte, t time.Time, precision string) ([]telegraf.Metric, error) {
+func (p *InfluxParser) ParseWithDefaultTimePrecision(buf []byte, t time.Time, precision string) ([]rush.Metric, error) {
 	if !bytes.HasSuffix(buf, []byte("\n")) {
 		buf = append(buf, '\n')
 	}
@@ -40,11 +40,11 @@ func (p *InfluxParser) ParseWithDefaultTimePrecision(buf []byte, t time.Time, pr
 // with each metric separated by newlines. If any metrics fail to parse,
 // a non-nil error will be returned in addition to the metrics that parsed
 // successfully.
-func (p *InfluxParser) Parse(buf []byte) ([]telegraf.Metric, error) {
+func (p *InfluxParser) Parse(buf []byte) ([]rush.Metric, error) {
 	return p.ParseWithDefaultTimePrecision(buf, time.Now(), "")
 }
 
-func (p *InfluxParser) ParseLine(line string) (telegraf.Metric, error) {
+func (p *InfluxParser) ParseLine(line string) (rush.Metric, error) {
 	metrics, err := p.Parse([]byte(line + "\n"))
 
 	if err != nil {

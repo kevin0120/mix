@@ -48,6 +48,6 @@ A list of databases to pull metrics about. If not specified, metrics for all dat
 ### Configuration example
 ```
 [[inputs.postgresql]]
-  address = "postgres://telegraf@localhost/someDB"
+  address = "postgres://rush@localhost/someDB"
   ignored_databases = ["template0", "template1"]
 ```

@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/metric"
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/metric"
+	"github.com/masami10/rush/testutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -72,7 +72,7 @@ func TestConnectAndWrite(t *testing.T) {
 
 func Test_insertSQL(t *testing.T) {
 	tests := []struct {
-		Metrics []telegraf.Metric
+		Metrics []rush.Metric
 		Want    string
 	}{
 		{

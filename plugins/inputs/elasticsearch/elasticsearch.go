@@ -3,10 +3,10 @@ package elasticsearch
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
-	jsonparser "github.com/influxdata/telegraf/plugins/parsers/json"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
+	jsonparser "github.com/masami10/rush/plugins/parsers/json"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -109,9 +109,9 @@ const sampleConfig = `
   # node_stats = ["jvm", "http"]
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 `
@@ -155,7 +155,7 @@ func (e *Elasticsearch) Description() string {
 
 // Gather reads the stats from Elasticsearch and writes it to the
 // Accumulator.
-func (e *Elasticsearch) Gather(acc telegraf.Accumulator) error {
+func (e *Elasticsearch) Gather(acc rush.Accumulator) error {
 	if e.client == nil {
 		client, err := e.createHttpClient()
 
@@ -169,7 +169,7 @@ func (e *Elasticsearch) Gather(acc telegraf.Accumulator) error {
 	wg.Add(len(e.Servers))
 
 	for _, serv := range e.Servers {
-		go func(s string, acc telegraf.Accumulator) {
+		go func(s string, acc rush.Accumulator) {
 			defer wg.Done()
 			url := e.nodeStatsUrl(s)
 			e.isMaster = false
@@ -246,7 +246,7 @@ func (e *Elasticsearch) nodeStatsUrl(baseUrl string) string {
 	return fmt.Sprintf("%s/%s", url, strings.Join(e.NodeStats, ","))
 }
 
-func (e *Elasticsearch) gatherNodeStats(url string, acc telegraf.Accumulator) error {
+func (e *Elasticsearch) gatherNodeStats(url string, acc rush.Accumulator) error {
 	nodeStats := &struct {
 		ClusterName string               `json:"cluster_name"`
 		Nodes       map[string]*nodeStat `json:"nodes"`
@@ -303,7 +303,7 @@ func (e *Elasticsearch) gatherNodeStats(url string, acc telegraf.Accumulator) er
 	return nil
 }
 
-func (e *Elasticsearch) gatherClusterHealth(url string, acc telegraf.Accumulator) error {
+func (e *Elasticsearch) gatherClusterHealth(url string, acc rush.Accumulator) error {
 	healthStats := &clusterHealth{}
 	if err := e.gatherJsonData(url, healthStats); err != nil {
 		return err
@@ -348,7 +348,7 @@ func (e *Elasticsearch) gatherClusterHealth(url string, acc telegraf.Accumulator
 	return nil
 }
 
-func (e *Elasticsearch) gatherClusterStats(url string, acc telegraf.Accumulator) error {
+func (e *Elasticsearch) gatherClusterStats(url string, acc rush.Accumulator) error {
 	clusterStats := &clusterStats{}
 	if err := e.gatherJsonData(url, clusterStats); err != nil {
 		return err
@@ -423,7 +423,7 @@ func (e *Elasticsearch) gatherJsonData(url string, v interface{}) error {
 }
 
 func init() {
-	inputs.Add("elasticsearch", func() telegraf.Input {
+	inputs.Add("elasticsearch", func() rush.Input {
 		return NewElasticsearch()
 	})
 }

@@ -3,8 +3,8 @@ package mqtt_consumer
 import (
 	"testing"
 
-	"github.com/influxdata/telegraf/plugins/parsers"
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/plugins/parsers"
+	"github.com/masami10/rush/testutil"
 
 	"github.com/stretchr/testify/assert"
 
@@ -22,7 +22,7 @@ const (
 func newTestMQTTConsumer() (*MQTTConsumer, chan mqtt.Message) {
 	in := make(chan mqtt.Message, 100)
 	n := &MQTTConsumer{
-		Topics:    []string{"telegraf"},
+		Topics:    []string{"rush"},
 		Servers:   []string{"localhost:1883"},
 		in:        in,
 		done:      make(chan struct{}),
@@ -51,20 +51,20 @@ func TestRandomClientID(t *testing.T) {
 func TestClientID(t *testing.T) {
 	m1 := &MQTTConsumer{
 		Servers:  []string{"localhost:1883"},
-		ClientID: "telegraf-test",
+		ClientID: "rush-test",
 	}
 	opts, err := m1.createOpts()
 	assert.NoError(t, err)
 
 	m2 := &MQTTConsumer{
 		Servers:  []string{"localhost:1883"},
-		ClientID: "telegraf-test",
+		ClientID: "rush-test",
 	}
 	opts2, err2 := m2.createOpts()
 	assert.NoError(t, err2)
 
-	assert.Equal(t, "telegraf-test", opts2.ClientID)
-	assert.Equal(t, "telegraf-test", opts.ClientID)
+	assert.Equal(t, "rush-test", opts2.ClientID)
+	assert.Equal(t, "rush-test", opts.ClientID)
 }
 
 // Test that Start() fails if client ID is not set but persistent is
@@ -189,7 +189,7 @@ func TestRunParserAndGatherJSON(t *testing.T) {
 
 func mqttMsg(val string) mqtt.Message {
 	return &message{
-		topic:   "telegraf/unit_test",
+		topic:   "rush/unit_test",
 		payload: []byte(val),
 	}
 }

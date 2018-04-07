@@ -11,9 +11,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 const acceptHeader = `application/vnd.google.protobuf;proto=io.prometheus.client.MetricFamily;encoding=delimited;q=0.7,text/plain;version=0.0.4;q=0.3`
@@ -129,7 +129,7 @@ func (p *Prometheus) GetAllURLs() ([]URLAndAddress, error) {
 
 // Reads stats from all configured servers accumulates stats.
 // Returns one of the errors encountered while gather stats (if any).
-func (p *Prometheus) Gather(acc telegraf.Accumulator) error {
+func (p *Prometheus) Gather(acc rush.Accumulator) error {
 	if p.client == nil {
 		client, err := p.createHttpClient()
 		if err != nil {
@@ -184,7 +184,7 @@ func (p *Prometheus) createHttpClient() (*http.Client, error) {
 	return client, nil
 }
 
-func (p *Prometheus) gatherURL(u URLAndAddress, acc telegraf.Accumulator) error {
+func (p *Prometheus) gatherURL(u URLAndAddress, acc rush.Accumulator) error {
 	var req, err = http.NewRequest("GET", u.URL.String(), nil)
 	req.Header.Add("Accept", acceptHeader)
 	var token []byte
@@ -228,13 +228,13 @@ func (p *Prometheus) gatherURL(u URLAndAddress, acc telegraf.Accumulator) error 
 		}
 
 		switch metric.Type() {
-		case telegraf.Counter:
+		case rush.Counter:
 			acc.AddCounter(metric.Name(), metric.Fields(), tags, metric.Time())
-		case telegraf.Gauge:
+		case rush.Gauge:
 			acc.AddGauge(metric.Name(), metric.Fields(), tags, metric.Time())
-		case telegraf.Summary:
+		case rush.Summary:
 			acc.AddSummary(metric.Name(), metric.Fields(), tags, metric.Time())
-		case telegraf.Histogram:
+		case rush.Histogram:
 			acc.AddHistogram(metric.Name(), metric.Fields(), tags, metric.Time())
 		default:
 			acc.AddFields(metric.Name(), metric.Fields(), tags, metric.Time())
@@ -245,7 +245,7 @@ func (p *Prometheus) gatherURL(u URLAndAddress, acc telegraf.Accumulator) error 
 }
 
 func init() {
-	inputs.Add("prometheus", func() telegraf.Input {
+	inputs.Add("prometheus", func() rush.Input {
 		return &Prometheus{ResponseTimeout: internal.Duration{Duration: time.Second * 3}}
 	})
 }

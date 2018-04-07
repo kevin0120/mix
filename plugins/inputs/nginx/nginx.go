@@ -11,9 +11,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 type Nginx struct {
@@ -38,9 +38,9 @@ var sampleConfig = `
   urls = ["http://localhost/server_status"]
 
   # TLS/SSL configuration
-  ssl_ca = "/etc/telegraf/ca.pem"
-  ssl_cert = "/etc/telegraf/cert.cer"
-  ssl_key = "/etc/telegraf/key.key"
+  ssl_ca = "/etc/rush/ca.pem"
+  ssl_cert = "/etc/rush/cert.cer"
+  ssl_key = "/etc/rush/key.key"
   insecure_skip_verify = false
 
   # HTTP response timeout (default: 5s)
@@ -55,7 +55,7 @@ func (n *Nginx) Description() string {
 	return "Read Nginx's basic status information (ngx_http_stub_status_module)"
 }
 
-func (n *Nginx) Gather(acc telegraf.Accumulator) error {
+func (n *Nginx) Gather(acc rush.Accumulator) error {
 	var wg sync.WaitGroup
 
 	// Create an HTTP client that is re-used for each
@@ -107,7 +107,7 @@ func (n *Nginx) createHttpClient() (*http.Client, error) {
 	return client, nil
 }
 
-func (n *Nginx) gatherUrl(addr *url.URL, acc telegraf.Accumulator) error {
+func (n *Nginx) gatherUrl(addr *url.URL, acc rush.Accumulator) error {
 	resp, err := n.client.Get(addr.String())
 	if err != nil {
 		return fmt.Errorf("error making HTTP request to %s: %s", addr.String(), err)
@@ -208,7 +208,7 @@ func getTags(addr *url.URL) map[string]string {
 }
 
 func init() {
-	inputs.Add("nginx", func() telegraf.Input {
+	inputs.Add("nginx", func() rush.Input {
 		return &Nginx{}
 	})
 }

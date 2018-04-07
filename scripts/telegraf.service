@@ -1,12 +1,12 @@
 [Unit]
 Description=The plugin-driven server agent for reporting metrics into InfluxDB
-Documentation=https://github.com/influxdata/telegraf
+Documentation=https://github.com/masami10/rush
 After=network.target
 
 [Service]
-EnvironmentFile=-/etc/default/telegraf
-User=telegraf
-ExecStart=/usr/bin/telegraf -config /etc/telegraf/telegraf.conf -config-directory /etc/telegraf/telegraf.d $TELEGRAF_OPTS
+EnvironmentFile=-/etc/default/rush
+User=rush
+ExecStart=/usr/bin/rush -config /etc/rush/rush.conf -config-directory /etc/rush/rush.d $RUSH_OPTS
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=on-failure
 RestartForceExitStatus=SIGPIPE

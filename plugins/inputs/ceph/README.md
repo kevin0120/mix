@@ -68,8 +68,8 @@ the cluster.  The currently supported commands are:
   ## e.g. client.admin.keyring in /etc/ceph, or the explicit path defined in the
   ## client section of ceph.conf for example:
   ##
-  ##     [client.telegraf]
-  ##         keyring = /etc/ceph/client.telegraf.keyring
+  ##     [client.rush]
+  ##         keyring = /etc/ceph/client.rush.keyring
   ##
   ## Consult the ceph documentation for more detail on keyring generation.
   ceph_user = "client.admin"
@@ -200,7 +200,7 @@ All measurements will have the following tags:
 *Admin Socket Stats*
 
 <pre>
-telegraf --config /etc/telegraf/telegraf.conf --config-directory /etc/telegraf/telegraf.d --input-filter ceph --test
+rush --config /etc/rush/rush.conf --config-directory /etc/rush/rush.d --input-filter ceph --test
 * Plugin: ceph, Collection 1
 > ceph,collection=paxos, id=node-2,role=openstack,type=mon accept_timeout=0,begin=14931264,begin_bytes.avgcount=14931264,begin_bytes.sum=180309683362,begin_keys.avgcount=0,begin_keys.sum=0,begin_latency.avgcount=14931264,begin_latency.sum=9293.29589,collect=1,collect_bytes.avgcount=1,collect_bytes.sum=24,collect_keys.avgcount=1,collect_keys.sum=1,collect_latency.avgcount=1,collect_latency.sum=0.00028,collect_timeout=0,collect_uncommitted=0,commit=14931264,commit_bytes.avgcount=0,commit_bytes.sum=0,commit_keys.avgcount=0,commit_keys.sum=0,commit_latency.avgcount=0,commit_latency.sum=0,lease_ack_timeout=0,lease_timeout=0,new_pn=0,new_pn_latency.avgcount=0,new_pn_latency.sum=0,refresh=14931264,refresh_latency.avgcount=14931264,refresh_latency.sum=8706.98498,restart=4,share_state=0,share_state_bytes.avgcount=0,share_state_bytes.sum=0,share_state_keys.avgcount=0,share_state_keys.sum=0,start_leader=0,start_peon=1,store_state=14931264,store_state_bytes.avgcount=14931264,store_state_bytes.sum=353119959211,store_state_keys.avgcount=14931264,store_state_keys.sum=289807523,store_state_latency.avgcount=14931264,store_state_latency.sum=10952.835724 1462821234814535148
 > ceph,collection=throttle-mon_client_bytes,id=node-2,type=mon get=1413017,get_or_fail_fail=0,get_or_fail_success=0,get_sum=71211705,max=104857600,put=1413013,put_sum=71211459,take=0,take_sum=0,val=246,wait.avgcount=0,wait.sum=0 1462821234814737219

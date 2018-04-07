@@ -8,9 +8,9 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 // NetResponses struct
@@ -160,7 +160,7 @@ func (n *NetResponse) UdpGather() (map[string]interface{}, error) {
 	return fields, nil
 }
 
-func (n *NetResponse) Gather(acc telegraf.Accumulator) error {
+func (n *NetResponse) Gather(acc rush.Accumulator) error {
 	// Set default values
 	if n.Timeout.Duration == 0 {
 		n.Timeout.Duration = time.Second
@@ -208,7 +208,7 @@ func (n *NetResponse) Gather(acc telegraf.Accumulator) error {
 }
 
 func init() {
-	inputs.Add("net_response", func() telegraf.Input {
+	inputs.Add("net_response", func() rush.Input {
 		return &NetResponse{}
 	})
 }

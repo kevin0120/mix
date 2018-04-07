@@ -1,4 +1,4 @@
-# Telegraf plugin: MongoDB
+# Rush plugin: MongoDB
 
 #### Configuration
 
@@ -13,15 +13,15 @@
   gather_perdb_stats = false
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 ```
 This connection uri may be different based on your environment and mongodb
 setup. If the user doesn't have the required privilege to execute serverStatus
-command the you will get this error on telegraf
+command the you will get this error on rush
 
 ```
 Error in input [mongodb]: not authorized on admin to execute command { serverStatus: 1, recordStats: 0 }
@@ -29,7 +29,7 @@ Error in input [mongodb]: not authorized on admin to execute command { serverSta
 
 #### Description
 
-The telegraf plugin collects mongodb stats exposed by serverStatus and few more
+The rush plugin collects mongodb stats exposed by serverStatus and few more
 and create a single measurement containing values e.g.
  * active_reads
  * active_writes

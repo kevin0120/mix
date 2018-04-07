@@ -8,28 +8,28 @@ For each of the active, hold, incoming, maildrop, and deferred queues (http://ww
 
 ```toml
 [[inputs.postfix]]
-  ## Postfix queue directory. If not provided, telegraf will try to use
+  ## Postfix queue directory. If not provided, rush will try to use
   ## 'postconf -h queue_directory' to determine it.
   # queue_directory = "/var/spool/postfix"
 ```
 
 #### Permissions:
 
-Telegraf will need read access to the files in the queue directory.  You may
+Rush will need read access to the files in the queue directory.  You may
 need to alter the permissions of these directories to provide access to the
-telegraf user.
+rush user.
 
 Unix permissions:
 ```sh
-$ sudo chgrp -R telegraf /var/spool/postfix/{active,hold,incoming,deferred}
+$ sudo chgrp -R rush /var/spool/postfix/{active,hold,incoming,deferred}
 $ sudo chmod -R g+rXs /var/spool/postfix/{active,hold,incoming,deferred}
-$ sudo usermod -a -G postdrop telegraf
+$ sudo usermod -a -G postdrop rush
 $ sudo chmod g+r /var/spool/postfix/maildrop
 ```
 
 Posix ACL:
 ```sh
-$ sudo setfacl -Rdm u:telegraf:rX /var/spool/postfix/{active,hold,incoming,deferred,maildrop}
+$ sudo setfacl -Rdm u:rush:rX /var/spool/postfix/{active,hold,incoming,deferred,maildrop}
 ```
 
 ### Measurements & Fields:

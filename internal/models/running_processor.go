@@ -3,14 +3,14 @@ package models
 import (
 	"sync"
 
-	"github.com/influxdata/telegraf"
+	"github.com/masami10/rush"
 )
 
 type RunningProcessor struct {
 	Name string
 
 	sync.Mutex
-	Processor telegraf.Processor
+	Processor rush.Processor
 	Config    *ProcessorConfig
 }
 
@@ -27,11 +27,11 @@ type ProcessorConfig struct {
 	Filter Filter
 }
 
-func (rp *RunningProcessor) Apply(in ...telegraf.Metric) []telegraf.Metric {
+func (rp *RunningProcessor) Apply(in ...rush.Metric) []rush.Metric {
 	rp.Lock()
 	defer rp.Unlock()
 
-	ret := []telegraf.Metric{}
+	ret := []rush.Metric{}
 
 	for _, metric := range in {
 		if rp.Config.Filter.IsActive() {

@@ -1,4 +1,4 @@
-# Telegraf plugin: passenger
+# Rush plugin: passenger
 
 Get phusion passenger stat using their command line utility
 `passenger-status`
@@ -100,7 +100,7 @@ Using this configuration:
 When run with:
 
 ```
-./telegraf --config telegraf.conf --input-filter passenger --test
+./rush --config rush.conf --input-filter passenger --test
 ```
 
 It produces:
@@ -116,7 +116,7 @@ It produces:
 # Note
 
 You have to ensure that you can run the `passenger-status` command under
-telegraf user. Depend on how you install and configure passenger, this
+rush user. Depend on how you install and configure passenger, this
 maybe an issue for you. If you are using passenger standlone, or compile
 yourself, it is straight forward. However, if you are using gem and
 `rvm`, it maybe harder to get this right.
@@ -134,5 +134,5 @@ path
 command = "source .rvm/scripts/rvm && passenger-status -v --show=xml"
 ```
 
-Anyway, just ensure that you can run the command under `telegraf` user, and it
+Anyway, just ensure that you can run the command under `rush` user, and it
 has to produce XML output.

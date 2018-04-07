@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/amir/raidman"
-	"github.com/influxdata/telegraf/metric"
+	"github.com/masami10/rush/metric"
 	"github.com/stretchr/testify/require"
 )
 
@@ -65,8 +65,8 @@ func TestMetricEvents(t *testing.T) {
 		TTL:                    20.0,
 		Separator:              "/",
 		MeasurementAsAttribute: false,
-		DescriptionText:        "metrics from telegraf",
-		Tags:                   []string{"telegraf"},
+		DescriptionText:        "metrics from rush",
+		Tags:                   []string{"rush"},
 	}
 
 	// build a single event
@@ -84,12 +84,12 @@ func TestMetricEvents(t *testing.T) {
 	expectedEvent := &raidman.Event{
 		Ttl:         20.0,
 		Time:        1257894000,
-		Tags:        []string{"telegraf", "value1"},
+		Tags:        []string{"rush", "value1"},
 		Host:        "abc123",
 		State:       "",
 		Service:     "test1/value",
 		Metric:      5.6,
-		Description: "metrics from telegraf",
+		Description: "metrics from rush",
 		Attributes:  map[string]string{"tag1": "value1"},
 	}
 	require.Equal(t, expectedEvent, events[0])
@@ -112,12 +112,12 @@ func TestMetricEvents(t *testing.T) {
 	expectedEvent = &raidman.Event{
 		Ttl:         20.0,
 		Time:        1351825200,
-		Tags:        []string{"telegraf"},
+		Tags:        []string{"rush"},
 		Host:        "xyz987",
 		State:       "",
 		Service:     "test2/point",
 		Metric:      int64(1),
-		Description: "metrics from telegraf",
+		Description: "metrics from rush",
 		Attributes:  map[string]string{},
 	}
 	require.Equal(t, expectedEvent, events[1])

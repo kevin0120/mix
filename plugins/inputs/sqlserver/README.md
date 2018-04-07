@@ -22,11 +22,11 @@ You have to create a login on every instance you want to monitor, with following
 ```SQL 
 USE master; 
 GO
-CREATE LOGIN [telegraf] WITH PASSWORD = N'mystrongpassword';
+CREATE LOGIN [rush] WITH PASSWORD = N'mystrongpassword';
 GO
-GRANT VIEW SERVER STATE TO [telegraf]; 
+GRANT VIEW SERVER STATE TO [rush];
 GO
-GRANT VIEW ANY DEFINITION TO [telegraf]; 
+GRANT VIEW ANY DEFINITION TO [rush];
 GO
 ```
 
@@ -43,8 +43,8 @@ GO
   #    See https://github.com/denisenkom/go-mssqldb for detailed connection parameters.
 
   servers = [
-	"Server=192.168.1.30;Port=1433;User Id=telegraf;Password=T$l$gr@f69*;app name=telegraf;log=1;",
-    "Server=192.168.1.30;Port=2222;User Id=telegraf;Password=T$l$gr@f69*;app name=telegraf;log=1;"
+	"Server=192.168.1.30;Port=1433;User Id=rush;Password=T$l$gr@f69*;app name=rush;log=1;",
+    "Server=192.168.1.30;Port=2222;User Id=rush;Password=T$l$gr@f69*;app name=rush;log=1;"
 	]
 ```
 
@@ -112,31 +112,31 @@ GO
 	
 ## Overview in Grafana:
 
-![telegraf-sqlserver-0](https://cloud.githubusercontent.com/assets/16494280/12538189/ec1b70aa-c2d3-11e5-97ec-1a4f575e8a07.png)
+![rush-sqlserver-0](https://cloud.githubusercontent.com/assets/16494280/12538189/ec1b70aa-c2d3-11e5-97ec-1a4f575e8a07.png)
 
 General Activity
-![telegraf-sqlserver-1](https://cloud.githubusercontent.com/assets/16494280/12591410/f098b602-c467-11e5-9acf-2edea077ed7e.png)
+![rush-sqlserver-1](https://cloud.githubusercontent.com/assets/16494280/12591410/f098b602-c467-11e5-9acf-2edea077ed7e.png)
 
 Memory
-![telegraf-sqlserver-2](https://cloud.githubusercontent.com/assets/16494280/12591412/f2075688-c467-11e5-9d0f-d256e032cd0e.png)
+![rush-sqlserver-2](https://cloud.githubusercontent.com/assets/16494280/12591412/f2075688-c467-11e5-9d0f-d256e032cd0e.png)
 
 I/O
-![telegraf-sqlserver-3](https://cloud.githubusercontent.com/assets/16494280/12591417/f40ccb84-c467-11e5-89ff-498fb1bc3110.png)
+![rush-sqlserver-3](https://cloud.githubusercontent.com/assets/16494280/12591417/f40ccb84-c467-11e5-89ff-498fb1bc3110.png)
 
 Disks
-![telegraf-sqlserver-4](https://cloud.githubusercontent.com/assets/16494280/12591420/f5de5f68-c467-11e5-90c8-9185444ac490.png)
+![rush-sqlserver-4](https://cloud.githubusercontent.com/assets/16494280/12591420/f5de5f68-c467-11e5-90c8-9185444ac490.png)
 
 CPU
-![telegraf-sqlserver-5](https://cloud.githubusercontent.com/assets/16494280/12591446/11dfe7b8-c468-11e5-9681-6e33296e70e8.png)
+![rush-sqlserver-5](https://cloud.githubusercontent.com/assets/16494280/12591446/11dfe7b8-c468-11e5-9681-6e33296e70e8.png)
 
 Full view
-![telegraf-sqlserver-full](https://cloud.githubusercontent.com/assets/16494280/12591426/fa2b17b4-c467-11e5-9c00-929f4c4aea57.png)
+![rush-sqlserver-full](https://cloud.githubusercontent.com/assets/16494280/12591426/fa2b17b4-c467-11e5-9c00-929f4c4aea57.png)
 
 
 ## Example Output:
 
 ``` 
-./telegraf --config telegraf.conf --test 
+./rush --config rush.conf --test
 * Plugin: sqlserver, Collection 1
 > Memory\ breakdown\ (%),servername=WIN8-DEV,type=Memory\ clerk Buffer\ pool=27.20,Cache\ (objects)=6.50,Cache\ (sql\ plans)=31.50,Other=34.80 1453876411474582877
 > Memory\ breakdown\ (bytes),servername=WIN8-DEV,type=Memory\ clerk Buffer\ pool=100016128.00,Cache\ (objects)=23904256.00,Cache\ (sql\ plans)=115621888.00,Other=127942656.00 1453876411474655779

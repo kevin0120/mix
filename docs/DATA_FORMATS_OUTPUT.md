@@ -1,12 +1,12 @@
-# Telegraf Output Data Formats
+# Rush Output Data Formats
 
-Telegraf is able to serialize metrics into the following output data formats:
+Rush is able to serialize metrics into the following output data formats:
 
-1. [InfluxDB Line Protocol](https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md#influx)
-1. [JSON](https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md#json)
-1. [Graphite](https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md#graphite)
+1. [InfluxDB Line Protocol](https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_OUTPUT.md#influx)
+1. [JSON](https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_OUTPUT.md#json)
+1. [Graphite](https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_OUTPUT.md#graphite)
 
-Telegraf metrics, like InfluxDB
+Rush metrics, like InfluxDB
 [points](https://docs.influxdata.com/influxdb/v0.10/write_protocols/line/),
 are a combination of four basic parts:
 
@@ -21,10 +21,10 @@ In InfluxDB line protocol, these 4 parts are easily defined in textual form:
 measurement_name[,tag1=val1,...]  field1=val1[,field2=val2,...]  [timestamp]
 ```
 
-For Telegraf outputs that write textual data (such as `kafka`, `mqtt`, and `file`),
+For Rush outputs that write textual data (such as `kafka`, `mqtt`, and `file`),
 InfluxDB line protocol was originally the only available output format. But now
-we are normalizing telegraf metric "serializers" into a
-[plugin-like interface](https://github.com/influxdata/telegraf/tree/master/plugins/serializers)
+we are normalizing rush metric "serializers" into a
+[plugin-like interface](https://github.com/masami10/rush/tree/master/plugins/serializers)
 across all output plugins that can support it.
 You will be able to identify a plugin that supports different data formats
 by the presence of a `data_format`
@@ -38,7 +38,7 @@ config option, for example, in the `file` output plugin:
   ## Data format to output.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_OUTPUT.md
   data_format = "influx"
 
   ## Additional configuration options go here
@@ -62,14 +62,14 @@ metrics are serialized directly into InfluxDB line-protocol.
   ## Data format to output.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_OUTPUT.md
   data_format = "influx"
 ```
 
 # Graphite:
 
-The Graphite data format translates Telegraf metrics into _dot_ buckets. A
-template can be specified for the output of Telegraf metrics into Graphite
+The Graphite data format translates Rush metrics into _dot_ buckets. A
+template can be specified for the output of Rush metrics into Graphite
 buckets. The default template is:
 
 ```
@@ -78,7 +78,7 @@ template = "host.tags.measurement.field"
 
 In the above template, we have four parts:
 
-1. _host_ is a tag key. This can be any tag key that is in the Telegraf
+1. _host_ is a tag key. This can be any tag key that is in the Rush
 metric(s). If the key doesn't exist, it will be ignored. If it does exist, the
 tag value will be filled in.
 1. _tags_ is a special keyword that outputs all remaining tag values, separated
@@ -109,18 +109,18 @@ to 1 (true) or 0 (false).
   ## Data format to output.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_OUTPUT.md
   data_format = "graphite"
 
   # prefix each graphite bucket
-  prefix = "telegraf"
+  prefix = "rush"
   # graphite template
   template = "host.tags.measurement.field"
 ```
 
 # JSON:
 
-The JSON data format serialized Telegraf metrics in json format. The format is:
+The JSON data format serialized Rush metrics in json format. The format is:
 
 ```json
 {
@@ -148,16 +148,16 @@ The JSON data format serialized Telegraf metrics in json format. The format is:
   ## Data format to output.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_OUTPUT.md
   data_format = "json"
   json_timestamp_units = "1ns"
 ```
 
-By default, the timestamp that is output in JSON data format serialized Telegraf
+By default, the timestamp that is output in JSON data format serialized Rush
 metrics is in seconds. The precision of this timestamp can be adjusted for any output
 by adding the optional `json_timestamp_units` parameter to the configuration for
 that output. This parameter can be used to set the timestamp units to  nanoseconds (`ns`),
 microseconds (`us` or `µs`), milliseconds (`ms`), or seconds (`s`). Note that this
 parameter will be truncated to the nearest power of 10 that, so if the `json_timestamp_units`
-are set to `15ms` the timestamps for the JSON format serialized Telegraf metrics will be
+are set to `15ms` the timestamps for the JSON format serialized Rush metrics will be
 output in hundredths of a second (`10ms`).

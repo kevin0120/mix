@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"syscall"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 type NetStats struct {
@@ -22,7 +22,7 @@ func (_ *NetStats) SampleConfig() string {
 	return tcpstatSampleConfig
 }
 
-func (s *NetStats) Gather(acc telegraf.Accumulator) error {
+func (s *NetStats) Gather(acc rush.Accumulator) error {
 	netconns, err := s.ps.NetConnections()
 	if err != nil {
 		return fmt.Errorf("error getting net connections info: %s", err)
@@ -65,7 +65,7 @@ func (s *NetStats) Gather(acc telegraf.Accumulator) error {
 }
 
 func init() {
-	inputs.Add("netstat", func() telegraf.Input {
+	inputs.Add("netstat", func() rush.Input {
 		return &NetStats{ps: newSystemPS()}
 	})
 }

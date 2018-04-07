@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/testutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -126,7 +126,7 @@ nread    nwritten reads    writes   wtime    wlentime wupdate  rtime    rlentime
 1884160  6450688  22       978      272187126 2850519036 2263669418655 424226814 2850519036 2263669871823 0        0
 `
 
-var testKstatPath = os.TempDir() + "/telegraf/proc/spl/kstat/zfs"
+var testKstatPath = os.TempDir() + "/rush/proc/spl/kstat/zfs"
 
 func TestZfsPoolMetrics(t *testing.T) {
 	err := os.MkdirAll(testKstatPath, 0755)
@@ -163,7 +163,7 @@ func TestZfsPoolMetrics(t *testing.T) {
 
 	acc.AssertContainsTaggedFields(t, "zfs_pool", poolMetrics, tags)
 
-	err = os.RemoveAll(os.TempDir() + "/telegraf")
+	err = os.RemoveAll(os.TempDir() + "/rush")
 	require.NoError(t, err)
 }
 
@@ -231,7 +231,7 @@ func TestZfsGeneratesMetrics(t *testing.T) {
 
 	acc3.AssertContainsTaggedFields(t, "zfs", intMetrics, tags)
 
-	err = os.RemoveAll(os.TempDir() + "/telegraf")
+	err = os.RemoveAll(os.TempDir() + "/rush")
 	require.NoError(t, err)
 }
 

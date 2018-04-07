@@ -5,7 +5,7 @@
 You will need to setup several volume mounts as well as some environment
 variables:
 ```
-docker run --name telegraf
+docker run --name rush
 	-v /:/hostfs:ro
 	-v /etc:/hostfs/etc:ro
 	-v /proc:/hostfs/proc:ro
@@ -15,7 +15,7 @@ docker run --name telegraf
 	-e HOST_PROC=/hostfs/proc
 	-e HOST_SYS=/hostfs/sys
 	-e HOST_MOUNT_PREFIX=/hostfs
-	telegraf
+	rush
 ```
 
 
@@ -35,7 +35,7 @@ If running manually set:
 export GODEBUG=netdns=cgo
 ```
 
-If running as a service add the environment variable to `/etc/default/telegraf`:
+If running as a service add the environment variable to `/etc/default/rush`:
 ```
 GODEBUG=netdns=cgo
 ```
@@ -43,4 +43,4 @@ GODEBUG=netdns=cgo
 ### Q: When will the next version be released?
 
 The latest release date estimate can be viewed on the
-[milestones](https://github.com/influxdata/telegraf/milestones) page.
+[milestones](https://github.com/masami10/rush/milestones) page.

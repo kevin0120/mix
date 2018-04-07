@@ -12,15 +12,15 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/influxdata/telegraf/agent"
-	"github.com/influxdata/telegraf/internal/config"
-	"github.com/influxdata/telegraf/logger"
-	_ "github.com/influxdata/telegraf/plugins/aggregators/all"
-	"github.com/influxdata/telegraf/plugins/inputs"
-	_ "github.com/influxdata/telegraf/plugins/inputs/all"
-	"github.com/influxdata/telegraf/plugins/outputs"
-	_ "github.com/influxdata/telegraf/plugins/outputs/all"
-	_ "github.com/influxdata/telegraf/plugins/processors/all"
+	"github.com/masami10/rush/agent"
+	"github.com/masami10/rush/internal/config"
+	"github.com/masami10/rush/logger"
+	_ "github.com/masami10/rush/plugins/aggregators/all"
+	"github.com/masami10/rush/plugins/inputs"
+	_ "github.com/masami10/rush/plugins/inputs/all"
+	"github.com/masami10/rush/plugins/outputs"
+	_ "github.com/masami10/rush/plugins/outputs/all"
+	_ "github.com/masami10/rush/plugins/processors/all"
 	"github.com/kardianos/service"
 )
 
@@ -51,7 +51,7 @@ var fAggregatorFilters = flag.String("aggregator-filter", "",
 var fProcessorFilters = flag.String("processor-filter", "",
 	"filter the processors to enable, separator is :")
 var fUsage = flag.String("usage", "",
-	"print usage for a plugin, ie, 'telegraf --usage mysql'")
+	"print usage for a plugin, ie, 'rush --usage mysql'")
 var fService = flag.String("service", "",
 	"operate on the service")
 
@@ -72,11 +72,11 @@ func init() {
 	}
 }
 
-const usage = `Telegraf, The plugin-driven server agent for collecting and reporting metrics.
+const usage = `Rush, The plugin-driven server agent for collecting and reporting metrics.
 
 Usage:
 
-  telegraf [commands|flags]
+  rush [commands|flags]
 
 The commands & flags are:
 
@@ -88,30 +88,30 @@ The commands & flags are:
   --config-directory  directory containing additional *.conf files
   --input-filter      filter the input plugins to enable, separator is :
   --output-filter     filter the output plugins to enable, separator is :
-  --usage             print usage for a plugin, ie, 'telegraf --usage mysql'
+  --usage             print usage for a plugin, ie, 'rush --usage mysql'
   --debug             print metrics as they're generated to stdout
   --pprof-addr        pprof address to listen on, format: localhost:6060 or :6060
   --quiet             run in quiet mode
 
 Examples:
 
-  # generate a telegraf config file:
-  telegraf config > telegraf.conf
+  # generate a rush config file:
+  rush config > rush.conf
 
   # generate config with only cpu input & influxdb output plugins defined
-  telegraf --input-filter cpu --output-filter influxdb config
+  rush --input-filter cpu --output-filter influxdb config
 
-  # run a single telegraf collection, outputing metrics to stdout
-  telegraf --config telegraf.conf --test
+  # run a single rush collection, outputing metrics to stdout
+  rush --config rush.conf --test
 
-  # run telegraf with all plugins defined in config file
-  telegraf --config telegraf.conf
+  # run rush with all plugins defined in config file
+  rush --config rush.conf
 
-  # run telegraf, enabling the cpu & memory input, and influxdb output plugins
-  telegraf --config telegraf.conf --input-filter cpu:mem --output-filter influxdb
+  # run rush, enabling the cpu & memory input, and influxdb output plugins
+  rush --config rush.conf --input-filter cpu:mem --output-filter influxdb
 
-  # run telegraf with pprof
-  telegraf --config telegraf.conf --pprof-addr localhost:6060
+  # run rush with pprof
+  rush --config rush.conf --pprof-addr localhost:6060
 `
 
 var stop chan struct{}
@@ -195,7 +195,7 @@ func reloadLoop(
 					close(shutdown)
 				}
 				if sig == syscall.SIGHUP {
-					log.Printf("I! Reloading Telegraf config\n")
+					log.Printf("I! Reloading Rush config\n")
 					<-reload
 					reload <- true
 					close(shutdown)
@@ -205,7 +205,7 @@ func reloadLoop(
 			}
 		}()
 
-		log.Printf("I! Starting Telegraf %s\n", displayVersion())
+		log.Printf("I! Starting Rush %s\n", displayVersion())
 		log.Printf("I! Loaded outputs: %s", strings.Join(c.OutputNames(), " "))
 		log.Printf("I! Loaded inputs: %s", strings.Join(c.InputNames(), " "))
 		log.Printf("I! Tags enabled: %s", c.ListTags())
@@ -311,7 +311,7 @@ func main() {
 	if len(args) > 0 {
 		switch args[0] {
 		case "version":
-			fmt.Printf("Telegraf %s (git: %s %s)\n", displayVersion(), branch, commit)
+			fmt.Printf("Rush %s (git: %s %s)\n", displayVersion(), branch, commit)
 			return
 		case "config":
 			config.PrintSampleConfig(
@@ -339,7 +339,7 @@ func main() {
 		}
 		return
 	case *fVersion:
-		fmt.Printf("Telegraf %s (git: %s %s)\n", displayVersion(), branch, commit)
+		fmt.Printf("Rush %s (git: %s %s)\n", displayVersion(), branch, commit)
 		return
 	case *fSampleConfig:
 		config.PrintSampleConfig(
@@ -360,11 +360,11 @@ func main() {
 
 	if runtime.GOOS == "windows" {
 		svcConfig := &service.Config{
-			Name:        "telegraf",
-			DisplayName: "Telegraf Data Collector Service",
+			Name:        "rush",
+			DisplayName: "Rush Data Collector Service",
 			Description: "Collects data using a series of plugins and publishes it to" +
 				"another series of plugins.",
-			Arguments: []string{"-config", "C:\\Program Files\\Telegraf\\telegraf.conf"},
+			Arguments: []string{"-config", "C:\\Program Files\\Rush\\rush.conf"},
 		}
 
 		prg := &program{

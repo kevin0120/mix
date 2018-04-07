@@ -3,14 +3,14 @@ package parsers
 import (
 	"fmt"
 
-	"github.com/influxdata/telegraf"
+	"github.com/masami10/rush"
 
-	"github.com/influxdata/telegraf/plugins/parsers/collectd"
-	"github.com/influxdata/telegraf/plugins/parsers/graphite"
-	"github.com/influxdata/telegraf/plugins/parsers/influx"
-	"github.com/influxdata/telegraf/plugins/parsers/json"
-	"github.com/influxdata/telegraf/plugins/parsers/nagios"
-	"github.com/influxdata/telegraf/plugins/parsers/value"
+	"github.com/masami10/rush/plugins/parsers/collectd"
+	"github.com/masami10/rush/plugins/parsers/graphite"
+	"github.com/masami10/rush/plugins/parsers/influx"
+	"github.com/masami10/rush/plugins/parsers/json"
+	"github.com/masami10/rush/plugins/parsers/nagios"
+	"github.com/masami10/rush/plugins/parsers/value"
 )
 
 // ParserInput is an interface for input plugins that are able to parse
@@ -24,13 +24,13 @@ type ParserInput interface {
 type Parser interface {
 	// Parse takes a byte buffer separated by newlines
 	// ie, `cpu.usage.idle 90\ncpu.usage.busy 10`
-	// and parses it into telegraf metrics
-	Parse(buf []byte) ([]telegraf.Metric, error)
+	// and parses it into rush metrics
+	Parse(buf []byte) ([]rush.Metric, error)
 
 	// ParseLine takes a single string metric
 	// ie, "cpu.usage.idle 90"
-	// and parses it into a telegraf metric.
-	ParseLine(line string) (telegraf.Metric, error)
+	// and parses it into a rush metric.
+	ParseLine(line string) (rush.Metric, error)
 
 	// SetDefaultTags tells the parser to add all of the given tags
 	// to each parsed metric.

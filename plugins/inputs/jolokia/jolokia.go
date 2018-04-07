@@ -10,9 +10,9 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 // Default http timeouts
@@ -62,7 +62,7 @@ type Jolokia struct {
 const sampleConfig = `
   # DEPRECATED: the jolokia plugin has been deprecated in favor of the
   # jolokia2 plugin
-  # see https://github.com/influxdata/telegraf/tree/master/plugins/inputs/jolokia2
+  # see https://github.com/masami10/rush/tree/master/plugins/inputs/jolokia2
 
   ## This is the context root used to compose the jolokia url
   ## NOTE that Jolokia requires a trailing slash at the end of the context root
@@ -256,12 +256,12 @@ func (j *Jolokia) extractValues(measurement string, value interface{}, fields ma
 	}
 }
 
-func (j *Jolokia) Gather(acc telegraf.Accumulator) error {
+func (j *Jolokia) Gather(acc rush.Accumulator) error {
 
 	if j.jClient == nil {
 		log.Println("W! DEPRECATED: the jolokia plugin has been deprecated " +
 			"in favor of the jolokia2 plugin " +
-			"(https://github.com/influxdata/telegraf/tree/master/plugins/inputs/jolokia2)")
+			"(https://github.com/masami10/rush/tree/master/plugins/inputs/jolokia2)")
 
 		tr := &http.Transport{ResponseHeaderTimeout: j.ResponseHeaderTimeout.Duration}
 		j.jClient = &JolokiaClientImpl{&http.Client{
@@ -319,7 +319,7 @@ func (j *Jolokia) Gather(acc telegraf.Accumulator) error {
 }
 
 func init() {
-	inputs.Add("jolokia", func() telegraf.Input {
+	inputs.Add("jolokia", func() rush.Input {
 		return &Jolokia{
 			ResponseHeaderTimeout: DefaultResponseHeaderTimeout,
 			ClientTimeout:         DefaultClientTimeout,

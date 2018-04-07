@@ -3,7 +3,7 @@ package metric
 import (
 	"io"
 
-	"github.com/influxdata/telegraf"
+	"github.com/masami10/rush"
 )
 
 type state int
@@ -27,8 +27,8 @@ const (
 )
 
 type reader struct {
-	metrics      []telegraf.Metric
-	splitMetrics []telegraf.Metric
+	metrics      []rush.Metric
+	splitMetrics []rush.Metric
 	buf          []byte
 	state        state
 
@@ -40,7 +40,7 @@ type reader struct {
 	iB int
 }
 
-func NewReader(metrics []telegraf.Metric) io.Reader {
+func NewReader(metrics []rush.Metric) io.Reader {
 	return &reader{
 		metrics: metrics,
 		state:   normal,

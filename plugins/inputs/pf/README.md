@@ -2,18 +2,18 @@
 
 The pf plugin gathers information from the FreeBSD/OpenBSD pf firewall. Currently it can retrive information about the state table: the number of current entries in the table, and counters for the number of searches, inserts, and removals to the table.
 
-The pf plugin retrives this information by invoking the `pfstat` command. The `pfstat` command requires read access to the device file `/dev/pf`. You have several options to permit telegraf to run `pfctl`:
+The pf plugin retrives this information by invoking the `pfstat` command. The `pfstat` command requires read access to the device file `/dev/pf`. You have several options to permit rush to run `pfctl`:
 
-* Run telegraf as root. This is strongly discouraged.
-* Change the ownership and permissions for /dev/pf such that the user telegraf runs at can read the /dev/pf device file. This is probably not that good of an idea either.
-* Configure sudo to grant telegraf to run `pfctl` as root. This is the most restrictive option, but require sudo setup.
+* Run rush as root. This is strongly discouraged.
+* Change the ownership and permissions for /dev/pf such that the user rush runs at can read the /dev/pf device file. This is probably not that good of an idea either.
+* Configure sudo to grant rush to run `pfctl` as root. This is the most restrictive option, but require sudo setup.
 
 ### Using sudo
 
 You may edit your sudo configuration with the following:
 
 ```sudo
-telegraf ALL=(root) NOPASSWD: /sbin/pfctl -s info
+rush ALL=(root) NOPASSWD: /sbin/pfctl -s info
 ```
 
 ### Configuration:
@@ -62,7 +62,7 @@ Counters
 ```
 
 ```
-> ./telegraf --config telegraf.conf --input-filter pf --test
+> ./rush --config rush.conf --input-filter pf --test
 * Plugin: inputs.pf, Collection 1
 > pf,host=columbia entries=3i,searches=2668i,inserts=12i,removals=9i 1510941775000000000
 ```

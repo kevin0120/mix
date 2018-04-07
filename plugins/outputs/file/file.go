@@ -5,9 +5,9 @@ import (
 	"io"
 	"os"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/outputs"
-	"github.com/influxdata/telegraf/plugins/serializers"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/outputs"
+	"github.com/masami10/rush/plugins/serializers"
 )
 
 type File struct {
@@ -26,7 +26,7 @@ var sampleConfig = `
   ## Data format to output.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_OUTPUT.md
   data_format = "influx"
 `
 
@@ -82,10 +82,10 @@ func (f *File) SampleConfig() string {
 }
 
 func (f *File) Description() string {
-	return "Send telegraf metrics to file(s)"
+	return "Send rush metrics to file(s)"
 }
 
-func (f *File) Write(metrics []telegraf.Metric) error {
+func (f *File) Write(metrics []rush.Metric) error {
 	if len(metrics) == 0 {
 		return nil
 	}
@@ -104,7 +104,7 @@ func (f *File) Write(metrics []telegraf.Metric) error {
 }
 
 func init() {
-	outputs.Add("file", func() telegraf.Output {
+	outputs.Add("file", func() rush.Output {
 		return &File{}
 	})
 }

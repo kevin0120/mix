@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 type InfluxDB struct {
@@ -46,9 +46,9 @@ func (*InfluxDB) SampleConfig() string {
   ]
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 
@@ -57,7 +57,7 @@ func (*InfluxDB) SampleConfig() string {
 `
 }
 
-func (i *InfluxDB) Gather(acc telegraf.Accumulator) error {
+func (i *InfluxDB) Gather(acc rush.Accumulator) error {
 	if len(i.URLs) == 0 {
 		i.URLs = []string{"http://localhost:8086/debug/vars"}
 	}
@@ -131,13 +131,13 @@ type memstats struct {
 
 // Gathers data from a particular URL
 // Parameters:
-//     acc    : The telegraf Accumulator to use
+//     acc    : The rush Accumulator to use
 //     url    : endpoint to send request to
 //
 // Returns:
 //     error: Any error that may have occurred
 func (i *InfluxDB) gatherURL(
-	acc telegraf.Accumulator,
+	acc rush.Accumulator,
 	url string,
 ) error {
 	shardCounter := 0
@@ -264,7 +264,7 @@ func (i *InfluxDB) gatherURL(
 }
 
 func init() {
-	inputs.Add("influxdb", func() telegraf.Input {
+	inputs.Add("influxdb", func() rush.Input {
 		return &InfluxDB{
 			Timeout: internal.Duration{Duration: time.Second * 5},
 		}

@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"testing"
 
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/testutil"
 )
 
 func TestGather(t *testing.T) {

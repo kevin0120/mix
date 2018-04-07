@@ -9,8 +9,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/testutil"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -54,7 +54,7 @@ func TestBuildMetricDatums(t *testing.T) {
 	assert := assert.New(t)
 
 	zero := 0.0
-	validMetrics := []telegraf.Metric{
+	validMetrics := []rush.Metric{
 		testutil.TestMetric(1),
 		testutil.TestMetric(int32(1)),
 		testutil.TestMetric(int64(1)),
@@ -65,7 +65,7 @@ func TestBuildMetricDatums(t *testing.T) {
 		testutil.TestMetric(float64(1.174271e+108)), // largest should be 1.174271e+108
 		testutil.TestMetric(true),
 	}
-	invalidMetrics := []telegraf.Metric{
+	invalidMetrics := []rush.Metric{
 		testutil.TestMetric("Foo"),
 		testutil.TestMetric(math.Log(-1.0)),
 		testutil.TestMetric(float64(8.515919e-109)), // smallest should be 8.515920e-109

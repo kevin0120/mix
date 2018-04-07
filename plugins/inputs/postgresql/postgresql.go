@@ -11,8 +11,8 @@ import (
 	// register in driver.
 	_ "github.com/jackc/pgx/stdlib"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 type Postgresql struct {
@@ -65,7 +65,7 @@ func (p *Postgresql) IgnoredColumns() map[string]bool {
 
 var localhost = "host=localhost sslmode=disable"
 
-func (p *Postgresql) Gather(acc telegraf.Accumulator) error {
+func (p *Postgresql) Gather(acc rush.Accumulator) error {
 	var (
 		err   error
 		db    *sql.DB
@@ -164,7 +164,7 @@ func (p *Postgresql) SanitizedAddress() (_ string, err error) {
 	return p.sanitizedAddress, err
 }
 
-func (p *Postgresql) accRow(row scanner, acc telegraf.Accumulator) error {
+func (p *Postgresql) accRow(row scanner, acc rush.Accumulator) error {
 	var columnVars []interface{}
 	var dbname bytes.Buffer
 
@@ -214,7 +214,7 @@ func (p *Postgresql) accRow(row scanner, acc telegraf.Accumulator) error {
 }
 
 func init() {
-	inputs.Add("postgresql", func() telegraf.Input {
+	inputs.Add("postgresql", func() rush.Input {
 		return &Postgresql{}
 	})
 }

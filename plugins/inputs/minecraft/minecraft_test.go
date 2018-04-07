@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/testutil"
 )
 
 // TestParsePlayerName tests different Minecraft RCON inputs for players

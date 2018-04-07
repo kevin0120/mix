@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 type Raindrops struct {
@@ -33,7 +33,7 @@ func (r *Raindrops) Description() string {
 	return "Read raindrops stats (raindrops - real-time stats for preforking Rack servers)"
 }
 
-func (r *Raindrops) Gather(acc telegraf.Accumulator) error {
+func (r *Raindrops) Gather(acc rush.Accumulator) error {
 	var wg sync.WaitGroup
 
 	for _, u := range r.Urls {
@@ -55,7 +55,7 @@ func (r *Raindrops) Gather(acc telegraf.Accumulator) error {
 	return nil
 }
 
-func (r *Raindrops) gatherUrl(addr *url.URL, acc telegraf.Accumulator) error {
+func (r *Raindrops) gatherUrl(addr *url.URL, acc rush.Accumulator) error {
 	resp, err := r.http_client.Get(addr.String())
 	if err != nil {
 		return fmt.Errorf("error making HTTP request to %s: %s", addr.String(), err)
@@ -176,7 +176,7 @@ func (r *Raindrops) getTags(addr *url.URL) map[string]string {
 }
 
 func init() {
-	inputs.Add("raindrops", func() telegraf.Input {
+	inputs.Add("raindrops", func() rush.Input {
 		return &Raindrops{http_client: &http.Client{
 			Transport: &http.Transport{
 				ResponseHeaderTimeout: time.Duration(3 * time.Second),

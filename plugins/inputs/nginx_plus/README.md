@@ -1,4 +1,4 @@
-# Telegraf Plugin: nginx_plus
+# Rush Plugin: nginx_plus
 
 Nginx Plus is a commercial version of the open source web server Nginx. The use this plugin you will need a license. For more information about the differences between Nginx (F/OSS) and Nginx Plus, [click here](https://www.nginx.com/blog/whats-difference-nginx-foss-nginx-plus/).
 
@@ -89,7 +89,7 @@ Using this configuration:
 
 When run with:
 ```
-./telegraf -config telegraf.conf -input-filter nginx_plus -test
+./rush -config rush.conf -input-filter nginx_plus -test
 ```
 
 It produces:

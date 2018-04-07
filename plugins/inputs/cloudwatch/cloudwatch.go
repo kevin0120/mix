@@ -10,11 +10,11 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	internalaws "github.com/influxdata/telegraf/internal/config/aws"
-	"github.com/influxdata/telegraf/internal/limiter"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	internalaws "github.com/masami10/rush/internal/config/aws"
+	"github.com/masami10/rush/internal/limiter"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 type (
@@ -84,7 +84,7 @@ func (c *CloudWatch) SampleConfig() string {
   # 3 minute, 5 minute, or larger intervals. See https://aws.amazon.com/cloudwatch/faqs/#monitoring.
   # Note that if a period is configured that is smaller than the minimum for a
   # particular metric, that metric will not be returned by the Cloudwatch API
-  # and will not be collected by Telegraf.
+  # and will not be collected by Rush.
   #
   ## Requested CloudWatch aggregation Period (required - must be a multiple of 60s)
   period = "5m"
@@ -176,7 +176,7 @@ func SelectMetrics(c *CloudWatch) ([]*cloudwatch.Metric, error) {
 	return metrics, nil
 }
 
-func (c *CloudWatch) Gather(acc telegraf.Accumulator) error {
+func (c *CloudWatch) Gather(acc rush.Accumulator) error {
 	if c.client == nil {
 		c.initializeCloudWatch()
 	}
@@ -208,7 +208,7 @@ func (c *CloudWatch) Gather(acc telegraf.Accumulator) error {
 }
 
 func init() {
-	inputs.Add("cloudwatch", func() telegraf.Input {
+	inputs.Add("cloudwatch", func() rush.Input {
 		ttl, _ := time.ParseDuration("1hr")
 		return &CloudWatch{
 			CacheTTL:  internal.Duration{Duration: ttl},
@@ -279,7 +279,7 @@ func (c *CloudWatch) fetchNamespaceMetrics() ([]*cloudwatch.Metric, error) {
  * Gather given Metric and emit any error
  */
 func (c *CloudWatch) gatherMetric(
-	acc telegraf.Accumulator,
+	acc rush.Accumulator,
 	metric *cloudwatch.Metric,
 	now time.Time,
 ) error {

@@ -16,15 +16,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/internal/models"
-	"github.com/influxdata/telegraf/plugins/aggregators"
-	"github.com/influxdata/telegraf/plugins/inputs"
-	"github.com/influxdata/telegraf/plugins/outputs"
-	"github.com/influxdata/telegraf/plugins/parsers"
-	"github.com/influxdata/telegraf/plugins/processors"
-	"github.com/influxdata/telegraf/plugins/serializers"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/internal/models"
+	"github.com/masami10/rush/plugins/aggregators"
+	"github.com/masami10/rush/plugins/inputs"
+	"github.com/masami10/rush/plugins/outputs"
+	"github.com/masami10/rush/plugins/parsers"
+	"github.com/masami10/rush/plugins/processors"
+	"github.com/masami10/rush/plugins/serializers"
 
 	"github.com/influxdata/toml"
 	"github.com/influxdata/toml/ast"
@@ -47,7 +47,7 @@ var (
 	)
 )
 
-// Config specifies the URL/user/password for the database that telegraf
+// Config specifies the URL/user/password for the database that rush
 // will be logging to, as well as all the plugins that the user has
 // specified
 type Config struct {
@@ -109,7 +109,7 @@ type AgentConfig struct {
 
 	// FlushJitter Jitters the flush interval by a random amount.
 	// This is primarily to avoid large write spikes for users running a large
-	// number of telegraf instances.
+	// number of rush instances.
 	// ie, a jitter of 5s and interval 10s means flushes will happen every 10-15s
 	FlushJitter internal.Duration
 
@@ -124,7 +124,7 @@ type AgentConfig struct {
 	// not be less than 2 times MetricBatchSize.
 	MetricBufferLimit int
 
-	// FlushBufferWhenFull tells Telegraf to flush the metric buffer whenever
+	// FlushBufferWhenFull tells Rush to flush the metric buffer whenever
 	// it fills up, regardless of FlushInterval. Setting this option to true
 	// does _not_ deactivate FlushInterval.
 	FlushBufferWhenFull bool
@@ -178,15 +178,15 @@ func (c *Config) ListTags() string {
 	return strings.Join(tags, " ")
 }
 
-var header = `# Telegraf Configuration
+var header = `# Rush Configuration
 #
-# Telegraf is entirely plugin driven. All metrics are gathered from the
+# Rush is entirely plugin driven. All metrics are gathered from the
 # declared inputs, and sent to the declared outputs.
 #
 # Plugins must be declared in here to be active.
 # To deactivate a plugin, comment out the name and any variables.
 #
-# Use 'telegraf -config telegraf.conf -test' to see what metrics a config
+# Use 'rush -config rush.conf -test' to see what metrics a config
 # file would generate.
 #
 # Environment variables can be used anywhere in this config file, simply prepend
@@ -202,7 +202,7 @@ var header = `# Telegraf Configuration
   # user = "$USER"
 
 
-# Configuration for telegraf agent
+# Configuration for rush agent
 [agent]
   ## Default data collection interval for all inputs
   interval = "10s"
@@ -210,12 +210,12 @@ var header = `# Telegraf Configuration
   ## ie, if interval="10s" then always collect on :00, :10, :20, etc.
   round_interval = true
 
-  ## Telegraf will send metrics to outputs in batches of at most
+  ## Rush will send metrics to outputs in batches of at most
   ## metric_batch_size metrics.
-  ## This controls the size of writes that Telegraf sends to output plugins.
+  ## This controls the size of writes that Rush sends to output plugins.
   metric_batch_size = 1000
 
-  ## For failed writes, telegraf will cache metric_buffer_limit metrics for each
+  ## For failed writes, rush will cache metric_buffer_limit metrics for each
   ## output, and will flush this buffer on a successful write. Oldest metrics
   ## are dropped first when this buffer fills.
   ## This buffer only fills when writes fail to output plugin(s).
@@ -231,7 +231,7 @@ var header = `# Telegraf Configuration
   ## interval. Maximum flush_interval will be flush_interval + flush_jitter
   flush_interval = "10s"
   ## Jitter the flush interval by a random amount. This is primarily to avoid
-  ## large write spikes for users running a large number of telegraf instances.
+  ## large write spikes for users running a large number of rush instances.
   ## ie, a jitter of 5s and interval 10s means flushes will happen every 10-15s
   flush_jitter = "0s"
 
@@ -245,16 +245,16 @@ var header = `# Telegraf Configuration
   precision = ""
 
   ## Logging configuration:
-  ## Run telegraf with debug log messages.
+  ## Run rush with debug log messages.
   debug = false
-  ## Run telegraf in quiet mode (error log messages only).
+  ## Run rush in quiet mode (error log messages only).
   quiet = false
   ## Specify the log file name. The empty string means to log to stderr.
   logfile = ""
 
   ## Override default hostname, if empty use os.Hostname()
   hostname = ""
-  ## If set to true, do no set the "host" tag in the telegraf agent.
+  ## If set to true, do no set the "host" tag in the rush agent.
   omit_hostname = false
 
 
@@ -407,7 +407,7 @@ func printFilteredInputs(inputFilters []string, commented bool) {
 	sort.Strings(pnames)
 
 	// cache service inputs to print them at the end
-	servInputs := make(map[string]telegraf.ServiceInput)
+	servInputs := make(map[string]rush.ServiceInput)
 	// for alphabetical looping:
 	servInputNames := []string{}
 
@@ -417,7 +417,7 @@ func printFilteredInputs(inputFilters []string, commented bool) {
 		input := creator()
 
 		switch p := input.(type) {
-		case telegraf.ServiceInput:
+		case rush.ServiceInput:
 			servInputs[pname] = p
 			servInputNames = append(servInputNames, pname)
 			continue
@@ -515,7 +515,7 @@ func PrintOutputConfig(name string) error {
 func (c *Config) LoadDirectory(path string) error {
 	walkfn := func(thispath string, info os.FileInfo, _ error) error {
 		if info == nil {
-			log.Printf("W! Telegraf is not permitted to read %s", thispath)
+			log.Printf("W! Rush is not permitted to read %s", thispath)
 			return nil
 		}
 		if info.IsDir() {
@@ -535,16 +535,16 @@ func (c *Config) LoadDirectory(path string) error {
 }
 
 // Try to find a default config file at these locations (in order):
-//   1. $TELEGRAF_CONFIG_PATH
-//   2. $HOME/.telegraf/telegraf.conf
-//   3. /etc/telegraf/telegraf.conf
+//   1. $RUSH_CONFIG_PATH
+//   2. $HOME/.rush/rush.conf
+//   3. /etc/rush/rush.conf
 //
 func getDefaultConfigPath() (string, error) {
-	envfile := os.Getenv("TELEGRAF_CONFIG_PATH")
-	homefile := os.ExpandEnv("${HOME}/.telegraf/telegraf.conf")
-	etcfile := "/etc/telegraf/telegraf.conf"
+	envfile := os.Getenv("RUSH_CONFIG_PATH")
+	homefile := os.ExpandEnv("${HOME}/.rush/rush.conf")
+	etcfile := "/etc/rush/rush.conf"
 	if runtime.GOOS == "windows" {
-		etcfile = `C:\Program Files\Telegraf\telegraf.conf`
+		etcfile = `C:\Program Files\Rush\rush.conf`
 	}
 	for _, path := range []string{envfile, homefile, etcfile} {
 		if _, err := os.Stat(path); err == nil {
@@ -555,7 +555,7 @@ func getDefaultConfigPath() (string, error) {
 
 	// if we got here, we didn't find a file in a default location
 	return "", fmt.Errorf("No config file specified, and could not find one"+
-		" in $TELEGRAF_CONFIG_PATH, %s, or %s", homefile, etcfile)
+		" in $RUSH_CONFIG_PATH, %s, or %s", homefile, etcfile)
 }
 
 // LoadConfig loads the given config file and applies it to c
@@ -689,7 +689,7 @@ func (c *Config) LoadConfig(path string) error {
 
 // trimBOM trims the Byte-Order-Marks from the beginning of the file.
 // this is for Windows compatibility only.
-// see https://github.com/influxdata/telegraf/issues/1378
+// see https://github.com/masami10/rush/issues/1378
 func trimBOM(f []byte) []byte {
 	return bytes.TrimPrefix(f, []byte("\xef\xbb\xbf"))
 }

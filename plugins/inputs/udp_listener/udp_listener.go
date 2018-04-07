@@ -7,20 +7,20 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
-	"github.com/influxdata/telegraf/plugins/parsers"
-	"github.com/influxdata/telegraf/selfstat"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
+	"github.com/masami10/rush/plugins/parsers"
+	"github.com/masami10/rush/selfstat"
 )
 
 // UdpListener main struct for the collector
 type UdpListener struct {
 	ServiceAddress string
 
-	// UDPBufferSize should only be set if you want/need the telegraf UDP socket to
+	// UDPBufferSize should only be set if you want/need the rush UDP socket to
 	// differ from the system setting. In cases where you set the rmem_default to a lower
 	// value at the host level, but need a larger buffer for UDP bursty traffic, this
-	// setting enables you to configure that value ONLY for telegraf UDP sockets on this listener
+	// setting enables you to configure that value ONLY for rush UDP sockets on this listener
 	// Set this to 0 (or comment out) to take system default
 	//
 	// NOTE: You should ensure that your rmem_max is >= to this setting to work properly!
@@ -31,7 +31,7 @@ type UdpListener struct {
 	// UDPPacketSize is deprecated, it's only here for legacy support
 	// we now always create 1 max size buffer and then copy only what we need
 	// into the in channel
-	// see https://github.com/influxdata/telegraf/pull/992
+	// see https://github.com/masami10/rush/pull/992
 	UDPPacketSize int `toml:"udp_packet_size"`
 
 	sync.Mutex
@@ -47,7 +47,7 @@ type UdpListener struct {
 	parser parsers.Parser
 
 	// Keep the accumulator in this struct
-	acc telegraf.Accumulator
+	acc rush.Accumulator
 
 	listener *net.UDPConn
 
@@ -69,7 +69,7 @@ var malformedwarn = "E! udp_listener has received %d malformed packets" +
 const sampleConfig = `
   # DEPRECATED: the TCP listener plugin has been deprecated in favor of the
   # socket_listener plugin
-  # see https://github.com/influxdata/telegraf/tree/master/plugins/inputs/socket_listener
+  # see https://github.com/masami10/rush/tree/master/plugins/inputs/socket_listener
 `
 
 func (u *UdpListener) SampleConfig() string {
@@ -82,7 +82,7 @@ func (u *UdpListener) Description() string {
 
 // All the work is done in the Start() function, so this is just a dummy
 // function.
-func (u *UdpListener) Gather(_ telegraf.Accumulator) error {
+func (u *UdpListener) Gather(_ rush.Accumulator) error {
 	return nil
 }
 
@@ -90,13 +90,13 @@ func (u *UdpListener) SetParser(parser parsers.Parser) {
 	u.parser = parser
 }
 
-func (u *UdpListener) Start(acc telegraf.Accumulator) error {
+func (u *UdpListener) Start(acc rush.Accumulator) error {
 	u.Lock()
 	defer u.Unlock()
 
 	log.Println("W! DEPRECATED: the UDP listener plugin has been deprecated " +
 		"in favor of the socket_listener plugin " +
-		"(https://github.com/influxdata/telegraf/tree/master/plugins/inputs/socket_listener)")
+		"(https://github.com/masami10/rush/tree/master/plugins/inputs/socket_listener)")
 
 	tags := map[string]string{
 		"address": u.ServiceAddress,
@@ -191,7 +191,7 @@ func (u *UdpListener) udpParser() error {
 	defer u.wg.Done()
 
 	var packet []byte
-	var metrics []telegraf.Metric
+	var metrics []rush.Metric
 	var err error
 	for {
 		select {
@@ -216,7 +216,7 @@ func (u *UdpListener) udpParser() error {
 }
 
 func init() {
-	inputs.Add("udp_listener", func() telegraf.Input {
+	inputs.Add("udp_listener", func() rush.Input {
 		return &UdpListener{
 			ServiceAddress:         ":8092",
 			AllowedPendingMessages: 10000,

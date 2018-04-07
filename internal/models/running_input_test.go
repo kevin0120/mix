@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/influxdata/telegraf"
+	"github.com/masami10/rush"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -22,7 +22,7 @@ func TestMakeMetricNoFields(t *testing.T) {
 		"RITest",
 		map[string]interface{}{},
 		map[string]string{},
-		telegraf.Untyped,
+		rush.Untyped,
 		now,
 	)
 	assert.Nil(t, m)
@@ -42,7 +42,7 @@ func TestMakeMetricNilFields(t *testing.T) {
 			"nil":   nil,
 		},
 		map[string]string{},
-		telegraf.Untyped,
+		rush.Untyped,
 		now,
 	)
 	assert.Equal(
@@ -67,7 +67,7 @@ func TestMakeMetric(t *testing.T) {
 		"RITest",
 		map[string]interface{}{"value": int(101)},
 		map[string]string{},
-		telegraf.Untyped,
+		rush.Untyped,
 		now,
 	)
 	assert.Equal(
@@ -78,14 +78,14 @@ func TestMakeMetric(t *testing.T) {
 	assert.Equal(
 		t,
 		m.Type(),
-		telegraf.Untyped,
+		rush.Untyped,
 	)
 
 	m = ri.MakeMetric(
 		"RITest",
 		map[string]interface{}{"value": int(101)},
 		map[string]string{},
-		telegraf.Counter,
+		rush.Counter,
 		now,
 	)
 	assert.Equal(
@@ -96,14 +96,14 @@ func TestMakeMetric(t *testing.T) {
 	assert.Equal(
 		t,
 		m.Type(),
-		telegraf.Counter,
+		rush.Counter,
 	)
 
 	m = ri.MakeMetric(
 		"RITest",
 		map[string]interface{}{"value": int(101)},
 		map[string]string{},
-		telegraf.Gauge,
+		rush.Gauge,
 		now,
 	)
 	assert.Equal(
@@ -114,7 +114,7 @@ func TestMakeMetric(t *testing.T) {
 	assert.Equal(
 		t,
 		m.Type(),
-		telegraf.Gauge,
+		rush.Gauge,
 	)
 }
 
@@ -134,7 +134,7 @@ func TestMakeMetricWithPluginTags(t *testing.T) {
 		"RITest",
 		map[string]interface{}{"value": int(101)},
 		nil,
-		telegraf.Untyped,
+		rush.Untyped,
 		now,
 	)
 	assert.Equal(
@@ -162,7 +162,7 @@ func TestMakeMetricFilteredOut(t *testing.T) {
 		"RITest",
 		map[string]interface{}{"value": int(101)},
 		nil,
-		telegraf.Untyped,
+		rush.Untyped,
 		now,
 	)
 	assert.Nil(t, m)
@@ -184,7 +184,7 @@ func TestMakeMetricWithDaemonTags(t *testing.T) {
 		"RITest",
 		map[string]interface{}{"value": int(101)},
 		map[string]string{},
-		telegraf.Untyped,
+		rush.Untyped,
 		now,
 	)
 	assert.Equal(
@@ -214,7 +214,7 @@ func TestMakeMetricInfFields(t *testing.T) {
 			"ninf":  ninf,
 		},
 		map[string]string{},
-		telegraf.Untyped,
+		rush.Untyped,
 		now,
 	)
 	assert.Equal(
@@ -251,7 +251,7 @@ func TestMakeMetricAllFieldTypes(t *testing.T) {
 			"m": true,
 		},
 		map[string]string{},
-		telegraf.Untyped,
+		rush.Untyped,
 		now,
 	)
 	assert.Contains(t, m.String(), "a=10i")
@@ -281,7 +281,7 @@ func TestMakeMetricNameOverride(t *testing.T) {
 		"RITest",
 		map[string]interface{}{"value": int(101)},
 		map[string]string{},
-		telegraf.Untyped,
+		rush.Untyped,
 		now,
 	)
 	assert.Equal(
@@ -302,7 +302,7 @@ func TestMakeMetricNamePrefix(t *testing.T) {
 		"RITest",
 		map[string]interface{}{"value": int(101)},
 		map[string]string{},
-		telegraf.Untyped,
+		rush.Untyped,
 		now,
 	)
 	assert.Equal(
@@ -323,7 +323,7 @@ func TestMakeMetricNameSuffix(t *testing.T) {
 		"RITest",
 		map[string]interface{}{"value": int(101)},
 		map[string]string{},
-		telegraf.Untyped,
+		rush.Untyped,
 		now,
 	)
 	assert.Equal(
@@ -441,7 +441,7 @@ func TestMakeMetric_TrailingSlash(t *testing.T) {
 				tc.measurement,
 				tc.fields,
 				tc.tags,
-				telegraf.Untyped,
+				rush.Untyped,
 				now)
 
 			if tc.expectedNil {
@@ -460,4 +460,4 @@ type testInput struct{}
 
 func (t *testInput) Description() string                   { return "" }
 func (t *testInput) SampleConfig() string                  { return "" }
-func (t *testInput) Gather(acc telegraf.Accumulator) error { return nil }
+func (t *testInput) Gather(acc rush.Accumulator) error { return nil }

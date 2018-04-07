@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/testutil"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -185,7 +185,7 @@ func TestCPUCountIncrease(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// TestCPUTimesDecrease tests that telegraf continue to works after
+// TestCPUTimesDecrease tests that rush continue to works after
 // CPU times decrease, which seems to occur when Linux system is suspended.
 func TestCPUTimesDecrease(t *testing.T) {
 	var mps MockPS

@@ -5,9 +5,9 @@ import (
 	"log"
 	"sync"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
-	"github.com/influxdata/telegraf/plugins/parsers"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
+	"github.com/masami10/rush/plugins/parsers"
 	"github.com/nats-io/nats"
 )
 
@@ -47,7 +47,7 @@ type natsConsumer struct {
 	// channel for all NATS read errors
 	errs chan error
 	done chan struct{}
-	acc  telegraf.Accumulator
+	acc  rush.Accumulator
 }
 
 var sampleConfig = `
@@ -56,9 +56,9 @@ var sampleConfig = `
   ## Use Transport Layer Security
   # secure = false
   ## subject(s) to consume
-  # subjects = ["telegraf"]
+  # subjects = ["rush"]
   ## name a queue group
-  # queue_group = "telegraf_consumers"
+  # queue_group = "rush_consumers"
 
   ## Sets the limits for pending msgs and bytes for each subscription
   ## These shouldn't need to be adjusted except in very high throughput scenarios
@@ -68,7 +68,7 @@ var sampleConfig = `
   ## Data format to consume.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "influx"
 `
 
@@ -93,7 +93,7 @@ func (n *natsConsumer) natsErrHandler(c *nats.Conn, s *nats.Subscription, e erro
 }
 
 // Start the nats consumer. Caller must call *natsConsumer.Stop() to clean up.
-func (n *natsConsumer) Start(acc telegraf.Accumulator) error {
+func (n *natsConsumer) Start(acc rush.Accumulator) error {
 	n.Lock()
 	defer n.Unlock()
 
@@ -154,7 +154,7 @@ func (n *natsConsumer) Start(acc telegraf.Accumulator) error {
 }
 
 // receiver() reads all incoming messages from NATS, and parses them into
-// telegraf metrics.
+// rush metrics.
 func (n *natsConsumer) receiver() {
 	defer n.wg.Done()
 	for {
@@ -197,17 +197,17 @@ func (n *natsConsumer) Stop() {
 	n.Unlock()
 }
 
-func (n *natsConsumer) Gather(acc telegraf.Accumulator) error {
+func (n *natsConsumer) Gather(acc rush.Accumulator) error {
 	return nil
 }
 
 func init() {
-	inputs.Add("nats_consumer", func() telegraf.Input {
+	inputs.Add("nats_consumer", func() rush.Input {
 		return &natsConsumer{
 			Servers:             []string{"nats://localhost:4222"},
 			Secure:              false,
-			Subjects:            []string{"telegraf"},
-			QueueGroup:          "telegraf_consumers",
+			Subjects:            []string{"rush"},
+			QueueGroup:          "rush_consumers",
 			PendingBytesLimit:   nats.DefaultSubPendingBytesLimit,
 			PendingMessageLimit: nats.DefaultSubPendingMsgsLimit,
 		}

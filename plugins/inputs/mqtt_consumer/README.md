@@ -3,7 +3,7 @@
 The [MQTT](http://mqtt.org/) consumer plugin reads from
 specified MQTT topics and adds messages to InfluxDB.
 The plugin expects messages in the
-[Telegraf Input Data Formats](https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md).
+[Rush Input Data Formats](https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md).
 
 ### Configuration:
 
@@ -20,8 +20,8 @@ The plugin expects messages in the
 
   ## Topics to subscribe to
   topics = [
-    "telegraf/host01/cpu",
-    "telegraf/+/mem",
+    "rush/host01/cpu",
+    "rush/+/mem",
     "sensors/#",
   ]
 
@@ -33,24 +33,24 @@ The plugin expects messages in the
   client_id = ""
 
   ## username and password to connect MQTT server.
-  # username = "telegraf"
+  # username = "rush"
   # password = "metricsmetricsmetricsmetrics"
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 
   ## Data format to consume.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "influx"
 ```
 
 ### Tags:
 
 - All measurements are tagged with the incoming topic, ie
-`topic=telegraf/host01/cpu`
+`topic=rush/host01/cpu`

@@ -7,12 +7,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/metric"
-	"github.com/influxdata/telegraf/plugins/outputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/metric"
+	"github.com/masami10/rush/plugins/outputs"
 
-	"github.com/influxdata/telegraf/plugins/outputs/influxdb/client"
+	"github.com/masami10/rush/plugins/outputs/influxdb/client"
 )
 
 var (
@@ -59,8 +59,8 @@ var sampleConfig = `
   ## this means that only ONE of the urls will be written to each interval.
   # urls = ["udp://127.0.0.1:8089"] # UDP endpoint example
   urls = ["http://127.0.0.1:8086"] # required
-  ## The target database for metrics (telegraf will create it if not exists).
-  database = "telegraf" # required
+  ## The target database for metrics (rush will create it if not exists).
+  database = "rush" # required
 
   ## Name of existing retention policy to write to.  Empty string writes to
   ## the default retention policy.
@@ -71,17 +71,17 @@ var sampleConfig = `
   ## Write timeout (for the InfluxDB client), formatted as a string.
   ## If not provided, will default to 5s. 0s means no timeout (not recommended).
   timeout = "5s"
-  # username = "telegraf"
+  # username = "rush"
   # password = "metricsmetricsmetricsmetrics"
   ## Set the user agent for HTTP POSTs (can be useful for log differentiation)
-  # user_agent = "telegraf"
+  # user_agent = "rush"
   ## Set UDP payload size, defaults to InfluxDB UDP Client default (512 bytes)
   # udp_payload = 512
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 
@@ -182,7 +182,7 @@ func (i *InfluxDB) Description() string {
 
 // Write will choose a random server in the cluster to write to until a successful write
 // occurs, logging each unsuccessful. If all servers fail, return error.
-func (i *InfluxDB) Write(metrics []telegraf.Metric) error {
+func (i *InfluxDB) Write(metrics []rush.Metric) error {
 	r := metric.NewReader(metrics)
 
 	// This will get set to nil if a successful write occurs
@@ -220,7 +220,7 @@ func (i *InfluxDB) Write(metrics []telegraf.Metric) error {
 
 			if strings.Contains(e.Error(), "unable to parse") {
 				log.Printf("E! Parse error; dropping points: %s", e)
-				// This error indicates a bug in Telegraf or InfluxDB parsing
+				// This error indicates a bug in Rush or InfluxDB parsing
 				// of line protocol.  Retries will not be successful.
 				err = nil
 				break
@@ -250,5 +250,5 @@ func newInflux() *InfluxDB {
 }
 
 func init() {
-	outputs.Add("influxdb", func() telegraf.Output { return newInflux() })
+	outputs.Add("influxdb", func() rush.Output { return newInflux() })
 }

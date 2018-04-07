@@ -9,10 +9,10 @@ import (
 	"net"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/outputs"
-	"github.com/influxdata/telegraf/plugins/serializers"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/outputs"
+	"github.com/masami10/rush/plugins/serializers"
 )
 
 type Graphite struct {
@@ -44,15 +44,15 @@ var sampleConfig = `
   ## Prefix metrics name
   prefix = ""
   ## Graphite output template
-  ## see https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md
+  ## see https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_OUTPUT.md
   template = "host.tags.measurement.field"
   ## timeout in seconds for the write connection to graphite
   timeout = 2
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 `
@@ -139,7 +139,7 @@ func checkEOF(conn net.Conn) {
 
 // Choose a random server in the cluster to write to until a successful write
 // occurs, logging each unsuccessful. If all servers fail, return error.
-func (g *Graphite) Write(metrics []telegraf.Metric) error {
+func (g *Graphite) Write(metrics []rush.Metric) error {
 	// Prepare data
 	var batch []byte
 	s, err := serializers.NewGraphiteSerializer(g.Prefix, g.Template)
@@ -195,7 +195,7 @@ func (g *Graphite) send(batch []byte) error {
 }
 
 func init() {
-	outputs.Add("graphite", func() telegraf.Output {
+	outputs.Add("graphite", func() rush.Output {
 		return &Graphite{}
 	})
 }

@@ -9,8 +9,8 @@ import (
 	"collectd.org/api"
 	"collectd.org/network"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/metric"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/metric"
 )
 
 const (
@@ -68,13 +68,13 @@ func NewCollectdParser(
 	return &parser, nil
 }
 
-func (p *CollectdParser) Parse(buf []byte) ([]telegraf.Metric, error) {
+func (p *CollectdParser) Parse(buf []byte) ([]rush.Metric, error) {
 	valueLists, err := network.Parse(buf, p.popts)
 	if err != nil {
 		return nil, fmt.Errorf("Collectd parser error: %s", err)
 	}
 
-	metrics := []telegraf.Metric{}
+	metrics := []rush.Metric{}
 	for _, valueList := range valueLists {
 		metrics = append(metrics, UnmarshalValueList(valueList)...)
 	}
@@ -93,7 +93,7 @@ func (p *CollectdParser) Parse(buf []byte) ([]telegraf.Metric, error) {
 	return metrics, nil
 }
 
-func (p *CollectdParser) ParseLine(line string) (telegraf.Metric, error) {
+func (p *CollectdParser) ParseLine(line string) (rush.Metric, error) {
 	metrics, err := p.Parse([]byte(line))
 	if err != nil {
 		return nil, err
@@ -110,11 +110,11 @@ func (p *CollectdParser) SetDefaultTags(tags map[string]string) {
 	p.DefaultTags = tags
 }
 
-// UnmarshalValueList translates a ValueList into a Telegraf metric.
-func UnmarshalValueList(vl *api.ValueList) []telegraf.Metric {
+// UnmarshalValueList translates a ValueList into a Rush metric.
+func UnmarshalValueList(vl *api.ValueList) []rush.Metric {
 	timestamp := vl.Time.UTC()
 
-	var metrics []telegraf.Metric
+	var metrics []rush.Metric
 	for i := range vl.Values {
 		var name string
 		name = fmt.Sprintf("%s_%s", vl.Identifier.Plugin, vl.DSName(i))

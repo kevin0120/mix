@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 const sampleConfig = `
@@ -50,7 +50,7 @@ func (s *Minecraft) SampleConfig() string {
 // Gather uses the RCON protocol to collect player and
 // scoreboard stats from a minecraft server.
 //var hasClient bool = false
-func (s *Minecraft) Gather(acc telegraf.Accumulator) error {
+func (s *Minecraft) Gather(acc rush.Accumulator) error {
 	// can't simply compare s.client to nil, because comparing an interface
 	// to nil often does not produce the desired result
 	if !s.clientSet {
@@ -144,7 +144,7 @@ func ParseScoreboard(input string) ([]Score, error) {
 }
 
 func init() {
-	inputs.Add("minecraft", func() telegraf.Input {
+	inputs.Add("minecraft", func() rush.Input {
 		return &Minecraft{
 			Server: "localhost",
 			Port:   "25575",

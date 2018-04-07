@@ -4,22 +4,22 @@
 1. Make changes or write plugin (see below for details)
 1. Add your plugin to one of: `plugins/{inputs,outputs,aggregators,processors}/all/all.go`
 1. If your plugin requires a new Go package,
-[add it](https://github.com/influxdata/telegraf/blob/master/CONTRIBUTING.md#adding-a-dependency)
+[add it](https://github.com/masami10/rush/blob/master/CONTRIBUTING.md#adding-a-dependency)
 1. Write a README for your plugin, if it's an input plugin, it should be structured
-like the [input example here](https://github.com/influxdata/telegraf/blob/master/plugins/inputs/EXAMPLE_README.md).
+like the [input example here](https://github.com/masami10/rush/blob/master/plugins/inputs/EXAMPLE_README.md).
 Output plugins READMEs are less structured,
 but any information you can provide on how the data will look is appreciated.
-See the [OpenTSDB output](https://github.com/influxdata/telegraf/tree/master/plugins/outputs/opentsdb)
+See the [OpenTSDB output](https://github.com/masami10/rush/tree/master/plugins/outputs/opentsdb)
 for a good example.
 1. **Optional:** Help users of your plugin by including example queries for populating dashboards. Include these sample queries in the `README.md` for the plugin.
-1. **Optional:** Write a [tickscript](https://docs.influxdata.com/kapacitor/v1.0/tick/syntax/) for your plugin and add it to [Kapacitor](https://github.com/influxdata/kapacitor/tree/master/examples/telegraf).
+1. **Optional:** Write a [tickscript](https://docs.influxdata.com/kapacitor/v1.0/tick/syntax/) for your plugin and add it to [Kapacitor](https://github.com/influxdata/kapacitor/tree/master/examples/rush).
 
 ## GoDoc
 
 Public interfaces for inputs, outputs, processors, aggregators, metrics,
 and the accumulator can be found on the GoDoc
 
-[![GoDoc](https://godoc.org/github.com/influxdata/telegraf?status.svg)](https://godoc.org/github.com/influxdata/telegraf)
+[![GoDoc](https://godoc.org/github.com/masami10/rush?status.svg)](https://godoc.org/github.com/masami10/rush)
 
 ## Sign the CLA
 
@@ -28,7 +28,7 @@ which can be found [on our website](http://influxdb.com/community/cla.html)
 
 ## Adding a dependency
 
-Assuming you can already build the project, run these in the telegraf directory:
+Assuming you can already build the project, run these in the rush directory:
 
 1. `go get github.com/sparrc/gdm`
 1. `gdm restore`
@@ -37,7 +37,7 @@ Assuming you can already build the project, run these in the telegraf directory:
 ## Input Plugins
 
 This section is for developers who want to create new collection inputs.
-Telegraf is entirely plugin driven. This interface allows for operators to
+Rush is entirely plugin driven. This interface allows for operators to
 pick and chose what is gathered and makes it easy for developers
 to create new ways of generating metrics.
 
@@ -46,13 +46,13 @@ and submit new inputs.
 
 ### Input Plugin Guidelines
 
-* A plugin must conform to the [`telegraf.Input`](https://godoc.org/github.com/influxdata/telegraf#Input) interface.
+* A plugin must conform to the [`rush.Input`](https://godoc.org/github.com/masami10/rush#Input) interface.
 * Input Plugins should call `inputs.Add` in their `init` function to register themselves.
 See below for a quick example.
 * Input Plugins must be added to the
-`github.com/influxdata/telegraf/plugins/inputs/all/all.go` file.
+`github.com/masami10/rush/plugins/inputs/all/all.go` file.
 * The `SampleConfig` function should return valid toml that describes how the
-plugin can be configured. This is include in `telegraf config`.
+plugin can be configured. This is include in `rush config`.
 * The `Description` function should say in one line what this plugin does.
 
 Let's say you've written a plugin that emits metrics about processes on the
@@ -66,8 +66,8 @@ package simple
 // simple.go
 
 import (
-    "github.com/influxdata/telegraf"
-    "github.com/influxdata/telegraf/plugins/inputs"
+    "github.com/masami10/rush"
+    "github.com/masami10/rush/plugins/inputs"
 )
 
 type Simple struct {
@@ -82,7 +82,7 @@ func (s *Simple) SampleConfig() string {
     return "ok = true # indicate if everything is fine"
 }
 
-func (s *Simple) Gather(acc telegraf.Accumulator) error {
+func (s *Simple) Gather(acc rush.Accumulator) error {
     if s.Ok {
         acc.AddFields("state", map[string]interface{}{"value": "pretty good"}, nil)
     } else {
@@ -93,7 +93,7 @@ func (s *Simple) Gather(acc telegraf.Accumulator) error {
 }
 
 func init() {
-    inputs.Add("simple", func() telegraf.Input { return &Simple{} })
+    inputs.Add("simple", func() rush.Input { return &Simple{} })
 }
 ```
 
@@ -107,17 +107,17 @@ for other outputs, such as [prometheus](https://prometheus.io/docs/concepts/metr
 ## Input Plugins Accepting Arbitrary Data Formats
 
 Some input plugins (such as
-[exec](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/exec))
+[exec](https://github.com/masami10/rush/tree/master/plugins/inputs/exec))
 accept arbitrary input data formats. An overview of these data formats can
 be found
-[here](https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md).
+[here](https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md).
 
 In order to enable this, you must specify a `SetParser(parser parsers.Parser)`
 function on the plugin object (see the exec plugin for an example), as well as
 defining `parser` as a field of the object.
 
 You can then utilize the parser internally in your plugin, parsing data as you
-see fit. Telegraf's configuration layer will take care of instantiating and
+see fit. Rush's configuration layer will take care of instantiating and
 creating the `Parser` object.
 
 You should also add the following to your SampleConfig() return:
@@ -126,7 +126,7 @@ You should also add the following to your SampleConfig() return:
   ## Data format to consume.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "influx"
 ```
 
@@ -137,24 +137,24 @@ Below is the `Parser` interface.
 type Parser interface {
     // Parse takes a byte buffer separated by newlines
     // ie, `cpu.usage.idle 90\ncpu.usage.busy 10`
-    // and parses it into telegraf metrics
-    Parse(buf []byte) ([]telegraf.Metric, error)
+    // and parses it into rush metrics
+    Parse(buf []byte) ([]rush.Metric, error)
 
     // ParseLine takes a single string metric
     // ie, "cpu.usage.idle 90"
-    // and parses it into a telegraf metric.
-    ParseLine(line string) (telegraf.Metric, error)
+    // and parses it into a rush metric.
+    ParseLine(line string) (rush.Metric, error)
 }
 ```
 
 And you can view the code
-[here.](https://github.com/influxdata/telegraf/blob/henrypfhu-master/plugins/parsers/registry.go)
+[here.](https://github.com/masami10/rush/blob/henrypfhu-master/plugins/parsers/registry.go)
 
 ## Service Input Plugins
 
 This section is for developers who want to create new "service" collection
 inputs. A service plugin differs from a regular plugin in that it operates
-a background service while Telegraf is running. One example would be the `statsd`
+a background service while Rush is running. One example would be the `statsd`
 plugin, which operates a statsd server.
 
 Service Input Plugins are substantially more complicated than a regular plugin, as they
@@ -177,13 +177,13 @@ similar constructs.
 
 ### Output Plugin Guidelines
 
-* An output must conform to the [`telegraf.Output`](https://godoc.org/github.com/influxdata/telegraf#Output) interface.
+* An output must conform to the [`rush.Output`](https://godoc.org/github.com/masami10/rush#Output) interface.
 * Outputs should call `outputs.Add` in their `init` function to register themselves.
 See below for a quick example.
-* To be available within Telegraf itself, plugins must add themselves to the
-`github.com/influxdata/telegraf/plugins/outputs/all/all.go` file.
+* To be available within Rush itself, plugins must add themselves to the
+`github.com/masami10/rush/plugins/outputs/all/all.go` file.
 * The `SampleConfig` function should return valid toml that describes how the
-output can be configured. This is include in `telegraf config`.
+output can be configured. This is include in `rush config`.
 * The `Description` function should say in one line what this output does.
 
 ### Output Example
@@ -194,8 +194,8 @@ package simpleoutput
 // simpleoutput.go
 
 import (
-    "github.com/influxdata/telegraf"
-    "github.com/influxdata/telegraf/plugins/outputs"
+    "github.com/masami10/rush"
+    "github.com/masami10/rush/plugins/outputs"
 )
 
 type Simple struct {
@@ -220,7 +220,7 @@ func (s *Simple) Close() error {
     return nil
 }
 
-func (s *Simple) Write(metrics []telegraf.Metric) error {
+func (s *Simple) Write(metrics []rush.Metric) error {
     for _, metric := range metrics {
         // write `metric` to the output sink here
     }
@@ -228,7 +228,7 @@ func (s *Simple) Write(metrics []telegraf.Metric) error {
 }
 
 func init() {
-    outputs.Add("simpleoutput", func() telegraf.Output { return &Simple{} })
+    outputs.Add("simpleoutput", func() rush.Output { return &Simple{} })
 }
 
 ```
@@ -236,10 +236,10 @@ func init() {
 ## Output Plugins Writing Arbitrary Data Formats
 
 Some output plugins (such as
-[file](https://github.com/influxdata/telegraf/tree/master/plugins/outputs/file))
+[file](https://github.com/masami10/rush/tree/master/plugins/outputs/file))
 can write arbitrary output data formats. An overview of these data formats can
 be found
-[here](https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md).
+[here](https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_OUTPUT.md).
 
 In order to enable this, you must specify a
 `SetSerializer(serializer serializers.Serializer)`
@@ -247,7 +247,7 @@ function on the plugin object (see the file plugin for an example), as well as
 defining `serializer` as a field of the object.
 
 You can then utilize the serializer internally in your plugin, serializing data
-before it's written. Telegraf's configuration layer will take care of
+before it's written. Rush's configuration layer will take care of
 instantiating and creating the `Serializer` object.
 
 You should also add the following to your SampleConfig() return:
@@ -256,7 +256,7 @@ You should also add the following to your SampleConfig() return:
   ## Data format to output.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_OUTPUT.md
   data_format = "influx"
 ```
 
@@ -264,7 +264,7 @@ You should also add the following to your SampleConfig() return:
 
 This section is for developers who want to create new "service" output. A
 service output differs from a regular output in that it operates a background service
-while Telegraf is running. One example would be the `prometheus_client` output,
+while Rush is running. One example would be the `prometheus_client` output,
 which operates an HTTP server.
 
 Their interface is quite similar to a regular output, with the addition of `Start()`
@@ -281,13 +281,13 @@ This section is for developers who want to create a new processor plugin.
 
 ### Processor Plugin Guidelines
 
-* A processor must conform to the [`telegraf.Processor`](https://godoc.org/github.com/influxdata/telegraf#Processor) interface.
+* A processor must conform to the [`rush.Processor`](https://godoc.org/github.com/masami10/rush#Processor) interface.
 * Processors should call `processors.Add` in their `init` function to register themselves.
 See below for a quick example.
-* To be available within Telegraf itself, plugins must add themselves to the
-`github.com/influxdata/telegraf/plugins/processors/all/all.go` file.
+* To be available within Rush itself, plugins must add themselves to the
+`github.com/masami10/rush/plugins/processors/all/all.go` file.
 * The `SampleConfig` function should return valid toml that describes how the
-processor can be configured. This is include in the output of `telegraf config`.
+processor can be configured. This is include in the output of `rush config`.
 * The `Description` function should say in one line what this processor does.
 
 ### Processor Example
@@ -300,8 +300,8 @@ package printer
 import (
 	"fmt"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/processors"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/processors"
 )
 
 type Printer struct {
@@ -318,7 +318,7 @@ func (p *Printer) Description() string {
 	return "Print all metrics that pass through this filter."
 }
 
-func (p *Printer) Apply(in ...telegraf.Metric) []telegraf.Metric {
+func (p *Printer) Apply(in ...rush.Metric) []rush.Metric {
 	for _, metric := range in {
 		fmt.Println(metric.String())
 	}
@@ -326,7 +326,7 @@ func (p *Printer) Apply(in ...telegraf.Metric) []telegraf.Metric {
 }
 
 func init() {
-	processors.Add("printer", func() telegraf.Processor {
+	processors.Add("printer", func() rush.Processor {
 		return &Printer{}
 	})
 }
@@ -338,13 +338,13 @@ This section is for developers who want to create a new aggregator plugin.
 
 ### Aggregator Plugin Guidelines
 
-* A aggregator must conform to the [`telegraf.Aggregator`](https://godoc.org/github.com/influxdata/telegraf#Aggregator) interface.
+* A aggregator must conform to the [`rush.Aggregator`](https://godoc.org/github.com/masami10/rush#Aggregator) interface.
 * Aggregators should call `aggregators.Add` in their `init` function to register themselves.
 See below for a quick example.
-* To be available within Telegraf itself, plugins must add themselves to the
-`github.com/influxdata/telegraf/plugins/aggregators/all/all.go` file.
+* To be available within Rush itself, plugins must add themselves to the
+`github.com/masami10/rush/plugins/aggregators/all/all.go` file.
 * The `SampleConfig` function should return valid toml that describes how the
-aggregator can be configured. This is include in `telegraf config`.
+aggregator can be configured. This is include in `rush config`.
 * The `Description` function should say in one line what this aggregator does.
 * The Aggregator plugin will need to keep caches of metrics that have passed
 through it. This should be done using the builtin `HashID()` function of each
@@ -359,8 +359,8 @@ package min
 // min.go
 
 import (
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/aggregators"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/aggregators"
 )
 
 type Min struct {
@@ -370,7 +370,7 @@ type Min struct {
 	tagCache   map[uint64]map[string]string
 }
 
-func NewMin() telegraf.Aggregator {
+func NewMin() rush.Aggregator {
 	m := &Min{}
 	m.Reset()
 	return m
@@ -392,7 +392,7 @@ func (m *Min) Description() string {
 	return "Keep the aggregate min of each metric passing through."
 }
 
-func (m *Min) Add(in telegraf.Metric) {
+func (m *Min) Add(in rush.Metric) {
 	id := in.HashID()
 	if _, ok := m.nameCache[id]; !ok {
 		// hit an uncached metric, create caches for first time:
@@ -421,7 +421,7 @@ func (m *Min) Add(in telegraf.Metric) {
 	}
 }
 
-func (m *Min) Push(acc telegraf.Accumulator) {
+func (m *Min) Push(acc rush.Accumulator) {
 	for id, _ := range m.nameCache {
 		fields := map[string]interface{}{}
 		for k, v := range m.fieldCache[id] {
@@ -449,7 +449,7 @@ func convert(in interface{}) (float64, bool) {
 }
 
 func init() {
-	aggregators.Add("min", func() telegraf.Aggregator {
+	aggregators.Add("min", func() rush.Aggregator {
 		return NewMin()
 	})
 }

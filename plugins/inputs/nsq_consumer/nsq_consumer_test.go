@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/influxdata/telegraf/plugins/parsers"
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/plugins/parsers"
+	"github.com/masami10/rush/testutil"
 	"github.com/nsqio/go-nsq"
 	"github.com/stretchr/testify/assert"
 )
@@ -37,7 +37,7 @@ func TestReadsMetricsFromNSQ(t *testing.T) {
 
 	consumer := &NSQConsumer{
 		Server:      "127.0.0.1:4155",
-		Topic:       "telegraf",
+		Topic:       "rush",
 		Channel:     "consume",
 		MaxInFlight: 1,
 		Nsqd:        []string{"127.0.0.1:4155"},

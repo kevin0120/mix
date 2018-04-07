@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 	"github.com/shirou/gopsutil/process"
 )
 
@@ -72,7 +72,7 @@ func (_ *Procstat) Description() string {
 	return "Monitor process cpu and memory usage"
 }
 
-func (p *Procstat) Gather(acc telegraf.Accumulator) error {
+func (p *Procstat) Gather(acc rush.Accumulator) error {
 	if p.createPIDFinder == nil {
 		p.createPIDFinder = defaultPIDFinder
 	}
@@ -95,7 +95,7 @@ func (p *Procstat) Gather(acc telegraf.Accumulator) error {
 }
 
 // Add metrics a single Process
-func (p *Procstat) addMetrics(proc Process, acc telegraf.Accumulator) {
+func (p *Procstat) addMetrics(proc Process, acc rush.Accumulator) {
 	var prefix string
 	if p.Prefix != "" {
 		prefix = p.Prefix + "_"
@@ -355,7 +355,7 @@ func (p *Procstat) cgroupPIDs() ([]PID, error) {
 }
 
 func init() {
-	inputs.Add("procstat", func() telegraf.Input {
+	inputs.Add("procstat", func() rush.Input {
 		return &Procstat{}
 	})
 }

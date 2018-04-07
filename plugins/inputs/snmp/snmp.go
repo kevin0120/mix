@@ -12,9 +12,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 
 	"github.com/soniah/gosnmp"
 )
@@ -131,7 +131,7 @@ type Snmp struct {
 	Tables []Table `toml:"table"`
 
 	// Name & Fields are the elements of a Table.
-	// Telegraf chokes if we try to embed a Table. So instead we have to embed the
+	// Rush chokes if we try to embed a Table. So instead we have to embed the
 	// fields of a Table, and construct a Table during runtime.
 	Name   string
 	Fields []Field `toml:"field"`
@@ -315,7 +315,7 @@ func Errorf(err error, msg string, format ...interface{}) error {
 }
 
 func init() {
-	inputs.Add("snmp", func() telegraf.Input {
+	inputs.Add("snmp", func() rush.Input {
 		return &Snmp{
 			Name:           "snmp",
 			Retries:        3,
@@ -340,7 +340,7 @@ func (s *Snmp) Description() string {
 // Gather retrieves all the configured fields and tables.
 // Any error encountered does not halt the process. The errors are accumulated
 // and returned at the end.
-func (s *Snmp) Gather(acc telegraf.Accumulator) error {
+func (s *Snmp) Gather(acc rush.Accumulator) error {
 	if err := s.init(); err != nil {
 		return err
 	}
@@ -379,7 +379,7 @@ func (s *Snmp) Gather(acc telegraf.Accumulator) error {
 	return nil
 }
 
-func (s *Snmp) gatherTable(acc telegraf.Accumulator, gs snmpConnection, t Table, topTags map[string]string, walk bool) error {
+func (s *Snmp) gatherTable(acc rush.Accumulator, gs snmpConnection, t Table, topTags map[string]string, walk bool) error {
 	rt, err := t.Build(gs, walk)
 	if err != nil {
 		return err

@@ -8,10 +8,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/outputs"
-	"github.com/influxdata/telegraf/plugins/serializers"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/outputs"
+	"github.com/masami10/rush/plugins/serializers"
 
 	"github.com/streadway/amqp"
 )
@@ -71,19 +71,19 @@ func (a *externalAuth) Response() string {
 const (
 	DefaultAuthMethod      = "PLAIN"
 	DefaultRetentionPolicy = "default"
-	DefaultDatabase        = "telegraf"
+	DefaultDatabase        = "rush"
 )
 
 var sampleConfig = `
   ## AMQP url
   url = "amqp://localhost:5672/influxdb"
   ## AMQP exchange
-  exchange = "telegraf"
+  exchange = "rush"
   ## Auth method. PLAIN and EXTERNAL are supported
   ## Using EXTERNAL requires enabling the rabbitmq_auth_mechanism_ssl plugin as
   ## described here: https://www.rabbitmq.com/plugins.html
   # auth_method = "PLAIN"
-  ## Telegraf tag to use as a routing key
+  ## Rush tag to use as a routing key
   ##  ie, if this tag exists, its value will be used as the routing key
   routing_tag = "host"
   ## Delivery Mode controls if a published message is persistent
@@ -93,23 +93,23 @@ var sampleConfig = `
   ## InfluxDB retention policy
   # retention_policy = "default"
   ## InfluxDB database
-  # database = "telegraf"
+  # database = "rush"
 
   ## Write timeout, formatted as a string.  If not provided, will default
   ## to 5s. 0s means no timeout (not recommended).
   # timeout = "5s"
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 
   ## Data format to output.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_OUTPUT.md
   data_format = "influx"
 `
 
@@ -227,7 +227,7 @@ func (q *AMQP) Description() string {
 	return "Configuration for the AMQP server to send metrics to"
 }
 
-func (q *AMQP) Write(metrics []telegraf.Metric) error {
+func (q *AMQP) Write(metrics []rush.Metric) error {
 	if len(metrics) == 0 {
 		return nil
 	}
@@ -289,7 +289,7 @@ func (q *AMQP) setClient(c *client) {
 }
 
 func init() {
-	outputs.Add("amqp", func() telegraf.Output {
+	outputs.Add("amqp", func() rush.Output {
 		return &AMQP{
 			AuthMethod:      DefaultAuthMethod,
 			Database:        DefaultDatabase,

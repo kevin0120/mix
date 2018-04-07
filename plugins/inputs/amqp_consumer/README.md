@@ -4,7 +4,7 @@ This plugin provides a consumer for use with AMQP 0-9-1, a promenent implementat
 
 Metrics are read from a topic exchange using the configured queue and binding_key.
 
-Message payload should be formatted in one of the [Telegraf Data Formats](https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md).
+Message payload should be formatted in one of the [Rush Data Formats](https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md).
 
 For an introduction to AMQP see:
 - https://www.rabbitmq.com/tutorials/amqp-concepts.html
@@ -18,9 +18,9 @@ The following defaults are known to work with RabbitMQ:
   ## AMQP url
   url = "amqp://localhost:5672/influxdb"
   ## AMQP exchange
-  exchange = "telegraf"
+  exchange = "rush"
   ## AMQP queue name
-  queue = "telegraf"
+  queue = "rush"
   ## Binding Key
   binding_key = "#"
 
@@ -33,15 +33,15 @@ The following defaults are known to work with RabbitMQ:
   ## described here: https://www.rabbitmq.com/plugins.html
   # auth_method = "PLAIN"
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 
   ## Data format to consume.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "influx"
 ```

@@ -5,14 +5,14 @@ import (
 	"log"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/metric"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/metric"
 )
 
 const meas = "github_webhooks"
 
 type Event interface {
-	NewMetric() telegraf.Metric
+	NewMetric() rush.Metric
 }
 
 type Repository struct {
@@ -91,7 +91,7 @@ type CommitCommentEvent struct {
 	Sender     Sender        `json:"sender"`
 }
 
-func (s CommitCommentEvent) NewMetric() telegraf.Metric {
+func (s CommitCommentEvent) NewMetric() rush.Metric {
 	event := "commit_comment"
 	t := map[string]string{
 		"event":      event,
@@ -121,7 +121,7 @@ type CreateEvent struct {
 	Sender     Sender     `json:"sender"`
 }
 
-func (s CreateEvent) NewMetric() telegraf.Metric {
+func (s CreateEvent) NewMetric() rush.Metric {
 	event := "create"
 	t := map[string]string{
 		"event":      event,
@@ -151,7 +151,7 @@ type DeleteEvent struct {
 	Sender     Sender     `json:"sender"`
 }
 
-func (s DeleteEvent) NewMetric() telegraf.Metric {
+func (s DeleteEvent) NewMetric() rush.Metric {
 	event := "delete"
 	t := map[string]string{
 		"event":      event,
@@ -180,7 +180,7 @@ type DeploymentEvent struct {
 	Sender     Sender     `json:"sender"`
 }
 
-func (s DeploymentEvent) NewMetric() telegraf.Metric {
+func (s DeploymentEvent) NewMetric() rush.Metric {
 	event := "deployment"
 	t := map[string]string{
 		"event":      event,
@@ -212,7 +212,7 @@ type DeploymentStatusEvent struct {
 	Sender           Sender           `json:"sender"`
 }
 
-func (s DeploymentStatusEvent) NewMetric() telegraf.Metric {
+func (s DeploymentStatusEvent) NewMetric() rush.Metric {
 	event := "delete"
 	t := map[string]string{
 		"event":      event,
@@ -245,7 +245,7 @@ type ForkEvent struct {
 	Sender     Sender     `json:"sender"`
 }
 
-func (s ForkEvent) NewMetric() telegraf.Metric {
+func (s ForkEvent) NewMetric() rush.Metric {
 	event := "fork"
 	t := map[string]string{
 		"event":      event,
@@ -274,7 +274,7 @@ type GollumEvent struct {
 }
 
 // REVIEW: Going to be lazy and not deal with the pages.
-func (s GollumEvent) NewMetric() telegraf.Metric {
+func (s GollumEvent) NewMetric() rush.Metric {
 	event := "gollum"
 	t := map[string]string{
 		"event":      event,
@@ -302,7 +302,7 @@ type IssueCommentEvent struct {
 	Sender     Sender       `json:"sender"`
 }
 
-func (s IssueCommentEvent) NewMetric() telegraf.Metric {
+func (s IssueCommentEvent) NewMetric() rush.Metric {
 	event := "issue_comment"
 	t := map[string]string{
 		"event":      event,
@@ -334,7 +334,7 @@ type IssuesEvent struct {
 	Sender     Sender     `json:"sender"`
 }
 
-func (s IssuesEvent) NewMetric() telegraf.Metric {
+func (s IssuesEvent) NewMetric() rush.Metric {
 	event := "issue"
 	t := map[string]string{
 		"event":      event,
@@ -365,7 +365,7 @@ type MemberEvent struct {
 	Sender     Sender     `json:"sender"`
 }
 
-func (s MemberEvent) NewMetric() telegraf.Metric {
+func (s MemberEvent) NewMetric() rush.Metric {
 	event := "member"
 	t := map[string]string{
 		"event":      event,
@@ -395,7 +395,7 @@ type MembershipEvent struct {
 	Team   Team   `json:"team"`
 }
 
-func (s MembershipEvent) NewMetric() telegraf.Metric {
+func (s MembershipEvent) NewMetric() rush.Metric {
 	event := "membership"
 	t := map[string]string{
 		"event":  event,
@@ -419,7 +419,7 @@ type PageBuildEvent struct {
 	Sender     Sender     `json:"sender"`
 }
 
-func (s PageBuildEvent) NewMetric() telegraf.Metric {
+func (s PageBuildEvent) NewMetric() rush.Metric {
 	event := "page_build"
 	t := map[string]string{
 		"event":      event,
@@ -445,7 +445,7 @@ type PublicEvent struct {
 	Sender     Sender     `json:"sender"`
 }
 
-func (s PublicEvent) NewMetric() telegraf.Metric {
+func (s PublicEvent) NewMetric() rush.Metric {
 	event := "public"
 	t := map[string]string{
 		"event":      event,
@@ -473,7 +473,7 @@ type PullRequestEvent struct {
 	Sender      Sender      `json:"sender"`
 }
 
-func (s PullRequestEvent) NewMetric() telegraf.Metric {
+func (s PullRequestEvent) NewMetric() rush.Metric {
 	event := "pull_request"
 	t := map[string]string{
 		"event":      event,
@@ -510,7 +510,7 @@ type PullRequestReviewCommentEvent struct {
 	Sender      Sender                   `json:"sender"`
 }
 
-func (s PullRequestReviewCommentEvent) NewMetric() telegraf.Metric {
+func (s PullRequestReviewCommentEvent) NewMetric() rush.Metric {
 	event := "pull_request_review_comment"
 	t := map[string]string{
 		"event":      event,
@@ -549,7 +549,7 @@ type PushEvent struct {
 	Sender     Sender     `json:"sender"`
 }
 
-func (s PushEvent) NewMetric() telegraf.Metric {
+func (s PushEvent) NewMetric() rush.Metric {
 	event := "push"
 	t := map[string]string{
 		"event":      event,
@@ -579,7 +579,7 @@ type ReleaseEvent struct {
 	Sender     Sender     `json:"sender"`
 }
 
-func (s ReleaseEvent) NewMetric() telegraf.Metric {
+func (s ReleaseEvent) NewMetric() rush.Metric {
 	event := "release"
 	t := map[string]string{
 		"event":      event,
@@ -606,7 +606,7 @@ type RepositoryEvent struct {
 	Sender     Sender     `json:"sender"`
 }
 
-func (s RepositoryEvent) NewMetric() telegraf.Metric {
+func (s RepositoryEvent) NewMetric() rush.Metric {
 	event := "repository"
 	t := map[string]string{
 		"event":      event,
@@ -634,7 +634,7 @@ type StatusEvent struct {
 	Sender     Sender     `json:"sender"`
 }
 
-func (s StatusEvent) NewMetric() telegraf.Metric {
+func (s StatusEvent) NewMetric() rush.Metric {
 	event := "status"
 	t := map[string]string{
 		"event":      event,
@@ -663,7 +663,7 @@ type TeamAddEvent struct {
 	Sender     Sender     `json:"sender"`
 }
 
-func (s TeamAddEvent) NewMetric() telegraf.Metric {
+func (s TeamAddEvent) NewMetric() rush.Metric {
 	event := "team_add"
 	t := map[string]string{
 		"event":      event,
@@ -690,7 +690,7 @@ type WatchEvent struct {
 	Sender     Sender     `json:"sender"`
 }
 
-func (s WatchEvent) NewMetric() telegraf.Metric {
+func (s WatchEvent) NewMetric() rush.Metric {
 	event := "delete"
 	t := map[string]string{
 		"event":      event,

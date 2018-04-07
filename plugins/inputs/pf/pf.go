@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 const measurement = "pf"
@@ -31,14 +31,14 @@ func (pf *PF) SampleConfig() string {
 	return `
   ## PF require root access on most systems.
   ## Setting 'use_sudo' to true will make use of sudo to run pfctl.
-  ## Users must configure sudo to allow telegraf user to run pfctl with no password.
+  ## Users must configure sudo to allow rush user to run pfctl with no password.
   ## pfctl can be restricted to only list command "pfctl -s info".
   use_sudo = false
 `
 }
 
 // Gather is the entrypoint for the plugin.
-func (pf *PF) Gather(acc telegraf.Accumulator) error {
+func (pf *PF) Gather(acc rush.Accumulator) error {
 	if pf.PfctlCommand == "" {
 		var err error
 		if pf.PfctlCommand, pf.PfctlArgs, err = pf.buildPfctlCmd(); err != nil {
@@ -67,7 +67,7 @@ func errMissingData(tag string) error {
 
 type pfctlOutputStanza struct {
 	HeaderRE  *regexp.Regexp
-	ParseFunc func([]string, telegraf.Accumulator) error
+	ParseFunc func([]string, rush.Accumulator) error
 	Found     bool
 }
 
@@ -80,7 +80,7 @@ var pfctlOutputStanzas = []*pfctlOutputStanza{
 
 var anyTableHeaderRE = regexp.MustCompile("^[A-Z]")
 
-func (pf *PF) parsePfctlOutput(pfoutput string, acc telegraf.Accumulator) error {
+func (pf *PF) parsePfctlOutput(pfoutput string, acc rush.Accumulator) error {
 	scanner := bufio.NewScanner(strings.NewReader(pfoutput))
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -124,7 +124,7 @@ var StateTable = []*Entry{
 
 var stateTableRE = regexp.MustCompile(`^  (.*?)\s+(\d+)`)
 
-func parseStateTable(lines []string, acc telegraf.Accumulator) error {
+func parseStateTable(lines []string, acc rush.Accumulator) error {
 	for _, v := range lines {
 		entries := stateTableRE.FindStringSubmatch(v)
 		if entries != nil {
@@ -184,7 +184,7 @@ func (pf *PF) buildPfctlCmd() (string, []string, error) {
 }
 
 func init() {
-	inputs.Add("pf", func() telegraf.Input {
+	inputs.Add("pf", func() rush.Input {
 		pf := new(PF)
 		pf.infoFunc = pf.callPfctl
 		return pf

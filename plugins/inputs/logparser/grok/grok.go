@@ -12,8 +12,8 @@ import (
 
 	"github.com/vjeantet/grok"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/metric"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/metric"
 )
 
 var timeLayouts = map[string]string{
@@ -177,7 +177,7 @@ func (p *Parser) Compile() error {
 }
 
 // ParseLine is the primary function to process individual lines, returning the metrics
-func (p *Parser) ParseLine(line string) (telegraf.Metric, error) {
+func (p *Parser) ParseLine(line string) (rush.Metric, error) {
 	var err error
 	// values are the parsed fields from the log line
 	var values map[string]string

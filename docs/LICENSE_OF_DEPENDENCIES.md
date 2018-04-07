@@ -1,6 +1,6 @@
 # Licenses of dependencies
 
-When distributed in a binary form, Telegraf may contain portions of the
+When distributed in a binary form, Rush may contain portions of the
 following works:
 
 - collectd.org [MIT](https://github.com/collectd/go-collectd/blob/master/LICENSE)
@@ -89,7 +89,7 @@ following works:
 - github.com/wvanbergen/kazoo-go [MIT](https://github.com/wvanbergen/kazoo-go/blob/master/MIT-LICENSE)
 - github.com/yuin/gopher-lua [MIT](https://github.com/yuin/gopher-lua/blob/master/LICENSE)
 - github.com/zensqlmonitor/go-mssqldb [BSD](https://github.com/zensqlmonitor/go-mssqldb/blob/master/LICENSE.txt)
-- golang.org/x/crypto [BSD](https://github.com/golang/crypto/blob/master/LICENSE)
+- golang.org/x/crypto [BSD](https://golang.org/x/crypto/blob/master/LICENSE)
 - golang.org/x/net [BSD](https://go.googlesource.com/net/+/master/LICENSE)
 - golang.org/x/text [BSD](https://go.googlesource.com/text/+/master/LICENSE)
 - golang.org/x/sys [BSD](https://go.googlesource.com/sys/+/master/LICENSE)

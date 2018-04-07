@@ -2,9 +2,9 @@
 
 The [NATS](http://www.nats.io/about/) consumer plugin reads from
 specified NATS subjects and adds messages to InfluxDB. The plugin expects messages
-in the [Telegraf Input Data Formats](https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md).
+in the [Rush Input Data Formats](https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md).
 A [Queue Group](http://www.nats.io/documentation/concepts/nats-queueing/)
-is used when subscribing to subjects so multiple instances of telegraf can read
+is used when subscribing to subjects so multiple instances of rush can read
 from a NATS cluster in parallel.
 
 ## Configuration
@@ -17,9 +17,9 @@ from a NATS cluster in parallel.
   ## Use Transport Layer Security
   secure = false
   ## subject(s) to consume
-  subjects = ["telegraf"]
+  subjects = ["rush"]
   ## name a queue group
-  queue_group = "telegraf_consumers"
+  queue_group = "rush_consumers"
   ## Maximum number of metrics to buffer between collection intervals
   metric_buffer = 100000
 
@@ -27,6 +27,6 @@ from a NATS cluster in parallel.
 
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "influx"
 ```

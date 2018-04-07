@@ -1,4 +1,4 @@
-# Telegraf Service Plugin: statsd
+# Rush Service Plugin: statsd
 
 ### Configuration
 
@@ -14,8 +14,8 @@
   ## Address and port to host UDP listener on
   service_address = ":8125"
 
-  ## The following configuration options control when telegraf clears it's cache
-  ## of previous values. If set to false, then telegraf will only clear it's
+  ## The following configuration options control when rush clears it's cache
+  ## of previous values. If set to false, then rush will only clear it's
   ## cache when the daemon is restarted.
   ## Reset gauges every interval (default=true)
   delete_gauges = true
@@ -37,7 +37,7 @@
   parse_data_dog_tags = false
 
   ## Statsd data translation templates, more info can be read here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md#graphite
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md#graphite
   # templates = [
   #     "cpu.* measurement*"
   # ]
@@ -55,11 +55,11 @@
 ### Description
 
 The statsd plugin is a special type of plugin which runs a backgrounded statsd
-listener service while telegraf is running.
+listener service while rush is running.
 
 The format of the statsd messages was based on the format described in the
 original [etsy statsd](https://github.com/etsy/statsd/blob/master/docs/metric_types.md)
-implementation. In short, the telegraf statsd listener will accept:
+implementation. In short, the rush statsd listener will accept:
 
 - Gauges
     - `users.current.den001.myapp:32|g` <- standard
@@ -214,4 +214,4 @@ mem.cached.localhost:256|g
 ```
 
 There are many more options available,
-[More details can be found here](https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md#graphite)
+[More details can be found here](https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md#graphite)

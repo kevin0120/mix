@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
+	"github.com/masami10/rush"
 )
 
 type JolokiaAgent struct {
@@ -57,7 +57,7 @@ func (ja *JolokiaAgent) Description() string {
 	return "Read JMX metrics from a Jolokia REST agent endpoint"
 }
 
-func (ja *JolokiaAgent) Gather(acc telegraf.Accumulator) error {
+func (ja *JolokiaAgent) Gather(acc rush.Accumulator) error {
 	if ja.gatherer == nil {
 		ja.gatherer = NewGatherer(ja.createMetrics())
 	}

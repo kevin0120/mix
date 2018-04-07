@@ -4,13 +4,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/influxdata/telegraf"
+	"github.com/masami10/rush"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-var benchM telegraf.Metric
+var benchM rush.Metric
 
 func Benchmark_ParseLine_CommonLogFormat(b *testing.B) {
 	p := &Parser{
@@ -18,7 +18,7 @@ func Benchmark_ParseLine_CommonLogFormat(b *testing.B) {
 	}
 	_ = p.Compile()
 
-	var m telegraf.Metric
+	var m rush.Metric
 	for n := 0; n < b.N; n++ {
 		m, _ = p.ParseLine(`127.0.0.1 user-identifier frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326`)
 	}
@@ -31,7 +31,7 @@ func Benchmark_ParseLine_CombinedLogFormat(b *testing.B) {
 	}
 	_ = p.Compile()
 
-	var m telegraf.Metric
+	var m rush.Metric
 	for n := 0; n < b.N; n++ {
 		m, _ = p.ParseLine(`127.0.0.1 user-identifier frank [10/Oct/2000:13:55:36 -0700] "GET /apache_pb.gif HTTP/1.0" 200 2326 "-" "Mozilla"`)
 	}
@@ -50,7 +50,7 @@ func Benchmark_ParseLine_CustomPattern(b *testing.B) {
 	}
 	_ = p.Compile()
 
-	var m telegraf.Metric
+	var m rush.Metric
 	for n := 0; n < b.N; n++ {
 		m, _ = p.ParseLine(`[04/Jun/2016:12:41:45 +0100] 1.25 200 192.168.1.1 5.432µs 101`)
 	}
@@ -166,7 +166,7 @@ func TestCustomInfluxdbHttpd(t *testing.T) {
 	assert.NoError(t, p.Compile())
 
 	// Parse an influxdb POST request
-	m, err := p.ParseLine(`[httpd] ::1 - - [14/Jun/2016:11:33:29 +0100] "POST /write?consistency=any&db=telegraf&precision=ns&rp= HTTP/1.1" 204 0 "-" "InfluxDBClient" 6f61bc44-321b-11e6-8050-000000000000 2513`)
+	m, err := p.ParseLine(`[httpd] ::1 - - [14/Jun/2016:11:33:29 +0100] "POST /write?consistency=any&db=rush&precision=ns&rp= HTTP/1.1" 204 0 "-" "InfluxDBClient" 6f61bc44-321b-11e6-8050-000000000000 2513`)
 	require.NotNil(t, m)
 	assert.NoError(t, err)
 	assert.Equal(t,
@@ -177,7 +177,7 @@ func TestCustomInfluxdbHttpd(t *testing.T) {
 			"http_version":     float64(1.1),
 			"ident":            "-",
 			"referrer":         "-",
-			"request":          "/write?consistency=any&db=telegraf&precision=ns&rp=",
+			"request":          "/write?consistency=any&db=rush&precision=ns&rp=",
 			"response_time_us": int64(2513),
 			"agent":            "InfluxDBClient",
 		},
@@ -185,7 +185,7 @@ func TestCustomInfluxdbHttpd(t *testing.T) {
 	assert.Equal(t, map[string]string{"verb": "POST", "resp_code": "204"}, m.Tags())
 
 	// Parse an influxdb GET request
-	m, err = p.ParseLine(`[httpd] ::1 - - [14/Jun/2016:12:10:02 +0100] "GET /query?db=telegraf&q=SELECT+bytes%2Cresponse_time_us+FROM+logparser_grok+WHERE+http_method+%3D+%27GET%27+AND+response_time_us+%3E+0+AND+time+%3E+now%28%29+-+1h HTTP/1.1" 200 578 "http://localhost:8083/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.84 Safari/537.36" 8a3806f1-3220-11e6-8006-000000000000 988`)
+	m, err = p.ParseLine(`[httpd] ::1 - - [14/Jun/2016:12:10:02 +0100] "GET /query?db=rush&q=SELECT+bytes%2Cresponse_time_us+FROM+logparser_grok+WHERE+http_method+%3D+%27GET%27+AND+response_time_us+%3E+0+AND+time+%3E+now%28%29+-+1h HTTP/1.1" 200 578 "http://localhost:8083/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.84 Safari/537.36" 8a3806f1-3220-11e6-8006-000000000000 988`)
 	require.NotNil(t, m)
 	assert.NoError(t, err)
 	assert.Equal(t,
@@ -196,7 +196,7 @@ func TestCustomInfluxdbHttpd(t *testing.T) {
 			"http_version":     float64(1.1),
 			"ident":            "-",
 			"referrer":         "http://localhost:8083/",
-			"request":          "/query?db=telegraf&q=SELECT+bytes%2Cresponse_time_us+FROM+logparser_grok+WHERE+http_method+%3D+%27GET%27+AND+response_time_us+%3E+0+AND+time+%3E+now%28%29+-+1h",
+			"request":          "/query?db=rush&q=SELECT+bytes%2Cresponse_time_us+FROM+logparser_grok+WHERE+http_method+%3D+%27GET%27+AND+response_time_us+%3E+0+AND+time+%3E+now%28%29+-+1h",
 			"response_time_us": int64(988),
 			"agent":            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.84 Safari/537.36",
 		},

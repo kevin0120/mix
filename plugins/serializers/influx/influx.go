@@ -1,12 +1,12 @@
 package influx
 
 import (
-	"github.com/influxdata/telegraf"
+	"github.com/masami10/rush"
 )
 
 type InfluxSerializer struct {
 }
 
-func (s *InfluxSerializer) Serialize(m telegraf.Metric) ([]byte, error) {
+func (s *InfluxSerializer) Serialize(m rush.Metric) ([]byte, error) {
 	return m.Serialize(), nil
 }

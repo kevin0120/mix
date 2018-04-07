@@ -3,8 +3,8 @@ package kafka
 import (
 	"testing"
 
-	"github.com/influxdata/telegraf/plugins/serializers"
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/plugins/serializers"
+	"github.com/masami10/rush/testutil"
 	"github.com/stretchr/testify/require"
 )
 

@@ -9,9 +9,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/serializers"
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/serializers"
+	"github.com/masami10/rush/testutil"
 )
 
 const (

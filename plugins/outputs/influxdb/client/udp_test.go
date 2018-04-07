@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/metric"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/metric"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -78,7 +78,7 @@ func TestUDPClient_Write(t *testing.T) {
 		map[string]interface{}{"this_is_a_very_long_field_name": 1.1}, ts)
 	m2, _ := metric.New("test", map[string]string{},
 		map[string]interface{}{"value": 1.1}, ts)
-	ms := []telegraf.Metric{m1, m2}
+	ms := []rush.Metric{m1, m2}
 	reader := metric.NewReader(ms)
 	err = client4.WriteStream(reader)
 	assert.NoError(t, err)

@@ -7,7 +7,7 @@ This plugin writes to a [Kafka Broker](http://kafka.apache.org/07/quickstart.htm
   ## URLs of kafka brokers
   brokers = ["localhost:9092"]
   ## Kafka topic for producer messages
-  topic = "telegraf"
+  topic = "rush"
 
   ## Optional topic suffix configuration.
   ## If the section is omitted, no suffix is used.
@@ -36,7 +36,7 @@ This plugin writes to a [Kafka Broker](http://kafka.apache.org/07/quickstart.htm
   #   keys = ["foo", "bar"]
   #   separator = "_"
 
-  ## Telegraf tag to use as a routing key
+  ## Rush tag to use as a routing key
   ##  ie, if this tag exists, its value will be used as the routing key
   routing_tag = "host"
 
@@ -67,9 +67,9 @@ This plugin writes to a [Kafka Broker](http://kafka.apache.org/07/quickstart.htm
   max_retry = 3
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 
@@ -82,7 +82,7 @@ This plugin writes to a [Kafka Broker](http://kafka.apache.org/07/quickstart.htm
 
 ### Required parameters:
 
-* `brokers`: List of strings, this is for speaking to a cluster of `kafka` brokers. On each flush interval, Telegraf will randomly choose one of the urls to write to. Each URL should just include host and port e.g. -> `["{host}:{port}","{host2}:{port2}"]`
+* `brokers`: List of strings, this is for speaking to a cluster of `kafka` brokers. On each flush interval, Rush will randomly choose one of the urls to write to. Each URL should just include host and port e.g. -> `["{host}:{port}","{host2}:{port2}"]`
 * `topic`: The `kafka` topic to publish to.
 
 ### Optional parameters:
@@ -95,6 +95,6 @@ This plugin writes to a [Kafka Broker](http://kafka.apache.org/07/quickstart.htm
 * `ssl_cert`: SSL CERT
 * `ssl_key`: SSL key
 * `insecure_skip_verify`: Use SSL but skip chain & host verification (default: false)
-* `data_format`: [About Telegraf data formats](https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md)
+* `data_format`: [About Rush data formats](https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_OUTPUT.md)
 * `topic_suffix`: Which, if any, method of calculating `kafka` topic suffix to use.
 For examples, please refer to sample configuration.

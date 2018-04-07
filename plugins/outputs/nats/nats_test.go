@@ -3,8 +3,8 @@ package nats
 import (
 	"testing"
 
-	"github.com/influxdata/telegraf/plugins/serializers"
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/plugins/serializers"
+	"github.com/masami10/rush/testutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -17,7 +17,7 @@ func TestConnectAndWrite(t *testing.T) {
 	s, _ := serializers.NewInfluxSerializer()
 	n := &NATS{
 		Servers:    server,
-		Subject:    "telegraf",
+		Subject:    "rush",
 		serializer: s,
 	}
 

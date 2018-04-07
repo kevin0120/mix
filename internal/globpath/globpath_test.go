@@ -45,7 +45,7 @@ func TestFindRootDir(t *testing.T) {
 		input  string
 		output string
 	}{
-		{"/var/log/telegraf.conf", "/var/log"},
+		{"/var/log/rush.conf", "/var/log"},
 		{"/home/**", "/home"},
 		{"/home/*/**", "/home"},
 		{"/lib/share/*/*/**.txt", "/lib/share"},

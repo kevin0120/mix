@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/testutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -220,10 +220,10 @@ func TestAddContainerMetrics(t *testing.T) {
 						Name: "net.rx.errors",
 						Tags: map[string]string{
 							"container_id":  "f25c457b-fceb-44f0-8f5b-38be34cbb6fb",
-							"executor_id":   "telegraf.192fb45f-cc0c-11e7-af48-ea183c0b541a",
-							"executor_name": "Command Executor (Task: telegraf.192fb45f-cc0c-11e7-af48-ea183c0b541a) (Command: NO EXECUTABLE)",
+							"executor_id":   "rush.192fb45f-cc0c-11e7-af48-ea183c0b541a",
+							"executor_name": "Command Executor (Task: rush.192fb45f-cc0c-11e7-af48-ea183c0b541a) (Command: NO EXECUTABLE)",
 							"framework_id":  "ab2f3a8b-06db-4e8c-95b6-fb1940874a30-0001",
-							"source":        "telegraf.192fb45f-cc0c-11e7-af48-ea183c0b541a",
+							"source":        "rush.192fb45f-cc0c-11e7-af48-ea183c0b541a",
 						},
 						Unit:  "count",
 						Value: 42.0,
@@ -232,18 +232,18 @@ func TestAddContainerMetrics(t *testing.T) {
 				Dimensions: map[string]interface{}{
 					"cluster_id":          "c0760bbd-9e9d-434b-bd4a-39c7cdef8a63",
 					"container_id":        "f25c457b-fceb-44f0-8f5b-38be34cbb6fb",
-					"executor_id":         "telegraf.192fb45f-cc0c-11e7-af48-ea183c0b541a",
+					"executor_id":         "rush.192fb45f-cc0c-11e7-af48-ea183c0b541a",
 					"framework_id":        "ab2f3a8b-06db-4e8c-95b6-fb1940874a30-0001",
 					"framework_name":      "marathon",
 					"framework_principal": "dcos_marathon",
 					"framework_role":      "slave_public",
 					"hostname":            "192.168.122.18",
 					"labels": map[string]string{
-						"DCOS_SPACE": "/telegraf",
+						"DCOS_SPACE": "/rush",
 					},
 					"mesos_id":  "2dfbbd28-29d2-411d-92c4-e2f84c38688e-S1",
-					"task_id":   "telegraf.192fb45f-cc0c-11e7-af48-ea183c0b541a",
-					"task_name": "telegraf",
+					"task_id":   "rush.192fb45f-cc0c-11e7-af48-ea183c0b541a",
+					"task_name": "rush",
 				},
 			},
 			check: func(acc *testutil.Accumulator) []bool {
@@ -254,8 +254,8 @@ func TestAddContainerMetrics(t *testing.T) {
 							"cluster":      "a",
 							"container_id": "f25c457b-fceb-44f0-8f5b-38be34cbb6fb",
 							"hostname":     "192.168.122.18",
-							"task_name":    "telegraf",
-							"DCOS_SPACE":   "/telegraf",
+							"task_name":    "rush",
+							"DCOS_SPACE":   "/rush",
 						},
 						"net_rx_errors",
 						42.0,

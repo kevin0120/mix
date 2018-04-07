@@ -1,9 +1,9 @@
 package hddtemp
 
 import (
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
-	gohddtemp "github.com/influxdata/telegraf/plugins/inputs/hddtemp/go-hddtemp"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
+	gohddtemp "github.com/masami10/rush/plugins/inputs/hddtemp/go-hddtemp"
 )
 
 const defaultAddress = "127.0.0.1:7634"
@@ -23,7 +23,7 @@ func (_ *HDDTemp) Description() string {
 }
 
 var hddtempSampleConfig = `
-  ## By default, telegraf gathers temps data from all disks detected by the
+  ## By default, rush gathers temps data from all disks detected by the
   ## hddtemp.
   ##
   ## Only collect temps from the selected disks.
@@ -38,7 +38,7 @@ func (_ *HDDTemp) SampleConfig() string {
 	return hddtempSampleConfig
 }
 
-func (h *HDDTemp) Gather(acc telegraf.Accumulator) error {
+func (h *HDDTemp) Gather(acc rush.Accumulator) error {
 	if h.fetcher == nil {
 		h.fetcher = gohddtemp.New()
 	}
@@ -71,7 +71,7 @@ func (h *HDDTemp) Gather(acc telegraf.Accumulator) error {
 }
 
 func init() {
-	inputs.Add("hddtemp", func() telegraf.Input {
+	inputs.Add("hddtemp", func() rush.Input {
 		return &HDDTemp{
 			Address: defaultAddress,
 			Devices: []string{"*"},

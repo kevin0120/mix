@@ -8,7 +8,7 @@ else
 PATH := $(subst :,/bin:,$(GOPATH))/bin:$(PATH)
 endif
 
-TELEGRAF := telegraf$(shell go tool dist env | grep -q 'GOOS=.windows.' && echo .exe)
+RUSH := rush$(shell go tool dist env | grep -q 'GOOS=.windows.' && echo .exe)
 
 LDFLAGS := $(LDFLAGS) -X main.commit=$(COMMIT) -X main.branch=$(BRANCH)
 ifdef VERSION
@@ -17,21 +17,21 @@ endif
 
 all:
 	$(MAKE) deps
-	$(MAKE) telegraf
+	$(MAKE) rush
 
 deps:
 	go get github.com/sparrc/gdm
 	gdm restore
 
-telegraf:
-	go build -i -o $(TELEGRAF) -ldflags "$(LDFLAGS)" ./cmd/telegraf/telegraf.go
+rush:
+	go build -i -o $(RUSH) -ldflags "$(LDFLAGS)" ./cmd/rush/rush.go
 
 go-install:
-	go install -ldflags "-w -s $(LDFLAGS)" ./cmd/telegraf
+	go install -ldflags "-w -s $(LDFLAGS)" ./cmd/rush
 
-install: telegraf
+install: rush
 	mkdir -p $(DESTDIR)$(PREFIX)/bin/
-	cp $(TELEGRAF) $(DESTDIR)$(PREFIX)/bin/
+	cp $(RUSH) $(DESTDIR)$(PREFIX)/bin/
 
 test:
 	go test -short ./...
@@ -51,13 +51,13 @@ package:
 	./scripts/build.py --package --platform=all --arch=all
 
 clean:
-	-rm -f telegraf
-	-rm -f telegraf.exe
+	-rm -f rush
+	-rm -f rush.exe
 
 docker-image:
 	./scripts/build.py --package --platform=linux --arch=amd64
-	cp build/telegraf*$(COMMIT)*.deb .
-	docker build -f scripts/dev.docker --build-arg "package=telegraf*$(COMMIT)*.deb" -t "telegraf-dev:$(COMMIT)" .
+	cp build/rush*$(COMMIT)*.deb .
+	docker build -f scripts/dev.docker --build-arg "package=rush*$(COMMIT)*.deb" -t "rush-dev:$(COMMIT)" .
 
 # Run all docker containers necessary for integration tests
 docker-run:
@@ -123,5 +123,5 @@ docker-kill:
 	-docker rm aerospike elasticsearch kafka memcached mqtt mysql nats nsq \
 		openldap postgres rabbitmq redis riemann zookeeper cratedb
 
-.PHONY: deps telegraf telegraf.exe install test test-windows lint test-all \
+.PHONY: deps rush rush.exe install test test-windows lint test-all \
 	package clean docker-run docker-run-circle docker-kill docker-image

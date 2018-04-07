@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 
 	// go-mssqldb initialization
 	_ "github.com/zensqlmonitor/go-mssqldb"
@@ -29,7 +29,7 @@ type MapQuery map[string]Query
 
 var queries MapQuery
 
-var defaultServer = "Server=.;app name=telegraf;log=1;"
+var defaultServer = "Server=.;app name=rush;log=1;"
 
 var sampleConfig = `
   ## Specify instances to monitor with a list of connection strings.
@@ -39,7 +39,7 @@ var sampleConfig = `
   ##   See https://github.com/denisenkom/go-mssqldb for detailed connection
   ##   parameters.
   # servers = [
-  #  "Server=192.168.1.10;Port=1433;User Id=<user>;Password=<pw>;app name=telegraf;log=1;",
+  #  "Server=192.168.1.10;Port=1433;User Id=<user>;Password=<pw>;app name=rush;log=1;",
   # ]
 `
 
@@ -72,7 +72,7 @@ func initQueries() {
 }
 
 // Gather collect data from SQL Server
-func (s *SQLServer) Gather(acc telegraf.Accumulator) error {
+func (s *SQLServer) Gather(acc rush.Accumulator) error {
 	initQueries()
 
 	if len(s.Servers) == 0 {
@@ -95,7 +95,7 @@ func (s *SQLServer) Gather(acc telegraf.Accumulator) error {
 	return nil
 }
 
-func (s *SQLServer) gatherServer(server string, query Query, acc telegraf.Accumulator) error {
+func (s *SQLServer) gatherServer(server string, query Query, acc rush.Accumulator) error {
 	// deferred opening
 	conn, err := sql.Open("mssql", server)
 	if err != nil {
@@ -131,7 +131,7 @@ func (s *SQLServer) gatherServer(server string, query Query, acc telegraf.Accumu
 	return rows.Err()
 }
 
-func (s *SQLServer) accRow(query Query, acc telegraf.Accumulator, row scanner) error {
+func (s *SQLServer) accRow(query Query, acc rush.Accumulator, row scanner) error {
 	var columnVars []interface{}
 	var fields = make(map[string]interface{})
 
@@ -183,7 +183,7 @@ func (s *SQLServer) accRow(query Query, acc telegraf.Accumulator, row scanner) e
 }
 
 func init() {
-	inputs.Add("sqlserver", func() telegraf.Input {
+	inputs.Add("sqlserver", func() rush.Input {
 		return &SQLServer{}
 	})
 }

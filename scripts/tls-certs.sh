@@ -6,9 +6,9 @@ echo 01 > ./serial &&
 touch ./index.txt &&
 cat >./openssl.conf <<EOF
 [ ca ]
-default_ca = telegraf_ca
+default_ca = rush_ca
 
-[ telegraf_ca ]
+[ rush_ca ]
 certificate = ./certs/cacert.pem
 database = ./index.txt
 new_certs_dir = ./certs_by_serial
@@ -19,10 +19,10 @@ default_crl_days = 3650
 default_days = 3650
 default_md = sha256
 
-policy = telegraf_ca_policy
+policy = rush_ca_policy
 x509_extensions = certificate_extensions
 
-[ telegraf_ca_policy ]
+[ rush_ca_policy ]
 commonName = supplied
 
 [ certificate_extensions ]
@@ -53,7 +53,7 @@ basicConstraints = CA:false
 keyUsage = keyEncipherment
 extendedKeyUsage = 1.3.6.1.5.5.7.3.1
 EOF
-openssl req -x509 -config ./openssl.conf -days 3650 -newkey rsa:1024 -out ./certs/cacert.pem -keyout ./private/cakey.pem -subj "/CN=Telegraf CA/" -nodes &&
+openssl req -x509 -config ./openssl.conf -days 3650 -newkey rsa:1024 -out ./certs/cacert.pem -keyout ./private/cakey.pem -subj "/CN=Rush CA/" -nodes &&
 
 # Create server keypair
 openssl genrsa -out ./private/serverkey.pem 1024 &&
@@ -62,5 +62,5 @@ openssl ca -config ./openssl.conf -in ./certs/servercsr.pem -out ./certs/serverc
 
 # Create client keypair
 openssl genrsa -out ./private/clientkey.pem 1024 &&
-openssl req -new -key ./private/clientkey.pem -out ./certs/clientcsr.pem -outform PEM -subj "/CN=telegraf/O=client/" &&
+openssl req -new -key ./private/clientkey.pem -out ./certs/clientcsr.pem -outform PEM -subj "/CN=rush/O=client/" &&
 openssl ca -config ./openssl.conf -in ./certs/clientcsr.pem -out ./certs/clientcert.pem -notext -batch -extensions client_ca_extensions

@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/influxdata/telegraf/plugins/parsers"
+	"github.com/masami10/rush/plugins/parsers"
 )
 
 func TestReadsMetricsFromKafka(t *testing.T) {
@@ -21,7 +21,7 @@ func TestReadsMetricsFromKafka(t *testing.T) {
 
 	brokerPeers := []string{testutil.GetLocalHost() + ":9092"}
 	zkPeers := []string{testutil.GetLocalHost() + ":2181"}
-	testTopic := fmt.Sprintf("telegraf_test_topic_legacy_%d", time.Now().Unix())
+	testTopic := fmt.Sprintf("rush_test_topic_legacy_%d", time.Now().Unix())
 
 	// Send a Kafka message to the kafka host
 	msg := "cpu_load_short,direction=in,host=server01,region=us-west value=23422.0 1422568543702900257\n"
@@ -37,7 +37,7 @@ func TestReadsMetricsFromKafka(t *testing.T) {
 
 	// Start the Kafka Consumer
 	k := &Kafka{
-		ConsumerGroup:  "telegraf_test_consumers",
+		ConsumerGroup:  "rush_test_consumers",
 		Topics:         []string{testTopic},
 		ZookeeperPeers: zkPeers,
 		PointBuffer:    100000,

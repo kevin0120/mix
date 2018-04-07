@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 const (
@@ -41,7 +41,7 @@ func (*Kapacitor) SampleConfig() string {
 `
 }
 
-func (k *Kapacitor) Gather(acc telegraf.Accumulator) error {
+func (k *Kapacitor) Gather(acc rush.Accumulator) error {
 	if k.client == nil {
 		k.client = &http.Client{Timeout: k.Timeout.Duration}
 	}
@@ -112,13 +112,13 @@ type stats struct {
 
 // Gathers data from a particular URL
 // Parameters:
-//     acc    : The telegraf Accumulator to use
+//     acc    : The rush Accumulator to use
 //     url    : endpoint to send request to
 //
 // Returns:
 //     error: Any error that may have occurred
 func (k *Kapacitor) gatherURL(
-	acc telegraf.Accumulator,
+	acc rush.Accumulator,
 	url string,
 ) error {
 	now := time.Now()
@@ -219,7 +219,7 @@ func (k *Kapacitor) gatherURL(
 }
 
 func init() {
-	inputs.Add("kapacitor", func() telegraf.Input {
+	inputs.Add("kapacitor", func() rush.Input {
 		return &Kapacitor{
 			URLs:    []string{defaultURL},
 			Timeout: internal.Duration{Duration: time.Second * 5},

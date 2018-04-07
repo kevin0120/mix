@@ -5,9 +5,9 @@ import (
 	"net"
 	"strings"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/filter"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/filter"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 type NetIOStats struct {
@@ -23,7 +23,7 @@ func (_ *NetIOStats) Description() string {
 }
 
 var netSampleConfig = `
-  ## By default, telegraf gathers stats from any up interface (excluding loopback)
+  ## By default, rush gathers stats from any up interface (excluding loopback)
   ## Setting interfaces will tell it to gather these explicit interfaces,
   ## regardless of status.
   ##
@@ -34,7 +34,7 @@ func (_ *NetIOStats) SampleConfig() string {
 	return netSampleConfig
 }
 
-func (s *NetIOStats) Gather(acc telegraf.Accumulator) error {
+func (s *NetIOStats) Gather(acc rush.Accumulator) error {
 	netio, err := s.ps.NetIO()
 	if err != nil {
 		return fmt.Errorf("error getting net io info: %s", err)
@@ -109,7 +109,7 @@ func (s *NetIOStats) Gather(acc telegraf.Accumulator) error {
 }
 
 func init() {
-	inputs.Add("net", func() telegraf.Input {
+	inputs.Add("net", func() rush.Input {
 		return &NetIOStats{ps: newSystemPS()}
 	})
 }

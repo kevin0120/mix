@@ -7,9 +7,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal/globpath"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal/globpath"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 const sampleConfig = `
@@ -47,7 +47,7 @@ func (_ *FileStat) Description() string {
 
 func (_ *FileStat) SampleConfig() string { return sampleConfig }
 
-func (f *FileStat) Gather(acc telegraf.Accumulator) error {
+func (f *FileStat) Gather(acc rush.Accumulator) error {
 	var err error
 
 	for _, filepath := range f.Files {
@@ -123,7 +123,7 @@ func getMd5(file string) (string, error) {
 }
 
 func init() {
-	inputs.Add("filestat", func() telegraf.Input {
+	inputs.Add("filestat", func() rush.Input {
 		return NewFileStat()
 	})
 }

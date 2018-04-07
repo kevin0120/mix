@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/metric"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/metric"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -17,7 +17,7 @@ import (
 
 func TestAdd(t *testing.T) {
 	now := time.Now()
-	metrics := make(chan telegraf.Metric, 10)
+	metrics := make(chan rush.Metric, 10)
 	defer close(metrics)
 	a := NewAccumulator(&TestMetricMaker{}, metrics)
 
@@ -48,7 +48,7 @@ func TestAdd(t *testing.T) {
 
 func TestAddFields(t *testing.T) {
 	now := time.Now()
-	metrics := make(chan telegraf.Metric, 10)
+	metrics := make(chan rush.Metric, 10)
 	defer close(metrics)
 	a := NewAccumulator(&TestMetricMaker{}, metrics)
 
@@ -79,7 +79,7 @@ func TestAccAddError(t *testing.T) {
 	log.SetOutput(errBuf)
 	defer log.SetOutput(os.Stderr)
 
-	metrics := make(chan telegraf.Metric, 10)
+	metrics := make(chan rush.Metric, 10)
 	defer close(metrics)
 	a := NewAccumulator(&TestMetricMaker{}, metrics)
 
@@ -100,7 +100,7 @@ func TestAccAddError(t *testing.T) {
 
 func TestAddNoIntervalWithPrecision(t *testing.T) {
 	now := time.Date(2006, time.February, 10, 12, 0, 0, 82912748, time.UTC)
-	metrics := make(chan telegraf.Metric, 10)
+	metrics := make(chan rush.Metric, 10)
 	defer close(metrics)
 	a := NewAccumulator(&TestMetricMaker{}, metrics)
 	a.SetPrecision(0, time.Second)
@@ -132,7 +132,7 @@ func TestAddNoIntervalWithPrecision(t *testing.T) {
 
 func TestAddDisablePrecision(t *testing.T) {
 	now := time.Date(2006, time.February, 10, 12, 0, 0, 82912748, time.UTC)
-	metrics := make(chan telegraf.Metric, 10)
+	metrics := make(chan rush.Metric, 10)
 	defer close(metrics)
 	a := NewAccumulator(&TestMetricMaker{}, metrics)
 
@@ -164,7 +164,7 @@ func TestAddDisablePrecision(t *testing.T) {
 
 func TestAddNoPrecisionWithInterval(t *testing.T) {
 	now := time.Date(2006, time.February, 10, 12, 0, 0, 82912748, time.UTC)
-	metrics := make(chan telegraf.Metric, 10)
+	metrics := make(chan rush.Metric, 10)
 	defer close(metrics)
 	a := NewAccumulator(&TestMetricMaker{}, metrics)
 
@@ -196,7 +196,7 @@ func TestAddNoPrecisionWithInterval(t *testing.T) {
 
 func TestDifferentPrecisions(t *testing.T) {
 	now := time.Date(2006, time.February, 10, 12, 0, 0, 82912748, time.UTC)
-	metrics := make(chan telegraf.Metric, 10)
+	metrics := make(chan rush.Metric, 10)
 	defer close(metrics)
 	a := NewAccumulator(&TestMetricMaker{}, metrics)
 
@@ -243,7 +243,7 @@ func TestDifferentPrecisions(t *testing.T) {
 
 func TestAddGauge(t *testing.T) {
 	now := time.Now()
-	metrics := make(chan telegraf.Metric, 10)
+	metrics := make(chan rush.Metric, 10)
 	defer close(metrics)
 	a := NewAccumulator(&TestMetricMaker{}, metrics)
 
@@ -260,24 +260,24 @@ func TestAddGauge(t *testing.T) {
 	testm := <-metrics
 	actual := testm.String()
 	assert.Contains(t, actual, "acctest value=101")
-	assert.Equal(t, testm.Type(), telegraf.Gauge)
+	assert.Equal(t, testm.Type(), rush.Gauge)
 
 	testm = <-metrics
 	actual = testm.String()
 	assert.Contains(t, actual, "acctest,acc=test value=101")
-	assert.Equal(t, testm.Type(), telegraf.Gauge)
+	assert.Equal(t, testm.Type(), rush.Gauge)
 
 	testm = <-metrics
 	actual = testm.String()
 	assert.Equal(t,
 		fmt.Sprintf("acctest,acc=test value=101 %d\n", now.UnixNano()),
 		actual)
-	assert.Equal(t, testm.Type(), telegraf.Gauge)
+	assert.Equal(t, testm.Type(), rush.Gauge)
 }
 
 func TestAddCounter(t *testing.T) {
 	now := time.Now()
-	metrics := make(chan telegraf.Metric, 10)
+	metrics := make(chan rush.Metric, 10)
 	defer close(metrics)
 	a := NewAccumulator(&TestMetricMaker{}, metrics)
 
@@ -294,19 +294,19 @@ func TestAddCounter(t *testing.T) {
 	testm := <-metrics
 	actual := testm.String()
 	assert.Contains(t, actual, "acctest value=101")
-	assert.Equal(t, testm.Type(), telegraf.Counter)
+	assert.Equal(t, testm.Type(), rush.Counter)
 
 	testm = <-metrics
 	actual = testm.String()
 	assert.Contains(t, actual, "acctest,acc=test value=101")
-	assert.Equal(t, testm.Type(), telegraf.Counter)
+	assert.Equal(t, testm.Type(), rush.Counter)
 
 	testm = <-metrics
 	actual = testm.String()
 	assert.Equal(t,
 		fmt.Sprintf("acctest,acc=test value=101 %d\n", now.UnixNano()),
 		actual)
-	assert.Equal(t, testm.Type(), telegraf.Counter)
+	assert.Equal(t, testm.Type(), rush.Counter)
 }
 
 type TestMetricMaker struct {
@@ -319,20 +319,20 @@ func (tm *TestMetricMaker) MakeMetric(
 	measurement string,
 	fields map[string]interface{},
 	tags map[string]string,
-	mType telegraf.ValueType,
+	mType rush.ValueType,
 	t time.Time,
-) telegraf.Metric {
+) rush.Metric {
 	switch mType {
-	case telegraf.Untyped:
+	case rush.Untyped:
 		if m, err := metric.New(measurement, tags, fields, t); err == nil {
 			return m
 		}
-	case telegraf.Counter:
-		if m, err := metric.New(measurement, tags, fields, t, telegraf.Counter); err == nil {
+	case rush.Counter:
+		if m, err := metric.New(measurement, tags, fields, t, rush.Counter); err == nil {
 			return m
 		}
-	case telegraf.Gauge:
-		if m, err := metric.New(measurement, tags, fields, t, telegraf.Gauge); err == nil {
+	case rush.Gauge:
+		if m, err := metric.New(measurement, tags, fields, t, rush.Gauge); err == nil {
 			return m
 		}
 	}

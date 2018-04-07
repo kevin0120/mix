@@ -1,4 +1,4 @@
-# Telegraf S.M.A.R.T. plugin
+# Rush S.M.A.R.T. plugin
 
 Get metrics using the command line utility `smartctl` for S.M.A.R.T. (Self-Monitoring, Analysis and Reporting Technology) storage devices. SMART is a monitoring system included in computer hard disk drives (HDDs) and solid-state drives (SSDs)[1] that detects and reports on various indicators of drive reliability, with the intent of enabling the anticipation of hardware failures.
 See smartmontools (https://www.smartmontools.org/).
@@ -95,7 +95,7 @@ devices can be referenced by the WWN in the following location:
   #
   ## On most platforms smartctl requires root access.
   ## Setting 'use_sudo' to true will make use of sudo to run smartctl.
-  ## Sudo must be configured to to allow the telegraf user to run smartctl
+  ## Sudo must be configured to to allow the rush user to run smartctl
   ## with out password.
   # use_sudo = false
   #

@@ -5,9 +5,9 @@ import (
 
 	"github.com/nsqio/go-nsq"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/outputs"
-	"github.com/influxdata/telegraf/plugins/serializers"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/outputs"
+	"github.com/masami10/rush/plugins/serializers"
 )
 
 type NSQ struct {
@@ -22,12 +22,12 @@ var sampleConfig = `
   ## Location of nsqd instance listening on TCP
   server = "localhost:4150"
   ## NSQ topic for producer messages
-  topic = "telegraf"
+  topic = "rush"
 
   ## Data format to output.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_OUTPUT.md
   data_format = "influx"
 `
 
@@ -57,10 +57,10 @@ func (n *NSQ) SampleConfig() string {
 }
 
 func (n *NSQ) Description() string {
-	return "Send telegraf measurements to NSQD"
+	return "Send rush measurements to NSQD"
 }
 
-func (n *NSQ) Write(metrics []telegraf.Metric) error {
+func (n *NSQ) Write(metrics []rush.Metric) error {
 	if len(metrics) == 0 {
 		return nil
 	}
@@ -80,7 +80,7 @@ func (n *NSQ) Write(metrics []telegraf.Metric) error {
 }
 
 func init() {
-	outputs.Add("nsq", func() telegraf.Output {
+	outputs.Add("nsq", func() rush.Output {
 		return &NSQ{}
 	})
 }

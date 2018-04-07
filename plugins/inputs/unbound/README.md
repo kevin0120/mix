@@ -16,7 +16,7 @@ This plugin gathers stats from [Unbound - a validating, recursive, and caching D
    ## The default timeout of 1s can be overriden with:
    #timeout = "1s"
 
-   ## Use the builtin fielddrop/fieldpass telegraf filters in order to keep only specific fields
+   ## Use the builtin fielddrop/fieldpass rush filters in order to keep only specific fields
    fieldpass = ["total_*", "num_*","time_up", "mem_*"]
 ```
 
@@ -96,21 +96,21 @@ https://www.unbound.net/documentation/unbound-control.html for details).
 ### Permissions:
 
 It's important to note that this plugin references unbound-control, which may require additional permissions to execute successfully.
-Depending on the user/group permissions of the telegraf user executing this plugin, you may need to alter the group membership, set facls, or use sudo.
+Depending on the user/group permissions of the rush user executing this plugin, you may need to alter the group membership, set facls, or use sudo.
 
 **Group membership (Recommended)**:
 ```bash
-$ groups telegraf
-telegraf : telegraf
+$ groups rush
+rush : rush
 
-$ usermod -a -G unbound telegraf
+$ usermod -a -G unbound rush
 
-$ groups telegraf
-telegraf : telegraf unbound
+$ groups rush
+rush : rush unbound
 ```
 
 **Sudo privileges**:
-If you use this method, you will need the following in your telegraf config:
+If you use this method, you will need the following in your rush config:
 ```toml
 [[inputs.unbound]]
   use_sudo = true
@@ -120,7 +120,7 @@ You will also need to update your sudoers file:
 ```bash
 $ visudo
 # Add the following line:
-telegraf ALL=(ALL) NOPASSWD: /usr/sbin/unbound-control
+rush ALL=(ALL) NOPASSWD: /usr/sbin/unbound-control
 ```
 
 Please use the solution you see as most appropriate.
@@ -128,7 +128,7 @@ Please use the solution you see as most appropriate.
 ### Example Output:
 
 ```
- telegraf --config etc/telegraf.conf --input-filter unbound --test
+ rush --config etc/rush.conf --input-filter unbound --test
 * Plugin: inputs.unbound, Collection 1
 > unbound,host=localhost total_num_cachehits=0,total_num_prefetch=0,total_requestlist_avg=0,total_requestlist_max=0,total_recursion_time_median=0,total_num_queries=0,total_requestlist_overwritten=0,total_requestlist_current_all=0,time_up=159185.583967,total_num_recursivereplies=0,total_requestlist_exceeded=0,total_requestlist_current_user=0,total_recursion_time_avg=0,total_tcpusage=0,total_num_cachemiss=0 1510130793000000000
 

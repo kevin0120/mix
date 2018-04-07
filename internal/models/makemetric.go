@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/metric"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/metric"
 )
 
 // makemetric is used by both RunningAggregator & RunningInput
@@ -33,9 +33,9 @@ func makemetric(
 	daemonTags map[string]string,
 	filter Filter,
 	applyFilter bool,
-	mType telegraf.ValueType,
+	mType rush.ValueType,
 	t time.Time,
-) telegraf.Metric {
+) rush.Metric {
 	if len(fields) == 0 || len(measurement) == 0 {
 		return nil
 	}

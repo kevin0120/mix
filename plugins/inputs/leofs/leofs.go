@@ -9,9 +9,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 const oid = ".1.3.6.1.4.1.35450"
@@ -147,7 +147,7 @@ func (l *LeoFS) Description() string {
 	return "Read metrics from a LeoFS Server via SNMP"
 }
 
-func (l *LeoFS) Gather(acc telegraf.Accumulator) error {
+func (l *LeoFS) Gather(acc rush.Accumulator) error {
 	if len(l.Servers) == 0 {
 		l.gatherServer(defaultEndpoint, ServerTypeManagerMaster, acc)
 		return nil
@@ -186,7 +186,7 @@ func (l *LeoFS) Gather(acc telegraf.Accumulator) error {
 func (l *LeoFS) gatherServer(
 	endpoint string,
 	serverType ServerType,
-	acc telegraf.Accumulator,
+	acc rush.Accumulator,
 ) error {
 	cmd := exec.Command("snmpwalk", "-v2c", "-cpublic", "-On", endpoint, oid)
 	stdout, err := cmd.StdoutPipe()
@@ -236,7 +236,7 @@ func retrieveTokenAfterColon(line string) (string, error) {
 }
 
 func init() {
-	inputs.Add("leofs", func() telegraf.Input {
+	inputs.Add("leofs", func() rush.Input {
 		return &LeoFS{}
 	})
 }

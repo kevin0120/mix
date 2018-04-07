@@ -13,9 +13,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 type ResponseMetrics struct {
@@ -112,9 +112,9 @@ var sampleConfig = `
   password = ""
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 `
@@ -128,7 +128,7 @@ func (h *GrayLog) Description() string {
 }
 
 // Gathers data for all servers.
-func (h *GrayLog) Gather(acc telegraf.Accumulator) error {
+func (h *GrayLog) Gather(acc rush.Accumulator) error {
 	var wg sync.WaitGroup
 
 	if h.client.HTTPClient() == nil {
@@ -163,14 +163,14 @@ func (h *GrayLog) Gather(acc telegraf.Accumulator) error {
 
 // Gathers data from a particular server
 // Parameters:
-//     acc      : The telegraf Accumulator to use
+//     acc      : The rush Accumulator to use
 //     serverURL: endpoint to send request to
 //     service  : the service being queried
 //
 // Returns:
 //     error: Any error that may have occurred
 func (h *GrayLog) gatherServer(
-	acc telegraf.Accumulator,
+	acc rush.Accumulator,
 	serverURL string,
 ) error {
 	resp, _, err := h.sendRequest(serverURL)
@@ -289,7 +289,7 @@ func (h *GrayLog) sendRequest(serverURL string) (string, float64, error) {
 }
 
 func init() {
-	inputs.Add("graylog", func() telegraf.Input {
+	inputs.Add("graylog", func() rush.Input {
 		return &GrayLog{
 			client: &RealHTTPClient{},
 		}

@@ -3,8 +3,8 @@ package couchdb
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 	"net/http"
 	"reflect"
 	"sync"
@@ -80,7 +80,7 @@ func (*CouchDB) SampleConfig() string {
 `
 }
 
-func (c *CouchDB) Gather(accumulator telegraf.Accumulator) error {
+func (c *CouchDB) Gather(accumulator rush.Accumulator) error {
 	var wg sync.WaitGroup
 	for _, u := range c.HOSTs {
 		wg.Add(1)
@@ -106,7 +106,7 @@ var client = &http.Client{
 	Timeout:   time.Duration(4 * time.Second),
 }
 
-func (c *CouchDB) fetchAndInsertData(accumulator telegraf.Accumulator, host string) error {
+func (c *CouchDB) fetchAndInsertData(accumulator rush.Accumulator, host string) error {
 
 	response, error := client.Get(host)
 	if error != nil {
@@ -193,7 +193,7 @@ func (c *CouchDB) generateFields(prefix string, obj metaData) map[string]interfa
 }
 
 func init() {
-	inputs.Add("couchdb", func() telegraf.Input {
+	inputs.Add("couchdb", func() rush.Input {
 		return &CouchDB{}
 	})
 }

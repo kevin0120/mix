@@ -4,8 +4,8 @@ package win_services
 
 import (
 	"fmt"
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/mgr"
 )
@@ -68,7 +68,7 @@ var sampleConfig = `
 
 var description = "Input plugin to report Windows services info."
 
-//WinServices is an implementation if telegraf.Input interface, providing info about Windows Services
+//WinServices is an implementation if rush.Input interface, providing info about Windows Services
 type WinServices struct {
 	ServiceNames []string `toml:"service_names"`
 	mgrProvider  WinServiceManagerProvider
@@ -90,7 +90,7 @@ func (m *WinServices) SampleConfig() string {
 	return sampleConfig
 }
 
-func (m *WinServices) Gather(acc telegraf.Accumulator) error {
+func (m *WinServices) Gather(acc rush.Accumulator) error {
 
 	serviceInfos, err := listServices(m.mgrProvider, m.ServiceNames)
 
@@ -179,5 +179,5 @@ func collectServiceInfo(scmgr WinServiceManager, serviceName string) (serviceInf
 }
 
 func init() {
-	inputs.Add("win_services", func() telegraf.Input { return &WinServices{mgrProvider: &MgProvider{}} })
+	inputs.Add("win_services", func() rush.Input { return &WinServices{mgrProvider: &MgProvider{}} })
 }

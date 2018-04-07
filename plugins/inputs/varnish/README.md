@@ -13,7 +13,7 @@ This plugin gathers stats from [Varnish HTTP Cache](https://varnish-cache.org/)
    ## The default location of the varnishstat binary can be overridden with:
    binary = "/usr/bin/varnishstat"
 
-   ## By default, telegraf gathers stats for 3 metric points.
+   ## By default, rush gathers stats for 3 metric points.
    ## Setting stats will override the defaults shown below.
    ## stats may also be set to ["all"], which will collect all stats
    stats = ["MAIN.cache_hit", "MAIN.cache_miss", "MAIN.uptime"]
@@ -341,17 +341,17 @@ the following values:
 ### Permissions:
 
 It's important to note that this plugin references varnishstat, which may require additional permissions to execute successfully.
-Depending on the user/group permissions of the telegraf user executing this plugin, you may need to alter the group membership, set facls, or use sudo.
+Depending on the user/group permissions of the rush user executing this plugin, you may need to alter the group membership, set facls, or use sudo.
 
 **Group membership (Recommended)**:
 ```bash
-$ groups telegraf
-telegraf : telegraf
+$ groups rush
+rush : rush
 
-$ usermod -a -G varnish telegraf
+$ usermod -a -G varnish rush
 
-$ groups telegraf
-telegraf : telegraf varnish
+$ groups rush
+rush : rush varnish
 ```
 
 **Extended filesystem ACL's**:
@@ -364,21 +364,21 @@ user::rw-
 group::r--
 other::---
 
-$ setfacl -m u:telegraf:r /var/lib/varnish/<hostname>/_.vsm
+$ setfacl -m u:rush:r /var/lib/varnish/<hostname>/_.vsm
 
 $ getfacl /var/lib/varnish/<hostname>/_.vsm
 # file: var/lib/varnish/<hostname>/_.vsm
 # owner: root
 # group: root
 user::rw-
-user:telegraf:r--
+user:rush:r--
 group::r--
 mask::r--
 other::---
 ```
 
 **Sudo privileges**:
-If you use this method, you will need the following in your telegraf config:
+If you use this method, you will need the following in your rush config:
 ```toml
 [[inputs.varnish]]
   use_sudo = true
@@ -388,7 +388,7 @@ You will also need to update your sudoers file:
 ```bash
 $ visudo
 # Add the following line:
-telegraf ALL=(ALL) NOPASSWD: /usr/bin/varnishstat
+rush ALL=(ALL) NOPASSWD: /usr/bin/varnishstat
 ```
 
 Please use the solution you see as most appropriate.
@@ -396,7 +396,7 @@ Please use the solution you see as most appropriate.
 ### Example Output:
 
 ```
- telegraf --config etc/telegraf.conf --input-filter varnish --test
+ rush --config etc/rush.conf --input-filter varnish --test
 * Plugin: varnish, Collection 1
 > varnish,host=rpercy-VirtualBox,section=MAIN cache_hit=0i,cache_miss=0i,uptime=8416i 1462765437090957980
 ```

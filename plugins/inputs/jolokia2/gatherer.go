@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/influxdata/telegraf"
+	"github.com/masami10/rush"
 )
 
 const defaultFieldName = "value"
@@ -24,7 +24,7 @@ func NewGatherer(metrics []Metric) *Gatherer {
 
 // Gather adds points to an accumulator from responses returned
 // by a Jolokia agent.
-func (g *Gatherer) Gather(client *Client, acc telegraf.Accumulator) error {
+func (g *Gatherer) Gather(client *Client, acc rush.Accumulator) error {
 	var tags map[string]string
 
 	if client.config.ProxyConfig != nil {
@@ -45,7 +45,7 @@ func (g *Gatherer) Gather(client *Client, acc telegraf.Accumulator) error {
 
 // gatherReponses adds points to an accumulator from the ReadResponse objects
 // returned by a Jolokia agent.
-func (g *Gatherer) gatherResponses(responses []ReadResponse, tags map[string]string, acc telegraf.Accumulator) {
+func (g *Gatherer) gatherResponses(responses []ReadResponse, tags map[string]string, acc rush.Accumulator) {
 	series := make(map[string][]point, 0)
 
 	for _, metric := range g.metrics {

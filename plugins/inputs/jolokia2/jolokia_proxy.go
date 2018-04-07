@@ -3,7 +3,7 @@ package jolokia2
 import (
 	"time"
 
-	"github.com/influxdata/telegraf"
+	"github.com/masami10/rush"
 )
 
 type JolokiaProxy struct {
@@ -73,7 +73,7 @@ func (jp *JolokiaProxy) Description() string {
 	return "Read JMX metrics from a Jolokia REST proxy endpoint"
 }
 
-func (jp *JolokiaProxy) Gather(acc telegraf.Accumulator) error {
+func (jp *JolokiaProxy) Gather(acc rush.Accumulator) error {
 	if jp.gatherer == nil {
 		jp.gatherer = NewGatherer(jp.createMetrics())
 	}

@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/influxdata/telegraf/internal/models"
-	"github.com/influxdata/telegraf/plugins/inputs"
-	"github.com/influxdata/telegraf/plugins/inputs/exec"
-	"github.com/influxdata/telegraf/plugins/inputs/memcached"
-	"github.com/influxdata/telegraf/plugins/inputs/procstat"
-	"github.com/influxdata/telegraf/plugins/parsers"
+	"github.com/masami10/rush/internal/models"
+	"github.com/masami10/rush/plugins/inputs"
+	"github.com/masami10/rush/plugins/inputs/exec"
+	"github.com/masami10/rush/plugins/inputs/memcached"
+	"github.com/masami10/rush/plugins/inputs/procstat"
+	"github.com/masami10/rush/plugins/parsers"
 
 	"github.com/stretchr/testify/assert"
 )

@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/influxdata/telegraf/plugins/parsers"
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/plugins/parsers"
+	"github.com/masami10/rush/testutil"
 
 	"github.com/Shopify/sarama"
 	"github.com/stretchr/testify/assert"
@@ -22,7 +22,7 @@ func newTestKafka() (*Kafka, chan *sarama.ConsumerMessage) {
 	in := make(chan *sarama.ConsumerMessage, 1000)
 	k := Kafka{
 		ConsumerGroup:   "test",
-		Topics:          []string{"telegraf"},
+		Topics:          []string{"rush"},
 		Brokers:         []string{"localhost:9092"},
 		Offset:          "oldest",
 		in:              in,

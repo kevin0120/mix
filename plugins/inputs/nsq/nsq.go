@@ -32,8 +32,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 // Might add Lookupd endpoints for cluster discovery
@@ -51,7 +51,7 @@ const (
 )
 
 func init() {
-	inputs.Add("nsq", func() telegraf.Input {
+	inputs.Add("nsq", func() rush.Input {
 		return &NSQ{}
 	})
 }
@@ -64,7 +64,7 @@ func (n *NSQ) Description() string {
 	return "Read NSQ topic and channel statistics."
 }
 
-func (n *NSQ) Gather(acc telegraf.Accumulator) error {
+func (n *NSQ) Gather(acc rush.Accumulator) error {
 	var wg sync.WaitGroup
 	for _, e := range n.Endpoints {
 		wg.Add(1)
@@ -87,7 +87,7 @@ var client = &http.Client{
 	Timeout:   time.Duration(4 * time.Second),
 }
 
-func (n *NSQ) gatherEndpoint(e string, acc telegraf.Accumulator) error {
+func (n *NSQ) gatherEndpoint(e string, acc rush.Accumulator) error {
 	u, err := buildURL(e)
 	if err != nil {
 		return err
@@ -152,7 +152,7 @@ func buildURL(e string) (*url.URL, error) {
 	return addr, nil
 }
 
-func topicStats(t TopicStats, acc telegraf.Accumulator, host, version string) {
+func topicStats(t TopicStats, acc rush.Accumulator, host, version string) {
 	// per topic overall (tag: name, paused, channel count)
 	tags := map[string]string{
 		"server_host":    host,
@@ -173,7 +173,7 @@ func topicStats(t TopicStats, acc telegraf.Accumulator, host, version string) {
 	}
 }
 
-func channelStats(c ChannelStats, acc telegraf.Accumulator, host, version, topic string) {
+func channelStats(c ChannelStats, acc rush.Accumulator, host, version, topic string) {
 	tags := map[string]string{
 		"server_host":    host,
 		"server_version": version,
@@ -198,7 +198,7 @@ func channelStats(c ChannelStats, acc telegraf.Accumulator, host, version, topic
 	}
 }
 
-func clientStats(c ClientStats, acc telegraf.Accumulator, host, version, topic, channel string) {
+func clientStats(c ClientStats, acc rush.Accumulator, host, version, topic, channel string) {
 	tags := map[string]string{
 		"server_host":       host,
 		"server_version":    version,

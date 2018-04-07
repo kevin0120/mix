@@ -1,9 +1,9 @@
 package wavefront
 
 import (
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/metric"
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/metric"
+	"github.com/masami10/rush/testutil"
 	"reflect"
 	"strings"
 	"testing"
@@ -40,7 +40,7 @@ func TestBuildMetrics(t *testing.T) {
 	var timestamp int64 = 1257894000
 
 	var metricTests = []struct {
-		metric       telegraf.Metric
+		metric       rush.Metric
 		metricPoints []MetricPoint
 	}{
 		{
@@ -82,7 +82,7 @@ func TestBuildMetricsWithSimpleFields(t *testing.T) {
 	)
 
 	var metricTests = []struct {
-		metric      telegraf.Metric
+		metric      rush.Metric
 		metricLines []MetricPoint
 	}{
 		{
@@ -175,17 +175,17 @@ func TestBuildTagsWithSource(t *testing.T) {
 		{
 			map[string]string{"snmp_host": "realHost", "host": "origHost"},
 			"realHost",
-			map[string]string{"telegraf_host": "origHost"},
+			map[string]string{"rush_host": "origHost"},
 		},
 		{
 			map[string]string{"hostagent": "realHost", "host": "origHost"},
 			"realHost",
-			map[string]string{"telegraf_host": "origHost"},
+			map[string]string{"rush_host": "origHost"},
 		},
 		{
 			map[string]string{"hostagent": "abc", "snmp_host": "realHost", "host": "origHost"},
 			"realHost",
-			map[string]string{"hostagent": "abc", "telegraf_host": "origHost"},
+			map[string]string{"hostagent": "abc", "rush_host": "origHost"},
 		},
 		{
 			map[string]string{"something": "abc", "host": "r*@l\"Ho/st"},

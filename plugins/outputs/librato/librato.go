@@ -9,10 +9,10 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/outputs"
-	"github.com/influxdata/telegraf/plugins/serializers/graphite"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/outputs"
+	"github.com/masami10/rush/plugins/serializers/graphite"
 )
 
 // Librato structure for configuration and client
@@ -35,7 +35,7 @@ var sampleConfig = `
   ## Librator API Docs
   ## http://dev.librato.com/v1/metrics-authentication
   ## Librato API user
-  api_user = "telegraf@influxdb.com" # required.
+  api_user = "rush@influxdb.com" # required.
   ## Librato API token
   api_token = "my-secret-token" # required.
   ## Debug
@@ -43,7 +43,7 @@ var sampleConfig = `
   ## Connection timeout.
   # timeout = "5s"
   ## Output source Template (same as graphite buckets)
-  ## see https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md#graphite
+  ## see https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_OUTPUT.md#graphite
   ## This template is used in librato's source (not metric's name)
   template = "host"
 
@@ -88,7 +88,7 @@ func (l *Librato) Connect() error {
 	return nil
 }
 
-func (l *Librato) Write(metrics []telegraf.Metric) error {
+func (l *Librato) Write(metrics []rush.Metric) error {
 
 	if len(metrics) == 0 {
 		return nil
@@ -183,7 +183,7 @@ func (l *Librato) Description() string {
 	return "Configuration for Librato API to send metrics to."
 }
 
-func (l *Librato) buildGauges(m telegraf.Metric) ([]*Gauge, error) {
+func (l *Librato) buildGauges(m rush.Metric) ([]*Gauge, error) {
 
 	gauges := []*Gauge{}
 	if m.Time().Unix() == 0 {
@@ -258,7 +258,7 @@ func (l *Librato) Close() error {
 }
 
 func init() {
-	outputs.Add("librato", func() telegraf.Output {
+	outputs.Add("librato", func() rush.Output {
 		return NewLibrato(libratoAPI)
 	})
 }

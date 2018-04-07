@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/metric"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/metric"
 )
 
 type JSONParser struct {
@@ -18,8 +18,8 @@ type JSONParser struct {
 	DefaultTags map[string]string
 }
 
-func (p *JSONParser) parseArray(buf []byte) ([]telegraf.Metric, error) {
-	metrics := make([]telegraf.Metric, 0)
+func (p *JSONParser) parseArray(buf []byte) ([]rush.Metric, error) {
+	metrics := make([]rush.Metric, 0)
 
 	var jsonOut []map[string]interface{}
 	err := json.Unmarshal(buf, &jsonOut)
@@ -33,7 +33,7 @@ func (p *JSONParser) parseArray(buf []byte) ([]telegraf.Metric, error) {
 	return metrics, nil
 }
 
-func (p *JSONParser) parseObject(metrics []telegraf.Metric, jsonOut map[string]interface{}) ([]telegraf.Metric, error) {
+func (p *JSONParser) parseObject(metrics []rush.Metric, jsonOut map[string]interface{}) ([]rush.Metric, error) {
 
 	tags := make(map[string]string)
 	for k, v := range p.DefaultTags {
@@ -66,14 +66,14 @@ func (p *JSONParser) parseObject(metrics []telegraf.Metric, jsonOut map[string]i
 	return append(metrics, metric), nil
 }
 
-func (p *JSONParser) Parse(buf []byte) ([]telegraf.Metric, error) {
+func (p *JSONParser) Parse(buf []byte) ([]rush.Metric, error) {
 	buf = bytes.TrimSpace(buf)
 	if len(buf) == 0 {
-		return make([]telegraf.Metric, 0), nil
+		return make([]rush.Metric, 0), nil
 	}
 
 	if !isarray(buf) {
-		metrics := make([]telegraf.Metric, 0)
+		metrics := make([]rush.Metric, 0)
 		var jsonOut map[string]interface{}
 		err := json.Unmarshal(buf, &jsonOut)
 		if err != nil {
@@ -85,7 +85,7 @@ func (p *JSONParser) Parse(buf []byte) ([]telegraf.Metric, error) {
 	return p.parseArray(buf)
 }
 
-func (p *JSONParser) ParseLine(line string) (telegraf.Metric, error) {
+func (p *JSONParser) ParseLine(line string) (rush.Metric, error) {
 	metrics, err := p.Parse([]byte(line + "\n"))
 
 	if err != nil {

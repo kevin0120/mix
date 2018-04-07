@@ -14,8 +14,8 @@ import (
 	"strconv"
 	"syscall"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 type Processes struct {
@@ -32,7 +32,7 @@ func (p *Processes) Description() string {
 
 func (p *Processes) SampleConfig() string { return "" }
 
-func (p *Processes) Gather(acc telegraf.Accumulator) error {
+func (p *Processes) Gather(acc rush.Accumulator) error {
 	// Get an empty map of metric fields
 	fields := getEmptyFields()
 
@@ -227,7 +227,7 @@ func execPS() ([]byte, error) {
 }
 
 func init() {
-	inputs.Add("processes", func() telegraf.Input {
+	inputs.Add("processes", func() rush.Input {
 		return &Processes{
 			execPS:       execPS,
 			readProcFile: readProcFile,

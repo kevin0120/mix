@@ -9,10 +9,10 @@ import (
 
 	"github.com/streadway/amqp"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
-	"github.com/influxdata/telegraf/plugins/parsers"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
+	"github.com/masami10/rush/plugins/parsers"
 )
 
 // AMQPConsumer is the top level struct for this plugin
@@ -64,9 +64,9 @@ func (a *AMQPConsumer) SampleConfig() string {
   ## AMQP url
   url = "amqp://localhost:5672/influxdb"
   ## AMQP exchange
-  exchange = "telegraf"
+  exchange = "rush"
   ## AMQP queue name
-  queue = "telegraf"
+  queue = "rush"
   ## Binding Key
   binding_key = "#"
 
@@ -79,16 +79,16 @@ func (a *AMQPConsumer) SampleConfig() string {
   # auth_method = "PLAIN"
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 
   ## Data format to consume.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "influx"
 `
 }
@@ -102,7 +102,7 @@ func (a *AMQPConsumer) SetParser(parser parsers.Parser) {
 }
 
 // All gathering is done in the Start function
-func (a *AMQPConsumer) Gather(_ telegraf.Accumulator) error {
+func (a *AMQPConsumer) Gather(_ rush.Accumulator) error {
 	return nil
 }
 
@@ -128,8 +128,8 @@ func (a *AMQPConsumer) createConfig() (*amqp.Config, error) {
 	return &config, nil
 }
 
-// Start satisfies the telegraf.ServiceInput interface
-func (a *AMQPConsumer) Start(acc telegraf.Accumulator) error {
+// Start satisfies the rush.ServiceInput interface
+func (a *AMQPConsumer) Start(acc rush.Accumulator) error {
 	amqpConf, err := a.createConfig()
 	if err != nil {
 		return err
@@ -243,7 +243,7 @@ func (a *AMQPConsumer) connect(amqpConf *amqp.Config) (<-chan amqp.Delivery, err
 }
 
 // Read messages from queue and add them to the Accumulator
-func (a *AMQPConsumer) process(msgs <-chan amqp.Delivery, acc telegraf.Accumulator) {
+func (a *AMQPConsumer) process(msgs <-chan amqp.Delivery, acc rush.Accumulator) {
 	defer a.wg.Done()
 	for d := range msgs {
 		metrics, err := a.parser.Parse(d.Body)
@@ -271,7 +271,7 @@ func (a *AMQPConsumer) Stop() {
 }
 
 func init() {
-	inputs.Add("amqp_consumer", func() telegraf.Input {
+	inputs.Add("amqp_consumer", func() rush.Input {
 		return &AMQPConsumer{
 			AuthMethod:    DefaultAuthMethod,
 			PrefetchCount: DefaultPrefetchCount,

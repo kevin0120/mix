@@ -1,5 +1,5 @@
 /*
-Lustre 2.x telegraf plugin
+Lustre 2.x rush plugin
 
 Lustre (http://lustre.org/) is an open-source, parallel file system
 for HPC environments. It stores statistics about its activity in
@@ -13,9 +13,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 // Lustre proc files can change between versions, so we want to future-proof
@@ -353,7 +353,7 @@ var wanted_mdt_jobstats_fields = []*mapping{
 	},
 }
 
-func (l *Lustre2) GetLustreProcStats(fileglob string, wanted_fields []*mapping, acc telegraf.Accumulator) error {
+func (l *Lustre2) GetLustreProcStats(fileglob string, wanted_fields []*mapping, acc rush.Accumulator) error {
 	files, err := filepath.Glob(fileglob)
 	if err != nil {
 		return err
@@ -422,7 +422,7 @@ func (l *Lustre2) Description() string {
 }
 
 // Gather reads stats from all lustre targets
-func (l *Lustre2) Gather(acc telegraf.Accumulator) error {
+func (l *Lustre2) Gather(acc rush.Accumulator) error {
 	l.allFields = make(map[string]map[string]interface{})
 
 	if len(l.Ost_procfiles) == 0 {
@@ -500,7 +500,7 @@ func (l *Lustre2) Gather(acc telegraf.Accumulator) error {
 }
 
 func init() {
-	inputs.Add("lustre2", func() telegraf.Input {
+	inputs.Add("lustre2", func() rush.Input {
 		return &Lustre2{}
 	})
 }

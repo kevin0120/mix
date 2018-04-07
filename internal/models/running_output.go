@@ -5,10 +5,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal/buffer"
-	"github.com/influxdata/telegraf/metric"
-	"github.com/influxdata/telegraf/selfstat"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal/buffer"
+	"github.com/masami10/rush/metric"
+	"github.com/masami10/rush/selfstat"
 )
 
 const (
@@ -22,7 +22,7 @@ const (
 // RunningOutput contains the output configuration
 type RunningOutput struct {
 	Name              string
-	Output            telegraf.Output
+	Output            rush.Output
 	Config            *OutputConfig
 	MetricBufferLimit int
 	MetricBatchSize   int
@@ -42,7 +42,7 @@ type RunningOutput struct {
 
 func NewRunningOutput(
 	name string,
-	output telegraf.Output,
+	output rush.Output,
 	conf *OutputConfig,
 	batchSize int,
 	bufferLimit int,
@@ -93,7 +93,7 @@ func NewRunningOutput(
 
 // AddMetric adds a metric to the output. This function can also write cached
 // points if FlushBufferWhenFull is true.
-func (ro *RunningOutput) AddMetric(m telegraf.Metric) {
+func (ro *RunningOutput) AddMetric(m rush.Metric) {
 	if m == nil {
 		return
 	}
@@ -168,7 +168,7 @@ func (ro *RunningOutput) Write() error {
 	return nil
 }
 
-func (ro *RunningOutput) write(metrics []telegraf.Metric) error {
+func (ro *RunningOutput) write(metrics []rush.Metric) error {
 	nMetrics := len(metrics)
 	if nMetrics == 0 {
 		return nil

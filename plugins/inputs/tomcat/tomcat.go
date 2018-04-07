@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 type TomcatStatus struct {
@@ -85,9 +85,9 @@ var sampleconfig = `
   # timeout = "5s"
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 `
@@ -100,7 +100,7 @@ func (s *Tomcat) SampleConfig() string {
 	return sampleconfig
 }
 
-func (s *Tomcat) Gather(acc telegraf.Accumulator) error {
+func (s *Tomcat) Gather(acc rush.Accumulator) error {
 	if s.client == nil {
 		client, err := s.createHttpClient()
 		if err != nil {
@@ -208,7 +208,7 @@ func (s *Tomcat) createHttpClient() (*http.Client, error) {
 }
 
 func init() {
-	inputs.Add("tomcat", func() telegraf.Input {
+	inputs.Add("tomcat", func() rush.Input {
 		return &Tomcat{
 			URL:      "http://127.0.0.1:8080/manager/status/all?XML=true",
 			Username: "tomcat",

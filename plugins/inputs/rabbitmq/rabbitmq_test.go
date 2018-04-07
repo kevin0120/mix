@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -273,7 +273,7 @@ const sampleQueuesResponse = `
       "avg_ack_ingress_rate": 0,
       "avg_ack_egress_rate": 0
     },
-    "name": "telegraf",
+    "name": "rush",
     "vhost": "collectd",
     "durable": true,
     "auto_delete": false,
@@ -364,7 +364,7 @@ const sampleQueuesResponse = `
       "avg_ack_ingress_rate": 0.19115840579934168,
       "avg_ack_egress_rate": 0.1492766485341716
     },
-    "name": "telegraf",
+    "name": "rush",
     "vhost": "metrics",
     "durable": true,
     "auto_delete": false,

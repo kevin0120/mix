@@ -3,8 +3,8 @@ package interrupts
 import (
 	"bufio"
 	"fmt"
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 	"io"
 	"os"
 	"strconv"
@@ -95,7 +95,7 @@ func gatherTagsFields(irq IRQ) (map[string]string, map[string]interface{}) {
 	return tags, fields
 }
 
-func (s *Interrupts) Gather(acc telegraf.Accumulator) error {
+func (s *Interrupts) Gather(acc rush.Accumulator) error {
 	for measurement, file := range map[string]string{"interrupts": "/proc/interrupts", "soft_interrupts": "/proc/softirqs"} {
 		f, err := os.Open(file)
 		if err != nil {
@@ -117,7 +117,7 @@ func (s *Interrupts) Gather(acc telegraf.Accumulator) error {
 }
 
 func init() {
-	inputs.Add("interrupts", func() telegraf.Input {
+	inputs.Add("interrupts", func() rush.Input {
 		return &Interrupts{}
 	})
 }

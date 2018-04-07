@@ -2,7 +2,7 @@
 
 The socket_writer plugin can write to a UDP, TCP, or unix socket.
 
-It can output data in any of the [supported output formats](https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md).
+It can output data in any of the [supported output formats](https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_OUTPUT.md).
 
 ```toml
 # Generic socket writer capable of handling multiple socket types.
@@ -16,8 +16,8 @@ It can output data in any of the [supported output formats](https://github.com/i
   # address = "udp://127.0.0.1:8094"
   # address = "udp4://127.0.0.1:8094"
   # address = "udp6://127.0.0.1:8094"
-  # address = "unix:///tmp/telegraf.sock"
-  # address = "unixgram:///tmp/telegraf.sock"
+  # address = "unix:///tmp/rush.sock"
+  # address = "unixgram:///tmp/rush.sock"
 
   ## Period between keep alive probes.
   ## Only applies to TCP sockets.
@@ -28,6 +28,6 @@ It can output data in any of the [supported output formats](https://github.com/i
   ## Data format to generate.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   # data_format = "influx"
 ```

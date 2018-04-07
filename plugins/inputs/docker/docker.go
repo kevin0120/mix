@@ -16,10 +16,10 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/swarm"
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/filter"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/filter"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 // Docker object
@@ -104,9 +104,9 @@ var sampleConfig = `
   docker_label_exclude = []
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 `
@@ -117,7 +117,7 @@ func (d *Docker) Description() string {
 
 func (d *Docker) SampleConfig() string { return sampleConfig }
 
-func (d *Docker) Gather(acc telegraf.Accumulator) error {
+func (d *Docker) Gather(acc rush.Accumulator) error {
 	if d.client == nil {
 		var c Client
 		var err error
@@ -191,7 +191,7 @@ func (d *Docker) Gather(acc telegraf.Accumulator) error {
 	return nil
 }
 
-func (d *Docker) gatherSwarmInfo(acc telegraf.Accumulator) error {
+func (d *Docker) gatherSwarmInfo(acc rush.Accumulator) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), d.Timeout.Duration)
 	defer cancel()
@@ -260,7 +260,7 @@ func (d *Docker) gatherSwarmInfo(acc telegraf.Accumulator) error {
 	return nil
 }
 
-func (d *Docker) gatherInfo(acc telegraf.Accumulator) error {
+func (d *Docker) gatherInfo(acc rush.Accumulator) error {
 	// Init vars
 	dataFields := make(map[string]interface{})
 	metadataFields := make(map[string]interface{})
@@ -335,7 +335,7 @@ func (d *Docker) gatherInfo(acc telegraf.Accumulator) error {
 
 func (d *Docker) gatherContainer(
 	container types.Container,
-	acc telegraf.Accumulator,
+	acc rush.Accumulator,
 ) error {
 	var v *types.StatsJSON
 	// Parse container name
@@ -415,7 +415,7 @@ func (d *Docker) gatherContainer(
 
 func gatherContainerStats(
 	stat *types.StatsJSON,
-	acc telegraf.Accumulator,
+	acc rush.Accumulator,
 	tags map[string]string,
 	id string,
 	perDevice bool,
@@ -590,7 +590,7 @@ func gatherContainerStats(
 
 func gatherBlockIOMetrics(
 	stat *types.StatsJSON,
-	acc telegraf.Accumulator,
+	acc rush.Accumulator,
 	tags map[string]string,
 	tm time.Time,
 	id string,
@@ -760,7 +760,7 @@ func (d *Docker) createLabelFilters() error {
 }
 
 func init() {
-	inputs.Add("docker", func() telegraf.Input {
+	inputs.Add("docker", func() rush.Input {
 		return &Docker{
 			PerDevice:      true,
 			Timeout:        internal.Duration{Duration: time.Second * 5},

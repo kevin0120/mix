@@ -12,10 +12,10 @@ import (
 
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
-	"github.com/influxdata/telegraf/plugins/parsers"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
+	"github.com/masami10/rush/plugins/parsers"
 )
 
 type setReadBufferer interface {
@@ -156,7 +156,7 @@ type SocketListener struct {
 	KeepAlivePeriod *internal.Duration
 
 	parsers.Parser
-	telegraf.Accumulator
+	rush.Accumulator
 	io.Closer
 }
 
@@ -175,8 +175,8 @@ func (sl *SocketListener) SampleConfig() string {
   # service_address = "udp://:8094"
   # service_address = "udp4://:8094"
   # service_address = "udp6://:8094"
-  # service_address = "unix:///tmp/telegraf.sock"
-  # service_address = "unixgram:///tmp/telegraf.sock"
+  # service_address = "unix:///tmp/rush.sock"
+  # service_address = "unixgram:///tmp/rush.sock"
 
   ## Maximum number of concurrent connections.
   ## Only applies to stream sockets (e.g. TCP).
@@ -203,12 +203,12 @@ func (sl *SocketListener) SampleConfig() string {
   ## Data format to consume.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   # data_format = "influx"
 `
 }
 
-func (sl *SocketListener) Gather(_ telegraf.Accumulator) error {
+func (sl *SocketListener) Gather(_ rush.Accumulator) error {
 	return nil
 }
 
@@ -216,7 +216,7 @@ func (sl *SocketListener) SetParser(parser parsers.Parser) {
 	sl.Parser = parser
 }
 
-func (sl *SocketListener) Start(acc telegraf.Accumulator) error {
+func (sl *SocketListener) Start(acc rush.Accumulator) error {
 	sl.Accumulator = acc
 	spl := strings.SplitN(sl.ServiceAddress, "://", 2)
 	if len(spl) != 2 {
@@ -311,5 +311,5 @@ func (uc unixCloser) Close() error {
 }
 
 func init() {
-	inputs.Add("socket_listener", func() telegraf.Input { return newSocketListener() })
+	inputs.Add("socket_listener", func() rush.Input { return newSocketListener() })
 }

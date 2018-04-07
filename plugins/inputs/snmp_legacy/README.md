@@ -29,7 +29,7 @@ In this example, the plugin will gather value of OIDS:
 
 #### Simple example
 
-In this example, Telegraf gathers value of OIDS:
+In this example, Rush gathers value of OIDS:
 
  - named **ifnumber**
  - named **interface_speed**
@@ -89,7 +89,7 @@ In this example, the plugin will gather value of OIDS:
 
 #### Simple bulk example
 
-In this example, Telegraf gathers value of OIDS:
+In this example, Rush gathers value of OIDS:
 
  - named **ifnumber**
  - named **interface_speed**
@@ -181,7 +181,7 @@ but you can still use it in combination of the following part.
 Note: This example is like a bulk request a but using an
 other configuration
 
-Telegraf gathers value of OIDS of the table:
+Rush gathers value of OIDS of the table:
 
  - named **iftable1**
 
@@ -246,7 +246,7 @@ but you can still use it in combination of the following part.
 Note: This example is like a bulk request a but using an
 other configuration
 
-Telegraf gathers value of OIDS of the table:
+Rush gathers value of OIDS of the table:
 
  - named **iftable2**
 
@@ -299,7 +299,7 @@ OIDS in subtables:
 In this example, we remove collect attribute to the host section,
 but you can still use it in combination of the following part.
 
-Telegraf gathers value of OIDS of the table:
+Rush gathers value of OIDS of the table:
 
  - named **iftable3**
 
@@ -403,7 +403,7 @@ Note: the plugin will add instance name as tag *instance*
 In this example, we remove collect attribute to the host section,
 but you can still use it in combination of the following part.
 
-Telegraf gathers value of OIDS of the table:
+Rush gathers value of OIDS of the table:
 
  - named **iftable4**
 

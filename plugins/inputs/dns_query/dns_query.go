@@ -9,8 +9,8 @@ import (
 
 	"github.com/miekg/dns"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 type DnsQuery struct {
@@ -61,7 +61,7 @@ func (d *DnsQuery) SampleConfig() string {
 func (d *DnsQuery) Description() string {
 	return "Query given DNS server and gives statistics"
 }
-func (d *DnsQuery) Gather(acc telegraf.Accumulator) error {
+func (d *DnsQuery) Gather(acc rush.Accumulator) error {
 	d.setDefaultValues()
 
 	for _, domain := range d.Domains {
@@ -166,7 +166,7 @@ func (d *DnsQuery) parseRecordType() (uint16, error) {
 }
 
 func init() {
-	inputs.Add("dns_query", func() telegraf.Input {
+	inputs.Add("dns_query", func() rush.Input {
 		return &DnsQuery{}
 	})
 }

@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/testutil"
 
-	"github.com/influxdata/telegraf"
+	"github.com/masami10/rush"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -100,7 +100,7 @@ func TestBuildTags(t *testing.T) {
 
 func TestBuildPoint(t *testing.T) {
 	var tagtests = []struct {
-		ptIn  telegraf.Metric
+		ptIn  rush.Metric
 		outPt Point
 		err   error
 	}{
@@ -170,7 +170,7 @@ func TestBuildPoint(t *testing.T) {
 
 func TestVerifyValue(t *testing.T) {
 	var tagtests = []struct {
-		ptIn        telegraf.Metric
+		ptIn        rush.Metric
 		validMetric bool
 	}{
 		{

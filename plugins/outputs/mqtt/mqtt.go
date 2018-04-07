@@ -6,10 +6,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/outputs"
-	"github.com/influxdata/telegraf/plugins/serializers"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/outputs"
+	"github.com/masami10/rush/plugins/serializers"
 
 	paho "github.com/eclipse/paho.mqtt.golang"
 )
@@ -20,10 +20,10 @@ var sampleConfig = `
   ## MQTT outputs send metrics to this topic format
   ##    "<topic_prefix>/<hostname>/<pluginname>/"
   ##   ex: prefix/web01.example.com/mem
-  topic_prefix = "telegraf"
+  topic_prefix = "rush"
 
   ## username and password to connect MQTT server.
-  # username = "telegraf"
+  # username = "rush"
   # password = "metricsmetricsmetricsmetrics"
 
   ## Timeout for write operations. default: 5s
@@ -33,16 +33,16 @@ var sampleConfig = `
   # client_id = ""
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 
   ## Data format to output.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_OUTPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_OUTPUT.md
   data_format = "influx"
 `
 
@@ -113,7 +113,7 @@ func (m *MQTT) Description() string {
 	return "Configuration for MQTT server to send metrics to"
 }
 
-func (m *MQTT) Write(metrics []telegraf.Metric) error {
+func (m *MQTT) Write(metrics []rush.Metric) error {
 	m.Lock()
 	defer m.Unlock()
 	if len(metrics) == 0 {
@@ -172,7 +172,7 @@ func (m *MQTT) createOpts() (*paho.ClientOptions, error) {
 	if m.ClientID != "" {
 		opts.SetClientID(m.ClientID)
 	} else {
-		opts.SetClientID("Telegraf-Output-" + internal.RandomString(5))
+		opts.SetClientID("Rush-Output-" + internal.RandomString(5))
 	}
 
 	tlsCfg, err := internal.GetTLSConfig(
@@ -209,7 +209,7 @@ func (m *MQTT) createOpts() (*paho.ClientOptions, error) {
 }
 
 func init() {
-	outputs.Add("mqtt", func() telegraf.Output {
+	outputs.Add("mqtt", func() rush.Output {
 		return &MQTT{}
 	})
 }

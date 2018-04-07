@@ -3,15 +3,15 @@ package basicstats
 import (
 	"math"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/aggregators"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/aggregators"
 )
 
 type BasicStats struct {
 	cache map[uint64]aggregate
 }
 
-func NewBasicStats() telegraf.Aggregator {
+func NewBasicStats() rush.Aggregator {
 	mm := &BasicStats{}
 	mm.Reset()
 	return mm
@@ -48,7 +48,7 @@ func (m *BasicStats) Description() string {
 	return "Keep the aggregate basicstats of each metric passing through."
 }
 
-func (m *BasicStats) Add(in telegraf.Metric) {
+func (m *BasicStats) Add(in rush.Metric) {
 	id := in.HashID()
 	if _, ok := m.cache[id]; !ok {
 		// hit an uncached metric, create caches for first time:
@@ -113,7 +113,7 @@ func (m *BasicStats) Add(in telegraf.Metric) {
 	}
 }
 
-func (m *BasicStats) Push(acc telegraf.Accumulator) {
+func (m *BasicStats) Push(acc rush.Accumulator) {
 	for _, aggregate := range m.cache {
 		fields := map[string]interface{}{}
 		for k, v := range aggregate.fields {
@@ -149,7 +149,7 @@ func convert(in interface{}) (float64, bool) {
 }
 
 func init() {
-	aggregators.Add("basicstats", func() telegraf.Aggregator {
+	aggregators.Add("basicstats", func() rush.Aggregator {
 		return NewBasicStats()
 	})
 }

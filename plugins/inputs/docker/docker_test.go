@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"testing"
 
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/testutil"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/swarm"

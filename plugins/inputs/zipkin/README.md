@@ -9,7 +9,7 @@ based on its main usage cases and the evolution of the OpenTracing standard.*
 ```toml
 [[inputs.zipkin]]
     path = "/api/v1/spans" # URL path for span data
-    port = 9411 # Port on which Telegraf listens
+    port = 9411 # Port on which Rush listens
 ```
 
 The plugin accepts spans in `JSON` or `thrift` if the `Content-Type` is `application/json` or `application/x-thrift`, respectively.
@@ -107,7 +107,7 @@ influxd -config=/path/to/your/config/file
 
   5. ___Update___ your retention policy:
 ```sql
-ALTER RETENTION POLICY "autogen" ON "telegraf" DURATION 1d SHARD DURATION 30m
+ALTER RETENTION POLICY "autogen" ON "rush" DURATION 1d SHARD DURATION 30m
 ```
 
 ### Example Input Trace:

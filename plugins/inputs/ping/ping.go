@@ -14,9 +14,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 // HostPinger is a function that runs the "ping" function using a list of
@@ -68,7 +68,7 @@ func (_ *Ping) SampleConfig() string {
 	return sampleConfig
 }
 
-func (p *Ping) Gather(acc telegraf.Accumulator) error {
+func (p *Ping) Gather(acc rush.Accumulator) error {
 
 	var wg sync.WaitGroup
 
@@ -240,7 +240,7 @@ func processPingOutput(out string) (int, int, float64, float64, float64, float64
 }
 
 func init() {
-	inputs.Add("ping", func() telegraf.Input {
+	inputs.Add("ping", func() rush.Input {
 		return &Ping{
 			pingHost:     hostPinger,
 			PingInterval: 1.0,

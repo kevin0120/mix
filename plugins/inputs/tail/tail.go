@@ -9,10 +9,10 @@ import (
 
 	"github.com/influxdata/tail"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal/globpath"
-	"github.com/influxdata/telegraf/plugins/inputs"
-	"github.com/influxdata/telegraf/plugins/parsers"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal/globpath"
+	"github.com/masami10/rush/plugins/inputs"
+	"github.com/masami10/rush/plugins/parsers"
 )
 
 const (
@@ -28,7 +28,7 @@ type Tail struct {
 	tailers []*tail.Tail
 	parser  parsers.Parser
 	wg      sync.WaitGroup
-	acc     telegraf.Accumulator
+	acc     rush.Accumulator
 
 	sync.Mutex
 }
@@ -61,7 +61,7 @@ const sampleConfig = `
   ## Data format to consume.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "influx"
 `
 
@@ -73,11 +73,11 @@ func (t *Tail) Description() string {
 	return "Stream a log file, like the tail -f command"
 }
 
-func (t *Tail) Gather(acc telegraf.Accumulator) error {
+func (t *Tail) Gather(acc rush.Accumulator) error {
 	return nil
 }
 
-func (t *Tail) Start(acc telegraf.Accumulator) error {
+func (t *Tail) Start(acc rush.Accumulator) error {
 	t.Lock()
 	defer t.Unlock()
 
@@ -132,7 +132,7 @@ func (t *Tail) Start(acc telegraf.Accumulator) error {
 func (t *Tail) receiver(tailer *tail.Tail) {
 	defer t.wg.Done()
 
-	var m telegraf.Metric
+	var m rush.Metric
 	var err error
 	var line *tail.Line
 	for line = range tailer.Lines {
@@ -177,7 +177,7 @@ func (t *Tail) SetParser(parser parsers.Parser) {
 }
 
 func init() {
-	inputs.Add("tail", func() telegraf.Input {
+	inputs.Add("tail", func() rush.Input {
 		return NewTail()
 	})
 }

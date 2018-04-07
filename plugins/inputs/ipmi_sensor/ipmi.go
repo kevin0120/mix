@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 var (
@@ -51,7 +51,7 @@ func (m *Ipmi) Description() string {
 	return "Read metrics from the bare metal servers via IPMI"
 }
 
-func (m *Ipmi) Gather(acc telegraf.Accumulator) error {
+func (m *Ipmi) Gather(acc rush.Accumulator) error {
 	if len(m.Path) == 0 {
 		return fmt.Errorf("ipmitool not found: verify that ipmitool is installed and that ipmitool is in your PATH")
 	}
@@ -74,7 +74,7 @@ func (m *Ipmi) Gather(acc telegraf.Accumulator) error {
 	return nil
 }
 
-func (m *Ipmi) parse(acc telegraf.Accumulator, server string) error {
+func (m *Ipmi) parse(acc rush.Accumulator, server string) error {
 	opts := make([]string, 0)
 	hostname := ""
 
@@ -161,7 +161,7 @@ func init() {
 		m.Path = path
 	}
 	m.Timeout = internal.Duration{Duration: time.Second * 20}
-	inputs.Add("ipmi_sensor", func() telegraf.Input {
+	inputs.Add("ipmi_sensor", func() rush.Input {
 		m := m
 		return &m
 	})

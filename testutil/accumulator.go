@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/influxdata/telegraf"
+	"github.com/masami10/rush"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -116,7 +116,7 @@ func (a *Accumulator) AddGauge(
 	a.AddFields(measurement, fields, tags, timestamp...)
 }
 
-func (a *Accumulator) AddMetrics(metrics []telegraf.Metric) {
+func (a *Accumulator) AddMetrics(metrics []rush.Metric) {
 	for _, m := range metrics {
 		a.AddFields(m.Name(), m.Fields(), m.Tags(), m.Time())
 	}
@@ -206,7 +206,7 @@ func (a *Accumulator) TagValue(measurement string, key string) string {
 }
 
 // Calls the given Gather function and returns the first error found.
-func (a *Accumulator) GatherError(gf func(telegraf.Accumulator) error) error {
+func (a *Accumulator) GatherError(gf func(rush.Accumulator) error) error {
 	if err := gf(a); err != nil {
 		return err
 	}

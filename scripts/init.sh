@@ -1,15 +1,15 @@
 #! /usr/bin/env bash
 
 # chkconfig: 2345 99 01
-# description: Telegraf daemon
+# description: Rush daemon
 
 ### BEGIN INIT INFO
-# Provides:          telegraf
+# Provides:          rush
 # Required-Start:    $all
 # Required-Stop:     $remote_fs $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: Start telegraf at boot time
+# Short-Description: Start rush at boot time
 ### END INIT INFO
 
 # this init script supports three different variations:
@@ -20,18 +20,18 @@
 # In the third case we have to define our own functions which are very dumb
 # and expect the args to be positioned correctly.
 
-# Command-line options that can be set in /etc/default/telegraf.  These will override
+# Command-line options that can be set in /etc/default/rush.  These will override
 # any config file values.
-TELEGRAF_OPTS=
+RUSH_OPTS=
 
-USER=telegraf
-GROUP=telegraf
+USER=rush
+GROUP=rush
 
 if [ -r /lib/lsb/init-functions ]; then
     source /lib/lsb/init-functions
 fi
 
-DEFAULT=/etc/default/telegraf
+DEFAULT=/etc/default/rush
 
 if [ -r $DEFAULT ]; then
     source $DEFAULT
@@ -45,7 +45,7 @@ if [ ! -f "$STDOUT" ]; then
 fi
 
 if [ -z "$STDERR" ]; then
-    STDERR=/var/log/telegraf/telegraf.log
+    STDERR=/var/log/rush/rush.log
 fi
 if [ ! -f "$STDERR" ]; then
     mkdir -p `dirname $STDERR`
@@ -94,13 +94,13 @@ function log_success_msg() {
 }
 
 # Process name ( For display )
-name=telegraf
+name=rush
 
 # Daemon name, where is the actual executable
-daemon=/usr/bin/telegraf
+daemon=/usr/bin/rush
 
 # pid file for the daemon
-pidfile=/var/run/telegraf/telegraf.pid
+pidfile=/var/run/rush/rush.pid
 piddir=`dirname $pidfile`
 
 if [ ! -d "$piddir" ]; then
@@ -109,8 +109,8 @@ if [ ! -d "$piddir" ]; then
 fi
 
 # Configuration file
-config=/etc/telegraf/telegraf.conf
-confdir=/etc/telegraf/telegraf.d
+config=/etc/rush/rush.conf
+confdir=/etc/rush/rush.d
 
 # If the daemon is not there, then exit.
 [ -x $daemon ] || exit 5
@@ -136,11 +136,11 @@ case $1 in
 
         log_success_msg "Starting the process" "$name"
         if command -v startproc >/dev/null; then
-            startproc -u "$USER" -g "$GROUP" -p "$pidfile" -q -- "$daemon" -pidfile "$pidfile" -config "$config" -config-directory "$confdir" $TELEGRAF_OPTS
+            startproc -u "$USER" -g "$GROUP" -p "$pidfile" -q -- "$daemon" -pidfile "$pidfile" -config "$config" -config-directory "$confdir" $RUSH_OPTS
         elif which start-stop-daemon > /dev/null 2>&1; then
-            start-stop-daemon --chuid $USER:$GROUP --start --quiet --pidfile $pidfile --exec $daemon -- -pidfile $pidfile -config $config -config-directory $confdir $TELEGRAF_OPTS >>$STDOUT 2>>$STDERR &
+            start-stop-daemon --chuid $USER:$GROUP --start --quiet --pidfile $pidfile --exec $daemon -- -pidfile $pidfile -config $config -config-directory $confdir $RUSH_OPTS >>$STDOUT 2>>$STDERR &
         else
-            su -s /bin/sh -c "nohup $daemon -pidfile $pidfile -config $config -config-directory $confdir $TELEGRAF_OPTS >>$STDOUT 2>>$STDERR &" $USER
+            su -s /bin/sh -c "nohup $daemon -pidfile $pidfile -config $config -config-directory $confdir $RUSH_OPTS >>$STDOUT 2>>$STDERR &" $USER
         fi
         log_success_msg "$name process was started"
         ;;

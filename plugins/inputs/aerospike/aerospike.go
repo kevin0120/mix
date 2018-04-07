@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 
 	as "github.com/aerospike/aerospike-client-go"
 )
@@ -34,7 +34,7 @@ func (a *Aerospike) Description() string {
 	return "Read stats from aerospike server(s)"
 }
 
-func (a *Aerospike) Gather(acc telegraf.Accumulator) error {
+func (a *Aerospike) Gather(acc rush.Accumulator) error {
 	if len(a.Servers) == 0 {
 		return a.gatherServer("127.0.0.1:3000", acc)
 	}
@@ -52,7 +52,7 @@ func (a *Aerospike) Gather(acc telegraf.Accumulator) error {
 	return nil
 }
 
-func (a *Aerospike) gatherServer(hostport string, acc telegraf.Accumulator) error {
+func (a *Aerospike) gatherServer(hostport string, acc rush.Accumulator) error {
 	host, port, err := net.SplitHostPort(hostport)
 	if err != nil {
 		return err
@@ -148,7 +148,7 @@ func copyTags(m map[string]string) map[string]string {
 }
 
 func init() {
-	inputs.Add("aerospike", func() telegraf.Input {
+	inputs.Add("aerospike", func() rush.Input {
 		return &Aerospike{}
 	})
 }

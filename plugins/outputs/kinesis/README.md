@@ -1,4 +1,4 @@
-## Amazon Kinesis Output for Telegraf
+## Amazon Kinesis Output for Rush
 
 This is an experimental plugin that is still in the early stages of development. It will batch up all of the Points
 in one Put request to Kinesis. This should save the number of API requests by a considerable level.
@@ -41,7 +41,7 @@ The region is the Amazon region that you wish to connect to. Examples include bu
 
 The streamname is used by the plugin to ensure that data is sent to the correct Kinesis stream. It is important to
 note that the stream *MUST* be pre-configured for this plugin to function correctly. If the stream does not exist the
-plugin will result in telegraf exiting with an exit code of 1.
+plugin will result in rush exiting with an exit code of 1.
 
 ### partitionkey [DEPRECATED]
 

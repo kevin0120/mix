@@ -1,4 +1,4 @@
-## Amazon CloudWatch Output for Telegraf
+## Amazon CloudWatch Output for Rush
 
 This plugin will send metrics to Amazon CloudWatch.
 

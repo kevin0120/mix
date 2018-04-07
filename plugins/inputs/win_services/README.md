@@ -1,7 +1,7 @@
-# Telegraf Plugin: win_services
+# Rush Plugin: win_services
 Input plugin to report Windows services info.
 
-It requires that Telegraf must be running under the administrator privileges.
+It requires that Rush must be running under the administrator privileges.
 ### Configuration:
 
 ```toml
@@ -56,7 +56,7 @@ The notification is sent via an HTTP POST call.
 ```
 stream
     |from()
-        .database('telegraf')
+        .database('rush')
         .retentionPolicy('autogen')
         .measurement('win_services')
         .groupBy('host','service_name')

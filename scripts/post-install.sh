@@ -1,65 +1,65 @@
 #!/bin/bash
 
 BIN_DIR=/usr/bin
-LOG_DIR=/var/log/telegraf
-SCRIPT_DIR=/usr/lib/telegraf/scripts
+LOG_DIR=/var/log/rush
+SCRIPT_DIR=/usr/lib/rush/scripts
 LOGROTATE_DIR=/etc/logrotate.d
 
 function install_init {
-    cp -f $SCRIPT_DIR/init.sh /etc/init.d/telegraf
-    chmod +x /etc/init.d/telegraf
+    cp -f $SCRIPT_DIR/init.sh /etc/init.d/rush
+    chmod +x /etc/init.d/rush
 }
 
 function install_systemd {
-    cp -f $SCRIPT_DIR/telegraf.service $1
-    systemctl enable telegraf || true
+    cp -f $SCRIPT_DIR/rush.service $1
+    systemctl enable rush || true
     systemctl daemon-reload || true
 }
 
 function install_update_rcd {
-    update-rc.d telegraf defaults
+    update-rc.d rush defaults
 }
 
 function install_chkconfig {
-    chkconfig --add telegraf
+    chkconfig --add rush
 }
 
-if ! grep "^telegraf:" /etc/group &>/dev/null; then
-    groupadd -r telegraf
+if ! grep "^rush:" /etc/group &>/dev/null; then
+    groupadd -r rush
 fi
 
-if ! id telegraf &>/dev/null; then
-    useradd -r -M telegraf -s /bin/false -d /etc/telegraf -g telegraf
+if ! id rush &>/dev/null; then
+    useradd -r -M rush -s /bin/false -d /etc/rush -g rush
 fi
 
 test -d $LOG_DIR || mkdir -p $LOG_DIR
-chown -R -L telegraf:telegraf $LOG_DIR
+chown -R -L rush:rush $LOG_DIR
 chmod 755 $LOG_DIR
 
 # Remove legacy symlink, if it exists
-if [[ -L /etc/init.d/telegraf ]]; then
-    rm -f /etc/init.d/telegraf
+if [[ -L /etc/init.d/rush ]]; then
+    rm -f /etc/init.d/rush
 fi
 # Remove legacy symlink, if it exists
-if [[ -L /etc/systemd/system/telegraf.service ]]; then
-    rm -f /etc/systemd/system/telegraf.service
+if [[ -L /etc/systemd/system/rush.service ]]; then
+    rm -f /etc/systemd/system/rush.service
 fi
 
 # Add defaults file, if it doesn't exist
-if [[ ! -f /etc/default/telegraf ]]; then
-    touch /etc/default/telegraf
+if [[ ! -f /etc/default/rush ]]; then
+    touch /etc/default/rush
 fi
 
 # Add .d configuration directory
-if [[ ! -d /etc/telegraf/telegraf.d ]]; then
-    mkdir -p /etc/telegraf/telegraf.d
+if [[ ! -d /etc/rush/rush.d ]]; then
+    mkdir -p /etc/rush/rush.d
 fi
 
 # Distribution-specific logic
 if [[ -f /etc/redhat-release ]] || [[ -f /etc/SuSE-release ]]; then
     # RHEL-variant logic
     if [[ "$(readlink /proc/1/exe)" == */systemd ]]; then
-        install_systemd /usr/lib/systemd/system/telegraf.service
+        install_systemd /usr/lib/systemd/system/rush.service
     else
         # Assuming SysVinit
         install_init
@@ -73,8 +73,8 @@ if [[ -f /etc/redhat-release ]] || [[ -f /etc/SuSE-release ]]; then
 elif [[ -f /etc/debian_version ]]; then
     # Debian/Ubuntu logic
     if [[ "$(readlink /proc/1/exe)" == */systemd ]]; then
-        install_systemd /lib/systemd/system/telegraf.service
-        deb-systemd-invoke restart telegraf.service || echo "WARNING: systemd not running."
+        install_systemd /lib/systemd/system/rush.service
+        deb-systemd-invoke restart rush.service || echo "WARNING: systemd not running."
     else
         # Assuming SysVinit
         install_init
@@ -84,7 +84,7 @@ elif [[ -f /etc/debian_version ]]; then
         else
             install_chkconfig
         fi
-        invoke-rc.d telegraf restart
+        invoke-rc.d rush restart
     fi
 elif [[ -f /etc/os-release ]]; then
     source /etc/os-release

@@ -83,9 +83,9 @@ This plugin gathers the statistic data from MySQL server
   interval_slow                             = "30m"
   
   ## Optional SSL Config (will be used if tls=custom parameter specified in server uri)
-  ssl_ca = "/etc/telegraf/ca.pem"
-  ssl_cert = "/etc/telegraf/cert.pem"
-  ssl_key = "/etc/telegraf/key.pem"
+  ssl_ca = "/etc/rush/ca.pem"
+  ssl_cert = "/etc/rush/cert.pem"
+  ssl_key = "/etc/rush/key.pem"
 ```
 
 ## Measurements & Fields

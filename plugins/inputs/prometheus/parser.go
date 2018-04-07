@@ -13,8 +13,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/metric"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/metric"
 
 	"github.com/matttproud/golang_protobuf_extensions/pbutil"
 	dto "github.com/prometheus/client_model/go"
@@ -23,8 +23,8 @@ import (
 
 // Parse returns a slice of Metrics from a text representation of a
 // metrics
-func Parse(buf []byte, header http.Header) ([]telegraf.Metric, error) {
-	var metrics []telegraf.Metric
+func Parse(buf []byte, header http.Header) ([]rush.Metric, error) {
+	var metrics []rush.Metric
 	var parser expfmt.TextParser
 	// parse even if the buffer begins with a newline
 	buf = bytes.TrimPrefix(buf, []byte("\n"))
@@ -78,7 +78,7 @@ func Parse(buf []byte, header http.Header) ([]telegraf.Metric, error) {
 				// standard metric
 				fields = getNameAndValue(m)
 			}
-			// converting to telegraf metric
+			// converting to rush metric
 			if len(fields) > 0 {
 				var t time.Time
 				if m.TimestampMs != nil && *m.TimestampMs > 0 {
@@ -97,18 +97,18 @@ func Parse(buf []byte, header http.Header) ([]telegraf.Metric, error) {
 	return metrics, err
 }
 
-func valueType(mt dto.MetricType) telegraf.ValueType {
+func valueType(mt dto.MetricType) rush.ValueType {
 	switch mt {
 	case dto.MetricType_COUNTER:
-		return telegraf.Counter
+		return rush.Counter
 	case dto.MetricType_GAUGE:
-		return telegraf.Gauge
+		return rush.Gauge
 	case dto.MetricType_SUMMARY:
-		return telegraf.Summary
+		return rush.Summary
 	case dto.MetricType_HISTOGRAM:
-		return telegraf.Histogram
+		return rush.Histogram
 	default:
-		return telegraf.Untyped
+		return rush.Untyped
 	}
 }
 

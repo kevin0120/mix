@@ -9,15 +9,15 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/influxdata/telegraf"
+	"github.com/masami10/rush"
 )
 
 type RollbarWebhook struct {
 	Path string
-	acc  telegraf.Accumulator
+	acc  rush.Accumulator
 }
 
-func (rb *RollbarWebhook) Register(router *mux.Router, acc telegraf.Accumulator) {
+func (rb *RollbarWebhook) Register(router *mux.Router, acc rush.Accumulator) {
 	router.HandleFunc(rb.Path, rb.eventHandler).Methods("POST")
 	log.Printf("I! Started the webhooks_rollbar on %s\n", rb.Path)
 	rb.acc = acc

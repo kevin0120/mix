@@ -1,10 +1,10 @@
 #!/bin/bash
 #
-# This is the Telegraf CircleCI test script. Using this script allows total control
+# This is the Rush CircleCI test script. Using this script allows total control
 # the environment in which the build and test is run, and matches the official
 # build process for InfluxDB.
 
-BUILD_DIR=$HOME/telegraf-build
+BUILD_DIR=$HOME/rush-build
 VERSION=`git describe --always --tags`
 
 # Executes the given statement, and exits if the command returns a non-zero code.
@@ -44,8 +44,8 @@ echo "\$GOPATH: $GOPATH"
 echo "\$CIRCLE_BRANCH: $CIRCLE_BRANCH"
 
 # Move the checked-out source to a better location
-exit_if_fail mv $HOME/telegraf $GOPATH/src/github.com/influxdata
-exit_if_fail cd $GOPATH/src/github.com/influxdata/telegraf
+exit_if_fail mv $HOME/rush $GOPATH/src/github.com/influxdata
+exit_if_fail cd $GOPATH/src/github.com/masami10/rush
 
 # Verify that go fmt has been run
 check_go_fmt
@@ -63,11 +63,11 @@ exit_if_fail go test -race ./...
 # Simple Integration Tests
 #   check that one test cpu & mem output work
 tmpdir=$(mktemp -d)
-./telegraf config > $tmpdir/config.toml
-exit_if_fail ./telegraf -config $tmpdir/config.toml \
+./rush config > $tmpdir/config.toml
+exit_if_fail ./rush -config $tmpdir/config.toml \
     -test -input-filter cpu:mem
 
-gzip telegraf -c > "$CIRCLE_ARTIFACTS/telegraf.gz"
+gzip rush -c > "$CIRCLE_ARTIFACTS/rush.gz"
 
 if git describe --exact-match HEAD 2>&1 >/dev/null; then
     # install fpm (packaging dependency)
@@ -77,7 +77,7 @@ if git describe --exact-match HEAD 2>&1 >/dev/null; then
     unset GOGC
     tag=$(git describe --exact-match HEAD)
     echo $tag
-    exit_if_fail ./scripts/build.py --release --package --platform=all --arch=all --upload --bucket=dl.influxdata.com/telegraf/releases
+    exit_if_fail ./scripts/build.py --release --package --platform=all --arch=all --upload --bucket=dl.influxdata.com/rush/releases
     mv build $CIRCLE_ARTIFACTS
 elif [ -n "${PACKAGE}" ]; then
     # install fpm (packaging dependency)
@@ -87,7 +87,7 @@ elif [ -n "${PACKAGE}" ]; then
     unset GOGC
     if [ "$(git rev-parse --abbrev-ref HEAD)" = master ]
     then
-        exit_if_fail ./scripts/build.py --nightly --package --platform=all --arch=all --upload --bucket=dl.influxdata.com/telegraf/nightlies
+        exit_if_fail ./scripts/build.py --nightly --package --platform=all --arch=all --upload --bucket=dl.influxdata.com/rush/nightlies
     else
         exit_if_fail ./scripts/build.py --package --platform=all --arch=all
     fi

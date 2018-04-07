@@ -3,8 +3,8 @@ package natsconsumer
 import (
 	"testing"
 
-	"github.com/influxdata/telegraf/plugins/parsers"
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/plugins/parsers"
+	"github.com/masami10/rush/testutil"
 	"github.com/nats-io/nats"
 	"github.com/stretchr/testify/assert"
 )
@@ -21,7 +21,7 @@ func newTestNatsConsumer() (*natsConsumer, chan *nats.Msg) {
 	in := make(chan *nats.Msg, metricBuffer)
 	n := &natsConsumer{
 		QueueGroup: "test",
-		Subjects:   []string{"telegraf"},
+		Subjects:   []string{"rush"},
 		Servers:    []string{"nats://localhost:4222"},
 		Secure:     false,
 		in:         in,
@@ -59,7 +59,7 @@ func TestRunParserInvalidMsg(t *testing.T) {
 	in <- natsMsg(invalidMsg)
 
 	acc.WaitError(1)
-	assert.Contains(t, acc.Errors[0].Error(), "E! subject: telegraf, error:  metric parsing error")
+	assert.Contains(t, acc.Errors[0].Error(), "E! subject: rush, error:  metric parsing error")
 	assert.EqualValues(t, 0, acc.NMetrics())
 }
 
@@ -125,7 +125,7 @@ func TestRunParserAndGatherJSON(t *testing.T) {
 
 func natsMsg(val string) *nats.Msg {
 	return &nats.Msg{
-		Subject: "telegraf",
+		Subject: "rush",
 		Data:    []byte(val),
 	}
 }

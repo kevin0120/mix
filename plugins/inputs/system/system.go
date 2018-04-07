@@ -10,8 +10,8 @@ import (
 	"github.com/shirou/gopsutil/host"
 	"github.com/shirou/gopsutil/load"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 type SystemStats struct{}
@@ -22,7 +22,7 @@ func (_ *SystemStats) Description() string {
 
 func (_ *SystemStats) SampleConfig() string { return "" }
 
-func (_ *SystemStats) Gather(acc telegraf.Accumulator) error {
+func (_ *SystemStats) Gather(acc rush.Accumulator) error {
 	loadavg, err := load.Avg()
 	if err != nil && !strings.Contains(err.Error(), "not implemented") {
 		return err
@@ -81,7 +81,7 @@ func format_uptime(uptime uint64) string {
 }
 
 func init() {
-	inputs.Add("system", func() telegraf.Input {
+	inputs.Add("system", func() rush.Input {
 		return &SystemStats{}
 	})
 }

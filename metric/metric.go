@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/influxdata/telegraf"
+	"github.com/masami10/rush"
 )
 
 const MaxInt = int(^uint(0) >> 1)
@@ -19,8 +19,8 @@ func New(
 	tags map[string]string,
 	fields map[string]interface{},
 	t time.Time,
-	mType ...telegraf.ValueType,
-) (telegraf.Metric, error) {
+	mType ...rush.ValueType,
+) (rush.Metric, error) {
 	if len(name) == 0 {
 		return nil, fmt.Errorf("missing measurement name")
 	}
@@ -31,11 +31,11 @@ func New(
 		return nil, fmt.Errorf("%s: measurement name cannot end with a backslash", name)
 	}
 
-	var thisType telegraf.ValueType
+	var thisType rush.ValueType
 	if len(mType) > 0 {
 		thisType = mType[0]
 	} else {
-		thisType = telegraf.Untyped
+		thisType = rush.Untyped
 	}
 
 	m := &metric{
@@ -169,7 +169,7 @@ type metric struct {
 	fields []byte
 	t      []byte
 
-	mType     telegraf.ValueType
+	mType     rush.ValueType
 	aggregate bool
 
 	// cached values for reuse in "get" functions
@@ -189,7 +189,7 @@ func (m *metric) IsAggregate() bool {
 	return m.aggregate
 }
 
-func (m *metric) Type() telegraf.ValueType {
+func (m *metric) Type() rush.ValueType {
 	return m.mType
 }
 
@@ -255,11 +255,11 @@ func (m *metric) SerializeTo(dst []byte) int {
 	return i + 1
 }
 
-func (m *metric) Split(maxSize int) []telegraf.Metric {
+func (m *metric) Split(maxSize int) []rush.Metric {
 	if m.Len() <= maxSize {
-		return []telegraf.Metric{m}
+		return []rush.Metric{m}
 	}
-	var out []telegraf.Metric
+	var out []rush.Metric
 
 	// constant number of bytes for each metric (in addition to field bytes)
 	constant := len(m.name) + len(m.tags) + len(m.t) + 3
@@ -507,11 +507,11 @@ func (m *metric) RemoveField(key string) error {
 	return nil
 }
 
-func (m *metric) Copy() telegraf.Metric {
+func (m *metric) Copy() rush.Metric {
 	return copyWith(m.name, m.tags, m.fields, m.t)
 }
 
-func copyWith(name, tags, fields, t []byte) telegraf.Metric {
+func copyWith(name, tags, fields, t []byte) rush.Metric {
 	out := metric{
 		name:   make([]byte, len(name)),
 		tags:   make([]byte, len(tags)),

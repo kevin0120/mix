@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/filter"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/filter"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 type runner func(cmdName string, Timeout internal.Duration, UseSudo bool) (*bytes.Buffer, error)
@@ -40,7 +40,7 @@ var sampleConfig = `
   ## The default timeout of 1s can be overriden with:
   timeout = "1s"
 
-  ## Use the builtin fielddrop/fieldpass telegraf filters in order to keep/remove specific fields
+  ## Use the builtin fielddrop/fieldpass rush filters in order to keep/remove specific fields
   fieldpass = ["total_*", "num_*","time_up", "mem_*"]
 `
 
@@ -77,7 +77,7 @@ func unboundRunner(cmdName string, Timeout internal.Duration, UseSudo bool) (*by
 // Gather collects stats from unbound-control and adds them to the Accumulator
 //
 // All the dots in stat name will replaced by underscores. Histogram statistics will not be collected.
-func (s *Unbound) Gather(acc telegraf.Accumulator) error {
+func (s *Unbound) Gather(acc rush.Accumulator) error {
 
 	// Always exclude histrogram statistics
 	stat_excluded := []string{"histogram.*"}
@@ -126,7 +126,7 @@ func (s *Unbound) Gather(acc telegraf.Accumulator) error {
 }
 
 func init() {
-	inputs.Add("unbound", func() telegraf.Input {
+	inputs.Add("unbound", func() rush.Input {
 		return &Unbound{
 			run:     unboundRunner,
 			Binary:  defaultBinary,

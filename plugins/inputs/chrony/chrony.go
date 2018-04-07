@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 var (
@@ -33,7 +33,7 @@ func (*Chrony) SampleConfig() string {
   `
 }
 
-func (c *Chrony) Gather(acc telegraf.Accumulator) error {
+func (c *Chrony) Gather(acc rush.Accumulator) error {
 	if len(c.path) == 0 {
 		return errors.New("chronyc not found: verify that chrony is installed and that chronyc is in your PATH")
 	}
@@ -125,7 +125,7 @@ func init() {
 	if len(path) > 0 {
 		c.path = path
 	}
-	inputs.Add("chrony", func() telegraf.Input {
+	inputs.Add("chrony", func() rush.Input {
 		return &c
 	})
 }

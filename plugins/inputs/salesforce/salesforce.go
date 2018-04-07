@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 var sampleConfig = `
@@ -82,7 +82,7 @@ func (s *Salesforce) Description() string {
 }
 
 // Reads limits values from Salesforce API
-func (s *Salesforce) Gather(acc telegraf.Accumulator) error {
+func (s *Salesforce) Gather(acc rush.Accumulator) error {
 	limits, err := s.fetchLimits()
 	if err != nil {
 		return err
@@ -239,7 +239,7 @@ func (s *Salesforce) login() error {
 }
 
 func init() {
-	inputs.Add("salesforce", func() telegraf.Input {
+	inputs.Add("salesforce", func() rush.Input {
 		return NewSalesforce()
 	})
 }

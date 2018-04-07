@@ -6,10 +6,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
-	"github.com/influxdata/telegraf/plugins/parsers"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
+	"github.com/masami10/rush/plugins/parsers"
 
 	"github.com/Shopify/sarama"
 	cluster "github.com/bsm/sarama-cluster"
@@ -54,7 +54,7 @@ type Kafka struct {
 	done chan struct{}
 
 	// keep the accumulator internally:
-	acc telegraf.Accumulator
+	acc rush.Accumulator
 
 	// doNotCommitMsgs tells the parser not to call CommitUpTo on the consumer
 	// this is mostly for test purposes, but there may be a use-case for it later.
@@ -65,12 +65,12 @@ var sampleConfig = `
   ## kafka servers
   brokers = ["localhost:9092"]
   ## topic(s) to consume
-  topics = ["telegraf"]
+  topics = ["rush"]
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 
@@ -79,14 +79,14 @@ var sampleConfig = `
   # sasl_password = "secret"
 
   ## the name of the consumer group
-  consumer_group = "telegraf_metrics_consumers"
+  consumer_group = "rush_metrics_consumers"
   ## Offset (must be either "oldest" or "newest")
   offset = "oldest"
 
   ## Data format to consume.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "influx"
 
   ## Maximum length of a message to consume, in bytes (default 0/unlimited);
@@ -106,7 +106,7 @@ func (k *Kafka) SetParser(parser parsers.Parser) {
 	k.parser = parser
 }
 
-func (k *Kafka) Start(acc telegraf.Accumulator) error {
+func (k *Kafka) Start(acc rush.Accumulator) error {
 	k.Lock()
 	defer k.Unlock()
 	var clusterErr error
@@ -219,12 +219,12 @@ func (k *Kafka) Stop() {
 	}
 }
 
-func (k *Kafka) Gather(acc telegraf.Accumulator) error {
+func (k *Kafka) Gather(acc rush.Accumulator) error {
 	return nil
 }
 
 func init() {
-	inputs.Add("kafka_consumer", func() telegraf.Input {
+	inputs.Add("kafka_consumer", func() rush.Input {
 		return &Kafka{}
 	})
 }

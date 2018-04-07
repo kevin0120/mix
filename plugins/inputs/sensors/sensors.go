@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 var (
@@ -39,7 +39,7 @@ func (*Sensors) SampleConfig() string {
 
 }
 
-func (s *Sensors) Gather(acc telegraf.Accumulator) error {
+func (s *Sensors) Gather(acc rush.Accumulator) error {
 	if len(s.path) == 0 {
 		return errors.New("sensors not found: verify that lm-sensors package is installed and that sensors is in your PATH")
 	}
@@ -49,8 +49,8 @@ func (s *Sensors) Gather(acc telegraf.Accumulator) error {
 
 // parse forks the command:
 //     sensors -u -A
-// and parses the output to add it to the telegraf.Accumulator.
-func (s *Sensors) parse(acc telegraf.Accumulator) error {
+// and parses the output to add it to the rush.Accumulator.
+func (s *Sensors) parse(acc rush.Accumulator) error {
 	tags := map[string]string{}
 	fields := map[string]interface{}{}
 	chip := ""
@@ -107,7 +107,7 @@ func init() {
 	if len(path) > 0 {
 		s.path = path
 	}
-	inputs.Add("sensors", func() telegraf.Input {
+	inputs.Add("sensors", func() rush.Input {
 		return &s
 	})
 }

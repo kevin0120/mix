@@ -16,9 +16,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 var (
@@ -135,7 +135,7 @@ func (*Sysstat) SampleConfig() string {
 	return sampleConfig
 }
 
-func (s *Sysstat) Gather(acc telegraf.Accumulator) error {
+func (s *Sysstat) Gather(acc rush.Accumulator) error {
 	if s.interval == 0 {
 		if firstTimestamp.IsZero() {
 			firstTimestamp = time.Now()
@@ -150,7 +150,7 @@ func (s *Sysstat) Gather(acc telegraf.Accumulator) error {
 	var wg sync.WaitGroup
 	for option := range s.Options {
 		wg.Add(1)
-		go func(acc telegraf.Accumulator, option string) {
+		go func(acc rush.Accumulator, option string) {
 			defer wg.Done()
 			acc.AddError(s.parse(acc, option, ts))
 		}(acc, option)
@@ -175,7 +175,7 @@ func (s *Sysstat) collect() error {
 		options = append(options, "-S", act)
 	}
 	s.tmpFile = path.Join("/tmp", fmt.Sprintf("sysstat-%d", time.Now().Unix()))
-	// collectInterval has to be smaller than the telegraf data collection interval
+	// collectInterval has to be smaller than the rush data collection interval
 	collectInterval := s.interval - parseInterval
 
 	// If true, interval is not defined yet and Gather is run for the first time.
@@ -222,8 +222,8 @@ func withCLocale(cmd *exec.Cmd) *exec.Cmd {
 
 // parse runs Sadf on the previously saved tmpFile:
 //    Sadf -p -- -p <option> tmpFile
-// and parses the output to add it to the telegraf.Accumulator acc.
-func (s *Sysstat) parse(acc telegraf.Accumulator, option string, ts time.Time) error {
+// and parses the output to add it to the rush.Accumulator acc.
+func (s *Sysstat) parse(acc rush.Accumulator, option string, ts time.Time) error {
 	cmd := execCommand(s.Sadf, s.sadfOptions(option)...)
 	cmd = withCLocale(cmd)
 	stdout, err := cmd.StdoutPipe()
@@ -342,7 +342,7 @@ func init() {
 	if len(sadf) > 0 {
 		s.Sadf = sadf
 	}
-	inputs.Add("sysstat", func() telegraf.Input {
+	inputs.Add("sysstat", func() rush.Input {
 		return &s
 	})
 }

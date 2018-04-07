@@ -11,11 +11,11 @@ Erase the other section and everything on and above this line.
 
 ## Bug report
 
-### Relevant telegraf.conf:
+### Relevant rush.conf:
 
 ### System info:
 
-[Include Telegraf version, operating system name, and other relevant details]
+[Include Rush version, operating system name, and other relevant details]
 
 ### Steps to reproduce:
 

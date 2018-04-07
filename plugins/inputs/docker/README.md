@@ -50,9 +50,9 @@ to gather stats from the [Engine API](https://docs.docker.com/engine/api/v1.20/)
   tag_env = ["JAVA_HOME", "HEAP_SIZE"]
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 ```
@@ -207,7 +207,7 @@ based on the availability of per-cpu stats on your system.
 ### Example Output:
 
 ```
-% ./telegraf --config ~/ws/telegraf.conf --input-filter docker --test
+% ./rush --config ~/ws/rush.conf --input-filter docker --test
 * Plugin: docker, Collection 1
 > docker n_cpus=8i 1456926671065383978
 > docker n_used_file_descriptors=15i 1456926671065383978

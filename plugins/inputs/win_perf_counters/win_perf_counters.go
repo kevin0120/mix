@@ -8,15 +8,15 @@ import (
 	"strings"
 	"unsafe"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 var sampleConfig = `
   ## By default this plugin returns basic CPU and Disk statistics.
   ## See the README file for more examples.
   ## Uncomment examples below or write your own as you see fit. If the system
-  ## being polled for data does not have the Object at startup of the Telegraf
+  ## being polled for data does not have the Object at startup of the Rush
   ## agent, it will not be gathered.
   ## Settings:
   # PrintValid = false # Print All matching performance counters
@@ -177,7 +177,7 @@ func (m *Win_PerfCounters) GetParsedItemsForTesting() []*item {
 	return m.itemCache
 }
 
-func (m *Win_PerfCounters) Gather(acc telegraf.Accumulator) error {
+func (m *Win_PerfCounters) Gather(acc rush.Accumulator) error {
 	// Parse the config once
 	if !m.configParsed {
 		err := m.ParseConfig()
@@ -261,5 +261,5 @@ func (m *Win_PerfCounters) Gather(acc telegraf.Accumulator) error {
 }
 
 func init() {
-	inputs.Add("win_perf_counters", func() telegraf.Input { return &Win_PerfCounters{} })
+	inputs.Add("win_perf_counters", func() rush.Input { return &Win_PerfCounters{} })
 }

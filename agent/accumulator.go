@@ -4,8 +4,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/selfstat"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/selfstat"
 )
 
 var (
@@ -18,14 +18,14 @@ type MetricMaker interface {
 		measurement string,
 		fields map[string]interface{},
 		tags map[string]string,
-		mType telegraf.ValueType,
+		mType rush.ValueType,
 		t time.Time,
-	) telegraf.Metric
+	) rush.Metric
 }
 
 func NewAccumulator(
 	maker MetricMaker,
-	metrics chan telegraf.Metric,
+	metrics chan rush.Metric,
 ) *accumulator {
 	acc := accumulator{
 		maker:     maker,
@@ -36,7 +36,7 @@ func NewAccumulator(
 }
 
 type accumulator struct {
-	metrics chan telegraf.Metric
+	metrics chan rush.Metric
 
 	maker MetricMaker
 
@@ -49,7 +49,7 @@ func (ac *accumulator) AddFields(
 	tags map[string]string,
 	t ...time.Time,
 ) {
-	if m := ac.maker.MakeMetric(measurement, fields, tags, telegraf.Untyped, ac.getTime(t)); m != nil {
+	if m := ac.maker.MakeMetric(measurement, fields, tags, rush.Untyped, ac.getTime(t)); m != nil {
 		ac.metrics <- m
 	}
 }
@@ -60,7 +60,7 @@ func (ac *accumulator) AddGauge(
 	tags map[string]string,
 	t ...time.Time,
 ) {
-	if m := ac.maker.MakeMetric(measurement, fields, tags, telegraf.Gauge, ac.getTime(t)); m != nil {
+	if m := ac.maker.MakeMetric(measurement, fields, tags, rush.Gauge, ac.getTime(t)); m != nil {
 		ac.metrics <- m
 	}
 }
@@ -71,7 +71,7 @@ func (ac *accumulator) AddCounter(
 	tags map[string]string,
 	t ...time.Time,
 ) {
-	if m := ac.maker.MakeMetric(measurement, fields, tags, telegraf.Counter, ac.getTime(t)); m != nil {
+	if m := ac.maker.MakeMetric(measurement, fields, tags, rush.Counter, ac.getTime(t)); m != nil {
 		ac.metrics <- m
 	}
 }
@@ -82,7 +82,7 @@ func (ac *accumulator) AddSummary(
 	tags map[string]string,
 	t ...time.Time,
 ) {
-	if m := ac.maker.MakeMetric(measurement, fields, tags, telegraf.Summary, ac.getTime(t)); m != nil {
+	if m := ac.maker.MakeMetric(measurement, fields, tags, rush.Summary, ac.getTime(t)); m != nil {
 		ac.metrics <- m
 	}
 }
@@ -93,7 +93,7 @@ func (ac *accumulator) AddHistogram(
 	tags map[string]string,
 	t ...time.Time,
 ) {
-	if m := ac.maker.MakeMetric(measurement, fields, tags, telegraf.Histogram, ac.getTime(t)); m != nil {
+	if m := ac.maker.MakeMetric(measurement, fields, tags, rush.Histogram, ac.getTime(t)); m != nil {
 		ac.metrics <- m
 	}
 }

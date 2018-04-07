@@ -7,15 +7,15 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/influxdata/telegraf"
+	"github.com/masami10/rush"
 )
 
 type PapertrailWebhook struct {
 	Path string
-	acc  telegraf.Accumulator
+	acc  rush.Accumulator
 }
 
-func (pt *PapertrailWebhook) Register(router *mux.Router, acc telegraf.Accumulator) {
+func (pt *PapertrailWebhook) Register(router *mux.Router, acc rush.Accumulator) {
 	router.HandleFunc(pt.Path, pt.eventHandler).Methods("POST")
 	log.Printf("I! Started the papertrail_webhook on %s", pt.Path)
 	pt.acc = acc

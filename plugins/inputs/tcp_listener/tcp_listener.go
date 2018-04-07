@@ -7,11 +7,11 @@ import (
 	"net"
 	"sync"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
-	"github.com/influxdata/telegraf/plugins/parsers"
-	"github.com/influxdata/telegraf/selfstat"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
+	"github.com/masami10/rush/plugins/parsers"
+	"github.com/masami10/rush/selfstat"
 )
 
 type TcpListener struct {
@@ -41,7 +41,7 @@ type TcpListener struct {
 	conns map[string]*net.TCPConn
 
 	parser parsers.Parser
-	acc    telegraf.Accumulator
+	acc    rush.Accumulator
 
 	MaxConnections     selfstat.Stat
 	CurrentConnections selfstat.Stat
@@ -60,7 +60,7 @@ var malformedwarn = "E! tcp_listener has received %d malformed packets" +
 const sampleConfig = `
   # DEPRECATED: the TCP listener plugin has been deprecated in favor of the
   # socket_listener plugin
-  # see https://github.com/influxdata/telegraf/tree/master/plugins/inputs/socket_listener
+  # see https://github.com/masami10/rush/tree/master/plugins/inputs/socket_listener
 `
 
 func (t *TcpListener) SampleConfig() string {
@@ -73,7 +73,7 @@ func (t *TcpListener) Description() string {
 
 // All the work is done in the Start() function, so this is just a dummy
 // function.
-func (t *TcpListener) Gather(_ telegraf.Accumulator) error {
+func (t *TcpListener) Gather(_ rush.Accumulator) error {
 	return nil
 }
 
@@ -82,13 +82,13 @@ func (t *TcpListener) SetParser(parser parsers.Parser) {
 }
 
 // Start starts the tcp listener service.
-func (t *TcpListener) Start(acc telegraf.Accumulator) error {
+func (t *TcpListener) Start(acc rush.Accumulator) error {
 	t.Lock()
 	defer t.Unlock()
 
 	log.Println("W! DEPRECATED: the TCP listener plugin has been deprecated " +
 		"in favor of the socket_listener plugin " +
-		"(https://github.com/influxdata/telegraf/tree/master/plugins/inputs/socket_listener)")
+		"(https://github.com/masami10/rush/tree/master/plugins/inputs/socket_listener)")
 
 	tags := map[string]string{
 		"address": t.ServiceAddress,
@@ -187,9 +187,9 @@ func (t *TcpListener) tcpListen() error {
 // refuser refuses a TCP connection
 func (t *TcpListener) refuser(conn *net.TCPConn) {
 	// Tell the connection why we are closing.
-	fmt.Fprintf(conn, "Telegraf maximum concurrent TCP connections (%d)"+
+	fmt.Fprintf(conn, "Rush maximum concurrent TCP connections (%d)"+
 		" reached, closing.\nYou may want to increase max_tcp_connections in"+
-		" the Telegraf tcp listener configuration.\n", t.MaxTCPConnections)
+		" the Rush tcp listener configuration.\n", t.MaxTCPConnections)
 	conn.Close()
 	log.Printf("I! Refused TCP Connection from %s", conn.RemoteAddr())
 	log.Printf("I! WARNING: Maximum TCP Connections reached, you may want to" +
@@ -247,7 +247,7 @@ func (t *TcpListener) tcpParser() error {
 	defer t.wg.Done()
 
 	var packet []byte
-	var metrics []telegraf.Metric
+	var metrics []rush.Metric
 	var err error
 	for {
 		select {
@@ -290,7 +290,7 @@ func (t *TcpListener) remember(id string, conn *net.TCPConn) {
 }
 
 func init() {
-	inputs.Add("tcp_listener", func() telegraf.Input {
+	inputs.Add("tcp_listener", func() rush.Input {
 		return &TcpListener{
 			ServiceAddress:         ":8094",
 			AllowedPendingMessages: 10000,

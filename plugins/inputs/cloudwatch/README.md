@@ -40,7 +40,7 @@ API endpoint. In the following order the plugin will attempt to authenticate.
   # 3 minute, 5 minute, or larger intervals. See https://aws.amazon.com/cloudwatch/faqs/#monitoring.
   # Note that if a period is configured that is smaller than the minimum for a
   # particular metric, that metric will not be returned by the Cloudwatch API
-  # and will not be collected by Telegraf.
+  # and will not be collected by Rush.
   #
   ## Requested CloudWatch aggregation Period (required - must be a multiple of 60s)
   period = "5m"
@@ -145,6 +145,6 @@ Tag Dimension names are represented in [snake case](https://en.wikipedia.org/wik
 ### Example Output:
 
 ```
-$ ./telegraf --config telegraf.conf --input-filter cloudwatch --test
+$ ./rush --config rush.conf --input-filter cloudwatch --test
 > cloudwatch_aws_elb,load_balancer_name=p-example,region=us-east-1,unit=seconds latency_average=0.004810798017284538,latency_maximum=0.1100282669067383,latency_minimum=0.0006084442138671875,latency_sample_count=4029,latency_sum=19.382705211639404 1459542420000000000
 ```

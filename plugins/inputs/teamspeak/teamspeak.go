@@ -3,8 +3,8 @@ package teamspeak
 import (
 	"github.com/multiplay/go-ts3"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 	"strconv"
 )
 
@@ -37,7 +37,7 @@ func (ts *Teamspeak) SampleConfig() string {
 	return sampleConfig
 }
 
-func (ts *Teamspeak) Gather(acc telegraf.Accumulator) error {
+func (ts *Teamspeak) Gather(acc rush.Accumulator) error {
 	var err error
 
 	if !ts.connected {
@@ -91,7 +91,7 @@ func (ts *Teamspeak) Gather(acc telegraf.Accumulator) error {
 }
 
 func init() {
-	inputs.Add("teamspeak", func() telegraf.Input {
+	inputs.Add("teamspeak", func() rush.Input {
 		return &Teamspeak{
 			Server:         "127.0.0.1:10011",
 			VirtualServers: []int{1},

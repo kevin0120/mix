@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -42,32 +42,32 @@ func TestSocketListener_udp(t *testing.T) {
 }
 
 func TestSocketListener_unix(t *testing.T) {
-	os.Create("/tmp/telegraf_test.sock")
+	os.Create("/tmp/rush_test.sock")
 	sl := newSocketListener()
-	sl.ServiceAddress = "unix:///tmp/telegraf_test.sock"
+	sl.ServiceAddress = "unix:///tmp/rush_test.sock"
 
 	acc := &testutil.Accumulator{}
 	err := sl.Start(acc)
 	require.NoError(t, err)
 	defer sl.Stop()
 
-	client, err := net.Dial("unix", "/tmp/telegraf_test.sock")
+	client, err := net.Dial("unix", "/tmp/rush_test.sock")
 	require.NoError(t, err)
 
 	testSocketListener(t, sl, client)
 }
 
 func TestSocketListener_unixgram(t *testing.T) {
-	os.Create("/tmp/telegraf_test.sock")
+	os.Create("/tmp/rush_test.sock")
 	sl := newSocketListener()
-	sl.ServiceAddress = "unixgram:///tmp/telegraf_test.sock"
+	sl.ServiceAddress = "unixgram:///tmp/rush_test.sock"
 
 	acc := &testutil.Accumulator{}
 	err := sl.Start(acc)
 	require.NoError(t, err)
 	defer sl.Stop()
 
-	client, err := net.Dial("unixgram", "/tmp/telegraf_test.sock")
+	client, err := net.Dial("unixgram", "/tmp/rush_test.sock")
 	require.NoError(t, err)
 
 	testSocketListener(t, sl, client)

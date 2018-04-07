@@ -1,6 +1,6 @@
 # Internal Input Plugin
 
-The `internal` plugin collects metrics about the telegraf agent itself.
+The `internal` plugin collects metrics about the rush agent itself.
 
 Note that some metrics are aggregates across all instances of one type of
 plugin.
@@ -10,7 +10,7 @@ plugin.
 ```toml
 # Collect statistics about itself
 [[inputs.internal]]
-  ## If true, collect telegraf memory stats.
+  ## If true, collect rush memory stats.
   # collect_memstats = true
 ```
 
@@ -33,7 +33,7 @@ memstats are taken from the Go runtime: https://golang.org/pkg/runtime/#MemStats
     - sys\_bytes
     - total\_alloc\_bytes
 
-agent stats collect aggregate stats on all telegraf plugins.
+agent stats collect aggregate stats on all rush plugins.
 
 - internal\_agent
     - gather\_errors

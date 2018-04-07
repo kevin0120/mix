@@ -6,14 +6,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/testutil"
 
-	"github.com/influxdata/telegraf"
+	"github.com/masami10/rush"
 )
 
 func TestBuildPoint(t *testing.T) {
 	var tagtests = []struct {
-		ptIn  telegraf.Metric
+		ptIn  rush.Metric
 		outPt Point
 		err   error
 	}{

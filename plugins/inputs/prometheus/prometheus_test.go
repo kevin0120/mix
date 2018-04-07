@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -90,7 +90,7 @@ func TestPrometheusGeneratesMetricsAlthoughFirstDNSFails(t *testing.T) {
 
 	p := &Prometheus{
 		URLs:               []string{ts.URL},
-		KubernetesServices: []string{"http://random.telegraf.local:88/metrics"},
+		KubernetesServices: []string{"http://random.rush.local:88/metrics"},
 	}
 
 	var acc testutil.Accumulator

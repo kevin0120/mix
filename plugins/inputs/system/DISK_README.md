@@ -11,7 +11,7 @@ https://en.wikipedia.org/wiki/Df_(Unix) for more details.
 ```
 # Read metrics about disk usage by mount point
 [[inputs.disk]]
-  # By default, telegraf gather stats for all mountpoints.
+  # By default, rush gather stats for all mountpoints.
   # Setting mountpoints will restrict the stats to the specified mountpoints.
   # mount_points = ["/"]
 ```
@@ -19,11 +19,11 @@ https://en.wikipedia.org/wiki/Df_(Unix) for more details.
 Additionally, the behavior of resolving the `mount_points` can be configured by using the `HOST_MOUNT_PREFIX` environment variable.
 When present, this variable is prepended to the mountpoints discovered by the plugin before retrieving stats.
 The prefix is stripped from the reported `path` in the measurement.
-This settings is useful when running `telegraf` inside a docker container to report host machine metrics.
+This settings is useful when running `rush` inside a docker container to report host machine metrics.
 In this case, the host's root volume should be mounted into the container and the `HOST_MOUNT_PREFIX` and `HOST_PROC` environment variables set.
 
 ```
-docker run -v /:/hostfs:ro -e HOST_MOUNT_PREFIX=/hostfs -e HOST_PROC=/hostfs/proc telegraf
+docker run -v /:/hostfs:ro -e HOST_MOUNT_PREFIX=/hostfs -e HOST_PROC=/hostfs/proc rush
 ```
 
 ### Measurements & Fields:
@@ -47,7 +47,7 @@ docker run -v /:/hostfs:ro -e HOST_MOUNT_PREFIX=/hostfs -e HOST_PROC=/hostfs/pro
 ### Example Output:
 
 ```
-% ./telegraf --config ~/ws/telegraf.conf --input-filter disk --test
+% ./rush --config ~/ws/rush.conf --input-filter disk --test
 * Plugin: disk, Collection 1
 > disk,fstype=hfs,mode=ro,path=/ free=398407520256i,inodes_free=97267461i,inodes_total=121847806i,inodes_used=24580345i,total=499088621568i,used=100418957312i,used_percent=20.131039916242397 1453832006274071563
 > disk,fstype=devfs,mode=rw,path=/dev free=0i,inodes_free=0i,inodes_total=628i,inodes_used=628i,total=185856i,used=185856i,used_percent=100 1453832006274137913
@@ -65,7 +65,7 @@ The diskio input plugin gathers metrics about disk traffic and timing.
 ```
 # Read metrics about disk IO by device
 [[inputs.diskio]]
-  ## By default, telegraf will gather stats for all devices including
+  ## By default, rush will gather stats for all devices including
   ## disk partitions.
   ## Setting devices will restrict the stats to the specified devices.
   # devices = ["sda", "sdb"]
@@ -148,7 +148,7 @@ SELECT derivative(last("weighted_io_time",1ms)) from "diskio" WHERE time > now()
 ### Example Output:
 
 ```
-% telegraf -config ~/.telegraf/telegraf.conf -input-filter diskio -test
+% rush -config ~/.rush/rush.conf -input-filter diskio -test
 * Plugin: inputs.diskio, Collection 1
 > diskio,name=sda weighted_io_time=8411917i,read_time=7446444i,write_time=971489i,io_time=866197i,write_bytes=5397686272i,iops_in_progress=0i,reads=2970519i,writes=361139i,read_bytes=119528903168i 1502467254359000000
 > diskio,name=sda1 reads=2149i,read_bytes=10753536i,write_bytes=20697088i,write_time=346i,weighted_io_time=505i,writes=2110i,read_time=161i,io_time=208i,iops_in_progress=0i 1502467254359000000

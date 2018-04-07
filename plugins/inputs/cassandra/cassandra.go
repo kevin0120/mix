@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -34,13 +34,13 @@ type Cassandra struct {
 type javaMetric struct {
 	host   string
 	metric string
-	acc    telegraf.Accumulator
+	acc    rush.Accumulator
 }
 
 type cassandraMetric struct {
 	host   string
 	metric string
-	acc    telegraf.Accumulator
+	acc    rush.Accumulator
 }
 
 type jmxMetric interface {
@@ -48,12 +48,12 @@ type jmxMetric interface {
 }
 
 func newJavaMetric(host string, metric string,
-	acc telegraf.Accumulator) *javaMetric {
+	acc rush.Accumulator) *javaMetric {
 	return &javaMetric{host: host, metric: metric, acc: acc}
 }
 
 func newCassandraMetric(host string, metric string,
-	acc telegraf.Accumulator) *cassandraMetric {
+	acc rush.Accumulator) *cassandraMetric {
 	return &cassandraMetric{host: host, metric: metric, acc: acc}
 }
 
@@ -256,7 +256,7 @@ func parseServerTokens(server string) map[string]string {
 	return serverTokens
 }
 
-func (c *Cassandra) Gather(acc telegraf.Accumulator) error {
+func (c *Cassandra) Gather(acc rush.Accumulator) error {
 	context := c.Context
 	servers := c.Servers
 	metrics := c.Metrics
@@ -306,7 +306,7 @@ func (c *Cassandra) Gather(acc telegraf.Accumulator) error {
 }
 
 func init() {
-	inputs.Add("cassandra", func() telegraf.Input {
+	inputs.Add("cassandra", func() rush.Input {
 		return &Cassandra{jClient: &JolokiaClientImpl{client: &http.Client{}}}
 	})
 }

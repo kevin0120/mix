@@ -10,9 +10,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/outputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/outputs"
 )
 
 type Datadog struct {
@@ -66,7 +66,7 @@ func (d *Datadog) Connect() error {
 	return nil
 }
 
-func (d *Datadog) Write(metrics []telegraf.Metric) error {
+func (d *Datadog) Write(metrics []rush.Metric) error {
 	if len(metrics) == 0 {
 		return nil
 	}
@@ -142,7 +142,7 @@ func (d *Datadog) authenticatedUrl() string {
 	return fmt.Sprintf("%s?%s", d.apiUrl, q.Encode())
 }
 
-func buildMetrics(m telegraf.Metric) (map[string]Point, error) {
+func buildMetrics(m rush.Metric) (map[string]Point, error) {
 	ms := make(map[string]Point)
 	for k, v := range m.Fields() {
 		if !verifyValue(v) {
@@ -200,7 +200,7 @@ func (d *Datadog) Close() error {
 }
 
 func init() {
-	outputs.Add("datadog", func() telegraf.Output {
+	outputs.Add("datadog", func() rush.Output {
 		return NewDatadog(datadog_api)
 	})
 }

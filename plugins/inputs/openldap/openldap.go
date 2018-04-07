@@ -7,9 +7,9 @@ import (
 
 	"gopkg.in/ldap.v2"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 type Openldap struct {
@@ -73,7 +73,7 @@ func NewOpenldap() *Openldap {
 }
 
 // gather metrics
-func (o *Openldap) Gather(acc telegraf.Accumulator) error {
+func (o *Openldap) Gather(acc rush.Accumulator) error {
 	var err error
 	var l *ldap.Conn
 	if o.Ssl != "" {
@@ -142,7 +142,7 @@ func (o *Openldap) Gather(acc telegraf.Accumulator) error {
 	return nil
 }
 
-func gatherSearchResult(sr *ldap.SearchResult, o *Openldap, acc telegraf.Accumulator) {
+func gatherSearchResult(sr *ldap.SearchResult, o *Openldap, acc rush.Accumulator) {
 	fields := map[string]interface{}{}
 	tags := map[string]string{
 		"server": o.Host,
@@ -174,5 +174,5 @@ func dnToMetric(dn, searchBase string) string {
 }
 
 func init() {
-	inputs.Add("openldap", func() telegraf.Input { return NewOpenldap() })
+	inputs.Add("openldap", func() rush.Input { return NewOpenldap() })
 }

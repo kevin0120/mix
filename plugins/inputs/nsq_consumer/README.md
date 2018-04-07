@@ -14,14 +14,14 @@ topic and adds messages to InfluxDB. This plugin allows a message to be in any o
   nsqd = ["localhost:4150"]
   ## An array representing the NSQLookupd HTTP Endpoints
   nsqlookupd = ["localhost:4161"]
-  topic = "telegraf"
+  topic = "rush"
   channel = "consumer"
   max_in_flight = 100
 
   ## Data format to consume.
   ## Each data format has its own unique set of configuration options, read
   ## more about them here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   data_format = "influx"
 ```
 

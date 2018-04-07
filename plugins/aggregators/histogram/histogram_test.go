@@ -5,14 +5,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/metric"
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/metric"
+	"github.com/masami10/rush/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
 // NewTestHistogram creates new test histogram aggregation with specified config
-func NewTestHistogram(cfg []config) telegraf.Aggregator {
+func NewTestHistogram(cfg []config) rush.Aggregator {
 	htm := &HistogramAggregator{Configs: cfg}
 	htm.buckets = make(bucketsByMetrics)
 	htm.resetCache()

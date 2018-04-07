@@ -63,21 +63,21 @@ depending of your smtpctl configuration.
 ### Permissions:
 
 It's important to note that this plugin references smtpctl, which may require additional permissions to execute successfully.
-Depending on the user/group permissions of the telegraf user executing this plugin, you may need to alter the group membership, set facls, or use sudo.
+Depending on the user/group permissions of the rush user executing this plugin, you may need to alter the group membership, set facls, or use sudo.
 
 **Group membership (Recommended)**:
 ```bash
-$ groups telegraf
-telegraf : telegraf
+$ groups rush
+rush : rush
 
-$ usermod -a -G opensmtpd telegraf
+$ usermod -a -G opensmtpd rush
 
-$ groups telegraf
-telegraf : telegraf opensmtpd
+$ groups rush
+rush : rush opensmtpd
 ```
 
 **Sudo privileges**:
-If you use this method, you will need the following in your telegraf config:
+If you use this method, you will need the following in your rush config:
 ```toml
 [[inputs.opensmtpd]]
   use_sudo = true
@@ -87,7 +87,7 @@ You will also need to update your sudoers file:
 ```bash
 $ visudo
 # Add the following line:
-telegraf ALL=(ALL) NOPASSWD: /usr/sbin/smtpctl
+rush ALL=(ALL) NOPASSWD: /usr/sbin/smtpctl
 ```
 
 Please use the solution you see as most appropriate.
@@ -95,7 +95,7 @@ Please use the solution you see as most appropriate.
 ### Example Output:
 
 ```
- telegraf --config etc/telegraf.conf --input-filter opensmtpd --test
+ rush --config etc/rush.conf --input-filter opensmtpd --test
 * Plugin: inputs.opensmtpd, Collection 1
 > opensmtpd,host=localhost scheduler_delivery_tempfail=822,mta_host=10,mta_task_running=4,queue_bounce=13017,scheduler_delivery_permfail=51022,mta_relay=7,queue_evpcache_size=2,scheduler_envelope_expired=26,bounce_message=0,mta_domain=7,queue_evpcache_update_hit=848,smtp_session_local=12294,bounce_envelope=0,queue_evpcache_load_hit=4389703,scheduler_ramqueue_update=0,mta_route=3,scheduler_delivery_ok=2149489,smtp_session_inet4=2131997,control_session=1,scheduler_envelope_incoming=0,uptime=10346728,scheduler_ramqueue_envelope=2,smtp_session=0,bounce_session=0,mta_envelope=2,mta_session=6,mta_task=2,scheduler_ramqueue_message=2,mta_connector=7,mta_source=1,scheduler_envelope=2,scheduler_envelope_inflight=2 1510220300000000000
 

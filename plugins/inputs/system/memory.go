@@ -3,8 +3,8 @@ package system
 import (
 	"fmt"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 type MemStats struct {
@@ -17,7 +17,7 @@ func (_ *MemStats) Description() string {
 
 func (_ *MemStats) SampleConfig() string { return "" }
 
-func (s *MemStats) Gather(acc telegraf.Accumulator) error {
+func (s *MemStats) Gather(acc rush.Accumulator) error {
 	vm, err := s.ps.VMStat()
 	if err != nil {
 		return fmt.Errorf("error getting virtual memory info: %s", err)
@@ -51,7 +51,7 @@ func (_ *SwapStats) Description() string {
 
 func (_ *SwapStats) SampleConfig() string { return "" }
 
-func (s *SwapStats) Gather(acc telegraf.Accumulator) error {
+func (s *SwapStats) Gather(acc rush.Accumulator) error {
 	swap, err := s.ps.SwapStat()
 	if err != nil {
 		return fmt.Errorf("error getting swap memory info: %s", err)
@@ -75,11 +75,11 @@ func (s *SwapStats) Gather(acc telegraf.Accumulator) error {
 
 func init() {
 	ps := newSystemPS()
-	inputs.Add("mem", func() telegraf.Input {
+	inputs.Add("mem", func() rush.Input {
 		return &MemStats{ps: ps}
 	})
 
-	inputs.Add("swap", func() telegraf.Input {
+	inputs.Add("swap", func() rush.Input {
 		return &SwapStats{ps: ps}
 	})
 }

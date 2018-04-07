@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	"github.com/hashicorp/consul/api"
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 type Consul struct {
@@ -94,7 +94,7 @@ func (c *Consul) createAPIClient() (*api.Client, error) {
 	return api.NewClient(config)
 }
 
-func (c *Consul) GatherHealthCheck(acc telegraf.Accumulator, checks []*api.HealthCheck) {
+func (c *Consul) GatherHealthCheck(acc rush.Accumulator, checks []*api.HealthCheck) {
 	for _, check := range checks {
 		record := make(map[string]interface{})
 		tags := make(map[string]string)
@@ -116,7 +116,7 @@ func (c *Consul) GatherHealthCheck(acc telegraf.Accumulator, checks []*api.Healt
 	}
 }
 
-func (c *Consul) Gather(acc telegraf.Accumulator) error {
+func (c *Consul) Gather(acc rush.Accumulator) error {
 	if c.client == nil {
 		newClient, err := c.createAPIClient()
 
@@ -139,7 +139,7 @@ func (c *Consul) Gather(acc telegraf.Accumulator) error {
 }
 
 func init() {
-	inputs.Add("consul", func() telegraf.Input {
+	inputs.Add("consul", func() rush.Input {
 		return &Consul{}
 	})
 }

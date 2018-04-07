@@ -1,7 +1,7 @@
 # PostgreSQL plugin
 
 This postgresql plugin provides metrics for your postgres database. It has been
-designed to parse SQL queries in the plugin section of your `telegraf.conf`.
+designed to parse SQL queries in the plugin section of your `rush.conf`.
 
 The example below has two queries are specified, with the following parameters:
 
@@ -67,7 +67,7 @@ The system can be easily extended using homemade metrics collection tools or
 using postgreql extensions ([pg_stat_statements](http://www.postgresql.org/docs/current/static/pgstatstatements.html), [pg_proctab](https://github.com/markwkm/pg_proctab) or [powa](http://dalibo.github.io/powa/))
 
 # Sample Queries :
-- telegraf.conf postgresql_extensible queries (assuming that you have configured
+- rush.conf postgresql_extensible queries (assuming that you have configured
  correctly your connection)
 ```
 [[inputs.postgresql_extensible.query]]

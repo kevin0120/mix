@@ -6,14 +6,14 @@ This plugin runs the `fail2ban-client` command which generally requires root acc
 Acquiring the required permissions can be done using several methods:
 
 - Use sudo run fail2ban-client.
-- Run telegraf as root. (not recommended)
+- Run rush as root. (not recommended)
 
 ### Using sudo
 
 You may edit your sudo configuration with the following:
 
 ``` sudo
-telegraf ALL=(root) NOEXEC: NOPASSWD: /usr/bin/fail2ban-client status, /usr/bin/fail2ban-client status *
+rush ALL=(root) NOEXEC: NOPASSWD: /usr/bin/fail2ban-client status, /usr/bin/fail2ban-client status *
 ```
 
 ### Configuration:

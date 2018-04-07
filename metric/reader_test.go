@@ -8,13 +8,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/influxdata/telegraf"
+	"github.com/masami10/rush"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func BenchmarkMetricReader(b *testing.B) {
-	metrics := make([]telegraf.Metric, 10)
+	metrics := make([]rush.Metric, 10)
 	for i := 0; i < 10; i++ {
 		metrics[i], _ = New("foo", map[string]string{},
 			map[string]interface{}{"value": int64(1)}, time.Now())
@@ -27,7 +27,7 @@ func BenchmarkMetricReader(b *testing.B) {
 
 func TestMetricReader(t *testing.T) {
 	ts := time.Unix(1481032190, 0)
-	metrics := make([]telegraf.Metric, 10)
+	metrics := make([]rush.Metric, 10)
 	for i := 0; i < 10; i++ {
 		metrics[i], _ = New("foo", map[string]string{},
 			map[string]interface{}{"value": int64(1)}, ts)
@@ -57,7 +57,7 @@ func TestMetricReader_OverflowMetric(t *testing.T) {
 	ts := time.Unix(1481032190, 0)
 	m, _ := New("foo", map[string]string{},
 		map[string]interface{}{"value": int64(10)}, ts)
-	metrics := []telegraf.Metric{m}
+	metrics := []rush.Metric{m}
 
 	r := NewReader(metrics)
 	buf := make([]byte, 5)
@@ -124,7 +124,7 @@ func TestMetricReader_MetricSizeEqualsBufferSize(t *testing.T) {
 	ts := time.Unix(1481032190, 0)
 	m1, _ := New("foo", map[string]string{},
 		map[string]interface{}{"a": int64(1)}, ts)
-	metrics := []telegraf.Metric{m1}
+	metrics := []rush.Metric{m1}
 
 	r := NewReader(metrics)
 	buf := make([]byte, m1.Len())
@@ -154,7 +154,7 @@ func TestMetricReader_SplitWithExactLengthSplit(t *testing.T) {
 	ts := time.Unix(1481032190, 0)
 	m1, _ := New("foo", map[string]string{},
 		map[string]interface{}{"a": int64(1), "bb": int64(2)}, ts)
-	metrics := []telegraf.Metric{m1}
+	metrics := []rush.Metric{m1}
 
 	r := NewReader(metrics)
 	buf := make([]byte, 30)
@@ -192,7 +192,7 @@ func TestMetricReader_SplitOverflowOversized(t *testing.T) {
 			"a":   int64(1),
 			"bbb": int64(2),
 		}, ts)
-	metrics := []telegraf.Metric{m1}
+	metrics := []rush.Metric{m1}
 
 	r := NewReader(metrics)
 	buf := make([]byte, 30)
@@ -225,7 +225,7 @@ func TestMetricReader_SplitOverflowUneeded(t *testing.T) {
 	ts := time.Unix(1481032190, 0)
 	m1, _ := New("foo", map[string]string{},
 		map[string]interface{}{"a": int64(1), "b": int64(2)}, ts)
-	metrics := []telegraf.Metric{m1}
+	metrics := []rush.Metric{m1}
 
 	r := NewReader(metrics)
 	buf := make([]byte, 29)
@@ -255,7 +255,7 @@ func TestMetricReader_OverflowMultipleMetrics(t *testing.T) {
 	ts := time.Unix(1481032190, 0)
 	m, _ := New("foo", map[string]string{},
 		map[string]interface{}{"value": int64(10)}, ts)
-	metrics := []telegraf.Metric{m, m.Copy()}
+	metrics := []rush.Metric{m, m.Copy()}
 
 	r := NewReader(metrics)
 	buf := make([]byte, 10)
@@ -334,7 +334,7 @@ func TestMetricReader_SplitMetric(t *testing.T) {
 		},
 		ts,
 	)
-	metrics := []telegraf.Metric{m1}
+	metrics := []rush.Metric{m1}
 
 	r := NewReader(metrics)
 	buf := make([]byte, 60)
@@ -390,7 +390,7 @@ func TestMetricReader_SplitMetric2(t *testing.T) {
 		},
 		ts,
 	)
-	metrics := []telegraf.Metric{m1, m2}
+	metrics := []rush.Metric{m1, m2}
 
 	r := NewReader(metrics)
 	buf := make([]byte, 60)
@@ -442,7 +442,7 @@ func TestMetricReader_SplitMetricTooLong(t *testing.T) {
 		},
 		ts,
 	)
-	metrics := []telegraf.Metric{m1}
+	metrics := []rush.Metric{m1}
 
 	r := NewReader(metrics)
 	buf := make([]byte, 30)
@@ -496,7 +496,7 @@ func TestMetricReader_SplitMetricChangingBuffer(t *testing.T) {
 		},
 		ts,
 	)
-	metrics := []telegraf.Metric{m1, m2}
+	metrics := []rush.Metric{m1, m2}
 
 	r := NewReader(metrics)
 
@@ -570,7 +570,7 @@ func TestMetricReader_SplitMetricChangingBuffer2(t *testing.T) {
 		},
 		ts,
 	)
-	metrics := []telegraf.Metric{m1, m2}
+	metrics := []rush.Metric{m1, m2}
 
 	r := NewReader(metrics)
 
@@ -629,7 +629,7 @@ func TestReader_Read(t *testing.T) {
 		tags   map[string]string
 		fields map[string]interface{}
 		t      time.Time
-		mType  []telegraf.ValueType
+		mType  []rush.ValueType
 	}
 	tests := []struct {
 		name     string
@@ -684,7 +684,7 @@ func TestReader_Read(t *testing.T) {
 			m, err := New(tt.args.name, tt.args.tags, tt.args.fields, tt.args.t, tt.args.mType...)
 			require.NoError(t, err)
 
-			r := NewReader([]telegraf.Metric{m})
+			r := NewReader([]rush.Metric{m})
 			num, err := r.Read(buf)
 			if err != io.EOF {
 				require.NoError(t, err)

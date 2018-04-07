@@ -53,7 +53,7 @@ Fields may vary depends on type of the plugin
 ### Example Output:
 
 ```
-$ telegraf --config fluentd.conf --input-filter fluentd --test
+$ rush --config fluentd.conf --input-filter fluentd --test
 * Plugin: inputs.fluentd, Collection 1
 > fluentd,host=T440s,plugin_id=object:9f748c,plugin_category=input,plugin_type=dummy buffer_total_queued_size=0,buffer_queue_length=0,retry_count=0 1492006105000000000
 > fluentd,plugin_category=input,plugin_type=dummy,host=T440s,plugin_id=object:8da98c buffer_queue_length=0,retry_count=0,buffer_total_queued_size=0 1492006105000000000

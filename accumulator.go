@@ -1,4 +1,4 @@
-package telegraf
+package rush
 
 import "time"
 

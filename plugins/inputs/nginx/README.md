@@ -1,4 +1,4 @@
-# Telegraf Plugin: Nginx
+# Rush Plugin: Nginx
 
 ### Configuration:
 
@@ -9,9 +9,9 @@
   urls = ["http://localhost/server_status"]
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 
@@ -47,7 +47,7 @@ Using this configuration:
 
 When run with:
 ```
-./telegraf --config telegraf.conf --input-filter nginx --test
+./rush --config rush.conf --input-filter nginx --test
 ```
 
 It produces:

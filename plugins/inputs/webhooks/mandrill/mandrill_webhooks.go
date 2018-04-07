@@ -9,15 +9,15 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/influxdata/telegraf"
+	"github.com/masami10/rush"
 )
 
 type MandrillWebhook struct {
 	Path string
-	acc  telegraf.Accumulator
+	acc  rush.Accumulator
 }
 
-func (md *MandrillWebhook) Register(router *mux.Router, acc telegraf.Accumulator) {
+func (md *MandrillWebhook) Register(router *mux.Router, acc rush.Accumulator) {
 	router.HandleFunc(md.Path, md.returnOK).Methods("HEAD")
 	router.HandleFunc(md.Path, md.eventHandler).Methods("POST")
 

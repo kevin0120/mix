@@ -4,11 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/metric"
-	prometheus_input "github.com/influxdata/telegraf/plugins/inputs/prometheus"
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/metric"
+	prometheus_input "github.com/masami10/rush/plugins/inputs/prometheus"
+	"github.com/masami10/rush/testutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -34,7 +34,7 @@ func TestWrite_Basic(t *testing.T) {
 		make(map[string]string),
 		map[string]interface{}{"value": 0.0},
 		now)
-	var metrics = []telegraf.Metric{
+	var metrics = []rush.Metric{
 		pt1,
 	}
 
@@ -44,7 +44,7 @@ func TestWrite_Basic(t *testing.T) {
 
 	fam, ok := client.fam["foo"]
 	require.True(t, ok)
-	require.Equal(t, telegraf.Untyped, fam.TelegrafValueType)
+	require.Equal(t, rush.Untyped, fam.RushValueType)
 	require.Equal(t, map[string]int{}, fam.LabelSet)
 
 	sample, ok := fam.Samples[CreateSampleID(pt1.Tags())]
@@ -62,7 +62,7 @@ func TestWrite_IntField(t *testing.T) {
 		make(map[string]string),
 		map[string]interface{}{"value": 42},
 		time.Now())
-	err = client.Write([]telegraf.Metric{p1})
+	err = client.Write([]rush.Metric{p1})
 	require.NoError(t, err)
 
 	fam, ok := client.fam["foo"]
@@ -81,7 +81,7 @@ func TestWrite_FieldNotValue(t *testing.T) {
 		make(map[string]string),
 		map[string]interface{}{"howdy": 0.0},
 		time.Now())
-	err = client.Write([]telegraf.Metric{p1})
+	err = client.Write([]rush.Metric{p1})
 	require.NoError(t, err)
 
 	fam, ok := client.fam["foo_howdy"]
@@ -99,7 +99,7 @@ func TestWrite_SkipNonNumberField(t *testing.T) {
 		make(map[string]string),
 		map[string]interface{}{"value": "howdy"},
 		time.Now())
-	err = client.Write([]telegraf.Metric{p1})
+	err = client.Write([]rush.Metric{p1})
 	require.NoError(t, err)
 
 	_, ok := client.fam["foo"]
@@ -111,44 +111,44 @@ func TestWrite_Counters(t *testing.T) {
 		measurement string
 		tags        map[string]string
 		fields      map[string]interface{}
-		valueType   telegraf.ValueType
+		valueType   rush.ValueType
 	}
 	var tests = []struct {
 		name       string
 		args       args
 		err        error
 		metricName string
-		valueType  telegraf.ValueType
+		valueType  rush.ValueType
 	}{
 		{
 			name: "field named value is not added to metric name",
 			args: args{
 				measurement: "foo",
 				fields:      map[string]interface{}{"value": 42},
-				valueType:   telegraf.Counter,
+				valueType:   rush.Counter,
 			},
 			metricName: "foo",
-			valueType:  telegraf.Counter,
+			valueType:  rush.Counter,
 		},
 		{
 			name: "field named counter is not added to metric name",
 			args: args{
 				measurement: "foo",
 				fields:      map[string]interface{}{"counter": 42},
-				valueType:   telegraf.Counter,
+				valueType:   rush.Counter,
 			},
 			metricName: "foo",
-			valueType:  telegraf.Counter,
+			valueType:  rush.Counter,
 		},
 		{
 			name: "field with any other name is added to metric name",
 			args: args{
 				measurement: "foo",
 				fields:      map[string]interface{}{"other": 42},
-				valueType:   telegraf.Counter,
+				valueType:   rush.Counter,
 			},
 			metricName: "foo_other",
-			valueType:  telegraf.Counter,
+			valueType:  rush.Counter,
 		},
 	}
 	for _, tt := range tests {
@@ -161,12 +161,12 @@ func TestWrite_Counters(t *testing.T) {
 				tt.args.valueType,
 			)
 			client := NewClient()
-			err = client.Write([]telegraf.Metric{m})
+			err = client.Write([]rush.Metric{m})
 			require.Equal(t, tt.err, err)
 
 			fam, ok := client.fam[tt.metricName]
 			require.True(t, ok)
-			require.Equal(t, tt.valueType, fam.TelegrafValueType)
+			require.Equal(t, tt.valueType, fam.RushValueType)
 		})
 	}
 }
@@ -179,8 +179,8 @@ func TestWrite_Sanitize(t *testing.T) {
 		map[string]string{"tag-with-dash": "localhost.local"},
 		map[string]interface{}{"field-with-dash": 42},
 		time.Now(),
-		telegraf.Counter)
-	err = client.Write([]telegraf.Metric{p1})
+		rush.Counter)
+	err = client.Write([]rush.Metric{p1})
 	require.NoError(t, err)
 
 	fam, ok := client.fam["foo_bar_field_with_dash"]
@@ -199,44 +199,44 @@ func TestWrite_Gauge(t *testing.T) {
 		measurement string
 		tags        map[string]string
 		fields      map[string]interface{}
-		valueType   telegraf.ValueType
+		valueType   rush.ValueType
 	}
 	var tests = []struct {
 		name       string
 		args       args
 		err        error
 		metricName string
-		valueType  telegraf.ValueType
+		valueType  rush.ValueType
 	}{
 		{
 			name: "field named value is not added to metric name",
 			args: args{
 				measurement: "foo",
 				fields:      map[string]interface{}{"value": 42},
-				valueType:   telegraf.Gauge,
+				valueType:   rush.Gauge,
 			},
 			metricName: "foo",
-			valueType:  telegraf.Gauge,
+			valueType:  rush.Gauge,
 		},
 		{
 			name: "field named gauge is not added to metric name",
 			args: args{
 				measurement: "foo",
 				fields:      map[string]interface{}{"gauge": 42},
-				valueType:   telegraf.Gauge,
+				valueType:   rush.Gauge,
 			},
 			metricName: "foo",
-			valueType:  telegraf.Gauge,
+			valueType:  rush.Gauge,
 		},
 		{
 			name: "field with any other name is added to metric name",
 			args: args{
 				measurement: "foo",
 				fields:      map[string]interface{}{"other": 42},
-				valueType:   telegraf.Gauge,
+				valueType:   rush.Gauge,
 			},
 			metricName: "foo_other",
-			valueType:  telegraf.Gauge,
+			valueType:  rush.Gauge,
 		},
 	}
 	for _, tt := range tests {
@@ -249,12 +249,12 @@ func TestWrite_Gauge(t *testing.T) {
 				tt.args.valueType,
 			)
 			client := NewClient()
-			err = client.Write([]telegraf.Metric{m})
+			err = client.Write([]rush.Metric{m})
 			require.Equal(t, tt.err, err)
 
 			fam, ok := client.fam[tt.metricName]
 			require.True(t, ok)
-			require.Equal(t, tt.valueType, fam.TelegrafValueType)
+			require.Equal(t, tt.valueType, fam.RushValueType)
 
 		})
 	}
@@ -268,9 +268,9 @@ func TestWrite_Summary(t *testing.T) {
 		make(map[string]string),
 		map[string]interface{}{"sum": 84, "count": 42, "0": 2, "0.5": 3, "1": 4},
 		time.Now(),
-		telegraf.Summary)
+		rush.Summary)
 
-	err = client.Write([]telegraf.Metric{p1})
+	err = client.Write([]rush.Metric{p1})
 	require.NoError(t, err)
 
 	fam, ok := client.fam["foo"]
@@ -293,9 +293,9 @@ func TestWrite_Histogram(t *testing.T) {
 		make(map[string]string),
 		map[string]interface{}{"sum": 84, "count": 42, "0": 2, "0.5": 3, "1": 4},
 		time.Now(),
-		telegraf.Histogram)
+		rush.Histogram)
 
-	err = client.Write([]telegraf.Metric{p1})
+	err = client.Write([]rush.Metric{p1})
 	require.NoError(t, err)
 
 	fam, ok := client.fam["foo"]
@@ -317,14 +317,14 @@ func TestWrite_MixedValueType(t *testing.T) {
 		make(map[string]string),
 		map[string]interface{}{"value": 1.0},
 		now,
-		telegraf.Counter)
+		rush.Counter)
 	p2, err := metric.New(
 		"foo",
 		make(map[string]string),
 		map[string]interface{}{"value": 2.0},
 		now,
-		telegraf.Gauge)
-	var metrics = []telegraf.Metric{p1, p2}
+		rush.Gauge)
+	var metrics = []rush.Metric{p1, p2}
 
 	client := NewClient()
 	err = client.Write(metrics)
@@ -342,14 +342,14 @@ func TestWrite_MixedValueTypeUpgrade(t *testing.T) {
 		map[string]string{"a": "x"},
 		map[string]interface{}{"value": 1.0},
 		now,
-		telegraf.Untyped)
+		rush.Untyped)
 	p2, err := metric.New(
 		"foo",
 		map[string]string{"a": "y"},
 		map[string]interface{}{"value": 2.0},
 		now,
-		telegraf.Gauge)
-	var metrics = []telegraf.Metric{p1, p2}
+		rush.Gauge)
+	var metrics = []rush.Metric{p1, p2}
 
 	client := NewClient()
 	err = client.Write(metrics)
@@ -367,14 +367,14 @@ func TestWrite_MixedValueTypeDowngrade(t *testing.T) {
 		map[string]string{"a": "x"},
 		map[string]interface{}{"value": 1.0},
 		now,
-		telegraf.Gauge)
+		rush.Gauge)
 	p2, err := metric.New(
 		"foo",
 		map[string]string{"a": "y"},
 		map[string]interface{}{"value": 2.0},
 		now,
-		telegraf.Untyped)
-	var metrics = []telegraf.Metric{p1, p2}
+		rush.Untyped)
+	var metrics = []rush.Metric{p1, p2}
 
 	client := NewClient()
 	err = client.Write(metrics)
@@ -397,7 +397,7 @@ func TestWrite_Tags(t *testing.T) {
 		map[string]string{"host": "localhost"},
 		map[string]interface{}{"value": 2.0},
 		now)
-	var metrics = []telegraf.Metric{p1, p2}
+	var metrics = []rush.Metric{p1, p2}
 
 	client := NewClient()
 	err = client.Write(metrics)
@@ -405,7 +405,7 @@ func TestWrite_Tags(t *testing.T) {
 
 	fam, ok := client.fam["foo"]
 	require.True(t, ok)
-	require.Equal(t, telegraf.Untyped, fam.TelegrafValueType)
+	require.Equal(t, rush.Untyped, fam.RushValueType)
 
 	require.Equal(t, map[string]int{"host": 1}, fam.LabelSet)
 
@@ -429,14 +429,14 @@ func TestWrite_StringFields(t *testing.T) {
 		make(map[string]string),
 		map[string]interface{}{"value": 1.0, "status": "good"},
 		now,
-		telegraf.Counter)
+		rush.Counter)
 	p2, err := metric.New(
 		"bar",
 		make(map[string]string),
 		map[string]interface{}{"status": "needs numeric field"},
 		now,
-		telegraf.Gauge)
-	var metrics = []telegraf.Metric{p1, p2}
+		rush.Gauge)
+	var metrics = []rush.Metric{p1, p2}
 
 	client := NewClient()
 	err = client.Write(metrics)
@@ -459,7 +459,7 @@ func TestExpire(t *testing.T) {
 		map[string]interface{}{"value": 1.0},
 		time.Now())
 	setUnixTime(client, 0)
-	err = client.Write([]telegraf.Metric{p1})
+	err = client.Write([]rush.Metric{p1})
 	require.NoError(t, err)
 
 	p2, err := metric.New(
@@ -468,7 +468,7 @@ func TestExpire(t *testing.T) {
 		map[string]interface{}{"value": 2.0},
 		time.Now())
 	setUnixTime(client, 1)
-	err = client.Write([]telegraf.Metric{p2})
+	err = client.Write([]rush.Metric{p2})
 
 	setUnixTime(client, 61)
 	require.Equal(t, 2, len(client.fam))
@@ -485,7 +485,7 @@ func TestExpire_TagsNoDecrement(t *testing.T) {
 		map[string]interface{}{"value": 1.0},
 		time.Now())
 	setUnixTime(client, 0)
-	err = client.Write([]telegraf.Metric{p1})
+	err = client.Write([]rush.Metric{p1})
 	require.NoError(t, err)
 
 	p2, err := metric.New(
@@ -494,7 +494,7 @@ func TestExpire_TagsNoDecrement(t *testing.T) {
 		map[string]interface{}{"value": 2.0},
 		time.Now())
 	setUnixTime(client, 1)
-	err = client.Write([]telegraf.Metric{p2})
+	err = client.Write([]rush.Metric{p2})
 
 	setUnixTime(client, 61)
 	fam, ok := client.fam["foo"]
@@ -515,7 +515,7 @@ func TestExpire_TagsWithDecrement(t *testing.T) {
 		map[string]interface{}{"value": 1.0},
 		time.Now())
 	setUnixTime(client, 0)
-	err = client.Write([]telegraf.Metric{p1})
+	err = client.Write([]rush.Metric{p1})
 	require.NoError(t, err)
 
 	p2, err := metric.New(
@@ -524,7 +524,7 @@ func TestExpire_TagsWithDecrement(t *testing.T) {
 		map[string]interface{}{"value": 2.0},
 		time.Now())
 	setUnixTime(client, 1)
-	err = client.Write([]telegraf.Metric{p2})
+	err = client.Write([]rush.Metric{p2})
 
 	setUnixTime(client, 61)
 	fam, ok := client.fam["foo"]
@@ -559,7 +559,7 @@ func TestPrometheusWritePointEmptyTag(t *testing.T) {
 		tags,
 		map[string]interface{}{"value": 1.0},
 		now)
-	var metrics = []telegraf.Metric{
+	var metrics = []rush.Metric{
 		pt1,
 		pt2,
 	}
@@ -594,7 +594,7 @@ func TestPrometheusWritePointEmptyTag(t *testing.T) {
 		tags,
 		map[string]interface{}{"value": 1.0},
 		now)
-	metrics = []telegraf.Metric{
+	metrics = []rush.Metric{
 		pt3,
 		pt4,
 	}

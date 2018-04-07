@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 // DefaultUsername will set a default value that corrasponds to the default
@@ -134,7 +134,7 @@ type Node struct {
 }
 
 // gatherFunc ...
-type gatherFunc func(r *RabbitMQ, acc telegraf.Accumulator)
+type gatherFunc func(r *RabbitMQ, acc rush.Accumulator)
 
 var gatherFunctions = []gatherFunc{gatherOverview, gatherNodes, gatherQueues}
 
@@ -148,9 +148,9 @@ var sampleConfig = `
   # password = "guest"
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 
@@ -170,7 +170,7 @@ var sampleConfig = `
 
   ## A list of queues to gather as the rabbitmq_queue measurement. If not
   ## specified, metrics for all queues are gathered.
-  # queues = ["telegraf"]
+  # queues = ["rush"]
 `
 
 // SampleConfig ...
@@ -184,7 +184,7 @@ func (r *RabbitMQ) Description() string {
 }
 
 // Gather ...
-func (r *RabbitMQ) Gather(acc telegraf.Accumulator) error {
+func (r *RabbitMQ) Gather(acc rush.Accumulator) error {
 	if r.Client == nil {
 		tlsCfg, err := internal.GetTLSConfig(
 			r.SSLCert, r.SSLKey, r.SSLCA, r.InsecureSkipVerify)
@@ -249,7 +249,7 @@ func (r *RabbitMQ) requestJSON(u string, target interface{}) error {
 	return nil
 }
 
-func gatherOverview(r *RabbitMQ, acc telegraf.Accumulator) {
+func gatherOverview(r *RabbitMQ, acc rush.Accumulator) {
 	overview := &OverviewResponse{}
 
 	err := r.requestJSON("/api/overview", &overview)
@@ -283,7 +283,7 @@ func gatherOverview(r *RabbitMQ, acc telegraf.Accumulator) {
 	acc.AddFields("rabbitmq_overview", fields, tags)
 }
 
-func gatherNodes(r *RabbitMQ, acc telegraf.Accumulator) {
+func gatherNodes(r *RabbitMQ, acc rush.Accumulator) {
 	nodes := make([]Node, 0)
 	// Gather information about nodes
 	err := r.requestJSON("/api/nodes", &nodes)
@@ -318,7 +318,7 @@ func gatherNodes(r *RabbitMQ, acc telegraf.Accumulator) {
 	}
 }
 
-func gatherQueues(r *RabbitMQ, acc telegraf.Accumulator) {
+func gatherQueues(r *RabbitMQ, acc rush.Accumulator) {
 	// Gather information about queues
 	queues := make([]Queue, 0)
 	err := r.requestJSON("/api/queues", &queues)
@@ -402,7 +402,7 @@ func (r *RabbitMQ) shouldGatherQueue(queue Queue) bool {
 }
 
 func init() {
-	inputs.Add("rabbitmq", func() telegraf.Input {
+	inputs.Add("rabbitmq", func() rush.Input {
 		return &RabbitMQ{
 			ResponseHeaderTimeout: internal.Duration{Duration: DefaultResponseHeaderTimeout * time.Second},
 			ClientTimeout:         internal.Duration{Duration: DefaultClientTimeout * time.Second},

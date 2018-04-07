@@ -2,7 +2,7 @@
 
 **This plugin is experimental and may cause high cardinality issues with moderate to large Kubernetes deployments**
 
-This input plugin talks to the kubelet api using the `/stats/summary` endpoint to gather metrics about the running pods and containers for a single host. It is assumed that this plugin is running as part of a `daemonset` within a kubernetes installation. This means that telegraf is running on every node within the cluster. Therefore, you should configure this plugin to talk to its locally running kubelet.
+This input plugin talks to the kubelet api using the `/stats/summary` endpoint to gather metrics about the running pods and containers for a single host. It is assumed that this plugin is running as part of a `daemonset` within a kubernetes installation. This means that rush is running on every node within the cluster. Therefore, you should configure this plugin to talk to its locally running kubelet.
 
 To find the ip address of the host you are running on you can issue a command like the following:
 ```
@@ -187,17 +187,17 @@ In this case we used the downward API to pass in the `$POD_NAMESPACE` and `$HOST
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: telegraf
-  namespace: telegraf
+  name: rush
+  namespace: rush
 spec:
   template:
     metadata:
       labels:
-        app: telegraf
+        app: rush
     spec:
-      serviceAccount: telegraf
+      serviceAccount: rush
       containers:
-        - name: telegraf
+        - name: rush
           image: quay.io/org/image:latest
           imagePullPolicy: IfNotPresent
           env:

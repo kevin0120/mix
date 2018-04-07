@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/amir/raidman"
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/outputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/outputs"
 )
 
 type Riemann struct {
@@ -49,14 +49,14 @@ var sampleConfig = `
   # string_as_state = false
 
   ## A list of tag keys whose values get sent as Riemann tags.
-  ## If empty, all Telegraf tag values will be sent as tags
-  # tag_keys = ["telegraf","custom_tag"]
+  ## If empty, all Rush tag values will be sent as tags
+  # tag_keys = ["rush","custom_tag"]
 
   ## Additional Riemann tags to send.
-  # tags = ["telegraf-output"]
+  # tags = ["rush-output"]
 
   ## Description for Riemann event
-  # description_text = "metrics collected from telegraf"
+  # description_text = "metrics collected from rush"
 
   ## Riemann client write timeout, defaults to "5s" if not set.
   # timeout = "5s"
@@ -94,7 +94,7 @@ func (r *Riemann) Description() string {
 	return "Configuration for the Riemann server to send metrics to"
 }
 
-func (r *Riemann) Write(metrics []telegraf.Metric) error {
+func (r *Riemann) Write(metrics []rush.Metric) error {
 	if len(metrics) == 0 {
 		return nil
 	}
@@ -121,7 +121,7 @@ func (r *Riemann) Write(metrics []telegraf.Metric) error {
 	return nil
 }
 
-func (r *Riemann) buildRiemannEvents(m telegraf.Metric) []*raidman.Event {
+func (r *Riemann) buildRiemannEvents(m rush.Metric) []*raidman.Event {
 	events := []*raidman.Event{}
 	for fieldName, value := range m.Fields() {
 		// get host for Riemann event
@@ -201,7 +201,7 @@ func (r *Riemann) tags(tags map[string]string) []string {
 		return values
 	}
 
-	// otherwise add all values from telegraf tag key/value pairs
+	// otherwise add all values from rush tag key/value pairs
 	var keys []string
 	for key := range tags {
 		keys = append(keys, key)
@@ -217,7 +217,7 @@ func (r *Riemann) tags(tags map[string]string) []string {
 }
 
 func init() {
-	outputs.Add("riemann", func() telegraf.Output {
+	outputs.Add("riemann", func() rush.Output {
 		return &Riemann{
 			Timeout: internal.Duration{Duration: time.Second * 5},
 		}

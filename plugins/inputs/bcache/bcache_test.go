@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/testutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -22,10 +22,10 @@ const (
 )
 
 var (
-	testBcachePath           = os.TempDir() + "/telegraf/sys/fs/bcache"
+	testBcachePath           = os.TempDir() + "/rush/sys/fs/bcache"
 	testBcacheUuidPath       = testBcachePath + "/663955a3-765a-4737-a9fd-8250a7a78411"
-	testBcacheDevPath        = os.TempDir() + "/telegraf/sys/devices/virtual/block/bcache0"
-	testBcacheBackingDevPath = os.TempDir() + "/telegraf/sys/devices/virtual/block/md10"
+	testBcacheDevPath        = os.TempDir() + "/rush/sys/devices/virtual/block/bcache0"
+	testBcacheBackingDevPath = os.TempDir() + "/rush/sys/devices/virtual/block/md10"
 )
 
 func TestBcacheGeneratesMetrics(t *testing.T) {
@@ -116,6 +116,6 @@ func TestBcacheGeneratesMetrics(t *testing.T) {
 	require.NoError(t, err)
 	acc.AssertContainsTaggedFields(t, "bcache", fields, tags)
 
-	err = os.RemoveAll(os.TempDir() + "/telegraf")
+	err = os.RemoveAll(os.TempDir() + "/rush")
 	require.NoError(t, err)
 }

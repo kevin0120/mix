@@ -10,9 +10,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 
-	"github.com/influxdata/telegraf"
-	internalaws "github.com/influxdata/telegraf/internal/config/aws"
-	"github.com/influxdata/telegraf/plugins/outputs"
+	"github.com/masami10/rush"
+	internalaws "github.com/masami10/rush/internal/config/aws"
+	"github.com/masami10/rush/plugins/outputs"
 )
 
 type CloudWatch struct {
@@ -48,7 +48,7 @@ var sampleConfig = `
   #shared_credential_file = ""
 
   ## Namespace for the CloudWatch MetricDatums
-  namespace = "InfluxData/Telegraf"
+  namespace = "InfluxData/Rush"
 `
 
 func (c *CloudWatch) SampleConfig() string {
@@ -78,7 +78,7 @@ func (c *CloudWatch) Close() error {
 	return nil
 }
 
-func (c *CloudWatch) Write(metrics []telegraf.Metric) error {
+func (c *CloudWatch) Write(metrics []rush.Metric) error {
 	for _, m := range metrics {
 		err := c.WriteSinglePoint(m)
 		if err != nil {
@@ -92,7 +92,7 @@ func (c *CloudWatch) Write(metrics []telegraf.Metric) error {
 // Write data for a single point. A point can have many fields and one field
 // is equal to one MetricDatum. There is a limit on how many MetricDatums a
 // request can have so we process one Point at a time.
-func (c *CloudWatch) WriteSinglePoint(point telegraf.Metric) error {
+func (c *CloudWatch) WriteSinglePoint(point rush.Metric) error {
 	datums := BuildMetricDatum(point)
 
 	const maxDatumsPerCall = 20 // PutMetricData only supports up to 20 data metrics per call
@@ -149,7 +149,7 @@ func PartitionDatums(size int, datums []*cloudwatch.MetricDatum) [][]*cloudwatch
 
 // Make a MetricDatum for each field in a Point. Only fields with values that can be
 // converted to float64 are supported. Non-supported fields are skipped.
-func BuildMetricDatum(point telegraf.Metric) []*cloudwatch.MetricDatum {
+func BuildMetricDatum(point rush.Metric) []*cloudwatch.MetricDatum {
 	datums := make([]*cloudwatch.MetricDatum, len(point.Fields()))
 	i := 0
 
@@ -255,7 +255,7 @@ func BuildDimensions(mTags map[string]string) []*cloudwatch.Dimension {
 }
 
 func init() {
-	outputs.Add("cloudwatch", func() telegraf.Output {
+	outputs.Add("cloudwatch", func() rush.Output {
 		return &CloudWatch{}
 	})
 }

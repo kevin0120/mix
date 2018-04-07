@@ -1,10 +1,10 @@
 package outputs
 
 import (
-	"github.com/influxdata/telegraf"
+	"github.com/masami10/rush"
 )
 
-type Creator func() telegraf.Output
+type Creator func() rush.Output
 
 var Outputs = map[string]Creator{}
 

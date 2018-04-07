@@ -1,8 +1,8 @@
 package dmcache
 
 import (
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 type DMCache struct {
@@ -24,7 +24,7 @@ func (c *DMCache) Description() string {
 }
 
 func init() {
-	inputs.Add("dmcache", func() telegraf.Input {
+	inputs.Add("dmcache", func() rush.Input {
 		return &DMCache{
 			PerDevice:        true,
 			getCurrentStatus: dmSetupStatus,

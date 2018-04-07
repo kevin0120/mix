@@ -13,12 +13,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/influxdata/telegraf/plugins/parsers/graphite"
+	"github.com/masami10/rush/plugins/parsers/graphite"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
-	"github.com/influxdata/telegraf/selfstat"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
+	"github.com/masami10/rush/selfstat"
 )
 
 const (
@@ -73,7 +73,7 @@ type Statsd struct {
 	// UDPPacketSize is deprecated, it's only here for legacy support
 	// we now always create 1 max size buffer and then copy only what we need
 	// into the in channel
-	// see https://github.com/influxdata/telegraf/pull/992
+	// see https://github.com/masami10/rush/pull/992
 	UDPPacketSize int `toml:"udp_packet_size"`
 
 	sync.Mutex
@@ -115,7 +115,7 @@ type Statsd struct {
 
 	graphiteParser *graphite.GraphiteParser
 
-	acc telegraf.Accumulator
+	acc rush.Accumulator
 
 	MaxConnections     selfstat.Stat
 	CurrentConnections selfstat.Stat
@@ -180,8 +180,8 @@ const sampleConfig = `
   ## Address and port to host UDP listener on
   service_address = ":8125"
 
-  ## The following configuration options control when telegraf clears it's cache
-  ## of previous values. If set to false, then telegraf will only clear it's
+  ## The following configuration options control when rush clears it's cache
+  ## of previous values. If set to false, then rush will only clear it's
   ## cache when the daemon is restarted.
   ## Reset gauges every interval (default=true)
   delete_gauges = true
@@ -203,7 +203,7 @@ const sampleConfig = `
   parse_data_dog_tags = false
 
   ## Statsd data translation templates, more info can be read here:
-  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md#graphite
+  ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md#graphite
   # templates = [
   #     "cpu.* measurement*"
   # ]
@@ -222,7 +222,7 @@ func (_ *Statsd) SampleConfig() string {
 	return sampleConfig
 }
 
-func (s *Statsd) Gather(acc telegraf.Accumulator) error {
+func (s *Statsd) Gather(acc rush.Accumulator) error {
 	s.Lock()
 	defer s.Unlock()
 	now := time.Now()
@@ -283,7 +283,7 @@ func (s *Statsd) Gather(acc telegraf.Accumulator) error {
 	return nil
 }
 
-func (s *Statsd) Start(_ telegraf.Accumulator) error {
+func (s *Statsd) Start(_ rush.Accumulator) error {
 	// Make data structures
 	s.gauges = make(map[string]cachedgauge)
 	s.counters = make(map[string]cachedcounter)
@@ -858,7 +858,7 @@ func (s *Statsd) isUDP() bool {
 }
 
 func init() {
-	inputs.Add("statsd", func() telegraf.Input {
+	inputs.Add("statsd", func() rush.Input {
 		return &Statsd{
 			Protocol:               defaultProtocol,
 			ServiceAddress:         ":8125",

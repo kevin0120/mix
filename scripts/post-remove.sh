@@ -1,28 +1,28 @@
 #!/bin/bash
 
 function disable_systemd {
-    systemctl disable telegraf
+    systemctl disable rush
     rm -f $1
 }
 
 function disable_update_rcd {
-    update-rc.d -f telegraf remove
-    rm -f /etc/init.d/telegraf
+    update-rc.d -f rush remove
+    rm -f /etc/init.d/rush
 }
 
 function disable_chkconfig {
-    chkconfig --del telegraf
-    rm -f /etc/init.d/telegraf
+    chkconfig --del rush
+    rm -f /etc/init.d/rush
 }
 
 if [[ -f /etc/redhat-release ]] || [[ -f /etc/SuSE-release ]]; then
     # RHEL-variant logic
     if [[ "$1" = "0" ]]; then
         # InfluxDB is no longer installed, remove from init system
-        rm -f /etc/default/telegraf
+        rm -f /etc/default/rush
 
         if [[ "$(readlink /proc/1/exe)" == */systemd ]]; then
-            disable_systemd /usr/lib/systemd/system/telegraf.service
+            disable_systemd /usr/lib/systemd/system/rush.service
         else
             # Assuming sysv
             disable_chkconfig
@@ -32,10 +32,10 @@ elif [[ -f /etc/debian_version ]]; then
     # Debian/Ubuntu logic
     if [ "$1" == "remove" -o "$1" == "purge" ]; then
         # Remove/purge
-        rm -f /etc/default/telegraf
+        rm -f /etc/default/rush
 
         if [[ "$(readlink /proc/1/exe)" == */systemd ]]; then
-            disable_systemd /lib/systemd/system/telegraf.service
+            disable_systemd /lib/systemd/system/rush.service
         else
             # Assuming sysv
             # Run update-rc.d or fallback to chkconfig if not available
@@ -52,7 +52,7 @@ elif [[ -f /etc/os-release ]]; then
         # Amazon Linux logic
         if [[ "$1" = "0" ]]; then
             # InfluxDB is no longer installed, remove from init system
-            rm -f /etc/default/telegraf
+            rm -f /etc/default/rush
             disable_chkconfig
         fi
     fi

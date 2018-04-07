@@ -12,9 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 // HTTPResponse struct
@@ -69,9 +69,9 @@ var sampleConfig = `
   # response_string_match = "\".*_status\".?:.?\"up\""
 
   ## Optional SSL Config
-  # ssl_ca = "/etc/telegraf/ca.pem"
-  # ssl_cert = "/etc/telegraf/cert.pem"
-  # ssl_key = "/etc/telegraf/key.pem"
+  # ssl_ca = "/etc/rush/ca.pem"
+  # ssl_cert = "/etc/rush/cert.pem"
+  # ssl_key = "/etc/rush/key.pem"
   ## Use SSL but skip chain & host verification
   # insecure_skip_verify = false
 
@@ -198,7 +198,7 @@ func (h *HTTPResponse) httpGather() (map[string]interface{}, error) {
 }
 
 // Gather gets all metric fields and tags and returns any errors it encounters
-func (h *HTTPResponse) Gather(acc telegraf.Accumulator) error {
+func (h *HTTPResponse) Gather(acc rush.Accumulator) error {
 	// Set default values
 	if h.ResponseTimeout.Duration < time.Second {
 		h.ResponseTimeout.Duration = time.Second * 5
@@ -240,7 +240,7 @@ func (h *HTTPResponse) Gather(acc telegraf.Accumulator) error {
 }
 
 func init() {
-	inputs.Add("http_response", func() telegraf.Input {
+	inputs.Add("http_response", func() rush.Input {
 		return &HTTPResponse{}
 	})
 }

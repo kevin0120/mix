@@ -80,7 +80,7 @@ func walkFilePath(root string, g glob.Glob) map[string]os.FileInfo {
 
 // find the root dir of the given path (could include globs).
 // ie:
-//   /var/log/telegraf.conf -> /var/log
+//   /var/log/rush.conf -> /var/log
 //   /home/** ->               /home
 //   /home/*/** ->             /home
 //   /lib/share/*/*/**.txt ->  /lib/share

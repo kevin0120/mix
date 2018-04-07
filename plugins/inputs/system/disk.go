@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 type DiskStats struct {
@@ -25,7 +25,7 @@ func (_ *DiskStats) Description() string {
 }
 
 var diskSampleConfig = `
-  ## By default, telegraf gather stats for all mountpoints.
+  ## By default, rush gather stats for all mountpoints.
   ## Setting mountpoints will restrict the stats to the specified mountpoints.
   # mount_points = ["/"]
 
@@ -38,7 +38,7 @@ func (_ *DiskStats) SampleConfig() string {
 	return diskSampleConfig
 }
 
-func (s *DiskStats) Gather(acc telegraf.Accumulator) error {
+func (s *DiskStats) Gather(acc rush.Accumulator) error {
 	// Legacy support:
 	if len(s.Mountpoints) != 0 {
 		s.MountPoints = s.Mountpoints
@@ -98,7 +98,7 @@ func (_ *DiskIOStats) Description() string {
 }
 
 var diskIoSampleConfig = `
-  ## By default, telegraf will gather stats for all devices including
+  ## By default, rush will gather stats for all devices including
   ## disk partitions.
   ## Setting devices will restrict the stats to the specified devices.
   # devices = ["sda", "sdb"]
@@ -127,7 +127,7 @@ func (_ *DiskIOStats) SampleConfig() string {
 	return diskIoSampleConfig
 }
 
-func (s *DiskIOStats) Gather(acc telegraf.Accumulator) error {
+func (s *DiskIOStats) Gather(acc rush.Accumulator) error {
 	diskio, err := s.ps.DiskIO(s.Devices)
 	if err != nil {
 		return fmt.Errorf("error getting disk io info: %s", err)
@@ -247,11 +247,11 @@ func parseOptions(opts string) MountOptions {
 
 func init() {
 	ps := newSystemPS()
-	inputs.Add("disk", func() telegraf.Input {
+	inputs.Add("disk", func() rush.Input {
 		return &DiskStats{ps: ps}
 	})
 
-	inputs.Add("diskio", func() telegraf.Input {
+	inputs.Add("diskio", func() rush.Input {
 		return &DiskIOStats{ps: ps, SkipSerialNumber: true}
 	})
 }

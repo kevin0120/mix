@@ -23,7 +23,7 @@ func mockExecCommand(arg0 string, args ...string) *exec.Cmd {
 
 // This is not a real test. This is just a way of mocking out commands.
 //
-// Idea based on https://github.com/golang/go/blob/7c31043/src/os/exec/exec_test.go#L568
+// Idea based on https://golang.org/x/go/blob/7c31043/src/os/exec/exec_test.go#L568
 func TestMockExecCommand(t *testing.T) {
 	var cmd []string
 	for _, arg := range os.Args {

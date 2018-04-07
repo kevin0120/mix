@@ -8,12 +8,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/plugins/inputs"
 )
 
 const sampleConfig = `
-  ## Postfix queue directory. If not provided, telegraf will try to use
+  ## Postfix queue directory. If not provided, rush will try to use
   ## 'postconf -h queue_directory' to determine it.
   # queue_directory = "/var/spool/postfix"
 `
@@ -68,7 +68,7 @@ type Postfix struct {
 	QueueDirectory string
 }
 
-func (p *Postfix) Gather(acc telegraf.Accumulator) error {
+func (p *Postfix) Gather(acc rush.Accumulator) error {
 	if p.QueueDirectory == "" {
 		var err error
 		p.QueueDirectory, err = getQueueDirectory()
@@ -126,7 +126,7 @@ func (p *Postfix) Description() string {
 }
 
 func init() {
-	inputs.Add("postfix", func() telegraf.Input {
+	inputs.Add("postfix", func() rush.Input {
 		return &Postfix{
 			QueueDirectory: "/var/spool/postfix",
 		}

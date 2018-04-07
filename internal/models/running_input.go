@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/selfstat"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/selfstat"
 )
 
 var GlobalMetricsGathered = selfstat.Register("agent", "metrics_gathered", map[string]string{})
 
 type RunningInput struct {
-	Input  telegraf.Input
+	Input  rush.Input
 	Config *InputConfig
 
 	trace       bool
@@ -21,7 +21,7 @@ type RunningInput struct {
 }
 
 func NewRunningInput(
-	input telegraf.Input,
+	input rush.Input,
 	config *InputConfig,
 ) *RunningInput {
 	return &RunningInput{
@@ -56,9 +56,9 @@ func (r *RunningInput) MakeMetric(
 	measurement string,
 	fields map[string]interface{},
 	tags map[string]string,
-	mType telegraf.ValueType,
+	mType rush.ValueType,
 	t time.Time,
-) telegraf.Metric {
+) rush.Metric {
 	m := makemetric(
 		measurement,
 		fields,

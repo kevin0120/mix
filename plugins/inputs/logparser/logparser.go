@@ -11,12 +11,12 @@ import (
 
 	"github.com/influxdata/tail"
 
-	"github.com/influxdata/telegraf"
-	"github.com/influxdata/telegraf/internal/globpath"
-	"github.com/influxdata/telegraf/plugins/inputs"
+	"github.com/masami10/rush"
+	"github.com/masami10/rush/internal/globpath"
+	"github.com/masami10/rush/plugins/inputs"
 
 	// Parsers
-	"github.com/influxdata/telegraf/plugins/inputs/logparser/grok"
+	"github.com/masami10/rush/plugins/inputs/logparser/grok"
 )
 
 const (
@@ -25,7 +25,7 @@ const (
 
 // LogParser in the primary interface for the plugin
 type LogParser interface {
-	ParseLine(line string) (telegraf.Metric, error)
+	ParseLine(line string) (rush.Metric, error)
 	Compile() error
 }
 
@@ -44,7 +44,7 @@ type LogParserPlugin struct {
 	lines   chan logEntry
 	done    chan struct{}
 	wg      sync.WaitGroup
-	acc     telegraf.Accumulator
+	acc     rush.Accumulator
 	parsers []LogParser
 
 	sync.Mutex
@@ -62,7 +62,7 @@ const sampleConfig = `
   files = ["/var/log/apache/access.log"]
 
   ## Read files that currently exist from the beginning. Files that are created
-  ## while telegraf is running (and that match the "files" globs) will always
+  ## while rush is running (and that match the "files" globs) will always
   ## be read from the beginning.
   from_beginning = false
 
@@ -70,7 +70,7 @@ const sampleConfig = `
   # watch_method = "inotify"
 
   ## Parse logstash-style "grok" patterns:
-  ##   Telegraf built-in parsing patterns: https://goo.gl/dkay10
+  ##   Rush built-in parsing patterns: https://goo.gl/dkay10
   [inputs.logparser.grok]
     ## This is a list of patterns to check the given log file(s) for.
     ## Note that adding patterns here increases processing time. The most
@@ -113,7 +113,7 @@ func (l *LogParserPlugin) Description() string {
 }
 
 // Gather is the primary function to collect the metrics for the plugin
-func (l *LogParserPlugin) Gather(acc telegraf.Accumulator) error {
+func (l *LogParserPlugin) Gather(acc rush.Accumulator) error {
 	l.Lock()
 	defer l.Unlock()
 
@@ -122,7 +122,7 @@ func (l *LogParserPlugin) Gather(acc telegraf.Accumulator) error {
 }
 
 // Start kicks off collection of stats for the plugin
-func (l *LogParserPlugin) Start(acc telegraf.Accumulator) error {
+func (l *LogParserPlugin) Start(acc rush.Accumulator) error {
 	l.Lock()
 	defer l.Unlock()
 
@@ -254,7 +254,7 @@ func (l *LogParserPlugin) receiver(tailer *tail.Tail) {
 func (l *LogParserPlugin) parser() {
 	defer l.wg.Done()
 
-	var m telegraf.Metric
+	var m rush.Metric
 	var err error
 	var entry logEntry
 	for {
@@ -298,7 +298,7 @@ func (l *LogParserPlugin) Stop() {
 }
 
 func init() {
-	inputs.Add("logparser", func() telegraf.Input {
+	inputs.Add("logparser", func() rush.Input {
 		return &LogParserPlugin{
 			WatchMethod: defaultWatchMethod,
 		}

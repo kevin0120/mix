@@ -60,8 +60,8 @@ The `use_regex` setting can be used to ensure all illegal characters are properl
 
 
 ### Source Override
-Often when collecting metrics from another system, you want to use the target system as the source, not the one running Telegraf. 
-Many Telegraf plugins will identify the target source with a tag. The tag name can vary for different plugins. The `source_override`
+Often when collecting metrics from another system, you want to use the target system as the source, not the one running Rush.
+Many Rush plugins will identify the target source with a tag. The tag name can vary for different plugins. The `source_override`
 option will use the value specified in any of the listed tags if found. The tag names are checked in the same order as listed, 
 and if found, the other tags will not be checked. If no tags specified are found, the default host tag will be used to identify the 
 source of the metric.

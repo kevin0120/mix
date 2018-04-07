@@ -3,8 +3,8 @@ package internal
 import (
 	"testing"
 
-	"github.com/influxdata/telegraf/selfstat"
-	"github.com/influxdata/telegraf/testutil"
+	"github.com/masami10/rush/selfstat"
+	"github.com/masami10/rush/testutil"
 
 	"github.com/stretchr/testify/assert"
 )

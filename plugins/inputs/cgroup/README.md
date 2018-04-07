@@ -1,4 +1,4 @@
-# CGroup Input Plugin For Telegraf Agent
+# CGroup Input Plugin For Rush Agent
 
 This input plugin will capture specific statistics per cgroup.
 
