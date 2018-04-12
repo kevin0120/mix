@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "aiis", "aiis\aiis.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "core", "core\core.csproj", "{6322016D-4510-4EBC-B3C1-8566F6C99A5B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "svw", "svw\svw.csproj", "{C1A8AABF-DD26-4989-8163-39489FA87739}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PluginSVW", "svw\PluginSVW.csproj", "{C1A8AABF-DD26-4989-8163-39489FA87739}"
 	ProjectSection(ProjectDependencies) = postProject
 		{6322016D-4510-4EBC-B3C1-8566F6C99A5B} = {6322016D-4510-4EBC-B3C1-8566F6C99A5B}
 	EndProjectSection

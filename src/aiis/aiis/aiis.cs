@@ -32,6 +32,7 @@ namespace aiis
             PluginSystem ps = new PluginSystem();
             ps.LoadFromConfig(config);
 
+            // 初始化服务
             HostConfiguration hc = new HostConfiguration();
             hc.UrlReservations.CreateAutomatically = true;
 
@@ -41,7 +42,7 @@ namespace aiis
                 try
                 {
                     nancyHost.Start();
-                    Console.WriteLine(string.Format("AIIS is running on {0}", url));
+                    Console.WriteLine(string.Format("AIIS is running on http://0.0.0.0:{0}", config.aiis.port.ToString()));
                 }
                 catch (Exception e)
                 {
