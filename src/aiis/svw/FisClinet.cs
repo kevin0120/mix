@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SVW.COMM;
 
-namespace svw
+namespace plugin
 {
     enum PMON_STATUS
     {

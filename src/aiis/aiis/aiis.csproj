@@ -69,13 +69,12 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="YamlDotNet, Version=4.3.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\YamlDotNet.4.3.1\lib\net45\YamlDotNet.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="aiis.cs" />
-    <Compile Include="PluginManager.cs" />
+    <Compile Include="Aiis.cs" />
+    <Compile Include="ApiConfig.cs" />
+    <Compile Include="PluginSystem.cs" />
+    <Compile Include="PluginSerializers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -4,15 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace core
+namespace test
 {
-    public interface IPlugin
+    public class Class1
     {
-        void Init();
-
-        void Release();
-
-        void Run();
-
     }
 }
