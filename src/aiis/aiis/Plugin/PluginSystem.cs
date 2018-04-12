@@ -11,12 +11,6 @@ using Nancy;
 
 namespace aiis
 {
-    enum PLUGIN_STATUS
-    {
-        Running = 0,
-        Stopped
-    };
-
     public class PluginInstance
     {
         public PluginInstance()
@@ -38,34 +32,67 @@ namespace aiis
         public PluginInstance instance;
     }
 
-    public class PluginSystem : NancyModule
+    public class PluginSystem
     {
-        public PluginSystem()
+        public static List<PluginModel> GetPlugins()
         {
-            _plugins = new List<PluginModel>();
-
-            // 插件列表
-            Get[ApiConfig.API_PREFIX() + "/plugins"] = _ => 
+            lock(_plugins)
             {
-                var q = this.Request.Query;
-                if(q.k.HasValue)
+                return _plugins;
+            }
+        }
+
+        public static int Enable(int id, bool enable, ref PluginModel plugin)
+        {
+            int rt = 0;
+
+            lock(_plugins)
+            {
+                PluginModel p = null;
+                try
                 {
-                    Console.WriteLine(q.k.ToString());
+                    p = _plugins[id - 1];
+                }
+                catch(Exception e)
+                {
+                    // 找不到
+                    rt = 1;
+                    return rt;
                 }
 
-                return Response.AsJson("{\"wef\":2}");
-            };
+                if(p.enable == enable)
+                {
+                    return 0;
+                }
+                else
+                {
+                    p.enable = enable;
+                    if(p.enable == true)
+                    {
+                        // 启用插件
+                        p.instance.task = Task.Run(() =>
+                        {
+                            var type = p.instance.type;
+                            var instance = p.instance.instance;
+                            type.GetMethod(PluginConfig.FUNC_RUN).Invoke(instance, null);
+                        });
+                    }
+                    else
+                    {
+                        // 停用插件
+                        p.instance.type.GetMethod(PluginConfig.FUNC_RELEASE).Invoke(p.instance.instance, null);
+                    }
 
-            // 插件启用停用
-            Patch[ApiConfig.API_PREFIX() + "/plugins/{id}"] = _ =>
-            {
-                var q = this.Request.Body;
+                    _plugins[id - 1] = p;
+                }
 
-                return new Response();
-            };
-        }   
+                plugin = p;
+            }
 
-        public void LoadFromConfig(AiisConfig config)
+            return 0;
+        }
+
+        public static void LoadFromConfig(AiisConfig config)
         {
             for(int i = 0; i < config.plugins.Count; ++i)
             {
@@ -88,7 +115,8 @@ namespace aiis
                     if (plugin.enable)
                     {
                         // 运行插件
-                        plugin.instance.task = Task.Run(() => {
+                        plugin.instance.task = Task.Run(() =>
+                        {
                             var type = plugin.instance.type;
                             var instance = plugin.instance.instance;
                             type.GetMethod(PluginConfig.FUNC_RUN).Invoke(instance, null);
@@ -107,8 +135,8 @@ namespace aiis
             }
             
         }
-
-        private List<PluginModel> _plugins;
+        
+        private static List<PluginModel> _plugins = new List<PluginModel>();
         private const string plugin_sub_path = "./plugins";
     }
 }

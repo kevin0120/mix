@@ -29,8 +29,7 @@ namespace aiis
 
             // 初始化插件
             Console.WriteLine("init plugins ...");
-            PluginSystem ps = new PluginSystem();
-            ps.LoadFromConfig(config);
+            PluginSystem.LoadFromConfig(config);
 
             // 初始化服务
             HostConfiguration hc = new HostConfiguration();
