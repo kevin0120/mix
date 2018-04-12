@@ -20,7 +20,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['mrp_workorder'],
+    'depends': ['mrp_workorder', 'mrp_enhance'],
 
     # always loaded
     'data': [
