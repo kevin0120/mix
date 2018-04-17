@@ -20,4 +20,4 @@ jobs:
             /go/bin/gdm restore
             go build -o ./bin/rush ./cmd/rush/rush.go
             docker login -u $ALIYUN_DOCKER_USER -p $ALIYUN_DOCKER_PWD registry.us-west-1.aliyuncs.com
-            ./build_docker.sh
+            sh ./build_docker.sh
