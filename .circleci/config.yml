@@ -15,9 +15,9 @@ jobs:
           command: |
             mkdir -p /go/src/github.com/masami10/rush && cd /go/src/github.com/masami10/rush
             cp -r /home/circleci/project/* ./
+            ls -al ./
             go get -u github.com/sparrc/gdm
             /go/bin/gdm restore
-            go build ./cmd/rush/rush.go -o ./bin/rush
-            ls -al
+            go build -o ./bin/rush ./cmd/rush/rush.go
             docker login -u $ALIYUN_DOCKER_USER -p $ALIYUN_DOCKER_PWD registry.us-west-1.aliyuncs.com
             ./build_docker.sh
