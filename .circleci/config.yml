@@ -1,0 +1,21 @@
+version: 2
+jobs:
+  build:
+    branches:
+      only:
+        - master
+    docker:
+      - image: circleci/golang:1.9
+    steps:
+      - checkout
+      # - setup_remote_docker:
+          # docker_layer_caching: true
+      - run:
+          name: build docker image
+          command: |
+            go get -u github.com/sparrc/gdm
+            ~/gdm restore
+            go build ./cmd/rush/rush.go -o ./bin/rush
+            ls -al
+            docker login -u $ALIYUN_DOCKER_USER -p $ALIYUN_DOCKER_PWD registry.us-west-1.aliyuncs.com
+            ./build_docker.sh
