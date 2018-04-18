@@ -1,0 +1,3 @@
+pyecharts # for visualization
+
+scipy # for SPC
