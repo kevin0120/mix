@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mrp_routing_view_form_inherit" model="ir.ui.view">
+        <field name="name">mrp_routing_view_form_inherit</field>
+        <field name="inherit_id" ref="mrp.mrp_routing_form_view"/>
+        <field name="model">mrp.routing</field>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="program_set" />
+            </field>
+            <xpath expr="//notebook[1]" position="inside">
+                <page string="工艺路线图片">
+                    <field name="worksheet_img" widget="image"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="mrp_routing_workcenter_view_form_inherit" model="ir.ui.view">
+        <field name="name">mrp_routing_workcenter_view_form_inherit</field>
+        <field name="model">mrp.routing.workcenter</field>
+        <field name="inherit_id" ref="mrp.mrp_routing_workcenter_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='workorder']" position="after">
+                <group string="程序号">
+                    <field name="program_set" />
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>
