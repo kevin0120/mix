@@ -27,12 +27,11 @@
                     <sheet>
                         <field name="id" invisible="True"/>
                         <div class="oe_button_box" name="button_box">
-                            <button class="oe_stat_button" name="action_sa_view_bom" type="object"
-                                attrs="{'invisible':[('type', 'not in', ['product', 'consu'])]}" icon="fa-flask">
+                            <button class="oe_stat_button" name="action_sa_view_bom" type="object" icon="fa-flask" attrs="{'invisible':[('sa_type', '=', 'screw')]}">
                                 <field string="Bill of Materials" name="bom_count" widget="statinfo"/>
                             </button>
                             <button class="oe_stat_button" name="%(mrp.act_product_mrp_production)d" type="action"
-                                attrs="{'invisible':[('type', 'not in', ['product', 'consu'])]}" icon="fa-list-alt" groups="base.group_no_one">
+                                attrs="{'invisible':[('sa_type', '=', 'screw')]}" icon="fa-list-alt" groups="base.group_no_one">
                                 <field string="Manufacturing" name="mo_count" widget="statinfo" />
                             </button>
                             <button name="toggle_active" type="object"

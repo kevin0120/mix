@@ -3,12 +3,18 @@
 from odoo import models, fields, api, _
 
 
+class ProductTemplate(models.Model):
+    _inherit = 'product.template'
+
+    sa_type = fields.Selection([('screw', 'Screw'), ('vehicle', 'Vechile')], default='vehicle')
+
+
 class ProductProduct(models.Model):
     _inherit = 'product.product'
 
-    sa_type = fields.Selection([('screw', 'Screw'), ('vehicle', 'Vechile')], default='vehicle')
-    screw_type_code = fields.Char(string='螺栓编号')
-    vehicle_type_code = fields.Char(string="车型编码")
+    sa_type = fields.Selection(related='product_tmpl_id.sa_type')
+    screw_type_code = fields.Char(string='螺栓编号', copy=False)
+    vehicle_type_code = fields.Char(string="车型编码", copy=False)
     active_bom_id = fields.Many2one('mrp.bom', string='Current Actived BOM', compute='_compute_actived_bom_id')
 
     active_bom_line_ids = fields.One2many('mrp.bom.line', related='active_bom_id.bom_line_ids')
@@ -24,16 +30,17 @@ class ProductProduct(models.Model):
         res = []
         for product in self:
             if product.sa_type == 'vehicle':
-                name = "[{0}] {1}".format(product.vehicle_type_code, product.name)
+                name = u"[{0}] {1}".format(product.vehicle_type_code, product.name)
             else:
-                name = "[{0}] {1}".format(product.screw_type_code, product.name)
+                name = u"[{0}] {1}".format(product.screw_type_code, product.name)
             res.append((product.id, name))
         return res
 
+    @api.multi
+    @api.depends('bom_ids')
     def _compute_actived_bom_id(self):
         for product in self:
             product.active_bom_id = product.bom_ids.filtered("active")
-
 
     ###此方法打开相应的页面
     @api.multi

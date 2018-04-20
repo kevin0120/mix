@@ -26,11 +26,14 @@
     'data': [
         # 'security/ir.model.access.csv',
         'views/sa_views_menus.xml',
-        'views/product_views.xml',
-        'views/mrp_routing_view.xml',
+        'views/mrp_worksegment_views.xml',
         'views/mrp_workorder_views.xml',
+        'views/mrp_workcenter_views.xml',
+        'views/mrp_routing_view.xml',
         'views/mrp_bom_views.xml',
+        'views/product_views.xml',
         'data/maintenance_data.xml',
+        'data/mrp_workcenter.xml'
     ],
     # only loaded in demonstration mode
 }
