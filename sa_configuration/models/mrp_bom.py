@@ -12,5 +12,5 @@ class MrpBom(models.Model):
 
     @api.constrains('product_id', 'product_tmpl_id')
     def _product_tmpl_product_constraint(self):
-        if self.product_id.product_tmpl_id.id != self.product_tmpl_id.idsa_mrp_bom_form_view:
+        if self.product_id.product_tmpl_id.id != self.product_tmpl_id.id:
             raise ValidationError('The product template "%s" is invalid on product with name "%s"' % (self.product_tmpl_id.name, self.product_id.name))

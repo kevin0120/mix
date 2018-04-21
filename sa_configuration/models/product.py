@@ -6,7 +6,7 @@ from odoo import models, fields, api, _
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
-    sa_type = fields.Selection([('screw', 'Screw'), ('vehicle', 'Vechile')], default='vehicle')
+    sa_type = fields.Selection([('screw', 'Screw'), ('vehicle', 'Vechile')], default='vehicle', string='产品类型')
 
 
 class ProductProduct(models.Model):
@@ -40,7 +40,7 @@ class ProductProduct(models.Model):
     @api.depends('bom_ids')
     def _compute_actived_bom_id(self):
         for product in self:
-            product.active_bom_id = product.bom_ids.filtered("active")
+            product.active_bom_id = product.bom_ids.filtered("active")[0] if product.bom_ids else False
 
     ###此方法打开相应的页面
     @api.multi
