@@ -15,6 +15,10 @@
         <field name="name">MasterPC</field>
         <field name="alias_id" ref="maintenance.mail_alias_equipment"/>
     </record>
+    <record id="equipment_IO" model="maintenance.equipment.category">
+        <field name="name">IO</field>
+        <field name="alias_id" ref="maintenance.mail_alias_equipment"/>
+    </record>
 
 </data>
 </odoo>

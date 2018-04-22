@@ -16,11 +16,15 @@
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/master/odoo/addons/base/module/module_data.xml
     # for the full list
-    'category': 'Uncategorized',
+    'category': 'Manufacture',
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['mrp_maintenance', 'maintenance','mrp'],
+    'depends': ['mrp_maintenance', 'maintenance', 'mrp', 'web_domain_field'],
+
+    "external_dependencies": {
+        "python": ['validators'],
+    },
 
     # always loaded
     'data': [
@@ -32,8 +36,10 @@
         'views/mrp_routing_view.xml',
         'views/mrp_bom_views.xml',
         'views/product_views.xml',
+        'views/maintenance_views.xml',
         'data/maintenance_data.xml',
-        'data/mrp_workcenter.xml'
+        'data/mrp_workcenter.xml',
+
     ],
     # only loaded in demonstration mode
 }

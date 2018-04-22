@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="sa_maintenance_equipment_view_form_inherit" model="ir.ui.view">
+        <field name="name">sa_maintenance_equipment_view_form_inherit</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="inherit_id" ref="maintenance.hr_equipment_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet[1]" position="before">
+                <field name="category_name" invisible="1"/>
+            </xpath>
+            <field name="category_id" position="replace">
+                <field name="category_id"  widget="selection"/>
+                <field name="parent_id" options="{'no_create_edit':True, 'no_open':True}"
+                       domain="[('category_name','=','MasterPC')]" attrs="{'invisible': [('category_name', '=', 'MasterPC')]}" />
+            </field>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="%(maintenance.hr_equipment_action)d"
+                        class="oe_stat_button"
+                        icon="fa-laptop"
+                        type="action" context="{'search_default_parent_id': active_id}" attrs="{'invisible': [('category_name', '!=', 'MasterPC')]}">
+                        <field string="Equipments" name="child_equipments_count" widget="statinfo"/>
+                    </button>
+            </xpath>
+            <!--<xpath expr="//notebook[1]" position="inside">-->
+                <!--<page string="Related Child Equipments">-->
+                    <!--<field name="child_ids" nolabel="1" widget="one2many_list" mode="tree" readonly="1"/>-->
+                    <!--<tree string="Equipments" create="false" editable="bottom">-->
+                        <!--<field name="name"/>-->
+                        <!--<field name="category_id" readonly="1"/>-->
+                        <!--<field name="serial_no"/>-->
+                      <!--</tree>-->
+                <!--</page>-->
+            <!--</xpath>-->
+        </field>
+    </record>
+
+    <record id="sa_maintenance_equipment_view_search_inherit" model='ir.ui.view'>
+      <field name="name">sa_maintenance_equipment_view_search_inherit</field>
+      <field name="model">maintenance.equipment</field>
+      <field name="inherit_id" ref="maintenance.hr_equipment_view_search"/>
+      <field name="arch" type="xml">
+        <field name="owner_user_id" position="after">
+          <field name="parent_id"/>
+        </field>
+      </field>
+    </record>
+
+        <menuitem id="sa_hr_equipment_form"
+            action="maintenance.hr_equipment_action"
+            parent="menu_mrp_worksite_form"
+            sequence="1"/>
+    </data>
+</odoo>
