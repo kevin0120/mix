@@ -5,6 +5,42 @@ from odoo.exceptions import ValidationError
 from odoo.osv import expression
 from validators import ipv4, ValidationFailure
 
+
+class EquipmentConnection(models.Model):
+    _name = 'maintenance.equipment.connection'
+
+    ip = fields.Char(string='IP')
+    tty = fields.Char(string='Serial TTY')
+
+    equipment_id = fields.Many2one('Equipment')
+
+    port = fields.Integer(string='port')
+    unitid = fields.Integer(string='Unit ID', help='Modbus need this ID for identification')
+    protocol = fields.Selection([('modbustcp','ModbusTCP'),('modbusrtu', 'ModbusRTU'),
+                                 ('rawtcp','TCP'),('rawudp','UDP')], string='Protocol')
+
+    @api.constrains('ip')
+    def _constraint_ip(self):
+        try:
+            ipv4(self.ip)
+        except ValidationFailure:
+            raise ValidationError(_('is NOT valid IP Address!'))
+
+    @api.multi
+    def name_get(self):
+        def get_names(cat):
+            if cat.protocol == 'modbustcp':
+                return u"modbustcp://{0}:{1}/{2}".format(cat.ip, cat.port, cat.unitid)
+            if cat.protocol == 'modbusrtu':
+                return u"modbusrtu://{0}/{1}".format(cat.tty, cat.unitid)
+            if cat.protocol == 'rawtcp':
+                return u"tcp://{0}:{1}".format(cat.ip, cat.port)
+            if cat.protocol == 'modbustcp':
+                return u"udp://{0}:{1}".format(cat.ip, cat.port)
+
+        return [(cat.id, get_names(cat)) for cat in self]
+
+
 class MaintenanceEquipment(models.Model):
     _inherit = 'maintenance.equipment'
     _parent_name = "parent_id"
@@ -21,6 +57,10 @@ class MaintenanceEquipment(models.Model):
     child_equipments_count = fields.Integer(compute='_compute_child_equipments_count')
 
     category_name = fields.Char(compute='_compute_categroy_name', default='', store=True)
+
+    connection_ids = fields.One2many('maintenance.equipment.connection', 'equipment_id', 'Connection Information')
+
+
 
 
     @api.multi
@@ -84,16 +124,4 @@ class MaintenanceEquipment(models.Model):
             categories = self.search(args, limit=limit)
         return categories.name_get()
 
-
-class EquipmentConnection(models.Model):
-    _name = 'maintenance.equipment.connection'
-
-    ip = fields.Char(string='IP',)
-
-    @api.constrains('ip')
-    def _constraint_ip(self):
-        try:
-            ipv4(self.ip)
-        except ValidationFailure:
-            raise ValidationError(_('is NOT valid IP Address!'))
 

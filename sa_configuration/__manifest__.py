@@ -30,6 +30,7 @@
     'data': [
         # 'security/ir.model.access.csv',
         'views/sa_views_menus.xml',
+        'views/equipment_connection_views.xml',
         'views/mrp_worksegment_views.xml',
         'views/mrp_workorder_views.xml',
         'views/mrp_workcenter_views.xml',
