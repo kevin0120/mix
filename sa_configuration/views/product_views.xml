@@ -56,6 +56,9 @@
                                         <field name="screw_type_code" attrs="{'invisible': [('sa_type','!=','screw')],'required':[('sa_type','=','screw')]}"/>
                                         <field name="vehicle_type_code" attrs="{'invisible': [('sa_type','!=','vehicle')],'required':[('sa_type','=','vehicle')]}"/>
                                     </group>
+                                    <group string="Tracking">
+                                        <field name="tracking" readonly="1"/>
+                                    </group>
                                 </group>
                             </page>
                             <page string="BOM" name="product_bom" attrs="{'invisible': [('sa_type','=','screw')]}">
@@ -112,7 +115,7 @@
             <field name="res_model">product.product</field>
             <field name="view_mode">tree,form,kanban</field>
             <field name="search_view_id" ref="product_search_form_view_sa"/>
-            <field name="context">{'default_type':'product','default_sa_type':'vehicle','search_default_vehicle': 1}</field>
+            <field name="context">{'default_type':'product','default_tracking': 'serial','default_sa_type':'vehicle','search_default_vehicle': 1}</field>
             <field name="view_ids"
                    eval="[(5, 0, 0),
                           (0, 0, {'view_mode': 'tree', 'view_id': ref('product_product_tree_view')}),

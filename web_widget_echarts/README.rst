@@ -49,7 +49,6 @@ To insert a Bokeh chart in a view proceed as follows:
             bar.print_echarts_options()
             pyecharts.configure(force_js_embed=True)
             bar.render_embed()
-            rec.echart = '%s%s' % (div, script)
 
 #. In the view, add something like this wherever you want to display your
    Echarts::

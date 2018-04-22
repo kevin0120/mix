@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api, _
+from odoo.exceptions import UserError
+
+import pyecharts
+from pyecharts import Bar , Pie
 
 
 class ProductTemplate(models.Model):
@@ -23,6 +27,10 @@ class ProductProduct(models.Model):
         ('screw_type_code_uniq', 'unique(screw_type_code)', _("A Screw Code can only be assigned to one SCREW !")),
         ('vehicle_type_code_uniq', 'unique(vehicle_type_code)', _("A Vehicle Code can only be assigned to one Vehicle !")),
     ]
+
+    @api.multi
+    def copy(self, default=None):
+        raise UserError(_('Product can not be copy by User!'))
 
     @api.multi
     @api.depends('name', 'screw_type_code', 'vehicle_type_code')
