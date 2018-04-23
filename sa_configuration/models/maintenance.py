@@ -11,20 +11,22 @@ class EquipmentConnection(models.Model):
     _description = 'Equipment Connection'
 
     active = fields.Boolean(default=True)
-    name = fields.Char(string='Connection')
+    name = fields.Char(string='Connection', required=True)
     ip = fields.Char(string='IP')
     tty = fields.Char(string='Serial TTY')
 
     equipment_id = fields.Many2one('maintenance.equipment', string='Equipment')
 
-    port = fields.Integer(string='port')
-    unitid = fields.Integer(string='Unit ID', help='Modbus need this ID for identification')
+    port = fields.Integer(string='port', default=0)
+    unitid = fields.Integer(string='Unit ID', help='Modbus need this ID for identification',default=0)
     protocol = fields.Selection([('modbustcp','ModbusTCP'),('modbusrtu', 'ModbusRTU'),
                                  ('rawtcp','TCP'),('rawudp','UDP')], string='Protocol')
 
     @api.one
     @api.constrains('ip')
     def _constraint_ip(self):
+        if not self.ip:
+            return
         ret = ip_address.ipv4(self.ip)
         if not ret:
             # 返回一个ValidationFailure对象： https://validators.readthedocs.io/en/latest/
