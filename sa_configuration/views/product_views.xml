@@ -16,7 +16,7 @@
         </record>
 
         <record id="product_normal_form_view" model="ir.ui.view">
-            <field name="name">product.product.form</field>
+            <field name="name">product_normal_form_view</field>
             <field name="model">product.product</field>
             <field name="mode">primary</field>
             <field eval="7" name="priority"/>

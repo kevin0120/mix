@@ -21,18 +21,14 @@
                         icon="fa-laptop"
                         type="action" context="{'search_default_parent_id': active_id}" attrs="{'invisible': [('category_name', '!=', 'MasterPC')]}">
                         <field string="Equipments" name="child_equipments_count" widget="statinfo"/>
-                    </button>
+                </button>
+                <button name="%(sa_equipment_connection_action)d"
+                        class="oe_stat_button"
+                        icon="fa-bars"
+                        type="action" context="{'search_default_equipment_id': active_id}">
+                        <field string="Connections" name="connections_count" widget="statinfo"/>
+                </button>
             </xpath>
-            <!--<xpath expr="//notebook[1]" position="inside">-->
-                <!--<page string="Related Child Equipments">-->
-                    <!--<field name="child_ids" nolabel="1" widget="one2many_list" mode="tree" readonly="1"/>-->
-                    <!--<tree string="Equipments" create="false" editable="bottom">-->
-                        <!--<field name="name"/>-->
-                        <!--<field name="category_id" readonly="1"/>-->
-                        <!--<field name="serial_no"/>-->
-                      <!--</tree>-->
-                <!--</page>-->
-            <!--</xpath>-->
         </field>
     </record>
 

@@ -3,27 +3,31 @@
 from odoo import models, fields,api, _
 from odoo.exceptions import ValidationError
 from odoo.osv import expression
-from validators import ipv4, ValidationFailure
+from validators import ip_address, ValidationFailure
 
 
 class EquipmentConnection(models.Model):
     _name = 'maintenance.equipment.connection'
+    _description = 'Equipment Connection'
 
+    active = fields.Boolean(default=True)
+    name = fields.Char(string='Connection')
     ip = fields.Char(string='IP')
     tty = fields.Char(string='Serial TTY')
 
-    equipment_id = fields.Many2one('Equipment')
+    equipment_id = fields.Many2one('maintenance.equipment', string='Equipment')
 
     port = fields.Integer(string='port')
     unitid = fields.Integer(string='Unit ID', help='Modbus need this ID for identification')
     protocol = fields.Selection([('modbustcp','ModbusTCP'),('modbusrtu', 'ModbusRTU'),
                                  ('rawtcp','TCP'),('rawudp','UDP')], string='Protocol')
 
+    @api.one
     @api.constrains('ip')
     def _constraint_ip(self):
-        try:
-            ipv4(self.ip)
-        except ValidationFailure:
+        ret = ip_address.ipv4(self.ip)
+        if not ret:
+            # 返回一个ValidationFailure对象： https://validators.readthedocs.io/en/latest/
             raise ValidationError(_('is NOT valid IP Address!'))
 
     @api.multi
@@ -56,17 +60,21 @@ class MaintenanceEquipment(models.Model):
     #
     child_equipments_count = fields.Integer(compute='_compute_child_equipments_count')
 
+    connections_count = fields.Integer(compute='_compute_connections_count')
+
     category_name = fields.Char(compute='_compute_categroy_name', default='', store=True)
 
     connection_ids = fields.One2many('maintenance.equipment.connection', 'equipment_id', 'Connection Information')
-
-
-
 
     @api.multi
     def _compute_child_equipments_count(self):
         for equipment in self:
             equipment.child_equipments_count = len(equipment.child_ids)
+
+    @api.multi
+    def _compute_connections_count(self):
+        for equipment in self:
+            equipment.connections_count = len(equipment.connection_ids)
 
     @api.multi
     @api.depends('category_id')
