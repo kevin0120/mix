@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record model="ir.ui.view" id="mrp_production_workcenter_form_view_inherit">
-        <field name="name">mrp_production_workcenter_form_view_inherit</field>
-        <field name="model">mrp.workorder</field>
-        <field name="inherit_id" ref="mrp.mrp_production_workcenter_form_view_inherit"/>
-        <field name="arch" type="xml">
-            <xpath expr="//notebook[1]/page[1]" position="after">
-                <page string="Work Instruction">
-                    <field name="echart" widget="echart" nolabel="1"/>
-                </page>
-            </xpath>
-        </field>
-    </record>
+    <!--<record model="ir.ui.view" id="mrp_production_workcenter_form_view_inherit">-->
+        <!--<field name="name">mrp_production_workcenter_form_view_inherit</field>-->
+        <!--<field name="model">mrp.workorder</field>-->
+        <!--<field name="inherit_id" ref="mrp.mrp_production_workcenter_form_view_inherit"/>-->
+        <!--<field name="arch" type="xml">-->
+            <!--&lt;!&ndash;<xpath expr="//notebook[1]/page[1]" position="after">&ndash;&gt;-->
+                <!--&lt;!&ndash;<page string="Work Instruction">&ndash;&gt;-->
+                    <!--&lt;!&ndash;<field name="echart" widget="echart" nolabel="1"/>&ndash;&gt;-->
+                <!--&lt;!&ndash;</page>&ndash;&gt;-->
+            <!--&lt;!&ndash;</xpath>&ndash;&gt;-->
+        <!--</field>-->
+    <!--</record>-->
 </odoo>

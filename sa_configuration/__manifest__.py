@@ -20,7 +20,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['mrp_maintenance', 'maintenance', 'mrp', 'web_domain_field'],
+    'depends': ['mrp_maintenance', 'maintenance', 'mrp', 'web_domain_field', 'quality_mrp'],
 
     "external_dependencies": {
         "python": ['validators'],
@@ -38,6 +38,7 @@
         'views/mrp_bom_views.xml',
         'views/product_views.xml',
         'views/maintenance_views.xml',
+        'views/quality_views.xml',
         'data/maintenance_data.xml',
         'data/mrp_workcenter.xml',
 

@@ -1,21 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
-import pyecharts
-from pyecharts import Bar
 
 
 class MrpWorkorder(models.Model):
     _inherit = 'mrp.workorder'
-
-    def _compute_bokeh_chart(self):
-        for rec in self:
-            bar = Bar("我的第一个图表", "这里是副标题")
-            bar.add("服装", ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"], [5, 20, 36, 10, 75, 90])
-            bar.print_echarts_options()
-            pyecharts.configure(force_js_embed=True)
-            x = bar.render_embed()
-            rec.echart = x
 
     routing_id = fields.Many2one(
         'mrp.routing', string='Operation', related='operation_id.routing_id', readonly=1)
@@ -23,6 +12,18 @@ class MrpWorkorder(models.Model):
     worksheet_img = fields.Binary(
         'Worksheet', related='routing_id.worksheet_img', readonly=True)
 
-    echart = fields.Text(
-        string='EChart',
-        compute=_compute_bokeh_chart)
+    @api.multi
+    def _create_checks(self):
+        for wo in self:
+            production = wo.production_id
+            points = self.env['quality.point'].search([('workcenter_id', '=', wo.workcenter_id.id),
+                                                       ('operation_id','=', wo.operation_id.id),  # 定位到某个作业的质量控制点
+                                                       ('picking_type_id', '=', production.picking_type_id.id),
+                                                       '|', ('product_id', '=', production.product_id.id),
+                                                       '&', ('product_id', '=', False), ('product_tmpl_id', '=', production.product_id.product_tmpl_id.id)])
+            for point in points:
+                if point.check_execute_now():
+                    self.env['quality.check'].create({'workorder_id': wo.id,
+                                                      'point_id': point.id,
+                                                      'team_id': point.team_id.id,
+                                                      'product_id': production.product_id.id})
