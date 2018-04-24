@@ -19,11 +19,11 @@ class EquipmentConnection(models.Model):
 
     port = fields.Integer(string='port', default=0)
     unitid = fields.Integer(string='Unit ID', help='Modbus need this ID for identification',default=0)
-    protocol = fields.Selection([('modbustcp','ModbusTCP'),('modbusrtu', 'ModbusRTU'),
+    protocol = fields.Selection([('modbustcp','ModbusTCP'),('modbusrtu', 'ModbusRTU'),('http',"HTTP"),
                                  ('rawtcp','TCP'),('rawudp','UDP')], string='Protocol')
 
     @api.one
-    @api.constrains('ip')
+    @api.constrains('ip', 'port')
     def _constraint_ip(self):
         if not self.ip:
             return
@@ -31,6 +31,8 @@ class EquipmentConnection(models.Model):
         if not ret:
             # 返回一个ValidationFailure对象： https://validators.readthedocs.io/en/latest/
             raise ValidationError(_('is NOT valid IP Address!'))
+        if self.port <= 0:
+            raise ValidationError(_('Port must be greater than ZERO!'))
 
     @api.multi
     def name_get(self):
@@ -43,6 +45,8 @@ class EquipmentConnection(models.Model):
                 return u"tcp://{0}:{1}".format(cat.ip, cat.port)
             if cat.protocol == 'modbustcp':
                 return u"udp://{0}:{1}".format(cat.ip, cat.port)
+            if cat.protocol == 'http':
+                return u"HTTP://{0}:{1}".format(cat.ip, cat.port)
 
         return [(cat.id, get_names(cat)) for cat in self]
 

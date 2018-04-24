@@ -23,8 +23,6 @@ class ProductProduct(models.Model):
 
     active_bom_line_ids = fields.One2many('mrp.bom.line', related='active_bom_id.bom_line_ids')
 
-
-
     _sql_constraints = [
         ('screw_type_code_uniq', 'unique(screw_type_code)', _("A Screw Code can only be assigned to one SCREW !")),
         ('vehicle_type_code_uniq', 'unique(vehicle_type_code)', _("A Vehicle Code can only be assigned to one Vehicle !")),
