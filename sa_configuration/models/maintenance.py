@@ -115,27 +115,27 @@ class MaintenanceEquipment(models.Model):
             args = []
         if name:
             # Be sure name_search is symetric to name_get
-            category_names = name.split(' / ')
-            parents = list(category_names)
+            equipment_names = name.split(' / ')
+            parents = list(equipment_names)
             child = parents.pop()
             domain = [('name', operator, child)]
             if parents:
                 names_ids = self.name_search(' / '.join(parents), args=args, operator='ilike', limit=limit)
-                category_ids = [name_id[0] for name_id in names_ids]
+                equipment_ids = [name_id[0] for name_id in names_ids]
                 if operator in expression.NEGATIVE_TERM_OPERATORS:
-                    categories = self.search([('id', 'not in', category_ids)])
-                    domain = expression.OR([[('parent_id', 'in', categories.ids)], domain])
+                    equipments = self.search([('id', 'not in', equipment_ids)])
+                    domain = expression.OR([[('parent_id', 'in', equipments.ids)], domain])
                 else:
-                    domain = expression.AND([[('parent_id', 'in', category_ids)], domain])
-                for i in range(1, len(category_names)):
-                    domain = [[('name', operator, ' / '.join(category_names[-1 - i:]))], domain]
+                    domain = expression.AND([[('parent_id', 'in', equipment_ids)], domain])
+                for i in range(1, len(equipment_names)):
+                    domain = [[('name', operator, ' / '.join(equipment_names[-1 - i:]))], domain]
                     if operator in expression.NEGATIVE_TERM_OPERATORS:
                         domain = expression.AND(domain)
                     else:
                         domain = expression.OR(domain)
-            categories = self.search(expression.AND([domain, args]), limit=limit)
+            equipments = self.search(expression.AND([domain, args]), limit=limit)
         else:
-            categories = self.search(args, limit=limit)
-        return categories.name_get()
+            equipments = self.search(args, limit=limit)
+        return equipments.name_get()
 
 
