@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="sa_program_form_view" model="ir.ui.view">
+            <field name="name">sa_program_form_view</field>
+            <field name="model">controller.program</field>
+            <field name="arch" type="xml">
+                <form string="Program">
+                    <group>
+                        <group string="Program">
+                            <field name="name"/>
+                        </group>
+                        <group string="Setting">
+                            <field name="code"/>
+                            <field name="style"/>
+                        </group>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="sa_program_tree_view" model="ir.ui.view">
+            <field name="name">sa_program_tree_view</field>
+            <field name="model">controller.program</field>
+            <field name="arch" type="xml">
+                <tree string="Program">
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="style"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="sa_program_form_action" model="ir.actions.act_window">
+            <field name="name">Controller Program</field>
+            <field name="res_model">controller.program</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="sa_menu_program_action"
+            action="sa_program_form_action"
+            parent="menu_bom_form"
+            sequence="50"/>
+    </data>
+</odoo>
+

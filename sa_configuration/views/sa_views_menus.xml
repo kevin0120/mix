@@ -30,12 +30,11 @@
             groups="base.group_system,base.group_no_one"
             sequence="40"/>
 
-        <!--<menuitem-->
-            <!--id="menu_mrp_workcenter_form"-->
-            <!--name="Work Center"-->
-            <!--action="mrp.mrp_workcenter_action"-->
-            <!--parent="menu_sa_configuration_root"-->
-            <!--groups="base.group_system,base.group_no_one"-->
-            <!--sequence="50"/>-->
+        <menuitem
+            id="menu_mrp_sa_setting"
+            name="Setting"
+            parent="menu_sa_configuration_root"
+            groups="base.group_system,base.group_no_one"
+            sequence="50"/>
     </data>
 </odoo>

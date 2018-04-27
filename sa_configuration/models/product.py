@@ -19,14 +19,21 @@ class ProductProduct(models.Model):
     sa_type = fields.Selection(related='product_tmpl_id.sa_type')
     screw_type_code = fields.Char(string='螺栓编号', copy=False)
     vehicle_type_code = fields.Char(string="车型编码", copy=False)
-    active_bom_id = fields.Many2one('mrp.bom', string='Current Actived BOM', compute='_compute_actived_bom_id')
+    qp_count = fields.Integer(string='Quality Point Count', compute='_compute_product_quality_point_count')
+    # active_bom_id = fields.Many2one('mrp.bom', string='Current Actived BOM', compute='_compute_actived_bom_id')
 
-    active_bom_line_ids = fields.One2many('mrp.bom.line', related='active_bom_id.bom_line_ids')
+    # active_bom_line_ids = fields.One2many('mrp.bom.line', related='active_bom_id.bom_line_ids')
+
+    description = fields.Text(string='Product Description')
 
     _sql_constraints = [
         ('screw_type_code_uniq', 'unique(screw_type_code)', _("A Screw Code can only be assigned to one SCREW !")),
         ('vehicle_type_code_uniq', 'unique(vehicle_type_code)', _("A Vehicle Code can only be assigned to one Vehicle !")),
     ]
+
+    def _compute_product_quality_point_count(self):
+        for product in self:
+            product.qp_count = self.env['quality.point'].search_count([('product_id','=', product.id)])
 
     @api.multi
     def copy(self, default=None):
@@ -44,11 +51,11 @@ class ProductProduct(models.Model):
             res.append((product.id, name))
         return res
 
-    @api.multi
-    @api.depends('bom_ids')
-    def _compute_actived_bom_id(self):
-        for product in self:
-            product.active_bom_id = product.bom_ids.filtered("active")[0] if product.bom_ids else False
+    # @api.multi
+    # @api.depends('bom_ids')
+    # def _compute_actived_bom_id(self):
+    #     for product in self:
+    #         product.active_bom_id = product.bom_ids.filtered("active")[0] if product.bom_ids else False
 
     ###此方法打开相应的页面
     @api.multi

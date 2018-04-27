@@ -7,8 +7,10 @@ from odoo.exceptions import ValidationError
 class MrpBom(models.Model):
     _inherit = 'mrp.bom'
 
-    _sql_constraints = [('product_uniq', 'unique(product_id, active)', u'当前产品只有唯一激活的BOM'),
-                        ('product_tmpl_uniq', 'unique(product_tmpl_id, active)', u'当前产品类型只有唯一激活的BOM')]
+    routing_group_id = fields.Many2one('mrp.routing.group', related='routing_id.group_id', readonly=True)
+
+    _sql_constraints = [('product_routing_uniq', 'unique(product_id, routing_id, active)', u'当前产品只有唯一激活工艺组的BOM'),
+                        ('product_tmpl_routing_uniq', 'unique(product_tmpl_id,routing_id, active)', u'当前产品类型只有唯一激活工艺组的BOM')]
 
     @api.constrains('product_id', 'product_tmpl_id')
     def _product_tmpl_product_constraint(self):

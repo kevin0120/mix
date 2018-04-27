@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 
 
 class MrpRoutingWorkcenter(models.Model):
@@ -8,20 +8,82 @@ class MrpRoutingWorkcenter(models.Model):
 
     def _default_get_program_set(self):
         routing_id = self._context.get('default_routing_id',False)
-        return self.env['mrp.routing'].browse(routing_id).program_set
+        return self.env['mrp.routing'].browse(routing_id).program_id
 
-    program_set = fields.Char(string='程序号', default=_default_get_program_set)
+    program_id = fields.Many2one('controller.program', string='程序号', default=_default_get_program_set)
 
+
+class MrpPR(models.Model):
+    _name = 'mrp.routing.group'
+    _description = 'Manufacutre Routing Group'
+
+    code = fields.Char(string='Routing Group Rerence', required=True)
+
+    name = fields.Char(string='Routing Group')
+
+    _sql_constraints = [('name_uniq', 'unique(name)',
+                         'Routing Group name must be unique!'),
+                        ('code_uniq', 'unique(code)',
+                         'Routing Group code must be unique!')
+                        ]
+
+    @api.onchange('code')
+    def _routing_group_code_change(self):
+        for routing in self:
+            routing.name = routing.code
+
+    @api.onchange('name')
+    def _routing_group_name_change(self):
+        for routing in self:
+            routing.code = routing.name
+
+    @api.multi
+    def name_get(self):
+        return [(group.id, group.code) for group in self]  # 强制可视化时候名称显示的是code
+
+
+class ControllerProgram(models.Model):
+    _name = 'controller.program'
+    _description = 'Controller Program'
+
+    name = fields.Char('Program Name')
+    code = fields.Char('Program Code', required=True, help=u'程序号')
+    style = fields.Char('Program Style', help=u'拧紧枪作业方式', required=True)
+
+    @api.onchange('code', 'style')
+    def _onchange_code_style(self):
+        for program in self:
+            program.name = u"{0}({1})".format(program.code, program.style)
+
+    @api.model
+    def create(self, vals):
+        if 'name' not in vals:
+            vals['name'] = u"{0}({1})".format(vals['code'], vals['style'])
+        return super(ControllerProgram, self).create(vals)
 
 class MrpRouting(models.Model):
     """ Specifies routings of work centers """
     _inherit = 'mrp.routing'
 
+    code = fields.Char('Reference', copy=False)
+
     operation_count = fields.Integer(string='Operations', compute='_compute_operation_count')
+
+    group_id = fields.Many2one('mrp.routing.group', string='PR Group')
 
     worksheet_img = fields.Binary('worksheet_img')
 
-    program_set = fields.Char(string='程序号')
+    program_id = fields.Many2one('controller.program', string='程序号')
+
+    @api.onchange('code')
+    def _routing_code_change(self):
+        for routing in self:
+            routing.name = routing.code
+
+    @api.onchange('name')
+    def _routing_code_change(self):
+        for routing in self:
+            routing.code = routing.name
 
     @api.depends('operation_ids')
     def _compute_operation_count(self):
@@ -40,3 +102,7 @@ class MrpRouting(models.Model):
         }
         action['domain'] = [('routing_id', 'in', [self.ids])]
         return action
+
+    @api.multi
+    def name_get(self):
+        return [(routing.id, routing.code) for routing in self]  # 强制可视化时候名称显示的是code

@@ -26,5 +26,5 @@ class QualityPoint(models.Model):
     @api.depends('operation_id', 'product_id','workcenter_id')
     def _compute_operation_id_domain(self):
         for rec in self:
-            operation_ids = rec.product_id.active_bom_id.routing_id.operation_ids.ids
+            operation_ids = rec.product_id.bom_ids.mapped('routing_id.operation_ids').ids or []
             rec.operation_id_domain = json.dumps([('workcenter_id', '=', rec.workcenter_id.id), ('id', 'in', operation_ids)])
