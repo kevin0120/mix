@@ -9,6 +9,8 @@ class QualityPoint(models.Model):
 
     operation_id = fields.Many2one('mrp.routing.workcenter', 'Operation')
 
+    times = fields.Integer('Repeat times', default=1)
+
     operation_id_domain = fields.Char(
         compute="_compute_operation_id_domain",
         readonly=True,
@@ -16,6 +18,13 @@ class QualityPoint(models.Model):
     )
 
     _sql_constraints = [('product_operation_uniq', 'unique(product_id,operation_id)', 'Only one quailty point per product operation is allowed')]
+
+    @api.onchange('operation_id')
+    def _onchange_opeartion_id(self):
+        self.ensure_one()
+        bom_line_ids = self.env['mrp.bom.line'].search([('bom_id.product_id', '=', self.product_id.id), ('operation_id', '=', self.operation_id.id)])
+        qtys = [bom_line_id.product_qty for bom_line_id in bom_line_ids]
+        self.times = sum(qtys)
 
     @api.constrains('product_id', 'product_tmpl_id')
     def _product_tmpl_product_constraint(self):

@@ -6,11 +6,14 @@ from odoo import models, fields, api, _
 class MrpRoutingWorkcenter(models.Model):
     _inherit = 'mrp.routing.workcenter'
 
-    def _default_get_program_set(self):
-        routing_id = self._context.get('default_routing_id',False)
-        return self.env['mrp.routing'].browse(routing_id).program_id
+    program_id = fields.Many2one('controller.program', string='程序号')
 
-    program_id = fields.Many2one('controller.program', string='程序号', default=_default_get_program_set)
+    group_id = fields.Many2one('mrp.routing.group', string='Routing Group')
+
+    worksheet_img = fields.Binary('worksheet_img')
+
+    _sql_constraints = [('routing_group_uniq', 'unique(routing_id,group_id)',
+                         'Per Routing only has one unique Routing group!')]
 
 
 class MrpPR(models.Model):
@@ -69,11 +72,6 @@ class MrpRouting(models.Model):
 
     operation_count = fields.Integer(string='Operations', compute='_compute_operation_count')
 
-    group_id = fields.Many2one('mrp.routing.group', string='PR Group')
-
-    worksheet_img = fields.Binary('worksheet_img')
-
-    program_id = fields.Many2one('controller.program', string='程序号')
 
     @api.onchange('code')
     def _routing_code_change(self):
@@ -93,12 +91,12 @@ class MrpRouting(models.Model):
     @api.multi
     def action_sa_view_operation(self):
         action = self.env.ref('sa_configuration.sa_mrp_routing_workcenter_action').read()[0]
-        workcenter_id = self.env.ref('sa_configuration.cunrong_default_workcenter').id
+        # workcenter_id = self.env.ref('sa_configuration.cunrong_default_workcenter').id
         ids = self.ids
         # bom specific to this variant or global to template
         action['context'] = {
             'default_routing_id': ids[0],
-            'default_workcenter_id': workcenter_id
+            # 'default_workcenter_id': self.workcenter_id.id
         }
         action['domain'] = [('routing_id', 'in', [self.ids])]
         return action

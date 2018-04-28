@@ -20,9 +20,9 @@ class ProductProduct(models.Model):
     screw_type_code = fields.Char(string='螺栓编号', copy=False)
     vehicle_type_code = fields.Char(string="车型编码", copy=False)
     qp_count = fields.Integer(string='Quality Point Count', compute='_compute_product_quality_point_count')
-    # active_bom_id = fields.Many2one('mrp.bom', string='Current Actived BOM', compute='_compute_actived_bom_id')
+    active_bom_id = fields.Many2one('mrp.bom', string='Current Actived BOM', compute='_compute_actived_bom_id')
 
-    # active_bom_line_ids = fields.One2many('mrp.bom.line', related='active_bom_id.bom_line_ids')
+    active_bom_line_ids = fields.One2many('mrp.bom.line', related='active_bom_id.bom_line_ids')
 
     description = fields.Text(string='Product Description')
 
@@ -51,11 +51,11 @@ class ProductProduct(models.Model):
             res.append((product.id, name))
         return res
 
-    # @api.multi
-    # @api.depends('bom_ids')
-    # def _compute_actived_bom_id(self):
-    #     for product in self:
-    #         product.active_bom_id = product.bom_ids.filtered("active")[0] if product.bom_ids else False
+    @api.multi
+    @api.depends('bom_ids')
+    def _compute_actived_bom_id(self):
+        for product in self:
+            product.active_bom_id = product.bom_ids.filtered("active")[0] if product.bom_ids else False
 
     ###此方法打开相应的页面
     @api.multi
@@ -71,4 +71,28 @@ class ProductProduct(models.Model):
                             ('product_tmpl_id', 'in', template_ids)]
         return action
 
+    @api.multi
+    def button_create_qcp(self):
+        self.ensure_one()
+        active_bom_line_ids = self.active_bom_line_ids
+        for line in active_bom_line_ids:
+            rec = self.env['quality.point'].search([('product_id', '=', self.id),
+                                                    ('product_tmpl_id','=', self.product_tmpl_id.id),('operation_id','=',line.operation_id.id)])
+            if rec and rec.times == line.product_qty:
+                return
+            if rec:
+                vals = {
+                    'times': line.product_qty  # 更新重复数量
+                }
+                rec.write(vals)
+            else:
+                vals = {
+                    'product_id': self.id,
+                    'product_tmpl_id': self.product_tmpl_id.id,
+                    'operation_id': line.operation_id.id,
+                    'picking_type_id': self.env['stock.picking.type'].search_read(domain=[('code', '=', 'mrp_operation')], fields=['id'], limit=1)[0]['id'],
+                    'workcenter_id': line.operation_id.workcenter_id.id,
+                    'times': line.product_qty
+                }
+                self.env['quality.point'].create(vals)
 

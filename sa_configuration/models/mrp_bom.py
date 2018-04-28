@@ -7,7 +7,9 @@ from odoo.exceptions import ValidationError
 class MrpBom(models.Model):
     _inherit = 'mrp.bom'
 
-    routing_group_id = fields.Many2one('mrp.routing.group', related='routing_id.group_id', readonly=True)
+    @api.onchange('routing_id','product_id')
+    def _onchange_routing_id(self):
+        self.code = u'[{0}]{1}'.format(self.routing_id.name, self.product_id.name)
 
     @api.constrains('product_id', 'product_tmpl_id')
     def _product_tmpl_product_constraint(self):

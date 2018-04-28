@@ -70,7 +70,7 @@
 
         <menuitem id="menu_mrp_worksegment_form_action"
             action="sa_mrp_worksegment_action"
-            parent="menu_mrp_worksite_form"
+            parent="menu_mrp_sa_setting"
             sequence="10"/>
 
     </data>

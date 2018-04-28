@@ -9,6 +9,7 @@
                 <field name="workcenter_id" position="after">
                     <field name="operation_id_domain" invisible="1"/>
                     <field name="operation_id" domain="operation_id_domain" attrs="{'invisible': [('workcenter_id', '=', False)],'required': [('workcenter_id', '!=', False)]}"/>
+                    <field name="times" attrs="{'invisible': [('workcenter_id', '=', False)],'required': [('workcenter_id', '!=', False)]}"/>
                 </field>
                 <field name="product_id" position="attributes">
                     <attribute name="required">1</attribute>
