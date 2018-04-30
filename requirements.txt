@@ -3,3 +3,5 @@ pyecharts # for visualization
 scipy # for SPC
 
 validators
+
+minio # minio 对象存储SDK
