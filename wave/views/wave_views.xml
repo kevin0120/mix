@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="sa_view_wave_form" model="ir.ui.view">
+            <field name="name">sa_view_wave_form</field>
+            <field name="model">wave.wave</field>
+            <field name="arch" type="xml">
+                <form string="Scope">
+                    <header>
+                        <button string="Query" type="object" name="button_query" class="oe_highlight"/>
+                    </header>
+                    <div>
+                        <group>
+                            <group string="Parameters">
+                                <field name="name"/>
+                                <field name="value" />
+                            </group>
+                            <group string="Charts">
+                                <field name="echart" widget="echart"/>
+                            </group>
+                        </group>
+                    </div>
+
+                </form>
+            </field>
+        </record>
+
+        <record id="action_wave_form" model="ir.actions.act_window">
+            <field name="name">Waveform</field>
+            <field name="res_model">wave.wave</field>
+            <field name="view_mode">form</field>
+            <field name="target">inline</field>
+        </record>
+
+</odoo>
