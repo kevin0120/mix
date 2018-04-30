@@ -14,10 +14,43 @@
                 <field name="product_id" position="attributes">
                     <attribute name="required">1</attribute>
                 </field>
+                <field name="tolerance_min" position="attributes">
+                    <attribute name="string">Torque Tolerance</attribute>
+                </field>
+                <xpath expr="//div[@class='o_row'][last()]" position="after">
+                    <label for="tolerance_min_degree" string="Degree Tolerance" attrs="{'invisible': [('test_type', '!=', 'measure')]}"/>
+                    <div attrs="{'invisible': [('test_type', '!=', 'measure')]}" class="o_row">
+                        <span>from </span> <field name="tolerance_min_degree"/>
+                        <span>to </span> <field name="tolerance_max_degree"/>
+                    </div>
+                </xpath>
+                <field name="norm" position="replace">
+
+                </field>
+                <field name="norm_unit" position="replace">
+
+                </field>
                 <field name="picking_type_id" position="attributes">
                     <attribute name="domain">[('code', '=', 'mrp_operation')]</attribute>
                     <attribute name="options">{'no_create': True, 'no_open': True}</attribute>
                 </field>
+            </field>
+        </record>
+
+        <record id="sa_quality_check_view_form_small_inherit" model="ir.ui.view">
+            <field name="name">sa_quality_check_view_form_small_inherit</field>
+            <field name="model">quality.check</field>
+            <field name="inherit_id" ref="quality.quality_check_view_form_small"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@class='o_row'][last()]" position="replace">
+                    <div attrs="{'invisible': [('test_type', '!=', 'measure')]}" class="o_row">
+                        <field name="measure" string="Torque Measure" attrs="{'required': [('test_type', '=', 'measure')]}"/><span>NM</span>
+                    </div>
+                    <label for="measure_degree" attrs="{'invisible': [('test_type', '!=', 'measure')]}"/>
+                    <div attrs="{'invisible': [('test_type', '!=', 'measure')]}" class="o_row">
+                        <field name="measure_degree" string="Degree Measure" attrs="{'required': [('test_type', '=', 'measure')]}"/><span>Deg</span>
+                    </div>
+                </xpath>
             </field>
         </record>
 

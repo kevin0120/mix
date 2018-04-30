@@ -75,6 +75,7 @@ class ProductProduct(models.Model):
     def button_create_qcp(self):
         self.ensure_one()
         active_bom_line_ids = self.active_bom_line_ids
+        # point_type_ids = self.env['quality.point.type'].search([])
         for line in active_bom_line_ids:
             rec = self.env['quality.point'].search([('product_id', '=', self.id),
                                                     ('product_tmpl_id','=', self.product_tmpl_id.id),('operation_id','=',line.operation_id.id)])
@@ -92,7 +93,8 @@ class ProductProduct(models.Model):
                     'operation_id': line.operation_id.id,
                     'picking_type_id': self.env['stock.picking.type'].search_read(domain=[('code', '=', 'mrp_operation')], fields=['id'], limit=1)[0]['id'],
                     'workcenter_id': line.operation_id.workcenter_id.id,
-                    'times': line.product_qty
+                    'times': line.product_qty,
+                    'test_type': 'measure',
                 }
                 self.env['quality.point'].create(vals)
 
