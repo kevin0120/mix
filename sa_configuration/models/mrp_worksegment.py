@@ -44,3 +44,4 @@ class MrpWorkCenter(models.Model):
     _inherit = 'mrp.workcenter'
 
     worksegment_id = fields.Many2one('mrp.worksegament', ondelete='cascade', copy=False)
+    hmi_id = fields.Many2one('maintenance.equipment', ondelete='cascade', copy=False)

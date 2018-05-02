@@ -27,7 +27,13 @@
                     <group string="Work Segment">
                         <field name="worksegment_id" required="1"/>
                     </group>
+                    <group string="HMI">
+                        <field name="hmi_id" required="1" domain="[('category_name','=','HMI')]"/>
+                    </group>
                 </group>
+                <xpath expr="//notebook/page[last()]" position="replace">
+
+                </xpath>
             </field>
         </record>
 

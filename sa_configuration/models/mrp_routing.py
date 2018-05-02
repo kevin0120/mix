@@ -13,8 +13,11 @@ class MrpRoutingWorkcenter(models.Model):
 
     worksheet_img = fields.Binary('worksheet_img')
 
+    max_op_time = fields.Integer('Max Operation time(second)', default=30)
+
     _sql_constraints = [('routing_group_uniq', 'unique(routing_id,group_id)',
                          'Per Routing only has one unique Routing group!')]
+
 
 
 class MrpPR(models.Model):

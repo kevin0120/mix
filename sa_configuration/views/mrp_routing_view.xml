@@ -30,7 +30,12 @@
                                 <field name="workcenter_id" />
                                 <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
                                 <field name="program_id" required="1"/>
+
+                            </group>
+                            <group name="parameters">
+                                <field name="program_id" required="1"/>
                                 <field name="max_redo_times" required="1"/>
+                                <field name="max_op_time" required="1"/>
                             </group>
                         </group>
                         <notebook>

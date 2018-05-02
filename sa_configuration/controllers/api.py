@@ -13,6 +13,36 @@ class SaConfiguration(http.Controller):
     def api_doc(self):
         return json.dumps(api_data)
 
+    @http.route('/api/v1/assemble_missions', type='json', auth='none', cors='*', csrf=False)
+    def assemble_mo_create(self):
+        vals = request.jsonrequest
+        vin = vals['vin']
+        count = request.env['mrp.production'].sudo().search_count(
+            [('vin', '=',vin)])
+        if count > 0:
+            return {'error': 400}
+
+        vechile_code = vals['model']
+        vals.pop('model')
+        product_id = request.env['product.product'].sudo().search(
+            [('vehicle_type_code', 'ilike',vechile_code)], limit=1)[0]
+        if not product_id:
+            return {'error': 405}
+        vals.update({'name': u'{0}--V001--{1}-{2}-{3}={4}'.format(
+            vals['equipment_name'],vals['factory_name'],vals['year'],vals['pin'],vals['pin_check_code'])})
+        vals.update({'product_id': product_id.id,
+                     'bom_id': product_id.active_bom_id.id,
+                     'product_tmpl_id': product_id.product_tmpl_id.id,
+                     'product_uom_id': product_id.active_bom_id.product_uom_id.id,
+                     'routing_id': product_id.active_bom_id.product_uom_id.id})
+
+        vals.pop('prs')
+        production = request.env['mrp.production'].sudo().create(vals)
+        production.button_plan()  ### 模拟点击安排,自动生成工单
+
+        if production:
+            return {'id': production.id}
+
     @http.route('/api/v1/results', type='http', auth='none', methods=['get'], cors='*', csrf=False)
     def _get_result_lists(self, **kw):
         ret = ResultList()

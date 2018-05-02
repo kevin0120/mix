@@ -50,6 +50,7 @@
                     <div attrs="{'invisible': [('test_type', '!=', 'measure')]}" class="o_row">
                         <field name="measure_degree" string="Degree Measure" attrs="{'required': [('test_type', '=', 'measure')]}"/><span>Deg</span>
                     </div>
+                    <field name="assembly_line" />
                 </xpath>
             </field>
         </record>
@@ -64,6 +65,18 @@
                         <field name="product_id" string="Product"/>
                         <filter string="Archived" name="inactive" domain="[('active','=',False)]"/>
                     </search>
+                </xpath>
+            </field>
+        </record>
+
+
+        <record id="sa_quality_check_view_search_inherit" model="ir.ui.view">
+            <field name="name">sa_quality_check_view_search_inherit</field>
+            <field name="model">quality.check</field>
+            <field name="inherit_id" ref="quality.quality_check_view_search"/>
+            <field name="arch" type="xml">
+                <xpath expr="//search[1]" position="inside">
+                    <field name="assembly_line" />
                 </xpath>
             </field>
         </record>
