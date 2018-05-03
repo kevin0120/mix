@@ -35,6 +35,44 @@ api_data = {
     "http"
   ],
   "paths": {
+    "/mrp.productions": {
+      "post": {
+        "summary": "下发装配任务",
+        "description": "当AIIS收到FIS下发的装配任务，会调用此API将任务同步下发给ODOO.",
+        "tags": [
+          "AIIS"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/mission"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/ResponseBody"
+            }
+          },
+          "400": {
+            "description": "失败",
+            "schema": {
+              "$ref": "#/definitions/ResponseBody"
+            }
+          }
+        }
+      }
+    },
     "/results": {
       "post": {
         "tags": [
@@ -900,6 +938,95 @@ api_data = {
     }
   },
   "definitions": {
+    "ResponseBody": {
+      "type": "object",
+      "properties": {
+        "jsonrpc": {
+          "type": "string",
+          "description": "jsonrpc版本",
+          "example": "2.0"
+        },
+        "id": {
+          "type": "number",
+          "example": 1
+        },
+        "result": {
+          "type": "object",
+          "description": "返回结果"
+        }
+      }
+    },
+    "PR": {
+      "type": "object",
+      "properties": {
+        "pr_group": {
+          "type": "string",
+          "description": "pr群组",
+          "example": "GSP"
+        },
+        "pr_value": {
+          "type": "string",
+          "description": "pr设定值",
+          "example": "G0C"
+        }
+      }
+    },
+    "mission": {
+      "type": "object",
+      "properties": {
+        "equipment_name": {
+          "type": "string",
+          "description": "设备名",
+          "example": "SR1J"
+        },
+        "factory_name": {
+          "type": "string",
+          "description": "订单工厂代号",
+          "example": "C6"
+        },
+        "year": {
+          "type": "number",
+          "description": "订单年份",
+          "example": 2018
+        },
+        "pin": {
+          "type": "number",
+          "description": "订单车身pin码",
+          "example": 6473537
+        },
+        "pin_check_code": {
+          "type": "number",
+          "description": "pin校验位",
+          "example": 5
+        },
+        "assembly_line": {
+          "type": "string",
+          "description": "装配流水线id",
+          "example": "01"
+        },
+        "lnr": {
+          "type": "string",
+          "description": "流水号",
+          "example": "0001"
+        },
+        "vin": {
+          "type": "string",
+          "description": "车辆识别号",
+          "example": "LSV2A8CA7JN508198"
+        },
+        "model": {
+          "type": "string",
+          "description": "车型代码",
+          "example": "BR24J3"
+        },
+        "prs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PR"
+          }
+        }
+      }
+    },
     "Order": {
       "type": "object",
       "properties": {
