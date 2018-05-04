@@ -10,6 +10,7 @@
                 <field name="factory_name" required="1" />
                 <field name="year" required="1" />
                 <field name="pin" required="1" />
+                <field name="production_routings" groups="base.group_erp_manager"/>
                 <field name="vin" required="1" />
                 <field name="pin_check_code" required="1" />
                 <field name="assembly_line" required="1" />

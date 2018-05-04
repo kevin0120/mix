@@ -53,9 +53,13 @@ class SaConfiguration(http.Controller):
                      'product_uom_id': product_id.active_bom_id.product_uom_id.id,
                      'routing_id': product_id.active_bom_id.product_uom_id.id})
 
+        prs = vals['prs']
         vals.pop('prs')
+        vals.update(
+            {'production_routings': json.dumps(prs)}
+        )
         production = request.env['mrp.production'].sudo().create(vals)
-        production.button_plan()  ### 模拟点击安排,自动生成工单
+        production.plan_by_prs()  ### 模拟点击安排,自动生成工单
 
         if production:
             # 创建MO成功

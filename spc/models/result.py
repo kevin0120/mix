@@ -50,6 +50,9 @@ class OperationResult(models.HyperModel):
     product_id = fields.Many2one('product.product', 'Product',
                                  domain="[('type', 'in', ['consu', 'product'])]", required=True)
 
+    consu_product_id = fields.Many2one('product.product', 'Consume Product',
+                                 domain="[('sa_type', '=', 'screw')]", required=True)
+
     measure_torque = fields.Float('Measure Torque(NM)', default=0.0, digits=dp.get_precision('Quality Tests'))
 
     measure_degree = fields.Float('Measure Degree(grad)', default=0.0, digits=dp.get_precision('Quality Tests'))

@@ -64,7 +64,7 @@
         </record>
 
         <record id="routing_group_0" model="mrp.routing.group">
-            <field name="code">PSW</field>
+            <field name="code">GSP</field>
         </record>
 
         <record id="routing_group_1" model="mrp.routing.group">
@@ -82,7 +82,7 @@
         </record>
 
         <record id="routing_operation_0" model="mrp.routing.workcenter">
-            <field name="name">测试作业1</field>
+            <field name="name">G0C</field>
             <field name="routing_id" ref="routing_0"/>
             <field name="program_id" ref="con_prog_0" />
             <field name="group_id" ref="routing_group_0" />
@@ -105,7 +105,7 @@
             <field name="name">测试车辆1</field>
             <field name="type">product</field>
             <field name="sa_type">vehicle</field>
-            <field name="vehicle_type_code">测试车辆编号1</field>
+            <field name="vehicle_type_code">BR24J3</field>
         </record>
 
     </data>
