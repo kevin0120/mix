@@ -108,5 +108,39 @@
             <field name="vehicle_type_code">测试车辆编号1</field>
         </record>
 
+        <record id="product_template_47" model="product.template">
+            <field name="name">测试车辆2</field>
+            <field name="type">product</field>
+        </record>
+
+        <record id="product_product_11" model="product.product">
+            <field name="name">测试车辆2</field>
+            <field name="type">product</field>
+            <field name="sa_type">vehicle</field>
+            <field name="vehicle_type_code">BR24J3</field>
+            <field name="product_tmpl_id" ref="product_template_47"/>
+        </record>
+
+        <record id="mrp_bom_7" model="mrp.bom">
+            <field name="product_tmpl_id" ref="product_template_47"/>
+            <field name="product_id" ref="product_product_11"/>
+            <field name="routing_id" ref="routing_0"/>
+            <field name="code">测试bom</field>
+        </record>
+
+        <record id="mrp_bom_line_18" model="mrp.bom.line">
+            <field name="product_id" ref="product_product_0"/>
+            <field name="routing_id" ref="routing_0"/>
+            <field name="bom_id" ref="mrp_bom_7"/>
+            <field name="operation_id" ref="routing_operation_0"/>
+        </record>
+
+        <record id="mrp_bom_line_19" model="mrp.bom.line">
+            <field name="product_id" ref="product_product_1"/>
+            <field name="routing_id" ref="routing_0"/>
+            <field name="bom_id" ref="mrp_bom_7"/>
+            <field name="operation_id" ref="routing_operation_1"/>
+        </record>
+
     </data>
 </odoo>
