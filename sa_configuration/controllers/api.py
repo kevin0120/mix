@@ -59,7 +59,7 @@ class SaConfiguration(http.Controller):
             {'production_routings': json.dumps(prs)}
         )
         production = request.env['mrp.production'].sudo().create(vals)
-        production.plan_by_prs()  ### 模拟点击安排,自动生成工单
+        production.sudo().plan_by_prs()  ### 模拟点击安排,自动生成工单
 
         if production:
             # 创建MO成功
