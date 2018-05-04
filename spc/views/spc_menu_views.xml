@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+    <menuitem id="menu_spc_scope_root"
+            name="SPC"
+            icon="fa-area-chart"
+            web_icon="spc,static/description/icon.png"
+            sequence="200"/>
+
+    <menuitem id="menu_spc_form"
+              name="SPC"
+              parent="menu_spc_scope_root" sequence="10"/>
+
+  </data>
+</odoo>

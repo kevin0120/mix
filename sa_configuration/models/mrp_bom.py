@@ -35,3 +35,11 @@ class MrpBom(models.Model):
         if count:
             raise ValidationError(
                 _(u'The product Template had a related routing config "%s" been actived!') % (self.product_tmpl_id.name))
+
+
+class MrpBomLine(models.Model):
+    _inherit = 'mrp.bom.line'
+
+    _sql_constraints = [
+        ('unique_operation_bom_id', 'unique(bom_id,operation_id)', 'Every Bom unique operation'),
+    ]

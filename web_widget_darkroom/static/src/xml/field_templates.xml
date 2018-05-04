@@ -9,7 +9,12 @@
     <t t-name="FieldDarkroomImage">
         <span class="o_form_field o_form_field_darkroom" t-att-style="widget.node.attrs.style">
             <t t-if="!widget.get('effective_readonly')">
-                <div class="darkroom-toolbar"/>
+                <div class="btn-group btn-group-sm">
+                    <button type="button" class="o_darkroom_button_new btn btn-sm btn-default btn-danger">New</button>
+                    <button type="button" class="o_darkroom_button_save btn btn-sm btn-default btn-success">Save</button>
+                    <button type="button" class="o_darkroom_button_edit btn btn-sm btn-default btn-warning">Edit</button>
+                </div>
+                <div class="tui-image-editor"/>
             </t>
         </span>
     </t>
@@ -17,7 +22,7 @@
     <t t-extend="FieldBinaryImage">
         <t t-jquery=".o_select_file_button" t-operation="after">
             <t t-if="widget.darkroom_supported()">
-                <i class="fa fa-picture-o fa-lg o_form_binary_image_darkroom_modal" title="Darkroom"></i>
+                <i class="fa fa-picture-o fa-lg o_form_binary_image_darkroom_modal" title="Editor"></i>
             </t>
         </t>
         <t t-jquery=".o_select_file_button" t-operation="replace">

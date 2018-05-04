@@ -23,19 +23,12 @@ odoo.define('web_widget_darkroom.darkroom_widget', function(require) {
 
         defaults: {
             // Canvas initialization size
-            minWidth: 100,
-            minHeight: 100,
-            maxWidth: 700,
-            maxHeight: 500,
-
-            // Plugin options
-            plugins: {
-                crop: {
-                    minHeight: 50,
-                    minWidth: 50,
-                    ratio: 1
-                },
-            },
+            cssMaxWidth: 700,
+            cssMaxHeight: 500,
+            selectionStyle: {
+                cornerSize: 20,
+                rotatingPointOffset: 70
+            }
         },
 
         init: function(field_manager, node) {
@@ -46,127 +39,46 @@ odoo.define('web_widget_darkroom.darkroom_widget', function(require) {
         _init_darkroom: function() {
             if (!this.darkroom) {
                 this._init_darkroom_icons();
-                this._init_darkroom_ui();
-                this._init_darkroom_plugins();
+                this.bind_events();
             }
         },
 
         _init_darkroom_icons: function() {
             var element = document.createElement('div');
             element.id = 'darkroom-icons';
-            element.style.height = 0;
-            element.style.width = 0;
-            element.style.position = 'absolute';
-            element.style.visibility = 'hidden';
+            // element.style.height = 0;
+            // element.style.width = 0;
+            // element.style.position = 'absolute';
+            // element.style.visibility = 'hidden';
             element.innerHTML = '<!-- inject:svg --><!-- endinject -->';
             this.el.appendChild(element);
         },
 
-        _init_darkroom_plugins: function() {
-            require('web_widget_darkroom.darkroom_crop').DarkroomPluginCrop();
-            require('web_widget_darkroom.darkroom_history').DarkroomPluginHistory();
-            require('web_widget_darkroom.darkroom_rotate').DarkroomPluginRotate();
-            require('web_widget_darkroom.darkroom_zoom').DarkroomPluginZoom();
-        },
+        bind_events: function () {
+            var self = this;
 
-        _init_darkroom_ui: function() {
-            // Button object
-            function Button(element) {
-                this.element = element;
-            }
-
-            Button.prototype = {
-                addEventListener: function(eventName, listener) {
-                    if (this.element.addEventListener) {
-                        this.element.addEventListener(eventName, listener);
-                    } else if (this.element.attachEvent) {
-                        this.element.attachEvent('on' + eventName, listener);
-                    }
-                },
-                removeEventListener: function(eventName, listener) {
-                    if (this.element.removeEventListener) {
-                        this.element.removeEventListener(eventName, listener);
-                    } else if (this.element.detachEvent) {
-                        this.element.detachEvent('on' + eventName, listener);
-                    }
-                },
-                active: function(bool) {
-                    if (bool) {
-                        this.element.classList.add('darkroom-button-active');
-                    } else {
-                        this.element.classList.remove('darkroom-button-active');
-                    }
-                },
-                hide: function(bool) {
-                    if (bool) {
-                        this.element.classList.add('hidden');
-                    } else {
-                        this.element.classList.remove('hidden');
-                    }
-                },
-                disable: function(bool) {
-                    this.element.disabled = bool;
-                },
-            };
-
-            // ButtonGroup object
-            function ButtonGroup(element) {
-                this.element = element;
-            }
-
-            ButtonGroup.prototype = {
-                createButton: function(options) {
-                    var defaults = {
-                        image: 'fa fa-question-circle',
-                        type: 'default',
-                        group: 'default',
-                        hide: false,
-                        disabled: false,
-                        editOnly: false,
-                        addClass: '',
-                    };
-                    var optionsMerged = Darkroom.Utils.extend(options, defaults);
-
-                    var buttonElement = document.createElement('button');
-                    buttonElement.type = 'button';
-                    buttonElement.className = 'darkroom-button darkroom-button-' + optionsMerged.type;
-                    buttonElement.innerHTML = '<i class="' + optionsMerged.image + ' fa-2x"></i>';
-                    if (optionsMerged.editOnly) {
-                        buttonElement.classList.add('oe_edit_only');
-                    }
-                    if (optionsMerged.addClass) {
-                        buttonElement.classList.add(optionsMerged.addClass);
-                    }
-                    this.element.appendChild(buttonElement);
-
-                    var button = new Button(buttonElement);
-                    button.hide(optionsMerged.hide);
-                    button.disable(optionsMerged.disabled);
-
-                    return button;
+            // event: click on '(Un)Follow' button, that toggles the follow for uid
+            this.$el.on('click', '.o_darkroom_button_new', function () {
+                if(self.darkroom){
+                    console.log('new');
+                    self.darkroom.addShape('circle', {
+                        fill: 'red',
+                        stroke: 'blue',
+                        strokeWidth: 3,
+                        rx: 10,
+                        ry: 100,
+                        isRegular: false
+                    }).then(function (objectProps) {
+                        console.log(objectProps.id);
+                    });
                 }
-            };
-
-            // Toolbar object
-            function Toolbar(element) {
-                this.element = element;
-            }
-
-            Toolbar.prototype = {
-                createButtonGroup: function() {
-                    var buttonGroupElement = document.createElement('div');
-                    buttonGroupElement.className = 'darkroom-button-group';
-                    this.element.appendChild(buttonGroupElement);
-
-                    return new ButtonGroup(buttonGroupElement);
-                }
-            };
-
-            Darkroom.UI = {
-                Toolbar: Toolbar,
-                ButtonGroup: ButtonGroup,
-                Button: Button,
-            };
+            });
+            this.$el.on('click', '.o_darkroom_button_save', function () {
+                console.log('save')
+            });
+            this.$el.on('click', '.o_darkroom_button_edit', function () {
+                console.log('edit')
+            });
         },
 
         destroy_content: function() {
@@ -181,6 +93,7 @@ odoo.define('web_widget_darkroom.darkroom_widget', function(require) {
         },
 
         render_value: function() {
+            var self = this;
             this.destroy_content();
             this._init_darkroom();
 
@@ -205,9 +118,15 @@ odoo.define('web_widget_darkroom.darkroom_widget', function(require) {
 
             var $img = $(QWeb.render("FieldBinaryImage-img", {widget: this, url: url}));
             this.$el.find('> img').remove();
-            this.$el.append($img);
-            this.darkroom = new Darkroom($img.get(0), this.options);
-            this.darkroom.widget = this;
+            var _t = this.$('.tui-image-editor');
+            // this.$el.append($img);
+            this.darkroom = new tui.ImageEditor(_t, this.options);
+            this.darkroom.loadImageFromURL('https://raw.githubusercontent.com/nhnent/tui.image-editor/master/examples/img/bg.jpg', 'tttt').then(
+                function (x) {
+                    console.log(x);
+                    self.darkroom.clearUndoStack();
+                }
+            );
         },
 
         commit_value: function() {

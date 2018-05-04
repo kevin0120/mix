@@ -7,7 +7,7 @@ import pyecharts
 
 class Wave(models.TransientModel):
     '''
-        抽象模型. 不需要持久化
+        瞬态模型. 不需要持久化
     '''
     _name = 'wave.wave'
     _description = 'Waveform scope wizard'

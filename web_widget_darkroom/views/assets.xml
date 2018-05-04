@@ -9,18 +9,9 @@
     <template id="assets_darkroom" name="web_widget_darkroom Assets" inherit_id="web.assets_backend">
         <xpath expr="//script[last()]" position="after">
             <link href="/web_widget_darkroom/static/src/less/darkroom.less" rel="stylesheet" type="text/less"/>
-            <script src="/web_widget_darkroom/static/lib/js/fabric.js"/>
-
-            <script src="/web_widget_darkroom/static/lib/darkroomjs/core/darkroom.js"/>
-            <script src="/web_widget_darkroom/static/lib/darkroomjs/core/plugin.js"/>
-            <script src="/web_widget_darkroom/static/lib/darkroomjs/core/transformation.js"/>
-            <script src="/web_widget_darkroom/static/lib/darkroomjs/core/utils.js"/>
-
-            <script src="/web_widget_darkroom/static/src/js/plugins/darkroom.crop.js"/>
-            <script src="/web_widget_darkroom/static/src/js/plugins/darkroom.history.js"/>
-            <script src="/web_widget_darkroom/static/src/js/plugins/darkroom.rotate.js"/>
-            <script src="/web_widget_darkroom/static/src/js/plugins/darkroom.zoom.js"/>
-
+            <script src="/web_widget_darkroom/static/lib/js/fabric.min.js"/>
+            <script src="/web_widget_darkroom/static/lib/js/tui-code-snippet.min.js"/>
+            <script src="/web_widget_darkroom/static/lib/tui-editor/tui-image-editor.min.js"/>
             <script src="/web_widget_darkroom/static/src/js/widget_darkroom.js"/>
             <script src="/web_widget_darkroom/static/src/js/widget_darkroom_modal.js"/>
         </xpath>

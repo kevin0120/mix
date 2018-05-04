@@ -71,6 +71,35 @@
             <field name="code">ASW</field>
         </record>
 
+        <record id="routing_0" model="mrp.routing">
+            <field name="code">测试路线1</field>
+            <field name="name">测试路线1</field>
+        </record>
+
+        <record id="routing_1" model="mrp.routing">
+            <field name="code">测试路线2</field>
+            <field name="name">测试路线2</field>
+        </record>
+
+        <record id="routing_operation_0" model="mrp.routing.workcenter">
+            <field name="name">测试作业1</field>
+            <field name="routing_id" ref="routing_0"/>
+            <field name="program_id" ref="con_prog_0" />
+            <field name="group_id" ref="routing_group_0" />
+            <field name="workcenter_id" ref="mrp_workcenter_0" />
+            <field name="max_redo_times">2</field>
+            <field name="max_op_time">30</field>
+        </record>
+
+        <record id="routing_operation_1" model="mrp.routing.workcenter">
+            <field name="name">测试作业2</field>
+            <field name="routing_id" ref="routing_0"/>
+            <field name="program_id" ref="con_prog_1" />
+            <field name="group_id" ref="routing_group_1" />
+            <field name="workcenter_id" ref="mrp_workcenter_1" />
+            <field name="max_redo_times">3</field>
+            <field name="max_op_time">30</field>
+        </record>
 
         <record id="product_product_10" model="product.product">
             <field name="name">测试车辆1</field>

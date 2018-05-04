@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- OPERATION.RESULT -->
+   <record id="operation_result_view_form" model="ir.ui.view">
+        <field name="name">operation_result_view_form</field>
+        <field name="model">operation.result</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="do_pass" type="object" class="btn-primary" attrs="{'invisible': [('quality_state', '!=', 'none')]}" string="Pass"/>
+                    <button name="do_pass" type="object" attrs="{'invisible': [('quality_state', '!=', 'fail')]}" groups="quality.group_quality_manager" string="Pass"/>
+                    <button name="do_fail" type="object" class="btn-primary" attrs="{'invisible': [('quality_state', '!=', 'none')]}" string="Fail"/>
+                    <button name="do_fail" type="object" attrs="{'invisible': [('quality_state', '!=', 'pass')]}" groups="quality.group_quality_manager" string="Fail"/>
+                    <field name="quality_state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="product_id"/>
+                            <field name="measure_torque"/>
+                            <field name="measure_degree"/>
+                        </group>
+                        <group>
+                            <field name="point_id"/>
+                            <field name="user_id" string="Control Person" invisible="1"/>
+                            <field name="time" />
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+      <record id="operation_result_view_kanban" model="ir.ui.view">
+        <field name="name">operation_result_view_kanban</field>
+        <field name="model">operation.result</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="time"/>
+                <field name="product_id"/>
+                <field name="quality_state"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_card oe_kanban_global_click">
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    <strong><span><t t-esc="record.name.value"/></span></strong>
+                                </div>
+                                <div class="col-xs-6">
+                                    <strong><span t-attf-class="pull-right text-right label #{['none'].indexOf(record.quality_state.raw_value) > -1 ? 'label-default' : ['fail'].indexOf(record.quality_state.raw_value) > -1 ? 'label-danger' : ['done'].indexOf(record.quality_state.raw_value) > -1 ? 'label-primary' : 'label-success'}"><t t-esc="record.quality_state.value"/></span></strong>
+                                </div>
+                            </div>
+                            <div class="row text-muted">
+                                <div class="col-xs-8">
+                                    <span><t t-esc="record.product_id.value"/></span>
+                                </div>
+                                <!--<div class="col-xs-4">-->
+                                    <!--<span><t t-esc="record.lot_id.value"/></span>-->
+                                <!--</div>-->
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="operation_result_view_tree" model="ir.ui.view">
+        <field name="name">operation_result_view_tree</field>
+        <field name="model">operation.result</field>
+        <field name="arch" type="xml">
+            <tree create="false" delete="false">
+                <field name='product_id'/>
+                <field name="time" string="Checked Date"/>
+                <field name="user_id" string="Checked By"/>
+                <field name="quality_state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="operation_result_view_graph" model="ir.ui.view">
+        <field name="name">operation_result_view_graph</field>
+        <field name="model">operation.result</field>
+        <field name="arch" type="xml">
+            <graph string="Quality Check Analysis">
+                <field name="time" type="col" interval="day"/>
+                <field name="quality_state" type="row"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="operation_result_view_pivot" model="ir.ui.view">
+         <field name="name">operation_result_view_pivot</field>
+         <field name="model">operation.result</field>
+         <field name="arch" type="xml">
+             <pivot string="Quality Check Analysis">
+                 <field name="time" type="col" interval="day"/>
+                 <field name="product_id" type="row"/>
+             </pivot>
+         </field>
+    </record>
+
+    <record id="operation_result_view_search" model="ir.ui.view">
+        <field name="name">operation_result_view_search</field>
+        <field name="model">operation.result</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="quality_state"/>
+                <field name="product_id" />
+                <field name="workorder_id" string="Operation"/>
+                <filter string="In Progress" domain="[('quality_state', '=', 'none')]" name="progress"/>
+                <filter string="Passed" domain="[('quality_state', '=', 'pass')]" name="passed"/>
+                <filter string="Failed" domain="[('quality_state', '=', 'fail')]" name="failed"/>
+                <group expand="0" string="Group By">
+                    <filter string="State" context="{'group_by': 'quality_state'}"/>
+                    <filter string="Product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Operation" context="{'group_by': 'workorder_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="operation_result_action_main" model="ir.actions.act_window">
+        <field name="name">Operation Result</field>
+        <field name="res_model">operation.result</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form,kanban,pivot,graph</field>
+        <field name="help" type="html">
+            <p>
+              Operation Result is the execution of a quality control in some point
+            </p>
+        </field>
+    </record>
+
+    <menuitem
+        id="menu_operation_result"
+        name="Operation Results"
+        action="operation_result_action_main"
+        parent="menu_spc_form"
+        sequence="10"/>
+
+</odoo>
