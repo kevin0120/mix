@@ -24,8 +24,12 @@
 
     # always loaded
     'data': [
-        # 'security/ir.model.access.csv',
+        'security/spc_security.xml',
+        'security/ir.model.access.csv',
         'views/spc_menu_views.xml',
         'views/operation_result_views.xml',
     ],
+    'installable': True,
+    'application': True,
+    'auto_install': False,
 }

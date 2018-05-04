@@ -47,10 +47,10 @@ class OperationResult(models.HyperModel):
 
     user_id = fields.Many2one('res.users', 'Responsible')
 
-    product_id = fields.Many2one('product.product', 'Product',
-                                 domain="[('type', 'in', ['consu', 'product'])]", required=True)
+    product_id = fields.Many2one('product.product', 'Vehicle',
+                                 domain="[('sa_type', '=', 'vehicle')]", required=True)
 
-    consu_product_id = fields.Many2one('product.product', 'Consume Product',
+    consu_product_id = fields.Many2one('product.product', 'Screw',
                                  domain="[('sa_type', '=', 'screw')]", required=True)
 
     measure_torque = fields.Float('Measure Torque(NM)', default=0.0, digits=dp.get_precision('Quality Tests'))

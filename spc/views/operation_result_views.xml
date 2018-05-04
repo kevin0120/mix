@@ -15,17 +15,34 @@
                     <field name="quality_state" widget="statusbar"/>
                 </header>
                 <sheet>
-                    <group>
-                        <group>
+                    <group string="Setting Info">
+                        <group string="Product">
                             <field name="product_id"/>
-                            <field name="measure_torque"/>
-                            <field name="measure_degree"/>
+                            <field name="consu_product_id" />
                         </group>
-                        <group>
-                            <field name="point_id"/>
-                            <field name="user_id" string="Control Person" invisible="1"/>
-                            <field name="time" />
+                        <group string="Manufacturing Info">
+                            <field name="production_id"/>
+                            <field name="workcenter_id" />
                         </group>
+                        <field name="pset_strategy" />
+                        <group string="Degree">
+                            <field name="pset_w_max"/>
+                            <field name="pset_w_min" />
+                            <field name="pset_w_threshold"/>
+                            <field name="pset_w_Target" />
+                        </group>
+                        <group string="Torque">
+                            <field name="pset_m_max"/>
+                            <field name="pset_m_min" />
+                            <field name="pset_m_threshold"/>
+                            <field name="pset_m_Target" />
+                        </group>
+                    </group>
+                    <group string="Result">
+                        <field name="time" string="Complete Time"/>
+                        <field name="measure_torque"/>
+                        <field name="measure_degree"/>
+                        <field name="measure_t_don" />
                     </group>
                 </sheet>
             </form>
@@ -72,10 +89,13 @@
         <field name="name">operation_result_view_tree</field>
         <field name="model">operation.result</field>
         <field name="arch" type="xml">
-            <tree create="false" delete="false">
-                <field name='product_id'/>
-                <field name="time" string="Checked Date"/>
-                <field name="user_id" string="Checked By"/>
+            <tree>
+                <field name="product_id"/>
+                <field name="consu_product_id" />
+                <field name="time" string="Complete Time"/>
+                <field name="measure_torque"/>
+                <field name="measure_degree"/>
+                <field name="measure_t_don" />
                 <field name="quality_state"/>
             </tree>
         </field>
@@ -110,13 +130,15 @@
             <search>
                 <field name="quality_state"/>
                 <field name="product_id" />
+                <field name="consu_product_id" />
                 <field name="workorder_id" string="Operation"/>
                 <filter string="In Progress" domain="[('quality_state', '=', 'none')]" name="progress"/>
                 <filter string="Passed" domain="[('quality_state', '=', 'pass')]" name="passed"/>
                 <filter string="Failed" domain="[('quality_state', '=', 'fail')]" name="failed"/>
                 <group expand="0" string="Group By">
                     <filter string="State" context="{'group_by': 'quality_state'}"/>
-                    <filter string="Product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Vehicle" context="{'group_by': 'product_id'}"/>
+                    <filter string="Vehicle" context="{'group_by': 'consu_product_id'}"/>
                     <filter string="Operation" context="{'group_by': 'workorder_id'}"/>
                 </group>
             </search>
