@@ -101,13 +101,6 @@
             <field name="max_op_time">30</field>
         </record>
 
-        <record id="product_product_10" model="product.product">
-            <field name="name">测试车辆1</field>
-            <field name="type">product</field>
-            <field name="sa_type">vehicle</field>
-            <field name="vehicle_type_code">BR24J3</field>
-        </record>
-
         <record id="product_template_47" model="product.template">
             <field name="name">测试车辆2</field>
             <field name="type">product</field>
