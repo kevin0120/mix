@@ -68,7 +68,7 @@ class MaintenanceEquipment(models.Model):
 
     connections_count = fields.Integer(compute='_compute_connections_count')
 
-    category_name = fields.Char(compute='_compute_categroy_name', default='', store=True)
+    category_name = fields.Char(compute='_compute_category_name', default='', store=True)
 
     connection_ids = fields.One2many('maintenance.equipment.connection', 'equipment_id', 'Connection Information')
 
@@ -84,7 +84,7 @@ class MaintenanceEquipment(models.Model):
 
     @api.multi
     @api.depends('category_id')
-    def _compute_categroy_name(self):
+    def _compute_category_name(self):
         for equipment in self:
             equipment.category_name = equipment.category_id.name or ''
 

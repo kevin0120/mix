@@ -45,6 +45,7 @@
         'views/quality_views.xml',
         'data/maintenance_data.xml',
         'data/mrp_workcenter.xml',
+        'data/test_data.xml',
 
     ],
     # only loaded in demonstration mode

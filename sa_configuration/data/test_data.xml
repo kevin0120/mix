@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="work_segment_1" model="mrp.worksegament">
+            <field name="name">测试工段1</field>
+            <field name="code">测试工段1</field>
+        </record>
+
+        <record id="hmi_0" model="maintenance.equipment">
+            <field name="name">测试HMI1</field>
+            <field name="serial_no">1122334455667788</field>
+            <field name="category_id" ref="equipment_hmi"/>
+        </record>
+
+        <record id="mrp_workcenter_0" model="mrp.workcenter">
+            <field name="name">测试工位1</field>
+            <field name="capacity">5</field>
+            <field name="time_start">10</field>
+            <field name="time_stop">8</field>
+            <field name="time_efficiency">87</field>
+            <field name="worksegment_id" ref="work_segment_1" />
+            <field name="hmi_id" ref="hmi_0" />
+        </record>
+
+        <record id="hmi_1" model="maintenance.equipment">
+            <field name="name">测试HMI2</field>
+            <field name="serial_no">112233445566778899</field>
+            <field name="category_id" ref="equipment_hmi"/>
+        </record>
+
+        <record id="mrp_workcenter_1" model="mrp.workcenter">
+            <field name="name">测试工位2</field>
+            <field name="capacity">5</field>
+            <field name="time_start">10</field>
+            <field name="time_stop">8</field>
+            <field name="time_efficiency">87</field>
+            <field name="worksegment_id" ref="work_segment_1" />
+            <field name="hmi_id" ref="hmi_1" />
+        </record>
+
+        <record id="product_product_0" model="product.product">
+            <field name="name">测试螺栓1</field>
+            <field name="type">product</field>
+            <field name="sa_type">screw</field>
+            <field name="screw_type_code">测试螺栓编号1</field>
+        </record>
+
+        <record id="product_product_1" model="product.product">
+            <field name="name">测试螺栓2</field>
+            <field name="type">product</field>
+            <field name="sa_type">screw</field>
+            <field name="screw_type_code">测试螺栓编号2</field>
+        </record>
+
+        <record id="con_prog_0" model="controller.program">
+            <field name="code">1</field>
+            <field name="strategy">AD</field>
+        </record>
+
+        <record id="con_prog_1" model="controller.program">
+            <field name="code">2</field>
+            <field name="strategy">AW</field>
+        </record>
+
+        <record id="routing_group_0" model="mrp.routing.group">
+            <field name="code">PSW</field>
+        </record>
+
+        <record id="routing_group_1" model="mrp.routing.group">
+            <field name="code">ASW</field>
+        </record>
+
+
+        <record id="product_product_10" model="product.product">
+            <field name="name">测试车辆1</field>
+            <field name="type">product</field>
+            <field name="sa_type">vehicle</field>
+            <field name="vehicle_type_code">测试车辆编号1</field>
+        </record>
+
+    </data>
+</odoo>

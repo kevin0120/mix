@@ -19,7 +19,6 @@ class MrpRoutingWorkcenter(models.Model):
                          'Per Routing only has one unique Routing group!')]
 
 
-
 class MrpPR(models.Model):
     _name = 'mrp.routing.group'
     _description = 'Manufacutre Routing Group'
@@ -55,18 +54,24 @@ class ControllerProgram(models.Model):
 
     name = fields.Char('Program Name')
     code = fields.Char('Program Code', required=True, help=u'程序号')
-    style = fields.Char('Program Style', help=u'拧紧枪作业方式', required=True)
+    strategy = fields.Selection([('AD', 'Torque tightening'),
+                                 ('AW', 'Angle tightening'),
+                                 ('ADW', 'Torque/Angle tightening'),
+                                 ('LN', 'Loosening'),
+                                 ('AN', 'Number of Pulses tightening'),
+                                 ('AT', 'Time tightening')], required=True)
 
-    @api.onchange('code', 'style')
+    @api.onchange('code', 'strategy')
     def _onchange_code_style(self):
         for program in self:
-            program.name = u"{0}({1})".format(program.code, program.style)
+            program.name = u"{0}({1})".format(program.code, program.strategy)
 
     @api.model
     def create(self, vals):
         if 'name' not in vals:
-            vals['name'] = u"{0}({1})".format(vals['code'], vals['style'])
+            vals['name'] = u"{0}({1})".format(vals['code'], vals['strategy'])
         return super(ControllerProgram, self).create(vals)
+
 
 class MrpRouting(models.Model):
     """ Specifies routings of work centers """

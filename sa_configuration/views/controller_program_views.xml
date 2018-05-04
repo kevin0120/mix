@@ -12,7 +12,7 @@
                         </group>
                         <group string="Setting">
                             <field name="code"/>
-                            <field name="style"/>
+                            <field name="strategy"/>
                         </group>
                     </group>
                 </form>
@@ -27,7 +27,7 @@
                 <tree string="Program">
                     <field name="name"/>
                     <field name="code"/>
-                    <field name="style"/>
+                    <field name="strategy"/>
                 </tree>
             </field>
         </record>
