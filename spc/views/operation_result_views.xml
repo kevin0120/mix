@@ -41,9 +41,13 @@
                     </group>
                     <group string="Result">
                         <field name="control_date" string="Checked Time"/>
+                        <field name="measure_result" />
                         <field name="measure_torque"/>
                         <field name="measure_degree"/>
                         <field name="measure_t_don" />
+                        <field name="one_time_pass" groups="base.group_no_one"/>
+                        <field name="final_pass" groups="base.group_no_one"/>
+                        <field name="lacking" groups="base.group_no_one" />
                     </group>
                 </sheet>
             </form>
@@ -108,7 +112,7 @@
         <field name="model">operation.result</field>
         <field name="arch" type="xml">
             <graph string="Quality Check Analysis">
-                <field name="time" type="col" interval="day"/>
+                <field name="control_date" type="col" interval="day"/>
                 <field name="measure_result" type="row"/>
             </graph>
         </field>
@@ -119,7 +123,7 @@
          <field name="model">operation.result</field>
          <field name="arch" type="xml">
              <pivot string="Quality Check Analysis">
-                 <field name="time" type="col" interval="day"/>
+                 <field name="control_date" type="col" interval="day"/>
                  <field name="product_id" type="row"/>
                  <field name="consu_product_id" type="row" />
              </pivot>
@@ -140,8 +144,10 @@
                 <filter string="Passed" domain="[('quality_state', '=', 'pass')]" name="passed"/>
                 <filter string="Failed" domain="[('quality_state', '=', 'fail')]" name="failed"/>
                 <separator/>
-                <filter string="OK" domain="[('measure_result', '=', 'ok')]" name="OK"/>
-                <filter string="NOK" domain="[('measure_result', '=', 'nok')]" name="NOK"/>
+                <filter string="OK" domain="[('measure_result', '=', 'ok')]" name="ok"/>
+                <filter string="NOK" domain="[('measure_result', '=', 'nok')]" name="nok"/>
+                <separator/>
+                <filter string="Data Lacking" domain="[('lacking', '=', 'lack')]" name="lacking"/>
                 <separator/>
                 <filter name="today" string="Today" domain="[('control_date', '&gt;=', datetime.datetime.now().replace(hour=0, minute=0, second=0)),('control_date', '&lt;=', datetime.datetime.now().replace(hour=23, minute=59, second=59))]" />
                 <filter name="month" string="Current Month" domain="[('control_date','&gt;=', context_today().strftime('%Y-%m-1')),('control_date','&lt;', (context_today() + relativedelta(months=1)).strftime('%Y-%m-1') )]"/>
@@ -152,6 +158,9 @@
                     <filter string="Vehicle" context="{'group_by': 'product_id'}"/>
                     <filter string="Screw" context="{'group_by': 'consu_product_id'}"/>
                     <filter string="Operation" context="{'group_by': 'workorder_id'}"/>
+                    <filter string="One Time Pass" context="{'group_by': 'one_time_pass'}"/>
+                    <filter string="Final Pass" context="{'group_by': 'final_pass'}"/>
+                    <filter string="Data Lacking" context="{'group_by': 'lacking'}"/>
                 </group>
             </search>
         </field>
