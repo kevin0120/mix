@@ -21,6 +21,7 @@
                             <field name="consu_product_id" />
                         </group>
                         <group string="Manufacturing Info">
+                            <field name="time" string="Order Date" />
                             <field name="production_id"/>
                             <field name="workcenter_id" />
                         </group>
@@ -39,7 +40,7 @@
                         </group>
                     </group>
                     <group string="Result">
-                        <field name="time" string="Complete Time"/>
+                        <field name="control_date" string="Checked Time"/>
                         <field name="measure_torque"/>
                         <field name="measure_degree"/>
                         <field name="measure_t_don" />
@@ -92,10 +93,11 @@
             <tree>
                 <field name="product_id"/>
                 <field name="consu_product_id" />
-                <field name="time" string="Complete Time"/>
+                <field name="control_date" string="Checked Time"/>
                 <field name="measure_torque"/>
                 <field name="measure_degree"/>
                 <field name="measure_t_don" />
+                <field name="measure_result" />
                 <field name="quality_state"/>
             </tree>
         </field>
@@ -107,7 +109,7 @@
         <field name="arch" type="xml">
             <graph string="Quality Check Analysis">
                 <field name="time" type="col" interval="day"/>
-                <field name="quality_state" type="row"/>
+                <field name="measure_result" type="row"/>
             </graph>
         </field>
     </record>
@@ -119,6 +121,7 @@
              <pivot string="Quality Check Analysis">
                  <field name="time" type="col" interval="day"/>
                  <field name="product_id" type="row"/>
+                 <field name="consu_product_id" type="row" />
              </pivot>
          </field>
     </record>
@@ -132,13 +135,20 @@
                 <field name="product_id" />
                 <field name="consu_product_id" />
                 <field name="workorder_id" string="Operation"/>
+                <separator/>
                 <filter string="In Progress" domain="[('quality_state', '=', 'none')]" name="progress"/>
                 <filter string="Passed" domain="[('quality_state', '=', 'pass')]" name="passed"/>
                 <filter string="Failed" domain="[('quality_state', '=', 'fail')]" name="failed"/>
+                <separator/>
+                <filter string="OK" domain="[('measure_result', '=', 'ok')]" name="OK"/>
+                <filter string="NOK" domain="[('measure_result', '=', 'nok')]" name="NOK"/>
+                <separator/>
+                <filter name="today" string="Today" domain="[('control_date', '&gt;=', datetime.datetime.now().replace(hour=0, minute=0, second=0)),('control_date', '&lt;=', datetime.datetime.now().replace(hour=23, minute=59, second=59))]" />
+                <filter name="month" string="Current Month" domain="[('control_date','&gt;=', context_today().strftime('%Y-%m-1')),('control_date','&lt;', (context_today() + relativedelta(months=1)).strftime('%Y-%m-1') )]"/>
                 <group expand="0" string="Group By">
                     <filter string="State" context="{'group_by': 'quality_state'}"/>
                     <filter string="Vehicle" context="{'group_by': 'product_id'}"/>
-                    <filter string="Vehicle" context="{'group_by': 'consu_product_id'}"/>
+                    <filter string="Screw" context="{'group_by': 'consu_product_id'}"/>
                     <filter string="Operation" context="{'group_by': 'workorder_id'}"/>
                 </group>
             </search>

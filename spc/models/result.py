@@ -3,7 +3,8 @@
 from odoo import fields,models,api,_
 from odoo.exceptions import ValidationError
 import odoo.addons.decimal_precision as dp
-from datetime import datetime
+from datetime import datetime, timedelta, date
+from dateutil.relativedelta import relativedelta
 
 
 class OperationResult(models.HyperModel):
@@ -52,6 +53,8 @@ class OperationResult(models.HyperModel):
 
     consu_product_id = fields.Many2one('product.product', 'Screw',
                                  domain="[('sa_type', '=', 'screw')]", required=True)
+
+    control_date = fields.Datetime('Control Date')
 
     measure_torque = fields.Float('Measure Torque(NM)', default=0.0, digits=dp.get_precision('Quality Tests'))
 

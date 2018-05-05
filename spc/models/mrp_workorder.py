@@ -25,5 +25,5 @@ class MrpWorkorder(models.Model):
                                                              'production_id': production.id,
                                                              'point_id': point.id,
                                                              'product_id': production.product_id.id,
-                                                             'consu_product_id': wo.operation_id.product_id.id,
+                                                             'consu_product_id': wo.consu_product_id.id,
                                                              'time': fields.Datetime.now()})
