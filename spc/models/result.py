@@ -68,7 +68,7 @@ class OperationResult(models.HyperModel):
         ('nok', 'NOK')], string="Measure Success", default='none')
 
     lacking = fields.Selection([('lack', 'Data Lacking'),
-        ('normal', 'Normal')], string='Lacking', default='normal', compute='_compute_result_lacking', store=True)
+        ('normal', 'Normal')], string='Lacking', default='lack', compute='_compute_result_lacking', store=True)
 
     op_time = fields.Integer(string=u'第几次拧紧作业', default=1)
 
@@ -93,11 +93,12 @@ class OperationResult(models.HyperModel):
                 result.one_time_pass = 'pass'
 
     @api.multi
-    @api.depends('measure_torque', 'measure_degree')
+    @api.depends('measure_torque', 'measure_degree', 'measure_result')
     def _compute_result_lacking(self):
         for result in self:
-            if result.measure_torque in [False,0.0] or result.measure_degree in [False,0.0]:
-                result.lacking = 'lack'
+            if result.measure_torque not in [False, 0.0] and result.measure_degree not in [False, 0.0] and result.measure_result != 'none':
+                result.lacking = 'normal'
+            result.lacking = 'lack'
 
     @api.multi
     def read(self, fields=None, load='_classic_read'):
