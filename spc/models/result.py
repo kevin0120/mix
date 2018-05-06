@@ -27,7 +27,7 @@ class OperationResult(models.HyperModel):
 
     pset_m_threshold = fields.Float(string='Set Threshold Torque(NM)', digits=dp.get_precision('Quality Tests'))
 
-    pset_m_Target = fields.Float(string='Set Target Torque(NM)', digits=dp.get_precision('Quality Tests'))
+    pset_m_target = fields.Float(string='Set Target Torque(NM)', digits=dp.get_precision('Quality Tests'))
 
     pset_w_max = fields.Float(string='Set Max Angel(grad)', digits=dp.get_precision('Quality Tests'))
 
@@ -35,7 +35,7 @@ class OperationResult(models.HyperModel):
 
     pset_w_threshold = fields.Float(string='Set Threshold Angel(grad)', digits=dp.get_precision('Quality Tests'))
 
-    pset_w_Target = fields.Float(string='Set Target Angel(grad)', digits=dp.get_precision('Quality Tests'))
+    pset_w_target = fields.Float(string='Set Target Angel(grad)', digits=dp.get_precision('Quality Tests'))
 
     cur_file = fields.Char(string='Waveform File')
 

@@ -30,13 +30,13 @@
                             <field name="pset_w_max"/>
                             <field name="pset_w_min" />
                             <field name="pset_w_threshold"/>
-                            <field name="pset_w_Target" />
+                            <field name="pset_w_target" />
                         </group>
                         <group string="Torque">
                             <field name="pset_m_max"/>
                             <field name="pset_m_min" />
                             <field name="pset_m_threshold"/>
-                            <field name="pset_m_Target" />
+                            <field name="pset_m_target" />
                         </group>
                     </group>
                     <group string="Result">
