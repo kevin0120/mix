@@ -136,8 +136,8 @@
         <field name="arch" type="xml">
             <search>
                 <field name="quality_state"/>
-                <field name="product_id" filter_domain="['|', ('name','ilike',self), ('product_id.vehicle_type_code','like',self)]"/>
-                <field name="consu_product_id" filter_domain="['|', ('name','ilike',self), ('consu_product_id.screw_type_code','like',self)]"/>
+                <field name="product_id" filter_domain="['|', ('product_id.name','ilike',self),('product_id.vehicle_type_code','ilike',self)]"/>
+                <field name="consu_product_id" filter_domain="['|', ('consu_product_id.name','ilike',self), ('consu_product_id.screw_type_code','ilike',self)]"/>
                 <field name="workorder_id" string="Operation"/>
                 <separator/>
                 <filter string="In Progress" domain="[('quality_state', '=', 'none')]" name="progress"/>
@@ -157,7 +157,7 @@
                     <filter string="State" context="{'group_by': 'quality_state'}"/>
                     <filter string="Vehicle" context="{'group_by': 'product_id'}"/>
                     <filter string="Screw" context="{'group_by': 'consu_product_id'}"/>
-                    <filter string="Operation" context="{'group_by': 'workorder_id'}"/>
+                    <filter string="WorkCenter" context="{'group_by': 'workcenter_id'}"/>
                     <filter string="One Time Pass" context="{'group_by': 'one_time_pass'}"/>
                     <filter string="Final Pass" context="{'group_by': 'final_pass'}"/>
                     <filter string="Data Lacking" context="{'group_by': 'lacking'}"/>
