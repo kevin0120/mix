@@ -4,7 +4,6 @@ import json
 from odoo.http import request,Response
 
 from api_data import api_data,DEFAULT_LIMIT
-from result import Result,ResultList
 
 
 class SaConfiguration(http.Controller):
@@ -13,7 +12,7 @@ class SaConfiguration(http.Controller):
     def api_doc(self):
         return json.dumps(api_data)
 
-    @http.route('/api/v1/mrp.productions', type='json', auth='none', cors='*', csrf=False)
+    @http.route('/api/v1/mrp.productions', type='json', methods=['POST','OPTIONS'], auth='none', cors='*', csrf=False)
     def assemble_mo_create(self):
         vals = request.jsonrequest
         vin = vals['vin']
@@ -46,12 +45,25 @@ class SaConfiguration(http.Controller):
 
         product_id = records[0]
 
+        assemble_line = vals['assembly_line']
+        vals.pop('assembly_line')
+        records = request.env['mrp.assemblyline'].sudo().search(
+            ['|', ('name', 'ilike', assemble_line), ('code', 'ilike', assemble_line)], limit=1)
+
+        if not records.exists():
+            # 找不到对应装配线
+            Response.status = "400 Bad Request"
+            return {"msg": "Assembly line " + assemble_line + " not found"}
+
+        assembly_line_id = records[0]
+
         vals.update({'name': mo_name})
         vals.update({'product_id': product_id.id,
                      'bom_id': product_id.active_bom_id.id,
                      'product_tmpl_id': product_id.product_tmpl_id.id,
                      'product_uom_id': product_id.active_bom_id.product_uom_id.id,
-                     'routing_id': product_id.active_bom_id.product_uom_id.id})
+                     'routing_id': product_id.active_bom_id.product_uom_id.id,
+                     'assembly_line_id': assembly_line_id.id})
 
         prs = vals['prs']
         vals.pop('prs')
@@ -69,21 +81,3 @@ class SaConfiguration(http.Controller):
             # 创建MO失败
             Response.status = "400 Bad Request"
             return {"msg": "create MO failed"}
-
-    @http.route('/api/v1/results', type='http', auth='none', methods=['get'], cors='*', csrf=False)
-    def _get_result_lists(self, **kw):
-        ret = ResultList()
-        fields = ['name']
-        domain = []
-        if 'date_from' in kw.keys():
-            domain += [('','>=', kw['date_from'])]
-        if 'date_to' in kw.keys():
-          domain += [('', '<=', kw['date_to'])]
-        if 'limit' in kw.keys():
-            limit = int(kw['limit'])
-        else:
-            limit = DEFAULT_LIMIT
-        quality_checks = request.env['quality.check'].sudo().search_read(domain, fields=fields, limit=limit)
-        map(lambda check: ret.append_result(Result.convert_from_quailty_check(check)), quality_checks)
-        body = ret.to_json()
-        return Response(body, headers=[('Content-Type', 'application/json'),('Content-Length', len(body))])

@@ -15,8 +15,6 @@ class OperationResult(models.HyperModel):
     workcenter_id = fields.Many2one('mrp.workcenter', related='workorder_id.workcenter_id', store=True, readonly=True)  # TDE: necessary ?
     production_id = fields.Many2one('mrp.production', 'Production Order')
 
-    pset_configuration = fields.Char(string='Pset Configuration')
-
     pset_strategy = fields.Selection([('AD', 'Torque tightening'),
                                          ('AW', 'Angle tightening'),
                                          ('ADW', 'Torque/Angle tightening'),
@@ -24,21 +22,21 @@ class OperationResult(models.HyperModel):
                                          ('AN', 'Number of Pulses tightening'),
                                          ('AT', 'Time tightening')])
 
-    pset_m_max = fields.Float(string='Set Max Torque(NM)', digits=dp.get_precision('Quality Tests'))
+    pset_m_max = fields.Float(string='Set Max Torque(NM)', digits=dp.get_precision('Operation Result'))
 
-    pset_m_min = fields.Float(string='Set Min Torque(NM)', digits=dp.get_precision('Quality Tests'))
+    pset_m_min = fields.Float(string='Set Min Torque(NM)', digits=dp.get_precision('Operation Result'))
 
-    pset_m_threshold = fields.Float(string='Set Threshold Torque(NM)', digits=dp.get_precision('Quality Tests'))
+    pset_m_threshold = fields.Float(string='Set Threshold Torque(NM)', digits=dp.get_precision('Operation Result'))
 
-    pset_m_target = fields.Float(string='Set Target Torque(NM)', digits=dp.get_precision('Quality Tests'))
+    pset_m_target = fields.Float(string='Set Target Torque(NM)', digits=dp.get_precision('Operation Result'))
 
-    pset_w_max = fields.Float(string='Set Max Angel(grad)', digits=dp.get_precision('Quality Tests'))
+    pset_w_max = fields.Float(string='Set Max Angel(grad)', digits=dp.get_precision('Operation Result'))
 
-    pset_w_min = fields.Float(string='Set Min Angel(grad)', digits=dp.get_precision('Quality Tests'))
+    pset_w_min = fields.Float(string='Set Min Angel(grad)', digits=dp.get_precision('Operation Result'))
 
-    pset_w_threshold = fields.Float(string='Set Threshold Angel(grad)', digits=dp.get_precision('Quality Tests'))
+    pset_w_threshold = fields.Float(string='Set Threshold Angel(grad)', digits=dp.get_precision('Operation Result'))
 
-    pset_w_target = fields.Float(string='Set Target Angel(grad)', digits=dp.get_precision('Quality Tests'))
+    pset_w_target = fields.Float(string='Set Target Angel(grad)', digits=dp.get_precision('Operation Result'))
 
     cur_objects = fields.Char(string='Waveform Files')
 
@@ -59,11 +57,11 @@ class OperationResult(models.HyperModel):
 
     control_date = fields.Datetime('Control Date')
 
-    measure_torque = fields.Float('Measure Torque(NM)', default=0.0, digits=dp.get_precision('Quality Tests'))
+    measure_torque = fields.Float('Measure Torque(NM)', default=0.0, digits=dp.get_precision('Operation Result'))
 
-    measure_degree = fields.Float('Measure Degree(grad)', default=0.0, digits=dp.get_precision('Quality Tests'))
+    measure_degree = fields.Float('Measure Degree(grad)', default=0.0, digits=dp.get_precision('Operation Result'))
 
-    measure_t_don = fields.Float('Measure Time Done(ms)', default=0.0, digits=dp.get_precision('Quality Tests'))
+    measure_t_don = fields.Float('Measure Time Done(ms)', default=0.0, digits=dp.get_precision('Operation Result'))
 
     measure_result = fields.Selection([
         ('none', 'No measure'),
@@ -88,7 +86,7 @@ class OperationResult(models.HyperModel):
     def _constraint_curs(self):
         try:
             obj = json.loads(self.cur_objects)
-            if not isinstance(list, obj):
+            if not isinstance(obj, list):
                 raise ValidationError('Waveform File is not a list')
         except ValueError:
             raise ValidationError('Waveform File is not Schema correct')
@@ -97,9 +95,9 @@ class OperationResult(models.HyperModel):
     @api.depends('measure_result', 'op_time')
     def _compute_result_pass(self):
         for result in self:
+            result.one_time_pass = 'fail'
+            result.final_pass = 'fail'
             if result.measure_result != 'ok':
-                result.one_time_pass = 'fail'
-                result.final_pass = 'fail'
                 return
             result.final_pass = 'pass'
             if result.op_time == 1:
@@ -109,12 +107,14 @@ class OperationResult(models.HyperModel):
     @api.depends('measure_torque', 'measure_degree', 'measure_result')
     def _compute_result_lacking(self):
         for result in self:
+            result.lacking = 'lack'
             if result.measure_torque not in [False, 0.0] and result.measure_degree not in [False, 0.0] and result.measure_result != 'none':
                 result.lacking = 'normal'
-            result.lacking = 'lack'
 
     @api.multi
     def read(self, fields=None, load='_classic_read'):
+        if not fields:
+            return super(OperationResult, self).read(fields, load=load)
         if 'display_name' in fields:
             fields.remove('display_name')
         if '__last_update' in fields:

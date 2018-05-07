@@ -22,7 +22,7 @@ class MrpProduction(models.Model):
     pin = fields.Integer(string='PIN')
     vin = fields.Char(string='VIN', copy=False)
     pin_check_code = fields.Integer(string='PIN check Code')
-    assembly_line = fields.Char(string='Assembly Line ID')
+    assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line ID')
     lnr = fields.Char(string='Line Number')
     knr = fields.Char(string='Vehicle Assembly Code', store=True, compute='_compute_mo_knr')
 

@@ -2,6 +2,11 @@
 <odoo>
     <data noupdate="1">
 
+        <record id="work_assemblyline_1" model="mrp.assemblyline">
+            <field name="name">测试生产线1</field>
+            <field name="code">01</field>
+        </record>
+
         <record id="work_segment_1" model="mrp.worksegament">
             <field name="name">测试工段1</field>
             <field name="code">测试工段1</field>

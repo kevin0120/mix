@@ -24,6 +24,7 @@
 
     # always loaded
     'data': [
+        'data/result_data.xml',
         'security/spc_security.xml',
         'security/ir.model.access.csv',
         'views/spc_menu_views.xml',

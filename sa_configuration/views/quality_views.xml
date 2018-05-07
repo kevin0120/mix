@@ -50,7 +50,7 @@
                     <div attrs="{'invisible': [('test_type', '!=', 'measure')]}" class="o_row">
                         <field name="measure_degree" string="Degree Measure" attrs="{'required': [('test_type', '=', 'measure')]}"/><span>Deg</span>
                     </div>
-                    <field name="assembly_line" />
+                    <field name="assembly_line_id" />
                 </xpath>
             </field>
         </record>
@@ -76,7 +76,7 @@
             <field name="inherit_id" ref="quality.quality_check_view_search"/>
             <field name="arch" type="xml">
                 <xpath expr="//search[1]" position="inside">
-                    <field name="assembly_line" />
+                    <field name="assembly_line_id" />
                 </xpath>
             </field>
         </record>

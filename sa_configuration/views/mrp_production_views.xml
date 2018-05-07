@@ -13,7 +13,7 @@
                 <field name="production_routings" groups="base.group_erp_manager"/>
                 <field name="vin" required="1" />
                 <field name="pin_check_code" required="1" />
-                <field name="assembly_line" required="1" />
+                <field name="assembly_line_id" required="1" />
                 <field name="lnr" required="1" />
                 <field name="knr" />
             </field>

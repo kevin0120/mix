@@ -20,7 +20,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['web','web_widget_echarts'],
+    'depends': ['web','web_widget_echarts', 'sa_configuration'],
 
     "external_dependencies": {
         "python": ['minio'],

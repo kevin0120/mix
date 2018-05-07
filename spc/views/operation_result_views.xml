@@ -41,6 +41,8 @@
                     </group>
                     <group string="Result">
                         <field name="control_date" string="Checked Time"/>
+                        <field name="op_time" />
+                        <field name="cur_objects" />
                         <field name="measure_result" />
                         <field name="measure_torque"/>
                         <field name="measure_degree"/>

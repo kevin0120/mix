@@ -52,7 +52,7 @@ class QualityCheck(models.Model):
     measure_degree = fields.Float('Measure Degree', default=0.0, digits=dp.get_precision('Quality Tests'),
                            track_visibility='onchange')
 
-    assembly_line = fields.Char(string='Assembly Line ID', related='production_id.assembly_line', readonly=True)
+    assembly_line_id = fields.Many2one('mrp.assemblyline',string='Assembly Line ID', related='production_id.assembly_line_id', readonly=True)
 
     @api.one
     @api.depends('measure','measure_degree')

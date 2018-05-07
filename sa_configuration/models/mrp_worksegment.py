@@ -7,6 +7,39 @@ import datetime
 from odoo import api, exceptions, fields, models, _
 
 
+class MrpWorkAssembly(models.Model):
+    _name = 'mrp.assemblyline'
+    _description = 'Work Assembly Line'
+    _order = "id"
+
+    name = fields.Char('Assembly Line', copy=False)
+    code = fields.Char('Reference', copy=False)
+    worksegment_count = fields.Integer('Work Segments', compute='_compute_worksegments_count')
+
+    active = fields.Boolean(
+        'Active', default=True,
+        help="If the active field is set to False, it will allow you to hide the bills of material without removing it.")
+
+    worksegment_ids = fields.One2many('mrp.worksegament', 'workassembly_id', 'Work Segments', copy=False)
+
+    _sql_constraints = [('code_uniq', 'unique(code)', 'Only one code per Work Assembly Line is allowed')]
+
+    @api.multi
+    @api.depends('worksegment_ids')
+    def _compute_worksegments_count(self):
+        for line in self:
+            line.worksegment_count = len(line.worksegment_ids)
+
+    @api.multi
+    @api.depends('name', 'code')
+    def name_get(self):
+        res = []
+        for line in self:
+            name = u"[{0}] {1}".format(line.code, line.name)
+            res.append((line.id, name))
+        return res
+
+
 class MrpWorkSegment(models.Model):
     _name = 'mrp.worksegament'
     _description = 'Work Segment'
@@ -14,6 +47,7 @@ class MrpWorkSegment(models.Model):
 
     name = fields.Char('Segament', copy=False)
     code = fields.Char('Reference', copy=False)
+    workassembly_id = fields.Many2one('mrp.assemblyline', string='Work Assembly Line')
     workcenter_count = fields.Integer('Work Centers', compute='_compute_workcenters_count')
 
     active = fields.Boolean(

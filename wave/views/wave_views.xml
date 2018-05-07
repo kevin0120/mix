@@ -9,14 +9,31 @@
                         <button string="Query" type="object" name="button_query" class="oe_highlight"/>
                     </header>
                     <div>
-                        <group>
-                            <group string="Parameters">
-                                <field name="name"/>
-                                <field name="value" />
+                        <group string="Query Parameters">
+                            <group string="Time">
+                                <field name="query_date_from" required="1"/>
+                                <field name="query_date_to"/>
                             </group>
-                            <group string="Charts">
-                                <field name="echart" widget="echart"/>
+                            <group string="Product">
+                                <field name="vehicle_id" />
+                                <field name="screw_id" />
                             </group>
+                            <group string="Manufacture">
+                                <field name="segment_id" />
+                                <field name="knr_code" />
+                                <field name="vin_code" />
+                                <field name="assembly_line_id" />
+                                <field name="segment_id" />
+                            </group>
+                            <group>
+                                <field name="limit" required="1"/>
+                            </group>
+                        </group>
+
+                    </div>
+                    <div>
+                        <group string="Waves">
+                            <field name="wave" widget="echart"/>
                         </group>
                     </div>
 
