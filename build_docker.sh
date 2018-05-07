@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version="0.0.1"
+version="0.0.2"
 
 docker_repo="registry.cn-hangzhou.aliyuncs.com/ca/docker"
 

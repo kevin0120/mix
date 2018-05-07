@@ -1,7 +1,6 @@
 package cvi_listener
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"log"
@@ -9,13 +8,13 @@ import (
 	"os"
 	"strings"
 	"sync"
-
 	"time"
 
 	"github.com/masami10/rush"
 	"github.com/masami10/rush/internal"
 	"github.com/masami10/rush/plugins/inputs"
 	"github.com/masami10/rush/plugins/parsers"
+	"github.com/masami10/rush/utils/cvi"
 )
 
 type setReadBufferer interface {
@@ -28,9 +27,12 @@ type streamSocketListener struct {
 
 	connections    map[string]net.Conn
 	connectionsMtx sync.Mutex
+
+	cvi3_clients   map[string]*CVI3Client
 }
 
 func (ssl *streamSocketListener) listen() {
+
 	ssl.connections = map[string]net.Conn{}
 
 	for {
@@ -92,33 +94,48 @@ func (ssl *streamSocketListener) read(c net.Conn) {
 	defer ssl.removeConnection(c)
 	defer c.Close()
 
-	scnr := bufio.NewScanner(c)
+	//scnr := bufio.NewScanner(c)
+	buffer := make([]byte, 65535)
 	for {
 		if ssl.ReadTimeout != nil && ssl.ReadTimeout.Duration > 0 {
 			c.SetReadDeadline(time.Now().Add(ssl.ReadTimeout.Duration))
 		}
-		if !scnr.Scan() {
+		//if !scnr.Scan() {
+		//	break
+		//}
+		//
+		//msg := string(scnr.Bytes())
+		n, err := c.Read(buffer)
+		if err != nil {
 			break
 		}
-		// 处理关于控制器上传的XML协议并进行http上传至xboard
-		//metrics, err := ssl.Parse(scnr.Bytes())
-		//if err != nil {
-		//	ssl.AddError(fmt.Errorf("unable to parse incoming line: %s", err))
-		//	//TODO rate limit
-		//	continue
-		//}
-		//for _, m := range metrics {
-		//	ssl.AddFields(m.Name(), m.Fields(), m.Tags(), m.Time())
-		//}
-	}
+		msg := string(buffer[0:n])
+		//fmt.Printf("%s\n", msg)
 
-	if err := scnr.Err(); err != nil {
-		if err, ok := err.(net.Error); ok && err.Timeout() {
-			log.Printf("D! Timeout in plugin [input.socket_listener]: %s", err)
-		} else if !strings.HasSuffix(err.Error(), ": use of closed network connection") {
-			ssl.AddError(err)
+		header := cvi.CVI3Header{}
+		header.Deserialize(msg[0: cvi.HEADER_LEN])
+
+		if header.TYP == cvi.Header_type_request_with_reply {
+			// 执行应答
+			keepalive_packet := cvi.GeneratePacket(header.MID, cvi.Header_type_reply, cvi.Xml_heart_beat)
+			_, err := c.Write([]byte(keepalive_packet))
+			if err != nil {
+				print("%s\n", err.Error())
+				break
+			}
+		} else if header.TYP == cvi.Header_type_keep_alive {
+			// 心跳响应
+
 		}
 	}
+
+	//if err := scnr.Err(); err != nil {
+	//	if err, ok := err.(net.Error); ok && err.Timeout() {
+	//		log.Printf("D! Timeout in plugin [input.socket_listener]: %s", err)
+	//	} else if !strings.HasSuffix(err.Error(), ": use of closed network connection") {
+	//		ssl.AddError(err)
+	//	}
+	//}
 }
 
 type packetSocketListener struct {
@@ -149,17 +166,21 @@ func (psl *packetSocketListener) listen() {
 	}
 }
 
-type CVIListener struct {
-	ServiceAddress  string
-	MaxConnections  int
-	ReadBufferSize  int
-	ReadTimeout     *internal.Duration
-	KeepAlivePeriod *internal.Duration
+type (
+	CVIListener struct {
+		ServiceAddress  string
+		MaxConnections  int
+		ReadBufferSize  int
+		ReadTimeout     *internal.Duration
+		KeepAlivePeriod *internal.Duration
+		Controllers	[]*CVIConfig
 
-	parsers.Parser
-	rush.Accumulator
-	io.Closer
-}
+		parsers.Parser
+		rush.Accumulator
+		io.Closer
+	}
+
+)
 
 func (sl *CVIListener) Description() string {
 	return "Generic socket listener capable of handling multiple socket types."
@@ -197,6 +218,13 @@ func (sl *CVIListener) SampleConfig() string {
   ## more about them here:
   ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   # data_format = "influx"
+
+  ## CVI3 Controllers, 
+  # [[inputs.cvi_listener.controllers]]
+  # 	sn = "1"
+  # 	ip = "192.168.1.200"
+  # 	port = 4700
+  #		hmi = "http://127.0.0.1:8000"
 `
 }
 
@@ -244,6 +272,18 @@ func (sl *CVIListener) Start(acc rush.Accumulator) error {
 
 		sl.Closer = ssl
 		go ssl.listen()
+
+		// 根据配置启动CVI客户端
+		ssl.cvi3_clients = map[string]*CVI3Client{}
+		for _, cvi3 := range sl.Controllers {
+			client := CVI3Client{}
+			client.Config = cvi3
+
+			ssl.cvi3_clients[cvi3.SN] = &client
+			client.Start()
+		}
+
+
 	case "udp", "udp4", "udp6", "ip", "ip4", "ip6", "unixgram":
 		pc, err := net.ListenPacket(spl[0], spl[1])
 		if err != nil {
