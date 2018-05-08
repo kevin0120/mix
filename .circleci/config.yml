@@ -17,10 +17,10 @@ jobs:
       - checkout
       # - setup_remote_docker:
       #     docker_layer_caching: true
-      - add_ssh_keys:
-          fingerprints:
-            - "c7:20:19:93:cd:c6:31:58:55:e4:8c:bb:44:06:87:85"
-            - "9b:7f:e5:b2:66:b6:84:71:94:2d:29:25:43:d5:24:4b"
+      # - add_ssh_keys:
+      #     fingerprints:
+      #       - "c7:20:19:93:cd:c6:31:58:55:e4:8c:bb:44:06:87:85"
+      #       - "9b:7f:e5:b2:66:b6:84:71:94:2d:29:25:43:d5:24:4b"
       - run:
           name: docker build
           command: |
