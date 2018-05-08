@@ -25,6 +25,6 @@ jobs:
           name: docker build
           command: |
             cd docker
-            ./build.sh
+            docker build --build-arg CODING_PWD=$CODING_PWD --build-arg CODING_USER=$CODING_USER --build-arg GITHUB_PWD=$GITHUB_PWD --build-arg GITHUB_USER=$GITHUB_USER -f ./Dockerfile -t gubinempower/sa-backend:20180508 . --no-cache
             docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PWD
             docker push gubinempower/sa-backend:20180508
