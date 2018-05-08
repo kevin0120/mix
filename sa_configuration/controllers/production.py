@@ -3,14 +3,8 @@ from odoo import http
 import json
 from odoo.http import request,Response
 
-from api_data import api_data,DEFAULT_LIMIT
-
 
 class SaConfiguration(http.Controller):
-    # 如果想使用此API,必须在配置文件中指定数据库方可使用
-    @http.route('/api/v1/doc', type='http', auth='none', cors='*', csrf=False)
-    def api_doc(self):
-        return json.dumps(api_data)
 
     @http.route('/api/v1/mrp.productions', type='json', methods=['POST','OPTIONS'], auth='none', cors='*', csrf=False)
     def assemble_mo_create(self):

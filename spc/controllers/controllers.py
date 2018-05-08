@@ -2,7 +2,6 @@
 from odoo import http,fields
 import json
 from odoo.http import request,Response
-from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from dateutil import parser
 
 DEFAULT_LIMIT = 80
