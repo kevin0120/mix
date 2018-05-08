@@ -28,7 +28,8 @@ type streamSocketListener struct {
 	connections    map[string]net.Conn
 	connectionsMtx sync.Mutex
 
-	cvi3_clients   map[string]*CVI3Client
+	cvi3_manager 	*CVI3Manager
+	api_server		*ApiServer
 }
 
 func (ssl *streamSocketListener) listen() {
@@ -110,22 +111,24 @@ func (ssl *streamSocketListener) read(c net.Conn) {
 			break
 		}
 		msg := string(buffer[0:n])
-		//fmt.Printf("%s\n", msg)
+		fmt.Printf("%s\n", msg)
 
 		header := cvi.CVI3Header{}
 		header.Deserialize(msg[0: cvi.HEADER_LEN])
 
-		if header.TYP == cvi.Header_type_request_with_reply {
+		if header.TYP == cvi.Header_type_request_with_reply || header.TYP == cvi.Header_type_keep_alive {
 			// 执行应答
-			keepalive_packet := cvi.GeneratePacket(header.MID, cvi.Header_type_reply, cvi.Xml_heart_beat)
-			_, err := c.Write([]byte(keepalive_packet))
+			reply := cvi.CVI3Header{}
+			reply.Init()
+			reply.TYP = cvi.Header_type_reply
+			reply.MID = header.MID
+			reply_packet := reply.Serialize()
+
+			_, err := c.Write([]byte(reply_packet))
 			if err != nil {
 				print("%s\n", err.Error())
 				break
 			}
-		} else if header.TYP == cvi.Header_type_keep_alive {
-			// 心跳响应
-
 		}
 	}
 
@@ -273,16 +276,14 @@ func (sl *CVIListener) Start(acc rush.Accumulator) error {
 		sl.Closer = ssl
 		go ssl.listen()
 
-		// 根据配置启动CVI客户端
-		ssl.cvi3_clients = map[string]*CVI3Client{}
-		for _, cvi3 := range sl.Controllers {
-			client := CVI3Client{}
-			client.Config = cvi3
+		ssl.cvi3_manager = &CVI3Manager{}
+		ssl.api_server = &ApiServer{}
 
-			ssl.cvi3_clients[cvi3.SN] = &client
-			client.Start()
-		}
+		// 启动客户端服务
+		ssl.cvi3_manager.StartService(sl.Controllers)
 
+		// 启动api服务
+		ssl.api_server.StartService(ssl.cvi3_manager)
 
 	case "udp", "udp4", "udp6", "ip", "ip4", "ip6", "unixgram":
 		pc, err := net.ListenPacket(spl[0], spl[1])

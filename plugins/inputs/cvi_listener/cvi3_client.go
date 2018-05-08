@@ -11,7 +11,7 @@ import (
 
 const (
 	// 心跳间隔(ms)
-	keep_alive_inteval = 5000
+	keep_alive_inteval = 7000
 
 	// 下发超时(ms)
 	send_timeout = 3000
@@ -59,6 +59,7 @@ func (client *CVI3Client) Start() {
 // PSet程序设定
 func (client *CVI3Client) PSet(pset int, workorder_id int) {
 	//time.Sleep(3000 * time.Millisecond)
+
 	sdate, stime := cvi.GetDateTime()
 	xml_pset := fmt.Sprintf(cvi.Xml_pset, sdate, stime, client.Config.SN, workorder_id, pset)
 
@@ -88,7 +89,7 @@ func (client *CVI3Client) Read(){
 		}
 		msg := string(buffer[0:n])
 
-		fmt.Printf("%s\n", msg)
+		//fmt.Printf("%s\n", msg)
 
 		// 处理应答
 		header := cvi.CVI3Header{}
@@ -109,12 +110,12 @@ func (client *CVI3Client) subscribe() {
 
 	client.add_to_queue(serial, "")
 
+	fmt.Printf("%s\n", subscribe_packet)
 	_, err := client.Conn.Write([]byte(subscribe_packet))
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())
 	}
 
-	//fmt.Printf("n=%d\n", n)
 }
 
 // 心跳
