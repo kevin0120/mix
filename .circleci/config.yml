@@ -19,8 +19,7 @@ jobs:
       #     docker_layer_caching: true
       - add_ssh_keys:
           fingerprints:
-            - "c7:20:19:93:cd:c6:31:58:55:e4:8c:bb:44:06:87:85"
-
+            - "c7:20:19:93:cd:c6:31:58:55:e4:8c:bb:44:06:87:85" 
       - run:
           name: docker build
           command: |
