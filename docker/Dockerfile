@@ -77,7 +77,8 @@ COPY ./sa_addons /usr/src
 RUN pip install --upgrade setuptools \
     && rm -rf /usr/src/odoo/.git \
     && rm -rf /usr/src/sa_addons/.git \
-    && rm -Rf /usr/src/sa_addons/docker \
+    && rm -rf /usr/src/sa_addons/docker \
+    && rm -rf /usr/src/sa_addons/.circleci \
     && pip install -r /usr/src/odoo/requirements.txt -i https://pypi.douban.com/simple \
     && pip install -r /usr/src/sa_addons/requirements.txt -i https://pypi.douban.com/simple \
 		&& ln -s /usr/src/odoo/setup/odoo /usr/local/bin/odoo \
