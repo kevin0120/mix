@@ -17,10 +17,14 @@ jobs:
       - checkout
       # - setup_remote_docker:
       #     docker_layer_caching: true
+      - add_ssh_keys:
+          fingerprints:
+            - "c7:20:19:93:cd:c6:31:58:55:e4:8c:bb:44:06:87:85"
+            - "c7:20:19:93:cd:c6:31:58:55:e4:8c:bb:44:06:87:85"
       - run:
           name: docker build
           command: |
             cd docker
-            docker build --build-arg CODING_PWD="$CODING_PWD" --build-arg CODING_USER="$CODING_USER" --build-arg GITHUB_PWD="$GITHUB_PWD" --build-arg GITHUB_USER="$GITHUB_USER" -f ./Dockerfile -t gubinempower/sa-backend:20180508 . --no-cache
-            docker login -u "$DOCKERHUB_USER" -p "$DOCKERHUB_PWD"
+            docker build -f ./Dockerfile -t gubinempower/sa-backend:20180508 . --no-cache
+            docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PWD
             docker push gubinempower/sa-backend:20180508

@@ -69,12 +69,12 @@ WORKDIR /usr/src
 
 # create the odoo user
 RUN adduser --home=/var/lib/odoo --disabled-password --gecos "" --shell=/bin/bash odoo \
-		&& git clone https://${CODING_USER}:${CODING_PWD}@git.coding.net/masami10/odoo-enterprise.git --branch ${ODOO_VERSION} --single-branch odoo \
+		&& git clone git@git.coding.net:masami10/odoo-enterprise.git --branch ${ODOO_VERSION} --single-branch odoo \
 		&& rm -rf odoo/.git \
 		&& pip install --upgrade pip -i https://pypi.douban.com/simple
 
 RUN pip install --upgrade setuptools \
-    && git clone https://${GITHUB_USER}:${GITHUB_PWD}@github.com/masami10/sa_addons.git --branch master --single-branch sa_addons \
+    && git clone git@github.com:masami10/sa_addons.git --branch master --single-branch sa_addons \
     && rm -rf /usr/src/sa_addons/.git \
     && rm -Rf /usr/src/sa_addons/docker \
     && pip install -r /usr/src/odoo/requirements.txt -i https://pypi.douban.com/simple \
