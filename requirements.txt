@@ -11,3 +11,5 @@ pandas
 scipy
 
 numpy
+
+boltons # for LRU caching

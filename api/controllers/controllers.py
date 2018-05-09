@@ -15,11 +15,18 @@ class BaseApi(http.Controller):
         return json.dumps(api_data)
 
     @http.route('/api/v1/res.users', type='http', auth='none', cors='*', csrf=False)
-    def _get_users_info(self, **query_params):
+    def _get_users_list_info(self, **query_params):
         _limit = DEFAULT_LIMIT
         if 'limit' in query_params:
             _limit = int(query_params['limit'])
-        users = request.env['res.users'].sudo().search([('id', '!=', 1)], limit=_limit).read(fields=NORMAL_RESULT_FIELDS_READ)
+        domain = [('id', '!=', 1)]
+        if 'uuids' in query_params:
+            uuids = query_params['uuids'].split(',')
+            domain += [('uuid', 'in', uuids)]
+        users = request.env['res.users'].sudo().search(domain, limit=_limit).read(fields=NORMAL_RESULT_FIELDS_READ)
+        if len(users) != len(uuids):
+            # 有某些uuid未找到
+            pass
         for user in users:
             if 'active' in user:
                 user.update({
@@ -36,6 +43,30 @@ class BaseApi(http.Controller):
             return Response(json.dumps({'msg': 'User not found'}), headers={'content-type': 'application/json'}, status=404)
 
         ret = user_id.sudo().read(fields=NORMAL_RESULT_FIELDS_READ)[0]
+        if 'active' in ret:
+            ret.update({
+                'status': 'active' if ret['active'] else 'archived'
+            })
+            ret.pop('active')
+
+        return Response(json.dumps(ret), headers={'content-type': 'application/json'}, status=200)
+
+    @http.route('/api/v1/res.users/batch_archived', type='json', auth='none', cors='*', csrf=False)
+    def _bach_patch_user_archived(self):
+        uuids = request.jsonrequest
+        user_ids = request.env['res.users'].sudo().search([('uuid', 'in', uuids)])
+
+        if not user_ids:
+            return Response(json.dumps({'msg': 'User not found'}), headers={'content-type': 'application/json'},
+                            status=404)
+
+        ret = user_ids.sudo().write({
+            'active': False
+        })
+        if not ret:
+            return Response(json.dumps({'msg': 'Batch Archived fail'}), headers={'content-type': 'application/json'},
+                            status=405)
+        ret = user_ids.sudo().read(fields=NORMAL_RESULT_FIELDS_READ)[0]
         if 'active' in ret:
             ret.update({
                 'status': 'active' if ret['active'] else 'archived'
