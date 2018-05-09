@@ -15,9 +15,72 @@ api_data = {
     "title": "智能装配应用服务器RESTful"
   },
   "paths": {
+    "/operation.results": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "成功更新了结果数据",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/ResultDetail"
+              }
+            }
+          },
+          "404": {
+            "description": "未找到记录"
+          },
+          "405": {
+            "description": "无效的输入"
+          }
+        },
+        "description": "获取拧紧结果数据",
+        "parameters": [
+          {
+            "name": "date_from",
+            "description": "查询起始时间",
+            "in": "query",
+            "type": "string",
+            "format": "date-time",
+            "default": "1996-12-19T16:39:57-08:00"
+          },
+          {
+            "name": "date_to",
+            "description": "查询终止时间",
+            "in": "query",
+            "type": "string",
+            "format": "date-time",
+            "default": "1996-12-29T16:39:57+08:00"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "integer",
+            "default": 80
+          }
+        ],
+        "tags": [
+          "Result"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "summary": "获取结果数据"
+      }
+    },
     "/operation.results/{resultId}": {
       "put": {
         "responses": {
+          "200": {
+            "description": "成功更新了结果数据",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/ResultDetail"
+              }
+            }
+          },
           "404": {
             "description": "resultId 未找到"
           }
@@ -41,7 +104,7 @@ api_data = {
           }
         ],
         "tags": [
-          "result"
+          "Result"
         ],
         "produces": [
           "application/json"
@@ -50,98 +113,52 @@ api_data = {
           "application/json"
         ],
         "summary": "更新一条结果数据"
-      }
-    },
-    "/results": {
-      "put": {
-        "responses": {
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Pet not found"
-          },
-          "405": {
-            "description": "Validation exception"
-          }
-        },
-        "description": "",
-        "parameters": [
-          {
-            "schema": {
-              "$ref": "#/definitions/Result"
-            },
-            "description": "Pet object that needs to be added to the store",
-            "required": True,
-            "name": "body",
-            "in": "body"
-          }
-        ],
-        "tags": [
-          "pet"
-        ],
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ],
-        "operationId": "updatePet",
-        "consumes": [
-          "application/json",
-          "application/xml"
-        ],
-        "summary": "Update an existing pet"
-      },
-      "post": {
-        "responses": {
-          "201": {
-            "description": "成功创建一条结果",
-            "schema": {
-              "$ref": "#/definitions/Result"
-            }
-          },
-          "405": {
-            "description": "Invalid input"
-          }
-        },
-        "description": "",
-        "parameters": [
-          {
-            "schema": {
-              "$ref": "#/definitions/Result"
-            },
-            "description": "添加工序结果",
-            "required": True,
-            "name": "body",
-            "in": "body"
-          }
-        ],
-        "tags": [
-          "result"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "operationId": "addResult",
-        "consumes": [
-          "application/json"
-        ],
-        "summary": "添加一条新的(拧紧)工序结果"
       },
       "get": {
         "responses": {
           "200": {
-            "description": "结果清单",
+            "description": "成功更新了结果数据",
             "schema": {
               "items": {
-                "$ref": "#/definitions/Result"
+                "$ref": "#/definitions/ResultDetail"
+              }
+            }
+          },
+          "404": {
+            "description": "resultId 未找到"
+          }
+        },
+        "description": "获取一条拧紧结果数据",
+        "parameters": [
+          {
+            "name": "resultId",
+            "description": "需要更新的结果的ID",
+            "format": "int64",
+            "required": True,
+            "in": "path",
+            "type": "integer"
+          }
+        ],
+        "tags": [
+          "Result"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "summary": "获取一条结果数据"
+      }
+    },
+    "/res.users": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "用户清单",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/User"
               },
               "type": "array"
             }
@@ -153,21 +170,17 @@ api_data = {
         "description": "",
         "parameters": [
           {
-            "description": "起始时间",
-            "required": False,
-            "type": "date",
-            "name": "date_from",
-            "in": "query"
-          },
-          {
-            "description": "截止时间",
-            "required": False,
-            "type": "date",
-            "name": "date_to",
-            "in": "query"
+            "description": "UUID to filter by",
+            "items": {
+              "type": "string"
+            },
+            "in": "query",
+            "type": "array",
+            "name": "uuids"
           },
           {
             "description": "返回结果限定个数",
+            "collectionFormat": "multi",
             "default": 80,
             "required": False,
             "in": "query",
@@ -176,532 +189,97 @@ api_data = {
           }
         ],
         "tags": [
-          "result"
+          "Users"
         ],
         "produces": [
           "application/json"
         ],
-        "operationId": "getResultList",
         "consumes": [
           "application/json"
         ],
-        "summary": "查询结果清单"
+        "summary": "查询用户清单"
       }
     },
-    "/pet/findByTags": {
+    "/res.users/{uuid}": {
       "get": {
         "responses": {
           "200": {
-            "description": "successful operation",
-            "schema": {
-              "items": {
-                "$ref": "#/definitions/Pet"
-              },
-              "type": "array"
-            }
-          },
-          "400": {
-            "description": "Invalid tag value"
-          }
-        },
-        "description": "Muliple tags can be provided with comma separated strings. Use         tag1, tag2, tag3 for testing.",
-        "parameters": [
-          {
-            "description": "Tags to filter by",
-            "items": {
-              "type": "string"
-            },
-            "required": True,
-            "collectionFormat": "multi",
-            "in": "query",
-            "type": "array",
-            "name": "tags"
-          }
-        ],
-        "tags": [
-          "pet"
-        ],
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "deprecated": True,
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ],
-        "operationId": "findPetsByTags",
-        "summary": "Finds Pets by tags"
-      }
-    },
-    "/user/createWithArray": {
-      "post": {
-        "responses": {
-          "default": {
-            "description": "successful operation"
-          }
-        },
-        "description": "",
-        "parameters": [
-          {
-            "schema": {
-              "items": {
-                "$ref": "#/definitions/User"
-              },
-              "type": "array"
-            },
-            "description": "List of user object",
-            "required": True,
-            "name": "body",
-            "in": "body"
-          }
-        ],
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Creates list of users with given input array",
-        "operationId": "createUsersWithArrayInput"
-      }
-    },
-    "/store/order": {
-      "post": {
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/Order"
-            }
-          },
-          "400": {
-            "description": "Invalid Order"
-          }
-        },
-        "description": "",
-        "parameters": [
-          {
-            "schema": {
-              "$ref": "#/definitions/Order"
-            },
-            "description": "order placed for purchasing the pet",
-            "required": True,
-            "name": "body",
-            "in": "body"
-          }
-        ],
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "tags": [
-          "store"
-        ],
-        "summary": "Place an order for a pet",
-        "operationId": "placeOrder"
-      }
-    },
-    "/store/order/{orderId}": {
-      "delete": {
-        "responses": {
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Order not found"
-          }
-        },
-        "description": "For valid response try integer IDs with positive integer value.         Negative or non-integer values will generate API errors",
-        "parameters": [
-          {
-            "description": "ID of the order that needs to be deleted",
-            "format": "int64",
-            "required": True,
-            "minimum": 1,
-            "in": "path",
-            "type": "integer",
-            "name": "orderId"
-          }
-        ],
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "tags": [
-          "store"
-        ],
-        "summary": "Delete purchase order by ID",
-        "operationId": "deleteOrder"
-      },
-      "get": {
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/Order"
-            }
-          },
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Order not found"
-          }
-        },
-        "description": "For valid response try integer IDs with value >= 1 and <= 10.         Other values will generated exceptions",
-        "parameters": [
-          {
-            "minimum": 1,
-            "name": "orderId",
-            "in": "path",
-            "format": "int64",
-            "required": True,
-            "type": "integer",
-            "maximum": 10,
-            "description": "ID of pet that needs to be fetched"
-          }
-        ],
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "tags": [
-          "store"
-        ],
-        "summary": "Find purchase order by ID",
-        "operationId": "getOrderById"
-      }
-    },
-    "/user/login": {
-      "get": {
-        "responses": {
-          "200": {
-            "headers": {
-              "X-Rate-Limit": {
-                "type": "integer",
-                "description": "calls per hour allowed by the user",
-                "format": "int32"
-              },
-              "X-Expires-After": {
-                "type": "string",
-                "description": "date in UTC when token expires",
-                "format": "date-time"
-              }
-            },
-            "description": "successful operation",
-            "schema": {
-              "type": "string"
-            }
-          },
-          "400": {
-            "description": "Invalid username/password supplied"
-          }
-        },
-        "description": "",
-        "parameters": [
-          {
-            "description": "The user name for login",
-            "required": True,
-            "type": "string",
-            "name": "username",
-            "in": "query"
-          },
-          {
-            "description": "The password for login in clear text",
-            "required": True,
-            "type": "string",
-            "name": "password",
-            "in": "query"
-          }
-        ],
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Logs user into the system",
-        "operationId": "loginUser"
-      }
-    },
-    "/user": {
-      "post": {
-        "responses": {
-          "default": {
-            "description": "successful operation"
-          }
-        },
-        "description": "This can only be done by the logged in user.",
-        "parameters": [
-          {
+            "description": "用户清单",
             "schema": {
               "$ref": "#/definitions/User"
-            },
-            "description": "Created user object",
+            }
+          },
+          "404": {
+            "description": "uuid not found"
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "description": "获取某一用户信息",
+        "parameters": [
+          {
+            "description": "用户唯一标示(胸卡信息)",
             "required": True,
-            "name": "body",
-            "in": "body"
+            "in": "path",
+            "type": "string",
+            "name": "uuid"
           }
         ],
+        "tags": [
+          "Users"
+        ],
         "produces": [
-          "application/xml",
           "application/json"
         ],
-        "tags": [
-          "user"
+        "consumes": [
+          "application/json"
         ],
-        "summary": "Create user",
-        "operationId": "createUser"
+        "summary": "查询用户清单"
       }
     },
-    "/user/{username}": {
+    "/res.users/batch_archived": {
       "put": {
         "responses": {
-          "400": {
-            "description": "Invalid user supplied"
-          },
-          "404": {
-            "description": "User not found"
-          }
-        },
-        "description": "This can only be done by the logged in user.",
-        "parameters": [
-          {
-            "description": "name that need to be updated",
-            "required": True,
-            "type": "string",
-            "name": "username",
-            "in": "path"
-          },
-          {
-            "schema": {
-              "$ref": "#/definitions/User"
-            },
-            "description": "Updated user object",
-            "required": True,
-            "name": "body",
-            "in": "body"
-          }
-        ],
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Updated user",
-        "operationId": "updateUser"
-      },
-      "delete": {
-        "responses": {
-          "400": {
-            "description": "Invalid username supplied"
-          },
-          "404": {
-            "description": "User not found"
-          }
-        },
-        "description": "This can only be done by the logged in user.",
-        "parameters": [
-          {
-            "description": "The name that needs to be deleted",
-            "required": True,
-            "type": "string",
-            "name": "username",
-            "in": "path"
-          }
-        ],
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Delete user",
-        "operationId": "deleteUser"
-      },
-      "get": {
-        "responses": {
           "200": {
-            "description": "successful operation",
+            "description": "用户清单",
             "schema": {
-              "$ref": "#/definitions/User"
-            }
-          },
-          "400": {
-            "description": "Invalid username supplied"
-          },
-          "404": {
-            "description": "User not found"
-          }
-        },
-        "description": "",
-        "parameters": [
-          {
-            "description": "The name that needs to be fetched. Use user1 for testing. ",
-            "required": True,
-            "type": "string",
-            "name": "username",
-            "in": "path"
-          }
-        ],
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Get user by user name",
-        "operationId": "getUserByName"
-      }
-    },
-    "/pet/findByStatus": {
-      "get": {
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "items": {
-                "$ref": "#/definitions/Pet"
-              },
-              "type": "array"
-            }
-          },
-          "400": {
-            "description": "Invalid status value"
-          }
-        },
-        "description": "Multiple status values can be provided with comma separated strings",
-        "parameters": [
-          {
-            "description": "Status values that need to be considered for filter",
-            "items": {
-              "default": "available",
-              "enum": [
-                "available",
-                "pending",
-                "sold"
-              ],
-              "type": "string"
-            },
-            "required": True,
-            "collectionFormat": "multi",
-            "in": "query",
-            "type": "array",
-            "name": "status"
-          }
-        ],
-        "tags": [
-          "pet"
-        ],
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ],
-        "operationId": "findPetsByStatus",
-        "summary": "Finds Pets by status"
-      }
-    },
-    "/store/inventory": {
-      "get": {
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "additionalProperties": {
-                "type": "integer",
-                "format": "int32"
-              },
-              "type": "object"
-            }
-          }
-        },
-        "description": "Returns a map of status codes to quantities",
-        "parameters": [],
-        "tags": [
-          "store"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "security": [
-          {
-            "api_key": []
-          }
-        ],
-        "operationId": "getInventory",
-        "summary": "Returns pet inventories by status"
-      }
-    },
-    "/user/logout": {
-      "get": {
-        "responses": {
-          "default": {
-            "description": "successful operation"
-          }
-        },
-        "description": "",
-        "parameters": [],
-        "produces": [
-          "application/xml",
-          "application/json"
-        ],
-        "tags": [
-          "user"
-        ],
-        "summary": "Logs out current logged in user session",
-        "operationId": "logoutUser"
-      }
-    },
-    "/user/createWithList": {
-      "post": {
-        "responses": {
-          "default": {
-            "description": "successful operation"
-          }
-        },
-        "description": "",
-        "parameters": [
-          {
-            "schema": {
+              "type": "array",
               "items": {
                 "$ref": "#/definitions/User"
-              },
-              "type": "array"
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "description": "批量归档用户",
+        "parameters": [
+          {
+            "description": "用户唯一标示(胸卡信息)",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "example": "112233"
+              }
             },
-            "description": "List of user object",
             "required": True,
-            "name": "body",
-            "in": "body"
+            "in": "body",
+            "name": "body"
           }
         ],
+        "tags": [
+          "Users"
+        ],
         "produces": [
-          "application/xml",
           "application/json"
         ],
-        "tags": [
-          "user"
+        "consumes": [
+          "application/json"
         ],
-        "summary": "Creates list of users with given input array",
-        "operationId": "createUsersWithListInput"
+        "summary": "批量归档用户"
       }
     },
     "/mrp.productions": {
@@ -741,62 +319,6 @@ api_data = {
           }
         }
       }
-    },
-    "/pet/{petId}/uploadImage": {
-      "post": {
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/ApiResponse"
-            }
-          }
-        },
-        "description": "",
-        "parameters": [
-          {
-            "description": "ID of pet to update",
-            "format": "int64",
-            "required": True,
-            "in": "path",
-            "type": "integer",
-            "name": "petId"
-          },
-          {
-            "description": "Additional data to pass to server",
-            "required": False,
-            "type": "string",
-            "name": "additionalMetadata",
-            "in": "formData"
-          },
-          {
-            "description": "file to upload",
-            "required": False,
-            "type": "file",
-            "name": "file",
-            "in": "formData"
-          }
-        ],
-        "tags": [
-          "pet"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "security": [
-          {
-            "petstore_auth": [
-              "write:pets",
-              "read:pets"
-            ]
-          }
-        ],
-        "operationId": "uploadFile",
-        "consumes": [
-          "multipart/form-data"
-        ],
-        "summary": "uploads an image"
-      }
     }
   },
   "host": "172.17.0.1:8069",
@@ -805,7 +327,7 @@ api_data = {
   ],
   "tags": [
     {
-      "name": "result",
+      "name": "Result",
       "description": "工序操作结果"
     },
     {
@@ -815,6 +337,10 @@ api_data = {
     {
       "name": "Manufacture",
       "description": "作业相关"
+    },
+    {
+      "name": "Users",
+      "description": "用户相关"
     }
   ],
   "definitions": {
@@ -872,32 +398,31 @@ api_data = {
       },
       "type": "object",
       "properties": {
-        "username": {
-          "type": "string"
+        "name": {
+          "type": "string",
+          "example": "顾斌"
         },
-        "phone": {
-          "type": "string"
-        },
-        "userStatus": {
-          "type": "integer",
+        "status": {
+          "type": "string",
           "description": "User Status",
-          "format": "int32"
-        },
-        "firstName": {
-          "type": "string"
-        },
-        "lastName": {
-          "type": "string"
-        },
-        "password": {
-          "type": "string"
+          "enum": [
+            "active",
+            "archived"
+          ],
+          "example": "active"
         },
         "id": {
           "type": "integer",
-          "format": "int64"
+          "format": "int64",
+          "example": 1
         },
-        "email": {
-          "type": "string"
+        "login": {
+          "type": "string",
+          "example": "gubin@empower.cn"
+        },
+        "uuid": {
+          "type": "string",
+          "example": "112233"
         }
       }
     },
@@ -965,6 +490,64 @@ api_data = {
         },
         "type": {
           "type": "string"
+        }
+      }
+    },
+    "OdooMany2One": {
+      "allOf": [
+        {
+          "type": "integer",
+          "example": 1
+        },
+        {
+          "type": "string",
+          "example": "ceshi"
+        }
+      ]
+    },
+    "ResultDetail": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "example": 1
+        },
+        "product_id": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OdooMany2One"
+          }
+        },
+        "consu_product_id": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OdooMany2One"
+          }
+        },
+        "workorder_id": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OdooMany2One"
+          }
+        },
+        "workcenter_id": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OdooMany2One"
+          }
+        },
+        "measure_result": {
+          "type": "string",
+          "enum": [
+            "nok",
+            "ok",
+            "none"
+          ],
+          "example": "none"
+        },
+        "op_time": {
+          "type": "integer",
+          "example": 1
         }
       }
     },
@@ -1041,7 +624,36 @@ api_data = {
         },
         "op_time": {
           "type": "integer",
-          "description": "当前操作"
+          "description": "当前操作",
+          "example": 1
+        },
+        "cur_objects": {
+          "items": {
+            "type": "string",
+            "example": "cur.json"
+          },
+          "type": "array",
+          "description": "个次操作波形对象列表"
+        },
+        "measure_torque": {
+          "type": "number",
+          "description": "实际扭矩",
+          "example": 3.224
+        },
+        "measure_degree": {
+          "type": "number",
+          "description": "实际角度",
+          "example": 2.44
+        },
+        "measure_t_don": {
+          "type": "number",
+          "description": "拧紧过程花费时间",
+          "example": 3.22
+        },
+        "user_id": {
+          "type": "integer",
+          "example": 1,
+          "description": "当前操作用户"
         }
       }
     },
