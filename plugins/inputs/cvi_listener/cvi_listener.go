@@ -283,7 +283,7 @@ func (sl *CVIListener) Start(acc rush.Accumulator) error {
 		ssl.cvi3_manager.StartService(sl.Controllers)
 
 		// 启动api服务
-		ssl.api_server.StartService(ssl.cvi3_manager)
+		go ssl.api_server.StartService(ssl.cvi3_manager)
 
 	case "udp", "udp4", "udp6", "ip", "ip4", "ip6", "unixgram":
 		pc, err := net.ListenPacket(spl[0], spl[1])

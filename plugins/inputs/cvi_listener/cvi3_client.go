@@ -14,7 +14,10 @@ const (
 	keep_alive_inteval = 7000
 
 	// 下发超时(ms)
-	send_timeout = 3000
+	REQUEST_TIMEOUT = 3000
+
+	STATUS_ONLINE = "online"
+	STATUS_OFFLINE = "offline"
 )
 
 type CVIConfig struct {
@@ -28,14 +31,19 @@ type CVI3Client struct {
 	Config 				*CVIConfig
 	Conn				net.Conn
 	serial_no			uint				// 1 ~ 9999
-	msg_queue			map[uint]string
+	Results				ResultQueue
 	mtx_serial			sync.Mutex
-	mtx_queue			sync.Mutex
+	Status				string
+	mtx_status			sync.Mutex
+	recv_flag			bool
+	mtx_write			sync.Mutex
 }
 
 // 启动客户端
 func (client *CVI3Client) Start() {
-	client.msg_queue = map[uint]string{}
+	client.Results = ResultQueue{}
+	client.Results.Results = map[uint]string{}
+
 
 	c, err := net.Dial("tcp", fmt.Sprintf("%s:%d", client.Config.IP, client.Config.Port))
 	if err != nil {
@@ -47,18 +55,24 @@ func (client *CVI3Client) Start() {
 	// 读取
 	go client.Read()
 
+	// 启动心跳检测
+	go client.keep_alive_check()
+
 	// 启动心跳
 	go client.keep_alive()
 
 	// 订阅数据
 	client.subscribe()
 
-	//go client.PSet(1, 1)
+	//client.PSet(1, 1)
+
+
 }
 
 // PSet程序设定
-func (client *CVI3Client) PSet(pset int, workorder_id int) {
-	//time.Sleep(3000 * time.Millisecond)
+func (client *CVI3Client) PSet(pset int, workorder_id int) (uint, error) {
+
+	//time.Sleep(3 * time.Second)
 
 	sdate, stime := cvi.GetDateTime()
 	xml_pset := fmt.Sprintf(cvi.Xml_pset, sdate, stime, client.Config.SN, workorder_id, pset)
@@ -67,12 +81,14 @@ func (client *CVI3Client) PSet(pset int, workorder_id int) {
 	pset_packet := cvi.GeneratePacket(serial, cvi.Header_type_request_with_reply, xml_pset)
 	fmt.Printf("%s\n", pset_packet)
 
-	client.add_to_queue(serial, "")
+	client.Results.update(serial, "")
 
-	_, err := client.Conn.Write([]byte(pset_packet))
+	_, err := client.SafeWrite([]byte(pset_packet))
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())
 	}
+
+	return serial, err
 }
 
 // 读取
@@ -87,31 +103,36 @@ func (client *CVI3Client) Read(){
 		if err != nil {
 			break
 		}
+
+		client.recv_flag = true
+
 		msg := string(buffer[0:n])
 
 		//fmt.Printf("%s\n", msg)
 
 		// 处理应答
+		header_str := msg[0: cvi.HEADER_LEN]
 		header := cvi.CVI3Header{}
-		header.Deserialize(msg[0: cvi.HEADER_LEN])
+		header.Deserialize(header_str)
 
-		client.remove_from_queue(header.MID)
+		client.Results.update(header.MID, header_str)
 
 	}
 }
 
 // 订阅数据
 func (client *CVI3Client) subscribe() {
+
 	sdate, stime := cvi.GetDateTime()
 	xml_subscribe := fmt.Sprintf(cvi.Xml_subscribe, sdate, stime)
 
 	serial := client.get_serial()
 	subscribe_packet := cvi.GeneratePacket(serial, cvi.Header_type_request_with_reply, xml_subscribe)
 
-	client.add_to_queue(serial, "")
+	client.Results.update(serial, "")
 
 	fmt.Printf("%s\n", subscribe_packet)
-	_, err := client.Conn.Write([]byte(subscribe_packet))
+	_, err := client.SafeWrite([]byte(subscribe_packet))
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())
 	}
@@ -123,10 +144,8 @@ func (client *CVI3Client) keep_alive() {
 	for {
 		serial := client.get_serial()
 		keep_alive_packet := cvi.GeneratePacket(serial, cvi.Header_type_request_with_reply, cvi.Xml_heart_beat)
-
-		client.add_to_queue(serial, "")
-
-		_, err := client.Conn.Write([]byte(keep_alive_packet))
+		client.Results.update(serial, "")
+		_, err := client.SafeWrite([]byte(keep_alive_packet))
 		if err != nil {
 			fmt.Printf("%s\n", err.Error())
 		}
@@ -134,6 +153,29 @@ func (client *CVI3Client) keep_alive() {
 		//fmt.Printf("n=%d\n", n)
 
 		time.Sleep(keep_alive_inteval * time.Millisecond)
+	}
+}
+
+// 心跳检测
+func (client *CVI3Client) keep_alive_check() {
+
+	for {
+
+		for i:=0; i < 3; i++ {
+			if client.recv_flag == true {
+				client.update_status(STATUS_ONLINE)
+				client.recv_flag = false
+				time.Sleep(keep_alive_inteval * time.Millisecond)
+				break
+			} else {
+				if i == 2 {
+					client.update_status(STATUS_OFFLINE)
+				}
+			}
+
+			time.Sleep(keep_alive_inteval * time.Millisecond)
+		}
+
 	}
 }
 
@@ -150,17 +192,42 @@ func (client *CVI3Client) get_serial() (uint) {
 	return client.serial_no
 }
 
-func (client *CVI3Client) add_to_queue(serial uint, msg string) {
-	defer client.mtx_queue.Unlock()
+func (client *CVI3Client) update_status(status string) {
+	defer client.mtx_status.Unlock()
 
-	client.mtx_queue.Lock()
-	client.msg_queue[serial] = msg
+	client.mtx_status.Lock()
+	client.Status = status
 }
 
-func (client *CVI3Client) remove_from_queue(serial uint) {
-	defer client.mtx_queue.Unlock()
+func (client *CVI3Client) SafeWrite(buf []byte) (int, error) {
+	defer client.mtx_write.Unlock()
 
-	client.mtx_queue.Lock()
-	delete(client.msg_queue, serial)
+	client.mtx_write.Lock()
+	return client.Conn.Write(buf)
 }
 
+type ResultQueue struct {
+	Results		map[uint]string
+	mtx			sync.Mutex
+}
+
+func (q *ResultQueue) update(serial uint, msg string) {
+	defer q.mtx.Unlock()
+
+	q.mtx.Lock()
+	q.Results[serial] = msg
+}
+
+func (q *ResultQueue) remove(serial uint) {
+	defer q.mtx.Unlock()
+
+	q.mtx.Lock()
+	delete(q.Results, serial)
+}
+
+func (q *ResultQueue) get(serial uint) (string) {
+	defer q.mtx.Unlock()
+
+	q.mtx.Lock()
+	return q.Results[serial]
+}

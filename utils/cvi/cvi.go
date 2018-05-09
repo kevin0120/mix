@@ -54,6 +54,14 @@ func (header *CVI3Header) Init() {
 	header.RSD = header_rsd
 }
 
+func (header *CVI3Header) Check() (bool) {
+	if header.COD == Header_code_ok {
+		return true
+	} else {
+		return false
+	}
+}
+
 func (header *CVI3Header) Serialize() string {
 	return fmt.Sprintf("%s%04d%08d%04d%04d%s%s",
 		header.HDR,
