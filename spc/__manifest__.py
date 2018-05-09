@@ -30,6 +30,7 @@
         'views/spc_menu_views.xml',
         'views/spc_wizard.xml',
         'views/operation_result_views.xml',
+        'views/mrp_production_views.xml',
     ],
     'installable': True,
     'application': True,

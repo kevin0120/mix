@@ -3,3 +3,4 @@
 from . import result
 from . import mrp_workorder
 from . import spc_wizard
+from . import mrp_production

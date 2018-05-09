@@ -282,6 +282,43 @@ api_data = {
         "summary": "批量归档用户"
       }
     },
+    "/mrp.productions/{vin}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "生产订单",
+            "schema": {
+              "$ref": "#/definitions/Production"
+            }
+          },
+          "404": {
+            "description": "vin not found"
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "description": "获取某一用户信息",
+        "parameters": [
+          {
+            "description": "VIN",
+            "required": True,
+            "in": "path",
+            "type": "string",
+            "name": "vin"
+          }
+        ],
+        "tags": [
+          "Manufacture"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "consumes": [
+          "application/json"
+        ]
+      }
+    },
     "/mrp.productions": {
       "post": {
         "description": "当AIIS收到FIS下发的装配任务，会调用此API将任务同步下发给ODOO.",
@@ -308,11 +345,52 @@ api_data = {
           "201": {
             "description": "成功",
             "schema": {
-              "$ref": "#/definitions/ResponseBody"
+              "$ref": "#/definitions/Production"
             }
           },
           "400": {
             "description": "失败",
+            "schema": {
+              "$ref": "#/definitions/ResponseBody"
+            }
+          }
+        }
+      },
+      "get": {
+        "description": "获取生产订单清单",
+        "parameters": [
+          {
+            "name": "vins",
+            "in": "query",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "default": "LSV2A8CA7JN508198"
+            }
+          }
+        ],
+        "tags": [
+          "Manufacture"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "获取生产订单清单",
+        "consumes": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Production"
+              }
+            }
+          },
+          "404": {
+            "description": "未找到",
             "schema": {
               "$ref": "#/definitions/ResponseBody"
             }
@@ -504,6 +582,42 @@ api_data = {
           "example": "ceshi"
         }
       ]
+    },
+    "Production": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "example": 1
+        },
+        "product_id": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OdooMany2One"
+          }
+        },
+        "result_ids": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "example": 1
+          }
+        },
+        "assembly_line_id": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OdooMany2One"
+          }
+        },
+        "vin": {
+          "type": "string",
+          "example": "456464"
+        },
+        "knr": {
+          "type": "string",
+          "example": "234242423424"
+        }
+      }
     },
     "ResultDetail": {
       "type": "object",

@@ -56,7 +56,7 @@ class SPC(http.Controller):
             quality_checks = request.env['operation.result'].sudo().search(domain, limit=limit)
         _ret = quality_checks.read(fields=NORMAL_RESULT_FIELDS_READ)
         if len(_ret) == 0:
-            body = {'msg': "result not existed"}
+            body = json.dumps({'msg': "result not existed"})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=404, headers=headers)
         ret = _ret[0] if result_id else _ret

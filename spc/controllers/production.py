@@ -1,10 +1,37 @@
 # -*- coding: utf-8 -*-
-from odoo import http
+from odoo import http, fields
 import json
 from odoo.http import request,Response
+from dateutil import parser
+
+DEFAULT_LIMIT = 80
+
+NORMAL_RESULT_FIELDS_READ = ['vin', 'id', 'knr', 'product_id', 'assembly_line_id', 'result_ids']
 
 
 class SaConfiguration(http.Controller):
+    @http.route(['/api/v1/mrp.productions', '/api/v1/mrp.productions/<string:vin>'], type='http', methods=['GET'], auth='none', cors='*', csrf=False)
+    def _get_productions(self, vin=None, **kw):
+        domain = []
+        if vin:
+            production_ids = request.env['mrp.production'].sudo().search([('vin', '=',vin)])
+        else:
+            if 'vins' in kw:
+                vins = kw['vins'].split(',')
+                domain += [('vin', 'in', vins)]
+            if 'limit' in kw.keys():
+                limit = int(kw['limit'])
+            else:
+                limit = DEFAULT_LIMIT
+            production_ids = request.env['mrp.production'].sudo().search(domain, limit=limit)
+        _ret = production_ids.sudo().read(fields=NORMAL_RESULT_FIELDS_READ)
+        if len(_ret) == 0:
+            body = json.dumps({'msg': "result not existed"})
+            headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
+            return Response(body, status=404, headers=headers)
+        ret = _ret[0] if vin else _ret
+        body = json.dumps(ret)
+        return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=200)
 
     @http.route('/api/v1/mrp.productions', type='json', methods=['POST','OPTIONS'], auth='none', cors='*', csrf=False)
     def assemble_mo_create(self):
@@ -44,7 +71,7 @@ class SaConfiguration(http.Controller):
         records = request.env['mrp.assemblyline'].sudo().search(
             ['|', ('name', 'ilike', assemble_line), ('code', 'ilike', assemble_line)], limit=1)
 
-        if not records.exists():
+        if not records:
             # 找不到对应装配线
             Response.status = "400 Bad Request"
             return {"msg": "Assembly line " + assemble_line + " not found"}
@@ -67,11 +94,12 @@ class SaConfiguration(http.Controller):
         production = request.env['mrp.production'].sudo().create(vals)
         production.sudo().plan_by_prs()  ### 模拟点击安排,自动生成工单
 
-        if production:
-            # 创建MO成功
-            Response.status = "201 Created"
-            return {"msg":""}
-        else:
-            # 创建MO失败
+        if not production:
             Response.status = "400 Bad Request"
             return {"msg": "create MO failed"}
+
+
+        # 创建MO成功
+        ret = production.sudo().sudo().read(fields=NORMAL_RESULT_FIELDS_READ)
+        body = json.dumps(ret)
+        return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=201)
