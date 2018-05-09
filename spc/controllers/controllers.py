@@ -38,20 +38,46 @@ class SPC(http.Controller):
                 return response
 
     @http.route(['/api/v1/operation.results', '/api/v1/operation.results/<int:result_id>'], type='http', auth='none', methods=['get'], cors='*', csrf=False)
-    def _get_result_lists(self, result_id, **kw):
+    def _get_result_lists(self, result_id=None, **kw):
         domain = []
         if result_id:
-            quality_checks = request.env['operation.results'].sudo().browse(result_id)
+            quality_checks = request.env['operation.result'].sudo().browse(result_id)
         else:
             if 'date_from' in kw.keys():
-                domain += [('control_date', '>=', kw['date_from'])]
+                _t = parser.parse(kw['date_from'])
+                domain += [('control_date', '>=', fields.Datetime.to_string((_t - _t.utcoffset())) )]
             if 'date_to' in kw.keys():
-                domain += [('control_date', '<=', kw['date_to'])]
+                _t = parser.parse(kw['date_to'])
+                domain += [('control_date', '<=', fields.Datetime.to_string((_t - _t.utcoffset())) )]
             if 'limit' in kw.keys():
                 limit = int(kw['limit'])
             else:
                 limit = DEFAULT_LIMIT
-            quality_checks = request.env['operation.results'].sudo().search(domain, limit=limit)
-        ret = quality_checks.fields_get()
+            quality_checks = request.env['operation.result'].sudo().search(domain, limit=limit)
+        _ret = quality_checks.read(fields=NORMAL_RESULT_FIELDS_READ)
+        if len(_ret) == 0:
+            body = {'msg': "result not existed"}
+            headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
+            return Response(body, status=404, headers=headers)
+        ret = _ret[0] if result_id else _ret
         body = json.dumps(ret)
         return Response(body, headers=[('Content-Type', 'application/json'),('Content-Length', len(body))], status=200)
+
+    @http.route('/api/v1/operation.results/<int:result_id>/curves_add', type='json', auth='none', cors='*', csrf=False)
+    def _append_curves(self, result_id):
+        operation_result_id = request.env['operation.result'].sudo().browse(result_id)
+        if not operation_result_id:
+            body = {'msg': "result %d not existed" % result_id}
+            headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
+            response = Response(body, status=404, headers=headers)
+            return response
+        else:
+            vals = request.jsonrequest
+            write_values = dict()
+            write_values['cur_objects'] = json.dumps(json.loads(operation_result_id.cur_objects).extend(vals))
+            ret = operation_result_id.sudo().write(write_values)
+            if ret:
+                body = json.dumps(operation_result_id.read(fields=NORMAL_RESULT_FIELDS_READ)[0])
+                headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
+                response = Response(body, status=200, headers=headers)
+                return response

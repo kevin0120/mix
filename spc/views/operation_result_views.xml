@@ -184,7 +184,7 @@
         id="menu_operation_result"
         name="Operation Results"
         action="operation_result_action_main"
-        parent="menu_spc_form"
+        parent="menu_spc_scope_root"
         sequence="10"/>
 
 </odoo>

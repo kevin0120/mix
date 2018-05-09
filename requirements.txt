@@ -1,5 +1,9 @@
 pyecharts # for visualization
 
+echarts-themes-pypkg # 主题支持
+
+pyecharts_snapshot
+
 scipy # for SPC
 
 validators

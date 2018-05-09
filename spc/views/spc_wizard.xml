@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="sa_spc_form" model="ir.ui.view">
+            <field name="name">sa_spc_form</field>
+            <field name="model">operation.result.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Scope">
+                    <header>
+                        <button string="Query" type="object" name="button_query" class="oe_highlight"/>
+                    </header>
+                    <div>
+                        <group string="Query Parameters">
+                            <group string="Time">
+                                <field name="query_date_from" required="1"/>
+                                <field name="query_date_to"/>
+                            </group>
+                            <group string="Product">
+                                <field name="vehicle_id" />
+                                <field name="screw_id" />
+                            </group>
+                            <group string="Manufacture">
+                                <field name="segment_id" />
+                                <field name="knr_code" />
+                                <field name="vin_code" />
+                                <field name="assembly_line_id" />
+                                <field name="segment_id" />
+                            </group>
+                            <group>
+                                <field name="limit" required="1"/>
+                            </group>
+                        </group>
+
+                    </div>
+                    <div>
+                        <group string="Waves">
+                            <field name="wave" widget="echart"/>
+                        </group>
+                    </div>
+
+                </form>
+            </field>
+        </record>
+
+        <record id="action_spc_form" model="ir.actions.act_window">
+            <field name="name">SPC</field>
+            <field name="res_model">operation.result.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">inline</field>
+        </record>
+
+        <menuitem
+        id="menu_spc"
+        name="SPC"
+        action="action_spc_form"
+        parent="menu_spc_scope_root"
+        sequence="20"/>
+
+</odoo>
