@@ -6,6 +6,8 @@ import (
 	"time"
 	"fmt"
 	"github.com/masami10/rush/utils/cvi"
+	"net"
+	"strings"
 )
 
 const (
@@ -35,6 +37,18 @@ func (cm *CVI3Manager) StartService(configs	[]*CVIConfig) {
 		cm.CVI3_clients[cvi3.SN] = &client
 		go client.Start()
 	}
+}
+
+func (cm *CVI3Manager) SetRemoteConn(addr string, c net.Conn) (string) {
+	ip := strings.Split(addr, ":")[0]
+	for k,v := range cm.CVI3_clients {
+		if v.Config.IP == ip {
+			v.RemoteConn = c
+			return k
+		}
+	}
+
+	return ""
 }
 
 func (cm *CVI3Manager) PSet(sn string, pset int, workorder_id int) (int) {

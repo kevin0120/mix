@@ -49,28 +49,29 @@ func (ssl *streamSocketListener) listen() {
 			}
 			break
 		}
+		sn := ssl.cvi3_manager.SetRemoteConn(c.RemoteAddr().String(), c)
 
-		ssl.connectionsMtx.Lock()
-		if ssl.MaxConnections > 0 && len(ssl.connections) >= ssl.MaxConnections {
-			ssl.connectionsMtx.Unlock()
-			c.Close()
-			continue
-		}
-		ssl.connections[c.RemoteAddr().String()] = c
-		ssl.connectionsMtx.Unlock()
+		//ssl.connectionsMtx.Lock()
+		//if ssl.MaxConnections > 0 && len(ssl.connections) >= ssl.MaxConnections {
+		//	ssl.connectionsMtx.Unlock()
+		//	c.Close()
+		//	continue
+		//}
+		//ssl.connections[c.RemoteAddr().String()] = c
+		//ssl.connectionsMtx.Unlock()
+		//
+		//if err := ssl.setKeepAlive(c); err != nil {
+		//	ssl.AddError(fmt.Errorf("unable to configure keep alive (%s): %s", ssl.ServiceAddress, err))
+		//}
 
-		if err := ssl.setKeepAlive(c); err != nil {
-			ssl.AddError(fmt.Errorf("unable to configure keep alive (%s): %s", ssl.ServiceAddress, err))
-		}
-
-		go ssl.read(c)
+		go ssl.read(sn)
 	}
 
-	ssl.connectionsMtx.Lock()
-	for _, c := range ssl.connections {
-		c.Close()
-	}
-	ssl.connectionsMtx.Unlock()
+	//ssl.connectionsMtx.Lock()
+	//for _, c := range ssl.connections {
+	//	c.Close()
+	//}
+	//ssl.connectionsMtx.Unlock()
 }
 
 func (ssl *streamSocketListener) setKeepAlive(c net.Conn) error {
@@ -98,13 +99,18 @@ func (ssl *streamSocketListener) removeConnection(c net.Conn) {
 
 }
 
-func (ssl *streamSocketListener) read(c net.Conn) {
-	defer ssl.removeConnection(c)
-	defer c.Close()
+func (ssl *streamSocketListener) read(sn string) {
+	//defer ssl.removeConnection(c)
+	//defer c.Close()
 
 	//scnr := bufio.NewScanner(c)
+	c := ssl.cvi3_manager.CVI3_clients[sn].RemoteConn
 	buffer := make([]byte, 65535)
 	for {
+		//if ssl.cvi3_manager.CVI3_clients[sn].Status == STATUS_OFFLINE {
+		//	break
+		//}
+
 		if ssl.ReadTimeout != nil && ssl.ReadTimeout.Duration > 0 {
 			c.SetReadDeadline(time.Now().Add(ssl.ReadTimeout.Duration))
 		}

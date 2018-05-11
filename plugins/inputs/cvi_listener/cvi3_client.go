@@ -37,12 +37,16 @@ type CVI3Client struct {
 	mtx_status			sync.Mutex
 	recv_flag			bool
 	mtx_write			sync.Mutex
+	RemoteConn			net.Conn
 }
 
 // 启动客户端
 func (client *CVI3Client) Start() {
 
 	client.Connect()
+
+	// 订阅数据
+	client.subscribe()
 
 	// 启动心跳检测
 	go client.keep_alive_check()
@@ -51,6 +55,7 @@ func (client *CVI3Client) Start() {
 
 func (client *CVI3Client) Connect() {
 	client.Status = STATUS_OFFLINE
+	client.serial_no = 0
 
 	fmt.Printf("CVI3:%s connecting ...\n", client.Config.SN)
 	for {
@@ -69,11 +74,11 @@ func (client *CVI3Client) Connect() {
 	// 读取
 	go client.Read()
 
+	client.update_status(STATUS_ONLINE)
+
 	// 启动心跳
 	go client.keep_alive()
 
-	// 订阅数据
-	client.subscribe()
 }
 
 // PSet程序设定
@@ -149,12 +154,16 @@ func (client *CVI3Client) subscribe() {
 // 心跳
 func (client *CVI3Client) keep_alive() {
 	for {
+		if client.Status == STATUS_OFFLINE {
+			break
+		}
+
 		serial := client.get_serial()
 		keep_alive_packet := cvi.GeneratePacket(serial, cvi.Header_type_request_with_reply, cvi.Xml_heart_beat)
 		client.Results.update(serial, "")
-		_, err := client.SafeWrite([]byte(keep_alive_packet))
+		n, err := client.SafeWrite([]byte(keep_alive_packet))
 		if err != nil {
-			fmt.Printf("%s\n", err.Error())
+			fmt.Printf("%d %s\n", n, err.Error())
 			break
 		}
 
@@ -180,8 +189,6 @@ func (client *CVI3Client) keep_alive_check() {
 				if i == 2 {
 					client.update_status(STATUS_OFFLINE)
 
-					// 断线重连
-					go client.Connect()
 				}
 			}
 
@@ -213,6 +220,14 @@ func (client *CVI3Client) update_status(status string) {
 		client.Status = status
 
 		fmt.Printf("civ3:%s %s\n", client.Config.SN, client.Status)
+
+		if client.Status == STATUS_OFFLINE {
+			client.Conn.Close()
+			client.RemoteConn.Close()
+
+			// 断线重连
+			go client.Connect()
+		}
 	}
 
 }
@@ -221,7 +236,8 @@ func (client *CVI3Client) SafeWrite(buf []byte) (int, error) {
 	defer client.mtx_write.Unlock()
 
 	client.mtx_write.Lock()
-	return client.Conn.Write(buf)
+	n, err := client.Conn.Write(buf)
+	return n, err
 }
 
 type ResultQueue struct {
