@@ -79,7 +79,7 @@ github.com/yuin/gopher-lua 66c871e454fcf10251c61bf8eff02d0978cae75a
 github.com/zensqlmonitor/go-mssqldb ffe5510c6fa5e15e6d983210ab501c815b56b363
 golang.org/x/crypto 2d027ae1dddd4694d54f7a8b6cbe78dca8720226
 golang.org/x/net f73e4c9ed3b7ebdd5f699a16a880c2b1994e50dd
-golang.org/x/sys 739734461d1c916b6c72a63d7efda2b27edb369f
+golang.org/x/sys 7dfd1290c7917b7ba22824b9d24954ab3002fe24
 golang.org/x/text 506f9d5c962f284575e88337e7d9296d27e729d3
 gopkg.in/asn1-ber.v1 4e86f4367175e39f69d9358a5f17b4dda270378d
 gopkg.in/fatih/pool.v2 6e328e67893eb46323ad06f0e92cb9536babbabc
