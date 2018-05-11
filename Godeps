@@ -91,6 +91,9 @@ gopkg.in/olivere/elastic.v5 3113f9b9ad37509fe5f8a0e5e91c96fdc4435e26
 gopkg.in/tomb.v1 dd632973f1e7218eb1089048e0798ec9ae7dceb8
 gopkg.in/yaml.v2 4c78c975fe7c825c6d1466c42be594d1d6f3aba6
 github.com/gorilla/mux 53c1911da2b537f792e7cafcb446b05ffe33b996
+github.com/mitchellh/go-homedir b8bc1bf767474819792c23f32d8286a45736f1c6
+golang.org/x/crypto/argon2 ae8bce0030810cf999bb2b9868ae5c7c58e6343b
+golang.org/x/net/http/httpguts f73e4c9ed3b7ebdd5f699a16a880c2b1994e50dd
 github.com/minio/minio-go 6f8ee6677a042d53d9251ecf7b1c7431c23d2416
 github.com/mattn/go-sqlite3 a72efd674f654961a11ac41aae72c0e43963fe6c
 github.com/satori/go.uuid 36e9d2ebbde5e3f13ab2e25625fd453271d6522e
