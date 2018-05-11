@@ -15,6 +15,7 @@ import (
 	"github.com/masami10/rush/plugins/inputs"
 	"github.com/masami10/rush/plugins/parsers"
 	"github.com/masami10/rush/utils/cvi"
+	"encoding/xml"
 )
 
 type setReadBufferer interface {
@@ -86,9 +87,11 @@ func (ssl *streamSocketListener) setKeepAlive(c net.Conn) error {
 }
 
 func (ssl *streamSocketListener) removeConnection(c net.Conn) {
+	defer ssl.connectionsMtx.Unlock()
+
 	ssl.connectionsMtx.Lock()
 	delete(ssl.connections, c.RemoteAddr().String())
-	ssl.connectionsMtx.Unlock()
+
 }
 
 func (ssl *streamSocketListener) read(c net.Conn) {
@@ -106,15 +109,32 @@ func (ssl *streamSocketListener) read(c net.Conn) {
 		//}
 		//
 		//msg := string(scnr.Bytes())
+		//fmt.Printf("%s\n", msg)
 		n, err := c.Read(buffer)
 		if err != nil {
 			break
 		}
 		msg := string(buffer[0:n])
-		fmt.Printf("%s\n", msg)
+		//fmt.Printf("%s\n", msg)
 
 		header := cvi.CVI3Header{}
 		header.Deserialize(msg[0: cvi.HEADER_LEN])
+		var body string = msg[cvi.HEADER_LEN: n]
+		var rest int = int(header.SIZ) - cvi.HEADER_LEN - n
+		for {
+			if rest <= 0 {
+				break
+			}
+			n, err := c.Read(buffer)
+			if err != nil {
+				break
+			}
+			body += string(buffer[0:n])
+			rest -= n
+		}
+
+		//fmt.Printf("%s\n", body)
+		go ssl.handle(body)
 
 		if header.TYP == cvi.Header_type_request_with_reply || header.TYP == cvi.Header_type_keep_alive {
 			// 执行应答
@@ -139,6 +159,39 @@ func (ssl *streamSocketListener) read(c net.Conn) {
 	//		ssl.AddError(err)
 	//	}
 	//}
+}
+
+func (ssl *streamSocketListener) handle(body string) {
+	//test_body, e := ioutil.ReadFile("/home/linshenqi/Documents/cur_test.xml")
+	//if e != nil {
+	//	fmt.Printf("%s\n", e.Error())
+	//}
+	//result := cvi.CVI3Result{}
+	////reader := strings.NewReader(string(test_body))
+	//err := xml.Unmarshal(test_body, &result)
+	//if err != nil {
+	//	fmt.Printf("%s\n", err.Error())
+	//}
+	//
+	//bs, _ :=json.Marshal(result)
+	//fmt.Printf("%s\n", string(bs))
+	//
+	//i := 3
+	//i++
+
+	if strings.Contains(body, cvi.XML_RESULT_KEY) {
+		//fmt.Printf("%s\n", body)
+
+		result := cvi.CVI3Result{}
+		err := xml.Unmarshal([]byte(body), &result)
+		if err != nil {
+			fmt.Printf("%s\n", err.Error())
+		}
+
+		//i := 3
+		//i++
+	}
+
 }
 
 type packetSocketListener struct {
@@ -284,6 +337,8 @@ func (sl *CVIListener) Start(acc rush.Accumulator) error {
 
 		// 启动api服务
 		go ssl.api_server.StartService(ssl.cvi3_manager)
+
+		//ssl.handle("")
 
 	case "udp", "udp4", "udp6", "ip", "ip4", "ip6", "unixgram":
 		pc, err := net.ListenPacket(spl[0], spl[1])

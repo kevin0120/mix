@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 	"strings"
+	"encoding/xml"
 )
 
 // header
@@ -35,8 +36,67 @@ const (
 
 	// RSD
 	header_rsd = "0000"
+
+	XML_RESULT_KEY = "<CUR>"
 )
 
+type PSetData struct {
+	Name string `xml:"NAM"`
+	Unit string `xml:"UNT"`
+	Value string `xml:"VAL"`
+}
+
+type SMP struct {
+	CUR_M string `xml:"Y1V"`
+	CUR_W string `xml:"Y2V"`
+}
+
+type CUR struct {
+	SMP SMP `xml:"SMP"`
+}
+
+type PRO struct {
+	Strategy string `xml:"PAP"`
+	Values []PSetData `xml:"MAR"`
+}
+
+type BLC struct {
+	PRO PRO `xml:"PRO"`
+	CUR CUR `xml:"CUR"`
+}
+
+type TIP struct {
+	PSet string `xml:"PRG"`
+	Date string `xml:"DAT"`
+	Time string `xml:"TIM"`
+	BLC BLC `xml:"BLC"`
+}
+
+type GRP struct {
+	TIP TIP `xml:"TIP"`
+}
+
+type FAS struct {
+	GRP GRP `xml:"GRP"`
+}
+
+type PAR struct {
+	SN string `xml:"PRT"`
+	Workorder_id string `xml:"PI1"`
+	Screw_id string `xml:"PI2"`
+	Test string `xml:"STC"`
+	Result string `xml:"PSC"`
+	FAS []FAS `xml:"FAS"`
+}
+
+type PRC_SST struct {
+	PAR PAR `xml:"PAR"`
+}
+
+type CVI3Result struct {
+	XMLName     xml.Name `xml:"ROOT"`
+	PRC_SST		PRC_SST `xml:"PRC_SST"`
+}
 
 type CVI3Header struct {
 	HDR string
@@ -82,6 +142,11 @@ func (header *CVI3Header) Deserialize(header_str string) {
 	n, err = strconv.ParseUint(header_str[4:8], 10, 32)
 	if err == nil {
 		header.MID = uint(n)
+	}
+
+	n, err = strconv.ParseUint(header_str[8:16], 10, 32)
+	if err == nil {
+		header.SIZ = int(n)
 	}
 
 	n, err = strconv.ParseUint(header_str[16:20], 10, 32)

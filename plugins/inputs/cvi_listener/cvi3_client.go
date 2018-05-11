@@ -11,7 +11,7 @@ import (
 
 const (
 	// 心跳间隔(ms)
-	keep_alive_inteval = 7000
+	keep_alive_inteval = 5000
 
 	// 下发超时(ms)
 	REQUEST_TIMEOUT = 3000
@@ -41,32 +41,39 @@ type CVI3Client struct {
 
 // 启动客户端
 func (client *CVI3Client) Start() {
-	client.Results = ResultQueue{}
-	client.Results.Results = map[uint]string{}
 
-
-	c, err := net.Dial("tcp", fmt.Sprintf("%s:%d", client.Config.IP, client.Config.Port))
-	if err != nil {
-		fmt.Printf("%s\n", err.Error())
-	}
-
-	client.Conn = c
-
-	// 读取
-	go client.Read()
+	client.Connect()
 
 	// 启动心跳检测
 	go client.keep_alive_check()
+
+}
+
+func (client *CVI3Client) Connect() {
+	client.Status = STATUS_OFFLINE
+
+	fmt.Printf("CVI3:%s connecting ...", client.Config.SN)
+	for {
+		c, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", client.Config.IP, client.Config.Port), 3 * time.Second)
+		if err != nil {
+			fmt.Printf("%s\n", err.Error())
+		} else {
+			client.Conn = c
+			break
+		}
+	}
+
+	client.Results = ResultQueue{}
+	client.Results.Results = map[uint]string{}
+
+	// 读取
+	go client.Read()
 
 	// 启动心跳
 	go client.keep_alive()
 
 	// 订阅数据
 	client.subscribe()
-
-	//client.PSet(1, 1)
-
-
 }
 
 // PSet程序设定
@@ -148,6 +155,7 @@ func (client *CVI3Client) keep_alive() {
 		_, err := client.SafeWrite([]byte(keep_alive_packet))
 		if err != nil {
 			fmt.Printf("%s\n", err.Error())
+			break
 		}
 
 		//fmt.Printf("n=%d\n", n)
@@ -166,10 +174,14 @@ func (client *CVI3Client) keep_alive_check() {
 				client.update_status(STATUS_ONLINE)
 				client.recv_flag = false
 				time.Sleep(keep_alive_inteval * time.Millisecond)
+
 				break
 			} else {
 				if i == 2 {
 					client.update_status(STATUS_OFFLINE)
+
+					// 断线重连
+					go client.Connect()
 				}
 			}
 
@@ -196,7 +208,13 @@ func (client *CVI3Client) update_status(status string) {
 	defer client.mtx_status.Unlock()
 
 	client.mtx_status.Lock()
-	client.Status = status
+
+	if status != client.Status {
+		client.Status = status
+
+		fmt.Printf("civ3:%s %s\n", client.Config.SN, client.Status)
+	}
+
 }
 
 func (client *CVI3Client) SafeWrite(buf []byte) (int, error) {
