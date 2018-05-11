@@ -82,11 +82,11 @@ type FAS struct {
 
 type PAR struct {
 	SN string `xml:"PRT"`
-	Workorder_id string `xml:"PI1"`
+	Workorder_id int `xml:"PI1"`
 	Screw_id string `xml:"PI2"`
 	Test string `xml:"STC"`
 	Result string `xml:"PSC"`
-	FAS []FAS `xml:"FAS"`
+	FAS FAS `xml:"FAS"`
 }
 
 type PRC_SST struct {
@@ -96,6 +96,12 @@ type PRC_SST struct {
 type CVI3Result struct {
 	XMLName     xml.Name `xml:"ROOT"`
 	PRC_SST		PRC_SST `xml:"PRC_SST"`
+}
+
+type CVI3CurveFile struct {
+	Result string	`json:"result"`
+	CUR_M []float64 `json:"cur_m"`
+	CUR_W []float64 `json:"cur_w"`
 }
 
 type CVI3Header struct {

@@ -52,7 +52,7 @@ func (client *CVI3Client) Start() {
 func (client *CVI3Client) Connect() {
 	client.Status = STATUS_OFFLINE
 
-	fmt.Printf("CVI3:%s connecting ...", client.Config.SN)
+	fmt.Printf("CVI3:%s connecting ...\n", client.Config.SN)
 	for {
 		c, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", client.Config.IP, client.Config.Port), 3 * time.Second)
 		if err != nil {
@@ -77,12 +77,12 @@ func (client *CVI3Client) Connect() {
 }
 
 // PSet程序设定
-func (client *CVI3Client) PSet(pset int, workorder_id int) (uint, error) {
+func (client *CVI3Client) PSet(pset int, workorder_id int, screw_id string) (uint, error) {
 
 	//time.Sleep(3 * time.Second)
 
 	sdate, stime := cvi.GetDateTime()
-	xml_pset := fmt.Sprintf(cvi.Xml_pset, sdate, stime, client.Config.SN, workorder_id, pset)
+	xml_pset := fmt.Sprintf(cvi.Xml_pset, sdate, stime, client.Config.SN, workorder_id, screw_id, pset)
 
 	serial := client.get_serial()
 	pset_packet := cvi.GeneratePacket(serial, cvi.Header_type_request_with_reply, xml_pset)
@@ -115,7 +115,7 @@ func (client *CVI3Client) Read(){
 
 		msg := string(buffer[0:n])
 
-		//fmt.Printf("%s\n", msg)
+		fmt.Printf("%s\n", msg)
 
 		// 处理应答
 		header_str := msg[0: cvi.HEADER_LEN]

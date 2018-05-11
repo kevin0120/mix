@@ -4,6 +4,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"database/sql"
 	"github.com/masami10/rush/utils/cvi"
+	"fmt"
 )
 
 type CURDB struct {
@@ -33,14 +34,17 @@ func (cur *CURDB) PreSave(sn string, workorder_id int, screw_id string) (error) 
 		return err
 	}
 
-	stmt, err := tx.Prepare("insert into curs(sn, workorderid, screw_id, has_result, saved, update_time, result_data) values(?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := tx.Prepare("insert into curs(sn, workorder_id, screw_id, has_result, saved, update_time, result_data) values(?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		return err
 	}
 
 	defer stmt.Close()
 	date, time := cvi.GetDateTime()
-	stmt.Exec(sn, workorder_id, screw_id, false, false, date + " " + time, "")
+	_,e := stmt.Exec(sn, workorder_id, screw_id, false, false, date + " " + time, "")
+	if e != nil {
+		fmt.Printf("%s\n", e.Error())
+	}
 	tx.Commit()
 
 	return nil
@@ -65,7 +69,7 @@ func (cur *CURDB) UpdateResultData(sn string, workorder_id int, screw_id string,
 	}
 
 	defer stmt.Close()
-	date, time := cvi.GetDateTime()
+	//date, time := cvi.GetDateTime()
 	stmt.Exec(result, true, sn, workorder_id, screw_id)
 	tx.Commit()
 
@@ -91,7 +95,7 @@ func (cur *CURDB) Saved(sn string, workorder_id int, screw_id string) (error) {
 	}
 
 	defer stmt.Close()
-	date, time := cvi.GetDateTime()
+	//date, time := cvi.GetDateTime()
 	stmt.Exec(true, sn, workorder_id, screw_id)
 	tx.Commit()
 

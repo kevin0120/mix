@@ -93,3 +93,4 @@ gopkg.in/yaml.v2 4c78c975fe7c825c6d1466c42be594d1d6f3aba6
 github.com/gorilla/mux 53c1911da2b537f792e7cafcb446b05ffe33b996
 github.com/minio/minio-go 6f8ee6677a042d53d9251ecf7b1c7431c23d2416
 github.com/mattn/go-sqlite3 a72efd674f654961a11ac41aae72c0e43963fe6c
+github.com/satori/go.uuid 36e9d2ebbde5e3f13ab2e25625fd453271d6522e

@@ -16,6 +16,8 @@ import (
 	"github.com/masami10/rush/plugins/parsers"
 	"github.com/masami10/rush/utils/cvi"
 	"encoding/xml"
+	"encoding/json"
+	"strconv"
 )
 
 type setReadBufferer interface {
@@ -31,6 +33,8 @@ type streamSocketListener struct {
 
 	cvi3_manager 	*CVI3Manager
 	api_server		*ApiServer
+	Storage			*Storage
+	CUR_DB			*CURDB
 }
 
 func (ssl *streamSocketListener) listen() {
@@ -162,25 +166,9 @@ func (ssl *streamSocketListener) read(c net.Conn) {
 }
 
 func (ssl *streamSocketListener) handle(body string) {
-	//test_body, e := ioutil.ReadFile("/home/linshenqi/Documents/cur_test.xml")
-	//if e != nil {
-	//	fmt.Printf("%s\n", e.Error())
-	//}
-	//result := cvi.CVI3Result{}
-	////reader := strings.NewReader(string(test_body))
-	//err := xml.Unmarshal(test_body, &result)
-	//if err != nil {
-	//	fmt.Printf("%s\n", err.Error())
-	//}
-	//
-	//bs, _ :=json.Marshal(result)
-	//fmt.Printf("%s\n", string(bs))
-	//
-	//i := 3
-	//i++
 
 	if strings.Contains(body, cvi.XML_RESULT_KEY) {
-		//fmt.Printf("%s\n", body)
+		// 处理结果数据
 
 		result := cvi.CVI3Result{}
 		err := xml.Unmarshal([]byte(body), &result)
@@ -188,8 +176,48 @@ func (ssl *streamSocketListener) handle(body string) {
 			fmt.Printf("%s\n", err.Error())
 		}
 
-		//i := 3
-		//i++
+		// 保存波形
+		cur_file := cvi.CVI3CurveFile{}
+		cur_file.Result = result.PRC_SST.PAR.Result
+		if cur_file.Result == "IO" {
+			cur_file.Result = "OK"
+		} else if cur_file.Result == "NIO" {
+			cur_file.Result = "NOK"
+		}
+
+		sn := result.PRC_SST.PAR.SN
+		workorder_id := result.PRC_SST.PAR.Workorder_id
+		screw_id := result.PRC_SST.PAR.Screw_id
+
+		cur_ms := strings.Split(result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.SMP.CUR_M, " ")
+		for i := range cur_ms {
+			v, _ := strconv.ParseFloat(cur_ms[i], 64)
+			cur_file.CUR_M = append(cur_file.CUR_M, v)
+		}
+
+		cur_ws := strings.Split(result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.SMP.CUR_W, " ")
+		for i := range cur_ws {
+			v, _ := strconv.ParseFloat(cur_ws[i], 64)
+			cur_file.CUR_W = append(cur_file.CUR_W, v)
+		}
+
+		cur_result, _ := json.Marshal(cur_file)
+		fmt.Printf("%s\n", string(cur_result))
+
+		// 保存数据库
+		ssl.CUR_DB.UpdateResultData(sn, workorder_id, screw_id, string(cur_result))
+
+		// 保存到对象存储
+		objectname := fmt.Sprintf("%s_%d_%s.json", sn, workorder_id, screw_id)
+		e := ssl.Storage.Upload(objectname, string(cur_result))
+		if e != nil {
+			fmt.Printf("%s\n", err.Error())
+		} else {
+			// 保存成功
+			ssl.CUR_DB.Saved(sn, workorder_id, screw_id)
+		}
+
+		// 将结果数据推送给hmi
 	}
 
 }
@@ -229,6 +257,12 @@ type (
 		ReadBufferSize  int
 		ReadTimeout     *internal.Duration
 		KeepAlivePeriod *internal.Duration
+		DbFile				string
+		MinioUrl        	string
+		MinioAccess     	string
+		MinioSecret        	string
+		MinioBacket        	string
+
 		Controllers	[]*CVIConfig
 
 		parsers.Parser
@@ -274,6 +308,15 @@ func (sl *CVIListener) SampleConfig() string {
   ## more about them here:
   ## https://github.com/masami10/rush/blob/master/docs/DATA_FORMATS_INPUT.md
   # data_format = "influx"
+
+  ## CVI3 DB
+  # db_file = "./cur.db"
+
+  ## CVI3 MINIO
+  # minio_url = "127.0.0.1:9000"
+  # minio_access = "access"
+  # minio_secret = "secret"
+  # minio_backet = "backet"
 
   ## CVI3 Controllers, 
   # [[inputs.cvi_listener.controllers]]
@@ -331,8 +374,20 @@ func (sl *CVIListener) Start(acc rush.Accumulator) error {
 
 		ssl.cvi3_manager = &CVI3Manager{}
 		ssl.api_server = &ApiServer{}
+		ssl.CUR_DB = &CURDB{}
+		ssl.Storage = &Storage{}
+
+		// 初始化缓存数据库
+		ssl.CUR_DB.File = sl.DbFile
+
+		// 初始化对象存储
+		ssl.Storage.MinioURL = sl.MinioUrl
+		ssl.Storage.MinioBacket = sl.MinioBacket
+		ssl.Storage.MinioAccess = sl.MinioAccess
+		ssl.Storage.MinioSecret = sl.MinioSecret
 
 		// 启动客户端服务
+		ssl.cvi3_manager.Parent = ssl
 		ssl.cvi3_manager.StartService(sl.Controllers)
 
 		// 启动api服务

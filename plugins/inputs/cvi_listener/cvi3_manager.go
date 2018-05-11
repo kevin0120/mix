@@ -1,13 +1,29 @@
 package cvi_listener
 
+import (
+	"github.com/satori/go.uuid"
+	"encoding/base64"
+	"time"
+	"fmt"
+	"github.com/masami10/rush/utils/cvi"
+)
+
 const (
 	ERR_CVI3_NOT_FOUND = -1
 	ERR_CVI3_OFFLINE = -2
 	ERR_CVI3_REQUEST = -3
 	ERR_CVI3_REPLY_TIMEOUT = -4
+	ERR_DB = -5
 )
+
 type CVI3Manager struct {
 	CVI3_clients   map[string]*CVI3Client
+	Parent *streamSocketListener
+}
+
+func (cm *CVI3Manager) generate_id() (string) {
+	u4 := uuid.NewV4()
+	return base64.RawURLEncoding.EncodeToString(u4.Bytes())
 }
 
 func (cm *CVI3Manager) StartService(configs	[]*CVIConfig) {
@@ -35,33 +51,39 @@ func (cm *CVI3Manager) PSet(sn string, pset int, workorder_id int) (int) {
 	}
 
 	// 设定pset并判断控制器响应
-	_, err := cvi3_client.PSet(pset, workorder_id)
+	screw_id := cm.generate_id()
+	serial, err := cvi3_client.PSet(pset, workorder_id, screw_id)
 	if err != nil {
 		// 控制器请求失败
 		return ERR_CVI3_REQUEST
 	}
 
-	//var header_str string
-	//for i := 0; i < 6; i++ {
-	//	header_str = cvi3_client.Results.get(serial)
-	//	if header_str != "" {
-	//		break
-	//	}
-	//	time.Sleep(500 * time.Millisecond)
-	//}
-	//
-	//if header_str == "" {
-	//	// 控制器请求失败
-	//	return ERR_CVI3_REPLY_TIMEOUT
-	//}
-	//
-	//fmt.Printf("reply_header:%s\n", header_str)
-	//header := cvi.CVI3Header{}
-	//header.Deserialize(header_str)
-	//if !header.Check() {
-	//	// 控制器请求失败
-	//	return ERR_CVI3_REQUEST
-	//}
+	var header_str string
+	for i := 0; i < 6; i++ {
+		header_str = cvi3_client.Results.get(serial)
+		if header_str != "" {
+			break
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+
+	if header_str == "" {
+		// 控制器请求失败
+		return ERR_CVI3_REPLY_TIMEOUT
+	}
+
+	fmt.Printf("reply_header:%s\n", header_str)
+	header := cvi.CVI3Header{}
+	header.Deserialize(header_str)
+	if !header.Check() {
+		// 控制器请求失败
+		return ERR_CVI3_REQUEST
+	}
+
+	dberr := cm.Parent.CUR_DB.PreSave(sn, workorder_id, screw_id)
+	if dberr != nil {
+		return ERR_DB
+	}
 
 	return 0
 }
