@@ -38,10 +38,13 @@ type CVI3Client struct {
 	recv_flag			bool
 	mtx_write			sync.Mutex
 	RemoteConn			net.Conn
+	HMI					HMI
 }
 
 // 启动客户端
 func (client *CVI3Client) Start() {
+	client.HMI = HMI{}
+	client.HMI.URL = client.Config.HMI
 
 	client.Connect()
 
@@ -211,6 +214,13 @@ func (client *CVI3Client) get_serial() (uint) {
 	return client.serial_no
 }
 
+func (client *CVI3Client) GetStatus() (string) {
+	defer client.mtx_status.Unlock()
+
+	client.mtx_status.Lock()
+	return client.Status
+}
+
 func (client *CVI3Client) update_status(status string) {
 	defer client.mtx_status.Unlock()
 
@@ -228,6 +238,12 @@ func (client *CVI3Client) update_status(status string) {
 			// 断线重连
 			go client.Connect()
 		}
+
+		// 将最新状态推送给hmi
+		s := ResponseStatus{}
+		s.SN = client.Config.SN
+		s.Status = client.Status
+		go client.HMI.PushStauts(s)
 	}
 
 }

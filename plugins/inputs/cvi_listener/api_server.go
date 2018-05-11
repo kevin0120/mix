@@ -38,6 +38,7 @@ func (as *ApiServer)APIDoc(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, "wefawef")
 }
 
+// 设置PSET拧接程序
 func (as *ApiServer)PSets(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -57,16 +58,19 @@ func (as *ApiServer)PSets(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, err.Error())
 	}
 
-	rt := as.cvi3_manager.PSet(pset.SN, pset.PSet, pset.Workorder_ID)
-	if rt != 0 {
+	e := as.cvi3_manager.PSet(pset.SN, pset.PSet, pset.Workorder_ID)
+	if e != nil {
 		w.WriteHeader(http.StatusBadRequest)
+
+		rt, _ := json.Marshal(ErrorMsg{e.Error()})
+		io.WriteString(w, string(rt))
 	} else {
 		w.WriteHeader(http.StatusOK)
 	}
 
-
 }
 
+// 取得控制器状态
 func (as *ApiServer)Status(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -94,10 +98,14 @@ func (as *ApiServer)Status(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, string(rt))
 }
 
+// 取得控制器中的结果
 func (as *ApiServer)Results(w http.ResponseWriter, r *http.Request) {
 
 }
 
+type ErrorMsg struct {
+	Msg string	`json:"msg"`
+}
 
 type RequestPSet struct {
 	SN string `json:"sn"`
@@ -108,4 +116,29 @@ type RequestPSet struct {
 type ResponseStatus struct {
 	SN string `json:"sn"`
 	Status string `json:"status"`
+}
+
+type ResponseResult struct {
+	SN string `json:"sn"`
+	Workorder_ID int `json:"workorder_id"`
+	CurFile string `json:"cur_file"`
+	Result string `json:"result"`
+	Dat string `json:"dat"`
+	PSet int `json:"pset"`
+	PSetDefine struct {
+		Strategy string `json:"strategy"`
+		Mp float64 `json:"M+"`
+		Mm float64 `json:"M-"`
+		Ms float64 `json:"MS"`
+		Ma float64 `json:"MA"`
+		Wp float64 `json:"W+"`
+		Wm float64 `json:"W-"`
+		Wa float64 `json:"WS"`
+	} `json:"pset_define"`
+
+	ResultValue struct {
+		Mi float64 `json:"MI"`
+		Wi float64 `json:"WI"`
+		Ti float64 `json:"TI"`
+	} `json:"result_value"`
 }

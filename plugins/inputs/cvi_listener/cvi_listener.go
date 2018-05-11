@@ -224,6 +224,8 @@ func (ssl *streamSocketListener) handle(body string) {
 		}
 
 		// 将结果数据推送给hmi
+		rr := XMl2Result(result)
+		go ssl.cvi3_manager.CVI3_clients[sn].HMI.PushResult(rr)
 	}
 
 }

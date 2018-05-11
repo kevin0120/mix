@@ -8,14 +8,16 @@ import (
 	"github.com/masami10/rush/utils/cvi"
 	"net"
 	"strings"
+	"github.com/pkg/errors"
 )
 
 const (
-	ERR_CVI3_NOT_FOUND = -1
-	ERR_CVI3_OFFLINE = -2
-	ERR_CVI3_REQUEST = -3
-	ERR_CVI3_REPLY_TIMEOUT = -4
-	ERR_DB = -5
+	ERR_CVI3_NOT_FOUND = "CIV3 SN is invalid"
+	ERR_CVI3_OFFLINE = "cvi3 offline"
+	ERR_CVI3_REQUEST = "request to cvi3 failed"
+	ERR_CVI3_REPLY_TIMEOUT = "cvi3 reply timeout"
+	ERR_CVI3_REPLY = "cvi3 reply contains error"
+	ERR_DB = "cvi3 reply presave failed"
 )
 
 type CVI3Manager struct {
@@ -51,17 +53,17 @@ func (cm *CVI3Manager) SetRemoteConn(addr string, c net.Conn) (string) {
 	return ""
 }
 
-func (cm *CVI3Manager) PSet(sn string, pset int, workorder_id int) (int) {
+func (cm *CVI3Manager) PSet(sn string, pset int, workorder_id int) (error) {
 	// 判断控制器是否存在
 	cvi3_client, exist := cm.CVI3_clients[sn]
 	if !exist {
 		// SN对应控制器不存在
-		return ERR_CVI3_NOT_FOUND
+		return errors.New(ERR_CVI3_NOT_FOUND)
 	}
 
-	if cvi3_client.Status == STATUS_OFFLINE {
+	if cvi3_client.GetStatus() == STATUS_OFFLINE {
 		// 控制器离线
-		return ERR_CVI3_OFFLINE
+		return errors.New(ERR_CVI3_OFFLINE)
 	}
 
 	// 设定pset并判断控制器响应
@@ -69,7 +71,7 @@ func (cm *CVI3Manager) PSet(sn string, pset int, workorder_id int) (int) {
 	serial, err := cvi3_client.PSet(pset, workorder_id, screw_id)
 	if err != nil {
 		// 控制器请求失败
-		return ERR_CVI3_REQUEST
+		return errors.New(ERR_CVI3_REQUEST)
 	}
 
 	var header_str string
@@ -83,7 +85,7 @@ func (cm *CVI3Manager) PSet(sn string, pset int, workorder_id int) (int) {
 
 	if header_str == "" {
 		// 控制器请求失败
-		return ERR_CVI3_REPLY_TIMEOUT
+		return errors.New(ERR_CVI3_REPLY_TIMEOUT)
 	}
 
 	fmt.Printf("reply_header:%s\n", header_str)
@@ -91,13 +93,13 @@ func (cm *CVI3Manager) PSet(sn string, pset int, workorder_id int) (int) {
 	header.Deserialize(header_str)
 	if !header.Check() {
 		// 控制器请求失败
-		return ERR_CVI3_REQUEST
+		return errors.New(ERR_CVI3_REPLY)
 	}
 
 	dberr := cm.Parent.CUR_DB.PreSave(sn, workorder_id, screw_id)
 	if dberr != nil {
-		return ERR_DB
+		return errors.New(ERR_DB)
 	}
 
-	return 0
+	return nil
 }

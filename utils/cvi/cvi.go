@@ -43,7 +43,7 @@ const (
 type PSetData struct {
 	Name string `xml:"NAM"`
 	Unit string `xml:"UNT"`
-	Value string `xml:"VAL"`
+	Value float64 `xml:"VAL"`
 }
 
 type SMP struct {
@@ -66,7 +66,7 @@ type BLC struct {
 }
 
 type TIP struct {
-	PSet string `xml:"PRG"`
+	PSet int `xml:"PRG"`
 	Date string `xml:"DAT"`
 	Time string `xml:"TIM"`
 	BLC BLC `xml:"BLC"`
