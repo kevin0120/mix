@@ -18,6 +18,12 @@
             <field name="category_id" ref="equipment_hmi"/>
         </record>
 
+        <record id="masterpc_0" model="maintenance.equipment">
+            <field name="name">测试masterpc1</field>
+            <field name="serial_no">1qaz2wsx</field>
+            <field name="category_id" ref="equipment_MasterPC"/>
+        </record>
+
         <record id="mrp_workcenter_0" model="mrp.workcenter">
             <field name="name">测试工位1</field>
             <field name="capacity">5</field>
@@ -26,12 +32,19 @@
             <field name="time_efficiency">87</field>
             <field name="worksegment_id" ref="work_segment_1" />
             <field name="hmi_id" ref="hmi_0" />
+            <field name="masterpc_id" ref="masterpc_0" />
         </record>
 
         <record id="hmi_1" model="maintenance.equipment">
             <field name="name">测试HMI2</field>
             <field name="serial_no">112233445566778899</field>
             <field name="category_id" ref="equipment_hmi"/>
+        </record>
+
+        <record id="masterpc_1" model="maintenance.equipment">
+            <field name="name">测试masterpc2</field>
+            <field name="serial_no">1QAZ2wsx</field>
+            <field name="category_id" ref="equipment_MasterPC"/>
         </record>
 
         <record id="mrp_workcenter_1" model="mrp.workcenter">
@@ -42,6 +55,24 @@
             <field name="time_efficiency">87</field>
             <field name="worksegment_id" ref="work_segment_1" />
             <field name="hmi_id" ref="hmi_1" />
+            <field name="masterpc_id" ref="masterpc_1" />
+        </record>
+
+        <record id="hmi_2" model="maintenance.equipment">
+            <field name="name">测试HMI3</field>
+            <field name="serial_no">778899</field>
+            <field name="category_id" ref="equipment_hmi"/>
+        </record>
+
+        <record id="mrp_workcenter_2" model="mrp.workcenter">
+            <field name="name">测试工位3</field>
+            <field name="capacity">5</field>
+            <field name="time_start">10</field>
+            <field name="time_stop">8</field>
+            <field name="time_efficiency">87</field>
+            <field name="worksegment_id" ref="work_segment_1" />
+            <field name="hmi_id" ref="hmi_2" />
+            <field name="masterpc_id" ref="masterpc_1" />
         </record>
 
         <record id="product_product_0" model="product.product">
@@ -130,6 +161,7 @@
             <field name="product_id" ref="product_product_0"/>
             <field name="routing_id" ref="routing_0"/>
             <field name="bom_id" ref="mrp_bom_7"/>
+            <field name="product_qty">4</field>
             <field name="operation_id" ref="routing_operation_0"/>
         </record>
 

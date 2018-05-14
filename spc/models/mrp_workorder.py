@@ -9,6 +9,8 @@ class MrpWorkorder(models.Model):
     worksheet_img = fields.Binary(
         'Worksheet', related='operation_id.worksheet_img', readonly=True)
 
+    result_ids = fields.One2many('operation.result', 'workorder_id',string='Operation Results')
+
     @api.multi
     def _create_checks(self):
         for wo in self:

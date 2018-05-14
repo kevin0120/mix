@@ -77,5 +77,8 @@ class MrpWorkSegment(models.Model):
 class MrpWorkCenter(models.Model):
     _inherit = 'mrp.workcenter'
 
-    worksegment_id = fields.Many2one('mrp.worksegament', ondelete='cascade', copy=False)
-    hmi_id = fields.Many2one('maintenance.equipment', ondelete='cascade', copy=False)
+    worksegment_id = fields.Many2one('mrp.worksegament', copy=False)
+    hmi_id = fields.Many2one('maintenance.equipment',  copy=False)
+    masterpc_id = fields.Many2one('maintenance.equipment',  copy=False)
+
+    _sql_constraints = [('code_hmi', 'unique(hmi_id)', 'Only one HMI is allowed')]

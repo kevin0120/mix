@@ -10,6 +10,7 @@ class MrpWorkorder(models.Model):
     _inherit = 'mrp.workorder'
 
     consu_product_id = fields.Many2one('product.product')
+    consu_product_qty = fields.Float('Consume Product Qty')
 
 
 class MrpProduction(models.Model):
@@ -52,6 +53,9 @@ class MrpProduction(models.Model):
                                                               order.bom_id.product_uom_id) / order.bom_id.product_qty
             boms, lines = order.bom_id.explode(order.product_id, quantity, picking_type=order.bom_id.picking_type_id)
             order._generate_workorders_by_prs(boms)
+        for production in self:
+            if not production.workorder_ids.mapped('check_ids'):
+                production.workorder_ids._create_checks()
         return orders_to_plan.write({'state': 'planned'})
 
     @api.multi
@@ -96,6 +100,7 @@ class MrpProduction(models.Model):
                 'duration_expected': duration_expected,
                 'state': len(workorders) == 0 and 'ready' or 'pending',
                 'consu_product_id': bom.bom_line_ids.filtered(lambda r: r.operation_id == operation).product_id.id or None,
+                'consu_product_qty': bom.bom_line_ids.filtered(lambda r: r.operation_id == operation).product_qty or None,
                 'qty_producing': quantity,
                 'capacity': operation.workcenter_id.capacity,
             })
@@ -140,6 +145,7 @@ class MrpProduction(models.Model):
                 'duration_expected': duration_expected,
                 'state': len(workorders) == 0 and 'ready' or 'pending',
                 'consu_product_id':bom.bom_line_ids.filtered(lambda r: r.operation_id == operation).product_id.id or None,
+                'consu_product_qty': bom.bom_line_ids.filtered(lambda r: r.operation_id == operation).product_qty or None,
                 'qty_producing': quantity,
                 'capacity': operation.workcenter_id.capacity,
             })

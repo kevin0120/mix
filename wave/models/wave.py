@@ -46,7 +46,9 @@ class Wave(models.TransientModel):
     segment_id = fields.Many2one('mrp.worksegament', string='Work Segment')
     knr_code = fields.Char(string='KNR')
     vin_code = fields.Char(string='VIN')
-    limit = fields.Integer('Query Limit', default=80)
+    limit = fields.Integer('Query Limit', default=100)
+
+    result_line_ids = fields.One2many('operation.result.line', 'wizard_id')
 
     wave = fields.Text(string='Waves', store=False)
 

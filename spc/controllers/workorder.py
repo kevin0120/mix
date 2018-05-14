@@ -1,0 +1,65 @@
+# -*- coding: utf-8 -*-
+from odoo import http, fields
+import json
+from odoo.http import request,Response
+
+DEFAULT_LIMIT = 80
+
+
+class ApiMrpWorkorder(http.Controller):
+    @http.route(['/api/v1/mrp.workorders/<string:order_id>', '/api/v1/mrp.workorders'], type='http', methods=['GET'], auth='none', cors='*', csrf=False)
+    def _get_workorders(self, order_id=None, **kw):
+        if order_id:
+            order = request.env['mrp.workorder'].sudo().search([('id', '=', order_id)])[0]
+            if not order:
+                body = json.dumps({'msg': 'Can not found workorder'})
+                return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
+                                status=404)
+            ret = {
+                'id': order.id,
+                'hmi': {'id': order.workcenter_id.hmi_id.id, 'uuid': order.workcenter_id.hmi_id.serial_no},
+                'worksheet': order.worksheet_img,
+                'pset': order.operation_id.program_id.code,
+                'nut_total': order.consu_product_qty,
+                'vin': order.production_id.vin,
+                'knr': order.production_id.knr,
+                'result_ids': order.result_ids.ids,
+                'status': order.state  # pending, ready, process, done, cancel
+            }
+            body = json.dumps(ret)
+            return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
+                            status=200)
+        domain =[]
+        if 'masterpc' in kw:
+            masterpc_uuid = kw['masterpc']
+            workcenter_id = request.env['mrp.workcenter'].sudo().search([('masterpc_id.serial_no', '=', masterpc_uuid)], limit=1)[0]
+            if not workcenter_id:
+                body = json.dumps({'msg':'Can not found Workcenter'})
+                return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=405)
+            domain += [('workcenter_id', 'in', workcenter_id.ids)]  # 添加查询域
+        if 'limit' in kw.keys():
+            limit = int(kw['limit'])
+        else:
+            limit = DEFAULT_LIMIT
+
+        workorder_ids = request.env['mrp.workorder'].sudo().search(domain, limit=limit)
+        _ret = list()
+        for order in workorder_ids:
+            _ret.append({
+                'id': order.id,
+                'hmi': {'id':workcenter_id.hmi_id.id, 'uuid': workcenter_id.hmi_id.serial_no},
+                'worksheet': order.worksheet_img,
+                'pset': order.operation_id.program_id.code,
+                'nut_total': order.consu_product_qty,
+                'vin': order.production_id.vin,
+                'knr': order.production_id.knr,
+                'result_ids': order.result_ids.ids,
+                'status': order.state  # pending, ready, process, done, cancel
+            })
+        if len(_ret) == 0:
+            body = json.dumps({'msg': "result not existed"})
+            headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
+            return Response(body, status=404, headers=headers)
+        body = json.dumps(_ret)
+        return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=200)
+

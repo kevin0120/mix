@@ -8,149 +8,13 @@ api_data = {
   "info": {
     "termsOfService": "http://centronsys.com",
     "version": "1.0.0",
+    "title": "智能装配应用服务器RESTful",
+    "description": "智能装配应用服务器RESTful",
     "contact": {
       "email": "gubin@centronsys.com"
-    },
-    "description": "智能装配应用服务器RESTful",
-    "title": "智能装配应用服务器RESTful"
+    }
   },
   "paths": {
-    "/operation.results": {
-      "get": {
-        "responses": {
-          "200": {
-            "description": "成功更新了结果数据",
-            "schema": {
-              "items": {
-                "$ref": "#/definitions/ResultDetail"
-              }
-            }
-          },
-          "404": {
-            "description": "未找到记录"
-          },
-          "405": {
-            "description": "无效的输入"
-          }
-        },
-        "description": "获取拧紧结果数据",
-        "parameters": [
-          {
-            "name": "date_from",
-            "description": "查询起始时间",
-            "in": "query",
-            "type": "string",
-            "format": "date-time",
-            "default": "1996-12-19T16:39:57-08:00"
-          },
-          {
-            "name": "date_to",
-            "description": "查询终止时间",
-            "in": "query",
-            "type": "string",
-            "format": "date-time",
-            "default": "1996-12-29T16:39:57+08:00"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "type": "integer",
-            "default": 80
-          }
-        ],
-        "tags": [
-          "Result"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "consumes": [
-          "application/json"
-        ],
-        "summary": "获取结果数据"
-      }
-    },
-    "/operation.results/{resultId}": {
-      "put": {
-        "responses": {
-          "200": {
-            "description": "成功更新了结果数据",
-            "schema": {
-              "items": {
-                "$ref": "#/definitions/ResultDetail"
-              }
-            }
-          },
-          "404": {
-            "description": "resultId 未找到"
-          }
-        },
-        "description": "更新一条拧紧结果数据",
-        "parameters": [
-          {
-            "description": "需要更新的结果的ID",
-            "format": "int64",
-            "required": True,
-            "in": "path",
-            "type": "integer",
-            "name": "resultId"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/result"
-            }
-          }
-        ],
-        "tags": [
-          "Result"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "consumes": [
-          "application/json"
-        ],
-        "summary": "更新一条结果数据"
-      },
-      "get": {
-        "responses": {
-          "200": {
-            "description": "成功更新了结果数据",
-            "schema": {
-              "items": {
-                "$ref": "#/definitions/ResultDetail"
-              }
-            }
-          },
-          "404": {
-            "description": "resultId 未找到"
-          }
-        },
-        "description": "获取一条拧紧结果数据",
-        "parameters": [
-          {
-            "name": "resultId",
-            "description": "需要更新的结果的ID",
-            "format": "int64",
-            "required": True,
-            "in": "path",
-            "type": "integer"
-          }
-        ],
-        "tags": [
-          "Result"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "consumes": [
-          "application/json"
-        ],
-        "summary": "获取一条结果数据"
-      }
-    },
     "/res.users": {
       "get": {
         "responses": {
@@ -167,119 +31,117 @@ api_data = {
             "description": "Invalid input"
           }
         },
-        "description": "",
         "parameters": [
           {
-            "description": "UUID to filter by",
             "items": {
               "type": "string"
             },
-            "in": "query",
             "type": "array",
-            "name": "uuids"
+            "description": "UUID to filter by",
+            "name": "uuids",
+            "in": "query"
           },
           {
             "description": "返回结果限定个数",
-            "collectionFormat": "multi",
             "default": 80,
             "required": False,
+            "name": "limit",
             "in": "query",
             "type": "integer",
-            "name": "limit"
+            "collectionFormat": "multi"
           }
-        ],
-        "tags": [
-          "Users"
         ],
         "produces": [
           "application/json"
         ],
+        "tags": [
+          "Users"
+        ],
+        "summary": "查询用户清单",
         "consumes": [
           "application/json"
         ],
-        "summary": "查询用户清单"
+        "description": ""
       }
     },
-    "/res.users/{uuid}": {
+    "/mrp.workorders": {
       "get": {
         "responses": {
           "200": {
-            "description": "用户清单",
+            "description": "获取工单",
             "schema": {
-              "$ref": "#/definitions/User"
+              "items": {
+                "$ref": "#/definitions/WorkOrder"
+              },
+              "type": "array"
             }
           },
           "404": {
-            "description": "uuid not found"
+            "description": "MasterPC not found"
           },
           "405": {
             "description": "Invalid input"
           }
         },
-        "description": "获取某一用户信息",
         "parameters": [
           {
-            "description": "用户唯一标示(胸卡信息)",
             "required": True,
-            "in": "path",
             "type": "string",
-            "name": "uuid"
+            "description": "MasterPC UUID",
+            "name": "masterpc",
+            "in": "query"
           }
-        ],
-        "tags": [
-          "Users"
         ],
         "produces": [
           "application/json"
         ],
+        "tags": [
+          "Manufacture"
+        ],
         "consumes": [
           "application/json"
         ],
-        "summary": "查询用户清单"
+        "description": "获取某一用户信息"
       }
     },
-    "/res.users/batch_archived": {
-      "put": {
+    "/mrp.workorders/{order_id}": {
+      "get": {
         "responses": {
           "200": {
-            "description": "用户清单",
+            "description": "获取工单",
             "schema": {
-              "type": "array",
               "items": {
-                "$ref": "#/definitions/User"
-              }
+                "$ref": "#/definitions/WorkOrder"
+              },
+              "type": "array"
             }
+          },
+          "404": {
+            "description": "MasterPC not found"
           },
           "405": {
             "description": "Invalid input"
           }
         },
-        "description": "批量归档用户",
         "parameters": [
           {
-            "description": "用户唯一标示(胸卡信息)",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "example": "112233"
-              }
-            },
             "required": True,
-            "in": "body",
-            "name": "body"
+            "type": "string",
+            "description": "MasterPC UUID",
+            "name": "order_id",
+            "in": "path"
           }
-        ],
-        "tags": [
-          "Users"
         ],
         "produces": [
           "application/json"
         ],
+        "tags": [
+          "Manufacture"
+        ],
         "consumes": [
           "application/json"
         ],
-        "summary": "批量归档用户"
+        "description": "获取某一用户信息"
       }
     },
     "/mrp.productions/{vin}": {
@@ -298,25 +160,205 @@ api_data = {
             "description": "Invalid input"
           }
         },
-        "description": "获取某一用户信息",
         "parameters": [
           {
-            "description": "VIN",
             "required": True,
-            "in": "path",
             "type": "string",
-            "name": "vin"
+            "description": "VIN",
+            "name": "vin",
+            "in": "path"
           }
-        ],
-        "tags": [
-          "Manufacture"
         ],
         "produces": [
           "application/json"
         ],
+        "tags": [
+          "Manufacture"
+        ],
         "consumes": [
           "application/json"
-        ]
+        ],
+        "description": "获取某一用户信息"
+      }
+    },
+    "/res.users/batch_archived": {
+      "put": {
+        "responses": {
+          "200": {
+            "description": "用户清单",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/User"
+              },
+              "type": "array"
+            }
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "parameters": [
+          {
+            "required": True,
+            "in": "body",
+            "description": "用户唯一标示(胸卡信息)",
+            "name": "body",
+            "schema": {
+              "items": {
+                "type": "string",
+                "example": "112233"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Users"
+        ],
+        "summary": "批量归档用户",
+        "consumes": [
+          "application/json"
+        ],
+        "description": "批量归档用户"
+      }
+    },
+    "/operation.results": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "成功更新了结果数据",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/ResultDetail"
+              }
+            }
+          },
+          "404": {
+            "description": "未找到记录"
+          },
+          "405": {
+            "description": "无效的输入"
+          }
+        },
+        "parameters": [
+          {
+            "name": "date_from",
+            "format": "date-time",
+            "default": "1996-12-19T16:39:57-08:00",
+            "in": "query",
+            "type": "string",
+            "description": "查询起始时间"
+          },
+          {
+            "name": "date_to",
+            "format": "date-time",
+            "default": "1996-12-29T16:39:57+08:00",
+            "in": "query",
+            "type": "string",
+            "description": "查询终止时间"
+          },
+          {
+            "default": 80,
+            "type": "integer",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Result"
+        ],
+        "summary": "获取结果数据",
+        "consumes": [
+          "application/json"
+        ],
+        "description": "获取拧紧结果数据"
+      }
+    },
+    "/operation.results/{resultId}": {
+      "put": {
+        "responses": {
+          "200": {
+            "description": "成功更新了结果数据",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/ResultDetail"
+              }
+            }
+          },
+          "404": {
+            "description": "resultId 未找到"
+          }
+        },
+        "parameters": [
+          {
+            "description": "需要更新的结果的ID",
+            "format": "int64",
+            "required": True,
+            "in": "path",
+            "type": "integer",
+            "name": "resultId"
+          },
+          {
+            "schema": {
+              "$ref": "#/definitions/result"
+            },
+            "name": "body",
+            "in": "body"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Result"
+        ],
+        "summary": "更新一条结果数据",
+        "consumes": [
+          "application/json"
+        ],
+        "description": "更新一条拧紧结果数据"
+      },
+      "get": {
+        "responses": {
+          "200": {
+            "description": "成功更新了结果数据",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/ResultDetail"
+              }
+            }
+          },
+          "404": {
+            "description": "resultId 未找到"
+          }
+        },
+        "parameters": [
+          {
+            "name": "resultId",
+            "format": "int64",
+            "required": True,
+            "in": "path",
+            "type": "integer",
+            "description": "需要更新的结果的ID"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Result"
+        ],
+        "summary": "获取一条结果数据",
+        "consumes": [
+          "application/json"
+        ],
+        "description": "获取一条拧紧结果数据"
       }
     },
     "/mrp.productions": {
@@ -324,18 +366,18 @@ api_data = {
         "description": "当AIIS收到FIS下发的装配任务，会调用此API将任务同步下发给ODOO.",
         "parameters": [
           {
+            "in": "body",
+            "name": "body",
             "schema": {
               "$ref": "#/definitions/mission"
-            },
-            "name": "body",
-            "in": "body"
+            }
           }
-        ],
-        "tags": [
-          "AIIS"
         ],
         "produces": [
           "application/json"
+        ],
+        "tags": [
+          "AIIS"
         ],
         "summary": "下发装配任务",
         "consumes": [
@@ -360,20 +402,20 @@ api_data = {
         "description": "获取生产订单清单",
         "parameters": [
           {
-            "name": "vins",
-            "in": "query",
-            "type": "array",
             "items": {
-              "type": "string",
-              "default": "LSV2A8CA7JN508198"
-            }
+              "default": "LSV2A8CA7JN508198",
+              "type": "string"
+            },
+            "type": "array",
+            "name": "vins",
+            "in": "query"
           }
-        ],
-        "tags": [
-          "Manufacture"
         ],
         "produces": [
           "application/json"
+        ],
+        "tags": [
+          "Manufacture"
         ],
         "summary": "获取生产订单清单",
         "consumes": [
@@ -383,10 +425,10 @@ api_data = {
           "200": {
             "description": "成功",
             "schema": {
-              "type": "array",
               "items": {
                 "$ref": "#/definitions/Production"
-              }
+              },
+              "type": "array"
             }
           },
           "404": {
@@ -396,6 +438,44 @@ api_data = {
             }
           }
         }
+      }
+    },
+    "/res.users/{uuid}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "用户清单",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "404": {
+            "description": "uuid not found"
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "parameters": [
+          {
+            "required": True,
+            "type": "string",
+            "description": "用户唯一标示(胸卡信息)",
+            "name": "uuid",
+            "in": "path"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Users"
+        ],
+        "summary": "查询用户清单",
+        "consumes": [
+          "application/json"
+        ],
+        "description": "获取某一用户信息"
       }
     }
   },
@@ -422,18 +502,74 @@ api_data = {
     }
   ],
   "definitions": {
-    "PR": {
+    "Category": {
+      "xml": {
+        "name": "Category"
+      },
       "type": "object",
       "properties": {
-        "pr_value": {
-          "type": "string",
-          "description": "pr设定值",
-          "example": "G0C"
+        "id": {
+          "type": "integer",
+          "format": "int64"
         },
-        "pr_group": {
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "mission": {
+      "type": "object",
+      "properties": {
+        "pin_check_code": {
+          "type": "number",
+          "description": "pin校验位",
+          "example": 5
+        },
+        "equipment_name": {
           "type": "string",
-          "description": "pr群组",
-          "example": "GSP"
+          "description": "设备名",
+          "example": "SR1J"
+        },
+        "factory_name": {
+          "type": "string",
+          "description": "订单工厂代号",
+          "example": "C6"
+        },
+        "pin": {
+          "type": "number",
+          "description": "订单车身pin码",
+          "example": 6473537
+        },
+        "prs": {
+          "items": {
+            "$ref": "#/definitions/PR"
+          },
+          "type": "array"
+        },
+        "year": {
+          "type": "number",
+          "description": "订单年份",
+          "example": 2018
+        },
+        "assembly_line": {
+          "type": "string",
+          "description": "装配流水线id",
+          "example": "01"
+        },
+        "model": {
+          "type": "string",
+          "description": "车型代码",
+          "example": "BR24J3"
+        },
+        "vin": {
+          "type": "string",
+          "description": "车辆识别号",
+          "example": "LSV2A8CA7JN508198"
+        },
+        "lnr": {
+          "type": "string",
+          "description": "流水号",
+          "example": "0001"
         }
       }
     },
@@ -452,6 +588,297 @@ api_data = {
         "result": {
           "type": "object",
           "description": "返回结果"
+        }
+      }
+    },
+    "Production": {
+      "type": "object",
+      "properties": {
+        "product_id": {
+          "items": {
+            "$ref": "#/definitions/OdooMany2One"
+          },
+          "type": "array"
+        },
+        "result_ids": {
+          "items": {
+            "type": "integer",
+            "example": 1
+          },
+          "type": "array"
+        },
+        "assembly_line_id": {
+          "items": {
+            "$ref": "#/definitions/OdooMany2One"
+          },
+          "type": "array"
+        },
+        "vin": {
+          "type": "string",
+          "example": "456464"
+        },
+        "knr": {
+          "type": "string",
+          "example": "234242423424"
+        },
+        "id": {
+          "type": "integer",
+          "example": 1
+        }
+      }
+    },
+    "ResultDetail": {
+      "type": "object",
+      "properties": {
+        "product_id": {
+          "items": {
+            "$ref": "#/definitions/OdooMany2One"
+          },
+          "type": "array"
+        },
+        "consu_product_id": {
+          "items": {
+            "$ref": "#/definitions/OdooMany2One"
+          },
+          "type": "array"
+        },
+        "workorder_id": {
+          "items": {
+            "$ref": "#/definitions/OdooMany2One"
+          },
+          "type": "array"
+        },
+        "workcenter_id": {
+          "items": {
+            "$ref": "#/definitions/OdooMany2One"
+          },
+          "type": "array"
+        },
+        "measure_result": {
+          "enum": [
+            "nok",
+            "ok",
+            "none"
+          ],
+          "type": "string",
+          "example": "none"
+        },
+        "op_time": {
+          "type": "integer",
+          "example": 1
+        },
+        "id": {
+          "type": "integer",
+          "example": 1
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "properties": {
+        "pset_m_threshold": {
+          "type": "number",
+          "example": 1.44,
+          "description": "设定扭矩阈值"
+        },
+        "pset_m_max": {
+          "type": "number",
+          "description": "设定最大扭矩",
+          "example": 4.34
+        },
+        "control_date": {
+          "example": "1996-12-19T16:39:57+08:00",
+          "type": "string",
+          "description": "拧紧时间",
+          "format": "date-time"
+        },
+        "pset_w_max": {
+          "type": "number",
+          "description": "设定最大角度",
+          "example": 4.34
+        },
+        "user_id": {
+          "type": "integer",
+          "example": 1,
+          "description": "当前操作用户"
+        },
+        "pset_strategy": {
+          "enum": [
+            "AD",
+            "AW",
+            "ADW",
+            "LN",
+            "AN",
+            "AT"
+          ],
+          "type": "string",
+          "description": "拧紧枪策略",
+          "example": "AD"
+        },
+        "pset_w_threshold": {
+          "type": "number",
+          "example": 1.44,
+          "description": "设定角度阈值"
+        },
+        "cur_objects": {
+          "items": {
+            "type": "string",
+            "example": "cur.json"
+          },
+          "type": "array",
+          "description": "个次操作波形对象列表"
+        },
+        "pset_m_target": {
+          "type": "number",
+          "example": 1.44,
+          "description": "设定目标扭矩"
+        },
+        "pset_m_min": {
+          "type": "number",
+          "example": 1.34,
+          "description": "设定最小扭矩"
+        },
+        "measure_degree": {
+          "type": "number",
+          "description": "实际角度",
+          "example": 2.44
+        },
+        "measure_t_don": {
+          "type": "number",
+          "description": "拧紧过程花费时间",
+          "example": 3.22
+        },
+        "measure_torque": {
+          "type": "number",
+          "description": "实际扭矩",
+          "example": 3.224
+        },
+        "measure_result": {
+          "enum": [
+            "ok",
+            "nok"
+          ],
+          "type": "string",
+          "description": "测量结果",
+          "example": "ok"
+        },
+        "op_time": {
+          "type": "integer",
+          "description": "当前操作",
+          "example": 1
+        },
+        "pset_w_min": {
+          "type": "number",
+          "example": 1.34,
+          "description": "设定最小角度"
+        },
+        "pset_w_target": {
+          "type": "number",
+          "example": 1.44,
+          "description": "设定目标角度"
+        }
+      }
+    },
+    "OdooMany2One": {
+      "allOf": [
+        {
+          "type": "integer",
+          "example": 1
+        },
+        {
+          "type": "string",
+          "example": "ceshi"
+        }
+      ]
+    },
+    "HMI": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      }
+    },
+    "result_id": {
+      "type": "integer"
+    },
+    "WorkOrder": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "pending",
+            "ready",
+            "process",
+            "done",
+            "cancel"
+          ],
+          "type": "string",
+          "description": "Order Status"
+        },
+        "hmi": {
+          "$ref": "#/definitions/HMI"
+        },
+        "worksheet": {
+          "type": "string",
+          "description": "作业图片"
+        },
+        "pset": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "nut_total": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "vin": {
+          "type": "string"
+        },
+        "knr": {
+          "type": "string"
+        },
+        "result_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/result_id"
+          }
+        }
+      }
+    },
+    "PR": {
+      "type": "object",
+      "properties": {
+        "pr_value": {
+          "type": "string",
+          "description": "pr设定值",
+          "example": "G0C"
+        },
+        "pr_group": {
+          "type": "string",
+          "description": "pr群组",
+          "example": "GSP"
+        }
+      }
+    },
+    "ApiResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "type": {
+          "type": "string"
         }
       }
     },
@@ -476,31 +903,31 @@ api_data = {
       },
       "type": "object",
       "properties": {
-        "name": {
-          "type": "string",
-          "example": "顾斌"
-        },
         "status": {
-          "type": "string",
-          "description": "User Status",
           "enum": [
             "active",
             "archived"
           ],
+          "type": "string",
+          "description": "User Status",
           "example": "active"
         },
-        "id": {
-          "type": "integer",
-          "format": "int64",
-          "example": 1
+        "uuid": {
+          "type": "string",
+          "example": "112233"
         },
         "login": {
           "type": "string",
           "example": "gubin@empower.cn"
         },
-        "uuid": {
+        "name": {
           "type": "string",
-          "example": "112233"
+          "example": "顾斌"
+        },
+        "id": {
+          "type": "integer",
+          "example": 1,
+          "format": "int64"
         }
       }
     },
@@ -555,329 +982,6 @@ api_data = {
           "format": "int64"
         }
       }
-    },
-    "ApiResponse": {
-      "type": "object",
-      "properties": {
-        "message": {
-          "type": "string"
-        },
-        "code": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "type": {
-          "type": "string"
-        }
-      }
-    },
-    "OdooMany2One": {
-      "allOf": [
-        {
-          "type": "integer",
-          "example": 1
-        },
-        {
-          "type": "string",
-          "example": "ceshi"
-        }
-      ]
-    },
-    "Production": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "example": 1
-        },
-        "product_id": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/OdooMany2One"
-          }
-        },
-        "result_ids": {
-          "type": "array",
-          "items": {
-            "type": "integer",
-            "example": 1
-          }
-        },
-        "assembly_line_id": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/OdooMany2One"
-          }
-        },
-        "vin": {
-          "type": "string",
-          "example": "456464"
-        },
-        "knr": {
-          "type": "string",
-          "example": "234242423424"
-        }
-      }
-    },
-    "ResultDetail": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "example": 1
-        },
-        "product_id": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/OdooMany2One"
-          }
-        },
-        "consu_product_id": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/OdooMany2One"
-          }
-        },
-        "workorder_id": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/OdooMany2One"
-          }
-        },
-        "workcenter_id": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/OdooMany2One"
-          }
-        },
-        "measure_result": {
-          "type": "string",
-          "enum": [
-            "nok",
-            "ok",
-            "none"
-          ],
-          "example": "none"
-        },
-        "op_time": {
-          "type": "integer",
-          "example": 1
-        }
-      }
-    },
-    "result": {
-      "type": "object",
-      "properties": {
-        "pset_strategy": {
-          "type": "string",
-          "enum": [
-            "AD",
-            "AW",
-            "ADW",
-            "LN",
-            "AN",
-            "AT"
-          ],
-          "description": "拧紧枪策略",
-          "example": "AD"
-        },
-        "pset_m_max": {
-          "type": "number",
-          "description": "设定最大扭矩",
-          "example": 4.34
-        },
-        "pset_m_min": {
-          "type": "number",
-          "example": 1.34,
-          "description": "设定最小扭矩"
-        },
-        "pset_m_threshold": {
-          "type": "number",
-          "example": 1.44,
-          "description": "设定扭矩阈值"
-        },
-        "pset_m_target": {
-          "type": "number",
-          "example": 1.44,
-          "description": "设定目标扭矩"
-        },
-        "pset_w_max": {
-          "type": "number",
-          "description": "设定最大角度",
-          "example": 4.34
-        },
-        "pset_w_min": {
-          "type": "number",
-          "example": 1.34,
-          "description": "设定最小角度"
-        },
-        "pset_w_threshold": {
-          "type": "number",
-          "example": 1.44,
-          "description": "设定角度阈值"
-        },
-        "pset_w_target": {
-          "type": "number",
-          "example": 1.44,
-          "description": "设定目标角度"
-        },
-        "measure_result": {
-          "type": "string",
-          "enum": [
-            "ok",
-            "nok"
-          ],
-          "description": "测量结果",
-          "example": "ok"
-        },
-        "control_date": {
-          "type": "string",
-          "format": "date-time",
-          "description": "拧紧时间",
-          "example": "1996-12-19T16:39:57+08:00"
-        },
-        "op_time": {
-          "type": "integer",
-          "description": "当前操作",
-          "example": 1
-        },
-        "cur_objects": {
-          "items": {
-            "type": "string",
-            "example": "cur.json"
-          },
-          "type": "array",
-          "description": "个次操作波形对象列表"
-        },
-        "measure_torque": {
-          "type": "number",
-          "description": "实际扭矩",
-          "example": 3.224
-        },
-        "measure_degree": {
-          "type": "number",
-          "description": "实际角度",
-          "example": 2.44
-        },
-        "measure_t_don": {
-          "type": "number",
-          "description": "拧紧过程花费时间",
-          "example": 3.22
-        },
-        "user_id": {
-          "type": "integer",
-          "example": 1,
-          "description": "当前操作用户"
-        }
-      }
-    },
-    "mission": {
-      "type": "object",
-      "properties": {
-        "pin_check_code": {
-          "type": "number",
-          "description": "pin校验位",
-          "example": 5
-        },
-        "vin": {
-          "type": "string",
-          "description": "车辆识别号",
-          "example": "LSV2A8CA7JN508198"
-        },
-        "factory_name": {
-          "type": "string",
-          "description": "订单工厂代号",
-          "example": "C6"
-        },
-        "prs": {
-          "items": {
-            "$ref": "#/definitions/PR"
-          },
-          "type": "array"
-        },
-        "pin": {
-          "type": "number",
-          "description": "订单车身pin码",
-          "example": 6473537
-        },
-        "year": {
-          "type": "number",
-          "description": "订单年份",
-          "example": 2018
-        },
-        "assembly_line": {
-          "type": "string",
-          "description": "装配流水线id",
-          "example": "01"
-        },
-        "model": {
-          "type": "string",
-          "description": "车型代码",
-          "example": "BR24J3"
-        },
-        "equipment_name": {
-          "type": "string",
-          "description": "设备名",
-          "example": "SR1J"
-        },
-        "lnr": {
-          "type": "string",
-          "description": "流水号",
-          "example": "0001"
-        }
-      }
-    },
-    "Category": {
-      "xml": {
-        "name": "Category"
-      },
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "name": {
-          "type": "string"
-        }
-      }
-    },
-    "Order": {
-      "xml": {
-        "name": "Order"
-      },
-      "type": "object",
-      "properties": {
-        "status": {
-          "enum": [
-            "placed",
-            "approved",
-            "delivered"
-          ],
-          "type": "string",
-          "description": "Order Status"
-        },
-        "shipDate": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "complete": {
-          "default": False,
-          "type": "boolean"
-        },
-        "petId": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "quantity": {
-          "type": "integer",
-          "format": "int32"
-        }
-      }
     }
   },
   "basePath": "/api/v1",
@@ -893,8 +997,8 @@ api_data = {
       "in": "header"
     },
     "petstore_auth": {
-      "flow": "implicit",
       "type": "oauth2",
+      "flow": "implicit",
       "authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
       "scopes": {
         "write:pets": "modify pets in your account",
