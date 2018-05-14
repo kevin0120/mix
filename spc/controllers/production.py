@@ -73,8 +73,9 @@ class SaConfiguration(http.Controller):
 
         if not records:
             # 找不到对应装配线
-            Response.status = "400 Bad Request"
-            return {"msg": "Assembly line " + assemble_line + " not found"}
+            records = request.env['mrp.assemblyline'].sudo().create({'name': assemble_line, 'code': assemble_line})
+            # Response.status = "400 Bad Request"
+            # return {"msg": "Assembly line " + assemble_line + " not found"}
 
         assembly_line_id = records[0]
 

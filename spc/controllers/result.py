@@ -3,10 +3,29 @@ from odoo import http,fields
 import json
 from odoo.http import request,Response
 from dateutil import parser
+import requests as Requests
 
 DEFAULT_LIMIT = 80
 
 NORMAL_RESULT_FIELDS_READ = ['workorder_id', 'id', 'product_id', 'consu_product_id', 'op_time', 'measure_result', 'workcenter_id']
+
+
+def _post_aiis_result_package(aiis_url, result):
+    data = {
+        'agna': result.production_id.equipment_name,
+        'fname': result.production_id.factory_name,
+        'year': result.production_id.year,
+        'pin': result.production_id.pin,
+        'pin_check': result.production_id.pin_check_code,
+        'assembly_line': result.production_id.assembly_line_id.code,
+        'lnr': result.production_id.lnr,
+        'nut_no': result.consu_product_id.screw_type_code,
+        'date': fields.Datetime.to_string(result.control_date),
+        'result': result.measure_result.upper() if result.measure_result != 'none' else 'NOK',
+        'MI': result.measure_torque,
+        'WI': result.measure_degree
+    }
+    return Requests.put(aiis_url, data=data, headers={'Content-Type', 'application/json'})
 
 
 class SPC(http.Controller):
@@ -31,11 +50,18 @@ class SPC(http.Controller):
                     'control_date': fields.Datetime.to_string((_t - _t.utcoffset()))
                 })
             ret = operation_result_id.sudo().write(vals)
-            if ret:
-                body = json.dumps(operation_result_id.read(fields=NORMAL_RESULT_FIELDS_READ)[0])
+            if not ret:
+                body = {'msg': "update result %d fail" % result_id}
                 headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
-                response = Response(body, status=200, headers=headers)
+                response = Response(body, status=405, headers=headers)
                 return response
+            if operation_result_id.measure_result == 'ok' or (operation_result_id.measure_result == 'nok' and operation_result_id.op_time >= operation_result_id.point_id.times):
+                aiis_url = request.env['ir.config_parameter'].sudo().get_param('aiis.url')
+                ret = _post_aiis_result_package(aiis_url, operation_result_id)
+            body = json.dumps(operation_result_id.read(fields=NORMAL_RESULT_FIELDS_READ)[0])
+            headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
+            response = Response(body, status=200, headers=headers)
+            return response
 
     @http.route(['/api/v1/operation.results', '/api/v1/operation.results/<int:result_id>'], type='http', auth='none', methods=['get'], cors='*', csrf=False)
     def _get_result_lists(self, result_id=None, **kw):

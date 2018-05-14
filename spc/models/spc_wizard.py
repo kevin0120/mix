@@ -37,7 +37,16 @@ class OperationResultReport(models.TransientModel):
         return result
 
     def _get_data(self):
-        pass
+        domain = []
+        if self.query_date_from:
+            domain += [('control_date', '>=', self.query_date_from)]
+        if self.query_date_to:
+            domain += [('control_date', '<=', self.query_date_to)]
+        if self.vehicle_id:
+            domain += [('product_id', '=', self.vehicle_id.id)]
+        if self.screw_id:
+            domain += [('consu_product_id', '=', self.vehicle_id.id)]
+        ret = self.env['operation.result'].sudo().search(domain, limit=self.limit)
 
     @api.multi
     def button_query(self):

@@ -3,7 +3,7 @@
 from odoo import models, fields, exceptions, _
 
 
-class S3Settings(models.TransientModel):
+class MinioSettings(models.TransientModel):
     _name = 'minio.config.settings'
     _inherit = 'res.config.settings'
 

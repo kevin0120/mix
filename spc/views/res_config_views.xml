@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="view_aiis_config_settings" model="ir.ui.view">
+            <field name="name">aiis settings</field>
+            <field name="model">aiis.config.settings</field>
+            <field name="arch" type="xml">
+                <form string="Settings AIIS" class="oe_form_configuration">
+                    <header>
+                        <button string="Apply" type="object" name="execute" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" type="object" name="cancel" class="oe_link"/>
+                    </header>
+                    <div>
+                        <group>
+                            <group string="Address">
+                                <field name="aiis_url"/>
+                            </group>
+                        </group>
+                    </div>
+
+                </form>
+            </field>
+        </record>
+
+        <record id="action_aiis_settings" model="ir.actions.act_window">
+            <field name="name">Aiis Settings</field>
+            <field name="res_model">aiis.config.settings</field>
+            <field name="view_mode">form</field>
+            <field name="target">inline</field>
+        </record>
+
+
+
+
+        <menuitem id="menu_aiis_settings"
+              name="Configuration"
+              groups="base.group_system"
+              parent="menu_spc_scope_root" action="action_aiis_settings" sequence="50"/>
+
+
+</odoo>
