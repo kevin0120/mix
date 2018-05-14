@@ -207,7 +207,7 @@ api_data = {
           {
             "description": "查询起始时间",
             "format": "date-time",
-            "default": "1996-12-19T16:39:57-08:00",
+            "default": "2017-06-19T16:39:57-08:00",
             "in": "query",
             "type": "string",
             "name": "date_from"
@@ -215,7 +215,7 @@ api_data = {
           {
             "description": "查询终止时间",
             "format": "date-time",
-            "default": "1996-12-29T16:39:57+08:00",
+            "default": "2018-12-29T16:39:57+08:00",
             "in": "query",
             "type": "string",
             "name": "date_to"
@@ -884,7 +884,7 @@ api_data = {
         "control_date": {
           "description": "拧紧时间",
           "type": "string",
-          "example": "1996-12-19T16:39:57+08:00",
+          "example": "2018-05-19T16:39:57+08:00",
           "format": "date-time"
         },
         "pset_w_max": {

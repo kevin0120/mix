@@ -33,6 +33,7 @@ class OperationResultReport(models.TransientModel):
     def read(self, fields=None, load='_classic_read'):
         result = super(OperationResultReport, self).read(fields, load=load)
         if 'wave' in fields and load == '_classic_read':
+            data = self._get_data()
             result[0].update({'wave': self._get_echart_data()})
         return result
 
@@ -45,8 +46,16 @@ class OperationResultReport(models.TransientModel):
         if self.vehicle_id:
             domain += [('product_id', '=', self.vehicle_id.id)]
         if self.screw_id:
-            domain += [('consu_product_id', '=', self.vehicle_id.id)]
-        ret = self.env['operation.result'].sudo().search(domain, limit=self.limit)
+            domain += [('consu_product_id', '=', self.screw_id.id)]
+        if self.assembly_line_id:
+            domain += [('production_id.assembly_line_id', '=', self.assembly_line_id.id)]
+        if self.segment_id:
+            domain += [('workcenter_id.segment_id', '=', self.segment_id.id)]
+        if self.knr_code:
+            domain += [('production_id.knr', 'like', self.knr_code)]
+        if self.vin_code:
+            domain += [('production_id.vin', 'like', self.vin_code)]
+        return self.env['operation.result'].sudo().search(domain, limit=self.limit)
 
     @api.multi
     def button_query(self):
