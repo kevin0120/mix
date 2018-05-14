@@ -62,6 +62,7 @@ func XMl2Result(result cvi.CVI3Result) (ResponseResult) {
 
 	return rr
 }
+
 func (hmi *HMI) PushResult(result ResponseResult) (error) {
 
 	client := &http.Client{}
