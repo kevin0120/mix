@@ -129,9 +129,9 @@ class OperationResult(models.HyperModel):
 
     @api.multi
     def write(self, vals):
-        if 'cur_objects' in vals:
-            cur_objects = list(set(json.loads(vals['cur_objects'])))  # 去重
-            vals.update({'cur_objects': json.dumps(cur_objects)})
+        # if 'cur_objects' in vals:
+        #     cur_objects = list(set(json.loads(vals['cur_objects'])))  # 去重
+        #     vals.update({'cur_objects': json.dumps(cur_objects)})
         ret = super(OperationResult, self).write(vals)
         return ret
 

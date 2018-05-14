@@ -15,6 +15,43 @@ api_data = {
     }
   },
   "paths": {
+    "/mrp.productions/{vin}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "生产订单",
+            "schema": {
+              "$ref": "#/definitions/Production"
+            }
+          },
+          "404": {
+            "description": "vin not found"
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "parameters": [
+          {
+            "required": True,
+            "type": "string",
+            "description": "VIN",
+            "name": "vin",
+            "in": "path"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Manufacture"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "description": "获取某一用户信息"
+      }
+    },
     "/res.users": {
       "get": {
         "responses": {
@@ -64,123 +101,6 @@ api_data = {
         "description": ""
       }
     },
-    "/mrp.workorders": {
-      "get": {
-        "responses": {
-          "200": {
-            "description": "获取工单",
-            "schema": {
-              "items": {
-                "$ref": "#/definitions/WorkOrder"
-              },
-              "type": "array"
-            }
-          },
-          "404": {
-            "description": "MasterPC not found"
-          },
-          "405": {
-            "description": "Invalid input"
-          }
-        },
-        "parameters": [
-          {
-            "required": True,
-            "type": "string",
-            "description": "MasterPC UUID",
-            "name": "masterpc",
-            "in": "query"
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "Manufacture"
-        ],
-        "consumes": [
-          "application/json"
-        ],
-        "description": "获取某一用户信息"
-      }
-    },
-    "/mrp.workorders/{order_id}": {
-      "get": {
-        "responses": {
-          "200": {
-            "description": "获取工单",
-            "schema": {
-              "items": {
-                "$ref": "#/definitions/WorkOrder"
-              },
-              "type": "array"
-            }
-          },
-          "404": {
-            "description": "MasterPC not found"
-          },
-          "405": {
-            "description": "Invalid input"
-          }
-        },
-        "parameters": [
-          {
-            "required": True,
-            "type": "string",
-            "description": "MasterPC UUID",
-            "name": "order_id",
-            "in": "path"
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "Manufacture"
-        ],
-        "consumes": [
-          "application/json"
-        ],
-        "description": "获取某一用户信息"
-      }
-    },
-    "/mrp.productions/{vin}": {
-      "get": {
-        "responses": {
-          "200": {
-            "description": "生产订单",
-            "schema": {
-              "$ref": "#/definitions/Production"
-            }
-          },
-          "404": {
-            "description": "vin not found"
-          },
-          "405": {
-            "description": "Invalid input"
-          }
-        },
-        "parameters": [
-          {
-            "required": True,
-            "type": "string",
-            "description": "VIN",
-            "name": "vin",
-            "in": "path"
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "Manufacture"
-        ],
-        "consumes": [
-          "application/json"
-        ],
-        "description": "获取某一用户信息"
-      }
-    },
     "/res.users/batch_archived": {
       "put": {
         "responses": {
@@ -225,6 +145,46 @@ api_data = {
         "description": "批量归档用户"
       }
     },
+    "/mrp.workorders/{order_id}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "获取工单",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/WorkOrder"
+              },
+              "type": "array"
+            }
+          },
+          "404": {
+            "description": "MasterPC not found"
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "parameters": [
+          {
+            "required": True,
+            "type": "string",
+            "description": "MasterPC UUID",
+            "name": "order_id",
+            "in": "path"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Manufacture"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "description": "获取某一用户信息"
+      }
+    },
     "/operation.results": {
       "get": {
         "responses": {
@@ -245,20 +205,20 @@ api_data = {
         },
         "parameters": [
           {
-            "name": "date_from",
+            "description": "查询起始时间",
             "format": "date-time",
             "default": "1996-12-19T16:39:57-08:00",
             "in": "query",
             "type": "string",
-            "description": "查询起始时间"
+            "name": "date_from"
           },
           {
-            "name": "date_to",
+            "description": "查询终止时间",
             "format": "date-time",
             "default": "1996-12-29T16:39:57+08:00",
             "in": "query",
             "type": "string",
-            "description": "查询终止时间"
+            "name": "date_to"
           },
           {
             "default": 80,
@@ -278,6 +238,51 @@ api_data = {
           "application/json"
         ],
         "description": "获取拧紧结果数据"
+      }
+    },
+    "/operation.results/{resultId}/curves_add": {
+      "patch": {
+        "responses": {
+          "200": {
+            "description": "成功更新了结果数据",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/ResultDetail"
+              }
+            }
+          },
+          "404": {
+            "description": "resultId 未找到"
+          }
+        },
+        "parameters": [
+          {
+            "description": "需要更新的结果的ID",
+            "format": "int64",
+            "required": True,
+            "in": "path",
+            "type": "integer",
+            "name": "resultId"
+          },
+          {
+            "schema": {
+              "$ref": "#/definitions/curve"
+            },
+            "name": "body",
+            "in": "body"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Result"
+        ],
+        "summary": "为一条结果添加波形",
+        "consumes": [
+          "application/json"
+        ],
+        "description": "更新一条拧紧结果数据"
       }
     },
     "/operation.results/{resultId}": {
@@ -340,12 +345,12 @@ api_data = {
         },
         "parameters": [
           {
-            "name": "resultId",
+            "description": "需要更新的结果的ID",
             "format": "int64",
             "required": True,
             "in": "path",
             "type": "integer",
-            "description": "需要更新的结果的ID"
+            "name": "resultId"
           }
         ],
         "produces": [
@@ -477,6 +482,46 @@ api_data = {
         ],
         "description": "获取某一用户信息"
       }
+    },
+    "/mrp.workorders": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "获取工单",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/WorkOrder"
+              },
+              "type": "array"
+            }
+          },
+          "404": {
+            "description": "MasterPC not found"
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "parameters": [
+          {
+            "required": True,
+            "type": "string",
+            "description": "MasterPC UUID",
+            "name": "masterpc",
+            "in": "query"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Manufacture"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "description": "获取某一用户信息"
+      }
     }
   },
   "host": "172.17.0.1:8069",
@@ -514,6 +559,107 @@ api_data = {
         },
         "name": {
           "type": "string"
+        }
+      }
+    },
+    "PR": {
+      "type": "object",
+      "properties": {
+        "pr_value": {
+          "type": "string",
+          "description": "pr设定值",
+          "example": "G0C"
+        },
+        "pr_group": {
+          "type": "string",
+          "description": "pr群组",
+          "example": "GSP"
+        }
+      }
+    },
+    "Tag": {
+      "xml": {
+        "name": "Tag"
+      },
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "HMI": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      }
+    },
+    "WorkOrder": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "pending",
+            "ready",
+            "process",
+            "done",
+            "cancel"
+          ],
+          "type": "string",
+          "description": "Order Status"
+        },
+        "nut_total": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pset": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "hmi": {
+          "$ref": "#/definitions/HMI"
+        },
+        "result_ids": {
+          "items": {
+            "$ref": "#/definitions/result_id"
+          },
+          "type": "array"
+        },
+        "worksheet": {
+          "type": "string",
+          "description": "作业图片"
+        },
+        "knr": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "vin": {
+          "type": "string"
+        }
+      }
+    },
+    "curve": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "example": "opration.json"
+        },
+        "op": {
+          "type": "integer",
+          "example": 1
         }
       }
     },
@@ -570,6 +716,55 @@ api_data = {
           "type": "string",
           "description": "流水号",
           "example": "0001"
+        }
+      }
+    },
+    "ApiResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "User": {
+      "xml": {
+        "name": "User"
+      },
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "active",
+            "archived"
+          ],
+          "type": "string",
+          "description": "User Status",
+          "example": "active"
+        },
+        "login": {
+          "type": "string",
+          "example": "gubin@empower.cn"
+        },
+        "id": {
+          "type": "integer",
+          "example": 1,
+          "format": "int64"
+        },
+        "name": {
+          "type": "string",
+          "example": "顾斌"
+        },
+        "uuid": {
+          "type": "string",
+          "example": "112233"
         }
       }
     },
@@ -687,9 +882,9 @@ api_data = {
           "example": 4.34
         },
         "control_date": {
-          "example": "1996-12-19T16:39:57+08:00",
-          "type": "string",
           "description": "拧紧时间",
+          "type": "string",
+          "example": "1996-12-19T16:39:57+08:00",
           "format": "date-time"
         },
         "pset_w_max": {
@@ -722,8 +917,7 @@ api_data = {
         },
         "cur_objects": {
           "items": {
-            "type": "string",
-            "example": "cur.json"
+            "$ref": "#/definitions/curve"
           },
           "type": "array",
           "description": "个次操作波形对象列表"
@@ -791,145 +985,8 @@ api_data = {
         }
       ]
     },
-    "HMI": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer"
-        },
-        "uuid": {
-          "type": "string"
-        }
-      }
-    },
     "result_id": {
       "type": "integer"
-    },
-    "WorkOrder": {
-      "type": "object",
-      "properties": {
-        "status": {
-          "enum": [
-            "pending",
-            "ready",
-            "process",
-            "done",
-            "cancel"
-          ],
-          "type": "string",
-          "description": "Order Status"
-        },
-        "hmi": {
-          "$ref": "#/definitions/HMI"
-        },
-        "worksheet": {
-          "type": "string",
-          "description": "作业图片"
-        },
-        "pset": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "nut_total": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "vin": {
-          "type": "string"
-        },
-        "knr": {
-          "type": "string"
-        },
-        "result_ids": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/result_id"
-          }
-        }
-      }
-    },
-    "PR": {
-      "type": "object",
-      "properties": {
-        "pr_value": {
-          "type": "string",
-          "description": "pr设定值",
-          "example": "G0C"
-        },
-        "pr_group": {
-          "type": "string",
-          "description": "pr群组",
-          "example": "GSP"
-        }
-      }
-    },
-    "ApiResponse": {
-      "type": "object",
-      "properties": {
-        "message": {
-          "type": "string"
-        },
-        "code": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "type": {
-          "type": "string"
-        }
-      }
-    },
-    "Tag": {
-      "xml": {
-        "name": "Tag"
-      },
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "name": {
-          "type": "string"
-        }
-      }
-    },
-    "User": {
-      "xml": {
-        "name": "User"
-      },
-      "type": "object",
-      "properties": {
-        "status": {
-          "enum": [
-            "active",
-            "archived"
-          ],
-          "type": "string",
-          "description": "User Status",
-          "example": "active"
-        },
-        "uuid": {
-          "type": "string",
-          "example": "112233"
-        },
-        "login": {
-          "type": "string",
-          "example": "gubin@empower.cn"
-        },
-        "name": {
-          "type": "string",
-          "example": "顾斌"
-        },
-        "id": {
-          "type": "integer",
-          "example": 1,
-          "format": "int64"
-        }
-      }
     },
     "Result": {
       "xml": {

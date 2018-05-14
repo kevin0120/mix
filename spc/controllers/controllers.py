@@ -63,7 +63,7 @@ class SPC(http.Controller):
         body = json.dumps(ret)
         return Response(body, headers=[('Content-Type', 'application/json'),('Content-Length', len(body))], status=200)
 
-    @http.route('/api/v1/operation.results/<int:result_id>/curves_add', type='json', auth='none', cors='*', csrf=False)
+    @http.route('/api/v1/operation.results/<int:result_id>/curves_add', type='json', methods=['PATCH', 'OPTIONS'], auth='none', cors='*', csrf=False)
     def _append_curves(self, result_id):
         operation_result_id = request.env['operation.result'].sudo().browse(result_id)
         if not operation_result_id:
@@ -74,7 +74,9 @@ class SPC(http.Controller):
         else:
             vals = request.jsonrequest
             write_values = dict()
-            write_values['cur_objects'] = json.dumps(json.loads(operation_result_id.cur_objects).extend(vals))
+            _vals = json.loads(operation_result_id.cur_objects)
+            _vals.append(vals)
+            write_values['cur_objects'] = json.dumps(_vals)
             ret = operation_result_id.sudo().write(write_values)
             if ret:
                 body = json.dumps(operation_result_id.read(fields=NORMAL_RESULT_FIELDS_READ)[0])
