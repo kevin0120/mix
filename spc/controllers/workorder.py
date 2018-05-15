@@ -63,7 +63,7 @@ class ApiMrpWorkorder(http.Controller):
                 'status': order.state  # pending, ready, process, done, cancel
             })
         if len(_ret) == 0:
-            body = json.dumps({'msg': "result not existed"})
+            body = json.dumps([])
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=404, headers=headers)
         body = json.dumps(_ret)
