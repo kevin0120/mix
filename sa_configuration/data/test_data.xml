@@ -24,6 +24,20 @@
             <field name="category_id" ref="equipment_MasterPC"/>
         </record>
 
+        <record id="controller_0" model="maintenance.equipment">
+            <field name="name">测试控制器1</field>
+            <field name="serial_no">0001</field>
+            <field name="parent_id" ref="masterpc_0"/>
+            <field name="category_id">2</field>
+        </record>
+
+        <record id="controller_1" model="maintenance.equipment">
+            <field name="name">测试控制器2</field>
+            <field name="serial_no">0002</field>
+            <field name="parent_id" ref="masterpc_0"/>
+            <field name="category_id">2</field>
+        </record>
+
         <record id="mrp_workcenter_0" model="mrp.workcenter">
             <field name="name">测试工位1</field>
             <field name="capacity">5</field>
