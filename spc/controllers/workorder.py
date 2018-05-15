@@ -5,6 +5,8 @@ from odoo.http import request,Response
 
 DEFAULT_LIMIT = 80
 
+DEFAULT_ORDER_BY = 'production_date DESC'
+
 
 class ApiMrpWorkorder(http.Controller):
     @http.route(['/api/v1/mrp.workorders/<string:order_id>', '/api/v1/mrp.workorders'], type='http', methods=['GET'], auth='none', cors='*', csrf=False)
@@ -41,8 +43,12 @@ class ApiMrpWorkorder(http.Controller):
             limit = int(kw['limit'])
         else:
             limit = DEFAULT_LIMIT
+        if 'order' in kw.keys():
+            order_by = kw['order'] + ' DESC'
+        else:
+            order_by = DEFAULT_ORDER_BY
 
-        workorder_ids = request.env['mrp.workorder'].sudo().search(domain, limit=limit)
+        workorder_ids = request.env['mrp.workorder'].sudo().search(domain, limit=limit, order=order_by)
         _ret = list()
         for order in workorder_ids:
             _ret.append({
