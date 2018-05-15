@@ -22,10 +22,9 @@ class OperationResultLine(models.TransientModel):
     #
     # user_id = fields.Many2one('res.users', 'Responsible')
     #
-    product_id = fields.Many2one('product.product')
+    product_id = fields.Many2one('product.product', 'Vehicle')
     #
-    # consu_product_id = fields.Many2one('product.product', 'Screw',
-    #                              domain="[('sa_type', '=', 'screw')]", required=True)
+    consu_product_id = fields.Many2one('product.product', 'Screw' )
     #
     # control_date = fields.Datetime('Control Date')
     #
@@ -35,10 +34,10 @@ class OperationResultLine(models.TransientModel):
     #
     # measure_t_don = fields.Float('Measure Time Done(ms)', default=0.0, digits=dp.get_precision('Operation Result'))
     #
-    # measure_result = fields.Selection([
-    #     ('none', 'No measure'),
-    #     ('ok', 'OK'),
-    #     ('nok', 'NOK')], string="Measure Success", default='none')
+    measure_result = fields.Selection([
+        ('none', 'No measure'),
+        ('ok', 'OK'),
+        ('nok', 'NOK')], string="Measure Result", default='none')
     #
     # lacking = fields.Selection([('lack', 'Data Lacking'),
     #     ('normal', 'Normal')], string='Lacking', default='lack', compute='_compute_result_lacking', store=True)

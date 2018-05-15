@@ -7,9 +7,12 @@
             web_icon="spc,static/description/icon.png"
             sequence="200"/>
 
-    <!--<menuitem id="menu_spc_form"-->
-              <!--name="SPC"-->
-              <!--parent="menu_spc_scope_root" sequence="10"/>-->
+    <menuitem
+      id="menu_spc_analyze"
+      name="SPC"
+      parent="menu_spc_scope_root"
+      sequence="20"/>
+
 
   </data>
 </odoo>

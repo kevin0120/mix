@@ -3,6 +3,7 @@
 
 from dateutil import relativedelta
 import datetime
+import json
 
 from odoo import api, exceptions, fields, models, _
 
@@ -78,7 +79,21 @@ class MrpWorkCenter(models.Model):
     _inherit = 'mrp.workcenter'
 
     worksegment_id = fields.Many2one('mrp.worksegament', copy=False)
-    hmi_id = fields.Many2one('maintenance.equipment',  copy=False)
-    masterpc_id = fields.Many2one('maintenance.equipment',  copy=False)
+    hmi_id = fields.Many2one('maintenance.equipment',  string='HMI', copy=False)
+    masterpc_id = fields.Many2one('maintenance.equipment',  string='MasterPC', copy=False)
 
-    _sql_constraints = [('code_hmi', 'unique(hmi_id)', 'Only one HMI is allowed')]
+    controller_id = fields.Many2one('maintenance.equipment', string='Controller', copy=False)
+
+    controller_id_domain = fields.Char(
+        compute="_compute_controller_id_domain",
+        readonly=True,
+        store=False,
+    )
+
+    @api.multi
+    @api.depends('masterpc_id')
+    def _compute_controller_id_domain(self):
+        for rec in self:
+            rec.controller_id_domain = json.dumps([('id', 'in', rec.masterpc_id.child_ids.ids), ('category_name', '=', 'Controller')])
+
+    _sql_constraints = [('code_hmi', 'unique(hmi_id)', 'Only one HMI is allowed'), ('code_controller', 'unique(controller_id)', 'Only one Controller is allowed')]

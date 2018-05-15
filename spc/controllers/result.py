@@ -21,7 +21,7 @@ def _post_aiis_result_package(aiis_url, result):
         'lnr': result.production_id.lnr,
         'nut_no': result.consu_product_id.screw_type_code,
         'date': fields.Datetime.to_string(result.control_date),
-        'result': result.measure_result.upper() if result.measure_result != 'none' else 'NOK',
+        'result': result.measure_result.upper(),
         'MI': result.measure_torque,
         'WI': result.measure_degree
     }

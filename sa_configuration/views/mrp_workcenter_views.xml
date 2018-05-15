@@ -28,8 +28,10 @@
                         <field name="worksegment_id" required="1"/>
                     </group>
                     <group string="Equipments">
+                        <field name="controller_id_domain" invisible="1" />
                         <field name="masterpc_id" string="MasterPC" required="1"  domain="[('category_name','=','MasterPC')]"/>
                         <field name="hmi_id" string="HMI" required="1" domain="[('category_name','=','HMI')]"/>
+                        <field name="controller_id" string="Controller" required="1" domain="controller_id_domain"/>
                     </group>
                 </group>
                 <xpath expr="//notebook/page[last()]" position="replace">

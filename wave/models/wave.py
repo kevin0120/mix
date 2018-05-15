@@ -104,5 +104,40 @@ class Wave(models.TransientModel):
         return _datas, ret
 
     @api.multi
-    def button_query(self):
+    def button_show(self):
         pass
+
+
+    def _get_result_data(self):
+        domain = []
+        if self.query_date_from:
+            domain += [('control_date', '>=', self.query_date_from)]
+        if self.query_date_to:
+            domain += [('control_date', '<=', self.query_date_to)]
+        if self.vehicle_id:
+            domain += [('product_id', '=', self.vehicle_id.id)]
+        if self.screw_id:
+            domain += [('consu_product_id', '=', self.screw_id.id)]
+        if self.assembly_line_id:
+            domain += [('production_id.assembly_line_id', '=', self.assembly_line_id.id)]
+        if self.segment_id:
+            domain += [('workcenter_id.segment_id', '=', self.segment_id.id)]
+        if self.knr_code:
+            domain += [('production_id.knr', 'like', self.knr_code)]
+        if self.vin_code:
+            domain += [('production_id.vin', 'like', self.vin_code)]
+        return self.env['operation.result'].sudo().search(domain, limit=self.limit)
+
+    @api.multi
+    def button_query(self):
+        data = self._get_result_data()
+        for result in data:
+            vals = {
+                'wizard_id': self.id,
+                'workorder_id': result.workorder_id.id,
+                'workcenter_id': result.workcenter_id.id,
+                'product_id': result.product_id.id,
+                'consu_product_id': result.consu_product_id.id,
+                'measure_result': result.measure_result
+            }
+            self.env['operation.result'].sudo().create(vals)
