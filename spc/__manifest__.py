@@ -31,7 +31,8 @@
         'views/spc_wizard.xml',
         'views/operation_result_views.xml',
         'views/mrp_production_views.xml',
-        'views/mrp_workorder_views.xml'
+        'views/mrp_workorder_views.xml',
+        'views/res_config_views.xml',
     ],
     'installable': True,
     'application': True,

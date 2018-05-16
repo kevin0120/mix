@@ -45,7 +45,6 @@
         'views/maintenance_views.xml',
         'views/quality_views.xml',
         'data/maintenance_data.xml',
-        'data/mrp_workcenter.xml',
         'data/test_data.xml',
 
     ],

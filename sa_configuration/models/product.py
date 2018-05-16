@@ -74,6 +74,8 @@ class ProductProduct(models.Model):
     @api.multi
     def button_create_qcp(self):
         self.ensure_one()
+        # 首先删除所有的qcp
+        self.env['quality.point'].search([('product_id', '=', self.id)]).sudo().unlink()
         active_bom_line_ids = self.active_bom_line_ids
         # point_type_ids = self.env['quality.point.type'].search([])
         for line in active_bom_line_ids:

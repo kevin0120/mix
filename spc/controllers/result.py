@@ -11,6 +11,8 @@ NORMAL_RESULT_FIELDS_READ = ['workorder_id', 'id', 'product_id', 'consu_product_
 
 
 def _post_aiis_result_package(aiis_url, result):
+    if not aiis_url:
+        return False
     data = {
         'agna': result.production_id.equipment_name,
         'fname': result.production_id.factory_name,
@@ -20,7 +22,7 @@ def _post_aiis_result_package(aiis_url, result):
         'assembly_line': result.production_id.assembly_line_id.code,
         'lnr': result.production_id.lnr,
         'nut_no': result.consu_product_id.screw_type_code,
-        'date': fields.Datetime.to_string(result.control_date),
+        'date': result.control_date,
         'result': result.measure_result.upper(),
         'MI': result.measure_torque,
         'WI': result.measure_degree

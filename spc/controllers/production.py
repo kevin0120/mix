@@ -84,7 +84,7 @@ class SaConfiguration(http.Controller):
                      'bom_id': product_id.active_bom_id.id,
                      'product_tmpl_id': product_id.product_tmpl_id.id,
                      'product_uom_id': product_id.active_bom_id.product_uom_id.id,
-                     'routing_id': product_id.active_bom_id.product_uom_id.id,
+                     'routing_id': product_id.active_bom_id.routing_id.id,
                      'assembly_line_id': assembly_line_id.id})
 
         prs = vals['prs']

@@ -137,10 +137,12 @@
         <field name="model">operation.result</field>
         <field name="arch" type="xml">
             <search>
-                <field name="quality_state"/>
+                <field name="knr" string="KNR/VIN" filter_domain="['|', ('knr','ilike',self),('vin','ilike',self)]"/>
                 <field name="product_id" filter_domain="['|', ('product_id.name','ilike',self),('product_id.vehicle_type_code','ilike',self)]"/>
                 <field name="consu_product_id" filter_domain="['|', ('consu_product_id.name','ilike',self), ('consu_product_id.screw_type_code','ilike',self)]"/>
                 <field name="workorder_id" string="Operation"/>
+                <field name="production_id" string="Production"/>
+                <field name="quality_state"/>
                 <separator/>
                 <filter string="In Progress" domain="[('quality_state', '=', 'none')]" name="progress"/>
                 <filter string="Passed" domain="[('quality_state', '=', 'pass')]" name="passed"/>
@@ -156,7 +158,7 @@
                 <filter name="year" string="This Year" domain="[('control_date','&gt;=', context_today().strftime('%Y-1-1')),('control_date','&lt;', (context_today() + relativedelta(years=1)).strftime('%Y-1-1') )]"/>
                 <filter name="last_year" string="Last Year" domain="[('control_date','&gt;=', (context_today() - relativedelta(years=1)).strftime('%Y-1-1')),('control_date','&lt;', context_today().strftime('%Y-1-1') )]"/>
                 <group expand="0" string="Group By">
-                    <filter string="State" context="{'group_by': 'quality_state'}"/>
+                    <filter string="Result" context="{'group_by': 'measure_result'}"/>
                     <filter string="Vehicle" context="{'group_by': 'product_id'}"/>
                     <filter string="Screw" context="{'group_by': 'consu_product_id'}"/>
                     <filter string="WorkCenter" context="{'group_by': 'workcenter_id'}"/>
@@ -178,6 +180,14 @@
               Operation Result is the execution of a quality control in some point
             </p>
         </field>
+    </record>
+
+    <record id="quality_check_action_spc" model="ir.actions.act_window">
+        <field name="name">Result Checks SPC</field>
+        <field name="res_model">operation.result</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="operation_result_view_graph"/>
     </record>
 
     <menuitem

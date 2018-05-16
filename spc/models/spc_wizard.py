@@ -5,6 +5,7 @@ from odoo import models, fields, api
 from pyecharts import Line, Bar
 from pyecharts import Pie, Style
 import pyecharts
+from pandas import DataFrame
 
 
 class OperationResultReport(models.TransientModel):
@@ -68,9 +69,31 @@ class OperationResultReport(models.TransientModel):
         return self.env['operation.result'].sudo().search(domain, limit=self.limit)
 
     @api.multi
-    def button_query(self):
-        pass
+    def button_query_vehicle(self):
+        result = {'count': 0,
+                  'ok': 0,
+                  'lacking': 0,
+                  'nok': 0,
+                  'used': 0}
+        knr_code = '%' + self.knr_code + '%' if self.knr_code else '%'
+        query = """
+                          SELECT b.knr as knr, count(*) as count, o.measure_result as result ,o.lacking as lack
+                          FROM operation_result o
+                          FULL JOIN mrp_production b ON (b.id = o.production_id)
+                          WHERE b.knr LIKE '%s'
+                          AND o.control_date >= '%s'
+                          AND o.control_date <= '%s'
+                          group by o.measure_result, o.lacking, b.knr
+                        """ % (knr_code, self.query_date_from, self.query_date_to)
+        self.env.cr.execute(query, ())
+        data = [row for row in self.env.cr.dictfetchall()]
+        df = DataFrame.from_dict(data)
+        print(df)
+        _df = df.groupby('knr')
+        print(_df)
 
+        result['used'] = result['count'] - result['lacking']
+        return result
     @api.multi
     def button_query_controller(self):
         result = {}

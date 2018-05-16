@@ -28,14 +28,28 @@
             <field name="name">测试控制器1</field>
             <field name="serial_no">0001</field>
             <field name="parent_id" ref="masterpc_0"/>
-            <field name="category_id">2</field>
+            <field name="category_id" ref="equipment_screw_controller"/>
         </record>
 
         <record id="controller_1" model="maintenance.equipment">
             <field name="name">测试控制器2</field>
             <field name="serial_no">0002</field>
             <field name="parent_id" ref="masterpc_0"/>
-            <field name="category_id">2</field>
+            <field name="category_id" ref="equipment_screw_controller"/>
+        </record>
+
+        <record id="controller_2" model="maintenance.equipment">
+            <field name="name">测试控制器3</field>
+            <field name="serial_no">0003</field>
+            <field name="parent_id" ref="masterpc_1"/>
+            <field name="category_id" ref="equipment_screw_controller"/>
+        </record>
+
+        <record id="controller_3" model="maintenance.equipment">
+            <field name="name">测试控制器4</field>
+            <field name="serial_no">0004</field>
+            <field name="parent_id" ref="masterpc_1"/>
+            <field name="category_id" ref="equipment_screw_controller"/>
         </record>
 
         <record id="mrp_workcenter_0" model="mrp.workcenter">
@@ -47,6 +61,7 @@
             <field name="worksegment_id" ref="work_segment_1" />
             <field name="hmi_id" ref="hmi_0" />
             <field name="masterpc_id" ref="masterpc_0" />
+            <field name="controller_id" ref="controller_0" />
         </record>
 
         <record id="hmi_1" model="maintenance.equipment">
@@ -70,6 +85,7 @@
             <field name="worksegment_id" ref="work_segment_1" />
             <field name="hmi_id" ref="hmi_1" />
             <field name="masterpc_id" ref="masterpc_1" />
+            <field name="controller_id" ref="controller_3" />
         </record>
 
         <record id="hmi_2" model="maintenance.equipment">

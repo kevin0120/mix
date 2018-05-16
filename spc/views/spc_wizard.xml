@@ -1,162 +1,197 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-        <record id="sa_spc_form" model="ir.ui.view">
-            <field name="name">sa_spc_form</field>
-            <field name="model">operation.result.wizard</field>
-            <field name="arch" type="xml">
-                <form string="Scope">
-                    <header>
-                        <button string="Query" type="object" name="button_query" class="oe_highlight"/>
-                    </header>
-                    <div>
-                        <group string="Query Parameters">
-                            <group string="Time">
-                                <field name="query_date_from" required="1"/>
-                                <field name="query_date_to"/>
-                            </group>
-                            <group string="Product">
-                                <field name="vehicle_id" options="
-                                    {'no_create_edit': True}"/>
-                                <field name="screw_id" options="
-                                    {'no_create_edit': True}"/>
-                            </group>
-                            <group string="Manufacture">
-                                <field name="segment_id" options="
-                                    {'no_create_edit': True}"/>
-                                <field name="knr_code" />
-                                <field name="vin_code" />
-                                <field name="assembly_line_id" options="
-                                    {'no_create_edit': True}"/>
-                                <field name="segment_id" options="
-                                    {'no_create_edit': True}"/>
-                            </group>
-                            <group>
-                                <field name="limit" required="1"/>
-                            </group>
-                        </group>
-
-                    </div>
-                    <div>
-                        <group string="Waves">
-                            <field name="success_analyze" widget="echart"/>
-                        </group>
-                    </div>
-
-                </form>
-            </field>
-        </record>
-
-        <record id="sa_vehicle_spc_form" model="ir.ui.view">
-            <field name="name">sa_vehicle_spc_form</field>
-            <field name="model">operation.result.wizard</field>
-            <field name="arch" type="xml">
-                <form string="Scope">
-                    <header>
-                        <button string="Query" type="object" name="button_query" class="oe_highlight"/>
-                    </header>
-                    <div>
-                        <group string="Query Parameters">
-                            <group string="Time">
-                                <field name="query_date_from" required="1"/>
-                                <field name="query_date_to"/>
-                            </group>
+        <!--<record id="sa_spc_form" model="ir.ui.view">-->
+            <!--<field name="name">sa_spc_form</field>-->
+            <!--<field name="model">operation.result.wizard</field>-->
+            <!--<field name="arch" type="xml">-->
+                <!--<form string="Scope">-->
+                    <!--<header>-->
+                        <!--<button string="Query" type="object" name="button_query" class="oe_highlight"/>-->
+                    <!--</header>-->
+                    <!--<div>-->
+                        <!--<group string="Query Parameters">-->
+                            <!--<group string="Time">-->
+                                <!--<field name="query_date_from" required="1"/>-->
+                                <!--<field name="query_date_to"/>-->
+                            <!--</group>-->
                             <!--<group string="Product">-->
                                 <!--<field name="vehicle_id" options="-->
                                     <!--{'no_create_edit': True}"/>-->
+                                <!--<field name="screw_id" options="-->
+                                    <!--{'no_create_edit': True}"/>-->
                             <!--</group>-->
-                            <group string="Manufacture">
-                                <field name="knr_code" />
-                                <field name="vin_code" />
-                            </group>
-                        </group>
-                        <div>
-                            <group string="合格率">
-                                <field name="success_analyze" widget="echart"/>
-                            </group>
-                        </div>
-                    </div>
+                            <!--<group string="Manufacture">-->
+                                <!--<field name="segment_id" options="-->
+                                    <!--{'no_create_edit': True}"/>-->
+                                <!--<field name="knr_code" />-->
+                                <!--<field name="vin_code" />-->
+                                <!--<field name="assembly_line_id" options="-->
+                                    <!--{'no_create_edit': True}"/>-->
+                                <!--<field name="segment_id" options="-->
+                                    <!--{'no_create_edit': True}"/>-->
+                            <!--</group>-->
+                            <!--<group>-->
+                                <!--<field name="limit" required="1"/>-->
+                            <!--</group>-->
+                        <!--</group>-->
 
-                </form>
+                    <!--</div>-->
+                    <!--<div>-->
+                        <!--<group string="Waves">-->
+                            <!--<field name="success_analyze" widget="echart"/>-->
+                        <!--</group>-->
+                    <!--</div>-->
+
+                <!--</form>-->
+            <!--</field>-->
+        <!--</record>-->
+
+        <!--<record id="sa_vehicle_spc_form" model="ir.ui.view">-->
+            <!--<field name="name">sa_vehicle_spc_form</field>-->
+            <!--<field name="model">operation.result.wizard</field>-->
+            <!--<field name="arch" type="xml">-->
+                <!--<form string="Scope">-->
+                    <!--<header>-->
+                        <!--<button string="Query" type="object" name="button_query_vehicle" class="oe_highlight"/>-->
+                    <!--</header>-->
+                    <!--<div>-->
+                        <!--<group string="Query Parameters">-->
+                            <!--<group string="Time">-->
+                                <!--<field name="query_date_from" required="1"/>-->
+                                <!--<field name="query_date_to"/>-->
+                            <!--</group>-->
+                            <!--&lt;!&ndash;<group string="Product">&ndash;&gt;-->
+                                <!--&lt;!&ndash;<field name="vehicle_id" options="&ndash;&gt;-->
+                                    <!--&lt;!&ndash;{'no_create_edit': True}"/>&ndash;&gt;-->
+                            <!--&lt;!&ndash;</group>&ndash;&gt;-->
+                            <!--<group string="Manufacture">-->
+                                <!--<field name="knr_code" />-->
+                                <!--<field name="vin_code" />-->
+                            <!--</group>-->
+                        <!--</group>-->
+                        <!--<div>-->
+                            <!--<group string="合格率">-->
+                                <!--<field name="success_analyze" widget="echart"/>-->
+                            <!--</group>-->
+                        <!--</div>-->
+                    <!--</div>-->
+
+                <!--</form>-->
+            <!--</field>-->
+        <!--</record>-->
+
+        <!--<record id="sa_controller_spc_form" model="ir.ui.view">-->
+                <!--<field name="name">sa_controller_spc_form</field>-->
+                <!--<field name="model">operation.result.wizard</field>-->
+                <!--<field name="arch" type="xml">-->
+                    <!--<form string="Scope">-->
+                        <!--<header>-->
+                            <!--<button string="Query" type="object" name="button_query_controller" class="oe_highlight"/>-->
+                        <!--</header>-->
+                        <!--<sheet>-->
+                            <!--<group string="Query Parameters">-->
+                                <!--<group string="Time">-->
+                                    <!--<field name="query_date_from" required="1"/>-->
+                                    <!--<field name="query_date_to"/>-->
+                                <!--</group>-->
+                                <!--<group string="Controller">-->
+                                    <!--<field name="controller_ids" options="{'no_create_edit': True}" widget="many2many_tags" required="1"/>-->
+                                <!--</group>-->
+                                <!--<group string="Manufacture">-->
+                                    <!--<field name="knr_code" />-->
+                                    <!--<field name="vin_code" />-->
+                                <!--</group>-->
+                            <!--</group>-->
+                        <!--</sheet>-->
+                        <!--<notebook>-->
+                            <!--<page string="合格率">-->
+                                    <!--<field name="success_controller_analyze" widget="echart"/>-->
+                            <!--</page>-->
+                            <!--<page string="合格率列表">-->
+                                <!--<field name="success_controller_analyze" widget="echart"/>-->
+                            <!--</page>-->
+                        <!--</notebook>-->
+                        <!--<div class="oe_chatter"/>-->
+                    <!--</form>-->
+                <!--</field>-->
+            <!--</record>-->
+
+        <record id="sa_spc_workcenter_form_view" model="ir.ui.view">
+            <field name="name">sa_spc_workcenter_form_view</field>
+            <field name="model">mrp.workcenter</field>
+            <field name="inherit_id" ref="sa_configuration.sa_mrp_workcenter_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@class='oe_button_box']" position="inside">
+                    <button string="SPC" name="action_see_spc_control" type="object" icon="fa-bars" class="oe_stat_button" groups="spc.group_spc_user, spc.group_spc_manager"/>
+                </xpath>
             </field>
         </record>
 
-        <record id="sa_controller_spc_form" model="ir.ui.view">
-                <field name="name">sa_controller_spc_form</field>
-                <field name="model">operation.result.wizard</field>
-                <field name="arch" type="xml">
-                    <form string="Scope">
-                        <header>
-                            <button string="Query" type="object" name="button_query_controller" class="oe_highlight"/>
-                        </header>
-                        <sheet>
-                            <group string="Query Parameters">
-                                <group string="Time">
-                                    <field name="query_date_from" required="1"/>
-                                    <field name="query_date_to"/>
-                                </group>
-                                <group string="Controller">
-                                    <field name="controller_ids" options="{'no_create_edit': True}" widget="many2many_tags" required="1"/>
-                                </group>
-                                <group string="Manufacture">
-                                    <field name="knr_code" />
-                                    <field name="vin_code" />
-                                </group>
-                            </group>
-                        </sheet>
-                        <notebook>
-                            <page string="合格率">
-                                    <field name="success_controller_analyze" widget="echart"/>
-                            </page>
-                            <page string="合格率列表">
-                                <field name="success_controller_analyze" widget="echart"/>
-                            </page>
-                        </notebook>
-                        <div class="oe_chatter"/>
-                    </form>
-                </field>
-            </record>
+
+
+        <record id="sa_spc_workcenter_tree_view" model="ir.ui.view">
+            <field name="name">sa_spc_workcenter_tree_view</field>
+            <field name="model">mrp.workcenter</field>
+            <field name="arch" type="xml">
+                <tree string="Work Center" create="0" delete="0">
+                    <field name="controller_id" />
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="worksegment_id" />
+                    <field name="resource_type" invisible="1"/>
+                    <field name="company_id" groups="base.group_multi_company"/>
+                    <field name="active" invisible="1"/>
+                </tree>
+            </field>
+        </record>
 
         <record id="action_spc_form" model="ir.actions.act_window">
             <field name="name">SPC</field>
-            <field name="res_model">operation.result.wizard</field>
+            <field name="res_model">mrp.production</field>
             <field name="view_mode">form</field>
             <field name="target">inline</field>
         </record>
 
         <record id="action_spc_vehicle_form" model="ir.actions.act_window">
             <field name="name">单车分析</field>
-            <field name="res_model">operation.result.wizard</field>
-            <field name="view_mode">form</field>
+            <field name="res_model">mrp.production</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="mrp.view_mrp_production_filter"/>
+            <field name="context">{'search_default_group_by_knr': 1}</field>
             <field name="view_ids"
                    eval="[(5, 0, 0),
-                          (0, 0, {'view_mode': 'form', 'view_id': ref('sa_vehicle_spc_form')})]"/>
-            <field name="target">inline</field>
+                          (0, 0, {'view_mode': 'tree', 'view_id': ref('mrp.mrp_production_tree_view')}),
+                          (0, 0, {'view_mode': 'form', 'view_id': ref('mrp.mrp_production_form_view')})]"/>
+            <!--<field name="target">inline</field>-->
         </record>
 
         <record id="action_spc_controller_form" model="ir.actions.act_window">
             <field name="name">单枪分析</field>
-            <field name="res_model">operation.result.wizard</field>
-            <field name="view_mode">form</field>
+            <field name="res_model">mrp.workcenter</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="sa_configuration.sa_view_mrp_workcenter_search_inherit"/>
+            <field name="context">{'search_default_group_by_controller': 1}</field>
             <field name="view_ids"
                    eval="[(5, 0, 0),
-                          (0, 0, {'view_mode': 'form', 'view_id': ref('sa_controller_spc_form')})]"/>
-            <field name="target">inline</field>
+                          (0, 0, {'view_mode': 'tree', 'view_id': ref('sa_spc_workcenter_tree_view')}),
+                          (0, 0, {'view_mode': 'form', 'view_id': ref('sa_spc_workcenter_form_view')})]"/>
+            <!--<field name="target">inline</field>-->
         </record>
 
-        <record id="action_spc_form" model="ir.actions.act_window">
-            <field name="name">SPC</field>
-            <field name="res_model">operation.result.wizard</field>
-            <field name="view_mode">form</field>
-            <field name="view_ids"
-                   eval="[(5, 0, 0),
-                          (0, 0, {'view_mode': 'form', 'view_id': ref('sa_spc_form')})]"/>
-            <field name="target">inline</field>
-        </record>
+        <!--<record id="action_spc_form" model="ir.actions.act_window">-->
+            <!--<field name="name">SPC</field>-->
+            <!--<field name="res_model">operation.result.wizard</field>-->
+            <!--<field name="view_mode">form</field>-->
+            <!--<field name="view_ids"-->
+                   <!--eval="[(5, 0, 0),-->
+                          <!--(0, 0, {'view_mode': 'form', 'view_id': ref('sa_spc_form')})]"/>-->
+            <!--<field name="target">inline</field>-->
+        <!--</record>-->
 
         <menuitem id="menu_spc_vehicle" name="单车分析" action="action_spc_vehicle_form" parent="menu_spc_analyze" sequence="10"/>
 
         <menuitem id="menu_spc_controller" name="单枪分析" action="action_spc_controller_form" parent="menu_spc_analyze" sequence="20"/>
 
-        <menuitem id="menu_spc" name="Vehicle Analyze" action="action_spc_form" parent="menu_spc_analyze" sequence="30"/>
+        <!--<menuitem id="menu_spc" name="Vehicle Analyze" action="action_spc_form" parent="menu_spc_analyze" sequence="30"/>-->
 
 </odoo>
