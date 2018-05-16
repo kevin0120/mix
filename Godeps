@@ -95,3 +95,4 @@ github.com/mitchellh/go-homedir b8bc1bf767474819792c23f32d8286a45736f1c6
 github.com/minio/minio-go 6f8ee6677a042d53d9251ecf7b1c7431c23d2416
 github.com/mattn/go-sqlite3 a72efd674f654961a11ac41aae72c0e43963fe6c
 github.com/satori/go.uuid 36e9d2ebbde5e3f13ab2e25625fd453271d6522e
+github.com/kataras/iris c022b7a71255aef4412c06540ee9dfacd36b03f8
