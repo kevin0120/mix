@@ -87,7 +87,13 @@ class Wave(models.TransientModel):
 
     def _get_data(self):
         client, bucket = self._recreate_minio_client()
-        objects = ['cur1.json', 'cur2.json', 'cur3.json', 'cur4.json', 'cur5.json']
+        data = self._get_result_data()
+        objects = []
+        for result in data:
+            objs = json.loads(result.cur_objects)
+            for cur in objs:
+                objects.append(cur['file'])
+
         ret = None
         need_fetch_objects = []
         _datas = []
@@ -98,8 +104,11 @@ class Wave(models.TransientModel):
             except KeyError as e:
                 need_fetch_objects.append(_t)
         _datas.extend(map(lambda x: _create_wave_result_dict(x, client.get_object(bucket, x).data.decode('utf-8')), need_fetch_objects)) # 合并结果
-        for i in range(len(_datas) -1):
-            ret = _datas[i]['wave'].merge(_datas[i+1]['wave'],how='outer', on='cur_w') if i == 0 else ret.merge(_datas[i+1]['wave'],how='outer', on='cur_w')
+        if len(_datas) > 1:
+            for i in range(len(_datas) -1):
+                ret = _datas[i]['wave'].merge(_datas[i+1]['wave'],how='outer', on='cur_w') if i == 0 else ret.merge(_datas[i+1]['wave'],how='outer', on='cur_w')
+        else:
+            ret = _datas[0]['wave']
         ret = ret.sort_values(by=['cur_w'])
         return _datas, ret
 
