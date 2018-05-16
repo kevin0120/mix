@@ -8,3 +8,4 @@ from . import mrp_workcenter
 from . import mrp_production
 from . import sync_results
 from . import res_config
+from . import tor_ang_spc

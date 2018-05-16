@@ -9,7 +9,7 @@
 
     <menuitem
       id="menu_spc_analyze"
-      name="SPC"
+      name="Analyze"
       parent="menu_spc_scope_root"
       sequence="20"/>
 

@@ -13,7 +13,7 @@ class MrpProduction(models.Model):
         action = self.env.ref('spc.quality_check_action_spc').read()[0]
         action.update({
             'context': {
-                'search_default_production_id': self.id
+                'search_default_name': self.knr if self.knr else self.vin
             }
         })
         return action

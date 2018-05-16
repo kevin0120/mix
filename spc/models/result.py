@@ -15,6 +15,8 @@ class OperationResult(models.HyperModel):
     workcenter_id = fields.Many2one('mrp.workcenter', related='workorder_id.workcenter_id', store=True, readonly=True)  # TDE: necessary ?
     production_id = fields.Many2one('mrp.production', 'Production Order')
 
+    assembly_line_id = fields.Many2one('mrp.assemblyline', related='production_id.assembly_line_id', string='Assembly Line', store=True, readonly=True)
+
     pset_strategy = fields.Selection([('AD', 'Torque tightening'),
                                          ('AW', 'Angle tightening'),
                                          ('ADW', 'Torque/Angle tightening'),

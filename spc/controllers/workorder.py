@@ -34,7 +34,7 @@ class ApiMrpWorkorder(http.Controller):
         domain =[]
         if 'masterpc' in kw:
             masterpc_uuid = kw['masterpc']
-            workcenter_id = request.env['mrp.workcenter'].sudo().search([('masterpc_id.serial_no', '=', masterpc_uuid)], limit=1)[0]
+            workcenter_id = request.env['mrp.workcenter'].sudo().search([('masterpc_id.serial_no', '=', masterpc_uuid)], limit=1)
             if not workcenter_id:
                 body = json.dumps({'msg':'Can not found Workcenter'})
                 return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=405)

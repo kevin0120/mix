@@ -27,7 +27,7 @@ def _post_aiis_result_package(aiis_url, result):
         'MI': result.measure_torque,
         'WI': result.measure_degree
     }
-    return Requests.put(aiis_url, data=data, headers={'Content-Type', 'application/json'})
+    return Requests.put(aiis_url, data=data, headers={'Content-Type': 'application/json'})
 
 
 class SPC(http.Controller):

@@ -24,6 +24,7 @@
                             <field name="time" string="Order Date" />
                             <field name="production_id"/>
                             <field name="workcenter_id" />
+                            <field name="assembly_line_id" />
                         </group>
                         <field name="pset_strategy" />
                         <group string="Degree">
@@ -137,10 +138,11 @@
         <field name="model">operation.result</field>
         <field name="arch" type="xml">
             <search>
-                <field name="knr" string="KNR/VIN" filter_domain="['|', ('knr','ilike',self),('vin','ilike',self)]"/>
+                <field name="name" string="KNR/VIN" filter_domain="['|', ('production_id.knr','ilike',self),('production_id.vin','ilike',self)]"/>
                 <field name="product_id" filter_domain="['|', ('product_id.name','ilike',self),('product_id.vehicle_type_code','ilike',self)]"/>
                 <field name="consu_product_id" filter_domain="['|', ('consu_product_id.name','ilike',self), ('consu_product_id.screw_type_code','ilike',self)]"/>
                 <field name="workorder_id" string="Operation"/>
+                <field name="workcenter_id" string="Controller"/>
                 <field name="production_id" string="Production"/>
                 <field name="quality_state"/>
                 <separator/>
@@ -152,6 +154,7 @@
                 <filter string="NOK" domain="[('measure_result', '=', 'nok')]" name="nok"/>
                 <separator/>
                 <filter string="Data Lacking" domain="[('lacking', '=', 'lack')]" name="lacking"/>
+                <filter string="Date Using" domain="[('lacking', '=', 'normal')]" name="using"/>
                 <separator/>
                 <filter name="today" string="Today" domain="[('control_date', '&gt;=', datetime.datetime.now().replace(hour=0, minute=0, second=0)),('control_date', '&lt;=', datetime.datetime.now().replace(hour=23, minute=59, second=59))]" />
                 <filter name="month" string="Current Month" domain="[('control_date','&gt;=', context_today().strftime('%Y-%m-1')),('control_date','&lt;', (context_today() + relativedelta(months=1)).strftime('%Y-%m-1') )]"/>
@@ -159,6 +162,7 @@
                 <filter name="last_year" string="Last Year" domain="[('control_date','&gt;=', (context_today() - relativedelta(years=1)).strftime('%Y-1-1')),('control_date','&lt;', context_today().strftime('%Y-1-1') )]"/>
                 <group expand="0" string="Group By">
                     <filter string="Result" context="{'group_by': 'measure_result'}"/>
+                    <filter string="Production" context="{'group_by': 'production_id'}"/>
                     <filter string="Vehicle" context="{'group_by': 'product_id'}"/>
                     <filter string="Screw" context="{'group_by': 'consu_product_id'}"/>
                     <filter string="WorkCenter" context="{'group_by': 'workcenter_id'}"/>
