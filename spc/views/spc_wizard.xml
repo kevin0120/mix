@@ -155,7 +155,15 @@
                                 <field name="normal_dist" widget="echart"/>
                         </page>
                         <page string="Weibull Distribution">
-                            <field name="weibull_dist" widget="echart"/>
+                            <group>
+                                <group>
+                                    <field name="weibull_dist_method" widget="radio" />
+                                </group>
+                                <group>
+                                    <field name="weibull_dist" widget="echart"/>
+                                </group>
+                            </group>
+
                         </page>
                         <page string="Scatter">
                             <field name="scatter" widget="echart"/>
