@@ -47,10 +47,11 @@ class SPC(http.Controller):
                 })
 
             if 'control_date' in vals:
-                _t = parser.parse(vals['control_date'])
-                vals.update({
-                    'control_date': fields.Datetime.to_string((_t - _t.utcoffset()))
-                })
+                _t = parser.parse(vals['control_date']) if vals['control_date'] else None
+                if _t:
+                    vals.update({
+                        'control_date': fields.Datetime.to_string((_t - _t.utcoffset()))
+                    })
             ret = operation_result_id.sudo().write(vals)
             if not ret:
                 body = {'msg': "update result %d fail" % result_id}
@@ -102,7 +103,7 @@ class SPC(http.Controller):
         else:
             vals = request.jsonrequest
             write_values = dict()
-            _vals = json.loads(operation_result_id.cur_objects)
+            _vals = json.loads(operation_result_id.cur_objects if operation_result_id.cur_objects else json.dumps([]))
             _vals.append(vals)
             write_values['cur_objects'] = json.dumps(_vals)
             ret = operation_result_id.sudo().write(write_values)

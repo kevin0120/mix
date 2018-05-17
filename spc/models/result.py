@@ -106,11 +106,12 @@ class OperationResult(models.HyperModel):
                 result.one_time_pass = 'pass'
 
     @api.multi
-    @api.depends('measure_torque', 'measure_degree', 'measure_result')
+    # @api.depends('measure_torque', 'measure_degree', 'measure_result')
+    @api.depends('measure_result')
     def _compute_result_lacking(self):
         for result in self:
             result.lacking = 'lack'
-            if result.measure_torque not in [False, 0.0] and result.measure_degree not in [False, 0.0] and result.measure_result != 'none':
+            if result.measure_result != 'none': # if result.measure_torque not in [False, 0.0] and result.measure_degree not in [False, 0.0] and result.measure_result != 'none':
                 result.lacking = 'normal'
 
     @api.multi
