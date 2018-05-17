@@ -1,4 +1,4 @@
-package rush_odoo
+package core
 
 import (
 	"net/http"
@@ -16,6 +16,7 @@ type ODOO struct {
 	URL string
 	MasterPC_SN string
 	DB *rushdb.DB
+	APIService *APIServer
 }
 
 func (odoo *ODOO) ListWorkorders(masterpc_sn string, limit int) ([]payload.ODOOWorkorder, error) {
@@ -77,9 +78,15 @@ func (odoo *ODOO) RequestWorkerOrders() {
 			fmt.Printf("%s\n", err.Error())
 		}
 
-		e := odoo.DB.InsertWorkorders(workorders)
+		neworders, e := odoo.DB.InsertWorkorders(workorders)
 		if e != nil {
 			fmt.Printf("%s\n", e.Error())
+		}
+
+		// 推送新工单
+		for _,v := range neworders {
+			order_str, _ := json.Marshal(v)
+			odoo.APIService.WSSendWorkorder(v.HMI.UUID, string(order_str))
 		}
 
 		time.Sleep(5 * time.Second)

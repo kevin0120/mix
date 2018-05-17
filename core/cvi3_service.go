@@ -1,4 +1,4 @@
-package rush_cvi3
+package core
 
 import (
 	"fmt"
@@ -11,13 +11,18 @@ import (
 	"time"
 	"github.com/masami10/rush/storage"
 	"github.com/masami10/rush/payload"
-	"github.com/masami10/rush/odoo"
 )
 
 func (service *CVI3Service) OnStatus(sn string, status string) {
 	fmt.Printf("%s:%s\n", sn, status)
 
 	// ws推送状态
+	s := payload.WSStatus{}
+	s.Status = status
+	s.SN = sn
+	msg, _ := json.Marshal(s)
+
+	service.APIService.WSSendStatus(string(msg))
 }
 
 func (service *CVI3Service) OnRecv(msg string) {
@@ -75,6 +80,22 @@ func (service *CVI3Service) OnRecv(msg string) {
 			fmt.Printf("%s\n", err.Error())
 		}
 
+		// 找到结果对应的hmi
+		var w rushdb.Workorders
+		w, err = service.DB.GetWorkorder(result_data.Workorder_ID)
+		if err == nil {
+			// ws推送结果到hmi
+			ws_result := payload.WSResult{}
+			ws_result.Result_id = result_data.Result_id
+			ws_result.Count = result_data.Count
+			ws_result.Result = result_data.Result
+			ws_result.MI = result_data.ResultValue.Mi
+			ws_result.WI = result_data.ResultValue.Wi
+			ws_result.TI = result_data.ResultValue.Ti
+			ws_str, _ := json.Marshal(ws_result)
+			go service.APIService.WSSendResult(w.HMI_sn, string(ws_str))
+		}
+
 		// 保存波形到对象存储
 		err = service.Storage.Upload(result_data.CurFile, r.Cur_data)
 		if err != nil {
@@ -111,8 +132,6 @@ func (service *CVI3Service) OnRecv(msg string) {
 
 		go service.ODOO.PutResult(result_data.Result_id, odoo_result)
 
-
-		// ws推送结果到hmi
 	}
 
 
@@ -125,7 +144,8 @@ type CVI3Service struct {
 	hmis	map[string]string
 	DB		*rushdb.DB
 	Storage	*rush_storage.Storage
-	ODOO	*rush_odoo.ODOO
+	ODOO	*ODOO
+	APIService *APIServer
 }
 
 func (service *CVI3Service) Config(configs []cvi3.CVI3Config) {

@@ -19,7 +19,7 @@ type DB struct {
 	Port uint
 }
 
-func (db *DB) InsertWorkorders(workorders []payload.ODOOWorkorder) error {
+func (db *DB) InsertResults(result Results) (error) {
 	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		db.User,
 		db.Pwd,
@@ -30,6 +30,30 @@ func (db *DB) InsertWorkorders(workorders []payload.ODOOWorkorder) error {
 	if err != nil {
 		return err
 	}
+
+	_, e := engine.Insert(result)
+	if e != nil {
+		return e
+	} else {
+		fmt.Printf("new result:%d\n", result.Result_id)
+	}
+
+	return nil
+}
+
+func (db *DB) InsertWorkorders(workorders []payload.ODOOWorkorder) ([]payload.ODOOWorkorder, error) {
+	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		db.User,
+		db.Pwd,
+		db.URL,
+		db.Port,
+		db.DBName))
+
+	if err != nil {
+		return workorders, err
+	}
+
+	new_orders := []payload.ODOOWorkorder{}
 
 	for _, v := range workorders {
 		has, _ := db.WorkorderExists(v.ID)
@@ -57,8 +81,9 @@ func (db *DB) InsertWorkorders(workorders []payload.ODOOWorkorder) error {
 
 		_, err := engine.Insert(o)
 		if err != nil {
-			return err
+			return workorders, err
 		} else {
+			new_orders = append(new_orders, v)
 			fmt.Printf("new workorder:%d\n", o.Workorder_id)
 		}
 
@@ -77,7 +102,7 @@ func (db *DB) InsertWorkorders(workorders []payload.ODOOWorkorder) error {
 
 			_, err := engine.Insert(r)
 			if err != nil {
-				return err
+				return workorders, err
 			} else {
 				fmt.Printf("new result:%d\n", result_id)
 			}
@@ -85,7 +110,7 @@ func (db *DB) InsertWorkorders(workorders []payload.ODOOWorkorder) error {
 
 	}
 
-	return nil
+	return new_orders, nil
 
 }
 
@@ -125,7 +150,12 @@ func (db *DB) GetResult(id int, count int) (Results, error) {
 	}
 
 	var rt bool
-	rt, err = engine.Alias("r").Where("r.result_id = ?", id).And("r.count = ?", count).Get(&result)
+	if count == 0 {
+		rt, err = engine.Alias("r").Where("r.result_id = ?", id).Limit(1).Get(&result)
+	} else {
+		rt, err = engine.Alias("r").Where("r.result_id = ?", id).And("r.count = ?", count).Limit(1).Get(&result)
+	}
+
 
 	if err != nil {
 		return result, err
@@ -138,7 +168,36 @@ func (db *DB) GetResult(id int, count int) (Results, error) {
 	}
 }
 
-func (db *DB) GetWorkorder(hmi_sn string, vin string, knr string) (Workorders, error) {
+func (db *DB) GetWorkorder(id int) (Workorders, error) {
+	var err error
+	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		db.User,
+		db.Pwd,
+		db.URL,
+		db.Port,
+		db.DBName))
+
+	workorder := Workorders{}
+
+	if err != nil {
+		return workorder, err
+	}
+
+	var rt bool
+	rt, err = engine.Alias("w").Where("w.workorder_id = ?", id).Get(&workorder)
+
+	if err != nil {
+		return workorder, err
+	} else {
+		if !rt {
+			return workorder, errors.New("workorder does not exist")
+		} else {
+			return workorder, nil
+		}
+	}
+}
+
+func (db *DB) FindWorkorder(hmi_sn string, vin string, knr string) (Workorders, error) {
 	var err error
 	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		db.User,
