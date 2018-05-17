@@ -40,11 +40,13 @@
                             </field>
                         </page>
                         <page string="WaveForm">
-                            <group string="Waves">
+                            <label for="wave" string="WaveForm"/>
+                            <div>
                                 <field name="wave" widget="echart"/>
-                            </group>
+                            </div>
                         </page>
                     </notebook>
+                    <div class="oe_chatter"/>
                 </form>
             </field>
         </record>

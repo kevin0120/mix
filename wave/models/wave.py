@@ -7,7 +7,7 @@ from minio import Minio
 from urlparse import urlsplit
 import json
 from pandas import DataFrame
-
+import itertools
 from boltons.cacheutils import LRU
 
 minioClient = None
@@ -46,7 +46,7 @@ class Wave(models.TransientModel):
     segment_id = fields.Many2one('mrp.worksegament', string='Work Segment')
     knr_code = fields.Char(string='KNR')
     vin_code = fields.Char(string='VIN')
-    limit = fields.Integer('Query Limit', default=100)
+    limit = fields.Integer('Query Limit', default=5)
 
     result_line_ids = fields.One2many('operation.result.line', 'wizard_id')
 
@@ -87,12 +87,12 @@ class Wave(models.TransientModel):
 
     def _get_data(self):
         client, bucket = self._recreate_minio_client()
-        data = self._get_result_data()
+        cur_objects = self._get_result_data().mapped('cur_objects')
         objects = []
-        for result in data:
-            objs = json.loads(result.cur_objects)
-            for cur in objs:
-                objects.append(cur['file'])
+        cur_objects = map(json.loads, cur_objects)
+        objs = list(itertools.chain.from_iterable(cur_objects))
+        for cur in objs:
+            objects.append(cur['file'])
 
         ret = None
         need_fetch_objects = []
@@ -116,9 +116,8 @@ class Wave(models.TransientModel):
     def button_show(self):
         pass
 
-
     def _get_result_data(self):
-        domain = []
+        domain = [('cur_objects', '!=', False)]
         if self.query_date_from:
             domain += [('control_date', '>=', self.query_date_from)]
         if self.query_date_to:
