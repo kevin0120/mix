@@ -10,7 +10,7 @@ NORMAL_RESULT_FIELDS_READ = ['vin', 'id', 'knr', 'product_id', 'assembly_line_id
 
 
 class SaConfiguration(http.Controller):
-    @http.route(['/api/v1/mrp.productions', '/api/v1/mrp.productions/<string:vin>'], type='http', methods=['GET'], auth='none', cors='*', csrf=False)
+    @http.route(['/api/v1/mrp.productions', '/api/v1/mrp.productions/<string:vin>'], type='http', methods=['GET', 'OPTIONS'], auth='none', cors='*', csrf=False)
     def _get_productions(self, vin=None, **kw):
         domain = []
         if vin:
@@ -44,15 +44,16 @@ class SaConfiguration(http.Controller):
             [('name', '=', mo_name)])
         if count > 0:
             # MO已存在
-            Response.status = "400 Bad Request"
-            return {"msg": "MO name " + mo_name + " already exists"}
+            body = json.dumps({"msg": "MO name " + mo_name + " already exists"})
+            return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=400)
 
         count = request.env['mrp.production'].sudo().search_count(
             [('vin', '=', vin)])
         if count > 0:
             # MO已存在
-            Response.status = "400 Bad Request"
-            return {"msg":"MO vin " + vin + " already exists"}
+            body = json.dumps({"msg":"MO vin " + vin + " already exists"})
+            return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
+                            status=400)
 
         vechile_code = vals['model']
         vals.pop('model')
@@ -61,8 +62,9 @@ class SaConfiguration(http.Controller):
 
         if not records.exists():
             # 找不到对应车型
-            Response.status = "400 Bad Request"
-            return {"msg":"vechile model " + vechile_code + " not found"}
+            body= json.dumps({"msg":"vechile model " + vechile_code + " not found"})
+            return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
+                            status=400)
 
         product_id = records[0]
 
@@ -104,7 +106,9 @@ class SaConfiguration(http.Controller):
 
         if not production:
             Response.status = "400 Bad Request"
-            return {"msg": "create MO failed"}
+            body = json.dumps({"msg": "create MO failed"})
+            return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
+                            status=400)
 
 
         # 创建MO成功
