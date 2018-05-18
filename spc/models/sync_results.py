@@ -66,7 +66,7 @@ class ResultSync(AbstractModel):
         domain = [('protocol', '=', 'http'), ('equipment_id.category_name', '=', 'MasterPC')]
         connections = self.env['maintenance.equipment.connection'].sudo().search(domain)
         urls = ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_RESULT_API) for connect in connections]
-        for url in urls:
-            self._get_masterpc_results(url)
+        ret = map(lambda url: self._get_masterpc_results(url), urls)
+        return True
 
 
