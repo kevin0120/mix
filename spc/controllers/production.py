@@ -10,7 +10,7 @@ NORMAL_RESULT_FIELDS_READ = ['vin', 'id', 'knr', 'product_id', 'assembly_line_id
 
 
 class SaConfiguration(http.Controller):
-    @http.route(['/api/v1/mrp.productions', '/api/v1/mrp.productions/<string:vin>'], type='http', methods=['GET'], auth='none', cors='*', csrf=False)
+    @http.route(['/api/v1/mrp.productions', '/api/v1/mrp.productions/<string:vin>'], type='http', methods=['GET', 'OPTIONS'], auth='none', cors='*', csrf=False)
     def _get_productions(self, vin=None, **kw):
         domain = []
         if vin:
