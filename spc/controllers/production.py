@@ -92,6 +92,13 @@ class SaConfiguration(http.Controller):
         vals.update(
             {'production_routings': json.dumps(prs)}
         )
+
+        if 'date_planned_start' in vals:
+            _t = parser.parse(vals['date_planned_start']) if vals['date_planned_start'] else None
+            if _t:
+                vals.update({
+                    'date_planned_start': fields.Datetime.to_string((_t - _t.utcoffset()))
+                })
         production = request.env['mrp.production'].sudo().create(vals)
         production.sudo().plan_by_prs()  ### 模拟点击安排,自动生成工单
 
