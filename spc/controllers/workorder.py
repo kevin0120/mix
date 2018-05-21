@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import http, fields
+from odoo import http, fields,api, SUPERUSER_ID
 import json
 from odoo.http import request,Response
 
@@ -11,8 +11,9 @@ DEFAULT_ORDER_BY = 'production_date DESC'
 class ApiMrpWorkorder(http.Controller):
     @http.route(['/api/v1/mrp.workorders/<string:order_id>', '/api/v1/mrp.workorders'], type='http', methods=['GET'], auth='none', cors='*', csrf=False)
     def _get_workorders(self, order_id=None, **kw):
+        env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         if order_id:
-            order = request.env['mrp.workorder'].sudo().search([('id', '=', order_id)])[0]
+            order = env['mrp.workorder'].search([('id', '=', order_id)])[0]
             if not order:
                 body = json.dumps({'msg': 'Can not found workorder'})
                 return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
@@ -34,7 +35,7 @@ class ApiMrpWorkorder(http.Controller):
         domain =[]
         if 'masterpc' in kw:
             masterpc_uuid = kw['masterpc']
-            workcenter_id = request.env['mrp.workcenter'].sudo().search([('masterpc_id.serial_no', '=', masterpc_uuid)], limit=1)
+            workcenter_id = env['mrp.workcenter'].search([('masterpc_id.serial_no', '=', masterpc_uuid)], limit=1)
             if not workcenter_id:
                 body = json.dumps({'msg':'Can not found Workcenter'})
                 return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=405)
@@ -48,7 +49,7 @@ class ApiMrpWorkorder(http.Controller):
         else:
             order_by = DEFAULT_ORDER_BY
 
-        workorder_ids = request.env['mrp.workorder'].sudo().search(domain, limit=limit, order=order_by)
+        workorder_ids = env['mrp.workorder'].search(domain, limit=limit, order=order_by)
         _ret = list()
         for order in workorder_ids:
             _ret.append({

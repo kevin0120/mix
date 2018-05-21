@@ -15,7 +15,7 @@ class SaConfiguration(http.Controller):
         domain = []
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         if vin:
-            production_ids = env['mrp.production'].sudo().search([('vin', '=',vin)])
+            production_ids = env['mrp.production'].search([('vin', '=',vin)])
         else:
             if 'vins' in kw:
                 vins = kw['vins'].split(',')
@@ -24,8 +24,8 @@ class SaConfiguration(http.Controller):
                 limit = int(kw['limit'])
             else:
                 limit = DEFAULT_LIMIT
-            production_ids = env['mrp.production'].sudo().search(domain, limit=limit)
-        _ret = production_ids.sudo().read(fields=NORMAL_RESULT_FIELDS_READ)
+            production_ids = env['mrp.production'].search(domain, limit=limit)
+        _ret = production_ids.read(fields=NORMAL_RESULT_FIELDS_READ)
         if len(_ret) == 0:
             body = json.dumps({'msg': "result not existed"})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
@@ -47,14 +47,14 @@ class SaConfiguration(http.Controller):
         mo_name = u'{0}--V001--{1}-{2}-{3}={4}'.format(
             vals['equipment_name'],vals['factory_name'],vals['year'],vals['pin'],vals['pin_check_code'])
 
-        count = env['mrp.production'].sudo().search_count(
+        count = env['mrp.production'].search_count(
             [('name', '=', mo_name)])
         if count > 0:
             # MO已存在
             body = json.dumps({"msg": "MO name " + mo_name + " already exists"})
             return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=400)
 
-        count = env['mrp.production'].sudo().search_count(
+        count = env['mrp.production'].search_count(
             [('vin', '=', vin)])
         if count > 0:
             # MO已存在
@@ -68,7 +68,7 @@ class SaConfiguration(http.Controller):
             return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
                             status=405)
         vals.pop('model')
-        records = env['product.product'].sudo().search(
+        records = env['product.product'].search(
             [('vehicle_type_code', 'ilike', vechile_code)], limit=1)
 
         if not records:
@@ -86,12 +86,12 @@ class SaConfiguration(http.Controller):
                             status=405)
 
         vals.pop('assembly_line')
-        records = env['mrp.assemblyline'].sudo().search(
+        records = env['mrp.assemblyline'].search(
             ['|', ('name', 'ilike', assemble_line), ('code', 'ilike', assemble_line)], limit=1)
 
         if not records:
             # 找不到对应装配线
-            records = env['mrp.assemblyline'].sudo().create({'name': assemble_line, 'code': assemble_line})
+            records = env['mrp.assemblyline'].create({'name': assemble_line, 'code': assemble_line})
             # Response.status = "400 Bad Request"
             # return {"msg": "Assembly line " + assemble_line + " not found"}
 
@@ -117,8 +117,8 @@ class SaConfiguration(http.Controller):
                 vals.update({
                     'date_planned_start': fields.Datetime.to_string((_t - _t.utcoffset()))
                 })
-        production = env['mrp.production'].sudo().create(vals)
-        production.sudo().plan_by_prs()  ### 模拟点击安排,自动生成工单
+        production = env['mrp.production'].create(vals)
+        production.plan_by_prs()  ### 模拟点击安排,自动生成工单
 
         if not production:
             body = json.dumps({"msg": "create MO failed"})
@@ -127,6 +127,6 @@ class SaConfiguration(http.Controller):
 
 
         # 创建MO成功
-        ret = production.sudo().sudo().read(fields=NORMAL_RESULT_FIELDS_READ)
+        ret = production.read(fields=NORMAL_RESULT_FIELDS_READ)
         body = json.dumps(ret)
         return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=201)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import http,fields
+from odoo import http,fields,api, SUPERUSER_ID
 import json
 from odoo.http import request,Response
 from dateutil import parser
@@ -33,7 +33,8 @@ def _post_aiis_result_package(aiis_url, result):
 class SPC(http.Controller):
     @http.route('/api/v1/operation.results/<int:result_id>', type='json', auth='none', cors='*', csrf=False)
     def _update_results(self, result_id):
-        operation_result_id = request.env['operation.result'].sudo().browse(result_id)
+        env = api.Environment(request.cr, SUPERUSER_ID, request.context)
+        operation_result_id = env['operation.result'].browse(result_id)
         if not operation_result_id:
             body = {'msg': "result %d not existed"% result_id}
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
@@ -52,14 +53,14 @@ class SPC(http.Controller):
                     vals.update({
                         'control_date': fields.Datetime.to_string((_t - _t.utcoffset()))
                     })
-            ret = operation_result_id.sudo().write(vals)
+            ret = operation_result_id.write(vals)
             if not ret:
                 body = {'msg': "update result %d fail" % result_id}
                 headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
                 response = Response(body, status=405, headers=headers)
                 return response
             if operation_result_id.measure_result == 'ok' or (operation_result_id.measure_result == 'nok' and operation_result_id.op_time >= operation_result_id.point_id.times):
-                aiis_url = request.env['ir.config_parameter'].sudo().get_param('aiis.url')
+                aiis_url = env['ir.config_parameter'].get_param('aiis.url')
                 ret = _post_aiis_result_package(aiis_url, operation_result_id)
             body = json.dumps(operation_result_id.read(fields=NORMAL_RESULT_FIELDS_READ)[0])
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
@@ -69,8 +70,9 @@ class SPC(http.Controller):
     @http.route(['/api/v1/operation.results', '/api/v1/operation.results/<int:result_id>'], type='http', auth='none', methods=['get'], cors='*', csrf=False)
     def _get_result_lists(self, result_id=None, **kw):
         domain = []
+        env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         if result_id:
-            quality_checks = request.env['operation.result'].sudo().browse(result_id)
+            quality_checks = env['operation.result'].browse(result_id)
         else:
             if 'date_from' in kw.keys():
                 _t = parser.parse(kw['date_from'])
@@ -82,7 +84,7 @@ class SPC(http.Controller):
                 limit = int(kw['limit'])
             else:
                 limit = DEFAULT_LIMIT
-            quality_checks = request.env['operation.result'].sudo().search(domain, limit=limit)
+            quality_checks = env['operation.result'].search(domain, limit=limit)
         _ret = quality_checks.read(fields=NORMAL_RESULT_FIELDS_READ)
         if len(_ret) == 0:
             body = json.dumps({'msg': "result not existed"})
@@ -94,7 +96,8 @@ class SPC(http.Controller):
 
     @http.route('/api/v1/operation.results/<int:result_id>/curves_add', type='json', methods=['PATCH', 'OPTIONS'], auth='none', cors='*', csrf=False)
     def _append_curves(self, result_id):
-        operation_result_id = request.env['operation.result'].sudo().browse(result_id)
+        env = api.Environment(request.cr, SUPERUSER_ID, request.context)
+        operation_result_id = env['operation.result'].browse(result_id)
         if not operation_result_id:
             body = {'msg': "result %d not existed" % result_id}
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
@@ -106,7 +109,7 @@ class SPC(http.Controller):
             _vals = json.loads(operation_result_id.cur_objects if operation_result_id.cur_objects else json.dumps([]))
             _vals.append(vals)
             write_values['cur_objects'] = json.dumps(_vals)
-            ret = operation_result_id.sudo().write(write_values)
+            ret = operation_result_id.write(write_values)
             if ret:
                 body = json.dumps(operation_result_id.read(fields=NORMAL_RESULT_FIELDS_READ)[0])
                 headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
