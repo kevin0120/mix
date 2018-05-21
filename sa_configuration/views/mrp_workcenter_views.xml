@@ -21,6 +21,7 @@
         <record id="sa_mrp_workcenter_form_view" model="ir.ui.view">
             <field name="name">sa_mrp_workcenter_form_view</field>
             <field name="model">mrp.workcenter</field>
+            <field eval="1" name="priority"/>
             <field name="arch" type="xml">
                 <form string="Work Center">
                     <sheet>
@@ -65,6 +66,7 @@
         <record id="sa_mrp_workcenter_tree_view_inherit" model="ir.ui.view">
             <field name="name">sa_mrp_workcenter_tree_view_inherit</field>
             <field name="model">mrp.workcenter</field>
+            <field eval="1" name="priority"/>
             <field name="arch" type="xml">
                 <tree string="Work Center">
                     <field name="sequence" widget="handle"/>
