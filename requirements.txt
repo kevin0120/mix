@@ -1,14 +1,14 @@
-pyecharts # for visualization
+pyecharts
 
-echarts-themes-pypkg # 主题支持
+echarts-themes-pypkg
 
 pyecharts_snapshot
 
-scipy # for SPC
+scipy
 
 validators
 
-minio # minio 对象存储SDK
+minio
 
 pandas
 
@@ -16,6 +16,6 @@ scipy
 
 numpy
 
-boltons # for LRU caching
+boltons
 
 requests
