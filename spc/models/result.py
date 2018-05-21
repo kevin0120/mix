@@ -88,7 +88,8 @@ class OperationResult(models.HyperModel):
 
     @api.multi
     def sent_aiis(self):
-        results = self.filtered(lambda r: not r.sent)
+        domain = [('sent', '=', False), ('measure_result', 'in', ['ok', 'nok'])]
+        results = self.search(domain)
         if not results:
             return True
         aiis_urls = self.env['ir.config_parameter'].sudo().get_param('aiis.urls').split(',')
