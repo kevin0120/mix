@@ -39,7 +39,11 @@ class SaConfiguration(http.Controller):
         # print(vals)
         # if 'xxx' not in vals or 'model' not in vals:
         #     print vals
-        vin = vals['vin']
+        vin = vals['vin'] if 'vin' in vals else None
+        if not vin:
+            body = json.dumps({"msg": "VIN not exists in parameters"})
+            return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
+                            status=405)
         mo_name = u'{0}--V001--{1}-{2}-{3}={4}'.format(
             vals['equipment_name'],vals['factory_name'],vals['year'],vals['pin'],vals['pin_check_code'])
 
@@ -54,17 +58,20 @@ class SaConfiguration(http.Controller):
             [('vin', '=', vin)])
         if count > 0:
             # MO已存在
-            body = json.dumps({"msg":"MO vin " + vin + " already exists"})
+            body = json.dumps({"msg": "MO vin " + vin + " already exists"})
             return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
                             status=400)
 
-        vechile_code = 'BR24J3'
-        # vals.pop('xxx') if 'xxx' in vals else None
-        # vals.pop('model') if 'model' in vals else None
+        vechile_code = vals['model'] if 'model' in vals else None
+        if not vechile_code:
+            body = json.dumps({"msg": "Vehicle Type code  not exists  in parameters"})
+            return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
+                            status=405)
+        vals.pop('model')
         records = request.env['product.product'].sudo().search(
             [('vehicle_type_code', 'ilike', vechile_code)], limit=1)
 
-        if not records.exists():
+        if not records:
             # 找不到对应车型
             body= json.dumps({"msg":"vechile model " + vechile_code + " not found"})
             return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
@@ -72,7 +79,12 @@ class SaConfiguration(http.Controller):
 
         product_id = records[0]
 
-        assemble_line = vals['assembly_line']
+        assemble_line = vals['assembly_line'] if 'assembly_line' in vals else None
+        if not assemble_line:
+            body = json.dumps({"msg": "assembly_line  not exists  in parameters"})
+            return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
+                            status=405)
+
         vals.pop('assembly_line')
         records = request.env['mrp.assemblyline'].sudo().search(
             ['|', ('name', 'ilike', assemble_line), ('code', 'ilike', assemble_line)], limit=1)
@@ -109,7 +121,6 @@ class SaConfiguration(http.Controller):
         production.sudo().plan_by_prs()  ### 模拟点击安排,自动生成工单
 
         if not production:
-            Response.status = "400 Bad Request"
             body = json.dumps({"msg": "create MO failed"})
             return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
                             status=400)
