@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 from scipy.stats import norm, dweibull, weibull_max, weibull_min, invweibull,exponweib
 from odoo import models, fields, api
+from odoo.exceptions import UserError,ValidationError
 from pyecharts import Overlap, Bar, Line, Grid
 import pyecharts
 from pandas import DataFrame
 import numpy as np
 from odoo.tools import float_round
+
+
+DEFAULT_LIMIT = 5000
+MIN_LIMIT = 1000
 
 class TorAngSPCReport(models.TransientModel):
     _name = "ta.spc.wizard"
@@ -16,13 +21,19 @@ class TorAngSPCReport(models.TransientModel):
     vehicle_id = fields.Many2one('product.product', string='Vehicle Type', domain=[('sa_type', '=', 'vehicle')])
     screw_id = fields.Many2one('product.product', string='Screw Type', domain=[('sa_type', '=', 'screw')])
     assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line')
-    limit = fields.Integer('Query Limit', default=5000)
+    limit = fields.Integer('Query Limit', default=DEFAULT_LIMIT)
     spc_target = fields.Selection([('torque', 'Torque'), ('angle', 'Angle')], string='统计对象', default='torque')
 
     normal_dist = fields.Text(string='Normal Distribution', store=False)
     weibull_dist = fields.Text(string='Weibull Distribution', store=False)
     weibull_dist_method = fields.Selection([('double', 'Double Weibull'),('inverted', 'Inverted'), ('exponential', 'Exponential'),('min', 'Min Weibull'), ('max', 'Max Weibull')], string='韦伯分布统计方法', default='min')
     scatter = fields.Text(string='Scatter', store=False)
+
+
+    @api.constrains('limit')
+    def _constraint_limit(self):
+        if self.limit < MIN_LIMIT:
+            raise UserError(u'查询数量不得小于最小查询数量:{0}'.format(MIN_LIMIT))
 
     def _get_weibull_dist(self, qty, mean=None, std=None, scale=1.0, shape=5.0):
 
@@ -104,7 +115,10 @@ class TorAngSPCReport(models.TransientModel):
         std = 0.0
         result = super(TorAngSPCReport, self).read(fields, load=load)
         if 'normal_dist' in fields or 'weibull_dist' in fields or'scatter' in fields and load == '_classic_read':
-            data = self._get_data()
+            data, length = self._get_data()
+            if not data:
+                self.env.user.notify_warning(u'查询获取结果:{0},请重新定义查询参数或等待新结果数据'.format(length))
+                return result
             mean = np.mean(data)
             std = np.std(data)
         if 'normal_dist' in fields and not data.empty:
@@ -139,9 +153,12 @@ class TorAngSPCReport(models.TransientModel):
             fields = ['measure_degree']
             order = 'measure_degree desc'
         _data = self.env['operation.result'].sudo().search_read(domain=domain, fields=fields, limit=self.limit, order=order)
+        length = len(_data)
+        if length < self.limit and length < 100:
+            return None,length
         df = DataFrame.from_dict(_data)
         df = df['measure_degree'] if self.spc_target == 'angle' else df['measure_torque']
-        return df
+        return df, length
 
     # @api.multi
     # def button_query_vehicle(self):

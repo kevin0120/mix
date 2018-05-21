@@ -6,8 +6,8 @@
             <field name="arch" type="xml">
                 <form string="Scope">
                     <header>
-                        <button string="Query" type="object" name="button_query" />
-                        <button string="Show WaveForm" type="object" name="button_show" class="oe_highlight"/>
+                        <button string="Query" type="object" name="button_query"  class="oe_highlight"/>
+                        <!--<button string="Show WaveForm" type="object" name="button_show" class="oe_highlight"/>-->
                     </header>
                     <sheet>
                         <group string="Query Parameters">

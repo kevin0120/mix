@@ -20,7 +20,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['sa_configuration','web_widget_echarts'],
+    'depends': ['sa_configuration','web_widget_echarts','web_notify'],
 
     # always loaded
     'data': [

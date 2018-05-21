@@ -81,13 +81,19 @@ class Wave(models.TransientModel):
     def read(self, fields=None, load='_classic_read'):
         result = super(Wave, self).read(fields, load=load)
         if 'wave' in fields and load == '_classic_read':
-            datas,ret = self._get_data()
+            _data = self._get_result_data()
+            if len(_data) == 0:
+                self.env.user.notify_warning(u'查询获取结果:0,请重新定义查询参数或等待新结果数据')
+                return result
+            self._create_result_data(_data)
+            datas, ret = self._get_data(_data)
+
             result[0].update({'wave': self._get_echart_data(datas, ret)})
         return result
 
-    def _get_data(self):
+    def _get_data(self, data):
         client, bucket = self._recreate_minio_client()
-        cur_objects = self._get_result_data().mapped('cur_objects')
+        cur_objects = data.mapped('cur_objects')
         objects = []
         cur_objects = map(json.loads, cur_objects)
         objs = list(itertools.chain.from_iterable(cur_objects))
@@ -136,9 +142,7 @@ class Wave(models.TransientModel):
             domain += [('production_id.vin', 'like', self.vin_code)]
         return self.env['operation.result'].sudo().search(domain, limit=self.limit)
 
-    @api.multi
-    def button_query(self):
-        data = self._get_result_data()
+    def _create_result_data(self, data):
         for result in data:
             vals = {
                 'wizard_id': self.id,
@@ -148,4 +152,8 @@ class Wave(models.TransientModel):
                 'consu_product_id': result.consu_product_id.id,
                 'measure_result': result.measure_result
             }
-            self.env['operation.result'].sudo().create(vals)
+            self.env['operation.result.line'].sudo().create(vals)
+
+    @api.multi
+    def button_query(self):
+        pass
