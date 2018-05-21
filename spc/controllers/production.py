@@ -36,6 +36,9 @@ class SaConfiguration(http.Controller):
     @http.route('/api/v1/mrp.productions', type='json', methods=['POST','OPTIONS'], auth='none', cors='*', csrf=False)
     def assemble_mo_create(self):
         vals = request.jsonrequest
+        # print(vals)
+        # if 'xxx' not in vals or 'model' not in vals:
+        #     print vals
         vin = vals['vin']
         mo_name = u'{0}--V001--{1}-{2}-{3}={4}'.format(
             vals['equipment_name'],vals['factory_name'],vals['year'],vals['pin'],vals['pin_check_code'])
@@ -55,8 +58,9 @@ class SaConfiguration(http.Controller):
             return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
                             status=400)
 
-        vechile_code = vals['model']
-        vals.pop('model')
+        vechile_code = 'BR24J3'
+        # vals.pop('xxx') if 'xxx' in vals else None
+        # vals.pop('model') if 'model' in vals else None
         records = request.env['product.product'].sudo().search(
             [('vehicle_type_code', 'ilike', vechile_code)], limit=1)
 

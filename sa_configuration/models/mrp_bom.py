@@ -49,3 +49,44 @@ class MrpBomLine(models.Model):
     _sql_constraints = [
         ('unique_operation_bom_id', 'unique(bom_id,operation_id)', 'Every Bom unique operation'),
     ]
+
+    @api.model
+    def create(self, vals):
+        line = super(MrpBomLine, self).create(vals)
+        vals = {
+            'product_id': line.bom_id.product_id.id,
+            'product_tmpl_id': line.bom_id.product_tmpl_id.id,
+            'operation_id': line.operation_id.id,
+            'picking_type_id':
+                self.env['stock.picking.type'].search_read(domain=[('code', '=', 'mrp_operation')], fields=['id'],
+                                                           limit=1)[0]['id'],
+            'workcenter_id': line.operation_id.workcenter_id.id,
+            'times': line.product_qty,
+            'test_type': 'measure',
+        }
+        self.env['quality.point'].sudo().create(vals)
+        return line
+
+    @api.multi
+    def write(self, vals):
+        res = super(MrpBomLine, self).write(vals)
+        if 'product_qty' in vals:
+            for line in self:
+                rec = self.env['quality.point'].search([('product_id', '=', line.bom_id.product_id.id),
+                                                        ('product_tmpl_id', '=', line.bom_id.product_tmpl_id.id),
+                                                        ('operation_id', '=', line.operation_id.id)])
+                rec.sudo().write({'times': line.product_qty})
+        return res
+
+
+    @api.multi
+    def unlink(self):
+        quality_points = self.env['quality.point']
+        for line in self:
+            rec = self.env['quality.point'].search([('product_id', '=', line.bom_id.product_id.id),
+                                                    ('product_tmpl_id', '=', line.bom_id.product_tmpl_id.id),
+                                                    ('operation_id', '=', line.operation_id.id)])
+            quality_points += rec
+        quality_points.sudo().unlink()
+        ret = super(MrpBomLine, self).unlink()
+        return ret

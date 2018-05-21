@@ -28,7 +28,6 @@
 
     # always loaded
     'data': [
-        # 'security/ir.model.access.csv',
         'views/res_user_views.xml',
         'views/menu_hide_views.xml',
         'views/sa_views_menus.xml',
@@ -46,7 +45,7 @@
         'views/quality_views.xml',
         'data/maintenance_data.xml',
         'data/test_data.xml',
-
+        'security/quality.xml',
     ],
     # only loaded in demonstration mode
 }
