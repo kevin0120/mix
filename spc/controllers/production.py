@@ -37,8 +37,6 @@ class SaConfiguration(http.Controller):
     def assemble_mo_create(self):
         vals = request.jsonrequest
         # print(vals)
-        # if 'xxx' not in vals or 'model' not in vals:
-        #     print vals
         vin = vals['vin'] if 'vin' in vals else None
         if not vin:
             body = json.dumps({"msg": "VIN not exists in parameters"})

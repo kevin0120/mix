@@ -40,6 +40,16 @@ class ProductProduct(models.Model):
         raise UserError(_('Product can not be copy by User!'))
 
     @api.multi
+    def write(self, vals):
+        if 'product_tmpl_id' in vals:
+            for product in self:
+                if product.product_tmpl_id.id == vals['product_tmpl_id']:
+                    continue
+                super(ProductProduct, product).write(vals)
+        return True
+
+
+    @api.multi
     @api.depends('name', 'screw_type_code', 'vehicle_type_code')
     def name_get(self):
         res = []
