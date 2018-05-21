@@ -5,6 +5,7 @@ from odoo.exceptions import ValidationError
 import odoo.addons.decimal_precision as dp
 from datetime import datetime, timedelta, date
 from dateutil.relativedelta import relativedelta
+from odoo.addons.spc.controllers.result import _post_aiis_result_package
 import json
 
 
@@ -82,6 +83,17 @@ class OperationResult(models.HyperModel):
     final_pass = fields.Selection([('pass', 'Final Passed'),
         ('fail', 'Failed')], string='Final Pass', default='fail',
                                 compute='_compute_result_pass', store=True)
+
+    sent = fields.Boolean('Have sent to aiis', default=False)
+
+    @api.multi
+    def sent_aiis(self):
+        results = self.filtered(lambda r: not r.sent)
+        if not results:
+            return True
+        aiis_urls = self.env['ir.config_parameter'].sudo().get_param('aiis.urls').split(',')
+        ret = _post_aiis_result_package(aiis_urls, results)
+        return True
 
     @api.one
     @api.constrains('cur_objects')

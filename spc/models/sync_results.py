@@ -12,6 +12,7 @@ from odoo.models import AbstractModel
 from odoo.tools.translate import _
 from odoo.tools import config
 from odoo.tools import misc
+from requests import ConnectionError
 
 import json
 from dateutil.relativedelta import relativedelta
@@ -22,14 +23,16 @@ _logger = logging.getLogger(__name__)
 MASTER_RESULT_API = '/api/v1/results'
 
 
-
 class ResultSync(AbstractModel):
     _name = "result.sync"
 
     def _get_masterpc_results(self, url):
         headers = {'Content-Type': 'application/json'}
         payloads = {'has_upload': False, 'result': ['ok', 'nok']}
-        ret = requests.get(url=url, params=payloads, headers=headers)
+        try:
+            ret = requests.get(url=url, params=payloads, headers=headers)
+        except ConnectionError:
+            return False
         if ret.status_code != 200:
             _logger.debug('Sync Result fail')
             return
@@ -39,7 +42,9 @@ class ResultSync(AbstractModel):
             if not op_result:
                 _logger.debug('Sync Result can not found result id: %d' % result['id'])
                 continue
-            rid = result.pop('id')
+            rid = result.pop('id') if 'id' in result else None
+            if not rid:
+                continue
             if 'cur_objects' in result:
                 result.update({
                     'cur_objects': json.dumps(result['cur_objects'])
@@ -56,7 +61,10 @@ class ResultSync(AbstractModel):
                 _logger.debug(u'更新结果 写入结果失败 result id: %d' % result['id'])
                 continue
             data = {'has_upload': True}
-            ret = requests.patch(url=url + '/{0}'.format(rid), data=json.dumps(data), headers=headers)
+            try:
+                ret = requests.patch(url=url + '/{0}'.format(rid), data=json.dumps(data), headers=headers)
+            except ConnectionError:
+                continue
             if ret.status_code != 200:
                 _logger.debug(u'更新MasterPC hasupload标志位失败')
             return True

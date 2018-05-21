@@ -4,30 +4,41 @@ import json
 from odoo.http import request,Response
 from dateutil import parser
 import requests as Requests
+from requests import ConnectionError,RequestException
 
 DEFAULT_LIMIT = 80
 
 NORMAL_RESULT_FIELDS_READ = ['workorder_id', 'id', 'product_id', 'consu_product_id', 'op_time', 'measure_result', 'workcenter_id']
 
 
-def _post_aiis_result_package(aiis_url, result):
-    if not aiis_url:
+def _post_aiis_result_package(aiis_urls, results):
+    if not aiis_urls:
         return False
-    data = {
-        'agna': result.production_id.equipment_name,
-        'fname': result.production_id.factory_name,
-        'year': result.production_id.year,
-        'pin': result.production_id.pin,
-        'pin_check': result.production_id.pin_check_code,
-        'assembly_line': result.production_id.assembly_line_id.code,
-        'lnr': result.production_id.lnr,
-        'nut_no': result.consu_product_id.screw_type_code,
-        'date': result.control_date,
-        'result': result.measure_result.upper(),
-        'MI': result.measure_torque,
-        'WI': result.measure_degree
-    }
-    return Requests.put(aiis_url, data=data, headers={'Content-Type': 'application/json'})
+    for url in aiis_urls:
+        for result in results:
+            data = {
+                'agna': result.production_id.equipment_name,
+                'fname': result.production_id.factory_name,
+                'year': result.production_id.year,
+                'pin': result.production_id.pin,
+                'pin_check': result.production_id.pin_check_code,
+                'assembly_line': result.production_id.assembly_line_id.code,
+                'lnr': result.production_id.lnr,
+                'nut_no': result.consu_product_id.screw_type_code,
+                'date': result.control_date,
+                'result': result.measure_result.upper(),
+                'MI': result.measure_torque,
+                'WI': result.measure_degree
+            }
+            try:
+                ret = Requests.put(url, data=json.dumps(data), headers={'Content-Type': 'application/json'})
+                if ret.status_code == 200:
+                    result.write({'sent': True})  ### 更新发送结果
+            except ConnectionError:
+                break  # 退出循环,进入下个aiis发送节点
+            except RequestException as e:
+                print(e)
+    return True
 
 
 class SPC(http.Controller):
@@ -60,8 +71,8 @@ class SPC(http.Controller):
                 response = Response(body, status=405, headers=headers)
                 return response
             if operation_result_id.measure_result == 'ok' or (operation_result_id.measure_result == 'nok' and operation_result_id.op_time >= operation_result_id.point_id.times):
-                aiis_url = env['ir.config_parameter'].get_param('aiis.url')
-                ret = _post_aiis_result_package(aiis_url, operation_result_id)
+                aiis_urls = env['ir.config_parameter'].get_param('aiis.urls').split(',')
+                ret = _post_aiis_result_package(aiis_urls, operation_result_id)
             body = json.dumps(operation_result_id.read(fields=NORMAL_RESULT_FIELDS_READ)[0])
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             response = Response(body, status=200, headers=headers)

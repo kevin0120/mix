@@ -14,7 +14,7 @@
                     <div>
                         <group>
                             <group string="Address">
-                                <field name="aiis_url"/>
+                                <field name="aiis_urls"/>
                             </group>
                         </group>
                     </div>

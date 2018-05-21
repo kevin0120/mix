@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <record id="operation_result_server_action" model="ir.actions.server">
+        <field name="name">Sent to FIS</field>
+        <field name="model_id" ref="spc.model_operation_result"/>
+        <field name="state">code</field>
+        <field name="code">records.sent_aiis()</field>
+    </record>
+
+    <record id="run_operation_result_action" model="ir.values">
+        <field name="model_id" ref="spc.model_operation_result" />
+        <field name="name">Sent to FIS</field>
+        <field name="key2">client_action_multi</field>
+        <field name="key">action</field>
+        <field name="model">operation.result</field>
+        <field name="value" eval="'ir.actions.server,' + str(ref('operation_result_server_action'))" />
+    </record>
+
     <!-- OPERATION.RESULT -->
    <record id="operation_result_view_form" model="ir.ui.view">
         <field name="name">operation_result_view_form</field>
@@ -8,10 +24,12 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="do_pass" type="object" class="btn-primary" attrs="{'invisible': [('quality_state', '!=', 'none')]}" string="Pass"/>
-                    <button name="do_pass" type="object" attrs="{'invisible': [('quality_state', '!=', 'fail')]}" groups="quality.group_quality_manager" string="Pass"/>
-                    <button name="do_fail" type="object" class="btn-primary" attrs="{'invisible': [('quality_state', '!=', 'none')]}" string="Fail"/>
-                    <button name="do_fail" type="object" attrs="{'invisible': [('quality_state', '!=', 'pass')]}" groups="quality.group_quality_manager" string="Fail"/>
+                    <field name="sent" invisible="1" />
+                    <button name="do_pass" type="object" class="btn-primary" attrs="{'invisible': [('quality_state', '!=', 'none')]}" string="Pass" groups="base.group_system"/>
+                    <button name="do_pass" type="object" attrs="{'invisible': [('quality_state', '!=', 'fail')]}" groups="base.group_system" string="Pass"/>
+                    <button name="do_fail" type="object" class="btn-primary" attrs="{'invisible': [('quality_state', '!=', 'none')]}" string="Fail" groups="base.group_system"/>
+                    <button name="do_fail" type="object" attrs="{'invisible': [('quality_state', '!=', 'pass')]}" groups="base.group_system" string="Fail"/>
+                    <button name="sent_aiis" type="object"  attrs="{'invisible': [('sent', '=', True)]}" class="oe_highlight" groups="base.group_no_one" string="Send to AIIS"/>
                     <field name="quality_state" widget="statusbar"/>
                 </header>
                 <sheet>
@@ -106,6 +124,7 @@
                 <field name="measure_t_don" />
                 <field name="measure_result" />
                 <field name="quality_state"/>
+                <field name="sent" groups="base.group_no_one"/>
             </tree>
         </field>
     </record>
