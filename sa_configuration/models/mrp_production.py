@@ -89,19 +89,19 @@ class MrpProduction(models.Model):
 
         for operation in need_plan_prs:
             # create workorder
-            cycle_number = math.ceil(bom_qty / operation.workcenter_id.capacity)  # TODO: float_round UP
-            duration_expected = (operation.workcenter_id.time_start +
-                                 operation.workcenter_id.time_stop +
-                                 cycle_number * operation.time_cycle * 100.0 / operation.workcenter_id.time_efficiency)
+            # cycle_number = math.ceil(bom_qty / operation.workcenter_id.capacity)  # TODO: float_round UP
+            # duration_expected = (operation.workcenter_id.time_start +
+            #                      operation.workcenter_id.time_stop +
+            #                      cycle_number * operation.time_cycle * 100.0 / operation.workcenter_id.time_efficiency)
             workorder = workorders.create({
                 'name': operation.name,
                 'production_id': self.id,
                 'workcenter_id': operation.workcenter_id.id,
                 'operation_id': operation.id,
-                'duration_expected': duration_expected,
+                # 'duration_expected': duration_expected,
                 'state': len(workorders) == 0 and 'ready' or 'pending',
-                'consu_product_id': bom.bom_line_ids.filtered(lambda r: r.operation_id == operation).product_id.id or None,
-                'consu_product_qty': bom.bom_line_ids.filtered(lambda r: r.operation_id == operation).product_qty or None,
+                'consu_product_id': bom.bom_line_ids.filtered(lambda r: r.operation_id.id == operation.id).product_id.id or None,
+                'consu_product_qty': bom.bom_line_ids.filtered(lambda r: r.operation_id.id == operation.id).product_qty or None,
                 'qty_producing': quantity,
                 'capacity': operation.workcenter_id.capacity,
             })
@@ -110,15 +110,15 @@ class MrpProduction(models.Model):
             workorders += workorder
 
             # assign moves; last operation receive all unassigned moves (which case ?)
-            moves_raw = self.move_raw_ids.filtered(lambda move: move.operation_id == operation)
-            if len(workorders) == len(bom.routing_id.operation_ids):
-                moves_raw |= self.move_raw_ids.filtered(lambda move: not move.operation_id)
-            moves_finished = self.move_finished_ids.filtered(
-                lambda move: move.operation_id == operation)  # TODO: code does nothing, unless maybe by_products?
-            moves_raw.mapped('move_lot_ids').write({'workorder_id': workorder.id})
-            (moves_finished + moves_raw).write({'workorder_id': workorder.id})
-
-            workorder._generate_lot_ids()
+            # moves_raw = self.move_raw_ids.filtered(lambda move: move.operation_id == operation)
+            # if len(workorders) == len(bom.routing_id.operation_ids):
+            #     moves_raw |= self.move_raw_ids.filtered(lambda move: not move.operation_id)
+            # moves_finished = self.move_finished_ids.filtered(
+            #     lambda move: move.operation_id == operation)  # TODO: code does nothing, unless maybe by_products?
+            # moves_raw.mapped('move_lot_ids').write({'workorder_id': workorder.id})
+            # (moves_finished + moves_raw).write({'workorder_id': workorder.id})
+            #
+            # workorder._generate_lot_ids()
         return workorders
 
     def _workorders_create(self, bom, bom_data):

@@ -22,18 +22,18 @@ class MrpWorkorder(models.Model):
     def _create_checks(self):
         for wo in self:
             production = wo.production_id
-            points = self.env['quality.point'].search([('workcenter_id', '=', wo.workcenter_id.id),
+            points = self.env['quality.point'].search_read([('workcenter_id', '=', wo.workcenter_id.id),
                                                        ('operation_id','=', wo.operation_id.id),  # 定位到某个作业的质量控制点
                                                        ('picking_type_id', '=', production.picking_type_id.id),
                                                        '|', ('product_id', '=', production.product_id.id),
-                                                       '&', ('product_id', '=', False), ('product_tmpl_id', '=', production.product_id.product_tmpl_id.id)])
+                                                       '&', ('product_id', '=', False), ('product_tmpl_id', '=', production.product_id.product_tmpl_id.id)], fields=['id', 'times'])
             for point in points:
                 vals = {'workorder_id': wo.id,
                          'production_id': production.id,
-                         'point_id': point.id,
+                         'point_id': point['id'],
                          'product_id': production.product_id.id,
                          'consu_product_id': wo.consu_product_id.id,
                          'time': production.date_planned_start or fields.Datetime.now(),
                          'control_date': fields.Datetime.now()}
-                if point.check_execute_now():
-                    map(lambda i: self.env['operation.result'].sudo().create(vals), range(point.times))
+                # if point.check_execute_now():
+                map(lambda i: self.env['operation.result'].sudo().create(vals), range(point['times']))
