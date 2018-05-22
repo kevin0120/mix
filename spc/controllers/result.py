@@ -71,7 +71,7 @@ class SPC(http.Controller):
                 response = Response(body, status=405, headers=headers)
                 return response
             if operation_result_id.measure_result == 'ok' or (operation_result_id.measure_result == 'nok' and operation_result_id.op_time >= operation_result_id.point_id.times):
-                _aiis_urls = self.env['ir.config_parameter'].sudo().get_param('aiis.urls')
+                _aiis_urls = env['ir.config_parameter'].sudo().get_param('aiis.urls')
                 if _aiis_urls:
                     aiis_urls = _aiis_urls.split(',')
                     ret = _post_aiis_result_package(aiis_urls, operation_result_id)
