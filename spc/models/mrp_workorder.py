@@ -11,6 +11,13 @@ class MrpWorkorder(models.Model):
 
     result_ids = fields.One2many('operation.result', 'workorder_id',string='Operation Results')
 
+    sent = fields.Boolean('Have sent to aiis', default=False)
+
+    @api.model
+    def create(self, vals):
+        order = super(MrpWorkorder, self).create(vals)
+        return order
+
     @api.multi
     def _create_checks(self):
         for wo in self:

@@ -1,0 +1,62 @@
+# -*- coding: utf-8 -*-
+
+import logging
+
+from odoo import api, release, SUPERUSER_ID, fields
+from odoo.exceptions import UserError
+from odoo.models import AbstractModel
+import requests as Requests
+from requests import ConnectionError, RequestException
+import json
+
+MASTER_WROKORDERS_API = '/api/v1/workorders'
+headers = {'Content-Type': 'application/json'}
+_logger = logging.getLogger(__name__)
+
+
+class PushWorkorder(AbstractModel):
+    _name = "workorder.push"
+
+    def _post_workorder_to_masterpc(self, url, orders):
+        r = list()
+        for workorder in orders:
+            vals = {
+                'id': workorder.id,
+                'hmi': {'id': workorder.workcenter_id.hmi_id.id, 'uuid': workorder.workcenter_id.hmi_id.serial_no},
+                'worksheet': workorder.worksheet_img,
+                'pset': workorder.operation_id.program_id.code,
+                'nut_total': workorder.consu_product_qty,
+                'vin': workorder.production_id.vin,
+                'knr': workorder.production_id.knr,
+                'result_ids': workorder.result_ids.ids,
+                'status': workorder.state  # pending, ready, process, done, cancel
+            }
+            r.append(vals)
+        try:
+            ret = Requests.post(url, data=json.dumps(r), headers=headers)
+            if ret.status_code == 201:
+                orders.write({'sent': True})
+                return True
+        except ConnectionError:
+            _logger.debug(u'masterpc:{0} 链接失败'.format(url))
+            return False
+        return True
+
+
+    @api.multi
+    def workerorder_push(self):
+        domain = [('sent', '=', False)]
+        orders = self.env['mrp.workorder'].sudo().search(domain)
+        masterpcs = orders.mapped('workcenter_id.masterpc_id')
+        for master in masterpcs:
+            need_send_orders = orders.filtered(lambda r: r.workcenter_id.masterpc_id.id == master.id)
+            if not need_send_orders:
+                continue
+            connections = master.connection_ids.filtered(lambda r: r.protocol == 'http')
+            if not connections:
+                continue
+            url = ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_WROKORDERS_API) for connect in connections][0]
+            ret = self._post_workorder_to_masterpc(url, need_send_orders)
+        return True
+
+

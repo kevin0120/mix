@@ -24,6 +24,14 @@
             <field name="category_id" ref="equipment_MasterPC"/>
         </record>
 
+        <record id="connections_0" model="maintenance.equipment.connection">
+            <field name="name">测试链接1</field>
+            <field name="protocol">http</field>
+            <field name="ip">127.0.0.1</field>
+            <field name="port">4444</field>
+            <field name="equipment_id" ref="masterpc_0"/>
+        </record>
+
         <record id="controller_0" model="maintenance.equipment">
             <field name="name">测试控制器1</field>
             <field name="serial_no">0001</field>
@@ -60,6 +68,14 @@
             <field name="name">测试masterpc2</field>
             <field name="serial_no">1QAZ2wsx</field>
             <field name="category_id" ref="equipment_MasterPC"/>
+        </record>
+
+        <record id="connections_1" model="maintenance.equipment.connection">
+            <field name="name">测试链接2</field>
+            <field name="protocol">http</field>
+            <field name="ip">127.0.0.1</field>
+            <field name="port">5555</field>
+            <field name="equipment_id" ref="masterpc_1"/>
         </record>
 
         <record id="controller_2" model="maintenance.equipment">

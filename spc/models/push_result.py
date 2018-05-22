@@ -47,7 +47,7 @@ class PushResult(AbstractModel):
 
     @api.multi
     def result_push(self):
-        domain = [('sent', '=', False), ('measure_result','in', ['ok','nok'])]
+        domain = [('sent', '=', False), ('measure_result', 'in', ['ok', 'nok'])]
         results = self.env['operation.result'].sudo().search(domain)
         if not results:
             return True

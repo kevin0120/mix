@@ -54,7 +54,7 @@ class ApiMrpWorkorder(http.Controller):
         for order in workorder_ids:
             _ret.append({
                 'id': order.id,
-                'hmi': {'id':workcenter_id.hmi_id.id, 'uuid': workcenter_id.hmi_id.serial_no},
+                'hmi': {'id': workcenter_id.hmi_id.id, 'uuid': workcenter_id.hmi_id.serial_no},
                 'worksheet': order.worksheet_img,
                 'pset': order.operation_id.program_id.code,
                 'nut_total': order.consu_product_qty,
