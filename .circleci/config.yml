@@ -18,6 +18,6 @@ jobs:
             ls -al ./
             go get -u github.com/sparrc/gdm
             /go/bin/gdm restore
-            go build -o ./bin/rush ./cmd/rush/rush.go
+            go build -o ./bin/rush ./rush.go
             docker login -u $ALIYUN_DOCKER_USER -p $ALIYUN_DOCKER_PWD registry.cn-hangzhou.aliyuncs.com
             sh ./build_docker.sh
