@@ -8,3 +8,4 @@ from . import mrp_routing
 from . import mrp_bom
 from . import maintenance
 from . import quality
+from . import point

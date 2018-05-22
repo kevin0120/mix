@@ -123,7 +123,7 @@
                 <field name="measure_degree"/>
                 <field name="measure_t_don" />
                 <field name="measure_result" />
-                <field name="quality_state"/>
+                <!--<field name="quality_state"/>-->
                 <field name="sent" groups="base.group_no_one"/>
             </tree>
         </field>
@@ -174,6 +174,8 @@
                 <separator/>
                 <filter string="Data Lacking" domain="[('lacking', '=', 'lack')]" name="lacking"/>
                 <filter string="Date Using" domain="[('lacking', '=', 'normal')]" name="using"/>
+                <separator/>
+                <filter string="Not send" domain="[('sent', '=', False)]" name="sent"/>
                 <separator/>
                 <filter name="today" string="Today" domain="[('control_date', '&gt;=', datetime.datetime.now().replace(hour=0, minute=0, second=0)),('control_date', '&lt;=', datetime.datetime.now().replace(hour=23, minute=59, second=59))]" />
                 <filter name="month" string="Current Month" domain="[('control_date','&gt;=', context_today().strftime('%Y-%m-1')),('control_date','&lt;', (context_today() + relativedelta(months=1)).strftime('%Y-%m-1') )]"/>

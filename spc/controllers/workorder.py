@@ -18,10 +18,14 @@ class ApiMrpWorkorder(http.Controller):
                 body = json.dumps({'msg': 'Can not found workorder'})
                 return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
                                 status=404)
+            points = env['point.point'].search_read(
+                domain=[('res_model', '=', 'mrp.routing.workcenter'), ('res_id', '=', order.operation_id.id),
+                        ('res_field', '=', 'worksheet_img')],
+                fields=['x_offset', 'y_offset'])
             ret = {
                 'id': order.id,
                 'hmi': {'id': order.workcenter_id.hmi_id.id, 'uuid': order.workcenter_id.hmi_id.serial_no},
-                'worksheet': order.worksheet_img,
+                'worksheet': {'content': order.worksheet_img, "points": points},
                 'pset': order.operation_id.program_id.code,
                 'nut_total': order.consu_product_qty,
                 'vin': order.production_id.vin,
@@ -52,10 +56,13 @@ class ApiMrpWorkorder(http.Controller):
         workorder_ids = env['mrp.workorder'].search(domain, limit=limit, order=order_by)
         _ret = list()
         for order in workorder_ids:
+            points = env['point.point'].search_read(
+                domain=[('res_model', '=', 'mrp.routing.workcenter'), ('res_id','=', order.operation_id.id), ('res_field', '=', 'worksheet_img')],
+                fields=['x_offset', 'y_offset'])
             _ret.append({
                 'id': order.id,
                 'hmi': {'id': workcenter_id.hmi_id.id, 'uuid': workcenter_id.hmi_id.serial_no},
-                'worksheet': order.worksheet_img,
+                'worksheet': {'content': order.worksheet_img, "points": points},
                 'pset': order.operation_id.program_id.code,
                 'nut_total': order.consu_product_qty,
                 'vin': order.production_id.vin,

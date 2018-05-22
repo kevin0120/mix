@@ -116,14 +116,14 @@ class TorAngSPCReport(models.TransientModel):
         result = super(TorAngSPCReport, self).read(fields, load=load)
         if 'normal_dist' in fields or 'weibull_dist' in fields or'scatter' in fields and load == '_classic_read':
             data, length = self._get_data()
-            if not data:
+            if data.empty:
                 self.env.user.notify_warning(u'查询获取结果:{0},请重新定义查询参数或等待新结果数据'.format(length))
                 return result
             mean = np.mean(data)
             std = np.std(data)
         if 'normal_dist' in fields and not data.empty:
             result[0].update({'normal_dist': self._get_normal_dist(mean=mean,std=std)})
-        if 'weibull_dist' in fields and not data.empty :
+        if 'weibull_dist' in fields and not data.empty:
             scale_parameter = self.env['ir.config_parameter'].sudo().get_param('weibull.scale', default=1.0)
             shape_parameter = self.env['ir.config_parameter'].sudo().get_param('weibull.shape', default=5.0)
             result[0].update({'weibull_dist': self._get_weibull_dist(len(data), mean=mean, std=std,
@@ -152,10 +152,10 @@ class TorAngSPCReport(models.TransientModel):
         if self.spc_target == 'angle':
             fields = ['measure_degree']
             order = 'measure_degree desc'
-        _data = self.env['operation.result'].sudo().search_read(domain=domain, fields=fields, limit=self.limit, order=order)
+        _data = self.env['operation.result'].sudo().search_read(domain=domain, fields=fields, limit=self.limit)
         length = len(_data)
         if length < self.limit and length < 100:
-            return None,length
+            return DataFrame(),length
         df = DataFrame.from_dict(_data)
         df = df['measure_degree'] if self.spc_target == 'angle' else df['measure_torque']
         return df, length

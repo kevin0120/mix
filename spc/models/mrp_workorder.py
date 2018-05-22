@@ -28,12 +28,12 @@ class MrpWorkorder(models.Model):
                                                        '|', ('product_id', '=', production.product_id.id),
                                                        '&', ('product_id', '=', False), ('product_tmpl_id', '=', production.product_id.product_tmpl_id.id)])
             for point in points:
+                vals = {'workorder_id': wo.id,
+                         'production_id': production.id,
+                         'point_id': point.id,
+                         'product_id': production.product_id.id,
+                         'consu_product_id': wo.consu_product_id.id,
+                         'time': production.date_planned_start or fields.Datetime.now(),
+                         'control_date': fields.Datetime.now()}
                 if point.check_execute_now():
-                    for i in range(point.times):
-                        self.env['operation.result'].create({'workorder_id': wo.id,
-                                                             'production_id': production.id,
-                                                             'point_id': point.id,
-                                                             'product_id': production.product_id.id,
-                                                             'consu_product_id': wo.consu_product_id.id,
-                                                             'time': production.date_planned_start or fields.Datetime.now(),
-                                                             'control_date': fields.Datetime.now()})
+                    map(lambda i: self.env['operation.result'].sudo().create(vals), range(point.times))

@@ -981,6 +981,34 @@ api_data = {
         }
       }
     },
+    "point": {
+      "type": "object",
+      "properties": {
+        "x_offset": {
+          "type": "integer",
+          "description": "左偏移"
+        },
+        "y_offset": {
+          "type": "integer",
+          "description": "上偏移"
+        }
+      }
+    },
+    "image": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "description": "图片内容"
+        },
+        "points": {
+          "items": {
+            "$ref": "#/definitions/point"
+          },
+          "type": "array"
+        }
+      }
+    },
     "WorkOrder": {
       "type": "object",
       "properties": {
@@ -1013,7 +1041,7 @@ api_data = {
           "type": "array"
         },
         "worksheet": {
-          "type": "string",
+          "$ref": "#/definitions/image",
           "description": "作业图片"
         },
         "knr": {

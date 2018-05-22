@@ -13,6 +13,8 @@ MASTER_WROKORDERS_API = '/api/v1/workorders'
 headers = {'Content-Type': 'application/json'}
 _logger = logging.getLogger(__name__)
 
+ORDER_LIMIT = 80
+
 
 class PushWorkorder(AbstractModel):
     _name = "workorder.push"
@@ -20,10 +22,14 @@ class PushWorkorder(AbstractModel):
     def _post_workorder_to_masterpc(self, url, orders):
         r = list()
         for workorder in orders:
+            points = self.env['point.point'].sudo().search_read(
+                domain=[('res_model', '=', 'mrp.routing.workcenter'), ('res_id', '=', workorder.operation_id.id),
+                        ('res_field', '=', 'worksheet_img')],
+                fields=['x_offset', 'y_offset'])
             vals = {
                 'id': workorder.id,
                 'hmi': {'id': workorder.workcenter_id.hmi_id.id, 'uuid': workorder.workcenter_id.hmi_id.serial_no},
-                'worksheet': workorder.worksheet_img,
+                'worksheet': {'content': workorder.worksheet_img, "points": points},
                 'pset': workorder.operation_id.program_id.code,
                 'nut_total': workorder.consu_product_qty,
                 'vin': workorder.production_id.vin,
@@ -46,7 +52,7 @@ class PushWorkorder(AbstractModel):
     @api.multi
     def workerorder_push(self):
         domain = [('sent', '=', False)]
-        orders = self.env['mrp.workorder'].sudo().search(domain)
+        orders = self.env['mrp.workorder'].sudo().search(domain, limit=ORDER_LIMIT)
         masterpcs = orders.mapped('workcenter_id.masterpc_id')
         for master in masterpcs:
             need_send_orders = orders.filtered(lambda r: r.workcenter_id.masterpc_id.id == master.id)

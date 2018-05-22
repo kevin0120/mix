@@ -72,7 +72,7 @@ class SPC(http.Controller):
                 return response
             if operation_result_id.measure_result == 'ok' or (operation_result_id.measure_result == 'nok' and operation_result_id.op_time >= operation_result_id.point_id.times):
                 aiis_urls = env['ir.config_parameter'].get_param('aiis.urls').split(',')
-                ret = _post_aiis_result_package(aiis_urls, operation_result_id)
+                # ret = _post_aiis_result_package(aiis_urls, operation_result_id)
             body = json.dumps(operation_result_id.read(fields=NORMAL_RESULT_FIELDS_READ)[0])
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             response = Response(body, status=200, headers=headers)
