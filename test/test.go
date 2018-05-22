@@ -41,7 +41,7 @@ func create_mo(odoo_url string, mo payload.ODOOMO, odoo_result payload.ODOOResul
 	mo_name := fmt.Sprintf("%s--V001--%s-%d-%d=%d", mo.Equipment_name, mo.Factory_name, mo.Year, mo.Pin, mo.Pin_check_code)
 
 
-	created, t, err := g_odoo.CreateMO(mo)
+	_, t, err := g_odoo.CreateMO(mo)
 
 
 	if err != nil {
@@ -52,9 +52,9 @@ func create_mo(odoo_url string, mo payload.ODOOMO, odoo_result payload.ODOOResul
 		go tracefile(t, mtx)
 
 		// 推送结果
-		if len(created)  > 0 {
-			go put_result(created[0], odoo_result, time_mtx)
-		}
+		//if len(created)  > 0 {
+		//	go put_result(created[0], odoo_result, time_mtx)
+		//}
 
 
 		result := fmt.Sprintf("创建工单:%s 用时:%s 结果:%s \n", mo_name, t, "ok")
@@ -190,8 +190,8 @@ func main() {
 
 	fmt.Printf("start\n")
 
-	//odoo := flag.String("odoo", "http://10.1.1.31", "--odoo")
-	odoo := flag.String("odoo", "http://127.0.0.1:8069", "--odoo")
+	odoo := flag.String("odoo", "http://10.1.1.31", "--odoo")
+	//odoo := flag.String("odoo", "http://127.0.0.1:8069", "--odoo")
 	task_num := flag.Int("task", 4, "--task")
 	req_itv := flag.Int("inteval", 100, "--inteval")
 	flag.Parse()

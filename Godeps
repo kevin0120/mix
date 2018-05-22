@@ -6,3 +6,11 @@ gopkg.in/yaml.v2 5420a8b6744d3b0345ab293f6fcba19c978f1183
 github.com/lib/pq d34b9ff171c21ad295489235aec8b6626023cd04
 github.com/go-xorm/xorm ab17aa22037beed8b99422a95d8a9419066caf7c
 github.com/linshenqi/TightningSys/desoutter/cvi3 738ba60410a62140a523fc0b05e0e7541d7a9887
+github.com/go-ini/ini bda519ae5f4cbc60d391ff8610711627a08b86ae
+github.com/go-xorm/builder bad0a612f0d6277b953910822ab5dfb30dd18237
+github.com/go-xorm/core c10e21e7e1cec20e09398f2dfae385e58c8df555
+github.com/hashicorp/go-version 23480c0665776210b5fbbac6eaaee40e3e6a96b7
+github.com/kataras/golog 03be101463868edc5a81f094fc68a5f6c1b5503a
+github.com/mitchellh/go-homedir b8bc1bf767474819792c23f32d8286a45736f1c6
+golang.org/x/crypto/argon2 ae8bce0030810cf999bb2b9868ae5c7c58e6343b
+golang.org/x/net/http/httpguts f73e4c9ed3b7ebdd5f699a16a880c2b1994e50dd
