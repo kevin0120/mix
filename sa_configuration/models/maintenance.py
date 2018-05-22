@@ -4,7 +4,11 @@ from odoo import models, fields,api, _
 from odoo.exceptions import ValidationError
 from odoo.osv import expression
 from validators import ip_address, ValidationFailure
+from odoo.exceptions import UserError
+from odoo.tools import html2text, ustr
+import requests as Requests
 
+HEALTHZ_URL = 'api/v1/healthz'
 
 class EquipmentConnection(models.Model):
     _name = 'maintenance.equipment.connection'
@@ -21,6 +25,19 @@ class EquipmentConnection(models.Model):
     unitid = fields.Integer(string='Unit ID', help='Modbus need this ID for identification',default=0)
     protocol = fields.Selection([('modbustcp','ModbusTCP'),('modbusrtu', 'ModbusRTU'),('http',"HTTP"),
                                  ('rawtcp','TCP'),('rawudp','UDP')], string='Protocol')
+
+    @api.multi
+    def button_check_healthz(self):
+        for connection in self:
+            if connection.protocol != 'http':
+                continue
+            try:
+                url = u'http://{0}:{1}/{2}'.format(connection.ip, connection.port, HEALTHZ_URL)
+                ret = Requests.get(url, headers={'Content-Type': 'application/json'})
+                if ret.status_code == 204:
+                    raise UserError(_("Connection Test Succeeded! Everything seems properly set up!"))
+            except Exception as e:
+                raise UserError(_("Connection Test Failed! Here is what we got instead:\n %s") % ustr(e))
 
     @api.one
     @api.constrains('ip', 'port')
