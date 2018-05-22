@@ -323,6 +323,11 @@ func (apiserver *APIServer) patchResult(ctx iris.Context) {
 	}
 }
 
+func (apiserver *APIServer) getHealthz(ctx iris.Context) {
+	ctx.StatusCode(iris.StatusNoContent)
+	return
+}
+
 func (apiserver *APIServer) getStatus(ctx iris.Context) {
 	// 返回控制器状态
 
@@ -466,6 +471,7 @@ func (apiserver *APIServer) StartService() error {
 		v1.Get("/results", apiserver.getResults)
 		v1.Patch("/results/{id:int}", apiserver.patchResult)
 		v1.Get("/status", apiserver.getStatus)
+		v1.Get("/healthz", apiserver.getHealthz)
 		v1.Post("/workorders", apiserver.createWorkorders)
 		app.Get("/ws", ws.Handler())
 	}

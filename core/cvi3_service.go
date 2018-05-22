@@ -16,7 +16,7 @@ import (
 type ControllerConf struct {
 	SN string	`yaml:"sn"`
 	IP string	`yaml:"ip"`
-	Port int	`yaml:"port"`
+	Port uint	`yaml:"port"`
 }
 
 type CVI3Conf struct {

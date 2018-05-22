@@ -190,8 +190,8 @@ func main() {
 
 	fmt.Printf("start\n")
 
-	odoo := flag.String("odoo", "http://10.1.1.31", "--odoo")
-	//odoo := flag.String("odoo", "http://127.0.0.1:8069", "--odoo")
+	//odoo := flag.String("odoo", "http://10.1.1.31", "--odoo")
+	odoo := flag.String("odoo", "http://127.0.0.1:8069", "--odoo")
 	task_num := flag.Int("task", 4, "--task")
 	req_itv := flag.Int("inteval", 100, "--inteval")
 	flag.Parse()
