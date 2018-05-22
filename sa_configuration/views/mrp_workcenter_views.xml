@@ -50,8 +50,10 @@
                                     <group string="Equipments">
                                         <field name="controller_id_domain" invisible="1" />
                                         <field name="masterpc_id" string="MasterPC" required="1"  domain="[('category_name','=','MasterPC')]"/>
+                                        <field name="controller_id" string="Controller" required="1" domain="controller_id_domain" attrs="{'invisible': [('masterpc_id','=',False)]}"/>/>
                                         <field name="hmi_id" string="HMI" required="1" domain="[('category_name','=','HMI')]"/>
-                                        <field name="controller_id" string="Controller" required="1" domain="controller_id_domain"/>
+                                        <field name="io_id" string="Remote IO" required="1" domain="[('category_name','=','IO')]"/>
+                                        <field name="rfid_id" string="RFID" required="1" domain="[('category_name','=','RFID')]"/>
                                     </group>
                                 </group>
                                 <separator string="Description"/>

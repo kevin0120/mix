@@ -486,6 +486,45 @@ api_data = {
         "description": "获取某一用户信息"
       }
     },
+    "/hmi.connections/{serial_no}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "连接信息清单",
+            "schema": {
+              "$ref": "#/definitions/hmi_connections"
+            }
+          },
+          "404": {
+            "description": "uuid not found"
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "parameters": [
+          {
+            "required": True,
+            "type": "string",
+            "description": "HMI唯一标示",
+            "in": "path",
+            "name": "serial_no",
+            "default": 1122334455667788
+          }
+        ],
+        "tags": [
+          "HMI"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "查询HMI连接信息",
+        "consumes": [
+          "application/json"
+        ],
+        "description": "获取某一用户信息"
+      }
+    },
     "/mrp.workorders": {
       "get": {
         "description": "获取某一用户信息",
@@ -701,14 +740,35 @@ api_data = {
         }
       }
     },
+    "EquipConnection": {
+      "type": "object",
+      "properties": {
+        "serial_no": {
+          "type": "string"
+        },
+        "connection": {
+          "type": "string"
+        }
+      }
+    },
+    "hmi_connections": {
+      "type": "object",
+      "properties": {
+        "masterpc": {
+          "$ref": "#/definitions/EquipConnection"
+        },
+        "controller": {
+          "$ref": "#/definitions/EquipConnection"
+        },
+        "io": {
+          "$ref": "#/definitions/EquipConnection"
+        },
+        "rfid": {
+          "$ref": "#/definitions/EquipConnection"
+        }
+      }
+    },
     "Result": {
-      "xml": {
-        "name": "Pet"
-      },
-      "required": [
-        "name",
-        "photoUrls"
-      ],
       "type": "object",
       "properties": {
         "category": {

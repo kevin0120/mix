@@ -24,5 +24,10 @@
         <!--<field name="alias_id" ref="maintenance.mail_alias_equipment"/>-->
     </record>
 
+    <record id="equipment_RFID" model="maintenance.equipment.category">
+        <field name="name">RFID</field>
+        <!--<field name="alias_id" ref="maintenance.mail_alias_equipment"/>-->
+    </record>
+
 </data>
 </odoo>

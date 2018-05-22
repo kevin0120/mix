@@ -46,6 +46,30 @@
             <field name="category_id" ref="equipment_screw_controller"/>
         </record>
 
+        <record id="io_0" model="maintenance.equipment">
+            <field name="name">测试IO0</field>
+            <field name="serial_no">1234567</field>
+            <field name="category_id" ref="equipment_IO"/>
+        </record>
+
+        <record id="io_1" model="maintenance.equipment">
+            <field name="name">测试IO1</field>
+            <field name="serial_no">74678963</field>
+            <field name="category_id" ref="equipment_IO"/>
+        </record>
+
+        <record id="rfid_0" model="maintenance.equipment">
+            <field name="name">测试RFID0</field>
+            <field name="serial_no">975368</field>
+            <field name="category_id" ref="equipment_RFID"/>
+        </record>
+
+        <record id="rfid_1" model="maintenance.equipment">
+            <field name="name">测试RFID1</field>
+            <field name="serial_no">126fe645</field>
+            <field name="category_id" ref="equipment_RFID"/>
+        </record>
+
         <record id="mrp_workcenter_0" model="mrp.workcenter">
             <field name="name">测试工位1</field>
             <field name="capacity">5</field>
@@ -55,6 +79,8 @@
             <field name="worksegment_id" ref="work_segment_1" />
             <field name="hmi_id" ref="hmi_0" />
             <field name="masterpc_id" ref="masterpc_0" />
+            <field name="io_id" ref="io_0" />
+            <field name="rfid_id" ref="rfid_0" />
             <field name="controller_id" ref="controller_0" />
         </record>
 
@@ -100,6 +126,8 @@
             <field name="time_efficiency">87</field>
             <field name="worksegment_id" ref="work_segment_1" />
             <field name="hmi_id" ref="hmi_1" />
+            <field name="io_id" ref="io_1" />
+            <field name="rfid_id" ref="rfid_1" />
             <field name="masterpc_id" ref="masterpc_1" />
             <field name="controller_id" ref="controller_3" />
         </record>

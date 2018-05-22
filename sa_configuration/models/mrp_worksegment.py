@@ -82,6 +82,10 @@ class MrpWorkCenter(models.Model):
     hmi_id = fields.Many2one('maintenance.equipment',  string='HMI', copy=False)
     masterpc_id = fields.Many2one('maintenance.equipment',  string='MasterPC', copy=False)
 
+    io_id = fields.Many2one('maintenance.equipment',  string='Remote IO', copy=False)
+
+    rfid_id = fields.Many2one('maintenance.equipment',  string='RFID', copy=False)
+
     controller_id = fields.Many2one('maintenance.equipment', string='Controller', copy=False)
 
     controller_id_domain = fields.Char(
@@ -96,4 +100,7 @@ class MrpWorkCenter(models.Model):
         for rec in self:
             rec.controller_id_domain = json.dumps([('id', 'in', rec.masterpc_id.child_ids.ids), ('category_name', '=', 'Controller')])
 
-    _sql_constraints = [('code_hmi', 'unique(hmi_id)', 'Only one HMI is allowed'), ('code_controller', 'unique(controller_id)', 'Only one Controller is allowed')]
+    _sql_constraints = [('code_hmi', 'unique(hmi_id)', 'Only one HMI is allowed'),
+                        ('code_controller', 'unique(controller_id)', 'Only one Controller is allowed'),
+                        ('code_rfid', 'unique(rfid_id)', 'Only one RFID is allowed'),
+                        ('code_io', 'unique(io_id)', 'Only one Remote IO is allowed')]
