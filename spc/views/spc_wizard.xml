@@ -215,7 +215,7 @@
             <field name="res_model">mrp.production</field>
             <field name="view_mode">tree,form</field>
             <field name="search_view_id" ref="mrp.view_mrp_production_filter"/>
-            <field name="context">{'search_default_group_by_knr': 1}</field>
+            <!--<field name="context">{'search_default_group_by_knr': 1}</field>-->
             <field name="view_ids"
                    eval="[(5, 0, 0),
                           (0, 0, {'view_mode': 'tree', 'view_id': ref('mrp.mrp_production_tree_view')}),

@@ -25,9 +25,10 @@ class MrpProduction(models.Model):
     pin_check_code = fields.Integer(string='PIN check Code')
     assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line ID')
     lnr = fields.Char(string='Line Number')
-    knr = fields.Char(string='Vehicle Assembly Code', store=True, compute='_compute_mo_knr')
+    knr = fields.Char(string='KNR', store=True, compute='_compute_mo_knr')
 
-    _sql_constraints = [('vin_uniq', 'unique(vin)', 'Only one VIN per MO is allowed')]
+    _sql_constraints = [('vin_uniq', 'unique(vin)', 'Only one VIN per MO is allowed'),
+                        ('pin_check_uniq', 'unique(pin,pin_check_code)', 'Only one KNR per MO is allowed')]
 
     @api.depends('pin','pin_check_code')
     def _compute_mo_knr(self):
