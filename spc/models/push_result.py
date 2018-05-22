@@ -51,7 +51,10 @@ class PushResult(AbstractModel):
         results = self.env['operation.result'].sudo().search(domain)
         if not results:
             return True
-        aiis_urls = self.env['ir.config_parameter'].sudo().get_param('aiis.urls').split(',')
+        _aiis_urls = self.env['ir.config_parameter'].sudo().get_param('aiis.urls')
+        if not _aiis_urls:
+            return True
+        aiis_urls = _aiis_urls.split(',')
         ret = map(lambda url: self._push_results(url, results), aiis_urls)
         return True
 
