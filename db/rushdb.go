@@ -12,11 +12,82 @@ import (
 )
 
 type DB struct {
-	DBName string
-	User string
-	Pwd	string
-	URL string
-	Port uint
+	DBName string	`yaml:"dbname"`
+	URL string		`yaml:"url"`
+	Port int		`yaml:"port"`
+	User string		`yaml:"user"`
+	Pwd string		`yaml:"pwd"`
+}
+
+func (db *DB) UpdateResults(id int, count int, flag bool)(error) {
+	//results := []Results{}
+	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		db.User,
+		db.Pwd,
+		db.URL,
+		db.Port,
+		db.DBName))
+
+	if err != nil {
+		return err
+	}
+
+	if count > 0 {
+		sql := "update `results` set result_upload = ? where result_id = ? and count = ?"
+		_, err = engine.Exec(sql, flag, id, count)
+	} else {
+		sql := "update `results` set result_upload = ? where result_id = ?"
+		_, err = engine.Exec(sql, flag, id)
+	}
+
+	if err != nil {
+		return err
+	} else {
+		return nil
+	}
+}
+
+func (db *DB) FindResults(result_upload bool, result []string)([]Results, error) {
+	results := []Results{}
+	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		db.User,
+		db.Pwd,
+		db.URL,
+		db.Port,
+		db.DBName))
+
+	if err != nil {
+		return results, err
+	}
+
+	e := engine.Alias("r").Where("r.result_upload = ?", result_upload).And("r.result <> ?", "NONE").Find(&results)
+	if e != nil {
+		return results, e
+	} else {
+		return results, nil
+	}
+}
+
+func (db *DB) ListResults(id int)([]Results, error) {
+	results := []Results{}
+
+	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		db.User,
+		db.Pwd,
+		db.URL,
+		db.Port,
+		db.DBName))
+
+	if err != nil {
+		return results, err
+	}
+
+	e := engine.Alias("r").Where("r.result_id = ?", id).Find(&results)
+	if e != nil {
+		return results, e
+	} else {
+		return results, nil
+	}
 }
 
 func (db *DB) InsertResults(result Results) (error) {

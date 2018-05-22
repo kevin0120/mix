@@ -19,6 +19,10 @@ type PSet struct {
 	Count int `json:"count"`
 }
 
+type ResultPatch struct {
+	HasUpload bool `json:"has_upload"`
+}
+
 type Workorder struct {
 	Workorder_id	int			`json:"workorder_id"`
 	HMI_sn			string		`json:"hmi_sn"`
@@ -112,6 +116,15 @@ func XMl2Result(result cvi3.CVI3Result) (Result) {
 	return rr
 }
 
+type ODOOMOCreated struct {
+	ID int				`json:"id"`
+	KNR string			`json:"knr"`
+	VIN string			`json:"vin"`
+	ProductID []string	`json:"-"`
+	Result_IDs []int	`json:"result_ids"`
+	AssembleLine []string `json:"-"`
+}
+
 type ODOOWorkorder struct {
 	ID	int				`json:"id"`
 	Status string		`json:"status"`
@@ -124,7 +137,14 @@ type ODOOWorkorder struct {
 	} `json:"hmi"`
 
 	Result_IDs []int	`json:"result_ids"`
-	Worksheet string	`json:"worksheet"`
+	Worksheet struct {
+		Content string	`json:"content"`
+		Points []struct {
+			X int32 `json:"x_offset"`
+			Y int32 `json:"y_offset"`
+		} `json:"points"`
+
+	}	`json:"worksheet"`
 	KNR string			`json:"knr"`
 	VIN string			`json:"vin"`
 }
@@ -132,6 +152,31 @@ type ODOOWorkorder struct {
 type CURObject struct {
 	File string  `json:"file"`
 	OP int  `json:"op"`
+}
+
+type ODOOCurveAppend struct {
+	File string `json:"file"`
+	OP int `json:"op"`
+}
+
+type ODOOResultSync struct {
+	ID	int	`json:"id"`
+	Pset_m_threshold	float64 `json:"pset_m_threshold"`
+	Pset_m_max	float64 `json:"pset_m_max"`
+	Pset_m_min	float64 `json:"pset_m_min"`
+	Control_date	string `json:"control_date"`
+	Pset_w_max	float64 `json:"pset_w_max"`
+	Pset_strategy	string `json:"pset_strategy"`
+	Pset_m_target	float64 `json:"pset_m_target"`
+	Measure_degree	float64 `json:"measure_degree"`
+	Measure_t_don	float64 `json:"measure_t_don"`
+	Measure_torque	float64 `json:"measure_torque"`
+	Measure_result	string `json:"measure_result"`
+	Op_time	int `json:"op_time"`
+	Pset_w_min	float64 `json:"pset_w_min"`
+	Pset_w_target	float64 `json:"pset_w_target"`
+
+	CURObjects	[]CURObject	`json:"cur_objects"`
 }
 
 type ODOOResult struct {
@@ -151,6 +196,26 @@ type ODOOResult struct {
 	Pset_w_target	float64 `json:"pset_w_target"`
 
 	CURObjects	[]CURObject	`json:"cur_objects"`
+}
+
+type ODOOPR struct {
+	Pr_value string `json:"pr_value"`
+	Pr_group string `json:"pr_group"`
+}
+
+type ODOOMO struct {
+	Pin_check_code int	`json:"pin_check_code"`
+	Equipment_name string	`json:"equipment_name"`
+	Factory_name string	`json:"factory_name"`
+	Pin int	`json:"pin"`
+	Year int `json:"year"`
+	Assembly_line string `json:"assembly_line"`
+	Model string `json:"model"`
+	//Model2 string `json:"model"`
+	Vin string `json:"vin"`
+	Lnr string `json:"lnr"`
+	Date_planned_start string `json:"date_planned_start"`
+	Prs []ODOOPR `json:"prs"`
 }
 
 type WSStatus struct {

@@ -9,6 +9,8 @@ import (
 	"github.com/kataras/iris/websocket"
 	"fmt"
 	"sync"
+	"strings"
+	"strconv"
 )
 
 const (
@@ -19,8 +21,12 @@ const (
 	WS_EVENT_WORKORDER = "workorder"
 )
 
+func CleanClient(id string) {
+
+}
+
 type WSClient struct {
-	Addr	string
+	ID	string
 	Conn websocket.Connection
 }
 
@@ -160,14 +166,173 @@ func (apiserver *APIServer) getWorkorder(ctx iris.Context) {
 	ctx.Write(body)
 }
 
+// 创建工单
+func (apiserver *APIServer) createWorkorders(ctx iris.Context) {
+	var err error
+	var workorders []payload.ODOOWorkorder
+	err = ctx.ReadJSON(&workorders)
+
+	if err != nil {
+		// 传输结构错误
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+
+		return
+	}
+
+	neworders, e := apiserver.DB.InsertWorkorders(workorders)
+	if e != nil {
+		//fmt.Printf("%s\n", e.Error())
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+
+		return
+	} else {
+		// 推送新工单
+		go apiserver.push_new_orders(neworders)
+
+		ctx.StatusCode(iris.StatusCreated)
+		return
+	}
+}
+
+func (apiserver *APIServer) push_new_orders(orders []payload.ODOOWorkorder) {
+	for _,v := range orders {
+		order_str, _ := json.Marshal(v)
+		apiserver.WSSendWorkorder(v.HMI.UUID, string(order_str))
+	}
+}
+
 func (apiserver *APIServer) getResults(ctx iris.Context) {
 	// 根据查询参数返回结果
+	has_upload := ctx.URLParam("has_upload")
+	if has_upload == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("has_upload is required")
+		return
+	}
+
+
+	result := ctx.URLParams()["result"]
+
+	if result == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("result is required")
+		return
+	}
+	re_list := strings.Split(result, ",")
+
+	bool_has_upload, err := strconv.ParseBool(has_upload)
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("has_upload value error")
+		return
+	}
+
+	//list_result := []string{}
+	//e := json.Unmarshal([]byte(result), &list_result)
+	//if e != nil {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("result value error")
+	//	return
+	//}
+
+
+	resp := []payload.ODOOResultSync{}
+	results, _ := apiserver.DB.FindResults(bool_has_upload, re_list)
+	target_results :=  map[int]rushdb.Results{}
+	for _, v := range results {
+		tr, exist := target_results[v.Result_id]
+		if exist {
+			// 已存在
+			if v.Count > tr.Count {
+				target_results[v.Result_id] = v
+			}
+		} else {
+			// 不存在
+			target_results[v.Result_id] = v
+		}
+	}
+
+	for _, v := range target_results {
+		odoo_result := payload.ODOOResultSync{}
+		stime := strings.Split(v.Update_time.Format("2006-01-02 15:04:05"), " ")
+		odoo_result.Control_date = fmt.Sprintf("%sT%s+08:00", stime[0], stime[1])
+
+		odoo_result.CURObjects = []payload.CURObject{}
+
+		results, _ := apiserver.DB.ListResults(v.Result_id)
+		for _,vi := range results {
+			nr := payload.Result{}
+			json.Unmarshal([]byte(vi.Result_data), &nr)
+			cur_object := payload.CURObject{}
+			cur_object.File = nr.CurFile
+			cur_object.OP = nr.Count
+			odoo_result.CURObjects = append(odoo_result.CURObjects, cur_object)
+		}
+
+		or := payload.Result{}
+		json.Unmarshal([]byte(v.Result_data), &or)
+
+		odoo_result.Measure_degree = or.ResultValue.Wi
+		odoo_result.Measure_result = strings.ToLower(or.Result)
+		odoo_result.Measure_t_don = or.ResultValue.Ti
+		odoo_result.Measure_torque = or.ResultValue.Mi
+		odoo_result.Op_time = or.Count
+		odoo_result.Pset_m_max = or.PSetDefine.Mp
+		odoo_result.Pset_m_min = or.PSetDefine.Mm
+		odoo_result.Pset_m_target = or.PSetDefine.Ma
+		odoo_result.Pset_m_threshold = or.PSetDefine.Ms
+		odoo_result.Pset_strategy = or.PSetDefine.Strategy
+		odoo_result.Pset_w_max = or.PSetDefine.Wp
+		odoo_result.Pset_w_min = or.PSetDefine.Wm
+		odoo_result.Pset_w_target = or.PSetDefine.Wa
+		odoo_result.ID = v.Result_id
+
+		resp = append(resp, odoo_result)
+	}
+
+	body, _ := json.Marshal(resp)
+	ctx.Header("content-type", "application/json")
+	ctx.Write(body)
+
+}
+
+func (apiserver *APIServer) patchResult(ctx iris.Context) {
+	id, err := strconv.Atoi(ctx.Params().Get("id"))
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+
+	var e error
+	var up payload.ResultPatch
+	e = ctx.ReadJSON(&up)
+	if e != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(e.Error())
+		return
+	}
+
+	e = apiserver.DB.UpdateResults(id, 0, up.HasUpload)
+	if e != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(e.Error())
+		return
+	}
 }
 
 func (apiserver *APIServer) getStatus(ctx iris.Context) {
 	// 返回控制器状态
 
-	//apiserver.CVI3.Service.
+	//hmi_sn := ctx.URLParam("hmi_sn")
+	//if hmi_sn != "" {
+	//	// 指定控制器
+	//	apiserver.CVI3.Service.
+	//} else {
+	//	// 所有控制器
+	//}
 }
 
 func (apiserver *APIServer) AddClient(sn string, c WSClient) {
@@ -175,6 +340,23 @@ func (apiserver *APIServer) AddClient(sn string, c WSClient) {
 
 	apiserver.WSMtx.Lock()
 	apiserver.WSClients[sn] = c
+}
+
+func (apiserver *APIServer) RemoveClient(id string) {
+	defer apiserver.WSMtx.Unlock()
+
+	apiserver.WSMtx.Lock()
+	var key string = ""
+	for k,v := range apiserver.WSClients {
+		if v.ID == id {
+			key = k
+			break
+		}
+	}
+
+	if key != "" {
+		delete(apiserver.WSClients, key)
+	}
 }
 
 func (apiserver *APIServer) GetClient(sn string) (WSClient, bool) {
@@ -213,9 +395,11 @@ func (apiserver *APIServer) WSSendWorkorder(sn string, payload string) {
 
 func (apiserver *APIServer) onWSConn(c websocket.Connection) {
 
+	api := apiserver
+
 	c.OnMessage(func(data []byte) {
 		// 接受客户端链接
-		fmt.Printf("recv from %s: %s\n", c.Context().RemoteAddr(), string(data))
+		fmt.Printf("recv from %s: %s\n", c.ID(), string(data))
 
 		var reg_msg payload.WSRegistMsg
 		var reg_str []byte
@@ -236,7 +420,7 @@ func (apiserver *APIServer) onWSConn(c websocket.Connection) {
 			// 将客户端加入列表
 			client := WSClient{}
 			client.Conn = c
-			client.Addr = c.Context().RemoteAddr()
+			client.ID = c.ID()
 			apiserver.AddClient(reg.HMI_SN, client)
 			reg_msg.Msg = "OK"
 			reg_str, _ = json.Marshal(reg_msg)
@@ -245,10 +429,13 @@ func (apiserver *APIServer) onWSConn(c websocket.Connection) {
 	})
 
 	c.OnDisconnect(func() {
-		fmt.Printf("Connection with addr: %s has been disconnected!\n", c.Context().RemoteAddr())
+		fmt.Printf("Connection with id: %s has been disconnected!\n", c.ID())
 		// 删除客户端
+		api.RemoveClient(c.ID())
 	})
+
 }
+
 
 func (apiserver *APIServer) StartService() error {
 
@@ -259,7 +446,7 @@ func (apiserver *APIServer) StartService() error {
 
 	crs := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
-		AllowedMethods:   []string{"GET", "HEAD", "POST", "PUT", "OPTIONS"},
+		AllowedMethods:   []string{"GET", "HEAD", "POST", "PUT", "PATCH", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "content-type", "X-Requested-With", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "Screen"},
 		AllowCredentials: true,
 	})
@@ -277,7 +464,9 @@ func (apiserver *APIServer) StartService() error {
 		v1.Put("/psets", apiserver.putPSets)
 		v1.Get("/workorder", apiserver.getWorkorder)
 		v1.Get("/results", apiserver.getResults)
+		v1.Patch("/results/{id:int}", apiserver.patchResult)
 		v1.Get("/status", apiserver.getStatus)
+		v1.Post("/workorders", apiserver.createWorkorders)
 		app.Get("/ws", ws.Handler())
 	}
 

@@ -13,6 +13,17 @@ import (
 	"github.com/masami10/rush/payload"
 )
 
+type ControllerConf struct {
+	SN string	`yaml:"sn"`
+	IP string	`yaml:"ip"`
+	Port int	`yaml:"port"`
+}
+
+type CVI3Conf struct {
+	Listen int `yaml:"listen"`
+	Controllers []ControllerConf `yaml:"controllers"`
+}
+
 func (service *CVI3Service) OnStatus(sn string, status string) {
 	fmt.Printf("%s:%s\n", sn, status)
 
@@ -111,11 +122,20 @@ func (service *CVI3Service) OnRecv(msg string) {
 		// 结果推送odoo
 		odoo_result := payload.ODOOResult{}
 		odoo_result.Control_date = result_data.Dat
-		cur_object := payload.CURObject{}
-		cur_object.File = result_data.CurFile
-		cur_object.OP = result_data.Count
+
 		odoo_result.CURObjects = []payload.CURObject{}
-		odoo_result.CURObjects = append(odoo_result.CURObjects, cur_object)
+
+
+		results, _ := service.DB.ListResults(result_data.Result_id)
+		for _,v := range results {
+			nr := payload.Result{}
+			json.Unmarshal([]byte(v.Result_data), &nr)
+			cur_object := payload.CURObject{}
+			cur_object.File = nr.CurFile
+			cur_object.OP = nr.Count
+			odoo_result.CURObjects = append(odoo_result.CURObjects, cur_object)
+		}
+
 		odoo_result.Measure_degree = result_data.ResultValue.Wi
 		odoo_result.Measure_result = strings.ToLower(result_data.Result)
 		odoo_result.Measure_t_don = result_data.ResultValue.Ti
@@ -131,6 +151,9 @@ func (service *CVI3Service) OnRecv(msg string) {
 		odoo_result.Pset_w_target = result_data.PSetDefine.Wa
 
 		go service.ODOO.PutResult(result_data.Result_id, odoo_result)
+
+		// 追加最新波形
+		//go service.ODOO.PatchCurve(result_data.Result_id, result_data.CurFile, result_data.Count)
 
 	}
 
