@@ -5,7 +5,7 @@ github.com/iris-contrib/middleware/cors 048e2be034ed172c6754448b8a54a9c55debad46
 gopkg.in/yaml.v2 5420a8b6744d3b0345ab293f6fcba19c978f1183
 github.com/lib/pq d34b9ff171c21ad295489235aec8b6626023cd04
 github.com/go-xorm/xorm ab17aa22037beed8b99422a95d8a9419066caf7c
-github.com/linshenqi/TightningSys/desoutter/cvi3 738ba60410a62140a523fc0b05e0e7541d7a9887
+github.com/linshenqi/TightningSys/desoutter/cvi3 caeaa29b0873e585469e12101c55d330fb08aed3
 github.com/go-ini/ini bda519ae5f4cbc60d391ff8610711627a08b86ae
 github.com/go-xorm/builder bad0a612f0d6277b953910822ab5dfb30dd18237
 github.com/go-xorm/core c10e21e7e1cec20e09398f2dfae385e58c8df555
@@ -19,3 +19,4 @@ golang.org/x/sys/cpu 7c87d13f8e835d2fb3a70a2912c811ed0c1d241b
 golang.org/x/text/secure/bidirule 5c1cf69b5978e5a34c5f9ba09a83e56acc4b7877
 golang.org/x/text/unicode/bidi 5c1cf69b5978e5a34c5f9ba09a83e56acc4b7877
 golang.org/x/text/unicode/norm 5c1cf69b5978e5a34c5f9ba09a83e56acc4b7877
+#github.com/satori/go.uuid 36e9d2ebbde5e3f13ab2e25625fd453271d6522e
