@@ -14,3 +14,8 @@ github.com/kataras/golog 03be101463868edc5a81f094fc68a5f6c1b5503a
 github.com/mitchellh/go-homedir b8bc1bf767474819792c23f32d8286a45736f1c6
 golang.org/x/crypto/argon2 ae8bce0030810cf999bb2b9868ae5c7c58e6343b
 golang.org/x/net/http/httpguts f73e4c9ed3b7ebdd5f699a16a880c2b1994e50dd
+github.com/kataras/pio a9733b5b6b83d32b479aacd51d26ef6018261963
+golang.org/x/sys/cpu 7c87d13f8e835d2fb3a70a2912c811ed0c1d241b
+golang.org/x/text/secure/bidirule 5c1cf69b5978e5a34c5f9ba09a83e56acc4b7877
+golang.org/x/text/unicode/bidi 5c1cf69b5978e5a34c5f9ba09a83e56acc4b7877
+golang.org/x/text/unicode/norm 5c1cf69b5978e5a34c5f9ba09a83e56acc4b7877
