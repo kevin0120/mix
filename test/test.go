@@ -41,7 +41,7 @@ func create_mo(odoo_url string, mo payload.ODOOMO, odoo_result payload.ODOOResul
 	mo_name := fmt.Sprintf("%s--V001--%s-%d-%d=%d", mo.Equipment_name, mo.Factory_name, mo.Year, mo.Pin, mo.Pin_check_code)
 
 
-	_, t, err := g_odoo.CreateMO(mo)
+	created, t, err := g_odoo.CreateMO(mo)
 
 
 	if err != nil {
@@ -52,9 +52,9 @@ func create_mo(odoo_url string, mo payload.ODOOMO, odoo_result payload.ODOOResul
 		go tracefile(t, mtx)
 
 		// 推送结果
-		//if len(created)  > 0 {
-		//	go put_result(created[0], odoo_result, time_mtx)
-		//}
+		if len(created)  > 0 {
+			go put_result(created[0], odoo_result, time_mtx)
+		}
 
 
 		result := fmt.Sprintf("创建工单:%s 用时:%s 结果:%s \n", mo_name, t, "ok")

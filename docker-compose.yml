@@ -1,0 +1,11 @@
+version: '2'
+services:
+  latest:
+    image: "linshenqi/rush"
+    ports:
+      - "38080:8080"
+      - "4710:4710"
+    volumes:
+      - /data/rush/conf:/rush/conf
+    restart: "always"
+    
