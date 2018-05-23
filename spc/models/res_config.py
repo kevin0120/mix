@@ -10,7 +10,7 @@ class AiisSettings(models.TransientModel):
     aiis_urls = fields.Char('AIIS URLs', default='http://127.0.0.1:9000,http://127.0.0.1:9001')
 
     def get_default_all(self, fields):
-        aiis_urls = self.env["ir.config_parameter"].get_param("aiis.urls", default='http://127.0.0.1:9000,http://127.0.0.1:9001')
+        aiis_urls = self.env["ir.config_parameter"].get_param("aiis.urls")
 
         return dict(
             aiis_urls=aiis_urls,
@@ -18,9 +18,7 @@ class AiisSettings(models.TransientModel):
 
     # minio_url
     def set_aiis_urls(self):
-        self.env['ir.config_parameter'].set_param("aiis.urls",
-                                                  self.aiis_urls or 'http://127.0.0.1:9000,http://127.0.0.1:9001',
-                                                  groups=['base.group_system'])
+        self.env['ir.config_parameter'].set_param("aiis.urls",self.aiis_urls,groups=['base.group_system'])
 
 
 class SPCSetting(models.TransientModel):
