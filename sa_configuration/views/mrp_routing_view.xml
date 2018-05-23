@@ -70,9 +70,9 @@
                             <button class="oe_stat_button" name="action_sa_view_operation" type="object" icon="fa-list-alt">
                                 <field string="Operation" name="operation_count" widget="statinfo" />
                             </button>
-                            <button class="oe_stat_button" name="toggle_active" type="object" icon="fa-archive">
+                            <button class="oe_stat_button" name="toggle_active" type="object" icon="fa-archive" groups="base.group_system">
                                 <field name="active" widget="boolean_button"
-                                    options='{"terminology": "archive"}' groups="base.group_no_one"/>
+                                    options='{"terminology": "archive"}'/>
                             </button>
                         </div>
                         <div class="oe_title">
