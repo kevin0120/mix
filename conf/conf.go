@@ -47,7 +47,7 @@ func CreateDefaultConf() ConfRush {
 	conf.CVI3.Listen = 4710
 	controller := core.ControllerConf{}
 	controller.IP = "127.0.0.1"
-	controller.Port = 4710
+	controller.Port = 4700
 	controller.SN = "1"
 	conf.CVI3.Controllers = append(conf.CVI3.Controllers, controller)
 

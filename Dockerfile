@@ -1,6 +1,5 @@
 FROM alpine:3.6
 
-ADD ./bin/rush /rush
-#RUN chmod +x /rush/rush
+ADD ./bin/rush /rush/rush
 CMD /rush/rush
 
