@@ -7,16 +7,20 @@ from datetime import datetime, timedelta, date
 from dateutil.relativedelta import relativedelta
 from odoo.addons.spc.controllers.result import _post_aiis_result_package
 import json
+import logging
+
+_logger = logging.getLogger(__name__)
+
 
 
 class OperationResult(models.HyperModel):
     _name = "operation.result"
 
     workorder_id = fields.Many2one('mrp.workorder', 'Operation')
-    workcenter_id = fields.Many2one('mrp.workcenter', related='workorder_id.workcenter_id', store=True, readonly=True)  # TDE: necessary ?
+    workcenter_id = fields.Many2one('mrp.workcenter',  readonly=True)
     production_id = fields.Many2one('mrp.production', 'Production Order')
 
-    assembly_line_id = fields.Many2one('mrp.assemblyline', related='production_id.assembly_line_id', string='Assembly Line', store=True, readonly=True)
+    assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line', readonly=True)
 
     pset_strategy = fields.Selection([('AD', 'Torque tightening'),
                                          ('AW', 'Angle tightening'),
@@ -142,6 +146,91 @@ class OperationResult(models.HyperModel):
         if 'name' not in vals or vals['name'] == _('New'):
             vals['name'] = self.env['ir.sequence'].next_by_code('quality.check') or _('New')
         return super(OperationResult, self).create(vals)
+
+    @api.model
+    def _bulk_create(self, all_vals):
+        # low-level implementation of create()
+        if self.is_transient():
+            self._transient_vacuum()
+
+        all_updates = []
+        for vals in all_vals:
+            if 'name' not in vals or vals['name'] == _('New'):
+                vals['name'] = self.env['ir.sequence'].next_by_code('quality.check') or _('New')
+            # data of parent records to create or update, by model
+            tocreate = {
+                parent_model: {'id': vals.pop(parent_field, None)}
+                for parent_model, parent_field in self._inherits.iteritems()
+            }
+
+            # list of column assignments defined as tuples like:
+            #   (column_name, format_string, column_value)
+            #   (column_name, sql_formula)
+            # Those tuples will be used by the string formatting for the INSERT
+            # statement below.
+            updates = [
+                ('id', "%s", "nextval('%s')" % self._sequence),
+            ]
+
+            upd_todo = []
+            unknown_fields = []
+            protected_fields = []
+            for name, val in vals.items():
+                field = self._fields.get(name)
+                if not field:
+                    unknown_fields.append(name)
+                    del vals[name]
+                elif field.inherited:
+                    tocreate[field.related_field.model_name][name] = val
+                    del vals[name]
+                elif not field.store:
+                    del vals[name]
+                elif field.inverse:
+                    protected_fields.append(field)
+            if unknown_fields:
+                _logger.warning('No such field(s) in model %s: %s.', self._name, ', '.join(unknown_fields))
+
+            # set boolean fields to False by default (to make search more powerful)
+            for name, field in self._fields.iteritems():
+                if field.type == 'boolean' and field.store and name not in vals:
+                    vals[name] = False
+
+            # determine SQL values
+            for name, val in vals.iteritems():
+                field = self._fields[name]
+                if field.store and field.column_type:
+                    updates.append((name, field.column_format, field.convert_to_column(val, self)))
+                else:
+                    upd_todo.append(name)
+
+                if hasattr(field, 'selection') and val:
+                    self._check_selection_field_value(name, val)
+
+            if self._log_access:
+                updates.append(('create_uid', '%s', self._uid))
+                updates.append(('write_uid', '%s', self._uid))
+                updates.append(('create_date', "(now() at time zone 'UTC')"))
+                updates.append(('write_date', "(now() at time zone 'UTC')"))
+            all_updates.append(updates)
+            # insert a row for this record
+        cr = self._cr
+        t = [tuple(u[2] for u in update if len(u) > 2) for update in all_updates]
+        query = """INSERT INTO "%s" (%s) VALUES %s RETURNING id""" % (
+            self._table,
+            ', '.join('"%s"' % u[0] for u in all_updates[0]),
+            ','.join("(nextval('%s')," % self._sequence + str(_t[1:])[1:] for _t in t),
+        )
+
+        cr.execute(query)
+
+        # from now on, self is the new record
+        ids_news = cr.fetchall()
+        return [ids[0] for ids in ids_news]
+
+    @api.model
+    def bulk_create(self, vals):
+        vals = [self._add_missing_default_values(val)for val in vals]
+        self._bulk_create(vals)
 
     @api.multi
     def write(self, vals):

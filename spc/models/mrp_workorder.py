@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
-
+import time
 
 class MrpWorkorder(models.Model):
     _inherit = 'mrp.workorder'
@@ -20,6 +20,7 @@ class MrpWorkorder(models.Model):
 
     @api.multi
     def _create_checks(self):
+        ret_vals = []
         for wo in self:
             production = wo.production_id
             points = self.env['quality.point'].search([('workcenter_id', '=', wo.workcenter_id.id),
@@ -30,10 +31,15 @@ class MrpWorkorder(models.Model):
             for point in points:
                 vals = {'workorder_id': wo.id,
                          'production_id': production.id,
+                         'workcenter_id': wo.workcenter_id.id,
+                         'assembly_line_id':production.assembly_line_id.id,
                          'point_id': point.id,
                          'product_id': production.product_id.id,
                          'consu_product_id': wo.consu_product_id.id,
                          'time': production.date_planned_start or fields.Datetime.now(),
                          'control_date': fields.Datetime.now()}
+
                 # if point.check_execute_now():
-                map(lambda i: self.env['operation.result'].sudo().create(vals), range(point.times))
+                map(lambda i: ret_vals.append(vals), range(point.times))
+
+        self.env['operation.result'].sudo().bulk_create(ret_vals)
