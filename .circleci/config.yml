@@ -5,7 +5,7 @@ jobs:
       only:
         - master
     docker:
-      - image: golang:alpine
+      - image: circleci/golang:latest
     steps:
       - checkout
       - setup_remote_docker:
@@ -14,10 +14,10 @@ jobs:
           name: build docker image
           command: |
             mkdir -p /go/src/github.com/masami10/rush && cd /go/src/github.com/masami10/rush
-            # cp -r /home/circleci/project/* ./
+            cp -r /home/circleci/project/* ./
             ls -al ./
             go get -u github.com/sparrc/gdm
             /go/bin/gdm restore
-            go build -o ./bin/rush ./rush.go
+            CGO_ENABLED=0 go build -o ./bin/rush ./rush.go
             docker login -u $DOCKER_USER -p $DOCKER_PWD
             sh ./build_docker.sh
