@@ -14,7 +14,7 @@ jobs:
           name: build docker image
           command: |
             mkdir -p /go/src/github.com/masami10/rush && cd /go/src/github.com/masami10/rush
-            cp -r /home/circleci/project/* ./
+            # cp -r /home/circleci/project/* ./
             ls -al ./
             go get -u github.com/sparrc/gdm
             /go/bin/gdm restore
