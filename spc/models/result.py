@@ -92,7 +92,7 @@ class OperationResult(models.HyperModel):
 
     @api.multi
     def sent_aiis(self):
-        domain = [('sent', '=', False), ('measure_result', 'in', ['ok', 'nok'])]
+        domain = [('measure_result', 'in', ['ok', 'nok'])]
         results = self.search(domain)
         if not results:
             return True

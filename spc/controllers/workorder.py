@@ -63,6 +63,8 @@ class ApiMrpWorkorder(http.Controller):
                 'id': order.id,
                 'hmi': {'id': workcenter_id.hmi_id.id, 'uuid': workcenter_id.hmi_id.serial_no},
                 'worksheet': {'content': order.worksheet_img, "points": points},
+                'max_redo_times': order.operation_id.max_redo_times,
+                'max_op_time': order.operation_id.max_op_time,
                 'pset': order.operation_id.program_id.code,
                 'nut_total': order.consu_product_qty,
                 'vin': order.production_id.vin,

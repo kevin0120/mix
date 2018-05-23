@@ -31,6 +31,8 @@ class PushWorkorder(AbstractModel):
                 'hmi': {'id': workorder.workcenter_id.hmi_id.id, 'uuid': workorder.workcenter_id.hmi_id.serial_no},
                 'worksheet': {'content': workorder.worksheet_img, "points": points},
                 'pset': workorder.operation_id.program_id.code,
+                'max_redo_times': workorder.operation_id.max_redo_times,
+                'max_op_time': workorder.operation_id.max_op_time,
                 'nut_total': workorder.consu_product_qty,
                 'vin': workorder.production_id.vin,
                 'knr': workorder.production_id.knr,
