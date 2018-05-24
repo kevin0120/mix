@@ -7,7 +7,6 @@ from pyecharts import Pie, Style
 import pyecharts
 from pandas import DataFrame
 
-
 class OperationResultReport(models.TransientModel):
     _name = "operation.result.wizard"
     _description = "Result Statistics Process Control"
@@ -94,6 +93,7 @@ class OperationResultReport(models.TransientModel):
 
         result['used'] = result['count'] - result['lacking']
         return result
+
     @api.multi
     def button_query_controller(self):
         result = {}

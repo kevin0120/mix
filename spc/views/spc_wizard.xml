@@ -121,10 +121,20 @@
             <field name="name">sa_spc_form_tor_ang</field>
             <field name="model">ta.spc.wizard</field>
             <field name="arch" type="xml">
-                <form string="Scope">
-                    <header>
-                        <button string="Query" type="object" name="button_query" class="oe_highlight"/>
-                    </header>
+                <form string="Result SPC">
+                    <field name="need_render" invisible="1"/>
+                    <div class="o_calendar_buttons">
+                        <button type="object" name="button_forward" class="o_calendar_button_prev btn btn-sm btn-primary"><span class="fa fa-arrow-left"/></button>
+                        <button type="object" string="Today" name="button_today" class="o_calendar_button_today btn btn-sm btn-primary"/>
+                        <button type="object" name="button_backend" class="o_calendar_button_next btn btn-sm btn-primary"><span class="fa fa-arrow-right"/></button>
+
+                        <div class="btn-group btn-group-sm">
+                            <button type="object" string="Day" name="button_step_day" class="o_calendar_button_day btn btn-sm btn-default" />
+                            <button type="object"  string="Week" name="button_step_week" class="o_calendar_button_week btn btn-sm btn-default"/>
+                            <button type="object"  string="Month" name="button_step_month" class="o_calendar_button_month btn btn-sm btn-default"/>
+                        </div>
+                        <button string="Query" type="object" name="button_query" class="oe_highlight oe_right" context="{'no_render': True}"/>
+                    </div>
                     <sheet>
                         <group string="Query Parameters">
                             <group string="Type">
@@ -146,6 +156,9 @@
                             </group>
                             <group>
                                 <field name="limit" required="1"/>
+                            </group>
+                            <group>
+                                <field name="step" string="Step" readonly="1"/>
                             </group>
                         </group>
 

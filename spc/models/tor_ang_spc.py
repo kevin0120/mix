@@ -7,7 +7,9 @@ import pyecharts
 from pandas import DataFrame
 import numpy as np
 from odoo.tools import float_round
-
+from dateutil.relativedelta import relativedelta
+import datetime
+import pytz
 
 DEFAULT_LIMIT = 5000
 MIN_LIMIT = 1000
@@ -24,11 +26,45 @@ class TorAngSPCReport(models.TransientModel):
     limit = fields.Integer('Query Limit', default=DEFAULT_LIMIT)
     spc_target = fields.Selection([('torque', 'Torque'), ('angle', 'Angle')], string='统计对象', default='torque')
 
-    normal_dist = fields.Text(string='Normal Distribution', store=False)
-    weibull_dist = fields.Text(string='Weibull Distribution', store=False)
+    normal_dist = fields.Text(string='Normal Distribution', store=False, compute='_compute_dist')
+    weibull_dist = fields.Text(string='Weibull Distribution', store=False, compute='_compute_dist')
     weibull_dist_method = fields.Selection([('double', 'Double Weibull'),('inverted', 'Inverted'), ('exponential', 'Exponential'),('min', 'Min Weibull'), ('max', 'Max Weibull')], string='韦伯分布统计方法', default='min')
-    scatter = fields.Text(string='Scatter', store=False)
+    scatter = fields.Text(string='Scatter', store=False, compute='_compute_dist')
 
+    step = fields.Selection([('day', 'Day'), ('month', 'Month'), ('week', 'Week')], default='day')
+
+    need_render = fields.Boolean(default=False)
+
+    @api.depends('need_render')
+    def _compute_dist(self):
+        if self.need_render:
+            data, length = self._get_data()
+            if data.empty:
+                self.env.user.notify_warning(u'查询获取结果:{0},请重新定义查询参数或等待新结果数据'.format(length))
+                return
+            mean = np.mean(data)
+            std = np.std(data)
+            self.normal_dist = self._get_normal_dist(mean=mean,std=std)
+            scale_parameter = self.env['ir.config_parameter'].sudo().get_param('weibull.scale', default=1.0)
+            shape_parameter = self.env['ir.config_parameter'].sudo().get_param('weibull.shape', default=5.0)
+            self.weibull_dist = self._get_weibull_dist(len(data), mean=mean, std=std,
+                                                        scale=scale_parameter, shape=shape_parameter)
+
+            self.scatter = self._get_scatter(data)
+
+    @api.onchange('weibull_dist_method')
+    def _compute_weibull_dist(self):
+        if self.need_render:
+            data, length = self._get_data()
+            if data.empty:
+                self.env.user.notify_warning(u'查询获取结果:{0},请重新定义查询参数或等待新结果数据'.format(length))
+                return
+            mean = np.mean(data)
+            std = np.std(data)
+            scale_parameter = self.env['ir.config_parameter'].sudo().get_param('weibull.scale', default=1.0)
+            shape_parameter = self.env['ir.config_parameter'].sudo().get_param('weibull.shape', default=5.0)
+            self.weibull_dist = self._get_weibull_dist(len(data), mean=mean, std=std,
+                                                       scale=scale_parameter, shape=shape_parameter)
 
     @api.constrains('limit')
     def _constraint_limit(self):
@@ -110,28 +146,33 @@ class TorAngSPCReport(models.TransientModel):
 
     @api.multi
     def read(self, fields=None, load='_classic_read'):
-        data = DataFrame()
-        mean = 0.0
-        std = 0.0
         result = super(TorAngSPCReport, self).read(fields, load=load)
-        if 'normal_dist' in fields or 'weibull_dist' in fields or'scatter' in fields and load == '_classic_read':
-            data, length = self._get_data()
-            if data.empty:
-                self.env.user.notify_warning(u'查询获取结果:{0},请重新定义查询参数或等待新结果数据'.format(length))
-                return result
-            mean = np.mean(data)
-            std = np.std(data)
-        if 'normal_dist' in fields and not data.empty:
-            result[0].update({'normal_dist': self._get_normal_dist(mean=mean,std=std)})
-        if 'weibull_dist' in fields and not data.empty:
-            scale_parameter = self.env['ir.config_parameter'].sudo().get_param('weibull.scale', default=1.0)
-            shape_parameter = self.env['ir.config_parameter'].sudo().get_param('weibull.shape', default=5.0)
-            result[0].update({'weibull_dist': self._get_weibull_dist(len(data), mean=mean, std=std,
-                                                                     scale=scale_parameter, shape=shape_parameter)})
-        if 'scatter' in fields and not data.empty:
-            result[0].update({'scatter': self._get_scatter(data)})
-
         return result
+
+    # @api.multi
+    # def read(self, fields=None, load='_classic_read'):
+    #     data = DataFrame()
+    #     mean = 0.0
+    #     std = 0.0
+    #     result = super(TorAngSPCReport, self).read(fields, load=load)
+    #     if 'normal_dist' in fields or 'weibull_dist' in fields or'scatter' in fields and load == '_classic_read':
+    #         data, length = self._get_data()
+    #         if data.empty:
+    #             self.env.user.notify_warning(u'查询获取结果:{0},请重新定义查询参数或等待新结果数据'.format(length))
+    #             return result
+    #         mean = np.mean(data)
+    #         std = np.std(data)
+    #     if 'normal_dist' in fields and not data.empty:
+    #         result[0].update({'normal_dist': self._get_normal_dist(mean=mean,std=std)})
+    #     if 'weibull_dist' in fields and not data.empty:
+    #         scale_parameter = self.env['ir.config_parameter'].sudo().get_param('weibull.scale', default=1.0)
+    #         shape_parameter = self.env['ir.config_parameter'].sudo().get_param('weibull.shape', default=5.0)
+    #         result[0].update({'weibull_dist': self._get_weibull_dist(len(data), mean=mean, std=std,
+    #                                                                  scale=scale_parameter, shape=shape_parameter)})
+    #     if 'scatter' in fields and not data.empty:
+    #         result[0].update({'scatter': self._get_scatter(data)})
+    #
+    #     return result
 
     def _get_data(self):
         domain = [('measure_result', 'in', ['ok', 'nok'])]
@@ -189,4 +230,46 @@ class TorAngSPCReport(models.TransientModel):
 
     @api.multi
     def button_query(self):
-        pass
+        self.need_render = True
+
+    @api.multi
+    def button_step_day(self):
+        self.step = 'day'
+
+    @api.multi
+    def button_step_week(self):
+        self.step = 'week'
+
+    @api.multi
+    def button_step_month(self):
+        self.step = 'month'
+
+    @api.multi
+    def button_backend(self):
+        if self.step == 'day':
+            self.query_date_from = fields.Datetime.from_string(self.query_date_from) + datetime.timedelta(days=1)
+            self.query_date_to = fields.Datetime.from_string(self.query_date_to) + datetime.timedelta(days=1)
+        if self.step == 'week':
+            self.query_date_from = fields.Datetime.from_string(self.query_date_from) + datetime.timedelta(weeks=1)
+            self.query_date_to = fields.Datetime.from_string(self.query_date_to) + datetime.timedelta(weeks=1)
+        if self.step == 'month':
+            self.query_date_from = fields.Datetime.from_string(self.query_date_from) + relativedelta(months=1)
+            self.query_date_to = fields.Datetime.from_string(self.query_date_to) + relativedelta(months=1)
+
+    @api.multi
+    def button_forward(self):
+        if self.step == 'day':
+            self.query_date_from = fields.Datetime.from_string(self.query_date_from) - datetime.timedelta(days=1)
+            self.query_date_to = fields.Datetime.from_string(self.query_date_to) - datetime.timedelta(days=1)
+        if self.step == 'week':
+            self.query_date_from = fields.Datetime.from_string(self.query_date_from) - datetime.timedelta(weeks=1)
+            self.query_date_to = fields.Datetime.from_string(self.query_date_to) - datetime.timedelta(weeks=1)
+        if self.step == 'month':
+            self.query_date_from = fields.Datetime.from_string(self.query_date_from) - relativedelta(months=1)
+            self.query_date_to = fields.Datetime.from_string(self.query_date_to) - relativedelta(months=1)
+
+    @api.multi
+    def button_today(self):
+        timezone = pytz.timezone(self._context.get('tz'))
+        self.query_date_from = timezone.localize(datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)).astimezone(tz=pytz.utc)
+        self.query_date_to = timezone.localize(datetime.datetime.now().replace(hour=23, minute=59, second=59, microsecond=999999)).astimezone(tz=pytz.utc)
