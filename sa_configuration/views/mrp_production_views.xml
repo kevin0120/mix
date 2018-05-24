@@ -32,9 +32,9 @@
                 <field name="knr" string="KNR" filter_domain="[('knr','ilike',self)]"/>
                 <field name="vin" string="VIN" filter_domain="[('vin','ilike',self)]"/>
             </field>
-            <xpath expr="//group[1]" position="inside">
-                <filter string="KNR" name="group_by_knr" domain="[]" context="{'group_by':'knr'}"/>
-            </xpath>
+            <!--<xpath expr="//group[1]" position="inside">-->
+                <!--<filter string="KNR" name="group_by_knr" domain="[]" context="{'group_by':'knr'}"/>-->
+            <!--</xpath>-->
         </field>
     </record>
 
