@@ -42,12 +42,12 @@ def _post_aiis_result_package(aiis_urls, results):
 
 
 class SPC(http.Controller):
-    @http.route('/api/v1/operation.results/<int:result_id>', type='json', auth='none', cors='*', csrf=False)
+    @http.route(['/api/v1/operation.results/<int:result_id>'], methods=['PUT','OPTIONS'], type='json', auth='none', cors='*', csrf=False)
     def _update_results(self, result_id):
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         operation_result_id = env['operation.result'].browse(result_id)
-        if not operation_result_id:
-            body = {'msg': "result %d not existed"% result_id}
+        if not operation_result_id.exists():
+            body = json.dumps({'msg': "result {0} not existed".format(result_id)})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             response = Response(body, status=404, headers=headers)
             return response
@@ -66,7 +66,7 @@ class SPC(http.Controller):
                     })
             ret = operation_result_id.write(vals)
             if not ret:
-                body = {'msg': "update result %d fail" % result_id}
+                body = json.dumps({'msg': "update result %d fail" % result_id})
                 headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
                 response = Response(body, status=405, headers=headers)
                 return response
@@ -75,26 +75,68 @@ class SPC(http.Controller):
                 if _aiis_urls:
                     aiis_urls = _aiis_urls.split(',')
                     ret = _post_aiis_result_package(aiis_urls, operation_result_id)
-            val = {
-                'workorder_id': operation_result_id.workorder_id.id,
-                'id':  operation_result_id.id,
-                'product_id': operation_result_id.product_id.id,
-                'consu_product_id': operation_result_id.consu_product_id.id,
-                'op_time': operation_result_id.op_time,
-                'measure_result': operation_result_id.measure_result,
-                'workcenter_id': operation_result_id.workcenter_id.id
-            }
-            body = json.dumps(val)
-            headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
-            response = Response(body, status=200, headers=headers)
+            # val = {
+            #     'workorder_id': operation_result_id.workorder_id.id,
+            #     'id':  operation_result_id.id,
+            #     'product_id': operation_result_id.product_id.id,
+            #     'consu_product_id': operation_result_id.consu_product_id.id,
+            #     'op_time': operation_result_id.op_time,
+            #     'measure_result': operation_result_id.measure_result,
+            #     'workcenter_id': operation_result_id.workcenter_id.id
+            # }
+            # body = json.dumps(val)
+            headers = [('Content-Type', 'application/json')]
+            response = Response(status=204, headers=headers)
             return response
+
+    @http.route(['/api/v1/operation.results'], methods=['PUT', 'OPTIONS'], type='json', auth='none', cors='*', csrf=False)
+    def _batch_update_results(self):
+        datas = request.jsonrequest
+        env = api.Environment(request.cr, SUPERUSER_ID, request.context)
+        result_ids = [val['id'] for val in datas]
+        operation_result_ids = env['operation.result'].search([('id', 'in', result_ids)])
+        if not operation_result_ids:
+            body = json.dumps({'msg': "result not existed"})
+            headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
+            response = Response(body, status=404, headers=headers)
+            return response
+        diff = list(set(result_ids) - set(operation_result_ids.ids))
+        if len(diff) > 0:
+            body = json.dumps({'msg': "result {0} not existed".format(diff)})
+            headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
+            response = Response(body, status=404, headers=headers)
+            return response
+        for val in datas:
+            if 'cur_objects' in val:
+                val.update({
+                    'cur_objects': json.dumps(val['cur_objects'])
+                })
+
+            if 'control_date' in val:
+                _t = parser.parse(val['control_date']) if val['control_date'] else None
+                if _t:
+                    val.update({
+                        'control_date': fields.Datetime.to_string((_t - _t.utcoffset()))
+                    })
+            result_id = val.pop('id')
+            need_update_result = operation_result_ids.filtered(lambda r: r.id == result_id)
+            ret = need_update_result.write(val)
+            if not ret:
+                body = json.dumps({'msg': "update result %d fail" % result_id})
+                headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
+                response = Response(body, status=405, headers=headers)
+                return response
+
+        headers = [('Content-Type', 'application/json')]
+        response = Response(status=204, headers=headers)
+        return response
 
     @http.route(['/api/v1/operation.results', '/api/v1/operation.results/<int:result_id>'], type='http', auth='none', methods=['get'], cors='*', csrf=False)
     def _get_result_lists(self, result_id=None, **kw):
         domain = []
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         if result_id:
-            quality_checks = env['operation.result'].browse(result_id)
+            quality_checks = env['operation.result'].search([('id', '=', result_id)])
         else:
             if 'date_from' in kw.keys():
                 _t = parser.parse(kw['date_from'])
@@ -129,7 +171,7 @@ class SPC(http.Controller):
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         operation_result_id = env['operation.result'].browse(result_id)
         if not operation_result_id:
-            body = {'msg': "result %d not existed" % result_id}
+            body = json.dumps({'msg': "result %d not existed" % result_id})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             response = Response(body, status=404, headers=headers)
             return response
