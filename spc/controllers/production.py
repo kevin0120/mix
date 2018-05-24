@@ -25,12 +25,19 @@ class SaConfiguration(http.Controller):
             else:
                 limit = DEFAULT_LIMIT
             production_ids = env['mrp.production'].search(domain, limit=limit)
-        _ret = production_ids.read(fields=NORMAL_RESULT_FIELDS_READ)
-        if len(_ret) == 0:
-            body = json.dumps({'msg': "result not existed"})
+        if not production_ids:
+            body = json.dumps({'msg': "MO not existed"})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=404, headers=headers)
-        ret = _ret[0] if vin else _ret
+        vals = [{
+            'id': production.id,
+            'vin': production.vin,
+            'knr': production.knr,
+            'product_id': production.product_id.id,
+            'assembly_line_id': production.assembly_line_id.id,
+            'result_ids': production.result_ids.ids,
+        } for production in production_ids]
+        ret = vals[0] if vin else vals
         body = json.dumps(ret)
         return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=200)
 
@@ -127,6 +134,13 @@ class SaConfiguration(http.Controller):
 
 
         # 创建MO成功
-        ret = production.read(fields=NORMAL_RESULT_FIELDS_READ)
-        body = json.dumps(ret)
+        vals = {
+            'id': production.id,
+            'vin': production.vin,
+            'knr': production.knr,
+            'product_id': production.product_id.id,
+            'assembly_line_id': production.assembly_line_id.id,
+            'result_ids': production.result_ids.ids,
+        }
+        body = json.dumps(vals)
         return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=201)

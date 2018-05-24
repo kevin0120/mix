@@ -75,7 +75,16 @@ class SPC(http.Controller):
                 if _aiis_urls:
                     aiis_urls = _aiis_urls.split(',')
                     ret = _post_aiis_result_package(aiis_urls, operation_result_id)
-            body = json.dumps(operation_result_id.read(fields=NORMAL_RESULT_FIELDS_READ)[0])
+            val = {
+                'workorder_id': operation_result_id.workorder_id.id,
+                'id':  operation_result_id.id,
+                'product_id': operation_result_id.product_id.id,
+                'consu_product_id': operation_result_id.consu_product_id.id,
+                'op_time': operation_result_id.op_time,
+                'measure_result': operation_result_id.measure_result,
+                'workcenter_id': operation_result_id.workcenter_id.id
+            }
+            body = json.dumps(val)
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             response = Response(body, status=200, headers=headers)
             return response
@@ -98,12 +107,20 @@ class SPC(http.Controller):
             else:
                 limit = DEFAULT_LIMIT
             quality_checks = env['operation.result'].search(domain, limit=limit)
-        _ret = quality_checks.read(fields=NORMAL_RESULT_FIELDS_READ)
-        if len(_ret) == 0:
+        if not quality_checks:
             body = json.dumps({'msg': "result not existed"})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=404, headers=headers)
-        ret = _ret[0] if result_id else _ret
+        vals = [{
+                'workorder_id': operation_result_id.workorder_id.id,
+                'id':  operation_result_id.id,
+                'product_id': operation_result_id.product_id.id,
+                'consu_product_id': operation_result_id.consu_product_id.id,
+                'op_time': operation_result_id.op_time,
+                'measure_result': operation_result_id.measure_result,
+                'workcenter_id': operation_result_id.workcenter_id.id
+            } for operation_result_id in quality_checks]
+        ret = vals[0] if result_id else vals
         body = json.dumps(ret)
         return Response(body, headers=[('Content-Type', 'application/json'),('Content-Length', len(body))], status=200)
 
@@ -124,7 +141,16 @@ class SPC(http.Controller):
             write_values['cur_objects'] = json.dumps(_vals)
             ret = operation_result_id.write(write_values)
             if ret:
-                body = json.dumps(operation_result_id.read(fields=NORMAL_RESULT_FIELDS_READ)[0])
+                val = {
+                    'workorder_id': operation_result_id.workorder_id.id,
+                    'id': operation_result_id.id,
+                    'product_id': operation_result_id.product_id.id,
+                    'consu_product_id': operation_result_id.consu_product_id.id,
+                    'op_time': operation_result_id.op_time,
+                    'measure_result': operation_result_id.measure_result,
+                    'workcenter_id': operation_result_id.workcenter_id.id
+                }
+                body = json.dumps(val)
                 headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
                 response = Response(body, status=200, headers=headers)
                 return response
