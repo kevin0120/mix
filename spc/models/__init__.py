@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from . import controller_result
+# from . import controller_result
 from . import result
 from . import mrp_workorder
 # from . import spc_wizard
