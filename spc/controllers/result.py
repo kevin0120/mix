@@ -118,14 +118,14 @@ class SPC(http.Controller):
                     val.update({
                         'control_date': fields.Datetime.to_string((_t - _t.utcoffset()))
                     })
-            result_id = val.pop('id')
-            need_update_result = operation_result_ids.filtered(lambda r: r.id == result_id)
-            ret = need_update_result.write(val)
-            if not ret:
-                body = json.dumps({'msg': "update result %d fail" % result_id})
-                headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
-                response = Response(body, status=405, headers=headers)
-                return response
+            # result_id = val.pop('id')
+            # need_update_result = operation_result_ids.filtered(lambda r: r.id == result_id)
+        ret = operation_result_ids.bulk_write(datas)
+        if not ret:
+            body = json.dumps({'msg': "update result fail"})
+            headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
+            response = Response(body, status=405, headers=headers)
+            return response
 
         headers = [('Content-Type', 'application/json')]
         response = Response(status=204, headers=headers)

@@ -9,8 +9,10 @@ from odoo.addons.spc.controllers.result import _post_aiis_result_package
 import json
 import logging
 
-_logger = logging.getLogger(__name__)
+from collections import defaultdict, MutableMapping, OrderedDict
+from odoo.tools import frozendict
 
+_logger = logging.getLogger(__name__)
 
 
 class OperationResult(models.HyperModel):
@@ -117,7 +119,7 @@ class OperationResult(models.HyperModel):
             result.one_time_pass = 'fail'
             result.final_pass = 'fail'
             if result.measure_result != 'ok':
-                return
+                continue
             result.final_pass = 'pass'
             if result.op_time == 1:
                 result.one_time_pass = 'pass'
@@ -239,6 +241,102 @@ class OperationResult(models.HyperModel):
         #     vals.update({'cur_objects': json.dumps(cur_objects)})
         ret = super(OperationResult, self).write(vals)
         return ret
+
+    @api.multi
+    def _bulk_write(self, all_vals):
+        all_updates = []
+        update_wo_ids = []
+        for vals in all_vals:
+            updates = []  # list of (column, expr) or (column, pattern, value)
+            splite_updates = []
+            upd_todo = []  # list of column names to set explicitly
+            updend = []  # list of possibly inherited field names
+            direct = []  # list of direcly updated columns
+            has_trans = self.env.lang and self.env.lang != 'en_US'
+            single_lang = len(self.env['res.lang'].get_installed()) <= 1
+            for name, val in vals.iteritems():
+                field = self._fields[name]
+                if field and field.deprecated:
+                    _logger.warning('Field %s.%s is deprecated: %s', self._name, name, field.deprecated)
+                if field.store:
+                    if hasattr(field, 'selection') and val:
+                        self._check_selection_field_value(name, val)
+                    if field.column_type:
+                        # if single_lang or not (has_trans and field.translate is True):
+                        #     # val is not a translation: update the table
+                        #     val = field.convert_to_column(val, self)
+                        updates.append((name, field.column_format, '''timestamp '%s' ''' % val if field.column_type[0] == 'timestamp' else val))
+                        if name != 'id':
+                            splite_updates.append((name, field.column_format, '''timestamp '%s' ''' % val if field.column_type[0] == 'timestamp' else val))
+                        direct.append(name)
+                    else:
+                        upd_todo.append(name)
+                else:
+                    updend.append(name)
+
+            if self._log_access:
+                updates.append(('write_uid', '%s', self._uid))
+                updates.append(('write_date', "(now() at time zone 'UTC')"))
+                direct.append('write_uid')
+                direct.append('write_date')
+            all_updates.append(updates)
+            update_wo_ids.append(splite_updates)
+
+        ### 添加需要重计算字段
+        self.modified([u[0] for u in update_wo_ids[0]])
+        cr = self._cr
+        t = [tuple(u[2] for u in update if len(u) > 2) for update in all_updates]
+        x = []
+        for _t in t:
+            s = '(%s)' % (','.join("'%s'" % _s if (isinstance(_s, str) or isinstance(_s, unicode)) and _s.find('timestamp') < 0 else '%s' % str(_s) for _s in _t))
+            x.append(s)
+        query = """UPDATE "%s" AS o SET (%s) = (%s) FROM(VALUES %s) AS s (%s) WHERE o.id = s.id""" % (
+            self._table,
+            ', '.join('%s' % u[0] for u in update_wo_ids[0]),
+            ','.join("s.%s" % u[0] for u in update_wo_ids[0]),
+            ','.join('%s'% _t for _t in x),
+            ', '.join('%s' % u[0] for u in all_updates[0]),
+        )
+
+        cr.execute(query)
+
+        map(lambda vals: self.browse(vals['id'])._validate_fields(vals), all_vals)
+
+        # recompute new-style fields
+        if self.env.recompute and self._context.get('recompute', True):
+            self._bulk_recompute()
+
+        return True
+
+    @api.model
+    def _bulk_recompute(self):
+        """ Recompute stored function fields. The fields and records to
+            recompute have been determined by method :meth:`modified`.
+        """
+        while self.env.has_todo():
+            field, recs = self.env.get_todo()
+            # determine the fields to recompute
+            fs = self.env[field.model_name]._field_computed[field]
+            ns = [f.name for f in fs if f.store]
+            # evaluate fields, and group record ids by update
+            updates = defaultdict(set)
+            for rec in recs.exists():
+                vals = rec._convert_to_write({n: rec[n] for n in ns})
+                updates[frozendict(vals)].add(rec.id)
+            # update records in batch when possible
+            with recs.env.norecompute():
+                for vals, ids in updates.iteritems():
+                    recs.browse(ids)._write(dict(vals))
+            # mark computed fields as done
+            map(recs._recompute_done, fs)
+
+    @api.multi
+    def bulk_write(self, vals):
+        if not self:
+            return True
+        self._check_concurrency()
+        self._bulk_write(vals)
+        return True
 
     @api.multi
     def do_fail(self):
