@@ -92,6 +92,7 @@ class SPC(http.Controller):
     @http.route(['/api/v1/operation.results'], methods=['PUT', 'OPTIONS'], type='json', auth='none', cors='*', csrf=False)
     def _batch_update_results(self):
         datas = request.jsonrequest
+        map(lambda val: val.update({'lacking': 'normal'}), datas)  ### 有结果传送 所以 lacking变为normal
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         result_ids = [val['id'] for val in datas]
         operation_result_ids = env['operation.result'].search([('id', 'in', result_ids)])

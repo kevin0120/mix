@@ -78,17 +78,15 @@ class OperationResult(models.HyperModel):
         ('nok', 'NOK')], string="Measure Success", default='none')
 
     lacking = fields.Selection([('lack', 'Data Lacking'),
-        ('normal', 'Normal')], string='Lacking', default='lack', compute='_compute_result_lacking', store=True)
+        ('normal', 'Normal')], string='Lacking', default='lack')
 
     op_time = fields.Integer(string=u'第几次拧紧作业', default=1)
 
     one_time_pass = fields.Selection([('pass', 'One Time Passed'),
-        ('fail', 'Failed')], string='One Time Pass', default='fail',
-                                   compute='_compute_result_pass', store=True)
+        ('fail', 'Failed')], string='One Time Pass', default='fail')
 
     final_pass = fields.Selection([('pass', 'Final Passed'),
-        ('fail', 'Failed')], string='Final Pass', default='fail',
-                                compute='_compute_result_pass', store=True)
+        ('fail', 'Failed')], string='Final Pass', default='fail')
 
     sent = fields.Boolean('Have sent to aiis', default=False)
 
@@ -112,26 +110,26 @@ class OperationResult(models.HyperModel):
         except ValueError:
             raise ValidationError('Waveform File is not Schema correct')
 
-    @api.multi
-    @api.depends('measure_result', 'op_time')
-    def _compute_result_pass(self):
-        for result in self:
-            result.one_time_pass = 'fail'
-            result.final_pass = 'fail'
-            if result.measure_result != 'ok':
-                continue
-            result.final_pass = 'pass'
-            if result.op_time == 1:
-                result.one_time_pass = 'pass'
+    # @api.multi
+    # @api.depends('measure_result', 'op_time')
+    # def _compute_result_pass(self):
+    #     for result in self:
+    #         result.one_time_pass = 'fail'
+    #         result.final_pass = 'fail'
+    #         if result.measure_result != 'ok':
+    #             continue
+    #         result.final_pass = 'pass'
+    #         if result.op_time == 1:
+    #             result.one_time_pass = 'pass'
 
-    @api.multi
-    # @api.depends('measure_torque', 'measure_degree', 'measure_result')
-    @api.depends('measure_result')
-    def _compute_result_lacking(self):
-        for result in self:
-            result.lacking = 'lack'
-            if result.measure_result != 'none': # if result.measure_torque not in [False, 0.0] and result.measure_degree not in [False, 0.0] and result.measure_result != 'none':
-                result.lacking = 'normal'
+    # @api.multi
+    # # @api.depends('measure_torque', 'measure_degree', 'measure_result')
+    # @api.depends('measure_result')
+    # def _compute_result_lacking(self):
+    #     for result in self:
+    #         result.lacking = 'lack'
+    #         if result.measure_result != 'none': # if result.measure_torque not in [False, 0.0] and result.measure_degree not in [False, 0.0] and result.measure_result != 'none':
+    #             result.lacking = 'normal'
 
     @api.multi
     def read(self, fields=None, load='_classic_read'):
