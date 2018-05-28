@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"container/list"
 	"sync"
+	"strings"
 )
 
 const (
@@ -37,7 +38,7 @@ type Workorder struct {
 	WorkSheet		string		`json:"work_sheet"`
 }
 
-type Result struct {
+type ControllerResult struct {
 	Result_id int	`json:"result_id"`
 	Controller_SN string `json:"controller_sn"`
 	Workorder_ID int `json:"workorder_id"`
@@ -46,26 +47,67 @@ type Result struct {
 	Dat string `json:"dat"`
 	PSet int `json:"pset"`
 	Count int `json:"count"`
-	PSetDefine struct {
-		Strategy string `json:"strategy"`
-		Mp float64 `json:"M+"`
-		Mm float64 `json:"M-"`
-		Ms float64 `json:"MS"`
-		Ma float64 `json:"MA"`
-		Wp float64 `json:"W+"`
-		Wm float64 `json:"W-"`
-		Wa float64 `json:"WS"`
-	} `json:"pset_define"`
+	PSetDefine PSetDefine `json:"pset_define"`
 
-	ResultValue struct {
-		Mi float64 `json:"MI"`
-		Wi float64 `json:"WI"`
-		Ti float64 `json:"TI"`
-	} `json:"result_value"`
+	ResultValue ResultValue `json:"result_value"`
 }
 
-func XMl2Result(result cvi3.CVI3Result) (Result) {
-	rr := Result{}
+type PSetDefine struct {
+	Strategy string `json:"strategy"`
+	Mp float64 `json:"M+"`
+	Mm float64 `json:"M-"`
+	Ms float64 `json:"MS"`
+	Ma float64 `json:"MA"`
+	Wp float64 `json:"W+"`
+	Wm float64 `json:"W-"`
+	Wa float64 `json:"WS"`
+}
+
+type ResultValue struct {
+	Mi float64 `json:"MI"`
+	Wi float64 `json:"WI"`
+	Ti float64 `json:"TI"`
+}
+
+type ControllerCurve struct {
+	ResultID int
+	CurveFile string
+	CurveData string
+	Count int
+}
+
+type ControllerCurveFile struct {
+	Result string	`json:"result"`
+	CUR_M []float64 `json:"cur_m"`
+	CUR_W []float64 `json:"cur_w"`
+}
+
+func XML2Curve (result cvi3.CVI3Result) (ControllerCurveFile) {
+	cur_result := ControllerCurveFile{}
+	cur_result.Result = result.PRC_SST.PAR.Result
+	if cur_result.Result == "IO" {
+		cur_result.Result = RESULT_OK
+	} else if cur_result.Result == "NIO" {
+		cur_result.Result = RESULT_NOK
+	}
+
+	cur_ms := strings.Split(result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.SMP.CUR_M, " ")
+	for i := range cur_ms {
+		v, _ := strconv.ParseFloat(cur_ms[i], 64)
+		cur_result.CUR_M = append(cur_result.CUR_M, v)
+	}
+
+	cur_ws := strings.Split(result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.SMP.CUR_W, " ")
+	for i := range cur_ws {
+		v, _ := strconv.ParseFloat(cur_ws[i], 64)
+		cur_result.CUR_W = append(cur_result.CUR_W, v)
+	}
+
+	return cur_result
+}
+
+func XMl2Result(result cvi3.CVI3Result) (ControllerResult) {
+	rr := ControllerResult{}
 
 	rr.Controller_SN = result.PRC_SST.PAR.SN
 	rr.Result = result.PRC_SST.PAR.Result
@@ -77,7 +119,7 @@ func XMl2Result(result cvi3.CVI3Result) (Result) {
 
 	rr.PSet = result.PRC_SST.PAR.FAS.GRP.TIP.PSet
 	rr.Workorder_ID = result.PRC_SST.PAR.Workorder_id
-	rr.Dat = fmt.Sprintf("%sT%s+08:00", result.PRC_SST.PAR.FAS.GRP.TIP.Date, result.PRC_SST.PAR.FAS.GRP.TIP.Time)
+	rr.Dat = fmt.Sprintf("%s %s", result.PRC_SST.PAR.FAS.GRP.TIP.Date, result.PRC_SST.PAR.FAS.GRP.TIP.Time)
 	result_id := result.PRC_SST.PAR.Result_id
 	rr.Result_id, _ = strconv.Atoi(result_id)
 	rr.CurFile = fmt.Sprintf("%s_%d_%s_%s.json", rr.Controller_SN, rr.Workorder_ID, result_id, cvi3.GenerateID())

@@ -320,68 +320,68 @@ func (odoo *ODOO) PutResult(id int, result payload.ODOOResult) (string, error) {
 //	}
 //}
 
-func (odoo *ODOO) TaskPutResults() {
-	for {
-		// 取得所有需要推送的结果数据
-
-		for {
-			v := odoo.PutStack.Pop()
-			if v == nil {
-				break
-			}
-
-			//var result payload.ODOORsultPut = payload.ODOORsultPut(v)
-			//_, err := odoo.PutResult(result.ID, result.Result)
-			//if err == nil {
-			//	odoo.DB.UpdateResults(result.ID, result.Result.Op_time, true)
-			//}
-		}
-
-
-
-		results, err := odoo.DB.ListNeedPushResults()
-		if err == nil {
-			for _, v := range results {
-				result_data := payload.Result{}
-				json.Unmarshal([]byte(v.Result_data), &result_data)
-
-				odoo_result := payload.ODOOResult{}
-				odoo_result.Control_date = result_data.Dat
-
-				odoo_result.CURObjects = []payload.CURObject{}
-
-
-				results, _ := odoo.DB.ListResults(result_data.Result_id)
-				for _,v := range results {
-					nr := payload.Result{}
-					json.Unmarshal([]byte(v.Result_data), &nr)
-					cur_object := payload.CURObject{}
-					cur_object.File = nr.CurFile
-					cur_object.OP = nr.Count
-					odoo_result.CURObjects = append(odoo_result.CURObjects, cur_object)
-				}
-
-				odoo_result.Measure_degree = result_data.ResultValue.Wi
-				odoo_result.Measure_result = strings.ToLower(result_data.Result)
-				odoo_result.Measure_t_don = result_data.ResultValue.Ti
-				odoo_result.Measure_torque = result_data.ResultValue.Mi
-				odoo_result.Op_time = result_data.Count
-				odoo_result.Pset_m_max = result_data.PSetDefine.Mp
-				odoo_result.Pset_m_min = result_data.PSetDefine.Mm
-				odoo_result.Pset_m_target = result_data.PSetDefine.Ma
-				odoo_result.Pset_m_threshold = result_data.PSetDefine.Ms
-				odoo_result.Pset_strategy = result_data.PSetDefine.Strategy
-				odoo_result.Pset_w_max = result_data.PSetDefine.Wp
-				odoo_result.Pset_w_min = result_data.PSetDefine.Wm
-				odoo_result.Pset_w_target = result_data.PSetDefine.Wa
-
-				_, err := odoo.PutResult(result_data.Result_id, odoo_result)
-				if err == nil {
-					odoo.DB.UpdateResults(result_data.Result_id, odoo_result.Op_time, true)
-				}
-			}
-		}
-
-		time.Sleep(time.Duration(odoo.Conf.Push_inteval) * time.Millisecond)
-	}
-}
+//func (odoo *ODOO) TaskPutResults() {
+//	for {
+//		// 取得所有需要推送的结果数据
+//
+//		for {
+//			v := odoo.PutStack.Pop()
+//			if v == nil {
+//				break
+//			}
+//
+//			//var result payload.ODOORsultPut = payload.ODOORsultPut(v)
+//			//_, err := odoo.PutResult(result.ID, result.Result)
+//			//if err == nil {
+//			//	odoo.DB.UpdateResults(result.ID, result.Result.Op_time, true)
+//			//}
+//		}
+//
+//
+//
+//		results, err := odoo.DB.ListNeedPushResults()
+//		if err == nil {
+//			for _, v := range results {
+//				result_data := payload.Result{}
+//				json.Unmarshal([]byte(v.Result_data), &result_data)
+//
+//				odoo_result := payload.ODOOResult{}
+//				odoo_result.Control_date = result_data.Dat
+//
+//				odoo_result.CURObjects = []payload.CURObject{}
+//
+//
+//				results, _ := odoo.DB.ListResults(result_data.Result_id)
+//				for _,v := range results {
+//					nr := payload.Result{}
+//					json.Unmarshal([]byte(v.Result_data), &nr)
+//					cur_object := payload.CURObject{}
+//					cur_object.File = nr.CurFile
+//					cur_object.OP = nr.Count
+//					odoo_result.CURObjects = append(odoo_result.CURObjects, cur_object)
+//				}
+//
+//				odoo_result.Measure_degree = result_data.ResultValue.Wi
+//				odoo_result.Measure_result = strings.ToLower(result_data.Result)
+//				odoo_result.Measure_t_don = result_data.ResultValue.Ti
+//				odoo_result.Measure_torque = result_data.ResultValue.Mi
+//				odoo_result.Op_time = result_data.Count
+//				odoo_result.Pset_m_max = result_data.PSetDefine.Mp
+//				odoo_result.Pset_m_min = result_data.PSetDefine.Mm
+//				odoo_result.Pset_m_target = result_data.PSetDefine.Ma
+//				odoo_result.Pset_m_threshold = result_data.PSetDefine.Ms
+//				odoo_result.Pset_strategy = result_data.PSetDefine.Strategy
+//				odoo_result.Pset_w_max = result_data.PSetDefine.Wp
+//				odoo_result.Pset_w_min = result_data.PSetDefine.Wm
+//				odoo_result.Pset_w_target = result_data.PSetDefine.Wa
+//
+//				_, err := odoo.PutResult(result_data.Result_id, odoo_result)
+//				if err == nil {
+//					odoo.DB.UpdateResults(result_data.Result_id, odoo_result.Op_time, true)
+//				}
+//			}
+//		}
+//
+//		time.Sleep(time.Duration(odoo.Conf.Push_inteval) * time.Millisecond)
+//	}
+//}

@@ -60,12 +60,14 @@ func main() {
 	cvi3_service.APIService = &API
 
 	configs := []cvi3.CVI3Config{}
-	configs = append(configs, cvi3.CVI3Config{c.CVI3.Controllers[0].SN, c.CVI3.Controllers[0].IP, c.CVI3.Controllers[0].Port})
+	for _, v := range c.CVI3.Controllers {
+		configs = append(configs, cvi3.CVI3Config{v.SN, v.IP, v.Port})
+	}
 	cvi3_service.Config(configs)
 
 	err = cvi3_service.StartService()
 	if err != nil {
-		fmt.Printf("cvi3_services service error:%s\n", err.Error())
+		fmt.Printf("初始化cvi3服务失败:%s\n", err.Error())
 	}
 
 	fmt.Printf("初始化api服务\n")
@@ -75,6 +77,6 @@ func main() {
 	API.CVI3 = &cvi3_service
 	err = API.StartService()
 	if err != nil {
-		fmt.Printf("api service error:%s\n", err.Error())
+		fmt.Printf("初始化api服务失败:%s\n", err.Error())
 	}
 }

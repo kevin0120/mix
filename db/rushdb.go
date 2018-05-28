@@ -9,6 +9,7 @@ import (
 	"github.com/kataras/iris/core/errors"
 
 	"github.com/masami10/rush/payload"
+	"time"
 )
 
 type DB struct {
@@ -53,6 +54,18 @@ func (db *DB)Init() (error) {
 	} else {
 		if !exist {
 			e = engine.CreateTables(&Results{})
+			if e != nil {
+				return e
+			}
+		}
+	}
+
+	exist, e = engine.IsTableExist(&Curves{})
+	if e != nil {
+		return e
+	} else {
+		if !exist {
+			e = engine.CreateTables(&Curves{})
 			if e != nil {
 				return e
 			}
@@ -149,11 +162,96 @@ func (db *DB) InsertResults(result Results) (error) {
 	if e != nil {
 		return e
 	} else {
-		fmt.Printf("new result:%d\n", result.Result_id)
+		fmt.Printf("new result:%d\n", result.ResultId)
 	}
 
 	return nil
 }
+
+func (db *DB) CurveExist(curve Curves) (bool, error) {
+	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		db.User,
+		db.Pwd,
+		db.URL,
+		db.Port,
+		db.DBName))
+
+	if err != nil {
+		return false, err
+	}
+
+	has, err := engine.Exist(&Curves{ ResultID: curve.ResultID, Count: curve.Count})
+	if err != nil {
+		return false, err
+	} else {
+		return has, nil
+	}
+}
+
+func (db *DB) InsertCurve(curve Curves) (error) {
+	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		db.User,
+		db.Pwd,
+		db.URL,
+		db.Port,
+		db.DBName))
+
+	if err != nil {
+		return err
+	}
+
+	_, e := engine.Insert(curve)
+	if e != nil {
+		return e
+	} else {
+		return nil
+	}
+}
+
+func (db *DB) UpdateCurve(curve Curves) (Curves, error) {
+	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		db.User,
+		db.Pwd,
+		db.URL,
+		db.Port,
+		db.DBName))
+
+	if err != nil {
+		return curve, err
+	}
+
+	sql := "update `curves` set has_upload = ?, curve_file = ?, curve_data = ? where result_id = ? and count = ?"
+	_, err = engine.Exec(sql,
+		curve.HasUpload, curve.CurveFile, curve.CurveData, curve.ResultID, curve.Count)
+
+	if err != nil {
+		return curve, err
+	} else {
+		return curve, nil
+	}
+}
+
+func (db *DB) ListCurves(result_id int) ([]Curves, error) {
+	var curves []Curves = []Curves{}
+	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		db.User,
+		db.Pwd,
+		db.URL,
+		db.Port,
+		db.DBName))
+
+	if err != nil {
+		return curves, err
+	}
+
+	e := engine.Alias("c").Where("c.result_id = ?", result_id).Find(&curves)
+	if e != nil {
+		return curves, e
+	} else {
+		return curves, nil
+	}
+}
+
 
 func (db *DB) InsertWorkorders(workorders []payload.ODOOWorkorder) ([]payload.ODOOWorkorder, error) {
 	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
@@ -183,38 +281,39 @@ func (db *DB) InsertWorkorders(workorders []payload.ODOOWorkorder) ([]payload.OD
 
 		o := new(Workorders)
 		o.Status = v.Status
-		o.Workorder_id = v.ID
+		o.WorkorderID = v.ID
 		o.PSet, _ = strconv.Atoi(v.PSet)
-		o.HMI_sn = v.HMI.UUID
+		o.HMISN = v.HMI.UUID
 		o.Knr = v.KNR
-		o.Nut_total = v.NutTotal
+		o.NutTotal = v.NutTotal
 		o.Vin = v.VIN
-		o.Max_op_time = v.Max_op_time
-		o.Max_redo_times = v.Max_redo_times
+		o.MaxOpTime = v.Max_op_time
+		o.MaxRedoTimes = v.Max_redo_times
 
 		ids, _ := json.Marshal(v.Result_IDs)
-		o.Result_ids = string(ids)
+		o.ResultIDs = string(ids)
 
 		_, err := engine.Insert(o)
 		if err != nil {
 			return workorders, err
 		} else {
 			new_orders = append(new_orders, v)
-			fmt.Printf("new workorder:%d\n", o.Workorder_id)
+			fmt.Printf("new workorder:%d\n", o.WorkorderID)
 		}
 
-		//// 预保存结果
+		// 预保存结果
 		for _, result_id := range v.Result_IDs {
 			r := new(Results)
-			r.Workorder_id = o.Workorder_id
+			r.ResultId = result_id
+			r.ControllerSN = ""
+			r.WorkorderID = o.WorkorderID
 			r.Result = payload.RESULT_NONE
-			r.Controller_sn = ""
+			r.HasUpload = false
+			r.Stage = "init"
+			r.UpdateTime = time.Now()
+			r.PSetDefine = ""
+			r.ResultValue = ""
 			r.Count = 1
-			r.Cur_data = ""
-			r.Cur_upload = false
-			r.Result_id = result_id
-			r.Result_data = ""
-			r.Result_upload = false
 
 			_, err := engine.Insert(r)
 			if err != nil {
@@ -242,7 +341,7 @@ func (db *DB) WorkorderExists(id int) (bool, error) {
 		return false, err
 	}
 
-	has, err := engine.Exist(&Workorders{ Workorder_id: id})
+	has, err := engine.Exist(&Workorders{ WorkorderID: id})
 	if err != nil {
 		return false, err
 	} else {
@@ -381,8 +480,17 @@ func (db *DB) UpdateResult(result Results) (Results, error) {
 		return result, err
 	}
 
-	sql := "update `results` set cur_upload = ?, result_upload = ?, update_time = ?, result_data = ?, cur_data = ?, controller_sn = ?, result = ?, need_upload = ? where result_id = ? and count = ?"
-	_, err = engine.Exec(sql, result.Cur_upload, result. Result_upload, result.Update_time, result.Result_data, result.Cur_data, result.Controller_sn, result.Result, result.Need_upload, result.Result_id, result.Count)
+	sql := "update `results` set ControllerSN = ?, Result = ?, HasUpload = ?, Stage = ?, UpdateTime = ?, PSetDefine = ?, ResultValue = ?, Count = ? where result_id = ?"
+	_, err = engine.Exec(sql,
+		result.ControllerSN,
+		result.Result,
+		result.HasUpload,
+		result.Stage,
+		result.UpdateTime,
+		result.PSetDefine,
+		result.ResultValue,
+		result.Count,
+		result.ResultId)
 
 	if err != nil {
 		return result, err

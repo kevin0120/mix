@@ -3,30 +3,36 @@ package rushdb
 import "time"
 
 type Workorders struct {
-	Workorder_id	int			`xorm:"int 'workorder_id'"`
-	HMI_sn			string		`xorm:"varchar(64) 'hmi_sn'"`
+	WorkorderID		int			`xorm:"int 'workorder_id'"`
+	HMISN			string		`xorm:"varchar(64) 'hmi_sn'"`
 	PSet			int			`xorm:"int 'pset'"`
-	Nut_total		float64		`xorm:"double 'nut_total'"`
+	NutTotal		float64		`xorm:"double 'nut_total'"`
 	Vin				string		`xorm:"varchar(64) 'vin'"`
 	Knr				string		`xorm:"varchar(64) 'knr'"`
-	Max_redo_times	int			`xorm:"int 'max_redo_times'"`
-	Max_op_time		int			`xorm:"int 'max_op_time'"`
+	MaxRedoTimes	int			`xorm:"int 'max_redo_times'"`
+	MaxOpTime		int			`xorm:"int 'max_op_time'"`
 	Status			string		`xorm:"varchar(32) 'status'"`
-	Result_ids		string		`xorm:"text 'result_ids'"`
+	ResultIDs		string		`xorm:"text 'result_ids'"`
 	WorkSheet		string		`xorm:"text 'work_sheet'"`
 }
 
 type Results struct {
-	Result_id		int			`xorm:"int 'result_id'"`
-	Controller_sn	string		`xorm:"varchar(64) 'controller_sn'"`
-	Workorder_id	int			`xorm:"int 'workorder_id'"`
+	ResultId		int			`xorm:"int 'result_id'"`
+	WorkorderID		int			`xorm:"int 'workorder_id'"`
+	ControllerSN	string		`xorm:"varchar(64) 'controller_sn'"`
 	Result			string		`xorm:"varchar(32) 'result'"`
-	Cur_upload		bool		`xorm:"bool 'cur_upload'"`
-	Result_upload	bool		`xorm:"bool 'result_upload'"`
-	Need_upload 	bool		`xorm:"bool 'need_upload'"`
-	Update_time		time.Time	`xorm:"date 'update_time'"`
-	Result_data		string		`xorm:"text 'result_data'"`
-	Cur_data		string		`xorm:"text 'cur_data'"`
-	Total_count		int			`xorm:"int 'total_count'"`
+	HasUpload		bool		`xorm:"bool 'has_upload'"`
+	Stage 			string		`xorm:"varchar(32) 'stage'"`
+	UpdateTime		time.Time	`xorm:"date 'update_time'"`
+	PSetDefine		string		`xorm:"text 'pset_define'"`
+	ResultValue		string		`xorm:"text 'result_value'"`
 	Count			int			`xorm:"int 'count'"`
+}
+
+type Curves struct {
+	ResultID		int			`xorm:"int 'result_id'"`
+	Count			int			`xorm:"int 'count'"`
+	CurveFile		string		`xorm:"varchar(32) 'curve_file'"`
+	CurveData		string		`xorm:"text 'curve_data'"`
+	HasUpload		bool		`xorm:"bool 'has_upload'"`
 }

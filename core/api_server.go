@@ -80,43 +80,15 @@ func (apiserver *APIServer) putPSets(ctx iris.Context) {
 	}
 
 	// 检测结果id
-	var oldresult rushdb.Results
-	oldresult, err = apiserver.DB.GetResult(pset.Result_id, 0)
+	result, err := apiserver.DB.GetResult(pset.Result_id, 0)
 	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString(err.Error())
 		return
 	}
 
-	var result rushdb.Results
-	result, err = apiserver.DB.GetResult(pset.Result_id, pset.Count)
-	if err != nil {
-		// 创建新结果
-
-		raw_result, _ := apiserver.DB.GetResult(pset.Result_id, 0)
-		nr := rushdb.Results{}
-		nr.Workorder_id = oldresult.Workorder_id
-		nr.Controller_sn = pset.Controller_SN
-		nr.Result = payload.RESULT_NONE
-		nr.Count = pset.Count
-		nr.Cur_data = ""
-		nr.Cur_upload = false
-		nr.Result_id = pset.Result_id
-		nr.Result_data = ""
-		nr.Result_upload = false
-		nr.Total_count = raw_result.Total_count
-		err := apiserver.DB.InsertResults(nr)
-		if err != nil {
-			ctx.StatusCode(iris.StatusBadRequest)
-			ctx.WriteString(err.Error())
-			return
-		}
-	} else {
-		result = oldresult
-	}
-
 	// 通过控制器设定程序
-	err = apiserver.CVI3.Service.PSet(pset.Controller_SN, pset.PSet, result.Workorder_id, pset.Result_id, pset.Count)
+	err = apiserver.CVI3.Service.PSet(pset.Controller_SN, pset.PSet, result.WorkorderID, pset.Result_id, pset.Count)
 	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString(err.Error())
@@ -150,15 +122,15 @@ func (apiserver *APIServer) getWorkorder(ctx iris.Context) {
 	}
 
 	resp := payload.Workorder{}
-	resp.HMI_sn = workorder.HMI_sn
+	resp.HMI_sn = workorder.HMISN
 	resp.PSet = workorder.PSet
-	resp.Workorder_id = workorder.Workorder_id
+	resp.Workorder_id = workorder.WorkorderID
 	resp.Vin = workorder.Vin
 	resp.Knr = workorder.Knr
-	resp.Nut_total = workorder.Nut_total
+	resp.Nut_total = workorder.NutTotal
 	resp.Status = workorder.Status
 	resp.WorkSheet = workorder.WorkSheet
-	json.Unmarshal([]byte(workorder.Result_ids), &resp.Result_ids)
+	json.Unmarshal([]byte(workorder.ResultIDs), &resp.Result_ids)
 
 	body, _ := json.Marshal(resp)
 	ctx.Header("content-type", "application/json")
@@ -179,7 +151,7 @@ func (apiserver *APIServer) postWorkorders(ctx iris.Context) {
 		return
 	}
 
-	neworders, e := apiserver.DB.InsertWorkorders(workorders)
+	_, e := apiserver.DB.InsertWorkorders(workorders)
 	if e != nil {
 		//fmt.Printf("%s\n", e.Error())
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -188,7 +160,7 @@ func (apiserver *APIServer) postWorkorders(ctx iris.Context) {
 		return
 	} else {
 		// 推送新工单
-		go apiserver.push_new_orders(neworders)
+		//go apiserver.push_new_orders(neworders)
 
 		ctx.StatusCode(iris.StatusCreated)
 		return
@@ -241,52 +213,55 @@ func (apiserver *APIServer) getResults(ctx iris.Context) {
 	results, _ := apiserver.DB.FindResults(bool_has_upload, re_list)
 	target_results :=  map[int]rushdb.Results{}
 	for _, v := range results {
-		tr, exist := target_results[v.Result_id]
+		tr, exist := target_results[v.ResultId]
 		if exist {
 			// 已存在
 			if v.Count > tr.Count {
-				target_results[v.Result_id] = v
+				target_results[v.ResultId] = v
 			}
 		} else {
 			// 不存在
-			target_results[v.Result_id] = v
+			target_results[v.ResultId] = v
 		}
 	}
 
 	for _, v := range target_results {
 		odoo_result := payload.ODOOResultSync{}
-		stime := strings.Split(v.Update_time.Format("2006-01-02 15:04:05"), " ")
+		stime := strings.Split(v.UpdateTime.Format("2006-01-02 15:04:05"), " ")
 		odoo_result.Control_date = fmt.Sprintf("%sT%s+08:00", stime[0], stime[1])
 
 		odoo_result.CURObjects = []payload.CURObject{}
 
-		results, _ := apiserver.DB.ListResults(v.Result_id)
-		for _,vi := range results {
-			nr := payload.Result{}
-			json.Unmarshal([]byte(vi.Result_data), &nr)
-			cur_object := payload.CURObject{}
-			cur_object.File = nr.CurFile
-			cur_object.OP = nr.Count
-			odoo_result.CURObjects = append(odoo_result.CURObjects, cur_object)
+		curves, err := apiserver.DB.ListCurves(v.ResultId)
+		if err != nil {
+			for _, c := range curves {
+				cur_object := payload.CURObject{}
+				cur_object.File = c.CurveFile
+				cur_object.OP = c.Count
+				odoo_result.CURObjects = append(odoo_result.CURObjects, cur_object)
+			}
 		}
 
-		or := payload.Result{}
-		json.Unmarshal([]byte(v.Result_data), &or)
+		r := payload.ResultValue{}
+		json.Unmarshal([]byte(v.ResultValue), &r)
 
-		odoo_result.Measure_degree = or.ResultValue.Wi
-		odoo_result.Measure_result = strings.ToLower(or.Result)
-		odoo_result.Measure_t_don = or.ResultValue.Ti
-		odoo_result.Measure_torque = or.ResultValue.Mi
-		odoo_result.Op_time = or.Count
-		odoo_result.Pset_m_max = or.PSetDefine.Mp
-		odoo_result.Pset_m_min = or.PSetDefine.Mm
-		odoo_result.Pset_m_target = or.PSetDefine.Ma
-		odoo_result.Pset_m_threshold = or.PSetDefine.Ms
-		odoo_result.Pset_strategy = or.PSetDefine.Strategy
-		odoo_result.Pset_w_max = or.PSetDefine.Wp
-		odoo_result.Pset_w_min = or.PSetDefine.Wm
-		odoo_result.Pset_w_target = or.PSetDefine.Wa
-		odoo_result.ID = v.Result_id
+		pset := payload.PSetDefine{}
+		json.Unmarshal([]byte(v.PSetDefine), &pset)
+
+		odoo_result.Measure_degree = r.Wi
+		odoo_result.Measure_result = strings.ToLower(v.Result)
+		odoo_result.Measure_t_don = r.Ti
+		odoo_result.Measure_torque = r.Mi
+		odoo_result.Op_time = v.Count
+		odoo_result.Pset_m_max = pset.Mp
+		odoo_result.Pset_m_min = pset.Mm
+		odoo_result.Pset_m_target = pset.Ma
+		odoo_result.Pset_m_threshold = pset.Ms
+		odoo_result.Pset_strategy = pset.Strategy
+		odoo_result.Pset_w_max = pset.Wp
+		odoo_result.Pset_w_min = pset.Wm
+		odoo_result.Pset_w_target = pset.Wa
+		odoo_result.ID = v.ResultId
 
 		resp = append(resp, odoo_result)
 	}
