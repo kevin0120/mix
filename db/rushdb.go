@@ -19,6 +19,49 @@ type DB struct {
 	Pwd string		`yaml:"pwd"`
 }
 
+func (db *DB)Init() (error) {
+
+	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		db.User,
+		db.Pwd,
+		db.URL,
+		db.Port,
+		db.DBName))
+
+	if err != nil {
+		return err
+	}
+
+	var exist bool
+	var e error
+
+	exist, e = engine.IsTableExist(&Workorders{})
+	if e != nil {
+		return e
+	} else {
+		if !exist {
+			e = engine.CreateTables(&Workorders{})
+			if e != nil {
+				return e
+			}
+		}
+	}
+
+	exist, e = engine.IsTableExist(&Results{})
+	if e != nil {
+		return e
+	} else {
+		if !exist {
+			e = engine.CreateTables(&Results{})
+			if e != nil {
+				return e
+			}
+		}
+	}
+
+	return nil
+}
+
 func (db *DB) UpdateResults(id int, count int, flag bool)(error) {
 	//results := []Results{}
 	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
@@ -60,7 +103,7 @@ func (db *DB) FindResults(result_upload bool, result []string)([]Results, error)
 		return results, err
 	}
 
-	e := engine.Alias("r").Where("r.result_upload = ?", result_upload).And("r.result <> ?", "NONE").Find(&results)
+	e := engine.Alias("r").Where("r.result_upload = ?", result_upload).And("r.need_upload = ?", true).And("r.result <> ?", "NONE").Find(&results)
 	if e != nil {
 		return results, e
 	} else {
@@ -146,6 +189,8 @@ func (db *DB) InsertWorkorders(workorders []payload.ODOOWorkorder) ([]payload.OD
 		o.Knr = v.KNR
 		o.Nut_total = v.NutTotal
 		o.Vin = v.VIN
+		o.Max_op_time = v.Max_op_time
+		o.Max_redo_times = v.Max_redo_times
 
 		ids, _ := json.Marshal(v.Result_IDs)
 		o.Result_ids = string(ids)
@@ -301,6 +346,28 @@ func (db *DB) FindWorkorder(hmi_sn string, vin string, knr string) (Workorders, 
 	}
 }
 
+func (db *DB) ListNeedPushResults() ([]Results, error) {
+	results := []Results{}
+
+	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		db.User,
+		db.Pwd,
+		db.URL,
+		db.Port,
+		db.DBName))
+
+	if err != nil {
+		return results, err
+	}
+
+	e := engine.Alias("r").Where("r.need_upload = ?", true).And("r.result_upload = ?", false).Find(&results)
+	if e != nil {
+		return results, e
+	} else {
+		return results, nil
+	}
+}
+
 func (db *DB) UpdateResult(result Results) (Results, error) {
 	var err error
 	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
@@ -314,8 +381,8 @@ func (db *DB) UpdateResult(result Results) (Results, error) {
 		return result, err
 	}
 
-	sql := "update `results` set cur_upload = ?, result_upload = ?, update_time = ?, result_data = ?, cur_data = ?, controller_sn = ?, result = ? where result_id = ? and count = ?"
-	_, err = engine.Exec(sql, result.Cur_upload, result. Result_upload, result.Update_time, result.Result_data, result.Cur_data, result.Controller_sn, result.Result, result.Result_id, result.Count)
+	sql := "update `results` set cur_upload = ?, result_upload = ?, update_time = ?, result_data = ?, cur_data = ?, controller_sn = ?, result = ?, need_upload = ? where result_id = ? and count = ?"
+	_, err = engine.Exec(sql, result.Cur_upload, result. Result_upload, result.Update_time, result.Result_data, result.Cur_data, result.Controller_sn, result.Result, result.Need_upload, result.Result_id, result.Count)
 
 	if err != nil {
 		return result, err

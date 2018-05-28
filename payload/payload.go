@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/linshenqi/TightningSys/desoutter/cvi3"
 	"strconv"
+	"container/list"
+	"sync"
 )
 
 const (
@@ -120,9 +122,9 @@ type ODOOMOCreated struct {
 	ID int				`json:"id"`
 	KNR string			`json:"knr"`
 	VIN string			`json:"vin"`
-	ProductID []string	`json:"-"`
+	ProductID int		`json:"product_id"`
 	Result_IDs []int	`json:"result_ids"`
-	AssembleLine []string `json:"-"`
+	AssembleLine int 	`json:"assembly_line_id"`
 }
 
 type ODOOWorkorder struct {
@@ -130,6 +132,8 @@ type ODOOWorkorder struct {
 	Status string		`json:"status"`
 	NutTotal float64	`json:"nut_total"`
 	PSet string			`json:"pset"`
+	Max_redo_times	int	`json:"max_redo_times"`
+	Max_op_time	int		`json:"max_op_time"`
 
 	HMI struct {
 		ID 		int		`json:"id"`
@@ -238,4 +242,40 @@ type WSRegist struct {
 
 type WSRegistMsg struct {
 	Msg string	`json:"msg"`
+}
+
+type ODOORsultPut struct {
+	ID int
+	Result ODOOResult
+}
+
+type SafeStack struct {
+	List *list.List
+	Mtx sync.Mutex
+}
+
+func (stack *SafeStack) Init() {
+	stack.List = list.New()
+	stack.Mtx = sync.Mutex{}
+}
+
+func (stack *SafeStack) Push(value interface{}) {
+	defer stack.Mtx.Unlock()
+
+	stack.Mtx.Lock()
+	stack.List.PushBack(value)
+}
+
+func (stack *SafeStack) Pop() interface{} {
+	defer stack.Mtx.Unlock()
+
+	stack.Mtx.Lock()
+
+	e := stack.List.Back()
+	if e != nil {
+		stack.List.Remove(e)
+		return e.Value
+	}
+
+	return nil
 }

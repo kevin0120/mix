@@ -33,15 +33,23 @@ func main() {
 
 	fmt.Printf("初始化数据库\n")
 	db = c.DB
+	db_err := db.Init()
+
+	if db_err != nil {
+		fmt.Printf("数据库初始化失败:%s\n", db_err.Error())
+		return
+	}
 
 	fmt.Printf("初始化对象存储\n")
 	storage.Conf = &c.MINIO
 
 	fmt.Printf("初始化odoo服务\n")
-	odoo.URL = c.ODOO.Urls[0]
+	odoo.Conf = c.ODOO
 	odoo.DB = &db
 	odoo.MasterPC_SN = masterpc_sn
 	odoo.APIService = &API
+
+	go odoo.TaskPutResults()
 
 	fmt.Printf("初始化cvi3服务\n")
 

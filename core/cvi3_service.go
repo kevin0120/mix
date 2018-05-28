@@ -86,6 +86,11 @@ func (service *CVI3Service) OnRecv(msg string) {
 		r.Controller_sn = result_data.Controller_SN
 		r.Count = result_data.Count
 
+		// 如果是最终结果，则设置发送标识
+		if r.Count >= r.Total_count || r.Result == payload.RESULT_OK{
+			r.Need_upload = true
+		}
+
 		_, err = service.DB.UpdateResult(r)
 		if err != nil {
 			fmt.Printf("%s\n", err.Error())
@@ -119,7 +124,7 @@ func (service *CVI3Service) OnRecv(msg string) {
 			}
 		}
 
-		// 结果推送odoo
+		// 加入odoo推送队列
 		odoo_result := payload.ODOOResult{}
 		odoo_result.Control_date = result_data.Dat
 
@@ -150,7 +155,13 @@ func (service *CVI3Service) OnRecv(msg string) {
 		odoo_result.Pset_w_min = result_data.PSetDefine.Wm
 		odoo_result.Pset_w_target = result_data.PSetDefine.Wa
 
-		go service.ODOO.PutResult(result_data.Result_id, odoo_result)
+		result_put := payload.ODOORsultPut{}
+		result_put.ID = result_data.Result_id
+		result_put.Result = odoo_result
+
+		service.ODOO.PutStack.Push(result_put)
+		//
+		//go service.ODOO.PutResult(result_data.Result_id, odoo_result)
 
 		// 追加最新波形
 		//go service.ODOO.PatchCurve(result_data.Result_id, result_data.CurFile, result_data.Count)

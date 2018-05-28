@@ -9,16 +9,18 @@ import (
 	"sync"
 	"os"
 	"strconv"
-	"flag"
 	"github.com/masami10/rush/payload"
 	"github.com/masami10/rush/core"
 	"math/rand"
+	"encoding/json"
+	"flag"
 )
 
 var g_Count int = 0
 var g_TableCount int = 0
 var g_odoo_url string = "http://10.1.1.31:8069"
 var g_task_num int = 8
+var g_result_batch bool =false
 //var g_req_mtx sync.Mutex
 var g_req_inteval int = 200
 var g_genetime_mtx sync.Mutex = sync.Mutex{}
@@ -27,15 +29,18 @@ var g_odoo core.ODOO = core.ODOO{}
 
 var g_time string = ""
 
+var g_odoo_result payload.ODOOResult = payload.ODOOResult{}
+var g_odoo_result_batch payload.ODOOResultSync = payload.ODOOResultSync{}
+
 //var g_result_value = [2]string{"ok", "nok"}
 //
 //var g_r *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-func create_mo(odoo_url string, mo payload.ODOOMO, odoo_result payload.ODOOResult, mtx sync.Mutex, time_mtx sync.Mutex) (error) {
+func create_mo(odoo_url string, mo payload.ODOOMO, mtx sync.Mutex, time_mtx sync.Mutex) (error) {
 	mo.Date_planned_start = g_time
 	mo.Pin = GenerateRangeNum(7, time_mtx)
 	vin_rand := GenerateRangeNum(6, time_mtx)
-	mo.Vin = fmt.Sprintf("LSV2A8CA7JN%d", vin_rand)
+	mo.Vin = fmt.Sprintf("LSVCDDCA7JN%d", vin_rand)
 
 	//SR1J--V001--C6-2018-6171427=5
 	mo_name := fmt.Sprintf("%s--V001--%s-%d-%d=%d", mo.Equipment_name, mo.Factory_name, mo.Year, mo.Pin, mo.Pin_check_code)
@@ -52,9 +57,7 @@ func create_mo(odoo_url string, mo payload.ODOOMO, odoo_result payload.ODOOResul
 		go tracefile(t, mtx)
 
 		// 推送结果
-		if len(created)  > 0 {
-			go put_result(created[0], odoo_result, time_mtx)
-		}
+		go put_result(created, time_mtx)
 
 
 		result := fmt.Sprintf("创建工单:%s 用时:%s 结果:%s \n", mo_name, t, "ok")
@@ -64,44 +67,86 @@ func create_mo(odoo_url string, mo payload.ODOOMO, odoo_result payload.ODOOResul
 	return nil
 }
 
-func put_result(mo payload.ODOOMOCreated, result payload.ODOOResult, mtx sync.Mutex) {
+func put_result(mo payload.ODOOMOCreated, mtx sync.Mutex) {
 	var r string
-	for _, v := range mo.Result_IDs {
-		result = RandomResult(result, mtx)
 
-		t, err := g_odoo.PutResult(v, result)
+	if g_result_batch == true {
+		rs := []payload.ODOOResultSync{}
+		ids := []int{}
+		for _, v := range mo.Result_IDs {
+			RandomResult(mtx)
+			g_odoo_result_batch.ID = v
 
+			if rand.Intn(100) != 99 {
+				rs = append(rs, g_odoo_result_batch)
+				ids = append(ids, v)
+			} else {
+				fmt.Printf("缺失:%d\n", v)
+			}
+
+		}
+
+		t, err := g_odoo.PutResultBatch(rs)
+		s_ids, _ := json.Marshal(ids)
 		if err != nil {
-			r = fmt.Sprintf("推送结果:%d 用时:%s 结果:%s \n", v, t, "fail")
+			r = fmt.Sprintf("批量推送结果:%s 用时:%s 结果:%s \n", s_ids, t, "fail")
 		} else {
-			r = fmt.Sprintf("推送结果:%d 用时:%s 结果:%s \n", v, t, "ok")
+			r = fmt.Sprintf("批量推送结果:%s 用时:%s 结果:%s \n", s_ids, t, "ok")
 		}
 		fmt.Printf(r)
+	} else {
+		for _, v := range mo.Result_IDs {
+			RandomResult(mtx)
+
+			t, err := g_odoo.PutResult(v, g_odoo_result)
+
+			if err != nil {
+				r = fmt.Sprintf("推送结果:%d 用时:%s 结果:%s \n", v, t, "fail")
+			} else {
+				r = fmt.Sprintf("推送结果:%d 用时:%s 结果:%s \n", v, t, "ok")
+			}
+			fmt.Printf(r)
+		}
 	}
+
 }
 
-func RandomResult(result payload.ODOOResult, mtx sync.Mutex) (payload.ODOOResult) {
-	result.Control_date = GenerateTime()
-	result.Measure_degree = (rand.Float64()*180) + 5
+func RandomResult(mtx sync.Mutex) {
+	if g_result_batch == true {
+		g_odoo_result_batch.Control_date = GenerateTime()
+		g_odoo_result_batch.Measure_degree = (rand.Float64()*180) + 5
 
-	s := GenerateRangeNum(8, mtx)
-	if s % 2 == 0{
-		result.Measure_result = "ok"
-		result.Op_time = 1
+		s := GenerateRangeNum(8, mtx)
+		if s % 2 == 0{
+			g_odoo_result_batch.Measure_result = "ok"
+		} else {
+			g_odoo_result_batch.Measure_result = "nok"
+		}
+
+		g_odoo_result_batch.Op_time = rand.Intn(3) + 1
+
+		//fmt.Printf("%s\n", result.Measure_result)
+		g_odoo_result_batch.Measure_t_don = rand.Float64() * 100 + 100
+		g_odoo_result_batch.Measure_torque = (rand.Float64()*10) + 10
 	} else {
-		result.Measure_result = "nok"
-		result.Op_time = 2
+		g_odoo_result.Control_date = GenerateTime()
+		g_odoo_result.Measure_degree = (rand.Float64()*180) + 5
+
+		s := GenerateRangeNum(8, mtx)
+		if s % 2 == 0{
+			g_odoo_result.Measure_result = "ok"
+		} else {
+			g_odoo_result.Measure_result = "nok"
+		}
+
+		g_odoo_result.Op_time = rand.Intn(3) + 1
+
+		//fmt.Printf("%s\n", result.Measure_result)
+		g_odoo_result.Measure_t_don = rand.Float64() * 100 + 100
+		g_odoo_result.Measure_torque = (rand.Float64()*10) + 10
 	}
 
-	if string(s)[0] == '3' {
-		result.Op_time = 3
-	}
 
-	//fmt.Printf("%s\n", result.Measure_result)
-	result.Measure_t_don = rand.Float64() * 100 + 100
-	result.Measure_torque = (rand.Float64()*10) + 10
-
-	return result
 }
 
 func GenerateTime() string {
@@ -166,11 +211,11 @@ func AddCount(mtx sync.Mutex) {
 	g_Count++
 }
 
-func RunTask_MO(mo payload.ODOOMO, odoo_result payload.ODOOResult, count_mtx sync.Mutex, file_mtx sync.Mutex, time_mtx sync.Mutex) {
+func RunTask_MO(mo payload.ODOOMO, count_mtx sync.Mutex, file_mtx sync.Mutex, time_mtx sync.Mutex) {
 	for {
 		ReCount(mo, count_mtx)
 
-		create_mo(g_odoo_url, mo, odoo_result, file_mtx, time_mtx)
+		create_mo(g_odoo_url, mo, file_mtx, time_mtx)
 
 		AddCount(count_mtx)
 
@@ -190,44 +235,66 @@ func main() {
 
 	fmt.Printf("start\n")
 
-	odoo := flag.String("odoo", "http://10.1.1.31", "--odoo")
-	//odoo := flag.String("odoo", "http://127.0.0.1:8069", "--odoo")
+	//odoo := flag.String("odoo", "http://10.1.1.31", "--odoo")
+	odoo := flag.String("odoo", "http://127.0.0.1:8069", "--odoo")
 	task_num := flag.Int("task", 4, "--task")
 	req_itv := flag.Int("inteval", 100, "--inteval")
+	batch := flag.Bool("batch", true, "--batch")
 	flag.Parse()
 
 	g_odoo_url = *odoo
 	g_task_num = *task_num
 	g_req_inteval = *req_itv
+	g_result_batch = *batch
 
 	fmt.Printf("odoo:%s, task:%d, inteval:%d\n", g_odoo_url, g_task_num, g_req_inteval)
 
-	g_odoo.MaxRetry = 3
-	g_odoo.URL = g_odoo_url
+	g_odoo.Conf.MaxRetry = 3
+	g_odoo.Conf.Urls = []string{}
+	g_odoo.Conf.Urls = append(g_odoo.Conf.Urls, g_odoo_url)
+	//g_odoo.Conf.Urls[0] = g_odoo_url
 
 	//return
 	FILE_MTX := sync.Mutex{}
 	TIME_MTX := sync.Mutex{}
 	COUNT_MTX := sync.Mutex{}
 
-
-	odoo_result := payload.ODOOResult{}
 	//odoo_result.Control_date = result_data.Dat
-	odoo_result.CURObjects = []payload.CURObject{}
-	cur_object := payload.CURObject{}
-	cur_object.File = "test.json"
-	cur_object.OP = 1
-	odoo_result.CURObjects = append(odoo_result.CURObjects, cur_object)
 
-	//odoo_result.Op_time = 1
-	odoo_result.Pset_m_max = 0.5
-	odoo_result.Pset_m_min = 0.01
-	odoo_result.Pset_m_target = 0.1
-	odoo_result.Pset_m_threshold = 0.2
-	odoo_result.Pset_strategy = "AW"
-	odoo_result.Pset_w_max = 190
-	odoo_result.Pset_w_min = 170
-	odoo_result.Pset_w_target = 180
+
+	if g_result_batch == true {
+		g_odoo_result_batch.CURObjects = []payload.CURObject{}
+		cur_object := payload.CURObject{}
+		cur_object.File = "test.json"
+		cur_object.OP = 1
+		g_odoo_result_batch.CURObjects = append(g_odoo_result.CURObjects, cur_object)
+
+		//odoo_result.Op_time = 1
+		g_odoo_result_batch.Pset_m_max = 0.5
+		g_odoo_result_batch.Pset_m_min = 0.01
+		g_odoo_result_batch.Pset_m_target = 0.1
+		g_odoo_result_batch.Pset_m_threshold = 0.2
+		g_odoo_result_batch.Pset_strategy = "AW"
+		g_odoo_result_batch.Pset_w_max = 190
+		g_odoo_result_batch.Pset_w_min = 170
+		g_odoo_result_batch.Pset_w_target = 180
+	} else {
+		g_odoo_result.CURObjects = []payload.CURObject{}
+		cur_object := payload.CURObject{}
+		cur_object.File = "test.json"
+		cur_object.OP = 1
+		g_odoo_result.CURObjects = append(g_odoo_result.CURObjects, cur_object)
+
+		//odoo_result.Op_time = 1
+		g_odoo_result.Pset_m_max = 0.5
+		g_odoo_result.Pset_m_min = 0.01
+		g_odoo_result.Pset_m_target = 0.1
+		g_odoo_result.Pset_m_threshold = 0.2
+		g_odoo_result.Pset_strategy = "AW"
+		g_odoo_result.Pset_w_max = 190
+		g_odoo_result.Pset_w_min = 170
+		g_odoo_result.Pset_w_target = 180
+	}
 
 
 	mo := payload.ODOOMO{}
@@ -279,7 +346,7 @@ func main() {
 
 	// 启动任务
 	for i := 0; i < g_task_num; i++ {
-		go RunTask_MO(mo, odoo_result, COUNT_MTX, FILE_MTX, TIME_MTX)
+		go RunTask_MO(mo, COUNT_MTX, FILE_MTX, TIME_MTX)
 
 		//if g_test_result {
 		//	go RunTask_Result(1, odoo_result, FILE_MTX)
@@ -288,6 +355,6 @@ func main() {
 	}
 
 	for {
-		time.Sleep(5 * time.Second)
+		time.Sleep(10000 * time.Millisecond)
 	}
 }

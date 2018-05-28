@@ -21,10 +21,6 @@ const (
 	WS_EVENT_WORKORDER = "workorder"
 )
 
-func CleanClient(id string) {
-
-}
-
 type WSClient struct {
 	ID	string
 	Conn websocket.Connection
@@ -96,6 +92,8 @@ func (apiserver *APIServer) putPSets(ctx iris.Context) {
 	result, err = apiserver.DB.GetResult(pset.Result_id, pset.Count)
 	if err != nil {
 		// 创建新结果
+
+		raw_result, _ := apiserver.DB.GetResult(pset.Result_id, 0)
 		nr := rushdb.Results{}
 		nr.Workorder_id = oldresult.Workorder_id
 		nr.Controller_sn = pset.Controller_SN
@@ -106,6 +104,7 @@ func (apiserver *APIServer) putPSets(ctx iris.Context) {
 		nr.Result_id = pset.Result_id
 		nr.Result_data = ""
 		nr.Result_upload = false
+		nr.Total_count = raw_result.Total_count
 		err := apiserver.DB.InsertResults(nr)
 		if err != nil {
 			ctx.StatusCode(iris.StatusBadRequest)
@@ -167,7 +166,7 @@ func (apiserver *APIServer) getWorkorder(ctx iris.Context) {
 }
 
 // 创建工单
-func (apiserver *APIServer) createWorkorders(ctx iris.Context) {
+func (apiserver *APIServer) postWorkorders(ctx iris.Context) {
 	var err error
 	var workorders []payload.ODOOWorkorder
 	err = ctx.ReadJSON(&workorders)
@@ -331,13 +330,18 @@ func (apiserver *APIServer) getHealthz(ctx iris.Context) {
 func (apiserver *APIServer) getStatus(ctx iris.Context) {
 	// 返回控制器状态
 
-	//hmi_sn := ctx.URLParam("hmi_sn")
-	//if hmi_sn != "" {
-	//	// 指定控制器
-	//	apiserver.CVI3.Service.
-	//} else {
-	//	// 所有控制器
-	//}
+	sn := ctx.URLParam("controller_sn")
+	status, err := apiserver.CVI3.Service.GetControllersStatus(sn)
+
+	if err != nil {
+		ctx.StatusCode(iris.StatusNotFound)
+		ctx.WriteString(err.Error())
+		return
+	} else {
+		body, _ := json.Marshal(status)
+		ctx.Header("content-type", "application/json")
+		ctx.Write(body)
+	}
 }
 
 func (apiserver *APIServer) AddClient(sn string, c WSClient) {
@@ -464,15 +468,15 @@ func (apiserver *APIServer) StartService() error {
 	ws.OnConnection(apiserver.onWSConn)
 
 
-	v1 := app.Party("/api/v1", crs).AllowMethods(iris.MethodOptions)
+	v1 := app.Party(API_PREFIX, crs).AllowMethods(iris.MethodOptions)
 	{
 		v1.Put("/psets", apiserver.putPSets)
 		v1.Get("/workorder", apiserver.getWorkorder)
 		v1.Get("/results", apiserver.getResults)
 		v1.Patch("/results/{id:int}", apiserver.patchResult)
-		v1.Get("/status", apiserver.getStatus)
+		v1.Get("/controller-status", apiserver.getStatus)
 		v1.Get("/healthz", apiserver.getHealthz)
-		v1.Post("/workorders", apiserver.createWorkorders)
+		v1.Post("/workorders", apiserver.postWorkorders)
 		app.Get("/ws", ws.Handler())
 	}
 

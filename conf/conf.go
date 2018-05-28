@@ -42,6 +42,8 @@ func CreateDefaultConf() ConfRush {
 	conf.DB.Port = 5432
 
 	conf.ODOO.Timeout = 3000
+	conf.ODOO.Push_inteval = 10000
+	conf.ODOO.MaxRetry = 3
 	conf.ODOO.Urls = append(conf.ODOO.Urls, "http://127.0.0.1:8069")
 
 	conf.CVI3.Listen = 4710
