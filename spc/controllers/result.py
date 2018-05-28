@@ -4,7 +4,7 @@ import json
 from odoo.http import request,Response
 from dateutil import parser
 import requests as Requests
-from requests import ConnectionError,RequestException
+from requests import ConnectionError, RequestException
 
 DEFAULT_LIMIT = 80
 

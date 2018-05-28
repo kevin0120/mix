@@ -100,15 +100,15 @@ class OperationResult(models.HyperModel):
         ret = _post_aiis_result_package(aiis_urls, results)
         return True
 
-    @api.one
-    @api.constrains('cur_objects')
-    def _constraint_curs(self):
-        try:
-            obj = json.loads(self.cur_objects)
-            if not isinstance(obj, list):
-                raise ValidationError('Waveform File is not a list')
-        except ValueError:
-            raise ValidationError('Waveform File is not Schema correct')
+    # @api.one
+    # @api.constrains('cur_objects')
+    # def _constraint_curs(self):
+    #     try:
+    #         obj = json.loads(self.cur_objects)
+    #         if not isinstance(obj, list):
+    #             raise ValidationError('Waveform File is not a list')
+    #     except ValueError:
+    #         raise ValidationError('Waveform File is not Schema correct')
 
     # @api.multi
     # @api.depends('measure_result', 'op_time')
@@ -297,12 +297,11 @@ class OperationResult(models.HyperModel):
         )
 
         cr.execute(query)
-
         map(lambda vals: self.browse(vals['id'])._validate_fields(vals), all_vals)
 
         # recompute new-style fields
-        if self.env.recompute and self._context.get('recompute', True):
-            self._bulk_recompute()
+        # if self.env.recompute and self._context.get('recompute', True):
+        #     self._bulk_recompute()
 
         return True
 
