@@ -49,7 +49,7 @@ func main() {
 	odoo.MasterPC_SN = masterpc_sn
 	odoo.APIService = &API
 
-	go odoo.TaskPutResults()
+	//go odoo.TaskPutResults()
 
 	fmt.Printf("初始化cvi3服务\n")
 

@@ -159,9 +159,9 @@ func (service *CVI3Service) OnRecv(msg string) {
 		result_put.ID = result_data.Result_id
 		result_put.Result = odoo_result
 
-		service.ODOO.PutStack.Push(result_put)
+		//service.ODOO.PutStack.Push(result_put)
 		//
-		//go service.ODOO.PutResult(result_data.Result_id, odoo_result)
+		go service.ODOO.PutResult(result_data.Result_id, odoo_result)
 
 		// 追加最新波形
 		//go service.ODOO.PatchCurve(result_data.Result_id, result_data.CurFile, result_data.Count)
