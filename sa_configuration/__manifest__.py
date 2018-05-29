@@ -46,6 +46,8 @@
         'data/maintenance_data.xml',
         'data/test_data.xml',
         'security/quality.xml',
+        'report/sa_mrp_report_main.xml',
+        'report/mrp_production_pin_template.xml',
     ],
     # only loaded in demonstration mode
 }

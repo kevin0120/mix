@@ -25,15 +25,16 @@ class MrpProduction(models.Model):
     pin_check_code = fields.Integer(string='PIN check Code')
     assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line ID')
     lnr = fields.Char(string='Line Number')
-    knr = fields.Char(string='KNR', store=True, compute='_compute_mo_knr')
+    knr = fields.Char(string='KNR', store=True, compute='_compute_long_pin')
+    long_pin = fields.Char(string='LongPIN', store=True, compute='_compute_long_pin')
 
     _sql_constraints = [('vin_uniq', 'unique(vin)', 'Only one VIN per MO is allowed'),
                         ('pin_check_uniq', 'unique(pin,pin_check_code)', 'Only one KNR per MO is allowed')]
 
-    @api.depends('pin','pin_check_code')
-    def _compute_mo_knr(self):
-        ### 只会在创建记录时计算一次
+    @api.depends('year', 'factory_name','pin','pin_check_code')
+    def _compute_long_pin(self):
         for mo in self:
+            mo.long_pin = u'{0}-{1}-{2}={3}'.format(mo.factory_name, mo.year, mo.pin, mo.pin_check_code)
             mo.knr = u'{0}{1}'.format(mo.pin, mo.pin_check_code)
 
     @api.constrains('year')
