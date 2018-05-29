@@ -1,6 +1,5 @@
 package diagnostic
 
-import "gopkg.in/yaml.v2"
 
 type Config struct {
 	File  string `yaml:"file"`

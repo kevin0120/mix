@@ -1,6 +1,15 @@
 package httpd
 
+import "github.com/influxdata/kapacitor/auth"
 
+const (
+	// Root path for the API
+	BasePath = "/aiis/v1"
+	// Root path for the preview API
+	BasePreviewPath = "/aiis/v1preview"
+	// Name of the special user for subscriptions
+	SubscriptionUser = "~subscriber"
+)
 
 type Route struct {
 	Method      string
@@ -9,12 +18,19 @@ type Route struct {
 }
 
 type Handler struct {
+	requireAuthentication bool
+	exposePprof           bool
+	sharedSecret          string
+
+	allowGzip bool
+
 	Version string
+
+	AuthService auth.Interface
+
 	DiagService interface {
 		SetLogLevelFromName(lvl string) error
 	}
-
-
 
 	diag Diagnostic
 	// Detailed logging of write path
@@ -25,12 +41,11 @@ type Handler struct {
 	loggingEnabled bool
 }
 
-func (h *Handler) AddRoutes(routes []Route) error {
-	for _, r := range routes {
-		err := h.addRawRoute(r)
-		if err != nil {
-			return err
-		}
+func NewHandler(loggingEnabled bool, writeTrace bool, d Diagnostic ) *Handler {
+	h := &Handler{
+		diag:                  d,
+		writeTrace:            writeTrace,
+		loggingEnabled:        loggingEnabled,
 	}
-	return nil
+	return h
 }

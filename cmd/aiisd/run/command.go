@@ -1,14 +1,15 @@
 package run
 
 import (
+	"flag"
 	"fmt"
 	"io"
-	"os"
+	"io/ioutil"
 	"log"
-	"flag"
+	"os"
 	"path/filepath"
 	"strconv"
-	"io/ioutil"
+
 	"github.com/masami10/aiis/server"
 	"gopkg.in/yaml.v2"
 	"github.com/masami10/aiis/services/diagnostic"
@@ -37,12 +38,11 @@ type Command struct {
 	Stdout io.Writer
 	Stderr io.Writer
 
-	Server      *server.Server
+	Server *server.Server
 
 	diagService *diagnostic.Service
 
 	Diag Diagnostic
-
 }
 
 // NewCommand return a new instance of Command.
@@ -70,11 +70,6 @@ func (cmd *Command) Run(args ...string) error {
 		return fmt.Errorf("parse config: %s", err)
 	}
 
-	// Apply any environment variables on top of the parsed config
-	if err := config.ApplyEnvOverrides(); err != nil {
-		return fmt.Errorf("apply env config: %v", err)
-	}
-
 	// Override config logging file if specified in the command line args.
 	if options.LogFile != "" {
 		config.Logging.File = options.LogFile
@@ -85,7 +80,6 @@ func (cmd *Command) Run(args ...string) error {
 		config.Logging.Level = options.LogLevel
 	}
 
-	// Initialize Logging Services
 	cmd.diagService = diagnostic.NewService(config.Logging, cmd.Stdout, cmd.Stderr)
 	if err := cmd.diagService.Open(); err != nil {
 		return fmt.Errorf("failed to open diagnostic service: %v", err)
@@ -106,12 +100,11 @@ func (cmd *Command) Run(args ...string) error {
 
 	// Create server from config and start it.
 	buildInfo := server.BuildInfo{Version: cmd.Version, Commit: cmd.Commit, Branch: cmd.Branch, Platform: cmd.Platform}
-	s, err := server.New(config, buildInfo, cmd.diagService)
+	s, err := server.New(config, buildInfo,cmd.diagService)
 	if err != nil {
 		return fmt.Errorf("create server: %s", err)
 	}
-	s.CPUProfile = options.CPUProfile
-	s.MemProfile = options.MemProfile
+
 	if err := s.Open(); err != nil {
 		return fmt.Errorf("open server: %s", err)
 	}
@@ -122,6 +115,19 @@ func (cmd *Command) Run(args ...string) error {
 	go cmd.monitorServerErrors()
 
 	return nil
+}
+
+func (cmd *Command) monitorServerErrors() {
+	for {
+		select {
+		case err := <-cmd.Server.Err():
+			if err != nil {
+				cmd.Diag.Error("encountered error", err)
+			}
+		case <-cmd.closing:
+			return
+		}
+	}
 }
 
 // Close shuts down the server.
@@ -152,9 +158,6 @@ func (cmd *Command) ParseFlags(args ...string) (Options, error) {
 	fs := flag.NewFlagSet("", flag.ContinueOnError)
 	fs.StringVar(&options.ConfigPath, "config", "", "")
 	fs.StringVar(&options.PIDFile, "pidfile", "", "")
-	fs.StringVar(&options.Hostname, "hostname", "", "")
-	fs.StringVar(&options.CPUProfile, "cpuprofile", "", "")
-	fs.StringVar(&options.MemProfile, "memprofile", "", "")
 	fs.StringVar(&options.LogFile, "log-file", "", "")
 	fs.StringVar(&options.LogLevel, "log-level", "", "")
 	fs.Usage = func() { fmt.Fprintln(cmd.Stderr, usage) }
@@ -196,8 +199,12 @@ func (cmd *Command) ParseConfig(path string) (*server.Config, error) {
 
 	log.Println("Using configuration at:", path)
 
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
 	config := server.NewConfig()
-	if _, err := yaml.DecodeFile(path, &config); err != nil {
+	if err := yaml.Unmarshal(data, &config); err != nil {
 		return nil, err
 	}
 
