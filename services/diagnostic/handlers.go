@@ -7,9 +7,9 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/influxdata/kapacitor/keyvalue"
-	"github.com/influxdata/kapacitor/models"
-	"github.com/influxdata/kapacitor/uuid"
+	"github.com/masami10/aiis/keyvalue"
+	"github.com/masami10/aiis/models"
+	"github.com/masami10/aiis/uuid"
 )
 
 func Err(l Logger, msg string, err error, ctx []keyvalue.T) {

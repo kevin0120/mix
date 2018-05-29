@@ -8,6 +8,7 @@ import (
 	"sync"
 	"net/url"
 	"fmt"
+	stdContext "context"
 
 	"github.com/kataras/iris"
 )
@@ -74,9 +75,6 @@ type Service struct {
 	shutdownTimeout time.Duration
 
 	Handler *Handler
-	// LocalHandler handler is used internally only for the local transport clients.
-	// It does not have authentication enabled.
-	LocalHandler *Handler
 
 	diag                  Diagnostic
 	httpServerErrorLogger *log.Logger
@@ -109,6 +107,7 @@ func NewService(c Config, hostname string, d Diagnostic) *Service {
 }
 
 func (s *Service) Open() error {
+	s.diag.StartingService()
 	app := iris.New()
 
 	// Method:    GET
@@ -135,14 +134,18 @@ func (s *Service) Open() error {
 	})
 
 	// Start the server using a network address.
-	app.Run(iris.Addr(s.externalURL))
+	app.Run(iris.Addr(s.addr))
 }
 
 func (s *Service) Close() error {
-	println("shutdown...")
+	s.diag.StoppedService()
 
 	timeout := s.shutdownTimeout
 	ctx, cancel := stdContext.WithTimeout(stdContext.Background(), timeout)
 	defer cancel()
 	app.Shutdown(ctx)
+}
+
+func (s *Service) AddRoutes(routes []Route) error {
+	return s.Handler.AddRoutes(routes)
 }

@@ -11,7 +11,7 @@ import (
 	"io/ioutil"
 	"github.com/masami10/aiis/server"
 	"gopkg.in/yaml.v2"
-	"github.com/influxdata/kapacitor/services/diagnostic"
+	"github.com/masami10/aiis/services/diagnostic"
 )
 
 // cmd handler

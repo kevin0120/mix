@@ -5,6 +5,7 @@ import (
 	"github.com/masami10/aiis/services/diagnostic"
 	"github.com/masami10/aiis/command"
 	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 )
 
 // Config represents the configuration format for the aiisd binary.

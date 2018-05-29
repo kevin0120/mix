@@ -11,7 +11,7 @@ import (
 	"sync"
 
 	"github.com/masami10/aiis/services/diagnostic"
-	"github.com/influxdata/kapacitor/keyvalue"
+	"github.com/masami10/aiis/keyvalue"
 	"github.com/masami10/aiis/services/httpd"
 
 	"github.com/pkg/errors"
