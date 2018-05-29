@@ -45,10 +45,14 @@ func (service *CVI3Service) HandleResult(result payload.ControllerResult) (error
 	r.ResultValue = string(s_value)
 	r.PSetDefine = string(s_pset)
 
-	service.DB.UpdateResult(r)
+	_, err = service.DB.UpdateResult(r)
+	if err != nil {
+		fmt.Printf("HandleResult err:%s\n", err.Error())
+		return nil
+	}
 
 	workorder, err := service.DB.GetWorkorder(result.Workorder_ID)
-	if err != nil {
+	if err == nil {
 		// 结果推送hmi
 		ws_result := payload.WSResult{}
 		ws_result.Result_id = result.Result_id
@@ -93,13 +97,15 @@ func (service *CVI3Service) HandleResult(result payload.ControllerResult) (error
 		}
 
 		_, err = service.ODOO.PutResult(result.Result_id, odoo_result)
-		if err != nil {
+		if err == nil {
 			// 发送成功
 			r.HasUpload = true
 			_, err := service.DB.UpdateResult(r)
 			if err != nil {
 				return err
 			}
+		} else {
+			return err
 		}
 	}
 
@@ -171,7 +177,7 @@ func (service *CVI3Service) OnRecv(msg string) {
 		}
 
 		// 结果数据
-		result_data := payload.XMl2Result(result)
+		result_data := payload.XML2Result(result)
 
 		// 波形文件
 		curve_file := payload.XML2Curve(result)
@@ -192,7 +198,6 @@ func (service *CVI3Service) OnRecv(msg string) {
 		}
 
 	}
-
 
 }
 

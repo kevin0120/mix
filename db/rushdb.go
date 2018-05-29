@@ -18,6 +18,8 @@ type DB struct {
 	Port int		`yaml:"port"`
 	User string		`yaml:"user"`
 	Pwd string		`yaml:"pwd"`
+	DataKeep int		`yaml:"data_keep"`				// 最小单位：天
+	DataCleanStep int	`yaml:"data_clean_step"`		// 最小单位：天
 }
 
 func (db *DB)Init() (error) {
@@ -252,6 +254,30 @@ func (db *DB) ListCurves(result_id int) ([]Curves, error) {
 	}
 }
 
+func (db *DB) DeleteCurves(result_id int) (error) {
+	var err error
+	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		db.User,
+		db.Pwd,
+		db.URL,
+		db.Port,
+		db.DBName))
+
+	if err != nil {
+		return err
+	}
+
+	sql := "delete from `curves` where result_id = ?"
+	_, err = engine.Exec(sql,
+		result_id)
+
+	if err != nil {
+		return err
+	} else {
+		return nil
+	}
+}
+
 
 func (db *DB) InsertWorkorders(workorders []payload.ODOOWorkorder) ([]payload.ODOOWorkorder, error) {
 	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
@@ -480,7 +506,7 @@ func (db *DB) UpdateResult(result Results) (Results, error) {
 		return result, err
 	}
 
-	sql := "update `results` set ControllerSN = ?, Result = ?, HasUpload = ?, Stage = ?, UpdateTime = ?, PSetDefine = ?, ResultValue = ?, Count = ? where result_id = ?"
+	sql := "update `results` set controller_sn = ?, result = ?, has_upload = ?, stage = ?, update_time = ?, pset_define = ?, result_value = ?, count = ? where result_id = ?"
 	_, err = engine.Exec(sql,
 		result.ControllerSN,
 		result.Result,
@@ -496,5 +522,84 @@ func (db *DB) UpdateResult(result Results) (Results, error) {
 		return result, err
 	} else {
 		return result, nil
+	}
+}
+
+func (db *DB) ListInvalidResults(dat time.Time) ([]Results, error) {
+	var err error
+	var results []Results
+	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		db.User,
+		db.Pwd,
+		db.URL,
+		db.Port,
+		db.DBName))
+
+	if err != nil {
+		return results, err
+	}
+
+	e := engine.Alias("r").Where("r.has_upload = ?", true).And("r.update_time < ?", dat).Find(&results)
+	if e != nil {
+		return results, e
+	} else {
+		return results, nil
+	}
+}
+
+func (db *DB) DeleteResult(result Results) (error) {
+	var err error
+	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+		db.User,
+		db.Pwd,
+		db.URL,
+		db.Port,
+		db.DBName))
+
+	if err != nil {
+		return err
+	}
+
+	_, err = engine.Id(result.ResultId).Unscoped().Delete(&result)
+	if err != nil {
+		return err
+	} else {
+		return nil
+	}
+}
+
+func (db *DB) CleanUpService() (error) {
+
+	for {
+		span, _ := time.ParseDuration(fmt.Sprintf("-%dh", db.DataKeep * 24))
+		dat := time.Now().Add(span)
+
+		results, err := db.ListInvalidResults(dat)
+		var exist_curve_not_upload bool  = false
+		if err == nil {
+			// 清理过期结果和波形
+			for _, v := range results {
+
+				curves, err := db.ListCurves(v.ResultId)
+				if err == nil {
+					for _, curve := range curves {
+						if curve.HasUpload == false {
+							exist_curve_not_upload = true
+							break
+						}
+					}
+
+					// 如果结果和对应的波形都已经上传，则可执行删除
+					if !exist_curve_not_upload {
+						db.DeleteResult(v)
+						db.DeleteCurves(v.ResultId)
+					}
+				}
+			}
+		} else {
+
+		}
+
+		time.Sleep(time.Duration(db.DataCleanStep) * time.Hour * 24)
 	}
 }

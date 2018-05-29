@@ -11,6 +11,7 @@ import (
 	"sync"
 	"strings"
 	"strconv"
+	"io/ioutil"
 )
 
 const (
@@ -32,6 +33,7 @@ type APIServer struct {
 	DB	*rushdb.DB
 	WSClients	map[string]WSClient
 	WSMtx	sync.Mutex
+	DocPath	string
 }
 
 func (apiserver *APIServer) putPSets(ctx iris.Context) {
@@ -99,8 +101,7 @@ func (apiserver *APIServer) putPSets(ctx iris.Context) {
 // 根据hmi序列号以及vin或knr取得工单
 func (apiserver *APIServer) getWorkorder(ctx iris.Context) {
 	hmi_sn := ctx.URLParam("hmi_sn")
-	vin := ctx.URLParam("vin")
-	knr := ctx.URLParam("knr")
+	vin_or_knr := ctx.URLParam("vin_or_knr")
 
 	if hmi_sn == "" {
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -108,10 +109,19 @@ func (apiserver *APIServer) getWorkorder(ctx iris.Context) {
 		return
 	}
 
-	if vin == "" && knr == "" {
+	if vin_or_knr == ""  {
 		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("vin or knr is required")
+		ctx.WriteString("vin_or_knr is required")
 		return
+	}
+
+	var vin = ""
+	var knr = ""
+
+	if strings.Contains(vin_or_knr, payload.KNR_KEY) {
+		knr = vin_or_knr
+	} else {
+		vin = vin_or_knr
 	}
 
 	workorder, err := apiserver.DB.FindWorkorder(hmi_sn, vin, knr)
@@ -165,6 +175,14 @@ func (apiserver *APIServer) postWorkorders(ctx iris.Context) {
 		ctx.StatusCode(iris.StatusCreated)
 		return
 	}
+}
+
+//api文档
+func (apiserver *APIServer) getDoc(ctx iris.Context) {
+	f, _ := ioutil.ReadFile(apiserver.DocPath)
+
+	ctx.Header("content-type", "application/json")
+	ctx.Write(f)
 }
 
 func (apiserver *APIServer) push_new_orders(orders []payload.ODOOWorkorder) {
@@ -421,8 +439,9 @@ func (apiserver *APIServer) onWSConn(c websocket.Connection) {
 }
 
 
-func (apiserver *APIServer) StartService() error {
+func (apiserver *APIServer) StartService(doc_path string) error {
 
+	apiserver.DocPath = doc_path
 	apiserver.WSClients = map[string]WSClient{}
 	apiserver.WSMtx = sync.Mutex{}
 
@@ -452,6 +471,7 @@ func (apiserver *APIServer) StartService() error {
 		v1.Get("/controller-status", apiserver.getStatus)
 		v1.Get("/healthz", apiserver.getHealthz)
 		v1.Post("/workorders", apiserver.postWorkorders)
+		v1.Get("/doc", apiserver.getDoc)
 		app.Get("/ws", ws.Handler())
 	}
 

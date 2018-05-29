@@ -14,7 +14,7 @@
     "/psets": {
       "put": {
         "tags": [
-          "CVI3"
+          "HMI"
         ],
         "summary": "设定拧接程序",
         "description": "设定拧接程序,第一次拧接时(调用成功会返回result_id)，不用传result_id和次数。后续拧接时需要传result_id和拧接次数",
@@ -67,16 +67,11 @@
             "required": true
           },
           {
-            "name": "vin",
+            "name": "vin_or_knr",
             "in": "query",
-            "description": "车辆识别号",
-            "type": "string"
-          },
-          {
-            "name": "knr",
-            "in": "query",
-            "description": "车辆装配代码",
-            "type": "string"
+            "description": "车辆识别号或车辆装配代码",
+            "type": "string",
+            "required": true
           }
         ],
         "responses": {
@@ -142,13 +137,15 @@
             "name": "has_upload",
             "in": "query",
             "description": "是否上传",
-            "type": "string"
+            "type": "string",
+            "required": true
           },
           {
             "name": "result",
             "in": "query",
             "description": "结果值列表",
-            "type": "string"
+            "type": "string",
+            "required": true
           }
         ],
         "responses": {
@@ -215,7 +212,7 @@
     "/controller-status": {
       "get": {
         "tags": [
-          "CVI3"
+          "HMI"
         ],
         "summary": "取得控制器状态",
         "description": "调用此API会返回Master PC下所有控制器的状态",
@@ -245,6 +242,25 @@
           },
           "400": {
             "description": "获取失败"
+          }
+        }
+      }
+    },
+    "/healthz": {
+      "get": {
+        "tags": [
+          "HMI"
+        ],
+        "summary": "心跳检测",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "204": {
+            "description": "成功"
           }
         }
       }

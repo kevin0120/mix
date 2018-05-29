@@ -15,6 +15,15 @@ const (
 	RESULT_NOK = "NOK"
 )
 
+const (
+	RESULT_STAGE_INIT = "init"
+	RESULT_STAGE_FINAL = "final"
+)
+
+const (
+	KNR_KEY = "-"
+)
+
 type PSet struct {
 	Controller_SN string `json:"controller_sn"`
 	PSet int `json:"pset"`
@@ -106,7 +115,7 @@ func XML2Curve (result cvi3.CVI3Result) (ControllerCurveFile) {
 	return cur_result
 }
 
-func XMl2Result(result cvi3.CVI3Result) (ControllerResult) {
+func XML2Result(result cvi3.CVI3Result) (ControllerResult) {
 	rr := ControllerResult{}
 
 	rr.Controller_SN = result.PRC_SST.PAR.SN

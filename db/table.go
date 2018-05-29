@@ -32,7 +32,7 @@ type Results struct {
 type Curves struct {
 	ResultID		int			`xorm:"int 'result_id'"`
 	Count			int			`xorm:"int 'count'"`
-	CurveFile		string		`xorm:"varchar(32) 'curve_file'"`
+	CurveFile		string		`xorm:"varchar(128) 'curve_file'"`
 	CurveData		string		`xorm:"text 'curve_data'"`
 	HasUpload		bool		`xorm:"bool 'has_upload'"`
 }

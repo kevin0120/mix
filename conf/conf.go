@@ -16,9 +16,10 @@ const (
 
 type ConfRush struct {
 	MasterPC struct{
-		SN string	`yaml:"sn"`
-		Port int	`yaml:"api_port"`
-	} `yaml:"masterpc"`
+		SN string			`yaml:"sn"`
+		Port int			`yaml:"api_port"`
+		APIDocPath string	`yaml:"api_doc_path"`
+	} `yaml:"rush"`
 
 	DB rushdb.DB `yaml:"db"`
 	MINIO rush_storage.StorageConf `yaml:"minio"`
@@ -40,6 +41,8 @@ func CreateDefaultConf() ConfRush {
 	conf.DB.Pwd = "pwd"
 	conf.DB.DBName = "dbname"
 	conf.DB.Port = 5432
+	conf.DB.DataKeep = 30
+	conf.DB.DataCleanStep = 1
 
 	conf.ODOO.Timeout = 3000
 	conf.ODOO.Push_inteval = 10000
@@ -55,6 +58,7 @@ func CreateDefaultConf() ConfRush {
 
 	conf.MasterPC.SN = "1"
 	conf.MasterPC.Port = 8080
+	conf.MasterPC.APIDocPath = "./doc/api.json"
 
 	conf.MINIO.URL = "127.0.0.1:9000"
 	conf.MINIO.Backet = "backet"
