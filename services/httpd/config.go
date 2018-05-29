@@ -1,6 +1,5 @@
 package httpd
 
-
 import (
 	"fmt"
 	"net"
@@ -9,7 +8,6 @@ import (
 
 	"github.com/influxdata/influxdb/toml"
 	"github.com/pkg/errors"
-	"gopkg.in/yaml.v2"
 )
 
 const (

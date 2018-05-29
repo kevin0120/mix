@@ -7,8 +7,9 @@ import (
 "log"
 "os"
 
-"gopkg.in/yaml.v2"
 "github.com/masami10/aiis/server"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
 )
 
 // PrintConfigCommand represents the command executed by "kapacitord config".
@@ -44,11 +45,6 @@ func (cmd *PrintConfigCommand) Run(args ...string) error {
 		return fmt.Errorf("parse config: %s", err)
 	}
 
-	// Apply any environment variables on top of the parsed config
-	if err := config.ApplyEnvOverrides(); err != nil {
-		return fmt.Errorf("apply env config: %v", err)
-	}
-
 	// Override config properties.
 	if *hostname != "" {
 		config.Hostname = *hostname
@@ -59,7 +55,7 @@ func (cmd *PrintConfigCommand) Run(args ...string) error {
 		return fmt.Errorf("%s. To generate a valid configuration file run `aiisd config > aiis.yaml`.", err)
 	}
 
-	toml.NewEncoder(cmd.Stdout).Encode(config)
+	yaml.NewEncoder(cmd.Stdout).Encode(config)
 	fmt.Fprint(cmd.Stdout, "\n")
 
 	return nil
@@ -106,9 +102,15 @@ func (cmd *PrintConfigCommand) parseConfig(path string) (*server.Config, error) 
 	}
 
 	log.Println("Merging with configuration at:", path)
-	if _, err := toml.DecodeFile(path, &config); err != nil {
+
+	d, err := yaml.Marshal( &config)
+	if err != nil {
 		return nil, err
 	}
+	if err := ioutil.WriteFile(path, d,0666); err != nil {
+		return nil, err
+	}
+
 	return config, nil
 }
 

@@ -104,7 +104,7 @@ func (m *Main) Run(args ...string) error {
 
 			case syscall.SIGHUP.String():
 				m.Diag.Info("SIGHUP received, reloading tasks/templates/handlers directory...")
-				cmd.Server.Reload()
+				cmd.Server.Reload() //现阶段reload 无任何作用
 
 			default:
 				m.Diag.Info("signal received, initializing clean shutdown...")

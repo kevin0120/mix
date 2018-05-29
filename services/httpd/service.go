@@ -1,16 +1,13 @@
 package httpd
 
 import (
-	"log"
-	"time"
-	"net"
-	"net/http"
-	"sync"
 	"net/url"
 	"fmt"
-	stdContext "context"
-
 	"github.com/kataras/iris"
+	"time"
+	"log"
+	stdContext "context"
+	"strings"
 )
 
 type Diagnostic interface {
@@ -19,6 +16,7 @@ type Diagnostic interface {
 	StartingService()
 	StoppedService()
 	ShutdownTimeout()
+	AuthenticationEnabled(enabled bool)
 
 	ListeningOn(addr string, proto string)
 
@@ -57,29 +55,19 @@ type Diagnostic interface {
 }
 
 type Service struct {
-	ln    net.Listener
 	addr  string
+	key   string
 	err   chan error
 
-	externalURL string
-
-	server *http.Server
-	mu     sync.Mutex
-	wg     sync.WaitGroup
-
-	new             chan net.Conn
-	active          chan net.Conn
-	idle            chan net.Conn
-	closed          chan net.Conn
-	stop            chan chan struct{}
-	shutdownTimeout time.Duration
-
 	Handler *Handler
+	shutdownTimeout time.Duration
+	externalURL string
+	server *iris.Application
+
+	stop            chan chan struct{}
 
 	diag                  Diagnostic
-	httpServerErrorLogger *log.Logger
 }
-
 
 func NewService(c Config, hostname string, d Diagnostic) *Service {
 
@@ -88,64 +76,90 @@ func NewService(c Config, hostname string, d Diagnostic) *Service {
 		Host:   fmt.Sprintf("%s:%d", hostname, port),
 		Scheme: "http",
 	}
-
 	s := &Service{
-		addr:            c.BindAddress,
-		externalURL:     u.String(),
-		err:             make(chan error, 1),
+		addr:        c.BindAddress,
+		externalURL: u.String(),
+		err:         make(chan error, 1),
 		shutdownTimeout: time.Duration(c.ShutdownTimeout),
 		Handler: NewHandler(
 			c.LogEnabled,
 			c.WriteTracing,
 			d,
 		),
-		diag: d,
-		httpServerErrorLogger: d.NewHTTPServerErrorLogger(),
 	}
 
 	return s
 }
 
+func (s *Service) manage() {
+
+	select {
+	case <-s.stop:
+		// if we're already all empty, we're already done
+		timeout := s.shutdownTimeout
+		ctx, cancel := stdContext.WithTimeout(stdContext.Background(), timeout)
+		defer cancel()
+		s.server.Shutdown(ctx)
+	}
+}
+
+
+// Close closes the underlying listener.
+func (s *Service) Close() error {
+	defer s.diag.StoppedService()
+	// If server is not set we were never started
+	if s.server == nil {
+		return nil
+	}
+	// Signal to manage loop we are stopping
+	stopping := make(chan struct{})
+	s.stop <- stopping
+
+	<-stopping
+	s.server = nil
+	return nil
+}
+
+func (s *Service) serve() {
+	err := s.server.Run(s.Addr())
+	// The listener was closed so exit
+	// See https://github.com/golang/go/issues/4373
+	if !strings.Contains(err.Error(), "closed") {
+		s.err <- fmt.Errorf("listener failed: addr=%s, err=%s", s.Addr(), err)
+	} else {
+		s.err <- nil
+	}
+}
+
+// Open starts the service
 func (s *Service) Open() error {
 	s.diag.StartingService()
-	app := iris.New()
 
-	// Method:    GET
-	// Resource:  http://localhost:8080
-	app.Get("/", func(ctx iris.Context) {
-		// Bind: {{.message}} with "Hello world!"
-		ctx.ViewData("message", "Hello world!")
-		// Render template file: ./views/hello.html
-		ctx.View("hello.html")
-	})
+	s.server = iris.New()
 
-	// Method:    GET
-	// Resource:  http://localhost:8080/user/42
-	//
-	// Need to use a custom regexp instead?
-	// Easy,
-	// just mark the parameter's type to 'string'
-	// which accepts anything and make use of
-	// its `regexp` macro function, i.e:
-	// app.Get("/user/{id:string regexp(^[0-9]+$)}")
-	app.Get("/user/{id:long}", func(ctx iris.Context) {
-		userID, _ := ctx.Params().GetInt64("id")
-		ctx.Writef("User ID: %d", userID)
-	})
+	s.stop = make(chan chan struct{})
 
-	// Start the server using a network address.
-	app.Run(iris.Addr(s.addr))
+	go s.manage()
+	go s.serve()
+	return nil
 }
 
-func (s *Service) Close() error {
-	s.diag.StoppedService()
-
-	timeout := s.shutdownTimeout
-	ctx, cancel := stdContext.WithTimeout(stdContext.Background(), timeout)
-	defer cancel()
-	app.Shutdown(ctx)
+func (s *Service) Addr() iris.Runner {
+	return iris.Addr(s.addr)
 }
 
-func (s *Service) AddRoutes(routes []Route) error {
-	return s.Handler.AddRoutes(routes)
+func (s *Service) Err() <-chan error {
+	return s.err
 }
+
+func (s *Service) URL() string {
+
+	return "http://" + s.server.ConfigurationReadOnly().GetVHost()
+}
+
+// URL that should resolve externally to the server HTTP endpoint.
+// It is possible that the URL does not resolve correctly  if the hostname config setting is incorrect.
+func (s *Service) ExternalURL() string {
+	return s.externalURL
+}
+
