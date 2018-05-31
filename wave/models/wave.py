@@ -50,7 +50,24 @@ class Wave(models.TransientModel):
 
     result_line_ids = fields.One2many('operation.result.line', 'wizard_id')
 
-    wave = fields.Text(string='Waves', store=False)
+    wave = fields.Text(string='Waves', store=False, compute='_compute_wave')
+
+    need_render = fields.Boolean(default=False)
+
+    @api.depends('need_render')
+    def _compute_wave(self):
+        self.ensure_one()
+        if not self.need_render:
+            return
+        records = self.result_line_ids.filtered(lambda r: r.selected == True)
+        if not records:
+            self.env.user.notify_warning(u'查询获取结果:0,请重新定义查询参数或等待新结果数据')
+            return
+        datas, ret = self._get_data(records)
+        if not len(datas):
+            self.env.user.notify_warning(u'查询获取结果:0,请重新定义查询参数或等待新结果数据')
+            return
+        self.wave = self._get_echart_data(datas, ret)
 
     def _recreate_minio_client(self):
         global minioClient
@@ -78,18 +95,9 @@ class Wave(models.TransientModel):
         return line.render_embed()
 
     @api.multi
-    def read(self, fields=None, load='_classic_read'):
-        result = super(Wave, self).read(fields, load=load)
-        if 'wave' in fields and load == '_classic_read':
-            _data = self._get_result_data()
-            if len(_data) == 0:
-                self.env.user.notify_warning(u'查询获取结果:0,请重新定义查询参数或等待新结果数据')
-                return result
-            self._create_result_data(_data)
-            datas, ret = self._get_data(_data)
+    def read(self, fields=None, load='_classic_`'):
+        return super(Wave, self).read(fields, load=load)
 
-            result[0].update({'wave': self._get_echart_data(datas, ret)})
-        return result
 
     def _get_data(self, data):
         client, bucket = self._recreate_minio_client()
@@ -120,7 +128,8 @@ class Wave(models.TransientModel):
 
     @api.multi
     def button_show(self):
-        pass
+        self.ensure_one()
+        self.need_render = True
 
     def _get_result_data(self):
         domain = [('cur_objects', '!=', False)]
@@ -135,25 +144,47 @@ class Wave(models.TransientModel):
         if self.assembly_line_id:
             domain += [('production_id.assembly_line_id', '=', self.assembly_line_id.id)]
         if self.segment_id:
-            domain += [('workcenter_id.segment_id', '=', self.segment_id.id)]
+            domain += [('workcenter_id.worksegment_id', '=', self.segment_id.id)]
         if self.knr_code:
             domain += [('production_id.knr', 'like', self.knr_code)]
         if self.vin_code:
             domain += [('production_id.vin', 'like', self.vin_code)]
         return self.env['operation.result'].sudo().search(domain, limit=self.limit)
 
-    def _create_result_data(self, data):
+    def _bulk_create_result_data(self, data):
+        datas = []
         for result in data:
             vals = {
                 'wizard_id': self.id,
                 'workorder_id': result.workorder_id.id,
                 'workcenter_id': result.workcenter_id.id,
                 'product_id': result.product_id.id,
+                'control_date': result.control_date,
                 'consu_product_id': result.consu_product_id.id,
-                'measure_result': result.measure_result
+                'measure_result': result.measure_result,
+                'measure_torque': result.measure_torque,
+                'measure_degree': result.measure_degree,
+                'measure_t_don': result.measure_t_don,
+                'cur_objects': result.cur_objects
             }
-            self.env['operation.result.line'].sudo().create(vals)
+            datas.append(vals)
+
+        if len(datas) == 0:
+            return
+
+        ids = self.env['operation.result.line'].sudo().bulk_create(datas)
+        target_ids = [x[0] for x in ids ]
+
+        self.sudo().write({'result_line_ids': [(6, 0, target_ids)]})
+
 
     @api.multi
     def button_query(self):
-        pass
+        self.ensure_one()
+        self.need_render = False
+
+        _data = self._get_result_data()
+        if len(_data) == 0:
+            self.env.user.notify_warning(u'查询获取结果:0,请重新定义查询参数或等待新结果数据')
+            # return result
+        self._bulk_create_result_data(_data)
