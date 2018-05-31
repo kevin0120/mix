@@ -65,20 +65,19 @@ type Service struct {
 	key  string
 	err  chan error
 
-	Handler         *Handler
+	Handler         []*Handler
 	shutdownTimeout time.Duration
 	externalURL     string
 	server          *iris.Application
 
 	stop chan chan struct{}
 
-	Partys []iris.Party
-
-	PartyByNames map[string]int
+	HandlerByNames map[string]int
 
 	cors CorsConfig
 
 	diag Diagnostic
+	httpServerErrorLogger *log.Logger
 }
 
 func NewService(c Config, hostname string, d Diagnostic) *Service {
@@ -92,21 +91,26 @@ func NewService(c Config, hostname string, d Diagnostic) *Service {
 		addr:            c.BindAddress,
 		externalURL:     u.String(),
 		cors:            c.Cors,
+		server: 		 iris.New(),
 		err:             make(chan error, 1),
-		PartyByNames:    make(map[string]int),
+		HandlerByNames:    make(map[string]int),
 		shutdownTimeout: time.Duration(c.ShutdownTimeout),
-		Handler: NewHandler(
-			c.LogEnabled,
-			c.WriteTracing,
-			d,
-		),
+		diag: d,
+		httpServerErrorLogger: d.NewHTTPServerErrorLogger(),
 	}
-	s.AddNewParty(BasePath)
-	p, err := s.GetPartyByName(BasePath)
-	if err != nil {
-		return nil
+	s.AddNewHandler(BasePath, c, d)
+
+	r := Route{
+		Method: "GET",
+		Pattern: "/test",
+		HandlerFunc: func(ctx iris.Context) {
+			// navigate to the middle of $GOPATH/src/github.com/kataras/iris/context/context.go
+			// to overview all context's method (there a lot of them, read that and you will learn how iris works too)
+			ctx.HTML("Hello from " + ctx.Path()) // Hello from /
+		},
 	}
-	s.Handler.SetParty(p)
+
+	s.Handler[0].AddRoute(r)
 
 	return s
 }
@@ -154,8 +158,6 @@ func (s *Service) serve() {
 func (s *Service) Open() error {
 	s.diag.StartingService()
 
-	s.server = iris.New()
-
 	s.stop = make(chan chan struct{})
 
 	go s.manage()
@@ -182,20 +184,20 @@ func (s *Service) ExternalURL() string {
 	return s.externalURL
 }
 
-func (s *Service) GetPartyByName(version string) (*iris.Party, error) {
-	i, ok := s.PartyByNames[version]
+func (s *Service) GetHandlerByName(version string) (*Handler, error) {
+	i, ok := s.HandlerByNames[version]
 	if !ok {
 		// Should be unreachable code
-		return nil, fmt.Errorf("cannot get party By %s", version)
+		return nil, fmt.Errorf("cannot get handler By %s", version)
 	}
 
-	return &(s.Partys[i]), nil
+	return s.Handler[i], nil
 }
 
-func (s *Service) AddNewParty(version string) error {
-	if _, ok := s.PartyByNames[version]; ok {
+func (s *Service) AddNewHandler(version string,c Config, d Diagnostic) error {
+	if _, ok := s.HandlerByNames[version]; ok {
 		// Should be unreachable code
-		panic("cannot append party twice")
+		panic("cannot append handler twice")
 	}
 	crs := cors.New(cors.Options{
 		AllowedOrigins:   s.cors.AllowedOrigins,
@@ -205,10 +207,16 @@ func (s *Service) AddNewParty(version string) error {
 	if p == nil {
 		return fmt.Errorf("fail to create the party%s", version)
 	}
-	i := len(s.Partys)
-	s.Partys = append(s.Partys, p)
+	h := NewHandler(
+		c.LogEnabled,
+		c.WriteTracing,
+		d,
+	)
+	h.party = &p
+	i := len(s.Handler)
+	s.Handler = append(s.Handler, h)
 
-	s.PartyByNames[version] = i
+	s.HandlerByNames[version] = i
 
 	return nil
 }
