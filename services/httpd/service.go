@@ -109,11 +109,9 @@ func NewService(c Config, hostname string, d Diagnostic, disc *diagnostic.Servic
 
 	r := Route{
 		Method: "GET",
-		Pattern: "/test",
+		Pattern: "/healthz",
 		HandlerFunc: func(ctx iris.Context) {
-			// navigate to the middle of $GOPATH/src/github.com/kataras/iris/context/context.go
-			// to overview all context's method (there a lot of them, read that and you will learn how iris works too)
-			ctx.HTML("Hello from " + ctx.Path()) // Hello from /
+			ctx.StatusCode(iris.StatusNoContent)
 		},
 	}
 	s.Handler[0].AddRoute(r)

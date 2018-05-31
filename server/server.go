@@ -66,6 +66,7 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.initHTTPDService()
 
+
 	s.appendHTTPDService()
 
 	return s, nil
