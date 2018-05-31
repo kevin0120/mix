@@ -69,6 +69,18 @@ func (service *CVI3Service) HandleResult(result payload.ControllerResult) (error
 		// 结果推送AIIS
 
 		odoo_result := payload.ODOOResult{}
+		if r.Result == payload.RESULT_OK {
+			odoo_result.Final_pass = "pass"
+			if r.Count == 1 {
+				odoo_result.One_time_pass = "pass"
+			} else {
+				odoo_result.One_time_pass = "fail"
+			}
+		} else {
+			odoo_result.Final_pass = "fail"
+			odoo_result.One_time_pass = "fail"
+		}
+
 		odoo_result.Control_date = fmt.Sprintf("%sT%s+08:00", times[0], times[1])
 
 		odoo_result.Measure_degree = result.ResultValue.Wi

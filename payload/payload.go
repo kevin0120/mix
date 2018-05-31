@@ -231,6 +231,7 @@ type ODOOResultSync struct {
 	Pset_w_min	float64 `json:"pset_w_min"`
 	Pset_w_target	float64 `json:"pset_w_target"`
 
+
 	CURObjects	[]CURObject	`json:"cur_objects"`
 }
 
@@ -249,6 +250,8 @@ type ODOOResult struct {
 	Op_time	int `json:"op_time"`
 	Pset_w_min	float64 `json:"pset_w_min"`
 	Pset_w_target	float64 `json:"pset_w_target"`
+	Final_pass	string	`json:"final_pass"`
+	One_time_pass	string	`json:"one_time_pass"`
 
 	CURObjects	[]CURObject	`json:"cur_objects"`
 }
