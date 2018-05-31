@@ -1,10 +1,10 @@
 package help
 
 import (
-"fmt"
-"io"
-"os"
-"strings"
+	"fmt"
+	"io"
+	"os"
+	"strings"
 )
 
 // Command displays help for command-line sub-commands.

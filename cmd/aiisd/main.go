@@ -1,18 +1,18 @@
 package main
 
 import (
-	"math/rand"
-	"time"
-	"os"
-	"fmt"
-	"io"
 	"flag"
-	"strings"
-	"os/signal"
-	"syscall"
-	"github.com/masami10/aiis/cmd/aiisd/run"
+	"fmt"
 	"github.com/masami10/aiis/cmd/aiisd/help"
+	"github.com/masami10/aiis/cmd/aiisd/run"
 	"github.com/masami10/aiis/services/diagnostic"
+	"io"
+	"math/rand"
+	"os"
+	"os/signal"
+	"strings"
+	"syscall"
+	"time"
 )
 
 type Diagnostic run.Diagnostic
@@ -33,7 +33,6 @@ func init() {
 		branch = "unknown"
 	}
 }
-
 
 // Main represents the program execution.
 type Main struct {

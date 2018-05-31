@@ -1,30 +1,27 @@
 package server
 
 import (
-	"github.com/masami10/aiis/command"
-	"os/user"
-	"os"
 	"fmt"
-	"path/filepath"
+	"github.com/masami10/aiis/command"
 	"github.com/masami10/aiis/services/diagnostic"
 	"github.com/masami10/aiis/services/httpd"
+	"os"
+	"os/user"
+	"path/filepath"
 
 	"github.com/pkg/errors"
 )
 
-
-
 type Config struct {
-	Hostname               string `yaml:"hostname"`
-	DataDir                string `yaml:"data_dir"`
+	Hostname string `yaml:"hostname"`
+	DataDir  string `yaml:"data_dir"`
 
-	Logging        			diagnostic.Config `yaml:"logging"`
+	Logging diagnostic.Config `yaml:"logging"`
 
-	HTTP 					httpd.Config `yaml:"httpd"`
+	HTTP httpd.Config `yaml:"httpd"`
 
 	Commander command.Commander `yaml:"-"`
 }
-
 
 func NewConfig() *Config {
 	c := &Config{

@@ -1,6 +1,5 @@
 package aiis
 
-
-func main(){
+func main() {
 
 }

@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/influxdata/influxdb/toml"
+	"github.com/masami10/aiis/toml"
 	"github.com/pkg/errors"
 )
 
@@ -14,18 +14,25 @@ const (
 	DefaultShutdownTimeout = toml.Duration(time.Second * 10)
 )
 
+type CorsConfig struct {
+	AllowedOrigins   []string `yaml:"allowed-origins"`
+	AllowCredentials bool     `yaml:"allow-credentials"`
+}
+
 type Config struct {
-	BindAddress      string        `yaml:"bind-address"`
-	LogEnabled       bool          `yaml:"log-enabled"`
-	WriteTracing     bool          `yaml:"write-tracing"`
-	ShutdownTimeout  toml.Duration `yaml:"shutdown-timeout"`
+	BindAddress     string        `yaml:"bind-address"`
+	LogEnabled      bool          `yaml:"log-enabled"`
+	WriteTracing    bool          `yaml:"write-tracing"`
+	ShutdownTimeout toml.Duration `yaml:"shutdown-timeout"`
+	Cors            CorsConfig    `yaml:"cors"`
 }
 
 func NewConfig() Config {
 	return Config{
-		BindAddress:      ":9092",
-		LogEnabled:       true,
-		ShutdownTimeout:  DefaultShutdownTimeout,
+		BindAddress:     ":9092",
+		LogEnabled:      true,
+		ShutdownTimeout: DefaultShutdownTimeout,
+		Cors:            CorsConfig{AllowedOrigins: []string{"*"}, AllowCredentials: true},
 	}
 }
 

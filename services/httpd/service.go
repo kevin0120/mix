@@ -1,13 +1,19 @@
 package httpd
 
 import (
-	"net/url"
-	"fmt"
-	"github.com/kataras/iris"
-	"time"
-	"log"
 	stdContext "context"
+	"fmt"
+	"github.com/iris-contrib/middleware/cors"
+	"github.com/kataras/iris"
+	"log"
+	"net/url"
 	"strings"
+	"time"
+)
+
+const (
+	// Root path for the API
+	BasePath = "/aiis/v1"
 )
 
 type Diagnostic interface {
@@ -55,18 +61,24 @@ type Diagnostic interface {
 }
 
 type Service struct {
-	addr  string
-	key   string
-	err   chan error
+	addr string
+	key  string
+	err  chan error
 
-	Handler *Handler
+	Handler         *Handler
 	shutdownTimeout time.Duration
-	externalURL string
-	server *iris.Application
+	externalURL     string
+	server          *iris.Application
 
-	stop            chan chan struct{}
+	stop chan chan struct{}
 
-	diag                  Diagnostic
+	Partys []iris.Party
+
+	PartyByNames map[string]int
+
+	cors CorsConfig
+
+	diag Diagnostic
 }
 
 func NewService(c Config, hostname string, d Diagnostic) *Service {
@@ -77,9 +89,11 @@ func NewService(c Config, hostname string, d Diagnostic) *Service {
 		Scheme: "http",
 	}
 	s := &Service{
-		addr:        c.BindAddress,
-		externalURL: u.String(),
-		err:         make(chan error, 1),
+		addr:            c.BindAddress,
+		externalURL:     u.String(),
+		cors:            c.Cors,
+		err:             make(chan error, 1),
+		PartyByNames:    make(map[string]int),
 		shutdownTimeout: time.Duration(c.ShutdownTimeout),
 		Handler: NewHandler(
 			c.LogEnabled,
@@ -87,6 +101,12 @@ func NewService(c Config, hostname string, d Diagnostic) *Service {
 			d,
 		),
 	}
+	s.AddNewParty(BasePath)
+	p, err := s.GetPartyByName(BasePath)
+	if err != nil {
+		return nil
+	}
+	s.Handler.SetParty(p)
 
 	return s
 }
@@ -102,7 +122,6 @@ func (s *Service) manage() {
 		s.server.Shutdown(ctx)
 	}
 }
-
 
 // Close closes the underlying listener.
 func (s *Service) Close() error {
@@ -163,3 +182,33 @@ func (s *Service) ExternalURL() string {
 	return s.externalURL
 }
 
+func (s *Service) GetPartyByName(version string) (*iris.Party, error) {
+	i, ok := s.PartyByNames[version]
+	if !ok {
+		// Should be unreachable code
+		return nil, fmt.Errorf("cannot get party By %s", version)
+	}
+
+	return &(s.Partys[i]), nil
+}
+
+func (s *Service) AddNewParty(version string) error {
+	if _, ok := s.PartyByNames[version]; ok {
+		// Should be unreachable code
+		panic("cannot append party twice")
+	}
+	crs := cors.New(cors.Options{
+		AllowedOrigins:   s.cors.AllowedOrigins,
+		AllowCredentials: s.cors.AllowCredentials,
+	})
+	p := s.server.Party(version, crs).AllowMethods(iris.MethodOptions)
+	if p == nil {
+		return fmt.Errorf("fail to create the party%s", version)
+	}
+	i := len(s.Partys)
+	s.Partys = append(s.Partys, p)
+
+	s.PartyByNames[version] = i
+
+	return nil
+}

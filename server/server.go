@@ -3,8 +3,8 @@ package server
 import (
 	"fmt"
 	"github.com/masami10/aiis/command"
+	"github.com/masami10/aiis/keyvalue"
 	"github.com/masami10/aiis/services/diagnostic"
-	"github.com/influxdata/kapacitor/keyvalue"
 	"github.com/masami10/aiis/services/httpd"
 )
 
@@ -31,20 +31,19 @@ type Server struct {
 	dataDir  string
 	hostname string
 
-	HTTPDService          *httpd.Service
-	config *Config
+	HTTPDService *httpd.Service
+	config       *Config
 	// List of services in startup order
 	Services []Service
 
 	ServicesByName map[string]int
-	err chan error
+	err            chan error
 
 	BuildInfo   BuildInfo
-	Commander command.Commander
+	Commander   command.Commander
 	DiagService *diagnostic.Service
 	Diag        Diagnostic
 }
-
 
 // New returns a new instance of Server built from a config.
 func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Server, error) {
@@ -54,14 +53,15 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	}
 	d := diagService.NewServerHandler()
 	s := &Server{
-		config:           c,
-		DiagService:	  diagService,
-		Diag:			  d,
-		BuildInfo:        buildInfo,
-		dataDir:          c.DataDir,
-		hostname:         c.Hostname,
-		err:              make(chan error),
-		Commander:        c.Commander,
+		config:         c,
+		DiagService:    diagService,
+		Diag:           d,
+		BuildInfo:      buildInfo,
+		dataDir:        c.DataDir,
+		hostname:       c.Hostname,
+		ServicesByName: make(map[string]int),
+		err:            make(chan error),
+		Commander:      c.Commander,
 	}
 
 	s.initHTTPDService()
@@ -105,7 +105,7 @@ func (s *Server) Open() error {
 }
 
 func (s *Server) startServices() error {
-	for _, service := range s.Services{
+	for _, service := range s.Services {
 		if err := service.Open(); err != nil {
 			return fmt.Errorf("open service %T: %s", service, err)
 		}

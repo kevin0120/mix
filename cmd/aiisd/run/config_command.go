@@ -1,13 +1,13 @@
 package run
 
 import (
-"flag"
-"fmt"
-"io"
-"log"
-"os"
+	"flag"
+	"fmt"
+	"io"
+	"log"
+	"os"
 
-"github.com/masami10/aiis/server"
+	"github.com/masami10/aiis/server"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 )
@@ -103,11 +103,11 @@ func (cmd *PrintConfigCommand) parseConfig(path string) (*server.Config, error) 
 
 	log.Println("Merging with configuration at:", path)
 
-	d, err := yaml.Marshal( &config)
+	d, err := yaml.Marshal(&config)
 	if err != nil {
 		return nil, err
 	}
-	if err := ioutil.WriteFile(path, d,0666); err != nil {
+	if err := ioutil.WriteFile(path, d, 0666); err != nil {
 		return nil, err
 	}
 

@@ -46,28 +46,22 @@
   revision = "e7cf9ea5ca9c574f3fd5f83f7eed4a6162a67dea"
 
 [[projects]]
-  name = "github.com/google/uuid"
-  packages = ["."]
-  revision = "064e2069ce9c359c118179501254f67d7d37ba24"
-  version = "0.2"
-
-[[projects]]
   branch = "master"
   name = "github.com/hashicorp/go-version"
   packages = ["."]
   revision = "23480c0665776210b5fbbac6eaaee40e3e6a96b7"
 
 [[projects]]
-  name = "github.com/influxdata/influxdb"
-  packages = ["toml"]
-  revision = "89e084a80fb1e0bf5e7d38038e3367f821fdf3d7"
-  version = "v1.5.3"
-
-[[projects]]
   branch = "master"
   name = "github.com/iris-contrib/formBinder"
   packages = ["."]
   revision = "ad9fb86c356f971f30319c40ddbdcf72129a2791"
+
+[[projects]]
+  name = "github.com/iris-contrib/middleware"
+  packages = ["cors"]
+  revision = "1060fbb0ce08a72c50c612e8e5bdc8076c28343d"
+  version = "v10"
 
 [[projects]]
   branch = "master"
@@ -118,6 +112,7 @@
     "view"
   ]
   revision = "e1e309c0fe31acda872cdf4833ca8402034cbee2"
+  source = "github.com/kataras/iris"
   version = "v10.6.5"
 
 [[projects]]
@@ -199,6 +194,12 @@
   version = "v0.8.0"
 
 [[projects]]
+  name = "github.com/rs/cors"
+  packages = ["."]
+  revision = "ca016a06a5753f8ba03029c0aa5e54afb1bf713f"
+  version = "v1.4.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/ryanuber/columnize"
   packages = ["."]
@@ -232,7 +233,7 @@
     "html",
     "html/atom"
   ]
-  revision = "dfa909b99c79129e1100513e5cd36307665e5723"
+  revision = "89e543239a64caf31d3a6865872ea120b41446df"
 
 [[projects]]
   branch = "master"
@@ -264,6 +265,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "37d74a89f9080866e365791d7ccd27d4f775da2e79f16f2501bed5f01ee64621"
+  inputs-digest = "6e500ad8eeae3bf92aa73fa3003b6b8f7b1bbd08682a567090c2ae61163b04f9"
   solver-name = "gps-cdcl"
   solver-version = 1

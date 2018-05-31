@@ -1,20 +1,24 @@
 package httpd
 
-import "github.com/influxdata/kapacitor/auth"
-
-const (
-	// Root path for the API
-	BasePath = "/aiis/v1"
-	// Root path for the preview API
-	BasePreviewPath = "/aiis/v1preview"
-	// Name of the special user for subscriptions
-	SubscriptionUser = "~subscriber"
+import (
+	"fmt"
+	"github.com/kataras/iris"
+	"github.com/kataras/iris/context"
 )
+
+//const (
+//	// Root path for the API
+//	BasePath = "/aiis/v1"
+//	// Root path for the preview API
+//	BasePreviewPath = "/aiis/v1preview"
+//	// Name of the special user for subscriptions
+//	SubscriptionUser = "~subscriber"
+//)
 
 type Route struct {
 	Method      string
 	Pattern     string
-	HandlerFunc interface{}
+	HandlerFunc context.Handler
 }
 
 type Handler struct {
@@ -26,8 +30,6 @@ type Handler struct {
 
 	Version string
 
-	AuthService auth.Interface
-
 	DiagService interface {
 		SetLogLevelFromName(lvl string) error
 	}
@@ -37,15 +39,30 @@ type Handler struct {
 	// Uses normal logger
 	writeTrace bool
 
+	party *iris.Party
+
 	// Log every HTTP access.
 	loggingEnabled bool
 }
 
-func NewHandler(loggingEnabled bool, writeTrace bool, d Diagnostic ) *Handler {
+func NewHandler(loggingEnabled bool, writeTrace bool, d Diagnostic) *Handler {
 	h := &Handler{
-		diag:                  d,
-		writeTrace:            writeTrace,
-		loggingEnabled:        loggingEnabled,
+		diag:           d,
+		writeTrace:     writeTrace,
+		loggingEnabled: loggingEnabled,
 	}
 	return h
+}
+
+func (h *Handler) AddRoute(r Route) error {
+	if len(r.Pattern) > 0 && r.Pattern[0] != '/' {
+		return fmt.Errorf("route patterns must begin with a '/' %s", r.Pattern)
+	}
+	(*h.party).Handle(r.Method, r.Pattern, r.HandlerFunc)
+	return nil
+}
+
+func (h *Handler) SetParty(p *iris.Party) error {
+	h.party = p
+	return nil
 }
