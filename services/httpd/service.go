@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"strings"
 	"time"
+	"github.com/masami10/aiis/services/diagnostic"
 )
 
 const (
@@ -77,10 +78,15 @@ type Service struct {
 	cors CorsConfig
 
 	diag Diagnostic
+
+	DiagService interface {
+		SetLogLevelFromName(lvl string) error
+	}
+
 	httpServerErrorLogger *log.Logger
 }
 
-func NewService(c Config, hostname string, d Diagnostic) *Service {
+func NewService(c Config, hostname string, d Diagnostic, disc *diagnostic.Service) *Service {
 
 	port, _ := c.Port()
 	u := url.URL{
@@ -96,9 +102,10 @@ func NewService(c Config, hostname string, d Diagnostic) *Service {
 		HandlerByNames:    make(map[string]int),
 		shutdownTimeout: time.Duration(c.ShutdownTimeout),
 		diag: d,
+		DiagService: disc,
 		httpServerErrorLogger: d.NewHTTPServerErrorLogger(),
 	}
-	s.AddNewHandler(BasePath, c, d)
+	s.AddNewHandler(BasePath, c, d, disc)
 
 	r := Route{
 		Method: "GET",
@@ -109,7 +116,6 @@ func NewService(c Config, hostname string, d Diagnostic) *Service {
 			ctx.HTML("Hello from " + ctx.Path()) // Hello from /
 		},
 	}
-
 	s.Handler[0].AddRoute(r)
 
 	return s
@@ -194,7 +200,7 @@ func (s *Service) GetHandlerByName(version string) (*Handler, error) {
 	return s.Handler[i], nil
 }
 
-func (s *Service) AddNewHandler(version string,c Config, d Diagnostic) error {
+func (s *Service) AddNewHandler(version string,c Config, d Diagnostic, disc *diagnostic.Service) error {
 	if _, ok := s.HandlerByNames[version]; ok {
 		// Should be unreachable code
 		panic("cannot append handler twice")
@@ -212,7 +218,10 @@ func (s *Service) AddNewHandler(version string,c Config, d Diagnostic) error {
 		c.WriteTracing,
 		d,
 	)
+	h.DiagService = disc
+	h.Version = version
 	h.party = &p
+
 	i := len(s.Handler)
 	s.Handler = append(s.Handler, h)
 

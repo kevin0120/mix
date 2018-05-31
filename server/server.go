@@ -66,6 +66,8 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.initHTTPDService()
 
+	s.appendHTTPDService()
+
 	return s, nil
 }
 
@@ -79,15 +81,13 @@ func (s *Server) AppendService(name string, srv Service) {
 	s.ServicesByName[name] = i
 }
 
-func (s *Server) initHTTPDService() {
+func (s *Server) initHTTPDService() error{
 	d := s.DiagService.NewHTTPDHandler()
-	srv := httpd.NewService(s.config.HTTP, s.hostname, d)
-
-	srv.Handler.DiagService = s.DiagService
-
-	srv.Handler.Version = s.BuildInfo.Version
+	srv := httpd.NewService(s.config.HTTP, s.hostname, d, s.DiagService)
 
 	s.HTTPDService = srv
+
+	return nil
 }
 
 func (s *Server) appendHTTPDService() {

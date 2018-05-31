@@ -25,7 +25,6 @@ type Handler struct {
 	requireAuthentication bool
 	exposePprof           bool
 	sharedSecret          string
-
 	allowGzip bool
 
 	Version string
