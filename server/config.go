@@ -9,6 +9,7 @@ import (
 	"os/user"
 	"path/filepath"
 
+	"github.com/masami10/aiis/services/pmon"
 	"github.com/pkg/errors"
 )
 
@@ -20,6 +21,8 @@ type Config struct {
 
 	HTTP httpd.Config `yaml:"httpd"`
 
+	Pmon pmon.Config `yaml:"pmon"`
+
 	Commander command.Commander `yaml:"-"`
 }
 
@@ -30,6 +33,7 @@ func NewConfig() *Config {
 	}
 
 	c.HTTP = httpd.NewConfig()
+	c.Pmon = pmon.NewConfig()
 	c.Logging = diagnostic.NewConfig()
 
 	return c
@@ -64,6 +68,10 @@ func (c *Config) Validate() error {
 
 	if err := c.HTTP.Validate(); err != nil {
 		return errors.Wrap(err, "http")
+	}
+
+	if err := c.Pmon.Validate(); err != nil {
+		return errors.Wrap(err, "pmon")
 	}
 
 	return nil

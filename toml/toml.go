@@ -1,17 +1,17 @@
 package toml
 
 import (
-"encoding"
-"errors"
-"fmt"
-"math"
-"os"
-"os/user"
-"reflect"
-"strconv"
-"strings"
-"time"
-"unicode"
+	"encoding"
+	"errors"
+	"fmt"
+	"math"
+	"os"
+	"os/user"
+	"reflect"
+	"strconv"
+	"strings"
+	"time"
+	"unicode"
 )
 
 // Duration is a TOML wrapper type for time.Duration.

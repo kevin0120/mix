@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris"
+	"github.com/masami10/aiis/services/diagnostic"
 	"log"
 	"net/url"
 	"strings"
 	"time"
-	"github.com/masami10/aiis/services/diagnostic"
 )
 
 const (
@@ -94,21 +94,21 @@ func NewService(c Config, hostname string, d Diagnostic, disc *diagnostic.Servic
 		Scheme: "http",
 	}
 	s := &Service{
-		addr:            c.BindAddress,
-		externalURL:     u.String(),
-		cors:            c.Cors,
-		server: 		 iris.New(),
-		err:             make(chan error, 1),
-		HandlerByNames:    make(map[string]int),
-		shutdownTimeout: time.Duration(c.ShutdownTimeout),
-		diag: d,
-		DiagService: disc,
+		addr:                  c.BindAddress,
+		externalURL:           u.String(),
+		cors:                  c.Cors,
+		server:                iris.New(),
+		err:                   make(chan error, 1),
+		HandlerByNames:        make(map[string]int),
+		shutdownTimeout:       time.Duration(c.ShutdownTimeout),
+		diag:                  d,
+		DiagService:           disc,
 		httpServerErrorLogger: d.NewHTTPServerErrorLogger(),
 	}
 	s.AddNewHandler(BasePath, c, d, disc)
 
 	r := Route{
-		Method: "GET",
+		Method:  "GET",
 		Pattern: "/healthz",
 		HandlerFunc: func(ctx iris.Context) {
 			ctx.StatusCode(iris.StatusNoContent)
@@ -120,15 +120,19 @@ func NewService(c Config, hostname string, d Diagnostic, disc *diagnostic.Servic
 }
 
 func (s *Service) manage() {
-
-	select {
-	case <-s.stop:
-		// if we're already all empty, we're already done
-		timeout := s.shutdownTimeout
-		ctx, cancel := stdContext.WithTimeout(stdContext.Background(), timeout)
-		defer cancel()
-		s.server.Shutdown(ctx)
+	println("start mamager")
+	for {
+		select {
+		case <-s.stop:
+			// if we're already all empty, we're already done
+			timeout := s.shutdownTimeout
+			ctx, cancel := stdContext.WithTimeout(stdContext.Background(), timeout)
+			defer cancel()
+			s.server.Shutdown(ctx)
+			return
+		}
 	}
+
 }
 
 // Close closes the underlying listener.
@@ -198,7 +202,7 @@ func (s *Service) GetHandlerByName(version string) (*Handler, error) {
 	return s.Handler[i], nil
 }
 
-func (s *Service) AddNewHandler(version string,c Config, d Diagnostic, disc *diagnostic.Service) error {
+func (s *Service) AddNewHandler(version string, c Config, d Diagnostic, disc *diagnostic.Service) error {
 	if _, ok := s.HandlerByNames[version]; ok {
 		// Should be unreachable code
 		panic("cannot append handler twice")

@@ -6,6 +6,7 @@ import (
 	"github.com/masami10/aiis/keyvalue"
 	"github.com/masami10/aiis/services/diagnostic"
 	"github.com/masami10/aiis/services/httpd"
+	"github.com/masami10/aiis/services/pmon"
 )
 
 type BuildInfo struct {
@@ -66,6 +67,7 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.initHTTPDService()
 
+	s.appendPmonService()
 
 	s.appendHTTPDService()
 
@@ -82,7 +84,7 @@ func (s *Server) AppendService(name string, srv Service) {
 	s.ServicesByName[name] = i
 }
 
-func (s *Server) initHTTPDService() error{
+func (s *Server) initHTTPDService() error {
 	d := s.DiagService.NewHTTPDHandler()
 	srv := httpd.NewService(s.config.HTTP, s.hostname, d, s.DiagService)
 
@@ -93,6 +95,18 @@ func (s *Server) initHTTPDService() error{
 
 func (s *Server) appendHTTPDService() {
 	s.AppendService("httpd", s.HTTPDService)
+}
+
+func (s *Server) appendPmonService() error {
+	c := s.config.Pmon
+	d := s.DiagService.NewPmonHandler()
+	srv := pmon.NewService(c, d)
+
+	srv.HTTPD = s.HTTPDService //httpd服务注入
+
+	s.AppendService("pmon", srv)
+
+	return nil
 }
 
 func (s *Server) Open() error {
@@ -123,6 +137,11 @@ func (s *Server) Reload() {
 }
 
 func (s *Server) Close() error {
+
+	if err := s.HTTPDService.Close(); err != nil {
+		s.Diag.Error("error closing httpd service", err)
+	}
+
 	for i := len(s.Services) - 1; i >= 0; i-- {
 		service := s.Services[i]
 		s.Diag.Debug("closing service", keyvalue.KV("service", fmt.Sprintf("%T", service)))

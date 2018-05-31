@@ -57,6 +57,12 @@ func (s *Service) NewHTTPDHandler() *HTTPDHandler {
 	}
 }
 
+func (s *Service) NewPmonHandler() *PmonHandler {
+	return &PmonHandler{
+		l: s.Logger.With(String("service", "pmon")),
+	}
+}
+
 func BootstrapMainHandler() *CmdHandler {
 	s := NewService(NewConfig(), nil, os.Stderr)
 	// Should never error

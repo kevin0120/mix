@@ -263,3 +263,13 @@ func (h *HTTPDHandler) RecoveryError(
 func (h *HTTPDHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
+
+// PMON Handler
+
+type PmonHandler struct {
+	l Logger
+}
+
+func (h *PmonHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
