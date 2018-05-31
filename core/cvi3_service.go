@@ -24,6 +24,8 @@ type CVI3Conf struct {
 }
 
 func (service *CVI3Service) HandleResult(result payload.ControllerResult) (error) {
+	fmt.Printf("处理结果数据...\n")
+
 	var err error
 	r, err := service.DB.GetResult(result.Result_id, 0)
 	if err != nil {
@@ -45,6 +47,7 @@ func (service *CVI3Service) HandleResult(result payload.ControllerResult) (error
 	r.ResultValue = string(s_value)
 	r.PSetDefine = string(s_pset)
 
+	fmt.Printf("保存结果到数据库\n")
 	_, err = service.DB.UpdateResult(r)
 	if err != nil {
 		fmt.Printf("HandleResult err:%s\n", err.Error())
@@ -62,6 +65,8 @@ func (service *CVI3Service) HandleResult(result payload.ControllerResult) (error
 		ws_result.WI = result.ResultValue.Wi
 		ws_result.TI = result.ResultValue.Ti
 		ws_str, _ := json.Marshal(ws_result)
+
+		fmt.Printf("Websocket推送结果到HMI\n")
 		go service.APIService.WSSendResult(workorder.HMISN, string(ws_str))
 	}
 
@@ -108,10 +113,12 @@ func (service *CVI3Service) HandleResult(result payload.ControllerResult) (error
 			odoo_result.CURObjects = append(odoo_result.CURObjects, curobject)
 		}
 
+		fmt.Printf("推送结果数据到AIIS\n")
 		_, err = service.ODOO.PutResult(result.Result_id, odoo_result)
 		if err == nil {
 			// 发送成功
 			r.HasUpload = true
+			fmt.Printf("推送成功，更新本地结果标识\n")
 			_, err := service.DB.UpdateResult(r)
 			if err != nil {
 				return err
@@ -125,6 +132,8 @@ func (service *CVI3Service) HandleResult(result payload.ControllerResult) (error
 }
 
 func (service *CVI3Service) HandleCurve(curve payload.ControllerCurve) (error) {
+	fmt.Printf("处理波形数据...\n")
+
 	// 保存波形到数据库
 	c := rushdb.Curves{}
 	c.ResultID = curve.ResultID
@@ -137,6 +146,7 @@ func (service *CVI3Service) HandleCurve(curve payload.ControllerCurve) (error) {
 	if err != nil {
 		return err
 	} else {
+		fmt.Printf("缓存波形数据到数据库\n")
 		if exist {
 			_, err := service.DB.UpdateCurve(c)
 			if err != nil {
@@ -151,11 +161,13 @@ func (service *CVI3Service) HandleCurve(curve payload.ControllerCurve) (error) {
 	}
 
 	// 保存波形到对象存储
+	fmt.Printf("保存波形数据到对象存储\n")
 	err = service.Storage.Upload(curve.CurveFile, curve.CurveData)
 	if err != nil {
 		return err
 	} else {
 		c.HasUpload = true
+		fmt.Printf("对象存储保存成功，更新本地结果标识\n")
 		_, err = service.DB.UpdateCurve(c)
 		if err != nil {
 			return err
@@ -167,7 +179,7 @@ func (service *CVI3Service) HandleCurve(curve payload.ControllerCurve) (error) {
 }
 
 func (service *CVI3Service) OnStatus(sn string, status string) {
-	fmt.Printf("%s:%s\n", sn, status)
+	fmt.Printf("sn:%s status:%s\n", sn, status)
 
 	// ws推送状态
 	s := payload.WSStatus{}
@@ -179,13 +191,15 @@ func (service *CVI3Service) OnStatus(sn string, status string) {
 }
 
 func (service *CVI3Service) OnRecv(msg string) {
-	fmt.Printf("%s\n", msg)
+
 
 	if strings.Contains(msg, cvi3.XML_RESULT_KEY) {
+		fmt.Printf("收到结果数据:%s\n", msg)
+
 		result := cvi3.CVI3Result{}
 		err := xml.Unmarshal([]byte(msg), &result)
 		if err != nil {
-			fmt.Printf("%s\n", err.Error())
+			fmt.Printf("OnRecv err:%s\n", err.Error())
 		}
 
 		// 结果数据
@@ -193,7 +207,6 @@ func (service *CVI3Service) OnRecv(msg string) {
 
 		// 波形文件
 		curve_file := payload.XML2Curve(result)
-
 
 		curve := payload.ControllerCurve{}
 		s_curvedata, _ := json.Marshal(curve_file)
@@ -209,6 +222,8 @@ func (service *CVI3Service) OnRecv(msg string) {
 			fmt.Printf("OnRecv err:%s\n", e.Error())
 		}
 
+	} else {
+		fmt.Printf("recv:%s\n", msg)
 	}
 
 }
