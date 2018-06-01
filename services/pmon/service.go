@@ -35,7 +35,7 @@ type Diagnostic interface {
 	Error(msg string, err error)
 }
 
-type EventHandler func(int, string, string)
+type EventHandler func(int, *C.char, *C.char)
 
 type Service struct {
 	configValue atomic.Value
@@ -61,8 +61,11 @@ func (s *Service) config() Config {
 	return s.configValue.Load().(Config)
 }
 
-func h(i int, ch string, msg string) {
-	fmt.Printf("%d, %s, %s", i, ch, msg)
+//请查阅 https://golang.org/cmd/cgo
+func h(i int, ch *C.char, msg *C.char) {
+	sCh := C.GoString(ch)
+	sMsg := C.GoString(msg)
+	fmt.Printf("%d, %s, %s", i, sCh, sMsg)
 }
 
 func (s *Service) Open() error {
