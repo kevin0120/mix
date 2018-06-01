@@ -134,17 +134,15 @@ func NewService(doc string, c Config, hostname string, d Diagnostic, disc *diagn
 }
 
 func (s *Service) manage() {
-	println("start mamager")
-	for {
-		select {
-		case <-s.stop:
-			// if we're already all empty, we're already done
-			timeout := s.shutdownTimeout
-			ctx, cancel := stdContext.WithTimeout(stdContext.Background(), timeout)
-			defer cancel()
-			s.server.Shutdown(ctx)
-			return
-		}
+	//println("start mamager")
+	select {
+	case <-s.stop:
+		// if we're already all empty, we're already done
+		timeout := s.shutdownTimeout
+		ctx, cancel := stdContext.WithTimeout(stdContext.Background(), timeout)
+		defer cancel()
+		s.server.Shutdown(ctx)
+		return
 	}
 
 }
