@@ -71,7 +71,7 @@ func (service *CVI3Service) HandleResult(result payload.ControllerResult) (error
 	}
 
 	if r.Count >= int(workorder.MaxRedoTimes) || r.Result == payload.RESULT_OK {
-		// 结果推送AIIS
+		// 结果推送Rush
 
 		odoo_result := payload.ODOOResult{}
 		if r.Result == payload.RESULT_OK {
@@ -113,7 +113,7 @@ func (service *CVI3Service) HandleResult(result payload.ControllerResult) (error
 			odoo_result.CURObjects = append(odoo_result.CURObjects, curobject)
 		}
 
-		fmt.Printf("推送结果数据到AIIS\n")
+		fmt.Printf("推送结果数据到Rush\n")
 		_, err = service.ODOO.PutResult(result.Result_id, odoo_result)
 		if err == nil {
 			// 发送成功
