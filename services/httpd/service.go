@@ -142,8 +142,8 @@ func (s *Service) manage() {
 		timeout := s.shutdownTimeout
 		ctx, cancel := stdContext.WithTimeout(stdContext.Background(), timeout)
 		defer cancel()
-		defer close(stopDone)
 		s.server.Shutdown(ctx)
+		close(stopDone)
 		return
 	}
 
