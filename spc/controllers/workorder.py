@@ -58,7 +58,7 @@ class ApiMrpWorkorder(http.Controller):
         for order in workorder_ids:
             points = env['point.point'].search_read(
                 domain=[('res_model', '=', 'mrp.routing.workcenter'), ('res_id','=', order.operation_id.id), ('res_field', '=', 'worksheet_img')],
-                fields=['x_offset', 'y_offset'])
+                fields=['x_offset', 'y_offset', 'sequence'])
             _ret.append({
                 'id': order.id,
                 'hmi': {'id': workcenter_id.hmi_id.id, 'uuid': workcenter_id.hmi_id.serial_no},

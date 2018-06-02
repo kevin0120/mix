@@ -11,9 +11,9 @@ class HMIConnections(http.Controller):
         hmi_id = None
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         if serial_no:
-            hmi = env['maintenance.equipment'].search_read(domain=[('serial_no', '=', serial_no)], fields=['id'], limit=1)
+            hmi = env['maintenance.equipment'].search([('serial_no', '=', serial_no)],limit=1)
             if hmi:
-                hmi_id = hmi[0]['id']
+                hmi_id = hmi.ids[0]
             else:
                 body = json.dumps({'msg': "hmi not existed"})
                 headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
@@ -31,6 +31,10 @@ class HMIConnections(http.Controller):
         io_connection = workercenter_id.io_id.connection_ids.filtered(lambda r: r.protocol == 'modbustcp')[0] if workercenter_id.io_id.connection_ids else None
         rfid_connection = workercenter_id.rfid_id.connection_ids.filtered(lambda r: r.protocol == 'rawtcp')[0] if workercenter_id.rfid_id.connection_ids else None
         val = {
+            'info': {
+                'workcenter': workercenter_id.name,
+                'worksegment': workercenter_id.worksegment_id.name
+            },
             'masterpc': {'serial_no': workercenter_id.masterpc_id.serial_no, 'connection':masterpc_connection.name_get()[0][1] if masterpc_connection else False},
             'controller': {'serial_no': workercenter_id.controller_id.serial_no, 'connection': False},
             'io': {'serial_no': workercenter_id.io_id.serial_no, 'connection': io_connection.name_get()[0][1] if io_connection else False},
