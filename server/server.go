@@ -10,6 +10,7 @@ import (
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/utils"
+	"github.com/pkg/errors"
 )
 
 type BuildInfo struct {
@@ -68,7 +69,9 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 		Commander:      c.Commander,
 	}
 
-	s.initHTTPDService()
+	if err := s.initHTTPDService(); err != nil {
+		return nil , errors.Wrap(err, "init httpd service")
+	}
 
 	s.appendMinioService()
 
@@ -146,17 +149,30 @@ func (s *Server) Open() error {
 		return err
 	}
 
+	go s.watchServices()
+
 	return nil
 }
 
 func (s *Server) startServices() error {
 	for _, service := range s.Services {
+		s.Diag.Debug("opening service", keyvalue.KV("service", fmt.Sprintf("%T", service)))
 		if err := service.Open(); err != nil {
 			return fmt.Errorf("open service %T: %s", service, err)
 		}
+		s.Diag.Debug("opened service", keyvalue.KV("service", fmt.Sprintf("%T", service)))
 	}
 
 	return nil
+}
+
+// Watch if something dies
+func (s *Server) watchServices() {
+	var err error
+	select {
+	case err = <-s.HTTPDService.Err():
+	}
+	s.err <- err
 }
 
 // Err returns an error channel that multiplexes all out of band errors received from all services.
