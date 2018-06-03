@@ -153,6 +153,8 @@ func (s *Server) appendWebsocketService() error {
 	d := s.DiagService.NewWebsocketHandler()
 	srv := wsnotify.NewService(c, d)
 
+	srv.Httpd = s.HTTPDService //http 服务注入
+
 	s.AppendService("websocket", srv)
 
 	return nil
