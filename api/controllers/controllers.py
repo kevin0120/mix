@@ -18,6 +18,11 @@ class BaseApi(http.Controller):
     def _get_default_logo(self):
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         company = env['res.company'].search([])
+        logo = company[0].logo
+        if not logo:
+            body = json.dumps({'msg': 'Logo not found'})
+            return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
+                            status=404)
         ret = {
             "logo": company[0].logo
         }
