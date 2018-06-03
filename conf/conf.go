@@ -1,13 +1,13 @@
 package conf
 
 import (
+	"fmt"
+	"github.com/masami10/rush/core"
 	"github.com/masami10/rush/db"
 	"github.com/masami10/rush/storage"
-	"github.com/masami10/rush/core"
-	"os"
 	"gopkg.in/yaml.v2"
-	"fmt"
 	"io/ioutil"
+	"os"
 )
 
 const (
@@ -15,22 +15,26 @@ const (
 )
 
 type ConfRush struct {
-	MasterPC struct{
-		SN string			`yaml:"sn"`
-		Port int			`yaml:"api_port"`
-		APIDocPath string	`yaml:"api_doc_path"`
+	MasterPC struct {
+		SN         string `yaml:"sn"`
+		Port       int    `yaml:"api_port"`
+		APIDocPath string `yaml:"api_doc_path"`
 	} `yaml:"rush"`
 
-	DB rushdb.DB `yaml:"db"`
+	DB    rushdb.DB                `yaml:"db"`
 	MINIO rush_storage.StorageConf `yaml:"minio"`
-	ODOO core.ODOOConf `yaml:"odoo"`
-	CVI3 core.CVI3Conf `yaml:"cvi3"`
+	ODOO  core.ODOOConf            `yaml:"odoo"`
+	CVI3  core.CVI3Conf            `yaml:"cvi3"`
 }
 
 func file_exists(path string) (bool, error) {
 	_, err := os.Stat(path)
-	if err == nil { return true, nil }
-	if os.IsNotExist(err) { return false, nil }
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
 	return true, err
 }
 

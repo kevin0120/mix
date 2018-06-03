@@ -1,29 +1,29 @@
 package core
 
 import (
+	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"github.com/linshenqi/TightningSys/desoutter/cvi3"
 	"github.com/masami10/rush/db"
-	"strings"
-	"encoding/xml"
-	"encoding/json"
-	"time"
-	"github.com/masami10/rush/storage"
 	"github.com/masami10/rush/payload"
+	"github.com/masami10/rush/storage"
+	"strings"
+	"time"
 )
 
 type ControllerConf struct {
-	SN string	`yaml:"sn"`
-	IP string	`yaml:"ip"`
-	Port uint	`yaml:"port"`
+	SN   string `yaml:"sn"`
+	IP   string `yaml:"ip"`
+	Port uint   `yaml:"port"`
 }
 
 type CVI3Conf struct {
-	Listen int `yaml:"listen"`
+	Listen      int              `yaml:"listen"`
 	Controllers []ControllerConf `yaml:"controllers"`
 }
 
-func (service *CVI3Service) HandleResult(result payload.ControllerResult) (error) {
+func (service *CVI3Service) HandleResult(result payload.ControllerResult) error {
 	fmt.Printf("处理结果数据...\n")
 
 	var err error
@@ -131,7 +131,7 @@ func (service *CVI3Service) HandleResult(result payload.ControllerResult) (error
 	return nil
 }
 
-func (service *CVI3Service) HandleCurve(curve payload.ControllerCurve) (error) {
+func (service *CVI3Service) HandleCurve(curve payload.ControllerCurve) error {
 	fmt.Printf("处理波形数据...\n")
 
 	// 保存波形到数据库
@@ -192,7 +192,6 @@ func (service *CVI3Service) OnStatus(sn string, status string) {
 
 func (service *CVI3Service) OnRecv(msg string) {
 
-
 	if strings.Contains(msg, cvi3.XML_RESULT_KEY) {
 		fmt.Printf("收到结果数据:%s\n", msg)
 
@@ -216,7 +215,7 @@ func (service *CVI3Service) OnRecv(msg string) {
 		curve.ResultID = result_data.Result_id
 
 		e := service.HandleCurve(curve)
-		if  e == nil {
+		if e == nil {
 			go service.HandleResult(result_data)
 		} else {
 			fmt.Printf("OnRecv err:%s\n", e.Error())
@@ -229,13 +228,13 @@ func (service *CVI3Service) OnRecv(msg string) {
 }
 
 type CVI3Service struct {
-	Service	cvi3.CVI3
-	Port	string
-	Configs []cvi3.CVI3Config
-	hmis	map[string]string
-	DB		*rushdb.DB
-	Storage	*rush_storage.Storage
-	ODOO	*ODOO
+	Service    cvi3.CVI3
+	Port       string
+	Configs    []cvi3.CVI3Config
+	hmis       map[string]string
+	DB         *rushdb.DB
+	Storage    *rush_storage.Storage
+	ODOO       *ODOO
 	APIService *APIServer
 }
 

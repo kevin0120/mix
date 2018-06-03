@@ -264,7 +264,6 @@ func (h *HTTPDHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
 
-
 // Aiis Handler
 
 type AiisHandler struct {
@@ -293,4 +292,26 @@ type MinioHandler struct {
 
 func (h *MinioHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
+}
+
+// Websocket Handler
+
+type WsHandler struct {
+	l Logger
+}
+
+func (h *WsHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+func (h *WsHandler) Disconnect(id string) {
+	h.l.Info("ws Connection disconnected", String("ID", id))
+}
+
+func (h *WsHandler) Close() {
+	h.l.Info("ws server closing")
+}
+
+func (h *WsHandler) Closed() {
+	h.l.Info("ws server closed")
 }

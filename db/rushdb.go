@@ -1,28 +1,28 @@
 package rushdb
 
 import (
-	_ "github.com/lib/pq"
-	"github.com/go-xorm/xorm"
-	"fmt"
 	"encoding/json"
-	"strconv"
+	"fmt"
+	"github.com/go-xorm/xorm"
 	"github.com/kataras/iris/core/errors"
+	_ "github.com/lib/pq"
+	"strconv"
 
 	"github.com/masami10/rush/payload"
 	"time"
 )
 
 type DB struct {
-	DBName string	`yaml:"dbname"`
-	URL string		`yaml:"url"`
-	Port int		`yaml:"port"`
-	User string		`yaml:"user"`
-	Pwd string		`yaml:"pwd"`
-	DataKeep int		`yaml:"data_keep"`				// 最小单位：天
-	DataCleanStep int	`yaml:"data_clean_step"`		// 最小单位：天
+	DBName        string `yaml:"dbname"`
+	URL           string `yaml:"url"`
+	Port          int    `yaml:"port"`
+	User          string `yaml:"user"`
+	Pwd           string `yaml:"pwd"`
+	DataKeep      int    `yaml:"data_keep"`       // 最小单位：天
+	DataCleanStep int    `yaml:"data_clean_step"` // 最小单位：天
 }
 
-func (db *DB)Init() (error) {
+func (db *DB) Init() error {
 
 	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		db.User,
@@ -77,7 +77,7 @@ func (db *DB)Init() (error) {
 	return nil
 }
 
-func (db *DB) UpdateResults(id int, count int, flag bool)(error) {
+func (db *DB) UpdateResults(id int, count int, flag bool) error {
 	//results := []Results{}
 	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		db.User,
@@ -105,7 +105,7 @@ func (db *DB) UpdateResults(id int, count int, flag bool)(error) {
 	}
 }
 
-func (db *DB) FindResults(result_upload bool, result []string)([]Results, error) {
+func (db *DB) FindResults(result_upload bool, result []string) ([]Results, error) {
 	results := []Results{}
 	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		db.User,
@@ -126,7 +126,7 @@ func (db *DB) FindResults(result_upload bool, result []string)([]Results, error)
 	}
 }
 
-func (db *DB) ListResults(id int)([]Results, error) {
+func (db *DB) ListResults(id int) ([]Results, error) {
 	results := []Results{}
 
 	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
@@ -148,7 +148,7 @@ func (db *DB) ListResults(id int)([]Results, error) {
 	}
 }
 
-func (db *DB) InsertResults(result Results) (error) {
+func (db *DB) InsertResults(result Results) error {
 	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		db.User,
 		db.Pwd,
@@ -182,7 +182,7 @@ func (db *DB) CurveExist(curve Curves) (bool, error) {
 		return false, err
 	}
 
-	has, err := engine.Exist(&Curves{ ResultID: curve.ResultID, Count: curve.Count})
+	has, err := engine.Exist(&Curves{ResultID: curve.ResultID, Count: curve.Count})
 	if err != nil {
 		return false, err
 	} else {
@@ -190,7 +190,7 @@ func (db *DB) CurveExist(curve Curves) (bool, error) {
 	}
 }
 
-func (db *DB) InsertCurve(curve Curves) (error) {
+func (db *DB) InsertCurve(curve Curves) error {
 	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		db.User,
 		db.Pwd,
@@ -254,7 +254,7 @@ func (db *DB) ListCurves(result_id int) ([]Curves, error) {
 	}
 }
 
-func (db *DB) DeleteCurves(result_id int) (error) {
+func (db *DB) DeleteCurves(result_id int) error {
 	var err error
 	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		db.User,
@@ -277,7 +277,6 @@ func (db *DB) DeleteCurves(result_id int) (error) {
 		return nil
 	}
 }
-
 
 func (db *DB) InsertWorkorders(workorders []payload.ODOOWorkorder) ([]payload.ODOOWorkorder, error) {
 	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
@@ -367,7 +366,7 @@ func (db *DB) WorkorderExists(id int) (bool, error) {
 		return false, err
 	}
 
-	has, err := engine.Exist(&Workorders{ WorkorderID: id})
+	has, err := engine.Exist(&Workorders{WorkorderID: id})
 	if err != nil {
 		return false, err
 	} else {
@@ -396,7 +395,6 @@ func (db *DB) GetResult(id int, count int) (Results, error) {
 	} else {
 		rt, err = engine.Alias("r").Where("r.result_id = ?", id).And("r.count = ?", count).Limit(1).Get(&result)
 	}
-
 
 	if err != nil {
 		return result, err
@@ -547,7 +545,7 @@ func (db *DB) ListInvalidResults(dat time.Time) ([]Results, error) {
 	}
 }
 
-func (db *DB) DeleteResult(result Results) (error) {
+func (db *DB) DeleteResult(result Results) error {
 	var err error
 	engine, err := xorm.NewEngine("postgres", fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		db.User,
@@ -568,14 +566,14 @@ func (db *DB) DeleteResult(result Results) (error) {
 	}
 }
 
-func (db *DB) CleanUpService() (error) {
+func (db *DB) CleanUpService() error {
 
 	for {
-		span, _ := time.ParseDuration(fmt.Sprintf("-%dh", db.DataKeep * 24))
+		span, _ := time.ParseDuration(fmt.Sprintf("-%dh", db.DataKeep*24))
 		dat := time.Now().Add(span)
 
 		results, err := db.ListInvalidResults(dat)
-		var exist_curve_not_upload bool  = false
+		var exist_curve_not_upload bool = false
 		if err == nil {
 			// 清理过期结果和波形
 			for _, v := range results {

@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"github.com/masami10/rush/command"
 	"github.com/masami10/rush/keyvalue"
+	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/diagnostic"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/minio"
-	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/odoo"
+	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 )
@@ -70,7 +71,7 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	}
 
 	if err := s.initHTTPDService(); err != nil {
-		return nil , errors.Wrap(err, "init httpd service")
+		return nil, errors.Wrap(err, "init httpd service")
 	}
 
 	s.appendMinioService()
@@ -138,6 +139,16 @@ func (s *Server) appendOdooService() error {
 	srv := odoo.NewService(c, d)
 
 	s.AppendService("odoo", srv)
+
+	return nil
+}
+
+func (s *Server) appendWebsocketService() error {
+	c := s.config.Ws
+	d := s.DiagService.NewWebsocketHandler()
+	srv := wsnotify.NewService(c, d)
+
+	s.AppendService("websocket", srv)
 
 	return nil
 }

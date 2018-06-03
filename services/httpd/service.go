@@ -6,11 +6,11 @@ import (
 	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris"
 	"github.com/masami10/rush/services/diagnostic"
+	"io/ioutil"
 	"log"
 	"net/url"
 	"strings"
 	"time"
-	"io/ioutil"
 )
 
 const (
@@ -70,7 +70,7 @@ type Service struct {
 	Handler         []*Handler
 	shutdownTimeout time.Duration
 	externalURL     string
-	server          *iris.Application
+	Server          *iris.Application
 
 	stop chan chan struct{}
 
@@ -83,7 +83,6 @@ type Service struct {
 	DiagService interface {
 		SetLogLevelFromName(lvl string) error
 	}
-
 	httpServerErrorLogger *log.Logger
 }
 
@@ -98,7 +97,7 @@ func NewService(doc string, c Config, hostname string, d Diagnostic, disc *diagn
 		addr:                  c.BindAddress,
 		externalURL:           u.String(),
 		cors:                  c.Cors,
-		server:                iris.New(),
+		Server:                iris.New(),
 		err:                   make(chan error, 1),
 		HandlerByNames:        make(map[string]int),
 		shutdownTimeout:       time.Duration(c.ShutdownTimeout),
@@ -129,7 +128,6 @@ func NewService(doc string, c Config, hostname string, d Diagnostic, disc *diagn
 
 	s.Handler[0].AddRoute(r1)
 
-
 	return s
 }
 
@@ -142,7 +140,7 @@ func (s *Service) manage() {
 		timeout := s.shutdownTimeout
 		ctx, cancel := stdContext.WithTimeout(stdContext.Background(), timeout)
 		defer cancel()
-		s.server.Shutdown(ctx)
+		s.Server.Shutdown(ctx)
 		close(stopDone)
 		return
 	}
@@ -153,7 +151,7 @@ func (s *Service) manage() {
 func (s *Service) Close() error {
 	defer s.diag.StoppedService()
 	// If server is not set we were never started
-	if s.server == nil {
+	if s.Server == nil {
 		return nil
 	}
 	// Signal to manage loop we are stopping
@@ -161,12 +159,12 @@ func (s *Service) Close() error {
 	s.stop <- stopping
 
 	<-stopping
-	s.server = nil
+	s.Server = nil
 	return nil
 }
 
 func (s *Service) serve() {
-	err := s.server.Run(s.Addr(), iris.WithoutInterruptHandler)
+	err := s.Server.Run(s.Addr(), iris.WithoutInterruptHandler)
 	// The listener was closed so exit
 	// See https://github.com/golang/go/issues/4373
 	if !strings.Contains(err.Error(), "closed") {
@@ -197,7 +195,7 @@ func (s *Service) Err() <-chan error {
 
 func (s *Service) URL() string {
 
-	return "http://" + s.server.ConfigurationReadOnly().GetVHost()
+	return "http://" + s.Server.ConfigurationReadOnly().GetVHost()
 }
 
 // URL that should resolve externally to the server HTTP endpoint.
@@ -225,7 +223,7 @@ func (s *Service) AddNewHandler(version string, c Config, d Diagnostic, disc *di
 		AllowedOrigins:   s.cors.AllowedOrigins,
 		AllowCredentials: s.cors.AllowCredentials,
 	})
-	p := s.server.Party(version, crs).AllowMethods(iris.MethodOptions)
+	p := s.Server.Party(version, crs).AllowMethods(iris.MethodOptions)
 	if p == nil {
 		return fmt.Errorf("fail to create the party%s", version)
 	}

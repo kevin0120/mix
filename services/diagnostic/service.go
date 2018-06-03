@@ -75,6 +75,12 @@ func (s *Service) NewMinioHandler() *MinioHandler {
 	}
 }
 
+func (s *Service) NewWebsocketHandler() *WsHandler {
+	return &WsHandler{
+		l: s.Logger.With(String("service", "websocket")),
+	}
+}
+
 func BootstrapMainHandler() *CmdHandler {
 	s := NewService(NewConfig(), nil, os.Stderr)
 	// Should never error

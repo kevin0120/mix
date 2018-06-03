@@ -1,39 +1,39 @@
 package core
 
 import (
-	"github.com/kataras/iris"
-	"github.com/iris-contrib/middleware/cors"
-	"github.com/masami10/rush/db"
 	"encoding/json"
-	"github.com/masami10/rush/payload"
-	"github.com/kataras/iris/websocket"
 	"fmt"
-	"sync"
-	"strings"
-	"strconv"
+	"github.com/iris-contrib/middleware/cors"
+	"github.com/kataras/iris"
+	"github.com/kataras/iris/websocket"
+	"github.com/masami10/rush/db"
+	"github.com/masami10/rush/payload"
 	"io/ioutil"
+	"strconv"
+	"strings"
+	"sync"
 )
 
 const (
 	API_PREFIX = "/api/v1"
 
-	WS_EVENT_STATUS = "status"
-	WS_EVENT_RESULT = "result"
+	WS_EVENT_STATUS    = "status"
+	WS_EVENT_RESULT    = "result"
 	WS_EVENT_WORKORDER = "workorder"
 )
 
 type WSClient struct {
-	ID	string
+	ID   string
 	Conn websocket.Connection
 }
 
 type APIServer struct {
-	Port string
-	CVI3 *CVI3Service
-	DB	*rushdb.DB
-	WSClients	map[string]WSClient
-	WSMtx	sync.Mutex
-	DocPath	string
+	Port      string
+	CVI3      *CVI3Service
+	DB        *rushdb.DB
+	WSClients map[string]WSClient
+	WSMtx     sync.Mutex
+	DocPath   string
 }
 
 func (apiserver *APIServer) putPSets(ctx iris.Context) {
@@ -109,7 +109,7 @@ func (apiserver *APIServer) getWorkorder(ctx iris.Context) {
 		return
 	}
 
-	if vin_or_knr == ""  {
+	if vin_or_knr == "" {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("vin_or_knr is required")
 		return
@@ -186,7 +186,7 @@ func (apiserver *APIServer) getDoc(ctx iris.Context) {
 }
 
 func (apiserver *APIServer) push_new_orders(orders []payload.ODOOWorkorder) {
-	for _,v := range orders {
+	for _, v := range orders {
 		order_str, _ := json.Marshal(v)
 		apiserver.WSSendWorkorder(v.HMI.UUID, string(order_str))
 	}
@@ -200,7 +200,6 @@ func (apiserver *APIServer) getResults(ctx iris.Context) {
 		ctx.WriteString("has_upload is required")
 		return
 	}
-
 
 	result := ctx.URLParams()["result"]
 
@@ -226,10 +225,9 @@ func (apiserver *APIServer) getResults(ctx iris.Context) {
 	//	return
 	//}
 
-
 	resp := []payload.ODOOResultSync{}
 	results, _ := apiserver.DB.FindResults(bool_has_upload, re_list)
-	target_results :=  map[int]rushdb.Results{}
+	target_results := map[int]rushdb.Results{}
 	for _, v := range results {
 		tr, exist := target_results[v.ResultId]
 		if exist {
@@ -349,7 +347,7 @@ func (apiserver *APIServer) RemoveClient(id string) {
 
 	apiserver.WSMtx.Lock()
 	var key string = ""
-	for k,v := range apiserver.WSClients {
+	for k, v := range apiserver.WSClients {
 		if v.ID == id {
 			key = k
 			break
@@ -366,7 +364,7 @@ func (apiserver *APIServer) GetClient(sn string) (WSClient, bool) {
 
 	apiserver.WSMtx.Lock()
 	v, e := apiserver.WSClients[sn]
-	return v,e
+	return v, e
 }
 
 func (apiserver *APIServer) WSSendStatus(payload string) {
@@ -374,7 +372,7 @@ func (apiserver *APIServer) WSSendStatus(payload string) {
 	defer apiserver.WSMtx.Unlock()
 
 	apiserver.WSMtx.Lock()
-	for _,v := range apiserver.WSClients {
+	for _, v := range apiserver.WSClients {
 		v.Conn.Emit(WS_EVENT_STATUS, payload)
 	}
 }
@@ -438,7 +436,6 @@ func (apiserver *APIServer) onWSConn(c websocket.Connection) {
 
 }
 
-
 func (apiserver *APIServer) StartService(doc_path string) error {
 
 	apiserver.DocPath = doc_path
@@ -460,7 +457,6 @@ func (apiserver *APIServer) StartService(doc_path string) error {
 	})
 
 	ws.OnConnection(apiserver.onWSConn)
-
 
 	v1 := app.Party(API_PREFIX, crs).AllowMethods(iris.MethodOptions)
 	{

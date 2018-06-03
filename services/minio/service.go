@@ -1,10 +1,10 @@
 package minio
 
 import (
-	"sync/atomic"
-	"github.com/minio/minio-go"
 	"fmt"
+	"github.com/minio/minio-go"
 	"strings"
+	"sync/atomic"
 )
 
 type Diagnostic interface {
@@ -13,10 +13,10 @@ type Diagnostic interface {
 
 type Service struct {
 	configValue atomic.Value
-	diag 		Diagnostic
-	bucket 		string
+	diag        Diagnostic
+	bucket      string
 
-	minio 		*minio.Client
+	minio *minio.Client
 }
 
 func (s *Service) config() Config {
@@ -33,25 +33,24 @@ func NewService(c Config, d Diagnostic) *Service {
 
 }
 
-func (s *Service) Open () error {
+func (s *Service) Open() error {
 	c := s.config()
 	client, err := minio.New(c.URL, c.Access, c.Secret, c.Secure)
 	if err != nil {
-		return fmt.Errorf("create minio fail %s",err.Error())
+		return fmt.Errorf("create minio fail %s", err.Error())
 	}
 	s.minio = client
 	return nil
 }
 
-
-func (s *Service) Close () error {
+func (s *Service) Close() error {
 	return nil
 }
 
 func (s *Service) Upload(obj string, data string) error {
 	isExist, err := s.minio.BucketExists(s.bucket)
-	if err != nil || !isExist{
-		return fmt.Errorf("Bucket %s not exist err msg: %s ",s.bucket,err.Error())
+	if err != nil || !isExist {
+		return fmt.Errorf("Bucket %s not exist err msg: %s ", s.bucket, err.Error())
 	}
 	reader := strings.NewReader(data)
 	_, e := s.minio.PutObject(s.bucket, obj, reader, reader.Size(), minio.PutObjectOptions{ContentType: "application/json"})

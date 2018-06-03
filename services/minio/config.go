@@ -1,26 +1,25 @@
 package minio
 
 import (
-	"net"
 	"github.com/pkg/errors"
+	"net"
 )
 
 type Config struct {
-	URL string		`yaml:"url"`
-	Bucket string	`yaml:"bucket"`
-	Access string	`yaml:"access"`
-	Secret string	`yaml:"secret"`
-	Secure bool		`yaml:"secure"`
+	URL    string `yaml:"url"`
+	Bucket string `yaml:"bucket"`
+	Access string `yaml:"access"`
+	Secret string `yaml:"secret"`
+	Secure bool   `yaml:"secure"`
 }
-
 
 func NewConfig() Config {
 	return Config{
-		URL:     		"127.0.0.1:9000",
-		Bucket:      	"bucket",
-		Access: 		"access",
-		Secret:     	"secret",
-		Secure: 		false,
+		URL:    "127.0.0.1:9000",
+		Bucket: "bucket",
+		Access: "access",
+		Secret: "secret",
+		Secure: false,
 	}
 }
 
@@ -31,4 +30,3 @@ func (c Config) Validate() error {
 	}
 	return nil
 }
-

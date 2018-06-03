@@ -9,19 +9,21 @@ import (
 	"os/user"
 	"path/filepath"
 
+	"github.com/masami10/rush/services/aiis"
+	"github.com/masami10/rush/services/minio"
+	"github.com/masami10/rush/services/odoo"
+	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
-	"github.com/masami10/rush/services/minio"
-	"github.com/masami10/rush/services/aiis"
-	"github.com/masami10/rush/services/odoo"
 )
 
 type Config struct {
 	Hostname string `yaml:"hostname"`
 	DataDir  string `yaml:"data_dir"`
-	SN string		`yaml:"serial_no"`
+	SN       string `yaml:"serial_no"`
 
-	DocPath string  `yaml:"doc_path"`
+	DocPath string `yaml:"doc_path"`
 
 	Logging diagnostic.Config `yaml:"logging"`
 
@@ -29,18 +31,22 @@ type Config struct {
 
 	Minio minio.Config `yaml:"minio"`
 
-	Aiis  aiis.Config  `yaml:"aiis"`
+	Aiis aiis.Config `yaml:"aiis"`
 
-	Odoo odoo.Config 	`yaml:"odoo"`
+	Odoo odoo.Config `yaml:"odoo"`
+
+	Ws wsnotify.Config `yaml:"websocket"`
+
+	Storage storage.Config `yaml:"storage"`
 
 	Commander command.Commander `yaml:"-"`
 }
 
 func NewConfig() *Config {
-	sn,_ := uuid.NewV4()
+	sn, _ := uuid.NewV4()
 	c := &Config{
 		Hostname:  "localhost",
-		SN: sn.String(),
+		SN:        sn.String(),
 		Commander: command.ExecCommander,
 	}
 
@@ -48,6 +54,8 @@ func NewConfig() *Config {
 	c.Minio = minio.NewConfig()
 	c.Aiis = aiis.NewConfig()
 	c.Odoo = odoo.NewConfig()
+	c.Ws = wsnotify.NewConfig()
+	c.Storage = storage.NewConfig()
 	c.Logging = diagnostic.NewConfig()
 
 	return c
@@ -81,7 +89,6 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("must configure valid data dir")
 	}
 
-
 	if err := c.HTTP.Validate(); err != nil {
 		return errors.Wrap(err, "http")
 	}
@@ -96,6 +103,14 @@ func (c *Config) Validate() error {
 
 	if err := c.Odoo.Validate(); err != nil {
 		return errors.Wrap(err, "odoo")
+	}
+
+	if err := c.Ws.Validate(); err != nil {
+		return errors.Wrap(err, "websocket")
+	}
+
+	if err := c.Storage.Validate(); err != nil {
+		return errors.Wrap(err, "storage")
 	}
 
 	return nil

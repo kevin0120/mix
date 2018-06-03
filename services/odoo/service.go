@@ -5,8 +5,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"gopkg.in/resty.v1"
 	"fmt"
+	"gopkg.in/resty.v1"
 )
 
 type Diagnostic interface {
@@ -80,7 +80,7 @@ func (s *Service) ResultPush(body interface{}) error {
 	return nil
 }
 
-func (s *Service) resultPush(body interface{},endpoint *Endpoint ) error {
+func (s *Service) resultPush(body interface{}, endpoint *Endpoint) error {
 	r := s.httpClient.R().SetBody(body)
 	switch endpoint.method {
 	case "PATCH":

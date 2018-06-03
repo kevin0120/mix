@@ -1,16 +1,16 @@
 package core
 
 import (
-	"net/http"
-	"fmt"
 	"encoding/json"
+	"fmt"
 	"github.com/kataras/iris/core/errors"
-	"io/ioutil"
 	"github.com/masami10/rush/db"
-	"time"
 	"github.com/masami10/rush/payload"
-	"strings"
+	"io/ioutil"
+	"net/http"
 	"strconv"
+	"strings"
+	"time"
 )
 
 const (
@@ -18,19 +18,19 @@ const (
 )
 
 type ODOOConf struct {
-	Timeout int			`yaml:"api_timeout"`		// 毫秒
-	Push_inteval int	`yaml:"push_inteval"`		// 毫秒
-	MaxRetry int		`yaml:"max_retry"`			// api最大尝试次数
-	Urls []string		`yaml:"urls"`
+	Timeout      int      `yaml:"api_timeout"`  // 毫秒
+	Push_inteval int      `yaml:"push_inteval"` // 毫秒
+	MaxRetry     int      `yaml:"max_retry"`    // api最大尝试次数
+	Urls         []string `yaml:"urls"`
 }
 
 type ODOO struct {
 	Conf ODOOConf
 
 	MasterPC_SN string
-	DB *rushdb.DB
-	APIService *APIServer
-	PutStack	payload.SafeStack
+	DB          *rushdb.DB
+	APIService  *APIServer
+	PutStack    payload.SafeStack
 }
 
 func (odoo *ODOO) Init() {
@@ -88,7 +88,7 @@ func (odoo *ODOO) CreateMO(mo payload.ODOOMO) (payload.ODOOMOCreated, string, er
 
 			}
 
-			time.Sleep(time.Duration(1 + i) * time.Second)
+			time.Sleep(time.Duration(1+i) * time.Second)
 		}
 
 	}
@@ -198,7 +198,7 @@ func (odoo *ODOO) PutResultBatch(results []payload.ODOOResultSync) (string, erro
 				elapsed := strconv.FormatFloat(time.Since(t).Seconds(), 'f', -1, 64)
 				if err != nil {
 					final_err = err
-					time.Sleep(time.Duration(1 + i) * time.Second)
+					time.Sleep(time.Duration(1+i) * time.Second)
 					continue
 				}
 
@@ -212,7 +212,7 @@ func (odoo *ODOO) PutResultBatch(results []payload.ODOOResultSync) (string, erro
 				} else {
 					//fmt.Printf("%s\n", string(body))
 					final_err = errors.New(string(body))
-					time.Sleep(time.Duration(1 + i) * time.Second)
+					time.Sleep(time.Duration(1+i) * time.Second)
 					continue
 				}
 			}
@@ -247,7 +247,7 @@ func (odoo *ODOO) PutResult(id int, result payload.ODOOResult) (string, error) {
 				elapsed := strconv.FormatFloat(time.Since(t).Seconds(), 'f', -1, 64)
 				if err != nil {
 					final_err = err
-					time.Sleep(time.Duration(1 + i) * time.Second)
+					time.Sleep(time.Duration(1+i) * time.Second)
 					continue
 				}
 
@@ -261,7 +261,7 @@ func (odoo *ODOO) PutResult(id int, result payload.ODOOResult) (string, error) {
 				} else {
 					//fmt.Printf("%s\n", string(body))
 					final_err = errors.New(string(body))
-					time.Sleep(time.Duration(1 + i) * time.Second)
+					time.Sleep(time.Duration(1+i) * time.Second)
 					continue
 				}
 			}
@@ -271,8 +271,6 @@ func (odoo *ODOO) PutResult(id int, result payload.ODOOResult) (string, error) {
 
 	return "", final_err
 }
-
-
 
 //func (odoo *ODOO) PatchCurve(result_id int, cur_file string, count int) (error) {
 //	client := &http.Client{}
