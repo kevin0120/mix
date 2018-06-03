@@ -1,11 +1,18 @@
 package storage
 
+import (
+	"github.com/masami10/rush/toml"
+	"time"
+	"fmt"
+)
+
 type Config struct {
 	Url         string `yaml:"db_url"`
 	DBName      string `yaml:"db_name"`
 	User        string `yaml:"db_user"`
 	Password    string `yaml:"db_pwd"`
 	MaxConnects int    `yaml:"max_connection"`
+	VacuumPeriod toml.Duration `yaml:"vacuum_period"`
 }
 
 func NewConfig() Config {
@@ -15,9 +22,15 @@ func NewConfig() Config {
 		User:        "user",
 		Password:    "pwd",
 		MaxConnects: 60,
+		VacuumPeriod: toml.Duration(time.Duration(3 * 30 *24 * time.Hour)),
 	}
 }
 
 func (c Config) Validate() error {
+
+	if c.VacuumPeriod < toml.Duration(time.Duration( 5 * 24 * time.Hour)) {
+		return fmt.Errorf("vacuum period %s is less than 5 days", c.VacuumPeriod.String())
+	}
+
 	return nil
 }

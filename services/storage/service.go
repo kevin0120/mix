@@ -7,6 +7,7 @@ import (
 	"github.com/masami10/rush/services/httpd"
 	"github.com/pkg/errors"
 	"sync/atomic"
+	"time"
 )
 
 type Diagnostic interface {
@@ -89,6 +90,8 @@ func (s *Service) Open() error {
 	s.eng = engine
 
 	s.diag.OpenEngineSuccess(info)
+
+	go s.DropTableManage() //启动drop数据协程
 	return nil
 }
 
@@ -121,4 +124,30 @@ func (s *Service) Store(data interface{}) error {
 	}
 
 	return nil
+}
+
+func (s *Service) DropTableManage() error {
+	c := s.Config()
+	for ;; {
+		start := time.Now()
+		//session := s.eng.NewSession()
+		//defer session.Close()
+		//
+		//// add Begin() before any action
+		//err := session.Begin()
+		//if err != nil {
+		//	session.Rollback()
+		//	s.diag.Error("vacuum table fail", err)
+		//}
+		//
+		//// add Commit() after all actions
+		//err = session.Commit()
+		//if err != nil {
+		//	s.diag.Error("vacuum table commit fail", err)
+		//}
+		diff := time.Since(start) // 执行的间隔时间
+
+		time.Sleep( time.Duration(c.VacuumPeriod) - diff)
+	}
+
 }
