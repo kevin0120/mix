@@ -15,12 +15,24 @@ class OperationView(http.Controller):
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=404, headers=headers)
         else:
-            vals = request.jsonrequest
-            if not isinstance(vals, list):
+            req_vals = request.jsonrequest
+            points = req_vals['points'] if 'points' in req_vals else None
+            img = req_vals['img'] if 'img' in req_vals else None
+            if img:
+                ret = operation.write({'worksheet_img': img})
+                if not ret:
+                    body = json.dumps({'msg': "Operation %d upload image fail" % operation_id})
+                    headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
+                    return Response(body, status=405, headers=headers)
+            if not points:
+                body = json.dumps({'msg': "Edit point success"})
+                headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
+                return Response(body, status=200, headers=headers)
+            if not isinstance(points, list):
                 body = json.dumps({'msg': "Body must be point array"})
                 headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
                 return Response(body, status=405, headers=headers)
-            for val in vals:
+            for val in points:
                 point_id = env['point.point'].search([('res_id', '=', operation_id),
                                                       ('res_model', '=', 'mrp.routing.workcenter'),
                                                       ('sequence', '=', val.sequence)])
