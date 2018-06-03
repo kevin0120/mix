@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import http
+from odoo import http,SUPERUSER_ID,api
 from odoo.http import request, Response
 
 from api_data import api_data,DEFAULT_LIMIT
@@ -13,6 +13,16 @@ class BaseApi(http.Controller):
     @http.route('/api/v1/doc', type='http', auth='none', cors='*', csrf=False)
     def _api_doc(self):
         return json.dumps(api_data)
+
+    @http.route('/api/v1/logo', type='http', auth='none', cors='*', csrf=False)
+    def _get_default_logo(self):
+        env = api.Environment(request.cr, SUPERUSER_ID, request.context)
+        company = env['res.company'].search([])
+        ret = {
+            "logo": company[0].logo
+        }
+        body = json.dumps(ret)
+        return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=200)
 
     @http.route('/api/v1/res.users', type='http', auth='none', cors='*', csrf=False)
     def _get_users_list_info(self, **query_params):
