@@ -10,6 +10,7 @@ import (
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/wsnotify"
+	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 )
@@ -80,6 +81,10 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.appendOdooService()
 
+	s.appendWebsocketService()
+
+	s.appendStorageService()
+
 	s.appendHTTPDService()
 
 	return s, nil
@@ -149,6 +154,17 @@ func (s *Server) appendWebsocketService() error {
 	srv := wsnotify.NewService(c, d)
 
 	s.AppendService("websocket", srv)
+
+	return nil
+}
+
+
+func (s *Server) appendStorageService() error {
+	c := s.config.Storage
+	d := s.DiagService.NewStorageHandler()
+	srv := storage.NewService(c, d)
+
+	s.AppendService("storage", srv)
 
 	return nil
 }

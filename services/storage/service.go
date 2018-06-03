@@ -84,6 +84,8 @@ func (s *Service) Open() error {
 
 	}
 
+	engine.SetMaxOpenConns(c.MaxConnects) // always success
+
 	s.eng = engine
 
 	s.diag.OpenEngineSuccess(info)

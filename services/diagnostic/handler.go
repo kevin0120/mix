@@ -315,3 +315,23 @@ func (h *WsHandler) Close() {
 func (h *WsHandler) Closed() {
 	h.l.Info("ws server closed")
 }
+
+type StorageHandler struct {
+	l Logger
+}
+
+func (h *StorageHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+func (h *StorageHandler) OpenEngineSuccess(msg string) {
+	h.l.Info("Open Engine success", String("T", msg))
+}
+
+func (h *StorageHandler) Close() {
+	h.l.Info("Storage Service closing")
+}
+
+func (h *StorageHandler) Closed() {
+	h.l.Info("Storage Service closed")
+}

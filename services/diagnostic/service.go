@@ -81,6 +81,12 @@ func (s *Service) NewWebsocketHandler() *WsHandler {
 	}
 }
 
+func (s *Service) NewStorageHandler() *StorageHandler {
+	return &StorageHandler{
+		l: s.Logger.With(String("service", "storage")),
+	}
+}
+
 func BootstrapMainHandler() *CmdHandler {
 	s := NewService(NewConfig(), nil, os.Stderr)
 	// Should never error
