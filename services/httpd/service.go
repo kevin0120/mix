@@ -6,11 +6,11 @@ import (
 	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris"
 	"github.com/masami10/rush/services/diagnostic"
-	"io/ioutil"
 	"log"
 	"net/url"
 	"strings"
 	"time"
+	"github.com/masami10/rush/services/storage"
 )
 
 const (
@@ -67,10 +67,13 @@ type Service struct {
 	key  string
 	err  chan error
 
+	methods			Methods
+	DB				*storage.Service
+	ApiDoc			string
 	Handler         []*Handler
 	shutdownTimeout time.Duration
 	externalURL     string
-	Server          *iris.Application
+	server          *iris.Application
 
 	stop chan chan struct{}
 
@@ -86,7 +89,7 @@ type Service struct {
 	httpServerErrorLogger *log.Logger
 }
 
-func NewService(doc string, c Config, hostname string, d Diagnostic, disc *diagnostic.Service) *Service {
+func NewService(doc string, c Config, hostname string, d Diagnostic, db *storage.Service, disc *diagnostic.Service) *Service {
 
 	port, _ := c.Port()
 	u := url.URL{
@@ -94,10 +97,13 @@ func NewService(doc string, c Config, hostname string, d Diagnostic, disc *diagn
 		Scheme: "http",
 	}
 	s := &Service{
+		DB:					   db,
+		methods:			   Methods{},
+		ApiDoc:				   doc,
 		addr:                  c.BindAddress,
 		externalURL:           u.String(),
 		cors:                  c.Cors,
-		Server:                iris.New(),
+		server:                iris.New(),
 		err:                   make(chan error, 1),
 		HandlerByNames:        make(map[string]int),
 		shutdownTimeout:       time.Duration(c.ShutdownTimeout),
@@ -105,28 +111,68 @@ func NewService(doc string, c Config, hostname string, d Diagnostic, disc *diagn
 		DiagService:           disc,
 		httpServerErrorLogger: d.NewHTTPServerErrorLogger(),
 	}
+
+	s.methods.service = s
+
 	s.AddNewHandler(BasePath, c, d, disc)
 
-	r := Route{
+	var r Route
+
+	r = Route{
 		Method:  "GET",
 		Pattern: "/healthz",
-		HandlerFunc: func(ctx iris.Context) {
-			ctx.StatusCode(iris.StatusNoContent)
-		},
+		HandlerFunc: s.methods.getHealthz,
 	}
 	s.Handler[0].AddRoute(r)
 
-	r1 := Route{
+	r = Route{
 		Method:  "GET",
 		Pattern: "/doc",
-		HandlerFunc: func(ctx iris.Context) {
-			f, _ := ioutil.ReadFile(doc)
-			ctx.Write(f)
-			ctx.StatusCode(iris.StatusOK)
-		},
+		HandlerFunc: s.methods.getDoc,
 	}
+	s.Handler[0].AddRoute(r)
 
-	s.Handler[0].AddRoute(r1)
+	r = Route{
+		Method:  "PUT",
+		Pattern: "/psets",
+		HandlerFunc: s.methods.putPSets,
+	}
+	s.Handler[0].AddRoute(r)
+
+	r = Route{
+		Method:  "GET",
+		Pattern: "/workorder",
+		HandlerFunc: s.methods.getWorkorder,
+	}
+	s.Handler[0].AddRoute(r)
+
+	r = Route{
+		Method:  "GET",
+		Pattern: "/results",
+		HandlerFunc: s.methods.getResults,
+	}
+	s.Handler[0].AddRoute(r)
+
+	r = Route{
+		Method:  "PATCH",
+		Pattern: "/results/{id:int}",
+		HandlerFunc: s.methods.patchResult,
+	}
+	s.Handler[0].AddRoute(r)
+
+	r = Route{
+		Method:  "GET",
+		Pattern: "/controller-status",
+		HandlerFunc: s.methods.getStatus,
+	}
+	s.Handler[0].AddRoute(r)
+
+	r = Route{
+		Method:  "POST",
+		Pattern: "/workorders",
+		HandlerFunc: s.methods.postWorkorders,
+	}
+	s.Handler[0].AddRoute(r)
 
 	return s
 }
@@ -140,7 +186,7 @@ func (s *Service) manage() {
 		timeout := s.shutdownTimeout
 		ctx, cancel := stdContext.WithTimeout(stdContext.Background(), timeout)
 		defer cancel()
-		s.Server.Shutdown(ctx)
+		s.server.Shutdown(ctx)
 		close(stopDone)
 		return
 	}
@@ -151,7 +197,7 @@ func (s *Service) manage() {
 func (s *Service) Close() error {
 	defer s.diag.StoppedService()
 	// If server is not set we were never started
-	if s.Server == nil {
+	if s.server == nil {
 		return nil
 	}
 	// Signal to manage loop we are stopping
@@ -159,12 +205,12 @@ func (s *Service) Close() error {
 	s.stop <- stopping
 
 	<-stopping
-	s.Server = nil
+	s.server = nil
 	return nil
 }
 
 func (s *Service) serve() {
-	err := s.Server.Run(s.Addr(), iris.WithoutInterruptHandler)
+	err := s.server.Run(s.Addr(), iris.WithoutInterruptHandler)
 	// The listener was closed so exit
 	// See https://github.com/golang/go/issues/4373
 	if !strings.Contains(err.Error(), "closed") {
@@ -195,7 +241,7 @@ func (s *Service) Err() <-chan error {
 
 func (s *Service) URL() string {
 
-	return "http://" + s.Server.ConfigurationReadOnly().GetVHost()
+	return "http://" + s.server.ConfigurationReadOnly().GetVHost()
 }
 
 // URL that should resolve externally to the server HTTP endpoint.
@@ -223,7 +269,7 @@ func (s *Service) AddNewHandler(version string, c Config, d Diagnostic, disc *di
 		AllowedOrigins:   s.cors.AllowedOrigins,
 		AllowCredentials: s.cors.AllowCredentials,
 	})
-	p := s.Server.Party(version, crs).AllowMethods(iris.MethodOptions)
+	p := s.server.Party(version, crs).AllowMethods(iris.MethodOptions)
 	if p == nil {
 		return fmt.Errorf("fail to create the party%s", version)
 	}

@@ -107,7 +107,9 @@ func (s *Server) initHTTPDService() error {
 		return fmt.Errorf("API File %s is not exist", p)
 	}
 	d := s.DiagService.NewHTTPDHandler()
-	srv := httpd.NewService(p, s.config.HTTP, s.hostname, d, s.DiagService)
+
+	//db := s.Services[s.ServicesByName["storage"]].(storage.Service)
+	srv := httpd.NewService(p, s.config.HTTP, s.hostname, d, nil, s.DiagService)
 
 	s.HTTPDService = srv
 

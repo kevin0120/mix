@@ -2,6 +2,10 @@ package wsnotify
 
 import "fmt"
 
+const (
+	WS_ROUTE = "/rush/v1/ws"
+)
+
 type Config struct {
 	Route 			string `yaml:"route"`
 	ReadBufferSize  int 	`yaml:"read_buf_size"`
@@ -10,7 +14,7 @@ type Config struct {
 
 func NewConfig() Config {
 	c := Config{
-		Route: "/ws",
+		Route: WS_ROUTE,
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}

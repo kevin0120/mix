@@ -8,6 +8,8 @@ import (
 	"github.com/pkg/errors"
 	"sync/atomic"
 	"time"
+	"github.com/masami10/rush/payload"
+	"encoding/json"
 )
 
 type Diagnostic interface {
@@ -150,4 +152,265 @@ func (s *Service) DropTableManage() error {
 		time.Sleep( time.Duration(c.VacuumPeriod) - diff)
 	}
 
+}
+
+
+
+func (s *Service) FindUnuploadResults(result_upload bool, result []string)([]Results, error) {
+	results := []Results{}
+
+	e := s.eng.Alias("r").Where("r.result_upload = ?", result_upload).And("r.need_upload = ?", true).And("r.result <> ?", "NONE").Find(&results)
+	if e != nil {
+		return results, e
+	} else {
+		return results, nil
+	}
+}
+
+func (s *Service) CurveExist(curve Curves) (bool, error) {
+
+	has, err := s.eng.Exist(&Curves{ ResultID: curve.ResultID, Count: curve.Count})
+	if err != nil {
+		return false, err
+	} else {
+		return has, nil
+	}
+}
+
+func (s *Service) UpdateCurve(curve Curves) (Curves, error) {
+
+	sql := "update `curves` set has_upload = ?, curve_file = ?, curve_data = ? where result_id = ? and count = ?"
+	_, err := s.eng.Exec(sql,
+		curve.HasUpload, curve.CurveFile, curve.CurveData, curve.ResultID, curve.Count)
+
+	if err != nil {
+		return curve, err
+	} else {
+		return curve, nil
+	}
+}
+
+func (s *Service) ListCurvesByResult(result_id int64) ([]Curves, error) {
+	var curves []Curves = []Curves{}
+
+	e := s.eng.Alias("c").Where("c.result_id = ?", result_id).Find(&curves)
+	if e != nil {
+		return curves, e
+	} else {
+		return curves, nil
+	}
+}
+
+func (s *Service) DeleteCurvesByResult(result_id int64) (error) {
+
+	sql := "delete from `curves` where result_id = ?"
+	_, err := s.eng.Exec(sql,
+		result_id)
+
+	if err != nil {
+		return err
+	} else {
+		return nil
+	}
+}
+
+
+func (s *Service) InsertWorkorder(workorder Workorders) (error) {
+
+	var err error
+	has, _ := s.WorkorderExists(workorder.WorkorderID)
+	if has {
+		// 忽略存在的记录
+		return nil
+	}
+
+	result_ids := []int64{}
+	err = json.Unmarshal([]byte(workorder.ResultIDs), &result_ids)
+	if err != nil {
+		return err
+	}
+
+	if len(result_ids) == 0 {
+		return nil
+	}
+
+	err = s.Store(workorder)
+	if err != nil {
+		return err
+	} else {
+		fmt.Printf("new workorder:%d\n", workorder.WorkorderID)
+	}
+
+	// 预保存结果
+	for _, result_id := range result_ids {
+		r := new(Results)
+		r.ResultId = result_id
+		r.ControllerSN = ""
+		r.WorkorderID = workorder.WorkorderID
+		r.Result = payload.RESULT_NONE
+		r.HasUpload = false
+		r.Stage = "init"
+		r.UpdateTime = time.Now()
+		r.PSetDefine = ""
+		r.ResultValue = ""
+		r.Count = 1
+
+		err = s.Store(r)
+		if err != nil {
+			return err
+		} else {
+			fmt.Printf("new result:%d\n", result_id)
+		}
+	}
+
+
+	return nil
+}
+
+func (s *Service) WorkorderExists(id int64) (bool, error) {
+
+	has, err := s.eng.Exist(&Workorders{ WorkorderID: id})
+	if err != nil {
+		return false, err
+	} else {
+		return has, nil
+	}
+}
+
+func (s *Service) GetResult(result_id int64, count int) (Results, error) {
+	var err error
+
+	result := Results{}
+
+	var rt bool
+	if count == 0 {
+		rt, err = s.eng.Alias("r").Where("r.x_result_id = ?", result_id).Limit(1).Get(&result)
+	} else {
+		rt, err = s.eng.Alias("r").Where("r.x_result_id = ?", result_id).And("r.count = ?", count).Limit(1).Get(&result)
+	}
+
+	if err != nil {
+		return result, err
+	} else {
+		if !rt {
+			return result, errors.New("result does not exist")
+		} else {
+			return result, nil
+		}
+	}
+}
+
+func (s *Service) GetWorkorder(id int) (Workorders, error) {
+	var err error
+
+	workorder := Workorders{}
+
+	var rt bool
+	rt, err = s.eng.Alias("w").Where("w.x_workorder_id = ?", id).Get(&workorder)
+
+	if err != nil {
+		return workorder, err
+	} else {
+		if !rt {
+			return workorder, errors.New("workorder does not exist")
+		} else {
+			return workorder, nil
+		}
+	}
+}
+
+func (s *Service) FindWorkorder(hmi_sn string, vin string, knr string) (Workorders, error) {
+	var err error
+
+	workorder := Workorders{}
+
+	var rt bool
+	if vin != "" {
+		rt, err = s.eng.Alias("w").Where("w.hmi_sn = ?", hmi_sn).And("w.vin = ?", vin).Get(&workorder)
+	} else {
+		rt, err = s.eng.Alias("w").Where("w.hmi_sn = ?", hmi_sn).And("w.knr = ?", knr).Get(&workorder)
+	}
+
+	if err != nil {
+		return workorder, err
+	} else {
+		if !rt {
+			return workorder, errors.New("workorder does not exist")
+		} else {
+			return workorder, nil
+		}
+	}
+}
+
+func (s *Service) ListNeedPushResults() ([]Results, error) {
+	results := []Results{}
+
+	e := s.eng.Alias("r").Where("r.need_upload = ?", true).And("r.result_upload = ?", false).Find(&results)
+	if e != nil {
+		return results, e
+	} else {
+		return results, nil
+	}
+}
+
+func (s *Service) UpdateResult(result Results) (Results, error) {
+	var err error
+
+	sql := "update `results` set controller_sn = ?, result = ?, has_upload = ?, stage = ?, update_time = ?, pset_define = ?, result_value = ?, count = ? where x_result_id = ?"
+	_, err = s.eng.Exec(sql,
+		result.ControllerSN,
+		result.Result,
+		result.HasUpload,
+		result.Stage,
+		result.UpdateTime,
+		result.PSetDefine,
+		result.ResultValue,
+		result.Count,
+		result.ResultId)
+
+	if err != nil {
+		return result, err
+	} else {
+		return result, nil
+	}
+}
+
+func (s *Service) UpdateResultByCount(id int64, count int, flag bool)(error) {
+
+	var err error
+	if count > 0 {
+		sql := "update `results` set result_upload = ? where x_result_id = ? and count = ?"
+		_, err = s.eng.Exec(sql, flag, id, count)
+	} else {
+		sql := "update `results` set result_upload = ? where x_result_id = ?"
+		_, err = s.eng.Exec(sql, flag, id)
+	}
+
+	if err != nil {
+		return err
+	} else {
+		return nil
+	}
+}
+
+func (s *Service) ListInvalidResults(dat time.Time) ([]Results, error) {
+	var results []Results
+
+	err := s.eng.Alias("r").Where("r.has_upload = ?", true).And("r.update_time < ?", dat).Find(&results)
+	if err != nil {
+		return results, err
+	} else {
+		return results, nil
+	}
+}
+
+func (s *Service) DeleteResult(result Results) (error) {
+	var err error
+
+	_, err = s.eng.Id(result.ResultId).Unscoped().Delete(&result)
+	if err != nil {
+		return err
+	} else {
+		return nil
+	}
 }

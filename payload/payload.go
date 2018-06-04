@@ -27,7 +27,7 @@ const (
 type PSet struct {
 	Controller_SN string `json:"controller_sn"`
 	PSet          int    `json:"pset"`
-	Result_id     int    `json:"result_id"`
+	Result_id     int64  `json:"result_id"`
 	Count         int    `json:"count"`
 }
 
@@ -36,14 +36,14 @@ type ResultPatch struct {
 }
 
 type Workorder struct {
-	Workorder_id int     `json:"workorder_id"`
+	Workorder_id int64   `json:"workorder_id"`
 	HMI_sn       string  `json:"hmi_sn"`
 	PSet         int     `json:"pset"`
 	Nut_total    float64 `json:"nut_total"`
 	Vin          string  `json:"vin"`
 	Knr          string  `json:"knr"`
 	Status       string  `json:"status"`
-	Result_ids   []int   `json:"result_ids"`
+	Result_ids   []int64 `json:"result_ids"`
 	WorkSheet    string  `json:"work_sheet"`
 }
 
@@ -178,7 +178,7 @@ type ODOOMOCreated struct {
 }
 
 type ODOOWorkorder struct {
-	ID             int     `json:"id"`
+	ID             int64   `json:"id"`
 	Status         string  `json:"status"`
 	NutTotal       float64 `json:"nut_total"`
 	PSet           string  `json:"pset"`
@@ -190,7 +190,7 @@ type ODOOWorkorder struct {
 		UUID string `json:"uuid"`
 	} `json:"hmi"`
 
-	Result_IDs []int `json:"result_ids"`
+	Result_IDs []int64 `json:"result_ids"`
 	Worksheet  struct {
 		Content string `json:"content"`
 		Points  []struct {
@@ -213,7 +213,7 @@ type ODOOCurveAppend struct {
 }
 
 type ODOOResultSync struct {
-	ID               int     `json:"id"`
+	ID               int64   `json:"id"`
 	Pset_m_threshold float64 `json:"pset_m_threshold"`
 	Pset_m_max       float64 `json:"pset_m_max"`
 	Pset_m_min       float64 `json:"pset_m_min"`
