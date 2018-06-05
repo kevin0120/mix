@@ -81,6 +81,12 @@ func (s *Service) NewWebsocketHandler() *WsHandler {
 	}
 }
 
+func (s *Service) NewHMIHandler() *WsHandler {
+	return &WsHandler{
+		l: s.Logger.With(String("service", "hmi")),
+	}
+}
+
 func (s *Service) NewStorageHandler() *StorageHandler {
 	return &StorageHandler{
 		l: s.Logger.With(String("service", "storage")),

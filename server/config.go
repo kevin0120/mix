@@ -11,7 +11,6 @@ import (
 
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/minio"
-	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
@@ -33,8 +32,6 @@ type Config struct {
 
 	Aiis aiis.Config `yaml:"aiis"`
 
-	Odoo odoo.Config `yaml:"odoo"`
-
 	Ws wsnotify.Config `yaml:"websocket"`
 
 	Storage storage.Config `yaml:"storage"`
@@ -53,7 +50,6 @@ func NewConfig() *Config {
 	c.HTTP = httpd.NewConfig()
 	c.Minio = minio.NewConfig()
 	c.Aiis = aiis.NewConfig()
-	c.Odoo = odoo.NewConfig()
 	c.Ws = wsnotify.NewConfig()
 	c.Storage = storage.NewConfig()
 	c.Logging = diagnostic.NewConfig()
@@ -99,10 +95,6 @@ func (c *Config) Validate() error {
 
 	if err := c.Aiis.Validate(); err != nil {
 		return errors.Wrap(err, "aiis")
-	}
-
-	if err := c.Odoo.Validate(); err != nil {
-		return errors.Wrap(err, "odoo")
 	}
 
 	if err := c.Ws.Validate(); err != nil {

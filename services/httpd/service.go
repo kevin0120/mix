@@ -10,7 +10,6 @@ import (
 	"net/url"
 	"strings"
 	"time"
-	"github.com/masami10/rush/services/storage"
 )
 
 const (
@@ -68,7 +67,7 @@ type Service struct {
 	err  chan error
 
 	methods			Methods
-	DB				*storage.Service
+
 	ApiDoc			string
 	Handler         []*Handler
 	shutdownTimeout time.Duration
@@ -89,7 +88,7 @@ type Service struct {
 	httpServerErrorLogger *log.Logger
 }
 
-func NewService(doc string, c Config, hostname string, d Diagnostic, db *storage.Service, disc *diagnostic.Service) *Service {
+func NewService(doc string, c Config, hostname string, d Diagnostic, disc *diagnostic.Service) *Service {
 
 	port, _ := c.Port()
 	u := url.URL{
@@ -97,7 +96,6 @@ func NewService(doc string, c Config, hostname string, d Diagnostic, db *storage
 		Scheme: "http",
 	}
 	s := &Service{
-		DB:					   db,
 		methods:			   Methods{},
 		ApiDoc:				   doc,
 		addr:                  c.BindAddress,
@@ -119,58 +117,10 @@ func NewService(doc string, c Config, hostname string, d Diagnostic, db *storage
 	var r Route
 
 	r = Route{
-		Method:  "GET",
-		Pattern: "/healthz",
-		HandlerFunc: s.methods.getHealthz,
-	}
-	s.Handler[0].AddRoute(r)
-
-	r = Route{
+		RouteType:	ROUTE_TYPE_HTTP,
 		Method:  "GET",
 		Pattern: "/doc",
 		HandlerFunc: s.methods.getDoc,
-	}
-	s.Handler[0].AddRoute(r)
-
-	r = Route{
-		Method:  "PUT",
-		Pattern: "/psets",
-		HandlerFunc: s.methods.putPSets,
-	}
-	s.Handler[0].AddRoute(r)
-
-	r = Route{
-		Method:  "GET",
-		Pattern: "/workorder",
-		HandlerFunc: s.methods.getWorkorder,
-	}
-	s.Handler[0].AddRoute(r)
-
-	r = Route{
-		Method:  "GET",
-		Pattern: "/results",
-		HandlerFunc: s.methods.getResults,
-	}
-	s.Handler[0].AddRoute(r)
-
-	r = Route{
-		Method:  "PATCH",
-		Pattern: "/results/{id:int}",
-		HandlerFunc: s.methods.patchResult,
-	}
-	s.Handler[0].AddRoute(r)
-
-	r = Route{
-		Method:  "GET",
-		Pattern: "/controller-status",
-		HandlerFunc: s.methods.getStatus,
-	}
-	s.Handler[0].AddRoute(r)
-
-	r = Route{
-		Method:  "POST",
-		Pattern: "/workorders",
-		HandlerFunc: s.methods.postWorkorders,
 	}
 	s.Handler[0].AddRoute(r)
 
@@ -268,6 +218,7 @@ func (s *Service) AddNewHandler(version string, c Config, d Diagnostic, disc *di
 	crs := cors.New(cors.Options{
 		AllowedOrigins:   s.cors.AllowedOrigins,
 		AllowCredentials: s.cors.AllowCredentials,
+		AllowedMethods:   s.cors.AllowedMethods,
 	})
 	p := s.server.Party(version, crs).AllowMethods(iris.MethodOptions)
 	if p == nil {
@@ -278,6 +229,7 @@ func (s *Service) AddNewHandler(version string, c Config, d Diagnostic, disc *di
 		c.WriteTracing,
 		d,
 	)
+	h.service = s.server
 	h.DiagService = disc
 	h.Version = version
 	h.party = &p

@@ -6,7 +6,7 @@
     "description": "工位HMI调用"
   },
   "host": "172.17.0.1:8080",
-  "basePath": "/api/v1",
+  "basePath": "/rush/v1",
   "schemes": [
     "http"
   ],
@@ -105,7 +105,10 @@
             "name": "body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/WorkorderPost"
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/WorkorderPost"
+              }
             }
           }
         ],
@@ -565,6 +568,16 @@
           "type": "string",
           "description": "拧接程序号",
           "example": "1"
+        },
+        "max_redo_times": {
+          "type": "number",
+          "description": "最大重试拧接次数",
+          "example": 3
+        },
+        "max_op_time": {
+          "type": "number",
+          "description": "最大步进时间(秒)",
+          "example": 30
         },
         "vin": {
           "type": "string",

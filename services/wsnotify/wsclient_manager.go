@@ -40,6 +40,16 @@ func (s *WSClientManager) RemoveClient(cid string) {
 	}
 }
 
+func (s *WSClientManager) NotifyALL(evt string, payload string) {
+	defer s.mutex.Unlock()
+
+	s.mutex.Lock()
+
+	for _, v := range s.conn {
+		v.Emit(evt, payload)
+	}
+}
+
 func (s *WSClientManager) CloseAll() {
 	defer s.mutex.Unlock()
 

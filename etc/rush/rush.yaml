@@ -1,7 +1,7 @@
 hostname: localhost
-data_dir: /home/gubin/.rush
-serial_no: 703433f1-9902-47fc-9a60-14e6540bc97d
-doc_path: /home/gubin/gopath/src/github.com/masami10/rush/services/httpd/doc/api.json
+data_dir: /home/linshenqi/.rush
+serial_no: 563cd53e-1811-4c7e-9eaa-c9467098586a
+doc_path: ./services/httpd/doc/api.json
 logging:
   file: STDERR
   level: DEBUG
@@ -9,35 +9,44 @@ httpd:
   bind-address: :8080
   log-enabled: true
   write-tracing: false
-  shutdown-timeout: 1s
+  shutdown-timeout: 10s
   cors:
     allowed-origins:
     - '*'
     allow-credentials: true
+    allowed-methods:
+    - 'GET'
+    - 'HEAD'
+    - 'POST'
+    - 'PUT'
+    - 'PATCH'
+    - 'OPTIONS'
+
 minio:
-  url: 127.0.0.1:9000
-  bucket: bucket
-  access: access
-  secret: secret
+  url: 127.0.0.1:39000
+  bucket: curves
+  access: adminadmin
+  secret: adminadmin
   secure: false
 aiis:
-  urls:
-  - http://127.0.0.1:9092
-  headers:
-    Content-Type: application/json
-  result_push_url: /aiis/v1/operation.results
-  push_method: PUT
-  timeout: 10ms
-  push_interval: 1s
-  max_retry: 5
-odoo:
   urls:
   - http://127.0.0.1:8069
   headers:
     Content-Type: application/json
-  production_url: /api/v1/mrp.productions
+  result_push_url: /api/v1/operation.results
   push_method: PUT
-  timeout: 10ms
+  timeout: 8s
   push_interval: 1s
   max_retry: 5
+websocket:
+  route: /rush/v1/ws
+  read_buf_size: 4096
+  write_buf_size: 4096
+storage:
+  db_url: 127.0.0.1:5432
+  db_name: rush
+  db_user: admin
+  db_pwd: admin
+  max_connection: 60
+  vacuum_period: 2160h0m0s
 

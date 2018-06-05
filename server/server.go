@@ -13,6 +13,7 @@ import (
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
+	"github.com/masami10/rush/services/hmi"
 )
 
 type BuildInfo struct {
@@ -37,6 +38,9 @@ type Service interface {
 type Server struct {
 	dataDir  string
 	hostname string
+
+
+	StorageServie *storage.Service
 
 	HTTPDService *httpd.Service
 	config       *Config
@@ -75,6 +79,8 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 		return nil, errors.Wrap(err, "init httpd service")
 	}
 
+	s.appendStorageService() //先于其他服务
+
 	s.appendMinioService()
 
 	s.appendAiisService()
@@ -83,7 +89,7 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.appendWebsocketService()
 
-	s.appendStorageService()
+	s.appendHMIService()
 
 	s.appendHTTPDService()
 
@@ -108,8 +114,7 @@ func (s *Server) initHTTPDService() error {
 	}
 	d := s.DiagService.NewHTTPDHandler()
 
-	//db := s.Services[s.ServicesByName["storage"]].(storage.Service)
-	srv := httpd.NewService(p, s.config.HTTP, s.hostname, d, nil, s.DiagService)
+	srv := httpd.NewService(p, s.config.HTTP, s.hostname, d, s.DiagService)
 
 	s.HTTPDService = srv
 
@@ -141,9 +146,11 @@ func (s *Server) appendAiisService() error {
 }
 
 func (s *Server) appendOdooService() error {
-	c := s.config.Odoo
 	d := s.DiagService.NewOdooHandler()
-	srv := odoo.NewService(c, d)
+	srv := odoo.NewService(d)
+
+	srv.DB = s.StorageServie
+	srv.Httpd = s.HTTPDService
 
 	s.AppendService("odoo", srv)
 
@@ -162,11 +169,25 @@ func (s *Server) appendWebsocketService() error {
 	return nil
 }
 
+func (s *Server) appendHMIService() error {
+	d := s.DiagService.NewHMIHandler()
+	srv := hmi.NewService(d)
+
+	srv.Httpd = s.HTTPDService //http 服务注入
+	srv.DB = s.StorageServie // stroage 服务注入
+
+	s.AppendService("hmi", srv)
+
+	return nil
+}
+
 
 func (s *Server) appendStorageService() error {
 	c := s.config.Storage
 	d := s.DiagService.NewStorageHandler()
 	srv := storage.NewService(c, d)
+
+	s.StorageServie = srv
 
 	s.AppendService("storage", srv)
 

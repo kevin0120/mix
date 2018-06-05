@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/go-xorm/xorm"
 	_ "github.com/lib/pq"
-	"github.com/masami10/rush/services/httpd"
 	"github.com/pkg/errors"
 	"sync/atomic"
 	"time"
@@ -23,7 +22,6 @@ type Service struct {
 	diag        Diagnostic
 	configValue atomic.Value
 	eng         *xorm.Engine
-	httpd       *httpd.Service
 }
 
 func NewService(c Config, d Diagnostic) *Service {
@@ -159,7 +157,7 @@ func (s *Service) DropTableManage() error {
 func (s *Service) FindUnuploadResults(result_upload bool, result []string)([]Results, error) {
 	results := []Results{}
 
-	e := s.eng.Alias("r").Where("r.result_upload = ?", result_upload).And("r.need_upload = ?", true).And("r.result <> ?", "NONE").Find(&results)
+	e := s.eng.Alias("r").Where("r.has_upload = ?", result_upload).And("r.stage = ?", payload.RESULT_STAGE_FINAL).And("r.result <> ?", "NONE").Find(&results)
 	if e != nil {
 		return results, e
 	} else {
@@ -220,13 +218,14 @@ func (s *Service) InsertWorkorder(workorder Workorders) (error) {
 	var err error
 	has, _ := s.WorkorderExists(workorder.WorkorderID)
 	if has {
-		// 忽略存在的记录
+		// 忽略存在的工单
 		return nil
 	}
 
 	result_ids := []int64{}
 	err = json.Unmarshal([]byte(workorder.ResultIDs), &result_ids)
 	if err != nil {
+		// 忽略没有结果列表的工单
 		return err
 	}
 
@@ -234,9 +233,17 @@ func (s *Service) InsertWorkorder(workorder Workorders) (error) {
 		return nil
 	}
 
-	err = s.Store(workorder)
+	session := s.eng.NewSession()
+	defer session.Close()
+
+	err = session.Begin()
+	// 执行事务
+
+	// 保存新工单
+	_, err = session.Insert(workorder)
 	if err != nil {
-		return err
+		session.Rollback()
+		return errors.Wrapf(err, "store data fail")
 	} else {
 		fmt.Printf("new workorder:%d\n", workorder.WorkorderID)
 	}
@@ -249,20 +256,25 @@ func (s *Service) InsertWorkorder(workorder Workorders) (error) {
 		r.WorkorderID = workorder.WorkorderID
 		r.Result = payload.RESULT_NONE
 		r.HasUpload = false
-		r.Stage = "init"
+		r.Stage = payload.RESULT_STAGE_INIT
 		r.UpdateTime = time.Now()
 		r.PSetDefine = ""
 		r.ResultValue = ""
 		r.Count = 1
 
-		err = s.Store(r)
+		_, err = session.Insert(r)
 		if err != nil {
-			return err
+			session.Rollback()
+			return errors.Wrapf(err, "store data fail")
 		} else {
 			fmt.Printf("new result:%d\n", result_id)
 		}
 	}
 
+	err = session.Commit()
+	if err != nil {
+		return errors.Wrapf(err, "commit fail")
+	}
 
 	return nil
 }
@@ -345,7 +357,7 @@ func (s *Service) FindWorkorder(hmi_sn string, vin string, knr string) (Workorde
 func (s *Service) ListNeedPushResults() ([]Results, error) {
 	results := []Results{}
 
-	e := s.eng.Alias("r").Where("r.need_upload = ?", true).And("r.result_upload = ?", false).Find(&results)
+	e := s.eng.Alias("r").Where("r.need_upload = ?", true).And("r.has_upload = ?", false).Find(&results)
 	if e != nil {
 		return results, e
 	} else {
@@ -379,10 +391,10 @@ func (s *Service) UpdateResultByCount(id int64, count int, flag bool)(error) {
 
 	var err error
 	if count > 0 {
-		sql := "update `results` set result_upload = ? where x_result_id = ? and count = ?"
+		sql := "update `results` set has_upload = ? where x_result_id = ? and count = ?"
 		_, err = s.eng.Exec(sql, flag, id, count)
 	} else {
-		sql := "update `results` set result_upload = ? where x_result_id = ?"
+		sql := "update `results` set has_upload = ? where x_result_id = ?"
 		_, err = s.eng.Exec(sql, flag, id)
 	}
 

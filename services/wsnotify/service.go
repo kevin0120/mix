@@ -9,10 +9,9 @@ import (
 	"fmt"
 )
 
-
 const (
-	WS_EVENT_STATUS    = "status"
-	WS_EVENT_RESULT    = "result"
+	WS_EVENT_STATUS = "status"
+	WS_EVENT_RESULT = "result"
 )
 
 type Diagnostic interface {
@@ -100,11 +99,12 @@ func (s *Service) Open() error {
 
 	s.ws.OnConnection(s.onConnect) // 注册连接回调函数
 
-	//s.Httpd.server.Get(c.Route, s.ws.Handler()) //将websocket 服务注册到get服务中
+	//s.Httpd.Server.Get(c.Route, s.ws.Handler()) //将websocket 服务注册到get服务中
 
 	r := httpd.Route{
+		RouteType:	httpd.ROUTE_TYPE_WS,
 		Method:  "GET",
-		Pattern: "/rush/v1/ws",
+		Pattern: c.Route,
 		HandlerFunc: s.ws.Handler(),
 	}
 	s.Httpd.Handler[0].AddRoute(r)
@@ -123,10 +123,15 @@ func (s *Service) Close() error {
 	return nil
 }
 
-// ws推送消息到指定控制器
-func (s *Service) WSSendMsg(sn string, evt string, payload string) {
+// ws推送结果到指定控制器
+func (s *Service) WSSendResult(sn string, payload string) {
 	c, exist := s.clientManager.GetClient(sn)
 	if exist {
-		c.Emit(evt, payload)
+		c.Emit(WS_EVENT_RESULT, payload)
 	}
+}
+
+// ws群发控制器状态
+func (s *Service) WSSendControllerStatus(payload string) {
+	s.clientManager.NotifyALL(WS_EVENT_STATUS, payload)
 }

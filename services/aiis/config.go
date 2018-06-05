@@ -20,7 +20,7 @@ type Config struct {
 func NewConfig() Config {
 	c := Config{
 		Urls:          []string{"http://127.0.0.1:9092"},
-		ResultPushUrl: "/aiis/v1/operation.results",
+		ResultPushUrl: "/aiis/v1/operation.results/%d",
 		Timeout:       toml.Duration(time.Millisecond * 10),
 		PushInterval:  toml.Duration(time.Second * 1),
 		PushMethod:    "PUT",

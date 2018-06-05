@@ -1,24 +1,28 @@
-package odoo
+package hmi
 
 import (
-	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/httpd"
+	"github.com/masami10/rush/services/storage"
 )
 
 type Diagnostic interface {
 	Error(msg string, err error)
+	Disconnect(id string)
+	Close()
+	Closed()
 }
 
 type Service struct {
-	diag        Diagnostic
+	diag Diagnostic
 	methods	Methods
 	DB	   *storage.Service
 	Httpd  *httpd.Service
 }
 
 func NewService(d Diagnostic) *Service {
+
 	s := &Service{
-		diag:      d,
+		diag: d,
 		methods: Methods{},
 	}
 
@@ -28,35 +32,49 @@ func NewService(d Diagnostic) *Service {
 }
 
 func (s *Service) Open() error {
+
 	var r httpd.Route
 
 	r = httpd.Route{
 		RouteType:	httpd.ROUTE_TYPE_HTTP,
+		Method:  "PUT",
+		Pattern: "/psets",
+		HandlerFunc: s.methods.putPSets,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:	httpd.ROUTE_TYPE_HTTP,
 		Method:  "GET",
-		Pattern: "/results",
-		HandlerFunc: s.methods.getResults,
+		Pattern: "/workorder",
+		HandlerFunc: s.methods.getWorkorder,
 	}
 	s.Httpd.Handler[0].AddRoute(r)
 
 	r = httpd.Route{
 		RouteType:	httpd.ROUTE_TYPE_HTTP,
-		Method:  "PATCH",
-		Pattern: "/results/{id:int}",
-		HandlerFunc: s.methods.patchResult,
+		Method:  "GET",
+		Pattern: "/controller-status",
+		HandlerFunc: s.methods.getStatus,
 	}
 	s.Httpd.Handler[0].AddRoute(r)
 
 	r = httpd.Route{
 		RouteType:	httpd.ROUTE_TYPE_HTTP,
-		Method:  "POST",
-		Pattern: "/workorders",
-		HandlerFunc: s.methods.postWorkorders,
+		Method:  "GET",
+		Pattern: "/healthz",
+		HandlerFunc: s.methods.getHealthz,
 	}
 	s.Httpd.Handler[0].AddRoute(r)
+
 
 	return nil
+
 }
 
 func (s *Service) Close() error {
+	s.diag.Close()
+	s.diag.Closed()
+
 	return nil
 }

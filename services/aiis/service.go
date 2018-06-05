@@ -69,38 +69,44 @@ func (s *Service) Close() error {
 	return nil
 }
 
-func (s *Service) ProductionCreate(body interface{}) error {
+func (s *Service) PutResult(result_id int64, body interface{}) (*resty.Response, error) {
+	var resp *resty.Response
+	var err error
+
 	for _, endpoint := range s.endpoints {
-		err := s.productionCreate(body, endpoint)
+		resp, err = s.putResult(body, fmt.Sprintf(endpoint.url, result_id), endpoint.method)
 		if err == nil {
 			// 如果第一次就成功，推出循环
 			break
 		}
 	}
-	return nil
+	return resp, nil
 }
 
-func (s *Service) productionCreate(body interface{}, endpoint *Endpoint) error {
+func (s *Service) putResult(body interface{}, url string , method string) (*resty.Response, error) {
 	r := s.httpClient.R().SetBody(body)
-	switch endpoint.method {
+	var resp *resty.Response
+	var err error
+
+	switch method {
 	case "PATCH":
-		_, err := r.Patch(endpoint.url)
+		resp, err = r.Patch(url)
 		if err != nil {
-			return fmt.Errorf("Create Production fail : %s ", err.Error())
+			return nil, fmt.Errorf("Result Put fail : %s ", err.Error())
 		}
 	case "PUT":
-		_, err := r.Put(endpoint.url)
+		resp, err = r.Put(url)
 		if err != nil {
-			return fmt.Errorf("Create Production fail : %s ", err.Error())
+			return nil, fmt.Errorf("Result Put fail : %s ", err.Error())
 		}
 	case "POST":
-		_, err := r.Post(endpoint.url)
+		resp, err = r.Post(url)
 		if err != nil {
-			return fmt.Errorf("Create Production fail : %s ", err.Error())
+			return nil, fmt.Errorf("Result Put fail : %s ", err.Error())
 		}
 	default:
-		return errors.New("Create Production :the Method is wrong ")
+		return nil, errors.New("Result Put :the Method is wrong ")
 
 	}
-	return nil
+	return resp, nil
 }

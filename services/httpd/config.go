@@ -17,6 +17,7 @@ const (
 type CorsConfig struct {
 	AllowedOrigins   []string `yaml:"allowed-origins"`
 	AllowCredentials bool     `yaml:"allow-credentials"`
+	AllowedMethods	 []string `yaml:"allowed-methods"`
 }
 
 type Config struct {

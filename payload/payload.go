@@ -35,16 +35,25 @@ type ResultPatch struct {
 	HasUpload bool `json:"has_upload"`
 }
 
+type Worksheet struct {
+	Content string	`json:"content"`
+	Points []struct {
+		X int32 `json:"x_offset"`
+		Y int32 `json:"y_offset"`
+	} `json:"points"`
+
+}
+
 type Workorder struct {
-	Workorder_id int64   `json:"workorder_id"`
-	HMI_sn       string  `json:"hmi_sn"`
-	PSet         int     `json:"pset"`
-	Nut_total    float64 `json:"nut_total"`
-	Vin          string  `json:"vin"`
-	Knr          string  `json:"knr"`
-	Status       string  `json:"status"`
-	Result_ids   []int64 `json:"result_ids"`
-	WorkSheet    string  `json:"work_sheet"`
+	Workorder_id int64   	`json:"workorder_id"`
+	HMI_sn       string  	`json:"hmi_sn"`
+	PSet         int     	`json:"pset"`
+	Nut_total    float64 	`json:"nut_total"`
+	Vin          string  	`json:"vin"`
+	Knr          string  	`json:"knr"`
+	Status       string  	`json:"status"`
+	Result_ids   []int64 	`json:"result_ids"`
+	WorkSheet    Worksheet  `json:"work_sheet"`
 }
 
 type ControllerResult struct {
@@ -178,28 +187,22 @@ type ODOOMOCreated struct {
 }
 
 type ODOOWorkorder struct {
-	ID             int64   `json:"id"`
-	Status         string  `json:"status"`
-	NutTotal       float64 `json:"nut_total"`
-	PSet           string  `json:"pset"`
-	Max_redo_times int     `json:"max_redo_times"`
-	Max_op_time    int     `json:"max_op_time"`
+	ID	int64				`json:"id"`
+	Status string		`json:"status"`
+	NutTotal float64	`json:"nut_total"`
+	PSet string			`json:"pset"`
+	Max_redo_times	int	`json:"max_redo_times"`
+	Max_op_time	int		`json:"max_op_time"`
 
 	HMI struct {
-		ID   int    `json:"id"`
-		UUID string `json:"uuid"`
+		ID 		int		`json:"id"`
+		UUID string		`json:"uuid"`
 	} `json:"hmi"`
 
-	Result_IDs []int64 `json:"result_ids"`
-	Worksheet  struct {
-		Content string `json:"content"`
-		Points  []struct {
-			X int32 `json:"x_offset"`
-			Y int32 `json:"y_offset"`
-		} `json:"points"`
-	} `json:"worksheet"`
-	KNR string `json:"knr"`
-	VIN string `json:"vin"`
+	Result_IDs []int64	`json:"result_ids"`
+	Worksheet Worksheet	`json:"worksheet"`
+	KNR string			`json:"knr"`
+	VIN string			`json:"vin"`
 }
 
 type CURObject struct {
