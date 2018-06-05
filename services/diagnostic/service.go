@@ -57,6 +57,18 @@ func (s *Service) NewHTTPDHandler() *HTTPDHandler {
 	}
 }
 
+func (s *Service) NewAudiVWHandler() *AudiVWHandler {
+	return &AudiVWHandler{
+		l: s.Logger.With(String("service", "AudiVW")),
+	}
+}
+
+func (s *Service) NewControllerHandler() *ControllerHandler {
+	return &ControllerHandler{
+		l: s.Logger.With(String("service", "Controller")),
+	}
+}
+
 func (s *Service) NewAiisHandler() *AiisHandler {
 	return &AiisHandler{
 		l: s.Logger.With(String("service", "aiis")),

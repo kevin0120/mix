@@ -14,6 +14,8 @@ import (
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"github.com/masami10/rush/services/hmi"
+	"github.com/masami10/rush/services/audi_vw"
+	"github.com/masami10/rush/services/controller"
 )
 
 type BuildInfo struct {
@@ -43,6 +45,9 @@ type Server struct {
 	StorageServie *storage.Service
 
 	HTTPDService *httpd.Service
+
+	AudiVWService *audi_vw.Service
+
 	config       *Config
 	// List of services in startup order
 	Services []Service
@@ -60,7 +65,7 @@ type Server struct {
 func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Server, error) {
 	err := c.Validate()
 	if err != nil {
-		return nil, fmt.Errorf("invalid configuration: %s. To generate a valid configuration file run `rushd config > rush.generated.conf`.", err)
+		return nil, fmt.Errorf("invalid configuration: %s. To generate a valid configuration file run `rushd config > rush.generated.conf`. ", err)
 	}
 	d := diagService.NewServerHandler()
 	s := &Server{
@@ -79,7 +84,9 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 		return nil, errors.Wrap(err, "init httpd service")
 	}
 
-	s.appendStorageService() //先于其他服务
+	if err := s.initAudiVWDService(); err != nil {
+		return nil, errors.Wrap(err, "init Audi/VW service")
+	}
 
 	s.appendMinioService()
 
@@ -90,6 +97,12 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	s.appendWebsocketService()
 
 	s.appendHMIService()
+
+	if err := s.appendControllersService(); err != nil {
+		return nil, errors.Wrap(err, "Controllers service")
+	}
+
+	s.appendAudiVWService() //此服务必须在控制器服务后进行append
 
 	s.appendHTTPDService()
 
@@ -121,6 +134,20 @@ func (s *Server) initHTTPDService() error {
 	return nil
 }
 
+func (s *Server) initAudiVWDService() error {
+	c := s.config.AudiVW
+	d := s.DiagService.NewAudiVWHandler()
+	srv := audi_vw.NewService(c, d)
+
+	s.AudiVWService = srv
+
+	return nil
+}
+
+func (s *Server) appendAudiVWService() {
+	s.AppendService("audi/vw", s.AudiVWService)
+}
+
 func (s *Server) appendHTTPDService() {
 	s.AppendService("httpd", s.HTTPDService)
 }
@@ -131,6 +158,21 @@ func (s *Server) appendMinioService() error {
 	srv := minio.NewService(c, d)
 
 	s.AppendService("minio", srv)
+
+	return nil
+}
+
+
+func (s *Server) appendControllersService() error {
+	c := s.config.Contollers
+	d := s.DiagService.NewControllerHandler()
+	srv, err := controller.NewService(c, d, s.AudiVWService)
+
+	if err != nil{
+		return errors.Wrap(err, "append Controller service fail")
+	}
+
+	s.AppendService("controller", srv)
 
 	return nil
 }
@@ -223,6 +265,7 @@ func (s *Server) watchServices() {
 	var err error
 	select {
 	case err = <-s.HTTPDService.Err():
+	case err = <-s.AudiVWService.Err():
 	}
 	s.err <- err
 }
