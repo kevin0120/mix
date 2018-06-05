@@ -335,3 +335,28 @@ func (h *StorageHandler) Close() {
 func (h *StorageHandler) Closed() {
 	h.l.Info("Storage Service closed")
 }
+
+
+//Audi / VW
+type AudiVWHandler struct {
+	l Logger
+}
+
+func (h *AudiVWHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+func (h *AudiVWHandler) StartManager() {
+	h.l.Info("start Manage for write")
+}
+
+
+// Controller
+type ControllerHandler struct {
+	l Logger
+}
+
+func (h *ControllerHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+

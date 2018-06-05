@@ -16,6 +16,8 @@ import (
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
+	"github.com/masami10/rush/services/controller"
+	"github.com/masami10/rush/services/audi_vw"
 )
 
 type Config struct {
@@ -39,6 +41,10 @@ type Config struct {
 
 	Storage storage.Config `yaml:"storage"`
 
+	AudiVW 	audi_vw.Config `yaml:"audi/vw"`
+
+	Contollers controller.Configs `yaml:"controllers"`
+
 	Commander command.Commander `yaml:"-"`
 }
 
@@ -57,6 +63,9 @@ func NewConfig() *Config {
 	c.Ws = wsnotify.NewConfig()
 	c.Storage = storage.NewConfig()
 	c.Logging = diagnostic.NewConfig()
+	c.AudiVW = audi_vw.NewConfig()
+
+	c.Contollers = controller.Configs{controller.NewConfig(),controller.NewConfig()}
 
 	return c
 }
@@ -111,6 +120,10 @@ func (c *Config) Validate() error {
 
 	if err := c.Storage.Validate(); err != nil {
 		return errors.Wrap(err, "storage")
+	}
+
+	if err := c.Contollers.Validate(); err != nil {
+		return errors.Wrap(err, "controller")
 	}
 
 	return nil
