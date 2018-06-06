@@ -2,9 +2,8 @@ package hmi
 
 import (
 	"github.com/kataras/iris"
-	"github.com/masami10/rush/payload"
-	"strings"
 	"encoding/json"
+	"github.com/masami10/rush/services/storage"
 )
 
 type Methods struct {
@@ -14,7 +13,7 @@ type Methods struct {
 func (m *Methods) putPSets(ctx iris.Context) {
 
 	var err error
-	var pset payload.PSet
+	var pset PSet
 	err = ctx.ReadJSON(&pset)
 
 	if err != nil {
@@ -57,7 +56,7 @@ func (m *Methods) putPSets(ctx iris.Context) {
 	}
 
 	// 检测结果id
-	_, err = m.service.DB.GetResult(pset.Result_id, 0)
+	result, err := m.service.DB.GetResult(pset.Result_id, 0)
 	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString(err.Error())
@@ -65,16 +64,17 @@ func (m *Methods) putPSets(ctx iris.Context) {
 	}
 
 	// 通过控制器设定程序
-	//err = apiserver.CVI3.Service.PSet(pset.Controller_SN, pset.PSet, result.WorkorderID, pset.Result_id, pset.Count)
-	//if err != nil {
-	//	ctx.StatusCode(iris.StatusBadRequest)
-	//	ctx.WriteString(err.Error())
-	//	return
-	//}
+	err = m.service.AudiVw.PSet(pset.Controller_SN, pset.PSet, result.WorkorderID, pset.Result_id, pset.Count)
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
 }
 
 // 根据hmi序列号以及vin或knr取得工单
 func (m *Methods) getWorkorder(ctx iris.Context) {
+	var err error
 	hmi_sn := ctx.URLParam("hmi_sn")
 	vin_or_knr := ctx.URLParam("vin_or_knr")
 
@@ -90,23 +90,18 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 		return
 	}
 
-	var vin = ""
-	var knr = ""
-
-	if strings.Contains(vin_or_knr, payload.KNR_KEY) {
-		knr = vin_or_knr
-	} else {
-		vin = vin_or_knr
-	}
-
-	workorder, err := m.service.DB.FindWorkorder(hmi_sn, vin, knr)
+	var workorder storage.Workorders
+	workorder, err = m.service.DB.FindWorkorder(hmi_sn, vin_or_knr, "")
 	if err != nil {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString(err.Error())
-		return
+		workorder, err = m.service.DB.FindWorkorder(hmi_sn, "", vin_or_knr)
+		if err != nil {
+			ctx.StatusCode(iris.StatusBadRequest)
+			ctx.WriteString(err.Error())
+			return
+		}
 	}
 
-	resp := payload.Workorder{}
+	resp := Workorder{}
 	resp.HMI_sn = workorder.HMISN
 	resp.PSet = workorder.PSet
 	resp.Workorder_id = workorder.WorkorderID
@@ -131,16 +126,16 @@ func (m *Methods) getHealthz(ctx iris.Context) {
 func (m *Methods) getStatus(ctx iris.Context) {
 	// 返回控制器状态
 
-	//sn := ctx.URLParam("controller_sn")
-	//status, err := apiserver.CVI3.Service.GetControllersStatus(sn)
-	//
-	//if err != nil {
-	//	ctx.StatusCode(iris.StatusNotFound)
-	//	ctx.WriteString(err.Error())
-	//	return
-	//} else {
-	//	body, _ := json.Marshal(status)
-	//	ctx.Header("content-type", "application/json")
-	//	ctx.Write(body)
-	//}
+	sn := ctx.URLParam("controller_sn")
+	status, err := m.service.AudiVw.GetControllersStatus(sn)
+
+	if err != nil {
+		ctx.StatusCode(iris.StatusNotFound)
+		ctx.WriteString(err.Error())
+		return
+	} else {
+		body, _ := json.Marshal(status)
+		ctx.Header("content-type", "application/json")
+		ctx.Write(body)
+	}
 }

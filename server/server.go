@@ -48,6 +48,10 @@ type Server struct {
 
 	AudiVWService *audi_vw.Service
 
+	WSNotifyService *wsnotify.Service
+	AiisService		*aiis.Service
+	MinioService	*minio.Service
+
 	config       *Config
 	// List of services in startup order
 	Services []Service
@@ -80,9 +84,13 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 		Commander:      c.Commander,
 	}
 
+	s.appendStorageService()
+
 	if err := s.initHTTPDService(); err != nil {
 		return nil, errors.Wrap(err, "init httpd service")
 	}
+
+	s.appendWebsocketService()
 
 	if err := s.initAudiVWDService(); err != nil {
 		return nil, errors.Wrap(err, "init Audi/VW service")
@@ -94,15 +102,13 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.appendOdooService()
 
-	s.appendWebsocketService()
-
-	s.appendHMIService()
-
 	if err := s.appendControllersService(); err != nil {
 		return nil, errors.Wrap(err, "Controllers service")
 	}
 
 	s.appendAudiVWService() //此服务必须在控制器服务后进行append
+
+	s.appendHMIService()
 
 	s.appendHTTPDService()
 
@@ -145,6 +151,12 @@ func (s *Server) initAudiVWDService() error {
 }
 
 func (s *Server) appendAudiVWService() {
+
+	s.AudiVWService.Minio = s.MinioService
+	s.AudiVWService.Aiis = s.AiisService
+	s.AudiVWService.WS = s.WSNotifyService
+	s.AudiVWService.DB = s.StorageServie
+
 	s.AppendService("audi/vw", s.AudiVWService)
 }
 
@@ -157,6 +169,7 @@ func (s *Server) appendMinioService() error {
 	d := s.DiagService.NewMinioHandler()
 	srv := minio.NewService(c, d)
 
+	s.MinioService = srv
 	s.AppendService("minio", srv)
 
 	return nil
@@ -182,6 +195,7 @@ func (s *Server) appendAiisService() error {
 	d := s.DiagService.NewAiisHandler()
 	srv := aiis.NewService(c, d)
 
+	s.AiisService = srv
 	s.AppendService("aiis", srv)
 
 	return nil
@@ -206,6 +220,7 @@ func (s *Server) appendWebsocketService() error {
 
 	srv.Httpd = s.HTTPDService //http 服务注入
 
+	s.WSNotifyService = srv
 	s.AppendService("websocket", srv)
 
 	return nil
@@ -217,6 +232,7 @@ func (s *Server) appendHMIService() error {
 
 	srv.Httpd = s.HTTPDService //http 服务注入
 	srv.DB = s.StorageServie // stroage 服务注入
+	srv.AudiVw = s.AudiVWService
 
 	s.AppendService("hmi", srv)
 

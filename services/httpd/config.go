@@ -33,7 +33,9 @@ func NewConfig() Config {
 		BindAddress:     ":8080",
 		LogEnabled:      true,
 		ShutdownTimeout: DefaultShutdownTimeout,
-		Cors:            CorsConfig{AllowedOrigins: []string{"*"}, AllowCredentials: true},
+		Cors:            CorsConfig{AllowedOrigins: []string{"*"},
+									AllowCredentials: true,
+									AllowedMethods: []string{"GET", "HEAD", "POST", "PUT", "PATCH", "OPTIONS"},},
 	}
 }
 

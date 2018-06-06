@@ -37,11 +37,6 @@ func (s *Service) Config() Config {
 	return s.configValue.Load().(Config)
 }
 
-
-type WSRegist struct {
-	HMI_SN string `json:"hmi_sn"`
-}
-
 func (s *Service) onConnect(c websocket.Connection) {
 
 	c.OnMessage(func(data []byte) {

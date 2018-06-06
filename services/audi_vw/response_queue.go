@@ -3,15 +3,25 @@ package audi_vw
 import "sync"
 
 type ResponseQueue struct {
-	Results		map[uint][]byte
+	Results		map[uint]string
 	mtx			sync.Mutex
 }
 
-func (q *ResponseQueue) update(serial uint, msg []byte) {
+func (q *ResponseQueue) Add(serial uint, msg string) {
 	defer q.mtx.Unlock()
 
 	q.mtx.Lock()
 	q.Results[serial] = msg
+}
+
+func (q *ResponseQueue) update(serial uint, msg string) {
+	defer q.mtx.Unlock()
+
+	q.mtx.Lock()
+	_, e := q.Results[serial]
+	if e {
+		q.Results[serial] = msg
+	}
 }
 
 func (q *ResponseQueue) remove(serial uint) {
@@ -21,7 +31,7 @@ func (q *ResponseQueue) remove(serial uint) {
 	delete(q.Results, serial)
 }
 
-func (q *ResponseQueue) get(serial uint) ([]byte) {
+func (q *ResponseQueue) get(serial uint) (string) {
 	defer q.mtx.Unlock()
 
 	q.mtx.Lock()

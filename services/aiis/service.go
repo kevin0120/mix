@@ -7,6 +7,7 @@ import (
 
 	"fmt"
 	"gopkg.in/resty.v1"
+	"net/http"
 )
 
 type Diagnostic interface {
@@ -80,7 +81,7 @@ func (s *Service) PutResult(result_id int64, body interface{}) (*resty.Response,
 			break
 		}
 	}
-	return resp, nil
+	return resp, err
 }
 
 func (s *Service) putResult(body interface{}, url string , method string) (*resty.Response, error) {
@@ -92,20 +93,32 @@ func (s *Service) putResult(body interface{}, url string , method string) (*rest
 	case "PATCH":
 		resp, err = r.Patch(url)
 		if err != nil {
-			return nil, fmt.Errorf("Result Put fail : %s ", err.Error())
+			return nil, fmt.Errorf("Result Put fail: %s", err.Error())
+		} else {
+			if resp.StatusCode() != http.StatusNoContent {
+				return nil, fmt.Errorf("Result Put fail: %d", resp.StatusCode())
+			}
 		}
 	case "PUT":
 		resp, err = r.Put(url)
 		if err != nil {
-			return nil, fmt.Errorf("Result Put fail : %s ", err.Error())
+			return nil, fmt.Errorf("Result Put fail: %s", err.Error())
+		} else {
+			if resp.StatusCode() != http.StatusNoContent {
+				return nil, fmt.Errorf("Result Put fail: %d", resp.StatusCode())
+			}
 		}
 	case "POST":
 		resp, err = r.Post(url)
 		if err != nil {
-			return nil, fmt.Errorf("Result Put fail : %s ", err.Error())
+			return nil, fmt.Errorf("Result Put fail: %s", err.Error())
+		} else {
+			if resp.StatusCode() != http.StatusNoContent {
+				return nil, fmt.Errorf("Result Put fail: %d", resp.StatusCode())
+			}
 		}
 	default:
-		return nil, errors.New("Result Put :the Method is wrong ")
+		return nil, errors.New("Result Put :the Method is wrong")
 
 	}
 	return resp, nil

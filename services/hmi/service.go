@@ -3,6 +3,7 @@ package hmi
 import (
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/audi_vw"
 )
 
 type Diagnostic interface {
@@ -17,6 +18,8 @@ type Service struct {
 	methods	Methods
 	DB	   *storage.Service
 	Httpd  *httpd.Service
+
+	AudiVw		*audi_vw.Service
 }
 
 func NewService(d Diagnostic) *Service {

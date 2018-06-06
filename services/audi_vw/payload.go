@@ -1,9 +1,22 @@
 package audi_vw
 
 import (
-"fmt"
-"strconv"
-"encoding/xml"
+	"fmt"
+	"strconv"
+	"encoding/xml"
+	"strings"
+	"github.com/masami10/rush/utils"
+)
+
+const (
+	RESULT_NONE = "NONE"
+	RESULT_OK   = "OK"
+	RESULT_NOK  = "NOK"
+)
+
+const (
+	RESULT_STAGE_INIT  = "init"
+	RESULT_STAGE_FINAL = "final"
 )
 
 // header
@@ -80,7 +93,7 @@ type FAS struct {
 
 type PAR struct {
 	SN string `xml:"PRT"`
-	Workorder_id int `xml:"PI1"`
+	Workorder_id int64 `xml:"PI1"`
 	Result_id string `xml:"PI2"`
 	Count int `xml:"STC"`
 	Result string `xml:"PSC"`
@@ -158,5 +171,124 @@ func (header *CVI3Header) Deserialize(header_str string) {
 	}
 }
 
+type ControllerCurve struct {
+	ResultID  int64
+	CurveFile string
+	CurveData string
+	Count     int
+}
 
+type ControllerCurveFile struct {
+	Result string    `json:"result"`
+	CUR_M  []float64 `json:"cur_m"`
+	CUR_W  []float64 `json:"cur_w"`
+}
 
+type ControllerResult struct {
+	Result_id     int64      `json:"result_id"`
+	Controller_SN string     `json:"controller_sn"`
+	Workorder_ID  int64      `json:"workorder_id"`
+	CurFile       string     `json:"cur_file"`
+	Result        string     `json:"result"`
+	Dat           string     `json:"dat"`
+	PSet          int        `json:"pset"`
+	Count         int        `json:"count"`
+	PSetDefine    PSetDefine `json:"pset_define"`
+
+	ResultValue ResultValue `json:"result_value"`
+}
+
+type PSetDefine struct {
+	Strategy string  `json:"strategy"`
+	Mp       float64 `json:"M+"`
+	Mm       float64 `json:"M-"`
+	Ms       float64 `json:"MS"`
+	Ma       float64 `json:"MA"`
+	Wp       float64 `json:"W+"`
+	Wm       float64 `json:"W-"`
+	Wa       float64 `json:"WS"`
+}
+
+type ResultValue struct {
+	Mi float64 `json:"MI"`
+	Wi float64 `json:"WI"`
+	Ti float64 `json:"TI"`
+}
+
+func XML2Curve(result CVI3Result) ControllerCurveFile {
+	cur_result := ControllerCurveFile{}
+	cur_result.Result = result.PRC_SST.PAR.Result
+	if cur_result.Result == "IO" {
+		cur_result.Result = RESULT_OK
+	} else if cur_result.Result == "NIO" {
+		cur_result.Result = RESULT_NOK
+	}
+
+	cur_ms := strings.Split(result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.SMP.CUR_M, " ")
+	for i := range cur_ms {
+		v, _ := strconv.ParseFloat(cur_ms[i], 64)
+		cur_result.CUR_M = append(cur_result.CUR_M, v)
+	}
+
+	cur_ws := strings.Split(result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.SMP.CUR_W, " ")
+	for i := range cur_ws {
+		v, _ := strconv.ParseFloat(cur_ws[i], 64)
+		cur_result.CUR_W = append(cur_result.CUR_W, v)
+	}
+
+	return cur_result
+}
+
+func XML2Result(result CVI3Result) ControllerResult {
+	rr := ControllerResult{}
+
+	rr.Controller_SN = result.PRC_SST.PAR.SN
+	rr.Result = result.PRC_SST.PAR.Result
+	if rr.Result == "IO" {
+		rr.Result = RESULT_OK
+	} else if rr.Result == "NIO" {
+		rr.Result = RESULT_NOK
+	}
+
+	rr.PSet = result.PRC_SST.PAR.FAS.GRP.TIP.PSet
+	rr.Workorder_ID = result.PRC_SST.PAR.Workorder_id
+	rr.Dat = fmt.Sprintf("%s %s", result.PRC_SST.PAR.FAS.GRP.TIP.Date, result.PRC_SST.PAR.FAS.GRP.TIP.Time)
+	result_id := result.PRC_SST.PAR.Result_id
+	rid, _ := strconv.Atoi(result_id)
+	rr.Result_id = int64(rid)
+	rr.CurFile = fmt.Sprintf("%s_%d_%s_%s.json", rr.Controller_SN, rr.Workorder_ID, result_id, utils.GenerateID())
+	rr.PSetDefine.Strategy = result.PRC_SST.PAR.FAS.GRP.TIP.BLC.PRO.Strategy
+	rr.Count = result.PRC_SST.PAR.Count
+
+	result_values := result.PRC_SST.PAR.FAS.GRP.TIP.BLC.PRO.Values
+	for i := range result_values {
+		switch result_values[i].Name {
+		case "M+":
+			rr.PSetDefine.Mp = result_values[i].Value
+		case "M-":
+			rr.PSetDefine.Mm = result_values[i].Value
+		case "MS":
+			rr.PSetDefine.Ms = result_values[i].Value
+		case "MA":
+			rr.PSetDefine.Ma = result_values[i].Value
+		case "W+":
+			rr.PSetDefine.Wp = result_values[i].Value
+		case "W-":
+			rr.PSetDefine.Wm = result_values[i].Value
+		case "WA":
+			rr.PSetDefine.Wa = result_values[i].Value
+		case "MI":
+			rr.ResultValue.Mi = result_values[i].Value
+		case "WI":
+			rr.ResultValue.Wi = result_values[i].Value
+		case "tI":
+			if result_values[i].Unit == "s" {
+				rr.ResultValue.Ti = result_values[i].Value * 1000
+			} else {
+				rr.ResultValue.Ti = result_values[i].Value
+			}
+		}
+	}
+
+	return rr
+}

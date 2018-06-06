@@ -9,8 +9,8 @@ import (
 	"time"
 )
 
-type Protocol interface {
-	ClientRead(c net.Conn)
+type Controller interface {
+	Read(c net.Conn)
 }
 
 type SocketWriter struct {
@@ -18,13 +18,15 @@ type SocketWriter struct {
 	KeepAlivePeriod time.Duration
 
 	net.Conn
-	Protocol
+
+	Controller
 }
 
-func NewSocketWriter(addr string) *SocketWriter {
+func NewSocketWriter(addr string, controller Controller) *SocketWriter {
 
 	return &SocketWriter{
 		Address: addr,
+		Controller: controller,
 	}
 }
 
@@ -87,7 +89,8 @@ func (sw *SocketWriter) Connect(timeout time.Duration) error {
 
 	sw.Conn = c
 
-	go sw.ClientRead(c)
+	go sw.Controller.Read(c)
+
 	return nil
 }
 

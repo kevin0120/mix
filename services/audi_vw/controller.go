@@ -8,31 +8,32 @@ import (
 	"sync"
 	"net"
 	"github.com/masami10/rush/services/controller"
+	"encoding/json"
+	"github.com/masami10/rush/services/wsnotify"
 )
 
-type ControllerStatus	string
+type ControllerStatusType	string
 
 const (
 	MINSEQUENCE uint = 1
 	MAXSEQUENCE uint = 9999
-	DAIL_TIMEOUT = time.Duration(300 * time.Millisecond)
+	DAIL_TIMEOUT = time.Duration(1 * time.Second)
 	MAX_KEEP_ALIVE_CHECK = 3
-	READ_BUF_LEN = 65535
 )
 
 const (
-	STATUS_ONLINE  ControllerStatus = "online"
-	STATUS_OFFLINE ControllerStatus = "offline"
+	STATUS_ONLINE  ControllerStatusType = "online"
+	STATUS_OFFLINE ControllerStatusType = "offline"
 )
 
 
 type Controller struct {
-	w 			*socket_writer.SocketWriter
-	Srv 		*Service
-	Status 		ControllerStatus
-	sequence	uint // 1~9999
-	buffer  	chan []byte
-	Response    ResponseQueue
+	w 				*socket_writer.SocketWriter
+	Srv 			*Service
+	Status 			ControllerStatusType
+	sequence		uint // 1~9999
+	buffer  		chan []byte
+	Response    	ResponseQueue
 	mtx_serial		*sync.Mutex
 	keep_period		time.Duration
 	req_timeout		time.Duration
@@ -40,7 +41,6 @@ type Controller struct {
 	RemoteConn		net.Conn
 	recv_flag		bool
 	cfg				controller.Config
-
 }
 
 
@@ -58,32 +58,40 @@ func (c *Controller)GeneratePacket( typ uint, xmlpacket string) (string, uint) {
 func (c *Controller) get_sequence() uint {
 	c.mtx_serial.Lock()
 	defer c.mtx_serial.Unlock()
-	s := c.sequence
+
 	if c.sequence == MAXSEQUENCE {
 		c.sequence = MINSEQUENCE
 	} else {
 		c.sequence++
 	}
-	return s
+	return c.sequence
 }
 
-func (c *Controller) GetStatus() (ControllerStatus) {
+func (c *Controller) GetStatus() (ControllerStatusType) {
 	defer c.mtx_status.Unlock()
 
 	c.mtx_status.Lock()
 	return c.Status
 }
 
-func (c *Controller) update_status(status ControllerStatus) {
+func (c *Controller) update_status(status ControllerStatusType) {
 	defer c.mtx_status.Unlock()
 
 	c.mtx_status.Lock()
 
 	if status != c.Status {
 		c.Status = status
+
 		// 将最新状态推送给hmi
-		//go client.Parent.FUNCStatus(client.Config.SN, client.Status)
-		//fmt.Printf("civ3:%s %s\n", client.Config.SN, client.Status)
+		s := wsnotify.WSStatus{
+			SN: c.cfg.SN,
+			Status: string(status),
+		}
+
+		msg, _ := json.Marshal(s)
+		c.Srv.WS.WSSendControllerStatus(string(msg))
+
+		fmt.Printf("civ3:%s %s\n", c.cfg.SN, c.Status)
 
 		if c.Status == STATUS_OFFLINE {
 			c.Close()
@@ -99,7 +107,7 @@ func (c *Controller) update_status(status ControllerStatus) {
 func NewController(c Config) Controller {
 
 	return Controller {
-		buffer: make(chan []byte, 1024), // 创建1个长度的通道，保证1收1发
+		buffer: make(chan []byte, 1024),
 		Status: STATUS_OFFLINE,
 		sequence: MINSEQUENCE,
 		mtx_serial: new(sync.Mutex),
@@ -111,7 +119,7 @@ func NewController(c Config) Controller {
 
 func (c *Controller) Start()  {
 
-	c.w = socket_writer.NewSocketWriter(c.cfg.RemoteIP)
+	c.w = socket_writer.NewSocketWriter(fmt.Sprintf("tcp://%s:%d", c.cfg.RemoteIP, c.cfg.Port), c)
 
 	// 启动心跳检测
 	go c.keep_alive_check()
@@ -149,13 +157,14 @@ func (c *Controller) keep_alive_check() {
 func (c *Controller) keepAlive() {
 
 	for {
-		<- time.After(time.Duration(c.keep_period)) // 周期性发送一次信号
 		if c.Status == STATUS_OFFLINE {
 			break
 		}
 
-		keepAlivePacket, seq := c.GeneratePacket(Header_type_request_with_reply, Xml_heart_beat)
+		keepAlivePacket, seq := c.GeneratePacket(Header_type_keep_alive, Xml_heart_beat)
 		c.Write([]byte(keepAlivePacket), seq)
+
+		<- time.After(time.Duration(c.keep_period)) // 周期性发送一次信号
 	}
 }
 
@@ -172,23 +181,21 @@ func (c *Controller) subscribe() {
 }
 
 func (s *Controller) Write(buf []byte, seq uint) {
-
 	s.buffer <- buf
-	s.Response.update(seq, buf)
 }
 
 // 异步发送
 func (s *Controller) manage() {
 
 	for {
-		<- time.After(time.Duration(s.req_timeout)) //300毫秒发送一次信号
-
 		v := <- s.buffer
 		err := s.w.Write([]byte(v))
 		if err != nil {
 			s.Srv.diag.Error("Write data fail", err)
 			break
 		}
+
+		<- time.After(time.Duration(s.req_timeout)) //300毫秒发送一次信号
 	}
 }
 
@@ -197,10 +204,16 @@ func (s *Controller) Connect() error {
 	s.Status = STATUS_OFFLINE
 	s.sequence = 0
 
+	s.Response = ResponseQueue {
+		Results: map[uint]string{},
+	}
+
+	fmt.Printf("CVI3:%s connecting ...\n", s.cfg.SN)
+
 	for {
 		err := s.w.Connect(DAIL_TIMEOUT)
 		if err != nil {
-			return err
+			fmt.Printf("%s\n", err.Error())
 		} else {
 			break
 		}
@@ -209,9 +222,6 @@ func (s *Controller) Connect() error {
 	}
 
 	s.update_status(STATUS_ONLINE)
-	s.Response = ResponseQueue {
-		Results: map[uint][]byte{},
-	}
 
 	// 启动发送
 	go s.manage()
@@ -228,10 +238,10 @@ func (s *Controller) Close() error {
 }
 
 // 客户端读取
-func (s *Controller) ClientRead(conn net.Conn){
+func (s *Controller) Read(conn net.Conn){
 	defer conn.Close()
 
-	buffer := make([]byte, READ_BUF_LEN)
+	buffer := make([]byte, s.Srv.config().ReadBufferSize)
 
 	for {
 		//msg, err := reader.ReadString('\n')
@@ -244,25 +254,27 @@ func (s *Controller) ClientRead(conn net.Conn){
 
 		msg := string(buffer[0:n])
 
-		//fmt.Printf("%s\n", msg)
+		//fmt.Printf("%s\n", string(buffer))
 
 		// 处理应答
 		header_str := msg[0: HEADER_LEN]
 		header := CVI3Header{}
 		header.Deserialize(header_str)
 
-		s.Response.update(header.MID, []byte(header_str))
+		s.Response.update(header.MID, header_str)
+
 	}
 }
 
 // PSet程序设定
-func (s *Controller) PSet(pset int, workorder_id int, reseult_id int, count int) (uint, error) {
+func (s *Controller) PSet(pset int, workorder_id int64, reseult_id int64, count int) (uint, error) {
 
 	sdate, stime := utils.GetDateTime()
 	xml_pset := fmt.Sprintf(Xml_pset, sdate, stime, s.cfg.SN, workorder_id, reseult_id, count, pset)
 
 	pset_packet, seq := s.GeneratePacket(Header_type_request_with_reply, xml_pset)
 
+	s.Response.Add(seq, "")
 	s.Write([]byte(pset_packet), seq)
 
 	return seq, nil

@@ -12,7 +12,7 @@ import (
 
 
 type Protocol interface {
-	Parse (buf []byte) error
+	Parse (buf []byte) ([]byte, error)
 	Read(c net.Conn)
 	NewConn(c net.Conn)
 }
@@ -26,12 +26,24 @@ type streamSocketListener struct {
 	*SocketListener
 
 	sockType string
+	Port	string
 
 	connections    map[string]net.Conn
 	connectionsMtx sync.Mutex
 }
 
 func (ssl *streamSocketListener) listen() {
+
+	for {
+		l, err := net.Listen("tcp", ssl.Port)
+		if err == nil {
+			ssl.Listener = l
+			break
+		}
+
+		time.Sleep(300 * time.Millisecond)
+	}
+
 	ssl.connections = map[string]net.Conn{}
 
 	for {
@@ -114,7 +126,7 @@ func (psl *packetSocketListener) listen() {
 			break
 		}
 
-		err = psl.Parse(buf[:n])
+		_, err = psl.Parse(buf[:n])
 		if err != nil {
 			log.Printf("unable to parse incoming packet: %s", err)
 			//TODO rate limit
@@ -234,6 +246,7 @@ func (sl *SocketListener) Start() error {
 			Listener:       l,
 			SocketListener: sl,
 			sockType:       spl[0],
+			Port:			spl[1],
 		}
 
 		sl.InterListener = ssl
@@ -277,10 +290,11 @@ func (sl *SocketListener) Stop() {
 	}
 }
 
-func NewSocketListener(addr string) *SocketListener {
+func NewSocketListener(addr string, protocol Protocol) *SocketListener {
 
 	return &SocketListener{
 		ServiceAddress: addr,
+		Protocol: protocol,
 	}
 }
 

@@ -1,6 +1,6 @@
 hostname: localhost
 data_dir: /home/linshenqi/.rush
-serial_no: 563cd53e-1811-4c7e-9eaa-c9467098586a
+serial_no: 1qaz2wsx
 doc_path: ./services/httpd/doc/api.json
 logging:
   file: STDERR
@@ -33,11 +33,11 @@ aiis:
   - http://127.0.0.1:8069
   headers:
     Content-Type: application/json
-  result_push_url: /api/v1/operation.results
+  result_push_url: /api/v1/operation.results/%d
   push_method: PUT
   timeout: 8s
   push_interval: 1s
-  max_retry: 5
+  max_retry: 3
 websocket:
   route: /rush/v1/ws
   read_buf_size: 4096
@@ -49,4 +49,19 @@ storage:
   db_pwd: admin
   max_connection: 60
   vacuum_period: 2160h0m0s
+audi/vw:
+  port: 4710
+  max_connection: 1024
+  read_buf: 65535
+  req_time_out: 300ms
+  keep_alive_period: 5s
+controllers:
+- serial_no: 0001
+  protocol: Audi/VW
+  remote_ip: 192.168.1.200
+  port: 4700
+- serial_no: 0002
+  protocol: Audi/VW
+  remote_ip: 192.168.1.202
+  port: 4700
 

@@ -7,7 +7,6 @@ import (
 	"github.com/pkg/errors"
 	"sync/atomic"
 	"time"
-	"github.com/masami10/rush/payload"
 	"encoding/json"
 )
 
@@ -126,38 +125,13 @@ func (s *Service) Store(data interface{}) error {
 	return nil
 }
 
-func (s *Service) DropTableManage() error {
-	c := s.Config()
-	for ;; {
-		start := time.Now()
-		//session := s.eng.NewSession()
-		//defer session.Close()
-		//
-		//// add Begin() before any action
-		//err := session.Begin()
-		//if err != nil {
-		//	session.Rollback()
-		//	s.diag.Error("vacuum table fail", err)
-		//}
-		//
-		//// add Commit() after all actions
-		//err = session.Commit()
-		//if err != nil {
-		//	s.diag.Error("vacuum table commit fail", err)
-		//}
-		diff := time.Since(start) // 执行的间隔时间
-
-		time.Sleep( time.Duration(c.VacuumPeriod) - diff)
-	}
-
-}
-
-
-
 func (s *Service) FindUnuploadResults(result_upload bool, result []string)([]Results, error) {
 	results := []Results{}
 
-	e := s.eng.Alias("r").Where("r.has_upload = ?", result_upload).And("r.stage = ?", payload.RESULT_STAGE_FINAL).And("r.result <> ?", "NONE").Find(&results)
+	ss := s.eng.Alias("r").Where("r.has_upload = ?", result_upload).And("r.stage = ?", "final").In("r.result", result)
+
+	e := ss.Find(&results)
+
 	if e != nil {
 		return results, e
 	} else {
@@ -199,18 +173,7 @@ func (s *Service) ListCurvesByResult(result_id int64) ([]Curves, error) {
 	}
 }
 
-func (s *Service) DeleteCurvesByResult(result_id int64) (error) {
 
-	sql := "delete from `curves` where result_id = ?"
-	_, err := s.eng.Exec(sql,
-		result_id)
-
-	if err != nil {
-		return err
-	} else {
-		return nil
-	}
-}
 
 
 func (s *Service) InsertWorkorder(workorder Workorders) (error) {
@@ -254,9 +217,9 @@ func (s *Service) InsertWorkorder(workorder Workorders) (error) {
 		r.ResultId = result_id
 		r.ControllerSN = ""
 		r.WorkorderID = workorder.WorkorderID
-		r.Result = payload.RESULT_NONE
+		r.Result = "NONE"
 		r.HasUpload = false
-		r.Stage = payload.RESULT_STAGE_INIT
+		r.Stage = "init"
 		r.UpdateTime = time.Now()
 		r.PSetDefine = ""
 		r.ResultValue = ""
@@ -312,7 +275,7 @@ func (s *Service) GetResult(result_id int64, count int) (Results, error) {
 	}
 }
 
-func (s *Service) GetWorkorder(id int) (Workorders, error) {
+func (s *Service) GetWorkorder(id int64) (Workorders, error) {
 	var err error
 
 	workorder := Workorders{}
@@ -354,17 +317,6 @@ func (s *Service) FindWorkorder(hmi_sn string, vin string, knr string) (Workorde
 	}
 }
 
-func (s *Service) ListNeedPushResults() ([]Results, error) {
-	results := []Results{}
-
-	e := s.eng.Alias("r").Where("r.need_upload = ?", true).And("r.has_upload = ?", false).Find(&results)
-	if e != nil {
-		return results, e
-	} else {
-		return results, nil
-	}
-}
-
 func (s *Service) UpdateResult(result Results) (Results, error) {
 	var err error
 
@@ -387,6 +339,21 @@ func (s *Service) UpdateResult(result Results) (Results, error) {
 	}
 }
 
+func (s *Service) UpdateWorkorder(workorder Workorders) (Workorders, error) {
+	var err error
+
+	sql := "update `workorders` set status = ? where x_workorder_id = ?"
+	_, err = s.eng.Exec(sql,
+		workorder.Status,
+		workorder.WorkorderID)
+
+	if err != nil {
+		return workorder, err
+	} else {
+		return workorder, nil
+	}
+}
+
 func (s *Service) UpdateResultByCount(id int64, count int, flag bool)(error) {
 
 	var err error
@@ -405,24 +372,58 @@ func (s *Service) UpdateResultByCount(id int64, count int, flag bool)(error) {
 	}
 }
 
-func (s *Service) ListInvalidResults(dat time.Time) ([]Results, error) {
-	var results []Results
+func (s *Service) DeleteInvalidResults() (error) {
+	sql := "delete from `results` where has_upload = true"
+	_, err := s.eng.Exec(sql)
 
-	err := s.eng.Alias("r").Where("r.has_upload = ?", true).And("r.update_time < ?", dat).Find(&results)
-	if err != nil {
-		return results, err
-	} else {
-		return results, nil
-	}
-}
-
-func (s *Service) DeleteResult(result Results) (error) {
-	var err error
-
-	_, err = s.eng.Id(result.ResultId).Unscoped().Delete(&result)
 	if err != nil {
 		return err
 	} else {
 		return nil
 	}
+}
+
+func (s *Service) DeleteInvalidCurves() (error) {
+
+	sql := "delete from `curves` where has_upload = true"
+	_, err := s.eng.Exec(sql)
+
+	if err != nil {
+		return err
+	} else {
+		return nil
+	}
+}
+
+func (s *Service) DeleteInvalidWorkorders() (error) {
+
+	sql := "delete from `workorders` where status = 'finished'"
+	_, err := s.eng.Exec(sql)
+
+	if err != nil {
+		return err
+	} else {
+		return nil
+	}
+}
+
+func (s *Service) DropTableManage() error {
+	c := s.Config()
+	for ;; {
+		start := time.Now()
+
+		// 清理过期结果
+		s.DeleteInvalidResults()
+
+		// 清理过期波形
+		s.DeleteInvalidCurves()
+
+		// 清理过期工单
+		s.DeleteInvalidWorkorders()
+
+		diff := time.Since(start) // 执行的间隔时间
+
+		time.Sleep( time.Duration(c.VacuumPeriod) - diff)
+	}
+
 }

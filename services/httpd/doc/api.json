@@ -6,7 +6,7 @@
     "description": "工位HMI调用"
   },
   "host": "172.17.0.1:8080",
-  "basePath": "/rush/v1",
+  "basePath": "/api/v1",
   "schemes": [
     "http"
   ],

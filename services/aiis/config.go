@@ -24,7 +24,7 @@ func NewConfig() Config {
 		Timeout:       toml.Duration(time.Millisecond * 10),
 		PushInterval:  toml.Duration(time.Second * 1),
 		PushMethod:    "PUT",
-		MaxRetry:      5,
+		MaxRetry:      3,
 		Headers:       map[string]string{"Content-Type": "application/json"},
 	}
 

@@ -2,12 +2,13 @@ package odoo
 
 import (
 	"github.com/kataras/iris"
-	"github.com/masami10/rush/payload"
 	"github.com/masami10/rush/services/storage"
 	"strconv"
 	"encoding/json"
 	"strings"
-	"fmt"
+	"github.com/masami10/rush/services/audi_vw"
+	"github.com/masami10/rush/services/aiis"
+	"time"
 )
 
 type Methods struct {
@@ -18,7 +19,7 @@ type Methods struct {
 // 创建工单
 func (m *Methods) postWorkorders(ctx iris.Context) {
 	var err error
-	var workorders []payload.ODOOWorkorder
+	var workorders []ODOOWorkorder
 	err = ctx.ReadJSON(&workorders)
 
 	if err != nil {
@@ -83,6 +84,9 @@ func (m *Methods) getResults(ctx iris.Context) {
 		return
 	}
 	re_list := strings.Split(result, ",")
+	for i, v := range re_list {
+		re_list[i] = strings.ToUpper(v)
+	}
 
 	bool_has_upload, err := strconv.ParseBool(has_upload)
 	if err != nil {
@@ -91,16 +95,7 @@ func (m *Methods) getResults(ctx iris.Context) {
 		return
 	}
 
-	//list_result := []string{}
-	//e := json.Unmarshal([]byte(result), &list_result)
-	//if e != nil {
-	//	ctx.StatusCode(iris.StatusBadRequest)
-	//	ctx.WriteString("result value error")
-	//	return
-	//}
-
-
-	resp := []payload.ODOOResultSync{}
+	resp := []ODOOResultSync{}
 	results, _ := m.service.DB.FindUnuploadResults(bool_has_upload, re_list)
 	target_results :=  map[int64]storage.Results{}
 	for _, v := range results {
@@ -117,26 +112,26 @@ func (m *Methods) getResults(ctx iris.Context) {
 	}
 
 	for _, v := range target_results {
-		odoo_result := payload.ODOOResultSync{}
-		stime := strings.Split(v.UpdateTime.Format("2006-01-02 15:04:05"), " ")
-		odoo_result.Control_date = fmt.Sprintf("%sT%s+08:00", stime[0], stime[1])
+		odoo_result := ODOOResultSync{}
 
-		odoo_result.CURObjects = []payload.CURObject{}
+		odoo_result.Control_date = v.UpdateTime.Format(time.RFC3339)
+
+		odoo_result.CURObjects = []aiis.CURObject{}
 
 		curves, err := m.service.DB.ListCurvesByResult(v.ResultId)
 		if err != nil {
 			for _, c := range curves {
-				cur_object := payload.CURObject{}
+				cur_object := aiis.CURObject{}
 				cur_object.File = c.CurveFile
 				cur_object.OP = c.Count
 				odoo_result.CURObjects = append(odoo_result.CURObjects, cur_object)
 			}
 		}
 
-		r := payload.ResultValue{}
+		r := audi_vw.ResultValue{}
 		json.Unmarshal([]byte(v.ResultValue), &r)
 
-		pset := payload.PSetDefine{}
+		pset := audi_vw.PSetDefine{}
 		json.Unmarshal([]byte(v.PSetDefine), &pset)
 
 		odoo_result.Measure_degree = r.Wi
@@ -172,7 +167,7 @@ func (m *Methods) patchResult(ctx iris.Context) {
 	}
 
 	var e error
-	var up payload.ResultPatch
+	var up ResultPatch
 	e = ctx.ReadJSON(&up)
 	if e != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
