@@ -13,6 +13,7 @@ import (
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/minio"
+	"strings"
 )
 
 const (
@@ -48,6 +49,7 @@ type Service struct {
 	Aiis			*aiis.Service
 	Minio			*minio.Service
 	handlers		Handlers
+	handle_buffer	chan string
 }
 
 
@@ -67,6 +69,7 @@ func NewService(c Config, d Diagnostic) *Service {
 		handlers: Handlers{},
 	}
 
+	s.handle_buffer = make(chan string, 4096)
 	s.handlers.AudiVw = s
 	lis := socket_listener.NewSocketListener(addr, s)
 	s.listener = lis
@@ -102,6 +105,8 @@ func (p *Service) Open() error {
 	for _, w := range p.Controllers{
 		go w.Start()
 	}
+
+	go p.HandleProcess()
 
 	return nil
 }
@@ -185,9 +190,18 @@ func (p *Service) Parse(buf []byte)  ([]byte, error){
 
 	msg := string(buf)
 
-	p.handlers.HandleMsg(msg)
+	if strings.Contains(msg, XML_RESULT_KEY) {
+		p.handle_buffer <- msg
+	}
 
 	return nil, nil
+}
+
+func (p *Service) HandleProcess() {
+	for {
+		msg := <- p.handle_buffer
+		p.handlers.HandleMsg(msg)
+	}
 }
 
 // 取得控制器状态

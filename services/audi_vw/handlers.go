@@ -6,9 +6,9 @@ import (
 	"github.com/masami10/rush/services/storage"
 	"time"
 	"strings"
-	"encoding/xml"
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/wsnotify"
+	"encoding/xml"
 )
 
 const(
@@ -130,23 +130,29 @@ func (h *Handlers) handleResult(result ControllerResult) (error) {
 			odoo_result.CURObjects = append(odoo_result.CURObjects, curobject)
 		}
 
-		fmt.Printf("推送结果数据到AIIS ...\n")
-		_, err = h.AudiVw.Aiis.PutResult(result.Result_id, odoo_result)
-		if err == nil {
-			// 发送成功
-			r.HasUpload = true
-			fmt.Printf("推送AIIS成功，更新本地结果标识\n")
-			_, err := h.AudiVw.DB.UpdateResult(r)
-			if err != nil {
-				return err
-			}
-		} else {
-			fmt.Printf("推送AIIS失败\n")
-			return err
-		}
+		go h.PutResultToAIIS(&odoo_result, &r)
+
 	}
 
 	return nil
+}
+
+func (h *Handlers) PutResultToAIIS(aiis_result *aiis.AIISResult, db_result *storage.Results) {
+	fmt.Printf("推送结果数据到AIIS ...\n")
+
+	_, err := h.AudiVw.Aiis.PutResult(db_result.ResultId, aiis_result)
+	if err == nil {
+		// 发送成功
+		db_result.HasUpload = true
+		fmt.Printf("推送AIIS成功，更新本地结果标识\n")
+		_, err := h.AudiVw.DB.UpdateResult(*db_result)
+		if err != nil {
+
+		}
+	} else {
+		fmt.Printf("推送AIIS失败\n")
+
+	}
 }
 
 // 处理波形数据
@@ -204,34 +210,32 @@ func (h *Handlers) handleCurve(curve ControllerCurve) (error) {
 // 处理收到的数据
 func (h *Handlers) HandleMsg(msg string) {
 
-	if strings.Contains(msg, XML_RESULT_KEY) {
-		fmt.Printf("收到结果数据:%s\n", msg)
+	fmt.Printf("收到结果数据:%s\n", msg)
 
-		result := CVI3Result{}
-		err := xml.Unmarshal([]byte(msg), &result)
-		if err != nil {
-			fmt.Printf("HandleMsg err:%s\n", err.Error())
-		}
+	result := CVI3Result{}
+	err := xml.Unmarshal([]byte(msg), &result)
+	if err != nil {
+		fmt.Printf("HandleMsg err(struct):%s\n", err.Error())
+	}
 
-		// 结果数据
-		result_data := XML2Result(result)
+	// 结果数据
+	result_data := XML2Result(result)
 
-		// 波形文件
-		curve_file := XML2Curve(result)
+	// 波形文件
+	curve_file := XML2Curve(result)
 
-		curve := ControllerCurve{}
-		s_curvedata, _ := json.Marshal(curve_file)
-		curve.CurveData = string(s_curvedata)
-		curve.Count = result_data.Count
-		curve.CurveFile = result_data.CurFile
-		curve.ResultID = result_data.Result_id
+	curve := ControllerCurve{}
+	s_curvedata, _ := json.Marshal(curve_file)
+	curve.CurveData = string(s_curvedata)
+	curve.Count = result_data.Count
+	curve.CurveFile = result_data.CurFile
+	curve.ResultID = result_data.Result_id
 
-		e := h.handleCurve(curve)
-		if  e == nil {
-			go h.handleResult(result_data)
-		} else {
-			fmt.Printf("HandleMsg err:%s\n", e.Error())
-		}
+	e := h.handleCurve(curve)
+	if  e == nil {
+		h.handleResult(result_data)
+	} else {
+		fmt.Printf("HandleMsg err:%s\n", e.Error())
 	}
 
 }

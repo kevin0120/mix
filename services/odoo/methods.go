@@ -75,7 +75,6 @@ func (m *Methods) getResults(ctx iris.Context) {
 		return
 	}
 
-
 	result := ctx.URLParams()["result"]
 
 	if result == "" {
