@@ -11,6 +11,11 @@ import (
 	"github.com/masami10/rush/services/wsnotify"
 )
 
+const(
+	ODOO_RESULT_PASS = "pass"
+	ODOO_RESULT_FAIL = "fail"
+)
+
 type Handlers struct {
 	AudiVw	*Service
 }
@@ -45,7 +50,7 @@ func (h *Handlers) handleResult(result ControllerResult) (error) {
 	r.ResultValue = string(s_value)
 	r.PSetDefine = string(s_pset)
 
-	fmt.Printf("缓存结果到数据库\n")
+	fmt.Printf("缓存结果到数据库 ...\n")
 
 	if r.Count >= int(workorder.MaxRedoTimes) || r.Result == RESULT_OK {
 		need_push_aiis = true
@@ -87,15 +92,15 @@ func (h *Handlers) handleResult(result ControllerResult) (error) {
 		// 结果推送AIIS
 		odoo_result := aiis.AIISResult{}
 		if r.Result == RESULT_OK {
-			odoo_result.Final_pass = "pass"
+			odoo_result.Final_pass = ODOO_RESULT_PASS
 			if r.Count == 1 {
-				odoo_result.One_time_pass = "pass"
+				odoo_result.One_time_pass = ODOO_RESULT_PASS
 			} else {
-				odoo_result.One_time_pass = "fail"
+				odoo_result.One_time_pass = ODOO_RESULT_FAIL
 			}
 		} else {
-			odoo_result.Final_pass = "fail"
-			odoo_result.One_time_pass = "fail"
+			odoo_result.Final_pass = ODOO_RESULT_FAIL
+			odoo_result.One_time_pass = ODOO_RESULT_FAIL
 		}
 
 		odoo_result.Control_date = r.UpdateTime.Format(time.RFC3339)
@@ -136,7 +141,7 @@ func (h *Handlers) handleResult(result ControllerResult) (error) {
 				return err
 			}
 		} else {
-			fmt.Printf("推送AIIS失败")
+			fmt.Printf("推送AIIS失败\n")
 			return err
 		}
 	}
@@ -205,7 +210,7 @@ func (h *Handlers) HandleMsg(msg string) {
 		result := CVI3Result{}
 		err := xml.Unmarshal([]byte(msg), &result)
 		if err != nil {
-			fmt.Printf("OnRecv err:%s\n", err.Error())
+			fmt.Printf("HandleMsg err:%s\n", err.Error())
 		}
 
 		// 结果数据
@@ -225,7 +230,7 @@ func (h *Handlers) HandleMsg(msg string) {
 		if  e == nil {
 			go h.handleResult(result_data)
 		} else {
-			fmt.Printf("OnRecv err:%s\n", e.Error())
+			fmt.Printf("HandleMsg err:%s\n", e.Error())
 		}
 	}
 

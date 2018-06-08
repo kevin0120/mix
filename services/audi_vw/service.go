@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"net"
-	"strings"
 	"sync/atomic"
 	"time"
 	"github.com/masami10/rush/services/storage"
@@ -125,23 +124,7 @@ func (p *Service) Close() error {
 	return nil
 }
 
-
-// 服务端接受新连接
-func (p *Service) NewConn(c net.Conn) {
-	p.setRemoteConn(c)
-}
-
-func (p *Service) setRemoteConn(c net.Conn) (string) {
-	ip := strings.Split(c.RemoteAddr().String(), ":")[0]
-	for k,v := range p.Controllers {
-		if v.cfg.RemoteIP == ip {
-			v.RemoteConn = c
-			return k
-		}
-	}
-
-	return ""
-}
+func (p *Service) NewConn(c net.Conn) {}
 
 // 服务端读取
 func (p *Service) Read(c net.Conn) {

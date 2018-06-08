@@ -171,6 +171,17 @@ func (header *CVI3Header) Deserialize(header_str string) {
 	}
 }
 
+func GeneratePacket(seq uint, typ uint, xmlpacket string) (string, uint) {
+	header := CVI3Header{}
+	header.Init()
+	header.MID = seq
+	header.SIZ = len(xmlpacket)
+	header.TYP = typ
+	header_str := header.Serialize()
+
+	return fmt.Sprintf("%s%s", header_str, xmlpacket), header.MID
+}
+
 type ControllerCurve struct {
 	ResultID  int64
 	CurveFile string

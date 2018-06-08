@@ -38,21 +38,8 @@ type Controller struct {
 	keep_period		time.Duration
 	req_timeout		time.Duration
 	mtx_status		sync.Mutex
-	RemoteConn		net.Conn
 	recv_flag		bool
 	cfg				controller.Config
-}
-
-
-func (c *Controller)GeneratePacket( typ uint, xmlpacket string) (string, uint) {
-	header := CVI3Header{}
-	header.Init()
-	header.MID = c.get_sequence()
-	header.SIZ = len(xmlpacket)
-	header.TYP = typ
-	header_str := header.Serialize()
-
-	return fmt.Sprintf("%s%s", header_str, xmlpacket), header.MID
 }
 
 func (c *Controller) get_sequence() uint {
@@ -95,7 +82,6 @@ func (c *Controller) update_status(status ControllerStatusType) {
 
 		if c.Status == STATUS_OFFLINE {
 			c.Close()
-			c.RemoteConn.Close()
 
 			// 断线重连
 			go c.Connect()
@@ -161,7 +147,8 @@ func (c *Controller) keepAlive() {
 			break
 		}
 
-		keepAlivePacket, seq := c.GeneratePacket(Header_type_keep_alive, Xml_heart_beat)
+		seq := c.get_sequence()
+		keepAlivePacket, seq := GeneratePacket(seq, Header_type_keep_alive, Xml_heart_beat)
 		c.Write([]byte(keepAlivePacket), seq)
 
 		<- time.After(time.Duration(c.keep_period)) // 周期性发送一次信号
@@ -174,83 +161,83 @@ func (c *Controller) subscribe() {
 	sdate, stime := utils.GetDateTime()
 	xml_subscribe := fmt.Sprintf(Xml_subscribe, sdate, stime)
 
-	subscribe_packet, seq := c.GeneratePacket(Header_type_request_with_reply, xml_subscribe)
+	seq := c.get_sequence()
+	subscribe_packet, seq := GeneratePacket(seq, Header_type_request_with_reply, xml_subscribe)
 
 	c.Write([]byte(subscribe_packet), seq)
 
 }
 
-func (s *Controller) Write(buf []byte, seq uint) {
-	s.buffer <- buf
+func (c *Controller) Write(buf []byte, seq uint) {
+	c.buffer <- buf
 }
 
 // 异步发送
-func (s *Controller) manage() {
+func (c *Controller) manage() {
 
 	for {
-		v := <- s.buffer
-		err := s.w.Write([]byte(v))
+		v := <- c.buffer
+		err := c.w.Write([]byte(v))
 		if err != nil {
-			s.Srv.diag.Error("Write data fail", err)
+			c.Srv.diag.Error("Write data fail", err)
 			break
 		}
 
-		<- time.After(time.Duration(s.req_timeout)) //300毫秒发送一次信号
+		<- time.After(time.Duration(c.req_timeout)) //300毫秒发送一次信号
 	}
 }
 
 
-func (s *Controller) Connect() error {
-	s.Status = STATUS_OFFLINE
-	s.sequence = 0
+func (c *Controller) Connect() error {
+	c.Status = STATUS_OFFLINE
+	c.sequence = 0
 
-	s.Response = ResponseQueue {
+	c.Response = ResponseQueue {
 		Results: map[uint]string{},
 	}
 
-	fmt.Printf("CVI3:%s connecting ...\n", s.cfg.SN)
+	fmt.Printf("CVI3:%s connecting ...\n", c.cfg.SN)
 
 	for {
-		err := s.w.Connect(DAIL_TIMEOUT)
+		err := c.w.Connect(DAIL_TIMEOUT)
 		if err != nil {
 			fmt.Printf("%s\n", err.Error())
 		} else {
 			break
 		}
 
-		time.Sleep(time.Duration(s.req_timeout))
+		time.Sleep(time.Duration(c.req_timeout))
 	}
 
-	s.update_status(STATUS_ONLINE)
+	c.update_status(STATUS_ONLINE)
 
 	// 启动发送
-	go s.manage()
+	go c.manage()
 
 	// 启动心跳
-	go s.keepAlive()
+	go c.keepAlive()
 
 	return nil
 }
 
 
-func (s *Controller) Close() error {
-	return s.w.Close()
+func (c *Controller) Close() error {
+	return c.w.Close()
 }
 
 // 客户端读取
-func (s *Controller) Read(conn net.Conn){
+func (c *Controller) Read(conn net.Conn){
 	defer conn.Close()
 
-	buffer := make([]byte, s.Srv.config().ReadBufferSize)
+	buffer := make([]byte, c.Srv.config().ReadBufferSize)
 
 	for {
-		//msg, err := reader.ReadString('\n')
 		n, err := conn.Read(buffer)
 		if err != nil {
 			break
 		}
 
-		s.recv_flag = true
+		c.recv_flag = true
 
 		msg := string(buffer[0:n])
 
@@ -261,21 +248,22 @@ func (s *Controller) Read(conn net.Conn){
 		header := CVI3Header{}
 		header.Deserialize(header_str)
 
-		s.Response.update(header.MID, header_str)
+		c.Response.update(header.MID, header_str)
 
 	}
 }
 
 // PSet程序设定
-func (s *Controller) PSet(pset int, workorder_id int64, reseult_id int64, count int) (uint, error) {
+func (c *Controller) PSet(pset int, workorder_id int64, reseult_id int64, count int) (uint, error) {
 
 	sdate, stime := utils.GetDateTime()
-	xml_pset := fmt.Sprintf(Xml_pset, sdate, stime, s.cfg.SN, workorder_id, reseult_id, count, pset)
+	xml_pset := fmt.Sprintf(Xml_pset, sdate, stime, c.cfg.SN, workorder_id, reseult_id, count, pset)
 
-	pset_packet, seq := s.GeneratePacket(Header_type_request_with_reply, xml_pset)
+	seq := c.get_sequence()
+	pset_packet, seq := GeneratePacket(seq, Header_type_request_with_reply, xml_pset)
 
-	s.Response.Add(seq, "")
-	s.Write([]byte(pset_packet), seq)
+	c.Response.Add(seq, "")
+	c.Write([]byte(pset_packet), seq)
 
 	return seq, nil
 }
