@@ -140,9 +140,11 @@ func (cvi3_client *CVI3Client) AudoPushResult() {
 
 				cvi3_client.PushResult(pset)
 
-				time.Sleep(1 * time.Second)
+				time.Sleep(5 * time.Second)
 			}
 		}
+
+		time.Sleep(10 * time.Second)
 	}
 
 

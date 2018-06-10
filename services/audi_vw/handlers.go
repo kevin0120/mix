@@ -16,12 +16,38 @@ const(
 	ODOO_RESULT_FAIL = "fail"
 )
 
+type HandlerContext struct {
+	cvi3_result CVI3Result
+	controller_curve ControllerCurve
+	controller_result ControllerResult
+	controller_curve_file ControllerCurveFile
+	db_curve	storage.Curves
+	result_ids []int64
+	ws_result wsnotify.WSResult
+	aiis_result aiis.AIISResult
+	aiis_curve aiis.CURObject
+}
+
 type Handlers struct {
 	AudiVw	*Service
+	HandlerContext HandlerContext
+}
+
+func (h *Handlers) Init() {
+	h.HandlerContext = HandlerContext {
+		cvi3_result: CVI3Result{},
+		controller_curve: ControllerCurve{},
+		controller_result: ControllerResult{},
+		controller_curve_file: ControllerCurveFile{},
+		db_curve: storage.Curves{},
+		ws_result: wsnotify.WSResult{},
+		aiis_result: aiis.AIISResult{},
+		aiis_curve: aiis.CURObject{},
+	}
 }
 
 // 处理结果数据
-func (h *Handlers) handleResult(result ControllerResult) (error) {
+func (h *Handlers) handleResult(result *ControllerResult) (error) {
 	fmt.Printf("处理结果数据 ...\n")
 
 	var need_push_aiis bool = false
@@ -56,12 +82,11 @@ func (h *Handlers) handleResult(result ControllerResult) (error) {
 		need_push_aiis = true
 		r.Stage = RESULT_STAGE_FINAL
 
-		ids := []int64{}
-		json.Unmarshal([]byte(workorder.ResultIDs), &ids)
-		if r.ResultId == ids[len(ids) - 1] {
+		json.Unmarshal([]byte(workorder.ResultIDs), &h.HandlerContext.result_ids)
+		if r.ResultId == h.HandlerContext.result_ids[len(h.HandlerContext.result_ids) - 1] {
 			// 标记工单已完成
 			workorder.Status = "finished"
-			h.AudiVw.DB.UpdateWorkorder(workorder)
+			h.AudiVw.DB.UpdateWorkorder(&workorder)
 
 		}
 	}
@@ -75,62 +100,62 @@ func (h *Handlers) handleResult(result ControllerResult) (error) {
 	}
 
 	// 结果推送hmi
-	ws_result := wsnotify.WSResult{}
-	ws_result.Result_id = result.Result_id
-	ws_result.Count = result.Count
-	ws_result.Result = result.Result
-	ws_result.MI = result.ResultValue.Mi
-	ws_result.WI = result.ResultValue.Wi
-	ws_result.TI = result.ResultValue.Ti
-	ws_str, _ := json.Marshal(ws_result)
+	h.HandlerContext.ws_result.Result_id = result.Result_id
+	h.HandlerContext.ws_result.Count = result.Count
+	h.HandlerContext.ws_result.Result = result.Result
+	h.HandlerContext.ws_result.MI = result.ResultValue.Mi
+	h.HandlerContext.ws_result.WI = result.ResultValue.Wi
+	h.HandlerContext.ws_result.TI = result.ResultValue.Ti
+	ws_str, _ := json.Marshal(h.HandlerContext.ws_result)
 
 	fmt.Printf("Websocket推送结果到HMI\n")
-	go h.AudiVw.WS.WSSendResult(workorder.HMISN, string(ws_str))
+	h.AudiVw.WS.WSSendResult(workorder.HMISN, string(ws_str))
 
 	if need_push_aiis {
 
 		// 结果推送AIIS
-		odoo_result := aiis.AIISResult{}
 		if r.Result == RESULT_OK {
-			odoo_result.Final_pass = ODOO_RESULT_PASS
+			h.HandlerContext.aiis_result.Final_pass = ODOO_RESULT_PASS
 			if r.Count == 1 {
-				odoo_result.One_time_pass = ODOO_RESULT_PASS
+				h.HandlerContext.aiis_result.One_time_pass = ODOO_RESULT_PASS
 			} else {
-				odoo_result.One_time_pass = ODOO_RESULT_FAIL
+				h.HandlerContext.aiis_result.One_time_pass = ODOO_RESULT_FAIL
 			}
 		} else {
-			odoo_result.Final_pass = ODOO_RESULT_FAIL
-			odoo_result.One_time_pass = ODOO_RESULT_FAIL
+			h.HandlerContext.aiis_result.Final_pass = ODOO_RESULT_FAIL
+			h.HandlerContext.aiis_result.One_time_pass = ODOO_RESULT_FAIL
 		}
 
-		odoo_result.Control_date = r.UpdateTime.Format(time.RFC3339)
+		h.HandlerContext.aiis_result.Control_date = r.UpdateTime.Format(time.RFC3339)
 
-		odoo_result.Measure_degree = result.ResultValue.Wi
-		odoo_result.Measure_result = strings.ToLower(result.Result)
-		odoo_result.Measure_t_don = result.ResultValue.Ti
-		odoo_result.Measure_torque = result.ResultValue.Mi
-		odoo_result.Op_time = result.Count
-		odoo_result.Pset_m_max = result.PSetDefine.Mp
-		odoo_result.Pset_m_min = result.PSetDefine.Mm
-		odoo_result.Pset_m_target = result.PSetDefine.Ma
-		odoo_result.Pset_m_threshold = result.PSetDefine.Ms
-		odoo_result.Pset_strategy = result.PSetDefine.Strategy
-		odoo_result.Pset_w_max = result.PSetDefine.Wp
-		odoo_result.Pset_w_min = result.PSetDefine.Wm
-		odoo_result.Pset_w_target = result.PSetDefine.Wa
+		h.HandlerContext.aiis_result.Measure_degree = result.ResultValue.Wi
+		h.HandlerContext.aiis_result.Measure_result = strings.ToLower(result.Result)
+		h.HandlerContext.aiis_result.Measure_t_don = result.ResultValue.Ti
+		h.HandlerContext.aiis_result.Measure_torque = result.ResultValue.Mi
+		h.HandlerContext.aiis_result.Op_time = result.Count
+		h.HandlerContext.aiis_result.Pset_m_max = result.PSetDefine.Mp
+		h.HandlerContext.aiis_result.Pset_m_min = result.PSetDefine.Mm
+		h.HandlerContext.aiis_result.Pset_m_target = result.PSetDefine.Ma
+		h.HandlerContext.aiis_result.Pset_m_threshold = result.PSetDefine.Ms
+		h.HandlerContext.aiis_result.Pset_strategy = result.PSetDefine.Strategy
+		h.HandlerContext.aiis_result.Pset_w_max = result.PSetDefine.Wp
+		h.HandlerContext.aiis_result.Pset_w_min = result.PSetDefine.Wm
+		h.HandlerContext.aiis_result.Pset_w_target = result.PSetDefine.Wa
 
 		curves, err := h.AudiVw.DB.ListCurvesByResult(result.Result_id)
 		if err != nil {
 			return err
 		}
+
+		h.HandlerContext.aiis_result.CURObjects = []aiis.CURObject{}
 		for _, v := range curves {
-			curobject := aiis.CURObject{}
-			curobject.OP = v.Count
-			curobject.File = v.CurveFile
-			odoo_result.CURObjects = append(odoo_result.CURObjects, curobject)
+			h.HandlerContext.aiis_curve.OP = v.Count
+			h.HandlerContext.aiis_curve.File = v.CurveFile
+			h.HandlerContext.aiis_result.CURObjects = append(h.HandlerContext.aiis_result.CURObjects, h.HandlerContext.aiis_curve)
 		}
 
-		go h.PutResultToAIIS(odoo_result, r.ResultId)
+
+		h.PutResultToAIIS(h.HandlerContext.aiis_result, r.ResultId)
 
 	}
 
@@ -146,6 +171,7 @@ func (h *Handlers) PutResultToAIIS(aiis_result aiis.AIISResult, r_id int64) erro
 		//db_result.HasUpload = true
 		fmt.Printf("推送AIIS成功，更新本地结果标识\n")
 		_, err := h.AudiVw.DB.UpdateResultUpload(true, r_id)
+
 		if err != nil {
 			return err
 		}
@@ -159,30 +185,29 @@ func (h *Handlers) PutResultToAIIS(aiis_result aiis.AIISResult, r_id int64) erro
 }
 
 // 处理波形数据
-func (h *Handlers) handleCurve(curve ControllerCurve) (error) {
+func (h *Handlers) handleCurve(curve *ControllerCurve) (error) {
 	fmt.Printf("处理波形数据 ...\n")
 
 	// 保存波形到数据库
-	c := storage.Curves{}
-	c.ResultID = curve.ResultID
-	c.CurveData = curve.CurveData
-	c.CurveFile = curve.CurveFile
-	c.Count = curve.Count
-	c.HasUpload = false
+	h.HandlerContext.db_curve.ResultID = curve.ResultID
+	h.HandlerContext.db_curve.CurveData = curve.CurveData
+	h.HandlerContext.db_curve.CurveFile = curve.CurveFile
+	h.HandlerContext.db_curve.Count = curve.Count
+	h.HandlerContext.db_curve.HasUpload = false
 
-	exist, err := h.AudiVw.DB.CurveExist(c)
+	exist, err := h.AudiVw.DB.CurveExist(&h.HandlerContext.db_curve)
 	if err != nil {
 		return err
 	} else {
 		fmt.Printf("缓存波形数据到数据库 ...\n")
 		if exist {
-			_, err := h.AudiVw.DB.UpdateCurve(c)
+			_, err := h.AudiVw.DB.UpdateCurve(&h.HandlerContext.db_curve)
 			if err != nil {
 				fmt.Printf("缓存波形失败\n")
 				return err
 			}
 		} else {
-			err := h.AudiVw.DB.Store(c)
+			err := h.AudiVw.DB.Store(h.HandlerContext.db_curve)
 			if err != nil {
 				fmt.Printf("缓存波形失败\n")
 				return err
@@ -199,9 +224,9 @@ func (h *Handlers) handleCurve(curve ControllerCurve) (error) {
 		fmt.Printf("对象存储保存失败\n")
 		return err
 	} else {
-		c.HasUpload = true
+		h.HandlerContext.db_curve.HasUpload = true
 		fmt.Printf("对象存储保存成功，更新本地结果标识\n")
-		_, err = h.AudiVw.DB.UpdateCurve(c)
+		_, err = h.AudiVw.DB.UpdateCurve(&h.HandlerContext.db_curve)
 		if err != nil {
 			return err
 		}
@@ -215,28 +240,31 @@ func (h *Handlers) HandleMsg(msg string) {
 
 	fmt.Printf("收到结果数据:%s\n", msg)
 
-	result := CVI3Result{}
-	err := xml.Unmarshal([]byte(msg), &result)
+	//h.HandlerContext.controller_curve_file.CUR_M = []float64{}
+	//h.HandlerContext.controller_curve_file.CUR_W = []float64{}
+	//h.HandlerContext.result_ids = []int64{}
+	//h.HandlerContext.aiis_result.CURObjects = []aiis.CURObject{}
+
+	err := xml.Unmarshal([]byte(msg), &h.HandlerContext.cvi3_result)
 	if err != nil {
 		fmt.Printf("HandleMsg err(struct):%s\n", err.Error())
 	}
 
-	// 结果数据
-	result_data := XML2Result(result)
+	//结果数据
+	XML2Result(&h.HandlerContext.cvi3_result, &h.HandlerContext.controller_result)
 
 	// 波形文件
-	curve_file := XML2Curve(result)
+	XML2Curve(&h.HandlerContext.cvi3_result, &h.HandlerContext.controller_curve_file)
 
-	curve := ControllerCurve{}
-	s_curvedata, _ := json.Marshal(curve_file)
-	curve.CurveData = string(s_curvedata)
-	curve.Count = result_data.Count
-	curve.CurveFile = result_data.CurFile
-	curve.ResultID = result_data.Result_id
+	s_curvedata, _ := json.Marshal(h.HandlerContext.controller_curve_file)
+	h.HandlerContext.controller_curve.CurveData = string(s_curvedata)
+	h.HandlerContext.controller_curve.Count = h.HandlerContext.controller_result.Count
+	h.HandlerContext.controller_curve.CurveFile = h.HandlerContext.controller_result.CurFile
+	h.HandlerContext.controller_curve.ResultID = h.HandlerContext.controller_result.Result_id
 
-	e := h.handleCurve(curve)
+	e := h.handleCurve(&h.HandlerContext.controller_curve)
 	if  e == nil {
-		h.handleResult(result_data)
+		h.handleResult(&h.HandlerContext.controller_result)
 	} else {
 		fmt.Printf("HandleMsg err:%s\n", e.Error())
 	}

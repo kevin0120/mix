@@ -226,8 +226,7 @@ type ResultValue struct {
 	Ti float64 `json:"TI"`
 }
 
-func XML2Curve(result CVI3Result) ControllerCurveFile {
-	cur_result := ControllerCurveFile{}
+func XML2Curve(result *CVI3Result, cur_result *ControllerCurveFile) {
 	cur_result.Result = result.PRC_SST.PAR.Result
 	if cur_result.Result == "IO" {
 		cur_result.Result = RESULT_OK
@@ -236,22 +235,22 @@ func XML2Curve(result CVI3Result) ControllerCurveFile {
 	}
 
 	cur_ms := strings.Split(result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.SMP.CUR_M, " ")
-	for i := range cur_ms {
-		v, _ := strconv.ParseFloat(cur_ms[i], 64)
-		cur_result.CUR_M = append(cur_result.CUR_M, v)
+	cur_result.CUR_M = []float64{}
+	for _, v := range cur_ms {
+		m, _ := strconv.ParseFloat(v, 64)
+		cur_result.CUR_M = append(cur_result.CUR_M, m)
 	}
 
 	cur_ws := strings.Split(result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.SMP.CUR_W, " ")
-	for i := range cur_ws {
-		v, _ := strconv.ParseFloat(cur_ws[i], 64)
-		cur_result.CUR_W = append(cur_result.CUR_W, v)
+	cur_result.CUR_W = []float64{}
+	for _, v := range cur_ws {
+		w, _ := strconv.ParseFloat(v, 64)
+		cur_result.CUR_W = append(cur_result.CUR_W, w)
 	}
 
-	return cur_result
 }
 
-func XML2Result(result CVI3Result) ControllerResult {
-	rr := ControllerResult{}
+func XML2Result(result *CVI3Result, rr *ControllerResult) {
 
 	rr.Controller_SN = result.PRC_SST.PAR.SN
 	rr.Result = result.PRC_SST.PAR.Result
@@ -301,5 +300,4 @@ func XML2Result(result CVI3Result) ControllerResult {
 		}
 	}
 
-	return rr
 }
