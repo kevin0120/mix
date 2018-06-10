@@ -44,7 +44,9 @@ class TorAngSPCReport(models.TransientModel):
                 return
             mean = np.mean(data)
             std = np.std(data)
-            self.normal_dist = self._get_normal_dist(mean=mean,std=std)
+            data_min = np.min(data)
+            data_max = np.max(data)
+            self.normal_dist = self._get_normal_dist(mean=mean,std=std,min=data_min, max=data_max)
             scale_parameter = self.env['ir.config_parameter'].sudo().get_param('weibull.scale', default=1.0)
             shape_parameter = self.env['ir.config_parameter'].sudo().get_param('weibull.shape', default=5.0)
             self.weibull_dist = self._get_weibull_dist(len(data), mean=mean, std=std,
@@ -104,10 +106,13 @@ class TorAngSPCReport(models.TransientModel):
         pyecharts.configure(force_js_embed=True)
         return line.render_embed()
 
-    def _get_normal_dist(self, mean=None, std=None):
+    def _get_normal_dist(self, mean=None, std=None, min=None, max=None):
         norm_data = norm(mean, std)
-        x_bar = np.arange(mean - std * 3.0, mean + std * 4.0, 1 * std)
-        y_bar = norm_data.pdf(x_bar)
+        x_bar = np.arange(int(min), int(max), 1)
+        y_bar = []
+        for x in x_bar:
+            y = norm_data.cdf(x+1) - norm_data.cdf(x)
+            y_bar.append(y)
 
         x_line = np.arange(mean - std * 3.0, mean + std * 4.0, 1 * std)
         y_line = norm_data.pdf(x_line)
