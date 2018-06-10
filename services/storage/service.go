@@ -317,11 +317,24 @@ func (s *Service) FindWorkorder(hmi_sn string, vin string, knr string) (Workorde
 	}
 }
 
-func (s *Service) UpdateResult(result Results) (Results, error) {
-	var err error
+func (s *Service) UpdateResultUpload(upload bool, r_id int64) (int64, error) {
+	sql := "update `results` set has_upload = ? where x_result_id = ?"
+
+	r, err := s.eng.Exec(sql,upload, r_id )
+
+	id, _ := r.RowsAffected()
+	if err != nil {
+
+		return id, errors.Wrapf(err, "Update result upload status fail for id : %d", id)
+	} else {
+		return id, nil
+	}
+}
+
+func (s *Service) UpdateResult(result Results) (int64, error) {
 
 	sql := "update `results` set controller_sn = ?, result = ?, has_upload = ?, stage = ?, update_time = ?, pset_define = ?, result_value = ?, count = ? where x_result_id = ?"
-	_, err = s.eng.Exec(sql,
+	r, err := s.eng.Exec(sql,
 		result.ControllerSN,
 		result.Result,
 		result.HasUpload,
@@ -332,10 +345,12 @@ func (s *Service) UpdateResult(result Results) (Results, error) {
 		result.Count,
 		result.ResultId)
 
+	id, _ := r.RowsAffected()
 	if err != nil {
-		return result, err
+
+		return id, errors.Wrapf(err, "Update result fail for id : %d", id)
 	} else {
-		return result, nil
+		return id, nil
 	}
 }
 

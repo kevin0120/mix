@@ -130,29 +130,32 @@ func (h *Handlers) handleResult(result ControllerResult) (error) {
 			odoo_result.CURObjects = append(odoo_result.CURObjects, curobject)
 		}
 
-		go h.PutResultToAIIS(&odoo_result, &r)
+		go h.PutResultToAIIS(odoo_result, r.ResultId)
 
 	}
 
 	return nil
 }
 
-func (h *Handlers) PutResultToAIIS(aiis_result *aiis.AIISResult, db_result *storage.Results) {
+func (h *Handlers) PutResultToAIIS(aiis_result aiis.AIISResult, r_id int64) error{
 	fmt.Printf("推送结果数据到AIIS ...\n")
 
-	_, err := h.AudiVw.Aiis.PutResult(db_result.ResultId, aiis_result)
+	err := h.AudiVw.Aiis.PutResult(r_id, aiis_result)
 	if err == nil {
 		// 发送成功
-		db_result.HasUpload = true
+		//db_result.HasUpload = true
 		fmt.Printf("推送AIIS成功，更新本地结果标识\n")
-		_, err := h.AudiVw.DB.UpdateResult(*db_result)
+		_, err := h.AudiVw.DB.UpdateResultUpload(true, r_id)
 		if err != nil {
-
+			return err
 		}
+		return nil
 	} else {
 		fmt.Printf("推送AIIS失败\n")
+		return err
 
 	}
+	return nil
 }
 
 // 处理波形数据
