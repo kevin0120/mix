@@ -69,7 +69,8 @@ func NewService(c Config, d Diagnostic) *Service {
 		handlers: Handlers{},
 	}
 
-	s.handle_buffer = make(chan string, 4096)
+	s.handlers.Init()
+	s.handle_buffer = make(chan string, 1024)
 	s.handlers.AudiVw = s
 	lis := socket_listener.NewSocketListener(addr, s)
 	s.listener = lis
@@ -167,7 +168,7 @@ func (p *Service) Read(c net.Conn) {
 			rest -= n
 		}
 
-		go p.Parse([]byte(body))
+		p.Parse([]byte(body))
 
 		if header.TYP == Header_type_request_with_reply || header.TYP == Header_type_keep_alive {
 			// 执行应答

@@ -139,7 +139,7 @@ func (s *Service) FindUnuploadResults(result_upload bool, result []string)([]Res
 	}
 }
 
-func (s *Service) CurveExist(curve Curves) (bool, error) {
+func (s *Service) CurveExist(curve *Curves) (bool, error) {
 
 	has, err := s.eng.Exist(&Curves{ ResultID: curve.ResultID, Count: curve.Count})
 	if err != nil {
@@ -149,7 +149,7 @@ func (s *Service) CurveExist(curve Curves) (bool, error) {
 	}
 }
 
-func (s *Service) UpdateCurve(curve Curves) (Curves, error) {
+func (s *Service) UpdateCurve(curve *Curves) (*Curves, error) {
 
 	sql := "update `curves` set has_upload = ?, curve_file = ?, curve_data = ? where result_id = ? and count = ?"
 	_, err := s.eng.Exec(sql,
@@ -317,7 +317,7 @@ func (s *Service) FindWorkorder(hmi_sn string, vin string, knr string) (Workorde
 	}
 }
 
-func (s *Service) UpdateResult(result Results) (Results, error) {
+func (s *Service) UpdateResult(result *Results) (*Results, error) {
 	var err error
 
 	sql := "update `results` set controller_sn = ?, result = ?, has_upload = ?, stage = ?, update_time = ?, pset_define = ?, result_value = ?, count = ? where x_result_id = ?"
@@ -339,7 +339,7 @@ func (s *Service) UpdateResult(result Results) (Results, error) {
 	}
 }
 
-func (s *Service) UpdateWorkorder(workorder Workorders) (Workorders, error) {
+func (s *Service) UpdateWorkorder(workorder *Workorders) (*Workorders, error) {
 	var err error
 
 	sql := "update `workorders` set status = ? where x_workorder_id = ?"

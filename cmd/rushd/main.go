@@ -13,6 +13,7 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
 )
 
 type Diagnostic run.Diagnostic
@@ -54,6 +55,15 @@ func NewMain() *Main {
 }
 
 func main() {
+
+	//agent := stackimpact.Start(stackimpact.Options{
+	//	AgentKey: "d0d6faa73ea9bb5981d6fd91410fe21b575a09fc",
+	//	AppName: "MyGoApp",
+	//})
+	//
+	//agent.StartCPUProfiler()
+	//agent.StartBlockProfiler()
+
 	rand.Seed(time.Now().UnixNano())
 
 	m := NewMain()

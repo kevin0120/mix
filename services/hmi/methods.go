@@ -109,6 +109,9 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 	resp.Knr = workorder.Knr
 	resp.Nut_total = workorder.NutTotal
 	resp.Status = workorder.Status
+	resp.MaxRedoTimes = workorder.MaxRedoTimes
+	resp.MaxOpTime = workorder.MaxOpTime
+
 	json.Unmarshal([]byte(workorder.WorkSheet), &resp.WorkSheet)
 	json.Unmarshal([]byte(workorder.ResultIDs), &resp.Result_ids)
 

@@ -6,7 +6,7 @@ logging:
   file: STDERR
   level: DEBUG
 httpd:
-  bind-address: :8080
+  bind-address: :8081
   log-enabled: true
   write-tracing: false
   shutdown-timeout: 10s
@@ -23,7 +23,7 @@ httpd:
     - 'OPTIONS'
 
 minio:
-  url: 127.0.0.1:9000
+  url: 127.0.0.1:39000
   bucket: curves
   access: minio
   secret: minio123
@@ -43,7 +43,7 @@ websocket:
   read_buf_size: 4096
   write_buf_size: 4096
 storage:
-  db_url: 127.0.0.1:5432
+  db_url: 10.1.1.50:5432
   db_name: rush
   db_user: admin
   db_pwd: admin
@@ -56,20 +56,20 @@ audi/vw:
   req_time_out: 300ms
   keep_alive_period: 5s
 controllers:
-- serial_no: 0001
-  protocol: Audi/VW
-  remote_ip: 192.168.1.200
-  port: 4700
-
-- serial_no: 0002
-  protocol: Audi/VW
-  remote_ip: 192.168.1.202
-  port: 4700
-
-#- serial_no: "0001"
+#- serial_no: 0001
 #  protocol: Audi/VW
-#  remote_ip: 127.0.0.1
-#  port: 4720
+#  remote_ip: 192.168.1.200
+#  port: 4700
+#
+#- serial_no: 0002
+#  protocol: Audi/VW
+#  remote_ip: 192.168.1.202
+#  port: 4700
+
+- serial_no: "0001"
+  protocol: Audi/VW
+  remote_ip: 127.0.0.1
+  port: 4720
 #- serial_no: "0002"
 #  protocol: Audi/VW
 #  remote_ip: 127.0.0.1

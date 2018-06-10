@@ -25,4 +25,6 @@ type Workorder struct {
 	Status       string  	`json:"status"`
 	Result_ids   []int64 	`json:"result_ids"`
 	WorkSheet    Worksheet  `json:"work_sheet"`
+	MaxRedoTimes	int		`json:"max_redo_times"`
+	MaxOpTime		int		`json:"max_op_time"`
 }

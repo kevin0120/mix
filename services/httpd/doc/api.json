@@ -416,7 +416,7 @@
     "status": {
       "type": "object",
       "properties": {
-        "sn": {
+        "controller_sn": {
           "type": "string",
           "description": "控制器序列号",
           "example": "123456"
