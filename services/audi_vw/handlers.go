@@ -243,6 +243,7 @@ func (h *Handlers) HandleMsg(msg string) {
 	err := xml.Unmarshal([]byte(msg), &h.HandlerContext.cvi3_result)
 	if err != nil {
 		fmt.Printf("HandleMsg err(struct):%s\n", err.Error())
+		return
 	}
 
 	//结果数据
