@@ -33,6 +33,7 @@ type Server struct {
 	hostname string
 
 	HTTPDService *httpd.Service
+	PmonService  *pmon.Service
 	config       *Config
 	// List of services in startup order
 	Services []Service
@@ -67,6 +68,11 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.initHTTPDService()
 
+	err = s.initPMONService()
+	if err != nil {
+		return nil, err
+	}
+
 	s.appendPmonService()
 
 	s.appendHTTPDService()
@@ -93,18 +99,27 @@ func (s *Server) initHTTPDService() error {
 	return nil
 }
 
+func (s *Server) initPMONService() error {
+	d := s.DiagService.NewPmonHandler()
+	srv, err := pmon.NewService(s.config.Pmon, d)
+
+	if err != nil {
+		return err
+	}
+
+	srv.HTTPD = s.HTTPDService //httpd服务注入
+
+	s.PmonService = srv
+
+	return nil
+}
+
 func (s *Server) appendHTTPDService() {
 	s.AppendService("httpd", s.HTTPDService)
 }
 
 func (s *Server) appendPmonService() error {
-	c := s.config.Pmon
-	d := s.DiagService.NewPmonHandler()
-	srv := pmon.NewService(c, d)
-
-	srv.HTTPD = s.HTTPDService //httpd服务注入
-
-	s.AppendService("pmon", srv)
+	s.AppendService("pmon", s.PmonService)
 
 	return nil
 }

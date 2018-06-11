@@ -1,181 +1,111 @@
 package pmon
 
-/*
-#include <stdlib.h>
-*/
-import "C"
 import (
-	"errors"
-	"fmt"
-	"path/filepath"
 	"sync/atomic"
-	"syscall"
+	"fmt"
+	"github.com/pkg/errors"
 	"github.com/masami10/aiis/services/httpd"
-	"unsafe"
-)
-
-type TraceLogLevel int
-
-const (
-	PmonLogall TraceLogLevel = iota
-	PmonLogaError
-	PmonLogaMsg
-)
-
-const (
-	MsgTypeSO = "SO"
-	MsgTypeAO = "AO"
-	MsgTypeSD = "SD"
-	MsgTypeAD = "AD"
-	MsgTypeSC = "SC"
-	MsgTypeAC = "AC"
+	"log"
 )
 
 type Diagnostic interface {
 	Error(msg string, err error)
 }
 
-type EventHandler func(int, *C.char, *C.char)
-
 type Service struct {
-	configValue atomic.Value
-	pmonLib     *syscall.DLL
-
-	expatLib *syscall.DLL
-
-	HTTPD *httpd.Service
-
-	diag Diagnostic
+	HTTPD		 	*httpd.Service
+	configValue 	atomic.Value
+	Channels 		map[string]*Channel
+	err 			chan error
+	diag 			Diagnostic
 }
 
-func NewService(c Config, d Diagnostic) *Service {
-	s := &Service{
-		diag: d,
+type PMONEventHandler func(error, []rune , interface{}) //事件号， 内容
+
+func NewService(conf Config, d Diagnostic) (*Service, error)  {
+	s := &Service{ err: make(chan error), diag:d}
+	c, err := PmonNewConfig(conf.Path)
+	if err != nil {
+		return nil, err
 	}
 	s.configValue.Store(c)
-	return s
-
+	s.Channels = make(map[string]*Channel, len(c.Channels))// 通道长度
+	connections := make(map[string]*Connection, len(c.Connections)) // 初始化长度
+	for name, conn := range c.Connections {
+		addr := fmt.Sprintf("udp://%s:%d",conn.Address[0],conn.Port)
+		connections[name] =  NewConnection(addr, name, c.WaitResp) //waitResponse 作为其读取Timeout
+		connections[name].SetDispatcher(s) //将服务注入进行通道分发
+	}
+	for cname,  channel:= range c.Channels {
+		connectKey := fmt.Sprintf("Port%d",channel.Port)
+		s.Channels[cname] = NewChannel(channel) //因为从远端传来的T/R相反，所以进行反转
+		s.Channels[cname].SetConnection(connections[connectKey])
+		connections[connectKey].AppendChannel(cname,channel.SNoT, channel.SNoR )
+	}
+	return s, nil
 }
 
-func (s *Service) config() Config {
-	return s.configValue.Load().(Config)
+func (s *Service)Config() PmonConfig {
+	return s.configValue.Load().(PmonConfig)
 }
 
-//请查阅 https://golang.org/cmd/cgo
-func h(i int, ch *C.char, msg *C.char) {
-	sCh := C.GoString(ch)
-	sMsg := C.GoString(msg)
-	fmt.Printf("%d, %s, %s", i, sCh, sMsg)
-}
-
-func (s *Service) Open() error {
-	c := s.config()
-	lib_pmon_path := filepath.Join(c.PmonDir, "pmon_lib.dll")
-	lib_expat_path := filepath.Join(c.PmonDir, "libexpat.dll")
-	lib_expat, err := syscall.LoadDLL(lib_expat_path)
-	if err != nil {
-		println(err.Error())
-		return fmt.Errorf("Load expat Lib fail: %s", lib_expat_path)
+func (s *Service) Open()  error{
+//func (s *Service) PmonInit( e PMONEventHandler, traceLevel int )  error{
+	for _, ch := range s.Channels {
+		err := ch.Start()
+		if err != nil {
+			return errors.Wrap(err, "Open connection fail")
+		}
 	}
-	lib_pmon, err := syscall.LoadDLL(lib_pmon_path)
-	if err != nil {
-		return fmt.Errorf("Load Pmon Lib fail: %s", lib_pmon_path)
-	}
-	s.pmonLib = lib_pmon
-	s.expatLib = lib_expat
-
-	_, err = s.init(h, PmonLogall)
-	if err != nil {
-		return err
-	}
-
+	go s.run()
 	return nil
 }
 
-func (s *Service) Close() error {
-	defer s.pmonLib.Release()
-	defer s.expatLib.Release()
+func (s *Service) Close()  error{
 	return nil
 }
 
-func (s *Service) init(e EventHandler, tracelevel TraceLogLevel) (bool, error) {
-	if s.pmonLib == nil {
-		return false, errors.New("Pmon lib is not current load")
+func (s *Service) PmonRegistryEvent(e PMONEventHandler, channelNumber string, ud interface{})  error{
+	if _, ok := s.Channels[channelNumber]; !ok {
+		log.Printf("not found channel %s", channelNumber)
+		return nil
 	}
-	proc, err := s.pmonLib.FindProc("PmonInit")
-
-	if err != nil {
-		return false, errors.New("fail to find the entrypoin PmonInit")
-	}
-
-	fn := syscall.NewCallback(e) //创建一个stdcall的回掉函数
-	r, _, err := proc.Call(fn, uintptr(tracelevel))
-
-	if err != nil {
-		return false, err
-	}
-	if r != 0 {
-		return false, fmt.Errorf("call PmonInit fail %d", r)
-	}
-
-	return false, nil
+	ch := s.Channels[channelNumber]
+	ch.RegistryHandler(e, ud)
+	return nil
 }
 
-func (s *Service) SendData(msgId int, channelNumber string, data string) (bool, error) {
-	if s.pmonLib == nil {
-		return false, errors.New("Pmon lib is not current load")
+func (s *Service) run() {
+	for {
+		err := <- s.err
+		log.Printf("fail %s", err)
 	}
-	proc, err := s.pmonLib.FindProc("SendData")
-
-	if err != nil {
-		return false, errors.New("fail to find the entrypoin SendData")
-	}
-
-	n := C.CString(channelNumber)
-	defer C.free(unsafe.Pointer(n))
-
-	d := C.CString(channelNumber)
-	defer C.free(unsafe.Pointer(d))
-
-	r, _, err := proc.Call(uintptr(msgId), uintptr(unsafe.Pointer(n)), uintptr(unsafe.Pointer(d)))
-
-	if err != nil {
-		return false, err
-	}
-	if r != 0 {
-		return false, fmt.Errorf("call PmonInit fail %d", r)
-	}
-
-	return false, nil
 }
 
-func (s *Service) SendPmonMessage(msgType string, channelNumber string, data string) (bool, error) {
-	if s.pmonLib == nil {
-		return false, errors.New("Pmon lib is not current load")
+func (s *Service) SendPmonMessage( msgType PMONSMGTYPE , channelNumber string , data string)  error{
+	if _, ok := s.Channels[channelNumber]; !ok {
+		log.Printf("not found channel %s", channelNumber)
+		return nil
 	}
-	proc, err := s.pmonLib.FindProc("SendPmonMessage")
-
+	ch := s.Channels[channelNumber]
+	x, err := ch.PMONGenerateMsg(msgType, data)
 	if err != nil {
-		return false, errors.New("fail to find the entrypoint SendPmonMessage")
+		log.Printf("Generation %s msg fail", msgType)
+		return errors.Wrap(err, "SendPmonMessage")
 	}
+	ch.Write([]byte(x), msgType)
+	return nil
+}
 
-	m := C.CString(msgType)
-	defer C.free(unsafe.Pointer(m))
+func (s *Service) SendData( msgId int ,channelNumber string , data string )  error{
+	return nil
+}
 
-	n := C.CString(channelNumber)
-	defer C.free(unsafe.Pointer(n))
 
-	d := C.CString(channelNumber)
-	defer C.free(unsafe.Pointer(d))
-
-	r, _, err := proc.Call(uintptr(unsafe.Pointer(m)), uintptr(unsafe.Pointer(n)), uintptr(unsafe.Pointer(d)))
-
-	if err != nil {
-		return false, err
+func (s *Service) Dispatch(pkg PmonPackage, chName string) {
+	if _, ok := s.Channels[chName]; !ok {
+		log.Printf("not found channel %s", chName)
+		return
 	}
-	if r != 0 {
-		return false, fmt.Errorf("call PmonInit fail %d", r)
-	}
-
-	return false, nil
+	s.Channels[chName].recvBuf <- pkg //将数据发送到通道中
 }
