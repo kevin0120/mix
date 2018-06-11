@@ -63,6 +63,7 @@ type SMP struct {
 }
 
 type CUR struct {
+	CNT int	`xml:"CNT"`
 	SMP SMP `xml:"SMP"`
 }
 
@@ -235,17 +236,17 @@ func XML2Curve(result *CVI3Result, cur_result *ControllerCurveFile) {
 	}
 
 	cur_ms := strings.Split(result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.SMP.CUR_M, " ")
-	cur_result.CUR_M = []float64{}
-	for _, v := range cur_ms {
+	cur_result.CUR_M = make([]float64, result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.CNT)
+	for k, v := range cur_ms {
 		m, _ := strconv.ParseFloat(v, 64)
-		cur_result.CUR_M = append(cur_result.CUR_M, m)
+		cur_result.CUR_M[k] = m
 	}
 
 	cur_ws := strings.Split(result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.SMP.CUR_W, " ")
-	cur_result.CUR_W = []float64{}
-	for _, v := range cur_ws {
+	cur_result.CUR_W = make([]float64, result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.CNT)
+	for k, v := range cur_ws {
 		w, _ := strconv.ParseFloat(v, 64)
-		cur_result.CUR_W = append(cur_result.CUR_W, w)
+		cur_result.CUR_W[k] = w
 	}
 
 }
