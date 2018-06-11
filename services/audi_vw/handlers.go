@@ -91,7 +91,7 @@ func (h *Handlers) handleResult(result *ControllerResult) (error) {
 		}
 	}
 
-	_, err = h.AudiVw.DB.UpdateResult(&r)
+	_, err = h.AudiVw.DB.UpdateResult(r)
 	if err != nil {
 		fmt.Printf("缓存结果失败:%s\n", err.Error())
 		return nil
@@ -154,29 +154,34 @@ func (h *Handlers) handleResult(result *ControllerResult) (error) {
 			h.HandlerContext.aiis_result.CURObjects = append(h.HandlerContext.aiis_result.CURObjects, h.HandlerContext.aiis_curve)
 		}
 
-		h.PutResultToAIIS(&h.HandlerContext.aiis_result, &r)
+
+		h.PutResultToAIIS(h.HandlerContext.aiis_result, r.ResultId)
 
 	}
 
 	return nil
 }
 
-func (h *Handlers) PutResultToAIIS(aiis_result *aiis.AIISResult, db_result *storage.Results) {
+func (h *Handlers) PutResultToAIIS(aiis_result aiis.AIISResult, r_id int64) error{
 	fmt.Printf("推送结果数据到AIIS ...\n")
 
-	_, err := h.AudiVw.Aiis.PutResult(db_result.ResultId, aiis_result)
+	err := h.AudiVw.Aiis.PutResult(r_id, aiis_result)
 	if err == nil {
 		// 发送成功
-		db_result.HasUpload = true
+		//db_result.HasUpload = true
 		fmt.Printf("推送AIIS成功，更新本地结果标识\n")
-		_, err := h.AudiVw.DB.UpdateResult(db_result)
-		if err != nil {
+		_, err := h.AudiVw.DB.UpdateResultUpload(true, r_id)
 
+		if err != nil {
+			return err
 		}
+		return nil
 	} else {
 		fmt.Printf("推送AIIS失败\n")
+		return err
 
 	}
+	return nil
 }
 
 // 处理波形数据
