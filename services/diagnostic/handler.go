@@ -324,6 +324,10 @@ func (h *StorageHandler) Info(msg string) {
 	h.l.Info(msg)
 }
 
+func (h *StorageHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}
+
 func (h *StorageHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
@@ -348,6 +352,10 @@ type AudiVWHandler struct {
 
 func (h *AudiVWHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
+}
+
+func (h *AudiVWHandler) Debug(msg string) {
+	h.l.Debug(msg)
 }
 
 func (h *AudiVWHandler) Info(msg string) {

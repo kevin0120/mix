@@ -6,6 +6,6 @@ services:
       - "38080:8080"
       - "4710:4710"
     volumes:
-      - /data/rush/conf:/conf
+      - /data/rush/conf:/etc/rush/conf
     restart: "always"
     

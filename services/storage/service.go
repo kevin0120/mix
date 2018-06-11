@@ -13,6 +13,7 @@ import (
 type Diagnostic interface {
 	Error(msg string, err error)
 	Info(msg string)
+	Debug(msg string)
 	OpenEngineSuccess(info string)
 	Close()
 	Closed()
@@ -209,7 +210,7 @@ func (s *Service) InsertWorkorder(workorder Workorders) (error) {
 		session.Rollback()
 		return errors.Wrapf(err, "store data fail")
 	} else {
-		s.diag.Info(fmt.Sprintf("new workorder:%d", workorder.WorkorderID))
+		s.diag.Debug(fmt.Sprintf("new workorder:%d", workorder.WorkorderID))
 	}
 
 	// 预保存结果
@@ -231,7 +232,7 @@ func (s *Service) InsertWorkorder(workorder Workorders) (error) {
 			session.Rollback()
 			return errors.Wrapf(err, "store data fail")
 		} else {
-			s.diag.Info(fmt.Sprintf("new result:%d", result_id))
+			s.diag.Debug(fmt.Sprintf("new result:%d", result_id))
 		}
 	}
 

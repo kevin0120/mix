@@ -129,7 +129,9 @@ def package_scripts(build_root, config_only=False):
         logging.info("Copying configuration to build directory.")
         conf_name = os.path.basename(DEFAULT_CONFIG)
         shutil.copyfile(DEFAULT_CONFIG, os.path.join(build_root, conf_name))
-        shutil.copyfile(DEFAULT_API_DOC, os.path.join(build_root, DEFAULT_API_DOC))
+
+        api_name = os.path.basename(DEFAULT_API_DOC)
+        shutil.copyfile(DEFAULT_API_DOC, os.path.join(build_root, api_name))
         os.chmod(os.path.join(build_root, conf_name), 0o644)
     else:
         logging.info("Copying scripts and configuration to build directory")

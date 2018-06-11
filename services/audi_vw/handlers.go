@@ -48,7 +48,7 @@ func (h *Handlers) Init() {
 
 // 处理结果数据
 func (h *Handlers) handleResult(result *ControllerResult) (error) {
-	h.AudiVw.diag.Info("处理结果数据 ...")
+	h.AudiVw.diag.Debug("处理结果数据 ...")
 
 	var need_push_aiis bool = false
 
@@ -76,7 +76,7 @@ func (h *Handlers) handleResult(result *ControllerResult) (error) {
 	r.ResultValue = string(s_value)
 	r.PSetDefine = string(s_pset)
 
-	h.AudiVw.diag.Info("缓存结果到数据库 ...")
+	h.AudiVw.diag.Debug("缓存结果到数据库 ...")
 
 	if r.Count >= int(workorder.MaxRedoTimes) || r.Result == RESULT_OK {
 		need_push_aiis = true
@@ -96,7 +96,7 @@ func (h *Handlers) handleResult(result *ControllerResult) (error) {
 		h.AudiVw.diag.Error("缓存结果失败", err)
 		return nil
 	} else {
-		h.AudiVw.diag.Info("缓存结果成功")
+		h.AudiVw.diag.Debug("缓存结果成功")
 	}
 
 	// 结果推送hmi
@@ -108,7 +108,7 @@ func (h *Handlers) handleResult(result *ControllerResult) (error) {
 	h.HandlerContext.ws_result.TI = result.ResultValue.Ti
 	ws_str, _ := json.Marshal(h.HandlerContext.ws_result)
 
-	h.AudiVw.diag.Info("Websocket推送结果到HMI")
+	h.AudiVw.diag.Debug("Websocket推送结果到HMI")
 
 	h.AudiVw.WS.WSSendResult(workorder.HMISN, string(ws_str))
 
@@ -164,13 +164,13 @@ func (h *Handlers) handleResult(result *ControllerResult) (error) {
 }
 
 func (h *Handlers) PutResultToAIIS(aiis_result aiis.AIISResult, r_id int64) error{
-	h.AudiVw.diag.Info("推送结果数据到AIIS")
+	h.AudiVw.diag.Debug("推送结果数据到AIIS")
 
 	err := h.AudiVw.Aiis.PutResult(r_id, aiis_result)
 	if err == nil {
 		// 发送成功
 		//db_result.HasUpload = true
-		h.AudiVw.diag.Info("推送AIIS成功，更新本地结果标识")
+		h.AudiVw.diag.Debug("推送AIIS成功，更新本地结果标识")
 		_, err := h.AudiVw.DB.UpdateResultUpload(true, r_id)
 
 		if err != nil {
@@ -187,7 +187,7 @@ func (h *Handlers) PutResultToAIIS(aiis_result aiis.AIISResult, r_id int64) erro
 
 // 处理波形数据
 func (h *Handlers) handleCurve(curve *ControllerCurve) (error) {
-	h.AudiVw.diag.Info("处理波形数据 ...")
+	h.AudiVw.diag.Debug("处理波形数据 ...")
 
 	// 保存波形到数据库
 	h.HandlerContext.db_curve.ResultID = curve.ResultID
@@ -200,7 +200,7 @@ func (h *Handlers) handleCurve(curve *ControllerCurve) (error) {
 	if err != nil {
 		return err
 	} else {
-		h.AudiVw.diag.Info("缓存波形数据到数据库 ...")
+		h.AudiVw.diag.Debug("缓存波形数据到数据库 ...")
 		if exist {
 			_, err := h.AudiVw.DB.UpdateCurve(&h.HandlerContext.db_curve)
 			if err != nil {
@@ -215,18 +215,18 @@ func (h *Handlers) handleCurve(curve *ControllerCurve) (error) {
 			}
 		}
 
-		h.AudiVw.diag.Info("缓存波形成功")
+		h.AudiVw.diag.Debug("缓存波形成功")
 	}
 
 	// 保存波形到对象存储
-	h.AudiVw.diag.Info("保存波形数据到对象存储 ...")
+	h.AudiVw.diag.Debug("保存波形数据到对象存储 ...")
 	err = h.AudiVw.Minio.Upload(curve.CurveFile, curve.CurveData)
 	if err != nil {
 		h.AudiVw.diag.Error("对象存储保存失败", err)
 		return err
 	} else {
 		h.HandlerContext.db_curve.HasUpload = true
-		h.AudiVw.diag.Info("对象存储保存成功，更新本地结果标识")
+		h.AudiVw.diag.Debug("对象存储保存成功，更新本地结果标识")
 		_, err = h.AudiVw.DB.UpdateCurve(&h.HandlerContext.db_curve)
 		if err != nil {
 			return err
@@ -239,7 +239,7 @@ func (h *Handlers) handleCurve(curve *ControllerCurve) (error) {
 // 处理收到的数据
 func (h *Handlers) HandleMsg(msg string) {
 
-	h.AudiVw.diag.Info(fmt.Sprintf("收到结果数据:%s\n", msg))
+	h.AudiVw.diag.Debug(fmt.Sprintf("收到结果数据:%s\n", msg))
 
 	//h.HandlerContext.controller_curve_file.CUR_M = []float64{}
 	//h.HandlerContext.controller_curve_file.CUR_W = []float64{}

@@ -27,6 +27,7 @@ const (
 type Diagnostic interface {
 	Error(msg string, err error)
 	Info(msg string)
+	Debug(msg string)
 	StartManager()
 }
 
