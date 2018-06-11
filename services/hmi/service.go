@@ -1,0 +1,83 @@
+package hmi
+
+import (
+	"github.com/masami10/rush/services/httpd"
+	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/audi_vw"
+)
+
+type Diagnostic interface {
+	Error(msg string, err error)
+	Disconnect(id string)
+	Close()
+	Closed()
+}
+
+type Service struct {
+	diag Diagnostic
+	methods	Methods
+	DB	   *storage.Service
+	Httpd  *httpd.Service
+
+	AudiVw		*audi_vw.Service
+}
+
+func NewService(d Diagnostic) *Service {
+
+	s := &Service{
+		diag: d,
+		methods: Methods{},
+	}
+
+	s.methods.service = s
+
+	return s
+}
+
+func (s *Service) Open() error {
+
+	var r httpd.Route
+
+	r = httpd.Route{
+		RouteType:	httpd.ROUTE_TYPE_HTTP,
+		Method:  "PUT",
+		Pattern: "/psets",
+		HandlerFunc: s.methods.putPSets,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:	httpd.ROUTE_TYPE_HTTP,
+		Method:  "GET",
+		Pattern: "/workorder",
+		HandlerFunc: s.methods.getWorkorder,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:	httpd.ROUTE_TYPE_HTTP,
+		Method:  "GET",
+		Pattern: "/controller-status",
+		HandlerFunc: s.methods.getStatus,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:	httpd.ROUTE_TYPE_HTTP,
+		Method:  "GET",
+		Pattern: "/healthz",
+		HandlerFunc: s.methods.getHealthz,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+
+	return nil
+
+}
+
+func (s *Service) Close() error {
+	s.diag.Close()
+	s.diag.Closed()
+
+	return nil
+}

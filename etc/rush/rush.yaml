@@ -1,0 +1,68 @@
+hostname: localhost
+data_dir: /home/linshenqi/.rush
+serial_no: 1qaz2wsx
+doc_path: /etc/rush/api.json
+logging:
+  file: STDERR
+  level: DEBUG
+httpd:
+  bind-address: :8080
+  log-enabled: true
+  write-tracing: false
+  shutdown-timeout: 10s
+  cors:
+    allowed-origins:
+    - '*'
+    allow-credentials: true
+    allowed-methods:
+    - 'GET'
+    - 'HEAD'
+    - 'POST'
+    - 'PUT'
+    - 'PATCH'
+    - 'OPTIONS'
+
+minio:
+  url: 127.0.0.1:9000
+  bucket: curves
+  access: minio
+  secret: minio123
+  secure: false
+aiis:
+  urls:
+  - http://127.0.0.1:8069
+  headers:
+    Content-Type: application/json
+  result_push_url: /api/v1/operation.results/%d
+  push_method: PUT
+  timeout: 8s
+  push_interval: 1s
+  max_retry: 3
+websocket:
+  route: /rush/v1/ws
+  read_buf_size: 4096
+  write_buf_size: 4096
+storage:
+  db_url: 127.0.0.1:5432
+  db_name: rush
+  db_user: admin
+  db_pwd: admin
+  max_connection: 60
+  vacuum_period: 2160h0m0s
+audi/vw:
+  port: 4710
+  max_connection: 1024
+  read_buf: 65535
+  req_time_out: 300ms
+  keep_alive_period: 5s
+controllers:
+- serial_no: 0001
+  protocol: Audi/VW
+  remote_ip: 192.168.1.200
+  port: 4700
+
+- serial_no: 0002
+  protocol: Audi/VW
+  remote_ip: 192.168.1.202
+  port: 4700
+

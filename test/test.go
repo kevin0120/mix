@@ -3,24 +3,25 @@ package main
 // CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ./test.go
 
 import (
-	"fmt"
-	"strings"
-	"time"
-	"sync"
-	"os"
-	"strconv"
-	"github.com/masami10/rush/payload"
-	"github.com/masami10/rush/core"
-	"math/rand"
 	"encoding/json"
 	"flag"
+	"fmt"
+	"github.com/masami10/rush/core"
+	"github.com/masami10/rush/payload"
+	"math/rand"
+	"os"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
 )
 
 var g_Count int = 0
 var g_TableCount int = 0
 var g_odoo_url string = "http://10.1.1.31:8069"
 var g_task_num int = 8
-var g_result_batch bool =false
+var g_result_batch bool = false
+
 //var g_req_mtx sync.Mutex
 var g_req_inteval int = 200
 var g_genetime_mtx sync.Mutex = sync.Mutex{}
@@ -36,7 +37,7 @@ var g_odoo_result_batch payload.ODOOResultSync = payload.ODOOResultSync{}
 //
 //var g_r *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-func create_mo(odoo_url string, mo payload.ODOOMO, mtx sync.Mutex, time_mtx sync.Mutex) (error) {
+func create_mo(odoo_url string, mo payload.ODOOMO, mtx sync.Mutex, time_mtx sync.Mutex) error {
 	mo.Date_planned_start = g_time
 	mo.Pin = GenerateRangeNum(7, time_mtx)
 	vin_rand := GenerateRangeNum(6, time_mtx)
@@ -45,9 +46,7 @@ func create_mo(odoo_url string, mo payload.ODOOMO, mtx sync.Mutex, time_mtx sync
 	//SR1J--V001--C6-2018-6171427=5
 	mo_name := fmt.Sprintf("%s--V001--%s-%d-%d=%d", mo.Equipment_name, mo.Factory_name, mo.Year, mo.Pin, mo.Pin_check_code)
 
-
 	created, t, err := g_odoo.CreateMO(mo)
-
 
 	if err != nil {
 		result := fmt.Sprintf("创建工单:%s 用时:%s 结果:%s \n", mo_name, t, "failed")
@@ -58,7 +57,6 @@ func create_mo(odoo_url string, mo payload.ODOOMO, mtx sync.Mutex, time_mtx sync
 
 		// 推送结果
 		go put_result(created, time_mtx)
-
 
 		result := fmt.Sprintf("创建工单:%s 用时:%s 结果:%s \n", mo_name, t, "ok")
 		fmt.Printf(result)
@@ -114,10 +112,10 @@ func put_result(mo payload.ODOOMOCreated, mtx sync.Mutex) {
 func RandomResult(mtx sync.Mutex) {
 	if g_result_batch == true {
 		g_odoo_result_batch.Control_date = GenerateTime()
-		g_odoo_result_batch.Measure_degree = (rand.Float64()*180) + 5
+		g_odoo_result_batch.Measure_degree = (rand.Float64() * 180) + 5
 
 		s := GenerateRangeNum(8, mtx)
-		if s % 2 == 0{
+		if s%2 == 0 {
 			g_odoo_result_batch.Measure_result = "ok"
 		} else {
 			g_odoo_result_batch.Measure_result = "nok"
@@ -126,14 +124,14 @@ func RandomResult(mtx sync.Mutex) {
 		g_odoo_result_batch.Op_time = rand.Intn(3) + 1
 
 		//fmt.Printf("%s\n", result.Measure_result)
-		g_odoo_result_batch.Measure_t_don = rand.Float64() * 100 + 100
-		g_odoo_result_batch.Measure_torque = (rand.Float64()*10) + 10
+		g_odoo_result_batch.Measure_t_don = rand.Float64()*100 + 100
+		g_odoo_result_batch.Measure_torque = (rand.Float64() * 10) + 10
 	} else {
 		g_odoo_result.Control_date = GenerateTime()
-		g_odoo_result.Measure_degree = (rand.Float64()*180) + 5
+		g_odoo_result.Measure_degree = (rand.Float64() * 180) + 5
 
 		s := GenerateRangeNum(8, mtx)
-		if s % 2 == 0{
+		if s%2 == 0 {
 			g_odoo_result.Measure_result = "ok"
 		} else {
 			g_odoo_result.Measure_result = "nok"
@@ -142,10 +140,9 @@ func RandomResult(mtx sync.Mutex) {
 		g_odoo_result.Op_time = rand.Intn(3) + 1
 
 		//fmt.Printf("%s\n", result.Measure_result)
-		g_odoo_result.Measure_t_don = rand.Float64() * 100 + 100
-		g_odoo_result.Measure_torque = (rand.Float64()*10) + 10
+		g_odoo_result.Measure_t_don = rand.Float64()*100 + 100
+		g_odoo_result.Measure_torque = (rand.Float64() * 10) + 10
 	}
-
 
 }
 
@@ -168,20 +165,20 @@ func GenerateRangeNum(len int, mtx sync.Mutex) int {
 	mtx.Lock()
 	nano := time.Now().Nanosecond()
 
-	t := fmt.Sprintf("%09d",nano)
+	t := fmt.Sprintf("%09d", nano)
 	//fmt.Printf("%s\n", t)
 	s := t[0:len]
-	i,_ := strconv.Atoi(s)
+	i, _ := strconv.Atoi(s)
 	return i
 }
 
-func tracefile(str_content string, mtx sync.Mutex)  {
+func tracefile(str_content string, mtx sync.Mutex) {
 	defer mtx.Unlock()
 	mtx.Lock()
-	fd,_:=os.OpenFile("test.csv",os.O_RDWR|os.O_CREATE|os.O_APPEND,0644)
+	fd, _ := os.OpenFile("test.csv", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
 	defer fd.Close()
-	fd_content:=strings.Join([]string{str_content,"\n"},"")
-	buf:=[]byte(fd_content)
+	fd_content := strings.Join([]string{str_content, "\n"}, "")
+	buf := []byte(fd_content)
 	fd.Write(buf)
 }
 
@@ -194,7 +191,7 @@ func ReCount(mo payload.ODOOMO, mtx sync.Mutex) payload.ODOOMO {
 		g_TableCount++
 		s_date, s_time := GetDateTime()
 		t, _ := time.Parse("2006-01-02 15:04:05", fmt.Sprintf("%s %s", s_date, s_time))
-		_t := t.Add(time.Duration(744 * g_TableCount) * time.Hour)
+		_t := t.Add(time.Duration(744*g_TableCount) * time.Hour)
 		st := strings.Split(_t.Format("2006-01-02 15:04:05"), " ")
 		g_time = fmt.Sprintf("%sT%s+08:00", st[0], st[1])
 
@@ -261,7 +258,6 @@ func main() {
 
 	//odoo_result.Control_date = result_data.Dat
 
-
 	if g_result_batch == true {
 		g_odoo_result_batch.CURObjects = []payload.CURObject{}
 		cur_object := payload.CURObject{}
@@ -295,7 +291,6 @@ func main() {
 		g_odoo_result.Pset_w_min = 170
 		g_odoo_result.Pset_w_target = 180
 	}
-
 
 	mo := payload.ODOOMO{}
 	mo.Pin_check_code = 5
@@ -339,7 +334,6 @@ func main() {
 	pr.Pr_group = "AED"
 	pr.Pr_value = "7JI"
 	mo.Prs = append(mo.Prs, pr)
-
 
 	s_date, s_time := GetDateTime()
 	g_time = fmt.Sprintf("%sT%s+08:00", s_date, s_time)
