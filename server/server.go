@@ -7,6 +7,7 @@ import (
 	"github.com/masami10/aiis/services/diagnostic"
 	"github.com/masami10/aiis/services/httpd"
 	"github.com/masami10/aiis/services/pmon"
+	"github.com/masami10/aiis/services/odoo"
 )
 
 type BuildInfo struct {
@@ -73,6 +74,8 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 		return nil, err
 	}
 
+	s.appendOdooService()
+
 	s.appendPmonService()
 
 	s.appendHTTPDService()
@@ -122,6 +125,15 @@ func (s *Server) appendPmonService() error {
 	s.AppendService("pmon", s.PmonService)
 
 	return nil
+}
+
+func (s *Server) appendOdooService()  {
+	c := s.config.Odoo
+	d := s.DiagService.NewOdooHandler()
+	srv := odoo.NewService(c, d)
+
+	s.AppendService("odoo", srv)
+
 }
 
 func (s *Server) Open() error {

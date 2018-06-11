@@ -63,6 +63,13 @@ func (s *Service) NewPmonHandler() *PmonHandler {
 	}
 }
 
+func (s *Service) NewOdooHandler() *OdooHandler {
+	return &OdooHandler{
+		l: s.Logger.With(String("service", "odoo")),
+	}
+}
+
+
 func BootstrapMainHandler() *CmdHandler {
 	s := NewService(NewConfig(), nil, os.Stderr)
 	// Should never error

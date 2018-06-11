@@ -273,3 +273,16 @@ type PmonHandler struct {
 func (h *PmonHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
+
+
+// Odoo Handler
+
+type OdooHandler struct {
+	l Logger
+}
+
+func (h *OdooHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+
