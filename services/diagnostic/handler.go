@@ -320,6 +320,10 @@ type StorageHandler struct {
 	l Logger
 }
 
+func (h *StorageHandler) Info(msg string) {
+	h.l.Info(msg)
+}
+
 func (h *StorageHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
@@ -344,6 +348,10 @@ type AudiVWHandler struct {
 
 func (h *AudiVWHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
+}
+
+func (h *AudiVWHandler) Info(msg string) {
+	h.l.Info(msg)
 }
 
 func (h *AudiVWHandler) StartManager() {

@@ -26,6 +26,7 @@ const (
 
 type Diagnostic interface {
 	Error(msg string, err error)
+	Info(msg string)
 	StartManager()
 }
 
@@ -98,6 +99,8 @@ func (p *Service) Write(serial_no string ,buf []byte)  error{
 
 func (p *Service) Open() error {
 
+	p.diag.StartManager()
+
 	err := p.listener.Start()
 	if err != nil {
 		return errors.Wrapf(err, "Open Protocol %s Listener fail", p.name)
@@ -143,19 +146,20 @@ func (p *Service) Read(c net.Conn) {
 
 		n, err := c.Read(buffer)
 		if err != nil {
-			fmt.Printf("%s\n", err.Error())
+			p.diag.Error("read err", err)
 			break
 		}
 		msg := string(buffer[0:n])
 		if len(msg) < HEADER_LEN {
 			continue
 		}
-		//fmt.Printf("%s\n", msg)
+
 
 		header := CVI3Header{}
 		header.Deserialize(msg[0: HEADER_LEN])
+		//fmt.Printf("%d\n", header.SIZ)
 		var body string = msg[HEADER_LEN: n]
-		var rest int = int(header.SIZ) - HEADER_LEN - n
+		var rest int = header.SIZ - HEADER_LEN - n
 		for {
 			if rest <= 0 {
 				break
@@ -199,6 +203,7 @@ func (p *Service) Parse(buf []byte)  ([]byte, error){
 }
 
 func (p *Service) HandleProcess() {
+	p.diag.StartManager()
 	for {
 		msg := <- p.handle_buffer
 		p.handlers.HandleMsg(msg)

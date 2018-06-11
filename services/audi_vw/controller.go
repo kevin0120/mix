@@ -78,7 +78,7 @@ func (c *Controller) update_status(status ControllerStatusType) {
 		msg, _ := json.Marshal(s)
 		c.Srv.WS.WSSendControllerStatus(string(msg))
 
-		fmt.Printf("civ3:%s %s\n", c.cfg.SN, c.Status)
+		c.Srv.diag.Info(fmt.Sprintf("civ3:%s %s\n", c.cfg.SN, c.Status))
 
 		if c.Status == STATUS_OFFLINE {
 			c.Close()
@@ -196,12 +196,12 @@ func (c *Controller) Connect() error {
 		Results: map[uint]string{},
 	}
 
-	fmt.Printf("CVI3:%s connecting ...\n", c.cfg.SN)
+	c.Srv.diag.Info(fmt.Sprintf("CVI3:%s connecting ...\n", c.cfg.SN))
 
 	for {
 		err := c.w.Connect(DAIL_TIMEOUT)
 		if err != nil {
-			fmt.Printf("%s\n", err.Error())
+			c.Srv.diag.Error("connect err", err)
 		} else {
 			break
 		}

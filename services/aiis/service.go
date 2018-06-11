@@ -74,7 +74,7 @@ func (s *Service) PutResult(result_id int64, body interface{}) error {
 
 	var err error
 	for _, endpoint := range s.endpoints {
-		err := s.putResult(body, fmt.Sprintf(endpoint.url, result_id), endpoint.method)
+		err = s.putResult(body, fmt.Sprintf(endpoint.url, result_id), endpoint.method)
 		if err == nil {
 			// 如果第一次就成功，推出循环
 			return nil

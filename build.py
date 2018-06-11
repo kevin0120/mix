@@ -33,6 +33,7 @@ POSTUNINST_SCRIPT = "scripts/post-uninstall.sh"
 LOGROTATE_CONFIG = "etc/logrotate.d/rush"
 BASH_COMPLETION_SH = "usr/share/bash-completion/completions/rush"
 DEFAULT_CONFIG = "etc/rush/rush.yaml"
+DEFAULT_API_DOC = "etc/rush/api.json"
 PREINST_SCRIPT = None
 
 # Default AWS S3 bucket for uploads
@@ -68,6 +69,7 @@ fpm_common_args = "-f -s dir --log error \
         PACKAGE_LICENSE,
         MAINTAINER,
         DEFAULT_CONFIG,
+        DEFAULT_API_DOC,
         LOGROTATE_CONFIG,
         ' --directories '.join([
                          LOG_DIR[1:],
@@ -127,6 +129,7 @@ def package_scripts(build_root, config_only=False):
         logging.info("Copying configuration to build directory.")
         conf_name = os.path.basename(DEFAULT_CONFIG)
         shutil.copyfile(DEFAULT_CONFIG, os.path.join(build_root, conf_name))
+        shutil.copyfile(DEFAULT_API_DOC, os.path.join(build_root, DEFAULT_API_DOC))
         os.chmod(os.path.join(build_root, conf_name), 0o644)
     else:
         logging.info("Copying scripts and configuration to build directory")
@@ -135,6 +138,7 @@ def package_scripts(build_root, config_only=False):
         shutil.copy(LOGROTATE_CONFIG, os.path.join(build_root, LOGROTATE_CONFIG))
         # shutil.copy(BASH_COMPLETION_SH, os.path.join(build_root, BASH_COMPLETION_SH))
         shutil.copy(DEFAULT_CONFIG, os.path.join(build_root, DEFAULT_CONFIG))
+        shutil.copy(DEFAULT_API_DOC, os.path.join(build_root, DEFAULT_API_DOC))
         os.chmod(os.path.join(build_root, LOGROTATE_CONFIG), 0o644)
 
 def run_generate():

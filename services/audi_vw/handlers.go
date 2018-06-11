@@ -48,7 +48,7 @@ func (h *Handlers) Init() {
 
 // 处理结果数据
 func (h *Handlers) handleResult(result *ControllerResult) (error) {
-	fmt.Printf("处理结果数据 ...\n")
+	h.AudiVw.diag.Info("处理结果数据 ...")
 
 	var need_push_aiis bool = false
 
@@ -76,7 +76,7 @@ func (h *Handlers) handleResult(result *ControllerResult) (error) {
 	r.ResultValue = string(s_value)
 	r.PSetDefine = string(s_pset)
 
-	fmt.Printf("缓存结果到数据库 ...\n")
+	h.AudiVw.diag.Info("缓存结果到数据库 ...")
 
 	if r.Count >= int(workorder.MaxRedoTimes) || r.Result == RESULT_OK {
 		need_push_aiis = true
@@ -93,10 +93,10 @@ func (h *Handlers) handleResult(result *ControllerResult) (error) {
 
 	_, err = h.AudiVw.DB.UpdateResult(r)
 	if err != nil {
-		fmt.Printf("缓存结果失败:%s\n", err.Error())
+		h.AudiVw.diag.Error("缓存结果失败", err)
 		return nil
 	} else {
-		fmt.Printf("缓存结果成功\n")
+		h.AudiVw.diag.Info("缓存结果成功")
 	}
 
 	// 结果推送hmi
@@ -108,7 +108,8 @@ func (h *Handlers) handleResult(result *ControllerResult) (error) {
 	h.HandlerContext.ws_result.TI = result.ResultValue.Ti
 	ws_str, _ := json.Marshal(h.HandlerContext.ws_result)
 
-	fmt.Printf("Websocket推送结果到HMI\n")
+	h.AudiVw.diag.Info("Websocket推送结果到HMI")
+
 	h.AudiVw.WS.WSSendResult(workorder.HMISN, string(ws_str))
 
 	if need_push_aiis {
@@ -163,13 +164,13 @@ func (h *Handlers) handleResult(result *ControllerResult) (error) {
 }
 
 func (h *Handlers) PutResultToAIIS(aiis_result aiis.AIISResult, r_id int64) error{
-	fmt.Printf("推送结果数据到AIIS ...\n")
+	h.AudiVw.diag.Info("推送结果数据到AIIS")
 
 	err := h.AudiVw.Aiis.PutResult(r_id, aiis_result)
 	if err == nil {
 		// 发送成功
 		//db_result.HasUpload = true
-		fmt.Printf("推送AIIS成功，更新本地结果标识\n")
+		h.AudiVw.diag.Info("推送AIIS成功，更新本地结果标识")
 		_, err := h.AudiVw.DB.UpdateResultUpload(true, r_id)
 
 		if err != nil {
@@ -177,7 +178,7 @@ func (h *Handlers) PutResultToAIIS(aiis_result aiis.AIISResult, r_id int64) erro
 		}
 		return nil
 	} else {
-		fmt.Printf("推送AIIS失败\n")
+		h.AudiVw.diag.Error("推送AIIS失败", err)
 		return err
 
 	}
@@ -186,7 +187,7 @@ func (h *Handlers) PutResultToAIIS(aiis_result aiis.AIISResult, r_id int64) erro
 
 // 处理波形数据
 func (h *Handlers) handleCurve(curve *ControllerCurve) (error) {
-	fmt.Printf("处理波形数据 ...\n")
+	h.AudiVw.diag.Info("处理波形数据 ...")
 
 	// 保存波形到数据库
 	h.HandlerContext.db_curve.ResultID = curve.ResultID
@@ -199,33 +200,33 @@ func (h *Handlers) handleCurve(curve *ControllerCurve) (error) {
 	if err != nil {
 		return err
 	} else {
-		fmt.Printf("缓存波形数据到数据库 ...\n")
+		h.AudiVw.diag.Info("缓存波形数据到数据库 ...")
 		if exist {
 			_, err := h.AudiVw.DB.UpdateCurve(&h.HandlerContext.db_curve)
 			if err != nil {
-				fmt.Printf("缓存波形失败\n")
+				h.AudiVw.diag.Error("缓存波形失败", err)
 				return err
 			}
 		} else {
 			err := h.AudiVw.DB.Store(h.HandlerContext.db_curve)
 			if err != nil {
-				fmt.Printf("缓存波形失败\n")
+				h.AudiVw.diag.Error("缓存波形失败", err)
 				return err
 			}
 		}
 
-		fmt.Printf("缓存波形成功\n")
+		h.AudiVw.diag.Info("缓存波形成功")
 	}
 
 	// 保存波形到对象存储
-	fmt.Printf("保存波形数据到对象存储 ...\n")
+	h.AudiVw.diag.Info("保存波形数据到对象存储 ...")
 	err = h.AudiVw.Minio.Upload(curve.CurveFile, curve.CurveData)
 	if err != nil {
-		fmt.Printf("对象存储保存失败\n")
+		h.AudiVw.diag.Error("对象存储保存失败", err)
 		return err
 	} else {
 		h.HandlerContext.db_curve.HasUpload = true
-		fmt.Printf("对象存储保存成功，更新本地结果标识\n")
+		h.AudiVw.diag.Info("对象存储保存成功，更新本地结果标识")
 		_, err = h.AudiVw.DB.UpdateCurve(&h.HandlerContext.db_curve)
 		if err != nil {
 			return err
@@ -238,7 +239,7 @@ func (h *Handlers) handleCurve(curve *ControllerCurve) (error) {
 // 处理收到的数据
 func (h *Handlers) HandleMsg(msg string) {
 
-	fmt.Printf("收到结果数据:%s\n", msg)
+	h.AudiVw.diag.Info(fmt.Sprintf("收到结果数据:%s\n", msg))
 
 	//h.HandlerContext.controller_curve_file.CUR_M = []float64{}
 	//h.HandlerContext.controller_curve_file.CUR_W = []float64{}
@@ -247,7 +248,7 @@ func (h *Handlers) HandleMsg(msg string) {
 
 	err := xml.Unmarshal([]byte(msg), &h.HandlerContext.cvi3_result)
 	if err != nil {
-		fmt.Printf("HandleMsg err(struct):%s\n", err.Error())
+		h.AudiVw.diag.Error("HandleMsg err", err)
 		return
 	}
 
@@ -267,7 +268,7 @@ func (h *Handlers) HandleMsg(msg string) {
 	if  e == nil {
 		h.handleResult(&h.HandlerContext.controller_result)
 	} else {
-		fmt.Printf("HandleMsg err:%s\n", e.Error())
+		h.AudiVw.diag.Error("handleCurve err", err)
 	}
 
 }
