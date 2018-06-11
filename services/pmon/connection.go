@@ -2,13 +2,10 @@ package pmon
 
 import (
 	"github.com/masami10/aiis/services/pmon/udp_driver"
+	"github.com/pkg/errors"
 	"log"
 	"time"
-	"github.com/pkg/errors"
 )
-
-
-
 
 type Dispatcher interface {
 	Dispatch(PmonPackage, string) //数据字节流，通道名字
@@ -16,26 +13,25 @@ type Dispatcher interface {
 
 //为了定位某个通道
 type channelInfo struct {
-	name 	string //通道名字
-	sNoT    string
-	sNoR	string
+	name string //通道名字
+	sNoT string
+	sNoR string
 }
 
 type Connection struct {
-	U 				*udp_driver.UDPDriver
-	started 		bool
-	name 			string
-	channels 		[]channelInfo
+	U        *udp_driver.UDPDriver
+	started  bool
+	name     string
+	channels []channelInfo
 	Dispatcher
 }
-
 
 func NewConnection(addr string, name string, deadline time.Duration) *Connection {
 	u := udp_driver.NewUDPDriver(addr, deadline)
 	c := &Connection{
-		U: u,
+		U:       u,
 		started: false,
-		name: name,
+		name:    name,
 	}
 	u.SetConnection(c) //注入服务为了进行分发
 	return c
@@ -53,7 +49,7 @@ func (c *Connection) Open() error {
 	return nil
 }
 
-func (c *Connection) Close() error{
+func (c *Connection) Close() error {
 	if c.started {
 		err := c.U.Close()
 		if err != nil {
@@ -69,7 +65,7 @@ func (c *Connection) SetDispatcher(d Dispatcher) error {
 	return nil
 }
 
-func (c *Connection) AppendChannel(name string, sNoT    string, sNoR	string ) {
+func (c *Connection) AppendChannel(name string, sNoT string, sNoR string) {
 	ch := channelInfo{
 		name: name,
 		sNoT: sNoT,
@@ -77,7 +73,6 @@ func (c *Connection) AppendChannel(name string, sNoT    string, sNoR	string ) {
 	}
 	c.channels = append(c.channels, ch)
 }
-
 
 func (c *Connection) Write(buf []byte, deadline time.Duration) error {
 	err := c.U.Write(buf, deadline)
@@ -97,17 +92,17 @@ func (c *Connection) dispatch(buf []byte) error {
 	return nil
 }
 
-func (c *Connection) Parse(buf []byte) error{
+func (c *Connection) Parse(buf []byte) error {
 	err := ValidateChecksum(buf)
 	if err != nil {
-		log.Printf("Validate fail %s ",err)
+		log.Printf("Validate fail %s ", err)
 	}
-	if IsUDPResponse(buf){
+	if IsUDPResponse(buf) {
 		c.U.NoReadDeadline() //设定为read永远阻塞
 		return nil
 	}
-	msgId:= GetMsgId(buf)
-	c.Write([]byte(UdpResponse(msgId)), time.Duration(time.Millisecond * 5)) //收到消息先发送udpResponse
-	c.dispatch(buf) //连接将数据分发到不同的通道
+	msgId := GetMsgId(buf)
+	c.Write([]byte(UdpResponse(msgId)), time.Duration(time.Millisecond*5)) //收到消息先发送udpResponse
+	c.dispatch(buf)                                                        //连接将数据分发到不同的通道
 	return nil
 }

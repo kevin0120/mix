@@ -1,12 +1,12 @@
 package pmon
 
 import (
+	"fmt"
+	"github.com/pkg/errors"
 	"strconv"
 	"sync"
-	"unicode/utf8"
-	"github.com/pkg/errors"
 	"sync/atomic"
-	"fmt"
+	"unicode/utf8"
 )
 
 type PmonChannelStatus string
@@ -34,7 +34,7 @@ func NewChannel(c cChannel) *Channel {
 		cChannel:   c,
 		mux:        new(sync.Mutex),
 		recvBuf:    make(chan PmonPackage, 10),
-		closed:		make(chan struct{}),
+		closed:     make(chan struct{}),
 		status:     STATUSCLOSE,
 		e:          nil,
 		ud:         nil,
@@ -98,13 +98,12 @@ func (ch *Channel) gethasSD() bool {
 	return ch.hasSendSD.Load().(bool)
 }
 
-
 func (ch *Channel) Write(buf []byte, msgType PMONSMGTYPE) error {
 	if ch.GetStatus() == STATUSCLOSE && msgType == PMONMSGSD {
 		return fmt.Errorf("channel %s is closed can not send SD", ch.Ch)
 	}
 	err := ch.conn.Write(buf, ch.WriteTimeout)
-	if err != nil &&  msgType == PMONMSGSD{
+	if err != nil && msgType == PMONMSGSD {
 		ch.SethasSD(true)
 	}
 	return err
@@ -119,18 +118,18 @@ func (ch *Channel) manage() {
 	//off := 0
 	//block_idx := 0
 	for {
-		select  {
-		case <- ch.closed:
+		select {
+		case <-ch.closed:
 			if ch.gethasSD() {
 				//有发送过sd,但没有收到ad，但是关闭了通道
 				res, _ := ch.generateAO(ch.conn.U.GetMsgNum())
-				ch.Write([]byte(res),PMONMSGAO ) //发送AO
-				bc := fmt.Sprintf("%04d",ch.GetBlockCount())
-				res, _ = ch.generateAD(ch.conn.U.GetMsgNum(),bc)
-				ch.Write([]byte(res),PMONMSGAD ) //发送AD
+				ch.Write([]byte(res), PMONMSGAO) //发送AO
+				bc := fmt.Sprintf("%04d", ch.GetBlockCount())
+				res, _ = ch.generateAD(ch.conn.U.GetMsgNum(), bc)
+				ch.Write([]byte(res), PMONMSGAD) //发送AD
 				res, _ = ch.generateAC(ch.conn.U.GetMsgNum())
-				ch.Write([]byte(res),PMONMSGAC ) //发送AC
-				ch.SethasSD(false) //走完此流程后没有SD
+				ch.Write([]byte(res), PMONMSGAC) //发送AC
+				ch.SethasSD(false)               //走完此流程后没有SD
 			}
 		case data := <-ch.recvBuf:
 			switch data.t {
@@ -139,11 +138,11 @@ func (ch *Channel) manage() {
 				if ch.Type == PMONMASTER {
 					//如果是master 需要回一个SO
 					res, _ = ch.generateSO(ch.conn.U.GetMsgNum())
-					ch.Write([]byte(res),PMONMSGSO )
+					ch.Write([]byte(res), PMONMSGSO)
 				} else {
 					res, _ = ch.generateAO(ch.conn.U.GetMsgNum())
 					ch.SetStatus(STATUSNORMAL)
-					ch.Write([]byte(res),PMONMSGAO )
+					ch.Write([]byte(res), PMONMSGAO)
 				}
 			case PMONMSGAO:
 				ch.SetStatus(STATUSNORMAL)
@@ -152,11 +151,11 @@ func (ch *Channel) manage() {
 				if ch.Type == PMONMASTER {
 					//如果是master 需要回一个SC
 					res, _ = ch.generateSC(ch.conn.U.GetMsgNum())
-					ch.Write([]byte(res),PMONMSGSC )
+					ch.Write([]byte(res), PMONMSGSC)
 				} else {
 					res, _ = ch.generateAC(ch.conn.U.GetMsgNum())
 					ch.SetStatus(STATUSCLOSE)
-					ch.Write([]byte(res),PMONMSGAC)
+					ch.Write([]byte(res), PMONMSGAC)
 				}
 			case PMONMSGAC:
 				ch.SetStatus(STATUSCLOSE)
@@ -165,7 +164,7 @@ func (ch *Channel) manage() {
 				BlockCounter := string(data.data[:4])
 				data_len, _ := strconv.Atoi(string(data.data[4:8]))
 				res, _ := ch.generateAD(ch.conn.U.GetMsgNum(), BlockCounter)
-				ch.Write([]byte(res) ,PMONMSGAD) //发送AD
+				ch.Write([]byte(res), PMONMSGAD) //发送AD
 				//if ch.Segment == NOSEGMENT {
 				//	buf = data.data[8: 8 +data_len]
 				//}else {
@@ -196,7 +195,7 @@ func (ch *Channel) manage() {
 				ret := make([]string, 2) //最大程度为2
 				ackInfo := string(data.data[15:17])
 				recipientInfo := string(data.data[17:19])
-				if ackInfo != "00"{
+				if ackInfo != "00" {
 					ret[0] = ackInfo
 				}
 				if recipientInfo != "00" {
@@ -204,7 +203,7 @@ func (ch *Channel) manage() {
 				}
 				if ch.e != nil {
 					if len(ret) != 0 {
-						ch.e( fmt.Errorf("AD msg return fail %s", ret) , nil, ch.ud)
+						ch.e(fmt.Errorf("AD msg return fail %s", ret), nil, ch.ud)
 					}
 				}
 				//block_idx = 0

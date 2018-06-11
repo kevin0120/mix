@@ -274,7 +274,6 @@ func (h *PmonHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
 
-
 // Odoo Handler
 
 type OdooHandler struct {
@@ -284,5 +283,3 @@ type OdooHandler struct {
 func (h *OdooHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
-
-

@@ -9,9 +9,9 @@ import (
 	"os/user"
 	"path/filepath"
 
+	"github.com/masami10/aiis/services/odoo"
 	"github.com/masami10/aiis/services/pmon"
 	"github.com/pkg/errors"
-	"github.com/masami10/aiis/services/odoo"
 )
 
 type Config struct {
@@ -24,7 +24,7 @@ type Config struct {
 
 	Pmon pmon.Config `yaml:"pmon"`
 
-	Odoo odoo.Config	`yaml:"odoo"`
+	Odoo odoo.Config `yaml:"odoo"`
 
 	Commander command.Commander `yaml:"-"`
 }

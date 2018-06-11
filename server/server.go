@@ -6,8 +6,8 @@ import (
 	"github.com/masami10/aiis/keyvalue"
 	"github.com/masami10/aiis/services/diagnostic"
 	"github.com/masami10/aiis/services/httpd"
-	"github.com/masami10/aiis/services/pmon"
 	"github.com/masami10/aiis/services/odoo"
+	"github.com/masami10/aiis/services/pmon"
 )
 
 type BuildInfo struct {
@@ -127,7 +127,7 @@ func (s *Server) appendPmonService() error {
 	return nil
 }
 
-func (s *Server) appendOdooService()  {
+func (s *Server) appendOdooService() {
 	c := s.config.Odoo
 	d := s.DiagService.NewOdooHandler()
 	srv := odoo.NewService(c, d)

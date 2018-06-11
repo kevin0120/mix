@@ -2,28 +2,27 @@ package udp_driver
 
 import (
 	"fmt"
-	"strings"
-	"time"
-	"sync"
+	"github.com/pkg/errors"
 	"log"
 	"net"
-	"github.com/pkg/errors"
+	"strings"
+	"sync"
+	"time"
 )
-
 
 type Connection interface {
 	Parse(buf []byte) error
 }
 
 type UDPDriver struct {
-	Writer     *SocketWriter
-	Listener   *SocketListener
-	ReadTimeout time.Duration
+	Writer       *SocketWriter
+	Listener     *SocketListener
+	ReadTimeout  time.Duration
 	ReadDeadline time.Time
 	Connection
-	mux 		*sync.Mutex
-	messageNum int //driver层存在的msg num，为了进行组包时候需要存在
-	checkTimeout       chan struct{} //检查readtimeout
+	mux          *sync.Mutex
+	messageNum   int           //driver层存在的msg num，为了进行组包时候需要存在
+	checkTimeout chan struct{} //检查readtimeout
 }
 
 // addr 格式为 udp://REMOTE_IP:PORT
@@ -35,28 +34,28 @@ func NewUDPDriver(addr string, deadline time.Duration) *UDPDriver {
 	w := NewSocketWriter(addr, time.Duration(time.Duration(0)))
 
 	return &UDPDriver{
-		Writer:     w,
-		Listener:   l,
-		messageNum: 1, //start from 1
-		mux: new(sync.Mutex),
-		ReadTimeout: deadline,
+		Writer:       w,
+		Listener:     l,
+		messageNum:   1, //start from 1
+		mux:          new(sync.Mutex),
+		ReadTimeout:  deadline,
 		checkTimeout: make(chan struct{}),
 	}
 }
 
-func (u *UDPDriver) GetMsgNum() int{
+func (u *UDPDriver) GetMsgNum() int {
 	defer u.mux.Unlock()
 	u.mux.Lock()
 	x := u.messageNum
 	if x >= 9999 {
 		u.messageNum = 1
-	}else{
+	} else {
 		u.messageNum += 1
 	}
 	return x
 }
 
-func (u *UDPDriver) Open() error{
+func (u *UDPDriver) Open() error {
 	if u.Listener != nil {
 		u.Listener.SetProtocol(u) //设定协议，必须在打开之前
 		if err := u.Listener.Start(); err != nil {
@@ -74,7 +73,7 @@ func (u *UDPDriver) Open() error{
 	return nil
 }
 
-func (u *UDPDriver) Close() error  {
+func (u *UDPDriver) Close() error {
 	if u.Listener != nil {
 		err := u.Listener.Close()
 		if err != nil {
@@ -98,15 +97,15 @@ func (u *UDPDriver) Close() error  {
 //	}
 //}
 
-func (u *UDPDriver) xWrite(buf []byte , deadline time.Duration) error{
+func (u *UDPDriver) xWrite(buf []byte, deadline time.Duration) error {
 	u.Writer.SetWriteDeadline(time.Now().Add(deadline)) //write 设定tiemout时间
-	return  u.Writer.Write(buf)
+	return u.Writer.Write(buf)
 }
 
-func (u *UDPDriver) Write(buf []byte , deadline time.Duration) error {
+func (u *UDPDriver) Write(buf []byte, deadline time.Duration) error {
 	mr := 3 //最大重试次数
 	var err error = nil
-	for i := 0; i < mr; i ++{
+	for i := 0; i < mr; i++ {
 		err = u.xWrite(buf, deadline)
 		if err != nil {
 			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
@@ -129,22 +128,22 @@ func (u *UDPDriver) Write(buf []byte , deadline time.Duration) error {
 	return nil
 }
 
-func (u *UDPDriver) updateReadDeadline() error{
-	return u.Listener.InterListener.setReadDeadLine(time.Now().Add( u.ReadTimeout )) //更新read deadline
+func (u *UDPDriver) updateReadDeadline() error {
+	return u.Listener.InterListener.setReadDeadLine(time.Now().Add(u.ReadTimeout)) //更新read deadline
 }
 
-func (u *UDPDriver) NoReadDeadline() error{
+func (u *UDPDriver) NoReadDeadline() error {
 	return u.Listener.InterListener.setReadDeadLine(time.Time{}) //设定为永远block
 }
 
-func (u *UDPDriver) SetConnection( c Connection) {
+func (u *UDPDriver) SetConnection(c Connection) {
 	u.Connection = c
 }
 
 func (u *UDPDriver) Parse(buf []byte) error {
 	err := u.Connection.Parse(buf)
 	if err != nil {
-		log.Printf("Validate fail %s ",err)
+		log.Printf("Validate fail %s ", err)
 	}
 
 	return nil

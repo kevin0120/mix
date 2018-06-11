@@ -111,7 +111,7 @@ func (psl *packetSocketListener) listen() {
 			if !strings.HasSuffix(err.Error(), ": use of closed network connection") {
 				log.Printf("UDP read error %s", err)
 			}
-			if  err, ok := err.(net.Error); !ok || !err.Timeout() {
+			if err, ok := err.(net.Error); !ok || !err.Timeout() {
 				log.Printf("UDP read Timeout %s", err) //获取Timeout 信息
 			}
 			continue
@@ -124,8 +124,6 @@ func (psl *packetSocketListener) listen() {
 		}
 	}
 }
-
-
 
 func (psl *packetSocketListener) RemoveConnection(c net.Conn) {
 	return
@@ -275,7 +273,6 @@ func (sl *SocketListener) Start() error {
 func (sl *SocketListener) SetProtocol(p Protocol) {
 	sl.Protocol = p
 }
-
 
 func (sl *SocketListener) Stop() {
 	if sl.InterListener != nil {

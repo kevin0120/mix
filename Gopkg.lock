@@ -152,12 +152,6 @@
   version = "v1.1"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/masami10/pmon"
-  packages = ["udp_driver"]
-  revision = "a36f6408117d81b4a926d0702cf4aa44e01c3c1c"
-
-[[projects]]
   name = "github.com/mattn/go-colorable"
   packages = ["."]
   revision = "167de6bfdfba052fa6b2d3664c8f5272e23c9072"
@@ -237,7 +231,9 @@
   name = "golang.org/x/net"
   packages = [
     "html",
-    "html/atom"
+    "html/atom",
+    "idna",
+    "publicsuffix"
   ]
   revision = "89e543239a64caf31d3a6865872ea120b41446df"
 
@@ -246,6 +242,27 @@
   name = "golang.org/x/sys"
   packages = ["unix"]
   revision = "c11f84a56e43e20a78cee75a7c034031ecf57d1f"
+
+[[projects]]
+  name = "golang.org/x/text"
+  packages = [
+    "collate",
+    "collate/build",
+    "internal/colltab",
+    "internal/gen",
+    "internal/tag",
+    "internal/triegen",
+    "internal/ucd",
+    "language",
+    "secure/bidirule",
+    "transform",
+    "unicode/bidi",
+    "unicode/cldr",
+    "unicode/norm",
+    "unicode/rangetable"
+  ]
+  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
+  version = "v0.3.0"
 
 [[projects]]
   name = "gopkg.in/AlecAivazis/survey.v1"
@@ -263,6 +280,12 @@
   version = "v1.37.0"
 
 [[projects]]
+  name = "gopkg.in/resty.v1"
+  packages = ["."]
+  revision = "fc3ad735b5565cada42d34bc298573fd3fe5adc6"
+  version = "v1.6"
+
+[[projects]]
   branch = "v2"
   name = "gopkg.in/russross/blackfriday.v2"
   packages = ["."]
@@ -277,6 +300,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b5159976b24de5d4d290ab8f0dfa6cf93fd20678c728a6e3c65c3a6badc96890"
+  inputs-digest = "1e357ceb6d54efd204fec2b9e6f4bf88ea28c959daf0b9092bc2146c1fd63a4e"
   solver-name = "gps-cdcl"
   solver-version = 1

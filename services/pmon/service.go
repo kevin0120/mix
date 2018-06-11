@@ -1,12 +1,12 @@
 package pmon
 
 import (
-	"sync/atomic"
 	"fmt"
-	"github.com/pkg/errors"
 	"github.com/masami10/aiis/services/httpd"
+	"github.com/masami10/aiis/utils"
+	"github.com/pkg/errors"
 	"log"
-	"github.com/masami10/rush/utils"
+	"sync/atomic"
 )
 
 type Diagnostic interface {
@@ -14,22 +14,22 @@ type Diagnostic interface {
 }
 
 type Service struct {
-	rawConf 		atomic.Value
-	HTTPD		 	*httpd.Service
-	configValue 	atomic.Value
-	Channels 		map[string]*Channel
-	err 			chan error
-	stop 			chan chan struct{}
-	diag 			Diagnostic
+	rawConf     atomic.Value
+	HTTPD       *httpd.Service
+	configValue atomic.Value
+	Channels    map[string]*Channel
+	err         chan error
+	stop        chan chan struct{}
+	diag        Diagnostic
 }
 
-type PMONEventHandler func(error, []rune , interface{}) //事件号， 内容
+type PMONEventHandler func(error, []rune, interface{}) //事件号， 内容
 
-func NewService(conf Config, d Diagnostic) (*Service, error)  {
+func NewService(conf Config, d Diagnostic) (*Service, error) {
 	s := &Service{
-		err: 					make(chan error,1),
-		diag:					d,
-		stop:                  make(chan chan struct{}),
+		err:  make(chan error, 1),
+		diag: d,
+		stop: make(chan chan struct{}),
 	}
 	c, err := PmonNewConfig(conf.Path)
 	if err != nil {
@@ -37,34 +37,34 @@ func NewService(conf Config, d Diagnostic) (*Service, error)  {
 	}
 	s.rawConf.Store(conf)
 	s.configValue.Store(c)
-	s.Channels = make(map[string]*Channel, len(c.Channels))// 通道长度
+	s.Channels = make(map[string]*Channel, len(c.Channels))         // 通道长度
 	connections := make(map[string]*Connection, len(c.Connections)) // 初始化长度
 	for name, conn := range c.Connections {
-		addr := fmt.Sprintf("udp://%s:%d",conn.Address[0],conn.Port)
-		connections[name] =  NewConnection(addr, name, c.WaitResp) //waitResponse 作为其读取Timeout
-		connections[name].SetDispatcher(s) //将服务注入进行通道分发
+		addr := fmt.Sprintf("udp://%s:%d", conn.Address[0], conn.Port)
+		connections[name] = NewConnection(addr, name, c.WaitResp) //waitResponse 作为其读取Timeout
+		connections[name].SetDispatcher(s)                        //将服务注入进行通道分发
 	}
-	for cname,  channel:= range c.Channels {
-		connectKey := fmt.Sprintf("Port%d",channel.Port)
+	for cname, channel := range c.Channels {
+		connectKey := fmt.Sprintf("Port%d", channel.Port)
 		s.Channels[cname] = NewChannel(channel) //因为从远端传来的T/R相反，所以进行反转
 		s.Channels[cname].SetConnection(connections[connectKey])
-		connections[connectKey].AppendChannel(cname,channel.SNoT, channel.SNoR )
+		connections[connectKey].AppendChannel(cname, channel.SNoT, channel.SNoR)
 	}
 	return s, nil
 }
 
-func (s *Service)Config() PmonConfig {
+func (s *Service) Config() PmonConfig {
 	return s.configValue.Load().(PmonConfig)
 }
 
-func (s *Service) Open()  error{
-	conf :=s.rawConf.Load().(Config)
-	if ! conf.Enable {
+func (s *Service) Open() error {
+	conf := s.rawConf.Load().(Config)
+	if !conf.Enable {
 		return nil
 	}
-	exist, err :=utils.FileIsExist(conf.Path)
+	exist, err := utils.FileIsExist(conf.Path)
 	if !exist {
-		return fmt.Errorf("Pmon Configuration path %s not exist ",conf.Path)
+		return fmt.Errorf("Pmon Configuration path %s not exist ", conf.Path)
 	}
 	if err != nil {
 		return err
@@ -79,8 +79,8 @@ func (s *Service) Open()  error{
 	return nil
 }
 
-func (s *Service) Close()  error{
-	for _, ch := range s.Channels{
+func (s *Service) Close() error {
+	for _, ch := range s.Channels {
 		err := ch.Stop()
 		if err != nil {
 			return err
@@ -97,7 +97,7 @@ func (s *Service) Err() <-chan error {
 	return s.err
 }
 
-func (s *Service) PmonRegistryEvent(e PMONEventHandler, channelNumber string, ud interface{})  error{
+func (s *Service) PmonRegistryEvent(e PMONEventHandler, channelNumber string, ud interface{}) error {
 	if _, ok := s.Channels[channelNumber]; !ok {
 		log.Printf("not found channel %s", channelNumber)
 		return nil
@@ -110,7 +110,7 @@ func (s *Service) PmonRegistryEvent(e PMONEventHandler, channelNumber string, ud
 func (s *Service) run() {
 	for {
 		select {
-		case err := <- s.err:
+		case err := <-s.err:
 			log.Printf("Pmon Service error msg %s", err)
 		case s := <-s.stop:
 			close(s)
@@ -118,7 +118,7 @@ func (s *Service) run() {
 	}
 }
 
-func (s *Service) SendPmonMessage( msgType PMONSMGTYPE , channelNumber string , data string)  error{
+func (s *Service) SendPmonMessage(msgType PMONSMGTYPE, channelNumber string, data string) error {
 	if _, ok := s.Channels[channelNumber]; !ok {
 		log.Printf("not found channel %s", channelNumber)
 		return nil
@@ -133,10 +133,9 @@ func (s *Service) SendPmonMessage( msgType PMONSMGTYPE , channelNumber string , 
 	return nil
 }
 
-func (s *Service) SendData( msgId int ,channelNumber string , data string )  error{
+func (s *Service) SendData(msgId int, channelNumber string, data string) error {
 	return nil
 }
-
 
 func (s *Service) Dispatch(pkg PmonPackage, chName string) {
 	if _, ok := s.Channels[chName]; !ok {

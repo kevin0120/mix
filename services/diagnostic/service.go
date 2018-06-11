@@ -69,7 +69,6 @@ func (s *Service) NewOdooHandler() *OdooHandler {
 	}
 }
 
-
 func BootstrapMainHandler() *CmdHandler {
 	s := NewService(NewConfig(), nil, os.Stderr)
 	// Should never error
