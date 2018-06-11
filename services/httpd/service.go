@@ -71,7 +71,7 @@ type Service struct {
 	externalURL     string
 	server          *iris.Application
 
-	stop chan chan struct{}
+	stop 			chan chan struct{}
 
 	HandlerByNames map[string]int
 
@@ -99,6 +99,7 @@ func NewService(c Config, hostname string, d Diagnostic, disc *diagnostic.Servic
 		cors:                  c.Cors,
 		server:                iris.New(),
 		err:                   make(chan error, 1),
+		stop:                  make(chan chan struct{},1),
 		HandlerByNames:        make(map[string]int),
 		shutdownTimeout:       time.Duration(c.ShutdownTimeout),
 		diag:                  d,
@@ -123,12 +124,13 @@ func (s *Service) manage() {
 	println("start mamager")
 	for {
 		select {
-		case <-s.stop:
+		case stopDone := <-s.stop:
 			// if we're already all empty, we're already done
 			timeout := s.shutdownTimeout
 			ctx, cancel := stdContext.WithTimeout(stdContext.Background(), timeout)
 			defer cancel()
 			s.server.Shutdown(ctx)
+			close(stopDone)
 			return
 		}
 	}

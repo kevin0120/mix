@@ -7,7 +7,6 @@ import (
 	"strings"
 	"strconv"
 	"time"
-	"github.com/masami10/rush/utils"
 )
 
 const (
@@ -169,15 +168,6 @@ func NewConfig() Config {
 }
 
 func (c Config) Validate() error  {
-	if c.Enable {
-		exist, err :=utils.FileIsExist(c.Path)
-		if !exist {
-			return fmt.Errorf("Pmon Configuration path %s not exist ",c.Path)
-		}
-		if err != nil {
-			return err
-		}
-	}
 	return nil
 }
 

@@ -1,7 +1,7 @@
 package pmon
 
 import (
-	"github.com/masami10/pmon/udp_driver"
+	"github.com/masami10/aiis/services/pmon/udp_driver"
 	"log"
 	"time"
 	"github.com/pkg/errors"
@@ -49,6 +49,17 @@ func (c *Connection) Open() error {
 			return errors.Wrap(err, "Open Connection fail")
 		}
 		c.started = true
+	}
+	return nil
+}
+
+func (c *Connection) Close() error{
+	if c.started {
+		err := c.U.Close()
+		if err != nil {
+			return err
+		}
+		c.started = false
 	}
 	return nil
 }

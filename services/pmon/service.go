@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/masami10/aiis/services/httpd"
 	"log"
+	"github.com/masami10/rush/utils"
 )
 
 type Diagnostic interface {
@@ -13,21 +14,28 @@ type Diagnostic interface {
 }
 
 type Service struct {
+	rawConf 		atomic.Value
 	HTTPD		 	*httpd.Service
 	configValue 	atomic.Value
 	Channels 		map[string]*Channel
 	err 			chan error
+	stop 			chan chan struct{}
 	diag 			Diagnostic
 }
 
 type PMONEventHandler func(error, []rune , interface{}) //事件号， 内容
 
 func NewService(conf Config, d Diagnostic) (*Service, error)  {
-	s := &Service{ err: make(chan error), diag:d}
+	s := &Service{
+		err: 					make(chan error,1),
+		diag:					d,
+		stop:                  make(chan chan struct{}),
+	}
 	c, err := PmonNewConfig(conf.Path)
 	if err != nil {
 		return nil, err
 	}
+	s.rawConf.Store(conf)
 	s.configValue.Store(c)
 	s.Channels = make(map[string]*Channel, len(c.Channels))// 通道长度
 	connections := make(map[string]*Connection, len(c.Connections)) // 初始化长度
@@ -50,7 +58,17 @@ func (s *Service)Config() PmonConfig {
 }
 
 func (s *Service) Open()  error{
-//func (s *Service) PmonInit( e PMONEventHandler, traceLevel int )  error{
+	conf :=s.rawConf.Load().(Config)
+	if ! conf.Enable {
+		return nil
+	}
+	exist, err :=utils.FileIsExist(conf.Path)
+	if !exist {
+		return fmt.Errorf("Pmon Configuration path %s not exist ",conf.Path)
+	}
+	if err != nil {
+		return err
+	}
 	for _, ch := range s.Channels {
 		err := ch.Start()
 		if err != nil {
@@ -62,7 +80,21 @@ func (s *Service) Open()  error{
 }
 
 func (s *Service) Close()  error{
+	for _, ch := range s.Channels{
+		err := ch.Stop()
+		if err != nil {
+			return err
+		}
+	}
+	stopping := make(chan struct{})
+	s.stop <- stopping
+
+	<-stopping
 	return nil
+}
+
+func (s *Service) Err() <-chan error {
+	return s.err
 }
 
 func (s *Service) PmonRegistryEvent(e PMONEventHandler, channelNumber string, ud interface{})  error{
@@ -77,8 +109,12 @@ func (s *Service) PmonRegistryEvent(e PMONEventHandler, channelNumber string, ud
 
 func (s *Service) run() {
 	for {
-		err := <- s.err
-		log.Printf("fail %s", err)
+		select {
+		case err := <- s.err:
+			log.Printf("Pmon Service error msg %s", err)
+		case s := <-s.stop:
+			close(s)
+		}
 	}
 }
 

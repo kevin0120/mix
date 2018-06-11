@@ -7,6 +7,7 @@ import (
 	"sync"
 	"log"
 	"net"
+	"github.com/pkg/errors"
 )
 
 
@@ -70,6 +71,23 @@ func (u *UDPDriver) Open() error{
 	}
 
 	//go u.manage()
+	return nil
+}
+
+func (u *UDPDriver) Close() error  {
+	if u.Listener != nil {
+		err := u.Listener.Close()
+		if err != nil {
+			return errors.Wrap(err, "Close the UDP Driver Listener")
+		}
+		u.Listener = nil
+	}
+	if u.Writer != nil {
+		if err := u.Writer.Close(); err != nil {
+			return errors.Wrap(err, "Close the UDP Driver Writer")
+		}
+		u.Writer = nil
+	}
 	return nil
 }
 

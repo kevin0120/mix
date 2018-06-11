@@ -63,6 +63,15 @@ func (ch *Channel) Start() error {
 	return nil
 }
 
+func (ch *Channel) Stop() error {
+	err := ch.conn.Close() //尝试关闭连接
+	if err != nil {
+		return errors.Wrapf(err, "Open connection fail,by channel %s", ch.Ch)
+	}
+	go ch.manage()
+	return nil
+}
+
 func (ch *Channel) GetStatus() PmonChannelStatus {
 	defer ch.mux.Unlock()
 	ch.mux.Lock()
