@@ -27,6 +27,7 @@ class MrpProduction(models.Model):
     lnr = fields.Char(string='Line Number')
     knr = fields.Char(string='KNR', store=True, compute='_compute_long_pin')
     long_pin = fields.Char(string='LongPIN', store=True, compute='_compute_long_pin')
+    display_long_pin = fields.Char(string='Display LongPIN', store=True, compute='_compute_long_pin')
 
     _sql_constraints = [('vin_uniq', 'unique(vin)', 'Only one VIN per MO is allowed'),
                         ('pin_check_uniq', 'unique(pin,pin_check_code)', 'Only one KNR per MO is allowed')]
@@ -34,8 +35,9 @@ class MrpProduction(models.Model):
     @api.depends('year', 'factory_name','pin','pin_check_code')
     def _compute_long_pin(self):
         for mo in self:
-            mo.long_pin = u'{0}-{1}-{2}={3}'.format(mo.factory_name, mo.year, mo.pin, mo.pin_check_code)
+            mo.long_pin = u'{0}{1}{2}{3}'.format(mo.factory_name, mo.year, mo.pin, mo.pin_check_code)
             mo.knr = u'{0}{1}'.format(mo.pin, mo.pin_check_code)
+            mo.display_long_pin = u'{0}-{1}-{2}={3}'.format(mo.factory_name, mo.year, mo.pin, mo.pin_check_code)
 
     @api.constrains('year')
     def _constraint_mo_year(self):

@@ -9,7 +9,7 @@ import requests as Requests
 from requests import ConnectionError, RequestException
 import json
 
-MASTER_WROKORDERS_API = '/api/v1/workorders'
+MASTER_WROKORDERS_API = '/rush/v1/workorders'
 headers = {'Content-Type': 'application/json'}
 _logger = logging.getLogger(__name__)
 
@@ -36,6 +36,7 @@ class PushWorkorder(AbstractModel):
                 'nut_total': workorder.consu_product_qty,
                 'vin': workorder.production_id.vin,
                 'knr': workorder.production_id.knr,
+                'long_pin': workorder.production_id.long_pin,
                 'result_ids': workorder.result_ids.ids,
                 'status': workorder.state  # pending, ready, process, done, cancel
             }
