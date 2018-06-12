@@ -5,7 +5,9 @@ import (
 	"sync/atomic"
 	"time"
 
+	"fmt"
 	"gopkg.in/resty.v1"
+	"net/http"
 )
 
 type Diagnostic interface {
@@ -13,6 +15,7 @@ type Diagnostic interface {
 }
 
 type Service struct {
+	route       string
 	configValue atomic.Value
 	diag        Diagnostic
 	httpClient  *resty.Client
@@ -20,7 +23,8 @@ type Service struct {
 
 func NewService(c Config, d Diagnostic) *Service {
 	s := &Service{
-		diag: d,
+		diag:  d,
+		route: c.URL + c.Route,
 	}
 
 	s.configValue.Store(c)
@@ -52,9 +56,19 @@ func (s *Service) Close() error {
 	return nil
 }
 
-func (s *Service) CreateMO() error {
+func (s *Service) CreateMO(body interface{}) error {
 	if s.httpClient == nil {
-		return errors.New("Odoo Http client is nil")
+		return errors.New("Odoo Http client is nil ")
+	}
+	r := s.httpClient.R().SetBody(body)
+
+	resp, err := r.Post(s.route)
+	if err != nil {
+		return fmt.Errorf("Create MO Post fail: %s ", err)
+	} else {
+		if resp.StatusCode() != http.StatusCreated {
+			return fmt.Errorf("Create MO Post fail: %s ", resp.Status())
+		}
 	}
 
 	return nil

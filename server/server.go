@@ -8,8 +8,8 @@ import (
 	"github.com/masami10/aiis/services/httpd"
 	"github.com/masami10/aiis/services/odoo"
 	"github.com/masami10/aiis/services/pmon"
-	"github.com/masami10/aiis/services/storage"
 	"github.com/masami10/aiis/services/rush"
+	"github.com/masami10/aiis/services/storage"
 )
 
 type BuildInfo struct {
@@ -40,7 +40,7 @@ type Server struct {
 
 	StorageService *storage.Service
 
-	config       *Config
+	config *Config
 	// List of services in startup order
 	Services []Service
 
@@ -100,8 +100,6 @@ func (s *Server) appendRushService() {
 
 	s.AppendService("rush", srv)
 }
-
-
 
 func (s *Server) appendStorageService() {
 	d := s.DiagService.NewStorageHandler()
@@ -171,14 +169,18 @@ func (s *Server) Open() error {
 		return err
 	}
 
+	go s.watchServices()
+
 	return nil
 }
 
 func (s *Server) startServices() error {
 	for _, service := range s.Services {
+		s.Diag.Debug("opening service", keyvalue.KV("service", fmt.Sprintf("%T", service)))
 		if err := service.Open(); err != nil {
 			return fmt.Errorf("open service %T: %s", service, err)
 		}
+		s.Diag.Debug("opened service", keyvalue.KV("service", fmt.Sprintf("%T", service)))
 	}
 
 	return nil
@@ -189,6 +191,15 @@ func (s *Server) Err() <-chan error { return s.err }
 
 func (s *Server) Reload() {
 	return
+}
+
+// Watch if something dies
+func (s *Server) watchServices() {
+	var err error
+	select {
+	case err = <-s.HTTPDService.Err():
+	}
+	s.err <- err
 }
 
 func (s *Server) Close() error {

@@ -2,11 +2,11 @@ package diagnostic
 
 import (
 	"errors"
+	"fmt"
 	"github.com/masami10/aiis/keyvalue"
 	"log"
 	"runtime"
 	"time"
-	"fmt"
 )
 
 type logLevel int
@@ -285,7 +285,6 @@ func (h *OdooHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
 
-
 // Storage Handler
 
 type StorageHandler struct {
@@ -300,6 +299,9 @@ func (h *StorageHandler) OpenEngineSuccess(msg string) {
 	h.l.Info(fmt.Sprintf("Open Engine Success: %s ", msg))
 }
 
+func (h *StorageHandler) UpdateResultSuccess(id int64) {
+	h.l.Debug(fmt.Sprintf("Update result Success: %d ", id))
+}
 
 // Rush Handler
 
@@ -310,5 +312,3 @@ type RushHandler struct {
 func (h *RushHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
-
-

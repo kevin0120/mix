@@ -13,8 +13,8 @@ import (
 
 	"github.com/masami10/aiis/services/odoo"
 	"github.com/masami10/aiis/services/pmon"
-	"github.com/pkg/errors"
 	"github.com/masami10/aiis/services/rush"
+	"github.com/pkg/errors"
 )
 
 type Config struct {
@@ -31,7 +31,7 @@ type Config struct {
 
 	Storage storage.Config `yaml:"storage"`
 
-	Rush 	rush.Config `yaml:"rush"`
+	Rush rush.Config `yaml:"rush"`
 
 	Commander command.Commander `yaml:"-"`
 }
@@ -47,7 +47,7 @@ func NewConfig() *Config {
 	c.Logging = diagnostic.NewConfig()
 	c.Odoo = odoo.NewConfig()
 	c.Storage = storage.NewConfig()
-	c.Rush	= rush.NewConfig()
+	c.Rush = rush.NewConfig()
 
 	return c
 }

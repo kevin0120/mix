@@ -57,7 +57,6 @@ func (s *Service) NewHTTPDHandler() *HTTPDHandler {
 	}
 }
 
-
 func (s *Service) NewRushHandler() *RushHandler {
 	return &RushHandler{
 		l: s.Logger.With(String("service", "rush")),

@@ -82,7 +82,6 @@ type Service struct {
 	DiagService interface {
 		SetLogLevelFromName(lvl string) error
 	}
-
 	httpServerErrorLogger *log.Logger
 }
 
@@ -99,16 +98,18 @@ func NewService(c Config, hostname string, d Diagnostic, disc *diagnostic.Servic
 		cors:                  c.Cors,
 		server:                iris.New(),
 		err:                   make(chan error, 1),
-		stop:                  make(chan chan struct{}, 1),
 		HandlerByNames:        make(map[string]int),
 		shutdownTimeout:       time.Duration(c.ShutdownTimeout),
 		diag:                  d,
 		DiagService:           disc,
 		httpServerErrorLogger: d.NewHTTPServerErrorLogger(),
 	}
+
 	s.AddNewHandler(BasePath, c, d, disc)
 
-	r := Route{
+	var r Route
+
+	r = Route{
 		Method:  "GET",
 		Pattern: "/healthz",
 		HandlerFunc: func(ctx iris.Context) {
@@ -121,18 +122,17 @@ func NewService(c Config, hostname string, d Diagnostic, disc *diagnostic.Servic
 }
 
 func (s *Service) manage() {
-	println("start mamager")
-	for {
-		select {
-		case stopDone := <-s.stop:
-			// if we're already all empty, we're already done
-			timeout := s.shutdownTimeout
-			ctx, cancel := stdContext.WithTimeout(stdContext.Background(), timeout)
-			defer cancel()
-			s.server.Shutdown(ctx)
-			close(stopDone)
-			return
-		}
+	//println("start mamager")
+	var stopDone chan struct{}
+	select {
+	case stopDone = <-s.stop:
+		// if we're already all empty, we're already done
+		timeout := s.shutdownTimeout
+		ctx, cancel := stdContext.WithTimeout(stdContext.Background(), timeout)
+		defer cancel()
+		s.server.Shutdown(ctx)
+		close(stopDone)
+		return
 	}
 
 }
@@ -154,7 +154,7 @@ func (s *Service) Close() error {
 }
 
 func (s *Service) serve() {
-	err := s.server.Run(s.Addr())
+	err := s.server.Run(s.Addr(), iris.WithoutInterruptHandler)
 	// The listener was closed so exit
 	// See https://github.com/golang/go/issues/4373
 	if !strings.Contains(err.Error(), "closed") {
@@ -212,6 +212,7 @@ func (s *Service) AddNewHandler(version string, c Config, d Diagnostic, disc *di
 	crs := cors.New(cors.Options{
 		AllowedOrigins:   s.cors.AllowedOrigins,
 		AllowCredentials: s.cors.AllowCredentials,
+		AllowedMethods:   s.cors.AllowedMethods,
 	})
 	p := s.server.Party(version, crs).AllowMethods(iris.MethodOptions)
 	if p == nil {
@@ -222,6 +223,7 @@ func (s *Service) AddNewHandler(version string, c Config, d Diagnostic, disc *di
 		c.WriteTracing,
 		d,
 	)
+	h.service = s.server
 	h.DiagService = disc
 	h.Version = version
 	h.party = &p

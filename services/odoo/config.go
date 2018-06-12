@@ -13,6 +13,7 @@ const (
 
 type Config struct {
 	URL          string            `yaml:"url"`
+	Route        string            `yaml:"route"`
 	Headers      map[string]string `yaml:"headers" override:"headers"`
 	Timeout      toml.Duration     `yaml:"timeout"`
 	PushInterval toml.Duration     `yaml:"push_interval"`
@@ -23,6 +24,7 @@ type Config struct {
 func NewConfig() Config {
 	return Config{
 		URL:          DEFAULT_URL,
+		Route:        "/api/v1/mrp.productions", //方法永远为post
 		Enable:       true,
 		Timeout:      toml.Duration(time.Millisecond * 10),
 		PushInterval: toml.Duration(time.Second * 1),
@@ -34,6 +36,9 @@ func NewConfig() Config {
 func (c Config) Validate() error {
 	if c.Enable && c.URL == "" {
 		return fmt.Errorf("Odoo URL is empty ")
+	}
+	if c.Enable && c.Route[0] != '/' {
+		return fmt.Errorf("route patterns must begin with a '/' %s", c.Route)
 	}
 	return nil
 }

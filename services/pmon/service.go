@@ -31,25 +31,8 @@ func NewService(conf Config, d Diagnostic) (*Service, error) {
 		diag: d,
 		stop: make(chan chan struct{}),
 	}
-	c, err := PmonNewConfig(conf.Path)
-	if err != nil {
-		return nil, err
-	}
+
 	s.rawConf.Store(conf)
-	s.configValue.Store(c)
-	s.Channels = make(map[string]*Channel, len(c.Channels))         // 通道长度
-	connections := make(map[string]*Connection, len(c.Connections)) // 初始化长度
-	for name, conn := range c.Connections {
-		addr := fmt.Sprintf("udp://%s:%d", conn.Address[0], conn.Port)
-		connections[name] = NewConnection(addr, name, c.WaitResp) //waitResponse 作为其读取Timeout
-		connections[name].SetDispatcher(s)                        //将服务注入进行通道分发
-	}
-	for cname, channel := range c.Channels {
-		connectKey := fmt.Sprintf("Port%d", channel.Port)
-		s.Channels[cname] = NewChannel(channel) //因为从远端传来的T/R相反，所以进行反转
-		s.Channels[cname].SetConnection(connections[connectKey])
-		connections[connectKey].AppendChannel(cname, channel.SNoT, channel.SNoR)
-	}
 	return s, nil
 }
 
@@ -66,8 +49,23 @@ func (s *Service) Open() error {
 	if !exist {
 		return fmt.Errorf("Pmon Configuration path %s not exist ", conf.Path)
 	}
+	c, err := PmonNewConfig(conf.Path)
 	if err != nil {
 		return err
+	}
+	s.configValue.Store(c)
+	s.Channels = make(map[string]*Channel, len(c.Channels))         // 通道长度
+	connections := make(map[string]*Connection, len(c.Connections)) // 初始化长度
+	for name, conn := range c.Connections {
+		addr := fmt.Sprintf("udp://%s:%d", conn.Address[0], conn.Port)
+		connections[name] = NewConnection(addr, name, c.WaitResp) //waitResponse 作为其读取Timeout
+		connections[name].SetDispatcher(s)                        //将服务注入进行通道分发
+	}
+	for cname, channel := range c.Channels {
+		connectKey := fmt.Sprintf("Port%d", channel.Port)
+		s.Channels[cname] = NewChannel(channel) //因为从远端传来的T/R相反，所以进行反转
+		s.Channels[cname].SetConnection(connections[connectKey])
+		connections[connectKey].AppendChannel(cname, channel.SNoT, channel.SNoR)
 	}
 	for _, ch := range s.Channels {
 		err := ch.Start()

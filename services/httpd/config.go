@@ -17,6 +17,7 @@ const (
 type CorsConfig struct {
 	AllowedOrigins   []string `yaml:"allowed-origins"`
 	AllowCredentials bool     `yaml:"allow-credentials"`
+	AllowedMethods   []string `yaml:"allowed-methods"`
 }
 
 type Config struct {
@@ -32,7 +33,9 @@ func NewConfig() Config {
 		BindAddress:     ":9092",
 		LogEnabled:      true,
 		ShutdownTimeout: DefaultShutdownTimeout,
-		Cors:            CorsConfig{AllowedOrigins: []string{"*"}, AllowCredentials: true},
+		Cors: CorsConfig{AllowedOrigins: []string{"*"},
+			AllowCredentials: true,
+			AllowedMethods:   []string{"GET", "HEAD", "POST", "PUT", "PATCH", "OPTIONS"}},
 	}
 }
 

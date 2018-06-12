@@ -8,12 +8,17 @@ import (
 
 //const (
 //	// Root path for the API
-//	BasePath = "/aiis/v1"
+//	BasePath = "/rush/v1"
 //	// Root path for the preview API
-//	BasePreviewPath = "/aiis/v1preview"
+//	BasePreviewPath = "/rush/v1preview"
 //	// Name of the special user for subscriptions
 //	SubscriptionUser = "~subscriber"
 //)
+
+const (
+	ROUTE_TYPE_HTTP = "http"
+	ROUTE_TYPE_WS   = "websocket"
+)
 
 type Route struct {
 	Method      string
@@ -38,7 +43,8 @@ type Handler struct {
 	// Uses normal logger
 	writeTrace bool
 
-	party *iris.Party
+	party   *iris.Party
+	service *iris.Application
 
 	// Log every HTTP access.
 	loggingEnabled bool
@@ -58,6 +64,7 @@ func (h *Handler) AddRoute(r Route) error {
 		return fmt.Errorf("route patterns must begin with a '/' %s", r.Pattern)
 	}
 	(*h.party).Handle(r.Method, r.Pattern, r.HandlerFunc)
+
 	return nil
 }
 

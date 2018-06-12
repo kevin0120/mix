@@ -1,13 +1,12 @@
 package rush
 
-
 type Config struct {
-	Enable bool   `yaml:"enable"`
+	Enable bool `yaml:"enable"`
 }
 
 func NewConfig() Config {
 	return Config{
-		Enable:true,
+		Enable: true,
 	}
 }
 
