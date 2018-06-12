@@ -5,7 +5,7 @@ from odoo.http import request, Response
 from api_data import api_data,DEFAULT_LIMIT
 import json
 
-NORMAL_RESULT_FIELDS_READ = ['id', 'name', 'login', 'active', 'uuid']
+NORMAL_USER_FIELDS_READ = ['id', 'name', 'login', 'active', 'uuid', 'image_small']
 
 
 class BaseApi(http.Controller):
@@ -38,10 +38,7 @@ class BaseApi(http.Controller):
         if 'uuids' in query_params:
             uuids = query_params['uuids'].split(',')
             domain += [('uuid', 'in', uuids)]
-        users = request.env['res.users'].sudo().search(domain, limit=_limit).read(fields=NORMAL_RESULT_FIELDS_READ)
-        if len(users) != len(uuids):
-            # 有某些uuid未找到
-            pass
+        users = request.env['res.users'].sudo().search(domain, limit=_limit).read(fields=NORMAL_USER_FIELDS_READ)
         for user in users:
             if 'active' in user:
                 user.update({
@@ -57,7 +54,7 @@ class BaseApi(http.Controller):
         if not user_id:
             return Response(json.dumps({'msg': 'User not found'}), headers={'content-type': 'application/json'}, status=404)
 
-        ret = user_id.sudo().read(fields=NORMAL_RESULT_FIELDS_READ)[0]
+        ret = user_id.sudo().read(fields=NORMAL_USER_FIELDS_READ)[0]
         if 'active' in ret:
             ret.update({
                 'status': 'active' if ret['active'] else 'archived'
@@ -81,7 +78,7 @@ class BaseApi(http.Controller):
         if not ret:
             return Response(json.dumps({'msg': 'Batch Archived fail'}), headers={'content-type': 'application/json'},
                             status=405)
-        ret = user_ids.sudo().read(fields=NORMAL_RESULT_FIELDS_READ)[0]
+        ret = user_ids.sudo().read(fields=NORMAL_USER_FIELDS_READ)[0]
         if 'active' in ret:
             ret.update({
                 'status': 'active' if ret['active'] else 'archived'

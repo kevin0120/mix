@@ -1152,6 +1152,9 @@ api_data = {
           "type": "integer",
           "example": 1,
           "format": "int64"
+        },
+        "image_small": {
+          "type": "string"
         }
       }
     },
