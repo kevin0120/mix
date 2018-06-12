@@ -8,7 +8,7 @@
                     <div class="oe_structure"/>
                     <div class="row">
                         <div class="col-xs-7">
-                            <h2>PIN # : <span t-field="o.long_pin"/></h2>
+                            <h2>PIN # : <span t-field="o.display_long_pin"/></h2>
                         </div>
                         <div class="col-xs-5">
                             <span class="text-right">
