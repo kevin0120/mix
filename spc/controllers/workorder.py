@@ -44,6 +44,9 @@ class ApiMrpWorkorder(http.Controller):
                 body = json.dumps({'msg':'Can not found Workcenter'})
                 return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=405)
             domain += [('workcenter_id', 'in', workcenter_id.ids)]  # 添加查询域
+        if 'code' in kw:
+            code = kw['code']
+            domain += ['|', '|', ('production_id.long_pin', 'like', code), ('production_id.knr', 'like', code), ('production_id.vin', 'like', code)]
         if 'limit' in kw.keys():
             limit = int(kw['limit'])
         else:
@@ -69,6 +72,7 @@ class ApiMrpWorkorder(http.Controller):
                 'nut_total': order.consu_product_qty,
                 'vin': order.production_id.vin,
                 'knr': order.production_id.knr,
+                'long_pin': order.production_id.long_pin,
                 'result_ids': order.result_ids.ids,
                 'status': order.state  # pending, ready, process, done, cancel
             })
@@ -78,4 +82,5 @@ class ApiMrpWorkorder(http.Controller):
             return Response(body, status=404, headers=headers)
         body = json.dumps(_ret)
         return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=200)
+
 

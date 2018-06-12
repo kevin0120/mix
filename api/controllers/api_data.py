@@ -443,6 +443,13 @@ api_data = {
             "in": "query"
           },
           {
+            "required": False,
+            "type": "string",
+            "description": "Long PIN or VIN or KNR",
+            "name": "code",
+            "in": "query"
+          },
+          {
             "description": "返回结果的条数限制",
             "default": 80,
             "required": False,
@@ -1248,6 +1255,9 @@ api_data = {
           "$ref": "#/definitions/image"
         },
         "knr": {
+          "type": "string"
+        },
+        "long_pin": {
           "type": "string"
         }
       }
