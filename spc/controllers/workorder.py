@@ -44,6 +44,16 @@ class ApiMrpWorkorder(http.Controller):
                 body = json.dumps({'msg':'Can not found Workcenter'})
                 return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=405)
             domain += [('workcenter_id', 'in', workcenter_id.ids)]  # 添加查询域
+
+        if 'hmi' in kw:
+            hmi = env['maintenance.equipment'].search([('serial_no', '=', kw['hmi'])], limit=1)
+            if hmi:
+                workcenter_id = env['mrp.workcenter'].search([('hmi_id', '=', hmi.ids[0])])
+                domain += [('workcenter_id', 'in', workcenter_id.ids)]
+            else:
+                body = json.dumps({'msg': 'Can not found hmi'})
+                return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
+                                status=405)
         if 'code' in kw:
             code = kw['code']
             domain += ['|', '|', ('production_id.long_pin', 'like', code), ('production_id.knr', 'like', code), ('production_id.vin', 'like', code)]
