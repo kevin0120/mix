@@ -1,24 +1,24 @@
 package main
 
 import (
-	"time"
-	"github.com/masami10/rush/test/cvi3_simulator/controller"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/masami10/rush/test/cvi3_simulator/controller"
 	"gopkg.in/yaml.v2"
-	"encoding/json"
+	"time"
 )
 
 const (
 	PORT_START = 4720
-	SN_START = 1
+	SN_START   = 1
 )
 
 type cvi3_cfg struct {
-	SN string	`yaml:"serial_no"`
+	SN       string `yaml:"serial_no"`
 	Protocol string `yaml:"protocol"`
-	IP string `yaml:"remote_ip"`
-	Port int `yaml:"port"`
+	IP       string `yaml:"remote_ip"`
+	Port     int    `yaml:"port"`
 }
 
 func main() {
@@ -47,19 +47,19 @@ func main() {
 	var sn int = SN_START
 	for i := PORT_START; i < (PORT_START + v_num); i++ {
 		cfg := cvi3_cfg{
-			SN: fmt.Sprintf("%04d", sn),
+			SN:       fmt.Sprintf("%04d", sn),
 			Protocol: "Audi/VW",
-			IP:v_ip,
-			Port:i,
+			IP:       v_ip,
+			Port:     i,
 		}
 
 		cfgs = append(cfgs, cfg)
 
-		server := controller.CVI3Server {
-			SN: cfg.SN,
+		server := controller.CVI3Server{
+			SN:           cfg.SN,
 			Workorder_id: int64(v_workorder),
-			Result_ids: result_ids,
-			Count: v_count,
+			Result_ids:   result_ids,
+			Count:        v_count,
 		}
 
 		servers = append(servers, &server)

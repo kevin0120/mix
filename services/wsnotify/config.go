@@ -7,14 +7,14 @@ const (
 )
 
 type Config struct {
-	Route 			string `yaml:"route"`
-	ReadBufferSize  int 	`yaml:"read_buf_size"`
-	WriteBufferSize int 	`yaml:"write_buf_size"`
+	Route           string `yaml:"route"`
+	ReadBufferSize  int    `yaml:"read_buf_size"`
+	WriteBufferSize int    `yaml:"write_buf_size"`
 }
 
 func NewConfig() Config {
 	c := Config{
-		Route: WS_ROUTE,
+		Route:           WS_ROUTE,
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}

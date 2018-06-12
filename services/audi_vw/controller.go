@@ -1,24 +1,24 @@
 package audi_vw
 
 import (
+	"encoding/json"
+	"fmt"
+	"github.com/masami10/rush/services/controller"
+	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/socket_writer"
 	"github.com/masami10/rush/utils"
-	"fmt"
-	"time"
-	"sync"
 	"net"
-	"github.com/masami10/rush/services/controller"
-	"encoding/json"
-	"github.com/masami10/rush/services/wsnotify"
+	"sync"
+	"time"
 )
 
-type ControllerStatusType	string
+type ControllerStatusType string
 
 const (
-	MINSEQUENCE uint = 1
-	MAXSEQUENCE uint = 9999
-	DAIL_TIMEOUT = time.Duration(1 * time.Second)
-	MAX_KEEP_ALIVE_CHECK = 3
+	MINSEQUENCE          uint = 1
+	MAXSEQUENCE          uint = 9999
+	DAIL_TIMEOUT              = time.Duration(1 * time.Second)
+	MAX_KEEP_ALIVE_CHECK      = 3
 )
 
 const (
@@ -26,20 +26,19 @@ const (
 	STATUS_OFFLINE ControllerStatusType = "offline"
 )
 
-
 type Controller struct {
-	w 				*socket_writer.SocketWriter
-	Srv 			*Service
-	Status 			ControllerStatusType
-	sequence		uint // 1~9999
-	buffer  		chan []byte
-	Response    	ResponseQueue
-	mtx_serial		*sync.Mutex
-	keep_period		time.Duration
-	req_timeout		time.Duration
-	mtx_status		sync.Mutex
-	recv_flag		bool
-	cfg				controller.Config
+	w           *socket_writer.SocketWriter
+	Srv         *Service
+	Status      ControllerStatusType
+	sequence    uint // 1~9999
+	buffer      chan []byte
+	Response    ResponseQueue
+	mtx_serial  *sync.Mutex
+	keep_period time.Duration
+	req_timeout time.Duration
+	mtx_status  sync.Mutex
+	recv_flag   bool
+	cfg         controller.Config
 }
 
 func (c *Controller) get_sequence() uint {
@@ -54,7 +53,7 @@ func (c *Controller) get_sequence() uint {
 	return c.sequence
 }
 
-func (c *Controller) GetStatus() (ControllerStatusType) {
+func (c *Controller) GetStatus() ControllerStatusType {
 	defer c.mtx_status.Unlock()
 
 	c.mtx_status.Lock()
@@ -71,7 +70,7 @@ func (c *Controller) update_status(status ControllerStatusType) {
 
 		// 将最新状态推送给hmi
 		s := wsnotify.WSStatus{
-			SN: c.cfg.SN,
+			SN:     c.cfg.SN,
 			Status: string(status),
 		}
 
@@ -89,21 +88,20 @@ func (c *Controller) update_status(status ControllerStatusType) {
 	}
 }
 
-
 func NewController(c Config) Controller {
 
-	return Controller {
-		buffer: make(chan []byte, 1024),
-		Status: STATUS_OFFLINE,
-		sequence: MINSEQUENCE,
-		mtx_serial: new(sync.Mutex),
+	return Controller{
+		buffer:      make(chan []byte, 1024),
+		Status:      STATUS_OFFLINE,
+		sequence:    MINSEQUENCE,
+		mtx_serial:  new(sync.Mutex),
 		keep_period: time.Duration(c.KeepAlivePeriod),
 		req_timeout: time.Duration(c.ReqTimeout),
-		mtx_status: sync.Mutex{},
+		mtx_status:  sync.Mutex{},
 	}
 }
 
-func (c *Controller) Start()  {
+func (c *Controller) Start() {
 
 	c.w = socket_writer.NewSocketWriter(fmt.Sprintf("tcp://%s:%d", c.cfg.RemoteIP, c.cfg.Port), c)
 
@@ -121,7 +119,7 @@ func (c *Controller) keep_alive_check() {
 
 	for {
 
-		for i:=0; i < MAX_KEEP_ALIVE_CHECK; i++ {
+		for i := 0; i < MAX_KEEP_ALIVE_CHECK; i++ {
 			if c.recv_flag == true {
 				c.update_status(STATUS_ONLINE)
 				c.recv_flag = false
@@ -151,7 +149,7 @@ func (c *Controller) keepAlive() {
 		keepAlivePacket, seq := GeneratePacket(seq, Header_type_keep_alive, Xml_heart_beat)
 		c.Write([]byte(keepAlivePacket), seq)
 
-		<- time.After(time.Duration(c.keep_period)) // 周期性发送一次信号
+		<-time.After(time.Duration(c.keep_period)) // 周期性发送一次信号
 	}
 }
 
@@ -176,23 +174,22 @@ func (c *Controller) Write(buf []byte, seq uint) {
 func (c *Controller) manage() {
 
 	for {
-		v := <- c.buffer
+		v := <-c.buffer
 		err := c.w.Write([]byte(v))
 		if err != nil {
 			c.Srv.diag.Error("Write data fail", err)
 			break
 		}
 
-		<- time.After(time.Duration(c.req_timeout)) //300毫秒发送一次信号
+		<-time.After(time.Duration(c.req_timeout)) //300毫秒发送一次信号
 	}
 }
-
 
 func (c *Controller) Connect() error {
 	c.Status = STATUS_OFFLINE
 	c.sequence = 0
 
-	c.Response = ResponseQueue {
+	c.Response = ResponseQueue{
 		Results: map[uint]string{},
 	}
 
@@ -220,13 +217,12 @@ func (c *Controller) Connect() error {
 	return nil
 }
 
-
 func (c *Controller) Close() error {
 	return c.w.Close()
 }
 
 // 客户端读取
-func (c *Controller) Read(conn net.Conn){
+func (c *Controller) Read(conn net.Conn) {
 	defer conn.Close()
 
 	buffer := make([]byte, c.Srv.config().ReadBufferSize)
@@ -244,7 +240,7 @@ func (c *Controller) Read(conn net.Conn){
 		//fmt.Printf("%s\n", string(buffer))
 
 		// 处理应答
-		header_str := msg[0: HEADER_LEN]
+		header_str := msg[0:HEADER_LEN]
 		header := CVI3Header{}
 		header.Deserialize(header_str)
 

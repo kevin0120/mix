@@ -1,9 +1,9 @@
 package httpd
 
 import (
+	"fmt"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/context"
-	"fmt"
 )
 
 //const (
@@ -17,11 +17,11 @@ import (
 
 const (
 	ROUTE_TYPE_HTTP = "http"
-	ROUTE_TYPE_WS = "websocket"
+	ROUTE_TYPE_WS   = "websocket"
 )
 
 type Route struct {
-	RouteType	string
+	RouteType   string
 	Method      string
 	Pattern     string
 	HandlerFunc context.Handler
@@ -44,8 +44,8 @@ type Handler struct {
 	// Uses normal logger
 	writeTrace bool
 
-	party *iris.Party
-	service	*iris.Application
+	party   *iris.Party
+	service *iris.Application
 
 	// Log every HTTP access.
 	loggingEnabled bool

@@ -1,53 +1,53 @@
 package audi_vw
 
 import (
-	"fmt"
 	"encoding/json"
-	"github.com/masami10/rush/services/storage"
-	"time"
-	"strings"
-	"github.com/masami10/rush/services/aiis"
-	"github.com/masami10/rush/services/wsnotify"
 	"encoding/xml"
+	"fmt"
+	"github.com/masami10/rush/services/aiis"
+	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/wsnotify"
+	"strings"
+	"time"
 )
 
-const(
+const (
 	ODOO_RESULT_PASS = "pass"
 	ODOO_RESULT_FAIL = "fail"
 )
 
 type HandlerContext struct {
-	cvi3_result CVI3Result
-	controller_curve ControllerCurve
-	controller_result ControllerResult
+	cvi3_result           CVI3Result
+	controller_curve      ControllerCurve
+	controller_result     ControllerResult
 	controller_curve_file ControllerCurveFile
-	db_curve	storage.Curves
-	result_ids []int64
-	ws_result wsnotify.WSResult
-	aiis_result aiis.AIISResult
-	aiis_curve aiis.CURObject
+	db_curve              storage.Curves
+	result_ids            []int64
+	ws_result             wsnotify.WSResult
+	aiis_result           aiis.AIISResult
+	aiis_curve            aiis.CURObject
 }
 
 type Handlers struct {
-	AudiVw	*Service
+	AudiVw         *Service
 	HandlerContext HandlerContext
 }
 
 func (h *Handlers) Init() {
-	h.HandlerContext = HandlerContext {
-		cvi3_result: CVI3Result{},
-		controller_curve: ControllerCurve{},
-		controller_result: ControllerResult{},
+	h.HandlerContext = HandlerContext{
+		cvi3_result:           CVI3Result{},
+		controller_curve:      ControllerCurve{},
+		controller_result:     ControllerResult{},
 		controller_curve_file: ControllerCurveFile{},
-		db_curve: storage.Curves{},
-		ws_result: wsnotify.WSResult{},
-		aiis_result: aiis.AIISResult{},
-		aiis_curve: aiis.CURObject{},
+		db_curve:              storage.Curves{},
+		ws_result:             wsnotify.WSResult{},
+		aiis_result:           aiis.AIISResult{},
+		aiis_curve:            aiis.CURObject{},
 	}
 }
 
 // 处理结果数据
-func (h *Handlers) handleResult(result *ControllerResult) (error) {
+func (h *Handlers) handleResult(result *ControllerResult) error {
 	h.AudiVw.diag.Debug("处理结果数据 ...")
 
 	var need_push_aiis bool = false
@@ -83,7 +83,7 @@ func (h *Handlers) handleResult(result *ControllerResult) (error) {
 		r.Stage = RESULT_STAGE_FINAL
 
 		json.Unmarshal([]byte(workorder.ResultIDs), &h.HandlerContext.result_ids)
-		if r.ResultId == h.HandlerContext.result_ids[len(h.HandlerContext.result_ids) - 1] {
+		if r.ResultId == h.HandlerContext.result_ids[len(h.HandlerContext.result_ids)-1] {
 			// 标记工单已完成
 			workorder.Status = "finished"
 			h.AudiVw.DB.UpdateWorkorder(&workorder)
@@ -155,7 +155,6 @@ func (h *Handlers) handleResult(result *ControllerResult) (error) {
 			h.HandlerContext.aiis_result.CURObjects = append(h.HandlerContext.aiis_result.CURObjects, h.HandlerContext.aiis_curve)
 		}
 
-
 		h.PutResultToAIIS(h.HandlerContext.aiis_result, r.ResultId)
 
 	}
@@ -163,7 +162,7 @@ func (h *Handlers) handleResult(result *ControllerResult) (error) {
 	return nil
 }
 
-func (h *Handlers) PutResultToAIIS(aiis_result aiis.AIISResult, r_id int64) error{
+func (h *Handlers) PutResultToAIIS(aiis_result aiis.AIISResult, r_id int64) error {
 	h.AudiVw.diag.Debug("推送结果数据到AIIS")
 
 	err := h.AudiVw.Aiis.PutResult(r_id, aiis_result)
@@ -186,7 +185,7 @@ func (h *Handlers) PutResultToAIIS(aiis_result aiis.AIISResult, r_id int64) erro
 }
 
 // 处理波形数据
-func (h *Handlers) handleCurve(curve *ControllerCurve) (error) {
+func (h *Handlers) handleCurve(curve *ControllerCurve) error {
 	h.AudiVw.diag.Debug("处理波形数据 ...")
 
 	// 保存波形到数据库
@@ -265,7 +264,7 @@ func (h *Handlers) HandleMsg(msg string) {
 	h.HandlerContext.controller_curve.ResultID = h.HandlerContext.controller_result.Result_id
 
 	e := h.handleCurve(&h.HandlerContext.controller_curve)
-	if  e == nil {
+	if e == nil {
 		h.handleResult(&h.HandlerContext.controller_result)
 	} else {
 		h.AudiVw.diag.Error("handleCurve err", err)

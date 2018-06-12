@@ -1,20 +1,19 @@
 package odoo
 
 import (
+	"encoding/json"
 	"github.com/kataras/iris"
+	"github.com/masami10/rush/services/aiis"
+	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/storage"
 	"strconv"
-	"encoding/json"
 	"strings"
-	"github.com/masami10/rush/services/audi_vw"
-	"github.com/masami10/rush/services/aiis"
 	"time"
 )
 
 type Methods struct {
-	service	*Service
+	service *Service
 }
-
 
 // 创建工单
 func (m *Methods) postWorkorders(ctx iris.Context) {
@@ -96,7 +95,7 @@ func (m *Methods) getResults(ctx iris.Context) {
 
 	resp := []ODOOResultSync{}
 	results, _ := m.service.DB.FindUnuploadResults(bool_has_upload, re_list)
-	target_results :=  map[int64]storage.Results{}
+	target_results := map[int64]storage.Results{}
 	for _, v := range results {
 		tr, exist := target_results[v.ResultId]
 		if exist {

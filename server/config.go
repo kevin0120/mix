@@ -10,13 +10,13 @@ import (
 	"path/filepath"
 
 	"github.com/masami10/rush/services/aiis"
+	"github.com/masami10/rush/services/audi_vw"
+	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
-	"github.com/masami10/rush/services/controller"
-	"github.com/masami10/rush/services/audi_vw"
 )
 
 type Config struct {
@@ -38,7 +38,7 @@ type Config struct {
 
 	Storage storage.Config `yaml:"storage"`
 
-	AudiVW 	audi_vw.Config `yaml:"audi/vw"`
+	AudiVW audi_vw.Config `yaml:"audi/vw"`
 
 	Contollers controller.Configs `yaml:"controllers"`
 
@@ -61,7 +61,7 @@ func NewConfig() *Config {
 	c.Logging = diagnostic.NewConfig()
 	c.AudiVW = audi_vw.NewConfig()
 
-	c.Contollers = controller.Configs{controller.NewConfig(),controller.NewConfig()}
+	c.Contollers = controller.Configs{controller.NewConfig(), controller.NewConfig()}
 
 	return c
 }

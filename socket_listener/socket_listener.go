@@ -1,18 +1,17 @@
 package socket_listener
 
 import (
-	"net"
-	"sync"
-	"strings"
-	"log"
 	"fmt"
-	"time"
+	"log"
+	"net"
 	"os"
+	"strings"
+	"sync"
+	"time"
 )
 
-
 type Protocol interface {
-	Parse (buf []byte) ([]byte, error)
+	Parse(buf []byte) ([]byte, error)
 	Read(c net.Conn)
 	NewConn(c net.Conn)
 }
@@ -26,7 +25,7 @@ type streamSocketListener struct {
 	*SocketListener
 
 	sockType string
-	Port	string
+	Port     string
 
 	connections    map[string]net.Conn
 	connectionsMtx sync.Mutex
@@ -109,7 +108,6 @@ func (ssl *streamSocketListener) RemoveConnection(c net.Conn) {
 	ssl.connectionsMtx.Unlock()
 }
 
-
 type packetSocketListener struct {
 	net.PacketConn
 	*SocketListener
@@ -121,7 +119,7 @@ func (psl *packetSocketListener) listen() {
 		n, _, err := psl.ReadFrom(buf)
 		if err != nil {
 			if !strings.HasSuffix(err.Error(), ": use of closed network connection") {
-				log.Printf("UDP read error %s",err)
+				log.Printf("UDP read error %s", err)
 			}
 			break
 		}
@@ -134,7 +132,6 @@ func (psl *packetSocketListener) listen() {
 		}
 	}
 }
-
 
 func (psl *packetSocketListener) RemoveConnection(c net.Conn) {
 	return
@@ -150,7 +147,7 @@ type SocketListener struct {
 	MaxConnections  int
 	ReadBufferSize  int
 	ReadTimeout     time.Duration
-	KeepAlivePeriod  time.Duration
+	KeepAlivePeriod time.Duration
 
 	Protocol //协议解析器服务
 
@@ -216,7 +213,6 @@ func (sl *SocketListener) Gather() error {
 	return nil
 }
 
-
 func (sl *SocketListener) Start() error {
 	spl := strings.SplitN(sl.ServiceAddress, "://", 2)
 	if len(spl) != 2 {
@@ -241,12 +237,11 @@ func (sl *SocketListener) Start() error {
 			return nil
 		}
 
-
 		ssl := &streamSocketListener{
 			Listener:       l,
 			SocketListener: sl,
 			sockType:       spl[0],
-			Port:			spl[1],
+			Port:           spl[1],
 		}
 
 		sl.InterListener = ssl
@@ -294,7 +289,7 @@ func NewSocketListener(addr string, protocol Protocol) *SocketListener {
 
 	return &SocketListener{
 		ServiceAddress: addr,
-		Protocol: protocol,
+		Protocol:       protocol,
 	}
 }
 

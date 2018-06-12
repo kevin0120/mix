@@ -1,8 +1,8 @@
 package odoo
 
 import (
-	"github.com/masami10/rush/services/hmi"
 	"github.com/masami10/rush/services/aiis"
+	"github.com/masami10/rush/services/hmi"
 )
 
 type ResultPatch struct {
@@ -19,22 +19,22 @@ type ODOOMOCreated struct {
 }
 
 type ODOOWorkorder struct {
-	ID	int64				`json:"id"`
-	Status string		`json:"status"`
-	NutTotal float64	`json:"nut_total"`
-	PSet string			`json:"pset"`
-	Max_redo_times	int	`json:"max_redo_times"`
-	Max_op_time	int		`json:"max_op_time"`
+	ID             int64   `json:"id"`
+	Status         string  `json:"status"`
+	NutTotal       float64 `json:"nut_total"`
+	PSet           string  `json:"pset"`
+	Max_redo_times int     `json:"max_redo_times"`
+	Max_op_time    int     `json:"max_op_time"`
 
 	HMI struct {
-		ID 		int		`json:"id"`
-		UUID string		`json:"uuid"`
+		ID   int    `json:"id"`
+		UUID string `json:"uuid"`
 	} `json:"hmi"`
 
-	Result_IDs []int64	`json:"result_ids"`
-	Worksheet hmi.Worksheet	`json:"worksheet"`
-	KNR string			`json:"knr"`
-	VIN string			`json:"vin"`
+	Result_IDs []int64       `json:"result_ids"`
+	Worksheet  hmi.Worksheet `json:"worksheet"`
+	KNR        string        `json:"knr"`
+	VIN        string        `json:"vin"`
 }
 
 type ODOOCurveAppend struct {

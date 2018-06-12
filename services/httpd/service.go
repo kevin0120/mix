@@ -66,9 +66,9 @@ type Service struct {
 	key  string
 	err  chan error
 
-	methods			Methods
+	methods Methods
 
-	ApiDoc			string
+	ApiDoc          string
 	Handler         []*Handler
 	shutdownTimeout time.Duration
 	externalURL     string
@@ -96,8 +96,8 @@ func NewService(doc string, c Config, hostname string, d Diagnostic, disc *diagn
 		Scheme: "http",
 	}
 	s := &Service{
-		methods:			   Methods{},
-		ApiDoc:				   doc,
+		methods:               Methods{},
+		ApiDoc:                doc,
 		addr:                  c.BindAddress,
 		externalURL:           u.String(),
 		cors:                  c.Cors,
@@ -117,9 +117,9 @@ func NewService(doc string, c Config, hostname string, d Diagnostic, disc *diagn
 	var r Route
 
 	r = Route{
-		RouteType:	ROUTE_TYPE_HTTP,
-		Method:  "GET",
-		Pattern: "/doc",
+		RouteType:   ROUTE_TYPE_HTTP,
+		Method:      "GET",
+		Pattern:     "/doc",
 		HandlerFunc: s.methods.getDoc,
 	}
 	s.Handler[0].AddRoute(r)

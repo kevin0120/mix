@@ -18,7 +18,6 @@ type WSResult struct {
 	TI        float64 `json:"ti"`
 }
 
-
 type WSRegistMsg struct {
 	Msg string `json:"msg"`
 }

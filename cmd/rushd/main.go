@@ -13,7 +13,6 @@ import (
 	"strings"
 	"syscall"
 	"time"
-
 )
 
 type Diagnostic run.Diagnostic

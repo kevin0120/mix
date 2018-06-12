@@ -6,5 +6,5 @@ tivan
 *~
 *#
 bin
-.exe
+*.exe
 *.log

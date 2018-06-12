@@ -1,32 +1,31 @@
 package controller
 
 import (
-	"github.com/masami10/rush/socket_listener"
-	"github.com/masami10/rush/services/audi_vw"
-	"net"
-	"fmt"
-	"strings"
 	"encoding/xml"
+	"fmt"
+	"github.com/masami10/rush/services/audi_vw"
+	"github.com/masami10/rush/socket_listener"
+	"net"
+	"strings"
 )
 
 const (
 	MASTER_PC_PORT = 4710
-	KEY_PSET = "PRG"
+	KEY_PSET       = "PRG"
 )
 
 type CVI3Server struct {
-	server	*socket_listener.SocketListener
+	server *socket_listener.SocketListener
 
 	cvi3_client CVI3Client
 
-	SN string
+	SN           string
 	Workorder_id int64
-	Result_ids []int64
-	Count int
-
+	Result_ids   []int64
+	Count        int
 }
 
-func (cvi3_server *CVI3Server) Start(port uint) (error) {
+func (cvi3_server *CVI3Server) Start(port uint) error {
 
 	addr := fmt.Sprintf("tcp://:%d", port)
 	cvi3_server.server = socket_listener.NewSocketListener(addr, cvi3_server)
@@ -38,8 +37,7 @@ func (cvi3_server *CVI3Server) Start(port uint) (error) {
 	return nil
 }
 
-
-func (cvi3_server *CVI3Server)Parse (buf []byte) ([]byte, error) {
+func (cvi3_server *CVI3Server) Parse(buf []byte) ([]byte, error) {
 	msg := string(buf)
 	if strings.Contains(msg, KEY_PSET) {
 		// 如果收到pset请求，调用客户端返回拧接结果
@@ -62,11 +60,11 @@ func (cvi3_server *CVI3Server) NewConn(c net.Conn) {
 
 	addr := fmt.Sprintf("tcp://%s:%d", ip, MASTER_PC_PORT)
 
-	cvi3_server.cvi3_client = CVI3Client {
-		SN: cvi3_server.SN,
+	cvi3_server.cvi3_client = CVI3Client{
+		SN:           cvi3_server.SN,
 		Workorder_id: cvi3_server.Workorder_id,
-		Result_ids: cvi3_server.Result_ids,
-		Count: cvi3_server.Count,
+		Result_ids:   cvi3_server.Result_ids,
+		Count:        cvi3_server.Count,
 	}
 
 	go cvi3_server.cvi3_client.Start(addr)
@@ -92,7 +90,7 @@ func (cvi3_server *CVI3Server) Read(c net.Conn) {
 		fmt.Printf("%s\n", msg)
 
 		header := audi_vw.CVI3Header{}
-		header.Deserialize(msg[0: audi_vw.HEADER_LEN])
+		header.Deserialize(msg[0:audi_vw.HEADER_LEN])
 
 		go cvi3_server.Parse(buffer)
 

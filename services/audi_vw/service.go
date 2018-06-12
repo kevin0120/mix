@@ -1,27 +1,27 @@
 package audi_vw
 
 import (
-	"github.com/masami10/rush/socket_listener"
-	"sync"
-	"github.com/masami10/rush/services/controller"
 	"fmt"
-	"github.com/pkg/errors"
-	"net"
-	"sync/atomic"
-	"time"
+	"github.com/masami10/rush/services/aiis"
+	"github.com/masami10/rush/services/controller"
+	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
-	"github.com/masami10/rush/services/aiis"
-	"github.com/masami10/rush/services/minio"
+	"github.com/masami10/rush/socket_listener"
+	"github.com/pkg/errors"
+	"net"
 	"strings"
+	"sync"
+	"sync/atomic"
+	"time"
 )
 
 const (
-	ERR_CVI3_NOT_FOUND = "CIV3 SN is invalid"
-	ERR_CVI3_OFFLINE = "cvi3 offline"
-	ERR_CVI3_REQUEST = "request to cvi3 failed"
+	ERR_CVI3_NOT_FOUND     = "CIV3 SN is invalid"
+	ERR_CVI3_OFFLINE       = "cvi3 offline"
+	ERR_CVI3_REQUEST       = "request to cvi3 failed"
 	ERR_CVI3_REPLY_TIMEOUT = "cvi3 reply timeout"
-	ERR_CVI3_REPLY = "cvi3 reply contains error"
+	ERR_CVI3_REPLY         = "cvi3 reply contains error"
 )
 
 type Diagnostic interface {
@@ -32,43 +32,40 @@ type Diagnostic interface {
 }
 
 type ControllerStatus struct {
-	SN string `json:"controller_sn"`
+	SN     string               `json:"controller_sn"`
 	Status ControllerStatusType `json:"status"`
 }
 
-
 type Service struct {
-
-	configValue		atomic.Value
-	name 			string
-	listener		*socket_listener.SocketListener
-	err 			chan error
-	Controllers		map[string]*Controller
-	mux 			*sync.Mutex
-	diag 			Diagnostic
-	DB				*storage.Service
-	WS				*wsnotify.Service
-	Aiis			*aiis.Service
-	Minio			*minio.Service
-	handlers		Handlers
-	handle_buffer	chan string
+	configValue   atomic.Value
+	name          string
+	listener      *socket_listener.SocketListener
+	err           chan error
+	Controllers   map[string]*Controller
+	mux           *sync.Mutex
+	diag          Diagnostic
+	DB            *storage.Service
+	WS            *wsnotify.Service
+	Aiis          *aiis.Service
+	Minio         *minio.Service
+	handlers      Handlers
+	handle_buffer chan string
 }
-
 
 func (s *Service) Err() <-chan error {
 	return s.err
 }
 
 func NewService(c Config, d Diagnostic) *Service {
-	addr := fmt.Sprintf("tcp://:%d",  c.Port)
+	addr := fmt.Sprintf("tcp://:%d", c.Port)
 
 	s := &Service{
 		Controllers: map[string]*Controller{},
-		name: controller.AUDIPROTOCOL,
-		mux: new(sync.Mutex),
-		err: make(chan error ,1),
-		diag: d,
-		handlers: Handlers{},
+		name:        controller.AUDIPROTOCOL,
+		mux:         new(sync.Mutex),
+		err:         make(chan error, 1),
+		diag:        d,
+		handlers:    Handlers{},
 	}
 
 	s.handlers.Init()
@@ -80,7 +77,6 @@ func NewService(c Config, d Diagnostic) *Service {
 
 	return s
 }
-
 
 func (s *Service) config() Config {
 	return s.configValue.Load().(Config)
@@ -94,7 +90,7 @@ func (p *Service) AddNewController(cfg controller.Config) {
 	p.Controllers[cfg.SN] = &c
 }
 
-func (p *Service) Write(serial_no string ,buf []byte)  error{
+func (p *Service) Write(serial_no string, buf []byte) error {
 	return nil
 }
 
@@ -107,7 +103,7 @@ func (p *Service) Open() error {
 		return errors.Wrapf(err, "Open Protocol %s Listener fail", p.name)
 	}
 
-	for _, w := range p.Controllers{
+	for _, w := range p.Controllers {
 		go w.Start()
 	}
 
@@ -124,7 +120,7 @@ func (p *Service) Close() error {
 
 	p.mux.Lock()
 	defer p.mux.Unlock()
-	for _,w := range p.Controllers {
+	for _, w := range p.Controllers {
 		err := w.Close()
 		if err != nil {
 			return errors.Wrapf(err, "Close Protocol %s Writer fail", p.name)
@@ -155,11 +151,10 @@ func (p *Service) Read(c net.Conn) {
 			continue
 		}
 
-
 		header := CVI3Header{}
-		header.Deserialize(msg[0: HEADER_LEN])
+		header.Deserialize(msg[0:HEADER_LEN])
 		//fmt.Printf("%d\n", header.SIZ)
-		var body string = msg[HEADER_LEN: n]
+		var body string = msg[HEADER_LEN:n]
 		var rest int = header.SIZ - HEADER_LEN - n
 		for {
 			if rest <= 0 {
@@ -192,7 +187,7 @@ func (p *Service) Read(c net.Conn) {
 	}
 }
 
-func (p *Service) Parse(buf []byte)  ([]byte, error){
+func (p *Service) Parse(buf []byte) ([]byte, error) {
 
 	msg := string(buf)
 
@@ -206,7 +201,7 @@ func (p *Service) Parse(buf []byte)  ([]byte, error){
 func (p *Service) HandleProcess() {
 	p.diag.StartManager()
 	for {
-		msg := <- p.handle_buffer
+		msg := <-p.handle_buffer
 		p.handlers.HandleMsg(msg)
 	}
 }
@@ -238,7 +233,7 @@ func (p *Service) GetControllersStatus(sn string) ([]ControllerStatus, error) {
 }
 
 // 设置拧接程序
-func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64, count int) (error) {
+func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64, count int) error {
 	// 判断控制器是否存在
 	c, exist := p.Controllers[sn]
 	if !exist {
