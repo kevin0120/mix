@@ -8,6 +8,8 @@ import (
 	"github.com/masami10/aiis/services/httpd"
 	"github.com/masami10/aiis/services/odoo"
 	"github.com/masami10/aiis/services/pmon"
+	"github.com/masami10/aiis/services/storage"
+	"github.com/masami10/aiis/services/rush"
 )
 
 type BuildInfo struct {
@@ -35,6 +37,9 @@ type Server struct {
 
 	HTTPDService *httpd.Service
 	PmonService  *pmon.Service
+
+	StorageService *storage.Service
+
 	config       *Config
 	// List of services in startup order
 	Services []Service
@@ -74,13 +79,36 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 		return nil, err
 	}
 
+	s.appendStorageService()
+
 	s.appendOdooService()
+
+	s.appendRushService() //必须后于http & storage
 
 	s.appendPmonService()
 
 	s.appendHTTPDService()
 
 	return s, nil
+}
+
+func (s *Server) appendRushService() {
+	d := s.DiagService.NewRushHandler()
+	srv := rush.NewService(s.config.Rush, d)
+	srv.HTTPDService = s.HTTPDService
+	srv.StorageService = s.StorageService
+
+	s.AppendService("rush", srv)
+}
+
+
+
+func (s *Server) appendStorageService() {
+	d := s.DiagService.NewStorageHandler()
+	srv := storage.NewService(s.config.Storage, d)
+
+	s.StorageService = srv
+	s.AppendService("storage", srv)
 }
 
 func (s *Server) AppendService(name string, srv Service) {

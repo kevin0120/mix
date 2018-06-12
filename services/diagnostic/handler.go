@@ -6,6 +6,7 @@ import (
 	"log"
 	"runtime"
 	"time"
+	"fmt"
 )
 
 type logLevel int
@@ -283,3 +284,31 @@ type OdooHandler struct {
 func (h *OdooHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
+
+
+// Storage Handler
+
+type StorageHandler struct {
+	l Logger
+}
+
+func (h *StorageHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+func (h *StorageHandler) OpenEngineSuccess(msg string) {
+	h.l.Info(fmt.Sprintf("Open Engine Success: %s ", msg))
+}
+
+
+// Rush Handler
+
+type RushHandler struct {
+	l Logger
+}
+
+func (h *RushHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+

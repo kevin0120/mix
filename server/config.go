@@ -2,16 +2,19 @@ package server
 
 import (
 	"fmt"
-	"github.com/masami10/aiis/command"
-	"github.com/masami10/aiis/services/diagnostic"
-	"github.com/masami10/aiis/services/httpd"
 	"os"
 	"os/user"
 	"path/filepath"
 
+	"github.com/masami10/aiis/command"
+	"github.com/masami10/aiis/services/diagnostic"
+	"github.com/masami10/aiis/services/httpd"
+	"github.com/masami10/aiis/services/storage"
+
 	"github.com/masami10/aiis/services/odoo"
 	"github.com/masami10/aiis/services/pmon"
 	"github.com/pkg/errors"
+	"github.com/masami10/aiis/services/rush"
 )
 
 type Config struct {
@@ -26,6 +29,10 @@ type Config struct {
 
 	Odoo odoo.Config `yaml:"odoo"`
 
+	Storage storage.Config `yaml:"storage"`
+
+	Rush 	rush.Config `yaml:"rush"`
+
 	Commander command.Commander `yaml:"-"`
 }
 
@@ -39,6 +46,8 @@ func NewConfig() *Config {
 	c.Pmon = pmon.NewConfig()
 	c.Logging = diagnostic.NewConfig()
 	c.Odoo = odoo.NewConfig()
+	c.Storage = storage.NewConfig()
+	c.Rush	= rush.NewConfig()
 
 	return c
 }
@@ -79,6 +88,14 @@ func (c *Config) Validate() error {
 	}
 	if err := c.Odoo.Validate(); err != nil {
 		return errors.Wrap(err, "odoo")
+	}
+
+	if err := c.Storage.Validate(); err != nil {
+		return errors.Wrap(err, "storage")
+	}
+
+	if err := c.Rush.Validate(); err != nil {
+		return errors.Wrap(err, "rush")
 	}
 
 	return nil

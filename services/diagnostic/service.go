@@ -57,6 +57,19 @@ func (s *Service) NewHTTPDHandler() *HTTPDHandler {
 	}
 }
 
+
+func (s *Service) NewRushHandler() *RushHandler {
+	return &RushHandler{
+		l: s.Logger.With(String("service", "rush")),
+	}
+}
+
+func (s *Service) NewStorageHandler() *StorageHandler {
+	return &StorageHandler{
+		l: s.Logger.With(String("service", "storage")),
+	}
+}
+
 func (s *Service) NewPmonHandler() *PmonHandler {
 	return &PmonHandler{
 		l: s.Logger.With(String("service", "pmon")),
