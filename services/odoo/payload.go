@@ -1,7 +1,6 @@
 package odoo
 
 import (
-	"github.com/masami10/rush/services/hmi"
 	"github.com/masami10/rush/services/aiis"
 )
 
@@ -32,9 +31,18 @@ type ODOOWorkorder struct {
 	} `json:"hmi"`
 
 	Result_IDs []int64	`json:"result_ids"`
-	Worksheet hmi.Worksheet	`json:"worksheet"`
+	Worksheet Worksheet	`json:"worksheet"`
 	KNR string			`json:"knr"`
 	VIN string			`json:"vin"`
+	LongPin string		`json:"long_pin"`
+}
+
+type Worksheet struct {
+	Content string	`json:"content"`
+	Points []struct {
+		X int32 `json:"x_offset"`
+		Y int32 `json:"y_offset"`
+	} `json:"points"`
 }
 
 type ODOOCurveAppend struct {

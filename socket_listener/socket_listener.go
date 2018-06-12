@@ -39,6 +39,8 @@ func (ssl *streamSocketListener) listen() {
 		if err == nil {
 			ssl.Listener = l
 			break
+		} else {
+			log.Printf("listen err:%s", err)
 		}
 
 		time.Sleep(300 * time.Millisecond)

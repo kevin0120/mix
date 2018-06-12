@@ -45,7 +45,7 @@ type Server struct {
 	StorageServie *storage.Service
 
 	HTTPDService *httpd.Service
-
+	OdooService *odoo.Service
 	AudiVWService *audi_vw.Service
 
 	WSNotifyService *wsnotify.Service
@@ -202,9 +202,11 @@ func (s *Server) appendAiisService() error {
 }
 
 func (s *Server) appendOdooService() error {
+	c := s.config.Odoo
 	d := s.DiagService.NewOdooHandler()
-	srv := odoo.NewService(d)
+	srv := odoo.NewService(c, d)
 
+	s.OdooService = srv
 	srv.DB = s.StorageServie
 	srv.Httpd = s.HTTPDService
 
@@ -230,6 +232,7 @@ func (s *Server) appendHMIService() error {
 	d := s.DiagService.NewHMIHandler()
 	srv := hmi.NewService(d)
 
+	srv.ODOO = s.OdooService
 	srv.Httpd = s.HTTPDService //http 服务注入
 	srv.DB = s.StorageServie // stroage 服务注入
 	srv.AudiVw = s.AudiVWService

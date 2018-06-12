@@ -17,6 +17,7 @@ import (
 	"github.com/satori/go.uuid"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/audi_vw"
+	"github.com/masami10/rush/services/odoo"
 )
 
 type Config struct {
@@ -35,6 +36,8 @@ type Config struct {
 	Aiis aiis.Config `yaml:"aiis"`
 
 	Ws wsnotify.Config `yaml:"websocket"`
+
+	Odoo odoo.Config `yaml:"odoo"`
 
 	Storage storage.Config `yaml:"storage"`
 
@@ -60,6 +63,7 @@ func NewConfig() *Config {
 	c.Storage = storage.NewConfig()
 	c.Logging = diagnostic.NewConfig()
 	c.AudiVW = audi_vw.NewConfig()
+	c.Odoo = odoo.NewConfig()
 
 	c.Contollers = controller.Configs{controller.NewConfig(),controller.NewConfig()}
 
@@ -106,6 +110,10 @@ func (c *Config) Validate() error {
 		return errors.Wrap(err, "aiis")
 	}
 
+	if err := c.Odoo.Validate(); err != nil {
+		return errors.Wrap(err, "odoo")
+	}
+
 	if err := c.Ws.Validate(); err != nil {
 		return errors.Wrap(err, "websocket")
 	}
@@ -117,6 +125,8 @@ func (c *Config) Validate() error {
 	if err := c.Contollers.Validate(); err != nil {
 		return errors.Wrap(err, "controller")
 	}
+
+
 
 	return nil
 }

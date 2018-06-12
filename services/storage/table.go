@@ -10,6 +10,7 @@ type Workorders struct {
 	NutTotal     	float64 `xorm:"double 'nut_total'"`
 	Vin          	string  `xorm:"varchar(64) 'vin'"`
 	Knr          	string  `xorm:"varchar(64) 'knr'"`
+	LongPin         string  `xorm:"varchar(64) 'long_pin'"`
 	MaxRedoTimes 	int     `xorm:"int 'max_redo_times'"`
 	MaxOpTime    	int     `xorm:"int 'max_op_time'"`
 	Status       	string  `xorm:"varchar(32) 'status'"`

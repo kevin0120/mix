@@ -204,7 +204,6 @@ func (p *Service) Parse(buf []byte)  ([]byte, error){
 }
 
 func (p *Service) HandleProcess() {
-	p.diag.StartManager()
 	for {
 		msg := <- p.handle_buffer
 		p.handlers.HandleMsg(msg)

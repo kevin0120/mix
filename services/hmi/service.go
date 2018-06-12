@@ -4,6 +4,7 @@ import (
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/audi_vw"
+	"github.com/masami10/rush/services/odoo"
 )
 
 type Diagnostic interface {
@@ -18,7 +19,7 @@ type Service struct {
 	methods	Methods
 	DB	   *storage.Service
 	Httpd  *httpd.Service
-
+	ODOO	*odoo.Service
 	AudiVw		*audi_vw.Service
 }
 

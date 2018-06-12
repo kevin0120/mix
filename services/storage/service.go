@@ -296,17 +296,13 @@ func (s *Service) GetWorkorder(id int64) (Workorders, error) {
 	}
 }
 
-func (s *Service) FindWorkorder(hmi_sn string, vin string, knr string) (Workorders, error) {
+func (s *Service) FindWorkorder(hmi_sn string, vin string, longpin string) (Workorders, error) {
 	var err error
 
 	workorder := Workorders{}
 
 	var rt bool
-	if vin != "" {
-		rt, err = s.eng.Alias("w").Where("w.hmi_sn = ?", hmi_sn).And("w.vin = ?", vin).Get(&workorder)
-	} else {
-		rt, err = s.eng.Alias("w").Where("w.hmi_sn = ?", hmi_sn).And("w.knr = ?", knr).Get(&workorder)
-	}
+	rt, err = s.eng.Alias("w").Where("w.hmi_sn = ?", hmi_sn).And("w.long_pin = ?", longpin).Or("w.vin = ?", vin).Get(&workorder)
 
 	if err != nil {
 		return workorder, err

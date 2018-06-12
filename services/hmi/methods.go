@@ -4,6 +4,7 @@ import (
 	"github.com/kataras/iris"
 	"encoding/json"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/odoo"
 )
 
 type Methods struct {
@@ -76,7 +77,7 @@ func (m *Methods) putPSets(ctx iris.Context) {
 func (m *Methods) getWorkorder(ctx iris.Context) {
 	var err error
 	hmi_sn := ctx.URLParam("hmi_sn")
-	vin_or_knr := ctx.URLParam("vin_or_knr")
+	vin_or_longpin := ctx.URLParam("vin_or_longpin")
 
 	if hmi_sn == "" {
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -84,20 +85,32 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 		return
 	}
 
-	if vin_or_knr == ""  {
+	if vin_or_longpin == ""  {
 		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("vin_or_knr is required")
+		ctx.WriteString("vin_or_longpin is required")
 		return
 	}
 
 	var workorder storage.Workorders
-	workorder, err = m.service.DB.FindWorkorder(hmi_sn, vin_or_knr, "")
+	workorder, err = m.service.DB.FindWorkorder(hmi_sn, vin_or_longpin, "")
 	if err != nil {
-		workorder, err = m.service.DB.FindWorkorder(hmi_sn, "", vin_or_knr)
-		if err != nil {
+		// 通过odoo定位并创建工单
+		body, e := m.service.ODOO.GetWorkorder("", hmi_sn, vin_or_longpin)
+		if e != nil {
 			ctx.StatusCode(iris.StatusBadRequest)
-			ctx.WriteString(err.Error())
+			ctx.WriteString("cannot find workorder")
 			return
+		} else {
+			var odoo_workorders []odoo.ODOOWorkorder
+			json.Unmarshal(body, &odoo_workorders)
+			o, e := m.service.ODOO.CreateWorkorders(odoo_workorders)
+			if e != nil {
+				ctx.StatusCode(iris.StatusBadRequest)
+				ctx.WriteString("save workorder failed")
+				return
+			} else {
+				workorder = o[0]
+			}
 		}
 	}
 
@@ -107,6 +120,7 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 	resp.Workorder_id = workorder.WorkorderID
 	resp.Vin = workorder.Vin
 	resp.Knr = workorder.Knr
+	resp.LongPin = workorder.LongPin
 	resp.Nut_total = workorder.NutTotal
 	resp.Status = workorder.Status
 	resp.MaxRedoTimes = workorder.MaxRedoTimes

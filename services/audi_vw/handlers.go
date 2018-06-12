@@ -110,7 +110,7 @@ func (h *Handlers) handleResult(result *ControllerResult) (error) {
 
 	h.AudiVw.diag.Debug("Websocket推送结果到HMI")
 
-	h.AudiVw.WS.WSSendResult(workorder.HMISN, string(ws_str))
+	go h.AudiVw.WS.WSSendResult(workorder.HMISN, string(ws_str))
 
 	if need_push_aiis {
 
@@ -241,11 +241,6 @@ func (h *Handlers) HandleMsg(msg string) {
 
 	h.AudiVw.diag.Debug(fmt.Sprintf("收到结果数据:%s\n", msg))
 
-	//h.HandlerContext.controller_curve_file.CUR_M = []float64{}
-	//h.HandlerContext.controller_curve_file.CUR_W = []float64{}
-	//h.HandlerContext.result_ids = []int64{}
-	//h.HandlerContext.aiis_result.CURObjects = []aiis.CURObject{}
-
 	err := xml.Unmarshal([]byte(msg), &h.HandlerContext.cvi3_result)
 	if err != nil {
 		h.AudiVw.diag.Error("HandleMsg err", err)
@@ -266,7 +261,7 @@ func (h *Handlers) HandleMsg(msg string) {
 
 	e := h.handleCurve(&h.HandlerContext.controller_curve)
 	if  e == nil {
-		h.handleResult(&h.HandlerContext.controller_result)
+		go h.handleResult(&h.HandlerContext.controller_result)
 	} else {
 		h.AudiVw.diag.Error("handleCurve err", err)
 	}

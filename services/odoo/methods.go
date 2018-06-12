@@ -15,7 +15,6 @@ type Methods struct {
 	service	*Service
 }
 
-
 // 创建工单
 func (m *Methods) postWorkorders(ctx iris.Context) {
 	var err error
@@ -30,33 +29,11 @@ func (m *Methods) postWorkorders(ctx iris.Context) {
 		return
 	}
 
-	var final_err error
-	for _, v := range workorders {
-		o := storage.Workorders{}
-		o.Status = v.Status
-		o.WorkorderID = v.ID
-		o.PSet, _ = strconv.Atoi(v.PSet)
-		o.HMISN = v.HMI.UUID
-		o.Knr = v.KNR
-		o.NutTotal = v.NutTotal
-		o.Vin = v.VIN
-		o.MaxOpTime = v.Max_op_time
-		o.MaxRedoTimes = v.Max_redo_times
-		worksheet, _ := json.Marshal(v.Worksheet)
-		o.WorkSheet = string(worksheet)
+	_, err = m.service.CreateWorkorders(workorders)
 
-		ids, _ := json.Marshal(v.Result_IDs)
-		o.ResultIDs = string(ids)
-
-		e := m.service.DB.InsertWorkorder(o)
-		if e != nil {
-			final_err = e
-		}
-	}
-
-	if final_err != nil {
+	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString(final_err.Error())
+		ctx.WriteString(err.Error())
 
 		return
 	} else {

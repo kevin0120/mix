@@ -1,7 +1,7 @@
 hostname: localhost
 data_dir: /home/linshenqi/.rush
 serial_no: 1qaz2wsx
-doc_path: /etc/rush/api.json
+doc_path: ./etc/rush/api.json
 logging:
   file: STDERR
   level: DEBUG
@@ -37,6 +37,16 @@ aiis:
   push_method: PUT
   timeout: 8s
   push_interval: 1s
+  max_retry: 3
+odoo:
+  urls:
+  - http://127.0.0.1:8069
+  headers:
+    Content-Type: application/json
+  workorder_get_url: /api/v1/mrp.workorders?masterpc=%s&hmi=%s&code=%s&limit=1&order=production_date
+  method: GET
+  timeout: 8s
+  interval: 1s
   max_retry: 3
 websocket:
   route: /rush/v1/ws
