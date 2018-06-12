@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	DEFAULT_URL = "127.0.0.1:8069"
+	DEFAULT_URL = "http://127.0.0.1:8069"
 )
 
 type Config struct {

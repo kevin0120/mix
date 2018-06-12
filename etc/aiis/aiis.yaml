@@ -12,11 +12,18 @@ httpd:
     allowed-origins:
     - '*'
     allow-credentials: true
+    allowed-methods:
+    - GET
+    - HEAD
+    - POST
+    - PUT
+    - PATCH
+    - OPTIONS
 pmon:
-  path: /etc/pmon/PMON.CFG
+  path: /home/gubin/gopath/src/github.com/masami10/aiis/etc/pmon/PMON.CFG
   enable: true
 odoo:
-  url: 127.0.0.1:8069
+  url: http://127.0.0.1:8069
   route: /api/v1/mrp.productions
   headers:
     Content-Type: application/json
@@ -32,4 +39,5 @@ storage:
   max_connection: 60
 rush:
   enable: true
+  workers: 5
 
