@@ -95,7 +95,7 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 	workorder, err = m.service.DB.FindWorkorder(hmi_sn, code)
 	if err != nil {
 		// 通过odoo定位并创建工单
-		body, e := m.service.ODOO.GetWorkorder("", hmi_sn, code)
+		body, e := m.service.ODOO.GetWorkorder(m.service.SN, hmi_sn, code)
 		if e != nil {
 			ctx.StatusCode(iris.StatusBadRequest)
 			ctx.WriteString("cannot find workorder")

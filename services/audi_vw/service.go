@@ -14,7 +14,6 @@ import (
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/minio"
 	"strings"
-	"runtime"
 )
 
 const (
@@ -111,8 +110,8 @@ func (p *Service) Open() error {
 		go w.Start()
 	}
 
-	cpu_num := runtime.NumCPU()
-	for i := 0; i < cpu_num; i++ {
+	//cpu_num := runtime.NumCPU()
+	for i := 0; i < p.config().Workers; i++ {
 		go p.HandleProcess()
 		p.diag.Debug(fmt.Sprintf("init handle process:%d", i + 1))
 	}

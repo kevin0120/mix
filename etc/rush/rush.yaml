@@ -65,6 +65,7 @@ audi/vw:
   read_buf: 65535
   req_time_out: 300ms
   keep_alive_period: 5s
+  workers: 4
 controllers:
 - serial_no: 0001
   protocol: Audi/VW

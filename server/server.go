@@ -236,6 +236,7 @@ func (s *Server) appendHMIService() error {
 	srv.Httpd = s.HTTPDService //http 服务注入
 	srv.DB = s.StorageServie // stroage 服务注入
 	srv.AudiVw = s.AudiVWService
+	srv.SN = s.config.SN
 
 	s.AppendService("hmi", srv)
 

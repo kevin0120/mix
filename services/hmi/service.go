@@ -21,6 +21,7 @@ type Service struct {
 	Httpd  *httpd.Service
 	ODOO	*odoo.Service
 	AudiVw		*audi_vw.Service
+	SN string
 }
 
 func NewService(d Diagnostic) *Service {
