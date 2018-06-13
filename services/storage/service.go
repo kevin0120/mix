@@ -129,7 +129,7 @@ func (s *Service) Store(data interface{}) error {
 }
 
 func (s *Service) FindUnuploadResults(result_upload bool, result []string)([]Results, error) {
-	results := []Results{}
+	var results []Results
 
 	ss := s.eng.Alias("r").Where("r.has_upload = ?", result_upload).And("r.stage = ?", "final").In("r.result", result)
 
@@ -166,7 +166,7 @@ func (s *Service) UpdateCurve(curve *Curves) (*Curves, error) {
 }
 
 func (s *Service) ListCurvesByResult(result_id int64) ([]Curves, error) {
-	var curves []Curves = []Curves{}
+	var curves []Curves
 
 	e := s.eng.Alias("c").Where("c.result_id = ?", result_id).Find(&curves)
 	if e != nil {
@@ -185,14 +185,15 @@ func (s *Service) InsertWorkorder(workorder Workorders) (error) {
 		return nil
 	}
 
-	result_ids := []int64{}
-	err = json.Unmarshal([]byte(workorder.ResultIDs), &result_ids)
+
+	var resultIds []int64
+	err = json.Unmarshal([]byte(workorder.ResultIDs), &resultIds)
 	if err != nil {
 		// 忽略没有结果列表的工单
 		return err
 	}
 
-	if len(result_ids) == 0 {
+	if len(resultIds) == 0 {
 		return nil
 	}
 
@@ -212,9 +213,9 @@ func (s *Service) InsertWorkorder(workorder Workorders) (error) {
 	}
 
 	// 预保存结果
-	for _, result_id := range result_ids {
+	for _, resultId := range resultIds {
 		r := new(Results)
-		r.ResultId = result_id
+		r.ResultId = resultId
 		r.ControllerSN = ""
 		r.WorkorderID = workorder.WorkorderID
 		r.Result = "NONE"
@@ -230,7 +231,7 @@ func (s *Service) InsertWorkorder(workorder Workorders) (error) {
 			session.Rollback()
 			return errors.Wrapf(err, "store data fail")
 		} else {
-			s.diag.Debug(fmt.Sprintf("new result:%d", result_id))
+			s.diag.Debug(fmt.Sprintf("new result:%d", resultId))
 		}
 	}
 
@@ -252,16 +253,16 @@ func (s *Service) WorkorderExists(id int64) (bool, error) {
 	}
 }
 
-func (s *Service) GetResult(result_id int64, count int) (Results, error) {
+func (s *Service) GetResult(resultId int64, count int) (Results, error) {
 	var err error
 
 	result := Results{}
 
 	var rt bool
 	if count == 0 {
-		rt, err = s.eng.Alias("r").Where("r.x_result_id = ?", result_id).Limit(1).Get(&result)
+		rt, err = s.eng.Alias("r").Where("r.x_result_id = ?", resultId).Limit(1).Get(&result)
 	} else {
-		rt, err = s.eng.Alias("r").Where("r.x_result_id = ?", result_id).And("r.count = ?", count).Limit(1).Get(&result)
+		rt, err = s.eng.Alias("r").Where("r.x_result_id = ?", resultId).And("r.count = ?", count).Limit(1).Get(&result)
 	}
 
 	if err != nil {
@@ -276,12 +277,10 @@ func (s *Service) GetResult(result_id int64, count int) (Results, error) {
 }
 
 func (s *Service) GetWorkorder(id int64) (Workorders, error) {
-	var err error
 
-	workorder := Workorders{}
+	var workorder Workorders
 
-	var rt bool
-	rt, err = s.eng.Alias("w").Where("w.x_workorder_id = ?", id).Get(&workorder)
+	rt, err := s.eng.Alias("w").Where("w.x_workorder_id = ?", id).Get(&workorder)
 
 	if err != nil {
 		return workorder, err
@@ -295,12 +294,10 @@ func (s *Service) GetWorkorder(id int64) (Workorders, error) {
 }
 
 func (s *Service) FindWorkorder(hmi_sn string, code string) (Workorders, error) {
-	var err error
 
-	workorder := Workorders{}
+	var workorder Workorders
 
-	var rt bool
-	rt, err = s.eng.Alias("w").Where("w.hmi_sn = ?", hmi_sn).And("w.long_pin = ?", code).Or("w.vin = ?", code).Or("w.knr = ?", code).Get(&workorder)
+	rt, err := s.eng.Alias("w").Where("w.hmi_sn = ?", hmi_sn).And("w.long_pin = ?", code).Or("w.vin = ?", code).Or("w.knr = ?", code).Get(&workorder)
 
 	if err != nil {
 		return workorder, err
@@ -352,10 +349,9 @@ func (s *Service) UpdateResult(result Results) (int64, error) {
 
 func (s *Service) UpdateWorkorder(workorder *Workorders) (*Workorders, error) {
 
-	var err error
 
 	sql := "update `workorders` set status = ? where x_workorder_id = ?"
-	_, err = s.eng.Exec(sql,
+	_, err := s.eng.Exec(sql,
 		workorder.Status,
 		workorder.WorkorderID)
 

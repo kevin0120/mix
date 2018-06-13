@@ -15,6 +15,7 @@ import (
 
 type Diagnostic interface {
 	Error(msg string, err error)
+	CreateWOSuccess(id int64)
 }
 
 type Endpoint struct {
@@ -145,9 +146,9 @@ func (s *Service) getWorkorder(url string , method string) ([]byte, error) {
 }
 
 func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workorders, error) {
-	var final_err error = nil
-	var db_workorders []storage.Workorders
-	for _, v := range workorders {
+	var finalErr error = nil
+	dbWorkorders := make([]storage.Workorders,len(workorders))
+	for i, v := range workorders {
 		o := storage.Workorders{}
 		o.Status = v.Status
 		o.WorkorderID = v.ID
@@ -167,11 +168,11 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 
 		e := s.DB.InsertWorkorder(o)
 		if e != nil {
-			final_err = e
+			finalErr = e
 		}
 
-		db_workorders = append(db_workorders, o)
+		dbWorkorders[i] = o
 	}
 
-	return db_workorders, final_err
+	return dbWorkorders, finalErr
 }

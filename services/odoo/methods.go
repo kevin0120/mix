@@ -17,9 +17,8 @@ type Methods struct {
 
 // 创建工单
 func (m *Methods) postWorkorders(ctx iris.Context) {
-	var err error
 	var workorders []ODOOWorkorder
-	err = ctx.ReadJSON(&workorders)
+	err := ctx.ReadJSON(&workorders)
 
 	if err != nil {
 		// 传输结构错误
@@ -34,10 +33,8 @@ func (m *Methods) postWorkorders(ctx iris.Context) {
 	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString(err.Error())
-
 		return
 	} else {
-
 		ctx.StatusCode(iris.StatusCreated)
 		return
 	}
@@ -59,48 +56,48 @@ func (m *Methods) getResults(ctx iris.Context) {
 		ctx.WriteString("result is required")
 		return
 	}
-	re_list := strings.Split(result, ",")
-	for i, v := range re_list {
-		re_list[i] = strings.ToUpper(v)
-	}
 
-	bool_has_upload, err := strconv.ParseBool(has_upload)
+	hasUpload, err := strconv.ParseBool(has_upload)
 	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("has_upload value error")
 		return
 	}
 
-	resp := []ODOOResultSync{}
-	results, _ := m.service.DB.FindUnuploadResults(bool_has_upload, re_list)
-	target_results := map[int64]storage.Results{}
+	queryMeasResultParam := strings.ToUpper(result)
+
+	results, _ := m.service.DB.FindUnuploadResults(hasUpload, strings.Split(queryMeasResultParam, ","))
+	targetResults := map[int64]storage.Results{}
 	for _, v := range results {
-		tr, exist := target_results[v.ResultId]
+		tr, exist := targetResults[v.ResultId]
 		if exist {
 			// 已存在
 			if v.Count > tr.Count {
-				target_results[v.ResultId] = v
+				targetResults[v.ResultId] = v
 			}
 		} else {
 			// 不存在
-			target_results[v.ResultId] = v
+			targetResults[v.ResultId] = v
 		}
 	}
 
-	for _, v := range target_results {
-		odoo_result := ODOOResultSync{}
+	resp := make([]ODOOResultSync, len(targetResults))
 
-		odoo_result.Control_date = v.UpdateTime.Format(time.RFC3339)
+	i := 0
+	for _, v := range targetResults {
+		odooResultSync := ODOOResultSync{}
 
-		odoo_result.CURObjects = []aiis.CURObject{}
+		odooResultSync.Control_date = v.UpdateTime.Format(time.RFC3339)
+
+		odooResultSync.CURObjects = []aiis.CURObject{}
 
 		curves, err := m.service.DB.ListCurvesByResult(v.ResultId)
 		if err != nil {
 			for _, c := range curves {
-				cur_object := aiis.CURObject{}
-				cur_object.File = c.CurveFile
-				cur_object.OP = c.Count
-				odoo_result.CURObjects = append(odoo_result.CURObjects, cur_object)
+				curObject := aiis.CURObject{}
+				curObject.File = c.CurveFile
+				curObject.OP = c.Count
+				odooResultSync.CURObjects = append(odooResultSync.CURObjects, curObject)
 			}
 		}
 
@@ -110,22 +107,23 @@ func (m *Methods) getResults(ctx iris.Context) {
 		pset := audi_vw.PSetDefine{}
 		json.Unmarshal([]byte(v.PSetDefine), &pset)
 
-		odoo_result.Measure_degree = r.Wi
-		odoo_result.Measure_result = strings.ToLower(v.Result)
-		odoo_result.Measure_t_don = r.Ti
-		odoo_result.Measure_torque = r.Mi
-		odoo_result.Op_time = v.Count
-		odoo_result.Pset_m_max = pset.Mp
-		odoo_result.Pset_m_min = pset.Mm
-		odoo_result.Pset_m_target = pset.Ma
-		odoo_result.Pset_m_threshold = pset.Ms
-		odoo_result.Pset_strategy = pset.Strategy
-		odoo_result.Pset_w_max = pset.Wp
-		odoo_result.Pset_w_min = pset.Wm
-		odoo_result.Pset_w_target = pset.Wa
-		odoo_result.ID = v.ResultId
+		odooResultSync.Measure_degree = r.Wi
+		odooResultSync.Measure_result = strings.ToLower(v.Result)
+		odooResultSync.Measure_t_don = r.Ti
+		odooResultSync.Measure_torque = r.Mi
+		odooResultSync.Op_time = v.Count
+		odooResultSync.Pset_m_max = pset.Mp
+		odooResultSync.Pset_m_min = pset.Mm
+		odooResultSync.Pset_m_target = pset.Ma
+		odooResultSync.Pset_m_threshold = pset.Ms
+		odooResultSync.Pset_strategy = pset.Strategy
+		odooResultSync.Pset_w_max = pset.Wp
+		odooResultSync.Pset_w_min = pset.Wm
+		odooResultSync.Pset_w_target = pset.Wa
+		odooResultSync.ID = v.ResultId
 
-		resp = append(resp, odoo_result)
+		resp[i] = odooResultSync
+		i += 1
 	}
 
 	body, _ := json.Marshal(resp)
@@ -142,9 +140,8 @@ func (m *Methods) patchResult(ctx iris.Context) {
 		return
 	}
 
-	var e error
-	var up ResultPatch
-	e = ctx.ReadJSON(&up)
+	up := ResultPatch{}
+	e := ctx.ReadJSON(&up)
 	if e != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString(e.Error())

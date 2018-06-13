@@ -43,10 +43,11 @@ func (c Config) Validate() error {
 }
 
 func (c Config) index() ([]*Endpoint, error) {
-	m := []*Endpoint{}
+	l := len(c.Urls)
+	m := make([]*Endpoint, l)
 
-	for _, url := range c.Urls {
-		m = append(m, NewEndpoint(url+c.WorkorderGetUrl, c.Headers, c.Method))
+	for i, url := range c.Urls {
+		m[i] = NewEndpoint(url+c.WorkorderGetUrl, c.Headers, c.Method)
 	}
 
 	return m, nil

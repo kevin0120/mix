@@ -12,6 +12,7 @@ import (
 
 type Diagnostic interface {
 	Error(msg string, err error)
+	PutResultDone()
 }
 
 type Endpoint struct {
@@ -92,33 +93,34 @@ func (s *Service) putResult(body interface{}, url string, method string) error {
 	case "PATCH":
 		resp, err = r.Patch(url)
 		if err != nil {
-			return fmt.Errorf("Result Put fail: %s", err.Error())
+			return fmt.Errorf("Result Put fail: %s ", err.Error())
 		} else {
 			if resp.StatusCode() != http.StatusNoContent {
-				return fmt.Errorf("Result Put fail: %d", resp.StatusCode())
+				return fmt.Errorf("Result Put fail: %d ", resp.StatusCode())
 			}
 		}
 	case "PUT":
 		resp, err = r.Put(url)
 		if err != nil {
-			return fmt.Errorf("Result Put fail: %s", err.Error())
+			return fmt.Errorf("Result Put fail: %s ", err.Error())
 		} else {
 			if resp.StatusCode() != http.StatusNoContent {
-				return fmt.Errorf("Result Put fail: %d", resp.StatusCode())
+				return fmt.Errorf("Result Put fail: %d ", resp.StatusCode())
 			}
 		}
 	case "POST":
 		resp, err = r.Post(url)
 		if err != nil {
-			return fmt.Errorf("Result Put fail: %s", err.Error())
+			return fmt.Errorf("Result Put fail: %s ", err.Error())
 		} else {
 			if resp.StatusCode() != http.StatusNoContent {
-				return fmt.Errorf("Result Put fail: %d", resp.StatusCode())
+				return fmt.Errorf("Result Put fail: %d ", resp.StatusCode())
 			}
 		}
 	default:
 		return errors.New("Result Put :the Method is wrong")
 
 	}
+	s.diag.PutResultDone()
 	return nil
 }

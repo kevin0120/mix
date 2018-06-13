@@ -3,7 +3,6 @@ package hmi
 import (
 	"github.com/kataras/iris"
 	"encoding/json"
-	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/odoo"
 )
 
@@ -91,8 +90,7 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 		return
 	}
 
-	var workorder storage.Workorders
-	workorder, err = m.service.DB.FindWorkorder(hmi_sn, code)
+	workorder, err := m.service.DB.FindWorkorder(hmi_sn, code)
 	if err != nil {
 		// 通过odoo定位并创建工单
 		body, e := m.service.ODOO.GetWorkorder(m.service.SN, hmi_sn, code)
@@ -101,9 +99,9 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 			ctx.WriteString("cannot find workorder")
 			return
 		} else {
-			var odoo_workorders []odoo.ODOOWorkorder
-			json.Unmarshal(body, &odoo_workorders)
-			o, e := m.service.ODOO.CreateWorkorders(odoo_workorders)
+			var odooWorkorders []odoo.ODOOWorkorder
+			json.Unmarshal(body, &odooWorkorders)
+			o, e := m.service.ODOO.CreateWorkorders(odooWorkorders)
 			if e != nil {
 				ctx.StatusCode(iris.StatusBadRequest)
 				ctx.WriteString("save workorder failed")

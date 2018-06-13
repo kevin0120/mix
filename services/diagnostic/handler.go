@@ -6,6 +6,7 @@ import (
 	"log"
 	"runtime"
 	"time"
+	"fmt"
 )
 
 type logLevel int
@@ -274,6 +275,10 @@ func (h *AiisHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
 
+func (h *AiisHandler) PutResultDone() {
+	h.l.Debug("Put Result to AIIS successful")
+}
+
 // Odoo Handler
 
 type OdooHandler struct {
@@ -282,6 +287,10 @@ type OdooHandler struct {
 
 func (h *OdooHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
+}
+
+func (h *OdooHandler) CreateWOSuccess(id int64) {
+	h.l.Debug(fmt.Sprintf("Create WO successful %d", id))
 }
 
 // Minio Handler

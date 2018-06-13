@@ -52,10 +52,11 @@ func (c Config) Validate() error {
 }
 
 func (c Config) index() ([]*Endpoint, error) {
-	m := []*Endpoint{}
+	capacity := len(c.Urls)
+	m := make([]*Endpoint, capacity, capacity) //提前分配内存
 
-	for _, url := range c.Urls {
-		m = append(m, NewEndpoint(url+c.ResultPushUrl, c.Headers, c.PushMethod))
+	for idx, url := range c.Urls {
+		m[idx] = NewEndpoint(url+c.ResultPushUrl, c.Headers, c.PushMethod)
 	}
 
 	return m, nil

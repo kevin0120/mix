@@ -44,13 +44,14 @@ type Service struct {
 	listener		*socket_listener.SocketListener
 	err 			chan error
 	Controllers		map[string]*Controller
-	mux 			*sync.Mutex
 	diag 			Diagnostic
 	DB				*storage.Service
 	WS				*wsnotify.Service
 	Aiis			*aiis.Service
 	Minio			*minio.Service
 	handlers		Handlers
+	wg 				sync.WaitGroup
+	closing 		chan struct{}
 	handle_buffer	chan string
 }
 
@@ -65,9 +66,10 @@ func NewService(c Config, d Diagnostic) *Service {
 	s := &Service{
 		Controllers: map[string]*Controller{},
 		name: controller.AUDIPROTOCOL,
-		mux: new(sync.Mutex),
 		err: make(chan error ,1),
 		diag: d,
+		wg: 	sync.WaitGroup{},
+		closing: make(chan struct{},1),
 		handlers: Handlers{},
 	}
 
@@ -93,7 +95,13 @@ func (p *Service) AddNewController(cfg controller.Config) {
 	p.Controllers[cfg.SN] = &c
 }
 
-func (p *Service) Write(serial_no string ,buf []byte)  error{
+func (p *Service) Write(sn string ,buf []byte)  error{
+	if _, ok := p.Controllers[sn]; !ok {
+		return fmt.Errorf("can not found controller :%s", sn)
+	}
+	c := p.Controllers[sn]
+	s := c.Sequence()
+	c.Write(buf, s)
 	return nil
 }
 
@@ -107,11 +115,11 @@ func (p *Service) Open() error {
 	}
 
 	for _, w := range p.Controllers{
-		go w.Start()
+		go w.Start() //异步启动控制器
 	}
 
-	//cpu_num := runtime.NumCPU()
 	for i := 0; i < p.config().Workers; i++ {
+		p.wg.Add(1)
 		go p.HandleProcess()
 		p.diag.Debug(fmt.Sprintf("init handle process:%d", i + 1))
 	}
@@ -125,19 +133,24 @@ func (p *Service) Close() error {
 		return errors.Wrapf(err, "Close Protocol %s Listener fail", p.name)
 	}
 
-	p.mux.Lock()
-	defer p.mux.Unlock()
 	for _,w := range p.Controllers {
 		err := w.Close()
 		if err != nil {
 			return errors.Wrapf(err, "Close Protocol %s Writer fail", p.name)
 		}
 	}
+	for i := 0; i < p.config().Workers; i++ {
+		p.closing <- struct{}{}
+		p.diag.Debug(fmt.Sprintf("Close AUDIVW Server Handler:%d", i + 1))
+	}
+
+	p.wg.Wait() //阻塞 等待全部handler关闭
 
 	return nil
 }
 
 func (p *Service) NewConn(c net.Conn) {}
+
 
 // 服务端读取
 func (p *Service) Read(c net.Conn) {
@@ -145,6 +158,9 @@ func (p *Service) Read(c net.Conn) {
 	defer ssl.InterListener.RemoveConnection(c)
 	defer c.Close()
 
+	rest := 0
+	body := ""
+	header := CVI3Header{}
 	buffer := make([]byte, p.config().ReadBufferSize)
 	for {
 
@@ -158,39 +174,53 @@ func (p *Service) Read(c net.Conn) {
 		if len(msg) < HEADER_LEN {
 			continue
 		}
-
-		header := CVI3Header{}
-		header.Deserialize(msg[0: HEADER_LEN])
-		//fmt.Printf("%d\n", header.SIZ)
-		var body string = msg[HEADER_LEN: n]
-		var rest int = header.SIZ - HEADER_LEN - n
-		for {
-			if rest <= 0 {
-				break
+		off := 0 //循环前偏移为0
+		for off < n {
+			if rest == 0{
+				header.Deserialize(msg[off: off+ HEADER_LEN])
+				if n-off > HEADER_LEN + header.SIZ {
+					//粘包
+					body = msg[off+ HEADER_LEN: off+ HEADER_LEN + header.SIZ]
+					p.Parse([]byte(body))
+					p.CVIResponse(&header, c)
+					off += HEADER_LEN + header.SIZ
+					rest = 0 //同样解析头
+				}else {
+					body = msg[off+ HEADER_LEN: n]
+					rest = header.SIZ - (n  - (off + HEADER_LEN))
+					break
+				}
+			} else {
+				if n-off > rest {
+					//粘包
+					body += string(buffer[off: off + rest]) //已经是完整的包
+					p.Parse([]byte(body))
+					p.CVIResponse(&header, c)
+					off += rest
+					rest = 0 //进入解析头
+				}else {
+					body += string(buffer[off: n])
+					rest -= n - off
+					break
+				}
 			}
-			n, err := c.Read(buffer)
-			if err != nil {
-				break
-			}
-			body += string(buffer[0:n])
-			rest -= n
 		}
+	}
+}
 
-		p.Parse([]byte(body))
 
-		if header.TYP == Header_type_request_with_reply || header.TYP == Header_type_keep_alive {
-			// 执行应答
-			reply := CVI3Header{}
-			reply.Init()
-			reply.TYP = Header_type_reply
-			reply.MID = header.MID
-			reply_packet := reply.Serialize()
+func (p *Service) CVIResponse (header *CVI3Header, c net.Conn) {
+	if header.TYP == Header_type_request_with_reply || header.TYP == Header_type_keep_alive {
+		// 执行应答
+		reply := CVI3Header{}
+		reply.Init()
+		reply.TYP = Header_type_reply
+		reply.MID = header.MID
+		replyPacket := reply.Serialize()
 
-			_, err := c.Write([]byte(reply_packet))
-			if err != nil {
-				print("server reply err:%s\n", err.Error())
-				break
-			}
+		_, err := c.Write([]byte(replyPacket))
+		if err != nil {
+			print("server reply err:%s\n", err.Error())
 		}
 	}
 }
@@ -208,19 +238,23 @@ func (p *Service) Parse(buf []byte)  ([]byte, error){
 
 func (p *Service) HandleProcess() {
 	var context = HandlerContext {
-		cvi3_result: CVI3Result{},
-		controller_curve: ControllerCurve{},
-		controller_result: ControllerResult{},
-		controller_curve_file: ControllerCurveFile{},
-		db_curve: storage.Curves{},
-		ws_result: wsnotify.WSResult{},
-		aiis_result: aiis.AIISResult{},
-		aiis_curve: aiis.CURObject{},
+		cvi3Result:          CVI3Result{},
+		controllerCurve:     ControllerCurve{},
+		controllerResult:    ControllerResult{},
+		controllerCurveFile: ControllerCurveFile{},
+		dbCurve:             storage.Curves{},
+		wsResult:            wsnotify.WSResult{},
+		aiisResult:          aiis.AIISResult{},
+		aiisCurve:           aiis.CURObject{},
 	}
 
-	for {
-		msg := <- p.handle_buffer
+	select {
+	case msg := <- p.handle_buffer:
 		p.handlers.HandleMsg(msg, &context)
+
+	case <- p.closing:
+		p.wg.Done()
+		return
 	}
 }
 
@@ -234,7 +268,7 @@ func (p *Service) GetControllersStatus(sn string) ([]ControllerStatus, error) {
 		} else {
 			s := ControllerStatus{}
 			s.SN = sn
-			s.Status = c.GetStatus()
+			s.Status = c.Status()
 			status = append(status, s)
 			return status, nil
 		}
@@ -242,7 +276,7 @@ func (p *Service) GetControllersStatus(sn string) ([]ControllerStatus, error) {
 		for k, v := range p.Controllers {
 			s := ControllerStatus{}
 			s.SN = k
-			s.Status = v.GetStatus()
+			s.Status = v.Status()
 			status = append(status, s)
 		}
 
@@ -259,40 +293,39 @@ func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64,
 		return errors.New(ERR_CVI3_NOT_FOUND)
 	}
 
-	if c.GetStatus() == STATUS_OFFLINE {
+	if c.Status() == STATUS_OFFLINE {
 		// 控制器离线
 		return errors.New(ERR_CVI3_OFFLINE)
 	}
 
 	// 设定pset并判断控制器响应
-	serial, err := c.PSet(pset, workorder_id, result_id, count, user_id)
+	_, err := c.PSet(pset, workorder_id, result_id, count, user_id)
 	if err != nil {
 		// 控制器请求失败
 		return errors.New(ERR_CVI3_REQUEST)
 	}
 
-	var header_str string
-	for i := 0; i < 6; i++ {
-		header_str = c.Response.get(serial)
-		if header_str != "" {
-			c.Response.remove(serial)
-			break
+
+	i := 0
+
+	for {
+		select {
+		case <- time.After(time.Duration(c.req_timeout)):
+			i += 1
+			if i >= 6 {
+				return errors.New(ERR_CVI3_REPLY_TIMEOUT)
+			}
+		case headerStr := <-c.response:
+			header := CVI3Header{}
+			header.Deserialize(headerStr)
+			if !header.Check() {
+				// 控制器请求失败
+				return errors.New(ERR_CVI3_REPLY)
+			}
+			return nil
 		}
-		time.Sleep(time.Duration(c.req_timeout))
-	}
-
-	if header_str == "" {
-		// 控制器请求失败
-		return errors.New(ERR_CVI3_REPLY_TIMEOUT)
-	}
-
-	//fmt.Printf("reply_header:%s\n", header_str)
-	header := CVI3Header{}
-	header.Deserialize(header_str)
-	if !header.Check() {
-		// 控制器请求失败
-		return errors.New(ERR_CVI3_REPLY)
 	}
 
 	return nil
+
 }

@@ -43,11 +43,11 @@ func NewService(cs Configs, d Diagnostic, pAudi Protocol) (*Service, error) {
 	return s, nil
 }
 
-func (s *Service) Write(serial_no string, buf []byte) error {
+func (s *Service) Write(serialNo string, buf []byte) error {
 
-	controller := s.protocols[serial_no]
+	controller := s.protocols[serialNo]
 
-	return controller.Write(serial_no, buf)
+	return controller.Write(serialNo, buf)
 }
 
 func (s *Service) Open() error {

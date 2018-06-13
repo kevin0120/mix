@@ -17,15 +17,15 @@ const(
 )
 
 type HandlerContext struct {
-	cvi3_result CVI3Result
-	controller_curve ControllerCurve
-	controller_result ControllerResult
-	controller_curve_file ControllerCurveFile
-	db_curve	storage.Curves
-	result_ids []int64
-	ws_result wsnotify.WSResult
-	aiis_result aiis.AIISResult
-	aiis_curve aiis.CURObject
+	cvi3Result          CVI3Result
+	controllerCurve     ControllerCurve
+	controllerResult    ControllerResult
+	controllerCurveFile ControllerCurveFile
+	dbCurve             storage.Curves
+	resultIds           []int64
+	wsResult            wsnotify.WSResult
+	aiisResult          aiis.AIISResult
+	aiisCurve           aiis.CURObject
 }
 
 type Handlers struct {
@@ -36,7 +36,7 @@ type Handlers struct {
 func (h *Handlers) handleResult(result *ControllerResult, ctx *HandlerContext) (error) {
 	h.AudiVw.diag.Debug("处理结果数据 ...")
 
-	var need_push_aiis bool = false
+	var needPushAiis bool = false
 
 	var err error
 	r, err := h.AudiVw.DB.GetResult(result.Result_id, 0)
@@ -66,11 +66,11 @@ func (h *Handlers) handleResult(result *ControllerResult, ctx *HandlerContext) (
 	h.AudiVw.diag.Debug("缓存结果到数据库 ...")
 
 	if r.Count >= int(workorder.MaxRedoTimes) || r.Result == RESULT_OK {
-		need_push_aiis = true
+		needPushAiis = true
 		r.Stage = RESULT_STAGE_FINAL
 
-		json.Unmarshal([]byte(workorder.ResultIDs), &ctx.result_ids)
-		if r.ResultId == ctx.result_ids[len(ctx.result_ids) - 1] {
+		json.Unmarshal([]byte(workorder.ResultIDs), &ctx.resultIds)
+		if r.ResultId == ctx.resultIds[len(ctx.resultIds) - 1] {
 			// 标记工单已完成
 			workorder.Status = "finished"
 			h.AudiVw.DB.UpdateWorkorder(&workorder)
@@ -87,65 +87,65 @@ func (h *Handlers) handleResult(result *ControllerResult, ctx *HandlerContext) (
 	}
 
 	// 结果推送hmi
-	ctx.ws_result.Result_id = result.Result_id
-	ctx.ws_result.Count = result.Count
-	ctx.ws_result.Result = result.Result
-	ctx.ws_result.MI = result.ResultValue.Mi
-	ctx.ws_result.WI = result.ResultValue.Wi
-	ctx.ws_result.TI = result.ResultValue.Ti
-	ws_str, _ := json.Marshal(ctx.ws_result)
+	ctx.wsResult.Result_id = result.Result_id
+	ctx.wsResult.Count = result.Count
+	ctx.wsResult.Result = result.Result
+	ctx.wsResult.MI = result.ResultValue.Mi
+	ctx.wsResult.WI = result.ResultValue.Wi
+	ctx.wsResult.TI = result.ResultValue.Ti
+	ws_str, _ := json.Marshal(ctx.wsResult)
 
 	h.AudiVw.diag.Debug("Websocket推送结果到HMI")
 
 	h.AudiVw.WS.WSSendResult(workorder.HMISN, string(ws_str))
 
-	if need_push_aiis {
+	if needPushAiis {
 
 		// 结果推送AIIS
 		if r.Result == RESULT_OK {
-			ctx.aiis_result.Final_pass = ODOO_RESULT_PASS
+			ctx.aiisResult.Final_pass = ODOO_RESULT_PASS
 			if r.Count == 1 {
-				ctx.aiis_result.One_time_pass = ODOO_RESULT_PASS
+				ctx.aiisResult.One_time_pass = ODOO_RESULT_PASS
 			} else {
-				ctx.aiis_result.One_time_pass = ODOO_RESULT_FAIL
+				ctx.aiisResult.One_time_pass = ODOO_RESULT_FAIL
 			}
 		} else {
-			ctx.aiis_result.Final_pass = ODOO_RESULT_FAIL
-			ctx.aiis_result.One_time_pass = ODOO_RESULT_FAIL
+			ctx.aiisResult.Final_pass = ODOO_RESULT_FAIL
+			ctx.aiisResult.One_time_pass = ODOO_RESULT_FAIL
 		}
 
-		ctx.aiis_result.Control_date = r.UpdateTime.Format(time.RFC3339)
+		ctx.aiisResult.Control_date = r.UpdateTime.Format(time.RFC3339)
 
-		ctx.aiis_result.Measure_degree = result.ResultValue.Wi
-		ctx.aiis_result.Measure_result = strings.ToLower(result.Result)
-		ctx.aiis_result.Measure_t_don = result.ResultValue.Ti
-		ctx.aiis_result.Measure_torque = result.ResultValue.Mi
-		ctx.aiis_result.Op_time = result.Count
-		ctx.aiis_result.Pset_m_max = result.PSetDefine.Mp
-		ctx.aiis_result.Pset_m_min = result.PSetDefine.Mm
-		ctx.aiis_result.Pset_m_target = result.PSetDefine.Ma
-		ctx.aiis_result.Pset_m_threshold = result.PSetDefine.Ms
-		ctx.aiis_result.Pset_strategy = result.PSetDefine.Strategy
-		ctx.aiis_result.Pset_w_max = result.PSetDefine.Wp
-		ctx.aiis_result.Pset_w_min = result.PSetDefine.Wm
-		ctx.aiis_result.Pset_w_target = result.PSetDefine.Wa
-		ctx.aiis_result.Pset_w_threshold = 1
-		ctx.aiis_result.UserID = result.UserID
+		ctx.aiisResult.Measure_degree = result.ResultValue.Wi
+		ctx.aiisResult.Measure_result = strings.ToLower(result.Result)
+		ctx.aiisResult.Measure_t_don = result.ResultValue.Ti
+		ctx.aiisResult.Measure_torque = result.ResultValue.Mi
+		ctx.aiisResult.Op_time = result.Count
+		ctx.aiisResult.Pset_m_max = result.PSetDefine.Mp
+		ctx.aiisResult.Pset_m_min = result.PSetDefine.Mm
+		ctx.aiisResult.Pset_m_target = result.PSetDefine.Ma
+		ctx.aiisResult.Pset_m_threshold = result.PSetDefine.Ms
+		ctx.aiisResult.Pset_strategy = result.PSetDefine.Strategy
+		ctx.aiisResult.Pset_w_max = result.PSetDefine.Wp
+		ctx.aiisResult.Pset_w_min = result.PSetDefine.Wm
+		ctx.aiisResult.Pset_w_target = result.PSetDefine.Wa
+		ctx.aiisResult.Pset_w_threshold = 1
+		ctx.aiisResult.UserID = result.UserID
 
 		curves, err := h.AudiVw.DB.ListCurvesByResult(result.Result_id)
 		if err != nil {
 			return err
 		}
 
-		ctx.aiis_result.CURObjects = []aiis.CURObject{}
+		ctx.aiisResult.CURObjects = []aiis.CURObject{}
 		for _, v := range curves {
-			ctx.aiis_curve.OP = v.Count
-			ctx.aiis_curve.File = v.CurveFile
-			ctx.aiis_result.CURObjects = append(ctx.aiis_result.CURObjects, ctx.aiis_curve)
+			ctx.aiisCurve.OP = v.Count
+			ctx.aiisCurve.File = v.CurveFile
+			ctx.aiisResult.CURObjects = append(ctx.aiisResult.CURObjects, ctx.aiisCurve)
 		}
 
 
-		h.PutResultToAIIS(ctx.aiis_result, r.ResultId)
+		h.PutResultToAIIS(ctx.aiisResult, r.ResultId)
 
 	}
 
@@ -179,25 +179,25 @@ func (h *Handlers) handleCurve(curve *ControllerCurve, ctx *HandlerContext) (err
 	h.AudiVw.diag.Debug("处理波形数据 ...")
 
 	// 保存波形到数据库
-	ctx.db_curve.ResultID = curve.ResultID
-	ctx.db_curve.CurveData = curve.CurveData
-	ctx.db_curve.CurveFile = curve.CurveFile
-	ctx.db_curve.Count = curve.Count
-	ctx.db_curve.HasUpload = false
+	ctx.dbCurve.ResultID = curve.ResultID
+	ctx.dbCurve.CurveData = curve.CurveData
+	ctx.dbCurve.CurveFile = curve.CurveFile
+	ctx.dbCurve.Count = curve.Count
+	ctx.dbCurve.HasUpload = false
 
-	exist, err := h.AudiVw.DB.CurveExist(&ctx.db_curve)
+	exist, err := h.AudiVw.DB.CurveExist(&ctx.dbCurve)
 	if err != nil {
 		return err
 	} else {
 		h.AudiVw.diag.Debug("缓存波形数据到数据库 ...")
 		if exist {
-			_, err := h.AudiVw.DB.UpdateCurve(&ctx.db_curve)
+			_, err := h.AudiVw.DB.UpdateCurve(&ctx.dbCurve)
 			if err != nil {
 				h.AudiVw.diag.Error("缓存波形失败", err)
 				return err
 			}
 		} else {
-			err := h.AudiVw.DB.Store(ctx.db_curve)
+			err := h.AudiVw.DB.Store(ctx.dbCurve)
 			if err != nil {
 				h.AudiVw.diag.Error("缓存波形失败", err)
 				return err
@@ -214,9 +214,9 @@ func (h *Handlers) handleCurve(curve *ControllerCurve, ctx *HandlerContext) (err
 		h.AudiVw.diag.Error("对象存储保存失败", err)
 		return err
 	} else {
-		ctx.db_curve.HasUpload = true
+		ctx.dbCurve.HasUpload = true
 		h.AudiVw.diag.Debug("对象存储保存成功，更新本地结果标识")
-		_, err = h.AudiVw.DB.UpdateCurve(&ctx.db_curve)
+		_, err = h.AudiVw.DB.UpdateCurve(&ctx.dbCurve)
 		if err != nil {
 			return err
 		}
@@ -230,27 +230,27 @@ func (h *Handlers) HandleMsg(msg string, ctx *HandlerContext) {
 
 	h.AudiVw.diag.Debug(fmt.Sprintf("收到结果数据:%s\n", msg))
 
-	err := xml.Unmarshal([]byte(msg), &ctx.cvi3_result)
+	err := xml.Unmarshal([]byte(msg), &ctx.cvi3Result)
 	if err != nil {
 		h.AudiVw.diag.Error(fmt.Sprint("HandlerMsg err:", msg), err)
 		return
 	}
 
 	//结果数据
-	XML2Result(&ctx.cvi3_result, &ctx.controller_result)
+	XML2Result(&ctx.cvi3Result, &ctx.controllerResult)
 
 	// 波形文件
-	XML2Curve(&ctx.cvi3_result, &ctx.controller_curve_file)
+	XML2Curve(&ctx.cvi3Result, &ctx.controllerCurveFile)
 
-	s_curvedata, _ := json.Marshal(ctx.controller_curve_file)
-	ctx.controller_curve.CurveData = string(s_curvedata)
-	ctx.controller_curve.Count = ctx.controller_result.Count
-	ctx.controller_curve.CurveFile = ctx.controller_result.CurFile
-	ctx.controller_curve.ResultID = ctx.controller_result.Result_id
+	sCurvedata, _ := json.Marshal(ctx.controllerCurveFile)
+	ctx.controllerCurve.CurveData = string(sCurvedata)
+	ctx.controllerCurve.Count = ctx.controllerResult.Count
+	ctx.controllerCurve.CurveFile = ctx.controllerResult.CurFile
+	ctx.controllerCurve.ResultID = ctx.controllerResult.Result_id
 
-	e := h.handleCurve(&ctx.controller_curve, ctx)
+	e := h.handleCurve(&ctx.controllerCurve, ctx)
 	if  e == nil {
-		h.handleResult(&ctx.controller_result, ctx)
+		h.handleResult(&ctx.controllerResult, ctx)
 	} else {
 		h.AudiVw.diag.Error("handleCurve err", err)
 	}
