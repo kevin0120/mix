@@ -254,10 +254,10 @@ func (c *Controller) Read(conn net.Conn){
 }
 
 // PSet程序设定
-func (c *Controller) PSet(pset int, workorder_id int64, reseult_id int64, count int) (uint, error) {
+func (c *Controller) PSet(pset int, workorder_id int64, reseult_id int64, count int, user_id int64) (uint, error) {
 
 	sdate, stime := utils.GetDateTime()
-	xml_pset := fmt.Sprintf(Xml_pset, sdate, stime, c.cfg.SN, workorder_id, reseult_id, count, pset)
+	xml_pset := fmt.Sprintf(Xml_pset, sdate, stime, c.cfg.SN, workorder_id, reseult_id, count, user_id, pset)
 
 	seq := c.get_sequence()
 	pset_packet, seq := GeneratePacket(seq, Header_type_request_with_reply, xml_pset)

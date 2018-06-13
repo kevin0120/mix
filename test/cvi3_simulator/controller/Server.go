@@ -89,7 +89,7 @@ func (cvi3_server *CVI3Server) Read(c net.Conn) {
 		if len(msg) < audi_vw.HEADER_LEN {
 			continue
 		}
-		fmt.Printf("%s\n", msg)
+		//fmt.Printf("%s\n", msg)
 
 		header := audi_vw.CVI3Header{}
 		header.Deserialize(msg[0: audi_vw.HEADER_LEN])

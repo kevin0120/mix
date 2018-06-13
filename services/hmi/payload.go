@@ -5,6 +5,7 @@ type PSet struct {
 	PSet          int    `json:"pset"`
 	Result_id     int64  `json:"result_id"`
 	Count         int    `json:"count"`
+	UserID		  int64	 `json:"user_id"`
 }
 
 type Worksheet struct {

@@ -140,11 +140,9 @@ func (cvi3_client *CVI3Client) AudoPushResult() {
 
 				cvi3_client.PushResult(pset)
 
-				time.Sleep(5 * time.Second)
 			}
 		}
 
-		time.Sleep(10 * time.Second)
 	}
 
 
@@ -161,10 +159,10 @@ func (cvi3_client *CVI3Client) manage() {
 		v := <- cvi3_client.buffer
 		err := cvi3_client.client.Write([]byte(v))
 		if err != nil {
-			break
+			fmt.Printf("控制器 %s 发送失败:%s\n", err.Error())
 		}
 
-		fmt.Printf("控制器:%s 发送:%s\n", cvi3_client.SN, string(v))
+		//fmt.Printf("控制器:%s 发送:%s\n", cvi3_client.SN, string(v))
 
 		<- time.After(time.Duration(300 * time.Millisecond)) //300毫秒发送一次信号
 	}

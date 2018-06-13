@@ -8,6 +8,7 @@ import (
 	"sync/atomic"
 	"time"
 	"encoding/json"
+	"sync"
 )
 
 type Diagnostic interface {
@@ -23,12 +24,14 @@ type Service struct {
 	diag        Diagnostic
 	configValue atomic.Value
 	eng         *xorm.Engine
+	w_mtx		sync.Mutex
 }
 
 func NewService(c Config, d Diagnostic) *Service {
 
 	s := &Service{
 		diag: d,
+		w_mtx: sync.Mutex{},
 	}
 
 	s.configValue.Store(c)
@@ -107,6 +110,9 @@ func (s *Service) Close() error {
 }
 
 func (s *Service) Store(data interface{}) error {
+	defer s.w_mtx.Unlock()
+	s.w_mtx.Lock()
+
 	session := s.eng.NewSession()
 	defer session.Close()
 
@@ -152,6 +158,8 @@ func (s *Service) CurveExist(curve *Curves) (bool, error) {
 }
 
 func (s *Service) UpdateCurve(curve *Curves) (*Curves, error) {
+	defer s.w_mtx.Unlock()
+	s.w_mtx.Lock()
 
 	sql := "update `curves` set has_upload = ?, curve_file = ?, curve_data = ? where result_id = ? and count = ?"
 	_, err := s.eng.Exec(sql,
@@ -296,13 +304,13 @@ func (s *Service) GetWorkorder(id int64) (Workorders, error) {
 	}
 }
 
-func (s *Service) FindWorkorder(hmi_sn string, vin string, longpin string) (Workorders, error) {
+func (s *Service) FindWorkorder(hmi_sn string, code string) (Workorders, error) {
 	var err error
 
 	workorder := Workorders{}
 
 	var rt bool
-	rt, err = s.eng.Alias("w").Where("w.hmi_sn = ?", hmi_sn).And("w.long_pin = ?", longpin).Or("w.vin = ?", vin).Get(&workorder)
+	rt, err = s.eng.Alias("w").Where("w.hmi_sn = ?", hmi_sn).And("w.long_pin = ?", code).Or("w.vin = ?", code).Or("w.knr = ?", code).Get(&workorder)
 
 	if err != nil {
 		return workorder, err
@@ -330,6 +338,9 @@ func (s *Service) UpdateResultUpload(upload bool, r_id int64) (int64, error) {
 }
 
 func (s *Service) UpdateResult(result Results) (int64, error) {
+	defer s.w_mtx.Unlock()
+	s.w_mtx.Lock()
+
 	sql := "update `results` set controller_sn = ?, result = ?, has_upload = ?, stage = ?, update_time = ?, pset_define = ?, result_value = ?, count = ? where x_result_id = ?"
 	r, err := s.eng.Exec(sql,
 		result.ControllerSN,
@@ -352,6 +363,9 @@ func (s *Service) UpdateResult(result Results) (int64, error) {
 }
 
 func (s *Service) UpdateWorkorder(workorder *Workorders) (*Workorders, error) {
+	defer s.w_mtx.Unlock()
+	s.w_mtx.Lock()
+
 	var err error
 
 	sql := "update `workorders` set status = ? where x_workorder_id = ?"

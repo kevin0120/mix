@@ -2,6 +2,8 @@ package aiis
 
 type AIISResult struct {
 	Pset_m_threshold float64 `json:"pset_m_threshold"`
+	Pset_w_threshold float64 `json:"pset_w_threshold"`
+	UserID			 int64	 `json:"user_id"`
 	Pset_m_max       float64 `json:"pset_m_max"`
 	Pset_m_min       float64 `json:"pset_m_min"`
 	Control_date     string  `json:"control_date"`

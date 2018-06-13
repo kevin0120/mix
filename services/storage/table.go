@@ -22,6 +22,7 @@ type Results struct {
 	Id   			int64		`xorm:"pk autoincr notnull 'id'"`
 	ResultId     	int64       `xorm:"bigint 'x_result_id'"`
 	WorkorderID  	int64       `xorm:"bigint 'x_workorder_id'"`
+	UserID  		int64       `xorm:"bigint 'user_id'"`
 	ControllerSN 	string    `xorm:"varchar(64) 'controller_sn'"`
 	Result       	string    `xorm:"varchar(32) 'result'"`
 	HasUpload    	bool      `xorm:"bool 'has_upload'"`

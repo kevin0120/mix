@@ -14,6 +14,7 @@ import (
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/minio"
 	"strings"
+	"runtime"
 )
 
 const (
@@ -71,7 +72,6 @@ func NewService(c Config, d Diagnostic) *Service {
 		handlers: Handlers{},
 	}
 
-	s.handlers.Init()
 	s.handle_buffer = make(chan string, 1024)
 	s.handlers.AudiVw = s
 	lis := socket_listener.NewSocketListener(addr, s)
@@ -111,7 +111,11 @@ func (p *Service) Open() error {
 		go w.Start()
 	}
 
-	go p.HandleProcess()
+	cpu_num := runtime.NumCPU()
+	for i := 0; i < cpu_num; i++ {
+		go p.HandleProcess()
+		p.diag.Debug(fmt.Sprintf("init handle process:%d", i + 1))
+	}
 
 	return nil
 }
@@ -150,11 +154,11 @@ func (p *Service) Read(c net.Conn) {
 			p.diag.Error("read err", err)
 			break
 		}
+
 		msg := string(buffer[0:n])
 		if len(msg) < HEADER_LEN {
 			continue
 		}
-
 
 		header := CVI3Header{}
 		header.Deserialize(msg[0: HEADER_LEN])
@@ -204,9 +208,20 @@ func (p *Service) Parse(buf []byte)  ([]byte, error){
 }
 
 func (p *Service) HandleProcess() {
+	var context = HandlerContext {
+		cvi3_result: CVI3Result{},
+		controller_curve: ControllerCurve{},
+		controller_result: ControllerResult{},
+		controller_curve_file: ControllerCurveFile{},
+		db_curve: storage.Curves{},
+		ws_result: wsnotify.WSResult{},
+		aiis_result: aiis.AIISResult{},
+		aiis_curve: aiis.CURObject{},
+	}
+
 	for {
 		msg := <- p.handle_buffer
-		p.handlers.HandleMsg(msg)
+		p.handlers.HandleMsg(msg, &context)
 	}
 }
 
@@ -237,7 +252,7 @@ func (p *Service) GetControllersStatus(sn string) ([]ControllerStatus, error) {
 }
 
 // 设置拧接程序
-func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64, count int) (error) {
+func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64, count int, user_id int64) (error) {
 	// 判断控制器是否存在
 	c, exist := p.Controllers[sn]
 	if !exist {
@@ -251,7 +266,7 @@ func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64,
 	}
 
 	// 设定pset并判断控制器响应
-	serial, err := c.PSet(pset, workorder_id, result_id, count)
+	serial, err := c.PSet(pset, workorder_id, result_id, count, user_id)
 	if err != nil {
 		// 控制器请求失败
 		return errors.New(ERR_CVI3_REQUEST)

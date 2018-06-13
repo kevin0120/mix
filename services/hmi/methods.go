@@ -65,7 +65,7 @@ func (m *Methods) putPSets(ctx iris.Context) {
 	}
 
 	// 通过控制器设定程序
-	err = m.service.AudiVw.PSet(pset.Controller_SN, pset.PSet, result.WorkorderID, pset.Result_id, pset.Count)
+	err = m.service.AudiVw.PSet(pset.Controller_SN, pset.PSet, result.WorkorderID, pset.Result_id, pset.Count, pset.UserID)
 	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString(err.Error())
@@ -77,7 +77,7 @@ func (m *Methods) putPSets(ctx iris.Context) {
 func (m *Methods) getWorkorder(ctx iris.Context) {
 	var err error
 	hmi_sn := ctx.URLParam("hmi_sn")
-	vin_or_longpin := ctx.URLParam("vin_or_longpin")
+	code := ctx.URLParam("vin_or_knr")
 
 	if hmi_sn == "" {
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -85,17 +85,17 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 		return
 	}
 
-	if vin_or_longpin == ""  {
+	if code == ""  {
 		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("vin_or_longpin is required")
+		ctx.WriteString("code is required")
 		return
 	}
 
 	var workorder storage.Workorders
-	workorder, err = m.service.DB.FindWorkorder(hmi_sn, vin_or_longpin, "")
+	workorder, err = m.service.DB.FindWorkorder(hmi_sn, code)
 	if err != nil {
 		// 通过odoo定位并创建工单
-		body, e := m.service.ODOO.GetWorkorder("", hmi_sn, vin_or_longpin)
+		body, e := m.service.ODOO.GetWorkorder("", hmi_sn, code)
 		if e != nil {
 			ctx.StatusCode(iris.StatusBadRequest)
 			ctx.WriteString("cannot find workorder")
