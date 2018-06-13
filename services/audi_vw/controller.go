@@ -36,7 +36,7 @@ type Controller struct {
 	response		  chan string
 	sequence          uint // 1~9999
 	buffer            chan []byte
-	//Response          ResponseQueue
+	Response          ResponseQueue
 	mux_seq           sync.Mutex
 	keep_period       time.Duration
 	req_timeout       time.Duration
@@ -227,9 +227,9 @@ func (c *Controller) Connect() error {
 	c.StatusValue.Store(STATUS_OFFLINE)
 	c.sequence = 0
 
-	//c.Response = ResponseQueue{
-	//	Results: map[uint]string{},
-	//}
+	c.Response = ResponseQueue{
+		Results: make(map[uint]string, 100),
+	}
 
 	c.Srv.diag.Debug(fmt.Sprintf("CVI3:%s connecting ...\n", c.cfg.SN))
 
@@ -295,10 +295,10 @@ func (c *Controller) Read(conn net.Conn) {
 		header := CVI3Header{}
 		header.Deserialize(header_str)
 
-		//c.response <- header_str
-
-		//c.Response.update(header.MID, header_str)
-
+		if c.Response.HasResponse(header.MID){
+			c.Response.update(header.MID, header_str)
+			c.response <- header_str
+		}
 	}
 }
 

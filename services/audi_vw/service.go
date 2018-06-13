@@ -13,6 +13,7 @@ import (
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/minio"
 	"strings"
+	//"time"
 )
 
 const (
@@ -302,32 +303,35 @@ func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64,
 	}
 
 	// 设定pset并判断控制器响应
-	_, err := c.PSet(pset, workorder_id, result_id, count, user_id)
+	seq, err := c.PSet(pset, workorder_id, result_id, count, user_id)
 	if err != nil {
 		// 控制器请求失败
 		return errors.New(ERR_CVI3_REQUEST)
 	}
 
+	c.Response.Add(seq, "")
+
+	defer c.Response.remove(seq)
 
 	//i := 0
-	//
-	//for {
-	//	select {
-	//	case <- time.After(time.Duration(c.req_timeout)):
-	//		i += 1
-	//		if i >= 6 {
-	//			return errors.New(ERR_CVI3_REPLY_TIMEOUT)
-	//		}
-	//	case headerStr := <-c.response:
-	//		header := CVI3Header{}
-	//		header.Deserialize(headerStr)
-	//		if !header.Check() {
-	//			// 控制器请求失败
-	//			return errors.New(ERR_CVI3_REPLY)
-	//		}
-	//		return nil
-	//	}
-	//}
+
+	for {
+		select {
+		//case <- time.After(time.Duration(c.req_timeout)):
+		//	i += 1
+		//	if i >= 6 {
+		//		return errors.New(ERR_CVI3_REPLY_TIMEOUT)
+		//	}
+		case headerStr := <-c.response:
+			header := CVI3Header{}
+			header.Deserialize(headerStr)
+			if !header.Check() {
+				// 控制器请求失败
+				return errors.New(ERR_CVI3_REPLY)
+			}
+			return nil
+		}
+	}
 
 	return nil
 
