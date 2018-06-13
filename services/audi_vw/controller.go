@@ -31,6 +31,8 @@ type Controller struct {
 	w                 *socket_writer.SocketWriter
 	Srv               *Service
 	StatusValue       atomic.Value
+
+	keepAliveCount	  atomic.Value
 	response		  chan string
 	sequence          uint // 1~9999
 	buffer            chan []byte
@@ -42,6 +44,14 @@ type Controller struct {
 	keepaliveDeadLine atomic.Value
 	closing           chan chan struct{}
 	cfg               controller.Config
+}
+
+func (c *Controller) KeepAliveCount() int {
+	return c.keepAliveCount.Load().(int)
+}
+
+func (c *Controller) updateKeepAliveCount(i int) {
+	c.keepAliveCount.Store(i)
 }
 
 func (c *Controller) Sequence() uint {
@@ -119,29 +129,30 @@ func (c *Controller) Start() {
 }
 
 func (c *Controller) manage()  {
-	cont := 0
 	for {
 		select {
 		case <- time.After(c.keep_period):
+			count := c.KeepAliveCount()
 			if c.Status() == STATUS_OFFLINE {
 				continue
 			}
-			if cont == MAX_KEEP_ALIVE_CHECK {
-				c.updateStatus(STATUS_OFFLINE)
-				cont = 0
+			if  count >= MAX_KEEP_ALIVE_CHECK {
+				go c.updateStatus(STATUS_OFFLINE)
+				c.updateKeepAliveCount(0)
 				continue
 			}
 			if c.KeepAliveDeadLine().Before(time.Now()) {
 				//到达了deadline
 				c.send_keepalive()
 				c.updateKeepAliveDeadLine() //更新keepalivedeadline
-				cont ++
+				c.updateKeepAliveCount(count+1)
 			}
 		case v := <-c.buffer:
 			err := c.w.Write([]byte(v))
 			if err != nil {
 				c.Srv.diag.Error("Write data fail", err)
 			}
+			time.Sleep(c.req_timeout)
 		case stopDone := <-c.closing:
 			close(stopDone)
 			return //退出manage协程
@@ -273,6 +284,8 @@ func (c *Controller) Read(conn net.Conn) {
 
 		c.updateKeepAliveDeadLine()
 
+		c.updateKeepAliveCount(0)
+
 		msg := string(buffer[0:n])
 
 		//fmt.Printf("%s\n", string(buffer))
@@ -282,7 +295,7 @@ func (c *Controller) Read(conn net.Conn) {
 		header := CVI3Header{}
 		header.Deserialize(header_str)
 
-		c.response <- header_str
+		//c.response <- header_str
 
 		//c.Response.update(header.MID, header_str)
 

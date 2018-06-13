@@ -8,7 +8,6 @@ import (
 	"github.com/pkg/errors"
 	"net"
 	"sync/atomic"
-	"time"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/services/aiis"
@@ -164,7 +163,7 @@ func (p *Service) Read(c net.Conn) {
 	buffer := make([]byte, p.config().ReadBufferSize)
 	for {
 
-		n, err := c.Read(buffer)
+		n,err := c.Read(buffer)
 		if err != nil {
 			p.diag.Error("read err", err)
 			break
@@ -189,6 +188,7 @@ func (p *Service) Read(c net.Conn) {
 					body = msg[off+ HEADER_LEN: n]
 					rest = header.SIZ - (n  - (off + HEADER_LEN))
 					break
+
 				}
 			} else {
 				if n-off > rest {
@@ -204,6 +204,9 @@ func (p *Service) Read(c net.Conn) {
 					break
 				}
 			}
+		}
+		if rest == 0 {
+			p.CVIResponse(&header, c)
 		}
 	}
 }
@@ -306,25 +309,25 @@ func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64,
 	}
 
 
-	i := 0
-
-	for {
-		select {
-		case <- time.After(time.Duration(c.req_timeout)):
-			i += 1
-			if i >= 6 {
-				return errors.New(ERR_CVI3_REPLY_TIMEOUT)
-			}
-		case headerStr := <-c.response:
-			header := CVI3Header{}
-			header.Deserialize(headerStr)
-			if !header.Check() {
-				// 控制器请求失败
-				return errors.New(ERR_CVI3_REPLY)
-			}
-			return nil
-		}
-	}
+	//i := 0
+	//
+	//for {
+	//	select {
+	//	case <- time.After(time.Duration(c.req_timeout)):
+	//		i += 1
+	//		if i >= 6 {
+	//			return errors.New(ERR_CVI3_REPLY_TIMEOUT)
+	//		}
+	//	case headerStr := <-c.response:
+	//		header := CVI3Header{}
+	//		header.Deserialize(headerStr)
+	//		if !header.Check() {
+	//			// 控制器请求失败
+	//			return errors.New(ERR_CVI3_REPLY)
+	//		}
+	//		return nil
+	//	}
+	//}
 
 	return nil
 
