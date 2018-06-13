@@ -6,7 +6,7 @@ import (
 )
 
 type Methods struct {
-	service	*Service
+	service *Service
 }
 
 func (m *Methods) getDoc(ctx iris.Context) {

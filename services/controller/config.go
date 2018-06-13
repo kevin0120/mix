@@ -1,17 +1,17 @@
 package controller
 
 import (
-	"github.com/pkg/errors"
-	"github.com/masami10/rush/utils"
 	"fmt"
+	"github.com/masami10/rush/utils"
+	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
 )
 
 type Config struct {
-	SN 			string		`yaml:"serial_no"`
-	Protocol 	string 		`yaml:"protocol"`
-	RemoteIP	string		`yaml:"remote_ip"`
-	Port		int			`yaml:"port"`
+	SN       string `yaml:"serial_no"`
+	Protocol string `yaml:"protocol"`
+	RemoteIP string `yaml:"remote_ip"`
+	Port     int    `yaml:"port"`
 }
 
 const (
@@ -21,22 +21,19 @@ const (
 
 var Protocols []string
 
-
-func init()  {
-	Protocols= []string{AUDIPROTOCOL, OPENPROTOCOL}
+func init() {
+	Protocols = []string{AUDIPROTOCOL, OPENPROTOCOL}
 }
-
 
 func NewConfig() Config {
-	_sn,_ := uuid.NewV4()
+	_sn, _ := uuid.NewV4()
 	return Config{
-		SN:		  _sn.String(),
+		SN:       _sn.String(),
 		Protocol: AUDIPROTOCOL,
 		RemoteIP: "127.0.0.1",
-		Port: 		4700,
+		Port:     4700,
 	}
 }
-
 
 func (c Config) Validate() error {
 	if c.SN == "" {
@@ -62,7 +59,7 @@ func (cs Configs) Validate() error {
 
 	for _, c := range cs {
 		err := c.Validate()
-		return errors.Wrap(err,"Validate Controllers Protocol Fail")
+		return errors.Wrap(err, "Validate Controllers Protocol Fail")
 	}
 
 	return nil

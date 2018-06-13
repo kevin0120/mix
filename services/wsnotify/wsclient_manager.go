@@ -6,12 +6,12 @@ import (
 )
 
 type WSClientManager struct {
-	conn map[string] websocket.Connection 	// sn : Connection
-	mutex sync.Mutex 						//为了连接进行锁操作
+	conn  map[string]websocket.Connection // sn : Connection
+	mutex sync.Mutex                      //为了连接进行锁操作
 }
 
 func (s *WSClientManager) Init() {
-	s.conn = map[string] websocket.Connection{}
+	s.conn = map[string]websocket.Connection{}
 	s.mutex = sync.Mutex{}
 }
 

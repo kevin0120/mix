@@ -1,7 +1,5 @@
 package audi_vw
 
-
-
 const (
 	// 心跳包
 	Xml_heart_beat = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root:ROOT xmlns:root=\"http://xmldefs.vw-group.com/KAP/station/V2.0/root\" xmlns:common=\"http://xmldefs.vw-group.com/KAP/station/V2.0/common\" xmlns:msl_msg=\"http://xmldefs.vw-group.com/KAP/station/V2.0/msl_msg\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://xmldefs.vw-group.com/KAP/station/V2.0/root \"><MSL_MSG><PNR>21</PNR></MSL_MSG></root:ROOT>"

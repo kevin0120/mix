@@ -5,17 +5,17 @@ import (
 	"github.com/masami10/rush/command"
 	"github.com/masami10/rush/keyvalue"
 	"github.com/masami10/rush/services/aiis"
+	"github.com/masami10/rush/services/audi_vw"
+	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/diagnostic"
+	"github.com/masami10/rush/services/hmi"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/odoo"
-	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
-	"github.com/masami10/rush/services/hmi"
-	"github.com/masami10/rush/services/audi_vw"
-	"github.com/masami10/rush/services/controller"
 )
 
 type BuildInfo struct {
@@ -41,7 +41,6 @@ type Server struct {
 	dataDir  string
 	hostname string
 
-
 	StorageServie *storage.Service
 
 	HTTPDService *httpd.Service
@@ -49,10 +48,10 @@ type Server struct {
 	AudiVWService *audi_vw.Service
 
 	WSNotifyService *wsnotify.Service
-	AiisService		*aiis.Service
-	MinioService	*minio.Service
+	AiisService     *aiis.Service
+	MinioService    *minio.Service
 
-	config       *Config
+	config *Config
 	// List of services in startup order
 	Services []Service
 
@@ -175,13 +174,12 @@ func (s *Server) appendMinioService() error {
 	return nil
 }
 
-
 func (s *Server) appendControllersService() error {
 	c := s.config.Contollers
 	d := s.DiagService.NewControllerHandler()
 	srv, err := controller.NewService(c, d, s.AudiVWService)
 
-	if err != nil{
+	if err != nil {
 		return errors.Wrap(err, "append Controller service fail")
 	}
 
@@ -234,7 +232,7 @@ func (s *Server) appendHMIService() error {
 
 	srv.ODOO = s.OdooService
 	srv.Httpd = s.HTTPDService //http 服务注入
-	srv.DB = s.StorageServie // stroage 服务注入
+	srv.DB = s.StorageServie   // stroage 服务注入
 	srv.AudiVw = s.AudiVWService
 	srv.SN = s.config.SN
 
@@ -242,7 +240,6 @@ func (s *Server) appendHMIService() error {
 
 	return nil
 }
-
 
 func (s *Server) appendStorageService() error {
 	c := s.config.Storage

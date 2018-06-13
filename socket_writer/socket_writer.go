@@ -25,7 +25,7 @@ type SocketWriter struct {
 func NewSocketWriter(addr string, controller Controller) *SocketWriter {
 
 	return &SocketWriter{
-		Address: addr,
+		Address:    addr,
 		Controller: controller,
 	}
 }
@@ -75,7 +75,6 @@ func (sw *SocketWriter) Connect(timeout time.Duration) error {
 		return fmt.Errorf("invalid address: %s", sw.Address)
 	}
 
-
 	var c net.Conn
 	c, err := net.DialTimeout(spl[0], spl[1], timeout)
 
@@ -112,7 +111,7 @@ func (sw *SocketWriter) setKeepAlive(c net.Conn) error {
 // Write writes the given metrics to the destination.
 // If an error is encountered, it is up to the caller to retry the same write again later.
 // Not parallel safe.
-func (sw *SocketWriter) Write( buf []byte) error {
+func (sw *SocketWriter) Write(buf []byte) error {
 
 	if _, err := sw.Conn.Write(buf); err != nil {
 		//TODO log & keep going with remaining strings

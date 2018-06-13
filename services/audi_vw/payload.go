@@ -1,11 +1,11 @@
 package audi_vw
 
 import (
-	"fmt"
-	"strconv"
 	"encoding/xml"
-	"strings"
+	"fmt"
 	"github.com/masami10/rush/utils"
+	"strconv"
+	"strings"
 )
 
 const (
@@ -28,19 +28,19 @@ const (
 
 	// TYP
 	Header_type_request_without_reply = 0
-	Header_type_request_with_reply = 1
-	Header_type_reply = 2
-	Header_type_keep_alive = 3
+	Header_type_request_with_reply    = 1
+	Header_type_reply                 = 2
+	Header_type_keep_alive            = 3
 
 	// COD
-	Header_code_ok = 0
-	Header_code_count_incorrect = 1
-	Header_code_reserved = 2
-	Header_code_length_incorrect = 3
-	Header_code_xml_syntax_error = 4
-	Header_code_xml_ver_conflict = 5
+	Header_code_ok                       = 0
+	Header_code_count_incorrect          = 1
+	Header_code_reserved                 = 2
+	Header_code_length_incorrect         = 3
+	Header_code_xml_syntax_error         = 4
+	Header_code_xml_ver_conflict         = 5
 	Header_code_order_cannot_be_executed = 10
-	Header_code_undefined_error = 99
+	Header_code_undefined_error          = 99
 
 	// REV
 	header_rev = "0000"
@@ -52,8 +52,8 @@ const (
 )
 
 type PSetData struct {
-	Name string `xml:"NAM"`
-	Unit string `xml:"UNT"`
+	Name  string  `xml:"NAM"`
+	Unit  string  `xml:"UNT"`
 	Value float64 `xml:"VAL"`
 }
 
@@ -63,13 +63,13 @@ type SMP struct {
 }
 
 type CUR struct {
-	CNT int	`xml:"CNT"`
+	CNT int `xml:"CNT"`
 	SMP SMP `xml:"SMP"`
 }
 
 type PRO struct {
-	Strategy string `xml:"PAP"`
-	Values []PSetData `xml:"MAR"`
+	Strategy string     `xml:"PAP"`
+	Values   []PSetData `xml:"MAR"`
 }
 
 type BLC struct {
@@ -78,10 +78,10 @@ type BLC struct {
 }
 
 type TIP struct {
-	PSet int `xml:"PRG"`
+	PSet int    `xml:"PRG"`
 	Date string `xml:"DAT"`
 	Time string `xml:"TIM"`
-	BLC BLC `xml:"BLC"`
+	BLC  BLC    `xml:"BLC"`
 }
 
 type GRP struct {
@@ -94,12 +94,12 @@ type FAS struct {
 }
 
 type PAR struct {
-	SN string `xml:"PRT"`
-	Workorder_id int64 `xml:"PI1"`
-	Result_id string `xml:"PI2"`
-	Count int `xml:"STC"`
-	Result string `xml:"PSC"`
-	FAS FAS `xml:"FAS"`
+	SN           string `xml:"PRT"`
+	Workorder_id int64  `xml:"PI1"`
+	Result_id    string `xml:"PI2"`
+	Count        int    `xml:"STC"`
+	Result       string `xml:"PSC"`
+	FAS          FAS    `xml:"FAS"`
 }
 
 type PRC_SST struct {
@@ -107,8 +107,8 @@ type PRC_SST struct {
 }
 
 type CVI3Result struct {
-	XMLName     xml.Name `xml:"ROOT"`
-	PRC_SST		PRC_SST `xml:"PRC_SST"`
+	XMLName xml.Name `xml:"ROOT"`
+	PRC_SST PRC_SST  `xml:"PRC_SST"`
 }
 
 type CVI3Header struct {
@@ -127,7 +127,7 @@ func (header *CVI3Header) Init() {
 	header.RSD = header_rsd
 }
 
-func (header *CVI3Header) Check() (bool) {
+func (header *CVI3Header) Check() bool {
 	if header.COD == Header_code_ok {
 		return true
 	} else {

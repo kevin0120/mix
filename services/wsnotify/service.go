@@ -3,10 +3,10 @@ package wsnotify
 import (
 	"github.com/kataras/iris/websocket"
 
-	"github.com/masami10/rush/services/httpd"
-	"sync/atomic"
 	"encoding/json"
 	"fmt"
+	"github.com/masami10/rush/services/httpd"
+	"sync/atomic"
 )
 
 const (
@@ -23,15 +23,14 @@ type Diagnostic interface {
 
 type Service struct {
 	configValue atomic.Value
-	diag Diagnostic
+	diag        Diagnostic
 
 	ws *websocket.Server
 
-	Httpd  *httpd.Service
+	Httpd *httpd.Service
 
-	clientManager	WSClientManager
+	clientManager WSClientManager
 }
-
 
 func (s *Service) Config() Config {
 	return s.configValue.Load().(Config)
@@ -43,7 +42,7 @@ func (s *Service) onConnect(c websocket.Connection) {
 		reg := WSRegist{}
 		err := json.Unmarshal(data, &reg)
 		if err != nil {
-			Msg := map[string]string{"msg":"regist msg error"}
+			Msg := map[string]string{"msg": "regist msg error"}
 			msg, _ := json.Marshal(Msg)
 			c.EmitMessage(msg)
 			return
@@ -52,13 +51,13 @@ func (s *Service) onConnect(c websocket.Connection) {
 		_, exist := s.clientManager.GetClient(reg.HMI_SN)
 		if exist {
 			Msg := fmt.Sprintf("client with sn:%s already exists", reg.HMI_SN)
-			_Msg := map[string]string{"msg":Msg}
+			_Msg := map[string]string{"msg": Msg}
 			reg_str, _ := json.Marshal(_Msg)
 			c.EmitMessage(reg_str)
 		} else {
 			// 将客户端加入列表
 			s.clientManager.AddClient(reg.HMI_SN, c)
-			Msg := map[string]string{"msg":"OK"}
+			Msg := map[string]string{"msg": "OK"}
 			msg, _ := json.Marshal(Msg)
 			c.EmitMessage(msg)
 		}
@@ -75,9 +74,9 @@ func (s *Service) onConnect(c websocket.Connection) {
 func NewService(c Config, d Diagnostic) *Service {
 
 	s := &Service{
-		diag:  			d,
-		ws:    			websocket.New(websocket.Config{WriteBufferSize: c.WriteBufferSize, ReadBufferSize: c.ReadBufferSize}),
-		clientManager:	WSClientManager{},
+		diag:          d,
+		ws:            websocket.New(websocket.Config{WriteBufferSize: c.WriteBufferSize, ReadBufferSize: c.ReadBufferSize}),
+		clientManager: WSClientManager{},
 	}
 
 	s.clientManager.Init()
@@ -97,9 +96,9 @@ func (s *Service) Open() error {
 	//s.Httpd.Server.Get(c.Route, s.ws.Handler()) //将websocket 服务注册到get服务中
 
 	r := httpd.Route{
-		RouteType:	httpd.ROUTE_TYPE_WS,
-		Method:  "GET",
-		Pattern: c.Route,
+		RouteType:   httpd.ROUTE_TYPE_WS,
+		Method:      "GET",
+		Pattern:     c.Route,
 		HandlerFunc: s.ws.Handler(),
 	}
 	s.Httpd.Handler[0].AddRoute(r)

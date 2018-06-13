@@ -1,9 +1,9 @@
 package utils
 
 import (
-	"os"
-	"github.com/satori/go.uuid"
 	"encoding/base64"
+	"github.com/satori/go.uuid"
+	"os"
 	"strings"
 	"time"
 )
@@ -28,7 +28,7 @@ func StringInSlice(a string, list []string) bool {
 	return false
 }
 
-func AppendByteSlice(s [] byte, t []byte) []byte {
+func AppendByteSlice(s []byte, t []byte) []byte {
 	zlen := len(s) + len(t)
 	z := make([]byte, zlen)
 	copy(z, s)
@@ -36,7 +36,7 @@ func AppendByteSlice(s [] byte, t []byte) []byte {
 	return z
 }
 
-func GenerateID() (string) {
+func GenerateID() string {
 	u4, _ := uuid.NewV4()
 	return base64.RawURLEncoding.EncodeToString(u4.Bytes())
 }

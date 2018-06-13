@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"fmt"
+	"github.com/pkg/errors"
 	"gopkg.in/resty.v1"
 	"net/http"
-	"github.com/pkg/errors"
 )
 
 type Diagnostic interface {
@@ -83,7 +83,7 @@ func (s *Service) PutResult(result_id int64, body interface{}) error {
 	return errors.Wrap(err, "Put result fail")
 }
 
-func (s *Service) putResult(body interface{}, url string , method string)error {
+func (s *Service) putResult(body interface{}, url string, method string) error {
 	r := s.httpClient.R().SetBody(body)
 	var resp *resty.Response
 	var err error

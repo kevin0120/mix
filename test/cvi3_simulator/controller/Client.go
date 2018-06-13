@@ -1,27 +1,27 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/masami10/rush/socket_writer"
 	"net"
-	"fmt"
 	//"time"
-	"sync"
-	"time"
 	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/utils"
 	"math/rand"
+	"sync"
+	"time"
 )
 
 type CVI3Client struct {
-	client	*socket_writer.SocketWriter
-	sequence		uint
-	SN				string
-	mtx_no			sync.Mutex
-	mtx_serial		sync.Mutex
-	buffer  		chan []byte
-	Workorder_id	int64
-	Result_ids		[]int64
-	Count			int
+	client       *socket_writer.SocketWriter
+	sequence     uint
+	SN           string
+	mtx_no       sync.Mutex
+	mtx_serial   sync.Mutex
+	buffer       chan []byte
+	Workorder_id int64
+	Result_ids   []int64
+	Count        int
 }
 
 func (cvi3_client *CVI3Client) Start(addr string) {
@@ -64,7 +64,7 @@ func (cvi3_client *CVI3Client) keepAlive() {
 		keepAlivePacket, seq := audi_vw.GeneratePacket(seq, audi_vw.Header_type_keep_alive, audi_vw.Xml_heart_beat)
 		cvi3_client.Write([]byte(keepAlivePacket), seq)
 
-		<- time.After(5 * time.Second) // 周期性发送一次信号
+		<-time.After(5 * time.Second) // 周期性发送一次信号
 	}
 }
 
@@ -98,7 +98,7 @@ func (cvi3_client *CVI3Client) PushResult(pset CVI3PSet) {
 
 	no := GenerateRangeNum(8, cvi3_client.mtx_no)
 	var result = ""
-	if no % 2 == 0 {
+	if no%2 == 0 {
 		result = "IO"
 	} else {
 		result = "NIO"
@@ -145,7 +145,6 @@ func (cvi3_client *CVI3Client) AudoPushResult() {
 
 	}
 
-
 }
 
 func (cvi3_client *CVI3Client) Write(buf []byte, seq uint) {
@@ -156,7 +155,7 @@ func (cvi3_client *CVI3Client) Write(buf []byte, seq uint) {
 func (cvi3_client *CVI3Client) manage() {
 
 	for {
-		v := <- cvi3_client.buffer
+		v := <-cvi3_client.buffer
 		err := cvi3_client.client.Write([]byte(v))
 		if err != nil {
 			fmt.Printf("控制器 %s 发送失败:%s\n", err.Error())
@@ -164,6 +163,6 @@ func (cvi3_client *CVI3Client) manage() {
 
 		//fmt.Printf("控制器:%s 发送:%s\n", cvi3_client.SN, string(v))
 
-		<- time.After(time.Duration(300 * time.Millisecond)) //300毫秒发送一次信号
+		<-time.After(time.Duration(300 * time.Millisecond)) //300毫秒发送一次信号
 	}
 }
