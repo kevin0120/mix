@@ -30,10 +30,10 @@ minio:
   secure: false
 aiis:
   urls:
-  - http://127.0.0.1:8069
+  - http://127.0.0.1:9092
   headers:
     Content-Type: application/json
-  result_push_url: /api/v1/operation.results/%d
+  result_push_url: /aiis/v1/operation.results/%d
   push_method: PUT
   timeout: 8s
   push_interval: 1s
