@@ -42,8 +42,8 @@ func (m *Methods) postWorkorders(ctx iris.Context) {
 
 func (m *Methods) getResults(ctx iris.Context) {
 	// 根据查询参数返回结果
-	has_upload := ctx.URLParam("has_upload")
-	if has_upload == "" {
+	hasUploadParam := ctx.URLParam("has_upload")
+	if hasUploadParam == "" {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("has_upload is required")
 		return
@@ -57,7 +57,7 @@ func (m *Methods) getResults(ctx iris.Context) {
 		return
 	}
 
-	hasUpload, err := strconv.ParseBool(has_upload)
+	hasUpload, err := strconv.ParseBool(hasUploadParam)
 	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("has_upload value error")

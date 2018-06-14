@@ -13,11 +13,11 @@ import (
 	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/minio"
+	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
-	"github.com/masami10/rush/services/odoo"
 )
 
 type Config struct {
@@ -125,8 +125,6 @@ func (c *Config) Validate() error {
 	if err := c.Contollers.Validate(); err != nil {
 		return errors.Wrap(err, "controller")
 	}
-
-
 
 	return nil
 }

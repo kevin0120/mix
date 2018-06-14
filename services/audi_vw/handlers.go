@@ -1,17 +1,17 @@
 package audi_vw
 
 import (
-	"fmt"
 	"encoding/json"
-	"github.com/masami10/rush/services/storage"
-	"time"
-	"strings"
-	"github.com/masami10/rush/services/aiis"
-	"github.com/masami10/rush/services/wsnotify"
 	"encoding/xml"
+	"fmt"
+	"github.com/masami10/rush/services/aiis"
+	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/wsnotify"
+	"strings"
+	"time"
 )
 
-const(
+const (
 	ODOO_RESULT_PASS = "pass"
 	ODOO_RESULT_FAIL = "fail"
 )
@@ -29,11 +29,11 @@ type HandlerContext struct {
 }
 
 type Handlers struct {
-	AudiVw	*Service
+	AudiVw *Service
 }
 
 // 处理结果数据
-func (h *Handlers) handleResult(result *ControllerResult, ctx *HandlerContext) (error) {
+func (h *Handlers) handleResult(result *ControllerResult, ctx *HandlerContext) error {
 	h.AudiVw.diag.Debug("处理结果数据 ...")
 
 	var needPushAiis bool = false
@@ -70,7 +70,7 @@ func (h *Handlers) handleResult(result *ControllerResult, ctx *HandlerContext) (
 		r.Stage = RESULT_STAGE_FINAL
 
 		json.Unmarshal([]byte(workorder.ResultIDs), &ctx.resultIds)
-		if r.ResultId == ctx.resultIds[len(ctx.resultIds) - 1] {
+		if r.ResultId == ctx.resultIds[len(ctx.resultIds)-1] {
 			// 标记工单已完成
 			workorder.Status = "finished"
 			h.AudiVw.DB.UpdateWorkorder(&workorder)
@@ -144,7 +144,6 @@ func (h *Handlers) handleResult(result *ControllerResult, ctx *HandlerContext) (
 			ctx.aiisResult.CURObjects = append(ctx.aiisResult.CURObjects, ctx.aiisCurve)
 		}
 
-
 		h.PutResultToAIIS(ctx.aiisResult, r.ResultId)
 
 	}
@@ -152,7 +151,7 @@ func (h *Handlers) handleResult(result *ControllerResult, ctx *HandlerContext) (
 	return nil
 }
 
-func (h *Handlers) PutResultToAIIS(aiis_result aiis.AIISResult, r_id int64) error{
+func (h *Handlers) PutResultToAIIS(aiis_result aiis.AIISResult, r_id int64) error {
 	h.AudiVw.diag.Debug("推送结果数据到AIIS")
 
 	err := h.AudiVw.Aiis.PutResult(r_id, aiis_result)
@@ -175,7 +174,7 @@ func (h *Handlers) PutResultToAIIS(aiis_result aiis.AIISResult, r_id int64) erro
 }
 
 // 处理波形数据
-func (h *Handlers) handleCurve(curve *ControllerCurve, ctx *HandlerContext) (error) {
+func (h *Handlers) handleCurve(curve *ControllerCurve, ctx *HandlerContext) error {
 	h.AudiVw.diag.Debug("处理波形数据 ...")
 
 	// 保存波形到数据库
@@ -249,7 +248,7 @@ func (h *Handlers) HandleMsg(msg string, ctx *HandlerContext) {
 	ctx.controllerCurve.ResultID = ctx.controllerResult.Result_id
 
 	e := h.handleCurve(&ctx.controllerCurve, ctx)
-	if  e == nil {
+	if e == nil {
 		h.handleResult(&ctx.controllerResult, ctx)
 	} else {
 		h.AudiVw.diag.Error("handleCurve err", err)

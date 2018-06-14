@@ -5,7 +5,7 @@ type PSet struct {
 	PSet          int    `json:"pset"`
 	Result_id     int64  `json:"result_id"`
 	Count         int    `json:"count"`
-	UserID		  int64	 `json:"user_id"`
+	UserID        int64  `json:"user_id"`
 }
 
 type Worksheet struct {
@@ -23,7 +23,7 @@ type Workorder struct {
 	Nut_total    float64   `json:"nut_total"`
 	Vin          string    `json:"vin"`
 	Knr          string    `json:"knr"`
-	LongPin		 string		`json:"long_pin"`
+	LongPin      string    `json:"long_pin"`
 	Status       string    `json:"status"`
 	Result_ids   []int64   `json:"result_ids"`
 	WorkSheet    Worksheet `json:"work_sheet"`

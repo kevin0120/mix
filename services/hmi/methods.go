@@ -1,13 +1,13 @@
 package hmi
 
 import (
-	"github.com/kataras/iris"
 	"encoding/json"
+	"github.com/kataras/iris"
 	"github.com/masami10/rush/services/odoo"
 )
 
 type Methods struct {
-	service	*Service
+	service *Service
 }
 
 func (m *Methods) putPSets(ctx iris.Context) {
@@ -84,7 +84,7 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 		return
 	}
 
-	if code == ""  {
+	if code == "" {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("code is required")
 		return

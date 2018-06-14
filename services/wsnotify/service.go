@@ -93,7 +93,7 @@ func (s *Service) Open() error {
 
 	s.ws.OnConnection(s.onConnect) // 注册连接回调函数
 
-	//s.Httpd.Server.Get(c.Route, s.ws.Handler()) //将websocket 服务注册到get服务中
+	//s.HTTPD.Server.Get(c.Route, s.ws.Handler()) //将websocket 服务注册到get服务中
 
 	r := httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_WS,

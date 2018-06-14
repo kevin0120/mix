@@ -1,13 +1,13 @@
 package storage
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/go-xorm/xorm"
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
 	"sync/atomic"
 	"time"
-	"encoding/json"
 )
 
 type Diagnostic interface {
@@ -128,7 +128,7 @@ func (s *Service) Store(data interface{}) error {
 	return nil
 }
 
-func (s *Service) FindUnuploadResults(result_upload bool, result []string)([]Results, error) {
+func (s *Service) FindUnuploadResults(result_upload bool, result []string) ([]Results, error) {
 	var results []Results
 
 	ss := s.eng.Alias("r").Where("r.has_upload = ?", result_upload).And("r.stage = ?", "final").In("r.result", result)
@@ -144,7 +144,7 @@ func (s *Service) FindUnuploadResults(result_upload bool, result []string)([]Res
 
 func (s *Service) CurveExist(curve *Curves) (bool, error) {
 
-	has, err := s.eng.Exist(&Curves{ ResultID: curve.ResultID, Count: curve.Count})
+	has, err := s.eng.Exist(&Curves{ResultID: curve.ResultID, Count: curve.Count})
 	if err != nil {
 		return false, err
 	} else {
@@ -176,15 +176,13 @@ func (s *Service) ListCurvesByResult(result_id int64) ([]Curves, error) {
 	}
 }
 
-func (s *Service) InsertWorkorder(workorder Workorders) (error) {
+func (s *Service) InsertWorkorder(workorder Workorders) error {
 
-	var err error
-	has, _ := s.WorkorderExists(workorder.WorkorderID)
+	has, err := s.WorkorderExists(workorder.WorkorderID)
 	if has {
 		// 忽略存在的工单
 		return nil
 	}
-
 
 	var resultIds []int64
 	err = json.Unmarshal([]byte(workorder.ResultIDs), &resultIds)
@@ -245,7 +243,7 @@ func (s *Service) InsertWorkorder(workorder Workorders) (error) {
 
 func (s *Service) WorkorderExists(id int64) (bool, error) {
 
-	has, err := s.eng.Exist(&Workorders{ WorkorderID: id})
+	has, err := s.eng.Exist(&Workorders{WorkorderID: id})
 	if err != nil {
 		return false, err
 	} else {
@@ -313,7 +311,7 @@ func (s *Service) FindWorkorder(hmi_sn string, code string) (Workorders, error) 
 func (s *Service) UpdateResultUpload(upload bool, r_id int64) (int64, error) {
 	sql := "update `results` set has_upload = ? where x_result_id = ?"
 
-	r, err := s.eng.Exec(sql,upload, r_id )
+	r, err := s.eng.Exec(sql, upload, r_id)
 
 	id, _ := r.RowsAffected()
 	if err != nil {
@@ -349,7 +347,6 @@ func (s *Service) UpdateResult(result Results) (int64, error) {
 
 func (s *Service) UpdateWorkorder(workorder *Workorders) (*Workorders, error) {
 
-
 	sql := "update `workorders` set status = ? where x_workorder_id = ?"
 	_, err := s.eng.Exec(sql,
 		workorder.Status,
@@ -362,7 +359,7 @@ func (s *Service) UpdateWorkorder(workorder *Workorders) (*Workorders, error) {
 	}
 }
 
-func (s *Service) UpdateResultByCount(id int64, count int, flag bool)(error) {
+func (s *Service) UpdateResultByCount(id int64, count int, flag bool) error {
 
 	var err error
 	if count > 0 {
@@ -380,7 +377,7 @@ func (s *Service) UpdateResultByCount(id int64, count int, flag bool)(error) {
 	}
 }
 
-func (s *Service) DeleteInvalidResults() (error) {
+func (s *Service) DeleteInvalidResults() error {
 	sql := "delete from `results` where has_upload = true"
 	_, err := s.eng.Exec(sql)
 
@@ -391,7 +388,7 @@ func (s *Service) DeleteInvalidResults() (error) {
 	}
 }
 
-func (s *Service) DeleteInvalidCurves() (error) {
+func (s *Service) DeleteInvalidCurves() error {
 
 	sql := "delete from `curves` where has_upload = true"
 	_, err := s.eng.Exec(sql)
@@ -403,7 +400,7 @@ func (s *Service) DeleteInvalidCurves() (error) {
 	}
 }
 
-func (s *Service) DeleteInvalidWorkorders() (error) {
+func (s *Service) DeleteInvalidWorkorders() error {
 
 	sql := "delete from `workorders` where status = 'finished'"
 	_, err := s.eng.Exec(sql)
@@ -417,7 +414,7 @@ func (s *Service) DeleteInvalidWorkorders() (error) {
 
 func (s *Service) DropTableManage() error {
 	c := s.Config()
-	for ;; {
+	for {
 		start := time.Now()
 
 		// 清理过期结果
@@ -431,7 +428,7 @@ func (s *Service) DropTableManage() error {
 
 		diff := time.Since(start) // 执行的间隔时间
 
-		time.Sleep( time.Duration(c.VacuumPeriod) - diff)
+		time.Sleep(time.Duration(c.VacuumPeriod) - diff)
 	}
 
 }

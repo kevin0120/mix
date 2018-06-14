@@ -1,6 +1,5 @@
 package audi_vw
 
-
 import "sync"
 
 type ResponseQueue struct {
@@ -25,7 +24,7 @@ func (q *ResponseQueue) update(serial uint, msg string) {
 	}
 }
 
-func (q *ResponseQueue) HasResponse(serial uint) bool{
+func (q *ResponseQueue) HasResponse(serial uint) bool {
 	defer q.mtx.Unlock()
 
 	q.mtx.Lock()

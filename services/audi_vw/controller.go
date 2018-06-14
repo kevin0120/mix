@@ -9,8 +9,8 @@ import (
 	"github.com/masami10/rush/utils"
 	"net"
 	"sync"
-	"time"
 	"sync/atomic"
+	"time"
 )
 
 type ControllerStatusType string
@@ -28,12 +28,12 @@ const (
 )
 
 type Controller struct {
-	w                 *socket_writer.SocketWriter
-	Srv               *Service
-	StatusValue       atomic.Value
+	w           *socket_writer.SocketWriter
+	Srv         *Service
+	StatusValue atomic.Value
 
-	keepAliveCount	  atomic.Value
-	response		  chan string
+	keepAliveCount    atomic.Value
+	response          chan string
 	sequence          uint // 1~9999
 	buffer            chan []byte
 	Response          ResponseQueue
@@ -102,7 +102,7 @@ func NewController(c Config) Controller {
 
 	cont := Controller{
 		buffer:      make(chan []byte, 1024),
-		response: 	 make(chan string),
+		response:    make(chan string),
 		closing:     make(chan chan struct{}),
 		sequence:    MINSEQUENCE,
 		mux_seq:     sync.Mutex{},
@@ -128,15 +128,15 @@ func (c *Controller) Start() {
 	c.subscribe()
 }
 
-func (c *Controller) manage()  {
+func (c *Controller) manage() {
 	for {
 		select {
-		case <- time.After(c.keep_period):
+		case <-time.After(c.keep_period):
 			count := c.KeepAliveCount()
 			if c.Status() == STATUS_OFFLINE {
 				continue
 			}
-			if  count >= MAX_KEEP_ALIVE_CHECK {
+			if count >= MAX_KEEP_ALIVE_CHECK {
 				go c.updateStatus(STATUS_OFFLINE)
 				c.updateKeepAliveCount(0)
 				continue
@@ -145,7 +145,7 @@ func (c *Controller) manage()  {
 				//到达了deadline
 				c.send_keepalive()
 				c.updateKeepAliveDeadLine() //更新keepalivedeadline
-				c.updateKeepAliveCount(count+1)
+				c.updateKeepAliveCount(count + 1)
 			}
 		case v := <-c.buffer:
 			err := c.w.Write([]byte(v))
@@ -160,7 +160,7 @@ func (c *Controller) manage()  {
 	}
 }
 
-func (c *Controller) send_keepalive(){
+func (c *Controller) send_keepalive() {
 	if c.Status() == STATUS_OFFLINE {
 		return
 	}
@@ -246,7 +246,6 @@ func (c *Controller) Connect() error {
 
 	c.updateStatus(STATUS_ONLINE)
 
-
 	// 启动发送
 	go c.manage()
 
@@ -257,7 +256,7 @@ func (c *Controller) updateKeepAliveDeadLine() {
 	c.keepaliveDeadLine.Store(time.Now().Add(c.keep_period))
 }
 
-func (c *Controller) KeepAliveDeadLine() time.Time{
+func (c *Controller) KeepAliveDeadLine() time.Time {
 	return c.keepaliveDeadLine.Load().(time.Time)
 }
 
@@ -295,7 +294,7 @@ func (c *Controller) Read(conn net.Conn) {
 		header := CVI3Header{}
 		header.Deserialize(header_str)
 
-		if c.Response.HasResponse(header.MID){
+		if c.Response.HasResponse(header.MID) {
 			c.Response.update(header.MID, header_str)
 			c.response <- header_str
 		}

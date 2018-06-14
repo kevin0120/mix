@@ -89,8 +89,8 @@ type GRP struct {
 }
 
 type FAS struct {
-	UserID int64	`xml:"FAP"`
-	GRP GRP 		`xml:"GRP"`
+	UserID int64 `xml:"FAP"`
+	GRP    GRP   `xml:"GRP"`
 }
 
 type PAR struct {
@@ -201,7 +201,7 @@ type ControllerResult struct {
 	Result_id     int64      `json:"result_id"`
 	Controller_SN string     `json:"controller_sn"`
 	Workorder_ID  int64      `json:"workorder_id"`
-	UserID		  int64		 `json:"user_id"`
+	UserID        int64      `json:"user_id"`
 	CurFile       string     `json:"cur_file"`
 	Result        string     `json:"result"`
 	Dat           string     `json:"dat"`

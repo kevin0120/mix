@@ -18,28 +18,28 @@ type ODOOMOCreated struct {
 }
 
 type ODOOWorkorder struct {
-	ID	int64				`json:"id"`
-	Status string		`json:"status"`
-	NutTotal float64	`json:"nut_total"`
-	PSet string			`json:"pset"`
-	Max_redo_times	int	`json:"max_redo_times"`
-	Max_op_time	int		`json:"max_op_time"`
+	ID             int64   `json:"id"`
+	Status         string  `json:"status"`
+	NutTotal       float64 `json:"nut_total"`
+	PSet           string  `json:"pset"`
+	Max_redo_times int     `json:"max_redo_times"`
+	Max_op_time    int     `json:"max_op_time"`
 
 	HMI struct {
-		ID 		int		`json:"id"`
-		UUID string		`json:"uuid"`
+		ID   int    `json:"id"`
+		UUID string `json:"uuid"`
 	} `json:"hmi"`
 
-	Result_IDs []int64	`json:"result_ids"`
-	Worksheet Worksheet	`json:"worksheet"`
-	KNR string			`json:"knr"`
-	VIN string			`json:"vin"`
-	LongPin string		`json:"long_pin"`
+	Result_IDs []int64   `json:"result_ids"`
+	Worksheet  Worksheet `json:"worksheet"`
+	KNR        string    `json:"knr"`
+	VIN        string    `json:"vin"`
+	LongPin    string    `json:"long_pin"`
 }
 
 type Worksheet struct {
-	Content string	`json:"content"`
-	Points []struct {
+	Content string `json:"content"`
+	Points  []struct {
 		X int32 `json:"x_offset"`
 		Y int32 `json:"y_offset"`
 	} `json:"points"`

@@ -2,11 +2,11 @@ package diagnostic
 
 import (
 	"errors"
+	"fmt"
 	"github.com/masami10/rush/keyvalue"
 	"log"
 	"runtime"
 	"time"
-	"fmt"
 )
 
 type logLevel int

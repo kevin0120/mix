@@ -1,16 +1,16 @@
 package odoo
 
 import (
-	"github.com/masami10/rush/services/storage"
+	"encoding/json"
+	"fmt"
 	"github.com/masami10/rush/services/httpd"
+	"github.com/masami10/rush/services/storage"
+	"github.com/pkg/errors"
 	"gopkg.in/resty.v1"
+	"net/http"
+	"strconv"
 	"sync/atomic"
 	"time"
-	"fmt"
-	"net/http"
-	"github.com/pkg/errors"
-	"strconv"
-	"encoding/json"
 )
 
 type Diagnostic interface {
@@ -33,10 +33,12 @@ func NewEndpoint(url string, headers map[string]string, method string) *Endpoint
 }
 
 type Service struct {
-	diag        Diagnostic
-	methods	Methods
-	DB	   *storage.Service
-	Httpd  *httpd.Service
+	diag         Diagnostic
+	methods      Methods
+	DB           *storage.Service
+	HTTPDService interface {
+		GetHandlerByName(version string) (*httpd.Handler, error)
+	}
 	httpClient  *resty.Client
 	endpoints   []*Endpoint
 	configValue atomic.Value
@@ -46,7 +48,7 @@ func NewService(c Config, d Diagnostic) *Service {
 	e, _ := c.index()
 	s := &Service{
 		diag:      d,
-		methods: Methods{},
+		methods:   Methods{},
 		endpoints: e,
 	}
 
@@ -73,31 +75,34 @@ func (s *Service) Open() error {
 		SetRetryWaitTime(time.Duration(c.Interval)).
 		SetRetryMaxWaitTime(20 * time.Second)
 
-	var r httpd.Route
+	handler, err := s.HTTPDService.GetHandlerByName(httpd.BasePath)
+	if err != nil {
+		return errors.Wrap(err, "Odoo server get Httpd default Handler fail")
+	}
 
-	r = httpd.Route{
-		RouteType:	httpd.ROUTE_TYPE_HTTP,
-		Method:  "GET",
-		Pattern: "/results",
+	r := httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "GET",
+		Pattern:     "/results",
 		HandlerFunc: s.methods.getResults,
 	}
-	s.Httpd.Handler[0].AddRoute(r)
+	handler.AddRoute(r)
 
 	r = httpd.Route{
-		RouteType:	httpd.ROUTE_TYPE_HTTP,
-		Method:  "PATCH",
-		Pattern: "/results/{id:int}",
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "PATCH",
+		Pattern:     "/results/{id:int}",
 		HandlerFunc: s.methods.patchResult,
 	}
-	s.Httpd.Handler[0].AddRoute(r)
+	handler.AddRoute(r)
 
 	r = httpd.Route{
-		RouteType:	httpd.ROUTE_TYPE_HTTP,
-		Method:  "POST",
-		Pattern: "/workorders",
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "POST",
+		Pattern:     "/workorders",
 		HandlerFunc: s.methods.postWorkorders,
 	}
-	s.Httpd.Handler[0].AddRoute(r)
+	handler.AddRoute(r)
 
 	return nil
 }
@@ -120,7 +125,7 @@ func (s *Service) GetWorkorder(masterpa_sn string, hmi_sn string, code string) (
 	return nil, errors.Wrap(err, "Get workorder fail")
 }
 
-func (s *Service) getWorkorder(url string , method string) ([]byte, error) {
+func (s *Service) getWorkorder(url string, method string) ([]byte, error) {
 	r := s.httpClient.R()
 	var resp *resty.Response
 	var err error
@@ -147,7 +152,7 @@ func (s *Service) getWorkorder(url string , method string) ([]byte, error) {
 
 func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workorders, error) {
 	var finalErr error = nil
-	dbWorkorders := make([]storage.Workorders,len(workorders))
+	dbWorkorders := make([]storage.Workorders, len(workorders))
 	for i, v := range workorders {
 		o := storage.Workorders{}
 		o.Status = v.Status

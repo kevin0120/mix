@@ -43,8 +43,8 @@ type Server struct {
 
 	StorageServie *storage.Service
 
-	HTTPDService *httpd.Service
-	OdooService *odoo.Service
+	HTTPDService  *httpd.Service
+	OdooService   *odoo.Service
 	AudiVWService *audi_vw.Service
 
 	WSNotifyService *wsnotify.Service
@@ -206,7 +206,7 @@ func (s *Server) appendOdooService() error {
 
 	s.OdooService = srv
 	srv.DB = s.StorageServie
-	srv.Httpd = s.HTTPDService
+	srv.HTTPDService = s.HTTPDService
 
 	s.AppendService("odoo", srv)
 

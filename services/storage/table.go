@@ -10,7 +10,7 @@ type Workorders struct {
 	NutTotal     float64 `xorm:"double 'nut_total'"`
 	Vin          string  `xorm:"varchar(64) 'vin'"`
 	Knr          string  `xorm:"varchar(64) 'knr'"`
-	LongPin         string  `xorm:"varchar(64) 'long_pin'"`
+	LongPin      string  `xorm:"varchar(64) 'long_pin'"`
 	MaxRedoTimes int     `xorm:"int 'max_redo_times'"`
 	MaxOpTime    int     `xorm:"int 'max_op_time'"`
 	Status       string  `xorm:"varchar(32) 'status'"`
@@ -22,7 +22,7 @@ type Results struct {
 	Id           int64     `xorm:"pk autoincr notnull 'id'"`
 	ResultId     int64     `xorm:"bigint 'x_result_id'"`
 	WorkorderID  int64     `xorm:"bigint 'x_workorder_id'"`
-	UserID  		int64       `xorm:"bigint 'user_id'"`
+	UserID       int64     `xorm:"bigint 'user_id'"`
 	ControllerSN string    `xorm:"varchar(64) 'controller_sn'"`
 	Result       string    `xorm:"varchar(32) 'result'"`
 	HasUpload    bool      `xorm:"bool 'has_upload'"`
