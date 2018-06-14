@@ -208,7 +208,7 @@ func PMONParseMsg(buf []byte) PmonPackage {
 	case PMONMSGAD:
 		return PmonPackage{
 			t:    PMONMSGAD,
-			data: nil,
+			data: buf[15:],
 		}
 	}
 	return PmonPackage{

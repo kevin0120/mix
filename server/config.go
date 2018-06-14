@@ -15,6 +15,7 @@ import (
 	"github.com/masami10/aiis/services/pmon"
 	"github.com/masami10/aiis/services/rush"
 	"github.com/pkg/errors"
+	"github.com/masami10/aiis/services/fis"
 )
 
 type Config struct {
@@ -26,6 +27,8 @@ type Config struct {
 	HTTP httpd.Config `yaml:"httpd"`
 
 	Pmon pmon.Config `yaml:"pmon"`
+
+	Fis fis.Config `yaml:"fis"`
 
 	Odoo odoo.Config `yaml:"odoo"`
 
@@ -44,6 +47,7 @@ func NewConfig() *Config {
 
 	c.HTTP = httpd.NewConfig()
 	c.Pmon = pmon.NewConfig()
+	c.Fis = fis.NewConfig()
 	c.Logging = diagnostic.NewConfig()
 	c.Odoo = odoo.NewConfig()
 	c.Storage = storage.NewConfig()
@@ -86,6 +90,11 @@ func (c *Config) Validate() error {
 	if err := c.Pmon.Validate(); err != nil {
 		return errors.Wrap(err, "pmon")
 	}
+
+	if err := c.Fis.Validate(); err != nil {
+		return errors.Wrap(err, "fis")
+	}
+
 	if err := c.Odoo.Validate(); err != nil {
 		return errors.Wrap(err, "odoo")
 	}

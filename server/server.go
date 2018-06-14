@@ -10,6 +10,7 @@ import (
 	"github.com/masami10/aiis/services/pmon"
 	"github.com/masami10/aiis/services/rush"
 	"github.com/masami10/aiis/services/storage"
+	"github.com/masami10/aiis/services/fis"
 )
 
 type BuildInfo struct {
@@ -37,6 +38,8 @@ type Server struct {
 
 	HTTPDService *httpd.Service
 	PmonService  *pmon.Service
+	FisService	 *fis.Service
+	OdooService	 *odoo.Service
 
 	StorageService *storage.Service
 
@@ -83,9 +86,11 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.appendOdooService()
 
-	s.appendRushService() //必须后于http & storage
-
 	s.appendPmonService()
+
+	s.appendFisService()
+
+	s.appendRushService() //必须后于http & storage
 
 	s.appendHTTPDService()
 
@@ -97,6 +102,7 @@ func (s *Server) appendRushService() {
 	srv := rush.NewService(s.config.Rush, d)
 	srv.HTTPDService = s.HTTPDService
 	srv.StorageService = s.StorageService
+	srv.Fis = s.FisService
 
 	s.AppendService("rush", srv)
 }
@@ -153,14 +159,28 @@ func (s *Server) appendPmonService() error {
 	return nil
 }
 
+func (s *Server) appendFisService() error {
+	d := s.DiagService.NewFisHandler()
+	c := s.config.Fis
+
+	srv := fis.NewService(d, c, s.PmonService)
+	srv.Odoo = s.OdooService
+	s.FisService = srv
+	s.AppendService("fis", srv)
+	return nil
+}
+
 func (s *Server) appendOdooService() {
 	c := s.config.Odoo
 	d := s.DiagService.NewOdooHandler()
 	srv := odoo.NewService(c, d)
 
+	s.OdooService = srv
 	s.AppendService("odoo", srv)
 
 }
+
+
 
 func (s *Server) Open() error {
 

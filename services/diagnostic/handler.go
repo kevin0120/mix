@@ -312,3 +312,12 @@ type RushHandler struct {
 func (h *RushHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
+
+// Fis Handler
+type FisHandler struct {
+	l Logger
+}
+
+func (h *FisHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}

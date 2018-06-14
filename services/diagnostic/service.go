@@ -81,6 +81,12 @@ func (s *Service) NewOdooHandler() *OdooHandler {
 	}
 }
 
+func (s *Service) NewFisHandler() *FisHandler {
+	return &FisHandler{
+		l: s.Logger.With(String("service", "fis")),
+	}
+}
+
 func BootstrapMainHandler() *CmdHandler {
 	s := NewService(NewConfig(), nil, os.Stderr)
 	// Should never error

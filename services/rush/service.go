@@ -5,6 +5,7 @@ import (
 	"github.com/kataras/iris"
 	"github.com/masami10/aiis/services/httpd"
 	"sync"
+	"github.com/masami10/aiis/services/fis"
 )
 
 type Diagnostic interface {
@@ -23,8 +24,10 @@ type Service struct {
 	chResult		chan cResult
 	closing 		chan struct{}
 	StorageService interface {
-		UpdateResults(result *OperationResult, id int64) error
+		UpdateResults(result *OperationResult, id int64, sent int) error
 	}
+
+	Fis			*fis.Service
 
 	diag 		Diagnostic
 }
@@ -68,7 +71,7 @@ func (s *Service) Open() error {
 
 	r := httpd.Route{
 		Method:      "PUT",
-		Pattern:     "/aiis/v1/operation.results/{result_id:long}",
+		Pattern:     "/operation.results/{result_id:long}",
 		HandlerFunc: s.getResultUpdate,
 	}
 	s.HTTPDService.Handler[0].AddRoute(r)
@@ -85,10 +88,7 @@ func (s *Service) run() {
 	for {
 		select {
 		case r := <- s.chResult:
-			err :=s.StorageService.UpdateResults(r.r, r.id)
-			if err != nil {
-				s.diag.Error("update result error ",err)
-			}
+			s.HandleResult(&r)
 
 		case <-s.closing:
 			s.wg.Done()
@@ -105,4 +105,61 @@ func (s *Service) Close() error {
 
 	s.wg.Wait()
 	return nil
+}
+
+func (s *Service) HandleResult(cr *cResult) {
+
+	// 结果推送fis
+	fis_result := fis.FisResult{}
+	fis_result.Init()
+
+	fis_result.EquipemntName = cr.r.EquipemntName
+	fis_result.FactoryName = cr.r.FactoryName
+	fis_result.Year = cr.r.Year
+	fis_result.Pin = cr.r.Pin
+	fis_result.PinCheckCode = cr.r.Pin_check_code
+	fis_result.AssemblyLine = cr.r.AssemblyLine
+	fis_result.ResultID = "1"
+
+	value_result := 1
+
+	if cr.r.MeasureResult == "ok" {
+		fis_result.ResultValue = "IO__"
+	} else {
+		fis_result.ResultValue = "NIO_"
+		value_result = 0
+	}
+
+	fis_result.Dat = cr.r.ControlDate
+	fis_result.SystemType = s.Fis.Config().SystemType
+	fis_result.SoftwareVersion = s.Fis.Config().SoftwareVersion
+	fis_result.Mode = s.Fis.Config().Mode
+
+	// 扭矩结果
+	rv := fis.FisResultValue{}
+	rv.Value = cr.r.MeasureTorque
+	rv.ID = fis.FIS_ID_NM
+	rv.Unit = fis.FIS_UNIT_NM
+	rv.Measure = value_result
+	fis_result.Values = append(fis_result.Values, rv)
+
+	// 角度结果
+	rv.Value = cr.r.MeasureDegree
+	rv.ID = fis.FIS_ID_DEG
+	rv.Unit = fis.FIS_UNIT_DEG
+	rv.Measure = value_result
+	fis_result.Values = append(fis_result.Values, rv)
+
+	sent := 1
+	e := s.Fis.PushResult(&fis_result)
+	if e != nil {
+		sent = 0
+		s.diag.Error("push result to fis error", e)
+	}
+
+	// 结果保存数据库
+	err := s.StorageService.UpdateResults(cr.r, cr.id, sent)
+	if err != nil {
+		s.diag.Error("update result error", err)
+	}
 }

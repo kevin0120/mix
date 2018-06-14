@@ -193,8 +193,8 @@ func (ch *Channel) manage() {
 			case PMONMSGAD:
 				ch.SethasSD(false)
 				ret := make([]string, 2) //最大程度为2
-				ackInfo := string(data.data[15:17])
-				recipientInfo := string(data.data[17:19])
+				ackInfo := string(data.data[:2])
+				recipientInfo := string(data.data[2:4])
 				if ackInfo != "00" {
 					ret[0] = ackInfo
 				}

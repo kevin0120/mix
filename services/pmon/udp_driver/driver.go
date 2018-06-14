@@ -103,37 +103,28 @@ func (u *UDPDriver) xWrite(buf []byte, deadline time.Duration) error {
 }
 
 func (u *UDPDriver) Write(buf []byte, deadline time.Duration) error {
-	mr := 3 //最大重试次数
-	var err error = nil
-	for i := 0; i < mr; i++ {
-		err = u.xWrite(buf, deadline)
-		if err != nil {
-			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-				log.Printf("D! Timeout in Write: %s", err)
-				time.Sleep(2 * deadline) // 2倍timeout后重试
-				continue
-			} else if netErr != nil && !strings.HasSuffix(err.Error(), ": use of closed network connection") {
-				log.Printf(" %s", err)
-				return err
-			}
-		}
-		//没有错误直接跳出循环
-		break
-	}
+	err := u.xWrite(buf, deadline)
 	if err != nil {
-		//最后重试也没成功
-		return err
+		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+			log.Printf("D! Timeout in Write: %s", err)
+			return err
+		} else if netErr != nil && !strings.HasSuffix(err.Error(), ": use of closed network connection") {
+			log.Printf(" %s", err)
+			return err
+		}
 	}
 	u.updateReadDeadline() //写成功，更新read deadline
 	return nil
 }
 
 func (u *UDPDriver) updateReadDeadline() error {
-	return u.Listener.InterListener.setReadDeadLine(time.Now().Add(u.ReadTimeout)) //更新read deadline
+	//return u.Listener.InterListener.setReadDeadLine(time.Now().Add(u.ReadTimeout)) //更新read deadline
+	return nil
 }
 
 func (u *UDPDriver) NoReadDeadline() error {
 	return u.Listener.InterListener.setReadDeadLine(time.Time{}) //设定为永远block
+	//return nil
 }
 
 func (u *UDPDriver) SetConnection(c Connection) {

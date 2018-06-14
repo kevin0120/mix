@@ -22,6 +22,15 @@ type OperationResult struct {
 	OPTime         int         `json:"op_time"`
 	PsetWMin       float32     `json:"pset_w_min"`
 	PsetWTarget    float32     `json:"pset_w_target"`
+
+	// mo相关信息
+	EquipemntName	string		`json:"equipment_name"`		// 设备名
+	FactoryName		string		`json:"factory_name"`		// 工厂代码
+	Year			int64		`json:"year"`
+	Pin				int64		`json:"pin"`
+	Pin_check_code	int64		`json:"pin_check_code"`
+	AssemblyLine	string		`json:"assembly_line"`
+
 }
 
 //type AIISResult struct {

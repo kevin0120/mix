@@ -21,7 +21,7 @@ type OperationResultModel struct {
 	UserId         int64     `xorm:" INTEGER 'user_id'"`
 	ConsuProductId int64     `xorm:" INTEGER 'consu_product_id'"`
 	WorkcenterId   int64     `xorm:" INTEGER 'workcenter_id'"`
-	Sent           bool      `xorm:" BOOL 'sent'"`
+	Sent           int       `xorm:" bool 'sent'"`
 	PsetWTarget    float32   `xorm:"numeric 'pset_w_target'"`
 	ProductionId   int64     `xorm:" INTEGER 'production_id'"`
 	Lacking        string    `xorm:"varchar(32) 'lacking'"`

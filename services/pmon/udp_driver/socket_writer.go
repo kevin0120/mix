@@ -91,7 +91,7 @@ func (sw *SocketWriter) setKeepAlive(c net.Conn) error {
 }
 
 func (sw *SocketWriter) SetWriteDeadline(t time.Time) error {
-	return sw.Conn.SetDeadline(t)
+	return sw.Conn.SetWriteDeadline(t)
 }
 
 // Write writes the given metrics to the destination.

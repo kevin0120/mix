@@ -7,6 +7,7 @@ import (
 	"github.com/masami10/aiis/services/rush"
 	"github.com/pkg/errors"
 	"sync/atomic"
+	"encoding/json"
 )
 
 type Diagnostic interface {
@@ -73,9 +74,37 @@ func (s *Service) Close() error {
 	return nil
 }
 
-func (s *Service) UpdateResults(result *rush.OperationResult, id int64) error {
+func (s *Service) UpdateResults(result *rush.OperationResult, id int64, sent int) error {
 
-	affected, err := s.eng.Table("operation_result").Update(result)
+	var r OperationResultModel
+	r.PsetMThreshold = result.PsetMThreshold
+	r.PsetMMax = result.PsetMMax
+	r.ControlDate = result.ControlDate
+	r.PsetWMax = result.PsetMMax
+	r.UserId = result.UserId
+	r.OneTimePass = result.OneTimePass
+	r.PsetStrategy = result.PsetStrategy
+	r.PsetWThreshold = result.PsetWThreshold
+
+	cur, _ := json.Marshal(result.CurObjects)
+	r.CurObjects = string(cur)
+
+	r.PsetMTarget = result.PsetMTarget
+	r.PsetMMin = result.PsetMMin
+	r.FinalPass = result.FinalPass
+	r.MeasureDegree = result.MeasureDegree
+	r.MeasureTDon = result.MeasureTDone
+	r.MeasureTorque = result.MeasureTorque
+	r.MeasureResult = result.MeasureResult
+	r.OpTime = result.OPTime
+	r.PsetWMin = result.PsetWMin
+	r.PsetWTarget = result.PsetWTarget
+	r.UserId = result.UserId
+	r.Lacking = "normal"
+
+	r.Sent = sent
+
+	affected, err := s.eng.Table("operation_result").ID(id).Update(&r)
 
 	if err != nil {
 		return errors.Wrapf(err, "Update result record %d fail", id)
