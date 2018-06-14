@@ -316,10 +316,11 @@ func (c *Controller) Read(conn net.Conn) {
 		header := CVI3Header{}
 		header.Deserialize(headerStr)
 
-		if c.Response.HasResponse(header.MID) {
-			c.Response.update(header.MID, headerStr)
-			c.response <- headerStr
-		}
+		c.Response.update(header.MID, headerStr)
+		//if c.Response.HasResponse(header.MID) {
+		//	c.Response.update(header.MID, headerStr)
+		//	c.response <- headerStr
+		//}
 	}
 }
 

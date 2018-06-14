@@ -24,14 +24,6 @@ func (q *ResponseQueue) update(serial uint32, msg string) {
 	}
 }
 
-func (q *ResponseQueue) HasResponse(serial uint32) bool {
-	defer q.mtx.Unlock()
-
-	q.mtx.Lock()
-	_, e := q.Results[serial]
-	return e
-}
-
 func (q *ResponseQueue) remove(serial uint32) {
 	defer q.mtx.Unlock()
 

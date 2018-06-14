@@ -14,6 +14,7 @@ import (
 	"sync"
 	"sync/atomic"
 	//"time"
+	"time"
 )
 
 const (
@@ -184,7 +185,6 @@ func (p *Service) Read(c net.Conn) {
 					body = msg[off+HEADER_LEN : n]
 					rest = header.SIZ - (n - (off + HEADER_LEN))
 					break
-
 				}
 			} else {
 				if n-off > rest {
@@ -201,7 +201,9 @@ func (p *Service) Read(c net.Conn) {
 				}
 			}
 		}
+
 		if rest == 0 {
+			p.Parse([]byte(body))
 			p.CVIResponse(&header, c)
 		}
 	}
@@ -309,22 +311,44 @@ func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64,
 
 	//i := 0
 
-	for {
-		select {
-		//case <- time.After(time.Duration(c.req_timeout)):
-		//	i += 1
-		//	if i >= 6 {
-		//		return errors.New(ERR_CVI3_REPLY_TIMEOUT)
-		//	}
-		case headerStr := <-c.response:
-			header := CVI3Header{}
-			header.Deserialize(headerStr)
-			if !header.Check() {
-				// 控制器请求失败
-				return errors.New(ERR_CVI3_REPLY)
-			}
-			return nil
+	//for {
+	//	select {
+	//	//case <- time.After(time.Duration(c.req_timeout)):
+	//	//	i += 1
+	//	//	if i >= 6 {
+	//	//		return errors.New(ERR_CVI3_REPLY_TIMEOUT)
+	//	//	}
+	//	case headerStr := <-c.response:
+	//		header := CVI3Header{}
+	//		header.Deserialize(headerStr)
+	//		if !header.Check() {
+	//			// 控制器请求失败
+	//			return errors.New(ERR_CVI3_REPLY)
+	//		}
+	//		return nil
+	//	}
+	//}
+
+	var header_str string
+	for i := 0; i < 6; i++ {
+		header_str = c.Response.get(seq)
+		if header_str != "" {
+			break
 		}
+		time.Sleep(time.Duration(c.req_timeout))
+	}
+
+	if header_str == "" {
+		// 控制器请求失败
+		return errors.New(ERR_CVI3_REPLY_TIMEOUT)
+	}
+
+	//fmt.Printf("reply_header:%s\n", header_str)
+	header := CVI3Header{}
+	header.Deserialize(header_str)
+	if !header.Check() {
+		// 控制器请求失败
+		return errors.New(ERR_CVI3_REPLY)
 	}
 
 	return nil
