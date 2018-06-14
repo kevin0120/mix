@@ -113,7 +113,7 @@ type CVI3Result struct {
 
 type CVI3Header struct {
 	HDR string
-	MID uint
+	MID uint32
 	SIZ int
 	TYP uint
 	COD uint
@@ -146,42 +146,42 @@ func (header *CVI3Header) Serialize() string {
 		header.RSD)
 }
 
-func (header *CVI3Header) Deserialize(header_str string) {
+func (header *CVI3Header) Deserialize(headerStr string) {
 	header.Init()
 
 	var n uint64
 	var err error
 
-	n, err = strconv.ParseUint(header_str[4:8], 10, 32)
+	n, err = strconv.ParseUint(headerStr[4:8], 10, 32)
 	if err == nil {
-		header.MID = uint(n)
+		header.MID = uint32(n)
 	}
 
-	n, err = strconv.ParseUint(header_str[8:16], 10, 32)
+	n, err = strconv.ParseUint(headerStr[8:16], 10, 32)
 	if err == nil {
 		header.SIZ = int(n)
 	}
 
-	n, err = strconv.ParseUint(header_str[16:20], 10, 32)
+	n, err = strconv.ParseUint(headerStr[16:20], 10, 32)
 	if err == nil {
 		header.TYP = uint(n)
 	}
 
-	n, err = strconv.ParseUint(header_str[20:24], 10, 32)
+	n, err = strconv.ParseUint(headerStr[20:24], 10, 32)
 	if err == nil {
 		header.COD = uint(n)
 	}
 }
 
-func GeneratePacket(seq uint, typ uint, xmlpacket string) (string, uint) {
+func GeneratePacket(seq uint32, typ uint, xmlpacket string) (string, uint32) {
 	header := CVI3Header{}
 	header.Init()
 	header.MID = seq
 	header.SIZ = len(xmlpacket)
 	header.TYP = typ
-	header_str := header.Serialize()
+	headerStr := header.Serialize()
 
-	return fmt.Sprintf("%s%s", header_str, xmlpacket), header.MID
+	return fmt.Sprintf("%s%s", headerStr, xmlpacket), header.MID
 }
 
 type ControllerCurve struct {

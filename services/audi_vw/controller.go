@@ -16,8 +16,8 @@ import (
 type ControllerStatusType string
 
 const (
-	MINSEQUENCE          uint = 1
-	MAXSEQUENCE          uint = 9999
+	MINSEQUENCE          uint32 = 1
+	MAXSEQUENCE          uint32 = 9999
 	DAIL_TIMEOUT              = time.Duration(5 * time.Second)
 	MAX_KEEP_ALIVE_CHECK      = 3
 )
@@ -32,9 +32,9 @@ type Controller struct {
 	Srv         *Service
 	StatusValue atomic.Value
 
-	keepAliveCount    atomic.Value
+	keepAliveCount    int32
 	response          chan string
-	sequence          uint // 1~9999
+	sequence          uint32 // 1~9999
 	buffer            chan []byte
 	Response          ResponseQueue
 	mux_seq           sync.Mutex
@@ -46,24 +46,43 @@ type Controller struct {
 	cfg               controller.Config
 }
 
-func (c *Controller) KeepAliveCount() int {
-	return c.keepAliveCount.Load().(int)
+func (c *Controller) KeepAliveCount() int32 {
+	return atomic.LoadInt32(&c.keepAliveCount)
 }
 
-func (c *Controller) updateKeepAliveCount(i int) {
-	c.keepAliveCount.Store(i)
+func (c *Controller) updateKeepAliveCount(i int32) {
+	atomic.SwapInt32(&c.keepAliveCount, i)
 }
 
-func (c *Controller) Sequence() uint {
+func (c *Controller) addKeepAliveCount() {
+	atomic.AddInt32(&c.keepAliveCount,1)
+}
+
+func (c *Controller) Sequence() uint32 {
+
 	c.mux_seq.Lock()
 	defer c.mux_seq.Unlock()
 
-	if c.sequence == MAXSEQUENCE {
+	seq := c.sequence
+
+	if seq == MAXSEQUENCE {
 		c.sequence = MINSEQUENCE
 	} else {
 		c.sequence++
 	}
-	return c.sequence
+	
+	return seq
+}
+
+func (c *Controller) setSequence(i uint32) {
+	c.mux_seq.Lock()
+	defer c.mux_seq.Unlock()
+	if i >= MAXSEQUENCE {
+		c.sequence = MINSEQUENCE
+	}else {
+		c.sequence = i
+	}
+
 }
 
 func (c *Controller) Status() ControllerStatusType {
@@ -129,30 +148,33 @@ func (c *Controller) Start() {
 }
 
 func (c *Controller) manage() {
+	nextWriteThreshold := time.Now()
 	for {
 		select {
 		case <-time.After(c.keep_period):
-			count := c.KeepAliveCount()
 			if c.Status() == STATUS_OFFLINE {
 				continue
 			}
-			if count >= MAX_KEEP_ALIVE_CHECK {
+			if  c.KeepAliveCount() >= MAX_KEEP_ALIVE_CHECK {
 				go c.updateStatus(STATUS_OFFLINE)
 				c.updateKeepAliveCount(0)
 				continue
 			}
 			if c.KeepAliveDeadLine().Before(time.Now()) {
 				//到达了deadline
-				c.send_keepalive()
+				c.sendKeepalive()
 				c.updateKeepAliveDeadLine() //更新keepalivedeadline
-				c.updateKeepAliveCount(count + 1)
+				c.addKeepAliveCount()
 			}
 		case v := <-c.buffer:
+			for nextWriteThreshold.After(time.Now()){
+				time.Sleep(time.Microsecond * 100)
+			}
 			err := c.w.Write([]byte(v))
 			if err != nil {
 				c.Srv.diag.Error("Write data fail", err)
 			}
-			time.Sleep(c.req_timeout)
+			nextWriteThreshold = time.Now().Add(c.req_timeout)
 		case stopDone := <-c.closing:
 			close(stopDone)
 			return //退出manage协程
@@ -160,7 +182,7 @@ func (c *Controller) manage() {
 	}
 }
 
-func (c *Controller) send_keepalive() {
+func (c *Controller) sendKeepalive() {
 	if c.Status() == STATUS_OFFLINE {
 		return
 	}
@@ -198,13 +220,13 @@ func (c *Controller) subscribe() {
 	xml_subscribe := fmt.Sprintf(Xml_subscribe, sdate, stime)
 
 	seq := c.Sequence()
-	subscribe_packet, seq := GeneratePacket(seq, Header_type_request_with_reply, xml_subscribe)
+	subscribePacket, seq := GeneratePacket(seq, Header_type_request_with_reply, xml_subscribe)
 
-	c.Write([]byte(subscribe_packet), seq)
+	c.Write([]byte(subscribePacket), seq)
 
 }
 
-func (c *Controller) Write(buf []byte, seq uint) {
+func (c *Controller) Write(buf []byte, seq uint32) {
 	c.buffer <- buf
 }
 
@@ -225,10 +247,10 @@ func (c *Controller) Write(buf []byte, seq uint) {
 
 func (c *Controller) Connect() error {
 	c.StatusValue.Store(STATUS_OFFLINE)
-	c.sequence = 0
+	c.setSequence(MINSEQUENCE)
 
 	c.Response = ResponseQueue{
-		Results: make(map[uint]string, 100),
+		Results: map[uint32]string{},
 	}
 
 	c.Srv.diag.Debug(fmt.Sprintf("CVI3:%s connecting ...\n", c.cfg.SN))
@@ -290,28 +312,28 @@ func (c *Controller) Read(conn net.Conn) {
 		//fmt.Printf("%s\n", string(buffer))
 
 		// 处理应答
-		header_str := msg[0:HEADER_LEN]
+		headerStr := msg[0:HEADER_LEN]
 		header := CVI3Header{}
-		header.Deserialize(header_str)
+		header.Deserialize(headerStr)
 
 		if c.Response.HasResponse(header.MID) {
-			c.Response.update(header.MID, header_str)
-			c.response <- header_str
+			c.Response.update(header.MID, headerStr)
+			c.response <- headerStr
 		}
 	}
 }
 
 // PSet程序设定
-func (c *Controller) PSet(pset int, workorder_id int64, reseult_id int64, count int, user_id int64) (uint, error) {
+func (c *Controller) PSet(pset int, workorder_id int64, reseult_id int64, count int, user_id int64) (uint32, error) {
 
 	sdate, stime := utils.GetDateTime()
-	xml_pset := fmt.Sprintf(Xml_pset, sdate, stime, c.cfg.SN, workorder_id, reseult_id, count, user_id, pset)
+	xmlPset := fmt.Sprintf(Xml_pset, sdate, stime, c.cfg.SN, workorder_id, reseult_id, count, user_id, pset)
 
 	seq := c.Sequence()
-	pset_packet, seq := GeneratePacket(seq, Header_type_request_with_reply, xml_pset)
+	psetPacket, seq := GeneratePacket(seq, Header_type_request_with_reply, xmlPset)
 
 	//c.Response.Add(seq, "")
-	c.Write([]byte(pset_packet), seq)
+	c.Write([]byte(psetPacket), seq)
 
 	return seq, nil
 }

@@ -258,7 +258,7 @@ func (p *Service) HandleProcess() {
 
 // 取得控制器状态
 func (p *Service) GetControllersStatus(sn string) ([]ControllerStatus, error) {
-	status := []ControllerStatus{}
+	var status []ControllerStatus
 	if sn != "" {
 		c, exist := p.Controllers[sn]
 		if !exist {
