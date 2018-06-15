@@ -12,7 +12,7 @@ import json
 _logger = logging.getLogger(__name__)
 
 
-AIIS_RESULT_API = '/api/v1/results'
+AIIS_RESULT_API = '/aiis/v1/fis.results'
 
 
 class PushResult(AbstractModel):
@@ -22,18 +22,18 @@ class PushResult(AbstractModel):
         for url in aiis_urls:
             for result in results:
                 data = {
-                    'agna': result.production_id.equipment_name,
-                    'fname': result.production_id.factory_name,
+                    'equipment_name': result.production_id.equipment_name,
+                    'factory_name': result.production_id.factory_name,
                     'year': result.production_id.year,
                     'pin': result.production_id.pin,
-                    'pin_check': result.production_id.pin_check_code,
+                    'pin_check_code': result.production_id.pin_check_code,
                     'assembly_line': result.production_id.assembly_line_id.code,
                     'lnr': result.production_id.lnr,
                     'nut_no': result.consu_product_id.screw_type_code,
-                    'date': result.control_date,
-                    'result': result.measure_result.upper(),
-                    'MI': result.measure_torque,
-                    'WI': result.measure_degree
+                    'control_date': result.control_date,
+                    'measure_result': result.measure_result.upper(),
+                    'measure_torque': result.measure_torque,
+                    'measure_degree': result.measure_degree
                 }
                 try:
                     ret = Requests.put(url, data=json.dumps(data), headers={'Content-Type': 'application/json'})

@@ -38,7 +38,16 @@ class PushWorkorder(AbstractModel):
                 'knr': workorder.production_id.knr,
                 'long_pin': workorder.production_id.long_pin,
                 'result_ids': workorder.result_ids.ids,
-                'status': workorder.state  # pending, ready, process, done, cancel
+                'status': workorder.state,  # pending, ready, process, done, cancel
+                
+                'equipment_name': workorder.production_id.equipment_name,
+                'factory_name': workorder.production_id.factory_name,
+                'year': workorder.production_id.year,
+                'pin': workorder.production_id.pin,
+                'pin_check_code': workorder.production_id.pin_check_code,
+                'assembly_line': workorder.production_id.assembly_line_id.code,
+                'lnr': workorder.production_id.lnr,
+                'nut_no': workorder.consu_product_id.screw_type_code
             }
             r.append(vals)
         try:
