@@ -42,7 +42,7 @@ odoo:
   urls:
   - http://127.0.0.1:8069
   headers:
-    Content-Type: application/json
+#    Content-Type: application/json
   workorder_get_url: /api/v1/mrp.workorders?masterpc=%s&hmi=%s&code=%s&limit=1&order=production_date
   method: GET
   timeout: 8s

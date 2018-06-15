@@ -35,6 +35,16 @@ type ODOOWorkorder struct {
 	KNR        string    `json:"knr"`
 	VIN        string    `json:"vin"`
 	LongPin    string    `json:"long_pin"`
+
+	// mo相关信息
+	MO_EquipemntName	string		`json:"equipment_name"`		// 设备名
+	MO_FactoryName		string		`json:"factory_name"`		// 工厂代码
+	MO_Year				int64		`json:"year"`
+	MO_Pin				int64		`json:"pin"`
+	MO_Pin_check_code	int64		`json:"pin_check_code"`
+	MO_AssemblyLine		string		`json:"assembly_line"`
+	MO_Lnr				string		`json:"lnr"`
+	MO_NutNo			string		`json:"nut_no"`
 }
 
 type Worksheet struct {

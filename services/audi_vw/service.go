@@ -247,15 +247,17 @@ func (p *Service) HandleProcess() {
 		aiisResult:          aiis.AIISResult{},
 		aiisCurve:           aiis.CURObject{},
 	}
+	for {
+		select {
+		case msg := <-p.handle_buffer:
+			p.handlers.HandleMsg(msg, &context)
 
-	select {
-	case msg := <-p.handle_buffer:
-		p.handlers.HandleMsg(msg, &context)
-
-	case <-p.closing:
-		p.wg.Done()
-		return
+		case <-p.closing:
+			p.wg.Done()
+			return
+		}
 	}
+
 }
 
 // 取得控制器状态

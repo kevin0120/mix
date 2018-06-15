@@ -16,6 +16,16 @@ type Workorders struct {
 	Status       string  `xorm:"varchar(32) 'status'"`
 	ResultIDs    string  `xorm:"text 'result_ids'"`
 	WorkSheet    string  `xorm:"text 'work_sheet'"`
+
+	// mo相关信息
+	MO_EquipemntName	string		`xorm:"varchar(64) 'equipment_name'"`		// 设备名
+	MO_FactoryName		string		`xorm:"varchar(64) 'factory_name'"`			// 工厂代码
+	MO_Year				int64		`xorm:"bigint 'year'"`
+	MO_Pin				int64		`xorm:"bigint 'pin'"`
+	MO_Pin_check_code	int64		`xorm:"bigint 'pin_check_code'"`
+	MO_AssemblyLine		string		`xorm:"varchar(64) 'assembly_line'"`
+	MO_Lnr				string		`xorm:"varchar(64) 'lnr'"`
+	MO_NutNo			string		`xorm:"varchar(64) 'nut_no'"`
 }
 
 type Results struct {

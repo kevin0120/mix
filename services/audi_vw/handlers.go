@@ -132,6 +132,16 @@ func (h *Handlers) handleResult(result *ControllerResult, ctx *HandlerContext) e
 		ctx.aiisResult.Pset_w_threshold = 1
 		ctx.aiisResult.UserID = result.UserID
 
+		// mo相关
+		ctx.aiisResult.MO_AssemblyLine = workorder.MO_AssemblyLine
+		ctx.aiisResult.MO_EquipemntName = workorder.MO_EquipemntName
+		ctx.aiisResult.MO_FactoryName = workorder.MO_FactoryName
+		ctx.aiisResult.MO_Pin = workorder.MO_Pin
+		ctx.aiisResult.MO_Pin_check_code = workorder.MO_Pin_check_code
+		ctx.aiisResult.MO_Year = workorder.MO_Year
+		ctx.aiisResult.MO_Lnr = workorder.MO_Lnr
+		ctx.aiisResult.MO_NutNo = workorder.MO_NutNo
+
 		curves, err := h.AudiVw.DB.ListCurvesByResult(result.Result_id)
 		if err != nil {
 			return err
