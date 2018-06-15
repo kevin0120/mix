@@ -3,9 +3,9 @@ package rush
 import (
 	"fmt"
 	"github.com/kataras/iris"
+	"github.com/masami10/aiis/services/fis"
 	"github.com/masami10/aiis/services/httpd"
 	"sync"
-	"github.com/masami10/aiis/services/fis"
 )
 
 type Diagnostic interface {
@@ -13,32 +13,32 @@ type Diagnostic interface {
 }
 
 type cResult struct {
-	r 		*OperationResult
-	id 		int64
+	r  *OperationResult
+	id int64
 }
 
 type Service struct {
-	HTTPDService *httpd.Service
-	workers			int
-	wg 				sync.WaitGroup
-	chResult		chan cResult
-	closing 		chan struct{}
+	HTTPDService   *httpd.Service
+	workers        int
+	wg             sync.WaitGroup
+	chResult       chan cResult
+	closing        chan struct{}
 	StorageService interface {
 		UpdateResults(result *OperationResult, id int64, sent int) error
 	}
 
-	Fis			*fis.Service
+	Fis *fis.Service
 
-	diag 		Diagnostic
+	diag Diagnostic
 }
 
 func NewService(c Config, d Diagnostic) *Service {
 	if c.Enable {
 		return &Service{
-			diag: 			d,
-			workers: 		c.Workers,
-			chResult:		make(chan cResult, c.Workers),
-			closing: 		make(chan struct{}),
+			diag:     d,
+			workers:  c.Workers,
+			chResult: make(chan cResult, c.Workers),
+			closing:  make(chan struct{}),
 		}
 	}
 	return nil
@@ -75,7 +75,7 @@ func (s *Service) Open() error {
 		HandlerFunc: s.getResultUpdate,
 	}
 	s.HTTPDService.Handler[0].AddRoute(r)
-	for i := 0; i < s.workers; i ++ {
+	for i := 0; i < s.workers; i++ {
 		s.wg.Add(1)
 
 		go s.run()
@@ -87,7 +87,7 @@ func (s *Service) Open() error {
 func (s *Service) run() {
 	for {
 		select {
-		case r := <- s.chResult:
+		case r := <-s.chResult:
 			s.HandleResult(&r)
 
 		case <-s.closing:
@@ -99,8 +99,8 @@ func (s *Service) run() {
 
 func (s *Service) Close() error {
 
-	for i := 0; i < s.workers; i ++ {
-		s.closing<- struct{}{}
+	for i := 0; i < s.workers; i++ {
+		s.closing <- struct{}{}
 	}
 
 	s.wg.Wait()

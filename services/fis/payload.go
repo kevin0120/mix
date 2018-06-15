@@ -1,22 +1,22 @@
 package fis
 
 import (
-	"time"
 	"fmt"
+	"time"
 )
 
 const (
-	FIS_VER = "V001"
-	FIS_TAG = "ERGEBNIS"
+	FIS_VER        = "V001"
+	FIS_TAG        = "ERGEBNIS"
 	FIS_RESULT_VER = "002"
 	FIS_RESULT_NUM = 1
 	FIS_RESULT_KEY = "RESULT"
-	FIS_VALUE_KEY = "VALUE"
+	FIS_VALUE_KEY  = "VALUE"
 	FIS_RESULT_LEN = 182
-	FIS_UNIT_NM = "Nm"
-	FIS_UNIT_DEG = "DEG"
-	FIS_ID_NM = 1
-	FIS_ID_DEG = 2
+	FIS_UNIT_NM    = "Nm"
+	FIS_UNIT_DEG   = "DEG"
+	FIS_ID_NM      = 1
+	FIS_ID_DEG     = 2
 
 	// 1. 设备名(4位）
 	// 2. 协议版本（4位）
@@ -51,7 +51,7 @@ const (
 	result_template = "%s--%s--%s-%d-%d=%d-%s%06d**%s%s%05d##%03d*%s*%-20s*%-10s*%-6s*%s*%s*%s*%-6s*%03d*%06d%-20f%-10s%d*%06d%-20f%-10s%d***"
 )
 
-func (fr *FisResult) Serialize() (string) {
+func (fr *FisResult) Serialize() string {
 
 	result_time := fr.Dat.Format("20060102150405")
 
@@ -91,34 +91,34 @@ func (fr *FisResult) Serialize() (string) {
 }
 
 type FisResultValue struct {
-	ID			int64		//结果值序号
-	Value		float32		//结果值(扭矩/角度)
-	Unit		string		//结果单位(Nm/DEG)
-	Measure		int			//检测结果(0: OK 1: NOK)
+	ID      int64   //结果值序号
+	Value   float32 //结果值(扭矩/角度)
+	Unit    string  //结果单位(Nm/DEG)
+	Measure int     //检测结果(0: OK 1: NOK)
 }
 
 type FisResult struct {
-	EquipemntName	string		//设备名
-	Ver				string		//协议版本（V001）
-	FactoryName		string		//工厂代码
-	Year			int64		//订单年份
-	Pin				int64		//车辆装配代码
-	PinCheckCode	int64		//校验位
-	AssemblyLine	string		//流水线
-	Seq				int64		//序列号
-	Tag				string		//结果Tag（ERGEBNIS）
-	ResultVer		string		//结果版本(002)
-	ResultLen		int64		//结果长度（从Tag开始算）
-	ResultNum		int64		//结果数量（001）
-	ResultKey		string		//结果Key（RESULT）
-	ResultID		string		//自定义的结果id
-	SystemType		string		//系统类型
-	SoftwareVersion	string		//软件版本
-	ResultValue		string		//拧接结果(IO/NIO)
-	Dat				time.Time	//时间日期（YYYYMMDDHHMMSS）
-	Mode			string		//操作模式（AUTO/MANU）
-	ValueKey		string		//结果key（VALUE）
-	Values			[]FisResultValue
+	EquipemntName   string    //设备名
+	Ver             string    //协议版本（V001）
+	FactoryName     string    //工厂代码
+	Year            int64     //订单年份
+	Pin             int64     //车辆装配代码
+	PinCheckCode    int64     //校验位
+	AssemblyLine    string    //流水线
+	Seq             int64     //序列号
+	Tag             string    //结果Tag（ERGEBNIS）
+	ResultVer       string    //结果版本(002)
+	ResultLen       int64     //结果长度（从Tag开始算）
+	ResultNum       int64     //结果数量（001）
+	ResultKey       string    //结果Key（RESULT）
+	ResultID        string    //自定义的结果id
+	SystemType      string    //系统类型
+	SoftwareVersion string    //软件版本
+	ResultValue     string    //拧接结果(IO/NIO)
+	Dat             time.Time //时间日期（YYYYMMDDHHMMSS）
+	Mode            string    //操作模式（AUTO/MANU）
+	ValueKey        string    //结果key（VALUE）
+	Values          []FisResultValue
 }
 
 func (fr *FisResult) Init() {
@@ -129,4 +129,3 @@ func (fr *FisResult) Init() {
 	fr.ResultKey = FIS_RESULT_KEY
 	fr.ValueKey = FIS_VALUE_KEY
 }
-

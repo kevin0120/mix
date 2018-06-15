@@ -1,18 +1,18 @@
 package fis
 
 import (
-	"github.com/masami10/aiis/services/pmon"
 	"fmt"
 	"github.com/masami10/aiis/services/odoo"
+	"github.com/masami10/aiis/services/pmon"
 	"strconv"
-	"sync/atomic"
 	"sync"
+	"sync/atomic"
 )
 
 const (
-	LEN_FIS_MO = 149
-	NUM_PRS = 16
-	LEN_PR_VALUE = 3
+	LEN_FIS_MO     = 149
+	NUM_PRS        = 16
+	LEN_PR_VALUE   = 3
 	MAX_RESULT_SEQ = 999999
 )
 
@@ -21,23 +21,23 @@ type Diagnostic interface {
 }
 
 type Service struct {
-	Pmon		*pmon.Service
-	Odoo		*odoo.Service
-	PR_GROUPS	[]string
+	Pmon        *pmon.Service
+	Odoo        *odoo.Service
+	PR_GROUPS   []string
 	diag        Diagnostic
 	configValue atomic.Value
 
-	result_seq		int64
-	result_seq_mtx	sync.Mutex
+	result_seq     int64
+	result_seq_mtx sync.Mutex
 }
 
-func NewService(d Diagnostic, c Config, pmon *pmon.Service) (*Service) {
+func NewService(d Diagnostic, c Config, pmon *pmon.Service) *Service {
 	s := &Service{
 		diag: d,
 	}
 
 	s.Pmon = pmon
-	s.PR_GROUPS = []string {
+	s.PR_GROUPS = []string{
 		"GSP",
 		"SAB",
 		"RAD",
@@ -140,7 +140,7 @@ func (s *Service) HandleMO(msg string) {
 	for i := 0; i < NUM_PRS; i++ {
 		pr := odoo.ODOOPR{}
 		pr.Pr_group = s.PR_GROUPS[i]
-		pr.Pr_value = s_prs[step:step + LEN_PR_VALUE]
+		pr.Pr_value = s_prs[step : step+LEN_PR_VALUE]
 
 		mo.Prs = append(mo.Prs, pr)
 		step += LEN_PR_VALUE + 1
@@ -152,7 +152,7 @@ func (s *Service) HandleMO(msg string) {
 	}
 }
 
-func (s *Service) PushResult(fis_result *FisResult) (error) {
+func (s *Service) PushResult(fis_result *FisResult) error {
 	fis_result.Seq = s.GetSeq()
 	return s.Pmon.SendPmonMessage(pmon.PMONMSGSD, s.Config().CH_SEND, fis_result.Serialize())
 }

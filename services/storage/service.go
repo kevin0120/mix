@@ -1,13 +1,13 @@
 package storage
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/go-xorm/xorm"
 	_ "github.com/lib/pq"
 	"github.com/masami10/aiis/services/rush"
 	"github.com/pkg/errors"
 	"sync/atomic"
-	"encoding/json"
 )
 
 type Diagnostic interface {

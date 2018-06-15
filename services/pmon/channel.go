@@ -123,12 +123,12 @@ func (ch *Channel) manage() {
 			if ch.gethasSD() {
 				//有发送过sd,但没有收到ad，但是关闭了通道
 				res, _ := ch.generateAO(ch.conn.U.GetMsgNum())
-				ch.Write([]byte(res), PMONMSGAO) //发送AO
+				ch.Write([]byte(res), PMONMSGAO) //发送AO,忽略错误
 				bc := fmt.Sprintf("%04d", ch.GetBlockCount())
 				res, _ = ch.generateAD(ch.conn.U.GetMsgNum(), bc)
-				ch.Write([]byte(res), PMONMSGAD) //发送AD
+				ch.Write([]byte(res), PMONMSGAD) //发送AD忽略错误
 				res, _ = ch.generateAC(ch.conn.U.GetMsgNum())
-				ch.Write([]byte(res), PMONMSGAC) //发送AC
+				ch.Write([]byte(res), PMONMSGAC) //发送AC忽略错误
 				ch.SethasSD(false)               //走完此流程后没有SD
 			}
 		case data := <-ch.recvBuf:
