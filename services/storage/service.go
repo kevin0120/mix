@@ -74,6 +74,21 @@ func (s *Service) Close() error {
 	return nil
 }
 
+func (s *Service) UpdateSent(id int64, sent int) error {
+
+	var r OperationResultModel
+	r.Sent = sent
+	affected, err := s.eng.Table("operation_result").ID(id).Update(&r)
+
+	if err != nil {
+		return errors.Wrapf(err, "Update result record %d fail", id)
+	}
+
+	s.diag.UpdateResultSuccess(affected)
+
+	return nil
+}
+
 func (s *Service) UpdateResults(result *rush.OperationResult, id int64, sent int) error {
 
 	var r OperationResultModel

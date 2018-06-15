@@ -30,7 +30,8 @@ type OperationResult struct {
 	Pin				int64		`json:"pin"`
 	Pin_check_code	int64		`json:"pin_check_code"`
 	AssemblyLine	string		`json:"assembly_line"`
-
+	Lnr				string		`json:"lnr"`
+	NutNo			string		`json:"nut_no"`
 }
 
 //type AIISResult struct {

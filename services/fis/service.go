@@ -6,7 +6,6 @@ import (
 	"github.com/masami10/aiis/services/odoo"
 	"strconv"
 	"sync/atomic"
-	"sync"
 )
 
 const (
@@ -27,8 +26,6 @@ type Service struct {
 	diag        Diagnostic
 	configValue atomic.Value
 
-	result_seq		int64
-	result_seq_mtx	sync.Mutex
 }
 
 func NewService(d Diagnostic, c Config, pmon *pmon.Service) (*Service) {
@@ -72,19 +69,6 @@ func (s *Service) Open() error {
 
 func (s *Service) Close() error {
 	return nil
-}
-
-func (s *Service) GetSeq() int64 {
-	s.result_seq_mtx.Lock()
-	defer s.result_seq_mtx.Unlock()
-
-	if s.result_seq == MAX_RESULT_SEQ {
-		s.result_seq = 1
-	} else {
-		s.result_seq++
-	}
-
-	return s.result_seq
 }
 
 func (s *Service) OnPmonEvent(err error, data []rune, obj interface{}) {
@@ -153,6 +137,5 @@ func (s *Service) HandleMO(msg string) {
 }
 
 func (s *Service) PushResult(fis_result *FisResult) (error) {
-	fis_result.Seq = s.GetSeq()
 	return s.Pmon.SendPmonMessage(pmon.PMONMSGSD, s.Config().CH_SEND, fis_result.Serialize())
 }

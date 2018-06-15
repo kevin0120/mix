@@ -52,6 +52,7 @@ func (s *Service) Open() error {
 	return nil
 }
 
+
 func (s *Service) Close() error {
 	return nil
 }

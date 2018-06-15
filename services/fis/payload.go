@@ -1,8 +1,8 @@
 package fis
 
 import (
-	"time"
 	"fmt"
+	"time"
 )
 
 const (
@@ -48,7 +48,7 @@ const (
 	// 28. 角度单位（10位，左对齐，右补空格）
 	// 29. 角度测量结果（1位）
 	//				   1   2   3  4  5  6  7 8     9 1011    12   13 14    15    16   17 18 19 20   21   22  23   24   25 26  27   28   29
-	result_template = "%s--%s--%s-%d-%d=%d-%s%06d**%s%s%05d##%03d*%s*%-20s*%-10s*%-6s*%s*%s*%s*%-6s*%03d*%06d%-20f%-10s%d*%06d%-20f%-10s%d***"
+	result_template = "%s--%s--%s-%d-%d=%d-%s%06s**%s%s%05d##%03d*%s*%-20s*%-10s*%-6s*%s*%s*%s*%-6s*%03d*%06d%-20f%-10s%d*%06d%-20f%-10s%d***"
 )
 
 func (fr *FisResult) Serialize() (string) {
@@ -64,7 +64,7 @@ func (fr *FisResult) Serialize() (string) {
 		fr.Pin,
 		fr.PinCheckCode,
 		fr.AssemblyLine,
-		fr.Seq,
+		fr.Lnr,
 		FIS_TAG,
 		FIS_RESULT_VER,
 		FIS_RESULT_LEN,
@@ -105,7 +105,7 @@ type FisResult struct {
 	Pin				int64		//车辆装配代码
 	PinCheckCode	int64		//校验位
 	AssemblyLine	string		//流水线
-	Seq				int64		//序列号
+	Lnr				string		//序列号
 	Tag				string		//结果Tag（ERGEBNIS）
 	ResultVer		string		//结果版本(002)
 	ResultLen		int64		//结果长度（从Tag开始算）
@@ -115,7 +115,7 @@ type FisResult struct {
 	SystemType		string		//系统类型
 	SoftwareVersion	string		//软件版本
 	ResultValue		string		//拧接结果(IO/NIO)
-	Dat				time.Time	//时间日期（YYYYMMDDHHMMSS）
+	Dat				time.Time		//时间日期（YYYYMMDDHHMMSS）
 	Mode			string		//操作模式（AUTO/MANU）
 	ValueKey		string		//结果key（VALUE）
 	Values			[]FisResultValue
