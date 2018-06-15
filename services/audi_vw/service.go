@@ -160,6 +160,9 @@ func (p *Service) Read(c net.Conn) {
 	body := ""
 	var header CVI3Header
 	scnr := bufio.NewScanner(c)
+	conf := p.config()
+	buf := make([]byte, conf.ReadBufferSize, conf.ReadBufferSize * 2)
+	scnr.Buffer(buf, cap(buf)) // 2倍的read buffer size 作为max
 	for {
 
 		if !scnr.Scan() {
