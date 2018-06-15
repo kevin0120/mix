@@ -6,7 +6,7 @@ from odoo.http import request,Response
 
 
 class OperationView(http.Controller):
-    @http.route('/api/v1/mrp.routing.workcenter/<int:operation_id>/edit', type='http', methods=['PUT', 'OPTIONS'], auth='none', cors='*', csrf=False)
+    @http.route('/api/v1/mrp.routing.workcenter/<int:operation_id>/edit', type='json', methods=['PUT', 'OPTIONS'], auth='none', cors='*', csrf=False)
     def _edit_points(self, operation_id=None):
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         operation = env['mrp.routing.workcenter'].search([('id', '=', operation_id)],limit=1)
@@ -35,15 +35,15 @@ class OperationView(http.Controller):
             for val in points:
                 point_id = env['point.point'].search([('res_id', '=', operation_id),
                                                       ('res_model', '=', 'mrp.routing.workcenter'),
-                                                      ('sequence', '=', val.sequence)])
+                                                      ('sequence', '=', val['sequence'])])
                 if not point_id:
-                    _val = val.update({'res_id': operation_id, 'res_model': 'mrp.routing.workcenter', 'res_field': 'worksheet_img'})
-                    env['point.point'].create(_val)
+                    val.update({'res_id': operation_id, 'res_model': 'mrp.routing.workcenter', 'res_field': 'worksheet_img'})
+                    env['point.point'].create(val)
                 else:
                     env['point.point'].write(val)
-                body = json.dumps({'msg': "Edit point success"})
-                headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
-                return Response(body, status=200, headers=headers)
+            body = json.dumps({'msg': "Edit point success"})
+            headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
+            return Response(body, status=200, headers=headers)
 
     @http.route(['/api/v1/mrp.routing.workcenter/<int:operation_id>', '/api/v1/mrp.routing.workcenter'], type='http', methods=['PUT', 'OPTIONS'], auth='none', cors='*', csrf=False)
     def _get_operations(self, operation_id=None):
