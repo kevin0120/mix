@@ -194,15 +194,15 @@ class TorAngSPCReport(models.TransientModel):
         if self.assembly_line_id:
             domain += [('assembly_line_id', '=', self.assembly_line_id.id)]
         if self.spc_target == 'torque':
-            fields = ['measure_torque']
-        if self.spc_target == 'angle':
-            fields = ['measure_degree']
-            order = 'measure_degree desc'
-        _data = self.env['operation.result'].sudo().search_read(domain=domain, fields=fields, limit=self.limit)
+            _data = self.env['operation.result'].sudo().get_torques(domain, limit=self.limit)
+            data = {'measure_torque': _data}
+        else:
+            _data = self.env['operation.result'].sudo().get_angles(domain, limit=self.limit)
+            data = {'measure_degree': _data}
         length = len(_data)
         if length < self.limit and length < 100:
-            return DataFrame(),length
-        df = DataFrame.from_dict(_data)
+            return DataFrame(), length
+        df = DataFrame.from_records(data)
         df = df['measure_degree'] if self.spc_target == 'angle' else df['measure_torque']
         return df, length
 

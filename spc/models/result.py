@@ -344,6 +344,50 @@ class OperationResult(models.HyperModel):
         return True
 
     @api.multi
+    def get_torques(self, args, limit=1000):
+        query = self._where_calc(args)
+        self._apply_ir_rules(query, 'read')
+        from_clause, where_clause, where_clause_params = query.get_sql()
+
+        where_str = where_clause and (" WHERE %s" % where_clause) or ''
+
+        limit_str = limit and ' limit %d' % limit or ''
+        query_str = 'SELECT "%s".measure_torque FROM ' % self._table + from_clause + where_str + limit_str
+        self._cr.execute(query_str, where_clause_params)
+        res = self._cr.fetchall()
+
+        # TDE note: with auto_join, we could have several lines about the same result
+        # i.e. a lead with several unread messages; we uniquify the result using
+        # a fast way to do it while preserving order (http://www.peterbe.com/plog/uniqifiers-benchmark)
+        def _uniquify_list(seq):
+            seen = set()
+            return [x for x in seq if x not in seen and not seen.add(x)]
+
+        return _uniquify_list([x[0] for x in res])
+
+    @api.multi
+    def get_angles(self, args, limit=1000):
+        query = self._where_calc(args)
+        self._apply_ir_rules(query, 'read')
+        from_clause, where_clause, where_clause_params = query.get_sql()
+
+        where_str = where_clause and (" WHERE %s" % where_clause) or ''
+
+        limit_str = limit and ' limit %d' % limit or ''
+        query_str = 'SELECT "%s".measure_degree FROM ' % self._table + from_clause + where_str + limit_str
+        self._cr.execute(query_str, where_clause_params)
+        res = self._cr.fetchall()
+
+        # TDE note: with auto_join, we could have several lines about the same result
+        # i.e. a lead with several unread messages; we uniquify the result using
+        # a fast way to do it while preserving order (http://www.peterbe.com/plog/uniqifiers-benchmark)
+        def _uniquify_list(seq):
+            seen = set()
+            return [x for x in seq if x not in seen and not seen.add(x)]
+
+        return _uniquify_list([x[0] for x in res])
+
+    @api.multi
     def do_pass(self):
         self.write({'quality_state': 'pass',
                     'user_id': self.env.user.id,
