@@ -3,44 +3,46 @@ package rush
 import (
 	"fmt"
 	"github.com/kataras/iris"
+	"github.com/masami10/aiis/services/fis"
 	"github.com/masami10/aiis/services/httpd"
 	"sync"
-	"github.com/masami10/aiis/services/fis"
 	"strings"
 )
+
 
 type Diagnostic interface {
 	Error(msg string, err error)
 }
 
 type cResult struct {
-	r 		*OperationResult
-	id 		int64
+	r  *OperationResult
+	id int64
 }
 
 type Service struct {
-	HTTPDService 	*httpd.Service
-	workers			int
-	wg 				sync.WaitGroup
-	chResult		chan cResult
-	closing 		chan struct{}
+	HTTPDService   *httpd.Service
+	workers        int
+	wg             sync.WaitGroup
+	chResult       chan cResult
+	closing        chan struct{}
+
 	StorageService interface {
 		UpdateResults(result *OperationResult, id int64, sent int) error
 		UpdateSent(id int64, sent int) error
 	}
 
-	Fis			*fis.Service
+	Fis *fis.Service
 
-	diag 		Diagnostic
+	diag Diagnostic
 }
 
 func NewService(c Config, d Diagnostic) *Service {
 	if c.Enable {
 		return &Service{
-			diag: 			d,
-			workers: 		c.Workers,
-			chResult:		make(chan cResult, c.Workers),
-			closing: 		make(chan struct{}),
+			diag:     d,
+			workers:  c.Workers,
+			chResult: make(chan cResult, c.Workers),
+			closing:  make(chan struct{}),
 		}
 	}
 	return nil
@@ -52,7 +54,6 @@ func (s *Service) putFisResult(ctx iris.Context) {
 	err := ctx.ReadJSON(&r)
 
 	if err != nil {
-		fmt.Printf(err.Error())
 		ctx.Writef(fmt.Sprintf("Result Params from Odoo wrong: %s", err.Error()))
 		ctx.StatusCode(iris.StatusBadRequest)
 		return
@@ -108,7 +109,7 @@ func (s *Service) Open() error {
 	}
 	s.HTTPDService.Handler[0].AddRoute(r_fis)
 
-	for i := 0; i < s.workers; i ++ {
+	for i := 0; i < s.workers; i++ {
 		s.wg.Add(1)
 
 		go s.run()
@@ -120,7 +121,7 @@ func (s *Service) Open() error {
 func (s *Service) run() {
 	for {
 		select {
-		case r := <- s.chResult:
+		case r := <-s.chResult:
 			s.HandleResult(&r)
 
 		case <-s.closing:
@@ -132,8 +133,8 @@ func (s *Service) run() {
 
 func (s *Service) Close() error {
 
-	for i := 0; i < s.workers; i ++ {
-		s.closing<- struct{}{}
+	for i := 0; i < s.workers; i++ {
+		s.closing <- struct{}{}
 	}
 
 	s.wg.Wait()
@@ -209,6 +210,4 @@ func (s *Service) HandleResult(cr *cResult) {
 			s.diag.Error("update result error", err)
 		}
 	}
-
-
 }

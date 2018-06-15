@@ -13,8 +13,8 @@ type ODOOMO struct {
 	Year           int    `json:"year"`
 	Assembly_line  string `json:"assembly_line"`
 	Model          string `json:"model"`
-	Vin                string   `json:"vin"`
-	Lnr                string   `json:"lnr"`
+	Vin            string `json:"vin"`
+	Lnr            string `json:"lnr"`
 	//Date_planned_start string   `json:"date_planned_start"`
-	Prs                []ODOOPR `json:"prs"`
+	Prs []ODOOPR `json:"prs"`
 }

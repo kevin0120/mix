@@ -5,12 +5,12 @@ import (
 	"github.com/masami10/aiis/command"
 	"github.com/masami10/aiis/keyvalue"
 	"github.com/masami10/aiis/services/diagnostic"
+	"github.com/masami10/aiis/services/fis"
 	"github.com/masami10/aiis/services/httpd"
 	"github.com/masami10/aiis/services/odoo"
 	"github.com/masami10/aiis/services/pmon"
 	"github.com/masami10/aiis/services/rush"
 	"github.com/masami10/aiis/services/storage"
-	"github.com/masami10/aiis/services/fis"
 )
 
 type BuildInfo struct {
@@ -38,8 +38,8 @@ type Server struct {
 
 	HTTPDService *httpd.Service
 	PmonService  *pmon.Service
-	FisService	 *fis.Service
-	OdooService	 *odoo.Service
+	FisService   *fis.Service
+	OdooService  *odoo.Service
 
 	StorageService *storage.Service
 
@@ -179,8 +179,6 @@ func (s *Server) appendOdooService() {
 	s.AppendService("odoo", srv)
 
 }
-
-
 
 func (s *Server) Open() error {
 
