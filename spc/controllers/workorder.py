@@ -31,7 +31,16 @@ class ApiMrpWorkorder(http.Controller):
                 'vin': order.production_id.vin,
                 'knr': order.production_id.knr,
                 'result_ids': order.result_ids.ids,
-                'status': order.state  # pending, ready, process, done, cancel
+                'status': order.state,  # pending, ready, process, done, cancel
+
+                'equipment_name': order.production_id.equipment_name,
+                'factory_name': order.production_id.factory_name,
+                'year': order.production_id.year,
+                'pin': order.production_id.pin,
+                'pin_check_code': order.production_id.pin_check_code,
+                'assembly_line': order.production_id.assembly_line_id.code,
+                'lnr': order.production_id.lnr,
+                'nut_no': order.consu_product_id.screw_type_code
             }
             body = json.dumps(ret)
             return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
@@ -84,7 +93,16 @@ class ApiMrpWorkorder(http.Controller):
                 'knr': order.production_id.knr,
                 'long_pin': order.production_id.long_pin,
                 'result_ids': order.result_ids.ids,
-                'status': order.state  # pending, ready, process, done, cancel
+                'status': order.state,  # pending, ready, process, done, cancel
+
+                'equipment_name': order.production_id.equipment_name,
+                'factory_name': order.production_id.factory_name,
+                'year': order.production_id.year,
+                'pin': order.production_id.pin,
+                'pin_check_code': order.production_id.pin_check_code,
+                'assembly_line': order.production_id.assembly_line_id.code,
+                'lnr': order.production_id.lnr,
+                'nut_no': order.consu_product_id.screw_type_code
             })
         if len(_ret) == 0:
             body = json.dumps([])

@@ -12,7 +12,7 @@ import json
 _logger = logging.getLogger(__name__)
 
 
-AIIS_RESULT_API = '/aiis/v1/operation.results'
+AIIS_RESULT_API = '/aiis/v1/fis.results'
 
 
 class PushResult(AbstractModel):
