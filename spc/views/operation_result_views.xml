@@ -118,6 +118,7 @@
             <tree>
                 <field name="product_id"/>
                 <field name="consu_product_id" />
+                <field name="workcenter_id" />
                 <field name="control_date" string="Checked Time"/>
                 <field name="measure_torque"/>
                 <field name="measure_degree"/>
@@ -183,7 +184,7 @@
                 <filter name="last_year" string="Last Year" domain="[('control_date','&gt;=', (context_today() - relativedelta(years=1)).strftime('%Y-1-1')),('control_date','&lt;', context_today().strftime('%Y-1-1') )]"/>
                 <group expand="0" string="Group By">
                     <filter string="Result" context="{'group_by': 'measure_result'}"/>
-                    <filter string="Production" context="{'group_by': 'production_id'}"/>
+                    <!--<filter string="Production" context="{'group_by': 'production_id'}"/>-->
                     <filter string="Vehicle" context="{'group_by': 'product_id'}"/>
                     <filter string="Screw" context="{'group_by': 'consu_product_id'}"/>
                     <filter string="WorkCenter" context="{'group_by': 'workcenter_id'}"/>
