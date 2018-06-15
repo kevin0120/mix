@@ -377,8 +377,8 @@ func (s *Service) UpdateResultByCount(id int64, count int, flag bool) error {
 	}
 }
 
-func (s *Service) DeleteInvalidResults() error {
-	sql := "delete from `results` where has_upload = true"
+func (s *Service) DeleteInvalidResults(keep time.Time) error {
+	sql := fmt.Sprintf("delete from `results` where has_upload = true and update_time < '%s'", keep.Format("2006-01-02 15:04:05"))
 	_, err := s.eng.Exec(sql)
 
 	if err != nil {
@@ -388,9 +388,9 @@ func (s *Service) DeleteInvalidResults() error {
 	}
 }
 
-func (s *Service) DeleteInvalidCurves() error {
+func (s *Service) DeleteInvalidCurves(keep time.Time) error {
 
-	sql := "delete from `curves` where has_upload = true"
+	sql := fmt.Sprintf("delete from `curves` where has_upload = true and update_time < '%s'", keep.Format("2006-01-02 15:04:05"))
 	_, err := s.eng.Exec(sql)
 
 	if err != nil {
@@ -400,9 +400,9 @@ func (s *Service) DeleteInvalidCurves() error {
 	}
 }
 
-func (s *Service) DeleteInvalidWorkorders() error {
+func (s *Service) DeleteInvalidWorkorders(keep time.Time) error {
 
-	sql := "delete from `workorders` where status = 'finished'"
+	sql := fmt.Sprintf("delete from `workorders` where status = 'finished' and update_time < '%s'", keep.Format("2006-01-02 15:04:05"))
 	_, err := s.eng.Exec(sql)
 
 	if err != nil {
@@ -417,14 +417,16 @@ func (s *Service) DropTableManage() error {
 	for {
 		start := time.Now()
 
+		keep := time.Now().Add(time.Duration(c.DataKeep) * -1)
+
 		// 清理过期结果
-		s.DeleteInvalidResults()
+		s.DeleteInvalidResults(keep)
 
 		// 清理过期波形
-		s.DeleteInvalidCurves()
+		s.DeleteInvalidCurves(keep)
 
 		// 清理过期工单
-		s.DeleteInvalidWorkorders()
+		s.DeleteInvalidWorkorders(keep)
 
 		diff := time.Since(start) // 执行的间隔时间
 

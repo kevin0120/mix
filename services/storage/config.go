@@ -13,6 +13,7 @@ type Config struct {
 	Password     string        `yaml:"db_pwd"`
 	MaxConnects  int           `yaml:"max_connection"`
 	VacuumPeriod toml.Duration `yaml:"vacuum_period"`
+	DataKeep	 toml.Duration `yaml:"data_keep"`
 }
 
 func NewConfig() Config {
@@ -23,6 +24,7 @@ func NewConfig() Config {
 		Password:     "pwd",
 		MaxConnects:  60,
 		VacuumPeriod: toml.Duration(time.Duration(3 * 30 * 24 * time.Hour)),
+		DataKeep: toml.Duration(time.Duration(3 * 30 * 24 * time.Hour)),
 	}
 }
 

@@ -170,6 +170,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 		o.MaxRedoTimes = v.Max_redo_times
 		worksheet, _ := json.Marshal(v.Worksheet)
 		o.WorkSheet = string(worksheet)
+		o.UpdateTime = v.UpdateTime
 
 		o.MO_Year = v.MO_Year
 		o.MO_Pin_check_code = v.MO_Pin_check_code

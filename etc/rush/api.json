@@ -35,10 +35,7 @@
         ],
         "responses": {
           "200": {
-            "description": "设置成功",
-            "schema": {
-              "$ref": "#/definitions/pset_response"
-            }
+            "description": "设置成功"
           },
           "400": {
             "description": "设置失败"
@@ -425,21 +422,6 @@
           "type": "string",
           "description": "控制器状态(online:在线 offline:离线)",
           "example": "online"
-        }
-      }
-    },
-    "pset_response": {
-      "type": "object",
-      "properties": {
-        "result_id": {
-          "type": "integer",
-          "description": "结果id",
-          "example": 1
-        },
-        "count": {
-          "type": "integer",
-          "description": "当前拧紧次数",
-          "example": 1
         }
       }
     },

@@ -2,6 +2,7 @@ package odoo
 
 import (
 	"github.com/masami10/rush/services/aiis"
+	"time"
 )
 
 type ResultPatch struct {
@@ -35,6 +36,7 @@ type ODOOWorkorder struct {
 	KNR        string    `json:"knr"`
 	VIN        string    `json:"vin"`
 	LongPin    string    `json:"long_pin"`
+	UpdateTime time.Time `json:"update_time"`
 
 	// mo相关信息
 	MO_EquipemntName	string		`json:"equipment_name"`		// 设备名

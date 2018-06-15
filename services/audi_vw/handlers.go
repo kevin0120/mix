@@ -193,6 +193,8 @@ func (h *Handlers) handleCurve(curve *ControllerCurve, ctx *HandlerContext) erro
 	ctx.dbCurve.CurveFile = curve.CurveFile
 	ctx.dbCurve.Count = curve.Count
 	ctx.dbCurve.HasUpload = false
+	loc, _ := time.LoadLocation("Local")
+	ctx.dbCurve.UpdateTime, _ = time.ParseInLocation("2006-01-02 15:04:05", ctx.controllerResult.Dat, loc)
 
 	exist, err := h.AudiVw.DB.CurveExist(&ctx.dbCurve)
 	if err != nil {

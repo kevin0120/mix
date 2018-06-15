@@ -16,6 +16,7 @@ type Workorders struct {
 	Status       string  `xorm:"varchar(32) 'status'"`
 	ResultIDs    string  `xorm:"text 'result_ids'"`
 	WorkSheet    string  `xorm:"text 'work_sheet'"`
+	UpdateTime	 time.Time `xorm:"datetime 'update_time'"`
 
 	// mo相关信息
 	MO_EquipemntName	string		`xorm:"varchar(64) 'equipment_name'"`		// 设备名
@@ -50,4 +51,5 @@ type Curves struct {
 	CurveFile string `xorm:"varchar(128) 'curve_file'"`
 	CurveData string `xorm:"text 'curve_data'"`
 	HasUpload bool   `xorm:"bool 'has_upload'"`
+	UpdateTime   time.Time `xorm:"datetime 'update_time'"`
 }
