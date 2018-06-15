@@ -11,6 +11,10 @@ DEFAULT_LIMIT = 80
 NORMAL_RESULT_FIELDS_READ = ['workorder_id', 'id', 'product_id', 'consu_product_id', 'op_time', 'measure_result', 'workcenter_id']
 
 
+def str_time_to_rfc3339(s_time):
+    sp = s_time.split(' ')
+    return sp[0] + 'T' + sp[1] + 'Z'
+
 def _post_aiis_result_package(aiis_urls, results):
     if not aiis_urls:
         return False
@@ -25,7 +29,7 @@ def _post_aiis_result_package(aiis_urls, results):
                 'assembly_line': result.production_id.assembly_line_id.code,
                 'lnr': result.production_id.lnr,
                 'nut_no': result.consu_product_id.screw_type_code,
-                'control_date': result.control_date,
+                'control_date': str_time_to_rfc3339(result.control_date),
                 'measure_result': result.measure_result.upper(),
                 'measure_torque': result.measure_torque,
                 'measure_degree': result.measure_degree
