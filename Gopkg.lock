@@ -246,6 +246,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/willf/pad"
+  packages = ["."]
+  revision = "b3d7806010228b1a954b4d9c4ee4cf6cb476b063"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/crypto"
   packages = [
     "acme",
@@ -327,6 +333,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "bc44d36634306909d03af5ebbc083fde777afbae1b13b31a7a6046427f6c9835"
+  inputs-digest = "0f2471443b4521226f69c4a572ab89a5df3659c2301bdbf720d07492df33fa74"
   solver-name = "gps-cdcl"
   solver-version = 1
