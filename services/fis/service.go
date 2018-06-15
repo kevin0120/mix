@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	LEN_FIS_MO     = 149
-	NUM_PRS        = 16
-	LEN_PR_VALUE   = 3
+	LEN_FIS_MO   = 149
+	NUM_PRS      = 16
+	LEN_PR_VALUE = 3
 )
 
 type Diagnostic interface {
@@ -60,7 +60,7 @@ func (s *Service) Config() Config {
 }
 
 func (s *Service) Open() error {
-	s.Pmon.PmonRegistryEvent(s.OnPmonEvent, s.Config().CH_RECV, nil)
+	s.Pmon.PmonRegistryEvent(s.OnPmonEvent, s.Config().chRecv, nil)
 
 	return nil
 }
@@ -134,6 +134,6 @@ func (s *Service) HandleMO(msg string) {
 	}
 }
 
-func (s *Service) PushResult(fis_result *FisResult) (error) {
-	return s.Pmon.SendPmonMessage(pmon.PMONMSGSD, s.Config().CH_SEND, fis_result.Serialize())
+func (s *Service) PushResult(result *FisResult) error {
+	return s.Pmon.SendPmonMessage(pmon.PMONMSGSD, s.Config().chSend, result.Serialize())
 }

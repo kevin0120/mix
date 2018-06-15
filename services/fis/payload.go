@@ -48,15 +48,15 @@ const (
 	// 28. 角度单位（10位，左对齐，右补空格）
 	// 29. 角度测量结果（1位）
 	//				   1   2   3  4  5  6  7 8     9 1011    12   13 14    15    16   17 18 19 20   21   22  23   24   25 26  27   28   29
-	result_template = "%s--%s--%s-%d-%d=%d-%s%06s**%s%s%05d##%03d*%s*%-20s*%-10s*%-6s*%s*%s*%s*%-6s*%03d*%06d%-20f%-10s%d*%06d%-20f%-10s%d***"
+	resultTemplate = "%s--%s--%s-%d-%d=%d-%s%06s**%s%s%05d##%03d*%s*%-20s*%-10s*%-6s*%s*%s*%s*%-6s*%03d*%06d%-20f%-10s%d*%06d%-20f%-10s%d***"
 )
 
 func (fr *FisResult) Serialize() string {
 
-	result_time := fr.Dat.Format("20060102150405")
+	resultTime := fr.Dat.Format("20060102150405")
 
 	l := len(fr.Values)
-	s_fis_result := fmt.Sprintf(result_template,
+	sFisResult := fmt.Sprintf(resultTemplate,
 		fr.EquipemntName,
 		FIS_VER,
 		fr.FactoryName,
@@ -74,7 +74,7 @@ func (fr *FisResult) Serialize() string {
 		fr.SystemType,
 		fr.SoftwareVersion,
 		fr.ResultValue,
-		result_time,
+		resultTime,
 		fr.Mode,
 		FIS_VALUE_KEY,
 		l,
@@ -87,7 +87,7 @@ func (fr *FisResult) Serialize() string {
 		fr.Values[1].Unit,
 		fr.Values[1].Measure)
 
-	return s_fis_result
+	return sFisResult
 }
 
 type FisResultValue struct {
@@ -98,7 +98,6 @@ type FisResultValue struct {
 }
 
 type FisResult struct {
-
 	EquipemntName   string    //设备名
 	Ver             string    //协议版本（V001）
 	FactoryName     string    //工厂代码
@@ -106,7 +105,7 @@ type FisResult struct {
 	Pin             int64     //车辆装配代码
 	PinCheckCode    int64     //校验位
 	AssemblyLine    string    //流水线
-	Lnr				string	  //流水号
+	Lnr             string    //流水号
 	Seq             int64     //序列号
 	Tag             string    //结果Tag（ERGEBNIS）
 	ResultVer       string    //结果版本(002)

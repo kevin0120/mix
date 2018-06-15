@@ -119,7 +119,7 @@ func (s *Service) run() {
 func (s *Service) SendPmonMessage(msgType PMONSMGTYPE, channelNumber string, data string) error {
 	if _, ok := s.Channels[channelNumber]; !ok {
 		log.Printf("not found channel %s", channelNumber)
-		return nil
+		return fmt.Errorf("Cannot Found the channel: %s\n", channelNumber)
 	}
 	ch := s.Channels[channelNumber]
 	x, err := ch.PMONGenerateMsg(msgType, data)
