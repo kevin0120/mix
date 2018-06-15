@@ -16,6 +16,10 @@ _logger = logging.getLogger(__name__)
 ORDER_LIMIT = 80
 
 
+def str_time_to_rfc3339(s_time):
+    sp = s_time.split(' ')
+    return sp[0] + 'T' + sp[1] + 'Z'
+
 class PushWorkorder(AbstractModel):
     _name = "workorder.push"
 
@@ -47,7 +51,8 @@ class PushWorkorder(AbstractModel):
                 'pin_check_code': workorder.production_id.pin_check_code,
                 'assembly_line': workorder.production_id.assembly_line_id.code,
                 'lnr': workorder.production_id.lnr,
-                'nut_no': workorder.consu_product_id.screw_type_code
+                'nut_no': workorder.consu_product_id.screw_type_code,
+                'update_time': str_time_to_rfc3339(workorder.production_date)
             }
             r.append(vals)
         try:

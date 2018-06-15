@@ -7,8 +7,15 @@ DEFAULT_LIMIT = 80
 
 DEFAULT_ORDER_BY = 'production_date DESC'
 
+def str_time_to_rfc3339(s_time):
+    sp = s_time.split(' ')
+    return sp[0] + 'T' + sp[1] + 'Z'
 
 class ApiMrpWorkorder(http.Controller):
+    def str_time_to_rfc3339(s_time):
+        sp = s_time.split(' ')
+        return sp[0] + 'T' + sp[1] + 'Z'
+
     @http.route(['/api/v1/mrp.workorders/<string:order_id>', '/api/v1/mrp.workorders'], type='http', methods=['GET'], auth='none', cors='*', csrf=False)
     def _get_workorders(self, order_id=None, **kw):
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
@@ -40,7 +47,8 @@ class ApiMrpWorkorder(http.Controller):
                 'pin_check_code': order.production_id.pin_check_code,
                 'assembly_line': order.production_id.assembly_line_id.code,
                 'lnr': order.production_id.lnr,
-                'nut_no': order.consu_product_id.screw_type_code
+                'nut_no': order.consu_product_id.screw_type_code,
+                'update_time': str_time_to_rfc3339(order.production_date)
             }
             body = json.dumps(ret)
             return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
@@ -102,7 +110,8 @@ class ApiMrpWorkorder(http.Controller):
                 'pin_check_code': order.production_id.pin_check_code,
                 'assembly_line': order.production_id.assembly_line_id.code,
                 'lnr': order.production_id.lnr,
-                'nut_no': order.consu_product_id.screw_type_code
+                'nut_no': order.consu_product_id.screw_type_code,
+                'update_time': str_time_to_rfc3339(order.production_date)
             })
         if len(_ret) == 0:
             body = json.dumps([])
