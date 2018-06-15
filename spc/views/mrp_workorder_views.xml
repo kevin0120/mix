@@ -10,6 +10,7 @@
                     <field name="result_ids" options="{'reload_on_button': True}" >
                         <tree delete="0" create="0">
                             <field name="consu_product_id" />
+                            <field name="workcenter_id" />
                             <field name="control_date" />
                             <field name="measure_torque" />
                             <field name="measure_degree" />

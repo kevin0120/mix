@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0+e-20171123\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-06-14 03:37+0000\n"
-"PO-Revision-Date: 2018-06-14 03:37+0000\n"
+"POT-Creation-Date: 2018-06-15 06:30+0000\n"
+"PO-Revision-Date: 2018-06-15 06:30+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -120,8 +120,10 @@ msgid "Current Month"
 msgstr "本月"
 
 #. module: spc
+#: code:addons/spc/models/result.py:80
 #: model:ir.ui.view,arch_db:spc.operation_result_view_search
 #: selection:operation.result,lacking:0
+#, python-format
 msgid "Data Lacking"
 msgstr "数据丢失"
 
@@ -167,10 +169,13 @@ msgid "Fail"
 msgstr "失败"
 
 #. module: spc
+#: code:addons/spc/models/result.py:86
+#: code:addons/spc/models/result.py:89
 #: model:ir.ui.view,arch_db:spc.operation_result_view_search
 #: selection:operation.result,final_pass:0
 #: selection:operation.result,one_time_pass:0
 #: selection:operation.result,quality_state:0
+#, python-format
 msgid "Failed"
 msgstr "失败的"
 
@@ -181,7 +186,9 @@ msgid "Final Pass"
 msgstr "最终通过"
 
 #. module: spc
+#: code:addons/spc/models/result.py:88
 #: selection:operation.result,final_pass:0
+#, python-format
 msgid "Final Passed"
 msgstr "最终通过"
 
@@ -215,7 +222,7 @@ msgstr "进行中"
 #. module: spc
 #: selection:ta.spc.wizard,weibull_dist_method:0
 msgid "Inverted"
-msgstr "Inverted"
+msgstr "反转"
 
 #. module: spc
 #: model:ir.ui.view,arch_db:spc.operation_result_view_search
@@ -279,7 +286,7 @@ msgstr "制造信息"
 #. module: spc
 #: model:ir.model,name:spc.model_mrp_production
 msgid "Manufacturing Order"
-msgstr "生产订单"
+msgstr "制造订单"
 
 #. module: spc
 #: selection:ta.spc.wizard,weibull_dist_method:0
@@ -289,7 +296,7 @@ msgstr "最大微博分布"
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_measure_degree
 msgid "Measure Degree(grad)"
-msgstr "实际角度(度)"
+msgstr "测量角度(度)"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_measure_result
@@ -299,12 +306,12 @@ msgstr "测量成功"
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_measure_t_don
 msgid "Measure Time Done(ms)"
-msgstr "拧紧花费时间(毫秒)"
+msgstr "作业花费时间(毫秒)"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_measure_torque
 msgid "Measure Torque(NM)"
-msgstr "实际扭矩(牛米)"
+msgstr "测量扭矩(牛米)"
 
 #. module: spc
 #: selection:ta.spc.wizard,weibull_dist_method:0
@@ -331,7 +338,7 @@ msgstr "名字"
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_need_render
 msgid "Need render"
-msgstr "需要渲染"
+msgstr "Need render"
 
 #. module: spc
 #: code:addons/spc/models/result.py:52
@@ -349,7 +356,9 @@ msgid "No measure"
 msgstr "未测量"
 
 #. module: spc
+#: code:addons/spc/models/result.py:81
 #: selection:operation.result,lacking:0
+#, python-format
 msgid "Normal"
 msgstr "正常"
 
@@ -382,7 +391,9 @@ msgid "One Time Pass"
 msgstr "一次通过"
 
 #. module: spc
+#: code:addons/spc/models/result.py:85
 #: selection:operation.result,one_time_pass:0
+#, python-format
 msgid "One Time Passed"
 msgstr "一次通过"
 
@@ -465,12 +476,12 @@ msgstr "从(日期)"
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_query_date_to
 msgid "Query Date to"
-msgstr "到(日期)"
+msgstr "至(日期)"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_limit
 msgid "Query Limit"
-msgstr "结果限制数量"
+msgstr "返回结果限制"
 
 #. module: spc
 #: model:ir.ui.view,arch_db:spc.sa_spc_form_tor_ang
@@ -522,7 +533,7 @@ msgstr "过程控制分析(SPC)"
 #. module: spc
 #: model:ir.actions.act_window,name:spc.action_spc_settings
 msgid "SPC Settings"
-msgstr "SPC Settings"
+msgstr "SPC设置"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_scatter
@@ -752,6 +763,36 @@ msgid "controller.result"
 msgstr "controller.result"
 
 #. module: spc
+#: code:addons/spc/models/result.py:80
+#, python-format
+msgid "lack"
+msgstr "缺失"
+
+#. module: spc
+#: code:addons/spc/models/result.py:78
+#, python-format
+msgid "nok"
+msgstr "NOK"
+
+#. module: spc
+#: code:addons/spc/models/result.py:76
+#, python-format
+msgid "none"
+msgstr "未测量"
+
+#. module: spc
+#: code:addons/spc/models/result.py:81
+#, python-format
+msgid "normal"
+msgstr "正常"
+
+#. module: spc
+#: code:addons/spc/models/result.py:77
+#, python-format
+msgid "ok"
+msgstr "OK"
+
+#. module: spc
 #: model:ir.model,name:spc.model_operation_result
 msgid "operation.result"
 msgstr "operation.result"
@@ -781,3 +822,4 @@ msgstr "spc.config.settings"
 #: model:ir.model,name:spc.model_workorder_push
 msgid "workorder.push"
 msgstr "workorder.push"
+

@@ -73,20 +73,20 @@ class OperationResult(models.HyperModel):
     measure_t_don = fields.Float('Measure Time Done(ms)', default=0.0, digits=dp.get_precision('Operation Result'))
 
     measure_result = fields.Selection([
-        ('none', 'No measure'),
-        ('ok', 'OK'),
-        ('nok', 'NOK')], string="Measure Success", default='none')
+        (_('none'), 'No measure'),
+        (_('ok'), 'OK'),
+        (_('nok'), 'NOK')], string="Measure Success", default='none')
 
-    lacking = fields.Selection([('lack', 'Data Lacking'),
-        ('normal', 'Normal')], string='Lacking', default='lack')
+    lacking = fields.Selection([(_('lack'), _('Data Lacking')),
+        (_('normal'), _('Normal'))], string='Lacking', default='lack')
 
     op_time = fields.Integer(string=u'第几次拧紧作业', default=1)
 
-    one_time_pass = fields.Selection([('pass', 'One Time Passed'),
-        ('fail', 'Failed')], string='One Time Pass', default='fail')
+    one_time_pass = fields.Selection([('pass', _('One Time Passed')),
+        ('fail', _('Failed'))], string='One Time Pass', default='fail')
 
-    final_pass = fields.Selection([('pass', 'Final Passed'),
-        ('fail', 'Failed')], string='Final Pass', default='fail')
+    final_pass = fields.Selection([('pass', _('Final Passed')),
+        ('fail', _('Failed'))], string='Final Pass', default='fail')
 
     sent = fields.Boolean('Have sent to aiis', default=False)
 
