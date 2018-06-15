@@ -18,8 +18,8 @@ type ControllerStatusType string
 const (
 	MINSEQUENCE          uint32 = 1
 	MAXSEQUENCE          uint32 = 9999
-	DAIL_TIMEOUT              = time.Duration(5 * time.Second)
-	MAX_KEEP_ALIVE_CHECK      = 3
+	DAIL_TIMEOUT                = time.Duration(5 * time.Second)
+	MAX_KEEP_ALIVE_CHECK        = 3
 )
 
 const (
@@ -55,7 +55,7 @@ func (c *Controller) updateKeepAliveCount(i int32) {
 }
 
 func (c *Controller) addKeepAliveCount() {
-	atomic.AddInt32(&c.keepAliveCount,1)
+	atomic.AddInt32(&c.keepAliveCount, 1)
 }
 
 func (c *Controller) Sequence() uint32 {
@@ -70,7 +70,7 @@ func (c *Controller) Sequence() uint32 {
 	} else {
 		c.sequence++
 	}
-	
+
 	return seq
 }
 
@@ -79,7 +79,7 @@ func (c *Controller) setSequence(i uint32) {
 	defer c.mux_seq.Unlock()
 	if i >= MAXSEQUENCE {
 		c.sequence = MINSEQUENCE
-	}else {
+	} else {
 		c.sequence = i
 	}
 
@@ -155,7 +155,7 @@ func (c *Controller) manage() {
 			if c.Status() == STATUS_OFFLINE {
 				continue
 			}
-			if  c.KeepAliveCount() >= MAX_KEEP_ALIVE_CHECK {
+			if c.KeepAliveCount() >= MAX_KEEP_ALIVE_CHECK {
 				go c.updateStatus(STATUS_OFFLINE)
 				c.updateKeepAliveCount(0)
 				continue
@@ -167,7 +167,7 @@ func (c *Controller) manage() {
 				c.addKeepAliveCount()
 			}
 		case v := <-c.buffer:
-			for nextWriteThreshold.After(time.Now()){
+			for nextWriteThreshold.After(time.Now()) {
 				time.Sleep(time.Microsecond * 100)
 			}
 			err := c.w.Write([]byte(v))

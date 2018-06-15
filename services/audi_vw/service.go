@@ -2,6 +2,11 @@ package audi_vw
 
 import (
 	"fmt"
+	"net"
+	"strings"
+	"sync"
+	"sync/atomic"
+
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/minio"
@@ -9,11 +14,8 @@ import (
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/socket_listener"
 	"github.com/pkg/errors"
-	"net"
-	"strings"
-	"sync"
-	"sync/atomic"
 	//"time"
+	"bufio"
 	"time"
 )
 
@@ -73,7 +75,7 @@ func NewService(c Config, d Diagnostic) *Service {
 
 	s.handle_buffer = make(chan string, 1024)
 	s.handlers.AudiVw = s
-	lis := socket_listener.NewSocketListener(addr, s)
+	lis := socket_listener.NewSocketListener(addr, s, c.ReadBufferSize)
 	s.listener = lis
 	s.configValue.Store(c)
 
@@ -156,15 +158,17 @@ func (p *Service) Read(c net.Conn) {
 
 	rest := 0
 	body := ""
-	header := CVI3Header{}
-	buffer := make([]byte, p.config().ReadBufferSize)
+	var header CVI3Header
+	scnr := bufio.NewScanner(c)
 	for {
 
-		n, err := c.Read(buffer)
-		if err != nil {
-			p.diag.Error("read err", err)
+		if !scnr.Scan() {
 			break
 		}
+
+		buffer := scnr.Bytes()
+
+		n := len(buffer)
 
 		msg := string(buffer[0:n])
 		if len(msg) < HEADER_LEN {
@@ -207,12 +211,20 @@ func (p *Service) Read(c net.Conn) {
 			p.CVIResponse(&header, c)
 		}
 	}
+
+	if err := scnr.Err(); err != nil {
+		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+			fmt.Printf("D! Timeout in plugin [input.socket_listener]: %s", err)
+		} else if netErr != nil && !strings.HasSuffix(err.Error(), ": use of closed network connection") {
+			p.diag.Error("using closing connection", err)
+		}
+	}
 }
 
 func (p *Service) CVIResponse(header *CVI3Header, c net.Conn) {
 	if header.TYP == Header_type_request_with_reply || header.TYP == Header_type_keep_alive {
 		// 执行应答
-		reply := CVI3Header{}
+		var reply CVI3Header
 		reply.Init()
 		reply.TYP = Header_type_reply
 		reply.MID = header.MID
@@ -220,7 +232,7 @@ func (p *Service) CVIResponse(header *CVI3Header, c net.Conn) {
 
 		_, err := c.Write([]byte(replyPacket))
 		if err != nil {
-			print("server reply err:%s\n", err.Error())
+			p.diag.Error("server reply err:%s\n", err)
 		}
 	}
 }
@@ -237,7 +249,7 @@ func (p *Service) Parse(buf []byte) ([]byte, error) {
 }
 
 func (p *Service) HandleProcess() {
-	var context = HandlerContext{
+	context := HandlerContext{
 		cvi3Result:          CVI3Result{},
 		controllerCurve:     ControllerCurve{},
 		controllerResult:    ControllerResult{},

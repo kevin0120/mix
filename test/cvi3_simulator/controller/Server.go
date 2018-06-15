@@ -28,7 +28,7 @@ type CVI3Server struct {
 func (cvi3_server *CVI3Server) Start(port uint) error {
 
 	addr := fmt.Sprintf("tcp://:%d", port)
-	cvi3_server.server = socket_listener.NewSocketListener(addr, cvi3_server)
+	cvi3_server.server = socket_listener.NewSocketListener(addr, cvi3_server, 65000)
 
 	cvi3_server.server.Start()
 
