@@ -37,7 +37,8 @@ def _post_aiis_result_package(aiis_urls, results):
             try:
                 ret = Requests.put(url, data=json.dumps(data), headers={'Content-Type': 'application/json'})
                 if ret.status_code == 200:
-                    result.write({'sent': True})  ### 更新发送结果
+                    if not result.sent:
+                        result.write({'sent': True})  ### 更新发送结果
             except ConnectionError:
                 break  # 退出循环,进入下个aiis发送节点
             except RequestException as e:

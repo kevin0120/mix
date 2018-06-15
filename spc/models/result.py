@@ -92,11 +92,13 @@ class OperationResult(models.HyperModel):
 
     @api.multi
     def sent_aiis(self):
-        domain = [('measure_result', 'in', ['ok', 'nok'])]
-        results = self.search(domain)
+        results = self.filtered(lambda r: r.measure_result in ['ok', 'nok'])
         if not results:
             return True
-        aiis_urls = self.env['ir.config_parameter'].sudo().get_param('aiis.urls').split(',')
+        aiis_urls = self.env['ir.config_parameter'].sudo().get_param('aiis.urls')
+        if not aiis_urls:
+            return
+        aiis_urls = aiis_urls.split(',')
         ret = _post_aiis_result_package(aiis_urls, results)
         return True
 
