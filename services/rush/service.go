@@ -28,7 +28,6 @@ type Service struct {
 
 	StorageService interface {
 		UpdateResults(result *OperationResult, id int64, sent int) error
-		UpdateSent(id int64, sent int) error
 	}
 
 	Fis *fis.Service
@@ -198,16 +197,9 @@ func (s *Service) HandleResult(cr *cResult) {
 		s.diag.Error("push result to fis error", e)
 	}
 
-	if len(cr.r.CurObjects) == 0 {
-		err := s.StorageService.UpdateSent(cr.id, sent)
-		if err != nil {
-			s.diag.Error("update sent error", err)
-		}
-	} else {
-		// 结果保存数据库
-		err := s.StorageService.UpdateResults(cr.r, cr.id, sent)
-		if err != nil {
-			s.diag.Error("update result error", err)
-		}
+	// 结果保存数据库
+	err := s.StorageService.UpdateResults(cr.r, cr.id, sent)
+	if err != nil {
+		s.diag.Error("update result error", err)
 	}
 }
