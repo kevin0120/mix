@@ -36,6 +36,8 @@ class EquipmentConnection(models.Model):
                 ret = Requests.get(url, headers={'Content-Type': 'application/json'})
                 if ret.status_code == 204:
                     raise UserError(_("Connection Test Succeeded! Everything seems properly set up!"))
+                else:
+                    raise UserError(_("Connection Test Failed! Here is what we got instead: %d!") % ret.status_code)
             except Exception as e:
                 raise UserError(_("Connection Test Failed! Here is what we got instead:\n %s") % ustr(e))
 
