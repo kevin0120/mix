@@ -70,7 +70,7 @@ func (c *Controller) Sequence() uint32 {
 	} else {
 		c.sequence++
 	}
-	
+
 	return seq
 }
 
