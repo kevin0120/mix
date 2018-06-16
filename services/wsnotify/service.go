@@ -12,7 +12,7 @@ import (
 const (
 	WS_EVENT_STATUS = "status"
 	WS_EVENT_RESULT = "result"
-	WS_EVENT_REG = "regist"
+	WS_EVENT_REG    = "regist"
 )
 
 type Diagnostic interface {
