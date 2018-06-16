@@ -75,6 +75,8 @@ func (s *Service) Open() error {
 		SetRetryWaitTime(time.Duration(c.Interval)).
 		SetRetryMaxWaitTime(20 * time.Second)
 
+	s.httpClient = client
+
 	handler, err := s.HTTPDService.GetHandlerByName(httpd.BasePath)
 	if err != nil {
 		return errors.Wrap(err, "Odoo server get Httpd default Handler fail")
@@ -136,8 +138,9 @@ func (s *Service) getWorkorder(url string, method string) ([]byte, error) {
 		if err != nil {
 			return nil, fmt.Errorf("Get workorder fail: %s", err.Error())
 		} else {
-			if resp.StatusCode() != http.StatusOK {
-				return nil, fmt.Errorf("Get workorder fail: %d", resp.StatusCode())
+			status := resp.StatusCode()
+			if status != http.StatusOK {
+				return nil, fmt.Errorf("Get workorder fail: %d", status)
 			} else {
 				return resp.Body(), nil
 			}
@@ -167,6 +170,16 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 		o.MaxRedoTimes = v.Max_redo_times
 		worksheet, _ := json.Marshal(v.Worksheet)
 		o.WorkSheet = string(worksheet)
+		o.UpdateTime = v.UpdateTime
+
+		o.MO_Year = v.MO_Year
+		o.MO_Pin_check_code = v.MO_Pin_check_code
+		o.MO_Pin = v.MO_Pin
+		o.MO_FactoryName = v.MO_FactoryName
+		o.MO_AssemblyLine = v.MO_AssemblyLine
+		o.MO_EquipemntName = v.MO_EquipemntName
+		o.MO_Lnr = v.MO_Lnr
+		o.MO_NutNo = v.MO_NutNo
 
 		ids, _ := json.Marshal(v.Result_IDs)
 		o.ResultIDs = string(ids)
