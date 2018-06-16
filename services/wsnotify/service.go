@@ -12,6 +12,7 @@ import (
 const (
 	WS_EVENT_STATUS = "status"
 	WS_EVENT_RESULT = "result"
+	WS_EVENT_REG = "regist"
 )
 
 type Diagnostic interface {
@@ -44,7 +45,7 @@ func (s *Service) onConnect(c websocket.Connection) {
 		if err != nil {
 			Msg := map[string]string{"msg": "regist msg error"}
 			msg, _ := json.Marshal(Msg)
-			c.EmitMessage(msg)
+			c.Emit(WS_EVENT_REG, msg)
 			return
 		}
 
@@ -53,13 +54,13 @@ func (s *Service) onConnect(c websocket.Connection) {
 			Msg := fmt.Sprintf("client with sn:%s already exists", reg.HMI_SN)
 			_Msg := map[string]string{"msg": Msg}
 			reg_str, _ := json.Marshal(_Msg)
-			c.EmitMessage(reg_str)
+			c.Emit(WS_EVENT_REG, reg_str)
 		} else {
 			// 将客户端加入列表
 			s.clientManager.AddClient(reg.HMI_SN, c)
 			Msg := map[string]string{"msg": "OK"}
 			msg, _ := json.Marshal(Msg)
-			c.EmitMessage(msg)
+			c.Emit(WS_EVENT_REG, msg)
 		}
 
 	})
