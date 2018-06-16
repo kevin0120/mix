@@ -118,7 +118,7 @@ func (s *Service) GetWorkorder(masterpa_sn string, hmi_sn string, code string) (
 	var err error
 	var body []byte
 	for _, endpoint := range s.endpoints {
-		body, err = s.getWorkorder(fmt.Sprintf(endpoint.url, masterpa_sn, hmi_sn, code), endpoint.method)
+		body, err = s.getWorkorder(fmt.Sprintf(endpoint.url, hmi_sn, code), endpoint.method)
 		if err == nil {
 			// 如果第一次就成功，推出循环
 			return body, nil
