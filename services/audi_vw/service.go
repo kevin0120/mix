@@ -16,6 +16,7 @@ import (
 	"github.com/pkg/errors"
 
 	"time"
+	"io"
 )
 
 const (
@@ -167,6 +168,8 @@ func (p *Service) Read(c net.Conn) {
 				p.diag.Error("Timeout in plugin AduiVW Protocol: %s", err)
 			} else if netErr != nil && !strings.HasSuffix(err.Error(), ": use of closed network connection") {
 				p.diag.Error("using closing connection", err)
+			} else if err == io.EOF {
+				p.diag.Error("network Connection EOF ", err)
 			}
 			break
 		}
