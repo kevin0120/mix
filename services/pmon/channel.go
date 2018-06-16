@@ -7,6 +7,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"unicode/utf8"
+	"time"
 )
 
 type PmonChannelStatus string
@@ -99,8 +100,18 @@ func (ch *Channel) gethasSD() bool {
 }
 
 func (ch *Channel) Write(buf []byte, msgType PMONSMGTYPE) error {
-	if ch.GetStatus() == STATUSCLOSE && msgType == PMONMSGSD {
-		return fmt.Errorf("channel %s is closed can not send SD", ch.Ch)
+	if msgType == PMONMSGSD && ch.GetStatus() == STATUSCLOSE {
+		i := 0
+		msg,_ := ch.PMONGenerateMsg(PMONMSGSO,"")
+		ch.conn.Write([]byte(msg), ch.WriteTimeout) //发送此SO忽略错误
+		time.Sleep(150 * time.Microsecond) //sleep 150 ms
+		for ch.GetStatus() == STATUSCLOSE &&  i < 2 {
+			time.Sleep(100 * time.Microsecond) //sleep 100 ms
+			i++
+		}
+		if ch.GetStatus() == STATUSCLOSE {
+			return fmt.Errorf("channel %s is closed can not send SD and send SO %d times", ch.Ch, i)
+		}
 	}
 	err := ch.conn.Write(buf, ch.WriteTimeout)
 	if err != nil && msgType == PMONMSGSD {
@@ -162,14 +173,14 @@ func (ch *Channel) manage() {
 				ch.closed <- struct{}{}
 			case PMONMSGSD:
 				BlockCounter := string(data.data[:4])
-				data_len, _ := strconv.Atoi(string(data.data[4:8]))
+				dataLen, _ := strconv.Atoi(string(data.data[4:8]))
 				res, _ := ch.generateAD(ch.conn.U.GetMsgNum(), BlockCounter)
 				ch.Write([]byte(res), PMONMSGAD) //发送AD
 				//if ch.Segment == NOSEGMENT {
-				//	buf = data.data[8: 8 +data_len]
+				//	buf = data.data[8: 8 +dataLen]
 				//}else {
 				//	//需要进行偏移赋值
-				//	d := data.data[8: 8 +data_len]
+				//	d := data.data[8: 8 +dataLen]
 				//	l := len(d)
 				//	buf[off: off + l] = d
 				//	off += l
@@ -180,9 +191,9 @@ func (ch *Channel) manage() {
 				//	off = 0 //准备接受下一个包 msg
 				//	ch.e(1, string(buf[:_off]), ch.ud)
 				//}
-				d := data.data[8 : 8+data_len]
+				d := data.data[8 : 8+dataLen]
 				var r []rune
-				for i := 0; i < data_len; {
+				for i := 0; i < dataLen; {
 					s, size := utf8.DecodeRune(d[i:])
 					r = append(r, s)
 					i += size
