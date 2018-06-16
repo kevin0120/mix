@@ -14,8 +14,7 @@ import (
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/socket_listener"
 	"github.com/pkg/errors"
-	//"time"
-	"bufio"
+
 	"time"
 )
 
@@ -75,7 +74,7 @@ func NewService(c Config, d Diagnostic) *Service {
 
 	s.handle_buffer = make(chan string, 1024)
 	s.handlers.AudiVw = s
-	lis := socket_listener.NewSocketListener(addr, s, c.ReadBufferSize)
+	lis := socket_listener.NewSocketListener(addr, s, c.ReadBufferSize * 2)
 	s.listener = lis
 	s.configValue.Store(c)
 
@@ -159,19 +158,18 @@ func (p *Service) Read(c net.Conn) {
 	rest := 0
 	body := ""
 	var header CVI3Header
-	scnr := bufio.NewScanner(c)
 	conf := p.config()
-	buf := make([]byte, conf.ReadBufferSize, conf.ReadBufferSize * 2)
-	scnr.Buffer(buf, cap(buf)) // 2倍的read buffer size 作为max
+	buffer := make([]byte, conf.ReadBufferSize * 2)
 	for {
+		n , err := c.Read(buffer)
 
-		if !scnr.Scan() {
-			break
+		if err != nil {
+			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+				p.diag.Error("Timeout in plugin AduiVW Protocol: %s", err)
+			} else if netErr != nil && !strings.HasSuffix(err.Error(), ": use of closed network connection") {
+				p.diag.Error("using closing connection", err)
+			}
 		}
-
-		buffer := scnr.Bytes()
-
-		n := len(buffer)
 
 		msg := string(buffer[0:n])
 		if len(msg) < HEADER_LEN {
@@ -215,13 +213,6 @@ func (p *Service) Read(c net.Conn) {
 		}
 	}
 
-	if err := scnr.Err(); err != nil {
-		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-			fmt.Printf("D! Timeout in plugin [input.socket_listener]: %s", err)
-		} else if netErr != nil && !strings.HasSuffix(err.Error(), ": use of closed network connection") {
-			p.diag.Error("using closing connection", err)
-		}
-	}
 }
 
 func (p *Service) CVIResponse(header *CVI3Header, c net.Conn) {
