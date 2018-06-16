@@ -292,6 +292,7 @@ func NewSocketListener(addr string, protocol Protocol, readBufSize int) *SocketL
 	return &SocketListener{
 		ServiceAddress: addr,
 		ReadBufferSize: readBufSize,
+		KeepAlivePeriod: time.Second * 3, //默认keepalive 周期３秒
 		Protocol:       protocol,
 	}
 }
