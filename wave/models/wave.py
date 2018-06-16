@@ -59,7 +59,7 @@ class Wave(models.TransientModel):
         self.ensure_one()
         if not self.need_render:
             return
-        records = self.result_line_ids.filtered(lambda r: r.selected == True)
+        records = self.result_line_ids.filtered(lambda r: r.selected)
         if not records:
             self.env.user.notify_warning(u'查询获取结果:0,请重新定义查询参数或等待新结果数据')
             return
@@ -103,14 +103,14 @@ class Wave(models.TransientModel):
     def read(self, fields=None, load='_classic_`'):
         return super(Wave, self).read(fields, load=load)
 
-
     def _get_data(self, data):
         client, bucket = self._recreate_minio_client()
         if not client or not bucket:
             return [], None  ### 返回无结果数值
         cur_objects = data.mapped('cur_objects')
+        _objects = [x for x in cur_objects if x]
         objects = []
-        cur_objects = map(json.loads, cur_objects)
+        cur_objects = map(json.loads, _objects)
         objs = list(itertools.chain.from_iterable(cur_objects))
         for cur in objs:
             objects.append(cur['file'])
@@ -124,10 +124,15 @@ class Wave(models.TransientModel):
                 _datas.append(_wave_cache[_t])
             except KeyError as e:
                 need_fetch_objects.append(_t)
-        _datas.extend(map(lambda x: _create_wave_result_dict(x, client.get_object(bucket, x).data.decode('utf-8')), need_fetch_objects)) # 合并结果
+        try:
+            _datas.extend(map(lambda x: _create_wave_result_dict(x, client.get_object(bucket, x).data.decode('utf-8')), need_fetch_objects)) # 合并结果
+        except Exception as e:
+            return [], None
         if len(_datas) > 1:
             for i in range(len(_datas) -1):
                 ret = _datas[i]['wave'].merge(_datas[i+1]['wave'],how='outer', on='cur_w') if i == 0 else ret.merge(_datas[i+1]['wave'],how='outer', on='cur_w')
+        elif len(_datas) == 0:
+            return [], None
         else:
             ret = _datas[0]['wave']
         ret = ret.sort_values(by=['cur_w'])

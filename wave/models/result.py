@@ -6,6 +6,42 @@ from odoo.exceptions import ValidationError
 import odoo.addons.decimal_precision as dp
 
 
+class OperationResult(models.HyperModel):
+    _inherit = "operation.result"
+
+    @api.multi
+    def show_waveform(self):
+        if not len(self):
+            self.env.user.notify_warning(u'查询获取结果:0,请重新定义查询参数或等待新结果数据')
+            return None,None
+        context = self._context
+        wave_obj = self.env['wave.wave']
+        wave_form = self.env.ref('wave.spc_compose_wave_wizard_form')
+        if not wave_form:
+            return None,None
+        datas, ret = wave_obj._get_data(self)
+        if not len(datas):
+            self.env.user.notify_warning(u'查询获取结果:0,请重新定义查询参数或等待新结果数据')
+            return None,None
+        wave = wave_obj._get_echart_data(datas, ret)
+        wave_wizard_id = self.env['wave.compose.wave'].sudo().create({'wave': wave})
+        if not wave_wizard_id:
+            return None, None
+        action = {
+            'name': _('Waveform Scope'),
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'wave.compose.wave',
+            'view_id': wave_form.id,
+            'res_id': wave_wizard_id.id,
+            'target': 'new',
+            'context': context,
+        }
+
+        return wave_form.id, wave_wizard_id.id
+
+
 class OperationResultLine(models.TransientModel):
     _name = "operation.result.line"
 

@@ -31,7 +31,9 @@
         # 'security/ir.model.access.csv',
         'views/wave_views.xml',
         'views/res_config_views.xml',
+        'views/operation_result_views.xml',
         'views/wave_menu_views.xml',
+        'views/wave_wizard_views.xml'
     ],
     'installable': True,
     'application': True,
