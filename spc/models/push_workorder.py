@@ -15,6 +15,8 @@ _logger = logging.getLogger(__name__)
 
 ORDER_LIMIT = 80
 
+ORDER_ORDER_BY = 'production_date ASC'
+
 
 def str_time_to_rfc3339(s_time):
     sp = s_time.split(' ')
@@ -69,7 +71,7 @@ class PushWorkorder(AbstractModel):
     @api.multi
     def workerorder_push(self):
         domain = [('sent', '=', False)]
-        orders = self.env['mrp.workorder'].sudo().search(domain, limit=ORDER_LIMIT)
+        orders = self.env['mrp.workorder'].sudo().search(domain, limit=ORDER_LIMIT, order=ORDER_ORDER_BY)
         masterpcs = orders.mapped('workcenter_id.masterpc_id')
         for master in masterpcs:
             need_send_orders = orders.filtered(lambda r: r.workcenter_id.masterpc_id.id == master.id)

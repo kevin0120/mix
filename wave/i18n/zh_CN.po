@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0+e-20171123\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-06-14 03:54+0000\n"
-"PO-Revision-Date: 2018-06-14 03:54+0000\n"
+"POT-Creation-Date: 2018-06-18 02:49+0000\n"
+"PO-Revision-Date: 2018-06-18 02:49+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -53,6 +53,7 @@ msgstr "控制日期"
 #. module: wave
 #: model:ir.model.fields,field_description:wave.field_minio_config_settings_create_uid
 #: model:ir.model.fields,field_description:wave.field_operation_result_line_create_uid
+#: model:ir.model.fields,field_description:wave.field_wave_compose_wave_create_uid
 #: model:ir.model.fields,field_description:wave.field_wave_wave_create_uid
 msgid "Created by"
 msgstr "创建人"
@@ -60,6 +61,7 @@ msgstr "创建人"
 #. module: wave
 #: model:ir.model.fields,field_description:wave.field_minio_config_settings_create_date
 #: model:ir.model.fields,field_description:wave.field_operation_result_line_create_date
+#: model:ir.model.fields,field_description:wave.field_wave_compose_wave_create_date
 #: model:ir.model.fields,field_description:wave.field_wave_wave_create_date
 msgid "Created on"
 msgstr "创建时间"
@@ -67,6 +69,7 @@ msgstr "创建时间"
 #. module: wave
 #: model:ir.model.fields,field_description:wave.field_minio_config_settings_display_name
 #: model:ir.model.fields,field_description:wave.field_operation_result_line_display_name
+#: model:ir.model.fields,field_description:wave.field_wave_compose_wave_display_name
 #: model:ir.model.fields,field_description:wave.field_wave_wave_display_name
 msgid "Display Name"
 msgstr "显示名称"
@@ -74,6 +77,7 @@ msgstr "显示名称"
 #. module: wave
 #: model:ir.model.fields,field_description:wave.field_minio_config_settings_id
 #: model:ir.model.fields,field_description:wave.field_operation_result_line_id
+#: model:ir.model.fields,field_description:wave.field_wave_compose_wave_id
 #: model:ir.model.fields,field_description:wave.field_wave_wave_id
 msgid "ID"
 msgstr "ID"
@@ -86,6 +90,7 @@ msgstr "KNR"
 #. module: wave
 #: model:ir.model.fields,field_description:wave.field_minio_config_settings___last_update
 #: model:ir.model.fields,field_description:wave.field_operation_result_line___last_update
+#: model:ir.model.fields,field_description:wave.field_wave_compose_wave___last_update
 #: model:ir.model.fields,field_description:wave.field_wave_wave___last_update
 msgid "Last Modified on"
 msgstr "最后修改日"
@@ -93,6 +98,7 @@ msgstr "最后修改日"
 #. module: wave
 #: model:ir.model.fields,field_description:wave.field_minio_config_settings_write_uid
 #: model:ir.model.fields,field_description:wave.field_operation_result_line_write_uid
+#: model:ir.model.fields,field_description:wave.field_wave_compose_wave_write_uid
 #: model:ir.model.fields,field_description:wave.field_wave_wave_write_uid
 msgid "Last Updated by"
 msgstr "最后更新人"
@@ -100,6 +106,7 @@ msgstr "最后更新人"
 #. module: wave
 #: model:ir.model.fields,field_description:wave.field_minio_config_settings_write_date
 #: model:ir.model.fields,field_description:wave.field_operation_result_line_write_date
+#: model:ir.model.fields,field_description:wave.field_wave_compose_wave_write_date
 #: model:ir.model.fields,field_description:wave.field_wave_wave_write_date
 msgid "Last Updated on"
 msgstr "最后更新时间"
@@ -250,6 +257,11 @@ msgid "Show WaveForm"
 msgstr "显示波形"
 
 #. module: wave
+#: model:ir.actions.server,name:wave.operation_result_show_waveform
+msgid "Show Waveform"
+msgstr "显示波形"
+
+#. module: wave
 #: model:ir.ui.view,arch_db:wave.sa_view_wave_form
 msgid "Time"
 msgstr "时间"
@@ -270,6 +282,11 @@ msgid "Vehicle Type"
 msgstr "车辆类型"
 
 #. module: wave
+#: model:ir.model,name:wave.model_wave_compose_wave
+msgid "Wave composition wizard"
+msgstr "Wave composition wizard"
+
+#. module: wave
 #: model:ir.ui.view,arch_db:wave.sa_view_wave_form
 msgid "WaveForm"
 msgstr "波形查看"
@@ -286,7 +303,11 @@ msgid "Waveform Files"
 msgstr "波形文件"
 
 #. module: wave
+#: code:addons/wave/models/result.py:31
+#: model:ir.actions.act_window,name:wave.action_result_wave_wizard
 #: model:ir.ui.menu,name:wave.menu_wave_scope_root
+#: model:ir.ui.view,arch_db:wave.spc_compose_wave_wizard_form
+#, python-format
 msgid "Waveform Scope"
 msgstr "波形查看器"
 
@@ -296,6 +317,7 @@ msgid "Waveform scope wizard"
 msgstr "波形查看导向"
 
 #. module: wave
+#: model:ir.model.fields,field_description:wave.field_wave_compose_wave_wave
 #: model:ir.model.fields,field_description:wave.field_wave_wave_wave
 msgid "Waves"
 msgstr "波形"
@@ -336,6 +358,11 @@ msgid "minio.config.settings"
 msgstr "minio.config.settings"
 
 #. module: wave
+#: model:ir.model,name:wave.model_operation_result
+msgid "operation.result"
+msgstr "operation.result"
+
+#. module: wave
 #: model:ir.model,name:wave.model_operation_result_line
 msgid "operation.result.line"
 msgstr "operation.result.line"
@@ -349,3 +376,4 @@ msgstr "或"
 #: model:ir.model.fields,field_description:wave.field_operation_result_line_selected
 msgid "select"
 msgstr "选择"
+
