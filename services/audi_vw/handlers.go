@@ -36,9 +36,8 @@ type Handlers struct {
 func (h *Handlers) handleResult(result *ControllerResult, ctx *HandlerContext) error {
 	h.AudiVw.diag.Debug("处理结果数据 ...")
 
-	var needPushAiis bool = false
+	needPushAiis := false
 
-	var err error
 	r, err := h.AudiVw.DB.GetResult(result.Result_id, 0)
 	if err != nil {
 		return err
@@ -49,7 +48,6 @@ func (h *Handlers) handleResult(result *ControllerResult, ctx *HandlerContext) e
 		return err
 	}
 
-	// 保存结果
 	loc, _ := time.LoadLocation("Local")
 	r.UpdateTime, _ = time.ParseInLocation("2006-01-02 15:04:05", result.Dat, loc)
 	r.Result = result.Result
@@ -63,27 +61,16 @@ func (h *Handlers) handleResult(result *ControllerResult, ctx *HandlerContext) e
 	r.ResultValue = string(s_value)
 	r.PSetDefine = string(s_pset)
 
-	h.AudiVw.diag.Debug("缓存结果到数据库 ...")
-
 	if r.Count >= int(workorder.MaxRedoTimes) || r.Result == RESULT_OK {
 		needPushAiis = true
 		r.Stage = RESULT_STAGE_FINAL
 
 		json.Unmarshal([]byte(workorder.ResultIDs), &ctx.resultIds)
 		if r.ResultId == ctx.resultIds[len(ctx.resultIds)-1] {
-			// 标记工单已完成
+			h.AudiVw.diag.Debug("工单已完成")
 			workorder.Status = "finished"
 			h.AudiVw.DB.UpdateWorkorder(&workorder)
-
 		}
-	}
-
-	_, err = h.AudiVw.DB.UpdateResult(r)
-	if err != nil {
-		h.AudiVw.diag.Error("缓存结果失败", err)
-		return nil
-	} else {
-		h.AudiVw.diag.Debug("缓存结果成功")
 	}
 
 	// 结果推送hmi
@@ -154,32 +141,26 @@ func (h *Handlers) handleResult(result *ControllerResult, ctx *HandlerContext) e
 			ctx.aiisResult.CURObjects = append(ctx.aiisResult.CURObjects, ctx.aiisCurve)
 		}
 
-		h.PutResultToAIIS(ctx.aiisResult, r.ResultId)
+		h.AudiVw.diag.Debug("推送结果数据到AIIS ...")
 
-	}
-
-	return nil
-}
-
-func (h *Handlers) PutResultToAIIS(aiis_result aiis.AIISResult, r_id int64) error {
-	h.AudiVw.diag.Debug("推送结果数据到AIIS")
-
-	err := h.AudiVw.Aiis.PutResult(r_id, aiis_result)
-	if err == nil {
-		// 发送成功
-		//db_result.HasUpload = true
-		h.AudiVw.diag.Debug("推送AIIS成功，更新本地结果标识")
-		_, err := h.AudiVw.DB.UpdateResultUpload(true, r_id)
-
-		if err != nil {
-			return err
+		err = h.AudiVw.Aiis.PutResult(r.ResultId, ctx.aiisResult)
+		if err == nil {
+			r.HasUpload = true
+			h.AudiVw.diag.Debug("推送AIIS成功，更新本地结果标识")
+		} else {
+			h.AudiVw.diag.Error("推送AIIS失败", err)
 		}
-		return nil
-	} else {
-		h.AudiVw.diag.Error("推送AIIS失败", err)
-		return err
-
 	}
+
+	h.AudiVw.diag.Debug("缓存结果到数据库 ...")
+	_, err = h.AudiVw.DB.UpdateResult(r)
+	if err != nil {
+		h.AudiVw.diag.Error("缓存结果失败", err)
+		return err
+	} else {
+		h.AudiVw.diag.Debug("缓存结果成功")
+	}
+
 	return nil
 }
 
@@ -187,7 +168,7 @@ func (h *Handlers) PutResultToAIIS(aiis_result aiis.AIISResult, r_id int64) erro
 func (h *Handlers) handleCurve(curve *ControllerCurve, ctx *HandlerContext) error {
 	h.AudiVw.diag.Debug("处理波形数据 ...")
 
-	// 保存波形到数据库
+
 	ctx.dbCurve.ResultID = curve.ResultID
 	ctx.dbCurve.CurveData = curve.CurveData
 	ctx.dbCurve.CurveFile = curve.CurveFile
@@ -196,6 +177,18 @@ func (h *Handlers) handleCurve(curve *ControllerCurve, ctx *HandlerContext) erro
 	loc, _ := time.LoadLocation("Local")
 	ctx.dbCurve.UpdateTime, _ = time.ParseInLocation("2006-01-02 15:04:05", ctx.controllerResult.Dat, loc)
 
+	// 保存波形到对象存储
+	h.AudiVw.diag.Debug("保存波形数据到对象存储 ...")
+	err := h.AudiVw.Minio.Upload(curve.CurveFile, curve.CurveData)
+	if err != nil {
+		h.AudiVw.diag.Error("对象存储保存失败", err)
+		return err
+	} else {
+		ctx.dbCurve.HasUpload = true
+		h.AudiVw.diag.Debug("波形存储成功")
+	}
+
+	// 保存波形到数据库
 	exist, err := h.AudiVw.DB.CurveExist(&ctx.dbCurve)
 	if err != nil {
 		return err
@@ -216,21 +209,6 @@ func (h *Handlers) handleCurve(curve *ControllerCurve, ctx *HandlerContext) erro
 		}
 
 		h.AudiVw.diag.Debug("缓存波形成功")
-	}
-
-	// 保存波形到对象存储
-	h.AudiVw.diag.Debug("保存波形数据到对象存储 ...")
-	err = h.AudiVw.Minio.Upload(curve.CurveFile, curve.CurveData)
-	if err != nil {
-		h.AudiVw.diag.Error("对象存储保存失败", err)
-		return err
-	} else {
-		ctx.dbCurve.HasUpload = true
-		h.AudiVw.diag.Debug("对象存储保存成功，更新本地结果标识")
-		_, err = h.AudiVw.DB.UpdateCurve(&ctx.dbCurve)
-		if err != nil {
-			return err
-		}
 	}
 
 	return nil
