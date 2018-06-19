@@ -59,7 +59,7 @@ class SaConfiguration(http.Controller):
         if count > 0:
             # MO已存在
             body = json.dumps({"msg": "MO name " + mo_name + " already exists"})
-            return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=204)
+            return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=405)
 
         count = env['mrp.production'].search_count(
             [('vin', '=', vin)])
@@ -67,7 +67,7 @@ class SaConfiguration(http.Controller):
             # MO已存在
             body = json.dumps({"msg": "MO vin " + vin + " already exists"})
             return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
-                            status=204)
+                            status=405)
 
         vechile_code = vals['model'] if 'model' in vals else None
         if not vechile_code:
