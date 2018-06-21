@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0+e-20171123\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-06-15 06:30+0000\n"
-"PO-Revision-Date: 2018-06-15 06:30+0000\n"
+"POT-Creation-Date: 2018-06-21 08:28+0000\n"
+"PO-Revision-Date: 2018-06-21 08:28+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -120,7 +120,7 @@ msgid "Current Month"
 msgstr "本月"
 
 #. module: spc
-#: code:addons/spc/models/result.py:80
+#: code:addons/spc/models/result.py:83
 #: model:ir.ui.view,arch_db:spc.operation_result_view_search
 #: selection:operation.result,lacking:0
 #, python-format
@@ -159,6 +159,21 @@ msgid "Double Weibull"
 msgstr "双韦伯分布"
 
 #. module: spc
+#: model:ir.ui.view,arch_db:spc.operation_result_view_form
+msgid "Except"
+msgstr "异常"
+
+#. module: spc
+#: selection:operation.result,quality_state:0
+msgid "Exception"
+msgstr "异常"
+
+#. module: spc
+#: model:ir.model.fields,field_description:spc.field_operation_result_exception_reason
+msgid "Exception Reason"
+msgstr "异常原因"
+
+#. module: spc
 #: selection:ta.spc.wizard,weibull_dist_method:0
 msgid "Exponential"
 msgstr "指数"
@@ -169,8 +184,8 @@ msgid "Fail"
 msgstr "失败"
 
 #. module: spc
-#: code:addons/spc/models/result.py:86
 #: code:addons/spc/models/result.py:89
+#: code:addons/spc/models/result.py:92
 #: model:ir.ui.view,arch_db:spc.operation_result_view_search
 #: selection:operation.result,final_pass:0
 #: selection:operation.result,one_time_pass:0
@@ -186,7 +201,7 @@ msgid "Final Pass"
 msgstr "最终通过"
 
 #. module: spc
-#: code:addons/spc/models/result.py:88
+#: code:addons/spc/models/result.py:91
 #: selection:operation.result,final_pass:0
 #, python-format
 msgid "Final Passed"
@@ -291,7 +306,7 @@ msgstr "制造订单"
 #. module: spc
 #: selection:ta.spc.wizard,weibull_dist_method:0
 msgid "Max Weibull"
-msgstr "最大韦伯分布"
+msgstr "最大微博分布"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_measure_degree
@@ -342,10 +357,10 @@ msgstr "Need render"
 
 #. module: spc
 #: code:addons/spc/models/result.py:52
-#: code:addons/spc/models/result.py:146
-#: code:addons/spc/models/result.py:147
-#: code:addons/spc/models/result.py:158
-#: code:addons/spc/models/result.py:159
+#: code:addons/spc/models/result.py:151
+#: code:addons/spc/models/result.py:152
+#: code:addons/spc/models/result.py:163
+#: code:addons/spc/models/result.py:164
 #, python-format
 msgid "New"
 msgstr "新建"
@@ -356,7 +371,7 @@ msgid "No measure"
 msgstr "未测量"
 
 #. module: spc
-#: code:addons/spc/models/result.py:81
+#: code:addons/spc/models/result.py:84
 #: selection:operation.result,lacking:0
 #, python-format
 msgid "Normal"
@@ -391,7 +406,7 @@ msgid "One Time Pass"
 msgstr "一次通过"
 
 #. module: spc
-#: code:addons/spc/models/result.py:85
+#: code:addons/spc/models/result.py:88
 #: selection:operation.result,one_time_pass:0
 #, python-format
 msgid "One Time Passed"
@@ -763,31 +778,31 @@ msgid "controller.result"
 msgstr "controller.result"
 
 #. module: spc
-#: code:addons/spc/models/result.py:80
+#: code:addons/spc/models/result.py:83
 #, python-format
 msgid "lack"
 msgstr "缺失"
 
 #. module: spc
-#: code:addons/spc/models/result.py:78
+#: code:addons/spc/models/result.py:81
 #, python-format
 msgid "nok"
 msgstr "NOK"
 
 #. module: spc
-#: code:addons/spc/models/result.py:76
+#: code:addons/spc/models/result.py:79
 #, python-format
 msgid "none"
 msgstr "未测量"
 
 #. module: spc
-#: code:addons/spc/models/result.py:81
+#: code:addons/spc/models/result.py:84
 #, python-format
 msgid "normal"
 msgstr "正常"
 
 #. module: spc
-#: code:addons/spc/models/result.py:77
+#: code:addons/spc/models/result.py:80
 #, python-format
 msgid "ok"
 msgstr "OK"
