@@ -29,6 +29,14 @@ class ApiMrpWorkorder(http.Controller):
                 domain=[('res_model', '=', 'mrp.routing.workcenter'), ('res_id', '=', order.operation_id.id),
                         ('res_field', '=', 'worksheet_img')],
                 fields=['x_offset', 'y_offset'])
+            results = []
+            for result in order.result_ids:
+                val = {'id': result.id,
+                       'tolerance_min': result.point_id.tolerance_min,
+                       'tolerance_max': result.point_id.tolerance_max,
+                       'tolerance_min_degree': result.point_id.tolerance_min_degree,
+                       'tolerance_max_degree':result.point_id.tolerance_max_degree}
+                results.append(val)
             ret = {
                 'id': order.id,
                 'hmi': {'id': order.workcenter_id.hmi_id.id, 'uuid': order.workcenter_id.hmi_id.serial_no},
@@ -37,7 +45,7 @@ class ApiMrpWorkorder(http.Controller):
                 'nut_total': order.consu_product_qty,
                 'vin': order.production_id.vin,
                 'knr': order.production_id.knr,
-                'result_ids': order.result_ids.ids,
+                'result_ids': results,
                 'status': order.state,  # pending, ready, process, done, cancel
 
                 'equipment_name': order.production_id.equipment_name,
