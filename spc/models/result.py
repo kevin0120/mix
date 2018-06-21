@@ -53,8 +53,11 @@ class OperationResult(models.HyperModel):
     point_id = fields.Many2one('quality.point', 'Control Point')
     quality_state = fields.Selection([
         ('none', 'To do'),
+        ('exception', 'Exception'),
         ('pass', 'Passed'),
         ('fail', 'Failed')], string='Status', default='none', copy=False)
+
+    exception_reason = fields.Char('Exception Reason')
 
     user_id = fields.Many2one('res.users', 'Responsible')
 
@@ -341,6 +344,14 @@ class OperationResult(models.HyperModel):
     def do_fail(self):
         self.write({
             'quality_state': 'fail',
+            'user_id': self.env.user.id,
+            'time': datetime.now()})
+        return True
+
+    @api.multi
+    def do_exception(self):
+        self.write({
+            'quality_state': 'exception',
             'user_id': self.env.user.id,
             'time': datetime.now()})
         return True

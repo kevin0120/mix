@@ -29,7 +29,8 @@
                     <button name="do_pass" type="object" attrs="{'invisible': [('quality_state', '!=', 'fail')]}" groups="base.group_system" string="Pass"/>
                     <button name="do_fail" type="object" class="btn-primary" attrs="{'invisible': [('quality_state', '!=', 'none')]}" string="Fail" groups="base.group_system"/>
                     <button name="do_fail" type="object" attrs="{'invisible': [('quality_state', '!=', 'pass')]}" groups="base.group_system" string="Fail"/>
-                    <button name="sent_aiis" type="object"  attrs="{'invisible': [('sent', '=', True)]}" class="oe_highlight" groups="base.group_no_one" string="Send to AIIS"/>
+                    <button name="do_exception" type="object" class="btn-primary" attrs="{'invisible': [('quality_state', '!=', 'none')]}" string="Except" groups="base.group_system"/>
+                    <button name="sent_aiis" type="object"  attrs="{'invisible': [('quality_state', 'in', ['none', 'exception'])]}" class="oe_highlight" groups="base.group_no_one" string="Send to AIIS"/>
                     <field name="quality_state" widget="statusbar"/>
                 </header>
                 <sheet>
@@ -70,6 +71,9 @@
                         <field name="final_pass" groups="base.group_no_one"/>
                         <field name="lacking" groups="base.group_no_one" />
                     </group>
+                    <group>
+                        <field name="exception_reason" attrs="{'invisible': [('quality_state', '!=', 'exception')]}"/>
+                    </group>
                 </sheet>
             </form>
         </field>
@@ -79,7 +83,7 @@
         <field name="name">operation_result_view_kanban</field>
         <field name="model">operation.result</field>
         <field name="arch" type="xml">
-            <kanban class="o_kanban_small_column">
+            <kanban class="o_kanban_small_column" default_order="quality_state asc">
                 <field name="name"/>
                 <field name="user_id"/>
                 <field name="time"/>
@@ -93,7 +97,7 @@
                                     <strong><span><t t-esc="record.name.value"/></span></strong>
                                 </div>
                                 <div class="col-xs-6">
-                                    <strong><span t-attf-class="pull-right text-right label #{['none'].indexOf(record.quality_state.raw_value) > -1 ? 'label-default' : ['fail'].indexOf(record.quality_state.raw_value) > -1 ? 'label-danger' : ['done'].indexOf(record.quality_state.raw_value) > -1 ? 'label-primary' : 'label-success'}"><t t-esc="record.quality_state.value"/></span></strong>
+                                    <strong><span t-attf-class="pull-right text-right label #{['none'].indexOf(record.quality_state.raw_value) > -1 ? 'label-default' : ['fail'].indexOf(record.quality_state.raw_value) > -1 ? 'label-danger' :['exception'].indexOf(record.quality_state.raw_value) > -1 ? 'label-warning' : ['done'].indexOf(record.quality_state.raw_value) > -1 ? 'label-primary' : 'label-success'}"><t t-esc="record.quality_state.value"/></span></strong>
                                 </div>
                             </div>
                             <div class="row text-muted">
@@ -115,7 +119,7 @@
         <field name="name">operation_result_view_tree</field>
         <field name="model">operation.result</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree default_order="quality_state asc" decoration-muted="quality_state == 'none'" decoration-success="quality_state == 'pass'" decoration-danger="quality_state == 'fail'" decoration-warning="quality_state == 'exception'"  create="0" edit="0">
                 <field name="product_id"/>
                 <field name="consu_product_id" />
                 <field name="workcenter_id" />
@@ -124,7 +128,7 @@
                 <field name="measure_degree"/>
                 <field name="measure_t_don" />
                 <field name="measure_result" />
-                <!--<field name="quality_state"/>-->
+                <field name="quality_state" groups="base.group_no_one"/>
                 <field name="sent" groups="base.group_no_one"/>
             </tree>
         </field>

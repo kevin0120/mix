@@ -234,7 +234,7 @@ msgstr "结果信息"
 #. module: wave
 #: model:ir.ui.view,arch_db:wave.sa_view_wave_form
 msgid "Scope"
-msgstr "波形查看器"
+msgstr "曲线查看器"
 
 #. module: wave
 #: model:ir.model.fields,field_description:wave.field_operation_result_line_consu_product_id
@@ -254,12 +254,12 @@ msgstr "设置对象存储bucket"
 #. module: wave
 #: model:ir.ui.view,arch_db:wave.sa_view_wave_form
 msgid "Show WaveForm"
-msgstr "显示波形"
+msgstr "显示曲线"
 
 #. module: wave
 #: model:ir.actions.server,name:wave.operation_result_show_waveform
 msgid "Show Waveform"
-msgstr "显示波形"
+msgstr "显示曲线"
 
 #. module: wave
 #: model:ir.ui.view,arch_db:wave.sa_view_wave_form
@@ -289,18 +289,18 @@ msgstr "Wave composition wizard"
 #. module: wave
 #: model:ir.ui.view,arch_db:wave.sa_view_wave_form
 msgid "WaveForm"
-msgstr "波形查看"
+msgstr "曲线查看"
 
 #. module: wave
 #: model:ir.actions.act_window,name:wave.action_wave_form
 #: model:ir.ui.menu,name:wave.menu_wave_form
 msgid "Waveform"
-msgstr "波形查看"
+msgstr "曲线查看"
 
 #. module: wave
 #: model:ir.model.fields,field_description:wave.field_operation_result_line_cur_objects
 msgid "Waveform Files"
-msgstr "波形文件"
+msgstr "曲线文件"
 
 #. module: wave
 #: code:addons/wave/models/result.py:31
@@ -309,23 +309,23 @@ msgstr "波形文件"
 #: model:ir.ui.view,arch_db:wave.spc_compose_wave_wizard_form
 #, python-format
 msgid "Waveform Scope"
-msgstr "波形查看器"
+msgstr "曲线查看器"
 
 #. module: wave
 #: model:ir.model,name:wave.model_wave_wave
 msgid "Waveform scope wizard"
-msgstr "波形查看导向"
+msgstr "曲线查看导向"
 
 #. module: wave
 #: model:ir.model.fields,field_description:wave.field_wave_compose_wave_wave
 #: model:ir.model.fields,field_description:wave.field_wave_wave_wave
 msgid "Waves"
-msgstr "波形"
+msgstr "曲线"
 
 #. module: wave
 #: model:ir.model.fields,help:wave.field_operation_result_line_selected
 msgid "Whether add this result to create waveform"
-msgstr "是否将此结果的波形显示"
+msgstr "是否将此结果的曲线显示"
 
 #. module: wave
 #: model:ir.model.fields,field_description:wave.field_operation_result_line_wizard_id
