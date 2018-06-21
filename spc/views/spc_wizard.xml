@@ -205,7 +205,7 @@
             <field name="model">mrp.workcenter</field>
             <field name="arch" type="xml">
                 <tree string="Work Center" create="0" delete="0">
-                    <field name="controller_id" />
+                    <field name="controller_ids" />
                     <field name="code"/>
                     <field name="name"/>
                     <field name="worksegment_id" />

@@ -39,11 +39,39 @@
             <field name="category_id" ref="equipment_screw_controller"/>
         </record>
 
+        <record id="gun_0" model="maintenance.equipment">
+            <field name="name">测试拧枪1</field>
+            <field name="serial_no">xx0011</field>
+            <field name="parent_id" ref="controller_0"/>
+            <field name="category_id" ref="equipment_Gun"/>
+        </record>
+
+        <record id="gun_1" model="maintenance.equipment">
+            <field name="name">测试拧枪2</field>
+            <field name="serial_no">xx0022</field>
+            <field name="parent_id" ref="controller_0"/>
+            <field name="category_id" ref="equipment_Gun"/>
+        </record>
+
         <record id="controller_1" model="maintenance.equipment">
             <field name="name">测试控制器2</field>
             <field name="serial_no">0002</field>
             <field name="parent_id" ref="masterpc_0"/>
             <field name="category_id" ref="equipment_screw_controller"/>
+        </record>
+
+        <record id="gun_2" model="maintenance.equipment">
+            <field name="name">测试拧枪3</field>
+            <field name="serial_no">xx0033</field>
+            <field name="parent_id" ref="controller_1"/>
+            <field name="category_id" ref="equipment_Gun"/>
+        </record>
+
+        <record id="gun_3" model="maintenance.equipment">
+            <field name="name">测试拧枪4</field>
+            <field name="serial_no">xx0044</field>
+            <field name="parent_id" ref="controller_1"/>
+            <field name="category_id" ref="equipment_Gun"/>
         </record>
 
         <record id="io_0" model="maintenance.equipment">
@@ -81,7 +109,7 @@
             <field name="masterpc_id" ref="masterpc_0" />
             <field name="io_id" ref="io_0" />
             <field name="rfid_id" ref="rfid_0" />
-            <field name="controller_id" ref="controller_0" />
+            <field name="controller_ids" eval="[(4, ref('sa_configuration.controller_0'))]"/>
         </record>
 
         <record id="hmi_1" model="maintenance.equipment">
@@ -129,7 +157,7 @@
             <field name="io_id" ref="io_1" />
             <field name="rfid_id" ref="rfid_1" />
             <field name="masterpc_id" ref="masterpc_1" />
-            <field name="controller_id" ref="controller_3" />
+            <field name="controller_ids" eval="[(4, ref('sa_configuration.controller_3'))]" />
         </record>
 
         <record id="hmi_2" model="maintenance.equipment">
@@ -178,7 +206,7 @@
         </record>
 
         <record id="routing_group_1" model="mrp.routing.group">
-            <field name="code">ASW</field>
+            <field name="code">SAB</field>
         </record>
 
         <record id="routing_group_2" model="mrp.routing.group">
@@ -309,10 +337,6 @@
             <field name="max_op_time">30</field>
         </record>
 
-        <record id="product_template_47" model="product.template">
-            <field name="name">测试车辆2</field>
-            <field name="type">product</field>
-        </record>
 
         <record id="product_product_11" model="product.product">
             <field name="name">测试车辆2</field>

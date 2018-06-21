@@ -5,7 +5,8 @@ from dateutil import relativedelta
 import datetime
 import json
 
-from odoo import api, exceptions, fields, models, _
+from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
 
 
 class MrpWorkAssembly(models.Model):
@@ -86,21 +87,59 @@ class MrpWorkCenter(models.Model):
 
     rfid_id = fields.Many2one('maintenance.equipment',  string='RFID', copy=False)
 
-    controller_id = fields.Many2one('maintenance.equipment', string='Controller', copy=False)
+    controller_ids = fields.Many2many('maintenance.equipment', 'controller_center_rel', 'center_id', 'controller_id', string='Controller', copy=False)
 
-    controller_id_domain = fields.Char(
-        compute="_compute_controller_id_domain",
+    gun_ids = fields.Many2many('maintenance.equipment', 'gun_center_rel', 'center_id', 'gun_id',
+                                      string='Screw Gun', copy=False)
+
+    controller_ids_domain = fields.Char(
+        compute="_compute_controller_ids_domain",
         readonly=True,
         store=False,
     )
 
+    gun_ids_domain = fields.Char(
+        compute="_compute_gun_ids_domain",
+        readonly=True,
+        store=False,
+    )
+
+    @api.constrains('controller_ids', 'gun_ids')
+    def _constraint_equipments(self):
+        self.ensure_one()
+        workcenter_ids = self.env['mrp.workcenter'].sudo().search([('id', '!=', self.id)])
+        for workcenter in workcenter_ids:
+            # org_list = workcenter.controller_ids.ids
+            # new_list = self.controller_ids.ids
+            # new = len(new_list) if new_list else 0
+            # org = len(org_list) if org_list else 0
+            # org_list.extend(new_list)
+            # if len(set(org_list)) != new + org:
+            #     raise ValidationError('控制器设置重复')
+            org_list = workcenter.gun_ids.ids
+            new_list = self.gun_ids.ids
+            new = len(new_list) if new_list else 0
+            org = len(org_list) if org_list else 0
+            org_list.extend(new_list)
+            if len(set(org_list)) != new + org:
+                raise ValidationError('拧紧枪设置重复')
+
+
+
     @api.multi
     @api.depends('masterpc_id')
-    def _compute_controller_id_domain(self):
+    def _compute_controller_ids_domain(self):
         for rec in self:
-            rec.controller_id_domain = json.dumps([('id', 'in', rec.masterpc_id.child_ids.ids), ('category_name', '=', 'Controller')])
+            rec.controller_ids_domain = json.dumps([('id', 'in', rec.masterpc_id.child_ids.ids), ('category_name', '=', 'Controller')])
+
+    @api.multi
+    @api.depends('controller_ids')
+    def _compute_gun_ids_domain(self):
+        for rec in self:
+            child_ids = rec.controller_ids.mapped('child_ids')
+            rec.gun_ids_domain = json.dumps([('id', 'in', child_ids.ids), ('category_name', '=', 'Gun')])
+            rec.gun_ids = [(5,)]  # 去除所有的枪 重新设置
 
     _sql_constraints = [('code_hmi', 'unique(hmi_id)', 'Only one HMI is allowed'),
-                        ('code_controller', 'unique(controller_id)', 'Only one Controller is allowed'),
                         ('code_rfid', 'unique(rfid_id)', 'Only one RFID is allowed'),
                         ('code_io', 'unique(io_id)', 'Only one Remote IO is allowed')]
