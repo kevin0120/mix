@@ -3,13 +3,20 @@
 from odoo import models, fields, api
 import time
 
+
+class MrpWOConsu(models.Model):
+    _inherit = 'mrp.wo.consu'
+
+    result_ids = fields.One2many('operation.result', 'consu_bom_line_id', string='Operation Results')
+
+
 class MrpWorkorder(models.Model):
     _inherit = 'mrp.workorder'
 
     worksheet_img = fields.Binary(
         'Worksheet', related='operation_id.worksheet_img', readonly=True)
 
-    result_ids = fields.One2many('operation.result', 'workorder_id',string='Operation Results')
+    result_ids = fields.One2many('operation.result', 'workorder_id', string='Operation Results')
 
     sent = fields.Boolean('Have sent to aiis', default=False)
 
@@ -29,13 +36,14 @@ class MrpWorkorder(models.Model):
                                                        '|', ('product_id', '=', production.product_id.id),
                                                        '&', ('product_id', '=', False), ('product_tmpl_id', '=', production.product_id.product_tmpl_id.id)])
             for point in points:
+                consu = wo.consu_bom_line_ids.filtered(lambda r: r.bom_line_id.id == point.bom_line_id.id)
                 vals = {'workorder_id': wo.id,
                          'production_id': production.id,
                          'workcenter_id': wo.workcenter_id.id,
                          'assembly_line_id':production.assembly_line_id.id,
                          'point_id': point.id,
                          'product_id': production.product_id.id,
-                         'consu_product_id': wo.consu_product_id.id,
+                         'consu_bom_line_id': consu.id,
                          'time': production.date_planned_start or fields.Datetime.now(),
                          'control_date': fields.Datetime.now()}
 

@@ -5,12 +5,28 @@ from odoo.exceptions import ValidationError
 import math, json
 
 
+class MrpWOConsu(models.Model):
+    _name = 'mrp.wo.consu'
+
+    _order = "sequence"
+
+    sequence = fields.Integer(string='Sequence')
+
+    workorder_id = fields.Many2one('mrp.workorder')
+
+    bom_line_id = fields.Many2one('mrp.bom.line')
+
+    product_id = fields.Many2one('product.product', string='Consume Product')
+    qty = fields.Float('Consume Product Qty')
+
+    program_id = fields.Many2one('controller.program')
+
+
 class MrpWorkorder(models.Model):
 
     _inherit = 'mrp.workorder'
 
-    consu_product_id = fields.Many2one('product.product')
-    consu_product_qty = fields.Float('Consume Product Qty')
+    consu_bom_line_ids = fields.One2many('mrp.wo.consu', 'workorder_id', string='Consume Product')
 
 
 class MrpProduction(models.Model):
@@ -77,6 +93,7 @@ class MrpProduction(models.Model):
                     BoMs
         """
         workorders = self.env['mrp.workorder']
+        consume_bom_lines = self.env['mrp.wo.consu']
         bom_qty = bom_data['qty']
 
         # Initial qty producing
@@ -97,22 +114,30 @@ class MrpProduction(models.Model):
             #                      operation.workcenter_id.time_stop +
             #                      cycle_number * operation.time_cycle * 100.0 / operation.workcenter_id.time_efficiency)
             match_bom_line_ids = bom.bom_line_ids.filtered(lambda r: r.operation_id == operation)
-            for line_id in match_bom_line_ids:
-                workorder = workorders.create({
-                    'name': operation.name,
-                    'production_id': self.id,
-                    'workcenter_id': operation.workcenter_id.id,
-                    'operation_id': operation.id,
-                    # 'duration_expected': duration_expected,
-                    'state': len(workorders) == 0 and 'ready' or 'pending',
-                    'consu_product_id': line_id.product_id.id or None,
-                    'consu_product_qty': line_id.product_qty or None,
-                    'qty_producing': quantity,
-                    'capacity': operation.workcenter_id.capacity,
-                })
-                if workorders:
-                    workorders[-1].next_work_order_id = workorder.id
-                workorders += workorder
+            workorder = workorders.create({
+                'name': operation.name,
+                'production_id': self.id,
+                'workcenter_id': operation.workcenter_id.id,
+                'operation_id': operation.id,
+                # 'duration_expected': duration_expected,
+                'state': len(workorders) == 0 and 'ready' or 'pending',
+                'qty_producing': quantity,
+                'capacity': operation.workcenter_id.capacity,
+            })
+            for idx, line_id in enumerate(match_bom_line_ids):
+                val = {
+                    'sequence': idx + 1,
+                    'workorder_id': workorder.id,
+                    'product_id': line_id.product_id.id or None,
+                    'qty': line_id.product_qty or None,
+                    'program_id': line_id.program_id.id or None,
+                    'bom_line_id': line_id.id
+                }
+                consume_bom_lines.create(val)
+
+            if workorders:
+                workorders[-1].next_work_order_id = workorder.id
+            workorders += workorder
 
             # assign moves; last operation receive all unassigned moves (which case ?)
             # moves_raw = self.move_raw_ids.filtered(lambda move: move.operation_id == operation)
@@ -128,6 +153,7 @@ class MrpProduction(models.Model):
 
     def _workorders_create(self, bom, bom_data):
         workorders = self.env['mrp.workorder']
+        consume_bom_lines = self.env['mrp.wo.consu']
         bom_qty = bom_data['qty']
 
         # Initial qty producing
@@ -144,22 +170,29 @@ class MrpProduction(models.Model):
                                  operation.workcenter_id.time_stop +
                                  cycle_number * operation.time_cycle * 100.0 / operation.workcenter_id.time_efficiency)
             match_bom_line_ids = bom.bom_line_ids.filtered(lambda r: r.operation_id == operation)
-            for line_id in match_bom_line_ids:
-                workorder = workorders.create({
-                    'name': operation.name,
-                    'production_id': self.id,
-                    'workcenter_id': operation.workcenter_id.id,
-                    'operation_id': operation.id,
-                    'duration_expected': duration_expected,
-                    'state': len(workorders) == 0 and 'ready' or 'pending',
-                    'consu_product_id':line_id.product_id.id or None,
-                    'consu_product_qty': line_id.product_qty or None,
-                    'qty_producing': quantity,
-                    'capacity': operation.workcenter_id.capacity,
-                })
-                if workorders:
-                    workorders[-1].next_work_order_id = workorder.id
-                workorders += workorder
+            workorder = workorders.create({
+                'name': operation.name,
+                'production_id': self.id,
+                'workcenter_id': operation.workcenter_id.id,
+                'operation_id': operation.id,
+                'duration_expected': duration_expected,
+                'state': len(workorders) == 0 and 'ready' or 'pending',
+                'qty_producing': quantity,
+                'capacity': operation.workcenter_id.capacity,
+            })
+            for idx, line_id in enumerate(match_bom_line_ids):
+                val = {
+                    'sequence': idx + 1,
+                    'workorder_id': workorder.id,
+                    'product_id': line_id.product_id.id or None,
+                    'qty': line_id.product_qty or None,
+                    'program_id': line_id.program_id.id or None,
+                    'bom_line_id': line_id.id
+                }
+                consume_bom_lines.create(val)
+            if workorders:
+                workorders[-1].next_work_order_id = workorder.id
+            workorders += workorder
 
             # assign moves; last operation receive all unassigned moves (which case ?)
             moves_raw = self.move_raw_ids.filtered(lambda move: move.operation_id == operation)

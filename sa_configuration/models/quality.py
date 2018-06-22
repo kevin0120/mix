@@ -18,13 +18,15 @@ class QualityPoint(models.Model):
 
     times = fields.Integer('Repeat times', default=1)
 
+    bom_line_id = fields.Many2one('mrp.bom.line')
+
     operation_id_domain = fields.Char(
         compute="_compute_operation_id_domain",
         readonly=True,
         store=False,
     )
 
-    # _sql_constraints = [('product_operation_uniq', 'unique(product_id,operation_id)', 'Only one quailty point per product operation is allowed')]
+    _sql_constraints = [('product_bom_line_id_uniq', 'unique(bom_line_id)', 'Only one quailty point per product bom line is allowed')]
 
     @api.onchange('operation_id')
     def _onchange_opeartion_id(self):

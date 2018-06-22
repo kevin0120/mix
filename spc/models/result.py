@@ -64,8 +64,9 @@ class OperationResult(models.HyperModel):
     product_id = fields.Many2one('product.product', 'Vehicle',
                                  domain="[('sa_type', '=', 'vehicle')]", required=True)
 
-    consu_product_id = fields.Many2one('product.product', 'Screw',
-                                 domain="[('sa_type', '=', 'screw')]", required=True)
+    consu_bom_line_id = fields.Many2one('mrp.wo.consu', required=True)
+
+    consu_product_id = fields.Many2one('product.product', related='consu_bom_line_id.product_id')
 
     control_date = fields.Datetime('Control Date')
 

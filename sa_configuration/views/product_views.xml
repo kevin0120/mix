@@ -73,10 +73,15 @@
                             <page string="BOM" name="product_bom" attrs="{'invisible': [('sa_type','=','screw')]}">
                                 <group name="bom">
                                     <field name="active_bom_line_ids" readonly="1" nolabel="1" widget="one2many_list">
-                                        <tree>
+                                        <tree edit="false" >
                                             <field name="routing_id" string="Routing Code"/>
                                             <field name="product_id"/>
                                             <field name="product_qty"/>
+                                            <field name="program_id" />
+                                            <field name="workcenter_id" />
+                                            <field name="masterpc_id" />
+                                            <field name="controller_id"/>
+                                            <field name="gun_id" />
                                        </tree>
                                     </field>
                                 </group>

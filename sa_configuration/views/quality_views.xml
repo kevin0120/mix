@@ -8,6 +8,7 @@
             <field name="arch" type="xml">
                 <field name="picking_type_id" position="replace">
                     <field name="operation_id" />
+                    <field name="bom_line_id" groups="base.group_no_one"/>
                     <field name="tolerance_min" string="Torque(Min)"/>
                     <field name="tolerance_max" string="Torque(Max)"/>
                     <field name="tolerance_min_degree" string="Degree(Min)"/>

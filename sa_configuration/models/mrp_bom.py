@@ -100,6 +100,7 @@ class MrpBomLine(models.Model):
             'product_id': line.bom_id.product_id.id,
             'product_tmpl_id': line.bom_id.product_tmpl_id.id,
             'operation_id': line.operation_id.id,
+            'bom_line_id': line.id,
             'picking_type_id':
                 self.env['stock.picking.type'].search_read(domain=[('code', '=', 'mrp_operation')], fields=['id'],
                                                            limit=1)[0]['id'],
@@ -115,9 +116,7 @@ class MrpBomLine(models.Model):
         res = super(MrpBomLine, self).write(vals)
         if 'product_qty' in vals:
             for line in self:
-                rec = self.env['quality.point'].search([('product_id', '=', line.bom_id.product_id.id),
-                                                        ('product_tmpl_id', '=', line.bom_id.product_tmpl_id.id),
-                                                        ('operation_id', '=', line.operation_id.id)])
+                rec = self.env['quality.point'].search([('bom_line_id', '=', line.id)])
                 rec.sudo().write({'times': line.product_qty})
         return res
 
@@ -126,9 +125,7 @@ class MrpBomLine(models.Model):
     def unlink(self):
         quality_points = self.env['quality.point']
         for line in self:
-            rec = self.env['quality.point'].search([('product_id', '=', line.bom_id.product_id.id),
-                                                    ('product_tmpl_id', '=', line.bom_id.product_tmpl_id.id),
-                                                    ('operation_id', '=', line.operation_id.id)])
+            rec = self.env['quality.point'].search([('bom_line_id', '=', line.id)])
             quality_points += rec
         quality_points.sudo().unlink()
         ret = super(MrpBomLine, self).unlink()
