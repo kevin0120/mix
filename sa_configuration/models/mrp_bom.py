@@ -87,7 +87,7 @@ class MrpBomLine(models.Model):
         self.gun_id = False
 
     @api.multi
-    @api.depends('workcenter_id')
+    @api.depends('operation_id.workcenter_id')
     def _compute_gun_id_domain(self):
         for rec in self:
             rec.gun_id_domain = json.dumps([('id', 'in', rec.workcenter_id.gun_ids.ids)])
