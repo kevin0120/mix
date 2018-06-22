@@ -131,6 +131,7 @@ class MrpWorkCenter(models.Model):
     def _compute_controller_ids_domain(self):
         for rec in self:
             rec.controller_ids_domain = json.dumps([('id', 'in', rec.masterpc_id.child_ids.ids), ('category_name', '=', 'Controller')])
+            rec.controller_ids = [(5,)]  # 去除所有的枪 重新设置
 
     @api.multi
     @api.depends('controller_ids')

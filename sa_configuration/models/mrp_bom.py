@@ -2,6 +2,7 @@
 
 from odoo import models, fields, api,_
 from odoo.exceptions import ValidationError
+import json
 
 
 class MrpBom(models.Model):
@@ -10,6 +11,7 @@ class MrpBom(models.Model):
     @api.onchange('routing_id','product_id')
     def _onchange_routing_id(self):
         self.code = u'[{0}]{1}'.format(self.routing_id.name, self.product_id.name)
+        self.bom_line_ids = [(5,)]  #删除所有BOM行
 
     @api.constrains('product_id', 'product_tmpl_id')
     def _product_tmpl_product_constraint(self):
@@ -46,9 +48,50 @@ class MrpBomLine(models.Model):
 
     workcenter_id = fields.Many2one('mrp.workcenter', related="operation_id.workcenter_id", string='Work Center')
 
-    _sql_constraints = [
-        ('unique_operation_bom_id', 'unique(bom_id,operation_id)', 'Every Bom unique operation'),
-    ]
+    masterpc_id = fields.Many2one('maintenance.equipment',  string='MasterPC', related="operation_id.workcenter_id.masterpc_id")
+
+    controller_id = fields.Many2one('maintenance.equipment', string='Controller', copy=False)
+
+    gun_id = fields.Many2one('maintenance.equipment', string='Screw Gun', copy=False)
+
+    # _sql_constraints = [
+    #     ('unique_operation_bom_id', 'unique(bom_id,operation_id)', 'Every Bom unique operation'),
+    # ]
+
+    controller_id_domain = fields.Char(
+        compute="_compute_gun_id_domain",
+        readonly=True,
+        store=False,
+    )
+
+    gun_id_domain = fields.Char(
+        compute="_compute_gun_id_domain",
+        readonly=True,
+        store=False,
+    )
+
+    @api.onchange('operation_id')
+    def _onchange_operation(self):
+        self.ensure_one()
+        self.controller_id = False
+        self.gun_id = False
+
+    @api.onchange('masterpc_id')
+    def _onchange_masterpc(self):
+        self.ensure_one()
+        self.controller_id = False
+
+    @api.onchange('controller_id')
+    def _onchange_controller(self):
+        self.ensure_one()
+        self.gun_id = False
+
+    @api.multi
+    @api.depends('workcenter_id')
+    def _compute_gun_id_domain(self):
+        for rec in self:
+            rec.gun_id_domain = json.dumps([('id', 'in', rec.workcenter_id.gun_ids.ids)])
+            rec.controller_id_domain = json.dumps([('id', 'in', rec.workcenter_id.controller_ids.ids)])
 
     @api.model
     def create(self, vals):

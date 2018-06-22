@@ -6,6 +6,8 @@ from odoo import models, fields, api, _
 class MrpRoutingWorkcenter(models.Model):
     _inherit = 'mrp.routing.workcenter'
 
+    workcenter_id = fields.Many2one('mrp.workcenter', copy=False)
+
     program_id = fields.Many2one('controller.program', string='程序号')
 
     group_id = fields.Many2one('mrp.routing.group', string='Routing Group')
@@ -15,8 +17,12 @@ class MrpRoutingWorkcenter(models.Model):
 
     max_op_time = fields.Integer('Max Operation time(second)', default=30)
 
-    _sql_constraints = [('routing_group_uniq', 'unique(routing_id,group_id)',
-                         'Per Routing only has one unique Routing group!')]
+    _sql_constraints = [('routing_group_wc_uniq', 'unique(routing_id,group_id, workcenter_id)',
+                         'Per Routing only has one unique Routing group per Work Center!')]
+
+    @api.multi
+    def name_get(self):
+        return [(operation.id, u"[{0}]{1}@{2}".format(operation.name, operation.group_id.code, operation.workcenter_id.name)) for operation in self]  # 强制可视化时候名称显示的是code
 
 
 class MrpPR(models.Model):

@@ -120,7 +120,7 @@ class MaintenanceEquipment(models.Model):
             res = []
             while cat:
                 if cat.name and cat.serial_no:
-                    res.append(cat.name + '#' + cat.serial_no)
+                    res.append(u"[{0}]{1}".format(cat.serial_no, cat.name))
                 if cat.name and not cat.serial_no:
                     res.append(cat.name)
                 cat = cat.parent_id

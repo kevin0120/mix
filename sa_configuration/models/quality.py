@@ -24,7 +24,7 @@ class QualityPoint(models.Model):
         store=False,
     )
 
-    _sql_constraints = [('product_operation_uniq', 'unique(product_id,operation_id)', 'Only one quailty point per product operation is allowed')]
+    # _sql_constraints = [('product_operation_uniq', 'unique(product_id,operation_id)', 'Only one quailty point per product operation is allowed')]
 
     @api.onchange('operation_id')
     def _onchange_opeartion_id(self):

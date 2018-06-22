@@ -139,11 +139,39 @@
             <field name="category_id" ref="equipment_screw_controller"/>
         </record>
 
+        <record id="gun_5" model="maintenance.equipment">
+            <field name="name">测试拧枪5</field>
+            <field name="serial_no">xx0055</field>
+            <field name="parent_id" ref="controller_2"/>
+            <field name="category_id" ref="equipment_Gun"/>
+        </record>
+
+        <record id="gun_6" model="maintenance.equipment">
+            <field name="name">测试拧枪6</field>
+            <field name="serial_no">xx1166</field>
+            <field name="parent_id" ref="controller_2"/>
+            <field name="category_id" ref="equipment_Gun"/>
+        </record>
+
         <record id="controller_3" model="maintenance.equipment">
             <field name="name">测试控制器4</field>
             <field name="serial_no">0004</field>
             <field name="parent_id" ref="masterpc_1"/>
             <field name="category_id" ref="equipment_screw_controller"/>
+        </record>
+
+        <record id="gun_7" model="maintenance.equipment">
+            <field name="name">测试拧枪7</field>
+            <field name="serial_no">xx0777</field>
+            <field name="parent_id" ref="controller_3"/>
+            <field name="category_id" ref="equipment_Gun"/>
+        </record>
+
+        <record id="gun_8" model="maintenance.equipment">
+            <field name="name">测试拧枪8</field>
+            <field name="serial_no">xx186</field>
+            <field name="parent_id" ref="controller_3"/>
+            <field name="category_id" ref="equipment_Gun"/>
         </record>
 
         <record id="mrp_workcenter_1" model="mrp.workcenter">
@@ -257,6 +285,16 @@
             <field name="max_op_time">30</field>
         </record>
 
+        <record id="routing_operation_20" model="mrp.routing.workcenter">
+            <field name="name">G0C</field>
+            <field name="routing_id" ref="routing_0"/>
+            <field name="program_id" ref="con_prog_0" />
+            <field name="group_id" ref="routing_group_0" />
+            <field name="workcenter_id" ref="mrp_workcenter_1" />
+            <field name="max_redo_times">3</field>
+            <field name="max_op_time">30</field>
+        </record>
+
         <record id="routing_operation_1" model="mrp.routing.workcenter">
             <field name="name">4X0</field>
             <field name="routing_id" ref="routing_0"/>
@@ -335,6 +373,11 @@
             <field name="workcenter_id" ref="mrp_workcenter_1" />
             <field name="max_redo_times">3</field>
             <field name="max_op_time">30</field>
+        </record>
+
+        <record id="product_template_47" model="product.template">
+            <field name="name">测试车辆2</field>
+            <field name="type">product</field>
         </record>
 
 

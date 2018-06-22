@@ -118,7 +118,7 @@ msgstr "<strong>工单</strong>"
 #. module: sa_configuration
 #: model:ir.ui.view,arch_db:sa_configuration.report_mrporder_pin
 msgid "<strong>WorkCenter</strong>"
-msgstr "<strong>工作中心</strong>"
+msgstr "<strong>工位</strong>"
 
 #. module: sa_configuration
 #: code:addons/sa_configuration/models/product.py:30
@@ -249,7 +249,7 @@ msgstr "子设备总数"
 #. module: sa_configuration
 #: model:ir.actions.act_window,help:sa_configuration.sa_mrp_workcenter_action
 msgid "Click to add a work center."
-msgstr "点击去添加一个工作中心."
+msgstr "点击去添加一个工位."
 
 #. module: sa_configuration
 #: model:ir.actions.act_window,help:sa_configuration.mrp_bom_form_action
@@ -404,7 +404,7 @@ msgstr "说明"
 #. module: sa_configuration
 #: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_workcenter_form_view
 msgid "Description of the work center..."
-msgstr "工作中心的说明..."
+msgstr "工位的说明..."
 
 #. module: sa_configuration
 #: model:ir.model.fields,field_description:sa_configuration.field_controller_program_display_name
@@ -638,7 +638,7 @@ msgstr "组装生产线"
 #. module: sa_configuration
 #: model:ir.ui.view,arch_db:sa_configuration.sa_view_mrp_workcenter_search_inherit
 msgid "Mrp Workcenter"
-msgstr "工作中心"
+msgstr "工位"
 
 #. module: sa_configuration
 #: model:ir.ui.view,arch_db:sa_configuration.sa_view_mrp_workcenter_search_inherit
@@ -956,7 +956,7 @@ msgstr "工艺名称"
 #: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_routing_workcenter_form_view
 #: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_routing_workcenter_tree_view
 msgid "Routing Work Centers"
-msgstr "工艺路线工作中心"
+msgstr "工艺路线工位"
 
 #. module: sa_configuration
 #: model:ir.actions.act_window,name:sa_configuration.sa_mrp_routing_action
@@ -1002,7 +1002,7 @@ msgstr "搜索组装生产线"
 #. module: sa_configuration
 #: model:ir.ui.view,arch_db:sa_configuration.sa_view_mrp_workcenter_search_inherit
 msgid "Search for mrp workcenter"
-msgstr "MRP工作中心的搜索"
+msgstr "MRP工位的搜索"
 
 #. module: sa_configuration
 #: model:ir.ui.view,arch_db:sa_configuration.sa_view_mrp_worksegment_search
@@ -1166,22 +1166,22 @@ msgstr "组装生产线"
 #: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_workcenter_form_view
 #: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_workcenter_tree_view_inherit
 msgid "Work Center"
-msgstr "工作中心"
+msgstr "工位"
 
 #. module: sa_configuration
 #: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_workcenter_form_view
 msgid "Work Center Name"
-msgstr "工作中心名称"
+msgstr "工位名称"
 
 #. module: sa_configuration
 #: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_routing_form_view
 msgid "Work Center Operations"
-msgstr "工作中心作业"
+msgstr "工位作业"
 
 #. module: sa_configuration
 #: model:ir.model,name:sa_configuration.model_mrp_routing_workcenter
 msgid "Work Center Usage"
-msgstr "工作中心使用情况"
+msgstr "工位使用情况"
 
 #. module: sa_configuration
 #: model:ir.actions.act_window,name:sa_configuration.sa_mrp_workcenter_action
@@ -1190,7 +1190,7 @@ msgstr "工作中心使用情况"
 #: model:ir.ui.menu,name:sa_configuration.menu_mrp_workcenter_form_action
 #: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_worksegment_form_view
 msgid "Work Centers"
-msgstr "工作中心"
+msgstr "工位"
 
 #. module: sa_configuration
 #: model:ir.actions.act_window,help:sa_configuration.sa_mrp_workcenter_action
@@ -1198,7 +1198,7 @@ msgid "Work Centers allow you to create and manage manufacturing\n"
 "                units. They consist of workers and/or machines, which are\n"
 "                considered as units for task assignation as well as capacity\n"
 "                and planning forecast."
-msgstr "工作中心允许你创建和管理制造单位，他们由工人和/或机器构成，\n"
+msgstr "工位允许你创建和管理制造单位，他们由工人和/或机器构成，\n"
 "通常被认为是任务分配的单位也是产能和预估计划的单位"
 
 #. module: sa_configuration
