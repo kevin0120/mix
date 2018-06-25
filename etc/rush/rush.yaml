@@ -6,7 +6,7 @@ logging:
   file: STDERR
   level: DEBUG
 httpd:
-  bind-address: :8080
+  bind-address: :8090
   log-enabled: true
   write-tracing: false
   shutdown-timeout: 10s
@@ -30,7 +30,7 @@ minio:
   secure: false
 aiis:
   urls:
-  - http://127.0.0.1:9092
+  - http://10.1.1.22:9092
   headers:
     Content-Type: application/json
   result_push_url: /aiis/v1/operation.results/%d
@@ -62,7 +62,7 @@ storage:
 audi/vw:
   port: 4710
   max_connection: 1024
-  read_buf: 655350
+  read_buf: 327675
   req_time_out: 300ms
   keep_alive_period: 7s
   workers: 1
@@ -72,8 +72,8 @@ controllers:
   remote_ip: 10.1.1.100
   port: 4700
 
-- serial_no: 0002
-  protocol: Audi/VW
-  remote_ip: 10.1.1.103
-  port: 4700
+#- serial_no: 0002
+#  protocol: Audi/VW
+#  remote_ip: 10.1.1.103
+#  port: 4700
 

@@ -161,7 +161,6 @@ func (p *Service) Read(c net.Conn) {
 	var header CVI3Header
 	buffer := make([]byte, p.config().ReadBufferSize * 2)
 	for {
-
 		n, err := c.Read(buffer)
 		if err != nil {
 			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
@@ -176,9 +175,11 @@ func (p *Service) Read(c net.Conn) {
 		}
 
 		msg := string(buffer[0:n])
-		if len(msg) < HEADER_LEN {
-			continue
-		}
+		//if len(msg) < HEADER_LEN {
+		//	continue
+		//}
+		//p.diag.Debug(fmt.Sprintf("before rest: %d", rest))
+
 		off := 0 //循环前偏移为0
 		for off < n {
 			if rest == 0 {
@@ -186,8 +187,8 @@ func (p *Service) Read(c net.Conn) {
 				if n-off > HEADER_LEN+header.SIZ {
 					//粘包
 					body = msg[off+HEADER_LEN : off+HEADER_LEN+header.SIZ]
-					p.Parse([]byte(body))
 					p.CVIResponse(&header, c)
+					p.Parse(body)
 					off += HEADER_LEN + header.SIZ
 					rest = 0 //同样解析头
 				} else {
@@ -199,8 +200,8 @@ func (p *Service) Read(c net.Conn) {
 				if n-off > rest {
 					//粘包
 					body += string(buffer[off : off+rest]) //已经是完整的包
-					p.Parse([]byte(body))
 					p.CVIResponse(&header, c)
+					p.Parse(body)
 					off += rest
 					rest = 0 //进入解析头
 				} else {
@@ -211,10 +212,14 @@ func (p *Service) Read(c net.Conn) {
 			}
 		}
 
+		//p.diag.Debug(fmt.Sprintf("after rest: %d", rest))
+
 		if rest == 0 {
-			p.Parse([]byte(body))
 			p.CVIResponse(&header, c)
+			p.Parse(body)
 		}
+
+		//time.Sleep(100 *time.Millisecond)
 	}
 
 }
@@ -228,16 +233,16 @@ func (p *Service) CVIResponse(header *CVI3Header, c net.Conn) {
 		reply.MID = header.MID
 		replyPacket := reply.Serialize()
 
-		_, err := c.Write([]byte(replyPacket))
+		n, err := c.Write([]byte(replyPacket))
+		p.diag.Debug(fmt.Sprintf("write response bytes length: %d",n))
 		if err != nil {
 			p.diag.Error("server reply err:%s\n", err)
 		}
 	}
 }
 
-func (p *Service) Parse(buf []byte) ([]byte, error) {
+func (p *Service) Parse(msg string) ([]byte, error) {
 
-	msg := string(buf)
 
 	if strings.Contains(msg, XML_RESULT_KEY) {
 		p.handle_buffer <- msg

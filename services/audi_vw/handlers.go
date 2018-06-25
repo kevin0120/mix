@@ -217,7 +217,7 @@ func (h *Handlers) handleCurve(curve *ControllerCurve, ctx *HandlerContext) erro
 // 处理收到的数据
 func (h *Handlers) HandleMsg(msg string, ctx *HandlerContext) {
 
-	h.AudiVw.diag.Debug(fmt.Sprintf("收到结果数据:%s\n", msg))
+	//h.AudiVw.diag.Debug(fmt.Sprintf("收到结果数据:%s\n", msg))
 
 	err := xml.Unmarshal([]byte(msg), &ctx.cvi3Result)
 	if err != nil {

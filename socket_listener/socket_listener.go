@@ -11,7 +11,7 @@ import (
 )
 
 type Protocol interface {
-	Parse(buf []byte) ([]byte, error)
+	Parse(msg string) ([]byte, error)
 	Read(c net.Conn)
 	NewConn(c net.Conn)
 }
@@ -126,7 +126,7 @@ func (psl *packetSocketListener) listen() {
 			break
 		}
 
-		_, err = psl.Parse(buf[:n])
+		_, err = psl.Parse(string(buf[:n]))
 		if err != nil {
 			log.Printf("unable to parse incoming packet: %s", err)
 			//TODO rate limit
@@ -293,7 +293,7 @@ func NewSocketListener(addr string, protocol Protocol, readBufSize int, maxConne
 		ServiceAddress: addr,
 		ReadBufferSize: readBufSize,
 		MaxConnections: maxConnections,
-		KeepAlivePeriod: time.Second * 3, //默认keepalive 周期３秒
+		//KeepAlivePeriod: time.Second * 3, //默认keepalive 周期３秒
 		Protocol:       protocol,
 	}
 }

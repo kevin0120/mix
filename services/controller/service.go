@@ -9,7 +9,7 @@ type Controller interface {
 }
 
 type Protocol interface {
-	Parse(buf []byte) ([]byte, error)
+	Parse(msg string) ([]byte, error)
 	Write(sn string, buf []byte) error
 	AddNewController(cfg Config)
 }
