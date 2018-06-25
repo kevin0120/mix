@@ -113,6 +113,10 @@ func (sw *SocketWriter) setKeepAlive(c net.Conn) error {
 // Not parallel safe.
 func (sw *SocketWriter) Write(buf []byte) error {
 
+	if sw.Conn == nil {
+		return nil
+	}
+
 	if _, err := sw.Conn.Write(buf); err != nil {
 		//TODO log & keep going with remaining strings
 		if err, ok := err.(net.Error); !ok || !err.Temporary() {
