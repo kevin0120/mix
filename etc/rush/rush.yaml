@@ -23,7 +23,7 @@ httpd:
     - 'OPTIONS'
 
 minio:
-  url: 127.0.0.1:9000
+  url: 10.1.1.22:9000
   bucket: curves
   access: minio
   secret: minio123
@@ -40,7 +40,7 @@ aiis:
   max_retry: 3
 odoo:
   urls:
-  - http://192.168.1.113
+  - http://127.0.0.1
   headers:
   workorder_get_url: /api/v1/mrp.workorders?hmi=%s&code=%s&limit=1&order=production_date
   method: GET
@@ -54,8 +54,8 @@ websocket:
 storage:
   db_url: 127.0.0.1:5432
   db_name: rush
-  db_user: admin
-  db_pwd: admin
+  db_user: odoo
+  db_pwd: odoo
   max_connection: 60
   vacuum_period: 2160h0m0s
   data_keep: 2060h
@@ -72,8 +72,8 @@ controllers:
   remote_ip: 10.1.1.100
   port: 4700
 
-#- serial_no: 0002
-#  protocol: Audi/VW
-#  remote_ip: 192.168.1.202
-#  port: 4700
+- serial_no: 0002
+  protocol: Audi/VW
+  remote_ip: 10.1.1.103
+  port: 4700
 
