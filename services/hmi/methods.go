@@ -3,10 +3,10 @@ package hmi
 import (
 	"encoding/json"
 	"github.com/kataras/iris"
-	"github.com/masami10/rush/services/odoo"
-	"strconv"
-	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/services/audi_vw"
+	"github.com/masami10/rush/services/odoo"
+	"github.com/masami10/rush/services/wsnotify"
+	"strconv"
 )
 
 const (

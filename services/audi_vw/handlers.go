@@ -168,7 +168,6 @@ func (h *Handlers) handleResult(result *ControllerResult, ctx *HandlerContext) e
 func (h *Handlers) handleCurve(curve *ControllerCurve, ctx *HandlerContext) error {
 	h.AudiVw.diag.Debug("处理波形数据 ...")
 
-
 	ctx.dbCurve.ResultID = curve.ResultID
 	ctx.dbCurve.CurveData = curve.CurveData
 	ctx.dbCurve.CurveFile = curve.CurveFile

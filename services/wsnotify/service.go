@@ -70,13 +70,22 @@ func (s *Service) onConnect(c websocket.Connection) {
 		s.diag.Disconnect(c.ID())
 	})
 
+	c.OnError(func(err error) {
+		s.diag.Error("Connection get error", err)
+		c.Disconnect()
+	})
+
 }
 
 func NewService(c Config, d Diagnostic) *Service {
 
 	s := &Service{
-		diag:          d,
-		ws:            websocket.New(websocket.Config{WriteBufferSize: c.WriteBufferSize, ReadBufferSize: c.ReadBufferSize}),
+		diag: d,
+		ws: websocket.New(websocket.Config{
+			WriteBufferSize: c.WriteBufferSize,
+			ReadBufferSize:  c.ReadBufferSize,
+			ReadTimeout:     websocket.DefaultWebsocketPongTimeout, //此作为readtimeout, 默认 如果有ping没有发送也成为read time out
+		}),
 		clientManager: WSClientManager{},
 	}
 

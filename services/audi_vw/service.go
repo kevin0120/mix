@@ -15,8 +15,8 @@ import (
 	"github.com/masami10/rush/socket_listener"
 	"github.com/pkg/errors"
 
-	"time"
 	"io"
+	"time"
 )
 
 const (
@@ -159,7 +159,7 @@ func (p *Service) Read(c net.Conn) {
 	rest := 0
 	body := ""
 	var header CVI3Header
-	buffer := make([]byte, p.config().ReadBufferSize * 2)
+	buffer := make([]byte, p.config().ReadBufferSize*2)
 	for {
 		n, err := c.Read(buffer)
 		if err != nil {
@@ -183,6 +183,10 @@ func (p *Service) Read(c net.Conn) {
 		off := 0 //循环前偏移为0
 		for off < n {
 			if rest == 0 {
+				if len(msg) < HEADER_LEN {
+					p.diag.Error("Length error", fmt.Errorf("Msg Length is small than %d\n", HEADER_LEN))
+					return //return
+				}
 				header.Deserialize(msg[off : off+HEADER_LEN])
 				if n-off > HEADER_LEN+header.SIZ {
 					//粘包
@@ -234,7 +238,7 @@ func (p *Service) CVIResponse(header *CVI3Header, c net.Conn) {
 		replyPacket := reply.Serialize()
 
 		n, err := c.Write([]byte(replyPacket))
-		p.diag.Debug(fmt.Sprintf("write response bytes length: %d",n))
+		p.diag.Debug(fmt.Sprintf("write response bytes length: %d", n))
 		if err != nil {
 			p.diag.Error("server reply err:%s\n", err)
 		}
@@ -242,7 +246,6 @@ func (p *Service) CVIResponse(header *CVI3Header, c net.Conn) {
 }
 
 func (p *Service) Parse(msg string) ([]byte, error) {
-
 
 	if strings.Contains(msg, XML_RESULT_KEY) {
 		p.handle_buffer <- msg
