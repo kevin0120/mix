@@ -84,6 +84,50 @@
         }
       }
     },
+    "/hmi-results": {
+      "get": {
+        "tags": [
+          "HMI"
+        ],
+        "summary": "根据结果id和拧接次数取得对应结果",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "result_id",
+            "in": "query",
+            "description": "结果id",
+            "type": "number",
+            "required": true
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "拧接次数",
+            "type": "number",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "返回结果",
+            "schema": {
+              "$ref": "#/definitions/hmi_result"
+            }
+          },
+          "400": {
+            "description": "请求参数错误"
+          },
+          "404": {
+            "description": "结果不存在"
+          }
+        }
+      }
+    },
     "/workorders": {
       "post": {
         "tags": [
@@ -583,6 +627,41 @@
           "items": {
             "type": "integer"
           }
+        }
+      }
+    },
+    "hmi_result": {
+      "type": "object",
+      "properties": {
+        "result_id": {
+          "type": "number",
+          "description": "结果id",
+          "example": 1
+        },
+        "count": {
+          "type": "number",
+          "description": "拧接次数",
+          "example": 1
+        },
+        "result": {
+          "type": "string",
+          "description": "结果值(OK/NOK)",
+          "example": 1
+        },
+        "mi": {
+          "type": "number",
+          "description": "扭矩(nm)",
+          "example": 1
+        },
+        "wi": {
+          "type": "number",
+          "description": "角度(deg)",
+          "example": 1
+        },
+        "ti": {
+          "type": "number",
+          "description": "拧接时间（ms）",
+          "example": 1
         }
       }
     }

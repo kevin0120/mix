@@ -173,6 +173,8 @@ func (c *Controller) manage() {
 			err := c.w.Write([]byte(v))
 			if err != nil {
 				c.Srv.diag.Error("Write data fail", err)
+			}else {
+				c.updateKeepAliveDeadLine()
 			}
 			nextWriteThreshold = time.Now().Add(c.req_timeout)
 		case stopDone := <-c.closing:
@@ -303,7 +305,7 @@ func (c *Controller) Read(conn net.Conn) {
 			break
 		}
 
-		c.updateKeepAliveDeadLine()
+		//c.updateKeepAliveDeadLine()
 
 		c.updateKeepAliveCount(0)
 

@@ -287,11 +287,12 @@ func (sl *SocketListener) Stop() {
 	}
 }
 
-func NewSocketListener(addr string, protocol Protocol, readBufSize int) *SocketListener {
+func NewSocketListener(addr string, protocol Protocol, readBufSize int, maxConnections int) *SocketListener {
 
 	return &SocketListener{
 		ServiceAddress: addr,
 		ReadBufferSize: readBufSize,
+		MaxConnections: maxConnections,
 		Protocol:       protocol,
 	}
 }

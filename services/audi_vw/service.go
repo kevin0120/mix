@@ -75,7 +75,7 @@ func NewService(c Config, d Diagnostic) *Service {
 
 	s.handle_buffer = make(chan string, 1024)
 	s.handlers.AudiVw = s
-	lis := socket_listener.NewSocketListener(addr, s, c.ReadBufferSize*2)
+	lis := socket_listener.NewSocketListener(addr, s, c.ReadBufferSize*2, c.MaxConnections)
 	s.listener = lis
 	s.configValue.Store(c)
 
@@ -166,6 +166,7 @@ func (p *Service) Read(c net.Conn) {
 		if err != nil {
 			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
 				p.diag.Error("Timeout in plugin AduiVW Protocol: %s", err)
+				continue
 			} else if netErr != nil && !strings.HasSuffix(err.Error(), ": use of closed network connection") {
 				p.diag.Error("using closing connection", err)
 			} else if err == io.EOF {
@@ -357,9 +358,10 @@ func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64,
 	//fmt.Printf("reply_header:%s\n", header_str)
 	header := CVI3Header{}
 	header.Deserialize(header_str)
+
 	if !header.Check() {
 		// 控制器请求失败
-		return errors.New(ERR_CVI3_REPLY)
+		return errors.New(fmt.Sprintf("%s:%d", ERR_CVI3_REPLY, header.COD))
 	}
 
 	return nil

@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"github.com/kataras/iris"
 	"github.com/masami10/rush/services/odoo"
+	"strconv"
+	"github.com/masami10/rush/services/wsnotify"
+	"github.com/masami10/rush/services/audi_vw"
 )
 
 const (
@@ -144,6 +147,63 @@ func (m *Methods) getHealthz(ctx iris.Context) {
 
 	ctx.StatusCode(iris.StatusNoContent)
 	return
+}
+
+func (m *Methods) getHmiResults(ctx iris.Context) {
+
+	result_id := ctx.URLParam("result_id")
+	count := ctx.URLParam("count")
+
+	if result_id == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("result_id is required")
+		return
+	}
+
+	if count == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("count is required")
+		return
+	}
+
+	n_result_id, err := strconv.Atoi(result_id)
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("result_id format error")
+		return
+	}
+
+	n_count, err := strconv.Atoi(count)
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("count format error")
+		return
+	}
+
+	db_result, err := m.service.DB.GetResult(int64(n_result_id), n_count)
+
+	if err != nil {
+		ctx.StatusCode(iris.StatusNotFound)
+		ctx.WriteString("result not found")
+		return
+	}
+
+	ws_result := wsnotify.WSResult{}
+	ws_result.Count = n_count
+	ws_result.Result_id = int64(n_result_id)
+	ws_result.Result = db_result.Result
+
+	result_value := audi_vw.ResultValue{}
+	json.Unmarshal([]byte(db_result.ResultValue), &result_value)
+
+	ws_result.TI = result_value.Ti
+	ws_result.MI = result_value.Mi
+	ws_result.WI = result_value.Wi
+
+	body, _ := json.Marshal(ws_result)
+	ctx.Header("content-type", "application/json")
+	ctx.Write(body)
+	ctx.StatusCode(iris.StatusOK)
 }
 
 func (m *Methods) getStatus(ctx iris.Context) {

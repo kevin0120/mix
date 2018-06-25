@@ -40,7 +40,7 @@ aiis:
   max_retry: 3
 odoo:
   urls:
-  - http://10.1.1.31
+  - http://192.168.1.113
   headers:
   workorder_get_url: /api/v1/mrp.workorders?hmi=%s&code=%s&limit=1&order=production_date
   method: GET
@@ -62,18 +62,18 @@ storage:
 audi/vw:
   port: 4710
   max_connection: 1024
-  read_buf: 65535
+  read_buf: 655350
   req_time_out: 300ms
-  keep_alive_period: 5s
-  workers: 4
+  keep_alive_period: 7s
+  workers: 1
 controllers:
 - serial_no: 0001
   protocol: Audi/VW
-  remote_ip: 192.168.1.200
+  remote_ip: 10.1.1.100
   port: 4700
 
-- serial_no: 0002
-  protocol: Audi/VW
-  remote_ip: 192.168.1.202
-  port: 4700
+#- serial_no: 0002
+#  protocol: Audi/VW
+#  remote_ip: 192.168.1.202
+#  port: 4700
 
