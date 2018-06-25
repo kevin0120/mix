@@ -44,25 +44,30 @@ func (s *Service) onConnect(c websocket.Connection) {
 		err := json.Unmarshal(data, &reg)
 		if err != nil {
 			Msg := map[string]string{"msg": "regist msg error"}
-			msg, _ := json.Marshal(Msg)
-			c.Emit(WS_EVENT_REG, msg)
+			msg, err := json.Marshal(Msg)
+			if err != nil {
+				c.Emit(WS_EVENT_REG, msg)
+			}
 			return
 		}
 
 		_, exist := s.clientManager.GetClient(reg.HMI_SN)
 		if exist {
 			Msg := fmt.Sprintf("client with sn:%s already exists", reg.HMI_SN)
-			_Msg := map[string]string{"msg": Msg}
-			reg_str, _ := json.Marshal(_Msg)
-			c.Emit(WS_EVENT_REG, reg_str)
+			msgs := map[string]string{"msg": Msg}
+			regStrs, err := json.Marshal(msgs)
+			if err != nil {
+				c.Emit(WS_EVENT_REG, regStrs)
+			}
 		} else {
 			// 将客户端加入列表
 			s.clientManager.AddClient(reg.HMI_SN, c)
 			Msg := map[string]string{"msg": "OK"}
-			msg, _ := json.Marshal(Msg)
-			c.Emit(WS_EVENT_REG, msg)
+			msg, err := json.Marshal(Msg)
+			if err != nil {
+				c.Emit(WS_EVENT_REG, msg)
+			}
 		}
-
 	})
 
 	c.OnDisconnect(func() {
