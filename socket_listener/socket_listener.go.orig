@@ -292,8 +292,11 @@ func NewSocketListener(addr string, protocol Protocol, readBufSize int, maxConne
 	return &SocketListener{
 		ServiceAddress: addr,
 		ReadBufferSize: readBufSize,
+<<<<<<< HEAD
 		MaxConnections: maxConnections,
+=======
 		KeepAlivePeriod: time.Second * 3, //默认keepalive 周期３秒
+>>>>>>> bdd634103ad26aa440e7f0b3b5b0191722b7c2df
 		Protocol:       protocol,
 	}
 }
