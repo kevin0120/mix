@@ -29,23 +29,38 @@ class ApiMrpWorkorder(http.Controller):
                 domain=[('res_model', '=', 'mrp.routing.workcenter'), ('res_id', '=', order.operation_id.id),
                         ('res_field', '=', 'worksheet_img')],
                 fields=['x_offset', 'y_offset'])
-            results = []
-            for result in order.result_ids:
-                val = {'id': result.id,
-                       'tolerance_min': result.point_id.tolerance_min,
-                       'tolerance_max': result.point_id.tolerance_max,
-                       'tolerance_min_degree': result.point_id.tolerance_min_degree,
-                       'tolerance_max_degree':result.point_id.tolerance_max_degree}
-                results.append(val)
+
+            # 工单中的消耗品列表
+            _consumes = list()
+            for consu in order.consu_bom_line_ids:
+                _results = list()
+                for result in consu.result_ids:
+                    _results.append({
+                        'id': result.id,
+                        'tolerance_min': result.point_id.tolerance_min,
+                        'tolerance_max': result.point_id.tolerance_max,
+                        'tolerance_min_degree': result.point_id.tolerance_min_degree,
+                        'tolerance_max_degree': result.point_id.tolerance_max_degree
+                    })
+
+                _consumes.append({
+                    "seq": consu.sequence,
+                    "pset": consu.bom_line_id.program_id.code,
+                    "nut_no": consu.product_id.screw_type_code,
+                    "gun_sn": consu.bom_line_id.gun_id.serial_no,
+                    "controller_sn": consu.bom_line_id.controller_id.serial_no,
+                    "results": _results
+                })
+
             ret = {
                 'id': order.id,
                 'hmi': {'id': order.workcenter_id.hmi_id.id, 'uuid': order.workcenter_id.hmi_id.serial_no},
                 'worksheet': {'content': order.worksheet_img, "points": points},
-                'pset': order.operation_id.program_id.code,
-                'nut_total': order.consu_product_qty,
+                # 'pset': order.operation_id.program_id.code,
+                # 'nut_total': order.consu_product_qty,
                 'vin': order.production_id.vin,
                 'knr': order.production_id.knr,
-                'result_ids': results,
+                # 'result_ids': results,
                 'status': order.state,  # pending, ready, process, done, cancel
 
                 'equipment_name': order.production_id.equipment_name,
@@ -55,7 +70,8 @@ class ApiMrpWorkorder(http.Controller):
                 'pin_check_code': order.production_id.pin_check_code,
                 'assembly_line': order.production_id.assembly_line_id.code,
                 'lnr': order.production_id.lnr,
-                'nut_no': order.consu_product_id.screw_type_code,
+                # 'nut_no': order.consu_product_id.screw_type_code,
+                'consumes': _consumes,
                 'update_time': str_time_to_rfc3339(order.production_date)
             }
             body = json.dumps(ret)
@@ -97,18 +113,41 @@ class ApiMrpWorkorder(http.Controller):
             points = env['point.point'].search_read(
                 domain=[('res_model', '=', 'mrp.routing.workcenter'), ('res_id','=', order.operation_id.id), ('res_field', '=', 'worksheet_img')],
                 fields=['x_offset', 'y_offset', 'sequence'])
+
+            # 工单中的消耗品列表
+            _consumes = list()
+            for consu in order.consu_bom_line_ids:
+                _results = list()
+                for result in consu.result_ids:
+                    _results.append({
+                        'id': result.id,
+                        'tolerance_min': result.point_id.tolerance_min,
+                        'tolerance_max': result.point_id.tolerance_max,
+                        'tolerance_min_degree': result.point_id.tolerance_min_degree,
+                        'tolerance_max_degree': result.point_id.tolerance_max_degree
+                    })
+
+                _consumes.append({
+                    "seq": consu.sequence,
+                    "pset": consu.bom_line_id.program_id.code,
+                    "nut_no": consu.product_id.screw_type_code,
+                    "gun_sn": consu.bom_line_id.gun_id.serial_no,
+                    "controller_sn": consu.bom_line_id.controller_id.serial_no,
+                    "results": _results
+                })
+
             _ret.append({
                 'id': order.id,
                 'hmi': {'id': workcenter_id.hmi_id.id, 'uuid': workcenter_id.hmi_id.serial_no},
                 'worksheet': {'content': order.worksheet_img, "points": points},
                 'max_redo_times': order.operation_id.max_redo_times,
                 'max_op_time': order.operation_id.max_op_time,
-                'pset': order.operation_id.program_id.code,
-                'nut_total': order.consu_product_qty,
+                # 'pset': order.operation_id.program_id.code,
+                # 'nut_total': order.consu_product_qty,
                 'vin': order.production_id.vin,
                 'knr': order.production_id.knr,
                 'long_pin': order.production_id.long_pin,
-                'result_ids': order.result_ids.ids,
+                # 'result_ids': order.result_ids.ids,
                 'status': order.state,  # pending, ready, process, done, cancel
 
                 'equipment_name': order.production_id.equipment_name,
@@ -118,7 +157,8 @@ class ApiMrpWorkorder(http.Controller):
                 'pin_check_code': order.production_id.pin_check_code,
                 'assembly_line': order.production_id.assembly_line_id.code,
                 'lnr': order.production_id.lnr,
-                'nut_no': order.consu_product_id.screw_type_code,
+                # 'nut_no': order.consu_product_id.screw_type_code,
+                'consumes': _consumes,
                 'update_time': str_time_to_rfc3339(order.production_date)
             })
         if len(_ret) == 0:

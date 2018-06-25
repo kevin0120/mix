@@ -8,7 +8,7 @@ class MrpRoutingWorkcenter(models.Model):
 
     workcenter_id = fields.Many2one('mrp.workcenter', copy=False)
 
-    program_id = fields.Many2one('controller.program', string='程序号')
+    # program_id = fields.Many2one('controller.program', string='程序号')
 
     group_id = fields.Many2one('mrp.routing.group', string='Routing Group')
     max_redo_times = fields.Integer('Operation Max Redo Times', default=1)  # 此项重试业务逻辑在HMI中实现

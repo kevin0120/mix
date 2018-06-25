@@ -44,7 +44,7 @@ class MrpBomLine(models.Model):
 
     group_id = fields.Many2one('mrp.routing.group', related="operation_id.group_id", string='Routing Group')
 
-    program_id = fields.Many2one('controller.program',  related="operation_id.program_id", string='程序号')
+    program_id = fields.Many2one('controller.program',  string='程序号')
 
     workcenter_id = fields.Many2one('mrp.workcenter', related="operation_id.workcenter_id", string='Work Center')
 
