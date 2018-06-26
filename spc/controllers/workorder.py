@@ -33,15 +33,11 @@ class ApiMrpWorkorder(http.Controller):
             # 工单中的消耗品列表
             _consumes = list()
             for consu in order.consu_bom_line_ids:
-                _results = list()
-                for result in consu.result_ids:
-                    _results.append({
-                        'id': result.id,
-                        'tolerance_min': result.point_id.tolerance_min,
-                        'tolerance_max': result.point_id.tolerance_max,
-                        'tolerance_min_degree': result.point_id.tolerance_min_degree,
-                        'tolerance_max_degree': result.point_id.tolerance_max_degree
-                    })
+
+                # 定位消耗品的qcp
+                _qcps = env['quality.point'].search_read(
+                    domain=[('bom_line_id', '=', consu.bom_line_id.id), ('operation_id', '=', order.operation_id.id)],
+                    fields=['tolerance_min', 'tolerance_max', 'tolerance_min_degree', 'tolerance_max_degree'])
 
                 _consumes.append({
                     "seq": consu.sequence,
@@ -49,7 +45,11 @@ class ApiMrpWorkorder(http.Controller):
                     "nut_no": consu.product_id.screw_type_code,
                     "gun_sn": consu.bom_line_id.gun_id.serial_no,
                     "controller_sn": consu.bom_line_id.controller_id.serial_no,
-                    "results": _results
+                    'tolerance_min': _qcps[0]['tolerance_min'],
+                    'tolerance_max': _qcps[0]['tolerance_max'],
+                    'tolerance_min_degree': _qcps[0]['tolerance_min_degree'],
+                    'tolerance_max_degree': _qcps[0]['tolerance_max_degree'],
+                    "result_ids": consu.result_ids.ids
                 })
 
             ret = {
@@ -117,15 +117,11 @@ class ApiMrpWorkorder(http.Controller):
             # 工单中的消耗品列表
             _consumes = list()
             for consu in order.consu_bom_line_ids:
-                _results = list()
-                for result in consu.result_ids:
-                    _results.append({
-                        'id': result.id,
-                        'tolerance_min': result.point_id.tolerance_min,
-                        'tolerance_max': result.point_id.tolerance_max,
-                        'tolerance_min_degree': result.point_id.tolerance_min_degree,
-                        'tolerance_max_degree': result.point_id.tolerance_max_degree
-                    })
+
+                # 定位消耗品的qcp
+                _qcps = env['quality.point'].search_read(
+                    domain=[('bom_line_id', '=', consu.bom_line_id.id), ('operation_id', '=', order.operation_id.id)],
+                    fields=['tolerance_min', 'tolerance_max', 'tolerance_min_degree', 'tolerance_max_degree'])
 
                 _consumes.append({
                     "seq": consu.sequence,
@@ -133,7 +129,11 @@ class ApiMrpWorkorder(http.Controller):
                     "nut_no": consu.product_id.screw_type_code,
                     "gun_sn": consu.bom_line_id.gun_id.serial_no,
                     "controller_sn": consu.bom_line_id.controller_id.serial_no,
-                    "results": _results
+                    'tolerance_min': _qcps[0]['tolerance_min'],
+                    'tolerance_max': _qcps[0]['tolerance_max'],
+                    'tolerance_min_degree': _qcps[0]['tolerance_min_degree'],
+                    'tolerance_max_degree': _qcps[0]['tolerance_max_degree'],
+                    "result_ids": consu.result_ids.ids
                 })
 
             _ret.append({

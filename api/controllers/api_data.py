@@ -436,7 +436,7 @@ api_data = {
         },
         "parameters": [
           {
-            "required": True,
+            "required": False,
             "type": "string",
             "description": "MasterPC UUID",
             "name": "masterpc",
@@ -758,8 +758,11 @@ api_data = {
         "masterpc": {
           "$ref": "#/definitions/EquipConnection"
         },
-        "controller": {
-          "$ref": "#/definitions/EquipConnection"
+        "controllers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EquipConnection"
+          }
         },
         "rfid": {
           "$ref": "#/definitions/EquipConnection"
@@ -1045,6 +1048,21 @@ api_data = {
           "type": "number",
           "example": 1.44,
           "description": "设定目标角度"
+        },
+        "quality_state": {
+          "enum": [
+            "exception",
+            "pass",
+            "fail"
+          ],
+          "type": "string",
+          "description": "质量检测结果",
+          "example": "pass"
+        },
+        "exception_reason": {
+          "type": "string",
+          "example": "unknown",
+          "description": "异常原因"
         }
       }
     },
@@ -1142,6 +1160,62 @@ api_data = {
         }
       }
     },
+    "Consume": {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "description": "序号",
+          "example": 1
+        },
+        "controller_sn": {
+          "type": "string",
+          "description": "控制器序列号",
+          "example": "0001"
+        },
+        "gun_sn": {
+          "type": "string",
+          "description": "枪的序列号",
+          "example": "0002"
+        },
+        "pset": {
+          "type": "integer",
+          "description": "程序号",
+          "example": 1
+        },
+        "nut_no": {
+          "type": "string",
+          "description": "螺栓编号",
+          "example": "1234"
+        },
+        "tolerance_max": {
+          "type": "number",
+          "description": "最大测量扭矩",
+          "example": 2
+        },
+        "tolerance_min": {
+          "type": "number",
+          "description": "最小测量扭矩",
+          "example": 1
+        },
+        "tolerance_max_degree": {
+          "type": "number",
+          "description": "最大测量角度",
+          "example": 190
+        },
+        "tolerance_min_degree": {
+          "type": "number",
+          "description": "最小测量角度",
+          "example": 170
+        },
+        "result_ids": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      }
+    },
     "WorkOrder": {
       "type": "object",
       "properties": {
@@ -1183,22 +1257,38 @@ api_data = {
           "type": "integer",
           "format": "int64"
         },
-        "nut_total": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "result_ids": {
-          "items": {
-            "$ref": "#/definitions/result_id"
-          },
-          "type": "array"
-        },
         "worksheet": {
           "description": "作业图片",
           "$ref": "#/definitions/image"
         },
         "knr": {
           "type": "string"
+        },
+        "equipment_name": {
+          "type": "string",
+          "description": "设备名",
+          "example": "SR1J"
+        },
+        "factory_name": {
+          "type": "string",
+          "description": "订单工厂代号",
+          "example": "C6"
+        },
+        "lnr": {
+          "type": "string",
+          "description": "流水号",
+          "example": "0001"
+        },
+        "assembly_line": {
+          "type": "string",
+          "description": "装配流水线id",
+          "example": "01"
+        },
+        "consumes": {
+          "items": {
+            "$ref": "#/definitions/Consume"
+          },
+          "type": "array"
         }
       }
     },
@@ -1405,31 +1495,6 @@ api_data = {
         },
         "name": {
           "type": "string"
-        }
-      }
-    },
-    "result_id": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "integer",
-          "example": 1
-        },
-        "tolerance_min": {
-          "type": "number",
-          "example": 10.11
-        },
-        "tolerance_max": {
-          "type": "number",
-          "example": 10.34
-        },
-        "tolerance_min_degree": {
-          "type": "number",
-          "example": 10.11
-        },
-        "tolerance_max_degree": {
-          "type": "number",
-          "example": 10.11
         }
       }
     }
