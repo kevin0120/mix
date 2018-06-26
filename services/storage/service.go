@@ -322,7 +322,7 @@ func (s *Service) UpdateResultUpload(upload bool, r_id int64) (int64, error) {
 	}
 }
 
-func (s *Service) UpdateResult(result Results) (int64, error) {
+func (s *Service) UpdateResult(result *Results) (int64, error) {
 
 	sql := "update `results` set controller_sn = ?, result = ?, has_upload = ?, stage = ?, update_time = ?, pset_define = ?, result_value = ?, count = ? where x_result_id = ?"
 	r, err := s.eng.Exec(sql,

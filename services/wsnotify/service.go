@@ -18,6 +18,7 @@ const (
 type Diagnostic interface {
 	Error(msg string, err error)
 	Disconnect(id string)
+	OnMessage(msg string)
 	Close()
 	Closed()
 }
@@ -40,6 +41,7 @@ func (s *Service) Config() Config {
 func (s *Service) onConnect(c websocket.Connection) {
 
 	c.OnMessage(func(data []byte) {
+		s.diag.OnMessage(string(data))
 		reg := WSRegist{}
 		err := json.Unmarshal(data, &reg)
 		if err != nil {

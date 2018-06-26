@@ -321,6 +321,10 @@ func (h *WsHandler) Close() {
 	h.l.Info("ws server closing")
 }
 
+func (h *WsHandler) OnMessage(msg string) {
+	h.l.Debug(msg)
+}
+
 func (h *WsHandler) Closed() {
 	h.l.Info("ws server closed")
 }

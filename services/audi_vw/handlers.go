@@ -32,61 +32,8 @@ type Handlers struct {
 	AudiVw *Service
 }
 
-// 处理结果数据
-func (h *Handlers) handleResult(result *ControllerResult, ctx *HandlerContext) error {
-	h.AudiVw.diag.Debug("处理结果数据 ...")
-
-	needPushAiis := false
-
-	r, err := h.AudiVw.DB.GetResult(result.Result_id, 0)
-	if err != nil {
-		return err
-	}
-
-	workorder, err := h.AudiVw.DB.GetWorkorder(result.Workorder_ID)
-	if err != nil {
-		return err
-	}
-
-	loc, _ := time.LoadLocation("Local")
-	r.UpdateTime, _ = time.ParseInLocation("2006-01-02 15:04:05", result.Dat, loc)
-	r.Result = result.Result
-	r.Count = result.Count
-	r.HasUpload = false
-	r.ControllerSN = result.Controller_SN
-	r.UserID = result.UserID
-	s_value, _ := json.Marshal(result.ResultValue)
-	s_pset, _ := json.Marshal(result.PSetDefine)
-
-	r.ResultValue = string(s_value)
-	r.PSetDefine = string(s_pset)
-
-	if r.Count >= int(workorder.MaxRedoTimes) || r.Result == RESULT_OK {
-		needPushAiis = true
-		r.Stage = RESULT_STAGE_FINAL
-
-		json.Unmarshal([]byte(workorder.ResultIDs), &ctx.resultIds)
-		if r.ResultId == ctx.resultIds[len(ctx.resultIds)-1] {
-			h.AudiVw.diag.Debug("工单已完成")
-			workorder.Status = "finished"
-			h.AudiVw.DB.UpdateWorkorder(&workorder)
-		}
-	}
-
-	// 结果推送hmi
-	ctx.wsResult.Result_id = result.Result_id
-	ctx.wsResult.Count = result.Count
-	ctx.wsResult.Result = result.Result
-	ctx.wsResult.MI = result.ResultValue.Mi
-	ctx.wsResult.WI = result.ResultValue.Wi
-	ctx.wsResult.TI = result.ResultValue.Ti
-	ws_str, _ := json.Marshal(ctx.wsResult)
-
-	h.AudiVw.diag.Debug("Websocket推送结果到HMI")
-
-	h.AudiVw.WS.WSSendResult(workorder.HMISN, string(ws_str))
-
-	if needPushAiis {
+func (h *Handlers) handleResult2(needPush bool, r *storage.Results, workorder *storage.Workorders, result *ControllerResult, ctx *HandlerContext) error {
+	if needPush {
 
 		// 结果推送AIIS
 		if r.Result == RESULT_OK {
@@ -153,13 +100,72 @@ func (h *Handlers) handleResult(result *ControllerResult, ctx *HandlerContext) e
 	}
 
 	h.AudiVw.diag.Debug("缓存结果到数据库 ...")
-	_, err = h.AudiVw.DB.UpdateResult(r)
+	_, err := h.AudiVw.DB.UpdateResult(r)
 	if err != nil {
 		h.AudiVw.diag.Error("缓存结果失败", err)
 		return err
 	} else {
 		h.AudiVw.diag.Debug("缓存结果成功")
 	}
+
+	return nil
+}
+
+// 处理结果数据
+func (h *Handlers) handleResult(result *ControllerResult, ctx *HandlerContext) error {
+	h.AudiVw.diag.Debug("处理结果数据 ...")
+
+	needPushAiis := false
+
+	r, err := h.AudiVw.DB.GetResult(result.Result_id, 0)
+	if err != nil {
+		return err
+	}
+
+	workorder, err := h.AudiVw.DB.GetWorkorder(result.Workorder_ID)
+	if err != nil {
+		return err
+	}
+
+	loc, _ := time.LoadLocation("Local")
+	r.UpdateTime, _ = time.ParseInLocation("2006-01-02 15:04:05", result.Dat, loc)
+	r.Result = result.Result
+	r.Count = result.Count
+	r.HasUpload = false
+	r.ControllerSN = result.Controller_SN
+	r.UserID = result.UserID
+	s_value, _ := json.Marshal(result.ResultValue)
+	s_pset, _ := json.Marshal(result.PSetDefine)
+
+	r.ResultValue = string(s_value)
+	r.PSetDefine = string(s_pset)
+
+	if r.Count >= int(workorder.MaxRedoTimes) || r.Result == RESULT_OK {
+		needPushAiis = true
+		r.Stage = RESULT_STAGE_FINAL
+
+		json.Unmarshal([]byte(workorder.ResultIDs), &ctx.resultIds)
+		if r.ResultId == ctx.resultIds[len(ctx.resultIds)-1] {
+			h.AudiVw.diag.Debug("工单已完成")
+			workorder.Status = "finished"
+			h.AudiVw.DB.UpdateWorkorder(&workorder)
+		}
+	}
+
+	// 结果推送hmi
+	ctx.wsResult.Result_id = result.Result_id
+	ctx.wsResult.Count = result.Count
+	ctx.wsResult.Result = result.Result
+	ctx.wsResult.MI = result.ResultValue.Mi
+	ctx.wsResult.WI = result.ResultValue.Wi
+	ctx.wsResult.TI = result.ResultValue.Ti
+	ws_str, _ := json.Marshal(ctx.wsResult)
+
+	h.AudiVw.diag.Debug("Websocket推送结果到HMI")
+
+	h.AudiVw.WS.WSSendResult(workorder.HMISN, string(ws_str))
+
+	go h.handleResult2(needPushAiis,&r, &workorder, result, ctx)
 
 	return nil
 }
