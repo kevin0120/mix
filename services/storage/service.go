@@ -402,7 +402,7 @@ func (s *Service) DeleteInvalidCurves(keep time.Time) error {
 
 func (s *Service) DeleteInvalidWorkorders(keep time.Time) error {
 
-	sql := fmt.Sprintf("delete from `workorders` where status = 'finished' and update_time < '%s'", keep.Format("2006-01-02 15:04:05"))
+	sql := fmt.Sprintf("delete from `workorders` where status = 'done' and update_time < '%s'", keep.Format("2006-01-02 15:04:05"))
 	_, err := s.eng.Exec(sql)
 
 	if err != nil {
