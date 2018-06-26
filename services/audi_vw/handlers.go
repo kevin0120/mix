@@ -33,6 +33,17 @@ type Handlers struct {
 }
 
 func (h *Handlers) PushAiis(needPush bool, r *storage.Results, workorder *storage.Workorders, result *ControllerResult, ctx *HandlerContext) error {
+
+	defer func() {
+		h.AudiVw.diag.Debug("缓存结果到数据库 ...")
+		_, err := h.AudiVw.DB.UpdateResult(r)
+		if err != nil {
+			h.AudiVw.diag.Error("缓存结果失败", err)
+		} else {
+			h.AudiVw.diag.Debug("缓存结果成功")
+		}
+	}()
+
 	if needPush {
 
 		// 结果推送AIIS
@@ -81,7 +92,6 @@ func (h *Handlers) PushAiis(needPush bool, r *storage.Results, workorder *storag
 			return err
 		}
 
-		ctx.aiisResult.CURObjects = []aiis.CURObject{}
 		for _, v := range curves {
 			ctx.aiisCurve.OP = v.Count
 			ctx.aiisCurve.File = v.CurveFile
@@ -97,15 +107,6 @@ func (h *Handlers) PushAiis(needPush bool, r *storage.Results, workorder *storag
 		} else {
 			h.AudiVw.diag.Error("推送AIIS失败", err)
 		}
-	}
-
-	h.AudiVw.diag.Debug("缓存结果到数据库 ...")
-	_, err := h.AudiVw.DB.UpdateResult(r)
-	if err != nil {
-		h.AudiVw.diag.Error("缓存结果失败", err)
-		return err
-	} else {
-		h.AudiVw.diag.Debug("缓存结果成功")
 	}
 
 	return nil
@@ -146,7 +147,7 @@ func (h *Handlers) handleResult(result *ControllerResult, ctx *HandlerContext) e
 
 		if r.ResultId == workorder.LastResultID {
 			h.AudiVw.diag.Debug("工单已完成")
-			workorder.Status = "finished"
+			workorder.Status = "done"
 			h.AudiVw.DB.UpdateWorkorder(&workorder)
 		}
 	}
