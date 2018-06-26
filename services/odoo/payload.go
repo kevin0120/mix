@@ -18,11 +18,23 @@ type ODOOMOCreated struct {
 	AssembleLine int    `json:"assembly_line_id"`
 }
 
+type ODOOConsume struct {
+	Seq						int64 	`json:"seq"`
+	ControllerSN 			string 	`json:"controller_sn"`
+	GunSN 					string 	`json:"gun_sn"`
+	ToleranceMinDegree 		float64 `json:"tolerance_min_degree"`
+	ToleranceMaxDegree 		float64 `json:"tolerance_max_degree"`
+	ToleranceMax 			float64 `json:"tolerance_max"`
+	ToleranceMin 			float64 `json:"tolerance_min"`
+	PSet           			string  `json:"pset"`
+	NutNo					string 	`json:"nut_no"`
+	ResultIDs 				[]int64 `json:"result_ids"`
+}
+
+
 type ODOOWorkorder struct {
 	ID             int64   `json:"id"`
 	Status         string  `json:"status"`
-	NutTotal       float64 `json:"nut_total"`
-	PSet           string  `json:"pset"`
 	Max_redo_times int     `json:"max_redo_times"`
 	Max_op_time    int     `json:"max_op_time"`
 
@@ -31,12 +43,12 @@ type ODOOWorkorder struct {
 		UUID string `json:"uuid"`
 	} `json:"hmi"`
 
-	Result_IDs []int64   `json:"result_ids"`
-	Worksheet  Worksheet `json:"worksheet"`
+	Worksheet  ODOOWorksheet `json:"worksheet"`
 	KNR        string    `json:"knr"`
 	VIN        string    `json:"vin"`
 	LongPin    string    `json:"long_pin"`
 	UpdateTime time.Time `json:"update_time"`
+	Consumes	[]ODOOConsume `json:"consumes"`
 
 	// mo相关信息
 	MO_EquipemntName  string `json:"equipment_name"` // 设备名
@@ -46,15 +58,16 @@ type ODOOWorkorder struct {
 	MO_Pin_check_code int64  `json:"pin_check_code"`
 	MO_AssemblyLine   string `json:"assembly_line"`
 	MO_Lnr            string `json:"lnr"`
-	MO_NutNo          string `json:"nut_no"`
 }
 
-type Worksheet struct {
+type ODOOPoints struct {
+	X float64 `json:"offset_x"`
+	Y float64 `json:"offset_y"`
+}
+
+type ODOOWorksheet struct {
 	Content string `json:"content"`
-	Points  []struct {
-		X int32 `json:"x_offset"`
-		Y int32 `json:"y_offset"`
-	} `json:"points"`
+	Points  []ODOOPoints `json:"points"`
 }
 
 type ODOOCurveAppend struct {

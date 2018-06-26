@@ -6,7 +6,7 @@ logging:
   file: STDERR
   level: DEBUG
 httpd:
-  bind-address: :8090
+  bind-address: :8080
   log-enabled: true
   write-tracing: false
   shutdown-timeout: 10s
@@ -53,9 +53,9 @@ websocket:
   write_buf_size: 4096
 storage:
   db_url: 127.0.0.1:5432
-  db_name: rush
-  db_user: odoo
-  db_pwd: odoo
+  db_name: rush_new
+  db_user: admin
+  db_pwd: admin
   max_connection: 60
   vacuum_period: 2160h0m0s
   data_keep: 2060h
@@ -72,8 +72,8 @@ controllers:
   remote_ip: 10.1.1.100
   port: 4700
 
-#- serial_no: 0002
-#  protocol: Audi/VW
-#  remote_ip: 10.1.1.103
-#  port: 4700
+- serial_no: 0002
+  protocol: Audi/VW
+  remote_ip: 10.1.1.103
+  port: 4700
 

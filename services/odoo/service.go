@@ -1,16 +1,15 @@
 package odoo
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/storage"
 	"github.com/pkg/errors"
 	"gopkg.in/resty.v1"
 	"net/http"
-	"strconv"
 	"sync/atomic"
 	"time"
+	"strconv"
 )
 
 type Diagnostic interface {
@@ -156,20 +155,23 @@ func (s *Service) getWorkorder(url string, method string) ([]byte, error) {
 func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workorders, error) {
 	var finalErr error = nil
 	dbWorkorders := make([]storage.Workorders, len(workorders))
+
 	for i, v := range workorders {
+		if len(v.Consumes) == 0 {
+			// 忽略没有消耗品的工单
+			continue
+		}
+
 		o := storage.Workorders{}
 		o.Status = v.Status
 		o.WorkorderID = v.ID
-		o.PSet, _ = strconv.Atoi(v.PSet)
 		o.HMISN = v.HMI.UUID
 		o.Knr = v.KNR
 		o.LongPin = v.LongPin
-		o.NutTotal = v.NutTotal
 		o.Vin = v.VIN
 		o.MaxOpTime = v.Max_op_time
 		o.MaxRedoTimes = v.Max_redo_times
-		worksheet, _ := json.Marshal(v.Worksheet)
-		o.WorkSheet = string(worksheet)
+		o.WorkSheet = v.Worksheet.Content
 		o.UpdateTime = v.UpdateTime
 
 		o.MO_Year = v.MO_Year
@@ -179,12 +181,56 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 		o.MO_AssemblyLine = v.MO_AssemblyLine
 		o.MO_EquipemntName = v.MO_EquipemntName
 		o.MO_Lnr = v.MO_Lnr
-		o.MO_NutNo = v.MO_NutNo
 
-		ids, _ := json.Marshal(v.Result_IDs)
-		o.ResultIDs = string(ids)
+		points_len := len(v.Worksheet.Points)
+		results := []storage.Results{}
+		result_count := 0
+		for _, consu := range v.Consumes {
+			if len(consu.ResultIDs) == 0 {
+				// 忽略没有结果的消耗品
+				continue
+			}
 
-		e := s.DB.InsertWorkorder(o)
+			r := storage.Results{}
+			r.ControllerSN = consu.ControllerSN
+			r.GunSN = consu.GunSN
+			r.PSet, _ = strconv.Atoi(consu.PSet)
+			r.ToleranceMax = consu.ToleranceMax
+			r.ToleranceMin = consu.ToleranceMin
+			r.ToleranceMaxDegree = consu.ToleranceMaxDegree
+			r.ToleranceMinDegree = consu.ToleranceMinDegree
+			r.NutNo = consu.NutNo
+
+			r.WorkorderID = o.WorkorderID
+			r.Result = "NONE"
+			r.HasUpload = false
+			r.Stage = "init"
+			r.UpdateTime = time.Now()
+			r.PSetDefine = ""
+			r.ResultValue = ""
+			r.Count = 1
+
+			for _, result_id := range consu.ResultIDs {
+				result_count++
+
+				if result_count <= points_len {
+					r.OffsetX = v.Worksheet.Points[result_count - 1].X
+					r.OffsetY = v.Worksheet.Points[result_count - 1].Y
+				} else {
+					// 点不存在
+					r.OffsetX = 0
+					r.OffsetY = 0
+				}
+
+				r.Seq = result_count
+				r.ResultId = result_id
+				results = append(results, r)
+			}
+		}
+
+		o.LastResultID = results[len(results) - 1].ResultId
+
+		e := s.DB.InsertWorkorder(&o, &results)
 		if e != nil {
 			finalErr = e
 		}

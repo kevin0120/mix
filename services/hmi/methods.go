@@ -41,6 +41,12 @@ func (m *Methods) putPSets(ctx iris.Context) {
 		return
 	}
 
+	if pset.GunSN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("gun_sn is required")
+		return
+	}
+
 	if pset.PSet == 0 {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("pset is required")
@@ -123,20 +129,30 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 		}
 	}
 
+	results, err := m.service.DB.FindResultsByWorkorder(workorder.WorkorderID)
+
 	resp := Workorder{}
 	resp.HMI_sn = workorder.HMISN
-	resp.PSet = workorder.PSet
 	resp.Workorder_id = workorder.WorkorderID
 	resp.Vin = workorder.Vin
 	resp.Knr = workorder.Knr
 	resp.LongPin = workorder.LongPin
-	resp.Nut_total = workorder.NutTotal
 	resp.Status = workorder.Status
 	resp.MaxRedoTimes = workorder.MaxRedoTimes
 	resp.MaxOpTime = workorder.MaxOpTime
+	resp.WorkSheet = workorder.WorkSheet
 
-	json.Unmarshal([]byte(workorder.WorkSheet), &resp.WorkSheet)
-	json.Unmarshal([]byte(workorder.ResultIDs), &resp.Result_ids)
+	for _, v := range results {
+		r := Result{}
+		r.PSet = v.PSet
+		r.GunSN = v.GunSN
+		r.ID = v.ResultId
+		r.Controller_SN = v.ControllerSN
+		r.X = v.OffsetX
+		r.Y = v.OffsetY
+
+		resp.Results = append(resp.Results, r)
+	}
 
 	body, _ := json.Marshal(resp)
 	ctx.Header("content-type", "application/json")

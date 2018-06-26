@@ -112,7 +112,7 @@ func (c *Controller) updateStatus(status ControllerStatusType) {
 		msg, _ := json.Marshal(s)
 		c.Srv.WS.WSSendControllerStatus(string(msg))
 
-		c.Srv.diag.Debug(fmt.Sprintf("civ3:%s %s\n", c.cfg.SN, status))
+		c.Srv.diag.Debug(fmt.Sprintf("CVI3:%s %s\n", c.cfg.SN, status))
 
 	}
 }

@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/go-xorm/xorm"
 	_ "github.com/lib/pq"
@@ -128,6 +127,20 @@ func (s *Service) Store(data interface{}) error {
 	return nil
 }
 
+func (s *Service) FindResultsByWorkorder(workorder_id int64) ([]Results, error) {
+	var results []Results
+
+	ss := s.eng.Alias("r").Where("r.x_workorder_id = ?", workorder_id).OrderBy("r.seq")
+
+	e := ss.Find(&results)
+
+	if e != nil {
+		return results, e
+	} else {
+		return results, nil
+	}
+}
+
 func (s *Service) FindUnuploadResults(result_upload bool, result []string) ([]Results, error) {
 	var results []Results
 
@@ -176,22 +189,11 @@ func (s *Service) ListCurvesByResult(result_id int64) ([]Curves, error) {
 	}
 }
 
-func (s *Service) InsertWorkorder(workorder Workorders) error {
+func (s *Service) InsertWorkorder(workorder *Workorders, results *[]Results) error {
 
 	has, err := s.WorkorderExists(workorder.WorkorderID)
 	if has {
 		// 忽略存在的工单
-		return nil
-	}
-
-	var resultIds []int64
-	err = json.Unmarshal([]byte(workorder.ResultIDs), &resultIds)
-	if err != nil {
-		// 忽略没有结果列表的工单
-		return err
-	}
-
-	if len(resultIds) == 0 {
 		return nil
 	}
 
@@ -211,25 +213,14 @@ func (s *Service) InsertWorkorder(workorder Workorders) error {
 	}
 
 	// 预保存结果
-	for _, resultId := range resultIds {
-		r := new(Results)
-		r.ResultId = resultId
-		r.ControllerSN = ""
-		r.WorkorderID = workorder.WorkorderID
-		r.Result = "NONE"
-		r.HasUpload = false
-		r.Stage = "init"
-		r.UpdateTime = time.Now()
-		r.PSetDefine = ""
-		r.ResultValue = ""
-		r.Count = 1
+	for _, v := range *results {
 
-		_, err = session.Insert(r)
+		_, err = session.Insert(v)
 		if err != nil {
 			session.Rollback()
 			return errors.Wrapf(err, "store data fail")
 		} else {
-			s.diag.Debug(fmt.Sprintf("new result:%d", resultId))
+			s.diag.Debug(fmt.Sprintf("new result:%d", v.ResultId))
 		}
 	}
 

@@ -22,7 +22,7 @@ type HandlerContext struct {
 	controllerResult    ControllerResult
 	controllerCurveFile ControllerCurveFile
 	dbCurve             storage.Curves
-	resultIds           []int64
+	//resultIds           []int64
 	wsResult            wsnotify.WSResult
 	aiisResult          aiis.AIISResult
 	aiisCurve           aiis.CURObject
@@ -32,7 +32,7 @@ type Handlers struct {
 	AudiVw *Service
 }
 
-func (h *Handlers) handleResult2(needPush bool, r *storage.Results, workorder *storage.Workorders, result *ControllerResult, ctx *HandlerContext) error {
+func (h *Handlers) PushAiis(needPush bool, r *storage.Results, workorder *storage.Workorders, result *ControllerResult, ctx *HandlerContext) error {
 	if needPush {
 
 		// 结果推送AIIS
@@ -74,7 +74,7 @@ func (h *Handlers) handleResult2(needPush bool, r *storage.Results, workorder *s
 		ctx.aiisResult.MO_Pin_check_code = workorder.MO_Pin_check_code
 		ctx.aiisResult.MO_Year = workorder.MO_Year
 		ctx.aiisResult.MO_Lnr = workorder.MO_Lnr
-		ctx.aiisResult.MO_NutNo = workorder.MO_NutNo
+		ctx.aiisResult.MO_NutNo = r.NutNo
 
 		curves, err := h.AudiVw.DB.ListCurvesByResult(result.Result_id)
 		if err != nil {
@@ -144,8 +144,7 @@ func (h *Handlers) handleResult(result *ControllerResult, ctx *HandlerContext) e
 		needPushAiis = true
 		r.Stage = RESULT_STAGE_FINAL
 
-		json.Unmarshal([]byte(workorder.ResultIDs), &ctx.resultIds)
-		if r.ResultId == ctx.resultIds[len(ctx.resultIds)-1] {
+		if r.ResultId == workorder.LastResultID {
 			h.AudiVw.diag.Debug("工单已完成")
 			workorder.Status = "finished"
 			h.AudiVw.DB.UpdateWorkorder(&workorder)
@@ -165,7 +164,7 @@ func (h *Handlers) handleResult(result *ControllerResult, ctx *HandlerContext) e
 
 	h.AudiVw.WS.WSSendResult(workorder.HMISN, string(ws_str))
 
-	go h.handleResult2(needPushAiis,&r, &workorder, result, ctx)
+	go h.PushAiis(needPushAiis,&r, &workorder, result, ctx)
 
 	return nil
 }

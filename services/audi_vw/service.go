@@ -237,8 +237,8 @@ func (p *Service) CVIResponse(header *CVI3Header, c net.Conn) {
 		reply.MID = header.MID
 		replyPacket := reply.Serialize()
 
-		n, err := c.Write([]byte(replyPacket))
-		p.diag.Debug(fmt.Sprintf("write response bytes length: %d", n))
+		_, err := c.Write([]byte(replyPacket))
+		//p.diag.Debug(fmt.Sprintf("write response bytes length: %d", n))
 		if err != nil {
 			p.diag.Error("server reply err:%s\n", err)
 		}
