@@ -37,9 +37,9 @@ class PushWorkorder(AbstractModel):
             _consumes = list()
             for consu in workorder.consu_bom_line_ids:
                 # 定位消耗品的qcp
-                _qcps = self.env['quality.point'].search_read(
-                    domain=[('bom_line_id', '=', consu.bom_line_id.id), ('operation_id', '=', workorder.operation_id.id)],
-                    fields=['tolerance_min', 'tolerance_max', 'tolerance_min_degree', 'tolerance_max_degree'])
+                _qcps = self.env['quality.point'].search([('bom_line_id', '=', consu.bom_line_id.id),
+                                                          ('operation_id', '=', workorder.operation_id.id)],
+                                                         limit=1)
 
                 _consumes.append({
                     "seq": consu.sequence,
@@ -47,10 +47,10 @@ class PushWorkorder(AbstractModel):
                     "nut_no": consu.product_id.screw_type_code,
                     "gun_sn": consu.bom_line_id.gun_id.serial_no,
                     "controller_sn": consu.bom_line_id.controller_id.serial_no,
-                    'tolerance_min': _qcps[0]['tolerance_min'],
-                    'tolerance_max': _qcps[0]['tolerance_max'],
-                    'tolerance_min_degree': _qcps[0]['tolerance_min_degree'],
-                    'tolerance_max_degree': _qcps[0]['tolerance_max_degree'],
+                    'tolerance_min': _qcps.tolerance_min if _qcps else 0.0,
+                    'tolerance_max': _qcps.tolerance_max if _qcps else 0.0,
+                    'tolerance_min_degree': _qcps.tolerance_min_degree if _qcps else 0.0,
+                    'tolerance_max_degree': _qcps.tolerance_max_degree if _qcps else 0.0,
                     "result_ids": consu.result_ids.ids
                 })
 
