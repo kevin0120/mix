@@ -92,8 +92,9 @@ class Wave(models.TransientModel):
     def _get_echart_data(self,datas,ret):
         line = Line(u"{0}".format(u'Waveform'), u"{0}-{1}".format(self.query_date_from, self.query_date_to), width=1920,height=1080)
         for index, data in enumerate(datas):
-            line.add(data['name'].split('.')[0], ret['cur_w'].values, ret[u'tor_{0}'.format(data['name'])].values,
-                     is_smooth=True, line_width=2, is_datazoom_show=True,datazoom_type='both',tooltip_tragger='axis')
+            line.add(data['name'].split('.')[0], ret['cur_w'].values, ret[u'{0}'.format(data['name'])].values,
+                     is_smooth=True, line_width=2, is_datazoom_show=True,
+                     datazoom_type='both', tooltip_tragger='axis', mark_line=["min", "max"])
             line.options.get('series')[index].update({'connectNulls': True})
         # line.print_echarts_options()
         pyecharts.configure(force_js_embed=True)
