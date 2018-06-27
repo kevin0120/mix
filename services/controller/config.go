@@ -12,11 +12,13 @@ type Config struct {
 	Protocol string `yaml:"protocol"`
 	RemoteIP string `yaml:"remote_ip"`
 	Port     int    `yaml:"port"`
+	ToolChannel int	`yaml:"channel"`
 }
 
 const (
 	AUDIPROTOCOL = "Audi/VW"
 	OPENPROTOCOL = "OpenProtocol"
+	DEFAULT_TOOL_CHANNEL = 1
 )
 
 var Protocols []string
@@ -32,6 +34,7 @@ func NewConfig() Config {
 		Protocol: AUDIPROTOCOL,
 		RemoteIP: "127.0.0.1",
 		Port:     4700,
+		ToolChannel: DEFAULT_TOOL_CHANNEL,
 	}
 }
 

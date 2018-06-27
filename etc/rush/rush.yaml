@@ -71,9 +71,11 @@ controllers:
   protocol: Audi/VW
   remote_ip: 10.1.1.100
   port: 4700
+  channel: 51
 
 - serial_no: 0002
   protocol: Audi/VW
   remote_ip: 10.1.1.103
   port: 4700
+  channel: 1
 

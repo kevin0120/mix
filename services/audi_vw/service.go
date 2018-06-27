@@ -319,7 +319,7 @@ func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64,
 	}
 
 	// 设定pset并判断控制器响应
-	seq, err := c.PSet(pset, workorder_id, result_id, count, user_id)
+	seq, err := c.PSet(pset, workorder_id, result_id, count, user_id, c.cfg.ToolChannel)
 	if err != nil {
 		// 控制器请求失败
 		return errors.New(ERR_CVI3_REQUEST)

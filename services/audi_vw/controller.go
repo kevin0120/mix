@@ -327,10 +327,16 @@ func (c *Controller) Read(conn net.Conn) {
 }
 
 // PSet程序设定
-func (c *Controller) PSet(pset int, workorder_id int64, reseult_id int64, count int, user_id int64) (uint32, error) {
+func (c *Controller) PSet(pset int, workorder_id int64, reseult_id int64, count int, user_id int64, channel int) (uint32, error) {
 
 	sdate, stime := utils.GetDateTime()
-	xmlPset := fmt.Sprintf(Xml_pset, sdate, stime, c.cfg.SN, workorder_id, reseult_id, count, user_id, pset)
+
+	tool_channel := ""
+	if channel != controller.DEFAULT_TOOL_CHANNEL {
+		tool_channel = fmt.Sprintf("<KNR>%d</KNR>", channel)
+	}
+
+	xmlPset := fmt.Sprintf(Xml_pset, sdate, stime, c.cfg.SN, workorder_id, reseult_id, count, user_id, pset, tool_channel, tool_channel, tool_channel)
 
 	seq := c.Sequence()
 	psetPacket, seq := GeneratePacket(seq, Header_type_request_with_reply, xmlPset)
