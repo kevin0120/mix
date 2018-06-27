@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api, _
+from odoo import models, fields, api, _, SUPERUSER_ID
 
+from odoo.exceptions import UserError
 
 class MrpRoutingWorkcenter(models.Model):
     _inherit = 'mrp.routing.workcenter'
@@ -9,6 +10,8 @@ class MrpRoutingWorkcenter(models.Model):
     workcenter_id = fields.Many2one('mrp.workcenter', copy=False)
 
     # program_id = fields.Many2one('controller.program', string='程序号')
+
+    operation_point_ids = fields.One2many('operation.point', 'operation_id', string='Operation Points')
 
     group_id = fields.Many2one('mrp.routing.group', string='Routing Group')
     max_redo_times = fields.Integer('Operation Max Redo Times', default=1)  # 此项重试业务逻辑在HMI中实现
@@ -19,6 +22,12 @@ class MrpRoutingWorkcenter(models.Model):
 
     _sql_constraints = [('routing_group_wc_uniq', 'unique(routing_id,group_id, workcenter_id)',
                          'Per Routing only has one unique Routing group per Work Center!')]
+
+    @api.multi
+    def button_resequence(self):
+        self.ensure_one()
+        for idx, opearion in enumerate(self.operation_point_ids):
+            opearion.write({'sequence': idx + 1})
 
     @api.multi
     def name_get(self):
@@ -67,6 +76,8 @@ class ControllerProgram(models.Model):
                                  ('AN', 'Number of Pulses tightening'),
                                  ('AT', 'Time tightening')], required=True)
 
+    active = fields.Boolean('Active', default=True)
+
     @api.onchange('code', 'strategy')
     def _onchange_code_style(self):
         for program in self:
@@ -77,6 +88,12 @@ class ControllerProgram(models.Model):
         if 'name' not in vals:
             vals['name'] = u"{0}({1})".format(vals['code'], vals['strategy'])
         return super(ControllerProgram, self).create(vals)
+
+    @api.multi
+    def unlink(self):
+        if self.env.uid != SUPERUSER_ID:
+            raise UserError(_(u"Only SuperUser can delete program"))
+        return super(ControllerProgram, self).unlink()
 
 
 class MrpRouting(models.Model):

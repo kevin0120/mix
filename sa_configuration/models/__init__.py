@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from . import point
 from . import res_users
 from . import mrp_worksegment
 from . import product
@@ -8,4 +9,4 @@ from . import mrp_routing
 from . import mrp_bom
 from . import maintenance
 from . import quality
-from . import point
+from . import res_config
