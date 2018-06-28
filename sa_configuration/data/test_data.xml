@@ -292,7 +292,7 @@
         <record id="routing_operation_0" model="mrp.routing.workcenter">
             <field name="name">G0C</field>
             <field name="routing_id" ref="routing_0"/>
-            <field name="program_id" ref="con_prog_0" />
+            <!--<field name="program_id" ref="con_prog_0" />-->
             <field name="group_id" ref="routing_group_0" />
             <field name="workcenter_id" ref="mrp_workcenter_0" />
             <field name="max_redo_times">3</field>
@@ -302,7 +302,7 @@
         <record id="routing_operation_20" model="mrp.routing.workcenter">
             <field name="name">G0C</field>
             <field name="routing_id" ref="routing_0"/>
-            <field name="program_id" ref="con_prog_0" />
+            <!--<field name="program_id" ref="con_prog_0" />-->
             <field name="group_id" ref="routing_group_0" />
             <field name="workcenter_id" ref="mrp_workcenter_1" />
             <field name="max_redo_times">3</field>
@@ -312,7 +312,7 @@
         <record id="routing_operation_1" model="mrp.routing.workcenter">
             <field name="name">4X0</field>
             <field name="routing_id" ref="routing_0"/>
-            <field name="program_id" ref="con_prog_1" />
+            <!--<field name="program_id" ref="con_prog_1" />-->
             <field name="group_id" ref="routing_group_1" />
             <field name="workcenter_id" ref="mrp_workcenter_1" />
             <field name="max_redo_times">3</field>
@@ -322,7 +322,7 @@
         <record id="routing_operation_2" model="mrp.routing.workcenter">
             <field name="name">C0D</field>
             <field name="routing_id" ref="routing_0"/>
-            <field name="program_id" ref="con_prog_1" />
+            <!--<field name="program_id" ref="con_prog_1" />-->
             <field name="group_id" ref="routing_group_2" />
             <field name="workcenter_id" ref="mrp_workcenter_1" />
             <field name="max_redo_times">3</field>
@@ -332,7 +332,7 @@
         <record id="routing_operation_3" model="mrp.routing.workcenter">
             <field name="name">HSS</field>
             <field name="routing_id" ref="routing_0"/>
-            <field name="program_id" ref="con_prog_1" />
+            <!--<field name="program_id" ref="con_prog_1" />-->
             <field name="group_id" ref="routing_group_3" />
             <field name="workcenter_id" ref="mrp_workcenter_1" />
             <field name="max_redo_times">3</field>
@@ -342,7 +342,7 @@
         <record id="routing_operation_4" model="mrp.routing.workcenter">
             <field name="name">1AC</field>
             <field name="routing_id" ref="routing_0"/>
-            <field name="program_id" ref="con_prog_1" />
+            <!--<field name="program_id" ref="con_prog_1" />-->
             <field name="group_id" ref="routing_group_4" />
             <field name="workcenter_id" ref="mrp_workcenter_1" />
             <field name="max_redo_times">3</field>
@@ -352,7 +352,7 @@
         <record id="routing_operation_5" model="mrp.routing.workcenter">
             <field name="name">TJ5</field>
             <field name="routing_id" ref="routing_0"/>
-            <field name="program_id" ref="con_prog_1" />
+            <!--<field name="program_id" ref="con_prog_1" />-->
             <field name="group_id" ref="routing_group_5" />
             <field name="workcenter_id" ref="mrp_workcenter_1" />
             <field name="max_redo_times">3</field>
@@ -362,7 +362,7 @@
         <record id="routing_operation_6" model="mrp.routing.workcenter">
             <field name="name">0ER</field>
             <field name="routing_id" ref="routing_0"/>
-            <field name="program_id" ref="con_prog_1" />
+            <!--<field name="program_id" ref="con_prog_1" />-->
             <field name="group_id" ref="routing_group_6" />
             <field name="workcenter_id" ref="mrp_workcenter_1" />
             <field name="max_redo_times">3</field>
@@ -372,7 +372,7 @@
         <record id="routing_operation_7" model="mrp.routing.workcenter">
             <field name="name">7JI</field>
             <field name="routing_id" ref="routing_0"/>
-            <field name="program_id" ref="con_prog_1" />
+            <!--<field name="program_id" ref="con_prog_1" />-->
             <field name="group_id" ref="routing_group_7" />
             <field name="workcenter_id" ref="mrp_workcenter_1" />
             <field name="max_redo_times">3</field>
@@ -382,7 +382,7 @@
         <record id="routing_operation_8" model="mrp.routing.workcenter">
             <field name="name">DW5</field>
             <field name="routing_id" ref="routing_0"/>
-            <field name="program_id" ref="con_prog_1" />
+            <!--<field name="program_id" ref="con_prog_1" />-->
             <field name="group_id" ref="routing_group_8" />
             <field name="workcenter_id" ref="mrp_workcenter_1" />
             <field name="max_redo_times">3</field>
@@ -410,140 +410,140 @@
             <field name="code">测试bom</field>
         </record>
 
-        <record id="mrp_bom_line_18" model="mrp.bom.line">
-            <field name="product_id" ref="product_product_0"/>
-            <field name="routing_id" ref="routing_0"/>
-            <field name="bom_id" ref="mrp_bom_7"/>
-            <field name="product_qty">4</field>
-            <field name="operation_id" ref="routing_operation_0"/>
-        </record>
+        <!--<record id="mrp_bom_line_18" model="mrp.bom.line">-->
+            <!--<field name="product_id" ref="product_product_0"/>-->
+            <!--<field name="routing_id" ref="routing_0"/>-->
+            <!--<field name="bom_id" ref="mrp_bom_7"/>-->
+            <!--<field name="product_qty">4</field>-->
+            <!--<field name="operation_id" ref="routing_operation_0"/>-->
+        <!--</record>-->
 
-        <record id="mrp_bom_line_19" model="mrp.bom.line">
-            <field name="product_id" ref="product_product_2"/>
-            <field name="routing_id" ref="routing_0"/>
-            <field name="bom_id" ref="mrp_bom_7"/>
-            <field name="product_qty">5</field>
-            <field name="operation_id" ref="routing_operation_0"/>
-        </record>
+        <!--<record id="mrp_bom_line_19" model="mrp.bom.line">-->
+            <!--<field name="product_id" ref="product_product_2"/>-->
+            <!--<field name="routing_id" ref="routing_0"/>-->
+            <!--<field name="bom_id" ref="mrp_bom_7"/>-->
+            <!--<field name="product_qty">5</field>-->
+            <!--<field name="operation_id" ref="routing_operation_0"/>-->
+        <!--</record>-->
 
-        <record id="mrp_bom_line_20" model="mrp.bom.line">
-            <field name="product_id" ref="product_product_2"/>
-            <field name="routing_id" ref="routing_0"/>
-            <field name="bom_id" ref="mrp_bom_7"/>
-            <field name="product_qty">6</field>
-            <field name="operation_id" ref="routing_operation_0"/>
-        </record>
+        <!--<record id="mrp_bom_line_20" model="mrp.bom.line">-->
+            <!--<field name="product_id" ref="product_product_2"/>-->
+            <!--<field name="routing_id" ref="routing_0"/>-->
+            <!--<field name="bom_id" ref="mrp_bom_7"/>-->
+            <!--<field name="product_qty">6</field>-->
+            <!--<field name="operation_id" ref="routing_operation_0"/>-->
+        <!--</record>-->
 
-        <record id="mrp_bom_line_21" model="mrp.bom.line">
-            <field name="product_id" ref="product_product_0"/>
-            <field name="routing_id" ref="routing_0"/>
-            <field name="bom_id" ref="mrp_bom_7"/>
-            <field name="product_qty">8</field>
-            <field name="operation_id" ref="routing_operation_20"/>
-        </record>
+        <!--<record id="mrp_bom_line_21" model="mrp.bom.line">-->
+            <!--<field name="product_id" ref="product_product_0"/>-->
+            <!--<field name="routing_id" ref="routing_0"/>-->
+            <!--<field name="bom_id" ref="mrp_bom_7"/>-->
+            <!--<field name="product_qty">8</field>-->
+            <!--<field name="operation_id" ref="routing_operation_20"/>-->
+        <!--</record>-->
 
-        <record id="mrp_bom_line_22" model="mrp.bom.line">
-            <field name="product_id" ref="product_product_1"/>
-            <field name="routing_id" ref="routing_0"/>
-            <field name="bom_id" ref="mrp_bom_7"/>
-            <field name="product_qty">5</field>
-            <field name="operation_id" ref="routing_operation_1"/>
-        </record>
+        <!--<record id="mrp_bom_line_22" model="mrp.bom.line">-->
+            <!--<field name="product_id" ref="product_product_1"/>-->
+            <!--<field name="routing_id" ref="routing_0"/>-->
+            <!--<field name="bom_id" ref="mrp_bom_7"/>-->
+            <!--<field name="product_qty">5</field>-->
+            <!--<field name="operation_id" ref="routing_operation_1"/>-->
+        <!--</record>-->
 
-        <record id="mrp_bom_line_23" model="mrp.bom.line">
-            <field name="product_id" ref="product_product_3"/>
-            <field name="routing_id" ref="routing_0"/>
-            <field name="bom_id" ref="mrp_bom_7"/>
-            <field name="product_qty">5</field>
-            <field name="operation_id" ref="routing_operation_1"/>
-        </record>
+        <!--<record id="mrp_bom_line_23" model="mrp.bom.line">-->
+            <!--<field name="product_id" ref="product_product_3"/>-->
+            <!--<field name="routing_id" ref="routing_0"/>-->
+            <!--<field name="bom_id" ref="mrp_bom_7"/>-->
+            <!--<field name="product_qty">5</field>-->
+            <!--<field name="operation_id" ref="routing_operation_1"/>-->
+        <!--</record>-->
 
-        <record id="mrp_bom_line_24" model="mrp.bom.line">
-            <field name="product_id" ref="product_product_1"/>
-            <field name="routing_id" ref="routing_0"/>
-            <field name="bom_id" ref="mrp_bom_7"/>
-            <field name="product_qty">6</field>
-            <field name="operation_id" ref="routing_operation_2"/>
-        </record>
+        <!--<record id="mrp_bom_line_24" model="mrp.bom.line">-->
+            <!--<field name="product_id" ref="product_product_1"/>-->
+            <!--<field name="routing_id" ref="routing_0"/>-->
+            <!--<field name="bom_id" ref="mrp_bom_7"/>-->
+            <!--<field name="product_qty">6</field>-->
+            <!--<field name="operation_id" ref="routing_operation_2"/>-->
+        <!--</record>-->
 
-        <record id="mrp_bom_line_25" model="mrp.bom.line">
-            <field name="product_id" ref="product_product_2"/>
-            <field name="routing_id" ref="routing_0"/>
-            <field name="bom_id" ref="mrp_bom_7"/>
-            <field name="product_qty">6</field>
-            <field name="operation_id" ref="routing_operation_2"/>
-        </record>
+        <!--<record id="mrp_bom_line_25" model="mrp.bom.line">-->
+            <!--<field name="product_id" ref="product_product_2"/>-->
+            <!--<field name="routing_id" ref="routing_0"/>-->
+            <!--<field name="bom_id" ref="mrp_bom_7"/>-->
+            <!--<field name="product_qty">6</field>-->
+            <!--<field name="operation_id" ref="routing_operation_2"/>-->
+        <!--</record>-->
 
-        <record id="mrp_bom_line_26" model="mrp.bom.line">
-            <field name="product_id" ref="product_product_1"/>
-            <field name="routing_id" ref="routing_0"/>
-            <field name="bom_id" ref="mrp_bom_7"/>
-            <field name="product_qty">7</field>
-            <field name="operation_id" ref="routing_operation_3"/>
-        </record>
+        <!--<record id="mrp_bom_line_26" model="mrp.bom.line">-->
+            <!--<field name="product_id" ref="product_product_1"/>-->
+            <!--<field name="routing_id" ref="routing_0"/>-->
+            <!--<field name="bom_id" ref="mrp_bom_7"/>-->
+            <!--<field name="product_qty">7</field>-->
+            <!--<field name="operation_id" ref="routing_operation_3"/>-->
+        <!--</record>-->
 
-        <record id="mrp_bom_line_27" model="mrp.bom.line">
-            <field name="product_id" ref="product_product_1"/>
-            <field name="routing_id" ref="routing_0"/>
-            <field name="bom_id" ref="mrp_bom_7"/>
-            <field name="product_qty">8</field>
-            <field name="operation_id" ref="routing_operation_4"/>
-        </record>
+        <!--<record id="mrp_bom_line_27" model="mrp.bom.line">-->
+            <!--<field name="product_id" ref="product_product_1"/>-->
+            <!--<field name="routing_id" ref="routing_0"/>-->
+            <!--<field name="bom_id" ref="mrp_bom_7"/>-->
+            <!--<field name="product_qty">8</field>-->
+            <!--<field name="operation_id" ref="routing_operation_4"/>-->
+        <!--</record>-->
 
-        <record id="mrp_bom_line_28" model="mrp.bom.line">
-            <field name="product_id" ref="product_product_1"/>
-            <field name="routing_id" ref="routing_0"/>
-            <field name="bom_id" ref="mrp_bom_7"/>
-            <field name="product_qty">9</field>
-            <field name="operation_id" ref="routing_operation_5"/>
-        </record>
+        <!--<record id="mrp_bom_line_28" model="mrp.bom.line">-->
+            <!--<field name="product_id" ref="product_product_1"/>-->
+            <!--<field name="routing_id" ref="routing_0"/>-->
+            <!--<field name="bom_id" ref="mrp_bom_7"/>-->
+            <!--<field name="product_qty">9</field>-->
+            <!--<field name="operation_id" ref="routing_operation_5"/>-->
+        <!--</record>-->
 
-        <record id="mrp_bom_line_29" model="mrp.bom.line">
-            <field name="product_id" ref="product_product_2"/>
-            <field name="routing_id" ref="routing_0"/>
-            <field name="bom_id" ref="mrp_bom_7"/>
-            <field name="product_qty">9</field>
-            <field name="operation_id" ref="routing_operation_5"/>
-        </record>
+        <!--<record id="mrp_bom_line_29" model="mrp.bom.line">-->
+            <!--<field name="product_id" ref="product_product_2"/>-->
+            <!--<field name="routing_id" ref="routing_0"/>-->
+            <!--<field name="bom_id" ref="mrp_bom_7"/>-->
+            <!--<field name="product_qty">9</field>-->
+            <!--<field name="operation_id" ref="routing_operation_5"/>-->
+        <!--</record>-->
 
-        <record id="mrp_bom_line_30" model="mrp.bom.line">
-            <field name="product_id" ref="product_product_1"/>
-            <field name="routing_id" ref="routing_0"/>
-            <field name="bom_id" ref="mrp_bom_7"/>
-            <field name="product_qty">10</field>
-            <field name="operation_id" ref="routing_operation_6"/>
-        </record>
+        <!--<record id="mrp_bom_line_30" model="mrp.bom.line">-->
+            <!--<field name="product_id" ref="product_product_1"/>-->
+            <!--<field name="routing_id" ref="routing_0"/>-->
+            <!--<field name="bom_id" ref="mrp_bom_7"/>-->
+            <!--<field name="product_qty">10</field>-->
+            <!--<field name="operation_id" ref="routing_operation_6"/>-->
+        <!--</record>-->
 
-        <record id="mrp_bom_line_31" model="mrp.bom.line">
-            <field name="product_id" ref="product_product_1"/>
-            <field name="routing_id" ref="routing_0"/>
-            <field name="bom_id" ref="mrp_bom_7"/>
-            <field name="product_qty">11</field>
-            <field name="operation_id" ref="routing_operation_7"/>
-        </record>
+        <!--<record id="mrp_bom_line_31" model="mrp.bom.line">-->
+            <!--<field name="product_id" ref="product_product_1"/>-->
+            <!--<field name="routing_id" ref="routing_0"/>-->
+            <!--<field name="bom_id" ref="mrp_bom_7"/>-->
+            <!--<field name="product_qty">11</field>-->
+            <!--<field name="operation_id" ref="routing_operation_7"/>-->
+        <!--</record>-->
 
-        <record id="mrp_bom_line_32" model="mrp.bom.line">
-            <field name="product_id" ref="product_product_1"/>
-            <field name="routing_id" ref="routing_0"/>
-            <field name="bom_id" ref="mrp_bom_7"/>
-            <field name="product_qty">1</field>
-            <field name="operation_id" ref="routing_operation_8"/>
-        </record>
+        <!--<record id="mrp_bom_line_32" model="mrp.bom.line">-->
+            <!--<field name="product_id" ref="product_product_1"/>-->
+            <!--<field name="routing_id" ref="routing_0"/>-->
+            <!--<field name="bom_id" ref="mrp_bom_7"/>-->
+            <!--<field name="product_qty">1</field>-->
+            <!--<field name="operation_id" ref="routing_operation_8"/>-->
+        <!--</record>-->
 
-        <record id="mrp_bom_line_33" model="mrp.bom.line">
-            <field name="product_id" ref="product_product_2"/>
-            <field name="routing_id" ref="routing_0"/>
-            <field name="bom_id" ref="mrp_bom_7"/>
-            <field name="product_qty">11</field>
-            <field name="operation_id" ref="routing_operation_8"/>
-        </record>
-        <record id="mrp_bom_line_34" model="mrp.bom.line">
-            <field name="product_id" ref="product_product_3"/>
-            <field name="routing_id" ref="routing_0"/>
-            <field name="bom_id" ref="mrp_bom_7"/>
-            <field name="product_qty">10</field>
-            <field name="operation_id" ref="routing_operation_8"/>
-        </record>
+        <!--<record id="mrp_bom_line_33" model="mrp.bom.line">-->
+            <!--<field name="product_id" ref="product_product_2"/>-->
+            <!--<field name="routing_id" ref="routing_0"/>-->
+            <!--<field name="bom_id" ref="mrp_bom_7"/>-->
+            <!--<field name="product_qty">11</field>-->
+            <!--<field name="operation_id" ref="routing_operation_8"/>-->
+        <!--</record>-->
+        <!--<record id="mrp_bom_line_34" model="mrp.bom.line">-->
+            <!--<field name="product_id" ref="product_product_3"/>-->
+            <!--<field name="routing_id" ref="routing_0"/>-->
+            <!--<field name="bom_id" ref="mrp_bom_7"/>-->
+            <!--<field name="product_qty">10</field>-->
+            <!--<field name="operation_id" ref="routing_operation_8"/>-->
+        <!--</record>-->
 
     </data>
 </odoo>

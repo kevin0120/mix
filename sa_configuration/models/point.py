@@ -36,7 +36,7 @@ class OperationPoints(models.Model):
             operation = self.env['mrp.routing.workcenter'].sudo().browse(operation_id)
             if 'max_redo_times' in fields:
                 res.update({'max_redo_times': operation.max_redo_times})
-            if 'sequence' in fields:
+            if 'sequence' in fields and operation.operation_point_ids:
                 res.update({'sequence': max(operation.operation_point_ids.mapped('sequence')) + 1})
         return res
 

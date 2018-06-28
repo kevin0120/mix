@@ -46,7 +46,10 @@
                             <field name="workcenter_id" />
                             <field name="assembly_line_id" />
                         </group>
-                        <field name="pset_strategy" />
+                        <group>
+                            <field name="qcp_id" />
+                            <field name="pset_strategy" />
+                        </group>
                         <group string="Degree">
                             <field name="pset_w_max"/>
                             <field name="pset_w_min" />

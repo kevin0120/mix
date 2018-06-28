@@ -8,9 +8,19 @@ import json
 class MrpBom(models.Model):
     _inherit = 'mrp.bom'
 
-    @api.onchange('routing_id','product_id')
+    operation_ids = fields.Many2many('mrp.routing.workcenter', 'bom_operation_rel', 'bom_id', 'operation_id',
+                                     string="Operations", copy=False)
+
+    @api.multi
+    def button_resequence(self):
+        self.ensure_one()
+        for idx, bom_line_id in enumerate(self.bom_line_ids):
+            bom_line_id.write({'sequence': idx + 1})
+
+    @api.onchange('routing_id', 'product_id')
     def _onchange_routing_id(self):
         self.code = u'[{0}]{1}'.format(self.routing_id.name, self.product_id.name)
+        self.operation_ids = [(5,)] #刪除所有作業
         self.bom_line_ids = [(5,)]  #删除所有BOM行
 
     @api.constrains('product_id', 'product_tmpl_id')
@@ -38,13 +48,48 @@ class MrpBom(models.Model):
             raise ValidationError(
                 _(u'The product Template had a related routing config "%s" been actived!') % (self.product_tmpl_id.name))
 
+    def _onchange_operations(self):
+        self.ensure_one()
+        operation_ids = self.operation_ids
+        need_delete_bom_line = self.env['mrp.bom.line']
+        for bom_line in self.bom_line_ids:
+            if bom_line.operation_id.id not in operation_ids.ids:
+                need_delete_bom_line += bom_line
+        need_delete_bom_line.unlink()  # delete bom line ids
+
+        bom_line_operations = self.bom_line_ids.mapped('operation_id')
+
+        delta_operation = self.operation_ids - bom_line_operations
+        for operation in delta_operation:
+            for operation_point in operation.operation_point_ids:
+                val = {
+                    "operation_point_id": operation_point.id,
+                    "bom_id": self.id,
+                }
+                self.env['mrp.bom.line'].sudo().create(val)
+
+    @api.multi
+    def write(self, vals):
+        ret = super(MrpBom, self).write(vals)
+        if 'operation_ids' in vals:
+            self._onchange_operations()
+        return ret
+
 
 class MrpBomLine(models.Model):
     _inherit = 'mrp.bom.line'
 
+    operation_point_id = fields.Many2one('operation.point', required=1)
+
+    product_id = fields.Many2one('product.product',  related="operation_point_id.product_id")
+
+    product_qty = fields.Float('Product Quantity', related="operation_point_id.product_qty")
+
+    operation_id = fields.Many2one('mrp.routing.workcenter', related="operation_point_id.operation_id")
+
     group_id = fields.Many2one('mrp.routing.group', related="operation_id.group_id", string='Routing Group')
 
-    program_id = fields.Many2one('controller.program',  string='程序号')
+    program_id = fields.Many2one('controller.program', related="operation_point_id.program_id", string='程序号')
 
     workcenter_id = fields.Many2one('mrp.workcenter', related="operation_id.workcenter_id", string='Work Center')
 
