@@ -32,20 +32,46 @@ class OperationView(http.Controller):
                 body = json.dumps({'msg': "Body must be point array"})
                 headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
                 return Response(body, status=405, headers=headers)
+
+            current_max_seq = len(operation.operation_point_ids)
             for val in points:
-                point_id = env['point.point'].search([('res_id', '=', operation_id),
-                                                      ('res_model', '=', 'mrp.routing.workcenter'),
-                                                      ('sequence', '=', val['sequence'])])
-                if not point_id:
-                    val.update({'res_id': operation_id, 'res_model': 'mrp.routing.workcenter', 'res_field': 'worksheet_img'})
-                    env['point.point'].create(val)
+                if not val.has_key('x_offset') or not val.has_key('y_offset'):
+                    # 忽略没有x_offset或y_offset的点
+                    continue
+
+                if val.has_key('sequence'):
+
+                    point = env['operation.point'].search([('operation_id', '=', operation_id),
+                                                          ('sequence', '=', val['sequence'])])
+                    if not point:
+                        # 新增点
+                        current_max_seq = current_max_seq + 1
+                        val.update({
+                            'operation_id': operation_id,
+                            'sequence': current_max_seq,
+                            'x_offset': val['x_offset'],
+                            'y_offset': val['y_offset']
+                        })
+                        env['operation.point'].create(val)
+                    else:
+                        # 更新点
+                        point.write(val)
                 else:
-                    env['point.point'].write(val)
+                    # 新增点
+                    current_max_seq = current_max_seq + 1
+                    val.update({
+                        'operation_id': operation_id,
+                        'sequence': current_max_seq,
+                        'x_offset': val['x_offset'],
+                        'y_offset': val['y_offset']
+                    })
+                    env['operation.point'].create(val)
+
             body = json.dumps({'msg': "Edit point success"})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=200, headers=headers)
 
-    @http.route(['/api/v1/mrp.routing.workcenter/<int:operation_id>', '/api/v1/mrp.routing.workcenter'], type='http', methods=['PUT', 'OPTIONS'], auth='none', cors='*', csrf=False)
+    @http.route(['/api/v1/mrp.routing.workcenter/<int:operation_id>', '/api/v1/mrp.routing.workcenter'], type='http', methods=['GET'], auth='none', cors='*', csrf=False)
     def _get_operations(self, operation_id=None):
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         if operation_id:
@@ -55,10 +81,19 @@ class OperationView(http.Controller):
                 headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
                 return Response(body, status=404, headers=headers)
             else:
+                _points = []
+                for point in operation.operation_point_ids:
+                    _points.append({
+                        'seq': point.sequence,
+                        'x_offset': point.x_offset,
+                        'y_offset': point.y_offset
+                    })
+
                 val = {
                     "id": operation_id,
-                    "name": operation.name,
-                    "img": operation.worksheet_img
+                    "name": u"[{0}]{1}@{2}/{3}".format(operation.name, operation.group_id.code, operation.workcenter_id.name, operation.routing_id.name),
+                    "img": operation.worksheet_img,
+                    "points": _points
                 }
                 body = json.dumps(val)
                 headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
@@ -70,7 +105,7 @@ class OperationView(http.Controller):
             for operation in operations:
                 vals.append({
                     'id': operation.id,
-                    'name': operation.name
+                    'name': u"[{0}]{1}@{2}/{3}".format(operation.name, operation.group_id.code, operation.workcenter_id.name, operation.routing_id.name)
                 })
             body = json.dumps(vals)
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
