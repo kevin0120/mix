@@ -23,14 +23,14 @@ httpd:
     - 'OPTIONS'
 
 minio:
-  url: 10.1.1.22:9000
+  url: 127.0.0.1:9000
   bucket: curves
   access: minio
   secret: minio123
   secure: false
 aiis:
   urls:
-  - http://10.1.1.22:9092
+  - http://127.0.0.1:9092
   headers:
     Content-Type: application/json
   result_push_url: /aiis/v1/operation.results/%d
@@ -40,7 +40,7 @@ aiis:
   max_retry: 3
 odoo:
   urls:
-  - http://127.0.0.1
+  - http://127.0.0.1:8069
   headers:
   workorder_get_url: /api/v1/mrp.workorders?hmi=%s&code=%s&limit=1&order=production_date
   method: GET
@@ -69,13 +69,13 @@ audi/vw:
 controllers:
 - serial_no: 0001
   protocol: Audi/VW
-  remote_ip: 10.1.1.100
+  remote_ip: 192.168.1.101
   port: 4700
   channel: 51
 
 - serial_no: 0002
   protocol: Audi/VW
-  remote_ip: 10.1.1.103
+  remote_ip: 192.168.1.102
   port: 4700
   channel: 1
 

@@ -93,7 +93,7 @@ func (m *Methods) putPSets(ctx iris.Context) {
 func (m *Methods) getWorkorder(ctx iris.Context) {
 	var err error
 	hmi_sn := ctx.URLParam("hmi_sn")
-	vin_or_knr := ctx.URLParam("vin_or_knr")
+	code := ctx.URLParam("code")
 
 	if hmi_sn == "" {
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -101,16 +101,16 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 		return
 	}
 
-	if vin_or_knr == "" {
+	if code == "" {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("code is required")
 		return
 	}
 
-	workorder, err := m.service.DB.FindWorkorder(hmi_sn, vin_or_knr)
+	workorder, err := m.service.DB.FindWorkorder(hmi_sn, code)
 	if err != nil {
 		// 通过odoo定位并创建工单
-		body, e := m.service.ODOO.GetWorkorder(m.service.SN, hmi_sn, vin_or_knr)
+		body, e := m.service.ODOO.GetWorkorder(m.service.SN, hmi_sn, code)
 		if e != nil {
 			ctx.StatusCode(iris.StatusBadRequest)
 			ctx.WriteString("cannot find workorder")

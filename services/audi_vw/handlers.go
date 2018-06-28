@@ -14,6 +14,10 @@ import (
 const (
 	ODOO_RESULT_PASS = "pass"
 	ODOO_RESULT_FAIL = "fail"
+
+	QUALITY_STATE_PASS = "pass"
+	QUALITY_STATE_FAIL = "fail"
+	QUALITY_STATE_EX = "exception"
 )
 
 type HandlerContext struct {
@@ -54,9 +58,30 @@ func (h *Handlers) PushAiis(needPush bool, r *storage.Results, workorder *storag
 			} else {
 				ctx.aiisResult.One_time_pass = ODOO_RESULT_FAIL
 			}
+
+			if (result.ResultValue.Mi >= r.ToleranceMin && result.ResultValue.Mi <= r.ToleranceMax) &&
+				(result.ResultValue.Wi >= r.ToleranceMinDegree && result.ResultValue.Wi <= r.ToleranceMaxDegree) {
+				ctx.aiisResult.QualityState = QUALITY_STATE_PASS
+				ctx.aiisResult.ExceptionReason = ""
+			} else {
+				ctx.aiisResult.QualityState = QUALITY_STATE_EX
+				ctx.aiisResult.ExceptionReason = QUALITY_STATE_EX
+			}
+
 		} else {
 			ctx.aiisResult.Final_pass = ODOO_RESULT_FAIL
 			ctx.aiisResult.One_time_pass = ODOO_RESULT_FAIL
+
+			if (result.ResultValue.Mi >= r.ToleranceMin && result.ResultValue.Mi <= r.ToleranceMax) &&
+				(result.ResultValue.Wi >= r.ToleranceMinDegree && result.ResultValue.Wi <= r.ToleranceMaxDegree) {
+
+				ctx.aiisResult.QualityState = QUALITY_STATE_EX
+				ctx.aiisResult.ExceptionReason = QUALITY_STATE_EX
+			} else {
+				ctx.aiisResult.QualityState = QUALITY_STATE_FAIL
+				ctx.aiisResult.ExceptionReason = ""
+			}
+
 		}
 
 		ctx.aiisResult.Control_date = r.UpdateTime.Format(time.RFC3339)
@@ -76,6 +101,7 @@ func (h *Handlers) PushAiis(needPush bool, r *storage.Results, workorder *storag
 		ctx.aiisResult.Pset_w_target = result.PSetDefine.Wa
 		ctx.aiisResult.Pset_w_threshold = 1
 		ctx.aiisResult.UserID = result.UserID
+		ctx.aiisResult.Seq = r.Seq
 
 		// mo相关
 		ctx.aiisResult.MO_AssemblyLine = workorder.MO_AssemblyLine
@@ -86,6 +112,7 @@ func (h *Handlers) PushAiis(needPush bool, r *storage.Results, workorder *storag
 		ctx.aiisResult.MO_Year = workorder.MO_Year
 		ctx.aiisResult.MO_Lnr = workorder.MO_Lnr
 		ctx.aiisResult.MO_NutNo = r.NutNo
+		ctx.aiisResult.MO_Model = workorder.MO_Model
 
 		curves, err := h.AudiVw.DB.ListCurvesByResult(result.Result_id)
 		if err != nil {

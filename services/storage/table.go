@@ -26,6 +26,7 @@ type Workorders struct {
 	MO_Pin_check_code int64  `xorm:"bigint 'pin_check_code'"`
 	MO_AssemblyLine   string `xorm:"varchar(64) 'assembly_line'"`
 	MO_Lnr            string `xorm:"varchar(64) 'lnr'"`
+	MO_Model		  string `xorm:"varchar(64) 'model'"`
 
 }
 

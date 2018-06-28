@@ -64,7 +64,7 @@
             "required": true
           },
           {
-            "name": "vin_or_knr",
+            "name": "code",
             "in": "query",
             "description": "车辆识别号或车辆装配代码",
             "type": "string",

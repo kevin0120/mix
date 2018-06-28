@@ -58,6 +58,7 @@ type ODOOWorkorder struct {
 	MO_Pin_check_code int64  `json:"pin_check_code"`
 	MO_AssemblyLine   string `json:"assembly_line"`
 	MO_Lnr            string `json:"lnr"`
+	MO_Model		  string `json:"model"`
 }
 
 type ODOOPoints struct {

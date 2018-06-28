@@ -19,6 +19,9 @@ type AIISResult struct {
 	Pset_w_target    float64 `json:"pset_w_target"`
 	Final_pass       string  `json:"final_pass"`
 	One_time_pass    string  `json:"one_time_pass"`
+	QualityState     string	 `json:"quality_state"`
+	ExceptionReason	 string	 `json:"exception_reason"`
+	Seq			     int     `json:"seq"`
 
 	CURObjects []CURObject `json:"cur_objects"`
 
@@ -31,6 +34,7 @@ type AIISResult struct {
 	MO_AssemblyLine   string `json:"assembly_line"`
 	MO_Lnr            string `json:"lnr"`
 	MO_NutNo          string `json:"nut_no"`
+	MO_Model		  string `json:"model"`
 }
 
 type CURObject struct {

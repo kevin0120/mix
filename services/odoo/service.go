@@ -181,6 +181,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 		o.MO_AssemblyLine = v.MO_AssemblyLine
 		o.MO_EquipemntName = v.MO_EquipemntName
 		o.MO_Lnr = v.MO_Lnr
+		o.MO_Model = v.MO_Model
 
 		points_len := len(v.Worksheet.Points)
 		results := []storage.Results{}
