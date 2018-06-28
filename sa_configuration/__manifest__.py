@@ -48,6 +48,7 @@
         'security/quality.xml',
         'report/sa_mrp_report_main.xml',
         'report/mrp_production_pin_template.xml',
+        'views/sa_config_setting.xml'
     ],
     # only loaded in demonstration mode
 }

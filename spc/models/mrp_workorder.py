@@ -18,7 +18,7 @@ class MrpWorkorder(models.Model):
 
     result_ids = fields.One2many('operation.result', 'workorder_id', string='Operation Results')
 
-    sent = fields.Boolean('Have sent to aiis', default=False)
+    sent = fields.Boolean('Have sent to Masterpc', default=False)
 
     @api.model
     def create(self, vals):
@@ -28,7 +28,11 @@ class MrpWorkorder(models.Model):
     @api.multi
     def _create_checks(self):
         ret_vals = []
+        idx = 1
+        ir_values = self.env['ir.values'].get_default('sa.config.settings', 'generate_result_sequence')
         for wo in self:
+            if not ir_values:
+                idx = 1  # 重置sequence
             production = wo.production_id
             points = self.env['quality.point'].search([('workcenter_id', '=', wo.workcenter_id.id),
                                                        ('operation_id','=', wo.operation_id.id),  # 定位到某个作业的质量控制点
@@ -37,8 +41,11 @@ class MrpWorkorder(models.Model):
                                                        '&', ('product_id', '=', False), ('product_tmpl_id', '=', production.product_id.product_tmpl_id.id)])
             for point in points:
                 consu = wo.consu_bom_line_ids.filtered(lambda r: r.bom_line_id.id == point.bom_line_id.id)
-                vals = {'workorder_id': wo.id,
+                vals = {
+                        "sequence": idx,
+                        'workorder_id': wo.id,
                          'production_id': production.id,
+                         'qcp_id': point.id,
                          'workcenter_id': wo.workcenter_id.id,
                          'assembly_line_id':production.assembly_line_id.id,
                          'point_id': point.id,
@@ -48,7 +55,7 @@ class MrpWorkorder(models.Model):
                          'time': production.date_planned_start or fields.Datetime.now(),
                          'control_date': fields.Datetime.now()}
 
-                # if point.check_execute_now():
-                map(lambda i: ret_vals.append(vals), range(point.times))
-
+                for i in range(point.times):
+                    ret_vals.append(vals)
+                    idx += 1
         self.env['operation.result'].sudo().bulk_create(ret_vals)

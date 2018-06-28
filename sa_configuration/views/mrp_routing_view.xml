@@ -21,6 +21,9 @@
             <field name="model">mrp.routing.workcenter</field>
             <field name="arch" type="xml">
                 <form string="Routing Work Centers">
+                    <header>
+                        <button string="ReSequence" type="object" name="button_resequence"  class="oe_highlight"/>
+                    </header>
                     <sheet>
                         <group>
                             <group name="description">
@@ -39,6 +42,30 @@
                         <notebook>
                             <page string="工艺路线图片">
                                 <field name="worksheet_img" widget="image" required="1"/>
+                            </page>
+                            <page string="Operation Points">
+                                <field name="operation_point_ids" widget="one2many_list" colspan="4" nolabel="1" mode="tree" context="{'default_operation_id':active_id}">
+                                    <tree string="Operation Points" editable="bottom">
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="product_id" required="1" context="{'default_type': 'product'}" domain="[('sa_type', '=', 'screw')]" options="{'no_create_edit': True,'no_open': True}"/>
+                                        <field name="product_qty" required="1"/>
+                                        <field name="program_id" required="1" options="{'no_create_edit': True,'no_open': True}"/>
+                                        <field name="max_redo_times" />
+                                        <field name="x_offset"/>
+                                        <field name="y_offset"/>
+                                    </tree>
+                                    <form string="Operation Points">
+                                        <group>
+                                            <field name="sequence" readonly="1"/>
+                                            <field name="product_id"/>
+                                            <field name="product_qty"/>
+                                            <field name="max_redo_times" />
+                                            <field name="program_id" />
+                                            <field name="x_offset"/>
+                                            <field name="y_offset"/>
+                                        </group>
+                                    </form>
+                                </field>
                             </page>
                             <page string="Description">
                                 <field name="note"/>

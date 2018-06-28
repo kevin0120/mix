@@ -18,11 +18,15 @@ _logger = logging.getLogger(__name__)
 class OperationResult(models.HyperModel):
     _name = "operation.result"
 
+    sequence = fields.Integer('sequence', default=1)
+
     workorder_id = fields.Many2one('mrp.workorder', 'Operation')
     workcenter_id = fields.Many2one('mrp.workcenter',  readonly=True)
     production_id = fields.Many2one('mrp.production', 'Production Order')
 
     assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line', readonly=True)
+
+    qcp_id = fields.Many2one('quality.point')
 
     pset_strategy = fields.Selection([('AD', 'Torque tightening'),
                                          ('AW', 'Angle tightening'),
