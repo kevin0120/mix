@@ -72,6 +72,7 @@ class ApiMrpWorkorder(http.Controller):
                 'lnr': order.production_id.lnr,
                 # 'nut_no': order.consu_product_id.screw_type_code,
                 'consumes': _consumes,
+                'model': order.production_id.product_id.vehicle_type_code,
                 'update_time': str_time_to_rfc3339(order.production_date)
             }
             body = json.dumps(ret)
@@ -159,6 +160,7 @@ class ApiMrpWorkorder(http.Controller):
                 'lnr': order.production_id.lnr,
                 # 'nut_no': order.consu_product_id.screw_type_code,
                 'consumes': _consumes,
+                'model': order.production_id.product_id.vehicle_type_code,
                 'update_time': str_time_to_rfc3339(order.production_date)
             })
         if len(_ret) == 0:

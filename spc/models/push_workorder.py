@@ -77,6 +77,7 @@ class PushWorkorder(AbstractModel):
                 'lnr': workorder.production_id.lnr,
                 # 'nut_no': workorder.consu_product_id.screw_type_code,
                 'consumes': _consumes,
+                'model': workorder.production_id.product_id.vehicle_type_code,
                 'update_time': str_time_to_rfc3339(workorder.production_date)
             }
             r.append(vals)
