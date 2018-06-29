@@ -11,7 +11,7 @@ type Workorders struct {
 	Vin          string    `xorm:"varchar(64) 'vin'"`
 	Knr          string    `xorm:"varchar(64) 'knr'"`
 	LongPin      string    `xorm:"varchar(64) 'long_pin'"`
-	MaxRedoTimes int       `xorm:"int 'max_redo_times'"`
+
 	MaxOpTime    int       `xorm:"int 'max_op_time'"`
 	Status       string    `xorm:"varchar(32) 'status'"`
 	LastResultID int64     `xorm:"bigint 'last_result_id'"`
@@ -53,6 +53,7 @@ type Results struct {
 	ToleranceMin 			float64 `xorm:"Double 'tolerance_min'"`
 	OffsetX		 float64	`xorm:"Double 'offset_x'"`
 	OffsetY		 float64	`xorm:"Double 'offset_y'"`
+	MaxRedoTimes int        `xorm:"int 'max_redo_times'"`
 }
 
 type Curves struct {

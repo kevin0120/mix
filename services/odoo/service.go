@@ -170,8 +170,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 		o.LongPin = v.LongPin
 		o.Vin = v.VIN
 		o.MaxOpTime = v.Max_op_time
-		o.MaxRedoTimes = v.Max_redo_times
-		o.WorkSheet = v.Worksheet.Content
+		o.WorkSheet = v.Worksheet
 		o.UpdateTime = v.UpdateTime
 
 		o.MO_Year = v.MO_Year
@@ -183,7 +182,6 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 		o.MO_Lnr = v.MO_Lnr
 		o.MO_Model = v.MO_Model
 
-		points_len := len(v.Worksheet.Points)
 		results := []storage.Results{}
 		result_count := 0
 		for _, consu := range v.Consumes {
@@ -214,14 +212,8 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 			for _, result_id := range consu.ResultIDs {
 				result_count++
 
-				if result_count <= points_len {
-					r.OffsetX = v.Worksheet.Points[result_count - 1].X
-					r.OffsetY = v.Worksheet.Points[result_count - 1].Y
-				} else {
-					// 点不存在
-					r.OffsetX = 0
-					r.OffsetY = 0
-				}
+				r.OffsetX = consu.X
+				r.OffsetY = consu.Y
 
 				r.Seq = result_count
 				r.ResultId = result_id

@@ -14,6 +14,7 @@ type Result struct {
 	Controller_SN 	string  `json:"controller_sn"`
 	GunSN		  	string  `json:"gun_sn"`
 	PSet          	int     `json:"pset"`
+	MaxRedoTimes 	int     `json:"max_redo_times"`
 	X 				float64 `json:"x_offset"`
 	Y 				float64 `json:"y_offset"`
 }
@@ -29,7 +30,7 @@ type Workorder struct {
 	Status       string    `json:"status"`
 	//Result_ids   []int64   `json:"result_ids"`
 	WorkSheet    string    `json:"work_sheet"`
-	MaxRedoTimes int       `json:"max_redo_times"`
+
 	MaxOpTime    int       `json:"max_op_time"`
 	Results		 []Result  `json:"results"`
 }

@@ -28,6 +28,9 @@ type ODOOConsume struct {
 	ToleranceMin 			float64 `json:"tolerance_min"`
 	PSet           			string  `json:"pset"`
 	NutNo					string 	`json:"nut_no"`
+	Max_redo_times 			int     `json:"max_redo_times"`
+	X 						float64 `json:"offset_x"`
+	Y 						float64 `json:"offset_y"`
 	ResultIDs 				[]int64 `json:"result_ids"`
 }
 
@@ -35,7 +38,6 @@ type ODOOConsume struct {
 type ODOOWorkorder struct {
 	ID             int64   `json:"id"`
 	Status         string  `json:"status"`
-	Max_redo_times int     `json:"max_redo_times"`
 	Max_op_time    int     `json:"max_op_time"`
 
 	HMI struct {
@@ -43,7 +45,7 @@ type ODOOWorkorder struct {
 		UUID string `json:"uuid"`
 	} `json:"hmi"`
 
-	Worksheet  ODOOWorksheet `json:"worksheet"`
+	Worksheet  string 	 `json:"worksheet"`
 	KNR        string    `json:"knr"`
 	VIN        string    `json:"vin"`
 	LongPin    string    `json:"long_pin"`
@@ -64,11 +66,6 @@ type ODOOWorkorder struct {
 type ODOOPoints struct {
 	X float64 `json:"offset_x"`
 	Y float64 `json:"offset_y"`
-}
-
-type ODOOWorksheet struct {
-	Content string `json:"content"`
-	Points  []ODOOPoints `json:"points"`
 }
 
 type ODOOCurveAppend struct {

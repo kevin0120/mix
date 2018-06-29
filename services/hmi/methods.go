@@ -138,7 +138,6 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 	resp.Knr = workorder.Knr
 	resp.LongPin = workorder.LongPin
 	resp.Status = workorder.Status
-	resp.MaxRedoTimes = workorder.MaxRedoTimes
 	resp.MaxOpTime = workorder.MaxOpTime
 	resp.WorkSheet = workorder.WorkSheet
 
@@ -150,6 +149,7 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 		r.Controller_SN = v.ControllerSN
 		r.X = v.OffsetX
 		r.Y = v.OffsetY
+		r.MaxRedoTimes = v.MaxRedoTimes
 
 		resp.Results = append(resp.Results, r)
 	}

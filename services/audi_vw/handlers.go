@@ -168,7 +168,7 @@ func (h *Handlers) handleResult(result *ControllerResult, ctx *HandlerContext) e
 	r.ResultValue = string(s_value)
 	r.PSetDefine = string(s_pset)
 
-	if r.Count >= int(workorder.MaxRedoTimes) || r.Result == RESULT_OK {
+	if r.Count >= int(r.MaxRedoTimes) || r.Result == RESULT_OK {
 		needPushAiis = true
 		r.Stage = RESULT_STAGE_FINAL
 
