@@ -21,7 +21,7 @@ def _create_wave_result_dict(x,data):
     _data = json.loads(data)
     _ret['result'] = _data['result']  # 不是dataframe 对象
     _data.pop('result')
-    _data[u'tor_{0}'.format(x)] = _data['cur_m']
+    _data[u'{0}'.format(x)] = _data['cur_m']
     _data.pop('cur_m')
     _ret['wave'] = DataFrame.from_dict(_data)
     _wave_cache[x] = _ret  # 将其加入缓存
