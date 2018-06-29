@@ -43,11 +43,11 @@
                                     <field name="controller_id_domain" invisible="1" />
                                     <field name="gun_id_domain" invisible="1" />
                                     <field name="sequence" widget="handle"/>
-                                    <field name="product_id" options="{'no_create_edit': True,'no_open': True}"/>
+                                    <field name="product_id" domain="[('sa_type', '=', 'screw')]" options="{'no_create_edit': True,'no_open': True}" required="1"/>
                                     <!--<field name="has_attachments" invisible="1"/>-->
                                     <!--<button name="action_see_attachments" type="object" icon="fa-files-o" attrs="{'invisible': [('has_attachments', '=', False)]}"/>-->
                                     <!--<button name="action_see_attachments" type="object" icon="fa-file" attrs="{'invisible': [('has_attachments', '=', True)]}"/>-->
-                                    <field name="product_qty"/>
+                                    <field name="product_qty" required="1" />
                                     <field name="operation_id" required="1"  readonly="1" options="{'no_quick_create':True,'no_create_edit':True}"/>
                                     <!--<field name="group_id" readonly="1"/>-->
                                     <field name="program_id" required="1"/>
