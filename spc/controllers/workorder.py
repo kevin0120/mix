@@ -127,8 +127,8 @@ class ApiMrpWorkorder(http.Controller):
 
                 # 定位消耗品的qcp
                 _qcps = env['quality.point'].search([('bom_line_id', '=', consu.bom_line_id.id),
-                                                          ('operation_id', '=', order.operation_id.id)],
-                                                         limit=1)
+                                                      ('operation_id', '=', order.operation_id.id)],
+                                                      limit=1)
 
                 _consumes.append({
                     "seq": consu.sequence,
