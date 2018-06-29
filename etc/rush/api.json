@@ -532,16 +532,6 @@
           "description": "hmi序列号",
           "example": "1122334455667788"
         },
-        "pset": {
-          "type": "integer",
-          "description": "拧接程序号",
-          "example": 1
-        },
-        "nut_total": {
-          "type": "number",
-          "description": "螺栓数量",
-          "example": 4
-        },
         "vin": {
           "type": "string",
           "description": "车辆识别号",
@@ -550,6 +540,11 @@
         "knr": {
           "type": "string",
           "description": "车辆装配代码",
+          "example": "64235375"
+        },
+        "long_pin": {
+          "type": "string",
+          "description": "long_pin",
           "example": "64235375"
         },
         "status": {

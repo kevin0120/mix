@@ -15,8 +15,8 @@ type Result struct {
 	GunSN		  	string  `json:"gun_sn"`
 	PSet          	int     `json:"pset"`
 	MaxRedoTimes 	int     `json:"max_redo_times"`
-	X 				float64 `json:"x_offset"`
-	Y 				float64 `json:"y_offset"`
+	X 				float64 `json:"offset_x"`
+	Y 				float64 `json:"offset_Y"`
 }
 
 type Workorder struct {
