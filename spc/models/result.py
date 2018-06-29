@@ -28,6 +28,8 @@ class OperationResult(models.HyperModel):
 
     qcp_id = fields.Many2one('quality.point')
 
+    gun_id = fields.Many2one('maintenance.equipment', string='Screw Gun', copy=False)
+
     pset_strategy = fields.Selection([('AD', 'Torque tightening'),
                                          ('AW', 'Angle tightening'),
                                          ('ADW', 'Torque/Angle tightening'),

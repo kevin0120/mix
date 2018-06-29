@@ -236,16 +236,41 @@
             <!--<field name="target">inline</field>-->
         </record>
 
+        <record id="sa_spc_equipment_form_view" model="ir.ui.view">
+            <field name="name">sa_spc_equipment_form_view</field>
+            <field name="model">maintenance.equipment</field>
+            <field name="inherit_id" ref="sa_configuration.sa_maintenance_equipment_view_form_inherit"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@class='oe_button_box']" position="inside">
+                    <button string="SPC" name="action_see_spc_control" type="object"
+                            icon="fa-bars" class="oe_stat_button" groups="spc.group_spc_user, spc.group_spc_manager"
+                             attrs="{'invisible': [('category_name','!=','Gun')]}"/>
+                </xpath>
+            </field>
+        </record>
+
+
+        <record id="sa_hr_equipment_view_tree_inherit" model="ir.ui.view">
+            <field name="name">sa_hr_equipment_view_tree_inherit</field>
+            <field name="model">maintenance.equipment</field>
+            <field name="inherit_id" ref="maintenance.hr_equipment_view_tree"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <field name="category_name" />
+                </field>
+            </field>
+        </record>
+
         <record id="action_spc_controller_form" model="ir.actions.act_window">
-            <field name="name">Controller Analyze</field>
-            <field name="res_model">mrp.workcenter</field>
+            <field name="name">Gun Analyze</field>
+            <field name="res_model">maintenance.equipment</field>
             <field name="view_mode">tree,form</field>
-            <field name="search_view_id" ref="sa_configuration.sa_view_mrp_workcenter_search_inherit"/>
-            <field name="context">{'search_default_group_by_controller': 1}</field>
+            <field name="search_view_id" ref="sa_configuration.sa_maintenance_equipment_view_search_inherit"/>
+            <field name="context">{'search_default_is_gun': 1}</field>
             <field name="view_ids"
                    eval="[(5, 0, 0),
-                          (0, 0, {'view_mode': 'tree', 'view_id': ref('sa_spc_workcenter_tree_view')}),
-                          (0, 0, {'view_mode': 'form', 'view_id': ref('sa_spc_workcenter_form_view')})]"/>
+                          (0, 0, {'view_mode': 'tree', 'view_id': ref('sa_hr_equipment_view_tree_inherit')}),
+                          (0, 0, {'view_mode': 'form', 'view_id': ref('sa_spc_equipment_form_view')})]"/>
             <!--<field name="target">inline</field>-->
         </record>
 
@@ -261,7 +286,7 @@
 
         <menuitem id="menu_spc_vehicle" name="Vehicle Analyze" action="action_spc_vehicle_form" parent="menu_spc_analyze" sequence="10"/>
 
-        <menuitem id="menu_spc_controller" name="Controller Analyze" action="action_spc_controller_form" parent="menu_spc_analyze" sequence="20"/>
+        <menuitem id="menu_spc_controller" name="Gun Analyze" action="action_spc_controller_form" parent="menu_spc_analyze" sequence="20"/>
 
         <menuitem id="menu_spc" name="SPC" action="action_spc_form" parent="menu_spc_analyze" sequence="30"/>
 

@@ -19,6 +19,8 @@ class MrpWOConsu(models.Model):
     product_id = fields.Many2one('product.product', string='Consume Product')
     qty = fields.Float('Consume Product Qty')
 
+    gun_id = fields.Many2one('maintenance.equipment', string='Screw Gun', copy=False)
+
     program_id = fields.Many2one('controller.program')
 
 
@@ -130,7 +132,8 @@ class MrpProduction(models.Model):
                     'workorder_id': workorder.id,
                     'product_id': line_id.product_id.id or None,
                     'qty': line_id.product_qty or None,
-                    'program_id': line_id.program_id.id or None,
+                    'gun_id': line_id.gun_id.id,
+                    'program_id': line_id.program_id.id,
                     'bom_line_id': line_id.id
                 }
                 consume_bom_lines.create(val)
@@ -186,7 +189,8 @@ class MrpProduction(models.Model):
                     'workorder_id': workorder.id,
                     'product_id': line_id.product_id.id or None,
                     'qty': line_id.product_qty or None,
-                    'program_id': line_id.program_id.id or None,
+                    'gun_id': line_id.gun_id.id,
+                    'program_id': line_id.program_id.id,
                     'bom_line_id': line_id.id
                 }
                 consume_bom_lines.create(val)
