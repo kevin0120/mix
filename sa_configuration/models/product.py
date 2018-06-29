@@ -44,8 +44,8 @@ class ProductProduct(models.Model):
         if 'product_tmpl_id' in vals:
             for product in self:
                 if product.product_tmpl_id.id == vals['product_tmpl_id']:
-                    continue
-                super(ProductProduct, product).write(vals)
+                    vals.pop('product_tmpl_id')
+        super(ProductProduct, self).write(vals)
         return True
 
 

@@ -64,6 +64,7 @@ class MrpBom(models.Model):
             for operation_point in operation.operation_point_ids:
                 val = {
                     "operation_point_id": operation_point.id,
+                    "product_id": operation_point.product_id.id,
                     "bom_id": self.id,
                 }
                 self.env['mrp.bom.line'].sudo().create(val)
@@ -81,11 +82,11 @@ class MrpBomLine(models.Model):
 
     operation_point_id = fields.Many2one('operation.point', required=1)
 
-    product_id = fields.Many2one('product.product',  related="operation_point_id.product_id")
+    product_id = fields.Many2one('product.product',  related="operation_point_id.product_id", store=True)
 
-    product_qty = fields.Float('Product Quantity', related="operation_point_id.product_qty")
+    product_qty = fields.Float('Product Quantity', related="operation_point_id.product_qty", store=True)
 
-    operation_id = fields.Many2one('mrp.routing.workcenter', related="operation_point_id.operation_id")
+    operation_id = fields.Many2one('mrp.routing.workcenter', related="operation_point_id.operation_id",store=True)
 
     group_id = fields.Many2one('mrp.routing.group', related="operation_id.group_id", string='Routing Group')
 
