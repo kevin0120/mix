@@ -27,22 +27,25 @@ class PushWorkorder(AbstractModel):
 
     def _post_workorder_to_masterpc(self, url, orders):
         r = list()
-        for workorder in orders:
-            points = self.env['point.point'].sudo().search_read(
-                domain=[('res_model', '=', 'mrp.routing.workcenter'), ('res_id', '=', workorder.operation_id.id),
-                        ('res_field', '=', 'worksheet_img')],
-                fields=['x_offset', 'y_offset'])
+        for order in orders:
+            # points = self.env['point.point'].sudo().search_read(
+            #     domain=[('res_model', '=', 'mrp.routing.workcenter'), ('res_id', '=', workorder.operation_id.id),
+            #             ('res_field', '=', 'worksheet_img')],
+            #     fields=['x_offset', 'y_offset'])
 
             # 工单中的消耗品列表
             _consumes = list()
-            for consu in workorder.consu_bom_line_ids:
+            for consu in order.consu_bom_line_ids:
                 # 定位消耗品的qcp
                 _qcps = self.env['quality.point'].search([('bom_line_id', '=', consu.bom_line_id.id),
-                                                          ('operation_id', '=', workorder.operation_id.id)],
+                                                          ('operation_id', '=', order.operation_id.id)],
                                                          limit=1)
 
                 _consumes.append({
                     "seq": consu.sequence,
+                    'max_redo_times': consu.bom_line_id.operation_point_id.max_redo_times,
+                    'offset_x': consu.bom_line_id.operation_point_id.x_offset,
+                    'offset_y': consu.bom_line_id.operation_point_id.y_offset,
                     "pset": consu.bom_line_id.program_id.code,
                     "nut_no": consu.product_id.screw_type_code,
                     "gun_sn": consu.bom_line_id.gun_id.serial_no,
@@ -55,29 +58,30 @@ class PushWorkorder(AbstractModel):
                 })
 
             vals = {
-                'id': workorder.id,
-                'hmi': {'id': workorder.workcenter_id.hmi_id.id, 'uuid': workorder.workcenter_id.hmi_id.serial_no},
-                'worksheet': {'content': workorder.worksheet_img, "points": points},
-                # 'pset': workorder.operation_id.program_id.code,
-                'max_redo_times': workorder.operation_id.max_redo_times,
-                'max_op_time': workorder.operation_id.max_op_time,
-                # 'nut_total': workorder.consu_product_qty,
-                'vin': workorder.production_id.vin,
-                'knr': workorder.production_id.knr,
-                'long_pin': workorder.production_id.long_pin,
-                # 'result_ids': workorder.result_ids.ids,
-                'status': workorder.state,  # pending, ready, process, done, cancel
-                
-                'equipment_name': workorder.production_id.equipment_name,
-                'factory_name': workorder.production_id.factory_name,
-                'year': workorder.production_id.year,
-                'pin': workorder.production_id.pin,
-                'pin_check_code': workorder.production_id.pin_check_code,
-                'assembly_line': workorder.production_id.assembly_line_id.code,
-                'lnr': workorder.production_id.lnr,
-                # 'nut_no': workorder.consu_product_id.screw_type_code,
+                'id': order.id,
+                'hmi': {'id': order.workcenter_id.hmi_id.id, 'uuid': order.workcenter_id.hmi_id.serial_no},
+                'worksheet': order.operation_id.worksheet_img,
+                # 'max_redo_times': order.operation_id.max_redo_times,
+                'max_op_time': order.operation_id.max_op_time,
+                # 'pset': order.operation_id.program_id.code,
+                # 'nut_total': order.consu_product_qty,
+                'vin': order.production_id.vin,
+                'knr': order.production_id.knr,
+                'long_pin': order.production_id.long_pin,
+                # 'result_ids': order.result_ids.ids,
+                'status': order.state,  # pending, ready, process, done, cancel
+
+                'equipment_name': order.production_id.equipment_name,
+                'factory_name': order.production_id.factory_name,
+                'year': order.production_id.year,
+                'pin': order.production_id.pin,
+                'pin_check_code': order.production_id.pin_check_code,
+                'assembly_line': order.production_id.assembly_line_id.code,
+                'lnr': order.production_id.lnr,
+                # 'nut_no': order.consu_product_id.screw_type_code,
                 'consumes': _consumes,
-                'update_time': str_time_to_rfc3339(workorder.production_date)
+                'model': order.production_id.product_id.vehicle_type_code,
+                'update_time': str_time_to_rfc3339(order.production_date)
             }
             r.append(vals)
         try:

@@ -25,10 +25,10 @@ class ApiMrpWorkorder(http.Controller):
                 body = json.dumps({'msg': 'Can not found workorder'})
                 return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
                                 status=404)
-            points = env['point.point'].search_read(
-                domain=[('res_model', '=', 'mrp.routing.workcenter'), ('res_id', '=', order.operation_id.id),
-                        ('res_field', '=', 'worksheet_img')],
-                fields=['x_offset', 'y_offset'])
+            # points = env['point.point'].search_read(
+            #     domain=[('res_model', '=', 'mrp.routing.workcenter'), ('res_id', '=', order.operation_id.id),
+            #             ('res_field', '=', 'worksheet_img')],
+            #     fields=['x_offset', 'y_offset'])
 
             # 工单中的消耗品列表
             _consumes = list()
@@ -41,6 +41,9 @@ class ApiMrpWorkorder(http.Controller):
 
                 _consumes.append({
                     "seq": consu.sequence,
+                    'max_redo_times':consu.bom_line_id.operation_point_id.max_redo_times,
+                    'offset_x': consu.bom_line_id.operation_point_id.x_offset,
+                    'offset_y': consu.bom_line_id.operation_point_id.y_offset,
                     "pset": consu.bom_line_id.program_id.code,
                     "nut_no": consu.product_id.screw_type_code,
                     "gun_sn": consu.bom_line_id.gun_id.serial_no,
@@ -55,12 +58,15 @@ class ApiMrpWorkorder(http.Controller):
             ret = {
                 'id': order.id,
                 'hmi': {'id': order.workcenter_id.hmi_id.id, 'uuid': order.workcenter_id.hmi_id.serial_no},
-                'worksheet': {'content': order.worksheet_img, "points": points},
+                'worksheet': order.operation_id.worksheet_img,
+                # 'max_redo_times': order.operation_id.max_redo_times,
+                'max_op_time': order.operation_id.max_op_time,
                 # 'pset': order.operation_id.program_id.code,
                 # 'nut_total': order.consu_product_qty,
                 'vin': order.production_id.vin,
                 'knr': order.production_id.knr,
-                # 'result_ids': results,
+                'long_pin': order.production_id.long_pin,
+                # 'result_ids': order.result_ids.ids,
                 'status': order.state,  # pending, ready, process, done, cancel
 
                 'equipment_name': order.production_id.equipment_name,
@@ -72,6 +78,7 @@ class ApiMrpWorkorder(http.Controller):
                 'lnr': order.production_id.lnr,
                 # 'nut_no': order.consu_product_id.screw_type_code,
                 'consumes': _consumes,
+                'model': order.production_id.product_id.vehicle_type_code,
                 'update_time': str_time_to_rfc3339(order.production_date)
             }
             body = json.dumps(ret)
@@ -110,9 +117,9 @@ class ApiMrpWorkorder(http.Controller):
         workorder_ids = env['mrp.workorder'].search(domain, limit=limit, order=order_by)
         _ret = list()
         for order in workorder_ids:
-            points = env['point.point'].search_read(
-                domain=[('res_model', '=', 'mrp.routing.workcenter'), ('res_id','=', order.operation_id.id), ('res_field', '=', 'worksheet_img')],
-                fields=['x_offset', 'y_offset', 'sequence'])
+            # points = env['point.point'].search_read(
+            #     domain=[('res_model', '=', 'mrp.routing.workcenter'), ('res_id','=', order.operation_id.id), ('res_field', '=', 'worksheet_img')],
+            #     fields=['x_offset', 'y_offset', 'sequence'])
 
             # 工单中的消耗品列表
             _consumes = list()
@@ -125,6 +132,9 @@ class ApiMrpWorkorder(http.Controller):
 
                 _consumes.append({
                     "seq": consu.sequence,
+                    'max_redo_times':consu.bom_line_id.operation_point_id.max_redo_times,
+                    'offset_x': consu.bom_line_id.operation_point_id.x_offset,
+                    'offset_y': consu.bom_line_id.operation_point_id.y_offset,
                     "pset": consu.bom_line_id.program_id.code,
                     "nut_no": consu.product_id.screw_type_code,
                     "gun_sn": consu.bom_line_id.gun_id.serial_no,
@@ -139,8 +149,8 @@ class ApiMrpWorkorder(http.Controller):
             _ret.append({
                 'id': order.id,
                 'hmi': {'id': workcenter_id.hmi_id.id, 'uuid': workcenter_id.hmi_id.serial_no},
-                'worksheet': {'content': order.worksheet_img, "points": points},
-                'max_redo_times': order.operation_id.max_redo_times,
+                'worksheet': order.operation_id.worksheet_img,
+                # 'max_redo_times': order.operation_id.max_redo_times,
                 'max_op_time': order.operation_id.max_op_time,
                 # 'pset': order.operation_id.program_id.code,
                 # 'nut_total': order.consu_product_qty,
@@ -159,6 +169,7 @@ class ApiMrpWorkorder(http.Controller):
                 'lnr': order.production_id.lnr,
                 # 'nut_no': order.consu_product_id.screw_type_code,
                 'consumes': _consumes,
+                'model': order.production_id.product_id.vehicle_type_code,
                 'update_time': str_time_to_rfc3339(order.production_date)
             })
         if len(_ret) == 0:

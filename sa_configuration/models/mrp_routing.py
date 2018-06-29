@@ -31,7 +31,7 @@ class MrpRoutingWorkcenter(models.Model):
 
     @api.multi
     def name_get(self):
-        return [(operation.id, u"[{0}]{1}@{2}".format(operation.name, operation.group_id.code, operation.workcenter_id.name)) for operation in self]  # 强制可视化时候名称显示的是code
+        return [(operation.id, u"[{0}]{1}@{2}/{3}".format(operation.name, operation.group_id.code, operation.workcenter_id.name, operation.routing_id.name)) for operation in self]  # 强制可视化时候名称显示的是code
 
 
 class MrpPR(models.Model):
