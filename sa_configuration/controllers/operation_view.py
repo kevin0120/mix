@@ -33,40 +33,43 @@ class OperationView(http.Controller):
                 headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
                 return Response(body, status=405, headers=headers)
 
-            current_max_seq = len(operation.operation_point_ids)
+            current_points = env['operation.point'].search([('operation_id', '=', operation_id)])
+            points_map = {i.id:i for i in current_points}
+
             for val in points:
                 if not val.has_key('x_offset') or not val.has_key('y_offset'):
                     # 忽略没有x_offset或y_offset的点
                     continue
 
-                if val.has_key('sequence'):
+                if val.has_key('id'):
 
-                    point = env['operation.point'].search([('operation_id', '=', operation_id),
-                                                          ('sequence', '=', val['sequence'])])
-                    if not point:
+                    if not points_map.has_key(val['id']):
                         # 新增点
-                        current_max_seq = current_max_seq + 1
                         val.update({
                             'operation_id': operation_id,
-                            'sequence': current_max_seq,
                             'x_offset': val['x_offset'],
                             'y_offset': val['y_offset']
                         })
                         env['operation.point'].create(val)
                     else:
                         # 更新点
+                        point = points_map[val['id']]
                         point.write(val)
+                        del points_map[point.id]
+
                 else:
                     # 新增点
-                    current_max_seq = current_max_seq + 1
                     val.update({
                         'operation_id': operation_id,
-                        'sequence': current_max_seq,
                         'x_offset': val['x_offset'],
                         'y_offset': val['y_offset']
                     })
                     env['operation.point'].create(val)
 
+            for k in points_map:
+                points_map[k].unlink()
+
+            operation.button_resequence()
             body = json.dumps({'msg': "Edit point success"})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=200, headers=headers)
@@ -84,6 +87,7 @@ class OperationView(http.Controller):
                 _points = []
                 for point in operation.operation_point_ids:
                     _points.append({
+                        'id': point.id,
                         'seq': point.sequence,
                         'x_offset': point.x_offset,
                         'y_offset': point.y_offset
