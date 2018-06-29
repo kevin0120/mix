@@ -511,6 +511,11 @@
           "type": "number",
           "description": "点位y坐标",
           "example": 200
+        },
+        "max_redo_times": {
+          "type": "number",
+          "description": "最大重试拧接次数",
+          "example": 3
         }
       }
     },
@@ -551,6 +556,11 @@
           "type": "string",
           "description": "工单状态",
           "example": "ready"
+        },
+        "max_op_time": {
+          "type": "number",
+          "description": "最大步进时间(秒)",
+          "example": 30
         },
         "work_sheet": {
           "type": "string",
