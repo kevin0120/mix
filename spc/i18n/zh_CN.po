@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0+e-20171123\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-06-21 08:28+0000\n"
-"PO-Revision-Date: 2018-06-21 08:28+0000\n"
+"POT-Creation-Date: 2018-06-29 03:35+0000\n"
+"PO-Revision-Date: 2018-06-29 03:35+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -80,6 +80,16 @@ msgid "Configuration"
 msgstr "配置"
 
 #. module: spc
+#: model:ir.model.fields,field_description:spc.field_operation_result_consu_bom_line_id
+msgid "Consu bom line id"
+msgstr "Consu bom line id"
+
+#. module: spc
+#: model:ir.model.fields,field_description:spc.field_operation_result_consu_product_id
+msgid "Consu product id"
+msgstr "螺栓"
+
+#. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_control_date
 msgid "Control Date"
 msgstr "控制日期"
@@ -88,17 +98,6 @@ msgstr "控制日期"
 #: model:ir.model.fields,field_description:spc.field_operation_result_point_id
 msgid "Control Point"
 msgstr "控制点"
-
-#. module: spc
-#: model:ir.ui.view,arch_db:spc.operation_result_view_search
-msgid "Controller"
-msgstr "控制器"
-
-#. module: spc
-#: model:ir.actions.act_window,name:spc.action_spc_controller_form
-#: model:ir.ui.menu,name:spc.menu_spc_controller
-msgid "Controller Analyze"
-msgstr "工位分析(控制器)"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_aiis_config_settings_create_uid
@@ -120,7 +119,7 @@ msgid "Current Month"
 msgstr "本月"
 
 #. module: spc
-#: code:addons/spc/models/result.py:83
+#: code:addons/spc/models/result.py:90
 #: model:ir.ui.view,arch_db:spc.operation_result_view_search
 #: selection:operation.result,lacking:0
 #, python-format
@@ -159,6 +158,11 @@ msgid "Double Weibull"
 msgstr "双韦伯分布"
 
 #. module: spc
+#: model:ir.model,name:spc.model_maintenance_equipment
+msgid "Equipment"
+msgstr "设备"
+
+#. module: spc
 #: model:ir.ui.view,arch_db:spc.operation_result_view_form
 msgid "Except"
 msgstr "异常"
@@ -184,8 +188,8 @@ msgid "Fail"
 msgstr "失败"
 
 #. module: spc
-#: code:addons/spc/models/result.py:89
-#: code:addons/spc/models/result.py:92
+#: code:addons/spc/models/result.py:96
+#: code:addons/spc/models/result.py:99
 #: model:ir.ui.view,arch_db:spc.operation_result_view_search
 #: selection:operation.result,final_pass:0
 #: selection:operation.result,one_time_pass:0
@@ -201,7 +205,7 @@ msgid "Final Pass"
 msgstr "最终通过"
 
 #. module: spc
-#: code:addons/spc/models/result.py:91
+#: code:addons/spc/models/result.py:98
 #: selection:operation.result,final_pass:0
 #, python-format
 msgid "Final Passed"
@@ -213,7 +217,17 @@ msgid "Group By"
 msgstr "分组"
 
 #. module: spc
+#: model:ir.actions.act_window,name:spc.action_spc_controller_form
+#: model:ir.ui.menu,name:spc.menu_spc_controller
+msgid "Gun Analyze"
+msgstr "Gun Analyze"
+
+#. module: spc
 #: model:ir.model.fields,field_description:spc.field_mrp_workorder_sent
+msgid "Have sent to Masterpc"
+msgstr "Have sent to Masterpc"
+
+#. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_sent
 msgid "Have sent to aiis"
 msgstr "已被发送给AIIS(FIS)"
@@ -301,7 +315,7 @@ msgstr "制造信息"
 #. module: spc
 #: model:ir.model,name:spc.model_mrp_production
 msgid "Manufacturing Order"
-msgstr "制造订单"
+msgstr "生产订单"
 
 #. module: spc
 #: selection:ta.spc.wizard,weibull_dist_method:0
@@ -356,11 +370,11 @@ msgid "Need render"
 msgstr "Need render"
 
 #. module: spc
-#: code:addons/spc/models/result.py:52
-#: code:addons/spc/models/result.py:151
-#: code:addons/spc/models/result.py:152
-#: code:addons/spc/models/result.py:163
-#: code:addons/spc/models/result.py:164
+#: code:addons/spc/models/result.py:58
+#: code:addons/spc/models/result.py:158
+#: code:addons/spc/models/result.py:159
+#: code:addons/spc/models/result.py:170
+#: code:addons/spc/models/result.py:171
 #, python-format
 msgid "New"
 msgstr "新建"
@@ -371,7 +385,7 @@ msgid "No measure"
 msgstr "未测量"
 
 #. module: spc
-#: code:addons/spc/models/result.py:84
+#: code:addons/spc/models/result.py:91
 #: selection:operation.result,lacking:0
 #, python-format
 msgid "Normal"
@@ -406,7 +420,7 @@ msgid "One Time Pass"
 msgstr "一次通过"
 
 #. module: spc
-#: code:addons/spc/models/result.py:88
+#: code:addons/spc/models/result.py:95
 #: selection:operation.result,one_time_pass:0
 #, python-format
 msgid "One Time Passed"
@@ -430,6 +444,7 @@ msgstr "作业结果是执行质量控制点的结果"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_mrp_production_result_ids
+#: model:ir.model.fields,field_description:spc.field_mrp_wo_consu_result_ids
 #: model:ir.model.fields,field_description:spc.field_mrp_workorder_result_ids
 #: model:ir.ui.menu,name:spc.menu_operation_result
 msgid "Operation Results"
@@ -471,6 +486,11 @@ msgstr "生产单"
 #: model:ir.model.fields,field_description:spc.field_operation_result_pset_strategy
 msgid "Pset strategy"
 msgstr "Pset策略"
+
+#. module: spc
+#: model:ir.model.fields,field_description:spc.field_operation_result_qcp_id
+msgid "Qcp id"
+msgstr "Qcp id"
 
 #. module: spc
 #: model:ir.ui.view,arch_db:spc.operation_result_view_graph
@@ -541,6 +561,7 @@ msgstr "结果"
 #: model:ir.ui.menu,name:spc.menu_spc_param_settings
 #: model:ir.ui.menu,name:spc.menu_spc_scope_root
 #: model:ir.ui.view,arch_db:spc.sa_mrp_production_form_inherit
+#: model:ir.ui.view,arch_db:spc.sa_spc_equipment_form_view
 #: model:ir.ui.view,arch_db:spc.sa_spc_workcenter_form_view
 msgid "SPC"
 msgstr "过程控制分析(SPC)"
@@ -557,10 +578,15 @@ msgid "Scatter"
 msgstr "散列图"
 
 #. module: spc
-#: model:ir.model.fields,field_description:spc.field_operation_result_consu_product_id
 #: model:ir.ui.view,arch_db:spc.operation_result_view_search
 msgid "Screw"
 msgstr "螺栓"
+
+#. module: spc
+#: model:ir.model.fields,field_description:spc.field_operation_result_gun_id
+#: model:ir.ui.view,arch_db:spc.operation_result_view_search
+msgid "Screw Gun"
+msgstr "拧紧枪"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_screw_id
@@ -743,6 +769,7 @@ msgstr "韦伯分布Shape参数"
 
 #. module: spc
 #: model:ir.model,name:spc.model_mrp_workcenter
+#: model:ir.ui.view,arch_db:spc.operation_result_view_search
 #: model:ir.ui.view,arch_db:spc.sa_spc_workcenter_tree_view
 msgid "Work Center"
 msgstr "工作中心"
@@ -773,36 +800,36 @@ msgid "aiis.config.settings"
 msgstr "aiis.config.settings"
 
 #. module: spc
-#: model:ir.model,name:spc.model_controller_result
-msgid "controller.result"
-msgstr "controller.result"
-
-#. module: spc
-#: code:addons/spc/models/result.py:83
+#: code:addons/spc/models/result.py:90
 #, python-format
 msgid "lack"
 msgstr "缺失"
 
 #. module: spc
-#: code:addons/spc/models/result.py:81
+#: model:ir.model,name:spc.model_mrp_wo_consu
+msgid "mrp.wo.consu"
+msgstr "mrp.wo.consu"
+
+#. module: spc
+#: code:addons/spc/models/result.py:88
 #, python-format
 msgid "nok"
 msgstr "NOK"
 
 #. module: spc
-#: code:addons/spc/models/result.py:79
+#: code:addons/spc/models/result.py:86
 #, python-format
 msgid "none"
 msgstr "未测量"
 
 #. module: spc
-#: code:addons/spc/models/result.py:84
+#: code:addons/spc/models/result.py:91
 #, python-format
 msgid "normal"
 msgstr "正常"
 
 #. module: spc
-#: code:addons/spc/models/result.py:80
+#: code:addons/spc/models/result.py:87
 #, python-format
 msgid "ok"
 msgstr "OK"
@@ -827,6 +854,11 @@ msgstr "result.push"
 #: model:ir.model,name:spc.model_result_sync
 msgid "result.sync"
 msgstr "result.sync"
+
+#. module: spc
+#: model:ir.model.fields,field_description:spc.field_operation_result_sequence
+msgid "sequence"
+msgstr "序列"
 
 #. module: spc
 #: model:ir.model,name:spc.model_spc_config_settings

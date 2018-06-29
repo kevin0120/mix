@@ -45,6 +45,7 @@
                             <field name="production_id"/>
                             <field name="workcenter_id" />
                             <field name="assembly_line_id" />
+                            <field name="gun_id" />
                         </group>
                         <group>
                             <field name="qcp_id" />
@@ -127,6 +128,7 @@
                 <field name="product_id"/>
                 <field name="consu_product_id" />
                 <field name="workcenter_id" />
+                <field name="gun_id" />
                 <field name="control_date" string="Checked Time"/>
                 <field name="measure_torque"/>
                 <field name="measure_degree"/>
@@ -157,6 +159,7 @@
                  <field name="control_date" type="col" interval="day"/>
                  <field name="product_id" type="row"/>
                  <field name="consu_product_id" type="row" />
+                 <field name="gun_id" />
              </pivot>
          </field>
     </record>
@@ -170,7 +173,8 @@
                 <field name="product_id" filter_domain="['|', ('product_id.name','ilike',self),('product_id.vehicle_type_code','ilike',self)]"/>
                 <field name="consu_product_id" filter_domain="['|', ('consu_product_id.name','ilike',self), ('consu_product_id.screw_type_code','ilike',self)]"/>
                 <field name="workorder_id" string="Operation"/>
-                <field name="workcenter_id" string="Controller"/>
+                <field name="workcenter_id" string="Work Center"/>
+                <field name="gun_id" string="Work Center"/>
                 <field name="production_id" string="Production"/>
                 <field name="quality_state"/>
                 <separator/>
@@ -199,6 +203,7 @@
                     <filter string="One Time Pass" context="{'group_by': 'one_time_pass'}"/>
                     <filter string="Final Pass" context="{'group_by': 'final_pass'}"/>
                     <filter string="Data Lacking" context="{'group_by': 'lacking'}"/>
+                    <filter string="Screw Gun" context="{'group_by': 'gun_id'}"/>
                 </group>
             </search>
         </field>
