@@ -38,4 +38,5 @@ type OperationResultModel struct {
 	PsetMMin       float32   `xorm:"numeric 'pset_m_min'"`
 	MeasureTDon    float32   `xorm:"numeric 'measure_t_don'"`
 	OpTime         int       `xorm:" INTEGER 'op_time'"`
+	ExceptionReason string	 `xorm:"varchar(32) 'exception_reason'"`
 }

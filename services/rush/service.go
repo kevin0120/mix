@@ -149,7 +149,7 @@ func (s *Service) OperationToFisResult(r *OperationResult) fis.FisResult {
 	result.Pin = r.Pin
 	result.PinCheckCode = r.Pin_check_code
 	result.AssemblyLine = r.AssemblyLine
-	result.ResultID = "1"
+	result.ResultID = fmt.Sprintf("%s-%s-%s-%02d", r.Model, s.Fis.Config().FactoryCode, r.NutNo, r.Seq)
 	result.Lnr = r.Lnr
 
 	valueResult := 1

@@ -105,7 +105,7 @@ func (ch *Channel) Write(buf []byte, msgType PMONSMGTYPE) error {
 		msg,_ := ch.PMONGenerateMsg(PMONMSGSO,"")
 		ch.conn.Write([]byte(msg), ch.WriteTimeout) //发送此SO忽略错误
 		time.Sleep(150 * time.Microsecond) //sleep 150 ms
-		for ch.GetStatus() == STATUSCLOSE &&  i < 2 {
+		for ch.GetStatus() == STATUSCLOSE &&  i < 6 {
 			time.Sleep(100 * time.Microsecond) //sleep 100 ms
 			i++
 		}

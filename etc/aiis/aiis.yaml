@@ -28,18 +28,19 @@ fis:
   system_type: screw
   software_version: 1.0
   mode: AUTO
+  factory_code: 20
 odoo:
-  url: http://127.0.0.1
+  url: http://127.0.0.1:8069
   route: /api/v1/mrp.productions
   headers:
     Content-Type: application/json
-  timeout: 10ms
+  timeout: 5s
   push_interval: 1s
-  max_retry: 3
+  max_retry: 1
   enable: true
 storage:
   db_url: 127.0.0.1:5432
-  db_name: sa
+  db_name: sa_ng
   db_user: admin
   db_pwd: admin
   max_connection: 60

@@ -101,6 +101,8 @@ func (s *Service) UpdateResults(result *rush.OperationResult, id int64, sent int
 	r.PsetWTarget = result.PsetWTarget
 	r.UserId = result.UserId
 	r.Lacking = "normal"
+	r.QualityState = result.QualityState
+	r.ExceptionReason = result.ExceptionReason
 
 	r.Sent = sent
 

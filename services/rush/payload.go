@@ -22,6 +22,9 @@ type OperationResult struct {
 	OPTime         int         `json:"op_time"`
 	PsetWMin       float32     `json:"pset_w_min"`
 	PsetWTarget    float32     `json:"pset_w_target"`
+	QualityState   string	   `json:"quality_state"`
+	ExceptionReason	string	   `json:"exception_reason"`
+	Seq			   int		   `json:"seq"`
 
 	// mo相关信息
 	EquipemntName  string `json:"equipment_name"` // 设备名
@@ -32,6 +35,7 @@ type OperationResult struct {
 	AssemblyLine   string `json:"assembly_line"`
 	Lnr            string `json:"lnr"`
 	NutNo          string `json:"nut_no"`
+	Model		   string `json:"model"`
 }
 
 //type AIISResult struct {

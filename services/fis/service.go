@@ -60,7 +60,7 @@ func (s *Service) Config() Config {
 }
 
 func (s *Service) Open() error {
-	s.Pmon.PmonRegistryEvent(s.OnPmonEvent, s.Config().chRecv, nil)
+	s.Pmon.PmonRegistryEvent(s.OnPmonEvent, s.Config().CHRecv, nil)
 
 	return nil
 }
@@ -131,9 +131,11 @@ func (s *Service) HandleMO(msg string) {
 	err := s.Odoo.CreateMO(mo)
 	if err != nil {
 		s.diag.Error("create mo err", err)
+	} else {
+		fmt.Printf("create mo ok:%d%d", mo.Pin, mo.Pin_check_code)
 	}
 }
 
 func (s *Service) PushResult(result *FisResult) error {
-	return s.Pmon.SendPmonMessage(pmon.PMONMSGSD, s.Config().chSend, result.Serialize())
+	return s.Pmon.SendPmonMessage(pmon.PMONMSGSD, s.Config().CHSend, result.Serialize())
 }
