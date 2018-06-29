@@ -16,7 +16,9 @@ class OperationView(http.Controller):
             return Response(body, status=404, headers=headers)
         else:
             req_vals = request.jsonrequest
-            points = req_vals['points'] if 'points' in req_vals else None
+            points = []
+            if req_vals.has_key('points'):
+                points = req_vals['points']
             img = req_vals['img'] if 'img' in req_vals else None
             if img:
                 ret = operation.write({'worksheet_img': img})
@@ -24,7 +26,7 @@ class OperationView(http.Controller):
                     body = json.dumps({'msg': "Operation %d upload image fail" % operation_id})
                     headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
                     return Response(body, status=405, headers=headers)
-            if not points:
+            if not req_vals.has_key('points'):
                 body = json.dumps({'msg': "Edit point success"})
                 headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
                 return Response(body, status=200, headers=headers)
