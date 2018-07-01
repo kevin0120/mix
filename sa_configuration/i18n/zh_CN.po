@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0+e-20171123\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-06-14 02:57+0000\n"
-"PO-Revision-Date: 2018-06-14 02:57+0000\n"
+"POT-Creation-Date: 2018-07-01 04:23+0000\n"
+"PO-Revision-Date: 2018-07-01 04:23+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -135,6 +135,7 @@ msgid "A Vehicle Code can only be assigned to one Vehicle !"
 msgstr "一个车辆编码只能被分配给一种车辆产品!"
 
 #. module: sa_configuration
+#: model:ir.model.fields,field_description:sa_configuration.field_controller_program_active
 #: model:ir.model.fields,field_description:sa_configuration.field_maintenance_equipment_connection_active
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_assemblyline_active
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_worksegament_active
@@ -150,6 +151,11 @@ msgstr "地址"
 #: selection:controller.program,strategy:0
 msgid "Angle tightening"
 msgstr "角度拧接(AW)"
+
+#. module: sa_configuration
+#: model:ir.ui.view,arch_db:sa_configuration.view_sa_config
+msgid "Apply"
+msgstr "应用"
 
 #. module: sa_configuration
 #: model:ir.ui.view,arch_db:sa_configuration.product_search_form_view_sa
@@ -227,14 +233,25 @@ msgid "BoM Lines"
 msgstr "BoM行"
 
 #. module: sa_configuration
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_wo_consu_bom_line_id
+#: model:ir.model.fields,field_description:sa_configuration.field_quality_point_bom_line_id
+msgid "Bom line id"
+msgstr "Bom line id"
+
+#. module: sa_configuration
 #: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_routing_form_view
 msgid "Budget Items"
 msgstr "预计项目"
 
 #. module: sa_configuration
-#: model:ir.model.fields,field_description:sa_configuration.field_maintenance_equipment_category_name_4001
+#: model:ir.ui.view,arch_db:sa_configuration.view_sa_config
+msgid "Cancel"
+msgstr "取消"
+
+#. module: sa_configuration
+#: model:ir.model.fields,field_description:sa_configuration.field_maintenance_equipment_category_name_4041
 msgid "Category name"
-msgstr "设备种类名称"
+msgstr "设备类别名称"
 
 #. module: sa_configuration
 #: model:ir.model.fields,field_description:sa_configuration.field_maintenance_equipment_child_ids
@@ -279,6 +296,12 @@ msgid "Configuration"
 msgstr "配置"
 
 #. module: sa_configuration
+#: model:ir.actions.act_window,name:sa_configuration.action_sa_config_configuration
+#: model:ir.ui.view,arch_db:sa_configuration.view_sa_config
+msgid "Configure"
+msgstr "配置"
+
+#. module: sa_configuration
 #: model:ir.actions.act_window,name:sa_configuration.sa_equipment_connection_action
 #: model:ir.model.fields,field_description:sa_configuration.field_maintenance_equipment_connection_name
 #: model:ir.ui.view,arch_db:sa_configuration.sa_equipment_connection_form_view
@@ -297,12 +320,18 @@ msgid "Connection Name"
 msgstr "链接名称"
 
 #. module: sa_configuration
-#: code:addons/sa_configuration/models/maintenance.py:40
+#: code:addons/sa_configuration/models/maintenance.py:42
 #, python-format
 msgid "Connection Test Failed! Here is what we got instead:\n"
 " %s"
 msgstr "连接测试失败! 这是我们获取的错误信息:\n"
 " %s"
+
+#. module: sa_configuration
+#: code:addons/sa_configuration/models/maintenance.py:40
+#, python-format
+msgid "Connection Test Failed! Here is what we got instead: %d!"
+msgstr "链接测试失败! Here is what we got instead: %d!"
 
 #. module: sa_configuration
 #: code:addons/sa_configuration/models/maintenance.py:38
@@ -321,19 +350,25 @@ msgid "Connections count"
 msgstr "链接总数"
 
 #. module: sa_configuration
-#: model:ir.model.fields,field_description:sa_configuration.field_mrp_workorder_consu_product_id
-msgid "Consu product id"
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_wo_consu_product_id
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_workorder_consu_bom_line_ids
+msgid "Consume Product"
 msgstr "消耗的产品"
 
 #. module: sa_configuration
-#: model:ir.model.fields,field_description:sa_configuration.field_mrp_workorder_consu_product_qty
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_wo_consu_qty
 msgid "Consume Product Qty"
 msgstr "消耗的产品数量"
 
 #. module: sa_configuration
-#: model:ir.model.fields,field_description:sa_configuration.field_mrp_workcenter_controller_id
+#: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_workorder_view_form_inherit_mrp
+msgid "Consume Tracking"
+msgstr "消耗追踪"
+
+#. module: sa_configuration
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_bom_line_controller_id
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_workcenter_controller_ids
 #: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_workcenter_form_view
-#: model:ir.ui.view,arch_db:sa_configuration.sa_view_mrp_workcenter_search_inherit
 #: model:maintenance.equipment.category,name:sa_configuration.equipment_screw_controller
 msgid "Controller"
 msgstr "控制器"
@@ -342,13 +377,19 @@ msgstr "控制器"
 #: model:ir.actions.act_window,name:sa_configuration.sa_program_form_action
 #: model:ir.model,name:sa_configuration.model_controller_program
 #: model:ir.ui.menu,name:sa_configuration.sa_menu_program_action
+#: model:ir.ui.view,arch_db:sa_configuration.sa_program_form_view
 msgid "Controller Program"
 msgstr "控制器程序"
 
 #. module: sa_configuration
-#: model:ir.model.fields,field_description:sa_configuration.field_mrp_workcenter_controller_id_domain
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_bom_line_controller_id_domain
 msgid "Controller id domain"
 msgstr "Controller id domain"
+
+#. module: sa_configuration
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_workcenter_controller_ids_domain
+msgid "Controller ids domain"
+msgstr "Controller ids domain"
 
 #. module: sa_configuration
 #: model:ir.model.fields,field_description:sa_configuration.field_controller_program_create_uid
@@ -356,7 +397,8 @@ msgstr "Controller id domain"
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_assemblyline_create_uid
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_routing_group_create_uid
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_worksegament_create_uid
-#: model:ir.model.fields,field_description:sa_configuration.field_point_point_create_uid
+#: model:ir.model.fields,field_description:sa_configuration.field_operation_point_create_uid
+#: model:ir.model.fields,field_description:sa_configuration.field_sa_config_settings_create_uid
 msgid "Created by"
 msgstr "创建人"
 
@@ -366,7 +408,8 @@ msgstr "创建人"
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_assemblyline_create_date
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_routing_group_create_date
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_worksegament_create_date
-#: model:ir.model.fields,field_description:sa_configuration.field_point_point_create_date
+#: model:ir.model.fields,field_description:sa_configuration.field_operation_point_create_date
+#: model:ir.model.fields,field_description:sa_configuration.field_sa_config_settings_create_date
 msgid "Created on"
 msgstr "创建时间"
 
@@ -396,6 +439,16 @@ msgid "Degree Tolerance"
 msgstr "角度阈值"
 
 #. module: sa_configuration
+#: model:ir.ui.view,arch_db:sa_configuration.sa_quality_point_view_tree_inherit
+msgid "Degree(Max)"
+msgstr "角度(最大)"
+
+#. module: sa_configuration
+#: model:ir.ui.view,arch_db:sa_configuration.sa_quality_point_view_tree_inherit
+msgid "Degree(Min)"
+msgstr "角度(最小)"
+
+#. module: sa_configuration
 #: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_routing_workcenter_form_view
 #: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_workcenter_form_view
 msgid "Description"
@@ -407,12 +460,19 @@ msgid "Description of the work center..."
 msgstr "工位的说明..."
 
 #. module: sa_configuration
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_production_display_long_pin
+msgid "Display LongPIN"
+msgstr "Display LongPIN"
+
+#. module: sa_configuration
 #: model:ir.model.fields,field_description:sa_configuration.field_controller_program_display_name
 #: model:ir.model.fields,field_description:sa_configuration.field_maintenance_equipment_connection_display_name
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_assemblyline_display_name
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_routing_group_display_name
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_wo_consu_display_name
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_worksegament_display_name
-#: model:ir.model.fields,field_description:sa_configuration.field_point_point_display_name
+#: model:ir.model.fields,field_description:sa_configuration.field_operation_point_display_name
+#: model:ir.model.fields,field_description:sa_configuration.field_sa_config_settings_display_name
 msgid "Display Name"
 msgstr "显示名称"
 
@@ -444,15 +504,10 @@ msgid "Equipments"
 msgstr "设备"
 
 #. module: sa_configuration
-#: code:addons/sa_configuration/models/maintenance.py:111
+#: code:addons/sa_configuration/models/maintenance.py:113
 #, python-format
 msgid "Error ! You cannot create recursive Equipments."
 msgstr "错误 ! 你不能创建递归的设备."
-
-#. module: sa_configuration
-#: sql_constraint:mrp.bom.line:0
-msgid "Every Bom unique operation"
-msgstr "每个物料清单的操作都是唯一的"
 
 #. module: sa_configuration
 #: sql_constraint:res.users:0
@@ -490,6 +545,21 @@ msgid "Group By..."
 msgstr "分组..."
 
 #. module: sa_configuration
+#: model:maintenance.equipment.category,name:sa_configuration.equipment_Gun
+msgid "Gun"
+msgstr "拧紧枪"
+
+#. module: sa_configuration
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_bom_line_gun_id_domain
+msgid "Gun id domain"
+msgstr "Gun id domain"
+
+#. module: sa_configuration
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_workcenter_gun_ids_domain
+msgid "Gun ids domain"
+msgstr "Gun ids domain"
+
+#. module: sa_configuration
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_workcenter_hmi_id
 #: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_workcenter_form_view
 #: model:maintenance.equipment.category,name:sa_configuration.equipment_hmi
@@ -506,8 +576,10 @@ msgstr "HTTP"
 #: model:ir.model.fields,field_description:sa_configuration.field_maintenance_equipment_connection_id
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_assemblyline_id
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_routing_group_id
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_wo_consu_id
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_worksegament_id
-#: model:ir.model.fields,field_description:sa_configuration.field_point_point_id
+#: model:ir.model.fields,field_description:sa_configuration.field_operation_point_id
+#: model:ir.model.fields,field_description:sa_configuration.field_sa_config_settings_id
 msgid "ID"
 msgstr "ID"
 
@@ -538,8 +610,10 @@ msgstr "KNR"
 #: model:ir.model.fields,field_description:sa_configuration.field_maintenance_equipment_connection___last_update
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_assemblyline___last_update
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_routing_group___last_update
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_wo_consu___last_update
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_worksegament___last_update
-#: model:ir.model.fields,field_description:sa_configuration.field_point_point___last_update
+#: model:ir.model.fields,field_description:sa_configuration.field_operation_point___last_update
+#: model:ir.model.fields,field_description:sa_configuration.field_sa_config_settings___last_update
 msgid "Last Modified on"
 msgstr "最后修改日"
 
@@ -549,7 +623,8 @@ msgstr "最后修改日"
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_assemblyline_write_uid
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_routing_group_write_uid
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_worksegament_write_uid
-#: model:ir.model.fields,field_description:sa_configuration.field_point_point_write_uid
+#: model:ir.model.fields,field_description:sa_configuration.field_operation_point_write_uid
+#: model:ir.model.fields,field_description:sa_configuration.field_sa_config_settings_write_uid
 msgid "Last Updated by"
 msgstr "最后更新人"
 
@@ -559,7 +634,8 @@ msgstr "最后更新人"
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_assemblyline_write_date
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_routing_group_write_date
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_worksegament_write_date
-#: model:ir.model.fields,field_description:sa_configuration.field_point_point_write_date
+#: model:ir.model.fields,field_description:sa_configuration.field_operation_point_write_date
+#: model:ir.model.fields,field_description:sa_configuration.field_sa_config_settings_write_date
 msgid "Last Updated on"
 msgstr "最后更新时间"
 
@@ -590,6 +666,7 @@ msgstr "制造"
 
 #. module: sa_configuration
 #: model:ir.model,name:sa_configuration.model_mrp_production
+#: model:ir.ui.view,arch_db:sa_configuration.view_sa_config
 msgid "Manufacturing Order"
 msgstr "制造订单"
 
@@ -599,11 +676,17 @@ msgid "Manufacutre Routing Group"
 msgstr "工艺组PR"
 
 #. module: sa_configuration
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_bom_line_masterpc_id
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_workcenter_masterpc_id
 #: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_workcenter_form_view
 #: model:maintenance.equipment.category,name:sa_configuration.equipment_MasterPC
 msgid "MasterPC"
 msgstr "MasterPC"
+
+#. module: sa_configuration
+#: model:ir.ui.view,arch_db:sa_configuration.sa_maintenance_equipment_view_search_inherit
+msgid "Masterpc"
+msgstr "Masterpc"
 
 #. module: sa_configuration
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_routing_workcenter_max_op_time
@@ -669,9 +752,10 @@ msgid "Odoo uses these BoMs to automatically propose manufacturing\n"
 msgstr "根据补货规则Odoo用BOM自动的生产生产订单"
 
 #. module: sa_configuration
-#: sql_constraint:mrp.workcenter:0
-msgid "Only one Controller is allowed"
-msgstr "一个工位只能有一个控制器"
+#: code:addons/sa_configuration/models/mrp_routing.py:95
+#, python-format
+msgid "Only SuperUser can delete program"
+msgstr "只有超级用户可以删除程序号"
 
 #. module: sa_configuration
 #: sql_constraint:mrp.workcenter:0
@@ -710,8 +794,8 @@ msgstr "每个工段只能有唯一的编码"
 
 #. module: sa_configuration
 #: sql_constraint:quality.point:0
-msgid "Only one quailty point per product operation is allowed"
-msgstr "每一个产品作业只能有一个质量控制点"
+msgid "Only one quailty point per product bom line is allowed"
+msgstr "每个bom行只能允许有一个质量控制点"
 
 #. module: sa_configuration
 #: model:ir.model.fields,field_description:sa_configuration.field_quality_point_operation_id
@@ -721,8 +805,20 @@ msgstr "作业"
 
 #. module: sa_configuration
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_routing_workcenter_max_redo_times
+#: model:ir.model.fields,field_description:sa_configuration.field_operation_point_max_redo_times
 msgid "Operation Max Redo Times"
 msgstr "作业最大重试次数"
+
+#. module: sa_configuration
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_routing_workcenter_operation_point_ids
+#: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_routing_workcenter_form_view
+msgid "Operation Points"
+msgstr "作业点"
+
+#. module: sa_configuration
+#: model:ir.model.fields,field_description:sa_configuration.field_operation_point_operation_id
+msgid "Operation id"
+msgstr "作业 id"
 
 #. module: sa_configuration
 #: model:ir.model.fields,field_description:sa_configuration.field_quality_point_operation_id_domain
@@ -730,6 +826,12 @@ msgid "Operation id domain"
 msgstr "Operation id domain"
 
 #. module: sa_configuration
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_bom_line_operation_point_id
+msgid "Operation point id"
+msgstr "Operation point id"
+
+#. module: sa_configuration
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_bom_operation_ids
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_routing_operation_count
 msgid "Operations"
 msgstr "作业"
@@ -747,7 +849,7 @@ msgstr "PIN # :"
 #. module: sa_configuration
 #: model:ir.actions.report.xml,name:sa_configuration.action_report_vin_production_order
 msgid "PIN Production Order"
-msgstr "PIN Production Order"
+msgstr "PIN 生产订单"
 
 #. module: sa_configuration
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_production_pin_check_code
@@ -761,17 +863,18 @@ msgstr "父设备"
 
 #. module: sa_configuration
 #: sql_constraint:mrp.routing.workcenter:0
-msgid "Per Routing only has one unique Routing group!"
-msgstr "每个工艺路线只能有一个工艺组!"
+msgid "Per Routing only has one unique Routing group per Work Center!"
+msgstr "Per Routing only has one unique Routing group per Work Center!"
 
 #. module: sa_configuration
-#: code:addons/sa_configuration/models/maintenance.py:52
+#: code:addons/sa_configuration/models/maintenance.py:54
 #, python-format
 msgid "Port must be greater than ZERO!"
 msgstr "端口必须大于0!"
 
 #. module: sa_configuration
 #: model:ir.model,name:sa_configuration.model_product_product
+#: model:ir.model.fields,field_description:sa_configuration.field_operation_point_product_id
 #: model:ir.ui.view,arch_db:sa_configuration.product_search_form_view_sa
 #: model:ir.ui.view,arch_db:sa_configuration.sa_product_normal_form_view
 #: model:ir.ui.view,arch_db:sa_configuration.sa_product_product_tree_view
@@ -784,6 +887,11 @@ msgstr "产品"
 #: model:ir.ui.view,arch_db:sa_configuration.sa_product_normal_form_view
 msgid "Product Name"
 msgstr "产品名称"
+
+#. module: sa_configuration
+#: model:ir.model.fields,field_description:sa_configuration.field_operation_point_product_qty
+msgid "Product Quantity"
+msgstr "数量"
 
 #. module: sa_configuration
 #: model:ir.ui.view,arch_db:sa_configuration.sa_product_normal_form_view
@@ -838,6 +946,11 @@ msgid "Program Name"
 msgstr "控制器程序名字"
 
 #. module: sa_configuration
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_wo_consu_program_id
+msgid "Program id"
+msgstr "Program id"
+
+#. module: sa_configuration
 #: model:ir.model.fields,field_description:sa_configuration.field_maintenance_equipment_connection_protocol
 #: model:ir.ui.view,arch_db:sa_configuration.sa_equipment_connection_form_view
 msgid "Protocol"
@@ -873,31 +986,32 @@ msgid "RFID"
 msgstr "RFID"
 
 #. module: sa_configuration
+#: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_bom_form_view
+#: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_routing_workcenter_form_view
+msgid "ReSequence"
+msgstr "重新排序"
+
+#. module: sa_configuration
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_assemblyline_code
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_worksegament_code
 msgid "Reference"
 msgstr "参照"
 
 #. module: sa_configuration
-#: model:ir.model.fields,field_description:sa_configuration.field_point_point_res_id
-msgid "Related Model ID"
-msgstr "Related Model ID"
-
-#. module: sa_configuration
-#: model:ir.model.fields,field_description:sa_configuration.field_point_point_res_field
-msgid "Related filed"
-msgstr "Related filed"
-
-#. module: sa_configuration
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_workcenter_io_id
 #: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_workcenter_form_view
 msgid "Remote IO"
-msgstr "远程IO魔抗"
+msgstr "远程IO模块"
 
 #. module: sa_configuration
 #: model:ir.model.fields,field_description:sa_configuration.field_quality_point_times
 msgid "Repeat times"
 msgstr "重复次数"
+
+#. module: sa_configuration
+#: model:ir.model.fields,field_description:sa_configuration.field_sa_config_settings_generate_result_sequence
+msgid "Result Sequences"
+msgstr "拧紧结果序列"
 
 #. module: sa_configuration
 #: model:ir.model.fields,field_description:sa_configuration.field_maintenance_equipment_parent_right
@@ -985,9 +1099,13 @@ msgid "Screw"
 msgstr "螺栓"
 
 #. module: sa_configuration
-#: model:maintenance.equipment.category,name:sa_configuration.equipment_Gun
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_bom_line_gun_id
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_wo_consu_gun_id
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_workcenter_gun_ids
+#: model:ir.ui.view,arch_db:sa_configuration.sa_maintenance_equipment_view_search_inherit
+#: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_workcenter_form_view
 msgid "Screw Gun"
-msgstr "拧枪"
+msgstr "拧紧枪"
 
 #. module: sa_configuration
 #: model:ir.ui.view,arch_db:sa_configuration.sa_view_mrp_bom_filter
@@ -1016,9 +1134,13 @@ msgstr "工段"
 
 #. module: sa_configuration
 #: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_workassembly_form_view
-#: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_worksegment_form_view
 msgid "Segments"
 msgstr "工段"
+
+#. module: sa_configuration
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_wo_consu_sequence
+msgid "Sequence"
+msgstr "序号"
 
 #. module: sa_configuration
 #: model:ir.model.fields,field_description:sa_configuration.field_maintenance_equipment_connection_tty
@@ -1026,9 +1148,24 @@ msgid "Serial TTY"
 msgstr "串口"
 
 #. module: sa_configuration
+#: selection:sa.config.settings,generate_result_sequence:0
+msgid "Set Sequence by Operation(default)"
+msgstr "Set Sequence by Operation(default)"
+
+#. module: sa_configuration
+#: selection:sa.config.settings,generate_result_sequence:0
+msgid "Set Sequence by Per Vehicle"
+msgstr "Set Sequence by Per Vehicle"
+
+#. module: sa_configuration
 #: model:ir.ui.menu,name:sa_configuration.menu_mrp_sa_setting
 #: model:ir.ui.view,arch_db:sa_configuration.sa_program_form_view
 msgid "Setting"
+msgstr "设置"
+
+#. module: sa_configuration
+#: model:ir.ui.menu,name:sa_configuration.menu_sa_config_configuration
+msgid "Settings"
 msgstr "设置"
 
 #. module: sa_configuration
@@ -1052,7 +1189,7 @@ msgid "Test Connection"
 msgstr "测试连接"
 
 #. module: sa_configuration
-#: code:addons/sa_configuration/models/mrp_bom.py:37
+#: code:addons/sa_configuration/models/mrp_bom.py:49
 #, python-format
 msgid "The product Template had a related routing config \"%s\" been actived!"
 msgstr "产品已经有相关的路线配置被激活： \"%s\" !"
@@ -1067,13 +1204,13 @@ msgstr "产品表单中的信息可以简化销售流程:\n"
 "价格，询价单中的注释，会计信息，补货方式等等"
 
 #. module: sa_configuration
-#: code:addons/sa_configuration/models/mrp_bom.py:26
+#: code:addons/sa_configuration/models/mrp_bom.py:38
 #, python-format
 msgid "The product had a related routing config \"%s\" been actived!"
 msgstr "产品已经有相关的路线配置被激活： \"%s\" !"
 
 #. module: sa_configuration
-#: code:addons/sa_configuration/models/mrp_bom.py:17
+#: code:addons/sa_configuration/models/mrp_bom.py:29
 #, python-format
 msgid "The product template \"%s\" is invalid on product with name \"%s\""
 msgstr "产品模板: \"%s\" 有一个无效的产品: \"%s\""
@@ -1086,7 +1223,7 @@ msgstr "时间拧紧(AT)"
 #. module: sa_configuration
 #: model:ir.ui.view,arch_db:sa_configuration.sa_quality_check_view_form_small_inherit
 msgid "Torque Measure"
-msgstr "Torque Measure"
+msgstr "扭矩测量"
 
 #. module: sa_configuration
 #: model:ir.ui.view,arch_db:sa_configuration.sa_quality_point_view_form_inherit_mrp
@@ -1097,6 +1234,16 @@ msgstr "扭矩阈值"
 #: selection:controller.program,strategy:0
 msgid "Torque tightening"
 msgstr "扭矩拧紧(AD)"
+
+#. module: sa_configuration
+#: model:ir.ui.view,arch_db:sa_configuration.sa_quality_point_view_tree_inherit
+msgid "Torque(Max)"
+msgstr "扭矩(最大)"
+
+#. module: sa_configuration
+#: model:ir.ui.view,arch_db:sa_configuration.sa_quality_point_view_tree_inherit
+msgid "Torque(Min)"
+msgstr "扭矩(最小)"
 
 #. module: sa_configuration
 #: selection:controller.program,strategy:0
@@ -1166,7 +1313,7 @@ msgstr "组装生产线"
 #: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_workcenter_form_view
 #: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_workcenter_tree_view_inherit
 msgid "Work Center"
-msgstr "工位"
+msgstr "工作中心"
 
 #. module: sa_configuration
 #: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_workcenter_form_view
@@ -1181,7 +1328,7 @@ msgstr "工位作业"
 #. module: sa_configuration
 #: model:ir.model,name:sa_configuration.model_mrp_routing_workcenter
 msgid "Work Center Usage"
-msgstr "工位使用情况"
+msgstr "工作中心使用情况"
 
 #. module: sa_configuration
 #: model:ir.actions.act_window,name:sa_configuration.sa_mrp_workcenter_action
@@ -1218,7 +1365,7 @@ msgstr "工段"
 #. module: sa_configuration
 #: model:ir.ui.view,arch_db:sa_configuration.sa_mrp_worksegment_form_view
 msgid "Work Segment Name"
-msgstr "Work Segment Name"
+msgstr "工段名称"
 
 #. module: sa_configuration
 #: model:ir.actions.act_window,name:sa_configuration.sa_mrp_worksegment_action
@@ -1233,6 +1380,11 @@ msgstr "工段"
 #: model:ir.ui.menu,name:sa_configuration.menu_mrp_worksite_form
 msgid "Work Site"
 msgstr "工作单元"
+
+#. module: sa_configuration
+#: model:ir.model.fields,field_description:sa_configuration.field_mrp_wo_consu_workorder_id
+msgid "Workorder id"
+msgstr "工单ID"
 
 #. module: sa_configuration
 #: model:ir.model.fields,field_description:sa_configuration.field_mrp_workcenter_worksegment_id
@@ -1253,7 +1405,7 @@ msgid "You must define a product for everything you sell, whether it's\n"
 msgstr "所有你要卖的东西都要定义为产品，不管是实体，消耗品或者你能提供给客户的服务"
 
 #. module: sa_configuration
-#: code:addons/sa_configuration/models/maintenance.py:50
+#: code:addons/sa_configuration/models/maintenance.py:52
 #, python-format
 msgid "is NOT valid IP Address!"
 msgstr "不是一个有效的IP地址!"
@@ -1264,19 +1416,24 @@ msgid "mrp.bom.line"
 msgstr "mrp.bom.line"
 
 #. module: sa_configuration
-#: model:ir.model,name:sa_configuration.model_point_point
-msgid "point.point"
-msgstr "point.point"
+#: model:ir.model,name:sa_configuration.model_mrp_wo_consu
+msgid "mrp.wo.consu"
+msgstr "mrp.wo.consu"
+
+#. module: sa_configuration
+#: model:ir.model,name:sa_configuration.model_operation_point
+msgid "operation.point"
+msgstr "operation.point"
 
 #. module: sa_configuration
 #: model:ir.model.fields,field_description:sa_configuration.field_maintenance_equipment_connection_port
 msgid "port"
-msgstr "port"
+msgstr "端口"
 
 #. module: sa_configuration
-#: model:ir.model.fields,field_description:sa_configuration.field_point_point_res_model
-msgid "related Model"
-msgstr "related Model"
+#: model:ir.model,name:sa_configuration.model_sa_config_settings
+msgid "sa.config.settings"
+msgstr "sa.config.settings"
 
 #. module: sa_configuration
 #: model:ir.ui.view,arch_db:sa_configuration.product_search_form_view_sa
@@ -1284,7 +1441,7 @@ msgid "sa_type"
 msgstr "类型"
 
 #. module: sa_configuration
-#: model:ir.model.fields,field_description:sa_configuration.field_point_point_sequence
+#: model:ir.model.fields,field_description:sa_configuration.field_operation_point_sequence
 msgid "sequence"
 msgstr "序列"
 
@@ -1294,14 +1451,14 @@ msgid "worksheet_img"
 msgstr "作业图片"
 
 #. module: sa_configuration
-#: model:ir.model.fields,field_description:sa_configuration.field_point_point_x_offset
+#: model:ir.model.fields,field_description:sa_configuration.field_operation_point_x_offset
 msgid "x axis offset from left(px)"
-msgstr "x轴左偏移(px)"
+msgstr "x轴偏移(px)"
 
 #. module: sa_configuration
-#: model:ir.model.fields,field_description:sa_configuration.field_point_point_y_offset
+#: model:ir.model.fields,field_description:sa_configuration.field_operation_point_y_offset
 msgid "y axis offset from top(px)"
-msgstr "y轴上偏移(px)"
+msgstr "y轴偏移(px)"
 
 #. module: sa_configuration
 #: model:maintenance.equipment,name:sa_configuration.hmi_0
@@ -1347,3 +1504,4 @@ msgstr "测试masterpc1"
 #: model:maintenance.equipment,name:sa_configuration.masterpc_1
 msgid "测试masterpc2"
 msgstr "测试masterpc2"
+
