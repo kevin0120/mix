@@ -38,7 +38,10 @@ class BaseApi(http.Controller):
         if 'uuids' in query_params:
             uuids = query_params['uuids'].split(',')
             domain += [('uuid', 'in', uuids)]
-        users = request.env['res.users'].sudo().search(domain, limit=_limit).read(fields=NORMAL_USER_FIELDS_READ)
+        _users = request.env['res.users'].sudo().search(domain, limit=_limit)
+        users = []
+        if _users:
+            users = _users.read(fields=NORMAL_USER_FIELDS_READ)
         for user in users:
             if 'active' in user:
                 user.update({
@@ -49,7 +52,8 @@ class BaseApi(http.Controller):
 
     @http.route('/api/v1/res.users/<string:uuid>', type='http', auth='none', cors='*', csrf=False)
     def _get_user_info(self, uuid):
-        user_id = request.env['res.users'].sudo().search([('uuid', '=', uuid)])[0]
+
+        user_id = request.env['res.users'].sudo().search([('uuid', '=', uuid)], limit=1)
 
         if not user_id:
             return Response(json.dumps({'msg': 'User not found'}), headers={'content-type': 'application/json'}, status=404)
