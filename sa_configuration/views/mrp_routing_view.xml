@@ -53,7 +53,7 @@
                                         <field name="max_redo_times" />
                                         <field name="x_offset"/>
                                         <field name="y_offset"/>
-                                        <field name="active" />
+                                        <field name="active" invisible="1"/>
                                         <button name="toggle_active" type="object" icon="fa-archive"/>
                                     </tree>
                                     <form string="Operation Points">
