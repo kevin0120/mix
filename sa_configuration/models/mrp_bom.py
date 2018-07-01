@@ -69,6 +69,13 @@ class MrpBom(models.Model):
                 }
                 self.env['mrp.bom.line'].sudo().create(val)
 
+    @api.model
+    def create(self, vals):
+        ret = super(MrpBom, self).create(vals)
+        if 'operation_ids' in vals:
+            ret._onchange_operations()
+        return ret
+
     @api.multi
     def write(self, vals):
         ret = super(MrpBom, self).write(vals)
