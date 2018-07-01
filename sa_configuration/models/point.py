@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 
-from odoo import api, fields, models
+from odoo import api, fields, models, SUPERUSER_ID, _
+
+from odoo.exceptions import UserError
 
 from odoo.addons import decimal_precision as dp
 
@@ -10,6 +12,10 @@ class OperationPoints(models.Model):
     _name = 'operation.point'
 
     _order = "sequence"
+
+    active = fields.Boolean(
+        'Active', default=True,
+        help="If the active field is set to False, it will allow you to hide the bills of material without removing it.")
 
     sequence = fields.Integer('sequence', default=1)
 
@@ -39,6 +45,20 @@ class OperationPoints(models.Model):
             if 'sequence' in fields and operation.operation_point_ids:
                 res.update({'sequence': max(operation.operation_point_ids.mapped('sequence')) + 1})
         return res
+
+    @api.multi
+    def unlink(self):
+        if self.env.uid != SUPERUSER_ID:
+            raise UserError(_(u"Only SuperUser can delete program"))
+        return super(OperationPoints, self).unlink()
+
+    @api.one
+    def toggle_active(self):
+        bom_line_id = self.env['mrp.bom.line'].search([('operation_point_id', '=', self.id)])
+        if bom_line_id:
+            bom_line_id.toggle_active()
+        return super(OperationPoints, self).toggle_active()
+
 
 
 

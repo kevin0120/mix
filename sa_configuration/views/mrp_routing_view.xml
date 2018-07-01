@@ -45,7 +45,7 @@
                             </page>
                             <page string="Operation Points">
                                 <field name="operation_point_ids" widget="one2many_list" colspan="4" nolabel="1" mode="tree" context="{'default_operation_id':active_id}">
-                                    <tree string="Operation Points" editable="bottom">
+                                    <tree string="Operation Points" editable="bottom" delete="false">
                                         <field name="sequence" widget="handle"/>
                                         <field name="product_id" required="1" context="{'default_type': 'product'}" domain="[('sa_type', '=', 'screw')]" options="{'no_create_edit': True,'no_open': True}"/>
                                         <field name="product_qty" required="1"/>
@@ -53,6 +53,8 @@
                                         <field name="max_redo_times" />
                                         <field name="x_offset"/>
                                         <field name="y_offset"/>
+                                        <field name="active" />
+                                        <button name="toggle_active" type="object" icon="fa-archive"/>
                                     </tree>
                                     <form string="Operation Points">
                                         <group>

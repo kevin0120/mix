@@ -87,7 +87,11 @@ class MrpBom(models.Model):
 class MrpBomLine(models.Model):
     _inherit = 'mrp.bom.line'
 
-    operation_point_id = fields.Many2one('operation.point', required=1)
+    active = fields.Boolean(
+        'Active', default=True,
+        help="If the active field is set to False, it will allow you to hide the bills of material without removing it.")
+
+    operation_point_id = fields.Many2one('operation.point', required=1, ondelete='cascade')
 
     product_id = fields.Many2one('product.product',  related="operation_point_id.product_id", store=True)
 
