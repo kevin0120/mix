@@ -18,7 +18,7 @@ class QualityPoint(models.Model):
 
     times = fields.Integer('Repeat times', default=1)
 
-    bom_line_id = fields.Many2one('mrp.bom.line')
+    bom_line_id = fields.Many2one('mrp.bom.line', ondelete='cascade')
 
     operation_id_domain = fields.Char(
         compute="_compute_operation_id_domain",
