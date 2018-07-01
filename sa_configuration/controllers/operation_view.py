@@ -69,7 +69,7 @@ class OperationView(http.Controller):
                     env['operation.point'].create(val)
 
             for k in points_map:
-                points_map[k].unlink()
+                points_map[k].toggle_active()
 
             operation.button_resequence()
             body = json.dumps({'msg': "Edit point success"})
