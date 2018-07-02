@@ -4,7 +4,7 @@ serial_no: 1qaz2wsx
 doc_path: ./etc/rush/api.json
 logging:
   file: STDERR
-  level: DEBUG
+  level: INFO
 httpd:
   bind-address: :8080
   log-enabled: true
@@ -62,7 +62,7 @@ storage:
 audi/vw:
   port: 4710
   max_connection: 1024
-  read_buf: 327675
+  read_buf: 65535
   req_time_out: 300ms
   keep_alive_period: 7s
   workers: 4

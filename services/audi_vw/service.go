@@ -158,6 +158,9 @@ func (p *Service) Read(c net.Conn) {
 
 	rest := 0
 	body := ""
+	header_rest := 0
+
+	var header_buffer string
 	var header CVI3Header
 	buffer := make([]byte, p.config().ReadBufferSize*2)
 	for {
@@ -183,27 +186,40 @@ func (p *Service) Read(c net.Conn) {
 		off := 0 //循环前偏移为0
 		for off < n {
 			if rest == 0 {
-				len_msg := len(msg)
-				if len_msg < HEADER_LEN {
-					p.diag.Error("Length error", fmt.Errorf("Msg Length is small than %d\n", HEADER_LEN))
-					return //return
+				len_msg := n - off
+				if len_msg < HEADER_LEN - header_rest {
+					//长度不够
+					if header_rest == 0 {
+						header_rest = HEADER_LEN - len_msg
+					}else {
+						header_rest -= len_msg
+					}
+					header_buffer += msg[off : off + len_msg]
+					break
+				}else {
+					//完整
+					if header_rest == 0 {
+						header_buffer = msg[off : off + HEADER_LEN]
+						off += HEADER_LEN
+					}else {
+						header_buffer += msg[off : off + header_rest]
+						off += header_rest
+						header_rest = 0
+					}
 				}
-
-				if len_msg <= off || len_msg <= (off+HEADER_LEN){
-					p.diag.Error("off error", fmt.Errorf("off:%d msg_len:%d msg:%s\n", off, len_msg, msg))
-				}
-
-				header.Deserialize(msg[off : off+HEADER_LEN])
-				if n-off > HEADER_LEN+header.SIZ {
+				//fmt.Printf("header rest:%d, offset:%d, n %d, header : %s\n", header_rest, off, n, header_buffer)
+				header.Deserialize(header_buffer)
+				header_buffer = ""
+				if n-off > header.SIZ {
 					//粘包
-					body = msg[off+HEADER_LEN : off+HEADER_LEN+header.SIZ]
+					body = msg[off : off+header.SIZ]
 					p.CVIResponse(&header, c)
 					p.Parse(body)
-					off += HEADER_LEN + header.SIZ
+					off += header.SIZ
 					rest = 0 //同样解析头
 				} else {
-					body = msg[off+HEADER_LEN : n]
-					rest = header.SIZ - (n - (off + HEADER_LEN))
+					body = msg[off : n]
+					rest = header.SIZ - (n - off)
 					break
 				}
 			} else {
