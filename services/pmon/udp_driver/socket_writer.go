@@ -91,6 +91,9 @@ func (sw *SocketWriter) setKeepAlive(c net.Conn) error {
 }
 
 func (sw *SocketWriter) SetWriteDeadline(t time.Time) error {
+	if sw.Conn == nil {
+		return nil
+	}
 	return sw.Conn.SetWriteDeadline(t)
 }
 
