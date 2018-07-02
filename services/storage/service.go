@@ -165,11 +165,28 @@ func (s *Service) CurveExist(curve *Curves) (bool, error) {
 	}
 }
 
+func (s *Service) GetCurve(curve *Curves) (interface{}, error) {
+
+	var rt_curve Curves
+
+	rt, err := s.eng.Alias("c").Where("c.result_id = ?", curve.ResultID).And("c.count = ?", curve.Count).Get(&rt_curve)
+
+	if err != nil {
+		return rt_curve, err
+	} else {
+		if !rt {
+			return nil, errors.New("curve does not exist")
+		} else {
+			return rt_curve, nil
+		}
+	}
+}
+
 func (s *Service) UpdateCurve(curve *Curves) (*Curves, error) {
 
-	sql := "update `curves` set has_upload = ?, curve_file = ?, curve_data = ? where result_id = ? and count = ?"
+	sql := "update `curves` set has_upload = ?, curve_file = ?, curve_data = ? where id = ?"
 	_, err := s.eng.Exec(sql,
-		curve.HasUpload, curve.CurveFile, curve.CurveData, curve.ResultID, curve.Count)
+		curve.HasUpload, curve.CurveFile, curve.CurveData, curve.Id)
 
 	if err != nil {
 		return curve, err
@@ -315,7 +332,7 @@ func (s *Service) UpdateResultUpload(upload bool, r_id int64) (int64, error) {
 
 func (s *Service) UpdateResult(result *Results) (int64, error) {
 
-	sql := "update `results` set controller_sn = ?, result = ?, has_upload = ?, stage = ?, update_time = ?, pset_define = ?, result_value = ?, count = ? where x_result_id = ?"
+	sql := "update `results` set controller_sn = ?, result = ?, has_upload = ?, stage = ?, update_time = ?, pset_define = ?, result_value = ?, count = ? where id = ?"
 	r, err := s.eng.Exec(sql,
 		result.ControllerSN,
 		result.Result,
@@ -325,7 +342,7 @@ func (s *Service) UpdateResult(result *Results) (int64, error) {
 		result.PSetDefine,
 		result.ResultValue,
 		result.Count,
-		result.ResultId)
+		result.Id)
 
 	if err != nil {
 
@@ -339,10 +356,10 @@ func (s *Service) UpdateResult(result *Results) (int64, error) {
 
 func (s *Service) UpdateWorkorder(workorder *Workorders) (*Workorders, error) {
 
-	sql := "update `workorders` set status = ? where x_workorder_id = ?"
+	sql := "update `workorders` set status = ? where id = ?"
 	_, err := s.eng.Exec(sql,
 		workorder.Status,
-		workorder.WorkorderID)
+		workorder.Id)
 
 	if err != nil {
 		return workorder, err

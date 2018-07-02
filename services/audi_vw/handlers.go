@@ -204,12 +204,14 @@ func (h *Handlers) handleCurve(curve *ControllerCurve, dat string) error {
 	}
 
 	// 保存波形到数据库
-	exist, err := h.AudiVw.DB.CurveExist(&dbCurve)
+	//exist, err := h.AudiVw.DB.CurveExist(&dbCurve)
+	raw_curve, err := h.AudiVw.DB.GetCurve(&dbCurve)
 	if err != nil {
 		return err
 	} else {
 		h.AudiVw.diag.Debug("缓存波形数据到数据库 ...")
-		if exist {
+		if raw_curve != nil {
+			dbCurve.Id = raw_curve.(storage.Curves).Id
 			_, err := h.AudiVw.DB.UpdateCurve(&dbCurve)
 			if err != nil {
 				h.AudiVw.diag.Error("缓存波形失败", err)
