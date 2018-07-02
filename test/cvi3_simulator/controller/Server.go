@@ -28,7 +28,7 @@ type CVI3Server struct {
 func (cvi3_server *CVI3Server) Start(port uint) error {
 
 	addr := fmt.Sprintf("tcp://:%d", port)
-	cvi3_server.server = socket_listener.NewSocketListener(addr, cvi3_server, 65000)
+	cvi3_server.server = socket_listener.NewSocketListener(addr, cvi3_server, 65000, 12)
 
 	cvi3_server.server.Start()
 
@@ -37,12 +37,13 @@ func (cvi3_server *CVI3Server) Start(port uint) error {
 	return nil
 }
 
-func (cvi3_server *CVI3Server) Parse(buf []byte) ([]byte, error) {
-	msg := string(buf)
+func (cvi3_server *CVI3Server) Parse(msg string) ([]byte, error) {
+
 	if strings.Contains(msg, KEY_PSET) {
 		// 如果收到pset请求，调用客户端返回拧接结果
 		pset := CVI3PSet{}
-		err := xml.Unmarshal(buf, &pset)
+
+		err := xml.Unmarshal([]byte(msg), &pset)
 		if err != nil {
 			fmt.Printf("Parse pset err:%s\n", err.Error())
 		}
@@ -92,7 +93,7 @@ func (cvi3_server *CVI3Server) Read(c net.Conn) {
 		header := audi_vw.CVI3Header{}
 		header.Deserialize(msg[0:audi_vw.HEADER_LEN])
 
-		go cvi3_server.Parse(buffer)
+		go cvi3_server.Parse(msg)
 
 		if header.TYP == audi_vw.Header_type_request_with_reply || header.TYP == audi_vw.Header_type_keep_alive {
 			// 执行应答

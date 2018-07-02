@@ -3,7 +3,6 @@ package audi_vw
 import (
 	"encoding/xml"
 	"fmt"
-	"github.com/masami10/rush/utils"
 	"strconv"
 	"strings"
 )
@@ -270,7 +269,7 @@ func XML2Result(result *CVI3Result, rr *ControllerResult) {
 	result_id := result.PRC_SST.PAR.Result_id
 	rid, _ := strconv.Atoi(result_id)
 	rr.Result_id = int64(rid)
-	rr.CurFile = fmt.Sprintf("%s_%d_%s_%s.json", rr.Controller_SN, rr.Workorder_ID, result_id, utils.GenerateID())
+	//rr.CurFile = fmt.Sprintf("%s_%d_%s_%s.json", rr.Controller_SN, rr.Workorder_ID, result_id, utils.GenerateID())
 	rr.PSetDefine.Strategy = result.PRC_SST.PAR.FAS.GRP.TIP.BLC.PRO.Strategy
 	rr.Count = result.PRC_SST.PAR.Count
 

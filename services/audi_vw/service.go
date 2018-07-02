@@ -183,10 +183,16 @@ func (p *Service) Read(c net.Conn) {
 		off := 0 //循环前偏移为0
 		for off < n {
 			if rest == 0 {
-				if len(msg) < HEADER_LEN {
+				len_msg := len(msg)
+				if len_msg < HEADER_LEN {
 					p.diag.Error("Length error", fmt.Errorf("Msg Length is small than %d\n", HEADER_LEN))
 					return //return
 				}
+
+				if len_msg <= off || len_msg <= (off+HEADER_LEN){
+					p.diag.Error("off error", fmt.Errorf("off:%d msg_len:%d msg:%s\n", off, len_msg, msg))
+				}
+
 				header.Deserialize(msg[off : off+HEADER_LEN])
 				if n-off > HEADER_LEN+header.SIZ {
 					//粘包
@@ -255,20 +261,10 @@ func (p *Service) Parse(msg string) ([]byte, error) {
 }
 
 func (p *Service) HandleProcess() {
-	context := HandlerContext{
-		cvi3Result:          CVI3Result{},
-		controllerCurve:     ControllerCurve{},
-		controllerResult:    ControllerResult{},
-		controllerCurveFile: ControllerCurveFile{},
-		dbCurve:             storage.Curves{},
-		wsResult:            wsnotify.WSResult{},
-		aiisResult:          aiis.AIISResult{},
-		aiisCurve:           aiis.CURObject{},
-	}
 	for {
 		select {
 		case msg := <-p.handle_buffer:
-			p.handlers.HandleMsg(msg, &context)
+			p.handlers.HandleMsg(msg)
 
 		case <-p.closing:
 			p.wg.Done()

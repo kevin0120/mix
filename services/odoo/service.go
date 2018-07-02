@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 	"time"
 	"strconv"
+	"github.com/masami10/rush/services/audi_vw"
 )
 
 type Diagnostic interface {
@@ -201,9 +202,9 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 			r.NutNo = consu.NutNo
 
 			r.WorkorderID = o.WorkorderID
-			r.Result = "NONE"
+			r.Result = audi_vw.RESULT_NONE
 			r.HasUpload = false
-			r.Stage = "init"
+			r.Stage = audi_vw.RESULT_STAGE_INIT
 			r.UpdateTime = time.Now()
 			r.PSetDefine = ""
 			r.ResultValue = ""
@@ -217,6 +218,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 
 				r.Seq = result_count
 				r.ResultId = result_id
+				r.MaxRedoTimes = consu.Max_redo_times
 				results = append(results, r)
 			}
 		}

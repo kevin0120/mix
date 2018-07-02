@@ -14,7 +14,7 @@ import (
 
 type CVI3Client struct {
 	client       *socket_writer.SocketWriter
-	sequence     uint
+	sequence     uint32
 	SN           string
 	mtx_no       sync.Mutex
 	mtx_serial   sync.Mutex
@@ -44,7 +44,7 @@ func (cvi3_client *CVI3Client) Start(addr string) {
 	//go cvi3_client.keepAlive()
 }
 
-func (cvi3_client *CVI3Client) get_sequence() uint {
+func (cvi3_client *CVI3Client) get_sequence() uint32 {
 	cvi3_client.mtx_serial.Lock()
 	defer cvi3_client.mtx_serial.Unlock()
 
@@ -147,7 +147,7 @@ func (cvi3_client *CVI3Client) AudoPushResult() {
 
 }
 
-func (cvi3_client *CVI3Client) Write(buf []byte, seq uint) {
+func (cvi3_client *CVI3Client) Write(buf []byte, seq uint32) {
 	cvi3_client.buffer <- buf
 }
 

@@ -327,11 +327,12 @@ func (s *Service) UpdateResult(result *Results) (int64, error) {
 		result.Count,
 		result.ResultId)
 
-	id, _ := r.RowsAffected()
 	if err != nil {
 
-		return id, errors.Wrapf(err, "Update result fail for id : %d", id)
+		return 0, errors.Wrapf(err, "Update result fail for id : %d", result.Id)
 	} else {
+
+		id, _ := r.RowsAffected()
 		return id, nil
 	}
 }

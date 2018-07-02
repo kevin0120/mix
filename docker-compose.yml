@@ -1,11 +1,15 @@
-version: '2'
+version: '2.1'
 services:
   latest:
     image: "linshenqi/rush"
     ports:
       - "38080:8080"
-      - "4710:4710"
+#      - "4710:4710"
     volumes:
       - /data/rush/conf:/etc/rush/conf
     restart: "always"
-    
+    healthcheck:
+      test: curl -f --silent --fail http://127.0.0.1:8080/rush/v1/healthz || exit 1
+      interval: 5s
+      timeout: 3s
+      retries: 3
