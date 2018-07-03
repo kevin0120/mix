@@ -1,0 +1,50 @@
+hostname: localhost
+data_dir: /home/linshenqi/.aiis
+logging:
+  file: STDERR
+  level: DEBUG
+httpd:
+  bind-address: :9092
+  log-enabled: true
+  write-tracing: false
+  shutdown-timeout: 10s
+  cors:
+    allowed-origins:
+    - '*'
+    allow-credentials: true
+    allowed-methods:
+    - GET
+    - HEAD
+    - POST
+    - PUT
+    - PATCH
+    - OPTIONS
+pmon:
+  path: /home/linshenqi/go/src/github.com/masami10/aiis/etc/pmon/PMON.CFG
+  enable: true
+fis:
+  ch_recv: 01
+  ch_send: 02
+  system_type: screw
+  software_version: 1.0
+  mode: AUTO
+  factory_code: 20
+odoo:
+  url: http://127.0.0.1:8069
+  route: /api/v1/mrp.productions
+  headers:
+    Content-Type: application/json
+  timeout: 5s
+  push_interval: 1s
+  max_retry: 1
+  enable: true
+storage:
+  db_url: 127.0.0.1:5432
+  db_name: sa_ng
+  db_user: admin
+  db_pwd: admin
+  max_connection: 60
+rush:
+  enable: true
+  workers: 4
+
