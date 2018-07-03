@@ -92,7 +92,7 @@ func (m *Methods) getResults(ctx iris.Context) {
 		odooResultSync.CURObjects = []aiis.CURObject{}
 
 		curves, err := m.service.DB.ListCurvesByResult(v.ResultId)
-		if err != nil {
+		if err == nil {
 			for _, c := range curves {
 				curObject := aiis.CURObject{}
 				curObject.File = c.CurveFile
@@ -106,6 +106,39 @@ func (m *Methods) getResults(ctx iris.Context) {
 
 		pset := audi_vw.PSetDefine{}
 		json.Unmarshal([]byte(v.PSetDefine), &pset)
+
+		if v.Result == audi_vw.RESULT_OK {
+			odooResultSync.Final_pass = audi_vw.ODOO_RESULT_PASS
+			if v.Count == 1 {
+				odooResultSync.One_time_pass = audi_vw.ODOO_RESULT_PASS
+			} else {
+				odooResultSync.One_time_pass = audi_vw.ODOO_RESULT_FAIL
+			}
+
+			if (r.Mi >= v.ToleranceMin && r.Mi <= v.ToleranceMax) &&
+				(r.Wi >= v.ToleranceMinDegree && r.Wi <= v.ToleranceMaxDegree) {
+				odooResultSync.QualityState = audi_vw.QUALITY_STATE_PASS
+				odooResultSync.ExceptionReason = ""
+			} else {
+				odooResultSync.QualityState = audi_vw.QUALITY_STATE_EX
+				odooResultSync.ExceptionReason = audi_vw.QUALITY_STATE_EX
+			}
+
+		} else {
+			odooResultSync.Final_pass = audi_vw.ODOO_RESULT_FAIL
+			odooResultSync.One_time_pass = audi_vw.ODOO_RESULT_FAIL
+
+			if (r.Mi >= v.ToleranceMin && r.Mi <= v.ToleranceMax) &&
+				(r.Wi >= v.ToleranceMinDegree && r.Wi <= v.ToleranceMaxDegree) {
+
+				odooResultSync.QualityState = audi_vw.QUALITY_STATE_EX
+				odooResultSync.ExceptionReason = audi_vw.QUALITY_STATE_EX
+			} else {
+				odooResultSync.QualityState = audi_vw.QUALITY_STATE_FAIL
+				odooResultSync.ExceptionReason = ""
+			}
+
+		}
 
 		odooResultSync.Measure_degree = r.Wi
 		odooResultSync.Measure_result = strings.ToLower(v.Result)

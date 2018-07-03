@@ -91,6 +91,12 @@ type ODOOResultSync struct {
 	Pset_w_target    float64 `json:"pset_w_target"`
 
 	CURObjects []aiis.CURObject `json:"cur_objects"`
+
+	Final_pass       string  `json:"final_pass"`
+	One_time_pass    string  `json:"one_time_pass"`
+	QualityState     string	 `json:"quality_state"`
+	ExceptionReason	 string	 `json:"exception_reason"`
+	UserID           int64   `json:"user_id"`
 }
 
 type ODOOPR struct {

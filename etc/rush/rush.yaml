@@ -4,9 +4,9 @@ serial_no: 1qaz2wsx
 doc_path: ./etc/rush/api.json
 logging:
   file: STDERR
-  level: INFO
+  level: DEBUG
 httpd:
-  bind-address: :8080
+  bind-address: :8082
   log-enabled: true
   write-tracing: false
   shutdown-timeout: 10s

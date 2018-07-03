@@ -172,10 +172,10 @@ func (s *Service) GetCurve(curve *Curves) (interface{}, error) {
 	rt, err := s.eng.Alias("c").Where("c.result_id = ?", curve.ResultID).And("c.count = ?", curve.Count).Get(&rt_curve)
 
 	if err != nil {
-		return rt_curve, err
+		return nil, err
 	} else {
 		if !rt {
-			return nil, errors.New("curve does not exist")
+			return nil, nil
 		} else {
 			return rt_curve, nil
 		}
