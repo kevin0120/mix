@@ -3,14 +3,17 @@ package minio
 import (
 	"github.com/pkg/errors"
 	"net"
+	"github.com/masami10/rush/toml"
+	"time"
 )
 
 type Config struct {
-	URL    string `yaml:"url"`
-	Bucket string `yaml:"bucket"`
-	Access string `yaml:"access"`
-	Secret string `yaml:"secret"`
-	Secure bool   `yaml:"secure"`
+	URL    		string 			`yaml:"url"`
+	Bucket 		string 			`yaml:"bucket"`
+	Access 		string 			`yaml:"access"`
+	Secret 		string 			`yaml:"secret"`
+	Secure 		bool   			`yaml:"secure"`
+	ReuploadItv	toml.Duration 	`yaml:"reupload_interval"`
 }
 
 func NewConfig() Config {
@@ -20,6 +23,7 @@ func NewConfig() Config {
 		Access: "access",
 		Secret: "secret",
 		Secure: false,
+		ReuploadItv: toml.Duration(time.Duration(24 * time.Hour)),
 	}
 }
 

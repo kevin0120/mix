@@ -167,6 +167,7 @@ func (s *Server) appendMinioService() error {
 	c := s.config.Minio
 	d := s.DiagService.NewMinioHandler()
 	srv := minio.NewService(c, d)
+	srv.DB = s.StorageServie
 
 	s.MinioService = srv
 	s.AppendService("minio", srv)

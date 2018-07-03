@@ -197,10 +197,9 @@ func (h *Handlers) handleCurve(curve *ControllerCurve, dat string) error {
 	err := h.AudiVw.Minio.Upload(curve.CurveFile, curve.CurveData)
 	if err != nil {
 		h.AudiVw.diag.Error("对象存储保存失败", err)
-		return err
 	} else {
 		dbCurve.HasUpload = true
-		h.AudiVw.diag.Debug("波形存储成功")
+		h.AudiVw.diag.Debug("对象存储保存成功")
 	}
 
 	// 保存波形到数据库

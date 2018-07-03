@@ -206,6 +206,17 @@ func (s *Service) ListCurvesByResult(result_id int64) ([]Curves, error) {
 	}
 }
 
+func (s *Service) ListUnuploadCurves() ([]Curves, error) {
+	var curves []Curves
+
+	e := s.eng.Alias("c").Where("c.has_upload = ?", false).Find(&curves)
+	if e != nil {
+		return curves, e
+	} else {
+		return curves, nil
+	}
+}
+
 func (s *Service) InsertWorkorder(workorder *Workorders, results *[]Results) error {
 
 	has, err := s.WorkorderExists(workorder.WorkorderID)

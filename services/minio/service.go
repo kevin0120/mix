@@ -5,6 +5,8 @@ import (
 	"github.com/minio/minio-go"
 	"strings"
 	"sync/atomic"
+	"time"
+	"github.com/masami10/rush/services/storage"
 )
 
 type Diagnostic interface {
@@ -16,6 +18,7 @@ type Service struct {
 	diag        Diagnostic
 	bucket      string
 
+	DB	  *storage.Service
 	minio *minio.Client
 }
 
@@ -40,6 +43,10 @@ func (s *Service) Open() error {
 		return fmt.Errorf("create minio fail %s", err.Error())
 	}
 	s.minio = client
+
+	// 启动重传服务
+	go s.TaskReupload()
+
 	return nil
 }
 
@@ -58,4 +65,24 @@ func (s *Service) Upload(obj string, data string) error {
 		return fmt.Errorf("Put Object %s fail ", obj)
 	}
 	return nil
+}
+
+func (s *Service) TaskReupload() {
+	for {
+
+		curves, err := s.DB.ListUnuploadCurves()
+		if err == nil {
+			for _, v := range curves {
+				err = s.Upload(v.CurveFile, v.CurveData)
+				if err != nil {
+					s.diag.Error(fmt.Sprintf("curve reupload failed, curve_id:%d result_id:%d", v.Id, v.ResultID), err)
+				} else {
+					v.HasUpload = true
+					s.DB.UpdateCurve(&v)
+				}
+			}
+		}
+
+		time.Sleep(time.Duration(s.config().ReuploadItv))
+	}
 }
