@@ -1,5 +1,6 @@
 FROM alpine:3.6
 
+RUN apk update && apk add curl
 RUN mkdir -p /etc/aiis/conf /etc/aiis/log
 
 COPY ./entrypoint.sh /
