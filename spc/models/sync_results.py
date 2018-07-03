@@ -20,7 +20,7 @@ from dateutil.relativedelta import relativedelta
 _logger = logging.getLogger(__name__)
 
 
-MASTER_RESULT_API = '/api/v1/results'
+MASTER_RESULT_API = '/rush/v1/results'
 
 
 class ResultSync(AbstractModel):
