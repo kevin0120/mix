@@ -13,13 +13,13 @@ jobs:
       - run:
           name: build docker image
           command: |
-#            mkdir -p /go/src/github.com/masami10/rush && cd /go/src/github.com/masami10/rush
-#            cp -r /home/circleci/project/* ./
-#            ls -al ./
-#            # go get -u github.com/sparrc/gdm
-#            go get -u github.com/golang/dep
-#            #/go/bin/gdm restore
-#            dep ensure -v
-#            CGO_ENABLED=0 go build -o ./bin/rush ./rush.go
-#            docker login -u $DOCKER_USER -p $DOCKER_PWD
-#            sh ./build_docker.sh
+            mkdir -p /go/src/github.com/masami10/rush && cd /go/src/github.com/masami10/rush
+            cp -r /home/circleci/project/* ./
+            ls -al ./
+            # go get -u github.com/sparrc/gdm
+            go get -u github.com/golang/dep
+            #/go/bin/gdm restore
+            dep ensure -v
+            CGO_ENABLED=0 go build -o ./build/rushd ./cmd/rushd/main.go
+            docker login -u $DOCKER_USER -p $DOCKER_PWD
+            sh ./build_docker.sh

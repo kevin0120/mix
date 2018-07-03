@@ -7,6 +7,7 @@ services:
 #      - "4710:4710"
     volumes:
       - /data/rush/conf:/etc/rush/conf
+      - /data/rush/log:/etc/rush/log
     restart: "always"
     healthcheck:
       test: curl -f --silent --fail http://127.0.0.1:8080/rush/v1/healthz || exit 1
