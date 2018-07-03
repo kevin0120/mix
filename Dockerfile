@@ -1,5 +1,6 @@
 FROM alpine:3.6
 
+RUN apk update && apk add curl
 RUN mkdir -p /etc/rush/conf /etc/rush/log
 
 COPY ./entrypoint.sh /
