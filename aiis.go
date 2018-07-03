@@ -1,5 +1,0 @@
-package aiis
-
-func main() {
-
-}
