@@ -97,7 +97,10 @@ func (c *Channel) generateSO(msgNum int) (string, error) {
 	s += c.Segment
 	s += "00"                          //data Security
 	s += fmt.Sprintf("%04d", c.Buffer) //四位补零
-	s += "0000"
+	s += fmt.Sprintf("%04d", c.RestartPointLength) //四位补零,Length of the starting point
+	for idx :=0; idx < c.RestartPointLength; idx ++ {
+		s += "0"
+	}
 	s += "0000"
 	s += PMONEND
 	s += checksum(s)
@@ -118,7 +121,10 @@ func (c *Channel) generateAO(msgNum int) (string, error) {
 	s += c.Segment
 	s += "00"                          //data Security
 	s += fmt.Sprintf("%04d", c.Buffer) //四位补零
-	s += "0000"
+	s += fmt.Sprintf("%04d", c.RestartPointLength) //四位补零,Length of the starting point
+	for idx :=0; idx < c.RestartPointLength; idx ++ {
+		s += "0"
+	}
 	s += "0000"
 	s += PMONEND
 	s += checksum(s)
