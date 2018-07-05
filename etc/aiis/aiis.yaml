@@ -20,7 +20,7 @@ httpd:
     - PATCH
     - OPTIONS
 pmon:
-  path: /home/linshenqi/go/src/github.com/masami10/aiis/etc/pmon/PMON.CFG
+  path: /home/gubin/gopath/src/github.com/masami10/aiis/etc/pmon/PMON.CFG
   enable: true
 fis:
   ch_recv: 01

@@ -41,6 +41,9 @@ func (s *Service) Config() PmonConfig {
 }
 
 func (s *Service) Open() error {
+	defer func() {
+		go s.run()
+	}()
 	conf := s.rawConf.Load().(Config)
 	if !conf.Enable {
 		return nil
@@ -73,7 +76,6 @@ func (s *Service) Open() error {
 			return errors.Wrap(err, "Open connection fail")
 		}
 	}
-	go s.run()
 	return nil
 }
 

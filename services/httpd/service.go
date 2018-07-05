@@ -71,6 +71,8 @@ type Service struct {
 	externalURL     string
 	server          *iris.Application
 
+	isOpen			bool
+
 	stop chan chan struct{}
 
 	HandlerByNames map[string]int
@@ -101,6 +103,7 @@ func NewService(c Config, hostname string, d Diagnostic, disc *diagnostic.Servic
 		HandlerByNames:        make(map[string]int),
 		shutdownTimeout:       time.Duration(c.ShutdownTimeout),
 		diag:                  d,
+		isOpen:				   false,
 		DiagService:           disc,
 		httpServerErrorLogger: d.NewHTTPServerErrorLogger(),
 	}
@@ -144,12 +147,16 @@ func (s *Service) Close() error {
 	if s.server == nil {
 		return nil
 	}
+	if s.isOpen == false {
+		return nil
+	}
 	// Signal to manage loop we are stopping
 	stopping := make(chan struct{})
 	s.stop <- stopping
 
 	<-stopping
 	s.server = nil
+	s.isOpen = false
 	return nil
 }
 
@@ -172,6 +179,7 @@ func (s *Service) Open() error {
 
 	go s.manage()
 	go s.serve()
+	s.isOpen = true
 	return nil
 }
 
