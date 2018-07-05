@@ -102,8 +102,8 @@ func (ch *Channel) gethasSD() bool {
 func (ch *Channel) Write(buf []byte, msgType PMONSMGTYPE) error {
 	if msgType == PMONMSGSD && ch.GetStatus() == STATUSCLOSE {
 		i := 0
-		msg,_ := ch.PMONGenerateMsg(PMONMSGSO,"")
-		ch.conn.Write([]byte(msg), ch.WriteTimeout) //发送此SO忽略错误
+		msg, _ := ch.PMONGenerateMsg(PMONMSGSO,"")
+		ch.conn.Write([]byte(msg[0]), ch.WriteTimeout) //发送此SO忽略错误
 		time.Sleep(150 * time.Microsecond) //sleep 150 ms
 		for ch.GetStatus() == STATUSCLOSE &&  i < 6 {
 			time.Sleep(100 * time.Microsecond) //sleep 100 ms

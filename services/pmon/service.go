@@ -129,8 +129,11 @@ func (s *Service) SendPmonMessage(msgType PMONSMGTYPE, channelNumber string, dat
 		log.Printf("Generation %s msg fail", msgType)
 		return errors.Wrap(err, "SendPmonMessage")
 	}
-	if err := ch.Write([]byte(x), msgType); err != nil {
-		return errors.Wrap(err, "SendPmonMessage Write")
+	for _,s := range x {
+		if err := ch.Write([]byte(s), msgType); err != nil {
+			return errors.Wrap(err, "SendPmonMessage Write")
+		}
+		//time.Sleep(100 * time.Millisecond)
 	}
 
 	return nil

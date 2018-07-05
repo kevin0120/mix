@@ -69,11 +69,11 @@ func parseChannel(key *ini.Key) (string, *cChannel) {
 	if ch == "" {
 		return ch, nil
 	}
-	_ss := strings.Split(ch, ",")
+	sses := strings.Split(ch, ",")
 
 	var ss []string
 
-	for _, s := range _ss {
+	for _, s := range sses {
 		d := strings.Replace(s, " ", "", -1)
 		ss = append(ss, d)
 	}
