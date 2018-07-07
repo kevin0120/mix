@@ -20,15 +20,32 @@ httpd:
     - PATCH
     - OPTIONS
 pmon:
-  path: /home/gubin/gopath/src/github.com/masami10/aiis/etc/pmon/PMON.CFG
+  path: /home/linshenqi/go/src/github.com/masami10/aiis/etc/pmon/PMON.CFG
   enable: true
 fis:
-  ch_recv: 01
-  ch_send: 02
+  ch_recv: 21
+  ch_send: 24
   system_type: screw
   software_version: 1.0
   mode: AUTO
   factory_code: 20
+  prs:
+    - GSP
+    - SAB
+    - RAD
+    - REI
+    - BRS
+    - GMO
+    - EDF
+    - AED
+    - MOT
+    - LES
+    - HIS
+    - AIB
+    - FSB
+    - SIH
+    - HBV
+    - AGM
 odoo:
   url: http://127.0.0.1:8069
   route: /api/v1/mrp.productions

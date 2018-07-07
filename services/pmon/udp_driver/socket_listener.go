@@ -104,7 +104,7 @@ func (psl *packetSocketListener) setReadDeadLine(t time.Time) error {
 }
 
 func (psl *packetSocketListener) setWriteDeadLine(t time.Time) error {
-	return psl.setWriteDeadLine(t)
+	return psl.SetWriteDeadline(t)
 }
 
 
@@ -219,7 +219,7 @@ func (sl *SocketListener) Description() string {
 //  ## Data format to consume.
 //  ## Each data format has its own unique set of configuration options, read
 //  ## more about them here:
-//  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+//  ## https://github.com/influxdata/telegraf/blob/master/doAOcs/DATA_FORMATS_INPUT.md
 //  # data_format = "influx"
 //`
 //}

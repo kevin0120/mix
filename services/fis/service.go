@@ -11,6 +11,7 @@ import (
 const (
 	LEN_FIS_MO   = 149
 	NUM_PRS      = 16
+	PRS_START	 = 64
 	LEN_PR_VALUE = 3
 )
 
@@ -117,9 +118,11 @@ func (s *Service) HandleMO(msg string) {
 	mo.Lnr = msg[34:38]
 
 	// prs
-	s_prs := msg[64:127]
+	num_prs := len(s.Config().PRS)
+	prs_end := PRS_START + (LEN_PR_VALUE * num_prs + num_prs - 1)
+	s_prs := msg[PRS_START:prs_end]
 	var step = 0
-	for i := 0; i < NUM_PRS; i++ {
+	for i := 0; i < num_prs; i++ {
 		pr := odoo.ODOOPR{}
 		pr.Pr_group = s.PR_GROUPS[i]
 		pr.Pr_value = s_prs[step : step+LEN_PR_VALUE]

@@ -153,8 +153,9 @@ func (c *Channel) generateSD(msgNum int, data string) ([]string, error) {
 		eLen := c.Buffer - len(s)
 		needSegment := int(math.Ceil(float64(len(d) / eLen)))
 		var r []string
-		for idx := 0; idx < needSegment; idx ++ {
-			off := 0
+		off := 0
+		for idx := 0; idx <= needSegment; idx ++ {
+
 			s := c.setPMONHeader(PMONSTARTREQ, msgNum + idx, PMONMSGSD)
 			s += fmt.Sprintf("%04d", c.GetBlockCount()) // BlockCount
 			residualLengh := len(d[off:])
