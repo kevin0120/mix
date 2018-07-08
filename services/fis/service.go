@@ -10,12 +10,15 @@ import (
 	"strings"
 	"github.com/willf/pad"
 	"sync"
+	"time"
 )
 
 const (
-	LEN_FIS_MO   = 149
 	PRS_START	 = 64
 	LEN_PR_VALUE = 3
+	MAX_HEARTBEAT_CHECK_COUNT = 3
+	FIS_STATUS_ONLINE = "online"
+	FIS_STATUS_OFFLINE = "offline"
 )
 
 type Diagnostic interface {
@@ -23,23 +26,37 @@ type Diagnostic interface {
 }
 
 type Service struct {
-	Pmon        *pmon.Service
-	Odoo        *odoo.Service
-	diag        Diagnostic
-	configValue atomic.Value
-	mtxFile		sync.Mutex
+	Pmon        	*pmon.Service
+	Odoo        	*odoo.Service
+	diag        	Diagnostic
+	configValue 	atomic.Value
+	mtxFile			sync.Mutex
+	keepAliveCount	int32
+	status			string
+	mtxStatus		sync.Mutex
 }
 
 func NewService(d Diagnostic, c Config, pmon *pmon.Service) *Service {
 	s := &Service{
 		diag: d,
 		mtxFile: sync.Mutex{},
+		status: FIS_STATUS_OFFLINE,
+		mtxStatus: sync.Mutex{},
 	}
 
 	s.Pmon = pmon
 
 	s.configValue.Store(c)
 	return s
+}
+
+func (s *Service) UpdateStatus(status string) {
+	s.mtxStatus.Lock()
+	defer s.mtxStatus.Unlock()
+
+	if s.status != status {
+		s.status = status
+	}
 }
 
 func (s *Service) Config() Config {
@@ -49,6 +66,9 @@ func (s *Service) Config() Config {
 func (s *Service) Open() error {
 	s.Pmon.PmonRegistryEvent(s.OnPmonEventMission, s.Config().CHRecvMission, nil)
 	s.Pmon.PmonRegistryEvent(s.OnPmonEventHeartbeat, s.Config().CHRecvHeartbeat, nil)
+
+	go s.HeartbeatCheck()
+
 	return nil
 }
 
@@ -68,7 +88,32 @@ func (s *Service) OnPmonEventMission(err error, data []rune, obj interface{}) {
 }
 
 func (s *Service) OnPmonEventHeartbeat(err error, data []rune, obj interface{}) {
+	s.UpdateStatus(FIS_STATUS_ONLINE)
+	s.updateKeepAliveCount(0)
+}
 
+func (s *Service) KeepAliveCount() int32 {
+	return atomic.LoadInt32(&s.keepAliveCount)
+}
+
+func (s *Service) updateKeepAliveCount(i int32) {
+	atomic.SwapInt32(&s.keepAliveCount, i)
+}
+
+func (s *Service) addKeepAliveCount() {
+	atomic.AddInt32(&s.keepAliveCount, 1)
+}
+
+func (s *Service) HeartbeatCheck() {
+	for {
+		if s.KeepAliveCount() >= MAX_HEARTBEAT_CHECK_COUNT {
+			s.UpdateStatus(FIS_STATUS_OFFLINE)
+		}
+
+		s.addKeepAliveCount()
+
+		time.Sleep(time.Duration(s.Config().HeartbeatItv))
+	}
 }
 
 func (s *Service) SaveRestartPoint(restartPoint string, ch string) {
@@ -107,12 +152,6 @@ func (s *Service) SaveRestartPoint(restartPoint string, ch string) {
 }
 
 func (s *Service) HandleMO(msg string) {
-
-	l := len(msg)
-	if l != LEN_FIS_MO {
-		s.diag.Error(msg, fmt.Errorf("msg len err:%d", l))
-		return
-	}
 
 	mo := odoo.ODOOMO{}
 

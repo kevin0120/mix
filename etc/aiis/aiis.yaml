@@ -30,6 +30,7 @@ fis:
   software_version: 1.0
   mode: AUTO
   factory_code: 20
+  heartbeat_interval: 1m
   prs:
     - GSP
     - SAB
