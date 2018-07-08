@@ -6,11 +6,14 @@ import (
 	"github.com/masami10/aiis/services/pmon"
 	"strconv"
 	"sync/atomic"
+	"io/ioutil"
+	"strings"
+	"github.com/willf/pad"
+	"sync"
 )
 
 const (
 	LEN_FIS_MO   = 149
-	NUM_PRS      = 16
 	PRS_START	 = 64
 	LEN_PR_VALUE = 3
 )
@@ -22,35 +25,18 @@ type Diagnostic interface {
 type Service struct {
 	Pmon        *pmon.Service
 	Odoo        *odoo.Service
-	PR_GROUPS   []string
 	diag        Diagnostic
 	configValue atomic.Value
+	mtxFile		sync.Mutex
 }
 
 func NewService(d Diagnostic, c Config, pmon *pmon.Service) *Service {
 	s := &Service{
 		diag: d,
+		mtxFile: sync.Mutex{},
 	}
 
 	s.Pmon = pmon
-	s.PR_GROUPS = []string{
-		"GSP",
-		"SAB",
-		"RAD",
-		"REI",
-		"BRS",
-		"GMO",
-		"EDF",
-		"AED",
-		"MOT",
-		"LES",
-		"HIS",
-		"AIB",
-		"FSB",
-		"SIH",
-		"HBV",
-		"AGM",
-	}
 
 	s.configValue.Store(c)
 	return s
@@ -61,8 +47,8 @@ func (s *Service) Config() Config {
 }
 
 func (s *Service) Open() error {
-	s.Pmon.PmonRegistryEvent(s.OnPmonEvent, s.Config().CHRecv, nil)
-
+	s.Pmon.PmonRegistryEvent(s.OnPmonEventMission, s.Config().CHRecvMission, nil)
+	s.Pmon.PmonRegistryEvent(s.OnPmonEventHeartbeat, s.Config().CHRecvHeartbeat, nil)
 	return nil
 }
 
@@ -70,13 +56,53 @@ func (s *Service) Close() error {
 	return nil
 }
 
-func (s *Service) OnPmonEvent(err error, data []rune, obj interface{}) {
+func (s *Service) OnPmonEventMission(err error, data []rune, obj interface{}) {
+
 	if err != nil {
-		fmt.Printf("err %s\n", err.Error())
+		s.diag.Error("pmon event mission error", err)
 	} else {
 		// 处理pmon收到的数据
 		msg := string(data)
 		s.HandleMO(msg)
+	}
+}
+
+func (s *Service) OnPmonEventHeartbeat(err error, data []rune, obj interface{}) {
+
+}
+
+func (s *Service) SaveRestartPoint(restartPoint string, ch string) {
+	// 更新通道restartpoint
+	s.Pmon.Channels[ch].RefreshRestartPoint(restartPoint)
+
+	// 保存文件
+	s.mtxFile.Lock()
+	defer s.mtxFile.Unlock()
+
+	f, err := ioutil.ReadFile(s.Pmon.Config().Ofhkht)
+	if err != nil {
+		s.diag.Error("read restart point file err", err)
+	}
+
+	lines := strings.Split(string(f), "\n")
+
+	for i, line := range lines {
+		values := strings.Split(line, "*")
+		if len(values) < 2 {
+			s.diag.Error("restart point format error", nil)
+		}
+
+		if values[0] == ch {
+
+			lines[i] = fmt.Sprint("%s*%s*", ch, pad.Left(restartPoint, s.Pmon.Channels[ch].RestartPointLength, "0"))
+			break
+		}
+	}
+
+	output := strings.Join(lines, "\n")
+	err = ioutil.WriteFile(s.Pmon.Config().Ofhkht, []byte(output), 0644)
+	if err != nil {
+		s.diag.Error("save restart point", err)
 	}
 }
 
@@ -116,6 +142,7 @@ func (s *Service) HandleMO(msg string) {
 
 	// 流水号
 	mo.Lnr = msg[34:38]
+	s.SaveRestartPoint(mo.Lnr, s.Config().CHRecvMission)
 
 	// prs
 	num_prs := len(s.Config().PRS)
@@ -124,7 +151,7 @@ func (s *Service) HandleMO(msg string) {
 	var step = 0
 	for i := 0; i < num_prs; i++ {
 		pr := odoo.ODOOPR{}
-		pr.Pr_group = s.PR_GROUPS[i]
+		pr.Pr_group = s.Config().PRS[i]
 		pr.Pr_value = s_prs[step : step+LEN_PR_VALUE]
 
 		mo.Prs = append(mo.Prs, pr)
@@ -134,11 +161,9 @@ func (s *Service) HandleMO(msg string) {
 	err := s.Odoo.CreateMO(mo)
 	if err != nil {
 		s.diag.Error("create mo err", err)
-	} else {
-		fmt.Printf("create mo ok:%d%d", mo.Pin, mo.Pin_check_code)
 	}
 }
 
 func (s *Service) PushResult(result *FisResult) error {
-	return s.Pmon.SendPmonMessage(pmon.PMONMSGSD, s.Config().CHSend, result.Serialize())
+	return s.Pmon.SendPmonMessage(pmon.PMONMSGSD, s.Config().CHSendResult, result.Serialize())
 }

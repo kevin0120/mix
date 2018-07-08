@@ -19,15 +19,18 @@ const (
 
 type Channel struct {
 	cChannel
-	conn       *Connection
-	mux        *sync.Mutex
-	BlockCount int
-	recvBuf    chan PmonPackage
-	status     PmonChannelStatus
-	closed     chan struct{}
-	hasSendSD  atomic.Value
-	e          PMONEventHandler
-	ud         interface{} //user data,回调时注入
+	conn       		*Connection
+	mux        		*sync.Mutex
+	BlockCount 		int
+	recvBuf    		chan PmonPackage
+	status     		PmonChannelStatus
+	closed     		chan struct{}
+	hasSendSD  		atomic.Value
+	e          		PMONEventHandler
+	Service			*Service
+	RestartPoint	string
+	MtxRestarPoint  sync.Mutex
+	ud         		interface{} //user data,回调时注入
 }
 
 func NewChannel(c cChannel) *Channel {
@@ -40,7 +43,24 @@ func NewChannel(c cChannel) *Channel {
 		e:          nil,
 		ud:         nil,
 		BlockCount: 1,
+		MtxRestarPoint: sync.Mutex{},
 	}
+}
+
+func (c *Channel) RefreshRestartPoint(restartPoint string) {
+	c.MtxRestarPoint.Lock()
+	defer c.MtxRestarPoint.Unlock()
+
+	if c.RestartPointLength > 0 {
+		c.RestartPoint = restartPoint
+	}
+}
+
+func (c *Channel) GetRestarPoint() string {
+	c.MtxRestarPoint.Lock()
+	defer c.MtxRestarPoint.Unlock()
+
+	return c.RestartPoint
 }
 
 func (c *Channel) GetBlockCount() int {
@@ -102,7 +122,11 @@ func (ch *Channel) gethasSD() bool {
 func (ch *Channel) Write(buf []byte, msgType PMONSMGTYPE) error {
 	if msgType == PMONMSGSD && ch.GetStatus() == STATUSCLOSE {
 		i := 0
-		msg, _ := ch.PMONGenerateMsg(PMONMSGSO,"")
+		msg, err := ch.PMONGenerateMsg(PMONMSGSO,"")
+		if err != nil {
+			ch.Service.diag.Error(fmt.Sprintf("Generation %s msg fail", msgType), err)
+			return errors.Wrap(err, "Channel.Write")
+		}
 		ch.conn.Write([]byte(msg[0]), ch.WriteTimeout) //发送此SO忽略错误
 		time.Sleep(150 * time.Millisecond) //sleep 150 ms
 		for ch.GetStatus() == STATUSCLOSE &&  i < 6 {

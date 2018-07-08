@@ -122,8 +122,11 @@ func (c *Channel) generateAO(msgNum int) (string, error) {
 	s += "00"                          //data Security
 	s += fmt.Sprintf("%04d", c.Buffer) //四位补零
 	s += fmt.Sprintf("%04d", c.RestartPointLength) //四位补零,Length of the starting point
-	for idx :=0; idx < c.RestartPointLength; idx ++ {
-		s += "0"
+	//for idx :=0; idx < c.RestartPointLength; idx ++ {
+	//	s += "0"
+	//}
+	if c.RestartPointLength > 0 {
+		s += c.GetRestarPoint()
 	}
 	s += "0000"
 	s += PMONEND

@@ -14,13 +14,13 @@ type Diagnostic interface {
 }
 
 type Service struct {
-	rawConf     atomic.Value
-	HTTPD       *httpd.Service
-	configValue atomic.Value
-	Channels    map[string]*Channel
-	err         chan error
-	stop        chan chan struct{}
-	diag        Diagnostic
+	rawConf     	atomic.Value
+	HTTPD       	*httpd.Service
+	configValue 	atomic.Value
+	Channels    	map[string]*Channel
+	err         	chan error
+	stop        	chan chan struct{}
+	diag        	Diagnostic
 }
 
 type PMONEventHandler func(error, []rune, interface{}) //事件号， 内容
@@ -68,6 +68,13 @@ func (s *Service) Open() error {
 		connectKey := fmt.Sprintf("Port%d", channel.Port)
 		s.Channels[cname] = NewChannel(channel) //因为从远端传来的T/R相反，所以进行反转
 		s.Channels[cname].SetConnection(connections[connectKey])
+		if _, ok := s.Config().RestartPoints[cname]; ok {
+			s.Channels[cname].RestartPoint = s.Config().RestartPoints[cname]
+		} else {
+			s.Channels[cname].RestartPoint = ""
+		}
+
+		s.Channels[cname].Service = s
 		connections[connectKey].AppendChannel(cname, channel.SNoT, channel.SNoR)
 	}
 	for _, ch := range s.Channels {

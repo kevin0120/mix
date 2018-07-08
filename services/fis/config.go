@@ -1,8 +1,9 @@
 package fis
 
 type Config struct {
-	CHRecv          string 		`yaml:"ch_recv"`
-	CHSend          string 		`yaml:"ch_send"`
+	CHRecvMission   string 		`yaml:"ch_recv_mission"`
+	CHSendResult    string 		`yaml:"ch_send_result"`
+	CHRecvHeartbeat string 		`yaml:"ch_recv_heartbeat"`
 	SystemType      string 		`yaml:"system_type"`
 	SoftwareVersion string 		`yaml:"software_version"`
 	Mode            string 		`yaml:"mode"`
@@ -15,8 +16,9 @@ func NewConfig() Config {
 	prs = append(prs, "GSP")
 
 	return Config{
-		CHSend:          "02",
-		CHRecv:          "01",
+		CHRecvMission:   "02",
+		CHSendResult:    "01",
+		CHRecvHeartbeat: "03",
 		SystemType:      "screw",
 		SoftwareVersion: "1.0",
 		Mode:            "AUTO",

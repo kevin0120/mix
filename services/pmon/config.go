@@ -7,6 +7,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"os"
+	"bufio"
+	"io"
+	"errors"
 )
 
 const (
@@ -34,11 +38,13 @@ type Config struct {
 }
 
 type PmonConfig struct {
-	ChannelCount int
-	Channels     map[string]cChannel
-	WaitResp     time.Duration
-	UdpCount     int
-	Connections  map[string]cConnection
+	ChannelCount 	int
+	Channels     	map[string]cChannel
+	WaitResp     	time.Duration
+	UdpCount     	int
+	Connections  	map[string]cConnection
+	Ofhkht			string
+	RestartPoints	map[string]string
 }
 
 type cConnection struct {
@@ -62,6 +68,32 @@ type cChannel struct {
 	WriteTimeout       time.Duration //为了重新发送数据
 	RestartPointLength int
 	Description        string
+}
+
+func parseRestartPoints(conf *PmonConfig) error {
+	f, err := os.Open(conf.Ofhkht)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	rd := bufio.NewReader(f)
+	for {
+		line, err := rd.ReadString('\n')
+
+		values := strings.Split(line, "*")
+		if len(values) < 2 {
+			return errors.New("restart point format error")
+		}
+
+		conf.RestartPoints[values[0]] = values[1]
+
+		if err == io.EOF {
+			break
+		}
+	}
+
+	return nil
 }
 
 func parseChannel(key *ini.Key) (string, *cChannel) {
@@ -173,7 +205,7 @@ func PmonNewConfig(path string) (PmonConfig, error) {
 		return PmonConfig{}, fmt.Errorf("path : %s is not a absoluted path", path)
 	}
 
-	var conf = PmonConfig{ChannelCount: 0}
+	var conf = PmonConfig{ChannelCount: 0, RestartPoints: map[string]string{}}
 
 	cfg, err := ini.Load(path)
 	if err != nil {
@@ -209,7 +241,18 @@ func PmonNewConfig(path string) (PmonConfig, error) {
 				conf.Connections[key.Name()] = con
 			}
 		}
-	}
-	return conf, nil
+		if strings.Contains(sec.Name(), "RestartPoint") {
+			for _, key := range sec.Keys() {
+				conf.Ofhkht = key.Value()
+				break
+			}
 
+			err := parseRestartPoints(&conf)
+			if err != nil {
+				fmt.Printf("parseRestartPoints failed: %v", err)
+			}
+		}
+	}
+
+	return conf, nil
 }

@@ -23,8 +23,9 @@ pmon:
   path: /home/linshenqi/go/src/github.com/masami10/aiis/etc/pmon/PMON.CFG
   enable: true
 fis:
-  ch_recv: 21
-  ch_send: 24
+  ch_recv_mission: 21
+  ch_send_result: 24
+  ch_recv_heartbeat: 25
   system_type: screw
   software_version: 1.0
   mode: AUTO
