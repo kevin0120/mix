@@ -56,7 +56,7 @@ func (c *Channel) RefreshRestartPoint(restartPoint string) {
 	}
 }
 
-func (c *Channel) GetRestarPoint() string {
+func (c *Channel) GetRestartPoint() string {
 	c.MtxRestarPoint.Lock()
 	defer c.MtxRestarPoint.Unlock()
 

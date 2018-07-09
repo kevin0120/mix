@@ -65,8 +65,9 @@ func (s *Service) Config() Config {
 }
 
 func (s *Service) Open() error {
-	s.Pmon.PmonRegistryEvent(s.OnPmonEventMission, s.Config().CHRecvMission, nil)
-	s.Pmon.PmonRegistryEvent(s.OnPmonEventHeartbeat, s.Config().CHRecvHeartbeat, nil)
+	c := s.Config()
+	s.Pmon.PmonRegistryEvent(s.OnPmonEventMission, c.CHRecvMission, nil)
+	s.Pmon.PmonRegistryEvent(s.OnPmonEventHeartbeat, c.CHRecvHeartbeat, nil)
 
 	go s.HeartbeatCheck()
 
@@ -106,18 +107,23 @@ func (s *Service) addKeepAliveCount() {
 }
 
 func (s *Service) HeartbeatCheck() {
+	interval := s.Config().HeartbeatItv
 	for {
-		if s.KeepAliveCount() >= MAX_HEARTBEAT_CHECK_COUNT {
-			s.UpdateStatus(FIS_STATUS_OFFLINE)
+		select {
+		case <-time.After(time.Duration(interval)):
+			if s.KeepAliveCount() >= MAX_HEARTBEAT_CHECK_COUNT {
+				s.UpdateStatus(FIS_STATUS_OFFLINE)
+			}
+
+			s.addKeepAliveCount()
+
 		}
-
-		s.addKeepAliveCount()
-
-		time.Sleep(time.Duration(s.Config().HeartbeatItv))
 	}
 }
 
 func (s *Service) SaveRestartPoint(restartPoint string, ch string) {
+
+	c := s.Pmon.Config()
 	// 更新通道restartpoint
 	s.Pmon.Channels[ch].RefreshRestartPoint(restartPoint)
 
@@ -125,7 +131,7 @@ func (s *Service) SaveRestartPoint(restartPoint string, ch string) {
 	s.mtxFile.Lock()
 	defer s.mtxFile.Unlock()
 
-	f, err := ioutil.ReadFile(s.Pmon.Config().Ofhkht)
+	f, err := ioutil.ReadFile(c.Ofhkht)
 	if err != nil {
 		s.diag.Error("read restart point file err", err)
 	}
@@ -146,7 +152,7 @@ func (s *Service) SaveRestartPoint(restartPoint string, ch string) {
 	}
 
 	output := strings.Join(lines, "\n")
-	err = ioutil.WriteFile(s.Pmon.Config().Ofhkht, []byte(output), 0644)
+	err = ioutil.WriteFile(c.Ofhkht, []byte(output), 0644)
 	if err != nil {
 		s.diag.Error("save restart point", err)
 	}
@@ -154,7 +160,9 @@ func (s *Service) SaveRestartPoint(restartPoint string, ch string) {
 
 func (s *Service) HandleMO(msg string) {
 
-	mo := odoo.ODOOMO{}
+	c := s.Config()
+
+	var mo odoo.ODOOMO
 
 	// 设备名
 	mo.Equipment_name = msg[0:4]
@@ -182,17 +190,17 @@ func (s *Service) HandleMO(msg string) {
 
 	// 流水号
 	mo.Lnr = msg[34:38]
-	s.SaveRestartPoint(mo.Lnr, s.Config().CHRecvMission)
+	s.SaveRestartPoint(mo.Lnr, c.CHRecvMission)
 
 	// prs
-	num_prs := len(s.Config().PRS)
-	prs_end := PRS_START + (LEN_PR_VALUE * num_prs + num_prs - 1)
-	s_prs := msg[PRS_START:prs_end]
+	numPrs := len(c.PRS)
+	prsEnd := PRS_START + (LEN_PR_VALUE *numPrs + numPrs - 1)
+	sPrs := msg[PRS_START:prsEnd]
 	var step = 0
-	for i := 0; i < num_prs; i++ {
+	for i := 0; i < numPrs; i++ {
 		pr := odoo.ODOOPR{}
 		pr.Pr_group = s.Config().PRS[i]
-		pr.Pr_value = s_prs[step : step+LEN_PR_VALUE]
+		pr.Pr_value = sPrs[step : step+LEN_PR_VALUE]
 
 		mo.Prs = append(mo.Prs, pr)
 		step += LEN_PR_VALUE + 1
