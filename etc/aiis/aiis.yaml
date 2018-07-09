@@ -21,6 +21,7 @@ httpd:
     - OPTIONS
 pmon:
   path: /home/linshenqi/go/src/github.com/masami10/aiis/etc/pmon/PMON.CFG
+  workers: 4
   enable: true
 fis:
   ch_recv_mission: 21

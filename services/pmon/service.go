@@ -61,7 +61,7 @@ func (s *Service) Open() error {
 	connections := make(map[string]*Connection, len(c.Connections)) // 初始化长度
 	for name, conn := range c.Connections {
 		addr := fmt.Sprintf("udp://%s:%d", conn.Address[0], conn.Port)
-		connections[name] = NewConnection(addr, name, c.WaitResp) //waitResponse 作为其读取Timeout
+		connections[name] = NewConnection(addr, name, c.WaitResp, conf.Workers) //waitResponse 作为其读取Timeout
 		connections[name].SetDispatcher(s)                        //将服务注入进行通道分发
 	}
 	for cname, channel := range c.Channels {
@@ -140,7 +140,6 @@ func (s *Service) SendPmonMessage(msgType PMONSMGTYPE, channelNumber string, dat
 		if err := ch.Write([]byte(s), msgType); err != nil {
 			return errors.Wrap(err, "SendPmonMessage Write")
 		}
-		//time.Sleep(100 * time.Millisecond)
 	}
 
 	return nil

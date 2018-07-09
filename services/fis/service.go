@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"github.com/masami10/aiis/services/odoo"
 	"github.com/masami10/aiis/services/pmon"
-	"strconv"
 	"sync/atomic"
 	"io/ioutil"
 	"strings"
 	"github.com/willf/pad"
 	"sync"
 	"time"
+	"strconv"
 )
 
 const (
@@ -189,6 +189,7 @@ func (s *Service) HandleMO(msg string) {
 
 	// 装配代码校验位
 	mo.Pin_check_code, _ = strconv.Atoi(msg[28:29])
+		time.Sleep(100 * time.Millisecond)
 
 	// 流水线
 	mo.Assembly_line = msg[30:32]

@@ -7,6 +7,11 @@ import (
 	"time"
 )
 
+type DispatchPkg struct {
+	p	PmonPackage
+	ch	string
+}
+
 type Dispatcher interface {
 	Dispatch(PmonPackage, string) //数据字节流，通道名字
 }
@@ -19,22 +24,38 @@ type channelInfo struct {
 }
 
 type Connection struct {
-	U        *udp_driver.UDPDriver
-	started  bool
-	name     string
-	channels []channelInfo
+	U        	*udp_driver.UDPDriver
+	started  	bool
+	name     	string
+	channels 	[]channelInfo
+	DispatchBuf	chan DispatchPkg
 	Dispatcher
 }
 
-func NewConnection(addr string, name string, deadline time.Duration) *Connection {
+func NewConnection(addr string, name string, deadline time.Duration, workers int) *Connection {
 	u := udp_driver.NewUDPDriver(addr, deadline)
 	c := &Connection{
-		U:       u,
-		started: false,
-		name:    name,
+		U:       		u,
+		started: 		false,
+		name:    		name,
+		DispatchBuf:	make(chan DispatchPkg, 1024),
 	}
 	u.SetConnection(c) //注入服务为了进行分发
+
+	for i := 0; i < workers; i++ {
+		go c.DispatchProcess()
+	}
+
 	return c
+}
+
+func (c *Connection) DispatchProcess() {
+	for {
+		select {
+		case pkg := <-c.DispatchBuf:
+			c.Dispatcher.Dispatch(pkg.p, pkg.ch)
+		}
+	}
 }
 
 //连接中打开相关的通道
@@ -86,7 +107,13 @@ func (c *Connection) dispatch(buf []byte) error {
 	for _, ch := range c.channels {
 		if ch.sNoR == rNoT && ch.sNoT == rNoR {
 			p := PMONParseMsg(buf)
-			c.Dispatcher.Dispatch(p, ch.name)
+
+			pkg := DispatchPkg {
+				p: p,
+				ch: ch.name,
+			}
+
+			c.DispatchBuf <- pkg
 		}
 	}
 	return nil
