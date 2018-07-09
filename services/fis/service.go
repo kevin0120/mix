@@ -56,6 +56,7 @@ func (s *Service) UpdateStatus(status string) {
 
 	if s.status != status {
 		s.status = status
+		fmt.Printf("fis status:%s\n", status)
 	}
 }
 
@@ -139,7 +140,7 @@ func (s *Service) SaveRestartPoint(restartPoint string, ch string) {
 
 		if values[0] == ch {
 
-			lines[i] = fmt.Sprint("%s*%s*", ch, pad.Left(restartPoint, s.Pmon.Channels[ch].RestartPointLength, "0"))
+			lines[i] = fmt.Sprintf("%s*%s*", ch, pad.Left(restartPoint, s.Pmon.Channels[ch].RestartPointLength, "0"))
 			break
 		}
 	}
