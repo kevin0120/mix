@@ -16,6 +16,7 @@ import (
 const (
 	PRS_START	 = 64
 	LEN_PR_VALUE = 3
+	LEN_MO_TAIL = 22
 	MAX_HEARTBEAT_CHECK_COUNT = 3
 	FIS_STATUS_ONLINE = "online"
 	FIS_STATUS_OFFLINE = "offline"
@@ -162,6 +163,16 @@ func (s *Service) HandleMO(msg string) {
 
 	c := s.Config()
 
+	numPrs := len(c.PRS)
+	prsEnd := PRS_START + (LEN_PR_VALUE *numPrs + numPrs - 1)
+	sPrs := msg[PRS_START:prsEnd]
+
+	len_mo := prsEnd + LEN_MO_TAIL
+	if len_mo != len(msg) {
+		s.diag.Error(msg, fmt.Errorf("msg len err:%d", len(msg)))
+		return
+	}
+
 	var mo odoo.ODOOMO
 
 	// 设备名
@@ -193,9 +204,6 @@ func (s *Service) HandleMO(msg string) {
 	s.SaveRestartPoint(mo.Lnr, c.CHRecvMission)
 
 	// prs
-	numPrs := len(c.PRS)
-	prsEnd := PRS_START + (LEN_PR_VALUE *numPrs + numPrs - 1)
-	sPrs := msg[PRS_START:prsEnd]
 	var step = 0
 	for i := 0; i < numPrs; i++ {
 		pr := odoo.ODOOPR{}
