@@ -64,8 +64,9 @@ func (s *Service) Config() Config {
 }
 
 func (s *Service) Open() error {
-	s.Pmon.PmonRegistryEvent(s.OnPmonEventMission, s.Config().CHRecvMission, nil)
-	s.Pmon.PmonRegistryEvent(s.OnPmonEventHeartbeat, s.Config().CHRecvHeartbeat, nil)
+	c := s.Config()
+	s.Pmon.PmonRegistryEvent(s.OnPmonEventMission, c.CHRecvMission, nil)
+	s.Pmon.PmonRegistryEvent(s.OnPmonEventHeartbeat, c.CHRecvHeartbeat, nil)
 
 	go s.HeartbeatCheck()
 
@@ -105,14 +106,17 @@ func (s *Service) addKeepAliveCount() {
 }
 
 func (s *Service) HeartbeatCheck() {
+	interval := s.Config().HeartbeatItv
 	for {
-		if s.KeepAliveCount() >= MAX_HEARTBEAT_CHECK_COUNT {
-			s.UpdateStatus(FIS_STATUS_OFFLINE)
+		select {
+		case <-time.After(time.Duration(interval)):
+			if s.KeepAliveCount() >= MAX_HEARTBEAT_CHECK_COUNT {
+				s.UpdateStatus(FIS_STATUS_OFFLINE)
+			}
+
+			s.addKeepAliveCount()
+
 		}
-
-		s.addKeepAliveCount()
-
-		time.Sleep(time.Duration(s.Config().HeartbeatItv))
 	}
 }
 
