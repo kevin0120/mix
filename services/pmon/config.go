@@ -86,6 +86,10 @@ func parseRestartPoints(conf *PmonConfig) error {
 			return errors.New("restart point format error")
 		}
 
+		if _,ok := conf.RestartPoints[values[0]]; !ok {
+			return fmt.Errorf("Channel %s not exist\n", values[0])
+		}
+
 		conf.RestartPoints[values[0]] = values[1]
 
 		if err == io.EOF {
