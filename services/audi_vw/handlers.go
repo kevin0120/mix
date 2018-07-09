@@ -119,7 +119,6 @@ func (h *Handlers) PushAiis(needPush bool, r *storage.Results, workorder *storag
 
 		err = h.AudiVw.Aiis.PutResult(r.ResultId, aiisResult)
 		if err == nil {
-			r.HasUpload = true
 			h.AudiVw.diag.Debug("推送AIIS成功，更新本地结果标识")
 		} else {
 			h.AudiVw.diag.Error("推送AIIS失败", err)
