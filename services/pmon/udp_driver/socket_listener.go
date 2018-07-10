@@ -107,7 +107,6 @@ func (psl *packetSocketListener) setWriteDeadLine(t time.Time) error {
 	return psl.SetWriteDeadline(t)
 }
 
-
 func (psl *packetSocketListener) write(buf []byte, addr net.Addr) error {
 	l := len(buf)
 	n, err := psl.WriteTo(buf, addr)
@@ -117,7 +116,7 @@ func (psl *packetSocketListener) write(buf []byte, addr net.Addr) error {
 	}
 
 	if n != l {
-		return fmt.Errorf("wirte fail,need write %d bytes, but only %d",l, n )
+		return fmt.Errorf("wirte fail,need write %d bytes, but only %d", l, n)
 	}
 
 	return nil

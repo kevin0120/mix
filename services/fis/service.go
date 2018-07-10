@@ -4,22 +4,22 @@ import (
 	"fmt"
 	"github.com/masami10/aiis/services/odoo"
 	"github.com/masami10/aiis/services/pmon"
-	"sync/atomic"
-	"io/ioutil"
-	"strings"
 	"github.com/willf/pad"
-	"sync"
-	"time"
+	"io/ioutil"
 	"strconv"
+	"strings"
+	"sync"
+	"sync/atomic"
+	"time"
 )
 
 const (
-	PRS_START	 = 64
-	LEN_PR_VALUE = 3
-	LEN_MO_TAIL = 22
+	PRS_START                 = 64
+	LEN_PR_VALUE              = 3
+	LEN_MO_TAIL               = 22
 	MAX_HEARTBEAT_CHECK_COUNT = 3
-	FIS_STATUS_ONLINE = "online"
-	FIS_STATUS_OFFLINE = "offline"
+	FIS_STATUS_ONLINE         = "online"
+	FIS_STATUS_OFFLINE        = "offline"
 )
 
 type Diagnostic interface {
@@ -27,21 +27,21 @@ type Diagnostic interface {
 }
 
 type Service struct {
-	Pmon        	*pmon.Service
-	Odoo        	*odoo.Service
-	diag        	Diagnostic
-	configValue 	atomic.Value
-	mtxFile			sync.Mutex
-	keepAliveCount	int32
-	status			string
-	mtxStatus		sync.Mutex
+	Pmon           *pmon.Service
+	Odoo           *odoo.Service
+	diag           Diagnostic
+	configValue    atomic.Value
+	mtxFile        sync.Mutex
+	keepAliveCount int32
+	status         string
+	mtxStatus      sync.Mutex
 }
 
 func NewService(d Diagnostic, c Config, pmon *pmon.Service) *Service {
 	s := &Service{
-		diag: d,
-		mtxFile: sync.Mutex{},
-		status: FIS_STATUS_OFFLINE,
+		diag:      d,
+		mtxFile:   sync.Mutex{},
+		status:    FIS_STATUS_OFFLINE,
 		mtxStatus: sync.Mutex{},
 	}
 
@@ -164,7 +164,7 @@ func (s *Service) HandleMO(msg string) {
 	c := s.Config()
 
 	numPrs := len(c.PRS)
-	prsEnd := PRS_START + (LEN_PR_VALUE *numPrs + numPrs - 1)
+	prsEnd := PRS_START + (LEN_PR_VALUE*numPrs + numPrs - 1)
 	sPrs := msg[PRS_START:prsEnd]
 
 	len_mo := prsEnd + LEN_MO_TAIL
@@ -189,7 +189,7 @@ func (s *Service) HandleMO(msg string) {
 
 	// 装配代码校验位
 	mo.Pin_check_code, _ = strconv.Atoi(msg[28:29])
-		time.Sleep(100 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 
 	// 流水线
 	mo.Assembly_line = msg[30:32]

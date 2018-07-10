@@ -71,7 +71,7 @@ type Service struct {
 	externalURL     string
 	server          *iris.Application
 
-	isOpen			bool
+	isOpen bool
 
 	stop chan chan struct{}
 
@@ -103,7 +103,7 @@ func NewService(c Config, hostname string, d Diagnostic, disc *diagnostic.Servic
 		HandlerByNames:        make(map[string]int),
 		shutdownTimeout:       time.Duration(c.ShutdownTimeout),
 		diag:                  d,
-		isOpen:				   false,
+		isOpen:                false,
 		DiagService:           disc,
 		httpServerErrorLogger: d.NewHTTPServerErrorLogger(),
 	}

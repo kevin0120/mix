@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/masami10/aiis/services/pmon"
-	"fmt"
 	"flag"
+	"fmt"
+	"github.com/masami10/aiis/services/pmon"
 	"time"
 )
 

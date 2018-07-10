@@ -1,17 +1,17 @@
 package rush
 
 import (
+	"errors"
 	"fmt"
 	"github.com/kataras/iris"
 	"github.com/masami10/aiis/services/fis"
 	"github.com/masami10/aiis/services/httpd"
+	"gopkg.in/resty.v1"
+	"net/http"
 	"strings"
 	"sync"
-	"net/http"
-	"gopkg.in/resty.v1"
-	"time"
 	"sync/atomic"
-	"errors"
+	"time"
 )
 
 type Diagnostic interface {
@@ -24,7 +24,7 @@ type cResult struct {
 }
 
 type RushResult struct {
-	HasUpload	bool	`json:"has_upload"`
+	HasUpload bool `json:"has_upload"`
 }
 
 type Service struct {
@@ -33,8 +33,8 @@ type Service struct {
 	wg           sync.WaitGroup
 	chResult     chan cResult
 	closing      chan struct{}
-	configValue atomic.Value
-	httpClient  *resty.Client
+	configValue  atomic.Value
+	httpClient   *resty.Client
 
 	StorageService interface {
 		UpdateResults(result *OperationResult, id int64, sent int) error

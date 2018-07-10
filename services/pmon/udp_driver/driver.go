@@ -41,7 +41,7 @@ func NewUDPDriver(addr string, deadline time.Duration) *UDPDriver {
 	//w := NewSocketWriter(addr, time.Duration(time.Duration(0)))
 
 	return &UDPDriver{
-		remoteAddr:       a,
+		remoteAddr:   a,
 		Listener:     l,
 		messageNum:   1, //start from 1
 		mux:          new(sync.Mutex),
@@ -106,7 +106,7 @@ func (u *UDPDriver) Close() error {
 
 func (u *UDPDriver) xWrite(buf []byte, deadline time.Duration) error {
 	u.Listener.setWriteDeadLine(time.Now().Add(deadline)) //write 设定tiemout时间
-	return u.Listener.write(buf,u.remoteAddr)
+	return u.Listener.write(buf, u.remoteAddr)
 }
 
 func (u *UDPDriver) Write(buf []byte, deadline time.Duration) error {

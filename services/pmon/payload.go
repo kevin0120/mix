@@ -2,8 +2,8 @@ package pmon
 
 import (
 	"fmt"
-	"strconv"
 	"math"
+	"strconv"
 )
 
 type PMONSMGTYPE = string
@@ -95,8 +95,8 @@ func (c *Channel) generateSO(msgNum int) (string, error) {
 	s := c.setPMONHeader(PMONSTARTREQ, msgNum, PMONMSGSO)
 	s += "00000000000000000000" //20个0 for Length of Object ID + Number of Records + Record Length + Generation Number
 	s += c.Segment
-	s += "00"                          //data Security
-	s += fmt.Sprintf("%04d", c.Buffer) //四位补零
+	s += "00"                                      //data Security
+	s += fmt.Sprintf("%04d", c.Buffer)             //四位补零
 	s += fmt.Sprintf("%04d", c.RestartPointLength) //四位补零,Length of the starting point
 	if c.RestartPointLength > 0 {
 		s += c.GetRestartPoint()
@@ -119,8 +119,8 @@ func (c *Channel) generateAO(msgNum int) (string, error) {
 	s := c.setPMONHeader(PMONSTARTREQ, msgNum, PMONMSGAO)
 	s += "0000000000" //8个0 for Length of Object ID +Generation Number
 	s += c.Segment
-	s += "00"                          //data Security
-	s += fmt.Sprintf("%04d", c.Buffer) //四位补零
+	s += "00"                                      //data Security
+	s += fmt.Sprintf("%04d", c.Buffer)             //四位补零
 	s += fmt.Sprintf("%04d", c.RestartPointLength) //四位补零,Length of the starting point
 	//for idx :=0; idx < c.RestartPointLength; idx ++ {
 	//	s += "0"
@@ -157,20 +157,20 @@ func (c *Channel) generateSD(msgNum int, data string) ([]string, error) {
 		needSegment := int(math.Ceil(float64(len(d) / eLen)))
 		var r []string
 		off := 0
-		for idx := 0; idx <= needSegment; idx ++ {
+		for idx := 0; idx <= needSegment; idx++ {
 
-			s := c.setPMONHeader(PMONSTARTREQ, msgNum + idx, PMONMSGSD)
+			s := c.setPMONHeader(PMONSTARTREQ, msgNum+idx, PMONMSGSD)
 			s += fmt.Sprintf("%04d", c.GetBlockCount()) // BlockCount
 			residualLengh := len(d[off:])
 			if residualLengh <= eLen {
 				//一条完整的
-				s += fmt.Sprintf("%04d", residualLengh)            // effective byte length = Residual byte length
-				s += fmt.Sprintf("%06d", residualLengh)            // Residual byte length
+				s += fmt.Sprintf("%04d", residualLengh) // effective byte length = Residual byte length
+				s += fmt.Sprintf("%06d", residualLengh) // Residual byte length
 				s += data[off:]
-			}else {
-				s += fmt.Sprintf("%04d", len(d[off: off + eLen]))            // effective byte length
-				s += fmt.Sprintf("%06d", residualLengh)            // Residual byte length
-				s += data[off: off + eLen]
+			} else {
+				s += fmt.Sprintf("%04d", len(d[off:off+eLen])) // effective byte length
+				s += fmt.Sprintf("%06d", residualLengh)        // Residual byte length
+				s += data[off : off+eLen]
 				off += eLen
 			}
 			s += PMONEND
@@ -178,7 +178,7 @@ func (c *Channel) generateSD(msgNum int, data string) ([]string, error) {
 			r = append(r, s) //添加到list中去
 		}
 		return r, nil
-	}else {
+	} else {
 		s += fmt.Sprintf("%04d", c.GetBlockCount()) // BlockCount
 		s += fmt.Sprintf("%04d", len(d))            // byte length
 		s += data
@@ -217,8 +217,8 @@ func (c *Channel) PMONGenerateMsg(t PMONSMGTYPE, data string) ([]string, error) 
 }
 
 func PMONParseMsg(buf []byte) PmonPackage {
-	protocol_element := string(buf[13:15])
-	switch protocol_element {
+	protocolElement := string(buf[13:15])
+	switch protocolElement {
 	case PMONMSGSO:
 		return PmonPackage{
 			t:    PMONMSGSO,

@@ -4,12 +4,13 @@ import (
 	"github.com/masami10/aiis/services/pmon/udp_driver"
 	"github.com/pkg/errors"
 	"log"
+	"sync"
 	"time"
 )
 
 type DispatchPkg struct {
-	p	PmonPackage
-	ch	string
+	p  PmonPackage
+	ch string
 }
 
 type Dispatcher interface {
@@ -24,27 +25,28 @@ type channelInfo struct {
 }
 
 type Connection struct {
-	U        	*udp_driver.UDPDriver
-	started  	bool
-	name     	string
-	channels 	[]channelInfo
-	DispatchBuf	chan DispatchPkg
+	U           *udp_driver.UDPDriver
+	started     bool
+	workers     int
+	wg          sync.WaitGroup
+	name        string
+	channels    []channelInfo
+	closing     chan struct{}
+	DispatchBuf chan DispatchPkg
 	Dispatcher
 }
 
 func NewConnection(addr string, name string, deadline time.Duration, workers int) *Connection {
 	u := udp_driver.NewUDPDriver(addr, deadline)
 	c := &Connection{
-		U:       		u,
-		started: 		false,
-		name:    		name,
-		DispatchBuf:	make(chan DispatchPkg, 1024),
+		U:           u,
+		started:     false,
+		name:        name,
+		workers:     workers,
+		DispatchBuf: make(chan DispatchPkg, workers),
+		closing:     make(chan struct{}),
 	}
 	u.SetConnection(c) //注入服务为了进行分发
-
-	for i := 0; i < workers; i++ {
-		go c.DispatchProcess()
-	}
 
 	return c
 }
@@ -54,6 +56,10 @@ func (c *Connection) DispatchProcess() {
 		select {
 		case pkg := <-c.DispatchBuf:
 			c.Dispatcher.Dispatch(pkg.p, pkg.ch)
+
+		case <-c.closing:
+			c.wg.Done()
+			return
 		}
 	}
 }
@@ -65,7 +71,15 @@ func (c *Connection) Open() error {
 		if err != nil {
 			return errors.Wrap(err, "Open Connection fail")
 		}
+
+		for i := 0; i < c.workers; i++ {
+			c.wg.Add(1)
+
+			go c.DispatchProcess()
+		}
+
 		c.started = true
+
 	}
 	return nil
 }
@@ -76,6 +90,12 @@ func (c *Connection) Close() error {
 		if err != nil {
 			return err
 		}
+		for i := 0; i < c.workers; i++ {
+			c.closing <- struct{}{}
+		}
+
+		c.wg.Wait()
+
 		c.started = false
 	}
 	return nil
@@ -108,8 +128,8 @@ func (c *Connection) dispatch(buf []byte) error {
 		if ch.sNoR == rNoT && ch.sNoT == rNoR {
 			p := PMONParseMsg(buf)
 
-			pkg := DispatchPkg {
-				p: p,
+			pkg := DispatchPkg{
+				p:  p,
 				ch: ch.name,
 			}
 

@@ -6,15 +6,15 @@ import (
 )
 
 type Config struct {
-	CHRecvMission   string 			`yaml:"ch_recv_mission"`
-	CHSendResult    string 			`yaml:"ch_send_result"`
-	CHRecvHeartbeat string 			`yaml:"ch_recv_heartbeat"`
-	SystemType      string 			`yaml:"system_type"`
-	SoftwareVersion string 			`yaml:"software_version"`
-	Mode            string 			`yaml:"mode"`
-	FactoryCode		string 			`yaml:"factory_code"`
-	PRS				[]string		`yaml:"prs"`
-	HeartbeatItv	toml.Duration	`yaml:"heartbeat_interval"`
+	CHRecvMission   string        `yaml:"ch_recv_mission"`
+	CHSendResult    string        `yaml:"ch_send_result"`
+	CHRecvHeartbeat string        `yaml:"ch_recv_heartbeat"`
+	SystemType      string        `yaml:"system_type"`
+	SoftwareVersion string        `yaml:"software_version"`
+	Mode            string        `yaml:"mode"`
+	FactoryCode     string        `yaml:"factory_code"`
+	PRS             []string      `yaml:"prs"`
+	HeartbeatItv    toml.Duration `yaml:"heartbeat_interval"`
 }
 
 func NewConfig() Config {
@@ -28,9 +28,9 @@ func NewConfig() Config {
 		SystemType:      "screw",
 		SoftwareVersion: "1.0",
 		Mode:            "AUTO",
-		FactoryCode:	 "01",
-		PRS:			 prs,
-		HeartbeatItv:	 toml.Duration(time.Minute * 1),
+		FactoryCode:     "01",
+		PRS:             prs,
+		HeartbeatItv:    toml.Duration(time.Minute * 1),
 	}
 }
 

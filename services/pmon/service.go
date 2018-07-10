@@ -14,13 +14,13 @@ type Diagnostic interface {
 }
 
 type Service struct {
-	rawConf     	atomic.Value
-	HTTPD       	*httpd.Service
-	configValue 	atomic.Value
-	Channels    	map[string]*Channel
-	err         	chan error
-	stop        	chan chan struct{}
-	diag        	Diagnostic
+	rawConf     atomic.Value
+	HTTPD       *httpd.Service
+	configValue atomic.Value
+	Channels    map[string]*Channel
+	err         chan error
+	stop        chan chan struct{}
+	diag        Diagnostic
 }
 
 type PMONEventHandler func(error, []rune, interface{}) //事件号， 内容
@@ -62,7 +62,7 @@ func (s *Service) Open() error {
 	for name, conn := range c.Connections {
 		addr := fmt.Sprintf("udp://%s:%d", conn.Address[0], conn.Port)
 		connections[name] = NewConnection(addr, name, c.WaitResp, conf.Workers) //waitResponse 作为其读取Timeout
-		connections[name].SetDispatcher(s)                        //将服务注入进行通道分发
+		connections[name].SetDispatcher(s)                                      //将服务注入进行通道分发
 	}
 	for cname, channel := range c.Channels {
 		connectKey := fmt.Sprintf("Port%d", channel.Port)
@@ -136,7 +136,7 @@ func (s *Service) SendPmonMessage(msgType PMONSMGTYPE, channelNumber string, dat
 		log.Printf("Generation %s msg fail", msgType)
 		return errors.Wrap(err, "SendPmonMessage")
 	}
-	for _,s := range x {
+	for _, s := range x {
 		if err := ch.Write([]byte(s), msgType); err != nil {
 			return errors.Wrap(err, "SendPmonMessage Write")
 		}

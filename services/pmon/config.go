@@ -1,16 +1,16 @@
 package pmon
 
 import (
+	"bufio"
+	"errors"
 	"fmt"
 	"gopkg.in/ini.v1"
+	"io"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
-	"os"
-	"bufio"
-	"io"
-	"errors"
 )
 
 const (
@@ -33,19 +33,19 @@ const (
 )
 
 type Config struct {
-	Path   		string 	`yaml:"path"`
-	Workers		int		`yaml:"workers"`
-	Enable 		bool   	`yaml:"enable"`
+	Path    string `yaml:"path"`
+	Workers int    `yaml:"workers"`
+	Enable  bool   `yaml:"enable"`
 }
 
 type PmonConfig struct {
-	ChannelCount 	int
-	Channels     	map[string]cChannel
-	WaitResp     	time.Duration
-	UdpCount     	int
-	Connections  	map[string]cConnection
-	Ofhkht			string
-	RestartPoints	map[string]string
+	ChannelCount  int
+	Channels      map[string]cChannel
+	WaitResp      time.Duration
+	UdpCount      int
+	Connections   map[string]cConnection
+	Ofhkht        string
+	RestartPoints map[string]string
 }
 
 type cConnection struct {
@@ -192,9 +192,9 @@ func parseConnection(key *ini.Key) cConnection {
 
 func NewConfig() Config {
 	return Config{
-		Path:   "/etc/pmon/PMON.CFG",
+		Path:    "/etc/pmon/PMON.CFG",
 		Workers: 4,
-		Enable: true,
+		Enable:  true,
 	}
 }
 
