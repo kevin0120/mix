@@ -8,16 +8,16 @@ import (
 )
 
 type Config struct {
-	SN       string `yaml:"serial_no"`
-	Protocol string `yaml:"protocol"`
-	RemoteIP string `yaml:"remote_ip"`
-	Port     int    `yaml:"port"`
-	ToolChannel int	`yaml:"channel"`
+	SN          string `yaml:"serial_no"`
+	Protocol    string `yaml:"protocol"`
+	RemoteIP    string `yaml:"remote_ip"`
+	Port        int    `yaml:"port"`
+	ToolChannel int    `yaml:"channel"`
 }
 
 const (
-	AUDIPROTOCOL = "Audi/VW"
-	OPENPROTOCOL = "OpenProtocol"
+	AUDIPROTOCOL         = "Audi/VW"
+	OPENPROTOCOL         = "OpenProtocol"
 	DEFAULT_TOOL_CHANNEL = 1
 )
 
@@ -30,10 +30,10 @@ func init() {
 func NewConfig() Config {
 	_sn, _ := uuid.NewV4()
 	return Config{
-		SN:       _sn.String(),
-		Protocol: AUDIPROTOCOL,
-		RemoteIP: "127.0.0.1",
-		Port:     4700,
+		SN:          _sn.String(),
+		Protocol:    AUDIPROTOCOL,
+		RemoteIP:    "127.0.0.1",
+		Port:        4700,
 		ToolChannel: DEFAULT_TOOL_CHANNEL,
 	}
 }

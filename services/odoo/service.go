@@ -2,15 +2,15 @@ package odoo
 
 import (
 	"fmt"
+	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/storage"
 	"github.com/pkg/errors"
 	"gopkg.in/resty.v1"
 	"net/http"
+	"strconv"
 	"sync/atomic"
 	"time"
-	"strconv"
-	"github.com/masami10/rush/services/audi_vw"
 )
 
 type Diagnostic interface {
@@ -223,7 +223,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 			}
 		}
 
-		o.LastResultID = results[len(results) - 1].ResultId
+		o.LastResultID = results[len(results)-1].ResultId
 
 		e := s.DB.InsertWorkorder(&o, &results)
 		if e != nil {

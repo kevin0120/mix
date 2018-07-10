@@ -8,6 +8,7 @@ import (
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -17,11 +18,76 @@ const (
 
 	QUALITY_STATE_PASS = "pass"
 	QUALITY_STATE_FAIL = "fail"
-	QUALITY_STATE_EX = "exception"
+	QUALITY_STATE_EX   = "exception"
+
+	HANDLER_TYPE_CURVE = "curve"
+	HANDLER_TYPE_AIIS  = "aiis"
 )
 
+type HandlerPkgCurve struct {
+	curve *ControllerCurve
+	dat   string
+}
+
+type HandlerPkgAiis struct {
+	needPush  bool
+	r         *storage.Results
+	workorder *storage.Workorders
+	result    *ControllerResult
+}
+
+type HandlerPkg struct {
+	HandlerType string
+	Pkg         interface{}
+}
+
 type Handlers struct {
-	AudiVw *Service
+	AudiVw     *Service
+	HandlerBuf chan HandlerPkg
+	closing    chan struct{}
+	workers    int
+	wg         sync.WaitGroup
+}
+
+func (h *Handlers) Init(workers int) {
+
+	h.workers = workers
+	h.closing = make(chan struct{})
+	h.HandlerBuf = make(chan HandlerPkg, workers)
+
+	for i := 0; i < h.workers; i++ {
+		h.wg.Add(1)
+		go h.asyncHandlerProcess()
+	}
+}
+
+func (h *Handlers) Release() {
+	for i := 0; i < h.workers; i++ {
+		h.closing <- struct{}{}
+	}
+
+	h.wg.Wait()
+}
+
+func (h *Handlers) asyncHandlerProcess() {
+	for {
+		select {
+		case pkg := <-h.HandlerBuf:
+			switch pkg.HandlerType {
+			case HANDLER_TYPE_AIIS:
+				pkg_aiis := pkg.Pkg.(HandlerPkgAiis)
+				h.PushAiis(pkg_aiis.needPush, pkg_aiis.r, pkg_aiis.workorder, pkg_aiis.result)
+
+			case HANDLER_TYPE_CURVE:
+				pkg_curve := pkg.Pkg.(HandlerPkgCurve)
+				h.handleCurve(pkg_curve.curve, pkg_curve.dat)
+			}
+
+		case <-h.closing:
+			h.wg.Done()
+			return
+		}
+	}
 }
 
 func (h *Handlers) PushAiis(needPush bool, r *storage.Results, workorder *storage.Workorders, result *ControllerResult) error {
@@ -173,7 +239,18 @@ func (h *Handlers) handleResult(result *ControllerResult, dbresult *storage.Resu
 
 	h.AudiVw.WS.WSSendResult(dbworkorder.HMISN, string(ws_str))
 
-	go h.PushAiis(needPushAiis, dbresult, dbworkorder, result)
+	pkg_aiis := HandlerPkgAiis{
+		needPush:  needPushAiis,
+		r:         dbresult,
+		workorder: dbworkorder,
+		result:    result,
+	}
+
+	pkg := HandlerPkg{
+		HandlerType: HANDLER_TYPE_AIIS,
+		Pkg:         pkg_aiis,
+	}
+	h.HandlerBuf <- pkg
 
 	return nil
 }
@@ -266,7 +343,7 @@ func (h *Handlers) HandleMsg(msg string) {
 	}
 
 	controllerResult.CurFile = fmt.Sprintf("%s_%s_%d_%d_%d.json",
-												workorder.MO_Model, result.NutNo, result.Seq, result.ResultId, controllerResult.Count)
+		workorder.MO_Model, result.NutNo, result.Seq, result.ResultId, controllerResult.Count)
 
 	sCurvedata, _ := json.Marshal(controllerCurveFile)
 	controllerCurve := ControllerCurve{}
@@ -275,7 +352,17 @@ func (h *Handlers) HandleMsg(msg string) {
 	controllerCurve.CurveFile = controllerResult.CurFile
 	controllerCurve.ResultID = controllerResult.Result_id
 
-	go h.handleCurve(&controllerCurve, controllerResult.Dat)
+	pkg_curve := HandlerPkgCurve{
+		curve: &controllerCurve,
+		dat:   controllerResult.Dat,
+	}
+
+	pkg := HandlerPkg{
+		HandlerType: HANDLER_TYPE_CURVE,
+		Pkg:         pkg_curve,
+	}
+	h.HandlerBuf <- pkg
+
 	h.handleResult(&controllerResult, &result, &workorder)
 
 	h.AudiVw.diag.Debug(fmt.Sprintf("HandleMsg end:%s", time.Now().Format("2006-01-02 15:04:05.999999999")))

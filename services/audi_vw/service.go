@@ -117,6 +117,8 @@ func (p *Service) Open() error {
 		go w.Start() //异步启动控制器
 	}
 
+	p.handlers.Init(p.config().Workers)
+
 	for i := 0; i < p.config().Workers; i++ {
 		p.wg.Add(1)
 		go p.HandleProcess()
@@ -142,6 +144,8 @@ func (p *Service) Close() error {
 		p.closing <- struct{}{}
 		p.diag.Debug(fmt.Sprintf("Close AUDIVW Server Handler:%d", i+1))
 	}
+
+	p.handlers.Release()
 
 	p.wg.Wait() //阻塞 等待全部handler关闭
 
@@ -187,22 +191,22 @@ func (p *Service) Read(c net.Conn) {
 		for off < n {
 			if rest == 0 {
 				len_msg := n - off
-				if len_msg < HEADER_LEN - header_rest {
+				if len_msg < HEADER_LEN-header_rest {
 					//长度不够
 					if header_rest == 0 {
 						header_rest = HEADER_LEN - len_msg
-					}else {
+					} else {
 						header_rest -= len_msg
 					}
-					header_buffer += msg[off : off + len_msg]
+					header_buffer += msg[off : off+len_msg]
 					break
-				}else {
+				} else {
 					//完整
 					if header_rest == 0 {
-						header_buffer = msg[off : off + HEADER_LEN]
+						header_buffer = msg[off : off+HEADER_LEN]
 						off += HEADER_LEN
-					}else {
-						header_buffer += msg[off : off + header_rest]
+					} else {
+						header_buffer += msg[off : off+header_rest]
 						off += header_rest
 						header_rest = 0
 					}
@@ -218,7 +222,7 @@ func (p *Service) Read(c net.Conn) {
 					off += header.SIZ
 					rest = 0 //同样解析头
 				} else {
-					body = msg[off : n]
+					body = msg[off:n]
 					rest = header.SIZ - (n - off)
 					break
 				}

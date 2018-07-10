@@ -2,11 +2,11 @@ package minio
 
 import (
 	"fmt"
+	"github.com/masami10/rush/services/storage"
 	"github.com/minio/minio-go"
 	"strings"
 	"sync/atomic"
 	"time"
-	"github.com/masami10/rush/services/storage"
 )
 
 type Diagnostic interface {
@@ -18,7 +18,7 @@ type Service struct {
 	diag        Diagnostic
 	bucket      string
 
-	DB	  *storage.Service
+	DB    *storage.Service
 	minio *minio.Client
 }
 
