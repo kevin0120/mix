@@ -41,6 +41,9 @@ func (s *Service) Config() PmonConfig {
 }
 
 func (s *Service) Open() error {
+	defer func() {
+		go s.run()
+	}()
 	conf := s.rawConf.Load().(Config)
 	if !conf.Enable {
 		return nil
@@ -58,13 +61,20 @@ func (s *Service) Open() error {
 	connections := make(map[string]*Connection, len(c.Connections)) // 初始化长度
 	for name, conn := range c.Connections {
 		addr := fmt.Sprintf("udp://%s:%d", conn.Address[0], conn.Port)
-		connections[name] = NewConnection(addr, name, c.WaitResp) //waitResponse 作为其读取Timeout
-		connections[name].SetDispatcher(s)                        //将服务注入进行通道分发
+		connections[name] = NewConnection(addr, name, c.WaitResp, conf.Workers) //waitResponse 作为其读取Timeout
+		connections[name].SetDispatcher(s)                                      //将服务注入进行通道分发
 	}
 	for cname, channel := range c.Channels {
 		connectKey := fmt.Sprintf("Port%d", channel.Port)
 		s.Channels[cname] = NewChannel(channel) //因为从远端传来的T/R相反，所以进行反转
 		s.Channels[cname].SetConnection(connections[connectKey])
+		if _, ok := s.Config().RestartPoints[cname]; ok {
+			s.Channels[cname].RestartPoint = s.Config().RestartPoints[cname]
+		} else {
+			s.Channels[cname].RestartPoint = ""
+		}
+
+		s.Channels[cname].Service = s
 		connections[connectKey].AppendChannel(cname, channel.SNoT, channel.SNoR)
 	}
 	for _, ch := range s.Channels {
@@ -73,7 +83,6 @@ func (s *Service) Open() error {
 			return errors.Wrap(err, "Open connection fail")
 		}
 	}
-	go s.run()
 	return nil
 }
 
@@ -127,8 +136,10 @@ func (s *Service) SendPmonMessage(msgType PMONSMGTYPE, channelNumber string, dat
 		log.Printf("Generation %s msg fail", msgType)
 		return errors.Wrap(err, "SendPmonMessage")
 	}
-	if err := ch.Write([]byte(x), msgType); err != nil {
-		return errors.Wrap(err, "SendPmonMessage Write")
+	for _, s := range x {
+		if err := ch.Write([]byte(s), msgType); err != nil {
+			return errors.Wrap(err, "SendPmonMessage Write")
+		}
 	}
 
 	return nil

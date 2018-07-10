@@ -1,12 +1,17 @@
 package rush
 
 import (
+	"errors"
 	"fmt"
 	"github.com/kataras/iris"
 	"github.com/masami10/aiis/services/fis"
 	"github.com/masami10/aiis/services/httpd"
+	"gopkg.in/resty.v1"
+	"net/http"
 	"strings"
 	"sync"
+	"sync/atomic"
+	"time"
 )
 
 type Diagnostic interface {
@@ -18,12 +23,18 @@ type cResult struct {
 	id int64
 }
 
+type RushResult struct {
+	HasUpload bool `json:"has_upload"`
+}
+
 type Service struct {
 	HTTPDService *httpd.Service
 	workers      int
 	wg           sync.WaitGroup
 	chResult     chan cResult
 	closing      chan struct{}
+	configValue  atomic.Value
+	httpClient   *resty.Client
 
 	StorageService interface {
 		UpdateResults(result *OperationResult, id int64, sent int) error
@@ -36,14 +47,22 @@ type Service struct {
 
 func NewService(c Config, d Diagnostic) *Service {
 	if c.Enable {
-		return &Service{
+		s := Service{
 			diag:     d,
 			workers:  c.Workers,
 			chResult: make(chan cResult, c.Workers),
 			closing:  make(chan struct{}),
 		}
+
+		s.configValue.Store(c)
+		return &s
 	}
+
 	return nil
+}
+
+func (s *Service) Config() Config {
+	return s.configValue.Load().(Config)
 }
 
 func (s *Service) putFisResult(ctx iris.Context) {
@@ -107,12 +126,25 @@ func (s *Service) Open() error {
 	}
 	s.HTTPDService.Handler[0].AddRoute(r)
 
+	client := resty.New()
+	client.SetRESTMode() // restful mode is default
+	client.SetTimeout(time.Duration(s.Config().Timeout))
+	client.SetContentLength(true)
+	// Headers for all request
+	client.SetHeaders(s.Config().Headers)
+	client.
+		SetRetryCount(s.Config().MaxRetry).
+		SetRetryWaitTime(time.Duration(s.Config().PushInterval)).
+		SetRetryMaxWaitTime(20 * time.Second)
+
+	s.httpClient = client
+
 	for i := 0; i < s.workers; i++ {
 		s.wg.Add(1)
 
 		go s.run()
-
 	}
+
 	return nil
 }
 
@@ -184,6 +216,27 @@ func (s *Service) OperationToFisResult(r *OperationResult) fis.FisResult {
 	return result
 }
 
+func (s *Service) PatchResultFlag(result_id int64, has_upload bool) error {
+	if s.httpClient == nil {
+		return errors.New("rush http client is nil")
+	}
+
+	rush_result := RushResult{}
+	rush_result.HasUpload = has_upload
+	r := s.httpClient.R().SetBody(rush_result)
+
+	resp, err := r.Patch(fmt.Sprintf("%s/%d", s.Config().Route, result_id))
+	if err != nil {
+		return fmt.Errorf("patch result flag failed: %s\n", err)
+	} else {
+		if resp.StatusCode() != http.StatusOK {
+			return fmt.Errorf("patch result flag failed: %s\n", resp.Status())
+		}
+	}
+
+	return nil
+}
+
 func (s *Service) HandleResult(cr *cResult) {
 
 	// 结果推送fis
@@ -200,5 +253,8 @@ func (s *Service) HandleResult(cr *cResult) {
 	err := s.StorageService.UpdateResults(cr.r, cr.id, sent)
 	if err != nil {
 		s.diag.Error("update result error", err)
+	} else {
+		// 更新masterpc结果上传标识
+		s.PatchResultFlag(cr.id, true)
 	}
 }

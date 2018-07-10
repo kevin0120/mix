@@ -4,14 +4,22 @@ import (
 	"fmt"
 	"github.com/masami10/aiis/services/odoo"
 	"github.com/masami10/aiis/services/pmon"
+	"github.com/willf/pad"
+	"io/ioutil"
 	"strconv"
+	"strings"
+	"sync"
 	"sync/atomic"
+	"time"
 )
 
 const (
-	LEN_FIS_MO   = 149
-	NUM_PRS      = 16
-	LEN_PR_VALUE = 3
+	PRS_START                 = 64
+	LEN_PR_VALUE              = 3
+	LEN_MO_TAIL               = 22
+	MAX_HEARTBEAT_CHECK_COUNT = 3
+	FIS_STATUS_ONLINE         = "online"
+	FIS_STATUS_OFFLINE        = "offline"
 )
 
 type Diagnostic interface {
@@ -19,40 +27,38 @@ type Diagnostic interface {
 }
 
 type Service struct {
-	Pmon        *pmon.Service
-	Odoo        *odoo.Service
-	PR_GROUPS   []string
-	diag        Diagnostic
-	configValue atomic.Value
+	Pmon           *pmon.Service
+	Odoo           *odoo.Service
+	diag           Diagnostic
+	configValue    atomic.Value
+	mtxFile        sync.Mutex
+	keepAliveCount int32
+	status         string
+	mtxStatus      sync.Mutex
 }
 
 func NewService(d Diagnostic, c Config, pmon *pmon.Service) *Service {
 	s := &Service{
-		diag: d,
+		diag:      d,
+		mtxFile:   sync.Mutex{},
+		status:    FIS_STATUS_OFFLINE,
+		mtxStatus: sync.Mutex{},
 	}
 
 	s.Pmon = pmon
-	s.PR_GROUPS = []string{
-		"GSP",
-		"SAB",
-		"RAD",
-		"REI",
-		"BRS",
-		"GMO",
-		"EDF",
-		"AED",
-		"MOT",
-		"LES",
-		"HIS",
-		"AIB",
-		"FSB",
-		"SIH",
-		"HBV",
-		"AGM",
-	}
 
 	s.configValue.Store(c)
 	return s
+}
+
+func (s *Service) UpdateStatus(status string) {
+	s.mtxStatus.Lock()
+	defer s.mtxStatus.Unlock()
+
+	if s.status != status {
+		s.status = status
+		fmt.Printf("fis status:%s\n", status)
+	}
 }
 
 func (s *Service) Config() Config {
@@ -60,7 +66,11 @@ func (s *Service) Config() Config {
 }
 
 func (s *Service) Open() error {
-	s.Pmon.PmonRegistryEvent(s.OnPmonEvent, s.Config().CHRecv, nil)
+	c := s.Config()
+	s.Pmon.PmonRegistryEvent(s.OnPmonEventMission, c.CHRecvMission, nil)
+	s.Pmon.PmonRegistryEvent(s.OnPmonEventHeartbeat, c.CHRecvHeartbeat, nil)
+
+	go s.HeartbeatCheck()
 
 	return nil
 }
@@ -69,9 +79,10 @@ func (s *Service) Close() error {
 	return nil
 }
 
-func (s *Service) OnPmonEvent(err error, data []rune, obj interface{}) {
+func (s *Service) OnPmonEventMission(err error, data []rune, obj interface{}) {
+
 	if err != nil {
-		fmt.Printf("err %s\n", err.Error())
+		s.diag.Error("pmon event mission error", err)
 	} else {
 		// 处理pmon收到的数据
 		msg := string(data)
@@ -79,15 +90,90 @@ func (s *Service) OnPmonEvent(err error, data []rune, obj interface{}) {
 	}
 }
 
+func (s *Service) OnPmonEventHeartbeat(err error, data []rune, obj interface{}) {
+	s.UpdateStatus(FIS_STATUS_ONLINE)
+	s.updateKeepAliveCount(0)
+}
+
+func (s *Service) KeepAliveCount() int32 {
+	return atomic.LoadInt32(&s.keepAliveCount)
+}
+
+func (s *Service) updateKeepAliveCount(i int32) {
+	atomic.SwapInt32(&s.keepAliveCount, i)
+}
+
+func (s *Service) addKeepAliveCount() {
+	atomic.AddInt32(&s.keepAliveCount, 1)
+}
+
+func (s *Service) HeartbeatCheck() {
+	interval := s.Config().HeartbeatItv
+	for {
+		select {
+		case <-time.After(time.Duration(interval)):
+			if s.KeepAliveCount() >= MAX_HEARTBEAT_CHECK_COUNT {
+				s.UpdateStatus(FIS_STATUS_OFFLINE)
+			}
+
+			s.addKeepAliveCount()
+
+		}
+	}
+}
+
+func (s *Service) SaveRestartPoint(restartPoint string, ch string) {
+
+	c := s.Pmon.Config()
+	// 更新通道restartpoint
+	s.Pmon.Channels[ch].RefreshRestartPoint(restartPoint)
+
+	// 保存文件
+	s.mtxFile.Lock()
+	defer s.mtxFile.Unlock()
+
+	f, err := ioutil.ReadFile(c.Ofhkht)
+	if err != nil {
+		s.diag.Error("read restart point file err", err)
+	}
+
+	lines := strings.Split(string(f), "\n")
+
+	for i, line := range lines {
+		values := strings.Split(line, "*")
+		if len(values) < 2 {
+			s.diag.Error("restart point format error", nil)
+		}
+
+		if values[0] == ch {
+
+			lines[i] = fmt.Sprintf("%s*%s*", ch, pad.Left(restartPoint, s.Pmon.Channels[ch].RestartPointLength, "0"))
+			break
+		}
+	}
+
+	output := strings.Join(lines, "\n")
+	err = ioutil.WriteFile(c.Ofhkht, []byte(output), 0644)
+	if err != nil {
+		s.diag.Error("save restart point", err)
+	}
+}
+
 func (s *Service) HandleMO(msg string) {
 
-	l := len(msg)
-	if l != LEN_FIS_MO {
-		s.diag.Error(msg, fmt.Errorf("msg len err:%d", l))
+	c := s.Config()
+
+	numPrs := len(c.PRS)
+	prsEnd := PRS_START + (LEN_PR_VALUE*numPrs + numPrs - 1)
+	sPrs := msg[PRS_START:prsEnd]
+
+	len_mo := prsEnd + LEN_MO_TAIL
+	if len_mo != len(msg) {
+		s.diag.Error(msg, fmt.Errorf("msg len err:%d", len(msg)))
 		return
 	}
 
-	mo := odoo.ODOOMO{}
+	var mo odoo.ODOOMO
 
 	// 设备名
 	mo.Equipment_name = msg[0:4]
@@ -103,6 +189,7 @@ func (s *Service) HandleMO(msg string) {
 
 	// 装配代码校验位
 	mo.Pin_check_code, _ = strconv.Atoi(msg[28:29])
+	time.Sleep(100 * time.Millisecond)
 
 	// 流水线
 	mo.Assembly_line = msg[30:32]
@@ -115,14 +202,14 @@ func (s *Service) HandleMO(msg string) {
 
 	// 流水号
 	mo.Lnr = msg[34:38]
+	s.SaveRestartPoint(mo.Lnr, c.CHRecvMission)
 
 	// prs
-	s_prs := msg[64:127]
 	var step = 0
-	for i := 0; i < NUM_PRS; i++ {
+	for i := 0; i < numPrs; i++ {
 		pr := odoo.ODOOPR{}
-		pr.Pr_group = s.PR_GROUPS[i]
-		pr.Pr_value = s_prs[step : step+LEN_PR_VALUE]
+		pr.Pr_group = s.Config().PRS[i]
+		pr.Pr_value = sPrs[step : step+LEN_PR_VALUE]
 
 		mo.Prs = append(mo.Prs, pr)
 		step += LEN_PR_VALUE + 1
@@ -131,11 +218,9 @@ func (s *Service) HandleMO(msg string) {
 	err := s.Odoo.CreateMO(mo)
 	if err != nil {
 		s.diag.Error("create mo err", err)
-	} else {
-		fmt.Printf("create mo ok:%d%d", mo.Pin, mo.Pin_check_code)
 	}
 }
 
 func (s *Service) PushResult(result *FisResult) error {
-	return s.Pmon.SendPmonMessage(pmon.PMONMSGSD, s.Config().CHSend, result.Serialize())
+	return s.Pmon.SendPmonMessage(pmon.PMONMSGSD, s.Config().CHSendResult, result.Serialize())
 }

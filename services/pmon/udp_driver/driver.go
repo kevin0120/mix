@@ -15,7 +15,7 @@ type Connection interface {
 }
 
 type UDPDriver struct {
-	Writer       *SocketWriter
+	remoteAddr   *net.UDPAddr
 	Listener     *SocketListener
 	ReadTimeout  time.Duration
 	ReadDeadline time.Time
@@ -31,10 +31,17 @@ func NewUDPDriver(addr string, deadline time.Duration) *UDPDriver {
 	listenerAddr := fmt.Sprintf("udp://:%s", sl[2])
 	l := NewSocketListener(listenerAddr)
 
-	w := NewSocketWriter(addr, time.Duration(time.Duration(0)))
+	a, err := net.ResolveUDPAddr("udp", strings.Split(addr, "://")[1])
+
+	if err != nil {
+		fmt.Printf("get updDriver fail resolve add error:%s", err)
+		return nil
+	}
+
+	//w := NewSocketWriter(addr, time.Duration(time.Duration(0)))
 
 	return &UDPDriver{
-		Writer:       w,
+		remoteAddr:   a,
 		Listener:     l,
 		messageNum:   1, //start from 1
 		mux:          new(sync.Mutex),
@@ -63,11 +70,11 @@ func (u *UDPDriver) Open() error {
 			return err
 		}
 	}
-	if u.Writer != nil {
-		if err := u.Writer.Connect(); err != nil {
-			return err
-		}
-	}
+	//if u.Writer != nil {
+	//	if err := u.Writer.Connect(); err != nil {
+	//		return err
+	//	}
+	//}
 
 	//go u.manage()
 	return nil
@@ -81,12 +88,12 @@ func (u *UDPDriver) Close() error {
 		}
 		u.Listener = nil
 	}
-	if u.Writer != nil {
-		if err := u.Writer.Close(); err != nil {
-			return errors.Wrap(err, "Close the UDP Driver Writer")
-		}
-		u.Writer = nil
-	}
+	//if u.Writer != nil {
+	//	if err := u.Writer.Close(); err != nil {
+	//		return errors.Wrap(err, "Close the UDP Driver Writer")
+	//	}
+	//	u.Writer = nil
+	//}
 	return nil
 }
 
@@ -98,8 +105,8 @@ func (u *UDPDriver) Close() error {
 //}
 
 func (u *UDPDriver) xWrite(buf []byte, deadline time.Duration) error {
-	u.Writer.SetWriteDeadline(time.Now().Add(deadline)) //write 设定tiemout时间
-	return u.Writer.Write(buf)
+	u.Listener.setWriteDeadLine(time.Now().Add(deadline)) //write 设定tiemout时间
+	return u.Listener.write(buf, u.remoteAddr)
 }
 
 func (u *UDPDriver) Write(buf []byte, deadline time.Duration) error {
@@ -144,5 +151,5 @@ func (u *UDPDriver) Read(c net.Conn) {
 	//无需实现
 }
 func (u *UDPDriver) NewConn(c net.Conn) {
-	//无需事先
+	//无需实现
 }

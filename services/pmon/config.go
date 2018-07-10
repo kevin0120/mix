@@ -1,8 +1,12 @@
 package pmon
 
 import (
+	"bufio"
+	"errors"
 	"fmt"
 	"gopkg.in/ini.v1"
+	"io"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -29,16 +33,19 @@ const (
 )
 
 type Config struct {
-	Path   string `yaml:"path"`
-	Enable bool   `yaml:"enable"`
+	Path    string `yaml:"path"`
+	Workers int    `yaml:"workers"`
+	Enable  bool   `yaml:"enable"`
 }
 
 type PmonConfig struct {
-	ChannelCount int
-	Channels     map[string]cChannel
-	WaitResp     time.Duration
-	UdpCount     int
-	Connections  map[string]cConnection
+	ChannelCount  int
+	Channels      map[string]cChannel
+	WaitResp      time.Duration
+	UdpCount      int
+	Connections   map[string]cConnection
+	Ofhkht        string
+	RestartPoints map[string]string
 }
 
 type cConnection struct {
@@ -64,16 +71,42 @@ type cChannel struct {
 	Description        string
 }
 
+func parseRestartPoints(conf *PmonConfig) error {
+	f, err := os.Open(conf.Ofhkht)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	rd := bufio.NewReader(f)
+	for {
+		line, err := rd.ReadString('\n')
+
+		values := strings.Split(line, "*")
+		if len(values) < 2 {
+			return errors.New("restart point format error")
+		}
+
+		conf.RestartPoints[values[0]] = values[1]
+
+		if err == io.EOF {
+			break
+		}
+	}
+
+	return nil
+}
+
 func parseChannel(key *ini.Key) (string, *cChannel) {
 	ch := key.String() // 拿到了一整行作为字符串，解析
 	if ch == "" {
 		return ch, nil
 	}
-	_ss := strings.Split(ch, ",")
+	sses := strings.Split(ch, ",")
 
 	var ss []string
 
-	for _, s := range _ss {
+	for _, s := range sses {
 		d := strings.Replace(s, " ", "", -1)
 		ss = append(ss, d)
 	}
@@ -159,8 +192,9 @@ func parseConnection(key *ini.Key) cConnection {
 
 func NewConfig() Config {
 	return Config{
-		Path:   "/etc/pmon/PMON.CFG",
-		Enable: true,
+		Path:    "/etc/pmon/PMON.CFG",
+		Workers: 4,
+		Enable:  true,
 	}
 }
 
@@ -173,7 +207,7 @@ func PmonNewConfig(path string) (PmonConfig, error) {
 		return PmonConfig{}, fmt.Errorf("path : %s is not a absoluted path", path)
 	}
 
-	var conf = PmonConfig{ChannelCount: 0}
+	var conf = PmonConfig{ChannelCount: 0, RestartPoints: map[string]string{}}
 
 	cfg, err := ini.Load(path)
 	if err != nil {
@@ -209,7 +243,18 @@ func PmonNewConfig(path string) (PmonConfig, error) {
 				conf.Connections[key.Name()] = con
 			}
 		}
-	}
-	return conf, nil
+		if strings.Contains(sec.Name(), "RestartPoint") {
+			for _, key := range sec.Keys() {
+				conf.Ofhkht = key.Value()
+				break
+			}
 
+			err := parseRestartPoints(&conf)
+			if err != nil {
+				fmt.Printf("parseRestartPoints failed: %v", err)
+			}
+		}
+	}
+
+	return conf, nil
 }

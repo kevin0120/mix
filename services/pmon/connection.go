@@ -4,8 +4,14 @@ import (
 	"github.com/masami10/aiis/services/pmon/udp_driver"
 	"github.com/pkg/errors"
 	"log"
+	"sync"
 	"time"
 )
+
+type DispatchPkg struct {
+	p  PmonPackage
+	ch string
+}
 
 type Dispatcher interface {
 	Dispatch(PmonPackage, string) //数据字节流，通道名字
@@ -19,22 +25,43 @@ type channelInfo struct {
 }
 
 type Connection struct {
-	U        *udp_driver.UDPDriver
-	started  bool
-	name     string
-	channels []channelInfo
+	U           *udp_driver.UDPDriver
+	started     bool
+	workers     int
+	wg          sync.WaitGroup
+	name        string
+	channels    []channelInfo
+	closing     chan struct{}
+	DispatchBuf chan DispatchPkg
 	Dispatcher
 }
 
-func NewConnection(addr string, name string, deadline time.Duration) *Connection {
+func NewConnection(addr string, name string, deadline time.Duration, workers int) *Connection {
 	u := udp_driver.NewUDPDriver(addr, deadline)
 	c := &Connection{
-		U:       u,
-		started: false,
-		name:    name,
+		U:           u,
+		started:     false,
+		name:        name,
+		workers:     workers,
+		DispatchBuf: make(chan DispatchPkg, workers),
+		closing:     make(chan struct{}),
 	}
 	u.SetConnection(c) //注入服务为了进行分发
+
 	return c
+}
+
+func (c *Connection) DispatchProcess() {
+	for {
+		select {
+		case pkg := <-c.DispatchBuf:
+			c.Dispatcher.Dispatch(pkg.p, pkg.ch)
+
+		case <-c.closing:
+			c.wg.Done()
+			return
+		}
+	}
 }
 
 //连接中打开相关的通道
@@ -44,7 +71,15 @@ func (c *Connection) Open() error {
 		if err != nil {
 			return errors.Wrap(err, "Open Connection fail")
 		}
+
+		for i := 0; i < c.workers; i++ {
+			c.wg.Add(1)
+
+			go c.DispatchProcess()
+		}
+
 		c.started = true
+
 	}
 	return nil
 }
@@ -55,6 +90,12 @@ func (c *Connection) Close() error {
 		if err != nil {
 			return err
 		}
+		for i := 0; i < c.workers; i++ {
+			c.closing <- struct{}{}
+		}
+
+		c.wg.Wait()
+
 		c.started = false
 	}
 	return nil
@@ -86,7 +127,13 @@ func (c *Connection) dispatch(buf []byte) error {
 	for _, ch := range c.channels {
 		if ch.sNoR == rNoT && ch.sNoT == rNoR {
 			p := PMONParseMsg(buf)
-			c.Dispatcher.Dispatch(p, ch.name)
+
+			pkg := DispatchPkg{
+				p:  p,
+				ch: ch.name,
+			}
+
+			c.DispatchBuf <- pkg
 		}
 	}
 	return nil

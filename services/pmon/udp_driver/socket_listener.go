@@ -103,6 +103,25 @@ func (psl *packetSocketListener) setReadDeadLine(t time.Time) error {
 	return psl.SetReadDeadline(t)
 }
 
+func (psl *packetSocketListener) setWriteDeadLine(t time.Time) error {
+	return psl.SetWriteDeadline(t)
+}
+
+func (psl *packetSocketListener) write(buf []byte, addr net.Addr) error {
+	l := len(buf)
+	n, err := psl.WriteTo(buf, addr)
+
+	if err != nil {
+		return err
+	}
+
+	if n != l {
+		return fmt.Errorf("wirte fail,need write %d bytes, but only %d", l, n)
+	}
+
+	return nil
+}
+
 func (psl *packetSocketListener) listen() {
 	buf := make([]byte, 64*1024) // 64kb - maximum size of IP packet
 	for {
@@ -133,6 +152,8 @@ type InterListener interface {
 	RemoveConnection(c net.Conn)
 	Close() error
 	setReadDeadLine(t time.Time) error
+	setWriteDeadLine(t time.Time) error
+	write(b []byte, addr net.Addr) error
 }
 
 type SocketListener struct {
@@ -197,7 +218,7 @@ func (sl *SocketListener) Description() string {
 //  ## Data format to consume.
 //  ## Each data format has its own unique set of configuration options, read
 //  ## more about them here:
-//  ## https://github.com/influxdata/telegraf/blob/master/docs/DATA_FORMATS_INPUT.md
+//  ## https://github.com/influxdata/telegraf/blob/master/doAOcs/DATA_FORMATS_INPUT.md
 //  # data_format = "influx"
 //`
 //}
@@ -304,5 +325,13 @@ func (uc unixCloser) RemoveConnection(c net.Conn) {
 }
 
 func (uc unixCloser) setReadDeadLine(t time.Time) error {
+	return nil
+}
+
+func (uc unixCloser) setWriteDeadLine(t time.Time) error {
+	return nil
+}
+
+func (uc unixCloser) write(buf []byte, addr net.Addr) error {
 	return nil
 }
