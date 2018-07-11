@@ -67,6 +67,8 @@ audi/vw:
   req_time_out: 300ms
   keep_alive_period: 7s
   workers: 4
+openprotocol:
+  keep_alive_period: 10s
 controllers:
 - serial_no: 0001
   protocol: Audi/VW

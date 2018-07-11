@@ -63,6 +63,12 @@ func (s *Service) NewAudiVWHandler() *AudiVWHandler {
 	}
 }
 
+func (s *Service) NewOpenProtocolHandler() *OpenProtocolHandler {
+	return &OpenProtocolHandler{
+		l: s.Logger.With(String("service", "OpenProtocol")),
+	}
+}
+
 func (s *Service) NewControllerHandler() *ControllerHandler {
 	return &ControllerHandler{
 		l: s.Logger.With(String("service", "Controller")),

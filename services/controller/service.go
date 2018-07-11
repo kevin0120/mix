@@ -22,7 +22,7 @@ type Service struct {
 	diag Diagnostic
 }
 
-func NewService(cs Configs, d Diagnostic, pAudi Protocol) (*Service, error) {
+func NewService(cs Configs, d Diagnostic, pAudi Protocol, pOpenprotocol Protocol) (*Service, error) {
 	s := &Service{
 		configs:   cs,
 		diag:      d,
@@ -34,6 +34,10 @@ func NewService(cs Configs, d Diagnostic, pAudi Protocol) (*Service, error) {
 		case AUDIPROTOCOL:
 			pAudi.AddNewController(c)
 			s.protocols[c.SN] = pAudi
+
+		case OPENPROTOCOL:
+			pOpenprotocol.AddNewController(c)
+			s.protocols[c.SN] = pOpenprotocol
 
 		default:
 

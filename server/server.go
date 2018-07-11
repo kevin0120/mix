@@ -12,6 +12,7 @@ import (
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/odoo"
+	"github.com/masami10/rush/services/openprotocol"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
@@ -43,9 +44,10 @@ type Server struct {
 
 	StorageServie *storage.Service
 
-	HTTPDService  *httpd.Service
-	OdooService   *odoo.Service
-	AudiVWService *audi_vw.Service
+	HTTPDService        *httpd.Service
+	OdooService         *odoo.Service
+	AudiVWService       *audi_vw.Service
+	OpenprotocolService *openprotocol.Service
 
 	WSNotifyService *wsnotify.Service
 	AiisService     *aiis.Service
@@ -95,6 +97,10 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 		return nil, errors.Wrap(err, "init Audi/VW service")
 	}
 
+	if err := s.initOpenProtocolService(); err != nil {
+		return nil, errors.Wrap(err, "init OpenProtocol service")
+	}
+
 	s.appendMinioService()
 
 	s.appendAiisService()
@@ -106,6 +112,8 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	}
 
 	s.appendAudiVWService() //此服务必须在控制器服务后进行append
+
+	s.appendOpenProtocolService()
 
 	s.appendHMIService()
 
@@ -159,6 +167,26 @@ func (s *Server) appendAudiVWService() {
 	s.AppendService("audi/vw", s.AudiVWService)
 }
 
+func (s *Server) initOpenProtocolService() error {
+	c := s.config.OpenProtocol
+	d := s.DiagService.NewOpenProtocolHandler()
+	srv := openprotocol.NewService(c, d)
+
+	s.OpenprotocolService = srv
+
+	return nil
+}
+
+func (s *Server) appendOpenProtocolService() {
+
+	//s.AudiVWService.Minio = s.MinioService
+	//s.AudiVWService.Aiis = s.AiisService
+	//s.AudiVWService.WS = s.WSNotifyService
+	//s.AudiVWService.DB = s.StorageServie
+
+	s.AppendService("openprotocol", s.OpenprotocolService)
+}
+
 func (s *Server) appendHTTPDService() {
 	s.AppendService("httpd", s.HTTPDService)
 }
@@ -178,7 +206,7 @@ func (s *Server) appendMinioService() error {
 func (s *Server) appendControllersService() error {
 	c := s.config.Contollers
 	d := s.DiagService.NewControllerHandler()
-	srv, err := controller.NewService(c, d, s.AudiVWService)
+	srv, err := controller.NewService(c, d, s.AudiVWService, s.OpenprotocolService)
 
 	if err != nil {
 		return errors.Wrap(err, "append Controller service fail")
