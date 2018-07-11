@@ -63,6 +63,13 @@ func (c *Channel) GetRestartPoint() string {
 	return c.RestartPoint
 }
 
+func (c *Channel) ResetBlockCount() {
+	defer c.mux.Unlock()
+	c.mux.Lock()
+
+	c.BlockCount = 1
+}
+
 func (c *Channel) GetBlockCount() int {
 	defer c.mux.Unlock()
 	c.mux.Lock()
@@ -80,6 +87,7 @@ func (ch *Channel) Start() error {
 	if err != nil {
 		return errors.Wrapf(err, "Open connection fail,by channel %s", ch.Ch)
 	}
+
 	go ch.manage()
 	return nil
 }
@@ -176,10 +184,12 @@ func (ch *Channel) manage() {
 					ch.Write([]byte(res), PMONMSGSO)
 				} else {
 					res, _ = ch.generateAO(ch.conn.U.GetMsgNum())
+					ch.ResetBlockCount()
 					ch.SetStatus(STATUSNORMAL)
 					ch.Write([]byte(res), PMONMSGAO)
 				}
 			case PMONMSGAO:
+				ch.ResetBlockCount()
 				ch.SetStatus(STATUSNORMAL)
 			case PMONMSGSC:
 				var res string

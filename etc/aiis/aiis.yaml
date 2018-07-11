@@ -26,12 +26,12 @@ pmon:
 fis:
   ch_recv_mission: 21
   ch_send_result: 24
-  ch_recv_heartbeat: 25
+  ch_recv_heartbeat: 20
   system_type: screw
   software_version: 1.0
   mode: AUTO
   factory_code: 20
-  heartbeat_interval: 5s
+  heartbeat_interval: 2m
   prs:
     - GSP
     - SAB
