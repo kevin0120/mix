@@ -179,10 +179,10 @@ func (s *Server) initOpenProtocolService() error {
 
 func (s *Server) appendOpenProtocolService() {
 
-	//s.AudiVWService.Minio = s.MinioService
-	//s.AudiVWService.Aiis = s.AiisService
-	//s.AudiVWService.WS = s.WSNotifyService
-	//s.AudiVWService.DB = s.StorageServie
+	s.OpenprotocolService.Minio = s.MinioService
+	s.OpenprotocolService.Aiis = s.AiisService
+	s.OpenprotocolService.WS = s.WSNotifyService
+	s.OpenprotocolService.DB = s.StorageServie
 
 	s.AppendService("openprotocol", s.OpenprotocolService)
 }
