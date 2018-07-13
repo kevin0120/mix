@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/kataras/iris"
 	"github.com/masami10/rush/services/audi_vw"
+	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/wsnotify"
 	"strconv"
@@ -81,7 +82,19 @@ func (m *Methods) putPSets(ctx iris.Context) {
 	}
 
 	// 通过控制器设定程序
-	err = m.service.AudiVw.PSet(pset.Controller_SN, pset.PSet, result.WorkorderID, pset.Result_id, pset.Count, pset.UserID)
+	c, exist := m.service.ControllerService.Controllers[pset.Controller_SN]
+	if !exist {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller not found")
+	}
+
+	switch c.Protocol() {
+	case controller.AUDIPROTOCOL:
+		err = m.service.AudiVw.PSet(pset.Controller_SN, pset.PSet, result.WorkorderID, pset.Result_id, pset.Count, pset.UserID)
+	case controller.OPENPROTOCOL:
+		err = m.service.OpenProtocol.PSet(pset.Controller_SN, pset.PSet, result.WorkorderID, pset.Result_id, pset.Count, pset.UserID)
+	}
+
 	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString(err.Error())

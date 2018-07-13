@@ -12,18 +12,11 @@ import (
 	"time"
 )
 
-type ControllerStatusType string
-
 const (
 	MINSEQUENCE          uint32 = 1
 	MAXSEQUENCE          uint32 = 9999
 	DAIL_TIMEOUT                = time.Duration(5 * time.Second)
 	MAX_KEEP_ALIVE_CHECK        = 3
-)
-
-const (
-	STATUS_ONLINE  ControllerStatusType = "online"
-	STATUS_OFFLINE ControllerStatusType = "offline"
 )
 
 type Controller struct {
@@ -43,6 +36,7 @@ type Controller struct {
 	keepaliveDeadLine atomic.Value
 	closing           chan chan struct{}
 	cfg               controller.Config
+	protocol          string
 }
 
 func (c *Controller) KeepAliveCount() int32 {
@@ -84,18 +78,18 @@ func (c *Controller) setSequence(i uint32) {
 
 }
 
-func (c *Controller) Status() ControllerStatusType {
+func (c *Controller) Status() string {
 
-	return c.StatusValue.Load().(ControllerStatusType)
+	return c.StatusValue.Load().(string)
 }
 
-func (c *Controller) updateStatus(status ControllerStatusType) {
+func (c *Controller) updateStatus(status string) {
 
 	if status != c.Status() {
 
 		c.StatusValue.Store(status)
 
-		if status == STATUS_OFFLINE {
+		if status == controller.STATUS_OFFLINE {
 			c.Close()
 
 			// 断线重连
@@ -126,11 +120,16 @@ func NewController(c Config) Controller {
 		mux_seq:     sync.Mutex{},
 		keep_period: time.Duration(c.KeepAlivePeriod),
 		req_timeout: time.Duration(c.ReqTimeout),
+		protocol:    controller.AUDIPROTOCOL,
 	}
 
-	cont.StatusValue.Store(STATUS_OFFLINE)
+	cont.StatusValue.Store(controller.STATUS_OFFLINE)
 
 	return cont
+}
+
+func (c *Controller) Protocol() string {
+	return c.protocol
 }
 
 func (c *Controller) Start() {
@@ -151,11 +150,11 @@ func (c *Controller) manage() {
 	for {
 		select {
 		case <-time.After(c.keep_period):
-			if c.Status() == STATUS_OFFLINE {
+			if c.Status() == controller.STATUS_OFFLINE {
 				continue
 			}
 			if c.KeepAliveCount() >= MAX_KEEP_ALIVE_CHECK {
-				go c.updateStatus(STATUS_OFFLINE)
+				go c.updateStatus(controller.STATUS_OFFLINE)
 				c.updateKeepAliveCount(0)
 				continue
 			}
@@ -184,7 +183,7 @@ func (c *Controller) manage() {
 }
 
 func (c *Controller) sendKeepalive() {
-	if c.Status() == STATUS_OFFLINE {
+	if c.Status() == controller.STATUS_OFFLINE {
 		return
 	}
 
@@ -244,7 +243,7 @@ func (c *Controller) Write(buf []byte, seq uint32) {
 //}
 
 func (c *Controller) Connect() error {
-	c.StatusValue.Store(STATUS_OFFLINE)
+	c.StatusValue.Store(controller.STATUS_OFFLINE)
 	c.setSequence(MINSEQUENCE)
 
 	c.Response = ResponseQueue{
@@ -264,7 +263,7 @@ func (c *Controller) Connect() error {
 		time.Sleep(time.Duration(c.req_timeout))
 	}
 
-	c.updateStatus(STATUS_ONLINE)
+	c.updateStatus(controller.STATUS_ONLINE)
 
 	// 启动发送
 	go c.manage()

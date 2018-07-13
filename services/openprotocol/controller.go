@@ -8,17 +8,11 @@ import (
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/socket_writer"
 	"net"
-	"sync"
 	"sync/atomic"
 	"time"
 )
 
-type ControllerStatusType string
-
 const (
-	STATUS_ONLINE  ControllerStatusType = "online"
-	STATUS_OFFLINE ControllerStatusType = "offline"
-
 	DAIL_TIMEOUT         = time.Duration(5 * time.Second)
 	MAX_KEEP_ALIVE_CHECK = 3
 )
@@ -41,7 +35,7 @@ type Controller struct {
 	closing           chan chan struct{}
 	handlerBuf        chan handlerPkg
 	keepaliveDeadLine atomic.Value
-	wg                sync.WaitGroup
+	protocol          string
 }
 
 func NewController(c Config) Controller {
@@ -53,9 +47,10 @@ func NewController(c Config) Controller {
 		req_timeout: time.Duration(c.ReqTimeout),
 		Response:    ResponseQueue{},
 		handlerBuf:  make(chan handlerPkg, 1024),
+		protocol:    controller.OPENPROTOCOL,
 	}
 
-	cont.StatusValue.Store(STATUS_OFFLINE)
+	cont.StatusValue.Store(controller.STATUS_OFFLINE)
 
 	return cont
 }
@@ -66,9 +61,6 @@ func (c *Controller) handlerProcess() {
 		case pkg := <-c.handlerBuf:
 			c.HandleMsg(&pkg)
 
-		case <-c.closing:
-			c.wg.Done()
-			return
 		}
 	}
 }
@@ -94,8 +86,12 @@ func (c *Controller) Start() {
 	c.Connect()
 }
 
+func (c *Controller) Protocol() string {
+	return c.protocol
+}
+
 func (c *Controller) Connect() error {
-	c.StatusValue.Store(STATUS_OFFLINE)
+	c.StatusValue.Store(controller.STATUS_OFFLINE)
 
 	for {
 		err := c.w.Connect(DAIL_TIMEOUT)
@@ -108,7 +104,7 @@ func (c *Controller) Connect() error {
 		time.Sleep(time.Duration(c.req_timeout))
 	}
 
-	c.updateStatus(STATUS_ONLINE)
+	c.updateStatus(controller.STATUS_ONLINE)
 
 	c.startComm()
 
@@ -116,7 +112,8 @@ func (c *Controller) Connect() error {
 	c.CurveSubcribe()
 	c.ResultSubcribe()
 	c.JobInfoSubscribe()
-
+	//c.IdentifierSubcribe()
+	//c.PSet()
 	// 启动发送
 	go c.manage()
 
@@ -143,13 +140,13 @@ func (c *Controller) KeepAliveDeadLine() time.Time {
 	return c.keepaliveDeadLine.Load().(time.Time)
 }
 
-func (c *Controller) Status() ControllerStatusType {
+func (c *Controller) Status() string {
 
-	return c.StatusValue.Load().(ControllerStatusType)
+	return c.StatusValue.Load().(string)
 }
 
 func (c *Controller) sendKeepalive() {
-	if c.Status() == STATUS_OFFLINE {
+	if c.Status() == controller.STATUS_OFFLINE {
 		return
 	}
 
@@ -158,7 +155,7 @@ func (c *Controller) sendKeepalive() {
 }
 
 func (c *Controller) startComm() error {
-	if c.Status() == STATUS_OFFLINE {
+	if c.Status() == controller.STATUS_OFFLINE {
 		return errors.New("status offline")
 	}
 
@@ -175,13 +172,13 @@ func (c *Controller) Write(buf []byte) {
 	c.buffer <- buf
 }
 
-func (c *Controller) updateStatus(status ControllerStatusType) {
+func (c *Controller) updateStatus(status string) {
 
 	if status != c.Status() {
 
 		c.StatusValue.Store(status)
 
-		if status == STATUS_OFFLINE {
+		if status == controller.STATUS_OFFLINE {
 			c.Close()
 
 			// 断线重连
@@ -307,11 +304,11 @@ func (c *Controller) manage() {
 	for {
 		select {
 		case <-time.After(c.keep_period):
-			if c.Status() == STATUS_OFFLINE {
+			if c.Status() == controller.STATUS_OFFLINE {
 				continue
 			}
 			if c.KeepAliveCount() >= MAX_KEEP_ALIVE_CHECK {
-				go c.updateStatus(STATUS_OFFLINE)
+				go c.updateStatus(controller.STATUS_OFFLINE)
 				c.updateKeepAliveCount(0)
 				continue
 			}
@@ -339,22 +336,34 @@ func (c *Controller) manage() {
 	}
 }
 
-func (c *Controller) PSet() error {
-	if c.Status() == STATUS_OFFLINE {
+func (c *Controller) pset(pset int) error {
+	if c.Status() == controller.STATUS_OFFLINE {
 		return errors.New("status offline")
 	}
 
-	pset := GeneratePackage(MID_0018_PSET, "001", "001", DEFAULT_MSG_END)
+	s_pset := GeneratePackage(MID_0018_PSET, "001", fmt.Sprintf("%03d", pset), DEFAULT_MSG_END)
+
+	c.Write([]byte(s_pset))
+
+	return nil
+}
+
+func (c *Controller) IdentifierSet(str string) error {
+	if c.Status() == controller.STATUS_OFFLINE {
+		return errors.New("status offline")
+	}
+
+	ide := GeneratePackage(MID_0150_IDENTIFIER_SET, "001", str, DEFAULT_MSG_END)
 
 	//c.Response.Add(MID_0018_PSET, "")
 
-	c.Write([]byte(pset))
+	c.Write([]byte(ide))
 
 	return nil
 }
 
 func (c *Controller) PSetSubscribe() error {
-	if c.Status() == STATUS_OFFLINE {
+	if c.Status() == controller.STATUS_OFFLINE {
 		return errors.New("status offline")
 	}
 
@@ -366,7 +375,7 @@ func (c *Controller) PSetSubscribe() error {
 }
 
 func (c *Controller) JobInfoSubscribe() error {
-	if c.Status() == STATUS_OFFLINE {
+	if c.Status() == controller.STATUS_OFFLINE {
 		return errors.New("status offline")
 	}
 
@@ -378,7 +387,7 @@ func (c *Controller) JobInfoSubscribe() error {
 }
 
 func (c *Controller) ResultSubcribe() error {
-	if c.Status() == STATUS_OFFLINE {
+	if c.Status() == controller.STATUS_OFFLINE {
 		return errors.New("status offline")
 	}
 
@@ -390,7 +399,7 @@ func (c *Controller) ResultSubcribe() error {
 }
 
 func (c *Controller) CurveSubcribe() error {
-	if c.Status() == STATUS_OFFLINE {
+	if c.Status() == controller.STATUS_OFFLINE {
 		return errors.New("status offline")
 	}
 
@@ -399,4 +408,20 @@ func (c *Controller) CurveSubcribe() error {
 	c.Write([]byte(pset))
 
 	return nil
+}
+
+func (c *Controller) PSet(pset int, workorder_id int64, result_id int64, count int, user_id int64, channel int) (uint32, error) {
+	// 设定结果标识
+	err := c.IdentifierSet(fmt.Sprintf("%d", result_id))
+	if err != nil {
+		return 0, err
+	}
+
+	// 设定pset
+	err = c.pset(pset)
+	if err != nil {
+		return 0, err
+	}
+
+	return 0, nil
 }

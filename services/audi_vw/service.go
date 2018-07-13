@@ -35,8 +35,8 @@ type Diagnostic interface {
 }
 
 type ControllerStatus struct {
-	SN     string               `json:"controller_sn"`
-	Status ControllerStatusType `json:"status"`
+	SN     string `json:"controller_sn"`
+	Status string `json:"status"`
 }
 
 type Service struct {
@@ -44,7 +44,6 @@ type Service struct {
 	name          string
 	listener      *socket_listener.SocketListener
 	err           chan error
-	Controllers   map[string]*Controller
 	diag          Diagnostic
 	DB            *storage.Service
 	WS            *wsnotify.Service
@@ -54,23 +53,24 @@ type Service struct {
 	wg            sync.WaitGroup
 	closing       chan struct{}
 	handle_buffer chan string
+	Parent        *controller.Service
 }
 
 func (s *Service) Err() <-chan error {
 	return s.err
 }
 
-func NewService(c Config, d Diagnostic) *Service {
+func NewService(c Config, d Diagnostic, parent *controller.Service) *Service {
 	addr := fmt.Sprintf("tcp://:%d", c.Port)
 
 	s := &Service{
-		Controllers: map[string]*Controller{},
-		name:        controller.AUDIPROTOCOL,
-		err:         make(chan error, 1),
-		diag:        d,
-		wg:          sync.WaitGroup{},
-		closing:     make(chan struct{}, 1),
-		handlers:    Handlers{},
+		name:     controller.AUDIPROTOCOL,
+		err:      make(chan error, 1),
+		diag:     d,
+		wg:       sync.WaitGroup{},
+		closing:  make(chan struct{}, 1),
+		handlers: Handlers{},
+		Parent:   parent,
 	}
 
 	s.handle_buffer = make(chan string, 1024)
@@ -86,19 +86,22 @@ func (s *Service) config() Config {
 	return s.configValue.Load().(Config)
 }
 
-func (p *Service) AddNewController(cfg controller.Config) {
+func (p *Service) AddNewController(cfg controller.Config) controller.Controller {
 	config := p.config()
 	c := NewController(config)
 	c.Srv = p //服务注入
 	c.cfg = cfg
-	p.Controllers[cfg.SN] = &c
+
+	return &c
 }
 
 func (p *Service) Write(sn string, buf []byte) error {
-	if _, ok := p.Controllers[sn]; !ok {
+	if _, ok := p.Parent.Controllers[sn]; !ok {
 		return fmt.Errorf("can not found controller :%s", sn)
 	}
-	c := p.Controllers[sn]
+	v := p.Parent.Controllers[sn]
+	c := v.(*Controller)
+
 	s := c.Sequence()
 	c.Write(buf, s)
 	return nil
@@ -113,8 +116,10 @@ func (p *Service) Open() error {
 		return errors.Wrapf(err, "Open Protocol %s Listener fail", p.name)
 	}
 
-	for _, w := range p.Controllers {
-		go w.Start() //异步启动控制器
+	for _, w := range p.Parent.Controllers {
+		if w.Protocol() == controller.AUDIPROTOCOL {
+			go w.Start() //异步启动控制器
+		}
 	}
 
 	p.handlers.Init(p.config().Workers)
@@ -134,7 +139,7 @@ func (p *Service) Close() error {
 		return errors.Wrapf(err, "Close Protocol %s Listener fail", p.name)
 	}
 
-	for _, w := range p.Controllers {
+	for _, w := range p.Parent.Controllers {
 		err := w.Close()
 		if err != nil {
 			return errors.Wrapf(err, "Close Protocol %s Writer fail", p.name)
@@ -298,7 +303,7 @@ func (p *Service) HandleProcess() {
 func (p *Service) GetControllersStatus(sn string) ([]ControllerStatus, error) {
 	var status []ControllerStatus
 	if sn != "" {
-		c, exist := p.Controllers[sn]
+		c, exist := p.Parent.Controllers[sn]
 		if !exist {
 			return status, errors.New("controller not found")
 		} else {
@@ -309,7 +314,7 @@ func (p *Service) GetControllersStatus(sn string) ([]ControllerStatus, error) {
 			return status, nil
 		}
 	} else {
-		for k, v := range p.Controllers {
+		for k, v := range p.Parent.Controllers {
 			s := ControllerStatus{}
 			s.SN = k
 			s.Status = v.Status()
@@ -323,13 +328,15 @@ func (p *Service) GetControllersStatus(sn string) ([]ControllerStatus, error) {
 // 设置拧接程序
 func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64, count int, user_id int64) error {
 	// 判断控制器是否存在
-	c, exist := p.Controllers[sn]
+	v, exist := p.Parent.Controllers[sn]
 	if !exist {
 		// SN对应控制器不存在
 		return errors.New(ERR_CVI3_NOT_FOUND)
 	}
 
-	if c.Status() == STATUS_OFFLINE {
+	c := v.(*Controller)
+
+	if c.Status() == controller.STATUS_OFFLINE {
 		// 控制器离线
 		return errors.New(ERR_CVI3_OFFLINE)
 	}
@@ -344,26 +351,6 @@ func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64,
 	c.Response.Add(seq, "")
 
 	defer c.Response.remove(seq)
-
-	//i := 0
-
-	//for {
-	//	select {
-	//	//case <- time.After(time.Duration(c.req_timeout)):
-	//	//	i += 1
-	//	//	if i >= 6 {
-	//	//		return errors.New(ERR_CVI3_REPLY_TIMEOUT)
-	//	//	}
-	//	case headerStr := <-c.response:
-	//		header := CVI3Header{}
-	//		header.Deserialize(headerStr)
-	//		if !header.Check() {
-	//			// 控制器请求失败
-	//			return errors.New(ERR_CVI3_REPLY)
-	//		}
-	//		return nil
-	//	}
-	//}
 
 	var header_str string
 	for i := 0; i < 6; i++ {

@@ -20,6 +20,8 @@ const (
 	MID_0034_JOB_INFO_SUBSCRIBE    = "0034"
 	MID_0060_LAST_RESULT_SUBSCRIBE = "0060"
 	MID_7408_LAST_CURVE_SUBSCRIBE  = "7408"
+	MID_0151_IDENTIFIER_SUBSCRIBE  = "0151"
+	MID_0150_IDENTIFIER_SET        = "0150"
 
 	MID_0061_LAST_RESULT = "0061"
 	MID_7410_LAST_CURVE  = "7410"
@@ -142,7 +144,85 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 		h.Spare = ""
 
 		return h.Serialize() + end
+
+	case MID_0151_IDENTIFIER_SUBSCRIBE:
+		h.MID = MID_0151_IDENTIFIER_SUBSCRIBE
+		h.LEN = LEN_HEADER
+		h.Revision = rev
+		h.NoAck = "1"
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + end
+
+	case MID_0150_IDENTIFIER_SET:
+		h.MID = MID_0150_IDENTIFIER_SET
+		h.LEN = LEN_HEADER + len(data)
+		h.Revision = rev
+		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + data + end
 	}
 
 	return ""
+}
+
+type ResultData struct {
+	CellID                        int
+	ChannelID                     int
+	ControllerName                string
+	VIN                           string
+	JobID                         string
+	PsetID                        string
+	Strategy                      string
+	StrategyOption                []byte
+	BatchSize                     int
+	BatchCount                    int
+	TighteningStatus              string
+	BatchStatus                   string
+	TorqueStatus                  string
+	AngleStatus                   string
+	RundownAngleStatus            string
+	CurrentMonitoringStatus       string
+	SelftapStatus                 string
+	PrevailTorqueMonitoringStatus string
+	PrevailTorqueCompensateStatus string
+	TighteningErrorStatus         []byte
+	TorqueMin                     float64
+	TorqueMax                     float64
+	TorqueFinalTarget             float64
+	Torque                        float64
+	AngleMin                      float64
+	AngleMax                      float64
+	FinalAngleTarget              float64
+	Angle                         float64
+	RundownAngleMin               float64
+	RundownAngleMax               float64
+	RundownAngle                  float64
+	CurrentMonitoringMin          float64
+	CurrentMonitoringMax          float64
+	CurrentMonitoring             float64
+	SelftapMin                    float64
+	SelftapMax                    float64
+	SelftapTorque                 float64
+	PrevailTorqueMonitoringMin    float64
+	PrevailTorqueMonitoringMax    float64
+	PrevailTorque                 float64
+	TightingID                    int64
+	JobSequenceNumber             int32
+	SyncTighteningID              int32
+	ToolSerialNumber              string
+	TimeStamp                     string
+	TimeStampPSetLastChange       string
+	PSetName                      string
+	TorqueUnit                    string
+	ResultType                    string
+}
+
+func (rd *ResultData) Deserialize(str string) error {
+	return nil
 }

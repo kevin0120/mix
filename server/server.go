@@ -42,7 +42,8 @@ type Server struct {
 	dataDir  string
 	hostname string
 
-	StorageServie *storage.Service
+	StorageServie     *storage.Service
+	ControllerService *controller.Service
 
 	HTTPDService        *httpd.Service
 	OdooService         *odoo.Service
@@ -150,7 +151,7 @@ func (s *Server) initHTTPDService() error {
 func (s *Server) initAudiVWDService() error {
 	c := s.config.AudiVW
 	d := s.DiagService.NewAudiVWHandler()
-	srv := audi_vw.NewService(c, d)
+	srv := audi_vw.NewService(c, d, s.ControllerService)
 
 	s.AudiVWService = srv
 
@@ -163,6 +164,7 @@ func (s *Server) appendAudiVWService() {
 	s.AudiVWService.Aiis = s.AiisService
 	s.AudiVWService.WS = s.WSNotifyService
 	s.AudiVWService.DB = s.StorageServie
+	s.AudiVWService.Parent = s.ControllerService
 
 	s.AppendService("audi/vw", s.AudiVWService)
 }
@@ -170,7 +172,7 @@ func (s *Server) appendAudiVWService() {
 func (s *Server) initOpenProtocolService() error {
 	c := s.config.OpenProtocol
 	d := s.DiagService.NewOpenProtocolHandler()
-	srv := openprotocol.NewService(c, d)
+	srv := openprotocol.NewService(c, d, s.ControllerService)
 
 	s.OpenprotocolService = srv
 
@@ -183,6 +185,7 @@ func (s *Server) appendOpenProtocolService() {
 	s.OpenprotocolService.Aiis = s.AiisService
 	s.OpenprotocolService.WS = s.WSNotifyService
 	s.OpenprotocolService.DB = s.StorageServie
+	s.OpenprotocolService.Parent = s.ControllerService
 
 	s.AppendService("openprotocol", s.OpenprotocolService)
 }
@@ -212,6 +215,7 @@ func (s *Server) appendControllersService() error {
 		return errors.Wrap(err, "append Controller service fail")
 	}
 
+	s.ControllerService = srv
 	s.AppendService("controller", srv)
 
 	return nil
@@ -264,6 +268,8 @@ func (s *Server) appendHMIService() error {
 	srv.DB = s.StorageServie   // stroage 服务注入
 	srv.AudiVw = s.AudiVWService
 	srv.SN = s.config.SN
+	srv.ControllerService = s.ControllerService
+	srv.OpenProtocol = s.OpenprotocolService
 
 	s.AppendService("hmi", srv)
 
