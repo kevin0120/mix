@@ -21,6 +21,8 @@ type Diagnostic interface {
 type cResult struct {
 	r  *OperationResult
 	id int64
+	ip string
+	port string
 }
 
 type RushResult struct {
@@ -35,6 +37,7 @@ type Service struct {
 	closing      chan struct{}
 	configValue  atomic.Value
 	httpClient   *resty.Client
+	route       string
 
 	StorageService interface {
 		UpdateResults(result *OperationResult, id int64, sent int) error
@@ -52,6 +55,7 @@ func NewService(c Config, d Diagnostic) *Service {
 			workers:  c.Workers,
 			chResult: make(chan cResult, c.Workers),
 			closing:  make(chan struct{}),
+			route: c.Route,
 		}
 
 		s.configValue.Store(c)
@@ -103,7 +107,19 @@ func (s *Service) getResultUpdate(ctx iris.Context) {
 		ctx.StatusCode(iris.StatusBadRequest)
 		return
 	}
-	cr := cResult{r: &r, id: resultId}
+	rush_port := ctx.GetHeader("rush_port")
+	rush_ip := ctx.Request().Host
+	if strings.Contains(rush_ip, ":") {
+		kvs := strings.Split(rush_ip, ":")
+		rush_ip = kvs[0]
+	}
+
+	cr := cResult {
+		r: &r,
+		id: resultId,
+		ip: rush_ip,
+		port: rush_port,
+	}
 
 	s.chResult <- cr
 
@@ -216,7 +232,7 @@ func (s *Service) OperationToFisResult(r *OperationResult) fis.FisResult {
 	return result
 }
 
-func (s *Service) PatchResultFlag(result_id int64, has_upload bool) error {
+func (s *Service) PatchResultFlag(result_id int64, has_upload bool, ip string, port string) error {
 	if s.httpClient == nil {
 		return errors.New("rush http client is nil")
 	}
@@ -225,7 +241,7 @@ func (s *Service) PatchResultFlag(result_id int64, has_upload bool) error {
 	rush_result.HasUpload = has_upload
 	r := s.httpClient.R().SetBody(rush_result)
 
-	resp, err := r.Patch(fmt.Sprintf("%s/%d", s.Config().Route, result_id))
+	resp, err := r.Patch(fmt.Sprintf("http://%s%s%s/%d", ip, port, s.route, result_id))
 	if err != nil {
 		return fmt.Errorf("patch result flag failed: %s\n", err)
 	} else {
@@ -255,6 +271,6 @@ func (s *Service) HandleResult(cr *cResult) {
 		s.diag.Error("update result error", err)
 	} else {
 		// 更新masterpc结果上传标识
-		s.PatchResultFlag(cr.id, true)
+		s.PatchResultFlag(cr.id, true, cr.ip, cr.port)
 	}
 }

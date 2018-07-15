@@ -67,7 +67,6 @@ storage:
 rush:
   enable: true
   workers: 4
-  url: http://127.0.0.1:80802
   route: /rush/v1/results
   headers:
     Content-Type: application/json

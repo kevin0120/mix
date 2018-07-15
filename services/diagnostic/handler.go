@@ -299,7 +299,7 @@ func (h *StorageHandler) OpenEngineSuccess(msg string) {
 	h.l.Info(fmt.Sprintf("Open Engine Success: %s ", msg))
 }
 
-func (h *StorageHandler) UpdateResultSuccess(id int64) {
+func (h *StorageHandler) 	UpdateResultSuccess(id int64) {
 	h.l.Debug(fmt.Sprintf("Update result Success: %d ", id))
 }
 
