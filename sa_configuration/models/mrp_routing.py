@@ -63,6 +63,22 @@ class MrpPR(models.Model):
         return [(group.id, group.code) for group in self]  # 强制可视化时候名称显示的是code
 
 
+class ControllerJob(models.Model):
+    _name = 'controller.job'
+    _description = 'Controller Job'
+
+    name = fields.Char('Job Name')
+    code = fields.Char('Job Code', required=True, help=u'Job')
+
+    active = fields.Boolean('Active', default=True)
+
+    @api.multi
+    def unlink(self):
+        if self.env.uid != SUPERUSER_ID:
+            raise UserError(_(u"Only SuperUser can delete Job ID"))
+        return super(ControllerJob, self).unlink()
+
+
 class ControllerProgram(models.Model):
     _name = 'controller.program'
     _description = 'Controller Program'
