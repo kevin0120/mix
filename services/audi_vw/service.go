@@ -16,7 +16,6 @@ import (
 	"github.com/pkg/errors"
 
 	"io"
-	"time"
 )
 
 const (
@@ -342,37 +341,10 @@ func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64,
 	}
 
 	// 设定pset并判断控制器响应
-	seq, err := c.PSet(pset, workorder_id, result_id, count, user_id, c.cfg.ToolChannel)
+	_, err := c.PSet(pset, workorder_id, result_id, count, user_id, c.cfg.ToolChannel)
 	if err != nil {
 		// 控制器请求失败
-		return errors.New(ERR_CVI3_REQUEST)
-	}
-
-	c.Response.Add(seq, "")
-
-	defer c.Response.remove(seq)
-
-	var header_str string
-	for i := 0; i < 6; i++ {
-		header_str = c.Response.get(seq)
-		if header_str != "" {
-			break
-		}
-		time.Sleep(time.Duration(c.req_timeout))
-	}
-
-	if header_str == "" {
-		// 控制器请求失败
-		return errors.New(ERR_CVI3_REPLY_TIMEOUT)
-	}
-
-	//fmt.Printf("reply_header:%s\n", header_str)
-	header := CVI3Header{}
-	header.Deserialize(header_str)
-
-	if !header.Check() {
-		// 控制器请求失败
-		return errors.New(fmt.Sprintf("%s:%d", ERR_CVI3_REPLY, header.COD))
+		return err
 	}
 
 	return nil

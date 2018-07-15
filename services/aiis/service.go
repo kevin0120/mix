@@ -34,13 +34,15 @@ type Service struct {
 	diag        Diagnostic
 	endpoints   []*Endpoint
 	httpClient  *resty.Client
+	rush_port string
 }
 
-func NewService(c Config, d Diagnostic) *Service {
+func NewService(c Config, d Diagnostic, rush_port string) *Service {
 	e, _ := c.index()
 	s := &Service{
 		diag:      d,
 		endpoints: e,
+		rush_port: rush_port,
 	}
 	s.configValue.Store(c)
 	return s
@@ -85,7 +87,7 @@ func (s *Service) PutResult(result_id int64, body interface{}) error {
 }
 
 func (s *Service) putResult(body interface{}, url string, method string) error {
-	r := s.httpClient.R().SetBody(body)
+	r := s.httpClient.R().SetBody(body).SetHeader("rush_port", s.rush_port)
 	var resp *resty.Response
 	var err error
 

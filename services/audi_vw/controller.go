@@ -10,6 +10,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	"errors"
 )
 
 const (
@@ -17,6 +18,7 @@ const (
 	MAXSEQUENCE          uint32 = 9999
 	DAIL_TIMEOUT                = time.Duration(5 * time.Second)
 	MAX_KEEP_ALIVE_CHECK        = 3
+	MAX_REPLY_TIMEOUT_COUNT = 10
 )
 
 type Controller struct {
@@ -338,6 +340,33 @@ func (c *Controller) PSet(pset int, workorder_id int64, reseult_id int64, count 
 
 	//c.Response.Add(seq, "")
 	c.Write([]byte(psetPacket), seq)
+
+	c.Response.Add(seq, "")
+
+	defer c.Response.remove(seq)
+
+	var header_str string
+	for i := 0; i < MAX_REPLY_TIMEOUT_COUNT; i++ {
+		header_str = c.Response.get(seq)
+		if header_str != "" {
+			break
+		}
+		time.Sleep(time.Duration(c.req_timeout))
+	}
+
+	if header_str == "" {
+		// 控制器请求失败
+		return seq, errors.New(ERR_CVI3_REPLY_TIMEOUT)
+	}
+
+	//fmt.Printf("reply_header:%s\n", header_str)
+	header := CVI3Header{}
+	header.Deserialize(header_str)
+
+	if !header.Check() {
+		// 控制器请求失败
+		return seq, errors.New(fmt.Sprintf("%s:%d", ERR_CVI3_REPLY, header.COD))
+	}
 
 	return seq, nil
 }

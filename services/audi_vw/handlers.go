@@ -320,7 +320,7 @@ func (h *Handlers) HandleMsg(msg string) {
 		return
 	}
 
-	//结果数据
+	// 结果数据
 	controllerResult := ControllerResult{}
 	XML2Result(&cvi3Result, &controllerResult)
 

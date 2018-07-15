@@ -224,7 +224,7 @@ func (s *Server) appendControllersService() error {
 func (s *Server) appendAiisService() error {
 	c := s.config.Aiis
 	d := s.DiagService.NewAiisHandler()
-	srv := aiis.NewService(c, d)
+	srv := aiis.NewService(c, d, s.config.HTTP.BindAddress)
 
 	s.AiisService = srv
 	s.AppendService("aiis", srv)
