@@ -3,11 +3,13 @@
 from odoo import http, fields,api, SUPERUSER_ID
 import json
 from odoo.http import request,Response
+import re
 
 
 class OperationView(http.Controller):
     @http.route('/api/v1/mrp.routing.workcenter/<int:operation_id>/edit', type='json', methods=['PUT', 'OPTIONS'], auth='none', cors='*', csrf=False)
     def _edit_points(self, operation_id=None):
+        pattern = re.compile(r"^data:image/(.+);base64,(.+)", re.DOTALL)
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         operation = env['mrp.routing.workcenter'].search([('id', '=', operation_id)],limit=1)
         if not operation:
@@ -21,7 +23,13 @@ class OperationView(http.Controller):
                 points = req_vals['points']
             img = req_vals['img'] if 'img' in req_vals else None
             if img:
-                ret = operation.write({'worksheet_img': img})
+                g = pattern.search(img)
+                if not g:
+                    body = json.dumps({'msg': "Image Format error"})
+                    headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
+                    return Response(body, status=405, headers=headers)
+                _data = g.group(2)
+                ret = operation.write({'worksheet_img': _data})
                 if not ret:
                     body = json.dumps({'msg': "Operation %d upload image fail" % operation_id})
                     headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
@@ -84,7 +92,7 @@ class OperationView(http.Controller):
                 val = {
                     "id": operation_id,
                     "name": u"[{0}]{1}@{2}/{3}".format(operation.name, operation.group_id.code, operation.workcenter_id.name, operation.routing_id.name),
-                    "img": operation.worksheet_img,
+                    "img": u'data:{0};base64,{1}'.format('image/png', operation.worksheet_img) if operation.worksheet_img else "",
                     "points": _points
                 }
                 body = json.dumps(val)
@@ -95,9 +103,18 @@ class OperationView(http.Controller):
             operations = env['mrp.routing.workcenter'].search([])
             vals = []
             for operation in operations:
+                _points = []
+                for point in operation.operation_point_ids:
+                    _points.append({
+                        'sequence': point.sequence,
+                        'x_offset': point.x_offset,
+                        'y_offset': point.y_offset
+                    })
                 vals.append({
                     'id': operation.id,
-                    'name': u"[{0}]{1}@{2}/{3}".format(operation.name, operation.group_id.code, operation.workcenter_id.name, operation.routing_id.name)
+                    'name': u"[{0}]{1}@{2}/{3}".format(operation.name, operation.group_id.code, operation.workcenter_id.name, operation.routing_id.name),
+                    "img": u'data:{0};base64,{1}'.format('image/png', operation.worksheet_img) if operation.worksheet_img else "",
+                    "points": _points
                 })
             body = json.dumps(vals)
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
