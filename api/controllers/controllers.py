@@ -24,7 +24,7 @@ class BaseApi(http.Controller):
             return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
                             status=404)
         ret = {
-            "logo": company[0].logo
+            "logo": u'data:{0};base64,{1}'.format('image/png', company[0].logo) if company[0].logo else ""
         }
         body = json.dumps(ret)
         return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=200)
@@ -48,6 +48,10 @@ class BaseApi(http.Controller):
                     'status': 'active' if user['active'] else 'archived'
                 })
                 user.pop('active')
+            if 'image_small' in user:
+                user.update({
+                    'image_small': u'data:{0};base64,{1}'.format('image/png', user['image_small']) if user['image_small'] else ""
+                })
         return Response(json.dumps(users), headers={'content-type': 'application/json'}, status=200)
 
     @http.route('/api/v1/res.users/<string:uuid>', type='http', auth='none', cors='*', csrf=False)
@@ -64,6 +68,10 @@ class BaseApi(http.Controller):
                 'status': 'active' if ret['active'] else 'archived'
             })
             ret.pop('active')
+        if 'image_small' in ret:
+            ret.update({
+                'image_small': u'data:{0};base64,{1}'.format('image/png', ret['image_small']) if ret['image_small'] else ""
+            })
 
         return Response(json.dumps(ret), headers={'content-type': 'application/json'}, status=200)
 
