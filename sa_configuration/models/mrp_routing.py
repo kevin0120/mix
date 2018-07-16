@@ -4,12 +4,13 @@ from odoo import models, fields, api, _, SUPERUSER_ID
 
 from odoo.exceptions import UserError
 
+
 class MrpRoutingWorkcenter(models.Model):
     _inherit = 'mrp.routing.workcenter'
 
     workcenter_id = fields.Many2one('mrp.workcenter', copy=False)
 
-    # program_id = fields.Many2one('controller.program', string='程序号')
+    op_job_id = fields.Many2one('controller.job', string='Job')
 
     operation_point_ids = fields.One2many('operation.point', 'operation_id', string='Operation Points')
 
@@ -71,6 +72,8 @@ class ControllerJob(models.Model):
     code = fields.Char('Job Code', required=True, help=u'Job')
 
     active = fields.Boolean('Active', default=True)
+
+    description = fields.Html('Description')
 
     @api.multi
     def unlink(self):

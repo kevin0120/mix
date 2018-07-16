@@ -38,6 +38,7 @@
         'views/mrp_workcenter_views.xml',
         'views/mrp_routing_view.xml',
         'views/mrp_routing_group_views.xml',
+        'views/controller_job_views.xml',
         'views/controller_program_views.xml',
         'views/mrp_bom_views.xml',
         'views/product_views.xml',
