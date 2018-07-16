@@ -34,7 +34,7 @@ type Service struct {
 	diag        Diagnostic
 	endpoints   []*Endpoint
 	httpClient  *resty.Client
-	rush_port string
+	rush_port   string
 }
 
 func NewService(c Config, d Diagnostic, rush_port string) *Service {

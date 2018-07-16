@@ -60,7 +60,6 @@ func (c *Controller) handlerProcess() {
 		select {
 		case pkg := <-c.handlerBuf:
 			c.HandleMsg(&pkg)
-
 		}
 	}
 }
@@ -115,6 +114,7 @@ func (c *Controller) Connect() error {
 	//c.IdentifierSubcribe()
 	//c.PSet()
 	// 启动发送
+	c.lastResult()
 	go c.manage()
 
 	return nil
@@ -336,6 +336,18 @@ func (c *Controller) manage() {
 	}
 }
 
+func (c *Controller) lastResult() error {
+	if c.Status() == controller.STATUS_OFFLINE {
+		return errors.New("status offline")
+	}
+
+	s_last_result := GeneratePackage(MID_0064_OLD_TIGHTING, "006", fmt.Sprintf("%010d", 0), DEFAULT_MSG_END)
+
+	c.Write([]byte(s_last_result))
+
+	return nil
+}
+
 func (c *Controller) pset(pset int) error {
 	if c.Status() == controller.STATUS_OFFLINE {
 		return errors.New("status offline")
@@ -344,6 +356,31 @@ func (c *Controller) pset(pset int) error {
 	s_pset := GeneratePackage(MID_0018_PSET, "001", fmt.Sprintf("%03d", pset), DEFAULT_MSG_END)
 
 	c.Write([]byte(s_pset))
+
+	return nil
+}
+
+// 0: set 1: reset
+func (c *Controller) JobOff(off string) error {
+	if c.Status() == controller.STATUS_OFFLINE {
+		return errors.New("status offline")
+	}
+
+	s_off := GeneratePackage(MID_0130_JOB_OFF, "001", off, DEFAULT_MSG_END)
+
+	c.Write([]byte(s_off))
+
+	return nil
+}
+
+func (c *Controller) jobSelect(job int) error {
+	if c.Status() == controller.STATUS_OFFLINE {
+		return errors.New("status offline")
+	}
+
+	s_job := GeneratePackage(MID_0038_JOB_SELECT, "002", fmt.Sprintf("%04d", job), DEFAULT_MSG_END)
+
+	c.Write([]byte(s_job))
 
 	return nil
 }
@@ -412,7 +449,8 @@ func (c *Controller) CurveSubcribe() error {
 
 func (c *Controller) PSet(pset int, workorder_id int64, result_id int64, count int, user_id int64, channel int) (uint32, error) {
 	// 设定结果标识
-	err := c.IdentifierSet(fmt.Sprintf("%d", result_id))
+	// 结果id-拧接次数-用户id
+	err := c.IdentifierSet(fmt.Sprintf("%d-%d-%d", user_id, count, result_id))
 	if err != nil {
 		return 0, err
 	}
@@ -424,4 +462,22 @@ func (c *Controller) PSet(pset int, workorder_id int64, result_id int64, count i
 	}
 
 	return 0, nil
+}
+
+func (c *Controller) JobSet(result_ids []int64, user_id int64, job int) error {
+	ids := ""
+	for _, v := range result_ids {
+		ids += fmt.Sprintf("%d,", v)
+	}
+	err := c.IdentifierSet(fmt.Sprintf("%d-%s", user_id, ids))
+	if err != nil {
+		return err
+	}
+
+	err = c.jobSelect(job)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

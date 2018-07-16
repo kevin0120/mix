@@ -107,3 +107,44 @@ func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64,
 
 	return nil
 }
+
+func (p *Service) JobSet(sn string, job int, result_ids []int64, user_id int64) error {
+	v, exist := p.Parent.Controllers[sn]
+	if !exist {
+		// SN对应控制器不存在
+		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
+	}
+
+	c := v.(*Controller)
+	// 设定pset并判断控制器响应
+	err := c.JobSet(result_ids, user_id, job)
+	if err != nil {
+		// 控制器请求失败
+		return errors.New(controller.ERR_PSET_ERROR)
+	}
+
+	return nil
+}
+
+func (p *Service) JobOFF(sn string, off bool) error {
+	v, exist := p.Parent.Controllers[sn]
+	if !exist {
+		// SN对应控制器不存在
+		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
+	}
+
+	c := v.(*Controller)
+
+	s_off := "0"
+	if off {
+		s_off = "1"
+	}
+
+	err := c.JobOff(s_off)
+	if err != nil {
+		// 控制器请求失败
+		return errors.New(controller.ERR_PSET_ERROR)
+	}
+
+	return nil
+}

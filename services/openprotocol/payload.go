@@ -22,11 +22,19 @@ const (
 	MID_7408_LAST_CURVE_SUBSCRIBE  = "7408"
 	MID_0151_IDENTIFIER_SUBSCRIBE  = "0151"
 	MID_0150_IDENTIFIER_SET        = "0150"
+	MID_0038_JOB_SELECT            = "0038"
+	MID_0064_OLD_TIGHTING          = "0064"
+	MID_0130_JOB_OFF               = "0130"
 
 	MID_0061_LAST_RESULT = "0061"
 	MID_7410_LAST_CURVE  = "7410"
 
 	MID_9999_ALIVE = "9999"
+)
+
+const (
+	MID_0038_REV_1 = "001"
+	MID_0038_REV_2 = "002"
 )
 
 type OpenProtocolHeader struct {
@@ -166,12 +174,47 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 		h.Spare = ""
 
 		return h.Serialize() + data + end
+
+	case MID_0038_JOB_SELECT:
+		h.MID = MID_0038_JOB_SELECT
+		h.LEN = LEN_HEADER + len(data)
+		h.Revision = rev
+		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + data + end
+
+	case MID_0064_OLD_TIGHTING:
+		h.MID = MID_0064_OLD_TIGHTING
+		h.LEN = LEN_HEADER + len(data)
+		h.Revision = rev
+		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + data + end
+
+	case MID_0130_JOB_OFF:
+		h.MID = MID_0130_JOB_OFF
+		h.LEN = LEN_HEADER + len(data)
+		h.Revision = rev
+		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + data + end
 	}
 
 	return ""
 }
 
 type ResultData struct {
+
+	//rev2
 	CellID                        int
 	ChannelID                     int
 	ControllerName                string
@@ -218,11 +261,29 @@ type ResultData struct {
 	ToolSerialNumber              string
 	TimeStamp                     string
 	TimeStampPSetLastChange       string
-	PSetName                      string
-	TorqueUnit                    string
-	ResultType                    string
+
+	//rev3
+	PSetName   string
+	TorqueUnit string
+	ResultType string
+
+	//rev4
+	ID2 string
+	ID3 string
+	ID4 string
+
+	//rev5
+	CustomerErrorCode string
+
+	//rev6
+
+	//rev998
+
 }
 
 func (rd *ResultData) Deserialize(str string) error {
+
+	//rd.CellID = str[0:1]
+
 	return nil
 }

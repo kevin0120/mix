@@ -2,6 +2,7 @@ package audi_vw
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/wsnotify"
@@ -10,15 +11,14 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-	"errors"
 )
 
 const (
-	MINSEQUENCE          uint32 = 1
-	MAXSEQUENCE          uint32 = 9999
-	DAIL_TIMEOUT                = time.Duration(5 * time.Second)
-	MAX_KEEP_ALIVE_CHECK        = 3
-	MAX_REPLY_TIMEOUT_COUNT = 10
+	MINSEQUENCE             uint32 = 1
+	MAXSEQUENCE             uint32 = 9999
+	DAIL_TIMEOUT                   = time.Duration(5 * time.Second)
+	MAX_KEEP_ALIVE_CHECK           = 3
+	MAX_REPLY_TIMEOUT_COUNT        = 10
 )
 
 type Controller struct {
