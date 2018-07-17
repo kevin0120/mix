@@ -8,6 +8,7 @@ import (
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
 	"sync/atomic"
+	"fmt"
 )
 
 type Diagnostic interface {
@@ -108,7 +109,7 @@ func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64,
 	return nil
 }
 
-func (p *Service) JobSet(sn string, job int, result_ids []int64, user_id int64) error {
+func (p *Service) JobSet(sn string, job int, workorder_id int64, user_id int64) error {
 	v, exist := p.Parent.Controllers[sn]
 	if !exist {
 		// SN对应控制器不存在
@@ -116,8 +117,21 @@ func (p *Service) JobSet(sn string, job int, result_ids []int64, user_id int64) 
 	}
 
 	c := v.(*Controller)
-	// 设定pset并判断控制器响应
-	err := c.JobSet(result_ids, user_id, job)
+
+	db_results, err := p.DB.FindResultsByWorkorder(workorder_id)
+	if err != nil {
+		return err
+	}
+
+	s_psets := ""
+	for _, v := range db_results {
+		s_psets += fmt.Sprintf("%d,", v.PSet)
+	}
+
+	//workorderid-userid-pset1,pset2, ...
+	id_info := fmt.Sprintf("%d-%d-%s", workorder_id, user_id, s_psets)
+
+	err = c.JobSet(id_info, job)
 	if err != nil {
 		// 控制器请求失败
 		return errors.New(controller.ERR_PSET_ERROR)

@@ -173,6 +173,10 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 		o.MaxOpTime = v.Max_op_time
 		o.WorkSheet = v.Worksheet
 		o.UpdateTime = v.UpdateTime
+		o.JobID, finalErr = strconv.Atoi(v.Job)
+		if finalErr != nil {
+			o.JobID = 0
+		}
 
 		o.MO_Year = v.MO_Year
 		o.MO_Pin_check_code = v.MO_Pin_check_code

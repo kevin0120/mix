@@ -174,9 +174,9 @@ func (m *Methods) putJobs(ctx iris.Context) {
 		return
 	}
 
-	if len(job.ResultIDs) == 0 {
+	if job.WorkorderiD == 0 {
 		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("result_ids is required")
+		ctx.WriteString("workorder_id is required")
 		return
 	}
 
@@ -193,7 +193,7 @@ func (m *Methods) putJobs(ctx iris.Context) {
 
 	switch c.Protocol() {
 	case controller.OPENPROTOCOL:
-		err = m.service.OpenProtocol.JobSet(job.Controller_SN, job.Job, job.ResultIDs, job.UserID)
+		err = m.service.OpenProtocol.JobSet(job.Controller_SN, job.Job, job.WorkorderiD, job.UserID)
 
 	default:
 		ctx.StatusCode(iris.StatusBadRequest)

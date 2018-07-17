@@ -5,7 +5,7 @@
     "title": "Master PC API",
     "description": "工位HMI调用"
   },
-  "host": "172.17.0.1:8080",
+  "host": "172.17.0.1:8082",
   "basePath": "/rush/v1",
   "schemes": [
     "http"
@@ -30,6 +30,70 @@
             "name": "body",
             "schema": {
               "$ref": "#/definitions/pset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "设置成功"
+          },
+          "400": {
+            "description": "设置失败"
+          }
+        }
+      }
+    },
+    "/jobs": {
+      "put": {
+        "tags": [
+          "HMI"
+        ],
+        "summary": "设定装配过程",
+        "description": "设定装配过程",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/job"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "设置成功"
+          },
+          "400": {
+            "description": "设置失败"
+          }
+        }
+      }
+    },
+    "/enable-job-mode": {
+      "put": {
+        "tags": [
+          "HMI"
+        ],
+        "summary": "启用job模式",
+        "description": "启用job模式",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/jobmode"
             }
           }
         ],
@@ -343,6 +407,46 @@
           "type": "integer",
           "description": "用户id",
           "example": 1
+        }
+      }
+    },
+    "job": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "type": "number",
+          "description": "装配过程号",
+          "example": 1
+        },
+        "controller_sn": {
+          "type": "string",
+          "description": "控制器序列号",
+          "example": "0001"
+        },
+        "workorder_id": {
+          "type": "integer",
+          "description": "用户id",
+          "example": 1
+        },
+        "user_id": {
+          "type": "integer",
+          "description": "用户id",
+          "example": 1
+        }
+      }
+    },
+    "jobmode": {
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "description": "是否启用",
+          "example": true
+        },
+        "controller_sn": {
+          "type": "string",
+          "description": "控制器序列号",
+          "example": "0001"
         }
       }
     },

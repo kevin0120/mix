@@ -70,10 +70,18 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 	switch pkg.Header.MID {
 	case MID_0061_LAST_RESULT:
 		// 处理结果
+		c.handleResult(pkg)
 
 	case MID_7410_LAST_CURVE:
 		// 处理波形
 	}
+}
+
+func (c *Controller) handleResult(pkg *handlerPkg) {
+	result_data := ResultData{}
+	result_data.Deserialize(pkg.Body)
+
+	fmt.Printf("")
 }
 
 func (c *Controller) Start() {
@@ -113,8 +121,7 @@ func (c *Controller) Connect() error {
 	c.ResultSubcribe()
 	c.JobInfoSubscribe()
 	//c.DataSubscribeCurve()
-	//c.IdentifierSubcribe()
-	//c.PSet()
+
 	// 启动发送
 	c.lastResult()
 	go c.manage()
@@ -490,12 +497,9 @@ func (c *Controller) PSet(pset int, workorder_id int64, result_id int64, count i
 	return 0, nil
 }
 
-func (c *Controller) JobSet(result_ids []int64, user_id int64, job int) error {
-	ids := ""
-	for _, v := range result_ids {
-		ids += fmt.Sprintf("%d,", v)
-	}
-	err := c.IdentifierSet(fmt.Sprintf("%d-%s", user_id, ids))
+func (c *Controller) JobSet(id_info string, job int) error {
+
+	err := c.IdentifierSet(id_info)
 	if err != nil {
 		return err
 	}

@@ -18,6 +18,8 @@ type Workorders struct {
 	WorkSheet    string    `xorm:"text 'work_sheet'"`
 	UpdateTime   time.Time `xorm:"datetime 'update_time'"`
 
+	JobID		int 	`xorm:"bigint 'job_id'"`
+
 	// mo相关信息
 	MO_EquipemntName  string `xorm:"varchar(64) 'equipment_name'"` // 设备名
 	MO_FactoryName    string `xorm:"varchar(64) 'factory_name'"`   // 工厂代码

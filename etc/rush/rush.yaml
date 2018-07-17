@@ -54,7 +54,7 @@ websocket:
   write_buf_size: 4096
 storage:
   db_url: 127.0.0.1:5432
-  db_name: rush_new
+  db_name: rush_changan
   db_user: admin
   db_pwd: admin
   max_connection: 60
@@ -78,11 +78,11 @@ controllers:
 #  port: 4700
 #  channel: 1
 
-- serial_no: 0002
-  protocol: Audi/VW
-  remote_ip: 192.168.1.102
-  port: 4700
-  channel: 1
+#- serial_no: 0002
+#  protocol: Audi/VW
+#  remote_ip: 192.168.1.102
+#  port: 4700
+#  channel: 1
 
 - serial_no: 0001
   protocol: OpenProtocol

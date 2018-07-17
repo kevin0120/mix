@@ -50,7 +50,7 @@ type ODOOWorkorder struct {
 	LongPin    string        `json:"long_pin"`
 	UpdateTime time.Time     `json:"update_time"`
 	Consumes   []ODOOConsume `json:"consumes"`
-
+	Job			string		`json:"job"`
 	// mo相关信息
 	MO_EquipemntName  string `json:"equipment_name"` // 设备名
 	MO_FactoryName    string `json:"factory_name"`   // 工厂代码

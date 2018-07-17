@@ -11,8 +11,8 @@ type PSet struct {
 
 type Job struct {
 	Controller_SN string  `json:"controller_sn"`
-	Job           int     `json:"job"`
-	ResultIDs     []int64 `json:"result_ids"`
+	Job           int     `json:"job_id"`
+	WorkorderiD   int64	   `json:"workorder_id"`
 	UserID        int64   `json:"user_id"`
 }
 

@@ -244,8 +244,8 @@ type ResultData struct {
 	ChannelID                     int
 	ControllerName                string
 	VIN                           string
-	JobID                         string
-	PsetID                        string
+	JobID                         int
+	PSetID                        int
 	Strategy                      string
 	StrategyOption                []byte
 	BatchSize                     int
@@ -280,7 +280,7 @@ type ResultData struct {
 	PrevailTorqueMonitoringMin    float64
 	PrevailTorqueMonitoringMax    float64
 	PrevailTorque                 float64
-	TightingID                    int64
+	TightingID                    string
 	JobSequenceNumber             int32
 	SyncTighteningID              int32
 	ToolSerialNumber              string
@@ -303,12 +303,126 @@ type ResultData struct {
 	//rev6
 
 	//rev998
+	NumberOfStages int
+	NumberOfStageResults int
+	StageResult string
 
 }
 
 func (rd *ResultData) Deserialize(str string) error {
 
-	//rd.CellID = str[0:1]
+	var err error = nil
+	rd.CellID, err = strconv.Atoi(str[2:6])
+	if err != nil {
+		return err
+	}
+
+	rd.ChannelID, err = strconv.Atoi(str[8:10])
+	if err != nil {
+		return err
+	}
+
+	rd.ControllerName = str[12:37]
+	rd.VIN = str[39:64]
+
+	rd.JobID, err = strconv.Atoi(str[66:70])
+	if err != nil {
+		return err
+	}
+
+	rd.PSetID, err = strconv.Atoi(str[72:75])
+	if err != nil {
+		return err
+	}
+
+	rd.Strategy = str[77:79]
+
+	rd.BatchSize, err = strconv.Atoi(str[88:92])
+	if err != nil {
+		return err
+	}
+
+	rd.BatchCount, err = strconv.Atoi(str[94:98])
+	if err != nil {
+		return err
+	}
+
+	rd.TighteningStatus = str[100:101]
+	rd.BatchStatus = str[103:104]
+	rd.TorqueStatus = str[106:107]
+	rd.AngleStatus = str[109:110]
+	rd.RundownAngleStatus = str[112:113]
+	rd.CurrentMonitoringStatus = str[115:116]
+	rd.SelftapStatus = str[118:119]
+	rd.PrevailTorqueMonitoringStatus = str[121:122]
+	rd.PrevailTorqueCompensateStatus = str[124:125]
+
+	//error_status := str[127:137]
+	//for _, v := range error_status {
+	//	rd.TighteningErrorStatus = append(rd.TighteningErrorStatus, v)
+	//}
+
+	rd.TorqueMin, err = strconv.ParseFloat(str[139:145], 64)
+	if err != nil {
+		return err
+	}
+
+	rd.TorqueMax, err = strconv.ParseFloat(str[147:153], 64)
+	if err != nil {
+		return err
+	}
+
+	rd.TorqueFinalTarget, err = strconv.ParseFloat(str[155:161], 64)
+	if err != nil {
+		return err
+	}
+
+	rd.Torque, err = strconv.ParseFloat(str[163:169], 64)
+	if err != nil {
+		return err
+	}
+
+	rd.AngleMin, err = strconv.ParseFloat(str[171:176], 64)
+	if err != nil {
+		return err
+	}
+
+	rd.AngleMax, err = strconv.ParseFloat(str[178:183], 64)
+	if err != nil {
+		return err
+	}
+
+	rd.FinalAngleTarget, err = strconv.ParseFloat(str[185:190], 64)
+	if err != nil {
+		return err
+	}
+
+	rd.Angle, err = strconv.ParseFloat(str[192:197], 64)
+	if err != nil {
+		return err
+	}
+
+	rd.TightingID= str[283:293]
+
+	rd.TimeStamp = str[325:344]
+
+	rd.TorqueUnit = str[394:395]
+	rd.ResultType = str[397:399]
+	rd.ID2 = str[401:426]
+	rd.ID3 = str[428:453]
+	rd.ID4 = str[455:480]
+
+	rd.NumberOfStages, err = strconv.Atoi(str[508:510])
+	if err != nil {
+		return err
+	}
+
+	rd.NumberOfStageResults, err = strconv.Atoi(str[512:514])
+	if err != nil {
+		return err
+	}
+
+	rd.StageResult = str[516:527]
 
 	return nil
 }
