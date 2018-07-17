@@ -25,6 +25,9 @@ const (
 	MID_0038_JOB_SELECT            = "0038"
 	MID_0064_OLD_TIGHTING          = "0064"
 	MID_0130_JOB_OFF               = "0130"
+	MID_0250_SELECTOR_SUBSCRIBE = "0250"
+
+	MID_0008_DATA_SUB = "0008"
 
 	MID_0061_LAST_RESULT = "0061"
 	MID_7410_LAST_CURVE  = "7410"
@@ -131,6 +134,17 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 
 		return h.Serialize() + end
 
+	case MID_0250_SELECTOR_SUBSCRIBE:
+		h.MID = MID_0250_SELECTOR_SUBSCRIBE
+		h.LEN = LEN_HEADER
+		h.Revision = rev
+		h.NoAck = "1"
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + end
+
 	case MID_0060_LAST_RESULT_SUBSCRIBE:
 		h.MID = MID_0060_LAST_RESULT_SUBSCRIBE
 		h.LEN = LEN_HEADER
@@ -199,6 +213,17 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 
 	case MID_0130_JOB_OFF:
 		h.MID = MID_0130_JOB_OFF
+		h.LEN = LEN_HEADER + len(data)
+		h.Revision = rev
+		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + data + end
+
+	case MID_0008_DATA_SUB:
+		h.MID = MID_0008_DATA_SUB
 		h.LEN = LEN_HEADER + len(data)
 		h.Revision = rev
 		h.NoAck = ""

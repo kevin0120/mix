@@ -108,9 +108,11 @@ func (c *Controller) Connect() error {
 	c.startComm()
 
 	c.PSetSubscribe()
-	c.CurveSubcribe()
+	//c.CurveSubscribe()
+	c.SelectorSubscribe()
 	c.ResultSubcribe()
 	c.JobInfoSubscribe()
+	//c.DataSubscribeCurve()
 	//c.IdentifierSubcribe()
 	//c.PSet()
 	// 启动发送
@@ -399,12 +401,36 @@ func (c *Controller) IdentifierSet(str string) error {
 	return nil
 }
 
+func (c *Controller) DataSubscribeCurve() error {
+	if c.Status() == controller.STATUS_OFFLINE {
+		return errors.New("status offline")
+	}
+
+	cs := GeneratePackage(MID_0008_DATA_SUB, "001", "0900001350                             01001", DEFAULT_MSG_END)
+
+	c.Write([]byte(cs))
+
+	return nil
+}
+
 func (c *Controller) PSetSubscribe() error {
 	if c.Status() == controller.STATUS_OFFLINE {
 		return errors.New("status offline")
 	}
 
 	pset := GeneratePackage(MID_0014_PSET_SUBSCRIBE, "000", "", DEFAULT_MSG_END)
+
+	c.Write([]byte(pset))
+
+	return nil
+}
+
+func (c *Controller) SelectorSubscribe() error {
+	if c.Status() == controller.STATUS_OFFLINE {
+		return errors.New("status offline")
+	}
+
+	pset := GeneratePackage(MID_0250_SELECTOR_SUBSCRIBE, "001", "", DEFAULT_MSG_END)
 
 	c.Write([]byte(pset))
 
@@ -435,7 +461,7 @@ func (c *Controller) ResultSubcribe() error {
 	return nil
 }
 
-func (c *Controller) CurveSubcribe() error {
+func (c *Controller) CurveSubscribe() error {
 	if c.Status() == controller.STATUS_OFFLINE {
 		return errors.New("status offline")
 	}
