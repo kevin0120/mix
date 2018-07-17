@@ -9,6 +9,18 @@ type PSet struct {
 	UserID        int64  `json:"user_id"`
 }
 
+type Job struct {
+	Controller_SN string  `json:"controller_sn"`
+	Job           int     `json:"job"`
+	ResultIDs     []int64 `json:"result_ids"`
+	UserID        int64   `json:"user_id"`
+}
+
+type EnableJobMode struct {
+	Controller_SN string `json:"controller_sn"`
+	Enable        bool   `json:"enable"`
+}
+
 type Result struct {
 	ID            int64   `json:"id"`
 	Controller_SN string  `json:"controller_sn"`

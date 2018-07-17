@@ -15,12 +15,6 @@ type Config struct {
 	ToolChannel int    `yaml:"channel"`
 }
 
-const (
-	AUDIPROTOCOL         = "Audi/VW"
-	OPENPROTOCOL         = "OpenProtocol"
-	DEFAULT_TOOL_CHANNEL = 1
-)
-
 var Protocols []string
 
 func init() {

@@ -2,6 +2,7 @@ package audi_vw
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/wsnotify"
@@ -12,18 +13,12 @@ import (
 	"time"
 )
 
-type ControllerStatusType string
-
 const (
-	MINSEQUENCE          uint32 = 1
-	MAXSEQUENCE          uint32 = 9999
-	DAIL_TIMEOUT                = time.Duration(5 * time.Second)
-	MAX_KEEP_ALIVE_CHECK        = 3
-)
-
-const (
-	STATUS_ONLINE  ControllerStatusType = "online"
-	STATUS_OFFLINE ControllerStatusType = "offline"
+	MINSEQUENCE             uint32 = 1
+	MAXSEQUENCE             uint32 = 9999
+	DAIL_TIMEOUT                   = time.Duration(5 * time.Second)
+	MAX_KEEP_ALIVE_CHECK           = 3
+	MAX_REPLY_TIMEOUT_COUNT        = 10
 )
 
 type Controller struct {
@@ -43,6 +38,7 @@ type Controller struct {
 	keepaliveDeadLine atomic.Value
 	closing           chan chan struct{}
 	cfg               controller.Config
+	protocol          string
 }
 
 func (c *Controller) KeepAliveCount() int32 {
@@ -84,18 +80,18 @@ func (c *Controller) setSequence(i uint32) {
 
 }
 
-func (c *Controller) Status() ControllerStatusType {
+func (c *Controller) Status() string {
 
-	return c.StatusValue.Load().(ControllerStatusType)
+	return c.StatusValue.Load().(string)
 }
 
-func (c *Controller) updateStatus(status ControllerStatusType) {
+func (c *Controller) updateStatus(status string) {
 
 	if status != c.Status() {
 
 		c.StatusValue.Store(status)
 
-		if status == STATUS_OFFLINE {
+		if status == controller.STATUS_OFFLINE {
 			c.Close()
 
 			// 断线重连
@@ -126,11 +122,16 @@ func NewController(c Config) Controller {
 		mux_seq:     sync.Mutex{},
 		keep_period: time.Duration(c.KeepAlivePeriod),
 		req_timeout: time.Duration(c.ReqTimeout),
+		protocol:    controller.AUDIPROTOCOL,
 	}
 
-	cont.StatusValue.Store(STATUS_OFFLINE)
+	cont.StatusValue.Store(controller.STATUS_OFFLINE)
 
 	return cont
+}
+
+func (c *Controller) Protocol() string {
+	return c.protocol
 }
 
 func (c *Controller) Start() {
@@ -151,11 +152,11 @@ func (c *Controller) manage() {
 	for {
 		select {
 		case <-time.After(c.keep_period):
-			if c.Status() == STATUS_OFFLINE {
+			if c.Status() == controller.STATUS_OFFLINE {
 				continue
 			}
 			if c.KeepAliveCount() >= MAX_KEEP_ALIVE_CHECK {
-				go c.updateStatus(STATUS_OFFLINE)
+				go c.updateStatus(controller.STATUS_OFFLINE)
 				c.updateKeepAliveCount(0)
 				continue
 			}
@@ -184,7 +185,7 @@ func (c *Controller) manage() {
 }
 
 func (c *Controller) sendKeepalive() {
-	if c.Status() == STATUS_OFFLINE {
+	if c.Status() == controller.STATUS_OFFLINE {
 		return
 	}
 
@@ -244,7 +245,7 @@ func (c *Controller) Write(buf []byte, seq uint32) {
 //}
 
 func (c *Controller) Connect() error {
-	c.StatusValue.Store(STATUS_OFFLINE)
+	c.StatusValue.Store(controller.STATUS_OFFLINE)
 	c.setSequence(MINSEQUENCE)
 
 	c.Response = ResponseQueue{
@@ -264,7 +265,7 @@ func (c *Controller) Connect() error {
 		time.Sleep(time.Duration(c.req_timeout))
 	}
 
-	c.updateStatus(STATUS_ONLINE)
+	c.updateStatus(controller.STATUS_ONLINE)
 
 	// 启动发送
 	go c.manage()
@@ -339,6 +340,33 @@ func (c *Controller) PSet(pset int, workorder_id int64, reseult_id int64, count 
 
 	//c.Response.Add(seq, "")
 	c.Write([]byte(psetPacket), seq)
+
+	c.Response.Add(seq, "")
+
+	defer c.Response.remove(seq)
+
+	var header_str string
+	for i := 0; i < MAX_REPLY_TIMEOUT_COUNT; i++ {
+		header_str = c.Response.get(seq)
+		if header_str != "" {
+			break
+		}
+		time.Sleep(time.Duration(c.req_timeout))
+	}
+
+	if header_str == "" {
+		// 控制器请求失败
+		return seq, errors.New(ERR_CVI3_REPLY_TIMEOUT)
+	}
+
+	//fmt.Printf("reply_header:%s\n", header_str)
+	header := CVI3Header{}
+	header.Deserialize(header_str)
+
+	if !header.Check() {
+		// 控制器请求失败
+		return seq, errors.New(fmt.Sprintf("%s:%d", ERR_CVI3_REPLY, header.COD))
+	}
 
 	return seq, nil
 }

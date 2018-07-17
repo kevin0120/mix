@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/kataras/iris"
 	"github.com/masami10/rush/services/audi_vw"
+	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/wsnotify"
 	"strconv"
@@ -81,7 +82,125 @@ func (m *Methods) putPSets(ctx iris.Context) {
 	}
 
 	// 通过控制器设定程序
-	err = m.service.AudiVw.PSet(pset.Controller_SN, pset.PSet, result.WorkorderID, pset.Result_id, pset.Count, pset.UserID)
+	c, exist := m.service.ControllerService.Controllers[pset.Controller_SN]
+	if !exist {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller not found")
+	}
+
+	switch c.Protocol() {
+	case controller.AUDIPROTOCOL:
+		err = m.service.AudiVw.PSet(pset.Controller_SN, pset.PSet, result.WorkorderID, pset.Result_id, pset.Count, pset.UserID)
+	case controller.OPENPROTOCOL:
+		err = m.service.OpenProtocol.PSet(pset.Controller_SN, pset.PSet, result.WorkorderID, pset.Result_id, pset.Count, pset.UserID)
+
+	default:
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("not supported")
+		return
+	}
+
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+}
+
+func (m *Methods) enableJobMode(ctx iris.Context) {
+	var jobmode EnableJobMode
+	err := ctx.ReadJSON(&jobmode)
+
+	if err != nil {
+		// 传输结构错误
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+
+		return
+	}
+
+	if jobmode.Controller_SN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller_sn is required")
+		return
+	}
+
+	c, exist := m.service.ControllerService.Controllers[jobmode.Controller_SN]
+	if !exist {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller not found")
+	}
+
+	switch c.Protocol() {
+	case controller.OPENPROTOCOL:
+		err = m.service.OpenProtocol.JobOFF(jobmode.Controller_SN, jobmode.Enable)
+
+	default:
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("not supported")
+		return
+	}
+
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+}
+
+func (m *Methods) putJobs(ctx iris.Context) {
+
+	var err error
+	var job Job
+	err = ctx.ReadJSON(&job)
+
+	if err != nil {
+		// 传输结构错误
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+
+		return
+	}
+
+	if job.Controller_SN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller_sn is required")
+		return
+	}
+
+	if job.Job == 0 {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("job is required")
+		return
+	}
+
+	if len(job.ResultIDs) == 0 {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("result_ids is required")
+		return
+	}
+
+	if job.UserID == 0 {
+		job.UserID = DEFAULT_USER_ID
+	}
+
+	// 通过控制器设定程序
+	c, exist := m.service.ControllerService.Controllers[job.Controller_SN]
+	if !exist {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller not found")
+	}
+
+	switch c.Protocol() {
+	case controller.OPENPROTOCOL:
+		err = m.service.OpenProtocol.JobSet(job.Controller_SN, job.Job, job.ResultIDs, job.UserID)
+
+	default:
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("not supported")
+		return
+	}
+
 	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString(err.Error())

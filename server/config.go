@@ -14,6 +14,7 @@ import (
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/odoo"
+	"github.com/masami10/rush/services/openprotocol"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
@@ -43,6 +44,8 @@ type Config struct {
 
 	AudiVW audi_vw.Config `yaml:"audi/vw"`
 
+	OpenProtocol openprotocol.Config `yaml:"openprotocol"`
+
 	Contollers controller.Configs `yaml:"controllers"`
 
 	Commander command.Commander `yaml:"-"`
@@ -63,6 +66,7 @@ func NewConfig() *Config {
 	c.Storage = storage.NewConfig()
 	c.Logging = diagnostic.NewConfig()
 	c.AudiVW = audi_vw.NewConfig()
+	c.OpenProtocol = openprotocol.NewConfig()
 	c.Odoo = odoo.NewConfig()
 
 	c.Contollers = controller.Configs{controller.NewConfig(), controller.NewConfig()}

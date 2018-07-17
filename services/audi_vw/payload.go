@@ -59,11 +59,14 @@ type PSetData struct {
 type SMP struct {
 	CUR_M string `xml:"Y1V"`
 	CUR_W string `xml:"Y2V"`
+	CUR_T string `xml:"XVA"`
 }
 
 type CUR struct {
-	CNT int `xml:"CNT"`
-	SMP SMP `xml:"SMP"`
+	STP float64 `xml:"STP"`
+	STV float64 `xml:"STV"`
+	CNT int     `xml:"CNT"`
+	SMP SMP     `xml:"SMP"`
 }
 
 type PRO struct {
@@ -194,6 +197,7 @@ type ControllerCurveFile struct {
 	Result string    `json:"result"`
 	CUR_M  []float64 `json:"cur_m"`
 	CUR_W  []float64 `json:"cur_w"`
+	CUR_T  []float64 `json:"cur_t"`
 }
 
 type ControllerResult struct {
@@ -248,6 +252,24 @@ func XML2Curve(result *CVI3Result, cur_result *ControllerCurveFile) {
 	for k, v := range cur_ws {
 		w, _ := strconv.ParseFloat(v, 64)
 		cur_result.CUR_W[k] = w
+	}
+
+	stp := result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.STP
+	stv := result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.STV
+	if result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.SMP.CUR_T == "" {
+		for i := 0; i < result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.CNT; i++ {
+			x := float64(i)*stp + stv
+			//t,_ := big.NewFloat(x).SetPrec(5).Float64()
+			t, _ := strconv.ParseFloat(fmt.Sprintf("%.5f", x), 64)
+			cur_result.CUR_T = append(cur_result.CUR_T, t)
+		}
+	} else {
+		cur_ts := strings.Split(result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.SMP.CUR_T, " ")
+		cur_result.CUR_T = make([]float64, result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.CNT)
+		for k, v := range cur_ts {
+			w, _ := strconv.ParseFloat(v, 64)
+			cur_result.CUR_T[k] = w
+		}
 	}
 
 }

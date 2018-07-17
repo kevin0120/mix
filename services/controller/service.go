@@ -6,34 +6,45 @@ type Diagnostic interface {
 
 type Controller interface {
 	Start()
+	Close() error
+	Status() string
+	Protocol() string
 }
 
 type Protocol interface {
 	Parse(msg string) ([]byte, error)
 	Write(sn string, buf []byte) error
-	AddNewController(cfg Config)
+	AddNewController(cfg Config) Controller
 }
 
 type Service struct {
 	configs []Config
 
-	protocols map[string]Protocol //进行服务注入, serial_no : Protocol
+	protocols   map[string]Protocol //进行服务注入, serial_no : Protocol
+	Controllers map[string]Controller
 
 	diag Diagnostic
 }
 
-func NewService(cs Configs, d Diagnostic, pAudi Protocol) (*Service, error) {
+func NewService(cs Configs, d Diagnostic, pAudi Protocol, pOpenprotocol Protocol) (*Service, error) {
 	s := &Service{
-		configs:   cs,
-		diag:      d,
-		protocols: map[string]Protocol{},
+		configs:     cs,
+		diag:        d,
+		Controllers: map[string]Controller{},
+		protocols:   map[string]Protocol{},
 	}
 
 	for _, c := range cs {
 		switch c.Protocol {
 		case AUDIPROTOCOL:
-			pAudi.AddNewController(c)
+			new_controller := pAudi.AddNewController(c)
+			s.Controllers[c.SN] = new_controller
 			s.protocols[c.SN] = pAudi
+
+		case OPENPROTOCOL:
+			new_controller := pOpenprotocol.AddNewController(c)
+			s.Controllers[c.SN] = new_controller
+			s.protocols[c.SN] = pOpenprotocol
 
 		default:
 

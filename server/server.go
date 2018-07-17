@@ -12,6 +12,7 @@ import (
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/odoo"
+	"github.com/masami10/rush/services/openprotocol"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
@@ -41,11 +42,13 @@ type Server struct {
 	dataDir  string
 	hostname string
 
-	StorageServie *storage.Service
+	StorageServie     *storage.Service
+	ControllerService *controller.Service
 
-	HTTPDService  *httpd.Service
-	OdooService   *odoo.Service
-	AudiVWService *audi_vw.Service
+	HTTPDService        *httpd.Service
+	OdooService         *odoo.Service
+	AudiVWService       *audi_vw.Service
+	OpenprotocolService *openprotocol.Service
 
 	WSNotifyService *wsnotify.Service
 	AiisService     *aiis.Service
@@ -95,6 +98,10 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 		return nil, errors.Wrap(err, "init Audi/VW service")
 	}
 
+	if err := s.initOpenProtocolService(); err != nil {
+		return nil, errors.Wrap(err, "init OpenProtocol service")
+	}
+
 	s.appendMinioService()
 
 	s.appendAiisService()
@@ -106,6 +113,8 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	}
 
 	s.appendAudiVWService() //此服务必须在控制器服务后进行append
+
+	s.appendOpenProtocolService()
 
 	s.appendHMIService()
 
@@ -142,7 +151,7 @@ func (s *Server) initHTTPDService() error {
 func (s *Server) initAudiVWDService() error {
 	c := s.config.AudiVW
 	d := s.DiagService.NewAudiVWHandler()
-	srv := audi_vw.NewService(c, d)
+	srv := audi_vw.NewService(c, d, s.ControllerService)
 
 	s.AudiVWService = srv
 
@@ -155,8 +164,30 @@ func (s *Server) appendAudiVWService() {
 	s.AudiVWService.Aiis = s.AiisService
 	s.AudiVWService.WS = s.WSNotifyService
 	s.AudiVWService.DB = s.StorageServie
+	s.AudiVWService.Parent = s.ControllerService
 
 	s.AppendService("audi/vw", s.AudiVWService)
+}
+
+func (s *Server) initOpenProtocolService() error {
+	c := s.config.OpenProtocol
+	d := s.DiagService.NewOpenProtocolHandler()
+	srv := openprotocol.NewService(c, d, s.ControllerService)
+
+	s.OpenprotocolService = srv
+
+	return nil
+}
+
+func (s *Server) appendOpenProtocolService() {
+
+	s.OpenprotocolService.Minio = s.MinioService
+	s.OpenprotocolService.Aiis = s.AiisService
+	s.OpenprotocolService.WS = s.WSNotifyService
+	s.OpenprotocolService.DB = s.StorageServie
+	s.OpenprotocolService.Parent = s.ControllerService
+
+	s.AppendService("openprotocol", s.OpenprotocolService)
 }
 
 func (s *Server) appendHTTPDService() {
@@ -178,12 +209,13 @@ func (s *Server) appendMinioService() error {
 func (s *Server) appendControllersService() error {
 	c := s.config.Contollers
 	d := s.DiagService.NewControllerHandler()
-	srv, err := controller.NewService(c, d, s.AudiVWService)
+	srv, err := controller.NewService(c, d, s.AudiVWService, s.OpenprotocolService)
 
 	if err != nil {
 		return errors.Wrap(err, "append Controller service fail")
 	}
 
+	s.ControllerService = srv
 	s.AppendService("controller", srv)
 
 	return nil
@@ -192,7 +224,7 @@ func (s *Server) appendControllersService() error {
 func (s *Server) appendAiisService() error {
 	c := s.config.Aiis
 	d := s.DiagService.NewAiisHandler()
-	srv := aiis.NewService(c, d)
+	srv := aiis.NewService(c, d, s.config.HTTP.BindAddress)
 
 	s.AiisService = srv
 	s.AppendService("aiis", srv)
@@ -236,6 +268,8 @@ func (s *Server) appendHMIService() error {
 	srv.DB = s.StorageServie   // stroage 服务注入
 	srv.AudiVw = s.AudiVWService
 	srv.SN = s.config.SN
+	srv.ControllerService = s.ControllerService
+	srv.OpenProtocol = s.OpenprotocolService
 
 	s.AppendService("hmi", srv)
 

@@ -2,8 +2,10 @@ package hmi
 
 import (
 	"github.com/masami10/rush/services/audi_vw"
+	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/odoo"
+	"github.com/masami10/rush/services/openprotocol"
 	"github.com/masami10/rush/services/storage"
 )
 
@@ -15,13 +17,15 @@ type Diagnostic interface {
 }
 
 type Service struct {
-	diag    Diagnostic
-	methods Methods
-	DB      *storage.Service
-	Httpd   *httpd.Service
-	ODOO    *odoo.Service
-	AudiVw  *audi_vw.Service
-	SN      string
+	diag              Diagnostic
+	methods           Methods
+	DB                *storage.Service
+	Httpd             *httpd.Service
+	ODOO              *odoo.Service
+	AudiVw            *audi_vw.Service
+	OpenProtocol      *openprotocol.Service
+	ControllerService *controller.Service
+	SN                string
 }
 
 func NewService(d Diagnostic) *Service {
@@ -45,6 +49,22 @@ func (s *Service) Open() error {
 		Method:      "PUT",
 		Pattern:     "/psets",
 		HandlerFunc: s.methods.putPSets,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "PUT",
+		Pattern:     "/jobs",
+		HandlerFunc: s.methods.putJobs,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "PUT",
+		Pattern:     "/enable-job-mode",
+		HandlerFunc: s.methods.enableJobMode,
 	}
 	s.Httpd.Handler[0].AddRoute(r)
 

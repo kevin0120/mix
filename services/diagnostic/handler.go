@@ -378,6 +378,23 @@ func (h *AudiVWHandler) StartManager() {
 	h.l.Info("start Manage for write")
 }
 
+//Openprotocol
+type OpenProtocolHandler struct {
+	l Logger
+}
+
+func (h *OpenProtocolHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+func (h *OpenProtocolHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}
+
+func (h *OpenProtocolHandler) Info(msg string) {
+	h.l.Info(msg)
+}
+
 // Controller
 type ControllerHandler struct {
 	l Logger
