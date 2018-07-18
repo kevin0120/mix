@@ -11,12 +11,12 @@ import (
 	"github.com/masami10/rush/socket_listener"
 	"github.com/pkg/errors"
 
-	"io"
 	"encoding/xml"
-	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/wsnotify"
+	"io"
 )
 
 const (
@@ -63,12 +63,12 @@ func NewService(c Config, d Diagnostic, parent *controller.Service) *Service {
 	addr := fmt.Sprintf("tcp://:%d", c.Port)
 
 	s := &Service{
-		name:     controller.AUDIPROTOCOL,
-		err:      make(chan error, 1),
-		diag:     d,
-		wg:       sync.WaitGroup{},
-		closing:  make(chan struct{}, 1),
-		Parent:   parent,
+		name:    controller.AUDIPROTOCOL,
+		err:     make(chan error, 1),
+		diag:    d,
+		wg:      sync.WaitGroup{},
+		closing: make(chan struct{}, 1),
+		Parent:  parent,
 	}
 
 	s.handle_buffer = make(chan string, 1024)

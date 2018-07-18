@@ -18,7 +18,7 @@ type Workorders struct {
 	WorkSheet    string    `xorm:"text 'work_sheet'"`
 	UpdateTime   time.Time `xorm:"datetime 'update_time'"`
 
-	JobID		int 	`xorm:"bigint 'job_id'"`
+	JobID int `xorm:"bigint 'job_id'"`
 
 	// mo相关信息
 	MO_EquipemntName  string `xorm:"varchar(64) 'equipment_name'"` // 设备名
@@ -68,7 +68,7 @@ type Curves struct {
 }
 
 type Controllers struct {
-	Id         int64     `xorm:"pk autoincr notnull 'id'"`
-	SN		   string    `xorm:"varchar(128) 'controller_sn'"`
-	LastID	   string    `xorm:"varchar(128) 'last_id'"`
+	Id     int64  `xorm:"pk autoincr notnull 'id'"`
+	SN     string `xorm:"varchar(128) 'controller_sn'"`
+	LastID string `xorm:"varchar(128) 'last_id'"`
 }

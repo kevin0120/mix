@@ -5,22 +5,22 @@ import (
 	"fmt"
 	"github.com/kataras/iris/core/errors"
 	"github.com/masami10/rush/services/controller"
+	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/socket_writer"
 	"net"
+	"strconv"
+	"strings"
+	"sync"
 	"sync/atomic"
 	"time"
-	"strings"
-	"strconv"
-	"github.com/masami10/rush/services/storage"
-	"sync"
 )
 
 const (
 	DAIL_TIMEOUT         = time.Duration(5 * time.Second)
 	MAX_KEEP_ALIVE_CHECK = 3
 
-	REPLY_TIMEOUT = time.Duration(300 * time.Millisecond)
+	REPLY_TIMEOUT   = time.Duration(300 * time.Millisecond)
 	MAX_REPLY_COUNT = 10
 )
 
@@ -38,7 +38,7 @@ type Controller struct {
 	req_timeout       time.Duration
 	Response          ResponseQueue
 	Srv               *Service
-	dbController	  *storage.Controllers
+	dbController      *storage.Controllers
 	buffer            chan []byte
 	closing           chan chan struct{}
 	handlerBuf        chan handlerPkg
@@ -175,7 +175,7 @@ func (c *Controller) handleResult(result_data *ResultData) {
 	controllerResult.ResultValue.Wi = result_data.Angle
 	//controllerResult.ResultValue.Ti = result_data.
 
-	switch result_data.Strategy{
+	switch result_data.Strategy {
 	case "01":
 		controllerResult.PSetDefine.Strategy = controller.STRATEGY_AW
 
@@ -197,7 +197,7 @@ func (c *Controller) handleResult(result_data *ResultData) {
 	controllerResult.PSetDefine.Wm = result_data.AngleMin
 	controllerResult.PSetDefine.Wa = result_data.FinalAngleTarget
 
-	c.Srv.Parent.Handle(controllerResult,nil)
+	c.Srv.Parent.Handle(controllerResult, nil)
 }
 
 func (c *Controller) Start() {
@@ -217,7 +217,7 @@ func (c *Controller) Connect() error {
 	c.StatusValue.Store(controller.STATUS_OFFLINE)
 	c.Response = ResponseQueue{
 		Results: map[string]interface{}{},
-		mtx: sync.Mutex{},
+		mtx:     sync.Mutex{},
 	}
 
 	for {
@@ -249,7 +249,6 @@ func (c *Controller) Connect() error {
 	return nil
 }
 
-
 func (c *Controller) GetPSetDetail(pset int) (PSetDetail, error) {
 	var obj_pset_detail PSetDetail
 
@@ -261,7 +260,7 @@ func (c *Controller) GetPSetDetail(pset int) (PSetDetail, error) {
 	c.Write([]byte(pset_detail))
 
 	var reply interface{} = nil
-	for i := 0; i < MAX_REPLY_COUNT; i++{
+	for i := 0; i < MAX_REPLY_COUNT; i++ {
 		reply = c.Response.get(MID_0013_PSET_DETAIL_REPLY)
 		if reply != nil {
 			break
@@ -282,7 +281,7 @@ func (c *Controller) SolveOldResults() {
 	c.getOldResult(0)
 
 	var last_result interface{} = nil
-	for i := 0; i < MAX_REPLY_COUNT; i++{
+	for i := 0; i < MAX_REPLY_COUNT; i++ {
 		last_result = c.Response.get(MID_0065_OLD_DATA)
 		if last_result != nil {
 			break

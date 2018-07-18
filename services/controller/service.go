@@ -1,12 +1,12 @@
 package controller
 
 import (
-	"github.com/masami10/rush/services/wsnotify"
+	"fmt"
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/wsnotify"
 	"sync"
-	"fmt"
 )
 
 type Diagnostic interface {
@@ -30,7 +30,7 @@ type Protocol interface {
 
 type HandlerPackage struct {
 	Result interface{}
-	Curve interface{}
+	Curve  interface{}
 }
 
 type Service struct {
@@ -39,14 +39,14 @@ type Service struct {
 	protocols   map[string]Protocol //进行服务注入, serial_no : Protocol
 	Controllers map[string]Controller
 
-	DB            *storage.Service
-	WS            *wsnotify.Service
-	Aiis          *aiis.Service
-	Minio         *minio.Service
+	DB    *storage.Service
+	WS    *wsnotify.Service
+	Aiis  *aiis.Service
+	Minio *minio.Service
 
-	handlers      Handlers
-	wg            sync.WaitGroup
-	closing       chan struct{}
+	handlers Handlers
+	wg       sync.WaitGroup
+	closing  chan struct{}
 
 	handle_buffer chan HandlerPackage
 
@@ -55,14 +55,14 @@ type Service struct {
 
 func NewService(cs Configs, d Diagnostic, pAudi Protocol, pOpenprotocol Protocol) (*Service, error) {
 	s := &Service{
-		configs:     cs,
-		diag:        d,
-		Controllers: map[string]Controller{},
-		protocols:   map[string]Protocol{},
-		handlers: Handlers{},
-		handle_buffer:make(chan HandlerPackage, 1024),
-		wg:       sync.WaitGroup{},
-		closing:  make(chan struct{}, 1),
+		configs:       cs,
+		diag:          d,
+		Controllers:   map[string]Controller{},
+		protocols:     map[string]Protocol{},
+		handlers:      Handlers{},
+		handle_buffer: make(chan HandlerPackage, 1024),
+		wg:            sync.WaitGroup{},
+		closing:       make(chan struct{}, 1),
 	}
 
 	s.handlers.controllerService = s
@@ -120,7 +120,7 @@ func (s *Service) Open() error {
 func (s *Service) Handle(result interface{}, curve interface{}) {
 	pkg := HandlerPackage{
 		Result: result,
-		Curve: curve,
+		Curve:  curve,
 	}
 
 	s.handle_buffer <- pkg

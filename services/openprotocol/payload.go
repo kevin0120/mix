@@ -17,18 +17,18 @@ const (
 	MID_0010_PSET_IDS              = "0010"
 	MID_0014_PSET_SUBSCRIBE        = "0014"
 	MID_0018_PSET                  = "0018"
-	MID_0012_PSET_DETAIL_REQUEST = "0012"
-	MID_0013_PSET_DETAIL_REPLY = "0013"
+	MID_0012_PSET_DETAIL_REQUEST   = "0012"
+	MID_0013_PSET_DETAIL_REPLY     = "0013"
 	MID_0034_JOB_INFO_SUBSCRIBE    = "0034"
 	MID_0060_LAST_RESULT_SUBSCRIBE = "0060"
 	MID_7408_LAST_CURVE_SUBSCRIBE  = "7408"
 	MID_0151_IDENTIFIER_SUBSCRIBE  = "0151"
 	MID_0150_IDENTIFIER_SET        = "0150"
 	MID_0038_JOB_SELECT            = "0038"
-	MID_0064_OLD_SUBSCRIBE          = "0064"
-	MID_0065_OLD_DATA          = "0065"
+	MID_0064_OLD_SUBSCRIBE         = "0064"
+	MID_0065_OLD_DATA              = "0065"
 	MID_0130_JOB_OFF               = "0130"
-	MID_0250_SELECTOR_SUBSCRIBE = "0250"
+	MID_0250_SELECTOR_SUBSCRIBE    = "0250"
 
 	MID_0008_DATA_SUB = "0008"
 
@@ -317,10 +317,9 @@ type ResultData struct {
 	//rev6
 
 	//rev998
-	NumberOfStages int
+	NumberOfStages       int
 	NumberOfStageResults int
-	StageResult string
-
+	StageResult          string
 }
 
 func (rd *ResultData) DeserializeOld(str string) error {
@@ -492,7 +491,7 @@ func (rd *ResultData) Deserialize(str string) error {
 		return err
 	}
 
-	rd.TightingID= str[283:293]
+	rd.TightingID = str[283:293]
 
 	rd.TimeStamp = str[325:344]
 
@@ -517,18 +516,17 @@ func (rd *ResultData) Deserialize(str string) error {
 	return nil
 }
 
-
 type PSetDetail struct {
-	PSetID int
-	PSetName string
+	PSetID            int
+	PSetName          string
 	RotationDirection string
-	BatchSize int
-	TorqueMin float64
-	TorqueMax float64
-	TorqueTarget float64
-	AngleMin float64
-	AngleMax float64
-	AngleTarget float64
+	BatchSize         int
+	TorqueMin         float64
+	TorqueMax         float64
+	TorqueTarget      float64
+	AngleMin          float64
+	AngleMax          float64
+	AngleTarget       float64
 }
 
 func (p *PSetDetail) Deserialize(str string) error {

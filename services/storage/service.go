@@ -493,7 +493,7 @@ func (s *Service) CreateController(controller_sn string) (Controllers, error) {
 	}
 }
 
-func (s *Service) UpdateTightning(id int64, last_id string) (error) {
+func (s *Service) UpdateTightning(id int64, last_id string) error {
 	sql := "update `controllers` set last_id = ? where id = ?"
 	_, err := s.eng.Exec(sql,
 		last_id,

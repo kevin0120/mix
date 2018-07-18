@@ -15,8 +15,8 @@ const (
 )
 
 const (
-	STRATEGY_AD = "AD"
-	STRATEGY_AW = "AW"
+	STRATEGY_AD  = "AD"
+	STRATEGY_AW  = "AW"
 	STRATEGY_ADW = "ADW"
 )
 

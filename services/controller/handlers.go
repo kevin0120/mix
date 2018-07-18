@@ -42,10 +42,10 @@ type HandlerPkg struct {
 
 type Handlers struct {
 	controllerService *Service
-	HandlerBuf chan HandlerPkg
-	closing    chan struct{}
-	workers    int
-	wg         sync.WaitGroup
+	HandlerBuf        chan HandlerPkg
+	closing           chan struct{}
+	workers           int
+	wg                sync.WaitGroup
 }
 
 func (h *Handlers) Init(workers int) {
@@ -348,7 +348,6 @@ func (h *Handlers) Handle(controllerResult interface{}, controllerCurveFile inte
 		}
 		h.HandlerBuf <- pkg
 	}
-
 
 	h.handleResult(&model_controllerResult, &result, &workorder)
 

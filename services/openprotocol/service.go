@@ -1,6 +1,7 @@
 package openprotocol
 
 import (
+	"fmt"
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/minio"
@@ -8,7 +9,6 @@ import (
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
 	"sync/atomic"
-	"fmt"
 )
 
 type Diagnostic interface {
