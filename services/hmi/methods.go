@@ -206,6 +206,13 @@ func (m *Methods) putJobs(ctx iris.Context) {
 		ctx.WriteString(err.Error())
 		return
 	}
+
+	err = m.service.DB.InitWorkorderForJob(job.WorkorderiD)
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
 }
 
 // 根据hmi序列号以及vin或knr取得工单

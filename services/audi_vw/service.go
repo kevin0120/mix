@@ -7,15 +7,16 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/controller"
-	"github.com/masami10/rush/services/minio"
-	"github.com/masami10/rush/services/storage"
-	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/socket_listener"
 	"github.com/pkg/errors"
 
 	"io"
+	"encoding/xml"
+	"github.com/masami10/rush/services/wsnotify"
+	"github.com/masami10/rush/services/aiis"
+	"github.com/masami10/rush/services/minio"
+	"github.com/masami10/rush/services/storage"
 )
 
 const (
@@ -48,7 +49,6 @@ type Service struct {
 	WS            *wsnotify.Service
 	Aiis          *aiis.Service
 	Minio         *minio.Service
-	handlers      Handlers
 	wg            sync.WaitGroup
 	closing       chan struct{}
 	handle_buffer chan string
@@ -68,12 +68,10 @@ func NewService(c Config, d Diagnostic, parent *controller.Service) *Service {
 		diag:     d,
 		wg:       sync.WaitGroup{},
 		closing:  make(chan struct{}, 1),
-		handlers: Handlers{},
 		Parent:   parent,
 	}
 
 	s.handle_buffer = make(chan string, 1024)
-	s.handlers.AudiVw = s
 	lis := socket_listener.NewSocketListener(addr, s, c.ReadBufferSize*2, c.MaxConnections)
 	s.listener = lis
 	s.configValue.Store(c)
@@ -121,13 +119,8 @@ func (p *Service) Open() error {
 		}
 	}
 
-	p.handlers.Init(p.config().Workers)
-
-	for i := 0; i < p.config().Workers; i++ {
-		p.wg.Add(1)
-		go p.HandleProcess()
-		p.diag.Debug(fmt.Sprintf("init handle process:%d", i+1))
-	}
+	p.wg.Add(1)
+	go p.HandleProcess()
 
 	return nil
 }
@@ -144,12 +137,8 @@ func (p *Service) Close() error {
 			return errors.Wrapf(err, "Close Protocol %s Writer fail", p.name)
 		}
 	}
-	for i := 0; i < p.config().Workers; i++ {
-		p.closing <- struct{}{}
-		p.diag.Debug(fmt.Sprintf("Close AUDIVW Server Handler:%d", i+1))
-	}
 
-	p.handlers.Release()
+	p.closing <- struct{}{}
 
 	p.wg.Wait() //阻塞 等待全部handler关闭
 
@@ -288,7 +277,22 @@ func (p *Service) HandleProcess() {
 	for {
 		select {
 		case msg := <-p.handle_buffer:
-			p.handlers.HandleMsg(msg)
+			cvi3Result := CVI3Result{}
+			err := xml.Unmarshal([]byte(msg), &cvi3Result)
+			if err != nil {
+				p.diag.Error(fmt.Sprint("HandlerMsg err:", msg), err)
+				return
+			}
+
+			// 结果数据
+			controllerResult := ControllerResult{}
+			XML2Result(&cvi3Result, &controllerResult)
+
+			// 波形文件
+			controllerCurveFile := ControllerCurveFile{}
+			XML2Curve(&cvi3Result, &controllerCurveFile)
+
+			p.Parent.Handle(controllerResult, controllerCurveFile)
 
 		case <-p.closing:
 			p.wg.Done()

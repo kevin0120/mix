@@ -118,20 +118,10 @@ func (p *Service) JobSet(sn string, job int, workorder_id int64, user_id int64) 
 
 	c := v.(*Controller)
 
-	db_results, err := p.DB.FindResultsByWorkorder(workorder_id)
-	if err != nil {
-		return err
-	}
+	//workorder_id-user_id
+	id_info := fmt.Sprintf("%d-%d", workorder_id, user_id)
 
-	s_psets := ""
-	for _, v := range db_results {
-		s_psets += fmt.Sprintf("%d,", v.PSet)
-	}
-
-	//workorderid-userid-pset1,pset2, ...
-	id_info := fmt.Sprintf("%d-%d-%s", workorder_id, user_id, s_psets)
-
-	err = c.JobSet(id_info, job)
+	err := c.JobSet(id_info, job)
 	if err != nil {
 		// 控制器请求失败
 		return errors.New(controller.ERR_PSET_ERROR)

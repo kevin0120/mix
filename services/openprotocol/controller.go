@@ -10,6 +10,9 @@ import (
 	"net"
 	"sync/atomic"
 	"time"
+	"strings"
+	"strconv"
+	"github.com/masami10/rush/services/storage"
 )
 
 const (
@@ -81,7 +84,75 @@ func (c *Controller) handleResult(pkg *handlerPkg) {
 	result_data := ResultData{}
 	result_data.Deserialize(pkg.Body)
 
-	fmt.Printf("")
+	controllerResult := controller.ControllerResult{}
+	id_info := result_data.VIN + result_data.ID2 + result_data.ID3 + result_data.ID4
+	kvs := strings.Split(id_info, "-")
+
+	if result_data.JobID > 0 {
+		// job模式
+
+		controllerResult.Workorder_ID, _ = strconv.ParseInt(kvs[0], 10, 64)
+		controllerResult.UserID, _ = strconv.ParseInt(kvs[1], 10, 64)
+
+		db_result, err := c.Srv.DB.FindTargetResultForJob(controllerResult.Workorder_ID)
+		if err != nil {
+			c.Srv.diag.Error("FindTargetResultForJob failed", err)
+		}
+
+		controllerResult.Count = db_result.Count + 1
+		controllerResult.Result_id = db_result.ResultId
+
+	} else {
+		// pset模式
+
+		// 结果id-拧接次数-用户id
+		controllerResult.Result_id, _ = strconv.ParseInt(kvs[0], 10, 64)
+		controllerResult.Count, _ = strconv.Atoi(kvs[1])
+		controllerResult.UserID, _ = strconv.ParseInt(kvs[2], 10, 64)
+
+		db_result, err := c.Srv.DB.GetResult(controllerResult.Result_id, 0)
+		if err != nil {
+			c.Srv.diag.Error("GetResult failed", err)
+		}
+
+		controllerResult.Workorder_ID = db_result.WorkorderID
+	}
+
+	controllerResult.PSet = result_data.PSetID
+	controllerResult.Controller_SN = c.cfg.SN
+	if result_data.TighteningStatus == "0" {
+		controllerResult.Result = storage.RESULT_NOK
+	} else {
+		controllerResult.Result = storage.RESULT_OK
+	}
+
+	controllerResult.ResultValue.Mi = result_data.Torque / 100
+	controllerResult.ResultValue.Wi = result_data.Angle
+	//controllerResult.ResultValue.Ti = result_data.
+
+	switch result_data.Strategy{
+	case "01":
+		controllerResult.PSetDefine.Strategy = controller.STRATEGY_AW
+
+	case "02":
+		controllerResult.PSetDefine.Strategy = controller.STRATEGY_AW
+
+	case "03":
+		controllerResult.PSetDefine.Strategy = controller.STRATEGY_ADW
+
+	case "04":
+		controllerResult.PSetDefine.Strategy = controller.STRATEGY_AD
+	}
+
+	controllerResult.PSetDefine.Mp = result_data.TorqueMax / 100
+	controllerResult.PSetDefine.Mm = result_data.TorqueMin / 100
+	controllerResult.PSetDefine.Ma = result_data.TorqueFinalTarget / 100
+
+	controllerResult.PSetDefine.Wp = result_data.AngleMax
+	controllerResult.PSetDefine.Wm = result_data.AngleMin
+	controllerResult.PSetDefine.Wa = result_data.FinalAngleTarget
+
+	c.Srv.Parent.Handle(controllerResult,nil)
 }
 
 func (c *Controller) Start() {
@@ -483,7 +554,7 @@ func (c *Controller) CurveSubscribe() error {
 func (c *Controller) PSet(pset int, workorder_id int64, result_id int64, count int, user_id int64, channel int) (uint32, error) {
 	// 设定结果标识
 	// 结果id-拧接次数-用户id
-	err := c.IdentifierSet(fmt.Sprintf("%d-%d-%d", user_id, count, result_id))
+	err := c.IdentifierSet(fmt.Sprintf("%d-%d-%d", result_id, count, user_id))
 	if err != nil {
 		return 0, err
 	}

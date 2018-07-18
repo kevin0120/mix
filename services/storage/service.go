@@ -432,6 +432,33 @@ func (s *Service) DeleteInvalidWorkorders(keep time.Time) error {
 	}
 }
 
+func (s *Service) InitWorkorderForJob(workorder_id int64) error {
+	sql := "update `results` set result = ?, stage = ?, count = ? where x_workorder_id = ?"
+	_, err := s.eng.Exec(sql, RESULT_NONE, RESULT_STAGE_INIT, 0, workorder_id)
+
+	if err != nil {
+		return err
+	} else {
+		return nil
+	}
+
+	return nil
+}
+
+func (s *Service) FindTargetResultForJob(workorder_id int64) (Results, error) {
+	var results []Results
+
+	ss := s.eng.Alias("r").Where("r.x_workorder_id = ?", workorder_id).And("r.stage = ?", RESULT_STAGE_INIT).OrderBy("r.seq")
+
+	e := ss.Find(&results)
+
+	if e != nil {
+		return Results{}, e
+	} else {
+		return results[0], nil
+	}
+}
+
 func (s *Service) DropTableManage() error {
 	c := s.Config()
 	for {

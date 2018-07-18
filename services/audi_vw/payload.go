@@ -5,19 +5,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"github.com/masami10/rush/services/storage"
 )
-
-const (
-	RESULT_NONE = "NONE"
-	RESULT_OK   = "OK"
-	RESULT_NOK  = "NOK"
-)
-
-const (
-	RESULT_STAGE_INIT  = "init"
-	RESULT_STAGE_FINAL = "final"
-)
-
 // header
 const (
 	HEADER_LEN = 32
@@ -235,9 +224,9 @@ type ResultValue struct {
 func XML2Curve(result *CVI3Result, cur_result *ControllerCurveFile) {
 	cur_result.Result = result.PRC_SST.PAR.Result
 	if cur_result.Result == "IO" {
-		cur_result.Result = RESULT_OK
+		cur_result.Result = storage.RESULT_OK
 	} else if cur_result.Result == "NIO" {
-		cur_result.Result = RESULT_NOK
+		cur_result.Result = storage.RESULT_NOK
 	}
 
 	cur_ms := strings.Split(result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.SMP.CUR_M, " ")
@@ -279,9 +268,9 @@ func XML2Result(result *CVI3Result, rr *ControllerResult) {
 	rr.Controller_SN = result.PRC_SST.PAR.SN
 	rr.Result = result.PRC_SST.PAR.Result
 	if rr.Result == "IO" {
-		rr.Result = RESULT_OK
+		rr.Result = storage.RESULT_OK
 	} else if rr.Result == "NIO" {
-		rr.Result = RESULT_NOK
+		rr.Result = storage.RESULT_NOK
 	}
 
 	rr.PSet = result.PRC_SST.PAR.FAS.GRP.TIP.PSet
