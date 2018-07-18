@@ -82,7 +82,16 @@ func (s *Service) Open() error {
 		if err := engine.Sync2(new(Curves)); err != nil {
 			return errors.Wrapf(err, "Create Table Curves fail")
 		}
+	}
 
+	exist, err = engine.IsTableExist("Controllers")
+	if err != nil {
+		return errors.Wrapf(err, "Check Table exist %s fail", "Controllers")
+	}
+	if !exist {
+		if err := engine.Sync2(new(Controllers)); err != nil {
+			return errors.Wrapf(err, "Create Table Controllers fail")
+		}
 	}
 
 	engine.SetMaxOpenConns(c.MaxConnects) // always success
@@ -456,6 +465,44 @@ func (s *Service) FindTargetResultForJob(workorder_id int64) (Results, error) {
 		return Results{}, e
 	} else {
 		return results[0], nil
+	}
+}
+
+func (s *Service) CreateController(controller_sn string) (Controllers, error) {
+	var controller Controllers
+
+	rt, err := s.eng.Alias("c").Where("c.controller_sn = ?", controller_sn).Get(&controller)
+
+	if err != nil {
+		return controller, err
+	} else {
+		if !rt {
+			// 创建
+			controller.SN = controller_sn
+			controller.LastID = "0"
+			err = s.Store(controller)
+			if err != nil {
+				return controller, err
+			} else {
+				rt, err = s.eng.Alias("c").Where("c.controller_sn = ?", controller_sn).Get(&controller)
+				return controller, nil
+			}
+		} else {
+			return controller, nil
+		}
+	}
+}
+
+func (s *Service) UpdateTightning(id int64, last_id string) (error) {
+	sql := "update `controllers` set last_id = ? where id = ?"
+	_, err := s.eng.Exec(sql,
+		last_id,
+		id)
+
+	if err != nil {
+		return err
+	} else {
+		return nil
 	}
 }
 

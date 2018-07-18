@@ -17,13 +17,16 @@ const (
 	MID_0010_PSET_IDS              = "0010"
 	MID_0014_PSET_SUBSCRIBE        = "0014"
 	MID_0018_PSET                  = "0018"
+	MID_0012_PSET_DETAIL_REQUEST = "0012"
+	MID_0013_PSET_DETAIL_REPLY = "0013"
 	MID_0034_JOB_INFO_SUBSCRIBE    = "0034"
 	MID_0060_LAST_RESULT_SUBSCRIBE = "0060"
 	MID_7408_LAST_CURVE_SUBSCRIBE  = "7408"
 	MID_0151_IDENTIFIER_SUBSCRIBE  = "0151"
 	MID_0150_IDENTIFIER_SET        = "0150"
 	MID_0038_JOB_SELECT            = "0038"
-	MID_0064_OLD_TIGHTING          = "0064"
+	MID_0064_OLD_SUBSCRIBE          = "0064"
+	MID_0065_OLD_DATA          = "0065"
 	MID_0130_JOB_OFF               = "0130"
 	MID_0250_SELECTOR_SUBSCRIBE = "0250"
 
@@ -200,8 +203,8 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 
 		return h.Serialize() + data + end
 
-	case MID_0064_OLD_TIGHTING:
-		h.MID = MID_0064_OLD_TIGHTING
+	case MID_0064_OLD_SUBSCRIBE:
+		h.MID = MID_0064_OLD_SUBSCRIBE
 		h.LEN = LEN_HEADER + len(data)
 		h.Revision = rev
 		h.NoAck = ""
@@ -224,6 +227,17 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 
 	case MID_0008_DATA_SUB:
 		h.MID = MID_0008_DATA_SUB
+		h.LEN = LEN_HEADER + len(data)
+		h.Revision = rev
+		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + data + end
+
+	case MID_0012_PSET_DETAIL_REQUEST:
+		h.MID = MID_0012_PSET_DETAIL_REQUEST
 		h.LEN = LEN_HEADER + len(data)
 		h.Revision = rev
 		h.NoAck = ""
@@ -307,6 +321,82 @@ type ResultData struct {
 	NumberOfStageResults int
 	StageResult string
 
+}
+
+func (rd *ResultData) DeserializeOld(str string) error {
+	var err error = nil
+
+	rd.TightingID = str[2:12]
+	rd.VIN = str[14:39]
+	rd.JobID, err = strconv.Atoi(str[41:45])
+	if err != nil {
+		return err
+	}
+
+	rd.PSetID, err = strconv.Atoi(str[47:50])
+	if err != nil {
+		return err
+	}
+
+	rd.Strategy = str[52:54]
+	rd.BatchSize, err = strconv.Atoi(str[63:67])
+	if err != nil {
+		return err
+	}
+
+	rd.BatchCount, err = strconv.Atoi(str[69:73])
+	if err != nil {
+		return err
+	}
+
+	rd.TighteningStatus = str[75:76]
+	rd.BatchStatus = str[78:79]
+	rd.TorqueStatus = str[81:82]
+	rd.AngleStatus = str[84:85]
+	rd.RundownAngleStatus = str[87:88]
+	rd.CurrentMonitoringStatus = str[90:91]
+	rd.SelftapStatus = str[93:94]
+	rd.PrevailTorqueMonitoringStatus = str[96:97]
+	rd.PrevailTorqueCompensateStatus = str[99:100]
+
+	rd.Torque, err = strconv.ParseFloat(str[114:120], 64)
+	if err != nil {
+		return err
+	}
+
+	rd.Angle, err = strconv.ParseFloat(str[122:127], 64)
+	if err != nil {
+		return err
+	}
+
+	rd.RundownAngle, err = strconv.ParseFloat(str[129:134], 64)
+	if err != nil {
+		return err
+	}
+
+	rd.CurrentMonitoring, err = strconv.ParseFloat(str[136:139], 64)
+	if err != nil {
+		return err
+	}
+
+	rd.SelftapTorque, err = strconv.ParseFloat(str[141:147], 64)
+	if err != nil {
+		return err
+	}
+
+	rd.PrevailTorque, err = strconv.ParseFloat(str[149:155], 64)
+	if err != nil {
+		return err
+	}
+
+	rd.TimeStamp = str[187:206]
+	rd.TorqueUnit = str[208:209]
+	rd.ResultType = str[211:213]
+	rd.ID2 = str[215:240]
+	rd.ID3 = str[242:267]
+	rd.ID4 = str[269:294]
+
+	return nil
 }
 
 func (rd *ResultData) Deserialize(str string) error {
@@ -423,6 +513,69 @@ func (rd *ResultData) Deserialize(str string) error {
 	}
 
 	rd.StageResult = str[516:527]
+
+	return nil
+}
+
+
+type PSetDetail struct {
+	PSetID int
+	PSetName string
+	RotationDirection string
+	BatchSize int
+	TorqueMin float64
+	TorqueMax float64
+	TorqueTarget float64
+	AngleMin float64
+	AngleMax float64
+	AngleTarget float64
+}
+
+func (p *PSetDetail) Deserialize(str string) error {
+	var err error = nil
+
+	p.PSetID, err = strconv.Atoi(str[2:5])
+	if err != nil {
+		return err
+	}
+
+	p.PSetName = str[7:32]
+	p.RotationDirection = str[34:35]
+
+	p.BatchSize, err = strconv.Atoi(str[37:39])
+	if err != nil {
+		return err
+	}
+
+	p.TorqueMin, err = strconv.ParseFloat(str[41:47], 64)
+	if err != nil {
+		return err
+	}
+
+	p.TorqueMax, err = strconv.ParseFloat(str[49:55], 64)
+	if err != nil {
+		return err
+	}
+
+	p.TorqueTarget, err = strconv.ParseFloat(str[57:63], 64)
+	if err != nil {
+		return err
+	}
+
+	p.AngleMin, err = strconv.ParseFloat(str[65:70], 64)
+	if err != nil {
+		return err
+	}
+
+	p.AngleMax, err = strconv.ParseFloat(str[72:77], 64)
+	if err != nil {
+		return err
+	}
+
+	p.AngleTarget, err = strconv.ParseFloat(str[79:84], 64)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

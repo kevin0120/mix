@@ -13,11 +13,15 @@ import (
 	"strings"
 	"strconv"
 	"github.com/masami10/rush/services/storage"
+	"sync"
 )
 
 const (
 	DAIL_TIMEOUT         = time.Duration(5 * time.Second)
 	MAX_KEEP_ALIVE_CHECK = 3
+
+	REPLY_TIMEOUT = time.Duration(300 * time.Millisecond)
+	MAX_REPLY_COUNT = 10
 )
 
 type handlerPkg struct {
@@ -34,6 +38,7 @@ type Controller struct {
 	req_timeout       time.Duration
 	Response          ResponseQueue
 	Srv               *Service
+	dbController	  *storage.Controllers
 	buffer            chan []byte
 	closing           chan chan struct{}
 	handlerBuf        chan handlerPkg
@@ -58,6 +63,10 @@ func NewController(c Config) Controller {
 	return cont
 }
 
+func (c *Controller) LoadController(controller *storage.Controllers) {
+	c.dbController = controller
+}
+
 func (c *Controller) handlerProcess() {
 	for {
 		select {
@@ -72,17 +81,53 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 
 	switch pkg.Header.MID {
 	case MID_0061_LAST_RESULT:
-		// 处理结果
-		c.handleResult(pkg)
+		// 结果数据
+
+		result_data := ResultData{}
+		result_data.Deserialize(pkg.Body)
+		c.handleResult(&result_data)
+
+	case MID_0065_OLD_DATA:
+		// 历史结果数据
+
+		result_data := ResultData{}
+		result_data.DeserializeOld(pkg.Body)
+
+		flag := c.Response.get(MID_0064_OLD_SUBSCRIBE)
+
+		if flag != nil {
+			defer c.Response.remove(MID_0064_OLD_SUBSCRIBE)
+			c.Response.Add(MID_0065_OLD_DATA, result_data)
+		} else {
+			// 处理历史数据
+			pset_detail, err := c.GetPSetDetail(result_data.PSetID)
+			if err == nil {
+				result_data.TorqueMin = pset_detail.TorqueMin
+				result_data.TorqueMax = pset_detail.TorqueMax
+				result_data.TorqueFinalTarget = pset_detail.TorqueTarget
+				result_data.AngleMax = pset_detail.AngleMax
+				result_data.AngleMin = pset_detail.AngleMin
+				result_data.FinalAngleTarget = pset_detail.AngleTarget
+			}
+
+			c.handleResult(&result_data)
+		}
+
+	case MID_0013_PSET_DETAIL_REPLY:
+		// pset详细数据
+		pset_detail := PSetDetail{}
+		pset_detail.Deserialize(pkg.Body)
+
+		c.Response.Add(MID_0013_PSET_DETAIL_REPLY, pset_detail)
 
 	case MID_7410_LAST_CURVE:
 		// 处理波形
 	}
 }
 
-func (c *Controller) handleResult(pkg *handlerPkg) {
-	result_data := ResultData{}
-	result_data.Deserialize(pkg.Body)
+func (c *Controller) handleResult(result_data *ResultData) {
+
+	c.Srv.DB.UpdateTightning(c.dbController.Id, result_data.TightingID)
 
 	controllerResult := controller.ControllerResult{}
 	id_info := result_data.VIN + result_data.ID2 + result_data.ID3 + result_data.ID4
@@ -170,6 +215,10 @@ func (c *Controller) Protocol() string {
 
 func (c *Controller) Connect() error {
 	c.StatusValue.Store(controller.STATUS_OFFLINE)
+	c.Response = ResponseQueue{
+		Results: map[string]interface{}{},
+		mtx: sync.Mutex{},
+	}
 
 	for {
 		err := c.w.Connect(DAIL_TIMEOUT)
@@ -192,12 +241,71 @@ func (c *Controller) Connect() error {
 	c.ResultSubcribe()
 	c.JobInfoSubscribe()
 	//c.DataSubscribeCurve()
-
 	// 启动发送
-	c.lastResult()
 	go c.manage()
 
+	go c.SolveOldResults()
+
 	return nil
+}
+
+
+func (c *Controller) GetPSetDetail(pset int) (PSetDetail, error) {
+	var obj_pset_detail PSetDetail
+
+	if c.Status() == controller.STATUS_OFFLINE {
+		return obj_pset_detail, fmt.Errorf("%s", controller.STATUS_OFFLINE)
+	}
+
+	pset_detail := GeneratePackage(MID_0012_PSET_DETAIL_REQUEST, "002", fmt.Sprintf("%03d", pset), DEFAULT_MSG_END)
+	c.Write([]byte(pset_detail))
+
+	var reply interface{} = nil
+	for i := 0; i < MAX_REPLY_COUNT; i++{
+		reply = c.Response.get(MID_0013_PSET_DETAIL_REPLY)
+		if reply != nil {
+			break
+		}
+
+		time.Sleep(REPLY_TIMEOUT)
+	}
+
+	if reply == nil {
+		return obj_pset_detail, fmt.Errorf("%s", "timeout")
+	}
+
+	return reply.(PSetDetail), nil
+}
+
+func (c *Controller) SolveOldResults() {
+	c.Response.Add(MID_0064_OLD_SUBSCRIBE, MID_0064_OLD_SUBSCRIBE)
+	c.getOldResult(0)
+
+	var last_result interface{} = nil
+	for i := 0; i < MAX_REPLY_COUNT; i++{
+		last_result = c.Response.get(MID_0065_OLD_DATA)
+		if last_result != nil {
+			break
+		}
+
+		time.Sleep(REPLY_TIMEOUT)
+	}
+
+	if last_result == nil {
+		return
+	}
+
+	obj_last_result := last_result.(ResultData)
+
+	if obj_last_result.TightingID != c.dbController.LastID {
+		start_id, _ := strconv.ParseInt(c.dbController.LastID, 10, 64)
+		end_id, _ := strconv.ParseInt(obj_last_result.TightingID, 10, 64)
+
+		for i := start_id + 1; i <= end_id; i++ {
+			c.getOldResult(i)
+		}
+
+	}
 }
 
 func (c *Controller) KeepAliveCount() int32 {
@@ -416,12 +524,12 @@ func (c *Controller) manage() {
 	}
 }
 
-func (c *Controller) lastResult() error {
+func (c *Controller) getOldResult(last_id int64) error {
 	if c.Status() == controller.STATUS_OFFLINE {
 		return errors.New("status offline")
 	}
 
-	s_last_result := GeneratePackage(MID_0064_OLD_TIGHTING, "006", fmt.Sprintf("%010d", 0), DEFAULT_MSG_END)
+	s_last_result := GeneratePackage(MID_0064_OLD_SUBSCRIBE, "006", fmt.Sprintf("%010d", last_id), DEFAULT_MSG_END)
 
 	c.Write([]byte(s_last_result))
 

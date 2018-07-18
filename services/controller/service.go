@@ -19,6 +19,7 @@ type Controller interface {
 	Close() error
 	Status() string
 	Protocol() string
+	LoadController(controller *storage.Controllers)
 }
 
 type Protocol interface {
@@ -86,6 +87,15 @@ func NewService(cs Configs, d Diagnostic, pAudi Protocol, pOpenprotocol Protocol
 	return s, nil
 }
 
+func (s *Service) InitControllers() {
+	for k, v := range s.Controllers {
+		c, err := s.DB.CreateController(k)
+		if err == nil {
+			v.LoadController(&c)
+		}
+	}
+}
+
 func (s *Service) Write(serialNo string, buf []byte) error {
 
 	controller := s.protocols[serialNo]
@@ -101,6 +111,8 @@ func (s *Service) Open() error {
 		go s.HandleProcess()
 		s.diag.Debug(fmt.Sprintf("init handle process:%d", i+1))
 	}
+
+	s.InitControllers()
 
 	return nil
 }

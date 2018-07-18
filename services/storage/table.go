@@ -66,3 +66,9 @@ type Curves struct {
 	HasUpload  bool      `xorm:"bool 'has_upload'"`
 	UpdateTime time.Time `xorm:"datetime 'update_time'"`
 }
+
+type Controllers struct {
+	Id         int64     `xorm:"pk autoincr notnull 'id'"`
+	SN		   string    `xorm:"varchar(128) 'controller_sn'"`
+	LastID	   string    `xorm:"varchar(128) 'last_id'"`
+}

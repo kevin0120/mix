@@ -3,18 +3,18 @@ package openprotocol
 import "sync"
 
 type ResponseQueue struct {
-	Results map[string]string
+	Results map[string]interface{}
 	mtx     sync.Mutex
 }
 
-func (q *ResponseQueue) Add(mid string, msg string) {
+func (q *ResponseQueue) Add(mid string, msg interface{}) {
 	defer q.mtx.Unlock()
 
 	q.mtx.Lock()
 	q.Results[mid] = msg
 }
 
-func (q *ResponseQueue) update(mid string, msg string) {
+func (q *ResponseQueue) update(mid string, msg interface{}) {
 	defer q.mtx.Unlock()
 
 	q.mtx.Lock()
@@ -31,9 +31,14 @@ func (q *ResponseQueue) remove(mid string) {
 	delete(q.Results, mid)
 }
 
-func (q *ResponseQueue) get(mid string) string {
+func (q *ResponseQueue) get(mid string) interface{} {
 	defer q.mtx.Unlock()
 
 	q.mtx.Lock()
-	return q.Results[mid]
+	m, e := q.Results[mid]
+	if e {
+		return m
+	} else {
+		return nil
+	}
 }

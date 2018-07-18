@@ -11,6 +11,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	"github.com/masami10/rush/services/storage"
 )
 
 const (
@@ -84,6 +85,8 @@ func (c *Controller) Status() string {
 
 	return c.StatusValue.Load().(string)
 }
+
+func (c *Controller) LoadController(controller *storage.Controllers) {}
 
 func (c *Controller) updateStatus(status string) {
 
