@@ -19,8 +19,8 @@ const (
 	MID_0018_PSET                  = "0018"
 	MID_0012_PSET_DETAIL_REQUEST   = "0012"
 	MID_0013_PSET_DETAIL_REPLY     = "0013"
-	MID_0010_PSET_LIST_REQUEST = "0010"
-	MID_0011_PSET_LIST_REPLY = "0011"
+	MID_0010_PSET_LIST_REQUEST     = "0010"
+	MID_0011_PSET_LIST_REPLY       = "0011"
 	MID_0034_JOB_INFO_SUBSCRIBE    = "0034"
 	MID_0060_LAST_RESULT_SUBSCRIBE = "0060"
 	MID_7408_LAST_CURVE_SUBSCRIBE  = "7408"
@@ -41,8 +41,13 @@ const (
 )
 
 const (
-	ROTATION_CW = "CW"
+	ROTATION_CW  = "CW"
 	ROTATION_CCW = "CCW"
+)
+
+const (
+	MODE_PSET = "pset"
+	MODE_JOB  = "job"
 )
 
 const (
@@ -524,16 +529,16 @@ func (rd *ResultData) Deserialize(str string) error {
 }
 
 type PSetDetail struct {
-	PSetID            int				`json:"pset"`
-	PSetName          string			`json:"pset_name"`
-	RotationDirection string			`json:"rotation_direction"`
-	BatchSize         int				`json:"batch_size"`
-	TorqueMin         float64			`json:"torque_min"`
-	TorqueMax         float64			`json:"torque_max"`
-	TorqueTarget      float64			`json:"torque_target"`
-	AngleMin          float64			`json:"angle_min"`
-	AngleMax          float64			`json:"angle_max"`
-	AngleTarget       float64			`json:"angle_target"`
+	PSetID            int     `json:"pset"`
+	PSetName          string  `json:"pset_name"`
+	RotationDirection string  `json:"rotation_direction"`
+	BatchSize         int     `json:"batch_size"`
+	TorqueMin         float64 `json:"torque_min"`
+	TorqueMax         float64 `json:"torque_max"`
+	TorqueTarget      float64 `json:"torque_target"`
+	AngleMin          float64 `json:"angle_min"`
+	AngleMax          float64 `json:"angle_max"`
+	AngleTarget       float64 `json:"angle_target"`
 }
 
 func (p *PSetDetail) Deserialize(str string) error {
@@ -600,7 +605,7 @@ func (p *PSetDetail) Deserialize(str string) error {
 }
 
 type PSetList struct {
-	num int
+	num   int
 	psets []int
 }
 
@@ -611,8 +616,8 @@ func (p *PSetList) Deserialize(str string) error {
 		return err
 	}
 
-	for i := 0; i < p.num; i++{
-		pset, _ := strconv.Atoi(str[(i + 1) * 3:(i + 1) * 3 + 3])
+	for i := 0; i < p.num; i++ {
+		pset, _ := strconv.Atoi(str[(i+1)*3 : (i+1)*3+3])
 		p.psets = append(p.psets, pset)
 	}
 

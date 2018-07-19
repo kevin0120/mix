@@ -44,6 +44,7 @@ type Controller struct {
 	handlerBuf        chan handlerPkg
 	keepaliveDeadLine atomic.Value
 	protocol          string
+	Mode              atomic.Value
 }
 
 func NewController(c Config) Controller {
@@ -127,7 +128,7 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 
 		c.Response.update(MID_0011_PSET_LIST_REPLY, pset_list)
 
-	//case MID_7410_LAST_CURVE:
+		//case MID_7410_LAST_CURVE:
 		// 处理波形
 	}
 }
@@ -245,6 +246,7 @@ func (c *Controller) Connect() error {
 
 	c.startComm()
 
+	c.JobOff("0")
 	c.PSetSubscribe()
 	//c.CurveSubscribe()
 	c.SelectorSubscribe()
@@ -605,6 +607,12 @@ func (c *Controller) JobOff(off string) error {
 
 	c.Write([]byte(s_off))
 
+	if off == "0" {
+		c.Mode.Store(MODE_PSET)
+	} else {
+		c.Mode.Store(MODE_JOB)
+	}
+
 	return nil
 }
 
@@ -708,6 +716,11 @@ func (c *Controller) CurveSubscribe() error {
 
 func (c *Controller) PSet(pset int, workorder_id int64, result_id int64, count int, user_id int64, channel int) (uint32, error) {
 	// 设定结果标识
+
+	if c.Mode.Load().(string) != MODE_PSET {
+		return 0, errors.New("current mode is not pset")
+	}
+
 	// 结果id-拧接次数-用户id
 	err := c.IdentifierSet(fmt.Sprintf("%d-%d-%d", result_id, count, user_id))
 	if err != nil {
@@ -724,6 +737,10 @@ func (c *Controller) PSet(pset int, workorder_id int64, result_id int64, count i
 }
 
 func (c *Controller) JobSet(id_info string, job int) error {
+
+	if c.Mode.Load().(string) != MODE_JOB {
+		return errors.New("current mode is not job")
+	}
 
 	err := c.IdentifierSet(id_info)
 	if err != nil {

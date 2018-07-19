@@ -41,6 +41,84 @@
             "description": "设置失败"
           }
         }
+      },
+      "get": {
+        "tags": [
+          "HMI"
+        ],
+        "summary": "取得控制器pset列表",
+        "description": "取得控制器pset列表",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "controller_sn",
+            "in": "query",
+            "description": "控制器序列号",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "设置成功",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          },
+          "400": {
+            "description": "设置失败"
+          }
+        }
+      }
+    },
+    "/pset-detail": {
+      "get": {
+        "tags": [
+          "HMI"
+        ],
+        "summary": "取得控制器pset详情",
+        "description": "取得控制器pset详情",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "controller_sn",
+            "in": "query",
+            "description": "控制器序列号",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "pset",
+            "in": "query",
+            "description": "pset程序号",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "设置成功",
+            "schema": {
+              "$ref": "#/definitions/PsetDetail"
+            }
+          },
+          "400": {
+            "description": "设置失败"
+          }
+        }
       }
     },
     "/jobs": {
@@ -75,13 +153,13 @@
         }
       }
     },
-    "/enable-job-mode": {
+    "/controller-mode": {
       "put": {
         "tags": [
           "HMI"
         ],
-        "summary": "启用job模式",
-        "description": "启用job模式",
+        "summary": "控制模式设置(pset模式/job模式)",
+        "description": "控制模式设置",
         "consumes": [
           "application/json"
         ],
@@ -379,7 +457,7 @@
       "type": "object",
       "properties": {
         "pset": {
-          "type": "number",
+          "type": "integer",
           "description": "程序号",
           "example": 1
         },
@@ -406,6 +484,65 @@
         "user_id": {
           "type": "integer",
           "description": "用户id",
+          "example": 1
+        }
+      }
+    },
+    "PsetDetail": {
+      "type": "object",
+      "properties": {
+        "pset": {
+          "type": "integer",
+          "description": "程序号",
+          "example": 1
+        },
+        "pset_name": {
+          "type": "string",
+          "description": "pset名称",
+          "example": "拧紧程序"
+        },
+        "rotation_direction": {
+          "type": "string",
+          "description": "拧紧方向",
+          "example": "CW",
+          "enum": [
+            "CW",
+            "CCW"
+          ]
+        },
+        "batch_size": {
+          "type": "integer",
+          "description": "批次数量",
+          "example": 1
+        },
+        "torque_min": {
+          "type": "number",
+          "description": "最小扭矩",
+          "example": 1
+        },
+        "torque_max": {
+          "type": "number",
+          "description": "最大扭矩",
+          "example": 1
+        },
+        "torque_target": {
+          "type": "number",
+          "description": "目标扭矩",
+          "example": 1
+        },
+        "angle_min": {
+          "type": "number",
+          "description": "最小角度",
+          "example": 1
+        },
+        "angle_max": {
+          "type": "number",
+          "description": "最大角度",
+          "example": 1
+        },
+        "angle_target": {
+          "type": "number",
+          "description": "目标角度",
           "example": 1
         }
       }
@@ -438,10 +575,14 @@
     "jobmode": {
       "type": "object",
       "properties": {
-        "enable": {
-          "type": "boolean",
-          "description": "是否启用",
-          "example": true
+        "mode": {
+          "type": "string",
+          "description": "控制模式",
+          "example": "pset",
+          "enum": [
+            "pset",
+            "job"
+          ]
         },
         "controller_sn": {
           "type": "string",

@@ -6,9 +6,9 @@ import (
 	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/odoo"
+	"github.com/masami10/rush/services/openprotocol"
 	"github.com/masami10/rush/services/wsnotify"
 	"strconv"
-	"github.com/masami10/rush/services/openprotocol"
 )
 
 const (
@@ -227,7 +227,7 @@ func (m *Methods) enableJobMode(ctx iris.Context) {
 	switch c.Protocol() {
 	case controller.OPENPROTOCOL:
 		flag := true
-		if mode.Mode == MODE_PSET{
+		if mode.Mode == openprotocol.MODE_PSET {
 			flag = false
 		}
 		err = m.service.OpenProtocol.JobOFF(mode.Controller_SN, flag)

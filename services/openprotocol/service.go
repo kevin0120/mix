@@ -93,17 +93,13 @@ func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64,
 		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
 	}
 
-	if v.Status() == controller.STATUS_OFFLINE {
-		// 控制器离线
-		return errors.New(string(controller.STATUS_OFFLINE))
-	}
-
 	c := v.(*Controller)
+
 	// 设定pset并判断控制器响应
 	_, err := c.PSet(pset, workorder_id, result_id, count, user_id, c.cfg.ToolChannel)
 	if err != nil {
 		// 控制器请求失败
-		return errors.New(controller.ERR_PSET_ERROR)
+		return err
 	}
 
 	return nil
@@ -124,7 +120,7 @@ func (p *Service) JobSet(sn string, job int, workorder_id int64, user_id int64) 
 	err := c.JobSet(id_info, job)
 	if err != nil {
 		// 控制器请求失败
-		return errors.New(controller.ERR_PSET_ERROR)
+		return err
 	}
 
 	return nil

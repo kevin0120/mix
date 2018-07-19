@@ -1,692 +1,91 @@
-swagger: '2.0'
-info:
-  version: 0.0.1
-  title: Master PC API
-  description: 工位HMI调用
-host: '172.17.0.1:8082'
-basePath: /rush/v1
-schemes:
-  - http
-paths:
-  /psets:
-    put:
-      tags:
-        - HMI
-      summary: 设定拧接程序
-      description: '设定拧接程序,第一次拧接时(调用成功会返回result_id)，不用传result_id和次数。后续拧接时需要传result_id和拧接次数'
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - in: body
-          name: body
-          schema:
-            $ref: '#/definitions/pset'
-      responses:
-        '200':
-          description: 设置成功
-        '400':
-          description: 设置失败
-      
-    get:
-      tags:
-        - HMI
-      summary: 取得控制器pset列表
-      description: 取得控制器pset列表
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - name: controller_sn
-          in: query
-          description: 控制器序列号
-          type: string
-          required: true
-      responses:
-        '200':
-          description: 设置成功
-          schema:
-            type: array
-            items:
-              type: integer
-            
-        '400':
-          description: 设置失败
-          
-  /pset-detail:
-    get:
-      tags:
-        - HMI
-      summary: 取得控制器pset详情
-      description: 取得控制器pset详情
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - name: controller_sn
-          in: query
-          description: 控制器序列号
-          type: string
-          required: true
-        - name: pset
-          in: query
-          description: pset程序号
-          type: integer
-          required: true
-      responses:
-        '200':
-          description: 设置成功
-          schema:
-            $ref: '#/definitions/PsetDetail'
-            
-        '400':
-          description: 设置失败
-          
-  /jobs:
-    put:
-      tags:
-        - HMI
-      summary: 设定装配过程
-      description: 设定装配过程
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - in: body
-          name: body
-          schema:
-            $ref: '#/definitions/job'
-      responses:
-        '200':
-          description: 设置成功
-        '400':
-          description: 设置失败
-  /controller-mode:
-    put:
-      tags:
-        - HMI
-      summary: 控制模式设置(pset模式/job模式)
-      description: 控制模式设置
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - in: body
-          name: body
-          schema:
-            $ref: '#/definitions/jobmode'
-      responses:
-        '200':
-          description: 设置成功
-        '400':
-          description: 设置失败
-  /workorder:
-    get:
-      tags:
-        - HMI
-      summary: 根据hmi序列号以及vin或knr取得工单
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - name: hmi_sn
-          in: query
-          description: hmi序列号
-          type: string
-          required: true
-        - name: code
-          in: query
-          description: 车辆识别号或车辆装配代码
-          type: string
-          required: true
-      responses:
-        '200':
-          description: 返回工单
-          schema:
-            $ref: '#/definitions/workorder'
-        '400':
-          description: 获取失败
-  /hmi-results:
-    get:
-      tags:
-        - HMI
-      summary: 根据结果id和拧接次数取得对应结果
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - name: result_id
-          in: query
-          description: 结果id
-          type: number
-          required: true
-        - name: count
-          in: query
-          description: 拧接次数
-          type: number
-          required: true
-      responses:
-        '200':
-          description: 返回结果
-          schema:
-            $ref: '#/definitions/hmi_result'
-        '400':
-          description: 请求参数错误
-        '404':
-          description: 结果不存在
-  /workorders:
-    post:
-      tags:
-        - ODOO
-      summary: 创建本地工单
-      description: 创建本地工单
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - name: body
-          in: body
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/WorkorderPost'
-      responses:
-        '201':
-          description: 成功
-        '400':
-          description: 获取失败
-  /results:
-    get:
-      tags:
-        - ODOO
-      summary: 查询拧接结果
-      description: 调用此API能够查询缓存在MasterPC中的结果
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - name: has_upload
-          in: query
-          description: 是否上传
-          type: string
-          required: true
-        - name: result
-          in: query
-          description: 结果值列表
-          type: string
-          required: true
-      responses:
-        '200':
-          description: 返回控制器结果
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/result'
-        '400':
-          description: 获取失败
-  '/results/{id}':
-    patch:
-      tags:
-        - ODOO
-      summary: 修改结果上传标识
-      description: 调用此API结果的上传标识
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - name: id
-          in: path
-          description: 结果id
-          type: integer
-          required: true
-        - name: body
-          in: body
-          schema:
-            $ref: '#/definitions/ResultPatch'
-      responses:
-        '200':
-          description: 返回控制器结果
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/result'
-        '400':
-          description: 获取失败
-  /controller-status:
-    get:
-      tags:
-        - HMI
-      summary: 取得控制器状态
-      description: 调用此API会返回Master PC下所有控制器的状态
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - name: controller_sn
-          in: query
-          description: 控制器序列号
-          type: string
-      responses:
-        '200':
-          description: 返回控制器状态
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/status'
-        '400':
-          description: 获取失败
-  /healthz:
-    get:
-      tags:
-        - HMI
-      summary: 心跳检测
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      responses:
-        '204':
-          description: 成功
-definitions:
-  pset:
-    type: object
-    properties:
-      pset:
-        type: integer
-        description: 程序号
-        example: 1
-      controller_sn:
-        type: string
-        description: 控制器序列号
-        example: '0001'
-      gun_sn:
-        type: string
-        description: 拧紧枪序列号
-        example: '123456'
-      result_id:
-        type: integer
-        description: 结果id
-        example: 1
-      count:
-        type: integer
-        description: 第n次拧接(从1开始)
-        example: 1
-      user_id:
-        type: integer
-        description: 用户id
-        example: 1
-        
-  PsetDetail:
-    type: object
-    properties:
-      pset:
-        type: integer
-        description: 程序号
-        example: 1
-      pset_name:
-        type: string
-        description: pset名称
-        example: '拧紧程序'
-      rotation_direction:
-        type: string
-        description: 拧紧方向
-        example: 'CW'
-        enum: 
-        - CW
-        - CCW
-      batch_size:
-        type: integer
-        description: 批次数量
-        example: 1
-      torque_min:
-        type: number
-        description: 最小扭矩
-        example: 1
-      torque_max:
-        type: number
-        description: 最大扭矩
-        example: 1
-      torque_target:
-        type: number
-        description: 目标扭矩
-        example: 1
-      angle_min:
-        type: number
-        description: 最小角度
-        example: 1
-      angle_max:
-        type: number
-        description: 最大角度
-        example: 1
-      angle_target:
-        type: number
-        description: 目标角度
-        example: 1
-        
-  job:
-    type: object
-    properties:
-      job_id:
-        type: number
-        description: 装配过程号
-        example: 1
-      controller_sn:
-        type: string
-        description: 控制器序列号
-        example: '0001'
-      workorder_id:
-        type: integer
-        description: 用户id
-        example: 1
-      user_id:
-        type: integer
-        description: 用户id
-        example: 1
-  jobmode:
-    type: object
-    properties:
-      mode:
-        type: string
-        description: 控制模式
-        example: pset
-        enum:
-        - pset
-        - job
-      controller_sn:
-        type: string
-        description: 控制器序列号
-        example: '0001'
-  pset_define:
-    type: object
-    properties:
-      strategy:
-        type: string
-        description: 拧紧策略
-        example: AW
-      M+:
-        type: number
-        description: 最大扭矩(单位nm)
-        example: 23
-      M-:
-        type: number
-        description: 最小扭矩(单位nm)
-        example: 2
-      MS:
-        type: number
-        description: 扭矩阈值(单位nm)
-        example: 2
-      MA:
-        type: number
-        description: 目标扭矩(单位nm)
-        example: 20
-      W+:
-        type: number
-        description: 最大角度(单位grad)
-        example: 2
-      W-:
-        type: number
-        description: 最小角度(单位grad)
-        example: 2
-      WA:
-        type: number
-        description: 目标角度(单位grad)
-        example: 2
-  result_value:
-    type: object
-    properties:
-      MI:
-        type: number
-        description: 实际扭矩(单位nm)
-        example: 20
-      WI:
-        type: number
-        description: 实际角度(单位grad)
-        example: 20
-      TI:
-        type: number
-        description: 实际时间(单位ms)
-        example: 20
-  result:
-    type: object
-    properties:
-      result_id:
-        type: integer
-        description: 结果id
-        example: 1
-      workorder_id:
-        type: integer
-        description: 对应的工单id
-        example: 1
-      controller_sn:
-        type: string
-        description: 对应的控制器序列号
-        example: string
-      cur_file:
-        type: string
-        description: 对应的波形文件
-        example: cur.json
-      result:
-        type: string
-        description: '拧紧结果(OK:成功 NOK:失败)'
-        example: OK
-      dat:
-        type: string
-        description: '拧接完成时间(yyyy-mm-ddThh:mm:ss+08:00)'
-        example: '2018-04-26T08:31:02+08:00'
-      pset:
-        type: integer
-        description: 对应的程序号
-        example: 1
-      count:
-        type: integer
-        description: 拧紧次数
-        example: 1
-      pset_define:
-        description: 拧接程序定义
-        $ref: '#/definitions/pset_define'
-      result_value:
-        description: 拧接结果值
-        $ref: '#/definitions/result_value'
-  status:
-    type: object
-    properties:
-      controller_sn:
-        type: string
-        description: 控制器序列号
-        example: '123456'
-      status:
-        type: string
-        description: '控制器状态(online:在线 offline:离线)'
-        example: online
-  OrderReulst:
-    type: object
-    properties:
-      id:
-        type: integer
-        description: 结果id
-        example: 1
-      pset:
-        type: number
-        description: 程序号
-        example: 1
-      controller_sn:
-        type: string
-        description: 控制器序列号
-        example: '0001'
-      gun_sn:
-        type: string
-        description: 拧紧枪序列号
-        example: '123456'
-      offset_x:
-        type: number
-        description: 点位x坐标
-        example: 100
-      offset_y:
-        type: number
-        description: 点位y坐标
-        example: 200
-      max_redo_times:
-        type: number
-        description: 最大重试拧接次数
-        example: 3
-  workorder:
-    type: object
-    properties:
-      workorder_id:
-        type: integer
-        description: 工单id
-        example: 1
-      hmi_sn:
-        type: string
-        description: hmi序列号
-        example: '1122334455667788'
-      vin:
-        type: string
-        description: 车辆识别号
-        example: LSV2A8CA2JN508198
-      knr:
-        type: string
-        description: 车辆装配代码
-        example: '64235375'
-      long_pin:
-        type: string
-        description: long_pin
-        example: '64235375'
-      status:
-        type: string
-        description: 工单状态
-        example: ready
-      max_op_time:
-        type: number
-        description: 最大步进时间(秒)
-        example: 30
-      work_sheet:
-        type: string
-        description: 作业图片(base64编码)
-      results:
-        type: array
-        description: 结果id列表
-        items:
-          $ref: '#/definitions/OrderReulst'
-  ResultPatch:
-    type: object
-    properties:
-      has_upload:
-        type: boolean
-        description: 是否已上传
-        example: true
-  HMI:
-    type: object
-    properties:
-      id:
-        type: integer
-        description: hmi id
-        example: 1
-      uuid:
-        type: string
-        description: hmi序列号
-        example: sn
-  Point:
-    type: object
-    properties:
-      x_offset:
-        type: integer
-        description: x坐标
-        example: 1
-      y_offset:
-        type: integer
-        description: y坐标
-        example: 1
-  Worksheet:
-    type: object
-    properties:
-      content:
-        type: string
-        description: 工作图片内容
-        example: ''
-      points:
-        type: array
-        items:
-          $ref: '#/definitions/Point'
-  WorkorderPost:
-    type: object
-    properties:
-      id:
-        type: integer
-        description: 工单id
-        example: 1
-      status:
-        type: string
-        description: 工单状态
-        example: ready
-      nut_total:
-        type: number
-        description: 螺栓总数
-        example: 4
-      pset:
-        type: string
-        description: 拧接程序号
-        example: '1'
-      max_redo_times:
-        type: number
-        description: 最大重试拧接次数
-        example: 3
-      max_op_time:
-        type: number
-        description: 最大步进时间(秒)
-        example: 30
-      vin:
-        type: string
-        description: 车辆识别号
-        example: LSV2A8CA72N949198
-      knr:
-        type: string
-        description: 车辆装配代码
-        example: '6474929'
-      hmi:
-        $ref: '#/definitions/HMI'
-      worksheet:
-        $ref: '#/definitions/Worksheet'
-      result_ids:
-        type: array
-        description: 结果id列表
-        items:
-          type: integer
-  hmi_result:
-    type: object
-    properties:
-      result_id:
-        type: number
-        description: 结果id
-        example: 1
-      count:
-        type: number
-        description: 拧接次数
-        example: 1
-      result:
-        type: string
-        description: 结果值(OK/NOK)
-        example: 1
-      mi:
-        type: number
-        description: 扭矩(nm)
-        example: 1
-      wi:
-        type: number
-        description: 角度(deg)
-        example: 1
-      ti:
-        type: number
-        description: 拧接时间（ms）
-        example: 1
+hostname: localhost
+data_dir: /home/linshenqi/.rush
+serial_no: 1qaz2wsx
+doc_path: ./etc/rush/api.json
+logging:
+  file: STDERR
+  level: DEBUG
+httpd:
+  bind-address: :8082
+  log-enabled: true
+  write-tracing: false
+  shutdown-timeout: 10s
+  cors:
+    allowed-origins:
+    - '*'
+    allow-credentials: true
+    allowed-methods:
+    - 'GET'
+    - 'HEAD'
+    - 'POST'
+    - 'PUT'
+    - 'PATCH'
+    - 'OPTIONS'
+
+minio:
+  url: 127.0.0.1:9000
+  bucket: curves
+  access: minio
+  secret: minio123
+  secure: false
+  reupload_interval: 24h
+aiis:
+  urls:
+  - http://127.0.0.1:9092
+  headers:
+    Content-Type: application/json
+  result_push_url: /aiis/v1/operation.results/%d
+  push_method: PUT
+  timeout: 8s
+  push_interval: 1s
+  max_retry: 3
+odoo:
+  urls:
+  - http://127.0.0.1:8069
+  headers:
+  workorder_get_url: /api/v1/mrp.workorders?hmi=%s&code=%s&limit=1&order=production_date
+  method: GET
+  timeout: 8s
+  interval: 1s
+  max_retry: 3
+websocket:
+  route: /rush/v1/ws
+  read_buf_size: 4096
+  write_buf_size: 4096
+storage:
+  db_url: 127.0.0.1:5432
+  db_name: rush_changan
+  db_user: admin
+  db_pwd: admin
+  max_connection: 60
+  vacuum_period: 2160h0m0s
+  data_keep: 2060h
+audi/vw:
+  port: 4710
+  max_connection: 1024
+  read_buf: 65535
+  req_time_out: 300ms
+  keep_alive_period: 7s
+  workers: 4
+openprotocol:
+  keep_alive_period: 10s
+  read_buf: 65535
+  req_time_out: 300ms
+controllers:
+#- serial_no: 0001
+#  protocol: Audi/VW
+#  remote_ip: 192.168.1.101
+#  port: 4700
+#  channel: 1
+
+#- serial_no: 0002
+#  protocol: Audi/VW
+#  remote_ip: 192.168.1.102
+#  port: 4700
+#  channel: 1
+
+- serial_no: 0001
+  protocol: OpenProtocol
+  remote_ip: 192.168.1.101
+  port: 4546
+  channel: 51
