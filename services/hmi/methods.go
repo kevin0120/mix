@@ -29,7 +29,6 @@ func (m *Methods) putPSets(ctx iris.Context) {
 		// 传输结构错误
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString(err.Error())
-
 		return
 	}
 
@@ -87,6 +86,7 @@ func (m *Methods) putPSets(ctx iris.Context) {
 	if !exist {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("controller not found")
+		return
 	}
 
 	switch c.Protocol() {
@@ -122,6 +122,7 @@ func (m *Methods) getPSetList(ctx iris.Context) {
 	if !exist {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("controller not found")
+		return
 	}
 
 	var err error = nil
@@ -132,6 +133,7 @@ func (m *Methods) getPSetList(ctx iris.Context) {
 		if err != nil {
 			ctx.StatusCode(iris.StatusBadRequest)
 			ctx.WriteString(err.Error())
+			return
 		}
 
 	default:
@@ -166,12 +168,14 @@ func (m *Methods) getPSetDetail(ctx iris.Context) {
 	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("pset format error")
+		return
 	}
 
 	c, exist := m.service.ControllerService.Controllers[controller_sn]
 	if !exist {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("controller not found")
+		return
 	}
 
 	var pset_detail openprotocol.PSetDetail
@@ -181,6 +185,7 @@ func (m *Methods) getPSetDetail(ctx iris.Context) {
 		if err != nil {
 			ctx.StatusCode(iris.StatusBadRequest)
 			ctx.WriteString(err.Error())
+			return
 		}
 
 	default:
@@ -202,7 +207,6 @@ func (m *Methods) enableJobMode(ctx iris.Context) {
 		// 传输结构错误
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString(err.Error())
-
 		return
 	}
 
@@ -222,6 +226,7 @@ func (m *Methods) enableJobMode(ctx iris.Context) {
 	if !exist {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("controller not found")
+		return
 	}
 
 	switch c.Protocol() {
@@ -255,7 +260,6 @@ func (m *Methods) putJobs(ctx iris.Context) {
 		// 传输结构错误
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString(err.Error())
-
 		return
 	}
 
@@ -293,6 +297,7 @@ func (m *Methods) putJobs(ctx iris.Context) {
 	if !exist {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("controller not found")
+		return
 	}
 
 	switch c.Protocol() {
