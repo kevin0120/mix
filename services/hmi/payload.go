@@ -1,5 +1,10 @@
 package hmi
 
+const (
+	MODE_PSET = "pset"
+	MODE_JOB = "job"
+)
+
 type PSet struct {
 	Controller_SN string `json:"controller_sn"`
 	GunSN         string `json:"gun_sn"`
@@ -16,9 +21,14 @@ type Job struct {
 	UserID        int64  `json:"user_id"`
 }
 
-type EnableJobMode struct {
+type ControllerMode struct {
 	Controller_SN string `json:"controller_sn"`
-	Enable        bool   `json:"enable"`
+	Mode        string   `json:"mode"`
+}
+
+type PSetDetailRequest struct {
+	Controller_SN string `json:"controller_sn"`
+	PSet          int     `json:"pset"`
 }
 
 type Result struct {

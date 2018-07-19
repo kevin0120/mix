@@ -118,9 +118,16 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 		pset_detail := PSetDetail{}
 		pset_detail.Deserialize(pkg.Body)
 
-		c.Response.Add(MID_0013_PSET_DETAIL_REPLY, pset_detail)
+		c.Response.update(MID_0013_PSET_DETAIL_REPLY, pset_detail)
 
-	case MID_7410_LAST_CURVE:
+	case MID_0011_PSET_LIST_REPLY:
+		// pset列表
+		pset_list := PSetList{}
+		pset_list.Deserialize(pkg.Body)
+
+		c.Response.update(MID_0011_PSET_LIST_REPLY, pset_list)
+
+	//case MID_7410_LAST_CURVE:
 		// 处理波形
 	}
 }
@@ -133,7 +140,7 @@ func (c *Controller) handleResult(result_data *ResultData) {
 	id_info := result_data.VIN + result_data.ID2 + result_data.ID3 + result_data.ID4
 	kvs := strings.Split(id_info, "-")
 
-	if result_data.JobID > 0 {
+	if len(kvs) == 2 {
 		// job模式
 
 		controllerResult.Workorder_ID, _ = strconv.ParseInt(kvs[0], 10, 64)
@@ -162,6 +169,9 @@ func (c *Controller) handleResult(result_data *ResultData) {
 
 		controllerResult.Workorder_ID = db_result.WorkorderID
 	}
+
+	dat_kvs := strings.Split(result_data.TimeStamp, ":")
+	controllerResult.Dat = fmt.Sprintf("%s %s:%s:%s", dat_kvs[0], dat_kvs[1], dat_kvs[2], dat_kvs[3])
 
 	controllerResult.PSet = result_data.PSetID
 	controllerResult.Controller_SN = c.cfg.SN
@@ -249,12 +259,46 @@ func (c *Controller) Connect() error {
 	return nil
 }
 
+func (c *Controller) GetPSetList() ([]int, error) {
+	var psets []int
+	if c.Status() == controller.STATUS_OFFLINE {
+		return psets, errors.New(controller.STATUS_OFFLINE)
+	}
+
+	defer c.Response.remove(MID_0011_PSET_LIST_REPLY)
+	c.Response.Add(MID_0011_PSET_LIST_REPLY, nil)
+
+	psets_request := GeneratePackage(MID_0010_PSET_LIST_REQUEST, "001", "", DEFAULT_MSG_END)
+	c.Write([]byte(psets_request))
+
+	var reply interface{} = nil
+	for i := 0; i < MAX_REPLY_COUNT; i++ {
+		reply = c.Response.get(MID_0011_PSET_LIST_REPLY)
+		if reply != nil {
+			break
+		}
+
+		time.Sleep(REPLY_TIMEOUT)
+	}
+
+	if reply == nil {
+		return psets, errors.New(controller.ERR_NOT_FOUND)
+	}
+
+	pset_list := reply.(PSetList)
+
+	return pset_list.psets, nil
+}
+
 func (c *Controller) GetPSetDetail(pset int) (PSetDetail, error) {
 	var obj_pset_detail PSetDetail
 
 	if c.Status() == controller.STATUS_OFFLINE {
-		return obj_pset_detail, fmt.Errorf("%s", controller.STATUS_OFFLINE)
+		return obj_pset_detail, errors.New(controller.STATUS_OFFLINE)
 	}
+
+	defer c.Response.remove(MID_0013_PSET_DETAIL_REPLY)
+	c.Response.Add(MID_0013_PSET_DETAIL_REPLY, nil)
 
 	pset_detail := GeneratePackage(MID_0012_PSET_DETAIL_REQUEST, "002", fmt.Sprintf("%03d", pset), DEFAULT_MSG_END)
 	c.Write([]byte(pset_detail))
@@ -270,13 +314,17 @@ func (c *Controller) GetPSetDetail(pset int) (PSetDetail, error) {
 	}
 
 	if reply == nil {
-		return obj_pset_detail, fmt.Errorf("%s", "timeout")
+		return obj_pset_detail, errors.New(controller.ERR_NOT_FOUND)
 	}
 
 	return reply.(PSetDetail), nil
 }
 
 func (c *Controller) SolveOldResults() {
+	if c.dbController.LastID == "0" {
+		return
+	}
+
 	c.Response.Add(MID_0064_OLD_SUBSCRIBE, MID_0064_OLD_SUBSCRIBE)
 	c.getOldResult(0)
 

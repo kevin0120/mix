@@ -152,3 +152,37 @@ func (p *Service) JobOFF(sn string, off bool) error {
 
 	return nil
 }
+
+func (p *Service) GetPSetList(sn string) ([]int, error) {
+	v, exist := p.Parent.Controllers[sn]
+	if !exist {
+		// SN对应控制器不存在
+		return []int{}, errors.New(controller.ERR_CONTROLER_NOT_FOUND)
+	}
+
+	c := v.(*Controller)
+
+	pset_list, err := c.GetPSetList()
+	if err != nil {
+		return []int{}, err
+	}
+
+	return pset_list, nil
+}
+
+func (p *Service) GetPSetDetail(sn string, pset int) (PSetDetail, error) {
+	v, exist := p.Parent.Controllers[sn]
+	if !exist {
+		// SN对应控制器不存在
+		return PSetDetail{}, errors.New(controller.ERR_CONTROLER_NOT_FOUND)
+	}
+
+	c := v.(*Controller)
+
+	pset_detail, err := c.GetPSetDetail(pset)
+	if err != nil {
+		return PSetDetail{}, err
+	}
+
+	return pset_detail, nil
+}

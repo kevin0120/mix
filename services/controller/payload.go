@@ -11,6 +11,8 @@ const (
 	STATUS_OFFLINE = "offline"
 
 	ERR_CONTROLER_NOT_FOUND = "controller not found"
+	ERR_CONTROLER_TIMEOUT = "controller timeout"
+	ERR_NOT_FOUND = "not found"
 	ERR_PSET_ERROR          = "pset error"
 )
 

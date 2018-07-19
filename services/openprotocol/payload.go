@@ -3,6 +3,7 @@ package openprotocol
 import (
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -14,11 +15,12 @@ const (
 	MID_0002_START_ACK             = "0002"
 	MID_0003_STOP                  = "0003"
 	MID_0004_STOP                  = "0004"
-	MID_0010_PSET_IDS              = "0010"
 	MID_0014_PSET_SUBSCRIBE        = "0014"
 	MID_0018_PSET                  = "0018"
 	MID_0012_PSET_DETAIL_REQUEST   = "0012"
 	MID_0013_PSET_DETAIL_REPLY     = "0013"
+	MID_0010_PSET_LIST_REQUEST = "0010"
+	MID_0011_PSET_LIST_REPLY = "0011"
 	MID_0034_JOB_INFO_SUBSCRIBE    = "0034"
 	MID_0060_LAST_RESULT_SUBSCRIBE = "0060"
 	MID_7408_LAST_CURVE_SUBSCRIBE  = "7408"
@@ -36,6 +38,11 @@ const (
 	MID_7410_LAST_CURVE  = "7410"
 
 	MID_9999_ALIVE = "9999"
+)
+
+const (
+	ROTATION_CW = "CW"
+	ROTATION_CCW = "CCW"
 )
 
 const (
@@ -85,17 +92,6 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 	case MID_0001_START:
 		h.MID = MID_0001_START
 		h.LEN = LEN_HEADER
-		h.Revision = rev
-		h.NoAck = ""
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + end
-
-	case MID_0010_PSET_IDS:
-		h.MID = MID_0010_PSET_IDS
-		h.LEN = LEN_HEADER + len(data)
 		h.Revision = rev
 		h.NoAck = ""
 		h.Station = ""
@@ -246,6 +242,17 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 		h.Spare = ""
 
 		return h.Serialize() + data + end
+
+	case MID_0010_PSET_LIST_REQUEST:
+		h.MID = MID_0010_PSET_LIST_REQUEST
+		h.LEN = LEN_HEADER
+		h.Revision = rev
+		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + end
 	}
 
 	return ""
@@ -517,16 +524,16 @@ func (rd *ResultData) Deserialize(str string) error {
 }
 
 type PSetDetail struct {
-	PSetID            int
-	PSetName          string
-	RotationDirection string
-	BatchSize         int
-	TorqueMin         float64
-	TorqueMax         float64
-	TorqueTarget      float64
-	AngleMin          float64
-	AngleMax          float64
-	AngleTarget       float64
+	PSetID            int				`json:"pset"`
+	PSetName          string			`json:"pset_name"`
+	RotationDirection string			`json:"rotation_direction"`
+	BatchSize         int				`json:"batch_size"`
+	TorqueMin         float64			`json:"torque_min"`
+	TorqueMax         float64			`json:"torque_max"`
+	TorqueTarget      float64			`json:"torque_target"`
+	AngleMin          float64			`json:"angle_min"`
+	AngleMax          float64			`json:"angle_max"`
+	AngleTarget       float64			`json:"angle_target"`
 }
 
 func (p *PSetDetail) Deserialize(str string) error {
@@ -537,8 +544,16 @@ func (p *PSetDetail) Deserialize(str string) error {
 		return err
 	}
 
-	p.PSetName = str[7:32]
+	p.PSetName = strings.TrimSpace(str[7:32])
 	p.RotationDirection = str[34:35]
+
+	switch p.RotationDirection {
+	case "1":
+		p.RotationDirection = ROTATION_CW
+
+	case "2":
+		p.RotationDirection = ROTATION_CCW
+	}
 
 	p.BatchSize, err = strconv.Atoi(str[37:39])
 	if err != nil {
@@ -550,15 +565,21 @@ func (p *PSetDetail) Deserialize(str string) error {
 		return err
 	}
 
+	p.TorqueMin = p.TorqueMin / 100
+
 	p.TorqueMax, err = strconv.ParseFloat(str[49:55], 64)
 	if err != nil {
 		return err
 	}
 
+	p.TorqueMax = p.TorqueMax / 100
+
 	p.TorqueTarget, err = strconv.ParseFloat(str[57:63], 64)
 	if err != nil {
 		return err
 	}
+
+	p.TorqueTarget = p.TorqueTarget / 100
 
 	p.AngleMin, err = strconv.ParseFloat(str[65:70], 64)
 	if err != nil {
@@ -573,6 +594,26 @@ func (p *PSetDetail) Deserialize(str string) error {
 	p.AngleTarget, err = strconv.ParseFloat(str[79:84], 64)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+type PSetList struct {
+	num int
+	psets []int
+}
+
+func (p *PSetList) Deserialize(str string) error {
+	var err error = nil
+	p.num, err = strconv.Atoi(str[0:3])
+	if err != nil {
+		return err
+	}
+
+	for i := 0; i < p.num; i++{
+		pset, _ := strconv.Atoi(str[(i + 1) * 3:(i + 1) * 3 + 3])
+		p.psets = append(p.psets, pset)
 	}
 
 	return nil

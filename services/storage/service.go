@@ -464,7 +464,11 @@ func (s *Service) FindTargetResultForJob(workorder_id int64) (Results, error) {
 	if e != nil {
 		return Results{}, e
 	} else {
-		return results[0], nil
+		if len(results) > 0 {
+			return results[0], nil
+		} else {
+			return Results{}, errors.New("result not found")
+		}
 	}
 }
 
