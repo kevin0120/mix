@@ -103,13 +103,13 @@ class OperationView(http.Controller):
             operations = env['mrp.routing.workcenter'].search([])
             vals = []
             for operation in operations:
-                _points = []
-                for point in operation.operation_point_ids:
-                    _points.append({
-                        'sequence': point.sequence,
-                        'x_offset': point.x_offset,
-                        'y_offset': point.y_offset
-                    })
+                # _points = []
+                # for point in operation.operation_point_ids:
+                #     _points.append({
+                #         'sequence': point.sequence,
+                #         'x_offset': point.x_offset,
+                #         'y_offset': point.y_offset
+                #     })
                 vals.append({
                     'id': operation.id,
                     'name': u"[{0}]{1}@{2}/{3}".format(operation.name, operation.group_id.code, operation.workcenter_id.name, operation.routing_id.name),
