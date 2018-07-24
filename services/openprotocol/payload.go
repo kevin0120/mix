@@ -2,6 +2,7 @@ package openprotocol
 
 import (
 	"fmt"
+	"github.com/imroc/biu"
 	"strconv"
 	"strings"
 )
@@ -263,6 +264,41 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 	return ""
 }
 
+var result_errors = []string{
+	"Rundown angle max shut off",
+	"Rundown angle min shut off",
+	"Torque max shut off",
+	"Angle max shut off",
+	"Selftap torque max shut off",
+	"Selftap torque min shut off",
+	"Prevail torque max shut off",
+	"Prevail torque min shut off",
+	"Prevail torque compensate overflow",
+	"Current monitoring max shut off",
+	"Post view torque min torque shut off",
+	"Post view torque max torque shut off",
+	"Post view torque Angle too small",
+	"Trigger lost",
+	"Torque less than target",
+	"Tool hot",
+	"Multistage abort",
+	"Rehit",
+	"DS measure failed",
+	"Current limit reached",
+	"EndTime out shutoff",
+	"Remove fastener limit exceeded",
+	"Disable drive",
+	"Transducer lost",
+	"Transducer shorted",
+	"Transducer corrupt",
+	"Sync timeout",
+	"Dynamic current monitoring min",
+	"Dynamic current monitoring max",
+	"Angle max monitor",
+	"Yield nut off",
+	"Yield too few samples",
+}
+
 type ResultData struct {
 
 	//rev2
@@ -285,7 +321,7 @@ type ResultData struct {
 	SelftapStatus                 string
 	PrevailTorqueMonitoringStatus string
 	PrevailTorqueCompensateStatus string
-	TighteningErrorStatus         []byte
+	TighteningErrorStatus         string
 	TorqueMin                     float64
 	TorqueMax                     float64
 	TorqueFinalTarget             float64
@@ -458,10 +494,21 @@ func (rd *ResultData) Deserialize(str string) error {
 	rd.PrevailTorqueMonitoringStatus = str[121:122]
 	rd.PrevailTorqueCompensateStatus = str[124:125]
 
-	//error_status := str[127:137]
-	//for _, v := range error_status {
-	//	rd.TighteningErrorStatus = append(rd.TighteningErrorStatus, v)
-	//}
+	error_status := str[127:137]
+	error_value, err := strconv.ParseInt(error_status, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	b_error := biu.ToBinaryString(error_value)
+	l := len(b_error)
+	for i := 0; i < l; i++ {
+		v := b_error[l-1-i]
+
+		if v == '1' {
+			rd.TighteningStatus += result_errors[i] + ","
+		}
+	}
 
 	rd.TorqueMin, err = strconv.ParseFloat(str[139:145], 64)
 	if err != nil {

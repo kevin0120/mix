@@ -285,11 +285,11 @@ func (p *Service) HandleProcess() {
 			}
 
 			// 结果数据
-			controllerResult := ControllerResult{}
+			controllerResult := controller.ControllerResult{}
 			XML2Result(&cvi3Result, &controllerResult)
 
 			// 波形文件
-			controllerCurveFile := ControllerCurveFile{}
+			controllerCurveFile := controller.ControllerCurveFile{}
 			XML2Curve(&cvi3Result, &controllerCurveFile)
 
 			p.Parent.Handle(controllerResult, controllerCurveFile)

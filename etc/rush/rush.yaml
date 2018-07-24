@@ -76,7 +76,7 @@ controllers:
 #  protocol: Audi/VW
 #  remote_ip: 192.168.1.101
 #  port: 4700
-#  channel: 1
+#  channel: 51
 
 #- serial_no: 0002
 #  protocol: Audi/VW

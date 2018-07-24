@@ -54,6 +54,8 @@ type ControllerResult struct {
 	PSetDefine    PSetDefine `json:"pset_define"`
 
 	ResultValue ResultValue `json:"result_value"`
+
+	ExceptionReason string
 }
 
 type PSetDefine struct {

@@ -208,6 +208,8 @@ func (c *Controller) handleResult(result_data *ResultData) {
 	controllerResult.PSetDefine.Wm = result_data.AngleMin
 	controllerResult.PSetDefine.Wa = result_data.FinalAngleTarget
 
+	controllerResult.ExceptionReason = result_data.TighteningStatus
+
 	c.Srv.Parent.Handle(controllerResult, nil)
 }
 

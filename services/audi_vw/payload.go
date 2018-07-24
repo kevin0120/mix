@@ -3,6 +3,7 @@ package audi_vw
 import (
 	"encoding/xml"
 	"fmt"
+	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/storage"
 	"strconv"
 	"strings"
@@ -176,53 +177,7 @@ func GeneratePacket(seq uint32, typ uint, xmlpacket string) (string, uint32) {
 	return fmt.Sprintf("%s%s", headerStr, xmlpacket), header.MID
 }
 
-type ControllerCurve struct {
-	ResultID  int64
-	CurveFile string
-	CurveData string
-	Count     int
-}
-
-type ControllerCurveFile struct {
-	Result string    `json:"result"`
-	CUR_M  []float64 `json:"cur_m"`
-	CUR_W  []float64 `json:"cur_w"`
-	CUR_T  []float64 `json:"cur_t"`
-}
-
-type ControllerResult struct {
-	Result_id     int64      `json:"result_id"`
-	Controller_SN string     `json:"controller_sn"`
-	Workorder_ID  int64      `json:"workorder_id"`
-	UserID        int64      `json:"user_id"`
-	CurFile       string     `json:"cur_file"`
-	Result        string     `json:"result"`
-	Dat           string     `json:"dat"`
-	PSet          int        `json:"pset"`
-	Count         int        `json:"count"`
-	PSetDefine    PSetDefine `json:"pset_define"`
-
-	ResultValue ResultValue `json:"result_value"`
-}
-
-type PSetDefine struct {
-	Strategy string  `json:"strategy"`
-	Mp       float64 `json:"M+"`
-	Mm       float64 `json:"M-"`
-	Ms       float64 `json:"MS"`
-	Ma       float64 `json:"MA"`
-	Wp       float64 `json:"W+"`
-	Wm       float64 `json:"W-"`
-	Wa       float64 `json:"WS"`
-}
-
-type ResultValue struct {
-	Mi float64 `json:"MI"`
-	Wi float64 `json:"WI"`
-	Ti float64 `json:"TI"`
-}
-
-func XML2Curve(result *CVI3Result, cur_result *ControllerCurveFile) {
+func XML2Curve(result *CVI3Result, cur_result *controller.ControllerCurveFile) {
 	cur_result.Result = result.PRC_SST.PAR.Result
 	if cur_result.Result == "IO" {
 		cur_result.Result = storage.RESULT_OK
@@ -264,7 +219,7 @@ func XML2Curve(result *CVI3Result, cur_result *ControllerCurveFile) {
 
 }
 
-func XML2Result(result *CVI3Result, rr *ControllerResult) {
+func XML2Result(result *CVI3Result, rr *controller.ControllerResult) {
 
 	rr.Controller_SN = result.PRC_SST.PAR.SN
 	rr.Result = result.PRC_SST.PAR.Result

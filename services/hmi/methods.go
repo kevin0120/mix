@@ -3,7 +3,6 @@ package hmi
 import (
 	"encoding/json"
 	"github.com/kataras/iris"
-	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/openprotocol"
@@ -444,7 +443,7 @@ func (m *Methods) getHmiResults(ctx iris.Context) {
 	ws_result.Result_id = int64(n_result_id)
 	ws_result.Result = db_result.Result
 
-	result_value := audi_vw.ResultValue{}
+	result_value := controller.ResultValue{}
 	json.Unmarshal([]byte(db_result.ResultValue), &result_value)
 
 	ws_result.TI = result_value.Ti

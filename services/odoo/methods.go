@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/kataras/iris"
 	"github.com/masami10/rush/services/aiis"
-	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/storage"
 	"strconv"
@@ -102,10 +101,10 @@ func (m *Methods) getResults(ctx iris.Context) {
 			}
 		}
 
-		r := audi_vw.ResultValue{}
+		r := controller.ResultValue{}
 		json.Unmarshal([]byte(v.ResultValue), &r)
 
-		pset := audi_vw.PSetDefine{}
+		pset := controller.PSetDefine{}
 		json.Unmarshal([]byte(v.PSetDefine), &pset)
 
 		if v.Result == storage.RESULT_OK {

@@ -128,6 +128,10 @@ func (h *Handlers) PushAiis(needPush bool, r *storage.Results, workorder *storag
 
 		}
 
+		if result.ExceptionReason != "" {
+			aiisResult.ExceptionReason = result.ExceptionReason + aiisResult.ExceptionReason
+		}
+
 		aiisResult.Control_date = r.UpdateTime.Format(time.RFC3339)
 
 		aiisResult.Measure_degree = result.ResultValue.Wi
