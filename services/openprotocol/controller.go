@@ -257,7 +257,6 @@ func (c *Controller) Connect() error {
 		time.Sleep(time.Duration(c.req_timeout))
 	}
 
-
 	c.updateStatus(controller.STATUS_ONLINE)
 
 	c.startComm()
@@ -336,7 +335,7 @@ func (c *Controller) GetPSetDetail(pset int) (PSetDetail, error) {
 		return obj_pset_detail, errors.New(controller.ERR_CONTROLER_TIMEOUT)
 	}
 
-	switch v := reply.(type){
+	switch v := reply.(type) {
 	case string:
 		return obj_pset_detail, errors.New(v)
 

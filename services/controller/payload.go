@@ -14,7 +14,7 @@ const (
 	ERR_CONTROLER_TIMEOUT   = "controller timeout"
 	ERR_NOT_FOUND           = "not found"
 	ERR_PSET_ERROR          = "pset error"
-	ERR_KNOWN          = "error known"
+	ERR_KNOWN               = "error known"
 )
 
 const (
