@@ -38,7 +38,7 @@ type Controller struct {
 	recv_flag         bool
 	keepaliveDeadLine atomic.Value
 	closing           chan chan struct{}
-	cfg               controller.Config
+	cfg               controller.ControllerConfig
 	protocol          string
 }
 

@@ -25,7 +25,7 @@ type Controller interface {
 type Protocol interface {
 	Parse(msg string) ([]byte, error)
 	Write(sn string, buf []byte) error
-	AddNewController(cfg Config) Controller
+	AddNewController(cfg ControllerConfig) Controller
 }
 
 type HandlerPackage struct {
@@ -34,7 +34,7 @@ type HandlerPackage struct {
 }
 
 type Service struct {
-	configs []Config
+	config Config
 
 	protocols   map[string]Protocol //进行服务注入, serial_no : Protocol
 	Controllers map[string]Controller
@@ -53,9 +53,9 @@ type Service struct {
 	diag Diagnostic
 }
 
-func NewService(cs Configs, d Diagnostic, pAudi Protocol, pOpenprotocol Protocol) (*Service, error) {
+func NewService(cs Config, d Diagnostic, pAudi Protocol, pOpenprotocol Protocol) (*Service, error) {
 	s := &Service{
-		configs:       cs,
+		config:       cs,
 		diag:          d,
 		Controllers:   map[string]Controller{},
 		protocols:     map[string]Protocol{},
@@ -67,7 +67,7 @@ func NewService(cs Configs, d Diagnostic, pAudi Protocol, pOpenprotocol Protocol
 
 	s.handlers.controllerService = s
 
-	for _, c := range cs {
+	for _, c := range cs.Configs {
 		switch c.Protocol {
 		case AUDIPROTOCOL:
 			new_controller := pAudi.AddNewController(c)
@@ -104,9 +104,9 @@ func (s *Service) Write(serialNo string, buf []byte) error {
 }
 
 func (s *Service) Open() error {
-	s.handlers.Init(4)
+	s.handlers.Init(s.config.Workers)
 
-	for i := 0; i < 4; i++ {
+	for i := 0; i < s.config.Workers; i++ {
 		s.wg.Add(1)
 		go s.HandleProcess()
 		s.diag.Debug(fmt.Sprintf("init handle process:%d", i+1))

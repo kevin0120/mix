@@ -31,7 +31,7 @@ type handlerPkg struct {
 
 type Controller struct {
 	w                 *socket_writer.SocketWriter
-	cfg               controller.Config
+	cfg               controller.ControllerConfig
 	StatusValue       atomic.Value
 	keepAliveCount    int32
 	keep_period       time.Duration

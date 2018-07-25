@@ -46,7 +46,7 @@ type Config struct {
 
 	OpenProtocol openprotocol.Config `yaml:"openprotocol"`
 
-	Contollers controller.Configs `yaml:"controllers"`
+	Contollers controller.Config `yaml:"controller_service"`
 
 	Commander command.Commander `yaml:"-"`
 }
@@ -69,7 +69,7 @@ func NewConfig() *Config {
 	c.OpenProtocol = openprotocol.NewConfig()
 	c.Odoo = odoo.NewConfig()
 
-	c.Contollers = controller.Configs{controller.NewConfig(), controller.NewConfig()}
+	c.Contollers = controller.NewConfig()
 
 	return c
 }

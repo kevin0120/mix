@@ -83,7 +83,7 @@ func (s *Service) config() Config {
 	return s.configValue.Load().(Config)
 }
 
-func (p *Service) AddNewController(cfg controller.Config) controller.Controller {
+func (p *Service) AddNewController(cfg controller.ControllerConfig) controller.Controller {
 	config := p.config()
 	c := NewController(config)
 	c.Srv = p //服务注入

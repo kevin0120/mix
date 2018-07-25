@@ -55,7 +55,7 @@ func (p *Service) Write(sn string, buf []byte) error {
 	return nil
 }
 
-func (p *Service) AddNewController(cfg controller.Config) controller.Controller {
+func (p *Service) AddNewController(cfg controller.ControllerConfig) controller.Controller {
 	config := p.config()
 	c := NewController(config)
 	c.Srv = p //服务注入
