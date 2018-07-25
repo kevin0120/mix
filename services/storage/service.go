@@ -510,6 +510,19 @@ func (s *Service) UpdateTightning(id int64, last_id string) error {
 	}
 }
 
+func (s *Service) ResetTightning(controller_sn string) error {
+	sql := "update `controllers` set last_id = ? where controller_sn = ?"
+	_, err := s.eng.Exec(sql,
+		"0",
+		controller_sn)
+
+	if err != nil {
+		return err
+	} else {
+		return nil
+	}
+}
+
 func (s *Service) DropTableManage() error {
 	c := s.Config()
 	for {

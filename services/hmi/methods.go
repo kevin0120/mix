@@ -374,6 +374,7 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 	resp.Status = workorder.Status
 	resp.MaxOpTime = workorder.MaxOpTime
 	resp.WorkSheet = workorder.WorkSheet
+	resp.Job = workorder.JobID
 
 	for _, v := range results {
 		r := Result{}

@@ -139,6 +139,8 @@ func (c *Controller) Protocol() string {
 
 func (c *Controller) Start() {
 
+	c.Srv.DB.ResetTightning(c.cfg.SN)
+
 	c.w = socket_writer.NewSocketWriter(fmt.Sprintf("tcp://%s:%d", c.cfg.RemoteIP, c.cfg.Port), c)
 
 	// 启动心跳检测

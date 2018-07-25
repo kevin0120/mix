@@ -502,13 +502,16 @@ func (rd *ResultData) Deserialize(str string) error {
 
 	b_error := biu.ToBinaryString(error_value)
 	l := len(b_error)
+	errs := []string{}
 	for i := 0; i < l; i++ {
 		v := b_error[l-1-i]
 
 		if v == '1' {
-			rd.TighteningStatus += result_errors[i] + ","
+			errs = append(errs, result_errors[i])
 		}
 	}
+
+	rd.TighteningStatus = strings.Join(errs, ",")
 
 	rd.TorqueMin, err = strconv.ParseFloat(str[139:145], 64)
 	if err != nil {

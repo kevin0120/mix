@@ -54,7 +54,7 @@ websocket:
   write_buf_size: 4096
 storage:
   db_url: 127.0.0.1:5432
-  db_name: rush_changan
+  db_name: rush
   db_user: admin
   db_pwd: admin
   max_connection: 60
@@ -66,7 +66,7 @@ audi/vw:
   read_buf: 65535
   req_time_out: 300ms
   keep_alive_period: 7s
-  workers: 4
+
 openprotocol:
   keep_alive_period: 10s
   read_buf: 65535
