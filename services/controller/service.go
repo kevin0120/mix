@@ -55,7 +55,7 @@ type Service struct {
 
 func NewService(cs Config, d Diagnostic, pAudi Protocol, pOpenprotocol Protocol) (*Service, error) {
 	s := &Service{
-		config:       cs,
+		config:        cs,
 		diag:          d,
 		Controllers:   map[string]Controller{},
 		protocols:     map[string]Protocol{},

@@ -72,6 +72,7 @@ openprotocol:
   read_buf: 65535
   req_time_out: 300ms
 
+# 协议类型: Audi/VW, OpenProtocol
 controller_service:
   workers: 4
   controllers:

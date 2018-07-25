@@ -49,6 +49,6 @@ type Workorder struct {
 	WorkSheet string `json:"work_sheet"`
 
 	MaxOpTime int      `json:"max_op_time"`
-	Job			int		`json:"job_id"`
+	Job       int      `json:"job_id"`
 	Results   []Result `json:"results"`
 }

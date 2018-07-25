@@ -16,8 +16,8 @@ type ControllerConfig struct {
 }
 
 type Config struct {
-	Workers		int `yaml:"workers"`
-	Configs     []ControllerConfig `yaml:"controllers"`
+	Workers int                `yaml:"workers"`
+	Configs []ControllerConfig `yaml:"controllers"`
 }
 
 var Protocols []string
@@ -30,17 +30,17 @@ func NewConfig() Config {
 	_sn, _ := uuid.NewV4()
 	configs := []ControllerConfig{}
 
-	configs = append(configs, ControllerConfig {
-			SN:          _sn.String(),
-			Protocol:    AUDIPROTOCOL,
-			RemoteIP:    "127.0.0.1",
-			Port:        4700,
-			ToolChannel: DEFAULT_TOOL_CHANNEL,
-		})
+	configs = append(configs, ControllerConfig{
+		SN:          _sn.String(),
+		Protocol:    AUDIPROTOCOL,
+		RemoteIP:    "127.0.0.1",
+		Port:        4700,
+		ToolChannel: DEFAULT_TOOL_CHANNEL,
+	})
 
-	return Config {
+	return Config{
 		Workers: 4,
-		Configs:configs,
+		Configs: configs,
 	}
 }
 

@@ -20,7 +20,7 @@ const (
 	DAIL_TIMEOUT         = time.Duration(5 * time.Second)
 	MAX_KEEP_ALIVE_CHECK = 3
 
-	REPLY_TIMEOUT   = time.Duration(300 * time.Millisecond)
+	REPLY_TIMEOUT   = time.Duration(100 * time.Millisecond)
 	MAX_REPLY_COUNT = 10
 )
 
@@ -119,17 +119,28 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 		pset_detail := PSetDetail{}
 		pset_detail.Deserialize(pkg.Body)
 
-		c.Response.update(MID_0013_PSET_DETAIL_REPLY, pset_detail)
+		c.Response.update(MID_0012_PSET_DETAIL_REQUEST, pset_detail)
 
 	case MID_0011_PSET_LIST_REPLY:
 		// pset列表
 		pset_list := PSetList{}
 		pset_list.Deserialize(pkg.Body)
 
-		c.Response.update(MID_0011_PSET_LIST_REPLY, pset_list)
+		c.Response.update(MID_0010_PSET_LIST_REQUEST, pset_list)
 
 		//case MID_7410_LAST_CURVE:
 		// 处理波形
+
+	case MID_0004_CMD_ERR:
+		// 请求错误
+
+		err_code := pkg.Body[4:6]
+		c.Response.update(pkg.Body[0:4], request_errors[err_code])
+
+	case MID_0005_CMD_OK:
+		// 请求正确
+
+		c.Response.update(pkg.Body, request_errors["00"])
 	}
 }
 
@@ -233,6 +244,8 @@ func (c *Controller) Connect() error {
 		mtx:     sync.Mutex{},
 	}
 
+	c.Mode.Store(MODE_PSET)
+
 	for {
 		err := c.w.Connect(DAIL_TIMEOUT)
 		if err != nil {
@@ -243,6 +256,7 @@ func (c *Controller) Connect() error {
 
 		time.Sleep(time.Duration(c.req_timeout))
 	}
+
 
 	c.updateStatus(controller.STATUS_ONLINE)
 
@@ -269,15 +283,16 @@ func (c *Controller) GetPSetList() ([]int, error) {
 		return psets, errors.New(controller.STATUS_OFFLINE)
 	}
 
-	defer c.Response.remove(MID_0011_PSET_LIST_REPLY)
-	c.Response.Add(MID_0011_PSET_LIST_REPLY, nil)
+	defer c.Response.remove(MID_0010_PSET_LIST_REQUEST)
+	c.Response.Add(MID_0010_PSET_LIST_REQUEST, nil)
 
 	psets_request := GeneratePackage(MID_0010_PSET_LIST_REQUEST, "001", "", DEFAULT_MSG_END)
 	c.Write([]byte(psets_request))
 
 	var reply interface{} = nil
+
 	for i := 0; i < MAX_REPLY_COUNT; i++ {
-		reply = c.Response.get(MID_0011_PSET_LIST_REPLY)
+		reply = c.Response.get(MID_0010_PSET_LIST_REQUEST)
 		if reply != nil {
 			break
 		}
@@ -286,7 +301,7 @@ func (c *Controller) GetPSetList() ([]int, error) {
 	}
 
 	if reply == nil {
-		return psets, errors.New(controller.ERR_NOT_FOUND)
+		return psets, errors.New(controller.ERR_CONTROLER_TIMEOUT)
 	}
 
 	pset_list := reply.(PSetList)
@@ -301,15 +316,15 @@ func (c *Controller) GetPSetDetail(pset int) (PSetDetail, error) {
 		return obj_pset_detail, errors.New(controller.STATUS_OFFLINE)
 	}
 
-	defer c.Response.remove(MID_0013_PSET_DETAIL_REPLY)
-	c.Response.Add(MID_0013_PSET_DETAIL_REPLY, nil)
+	defer c.Response.remove(MID_0012_PSET_DETAIL_REQUEST)
+	c.Response.Add(MID_0012_PSET_DETAIL_REQUEST, nil)
 
 	pset_detail := GeneratePackage(MID_0012_PSET_DETAIL_REQUEST, "002", fmt.Sprintf("%03d", pset), DEFAULT_MSG_END)
 	c.Write([]byte(pset_detail))
 
 	var reply interface{} = nil
 	for i := 0; i < MAX_REPLY_COUNT; i++ {
-		reply = c.Response.get(MID_0013_PSET_DETAIL_REPLY)
+		reply = c.Response.get(MID_0012_PSET_DETAIL_REQUEST)
 		if reply != nil {
 			break
 		}
@@ -318,10 +333,20 @@ func (c *Controller) GetPSetDetail(pset int) (PSetDetail, error) {
 	}
 
 	if reply == nil {
-		return obj_pset_detail, errors.New(controller.ERR_NOT_FOUND)
+		return obj_pset_detail, errors.New(controller.ERR_CONTROLER_TIMEOUT)
 	}
 
-	return reply.(PSetDetail), nil
+	switch v := reply.(type){
+	case string:
+		return obj_pset_detail, errors.New(v)
+
+	case PSetDetail:
+		return reply.(PSetDetail), nil
+
+	default:
+		return obj_pset_detail, errors.New(controller.ERR_KNOWN)
+	}
+
 }
 
 func (c *Controller) SolveOldResults() {
@@ -592,9 +617,31 @@ func (c *Controller) pset(pset int) error {
 		return errors.New("status offline")
 	}
 
+	c.Response.Add(MID_0018_PSET, nil)
+	defer c.Response.remove(MID_0018_PSET)
+
 	s_pset := GeneratePackage(MID_0018_PSET, "001", fmt.Sprintf("%03d", pset), DEFAULT_MSG_END)
 
 	c.Write([]byte(s_pset))
+
+	var reply interface{} = nil
+	for i := 0; i < MAX_REPLY_COUNT; i++ {
+		reply = c.Response.get(MID_0018_PSET)
+		if reply != nil {
+			break
+		}
+
+		time.Sleep(REPLY_TIMEOUT)
+	}
+
+	if reply == nil {
+		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	}
+
+	s_reply := reply.(string)
+	if s_reply != request_errors["00"] {
+		return errors.New(s_reply)
+	}
 
 	return nil
 }
@@ -605,9 +652,26 @@ func (c *Controller) JobOff(off string) error {
 		return errors.New("status offline")
 	}
 
+	c.Response.Add(MID_0130_JOB_OFF, nil)
+	defer c.Response.remove(MID_0130_JOB_OFF)
+
 	s_off := GeneratePackage(MID_0130_JOB_OFF, "001", off, DEFAULT_MSG_END)
 
 	c.Write([]byte(s_off))
+
+	var reply interface{} = nil
+	for i := 0; i < MAX_REPLY_COUNT; i++ {
+		reply = c.Response.get(MID_0130_JOB_OFF)
+		if reply != nil {
+			break
+		}
+
+		time.Sleep(REPLY_TIMEOUT)
+	}
+
+	if reply == nil {
+		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	}
 
 	if off == "0" {
 		c.Mode.Store(MODE_PSET)
@@ -623,9 +687,31 @@ func (c *Controller) jobSelect(job int) error {
 		return errors.New("status offline")
 	}
 
+	c.Response.Add(MID_0038_JOB_SELECT, nil)
+	defer c.Response.remove(MID_0038_JOB_SELECT)
+
 	s_job := GeneratePackage(MID_0038_JOB_SELECT, "002", fmt.Sprintf("%04d", job), DEFAULT_MSG_END)
 
 	c.Write([]byte(s_job))
+
+	var reply interface{} = nil
+	for i := 0; i < MAX_REPLY_COUNT; i++ {
+		reply = c.Response.get(MID_0038_JOB_SELECT)
+		if reply != nil {
+			break
+		}
+
+		time.Sleep(REPLY_TIMEOUT)
+	}
+
+	if reply == nil {
+		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	}
+
+	s_reply := reply.(string)
+	if s_reply != request_errors["00"] {
+		return errors.New(s_reply)
+	}
 
 	return nil
 }
@@ -636,8 +722,6 @@ func (c *Controller) IdentifierSet(str string) error {
 	}
 
 	ide := GeneratePackage(MID_0150_IDENTIFIER_SET, "001", str, DEFAULT_MSG_END)
-
-	//c.Response.Add(MID_0018_PSET, "")
 
 	c.Write([]byte(ide))
 
