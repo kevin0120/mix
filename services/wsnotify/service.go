@@ -50,6 +50,8 @@ func (s *Service) onConnect(c websocket.Connection) {
 			if err != nil {
 				c.Emit(WS_EVENT_REG, msg)
 			}
+
+			c.Disconnect()
 			return
 		}
 
@@ -61,6 +63,8 @@ func (s *Service) onConnect(c websocket.Connection) {
 			if err != nil {
 				c.Emit(WS_EVENT_REG, regStrs)
 			}
+
+			c.Disconnect()
 		} else {
 			// 将客户端加入列表
 			s.clientManager.AddClient(reg.HMI_SN, c)
