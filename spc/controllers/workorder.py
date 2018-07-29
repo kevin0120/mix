@@ -58,7 +58,7 @@ class ApiMrpWorkorder(http.Controller):
             ret = {
                 'id': order.id,
                 'hmi': {'id': order.workcenter_id.hmi_id.id, 'uuid': order.workcenter_id.hmi_id.serial_no},
-                'worksheet': order.operation_id.worksheet_img,
+                'worksheet': u'data:{0};base64,{1}'.format('image/png', order.operation_id.worksheet_img) if order.operation_id.worksheet_img else "",
                 # 'max_redo_times': order.operation_id.max_redo_times,
                 'max_op_time': order.operation_id.max_op_time,
                 'job': order.operation_id.op_job_id.code if order.operation_id.op_job_id else False,
@@ -149,7 +149,7 @@ class ApiMrpWorkorder(http.Controller):
             _ret.append({
                 'id': order.id,
                 'hmi': {'id': workcenter_id.hmi_id.id, 'uuid': workcenter_id.hmi_id.serial_no},
-                'worksheet': order.operation_id.worksheet_img,
+                'worksheet': u'data:{0};base64,{1}'.format('image/png', order.operation_id.worksheet_img) if order.operation_id.worksheet_img else "",
                 # 'max_redo_times': order.operation_id.max_redo_times,
                 'max_op_time': order.operation_id.max_op_time,
                 'job': order.operation_id.op_job_id.code if order.operation_id.op_job_id else False,
