@@ -58,6 +58,7 @@ class ApiMrpWorkorder(http.Controller):
             ret = {
                 'id': order.id,
                 'hmi': {'id': order.workcenter_id.hmi_id.id, 'uuid': order.workcenter_id.hmi_id.serial_no},
+                # 'worksheet': order.operation_id.worksheet_img,
                 'worksheet': u'data:{0};base64,{1}'.format('image/png', order.operation_id.worksheet_img) if order.operation_id.worksheet_img else "",
                 # 'max_redo_times': order.operation_id.max_redo_times,
                 'max_op_time': order.operation_id.max_op_time,
@@ -104,7 +105,7 @@ class ApiMrpWorkorder(http.Controller):
                                 status=405)
         if 'code' in kw:
             code = kw['code']
-            domain += ['|', '|', ('production_id.long_pin', 'like', code), ('production_id.knr', 'like', code), ('production_id.vin', 'like', code)]
+            domain += ['|', '|', ('production_id.long_pin', '=', code), ('production_id.knr', '=', code), ('production_id.vin', '=', code)]
         if 'limit' in kw.keys():
             limit = int(kw['limit'])
         else:
@@ -149,6 +150,7 @@ class ApiMrpWorkorder(http.Controller):
             _ret.append({
                 'id': order.id,
                 'hmi': {'id': workcenter_id.hmi_id.id, 'uuid': workcenter_id.hmi_id.serial_no},
+                # 'worksheet': order.operation_id.worksheet_img,
                 'worksheet': u'data:{0};base64,{1}'.format('image/png', order.operation_id.worksheet_img) if order.operation_id.worksheet_img else "",
                 # 'max_redo_times': order.operation_id.max_redo_times,
                 'max_op_time': order.operation_id.max_op_time,

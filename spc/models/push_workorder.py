@@ -60,8 +60,8 @@ class PushWorkorder(AbstractModel):
             vals = {
                 'id': order.id,
                 'hmi': {'id': order.workcenter_id.hmi_id.id, 'uuid': order.workcenter_id.hmi_id.serial_no},
+                # 'worksheet': order.operation_id.worksheet_img,
                 'worksheet': u'data:{0};base64,{1}'.format('image/png', order.operation_id.worksheet_img) if order.operation_id.worksheet_img else "",
-
                 # 'max_redo_times': order.operation_id.max_redo_times,
                 'max_op_time': order.operation_id.max_op_time,
                 # 'pset': order.operation_id.program_id.code,
