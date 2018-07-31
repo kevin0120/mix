@@ -12,7 +12,7 @@
                     <field name="max_redo_times" />
                     <field name="routing_id" />
                     <field name="group_id"/>
-                    <!--<field name="program_id"/>-->
+                    <field name="op_job_id"/>
                 </tree>
             </field>
         </record>
@@ -34,7 +34,7 @@
                                 <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
                             </group>
                             <group name="parameters">
-                                <!--<field name="program_id" required="1"/>-->
+                                <field name="op_job_id" required="1"/>
                                 <field name="max_redo_times" required="1"/>
                                 <field name="max_op_time" required="1"/>
                             </group>
@@ -125,7 +125,7 @@
                                         <field name="name"/>
                                         <field name="workcenter_id" />
                                         <field name="group_id" />
-                                        <!--<field name="program_id"/>-->
+                                        <field name="op_job_id"/>
                                     </tree>
                                 </field>
                             </page>

@@ -46,10 +46,10 @@ class PushWorkorder(AbstractModel):
                     'max_redo_times': consu.bom_line_id.operation_point_id.max_redo_times,
                     'offset_x': consu.bom_line_id.operation_point_id.x_offset,
                     'offset_y': consu.bom_line_id.operation_point_id.y_offset,
-                    "pset": consu.bom_line_id.program_id.code,
+                    "pset": consu.bom_line_id.program_id.code if consu.bom_line_id.program_id.code else "0",
                     "nut_no": consu.product_id.screw_type_code,
-                    "gun_sn": consu.bom_line_id.gun_id.serial_no,
-                    "controller_sn": consu.bom_line_id.controller_id.serial_no,
+                    "gun_sn": consu.bom_line_id.gun_id.serial_no if consu.bom_line_id.gun_id.serial_no else "",
+                    "controller_sn": consu.bom_line_id.controller_id.serial_no if consu.bom_line_id.controller_id.serial_no else "",
                     'tolerance_min': _qcps.tolerance_min if _qcps else 0.0,
                     'tolerance_max': _qcps.tolerance_max if _qcps else 0.0,
                     'tolerance_min_degree': _qcps.tolerance_min_degree if _qcps else 0.0,
@@ -60,7 +60,8 @@ class PushWorkorder(AbstractModel):
             vals = {
                 'id': order.id,
                 'hmi': {'id': order.workcenter_id.hmi_id.id, 'uuid': order.workcenter_id.hmi_id.serial_no},
-                'worksheet': order.operation_id.worksheet_img,
+                # 'worksheet': order.operation_id.worksheet_img,
+                'worksheet': u'data:{0};base64,{1}'.format('image/png', order.operation_id.worksheet_img) if order.operation_id.worksheet_img else "",
                 # 'max_redo_times': order.operation_id.max_redo_times,
                 'max_op_time': order.operation_id.max_op_time,
                 # 'pset': order.operation_id.program_id.code,
@@ -81,7 +82,8 @@ class PushWorkorder(AbstractModel):
                 # 'nut_no': order.consu_product_id.screw_type_code,
                 'consumes': _consumes,
                 'model': order.production_id.product_id.vehicle_type_code,
-                'update_time': str_time_to_rfc3339(order.production_date)
+                'update_time': str_time_to_rfc3339(order.production_date),
+                'job': order.operation_id.op_job_id.code if order.operation_id.op_job_id else "0"
             }
             r.append(vals)
         try:
