@@ -10,15 +10,20 @@ type PSet struct {
 }
 
 type Job struct {
-	Controller_SN string  `json:"controller_sn"`
-	Job           int     `json:"job"`
-	ResultIDs     []int64 `json:"result_ids"`
-	UserID        int64   `json:"user_id"`
+	Controller_SN string `json:"controller_sn"`
+	Job           int    `json:"job_id"`
+	WorkorderiD   int64  `json:"workorder_id"`
+	UserID        int64  `json:"user_id"`
 }
 
-type EnableJobMode struct {
+type ControllerMode struct {
 	Controller_SN string `json:"controller_sn"`
-	Enable        bool   `json:"enable"`
+	Mode          string `json:"mode"`
+}
+
+type PSetDetailRequest struct {
+	Controller_SN string `json:"controller_sn"`
+	PSet          int    `json:"pset"`
 }
 
 type Result struct {
@@ -44,5 +49,6 @@ type Workorder struct {
 	WorkSheet string `json:"work_sheet"`
 
 	MaxOpTime int      `json:"max_op_time"`
+	Job       int      `json:"job_id"`
 	Results   []Result `json:"results"`
 }

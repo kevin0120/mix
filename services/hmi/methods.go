@@ -3,9 +3,9 @@ package hmi
 import (
 	"encoding/json"
 	"github.com/kataras/iris"
-	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/odoo"
+	"github.com/masami10/rush/services/openprotocol"
 	"github.com/masami10/rush/services/wsnotify"
 	"strconv"
 )
@@ -28,7 +28,6 @@ func (m *Methods) putPSets(ctx iris.Context) {
 		// 传输结构错误
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString(err.Error())
-
 		return
 	}
 
@@ -86,6 +85,7 @@ func (m *Methods) putPSets(ctx iris.Context) {
 	if !exist {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("controller not found")
+		return
 	}
 
 	switch c.Protocol() {
@@ -107,33 +107,134 @@ func (m *Methods) putPSets(ctx iris.Context) {
 	}
 }
 
-func (m *Methods) enableJobMode(ctx iris.Context) {
-	var jobmode EnableJobMode
-	err := ctx.ReadJSON(&jobmode)
+func (m *Methods) getPSetList(ctx iris.Context) {
 
-	if err != nil {
-		// 传输结构错误
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString(err.Error())
+	controller_sn := ctx.URLParam("controller_sn")
 
-		return
-	}
-
-	if jobmode.Controller_SN == "" {
+	if controller_sn == "" {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("controller_sn is required")
 		return
 	}
 
-	c, exist := m.service.ControllerService.Controllers[jobmode.Controller_SN]
+	c, exist := m.service.ControllerService.Controllers[controller_sn]
 	if !exist {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("controller not found")
+		return
+	}
+
+	var err error = nil
+	var pset_list []int
+	switch c.Protocol() {
+	case controller.OPENPROTOCOL:
+		pset_list, err = m.service.OpenProtocol.GetPSetList(controller_sn)
+		if err != nil {
+			ctx.StatusCode(iris.StatusBadRequest)
+			ctx.WriteString(err.Error())
+			return
+		}
+
+	default:
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("not supported")
+		return
+	}
+
+	body, _ := json.Marshal(pset_list)
+	ctx.Header("content-type", "application/json")
+	ctx.Write(body)
+}
+
+func (m *Methods) getPSetDetail(ctx iris.Context) {
+
+	controller_sn := ctx.URLParam("controller_sn")
+	pset := ctx.URLParam("pset")
+
+	if controller_sn == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller_sn is required")
+		return
+	}
+
+	if pset == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("pset is required")
+		return
+	}
+
+	v_pset, err := strconv.Atoi(pset)
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("pset format error")
+		return
+	}
+
+	c, exist := m.service.ControllerService.Controllers[controller_sn]
+	if !exist {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller not found")
+		return
+	}
+
+	var pset_detail openprotocol.PSetDetail
+	switch c.Protocol() {
+	case controller.OPENPROTOCOL:
+		pset_detail, err = m.service.OpenProtocol.GetPSetDetail(controller_sn, v_pset)
+		if err != nil {
+			ctx.StatusCode(iris.StatusBadRequest)
+			ctx.WriteString(err.Error())
+			return
+		}
+
+	default:
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("not supported")
+		return
+	}
+
+	body, _ := json.Marshal(pset_detail)
+	ctx.Header("content-type", "application/json")
+	ctx.Write(body)
+}
+
+func (m *Methods) enableJobMode(ctx iris.Context) {
+	var mode ControllerMode
+	err := ctx.ReadJSON(&mode)
+
+	if err != nil {
+		// 传输结构错误
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+
+	if mode.Controller_SN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller_sn is required")
+		return
+	}
+
+	if mode.Mode == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("mode is required")
+		return
+	}
+
+	c, exist := m.service.ControllerService.Controllers[mode.Controller_SN]
+	if !exist {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller not found")
+		return
 	}
 
 	switch c.Protocol() {
 	case controller.OPENPROTOCOL:
-		err = m.service.OpenProtocol.JobOFF(jobmode.Controller_SN, jobmode.Enable)
+		flag := true
+		if mode.Mode == openprotocol.MODE_PSET {
+			flag = false
+		}
+		err = m.service.OpenProtocol.JobOFF(mode.Controller_SN, flag)
 
 	default:
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -158,7 +259,6 @@ func (m *Methods) putJobs(ctx iris.Context) {
 		// 传输结构错误
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString(err.Error())
-
 		return
 	}
 
@@ -174,9 +274,16 @@ func (m *Methods) putJobs(ctx iris.Context) {
 		return
 	}
 
-	if len(job.ResultIDs) == 0 {
+	if job.WorkorderiD == 0 {
 		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("result_ids is required")
+		ctx.WriteString("workorder_id is required")
+		return
+	}
+
+	exist, _ := m.service.DB.WorkorderExists(job.WorkorderiD)
+	if !exist {
+		ctx.StatusCode(iris.StatusNotFound)
+		ctx.WriteString("workorder not found")
 		return
 	}
 
@@ -189,11 +296,12 @@ func (m *Methods) putJobs(ctx iris.Context) {
 	if !exist {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("controller not found")
+		return
 	}
 
 	switch c.Protocol() {
 	case controller.OPENPROTOCOL:
-		err = m.service.OpenProtocol.JobSet(job.Controller_SN, job.Job, job.ResultIDs, job.UserID)
+		err = m.service.OpenProtocol.JobSet(job.Controller_SN, job.Job, job.WorkorderiD, job.UserID)
 
 	default:
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -201,6 +309,13 @@ func (m *Methods) putJobs(ctx iris.Context) {
 		return
 	}
 
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+
+	err = m.service.DB.InitWorkorderForJob(job.WorkorderiD)
 	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString(err.Error())
@@ -259,6 +374,7 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 	resp.Status = workorder.Status
 	resp.MaxOpTime = workorder.MaxOpTime
 	resp.WorkSheet = workorder.WorkSheet
+	resp.Job = workorder.JobID
 
 	for _, v := range results {
 		r := Result{}
@@ -328,7 +444,7 @@ func (m *Methods) getHmiResults(ctx iris.Context) {
 	ws_result.Result_id = int64(n_result_id)
 	ws_result.Result = db_result.Result
 
-	result_value := audi_vw.ResultValue{}
+	result_value := controller.ResultValue{}
 	json.Unmarshal([]byte(db_result.ResultValue), &result_value)
 
 	ws_result.TI = result_value.Ti

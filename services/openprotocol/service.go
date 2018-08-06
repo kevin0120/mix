@@ -1,6 +1,7 @@
 package openprotocol
 
 import (
+	"fmt"
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/minio"
@@ -54,7 +55,7 @@ func (p *Service) Write(sn string, buf []byte) error {
 	return nil
 }
 
-func (p *Service) AddNewController(cfg controller.Config) controller.Controller {
+func (p *Service) AddNewController(cfg controller.ControllerConfig) controller.Controller {
 	config := p.config()
 	c := NewController(config)
 	c.Srv = p //服务注入
@@ -92,23 +93,19 @@ func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64,
 		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
 	}
 
-	if v.Status() == controller.STATUS_OFFLINE {
-		// 控制器离线
-		return errors.New(string(controller.STATUS_OFFLINE))
-	}
-
 	c := v.(*Controller)
+
 	// 设定pset并判断控制器响应
 	_, err := c.PSet(pset, workorder_id, result_id, count, user_id, c.cfg.ToolChannel)
 	if err != nil {
 		// 控制器请求失败
-		return errors.New(controller.ERR_PSET_ERROR)
+		return err
 	}
 
 	return nil
 }
 
-func (p *Service) JobSet(sn string, job int, result_ids []int64, user_id int64) error {
+func (p *Service) JobSet(sn string, job int, workorder_id int64, user_id int64) error {
 	v, exist := p.Parent.Controllers[sn]
 	if !exist {
 		// SN对应控制器不存在
@@ -116,11 +113,14 @@ func (p *Service) JobSet(sn string, job int, result_ids []int64, user_id int64) 
 	}
 
 	c := v.(*Controller)
-	// 设定pset并判断控制器响应
-	err := c.JobSet(result_ids, user_id, job)
+
+	//workorder_id-user_id
+	id_info := fmt.Sprintf("%d-%d", workorder_id, user_id)
+
+	err := c.JobSet(id_info, job)
 	if err != nil {
 		// 控制器请求失败
-		return errors.New(controller.ERR_PSET_ERROR)
+		return err
 	}
 
 	return nil
@@ -147,4 +147,38 @@ func (p *Service) JobOFF(sn string, off bool) error {
 	}
 
 	return nil
+}
+
+func (p *Service) GetPSetList(sn string) ([]int, error) {
+	v, exist := p.Parent.Controllers[sn]
+	if !exist {
+		// SN对应控制器不存在
+		return []int{}, errors.New(controller.ERR_CONTROLER_NOT_FOUND)
+	}
+
+	c := v.(*Controller)
+
+	pset_list, err := c.GetPSetList()
+	if err != nil {
+		return []int{}, err
+	}
+
+	return pset_list, nil
+}
+
+func (p *Service) GetPSetDetail(sn string, pset int) (PSetDetail, error) {
+	v, exist := p.Parent.Controllers[sn]
+	if !exist {
+		// SN对应控制器不存在
+		return PSetDetail{}, errors.New(controller.ERR_CONTROLER_NOT_FOUND)
+	}
+
+	c := v.(*Controller)
+
+	pset_detail, err := c.GetPSetDetail(pset)
+	if err != nil {
+		return PSetDetail{}, err
+	}
+
+	return pset_detail, nil
 }

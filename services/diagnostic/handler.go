@@ -403,3 +403,7 @@ type ControllerHandler struct {
 func (h *ControllerHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
+
+func (h *ControllerHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}

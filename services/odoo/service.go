@@ -2,7 +2,6 @@ package odoo
 
 import (
 	"fmt"
-	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/storage"
 	"github.com/pkg/errors"
@@ -173,6 +172,10 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 		o.MaxOpTime = v.Max_op_time
 		o.WorkSheet = v.Worksheet
 		o.UpdateTime = v.UpdateTime
+		o.JobID, finalErr = strconv.Atoi(v.Job)
+		if finalErr != nil {
+			o.JobID = 0
+		}
 
 		o.MO_Year = v.MO_Year
 		o.MO_Pin_check_code = v.MO_Pin_check_code
@@ -202,13 +205,13 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 			r.NutNo = consu.NutNo
 
 			r.WorkorderID = o.WorkorderID
-			r.Result = audi_vw.RESULT_NONE
+			r.Result = storage.RESULT_NONE
 			r.HasUpload = false
-			r.Stage = audi_vw.RESULT_STAGE_INIT
+			r.Stage = storage.RESULT_STAGE_INIT
 			r.UpdateTime = time.Now()
 			r.PSetDefine = ""
 			r.ResultValue = ""
-			r.Count = 1
+			r.Count = 0
 
 			for _, result_id := range consu.ResultIDs {
 				result_count++

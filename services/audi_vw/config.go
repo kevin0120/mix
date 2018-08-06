@@ -11,7 +11,6 @@ type Config struct {
 	ReadBufferSize  int           `yaml:"read_buf"`
 	ReqTimeout      toml.Duration `yaml:"req_time_out"`
 	KeepAlivePeriod toml.Duration `yaml:"keep_alive_period"`
-	Workers         int           `yaml:"workers"`
 }
 
 func NewConfig() Config {
@@ -21,7 +20,6 @@ func NewConfig() Config {
 		ReadBufferSize:  65535,
 		ReqTimeout:      toml.Duration(time.Microsecond * 3000),
 		KeepAlivePeriod: toml.Duration(time.Second * 5), //协议层keepalive 周期
-		Workers:         4,
 	}
 }
 

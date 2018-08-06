@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/masami10/rush/services/controller"
+	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/socket_writer"
 	"net"
@@ -37,7 +38,7 @@ type Controller struct {
 	recv_flag         bool
 	keepaliveDeadLine atomic.Value
 	closing           chan chan struct{}
-	cfg               controller.Config
+	cfg               controller.ControllerConfig
 	protocol          string
 }
 
@@ -84,6 +85,8 @@ func (c *Controller) Status() string {
 
 	return c.StatusValue.Load().(string)
 }
+
+func (c *Controller) LoadController(controller *storage.Controllers) {}
 
 func (c *Controller) updateStatus(status string) {
 
@@ -135,6 +138,8 @@ func (c *Controller) Protocol() string {
 }
 
 func (c *Controller) Start() {
+
+	c.Srv.DB.ResetTightning(c.cfg.SN)
 
 	c.w = socket_writer.NewSocketWriter(fmt.Sprintf("tcp://%s:%d", c.cfg.RemoteIP, c.cfg.Port), c)
 
