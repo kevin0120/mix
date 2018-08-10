@@ -85,6 +85,26 @@ func (p *Service) Close() error {
 	return nil
 }
 
+func (p *Service) ToolControl(sn string, enable bool) error {
+	// 判断控制器是否存在
+	v, exist := p.Parent.Controllers[sn]
+	if !exist {
+		// SN对应控制器不存在
+		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
+	}
+
+	c := v.(*Controller)
+
+	// 工具使能
+	err := c.ToolControl(enable)
+	if err != nil {
+		// 控制器请求失败
+		return err
+	}
+
+	return nil
+}
+
 func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64, count int, user_id int64) error {
 	// 判断控制器是否存在
 	v, exist := p.Parent.Controllers[sn]

@@ -18,6 +18,57 @@ type Methods struct {
 	service *Service
 }
 
+func (m *Methods) putToolControl(ctx iris.Context) {
+	var err error
+	var te ToolEnable
+	err = ctx.ReadJSON(&te)
+
+	if err != nil {
+		// 传输结构错误
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+
+	if te.Controller_SN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller_sn is required")
+		return
+	}
+
+	if te.GunSN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("gun_sn is required")
+		return
+	}
+
+	// 通过控制器设定程序
+	c, exist := m.service.ControllerService.Controllers[te.Controller_SN]
+	if !exist {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller not found")
+		return
+	}
+
+	switch c.Protocol() {
+	case controller.AUDIPROTOCOL:
+		err = m.service.AudiVw.ToolControl(te.Controller_SN, te.Enable)
+	case controller.OPENPROTOCOL:
+		err = m.service.OpenProtocol.ToolControl(te.Controller_SN, te.Enable)
+
+	default:
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("not supported")
+		return
+	}
+
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+}
+
 func (m *Methods) putPSets(ctx iris.Context) {
 
 	var err error

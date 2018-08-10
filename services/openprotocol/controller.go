@@ -21,7 +21,7 @@ const (
 	MAX_KEEP_ALIVE_CHECK = 3
 
 	REPLY_TIMEOUT   = time.Duration(100 * time.Millisecond)
-	MAX_REPLY_COUNT = 10
+	MAX_REPLY_COUNT = 20
 )
 
 type handlerPkg struct {
@@ -166,7 +166,7 @@ func (c *Controller) handleResult(result_data *ResultData) {
 		controllerResult.Count = db_result.Count + 1
 		controllerResult.Result_id = db_result.ResultId
 
-	} else {
+	} else if len(kvs) == 3 {
 		// pset模式
 
 		// 结果id-拧接次数-用户id
@@ -180,6 +180,9 @@ func (c *Controller) handleResult(result_data *ResultData) {
 		}
 
 		controllerResult.Workorder_ID = db_result.WorkorderID
+	} else {
+		c.Srv.diag.Error(id_info, errors.New("invalid id"))
+		return
 	}
 
 	dat_kvs := strings.Split(result_data.TimeStamp, ":")
@@ -626,6 +629,45 @@ func (c *Controller) pset(pset int) error {
 	var reply interface{} = nil
 	for i := 0; i < MAX_REPLY_COUNT; i++ {
 		reply = c.Response.get(MID_0018_PSET)
+		if reply != nil {
+			break
+		}
+
+		time.Sleep(REPLY_TIMEOUT)
+	}
+
+	if reply == nil {
+		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	}
+
+	s_reply := reply.(string)
+	if s_reply != request_errors["00"] {
+		return errors.New(s_reply)
+	}
+
+	return nil
+}
+
+func (c *Controller) ToolControl(enable bool) error {
+	if c.Status() == controller.STATUS_OFFLINE {
+		return errors.New("status offline")
+	}
+
+	s_cmd := MID_0042_TOOL_DISABLE
+	if enable {
+		s_cmd = MID_0043_TOOL_ENABLE
+	}
+
+	c.Response.Add(s_cmd, nil)
+	defer c.Response.remove(s_cmd)
+
+	s_send := GeneratePackage(s_cmd, "001", "", DEFAULT_MSG_END)
+
+	c.Write([]byte(s_send))
+
+	var reply interface{} = nil
+	for i := 0; i < MAX_REPLY_COUNT; i++ {
+		reply = c.Response.get(s_cmd)
 		if reply != nil {
 			break
 		}

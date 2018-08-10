@@ -266,10 +266,7 @@ func (p *Service) CVIResponse(header *CVI3Header, c net.Conn) {
 
 func (p *Service) Parse(msg string) ([]byte, error) {
 
-	if strings.Contains(msg, XML_RESULT_KEY) {
-		p.handle_buffer <- msg
-	}
-
+	p.handle_buffer <- msg
 	return nil, nil
 }
 
@@ -277,22 +274,57 @@ func (p *Service) HandleProcess() {
 	for {
 		select {
 		case msg := <-p.handle_buffer:
-			cvi3Result := CVI3Result{}
-			err := xml.Unmarshal([]byte(msg), &cvi3Result)
-			if err != nil {
-				p.diag.Error(fmt.Sprint("HandlerMsg err:", msg), err)
-				return
+
+			// 处理结果
+			if strings.Contains(msg, XML_RESULT_KEY) {
+				cvi3Result := CVI3Result{}
+				err := xml.Unmarshal([]byte(msg), &cvi3Result)
+				if err != nil {
+					p.diag.Error(fmt.Sprint("HandlerMsg err:", msg), err)
+					return
+				}
+
+				// 结果数据
+				controllerResult := controller.ControllerResult{}
+				XML2Result(&cvi3Result, &controllerResult)
+
+				// 波形文件
+				controllerCurveFile := controller.ControllerCurveFile{}
+				XML2Curve(&cvi3Result, &controllerCurveFile)
+
+				p.Parent.Handle(controllerResult, controllerCurveFile)
 			}
 
-			// 结果数据
-			controllerResult := controller.ControllerResult{}
-			XML2Result(&cvi3Result, &controllerResult)
+			// 处理事件
+			if strings.Contains(msg, XML_EVENT_KEY) {
 
-			// 波形文件
-			controllerCurveFile := controller.ControllerCurveFile{}
-			XML2Curve(&cvi3Result, &controllerCurveFile)
+				evt := Evt{}
+				err := xml.Unmarshal([]byte(msg), &evt)
+				if err != nil {
+					p.diag.Error(fmt.Sprint("HandlerMsg err:", msg), err)
+					return
+				}
 
-			p.Parent.Handle(controllerResult, controllerCurveFile)
+				// 拧紧枪状态变化
+				//if strings.Contains(msg, XML_STATUS_KEY) {
+				//	if evt.MSL_MSG.EVT.STS.ONC.RDY == 0 {
+				//	}
+				//}
+
+				// 套同选择器事件
+				//if strings.Contains(msg, XML_NUT_KEY) {
+				//	// 将套筒信息推送hmi
+				//	ws := wsnotify.WSSelector{}
+				//	ws.SN = ""
+				//	ws.Selectors = []int{}
+				//	for _, v := range evt.MSL_MSG.EVT.STS.ONC.NUT.NIDs {
+				//		ws.Selectors = append(ws.Selectors, nut_ids[v])
+				//	}
+				//	ws_str, _ := json.Marshal(ws)
+				//
+				//	p.WS.WSSendControllerSelectorStatus(string(ws_str))
+				//}
+			}
 
 		case <-p.closing:
 			p.wg.Done()
@@ -346,6 +378,33 @@ func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64,
 
 	// 设定pset并判断控制器响应
 	_, err := c.PSet(pset, workorder_id, result_id, count, user_id, c.cfg.ToolChannel)
+	if err != nil {
+		// 控制器请求失败
+		return err
+	}
+
+	return nil
+
+}
+
+// 拧紧抢使能控制
+func (p *Service) ToolControl(sn string, enable bool) error {
+	// 判断控制器是否存在
+	v, exist := p.Parent.Controllers[sn]
+	if !exist {
+		// SN对应控制器不存在
+		return errors.New(ERR_CVI3_NOT_FOUND)
+	}
+
+	c := v.(*Controller)
+
+	if c.Status() == controller.STATUS_OFFLINE {
+		// 控制器离线
+		return errors.New(ERR_CVI3_OFFLINE)
+	}
+
+	// 使能控制
+	err := c.ToolControl(enable, c.cfg.ToolChannel)
 	if err != nil {
 		// 控制器请求失败
 		return err

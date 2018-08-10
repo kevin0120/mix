@@ -39,7 +39,60 @@ const (
 	header_rsd = "0000"
 
 	XML_RESULT_KEY = "<CUR>"
+	XML_EVENT_KEY  = "<EVT>"
+	XML_NUT_KEY    = "<NUT"
+	XML_STATUS_KEY = "<RDY>"
 )
+
+var request_errors = map[uint]string{
+	1:  "Telegram count incorrect",
+	2:  "Reserved",
+	3:  "Incorrect length",
+	4:  "XML syntax error",
+	5:  "XML protocol: Version number conflict",
+	10: "Order cannot be executed",
+	99: "Undefined error",
+}
+
+var nut_ids = map[string]int{
+	"A": 1,
+	"B": 2,
+	"C": 3,
+	"D": 4,
+}
+
+type HandlerPkg struct {
+	IP  string
+	Msg string
+}
+
+type Evt struct {
+	XMLName xml.Name `xml:"ROOT"`
+	MSL_MSG struct {
+		EVT struct {
+			STS struct {
+				ONC struct {
+					RDY int `xml:"RDY"`
+					NUT struct {
+						NIDs []string `xml:"NID"`
+					} `xml:"NUT"`
+				} `xml:"ONC"`
+			} `xml:"STS"`
+		} `xml:"EVT"`
+	} `xml:"MSL_MSG"`
+}
+
+type StatusMsg struct {
+	XMLName xml.Name `xml:"ROOT"`
+	MSL_MSG struct {
+		GRP struct {
+			IPA string `xml:"IPA"`
+			MSG struct {
+				MGS string `xml:"MGS"`
+			} `xml:"MSG"`
+		} `xml:"GRP"`
+	} `xml:"MSL_MSG"`
+}
 
 type PSetData struct {
 	Name  string  `xml:"NAM"`
@@ -269,5 +322,4 @@ func XML2Result(result *CVI3Result, rr *controller.ControllerResult) {
 			}
 		}
 	}
-
 }

@@ -33,6 +33,8 @@ const (
 	MID_0065_OLD_DATA              = "0065"
 	MID_0130_JOB_OFF               = "0130"
 	MID_0250_SELECTOR_SUBSCRIBE    = "0250"
+	MID_0042_TOOL_DISABLE          = "0042"
+	MID_0043_TOOL_ENABLE           = "0043"
 
 	MID_0008_DATA_SUB = "0008"
 
@@ -322,6 +324,28 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 
 	case MID_0010_PSET_LIST_REQUEST:
 		h.MID = MID_0010_PSET_LIST_REQUEST
+		h.LEN = LEN_HEADER
+		h.Revision = rev
+		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + end
+
+	case MID_0042_TOOL_DISABLE:
+		h.MID = MID_0042_TOOL_DISABLE
+		h.LEN = LEN_HEADER
+		h.Revision = rev
+		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + end
+
+	case MID_0043_TOOL_ENABLE:
+		h.MID = MID_0043_TOOL_ENABLE
 		h.LEN = LEN_HEADER
 		h.Revision = rev
 		h.NoAck = ""
