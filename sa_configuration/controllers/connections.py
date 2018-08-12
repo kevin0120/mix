@@ -27,10 +27,21 @@ class HMIConnections(http.Controller):
             body = json.dumps({'msg': "Workcenter Cofiguration is not Complete"})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=404, headers=headers)
-        masterpc_connection = workercenter_id.masterpc_id.connection_ids.filtered(lambda r: r.protocol == 'http')[0] if workercenter_id.masterpc_id.connection_ids else None
-        io_connection = workercenter_id.io_id.connection_ids.filtered(lambda r: r.protocol == 'modbustcp')[0] if workercenter_id.io_id.connection_ids else None
-        rfid_connection = workercenter_id.rfid_id.connection_ids.filtered(lambda r: r.protocol == 'rawtcp')[0] if workercenter_id.rfid_id.connection_ids else None
-
+        c = workercenter_id.masterpc_id.connection_ids.filtered(lambda r: r.protocol == 'http')
+        if c:
+            masterpc_connection = c[0]
+        else:
+            masterpc_connection = None
+        c = workercenter_id.io_id.connection_ids.filtered(lambda r: r.protocol == 'modbustcp')
+        if c:
+            io_connection = c[0]
+        else:
+            io_connection = None
+        c = workercenter_id.rfid_id.connection_ids.filtered(lambda r: r.protocol == 'rawtcp')
+        if c:
+            rfid_connection = c[0]
+        else:
+            rfid_connection = None
 
         _controllers = []
         for controller in workercenter_id.controller_ids:
