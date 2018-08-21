@@ -695,7 +695,12 @@
           "description": "车辆识别号",
           "example": "LVS123456"
         }
-      }
+      },
+      "required": [
+        "pset",
+        "controller_sn",
+        "car_type"
+      ]
     },
     "PsetDetail": {
       "type": "object",
@@ -890,7 +895,12 @@
           "description": "车辆识别号",
           "example": "LVS123456"
         }
-      }
+      },
+      "required": [
+        "job_id",
+        "controller_sn",
+        "car_type"
+      ]
     },
     "jobmode": {
       "type": "object",
@@ -1307,7 +1317,11 @@
           "description": "是否使能",
           "example": true
         }
-      }
+      },
+      "required": [
+        "controller_sn",
+        "enable"
+      ]
     }
   }
 }

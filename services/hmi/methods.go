@@ -37,11 +37,11 @@ func (m *Methods) putToolControl(ctx iris.Context) {
 		return
 	}
 
-	if te.GunSN == "" {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("gun_sn is required")
-		return
-	}
+	//if te.GunSN == "" {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("gun_sn is required")
+	//	return
+	//}
 
 	// 通过控制器设定程序
 	c, exist := m.service.ControllerService.Controllers[te.Controller_SN]
@@ -182,11 +182,9 @@ func (m *Methods) putManualPSets(ctx iris.Context) {
 		return
 	}
 
-	if pset.GunSN == "" {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("gun_sn is required")
-		return
-	}
+	//if pset.GunSN == "" {
+	//	pset.GunSN = ""
+	//}
 
 	if pset.PSet == 0 {
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -194,11 +192,9 @@ func (m *Methods) putManualPSets(ctx iris.Context) {
 		return
 	}
 
-	if pset.Vin == "" {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("vin is required")
-		return
-	}
+	//if pset.Vin == "" {
+	//	pset.Vin = ""
+	//}
 
 	if pset.CarType == "" {
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -570,11 +566,11 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 		return
 	}
 
-	if job.Vin == "" {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("vin is required")
-		return
-	}
+	//if job.Vin == "" {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("vin is required")
+	//	return
+	//}
 
 	if job.UserID == 0 {
 		job.UserID = DEFAULT_USER_ID
