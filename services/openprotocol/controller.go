@@ -131,6 +131,19 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 		//case MID_7410_LAST_CURVE:
 		// 处理波形
 
+	case MID_0031_JOB_LIST_REPLY:
+		job_list := JobList{}
+		job_list.Deserialize(pkg.Body)
+
+		c.Response.update(MID_0030_JOB_LIST_REQUEST, job_list)
+
+	case MID_0033_JOB_DETAIL_REPLY:
+		// job详细数据
+		job_detail := JobDetail{}
+		job_detail.Deserialize(pkg.Body)
+
+		c.Response.update(MID_0032_JOB_DETAIL_REQUEST, job_detail)
+
 	case MID_0004_CMD_ERR:
 		// 请求错误
 
@@ -347,6 +360,78 @@ func (c *Controller) GetPSetDetail(pset int) (PSetDetail, error) {
 
 	default:
 		return obj_pset_detail, errors.New(controller.ERR_KNOWN)
+	}
+
+}
+
+func (c *Controller) GetJobList() ([]int, error) {
+	var jobs []int
+	if c.Status() == controller.STATUS_OFFLINE {
+		return jobs, errors.New(controller.STATUS_OFFLINE)
+	}
+
+	defer c.Response.remove(MID_0030_JOB_LIST_REQUEST)
+	c.Response.Add(MID_0030_JOB_LIST_REQUEST, nil)
+
+	psets_request := GeneratePackage(MID_0030_JOB_LIST_REQUEST, "002", "", DEFAULT_MSG_END)
+	c.Write([]byte(psets_request))
+
+	var reply interface{} = nil
+
+	for i := 0; i < MAX_REPLY_COUNT; i++ {
+		reply = c.Response.get(MID_0030_JOB_LIST_REQUEST)
+		if reply != nil {
+			break
+		}
+
+		time.Sleep(REPLY_TIMEOUT)
+	}
+
+	if reply == nil {
+		return jobs, errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	}
+
+	job_list := reply.(JobList)
+
+	return job_list.jobs, nil
+}
+
+func (c *Controller) GetJobDetail(job int) (JobDetail, error) {
+	var obj_job_detail JobDetail
+
+	if c.Status() == controller.STATUS_OFFLINE {
+		return obj_job_detail, errors.New(controller.STATUS_OFFLINE)
+	}
+
+	defer c.Response.remove(MID_0032_JOB_DETAIL_REQUEST)
+	c.Response.Add(MID_0032_JOB_DETAIL_REQUEST, nil)
+
+	job_detail := GeneratePackage(MID_0032_JOB_DETAIL_REQUEST, "003", fmt.Sprintf("%04d", job), DEFAULT_MSG_END)
+	c.Write([]byte(job_detail))
+
+	var reply interface{} = nil
+	for i := 0; i < MAX_REPLY_COUNT; i++ {
+		reply = c.Response.get(MID_0032_JOB_DETAIL_REQUEST)
+		if reply != nil {
+			break
+		}
+
+		time.Sleep(REPLY_TIMEOUT)
+	}
+
+	if reply == nil {
+		return obj_job_detail, errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	}
+
+	switch v := reply.(type) {
+	case string:
+		return obj_job_detail, errors.New(v)
+
+	case JobDetail:
+		return reply.(JobDetail), nil
+
+	default:
+		return obj_job_detail, errors.New(controller.ERR_KNOWN)
 	}
 
 }

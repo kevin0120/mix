@@ -7,7 +7,7 @@ import (
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/openprotocol"
 	"github.com/masami10/rush/services/storage"
-	)
+)
 
 type Diagnostic interface {
 	Error(msg string, err error)
@@ -73,6 +73,22 @@ func (s *Service) Open() error {
 		Method:      "GET",
 		Pattern:     "/pset-detail",
 		HandlerFunc: s.methods.getPSetDetail,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "GET",
+		Pattern:     "/jobs",
+		HandlerFunc: s.methods.getJobList,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "GET",
+		Pattern:     "/job-detail",
+		HandlerFunc: s.methods.getJobDetail,
 	}
 	s.Httpd.Handler[0].AddRoute(r)
 

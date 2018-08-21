@@ -77,6 +77,6 @@ type ResultValue struct {
 }
 
 type CurveObject struct {
-	File string
+	File  string
 	Count int
 }

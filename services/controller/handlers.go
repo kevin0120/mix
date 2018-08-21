@@ -259,7 +259,6 @@ func (h *Handlers) handleResult(result *ControllerResult, dbresult *storage.Resu
 		h.HandlerBuf <- pkg
 	}
 
-
 	defer func() {
 		h.controllerService.diag.Debug("缓存结果到数据库 ...")
 		_, err := h.controllerService.DB.UpdateResult(dbresult)
@@ -370,7 +369,7 @@ func (h *Handlers) Handle(controllerResult interface{}, controllerCurveFile inte
 	}
 
 	cur_obj := CurveObject{
-		File: model_controllerResult.CurFile,
+		File:  model_controllerResult.CurFile,
 		Count: model_controllerResult.Count,
 	}
 

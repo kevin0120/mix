@@ -202,3 +202,37 @@ func (p *Service) GetPSetDetail(sn string, pset int) (PSetDetail, error) {
 
 	return pset_detail, nil
 }
+
+func (p *Service) GetJobList(sn string) ([]int, error) {
+	v, exist := p.Parent.Controllers[sn]
+	if !exist {
+		// SN对应控制器不存在
+		return []int{}, errors.New(controller.ERR_CONTROLER_NOT_FOUND)
+	}
+
+	c := v.(*Controller)
+
+	job_list, err := c.GetJobList()
+	if err != nil {
+		return []int{}, err
+	}
+
+	return job_list, nil
+}
+
+func (p *Service) GetJobDetail(sn string, job int) (JobDetail, error) {
+	v, exist := p.Parent.Controllers[sn]
+	if !exist {
+		// SN对应控制器不存在
+		return JobDetail{}, errors.New(controller.ERR_CONTROLER_NOT_FOUND)
+	}
+
+	c := v.(*Controller)
+
+	job_detail, err := c.GetJobDetail(job)
+	if err != nil {
+		return JobDetail{}, err
+	}
+
+	return job_detail, nil
+}

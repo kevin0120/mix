@@ -8,7 +8,7 @@ import (
 	"github.com/masami10/rush/services/openprotocol"
 	"github.com/masami10/rush/services/wsnotify"
 	"strconv"
-		)
+)
 
 const (
 	DEFAULT_USER_ID = 1
@@ -245,6 +245,97 @@ func (m *Methods) getPSetDetail(ctx iris.Context) {
 	}
 
 	body, _ := json.Marshal(pset_detail)
+	ctx.Header("content-type", "application/json")
+	ctx.Write(body)
+}
+
+func (m *Methods) getJobList(ctx iris.Context) {
+
+	controller_sn := ctx.URLParam("controller_sn")
+
+	if controller_sn == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller_sn is required")
+		return
+	}
+
+	c, exist := m.service.ControllerService.Controllers[controller_sn]
+	if !exist {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller not found")
+		return
+	}
+
+	var err error = nil
+	var job_list []int
+	switch c.Protocol() {
+	case controller.OPENPROTOCOL:
+		job_list, err = m.service.OpenProtocol.GetJobList(controller_sn)
+		if err != nil {
+			ctx.StatusCode(iris.StatusBadRequest)
+			ctx.WriteString(err.Error())
+			return
+		}
+
+	default:
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("not supported")
+		return
+	}
+
+	body, _ := json.Marshal(job_list)
+	ctx.Header("content-type", "application/json")
+	ctx.Write(body)
+}
+
+func (m *Methods) getJobDetail(ctx iris.Context) {
+
+	controller_sn := ctx.URLParam("controller_sn")
+	job := ctx.URLParam("job")
+
+	if controller_sn == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller_sn is required")
+		return
+	}
+
+	if job == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("job is required")
+		return
+	}
+
+	v_job, err := strconv.Atoi(job)
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("pset format error")
+		return
+	}
+
+	c, exist := m.service.ControllerService.Controllers[controller_sn]
+	if !exist {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller not found")
+		return
+	}
+
+	var job_detail openprotocol.JobDetail
+	switch c.Protocol() {
+	case controller.OPENPROTOCOL:
+		job_detail, err = m.service.OpenProtocol.GetJobDetail(controller_sn, v_job)
+		if err != nil {
+			ctx.StatusCode(iris.StatusBadRequest)
+			ctx.WriteString(err.Error())
+			return
+		}
+
+	default:
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("not supported")
+		return
+	}
+
+	body, _ := json.Marshal(job_detail)
 	ctx.Header("content-type", "application/json")
 	ctx.Write(body)
 }

@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"sync/atomic"
 	"time"
-	)
+)
 
 type Diagnostic interface {
 	Error(msg string, err error)
@@ -156,7 +156,6 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 
 	var finalErr error = nil
 	dbWorkorders := make([]storage.Workorders, len(workorders))
-
 
 	for i, v := range workorders {
 
