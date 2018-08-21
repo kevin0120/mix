@@ -33,6 +33,7 @@ type HandlerPkgAiis struct {
 	r         *storage.Results
 	workorder *storage.Workorders
 	result    *ControllerResult
+	curve_obj *CurveObject
 }
 
 type HandlerPkg struct {
@@ -75,7 +76,7 @@ func (h *Handlers) asyncHandlerProcess() {
 			switch pkg.HandlerType {
 			case HANDLER_TYPE_AIIS:
 				pkg_aiis := pkg.Pkg.(HandlerPkgAiis)
-				h.PushAiis(pkg_aiis.needPush, pkg_aiis.r, pkg_aiis.workorder, pkg_aiis.result)
+				h.PushAiis(pkg_aiis.needPush, pkg_aiis.r, pkg_aiis.workorder, pkg_aiis.result, pkg_aiis.curve_obj)
 
 			case HANDLER_TYPE_CURVE:
 				pkg_curve := pkg.Pkg.(HandlerPkgCurve)
@@ -89,7 +90,7 @@ func (h *Handlers) asyncHandlerProcess() {
 	}
 }
 
-func (h *Handlers) PushAiis(needPush bool, r *storage.Results, workorder *storage.Workorders, result *ControllerResult) error {
+func (h *Handlers) PushAiis(needPush bool, r *storage.Results, workorder *storage.Workorders, result *ControllerResult, curve_obj *CurveObject) error {
 
 	if needPush {
 
@@ -167,10 +168,20 @@ func (h *Handlers) PushAiis(needPush bool, r *storage.Results, workorder *storag
 			return err
 		}
 
+		curve_exist := false
 		aiisCurve := aiis.CURObject{}
 		for _, v := range curves {
+			if v.CurveFile == curve_obj.File {
+				curve_exist = true
+			}
 			aiisCurve.OP = v.Count
 			aiisCurve.File = v.CurveFile
+			aiisResult.CURObjects = append(aiisResult.CURObjects, aiisCurve)
+		}
+
+		if !curve_exist {
+			aiisCurve.OP = curve_obj.Count
+			aiisCurve.File = curve_obj.File
 			aiisResult.CURObjects = append(aiisResult.CURObjects, aiisCurve)
 		}
 
@@ -188,7 +199,7 @@ func (h *Handlers) PushAiis(needPush bool, r *storage.Results, workorder *storag
 }
 
 // 处理结果数据
-func (h *Handlers) handleResult(result *ControllerResult, dbresult *storage.Results, dbworkorder *storage.Workorders) error {
+func (h *Handlers) handleResult(result *ControllerResult, dbresult *storage.Results, dbworkorder *storage.Workorders, curve_obj *CurveObject) error {
 	h.controllerService.diag.Debug("处理结果数据 ...")
 
 	needPushAiis := false
@@ -231,18 +242,23 @@ func (h *Handlers) handleResult(result *ControllerResult, dbresult *storage.Resu
 
 	h.controllerService.WS.WSSendResult(dbworkorder.HMISN, string(ws_str))
 
-	pkg_aiis := HandlerPkgAiis{
-		needPush:  needPushAiis,
-		r:         dbresult,
-		workorder: dbworkorder,
-		result:    result,
+	if needPushAiis {
+		pkg_aiis := HandlerPkgAiis{
+			needPush:  needPushAiis,
+			r:         dbresult,
+			workorder: dbworkorder,
+			result:    result,
+			curve_obj: curve_obj,
+		}
+
+		pkg := HandlerPkg{
+			HandlerType: HANDLER_TYPE_AIIS,
+			Pkg:         pkg_aiis,
+		}
+
+		h.HandlerBuf <- pkg
 	}
 
-	pkg := HandlerPkg{
-		HandlerType: HANDLER_TYPE_AIIS,
-		Pkg:         pkg_aiis,
-	}
-	h.HandlerBuf <- pkg
 
 	defer func() {
 		h.controllerService.diag.Debug("缓存结果到数据库 ...")
@@ -353,6 +369,11 @@ func (h *Handlers) Handle(controllerResult interface{}, controllerCurveFile inte
 		h.HandlerBuf <- pkg
 	}
 
-	h.handleResult(&model_controllerResult, &result, &workorder)
+	cur_obj := CurveObject{
+		File: model_controllerResult.CurFile,
+		Count: model_controllerResult.Count,
+	}
+
+	h.handleResult(&model_controllerResult, &result, &workorder, &cur_obj)
 
 }

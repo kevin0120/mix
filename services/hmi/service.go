@@ -7,7 +7,7 @@ import (
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/openprotocol"
 	"github.com/masami10/rush/services/storage"
-)
+	)
 
 type Diagnostic interface {
 	Error(msg string, err error)

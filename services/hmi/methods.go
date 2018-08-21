@@ -8,7 +8,7 @@ import (
 	"github.com/masami10/rush/services/openprotocol"
 	"github.com/masami10/rush/services/wsnotify"
 	"strconv"
-)
+		)
 
 const (
 	DEFAULT_USER_ID = 1
@@ -376,6 +376,7 @@ func (m *Methods) putJobs(ctx iris.Context) {
 
 // 根据hmi序列号以及vin或knr取得工单
 func (m *Methods) getWorkorder(ctx iris.Context) {
+
 	var err error
 	hmi_sn := ctx.URLParam("hmi_sn")
 	code := ctx.URLParam("code")

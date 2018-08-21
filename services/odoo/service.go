@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"sync/atomic"
 	"time"
-)
+	)
 
 type Diagnostic interface {
 	Error(msg string, err error)
@@ -153,12 +153,21 @@ func (s *Service) getWorkorder(url string, method string) ([]byte, error) {
 }
 
 func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workorders, error) {
+
 	var finalErr error = nil
 	dbWorkorders := make([]storage.Workorders, len(workorders))
 
+
 	for i, v := range workorders {
+
 		if len(v.Consumes) == 0 {
 			// 忽略没有消耗品的工单
+			continue
+		}
+
+		exist, _ := s.DB.WorkorderExists(v.ID)
+		if exist {
+			// 忽略已存在的工单
 			continue
 		}
 
