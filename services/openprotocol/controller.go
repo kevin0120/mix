@@ -165,6 +165,15 @@ func (c *Controller) handleResult(result_data *ResultData) {
 	id_info := result_data.VIN + result_data.ID2 + result_data.ID3 + result_data.ID4
 	kvs := strings.Split(id_info, "-")
 
+	if id_info == "" {
+		c.Srv.diag.Error(id_info, errors.New("invalid id"))
+		return
+	}
+
+	if kvs[0] == "manual" {
+		return
+	}
+
 	if len(kvs) == 2 {
 		// job模式
 
@@ -926,7 +935,7 @@ func (c *Controller) CurveSubscribe() error {
 	return nil
 }
 
-func (c *Controller) PSet(pset int, workorder_id int64, result_id int64, count int, user_id int64, channel int) (uint32, error) {
+func (c *Controller) PSet(pset int, channel int, ex_info string) (uint32, error) {
 	// 设定结果标识
 
 	if c.Mode.Load().(string) != MODE_PSET {
@@ -934,7 +943,7 @@ func (c *Controller) PSet(pset int, workorder_id int64, result_id int64, count i
 	}
 
 	// 结果id-拧接次数-用户id
-	err := c.IdentifierSet(fmt.Sprintf("%d-%d-%d", result_id, count, user_id))
+	err := c.IdentifierSet(ex_info)
 	if err != nil {
 		return 0, err
 	}

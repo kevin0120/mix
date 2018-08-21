@@ -62,6 +62,14 @@ func (s *Service) Open() error {
 
 	r = httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "PUT",
+		Pattern:     "/psets-manual",
+		HandlerFunc: s.methods.putManualPSets,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
 		Method:      "GET",
 		Pattern:     "/psets",
 		HandlerFunc: s.methods.getPSetList,
@@ -97,6 +105,14 @@ func (s *Service) Open() error {
 		Method:      "PUT",
 		Pattern:     "/jobs",
 		HandlerFunc: s.methods.putJobs,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "PUT",
+		Pattern:     "/jobs-manual",
+		HandlerFunc: s.methods.putManualJobs,
 	}
 	s.Httpd.Handler[0].AddRoute(r)
 

@@ -11,6 +11,38 @@
     "http"
   ],
   "paths": {
+    "/tool-enable": {
+      "put": {
+        "tags": [
+          "HMI"
+        ],
+        "summary": "工具使能控制",
+        "description": "工具使能控制",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/tool_enable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "设置成功"
+          },
+          "400": {
+            "description": "设置失败"
+          }
+        }
+      }
+    },
     "/psets": {
       "put": {
         "tags": [
@@ -75,6 +107,38 @@
           },
           "400": {
             "description": "获取失败"
+          }
+        }
+      }
+    },
+    "/psets-manual": {
+      "put": {
+        "tags": [
+          "HMI"
+        ],
+        "summary": "设定拧接程序",
+        "description": "设定拧接程序,第一次拧接时(调用成功会返回result_id)，不用传result_id和次数。后续拧接时需要传result_id和拧接次数",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/pset_manual"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "设置成功"
+          },
+          "400": {
+            "description": "设置失败"
           }
         }
       }
@@ -185,6 +249,38 @@
           },
           "400": {
             "description": "获取失败"
+          }
+        }
+      }
+    },
+    "/jobs-manual": {
+      "put": {
+        "tags": [
+          "HMI"
+        ],
+        "summary": "设定装配过程",
+        "description": "设定装配过程",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/job_manual"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "设置成功"
+          },
+          "400": {
+            "description": "设置失败"
           }
         }
       }
@@ -566,6 +662,41 @@
         }
       }
     },
+    "pset_manual": {
+      "type": "object",
+      "properties": {
+        "pset": {
+          "type": "integer",
+          "description": "程序号",
+          "example": 1
+        },
+        "controller_sn": {
+          "type": "string",
+          "description": "控制器序列号",
+          "example": "0001"
+        },
+        "gun_sn": {
+          "type": "string",
+          "description": "拧紧枪序列号",
+          "example": "123456"
+        },
+        "user_id": {
+          "type": "integer",
+          "description": "用户id",
+          "example": 1
+        },
+        "car_type": {
+          "type": "string",
+          "description": "车型编号",
+          "example": "CAR123"
+        },
+        "vin": {
+          "type": "string",
+          "description": "车辆识别号",
+          "example": "LVS123456"
+        }
+      }
+    },
     "PsetDetail": {
       "type": "object",
       "properties": {
@@ -728,6 +859,36 @@
           "type": "integer",
           "description": "用户id",
           "example": 1
+        }
+      }
+    },
+    "job_manual": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "type": "number",
+          "description": "装配过程号",
+          "example": 1
+        },
+        "controller_sn": {
+          "type": "string",
+          "description": "控制器序列号",
+          "example": "0001"
+        },
+        "user_id": {
+          "type": "integer",
+          "description": "用户id",
+          "example": 1
+        },
+        "car_type": {
+          "type": "string",
+          "description": "车型编号",
+          "example": "CAR123"
+        },
+        "vin": {
+          "type": "string",
+          "description": "车辆识别号",
+          "example": "LVS123456"
         }
       }
     },
@@ -1125,6 +1286,26 @@
           "type": "number",
           "description": "拧接时间（ms）",
           "example": 1
+        }
+      }
+    },
+    "tool_enable": {
+      "type": "object",
+      "properties": {
+        "controller_sn": {
+          "type": "string",
+          "description": "控制器序列号",
+          "example": "0001"
+        },
+        "gun_sn": {
+          "type": "string",
+          "description": "工具序列号",
+          "example": "0001"
+        },
+        "enable": {
+          "type": "boolean",
+          "description": "是否使能",
+          "example": true
         }
       }
     }

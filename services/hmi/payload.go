@@ -9,6 +9,15 @@ type PSet struct {
 	UserID        int64  `json:"user_id"`
 }
 
+type PSetManual struct {
+	Controller_SN string `json:"controller_sn"`
+	GunSN         string `json:"gun_sn"`
+	PSet          int    `json:"pset"`
+	UserID        int64  `json:"user_id"`
+	CarType       string `json:"car_type"`
+	Vin           string `json:"vin"`
+}
+
 type ToolEnable struct {
 	Controller_SN string `json:"controller_sn"`
 	GunSN         string `json:"gun_sn"`
@@ -20,6 +29,14 @@ type Job struct {
 	Job           int    `json:"job_id"`
 	WorkorderiD   int64  `json:"workorder_id"`
 	UserID        int64  `json:"user_id"`
+}
+
+type JobManual struct {
+	Controller_SN string `json:"controller_sn"`
+	Job           int    `json:"job_id"`
+	UserID        int64  `json:"user_id"`
+	CarType       string `json:"car_type"`
+	Vin           string `json:"vin"`
 }
 
 type ControllerMode struct {

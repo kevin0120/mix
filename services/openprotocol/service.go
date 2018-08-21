@@ -105,7 +105,29 @@ func (p *Service) ToolControl(sn string, enable bool) error {
 	return nil
 }
 
-func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64, count int, user_id int64) error {
+func (p *Service) PSet(sn string, pset int, result_id int64, count int, user_id int64) error {
+	// 判断控制器是否存在
+	v, exist := p.Parent.Controllers[sn]
+	if !exist {
+		// SN对应控制器不存在
+		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
+	}
+
+	c := v.(*Controller)
+
+	ex_info := fmt.Sprintf("%d-%d-%d", result_id, count, user_id)
+
+	// 设定pset并判断控制器响应
+	_, err := c.PSet(pset, c.cfg.ToolChannel, ex_info)
+	if err != nil {
+		// 控制器请求失败
+		return err
+	}
+
+	return nil
+}
+
+func (p *Service) PSetManual(sn string, pset int, user_id int64, ex_info string) error {
 	// 判断控制器是否存在
 	v, exist := p.Parent.Controllers[sn]
 	if !exist {
@@ -116,7 +138,7 @@ func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64,
 	c := v.(*Controller)
 
 	// 设定pset并判断控制器响应
-	_, err := c.PSet(pset, workorder_id, result_id, count, user_id, c.cfg.ToolChannel)
+	_, err := c.PSet(pset, c.cfg.ToolChannel, "manual-"+ex_info)
 	if err != nil {
 		// 控制器请求失败
 		return err
@@ -136,6 +158,27 @@ func (p *Service) JobSet(sn string, job int, workorder_id int64, user_id int64) 
 
 	//workorder_id-user_id
 	id_info := fmt.Sprintf("%d-%d", workorder_id, user_id)
+
+	err := c.JobSet(id_info, job)
+	if err != nil {
+		// 控制器请求失败
+		return err
+	}
+
+	return nil
+}
+
+func (p *Service) JobSetManual(sn string, job int, user_id int64, ex_info string) error {
+	v, exist := p.Parent.Controllers[sn]
+	if !exist {
+		// SN对应控制器不存在
+		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
+	}
+
+	c := v.(*Controller)
+
+	//workorder_id-user_id
+	id_info := fmt.Sprintf("manual-%s-%d", ex_info, user_id)
 
 	err := c.JobSet(id_info, job)
 	if err != nil {
