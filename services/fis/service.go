@@ -159,7 +159,9 @@ func (s *Service) SaveRestartPoint(restartPoint string, ch string) {
 	}
 }
 
-func (s *Service) HandleMO(msg string) {
+func (s *Service) HandleMO(str string) {
+
+	msg := strings.TrimSpace(str)
 
 	c := s.Config()
 
