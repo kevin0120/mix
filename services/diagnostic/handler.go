@@ -321,3 +321,35 @@ type FisHandler struct {
 func (h *FisHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
+
+type WsHandler struct {
+	l Logger
+}
+
+type ChanganHandler struct {
+	l Logger
+}
+
+func (h *ChanganHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+func (h *WsHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+func (h *WsHandler) Disconnect(id string) {
+	h.l.Info("ws Connection disconnected", String("ID", id))
+}
+
+func (h *WsHandler) Close() {
+	h.l.Info("ws server closing")
+}
+
+func (h *WsHandler) OnMessage(msg string) {
+	h.l.Debug(msg)
+}
+
+func (h *WsHandler) Closed() {
+	h.l.Info("ws server closed")
+}

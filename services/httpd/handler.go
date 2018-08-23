@@ -21,6 +21,7 @@ const (
 )
 
 type Route struct {
+	RouteType   string
 	Method      string
 	Pattern     string
 	HandlerFunc context.Handler
@@ -63,7 +64,11 @@ func (h *Handler) AddRoute(r Route) error {
 	if len(r.Pattern) > 0 && r.Pattern[0] != '/' {
 		return fmt.Errorf("route patterns must begin with a '/' %s", r.Pattern)
 	}
-	(*h.party).Handle(r.Method, r.Pattern, r.HandlerFunc)
+	if r.RouteType == ROUTE_TYPE_HTTP {
+		(*h.party).Handle(r.Method, r.Pattern, r.HandlerFunc)
+	} else {
+		h.service.Get(r.Pattern, r.HandlerFunc)
+	}
 
 	return nil
 }

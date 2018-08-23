@@ -15,7 +15,9 @@ import (
 	"github.com/masami10/aiis/services/odoo"
 	"github.com/masami10/aiis/services/pmon"
 	"github.com/masami10/aiis/services/rush"
+	"github.com/masami10/aiis/services/wsnotify"
 	"github.com/pkg/errors"
+	"github.com/masami10/aiis/services/changan"
 )
 
 type Config struct {
@@ -29,6 +31,10 @@ type Config struct {
 	Pmon pmon.Config `yaml:"pmon"`
 
 	Fis fis.Config `yaml:"fis"`
+
+	Changan changan.Config `yaml:"changan"`
+
+	Ws wsnotify.Config `yaml:"websocket"`
 
 	Odoo odoo.Config `yaml:"odoo"`
 
@@ -52,6 +58,8 @@ func NewConfig() *Config {
 	c.Odoo = odoo.NewConfig()
 	c.Storage = storage.NewConfig()
 	c.Rush = rush.NewConfig()
+	c.Ws = wsnotify.NewConfig()
+	c.Changan = changan.NewConfig()
 
 	return c
 }
@@ -93,6 +101,10 @@ func (c *Config) Validate() error {
 
 	if err := c.Fis.Validate(); err != nil {
 		return errors.Wrap(err, "fis")
+	}
+
+	if err := c.Changan.Validate(); err != nil {
+		return errors.Wrap(err, "changan")
 	}
 
 	if err := c.Odoo.Validate(); err != nil {

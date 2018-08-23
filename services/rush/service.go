@@ -113,6 +113,7 @@ func (s *Service) getResultUpdate(ctx iris.Context) {
 func (s *Service) Open() error {
 
 	r := httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
 		Method:      "PUT",
 		Pattern:     "/operation.results/{result_id:long}",
 		HandlerFunc: s.getResultUpdate,
@@ -120,6 +121,7 @@ func (s *Service) Open() error {
 	s.HTTPDService.Handler[0].AddRoute(r)
 
 	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
 		Method:      "PUT",
 		Pattern:     "/fis.results",
 		HandlerFunc: s.putFisResult,

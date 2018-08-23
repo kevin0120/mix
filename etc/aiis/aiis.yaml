@@ -19,6 +19,10 @@ httpd:
     - PUT
     - PATCH
     - OPTIONS
+websocket:
+  route: /aiis/v1/ws
+  read_buf_size: 4096
+  write_buf_size: 4096
 pmon:
   path: /home/linshenqi/go/src/github.com/masami10/aiis/etc/pmon/PMON.CFG
   workers: 4
@@ -49,6 +53,10 @@ fis:
     - SIH
     - HBV
     - AGM
+changan:
+  andon_ip: 192.168.1.1
+  andon_port: 8888
+  enable: true
 odoo:
   url: http://172.17.0.1:8069
   route: /api/v1/mrp.productions

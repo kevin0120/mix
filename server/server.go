@@ -11,6 +11,8 @@ import (
 	"github.com/masami10/aiis/services/pmon"
 	"github.com/masami10/aiis/services/rush"
 	"github.com/masami10/aiis/services/storage"
+	"github.com/masami10/aiis/services/wsnotify"
+	"github.com/masami10/aiis/services/changan"
 )
 
 type BuildInfo struct {
@@ -41,7 +43,8 @@ type Server struct {
 	FisService   *fis.Service
 	OdooService  *odoo.Service
 
-	StorageService *storage.Service
+	StorageService  *storage.Service
+	WSNotifyService *wsnotify.Service
 
 	config *Config
 	// List of services in startup order
@@ -77,6 +80,8 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.initHTTPDService()
 
+	s.appendWebsocketService()
+
 	err = s.initPMONService()
 	if err != nil {
 		return nil, err
@@ -89,6 +94,8 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	s.appendPmonService()
 
 	s.appendFisService()
+
+	s.appendChanganService()
 
 	s.appendRushService() //必须后于http & storage
 
@@ -159,6 +166,19 @@ func (s *Server) appendPmonService() error {
 	return nil
 }
 
+func (s *Server) appendWebsocketService() error {
+	c := s.config.Ws
+	d := s.DiagService.NewWebsocketHandler()
+	srv := wsnotify.NewService(c, d)
+
+	srv.Httpd = s.HTTPDService //http 服务注入
+
+	s.WSNotifyService = srv
+	s.AppendService("websocket", srv)
+
+	return nil
+}
+
 func (s *Server) appendFisService() error {
 	d := s.DiagService.NewFisHandler()
 	c := s.config.Fis
@@ -167,6 +187,15 @@ func (s *Server) appendFisService() error {
 	srv.Odoo = s.OdooService
 	s.FisService = srv
 	s.AppendService("fis", srv)
+	return nil
+}
+
+func (s *Server) appendChanganService() error {
+	d := s.DiagService.NewChanganHandler()
+	c := s.config.Changan
+
+	srv := changan.NewService(d, c, s.HTTPDService, s.WSNotifyService)
+	s.AppendService("changan", srv)
 	return nil
 }
 
