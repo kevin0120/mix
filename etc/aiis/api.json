@@ -1,0 +1,51 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "0.0.1",
+    "title": "AIIS API"
+  },
+  "host": "172.17.0.1:9092",
+  "basePath": "/aiis/v1",
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/andon-test": {
+      "put": {
+        "tags": [
+          "Andon"
+        ],
+        "summary": "ANDON通信测试",
+        "description": "ANDON通信测试",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/andon"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "设置成功"
+          },
+          "400": {
+            "description": "设置失败"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "andon": {
+      "type": "object"
+    }
+  }
+}
