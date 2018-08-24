@@ -82,7 +82,16 @@ func (s *Service) Open() error {
 		if err := engine.Sync2(new(Curves)); err != nil {
 			return errors.Wrapf(err, "Create Table Curves fail")
 		}
+	}
 
+	exist, err = engine.IsTableExist("Controllers")
+	if err != nil {
+		return errors.Wrapf(err, "Check Table exist %s fail", "Controllers")
+	}
+	if !exist {
+		if err := engine.Sync2(new(Controllers)); err != nil {
+			return errors.Wrapf(err, "Create Table Controllers fail")
+		}
 	}
 
 	engine.SetMaxOpenConns(c.MaxConnects) // always success
@@ -243,6 +252,10 @@ func (s *Service) InsertWorkorder(workorder *Workorders, results *[]Results) err
 	// 预保存结果
 	for _, v := range *results {
 
+		has, _ := s.ResultExists(v.ResultId)
+		if has {
+			continue
+		}
 		_, err = session.Insert(v)
 		if err != nil {
 			session.Rollback()
@@ -263,6 +276,16 @@ func (s *Service) InsertWorkorder(workorder *Workorders, results *[]Results) err
 func (s *Service) WorkorderExists(id int64) (bool, error) {
 
 	has, err := s.eng.Exist(&Workorders{WorkorderID: id})
+	if err != nil {
+		return false, err
+	} else {
+		return has, nil
+	}
+}
+
+func (s *Service) ResultExists(id int64) (bool, error) {
+
+	has, err := s.eng.Exist(&Results{ResultId: id})
 	if err != nil {
 		return false, err
 	} else {
@@ -314,7 +337,7 @@ func (s *Service) FindWorkorder(hmi_sn string, code string) (Workorders, error) 
 
 	var workorder Workorders
 
-	rt, err := s.eng.Alias("w").Where("w.hmi_sn = ?", hmi_sn).And("w.long_pin = ?", code).Or("w.vin = ?", code).Or("w.knr = ?", code).Get(&workorder)
+	rt, err := s.eng.Alias("w").Where("w.hmi_sn = ?", hmi_sn).And("w.long_pin = ? or w.vin = ? or w.knr = ?", code, code, code).Get(&workorder)
 
 	if err != nil {
 		return workorder, err
@@ -424,6 +447,88 @@ func (s *Service) DeleteInvalidWorkorders(keep time.Time) error {
 
 	sql := fmt.Sprintf("delete from `workorders` where status = 'done' and update_time < '%s'", keep.Format("2006-01-02 15:04:05"))
 	_, err := s.eng.Exec(sql)
+
+	if err != nil {
+		return err
+	} else {
+		return nil
+	}
+}
+
+func (s *Service) InitWorkorderForJob(workorder_id int64) error {
+	sql := "update `results` set result = ?, stage = ?, count = ? where x_workorder_id = ?"
+	_, err := s.eng.Exec(sql, RESULT_NONE, RESULT_STAGE_INIT, 0, workorder_id)
+
+	if err != nil {
+		return err
+	} else {
+		return nil
+	}
+
+	return nil
+}
+
+func (s *Service) FindTargetResultForJob(workorder_id int64) (Results, error) {
+	var results []Results
+
+	ss := s.eng.Alias("r").Where("r.x_workorder_id = ?", workorder_id).And("r.stage = ?", RESULT_STAGE_INIT).OrderBy("r.seq")
+
+	e := ss.Find(&results)
+
+	if e != nil {
+		return Results{}, e
+	} else {
+		if len(results) > 0 {
+			return results[0], nil
+		} else {
+			return Results{}, errors.New("result not found")
+		}
+	}
+}
+
+func (s *Service) CreateController(controller_sn string) (Controllers, error) {
+	var controller Controllers
+
+	rt, err := s.eng.Alias("c").Where("c.controller_sn = ?", controller_sn).Get(&controller)
+
+	if err != nil {
+		return controller, err
+	} else {
+		if !rt {
+			// 创建
+			controller.SN = controller_sn
+			controller.LastID = "0"
+			err = s.Store(controller)
+			if err != nil {
+				return controller, err
+			} else {
+				rt, err = s.eng.Alias("c").Where("c.controller_sn = ?", controller_sn).Get(&controller)
+				return controller, nil
+			}
+		} else {
+			return controller, nil
+		}
+	}
+}
+
+func (s *Service) UpdateTightning(id int64, last_id string) error {
+	sql := "update `controllers` set last_id = ? where id = ?"
+	_, err := s.eng.Exec(sql,
+		last_id,
+		id)
+
+	if err != nil {
+		return err
+	} else {
+		return nil
+	}
+}
+
+func (s *Service) ResetTightning(controller_sn string) error {
+	sql := "update `controllers` set last_id = ? where controller_sn = ?"
+	_, err := s.eng.Exec(sql,
+		"0",
+		controller_sn)
 
 	if err != nil {
 		return err

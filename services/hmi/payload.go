@@ -9,16 +9,44 @@ type PSet struct {
 	UserID        int64  `json:"user_id"`
 }
 
-type Job struct {
-	Controller_SN string  `json:"controller_sn"`
-	Job           int     `json:"job"`
-	ResultIDs     []int64 `json:"result_ids"`
-	UserID        int64   `json:"user_id"`
+type PSetManual struct {
+	Controller_SN string `json:"controller_sn"`
+	GunSN         string `json:"gun_sn"`
+	PSet          int    `json:"pset"`
+	UserID        int64  `json:"user_id"`
+	CarType       string `json:"car_type"`
+	Vin           string `json:"vin"`
 }
 
-type EnableJobMode struct {
+type ToolEnable struct {
 	Controller_SN string `json:"controller_sn"`
+	GunSN         string `json:"gun_sn"`
 	Enable        bool   `json:"enable"`
+}
+
+type Job struct {
+	Controller_SN string `json:"controller_sn"`
+	Job           int    `json:"job_id"`
+	WorkorderiD   int64  `json:"workorder_id"`
+	UserID        int64  `json:"user_id"`
+}
+
+type JobManual struct {
+	Controller_SN string `json:"controller_sn"`
+	Job           int    `json:"job_id"`
+	UserID        int64  `json:"user_id"`
+	CarType       string `json:"car_type"`
+	Vin           string `json:"vin"`
+}
+
+type ControllerMode struct {
+	Controller_SN string `json:"controller_sn"`
+	Mode          string `json:"mode"`
+}
+
+type PSetDetailRequest struct {
+	Controller_SN string `json:"controller_sn"`
+	PSet          int    `json:"pset"`
 }
 
 type Result struct {
@@ -44,5 +72,6 @@ type Workorder struct {
 	WorkSheet string `json:"work_sheet"`
 
 	MaxOpTime int      `json:"max_op_time"`
+	Job       int      `json:"job_id"`
 	Results   []Result `json:"results"`
 }

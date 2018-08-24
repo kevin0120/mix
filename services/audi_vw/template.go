@@ -9,4 +9,7 @@ const (
 
 	// pset程序设定(日期，时间, sn, workorder_id, result_id, 拧紧次数, 用户id，程序号, knr, knr, knr)
 	Xml_pset = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root:ROOT xmlns:root=\"http://xmldefs.vw-group.com/KAP/station/V2.0/root\" xmlns:common=\"http://xmldefs.vw-group.com/KAP/station/V2.0/common\" xmlns:msl_msg=\"http://xmldefs.vw-group.com/KAP/station/V2.0/msl_msg\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://xmldefs.vw-group.com/KAP/station/V2.0/root \"><MSL_MSG><PNR>21</PNR><PID><PRT>%s</PRT><PI1>%d</PI1><PI2>%d</PI2><STC>%d</STC></PID><SID><FAP>%d</FAP><FNR>FNR</FNR><COM>COM</COM><CNR>CNR</CNR><WID>WID</WID></SID><PRS><PRG>%d</PRG><TAP>TAP</TAP><TNR>TNR</TNR><SIO>1</SIO><MNO>0</MNO><NUT>0</NUT>%s</PRS><TOL><VAL>1</VAL>%s</TOL><STR><VAL>1</VAL>%s</STR></MSL_MSG></root:ROOT>"
+
+	// 拧紧抢使能控制(是否使能, knr)
+	Xml_enable = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><root:ROOT xmlns:root=\"http://xmldefs.vw-group.com/KAP/station/V2.0/root\" xmlns:common=\"http://xmldefs.vw-group.com/KAP/station/V2.0/common\" xmlns:msl_msg=\"http://xmldefs.vw-group.com/KAP/station/V2.0/msl_msg\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://xmldefs.vw-group.com/KAP/station/V2.0/root \"><MSL_MSG><PNR>21</PNR><TOL><VAL>%d</VAL>%s</TOL></MSL_MSG></root:ROOT>"
 )

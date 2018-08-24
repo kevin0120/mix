@@ -5,12 +5,44 @@
     "title": "Master PC API",
     "description": "工位HMI调用"
   },
-  "host": "172.17.0.1:8080",
+  "host": "172.17.0.1:8082",
   "basePath": "/rush/v1",
   "schemes": [
     "http"
   ],
   "paths": {
+    "/tool-enable": {
+      "put": {
+        "tags": [
+          "HMI"
+        ],
+        "summary": "工具使能控制",
+        "description": "工具使能控制",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/tool_enable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "设置成功"
+          },
+          "400": {
+            "description": "设置失败"
+          }
+        }
+      }
+    },
     "/psets": {
       "put": {
         "tags": [
@@ -30,6 +62,290 @@
             "name": "body",
             "schema": {
               "$ref": "#/definitions/pset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "设置成功"
+          },
+          "400": {
+            "description": "设置失败"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "HMI"
+        ],
+        "summary": "取得控制器pset列表",
+        "description": "取得控制器pset列表",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "controller_sn",
+            "in": "query",
+            "description": "控制器序列号",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取成功",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          },
+          "400": {
+            "description": "获取失败"
+          }
+        }
+      }
+    },
+    "/psets-manual": {
+      "put": {
+        "tags": [
+          "HMI"
+        ],
+        "summary": "设定拧接程序",
+        "description": "设定拧接程序,第一次拧接时(调用成功会返回result_id)，不用传result_id和次数。后续拧接时需要传result_id和拧接次数",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/pset_manual"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "设置成功"
+          },
+          "400": {
+            "description": "设置失败"
+          }
+        }
+      }
+    },
+    "/pset-detail": {
+      "get": {
+        "tags": [
+          "HMI"
+        ],
+        "summary": "取得控制器pset详情",
+        "description": "取得控制器pset详情",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "controller_sn",
+            "in": "query",
+            "description": "控制器序列号",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "pset",
+            "in": "query",
+            "description": "pset程序号",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/PsetDetail"
+            }
+          },
+          "400": {
+            "description": "失败"
+          }
+        }
+      }
+    },
+    "/jobs": {
+      "put": {
+        "tags": [
+          "HMI"
+        ],
+        "summary": "设定装配过程",
+        "description": "设定装配过程",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/job"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "设置成功"
+          },
+          "400": {
+            "description": "设置失败"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "HMI"
+        ],
+        "summary": "取得控制器job列表",
+        "description": "取得控制器job列表",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "controller_sn",
+            "in": "query",
+            "description": "控制器序列号",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取成功",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          },
+          "400": {
+            "description": "获取失败"
+          }
+        }
+      }
+    },
+    "/jobs-manual": {
+      "put": {
+        "tags": [
+          "HMI"
+        ],
+        "summary": "设定装配过程",
+        "description": "设定装配过程",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/job_manual"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "设置成功"
+          },
+          "400": {
+            "description": "设置失败"
+          }
+        }
+      }
+    },
+    "/job-detail": {
+      "get": {
+        "tags": [
+          "HMI"
+        ],
+        "summary": "取得控制器job详情",
+        "description": "取得控制器job详情",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "controller_sn",
+            "in": "query",
+            "description": "控制器序列号",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "job",
+            "in": "query",
+            "description": "job号",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/JobDetail"
+            }
+          },
+          "400": {
+            "description": "失败"
+          }
+        }
+      }
+    },
+    "/controller-mode": {
+      "put": {
+        "tags": [
+          "HMI"
+        ],
+        "summary": "控制模式设置(pset模式/job模式)",
+        "description": "控制模式设置",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/jobmode"
             }
           }
         ],
@@ -315,7 +631,7 @@
       "type": "object",
       "properties": {
         "pset": {
-          "type": "number",
+          "type": "integer",
           "description": "程序号",
           "example": 1
         },
@@ -343,6 +659,265 @@
           "type": "integer",
           "description": "用户id",
           "example": 1
+        }
+      }
+    },
+    "pset_manual": {
+      "type": "object",
+      "properties": {
+        "pset": {
+          "type": "integer",
+          "description": "程序号",
+          "example": 1
+        },
+        "controller_sn": {
+          "type": "string",
+          "description": "控制器序列号",
+          "example": "0001"
+        },
+        "gun_sn": {
+          "type": "string",
+          "description": "拧紧枪序列号",
+          "example": "123456"
+        },
+        "user_id": {
+          "type": "integer",
+          "description": "用户id",
+          "example": 1
+        },
+        "car_type": {
+          "type": "string",
+          "description": "车型编号",
+          "example": "CAR123"
+        },
+        "vin": {
+          "type": "string",
+          "description": "车辆识别号",
+          "example": "LVS123456"
+        }
+      },
+      "required": [
+        "pset",
+        "controller_sn",
+        "car_type"
+      ]
+    },
+    "PsetDetail": {
+      "type": "object",
+      "properties": {
+        "pset": {
+          "type": "integer",
+          "description": "程序号",
+          "example": 1
+        },
+        "pset_name": {
+          "type": "string",
+          "description": "pset名称",
+          "example": "拧紧程序"
+        },
+        "rotation_direction": {
+          "type": "string",
+          "description": "拧紧方向",
+          "example": "CW",
+          "enum": [
+            "CW",
+            "CCW"
+          ]
+        },
+        "batch_size": {
+          "type": "integer",
+          "description": "批次数量",
+          "example": 1
+        },
+        "torque_min": {
+          "type": "number",
+          "description": "最小扭矩",
+          "example": 1
+        },
+        "torque_max": {
+          "type": "number",
+          "description": "最大扭矩",
+          "example": 1
+        },
+        "torque_target": {
+          "type": "number",
+          "description": "目标扭矩",
+          "example": 1
+        },
+        "angle_min": {
+          "type": "number",
+          "description": "最小角度",
+          "example": 1
+        },
+        "angle_max": {
+          "type": "number",
+          "description": "最大角度",
+          "example": 1
+        },
+        "angle_target": {
+          "type": "number",
+          "description": "目标角度",
+          "example": 1
+        }
+      }
+    },
+    "JobStep": {
+      "type": "object",
+      "properties": {
+        "step_name": {
+          "type": "string",
+          "description": "步骤名称",
+          "example": "step1"
+        },
+        "channel_id": {
+          "type": "integer",
+          "description": "工具通道号",
+          "example": 1
+        },
+        "pset_id": {
+          "type": "integer",
+          "description": "pset程序号",
+          "example": 1
+        },
+        "batch_size": {
+          "type": "integer",
+          "description": "批次数量",
+          "example": 1
+        },
+        "socket": {
+          "type": "integer",
+          "description": "套筒序号",
+          "example": 1
+        }
+      }
+    },
+    "JobDetail": {
+      "type": "object",
+      "properties": {
+        "job": {
+          "type": "integer",
+          "description": "job号",
+          "example": 1
+        },
+        "job_name": {
+          "type": "string",
+          "description": "job名称",
+          "example": "装配过程"
+        },
+        "order_strategy": {
+          "type": "string",
+          "description": "顺序策略",
+          "example": "forced"
+        },
+        "count_type": {
+          "type": "string",
+          "description": "计数类型",
+          "example": "only the OK tightenings are counted"
+        },
+        "lock_at_job_done": {
+          "type": "boolean",
+          "description": "拧接完成是否锁定",
+          "example": true
+        },
+        "use_line_control": {
+          "type": "boolean",
+          "description": "是否使用line control",
+          "example": false
+        },
+        "repeat_job": {
+          "type": "boolean",
+          "description": "是否重复进行job",
+          "example": false
+        },
+        "loosening_strategy": {
+          "type": "string",
+          "description": "拧松策略",
+          "example": "disable"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/JobStep"
+          }
+        }
+      }
+    },
+    "job": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "type": "number",
+          "description": "装配过程号",
+          "example": 1
+        },
+        "controller_sn": {
+          "type": "string",
+          "description": "控制器序列号",
+          "example": "0001"
+        },
+        "workorder_id": {
+          "type": "integer",
+          "description": "用户id",
+          "example": 1
+        },
+        "user_id": {
+          "type": "integer",
+          "description": "用户id",
+          "example": 1
+        }
+      }
+    },
+    "job_manual": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "type": "number",
+          "description": "装配过程号",
+          "example": 1
+        },
+        "controller_sn": {
+          "type": "string",
+          "description": "控制器序列号",
+          "example": "0001"
+        },
+        "user_id": {
+          "type": "integer",
+          "description": "用户id",
+          "example": 1
+        },
+        "car_type": {
+          "type": "string",
+          "description": "车型编号",
+          "example": "CAR123"
+        },
+        "vin": {
+          "type": "string",
+          "description": "车辆识别号",
+          "example": "LVS123456"
+        }
+      },
+      "required": [
+        "job_id",
+        "controller_sn",
+        "car_type"
+      ]
+    },
+    "jobmode": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "description": "控制模式",
+          "example": "pset",
+          "enum": [
+            "pset",
+            "job"
+          ]
+        },
+        "controller_sn": {
+          "type": "string",
+          "description": "控制器序列号",
+          "example": "0001"
         }
       }
     },
@@ -561,6 +1136,11 @@
           "type": "string",
           "description": "作业图片(base64编码)"
         },
+        "job_id": {
+          "type": "integer",
+          "description": "装配过程id",
+          "example": 1
+        },
         "results": {
           "type": "array",
           "description": "结果id列表",
@@ -718,6 +1298,30 @@
           "example": 1
         }
       }
+    },
+    "tool_enable": {
+      "type": "object",
+      "properties": {
+        "controller_sn": {
+          "type": "string",
+          "description": "控制器序列号",
+          "example": "0001"
+        },
+        "gun_sn": {
+          "type": "string",
+          "description": "工具序列号",
+          "example": "0001"
+        },
+        "enable": {
+          "type": "boolean",
+          "description": "是否使能",
+          "example": true
+        }
+      },
+      "required": [
+        "controller_sn",
+        "enable"
+      ]
     }
   }
 }

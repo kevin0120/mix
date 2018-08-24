@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/kataras/iris"
 	"github.com/masami10/rush/services/aiis"
-	"github.com/masami10/rush/services/audi_vw"
+	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/storage"
 	"strconv"
 	"strings"
@@ -101,40 +101,40 @@ func (m *Methods) getResults(ctx iris.Context) {
 			}
 		}
 
-		r := audi_vw.ResultValue{}
+		r := controller.ResultValue{}
 		json.Unmarshal([]byte(v.ResultValue), &r)
 
-		pset := audi_vw.PSetDefine{}
+		pset := controller.PSetDefine{}
 		json.Unmarshal([]byte(v.PSetDefine), &pset)
 
-		if v.Result == audi_vw.RESULT_OK {
-			odooResultSync.Final_pass = audi_vw.ODOO_RESULT_PASS
+		if v.Result == storage.RESULT_OK {
+			odooResultSync.Final_pass = controller.ODOO_RESULT_PASS
 			if v.Count == 1 {
-				odooResultSync.One_time_pass = audi_vw.ODOO_RESULT_PASS
+				odooResultSync.One_time_pass = controller.ODOO_RESULT_PASS
 			} else {
-				odooResultSync.One_time_pass = audi_vw.ODOO_RESULT_FAIL
+				odooResultSync.One_time_pass = controller.ODOO_RESULT_FAIL
 			}
 
 			if (r.Mi >= v.ToleranceMin && r.Mi <= v.ToleranceMax) &&
 				(r.Wi >= v.ToleranceMinDegree && r.Wi <= v.ToleranceMaxDegree) {
-				odooResultSync.QualityState = audi_vw.QUALITY_STATE_PASS
+				odooResultSync.QualityState = controller.QUALITY_STATE_PASS
 				odooResultSync.ExceptionReason = ""
 			} else {
-				odooResultSync.QualityState = audi_vw.QUALITY_STATE_EX
-				odooResultSync.ExceptionReason = audi_vw.QUALITY_STATE_EX
+				odooResultSync.QualityState = controller.QUALITY_STATE_EX
+				odooResultSync.ExceptionReason = controller.QUALITY_STATE_EX
 			}
 
 		} else {
-			odooResultSync.Final_pass = audi_vw.ODOO_RESULT_FAIL
-			odooResultSync.One_time_pass = audi_vw.ODOO_RESULT_FAIL
+			odooResultSync.Final_pass = controller.ODOO_RESULT_FAIL
+			odooResultSync.One_time_pass = controller.ODOO_RESULT_FAIL
 
 			if (r.Mi >= v.ToleranceMin && r.Mi <= v.ToleranceMax) &&
 				(r.Wi >= v.ToleranceMinDegree && r.Wi <= v.ToleranceMaxDegree) {
 
-				odooResultSync.QualityState = audi_vw.QUALITY_STATE_EX
-				odooResultSync.ExceptionReason = audi_vw.QUALITY_STATE_EX
+				odooResultSync.QualityState = controller.QUALITY_STATE_EX
+				odooResultSync.ExceptionReason = controller.QUALITY_STATE_EX
 			} else {
-				odooResultSync.QualityState = audi_vw.QUALITY_STATE_FAIL
+				odooResultSync.QualityState = controller.QUALITY_STATE_FAIL
 				odooResultSync.ExceptionReason = ""
 			}
 

@@ -10,9 +10,10 @@ import (
 )
 
 const (
-	WS_EVENT_STATUS = "status"
-	WS_EVENT_RESULT = "result"
-	WS_EVENT_REG    = "regist"
+	WS_EVENT_STATUS   = "status"
+	WS_EVENT_RESULT   = "result"
+	WS_EVENT_REG      = "regist"
+	WS_EVENT_SELECTOR = "selector"
 )
 
 type Diagnostic interface {
@@ -50,6 +51,8 @@ func (s *Service) onConnect(c websocket.Connection) {
 			if err != nil {
 				c.Emit(WS_EVENT_REG, msg)
 			}
+
+			c.Disconnect()
 			return
 		}
 
@@ -61,6 +64,8 @@ func (s *Service) onConnect(c websocket.Connection) {
 			if err != nil {
 				c.Emit(WS_EVENT_REG, regStrs)
 			}
+
+			c.Disconnect()
 		} else {
 			// 将客户端加入列表
 			s.clientManager.AddClient(reg.HMI_SN, c)
@@ -145,4 +150,9 @@ func (s *Service) WSSendResult(sn string, payload string) {
 // ws群发控制器状态
 func (s *Service) WSSendControllerStatus(payload string) {
 	s.clientManager.NotifyALL(WS_EVENT_STATUS, payload)
+}
+
+// ws群发控制器套筒状态
+func (s *Service) WSSendControllerSelectorStatus(payload string) {
+	s.clientManager.NotifyALL(WS_EVENT_SELECTOR, payload)
 }

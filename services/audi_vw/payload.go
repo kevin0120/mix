@@ -3,19 +3,10 @@ package audi_vw
 import (
 	"encoding/xml"
 	"fmt"
+	"github.com/masami10/rush/services/controller"
+	"github.com/masami10/rush/services/storage"
 	"strconv"
 	"strings"
-)
-
-const (
-	RESULT_NONE = "NONE"
-	RESULT_OK   = "OK"
-	RESULT_NOK  = "NOK"
-)
-
-const (
-	RESULT_STAGE_INIT  = "init"
-	RESULT_STAGE_FINAL = "final"
 )
 
 // header
@@ -48,7 +39,60 @@ const (
 	header_rsd = "0000"
 
 	XML_RESULT_KEY = "<CUR>"
+	XML_EVENT_KEY  = "<EVT>"
+	XML_NUT_KEY    = "<NUT"
+	XML_STATUS_KEY = "<RDY>"
 )
+
+var request_errors = map[uint]string{
+	1:  "Telegram count incorrect",
+	2:  "Reserved",
+	3:  "Incorrect length",
+	4:  "XML syntax error",
+	5:  "XML protocol: Version number conflict",
+	10: "Order cannot be executed",
+	99: "Undefined error",
+}
+
+var nut_ids = map[string]int{
+	"A": 1,
+	"B": 2,
+	"C": 3,
+	"D": 4,
+}
+
+type HandlerPkg struct {
+	IP  string
+	Msg string
+}
+
+type Evt struct {
+	XMLName xml.Name `xml:"ROOT"`
+	MSL_MSG struct {
+		EVT struct {
+			STS struct {
+				ONC struct {
+					RDY int `xml:"RDY"`
+					NUT struct {
+						NIDs []string `xml:"NID"`
+					} `xml:"NUT"`
+				} `xml:"ONC"`
+			} `xml:"STS"`
+		} `xml:"EVT"`
+	} `xml:"MSL_MSG"`
+}
+
+type StatusMsg struct {
+	XMLName xml.Name `xml:"ROOT"`
+	MSL_MSG struct {
+		GRP struct {
+			IPA string `xml:"IPA"`
+			MSG struct {
+				MGS string `xml:"MGS"`
+			} `xml:"MSG"`
+		} `xml:"GRP"`
+	} `xml:"MSL_MSG"`
+}
 
 type PSetData struct {
 	Name  string  `xml:"NAM"`
@@ -186,58 +230,12 @@ func GeneratePacket(seq uint32, typ uint, xmlpacket string) (string, uint32) {
 	return fmt.Sprintf("%s%s", headerStr, xmlpacket), header.MID
 }
 
-type ControllerCurve struct {
-	ResultID  int64
-	CurveFile string
-	CurveData string
-	Count     int
-}
-
-type ControllerCurveFile struct {
-	Result string    `json:"result"`
-	CUR_M  []float64 `json:"cur_m"`
-	CUR_W  []float64 `json:"cur_w"`
-	CUR_T  []float64 `json:"cur_t"`
-}
-
-type ControllerResult struct {
-	Result_id     int64      `json:"result_id"`
-	Controller_SN string     `json:"controller_sn"`
-	Workorder_ID  int64      `json:"workorder_id"`
-	UserID        int64      `json:"user_id"`
-	CurFile       string     `json:"cur_file"`
-	Result        string     `json:"result"`
-	Dat           string     `json:"dat"`
-	PSet          int        `json:"pset"`
-	Count         int        `json:"count"`
-	PSetDefine    PSetDefine `json:"pset_define"`
-
-	ResultValue ResultValue `json:"result_value"`
-}
-
-type PSetDefine struct {
-	Strategy string  `json:"strategy"`
-	Mp       float64 `json:"M+"`
-	Mm       float64 `json:"M-"`
-	Ms       float64 `json:"MS"`
-	Ma       float64 `json:"MA"`
-	Wp       float64 `json:"W+"`
-	Wm       float64 `json:"W-"`
-	Wa       float64 `json:"WS"`
-}
-
-type ResultValue struct {
-	Mi float64 `json:"MI"`
-	Wi float64 `json:"WI"`
-	Ti float64 `json:"TI"`
-}
-
-func XML2Curve(result *CVI3Result, cur_result *ControllerCurveFile) {
+func XML2Curve(result *CVI3Result, cur_result *controller.ControllerCurveFile) {
 	cur_result.Result = result.PRC_SST.PAR.Result
 	if cur_result.Result == "IO" {
-		cur_result.Result = RESULT_OK
+		cur_result.Result = storage.RESULT_OK
 	} else if cur_result.Result == "NIO" {
-		cur_result.Result = RESULT_NOK
+		cur_result.Result = storage.RESULT_NOK
 	}
 
 	cur_ms := strings.Split(result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.SMP.CUR_M, " ")
@@ -274,14 +272,14 @@ func XML2Curve(result *CVI3Result, cur_result *ControllerCurveFile) {
 
 }
 
-func XML2Result(result *CVI3Result, rr *ControllerResult) {
+func XML2Result(result *CVI3Result, rr *controller.ControllerResult) {
 
 	rr.Controller_SN = result.PRC_SST.PAR.SN
 	rr.Result = result.PRC_SST.PAR.Result
 	if rr.Result == "IO" {
-		rr.Result = RESULT_OK
+		rr.Result = storage.RESULT_OK
 	} else if rr.Result == "NIO" {
-		rr.Result = RESULT_NOK
+		rr.Result = storage.RESULT_NOK
 	}
 
 	rr.PSet = result.PRC_SST.PAR.FAS.GRP.TIP.PSet
@@ -324,5 +322,4 @@ func XML2Result(result *CVI3Result, rr *ControllerResult) {
 			}
 		}
 	}
-
 }

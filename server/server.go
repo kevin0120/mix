@@ -215,6 +215,10 @@ func (s *Server) appendControllersService() error {
 		return errors.Wrap(err, "append Controller service fail")
 	}
 
+	srv.DB = s.StorageServie
+	srv.WS = s.WSNotifyService
+	srv.Aiis = s.AiisService
+	srv.Minio = s.MinioService
 	s.ControllerService = srv
 	s.AppendService("controller", srv)
 
