@@ -21,7 +21,7 @@ const (
 	MAX_KEEP_ALIVE_CHECK = 3
 
 	REPLY_TIMEOUT   = time.Duration(100 * time.Millisecond)
-	MAX_REPLY_COUNT = 10
+	MAX_REPLY_COUNT = 20
 )
 
 type handlerPkg struct {
@@ -131,6 +131,19 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 		//case MID_7410_LAST_CURVE:
 		// 处理波形
 
+	case MID_0031_JOB_LIST_REPLY:
+		job_list := JobList{}
+		job_list.Deserialize(pkg.Body)
+
+		c.Response.update(MID_0030_JOB_LIST_REQUEST, job_list)
+
+	case MID_0033_JOB_DETAIL_REPLY:
+		// job详细数据
+		job_detail := JobDetail{}
+		job_detail.Deserialize(pkg.Body)
+
+		c.Response.update(MID_0032_JOB_DETAIL_REQUEST, job_detail)
+
 	case MID_0004_CMD_ERR:
 		// 请求错误
 
@@ -152,6 +165,15 @@ func (c *Controller) handleResult(result_data *ResultData) {
 	id_info := result_data.VIN + result_data.ID2 + result_data.ID3 + result_data.ID4
 	kvs := strings.Split(id_info, "-")
 
+	if id_info == "" {
+		c.Srv.diag.Error(id_info, errors.New("invalid id"))
+		return
+	}
+
+	if kvs[0] == "manual" {
+		return
+	}
+
 	if len(kvs) == 2 {
 		// job模式
 
@@ -166,7 +188,7 @@ func (c *Controller) handleResult(result_data *ResultData) {
 		controllerResult.Count = db_result.Count + 1
 		controllerResult.Result_id = db_result.ResultId
 
-	} else {
+	} else if len(kvs) == 3 {
 		// pset模式
 
 		// 结果id-拧接次数-用户id
@@ -180,6 +202,9 @@ func (c *Controller) handleResult(result_data *ResultData) {
 		}
 
 		controllerResult.Workorder_ID = db_result.WorkorderID
+	} else {
+		c.Srv.diag.Error(id_info, errors.New("invalid id"))
+		return
 	}
 
 	dat_kvs := strings.Split(result_data.TimeStamp, ":")
@@ -344,6 +369,78 @@ func (c *Controller) GetPSetDetail(pset int) (PSetDetail, error) {
 
 	default:
 		return obj_pset_detail, errors.New(controller.ERR_KNOWN)
+	}
+
+}
+
+func (c *Controller) GetJobList() ([]int, error) {
+	var jobs []int
+	if c.Status() == controller.STATUS_OFFLINE {
+		return jobs, errors.New(controller.STATUS_OFFLINE)
+	}
+
+	defer c.Response.remove(MID_0030_JOB_LIST_REQUEST)
+	c.Response.Add(MID_0030_JOB_LIST_REQUEST, nil)
+
+	psets_request := GeneratePackage(MID_0030_JOB_LIST_REQUEST, "002", "", DEFAULT_MSG_END)
+	c.Write([]byte(psets_request))
+
+	var reply interface{} = nil
+
+	for i := 0; i < MAX_REPLY_COUNT; i++ {
+		reply = c.Response.get(MID_0030_JOB_LIST_REQUEST)
+		if reply != nil {
+			break
+		}
+
+		time.Sleep(REPLY_TIMEOUT)
+	}
+
+	if reply == nil {
+		return jobs, errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	}
+
+	job_list := reply.(JobList)
+
+	return job_list.jobs, nil
+}
+
+func (c *Controller) GetJobDetail(job int) (JobDetail, error) {
+	var obj_job_detail JobDetail
+
+	if c.Status() == controller.STATUS_OFFLINE {
+		return obj_job_detail, errors.New(controller.STATUS_OFFLINE)
+	}
+
+	defer c.Response.remove(MID_0032_JOB_DETAIL_REQUEST)
+	c.Response.Add(MID_0032_JOB_DETAIL_REQUEST, nil)
+
+	job_detail := GeneratePackage(MID_0032_JOB_DETAIL_REQUEST, "003", fmt.Sprintf("%04d", job), DEFAULT_MSG_END)
+	c.Write([]byte(job_detail))
+
+	var reply interface{} = nil
+	for i := 0; i < MAX_REPLY_COUNT; i++ {
+		reply = c.Response.get(MID_0032_JOB_DETAIL_REQUEST)
+		if reply != nil {
+			break
+		}
+
+		time.Sleep(REPLY_TIMEOUT)
+	}
+
+	if reply == nil {
+		return obj_job_detail, errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	}
+
+	switch v := reply.(type) {
+	case string:
+		return obj_job_detail, errors.New(v)
+
+	case JobDetail:
+		return reply.(JobDetail), nil
+
+	default:
+		return obj_job_detail, errors.New(controller.ERR_KNOWN)
 	}
 
 }
@@ -645,6 +742,45 @@ func (c *Controller) pset(pset int) error {
 	return nil
 }
 
+func (c *Controller) ToolControl(enable bool) error {
+	if c.Status() == controller.STATUS_OFFLINE {
+		return errors.New("status offline")
+	}
+
+	s_cmd := MID_0042_TOOL_DISABLE
+	if enable {
+		s_cmd = MID_0043_TOOL_ENABLE
+	}
+
+	c.Response.Add(s_cmd, nil)
+	defer c.Response.remove(s_cmd)
+
+	s_send := GeneratePackage(s_cmd, "001", "", DEFAULT_MSG_END)
+
+	c.Write([]byte(s_send))
+
+	var reply interface{} = nil
+	for i := 0; i < MAX_REPLY_COUNT; i++ {
+		reply = c.Response.get(s_cmd)
+		if reply != nil {
+			break
+		}
+
+		time.Sleep(REPLY_TIMEOUT)
+	}
+
+	if reply == nil {
+		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	}
+
+	s_reply := reply.(string)
+	if s_reply != request_errors["00"] {
+		return errors.New(s_reply)
+	}
+
+	return nil
+}
+
 // 0: set 1: reset
 func (c *Controller) JobOff(off string) error {
 	if c.Status() == controller.STATUS_OFFLINE {
@@ -799,7 +935,7 @@ func (c *Controller) CurveSubscribe() error {
 	return nil
 }
 
-func (c *Controller) PSet(pset int, workorder_id int64, result_id int64, count int, user_id int64, channel int) (uint32, error) {
+func (c *Controller) PSet(pset int, channel int, ex_info string) (uint32, error) {
 	// 设定结果标识
 
 	if c.Mode.Load().(string) != MODE_PSET {
@@ -807,7 +943,7 @@ func (c *Controller) PSet(pset int, workorder_id int64, result_id int64, count i
 	}
 
 	// 结果id-拧接次数-用户id
-	err := c.IdentifierSet(fmt.Sprintf("%d-%d-%d", result_id, count, user_id))
+	err := c.IdentifierSet(ex_info)
 	if err != nil {
 		return 0, err
 	}

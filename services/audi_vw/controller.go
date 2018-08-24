@@ -328,6 +328,55 @@ func (c *Controller) Read(conn net.Conn) {
 	}
 }
 
+// 拧紧抢使能
+func (c *Controller) ToolControl(enable bool, channel int) error {
+	tool_channel := ""
+	if channel != controller.DEFAULT_TOOL_CHANNEL {
+		tool_channel = fmt.Sprintf("<KNR>%d</KNR>", channel)
+	}
+
+	val_enable := 0
+	if enable {
+		val_enable = 1
+	}
+
+	xmlEnable := fmt.Sprintf(Xml_enable, val_enable, tool_channel)
+
+	seq := c.Sequence()
+	psetPacket, seq := GeneratePacket(seq, Header_type_request_with_reply, xmlEnable)
+
+	c.Write([]byte(psetPacket), seq)
+
+	c.Response.Add(seq, "")
+
+	defer c.Response.remove(seq)
+
+	var header_str string
+	for i := 0; i < MAX_REPLY_TIMEOUT_COUNT; i++ {
+		header_str = c.Response.get(seq)
+		if header_str != "" {
+			break
+		}
+		time.Sleep(time.Duration(c.req_timeout))
+	}
+
+	if header_str == "" {
+		// 控制器请求失败
+		return errors.New(ERR_CVI3_REPLY_TIMEOUT)
+	}
+
+	//fmt.Printf("reply_header:%s\n", header_str)
+	header := CVI3Header{}
+	header.Deserialize(header_str)
+
+	if !header.Check() {
+		// 控制器请求失败
+		return errors.New(fmt.Sprintf("%s:%s", ERR_CVI3_REPLY, request_errors[header.COD]))
+	}
+
+	return nil
+}
+
 // PSet程序设定
 func (c *Controller) PSet(pset int, workorder_id int64, reseult_id int64, count int, user_id int64, channel int) (uint32, error) {
 
@@ -370,7 +419,7 @@ func (c *Controller) PSet(pset int, workorder_id int64, reseult_id int64, count 
 
 	if !header.Check() {
 		// 控制器请求失败
-		return seq, errors.New(fmt.Sprintf("%s:%d", ERR_CVI3_REPLY, header.COD))
+		return seq, errors.New(fmt.Sprintf("%s:%s", ERR_CVI3_REPLY, request_errors[header.COD]))
 	}
 
 	return seq, nil

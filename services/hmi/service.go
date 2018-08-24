@@ -47,8 +47,24 @@ func (s *Service) Open() error {
 	r = httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
 		Method:      "PUT",
+		Pattern:     "/tool-enable",
+		HandlerFunc: s.methods.putToolControl,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "PUT",
 		Pattern:     "/psets",
 		HandlerFunc: s.methods.putPSets,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "PUT",
+		Pattern:     "/psets-manual",
+		HandlerFunc: s.methods.putManualPSets,
 	}
 	s.Httpd.Handler[0].AddRoute(r)
 
@@ -70,9 +86,33 @@ func (s *Service) Open() error {
 
 	r = httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "GET",
+		Pattern:     "/jobs",
+		HandlerFunc: s.methods.getJobList,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "GET",
+		Pattern:     "/job-detail",
+		HandlerFunc: s.methods.getJobDetail,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
 		Method:      "PUT",
 		Pattern:     "/jobs",
 		HandlerFunc: s.methods.putJobs,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "PUT",
+		Pattern:     "/jobs-manual",
+		HandlerFunc: s.methods.putManualJobs,
 	}
 	s.Httpd.Handler[0].AddRoute(r)
 

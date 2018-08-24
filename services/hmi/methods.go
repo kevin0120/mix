@@ -2,6 +2,7 @@ package hmi
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/kataras/iris"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/odoo"
@@ -16,6 +17,57 @@ const (
 
 type Methods struct {
 	service *Service
+}
+
+func (m *Methods) putToolControl(ctx iris.Context) {
+	var err error
+	var te ToolEnable
+	err = ctx.ReadJSON(&te)
+
+	if err != nil {
+		// 传输结构错误
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+
+	if te.Controller_SN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller_sn is required")
+		return
+	}
+
+	//if te.GunSN == "" {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("gun_sn is required")
+	//	return
+	//}
+
+	// 通过控制器设定程序
+	c, exist := m.service.ControllerService.Controllers[te.Controller_SN]
+	if !exist {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller not found")
+		return
+	}
+
+	switch c.Protocol() {
+	case controller.AUDIPROTOCOL:
+		err = m.service.AudiVw.ToolControl(te.Controller_SN, te.Enable)
+	case controller.OPENPROTOCOL:
+		err = m.service.OpenProtocol.ToolControl(te.Controller_SN, te.Enable)
+
+	default:
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("not supported")
+		return
+	}
+
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
 }
 
 func (m *Methods) putPSets(ctx iris.Context) {
@@ -92,7 +144,76 @@ func (m *Methods) putPSets(ctx iris.Context) {
 	case controller.AUDIPROTOCOL:
 		err = m.service.AudiVw.PSet(pset.Controller_SN, pset.PSet, result.WorkorderID, pset.Result_id, pset.Count, pset.UserID)
 	case controller.OPENPROTOCOL:
-		err = m.service.OpenProtocol.PSet(pset.Controller_SN, pset.PSet, result.WorkorderID, pset.Result_id, pset.Count, pset.UserID)
+		err = m.service.OpenProtocol.PSet(pset.Controller_SN, pset.PSet, pset.Result_id, pset.Count, pset.UserID)
+
+	default:
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("not supported")
+		return
+	}
+
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+}
+
+func (m *Methods) putManualPSets(ctx iris.Context) {
+
+	var err error
+	var pset PSetManual
+	err = ctx.ReadJSON(&pset)
+
+	if err != nil {
+		// 传输结构错误
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+
+	if pset.UserID == 0 {
+		pset.UserID = DEFAULT_USER_ID
+	}
+
+	if pset.Controller_SN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller_sn is required")
+		return
+	}
+
+	//if pset.GunSN == "" {
+	//	pset.GunSN = ""
+	//}
+
+	if pset.PSet == 0 {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("pset is required")
+		return
+	}
+
+	//if pset.Vin == "" {
+	//	pset.Vin = ""
+	//}
+
+	if pset.CarType == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("CarType is required")
+		return
+	}
+
+	// 通过控制器设定程序
+	c, exist := m.service.ControllerService.Controllers[pset.Controller_SN]
+	if !exist {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller not found")
+		return
+	}
+
+	switch c.Protocol() {
+	case controller.OPENPROTOCOL:
+		ex_info := fmt.Sprintf("%s-%s-%d", pset.CarType, pset.Vin, pset.UserID)
+		err = m.service.OpenProtocol.PSetManual(pset.Controller_SN, pset.PSet, pset.UserID, ex_info)
 
 	default:
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -194,6 +315,97 @@ func (m *Methods) getPSetDetail(ctx iris.Context) {
 	}
 
 	body, _ := json.Marshal(pset_detail)
+	ctx.Header("content-type", "application/json")
+	ctx.Write(body)
+}
+
+func (m *Methods) getJobList(ctx iris.Context) {
+
+	controller_sn := ctx.URLParam("controller_sn")
+
+	if controller_sn == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller_sn is required")
+		return
+	}
+
+	c, exist := m.service.ControllerService.Controllers[controller_sn]
+	if !exist {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller not found")
+		return
+	}
+
+	var err error = nil
+	var job_list []int
+	switch c.Protocol() {
+	case controller.OPENPROTOCOL:
+		job_list, err = m.service.OpenProtocol.GetJobList(controller_sn)
+		if err != nil {
+			ctx.StatusCode(iris.StatusBadRequest)
+			ctx.WriteString(err.Error())
+			return
+		}
+
+	default:
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("not supported")
+		return
+	}
+
+	body, _ := json.Marshal(job_list)
+	ctx.Header("content-type", "application/json")
+	ctx.Write(body)
+}
+
+func (m *Methods) getJobDetail(ctx iris.Context) {
+
+	controller_sn := ctx.URLParam("controller_sn")
+	job := ctx.URLParam("job")
+
+	if controller_sn == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller_sn is required")
+		return
+	}
+
+	if job == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("job is required")
+		return
+	}
+
+	v_job, err := strconv.Atoi(job)
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("pset format error")
+		return
+	}
+
+	c, exist := m.service.ControllerService.Controllers[controller_sn]
+	if !exist {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller not found")
+		return
+	}
+
+	var job_detail openprotocol.JobDetail
+	switch c.Protocol() {
+	case controller.OPENPROTOCOL:
+		job_detail, err = m.service.OpenProtocol.GetJobDetail(controller_sn, v_job)
+		if err != nil {
+			ctx.StatusCode(iris.StatusBadRequest)
+			ctx.WriteString(err.Error())
+			return
+		}
+
+	default:
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("not supported")
+		return
+	}
+
+	body, _ := json.Marshal(job_detail)
 	ctx.Header("content-type", "application/json")
 	ctx.Write(body)
 }
@@ -323,8 +535,76 @@ func (m *Methods) putJobs(ctx iris.Context) {
 	}
 }
 
+func (m *Methods) putManualJobs(ctx iris.Context) {
+
+	var err error
+	var job JobManual
+	err = ctx.ReadJSON(&job)
+
+	if err != nil {
+		// 传输结构错误
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+
+	if job.Controller_SN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller_sn is required")
+		return
+	}
+
+	if job.Job == 0 {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("job is required")
+		return
+	}
+
+	if job.CarType == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("car type is required")
+		return
+	}
+
+	//if job.Vin == "" {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("vin is required")
+	//	return
+	//}
+
+	if job.UserID == 0 {
+		job.UserID = DEFAULT_USER_ID
+	}
+
+	// 通过控制器设定程序
+	c, exist := m.service.ControllerService.Controllers[job.Controller_SN]
+	if !exist {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller not found")
+		return
+	}
+
+	switch c.Protocol() {
+	case controller.OPENPROTOCOL:
+		ex_info := fmt.Sprintf("%s-%s-%d", job.CarType, job.Vin, job.UserID)
+		err = m.service.OpenProtocol.JobSetManual(job.Controller_SN, job.Job, job.UserID, ex_info)
+
+	default:
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("not supported")
+		return
+	}
+
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+}
+
 // 根据hmi序列号以及vin或knr取得工单
 func (m *Methods) getWorkorder(ctx iris.Context) {
+
 	var err error
 	hmi_sn := ctx.URLParam("hmi_sn")
 	code := ctx.URLParam("code")

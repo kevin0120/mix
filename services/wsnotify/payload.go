@@ -18,6 +18,11 @@ type WSResult struct {
 	TI        float64 `json:"ti"`
 }
 
+type WSSelector struct {
+	SN        string `json:"controller_sn"`
+	Selectors []int  `json:"selectors"`
+}
+
 type WSRegistMsg struct {
 	Msg string `json:"msg"`
 }

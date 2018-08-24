@@ -75,3 +75,8 @@ type ResultValue struct {
 	Wi float64 `json:"WI"`
 	Ti float64 `json:"TI"`
 }
+
+type CurveObject struct {
+	File  string
+	Count int
+}

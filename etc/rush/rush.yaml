@@ -76,11 +76,11 @@ openprotocol:
 controller_service:
   workers: 4
   controllers:
-  - serial_no: 0001
-    protocol: Audi/VW
-    remote_ip: 192.168.1.101
-    port: 4700
-    channel: 1
+#  - serial_no: 0001
+#    protocol: Audi/VW
+#    remote_ip: 192.168.1.101
+#    port: 4700
+#    channel: 1
 
   - serial_no: 0002
     protocol: Audi/VW
@@ -88,8 +88,8 @@ controller_service:
     port: 4700
     channel: 1
 
-#  - serial_no: 0001
-#    protocol: OpenProtocol
-#    remote_ip: 192.168.1.101
-#    port: 4546
-#    channel: 51
+  - serial_no: 0001
+    protocol: OpenProtocol
+    remote_ip: 192.168.1.101
+    port: 4546
+    channel: 51

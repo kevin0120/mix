@@ -33,6 +33,12 @@ const (
 	MID_0065_OLD_DATA              = "0065"
 	MID_0130_JOB_OFF               = "0130"
 	MID_0250_SELECTOR_SUBSCRIBE    = "0250"
+	MID_0042_TOOL_DISABLE          = "0042"
+	MID_0043_TOOL_ENABLE           = "0043"
+	MID_0030_JOB_LIST_REQUEST      = "0030"
+	MID_0031_JOB_LIST_REPLY        = "0031"
+	MID_0032_JOB_DETAIL_REQUEST    = "0032"
+	MID_0033_JOB_DETAIL_REPLY      = "0033"
 
 	MID_0008_DATA_SUB = "0008"
 
@@ -322,6 +328,50 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 
 	case MID_0010_PSET_LIST_REQUEST:
 		h.MID = MID_0010_PSET_LIST_REQUEST
+		h.LEN = LEN_HEADER
+		h.Revision = rev
+		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + end
+
+	case MID_0032_JOB_DETAIL_REQUEST:
+		h.MID = MID_0032_JOB_DETAIL_REQUEST
+		h.LEN = LEN_HEADER + len(data)
+		h.Revision = rev
+		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + data + end
+
+	case MID_0030_JOB_LIST_REQUEST:
+		h.MID = MID_0030_JOB_LIST_REQUEST
+		h.LEN = LEN_HEADER
+		h.Revision = rev
+		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + end
+
+	case MID_0042_TOOL_DISABLE:
+		h.MID = MID_0042_TOOL_DISABLE
+		h.LEN = LEN_HEADER
+		h.Revision = rev
+		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + end
+
+	case MID_0043_TOOL_ENABLE:
+		h.MID = MID_0043_TOOL_ENABLE
 		h.LEN = LEN_HEADER
 		h.Revision = rev
 		h.NoAck = ""
@@ -740,6 +790,141 @@ func (p *PSetList) Deserialize(str string) error {
 	for i := 0; i < p.num; i++ {
 		pset, _ := strconv.Atoi(str[(i+1)*3 : (i+1)*3+3])
 		p.psets = append(p.psets, pset)
+	}
+
+	return nil
+}
+
+type JobList struct {
+	num  int
+	jobs []int
+}
+
+func (p *JobList) Deserialize(str string) error {
+	var err error = nil
+	p.num, err = strconv.Atoi(str[0:4])
+	if err != nil {
+		return err
+	}
+
+	for i := 0; i < p.num; i++ {
+		job, _ := strconv.Atoi(str[(i+1)*4 : (i+1)*4+4])
+		p.jobs = append(p.jobs, job)
+	}
+
+	return nil
+}
+
+type JobStep struct {
+	StepName  string `json:"step_name"`
+	ChannelID int    `json:"channel_id"`
+	PSetID    int    `json:"pset_id"`
+	BatchSize int    `json:"batch_size"`
+	Socket    int    `json:"socket"`
+}
+
+type JobDetail struct {
+	JobID         int    `json:"job"`
+	JobName       string `json:"job_name"`
+	OrderStrategy string `json:"order_strategy"`
+	//MaxTimeforFirstTightening int
+	//MaxTimetoCompleteJob int
+	CountType         string    `json:"count_type"`
+	LockAtJobDone     bool      `json:"lock_at_job_done"`
+	UseLineControl    bool      `json:"use_line_control"`
+	RepeatJob         bool      `json:"repeat_job"`
+	LooseningStrategy string    `json:"loosening_strategy"`
+	Steps             []JobStep `json:"steps"`
+}
+
+func (p *JobDetail) Deserialize(str string) error {
+	var err error = nil
+
+	p.JobID, err = strconv.Atoi(str[2:6])
+	if err != nil {
+		return err
+	}
+
+	p.JobName = strings.TrimSpace(str[8:33])
+
+	order := str[35:36]
+	switch order {
+	case "0":
+		p.OrderStrategy = "free"
+
+	case "1":
+		p.OrderStrategy = "forced"
+
+	case "2":
+		p.OrderStrategy = "free and forced"
+	}
+
+	//p.MaxTimeforFirstTightening, err = strconv.Atoi(str[38:42])
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//p.MaxTimetoCompleteJob, err = strconv.Atoi(str[44:49])
+	//if err != nil {
+	//	return err
+	//}
+
+	count_type := str[51:52]
+	switch count_type {
+	case "0":
+		p.CountType = "only the OK tightenings are counted"
+
+	case "1":
+		p.CountType = "both the OK and NOK tightenings are counted"
+	}
+
+	if str[54:55] == "0" {
+		p.LockAtJobDone = false
+	} else {
+		p.LockAtJobDone = true
+	}
+
+	if str[57:58] == "0" {
+		p.UseLineControl = false
+	} else {
+		p.UseLineControl = true
+	}
+
+	if str[60:61] == "0" {
+		p.RepeatJob = false
+	} else {
+		p.RepeatJob = true
+	}
+
+	loosening, err := strconv.Atoi(str[63:65])
+	if err != nil {
+		return err
+	}
+
+	switch loosening {
+	case 0:
+		p.LooseningStrategy = "enable"
+
+	case 1:
+		p.LooseningStrategy = "disable"
+
+	case 2:
+		p.LooseningStrategy = "enable only on NOK tightening"
+	}
+
+	step_str := str[75 : len(str)-1]
+	steps := strings.Split(step_str, ";")
+	job_step := JobStep{}
+	for _, v := range steps {
+		values := strings.Split(v, ":")
+
+		job_step.ChannelID, _ = strconv.Atoi(values[0])
+		job_step.PSetID, _ = strconv.Atoi(values[1])
+		job_step.BatchSize, _ = strconv.Atoi(values[3])
+		job_step.Socket, _ = strconv.Atoi(values[4])
+		job_step.StepName = strings.TrimSpace(values[5])
+
+		p.Steps = append(p.Steps, job_step)
 	}
 
 	return nil

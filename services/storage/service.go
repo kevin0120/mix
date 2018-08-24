@@ -252,6 +252,10 @@ func (s *Service) InsertWorkorder(workorder *Workorders, results *[]Results) err
 	// 预保存结果
 	for _, v := range *results {
 
+		has, _ := s.ResultExists(v.ResultId)
+		if has {
+			continue
+		}
 		_, err = session.Insert(v)
 		if err != nil {
 			session.Rollback()
@@ -272,6 +276,16 @@ func (s *Service) InsertWorkorder(workorder *Workorders, results *[]Results) err
 func (s *Service) WorkorderExists(id int64) (bool, error) {
 
 	has, err := s.eng.Exist(&Workorders{WorkorderID: id})
+	if err != nil {
+		return false, err
+	} else {
+		return has, nil
+	}
+}
+
+func (s *Service) ResultExists(id int64) (bool, error) {
+
+	has, err := s.eng.Exist(&Results{ResultId: id})
 	if err != nil {
 		return false, err
 	} else {
