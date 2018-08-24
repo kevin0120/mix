@@ -206,7 +206,7 @@ func (p *Service) JobOFF(sn string, off bool) error {
 	err := c.JobOff(s_off)
 	if err != nil {
 		// 控制器请求失败
-		return errors.New(controller.ERR_PSET_ERROR)
+		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
 	}
 
 	return nil
