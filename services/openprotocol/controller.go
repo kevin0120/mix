@@ -162,50 +162,15 @@ func (c *Controller) handleResult(result_data *ResultData) {
 	c.Srv.DB.UpdateTightning(c.dbController.Id, result_data.TightingID)
 
 	controllerResult := controller.ControllerResult{}
-	id_info := result_data.VIN + result_data.ID2 + result_data.ID3 + result_data.ID4
-	kvs := strings.Split(id_info, "-")
+	c.Srv.diag.Info(fmt.Sprintf("vin:%s id2:%s id3:%s id4:%s", result_data.VIN, result_data.ID2, result_data.ID3, result_data.ID4))
 
+	id_info := strings.TrimSpace(result_data.VIN + result_data.ID2 + result_data.ID3 + result_data.ID4)
 	if id_info == "" {
 		c.Srv.diag.Error(id_info, errors.New("invalid id"))
 		return
 	}
 
-	if kvs[0] == "manual" {
-		return
-	}
-
-	if len(kvs) == 2 {
-		// job模式
-
-		controllerResult.Workorder_ID, _ = strconv.ParseInt(kvs[0], 10, 64)
-		controllerResult.UserID, _ = strconv.ParseInt(kvs[1], 10, 64)
-
-		db_result, err := c.Srv.DB.FindTargetResultForJob(controllerResult.Workorder_ID)
-		if err != nil {
-			c.Srv.diag.Error("FindTargetResultForJob failed", err)
-		}
-
-		controllerResult.Count = db_result.Count + 1
-		controllerResult.Result_id = db_result.ResultId
-
-	} else if len(kvs) == 3 {
-		// pset模式
-
-		// 结果id-拧接次数-用户id
-		controllerResult.Result_id, _ = strconv.ParseInt(kvs[0], 10, 64)
-		controllerResult.Count, _ = strconv.Atoi(kvs[1])
-		controllerResult.UserID, _ = strconv.ParseInt(kvs[2], 10, 64)
-
-		db_result, err := c.Srv.DB.GetResult(controllerResult.Result_id, 0)
-		if err != nil {
-			c.Srv.diag.Error("GetResult failed", err)
-		}
-
-		controllerResult.Workorder_ID = db_result.WorkorderID
-	} else {
-		c.Srv.diag.Error(id_info, errors.New("invalid id"))
-		return
-	}
+	kvs := strings.Split(id_info, "-")
 
 	dat_kvs := strings.Split(result_data.TimeStamp, ":")
 	controllerResult.Dat = fmt.Sprintf("%s %s:%s:%s", dat_kvs[0], dat_kvs[1], dat_kvs[2], dat_kvs[3])
@@ -244,7 +209,82 @@ func (c *Controller) handleResult(result_data *ResultData) {
 	controllerResult.PSetDefine.Wm = result_data.AngleMin
 	controllerResult.PSetDefine.Wa = result_data.FinalAngleTarget
 
-	controllerResult.ExceptionReason = result_data.TighteningStatus
+	controllerResult.ExceptionReason = result_data.TighteningErrorStatus
+
+	if kvs[0] != "auto" {
+		// 手动模式
+
+		if result_data.VIN != "" {
+			// 手动job[vin-cartype-hmisn-userid]
+
+			// vin:cartype
+			key := result_data.VIN + ":" + result_data.ID3
+			db_result, err := c.Srv.DB.FindTargetResultForJobManual(key)
+			if err != nil {
+				c.Srv.diag.Error("FindTargetResultForJobManual failed", err)
+			}
+
+			if controllerResult.Result == storage.RESULT_OK {
+				db_result.Stage = storage.RESULT_STAGE_FINAL
+				c.Srv.DB.UpdateResult(&db_result)
+			}
+
+			// 结果推送hmi
+			wsResult := wsnotify.WSResult{}
+			wsResult.Result_id = controllerResult.Result_id
+			wsResult.Count = controllerResult.Count
+			wsResult.Result = controllerResult.Result
+			wsResult.MI = controllerResult.ResultValue.Mi
+			wsResult.WI = controllerResult.ResultValue.Wi
+			wsResult.TI = controllerResult.ResultValue.Ti
+			wsResult.Seq = db_result.Seq
+			ws_str, _ := json.Marshal(wsResult)
+
+			c.Srv.diag.Debug(fmt.Sprintf("results:%s", controllerResult.Result))
+
+			c.Srv.WS.WSSendResult(result_data.ID2, string(ws_str))
+		} else {
+			// 手动pset[-cartype-hmisn-userid]
+		}
+
+
+		return
+	}
+
+	if len(kvs) == 2 {
+		// job模式
+
+		controllerResult.Workorder_ID, _ = strconv.ParseInt(kvs[0], 10, 64)
+		controllerResult.UserID, _ = strconv.ParseInt(kvs[1], 10, 64)
+
+		db_result, err := c.Srv.DB.FindTargetResultForJob(controllerResult.Workorder_ID)
+		if err != nil {
+			c.Srv.diag.Error("FindTargetResultForJob failed", err)
+		}
+
+		controllerResult.Count = db_result.Count + 1
+		controllerResult.Result_id = db_result.ResultId
+
+	} else if len(kvs) == 3 {
+		// pset模式
+
+		// 结果id-拧接次数-用户id
+		controllerResult.Result_id, _ = strconv.ParseInt(kvs[0], 10, 64)
+		controllerResult.Count, _ = strconv.Atoi(kvs[1])
+		controllerResult.UserID, _ = strconv.ParseInt(kvs[2], 10, 64)
+
+		db_result, err := c.Srv.DB.GetResult(controllerResult.Result_id, 0)
+		if err != nil {
+			c.Srv.diag.Error("GetResult failed", err)
+		}
+
+		controllerResult.Workorder_ID = db_result.WorkorderID
+	} else {
+		c.Srv.diag.Error(id_info, errors.New("invalid id"))
+		return
+	}
+
+
 
 	c.Srv.Parent.Handle(controllerResult, nil)
 }

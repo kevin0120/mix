@@ -11,6 +11,7 @@ type WSStatus struct {
 
 type WSResult struct {
 	Result_id int64   `json:"result_id"`
+	Seq		int			`json:"sequence"`
 	Count     int     `json:"count"`
 	Result    string  `json:"result"`
 	MI        float64 `json:"mi"`

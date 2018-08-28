@@ -37,6 +37,15 @@ type JobManual struct {
 	UserID        int64  `json:"user_id"`
 	CarType       string `json:"car_type"`
 	Vin           string `json:"vin"`
+	HmiSN		string `json:"hmi_sn"`
+	Points		  []JobPoint `json:"points"`
+}
+
+type JobPoint struct {
+	Seq int `json:"sequence"`
+	PSet int `json:"pset"`
+	X             float64 `json:"offset_x"`
+	Y             float64 `json:"offset_Y"`
 }
 
 type ControllerMode struct {

@@ -9,6 +9,8 @@ import (
 	"github.com/masami10/rush/services/openprotocol"
 	"github.com/masami10/rush/services/wsnotify"
 	"strconv"
+	"github.com/kataras/iris/core/errors"
+	"github.com/masami10/rush/services/storage"
 )
 
 const (
@@ -212,7 +214,7 @@ func (m *Methods) putManualPSets(ctx iris.Context) {
 
 	switch c.Protocol() {
 	case controller.OPENPROTOCOL:
-		ex_info := fmt.Sprintf("%s-%s-%d", pset.CarType, pset.Vin, pset.UserID)
+		ex_info := fmt.Sprintf("%s-%s-%d", pset.Vin, pset.CarType, pset.UserID)
 		err = m.service.OpenProtocol.PSetManual(pset.Controller_SN, pset.PSet, pset.UserID, ex_info)
 
 	default:
@@ -566,6 +568,12 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 		return
 	}
 
+	if job.HmiSN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("hmi sn is required")
+		return
+	}
+
 	//if job.Vin == "" {
 	//	ctx.StatusCode(iris.StatusBadRequest)
 	//	ctx.WriteString("vin is required")
@@ -586,7 +594,15 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 
 	switch c.Protocol() {
 	case controller.OPENPROTOCOL:
-		ex_info := fmt.Sprintf("%s-%s-%d", job.CarType, job.Vin, job.UserID)
+		err := m.insertResultsForJob(&job)
+		if err != nil {
+			ctx.StatusCode(iris.StatusBadRequest)
+			ctx.WriteString(err.Error())
+			return
+		}
+		//vin-cartype-hmisn-userid
+		ex_info := fmt.Sprintf("%25s%25s%25s%25d", job.Vin, job.HmiSN, job.CarType, job.UserID)
+		fmt.Printf(ex_info)
 		err = m.service.OpenProtocol.JobSetManual(job.Controller_SN, job.Job, job.UserID, ex_info)
 
 	default:
@@ -600,6 +616,32 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 		ctx.WriteString(err.Error())
 		return
 	}
+}
+
+func (m *Methods) insertResultsForJob(job *JobManual) error {
+	if len(job.Points) == 0 {
+		return errors.New("points is required")
+	}
+
+	key := job.Vin + ":" + job.CarType
+	err := m.service.DB.DeleteResultsForJob(key)
+
+	db_results := []storage.Results{}
+	for _, v := range job.Points {
+		r := storage.Results{}
+		r.PSetDefine = key
+		r.PSet = v.PSet
+		r.OffsetX = v.X
+		r.OffsetY = v.Y
+		r.Seq = v.Seq
+		r.Stage = storage.RESULT_STAGE_INIT
+
+		db_results = append(db_results, r)
+	}
+
+	err = m.service.DB.InsertWorkorder(nil, &db_results)
+
+	return err
 }
 
 // 根据hmi序列号以及vin或knr取得工单

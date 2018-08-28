@@ -115,7 +115,7 @@ func (p *Service) PSet(sn string, pset int, result_id int64, count int, user_id 
 
 	c := v.(*Controller)
 
-	ex_info := fmt.Sprintf("%d-%d-%d", result_id, count, user_id)
+	ex_info := fmt.Sprintf("%s-%d-%d-%d", controller.AUTO_MODE, result_id, count, user_id)
 
 	// 设定pset并判断控制器响应
 	_, err := c.PSet(pset, c.cfg.ToolChannel, ex_info)
@@ -138,7 +138,7 @@ func (p *Service) PSetManual(sn string, pset int, user_id int64, ex_info string)
 	c := v.(*Controller)
 
 	// 设定pset并判断控制器响应
-	_, err := c.PSet(pset, c.cfg.ToolChannel, "manual-"+ex_info)
+	_, err := c.PSet(pset, c.cfg.ToolChannel, ex_info)
 	if err != nil {
 		// 控制器请求失败
 		return err
@@ -157,7 +157,7 @@ func (p *Service) JobSet(sn string, job int, workorder_id int64, user_id int64) 
 	c := v.(*Controller)
 
 	//workorder_id-user_id
-	id_info := fmt.Sprintf("%d-%d", workorder_id, user_id)
+	id_info := fmt.Sprintf("%s-%d-%d", controller.AUTO_MODE, workorder_id, user_id)
 
 	err := c.JobSet(id_info, job)
 	if err != nil {
@@ -177,16 +177,7 @@ func (p *Service) JobSetManual(sn string, job int, user_id int64, ex_info string
 
 	c := v.(*Controller)
 
-	//workorder_id-user_id
-	id_info := fmt.Sprintf("manual-%s-%d", ex_info, user_id)
-
-	err := c.JobSet(id_info, job)
-	if err != nil {
-		// 控制器请求失败
-		return err
-	}
-
-	return nil
+	return c.JobSet(ex_info, job)
 }
 
 func (p *Service) JobOFF(sn string, off bool) error {

@@ -228,42 +228,47 @@ func (s *Service) ListUnuploadCurves() ([]Curves, error) {
 
 func (s *Service) InsertWorkorder(workorder *Workorders, results *[]Results) error {
 
-	has, err := s.WorkorderExists(workorder.WorkorderID)
-	if has {
-		// 忽略存在的工单
-		return nil
-	}
-
 	session := s.eng.NewSession()
 	defer session.Close()
 
-	err = session.Begin()
+	err := session.Begin()
 	// 执行事务
 
 	// 保存新工单
-	_, err = session.Insert(workorder)
-	if err != nil {
-		session.Rollback()
-		return errors.Wrapf(err, "store data fail")
-	} else {
-		s.diag.Debug(fmt.Sprintf("new workorder:%d", workorder.WorkorderID))
-	}
-
-	// 预保存结果
-	for _, v := range *results {
-
-		has, _ := s.ResultExists(v.ResultId)
+	if workorder != nil {
+		has, err := s.WorkorderExists(workorder.WorkorderID)
 		if has {
-			continue
+			// 忽略存在的工单
+			return nil
 		}
-		_, err = session.Insert(v)
+		_, err = session.Insert(workorder)
 		if err != nil {
 			session.Rollback()
 			return errors.Wrapf(err, "store data fail")
 		} else {
-			s.diag.Debug(fmt.Sprintf("new result:%d", v.ResultId))
+			s.diag.Debug(fmt.Sprintf("new workorder:%d", workorder.WorkorderID))
 		}
 	}
+
+
+	// 预保存结果
+	if results != nil {
+		for _, v := range *results {
+
+			has, _ := s.ResultExists(v.ResultId)
+			if has {
+				continue
+			}
+			_, err = session.Insert(v)
+			if err != nil {
+				session.Rollback()
+				return errors.Wrapf(err, "store data fail")
+			} else {
+				s.diag.Debug(fmt.Sprintf("new result:%d", v.ResultId))
+			}
+		}
+	}
+
 
 	err = session.Commit()
 	if err != nil {
@@ -271,6 +276,17 @@ func (s *Service) InsertWorkorder(workorder *Workorders, results *[]Results) err
 	}
 
 	return nil
+}
+
+func (s *Service) DeleteResultsForJob(key string) error {
+	sql := fmt.Sprintf("delete from `results` where pset_define ='%s'", key)
+	_, err := s.eng.Exec(sql)
+
+	if err != nil {
+		return err
+	} else {
+		return nil
+	}
 }
 
 func (s *Service) WorkorderExists(id int64) (bool, error) {
@@ -472,6 +488,24 @@ func (s *Service) FindTargetResultForJob(workorder_id int64) (Results, error) {
 	var results []Results
 
 	ss := s.eng.Alias("r").Where("r.x_workorder_id = ?", workorder_id).And("r.stage = ?", RESULT_STAGE_INIT).OrderBy("r.seq")
+
+	e := ss.Find(&results)
+
+	if e != nil {
+		return Results{}, e
+	} else {
+		if len(results) > 0 {
+			return results[0], nil
+		} else {
+			return Results{}, errors.New("result not found")
+		}
+	}
+}
+
+func (s *Service) FindTargetResultForJobManual(key string) (Results, error) {
+	var results []Results
+
+	ss := s.eng.Alias("r").Where("r.pset_define = ?", key).And("r.stage = ?", RESULT_STAGE_INIT).OrderBy("r.seq")
 
 	e := ss.Find(&results)
 

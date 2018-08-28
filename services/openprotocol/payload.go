@@ -262,7 +262,7 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 
 	case MID_0150_IDENTIFIER_SET:
 		h.MID = MID_0150_IDENTIFIER_SET
-		h.LEN = LEN_HEADER + len(data)
+		h.LEN = LEN_HEADER + 100
 		h.Revision = rev
 		h.NoAck = ""
 		h.Station = ""
@@ -581,7 +581,7 @@ func (rd *ResultData) Deserialize(str string) error {
 	}
 
 	rd.ControllerName = str[12:37]
-	rd.VIN = str[39:64]
+	rd.VIN = strings.TrimSpace(str[39:64])
 
 	rd.JobID, err = strconv.Atoi(str[66:70])
 	if err != nil {
@@ -632,7 +632,7 @@ func (rd *ResultData) Deserialize(str string) error {
 		}
 	}
 
-	rd.TighteningStatus = strings.Join(errs, ",")
+	rd.TighteningErrorStatus = strings.Join(errs, ",")
 
 	rd.TorqueMin, err = strconv.ParseFloat(str[139:145], 64)
 	if err != nil {
@@ -680,9 +680,9 @@ func (rd *ResultData) Deserialize(str string) error {
 
 	rd.TorqueUnit = str[394:395]
 	rd.ResultType = str[397:399]
-	rd.ID2 = str[401:426]
-	rd.ID3 = str[428:453]
-	rd.ID4 = str[455:480]
+	rd.ID2 = strings.TrimSpace(str[401:426])
+	rd.ID3 = strings.TrimSpace(str[428:453])
+	rd.ID4 = strings.TrimSpace(str[455:480])
 
 	rd.NumberOfStages, err = strconv.Atoi(str[508:510])
 	if err != nil {

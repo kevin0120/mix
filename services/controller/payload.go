@@ -4,6 +4,7 @@ const (
 	AUDIPROTOCOL         = "Audi/VW"
 	OPENPROTOCOL         = "OpenProtocol"
 	DEFAULT_TOOL_CHANNEL = 1
+	AUTO_MODE = "auto"
 )
 
 const (
