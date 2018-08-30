@@ -236,7 +236,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 
 		o.LastResultID = results[len(results)-1].ResultId
 
-		e := s.DB.InsertWorkorder(&o, &results)
+		e := s.DB.InsertWorkorder(&o, &results, true)
 		if e != nil {
 			finalErr = e
 		}

@@ -226,7 +226,7 @@ func (s *Service) ListUnuploadCurves() ([]Curves, error) {
 	}
 }
 
-func (s *Service) InsertWorkorder(workorder *Workorders, results *[]Results) error {
+func (s *Service) InsertWorkorder(workorder *Workorders, results *[]Results, checkResult bool) error {
 
 	session := s.eng.NewSession()
 	defer session.Close()
@@ -250,15 +250,17 @@ func (s *Service) InsertWorkorder(workorder *Workorders, results *[]Results) err
 		}
 	}
 
-
 	// 预保存结果
 	if results != nil {
 		for _, v := range *results {
 
-			has, _ := s.ResultExists(v.ResultId)
-			if has {
-				continue
+			if checkResult {
+				has, _ := s.ResultExists(v.ResultId)
+				if has {
+					continue
+				}
 			}
+
 			_, err = session.Insert(v)
 			if err != nil {
 				session.Rollback()
@@ -268,7 +270,6 @@ func (s *Service) InsertWorkorder(workorder *Workorders, results *[]Results) err
 			}
 		}
 	}
-
 
 	err = session.Commit()
 	if err != nil {

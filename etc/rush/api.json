@@ -359,6 +359,38 @@
         }
       }
     },
+    "/io-sets": {
+      "put": {
+        "tags": [
+          "HMI"
+        ],
+        "summary": "设定控制器的IO输出",
+        "description": "在body中可以传入IO状态列表，可以对每个IO进行打开(on)/关闭(off)/闪烁(flashing)等操作",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/ioset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "设置成功"
+          },
+          "400": {
+            "description": "设置失败"
+          }
+        }
+      }
+    },
     "/workorder": {
       "get": {
         "tags": [
@@ -694,12 +726,18 @@
           "type": "string",
           "description": "车辆识别号",
           "example": "LVS123456"
+        },
+        "hmi_sn": {
+          "type": "string",
+          "description": "hmi序列号",
+          "example": "1122334455667788"
         }
       },
       "required": [
         "pset",
         "controller_sn",
-        "car_type"
+        "car_type",
+        "hmi_sn"
       ]
     },
     "PsetDetail": {
@@ -867,6 +905,36 @@
         }
       }
     },
+    "job_point": {
+      "type": "object",
+      "properties": {
+        "sequence": {
+          "type": "integer",
+          "description": "点位序号",
+          "example": 1
+        },
+        "pset": {
+          "type": "integer",
+          "description": "程序号",
+          "example": 1
+        },
+        "offset_x": {
+          "type": "number",
+          "description": "点位x坐标",
+          "example": 100
+        },
+        "offset_Y": {
+          "type": "number",
+          "description": "点位y坐标",
+          "example": 200
+        },
+        "max_op_time": {
+          "type": "integer",
+          "description": "最大操作次数",
+          "example": 3
+        }
+      }
+    },
     "job_manual": {
       "type": "object",
       "properties": {
@@ -894,12 +962,25 @@
           "type": "string",
           "description": "车辆识别号",
           "example": "LVS123456"
+        },
+        "hmi_sn": {
+          "type": "string",
+          "description": "hmi序列号",
+          "example": "1122334455667788"
+        },
+        "points": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/job_point"
+          }
         }
       },
       "required": [
         "job_id",
         "controller_sn",
-        "car_type"
+        "car_type",
+        "hmi_sn",
+        "points"
       ]
     },
     "jobmode": {
@@ -1322,6 +1403,42 @@
         "controller_sn",
         "enable"
       ]
+    },
+    "iostatus": {
+      "type": "object",
+      "properties": {
+        "no": {
+          "type": "integer",
+          "description": "IO序号，从0开始（CVI3有8个IO输出）",
+          "example": 0
+        },
+        "status": {
+          "type": "string",
+          "description": "状态(on/off/flashing)",
+          "example": "on",
+          "enum": [
+            "on",
+            "off",
+            "flashing"
+          ]
+        }
+      }
+    },
+    "ioset": {
+      "type": "object",
+      "properties": {
+        "controller_sn": {
+          "type": "string",
+          "description": "控制器序列号",
+          "example": "0001"
+        },
+        "io_status": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/iostatus"
+          }
+        }
+      }
     }
   }
 }

@@ -270,3 +270,15 @@ func (p *Service) GetJobDetail(sn string, job int) (JobDetail, error) {
 
 	return job_detail, nil
 }
+
+func (p *Service) IOSet(sn string, ios *[]IOStatus) error {
+	v, exist := p.Parent.Controllers[sn]
+	if !exist {
+		// SN对应控制器不存在
+		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
+	}
+
+	c := v.(*Controller)
+
+	return c.IOSet(ios)
+}

@@ -1,5 +1,7 @@
 package hmi
 
+import "github.com/masami10/rush/services/openprotocol"
+
 type PSet struct {
 	Controller_SN string `json:"controller_sn"`
 	GunSN         string `json:"gun_sn"`
@@ -16,6 +18,12 @@ type PSetManual struct {
 	UserID        int64  `json:"user_id"`
 	CarType       string `json:"car_type"`
 	Vin           string `json:"vin"`
+	HmiSN         string `json:"hmi_sn"`
+}
+
+type IOSet struct {
+	Controller_SN string                  `json:"controller_sn"`
+	IOStatus      []openprotocol.IOStatus `json:"io_status"`
 }
 
 type ToolEnable struct {
@@ -32,20 +40,21 @@ type Job struct {
 }
 
 type JobManual struct {
-	Controller_SN string `json:"controller_sn"`
-	Job           int    `json:"job_id"`
-	UserID        int64  `json:"user_id"`
-	CarType       string `json:"car_type"`
-	Vin           string `json:"vin"`
-	HmiSN		string `json:"hmi_sn"`
-	Points		  []JobPoint `json:"points"`
+	Controller_SN string     `json:"controller_sn"`
+	Job           int        `json:"job_id"`
+	UserID        int64      `json:"user_id"`
+	CarType       string     `json:"car_type"`
+	Vin           string     `json:"vin"`
+	HmiSN         string     `json:"hmi_sn"`
+	Points        []JobPoint `json:"points"`
 }
 
 type JobPoint struct {
-	Seq int `json:"sequence"`
-	PSet int `json:"pset"`
-	X             float64 `json:"offset_x"`
-	Y             float64 `json:"offset_Y"`
+	Seq       int     `json:"sequence"`
+	PSet      int     `json:"pset"`
+	X         float64 `json:"offset_x"`
+	Y         float64 `json:"offset_Y"`
+	MaxOpTime int     `json:"max_op_time"`
 }
 
 type ControllerMode struct {

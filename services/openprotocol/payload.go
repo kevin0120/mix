@@ -8,6 +8,17 @@ import (
 )
 
 const (
+	IO_STATUS_ON       = "on"
+	IO_STATUS_OFF      = "off"
+	IO_STATUS_FLASHING = "flashing"
+)
+
+type IOStatus struct {
+	No     int    `json:"no"`
+	Status string `json:"status"`
+}
+
+const (
 	LEN_HEADER      = 20
 	DEFAULT_REV     = "000"
 	DEFAULT_MSG_END = string(0x00)
@@ -39,6 +50,7 @@ const (
 	MID_0031_JOB_LIST_REPLY        = "0031"
 	MID_0032_JOB_DETAIL_REQUEST    = "0032"
 	MID_0033_JOB_DETAIL_REPLY      = "0033"
+	MID_0200_CONTROLLER_RELAYS     = "0200"
 
 	MID_0008_DATA_SUB = "0008"
 
@@ -380,6 +392,17 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 		h.Spare = ""
 
 		return h.Serialize() + end
+
+	case MID_0200_CONTROLLER_RELAYS:
+		h.MID = MID_0200_CONTROLLER_RELAYS
+		h.LEN = LEN_HEADER + len(data)
+		h.Revision = rev
+		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + data + end
 	}
 
 	return ""

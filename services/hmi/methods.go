@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kataras/iris"
+	"github.com/kataras/iris/core/errors"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/openprotocol"
+	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"strconv"
-	"github.com/kataras/iris/core/errors"
-	"github.com/masami10/rush/services/storage"
 )
 
 const (
@@ -184,6 +184,12 @@ func (m *Methods) putManualPSets(ctx iris.Context) {
 		return
 	}
 
+	if pset.HmiSN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("hmi sn is required")
+		return
+	}
+
 	//if pset.GunSN == "" {
 	//	pset.GunSN = ""
 	//}
@@ -214,7 +220,7 @@ func (m *Methods) putManualPSets(ctx iris.Context) {
 
 	switch c.Protocol() {
 	case controller.OPENPROTOCOL:
-		ex_info := fmt.Sprintf("%s-%s-%d", pset.Vin, pset.CarType, pset.UserID)
+		ex_info := fmt.Sprintf("%25s%25s%25s%25d", pset.Vin, pset.HmiSN, pset.CarType, pset.UserID)
 		err = m.service.OpenProtocol.PSetManual(pset.Controller_SN, pset.PSet, pset.UserID, ex_info)
 
 	default:
@@ -602,7 +608,6 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 		}
 		//vin-cartype-hmisn-userid
 		ex_info := fmt.Sprintf("%25s%25s%25s%25d", job.Vin, job.HmiSN, job.CarType, job.UserID)
-		fmt.Printf(ex_info)
 		err = m.service.OpenProtocol.JobSetManual(job.Controller_SN, job.Job, job.UserID, ex_info)
 
 	default:
@@ -623,8 +628,7 @@ func (m *Methods) insertResultsForJob(job *JobManual) error {
 		return errors.New("points is required")
 	}
 
-	key := job.Vin + ":" + job.CarType
-	err := m.service.DB.DeleteResultsForJob(key)
+	key := job.Vin + ":" + job.CarType + ":" + job.HmiSN
 
 	db_results := []storage.Results{}
 	for _, v := range job.Points {
@@ -634,12 +638,14 @@ func (m *Methods) insertResultsForJob(job *JobManual) error {
 		r.OffsetX = v.X
 		r.OffsetY = v.Y
 		r.Seq = v.Seq
+		r.MaxRedoTimes = v.MaxOpTime
 		r.Stage = storage.RESULT_STAGE_INIT
 
 		db_results = append(db_results, r)
 	}
 
-	err = m.service.DB.InsertWorkorder(nil, &db_results)
+	err := m.service.DB.DeleteResultsForJob(key)
+	err = m.service.DB.InsertWorkorder(nil, &db_results, false)
 
 	return err
 }
@@ -793,5 +799,46 @@ func (m *Methods) getStatus(ctx iris.Context) {
 		body, _ := json.Marshal(status)
 		ctx.Header("content-type", "application/json")
 		ctx.Write(body)
+	}
+}
+
+func (m *Methods) putIOSet(ctx iris.Context) {
+	io_set := IOSet{}
+	err := ctx.ReadJSON(&io_set)
+
+	if err != nil {
+		// 传输结构错误
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+
+	if io_set.Controller_SN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller_sn is required")
+		return
+	}
+
+	// 通过控制器设定程序
+	c, exist := m.service.ControllerService.Controllers[io_set.Controller_SN]
+	if !exist {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller not found")
+		return
+	}
+
+	switch c.Protocol() {
+	case controller.OPENPROTOCOL:
+		err = m.service.OpenProtocol.IOSet(io_set.Controller_SN, &io_set.IOStatus)
+		if err != nil {
+			ctx.StatusCode(iris.StatusBadRequest)
+			ctx.WriteString(err.Error())
+			return
+		}
+
+	default:
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("not supported")
+		return
 	}
 }

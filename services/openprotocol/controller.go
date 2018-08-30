@@ -212,41 +212,34 @@ func (c *Controller) handleResult(result_data *ResultData) {
 	controllerResult.ExceptionReason = result_data.TighteningErrorStatus
 
 	if kvs[0] != "auto" {
-		// 手动模式
+		// 手动模式 [vin-hmisn-cartype-userid]
 
-		if result_data.VIN != "" {
-			// 手动job[vin-cartype-hmisn-userid]
-
-			// vin:cartype
-			key := result_data.VIN + ":" + result_data.ID3
-			db_result, err := c.Srv.DB.FindTargetResultForJobManual(key)
-			if err != nil {
-				c.Srv.diag.Error("FindTargetResultForJobManual failed", err)
-			}
-
-			if controllerResult.Result == storage.RESULT_OK {
-				db_result.Stage = storage.RESULT_STAGE_FINAL
-				c.Srv.DB.UpdateResult(&db_result)
-			}
-
-			// 结果推送hmi
-			wsResult := wsnotify.WSResult{}
-			wsResult.Result_id = controllerResult.Result_id
-			wsResult.Count = controllerResult.Count
-			wsResult.Result = controllerResult.Result
-			wsResult.MI = controllerResult.ResultValue.Mi
-			wsResult.WI = controllerResult.ResultValue.Wi
-			wsResult.TI = controllerResult.ResultValue.Ti
-			wsResult.Seq = db_result.Seq
-			ws_str, _ := json.Marshal(wsResult)
-
-			c.Srv.diag.Debug(fmt.Sprintf("results:%s", controllerResult.Result))
-
-			c.Srv.WS.WSSendResult(result_data.ID2, string(ws_str))
-		} else {
-			// 手动pset[-cartype-hmisn-userid]
+		// vin:cartype:hmisn
+		key := result_data.VIN + ":" + result_data.ID3 + ":" + result_data.ID2
+		db_result, err := c.Srv.DB.FindTargetResultForJobManual(key)
+		if err != nil {
+			c.Srv.diag.Error("FindTargetResultForJobManual failed", err)
 		}
 
+		if controllerResult.Result == storage.RESULT_OK {
+			db_result.Stage = storage.RESULT_STAGE_FINAL
+			c.Srv.DB.UpdateResult(&db_result)
+		}
+
+		// 结果推送hmi
+		wsResult := wsnotify.WSResult{}
+		wsResult.Result_id = controllerResult.Result_id
+		wsResult.Count = controllerResult.Count
+		wsResult.Result = controllerResult.Result
+		wsResult.MI = controllerResult.ResultValue.Mi
+		wsResult.WI = controllerResult.ResultValue.Wi
+		wsResult.TI = controllerResult.ResultValue.Ti
+		wsResult.Seq = db_result.Seq
+		ws_str, _ := json.Marshal(wsResult)
+
+		c.Srv.diag.Debug(fmt.Sprintf("results:%s", controllerResult.Result))
+
+		c.Srv.WS.WSSendResult(result_data.ID2, string(ws_str))
 
 		return
 	}
@@ -283,8 +276,6 @@ func (c *Controller) handleResult(result_data *ResultData) {
 		c.Srv.diag.Error(id_info, errors.New("invalid id"))
 		return
 	}
-
-
 
 	c.Srv.Parent.Handle(controllerResult, nil)
 }
@@ -995,6 +986,73 @@ func (c *Controller) PSet(pset int, channel int, ex_info string) (uint32, error)
 	}
 
 	return 0, nil
+}
+
+func (c *Controller) findIOByNo(no int, ios *[]IOStatus) (IOStatus, error) {
+	for _, v := range *ios {
+		if no == v.No {
+			return v, nil
+		}
+	}
+
+	return IOStatus{}, errors.New("not found")
+}
+
+func (c *Controller) IOSet(ios *[]IOStatus) error {
+	if c.Status() == controller.STATUS_OFFLINE {
+		return errors.New("status offline")
+	}
+
+	if len(*ios) == 0 {
+		return errors.New("io status list is required")
+	}
+
+	str_io := ""
+	for i := 0; i < 10; i++ {
+		io, err := c.findIOByNo(i, ios)
+		if err != nil {
+			str_io += "3"
+		} else {
+			switch io.Status {
+			case IO_STATUS_OFF:
+				str_io += "0"
+
+			case IO_STATUS_ON:
+				str_io += "1"
+
+			case IO_STATUS_FLASHING:
+				str_io += "2"
+			}
+		}
+	}
+
+	c.Response.Add(MID_0200_CONTROLLER_RELAYS, nil)
+	defer c.Response.remove(MID_0200_CONTROLLER_RELAYS)
+
+	s_io := GeneratePackage(MID_0200_CONTROLLER_RELAYS, "001", str_io, DEFAULT_MSG_END)
+
+	c.Write([]byte(s_io))
+
+	var reply interface{} = nil
+	for i := 0; i < MAX_REPLY_COUNT; i++ {
+		reply = c.Response.get(MID_0200_CONTROLLER_RELAYS)
+		if reply != nil {
+			break
+		}
+
+		time.Sleep(REPLY_TIMEOUT)
+	}
+
+	if reply == nil {
+		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	}
+
+	s_reply := reply.(string)
+	if s_reply != request_errors["00"] {
+		return errors.New(s_reply)
+	}
+
+	return nil
 }
 
 func (c *Controller) JobSet(id_info string, job int) error {
