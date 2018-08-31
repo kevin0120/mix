@@ -200,9 +200,9 @@ func (m *Methods) putManualPSets(ctx iris.Context) {
 		return
 	}
 
-	//if pset.Vin == "" {
-	//	pset.Vin = ""
-	//}
+	if pset.Vin == "" {
+		pset.Vin = "unknown"
+	}
 
 	if pset.CarType == "" {
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -220,6 +220,13 @@ func (m *Methods) putManualPSets(ctx iris.Context) {
 
 	switch c.Protocol() {
 	case controller.OPENPROTOCOL:
+		err = m.insertResultsForPSet(&pset)
+		if err != nil {
+			ctx.StatusCode(iris.StatusBadRequest)
+			ctx.WriteString(err.Error())
+			return
+		}
+
 		ex_info := fmt.Sprintf("%25s%25s%25s%25d", pset.Vin, pset.HmiSN, pset.CarType, pset.UserID)
 		err = m.service.OpenProtocol.PSetManual(pset.Controller_SN, pset.PSet, pset.UserID, ex_info)
 
@@ -600,7 +607,7 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 
 	switch c.Protocol() {
 	case controller.OPENPROTOCOL:
-		err := m.insertResultsForJob(&job)
+		err = m.insertResultsForJob(&job)
 		if err != nil {
 			ctx.StatusCode(iris.StatusBadRequest)
 			ctx.WriteString(err.Error())
@@ -628,7 +635,7 @@ func (m *Methods) insertResultsForJob(job *JobManual) error {
 		return errors.New("points is required")
 	}
 
-	key := job.Vin + ":" + job.CarType + ":" + job.HmiSN
+	key := fmt.Sprintf("%s:%s:%s:%d", job.Vin, job.CarType, job.HmiSN, job.ProductID)
 
 	db_results := []storage.Results{}
 	for _, v := range job.Points {
@@ -646,6 +653,24 @@ func (m *Methods) insertResultsForJob(job *JobManual) error {
 
 	err := m.service.DB.DeleteResultsForJob(key)
 	err = m.service.DB.InsertWorkorder(nil, &db_results, false)
+
+	return err
+}
+
+func (m *Methods) insertResultsForPSet(pset *PSetManual) error {
+
+	key := fmt.Sprintf("%s:%s:%s:%d", pset.Vin, pset.CarType, pset.HmiSN, pset.ProductID)
+
+	r := storage.Results{}
+	r.PSetDefine = key
+	r.PSet = pset.PSet
+	r.Stage = storage.RESULT_STAGE_INIT
+
+	db_reuslt := []storage.Results{}
+	db_reuslt = append(db_reuslt, r)
+
+	err := m.service.DB.DeleteResultsForJob(key)
+	err = m.service.DB.InsertWorkorder(nil, &db_reuslt, false)
 
 	return err
 }

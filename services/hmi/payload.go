@@ -19,6 +19,7 @@ type PSetManual struct {
 	CarType       string `json:"car_type"`
 	Vin           string `json:"vin"`
 	HmiSN         string `json:"hmi_sn"`
+	ProductID     int64  `json:"product_id"`
 }
 
 type IOSet struct {
@@ -46,6 +47,7 @@ type JobManual struct {
 	CarType       string     `json:"car_type"`
 	Vin           string     `json:"vin"`
 	HmiSN         string     `json:"hmi_sn"`
+	ProductID     int64      `json:"product_id"`
 	Points        []JobPoint `json:"points"`
 }
 

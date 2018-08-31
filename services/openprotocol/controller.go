@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kataras/iris/core/errors"
+	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
@@ -240,6 +241,52 @@ func (c *Controller) handleResult(result_data *ResultData) {
 		c.Srv.diag.Debug(fmt.Sprintf("results:%s", controllerResult.Result))
 
 		c.Srv.WS.WSSendResult(result_data.ID2, string(ws_str))
+
+		// 结果推送aiis
+		aiisResult := aiis.AIISResult{}
+
+		if controllerResult.ExceptionReason != "" {
+			aiisResult.ExceptionReason = controllerResult.ExceptionReason + aiisResult.ExceptionReason
+		}
+
+		aiisResult.Control_date = time.Now().Format(time.RFC3339)
+
+		aiisResult.Measure_degree = controllerResult.ResultValue.Wi
+		aiisResult.Measure_result = strings.ToLower(controllerResult.Result)
+		aiisResult.Measure_t_don = controllerResult.ResultValue.Ti
+		aiisResult.Measure_torque = controllerResult.ResultValue.Mi
+		aiisResult.Op_time = controllerResult.Count
+		aiisResult.Pset_m_max = controllerResult.PSetDefine.Mp
+		aiisResult.Pset_m_min = controllerResult.PSetDefine.Mm
+		aiisResult.Pset_m_target = controllerResult.PSetDefine.Ma
+		aiisResult.Pset_m_threshold = controllerResult.PSetDefine.Ms
+		aiisResult.Pset_strategy = controllerResult.PSetDefine.Strategy
+		aiisResult.Pset_w_max = controllerResult.PSetDefine.Wp
+		aiisResult.Pset_w_min = controllerResult.PSetDefine.Wm
+		aiisResult.Pset_w_target = controllerResult.PSetDefine.Wa
+		aiisResult.Pset_w_threshold = 1
+
+		ks := strings.Split(db_result.PSetDefine, ":")
+		if len(ks) < 4 {
+			return
+		}
+		pid, _ := strconv.Atoi(ks[3])
+		aiisResult.ProductID = int64(pid)
+
+		uid, _ := strconv.Atoi(result_data.ID4)
+		aiisResult.UserID = int64(uid)
+
+		// mo相关
+		aiisResult.MO_Model = result_data.ID3
+
+		c.Srv.diag.Debug("推送结果数据到AIIS ...")
+
+		err = c.Srv.Aiis.PutResult(0, aiisResult)
+		if err == nil {
+			c.Srv.diag.Debug("推送AIIS成功，更新本地结果标识")
+		} else {
+			c.Srv.diag.Error("推送AIIS失败", err)
+		}
 
 		return
 	}
