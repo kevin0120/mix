@@ -11,13 +11,13 @@ import (
 	"github.com/masami10/aiis/services/httpd"
 	"github.com/masami10/aiis/services/storage"
 
+	"github.com/masami10/aiis/services/changan"
 	"github.com/masami10/aiis/services/fis"
 	"github.com/masami10/aiis/services/odoo"
 	"github.com/masami10/aiis/services/pmon"
 	"github.com/masami10/aiis/services/rush"
 	"github.com/masami10/aiis/services/wsnotify"
 	"github.com/pkg/errors"
-	"github.com/masami10/aiis/services/changan"
 )
 
 type Config struct {

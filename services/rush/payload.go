@@ -25,6 +25,7 @@ type OperationResult struct {
 	QualityState    string      `json:"quality_state"`
 	ExceptionReason string      `json:"exception_reason"`
 	Seq             int         `json:"seq"`
+	ProductID       int64       `json:"product_id"`
 
 	// mo相关信息
 	EquipemntName  string `json:"equipment_name"` // 设备名

@@ -1,12 +1,12 @@
 package changan
 
 import (
-	"sync/atomic"
-		"github.com/masami10/aiis/services/wsnotify"
-	"github.com/masami10/aiis/services/httpd"
-	"github.com/kataras/iris"
-	"fmt"
 	"encoding/json"
+	"fmt"
+	"github.com/kataras/iris"
+	"github.com/masami10/aiis/services/httpd"
+	"github.com/masami10/aiis/services/wsnotify"
+	"sync/atomic"
 )
 
 type Diagnostic interface {
@@ -14,17 +14,17 @@ type Diagnostic interface {
 }
 
 type Service struct {
-	WS			   *wsnotify.Service
-	HTTPDService 	*httpd.Service
-	diag           Diagnostic
-	configValue    atomic.Value
+	WS           *wsnotify.Service
+	HTTPDService *httpd.Service
+	diag         Diagnostic
+	configValue  atomic.Value
 }
 
 func NewService(d Diagnostic, c Config, httpd *httpd.Service, ws *wsnotify.Service) *Service {
 	if c.Enable {
 		s := &Service{
-			diag: 	d,
-			WS: 	ws,
+			diag:         d,
+			WS:           ws,
 			HTTPDService: httpd,
 		}
 
@@ -41,7 +41,7 @@ func (s *Service) Config() Config {
 
 func (s *Service) Open() error {
 
-	r := httpd.Route {
+	r := httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
 		Method:      "PUT",
 		Pattern:     "/andon-test",

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/masami10/aiis/command"
 	"github.com/masami10/aiis/keyvalue"
+	"github.com/masami10/aiis/services/changan"
 	"github.com/masami10/aiis/services/diagnostic"
 	"github.com/masami10/aiis/services/fis"
 	"github.com/masami10/aiis/services/httpd"
@@ -12,7 +13,6 @@ import (
 	"github.com/masami10/aiis/services/rush"
 	"github.com/masami10/aiis/services/storage"
 	"github.com/masami10/aiis/services/wsnotify"
-	"github.com/masami10/aiis/services/changan"
 )
 
 type BuildInfo struct {
@@ -184,9 +184,13 @@ func (s *Server) appendFisService() error {
 	c := s.config.Fis
 
 	srv := fis.NewService(d, c, s.PmonService)
-	srv.Odoo = s.OdooService
-	s.FisService = srv
-	s.AppendService("fis", srv)
+
+	if c.Enable {
+		srv.Odoo = s.OdooService
+		s.FisService = srv
+		s.AppendService("fis", srv)
+	}
+
 	return nil
 }
 

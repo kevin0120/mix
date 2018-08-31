@@ -106,13 +106,30 @@ func (s *Service) UpdateResults(result *rush.OperationResult, id int64, sent int
 
 	r.Sent = sent
 
-	affected, err := s.eng.Table("operation_result").ID(id).Update(&r)
+	if id == 0 {
+		// 新增
 
-	if err != nil {
-		return errors.Wrapf(err, "Update result record %d fail", id)
+		r.CreateTime = r.ControlDate
+		r.ProductId = result.ProductID
+
+		affected, err := s.eng.Table("operation_result").Insert(&r)
+
+		if err != nil {
+			return errors.Wrapf(err, "insert result record fail", id)
+		}
+
+		s.diag.UpdateResultSuccess(affected)
+	} else {
+		// 更新
+
+		affected, err := s.eng.Table("operation_result").ID(id).Update(&r)
+
+		if err != nil {
+			return errors.Wrapf(err, "Update result record %d fail", id)
+		}
+
+		s.diag.UpdateResultSuccess(affected)
 	}
-
-	s.diag.UpdateResultSuccess(affected)
 
 	return nil
 }

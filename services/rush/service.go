@@ -76,13 +76,15 @@ func (s *Service) putFisResult(ctx iris.Context) {
 		return
 	}
 
-	fis_result := s.OperationToFisResult(&r)
-	fis_err := s.Fis.PushResult(&fis_result)
-	if fis_err != nil {
-		ctx.Writef(fmt.Sprintf("Push fis err: %s", fis_err.Error()))
-		ctx.StatusCode(iris.StatusBadRequest)
-	} else {
-		ctx.StatusCode(iris.StatusOK)
+	if s.Fis != nil {
+		fis_result := s.OperationToFisResult(&r)
+		fis_err := s.Fis.PushResult(&fis_result)
+		if fis_err != nil {
+			ctx.Writef(fmt.Sprintf("Push fis err: %s", fis_err.Error()))
+			ctx.StatusCode(iris.StatusBadRequest)
+		} else {
+			ctx.StatusCode(iris.StatusOK)
+		}
 	}
 
 }
@@ -242,13 +244,15 @@ func (s *Service) PatchResultFlag(result_id int64, has_upload bool) error {
 func (s *Service) HandleResult(cr *cResult) {
 
 	// 结果推送fis
-	fisResult := s.OperationToFisResult(cr.r)
-
 	sent := 1
-	e := s.Fis.PushResult(&fisResult)
-	if e != nil {
-		sent = 0
-		s.diag.Error("push result to fis error", e)
+	if s.Fis != nil {
+		fisResult := s.OperationToFisResult(cr.r)
+
+		e := s.Fis.PushResult(&fisResult)
+		if e != nil {
+			sent = 0
+			s.diag.Error("push result to fis error", e)
+		}
 	}
 
 	// 结果保存数据库
@@ -257,6 +261,8 @@ func (s *Service) HandleResult(cr *cResult) {
 		s.diag.Error("update result error", err)
 	} else {
 		// 更新masterpc结果上传标识
-		s.PatchResultFlag(cr.id, true)
+		if cr.id > 0 {
+			s.PatchResultFlag(cr.id, true)
+		}
 	}
 }

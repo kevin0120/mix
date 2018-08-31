@@ -38,17 +38,21 @@ type Service struct {
 }
 
 func NewService(d Diagnostic, c Config, pmon *pmon.Service) *Service {
-	s := &Service{
-		diag:      d,
-		mtxFile:   sync.Mutex{},
-		status:    FIS_STATUS_OFFLINE,
-		mtxStatus: sync.Mutex{},
+	if c.Enable {
+		s := &Service{
+			diag:      d,
+			mtxFile:   sync.Mutex{},
+			status:    FIS_STATUS_OFFLINE,
+			mtxStatus: sync.Mutex{},
+		}
+
+		s.Pmon = pmon
+
+		s.configValue.Store(c)
+		return s
 	}
 
-	s.Pmon = pmon
-
-	s.configValue.Store(c)
-	return s
+	return nil
 }
 
 func (s *Service) UpdateStatus(status string) {
@@ -66,6 +70,7 @@ func (s *Service) Config() Config {
 }
 
 func (s *Service) Open() error {
+
 	c := s.Config()
 	s.Pmon.PmonRegistryEvent(s.OnPmonEventMission, c.CHRecvMission, nil)
 	s.Pmon.PmonRegistryEvent(s.OnPmonEventHeartbeat, c.CHRecvHeartbeat, nil)
