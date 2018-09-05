@@ -618,7 +618,7 @@
           {
             "name": "controller_sn",
             "in": "query",
-            "description": "控制器序列号",
+            "description": "控制器序列号(多个序列号通过，分隔)",
             "type": "string"
           }
         ],
@@ -731,12 +731,16 @@
           "type": "string",
           "description": "hmi序列号",
           "example": "1122334455667788"
+        },
+        "count": {
+          "type": "integer",
+          "description": "拧接次数(0:无限制)",
+          "example": 1
         }
       },
       "required": [
         "pset",
         "controller_sn",
-        "car_type",
         "hmi_sn"
       ]
     },
@@ -978,9 +982,7 @@
       "required": [
         "job_id",
         "controller_sn",
-        "car_type",
-        "hmi_sn",
-        "points"
+        "hmi_sn"
       ]
     },
     "jobmode": {

@@ -335,25 +335,28 @@ func (p *Service) HandleProcess() {
 }
 
 // 取得控制器状态
-func (p *Service) GetControllersStatus(sn string) ([]ControllerStatus, error) {
+func (p *Service) GetControllersStatus(sns []string) ([]ControllerStatus, error) {
 	var status []ControllerStatus
-	if sn != "" {
-		c, exist := p.Parent.Controllers[sn]
-		if !exist {
-			return status, errors.New("controller not found")
-		} else {
-			s := ControllerStatus{}
-			s.SN = sn
-			s.Status = c.Status()
-			status = append(status, s)
-			return status, nil
-		}
-	} else {
+
+	if len(sns) == 0 {
 		for k, v := range p.Parent.Controllers {
 			s := ControllerStatus{}
 			s.SN = k
 			s.Status = v.Status()
 			status = append(status, s)
+		}
+
+		return status, nil
+
+	} else {
+		for _, v := range sns {
+			c, exist := p.Parent.Controllers[v]
+			if exist {
+				s := ControllerStatus{}
+				s.SN = v
+				s.Status = c.Status()
+				status = append(status, s)
+			}
 		}
 
 		return status, nil

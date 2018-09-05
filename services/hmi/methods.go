@@ -11,6 +11,7 @@ import (
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -210,6 +211,12 @@ func (m *Methods) putManualPSets(ctx iris.Context) {
 		return
 	}
 
+	if pset.Count < 0 {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("pset count must be greater than or equal to 0")
+		return
+	}
+
 	// 通过控制器设定程序
 	c, exist := m.service.ControllerService.Controllers[pset.Controller_SN]
 	if !exist {
@@ -228,7 +235,7 @@ func (m *Methods) putManualPSets(ctx iris.Context) {
 		}
 
 		ex_info := fmt.Sprintf("%25s%25s%25s%25d", pset.Vin, pset.HmiSN, pset.CarType, pset.UserID)
-		err = m.service.OpenProtocol.PSetManual(pset.Controller_SN, pset.PSet, pset.UserID, ex_info)
+		err = m.service.OpenProtocol.PSetManual(pset.Controller_SN, pset.PSet, pset.UserID, ex_info, pset.Count)
 
 	default:
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -635,7 +642,7 @@ func (m *Methods) insertResultsForJob(job *JobManual) error {
 		return errors.New("points is required")
 	}
 
-	key := fmt.Sprintf("%s:%s:%s:%d", job.Vin, job.CarType, job.HmiSN, job.ProductID)
+	key := fmt.Sprintf("%s:%s:%s:%d:%d", job.Vin, job.CarType, job.HmiSN, job.ProductID, job.WorkcenterID)
 
 	db_results := []storage.Results{}
 	for _, v := range job.Points {
@@ -659,7 +666,7 @@ func (m *Methods) insertResultsForJob(job *JobManual) error {
 
 func (m *Methods) insertResultsForPSet(pset *PSetManual) error {
 
-	key := fmt.Sprintf("%s:%s:%s:%d", pset.Vin, pset.CarType, pset.HmiSN, pset.ProductID)
+	key := fmt.Sprintf("%s:%s:%s:%d:%d", pset.Vin, pset.CarType, pset.HmiSN, pset.ProductID, pset.WorkcenterID)
 
 	r := storage.Results{}
 	r.PSetDefine = key
@@ -814,7 +821,18 @@ func (m *Methods) getStatus(ctx iris.Context) {
 	// 返回控制器状态
 
 	sn := ctx.URLParam("controller_sn")
-	status, err := m.service.AudiVw.GetControllersStatus(sn)
+
+	sns := []string{}
+	if sn != "" {
+		vs := strings.Split(sn, ",")
+		for _, v := range vs {
+			if strings.TrimSpace(v) != "" {
+				sns = append(sns, strings.TrimSpace(v))
+			}
+		}
+	}
+
+	status, err := m.service.AudiVw.GetControllersStatus(sns)
 
 	if err != nil {
 		ctx.StatusCode(iris.StatusNotFound)

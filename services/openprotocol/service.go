@@ -118,7 +118,7 @@ func (p *Service) PSet(sn string, pset int, result_id int64, count int, user_id 
 	ex_info := fmt.Sprintf("%s-%d-%d-%d", controller.AUTO_MODE, result_id, count, user_id)
 
 	// 设定pset并判断控制器响应
-	_, err := c.PSet(pset, c.cfg.ToolChannel, ex_info)
+	_, err := c.PSet(pset, c.cfg.ToolChannel, ex_info, 1)
 	if err != nil {
 		// 控制器请求失败
 		return err
@@ -127,7 +127,7 @@ func (p *Service) PSet(sn string, pset int, result_id int64, count int, user_id 
 	return nil
 }
 
-func (p *Service) PSetManual(sn string, pset int, user_id int64, ex_info string) error {
+func (p *Service) PSetManual(sn string, pset int, user_id int64, ex_info string, count int) error {
 	// 判断控制器是否存在
 	v, exist := p.Parent.Controllers[sn]
 	if !exist {
@@ -138,7 +138,7 @@ func (p *Service) PSetManual(sn string, pset int, user_id int64, ex_info string)
 	c := v.(*Controller)
 
 	// 设定pset并判断控制器响应
-	_, err := c.PSet(pset, c.cfg.ToolChannel, ex_info)
+	_, err := c.PSet(pset, c.cfg.ToolChannel, ex_info, count)
 	if err != nil {
 		// 控制器请求失败
 		return err

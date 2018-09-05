@@ -23,6 +23,7 @@ type AIISResult struct {
 	ExceptionReason  string  `json:"exception_reason"`
 	Seq              int     `json:"seq"`
 	ProductID        int64   `json:"product_id"`
+	WorkcenterID        int64   `json:"workcenter_id"`
 
 	CURObjects []CURObject `json:"cur_objects"`
 

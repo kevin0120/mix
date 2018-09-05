@@ -276,6 +276,9 @@ func (c *Controller) handleResult(result_data *ResultData) {
 		uid, _ := strconv.Atoi(result_data.ID4)
 		aiisResult.UserID = int64(uid)
 
+		wid, _ := strconv.Atoi(ks[4])
+		aiisResult.WorkcenterID = int64(wid)
+
 		// mo相关
 		aiisResult.MO_Model = result_data.ID3
 
@@ -941,6 +944,32 @@ func (c *Controller) IdentifierSet(str string) error {
 	return nil
 }
 
+func (c *Controller) PSetBatchSet(pset int, batch int) error {
+	if c.Status() == controller.STATUS_OFFLINE {
+		return errors.New("status offline")
+	}
+
+	s := fmt.Sprintf("%03d%02d", pset, batch)
+	ide := GeneratePackage(MID_0019_PSET_BATCH_SET, "001", s, DEFAULT_MSG_END)
+
+	c.Write([]byte(ide))
+
+	return nil
+}
+
+func (c *Controller) PSetBatchReset(pset int) error {
+	if c.Status() == controller.STATUS_OFFLINE {
+		return errors.New("status offline")
+	}
+
+	s := fmt.Sprintf("%03d", pset)
+	ide := GeneratePackage(MID_0020_PSET_BATCH_RESET, "001", s, DEFAULT_MSG_END)
+
+	c.Write([]byte(ide))
+
+	return nil
+}
+
 func (c *Controller) DataSubscribeCurve() error {
 	if c.Status() == controller.STATUS_OFFLINE {
 		return errors.New("status offline")
@@ -1013,12 +1042,15 @@ func (c *Controller) CurveSubscribe() error {
 	return nil
 }
 
-func (c *Controller) PSet(pset int, channel int, ex_info string) (uint32, error) {
+func (c *Controller) PSet(pset int, channel int, ex_info string, count int) (uint32, error) {
 	// 设定结果标识
 
 	if c.Mode.Load().(string) != MODE_PSET {
 		return 0, errors.New("current mode is not pset")
 	}
+
+	// 次数控制
+	c.PSetBatchSet(pset, count)
 
 	// 结果id-拧接次数-用户id
 	err := c.IdentifierSet(ex_info)

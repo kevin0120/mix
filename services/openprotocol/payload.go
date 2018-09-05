@@ -51,6 +51,8 @@ const (
 	MID_0032_JOB_DETAIL_REQUEST    = "0032"
 	MID_0033_JOB_DETAIL_REPLY      = "0033"
 	MID_0200_CONTROLLER_RELAYS     = "0200"
+	MID_0019_PSET_BATCH_SET = "0019"
+	MID_0020_PSET_BATCH_RESET = "0020"
 
 	MID_0008_DATA_SUB = "0008"
 
@@ -395,6 +397,28 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 
 	case MID_0200_CONTROLLER_RELAYS:
 		h.MID = MID_0200_CONTROLLER_RELAYS
+		h.LEN = LEN_HEADER + len(data)
+		h.Revision = rev
+		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + data + end
+
+	case MID_0019_PSET_BATCH_SET:
+		h.MID = MID_0019_PSET_BATCH_SET
+		h.LEN = LEN_HEADER + len(data)
+		h.Revision = rev
+		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + data + end
+
+	case MID_0020_PSET_BATCH_RESET:
+		h.MID = MID_0020_PSET_BATCH_RESET
 		h.LEN = LEN_HEADER + len(data)
 		h.Revision = rev
 		h.NoAck = ""

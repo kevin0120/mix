@@ -506,7 +506,7 @@ func (s *Service) FindTargetResultForJob(workorder_id int64) (Results, error) {
 func (s *Service) FindTargetResultForJobManual(key string) (Results, error) {
 	var results []Results
 
-	ss := s.eng.Alias("r").Where("r.pset_define like ?", key+"%").And("r.stage = ?", RESULT_STAGE_INIT).OrderBy("r.seq")
+	ss := s.eng.Alias("r").Where("r.pset_define like ?", key+"%").And("r.stage = ? or r.seq = ?", RESULT_STAGE_INIT, 0).OrderBy("r.seq")
 
 	e := ss.Find(&results)
 
