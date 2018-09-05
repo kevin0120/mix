@@ -647,7 +647,7 @@ func (m *Methods) insertResultsForJob(job *JobManual) error {
 	db_results := []storage.Results{}
 	for _, v := range job.Points {
 		r := storage.Results{}
-		r.PSetDefine = key
+		r.ExInfo = key
 		r.PSet = v.PSet
 		r.OffsetX = v.X
 		r.OffsetY = v.Y
@@ -669,7 +669,7 @@ func (m *Methods) insertResultsForPSet(pset *PSetManual) error {
 	key := fmt.Sprintf("%s:%s:%s:%d:%d", pset.Vin, pset.CarType, pset.HmiSN, pset.ProductID, pset.WorkcenterID)
 
 	r := storage.Results{}
-	r.PSetDefine = key
+	r.ExInfo = key
 	r.PSet = pset.PSet
 	r.Stage = storage.RESULT_STAGE_INIT
 

@@ -51,8 +51,8 @@ const (
 	MID_0032_JOB_DETAIL_REQUEST    = "0032"
 	MID_0033_JOB_DETAIL_REPLY      = "0033"
 	MID_0200_CONTROLLER_RELAYS     = "0200"
-	MID_0019_PSET_BATCH_SET = "0019"
-	MID_0020_PSET_BATCH_RESET = "0020"
+	MID_0019_PSET_BATCH_SET        = "0019"
+	MID_0020_PSET_BATCH_RESET      = "0020"
 
 	MID_0008_DATA_SUB = "0008"
 
@@ -628,7 +628,7 @@ func (rd *ResultData) Deserialize(str string) error {
 	}
 
 	rd.ControllerName = str[12:37]
-	rd.VIN = strings.TrimSpace(str[39:64])
+	rd.VIN = str[39:64]
 
 	rd.JobID, err = strconv.Atoi(str[66:70])
 	if err != nil {
@@ -663,12 +663,14 @@ func (rd *ResultData) Deserialize(str string) error {
 	rd.PrevailTorqueCompensateStatus = str[124:125]
 
 	error_status := str[127:137]
-	error_value, err := strconv.ParseInt(error_status, 10, 64)
+	error_value, err := strconv.ParseInt(error_status, 10, 32)
 	if err != nil {
 		return err
 	}
 
 	b_error := biu.ToBinaryString(error_value)
+	b_error = strings.Trim(b_error, "[] ")
+	b_error = strings.Replace(b_error, " ", "", -1)
 	l := len(b_error)
 	errs := []string{}
 	for i := 0; i < l; i++ {
@@ -727,9 +729,9 @@ func (rd *ResultData) Deserialize(str string) error {
 
 	rd.TorqueUnit = str[394:395]
 	rd.ResultType = str[397:399]
-	rd.ID2 = strings.TrimSpace(str[401:426])
-	rd.ID3 = strings.TrimSpace(str[428:453])
-	rd.ID4 = strings.TrimSpace(str[455:480])
+	rd.ID2 = str[401:426]
+	rd.ID3 = str[428:453]
+	rd.ID4 = str[455:480]
 
 	rd.NumberOfStages, err = strconv.Atoi(str[508:510])
 	if err != nil {

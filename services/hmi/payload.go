@@ -20,8 +20,8 @@ type PSetManual struct {
 	Vin           string `json:"vin"`
 	HmiSN         string `json:"hmi_sn"`
 	ProductID     int64  `json:"product_id"`
-	Count	int    `json:"count"`
-	WorkcenterID int64 `json:"workcenter_id"`
+	Count         int    `json:"count"`
+	WorkcenterID  int64  `json:"workcenter_id"`
 }
 
 type IOSet struct {
@@ -51,7 +51,7 @@ type JobManual struct {
 	HmiSN         string     `json:"hmi_sn"`
 	ProductID     int64      `json:"product_id"`
 	Points        []JobPoint `json:"points"`
-	WorkcenterID int64 `json:"workcenter_id"`
+	WorkcenterID  int64      `json:"workcenter_id"`
 }
 
 type JobPoint struct {

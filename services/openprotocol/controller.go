@@ -160,12 +160,17 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 
 func (c *Controller) handleResult(result_data *ResultData) {
 
+	result_data.VIN = strings.TrimSpace(result_data.VIN)
+	result_data.ID2 = strings.TrimSpace(result_data.ID2)
+	result_data.ID3 = strings.TrimSpace(result_data.ID3)
+	result_data.ID4 = strings.TrimSpace(result_data.ID4)
+
 	c.Srv.DB.UpdateTightning(c.dbController.Id, result_data.TightingID)
 
 	controllerResult := controller.ControllerResult{}
 	c.Srv.diag.Info(fmt.Sprintf("vin:%s id2:%s id3:%s id4:%s", result_data.VIN, result_data.ID2, result_data.ID3, result_data.ID4))
 
-	id_info := strings.TrimSpace(result_data.VIN + result_data.ID2 + result_data.ID3 + result_data.ID4)
+	id_info := result_data.VIN + result_data.ID2 + result_data.ID3 + result_data.ID4
 	if id_info == "" {
 		c.Srv.diag.Error(id_info, errors.New("invalid id"))
 		return
@@ -266,10 +271,11 @@ func (c *Controller) handleResult(result_data *ResultData) {
 		aiisResult.Pset_w_target = controllerResult.PSetDefine.Wa
 		aiisResult.Pset_w_threshold = 1
 
-		ks := strings.Split(db_result.PSetDefine, ":")
+		ks := strings.Split(db_result.ExInfo, ":")
 		if len(ks) < 4 {
 			return
 		}
+
 		pid, _ := strconv.Atoi(ks[3])
 		aiisResult.ProductID = int64(pid)
 

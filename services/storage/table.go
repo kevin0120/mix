@@ -55,6 +55,7 @@ type Results struct {
 	OffsetX            float64   `xorm:"Double 'offset_x'"`
 	OffsetY            float64   `xorm:"Double 'offset_y'"`
 	MaxRedoTimes       int       `xorm:"int 'max_redo_times'"`
+	ExInfo             string    `xorm:"text 'exinfo'"`
 }
 
 type Curves struct {
