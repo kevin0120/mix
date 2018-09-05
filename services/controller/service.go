@@ -44,7 +44,7 @@ type Service struct {
 	Aiis  *aiis.Service
 	Minio *minio.Service
 
-	handlers Handlers
+	Handlers Handlers
 	wg       sync.WaitGroup
 	closing  chan struct{}
 
@@ -59,13 +59,13 @@ func NewService(cs Config, d Diagnostic, pAudi Protocol, pOpenprotocol Protocol)
 		diag:          d,
 		Controllers:   map[string]Controller{},
 		protocols:     map[string]Protocol{},
-		handlers:      Handlers{},
+		Handlers:      Handlers{},
 		handle_buffer: make(chan HandlerPackage, 1024),
 		wg:            sync.WaitGroup{},
 		closing:       make(chan struct{}, 1),
 	}
 
-	s.handlers.controllerService = s
+	s.Handlers.controllerService = s
 
 	for _, c := range cs.Configs {
 		switch c.Protocol {
@@ -104,7 +104,7 @@ func (s *Service) Write(serialNo string, buf []byte) error {
 }
 
 func (s *Service) Open() error {
-	s.handlers.Init(s.config.Workers)
+	s.Handlers.Init(s.config.Workers)
 
 	for i := 0; i < s.config.Workers; i++ {
 		s.wg.Add(1)
@@ -130,7 +130,7 @@ func (s *Service) HandleProcess() {
 	for {
 		select {
 		case msg := <-s.handle_buffer:
-			s.handlers.Handle(msg.Result, msg.Curve)
+			s.Handlers.Handle(msg.Result, msg.Curve)
 
 		case <-s.closing:
 			s.wg.Done()

@@ -247,6 +247,9 @@ func (c *Controller) handleResult(result_data *ResultData) {
 
 		c.Srv.WS.WSSendResult(result_data.ID2, string(ws_str))
 
+		// 结果缓存数据库
+		c.Srv.Parent.Handlers.SaveResult(&controllerResult, &db_result)
+
 		// 结果推送aiis
 		aiisResult := aiis.AIISResult{}
 

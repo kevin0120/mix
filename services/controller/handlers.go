@@ -198,6 +198,33 @@ func (h *Handlers) PushAiis(needPush bool, r *storage.Results, workorder *storag
 	return nil
 }
 
+//
+func (h *Handlers) SaveResult(result *ControllerResult, dbresult *storage.Results) (*storage.Results, error) {
+	loc, _ := time.LoadLocation("Local")
+	dbresult.UpdateTime, _ = time.ParseInLocation("2006-01-02 15:04:05", result.Dat, loc)
+	dbresult.Result = result.Result
+	dbresult.Count = result.Count
+	dbresult.HasUpload = false
+	dbresult.ControllerSN = result.Controller_SN
+	dbresult.UserID = result.UserID
+
+	s_value, _ := json.Marshal(result.ResultValue)
+	s_pset, _ := json.Marshal(result.PSetDefine)
+
+	dbresult.ResultValue = string(s_value)
+	dbresult.PSetDefine = string(s_pset)
+
+	h.controllerService.diag.Debug("缓存结果到数据库 ...")
+	_, err := h.controllerService.DB.UpdateResult(dbresult)
+	if err != nil {
+		h.controllerService.diag.Error("缓存结果失败", err)
+	} else {
+		h.controllerService.diag.Debug("缓存结果成功")
+	}
+
+	return dbresult, nil
+}
+
 // 处理结果数据
 func (h *Handlers) handleResult(result *ControllerResult, dbresult *storage.Results, dbworkorder *storage.Workorders, curve_obj *CurveObject) error {
 	h.controllerService.diag.Debug("处理结果数据 ...")
