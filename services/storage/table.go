@@ -73,3 +73,9 @@ type Controllers struct {
 	SN     string `xorm:"varchar(128) 'controller_sn'"`
 	LastID string `xorm:"varchar(128) 'last_id'"`
 }
+
+type Guns struct {
+	Id     int64  `xorm:"pk autoincr notnull 'id'"`
+	GunID  int64  `xorm:"bigint 'gun_id'"`
+	Serial string `xorm:"varchar(128) 'serial'"`
+}

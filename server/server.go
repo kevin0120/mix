@@ -186,6 +186,7 @@ func (s *Server) appendOpenProtocolService() {
 	s.OpenprotocolService.WS = s.WSNotifyService
 	s.OpenprotocolService.DB = s.StorageServie
 	s.OpenprotocolService.Parent = s.ControllerService
+	s.OpenprotocolService.Odoo = s.OdooService
 
 	s.AppendService("openprotocol", s.OpenprotocolService)
 }

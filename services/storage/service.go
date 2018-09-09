@@ -94,6 +94,16 @@ func (s *Service) Open() error {
 		}
 	}
 
+	exist, err = engine.IsTableExist("Guns")
+	if err != nil {
+		return errors.Wrapf(err, "Check Table exist %s fail", "Guns")
+	}
+	if !exist {
+		if err := engine.Sync2(new(Guns)); err != nil {
+			return errors.Wrapf(err, "Create Table Guns fail")
+		}
+	}
+
 	engine.SetMaxOpenConns(c.MaxConnects) // always success
 
 	s.eng = engine
@@ -187,6 +197,23 @@ func (s *Service) GetCurve(curve *Curves) (interface{}, error) {
 			return nil, nil
 		} else {
 			return rt_curve, nil
+		}
+	}
+}
+
+func (s *Service) GetGun(serial string) (Guns, error) {
+
+	var rt_gun Guns
+
+	rt, err := s.eng.Alias("g").Where("g.serial = ?", serial).Get(&rt_gun)
+
+	if err != nil {
+		return rt_gun, err
+	} else {
+		if !rt {
+			return rt_gun, errors.New("found gun failed")
+		} else {
+			return rt_gun, nil
 		}
 	}
 }

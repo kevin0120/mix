@@ -53,6 +53,7 @@ const (
 	MID_0200_CONTROLLER_RELAYS     = "0200"
 	MID_0019_PSET_BATCH_SET        = "0019"
 	MID_0020_PSET_BATCH_RESET      = "0020"
+	MID_0035_JOB_INFO              = "0035"
 
 	MID_0008_DATA_SUB = "0008"
 
@@ -605,6 +606,7 @@ func (rd *ResultData) DeserializeOld(str string) error {
 	}
 
 	rd.TimeStamp = str[187:206]
+	rd.ToolSerialNumber = str[171:285]
 	rd.TorqueUnit = str[208:209]
 	rd.ResultType = str[211:213]
 	rd.ID2 = str[215:240]
@@ -726,6 +728,8 @@ func (rd *ResultData) Deserialize(str string) error {
 	rd.TightingID = str[283:293]
 
 	rd.TimeStamp = str[325:344]
+
+	rd.ToolSerialNumber = str[309:323]
 
 	rd.TorqueUnit = str[394:395]
 	rd.ResultType = str[397:399]
@@ -974,6 +978,67 @@ func (p *JobDetail) Deserialize(str string) error {
 		job_step.StepName = strings.TrimSpace(values[5])
 
 		p.Steps = append(p.Steps, job_step)
+	}
+
+	return nil
+}
+
+type JobInfo struct {
+	JobID           int
+	JobStatus       int
+	JobBatchMode    int
+	JobBatchSize    int
+	JobBatchCounter int
+	Timestamp       string
+	JobCurrentStep  int
+	JobTotalStep    int
+	JobStepType     int
+}
+
+func (ji *JobInfo) Deserialize(msg string) error {
+
+	var err error
+
+	ji.JobID, err = strconv.Atoi(msg[2:6])
+	if err != nil {
+		return err
+	}
+
+	ji.JobStatus, err = strconv.Atoi(msg[8:9])
+	if err != nil {
+		return err
+	}
+
+	ji.JobBatchMode, err = strconv.Atoi(msg[11:12])
+	if err != nil {
+		return err
+	}
+
+	ji.JobBatchSize, err = strconv.Atoi(msg[14:17])
+	if err != nil {
+		return err
+	}
+
+	ji.JobBatchCounter, err = strconv.Atoi(msg[20:24])
+	if err != nil {
+		return err
+	}
+
+	ji.Timestamp = msg[26:45]
+
+	ji.JobCurrentStep, err = strconv.Atoi(msg[47:50])
+	if err != nil {
+		return err
+	}
+
+	ji.JobTotalStep, err = strconv.Atoi(msg[52:55])
+	if err != nil {
+		return err
+	}
+
+	ji.JobStepType, err = strconv.Atoi(msg[57:59])
+	if err != nil {
+		return err
 	}
 
 	return nil

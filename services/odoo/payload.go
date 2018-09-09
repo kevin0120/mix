@@ -117,3 +117,8 @@ type ODOOMO struct {
 	Date_planned_start string   `json:"date_planned_start"`
 	Prs                []ODOOPR `json:"prs"`
 }
+
+type ODOOGun struct {
+	ID     int64  `json:"id"`
+	Serial string `json:"serial"`
+}

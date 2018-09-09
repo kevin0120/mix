@@ -155,6 +155,21 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 		// 请求正确
 
 		c.Response.update(pkg.Body, request_errors["00"])
+
+	case MID_0035_JOB_INFO:
+		job_info := JobInfo{}
+		job_info.Deserialize(pkg.Body)
+
+		if job_info.JobCurrentStep == 0 {
+			// 推送job选择信息
+
+			job_select := wsnotify.WSJobSelect{
+				JobID: job_info.JobID,
+			}
+
+			ws_str, _ := json.Marshal(job_select)
+			c.Srv.WS.WSSendJob(string(ws_str))
+		}
 	}
 }
 
@@ -218,6 +233,10 @@ func (c *Controller) handleResult(result_data *ResultData) {
 	controllerResult.ExceptionReason = result_data.TighteningErrorStatus
 
 	if kvs[0] != "auto" {
+		if c.Srv.config().SkipJob == result_data.JobID {
+			return
+		}
+
 		// 手动模式 [vin-hmisn-cartype-userid]
 
 		// vin:cartype:hmisn
@@ -257,8 +276,21 @@ func (c *Controller) handleResult(result_data *ResultData) {
 			aiisResult.ExceptionReason = controllerResult.ExceptionReason + aiisResult.ExceptionReason
 		}
 
+		gun, err := c.Srv.DB.GetGun(result_data.ToolSerialNumber)
+		if err != nil {
+			odoo_gun, err := c.Srv.Odoo.GetGun(result_data.ToolSerialNumber)
+			if err == nil {
+				gun.GunID = odoo_gun.ID
+				gun.Serial = odoo_gun.Serial
+				c.Srv.DB.Store(gun)
+			}
+		}
+
+		aiisResult.GunID = gun.GunID
+
 		aiisResult.Control_date = time.Now().Format(time.RFC3339)
 
+		aiisResult.Vin = result_data.VIN
 		aiisResult.Measure_degree = controllerResult.ResultValue.Wi
 		aiisResult.Measure_result = strings.ToLower(controllerResult.Result)
 		aiisResult.Measure_t_don = controllerResult.ResultValue.Ti
@@ -273,6 +305,11 @@ func (c *Controller) handleResult(result_data *ResultData) {
 		aiisResult.Pset_w_min = controllerResult.PSetDefine.Wm
 		aiisResult.Pset_w_target = controllerResult.PSetDefine.Wa
 		aiisResult.Pset_w_threshold = 1
+
+		aiisResult.QualityState = controller.QUALITY_STATE_PASS
+		if controllerResult.ExceptionReason != "" {
+			aiisResult.QualityState = controller.QUALITY_STATE_EX
+		}
 
 		ks := strings.Split(db_result.ExInfo, ":")
 		if len(ks) < 4 {

@@ -5,6 +5,7 @@ import (
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/minio"
+	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
@@ -26,6 +27,7 @@ type Service struct {
 	WS    *wsnotify.Service
 	Aiis  *aiis.Service
 	Minio *minio.Service
+	Odoo  *odoo.Service
 
 	Parent *controller.Service
 }

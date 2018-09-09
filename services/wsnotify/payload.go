@@ -24,6 +24,10 @@ type WSSelector struct {
 	Selectors []int  `json:"selectors"`
 }
 
+type WSJobSelect struct {
+	JobID int `json:"job_id"`
+}
+
 type WSRegistMsg struct {
 	Msg string `json:"msg"`
 }

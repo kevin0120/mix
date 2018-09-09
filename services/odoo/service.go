@@ -1,6 +1,7 @@
 package odoo
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/storage"
@@ -21,13 +22,15 @@ type Endpoint struct {
 	url     string
 	headers map[string]string
 	method  string
+	name    string
 }
 
-func NewEndpoint(url string, headers map[string]string, method string) *Endpoint {
+func NewEndpoint(url string, headers map[string]string, method string, name string) *Endpoint {
 	return &Endpoint{
 		url:     url,
 		headers: headers,
 		method:  method,
+		name:    name,
 	}
 }
 
@@ -57,6 +60,18 @@ func NewService(c Config, d Diagnostic) *Service {
 	return s
 }
 
+func (s *Service) GetEndpoints(name string) []Endpoint {
+
+	endpoints := []Endpoint{}
+	for _, v := range s.endpoints {
+		if v.name == name {
+			endpoints = append(endpoints, *v)
+		}
+	}
+
+	return endpoints
+}
+
 func (s *Service) Config() Config {
 	return s.configValue.Load().(Config)
 }
@@ -68,7 +83,6 @@ func (s *Service) Open() error {
 	client.SetTimeout(time.Duration(c.Timeout))
 	client.SetContentLength(true)
 	// Headers for all request
-	client.SetHeaders(c.Headers)
 	client.
 		SetRetryCount(c.MaxRetry).
 		SetRetryWaitTime(time.Duration(c.Interval)).
@@ -116,7 +130,8 @@ func (s *Service) GetWorkorder(masterpa_sn string, hmi_sn string, code string) (
 
 	var err error
 	var body []byte
-	for _, endpoint := range s.endpoints {
+	endpoints := s.GetEndpoints("getWorkder")
+	for _, endpoint := range endpoints {
 		body, err = s.getWorkorder(fmt.Sprintf(endpoint.url, hmi_sn, code), endpoint.method)
 		if err == nil {
 			// 如果第一次就成功，推出循环
@@ -146,6 +161,54 @@ func (s *Service) getWorkorder(url string, method string) ([]byte, error) {
 		}
 	default:
 		return nil, errors.New("Get workorder :the Method is wrong")
+
+	}
+
+	return nil, nil
+}
+
+func (s *Service) GetGun(serial string) (ODOOGun, error) {
+
+	var err error
+	var gun ODOOGun
+	endpoints := s.GetEndpoints("getGun")
+	for _, endpoint := range endpoints {
+		body, err := s.getGun(fmt.Sprintf(endpoint.url, serial), endpoint.method)
+		if err == nil {
+			// 如果第一次就成功，推出循环
+			var guns []ODOOGun
+			err = json.Unmarshal(body, &guns)
+			if err != nil || len(guns) == 0 {
+				return gun, errors.Wrap(err, "Get gun fail")
+			}
+
+			return guns[0], nil
+		}
+	}
+
+	return gun, errors.Wrap(err, "Get gun fail")
+}
+
+func (s *Service) getGun(url string, method string) ([]byte, error) {
+	r := s.httpClient.R()
+	var resp *resty.Response
+	var err error
+
+	switch method {
+	case "GET":
+		resp, err = r.Get(url)
+		if err != nil {
+			return nil, fmt.Errorf("Get gun fail: %s", err.Error())
+		} else {
+			status := resp.StatusCode()
+			if status != http.StatusOK {
+				return nil, fmt.Errorf("Get gun fail: %d", status)
+			} else {
+				return resp.Body(), nil
+			}
+		}
+	default:
+		return nil, errors.New("Get gun :the Method is wrong")
 
 	}
 

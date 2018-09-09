@@ -14,6 +14,8 @@ const (
 	WS_EVENT_RESULT   = "result"
 	WS_EVENT_REG      = "regist"
 	WS_EVENT_SELECTOR = "selector"
+	WS_EVENT_JOB      = "job"
+	WS_EVENT_SCANNER  = "scanner"
 )
 
 type Diagnostic interface {
@@ -155,4 +157,14 @@ func (s *Service) WSSendControllerStatus(payload string) {
 // ws群发控制器套筒状态
 func (s *Service) WSSendControllerSelectorStatus(payload string) {
 	s.clientManager.NotifyALL(WS_EVENT_SELECTOR, payload)
+}
+
+// ws群发job选择信息
+func (s *Service) WSSendJob(payload string) {
+	s.clientManager.NotifyALL(WS_EVENT_JOB, payload)
+}
+
+// ws群发扫码信息
+func (s *Service) WSSendScanner(payload string) {
+	s.clientManager.NotifyALL(WS_EVENT_SCANNER, payload)
 }
