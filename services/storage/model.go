@@ -20,9 +20,9 @@ type OperationResultModel struct {
 	PsetWMax      float32 `xorm:"numeric 'pset_w_max'"`
 	UserId        int64   `xorm:" INTEGER 'user_id'"`
 	//ConsuProductId  int64     `xorm:" INTEGER 'consu_product_id'"`
-	//WorkcenterId    int64     `xorm:" INTEGER 'workcenter_id'"`
-	Sent        int     `xorm:" bool 'sent'"`
-	PsetWTarget float32 `xorm:"numeric 'pset_w_target'"`
+	WorkcenterId int64   `xorm:" INTEGER 'workcenter_id'"`
+	Sent         int     `xorm:" bool 'sent'"`
+	PsetWTarget  float32 `xorm:"numeric 'pset_w_target'"`
 	//ProductionId    int64     `xorm:" INTEGER 'production_id'"`
 	Lacking      string `xorm:"varchar(32) 'lacking'"`
 	QualityState string `xorm:"varchar(32) 'quality_state'"`
@@ -39,5 +39,7 @@ type OperationResultModel struct {
 	MeasureTDon     float32   `xorm:"numeric 'measure_t_don'"`
 	OpTime          int       `xorm:" INTEGER 'op_time'"`
 	ExceptionReason string    `xorm:"varchar(32) 'exception_reason'"`
+	GunID           int64     `xorm:" INTEGER 'gun_id'"`
 	//ConsuBomLineID  int64	  `xorm:" INTEGER 'consu_bom_line_id'"`
+	Vin string `xorm:"varchar(128) 'vin'"`
 }

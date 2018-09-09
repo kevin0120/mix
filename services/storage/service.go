@@ -103,7 +103,7 @@ func (s *Service) UpdateResults(result *rush.OperationResult, id int64, sent int
 	r.Lacking = "normal"
 	r.QualityState = result.QualityState
 	r.ExceptionReason = result.ExceptionReason
-
+	r.WorkcenterId = result.WorkcenterID
 	r.Sent = sent
 
 	if id == 0 {
@@ -111,6 +111,8 @@ func (s *Service) UpdateResults(result *rush.OperationResult, id int64, sent int
 
 		r.CreateTime = r.ControlDate
 		r.ProductId = result.ProductID
+		r.Vin = result.Vin
+		r.GunID = result.GunID
 
 		affected, err := s.eng.Table("operation_result").Insert(&r)
 

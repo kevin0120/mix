@@ -26,6 +26,9 @@ type OperationResult struct {
 	ExceptionReason string      `json:"exception_reason"`
 	Seq             int         `json:"seq"`
 	ProductID       int64       `json:"product_id"`
+	WorkcenterID    int64       `json:"workcenter_id"`
+	Vin             string      `json:"vin"`
+	GunID           int64       `json:"gun_id"`
 
 	// mo相关信息
 	EquipemntName  string `json:"equipment_name"` // 设备名
