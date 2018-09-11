@@ -28,6 +28,10 @@ type WSJobSelect struct {
 	JobID int `json:"job_id"`
 }
 
+type WSScanner struct {
+	Barcode string `json:"barcode"`
+}
+
 type WSRegistMsg struct {
 	Msg string `json:"msg"`
 }

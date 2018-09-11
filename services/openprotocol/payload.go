@@ -606,7 +606,7 @@ func (rd *ResultData) DeserializeOld(str string) error {
 	}
 
 	rd.TimeStamp = str[187:206]
-	rd.ToolSerialNumber = str[171:285]
+	rd.ToolSerialNumber = strings.TrimSpace(str[171:285])
 	rd.TorqueUnit = str[208:209]
 	rd.ResultType = str[211:213]
 	rd.ID2 = str[215:240]
@@ -729,7 +729,7 @@ func (rd *ResultData) Deserialize(str string) error {
 
 	rd.TimeStamp = str[325:344]
 
-	rd.ToolSerialNumber = str[309:323]
+	rd.ToolSerialNumber = strings.TrimSpace(str[309:323])
 
 	rd.TorqueUnit = str[394:395]
 	rd.ResultType = str[397:399]

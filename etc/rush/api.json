@@ -656,6 +656,38 @@
           }
         }
       }
+    },
+    "/scanner": {
+      "put": {
+        "tags": [
+          "Test"
+        ],
+        "summary": "测试websocket订阅控制器条码",
+        "description": "测试websocket订阅控制器条码",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/scanner"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "设置成功"
+          },
+          "400": {
+            "description": "设置失败"
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -1439,6 +1471,16 @@
           "items": {
             "$ref": "#/definitions/iostatus"
           }
+        }
+      }
+    },
+    "scanner": {
+      "type": "object",
+      "properties": {
+        "barcode": {
+          "type": "string",
+          "description": "条码",
+          "example": "LFPH4ACB411C02008"
         }
       }
     }

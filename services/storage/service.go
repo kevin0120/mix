@@ -307,7 +307,7 @@ func (s *Service) InsertWorkorder(workorder *Workorders, results *[]Results, che
 }
 
 func (s *Service) DeleteResultsForJob(key string) error {
-	sql := fmt.Sprintf("delete from `results` where pset_define ='%s'", key)
+	sql := fmt.Sprintf("delete from `results` where exinfo ='%s'", key)
 	_, err := s.eng.Exec(sql)
 
 	if err != nil {

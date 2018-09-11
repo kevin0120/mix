@@ -642,12 +642,12 @@ func (m *Methods) insertResultsForJob(job *JobManual) error {
 		return errors.New("points is required")
 	}
 
-	key := fmt.Sprintf("%s:%s:%s:%d:%d", job.Vin, job.CarType, job.HmiSN, job.ProductID, job.WorkcenterID)
+	key := fmt.Sprintf("%s:%s:%s:%d:%d:%d", job.Vin, job.CarType, job.HmiSN, job.ProductID, job.WorkcenterID)
 
 	db_results := []storage.Results{}
 	for _, v := range job.Points {
 		r := storage.Results{}
-		r.ExInfo = key
+		r.ExInfo = fmt.Sprintf("%s:%d", key, v.NutID)
 		r.PSet = v.PSet
 		r.OffsetX = v.X
 		r.OffsetY = v.Y
@@ -745,6 +745,7 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 		r.X = v.OffsetX
 		r.Y = v.OffsetY
 		r.MaxRedoTimes = v.MaxRedoTimes
+		r.Seq = v.Seq
 
 		resp.Results = append(resp.Results, r)
 	}
@@ -884,4 +885,19 @@ func (m *Methods) putIOSet(ctx iris.Context) {
 		ctx.WriteString("not supported")
 		return
 	}
+}
+
+func (m *Methods) putBarcodeTest(ctx iris.Context) {
+	barcode := wsnotify.WSScanner{}
+	err := ctx.ReadJSON(&barcode)
+
+	if err != nil {
+		// 传输结构错误
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+
+	str, _ := json.Marshal(barcode)
+	m.service.OpenProtocol.WS.WSSendScanner(string(str))
 }

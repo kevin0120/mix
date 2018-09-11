@@ -164,6 +164,14 @@ func (s *Service) Open() error {
 	}
 	s.Httpd.Handler[0].AddRoute(r)
 
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "PUT",
+		Pattern:     "/scanner",
+		HandlerFunc: s.methods.putBarcodeTest,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
 	return nil
 
 }

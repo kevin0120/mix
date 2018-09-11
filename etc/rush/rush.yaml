@@ -42,10 +42,6 @@ aiis:
 odoo:
   urls:
   - http://127.0.0.1:8069
-#  headers:
-#  workorder_get_url:
-#  gun_get_url: /api/v1/guns?serial=%s
-#  method: GET
   timeout: 8s
   interval: 1s
   max_retry: 3
@@ -58,6 +54,10 @@ odoo:
     path: /api/v1/guns?serial=%s
     headers:
     method: GET
+  - name: createMO
+    path: /api/v1/mrp.productions
+    headers:
+    method: POST
 
 websocket:
   route: /rush/v1/ws

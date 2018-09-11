@@ -130,7 +130,7 @@ func (s *Service) GetWorkorder(masterpa_sn string, hmi_sn string, code string) (
 
 	var err error
 	var body []byte
-	endpoints := s.GetEndpoints("getWorkder")
+	endpoints := s.GetEndpoints("getWorkorder")
 	for _, endpoint := range endpoints {
 		body, err = s.getWorkorder(fmt.Sprintf(endpoint.url, hmi_sn, code), endpoint.method)
 		if err == nil {

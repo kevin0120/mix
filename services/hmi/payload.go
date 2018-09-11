@@ -60,6 +60,7 @@ type JobPoint struct {
 	X         float64 `json:"offset_x"`
 	Y         float64 `json:"offset_Y"`
 	MaxOpTime int     `json:"max_op_time"`
+	NutID	  int64		`json:"nut_id"`
 }
 
 type ControllerMode struct {
@@ -80,6 +81,7 @@ type Result struct {
 	MaxRedoTimes  int     `json:"max_redo_times"`
 	X             float64 `json:"offset_x"`
 	Y             float64 `json:"offset_Y"`
+	Seq       int     `json:"sequence"`
 }
 
 type Workorder struct {

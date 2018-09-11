@@ -325,6 +325,9 @@ func (c *Controller) handleResult(result_data *ResultData) {
 		wid, _ := strconv.Atoi(ks[4])
 		aiisResult.WorkcenterID = int64(wid)
 
+		nid, _ := strconv.Atoi(ks[5])
+		aiisResult.NutID = int64(nid)
+
 		// mo相关
 		aiisResult.MO_Model = result_data.ID3
 
@@ -413,7 +416,7 @@ func (c *Controller) Connect() error {
 
 	c.startComm()
 
-	c.JobOff("0")
+	c.JobOff("1")
 	c.PSetSubscribe()
 	//c.CurveSubscribe()
 	c.SelectorSubscribe()

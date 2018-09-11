@@ -3,17 +3,21 @@ package main
 // CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ./test.go
 
 import (
-	"encoding/json"
-	"flag"
+		"flag"
 	"fmt"
-	"github.com/masami10/rush/core"
-	"github.com/masami10/rush/payload"
 	"math/rand"
 	"os"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+	"github.com/masami10/rush/services/odoo"
+	"github.com/masami10/rush/services/aiis"
+	"net/http"
+	"gopkg.in/resty.v1"
+	"encoding/json"
+	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/controller"
 )
 
 var g_Count int = 0
@@ -26,18 +30,41 @@ var g_result_batch bool = false
 var g_req_inteval int = 200
 var g_genetime_mtx sync.Mutex = sync.Mutex{}
 
-var g_odoo core.ODOO = core.ODOO{}
+var g_odoo odoo.Service = odoo.Service{}
 
 var g_time string = ""
 
-var g_odoo_result payload.ODOOResult = payload.ODOOResult{}
-var g_odoo_result_batch payload.ODOOResultSync = payload.ODOOResultSync{}
+var g_odoo_result odoo.ODOOResultSync = odoo.ODOOResultSync{}
+var g_odoo_result_batch odoo.ODOOResultSync = odoo.ODOOResultSync{}
+
+var g_httpClient_odoo *resty.Client
+var g_httpClient_aiis *resty.Client
 
 //var g_result_value = [2]string{"ok", "nok"}
 //
 //var g_r *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
-func create_mo(odoo_url string, mo payload.ODOOMO, mtx sync.Mutex, time_mtx sync.Mutex) error {
+func ODOOCreateMO(url string, body interface{}) (odoo.ODOOMOCreated, error) {
+
+	created := odoo.ODOOMOCreated{}
+
+	r := g_httpClient_odoo.R().SetBody(body)
+
+	resp, err := r.Post(url)
+	if err != nil {
+		return created, fmt.Errorf("Create MO Post fail: %s\n", err)
+	} else {
+		if resp.StatusCode() != http.StatusCreated {
+			return created, fmt.Errorf("Create MO Post fail: %s\n", resp.Status())
+		} else {
+			json.Unmarshal(resp.Body(), &created)
+		}
+	}
+
+	return created, nil
+}
+
+func create_mo(odoo_url string, mo odoo.ODOOMO, mtx sync.Mutex, time_mtx sync.Mutex) error {
 	mo.Date_planned_start = g_time
 	mo.Pin = GenerateRangeNum(7, time_mtx)
 	vin_rand := GenerateRangeNum(6, time_mtx)
@@ -45,66 +72,99 @@ func create_mo(odoo_url string, mo payload.ODOOMO, mtx sync.Mutex, time_mtx sync
 
 	//SR1J--V001--C6-2018-6171427=5
 	mo_name := fmt.Sprintf("%s--V001--%s-%d-%d=%d", mo.Equipment_name, mo.Factory_name, mo.Year, mo.Pin, mo.Pin_check_code)
+	fmt.Printf("%s\n", mo_name)
 
-	created, t, err := g_odoo.CreateMO(mo)
+	created, err := ODOOCreateMO(fmt.Sprintf("%s/api/v1/api/v1/mrp.productions", g_odoo_url), mo)
 
-	if err != nil {
-		result := fmt.Sprintf("创建工单:%s 用时:%s 结果:%s \n", mo_name, t, "failed")
-		fmt.Printf(result)
-	} else {
-		// 写入文件
-		go tracefile(t, mtx)
-
-		// 推送结果
+	if err == nil {
 		go put_result(created, time_mtx)
-
-		result := fmt.Sprintf("创建工单:%s 用时:%s 结果:%s \n", mo_name, t, "ok")
-		fmt.Printf(result)
 	}
 
 	return nil
 }
 
-func put_result(mo payload.ODOOMOCreated, mtx sync.Mutex) {
+func putResult(body interface{}, url string) error {
+	r := g_httpClient_aiis.R().SetBody(body)
+	var resp *resty.Response
+	var err error
+
+	resp, err = r.Put(url)
+
+	if err != nil {
+		return fmt.Errorf("Result Put fail: %s ", err.Error())
+	} else {
+		if resp.StatusCode() != http.StatusNoContent {
+			return fmt.Errorf("Result Put fail: %d ", resp.StatusCode())
+		}
+	}
+	return nil
+}
+
+func resultToAiis(odoo_result *odoo.ODOOResultSync) aiis.AIISResult{
+	aiisResult := aiis.AIISResult{}
+
+	if odoo_result.Measure_result == storage.RESULT_OK {
+		aiisResult.Final_pass = controller.ODOO_RESULT_PASS
+		aiisResult.One_time_pass = controller.ODOO_RESULT_PASS
+
+		aiisResult.QualityState = controller.QUALITY_STATE_PASS
+		aiisResult.ExceptionReason = ""
+
+	} else {
+		aiisResult.Final_pass = controller.ODOO_RESULT_FAIL
+		aiisResult.One_time_pass = controller.ODOO_RESULT_FAIL
+		aiisResult.QualityState = controller.QUALITY_STATE_PASS
+		aiisResult.ExceptionReason = ""
+	}
+
+	aiisResult.ExceptionReason = odoo_result.ExceptionReason
+
+	//aiisResult.Control_date = odoo_result.UpdateTime.Format(time.RFC3339)
+
+	aiisResult.Measure_degree = odoo_result.Measure_degree
+	aiisResult.Measure_result = strings.ToLower(odoo_result.Measure_result)
+	aiisResult.Measure_t_don = odoo_result.Measure_t_don
+	aiisResult.Measure_torque = odoo_result.Measure_torque
+	//aiisResult.Op_time = result.Count
+	//aiisResult.Pset_m_max = result.PSetDefine.Mp
+	//aiisResult.Pset_m_min = result.PSetDefine.Mm
+	//aiisResult.Pset_m_target = result.PSetDefine.Ma
+	//aiisResult.Pset_m_threshold = result.PSetDefine.Ms
+	//aiisResult.Pset_strategy = result.PSetDefine.Strategy
+	//aiisResult.Pset_w_max = result.PSetDefine.Wp
+	//aiisResult.Pset_w_min = result.PSetDefine.Wm
+	//aiisResult.Pset_w_target = result.PSetDefine.Wa
+	//aiisResult.Pset_w_threshold = 1
+	aiisResult.UserID = 1
+
+	// mo相关
+	//aiisResult.MO_AssemblyLine = workorder.MO_AssemblyLine
+	//aiisResult.MO_EquipemntName = workorder.MO_EquipemntName
+	//aiisResult.MO_FactoryName = workorder.MO_FactoryName
+	//aiisResult.MO_Pin = workorder.MO_Pin
+	//aiisResult.MO_Pin_check_code = workorder.MO_Pin_check_code
+	//aiisResult.MO_Year = workorder.MO_Year
+	//aiisResult.MO_Lnr = workorder.MO_Lnr
+	//aiisResult.MO_NutNo = r.NutNo
+	//aiisResult.MO_Model = workorder.MO_Model
+
+	return aiisResult
+}
+
+func put_result(mo odoo.ODOOMOCreated, mtx sync.Mutex) {
 	var r string
 
-	if g_result_batch == true {
-		rs := []payload.ODOOResultSync{}
-		ids := []int{}
-		for _, v := range mo.Result_IDs {
-			RandomResult(mtx)
-			g_odoo_result_batch.ID = v
+	for _, v := range mo.Result_IDs {
+		RandomResult(mtx)
 
-			if rand.Intn(100) != 99 {
-				rs = append(rs, g_odoo_result_batch)
-				ids = append(ids, v)
-			} else {
-				fmt.Printf("缺失:%d\n", v)
-			}
+		err := putResult(resultToAiis(&g_odoo_result), fmt.Sprint("http://127.0.0.1:9092/operation.results/%d", v))
 
-		}
-
-		t, err := g_odoo.PutResultBatch(rs)
-		s_ids, _ := json.Marshal(ids)
 		if err != nil {
-			r = fmt.Sprintf("批量推送结果:%s 用时:%s 结果:%s \n", s_ids, t, "fail")
+			r = fmt.Sprintf("推送结果:%d 结果:%s \n", v, "fail")
 		} else {
-			r = fmt.Sprintf("批量推送结果:%s 用时:%s 结果:%s \n", s_ids, t, "ok")
+			r = fmt.Sprintf("推送结果:%d 结果:%s \n", v, "ok")
 		}
 		fmt.Printf(r)
-	} else {
-		for _, v := range mo.Result_IDs {
-			RandomResult(mtx)
-
-			t, err := g_odoo.PutResult(v, g_odoo_result)
-
-			if err != nil {
-				r = fmt.Sprintf("推送结果:%d 用时:%s 结果:%s \n", v, t, "fail")
-			} else {
-				r = fmt.Sprintf("推送结果:%d 用时:%s 结果:%s \n", v, t, "ok")
-			}
-			fmt.Printf(r)
-		}
 	}
 
 }
@@ -182,7 +242,7 @@ func tracefile(str_content string, mtx sync.Mutex) {
 	fd.Write(buf)
 }
 
-func ReCount(mo payload.ODOOMO, mtx sync.Mutex) payload.ODOOMO {
+func ReCount(mo odoo.ODOOMO, mtx sync.Mutex) odoo.ODOOMO {
 	defer mtx.Unlock()
 
 	mtx.Lock()
@@ -208,7 +268,7 @@ func AddCount(mtx sync.Mutex) {
 	g_Count++
 }
 
-func RunTask_MO(mo payload.ODOOMO, count_mtx sync.Mutex, file_mtx sync.Mutex, time_mtx sync.Mutex) {
+func RunTask_MO(mo odoo.ODOOMO, count_mtx sync.Mutex, file_mtx sync.Mutex, time_mtx sync.Mutex) {
 	for {
 		ReCount(mo, count_mtx)
 
@@ -233,23 +293,43 @@ func main() {
 	fmt.Printf("start\n")
 
 	//odoo := flag.String("odoo", "http://10.1.1.31", "--odoo")
-	odoo := flag.String("odoo", "http://127.0.0.1:8069", "--odoo")
+	odoo_url := flag.String("odoo", "http://127.0.0.1:8069", "--odoo")
 	task_num := flag.Int("task", 4, "--task")
 	req_itv := flag.Int("inteval", 100, "--inteval")
 	batch := flag.Bool("batch", true, "--batch")
 	flag.Parse()
 
-	g_odoo_url = *odoo
+	g_odoo_url = *odoo_url
 	g_task_num = *task_num
 	g_req_inteval = *req_itv
 	g_result_batch = *batch
 
 	fmt.Printf("odoo:%s, task:%d, inteval:%d\n", g_odoo_url, g_task_num, g_req_inteval)
 
-	g_odoo.Conf.MaxRetry = 3
-	g_odoo.Conf.Urls = []string{}
-	g_odoo.Conf.Urls = append(g_odoo.Conf.Urls, g_odoo_url)
+	//g_odoo.Conf.MaxRetry = 3
+	//g_odoo.Conf.Urls = []string{}
+	//g_odoo.Conf.Urls = append(g_odoo.Conf.Urls, g_odoo_url)
 	//g_odoo.Conf.Urls[0] = g_odoo_url
+
+	g_httpClient_odoo = resty.New()
+	g_httpClient_odoo.SetRESTMode() // restful mode is default
+	g_httpClient_odoo.SetTimeout(time.Duration(5 * time.Second))
+	g_httpClient_odoo.SetContentLength(true)
+	// Headers for all request
+	g_httpClient_odoo.
+		SetRetryCount(3).
+		SetRetryWaitTime(time.Duration(1 * time.Second)).
+		SetRetryMaxWaitTime(20 * time.Second)
+
+	g_httpClient_aiis = resty.New()
+	g_httpClient_aiis.SetRESTMode() // restful mode is default
+	g_httpClient_aiis.SetTimeout(time.Duration(5 * time.Second))
+	g_httpClient_aiis.SetContentLength(true)
+	// Headers for all request
+	g_httpClient_aiis.
+		SetRetryCount(3).
+		SetRetryWaitTime(time.Duration(1 * time.Second)).
+		SetRetryMaxWaitTime(20 * time.Second)
 
 	//return
 	FILE_MTX := sync.Mutex{}
@@ -259,8 +339,8 @@ func main() {
 	//odoo_result.Control_date = result_data.Dat
 
 	if g_result_batch == true {
-		g_odoo_result_batch.CURObjects = []payload.CURObject{}
-		cur_object := payload.CURObject{}
+		g_odoo_result_batch.CURObjects = []aiis.CURObject{}
+		cur_object := aiis.CURObject{}
 		cur_object.File = "test.json"
 		cur_object.OP = 1
 		g_odoo_result_batch.CURObjects = append(g_odoo_result.CURObjects, cur_object)
@@ -275,8 +355,8 @@ func main() {
 		g_odoo_result_batch.Pset_w_min = 170
 		g_odoo_result_batch.Pset_w_target = 180
 	} else {
-		g_odoo_result.CURObjects = []payload.CURObject{}
-		cur_object := payload.CURObject{}
+		g_odoo_result.CURObjects = []aiis.CURObject{}
+		cur_object := aiis.CURObject{}
 		cur_object.File = "test.json"
 		cur_object.OP = 1
 		g_odoo_result.CURObjects = append(g_odoo_result.CURObjects, cur_object)
@@ -292,7 +372,7 @@ func main() {
 		g_odoo_result.Pset_w_target = 180
 	}
 
-	mo := payload.ODOOMO{}
+	mo := odoo.ODOOMO{}
 	mo.Pin_check_code = 5
 	mo.Year = 2018
 	mo.Factory_name = "C6"
@@ -301,8 +381,8 @@ func main() {
 	mo.Model = "BR24J3"
 	//mo.Model2 = "model"
 	mo.Lnr = "0001"
-	mo.Prs = []payload.ODOOPR{}
-	var pr payload.ODOOPR = payload.ODOOPR{}
+	mo.Prs = []odoo.ODOOPR{}
+	var pr odoo.ODOOPR = odoo.ODOOPR{}
 	pr.Pr_group = "GSP"
 	pr.Pr_value = "G0C"
 	mo.Prs = append(mo.Prs, pr)
@@ -341,11 +421,6 @@ func main() {
 	// 启动任务
 	for i := 0; i < g_task_num; i++ {
 		go RunTask_MO(mo, COUNT_MTX, FILE_MTX, TIME_MTX)
-
-		//if g_test_result {
-		//	go RunTask_Result(1, odoo_result, FILE_MTX)
-		//}
-
 	}
 
 	for {
