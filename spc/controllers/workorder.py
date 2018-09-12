@@ -16,11 +16,12 @@ class ApiMrpWorkorder(http.Controller):
         sp = s_time.split(' ')
         return sp[0] + 'T' + sp[1] + 'Z'
 
-    @http.route(['/api/v1/mrp.workorders/<string:order_id>', '/api/v1/mrp.workorders'], type='http', methods=['GET'], auth='none', cors='*', csrf=False)
+    @http.route(['/api/v1/mrp.workorders/<int:order_id>', '/api/v1/mrp.workorders'], type='http', methods=['GET'], auth='none', cors='*', csrf=False)
     def _get_workorders(self, order_id=None, **kw):
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
+        workcenter_id = None
         if order_id:
-            order = env['mrp.workorder'].search([('id', '=', order_id)])[0]
+            order = env['mrp.workorder'].search([('id', '=', int(order_id))])
             if not order:
                 body = json.dumps({'msg': 'Can not found workorder'})
                 return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
@@ -32,33 +33,34 @@ class ApiMrpWorkorder(http.Controller):
 
             # 工单中的消耗品列表
             _consumes = list()
-            for consu in order.consu_bom_line_ids:
+            if order.consu_bom_line_ids:
+                for consu in order.consu_bom_line_ids:
 
-                # 定位消耗品的qcp
-                _qcps = env['quality.point'].search([('bom_line_id', '=', consu.bom_line_id.id),
-                                                          ('operation_id', '=', order.operation_id.id)],
-                                                         limit=1)
+                    # 定位消耗品的qcp
+                    _qcps = env['quality.point'].search([('bom_line_id', '=', consu.bom_line_id.id),
+                                                              ('operation_id', '=', order.operation_id.id)],
+                                                             limit=1)
 
-                _consumes.append({
-                    "seq": consu.sequence,
-                    'max_redo_times':consu.bom_line_id.operation_point_id.max_redo_times,
-                    'offset_x': consu.bom_line_id.operation_point_id.x_offset,
-                    'offset_y': consu.bom_line_id.operation_point_id.y_offset,
-                    "pset": consu.bom_line_id.program_id.code,
-                    "nut_no": consu.product_id.screw_type_code,
-                    "gun_sn": consu.bom_line_id.gun_id.serial_no,
-                    "controller_sn": consu.bom_line_id.controller_id.serial_no,
-                    'tolerance_min': _qcps.tolerance_min if _qcps else 0.0,
-                    'tolerance_max': _qcps.tolerance_max if _qcps else 0.0,
-                    'tolerance_min_degree': _qcps.tolerance_min_degree if _qcps else 0.0,
-                    'tolerance_max_degree': _qcps.tolerance_max_degree if _qcps else 0.0,
-                    "result_ids": consu.result_ids.ids
-                })
+                    _consumes.append({
+                        "seq": consu.sequence,
+                        'max_redo_times':consu.bom_line_id.operation_point_id.max_redo_times,
+                        'offset_x': consu.bom_line_id.operation_point_id.x_offset,
+                        'offset_y': consu.bom_line_id.operation_point_id.y_offset,
+                        "pset": consu.bom_line_id.program_id.code,
+                        "nut_no": consu.product_id.screw_type_code,
+                        "gun_sn": consu.bom_line_id.gun_id.serial_no,
+                        "controller_sn": consu.bom_line_id.controller_id.serial_no,
+                        'tolerance_min': _qcps.tolerance_min if _qcps else 0.0,
+                        'tolerance_max': _qcps.tolerance_max if _qcps else 0.0,
+                        'tolerance_min_degree': _qcps.tolerance_min_degree if _qcps else 0.0,
+                        'tolerance_max_degree': _qcps.tolerance_max_degree if _qcps else 0.0,
+                        "result_ids": consu.result_ids.ids
+                    })
 
             ret = {
                 'id': order.id,
                 'hmi': {'id': order.workcenter_id.hmi_id.id, 'uuid': order.workcenter_id.hmi_id.serial_no},
-                # 'worksheet': order.operation_id.worksheet_img,
+                'vehicleTypeImg': u'data:{0};base64,{1}'.format('image/png', order.product_id.image_small) if order.product_id.image_small else None,
                 'worksheet': u'data:{0};base64,{1}'.format('image/png', order.operation_id.worksheet_img) if order.operation_id.worksheet_img else "",
                 # 'max_redo_times': order.operation_id.max_redo_times,
                 'max_op_time': order.operation_id.max_op_time,
@@ -124,33 +126,34 @@ class ApiMrpWorkorder(http.Controller):
 
             # 工单中的消耗品列表
             _consumes = list()
-            for consu in order.consu_bom_line_ids:
+            if order.consu_bom_line_ids:
+                for consu in order.consu_bom_line_ids:
 
-                # 定位消耗品的qcp
-                _qcps = env['quality.point'].search([('bom_line_id', '=', consu.bom_line_id.id),
-                                                      ('operation_id', '=', order.operation_id.id)],
-                                                      limit=1)
+                    # 定位消耗品的qcp
+                    _qcps = env['quality.point'].search([('bom_line_id', '=', consu.bom_line_id.id),
+                                                          ('operation_id', '=', order.operation_id.id)],
+                                                          limit=1)
 
-                _consumes.append({
-                    "seq": consu.sequence,
-                    'max_redo_times':consu.bom_line_id.operation_point_id.max_redo_times,
-                    'offset_x': consu.bom_line_id.operation_point_id.x_offset,
-                    'offset_y': consu.bom_line_id.operation_point_id.y_offset,
-                    "pset": consu.bom_line_id.program_id.code,
-                    "nut_no": consu.product_id.screw_type_code,
-                    "gun_sn": consu.bom_line_id.gun_id.serial_no,
-                    "controller_sn": consu.bom_line_id.controller_id.serial_no,
-                    'tolerance_min': _qcps.tolerance_min if _qcps else 0.0,
-                    'tolerance_max': _qcps.tolerance_max if _qcps else 0.0,
-                    'tolerance_min_degree': _qcps.tolerance_min_degree if _qcps else 0.0,
-                    'tolerance_max_degree': _qcps.tolerance_max_degree if _qcps else 0.0,
-                    "result_ids": consu.result_ids.ids
-                })
+                    _consumes.append({
+                        "seq": consu.sequence,
+                        'max_redo_times':consu.bom_line_id.operation_point_id.max_redo_times,
+                        'offset_x': consu.bom_line_id.operation_point_id.x_offset,
+                        'offset_y': consu.bom_line_id.operation_point_id.y_offset,
+                        "pset": consu.bom_line_id.program_id.code,
+                        "nut_no": consu.product_id.screw_type_code,
+                        "gun_sn": consu.bom_line_id.gun_id.serial_no,
+                        "controller_sn": consu.bom_line_id.controller_id.serial_no,
+                        'tolerance_min': _qcps.tolerance_min if _qcps else 0.0,
+                        'tolerance_max': _qcps.tolerance_max if _qcps else 0.0,
+                        'tolerance_min_degree': _qcps.tolerance_min_degree if _qcps else 0.0,
+                        'tolerance_max_degree': _qcps.tolerance_max_degree if _qcps else 0.0,
+                        "result_ids": consu.result_ids.ids
+                    })
 
             _ret.append({
                 'id': order.id,
-                'hmi': {'id': workcenter_id.hmi_id.id, 'uuid': workcenter_id.hmi_id.serial_no},
-                # 'worksheet': order.operation_id.worksheet_img,
+                'hmi': {'id': workcenter_id.hmi_id.id, 'uuid': workcenter_id.hmi_id.serial_no} if workcenter_id else None ,
+                'vehicleTypeImg': u'data:{0};base64,{1}'.format('image/png', order.product_id.image_small) if order.product_id.image_small else None,
                 'worksheet': u'data:{0};base64,{1}'.format('image/png', order.operation_id.worksheet_img) if order.operation_id.worksheet_img else "",
                 # 'max_redo_times': order.operation_id.max_redo_times,
                 'max_op_time': order.operation_id.max_op_time,

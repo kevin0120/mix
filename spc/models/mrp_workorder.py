@@ -59,4 +59,5 @@ class MrpWorkorder(models.Model):
                 for i in range(point.times):
                     ret_vals.append(vals)
                     idx += 1
-        self.env['operation.result'].sudo().bulk_create(ret_vals)
+        if len(ret_vals):
+            self.env['operation.result'].sudo().bulk_create(ret_vals)
