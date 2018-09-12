@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="report_result_tighting">
+            <t t-call="report.html_container">
+                <t t-call="report.external_layout">
+                    <div class="page">
+                        <h2>
+                        拧紧结果质检报告
+                        </h2>
+                        <table class="table table-condensed">
+                        <thead>
+                            <tr>
+                                <th><strong>Date</strong></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span t-esc="get_day"/>
+                                </td>
+                            </tr>
+                        </tbody>
+                        </table>
+                        <table class="table table-condensed">
+                            <thead>
+                                <tr>
+                                    <th><strong>Tightening Datetime</strong></th>
+                                    <th><strong>Vehicle</strong></th>
+                                    <th><strong>VIN</strong></th>
+                                    <th><strong>Result</strong></th>
+                                    <!--<th class="text-right"><strong>Quantity</strong></th>-->
+                                </tr>
+                            </thead>
+                            <tr t-foreach="docs" t-as="line">
+                                <td><span t-field="line.control_date"/></td>
+                                <td><span t-field="line.product_id"/></td>
+                                <td><span t-field="line.production_id.vin"/></td>
+                                <td><span t-field="line.measure_result"/></td>
+                                <!--<td class="text-right"><span t-field="line.product_qty"/> <span t-field="line.product_uom_id" groups="product.group_uom"/></td>-->
+                            </tr>
+                            <tr>
+                                <td></td>
+                            </tr>
+                        </table>
+                        <!--<t t-if="o.filter == 'product' and o.product_id">-->
+                          <!--<div class="row">-->
+                            <!--<div class="col-xs-4 pull-right">-->
+                                 <!--<table class="table table-condensed">-->
+                                    <!--<tr class="border-black">-->
+                                        <!--<td><strong>Total Quantity</strong></td>-->
+                                        <!--<td class="text-right">-->
+                                            <!--<span t-field="o.total_qty"/> <span t-field="o.product_id.uom_id"/>-->
+                                        <!--</td>-->
+                                    <!--</tr>-->
+                                <!--</table>-->
+                            <!--</div>-->
+                          <!--</div>-->
+                        <!--</t>-->
+                    </div>
+                </t>
+             </t>
+        </template>
+
+
+
+    </data>
+</odoo>
