@@ -14,7 +14,7 @@
             <field name="name">Report Tightening Result</field>
             <field name="model">tight.result.report</field>
             <field name="arch" type="xml">
-            <form string="Pay Head Employee Breakup">
+            <form string="Report Tightening Result">
                 <footer>
                     <button name="print_report" string="Print" type="object" class="btn-primary"/>
                     <button string="Cancel" class="btn-default" special="cancel" />
@@ -41,7 +41,7 @@
         parent="menu_spc_scope_root"
         action="action_report_tighting_result"
         sequence="100"
-        id="menu_yearly_salary_detail"
+        id="menu_report_tighting_result"
        />
     </data>
 </odoo>

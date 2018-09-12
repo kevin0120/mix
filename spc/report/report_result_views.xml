@@ -6,7 +6,7 @@
                 <t t-call="report.external_layout">
                     <div class="page">
                         <h2>
-                        拧紧结果质检报告
+                        拧紧结果报告
                         </h2>
                         <table class="table table-condensed">
                         <thead>
@@ -22,22 +22,33 @@
                             </tr>
                         </tbody>
                         </table>
-                        <table class="table table-condensed">
+                        <table class="table table-condensed"  >
                             <thead>
                                 <tr>
-                                    <th><strong>Tightening Datetime</strong></th>
-                                    <th><strong>Vehicle</strong></th>
                                     <th><strong>VIN</strong></th>
-                                    <th><strong>Result</strong></th>
                                     <!--<th class="text-right"><strong>Quantity</strong></th>-->
                                 </tr>
                             </thead>
                             <tr t-foreach="docs" t-as="line">
-                                <td><span t-field="line.control_date"/></td>
-                                <td><span t-field="line.product_id"/></td>
-                                <td><span t-field="line.production_id.vin"/></td>
-                                <td><span t-field="line.measure_result"/></td>
-                                <!--<td class="text-right"><span t-field="line.product_qty"/> <span t-field="line.product_uom_id" groups="product.group_uom"/></td>-->
+                                <td>
+                                    <span t-esc="line[0]['name']"/>
+                                </td>
+                                <td t-if="line[0]['lines']">
+                                    <table class="table table-condensed" t-if="line[0]['lines']">
+                                        <thead>
+                                            <tr>
+                                                <th><strong>拧紧时间</strong></th>
+                                                <th><strong>Job号</strong></th>
+                                                <th><strong>结果</strong></th>
+                                            </tr>
+                                        </thead>
+                                        <tr t-foreach="line[0]['lines']" t-as="result">
+                                            <td><span t-field="result.control_date"/></td>
+                                            <td><span t-esc="1"/></td>
+                                            <td><span t-field="result.measure_result"/></td>
+                                        </tr>
+                                    </table>
+                                </td>
                             </tr>
                             <tr>
                                 <td></td>
