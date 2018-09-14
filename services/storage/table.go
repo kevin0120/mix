@@ -16,6 +16,7 @@ type Workorders struct {
 	Status       string    `xorm:"varchar(32) 'status'"`
 	LastResultID int64     `xorm:"bigint 'last_result_id'"`
 	WorkSheet    string    `xorm:"text 'work_sheet'"`
+	VehicleTypeImg    string    `xorm:"text 'vehicle_type_img'"`
 	UpdateTime   time.Time `xorm:"datetime 'update_time'"`
 
 	JobID int `xorm:"bigint 'job_id'"`
@@ -55,6 +56,7 @@ type Results struct {
 	OffsetX            float64   `xorm:"Double 'offset_x'"`
 	OffsetY            float64   `xorm:"Double 'offset_y'"`
 	MaxRedoTimes       int       `xorm:"int 'max_redo_times'"`
+	Batch			   string	 `xorm:"varchar(32) 'batch'"`
 	ExInfo             string    `xorm:"text 'exinfo'"`
 }
 

@@ -170,6 +170,16 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 			ws_str, _ := json.Marshal(job_select)
 			c.Srv.WS.WSSendJob(string(ws_str))
 		}
+
+	case MID_0211_INPUT_MONITOR:
+		inputs := IOMonitor{}
+		inputs.Deserialize(pkg.Body)
+
+		inputs.ControllerSN = c.cfg.SN
+
+		str, _ := json.Marshal(inputs)
+		fmt.Printf(fmt.Sprintf("%s\n", string(str)))
+		c.Srv.WS.WSSendIOInput(string(str))
 	}
 }
 
@@ -178,6 +188,8 @@ func (c *Controller) handleResult(result_data *ResultData) {
 	result_data.VIN = strings.TrimSpace(result_data.VIN)
 	result_data.ID2 = strings.TrimSpace(result_data.ID2)
 	result_data.ID3 = strings.TrimSpace(result_data.ID3)
+
+	// product_id:workcenter_id:user_id
 	result_data.ID4 = strings.TrimSpace(result_data.ID4)
 
 	c.Srv.DB.UpdateTightning(c.dbController.Id, result_data.TightingID)
@@ -192,6 +204,8 @@ func (c *Controller) handleResult(result_data *ResultData) {
 	}
 
 	kvs := strings.Split(id_info, "-")
+
+	controllerResult.Batch = fmt.Sprintf("%d/%d", result_data.BatchCount, result_data.BatchSize)
 
 	dat_kvs := strings.Split(result_data.TimeStamp, ":")
 	controllerResult.Dat = fmt.Sprintf("%s %s:%s:%s", dat_kvs[0], dat_kvs[1], dat_kvs[2], dat_kvs[3])
@@ -240,16 +254,20 @@ func (c *Controller) handleResult(result_data *ResultData) {
 		// 手动模式 [vin-hmisn-cartype-userid]
 
 		// vin:cartype:hmisn
-		key := result_data.VIN + ":" + result_data.ID3 + ":" + result_data.ID2
-		db_result, err := c.Srv.DB.FindTargetResultForJobManual(key)
-		if err != nil {
-			c.Srv.diag.Error("FindTargetResultForJobManual failed", err)
-		}
+		//key := result_data.VIN + ":" + result_data.ID3 + ":" + result_data.ID2
+		//db_result, err := c.Srv.DB.FindTargetResultForJobManual(key)
+		//if err != nil {
+		//	c.Srv.diag.Error("FindTargetResultForJobManual failed", err)
+		//}
 
-		if controllerResult.Result == storage.RESULT_OK {
-			db_result.Stage = storage.RESULT_STAGE_FINAL
-			c.Srv.DB.UpdateResult(&db_result)
-		}
+		db_result := storage.Results{}
+		db_result.Batch = controllerResult.Batch
+		db_result.GunSN = result_data.ToolSerialNumber
+
+		//if controllerResult.Result == storage.RESULT_OK {
+		//
+		//}
+		db_result.Stage = storage.RESULT_STAGE_FINAL
 
 		// 结果推送hmi
 		wsResult := wsnotify.WSResult{}
@@ -262,15 +280,21 @@ func (c *Controller) handleResult(result_data *ResultData) {
 		wsResult.Seq = db_result.Seq
 		ws_str, _ := json.Marshal(wsResult)
 
-		c.Srv.diag.Debug(fmt.Sprintf("results:%s", controllerResult.Result))
+		c.Srv.diag.Debug(fmt.Sprintf("results:%s", string(ws_str)))
 
-		c.Srv.WS.WSSendResult(result_data.ID2, string(ws_str))
+		if result_data.ID2 == "" {
+			c.Srv.WS.WSSend(wsnotify.WS_EVENT_RESULT, string(ws_str))
+		} else {
+			c.Srv.WS.WSSendResult(result_data.ID2, string(ws_str))
+		}
 
 		// 结果缓存数据库
-		c.Srv.Parent.Handlers.SaveResult(&controllerResult, &db_result)
+		c.Srv.Parent.Handlers.SaveResult(&controllerResult, &db_result, true)
 
 		// 结果推送aiis
 		aiisResult := aiis.AIISResult{}
+
+		aiisResult.Batch = controllerResult.Batch
 
 		if controllerResult.ExceptionReason != "" {
 			aiisResult.ExceptionReason = controllerResult.ExceptionReason + aiisResult.ExceptionReason
@@ -311,22 +335,29 @@ func (c *Controller) handleResult(result_data *ResultData) {
 			aiisResult.QualityState = controller.QUALITY_STATE_EX
 		}
 
-		ks := strings.Split(db_result.ExInfo, ":")
-		if len(ks) < 4 {
-			return
+		//ks := strings.Split(db_result.ExInfo, ":")
+		//if len(ks) < 4 {
+		//	return
+		//}
+
+		ks := strings.Split(result_data.ID4, ":")
+
+		if len(ks) > 2 {
+			if ks[0] != "" {
+				pid, _ := strconv.Atoi(ks[0])
+				aiisResult.ProductID = int64(pid)
+			}
+
+			if ks[1] != "" {
+				wid, _ := strconv.Atoi(ks[1])
+				aiisResult.WorkcenterID = int64(wid)
+			}
+
+			if ks[2] != "" {
+				uid, _ := strconv.Atoi(ks[2])
+				aiisResult.UserID = int64(uid)
+			}
 		}
-
-		pid, _ := strconv.Atoi(ks[3])
-		aiisResult.ProductID = int64(pid)
-
-		uid, _ := strconv.Atoi(result_data.ID4)
-		aiisResult.UserID = int64(uid)
-
-		wid, _ := strconv.Atoi(ks[4])
-		aiisResult.WorkcenterID = int64(wid)
-
-		nid, _ := strconv.Atoi(ks[5])
-		aiisResult.NutID = int64(nid)
 
 		// mo相关
 		aiisResult.MO_Model = result_data.ID3
@@ -416,12 +447,13 @@ func (c *Controller) Connect() error {
 
 	c.startComm()
 
-	c.JobOff("1")
+	//c.JobOff("1")
 	c.PSetSubscribe()
 	//c.CurveSubscribe()
 	c.SelectorSubscribe()
 	c.ResultSubcribe()
 	c.JobInfoSubscribe()
+	c.IOInputSubscribe()
 	//c.DataSubscribeCurve()
 	// 启动发送
 	go c.manage()
@@ -1067,6 +1099,18 @@ func (c *Controller) JobInfoSubscribe() error {
 	return nil
 }
 
+func (c *Controller) IOInputSubscribe() error {
+	if c.Status() == controller.STATUS_OFFLINE {
+		return errors.New("status offline")
+	}
+
+	input := GeneratePackage(MID_0210_INPUT_SUBSCRIBE, "001", "", DEFAULT_MSG_END)
+
+	c.Write([]byte(input))
+
+	return nil
+}
+
 func (c *Controller) ResultSubcribe() error {
 	if c.Status() == controller.STATUS_OFFLINE {
 		return errors.New("status offline")
@@ -1197,6 +1241,41 @@ func (c *Controller) JobSet(id_info string, job int) error {
 	err = c.jobSelect(job)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (c *Controller) JobAbort() error {
+
+	if c.Mode.Load().(string) != MODE_JOB {
+		return errors.New("current mode is not job")
+	}
+
+	c.Response.Add(MID_0127_JOB_ABORT, nil)
+	defer c.Response.remove(MID_0127_JOB_ABORT)
+
+	s_job := GeneratePackage(MID_0127_JOB_ABORT, "001", "", DEFAULT_MSG_END)
+
+	c.Write([]byte(s_job))
+
+	var reply interface{} = nil
+	for i := 0; i < MAX_REPLY_COUNT; i++ {
+		reply = c.Response.get(MID_0127_JOB_ABORT)
+		if reply != nil {
+			break
+		}
+
+		time.Sleep(REPLY_TIMEOUT)
+	}
+
+	if reply == nil {
+		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	}
+
+	s_reply := reply.(string)
+	if s_reply != request_errors["00"] {
+		return errors.New(s_reply)
 	}
 
 	return nil

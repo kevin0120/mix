@@ -7,6 +7,11 @@ import (
 	"strings"
 )
 
+
+const (
+	JOB_ACTION_ABORT = "abort"
+)
+
 const (
 	IO_STATUS_ON       = "on"
 	IO_STATUS_OFF      = "off"
@@ -54,6 +59,9 @@ const (
 	MID_0019_PSET_BATCH_SET        = "0019"
 	MID_0020_PSET_BATCH_RESET      = "0020"
 	MID_0035_JOB_INFO              = "0035"
+	MID_0210_INPUT_SUBSCRIBE              = "0210"
+	MID_0211_INPUT_MONITOR              = "0211"
+	MID_0127_JOB_ABORT = "0127"
 
 	MID_0008_DATA_SUB = "0008"
 
@@ -428,9 +436,43 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 		h.Spare = ""
 
 		return h.Serialize() + data + end
+
+	case MID_0210_INPUT_SUBSCRIBE:
+		h.MID = MID_0210_INPUT_SUBSCRIBE
+		h.LEN = LEN_HEADER
+		h.Revision = rev
+		h.NoAck = "1"
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + end
+
+	case MID_0127_JOB_ABORT:
+		h.MID = MID_0127_JOB_ABORT
+		h.LEN = LEN_HEADER
+		h.Revision = rev
+		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + end
 	}
 
 	return ""
+}
+
+type IOMonitor struct {
+	ControllerSN string `json:"controller_sn"`
+	Inputs string `json:"inputs"`
+}
+
+func (iom *IOMonitor) Deserialize(str string) error {
+
+	iom.Inputs = str
+
+	return nil
 }
 
 var result_errors = []string{

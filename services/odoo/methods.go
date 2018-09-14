@@ -188,3 +188,21 @@ func (m *Methods) patchResult(ctx iris.Context) {
 		return
 	}
 }
+
+func (m *Methods) putSyncRoutingOpertions(ctx iris.Context) {
+
+	//up := ResultPatch{}
+	//e := ctx.ReadJSON(&up)
+	//if e != nil {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString(e.Error())
+	//	return
+	//}
+	//
+	//e = m.service.DB.UpdateResultByCount(int64(id), 0, up.HasUpload)
+	//if e != nil {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString(e.Error())
+	//	return
+	//}
+}

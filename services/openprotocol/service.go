@@ -205,6 +205,28 @@ func (p *Service) JobOFF(sn string, off bool) error {
 	return nil
 }
 
+func (p *Service) JobControl(sn string, action string) error {
+	v, exist := p.Parent.Controllers[sn]
+	if !exist {
+		// SN对应控制器不存在
+		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
+	}
+
+	c := v.(*Controller)
+
+	var err error
+	if action == JOB_ACTION_ABORT {
+		err = c.JobAbort()
+	}
+
+	if err != nil {
+		// 控制器请求失败
+		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	}
+
+	return nil
+}
+
 func (p *Service) GetPSetList(sn string) ([]int, error) {
 	v, exist := p.Parent.Controllers[sn]
 	if !exist {

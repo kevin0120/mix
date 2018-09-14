@@ -199,7 +199,7 @@ func (h *Handlers) PushAiis(needPush bool, r *storage.Results, workorder *storag
 }
 
 //
-func (h *Handlers) SaveResult(result *ControllerResult, dbresult *storage.Results) (*storage.Results, error) {
+func (h *Handlers) SaveResult(result *ControllerResult, dbresult *storage.Results, create bool) (*storage.Results, error) {
 	loc, _ := time.LoadLocation("Local")
 	dbresult.UpdateTime, _ = time.ParseInLocation("2006-01-02 15:04:05", result.Dat, loc)
 	dbresult.Result = result.Result
@@ -215,7 +215,14 @@ func (h *Handlers) SaveResult(result *ControllerResult, dbresult *storage.Result
 	dbresult.PSetDefine = string(s_pset)
 
 	h.controllerService.diag.Debug("缓存结果到数据库 ...")
-	_, err := h.controllerService.DB.UpdateResult(dbresult)
+
+	var err error = nil
+	if create {
+		err = h.controllerService.DB.Store(dbresult)
+	} else {
+		_, err = h.controllerService.DB.UpdateResult(dbresult)
+	}
+
 	if err != nil {
 		h.controllerService.diag.Error("缓存结果失败", err)
 	} else {

@@ -44,6 +44,7 @@ type ODOOWorkorder struct {
 		UUID string `json:"uuid"`
 	} `json:"hmi"`
 
+	VehicleTypeImg string `json:"vehicleTypeImg"`
 	Worksheet  string        `json:"worksheet"`
 	KNR        string        `json:"knr"`
 	VIN        string        `json:"vin"`
@@ -121,4 +122,8 @@ type ODOOMO struct {
 type ODOOGun struct {
 	ID     int64  `json:"id"`
 	Serial string `json:"serial"`
+}
+
+type RoutingOperation struct {
+	OperationID int64 `json:"id"`
 }

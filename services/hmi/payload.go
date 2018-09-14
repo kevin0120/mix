@@ -1,6 +1,8 @@
 package hmi
 
-import "github.com/masami10/rush/services/openprotocol"
+import (
+	"github.com/masami10/rush/services/openprotocol"
+	)
 
 type PSet struct {
 	Controller_SN string `json:"controller_sn"`
@@ -52,6 +54,7 @@ type JobManual struct {
 	ProductID     int64      `json:"product_id"`
 	Points        []JobPoint `json:"points"`
 	WorkcenterID  int64      `json:"workcenter_id"`
+	Skip		  bool		 `json:"skip"`
 }
 
 type JobPoint struct {
@@ -95,8 +98,14 @@ type Workorder struct {
 	Status  string `json:"status"`
 	//Result_ids   []int64   `json:"result_ids"`
 	WorkSheet string `json:"work_sheet"`
+	VehicleTypeImg string `json:"vehicleTypeImg"`
 
 	MaxOpTime int      `json:"max_op_time"`
 	Job       int      `json:"job_id"`
 	Results   []Result `json:"results"`
+}
+
+type JobControl struct {
+	Controller_SN string  `json:"controller_sn"`
+	Action string `json:"action"`
 }

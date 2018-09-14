@@ -582,11 +582,11 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 		return
 	}
 
-	if job.CarType == "" {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("car type is required")
-		return
-	}
+	//if job.CarType == "" {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("car type is required")
+	//	return
+	//}
 
 	if job.HmiSN == "" {
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -614,14 +614,18 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 
 	switch c.Protocol() {
 	case controller.OPENPROTOCOL:
-		err = m.insertResultsForJob(&job)
-		if err != nil {
-			ctx.StatusCode(iris.StatusBadRequest)
-			ctx.WriteString(err.Error())
-			return
-		}
+
+		//if !job.Skip {
+		//	err = m.insertResultsForJob(&job)
+		//	if err != nil {
+		//		ctx.StatusCode(iris.StatusBadRequest)
+		//		ctx.WriteString(err.Error())
+		//		return
+		//	}
+		//}
+
 		//vin-cartype-hmisn-userid
-		ex_info := fmt.Sprintf("%25s%25s%25s%25d", job.Vin, job.HmiSN, job.CarType, job.UserID)
+		ex_info := fmt.Sprintf("%25s%25s%25s%25s", job.Vin, job.HmiSN, job.CarType, fmt.Sprintf("%d:%d:%d", job.ProductID, job.WorkcenterID, job.UserID))
 		err = m.service.OpenProtocol.JobSetManual(job.Controller_SN, job.Job, job.UserID, ex_info)
 
 	default:
@@ -642,12 +646,13 @@ func (m *Methods) insertResultsForJob(job *JobManual) error {
 		return errors.New("points is required")
 	}
 
-	key := fmt.Sprintf("%s:%s:%s:%d:%d:%d", job.Vin, job.CarType, job.HmiSN, job.ProductID, job.WorkcenterID)
+	key := fmt.Sprintf("%s:%s:%s:%d:%d", job.Vin, job.CarType, job.HmiSN, job.ProductID, job.WorkcenterID)
+	err := m.service.DB.DeleteResultsForJob(key)
 
 	db_results := []storage.Results{}
 	for _, v := range job.Points {
 		r := storage.Results{}
-		r.ExInfo = fmt.Sprintf("%s:%d", key, v.NutID)
+		r.ExInfo = key
 		r.PSet = v.PSet
 		r.OffsetX = v.X
 		r.OffsetY = v.Y
@@ -658,7 +663,6 @@ func (m *Methods) insertResultsForJob(job *JobManual) error {
 		db_results = append(db_results, r)
 	}
 
-	err := m.service.DB.DeleteResultsForJob(key)
 	err = m.service.DB.InsertWorkorder(nil, &db_results, false)
 
 	return err
@@ -715,7 +719,7 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 			o, e := m.service.ODOO.CreateWorkorders(odooWorkorders)
 			if e != nil {
 				ctx.StatusCode(iris.StatusBadRequest)
-				ctx.WriteString("save workorder failed")
+				ctx.WriteString(fmt.Sprintf("save workorder failed:%s", e.Error()))
 				return
 			} else {
 				workorder = o[0]
@@ -735,6 +739,7 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 	resp.MaxOpTime = workorder.MaxOpTime
 	resp.WorkSheet = workorder.WorkSheet
 	resp.Job = workorder.JobID
+	resp.VehicleTypeImg = workorder.VehicleTypeImg
 
 	for _, v := range results {
 		r := Result{}
@@ -901,3 +906,60 @@ func (m *Methods) putBarcodeTest(ctx iris.Context) {
 	str, _ := json.Marshal(barcode)
 	m.service.OpenProtocol.WS.WSSendScanner(string(str))
 }
+
+func (m *Methods) putIOInputTest(ctx iris.Context) {
+	inputs := openprotocol.IOMonitor{}
+	err := ctx.ReadJSON(&inputs)
+
+	if err != nil {
+		// 传输结构错误
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+
+	str, _ := json.Marshal(inputs)
+	m.service.OpenProtocol.WS.WSSendIOInput(string(str))
+}
+
+func (m *Methods) putJobControll(ctx iris.Context) {
+	jc := JobControl{}
+	err := ctx.ReadJSON(&jc)
+
+	if err != nil {
+		// 传输结构错误
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+
+	if jc.Controller_SN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller_sn is required")
+		return
+	}
+
+	// 通过控制器设定程序
+	c, exist := m.service.ControllerService.Controllers[jc.Controller_SN]
+	if !exist {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller not found")
+		return
+	}
+
+	switch c.Protocol() {
+	case controller.OPENPROTOCOL:
+		err = m.service.OpenProtocol.JobControl(jc.Controller_SN, jc.Action)
+		if err != nil {
+			ctx.StatusCode(iris.StatusBadRequest)
+			ctx.WriteString(err.Error())
+			return
+		}
+
+	default:
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("not supported")
+		return
+	}
+}
+

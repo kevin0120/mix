@@ -242,11 +242,9 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 		o.Vin = v.VIN
 		o.MaxOpTime = v.Max_op_time
 		o.WorkSheet = v.Worksheet
+		o.VehicleTypeImg = v.VehicleTypeImg
 		o.UpdateTime = v.UpdateTime
-		o.JobID, finalErr = strconv.Atoi(v.Job)
-		if finalErr != nil {
-			o.JobID = 0
-		}
+		o.JobID, _ = strconv.Atoi(v.Job)
 
 		o.MO_Year = v.MO_Year
 		o.MO_Pin_check_code = v.MO_Pin_check_code
