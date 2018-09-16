@@ -81,6 +81,8 @@ func (s *Service) andonTest(ctx iris.Context) {
 		for _, v := range tasks {
 			t, _ := json.Marshal(v)
 			s.WS.WSSendTask(v.Workcenter, string(t))
+
+			//fmt.Printf("send task -- workcenter:%s payload:%s\n", v.Workcenter, string(t))
 		}
 	}
 }

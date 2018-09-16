@@ -105,6 +105,7 @@ func (s *Service) UpdateResults(result *rush.OperationResult, id int64, sent int
 	r.ExceptionReason = result.ExceptionReason
 	r.WorkcenterId = result.WorkcenterID
 	r.Sent = sent
+	r.Batch = result.Batch
 
 	if id == 0 {
 		// 新增

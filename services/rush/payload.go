@@ -29,6 +29,7 @@ type OperationResult struct {
 	WorkcenterID    int64       `json:"workcenter_id"`
 	Vin             string      `json:"vin"`
 	GunID           int64       `json:"gun_id"`
+	Batch			string `json:"batch"`
 
 	// mo相关信息
 	EquipemntName  string `json:"equipment_name"` // 设备名

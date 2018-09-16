@@ -130,6 +130,14 @@ func (s *Service) Open() error {
 	}
 	s.HTTPDService.Handler[0].AddRoute(r)
 
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "GET",
+		Pattern:     "/healthz",
+		HandlerFunc: s.getHealthz,
+	}
+	s.HTTPDService.Handler[0].AddRoute(r)
+
 	client := resty.New()
 	client.SetRESTMode() // restful mode is default
 	client.SetTimeout(time.Duration(s.Config().Timeout))
@@ -150,6 +158,12 @@ func (s *Service) Open() error {
 	}
 
 	return nil
+}
+
+func (s *Service) getHealthz(ctx iris.Context) {
+
+	ctx.StatusCode(iris.StatusNoContent)
+	return
 }
 
 func (s *Service) run() {

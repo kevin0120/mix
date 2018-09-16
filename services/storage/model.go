@@ -18,9 +18,9 @@ type OperationResultModel struct {
 	MeasureTorque float32 `xorm:"numeric 'measure_torque'"`
 	MeasureResult string  `xorm:"varchar(32) 'measure_result'"`
 	PsetWMax      float32 `xorm:"numeric 'pset_w_max'"`
-	UserId        int64   `xorm:" INTEGER 'user_id'"`
+	UserId        int64   `xorm:" INTEGER null 'user_id'"`
 	//ConsuProductId  int64     `xorm:" INTEGER 'consu_product_id'"`
-	WorkcenterId int64   `xorm:" INTEGER 'workcenter_id'"`
+	WorkcenterId int64   `xorm:" INTEGER null 'workcenter_id'"`
 	Sent         int     `xorm:" bool 'sent'"`
 	PsetWTarget  float32 `xorm:"numeric 'pset_w_target'"`
 	//ProductionId    int64     `xorm:" INTEGER 'production_id'"`
@@ -30,7 +30,7 @@ type OperationResultModel struct {
 	//AssemblyLineId  int64     `xorm:" INTEGER 'assembly_line_id'"`
 	PsetMTarget     float32   `xorm:"numeric 'pset_m_target'"`
 	PsetWMin        float32   `xorm:"numeric 'pset_w_min'"`
-	ProductId       int64     `xorm:" INTEGER 'product_id'"`
+	ProductId       int64     `xorm:" INTEGER null 'product_id'"`
 	ControlDate     time.Time `xorm:"TIMESTAMP 'control_date'"`
 	Name            string    `xorm:"varchar(128) 'name'"`
 	PsetWThreshold  float32   `xorm:"numeric 'pset_w_threshold'"`
@@ -39,7 +39,8 @@ type OperationResultModel struct {
 	MeasureTDon     float32   `xorm:"numeric 'measure_t_don'"`
 	OpTime          int       `xorm:" INTEGER 'op_time'"`
 	ExceptionReason string    `xorm:"varchar(32) 'exception_reason'"`
-	GunID           int64     `xorm:" INTEGER 'gun_id'"`
+	GunID           int64     `xorm:" INTEGER null 'gun_id'"`
 	//ConsuBomLineID  int64	  `xorm:" INTEGER 'consu_bom_line_id'"`
 	Vin string `xorm:"varchar(128) 'vin'"`
+	Batch string `xorm:"varchar(128) 'batch'"`
 }
