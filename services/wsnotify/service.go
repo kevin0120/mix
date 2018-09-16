@@ -16,7 +16,7 @@ const (
 	WS_EVENT_SELECTOR = "selector"
 	WS_EVENT_JOB      = "job"
 	WS_EVENT_SCANNER  = "scanner"
-	WS_EVENT_IO = "io"
+	WS_EVENT_IO       = "io"
 )
 
 type Diagnostic interface {

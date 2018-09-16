@@ -25,7 +25,7 @@ type AIISResult struct {
 	ProductID        int64   `json:"product_id"`
 	WorkcenterID     int64   `json:"workcenter_id"`
 	GunID            int64   `json:"gun_id"`
-	Batch			string `json:"batch"`
+	Batch            string  `json:"batch"`
 
 	CURObjects []CURObject `json:"cur_objects"`
 

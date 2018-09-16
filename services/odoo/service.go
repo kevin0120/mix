@@ -119,6 +119,14 @@ func (s *Service) Open() error {
 	}
 	handler.AddRoute(r)
 
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "PUT",
+		Pattern:     "/mrp.routing.workcenter",
+		HandlerFunc: s.methods.putSyncRoutingOpertions,
+	}
+	handler.AddRoute(r)
+
 	return nil
 }
 
@@ -297,7 +305,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 
 		o.LastResultID = results[len(results)-1].ResultId
 
-		e := s.DB.InsertWorkorder(&o, &results, true)
+		e := s.DB.InsertWorkorder(&o, &results, true, true, false)
 		if e != nil {
 			finalErr = e
 		}

@@ -12,12 +12,16 @@ type Workorders struct {
 	Knr     string `xorm:"varchar(64) 'knr'"`
 	LongPin string `xorm:"varchar(64) 'long_pin'"`
 
-	MaxOpTime    int       `xorm:"int 'max_op_time'"`
-	Status       string    `xorm:"varchar(32) 'status'"`
-	LastResultID int64     `xorm:"bigint 'last_result_id'"`
-	WorkSheet    string    `xorm:"text 'work_sheet'"`
-	VehicleTypeImg    string    `xorm:"text 'vehicle_type_img'"`
-	UpdateTime   time.Time `xorm:"datetime 'update_time'"`
+	MaxOpTime      int       `xorm:"int 'max_op_time'"`
+	MaxSeq         int       `xorm:"int 'max_seq'"`
+	Status         string    `xorm:"varchar(32) 'status'"`
+	LastResultID   int64     `xorm:"bigint 'last_result_id'"`
+	WorkSheet      string    `xorm:"text 'work_sheet'"`
+	VehicleTypeImg string    `xorm:"text 'vehicle_type_img'"`
+	UpdateTime     time.Time `xorm:"datetime 'update_time'"`
+	ProductID      int64     `xorm:"bigint 'product_id'"`
+	WorkcenterID   int64     `xorm:"bigint 'workcenter_id'"`
+	UserID         int64     `xorm:"bigint 'user_id'"`
 
 	JobID int `xorm:"bigint 'job_id'"`
 
@@ -56,7 +60,7 @@ type Results struct {
 	OffsetX            float64   `xorm:"Double 'offset_x'"`
 	OffsetY            float64   `xorm:"Double 'offset_y'"`
 	MaxRedoTimes       int       `xorm:"int 'max_redo_times'"`
-	Batch			   string	 `xorm:"varchar(32) 'batch'"`
+	Batch              string    `xorm:"varchar(32) 'batch'"`
 	ExInfo             string    `xorm:"text 'exinfo'"`
 }
 

@@ -52,7 +52,7 @@ type ControllerResult struct {
 	Result        string     `json:"result"`
 	Dat           string     `json:"dat"`
 	PSet          int        `json:"pset"`
-	Batch         string `json:"batch"`
+	Batch         string     `json:"batch"`
 	Count         int        `json:"count"`
 	PSetDefine    PSetDefine `json:"pset_define"`
 

@@ -253,7 +253,7 @@ func (s *Service) ListUnuploadCurves() ([]Curves, error) {
 	}
 }
 
-func (s *Service) InsertWorkorder(workorder *Workorders, results *[]Results, checkResult bool) error {
+func (s *Service) InsertWorkorder(workorder *Workorders, results *[]Results, checkWorkorder bool, checkResult bool, rawid bool) error {
 
 	session := s.eng.NewSession()
 	defer session.Close()
@@ -262,18 +262,23 @@ func (s *Service) InsertWorkorder(workorder *Workorders, results *[]Results, che
 	// 执行事务
 
 	// 保存新工单
+	var raw_workorderid int64
 	if workorder != nil {
-		has, err := s.WorkorderExists(workorder.WorkorderID)
-		if has {
-			// 忽略存在的工单
-			return nil
+		if checkWorkorder {
+			has, _ := s.WorkorderExists(workorder.WorkorderID)
+			if has {
+				// 忽略存在的工单
+				return nil
+			}
 		}
+
 		_, err = session.Insert(workorder)
 		if err != nil {
 			session.Rollback()
 			return errors.Wrapf(err, "store data fail")
 		} else {
 			s.diag.Debug(fmt.Sprintf("new workorder:%d", workorder.WorkorderID))
+			raw_workorderid = workorder.Id
 		}
 	}
 
@@ -286,6 +291,10 @@ func (s *Service) InsertWorkorder(workorder *Workorders, results *[]Results, che
 				if has {
 					continue
 				}
+			}
+
+			if rawid {
+				v.WorkorderID = raw_workorderid
 			}
 
 			_, err = session.Insert(v)
@@ -360,11 +369,16 @@ func (s *Service) GetResult(resultId int64, count int) (Results, error) {
 	}
 }
 
-func (s *Service) GetWorkorder(id int64) (Workorders, error) {
+func (s *Service) GetWorkorder(id int64, raw bool) (Workorders, error) {
 
 	var workorder Workorders
 
-	rt, err := s.eng.Alias("w").Where("w.x_workorder_id = ?", id).Get(&workorder)
+	key := "x_workorder_id"
+	if raw {
+		key = "id"
+	}
+
+	rt, err := s.eng.Alias("w").Where(fmt.Sprintf("w.%s = ?", key), id).Get(&workorder)
 
 	if err != nil {
 		return workorder, err
@@ -410,7 +424,7 @@ func (s *Service) UpdateResultUpload(upload bool, r_id int64) (int64, error) {
 
 func (s *Service) UpdateResult(result *Results) (int64, error) {
 
-	sql := "update `results` set controller_sn = ?, result = ?, has_upload = ?, stage = ?, update_time = ?, pset_define = ?, result_value = ?, count = ? where id = ?"
+	sql := "update `results` set controller_sn = ?, result = ?, has_upload = ?, stage = ?, update_time = ?, pset_define = ?, result_value = ?, count = ?, batch = ? where id = ?"
 	r, err := s.eng.Exec(sql,
 		result.ControllerSN,
 		result.Result,
@@ -420,6 +434,7 @@ func (s *Service) UpdateResult(result *Results) (int64, error) {
 		result.PSetDefine,
 		result.ResultValue,
 		result.Count,
+		result.Batch,
 		result.Id)
 
 	if err != nil {
@@ -530,10 +545,10 @@ func (s *Service) FindTargetResultForJob(workorder_id int64) (Results, error) {
 	}
 }
 
-func (s *Service) FindTargetResultForJobManual(key string) (Results, error) {
+func (s *Service) FindTargetResultForJobManual(raw_workorder_id int64) (Results, error) {
 	var results []Results
 
-	ss := s.eng.Alias("r").Where("r.exinfo like ?", key+"%").And("r.stage = ? or r.seq = ?", RESULT_STAGE_INIT, 0).OrderBy("r.seq")
+	ss := s.eng.Alias("r").Where("r.x_workorder_id = ?", raw_workorder_id).And("r.stage = ? or r.seq = ?", RESULT_STAGE_INIT, 0).OrderBy("r.seq")
 
 	e := ss.Find(&results)
 

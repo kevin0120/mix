@@ -2,7 +2,7 @@ package hmi
 
 import (
 	"github.com/masami10/rush/services/openprotocol"
-	)
+)
 
 type PSet struct {
 	Controller_SN string `json:"controller_sn"`
@@ -54,7 +54,7 @@ type JobManual struct {
 	ProductID     int64      `json:"product_id"`
 	Points        []JobPoint `json:"points"`
 	WorkcenterID  int64      `json:"workcenter_id"`
-	Skip		  bool		 `json:"skip"`
+	Skip          bool       `json:"skip"`
 }
 
 type JobPoint struct {
@@ -63,7 +63,7 @@ type JobPoint struct {
 	X         float64 `json:"offset_x"`
 	Y         float64 `json:"offset_Y"`
 	MaxOpTime int     `json:"max_op_time"`
-	NutID	  int64		`json:"nut_id"`
+	NutID     int64   `json:"nut_id"`
 }
 
 type ControllerMode struct {
@@ -84,7 +84,7 @@ type Result struct {
 	MaxRedoTimes  int     `json:"max_redo_times"`
 	X             float64 `json:"offset_x"`
 	Y             float64 `json:"offset_Y"`
-	Seq       int     `json:"sequence"`
+	Seq           int     `json:"sequence"`
 }
 
 type Workorder struct {
@@ -97,7 +97,7 @@ type Workorder struct {
 	LongPin string `json:"long_pin"`
 	Status  string `json:"status"`
 	//Result_ids   []int64   `json:"result_ids"`
-	WorkSheet string `json:"work_sheet"`
+	WorkSheet      string `json:"work_sheet"`
 	VehicleTypeImg string `json:"vehicleTypeImg"`
 
 	MaxOpTime int      `json:"max_op_time"`
@@ -106,6 +106,6 @@ type Workorder struct {
 }
 
 type JobControl struct {
-	Controller_SN string  `json:"controller_sn"`
-	Action string `json:"action"`
+	Controller_SN string `json:"controller_sn"`
+	Action        string `json:"action"`
 }

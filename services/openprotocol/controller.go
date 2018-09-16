@@ -186,18 +186,21 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 func (c *Controller) handleResult(result_data *ResultData) {
 
 	result_data.VIN = strings.TrimSpace(result_data.VIN)
+
+	// raw workorder id
 	result_data.ID2 = strings.TrimSpace(result_data.ID2)
+
+	// user id
 	result_data.ID3 = strings.TrimSpace(result_data.ID3)
 
-	// product_id:workcenter_id:user_id
 	result_data.ID4 = strings.TrimSpace(result_data.ID4)
 
 	c.Srv.DB.UpdateTightning(c.dbController.Id, result_data.TightingID)
 
 	controllerResult := controller.ControllerResult{}
-	c.Srv.diag.Info(fmt.Sprintf("vin:%s id2:%s id3:%s id4:%s", result_data.VIN, result_data.ID2, result_data.ID3, result_data.ID4))
+	c.Srv.diag.Info(fmt.Sprintf("vin:%s raw workorder_id:%s user_id:%s", result_data.VIN, result_data.ID2, result_data.ID3))
 
-	id_info := result_data.VIN + result_data.ID2 + result_data.ID3 + result_data.ID4
+	id_info := result_data.VIN + result_data.ID2 + result_data.ID3
 	if id_info == "" {
 		c.Srv.diag.Error(id_info, errors.New("invalid id"))
 		return
@@ -205,7 +208,7 @@ func (c *Controller) handleResult(result_data *ResultData) {
 
 	kvs := strings.Split(id_info, "-")
 
-	controllerResult.Batch = fmt.Sprintf("%d/%d", result_data.BatchCount, result_data.BatchSize)
+	//controllerResult.Batch = fmt.Sprintf("%d/%d", result_data.BatchCount, result_data.BatchSize)
 
 	dat_kvs := strings.Split(result_data.TimeStamp, ":")
 	controllerResult.Dat = fmt.Sprintf("%s %s:%s:%s", dat_kvs[0], dat_kvs[1], dat_kvs[2], dat_kvs[3])
@@ -255,19 +258,21 @@ func (c *Controller) handleResult(result_data *ResultData) {
 
 		// vin:cartype:hmisn
 		//key := result_data.VIN + ":" + result_data.ID3 + ":" + result_data.ID2
-		//db_result, err := c.Srv.DB.FindTargetResultForJobManual(key)
-		//if err != nil {
-		//	c.Srv.diag.Error("FindTargetResultForJobManual failed", err)
-		//}
+		raw_id, _ := strconv.ParseInt(result_data.ID2, 10, 64)
+		db_workorder, err := c.Srv.DB.GetWorkorder(raw_id, true)
+		db_result, err := c.Srv.DB.FindTargetResultForJobManual(raw_id)
+		if err != nil {
+			c.Srv.diag.Error("FindTargetResultForJobManual failed", err)
+		}
 
-		db_result := storage.Results{}
+		//db_result := storage.Results{}
+		controllerResult.Batch = fmt.Sprintf("%d/%d", db_result.Seq, db_workorder.MaxSeq)
 		db_result.Batch = controllerResult.Batch
 		db_result.GunSN = result_data.ToolSerialNumber
 
-		//if controllerResult.Result == storage.RESULT_OK {
-		//
-		//}
-		db_result.Stage = storage.RESULT_STAGE_FINAL
+		if controllerResult.Result == storage.RESULT_OK {
+			db_result.Stage = storage.RESULT_STAGE_FINAL
+		}
 
 		// 结果推送hmi
 		wsResult := wsnotify.WSResult{}
@@ -289,7 +294,7 @@ func (c *Controller) handleResult(result_data *ResultData) {
 		}
 
 		// 结果缓存数据库
-		c.Srv.Parent.Handlers.SaveResult(&controllerResult, &db_result, true)
+		c.Srv.Parent.Handlers.SaveResult(&controllerResult, &db_result, false)
 
 		// 结果推送aiis
 		aiisResult := aiis.AIISResult{}
@@ -340,27 +345,27 @@ func (c *Controller) handleResult(result_data *ResultData) {
 		//	return
 		//}
 
-		ks := strings.Split(result_data.ID4, ":")
+		aiisResult.ProductID = db_workorder.ProductID
+		aiisResult.WorkcenterID = db_workorder.WorkcenterID
+		aiisResult.UserID = db_workorder.UserID
+		//ks := strings.Split(result_data.ID4, ":")
 
-		if len(ks) > 2 {
-			if ks[0] != "" {
-				pid, _ := strconv.Atoi(ks[0])
-				aiisResult.ProductID = int64(pid)
-			}
-
-			if ks[1] != "" {
-				wid, _ := strconv.Atoi(ks[1])
-				aiisResult.WorkcenterID = int64(wid)
-			}
-
-			if ks[2] != "" {
-				uid, _ := strconv.Atoi(ks[2])
-				aiisResult.UserID = int64(uid)
-			}
-		}
-
-		// mo相关
-		aiisResult.MO_Model = result_data.ID3
+		//if len(ks) > 2 {
+		//	if ks[0] != "" {
+		//		pid, _ := strconv.Atoi(ks[0])
+		//		aiisResult.ProductID = int64(pid)
+		//	}
+		//
+		//	if ks[1] != "" {
+		//		wid, _ := strconv.Atoi(ks[1])
+		//		aiisResult.WorkcenterID = int64(wid)
+		//	}
+		//
+		//	if ks[2] != "" {
+		//		uid, _ := strconv.Atoi(ks[2])
+		//		aiisResult.UserID = int64(uid)
+		//	}
+		//}
 
 		c.Srv.diag.Debug("推送结果数据到AIIS ...")
 
@@ -374,40 +379,40 @@ func (c *Controller) handleResult(result_data *ResultData) {
 		return
 	}
 
-	if len(kvs) == 2 {
-		// job模式
-
-		controllerResult.Workorder_ID, _ = strconv.ParseInt(kvs[0], 10, 64)
-		controllerResult.UserID, _ = strconv.ParseInt(kvs[1], 10, 64)
-
-		db_result, err := c.Srv.DB.FindTargetResultForJob(controllerResult.Workorder_ID)
-		if err != nil {
-			c.Srv.diag.Error("FindTargetResultForJob failed", err)
-		}
-
-		controllerResult.Count = db_result.Count + 1
-		controllerResult.Result_id = db_result.ResultId
-
-	} else if len(kvs) == 3 {
-		// pset模式
-
-		// 结果id-拧接次数-用户id
-		controllerResult.Result_id, _ = strconv.ParseInt(kvs[0], 10, 64)
-		controllerResult.Count, _ = strconv.Atoi(kvs[1])
-		controllerResult.UserID, _ = strconv.ParseInt(kvs[2], 10, 64)
-
-		db_result, err := c.Srv.DB.GetResult(controllerResult.Result_id, 0)
-		if err != nil {
-			c.Srv.diag.Error("GetResult failed", err)
-		}
-
-		controllerResult.Workorder_ID = db_result.WorkorderID
-	} else {
-		c.Srv.diag.Error(id_info, errors.New("invalid id"))
-		return
-	}
-
-	c.Srv.Parent.Handle(controllerResult, nil)
+	//if len(kvs) == 2 {
+	//	// job模式
+	//
+	//	controllerResult.Workorder_ID, _ = strconv.ParseInt(kvs[0], 10, 64)
+	//	controllerResult.UserID, _ = strconv.ParseInt(kvs[1], 10, 64)
+	//
+	//	db_result, err := c.Srv.DB.FindTargetResultForJob(controllerResult.Workorder_ID)
+	//	if err != nil {
+	//		c.Srv.diag.Error("FindTargetResultForJob failed", err)
+	//	}
+	//
+	//	controllerResult.Count = db_result.Count + 1
+	//	controllerResult.Result_id = db_result.ResultId
+	//
+	//} else if len(kvs) == 3 {
+	//	// pset模式
+	//
+	//	// 结果id-拧接次数-用户id
+	//	controllerResult.Result_id, _ = strconv.ParseInt(kvs[0], 10, 64)
+	//	controllerResult.Count, _ = strconv.Atoi(kvs[1])
+	//	controllerResult.UserID, _ = strconv.ParseInt(kvs[2], 10, 64)
+	//
+	//	db_result, err := c.Srv.DB.GetResult(controllerResult.Result_id, 0)
+	//	if err != nil {
+	//		c.Srv.diag.Error("GetResult failed", err)
+	//	}
+	//
+	//	controllerResult.Workorder_ID = db_result.WorkorderID
+	//} else {
+	//	c.Srv.diag.Error(id_info, errors.New("invalid id"))
+	//	return
+	//}
+	//
+	//c.Srv.Parent.Handle(controllerResult, nil)
 }
 
 func (c *Controller) Start() {

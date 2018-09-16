@@ -7,7 +7,6 @@ import (
 	"strings"
 )
 
-
 const (
 	JOB_ACTION_ABORT = "abort"
 )
@@ -59,9 +58,9 @@ const (
 	MID_0019_PSET_BATCH_SET        = "0019"
 	MID_0020_PSET_BATCH_RESET      = "0020"
 	MID_0035_JOB_INFO              = "0035"
-	MID_0210_INPUT_SUBSCRIBE              = "0210"
-	MID_0211_INPUT_MONITOR              = "0211"
-	MID_0127_JOB_ABORT = "0127"
+	MID_0210_INPUT_SUBSCRIBE       = "0210"
+	MID_0211_INPUT_MONITOR         = "0211"
+	MID_0127_JOB_ABORT             = "0127"
 
 	MID_0008_DATA_SUB = "0008"
 
@@ -465,7 +464,7 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 
 type IOMonitor struct {
 	ControllerSN string `json:"controller_sn"`
-	Inputs string `json:"inputs"`
+	Inputs       string `json:"inputs"`
 }
 
 func (iom *IOMonitor) Deserialize(str string) error {

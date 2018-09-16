@@ -3,21 +3,21 @@ package main
 // CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ./test.go
 
 import (
-		"flag"
+	"encoding/json"
+	"flag"
 	"fmt"
+	"github.com/masami10/rush/services/aiis"
+	"github.com/masami10/rush/services/controller"
+	"github.com/masami10/rush/services/odoo"
+	"github.com/masami10/rush/services/storage"
+	"gopkg.in/resty.v1"
 	"math/rand"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
-	"github.com/masami10/rush/services/odoo"
-	"github.com/masami10/rush/services/aiis"
-	"net/http"
-	"gopkg.in/resty.v1"
-	"encoding/json"
-	"github.com/masami10/rush/services/storage"
-	"github.com/masami10/rush/services/controller"
 )
 
 var g_Count int = 0
@@ -100,7 +100,7 @@ func putResult(body interface{}, url string) error {
 	return nil
 }
 
-func resultToAiis(odoo_result *odoo.ODOOResultSync) aiis.AIISResult{
+func resultToAiis(odoo_result *odoo.ODOOResultSync) aiis.AIISResult {
 	aiisResult := aiis.AIISResult{}
 
 	if odoo_result.Measure_result == storage.RESULT_OK {

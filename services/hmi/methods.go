@@ -615,17 +615,18 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 	switch c.Protocol() {
 	case controller.OPENPROTOCOL:
 
-		//if !job.Skip {
-		//	err = m.insertResultsForJob(&job)
-		//	if err != nil {
-		//		ctx.StatusCode(iris.StatusBadRequest)
-		//		ctx.WriteString(err.Error())
-		//		return
-		//	}
-		//}
+		var db_workorder *storage.Workorders
+		if !job.Skip {
+			db_workorder, err = m.insertResultsForJob(&job)
+			if err != nil {
+				ctx.StatusCode(iris.StatusBadRequest)
+				ctx.WriteString(err.Error())
+				return
+			}
+		}
 
 		//vin-cartype-hmisn-userid
-		ex_info := fmt.Sprintf("%25s%25s%25s%25s", job.Vin, job.HmiSN, job.CarType, fmt.Sprintf("%d:%d:%d", job.ProductID, job.WorkcenterID, job.UserID))
+		ex_info := fmt.Sprintf("%25s%25d%25d%25s", job.Vin, db_workorder.Id, job.UserID, "")
 		err = m.service.OpenProtocol.JobSetManual(job.Controller_SN, job.Job, job.UserID, ex_info)
 
 	default:
@@ -641,18 +642,21 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 	}
 }
 
-func (m *Methods) insertResultsForJob(job *JobManual) error {
+func (m *Methods) insertResultsForJob(job *JobManual) (*storage.Workorders, error) {
 	if len(job.Points) == 0 {
-		return errors.New("points is required")
+		return nil, errors.New("points is required")
 	}
 
-	key := fmt.Sprintf("%s:%s:%s:%d:%d", job.Vin, job.CarType, job.HmiSN, job.ProductID, job.WorkcenterID)
-	err := m.service.DB.DeleteResultsForJob(key)
+	//key := fmt.Sprintf("%s:%s:%s:%d:%d", job.Vin, job.HmiSN, job.ProductID, job.WorkcenterID, job.UserID)
+	//err := m.service.DB.DeleteResultsForJob(key)
 
+	max_seq := 0
 	db_results := []storage.Results{}
 	for _, v := range job.Points {
+		if v.Seq > max_seq {
+			max_seq = v.Seq
+		}
 		r := storage.Results{}
-		r.ExInfo = key
 		r.PSet = v.PSet
 		r.OffsetX = v.X
 		r.OffsetY = v.Y
@@ -663,9 +667,18 @@ func (m *Methods) insertResultsForJob(job *JobManual) error {
 		db_results = append(db_results, r)
 	}
 
-	err = m.service.DB.InsertWorkorder(nil, &db_results, false)
+	db_workorder := storage.Workorders{}
+	db_workorder.Vin = job.Vin
+	db_workorder.JobID = job.Job
+	db_workorder.HMISN = job.HmiSN
+	db_workorder.ProductID = job.ProductID
+	db_workorder.WorkcenterID = job.WorkcenterID
+	db_workorder.MaxSeq = max_seq
+	db_workorder.UserID = job.UserID
 
-	return err
+	err := m.service.DB.InsertWorkorder(&db_workorder, &db_results, false, false, true)
+
+	return &db_workorder, err
 }
 
 func (m *Methods) insertResultsForPSet(pset *PSetManual) error {
@@ -681,7 +694,7 @@ func (m *Methods) insertResultsForPSet(pset *PSetManual) error {
 	db_reuslt = append(db_reuslt, r)
 
 	err := m.service.DB.DeleteResultsForJob(key)
-	err = m.service.DB.InsertWorkorder(nil, &db_reuslt, false)
+	err = m.service.DB.InsertWorkorder(nil, &db_reuslt, false, false, false)
 
 	return err
 }
@@ -962,4 +975,3 @@ func (m *Methods) putJobControll(ctx iris.Context) {
 		return
 	}
 }
-
