@@ -17,10 +17,10 @@ type Config struct {
 
 func NewConfig() Config {
 
-	_guid, _ := uuid.NewV4()
+	_guid := uuid.NewV4()
 
 	return Config{
-		AndonAddr:       "tcp://192.168.1.1:9002",
+		AndonAddr:       "tcp://192.168.1.4:9002",
 		Enable:          true,
 		KeepAlivePeriod: toml.Duration(3 * time.Second),
 		ReadTimeout:     toml.Duration(10 * time.Second),

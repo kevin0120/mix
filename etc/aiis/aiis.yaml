@@ -55,9 +55,12 @@ fis:
     - AGM
   enable: false
 changan:
-  andon_ip: 192.168.1.1
-  andon_port: 8888
+  andon_addr: tcp://192.168.1.4:9002
   enable: true
+  keepalive_period: 3s
+  read_timeout: 10s
+  read_buffer_size: 65535
+  GUID: 17e2735f-fe49-4d8e-bdb6-81d5af997559
 odoo:
   url: http://172.17.0.1:8069
   route: /api/v1/mrp.productions
