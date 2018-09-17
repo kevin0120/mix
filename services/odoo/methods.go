@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-)
+	)
 
 type Methods struct {
 	service *Service
@@ -191,18 +191,34 @@ func (m *Methods) patchResult(ctx iris.Context) {
 
 func (m *Methods) putSyncRoutingOpertions(ctx iris.Context) {
 
-	//up := ResultPatch{}
-	//e := ctx.ReadJSON(&up)
-	//if e != nil {
-	//	ctx.StatusCode(iris.StatusBadRequest)
-	//	ctx.WriteString(e.Error())
-	//	return
-	//}
-	//
-	//e = m.service.DB.UpdateResultByCount(int64(id), 0, up.HasUpload)
-	//if e != nil {
-	//	ctx.StatusCode(iris.StatusBadRequest)
-	//	ctx.WriteString(e.Error())
-	//	return
-	//}
+	ro := RoutingOperation{}
+	e := ctx.ReadJSON(&ro)
+	if e != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(e.Error())
+		return
+	}
+
+	points, _ := json.Marshal(ro.Points)
+
+	db_ro, err := m.service.DB.GetRoutingOperations(ro.OperationID)
+
+	db_ro.Points = string(points)
+	db_ro.VehicleTypeImg = ro.VehicleTypeImg
+	db_ro.WorkcenterCode = ro.WorkcenterCode
+	db_ro.ProductType = ro.ProductType
+	db_ro.ProductId = ro.ProductId
+	db_ro.Img = ro.Img
+	db_ro.Name = ro.Name
+	db_ro.MaxOpTime = ro.MaxOpTime
+	db_ro.Job = ro.Job
+
+	if err != nil {
+		// 新增
+		db_ro.OperationID = ro.OperationID
+		m.service.DB.Store(db_ro)
+	} else {
+		// 更新
+		m.service.DB.UpdateRoutingOperations(&db_ro)
+	}
 }

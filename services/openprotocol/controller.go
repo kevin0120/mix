@@ -282,16 +282,16 @@ func (c *Controller) handleResult(result_data *ResultData) {
 		wsResult.MI = controllerResult.ResultValue.Mi
 		wsResult.WI = controllerResult.ResultValue.Wi
 		wsResult.TI = controllerResult.ResultValue.Ti
-		wsResult.Seq = db_result.Seq
-		ws_str, _ := json.Marshal(wsResult)
+		//wsResult.Seq = db_result.Seq
+		wsResult.GroupSeq = db_result.GroupSeq
+
+		wsResults := []wsnotify.WSResult{}
+		wsResults = append(wsResults, wsResult)
+		ws_str, _ := json.Marshal(wsResults)
 
 		c.Srv.diag.Debug(fmt.Sprintf("results:%s", string(ws_str)))
 
-		if result_data.ID2 == "" {
-			c.Srv.WS.WSSend(wsnotify.WS_EVENT_RESULT, string(ws_str))
-		} else {
-			c.Srv.WS.WSSendResult(result_data.ID2, string(ws_str))
-		}
+		c.Srv.WS.WSSendResult(db_workorder.HMISN, string(ws_str))
 
 		// 结果缓存数据库
 		c.Srv.Parent.Handlers.SaveResult(&controllerResult, &db_result, false)

@@ -64,6 +64,7 @@ type JobPoint struct {
 	Y         float64 `json:"offset_Y"`
 	MaxOpTime int     `json:"max_op_time"`
 	NutID     int64   `json:"nut_id"`
+	GroupSeq       int     `json:"group_sequence"`
 }
 
 type ControllerMode struct {
@@ -108,4 +109,26 @@ type Workorder struct {
 type JobControl struct {
 	Controller_SN string `json:"controller_sn"`
 	Action        string `json:"action"`
+}
+
+type RoutingOperationPoint struct {
+	Seq int `json:"sequence"`
+	MaxOpTime int `json:"max_op_time"`
+	PSet int `json:"pset"`
+	X         float64 `json:"offset_x"`
+	Y         float64 `json:"offset_Y"`
+	GroupSequence int `json:"group_sequence"`
+}
+
+type RoutingOperation struct {
+	OperationID    int64       `json:"id"`
+	Job            int         `json:"job"`
+	MaxOpTime      int         `json:"max_op_time"`
+	Name           string      `json:"name"`
+	Img            string      `json:"img"`
+	ProductId      int64       `json:"product_id"`
+	ProductType    string      `json:"product_type"`
+	WorkcenterCode string      `json:"workcenter_code"`
+	VehicleTypeImg string      `json:"vehicleTypeImg"`
+	Points         []RoutingOperationPoint `json:"points"`
 }

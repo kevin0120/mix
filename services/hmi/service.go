@@ -188,6 +188,14 @@ func (s *Service) Open() error {
 	}
 	s.Httpd.Handler[0].AddRoute(r)
 
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "GET",
+		Pattern:     "/operation/{code:string}",
+		HandlerFunc: s.methods.getRoutingOpertions,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
 	return nil
 
 }

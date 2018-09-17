@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"sync/atomic"
 	"time"
-)
+	)
 
 type Diagnostic interface {
 	Error(msg string, err error)
@@ -101,6 +101,16 @@ func (s *Service) Open() error {
 	if !exist {
 		if err := engine.Sync2(new(Guns)); err != nil {
 			return errors.Wrapf(err, "Create Table Guns fail")
+		}
+	}
+
+	exist, err = engine.IsTableExist("RoutingOperations")
+	if err != nil {
+		return errors.Wrapf(err, "Check Table exist %s fail", "RoutingOperations")
+	}
+	if !exist {
+		if err := engine.Sync2(new(RoutingOperations)); err != nil {
+			return errors.Wrapf(err, "Create Table RoutingOperations fail")
 		}
 	}
 
@@ -614,6 +624,63 @@ func (s *Service) ResetTightning(controller_sn string) error {
 	}
 }
 
+func (s *Service) UpdateRoutingOperations(ro *RoutingOperations) error {
+	sql := "update `routing_operations` set job = ?, max_op_time = ?, name = ?, img = ?, product_id = ?, product_type = ?, workcenter_code = ?, vehicle_type_img = ?, points = ? where operation_id = ?"
+	_, err := s.eng.Exec(sql,
+		ro.Job,
+		ro.MaxOpTime,
+		ro.Name,
+		ro.Img,
+		ro.ProductId,
+		ro.ProductType,
+		ro.WorkcenterCode,
+		ro.VehicleTypeImg,
+		ro.Points,
+		ro.OperationID)
+
+	if err != nil {
+		return err
+	} else {
+		return nil
+	}
+}
+
+func (s *Service) GetRoutingOperations(op_id int64) (RoutingOperations, error) {
+
+	var ro RoutingOperations
+
+	rt, err := s.eng.Alias("r").Where("r.operation_id = ?", op_id).Get(&ro)
+
+	if err != nil {
+		return ro, err
+	} else {
+		if !rt {
+			return ro, errors.New("found RoutingOperations failed")
+		} else {
+			return ro, nil
+		}
+	}
+}
+
+func (s *Service) FindRoutingOperations(workcenter_code string, cartype string, job int) (RoutingOperations, error) {
+
+	var ros []RoutingOperations
+
+	ss := s.eng.Alias("r").Where("r.workcenter_code = ?", workcenter_code).And("r.product_type = ? or r.job = ?", cartype, job)
+
+	e := ss.Find(&ros)
+
+	if e != nil {
+		return RoutingOperations{}, e
+	} else {
+		if len(ros) > 0 {
+			return ros[0], nil
+		} else {
+			return RoutingOperations{}, errors.New("result not found")
+		}
+	}
+}
+
 func (s *Service) DropTableManage() error {
 	c := s.Config()
 	for {
@@ -634,5 +701,6 @@ func (s *Service) DropTableManage() error {
 
 		time.Sleep(time.Duration(c.VacuumPeriod) - diff)
 	}
-
 }
+
+

@@ -39,6 +39,7 @@ type Workorders struct {
 type Results struct {
 	Id                 int64     `xorm:"pk autoincr notnull 'id'"`
 	Seq                int       `xorm:"int 'seq'"`
+	GroupSeq                int       `xorm:"int 'group_sequence'"`
 	ResultId           int64     `xorm:"bigint 'x_result_id'"`
 	WorkorderID        int64     `xorm:"bigint 'x_workorder_id'"`
 	UserID             int64     `xorm:"bigint 'user_id'"`
@@ -84,4 +85,17 @@ type Guns struct {
 	Id     int64  `xorm:"pk autoincr notnull 'id'"`
 	GunID  int64  `xorm:"bigint 'gun_id'"`
 	Serial string `xorm:"varchar(128) 'serial'"`
+}
+
+type RoutingOperations struct {
+	OperationID    int64       `xorm:"bigint 'operation_id'"`
+	Job            int         `xorm:"bigint 'job'"`
+	MaxOpTime      int         `xorm:"int 'max_op_time'"`
+	Name           string      `xorm:"varchar(256) 'name'"`
+	Img            string      `xorm:"text 'img'"`
+	ProductId      int64       `xorm:"bigint 'product_id'"`
+	ProductType    string      `xorm:"varchar(256) 'product_type'"`
+	WorkcenterCode string      `xorm:"varchar(256) 'workcenter_code'"`
+	VehicleTypeImg string      `xorm:"text 'vehicle_type_img'"`
+	Points         string 	   `xorm:"text 'points'"`
 }
