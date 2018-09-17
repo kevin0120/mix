@@ -87,6 +87,18 @@ func (s *Service) NewFisHandler() *FisHandler {
 	}
 }
 
+func (s *Service) NewChanganHandler() *ChanganHandler {
+	return &ChanganHandler{
+		l: s.Logger.With(String("service", "fis")),
+	}
+}
+
+func (s *Service) NewWebsocketHandler() *WsHandler {
+	return &WsHandler{
+		l: s.Logger.With(String("service", "websocket")),
+	}
+}
+
 func BootstrapMainHandler() *CmdHandler {
 	s := NewService(NewConfig(), nil, os.Stderr)
 	// Should never error

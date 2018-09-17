@@ -15,6 +15,7 @@ type Config struct {
 	FactoryCode     string        `yaml:"factory_code"`
 	PRS             []string      `yaml:"prs"`
 	HeartbeatItv    toml.Duration `yaml:"heartbeat_interval"`
+	Enable          bool          `yaml:"enable"`
 }
 
 func NewConfig() Config {
@@ -31,6 +32,7 @@ func NewConfig() Config {
 		FactoryCode:     "01",
 		PRS:             prs,
 		HeartbeatItv:    toml.Duration(time.Minute * 1),
+		Enable:          false,
 	}
 }
 

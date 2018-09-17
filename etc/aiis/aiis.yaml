@@ -19,6 +19,10 @@ httpd:
     - PUT
     - PATCH
     - OPTIONS
+websocket:
+  route: /aiis/v1/ws
+  read_buf_size: 4096
+  write_buf_size: 4096
 pmon:
   path: /home/linshenqi/go/src/github.com/masami10/aiis/etc/pmon/PMON.CFG
   workers: 4
@@ -49,8 +53,13 @@ fis:
     - SIH
     - HBV
     - AGM
+  enable: false
+changan:
+  andon_ip: 192.168.1.1
+  andon_port: 8888
+  enable: true
 odoo:
-  url: http://127.0.0.1:8069
+  url: http://172.17.0.1:8069
   route: /api/v1/mrp.productions
   headers:
     Content-Type: application/json
@@ -59,14 +68,15 @@ odoo:
   max_retry: 1
   enable: true
 storage:
-  db_url: 127.0.0.1:5432
-  db_name: sa_ng
+  db_url: 172.17.0.1:5432
+  db_name: sa
   db_user: admin
   db_pwd: admin
   max_connection: 60
 rush:
   enable: true
   workers: 4
+  url: http://172.17.0.1:8082
   route: /rush/v1/results
   headers:
     Content-Type: application/json
