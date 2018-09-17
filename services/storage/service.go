@@ -69,6 +69,9 @@ func (s *Service) Open() error {
 }
 
 func (s *Service) Close() error {
+	if s.eng == nil {
+		return nil
+	}
 	s.eng.Close()
 
 	return nil

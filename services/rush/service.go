@@ -30,6 +30,7 @@ type RushResult struct {
 type Service struct {
 	HTTPDService *httpd.Service
 	workers      int
+	Opened 		 bool
 	wg           sync.WaitGroup
 	chResult     chan cResult
 	closing      chan struct{}
@@ -50,8 +51,8 @@ func NewService(c Config, d Diagnostic) *Service {
 		s := Service{
 			diag:     d,
 			workers:  c.Workers,
+			Opened:   false,
 			chResult: make(chan cResult, c.Workers),
-			closing:  make(chan struct{}),
 		}
 
 		s.configValue.Store(c)
@@ -156,6 +157,8 @@ func (s *Service) Open() error {
 
 		go s.run()
 	}
+	
+	s.Opened = true
 
 	return nil
 }
@@ -180,9 +183,13 @@ func (s *Service) run() {
 }
 
 func (s *Service) Close() error {
+	if !s.Opened {
+		return nil
+	}
 
 	for i := 0; i < s.workers; i++ {
-		s.closing <- struct{}{}
+		ss := struct{}{}
+		s.closing <- ss
 	}
 
 	s.wg.Wait()

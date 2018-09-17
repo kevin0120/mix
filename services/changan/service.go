@@ -23,6 +23,7 @@ type Service struct {
 	WS              *wsnotify.Service
 	HTTPDService    *httpd.Service
 	Conn            net.Conn
+	Opened  		bool
 	ReadTimeout     time.Duration
 	diag            Diagnostic
 	Seq             int
@@ -51,6 +52,7 @@ func NewService(d Diagnostic, c Config, h *httpd.Service, ws *wsnotify.Service) 
 		Msgs:            make(chan AndonMsg, 100),
 		requestTaskInfo: make(chan string, 1),
 		Seq:             1,
+		Opened: 		 false,
 		ReadTimeout:     time.Duration(c.ReadTimeout),
 	}
 
@@ -121,11 +123,16 @@ func (s *Service) Open() error {
 	go s.manage()
 
 	go s.readHandler(s.Conn)
+	
+	s.Opened = true
 
 	return nil
 }
 
 func (s *Service) Close() error {
+	if !s.Opened {
+		return nil
+	}
 	stopping := make(chan struct{})
 	s.stop <- stopping
 
