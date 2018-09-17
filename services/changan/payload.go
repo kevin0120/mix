@@ -3,17 +3,16 @@ package changan
 import "encoding/json"
 
 const (
-	MSG_TASK      = 1001
-	MSG_TASK_ACK  = 2001
-	MSG_HEART     = 1999
-	MSG_HEART_ACK = 2999
-	MSG_GET_TASK  = 1002
+	MSG_TASK         = 1001
+	MSG_TASK_ACK     = 2001
+	MSG_HEART        = 1999
+	MSG_HEART_ACK    = 2999
+	MSG_GET_TASK     = 1002
 	MSG_GET_TASK_ACK = 2002
-	MSG_REGIST = 1003
-	MSG_REGIST_ACK = 2003
-	MSG_GUID_REQ = 1004
+	MSG_REGIST       = 1003
+	MSG_REGIST_ACK   = 2003
+	MSG_GUID_REQ     = 1004
 	MSG_GUID_REQ_ACK = 2004
-
 )
 
 type AndonMsg struct {

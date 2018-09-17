@@ -3,6 +3,8 @@ package changan
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/kataras/iris"
+	"github.com/masami10/aiis/services/httpd"
 	"github.com/masami10/aiis/services/wsnotify"
 	"io"
 	"log"
@@ -10,8 +12,6 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
-	"github.com/masami10/aiis/services/httpd"
-	"github.com/kataras/iris"
 )
 
 type Diagnostic interface {
@@ -20,16 +20,16 @@ type Diagnostic interface {
 }
 
 type Service struct {
-	WS          *wsnotify.Service
-	HTTPDService *httpd.Service
-	Conn        net.Conn
-	ReadTimeout time.Duration
-	diag        Diagnostic
-	Seq         int
-	configValue atomic.Value
-	Msgs		chan AndonMsg
+	WS              *wsnotify.Service
+	HTTPDService    *httpd.Service
+	Conn            net.Conn
+	ReadTimeout     time.Duration
+	diag            Diagnostic
+	Seq             int
+	configValue     atomic.Value
+	Msgs            chan AndonMsg
 	requestTaskInfo chan string
-	stop        chan chan struct{}
+	stop            chan chan struct{}
 }
 
 func (c *Service) GetSequenceNum() int {
@@ -42,24 +42,21 @@ func (c *Service) GetSequenceNum() int {
 	return x
 }
 
-func NewService(d Diagnostic, c Config,h *httpd.Service, ws *wsnotify.Service) *Service {
-	if c.Enable {
+func NewService(d Diagnostic, c Config, h *httpd.Service, ws *wsnotify.Service) *Service {
 
-		s := &Service{
-			diag:        	d,
-			HTTPDService: 	h,
-			WS:          	ws,
-			Msgs:        	make(chan AndonMsg, 10),
-			requestTaskInfo: make(chan string ,1),
-			Seq: 			1,
-			ReadTimeout: 	time.Duration(c.ReadTimeout),
-		}
-
-		s.configValue.Store(c)
-		return s
+	s := &Service{
+		diag:            d,
+		HTTPDService:    h,
+		WS:              ws,
+		Msgs:            make(chan AndonMsg, 10),
+		requestTaskInfo: make(chan string, 1),
+		Seq:             1,
+		ReadTimeout:     time.Duration(c.ReadTimeout),
 	}
 
-	return nil
+	s.configValue.Store(c)
+	return s
+
 }
 
 func (s *Service) Config() Config {
@@ -86,6 +83,12 @@ func (s *Service) setKeepAlive(con net.Conn) error {
 
 func (s *Service) Open() error {
 
+	//开始配置
+	c := s.configValue.Load().(Config)
+
+	if !c.Enable {
+		return nil
+	}
 
 	r := httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
@@ -94,10 +97,6 @@ func (s *Service) Open() error {
 		HandlerFunc: s.andonGetTaskbyworkCenter,
 	}
 	s.HTTPDService.Handler[0].AddRoute(r)
-
-
-	//开始配置
-	c := s.configValue.Load().(Config)
 
 	spl := strings.SplitN(c.AndonAddr, "://", 2)
 	if len(spl) != 2 {
@@ -113,9 +112,8 @@ func (s *Service) Open() error {
 	// 设置keep alive
 	s.setKeepAlive(con)
 
-
 	// 注册aiis 服务到andon系统中
-	if err = s.write(PakcageMsg(MSG_REGIST, s.GetSequenceNum(),nil)); err != nil {
+	if err = s.write(PakcageMsg(MSG_REGIST, s.GetSequenceNum(), nil)); err != nil {
 		s.diag.Error("Regist to Andon fail", err)
 		return err
 	}
@@ -170,7 +168,7 @@ func (s *Service) manage() {
 				s.diag.Error("send keep Alive msg fail", err)
 			}
 
-		case msg := <- s.Msgs:
+		case msg := <-s.Msgs:
 			switch msg.MsgType {
 			case MSG_HEART:
 				fmt.Printf("heart beat seq : %d\n", msg.Seq)
@@ -190,7 +188,7 @@ func (s *Service) manage() {
 			case MSG_GET_TASK_ACK:
 				strData, _ := json.Marshal(msg.Data)
 
-				s.requestTaskInfo  <- string(strData[:])
+				s.requestTaskInfo <- string(strData[:])
 			case MSG_GUID_REQ:
 				d := AndonGUID{GUID: c.GUID}
 
@@ -249,7 +247,7 @@ func (s *Service) andonGetTaskbyworkCenter(ctx iris.Context) {
 	c := s.configValue.Load().(Config)
 	workcenter := ctx.Params().Get("workcenter")
 
-	payload := PakcageMsg(MSG_GET_TASK, s.GetSequenceNum(), AndonWorkCenter{Workcenter:workcenter})
+	payload := PakcageMsg(MSG_GET_TASK, s.GetSequenceNum(), AndonWorkCenter{Workcenter: workcenter})
 
 	if err := s.write(payload); err != nil {
 		ctx.Writef(fmt.Sprintf("Try to get workcenter: %s task fail", workcenter))
@@ -258,12 +256,12 @@ func (s *Service) andonGetTaskbyworkCenter(ctx iris.Context) {
 	}
 
 	select {
-	case <- time.After(time.Duration(2 * c.ReadTimeout)):
+	case <-time.After(time.Duration(2 * c.ReadTimeout)):
 		ctx.Writef(fmt.Sprintf("Try to get workcenter: %s task fail, Timeout!", workcenter))
 		ctx.StatusCode(iris.StatusBadRequest)
 		return
-	case msg := <- s.requestTaskInfo:
-		if strings.HasPrefix(msg, "error:"){
+	case msg := <-s.requestTaskInfo:
+		if strings.HasPrefix(msg, "error:") {
 			// error happen
 			ctx.Writef(msg)
 			ctx.StatusCode(iris.StatusBadRequest)

@@ -41,6 +41,41 @@
           }
         }
       }
+    },
+    "/operation/{workcenter}": {
+      "put": {
+        "tags": [
+          "Andon"
+        ],
+        "summary": "获取工单信息",
+        "description": "获取工单信息",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "workcenter",
+            "type": "string",
+            "default": "1122334455667788"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "设置成功",
+            "schema": {
+              "$ref": "#/definitions/andon"
+            }
+          },
+          "400": {
+            "description": "设置失败"
+          }
+        }
+      }
     }
   },
   "definitions": {
