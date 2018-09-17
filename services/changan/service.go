@@ -170,7 +170,7 @@ func (s *Service) manage() {
 
 		case msg := <-s.Msgs:
 			switch msg.MsgType {
-			case MSG_HEART:
+			case MSG_HEART_ACK:
 				fmt.Printf("heart beat seq : %d\n", msg.Seq)
 			case MSG_TASK:
 				s.diag.ReciveNewTask(msg.Data.(string))
@@ -237,8 +237,8 @@ func (s *Service) readHandler(c net.Conn) {
 		}
 		// 发送到通道中进行处理
 		s.Msgs <- msg
-		//打印测试
-		fmt.Println(msg)
+		////打印测试
+		//fmt.Println(msg)
 
 	}
 }
@@ -256,7 +256,7 @@ func (s *Service) andonGetTaskbyworkCenter(ctx iris.Context) {
 	}
 
 	select {
-	case <-time.After(time.Duration(2 * c.ReadTimeout)):
+	case <-time.After(time.Duration(3 * c.ReadTimeout)):
 		ctx.Writef(fmt.Sprintf("Try to get workcenter: %s task fail, Timeout!", workcenter))
 		ctx.StatusCode(iris.StatusBadRequest)
 		return
@@ -264,6 +264,15 @@ func (s *Service) andonGetTaskbyworkCenter(ctx iris.Context) {
 		if strings.HasPrefix(msg, "error:") {
 			// error happen
 			ctx.Writef(msg)
+			ctx.StatusCode(iris.StatusBadRequest)
+			return
+		}
+
+		var task AndonTask
+
+		if err := json.Unmarshal([]byte(msg), &task); err != nil {
+			//错误的返回值
+			ctx.Writef(fmt.Sprintf("not corrent task struct: %s", msg))
 			ctx.StatusCode(iris.StatusBadRequest)
 			return
 		}
