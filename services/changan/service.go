@@ -48,7 +48,7 @@ func NewService(d Diagnostic, c Config, h *httpd.Service, ws *wsnotify.Service) 
 		diag:            d,
 		HTTPDService:    h,
 		WS:              ws,
-		Msgs:            make(chan AndonMsg, 10),
+		Msgs:            make(chan AndonMsg, 100),
 		requestTaskInfo: make(chan string, 1),
 		Seq:             1,
 		ReadTimeout:     time.Duration(c.ReadTimeout),
@@ -167,14 +167,16 @@ func (s *Service) manage() {
 			if err != nil {
 				s.diag.Error("send keep Alive msg fail", err)
 			}
-
+		case msg := <-s.requestTaskInfo:
+			//为了不会永远将其阻塞,超过timeout后的应答将会跑到此处
+			fmt.Printf("should never go here : %s", msg)
 		case msg := <-s.Msgs:
 			switch msg.MsgType {
 			case MSG_HEART_ACK:
 				fmt.Printf("heart beat seq : %d\n", msg.Seq)
 			case MSG_TASK:
-				s.diag.ReciveNewTask(msg.Data.(string))
 				strData, _ := json.Marshal(msg.Data)
+				s.diag.ReciveNewTask(string(strData))
 				var tasks []AndonTask
 				err := json.Unmarshal(strData, &tasks)
 				if err != nil {
@@ -185,8 +187,12 @@ func (s *Service) manage() {
 					t, _ := json.Marshal(v)
 					s.WS.WSSendTask(v.Workcenter, string(t))
 				}
+				s.write(PakcageMsg(MSG_TASK_ACK, s.GetSequenceNum(), nil))
 			case MSG_GET_TASK_ACK:
-				strData, _ := json.Marshal(msg.Data)
+				strData, err := json.Marshal(msg.Data)
+				if err != nil {
+					s.requestTaskInfo <- fmt.Sprintf("error: %s", err.Error())
+				}
 
 				s.requestTaskInfo <- string(strData[:])
 			case MSG_GUID_REQ:
