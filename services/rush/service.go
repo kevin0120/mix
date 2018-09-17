@@ -292,7 +292,7 @@ func (s *Service) HandleResult(cr *cResult) {
 	} else {
 		// 更新masterpc结果上传标识
 		if cr.id > 0 {
-			s.PatchResultFlag(cr.id, true)
+			s.PatchResultFlag(cr.id, true, cr.ip, cr.port)
 		}
 	}
 }
