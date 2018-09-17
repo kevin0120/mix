@@ -178,8 +178,22 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 		inputs.ControllerSN = c.cfg.SN
 
 		str, _ := json.Marshal(inputs)
-		fmt.Printf(fmt.Sprintf("%s\n", string(str)))
+		//fmt.Printf(fmt.Sprintf("%s\n", string(str)))
 		c.Srv.WS.WSSendIOInput(string(str))
+
+	case MID_0101_MULTI_SPINDLE_RESULT:
+
+	case MID_0052_VIN:
+		// 收到条码
+		ids := DeserializeIDS(pkg.Body)
+
+		barcode := wsnotify.WSScanner{
+			Barcode: ids[0],
+		}
+
+		str, _ := json.Marshal(barcode)
+
+		c.Srv.WS.WSSend(wsnotify.WS_EVENT_SCANNER, string(str))
 	}
 }
 
@@ -190,7 +204,6 @@ func (c *Controller) handleResult(result_data *ResultData) {
 	// raw workorder id
 	result_data.ID2 = strings.TrimSpace(result_data.ID2)
 
-	// user id
 	result_data.ID3 = strings.TrimSpace(result_data.ID3)
 
 	result_data.ID4 = strings.TrimSpace(result_data.ID4)
@@ -312,14 +325,14 @@ func (c *Controller) handleResult(result_data *ResultData) {
 				gun.GunID = odoo_gun.ID
 				gun.Serial = odoo_gun.Serial
 				c.Srv.DB.Store(gun)
+
 			}
 		}
 
 		aiisResult.GunID = gun.GunID
-
 		aiisResult.Control_date = time.Now().Format(time.RFC3339)
 
-		aiisResult.Vin = result_data.VIN
+		aiisResult.Vin = db_workorder.Vin
 		aiisResult.Measure_degree = controllerResult.ResultValue.Wi
 		aiisResult.Measure_result = strings.ToLower(controllerResult.Result)
 		aiisResult.Measure_t_don = controllerResult.ResultValue.Ti
@@ -340,32 +353,10 @@ func (c *Controller) handleResult(result_data *ResultData) {
 			aiisResult.QualityState = controller.QUALITY_STATE_EX
 		}
 
-		//ks := strings.Split(db_result.ExInfo, ":")
-		//if len(ks) < 4 {
-		//	return
-		//}
-
 		aiisResult.ProductID = db_workorder.ProductID
 		aiisResult.WorkcenterID = db_workorder.WorkcenterID
 		aiisResult.UserID = db_workorder.UserID
 		//ks := strings.Split(result_data.ID4, ":")
-
-		//if len(ks) > 2 {
-		//	if ks[0] != "" {
-		//		pid, _ := strconv.Atoi(ks[0])
-		//		aiisResult.ProductID = int64(pid)
-		//	}
-		//
-		//	if ks[1] != "" {
-		//		wid, _ := strconv.Atoi(ks[1])
-		//		aiisResult.WorkcenterID = int64(wid)
-		//	}
-		//
-		//	if ks[2] != "" {
-		//		uid, _ := strconv.Atoi(ks[2])
-		//		aiisResult.UserID = int64(uid)
-		//	}
-		//}
 
 		c.Srv.diag.Debug("推送结果数据到AIIS ...")
 
@@ -435,7 +426,7 @@ func (c *Controller) Connect() error {
 		mtx:     sync.Mutex{},
 	}
 
-	c.Mode.Store(MODE_PSET)
+	c.Mode.Store(MODE_JOB)
 
 	for {
 		err := c.w.Connect(DAIL_TIMEOUT)
@@ -459,6 +450,8 @@ func (c *Controller) Connect() error {
 	c.ResultSubcribe()
 	c.JobInfoSubscribe()
 	c.IOInputSubscribe()
+	c.MultiSpindleResultSubscribe()
+	c.VinSubscribe()
 	//c.DataSubscribeCurve()
 	// 启动发送
 	go c.manage()
@@ -1110,6 +1103,30 @@ func (c *Controller) IOInputSubscribe() error {
 	}
 
 	input := GeneratePackage(MID_0210_INPUT_SUBSCRIBE, "001", "", DEFAULT_MSG_END)
+
+	c.Write([]byte(input))
+
+	return nil
+}
+
+func (c *Controller) MultiSpindleResultSubscribe() error {
+	if c.Status() == controller.STATUS_OFFLINE {
+		return errors.New("status offline")
+	}
+
+	input := GeneratePackage(MID_0100_MULTI_SPINDLE_SUBSCRIBE, "001", "", DEFAULT_MSG_END)
+
+	c.Write([]byte(input))
+
+	return nil
+}
+
+func (c *Controller) VinSubscribe() error {
+	if c.Status() == controller.STATUS_OFFLINE {
+		return errors.New("status offline")
+	}
+
+	input := GeneratePackage(MID_0051_VIN_SUBSCRIBE, "002", "", DEFAULT_MSG_END)
 
 	c.Write([]byte(input))
 

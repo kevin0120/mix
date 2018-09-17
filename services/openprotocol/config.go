@@ -10,6 +10,7 @@ type Config struct {
 	ReadBufferSize  int           `yaml:"read_buf"`
 	ReqTimeout      toml.Duration `yaml:"req_time_out"`
 	SkipJob         int           `yaml:"skip_job"`
+	DataIndex		int			  `yaml:"data_index"`
 }
 
 func NewConfig() Config {
@@ -18,6 +19,7 @@ func NewConfig() Config {
 		ReadBufferSize:  65535,
 		ReqTimeout:      toml.Duration(time.Microsecond * 3000),
 		SkipJob:         0,
+		DataIndex: 1,
 	}
 }
 

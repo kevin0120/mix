@@ -626,7 +626,7 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 		}
 
 		//vin-cartype-hmisn-userid
-		ex_info := fmt.Sprintf("%25s%25d%25d%25s", job.Vin, db_workorder.Id, job.UserID, "")
+		ex_info := m.service.OpenProtocol.GenerateIDInfo(fmt.Sprintf("%d", db_workorder.Id))
 		err = m.service.OpenProtocol.JobSetManual(job.Controller_SN, job.Job, job.UserID, ex_info)
 
 	default:

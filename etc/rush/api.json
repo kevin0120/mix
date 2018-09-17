@@ -657,13 +657,55 @@
         }
       }
     },
+    "/operation/{center_code}": {
+      "get": {
+        "tags": [
+          "HMI"
+        ],
+        "description": "获取某个工位某种车型的作业清单",
+        "parameters": [
+          {
+            "description": "需要获取的工位的代码",
+            "default": "测试工位1",
+            "required": true,
+            "in": "path",
+            "type": "string",
+            "name": "center_code"
+          },
+          {
+            "description": "需要获取的车型类型",
+            "default": "BR24J3",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "name": "carType"
+          },
+          {
+            "description": "job",
+            "default": 1,
+            "required": false,
+            "in": "query",
+            "type": "integer",
+            "name": "job"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/GeneralOperationDetail"
+            }
+          }
+        }
+      }
+    },
     "/scanner": {
       "put": {
         "tags": [
           "Test"
         ],
-        "summary": "测试websocket订阅控制器条码",
-        "description": "测试websocket订阅控制器条码",
+        "summary": "scanner",
+        "description": "scanner",
         "consumes": [
           "application/json"
         ],
@@ -676,6 +718,38 @@
             "name": "body",
             "schema": {
               "$ref": "#/definitions/scanner"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "设置成功"
+          },
+          "400": {
+            "description": "设置失败"
+          }
+        }
+      }
+    },
+    "/input-test": {
+      "put": {
+        "tags": [
+          "Test"
+        ],
+        "summary": "input-test",
+        "description": "input-test",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/input_test"
             }
           }
         ],
@@ -1481,6 +1555,71 @@
           "type": "string",
           "description": "条码",
           "example": "LFPH4ACB411C02008"
+        }
+      }
+    },
+    "input_test": {
+      "type": "object",
+      "properties": {
+        "controller_sn": {
+          "type": "string",
+          "description": "控制器序列号",
+          "example": "0001"
+        },
+        "inputs": {
+          "type": "string",
+          "description": "输入状态",
+          "example": "00000000"
+        }
+      }
+    },
+    "GeneralOperationDetail": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "img": {
+          "type": "string",
+          "description": "作业图片信息(base64)"
+        },
+        "max_op_time": {
+          "type": "integer"
+        },
+        "job": {
+          "type": "integer"
+        },
+        "points": {
+          "items": {
+            "$ref": "#/definitions/Generalpoint"
+          },
+          "type": "array"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "product_id": {
+          "type": "integer"
+        }
+      }
+    },
+    "Generalpoint": {
+      "type": "object",
+      "properties": {
+        "pset": {
+          "type": "integer"
+        },
+        "y_offset": {
+          "type": "integer",
+          "description": "上偏移"
+        },
+        "x_offset": {
+          "type": "integer",
+          "description": "左偏移"
+        },
+        "sequence": {
+          "type": "integer",
+          "description": "序号"
         }
       }
     }

@@ -33,9 +33,9 @@ type WSScanner struct {
 	Barcode string `json:"barcode"`
 }
 
-type WSIO struct {
-	Barcode string `json:"barcode"`
-}
+//type WSIO struct {
+//	Barcode string `json:"barcode"`
+//}
 
 type WSRegistMsg struct {
 	Msg string `json:"msg"`

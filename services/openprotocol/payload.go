@@ -61,6 +61,10 @@ const (
 	MID_0210_INPUT_SUBSCRIBE       = "0210"
 	MID_0211_INPUT_MONITOR         = "0211"
 	MID_0127_JOB_ABORT             = "0127"
+	MID_0100_MULTI_SPINDLE_SUBSCRIBE = "0100"
+	MID_0101_MULTI_SPINDLE_RESULT = "0101"
+	MID_0051_VIN_SUBSCRIBE = "0051"
+	MID_0052_VIN = "0052"
 
 	MID_0008_DATA_SUB = "0008"
 
@@ -452,6 +456,28 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 		h.LEN = LEN_HEADER
 		h.Revision = rev
 		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + end
+
+	case MID_0100_MULTI_SPINDLE_SUBSCRIBE:
+		h.MID = MID_0100_MULTI_SPINDLE_SUBSCRIBE
+		h.LEN = LEN_HEADER
+		h.Revision = rev
+		h.NoAck = "1"
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + end
+
+	case MID_0051_VIN_SUBSCRIBE:
+		h.MID = MID_0051_VIN_SUBSCRIBE
+		h.LEN = LEN_HEADER
+		h.Revision = rev
+		h.NoAck = "1"
 		h.Station = ""
 		h.Spindle = ""
 		h.Spare = ""
@@ -1083,4 +1109,38 @@ func (ji *JobInfo) Deserialize(msg string) error {
 	}
 
 	return nil
+}
+
+func DeserializeIDS(str string) []string {
+	rt := []string{}
+
+	vin := strings.TrimSpace(str[2:27])
+	rt = append(rt, vin)
+
+	id2 := strings.TrimSpace(str[29:54])
+	rt = append(rt, id2)
+
+	id3 := strings.TrimSpace(str[56:71])
+	rt = append(rt, id3)
+
+	id4 := strings.TrimSpace(str[73:98])
+	rt = append(rt, id4)
+
+	return rt
+}
+
+type MultiSpindleResult struct {
+	TotalSpindleNumber int
+	Vin string
+	JobID int
+	PSetID int
+	BatchSize int
+	BatchCount int
+	BatchStatus int
+	TorqueMin                     float64
+	TorqueMax                     float64
+	TorqueFinalTarget             float64
+	AngleMin                      float64
+	AngleMax                      float64
+	FinalAngleTarget              float64
 }
