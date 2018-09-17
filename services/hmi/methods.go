@@ -4,11 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kataras/iris"
+	"github.com/kataras/iris/core/errors"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/openprotocol"
+	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -182,6 +185,12 @@ func (m *Methods) putManualPSets(ctx iris.Context) {
 		return
 	}
 
+	if pset.HmiSN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("hmi sn is required")
+		return
+	}
+
 	//if pset.GunSN == "" {
 	//	pset.GunSN = ""
 	//}
@@ -192,13 +201,19 @@ func (m *Methods) putManualPSets(ctx iris.Context) {
 		return
 	}
 
-	//if pset.Vin == "" {
-	//	pset.Vin = ""
-	//}
+	if pset.Vin == "" {
+		pset.Vin = "unknown"
+	}
 
 	if pset.CarType == "" {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("CarType is required")
+		return
+	}
+
+	if pset.Count < 0 {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("pset count must be greater than or equal to 0")
 		return
 	}
 
@@ -212,8 +227,15 @@ func (m *Methods) putManualPSets(ctx iris.Context) {
 
 	switch c.Protocol() {
 	case controller.OPENPROTOCOL:
-		ex_info := fmt.Sprintf("%s-%s-%d", pset.CarType, pset.Vin, pset.UserID)
-		err = m.service.OpenProtocol.PSetManual(pset.Controller_SN, pset.PSet, pset.UserID, ex_info)
+		err = m.insertResultsForPSet(&pset)
+		if err != nil {
+			ctx.StatusCode(iris.StatusBadRequest)
+			ctx.WriteString(err.Error())
+			return
+		}
+
+		ex_info := fmt.Sprintf("%25s%25s%25s%25d", pset.Vin, pset.HmiSN, pset.CarType, pset.UserID)
+		err = m.service.OpenProtocol.PSetManual(pset.Controller_SN, pset.PSet, pset.UserID, ex_info, pset.Count)
 
 	default:
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -560,9 +582,15 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 		return
 	}
 
-	if job.CarType == "" {
+	//if job.CarType == "" {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("car type is required")
+	//	return
+	//}
+
+	if job.HmiSN == "" {
 		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("car type is required")
+		ctx.WriteString("hmi sn is required")
 		return
 	}
 
@@ -586,7 +614,19 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 
 	switch c.Protocol() {
 	case controller.OPENPROTOCOL:
-		ex_info := fmt.Sprintf("%s-%s-%d", job.CarType, job.Vin, job.UserID)
+
+		var db_workorder *storage.Workorders
+		if !job.Skip {
+			db_workorder, err = m.insertResultsForJob(&job)
+			if err != nil {
+				ctx.StatusCode(iris.StatusBadRequest)
+				ctx.WriteString(err.Error())
+				return
+			}
+		}
+
+		//vin-cartype-hmisn-userid
+		ex_info := m.service.OpenProtocol.GenerateIDInfo(fmt.Sprintf("%d", db_workorder.Id))
 		err = m.service.OpenProtocol.JobSetManual(job.Controller_SN, job.Job, job.UserID, ex_info)
 
 	default:
@@ -600,6 +640,64 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 		ctx.WriteString(err.Error())
 		return
 	}
+}
+
+func (m *Methods) insertResultsForJob(job *JobManual) (*storage.Workorders, error) {
+	if len(job.Points) == 0 {
+		return nil, errors.New("points is required")
+	}
+
+	//key := fmt.Sprintf("%s:%s:%s:%d:%d", job.Vin, job.HmiSN, job.ProductID, job.WorkcenterID, job.UserID)
+	//err := m.service.DB.DeleteResultsForJob(key)
+
+	max_seq := 0
+	db_results := []storage.Results{}
+	for _, v := range job.Points {
+		if v.Seq > max_seq {
+			max_seq = v.Seq
+		}
+		r := storage.Results{}
+		r.PSet = v.PSet
+		r.GroupSeq = v.GroupSeq
+		r.OffsetX = v.X
+		r.OffsetY = v.Y
+		r.Seq = v.Seq
+		r.MaxRedoTimes = v.MaxOpTime
+		r.Stage = storage.RESULT_STAGE_INIT
+
+		db_results = append(db_results, r)
+	}
+
+	db_workorder := storage.Workorders{}
+	db_workorder.Vin = job.Vin
+	db_workorder.JobID = job.Job
+	db_workorder.HMISN = job.HmiSN
+	db_workorder.ProductID = job.ProductID
+	db_workorder.WorkcenterID = job.WorkcenterID
+	db_workorder.MaxSeq = max_seq
+	db_workorder.UserID = job.UserID
+
+	err := m.service.DB.InsertWorkorder(&db_workorder, &db_results, false, false, true)
+
+	return &db_workorder, err
+}
+
+func (m *Methods) insertResultsForPSet(pset *PSetManual) error {
+
+	key := fmt.Sprintf("%s:%s:%s:%d:%d", pset.Vin, pset.CarType, pset.HmiSN, pset.ProductID, pset.WorkcenterID)
+
+	r := storage.Results{}
+	r.ExInfo = key
+	r.PSet = pset.PSet
+	r.Stage = storage.RESULT_STAGE_INIT
+
+	db_reuslt := []storage.Results{}
+	db_reuslt = append(db_reuslt, r)
+
+	err := m.service.DB.DeleteResultsForJob(key)
+	err = m.service.DB.InsertWorkorder(nil, &db_reuslt, false, false, false)
+
+	return err
 }
 
 // 根据hmi序列号以及vin或knr取得工单
@@ -635,7 +733,7 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 			o, e := m.service.ODOO.CreateWorkorders(odooWorkorders)
 			if e != nil {
 				ctx.StatusCode(iris.StatusBadRequest)
-				ctx.WriteString("save workorder failed")
+				ctx.WriteString(fmt.Sprintf("save workorder failed:%s", e.Error()))
 				return
 			} else {
 				workorder = o[0]
@@ -655,6 +753,7 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 	resp.MaxOpTime = workorder.MaxOpTime
 	resp.WorkSheet = workorder.WorkSheet
 	resp.Job = workorder.JobID
+	resp.VehicleTypeImg = workorder.VehicleTypeImg
 
 	for _, v := range results {
 		r := Result{}
@@ -665,6 +764,7 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 		r.X = v.OffsetX
 		r.Y = v.OffsetY
 		r.MaxRedoTimes = v.MaxRedoTimes
+		r.Seq = v.Seq
 
 		resp.Results = append(resp.Results, r)
 	}
@@ -741,7 +841,18 @@ func (m *Methods) getStatus(ctx iris.Context) {
 	// 返回控制器状态
 
 	sn := ctx.URLParam("controller_sn")
-	status, err := m.service.AudiVw.GetControllersStatus(sn)
+
+	sns := []string{}
+	if sn != "" {
+		vs := strings.Split(sn, ",")
+		for _, v := range vs {
+			if strings.TrimSpace(v) != "" {
+				sns = append(sns, strings.TrimSpace(v))
+			}
+		}
+	}
+
+	status, err := m.service.AudiVw.GetControllersStatus(sns)
 
 	if err != nil {
 		ctx.StatusCode(iris.StatusNotFound)
@@ -752,4 +863,154 @@ func (m *Methods) getStatus(ctx iris.Context) {
 		ctx.Header("content-type", "application/json")
 		ctx.Write(body)
 	}
+}
+
+func (m *Methods) putIOSet(ctx iris.Context) {
+	io_set := IOSet{}
+	err := ctx.ReadJSON(&io_set)
+
+	if err != nil {
+		// 传输结构错误
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+
+	if io_set.Controller_SN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller_sn is required")
+		return
+	}
+
+	// 通过控制器设定程序
+	c, exist := m.service.ControllerService.Controllers[io_set.Controller_SN]
+	if !exist {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller not found")
+		return
+	}
+
+	switch c.Protocol() {
+	case controller.OPENPROTOCOL:
+		err = m.service.OpenProtocol.IOSet(io_set.Controller_SN, &io_set.IOStatus)
+		if err != nil {
+			ctx.StatusCode(iris.StatusBadRequest)
+			ctx.WriteString(err.Error())
+			return
+		}
+
+	default:
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("not supported")
+		return
+	}
+}
+
+func (m *Methods) putBarcodeTest(ctx iris.Context) {
+	barcode := wsnotify.WSScanner{}
+	err := ctx.ReadJSON(&barcode)
+
+	if err != nil {
+		// 传输结构错误
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+
+	str, _ := json.Marshal(barcode)
+	m.service.OpenProtocol.WS.WSSendScanner(string(str))
+}
+
+func (m *Methods) putIOInputTest(ctx iris.Context) {
+	inputs := openprotocol.IOMonitor{}
+	err := ctx.ReadJSON(&inputs)
+
+	if err != nil {
+		// 传输结构错误
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+
+	str, _ := json.Marshal(inputs)
+	m.service.OpenProtocol.WS.WSSendIOInput(string(str))
+}
+
+func (m *Methods) putJobControll(ctx iris.Context) {
+	jc := JobControl{}
+	err := ctx.ReadJSON(&jc)
+
+	if err != nil {
+		// 传输结构错误
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+
+	if jc.Controller_SN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller_sn is required")
+		return
+	}
+
+	// 通过控制器设定程序
+	c, exist := m.service.ControllerService.Controllers[jc.Controller_SN]
+	if !exist {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller not found")
+		return
+	}
+
+	switch c.Protocol() {
+	case controller.OPENPROTOCOL:
+		err = m.service.OpenProtocol.JobControl(jc.Controller_SN, jc.Action)
+		if err != nil {
+			ctx.StatusCode(iris.StatusBadRequest)
+			ctx.WriteString(err.Error())
+			return
+		}
+
+	default:
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("not supported")
+		return
+	}
+}
+
+func (m *Methods) getRoutingOpertions(ctx iris.Context) {
+	code:= ctx.Params().Get("code")
+	if code == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("workcenter code is required")
+		return
+	}
+
+	carType := ctx.URLParam("carType")
+	job, _ := strconv.Atoi(ctx.URLParams()["job"])
+
+	ro, err := m.service.DB.FindRoutingOperations(code, carType, job)
+	if err != nil {
+		ctx.StatusCode(iris.StatusNotFound)
+		ctx.WriteString("can not find RoutingOpertions")
+		return
+	}
+
+	points := []RoutingOperationPoint{}
+	json.Unmarshal([]byte(ro.Points), &points)
+
+	rt_ro := RoutingOperation{}
+	rt_ro.Points = points
+	rt_ro.OperationID = ro.OperationID
+	rt_ro.Job = ro.Job
+	rt_ro.MaxOpTime = ro.MaxOpTime
+	rt_ro.Name = ro.Name
+	rt_ro.Img = ro.Img
+	rt_ro.ProductId = ro.ProductId
+	rt_ro.WorkcenterCode = ro.WorkcenterCode
+	rt_ro.VehicleTypeImg = ro.VehicleTypeImg
+	rt_ro.ProductType = ro.ProductType
+
+	body, _ := json.Marshal(rt_ro)
+	ctx.Header("content-type", "application/json")
+	ctx.Write(body)
 }

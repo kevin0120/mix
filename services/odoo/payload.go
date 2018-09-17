@@ -44,13 +44,14 @@ type ODOOWorkorder struct {
 		UUID string `json:"uuid"`
 	} `json:"hmi"`
 
-	Worksheet  string        `json:"worksheet"`
-	KNR        string        `json:"knr"`
-	VIN        string        `json:"vin"`
-	LongPin    string        `json:"long_pin"`
-	UpdateTime time.Time     `json:"update_time"`
-	Consumes   []ODOOConsume `json:"consumes"`
-	Job        string        `json:"job"`
+	VehicleTypeImg string        `json:"vehicleTypeImg"`
+	Worksheet      string        `json:"worksheet"`
+	KNR            string        `json:"knr"`
+	VIN            string        `json:"vin"`
+	LongPin        string        `json:"long_pin"`
+	UpdateTime     time.Time     `json:"update_time"`
+	Consumes       []ODOOConsume `json:"consumes"`
+	Job            string        `json:"job"`
 	// mo相关信息
 	MO_EquipemntName  string `json:"equipment_name"` // 设备名
 	MO_FactoryName    string `json:"factory_name"`   // 工厂代码
@@ -116,4 +117,22 @@ type ODOOMO struct {
 	Lnr                string   `json:"lnr"`
 	Date_planned_start string   `json:"date_planned_start"`
 	Prs                []ODOOPR `json:"prs"`
+}
+
+type ODOOGun struct {
+	ID     int64  `json:"id"`
+	Serial string `json:"serial"`
+}
+
+type RoutingOperation struct {
+	OperationID    int64       `json:"id"`
+	Job            int         `json:"job"`
+	MaxOpTime      int         `json:"max_op_time"`
+	Name           string      `json:"name"`
+	Img            string      `json:"img"`
+	ProductId      int64       `json:"product_id"`
+	ProductType    string      `json:"product_type"`
+	WorkcenterCode string      `json:"workcenter_code"`
+	VehicleTypeImg string      `json:"vehicleTypeImg"`
+	Points         interface{} `json:"points"`
 }

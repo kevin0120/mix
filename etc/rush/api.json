@@ -359,6 +359,38 @@
         }
       }
     },
+    "/io-sets": {
+      "put": {
+        "tags": [
+          "HMI"
+        ],
+        "summary": "设定控制器的IO输出",
+        "description": "在body中可以传入IO状态列表，可以对每个IO进行打开(on)/关闭(off)/闪烁(flashing)等操作",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/ioset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "设置成功"
+          },
+          "400": {
+            "description": "设置失败"
+          }
+        }
+      }
+    },
     "/workorder": {
       "get": {
         "tags": [
@@ -586,7 +618,7 @@
           {
             "name": "controller_sn",
             "in": "query",
-            "description": "控制器序列号",
+            "description": "控制器序列号(多个序列号通过，分隔)",
             "type": "string"
           }
         ],
@@ -621,6 +653,112 @@
         "responses": {
           "204": {
             "description": "成功"
+          }
+        }
+      }
+    },
+    "/operation/{center_code}": {
+      "get": {
+        "tags": [
+          "HMI"
+        ],
+        "description": "获取某个工位某种车型的作业清单",
+        "parameters": [
+          {
+            "description": "需要获取的工位的代码",
+            "default": "测试工位1",
+            "required": true,
+            "in": "path",
+            "type": "string",
+            "name": "center_code"
+          },
+          {
+            "description": "需要获取的车型类型",
+            "default": "BR24J3",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "name": "carType"
+          },
+          {
+            "description": "job",
+            "default": 1,
+            "required": false,
+            "in": "query",
+            "type": "integer",
+            "name": "job"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/GeneralOperationDetail"
+            }
+          }
+        }
+      }
+    },
+    "/scanner": {
+      "put": {
+        "tags": [
+          "Test"
+        ],
+        "summary": "scanner",
+        "description": "scanner",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/scanner"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "设置成功"
+          },
+          "400": {
+            "description": "设置失败"
+          }
+        }
+      }
+    },
+    "/input-test": {
+      "put": {
+        "tags": [
+          "Test"
+        ],
+        "summary": "input-test",
+        "description": "input-test",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/input_test"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "设置成功"
+          },
+          "400": {
+            "description": "设置失败"
           }
         }
       }
@@ -694,12 +832,22 @@
           "type": "string",
           "description": "车辆识别号",
           "example": "LVS123456"
+        },
+        "hmi_sn": {
+          "type": "string",
+          "description": "hmi序列号",
+          "example": "1122334455667788"
+        },
+        "count": {
+          "type": "integer",
+          "description": "拧接次数(0:无限制)",
+          "example": 1
         }
       },
       "required": [
         "pset",
         "controller_sn",
-        "car_type"
+        "hmi_sn"
       ]
     },
     "PsetDetail": {
@@ -867,6 +1015,36 @@
         }
       }
     },
+    "job_point": {
+      "type": "object",
+      "properties": {
+        "sequence": {
+          "type": "integer",
+          "description": "点位序号",
+          "example": 1
+        },
+        "pset": {
+          "type": "integer",
+          "description": "程序号",
+          "example": 1
+        },
+        "offset_x": {
+          "type": "number",
+          "description": "点位x坐标",
+          "example": 100
+        },
+        "offset_Y": {
+          "type": "number",
+          "description": "点位y坐标",
+          "example": 200
+        },
+        "max_op_time": {
+          "type": "integer",
+          "description": "最大操作次数",
+          "example": 3
+        }
+      }
+    },
     "job_manual": {
       "type": "object",
       "properties": {
@@ -894,12 +1072,23 @@
           "type": "string",
           "description": "车辆识别号",
           "example": "LVS123456"
+        },
+        "hmi_sn": {
+          "type": "string",
+          "description": "hmi序列号",
+          "example": "1122334455667788"
+        },
+        "points": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/job_point"
+          }
         }
       },
       "required": [
         "job_id",
         "controller_sn",
-        "car_type"
+        "hmi_sn"
       ]
     },
     "jobmode": {
@@ -1322,6 +1511,117 @@
         "controller_sn",
         "enable"
       ]
+    },
+    "iostatus": {
+      "type": "object",
+      "properties": {
+        "no": {
+          "type": "integer",
+          "description": "IO序号，从0开始（CVI3有8个IO输出）",
+          "example": 0
+        },
+        "status": {
+          "type": "string",
+          "description": "状态(on/off/flashing)",
+          "example": "on",
+          "enum": [
+            "on",
+            "off",
+            "flashing"
+          ]
+        }
+      }
+    },
+    "ioset": {
+      "type": "object",
+      "properties": {
+        "controller_sn": {
+          "type": "string",
+          "description": "控制器序列号",
+          "example": "0001"
+        },
+        "io_status": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/iostatus"
+          }
+        }
+      }
+    },
+    "scanner": {
+      "type": "object",
+      "properties": {
+        "barcode": {
+          "type": "string",
+          "description": "条码",
+          "example": "LFPH4ACB411C02008"
+        }
+      }
+    },
+    "input_test": {
+      "type": "object",
+      "properties": {
+        "controller_sn": {
+          "type": "string",
+          "description": "控制器序列号",
+          "example": "0001"
+        },
+        "inputs": {
+          "type": "string",
+          "description": "输入状态",
+          "example": "00000000"
+        }
+      }
+    },
+    "GeneralOperationDetail": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "img": {
+          "type": "string",
+          "description": "作业图片信息(base64)"
+        },
+        "max_op_time": {
+          "type": "integer"
+        },
+        "job": {
+          "type": "integer"
+        },
+        "points": {
+          "items": {
+            "$ref": "#/definitions/Generalpoint"
+          },
+          "type": "array"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "product_id": {
+          "type": "integer"
+        }
+      }
+    },
+    "Generalpoint": {
+      "type": "object",
+      "properties": {
+        "pset": {
+          "type": "integer"
+        },
+        "y_offset": {
+          "type": "integer",
+          "description": "上偏移"
+        },
+        "x_offset": {
+          "type": "integer",
+          "description": "左偏移"
+        },
+        "sequence": {
+          "type": "integer",
+          "description": "序号"
+        }
+      }
     }
   }
 }

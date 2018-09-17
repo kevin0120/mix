@@ -5,6 +5,7 @@ import (
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/minio"
+	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
@@ -26,6 +27,7 @@ type Service struct {
 	WS    *wsnotify.Service
 	Aiis  *aiis.Service
 	Minio *minio.Service
+	Odoo  *odoo.Service
 
 	Parent *controller.Service
 }
@@ -115,10 +117,10 @@ func (p *Service) PSet(sn string, pset int, result_id int64, count int, user_id 
 
 	c := v.(*Controller)
 
-	ex_info := fmt.Sprintf("%d-%d-%d", result_id, count, user_id)
+	ex_info := fmt.Sprintf("%s-%d-%d-%d", controller.AUTO_MODE, result_id, count, user_id)
 
 	// 设定pset并判断控制器响应
-	_, err := c.PSet(pset, c.cfg.ToolChannel, ex_info)
+	_, err := c.PSet(pset, c.cfg.ToolChannel, ex_info, 1)
 	if err != nil {
 		// 控制器请求失败
 		return err
@@ -127,7 +129,7 @@ func (p *Service) PSet(sn string, pset int, result_id int64, count int, user_id 
 	return nil
 }
 
-func (p *Service) PSetManual(sn string, pset int, user_id int64, ex_info string) error {
+func (p *Service) PSetManual(sn string, pset int, user_id int64, ex_info string, count int) error {
 	// 判断控制器是否存在
 	v, exist := p.Parent.Controllers[sn]
 	if !exist {
@@ -138,7 +140,7 @@ func (p *Service) PSetManual(sn string, pset int, user_id int64, ex_info string)
 	c := v.(*Controller)
 
 	// 设定pset并判断控制器响应
-	_, err := c.PSet(pset, c.cfg.ToolChannel, "manual-"+ex_info)
+	_, err := c.PSet(pset, c.cfg.ToolChannel, ex_info, count)
 	if err != nil {
 		// 控制器请求失败
 		return err
@@ -157,7 +159,7 @@ func (p *Service) JobSet(sn string, job int, workorder_id int64, user_id int64) 
 	c := v.(*Controller)
 
 	//workorder_id-user_id
-	id_info := fmt.Sprintf("%d-%d", workorder_id, user_id)
+	id_info := fmt.Sprintf("%s-%d-%d", controller.AUTO_MODE, workorder_id, user_id)
 
 	err := c.JobSet(id_info, job)
 	if err != nil {
@@ -177,16 +179,7 @@ func (p *Service) JobSetManual(sn string, job int, user_id int64, ex_info string
 
 	c := v.(*Controller)
 
-	//workorder_id-user_id
-	id_info := fmt.Sprintf("manual-%s-%d", ex_info, user_id)
-
-	err := c.JobSet(id_info, job)
-	if err != nil {
-		// 控制器请求失败
-		return err
-	}
-
-	return nil
+	return c.JobSet(ex_info, job)
 }
 
 func (p *Service) JobOFF(sn string, off bool) error {
@@ -204,6 +197,28 @@ func (p *Service) JobOFF(sn string, off bool) error {
 	}
 
 	err := c.JobOff(s_off)
+	if err != nil {
+		// 控制器请求失败
+		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	}
+
+	return nil
+}
+
+func (p *Service) JobControl(sn string, action string) error {
+	v, exist := p.Parent.Controllers[sn]
+	if !exist {
+		// SN对应控制器不存在
+		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
+	}
+
+	c := v.(*Controller)
+
+	var err error
+	if action == JOB_ACTION_ABORT {
+		err = c.JobAbort()
+	}
+
 	if err != nil {
 		// 控制器请求失败
 		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
@@ -278,4 +293,29 @@ func (p *Service) GetJobDetail(sn string, job int) (JobDetail, error) {
 	}
 
 	return job_detail, nil
+}
+
+func (p *Service) IOSet(sn string, ios *[]IOStatus) error {
+	v, exist := p.Parent.Controllers[sn]
+	if !exist {
+		// SN对应控制器不存在
+		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
+	}
+
+	c := v.(*Controller)
+
+	return c.IOSet(ios)
+}
+
+func (p *Service) GenerateIDInfo(info string) string {
+	ids := ""
+	for i := 0; i < 4; i++ {
+		if i == p.config().DataIndex {
+			ids += fmt.Sprintf("%25s", info)
+		} else {
+			ids += fmt.Sprintf("%25s", "")
+		}
+	}
+
+	return ids
 }

@@ -42,12 +42,23 @@ aiis:
 odoo:
   urls:
   - http://127.0.0.1:8069
-  headers:
-  workorder_get_url: /api/v1/mrp.workorders?hmi=%s&code=%s&limit=1&order=production_date
-  method: GET
   timeout: 8s
   interval: 1s
   max_retry: 3
+  endpoints:
+  - name: getWorkorder
+    path: /api/v1/mrp.workorders?hmi=%s&code=%s&limit=1&order=production_date
+    headers:
+    method: GET
+  - name: getGun
+    path: /api/v1/guns?serial=%s
+    headers:
+    method: GET
+  - name: createMO
+    path: /api/v1/mrp.productions
+    headers:
+    method: POST
+
 websocket:
   route: /rush/v1/ws
   read_buf_size: 4096
@@ -71,6 +82,10 @@ openprotocol:
   keep_alive_period: 10s
   read_buf: 65535
   req_time_out: 300ms
+  skip_job: 250
+
+  # 0:vin 1:id2 2:id3 3:id4
+  data_index: 1
 
 # 协议类型: Audi/VW, OpenProtocol
 controller_service:
@@ -82,14 +97,20 @@ controller_service:
 #    port: 4700
 #    channel: 1
 
-  - serial_no: 0002
-    protocol: Audi/VW
-    remote_ip: 192.168.1.102
-    port: 4700
-    channel: 1
+#  - serial_no: 0002
+#    protocol: Audi/VW
+#    remote_ip: 192.168.1.102
+#    port: 4700
+#    channel: 1
 
   - serial_no: 0001
     protocol: OpenProtocol
     remote_ip: 192.168.1.101
     port: 4546
     channel: 51
+
+#  - serial_no: 0002
+#    protocol: OpenProtocol
+#    remote_ip: 192.168.1.102
+#    port: 4545
+#    channel: 1

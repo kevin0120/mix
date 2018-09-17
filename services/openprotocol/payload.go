@@ -8,6 +8,21 @@ import (
 )
 
 const (
+	JOB_ACTION_ABORT = "abort"
+)
+
+const (
+	IO_STATUS_ON       = "on"
+	IO_STATUS_OFF      = "off"
+	IO_STATUS_FLASHING = "flashing"
+)
+
+type IOStatus struct {
+	No     int    `json:"no"`
+	Status string `json:"status"`
+}
+
+const (
 	LEN_HEADER      = 20
 	DEFAULT_REV     = "000"
 	DEFAULT_MSG_END = string(0x00)
@@ -39,6 +54,17 @@ const (
 	MID_0031_JOB_LIST_REPLY        = "0031"
 	MID_0032_JOB_DETAIL_REQUEST    = "0032"
 	MID_0033_JOB_DETAIL_REPLY      = "0033"
+	MID_0200_CONTROLLER_RELAYS     = "0200"
+	MID_0019_PSET_BATCH_SET        = "0019"
+	MID_0020_PSET_BATCH_RESET      = "0020"
+	MID_0035_JOB_INFO              = "0035"
+	MID_0210_INPUT_SUBSCRIBE       = "0210"
+	MID_0211_INPUT_MONITOR         = "0211"
+	MID_0127_JOB_ABORT             = "0127"
+	MID_0100_MULTI_SPINDLE_SUBSCRIBE = "0100"
+	MID_0101_MULTI_SPINDLE_RESULT = "0101"
+	MID_0051_VIN_SUBSCRIBE = "0051"
+	MID_0052_VIN = "0052"
 
 	MID_0008_DATA_SUB = "0008"
 
@@ -262,7 +288,7 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 
 	case MID_0150_IDENTIFIER_SET:
 		h.MID = MID_0150_IDENTIFIER_SET
-		h.LEN = LEN_HEADER + len(data)
+		h.LEN = LEN_HEADER + 100
 		h.Revision = rev
 		h.NoAck = ""
 		h.Station = ""
@@ -380,9 +406,98 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 		h.Spare = ""
 
 		return h.Serialize() + end
+
+	case MID_0200_CONTROLLER_RELAYS:
+		h.MID = MID_0200_CONTROLLER_RELAYS
+		h.LEN = LEN_HEADER + len(data)
+		h.Revision = rev
+		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + data + end
+
+	case MID_0019_PSET_BATCH_SET:
+		h.MID = MID_0019_PSET_BATCH_SET
+		h.LEN = LEN_HEADER + len(data)
+		h.Revision = rev
+		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + data + end
+
+	case MID_0020_PSET_BATCH_RESET:
+		h.MID = MID_0020_PSET_BATCH_RESET
+		h.LEN = LEN_HEADER + len(data)
+		h.Revision = rev
+		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + data + end
+
+	case MID_0210_INPUT_SUBSCRIBE:
+		h.MID = MID_0210_INPUT_SUBSCRIBE
+		h.LEN = LEN_HEADER
+		h.Revision = rev
+		h.NoAck = "1"
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + end
+
+	case MID_0127_JOB_ABORT:
+		h.MID = MID_0127_JOB_ABORT
+		h.LEN = LEN_HEADER
+		h.Revision = rev
+		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + end
+
+	case MID_0100_MULTI_SPINDLE_SUBSCRIBE:
+		h.MID = MID_0100_MULTI_SPINDLE_SUBSCRIBE
+		h.LEN = LEN_HEADER
+		h.Revision = rev
+		h.NoAck = "1"
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + end
+
+	case MID_0051_VIN_SUBSCRIBE:
+		h.MID = MID_0051_VIN_SUBSCRIBE
+		h.LEN = LEN_HEADER
+		h.Revision = rev
+		h.NoAck = "1"
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+
+		return h.Serialize() + end
 	}
 
 	return ""
+}
+
+type IOMonitor struct {
+	ControllerSN string `json:"controller_sn"`
+	Inputs       string `json:"inputs"`
+}
+
+func (iom *IOMonitor) Deserialize(str string) error {
+
+	iom.Inputs = str
+
+	return nil
 }
 
 var result_errors = []string{
@@ -558,6 +673,7 @@ func (rd *ResultData) DeserializeOld(str string) error {
 	}
 
 	rd.TimeStamp = str[187:206]
+	rd.ToolSerialNumber = strings.TrimSpace(str[171:285])
 	rd.TorqueUnit = str[208:209]
 	rd.ResultType = str[211:213]
 	rd.ID2 = str[215:240]
@@ -616,12 +732,14 @@ func (rd *ResultData) Deserialize(str string) error {
 	rd.PrevailTorqueCompensateStatus = str[124:125]
 
 	error_status := str[127:137]
-	error_value, err := strconv.ParseInt(error_status, 10, 64)
+	error_value, err := strconv.ParseInt(error_status, 10, 32)
 	if err != nil {
 		return err
 	}
 
 	b_error := biu.ToBinaryString(error_value)
+	b_error = strings.Trim(b_error, "[] ")
+	b_error = strings.Replace(b_error, " ", "", -1)
 	l := len(b_error)
 	errs := []string{}
 	for i := 0; i < l; i++ {
@@ -632,7 +750,7 @@ func (rd *ResultData) Deserialize(str string) error {
 		}
 	}
 
-	rd.TighteningStatus = strings.Join(errs, ",")
+	rd.TighteningErrorStatus = strings.Join(errs, ",")
 
 	rd.TorqueMin, err = strconv.ParseFloat(str[139:145], 64)
 	if err != nil {
@@ -677,6 +795,8 @@ func (rd *ResultData) Deserialize(str string) error {
 	rd.TightingID = str[283:293]
 
 	rd.TimeStamp = str[325:344]
+
+	rd.ToolSerialNumber = strings.TrimSpace(str[309:323])
 
 	rd.TorqueUnit = str[394:395]
 	rd.ResultType = str[397:399]
@@ -928,4 +1048,99 @@ func (p *JobDetail) Deserialize(str string) error {
 	}
 
 	return nil
+}
+
+type JobInfo struct {
+	JobID           int
+	JobStatus       int
+	JobBatchMode    int
+	JobBatchSize    int
+	JobBatchCounter int
+	Timestamp       string
+	JobCurrentStep  int
+	JobTotalStep    int
+	JobStepType     int
+}
+
+func (ji *JobInfo) Deserialize(msg string) error {
+
+	var err error
+
+	ji.JobID, err = strconv.Atoi(msg[2:6])
+	if err != nil {
+		return err
+	}
+
+	ji.JobStatus, err = strconv.Atoi(msg[8:9])
+	if err != nil {
+		return err
+	}
+
+	ji.JobBatchMode, err = strconv.Atoi(msg[11:12])
+	if err != nil {
+		return err
+	}
+
+	ji.JobBatchSize, err = strconv.Atoi(msg[14:17])
+	if err != nil {
+		return err
+	}
+
+	ji.JobBatchCounter, err = strconv.Atoi(msg[20:24])
+	if err != nil {
+		return err
+	}
+
+	ji.Timestamp = msg[26:45]
+
+	ji.JobCurrentStep, err = strconv.Atoi(msg[47:50])
+	if err != nil {
+		return err
+	}
+
+	ji.JobTotalStep, err = strconv.Atoi(msg[52:55])
+	if err != nil {
+		return err
+	}
+
+	ji.JobStepType, err = strconv.Atoi(msg[57:59])
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DeserializeIDS(str string) []string {
+	rt := []string{}
+
+	vin := strings.TrimSpace(str[2:27])
+	rt = append(rt, vin)
+
+	id2 := strings.TrimSpace(str[29:54])
+	rt = append(rt, id2)
+
+	id3 := strings.TrimSpace(str[56:71])
+	rt = append(rt, id3)
+
+	id4 := strings.TrimSpace(str[73:98])
+	rt = append(rt, id4)
+
+	return rt
+}
+
+type MultiSpindleResult struct {
+	TotalSpindleNumber int
+	Vin string
+	JobID int
+	PSetID int
+	BatchSize int
+	BatchCount int
+	BatchStatus int
+	TorqueMin                     float64
+	TorqueMax                     float64
+	TorqueFinalTarget             float64
+	AngleMin                      float64
+	AngleMax                      float64
+	FinalAngleTarget              float64
 }

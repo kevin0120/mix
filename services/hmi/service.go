@@ -156,6 +156,46 @@ func (s *Service) Open() error {
 	}
 	s.Httpd.Handler[0].AddRoute(r)
 
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "PUT",
+		Pattern:     "/io-sets",
+		HandlerFunc: s.methods.putIOSet,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "PUT",
+		Pattern:     "/scanner",
+		HandlerFunc: s.methods.putBarcodeTest,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "PUT",
+		Pattern:     "/input-test",
+		HandlerFunc: s.methods.putIOInputTest,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "PUT",
+		Pattern:     "/job-control",
+		HandlerFunc: s.methods.putJobControll,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "GET",
+		Pattern:     "/operation/{code:string}",
+		HandlerFunc: s.methods.getRoutingOpertions,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
 	return nil
 
 }

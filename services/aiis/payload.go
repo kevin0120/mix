@@ -22,6 +22,10 @@ type AIISResult struct {
 	QualityState     string  `json:"quality_state"`
 	ExceptionReason  string  `json:"exception_reason"`
 	Seq              int     `json:"seq"`
+	ProductID        int64   `json:"product_id"`
+	WorkcenterID     int64   `json:"workcenter_id"`
+	GunID            int64   `json:"gun_id"`
+	Batch            string  `json:"batch"`
 
 	CURObjects []CURObject `json:"cur_objects"`
 
@@ -35,6 +39,8 @@ type AIISResult struct {
 	MO_Lnr            string `json:"lnr"`
 	MO_NutNo          string `json:"nut_no"`
 	MO_Model          string `json:"model"`
+
+	Vin string `json:"vin"`
 }
 
 type CURObject struct {

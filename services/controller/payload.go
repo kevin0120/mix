@@ -4,6 +4,7 @@ const (
 	AUDIPROTOCOL         = "Audi/VW"
 	OPENPROTOCOL         = "OpenProtocol"
 	DEFAULT_TOOL_CHANNEL = 1
+	AUTO_MODE            = "auto"
 )
 
 const (
@@ -51,6 +52,7 @@ type ControllerResult struct {
 	Result        string     `json:"result"`
 	Dat           string     `json:"dat"`
 	PSet          int        `json:"pset"`
+	Batch         string     `json:"batch"`
 	Count         int        `json:"count"`
 	PSetDefine    PSetDefine `json:"pset_define"`
 
