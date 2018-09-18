@@ -3,7 +3,7 @@ services:
   latest:
     image: "linshenqi/aiis"
     ports:
-      - "39092:9092"
+      - "9092:9092"
     volumes:
       - /data/aiis/conf:/etc/aiis/conf
       - /data/aiis/log:/etc/aiis/log
