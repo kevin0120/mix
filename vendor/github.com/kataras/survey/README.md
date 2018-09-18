@@ -1,17 +1,27 @@
-# Survey
-[![Build Status](https://travis-ci.org/AlecAivazis/survey.svg?branch=feature%2Fpretty)](https://travis-ci.org/AlecAivazis/survey)
-[![GoDoc](http://img.shields.io/badge/godoc-reference-5272B4.svg)](https://github.com/AlecAivazis/survey)
+# Changes
+
+- Misspell and the Transform feature.
+- Fix if Confirm and `Validate: survey.Required` is used
+and answer is "No" (== false)
+then it shows "Sorry, your reply was invalid: Value is required"
+and it stucks there.
+This happens because 'false' is the zero value of a "bool" type.validation.go#isZero.
+- Vendors manually added, carefully.
+
+# Survey[![Build Status](https://travis-ci.org/kataras/survey.svg?branch=feature%2Fpretty)](https://travis-ci.org/kataras/survey)[![GoDoc](http://img.shields.io/badge/godoc-reference-5272B4.svg)](https://godoc.org/github.com/kataras/survey)
 
 A library for building interactive prompts. Heavily inspired by the great [inquirer.js](https://github.com/SBoudrias/Inquirer.js/).
 
 ![](https://zippy.gfycat.com/AmusingBossyArrowworm.gif)
+
+Created by [AlecAivazis](https://github.com/AlecAivazis/).
 
 ```go
 package main
 
 import (
     "fmt"
-    "gopkg.in/AlecAivazis/survey.v1"
+    "github.com/kataras/survey"
 )
 
 // the questions to ask
@@ -20,6 +30,7 @@ var qs = []*survey.Question{
         Name:     "name",
         Prompt:   &survey.Input{Message: "What is your name?"},
         Validate: survey.Required,
+        Transform: survey.Title,
     },
     {
         Name: "color",
@@ -74,16 +85,16 @@ func main() {
 
 ## Examples
 
-Examples can be found in the `examples/` directory. Run them
+Examples can be found in the `_examples/` directory. Run them
 to see basic behavior:
 
 ```bash
-go get gopkg.in/AlecAivazis/survey.v1
+go get github.com/kataras/survey
 
 # ... navigate to the repo in your GOPATH
 
-go run examples/simple.go
-go run examples/validation.go
+go run _examples/simple/simple.go
+go run _examples/validation/validation.go
 ```
 
 ## Prompts
@@ -188,7 +199,7 @@ q := &survey.Question{
     Prompt: &survey.Input{Message: "Hello world validation"},
     Validate: func (val interface{}) error {
         // since we are validating an Input, the assertion will always succeed
-        if str, ok := val.(string) ; ok && len(str) > 10 {
+        if str, ok := val.(string) ; !ok || len(str) > 10 {
             return errors.New("This response cannot be longer than 10 characters.")
         }
     }
@@ -227,8 +238,8 @@ looks for by setting the `HelpInputRune` variable in `survey/core`:
 ```golang
 
 import (
-    "gopkg.in/AlecAivazis/survey.v1"
-    surveyCore "gopkg.in/AlecAivazis/survey.v1/core"
+    "github.com/kataras/survey"
+    surveyCore "github.com/kataras/survey/core"
 )
 
 number := ""
@@ -285,14 +296,3 @@ in `survey/core`:
 | SelectFocusIcon     |       ❯        | Marks the current focus in `Select` and `MultiSelect` prompts     |
 | MarkedOptionIcon    |       ◉        | Marks a chosen selection in a `MultiSelect` prompt                |
 | UnmarkedOptionIcon  |       ◯        | Marks an unselected option in a `MultiSelect` prompt              |
-
-## Versioning
-
-This project tries to maintain semantic GitHub releases as closely as possible. And relies on [gopkg.in](http://labix.org/gopkg.in)
-to maintain those releasees. Importing v1 of survey could look something like
-
-```golang
-package main
-
-import "gopkg.in/AlecAivazis/survey.v1"
-```

@@ -26,7 +26,7 @@ websocket:
 pmon:
   path: /home/linshenqi/go/src/github.com/masami10/aiis/etc/pmon/PMON.CFG
   workers: 4
-  enable: true
+  enable: false
 fis:
   ch_recv_mission: 21
   ch_send_result: 24
@@ -55,11 +55,14 @@ fis:
     - AGM
   enable: false
 changan:
-  andon_ip: 192.168.1.1
-  andon_port: 8888
-  enable: true
+  andon_addr: tcp://127.0.0.1:9002
+  enable: false
+  keepalive_period: 3s
+  read_timeout: 10s
+  read_buffer_size: 65535
+  GUID: 17e2735f-fe49-4d8e-bdb6-81d5af997559
 odoo:
-  url: http://172.17.0.1:8069
+  url: http://192.168.1.4:8069
   route: /api/v1/mrp.productions
   headers:
     Content-Type: application/json
@@ -68,7 +71,7 @@ odoo:
   max_retry: 1
   enable: true
 storage:
-  db_url: 172.17.0.1:5432
+  db_url: 192.168.1.4:5432
   db_name: sa
   db_user: admin
   db_pwd: admin
@@ -76,7 +79,7 @@ storage:
 rush:
   enable: true
   workers: 4
-  url: http://172.17.0.1:8082
+  url: http://192.168.1.4:8082
   route: /rush/v1/results
   headers:
     Content-Type: application/json

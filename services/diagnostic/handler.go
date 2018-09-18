@@ -334,6 +334,10 @@ func (h *ChanganHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
 
+func (h *ChanganHandler) ReciveNewTask(msg string) {
+	h.l.Info(fmt.Sprintf("ReciveNewTask from Andon: %s ", msg))
+}
+
 func (h *WsHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }

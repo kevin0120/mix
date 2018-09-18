@@ -422,6 +422,46 @@ var (
 	//
 	// A shortcut of the `cache#Cache304`.
 	Cache304 = cache.Cache304
+
+	// CookiePath is a `CookieOption`.
+	// Use it to change the cookie's Path field.
+	//
+	// A shortcut for the `context#CookiePath`.
+	CookiePath = context.CookiePath
+	// CookieCleanPath is a `CookieOption`.
+	// Use it to clear the cookie's Path field, exactly the same as `CookiePath("")`.
+	//
+	// A shortcut for the `context#CookieCleanPath`.
+	CookieCleanPath = context.CookieCleanPath
+	// CookieExpires is a `CookieOption`.
+	// Use it to change the cookie's Expires and MaxAge fields by passing the lifetime of the cookie.
+	//
+	// A shortcut for the `context#CookieExpires`.
+	CookieExpires = context.CookieExpires
+	// CookieHTTPOnly is a `CookieOption`.
+	// Use it to set the cookie's HttpOnly field to false or true.
+	// HttpOnly field defaults to true for `RemoveCookie` and `SetCookieKV`.
+	//
+	// A shortcut for the `context#CookieHTTPOnly`.
+	CookieHTTPOnly = context.CookieHTTPOnly
+	// CookieEncode is a `CookieOption`.
+	// Provides encoding functionality when adding a cookie.
+	// Accepts a `context#CookieEncoder` and sets the cookie's value to the encoded value.
+	// Users of that is the `context#SetCookie` and `context#SetCookieKV`.
+	//
+	// Example: https://github.com/kataras/iris/tree/master/_examples/cookies/securecookie
+	//
+	// A shortcut for the `context#CookieEncode`.
+	CookieEncode = context.CookieEncode
+	// CookieDecode is a `CookieOption`.
+	// Provides decoding functionality when retrieving a cookie.
+	// Accepts a `context#CookieDecoder` and sets the cookie's value to the decoded value before return by the `GetCookie`.
+	// User of that is the `context#GetCookie`.
+	//
+	// Example: https://github.com/kataras/iris/tree/master/_examples/cookies/securecookie
+	//
+	// A shortcut for the `context#CookieDecode`.
+	CookieDecode = context.CookieDecode
 )
 
 // SPA  accepts an "assetHandler" which can be the result of an

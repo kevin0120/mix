@@ -1,19 +1,31 @@
 package changan
 
+import (
+	"github.com/masami10/aiis/toml"
+	"github.com/satori/go.uuid"
+	"time"
+)
+
 type Config struct {
-	AndonIP   string `yaml:"andon_ip"`
-	AndonPort uint   `yaml:"andon_port"`
-	Enable    bool   `yaml:"enable"`
+	AndonAddr       string        `yaml:"andon_addr"`
+	Enable          bool          `yaml:"enable"`
+	KeepAlivePeriod toml.Duration `yaml:"keepalive_period"`
+	ReadTimeout     toml.Duration `yaml:"read_timeout"`
+	ReadBufferSize  int           `yaml:"read_buffer_size"`
+	GUID            string        `yaml:"GUID"`
 }
 
 func NewConfig() Config {
-	prs := []string{}
-	prs = append(prs, "GSP")
+
+	_guid := uuid.NewV4()
 
 	return Config{
-		AndonIP:   "192.168.1.1",
-		AndonPort: 8888,
-		Enable:    true,
+		AndonAddr:       "tcp://192.168.1.4:9002",
+		Enable:          true,
+		KeepAlivePeriod: toml.Duration(3 * time.Second),
+		ReadTimeout:     toml.Duration(10 * time.Second),
+		ReadBufferSize:  65535,
+		GUID:            _guid.String(),
 	}
 }
 

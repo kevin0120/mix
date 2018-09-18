@@ -41,6 +41,6 @@ type OperationResultModel struct {
 	ExceptionReason string    `xorm:"varchar(32) 'exception_reason'"`
 	GunID           int64     `xorm:" INTEGER null 'gun_id'"`
 	//ConsuBomLineID  int64	  `xorm:" INTEGER 'consu_bom_line_id'"`
-	Vin string `xorm:"varchar(128) 'vin'"`
+	Vin   string `xorm:"varchar(128) 'vin'"`
 	Batch string `xorm:"varchar(128) 'batch'"`
 }

@@ -21,15 +21,16 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/kataras/iris/core/errors"
+	"github.com/kataras/iris/core/memstore"
+
+	"github.com/Shopify/goreferrer"
 	"github.com/fatih/structs"
 	formbinder "github.com/iris-contrib/formBinder"
 	"github.com/json-iterator/go"
 	"github.com/microcosm-cc/bluemonday"
 	"gopkg.in/russross/blackfriday.v2"
 	"gopkg.in/yaml.v2"
-
-	"github.com/kataras/iris/core/errors"
-	"github.com/kataras/iris/core/memstore"
 )
 
 type (
@@ -141,18 +142,31 @@ func (r RequestParams) GetDecoded(key string) string {
 }
 
 // GetInt returns the path parameter's value as int, based on its key.
+// It checks for all available types of int, including int64, strings etc.
+// It will return -1 and a non-nil error if parameter wasn't found.
 func (r RequestParams) GetInt(key string) (int, error) {
 	return r.store.GetInt(key)
 }
 
 // GetInt64 returns the path paramete's value as int64, based on its key.
+// It checks for all available types of int, including int, strings etc.
+// It will return -1 and a non-nil error if parameter wasn't found.
 func (r RequestParams) GetInt64(key string) (int64, error) {
 	return r.store.GetInt64(key)
 }
 
 // GetFloat64 returns a path parameter's value based as float64 on its route's dynamic path key.
+// It checks for all available types of int, including float64, int, strings etc.
+// It will return -1 and a non-nil error if parameter wasn't found.
 func (r RequestParams) GetFloat64(key string) (float64, error) {
 	return r.store.GetFloat64(key)
+}
+
+// GetUint64 returns the path paramete's value as uint64, based on its key.
+// It checks for all available types of int, including int, uint64, int64, strings etc.
+// It will return 0 and a non-nil error if parameter wasn't found.
+func (r RequestParams) GetUint64(key string) (uint64, error) {
+	return r.store.GetUint64(key)
 }
 
 // GetBool returns the path parameter's value as bool, based on its key.
@@ -340,6 +354,32 @@ type Context interface {
 	// IsStopped checks and returns true if the current position of the Context is 255,
 	// means that the StopExecution() was called.
 	IsStopped() bool
+	// OnConnectionClose registers the "cb" function which will fire (on its own goroutine, no need to be registered goroutine by the end-dev)
+	// when the underlying connection has gone away.
+	//
+	// This mechanism can be used to cancel long operations on the server
+	// if the client has disconnected before the response is ready.
+	//
+	// It depends on the `http#CloseNotify`.
+	// CloseNotify may wait to notify until Request.Body has been
+	// fully read.
+	//
+	// After the main Handler has returned, there is no guarantee
+	// that the channel receives a value.
+	//
+	// Finally, it reports whether the protocol supports pipelines (HTTP/1.1 with pipelines disabled is not supported).
+	// The "cb" will not fire for sure if the output value is false.
+	//
+	// Note that you can register only one callback for the entire request handler chain/per route.
+	//
+	// Look the `ResponseWriter#CloseNotifier` for more.
+	OnConnectionClose(fnGoroutine func()) bool
+	// OnClose registers the callback function "cb" to the underline connection closing event using the `Context#OnConnectionClose`
+	// and also in the end of the request handler using the `ResponseWriter#SetBeforeFlush`.
+	// Note that you can register only one callback for the entire request handler chain/per route.
+	//
+	// Look the `Context#OnConnectionClose` and `ResponseWriter#SetBeforeFlush` for more.
+	OnClose(cb func())
 
 	//  +------------------------------------------------------------+
 	//  | Current "user/request" storage                             |
@@ -419,8 +459,12 @@ type Context interface {
 	//
 	// Keep note that this checks the "User-Agent" request header.
 	IsMobile() bool
+	// GetReferrer extracts and returns the information from the "Referer" header as specified
+	// in https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
+	// or by the URL query parameter "referer".
+	GetReferrer() Referrer
 	//  +------------------------------------------------------------+
-	//  | Response Headers helpers                                   |
+	//  | Headers helpers                                            |
 	//  +------------------------------------------------------------+
 
 	// Header adds a header to the response writer.
@@ -431,16 +475,18 @@ type Context interface {
 	// GetContentType returns the response writer's header value of "Content-Type"
 	// which may, setted before with the 'ContentType'.
 	GetContentType() string
+	// GetContentType returns the request's header value of "Content-Type".
+	GetContentTypeRequested() string
 
 	// GetContentLength returns the request's header value of "Content-Length".
 	// Returns 0 if header was unable to be found or its value was not a valid number.
 	GetContentLength() int64
 
 	// StatusCode sets the status code header to the response.
-	// Look .GetStatusCode too.
+	// Look .`GetStatusCode` too.
 	StatusCode(statusCode int)
 	// GetStatusCode returns the current status code of the response.
-	// Look StatusCode too.
+	// Look `StatusCode` too.
 	GetStatusCode() int
 
 	// Redirect sends a redirect response to the client
@@ -475,6 +521,9 @@ type Context interface {
 	// URLParamIntDefault returns the url query parameter as int value from a request,
 	// if not found or parse failed then "def" is returned.
 	URLParamIntDefault(name string, def int) int
+	// URLParamInt32Default returns the url query parameter as int32 value from a request,
+	// if not found or parse failed then "def" is returned.
+	URLParamInt32Default(name string, def int32) int32
 	// URLParamInt64 returns the url query parameter as int64 value from a request,
 	// returns -1 and an error if parse failed.
 	URLParamInt64(name string) (int64, error)
@@ -622,6 +671,10 @@ type Context interface {
 	// Examples of usage: context.ReadJSON, context.ReadXML.
 	//
 	// Example: https://github.com/kataras/iris/blob/master/_examples/http_request/read-custom-via-unmarshaler/main.go
+	//
+	// UnmarshalBody does not check about gzipped data.
+	// Do not rely on compressed data incoming to your server. The main reason is: https://en.wikipedia.org/wiki/Zip_bomb
+	// However you are still free to read the `ctx.Request().Body io.Reader` manually.
 	UnmarshalBody(outPtr interface{}, unmarshaler Unmarshaler) error
 	// ReadJSON reads JSON from request's body and binds it to a pointer of a value of any json-valid type.
 	//
@@ -854,18 +907,41 @@ type Context interface {
 	//  | Cookies                                                    |
 	//  +------------------------------------------------------------+
 
-	// SetCookie adds a cookie
-	SetCookie(cookie *http.Cookie)
-	// SetCookieKV adds a cookie, receives just a name(string) and a value(string)
+	// SetCookie adds a cookie.
+	// Use of the "options" is not required, they can be used to amend the "cookie".
 	//
-	// If you use this method, it expires at 2 hours
-	// use ctx.SetCookie or http.SetCookie if you want to change more fields.
-	SetCookieKV(name, value string)
+	// Example: https://github.com/kataras/iris/tree/master/_examples/cookies/basic
+	SetCookie(cookie *http.Cookie, options ...CookieOption)
+	// SetCookieKV adds a cookie, requires the name(string) and the value(string).
+	//
+	// By default it expires at 2 hours and it's added to the root path,
+	// use the `CookieExpires` and `CookiePath` to modify them.
+	// Alternatively: ctx.SetCookie(&http.Cookie{...})
+	//
+	// If you want to set custom the path:
+	// ctx.SetCookieKV(name, value, iris.CookiePath("/custom/path/cookie/will/be/stored"))
+	//
+	// If you want to be visible only to current request path:
+	// ctx.SetCookieKV(name, value, iris.CookieCleanPath/iris.CookiePath(""))
+	// More:
+	//                              iris.CookieExpires(time.Duration)
+	//                              iris.CookieHTTPOnly(false)
+	//
+	// Example: https://github.com/kataras/iris/tree/master/_examples/cookies/basic
+	SetCookieKV(name, value string, options ...CookieOption)
 	// GetCookie returns cookie's value by it's name
 	// returns empty string if nothing was found.
-	GetCookie(name string) string
-	// RemoveCookie deletes a cookie by it's name.
-	RemoveCookie(name string)
+	//
+	// If you want more than the value then:
+	// cookie, err := ctx.Request().Cookie("name")
+	//
+	// Example: https://github.com/kataras/iris/tree/master/_examples/cookies/basic
+	GetCookie(name string, options ...CookieOption) string
+	// RemoveCookie deletes a cookie by it's name and path = "/".
+	// Tip: change the cookie's path to the current one by: RemoveCookie("name", iris.CookieCleanPath)
+	//
+	// Example: https://github.com/kataras/iris/tree/master/_examples/cookies/basic
+	RemoveCookie(name string, options ...CookieOption)
 	// VisitAllCookies takes a visitor which loops
 	// on each (request's) cookies' name and value.
 	VisitAllCookies(visitor func(name string, value string))
@@ -1233,7 +1309,7 @@ func (ctx *context) HandlerName() string {
 // It can be changed to a customized one if needed (very advanced usage).
 //
 // See `DefaultNext` for more information about this and why it's exported like this.
-var Next = DefaultNext ///TODO: add an example for this usecase, i.e describe handlers and skip only file handlers.
+var Next = DefaultNext
 
 // DefaultNext is the default function that executed on each middleware if `ctx.Next()`
 // is called.
@@ -1330,6 +1406,76 @@ func (ctx *context) StopExecution() {
 // means that the StopExecution() was called.
 func (ctx *context) IsStopped() bool {
 	return ctx.currentHandlerIndex == stopExecutionIndex
+}
+
+// OnConnectionClose registers the "cb" function which will fire (on its own goroutine, no need to be registered goroutine by the end-dev)
+// when the underlying connection has gone away.
+//
+// This mechanism can be used to cancel long operations on the server
+// if the client has disconnected before the response is ready.
+//
+// It depends on the `http#CloseNotify`.
+// CloseNotify may wait to notify until Request.Body has been
+// fully read.
+//
+// After the main Handler has returned, there is no guarantee
+// that the channel receives a value.
+//
+// Finally, it reports whether the protocol supports pipelines (HTTP/1.1 with pipelines disabled is not supported).
+// The "cb" will not fire for sure if the output value is false.
+//
+// Note that you can register only one callback for the entire request handler chain/per route.
+//
+// Look the `ResponseWriter#CloseNotifier` for more.
+func (ctx *context) OnConnectionClose(cb func()) bool {
+	// Note that `ctx.ResponseWriter().CloseNotify()` can already do the same
+	// but it returns a channel which will never fire if it the protocol version is not compatible,
+	// here we don't want to allocate an empty channel, just skip it.
+	notifier, ok := ctx.writer.CloseNotifier()
+	if !ok {
+		return false
+	}
+
+	notify := notifier.CloseNotify()
+	go func() {
+		<-notify
+		if cb != nil {
+			cb()
+		}
+	}()
+
+	return true
+}
+
+// OnClose registers the callback function "cb" to the underline connection closing event using the `Context#OnConnectionClose`
+// and also in the end of the request handler using the `ResponseWriter#SetBeforeFlush`.
+// Note that you can register only one callback for the entire request handler chain/per route.
+//
+// Look the `Context#OnConnectionClose` and `ResponseWriter#SetBeforeFlush` for more.
+func (ctx *context) OnClose(cb func()) {
+	if cb == nil {
+		return
+	}
+
+	// Register the on underline connection close handler first.
+	ctx.OnConnectionClose(cb)
+
+	// Author's notes:
+	// This is fired on `ctx.ResponseWriter().FlushResponse()` which is fired by the framework automatically, internally, on the end of request handler(s),
+	// it is not fired on the underline streaming function of the writer: `ctx.ResponseWriter().Flush()` (which can be fired more than one if streaming is supported by the client).
+	// The `FlushResponse` is called only once, so add the "cb" here, no need to add done request handlers each time `OnClose` is called by the end-dev.
+	//
+	// Don't allow more than one because we don't allow that on `OnConnectionClose` too:
+	// old := ctx.writer.GetBeforeFlush()
+	// if old != nil {
+	// 	ctx.writer.SetBeforeFlush(func() {
+	// 		old()
+	// 		cb()
+	// 	})
+	// 	return
+	// }
+
+	ctx.writer.SetBeforeFlush(cb)
 }
 
 //  +------------------------------------------------------------+
@@ -1559,6 +1705,84 @@ func (ctx *context) IsMobile() bool {
 	return isMobileRegex.MatchString(s)
 }
 
+type (
+	// Referrer contains the extracted information from the `GetReferrer`
+	//
+	// The structure contains struct tags for JSON, form, XML, YAML and TOML.
+	// Look the `GetReferrer() Referrer` and `goreferrer` external package.
+	Referrer struct {
+		Type       ReferrerType             `json:"type" form:"referrer_type" xml:"Type" yaml:"Type" toml:"Type"`
+		Label      string                   `json:"label" form:"referrer_form" xml:"Label" yaml:"Label" toml:"Label"`
+		URL        string                   `json:"url" form:"referrer_url" xml:"URL" yaml:"URL" toml:"URL"`
+		Subdomain  string                   `json:"subdomain" form:"referrer_subdomain" xml:"Subdomain" yaml:"Subdomain" toml:"Subdomain"`
+		Domain     string                   `json:"domain" form:"referrer_domain" xml:"Domain" yaml:"Domain" toml:"Domain"`
+		Tld        string                   `json:"tld" form:"referrer_tld" xml:"Tld" yaml:"Tld" toml:"Tld"`
+		Path       string                   `json:"path" form:"referrer_path" xml:"Path" yaml:"Path" toml:"Path"`
+		Query      string                   `json:"query" form:"referrer_query" xml:"Query" yaml:"Query" toml:"GoogleType"`
+		GoogleType ReferrerGoogleSearchType `json:"googleType" form:"referrer_google_type" xml:"GoogleType" yaml:"GoogleType" toml:"GoogleType"`
+	}
+
+	// ReferrerType is the goreferrer enum for a referrer type (indirect, direct, email, search, social).
+	ReferrerType int
+
+	// ReferrerGoogleSearchType is the goreferrer enum for a google search type (organic, adwords).
+	ReferrerGoogleSearchType int
+)
+
+// Contains the available values of the goreferrer enums.
+const (
+	ReferrerInvalid ReferrerType = iota
+	ReferrerIndirect
+	ReferrerDirect
+	ReferrerEmail
+	ReferrerSearch
+	ReferrerSocial
+
+	ReferrerNotGoogleSearch ReferrerGoogleSearchType = iota
+	ReferrerGoogleOrganicSearch
+	ReferrerGoogleAdwords
+)
+
+func (gs ReferrerGoogleSearchType) String() string {
+	return goreferrer.GoogleSearchType(gs).String()
+}
+
+func (r ReferrerType) String() string {
+	return goreferrer.ReferrerType(r).String()
+}
+
+// unnecessary but good to know the default values upfront.
+var emptyReferrer = Referrer{Type: ReferrerInvalid, GoogleType: ReferrerNotGoogleSearch}
+
+// GetReferrer extracts and returns the information from the "Referer" header as specified
+// in https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
+// or by the URL query parameter "referer".
+func (ctx *context) GetReferrer() Referrer {
+	// the underline net/http follows the https://tools.ietf.org/html/rfc7231#section-5.5.2,
+	// so there is nothing special left to do.
+	// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
+	refURL := ctx.GetHeader("Referer")
+	if refURL == "" {
+		refURL = ctx.URLParam("referer")
+	}
+
+	if ref := goreferrer.DefaultRules.Parse(refURL); ref.Type > goreferrer.Invalid {
+		return Referrer{
+			Type:       ReferrerType(ref.Type),
+			Label:      ref.Label,
+			URL:        ref.URL,
+			Subdomain:  ref.Subdomain,
+			Domain:     ref.Domain,
+			Tld:        ref.Tld,
+			Path:       ref.Path,
+			Query:      ref.Query,
+			GoogleType: ReferrerGoogleSearchType(ref.GoogleType),
+		}
+	}
+
+	return emptyReferrer
+}
+
 //  +------------------------------------------------------------+
 //  | Response Headers helpers                                   |
 //  +------------------------------------------------------------+
@@ -1599,6 +1823,11 @@ func (ctx *context) ContentType(cType string) {
 // which may, setted before with the 'ContentType'.
 func (ctx *context) GetContentType() string {
 	return ctx.writer.Header().Get(ContentTypeHeaderKey)
+}
+
+// GetContentType returns the request's header value of "Content-Type".
+func (ctx *context) GetContentTypeRequested() string {
+	return ctx.GetHeader(ContentTypeHeaderKey)
 }
 
 // GetContentLength returns the request's header value of "Content-Length".
@@ -1698,6 +1927,21 @@ func (ctx *context) URLParamIntDefault(name string, def int) int {
 	}
 
 	return v
+}
+
+// URLParamInt32Default returns the url query parameter as int32 value from a request,
+// if not found or parse failed then "def" is returned.
+func (ctx *context) URLParamInt32Default(name string, def int32) int32 {
+	if v := ctx.URLParam(name); v != "" {
+		n, err := strconv.ParseInt(v, 10, 32)
+		if err != nil {
+			return def
+		}
+
+		return int32(n)
+	}
+
+	return def
 }
 
 // URLParamInt64 returns the url query parameter as int64 value from a request,
@@ -2105,6 +2349,10 @@ func (ctx *context) SetMaxRequestBodySize(limitOverBytes int64) {
 // Examples of usage: context.ReadJSON, context.ReadXML.
 //
 // Example: https://github.com/kataras/iris/blob/master/_examples/http_request/read-custom-via-unmarshaler/main.go
+//
+// UnmarshalBody does not check about gzipped data.
+// Do not rely on compressed data incoming to your server. The main reason is: https://en.wikipedia.org/wiki/Zip_bomb
+// However you are still free to read the `ctx.Request().Body io.Reader` manually.
 func (ctx *context) UnmarshalBody(outPtr interface{}, unmarshaler Unmarshaler) error {
 	if ctx.request.Body == nil {
 		return errors.New("unmarshal: empty body")
@@ -2992,57 +3240,189 @@ func (ctx *context) SendFile(filename string, destinationName string) error {
 }
 
 //  +------------------------------------------------------------+
-//  | Cookies, Session and Flashes                               |
+//  | Cookies                                                    |
 //  +------------------------------------------------------------+
 
-// SetCookie adds a cookie
-func (ctx *context) SetCookie(cookie *http.Cookie) {
+// CookieOption is the type of function that is accepted on
+// context's methods like `SetCookieKV`, `RemoveCookie` and `SetCookie`
+// as their (last) variadic input argument to amend the end cookie's form.
+//
+// Any custom or built'n `CookieOption` is valid,
+// see `CookiePath`, `CookieCleanPath`, `CookieExpires` and `CookieHTTPOnly` for more.
+type CookieOption func(*http.Cookie)
+
+// CookiePath is a `CookieOption`.
+// Use it to change the cookie's Path field.
+func CookiePath(path string) CookieOption {
+	return func(c *http.Cookie) {
+		c.Path = path
+	}
+}
+
+// CookieCleanPath is a `CookieOption`.
+// Use it to clear the cookie's Path field, exactly the same as `CookiePath("")`.
+func CookieCleanPath(c *http.Cookie) {
+	c.Path = ""
+}
+
+// CookieExpires is a `CookieOption`.
+// Use it to change the cookie's Expires and MaxAge fields by passing the lifetime of the cookie.
+func CookieExpires(durFromNow time.Duration) CookieOption {
+	return func(c *http.Cookie) {
+		c.Expires = time.Now().Add(durFromNow)
+		c.MaxAge = int(durFromNow.Seconds())
+	}
+}
+
+// CookieHTTPOnly is a `CookieOption`.
+// Use it to set the cookie's HttpOnly field to false or true.
+// HttpOnly field defaults to true for `RemoveCookie` and `SetCookieKV`.
+func CookieHTTPOnly(httpOnly bool) CookieOption {
+	return func(c *http.Cookie) {
+		c.HttpOnly = httpOnly
+	}
+}
+
+type (
+	// CookieEncoder should encode the cookie value.
+	// Should accept as first argument the cookie name
+	// and as second argument the cookie value ptr.
+	// Should return an encoded value or an empty one if encode operation failed.
+	// Should return an error if encode operation failed.
+	//
+	// Note: Errors are not printed, so you have to know what you're doing,
+	// and remember: if you use AES it only supports key sizes of 16, 24 or 32 bytes.
+	// You either need to provide exactly that amount or you derive the key from what you type in.
+	//
+	// See `CookieDecoder` too.
+	CookieEncoder func(cookieName string, value interface{}) (string, error)
+	// CookieDecoder should decode the cookie value.
+	// Should accept as first argument the cookie name,
+	// as second argument the encoded cookie value and as third argument the decoded value ptr.
+	// Should return a decoded value or an empty one if decode operation failed.
+	// Should return an error if decode operation failed.
+	//
+	// Note: Errors are not printed, so you have to know what you're doing,
+	// and remember: if you use AES it only supports key sizes of 16, 24 or 32 bytes.
+	// You either need to provide exactly that amount or you derive the key from what you type in.
+	//
+	// See `CookieEncoder` too.
+	CookieDecoder func(cookieName string, cookieValue string, v interface{}) error
+)
+
+// CookieEncode is a `CookieOption`.
+// Provides encoding functionality when adding a cookie.
+// Accepts a `CookieEncoder` and sets the cookie's value to the encoded value.
+// Users of that is the `SetCookie` and `SetCookieKV`.
+//
+// Example: https://github.com/kataras/iris/tree/master/_examples/cookies/securecookie
+func CookieEncode(encode CookieEncoder) CookieOption {
+	return func(c *http.Cookie) {
+		newVal, err := encode(c.Name, c.Value)
+		if err != nil {
+			c.Value = ""
+		} else {
+			c.Value = newVal
+		}
+	}
+}
+
+// CookieDecode is a `CookieOption`.
+// Provides decoding functionality when retrieving a cookie.
+// Accepts a `CookieDecoder` and sets the cookie's value to the decoded value before return by the `GetCookie`.
+// User of that is the `GetCookie`.
+//
+// Example: https://github.com/kataras/iris/tree/master/_examples/cookies/securecookie
+func CookieDecode(decode CookieDecoder) CookieOption {
+	return func(c *http.Cookie) {
+		if err := decode(c.Name, c.Value, &c.Value); err != nil {
+			c.Value = ""
+		}
+	}
+}
+
+// SetCookie adds a cookie.
+// Use of the "options" is not required, they can be used to amend the "cookie".
+//
+// Example: https://github.com/kataras/iris/tree/master/_examples/cookies/basic
+func (ctx *context) SetCookie(cookie *http.Cookie, options ...CookieOption) {
+	for _, opt := range options {
+		opt(cookie)
+	}
+
 	http.SetCookie(ctx.writer, cookie)
 }
 
-var (
-	// SetCookieKVExpiration is 2 hours by-default
-	// you can change it or simple, use the SetCookie for more control.
-	SetCookieKVExpiration = time.Duration(120) * time.Minute
-)
-
-// SetCookieKV adds a cookie, receives just a name(string) and a value(string)
+// SetCookieKV adds a cookie, requires the name(string) and the value(string).
 //
-// If you use this method, it expires at 2 hours
-// use ctx.SetCookie or http.SetCookie if you want to change more fields.
-func (ctx *context) SetCookieKV(name, value string) {
+// By default it expires at 2 hours and it's added to the root path,
+// use the `CookieExpires` and `CookiePath` to modify them.
+// Alternatively: ctx.SetCookie(&http.Cookie{...})
+//
+// If you want to set custom the path:
+// ctx.SetCookieKV(name, value, iris.CookiePath("/custom/path/cookie/will/be/stored"))
+//
+// If you want to be visible only to current request path:
+// (note that client should be responsible for that if server sent an empty cookie's path, all browsers are compatible)
+// ctx.SetCookieKV(name, value, iris.CookieCleanPath/iris.CookiePath(""))
+// More:
+//                              iris.CookieExpires(time.Duration)
+//                              iris.CookieHTTPOnly(false)
+//
+// Examples: https://github.com/kataras/iris/tree/master/_examples/cookies/basic
+func (ctx *context) SetCookieKV(name, value string, options ...CookieOption) {
 	c := &http.Cookie{}
+	c.Path = "/"
 	c.Name = name
 	c.Value = url.QueryEscape(value)
 	c.HttpOnly = true
 	c.Expires = time.Now().Add(SetCookieKVExpiration)
 	c.MaxAge = int(SetCookieKVExpiration.Seconds())
-	ctx.SetCookie(c)
+	ctx.SetCookie(c, options...)
 }
 
 // GetCookie returns cookie's value by it's name
 // returns empty string if nothing was found.
-func (ctx *context) GetCookie(name string) string {
+//
+// If you want more than the value then:
+// cookie, err := ctx.Request().Cookie("name")
+//
+// Example: https://github.com/kataras/iris/tree/master/_examples/cookies/basic
+func (ctx *context) GetCookie(name string, options ...CookieOption) string {
 	cookie, err := ctx.request.Cookie(name)
 	if err != nil {
 		return ""
 	}
+
+	for _, opt := range options {
+		opt(cookie)
+	}
+
 	value, _ := url.QueryUnescape(cookie.Value)
 	return value
 }
 
-// RemoveCookie deletes a cookie by it's name.
-func (ctx *context) RemoveCookie(name string) {
+// SetCookieKVExpiration is 2 hours by-default
+// you can change it or simple, use the SetCookie for more control.
+//
+// See `SetCookieKVExpiration` and `CookieExpires` for more.
+var SetCookieKVExpiration = time.Duration(120) * time.Minute
+
+// RemoveCookie deletes a cookie by it's name and path = "/".
+// Tip: change the cookie's path to the current one by: RemoveCookie("name", iris.CookieCleanPath)
+//
+// Example: https://github.com/kataras/iris/tree/master/_examples/cookies/basic
+func (ctx *context) RemoveCookie(name string, options ...CookieOption) {
 	c := &http.Cookie{}
 	c.Name = name
 	c.Value = ""
-	c.Path = "/"
+	c.Path = "/" // if user wants to change it, use of the CookieOption `CookiePath` is required if not `ctx.SetCookie`.
 	c.HttpOnly = true
-	// RFC says 1 second, but let's do it 1 minute to make sure is working
+	// RFC says 1 second, but let's do it 1  to make sure is working
 	exp := time.Now().Add(-time.Duration(1) * time.Minute)
 	c.Expires = exp
 	c.MaxAge = -1
-	ctx.SetCookie(c)
+	ctx.SetCookie(c, options...)
 	// delete request's cookie also, which is temporary available.
 	ctx.request.Header.Set("Cookie", "")
 }

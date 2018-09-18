@@ -43,6 +43,10 @@
   name = "github.com/kataras/golog"
 
 [[constraint]]
+  branch = "v2"
+  name = "github.com/kataras/survey"
+
+[[constraint]]
   name = "github.com/klauspost/compress"
   version = "1.2.1"
 
@@ -59,8 +63,8 @@
   name = "github.com/ryanuber/columnize"
 
 [[constraint]]
-  branch = "master"
-  name = "github.com/satori/go.uuid"
+  branch = "v2"
+  name = "github.com/iris-contrib/go.uuid"
 
 [[constraint]]
   branch = "master"
@@ -71,5 +75,9 @@
   name = "golang.org/x/crypto"
 
 [[constraint]]
-  branch = "v2"
   name = "gopkg.in/yaml.v2"
+  version = "2.2.1"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/Shopify/goreferrer"

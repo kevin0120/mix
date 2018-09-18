@@ -14,6 +14,7 @@ type Diagnostic interface {
 }
 
 type Service struct {
+	Opened      bool
 	rawConf     atomic.Value
 	HTTPD       *httpd.Service
 	configValue atomic.Value
@@ -29,6 +30,7 @@ func NewService(conf Config, d Diagnostic) (*Service, error) {
 	s := &Service{
 		err:  make(chan error, 1),
 		diag: d,
+		Opened: false,
 		stop: make(chan chan struct{}),
 	}
 
@@ -83,10 +85,14 @@ func (s *Service) Open() error {
 			return errors.Wrap(err, "Open connection fail")
 		}
 	}
+	s.Opened = true
 	return nil
 }
 
 func (s *Service) Close() error {
+	if !s.Opened {
+		return nil
+	}
 	for _, ch := range s.Channels {
 		err := ch.Stop()
 		if err != nil {

@@ -17,6 +17,65 @@ Developers are not forced to upgrade if they don't really need it. Upgrade whene
 
 **How to upgrade**: Open your command-line and execute this command: `go get -u github.com/kataras/iris` or let the automatic updater do that for you.
 
+# Sat, 11 August 2018 | v10.7.0
+
+I am overjoyed to announce stage 1 of the the Iris Web framework **10.7 stable release is now available**.
+
+Version 10.7.0 is part of the official [releases](https://github.com/kataras/iris/releases).
+
+This release does not contain any breaking changes to existing Iris-based projects built on older versions of Iris. Iris developers can upgrade with absolute safety.
+
+Read below the changes and the improvements to the framework's internals. We also have more examples for beginners in our community.
+
+## New Examples
+
+- [Iris + WebAssemply = 💓](_examples/webassembly/basic/main.go) **compatible only for projects built with go11.beta and above**
+- [Server-Sent Events](_examples/http_responsewriter/sse/main.go)
+- [Struct Validation on context.ReadJSON](_examples/http_request/read-json-struct-validation/main.go)
+- [Extract referrer from "referer" header or URL query parameter](_examples/http_request/extract-referer/main.go)
+- [Hero Sessions](_examples/hero/sessions)
+- [Yet another dependency injection example with hero](_examples/hero/smart-contract/main.go)
+- [Writing an API for the Apache Kafka](_examples/tutorial/api-for-apache-kafka)
+
+> Also, all "sessions" examples have been customized to include the `AllowReclaim: true` option.
+
+## kataras/iris/websocket
+
+- Change connection list from a customized slice to `sync.Map` with: [this](https://github.com/kataras/iris/commit/5f16704f45bedd767527eadf411cf9bc0f8edaee) and [that commit](https://github.com/kataras/iris/commit/16b30e8eed1406c61abc01282120870bd9fa31d8)
+- Minify and add the `iris-ws.js` to the famous https://cdnjs.com via [this PR](https://github.com/kataras/iris/pull/1053) made by [Dibyendu Das](https://github.com/dibyendu)
+
+## kataras/iris/core/router
+
+- Add `json` field tags and new functions such as `ChangeMethod`, `SetStatusOffline` and `RestoreStatus` to the `Route` structure, these type of changes to the routes at runtime have effect after the manual call of the `Router/Application.RefreshRouter()` (not recommended but useful for custom Iris web server's remote control panels)
+- Add `GetRoutesReadOnly` function to the `APIBuilder` structure
+
+## kataras/iris/context
+
+- Add `GetReferrer`, `GetContentTypeRequested` and `URLParamInt32Default` functions
+- Insert `Trace`, `Tmpl` and `MainHandlerName` functions to the `RouteReadOnly` interface
+- Add `OnConnectionClose` function listener to fire a callback when the underline tcp connection is closed, extremely useful for SSE or other loop-forever implementations inside a handler -- and `OnClose` which is the same as `OnConnectionClose(myFunc)` and `defer myFunc()` [*](https://github.com/kataras/iris/commit/6898c2f755a0e22aa42e3b1799e29c857777a6f9)
+
+This release contains minor grammar and typo fixes and more meaningful [godoc](https://godoc.org/github.com/kataras/iris) code comments too. 
+
+## Industry
+
+I am glad to announce that Iris has been chosen as the main development kit for eight medium-to-large sized companies and a new very promising India-based startup. I want to thank you once again for the unwavering support and trust you have shown me, especially this year, despite the past unfair rumours and defamation that we suffered by the merciless competition.
+
+# Tu, 05 June 2018 | v10.6.6
+
+- **view/pug**: update vendor for Pug (Jade) parser and add [Iris + Pug examples](https://github.com/kataras/iris/tree/master/_examples#view) via [this commit](https://github.com/kataras/iris/commit/e0171cbed69efecba199ef547aa5e7063e18b27a), relative to [issue #1003](https://github.com/kataras/iris/issues/1003) opened by [@DjLeChuck](https://github.com/DjLeChuck)
+- **middleware/logger**: new configuration field, defaults to false: `Query bool`, if true prints the full path, including the URL query as requested at [issue #1017](https://github.com/kataras/iris/issues/1017) by [@andr33z](https://github.com/andr33z). Example [here](https://github.com/kataras/iris/blob/master/_examples/http_request/request-logger/main.go#L21). Implemented by [this commit](https://github.com/kataras/iris/commit/a7364876e0d1b8bd60acf94f17f6d1341b16c617)
+- **cookies**: some minor but helpful additions, like `CookieOption` relative to [issue #1018](https://github.com/kataras/iris/issues/1018) asked by [@dibyendu](https://github.com/dibyendu). [Cookies examples added](https://github.com/kataras/iris/tree/master/_examples/cookies) too. Implemented by [this commit](https://github.com/kataras/iris/commit/574414a64ed3d8736c836d476e6304d915f4a511)
+- **cookies**: ability to set custom cookie encoders to encode the cookie's value before sent by `context#SetCookie` and `context#SetCookieKV` and cookie decoders to decode the cookie's value when retrieving from `context#GetCookie`. That was the second and final part relative to a community's question at: [issue #1018](https://github.com/kataras/iris/issues/1018). Implemented by [this commit](https://github.com/kataras/iris/commit/f708c6098faec7c4e2232c791380cdff7a26960b)
+- **fix**: [issue #1020](https://github.com/kataras/iris/issues/1020) via [this commit](https://github.com/kataras/iris/commit/3d30ccef05703246b716a14dda14d2f28294dbd2), redis database stores the int as float64, don't change that native behavior, just grab it nicely.
+
+## Translations (2)
+
+- [README_PT_BR.md](README_PT_BR.md) for Brazilian Portuguese language via [this PR](https://github.com/kataras/iris/pull/1008) thanks to [@gschri](https://github.com/gschri)
+- [README_JPN.md](README_JPN.md) for Japanese language via [this PR](https://github.com/kataras/iris/pull/1015) thanks to [@tkhkokd](https://github.com/tkhkokd).
+
+Thank you both for your contribution. We all looking forward for the HISTORY translations as well!!!
+
 # Mo, 21 May 2018 | v10.6.5
 
 First of all, special thanks to [@haritsfahreza](https://github.com/haritsfahreza) for translating the entire Iris' README page & Changelogs to the Bahasa Indonesia language via PR: [#1000](https://github.com/kataras/iris/pull/1000)!

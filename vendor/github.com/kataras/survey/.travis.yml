@@ -1,13 +1,11 @@
 language: go
-
-go_import_path: gopkg.in/AlecAivazis/survey.v1
-
-before_install:
-  - go get github.com/AlecAivazis/run
-
+os:
+  - linux
+  - osx
+go:
+  - go1.9
+go_import_path: github.com/kataras/survey
 install:
-  - run install-deps
-
+  - go get ./...
 script:
-  - run tests
-  # - run autoplay-tests
+  - go test -v -cover ./...
