@@ -59,7 +59,7 @@ changan:
   andon_port: 8888
   enable: true
 odoo:
-  url: http://172.17.0.1:8069
+  url: http://192.168.1.8:8069
   route: /api/v1/mrp.productions
   headers:
     Content-Type: application/json
@@ -68,7 +68,7 @@ odoo:
   max_retry: 1
   enable: true
 storage:
-  db_url: 172.17.0.1:5432
+  db_url: 192.168.1.8:5432
   db_name: sa
   db_user: admin
   db_pwd: admin
