@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"sync/atomic"
 	"time"
-	)
+)
 
 type Diagnostic interface {
 	Error(msg string, err error)
@@ -681,6 +681,19 @@ func (s *Service) FindRoutingOperations(workcenter_code string, cartype string, 
 	}
 }
 
+func (s *Service) FindLocalResults(hmi_sn string) ([]ResultsWorkorders, error) {
+	var results []ResultsWorkorders
+
+	sql := "select * from results, workorders where results.x_workorder_id = workorders.id and results.stage = 'final' "
+	if hmi_sn != "" {
+		sql = sql + fmt.Sprintf(" and workorders.hmi_sn = '%s'", hmi_sn)
+	}
+
+	err := s.eng.SQL(sql).Find(&results)
+
+	return results, err
+}
+
 func (s *Service) DropTableManage() error {
 	c := s.Config()
 	for {
@@ -702,5 +715,3 @@ func (s *Service) DropTableManage() error {
 		time.Sleep(time.Duration(c.VacuumPeriod) - diff)
 	}
 }
-
-

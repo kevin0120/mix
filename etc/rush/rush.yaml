@@ -23,7 +23,7 @@ httpd:
     - 'OPTIONS'
 
 minio:
-  url: 127.0.0.1:9000
+  url: 172.17.0.1:9000
   bucket: curves
   access: minio
   secret: minio123
@@ -31,7 +31,7 @@ minio:
   reupload_interval: 24h
 aiis:
   urls:
-  - http://127.0.0.1:9092
+  - http://172.17.0.1:9092
   headers:
     Content-Type: application/json
   result_push_url: /aiis/v1/operation.results/%d
@@ -41,7 +41,7 @@ aiis:
   max_retry: 3
 odoo:
   urls:
-  - http://127.0.0.1:8069
+  - http://172.17.0.1:8069
   timeout: 8s
   interval: 1s
   max_retry: 3
@@ -64,7 +64,7 @@ websocket:
   read_buf_size: 4096
   write_buf_size: 4096
 storage:
-  db_url: 127.0.0.1:5432
+  db_url: 172.17.0.1:5432
   db_name: rush
   db_user: admin
   db_pwd: admin

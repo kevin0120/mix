@@ -64,7 +64,7 @@ type JobPoint struct {
 	Y         float64 `json:"offset_Y"`
 	MaxOpTime int     `json:"max_op_time"`
 	NutID     int64   `json:"nut_id"`
-	GroupSeq       int     `json:"group_sequence"`
+	GroupSeq  int     `json:"group_sequence"`
 }
 
 type ControllerMode struct {
@@ -112,23 +112,37 @@ type JobControl struct {
 }
 
 type RoutingOperationPoint struct {
-	Seq int `json:"sequence"`
-	MaxOpTime int `json:"max_op_time"`
-	PSet int `json:"pset"`
-	X         float64 `json:"offset_x"`
-	Y         float64 `json:"offset_Y"`
-	GroupSequence int `json:"group_sequence"`
+	Seq           int     `json:"sequence"`
+	MaxOpTime     int     `json:"max_op_time"`
+	PSet          int     `json:"pset"`
+	X             float64 `json:"offset_x"`
+	Y             float64 `json:"offset_Y"`
+	GroupSequence int     `json:"group_sequence"`
 }
 
 type RoutingOperation struct {
-	OperationID    int64       `json:"id"`
-	Job            int         `json:"job"`
-	MaxOpTime      int         `json:"max_op_time"`
-	Name           string      `json:"name"`
-	Img            string      `json:"img"`
-	ProductId      int64       `json:"product_id"`
-	ProductType    string      `json:"product_type"`
-	WorkcenterCode string      `json:"workcenter_code"`
-	VehicleTypeImg string      `json:"vehicleTypeImg"`
+	OperationID    int64                   `json:"id"`
+	Job            int                     `json:"job"`
+	MaxOpTime      int                     `json:"max_op_time"`
+	Name           string                  `json:"name"`
+	Img            string                  `json:"img"`
+	ProductId      int64                   `json:"product_id"`
+	ProductType    string                  `json:"product_type"`
+	WorkcenterCode string                  `json:"workcenter_code"`
+	VehicleTypeImg string                  `json:"vehicleTypeImg"`
 	Points         []RoutingOperationPoint `json:"points"`
+}
+
+type LocalResults struct {
+	HmiSN        interface{} `json:"hmi_sn,omitempty"`
+	Vin          interface{} `json:"vin,omitempty"`
+	VehicleType  interface{} `json:"vehicle_type,omitempty"`
+	JobID        interface{} `json:"job_id,omitempty"`
+	ControllerSN interface{} `json:"controller_sn,omitempty"`
+	GunSN        interface{} `json:"gun_sn,omitempty"`
+	Result       interface{} `json:"result,omitempty"`
+	Torque       interface{} `json:"torque,omitempty"`
+	Angle        interface{} `json:"angle,omitempty"`
+	TimeStamp    interface{} `json:"timestamp,omitempty"`
+	Batch        interface{} `json:"batch,omitempty"`
 }

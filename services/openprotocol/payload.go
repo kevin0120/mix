@@ -27,44 +27,44 @@ const (
 	DEFAULT_REV     = "000"
 	DEFAULT_MSG_END = string(0x00)
 
-	MID_0001_START                 = "0001"
-	MID_0002_START_ACK             = "0002"
-	MID_0003_STOP                  = "0003"
-	MID_0004_CMD_ERR               = "0004"
-	MID_0005_CMD_OK                = "0005"
-	MID_0014_PSET_SUBSCRIBE        = "0014"
-	MID_0018_PSET                  = "0018"
-	MID_0012_PSET_DETAIL_REQUEST   = "0012"
-	MID_0013_PSET_DETAIL_REPLY     = "0013"
-	MID_0010_PSET_LIST_REQUEST     = "0010"
-	MID_0011_PSET_LIST_REPLY       = "0011"
-	MID_0034_JOB_INFO_SUBSCRIBE    = "0034"
-	MID_0060_LAST_RESULT_SUBSCRIBE = "0060"
-	MID_7408_LAST_CURVE_SUBSCRIBE  = "7408"
-	MID_0151_IDENTIFIER_SUBSCRIBE  = "0151"
-	MID_0150_IDENTIFIER_SET        = "0150"
-	MID_0038_JOB_SELECT            = "0038"
-	MID_0064_OLD_SUBSCRIBE         = "0064"
-	MID_0065_OLD_DATA              = "0065"
-	MID_0130_JOB_OFF               = "0130"
-	MID_0250_SELECTOR_SUBSCRIBE    = "0250"
-	MID_0042_TOOL_DISABLE          = "0042"
-	MID_0043_TOOL_ENABLE           = "0043"
-	MID_0030_JOB_LIST_REQUEST      = "0030"
-	MID_0031_JOB_LIST_REPLY        = "0031"
-	MID_0032_JOB_DETAIL_REQUEST    = "0032"
-	MID_0033_JOB_DETAIL_REPLY      = "0033"
-	MID_0200_CONTROLLER_RELAYS     = "0200"
-	MID_0019_PSET_BATCH_SET        = "0019"
-	MID_0020_PSET_BATCH_RESET      = "0020"
-	MID_0035_JOB_INFO              = "0035"
-	MID_0210_INPUT_SUBSCRIBE       = "0210"
-	MID_0211_INPUT_MONITOR         = "0211"
-	MID_0127_JOB_ABORT             = "0127"
+	MID_0001_START                   = "0001"
+	MID_0002_START_ACK               = "0002"
+	MID_0003_STOP                    = "0003"
+	MID_0004_CMD_ERR                 = "0004"
+	MID_0005_CMD_OK                  = "0005"
+	MID_0014_PSET_SUBSCRIBE          = "0014"
+	MID_0018_PSET                    = "0018"
+	MID_0012_PSET_DETAIL_REQUEST     = "0012"
+	MID_0013_PSET_DETAIL_REPLY       = "0013"
+	MID_0010_PSET_LIST_REQUEST       = "0010"
+	MID_0011_PSET_LIST_REPLY         = "0011"
+	MID_0034_JOB_INFO_SUBSCRIBE      = "0034"
+	MID_0060_LAST_RESULT_SUBSCRIBE   = "0060"
+	MID_7408_LAST_CURVE_SUBSCRIBE    = "7408"
+	MID_0151_IDENTIFIER_SUBSCRIBE    = "0151"
+	MID_0150_IDENTIFIER_SET          = "0150"
+	MID_0038_JOB_SELECT              = "0038"
+	MID_0064_OLD_SUBSCRIBE           = "0064"
+	MID_0065_OLD_DATA                = "0065"
+	MID_0130_JOB_OFF                 = "0130"
+	MID_0250_SELECTOR_SUBSCRIBE      = "0250"
+	MID_0042_TOOL_DISABLE            = "0042"
+	MID_0043_TOOL_ENABLE             = "0043"
+	MID_0030_JOB_LIST_REQUEST        = "0030"
+	MID_0031_JOB_LIST_REPLY          = "0031"
+	MID_0032_JOB_DETAIL_REQUEST      = "0032"
+	MID_0033_JOB_DETAIL_REPLY        = "0033"
+	MID_0200_CONTROLLER_RELAYS       = "0200"
+	MID_0019_PSET_BATCH_SET          = "0019"
+	MID_0020_PSET_BATCH_RESET        = "0020"
+	MID_0035_JOB_INFO                = "0035"
+	MID_0210_INPUT_SUBSCRIBE         = "0210"
+	MID_0211_INPUT_MONITOR           = "0211"
+	MID_0127_JOB_ABORT               = "0127"
 	MID_0100_MULTI_SPINDLE_SUBSCRIBE = "0100"
-	MID_0101_MULTI_SPINDLE_RESULT = "0101"
-	MID_0051_VIN_SUBSCRIBE = "0051"
-	MID_0052_VIN = "0052"
+	MID_0101_MULTI_SPINDLE_RESULT    = "0101"
+	MID_0051_VIN_SUBSCRIBE           = "0051"
+	MID_0052_VIN                     = "0052"
 
 	MID_0008_DATA_SUB = "0008"
 
@@ -1131,16 +1131,16 @@ func DeserializeIDS(str string) []string {
 
 type MultiSpindleResult struct {
 	TotalSpindleNumber int
-	Vin string
-	JobID int
-	PSetID int
-	BatchSize int
-	BatchCount int
-	BatchStatus int
-	TorqueMin                     float64
-	TorqueMax                     float64
-	TorqueFinalTarget             float64
-	AngleMin                      float64
-	AngleMax                      float64
-	FinalAngleTarget              float64
+	Vin                string
+	JobID              int
+	PSetID             int
+	BatchSize          int
+	BatchCount         int
+	BatchStatus        int
+	TorqueMin          float64
+	TorqueMax          float64
+	TorqueFinalTarget  float64
+	AngleMin           float64
+	AngleMax           float64
+	FinalAngleTarget   float64
 }

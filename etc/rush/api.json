@@ -699,6 +699,43 @@
         }
       }
     },
+    "/local-results": {
+      "get": {
+        "tags": [
+          "HMI"
+        ],
+        "description": "查询本地结果",
+        "parameters": [
+          {
+            "description": "hmi序列号",
+            "default": 1122334455667788,
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "name": "hmi_sn"
+          },
+          {
+            "description": "字段过滤器(,分隔)",
+            "default": "",
+            "required": false,
+            "in": "query",
+            "type": "string",
+            "name": "filters"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/LocalResult"
+              }
+            }
+          }
+        }
+      }
+    },
     "/scanner": {
       "put": {
         "tags": [
@@ -1620,6 +1657,66 @@
         "sequence": {
           "type": "integer",
           "description": "序号"
+        }
+      }
+    },
+    "LocalResult": {
+      "type": "object",
+      "properties": {
+        "hmi_sn": {
+          "type": "string",
+          "description": "hmi序列号",
+          "example": "1122334455667788"
+        },
+        "controller_sn": {
+          "type": "string",
+          "description": "控制器序列号",
+          "example": "0001"
+        },
+        "gun_sn": {
+          "type": "string",
+          "description": "工具序列号",
+          "example": "123456"
+        },
+        "result": {
+          "type": "string",
+          "description": "结果值(OK/NOK)",
+          "example": "OK"
+        },
+        "torque": {
+          "type": "number",
+          "description": "扭矩(nm)",
+          "example": 1
+        },
+        "angle": {
+          "type": "number",
+          "description": "角度(deg)",
+          "example": 1
+        },
+        "vin": {
+          "type": "string",
+          "description": "车辆识别号",
+          "example": "LSV2A8CA72N949198"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "拧接完成时间(yyyy-mm-ddThh:mm:ss+08:00)",
+          "example": "2018-04-26T08:31:02+08:00"
+        },
+        "job_id": {
+          "type": "number",
+          "description": "装配过程号",
+          "example": 1
+        },
+        "batch": {
+          "type": "string",
+          "description": "批次信息",
+          "example": "1/4"
+        },
+        "vehicle_type": {
+          "type": "string",
+          "description": "车型代码",
+          "example": "CAR111"
         }
       }
     }

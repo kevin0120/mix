@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	)
+)
 
 type Methods struct {
 	service *Service

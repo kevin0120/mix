@@ -12,6 +12,7 @@ import (
 	"github.com/masami10/rush/services/wsnotify"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
@@ -978,7 +979,7 @@ func (m *Methods) putJobControll(ctx iris.Context) {
 }
 
 func (m *Methods) getRoutingOpertions(ctx iris.Context) {
-	code:= ctx.Params().Get("code")
+	code := ctx.Params().Get("code")
 	if code == "" {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("workcenter code is required")
@@ -1011,6 +1012,51 @@ func (m *Methods) getRoutingOpertions(ctx iris.Context) {
 	rt_ro.ProductType = ro.ProductType
 
 	body, _ := json.Marshal(rt_ro)
+	ctx.Header("content-type", "application/json")
+	ctx.Write(body)
+}
+
+func (m *Methods) filterValue(filters string, key string, value interface{}) interface{} {
+	if filters == "" || strings.Contains(filters, key) {
+		return value
+	}
+
+	return nil
+}
+
+func (m *Methods) getLocalResults(ctx iris.Context) {
+	hmi_sn := ctx.URLParam("hmi_sn")
+	filters := ctx.URLParam("filters")
+
+	results, err := m.service.DB.FindLocalResults(hmi_sn)
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+
+	rt := []LocalResults{}
+	sr := controller.ResultValue{}
+	for _, v := range results {
+		json.Unmarshal([]byte(v.ResultValue), &sr)
+		lr := LocalResults{
+			HmiSN:        m.filterValue(filters, "hmi_sn", string(v.HMISN)),
+			Vin:          m.filterValue(filters, "vin", string(v.Vin)),
+			ControllerSN: m.filterValue(filters, "controller_sn", string(v.ControllerSN)),
+			GunSN:        m.filterValue(filters, "gun_sn", string(v.GunSN)),
+			Result:       m.filterValue(filters, "result", string(v.Result)),
+			Torque:       m.filterValue(filters, "torque", float64(sr.Mi)),
+			Angle:        m.filterValue(filters, "angel", float64(sr.Wi)),
+			TimeStamp:    m.filterValue(filters, "timestamp", string(v.Results.UpdateTime.Format(time.RFC3339))),
+			Batch:        m.filterValue(filters, "batch", string(v.Batch)),
+			VehicleType:  m.filterValue(filters, "vehicle_type", string(v.MO_Model)),
+			JobID:        m.filterValue(filters, "job_id", int(v.JobID)),
+		}
+
+		rt = append(rt, lr)
+	}
+
+	body, _ := json.Marshal(rt)
 	ctx.Header("content-type", "application/json")
 	ctx.Write(body)
 }
