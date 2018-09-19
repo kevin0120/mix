@@ -91,6 +91,8 @@ func (m *Methods) getResults(ctx iris.Context) {
 
 		odooResultSync.CURObjects = []aiis.CURObject{}
 
+		odooResultSync.Batch = v.Batch
+
 		curves, err := m.service.DB.ListCurvesByResult(v.ResultId)
 		if err == nil {
 			for _, c := range curves {

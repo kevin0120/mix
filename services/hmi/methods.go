@@ -628,7 +628,10 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 
 		//vin-cartype-hmisn-userid
 		ex_info := m.service.OpenProtocol.GenerateIDInfo(fmt.Sprintf("%d", db_workorder.Id))
-		err = m.service.OpenProtocol.JobSetManual(job.Controller_SN, job.Job, job.UserID, ex_info)
+
+		if !job.HasSet {
+			err = m.service.OpenProtocol.JobSetManual(job.Controller_SN, job.Job, job.UserID, ex_info)
+		}
 
 	default:
 		ctx.StatusCode(iris.StatusBadRequest)

@@ -97,6 +97,8 @@ type ODOOResultSync struct {
 	QualityState    string `json:"quality_state"`
 	ExceptionReason string `json:"exception_reason"`
 	UserID          int64  `json:"user_id"`
+	Batch           string `json:"batch"`
+	Vin             string `json:"vin"`
 }
 
 type ODOOPR struct {
