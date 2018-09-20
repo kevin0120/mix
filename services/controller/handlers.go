@@ -96,6 +96,7 @@ func (h *Handlers) PushAiis(needPush bool, r *storage.Results, workorder *storag
 
 		// 结果推送AIIS
 		aiisResult := aiis.AIISResult{}
+		aiisResult.ID = r.Id
 		if r.Result == storage.RESULT_OK {
 			aiisResult.Final_pass = ODOO_RESULT_PASS
 			if r.Count == 1 {
