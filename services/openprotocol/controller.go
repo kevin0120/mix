@@ -312,6 +312,7 @@ func (c *Controller) handleResult(result_data *ResultData) {
 		// 结果推送aiis
 		aiisResult := aiis.AIISResult{}
 
+		aiisResult.ID = db_result.Id
 		aiisResult.Batch = controllerResult.Batch
 
 		if controllerResult.ExceptionReason != "" {

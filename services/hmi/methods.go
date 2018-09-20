@@ -617,6 +617,7 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 	case controller.OPENPROTOCOL:
 
 		var db_workorder *storage.Workorders
+		ex_info := ""
 		if !job.Skip {
 			db_workorder, err = m.insertResultsForJob(&job)
 			if err != nil {
@@ -624,13 +625,15 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 				ctx.WriteString(err.Error())
 				return
 			}
-		}
 
-		//vin-cartype-hmisn-userid
-		ex_info := m.service.OpenProtocol.GenerateIDInfo(fmt.Sprintf("%d", db_workorder.Id))
+			//vin-cartype-hmisn-userid
+			ex_info = m.service.OpenProtocol.GenerateIDInfo(fmt.Sprintf("%d", db_workorder.Id))
+		}
 
 		if !job.HasSet {
 			err = m.service.OpenProtocol.JobSetManual(job.Controller_SN, job.Job, job.UserID, ex_info)
+		} else {
+			m.service.OpenProtocol.IDSet(job.Controller_SN, ex_info)
 		}
 
 	default:
@@ -668,6 +671,7 @@ func (m *Methods) insertResultsForJob(job *JobManual) (*storage.Workorders, erro
 		r.Seq = v.Seq
 		r.MaxRedoTimes = v.MaxOpTime
 		r.Stage = storage.RESULT_STAGE_INIT
+		r.Result = storage.RESULT_NONE
 
 		db_results = append(db_results, r)
 	}
@@ -680,6 +684,7 @@ func (m *Methods) insertResultsForJob(job *JobManual) (*storage.Workorders, erro
 	db_workorder.WorkcenterID = job.WorkcenterID
 	db_workorder.MaxSeq = max_seq
 	db_workorder.UserID = job.UserID
+	db_workorder.MO_Model = job.CarType
 
 	err := m.service.DB.InsertWorkorder(&db_workorder, &db_results, false, false, true)
 
@@ -990,7 +995,7 @@ func (m *Methods) getRoutingOpertions(ctx iris.Context) {
 	}
 
 	carType := ctx.URLParam("carType")
-	job, _ := strconv.Atoi(ctx.URLParams()["job"])
+	job, _ := strconv.Atoi(ctx.URLParam("job"))
 
 	ro, err := m.service.DB.FindRoutingOperations(code, carType, job)
 	if err != nil {
@@ -1030,8 +1035,9 @@ func (m *Methods) filterValue(filters string, key string, value interface{}) int
 func (m *Methods) getLocalResults(ctx iris.Context) {
 	hmi_sn := ctx.URLParam("hmi_sn")
 	filters := ctx.URLParam("filters")
+	limit, _ := strconv.Atoi(ctx.URLParam("limit"))
 
-	results, err := m.service.DB.FindLocalResults(hmi_sn)
+	results, err := m.service.DB.FindLocalResults(hmi_sn, limit)
 	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString(err.Error())
@@ -1049,7 +1055,7 @@ func (m *Methods) getLocalResults(ctx iris.Context) {
 			GunSN:        m.filterValue(filters, "gun_sn", string(v.GunSN)),
 			Result:       m.filterValue(filters, "result", string(v.Result)),
 			Torque:       m.filterValue(filters, "torque", float64(sr.Mi)),
-			Angle:        m.filterValue(filters, "angel", float64(sr.Wi)),
+			Angle:        m.filterValue(filters, "angle", float64(sr.Wi)),
 			TimeStamp:    m.filterValue(filters, "timestamp", string(v.Results.UpdateTime.Format(time.RFC3339))),
 			Batch:        m.filterValue(filters, "batch", string(v.Batch)),
 			VehicleType:  m.filterValue(filters, "vehicle_type", string(v.MO_Model)),

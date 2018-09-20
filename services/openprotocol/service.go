@@ -170,6 +170,24 @@ func (p *Service) JobSet(sn string, job int, workorder_id int64, user_id int64) 
 	return nil
 }
 
+func (p *Service) IDSet(sn string, str string) error {
+	v, exist := p.Parent.Controllers[sn]
+	if !exist {
+		// SN对应控制器不存在
+		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
+	}
+
+	c := v.(*Controller)
+
+	err := c.IdentifierSet(str)
+	if err != nil {
+		// 控制器请求失败
+		return err
+	}
+
+	return nil
+}
+
 func (p *Service) JobSetManual(sn string, job int, user_id int64, ex_info string) error {
 	v, exist := p.Parent.Controllers[sn]
 	if !exist {

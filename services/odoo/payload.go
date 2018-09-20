@@ -99,6 +99,8 @@ type ODOOResultSync struct {
 	UserID          int64  `json:"user_id"`
 	Batch           string `json:"batch"`
 	Vin             string `json:"vin"`
+
+	LocalID int64 `json:"local_id"`
 }
 
 type ODOOPR struct {

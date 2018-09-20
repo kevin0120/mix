@@ -434,7 +434,7 @@ func (s *Service) UpdateResultUpload(upload bool, r_id int64) (int64, error) {
 
 func (s *Service) UpdateResult(result *Results) (int64, error) {
 
-	sql := "update `results` set controller_sn = ?, result = ?, has_upload = ?, stage = ?, update_time = ?, pset_define = ?, result_value = ?, count = ?, batch = ? where id = ?"
+	sql := "update `results` set controller_sn = ?, result = ?, has_upload = ?, stage = ?, update_time = ?, pset_define = ?, result_value = ?, count = ?, batch = ?, gun_sn = ? where id = ?"
 	r, err := s.eng.Exec(sql,
 		result.ControllerSN,
 		result.Result,
@@ -445,6 +445,7 @@ func (s *Service) UpdateResult(result *Results) (int64, error) {
 		result.ResultValue,
 		result.Count,
 		result.Batch,
+		result.GunSN,
 		result.Id)
 
 	if err != nil {
@@ -475,10 +476,10 @@ func (s *Service) UpdateResultByCount(id int64, count int, flag bool) error {
 
 	var err error
 	if count > 0 {
-		sql := "update `results` set has_upload = ? where x_result_id = ? and count = ?"
+		sql := "update `results` set has_upload = ? where id = ? and count = ?"
 		_, err = s.eng.Exec(sql, flag, id, count)
 	} else {
-		sql := "update `results` set has_upload = ? where x_result_id = ?"
+		sql := "update `results` set has_upload = ? where id = ?"
 		_, err = s.eng.Exec(sql, flag, id)
 	}
 
@@ -681,7 +682,7 @@ func (s *Service) FindRoutingOperations(workcenter_code string, cartype string, 
 	}
 }
 
-func (s *Service) FindLocalResults(hmi_sn string) ([]ResultsWorkorders, error) {
+func (s *Service) FindLocalResults(hmi_sn string, limit int) ([]ResultsWorkorders, error) {
 	var results []ResultsWorkorders
 
 	sql := "select * from results, workorders where results.x_workorder_id = workorders.id and results.stage = 'final' "
@@ -689,7 +690,15 @@ func (s *Service) FindLocalResults(hmi_sn string) ([]ResultsWorkorders, error) {
 		sql = sql + fmt.Sprintf(" and workorders.hmi_sn = '%s'", hmi_sn)
 	}
 
+	sql = sql + " order by results.update_time desc"
+
 	err := s.eng.SQL(sql).Find(&results)
+
+	if limit > 0 {
+		if limit < len(results) {
+			return results[0:limit], err
+		}
+	}
 
 	return results, err
 }

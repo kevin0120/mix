@@ -1,6 +1,7 @@
 package aiis
 
 type AIISResult struct {
+	ID               int64   `json:"id"`
 	Pset_m_threshold float64 `json:"pset_m_threshold"`
 	Pset_w_threshold float64 `json:"pset_w_threshold"`
 	UserID           int64   `json:"user_id"`

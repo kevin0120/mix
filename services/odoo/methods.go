@@ -72,12 +72,12 @@ func (m *Methods) getResults(ctx iris.Context) {
 		tr, exist := targetResults[v.ResultId]
 		if exist {
 			// 已存在
-			if v.Count > tr.Count {
-				targetResults[v.ResultId] = v
+			if v.Count > tr.Count || v.ResultId == 0{
+				targetResults[v.Id] = v
 			}
 		} else {
 			// 不存在
-			targetResults[v.ResultId] = v
+			targetResults[v.Id] = v
 		}
 	}
 
@@ -86,6 +86,8 @@ func (m *Methods) getResults(ctx iris.Context) {
 	i := 0
 	for _, v := range targetResults {
 		odooResultSync := ODOOResultSync{}
+
+		odooResultSync.LocalID = v.Id
 
 		odooResultSync.Control_date = v.UpdateTime.Format(time.RFC3339)
 
