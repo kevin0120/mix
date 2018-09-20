@@ -298,8 +298,6 @@ func (s *Service) HandleResult(cr *cResult) {
 		s.diag.Error("update result error", err)
 	} else {
 		// 更新masterpc结果上传标识
-		if cr.id > 0 {
-			s.PatchResultFlag(cr.id, true, cr.ip, cr.port)
-		}
+		s.PatchResultFlag(cr.r.ID, true, cr.ip, cr.port)
 	}
 }

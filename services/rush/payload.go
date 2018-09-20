@@ -3,6 +3,7 @@ package rush
 import "time"
 
 type OperationResult struct {
+	ID int64 `json:"id"`
 	PsetMThreshold  float32     `json:"pset_m_threshold"`
 	PsetMMax        float32     `json:"pset_m_max"`
 	ControlDate     time.Time   `json:"control_date"`

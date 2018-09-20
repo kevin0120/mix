@@ -100,31 +100,20 @@ func (s *Service) Open() error {
 	}
 	s.HTTPDService.Handler[0].AddRoute(r)
 
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "PUT",
+		Pattern:     "/andon-test",
+		HandlerFunc: s.andonTest,
+	}
+	s.HTTPDService.Handler[0].AddRoute(r)
+
 	spl := strings.SplitN(c.AndonAddr, "://", 2)
 	if len(spl) != 2 {
 		return fmt.Errorf("invalid address: %s", c.AndonAddr)
 	}
-	con, err := net.DialTimeout(spl[0], spl[1], 3*time.Second)
-	if err != nil {
-		return err
-	}
 
-	s.Conn = con
-
-	// 设置keep alive
-	s.setKeepAlive(con)
-
-	// 注册aiis 服务到andon系统中
-	if err = s.write(PakcageMsg(MSG_REGIST, s.GetSequenceNum(), nil)); err != nil {
-		s.diag.Error("Regist to Andon fail", err)
-		return err
-	}
-
-	go s.manage()
-
-	go s.readHandler(s.Conn)
-	
-	s.Opened = true
+	go s.Connect(spl)
 
 	return nil
 }
@@ -140,6 +129,36 @@ func (s *Service) Close() error {
 	s.Conn = nil
 
 	return nil
+}
+
+func (s *Service) Connect(spl []string) {
+
+	var con net.Conn
+	var err error
+	for {
+		con, err = net.DialTimeout(spl[0], spl[1], 3*time.Second)
+		if err == nil {
+			break
+		}
+	}
+
+
+	s.Conn = con
+
+	// 设置keep alive
+	s.setKeepAlive(con)
+
+	// 注册aiis 服务到andon系统中
+	if err = s.write(PakcageMsg(MSG_REGIST, s.GetSequenceNum(), nil)); err != nil {
+		s.diag.Error("Regist to Andon fail", err)
+		//return err
+	}
+
+	go s.manage()
+
+	go s.readHandler(s.Conn)
+
+	s.Opened = true
 }
 
 func (s *Service) write(buf []byte) error {
@@ -294,5 +313,36 @@ func (s *Service) andonGetTaskbyworkCenter(ctx iris.Context) {
 
 		ctx.StatusCode(iris.StatusOK)
 		return
+	}
+}
+
+func (s *Service) andonTest(ctx iris.Context) {
+	andon_msg := AndonMsg{}
+	err := ctx.ReadJSON(&andon_msg)
+
+	if err != nil {
+		ctx.Writef(fmt.Sprintf("param error: %s", err.Error()))
+		ctx.StatusCode(iris.StatusBadRequest)
+		return
+	}
+
+	str_data, _ := json.Marshal(andon_msg.Data)
+
+	switch andon_msg.MsgType {
+	case MSG_TASK:
+		tasks := []AndonTask{}
+		err = json.Unmarshal(str_data, &tasks)
+		if err != nil {
+			ctx.Writef(fmt.Sprintf("tasks error: %s", err.Error()))
+			ctx.StatusCode(iris.StatusBadRequest)
+			return
+		}
+
+		for _, v := range tasks {
+			t, _ := json.Marshal(v)
+			s.WS.WSSendTask(v.Workcenter, string(t))
+
+			//fmt.Printf("send task -- workcenter:%s payload:%s\n", v.Workcenter, string(t))
+		}
 	}
 }
