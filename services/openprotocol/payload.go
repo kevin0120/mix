@@ -2,7 +2,7 @@ package openprotocol
 
 import (
 	"fmt"
-	"github.com/imroc/biu"
+	"github.com/masami10/rush/utils/biu"
 	"strconv"
 	"strings"
 )
