@@ -43,6 +43,7 @@ class ResultSync(AbstractModel):
                 _logger.debug('Sync Result can not found result id: %d' % result['id'])
                 continue
             rid = result.pop('id') if 'id' in result else None
+            lid = result.pop('local_id') if 'local_id' in result else None
             if not rid:
                 continue
             if 'cur_objects' in result:
@@ -62,7 +63,7 @@ class ResultSync(AbstractModel):
                 continue
             data = {'has_upload': True}
             try:
-                ret = requests.patch(url=url + '/{0}'.format(rid), data=json.dumps(data), headers=headers)
+                ret = requests.patch(url=url + '/{0}'.format(lid), data=json.dumps(data), headers=headers)
             except ConnectionError:
                 continue
             if ret.status_code != 200:
