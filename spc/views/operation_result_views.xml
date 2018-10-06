@@ -194,7 +194,7 @@
                 <filter name="month" string="Current Month" domain="[('control_date','&gt;=', context_today().strftime('%Y-%m-1')),('control_date','&lt;', (context_today() + relativedelta(months=1)).strftime('%Y-%m-1') )]"/>
                 <filter name="year" string="This Year" domain="[('control_date','&gt;=', context_today().strftime('%Y-1-1')),('control_date','&lt;', (context_today() + relativedelta(years=1)).strftime('%Y-1-1') )]"/>
                 <filter name="last_year" string="Last Year" domain="[('control_date','&gt;=', (context_today() - relativedelta(years=1)).strftime('%Y-1-1')),('control_date','&lt;', context_today().strftime('%Y-1-1') )]"/>
-                <group expand="0" string="Group By">
+                <group expand="1" string="Group By">
                     <filter string="Result" context="{'group_by': 'measure_result'}"/>
                     <!--<filter string="Production" context="{'group_by': 'production_id'}"/>-->
                     <filter string="Vehicle" context="{'group_by': 'product_id'}"/>
@@ -204,6 +204,8 @@
                     <filter string="Final Pass" context="{'group_by': 'final_pass'}"/>
                     <filter string="Data Lacking" context="{'group_by': 'lacking'}"/>
                     <filter string="Screw Gun" context="{'group_by': 'gun_id'}"/>
+                    <separator/>
+                        <filter string="Tightening Date" context="{'group_by': 'control_date:month'}"/>
                 </group>
             </search>
         </field>
