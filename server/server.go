@@ -200,9 +200,12 @@ func (s *Server) appendChanganService() error {
 	d := s.DiagService.NewChanganHandler()
 	c := s.config.Changan
 
-	srv := changan.NewService(d, c, s.HTTPDService, s.WSNotifyService)
-	s.AppendService("changan", srv)
-	s.ChanganService = srv
+	if c.Enable {
+		srv := changan.NewService(d, c, s.HTTPDService, s.WSNotifyService)
+		s.AppendService("changan", srv)
+		s.ChanganService = srv
+	}
+
 	return nil
 }
 

@@ -89,14 +89,14 @@ func (s *Service) setKeepAlive(con net.Conn) error {
 
 func (s *Service) Open() error {
 
-	s.AndonDB.StartService()
-
 	//开始配置
 	c := s.configValue.Load().(Config)
 
 	if !c.Enable {
 		return nil
 	}
+
+	s.AndonDB.StartService()
 
 	r := httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
