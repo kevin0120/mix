@@ -56,7 +56,6 @@ func (s *Service) Open() error {
 	}
 	if !exist {
 		return errors.New("Check Table exist operation_result fail, Please start Odoo first")
-
 	}
 
 	engine.SetMaxOpenConns(c.MaxConnects) // always success

@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:b62a3c5b37db602bf1158e921da1a762315a4c37855fd418a14498aa87a342d5"
+  name = "cloud.google.com/go"
+  packages = ["civil"]
+  pruneopts = "UT"
+  revision = "97efc2c9ffd9fe8ef47f7f3203dc60bbca547374"
+  version = "v0.28.0"
+
+[[projects]]
   digest = "1:b16fbfbcc20645cb419f78325bb2e85ec729b338e996a228124d68931a6f2a37"
   name = "github.com/BurntSushi/toml"
   packages = ["."]
@@ -37,6 +45,17 @@
   ]
   pruneopts = "UT"
   revision = "b565731e1464263de0bda75f2e45d97b54b60110"
+
+[[projects]]
+  branch = "master"
+  digest = "1:6f120164f62e62991d0f85562abe2002d438abb2ca80b7717a2f4ae2af1c6829"
+  name = "github.com/denisenkom/go-mssqldb"
+  packages = [
+    ".",
+    "internal/cp",
+  ]
+  pruneopts = "UT"
+  revision = "1eb28afdf9b6e56cf673badd47545f844fe81103"
 
 [[projects]]
   branch = "master"
@@ -340,11 +359,12 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:dedf20eb0d3e8d6aa8a4d3d2fae248222b688ed528201995e152cc497899123c"
+  digest = "1:21fff5e6df3eecd602ee8f53b0df0e19ecdfbe601e8e1baec628a4189b34d491"
   name = "golang.org/x/crypto"
   packages = [
     "acme",
     "acme/autocert",
+    "md4",
   ]
   pruneopts = "UT"
   revision = "0e37d006457bf46f9e6692014ba72ef82c33022c"
@@ -429,6 +449,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/denisenkom/go-mssqldb",
     "github.com/go-xorm/xorm",
     "github.com/iris-contrib/middleware/cors",
     "github.com/kataras/iris",

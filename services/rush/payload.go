@@ -3,7 +3,7 @@ package rush
 import "time"
 
 type OperationResult struct {
-	ID int64 `json:"id"`
+	ID              int64       `json:"id"`
 	PsetMThreshold  float32     `json:"pset_m_threshold"`
 	PsetMMax        float32     `json:"pset_m_max"`
 	ControlDate     time.Time   `json:"control_date"`
@@ -31,6 +31,11 @@ type OperationResult struct {
 	Vin             string      `json:"vin"`
 	GunID           int64       `json:"gun_id"`
 	Batch           string      `json:"batch"`
+	Mode            string      `json:"mode"`
+	ControllerSN    string      `json:"controller_sn"`
+	TighteningId    int64       `json:"tightening_id"`
+	ToolSN          string      `json:"tool_sn"`
+	WorkcenterCode  string      `json:"workcenter_code"`
 
 	// mo相关信息
 	EquipemntName  string `json:"equipment_name"` // 设备名

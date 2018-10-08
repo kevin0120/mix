@@ -28,10 +28,10 @@ type PMONEventHandler func(error, []rune, interface{}) //事件号， 内容
 
 func NewService(conf Config, d Diagnostic) (*Service, error) {
 	s := &Service{
-		err:  make(chan error, 1),
-		diag: d,
+		err:    make(chan error, 1),
+		diag:   d,
 		Opened: false,
-		stop: make(chan chan struct{}),
+		stop:   make(chan chan struct{}),
 	}
 
 	s.rawConf.Store(conf)

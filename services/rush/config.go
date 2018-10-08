@@ -5,7 +5,6 @@ import (
 	"time"
 )
 
-
 type Config struct {
 	Enable       bool              `yaml:"enable"`
 	Workers      int               `yaml:"workers"`

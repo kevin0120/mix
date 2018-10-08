@@ -38,10 +38,11 @@ type Server struct {
 	dataDir  string
 	hostname string
 
-	HTTPDService *httpd.Service
-	PmonService  *pmon.Service
-	FisService   *fis.Service
-	OdooService  *odoo.Service
+	HTTPDService   *httpd.Service
+	PmonService    *pmon.Service
+	FisService     *fis.Service
+	ChanganService *changan.Service
+	OdooService    *odoo.Service
 
 	StorageService  *storage.Service
 	WSNotifyService *wsnotify.Service
@@ -110,6 +111,7 @@ func (s *Server) appendRushService() {
 	srv.HTTPDService = s.HTTPDService
 	srv.StorageService = s.StorageService
 	srv.Fis = s.FisService
+	srv.Changan = s.ChanganService
 
 	s.AppendService("rush", srv)
 }
@@ -200,6 +202,7 @@ func (s *Server) appendChanganService() error {
 
 	srv := changan.NewService(d, c, s.HTTPDService, s.WSNotifyService)
 	s.AppendService("changan", srv)
+	s.ChanganService = srv
 	return nil
 }
 

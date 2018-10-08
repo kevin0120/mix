@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/kataras/iris"
+	"github.com/masami10/aiis/services/changan"
 	"github.com/masami10/aiis/services/fis"
 	"github.com/masami10/aiis/services/httpd"
 	"gopkg.in/resty.v1"
@@ -19,9 +20,9 @@ type Diagnostic interface {
 }
 
 type cResult struct {
-	r  *OperationResult
-	id int64
-	ip string
+	r    *OperationResult
+	id   int64
+	ip   string
 	port string
 }
 
@@ -32,19 +33,20 @@ type RushResult struct {
 type Service struct {
 	HTTPDService *httpd.Service
 	workers      int
-	Opened 		 bool
+	Opened       bool
 	wg           sync.WaitGroup
 	chResult     chan cResult
 	closing      chan struct{}
 	configValue  atomic.Value
 	httpClient   *resty.Client
-	route       string
+	route        string
 
 	StorageService interface {
 		UpdateResults(result *OperationResult, id int64, sent int) error
 	}
 
-	Fis *fis.Service
+	Fis     *fis.Service
+	Changan *changan.Service
 
 	diag Diagnostic
 }
@@ -56,7 +58,7 @@ func NewService(c Config, d Diagnostic) *Service {
 			workers:  c.Workers,
 			Opened:   false,
 			chResult: make(chan cResult, c.Workers),
-			route: c.Route,
+			route:    c.Route,
 		}
 
 		s.configValue.Store(c)
@@ -117,10 +119,10 @@ func (s *Service) getResultUpdate(ctx iris.Context) {
 		rush_ip = kvs[0]
 	}
 
-	cr := cResult {
-		r: &r,
-		id: resultId,
-		ip: rush_ip,
+	cr := cResult{
+		r:    &r,
+		id:   resultId,
+		ip:   rush_ip,
 		port: rush_port,
 	}
 
@@ -173,7 +175,7 @@ func (s *Service) Open() error {
 
 		go s.run()
 	}
-	
+
 	s.Opened = true
 
 	return nil
@@ -257,6 +259,34 @@ func (s *Service) OperationToFisResult(r *OperationResult) fis.FisResult {
 	return result
 }
 
+func (s *Service) OperationToChanganResult(r *OperationResult) changan.TighteningResults {
+	result := changan.TighteningResults{}
+
+	result.Spent = 0
+	result.Angle = r.MeasureDegree
+	result.Torque = r.MeasureTorque
+	result.Result = r.MeasureResult
+	result.Mode = r.Mode
+	result.AngleMax = r.PsetWMax
+	result.AngleMin = r.PsetWMin
+	result.AngleTarget = r.PsetWTarget
+	result.Batch = r.Batch
+	result.Cartype = r.Model
+	result.ControllerSn = r.ControllerSN
+	result.Exception = r.ExceptionReason
+	result.Strategy = r.PsetStrategy
+	result.TighteningId = r.TighteningId
+	result.ToolSn = r.ToolSN
+	result.TorqueMax = r.PsetMMax
+	result.TorqueMin = r.PsetMMin
+	result.TorqueTarget = r.PsetMTarget
+	result.UpdateTime = r.ControlDate
+	result.Vin = r.Vin
+	result.WorkcenterCode = r.WorkcenterCode
+
+	return result
+}
+
 func (s *Service) PatchResultFlag(result_id int64, has_upload bool, ip string, port string) error {
 	if s.httpClient == nil {
 		return errors.New("rush http client is nil")
@@ -289,6 +319,14 @@ func (s *Service) HandleResult(cr *cResult) {
 		if e != nil {
 			sent = 0
 			s.diag.Error("push result to fis error", e)
+		}
+	}
+
+	if s.Changan != nil {
+		changanResult := s.OperationToChanganResult(cr.r)
+
+		if !s.Changan.AndonDB.InsertResult(&changanResult) {
+			s.diag.Error("insert andon result failed", nil)
 		}
 	}
 

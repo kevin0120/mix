@@ -23,7 +23,7 @@ type Service struct {
 	WS              *wsnotify.Service
 	HTTPDService    *httpd.Service
 	Conn            net.Conn
-	Opened  		bool
+	Opened          bool
 	ReadTimeout     time.Duration
 	diag            Diagnostic
 	Seq             int
@@ -31,6 +31,7 @@ type Service struct {
 	Msgs            chan AndonMsg
 	requestTaskInfo chan string
 	stop            chan chan struct{}
+	AndonDB         *AndonDB
 }
 
 func (c *Service) GetSequenceNum() int {
@@ -52,8 +53,11 @@ func NewService(d Diagnostic, c Config, h *httpd.Service, ws *wsnotify.Service) 
 		Msgs:            make(chan AndonMsg, 100),
 		requestTaskInfo: make(chan string, 1),
 		Seq:             1,
-		Opened: 		 false,
+		Opened:          false,
 		ReadTimeout:     time.Duration(c.ReadTimeout),
+		AndonDB: &AndonDB{
+			cfg: &c.DB,
+		},
 	}
 
 	s.configValue.Store(c)
@@ -84,6 +88,8 @@ func (s *Service) setKeepAlive(con net.Conn) error {
 }
 
 func (s *Service) Open() error {
+
+	s.AndonDB.StartService()
 
 	//开始配置
 	c := s.configValue.Load().(Config)
@@ -122,6 +128,8 @@ func (s *Service) Close() error {
 	if !s.Opened {
 		return nil
 	}
+
+	s.AndonDB.StopService()
 	stopping := make(chan struct{})
 	s.stop <- stopping
 
@@ -141,7 +149,6 @@ func (s *Service) Connect(spl []string) {
 			break
 		}
 	}
-
 
 	s.Conn = con
 
