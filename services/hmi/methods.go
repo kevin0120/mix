@@ -765,6 +765,7 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 	resp.WorkSheet = workorder.WorkSheet
 	resp.Job = workorder.JobID
 	resp.VehicleTypeImg = workorder.VehicleTypeImg
+	resp.Lnr = workorder.MO_Lnr
 
 	for _, v := range results {
 		r := Result{}

@@ -91,20 +91,18 @@ type Result struct {
 }
 
 type Workorder struct {
-	Workorder_id int64  `json:"workorder_id"`
-	HMI_sn       string `json:"hmi_sn"`
-	//PSet         int       `json:"pset"`
-	//Nut_total    float64   `json:"nut_total"`
-	Vin     string `json:"vin"`
-	Knr     string `json:"knr"`
-	LongPin string `json:"long_pin"`
-	Status  string `json:"status"`
-	//Result_ids   []int64   `json:"result_ids"`
+	Workorder_id   int64  `json:"workorder_id"`
+	HMI_sn         string `json:"hmi_sn"`
+	Vin            string `json:"vin"`
+	Knr            string `json:"knr"`
+	LongPin        string `json:"long_pin"`
+	Status         string `json:"status"`
 	WorkSheet      string `json:"work_sheet"`
 	VehicleTypeImg string `json:"vehicleTypeImg"`
 
 	MaxOpTime int      `json:"max_op_time"`
 	Job       int      `json:"job_id"`
+	Lnr       string   `json:"lnr"`
 	Results   []Result `json:"results"`
 }
 
