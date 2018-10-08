@@ -27,6 +27,11 @@ type AIISResult struct {
 	WorkcenterID     int64   `json:"workcenter_id"`
 	GunID            int64   `json:"gun_id"`
 	Batch            string  `json:"batch"`
+	Mode             string  `json:"mode"`
+	ControllerSN     string  `json:"controller_sn"`
+	TighteningId     int64   `json:"tightening_id"`
+	ToolSN           string  `json:"tool_sn"`
+	WorkcenterCode   string  `json:"workcenter_code"`
 
 	CURObjects []CURObject `json:"cur_objects"`
 

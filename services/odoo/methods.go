@@ -72,7 +72,7 @@ func (m *Methods) getResults(ctx iris.Context) {
 		tr, exist := targetResults[v.ResultId]
 		if exist {
 			// 已存在
-			if v.Count > tr.Count || v.ResultId == 0{
+			if v.Count > tr.Count || v.ResultId == 0 {
 				targetResults[v.Id] = v
 			}
 		} else {

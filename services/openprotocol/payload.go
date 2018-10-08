@@ -23,9 +23,10 @@ type IOStatus struct {
 }
 
 const (
-	LEN_HEADER      = 20
-	DEFAULT_REV     = "000"
-	DEFAULT_MSG_END = string(0x00)
+	LEN_HEADER         = 20
+	DEFAULT_REV        = "000"
+	DEFAULT_MSG_END    = string(0x00)
+	LEN_SINGLE_SPINDLE = 18
 
 	MID_0001_START                   = "0001"
 	MID_0002_START_ACK               = "0002"
@@ -1129,6 +1130,14 @@ func DeserializeIDS(str string) []string {
 	return rt
 }
 
+type SingleSpindleResult struct {
+	SpindleNo int
+	ChannelID int
+	Result    string
+	Torque    float64
+	Angle     float64
+}
+
 type MultiSpindleResult struct {
 	TotalSpindleNumber int
 	Vin                string
@@ -1143,4 +1152,30 @@ type MultiSpindleResult struct {
 	AngleMin           float64
 	AngleMax           float64
 	FinalAngleTarget   float64
+
+	Spindles []SingleSpindleResult
+}
+
+func (msr *MultiSpindleResult) Deserialize(str string) {
+
+	sps := str[154:len(str)]
+
+	sp_num := len(sps) / LEN_SINGLE_SPINDLE
+	sp := SingleSpindleResult{}
+	for i := 0; i < sp_num; i++ {
+		target_sp := sps[i*LEN_SINGLE_SPINDLE : i*LEN_SINGLE_SPINDLE+LEN_SINGLE_SPINDLE]
+		sp.SpindleNo, _ = strconv.Atoi(target_sp[0:2])
+		if target_sp[4:5] == "0" {
+			sp.Result = "NOK"
+		} else {
+			sp.Result = "OK"
+		}
+
+		sp.Torque, _ = strconv.ParseFloat(target_sp[6:12], 64)
+		sp.Torque = sp.Torque / 100
+
+		sp.Angle, _ = strconv.ParseFloat(target_sp[13:LEN_SINGLE_SPINDLE], 64)
+
+		msr.Spindles = append(msr.Spindles, sp)
+	}
 }

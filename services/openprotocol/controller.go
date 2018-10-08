@@ -46,6 +46,8 @@ type Controller struct {
 	keepaliveDeadLine atomic.Value
 	protocol          string
 	Mode              atomic.Value
+	TriggerStart      time.Time
+	TriggerStop       time.Time
 }
 
 func NewController(c Config) Controller {
@@ -178,10 +180,38 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 		inputs.ControllerSN = c.cfg.SN
 
 		str, _ := json.Marshal(inputs)
-		//fmt.Printf(fmt.Sprintf("%s\n", string(str)))
-		c.Srv.WS.WSSendIOInput(string(str))
+		fmt.Printf(fmt.Sprintf("%s\n", string(str)))
+		go c.Srv.WS.WSSendIOInput(string(str))
+
+		if inputs.Inputs[c.Srv.config().IOTrigger-1] == '1' {
+			// 开始trigger计时
+			c.TriggerStart = time.Now()
+			go c.Srv.DB.UpdateResultTriggerTime("trigger_start", c.TriggerStart, c.cfg.SN)
+		} else if inputs.Inputs[c.Srv.config().IOTrigger-1] == '0' {
+			// 释放trigger
+			c.TriggerStop = time.Now()
+			go c.Srv.DB.UpdateResultTriggerTime("trigger_stop", c.TriggerStop, c.cfg.SN)
+		}
 
 	case MID_0101_MULTI_SPINDLE_RESULT:
+		ms := MultiSpindleResult{}
+		ms.Deserialize(pkg.Body)
+
+		wsResults := []wsnotify.WSResult{}
+		wsResult := wsnotify.WSResult{}
+		for _, v := range ms.Spindles {
+			wsResult.Result_id = 1
+			wsResult.Count = 1
+			wsResult.Result = v.Result
+			wsResult.MI = v.Torque
+			wsResult.WI = v.Angle
+			wsResult.TI = 0
+			wsResult.GroupSeq = 1
+			wsResults = append(wsResults, wsResult)
+		}
+
+		ws_str, _ := json.Marshal(wsResults)
+		c.Srv.WS.WSSendResult("1122334455667788", string(ws_str))
 
 	case MID_0052_VIN:
 		// 收到条码
@@ -196,6 +226,8 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 		c.Srv.WS.WSSend(wsnotify.WS_EVENT_SCANNER, string(str))
 	}
 }
+
+//var g_group
 
 func (c *Controller) handleResult(result_data *ResultData) {
 
@@ -278,6 +310,9 @@ func (c *Controller) handleResult(result_data *ResultData) {
 			c.Srv.diag.Error("FindTargetResultForJobManual failed", err)
 		}
 
+		if err == nil {
+			db_result.Spent = (c.TriggerStop.UnixNano() - c.TriggerStart.UnixNano()) / 1000000
+		}
 		//db_result := storage.Results{}
 		controllerResult.Batch = fmt.Sprintf("%d/%d", db_result.Seq, db_workorder.MaxSeq)
 		db_result.Batch = controllerResult.Batch
@@ -313,7 +348,13 @@ func (c *Controller) handleResult(result_data *ResultData) {
 		aiisResult := aiis.AIISResult{}
 
 		aiisResult.ID = db_result.Id
+		aiisResult.MO_Model = db_workorder.MO_Model
 		aiisResult.Batch = controllerResult.Batch
+		aiisResult.Mode = db_workorder.Mode
+		aiisResult.WorkcenterCode = db_workorder.HMISN
+		aiisResult.ControllerSN = db_result.ControllerSN
+		aiisResult.ToolSN = db_result.GunSN
+		aiisResult.TighteningId, _ = strconv.ParseInt(result_data.TightingID, 10, 64)
 
 		if controllerResult.ExceptionReason != "" {
 			aiisResult.ExceptionReason = controllerResult.ExceptionReason + aiisResult.ExceptionReason
@@ -1115,7 +1156,7 @@ func (c *Controller) MultiSpindleResultSubscribe() error {
 		return errors.New("status offline")
 	}
 
-	input := GeneratePackage(MID_0100_MULTI_SPINDLE_SUBSCRIBE, "001", "", DEFAULT_MSG_END)
+	input := GeneratePackage(MID_0100_MULTI_SPINDLE_SUBSCRIBE, "000", "", DEFAULT_MSG_END)
 
 	c.Write([]byte(input))
 

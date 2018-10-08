@@ -60,7 +60,6 @@ func (s *Service) Open() error {
 		if err := engine.Sync2(new(Workorders)); err != nil {
 			return errors.Wrapf(err, "Create Table Workorders fail")
 		}
-
 	}
 
 	exist, err = engine.IsTableExist("Results")
@@ -434,7 +433,7 @@ func (s *Service) UpdateResultUpload(upload bool, r_id int64) (int64, error) {
 
 func (s *Service) UpdateResult(result *Results) (int64, error) {
 
-	sql := "update `results` set controller_sn = ?, result = ?, has_upload = ?, stage = ?, update_time = ?, pset_define = ?, result_value = ?, count = ?, batch = ?, gun_sn = ? where id = ?"
+	sql := "update `results` set controller_sn = ?, result = ?, has_upload = ?, stage = ?, update_time = ?, pset_define = ?, result_value = ?, count = ?, batch = ?, gun_sn = ?, spent = ? where id = ?"
 	r, err := s.eng.Exec(sql,
 		result.ControllerSN,
 		result.Result,
@@ -446,6 +445,7 @@ func (s *Service) UpdateResult(result *Results) (int64, error) {
 		result.Count,
 		result.Batch,
 		result.GunSN,
+		result.Spent,
 		result.Id)
 
 	if err != nil {
@@ -701,6 +701,35 @@ func (s *Service) FindLocalResults(hmi_sn string, limit int) ([]ResultsWorkorder
 	}
 
 	return results, err
+}
+
+func (s *Service) UpdateResultTriggerTime(trigger_type string, trigger_time time.Time, controller_sn string) error {
+
+	sql := fmt.Sprintf("update `controllers` set %s = ? where controller_sn = ?", trigger_type, trigger_time)
+	_, err := s.eng.Exec(sql, controller_sn)
+
+	if err != nil {
+		return err
+	} else {
+		return nil
+	}
+}
+
+func (s *Service) GetController(sn string) (interface{}, error) {
+
+	var rt_controller Controllers
+
+	rt, err := s.eng.Alias("c").Where("c.controller_sn = ?", sn).Get(&rt_controller)
+
+	if err != nil {
+		return nil, err
+	} else {
+		if !rt {
+			return nil, nil
+		} else {
+			return rt_controller, nil
+		}
+	}
 }
 
 func (s *Service) DropTableManage() error {

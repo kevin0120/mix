@@ -672,6 +672,7 @@ func (m *Methods) insertResultsForJob(job *JobManual) (*storage.Workorders, erro
 		r.MaxRedoTimes = v.MaxOpTime
 		r.Stage = storage.RESULT_STAGE_INIT
 		r.Result = storage.RESULT_NONE
+		r.ControllerSN = job.Controller_SN
 
 		db_results = append(db_results, r)
 	}
@@ -685,6 +686,7 @@ func (m *Methods) insertResultsForJob(job *JobManual) (*storage.Workorders, erro
 	db_workorder.MaxSeq = max_seq
 	db_workorder.UserID = job.UserID
 	db_workorder.MO_Model = job.CarType
+	db_workorder.Mode = job.Mode
 
 	err := m.service.DB.InsertWorkorder(&db_workorder, &db_results, false, false, true)
 

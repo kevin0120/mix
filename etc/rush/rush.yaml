@@ -83,6 +83,7 @@ openprotocol:
   read_buf: 65535
   req_time_out: 300ms
   skip_job: 250
+  io_trigger: 7
 
   # 0:vin 1:id2 2:id3 3:id4
   data_index: 1
@@ -112,5 +113,11 @@ controller_service:
 #  - serial_no: 0002
 #    protocol: OpenProtocol
 #    remote_ip: 192.168.1.102
+#    port: 4545
+#    channel: 1
+
+#  - serial_no: 0001
+#    protocol: OpenProtocol
+#    remote_ip: 192.168.5.212
 #    port: 4545
 #    channel: 1

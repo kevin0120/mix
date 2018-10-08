@@ -56,6 +56,7 @@ type JobManual struct {
 	WorkcenterID  int64      `json:"workcenter_id"`
 	Skip          bool       `json:"skip"`
 	HasSet        bool       `json:"has_set"`
+	Mode          string     `json:"mode"`
 }
 
 type JobPoint struct {

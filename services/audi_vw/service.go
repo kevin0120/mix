@@ -298,6 +298,7 @@ func (p *Service) HandleProcess() {
 			// 处理事件
 			if strings.Contains(msg, XML_EVENT_KEY) {
 
+				//fmt.Printf("xml evt:%s\n", msg)
 				evt := Evt{}
 				err := xml.Unmarshal([]byte(msg), &evt)
 				if err != nil {

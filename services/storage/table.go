@@ -23,7 +23,8 @@ type Workorders struct {
 	WorkcenterID   int64     `xorm:"bigint 'workcenter_id'"`
 	UserID         int64     `xorm:"bigint 'user_id'"`
 
-	JobID int `xorm:"bigint 'job_id'"`
+	JobID int    `xorm:"bigint 'job_id'"`
+	Mode  string `xorm:"varchar(64) 'mode'"`
 
 	// mo相关信息
 	MO_EquipemntName  string `xorm:"varchar(64) 'equipment_name'"` // 设备名
@@ -63,6 +64,7 @@ type Results struct {
 	MaxRedoTimes       int       `xorm:"int 'max_redo_times'"`
 	Batch              string    `xorm:"varchar(32) 'batch'"`
 	ExInfo             string    `xorm:"text 'exinfo'"`
+	Spent              int64     `xorm:"bigint 'spent'"`
 }
 
 type ResultsWorkorders struct {
@@ -81,9 +83,11 @@ type Curves struct {
 }
 
 type Controllers struct {
-	Id     int64  `xorm:"pk autoincr notnull 'id'"`
-	SN     string `xorm:"varchar(128) 'controller_sn'"`
-	LastID string `xorm:"varchar(128) 'last_id'"`
+	Id           int64     `xorm:"pk autoincr notnull 'id'"`
+	SN           string    `xorm:"varchar(128) 'controller_sn'"`
+	LastID       string    `xorm:"varchar(128) 'last_id'"`
+	TriggerStart time.Time `xorm:"datetime 'trigger_start'"`
+	TriggerStop  time.Time `xorm:"datetime 'trigger_stop'"`
 }
 
 type Guns struct {
