@@ -372,7 +372,7 @@ func (h *Handlers) Handle(controllerResult interface{}, controllerCurveFile inte
 	}
 
 	workorder := storage.Workorders{}
-	workorder, err = h.controllerService.DB.GetWorkorder(model_controllerResult.Workorder_ID, false)
+	workorder, err = h.controllerService.DB.GetWorkorder(model_controllerResult.Workorder_ID, true)
 	if err != nil {
 		h.controllerService.diag.Error("Cannot find workorder", err)
 		return

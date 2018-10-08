@@ -706,7 +706,7 @@ func (m *Methods) insertResultsForPSet(pset *PSetManual) error {
 	db_reuslt = append(db_reuslt, r)
 
 	err := m.service.DB.DeleteResultsForJob(key)
-	err = m.service.DB.InsertWorkorder(nil, &db_reuslt, false, false, false)
+	err = m.service.DB.InsertWorkorder(nil, &db_reuslt, false, false, true)
 
 	return err
 }
@@ -752,7 +752,7 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 		}
 	}
 
-	results, err := m.service.DB.FindResultsByWorkorder(workorder.WorkorderID)
+	results, err := m.service.DB.FindResultsByWorkorder(workorder.Id)
 
 	resp := Workorder{}
 	resp.HMI_sn = workorder.HMISN

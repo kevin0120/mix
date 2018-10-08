@@ -6,8 +6,6 @@ type Workorders struct {
 	Id          int64  `xorm:"pk autoincr notnull 'id'"`
 	WorkorderID int64  `xorm:"bigint 'x_workorder_id'"`
 	HMISN       string `xorm:"varchar(64) 'hmi_sn'"`
-	//PSet         int       `xorm:"int 'pset'"`
-	//NutTotal     float64   `xorm:"double 'nut_total'"`
 	Vin     string `xorm:"varchar(64) 'vin'"`
 	Knr     string `xorm:"varchar(64) 'knr'"`
 	LongPin string `xorm:"varchar(64) 'long_pin'"`
