@@ -687,6 +687,7 @@ func (m *Methods) insertResultsForJob(job *JobManual) (*storage.Workorders, erro
 	db_workorder.UserID = job.UserID
 	db_workorder.MO_Model = job.CarType
 	db_workorder.Mode = job.Mode
+	db_workorder.UpdateTime = time.Now()
 
 	err := m.service.DB.InsertWorkorder(&db_workorder, &db_results, false, false, true)
 
@@ -709,6 +710,36 @@ func (m *Methods) insertResultsForPSet(pset *PSetManual) error {
 	err = m.service.DB.InsertWorkorder(nil, &db_reuslt, false, false, true)
 
 	return err
+}
+
+func (m *Methods) getNextWorkorder(ctx iris.Context) {
+	var err error = nil
+	hmi_sn := ctx.URLParam("hmi_sn")
+
+	if hmi_sn == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("hmi_sn is required")
+		return
+	}
+
+	workorder, err := m.service.DB.FindNextWorkorder(hmi_sn)
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+
+	nw := NextWorkorder {
+		Vin: workorder.Vin,
+		LongPin: workorder.LongPin,
+		Knr: workorder.Knr,
+		Model: workorder.MO_Model,
+		Lnr: workorder.MO_Lnr,
+	}
+
+	body, _ := json.Marshal(nw)
+	ctx.Header("content-type", "application/json")
+	ctx.Write(body)
 }
 
 // 根据hmi序列号以及vin或knr取得工单
@@ -766,6 +797,7 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 	resp.Job = workorder.JobID
 	resp.VehicleTypeImg = workorder.VehicleTypeImg
 	resp.Lnr = workorder.MO_Lnr
+	resp.Model = workorder.MO_Model
 
 	for _, v := range results {
 		r := Result{}

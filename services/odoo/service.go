@@ -251,7 +251,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 		o.MaxOpTime = v.Max_op_time
 		o.WorkSheet = v.Worksheet
 		o.VehicleTypeImg = v.VehicleTypeImg
-		o.UpdateTime = v.UpdateTime
+		o.UpdateTime = time.Now()
 		o.JobID, _ = strconv.Atoi(v.Job)
 
 		o.MO_Year = v.MO_Year
@@ -281,7 +281,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 			r.ToleranceMinDegree = consu.ToleranceMinDegree
 			r.NutNo = consu.NutNo
 
-			r.WorkorderID = o.WorkorderID
+			//r.WorkorderID = o.WorkorderID
 			r.Result = storage.RESULT_NONE
 			r.HasUpload = false
 			r.Stage = storage.RESULT_STAGE_INIT

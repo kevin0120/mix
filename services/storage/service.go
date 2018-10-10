@@ -417,6 +417,23 @@ func (s *Service) FindWorkorder(hmi_sn string, code string) (Workorders, error) 
 	}
 }
 
+func (s *Service) FindNextWorkorder(hmi_sn string) (Workorders, error) {
+
+	var workorder Workorders
+
+	rt, err := s.eng.Alias("w").Where("w.hmi_sn = ?", hmi_sn).And("w.status = ?", "ready").Asc("w.update_time").Get(&workorder)
+
+	if err != nil {
+		return workorder, err
+	} else {
+		if !rt {
+			return workorder, errors.New("workorder does not exist")
+		} else {
+			return workorder, nil
+		}
+	}
+}
+
 func (s *Service) UpdateResultUpload(upload bool, r_id int64) (int64, error) {
 	sql := "update `results` set has_upload = ? where x_result_id = ?"
 

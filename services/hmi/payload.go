@@ -103,7 +103,16 @@ type Workorder struct {
 	MaxOpTime int      `json:"max_op_time"`
 	Job       int      `json:"job_id"`
 	Lnr       string   `json:"lnr"`
+	Model     string   `json:"model"`
 	Results   []Result `json:"results"`
+}
+
+type NextWorkorder struct {
+	Vin       string `json:"vin"`
+	Model     string `json:"model"`
+	LongPin   string `json:"long_pin"`
+	Knr       string `json:"knr"`
+	Lnr       string `json:"lnr"`
 }
 
 type JobControl struct {
