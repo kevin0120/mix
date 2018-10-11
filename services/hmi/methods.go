@@ -1095,6 +1095,7 @@ func (m *Methods) getLocalResults(ctx iris.Context) {
 			Batch:        m.filterValue(filters, "batch", string(v.Batch)),
 			VehicleType:  m.filterValue(filters, "vehicle_type", string(v.MO_Model)),
 			JobID:        m.filterValue(filters, "job_id", int(v.JobID)),
+			PSetID:        m.filterValue(filters, "pset_id", int(v.PSet)),
 		}
 
 		rt = append(rt, lr)

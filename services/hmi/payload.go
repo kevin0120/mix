@@ -147,6 +147,7 @@ type LocalResults struct {
 	Vin          interface{} `json:"vin,omitempty"`
 	VehicleType  interface{} `json:"vehicle_type,omitempty"`
 	JobID        interface{} `json:"job_id,omitempty"`
+	PSetID        interface{} `json:"pset_id,omitempty"`
 	ControllerSN interface{} `json:"controller_sn,omitempty"`
 	GunSN        interface{} `json:"gun_sn,omitempty"`
 	Result       interface{} `json:"result,omitempty"`

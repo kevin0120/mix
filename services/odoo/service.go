@@ -265,7 +265,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 
 		results := []storage.Results{}
 		result_count := 0
-		for _, consu := range v.Consumes {
+		for k, consu := range v.Consumes {
 			if len(consu.ResultIDs) == 0 {
 				// 忽略没有结果的消耗品
 				continue
@@ -280,6 +280,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 			r.ToleranceMaxDegree = consu.ToleranceMaxDegree
 			r.ToleranceMinDegree = consu.ToleranceMinDegree
 			r.NutNo = consu.NutNo
+			r.Batch = fmt.Sprint("%d/%d", k + 1, len(v.Consumes))
 
 			//r.WorkorderID = o.WorkorderID
 			r.Result = storage.RESULT_NONE
