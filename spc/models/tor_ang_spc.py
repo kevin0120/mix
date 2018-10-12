@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# from __future__ import unicode_literals
+from __future__ import division
 from scipy.stats import norm, dweibull, weibull_max, weibull_min, invweibull,exponweib
 from odoo import models, fields, api
 from odoo.exceptions import UserError,ValidationError
@@ -46,7 +48,7 @@ class TorAngSPCReport(models.TransientModel):
             std = np.std(data)
             data_min = np.min(data)
             data_max = np.max(data)
-            self.normal_dist = self._get_normal_dist(mean=mean,std=std,min=data_min, max=data_max)
+            self.normal_dist = self._get_normal_dist(data=data, mean=mean,std=std,min=data_min, max=data_max)
             scale_parameter = self.env['ir.config_parameter'].sudo().get_param('weibull.scale', default=1.0)
             shape_parameter = self.env['ir.config_parameter'].sudo().get_param('weibull.shape', default=5.0)
             self.weibull_dist = self._get_weibull_dist(len(data), mean=mean, std=std,
@@ -106,35 +108,42 @@ class TorAngSPCReport(models.TransientModel):
         pyecharts.configure(force_js_embed=True)
         return line.render_embed()
 
-    def _get_normal_dist(self, mean=None, std=None, min=None, max=None):
+    def _get_normal_dist(self, data, mean=None, std=None, min=None, max=None):
+        STEP = 0.25 * std
+        length = len(data)
         norm_data = norm(mean, std)
-        x_bar = np.arange(int(min), int(max), 1)
-        y_bar = []
-        for x in x_bar:
-            y = norm_data.cdf(x+1) - norm_data.cdf(x)
-            y_bar.append(y)
+        # x_bar = np.arange(int(min), int(max), 1)
+        t = data.get_values()
 
-        x_line = np.arange(mean - std * 3.0, mean + std * 4.0, 1 * std)
-        y_line = norm_data.pdf(x_line)
+        x_bar = x_line = np.around(np.arange(mean - std * 3.0, mean + std * 4.0, STEP), decimals=3)
+        y_line = np.around(norm_data.pdf(x_line),decimals=3)
+        # x_bar = np.arange(mean - std * 3.0, mean + std * 4.0, STEP)
+        _y_bar, bin_edges = np.histogram(t, range=(mean - std * 3.0, mean + std * 4.0), bins=len(x_bar))
+        vfunc = np.vectorize(lambda x: x / length, otypes=[float])
+        y_bar = np.around(vfunc(_y_bar), decimals=3)
 
         bar = Bar(title=u"Normal Distribution({0})".format(self.spc_target), title_pos="50%", width=960, height=1440)
-        bar.add(u'{0}'.format(self.spc_target), x_bar, y_bar, legend_orient="vertical", legend_top="45%", legend_pos='50%',
-                xaxis_name=u'{0}'.format(self.spc_target), mark_line=["min", "max"], yaxis_name_gap=100,
-                label_color=['rgba(255,106,106,0.5)'],
+        bar.add(u'{0}'.format(self.spc_target), bin_edges[1:], y_bar, legend_orient="vertical", legend_top="45%", legend_pos='50%',
+                xaxis_name=u'{0}'.format(self.spc_target), yaxis_name_gap=100, label_pos='inside', is_label_show=True,
+                label_color=['#a6c84c', '#ffa022', '#46bee9'],
+                # bar_category_gap=0, ### 直方图
                 yaxis_name=u'概率(Probability)')
         line = Line(width=960, height=1440)
         line.add(u'{0}'.format(self.spc_target).format(self.spc_target), x_line, y_line, xaxis_name=u'{0}'.format(self.spc_target),
-                 yaxis_name=u'概率(Probability)',
+                 yaxis_name=u'概率(Probability)', mark_line_valuedim=['x', 'x'], mark_line=['min', 'max'],
                  line_color='rgba(0 ,255 ,127,0.5)', is_legend_show=False,
-                 is_smooth=True, line_width=2,
-                 is_datazoom_show=True, datazoom_type='both',
-                 tooltip_tragger='axis',is_fill=True, area_color='#20B2AA', area_opacity=0.4)
+                 is_smooth=True, line_width=2, is_label_show=False,
+                 is_datazoom_show=False, datazoom_type='both', label_text_size=16,
+                 tooltip_tragger='axis', is_fill=False)
 
-        grid = Grid(width=1920, height=1440)
-        grid.add(bar, grid_bottom="60%", grid_left="60%")
-        grid.add(line, grid_bottom="60%", grid_right="60%")
+        # grid = Grid(width=1920, height=1440, )
+        # grid.add(bar, grid_bottom="60%", grid_left="60%")
+        # grid.add(line, grid_bottom="60%", grid_right="60%")
+        overlap = Overlap(width=1080, height=1024, page_title=u"Normal Distribution({0})".format(self.spc_target))
+        overlap.add(line)
+        overlap.add(bar)
         pyecharts.configure(force_js_embed=True)
-        return grid.render_embed()
+        return overlap.render_embed()
 
     def _get_scatter(self,  data):
         qty = len(data)
