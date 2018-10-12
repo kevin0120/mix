@@ -6,14 +6,29 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0+e-20171123\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-06-29 03:35+0000\n"
-"PO-Revision-Date: 2018-06-29 03:35+0000\n"
+"POT-Creation-Date: 2018-10-12 06:15+0000\n"
+"PO-Revision-Date: 2018-10-12 06:15+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
+
+#. module: spc
+#: model:ir.ui.view,arch_db:spc.report_result_tighting
+msgid "<strong>Date</strong>"
+msgstr "<strong>日期</strong>"
+
+#. module: spc
+#: model:ir.ui.view,arch_db:spc.report_result_tighting
+msgid "<strong>Job号</strong>"
+msgstr "<strong>Job号</strong>"
+
+#. module: spc
+#: model:ir.ui.view,arch_db:spc.report_result_tighting
+msgid "<strong>VIN</strong>"
+msgstr "<strong>VIN</strong>"
 
 #. module: spc
 #: model:ir.ui.menu,name:spc.menu_aiis_settings
@@ -64,6 +79,7 @@ msgstr "组装生产线"
 
 #. module: spc
 #: model:ir.ui.view,arch_db:spc.view_aiis_config_settings
+#: model:ir.ui.view,arch_db:spc.view_report_tighting_detail
 #: model:ir.ui.view,arch_db:spc.view_spc_config_settings
 msgid "Cancel"
 msgstr "取消"
@@ -103,6 +119,7 @@ msgstr "控制点"
 #: model:ir.model.fields,field_description:spc.field_aiis_config_settings_create_uid
 #: model:ir.model.fields,field_description:spc.field_spc_config_settings_create_uid
 #: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_create_uid
+#: model:ir.model.fields,field_description:spc.field_tight_result_report_create_uid
 msgid "Created by"
 msgstr "创建人"
 
@@ -110,6 +127,7 @@ msgstr "创建人"
 #: model:ir.model.fields,field_description:spc.field_aiis_config_settings_create_date
 #: model:ir.model.fields,field_description:spc.field_spc_config_settings_create_date
 #: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_create_date
+#: model:ir.model.fields,field_description:spc.field_tight_result_report_create_date
 msgid "Created on"
 msgstr "创建时间"
 
@@ -144,10 +162,12 @@ msgstr "角度"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_aiis_config_settings_display_name
+#: model:ir.model.fields,field_description:spc.field_report_spc_report_result_tighting_display_name
 #: model:ir.model.fields,field_description:spc.field_result_push_display_name
 #: model:ir.model.fields,field_description:spc.field_result_sync_display_name
 #: model:ir.model.fields,field_description:spc.field_spc_config_settings_display_name
 #: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_display_name
+#: model:ir.model.fields,field_description:spc.field_tight_result_report_display_name
 #: model:ir.model.fields,field_description:spc.field_workorder_push_display_name
 msgid "Display Name"
 msgstr "显示名称"
@@ -156,6 +176,11 @@ msgstr "显示名称"
 #: selection:ta.spc.wizard,weibull_dist_method:0
 msgid "Double Weibull"
 msgstr "双韦伯分布"
+
+#. module: spc
+#: model:ir.model.fields,field_description:spc.field_tight_result_report_date_to
+msgid "End Date"
+msgstr "结束日期"
 
 #. module: spc
 #: model:ir.model,name:spc.model_maintenance_equipment
@@ -212,6 +237,12 @@ msgid "Final Passed"
 msgstr "最终通过"
 
 #. module: spc
+#: code:addons/spc/report/tighting_result_report.py:46
+#, python-format
+msgid "Form content is missing, this report cannot be printed."
+msgstr "表单内容缺失,此报告无法打印."
+
+#. module: spc
 #: model:ir.ui.view,arch_db:spc.operation_result_view_search
 msgid "Group By"
 msgstr "分组"
@@ -220,12 +251,12 @@ msgstr "分组"
 #: model:ir.actions.act_window,name:spc.action_spc_controller_form
 #: model:ir.ui.menu,name:spc.menu_spc_controller
 msgid "Gun Analyze"
-msgstr "Gun Analyze"
+msgstr "单枪分析"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_mrp_workorder_sent
 msgid "Have sent to Masterpc"
-msgstr "Have sent to Masterpc"
+msgstr "已发送给MasterPC"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_sent
@@ -235,10 +266,12 @@ msgstr "已被发送给AIIS(FIS)"
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_aiis_config_settings_id
 #: model:ir.model.fields,field_description:spc.field_operation_result_id
+#: model:ir.model.fields,field_description:spc.field_report_spc_report_result_tighting_id
 #: model:ir.model.fields,field_description:spc.field_result_push_id
 #: model:ir.model.fields,field_description:spc.field_result_sync_id
 #: model:ir.model.fields,field_description:spc.field_spc_config_settings_id
 #: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_id
+#: model:ir.model.fields,field_description:spc.field_tight_result_report_id
 #: model:ir.model.fields,field_description:spc.field_workorder_push_id
 msgid "ID"
 msgstr "ID"
@@ -265,10 +298,12 @@ msgstr "数据丢失"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_aiis_config_settings___last_update
+#: model:ir.model.fields,field_description:spc.field_report_spc_report_result_tighting___last_update
 #: model:ir.model.fields,field_description:spc.field_result_push___last_update
 #: model:ir.model.fields,field_description:spc.field_result_sync___last_update
 #: model:ir.model.fields,field_description:spc.field_spc_config_settings___last_update
 #: model:ir.model.fields,field_description:spc.field_ta_spc_wizard___last_update
+#: model:ir.model.fields,field_description:spc.field_tight_result_report___last_update
 #: model:ir.model.fields,field_description:spc.field_workorder_push___last_update
 msgid "Last Modified on"
 msgstr "最后修改日"
@@ -277,6 +312,7 @@ msgstr "最后修改日"
 #: model:ir.model.fields,field_description:spc.field_aiis_config_settings_write_uid
 #: model:ir.model.fields,field_description:spc.field_spc_config_settings_write_uid
 #: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_write_uid
+#: model:ir.model.fields,field_description:spc.field_tight_result_report_write_uid
 msgid "Last Updated by"
 msgstr "最后更新人"
 
@@ -284,6 +320,7 @@ msgstr "最后更新人"
 #: model:ir.model.fields,field_description:spc.field_aiis_config_settings_write_date
 #: model:ir.model.fields,field_description:spc.field_spc_config_settings_write_date
 #: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_write_date
+#: model:ir.model.fields,field_description:spc.field_tight_result_report_write_date
 msgid "Last Updated on"
 msgstr "最后更新时间"
 
@@ -320,7 +357,7 @@ msgstr "生产订单"
 #. module: spc
 #: selection:ta.spc.wizard,weibull_dist_method:0
 msgid "Max Weibull"
-msgstr "最大微博分布"
+msgstr "最大韦伯分布"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_measure_degree
@@ -467,6 +504,11 @@ msgid "Passed"
 msgstr "通过的"
 
 #. module: spc
+#: model:ir.ui.view,arch_db:spc.view_report_tighting_detail
+msgid "Print"
+msgstr "打印"
+
+#. module: spc
 #: model:ir.ui.view,arch_db:spc.operation_result_view_form
 #: model:ir.ui.view,arch_db:spc.sa_spc_form_tor_ang
 msgid "Product"
@@ -522,6 +564,14 @@ msgstr "返回结果限制"
 #: model:ir.ui.view,arch_db:spc.sa_spc_form_tor_ang
 msgid "Query Parameters"
 msgstr "查询参数"
+
+#. module: spc
+#: model:ir.actions.act_window,name:spc.action_report_tighting_result
+#: model:ir.actions.report.xml,name:spc.tight_result_report
+#: model:ir.ui.menu,name:spc.menu_report_tighting_result
+#: model:ir.ui.view,arch_db:spc.view_report_tighting_detail
+msgid "Report Tightening Result"
+msgstr "拧紧结果报告"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_user_id
@@ -659,6 +709,11 @@ msgid "Settings SPC"
 msgstr "SPC设置"
 
 #. module: spc
+#: model:ir.model.fields,field_description:spc.field_tight_result_report_date_from
+msgid "Start Date"
+msgstr "开始日期"
+
+#. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_quality_state
 msgid "Status"
 msgstr "状态"
@@ -673,6 +728,11 @@ msgstr "步"
 #: model:ir.ui.view,arch_db:spc.operation_result_view_search
 msgid "This Year"
 msgstr "本年度"
+
+#. module: spc
+#: model:ir.ui.view,arch_db:spc.operation_result_view_search
+msgid "Tightening Date"
+msgstr "拧紧日期"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_time
@@ -844,6 +904,11 @@ msgstr "operation.result"
 #: model:ir.ui.view,arch_db:spc.view_spc_config_settings
 msgid "or"
 msgstr "或"
+
+#. module: spc
+#: model:ir.model,name:spc.model_report_spc_report_result_tighting
+msgid "report.spc.report_result_tighting"
+msgstr "report.spc.report_result_tighting"
 
 #. module: spc
 #: model:ir.model,name:spc.model_result_push
