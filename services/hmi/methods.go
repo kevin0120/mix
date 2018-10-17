@@ -813,6 +813,14 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 		resp.Results = append(resp.Results, r)
 	}
 
+	next_workorder, err := m.service.DB.FindNextWorkorder(hmi_sn)
+	if err == nil {
+		if code != next_workorder.Knr && code != next_workorder.LongPin && code != next_workorder.Vin {
+			// 车辆校验失败
+			ctx.StatusCode(iris.StatusConflict)
+		}
+	}
+
 	body, _ := json.Marshal(resp)
 	ctx.Header("content-type", "application/json")
 	ctx.Write(body)
