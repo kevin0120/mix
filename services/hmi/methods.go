@@ -783,6 +783,8 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 		}
 	}
 
+
+
 	results, err := m.service.DB.FindResultsByWorkorder(workorder.Id)
 
 	resp := Workorder{}
@@ -813,13 +815,23 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 		resp.Results = append(resp.Results, r)
 	}
 
+	reasons := []string{}
+	if workorder.Status == "done" {
+		// 工单已完成
+		ctx.StatusCode(iris.StatusConflict)
+		reasons = append(reasons, "done")
+	}
+
 	next_workorder, err := m.service.DB.FindNextWorkorder(hmi_sn)
 	if err == nil {
 		if code != next_workorder.Knr && code != next_workorder.LongPin && code != next_workorder.Vin {
 			// 车辆校验失败
 			ctx.StatusCode(iris.StatusConflict)
+			reasons = append(reasons, "conflict")
 		}
 	}
+
+	resp.Reasons = reasons
 
 	body, _ := json.Marshal(resp)
 	ctx.Header("content-type", "application/json")

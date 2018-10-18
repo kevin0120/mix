@@ -180,7 +180,6 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 		inputs.ControllerSN = c.cfg.SN
 
 		str, _ := json.Marshal(inputs)
-		fmt.Printf(fmt.Sprintf("%s\n", string(str)))
 		go c.Srv.WS.WSSendIOInput(string(str))
 
 		if inputs.Inputs[c.Srv.config().IOTrigger-1] == '1' {
@@ -210,8 +209,8 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 			wsResults = append(wsResults, wsResult)
 		}
 
-		ws_str, _ := json.Marshal(wsResults)
-		c.Srv.WS.WSSendResult("1122334455667788", string(ws_str))
+		//ws_str, _ := json.Marshal(wsResults)
+		////c.Srv.WS.WSSendResult("1122334455667788", string(ws_str))
 
 	case MID_0052_VIN:
 		// 收到条码

@@ -242,7 +242,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 		}
 
 		o := storage.Workorders{}
-		o.Status = v.Status
+		o.Status = "ready"
 		o.WorkorderID = v.ID
 		o.HMISN = v.HMI.UUID
 		o.Knr = v.KNR

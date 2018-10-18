@@ -105,6 +105,8 @@ type Workorder struct {
 	Lnr       string   `json:"lnr"`
 	Model     string   `json:"model"`
 	Results   []Result `json:"results"`
+
+	Reasons	  []string	`json:"reason"`
 }
 
 type NextWorkorder struct {
