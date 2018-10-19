@@ -141,5 +141,9 @@ func (s *Service) HandleProcess() {
 }
 
 func (s *Service) Close() error {
+	for i := 0; i < s.config.Workers; i++ {
+		s.closing <- struct{}{}
+		s.diag.Debug(fmt.Sprintf("stop handler process:%d", i+1))
+	}
 	return nil
 }
