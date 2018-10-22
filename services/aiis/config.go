@@ -8,24 +8,28 @@ import (
 )
 
 type Config struct {
-	Urls          []string          `yaml:"urls"`
-	Headers       map[string]string `yaml:"headers" override:"headers"`
-	ResultPushUrl string            `yaml:"result_push_url"`
-	PushMethod    string            `yaml:"push_method"`
-	Timeout       toml.Duration     `yaml:"timeout"`
-	PushInterval  toml.Duration     `yaml:"push_interval"`
-	MaxRetry      int               `yaml:"max_retry"` // api最大尝试次数
+	Urls                []string          `yaml:"urls"`
+	Headers             map[string]string `yaml:"headers" override:"headers"`
+	ResultPushUrl       string            `yaml:"result_push_url"`
+	PushMethod          string            `yaml:"push_method"`
+	Timeout             toml.Duration     `yaml:"timeout"`
+	PushInterval        toml.Duration     `yaml:"push_interval"`
+	MaxRetry            int               `yaml:"max_retry"` // api最大尝试次数
+	WSResultRoute       string            `yaml:"ws_result_route"`
+	ResultUploadInteval toml.Duration     `yaml:"result_upload_inteval"`
 }
 
 func NewConfig() Config {
 	c := Config{
-		Urls:          []string{"http://127.0.0.1:9092"},
-		ResultPushUrl: "/aiis/v1/operation.results/%d",
-		Timeout:       toml.Duration(time.Millisecond * 10),
-		PushInterval:  toml.Duration(time.Second * 1),
-		PushMethod:    "PUT",
-		MaxRetry:      3,
-		Headers:       map[string]string{"Content-Type": "application/json"},
+		Urls:                []string{"http://127.0.0.1:9092"},
+		ResultPushUrl:       "/aiis/v1/operation.results/%d",
+		Timeout:             toml.Duration(time.Millisecond * 10),
+		PushInterval:        toml.Duration(time.Second * 1),
+		PushMethod:          "PUT",
+		MaxRetry:            3,
+		Headers:             map[string]string{"Content-Type": "application/json"},
+		WSResultRoute:       "ws://127.0.0.1/aiis/v1/ws/results",
+		ResultUploadInteval: toml.Duration(time.Duration(1 * time.Hour)),
 	}
 
 	return c

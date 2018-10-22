@@ -3,13 +3,13 @@ package main
 // CGO_ENABLED=0 GOARCH=amd64 go build ./stress_test.go
 
 import (
-	"fmt"
 	"flag"
-	"sync"
-	"time"
+	"fmt"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
+	"time"
 )
 
 var gAiisUrl = "http://10.1.1.31:8069"
@@ -17,17 +17,16 @@ var gTaskNum = 8
 var gResultBatch = false
 
 var gReqInteval = 200
-var g_genetime_mtx  = sync.Mutex{}
-
+var g_genetime_mtx = sync.Mutex{}
 
 type Service struct {
-	wg       sync.WaitGroup
-	closing  chan chan struct{}
+	wg      sync.WaitGroup
+	closing chan chan struct{}
 }
 
 var gService = Service{}
 
-func Close()  {
+func Close() {
 	for i := 0; i < gTaskNum; i++ {
 		closed := make(chan struct{})
 		gService.closing <- closed
@@ -40,7 +39,7 @@ func task() {
 
 	for {
 		select {
-		case <- time.After(time.Duration(gReqInteval) * time.Millisecond):
+		case <-time.After(time.Duration(gReqInteval) * time.Millisecond):
 			//开始执行压力测试任务
 			fmt.Println("stress test going\n")
 		case stopDone := <-gService.closing:

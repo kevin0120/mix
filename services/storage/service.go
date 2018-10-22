@@ -183,6 +183,20 @@ func (s *Service) FindUnuploadResults(result_upload bool, result []string) ([]Re
 	}
 }
 
+func (s *Service) ListUnuploadResults() ([]Results, error) {
+	var results []Results
+
+	ss := s.eng.Alias("r").Where("r.has_upload = ?", false).And("r.stage = ?", "final")
+
+	e := ss.Find(&results)
+
+	if e != nil {
+		return results, e
+	} else {
+		return results, nil
+	}
+}
+
 func (s *Service) CurveExist(curve *Curves) (bool, error) {
 
 	has, err := s.eng.Exist(&Curves{ResultID: curve.ResultID, Count: curve.Count})

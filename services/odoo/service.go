@@ -280,7 +280,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 			r.ToleranceMaxDegree = consu.ToleranceMaxDegree
 			r.ToleranceMinDegree = consu.ToleranceMinDegree
 			r.NutNo = consu.NutNo
-			r.Batch = fmt.Sprintf("%d/%d", k + 1, len(v.Consumes))
+			r.Batch = fmt.Sprintf("%d/%d", k+1, len(v.Consumes))
 
 			//r.WorkorderID = o.WorkorderID
 			r.Result = storage.RESULT_NONE

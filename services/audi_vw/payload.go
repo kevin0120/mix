@@ -127,7 +127,7 @@ type TIP struct {
 	PSet int    `xml:"PRG"`
 	Date string `xml:"DAT"`
 	Time string `xml:"TIM"`
-	BLC  BLC    `xml:"BLC"`
+	BLC  []BLC  `xml:"BLC"`
 }
 
 type GRP struct {
@@ -238,32 +238,33 @@ func XML2Curve(result *CVI3Result, cur_result *controller.ControllerCurveFile) {
 		cur_result.Result = storage.RESULT_NOK
 	}
 
-	cur_ms := strings.Split(result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.SMP.CUR_M, " ")
-	cur_result.CUR_M = make([]float64, result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.CNT)
+	blc := result.PRC_SST.PAR.FAS.GRP.TIP.BLC
+	cur_ms := strings.Split(blc[len(blc)-1].CUR.SMP.CUR_M, " ")
+	cur_result.CUR_M = make([]float64, blc[len(blc)-1].CUR.CNT)
 	for k, v := range cur_ms {
 		m, _ := strconv.ParseFloat(v, 64)
 		cur_result.CUR_M[k] = m
 	}
 
-	cur_ws := strings.Split(result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.SMP.CUR_W, " ")
-	cur_result.CUR_W = make([]float64, result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.CNT)
+	cur_ws := strings.Split(blc[len(blc)-1].CUR.SMP.CUR_W, " ")
+	cur_result.CUR_W = make([]float64, blc[len(blc)-1].CUR.CNT)
 	for k, v := range cur_ws {
 		w, _ := strconv.ParseFloat(v, 64)
 		cur_result.CUR_W[k] = w
 	}
 
-	stp := result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.STP
-	stv := result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.STV
-	if result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.SMP.CUR_T == "" {
-		for i := 0; i < result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.CNT; i++ {
+	stp := blc[len(blc)-1].CUR.STP
+	stv := blc[len(blc)-1].CUR.STV
+	if blc[len(blc)-1].CUR.SMP.CUR_T == "" {
+		for i := 0; i < blc[len(blc)-1].CUR.CNT; i++ {
 			x := float64(i)*stp + stv
 			//t,_ := big.NewFloat(x).SetPrec(5).Float64()
 			t, _ := strconv.ParseFloat(fmt.Sprintf("%.5f", x), 64)
 			cur_result.CUR_T = append(cur_result.CUR_T, t)
 		}
 	} else {
-		cur_ts := strings.Split(result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.SMP.CUR_T, " ")
-		cur_result.CUR_T = make([]float64, result.PRC_SST.PAR.FAS.GRP.TIP.BLC.CUR.CNT)
+		cur_ts := strings.Split(blc[len(blc)-1].CUR.SMP.CUR_T, " ")
+		cur_result.CUR_T = make([]float64, blc[len(blc)-1].CUR.CNT)
 		for k, v := range cur_ts {
 			w, _ := strconv.ParseFloat(v, 64)
 			cur_result.CUR_T[k] = w
@@ -273,6 +274,8 @@ func XML2Curve(result *CVI3Result, cur_result *controller.ControllerCurveFile) {
 }
 
 func XML2Result(result *CVI3Result, rr *controller.ControllerResult) {
+
+	blcs := result.PRC_SST.PAR.FAS.GRP.TIP.BLC
 
 	rr.Controller_SN = result.PRC_SST.PAR.SN
 	rr.Result = result.PRC_SST.PAR.Result
@@ -290,10 +293,10 @@ func XML2Result(result *CVI3Result, rr *controller.ControllerResult) {
 	rid, _ := strconv.Atoi(result_id)
 	rr.Result_id = int64(rid)
 	//rr.CurFile = fmt.Sprintf("%s_%d_%s_%s.json", rr.Controller_SN, rr.Workorder_ID, result_id, utils.GenerateID())
-	rr.PSetDefine.Strategy = result.PRC_SST.PAR.FAS.GRP.TIP.BLC.PRO.Strategy
+	rr.PSetDefine.Strategy = blcs[len(blcs)-1].PRO.Strategy
 	rr.Count = result.PRC_SST.PAR.Count
 
-	result_values := result.PRC_SST.PAR.FAS.GRP.TIP.BLC.PRO.Values
+	result_values := blcs[len(blcs)-1].PRO.Values
 	for i := range result_values {
 		switch result_values[i].Name {
 		case "M+":

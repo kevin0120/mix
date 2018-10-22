@@ -106,15 +106,15 @@ type Workorder struct {
 	Model     string   `json:"model"`
 	Results   []Result `json:"results"`
 
-	Reasons	  []string	`json:"reasons"`
+	Reasons []string `json:"reasons"`
 }
 
 type NextWorkorder struct {
-	Vin       string `json:"vin"`
-	Model     string `json:"model"`
-	LongPin   string `json:"long_pin"`
-	Knr       string `json:"knr"`
-	Lnr       string `json:"lnr"`
+	Vin     string `json:"vin"`
+	Model   string `json:"model"`
+	LongPin string `json:"long_pin"`
+	Knr     string `json:"knr"`
+	Lnr     string `json:"lnr"`
 }
 
 type JobControl struct {
@@ -149,7 +149,7 @@ type LocalResults struct {
 	Vin          interface{} `json:"vin,omitempty"`
 	VehicleType  interface{} `json:"vehicle_type,omitempty"`
 	JobID        interface{} `json:"job_id,omitempty"`
-	PSetID        interface{} `json:"pset_id,omitempty"`
+	PSetID       interface{} `json:"pset_id,omitempty"`
 	ControllerSN interface{} `json:"controller_sn,omitempty"`
 	GunSN        interface{} `json:"gun_sn,omitempty"`
 	Result       interface{} `json:"result,omitempty"`

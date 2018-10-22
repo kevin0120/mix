@@ -729,12 +729,12 @@ func (m *Methods) getNextWorkorder(ctx iris.Context) {
 		return
 	}
 
-	nw := NextWorkorder {
-		Vin: workorder.Vin,
+	nw := NextWorkorder{
+		Vin:     workorder.Vin,
 		LongPin: workorder.LongPin,
-		Knr: workorder.Knr,
-		Model: workorder.MO_Model,
-		Lnr: workorder.MO_Lnr,
+		Knr:     workorder.Knr,
+		Model:   workorder.MO_Model,
+		Lnr:     workorder.MO_Lnr,
 	}
 
 	body, _ := json.Marshal(nw)
@@ -782,8 +782,6 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 			}
 		}
 	}
-
-
 
 	results, err := m.service.DB.FindResultsByWorkorder(workorder.Id)
 
@@ -1115,7 +1113,7 @@ func (m *Methods) getLocalResults(ctx iris.Context) {
 			Batch:        m.filterValue(filters, "batch", string(v.Batch)),
 			VehicleType:  m.filterValue(filters, "vehicle_type", string(v.MO_Model)),
 			JobID:        m.filterValue(filters, "job_id", int(v.JobID)),
-			PSetID:        m.filterValue(filters, "pset_id", int(v.PSet)),
+			PSetID:       m.filterValue(filters, "pset_id", int(v.PSet)),
 		}
 
 		rt = append(rt, lr)

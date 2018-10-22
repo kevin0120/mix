@@ -39,9 +39,11 @@ aiis:
   timeout: 8s
   push_interval: 1s
   max_retry: 3
+  ws_result_route: /aiis/v1/ws/results
+  ResultUploadInteval: 1h
 odoo:
   urls:
-  - http://127.0.0.1:8069
+  - http://192.168.1.6:8069
   timeout: 8s
   interval: 1s
   max_retry: 3
@@ -98,17 +100,17 @@ controller_service:
 #    port: 4700
 #    channel: 51
 
-#  - serial_no: 0002
-#    protocol: Audi/VW
-#    remote_ip: 192.168.1.102
-#    port: 4700
-#    channel: 1
+  - serial_no: 0002
+    protocol: Audi/VW
+    remote_ip: 192.168.1.102
+    port: 4700
+    channel: 1
 
-  - serial_no: 0001
-    protocol: OpenProtocol
-    remote_ip: 192.168.1.101
-    port: 4546
-    channel: 51
+#  - serial_no: 0001
+#    protocol: OpenProtocol
+#    remote_ip: 192.168.1.101
+#    port: 4546
+#    channel: 51
 
 #  - serial_no: 0002
 #    protocol: OpenProtocol

@@ -231,6 +231,7 @@ func (s *Server) appendAiisService() error {
 	d := s.DiagService.NewAiisHandler()
 	srv := aiis.NewService(c, d, s.config.HTTP.BindAddress)
 
+	srv.SN = s.config.SN
 	s.AiisService = srv
 	s.AppendService("aiis", srv)
 
