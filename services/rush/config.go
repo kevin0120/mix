@@ -13,6 +13,10 @@ type Config struct {
 	Timeout      toml.Duration     `yaml:"timeout"`
 	PushInterval toml.Duration     `yaml:"push_interval"`
 	MaxRetry     int               `yaml:"max_retry"` // api最大尝试次数
+
+	WSRoute           string `yaml:"ws_route"`
+	WSReadBufferSize  int    `yaml:"ws_read_buf_size"`
+	WSWriteBufferSize int    `yaml:"ws_write_buf_size"`
 }
 
 func NewConfig() Config {

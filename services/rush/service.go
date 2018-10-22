@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/kataras/iris"
+	"github.com/kataras/iris/websocket"
 	"github.com/masami10/aiis/services/changan"
 	"github.com/masami10/aiis/services/fis"
 	"github.com/masami10/aiis/services/httpd"
@@ -13,6 +14,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+	"github.com/masami10/aiis/services/wsnotify"
+	"encoding/json"
 )
 
 type Diagnostic interface {
@@ -41,6 +44,9 @@ type Service struct {
 	httpClient   *resty.Client
 	route        string
 
+	ws *websocket.Server
+	clientManager wsnotify.WSClientManager
+
 	StorageService interface {
 		UpdateResults(result *OperationResult, id int64, sent int) error
 	}
@@ -59,8 +65,16 @@ func NewService(c Config, d Diagnostic) *Service {
 			Opened:   false,
 			chResult: make(chan cResult, c.Workers),
 			route:    c.Route,
+
+			ws: websocket.New(websocket.Config{
+				WriteBufferSize: c.WSWriteBufferSize,
+				ReadBufferSize:  c.WSReadBufferSize,
+				ReadTimeout:     websocket.DefaultWebsocketPongTimeout, //此作为readtimeout, 默认 如果有ping没有发送也成为read time out
+			}),
+			clientManager: wsnotify.WSClientManager{},
 		}
 
+		s.clientManager.Init()
 		s.configValue.Store(c)
 		return &s
 	}
@@ -70,6 +84,150 @@ func NewService(c Config, d Diagnostic) *Service {
 
 func (s *Service) Config() Config {
 	return s.configValue.Load().(Config)
+}
+
+func (s *Service) Open() error {
+
+	r := httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "PUT",
+		Pattern:     "/operation.results/{result_id:long}",
+		HandlerFunc: s.getResultUpdate,
+	}
+	s.HTTPDService.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "PUT",
+		Pattern:     "/fis.results",
+		HandlerFunc: s.putFisResult,
+	}
+	s.HTTPDService.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "GET",
+		Pattern:     "/healthz",
+		HandlerFunc: s.getHealthz,
+	}
+	s.HTTPDService.Handler[0].AddRoute(r)
+
+	s.ws.OnConnection(s.onConnect)
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_WS,
+		Method:      "GET",
+		Pattern:     s.Config().WSRoute,
+		HandlerFunc: s.ws.Handler(),
+	}
+	s.HTTPDService.Handler[0].AddRoute(r)
+
+	client := resty.New()
+	client.SetRESTMode() // restful mode is default
+	client.SetTimeout(time.Duration(s.Config().Timeout))
+	client.SetContentLength(true)
+	// Headers for all request
+	client.SetHeaders(s.Config().Headers)
+	client.
+		SetRetryCount(s.Config().MaxRetry).
+		SetRetryWaitTime(time.Duration(s.Config().PushInterval)).
+		SetRetryMaxWaitTime(20 * time.Second)
+
+	s.httpClient = client
+
+	for i := 0; i < s.workers; i++ {
+		s.wg.Add(1)
+
+		go s.run()
+	}
+
+	s.Opened = true
+
+	return nil
+}
+
+func (s *Service) onConnect(c websocket.Connection) {
+
+	c.OnMessage(func(data []byte) {
+		ws_msg := WSMsg{}
+		err := json.Unmarshal(data, &ws_msg)
+		if err != nil {
+			s.diag.Error("ws error", err)
+			return
+		}
+
+		str_data, _ := json.Marshal(ws_msg.Data)
+
+		switch ws_msg.Type {
+		case WS_REG:
+			reg := WSRegist{}
+			err := json.Unmarshal(str_data, &reg)
+			if err != nil {
+				Msg := map[string]string{"msg": "regist msg error"}
+				msg, err := json.Marshal(Msg)
+				if err != nil {
+					c.Emit(wsnotify.WS_EVENT_REG, msg)
+				}
+
+				c.Disconnect()
+				return
+			}
+
+			_, exist := s.clientManager.GetClient(reg.Rush_SN)
+			if exist {
+				Msg := fmt.Sprintf("client with sn:%s already exists", reg.Rush_SN)
+				msgs := map[string]string{"msg": Msg}
+				regStrs, err := json.Marshal(msgs)
+				if err != nil {
+					c.Emit(wsnotify.WS_EVENT_REG, regStrs)
+				}
+
+				c.Disconnect()
+			} else {
+				// 将客户端加入列表
+				s.clientManager.AddClient(reg.Rush_SN, c)
+				Msg := map[string]string{"msg": "OK"}
+				msg, err := json.Marshal(Msg)
+				if err != nil {
+					c.Emit(wsnotify.WS_EVENT_REG, msg)
+				}
+			}
+
+		case WS_RESULT:
+			op_result := WSOpResult{}
+			err := json.Unmarshal(str_data, &op_result)
+			if err != nil {
+				s.diag.Error("ws result error", err)
+				return
+			}
+
+			rush_ip := strings.Split(c.Context().RemoteAddr(), ":")[0]
+			if strings.Contains(rush_ip, ":") {
+				kvs := strings.Split(rush_ip, ":")
+				rush_ip = kvs[0]
+			}
+
+			cr := cResult{
+				r:    &op_result.Result,
+				id:   op_result.ResultID,
+				ip:   rush_ip,
+				port: op_result.Port,
+			}
+
+			s.chResult <- cr
+		}
+
+
+	})
+
+	c.OnDisconnect(func() {
+		s.clientManager.RemoveClient(c.ID())
+	})
+
+	c.OnError(func(err error) {
+		s.diag.Error("Connection get error", err)
+		c.Disconnect()
+	})
+
 }
 
 func (s *Service) putFisResult(ctx iris.Context) {
@@ -131,55 +289,7 @@ func (s *Service) getResultUpdate(ctx iris.Context) {
 	ctx.StatusCode(iris.StatusNoContent)
 }
 
-func (s *Service) Open() error {
 
-	r := httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "PUT",
-		Pattern:     "/operation.results/{result_id:long}",
-		HandlerFunc: s.getResultUpdate,
-	}
-	s.HTTPDService.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "PUT",
-		Pattern:     "/fis.results",
-		HandlerFunc: s.putFisResult,
-	}
-	s.HTTPDService.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "GET",
-		Pattern:     "/healthz",
-		HandlerFunc: s.getHealthz,
-	}
-	s.HTTPDService.Handler[0].AddRoute(r)
-
-	client := resty.New()
-	client.SetRESTMode() // restful mode is default
-	client.SetTimeout(time.Duration(s.Config().Timeout))
-	client.SetContentLength(true)
-	// Headers for all request
-	client.SetHeaders(s.Config().Headers)
-	client.
-		SetRetryCount(s.Config().MaxRetry).
-		SetRetryWaitTime(time.Duration(s.Config().PushInterval)).
-		SetRetryMaxWaitTime(20 * time.Second)
-
-	s.httpClient = client
-
-	for i := 0; i < s.workers; i++ {
-		s.wg.Add(1)
-
-		go s.run()
-	}
-
-	s.Opened = true
-
-	return nil
-}
 
 func (s *Service) getHealthz(ctx iris.Context) {
 

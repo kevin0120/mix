@@ -149,6 +149,25 @@
   revision = "d0897469986fd8cbb04265da38d9fce539750ec8"
 
 [[projects]]
+  digest = "1:89afca4ec8130e6ba5f4005ac696b689bc850098a794f70f76e7f25951edce74"
+  name = "github.com/jinzhu/gorm"
+  packages = [
+    ".",
+    "dialects/mssql",
+  ]
+  pruneopts = "UT"
+  revision = "6ed508ec6a4ecb3531899a69cbc746ccf65a4166"
+  version = "v1.9.1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:fd97437fbb6b7dce04132cf06775bd258cce305c44add58eb55ca86c6c325160"
+  name = "github.com/jinzhu/inflection"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "04140366298a54a039076d798123ffa108fff46c"
+
+[[projects]]
   branch = "master"
   digest = "1:8d44b575d464430d321863488733d08f98b925721fff5b5f7f5011b6848ef135"
   name = "github.com/json-iterator/go"
@@ -449,9 +468,10 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/denisenkom/go-mssqldb",
     "github.com/go-xorm/xorm",
     "github.com/iris-contrib/middleware/cors",
+    "github.com/jinzhu/gorm",
+    "github.com/jinzhu/gorm/dialects/mssql",
     "github.com/kataras/iris",
     "github.com/kataras/iris/context",
     "github.com/kataras/iris/websocket",

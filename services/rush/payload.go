@@ -2,6 +2,11 @@ package rush
 
 import "time"
 
+const (
+	WS_REG = "reg"
+	WS_RESULT = "result"
+)
+
 type OperationResult struct {
 	ID              int64       `json:"id"`
 	PsetMThreshold  float32     `json:"pset_m_threshold"`
@@ -73,4 +78,19 @@ type OperationResult struct {
 type CURObject struct {
 	File string `json:"file"`
 	OP   int    `json:"op"`
+}
+
+type WSMsg struct {
+	Type string `json:"type"`
+	Data interface{} `json:"data"`
+}
+
+type WSRegist struct {
+	Rush_SN string `json:"rush_sn"`
+}
+
+type WSOpResult struct {
+	ResultID int64 `json:"result_id"`
+	Result OperationResult `json:"result"`
+	Port string `json:"port"`
 }
