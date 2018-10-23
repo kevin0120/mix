@@ -1,6 +1,7 @@
 package rush
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/kataras/iris"
@@ -8,14 +9,13 @@ import (
 	"github.com/masami10/aiis/services/changan"
 	"github.com/masami10/aiis/services/fis"
 	"github.com/masami10/aiis/services/httpd"
+	"github.com/masami10/aiis/services/wsnotify"
 	"gopkg.in/resty.v1"
 	"net/http"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
-	"github.com/masami10/aiis/services/wsnotify"
-	"encoding/json"
 )
 
 type Diagnostic interface {
@@ -44,7 +44,7 @@ type Service struct {
 	httpClient   *resty.Client
 	route        string
 
-	ws *websocket.Server
+	ws            *websocket.Server
 	clientManager wsnotify.WSClientManager
 
 	StorageService interface {
@@ -216,7 +216,6 @@ func (s *Service) onConnect(c websocket.Connection) {
 			s.chResult <- cr
 		}
 
-
 	})
 
 	c.OnDisconnect(func() {
@@ -288,8 +287,6 @@ func (s *Service) getResultUpdate(ctx iris.Context) {
 
 	ctx.StatusCode(iris.StatusNoContent)
 }
-
-
 
 func (s *Service) getHealthz(ctx iris.Context) {
 

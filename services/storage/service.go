@@ -120,7 +120,7 @@ func (s *Service) UpdateResults(result *rush.OperationResult, id int64, sent int
 		affected, err := s.eng.Table("operation_result").Insert(&r)
 
 		if err != nil {
-			return errors.Wrapf(err, "insert result record fail", id)
+			return errors.Wrapf(err, "insert result record fail: %s", err.Error())
 		}
 
 		s.diag.UpdateResultSuccess(affected)
@@ -130,7 +130,7 @@ func (s *Service) UpdateResults(result *rush.OperationResult, id int64, sent int
 		affected, err := s.eng.Table("operation_result").ID(id).Update(&r)
 
 		if err != nil {
-			return errors.Wrapf(err, "Update result record %d fail", id)
+			return errors.Wrapf(err, "Update result record %d fail: %s", id, err.Error())
 		}
 
 		s.diag.UpdateResultSuccess(affected)

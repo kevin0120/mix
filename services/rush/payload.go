@@ -3,7 +3,7 @@ package rush
 import "time"
 
 const (
-	WS_REG = "reg"
+	WS_REG    = "reg"
 	WS_RESULT = "result"
 )
 
@@ -81,7 +81,7 @@ type CURObject struct {
 }
 
 type WSMsg struct {
-	Type string `json:"type"`
+	Type string      `json:"type"`
 	Data interface{} `json:"data"`
 }
 
@@ -90,7 +90,7 @@ type WSRegist struct {
 }
 
 type WSOpResult struct {
-	ResultID int64 `json:"result_id"`
-	Result OperationResult `json:"result"`
-	Port string `json:"port"`
+	ResultID int64           `json:"result_id"`
+	Result   OperationResult `json:"result"`
+	Port     string          `json:"port"`
 }
