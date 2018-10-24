@@ -5,22 +5,25 @@ package utils
 import (
 	"errors"
 	"log"
-		"net/http"
+	"net/http"
 	"net/url"
 	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
-	)
+)
 
 const (
 	RECONNECT_ITV = 1
+	PING_ITV      = 10
 )
 
 // ErrNotConnected is returned when the application read/writes
 // a message and the connection is closed
 var ErrNotConnected = errors.New("websocket: not connected")
-type OnConnected func ()
+
+type OnConnected func()
+
 // The RecConn type represents a Reconnecting WebSocket connection.
 type RecConn struct {
 	// RecIntvlMin specifies the initial reconnecting interval,
@@ -178,7 +181,7 @@ func (rc *RecConn) Dial(urlStr string, reqHeader http.Header) {
 				}
 			}
 
-			time.Sleep(3 * time.Second)
+			time.Sleep(PING_ITV * time.Second)
 		}
 
 	}()

@@ -73,3 +73,20 @@ type WSOpResult struct {
 	Result   AIISResult `json:"result"`
 	Port     string     `json:"port"`
 }
+
+type PSetDefine struct {
+	Strategy string  `json:"strategy"`
+	Mp       float64 `json:"M+"`
+	Mm       float64 `json:"M-"`
+	Ms       float64 `json:"MS"`
+	Ma       float64 `json:"MA"`
+	Wp       float64 `json:"W+"`
+	Wm       float64 `json:"W-"`
+	Wa       float64 `json:"WS"`
+}
+
+type ResultValue struct {
+	Mi float64 `json:"MI"`
+	Wi float64 `json:"WI"`
+	Ti float64 `json:"TI"`
+}
