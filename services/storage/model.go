@@ -5,42 +5,103 @@ import (
 )
 
 //odoo中的operation_result数据库 模型
+//type OperationResultModel struct {
+//	Id             int64     `xorm:"pk SERIAL notnull 'id'"`
+//	CreateTime     time.Time `xorm:"DATE notnull 'time'"`
+//	PsetMThreshold float32   `xorm:"numeric 'pset_m_threshold'"`
+//	PsetMMax       float32   `xorm:"numeric 'pset_m_max'"`
+//	FinalPass      string    `xorm:"varchar(32) 'final_pass'"`
+//	OneTimePass    string    `xorm:"varchar(32) 'one_time_pass'"`
+//	//PointId         int64     `xorm:" INTEGER 'point_id'"`
+//	//WorkorderId     int64     `xorm:" INTEGER 'workorder_id'"`
+//	MeasureDegree float32 `xorm:"numeric 'measure_degree'"`
+//	MeasureTorque float32 `xorm:"numeric 'measure_torque'"`
+//	MeasureResult string  `xorm:"varchar(32) 'measure_result'"`
+//	PsetWMax      float32 `xorm:"numeric 'pset_w_max'"`
+//	UserId        int64   `xorm:" INTEGER null 'user_id'"`
+//	//ConsuProductId  int64     `xorm:" INTEGER 'consu_product_id'"`
+//	WorkcenterId int64   `xorm:" INTEGER null 'workcenter_id'"`
+//	Sent         int     `xorm:" bool 'sent'"`
+//	PsetWTarget  float32 `xorm:"numeric 'pset_w_target'"`
+//	//ProductionId    int64     `xorm:" INTEGER 'production_id'"`
+//	Lacking      string `xorm:"varchar(32) 'lacking'"`
+//	QualityState string `xorm:"varchar(32) 'quality_state'"`
+//	PsetStrategy string `xorm:"varchar(32) 'pset_strategy'"`
+//	//AssemblyLineId  int64     `xorm:" INTEGER 'assembly_line_id'"`
+//	PsetMTarget     float32   `xorm:"numeric 'pset_m_target'"`
+//	PsetWMin        float32   `xorm:"numeric 'pset_w_min'"`
+//	ProductId       int64     `xorm:" INTEGER null 'product_id'"`
+//	ControlDate     time.Time `xorm:"TIMESTAMP 'control_date'"`
+//	Name            string    `xorm:"varchar(128) 'name'"`
+//	PsetWThreshold  float32   `xorm:"numeric 'pset_w_threshold'"`
+//	CurObjects      string    `xorm:"varchar(256) 'cur_objects'"`
+//	PsetMMin        float32   `xorm:"numeric 'pset_m_min'"`
+//	MeasureTDon     float32   `xorm:"numeric 'measure_t_don'"`
+//	OpTime          int       `xorm:" INTEGER 'op_time'"`
+//	ExceptionReason string    `xorm:"varchar(32) 'exception_reason'"`
+//	GunID           int64     `xorm:" INTEGER null 'gun_id'"`
+//	//ConsuBomLineID  int64	  `xorm:" INTEGER 'consu_bom_line_id'"`
+//	Vin   string `xorm:"varchar(128) 'vin'"`
+//	Batch string `xorm:"varchar(128) 'batch'"`
+//}
+
+var KEYS = []string {
+	"pset_m_threshold",
+	"pset_m_max",
+	"control_date",
+	"pset_w_max",
+	"user_id",
+	"one_time_pass",
+	"pset_strategy",
+	"pset_w_threshold",
+	"cur_objects",
+	"pset_m_target",
+	"pset_m_min",
+	"final_pass",
+	"measure_degree",
+	"measure_t_don",
+	"measure_torque",
+	"measure_result",
+	"op_time",
+	"pset_w_min",
+	"pset_w_target",
+	"lacking",
+	"quality_state",
+	"exception_reason",
+	"id",
+	"sent",
+}
+
 type OperationResultModel struct {
-	Id             int64     `xorm:"pk SERIAL notnull 'id'"`
-	CreateTime     time.Time `xorm:"DATE notnull 'time'"`
-	PsetMThreshold float32   `xorm:"numeric 'pset_m_threshold'"`
-	PsetMMax       float32   `xorm:"numeric 'pset_m_max'"`
-	FinalPass      string    `xorm:"varchar(32) 'final_pass'"`
-	OneTimePass    string    `xorm:"varchar(32) 'one_time_pass'"`
-	//PointId         int64     `xorm:" INTEGER 'point_id'"`
-	//WorkorderId     int64     `xorm:" INTEGER 'workorder_id'"`
-	MeasureDegree float32 `xorm:"numeric 'measure_degree'"`
-	MeasureTorque float32 `xorm:"numeric 'measure_torque'"`
-	MeasureResult string  `xorm:"varchar(32) 'measure_result'"`
-	PsetWMax      float32 `xorm:"numeric 'pset_w_max'"`
-	UserId        int64   `xorm:" INTEGER null 'user_id'"`
-	//ConsuProductId  int64     `xorm:" INTEGER 'consu_product_id'"`
-	WorkcenterId int64   `xorm:" INTEGER null 'workcenter_id'"`
-	Sent         int     `xorm:" bool 'sent'"`
-	PsetWTarget  float32 `xorm:"numeric 'pset_w_target'"`
-	//ProductionId    int64     `xorm:" INTEGER 'production_id'"`
-	Lacking      string `xorm:"varchar(32) 'lacking'"`
-	QualityState string `xorm:"varchar(32) 'quality_state'"`
-	PsetStrategy string `xorm:"varchar(32) 'pset_strategy'"`
-	//AssemblyLineId  int64     `xorm:" INTEGER 'assembly_line_id'"`
-	PsetMTarget     float32   `xorm:"numeric 'pset_m_target'"`
-	PsetWMin        float32   `xorm:"numeric 'pset_w_min'"`
-	ProductId       int64     `xorm:" INTEGER null 'product_id'"`
-	ControlDate     time.Time `xorm:"TIMESTAMP 'control_date'"`
-	Name            string    `xorm:"varchar(128) 'name'"`
-	PsetWThreshold  float32   `xorm:"numeric 'pset_w_threshold'"`
-	CurObjects      string    `xorm:"varchar(256) 'cur_objects'"`
-	PsetMMin        float32   `xorm:"numeric 'pset_m_min'"`
-	MeasureTDon     float32   `xorm:"numeric 'measure_t_don'"`
-	OpTime          int       `xorm:" INTEGER 'op_time'"`
-	ExceptionReason string    `xorm:"varchar(32) 'exception_reason'"`
-	GunID           int64     `xorm:" INTEGER null 'gun_id'"`
-	//ConsuBomLineID  int64	  `xorm:" INTEGER 'consu_bom_line_id'"`
-	Vin   string `xorm:"varchar(128) 'vin'"`
-	Batch string `xorm:"varchar(128) 'batch'"`
+	Id              int64     `gorm:"column:id;PRIMARY_KEY"`
+	CreateTime      time.Time `gorm:"column:time"`
+	PsetMThreshold  float32   `gorm:"column:pset_m_threshold"`
+	PsetMMax        float32   `gorm:"column:pset_m_max"`
+	FinalPass       string    `gorm:"column:final_pass"`
+	OneTimePass     string    `gorm:"column:one_time_pass"`
+	MeasureDegree   float32   `gorm:"column:measure_degree"`
+	MeasureTorque   float32   `gorm:"column:measure_torque"`
+	MeasureResult   string    `gorm:"column:measure_result"`
+	PsetWMax        float32   `gorm:"column:pset_w_max"`
+	UserId          int64     `gorm:"column:user_id"`
+	WorkcenterId    int64     `gorm:"column:workcenter_id"`
+	Sent            int       `gorm:"column:sent"`
+	PsetWTarget     float32   `gorm:"column:pset_w_target"`
+	Lacking         string    `gorm:"column:lacking"`
+	QualityState    string    `gorm:"column:quality_state"`
+	PsetStrategy    string    `gorm:"column:pset_strategy"`
+	PsetMTarget     float32   `gorm:"column:pset_m_target"`
+	PsetWMin        float32   `gorm:"column:pset_w_min"`
+	ProductId       int64     `gorm:"column:product_id"`
+	ControlDate     time.Time `gorm:"column:control_date"`
+	Name            string    `gorm:"column:name"`
+	PsetWThreshold  float32   `gorm:"column:pset_w_threshold"`
+	CurObjects      string    `gorm:"column:cur_objects"`
+	PsetMMin        float32   `gorm:"column:pset_m_min"`
+	MeasureTDon     float32   `gorm:"column:measure_t_don"`
+	OpTime          int       `gorm:"column:op_time"`
+	ExceptionReason string    `gorm:"column:exception_reason"`
+	GunID           int64     `gorm:"column:gun_id"`
+	Vin             string    `gorm:"column:vin"`
+	Batch           string    `gorm:"column:batch"`
 }

@@ -54,6 +54,12 @@ type OperationResult struct {
 	Model          string `json:"model"`
 }
 
+type ResultObject struct {
+	OR   map[string]interface{}
+	ID   int64
+	Send int
+}
+
 //type AIISResult struct {
 //	Pset_m_threshold float64 `json:"pset_m_threshold"`
 //	Pset_m_max       float64 `json:"pset_m_max"`

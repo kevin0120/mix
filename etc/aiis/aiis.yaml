@@ -53,7 +53,7 @@ fis:
     - SIH
     - HBV
     - AGM
-  enable: false
+  enable: true
 changan:
   andon_addr: tcp://127.0.0.1:9002
   enable: false
@@ -83,9 +83,12 @@ storage:
   db_user: admin
   db_pwd: admin
   max_connection: 60
+  batch_save_rows_limit: 100
+  batch_save_time_limit: 5s
+
 rush:
   enable: true
-  workers: 4
+  workers: 8
   url: http://127.0.0.1:8082
   route: /rush/v1/results
   headers:

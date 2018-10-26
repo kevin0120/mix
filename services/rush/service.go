@@ -49,6 +49,7 @@ type Service struct {
 
 	StorageService interface {
 		UpdateResults(result *OperationResult, id int64, sent int) error
+		AddResult(r *ResultObject)
 	}
 
 	Fis     *fis.Service
@@ -63,7 +64,7 @@ func NewService(c Config, d Diagnostic) *Service {
 			diag:     d,
 			workers:  c.Workers,
 			Opened:   false,
-			chResult: make(chan cResult, c.Workers),
+			chResult: make(chan cResult, c.Workers * 4),
 			route:    c.Route,
 
 			ws: websocket.New(websocket.Config{
@@ -254,6 +255,7 @@ func (s *Service) putFisResult(ctx iris.Context) {
 }
 
 func (s *Service) getResultUpdate(ctx iris.Context) {
+
 	resultId, err := ctx.Params().GetInt64("result_id")
 
 	if err != nil {
@@ -263,6 +265,8 @@ func (s *Service) getResultUpdate(ctx iris.Context) {
 	}
 	var r OperationResult
 	err = ctx.ReadJSON(&r)
+	//ctx.Request().Body.Read()
+
 
 	if err != nil {
 		ctx.Writef(fmt.Sprintf("Result Params from Rush wrong: %s", err))
@@ -437,12 +441,24 @@ func (s *Service) HandleResult(cr *cResult) {
 		}
 	}
 
-	// 结果保存数据库
-	err := s.StorageService.UpdateResults(cr.r, cr.id, sent)
-	if err != nil {
-		s.diag.Error("update result error", err)
-	} else {
-		// 更新masterpc结果上传标识
-		s.PatchResultFlag(cr.r.ID, true, cr.ip, cr.port)
+	json_str, _ := json.Marshal(cr.r)
+	json_obj := map[string]interface{}{}
+	json.Unmarshal(json_str, &json_obj)
+	result := &ResultObject{
+		OR: json_obj,
+		ID: cr.id,
+		Send: sent,
 	}
+
+	s.StorageService.AddResult(result)
+
+	// 结果保存数据库
+	//err := s.StorageService.UpdateResults(cr.r, cr.id, sent)
+	//
+	//if err != nil {
+	//	s.diag.Error("update result error", err)
+	//} else {
+	//	// 更新masterpc结果上传标识
+	//	//s.PatchResultFlag(cr.r.ID, true, cr.ip, cr.port)
+	//}
 }

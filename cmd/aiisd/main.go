@@ -7,7 +7,10 @@ import (
 	"github.com/masami10/aiis/cmd/aiisd/run"
 	"github.com/masami10/aiis/services/diagnostic"
 	"io"
+	"log"
 	"math/rand"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"strings"
@@ -54,6 +57,10 @@ func NewMain() *Main {
 }
 
 func main() {
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
+
 	rand.Seed(time.Now().UnixNano())
 
 	m := NewMain()
@@ -61,6 +68,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+
 }
 
 func (m *Main) Run(args ...string) error {
