@@ -188,7 +188,7 @@ func (s *Service) BatchSave(results []*rush.ResultObject) error {
 	result := s.eng.Exec(sql)
 	if result.Error == nil {
 		//result.
-		fmt.Printf("success:%d\n", result.RowsAffected)
+		//s.diag.Printf("success:%d\n", result.RowsAffected)
 	}
 	return result.Error
 }
