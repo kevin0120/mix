@@ -39,7 +39,7 @@ type Service struct {
 	endpoints   []*Endpoint
 	httpClient  *resty.Client
 	rush_port   string
-	db          *storage.Service
+	DB          *storage.Service
 	ws          utils.RecConn
 	//ws			websocket.Client
 	SN string
@@ -177,12 +177,12 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	psetDefine := PSetDefine{}
 	json.Unmarshal([]byte(result.PSetDefine), &psetDefine)
 
-	dbWorkorder, err := s.db.GetWorkorder(result.WorkorderID, true)
+	dbWorkorder, err := s.DB.GetWorkorder(result.WorkorderID, true)
 	if err != nil {
 		return aiisResult, err
 	}
 
-	curves, err := s.db.ListCurvesByResult(result.ResultId)
+	curves, err := s.DB.ListCurvesByResult(result.ResultId)
 	if err == nil {
 		aiisCurve := CURObject{}
 		for _, v := range curves {
@@ -227,7 +227,7 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 func (s *Service) ResultUploadManager() error {
 	for {
 
-		results, err := s.db.ListUnuploadResults()
+		results, err := s.DB.ListUnuploadResults()
 		if err == nil {
 			for _, v := range results {
 				aiisResult, err := s.ResultToAiisResult(&v)
