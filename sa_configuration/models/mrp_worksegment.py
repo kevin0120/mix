@@ -4,6 +4,7 @@
 from dateutil import relativedelta
 import datetime
 import json
+import urllib
 
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
@@ -79,6 +80,8 @@ class MrpWorkSegment(models.Model):
 class MrpWorkCenter(models.Model):
     _inherit = 'mrp.workcenter'
 
+    external_url = fields.Text('External URL', compute='_compute_external_url')
+
     worksegment_id = fields.Many2one('mrp.worksegament', copy=False)
     hmi_id = fields.Many2one('maintenance.equipment',  string='HMI', copy=False)
     masterpc_id = fields.Many2one('maintenance.equipment',  string='MasterPC', copy=False)
@@ -124,7 +127,12 @@ class MrpWorkCenter(models.Model):
             if len(set(org_list)) != new + org:
                 raise ValidationError('拧紧枪设置重复')
 
-
+    @api.multi
+    def _compute_external_url(self):
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        for rec in self:
+             t = urllib.quote(u'{0}/web#id={1}&view_type=form&model=mrp.workcenter'.format(base_url, rec.id))
+             rec.external_url = t
 
     @api.multi
     @api.depends('masterpc_id')

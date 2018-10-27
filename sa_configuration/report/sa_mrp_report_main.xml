@@ -10,5 +10,13 @@
             report_type="qweb-pdf"
         />
 
+        <report
+            id="report_workcenter_labels"
+            string="Work Center Labels"
+            model="mrp.workcenter"
+            report_type="qweb-pdf"
+            name="sa_configuration.report_workcenterlabel"
+            file="sa_configuration.report_workcenterlabel"/>
+
     </data>
 </odoo>
