@@ -1,0 +1,28 @@
+<odoo>
+  <data>
+    <record id="sa_maintenance_request_view_form_inherit_hr" model="ir.ui.view">
+        <field name="name">sa_maintenance_request_view_form_inherit_hr</field>
+        <field name="model">maintenance.request</field>
+        <field name="inherit_id" ref="maintenance.hr_equipment_request_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/button[@name='archive_equipment_request']" position="before">
+                <button name="assign_ticket_to_self" string="I take it" type="object" class="oe_highlight" groups="maintenance.group_equipment_manager"/>
+            </xpath>
+          <xpath expr="//field[@name='production_id']" position="replace">
+          </xpath>
+          <xpath expr="//field[@name='workorder_id']" position="replace">
+          </xpath>
+          <xpath expr="//field[@name='description']" position="replace">
+            <notebook colspan="4">
+                <page string="Description" >
+                  <field name="description" placeholder="Add an internal note..." />
+                </page>
+                <page string="Check List" >
+                  <field name="description" placeholder="Add an internal note..." />
+                </page>
+            </notebook>
+          </xpath>
+        </field>
+    </record>
+  </data>
+</odoo>
