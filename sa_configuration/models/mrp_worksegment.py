@@ -131,8 +131,7 @@ class MrpWorkCenter(models.Model):
     def _compute_external_url(self):
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         for rec in self:
-             t = urllib.quote(u'{0}/web#id={1}&view_type=form&model=mrp.workcenter'.format(base_url, rec.id))
-             rec.external_url = t
+             rec.external_url = urllib.quote(u'{0}/web#id={1}&view_type=form&model=mrp.workcenter'.format(base_url, rec.id))
 
     @api.multi
     @api.depends('masterpc_id')

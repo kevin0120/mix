@@ -8,6 +8,9 @@ from odoo.exceptions import UserError
 from odoo.tools import html2text, ustr
 import requests as Requests
 
+import urllib
+
+
 HEALTHZ_URL = 'api/v1/healthz'
 
 class EquipmentConnection(models.Model):
@@ -80,6 +83,8 @@ class MaintenanceEquipment(models.Model):
     parent_id = fields.Many2one('maintenance.equipment', 'Parent Equipment', index=True, ondelete='cascade')
     child_ids = fields.One2many('maintenance.equipment', 'parent_id', 'Child Equipments')
 
+    external_url = fields.Text('External URL', compute='_compute_external_url')
+
     parent_left = fields.Integer('Left Parent', index=1)
     parent_right = fields.Integer('Right Parent', index=1)
     #
@@ -90,6 +95,12 @@ class MaintenanceEquipment(models.Model):
     category_name = fields.Char(compute='_compute_category_name', default='', store=True)
 
     connection_ids = fields.One2many('maintenance.equipment.connection', 'equipment_id', 'Connection Information')
+
+    @api.multi
+    def _compute_external_url(self):
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        for rec in self:
+            rec.external_url = urllib.quote(u'{0}/web#id={1}&view_type=form&model=maintenance.equipment'.format(base_url, rec.id))
 
     @api.multi
     def _compute_child_equipments_count(self):

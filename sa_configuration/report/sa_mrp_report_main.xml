@@ -18,5 +18,13 @@
             name="sa_configuration.report_workcenterlabel"
             file="sa_configuration.report_workcenterlabel"/>
 
+        <report
+            id="report_equipment_labels"
+            string="Equipment Labels"
+            model="maintenance.equipment"
+            report_type="qweb-pdf"
+            name="sa_configuration.report_equipmentlabel"
+            file="sa_configuration.report_equipmentlabel"/>
+
     </data>
 </odoo>
