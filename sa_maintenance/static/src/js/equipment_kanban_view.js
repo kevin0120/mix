@@ -15,8 +15,6 @@ odoo.define('equipment.kanban', function (require) {
     var EquipmentKanBanView = KanbanView.extend({
         display_name: _lt('Equipment Dashboard'),
         icon: 'fa-dashboard',
-        groupable: false,
-
 
     });
 

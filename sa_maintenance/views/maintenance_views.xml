@@ -41,6 +41,9 @@
                     <span class="oe_kanban_equpiment_status"/>
                 </div>
             </xpath>
+            <xpath expr="//div[@class='oe_kanban_footer_left mt4 label label-danger']" position="after">
+                <div class="oe_kanban_footer_left mt4 label equip_status"/>
+            </xpath>
         </field>
       </record>
 

@@ -22,11 +22,13 @@ KanbanRecord.include({
           dataType: 'json',
           beforeSend: function(xhr) {xhr.setRequestHeader('Content-Type', 'application/json');},
           success: function(){
+              self.$("div.equip_status").text(_t('Connecting')).removeClass('label-danger').addClass('label-success');
               if(self.$(".oe_kanban_equpiment_status").hasClass('oe_kanban_equpiment_status_red')){
                   self.$(".oe_kanban_equpiment_status").removeClass('oe_kanban_equpiment_status_red').addClass('oe_kanban_equpiment_status_green');
               }
           },
           error: function() {
+              self.$("div.equip_status").text(_t('Disconnect')).removeClass('label-success').addClass('label-danger');
               if(self.$(".oe_kanban_equpiment_status").hasClass('oe_kanban_equpiment_status_green')){
                   self.$(".oe_kanban_equpiment_status").removeClass('oe_kanban_equpiment_status_green').addClass('oe_kanban_equpiment_status_red');
               }
@@ -35,8 +37,11 @@ KanbanRecord.include({
     },
 
     destroy: function(){
-        clearInterval(this.mytimer);
+        var self = this;
         this._super();
+        if(self.mytimer){
+            clearInterval(self.mytimer);
+        }
     },
 
     start: function() {
@@ -44,7 +49,9 @@ KanbanRecord.include({
         if (this.model === 'maintenance.equipment'){
             this._super.apply(this, arguments);
             self.$(".oe_kanban_equpiment_status").addClass('oe_kanban_equpiment_status_red');
+            self.$("div.equip_status").text(_t('Disconnect')).addClass('label-danger');
             if(self.values.healthz_url.value) {
+                self.ping.bind(self)(); //initial first
                 self.mytimer = setInterval(self.ping.bind(self), 3000);
             }
         } else{
