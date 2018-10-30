@@ -20,7 +20,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['mrp_maintenance', 'maintenance', 'mrp', 'web_domain_field', 'quality_mrp', 'web_widget_darkroom'],
+    'depends': ['mrp_maintenance', 'maintenance', 'mrp', 'web_domain_field', 'quality_mrp'],
 
     "external_dependencies": {
         "python": ['validators'],

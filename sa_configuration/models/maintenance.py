@@ -13,6 +13,8 @@ import urllib
 
 HEALTHZ_URL = 'api/v1/healthz'
 
+DEFAULT_TIMEOUT = 2  ### 2秒 timeout
+
 class EquipmentConnection(models.Model):
     _name = 'maintenance.equipment.connection'
     _description = 'Equipment Connection'
@@ -36,7 +38,7 @@ class EquipmentConnection(models.Model):
                 continue
             try:
                 url = u'http://{0}:{1}/{2}'.format(connection.ip, connection.port, HEALTHZ_URL)
-                ret = Requests.get(url, headers={'Content-Type': 'application/json'})
+                ret = Requests.get(url, headers={'Content-Type': 'application/json'}, timeout=DEFAULT_TIMEOUT)
                 if ret.status_code == 204:
                     raise UserError(_("Connection Test Succeeded! Everything seems properly set up!"))
                 else:
@@ -85,6 +87,8 @@ class MaintenanceEquipment(models.Model):
 
     external_url = fields.Text('External URL', compute='_compute_external_url')
 
+    healthz_url = fields.Char('Healthz Check URL')
+
     parent_left = fields.Integer('Left Parent', index=1)
     parent_right = fields.Integer('Right Parent', index=1)
     #
@@ -95,6 +99,21 @@ class MaintenanceEquipment(models.Model):
     category_name = fields.Char(compute='_compute_category_name', default='', store=True)
 
     connection_ids = fields.One2many('maintenance.equipment.connection', 'equipment_id', 'Connection Information')
+
+    @api.multi
+    def button_check_healthz(self):
+        for e in self:
+            url = e.healthz_url
+            if not url:
+                continue
+            try:
+                ret = Requests.get(url, headers={'Content-Type': 'application/json'}, timeout=DEFAULT_TIMEOUT)
+                if ret.status_code == 204:
+                    raise UserError(_("Connection Test Succeeded! Everything seems properly set up!"))
+                else:
+                    raise UserError(_("Connection Test Failed! Here is what we got instead: %d!") % ret.status_code)
+            except Exception as e:
+                raise UserError(_("Connection Test Failed! Here is what we got instead:\n %s") % ustr(e))
 
     @api.multi
     def _compute_external_url(self):

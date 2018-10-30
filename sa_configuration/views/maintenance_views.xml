@@ -14,11 +14,19 @@
                 <field name="category_id"  widget="selection"/>
                 <field name="parent_id" options="{'no_create_edit':True, 'no_open':True}"
                        domain="[('category_name','=','MasterPC')]" attrs="{'invisible': [('category_name', '=', 'MasterPC')]}" />
+                <field name="healthz_url" />
             </field>
             <field name="serial_no" position="attributes">
                 <attribute name="attrs">{'required': [('category_name', '=', 'HMI')]}</attribute>
             </field>
             <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="button_check_healthz"
+                        type="object"
+                        string="Test"
+                        icon="fa-television"
+                        class="oe_stat_button"
+                        attrs="{'invisible': [('healthz_url', '=', False )]}"/>
+
                 <button name="%(maintenance.hr_equipment_action)d"
                         class="oe_stat_button"
                         icon="fa-laptop"
