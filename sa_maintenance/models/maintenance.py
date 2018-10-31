@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 import odoo.addons.decimal_precision as dp
-
+from odoo.exceptions import UserError
+from itertools import groupby
+import json
 
 class MaintenanceCheckPointCategory(models.Model):
     _name = 'maintenance.cp.category'
@@ -20,10 +22,11 @@ class MaintenanceCheckPoint(models.Model):
     _name = 'maintenance.cp'
     _description = 'Equipment Checklist for each maintenance request '
 
+    name = fields.Char('CP Name')
     equipment_id = fields.Many2one('maintenance.equipment', string='Equipment', index=True)
 
     category_id = fields.Many2one('maintenance.cp.category')
-    description = fields.Html('Maintenance Check Point Description')
+    description = fields.Char('Maintenance Check Point Description')
 
     test_type = fields.Selection(related='category_id.test_type', readonly=True)
 
@@ -42,7 +45,19 @@ class MaintenanceCheckPointAction(models.Model):
 
     request_id = fields.Many2one('maintenance.request', string='Request', index=True)
 
-    point_id = fields.Many2one('maintenance.cp', 'Check Point')
+    test_type = fields.Selection([
+        ('passfail', 'Pass - Fail'),
+        ('measure', 'Measure')], string="Test Type",
+        default='passfail', required=True)
+
+    category_id = fields.Many2one('maintenance.cp.category')
+
+    description = fields.Char('Maintenance Check Point Description')
+
+    norm = fields.Float('Norm', digits=dp.get_precision('Maintenance Tests'))  # TDE RENAME ?
+    tolerance_min = fields.Float('Min Tolerance', digits=dp.get_precision('Maintenance Tests'))
+    tolerance_max = fields.Float('Max Tolerance', digits=dp.get_precision('Maintenance Tests'))
+
     measure = fields.Float(digits=dp.get_precision('Maintenance Tests'))
 
     measure_success = fields.Selection([
@@ -54,13 +69,84 @@ class MaintenanceCheckPointAction(models.Model):
     @api.one
     @api.depends('measure')
     def _compute_measure_success(self):
-        if self.point_id.test_type == 'passfail':
+        if self.test_type == 'passfail':
             self.measure_success = 'none'
         else:
-            if self.measure < self.point_id.tolerance_min or self.measure > self.point_id.tolerance_max:
+            if self.measure < self.tolerance_min or self.measure > self.tolerance_max:
                 self.measure_success = 'fail'
             else:
                 self.measure_success = 'pass'
+
+    @api.model
+    def bulk_create(self, all_vals):
+
+        all_updates = []
+        for vals in all_vals:
+            tocreate = {
+                parent_model: {'id': vals.pop(parent_field, None)}
+                for parent_model, parent_field in self._inherits.iteritems()
+            }
+
+            # list of column assignments defined as tuples like:
+            #   (column_name, format_string, column_value)
+            #   (column_name, sql_formula)
+            # Those tuples will be used by the string formatting for the INSERT
+            # statement below.
+            updates = [
+                ('id', "%s", "nextval('%s')" % self._sequence),
+            ]
+
+            upd_todo = []
+            unknown_fields = []
+            protected_fields = []
+            for name, val in vals.items():
+                field = self._fields.get(name)
+                if not field:
+                    unknown_fields.append(name)
+                    del vals[name]
+                elif field.inherited:
+                    tocreate[field.related_field.model_name][name] = val
+                    del vals[name]
+                elif not field.store:
+                    del vals[name]
+                elif field.inverse:
+                    protected_fields.append(field)
+
+            # set boolean fields to False by default (to make search more powerful)
+            for name, field in self._fields.iteritems():
+                if field.type == 'boolean' and field.store and name not in vals:
+                    vals[name] = False
+
+            # determine SQL values
+            for name, val in vals.iteritems():
+                field = self._fields[name]
+                if field.store and field.column_type:
+                    updates.append((name, field.column_format, field.convert_to_column(val, self)))
+                else:
+                    upd_todo.append(name)
+
+                if hasattr(field, 'selection') and val:
+                    self._check_selection_field_value(name, val)
+
+            if self._log_access:
+                updates.append(('create_uid', '%s', self._uid))
+                updates.append(('write_uid', '%s', self._uid))
+                # updates.append(('create_date', '%s', '(now() at time zone \'UTC\')'))
+                # updates.append(('write_date', '%s', '(now() at time zone \'UTC\')'))
+            all_updates.append(updates)
+        cr = self._cr
+        t = [tuple(u[2] for u in update if len(u) > 2) for update in all_updates]
+        query = """INSERT INTO "%s" (%s) VALUES %s RETURNING id""" % (
+            self._table,
+            ', '.join('"%s"' % u[0] for u in all_updates[0]),
+            ','.join("(nextval('%s')," % self._sequence + str(_t[1:])[1:] for _t in t),
+        )
+
+        cr.execute(query)
+
+        # from now on, self is the new record
+        ids_news = cr.fetchall()
+        return [ids[0] for ids in ids_news]
 
 
 class MaintenanceRequest(models.Model):
@@ -74,6 +160,20 @@ class MaintenanceRequest(models.Model):
         if 'equipment_id' in vals and vals.get('maintenance_type', 'corrective') == 'preventive':
             equipment_id = vals.get('equipment_id')
             check_point_ids = self.env['maintenance.cp'].sudo().search([('equipment_id', '=', equipment_id)])
+            actions = []
+            for check_point in check_point_ids:
+                actions.append({
+                    'point_id': check_point.id,
+                    'category_id': check_point.category_id.id,
+                    'request_id': ret.id,
+                    'description': check_point.description if check_point.description else "",
+                    'test_type': check_point.category_id.test_type,
+                    'norm': check_point.norm,
+                    'tolerance_min': check_point.tolerance_min,
+                    'tolerance_max': check_point.tolerance_max,
+                })
+            if len(actions) > 0:
+                self.env['maintenance.cp.action'].sudo().bulk_create(actions)
 
         return ret
 

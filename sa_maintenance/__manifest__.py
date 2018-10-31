@@ -27,6 +27,9 @@
         'data/data.xml',
         'views/maintenance_views.xml',
         'views/templates.xml',
+        'views/equipment_view.xml',
+        'report/maintenance_report_main.xml',
+        'report/report_maintenance_views.xml'
     ],
     # only loaded in demonstration mode
     'demo': [
