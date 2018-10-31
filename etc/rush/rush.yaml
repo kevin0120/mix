@@ -31,7 +31,7 @@ minio:
   reupload_interval: 24h
 aiis:
   urls:
-  - http://172.17.0.1:9092
+  - http://aiis.sa.com
   headers:
     Content-Type: application/json
   result_push_url: /aiis/v1/operation.results/%d
@@ -100,11 +100,11 @@ controller_service:
 #    port: 4700
 #    channel: 51
 
-  - serial_no: 0002
-    protocol: Audi/VW
-    remote_ip: 192.168.1.102
-    port: 4700
-    channel: 1
+#  - serial_no: 0002
+#    protocol: Audi/VW
+#    remote_ip: 192.168.1.102
+#    port: 4700
+#    channel: 1
 
 #  - serial_no: 0001
 #    protocol: OpenProtocol

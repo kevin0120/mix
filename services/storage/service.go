@@ -392,6 +392,21 @@ func (s *Service) GetResult(resultId int64, count int) (Results, error) {
 	}
 }
 
+func (s *Service) ListWorkorders(hmi_sn string, status string) ([]Workorders, error) {
+	var workorders []Workorders
+
+	sql := fmt.Sprintf("select * from workorders where hmi_sn = '%s'", hmi_sn)
+	if status != "" {
+		sql = sql + fmt.Sprintf(" and workorders.status = '%s'", status)
+	}
+
+	sql = sql + " order by lnr asc"
+
+	err := s.eng.SQL(sql).Find(&workorders)
+
+	return workorders, err
+}
+
 func (s *Service) GetWorkorder(id int64, raw bool) (Workorders, error) {
 
 	var workorder Workorders

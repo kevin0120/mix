@@ -1123,3 +1123,37 @@ func (m *Methods) getLocalResults(ctx iris.Context) {
 	ctx.Header("content-type", "application/json")
 	ctx.Write(body)
 }
+
+func (m *Methods) listWorkorders(ctx iris.Context) {
+	status := ctx.URLParam("status")
+	hmi_sn := ctx.URLParam("hmi_sn")
+	if hmi_sn == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("hmi_sn is required")
+		return
+	}
+
+	workorders, err := m.service.DB.ListWorkorders(hmi_sn, status)
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("find workorders failed")
+		return
+	}
+
+	rtWorkorders := []NextWorkorder{}
+	for _, v := range workorders {
+		rw := NextWorkorder {
+			Vin: v.Vin,
+			Model: v.MO_Model,
+			Knr: v.Knr,
+			LongPin: v.LongPin,
+			Lnr: v.MO_Lnr,
+		}
+
+		rtWorkorders = append(rtWorkorders, rw)
+	}
+
+	body, _ := json.Marshal(rtWorkorders)
+	ctx.Header("content-type", "application/json")
+	ctx.Write(body)
+}

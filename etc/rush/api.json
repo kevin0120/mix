@@ -509,6 +509,48 @@
             "description": "获取失败"
           }
         }
+      },
+      "get": {
+        "tags": [
+          "HMI"
+        ],
+        "summary": "取得工单列表",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "hmi_sn",
+            "in": "query",
+            "description": "hmi序列号",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "工单状态",
+            "type": "string",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "返回工单列表",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/NextWorder"
+              }
+            }
+          },
+          "400": {
+            "description": "获取失败"
+          }
+        }
       }
     },
     "/results": {
@@ -1667,6 +1709,36 @@
         "sequence": {
           "type": "integer",
           "description": "序号"
+        }
+      }
+    },
+    "NextWorder": {
+      "type": "object",
+      "properties": {
+        "vin": {
+          "type": "string",
+          "description": "车辆识别号",
+          "example": "LSV2A8CA7JN508198"
+        },
+        "model": {
+          "type": "string",
+          "description": "车型代码",
+          "example": "BR24J3"
+        },
+        "long_pin": {
+          "type": "string",
+          "description": "pin",
+          "example": "C6201864735595"
+        },
+        "knr": {
+          "type": "string",
+          "description": "knr",
+          "example": "64735595"
+        },
+        "lnr": {
+          "type": "string",
+          "description": "车序",
+          "example": "0001"
         }
       }
     },
