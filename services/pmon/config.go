@@ -82,15 +82,14 @@ func parseRestartPoints(conf *PmonConfig) error {
 	for {
 		line, err := rd.ReadString('\n')
 
-		if line == "" {
-			continue
-		}
-		values := strings.Split(line, "*")
-		if len(values) < 2 {
-			return errors.New("restart point format error")
-		}
+		if line != "" {
+			values := strings.Split(line, "*")
+			if len(values) < 2 {
+				return errors.New("restart point format error")
+			}
 
-		conf.RestartPoints[values[0]] = values[1]
+			conf.RestartPoints[values[0]] = values[1]
+		}
 
 		if err == io.EOF {
 			break
@@ -254,7 +253,7 @@ func PmonNewConfig(path string) (PmonConfig, error) {
 
 			err := parseRestartPoints(&conf)
 			if err != nil {
-				fmt.Printf("parseRestartPoints failed: %v", err)
+				fmt.Printf("parseRestartPoints failed: %v\n", err)
 			}
 		}
 	}
