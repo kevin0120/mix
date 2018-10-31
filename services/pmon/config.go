@@ -82,6 +82,9 @@ func parseRestartPoints(conf *PmonConfig) error {
 	for {
 		line, err := rd.ReadString('\n')
 
+		if line == "" {
+			continue
+		}
 		values := strings.Split(line, "*")
 		if len(values) < 2 {
 			return errors.New("restart point format error")

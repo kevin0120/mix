@@ -278,11 +278,7 @@ func (s *Service) getResultUpdate(ctx iris.Context) {
 		return
 	}
 	rush_port := ctx.GetHeader("rush_port")
-	rush_ip := strings.Split(ctx.Request().RemoteAddr, ":")[0]
-	if strings.Contains(rush_ip, ":") {
-		kvs := strings.Split(rush_ip, ":")
-		rush_ip = kvs[0]
-	}
+	rush_ip := ctx.GetHeader("rush_ip")
 
 	cr := cResult{
 		r:    &r,
