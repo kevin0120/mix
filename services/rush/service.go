@@ -44,13 +44,13 @@ type Service struct {
 	configValue  atomic.Value
 	httpClient   *resty.Client
 	route        string
-	DB           *storage.Service
 
 	ws            *websocket.Server
 	clientManager wsnotify.WSClientManager
 
 	StorageService interface {
 		UpdateResults(result *storage.OperationResult, id int64, sent int) error
+		BatchSave(results []*storage.ResultObject) error
 	}
 
 	Fis     *fis.Service
@@ -482,7 +482,7 @@ func (s *Service) TaskResultsBatchSave() {
 		select {
 		case <-time.After(time.Duration(c.BatchSaveTimeLimit)):
 			if idx > 0 {
-				if s.DB.BatchSave(results) == nil {
+				if s.StorageService.BatchSave(results) == nil {
 					for _, v := range results {
 						s.PatchResultFlag(v.ID, true, v.IP, v.Port)
 					}
@@ -495,7 +495,7 @@ func (s *Service) TaskResultsBatchSave() {
 			idx++
 
 			if idx == s.Config().BatchSaveRowsLimit {
-				if s.DB.BatchSave(results) == nil {
+				if s.StorageService.BatchSave(results) == nil {
 					for _, v := range results {
 						s.PatchResultFlag(v.ID, true, v.IP, v.Port)
 					}

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version="0.1.13"
+version="0.1.14"
 
 docker_repo="linshenqi/aiis"
 
