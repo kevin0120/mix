@@ -53,10 +53,10 @@ fis:
     - SIH
     - HBV
     - AGM
-  enable: false
+  enable: true
 changan:
   andon_addr: tcp://127.0.0.1:9002
-  enable: true
+  enable: false
   keepalive_period: 3s
   read_timeout: 10s
   read_buffer_size: 65535
@@ -69,7 +69,7 @@ changan:
     max_connection: 60
 
 odoo:
-  url: http://127.0.0.1:8069
+  url: http://odoo.sa.com
   route: /api/v1/mrp.productions
   headers:
     Content-Type: application/json
@@ -78,7 +78,7 @@ odoo:
   max_retry: 1
   enable: true
 storage:
-  db_url: 127.0.0.1:5432
+  db_url: 192.168.1.3:5432
   db_name: sa
   db_user: admin
   db_pwd: admin

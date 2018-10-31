@@ -411,7 +411,12 @@ func (s *Service) PatchResultFlag(result_id int64, has_upload bool, ip string, p
 	rush_result.HasUpload = has_upload
 	r := s.httpClient.R().SetBody(rush_result)
 
-	resp, err := r.Patch(fmt.Sprintf("http://%s%s%s/%d", ip, port, s.route, result_id))
+	s_port := port
+	if s_port == "" {
+		s_port = "80"
+	}
+	url := fmt.Sprintf("http://%s:%s%s/%d", ip, s_port, s.route, result_id)
+	resp, err := r.Patch(url)
 	if err != nil {
 		return fmt.Errorf("patch result flag failed: %s\n", err)
 	} else {
