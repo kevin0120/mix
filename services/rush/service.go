@@ -9,6 +9,7 @@ import (
 	"github.com/masami10/aiis/services/changan"
 	"github.com/masami10/aiis/services/fis"
 	"github.com/masami10/aiis/services/httpd"
+	"github.com/masami10/aiis/services/storage"
 	"github.com/masami10/aiis/services/wsnotify"
 	"gopkg.in/resty.v1"
 	"net/http"
@@ -23,7 +24,7 @@ type Diagnostic interface {
 }
 
 type cResult struct {
-	r    *OperationResult
+	r    *storage.OperationResult
 	id   int64
 	ip   string
 	port string
@@ -43,19 +44,20 @@ type Service struct {
 	configValue  atomic.Value
 	httpClient   *resty.Client
 	route        string
+	DB           *storage.Service
 
 	ws            *websocket.Server
 	clientManager wsnotify.WSClientManager
 
 	StorageService interface {
-		UpdateResults(result *OperationResult, id int64, sent int) error
-		AddResult(r *ResultObject)
+		UpdateResults(result *storage.OperationResult, id int64, sent int) error
 	}
 
 	Fis     *fis.Service
 	Changan *changan.Service
 
-	diag Diagnostic
+	results chan *storage.ResultObject
+	diag    Diagnostic
 }
 
 func NewService(c Config, d Diagnostic) *Service {
@@ -64,7 +66,7 @@ func NewService(c Config, d Diagnostic) *Service {
 			diag:     d,
 			workers:  c.Workers,
 			Opened:   false,
-			chResult: make(chan cResult, c.Workers * 4),
+			chResult: make(chan cResult, c.Workers*4),
 			route:    c.Route,
 
 			ws: websocket.New(websocket.Config{
@@ -73,6 +75,7 @@ func NewService(c Config, d Diagnostic) *Service {
 				ReadTimeout:     websocket.DefaultWebsocketPongTimeout, //此作为readtimeout, 默认 如果有ping没有发送也成为read time out
 			}),
 			clientManager: wsnotify.WSClientManager{},
+			results:       make(chan *storage.ResultObject, c.BatchSaveRowsLimit),
 		}
 
 		s.clientManager.Init()
@@ -140,6 +143,8 @@ func (s *Service) Open() error {
 
 		go s.run()
 	}
+
+	go s.TaskResultsBatchSave()
 
 	s.Opened = true
 
@@ -232,7 +237,7 @@ func (s *Service) onConnect(c websocket.Connection) {
 
 func (s *Service) putFisResult(ctx iris.Context) {
 
-	var r OperationResult
+	var r storage.OperationResult
 	err := ctx.ReadJSON(&r)
 
 	if err != nil {
@@ -263,10 +268,9 @@ func (s *Service) getResultUpdate(ctx iris.Context) {
 		ctx.StatusCode(iris.StatusBadRequest)
 		return
 	}
-	var r OperationResult
+	var r storage.OperationResult
 	err = ctx.ReadJSON(&r)
 	//ctx.Request().Body.Read()
-
 
 	if err != nil {
 		ctx.Writef(fmt.Sprintf("Result Params from Rush wrong: %s", err))
@@ -325,7 +329,7 @@ func (s *Service) Close() error {
 	return nil
 }
 
-func (s *Service) OperationToFisResult(r *OperationResult) fis.FisResult {
+func (s *Service) OperationToFisResult(r *storage.OperationResult) fis.FisResult {
 	var result fis.FisResult
 	result.Init()
 
@@ -370,7 +374,7 @@ func (s *Service) OperationToFisResult(r *OperationResult) fis.FisResult {
 	return result
 }
 
-func (s *Service) OperationToChanganResult(r *OperationResult) changan.TighteningResults {
+func (s *Service) OperationToChanganResult(r *storage.OperationResult) changan.TighteningResults {
 	result := changan.TighteningResults{}
 
 	result.Spent = 0
@@ -444,13 +448,15 @@ func (s *Service) HandleResult(cr *cResult) {
 	json_str, _ := json.Marshal(cr.r)
 	json_obj := map[string]interface{}{}
 	json.Unmarshal(json_str, &json_obj)
-	result := &ResultObject{
-		OR: json_obj,
-		ID: cr.id,
+	result := &storage.ResultObject{
+		OR:   json_obj,
+		ID:   cr.id,
 		Send: sent,
+		IP:   cr.ip,
+		Port: cr.port,
 	}
 
-	s.StorageService.AddResult(result)
+	s.AddResult(result)
 
 	// 结果保存数据库
 	//err := s.StorageService.UpdateResults(cr.r, cr.id, sent)
@@ -461,4 +467,41 @@ func (s *Service) HandleResult(cr *cResult) {
 	//	// 更新masterpc结果上传标识
 	//	//s.PatchResultFlag(cr.r.ID, true, cr.ip, cr.port)
 	//}
+}
+
+func (s *Service) AddResult(r *storage.ResultObject) {
+	s.results <- r
+}
+
+func (s *Service) TaskResultsBatchSave() {
+	idx := 0
+	c := s.configValue.Load().(Config)
+	results := make([]*storage.ResultObject, c.BatchSaveRowsLimit)
+
+	for {
+		select {
+		case <-time.After(time.Duration(c.BatchSaveTimeLimit)):
+			if idx > 0 {
+				if s.DB.BatchSave(results) == nil {
+					for _, v := range results {
+						s.PatchResultFlag(v.ID, true, v.IP, v.Port)
+					}
+				}
+				idx = 0
+			}
+
+		case data := <-s.results:
+			results[idx] = data
+			idx++
+
+			if idx == s.Config().BatchSaveRowsLimit {
+				if s.DB.BatchSave(results) == nil {
+					for _, v := range results {
+						s.PatchResultFlag(v.ID, true, v.IP, v.Port)
+					}
+				}
+				idx = 0
+			}
+		}
+	}
 }

@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
-	"github.com/masami10/aiis/services/rush"
 	"github.com/pkg/errors"
+	"reflect"
 	"strings"
 	"sync/atomic"
-	"time"
-	"reflect"
 )
 
 type Diagnostic interface {
@@ -24,15 +22,12 @@ type Service struct {
 	configValue atomic.Value
 	//eng         *xorm.Engine
 	eng *gorm.DB
-
-	results  chan *rush.ResultObject
 }
 
 func NewService(c Config, d Diagnostic) *Service {
 
 	s := &Service{
 		diag: d,
-		results: make(chan *rush.ResultObject, c.BatchSaveRowsLimit),
 	}
 
 	s.configValue.Store(c)
@@ -86,8 +81,6 @@ func (s *Service) Open() error {
 
 	s.eng = _db
 
-	go s.TaskResultsBatchSave()
-
 	s.diag.OpenEngineSuccess(sConn)
 
 	return nil
@@ -102,34 +95,7 @@ func (s *Service) Close() error {
 	return nil
 }
 
-func (s *Service) TaskResultsBatchSave() {
-	idx := 0
-	c := s.configValue.Load().(Config)
-	results := make([]*rush.ResultObject, c.BatchSaveRowsLimit)
-
-	for {
-		select {
-		case <- time.After(time.Duration(c.BatchSaveTimeLimit)):
-			if idx > 0 {
-				s.BatchSave(results)
-				idx = 0
-			}
-
-
-		case data := <- s.results:
-			results[idx] = data
-			idx++
-
-			if idx == s.Config().BatchSaveRowsLimit {
-				s.BatchSave(results)
-				idx = 0
-			}
-		}
-	}
-
-}
-
-func (s *Service) BatchSave(results []*rush.ResultObject) error {
+func (s *Service) BatchSave(results []*ResultObject) error {
 
 	arrSKeys := []string{}
 	for _, v := range KEYS {
@@ -187,17 +153,14 @@ func (s *Service) BatchSave(results []*rush.ResultObject) error {
 
 	result := s.eng.Exec(sql)
 	if result.Error == nil {
+
 		//result.
 		//s.diag.Printf("success:%d\n", result.RowsAffected)
 	}
 	return result.Error
 }
 
-func (s *Service) AddResult(r *rush.ResultObject) {
-	s.results <- r
-}
-
-func (s *Service) UpdateResults(result *rush.OperationResult, id int64, sent int) error {
+func (s *Service) UpdateResults(result *OperationResult, id int64, sent int) error {
 
 	var r OperationResultModel
 	r.PsetMThreshold = result.PsetMThreshold

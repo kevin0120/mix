@@ -53,10 +53,10 @@ fis:
     - SIH
     - HBV
     - AGM
-  enable: true
+  enable: false
 changan:
   andon_addr: tcp://127.0.0.1:9002
-  enable: false
+  enable: true
   keepalive_period: 3s
   read_timeout: 10s
   read_buffer_size: 65535
@@ -69,7 +69,7 @@ changan:
     max_connection: 60
 
 odoo:
-  url: http://192.168.1.6:8069
+  url: http://127.0.0.1:8069
   route: /api/v1/mrp.productions
   headers:
     Content-Type: application/json
@@ -78,13 +78,11 @@ odoo:
   max_retry: 1
   enable: true
 storage:
-  db_url: 192.168.1.6:5432
+  db_url: 127.0.0.1:5432
   db_name: sa
   db_user: admin
   db_pwd: admin
   max_connection: 60
-  batch_save_rows_limit: 100
-  batch_save_time_limit: 5s
 
 rush:
   enable: true
@@ -99,4 +97,6 @@ rush:
   ws_route: /aiis/v1/ws/results
   ws_read_buf_size: 4096
   ws_write_buf_size: 4096
+  batch_save_rows_limit: 100
+  batch_save_time_limit: 5s
 

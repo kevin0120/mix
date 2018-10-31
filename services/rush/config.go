@@ -17,6 +17,9 @@ type Config struct {
 	WSRoute           string `yaml:"ws_route"`
 	WSReadBufferSize  int    `yaml:"ws_read_buf_size"`
 	WSWriteBufferSize int    `yaml:"ws_write_buf_size"`
+
+	BatchSaveRowsLimit int           `yaml:"batch_save_rows_limit"`
+	BatchSaveTimeLimit toml.Duration `yaml:"batch_save_time_limit"`
 }
 
 func NewConfig() Config {
@@ -28,6 +31,9 @@ func NewConfig() Config {
 		PushInterval: toml.Duration(time.Second * 1),
 		MaxRetry:     3,
 		Headers:      map[string]string{"Content-Type": "application/json"},
+
+		BatchSaveRowsLimit: 64,
+		BatchSaveTimeLimit: toml.Duration(30 * time.Second),
 	}
 }
 
