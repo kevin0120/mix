@@ -7,7 +7,7 @@
         <field name="inherit_id" ref="maintenance.hr_equipment_request_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//header/button[@name='archive_equipment_request']" position="before">
-                <button name="assign_ticket_to_self" string="I take it" type="object" class="oe_highlight" groups="maintenance.group_equipment_manager"/>
+                <button name="assign_ticket_to_self" string="I take it" type="object" class="oe_highlight"/>
             </xpath>
           <xpath expr="//field[@name='production_id']" position="replace">
               <field name="production_id" invisible="1"/>
@@ -37,5 +37,28 @@
           </xpath>
         </field>
     </record>
+
+      <record id="sa_maintenance_equipment_view_kanban_inherit_hr" model="ir.ui.view">
+        <field name="name">sa_maintenance_equipment_view_kanban_inherit_hr</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="inherit_id" ref="maintenance.hr_equipment_view_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban" position="attributes">
+                <attribute name="js_class">equipment_kanban</attribute>
+            </xpath>
+            <field name="name" position="after">
+                <field name="healthz_url"/>
+            </field>
+            <xpath expr="//div[@class='oe_kanban_bottom_right']" position="inside">
+                <div class="pull-left">
+                    <span class="oe_kanban_equpiment_status"/>
+                </div>
+            </xpath>
+            <xpath expr="//div[@class='oe_kanban_footer_left mt4 label label-danger']" position="after">
+                <div class="oe_kanban_footer_left mt4 label equip_status"/>
+            </xpath>
+        </field>
+      </record>
+
   </data>
 </odoo>

@@ -20,19 +20,22 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['mrp_maintenance'],
+    'depends': ['mrp_maintenance', 'sa_configuration'],
 
     # always loaded
     'data': [
         'data/data.xml',
         'views/maintenance_views.xml',
-        'views/templates.xml',
+        'views/mrp_maintenance_template.xml',
         'views/equipment_view.xml',
         'report/maintenance_report_main.xml',
         'report/report_maintenance_views.xml'
     ],
+    # 'qweb': [
+    #     "static/src/xml/mrp_maintenance_template.xml",
+    # ],
     # only loaded in demonstration mode
-    'demo': [
-        'demo/demo.xml',
-    ],
+    # 'demo': [
+    #     'demo/demo.xml',
+    # ],
 }
