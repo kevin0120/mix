@@ -25,31 +25,42 @@
 
                         </tbody>
                         </table>
-                        <table class="table table-condensed"  >
+                        <table class="table table-condensed">
                             <thead>
                                 <tr>
-                                    <th colspan="2"><strong>检测名称</strong></th>
-                                    <th colspan="2"><strong>描述</strong></th>
-                                    <th colspan="2"><strong>检测标准</strong></th>
-                                    <th colspan="2"><strong>检测结果</strong></th>
+                                    <th><strong>检测名称</strong></th>
+                                    <th><strong>描述</strong></th>
+                                    <th><strong>检测内容</strong></th>
+                                    <th><strong>检测结果</strong></th>
                                 </tr>
                             </thead>
 
                             <tr t-foreach="o.check_point_action_ids" t-as="point">
-                                <td colspan="2"><span t-field="point.category_id.name"/></td>
-                                <td colspan="2"><span t-field="point.description"/></td>
+                                <td><span t-field="point.category_id.name"/></td>
+                                <td><span t-field="point.description"/></td>
 
                                 <td t-if="point.test_type == 'measure'">
-                                    <td>
-                                        最小值: <span t-field="point.tolerance_min"/><br/>
-                                        最大值: <span t-field="point.tolerance_max"/><br/>
-                                        实际检测值:
-                                    </td>
+                                    <table class="table table-condensed">
+                                        <thead>
+                                            <tr>
+                                                <th><strong>检测标准</strong></th>
+                                                <th><strong>测量值</strong></th>
+                                            </tr>
+                                        </thead>
+                                        <tr>
+                                            <td>
+                                                最小值: <span t-field="point.tolerance_min"/><br/>
+                                                最大值: <span t-field="point.tolerance_max"/><br/>
+                                                正常值: <span t-field="point.norm"/>
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </table>
                                 </td>
-                                <td t-else="" colspan="2">
+                                <td t-else="">
                                     <span t-field="point.description"/>
                                 </td>
-                                <td colspan="2">
+                                <td>
                                     <input name="pass" type="checkbox" /> Pass
                                     <input name="fail" type="checkbox" /> Fail
                                 </td>

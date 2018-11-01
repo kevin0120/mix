@@ -26,6 +26,7 @@
                         <field name="category_id" required="1"/>
                         <field name="test_type" />
                         <field name="description" />
+                        <field name="norm" />
                         <field name="tolerance_min" />
                         <field name="tolerance_max" />
                         <field name="measure" />
