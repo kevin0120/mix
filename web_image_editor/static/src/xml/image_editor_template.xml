@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+    Copyright 2016-2017 LasLabs Inc.
+    License LGPL-3 or later (http://www.gnu.org/licenses/lgpl.html).
+-->
+
+<templates id="template">
+    <t t-name="ImageEditor">
+        <div id="tui-image-editor-container">
+            <button type="button" class="btn btn-sm btn-primary js_add_mask"><span>Add New Mark</span></button>
+        </div>
+    </t>
+
+</templates>
