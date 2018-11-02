@@ -25,6 +25,18 @@ class MrpRoutingWorkcenter(models.Model):
                          'Per Routing only has one unique Routing group per Work Center!')]
 
     @api.multi
+    def get_operation_points(self):
+        self.ensure_one()
+        vals = []
+        for point in self.operation_point_ids:
+            vals.append({
+                'sequence': point.sequence,
+                'x_offset': point.x_offset,
+                'y_offset': point.y_offset
+            })
+        return vals
+
+    @api.multi
     def button_resequence(self):
         self.ensure_one()
         for idx, opearion in enumerate(self.operation_point_ids):

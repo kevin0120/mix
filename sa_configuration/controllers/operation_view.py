@@ -71,6 +71,49 @@ class OperationView(http.Controller):
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=200, headers=headers)
 
+    @http.route('/api/v1/mrp.routing.workcenter/<int:operation_id>/points_edit', type='json', methods=['PUT', 'OPTIONS'], auth='none', cors='*', csrf=False)
+    def _edit_points(self, operation_id=None):
+        env = api.Environment(request.cr, SUPERUSER_ID, request.context)
+        operation = env['mrp.routing.workcenter'].search([('id', '=', operation_id)],limit=1)
+        if not operation:
+            body = json.dumps({'msg': "Operation %d not existed" % operation_id})
+            headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
+            return Response(body, status=404, headers=headers)
+        else:
+            points = request.jsonrequest
+            if not isinstance(points, list):
+                body = json.dumps({'msg': "Body must be point array"})
+                headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
+                return Response(body, status=405, headers=headers)
+
+            current_points = env['operation.point'].search([('operation_id', '=', operation_id)])
+            points_map = {i.id:i for i in current_points}
+
+            for val in points:
+                point_id = env['operation.point'].search([('operation_id', '=', operation_id),
+                                                          ('sequence', '=', val['sequence'])])
+                if not point_id:
+                    # 新增
+                    val.update({
+                        'operation_id': operation_id,
+                        'sequence': val['sequence'],
+                        'x_offset': val['x_offset'],
+                        'y_offset': val['y_offset']
+                    })
+                    env['operation.point'].create(val)
+                else:
+                    # 更新
+                    point_id.write(val)
+                    if points_map.has_key(point_id.id):
+                        del points_map[point_id.id]
+
+            for k in points_map:
+                points_map[k].toggle_active()
+
+            body = json.dumps({'msg': "Edit point success"})
+            headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
+            return Response(body, status=200, headers=headers)
+
     @http.route(['/api/v1/mrp.routing.workcenter/<int:operation_id>', '/api/v1/mrp.routing.workcenter'], type='http', methods=['GET'], auth='none', cors='*', csrf=False)
     def _get_operations(self, operation_id=None):
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
