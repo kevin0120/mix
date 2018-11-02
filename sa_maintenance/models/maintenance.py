@@ -30,7 +30,7 @@ class MaintenanceCheckPoint(models.Model):
 
     test_type = fields.Selection(related='category_id.test_type', readonly=True)
 
-    norm = fields.Float('Norm', digits=dp.get_precision('Maintenance Tests'))  # TDE RENAME ?
+    norm = fields.Float('Normal', digits=dp.get_precision('Maintenance Tests'))  # TDE RENAME ?
     tolerance_min = fields.Float('Min Tolerance', digits=dp.get_precision('Maintenance Tests'))
     tolerance_max = fields.Float('Max Tolerance', digits=dp.get_precision('Maintenance Tests'))
 
@@ -54,7 +54,7 @@ class MaintenanceCheckPointAction(models.Model):
 
     description = fields.Char('Maintenance Check Point Description')
 
-    norm = fields.Float('Norm', digits=dp.get_precision('Maintenance Tests'))  # TDE RENAME ?
+    norm = fields.Float('Normal', digits=dp.get_precision('Maintenance Tests'))  # TDE RENAME ?
     tolerance_min = fields.Float('Min Tolerance', digits=dp.get_precision('Maintenance Tests'))
     tolerance_max = fields.Float('Max Tolerance', digits=dp.get_precision('Maintenance Tests'))
 

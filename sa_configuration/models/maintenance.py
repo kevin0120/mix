@@ -100,6 +100,8 @@ class MaintenanceEquipment(models.Model):
 
     connection_ids = fields.One2many('maintenance.equipment.connection', 'equipment_id', 'Connection Information')
 
+    image_medium = fields.Binary("Medium-sized image", attachment=True)
+
     @api.multi
     def button_check_healthz(self):
         for e in self:
