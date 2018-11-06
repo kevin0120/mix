@@ -28,5 +28,7 @@
         'views/mrp_routing_view.xml',
         'views/operation_result_views.xml',
         'views/hide_menu.xml',
+        'views/mrp_bom_views.xml',
+        'views/mrp_workcenter_views.xml',
     ],
 }
