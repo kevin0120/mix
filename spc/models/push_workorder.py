@@ -22,6 +22,7 @@ def str_time_to_rfc3339(s_time):
     sp = s_time.split(' ')
     return sp[0] + 'T' + sp[1] + 'Z'
 
+
 class PushWorkorder(AbstractModel):
     _name = "workorder.push"
 
@@ -37,12 +38,13 @@ class PushWorkorder(AbstractModel):
             _consumes = list()
             for consu in order.consu_bom_line_ids:
                 # 定位消耗品的qcp
-                _qcps = self.env['quality.point'].search([('bom_line_id', '=', consu.bom_line_id.id),
+                _qcps = self.env['quality.point'].sudo().search([('bom_line_id', '=', consu.bom_line_id.id),
                                                           ('operation_id', '=', order.operation_id.id)],
                                                          limit=1)
 
                 _consumes.append({
-                    "seq": consu.sequence,
+                    "sequence": consu.bom_line_id.operation_point_id.sequence,
+                    "group_sequence": consu.bom_line_id.operation_point_id.group_sequence,
                     'max_redo_times': consu.bom_line_id.operation_point_id.max_redo_times,
                     'offset_x': consu.bom_line_id.operation_point_id.x_offset,
                     'offset_y': consu.bom_line_id.operation_point_id.y_offset,
@@ -60,18 +62,12 @@ class PushWorkorder(AbstractModel):
             vals = {
                 'id': order.id,
                 'hmi': {'id': order.workcenter_id.hmi_id.id, 'uuid': order.workcenter_id.hmi_id.serial_no},
-                # 'worksheet': order.operation_id.worksheet_img,
                 'worksheet': u'data:{0};base64,{1}'.format('image/png', order.operation_id.worksheet_img) if order.operation_id.worksheet_img else "",
-                # 'max_redo_times': order.operation_id.max_redo_times,
                 'max_op_time': order.operation_id.max_op_time,
-                # 'pset': order.operation_id.program_id.code,
-                # 'nut_total': order.consu_product_qty,
                 'vin': order.production_id.vin,
                 'knr': order.production_id.knr,
                 'long_pin': order.production_id.long_pin,
-                # 'result_ids': order.result_ids.ids,
                 'status': order.state,  # pending, ready, process, done, cancel
-
                 'equipment_name': order.production_id.equipment_name,
                 'factory_name': order.production_id.factory_name,
                 'year': order.production_id.year,
@@ -79,7 +75,6 @@ class PushWorkorder(AbstractModel):
                 'pin_check_code': order.production_id.pin_check_code,
                 'assembly_line': order.production_id.assembly_line_id.code,
                 'lnr': order.production_id.lnr,
-                # 'nut_no': order.consu_product_id.screw_type_code,
                 'consumes': _consumes,
                 'model': order.production_id.product_id.vehicle_type_code,
                 'update_time': str_time_to_rfc3339(order.production_date),

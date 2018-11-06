@@ -39,28 +39,42 @@ class ResultSync(AbstractModel):
         ret = ret.json()
         for result in ret:
             op_result = self.env['operation.result'].sudo().browse(result['id'])
-            if not op_result:
-                _logger.debug('Sync Result can not found result id: %d' % result['id'])
-                continue
-            rid = result.pop('id') if 'id' in result else None
             lid = result.pop('local_id') if 'local_id' in result else None
-            if not rid:
-                continue
-            if 'cur_objects' in result:
-                result.update({
-                    'cur_objects': json.dumps(result['cur_objects'])
-                })
+            if not op_result:
+                # 新增结果
+                if 'control_date' in result:
+                    _t = parser.parse(result['control_date']) if result['control_date'] else None
+                    if _t:
+                        result.update({
+                            'control_date': fields.Datetime.to_string((_t - _t.utcoffset())),
+                            'time': fields.Datetime.to_string((_t - _t.utcoffset()))
+                        })
 
-            if 'control_date' in result:
-                _t = parser.parse(result['control_date']) if result['control_date'] else None
-                if _t:
+                self.env['operation.result'].create(result)
+
+                _logger.debug('Sync Result can not found result id: %d' % result['id'])
+
+            else:
+                rid = result.pop('id') if 'id' in result else None
+
+                if not rid:
+                    continue
+                if 'cur_objects' in result:
                     result.update({
-                        'control_date': fields.Datetime.to_string((_t - _t.utcoffset()))
+                        'cur_objects': json.dumps(result['cur_objects'])
                     })
-            ret = op_result.sudo().write(result)
-            if not ret:
-                _logger.debug(u'更新结果 写入结果失败 result id: %d' % result['id'])
-                continue
+
+                if 'control_date' in result:
+                    _t = parser.parse(result['control_date']) if result['control_date'] else None
+                    if _t:
+                        result.update({
+                            'control_date': fields.Datetime.to_string((_t - _t.utcoffset()))
+                        })
+                ret = op_result.sudo().write(result)
+                if not ret:
+                    _logger.debug(u'更新结果 写入结果失败 result id: %d' % result['id'])
+                    continue
+
             data = {'has_upload': True}
             try:
                 ret = requests.patch(url=url + '/{0}'.format(lid), data=json.dumps(data), headers=headers)
@@ -68,7 +82,6 @@ class ResultSync(AbstractModel):
                 continue
             if ret.status_code != 200:
                 _logger.debug(u'更新MasterPC hasupload标志位失败')
-            return True
 
     @api.multi
     def result_sync(self):

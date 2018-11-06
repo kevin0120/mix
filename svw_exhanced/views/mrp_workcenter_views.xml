@@ -1,0 +1,21 @@
+<odoo>
+    <data>
+
+        <record model="ir.ui.view" id="sa_svw_mrp_workcenter_form_view_inherit">
+            <field name="name">sa_svw_mrp_workcenter_form_view_inherit</field>
+            <field name="model">mrp.workcenter</field>
+            <field name="inherit_id" ref="sa_base.sa_mrp_workcenter_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook/page/group/group[@name='equipment']/field[@name='controller_ids']" position="attributes">
+                    <attribute name="required">1</attribute>
+                </xpath>
+                <xpath expr="//notebook/page/group/group[@name='equipment']/field[@name='io_id']" position="attributes">
+                    <attribute name="required">1</attribute>
+                </xpath>
+                <xpath expr="//notebook/page/group/group[@name='equipment']/field[@name='rfid_id']" position="attributes">
+                    <attribute name="required">1</attribute>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -37,34 +37,14 @@ class TightResultReport(models.TransientModel):
 
 
 class ReportTightResultReport(models.AbstractModel):
-    _name = 'report.spc.report_result_tighting'
+    _name = 'spc.report_result_tighting'
 
     @api.model
     def render_html(self, docids, data=None):
-        report_pages = [[]]
-        if not data.get('form'):
-            raise UserError(_("Form content is missing, this report cannot be printed."))
-
-        Report = self.env['report']
-        date_from = fields.Datetime.to_string(fields.Datetime.from_string(data['form']['date_from']))
-        date_to = fields.Datetime.to_string(fields.Datetime.from_string(data['form']['date_to']))
-
-        holidays_report = Report._get_report_from_name('spc.report_result_tighting')
-        results = self.env['operation.result'].search([ ('control_date', '>=', date_from), ('control_date', '<=', date_to ) ])
-
-        for category, lines in groupby(results, lambda r: r.production_id):
-            if report_pages[-1] and report_pages[-1][-1]['name']:
-                report_pages.append([])
-                # Append category to current report page
-            report_pages[-1].append({
-                'name': category and category.vin or 'Uncategorized',
-                'lines': list(lines)
-            })
-
-        docargs = {
-            'doc_ids': self.ids,
-            'doc_model': holidays_report.model,
-            'docs': report_pages,
-            'get_day': fields.Datetime.now(),
-        }
-        return Report.render('spc.report_result_tighting', docargs)
+        """
+        渲染报告html的方法,在每个项目中进行override,重写方法
+        :param docids:
+        :param data:
+        :return:
+        """
+        return True

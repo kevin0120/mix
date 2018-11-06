@@ -24,6 +24,8 @@ class OperationResult(models.HyperModel):
     workcenter_id = fields.Many2one('mrp.workcenter',  readonly=True)
     production_id = fields.Many2one('mrp.production', 'Production Order')
 
+    vin = fields.Char('Vin')  # 如果无法通过工单查询,使用此字段
+
     assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line', readonly=True)
 
     qcp_id = fields.Many2one('quality.point')
@@ -68,9 +70,9 @@ class OperationResult(models.HyperModel):
     user_id = fields.Many2one('res.users', 'Responsible')
 
     product_id = fields.Many2one('product.product', 'Vehicle',
-                                 domain="[('sa_type', '=', 'vehicle')]", required=True)
+                                 domain="[('sa_type', '=', 'vehicle')]")
 
-    consu_bom_line_id = fields.Many2one('mrp.wo.consu', required=True)
+    consu_bom_line_id = fields.Many2one('mrp.wo.consu')
 
     consu_product_id = fields.Many2one('product.product')
 
@@ -99,6 +101,8 @@ class OperationResult(models.HyperModel):
         ('fail', _('Failed'))], string='Final Pass', default='fail')
 
     sent = fields.Boolean('Have sent to aiis', default=False)
+
+    batch = fields.Char('Batch')  # 批次信息
 
     @api.multi
     def sent_aiis(self):

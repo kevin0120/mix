@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "sa_maintenance",
+    'name': "changan_exhanced",
 
     'summary': """
         Short (1 phrase/line) summary of the module's purpose, used as
@@ -20,22 +20,13 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['mrp_maintenance', 'sa_base'],
+    'depends': ['sa_base', 'spc'],
 
     # always loaded
     'data': [
-        'data/data.xml',
-        'views/maintenance_views.xml',
-        'views/mrp_maintenance_template.xml',
-        'views/equipment_view.xml',
-        'report/maintenance_report_main.xml',
-        'report/report_maintenance_views.xml'
+        # 'security/ir.model.access.csv',
+        'views/mrp_routing_view.xml',
+        'views/operation_result_views.xml',
+        'views/hide_menu.xml',
     ],
-    # 'qweb': [
-    #     "static/src/xml/mrp_maintenance_template.xml",
-    # ],
-    # only loaded in demonstration mode
-    # 'demo': [
-    #     'demo/demo.xml',
-    # ],
 }

@@ -42,7 +42,8 @@ class ApiMrpWorkorder(http.Controller):
                                                              limit=1)
 
                     _consumes.append({
-                        "seq": consu.sequence,
+                        "sequence": consu.bom_line_id.operation_point_id.sequence,
+                        "group_sequence": consu.bom_line_id.operation_point_id.group_sequence,
                         'max_redo_times':consu.bom_line_id.operation_point_id.max_redo_times,
                         'offset_x': consu.bom_line_id.operation_point_id.x_offset,
                         'offset_y': consu.bom_line_id.operation_point_id.y_offset,
@@ -135,7 +136,8 @@ class ApiMrpWorkorder(http.Controller):
                                                           limit=1)
 
                     _consumes.append({
-                        "seq": consu.sequence,
+                        "sequence": consu.bom_line_id.operation_point_id.sequence,
+                        "group_sequence": consu.bom_line_id.operation_point_id.group_sequence,
                         'max_redo_times':consu.bom_line_id.operation_point_id.max_redo_times,
                         'offset_x': consu.bom_line_id.operation_point_id.x_offset,
                         'offset_y': consu.bom_line_id.operation_point_id.y_offset,
