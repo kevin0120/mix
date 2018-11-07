@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"github.com/masami10/aiis/services/aiis"
 	"time"
 )
 
@@ -70,6 +71,7 @@ var KEYS = []string{
 	"exception_reason",
 	"id",
 	"sent",
+	"batch",
 }
 
 type OperationResultModel struct {
@@ -107,11 +109,12 @@ type OperationResultModel struct {
 }
 
 type ResultObject struct {
-	OR   map[string]interface{}
-	ID   int64
-	Send int
-	Port string
-	IP   string
+	OR     map[string]interface{}
+	ID     int64
+	Send   int
+	Port   string
+	IP     string
+	Stream *aiis.RPCAiis_RPCNodeServer
 }
 
 type OperationResult struct {

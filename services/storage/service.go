@@ -106,6 +106,9 @@ func (s *Service) BatchSave(results []*ResultObject) error {
 
 	arrValues := []string{}
 	for _, v := range results {
+		if v == nil {
+			continue
+		}
 
 		arrValue := []string{}
 		for _, k := range KEYS {
@@ -120,6 +123,13 @@ func (s *Service) BatchSave(results []*ResultObject) error {
 				} else {
 					arrValue = append(arrValue, "false")
 				}
+				continue
+			}
+
+			if k == "cur_objects" {
+				curs, _ := json.Marshal(v.OR[k])
+				fmt.Printf("%s\n", string(curs))
+				arrValue = append(arrValue, fmt.Sprintf("'%s'", string(curs)))
 				continue
 			}
 

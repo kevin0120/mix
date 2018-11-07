@@ -20,6 +20,7 @@ type Config struct {
 
 	BatchSaveRowsLimit int           `yaml:"batch_save_rows_limit"`
 	BatchSaveTimeLimit toml.Duration `yaml:"batch_save_time_limit"`
+	GRPCPort           int           `yaml:"grpc_port"`
 }
 
 func NewConfig() Config {
@@ -34,6 +35,7 @@ func NewConfig() Config {
 
 		BatchSaveRowsLimit: 64,
 		BatchSaveTimeLimit: toml.Duration(30 * time.Second),
+		GRPCPort:           9093,
 	}
 }
 

@@ -313,6 +313,10 @@ func (h *RushHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
 
+func (h *RushHandler) Info(msg string) {
+	h.l.Info(msg)
+}
+
 // Fis Handler
 type FisHandler struct {
 	l Logger

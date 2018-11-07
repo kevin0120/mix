@@ -2,17 +2,16 @@ package rush
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/websocket"
+	"github.com/masami10/aiis/services/aiis"
 	"github.com/masami10/aiis/services/changan"
 	"github.com/masami10/aiis/services/fis"
 	"github.com/masami10/aiis/services/httpd"
 	"github.com/masami10/aiis/services/storage"
 	"github.com/masami10/aiis/services/wsnotify"
 	"gopkg.in/resty.v1"
-	"net/http"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -21,17 +20,20 @@ import (
 
 type Diagnostic interface {
 	Error(msg string, err error)
+	Info(msg string)
 }
 
-type cResult struct {
-	r    *storage.OperationResult
-	id   int64
-	ip   string
-	port string
+type CResult struct {
+	r      *storage.OperationResult
+	id     int64
+	ip     string
+	port   string
+	stream *aiis.RPCAiis_RPCNodeServer
 }
 
 type RushResult struct {
-	HasUpload bool `json:"has_upload"`
+	ID        int64 `json:"id"`
+	HasUpload bool  `json:"has_upload"`
 }
 
 type Service struct {
@@ -39,7 +41,7 @@ type Service struct {
 	workers      int
 	Opened       bool
 	wg           sync.WaitGroup
-	chResult     chan cResult
+	chResult     chan CResult
 	closing      chan struct{}
 	configValue  atomic.Value
 	httpClient   *resty.Client
@@ -58,6 +60,8 @@ type Service struct {
 
 	results chan *storage.ResultObject
 	diag    Diagnostic
+
+	rpc aiis.GRPCServer
 }
 
 func NewService(c Config, d Diagnostic) *Service {
@@ -66,7 +70,7 @@ func NewService(c Config, d Diagnostic) *Service {
 			diag:     d,
 			workers:  c.Workers,
 			Opened:   false,
-			chResult: make(chan cResult, c.Workers*4),
+			chResult: make(chan CResult, c.Workers*4),
 			route:    c.Route,
 
 			ws: websocket.New(websocket.Config{
@@ -76,8 +80,11 @@ func NewService(c Config, d Diagnostic) *Service {
 			}),
 			clientManager: wsnotify.WSClientManager{},
 			results:       make(chan *storage.ResultObject, c.BatchSaveRowsLimit),
+			rpc:           aiis.GRPCServer{},
 		}
 
+		s.rpc.RPCRecv = s.OnRPCRecv
+		s.rpc.RPCNewClient = s.OnRPCNewClinet
 		s.clientManager.Init()
 		s.configValue.Store(c)
 		return &s
@@ -146,9 +153,32 @@ func (s *Service) Open() error {
 
 	go s.TaskResultsBatchSave()
 
+	s.rpc.Start(s.Config().GRPCPort)
+
 	s.Opened = true
 
 	return nil
+}
+
+func (s *Service) OnRPCNewClinet(stream *aiis.RPCAiis_RPCNodeServer) {
+	s.diag.Info("new rpc client")
+}
+
+func (s *Service) OnRPCRecv(stream *aiis.RPCAiis_RPCNodeServer, payload string) {
+	op_result := WSOpResult{}
+	err := json.Unmarshal([]byte(payload), &op_result)
+	if err != nil {
+		s.diag.Error("op result error", err)
+		return
+	}
+
+	cr := CResult{
+		r:      &op_result.Result,
+		id:     op_result.ResultID,
+		stream: stream,
+	}
+
+	s.AddResultTask(cr)
 }
 
 func (s *Service) onConnect(c websocket.Connection) {
@@ -212,7 +242,7 @@ func (s *Service) onConnect(c websocket.Connection) {
 				rush_ip = kvs[0]
 			}
 
-			cr := cResult{
+			cr := CResult{
 				r:    &op_result.Result,
 				id:   op_result.ResultID,
 				ip:   rush_ip,
@@ -233,6 +263,10 @@ func (s *Service) onConnect(c websocket.Connection) {
 		c.Disconnect()
 	})
 
+}
+
+func (s *Service) AddResultTask(cr CResult) {
+	s.chResult <- cr
 }
 
 func (s *Service) putFisResult(ctx iris.Context) {
@@ -280,7 +314,7 @@ func (s *Service) getResultUpdate(ctx iris.Context) {
 	rush_port := ctx.GetHeader("rush_port")
 	rush_ip := ctx.GetHeader("rush_ip")
 
-	cr := cResult{
+	cr := CResult{
 		r:    &r,
 		id:   resultId,
 		ip:   rush_ip,
@@ -322,6 +356,9 @@ func (s *Service) Close() error {
 	}
 
 	s.wg.Wait()
+
+	s.rpc.Stop()
+
 	return nil
 }
 
@@ -398,33 +435,41 @@ func (s *Service) OperationToChanganResult(r *storage.OperationResult) changan.T
 	return result
 }
 
-func (s *Service) PatchResultFlag(result_id int64, has_upload bool, ip string, port string) error {
-	if s.httpClient == nil {
-		return errors.New("rush http client is nil")
+func (s *Service) PatchResultFlag(stream *aiis.RPCAiis_RPCNodeServer, result_id int64, has_upload bool, ip string, port string) error {
+	//if s.httpClient == nil {
+	//	return errors.New("rush http client is nil")
+	//}
+	//
+	//rush_result := RushResult{}
+	//rush_result.HasUpload = has_upload
+	//r := s.httpClient.R().SetBody(rush_result)
+	//
+	//s_port := port
+	//if s_port == "" {
+	//	s_port = "80"
+	//}
+	//url := fmt.Sprintf("http://%s:%s%s/%d", ip, s_port, s.route, result_id)
+	//resp, err := r.Patch(url)
+	//if err != nil {
+	//	return fmt.Errorf("patch result flag failed: %s\n", err)
+	//} else {
+	//	if resp.StatusCode() != http.StatusOK {
+	//		return fmt.Errorf("patch result flag failed: %s\n", resp.Status())
+	//	}
+	//}
+
+	rushResult := RushResult{
+		ID:        result_id,
+		HasUpload: has_upload,
 	}
 
-	rush_result := RushResult{}
-	rush_result.HasUpload = has_upload
-	r := s.httpClient.R().SetBody(rush_result)
-
-	s_port := port
-	if s_port == "" {
-		s_port = "80"
-	}
-	url := fmt.Sprintf("http://%s:%s%s/%d", ip, s_port, s.route, result_id)
-	resp, err := r.Patch(url)
-	if err != nil {
-		return fmt.Errorf("patch result flag failed: %s\n", err)
-	} else {
-		if resp.StatusCode() != http.StatusOK {
-			return fmt.Errorf("patch result flag failed: %s\n", resp.Status())
-		}
-	}
+	str, _ := json.Marshal(rushResult)
+	s.rpc.RPCSend(stream, string(str))
 
 	return nil
 }
 
-func (s *Service) HandleResult(cr *cResult) {
+func (s *Service) HandleResult(cr *CResult) {
 
 	// 结果推送fis
 	sent := 1
@@ -450,11 +495,12 @@ func (s *Service) HandleResult(cr *cResult) {
 	json_obj := map[string]interface{}{}
 	json.Unmarshal(json_str, &json_obj)
 	result := &storage.ResultObject{
-		OR:   json_obj,
-		ID:   cr.id,
-		Send: sent,
-		IP:   cr.ip,
-		Port: cr.port,
+		OR:     json_obj,
+		ID:     cr.id,
+		Send:   sent,
+		IP:     cr.ip,
+		Port:   cr.port,
+		Stream: cr.stream,
 	}
 
 	s.AddResult(result)
@@ -475,33 +521,33 @@ func (s *Service) AddResult(r *storage.ResultObject) {
 }
 
 func (s *Service) TaskResultsBatchSave() {
-	idx := 0
+	//idx := 0
 	c := s.configValue.Load().(Config)
-	results := make([]*storage.ResultObject, c.BatchSaveRowsLimit)
+	//results := make([]*storage.ResultObject, c.BatchSaveRowsLimit)
+	results := []*storage.ResultObject{}
 
 	for {
 		select {
 		case <-time.After(time.Duration(c.BatchSaveTimeLimit)):
-			if idx > 0 {
+			if len(results) > 0 {
 				if s.StorageService.BatchSave(results) == nil {
 					for _, v := range results {
-						s.PatchResultFlag(v.ID, true, v.IP, v.Port)
+						s.PatchResultFlag(v.Stream, int64(v.OR["id"].(float64)), true, v.IP, v.Port)
 					}
 				}
-				idx = 0
+				results = []*storage.ResultObject{}
 			}
 
 		case data := <-s.results:
-			results[idx] = data
-			idx++
+			results = append(results, data)
 
-			if idx == s.Config().BatchSaveRowsLimit {
+			if len(results) == s.Config().BatchSaveRowsLimit {
 				if s.StorageService.BatchSave(results) == nil {
 					for _, v := range results {
-						s.PatchResultFlag(v.ID, true, v.IP, v.Port)
+						s.PatchResultFlag(v.Stream, int64(v.OR["id"].(float64)), true, v.IP, v.Port)
 					}
 				}
-				idx = 0
+				results = []*storage.ResultObject{}
 			}
 		}
 	}

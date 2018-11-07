@@ -1,0 +1,12 @@
+
+syntax = "proto3";
+
+package aiis;
+
+service RPCAiis {
+    rpc RPCNode(stream Payload) returns (stream Payload) {}
+}
+
+message Payload {
+    string payload = 1;
+}

@@ -78,7 +78,7 @@ odoo:
   max_retry: 1
   enable: true
 storage:
-  db_url: 192.168.1.3:5432
+  db_url: 127.0.0.1:5432
   db_name: sa
   db_user: admin
   db_pwd: admin
@@ -99,4 +99,5 @@ rush:
   ws_write_buf_size: 4096
   batch_save_rows_limit: 100
   batch_save_time_limit: 5s
+  grpc_port: 9093
 
