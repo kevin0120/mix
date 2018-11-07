@@ -9,7 +9,7 @@ DEFAULT_LIMIT = 80
 
 class OperationView(http.Controller):
     @http.route('/api/v1/mrp.routing.workcenter/<int:operation_id>/edit', type='json', methods=['PUT', 'OPTIONS'], auth='none', cors='*', csrf=False)
-    def _edit_points(self, operation_id=None):
+    def _edit(self, operation_id=None):
         pattern = re.compile(r"^data:image/(.+);base64,(.+)", re.DOTALL)
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         operation = env['mrp.routing.workcenter'].search([('id', '=', operation_id)],limit=1)
