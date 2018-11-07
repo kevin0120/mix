@@ -177,7 +177,7 @@ func (m *Methods) patchResult(ctx iris.Context) {
 		return
 	}
 
-	up := ResultPatch{}
+	up := aiis.ResultPatch{}
 	e := ctx.ReadJSON(&up)
 	if e != nil {
 		ctx.StatusCode(iris.StatusBadRequest)

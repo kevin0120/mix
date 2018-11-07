@@ -164,6 +164,8 @@ func (h *Handlers) PushAiis(needPush bool, r *storage.Results, workorder *storag
 		aiisResult.MO_NutNo = r.NutNo
 		aiisResult.MO_Model = workorder.MO_Model
 
+		aiisResult.Batch = r.Batch
+
 		curves, err := h.controllerService.DB.ListCurvesByResult(result.Result_id)
 		if err != nil {
 			return err

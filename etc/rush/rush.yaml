@@ -31,7 +31,7 @@ minio:
   reupload_interval: 24h
 aiis:
   urls:
-  - http://aiis.sa.com
+  - http://127.0.0.1:9092
   headers:
     Content-Type: application/json
   result_push_url: /aiis/v1/operation.results/%d
@@ -41,9 +41,10 @@ aiis:
   max_retry: 3
   ws_result_route: /aiis/v1/ws/results
   ResultUploadInteval: 1h
+  grpc_server: 127.0.0.1:9093
 odoo:
   urls:
-  - http://192.168.1.6:8069
+  - http://127.0.0.1:8069
   timeout: 8s
   interval: 1s
   max_retry: 3
@@ -100,11 +101,11 @@ controller_service:
 #    port: 4700
 #    channel: 51
 
-#  - serial_no: 0002
-#    protocol: Audi/VW
-#    remote_ip: 192.168.1.102
-#    port: 4700
-#    channel: 1
+  - serial_no: 0002
+    protocol: Audi/VW
+    remote_ip: 192.168.4.102
+    port: 4700
+    channel: 1
 
 #  - serial_no: 0001
 #    protocol: OpenProtocol

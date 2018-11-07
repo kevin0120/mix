@@ -5,10 +5,6 @@ import (
 	"time"
 )
 
-type ResultPatch struct {
-	HasUpload bool `json:"has_upload"`
-}
-
 type ODOOMOCreated struct {
 	ID           int    `json:"id"`
 	KNR          string `json:"knr"`

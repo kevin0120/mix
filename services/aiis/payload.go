@@ -90,3 +90,8 @@ type ResultValue struct {
 	Wi float64 `json:"WI"`
 	Ti float64 `json:"TI"`
 }
+
+type ResultPatch struct {
+	ID        int64 `json:"id"`
+	HasUpload bool  `json:"has_upload"`
+}

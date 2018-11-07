@@ -17,6 +17,7 @@ type Config struct {
 	MaxRetry            int               `yaml:"max_retry"` // api最大尝试次数
 	WSResultRoute       string            `yaml:"ws_result_route"`
 	ResultUploadInteval toml.Duration     `yaml:"result_upload_inteval"`
+	GRPCServer          string            `yaml:"grpc_server"`
 }
 
 func NewConfig() Config {
@@ -30,6 +31,7 @@ func NewConfig() Config {
 		Headers:             map[string]string{"Content-Type": "application/json"},
 		WSResultRoute:       "ws://127.0.0.1/aiis/v1/ws/results",
 		ResultUploadInteval: toml.Duration(time.Duration(1 * time.Hour)),
+		GRPCServer:          "127.0.0.1:9093",
 	}
 
 	return c

@@ -275,6 +275,14 @@ func (h *AiisHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
 
+func (h *AiisHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}
+
+func (h *AiisHandler) Info(msg string) {
+	h.l.Info(msg)
+}
+
 func (h *AiisHandler) PutResultDone() {
 	h.l.Debug("Put Result to AIIS successful")
 }

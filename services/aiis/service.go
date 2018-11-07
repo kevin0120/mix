@@ -16,6 +16,8 @@ import (
 
 type Diagnostic interface {
 	Error(msg string, err error)
+	Debug(msg string)
+	Info(msg string)
 	PutResultDone()
 }
 
@@ -42,7 +44,8 @@ type Service struct {
 	DB          *storage.Service
 	ws          utils.RecConn
 	//ws			websocket.Client
-	SN string
+	SN  string
+	rpc GRPCClient
 }
 
 func NewService(c Config, d Diagnostic, rush_port string) *Service {
@@ -51,7 +54,10 @@ func NewService(c Config, d Diagnostic, rush_port string) *Service {
 		diag:      d,
 		endpoints: e,
 		rush_port: rush_port,
+		rpc:       GRPCClient{},
 	}
+	s.rpc.RPCRecv = s.OnRPCRecv
+	s.rpc.srv = s
 	s.configValue.Store(c)
 	return s
 }
@@ -94,6 +100,8 @@ func (s *Service) Open() error {
 
 	go s.ResultUploadManager()
 
+	s.rpc.Start()
+
 	return nil
 }
 
@@ -101,16 +109,22 @@ func (s *Service) Close() error {
 	return nil
 }
 
+func (s *Service) OnRPCRecv(payload string) {
+	rp := ResultPatch{}
+	json.Unmarshal([]byte(payload), &rp)
+	s.DB.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
+}
+
 func (s *Service) PutResult(result_id int64, body interface{}) error {
 
-	var err error
-	for _, endpoint := range s.endpoints {
-		err = s.putResult(body, fmt.Sprintf(endpoint.url, result_id), endpoint.method)
-		if err == nil {
-			// 如果第一次就成功，推出循环
-			return nil
-		}
-	}
+	//var err error
+	//for _, endpoint := range s.endpoints {
+	//	err = s.putResult(body, fmt.Sprintf(endpoint.url, result_id), endpoint.method)
+	//	if err == nil {
+	//		// 如果第一次就成功，推出循环
+	//		return nil
+	//	}
+	//}
 
 	//ws_msg := WSMsg{
 	//	Type: WS_RESULT,
@@ -124,7 +138,20 @@ func (s *Service) PutResult(result_id int64, body interface{}) error {
 	//str, _ := json.Marshal(ws_msg)
 	//s.ws.WriteMessage(websocket.TextMessage, str)
 	//s.ws.SendText(string(str))
-	return nil
+
+	result := WSOpResult{
+		ResultID: result_id,
+		Result:   body.(AIISResult),
+		Port:     s.rush_port,
+	}
+
+	str, _ := json.Marshal(result)
+	err := s.rpc.RPCSend(string(str))
+	if err != nil {
+		fmt.Printf("grpc err: %s\n", err.Error())
+	}
+
+	return err
 }
 
 func (s *Service) putResult(body interface{}, url string, method string) error {
