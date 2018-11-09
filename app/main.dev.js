@@ -10,10 +10,16 @@
  *
  * @flow
  */
-import { app, BrowserWindow } from 'electron';
+import electron, { app, BrowserWindow, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import url from 'url';
+import path from 'path';
 import MenuBuilder from './menu';
+
+
+import { defaultConfigs } from './shared/config/defaultConfig'
+
 
 export default class AppUpdater {
   constructor() {
@@ -59,6 +65,17 @@ app.on('window-all-closed', () => {
   }
 });
 
+app.on('will-quit', () => {
+  if (process.env.NODE_ENV === 'production') {
+    const {exec} = require('child_process');
+    exec("shutdown -h now");
+  }
+});
+
+ipcMain.on('asynchronous-message', (event, arg) => {
+  app.quit()
+});
+
 app.on('ready', async () => {
   if (
     process.env.NODE_ENV === 'development' ||
@@ -67,19 +84,44 @@ app.on('ready', async () => {
     await installExtensions();
   }
 
+  const size = electron.screen.getPrimaryDisplay().workAreaSize;
+
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1024,
-    height: 728
+    width: size.width,
+    height: size.height,
+    fullscreenable: true,
+    minimizable: false
   });
 
-  mainWindow.loadURL(`file://${__dirname}/app.html`);
+  if (defaultConfigs.systemSettings.authEnable) {
+    mainWindow.loadURL(
+      url.format({
+        pathname: path.join(__dirname, 'app.html'),
+        protocol: 'file:',
+        hash: '/pages/login',
+        slashes: false
+      })
+    );
+  } else {
+    mainWindow.loadURL(
+      url.format({
+        pathname: path.join(__dirname, 'app.html'),
+        protocol: 'file:',
+        hash: '/',
+        slashes: false
+      })
+    );
+  }
 
   // @TODO: Use 'ready-to-show' event
   //        https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
   mainWindow.webContents.on('did-finish-load', () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
+    }
+    if (process.env.NODE_ENV === 'production') {
+      mainWindow.setKiosk(true); // 只有生产环境才全屏
     }
     if (process.env.START_MINIMIZED) {
       mainWindow.minimize();

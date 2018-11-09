@@ -1,0 +1,137 @@
+{
+  "Title": "Welcome",
+  "Language": {
+    "en": "EN",
+    "zh_CN": "zh_CN"
+  },
+  "Back": "Back",
+  "main": {
+    "operation": "Operation",
+    "home": "Home",
+    "worksheet_img": "SOP",
+    "preferences": "Config",
+    "help": "Help",
+    "lock": "Lock",
+    "event": "Event",
+    "resultQuery": "Result",
+    "login": "Login",
+    "nextOrder": "Next Order"
+  },
+  "OEE": {
+    "title": "Failure Record",
+    "resume": "Resume Procedure",
+    "FaultType": "Please Select Fault Type",
+    "FaultCode": "Please Select Failures",
+    "Availability": "Availability",
+    "Performance": "Performance",
+    "Quality": "Quality",
+    "Productive": "Productive"
+  },
+  "ManualDiag": {
+    "title": "VIN/KNR"
+  },
+  "Configuration": {
+    "network": {
+      "name": "Network(wifi)",
+      "SSID": "SSID",
+      "PWD": "Password",
+      "Addr": "IP Address",
+      "Mask": "Net Mask",
+      "Gateway": "Gateway"
+    },
+    "IO": {
+      "name": "IO(input/output)",
+      "INname": "IO(input)",
+      "OUTname": "IO(output)"
+    },
+    "connections": {
+      "name": "Connections",
+      "Odoo": "Server API URL",
+      "HMI": "HMI Serial NO."
+    }
+  },
+  "test": {
+    "masterPC": "MasterPC URL",
+    "HMI": "HMI Serial NO",
+    "RFID": "RFID Link Addr",
+    "IO": "IO Module Link Addr"
+  },
+  "editor": {
+    "PicSelect": "New Pic",
+    "PointAdd": "Add",
+    "PointDel": "Del",
+    "Save": "Save"
+  },
+  "Common": {
+    "Yes": "Yes",
+    "No": "No",
+    "WorkSegment": "Work Segment",
+    "WorkCenter": "Work Center",
+    "SocketTray": "Socket Tray",
+    "Controller": "Controller",
+    "isRequired": "Required",
+    "Submit": "Submit",
+    "Test": "Test",
+    "Shutdown": "Power Off",
+    "Logout": "Log Out",
+    "QuestShutdown": "Power Off Right Now?",
+    "Close": "Close",
+    "Manual": "Manual",
+    "Auto": "Auto",
+    "Download": "Download",
+    "Bypass": "Bypass",
+    "Reset": "Reset",
+    "QuestBypass": "Let the car bypass ?",
+    "Result": "Result",
+    "VerifyCar": "Verify Car Information",
+    "QuestConfirmCarInfo": "I will close in 5 seconds. Car VIN/KNR is Correct?"
+  },
+  "ManualBar": {
+    "Vehicle": "Vehicle Select",
+    "VIN": "VIN",
+    "Job": "Job Select",
+    "Pset": "Pset Select",
+    "ContinuePset": "Pset Continue",
+    "DiscretePset": "Pset Discrete",
+    "EnableForce": "Force Enable",
+    "DisableForce": "Force Disable"
+  },
+  "SwitchModeBar": {
+    "title": "Switch Controller Work Mode",
+    "Pset": "Pset",
+    "Job": "Job"
+  },
+  "HealthCheck": {
+    "MasterPC": "MasterPC",
+    "Controller": "Controller",
+    "IO": "IO Module",
+    "RFID": "RFID",
+    "Odoo": "Backend Server"
+  },
+  "Lock": {
+    "Pwd": "Enter Password",
+    "Unlock": "Unlock"
+  },
+  "Login": {
+    "Name": "User Name...",
+    "Pwd": "Enter Password",
+    "Submit": "Let's go"
+  },
+  "Operation": {
+    "Processbar": {
+      "Init": "Initialing, Please waiting for one moment...",
+      "Ready": "Waiting Vehicle Incoming...",
+      "Fail": "Max Times Reached",
+      "Error": "System Error"
+    },
+    "Display": {
+      "Init": "Initialing",
+      "Ready": "Ready",
+      "Doing": "Doing",
+      "Fail": "Fail",
+      "Error": "Error",
+      "Timeout": "Timeout",
+      "Continue": "Doing"
+    }
+  }
+}

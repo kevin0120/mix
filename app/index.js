@@ -1,15 +1,58 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
+
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import blue from '@material-ui/core/colors/blue';
+
+import { CreateDailyLogger, Info } from "./logger";
+
+import {i18n} from "./i18n"; // 初始化i18n配置
+
 import Root from './containers/Root';
 import { configureStore, history } from './store/configureStore';
+import rootSaga from './sagas';
 import './app.global.css';
 
-const store = configureStore();
+const store = configureStore(); // 创建默认state
+store.runSaga(rootSaga);
+
+const theme = createMuiTheme({
+  palette: {
+    primary: blue,
+    secondary: {
+      main: '#126292',
+    },
+    status: {
+      danger: 'orange',
+    },
+  },
+  typography: {
+    // Use the system font instead of the default Roboto font.
+    fontFamily: [
+      'Noto Sans',
+      'Noto Sans SC',
+      '"Segoe UI"',
+      'Roboto',
+      '"Helvetica Neue"',
+      'Arial',
+      'sans-serif',
+      '"Apple Color Emoji"',
+      '"Segoe UI Emoji"',
+      '"Segoe UI Symbol"',
+    ].join(','),
+  },
+});
+
+CreateDailyLogger();  // 创建日志对象,永远成功
+
+Info("程序已启动...");
 
 render(
   <AppContainer>
-    <Root store={store} history={history} />
+    <MuiThemeProvider theme={theme}>
+      <Root store={store} history={history} />
+    </MuiThemeProvider>
   </AppContainer>,
   document.getElementById('root')
 );
@@ -20,7 +63,9 @@ if (module.hot) {
     const NextRoot = require('./containers/Root').default;
     render(
       <AppContainer>
-        <NextRoot store={store} history={history} />
+        <MuiThemeProvider theme={theme}>
+          <NextRoot store={store} history={history} />
+        </MuiThemeProvider>
       </AppContainer>,
       document.getElementById('root')
     );

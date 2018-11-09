@@ -1,0 +1,137 @@
+{
+  "Title": "欢迎",
+  "Language": {
+    "en": "英文",
+    "zh_CN": "中文(简体)"
+  },
+  "Back": "返回",
+  "main": {
+    "operation": "作业",
+    "home": "首页",
+    "worksheet_img": "工艺&作业配置",
+    "preferences": "系统配置",
+    "help": "帮助",
+    "lock": "锁屏",
+    "event": "事件日志",
+    "resultQuery": "结果查询",
+    "login": "登出",
+    "nextOrder": "下一工单"
+  },
+  "OEE": {
+    "title": "故障记录",
+    "resume": "继续作业",
+    "FaultType": "请选择故障类型",
+    "FaultCode": "请选择具体的故障原因",
+    "Availability": "可用率",
+    "Performance": "表现率",
+    "Quality": "质量",
+    "Productive": "生产率"
+  },
+  "ManualDiag": {
+    "title": "VIN/KNR"
+  },
+  "Configuration": {
+    "network": {
+      "name": "网络配置(wifi)",
+      "SSID": "SSID",
+      "PWD": "无线密码",
+      "Addr": "IP地址",
+      "Mask": "子网掩码",
+      "Gateway": "网关"
+    },
+    "IO": {
+      "name": "IO(输入/输出)",
+      "INname": "IO(输入)",
+      "OUTname": "IO(输出)"
+    },
+    "connections": {
+      "name": "外围连接",
+      "Odoo": "应用服务器API地址",
+      "HMI": "HMI序列号"
+    }
+  },
+  "test": {
+    "masterPC": "MasterPC URL",
+    "HMI": "HMI序列号",
+    "RFID": "RFID链接地址",
+    "IO": "IO模块链接地址"
+  },
+  "editor": {
+    "PicSelect": "插入新图片",
+    "PointAdd": "添加拧紧点",
+    "PointDel": "删除拧紧点",
+    "Save": "保存"
+  },
+  "Common": {
+    "Yes": "是",
+    "No": "否",
+    "WorkSegment": "工段",
+    "WorkCenter": "工位",
+    "SocketTray": "套筒",
+    "Controller": "控制器",
+    "isRequired": "必填",
+    "Submit": "确定",
+    "Test": "测试",
+    "Shutdown": "关机",
+    "Logout": "登出",
+    "QuestShutdown": "是否现在关机?",
+    "Close": "关闭",
+    "Manual": "手动",
+    "Auto": "自动",
+    "Download": "下载",
+    "Bypass": "车辆放行",
+    "Reset": "复位",
+    "QuestBypass": "是否放行车辆 ?",
+    "Result": "结果",
+    "VerifyCar": "验证车辆信息",
+    "QuestConfirmCarInfo": "此对话框将在5秒后自动关闭,车辆信息是否准确?"
+  },
+  "ManualBar": {
+    "Vehicle": "车型选择",
+    "VIN": "VIN",
+    "Job": "装配过程选择",
+    "Pset": "程序号选择",
+    "ContinuePset": "连续作业",
+    "DiscretePset": "间断作业",
+    "EnableForce": "强制使能",
+    "DisableForce": "强制关闭"
+  },
+  "SwitchModeBar": {
+    "title": "切换拧紧控制器工作模式",
+    "Pset": "程序号",
+    "Job": "装配过程"
+  },
+  "HealthCheck": {
+    "MasterPC": "MasterPC",
+    "Controller": "控制器",
+    "IO": "输入/输出模块",
+    "RFID": "射频识别模块",
+    "Odoo": "后台服务器"
+  },
+  "Lock": {
+    "Pwd": "请输入密码...",
+    "Unlock": "解锁"
+  },
+  "Login": {
+    "Name": "用户名",
+    "Pwd": "密码",
+    "Submit": "登录"
+  },
+  "Operation": {
+    "Processbar": {
+      "Init": "系统启动中,请稍后...",
+      "Ready": "等待车辆进站...",
+      "Fail": "达到最大拧接次数",
+      "Error": "系统异常"
+    },
+    "Display": {
+      "Init": "启动中",
+      "Ready": "就绪",
+      "Doing": "作业中",
+      "Fail": "失败",
+      "Error": "异常",
+      "Timeout": "超时",
+      "Continue": "作业中"
+    }
+  }
+}
