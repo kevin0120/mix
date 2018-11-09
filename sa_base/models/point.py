@@ -65,9 +65,9 @@ class OperationPoints(models.Model):
 
     product_qty = fields.Float('Product Quantity', default=1.0, digits=dp.get_precision('Product Unit of Measure'))
 
-    x_offset = fields.Integer('x axis offset from left(px)', default=0)
+    x_offset = fields.Float('x axis offset from left(px)', default=0.0, digits=dp.get_precision('POINT_OFFSET'))
 
-    y_offset = fields.Integer('y axis offset from top(px)', default=0)
+    y_offset = fields.Float('y axis offset from top(px)', default=0.0, digits=dp.get_precision('POINT_OFFSET'))
 
     program_id = fields.Many2one('controller.program',  string='程序号', ondelete='cascade')
 
