@@ -57,7 +57,8 @@ class MrpWorkorder(models.Model):
                          'control_date': fields.Datetime.now()}
 
                 for i in range(point.times):
-                    ret_vals.append(vals)
-                    idx += 1
+                    if vals['gun_id']:
+                        ret_vals.append(vals)
+                        idx += 1
         if len(ret_vals):
             self.env['operation.result'].sudo().bulk_create(ret_vals)
