@@ -302,7 +302,17 @@ func (c *Controller) handleResult(result_data *ResultData) {
 
 		// vin:cartype:hmisn
 		//key := result_data.VIN + ":" + result_data.ID3 + ":" + result_data.ID2
-		raw_id, _ := strconv.ParseInt(result_data.ID2, 10, 64)
+		targetID := result_data.VIN
+		switch c.Srv.config().DataIndex {
+		case 1:
+			targetID = result_data.ID2
+		case 2:
+			targetID = result_data.ID3
+		case 3:
+			targetID = result_data.ID4
+		}
+
+		raw_id, _ := strconv.ParseInt(targetID, 10, 64)
 		db_workorder, err := c.Srv.DB.GetWorkorder(raw_id, true)
 		db_result, err := c.Srv.DB.FindTargetResultForJobManual(raw_id)
 		if err != nil {

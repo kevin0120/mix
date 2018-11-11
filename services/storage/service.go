@@ -61,7 +61,6 @@ func (s *Service) Open() error {
 		}
 	}
 
-
 	exist, err = engine.IsTableExist("Results")
 	if err == nil {
 		if !exist {
@@ -70,7 +69,6 @@ func (s *Service) Open() error {
 			}
 		}
 	}
-
 
 	exist, err = engine.IsTableExist("Curves")
 	if err == nil {
@@ -81,7 +79,6 @@ func (s *Service) Open() error {
 		}
 	}
 
-
 	exist, err = engine.IsTableExist("Controllers")
 	if err == nil {
 		if !exist {
@@ -90,7 +87,6 @@ func (s *Service) Open() error {
 			}
 		}
 	}
-
 
 	exist, err = engine.IsTableExist("Guns")
 	if err == nil {
@@ -101,7 +97,6 @@ func (s *Service) Open() error {
 		}
 	}
 
-
 	exist, err = engine.IsTableExist("RoutingOperations")
 	if err == nil {
 		if !exist {
@@ -110,7 +105,6 @@ func (s *Service) Open() error {
 			}
 		}
 	}
-
 
 	engine.SetMaxOpenConns(c.MaxConnects) // always success
 
