@@ -802,7 +802,7 @@ msgstr "车辆类型"
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_cur_objects
 msgid "Waveform Files"
-msgstr "波形文件"
+msgstr "曲线文件"
 
 #. module: spc
 #: model:ir.ui.view,arch_db:spc.sa_spc_form_tor_ang
