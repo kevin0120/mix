@@ -75,8 +75,4 @@ class DarkroomModal(models.TransientModel):
     def action_save(self):
         self.ensure_one()
 
-        res_record = self._default_res_record()
-        res_field_name = self._default_res_field_id().name
-        setattr(res_record, res_field_name, self.image)
-
         return {'type': 'ir.actions.act_window_close'}

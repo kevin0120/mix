@@ -41,7 +41,9 @@ odoo.define('web_widget_darkroom.image_editor', function (require) {
                 }
             }).then(function (response) {
 
-            })
+            });
+
+            self.do_action({"type":"ir.actions.act_window_close"});
 
         },
 
