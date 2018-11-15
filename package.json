@@ -58,7 +58,8 @@
   },
   "main": "./app/main.prod.js",
   "build": {
-    "productName": "ElectronReact",
+    "productName": "ControlPanel-SA",
+    "extends": null,
     "appId": "org.develar.ElectronReact",
     "files": [
       "locales/",
@@ -99,7 +100,7 @@
         "snap",
         "AppImage"
       ],
-      "category": "Development"
+      "category": "SmartAssembly"
     },
     "directories": {
       "buildResources": "resources",
@@ -193,7 +194,7 @@
     "css-loader": "^1.0.1",
     "detect-port": "^1.2.3",
     "electron": "^2.0.6",
-    "electron-builder": "^20.28.4",
+    "electron-builder": "^20.34.0",
     "electron-devtools-installer": "^2.2.4",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
@@ -253,7 +254,7 @@
     "devtron": "^1.4.0",
     "electron-debug": "^2.0.0",
     "electron-log": "^2.2.17",
-    "electron-updater": "^3.1.6",
+    "electron-updater": "^3.2.3",
     "history": "^4.7.2",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
