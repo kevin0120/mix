@@ -1,6 +1,9 @@
 import { cloneDeep } from 'lodash';
 import { toast } from 'react-toastify';
 
+import axios from 'axios';
+import axiosRetry from 'axios-retry';
+
 export function sortObj(obj, orderKey) {
   const orderedKey = Object.keys(obj).sort((a, b) => (
     obj[a][orderKey] - obj[b][orderKey]));
@@ -43,4 +46,31 @@ function getCheckDigit(vin) {
     sum += transliterate(vin[i]) * map.indexOf(weights[i]);
   return map[sum % 11];
 }
+
+export class HttpClient {
+  constructor() {
+    this.instance = null;
+  }
+
+  static getInstance() {
+    if(!this.instance){
+      this.instance = axios.create({
+        timeout: 3000,
+        headers: {'Content-Type': 'application/json'}
+      });
+      axiosRetry(this.instance, {
+        retries: 2,
+        retryDelay: axiosRetry.exponentialDelay,
+        retryCondition: (err) => (
+          err.message.indexOf("200") === -1
+        ),
+      });
+      return this.instance;
+    }
+    return this.instance;
+  }
+
+}
+
+export const defaultClient = HttpClient.getInstance();
 

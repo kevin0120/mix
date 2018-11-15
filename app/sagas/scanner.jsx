@@ -1,4 +1,4 @@
-// @flows
+// @flow
 
 import { select, put, takeEvery } from 'redux-saga/effects'
 

@@ -1,10 +1,13 @@
 // @flow
-import type { Action } from './types';
 
 import { defaultConfigs } from '../shared/config/defaultConfig'
 
 
-export default function setting(state: object = defaultConfigs, action: Action) {
+type actionType = {
+  +type: string
+};
+
+export default function setting(state: object = defaultConfigs, action: actionType) {
   switch (action.type) {
     default:
       return state;

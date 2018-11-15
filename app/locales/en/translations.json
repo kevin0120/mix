@@ -47,7 +47,8 @@
     "connections": {
       "name": "Connections",
       "Odoo": "Server API URL",
-      "HMI": "HMI Serial NO."
+      "HMI": "HMI Serial NO.",
+      "AIIS": "AIIS"
     }
   },
   "test": {

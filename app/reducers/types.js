@@ -2,7 +2,7 @@ import type { Dispatch as ReduxDispatch, Store as ReduxStore } from 'redux';
 
 
 export type StateType = {
-  +counter: number,
+  +notify: object,
   +setting: object
 };
 

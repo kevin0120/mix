@@ -1,4 +1,4 @@
-// @flows
+// @flow
 import { CARD_AUTH } from './actionTypes';
 
 const pcsclite = require('pcsclite');

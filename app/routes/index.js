@@ -2,7 +2,6 @@
 import React from 'react';
 
 import HomePage from '../containers/HomePage';
-import CounterPage from '../containers/CounterPage';
 // import Editor from '../containers/editor';
 // import Preferences from '../containers/preferences';
 // import Help from '../containers/help';
@@ -133,7 +132,6 @@ export const routeConfigs = [
 
 const indexRoutes = [
   { path: "/pages", component: Pages },
-  { path: "/counter", component: CounterPage },
   { path: "/", component: HomePage }
 ];
 

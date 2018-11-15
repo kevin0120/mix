@@ -1,10 +1,10 @@
 
+import Fingerprint from "@material-ui/icons/Fingerprint";
+import LockOpen from "@material-ui/icons/LockOpen";
 import LockScreenPage from "../containers/lock";
 import LoginPage from "../containers/login";
 
 // @material-ui/icons
-import Fingerprint from "@material-ui/icons/Fingerprint";
-import LockOpen from "@material-ui/icons/LockOpen";
 
 const pagesRoutes = [
   {

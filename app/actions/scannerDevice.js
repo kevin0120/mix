@@ -1,4 +1,4 @@
-// @flows
+// @flow
 
 import { SCANNER } from "./actionTypes";
 
@@ -102,5 +102,5 @@ export const  stopListernScanner = () => {
     scanner.close();
     scanner = null;
   }
-}
+};
 

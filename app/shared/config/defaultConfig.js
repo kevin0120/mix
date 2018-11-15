@@ -39,13 +39,18 @@ export const defaultConfigs = {
     odooConnection: {
       odooUrl: {
         displayOrder: 1,
-        value: 'http://192.168.1.6:8069/api/v1',
+        value: 'http://192.168.4.3:8069/api/v1',
         displayTitle: 'Configuration.connections.Odoo'
       },
       hmiSn: {
         displayOrder: 2,
-        value: '112233445566778899',
+        value: '1122334455667788',
         displayTitle: 'Configuration.connections.HMI'
+      },
+      aiisUrl: {
+        displayOrder: 3,
+        value: 'http://192.168.4.3:9092/aiis/v1',
+        displayTitle: 'Configuration.connections.AIIS'
       }
     },
     modbus: {
