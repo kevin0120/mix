@@ -72,6 +72,11 @@ var KEYS = []string{
 	"id",
 	"sent",
 	"batch",
+	"time",
+	"workcenter_id",
+	"gun_id",
+	"product_id",
+	"vin",
 }
 
 type OperationResultModel struct {

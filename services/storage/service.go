@@ -97,6 +97,17 @@ func (s *Service) Close() error {
 
 func (s *Service) BatchSave(results []*ResultObject) error {
 
+	updateResults := []*ResultObject{}
+	insertResults := []*ResultObject{}
+
+	for _, v := range results {
+		if v.ID == 0 {
+			insertResults = append(insertResults, v)
+		} else {
+			updateResults = append(updateResults, v)
+		}
+	}
+
 	arrSKeys := []string{}
 	for _, v := range KEYS {
 		arrSKeys = append(arrSKeys, fmt.Sprintf("s.%s", v))
@@ -104,70 +115,141 @@ func (s *Service) BatchSave(results []*ResultObject) error {
 	strKeys := fmt.Sprintf("(%s)", strings.Join(KEYS, ","))
 	strSKeys := fmt.Sprintf("(%s)", strings.Join(arrSKeys, ","))
 
-	arrValues := []string{}
-	for _, v := range results {
-		if v == nil {
-			continue
-		}
-
-		arrValue := []string{}
-		for _, k := range KEYS {
-			if k == "id" {
-				arrValue = append(arrValue, fmt.Sprintf("%d", v.ID))
+	// 更新
+	if len(updateResults) > 0 {
+		arrValues := []string{}
+		for _, v := range updateResults {
+			if v == nil {
 				continue
 			}
 
-			if k == "sent" {
-				if v.Send == 1 {
-					arrValue = append(arrValue, "true")
-				} else {
-					arrValue = append(arrValue, "false")
+			arrValue := []string{}
+			for _, k := range KEYS {
+				if k == "id" {
+					arrValue = append(arrValue, fmt.Sprintf("%d", v.ID))
+					continue
 				}
+
+				if k == "sent" {
+					if v.Send == 1 {
+						arrValue = append(arrValue, "true")
+					} else {
+						arrValue = append(arrValue, "false")
+					}
+					continue
+				}
+
+				if k == "cur_objects" {
+					curs, _ := json.Marshal(v.OR[k])
+					//fmt.Printf("%s\n", string(curs))
+					arrValue = append(arrValue, fmt.Sprintf("'%s'", string(curs)))
+					continue
+				}
+
+				if k == "control_date" {
+					arrValue = append(arrValue, fmt.Sprintf("timestamp '%s'", reflect.ValueOf(v.OR[k]).String()))
+					continue
+				}
+
+				targetType := fmt.Sprintf("%T", v.OR[k])
+
+				switch targetType {
+				case "<nil>":
+					arrValue = append(arrValue, "''")
+				case "array":
+					arrValue = append(arrValue, fmt.Sprintf("'%s'", reflect.ValueOf(v.OR[k]).String()))
+				case "time":
+					arrValue = append(arrValue, fmt.Sprintf("timestamp '%s'", reflect.ValueOf(v.OR[k]).String()))
+				case "string":
+					arrValue = append(arrValue, fmt.Sprintf("'%s'", reflect.ValueOf(v.OR[k]).String()))
+				default:
+					arrValue = append(arrValue, fmt.Sprintf("%v", v.OR[k]))
+				}
+			}
+
+			arrValues = append(arrValues, fmt.Sprintf("(%s)", strings.Join(arrValue, ",")))
+		}
+		strValues := strings.Join(arrValues, ",")
+
+		sql := fmt.Sprintf("UPDATE operation_result AS o SET %s = %s FROM(VALUES %s ) AS s %s WHERE o.id = s.id", strKeys, strSKeys, strValues, strKeys)
+
+		result := s.eng.Exec(sql)
+		if result.Error != nil {
+			return result.Error
+		}
+	}
+
+	// 新增
+	if len(insertResults) > 0 {
+		arrInsertValues := []string{}
+		for _, v := range insertResults {
+			if v == nil {
 				continue
 			}
 
-			if k == "cur_objects" {
-				curs, _ := json.Marshal(v.OR[k])
-				fmt.Printf("%s\n", string(curs))
-				arrValue = append(arrValue, fmt.Sprintf("'%s'", string(curs)))
-				continue
+			arrValue := []string{}
+			for _, k := range KEYS {
+				if k == "id" {
+					arrValue = append(arrValue, "nextval('operation_result_id_seq')")
+					continue
+				}
+
+				if k == "sent" {
+					if v.Send == 1 {
+						arrValue = append(arrValue, "true")
+					} else {
+						arrValue = append(arrValue, "false")
+					}
+					continue
+				}
+
+				if k == "cur_objects" {
+					curs, _ := json.Marshal(v.OR[k])
+					//fmt.Printf("%s\n", string(curs))
+					arrValue = append(arrValue, fmt.Sprintf("'%s'", string(curs)))
+					continue
+				}
+
+				if k == "control_date" {
+					arrValue = append(arrValue, fmt.Sprintf("timestamp '%s'", reflect.ValueOf(v.OR[k]).String()))
+					continue
+				}
+
+				if k == "time" {
+					arrValue = append(arrValue, fmt.Sprintf("'%s'", reflect.ValueOf(v.OR["control_date"]).String()))
+					continue
+				}
+
+				targetType := fmt.Sprintf("%T", v.OR[k])
+
+				switch targetType {
+				case "<nil>":
+					arrValue = append(arrValue, "''")
+				case "array":
+					arrValue = append(arrValue, fmt.Sprintf("'%s'", reflect.ValueOf(v.OR[k]).String()))
+				case "time":
+					arrValue = append(arrValue, fmt.Sprintf("timestamp '%s'", reflect.ValueOf(v.OR[k]).String()))
+				case "string":
+					arrValue = append(arrValue, fmt.Sprintf("'%s'", reflect.ValueOf(v.OR[k]).String()))
+				default:
+					arrValue = append(arrValue, fmt.Sprintf("%v", v.OR[k]))
+				}
 			}
 
-			if k == "control_date" {
-				arrValue = append(arrValue, fmt.Sprintf("timestamp '%s'", reflect.ValueOf(v.OR[k]).String()))
-				continue
-			}
-
-			targetType := fmt.Sprintf("%T", v.OR[k])
-
-			switch targetType {
-			case "<nil>":
-				arrValue = append(arrValue, "''")
-			case "array":
-				arrValue = append(arrValue, fmt.Sprintf("'%s'", reflect.ValueOf(v.OR[k]).String()))
-			case "time":
-				arrValue = append(arrValue, fmt.Sprintf("timestamp '%s'", reflect.ValueOf(v.OR[k]).String()))
-			case "string":
-				arrValue = append(arrValue, fmt.Sprintf("'%s'", reflect.ValueOf(v.OR[k]).String()))
-			default:
-				arrValue = append(arrValue, fmt.Sprintf("%v", v.OR[k]))
-			}
+			arrInsertValues = append(arrInsertValues, fmt.Sprintf("(%s)", strings.Join(arrValue, ",")))
 		}
 
-		arrValues = append(arrValues, fmt.Sprintf("(%s)", strings.Join(arrValue, ",")))
+		strInsertValues := strings.Join(arrInsertValues, ",")
+
+		insertSql := fmt.Sprintf("INSERT INTO \"operation_result\" %s VALUES %s RETURNING id", strKeys, strInsertValues)
+
+		insertResult := s.eng.Exec(insertSql)
+		if insertResult.Error != nil {
+			return insertResult.Error
+		}
 	}
 
-	strValues := strings.Join(arrValues, ",")
-
-	sql := fmt.Sprintf("UPDATE operation_result AS o SET %s = %s FROM(VALUES %s ) AS s %s WHERE o.id = s.id", strKeys, strSKeys, strValues, strKeys)
-
-	result := s.eng.Exec(sql)
-	if result.Error == nil {
-
-		//result.
-		//s.diag.Printf("success:%d\n", result.RowsAffected)
-	}
-	return result.Error
+	return nil
 }
 
 func (s *Service) UpdateResults(result *OperationResult, id int64, sent int) error {
