@@ -6,11 +6,9 @@
  * Vestibulum commodo. Ut rhoncus gravida arcu.
  */
 
-
-
 // flow
 
-import connections from './connections'
+import connections from './connections';
 
 const Configuration = {
   connections

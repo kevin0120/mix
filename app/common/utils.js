@@ -5,11 +5,12 @@ import axios from 'axios';
 import axiosRetry from 'axios-retry';
 
 export function sortObj(obj, orderKey) {
-  const orderedKey = Object.keys(obj).sort((a, b) => (
-    obj[a][orderKey] - obj[b][orderKey]));
+  const orderedKey = Object.keys(obj).sort(
+    (a, b) => obj[a][orderKey] - obj[b][orderKey]
+  );
   return orderedKey.map(key => ({
     key,
-    value: cloneDeep(obj[key]),
+    value: cloneDeep(obj[key])
   }));
 }
 
@@ -23,7 +24,7 @@ export function showNoty(type, text) {
     closeOnClick: true,
     pauseOnHover: true,
     draggable: true,
-    draggablePercent: 60,
+    draggablePercent: 60
   });
 }
 
@@ -32,8 +33,8 @@ export function isVin(vin) {
   return getCheckDigit(vin) === vin[8];
 }
 
-  // source: https://en.wikipedia.org/wiki/Vehicle_identification_number#Example_Code
-  // ---------------------------------------------------------------------------------
+// source: https://en.wikipedia.org/wiki/Vehicle_identification_number#Example_Code
+// ---------------------------------------------------------------------------------
 function transliterate(c) {
   return '0123456789.ABCDEFGH..JKLMN.P.R..STUVWXYZ'.indexOf(c) % 10;
 }
@@ -53,24 +54,20 @@ export class HttpClient {
   }
 
   static getInstance() {
-    if(!this.instance){
+    if (!this.instance) {
       this.instance = axios.create({
         timeout: 3000,
-        headers: {'Content-Type': 'application/json'}
+        headers: { 'Content-Type': 'application/json' }
       });
       axiosRetry(this.instance, {
         retries: 2,
         retryDelay: axiosRetry.exponentialDelay,
-        retryCondition: (err) => (
-          err.message.indexOf("200") === -1
-        ),
+        retryCondition: err => err.message.indexOf('200') === -1
       });
       return this.instance;
     }
     return this.instance;
   }
-
 }
 
 export const defaultClient = HttpClient.getInstance();
-

@@ -5,46 +5,61 @@ export default () => ({
     position: 'relative',
     borderRadius: '50%',
     transition: 'background-color 0.5s, box-shadow 0.5s',
-    backgroundImage: '-owg-radial-gradient(50% 50%, circle closest-corner, #f44336, rgba(0, 0, 0, 0.1))',
-    backgroundImage: '-webkit-radial-gradient(50% 50%, circle closest-corner, #f44336, rgba(0, 0, 0, 0.1))',
-    backgroundImage: '-moz-radial-gradient(50% 50%, circle closest-corner, #f44336, rgba(0, 0, 0, 0.1))',
-    backgroundImage: '-o-radial-gradient(50% 50%, circle closest-corner, #f44336, rgba(0, 0, 0, 0.1))',
-    backgroundImage: 'radial-gradient(50% 50%, circle closest-corner, #f44336, rgba(0, 0, 0, 0.1))',
+    backgroundImage:
+      '-owg-radial-gradient(50% 50%, circle closest-corner, #f44336, rgba(0, 0, 0, 0.1))',
+    backgroundImage:
+      '-webkit-radial-gradient(50% 50%, circle closest-corner, #f44336, rgba(0, 0, 0, 0.1))',
+    backgroundImage:
+      '-moz-radial-gradient(50% 50%, circle closest-corner, #f44336, rgba(0, 0, 0, 0.1))',
+    backgroundImage:
+      '-o-radial-gradient(50% 50%, circle closest-corner, #f44336, rgba(0, 0, 0, 0.1))',
+    backgroundImage:
+      'radial-gradient(50% 50%, circle closest-corner, #f44336, rgba(0, 0, 0, 0.1))'
   },
   infoSuccess: {
     padding: '10px',
     cursor: 'pointer',
     position: 'relative',
     borderRadius: '50%',
-    backgroundImage: '-owg-radial-gradient(50% 50%, circle closest-corner, #4caf50, rgba(0, 0, 0, 0.25))',
-    backgroundImage: '-webkit-radial-gradient(50% 50%, circle closest-corner, #4caf50, rgba(0, 0, 0, 0.25))',
-    backgroundImage: '-moz-radial-gradient(50% 50%, circle closest-corner, #4caf50, rgba(0, 0, 0, 0.25))',
-    backgroundImage: '-o-radial-gradient(50% 50%, circle closest-corner, #4caf50, rgba(0, 0, 0, 0.25))',
-    backgroundImage: 'radial-gradient(50% 50%, circle closest-corner, #4caf50, rgba(0, 0, 0, 0.25))',
-    transition: 'background-color 0.5s, box-shadow 0.5s',
-},
+    backgroundImage:
+      '-owg-radial-gradient(50% 50%, circle closest-corner, #4caf50, rgba(0, 0, 0, 0.25))',
+    backgroundImage:
+      '-webkit-radial-gradient(50% 50%, circle closest-corner, #4caf50, rgba(0, 0, 0, 0.25))',
+    backgroundImage:
+      '-moz-radial-gradient(50% 50%, circle closest-corner, #4caf50, rgba(0, 0, 0, 0.25))',
+    backgroundImage:
+      '-o-radial-gradient(50% 50%, circle closest-corner, #4caf50, rgba(0, 0, 0, 0.25))',
+    backgroundImage:
+      'radial-gradient(50% 50%, circle closest-corner, #4caf50, rgba(0, 0, 0, 0.25))',
+    transition: 'background-color 0.5s, box-shadow 0.5s'
+  },
   infoError: {
     padding: '10px',
     cursor: 'pointer',
     position: 'relative',
     borderRadius: '50%',
-    backgroundImage: '-owg-radial-gradient(50% 50%, circle closest-corner, #f44336, rgba(0, 0, 0, 0.1))',
-    backgroundImage: '-webkit-radial-gradient(50% 50%, circle closest-corner, #f44336, rgba(0, 0, 0, 0.1))',
-    backgroundImage: '-moz-radial-gradient(50% 50%, circle closest-corner, #f44336, rgba(0, 0, 0, 0.1))',
-    backgroundImage: '-o-radial-gradient(50% 50%, circle closest-corner, #f44336, rgba(0, 0, 0, 0.1))',
-    backgroundImage: 'radial-gradient(50% 50%, circle closest-corner, #f44336, rgba(0, 0, 0, 0.1))',
+    backgroundImage:
+      '-owg-radial-gradient(50% 50%, circle closest-corner, #f44336, rgba(0, 0, 0, 0.1))',
+    backgroundImage:
+      '-webkit-radial-gradient(50% 50%, circle closest-corner, #f44336, rgba(0, 0, 0, 0.1))',
+    backgroundImage:
+      '-moz-radial-gradient(50% 50%, circle closest-corner, #f44336, rgba(0, 0, 0, 0.1))',
+    backgroundImage:
+      '-o-radial-gradient(50% 50%, circle closest-corner, #f44336, rgba(0, 0, 0, 0.1))',
+    backgroundImage:
+      'radial-gradient(50% 50%, circle closest-corner, #f44336, rgba(0, 0, 0, 0.1))'
   },
   infoItem: {
     width: 200,
     '&:firstChild': {
-      marginTop: 300,
+      marginTop: 300
     },
     padding: '0 20px',
-    marginTop: 18,
+    marginTop: 18
   },
   infoText: {
     '&>span': {
-      fontSize: 14,
-    },
-  },
+      fontSize: 14
+    }
+  }
 });

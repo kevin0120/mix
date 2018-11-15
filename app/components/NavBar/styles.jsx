@@ -1,6 +1,6 @@
 export default () => ({
   itemWrap: {
-    margin: '0 8px',
+    margin: '0 8px'
   },
   menuItem: {
     paddingLeft: '32px',
@@ -8,10 +8,10 @@ export default () => ({
     height: '40px',
     color: '#333',
     '&:hover': {
-      fontWeight: 'bold',
+      fontWeight: 'bold'
     },
     '&:first-child': {
-      marginTop: '18px',
-    },
-  },
+      marginTop: '18px'
+    }
+  }
 });

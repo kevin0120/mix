@@ -8,11 +8,12 @@
 
 // @flow
 
-import { defaultClient } from '../../common/utils'
+import { defaultClient } from '../../common/utils';
 
-export const fetchConnectionInfo = (fullUrl) => defaultClient.get(fullUrl).then( resp => (
-    resp.data
-  ))
+export const fetchConnectionInfo = fullUrl =>
+  defaultClient
+    .get(fullUrl)
+    .then(resp => resp.data)
     .catch(e => {
-        throw e.toString();
-      });
+      throw e.toString();
+    });

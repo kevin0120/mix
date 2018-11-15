@@ -15,10 +15,10 @@ import SettingsApplicationsIcon from '@material-ui/icons/SettingsApplications';
 import BuildIcon from '@material-ui/icons/Build';
 import HelpIcon from '@material-ui/icons/Help';
 import CollectionsIcon from '@material-ui/icons/Collections';
-import LockIcon from "@material-ui/icons/Lock";
-import Fingerprint from "@material-ui/icons/Fingerprint";
-import Mail from "@material-ui/icons/Mail";
-import Save from "@material-ui/icons/Save";
+import LockIcon from '@material-ui/icons/Lock';
+import Fingerprint from '@material-ui/icons/Fingerprint';
+import Mail from '@material-ui/icons/Mail';
+import Save from '@material-ui/icons/Save';
 
 // imgs
 import helpImg from '../../resources/imgs/help.png';
@@ -36,8 +36,7 @@ import {
   successColor,
   warningColor,
   dangerColor
-} from "../common/jss/material-react-pro";
-
+} from '../common/jss/material-react-pro';
 
 export const routeConfigs = [
   {
@@ -46,7 +45,7 @@ export const routeConfigs = [
     title: 'main.home',
     main: HomePage,
     icon: HomeIcon,
-    color: grayColor,
+    color: grayColor
   },
   // {
   //   name: 'working',
@@ -126,13 +125,13 @@ export const routeConfigs = [
     icon: Fingerprint,
     color: grayColor,
     image: LoginImg,
-    enName: 'Login',
-  },
+    enName: 'Login'
+  }
 ];
 
 const indexRoutes = [
-  { path: "/pages", component: Pages },
-  { path: "/", component: HomePage }
+  { path: '/pages', component: Pages },
+  { path: '/', component: HomePage }
 ];
 
 export default indexRoutes;

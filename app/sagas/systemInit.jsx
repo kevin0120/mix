@@ -8,12 +8,11 @@
 
 // @flow
 
-import { call, take } from 'redux-saga/effects'
+import { call, take } from 'redux-saga/effects';
 
-import { SYSTEM_INIT } from "../actions/actionTypes";
+import { SYSTEM_INIT } from '../actions/actionTypes';
 
-import { fetchConnectionInfo } from "./api/systemInit";
-
+import { fetchConnectionInfo } from './api/systemInit';
 
 export function* fetchConnectionFlow(baseUrl, hmiSN) {
   const fullUrl = `${baseUrl}/hmi.connections/${hmiSN}`;
@@ -22,10 +21,10 @@ export function* fetchConnectionFlow(baseUrl, hmiSN) {
 }
 
 export function* sysInitFlow() {
-    const{ baseUrl, hmiSN } = yield take(SYSTEM_INIT); // 只获取一次
+  const { baseUrl, hmiSN } = yield take(SYSTEM_INIT); // 只获取一次
   try {
     yield call(fetchConnectionFlow, baseUrl, hmiSN);
-  }catch (e) {
+  } catch (e) {
     console.log(e);
   }
 }

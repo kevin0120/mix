@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { I18n } from 'react-i18next';
 
-
 import { withStyles } from '@material-ui/core/styles';
 
 import ListItem from '@material-ui/core/ListItem';
@@ -13,21 +12,20 @@ import * as Utils from '../../common/utils';
 
 import {
   masterPCHealthCheck,
-  controllerHealthCheck,
+  controllerHealthCheck
 } from '../../actions/healthCheck';
 
 import styles from './styles';
 
-
 const mapStateToProps = (state, ownProps) => ({
   healthCheckResults: state.healthCheckResults,
   connInfo: state.connInfo,
-  ...ownProps,
+  ...ownProps
 });
 
 const mapDispatchToProps = {
   masterPCHealthCheck,
-  controllerHealthCheck,
+  controllerHealthCheck
 };
 
 class ConnectedHealthCheck extends React.Component {
@@ -37,7 +35,7 @@ class ConnectedHealthCheck extends React.Component {
   }
 
   componentDidMount() {
-    console.log("health timer restart");
+    console.log('health timer restart');
     this.restartTimer();
   }
 
@@ -58,9 +56,11 @@ class ConnectedHealthCheck extends React.Component {
     const Controllers = this.props.connInfo.controllers;
 
     if (options.enableDebugLog) {
-      console.log('restart MasterPC HealthCheck. ' +
-        `conn: ${masterpcConn}, ` +
-        `interval: ${options.intervalMasterPC}ms`);
+      console.log(
+        'restart MasterPC HealthCheck. ' +
+          `conn: ${masterpcConn}, ` +
+          `interval: ${options.intervalMasterPC}ms`
+      );
     }
 
     this.stopTimer();
@@ -73,14 +73,16 @@ class ConnectedHealthCheck extends React.Component {
   render() {
     const { classes, styleOptions, healthCheckResults } = this.props;
 
-    return (Utils.sortObj(healthCheckResults, 'displayOrder').map(({ key, value: item }) => {
-      const { health, displayTitle } = item;
-      const statusClassName = health ? classes.infoSuccess : classes.infoError;
+    return Utils.sortObj(healthCheckResults, 'displayOrder').map(
+      ({ key, value: item }) => {
+        const { health, displayTitle } = item;
+        const statusClassName = health
+          ? classes.infoSuccess
+          : classes.infoError;
 
-      return (
-        <I18n ns="translations">
-          {
-            t => (
+        return (
+          <I18n ns="translations">
+            {t => (
               <ListItem
                 key={key}
                 disableGutters={styleOptions.disableGutters}
@@ -90,14 +92,13 @@ class ConnectedHealthCheck extends React.Component {
                   className={classes.infoText}
                   primary={t(displayTitle)}
                 />
-                <div className={`${classes.infoStatus} ${statusClassName}`}
-                />
+                <div className={`${classes.infoStatus} ${statusClassName}`} />
               </ListItem>
-            )
-          }
-        </I18n>
-      );
-    }));
+            )}
+          </I18n>
+        );
+      }
+    );
   }
 }
 
@@ -106,45 +107,45 @@ ConnectedHealthCheck.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   connInfo: PropTypes.shape({
     masterpc: PropTypes.shape({
-      connection: PropTypes.string,
+      connection: PropTypes.string
     }),
-    controllers: PropTypes.array,
+    controllers: PropTypes.array
   }),
   healthCheckResults: PropTypes.shape({}).isRequired,
   styleOptions: PropTypes.shape({
-    disableGutters: PropTypes.bool,
+    disableGutters: PropTypes.bool
   }),
   // Connection Options
   options: PropTypes.shape({
     intervalMasterPC: PropTypes.number,
     intervalControllerSN: PropTypes.number,
-    enableDebugLog: PropTypes.bool,
+    enableDebugLog: PropTypes.bool
   }),
   // functions
   masterPCHealthCheck: PropTypes.func.isRequired,
-  controllerHealthCheck: PropTypes.func.isRequired,
+  controllerHealthCheck: PropTypes.func.isRequired
 };
 
 ConnectedHealthCheck.defaultProps = {
   styleOptions: {
-    disableGutters: false,
+    disableGutters: false
   },
   connInfo: {
     masterpc: {
-      connection: null,
+      connection: null
     },
-    controllers: [],
+    controllers: []
   },
   options: {
     intervalMasterPC: 3000,
     intervalControllerSN: 3000,
-    enableDebugLog: false,
-  },
+    enableDebugLog: false
+  }
 };
 
 const HealthCheck = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 )(ConnectedHealthCheck);
 
 export default withStyles(styles)(HealthCheck);

@@ -17,9 +17,7 @@ import url from 'url';
 import path from 'path';
 import MenuBuilder from './menu';
 
-
-import { defaultConfigs } from './shared/config/defaultConfig'
-
+import { defaultConfigs } from './shared/config/defaultConfig';
 
 export default class AppUpdater {
   constructor() {
@@ -67,13 +65,13 @@ app.on('window-all-closed', () => {
 
 app.on('will-quit', () => {
   if (process.env.NODE_ENV === 'production') {
-    const {exec} = require('child_process');
-    exec("shutdown -h now");
+    const { exec } = require('child_process');
+    exec('shutdown -h now');
   }
 });
 
 ipcMain.on('asynchronous-message', (event, arg) => {
-  app.quit()
+  app.quit();
 });
 
 app.on('ready', async () => {

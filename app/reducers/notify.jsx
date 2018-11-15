@@ -13,7 +13,10 @@ type actionType = {
   +isShow: boolean
 };
 
-export default function notify(state: object = defaultNotify, action: actionType) {
+export default function notify(
+  state: object = defaultNotify,
+  action: actionType
+) {
   switch (action.type) {
     default:
       return state;

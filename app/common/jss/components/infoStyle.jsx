@@ -11,18 +11,18 @@ import {
   roseColor,
   grayColor,
   title
-} from "../material-react-pro.jsx";
+} from '../material-react-pro.jsx';
 
 const infoStyle = {
   infoArea: {
-    maxWidth: "360px",
-    margin: "0 auto",
-    padding: "70px 0 30px"
+    maxWidth: '360px',
+    margin: '0 auto',
+    padding: '70px 0 30px'
   },
   iconWrapper: {
-    float: "left",
-    marginTop: "24px",
-    marginRight: "10px"
+    float: 'left',
+    marginTop: '24px',
+    marginRight: '10px'
   },
   primary: {
     color: primaryColor
@@ -46,39 +46,37 @@ const infoStyle = {
     color: grayColor
   },
   icon: {
-    width: "36px",
-    height: "36px"
+    width: '36px',
+    height: '36px'
   },
   descriptionWrapper: {
     color: grayColor,
-    overflow: "hidden"
+    overflow: 'hidden'
   },
   title: {
     ...title,
-    margin: "1.75rem 0 0.875rem !important",
-    minHeight: "unset"
+    margin: '1.75rem 0 0.875rem !important',
+    minHeight: 'unset'
   },
   description: {
     color: grayColor,
-    overflow: "hidden",
-    marginTop: "0px",
-    "& p": {
+    overflow: 'hidden',
+    marginTop: '0px',
+    '& p': {
       color: grayColor,
-      fontSize: "14px"
+      fontSize: '14px'
     }
   },
   iconWrapperVertical: {
-    float: "none"
+    float: 'none'
   },
   iconVertical: {
-    width: "61px",
-    height: "61px"
+    width: '61px',
+    height: '61px'
   }
 };
 
 export default infoStyle;
-
-
 
 // WEBPACK FOOTER //
 // ./src/assets/jss/material-kit-pro-react/components/infoStyle.jsx

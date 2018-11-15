@@ -1,23 +1,23 @@
-import React from "react";
-import PropTypes from "prop-types";
-import cx from "classnames";
+import React from 'react';
+import PropTypes from 'prop-types';
+import cx from 'classnames';
 
 // @material-ui/core components
-import withStyles from "@material-ui/core/styles/withStyles";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
-import Hidden from "@material-ui/core/Hidden";
+import withStyles from '@material-ui/core/styles/withStyles';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import Hidden from '@material-ui/core/Hidden';
 
 // material-ui icons
-import Menu from "@material-ui/icons/Menu";
-import MoreVert from "@material-ui/icons/MoreVert";
-import ViewList from "@material-ui/icons/ViewList";
+import Menu from '@material-ui/icons/Menu';
+import MoreVert from '@material-ui/icons/MoreVert';
+import ViewList from '@material-ui/icons/ViewList';
 
 // core components
-import HeaderLinks from "./HeaderLinks";
-import Button from "../../components/CustomButtons/Button.jsx";
+import HeaderLinks from './HeaderLinks';
+import Button from '../../components/CustomButtons/Button.jsx';
 
-import headerStyle from "../../common/jss/components/headerStyle.jsx";
+import headerStyle from '../../common/jss/components/headerStyle.jsx';
 
 function Header({ ...props }) {
   function makeBrand() {
@@ -40,11 +40,11 @@ function Header({ ...props }) {
   }
   const { classes, color, rtlActive } = props;
   const appBarClasses = cx({
-    [" " + classes[color]]: color
+    [' ' + classes[color]]: color
   });
   const sidebarMinimize =
     classes.sidebarMinimize +
-    " " +
+    ' ' +
     cx({
       [classes.sidebarMinimizeRTL]: rtlActive
     });
@@ -101,13 +101,11 @@ function Header({ ...props }) {
 
 Header.propTypes = {
   classes: PropTypes.object.isRequired,
-  color: PropTypes.oneOf(["primary", "info", "success", "warning", "danger"]),
+  color: PropTypes.oneOf(['primary', 'info', 'success', 'warning', 'danger']),
   rtlActive: PropTypes.bool
 };
 
 export default withStyles(headerStyle)(Header);
-
-
 
 // WEBPACK FOOTER //
 // ./src/components/Header/Header.jsx

@@ -1,14 +1,14 @@
-import React from "react";
+import React from 'react';
 // nodejs library that concatenates classes
-import classNames from "classnames";
+import classNames from 'classnames';
 // nodejs library to set properties for components
-import PropTypes from "prop-types";
+import PropTypes from 'prop-types';
 // @material-ui/core components
-import withStyles from "@material-ui/core/styles/withStyles";
+import withStyles from '@material-ui/core/styles/withStyles';
 // @material-ui/icons
 
 // core components
-import cardStyle from "../../common/jss/components/cardStyle.jsx";
+import cardStyle from '../../common/jss/components/cardStyle.jsx';
 
 function Card({ ...props }) {
   const {
@@ -36,7 +36,7 @@ function Card({ ...props }) {
     [classes.cardRaised]: raised,
     [classes.cardBackground]: background,
     [classes.cardPricingColor]:
-    (pricing && color !== undefined) || (pricing && background !== undefined),
+      (pricing && color !== undefined) || (pricing && background !== undefined),
     [classes[color]]: color,
     [classes.cardPricing]: pricing,
     [classes.cardProduct]: product,
@@ -62,13 +62,13 @@ Card.propTypes = {
   pricing: PropTypes.bool,
   testimonial: PropTypes.bool,
   color: PropTypes.oneOf([
-    "primary",
-    "info",
-    "success",
-    "warning",
-    "danger",
-    "rose",
-    "gray"
+    'primary',
+    'info',
+    'success',
+    'warning',
+    'danger',
+    'rose',
+    'gray'
   ]),
   product: PropTypes.bool,
   chart: PropTypes.bool,
@@ -76,8 +76,6 @@ Card.propTypes = {
 };
 
 export default withStyles(cardStyle)(Card);
-
-
 
 // WEBPACK FOOTER //
 // ./src/components/Card/Card.jsx

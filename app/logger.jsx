@@ -8,7 +8,10 @@ const os = require('os');
 const getAppDirectory = () => {
   switch (process.platform) {
     case 'darwin':
-      return process.execPath.substring(0, process.execPath.indexOf('.app') + 4);
+      return process.execPath.substring(
+        0,
+        process.execPath.indexOf('.app') + 4
+      );
     case 'linux':
     case 'win32':
       return path.join(os.homedir(), '.controlPanel_sa');
@@ -20,10 +23,9 @@ const homeDir = getAppDirectory();
 
 const dir = path.join(homeDir, 'logs');
 
-
 let gLogger = null;
 
-const cpFormate = (info)  => {
+const cpFormate = info => {
   return `${info.timestamp} ${info.level}: ${info.message}`;
 };
 
@@ -37,7 +39,7 @@ export function CreateDailyLogger() {
       level: 'info',
       transports: [
         new transports.File({
-          name: "info",
+          name: 'info',
           filename: path.join(homeDir, 'logs/event.log'),
           level: 'info',
           tailable: true,
@@ -45,7 +47,7 @@ export function CreateDailyLogger() {
           maxsize: 65535,
           zippedArchive: true,
           formatter: cpFormate
-        }),
+        })
         // new transports.File({
         //   name: "alarm-file",
         //   filename: './logs/alarm.log',
@@ -63,29 +65,22 @@ export function CreateDailyLogger() {
 }
 
 export function Info(msg) {
-  if (gLogger === null)
-    return;
-  gLogger.info(msg)
-
+  if (gLogger === null) return;
+  gLogger.info(msg);
 }
 
 export function Warn(msg) {
-  if (gLogger === null)
-    return;
-  gLogger.warn(msg)
-
+  if (gLogger === null) return;
+  gLogger.warn(msg);
 }
 
 export function Error(msg) {
-  if (gLogger === null)
-    return;
-  gLogger.error(msg)
-
+  if (gLogger === null) return;
+  gLogger.error(msg);
 }
 
-
 export function Query(options, f) {
-  if (gLogger === null){
+  if (gLogger === null) {
     return;
   }
   return gLogger.query(options, f);

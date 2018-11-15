@@ -1,6 +1,6 @@
 // @flow
 
-import { SCANNER } from "./actionTypes";
+import { SCANNER } from './actionTypes';
 
 let scanner = null;
 
@@ -9,59 +9,55 @@ const HID = require('node-hid');
 
 const lodash = require('lodash');
 
-
-
 function getBarcode(mode, chunk) {
   let buf;
   switch (mode) {
     case 'HID': {
-      const idx = lodash.findIndex(chunk, (o) => o === 0);
-      buf = Buffer.from(chunk.slice(5,idx), 'hex');
+      const idx = lodash.findIndex(chunk, o => o === 0);
+      buf = Buffer.from(chunk.slice(5, idx), 'hex');
       return buf.toString();
     }
 
     case 'BT_HID': {
-      const idx1 = lodash.indexOf(chunk,0,);
+      const idx1 = lodash.indexOf(chunk, 0);
       const idx2 = lodash.indexOf(chunk, 0, idx1 + 1);
       buf = Buffer.from(chunk.slice(idx1 + 1, idx2), 'hex');
       return buf.toString();
     }
     default:
-      console.log('error mode')
+      console.log('error mode');
   }
 }
-
 
 export function NewCar(aBarcode: string) {
   return {
-      type: SCANNER.READ_NEW_DATA,
-      data: aBarcode,
-  }
+    type: SCANNER.READ_NEW_DATA,
+    data: aBarcode
+  };
 }
 
 export const listenToNewCar = (dispatch, getState) => {
-    const config = getState().setting;
-    const { vendorId, mode } = config.system.device.scanner;
-  if (scanner == null){
-      try {
-        const devices = HID.devices();
-        const deviceInfo = devices.find(d => d.vendorId === vendorId
-        );
-        if (deviceInfo) {
-          scanner = new HID.HID(deviceInfo.path);
-          ScannerProcess(scanner, dispatch, mode);
-        }
-      }catch (error) {
-        scanner = null;
-        dispatch({
-          type: SCANNER.READ_ERROR,
-          data: '请插拔扫码枪'.concat(error.toString()),
-        });
+  const config = getState().setting;
+  const { vendorId, mode } = config.system.device.scanner;
+  if (scanner == null) {
+    try {
+      const devices = HID.devices();
+      const deviceInfo = devices.find(d => d.vendorId === vendorId);
+      if (deviceInfo) {
+        scanner = new HID.HID(deviceInfo.path);
+        ScannerProcess(scanner, dispatch, mode);
       }
+    } catch (error) {
+      scanner = null;
+      dispatch({
+        type: SCANNER.READ_ERROR,
+        data: '请插拔扫码枪'.concat(error.toString())
+      });
+    }
   }
   usbDetect.startMonitoring();
 
-  usbDetect.on('add:'.concat(vendorId) , (device) => {
+  usbDetect.on('add:'.concat(vendorId), device => {
     try {
       scanner = new HID.HID(device.vendorId, device.productId);
       ScannerProcess(scanner, dispatch, mode);
@@ -72,14 +68,13 @@ export const listenToNewCar = (dispatch, getState) => {
       }
     }
   });
-  usbDetect.on('remove:'.concat(vendorId) ,() => {
+  usbDetect.on('remove:'.concat(vendorId), () => {
     if (scanner != null) {
       scanner.close();
       scanner = null;
     }
   });
 };
-
 
 const ScannerProcess = (s, dispatch, mode) => {
   s.on('data', chunk => {
@@ -91,16 +86,15 @@ const ScannerProcess = (s, dispatch, mode) => {
     scanner = null;
     dispatch({
       type: SCANNER.READ_ERROR,
-      data: '请插拔扫码枪'.concat(error.toString()),
+      data: '请插拔扫码枪'.concat(error.toString())
     });
   });
 };
 
-export const  stopListernScanner = () => {
+export const stopListernScanner = () => {
   usbDetect.stopMonitoring();
   if (scanner != null) {
     scanner.close();
     scanner = null;
   }
 };
-

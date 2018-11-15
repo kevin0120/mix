@@ -1,6 +1,6 @@
-import React from "react";
+import React from 'react';
 
-import defaultImage from "../../../resources/imgs/default-avatar.png";
+import defaultImage from '../../../resources/imgs/default-avatar.png';
 
 class PictureUpload extends React.Component {
   constructor(props) {
@@ -48,8 +48,6 @@ class PictureUpload extends React.Component {
 }
 
 export default PictureUpload;
-
-
 
 // WEBPACK FOOTER //
 // ./src/components/CustomUpload/PictureUpload.jsx

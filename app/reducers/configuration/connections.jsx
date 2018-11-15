@@ -8,19 +8,21 @@
 
 // flow
 
-
 const defaultConnInfo = {
-    masterpc: '',
-    rfid: '',
-    controllers: [],
-    io: '',
-  };
+  masterpc: '',
+  rfid: '',
+  controllers: [],
+  io: ''
+};
 
 type actionType = {
   +type: string
 };
 
-export default function connections(state: object = defaultConnInfo, action: actionType) {
+export default function connections(
+  state: object = defaultConnInfo,
+  action: actionType
+) {
   switch (action.type) {
     default:
       return state;
