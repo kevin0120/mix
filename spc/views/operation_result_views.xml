@@ -208,7 +208,11 @@
                     <filter string="Data Lacking" context="{'group_by': 'lacking'}"/>
                     <filter string="Screw Gun" context="{'group_by': 'gun_id'}"/>
                     <separator/>
-                        <filter string="Tightening Date" context="{'group_by': 'control_date:month'}"/>
+                    <filter string="Tightening Date Day" context="{'group_by': 'control_date:day'}"/>
+                    <filter string="Tightening Date Week" context="{'group_by': 'control_date:week'}"/>
+                    <filter string="Tightening Date Month" context="{'group_by': 'control_date:month'}"/>
+                    <filter string="Tightening Date Quarter" context="{'group_by': 'control_date:quarter'}"/>
+                    <filter string="Tightening Date Year" context="{'group_by': 'control_date:year'}"/>
                 </group>
             </search>
         </field>
