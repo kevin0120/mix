@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from __future__ import division
 from odoo import fields,models,api,_
 from odoo.exceptions import ValidationError
 import odoo.addons.decimal_precision as dp
@@ -8,6 +8,7 @@ from dateutil.relativedelta import relativedelta
 from odoo.addons.spc.controllers.result import _post_aiis_result_package
 import json
 import logging
+from odoo.tools import float_round
 
 from collections import defaultdict, MutableMapping, OrderedDict
 from odoo.tools import frozendict
@@ -427,3 +428,28 @@ class OperationResult(models.HyperModel):
         else:
             return self.do_pass()
 
+    @api.model
+    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=False):
+
+        if 'measure_result' in fields and 'measure_result' not in groupby:
+            groupby.append('measure_result')
+        res = super(OperationResult, self).read_group(domain, fields, groupby, offset=offset, limit=limit,
+                                                      orderby=orderby, lazy=lazy)
+        if 'measure_result' in fields:
+            for line in res:
+                _domain = []
+                last_domain = None
+                if '__domain' in line:
+                    for d in line['__domain']:
+                        if d[0] == 'measure_result':
+                            if last_domain == '|':
+                                _domain.pop()
+                            else:
+                                _domain.pop(0)
+                        else:
+                            _domain.append(d)
+                        last_domain = d
+                    count = self.search_count(_domain)
+                    inv_value = float_round(line['__count'] / count, precision_digits=3)
+                    line['__count'] = inv_value
+        return res

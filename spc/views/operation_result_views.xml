@@ -148,7 +148,7 @@
         <field name="model">operation.result</field>
         <field name="arch" type="xml">
             <graph string="Quality Check Analysis">
-                <field name="control_date" type="col" interval="day"/>
+                <field name="control_date" type="col" interval="week"/>
                 <field name="measure_result" type="row"/>
             </graph>
         </field>
