@@ -44,8 +44,9 @@
                         <notebook>
                             <page string="General Information">
                                 <group>
-                                    <group string="Work Segment" name="segment">
-                                        <field name="worksegment_id" required="1"/>
+                                    <group string="Work Area" name="segment">
+                                        <field name="worksegment_id" />
+                                        <field name="qc_workcenter_id"/>
                                     </group>
                                     <group string="Equipments" name="equipment">
                                         <field name="controller_ids_domain" invisible="1" />

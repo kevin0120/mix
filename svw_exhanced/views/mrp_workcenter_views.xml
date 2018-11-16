@@ -1,6 +1,5 @@
 <odoo>
     <data>
-
         <record model="ir.ui.view" id="sa_svw_mrp_workcenter_form_view_inherit">
             <field name="name">sa_svw_mrp_workcenter_form_view_inherit</field>
             <field name="model">mrp.workcenter</field>
@@ -15,6 +14,10 @@
                 <xpath expr="//notebook/page/group/group[@name='equipment']/field[@name='rfid_id']" position="attributes">
                     <attribute name="required">1</attribute>
                 </xpath>
+                <field name="qc_workcenter_id" position="attributes">
+                    <attribute name="string">QRK</attribute>
+                    <attribute name="options">{'no_create_edit': True , 'no_open': True}</attribute>
+                </field>
             </field>
         </record>
     </data>

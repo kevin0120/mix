@@ -82,6 +82,8 @@ class MrpWorkCenter(models.Model):
 
     external_url = fields.Text('External URL', compute='_compute_external_url')
 
+    qc_workcenter_id = fields.Many2one('mrp.workcenter', string='Quality Check Work Center')
+
     worksegment_id = fields.Many2one('mrp.worksegament', copy=False)
     hmi_id = fields.Many2one('maintenance.equipment',  string='HMI', copy=False)
     masterpc_id = fields.Many2one('maintenance.equipment',  string='MasterPC', copy=False)

@@ -53,7 +53,8 @@ class HMIConnections(http.Controller):
         val = {
             'info': {
                 'workcenter': workercenter_id.name,
-                'worksegment': workercenter_id.worksegment_id.name
+                'worksegment': workercenter_id.worksegment_id.name if workercenter_id.worksegment_id else None,
+                'qc_workcenter': workercenter_id.qc_workcenter_id.name if workercenter_id.qc_workcenter_id else None
             },
             'masterpc': {'serial_no': workercenter_id.masterpc_id.serial_no, 'connection':masterpc_connection.name_get()[0][1] if masterpc_connection else False},
             # 'controller': {'serial_no': workercenter_id.controller_id.serial_no, 'connection': False},
