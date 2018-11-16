@@ -16,7 +16,6 @@
                 </xpath>
                 <field name="qc_workcenter_id" position="attributes">
                     <attribute name="string">QRK</attribute>
-                    <attribute name="options">{'no_create_edit': True , 'no_open': True}</attribute>
                 </field>
                 <field name="code" position="attributes">
                     <attribute name="required">1</attribute>

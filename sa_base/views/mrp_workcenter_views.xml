@@ -45,8 +45,8 @@
                             <page string="General Information">
                                 <group>
                                     <group string="Work Area" name="segment">
-                                        <field name="worksegment_id" />
-                                        <field name="qc_workcenter_id"/>
+                                        <field name="worksegment_id" options="{'no_create_edit': True , 'no_open': True}"/>
+                                        <field name="qc_workcenter_id" options="{'no_create_edit': True , 'no_open': True}"/>
                                     </group>
                                     <group string="Equipments" name="equipment">
                                         <field name="controller_ids_domain" invisible="1" />
