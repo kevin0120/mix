@@ -52,6 +52,7 @@ class HMIConnections(http.Controller):
 
         val = {
             'info': {
+                'workcenter_code': workercenter_id.code,
                 'workcenter': workercenter_id.name,
                 'worksegment': workercenter_id.worksegment_id.name if workercenter_id.worksegment_id else None,
                 'qc_workcenter': workercenter_id.qc_workcenter_id.name if workercenter_id.qc_workcenter_id else None
