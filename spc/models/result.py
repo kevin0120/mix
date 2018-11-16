@@ -79,11 +79,11 @@ class OperationResult(models.HyperModel):
 
     control_date = fields.Datetime('Control Date')
 
-    measure_torque = fields.Float('Measure Torque(NM)', default=0.0, digits=dp.get_precision('Operation Result'))
+    measure_torque = fields.Float('Measure Torque(NM)', default=0.0, digits=dp.get_precision('Operation Result'), group_operator="avg")
 
-    measure_degree = fields.Float('Measure Degree(grad)', default=0.0, digits=dp.get_precision('Operation Result'))
+    measure_degree = fields.Float('Measure Degree(grad)', default=0.0, digits=dp.get_precision('Operation Result'), group_operator="avg")
 
-    measure_t_don = fields.Float('Measure Time Done(ms)', default=0.0, digits=dp.get_precision('Operation Result'))
+    measure_t_don = fields.Float('Measure Time Done(ms)', default=0.0, digits=dp.get_precision('Operation Result'), group_operator="avg")
 
     measure_result = fields.Selection([
         (_('none'), 'No measure'),
@@ -356,16 +356,14 @@ class OperationResult(models.HyperModel):
     def do_fail(self):
         self.write({
             'quality_state': 'fail',
-            'user_id': self.env.user.id,
-            'time': datetime.now()})
+            'user_id': self.env.user.id})
         return True
 
     @api.multi
     def do_exception(self):
         self.write({
             'quality_state': 'exception',
-            'user_id': self.env.user.id,
-            'time': datetime.now()})
+            'user_id': self.env.user.id})
         return True
 
     @api.multi
@@ -415,8 +413,7 @@ class OperationResult(models.HyperModel):
     @api.multi
     def do_pass(self):
         self.write({'quality_state': 'pass',
-                    'user_id': self.env.user.id,
-                    'time': datetime.now()})
+                    'user_id': self.env.user.id})
         return True
 
     @api.multi
@@ -431,25 +428,32 @@ class OperationResult(models.HyperModel):
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=False):
 
+        _cache = {}
+
         if 'measure_result' in fields and 'measure_result' not in groupby:
             groupby.append('measure_result')
         res = super(OperationResult, self).read_group(domain, fields, groupby, offset=offset, limit=limit,
                                                       orderby=orderby, lazy=lazy)
         if 'measure_result' in fields:
             for line in res:
+                if '__count' not in line.keys():
+                    continue
                 _domain = []
                 last_domain = None
                 if '__domain' in line:
                     for d in line['__domain']:
                         if d[0] == 'measure_result':
                             if last_domain == '|':
-                                _domain.pop()
+                                _domain.pop() if len(_domain) else None
                             else:
-                                _domain.pop(0)
+                                _domain.pop(0) if len(_domain) else None
                         else:
                             _domain.append(d)
                         last_domain = d
-                    count = self.search_count(_domain)
-                    inv_value = float_round(line['__count'] / count, precision_digits=3)
-                    line['__count'] = inv_value
+                k = repr(_domain)
+                if k not in _cache.keys():
+                    _cache[k] = self.search_count(_domain)
+                count = _cache[k]
+                inv_value = float_round(line['__count'] / count, precision_digits=3)
+                line['__count'] = inv_value
         return res
