@@ -9,20 +9,36 @@
 // flow
 
 
+import { CONNECTION } from '../../actions/actionTypes';
+
 const defaultConnInfo = {
     masterpc: '',
     rfid: '',
     controllers: [],
     io: '',
+    workcenterCode: ''
   };
 
 type actionType = {
-  +type: string
+  +type: string,
+  +data: object
 };
 
 export default function connections(state: object = defaultConnInfo, action: actionType) {
   switch (action.type) {
+    case CONNECTION.FETCH_OK:{
+      const { masterpc, rfid, io, controllers, info } = action.data;
+      return {
+        ...state,
+        masterpc: masterpc.connection,
+        rfid: rfid.connection,
+        io: io.connection,
+        workcenterCode: info.workcenter_code,
+        controllers
+      };
+    }
     default:
       return state;
   }
 }
+

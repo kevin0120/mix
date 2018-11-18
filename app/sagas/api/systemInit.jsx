@@ -11,7 +11,7 @@
 import { defaultClient } from '../../common/utils'
 
 export const fetchConnectionInfo = (fullUrl) => defaultClient.get(fullUrl).then( resp => (
-    resp.data
+    resp
   ))
     .catch(e => {
         throw e.toString();
