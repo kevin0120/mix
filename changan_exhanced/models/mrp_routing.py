@@ -31,6 +31,7 @@ class MrpRoutingWorkcenter(models.Model):
 
             val = {
                 "id": operation_id.id,
+                "workcenter_id": operation_id.operation_id.id,
                 "job": int(operation_id.op_job_id.code) if operation_id.op_job_id else 0,
                 "max_op_time": operation_id.max_op_time,
                 "name": u"[{0}]{1}@{2}/{3}".format(operation_id.name, operation_id.group_id.code,
