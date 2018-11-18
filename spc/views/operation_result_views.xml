@@ -132,9 +132,9 @@
                 <field name="workcenter_id" />
                 <field name="gun_id" />
                 <field name="control_date" string="Checked Time"/>
-                <field name="measure_torque"/>
-                <field name="measure_degree"/>
-                <field name="measure_t_don" />
+                <field name="measure_torque" avg="Avg. Torque" />
+                <field name="measure_degree" avg="Avg. Degree" />
+                <field name="measure_t_don" avg="Avg. Operation Duration" />
                 <field name="measure_result" />
                 <field name="quality_state" groups="base.group_no_one"/>
                 <field name="batch"/>
@@ -148,7 +148,7 @@
         <field name="model">operation.result</field>
         <field name="arch" type="xml">
             <graph string="Quality Check Analysis">
-                <field name="control_date" type="col" interval="day"/>
+                <field name="control_date" type="col" interval="week"/>
                 <field name="measure_result" type="row"/>
             </graph>
         </field>
@@ -208,7 +208,11 @@
                     <filter string="Data Lacking" context="{'group_by': 'lacking'}"/>
                     <filter string="Screw Gun" context="{'group_by': 'gun_id'}"/>
                     <separator/>
-                        <filter string="Tightening Date" context="{'group_by': 'control_date:month'}"/>
+                    <filter string="Tightening Date Day" context="{'group_by': 'control_date:day'}"/>
+                    <filter string="Tightening Date Week" context="{'group_by': 'control_date:week'}"/>
+                    <filter string="Tightening Date Month" context="{'group_by': 'control_date:month'}"/>
+                    <filter string="Tightening Date Quarter" context="{'group_by': 'control_date:quarter'}"/>
+                    <filter string="Tightening Date Year" context="{'group_by': 'control_date:year'}"/>
                 </group>
             </search>
         </field>

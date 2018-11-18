@@ -55,6 +55,7 @@ def _get_operation_by_center_code(self, center_code=None, **kw):
 
     val = {
         "id": operation_id.id,
+        "workcenter_id": operation_id.operation_id.id,
         "job": int(operation_id.op_job_id.code) if operation_id.op_job_id else None,
         "max_op_time": operation_id.max_op_time,
         "name": u"[{0}]{1}@{2}/{3}".format(operation_id.name, operation_id.group_id.code,
@@ -62,7 +63,7 @@ def _get_operation_by_center_code(self, center_code=None, **kw):
                                            operation_id.routing_id.name),
         "img": u'data:{0};base64,{1}'.format('image/png',
                                              operation_id.worksheet_img) if operation_id.worksheet_img else "",
-        "product_id": bom_id.product_id.id if bom_id else None,
+        "product_id": bom_id.product_id.id if bom_id.product_id else None,
         'vehicleTypeImg': u'data:{0};base64,{1}'.format('image/png', bom_id.product_id.image_small) if bom_id and bom_id.product_id.image_small else None,
         "points": _points
     }

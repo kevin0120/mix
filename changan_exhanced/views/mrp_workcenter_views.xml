@@ -18,6 +18,9 @@
                 </xpath>
                 <xpath expr="//notebook/page/group/group[@name='equipment']/field[@name='rfid_id']" position="replace">
                 </xpath>
+                <field name="code" position="attributes">
+                    <attribute name="required">1</attribute>
+                </field>
             </field>
         </record>
     </data>
