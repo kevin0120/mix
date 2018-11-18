@@ -1,7 +1,7 @@
 // @flow
 import { createStore, applyMiddleware } from 'redux';
 // import thunk from 'redux-thunk';
-import createSagaMiddleware from 'redux-saga'
+import createSagaMiddleware from 'redux-saga';
 import { createHashHistory } from 'history';
 import { routerMiddleware } from 'connected-react-router';
 import createRootReducer from '../reducers';
@@ -18,7 +18,7 @@ function configureStore(initialState?: StateType) {
   return {
     ...createStore(rootReducer, initialState, enhancer),
     runSaga: sagaMiddleware.run
-  }
+  };
 }
 
 export default { configureStore, history };

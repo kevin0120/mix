@@ -1,10 +1,8 @@
 // @flow
 
-import { take, put, call } from 'redux-saga/effects'
+import { take, put, call } from 'redux-saga/effects';
 
-import {
-  CARD_AUTH,
-} from '../actions/actionTypes';
+import { CARD_AUTH } from '../actions/actionTypes';
 
 export function* getCardReaderInsert(action) {
   console.log(action);
@@ -12,8 +10,8 @@ export function* getCardReaderInsert(action) {
 }
 
 export function* authFlow() {
-  while (true){
-    const {t } = yield take(CARD_AUTH.READER.INSERTED);
+  while (true) {
+    const { t } = yield take(CARD_AUTH.READER.INSERTED);
     yield call(getCardReaderInsert, t);
   }
 }

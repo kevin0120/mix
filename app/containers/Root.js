@@ -8,7 +8,6 @@ import { listenToNewCar } from '../actions/scannerDevice';
 import { setCardAuthListener } from '../actions/cardAuth';
 import { systemInit } from '../actions/sysInit';
 
-
 type Props = {
   store: Store,
   history: {}

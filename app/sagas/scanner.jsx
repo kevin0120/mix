@@ -21,10 +21,8 @@ export function* watchScanner() {
       }
     }
 
-    console.log('triggerFlagNum:',triggerFlagNum);
     if (triggerFlagNum === triggers.length) {
       yield call(getOperation);
     }
-
   }
 }

@@ -1,13 +1,12 @@
-
 export const defaultConfigs = {
   version: 'v0.1',
-  base:{
+  base: {
     userInfo: {
       uuid: '1234'
     },
     psetPointDiameter: 30 // 编辑页面点位大小,未来不使用
   },
-  page:{
+  page: {
     // 配置页面不同的导航页
     network: {
       ssid: {
@@ -154,20 +153,20 @@ export const defaultConfigs = {
           label: ''
         }
       ]
-    },
+    }
   },
-  system:{
+  system: {
     device: {
       scanner: {
         vendorId: 3118,
-        mode: 'HID', // HID or BT_HID
+        mode: 'HID' // HID or BT_HID
         // vendorId: 1504
       },
       rfid: {
         host: '192.168.1.120',
         port: 2112
-      },
-    },
+      }
+    }
   },
   // workflow:{
   //   name: "VW", // 工作流有: General or VW,
@@ -213,12 +212,12 @@ export const defaultConfigs = {
   systemSettings: {
     enableDebugInfo: false,
     showSwitchMode: false, // 切换pset or job 模式
-    defaultControllerSN: "0001",
+    defaultControllerSN: '0001',
     authEnable: true,
     switchAutoManual: false,
     oeeFuncEnable: false,
     modbusEnable: true,
     rfidEnabled: false,
-    psetContinueMode: false,
-  },
+    psetContinueMode: false
+  }
 };

@@ -5,9 +5,9 @@ import { AppContainer } from 'react-hot-loader';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import blue from '@material-ui/core/colors/blue';
 
-import { CreateDailyLogger, Info } from "./logger";
+import { CreateDailyLogger, Info } from './logger';
 
-import {i18n} from "./i18n"; // 初始化i18n配置
+import { i18n } from './i18n'; // 初始化i18n配置
 
 import Root from './containers/Root';
 import { configureStore, history } from './store/configureStore';
@@ -21,11 +21,11 @@ const theme = createMuiTheme({
   palette: {
     primary: blue,
     secondary: {
-      main: '#126292',
+      main: '#126292'
     },
     status: {
-      danger: 'orange',
-    },
+      danger: 'orange'
+    }
   },
   typography: {
     // Use the system font instead of the default Roboto font.
@@ -39,14 +39,14 @@ const theme = createMuiTheme({
       'sans-serif',
       '"Apple Color Emoji"',
       '"Segoe UI Emoji"',
-      '"Segoe UI Symbol"',
-    ].join(','),
-  },
+      '"Segoe UI Symbol"'
+    ].join(',')
+  }
 });
 
-CreateDailyLogger();  // 创建日志对象,永远成功
+CreateDailyLogger(); // 创建日志对象,永远成功
 
-Info("程序已启动...");
+Info('程序已启动...');
 
 render(
   <AppContainer>

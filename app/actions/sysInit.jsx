@@ -2,11 +2,9 @@
 
 import { SYSTEM_INIT } from './actionTypes';
 
-export const systemInit = (baseUrl: string, hmiSN: string, dispatch) => (
-  {
-    type: SYSTEM_INIT,
-    baseUrl,
-    hmiSN,
-    dispatch
-  }
-);
+export const systemInit = (baseUrl: string, hmiSN: string, dispatch) => ({
+  type: SYSTEM_INIT,
+  baseUrl,
+  hmiSN,
+  dispatch,
+});

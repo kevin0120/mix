@@ -1,17 +1,17 @@
-import React from "react";
-import PropTypes from "prop-types";
-import classNames from "classnames";
+import React from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
 // @material-ui/core components
-import withStyles from "@material-ui/core/styles/withStyles";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
+import withStyles from '@material-ui/core/styles/withStyles';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
 
-import footerStyle from "../../common/jss/components/footerStyle";
+import footerStyle from '../../common/jss/components/footerStyle';
 
 function Footer(props) {
   const { children, content, classes, theme, big, className } = props;
-  const themeType = theme === "transparent" || theme === undefined;
+  const themeType = theme === 'transparent' || theme === undefined;
   const footerClasses = classNames({
     [classes.footer]: true,
     [classes[theme]]: themeType,
@@ -31,7 +31,7 @@ function Footer(props) {
             <hr />
           </div>
         ) : (
-          " "
+          ' '
         )}
         {content}
         <div className={classes.clearFix} />
@@ -42,14 +42,12 @@ function Footer(props) {
 
 Footer.propTypes = {
   classes: PropTypes.object.isRequired,
-  theme: PropTypes.oneOf(["dark", "white", "transparent"]),
+  theme: PropTypes.oneOf(['dark', 'white', 'transparent']),
   big: PropTypes.bool,
   content: PropTypes.node.isRequired
 };
 
 export default withStyles(footerStyle)(Footer);
-
-
 
 // WEBPACK FOOTER //
 // ./src/components/Footer/Footer.jsx

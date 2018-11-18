@@ -1,27 +1,27 @@
-import React from "react";
-import cx from "classnames";
-import PropTypes from "prop-types";
-import { NavLink } from "react-router-dom";
+import React from 'react';
+import cx from 'classnames';
+import PropTypes from 'prop-types';
+import { NavLink } from 'react-router-dom';
 
 // @material-ui/core components
-import withStyles from "@material-ui/core/styles/withStyles";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
-import Hidden from "@material-ui/core/Hidden";
-import Drawer from "@material-ui/core/Drawer";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
+import withStyles from '@material-ui/core/styles/withStyles';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import Hidden from '@material-ui/core/Hidden';
+import Drawer from '@material-ui/core/Drawer';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
 
 // @material-ui/icons
-import Dashboard from "@material-ui/icons/Dashboard";
-import Menu from "@material-ui/icons/Menu";
+import Dashboard from '@material-ui/icons/Dashboard';
+import Menu from '@material-ui/icons/Menu';
 
 // core components
-import Button from "../CustomButtons/Button";
+import Button from '../CustomButtons/Button';
 
-import pagesHeaderStyle from "../../common/jss/components/pagesHeaderStyle.jsx";
+import pagesHeaderStyle from '../../common/jss/components/pagesHeaderStyle.jsx';
 
 class PagesHeader extends React.Component {
   constructor(props) {
@@ -46,17 +46,17 @@ class PagesHeader extends React.Component {
   render() {
     const { classes, color } = this.props;
     const appBarClasses = cx({
-      [" " + classes[color]]: color
+      [' ' + classes[color]]: color
     });
     var list = (
       <List className={classes.list}>
         <ListItem className={classes.listItem}>
-          <NavLink to={"/welcome"} className={classes.navLink}>
+          <NavLink to={'/welcome'} className={classes.navLink}>
             <ListItemIcon className={classes.listItemIcon}>
               <Dashboard />
             </ListItemIcon>
             <ListItemText
-              primary={"Welcome"}
+              primary={'Welcome'}
               disableTypography={true}
               className={classes.listItemText}
             />
@@ -99,7 +99,7 @@ class PagesHeader extends React.Component {
             <Hidden mdUp>
               <Drawer
                 variant="temporary"
-                anchor={"right"}
+                anchor={'right'}
                 open={this.state.open}
                 classes={{
                   paper: classes.drawerPaper
@@ -121,12 +121,10 @@ class PagesHeader extends React.Component {
 
 PagesHeader.propTypes = {
   classes: PropTypes.object.isRequired,
-  color: PropTypes.oneOf(["primary", "info", "success", "warning", "danger"])
+  color: PropTypes.oneOf(['primary', 'info', 'success', 'warning', 'danger'])
 };
 
 export default withStyles(pagesHeaderStyle)(PagesHeader);
-
-
 
 // WEBPACK FOOTER //
 // ./src/components/Header/PagesHeader.jsx

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { bindActionCreators } from "redux";
+import { bindActionCreators } from 'redux';
 
 import CheckCircleIcon from '@material-ui/icons/CheckCircleOutlineOutlined';
 import ErrorIcon from '@material-ui/icons/ErrorOutlineOutlined';
@@ -11,14 +11,13 @@ import { withStyles } from '@material-ui/core/styles';
 import Snackbar from '../Snackbar/Snackbar';
 import * as NotificationActions from '../../actions/notification';
 
-import notificationsStyle from "../../common/jss/views/notificationsStyle";
-
+import notificationsStyle from '../../common/jss/views/notificationsStyle';
 
 const mapStateToProps = (state, ownProps) => ({
   message: state.notify.message,
   variant: state.notify.variant,
   isShow: state.notify.isShow,
-  ...ownProps,
+  ...ownProps
 });
 
 function mapDispatchToProps(dispatch) {
@@ -29,7 +28,7 @@ const variantIcon = {
   success: CheckCircleIcon,
   warning: WarningIcon,
   error: ErrorIcon,
-  info: InfoIcon,
+  info: InfoIcon
 };
 
 /* eslint-disable react/prefer-stateless-function */
@@ -45,18 +44,17 @@ class ConnectedNoty extends React.PureComponent {
   }
 
   render() {
-    const { message, variant, isShow,
-    } = this.props;
+    const { message, variant, isShow } = this.props;
 
     const Icon = variantIcon[variant];
 
     return (
       <Snackbar
         place="tl"
-        color={ variant }
-        icon= { Icon }
-        message={ message }
-        open={ isShow }
+        color={variant}
+        icon={Icon}
+        message={message}
+        open={isShow}
         closeNotification={this.handleClose}
         close
       />
@@ -65,15 +63,17 @@ class ConnectedNoty extends React.PureComponent {
 }
 
 ConnectedNoty.propTypes = {
-  classes: PropTypes.shape({
-  }).isRequired,
+  classes: PropTypes.shape({}).isRequired,
   message: PropTypes.string.isRequired,
   isShow: PropTypes.bool.isRequired,
-  variant: PropTypes.oneOf(['success', 'warning', 'error', 'info','danger']).isRequired,
-  closeNotification: PropTypes.func.isRequired,
+  variant: PropTypes.oneOf(['success', 'warning', 'error', 'info', 'danger'])
+    .isRequired,
+  closeNotification: PropTypes.func.isRequired
 };
 
-
-const Notify = connect(mapStateToProps, mapDispatchToProps)(ConnectedNoty);
+const Notify = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ConnectedNoty);
 
 export default withStyles(notificationsStyle)(Notify);

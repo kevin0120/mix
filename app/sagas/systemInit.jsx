@@ -12,9 +12,8 @@ import { call, take, put } from 'redux-saga/effects'
 
 import { CONNECTION, SYSTEM_INIT } from '../actions/actionTypes';
 
-import { fetchConnectionInfo } from "./api/systemInit";
+import { fetchConnectionInfo } from './api/systemInit';
 import { initRush } from '../actions/rush';
-
 
 export function* fetchConnectionFlow(baseUrl, hmiSN, dispatch) {
   const fullUrl = `${baseUrl}/hmi.connections/${hmiSN}`;
@@ -32,7 +31,7 @@ export function* sysInitFlow() {
     const{ baseUrl, hmiSN, dispatch } = yield take(SYSTEM_INIT); // 只获取一次
   try {
     yield call(fetchConnectionFlow, baseUrl, hmiSN, dispatch);
-  }catch (e) {
+  } catch (e) {
     console.log(e);
   }
 }

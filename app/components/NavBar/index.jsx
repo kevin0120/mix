@@ -14,51 +14,52 @@ import styles from './styles';
 
 /* eslint-disable react/prefer-stateless-function */
 class ConnectedNavBar extends React.Component {
-
   render() {
     const { classes, styleOptions } = this.props;
 
     return (
       <I18n ns="translations">
-        {
-          t => (
-            <div>
-              <List className={classes.sideNav}>
-                {routeConfigs.slice(0,-1).map(route => (
-                  <li className={classes.itemWrap} key={route.name}>
-                    <ListItem button component="a" href={`#${route.url}`} className={classes.menuItem}>
-                      <ListItemIcon>
-                        <route.icon style={{ color: route.color }} />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={t(route.title)}
-                        disableTypography={styleOptions.disableTypography}
-                      />
-                    </ListItem>
-                    <Divider />
-                  </li>
-                ))}
-                </List>
-              </div>
-            )
-          }
+        {t => (
+          <div>
+            <List className={classes.sideNav}>
+              {routeConfigs.slice(0, -1).map(route => (
+                <li className={classes.itemWrap} key={route.name}>
+                  <ListItem
+                    button
+                    component="a"
+                    href={`#${route.url}`}
+                    className={classes.menuItem}
+                  >
+                    <ListItemIcon>
+                      <route.icon style={{ color: route.color }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={t(route.title)}
+                      disableTypography={styleOptions.disableTypography}
+                    />
+                  </ListItem>
+                  <Divider />
+                </li>
+              ))}
+            </List>
+          </div>
+        )}
       </I18n>
     );
   }
 }
 
 ConnectedNavBar.propTypes = {
-  classes: PropTypes.shape({
-  }).isRequired,
+  classes: PropTypes.shape({}).isRequired,
   styleOptions: PropTypes.shape({
-    disableTypography: PropTypes.bool,
-  }),
+    disableTypography: PropTypes.bool
+  })
 };
 
 ConnectedNavBar.defaultProps = {
   styleOptions: {
-    disableTypography: true,
-  },
+    disableTypography: true
+  }
 };
 
 const NavBar = withStyles(styles)(ConnectedNavBar);

@@ -1,22 +1,22 @@
-import React from "react";
+import React from 'react';
 // nodejs library that concatenates classes
-import classNames from "classnames";
+import classNames from 'classnames';
 // nodejs library to set properties for components
-import PropTypes from "prop-types";
+import PropTypes from 'prop-types';
 
 // @material-ui/core components
-import withStyles from "@material-ui/core/styles/withStyles";
-import MenuItem from "@material-ui/core/MenuItem";
-import MenuList from "@material-ui/core/MenuList";
-import ClickAwayListener from "@material-ui/core/ClickAwayListener";
-import Paper from "@material-ui/core/Paper";
-import Grow from "@material-ui/core/Grow";
-import Divider from "@material-ui/core/Divider";
-import Popper from "@material-ui/core/Popper";
+import withStyles from '@material-ui/core/styles/withStyles';
+import MenuItem from '@material-ui/core/MenuItem';
+import MenuList from '@material-ui/core/MenuList';
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+import Paper from '@material-ui/core/Paper';
+import Grow from '@material-ui/core/Grow';
+import Divider from '@material-ui/core/Divider';
+import Popper from '@material-ui/core/Popper';
 // core components
-import Button from "../../components/CustomButtons/Button.jsx";
+import Button from '../../components/CustomButtons/Button.jsx';
 
-import customDropdownStyle from "../../common/jss/components/customDropdownStyle.jsx";
+import customDropdownStyle from '../../common/jss/components/customDropdownStyle.jsx';
 
 class CustomDropdown extends React.Component {
   constructor(props) {
@@ -62,7 +62,7 @@ class CustomDropdown extends React.Component {
     });
     const dropdownItem = classNames({
       [classes.dropdownItem]: true,
-      [classes[hoverColor + "Hover"]]: true,
+      [classes[hoverColor + 'Hover']]: true,
       [classes.noLiPadding]: noLiPadding,
       [classes.dropdownItemRTL]: rtlActive
     });
@@ -85,12 +85,12 @@ class CustomDropdown extends React.Component {
                 className={classes.dropdownDividerItem}
               />
             );
-          } else if (prop.ref === "multi") {
+          } else if (prop.ref === 'multi') {
             return (
               <MenuItem
                 key={key}
                 className={dropdownItem}
-                style={{ overflow: "visible", padding: 0 }}
+                style={{ overflow: 'visible', padding: 0 }}
               >
                 {prop}
               </MenuItem>
@@ -110,10 +110,10 @@ class CustomDropdown extends React.Component {
     );
     return (
       <div className={innerDropDown ? classes.innerManager : classes.manager}>
-        <div className={buttonText !== undefined ? "" : classes.target}>
+        <div className={buttonText !== undefined ? '' : classes.target}>
           <Button
             aria-label="Notifications"
-            aria-owns={open ? "menu-list" : null}
+            aria-owns={open ? 'menu-list' : null}
             aria-haspopup="true"
             buttonRef={node => {
               this.anchorEl = node;
@@ -146,8 +146,8 @@ class CustomDropdown extends React.Component {
               id="menu-list"
               style={
                 dropup
-                  ? { transformOrigin: "0 100% 0" }
-                  : { transformOrigin: "0 0 0" }
+                  ? { transformOrigin: '0 100% 0' }
+                  : { transformOrigin: '0 0 0' }
               }
             >
               <Paper className={classes.dropdown}>
@@ -170,19 +170,19 @@ class CustomDropdown extends React.Component {
 CustomDropdown.defaultProps = {
   caret: true,
   dropup: false,
-  hoverColor: "primary"
+  hoverColor: 'primary'
 };
 
 CustomDropdown.propTypes = {
   classes: PropTypes.object.isRequired,
   hoverColor: PropTypes.oneOf([
-    "dark",
-    "primary",
-    "info",
-    "success",
-    "warning",
-    "danger",
-    "rose"
+    'dark',
+    'primary',
+    'info',
+    'success',
+    'warning',
+    'danger',
+    'rose'
   ]),
   buttonText: PropTypes.node,
   buttonIcon: PropTypes.func,
@@ -193,18 +193,18 @@ CustomDropdown.propTypes = {
   rtlActive: PropTypes.bool,
   caret: PropTypes.bool,
   dropPlacement: PropTypes.oneOf([
-    "bottom",
-    "top",
-    "right",
-    "left",
-    "bottom-start",
-    "bottom-end",
-    "top-start",
-    "top-end",
-    "right-start",
-    "right-end",
-    "left-start",
-    "left-end"
+    'bottom',
+    'top',
+    'right',
+    'left',
+    'bottom-start',
+    'bottom-end',
+    'top-start',
+    'top-end',
+    'right-start',
+    'right-end',
+    'left-start',
+    'left-end'
   ]),
   noLiPadding: PropTypes.bool,
   innerDropDown: PropTypes.bool,
@@ -212,8 +212,6 @@ CustomDropdown.propTypes = {
 };
 
 export default withStyles(customDropdownStyle)(CustomDropdown);
-
-
 
 // WEBPACK FOOTER //
 // ./src/components/CustomDropdown/CustomDropdown.jsx
