@@ -5,6 +5,8 @@ import { connectRouter } from 'connected-react-router';
 import setting from './setting';
 import notify from './notify';
 import Configuration from './configuration';
+import users from './user';
+import workMode from './workmode';
 
 export default function createRootReducer(history: {}) {
   const routerReducer = connectRouter(history)(() => {});
@@ -14,7 +16,9 @@ export default function createRootReducer(history: {}) {
       router: routerReducer,
       setting,
       notify,
-      ...Configuration
+      ...Configuration,
+      users,
+      workMode
     })
   );
 }

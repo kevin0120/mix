@@ -17,12 +17,6 @@ import {
 
 import styles from './styles';
 
-const mapStateToProps = (state, ownProps) => ({
-  healthCheckResults: state.healthCheckResults,
-  connInfo: state.connInfo,
-  ...ownProps
-});
-
 const mapDispatchToProps = {
   masterPCHealthCheck,
   controllerHealthCheck
@@ -50,24 +44,16 @@ class ConnectedHealthCheck extends React.Component {
   }
 
   restartTimer() {
-    const { options } = this.props;
-    const masterpcConn = this.props.connInfo.masterpc.connection;
+    const { connections } = this.props;
+    const masterpcConn = connections.masterpc;
 
-    const Controllers = this.props.connInfo.controllers;
-
-    if (options.enableDebugLog) {
-      console.log(
-        'restart MasterPC HealthCheck. ' +
-          `conn: ${masterpcConn}, ` +
-          `interval: ${options.intervalMasterPC}ms`
-      );
-    }
+    const Controllers = connections.controllers;
 
     this.stopTimer();
     this.timerHealz = setInterval(() => {
       this.props.masterPCHealthCheck(masterpcConn);
       this.props.controllerHealthCheck(masterpcConn, Controllers);
-    }, options.intervalMasterPC);
+    }, 3000);
   }
 
   render() {
@@ -126,25 +112,8 @@ ConnectedHealthCheck.propTypes = {
   controllerHealthCheck: PropTypes.func.isRequired
 };
 
-ConnectedHealthCheck.defaultProps = {
-  styleOptions: {
-    disableGutters: false
-  },
-  connInfo: {
-    masterpc: {
-      connection: null
-    },
-    controllers: []
-  },
-  options: {
-    intervalMasterPC: 3000,
-    intervalControllerSN: 3000,
-    enableDebugLog: false
-  }
-};
 
 const HealthCheck = connect(
-  mapStateToProps,
   mapDispatchToProps
 )(ConnectedHealthCheck);
 

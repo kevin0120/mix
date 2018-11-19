@@ -170,6 +170,8 @@ export const defaultConfigs = {
   },
   workflow: {
     name: 'VW', // 工作流有: General or VW,
+    workMode: 'auto', // auto or manual or scanner(for 长安汽车)
+    controlMode: 'pset', // pset or job
     bypass: {
       enable: true,
       output: 4, // 输出,输入哪一位

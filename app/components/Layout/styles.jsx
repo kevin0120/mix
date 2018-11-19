@@ -1,5 +1,5 @@
-import pagesStyle from '../../common/jss/layouts/pagesStyle.jsx';
-import imagesStyles from '../../common/jss/imagesStyles.jsx';
+import pagesStyle from '../../common/jss/layouts/pagesStyle';
+import imagesStyles from '../../common/jss/imagesStyles';
 
 export default theme => ({
   ...pagesStyle,

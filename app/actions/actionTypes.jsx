@@ -29,3 +29,12 @@ export const NOTIFY = {
 };
 
 export const SYSTEM_INIT = 'SYSTEM_INIT';
+
+export const SET_HEALTHZ_CHECK = 'SET_HEALTHZ_CHECK';
+
+export const WORK_MODE = {
+  SWITCH_WM: 'SWITCH_WORK_MODE',
+  SWITCH_CM: 'SWITCH_CONTROL_MODE'
+};
+
+e;
