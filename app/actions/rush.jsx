@@ -8,12 +8,15 @@ const WebSocket = require('@oznu/ws-connect');
 export function NewResults(results) {
   return {
     type: RUSH.NEW_RESULTS,
-    data: results,
-  }
+    data: results
+  };
 }
 
 export function stopWebsocket() {
-  if (ws.ws.readyState === OWebSocket.OPEN || ws.ws.readyState === OWebSocket.CONNECTING) {
+  if (
+    ws.ws.readyState === OWebSocket.OPEN ||
+    ws.ws.readyState === OWebSocket.CONNECTING
+  ) {
     ws.close();
   }
   ws = null;
@@ -34,16 +37,17 @@ export function initRush(dispatch, httpConn, hmiSN) {
   ws = new WebSocket(wsURL);
   ws.on('open', () => {
     // reg msg
-    ws.sendJson({ hmi_sn: hmiSN },
-      err => {
-        if (err) {
-          ws.close();
-        }
-      });
+    ws.sendJson({ hmi_sn: hmiSN }, err => {
+      if (err) {
+        ws.close();
+      }
+    });
   });
 
   ws.on('close', (code, reason) => {
-    console.log(`websocket disconnected. retry in 1s code: ${code}, reason: ${reason}`);
+    console.log(
+      `websocket disconnected. retry in 1s code: ${code}, reason: ${reason}`
+    );
   });
 
   ws.on('error', () => {
@@ -57,7 +61,6 @@ export function initRush(dispatch, httpConn, hmiSN) {
   });
 
   ws.on('message', dataRaw => {
-
     const dataArray = dataRaw.split(';');
 
     const event = dataArray[0].split(':').slice(-1)[0];
@@ -69,19 +72,16 @@ export function initRush(dispatch, httpConn, hmiSN) {
 
     switch (event) {
       case 'job':
-
         break;
       case 'io':
-
         break;
       case 'result':
         dispatch(NewResults(json));
         break;
       case 'scanner':
-
         break;
       default:
-        console.log("no define event");
+        console.log('no define event');
     }
   });
 }

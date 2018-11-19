@@ -8,14 +8,16 @@ import { sysInitFlow } from './systemInit';
 import { watchResults } from './operation';
 import { watchIO } from './io';
 import { watchHealth} from './health';
+import { shutDownDiagWorkFlow } from './shutDownDiag';
+import { toolFunctions } from './tools';
 
-export default function * rootSaga () {
+export default function* rootSaga() {
   yield all([
     authFlow(),
     watchScanner(),
     watchResults(),
-    watchIO(),
-    watchHealth(),
+    shutDownDiagWorkFlow(),
+    toolFunctions()
     sysInitFlow(),
   ]);
 }

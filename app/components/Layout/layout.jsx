@@ -42,6 +42,9 @@ import i18n from '../../i18n';
 import HealthCheck from '../HealthCheck';
 import Button from '../CustomButtons/Button';
 
+const lodash = require('lodash');
+
+
 /* eslint-disable react/prefer-stateless-function */
 export default function withLayout(SubCompontents, showTop = true) {
   class ConnectedLayout extends React.Component {
@@ -112,28 +115,17 @@ export default function withLayout(SubCompontents, showTop = true) {
 
     HealthCheckOk() {
       const { healthCheckResults } = this.props;
-      for (const key in healthCheckResults) {
-        if (!healthCheckResults[key].health) {
-          return false;
-        }
-      }
-
-      return false;
+      return lodash.every(healthCheckResults, {isHealth: true});
     }
 
     render() {
       let shouldProcessing = true;
-      if (
-        this.props.orderStatus === 'Ready' ||
-        this.props.orderStatus === 'PreDoing' ||
-        this.props.orderStatus === 'Timeout' ||
-        this.props.orderStatus === 'Init' ||
-        !this.props.isAutoMode
-      ) {
+      const { orderStatus, classes, avatarImg, Username, workMode, healthCheckResults, connections } = this.props;
+      const isAutoMode = workMode === 'auto';
+      if (lodash.include(['Ready','PreDoing', 'Timeout', 'Init'], orderStatus) || !isAutoMode) {
         shouldProcessing = false;
       }
 
-      const { classes, theme, avatarImg, Username } = this.props;
       const { anchorEl, value, showStatus } = this.state;
       const open = Boolean(anchorEl);
 
@@ -235,9 +227,6 @@ export default function withLayout(SubCompontents, showTop = true) {
                     >
                       <Language />
                     </IconButton>
-                    {/*<IconButton color="inherit" aria-label="Menu" className={classes.menuButton} onClick={(e) => this.toggleMenu(true,e)} disabled={ shouldProcessing }>*/}
-                    {/*<MenuIcon />*/}
-                    {/*</IconButton>*/}
                     <Menu
                       id="menu-appbar"
                       anchorEl={showStatus}
@@ -253,7 +242,7 @@ export default function withLayout(SubCompontents, showTop = true) {
                       onClose={this.handleCloseStatus}
                       TransitionComponent={Fade}
                     >
-                      <HealthCheck />
+                      <HealthCheck healthCheckResults={healthCheckResults} connections={connections} />
                     </Menu>
                     <Menu
                       id="menu-appbar"
@@ -322,20 +311,15 @@ export default function withLayout(SubCompontents, showTop = true) {
   ConnectedLayout.propTypes = {
     classes: PropTypes.object.isRequired,
     orderStatus: PropTypes.string.isRequired,
-    ControlMode: PropTypes.string,
-    isAutoMode: PropTypes.bool,
+    workMode: PropTypes.bool,
     healthCheckResults: PropTypes.shape({}).isRequired
   };
 
   const mapStateToProps = (state, ownProps) => ({
-    debugInfo: state.debugInfo,
-    enableDebugInfo: state.userConfigs.enableDebugInfo,
-    avatarImg: state.userInfo.image_small,
-    theme: PropTypes.object.isRequired,
-    orderStatus: state.orderProgress.orderStatus,
-    ControlMode: state.ControlMode,
-    isAutoMode: state.isAutoMode,
-    Username: state.userInfo.name,
+    usersInfo: state.users,
+    connections: state.connections,
+    orderStatus: state.operation.operationStatus,
+    workMode: state.workMode.workMode,
     healthCheckResults: state.healthCheckResults,
     ...ownProps
   });

@@ -10,10 +10,10 @@
 
 import { defaultClient } from '../../common/utils';
 
-export const fetchConnectionInfo = fullUrl =>
+export const apiToolEnable = (fullUrl, data) =>
   defaultClient
-    .get(fullUrl)
-    .then(resp => resp.data)
+    .put(fullUrl, data)
+    .then(resp => resp)
     .catch(e => {
       throw e.toString();
     });

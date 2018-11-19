@@ -8,12 +8,26 @@
 
 // @flow
 
-import { defaultClient } from '../../common/utils';
+import { SHUTDOWN_DIAG } from './actionTypes';
 
-export const fetchConnectionInfo = fullUrl =>
-  defaultClient
-    .get(fullUrl)
-    .then(resp => resp.data)
-    .catch(e => {
-      throw e.toString();
-    });
+export function openShutdown(dType, data = null) {
+  return {
+    type: SHUTDOWN_DIAG.OPEN,
+    dType,
+    data
+  };
+}
+
+export function closeShutDownDiag(dType) {
+  return {
+    type: SHUTDOWN_DIAG.CLOSE_START,
+    dType
+  };
+}
+
+export function confirmShutDownDiag(dType) {
+  return {
+    type: SHUTDOWN_DIAG.CONFIRM,
+    dType
+  };
+}

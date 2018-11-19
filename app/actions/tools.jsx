@@ -8,12 +8,18 @@
 
 // @flow
 
-import { defaultClient } from '../../common/utils';
+import { TOOLS } from './actionTypes';
 
-export const fetchConnectionInfo = fullUrl =>
-  defaultClient
-    .get(fullUrl)
-    .then(resp => resp.data)
-    .catch(e => {
-      throw e.toString();
-    });
+export function toolEnable() {
+  return {
+    type: TOOLS.ENABLE,
+    enable: true
+  };
+}
+
+export function toolDisable() {
+  return {
+    type: TOOLS.ENABLE,
+    enable: false
+  };
+}

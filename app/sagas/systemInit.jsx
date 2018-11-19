@@ -22,7 +22,7 @@ export function* fetchConnectionFlow(baseUrl, hmiSN, dispatch) {
   const resp = yield call(fetchConnectionInfo, fullUrl);
 
   if (resp.status === 200) {
-    yield put({type: CONNECTION.FETCH_OK, data: resp.data});
+    yield put({ type: CONNECTION.FETCH_OK, data: resp.data });
 
     // 初始化rush
     yield call(initRush, dispatch, resp.data.masterpc.connection, hmiSN);
@@ -39,7 +39,7 @@ export function* fetchConnectionFlow(baseUrl, hmiSN, dispatch) {
 }
 
 export function* sysInitFlow() {
-    const{ baseUrl, hmiSN, dispatch } = yield take(SYSTEM_INIT); // 只获取一次
+  const { baseUrl, hmiSN, dispatch } = yield take(SYSTEM_INIT); // 只获取一次
   try {
     yield call(fetchConnectionFlow, baseUrl, hmiSN, dispatch);
   } catch (e) {

@@ -6,9 +6,9 @@ import { SCANNER, OPERATION } from '../actions/actionTypes';
 import { getOperation } from './operation';
 
 export function* watchScanner() {
-  while (true){
+  while (true) {
     const { data } = yield take(SCANNER.READ_NEW_DATA);
-    yield put({type: OPERATION.TRIGGER.NEW_DATA, data: data});
+    yield put({ type: OPERATION.TRIGGER.NEW_DATA, data: data });
 
     const state = yield select();
 

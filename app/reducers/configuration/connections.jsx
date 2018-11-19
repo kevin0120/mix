@@ -28,7 +28,7 @@ export default function connections(
   action: actionType
 ) {
   switch (action.type) {
-    case CONNECTION.FETCH_OK:{
+    case CONNECTION.FETCH_OK: {
       const { masterpc, rfid, io, controllers, info } = action.data;
       return {
         ...state,
@@ -43,4 +43,3 @@ export default function connections(
       return state;
   }
 }
-

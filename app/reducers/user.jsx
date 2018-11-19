@@ -8,12 +8,27 @@
 
 // @flow
 
-import { defaultClient } from '../../common/utils';
+const defaultUsers = [
+  // {
+  //   name: "dummy",
+  //   avatar: "",
+  //   uid: 1,
+  // },
+];
 
-export const fetchConnectionInfo = fullUrl =>
-  defaultClient
-    .get(fullUrl)
-    .then(resp => resp.data)
-    .catch(e => {
-      throw e.toString();
-    });
+type actionType = {
+  +type: string,
+  +name: string,
+  +avatar: string,
+  +uid: number
+};
+
+export default function users(
+  state: object = defaultUsers,
+  action: actionType
+) {
+  switch (action.type) {
+    default:
+      return state;
+  }
+}

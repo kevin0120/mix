@@ -1,5 +1,5 @@
 import { OPERATION } from '../actions/actionTypes';
-import {isVin} from '../common/utils';
+import { isVin } from '../common/utils';
 
 import { setLedReady } from '../actions/ioModbus';
 
@@ -8,12 +8,12 @@ export const OPERATION_STATUS = {
   READY: 'Ready',
   DOING: 'Doing',
   TIMEOUT: 'Timeout',
-  FAIL: 'Fail',
+  FAIL: 'Fail'
 };
 
 export const OPERATION_RESULT = {
   OK: 'OK',
-  NOK: 'NOK',
+  NOK: 'NOK'
 };
 
 const defaultOperations = {
@@ -27,28 +27,35 @@ const defaultOperations = {
   workSheet: '',
   productID: -1,
   workcenterID: -1,
-  results: [{
-    id: -1,
-    controller_sn: '',
-    gun_sn: '',
-    pset: -1,
-    max_redo_times: 3,
-    offset_x: 0,
-    offset_y: 0,
-    sequence: 0,
-    group_sequence: 0,
-    ti: 0,
-    mi: 0,
-    wi: 0,
-    result: '',
-  }]
+  results: [
+    {
+      id: -1,
+      controller_sn: '',
+      gun_sn: '',
+      pset: -1,
+      max_redo_times: 3,
+      offset_x: 0,
+      offset_y: 0,
+      sequence: 0,
+      group_sequence: 0,
+      ti: 0,
+      mi: 0,
+      wi: 0,
+      result: ''
+    }
+  ]
 };
 
 type actionType = {
-  +type: string
+  +type: string,
+  +data: object,
+  +force: boolean
 };
 
-export default function operations(state: object = defaultOperations, action: actionType) {
+export default function operations(
+  state: object = defaultOperations,
+  action: actionType
+) {
   switch (action.type) {
     case OPERATION.TRIGGER.NEW_DATA:
       return NewTriggerData(state, action.data);
@@ -64,6 +71,8 @@ export default function operations(state: object = defaultOperations, action: ac
       return OperationFailed(state, action.data);
     case OPERATION.FINISHED:
       return OperationFinished(state, action.data);
+    case OPERATION.FORCE_FINISHED:
+      return ForceOperationFinished(state);
     default:
       return state;
   }
@@ -73,13 +82,13 @@ function NewTriggerData(state, data) {
   if (isVin(data)) {
     return {
       ...state,
-      carID: data,
+      carID: data
     };
   }
 
   return {
     ...state,
-    carType: data,
+    carType: data
   };
 }
 
@@ -95,8 +104,8 @@ function NewOperation(state, mode, data) {
       workcenterID: data.workcenter_id,
       results: data.points,
       activeResultIndex: 0,
-      failCount: 0,
-    }
+      failCount: 0
+    };
   }
 
   // 工单模式
@@ -107,15 +116,15 @@ function NewOperation(state, mode, data) {
     workSheet: data.work_sheet,
     results: data.results,
     activeResultIndex: 0,
-    failCount: 0,
-  }
+    failCount: 0
+  };
 }
 
 function OperationStarted(state) {
   return {
     ...state,
-    operationStatus: OPERATION_STATUS.DOING,
-  }
+    operationStatus: OPERATION_STATUS.DOING
+  };
 }
 
 function mergeResults(state, data) {
@@ -144,7 +153,7 @@ function OperationResultOK(state, data) {
     failCount: 0,
     operationStatus: OPERATION_STATUS.DOING,
     results
-  }
+  };
 }
 
 function OperationResultNOK(state, data) {
@@ -154,7 +163,7 @@ function OperationResultNOK(state, data) {
     ...state,
     failCount: state.failCount + 1,
     results
-  }
+  };
 }
 
 function OperationFailed(state, data) {
@@ -165,7 +174,14 @@ function OperationFailed(state, data) {
     failCount: state.failCount + 1,
     operationStatus: OPERATION_STATUS.FAIL,
     results
-  }
+  };
+}
+
+function ForceOperationFinished(state) {
+  return {
+    ...state,
+    operationStatus: OPERATION_STATUS.READY
+  };
 }
 
 function OperationFinished(state, data) {
@@ -177,5 +193,5 @@ function OperationFinished(state, data) {
     ...state,
     operationStatus: OPERATION_STATUS.READY,
     results
-  }
+  };
 }

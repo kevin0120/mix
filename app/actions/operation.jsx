@@ -8,12 +8,16 @@
 
 // @flow
 
-import { defaultClient } from '../../common/utils';
+import { OPERATION } from './actionTypes';
 
-export const fetchConnectionInfo = fullUrl =>
-  defaultClient
-    .get(fullUrl)
-    .then(resp => resp.data)
-    .catch(e => {
-      throw e.toString();
-    });
+export function forceSwitch2Ready() {
+  return {
+    type: OPERATION.FORCE_FINISHED
+  };
+}
+
+export function switch2Doing() {
+  return {
+    type: OPERATION.STARTED
+  };
+}

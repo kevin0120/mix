@@ -3,14 +3,17 @@ import { USER } from '../actions/actionTypes';
 const defaultUsers = {
   uuid: '',
   name: '',
-  avatar: '',
+  avatar: ''
 };
 
 type actionType = {
   +type: string
 };
 
-export default function users(state: object = defaultUsers, action: actionType) {
+export default function users(
+  state: object = defaultUsers,
+  action: actionType
+) {
   switch (action.type) {
     case USER.FETCH_OK:
       return NewUser(state, action.data);
@@ -24,6 +27,6 @@ export function NewUser(state, data) {
     ...state,
     uuid: data.uuid,
     name: data.name,
-    avatar: data.avatar,
+    avatar: data.avatar
   };
 }
