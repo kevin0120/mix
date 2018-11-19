@@ -6,5 +6,5 @@ export const systemInit = (baseUrl: string, hmiSN: string, dispatch) => ({
   type: SYSTEM_INIT,
   baseUrl,
   hmiSN,
-  dispatch,
+  dispatch
 });
