@@ -168,28 +168,26 @@ export const defaultConfigs = {
       }
     }
   },
-  workflow: {
-    name: 'VW', // 工作流有: General or VW,
-    workMode: 'auto', // auto or manual or scanner(for 长安汽车)
-    controlMode: 'pset', // pset or job
-    bypass: {
-      enable: true,
-      output: 4, // 输出,输入哪一位
-      wait: 5000
-    },
-    manualByPanel: {
-      enable: false,
-      input: 4, // 前几位
-      wait: 5000
-    },
+  // 作业配置
+  operationSettings: {
+    opMode: 'op', // 作业模式:        op 或 order
+    controllerMode: 'job', // 拧紧模式:        job 或 pset
+    workMode: 'auto', // 工作模式:        auto 或 scanner 或 manual
+    flowTriggers: ['carType', 'carID'], // 工作流程触发条件:  carType:车型代码 carID:vin/knr/longpin
+
+    // 作业前检测(order mode only)
+    preCheck: true,
+
+    // 强制放行配置
     byPass: {
       enable: true,
-      byPassJob: 250,
-      // sleep/press
-      byPassType: 'sleep',
-      byPassPress: 2
-    }
+      type: 'sleep' // sleep or press
+    },
+
+    // 结果对话框
+    enableResultDialog: true
   },
+
   systemSettings: {
     enableDebugInfo: false,
     showSwitchMode: false, // 切换pset or job 模式

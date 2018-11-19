@@ -8,22 +8,29 @@
 
 // @flow
 
-import { call, take } from 'redux-saga/effects';
+import { call, take, put } from 'redux-saga/effects';
 
-import { SYSTEM_INIT } from '../actions/actionTypes';
+import { CONNECTION, SYSTEM_INIT } from '../actions/actionTypes';
 
 import { fetchConnectionInfo } from './api/systemInit';
+import { initRush } from '../actions/rush';
 
-export function* fetchConnectionFlow(baseUrl, hmiSN) {
+export function* fetchConnectionFlow(baseUrl, hmiSN, dispatch) {
   const fullUrl = `${baseUrl}/hmi.connections/${hmiSN}`;
-  const info = yield call(fetchConnectionInfo, fullUrl);
-  console.log(info);
+  const resp = yield call(fetchConnectionInfo, fullUrl);
+
+  if (resp.status === 200) {
+    yield put({ type: CONNECTION.FETCH_OK, data: resp.data });
+
+    // 初始化rush
+    yield call(initRush, dispatch, resp.data.masterpc.connection, hmiSN);
+  }
 }
 
 export function* sysInitFlow() {
-  const { baseUrl, hmiSN } = yield take(SYSTEM_INIT); // 只获取一次
+  const { baseUrl, hmiSN, dispatch } = yield take(SYSTEM_INIT); // 只获取一次
   try {
-    yield call(fetchConnectionFlow, baseUrl, hmiSN);
+    yield call(fetchConnectionFlow, baseUrl, hmiSN, dispatch);
   } catch (e) {
     console.log(e);
   }

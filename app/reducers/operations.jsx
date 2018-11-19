@@ -1,0 +1,187 @@
+import { OPERATION } from '../actions/actionTypes';
+import { isVin } from '../common/utils';
+
+export const OPERATION_STATUS = {
+  INIT: 'Init',
+  READY: 'Ready',
+  DOING: 'Doing',
+  TIMEOUT: 'Timeout',
+  FAIL: 'Fail'
+};
+
+export const OPERATION_RESULT = {
+  OK: 'OK',
+  NOK: 'NOK'
+};
+
+const defaultOperations = {
+  operationStatus: '',
+  carID: '',
+  carType: '',
+  activeResultIndex: -1,
+  failCount: -1,
+  jobID: -1,
+  maxOpTimes: 30,
+  workSheet: '',
+  productID: -1,
+  workcenterID: -1,
+  results: [
+    {
+      id: -1,
+      controller_sn: '',
+      gun_sn: '',
+      pset: -1,
+      max_redo_times: 3,
+      offset_x: 0,
+      offset_y: 0,
+      sequence: 0,
+      group_sequence: 0,
+      ti: 0,
+      mi: 0,
+      wi: 0,
+      result: ''
+    }
+  ]
+};
+
+type actionType = {
+  +type: string,
+  +data: object,
+  +force: boolean
+};
+
+export default function operations(
+  state: object = defaultOperations,
+  action: actionType
+) {
+  switch (action.type) {
+    case OPERATION.TRIGGER.NEW_DATA:
+      return NewTriggerData(state, action.data);
+    case OPERATION.OPERATION.FETCH_OK:
+      return NewOperation(state, action.mode, action.data);
+    case OPERATION.STARTED:
+      return OperationStarted(state);
+    case OPERATION.RESULT.OK:
+      return OperationResultOK(state, action.data);
+    case OPERATION.RESULT.NOK:
+      return OperationResultNOK(state, action.data);
+    case OPERATION.FAILED:
+      return OperationFailed(state, action.data);
+    case OPERATION.FINISHED:
+      return OperationFinished(state, action.data);
+    case OPERATION.FORCE_FINISHED:
+      return ForceOperationFinished(state);
+    default:
+      return state;
+  }
+}
+
+function NewTriggerData(state, data) {
+  if (isVin(data)) {
+    return {
+      ...state,
+      carID: data
+    };
+  }
+
+  return {
+    ...state,
+    carType: data
+  };
+}
+
+function NewOperation(state, mode, data) {
+  if (mode === 'op') {
+    // 作业模式
+    return {
+      ...state,
+      jobID: data.job,
+      maxOpTimes: data.max_op_time,
+      workSheet: data.img,
+      productID: data.product_id,
+      workcenterID: data.workcenter_id,
+      results: data.points,
+      activeResultIndex: 0,
+      failCount: 0
+    };
+  }
+
+  // 工单模式
+  return {
+    ...state,
+    jobID: data.job_id,
+    maxOpTimes: data.max_op_time,
+    workSheet: data.work_sheet,
+    results: data.results,
+    activeResultIndex: 0,
+    failCount: 0
+  };
+}
+
+function OperationStarted(state) {
+  return {
+    ...state,
+    operationStatus: OPERATION_STATUS.DOING
+  };
+}
+
+function mergeResults(state, data) {
+  const rs = state.results;
+  for (let i = 0; i < data.length; i += 1) {
+    rs[i + state.activeResultIndex].ti = data[i].ti;
+    rs[i + state.activeResultIndex].mi = data[i].mi;
+    rs[i + state.activeResultIndex].wi = data[i].wi;
+    rs[i + state.activeResultIndex].result = data[i].result;
+  }
+
+  return rs;
+}
+
+function OperationResultOK(state, data) {
+  const results = mergeResults(state, data);
+
+  return {
+    ...state,
+    activeResultIndex: state.activeResultIndex + data.length,
+    failCount: 0,
+    results
+  };
+}
+
+function OperationResultNOK(state, data) {
+  const results = mergeResults(state, data);
+
+  return {
+    ...state,
+    failCount: state.failCount + 1,
+    results
+  };
+}
+
+function OperationFailed(state, data) {
+  const results = mergeResults(state, data);
+
+  return {
+    ...state,
+    failCount: state.failCount + 1,
+    operationStatus: OPERATION_STATUS.FAIL,
+    results
+  };
+}
+
+function ForceOperationFinished(state) {
+  return {
+    ...state,
+    operationStatus: OPERATION_STATUS.READY
+  };
+}
+
+function OperationFinished(state, data) {
+  const results = mergeResults(state, data);
+
+  return {
+    ...state,
+    operationStatus: OPERATION_STATUS.READY,
+    results
+  };
+}

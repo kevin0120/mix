@@ -7,6 +7,8 @@ import notify from './notify';
 import Configuration from './configuration';
 import users from './user';
 import workMode from './workmode';
+import operations from './operations';
+import shutDownDiag from './shutDownDiag';
 
 export default function createRootReducer(history: {}) {
   const routerReducer = connectRouter(history)(() => {});
@@ -18,7 +20,9 @@ export default function createRootReducer(history: {}) {
       notify,
       ...Configuration,
       users,
-      workMode
+      workMode,
+      operations,
+      shutDownDiag
     })
   );
 }

@@ -6,30 +6,32 @@
  * Vestibulum commodo. Ut rhoncus gravida arcu.
  */
 
-// @flow
+import { SHUTDOWN_DIAG } from '../actions/actionTypes';
 
-import configs from '../shared/config';
-import WORK_MODE from '../actions/actionTypes';
-
-const defaultWorkMode = {
-  workMode: configs.operationSettings.workMode,
-  controllerMode: configs.operationSettings.controllerMode
+const defaultShutDownDiag = {
+  show: false,
+  type: '', // 显示的类型
+  msg: ''
 };
 
 type actionType = {
   +type: string,
-  +mode: string
+  +msg: string,
+  +dType: string
 };
 
-export default function workMode(
-  state: object = defaultWorkMode,
+export default function shutDownDiag(
+  state: object = defaultShutDownDiag,
   action: actionType
 ) {
   switch (action.type) {
-    case WORK_MODE.SWITCH_CM:
-      return { ...state, controlMode: action.mode };
-    case WORK_MODE.SWITCH_WM:
-      return { ...state, workMode: action.mode };
+    case SHUTDOWN_DIAG.CLOSE: {
+      return { ...state, show: false };
+    }
+    case SHUTDOWN_DIAG.OPEN_WITH_MSG: {
+      const { dType, msg } = action.msg;
+      return { ...state, show: true, type: dType, msg };
+    }
     default:
       return state;
   }
