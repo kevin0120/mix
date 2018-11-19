@@ -8,12 +8,14 @@
 
 // @flow
 
-import { call, take, put } from 'redux-saga/effects'
+import { call, take, put, select } from 'redux-saga/effects'
 
 import { CONNECTION, SYSTEM_INIT } from '../actions/actionTypes';
 
 import { fetchConnectionInfo } from './api/systemInit';
 import { initRush } from '../actions/rush';
+import { initIOModbus } from '../actions/ioModbus';
+import { OPERATION_STATUS } from '../reducers/operations';
 
 export function* fetchConnectionFlow(baseUrl, hmiSN, dispatch) {
   const fullUrl = `${baseUrl}/hmi.connections/${hmiSN}`;
@@ -24,7 +26,16 @@ export function* fetchConnectionFlow(baseUrl, hmiSN, dispatch) {
 
     // 初始化rush
     yield call(initRush, dispatch, resp.data.masterpc.connection, hmiSN);
+
+    // 初始化io
+    const state = yield select();
+    yield call(initIOModbus, dispatch, state);
+
+
   }
+
+  const data = [];
+  yield put({type: OPERATION_STATUS.READY, data});
 }
 
 export function* sysInitFlow() {

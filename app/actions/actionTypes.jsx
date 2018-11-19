@@ -52,6 +52,10 @@ export const OPERATION = {
   FAILED: 'OPERATION_FAILED',
 };
 
+export const IO = {
+  FUNCTION: 'IO_FUNCTION',
+};
+
 export const CONNECTION = {
   FETCH_OK: 'CONNECTION_FETCH_OK',
   FETCH_FAIL: 'CONNECTION_FETCH_FAIL',
@@ -63,3 +67,13 @@ export const NOTIFY = {
 };
 
 export const SYSTEM_INIT = 'SYSTEM_INIT';
+
+// Health Checking Actions
+export const HEALTH = {
+  HEALTH: 'HEALTH',
+  MASTERPC: 'HEALTH_MASTERPC',
+  CONTROLLER: 'HEALTH_CONTROLLER',
+  RFID: 'HEALTH_RFID',
+  IO: 'HEALTH_IO',
+};
+

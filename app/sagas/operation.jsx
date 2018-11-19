@@ -142,9 +142,7 @@ export function* handleResults(data) {
 
     }
 
-  } else {
-
-    if (state.operations.activeResultIndex + data.length >= state.operations.results.length) {
+  } else if (state.operations.activeResultIndex + data.length >= state.operations.results.length) {
 
       // 作业完成
       rType = OPERATION.FINISHED;
@@ -156,9 +154,8 @@ export function* handleResults(data) {
       continueDoing = true;
 
     }
-  }
 
-  yield put({type: rType, data: data});
+  yield put({type: rType, data});
   if (continueDoing) {
     yield call(doingOperation);
   }

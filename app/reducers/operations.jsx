@@ -1,6 +1,8 @@
 import { OPERATION } from '../actions/actionTypes';
 import {isVin} from '../common/utils';
 
+import { setLedReady } from '../actions/ioModbus';
+
 export const OPERATION_STATUS = {
   INIT: 'Init',
   READY: 'Ready',
@@ -118,6 +120,11 @@ function OperationStarted(state) {
 
 function mergeResults(state, data) {
   const rs = state.results;
+
+  if (!data) {
+    return rs;
+  }
+
   for(let i = 0; i < data.length; i++) {
     rs[i + state.activeResultIndex].ti = data[i].ti;
     rs[i + state.activeResultIndex].mi = data[i].mi;
@@ -135,6 +142,7 @@ function OperationResultOK(state, data) {
     ...state,
     activeResultIndex: state.activeResultIndex + data.length,
     failCount: 0,
+    operationStatus: OPERATION_STATUS.DOING,
     results
   }
 }
@@ -161,6 +169,8 @@ function OperationFailed(state, data) {
 }
 
 function OperationFinished(state, data) {
+  setLedReady();
+
   const results = mergeResults(state, data);
 
   return {
