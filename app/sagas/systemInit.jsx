@@ -31,11 +31,9 @@ export function* fetchConnectionFlow(baseUrl, hmiSN, dispatch) {
     const state = yield select();
     yield call(initIOModbus, dispatch, state);
 
-
   }
 
-  const data = [];
-  yield put({type: OPERATION_STATUS.READY, data});
+  yield put({type: OPERATION_STATUS.READY, data:[]});
 }
 
 export function* sysInitFlow() {

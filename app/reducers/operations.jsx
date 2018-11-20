@@ -1,7 +1,7 @@
 import { OPERATION } from '../actions/actionTypes';
-import { isVin } from '../common/utils';
+import { isCarID } from '../common/utils';
 
-import { setLedReady } from '../actions/ioModbus';
+import { setLedStatusDoing, setLedError, setLedStatusReady, sOn, sBlinkOn } from '../actions/ioModbus';
 
 export const OPERATION_STATUS = {
   INIT: 'Init',
@@ -71,15 +71,15 @@ export default function operations(
       return OperationFailed(state, action.data);
     case OPERATION.FINISHED:
       return OperationFinished(state, action.data);
-    case OPERATION.FORCE_FINISHED:
-      return ForceOperationFinished(state);
+    case OPERATION.CONTINUE:
+      return OperationContinue(state);
     default:
       return state;
   }
 }
 
 function NewTriggerData(state, data) {
-  if (isVin(data)) {
+  if (isCarID(data)) {
     return {
       ...state,
       carID: data
@@ -121,6 +121,8 @@ function NewOperation(state, mode, data) {
 }
 
 function OperationStarted(state) {
+  setLedStatusDoing();
+
   return {
     ...state,
     operationStatus: OPERATION_STATUS.DOING
@@ -167,6 +169,7 @@ function OperationResultNOK(state, data) {
 }
 
 function OperationFailed(state, data) {
+  setLedError(sOn);
   const results = mergeResults(state, data);
 
   return {
@@ -177,21 +180,38 @@ function OperationFailed(state, data) {
   };
 }
 
-function ForceOperationFinished(state) {
-  return {
-    ...state,
-    operationStatus: OPERATION_STATUS.READY
-  };
-}
-
 function OperationFinished(state, data) {
-  setLedReady();
+  setLedStatusReady();
 
   const results = mergeResults(state, data);
 
   return {
     ...state,
     operationStatus: OPERATION_STATUS.READY,
+    failCount: 0,
+    activeResultIndex: -1,
     results
+  };
+}
+
+function OperationContinue(state) {
+  setLedStatusDoing();
+
+  const { activeResultIndex, results } = state;
+  let count = 1;
+  const ele = results[activeResultIndex + 1];
+  for(let i = activeResultIndex + 2; i < results.length; i++) {
+    if (ele.group_sequence === results[i].group_sequence) {
+      count += 1;
+    } else {
+      break;
+    }
+  }
+
+  return {
+    ...state,
+    operationStatus: OPERATION_STATUS.DOING,
+    activeResultIndex: activeResultIndex + count,
+    failCount: 0,
   };
 }

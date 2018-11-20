@@ -32,6 +32,9 @@ export default function shutDownDiag(
       const { dType, msg } = action.msg;
       return { ...state, show: true, type: dType, msg };
     }
+    case SHUTDOWN_DIAG.OPEN: {
+
+    }
     default:
       return state;
   }

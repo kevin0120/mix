@@ -124,14 +124,14 @@ function initModBusIO(modusConfig) {
 //   };
 // }
 
-export function setLedReady() {
+export function setLedStatusReady() {
   ioStatus[oError] = sOff;
   ioStatus[oInfo] = sOff;
   ioStatus[oDoing] = sBlinkOn;
   ioStatus[oWarning] = sOff;
 }
 
-export function setLedDoing() {
+export function setLedStatusDoing() {
   ioStatus[oError] = sOff;
   ioStatus[oDoing] = sOn;
   ioStatus[oInfo] = sOn;
@@ -143,11 +143,11 @@ export function setLedInfo(flag) {
 }
 
 export function setLedWarning(flag) {
-  ioStatus[iYellow] = flag;
+  ioStatus[oWarning] = flag;
 }
 
 export function setLedError(flag) {
-  ioStatus[iRed] = flag;
+  ioStatus[oError] = flag;
 }
 
 export function initIOModbus(dispatch, state) {
@@ -209,7 +209,7 @@ export function initIOModbus(dispatch, state) {
             const diff = (new Date().getTime() - timeStamp) / 1000;
             if (diff >= byPassTimeout) {
               // 钥匙延迟3秒放行
-              if (userConfigs.byPassType === 'sleep') {
+              if (userConfigs.operationSettings.byPass.type === 'sleep') {
                 dispatch({
                   type: IO.FUNCTION,
                   data: IO_FUNCTION.IN.BYPASS
@@ -217,12 +217,10 @@ export function initIOModbus(dispatch, state) {
               }
             } else {
               // 复位动作
-              if (fail) {
-                dispatch({
-                  type: IO.FUNCTION,
-                  data: IO_FUNCTION.IN.RESET
-                });
-              }
+              dispatch({
+                type: IO.FUNCTION,
+                data: IO_FUNCTION.IN.RESET
+              });
             }
           }
         }

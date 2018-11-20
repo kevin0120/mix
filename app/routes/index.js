@@ -1,7 +1,7 @@
 /* eslint flowtype-errors/show-errors: 0 */
 import React from 'react';
 
-import HomePage from '../containers/HomePage';
+// import HomePage from '../containers/HomePage';
 // import Editor from '../containers/editor';
 // import Preferences from '../containers/preferences';
 // import Help from '../containers/help';
@@ -39,14 +39,14 @@ import {
 } from '../common/jss/material-react-pro';
 
 export const routeConfigs = [
-  {
-    name: 'welcome',
-    url: '/welcome',
-    title: 'main.home',
-    main: HomePage,
-    icon: HomeIcon,
-    color: grayColor
-  },
+  // {
+  //   name: 'welcome',
+  //   url: '/welcome',
+  //   title: 'main.home',
+  //   main: HomePage,
+  //   icon: HomeIcon,
+  //   color: grayColor
+  // },
   // {
   //   name: 'working',
   //   url: '/working',
@@ -131,7 +131,7 @@ export const routeConfigs = [
 
 const indexRoutes = [
   { path: '/pages', component: Pages },
-  { path: '/', component: HomePage }
+  // { path: '/', component: HomePage }
 ];
 
 export default indexRoutes;
