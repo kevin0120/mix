@@ -42,7 +42,10 @@ const withstyles = theme => ({
     display: 'flex',
     flexWrap: 'wrap',
     minWidth: 300,
-    width: '100%'
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#232c39',
+    backgroundImage: 'linear-gradient(45deg, rgba(0, 216, 255, 0.5) 10%, rgba(0, 1, 127, 0.7))',
   },
   container: {
     padding: '40px 10px',
@@ -168,7 +171,7 @@ class ConnectedWelcome extends React.Component {
     return (
       <I18n ns="translations">
         {t => (
-          <div className={classes.wrap}>
+          <div className={classes.root}>
             <Grid
               container
               className={classes.container}

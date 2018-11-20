@@ -1,8 +1,6 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { I18n } from 'react-i18next';
-import { bindActionCreators } from 'redux';
 
 import { withStyles } from '@material-ui/core/styles';
 
@@ -11,28 +9,10 @@ import ListItemText from '@material-ui/core/ListItemText';
 
 import * as Utils from '../../common/utils';
 
-import  * as healthzCheckActions  from '../../actions/healthCheck';
-
 import styles from './styles';
 
-function mapDispatchToProps(dispatch){
-  return bindActionCreators(healthzCheckActions, dispatch);
-}
 
 class ConnectedHealthCheck extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
-  componentDidMount() {
-    const { startHealthzCheck } = this.props;
-    startHealthzCheck();
-  }
-
-  componentWillUnmount() {
-    const { stopHealthzCheck } = this.props;
-    stopHealthzCheck();
-  }
 
   render() {
     const { classes, healthCheckResults } = this.props;
@@ -73,10 +53,6 @@ ConnectedHealthCheck.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   healthCheckResults: PropTypes.shape({}).isRequired,
   // functions
-  stopHealthzCheck: PropTypes.func.isRequired,
-  startHealthzCheck: PropTypes.func.isRequired
 };
 
-const HealthCheck = connect(mapDispatchToProps)(ConnectedHealthCheck);
-
-export default withStyles(styles)(HealthCheck);
+export default withStyles(styles)(ConnectedHealthCheck);
