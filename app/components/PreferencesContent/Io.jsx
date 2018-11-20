@@ -20,7 +20,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 
 import saveConfigs from '../../actions/userConfigs';
-import { modbusOptions } from '../../shared/deviceModbus';
+import { IO_FUNCTION } from '../../reducers/io';
 
 
 import {
@@ -71,7 +71,7 @@ class ConnectedIo extends React.PureComponent {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleTest = this.handleTest.bind(this);
 
-    this.modbusOptions = modbusOptions;
+    this.IO_FUNCTION = IO_FUNCTION;
   }
 
   handleChange(e, idx, io, key) {
@@ -107,9 +107,9 @@ class ConnectedIo extends React.PureComponent {
     const { btnGroupStatus } = this.state;
     return data.map((item, idx) => {
       const options = get(
-        this.modbusOptions,
+        this.IO_FUNCTION,
         String.prototype.toLowerCase.call(item.io),
-        this.modbusOptions.in,
+        this.IO_FUNCTION.IN,
       );
       const selectItems = options.map(v => (<MenuItem key={v} value={v}>{v}</MenuItem>));
 

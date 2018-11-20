@@ -1,4 +1,4 @@
-import { USER_CONFIGS } from 'actions/actionTypes';
+import { USER_CONFIGS } from './actionTypes';
 
 export default function saveConfigs(section, newConfigs) {
   return {

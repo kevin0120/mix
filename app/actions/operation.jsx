@@ -25,6 +25,6 @@ export function switch2Doing() {
 export function operationVerified(data) {
   return {
     type: OPERATION.VERIFIED,
-    data: data
+    data
   };
 }

@@ -55,7 +55,7 @@ export function* confirmDiag(dType, data) {
     }
     case 'verify': {
       // 冲突确认，继续作业
-      yield put(operationVerified, data);
+      yield put(operationVerified(data));
       break;
     }
     default: {

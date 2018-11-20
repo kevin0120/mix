@@ -53,7 +53,7 @@ export function* getOperation() {
     }
   } else {
     // 工单模式
-    
+
     const hmiSN = state.setting.page.odooConnection.hmiSn.value;
     const code = state.operations.carID;
     try {
@@ -94,7 +94,7 @@ export function* startOperation(data) {
   yield put({
     type: OPERATION.OPERATION.FETCH_OK,
     mode: state.setting.operationSettings.opMode,
-    data: data
+    data
   });
 
   state = yield select();

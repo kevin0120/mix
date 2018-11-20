@@ -7,7 +7,6 @@ import { watchScanner } from './scanner';
 import { sysInitFlow } from './systemInit';
 import { watchOperation, watchResults } from './operation';
 import { watchIO } from './io';
-import { watchHealth} from './health';
 import { shutDownDiagWorkFlow } from './shutDownDiag';
 import { toolFunctions } from './tools';
 import { loginFlow, logoutFlow } from './auth'
@@ -20,7 +19,6 @@ export default function* rootSaga() {
     watchScanner(),
     watchResults(),
     watchIO(),
-    watchHealth(),
     shutDownDiagWorkFlow(),
     toolFunctions(),
     // auth
