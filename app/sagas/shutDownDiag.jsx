@@ -10,7 +10,7 @@
 
 import { select, put, call, take } from 'redux-saga/effects';
 
-import { SHUTDOWN_DIAG, OPERATION } from '../actions/actionTypes';
+import { SHUTDOWN_DIAG } from '../actions/actionTypes';
 
 import { forceSwitch2Ready, switch2Doing } from '../actions/operation';
 import { Info } from '../logger';
@@ -33,7 +33,7 @@ export function* openDiag(dType, data) {
 
 export function* closeDiag(dType) {
   if (dType === 'verify') {
-    yield put(forceSwitch2Ready);
+    yield put(forceSwitch2Ready());
   }
 
   yield put({ type: SHUTDOWN_DIAG.CLOSE });
@@ -49,15 +49,15 @@ export function* confirmDiag(dType, data) {
       const op = yield select(getOperations);
       const { carID } = op;
       Info(`车辆已放行 车辆ID:${carID}`);
-      yield put(toolDisable);
-      yield put(forceSwitch2Ready);
+      yield put(toolDisable());
+      yield put(forceSwitch2Ready());
       break;
     }
     case 'verify': {
       break;
     }
     default: {
-      yield put(switch2Doing);
+      yield put(switch2Doing());
     }
   }
 

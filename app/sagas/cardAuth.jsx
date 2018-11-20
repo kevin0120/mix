@@ -9,7 +9,7 @@ export function* getCardReaderInsert(action) {
   yield put({ type: 'INCREMENT' }); // dispatch a new action to reducer
 }
 
-export function* authFlow() {
+export function* cardAuthFlow() {
   while (true) {
     const { t } = yield take(CARD_AUTH.READER.INSERTED);
     yield call(getCardReaderInsert, t);

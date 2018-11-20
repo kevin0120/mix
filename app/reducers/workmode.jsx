@@ -9,7 +9,7 @@
 // @flow
 
 import configs from '../shared/config';
-import WORK_MODE from '../actions/actionTypes';
+import { WORK_MODE } from '../actions/actionTypes';
 
 const defaultWorkMode = {
   workMode: configs.operationSettings.workMode,

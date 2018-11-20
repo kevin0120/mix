@@ -1,11 +1,9 @@
 /* eslint flowtype-errors/show-errors: 0 */
 import React from 'react';
 
-import HomePage from '../containers/HomePage';
 // import Editor from '../containers/editor';
 // import Preferences from '../containers/preferences';
 // import Help from '../containers/help';
-import Pages from '../layouts/Pages';
 // import Event from '../containers/event';
 // import ConnResult from '../containers/queryResult';
 
@@ -19,6 +17,8 @@ import LockIcon from '@material-ui/icons/Lock';
 import Fingerprint from '@material-ui/icons/Fingerprint';
 import Mail from '@material-ui/icons/Mail';
 import Save from '@material-ui/icons/Save';
+import Pages from '../layouts/Pages';
+import HomePage from '../containers/Home';
 
 // imgs
 import helpImg from '../../resources/imgs/help.png';
