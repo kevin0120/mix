@@ -14,6 +14,8 @@ import { CONNECTION, SYSTEM_INIT } from '../actions/actionTypes';
 
 import { fetchConnectionInfo } from './api/systemInit';
 import { initRush } from '../actions/rush';
+import { startHealthzCheck } from '../actions/healthCheck';
+import { setNewNotification } from '../actions/notification';
 
 export function* fetchConnectionFlow(baseUrl, hmiSN, dispatch) {
   const fullUrl = `${baseUrl}/hmi.connections/${hmiSN}`;
@@ -21,6 +23,11 @@ export function* fetchConnectionFlow(baseUrl, hmiSN, dispatch) {
 
   if (resp.status === 200) {
     yield put({ type: CONNECTION.FETCH_OK, data: resp.data });
+
+    const url = resp.data.masterpc.connection;
+    const controllers = resp.data.controllers.map(i => i.serial_no);
+
+    yield put(startHealthzCheck(url, controllers)); // 启动healthzcheck 定时器
 
     // 初始化rush
     yield call(initRush, dispatch, resp.data.masterpc.connection, hmiSN);
@@ -32,6 +39,6 @@ export function* sysInitFlow() {
   try {
     yield call(fetchConnectionFlow, baseUrl, hmiSN, dispatch);
   } catch (e) {
-    console.log(e);
+    yield put(setNewNotification('error', e.toString()));
   }
 }

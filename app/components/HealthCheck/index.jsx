@@ -11,13 +11,11 @@ import * as Utils from '../../common/utils';
 
 import styles from './styles';
 
-
 class ConnectedHealthCheck extends React.Component {
-
   render() {
     const { classes, healthCheckResults } = this.props;
 
-    const styleOptions = {disableGutters: false};
+    const styleOptions = { disableGutters: false };
 
     return Utils.sortObj(healthCheckResults, 'displayOrder').map(
       ({ key, value: item }) => {
@@ -51,7 +49,7 @@ class ConnectedHealthCheck extends React.Component {
 ConnectedHealthCheck.propTypes = {
   // styles
   classes: PropTypes.shape({}).isRequired,
-  healthCheckResults: PropTypes.shape({}).isRequired,
+  healthCheckResults: PropTypes.shape({}).isRequired
   // functions
 };
 

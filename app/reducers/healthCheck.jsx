@@ -8,7 +8,7 @@
 
 // @flow
 
-import SET_HEALTHZ_CHECK from '../actions/actionTypes';
+import { HEALTHZ_CHECK } from '../actions/actionTypes';
 
 const lodash = require('lodash');
 
@@ -18,6 +18,12 @@ const defaultHealthChecks = {
     optionInfo: '',
     isHealth: false,
     displayTitle: 'HealthCheck.MasterPC'
+  },
+  controller: {
+    displayOrder: 11,
+    optionInfo: '',
+    isHealth: false,
+    displayTitle: 'HealthCheck.Controller'
   },
   modbus: {
     displayOrder: 21,
@@ -50,7 +56,7 @@ export default function healthCheckResults(
   action: actionType
 ) {
   switch (action.type) {
-    case SET_HEALTHZ_CHECK:
+    case HEALTHZ_CHECK.SET:
       if (!lodash.has(state, action.section)) return state;
       return {
         ...state,

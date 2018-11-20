@@ -10,7 +10,6 @@ import { OPERATION_RESULT } from '../reducers/operations';
 
 const lodash = require('lodash');
 
-
 // 定位作业
 export function* getOperation() {
   const state = yield select();
@@ -147,7 +146,6 @@ export function* handleResults(data) {
   const state = yield select();
 
   const hasFail = lodash.every(data, v => v.result === OPERATION_RESULT.NOK);
-
 
   let rType = '';
   let continueDoing = false;

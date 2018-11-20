@@ -24,15 +24,14 @@ import Fade from '@material-ui/core/Fade';
 
 import MenuIcon from '@material-ui/icons/Menu';
 
-
 import Divider from '@material-ui/core/Divider';
 
 import Flag from 'react-flags';
 
 import BottomNavigation from '@material-ui/core/BottomNavigation';
 import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
-import Notify from "../Notify";
-import NavBar from "../NavBar";
+import Notify from '../Notify';
+import NavBar from '../NavBar';
 
 import styles from './styles';
 
@@ -62,7 +61,6 @@ export default function withLayout(SubCompontents, showTop = true) {
       this.handleCloseStatus = this.handleCloseStatus.bind(this);
     }
 
-
     shouldComponentUpdate(nextProps, nextState) {
       return true;
     }
@@ -76,7 +74,10 @@ export default function withLayout(SubCompontents, showTop = true) {
       const { orderStatus, workMode } = this.props;
       const isAutoMode = workMode === 'auto';
       if (
-        lodash.includes(['Ready', 'PreDoing', 'Timeout', 'Init'], orderStatus) ||
+        lodash.includes(
+          ['Ready', 'PreDoing', 'Timeout', 'Init'],
+          orderStatus
+        ) ||
         !isAutoMode
       ) {
         shouldProcessing = false;
@@ -88,7 +89,6 @@ export default function withLayout(SubCompontents, showTop = true) {
         });
       }
     }
-
 
     handleMenu(event) {
       this.setState({ anchorEl: event.currentTarget });
@@ -129,8 +129,14 @@ export default function withLayout(SubCompontents, showTop = true) {
         usersInfo
       } = this.props;
       const isAutoMode = workMode === 'auto';
-      const {uid, name, uuid, avatar } = usersInfo[0];
-      if (lodash.includes(['Ready', 'PreDoing', 'Timeout', 'Init'], orderStatus) || !isAutoMode) {
+      const { uid, name, uuid, avatar } = usersInfo[0];
+      if (
+        lodash.includes(
+          ['Ready', 'PreDoing', 'Timeout', 'Init'],
+          orderStatus
+        ) ||
+        !isAutoMode
+      ) {
         shouldProcessing = false;
       }
 
@@ -175,13 +181,9 @@ export default function withLayout(SubCompontents, showTop = true) {
                     <img
                       alt={name}
                       src={avatar}
-                      className={
-                        `${classes.imgRaised
-                        } ${
-                        classes.imgRounded
-                        } ${
-                        classes.imgFluid}`
-                      }
+                      className={`${classes.imgRaised} ${classes.imgRounded} ${
+                        classes.imgFluid
+                      }`}
                     />
                   </div>
                   <div className={classes.menuUserName}>
@@ -238,7 +240,7 @@ export default function withLayout(SubCompontents, showTop = true) {
                       onClose={this.handleCloseStatus}
                       TransitionComponent={Fade}
                     >
-                      <HealthCheck healthCheckResults={healthCheckResults}/>
+                      <HealthCheck healthCheckResults={healthCheckResults} />
                     </Menu>
                     <Menu
                       id="menu-appbar"

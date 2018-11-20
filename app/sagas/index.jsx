@@ -8,8 +8,8 @@ import { sysInitFlow } from './systemInit';
 import { watchResults } from './operation';
 import { shutDownDiagWorkFlow } from './shutDownDiag';
 import { toolFunctions } from './tools';
-import { loginFlow, logoutFlow } from './auth'
-import { healthzCheckFlow } from './healthzCheck'
+import { loginFlow, logoutFlow } from './auth';
+import { healthzCheckFlow } from './healthzCheck';
 
 export default function* rootSaga() {
   yield all([
@@ -24,6 +24,6 @@ export default function* rootSaga() {
     loginFlow(),
     logoutFlow(),
     // healthz
-    healthzCheckFlow(),
+    healthzCheckFlow()
   ]);
 }

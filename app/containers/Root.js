@@ -7,7 +7,6 @@ import Routes from '../Routes';
 import { listenToNewCar } from '../actions/scannerDevice';
 import { setCardAuthListener } from '../actions/cardAuth';
 import { systemInit } from '../actions/sysInit';
-import { startHealthzCheck } from '../actions/healthCheck';
 
 type Props = {
   store: Store,
@@ -20,8 +19,13 @@ export default class Root extends Component<Props> {
     listenToNewCar(store.dispatch, store.getState);
     setCardAuthListener(store.dispatch);
     const connectionInfo = store.getState().setting.page.odooConnection;
-    store.dispatch(systemInit(connectionInfo.odooUrl.value, connectionInfo.hmiSn.value, store.dispatch)); // 初始化获取默认值
-    store.dispatch(startHealthzCheck()); // 启动healthzcheck 定时器
+    store.dispatch(
+      systemInit(
+        connectionInfo.odooUrl.value,
+        connectionInfo.hmiSn.value,
+        store.dispatch
+      )
+    ); // 初始化获取默认值
     return (
       <Provider store={store}>
         <ConnectedRouter history={history}>
