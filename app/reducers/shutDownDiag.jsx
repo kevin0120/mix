@@ -29,8 +29,8 @@ export default function shutDownDiag(
       return { ...state, show: false };
     }
     case SHUTDOWN_DIAG.OPEN_WITH_MSG: {
-      const { dType, msg } = action.msg;
-      return { ...state, show: true, type: dType, msg };
+      const { dType, msg } = action;
+      return { show: true, type: dType, msg };
     }
     default:
       return state;

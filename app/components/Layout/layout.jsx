@@ -130,10 +130,7 @@ export default function withLayout(SubCompontents, showTop = true) {
       } = this.props;
       const isAutoMode = workMode === 'auto';
       const {uid, name, uuid, avatar } = usersInfo[0];
-      if (
-        lodash.includes(['Ready', 'PreDoing', 'Timeout', 'Init'], orderStatus) ||
-        !isAutoMode
-      ) {
+      if (lodash.includes(['Ready', 'PreDoing', 'Timeout', 'Init'], orderStatus) || !isAutoMode) {
         shouldProcessing = false;
       }
 
@@ -241,10 +238,7 @@ export default function withLayout(SubCompontents, showTop = true) {
                       onClose={this.handleCloseStatus}
                       TransitionComponent={Fade}
                     >
-                      <HealthCheck
-                        healthCheckResults={healthCheckResults}
-                        connections={connections}
-                      />
+                      <HealthCheck healthCheckResults={healthCheckResults}/>
                     </Menu>
                     <Menu
                       id="menu-appbar"

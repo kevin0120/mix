@@ -15,7 +15,7 @@ export const OPERATION_RESULT = {
 };
 
 const defaultOperations = {
-  operationStatus: '',
+  operationStatus: 'Init',
   carID: '',
   carType: '',
   activeResultIndex: -1,

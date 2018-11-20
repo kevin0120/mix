@@ -22,7 +22,7 @@ const getOperations = state => state.operations;
 
 export function* openDiag(dType, data) {
   const state = yield select();
-  const { enable } = state.operationSettings.byPass;
+  const { enable } = state.setting.operationSettings.byPass;
   if (dType === 'bypass' && !enable) {
     // bypass 但是其功能未使能
     return;
