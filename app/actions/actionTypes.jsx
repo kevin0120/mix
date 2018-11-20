@@ -24,7 +24,10 @@ export const CARD_AUTH = {
 };
 
 export const USER = {
-  FETCH_OK: 'USER_FETCH_OK'
+  LOGIN_REQUEST: 'USER.LOGIN_REQUEST',
+  LOGIN_SUCCESS: 'USER.LOGIN_SUCCESS',
+  LOGOUT: 'USER.LOGOUT',
+  LOGOUT_SUCCESS: 'USER.LOGOUT_SUCCESS',
 };
 
 export const RUSH = {
@@ -80,7 +83,10 @@ export const HEALTH = {
   IO: 'HEALTH_IO',
 };
 
-export const SET_HEALTHZ_CHECK = 'SET_HEALTHZ_CHECK';
+export const HEALTHZ_CHECK = {
+  START: 'HEALTHZ_CHECK.START',
+  STOP: 'HEALTHZ_CHECK.STOP'
+};
 
 export const WORK_MODE = {
   SWITCH_WM: 'SWITCH_WORK_MODE',

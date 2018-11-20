@@ -24,8 +24,6 @@ import Fade from '@material-ui/core/Fade';
 
 import MenuIcon from '@material-ui/icons/Menu';
 
-import NavBar from '../../components/NavBar';
-import Notify from '../../components/Notify';
 
 import Divider from '@material-ui/core/Divider';
 
@@ -33,6 +31,8 @@ import Flag from 'react-flags';
 
 import BottomNavigation from '@material-ui/core/BottomNavigation';
 import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
+import Notify from "../Notify";
+import NavBar from "../NavBar";
 
 import styles from './styles';
 
@@ -43,7 +43,6 @@ import HealthCheck from '../HealthCheck';
 import Button from '../CustomButtons/Button';
 
 const lodash = require('lodash');
-
 
 /* eslint-disable react/prefer-stateless-function */
 export default function withLayout(SubCompontents, showTop = true) {
@@ -63,18 +62,22 @@ export default function withLayout(SubCompontents, showTop = true) {
       this.handleCloseStatus = this.handleCloseStatus.bind(this);
     }
 
+
+    shouldComponentUpdate(nextProps, nextState) {
+      return true;
+    }
+
     handleChange = (event, value) => {
       this.setState({ value });
     };
 
     toggleMenu(open, e) {
       let shouldProcessing = true;
+      const { orderStatus, workMode } = this.props;
+      const isAutoMode = workMode === 'auto';
       if (
-        this.props.orderStatus === 'Ready' ||
-        this.props.orderStatus === 'PreDoing' ||
-        this.props.orderStatus === 'Timeout' ||
-        this.props.orderStatus === 'Init' ||
-        !this.props.isAutoMode
+        lodash.includes(['Ready', 'PreDoing', 'Timeout', 'Init'], orderStatus) ||
+        !isAutoMode
       ) {
         shouldProcessing = false;
       }
@@ -86,9 +89,6 @@ export default function withLayout(SubCompontents, showTop = true) {
       }
     }
 
-    shouldComponentUpdate(nextProps, nextState) {
-      return true;
-    }
 
     handleMenu(event) {
       this.setState({ anchorEl: event.currentTarget });
@@ -115,18 +115,29 @@ export default function withLayout(SubCompontents, showTop = true) {
 
     HealthCheckOk() {
       const { healthCheckResults } = this.props;
-      return lodash.every(healthCheckResults, {isHealth: true});
+      return lodash.every(healthCheckResults, { isHealth: true });
     }
 
     render() {
       let shouldProcessing = true;
-      const { orderStatus, classes, avatarImg, Username, workMode, healthCheckResults, connections } = this.props;
+      const {
+        orderStatus,
+        classes,
+        workMode,
+        healthCheckResults,
+        connections,
+        usersInfo
+      } = this.props;
       const isAutoMode = workMode === 'auto';
-      if (lodash.include(['Ready','PreDoing', 'Timeout', 'Init'], orderStatus) || !isAutoMode) {
+      const {uid, name, uuid, avatar } = usersInfo[0];
+      if (
+        lodash.includes(['Ready', 'PreDoing', 'Timeout', 'Init'], orderStatus) ||
+        !isAutoMode
+      ) {
         shouldProcessing = false;
       }
 
-      const { anchorEl, value, showStatus } = this.state;
+      const { anchorEl, value, showStatus, isMenuOpen } = this.state;
       const open = Boolean(anchorEl);
 
       const openStatusMenu = Boolean(showStatus);
@@ -144,7 +155,7 @@ export default function withLayout(SubCompontents, showTop = true) {
               <ClickAwayListener onClickAway={() => this.toggleMenu(false)}>
                 <SwipeableDrawer
                   anchor="right"
-                  open={this.state.isMenuOpen}
+                  open={isMenuOpen}
                   disableSwipeToOpen={disableSwipeToOpen}
                   onClose={() => this.toggleMenu(false)}
                   onOpen={() => this.toggleMenu(true)}
@@ -163,33 +174,21 @@ export default function withLayout(SubCompontents, showTop = true) {
               <Notify />
               <AppBar position="fixed" className={classes.appBar}>
                 <Toolbar className={classes.topBar}>
-                  {/* <Typography variant="title" color="inherit" className={classes.navTitle}>
-                        {t('Title')}
-                      </Typography> */}
                   <div className={classes.menuBtnWrapAvatar}>
-                    {/*<IconButton*/}
-                    {/*aria-owns={open ? 'menu-appbar' : null}*/}
-                    {/*aria-haspopup="true"*/}
-                    {/*onClick={this.handleMenu}*/}
-                    {/*color="inherit"*/}
-                    {/*disabled={ shouldProcessing }*/}
-                    {/*>*/}
-                    {/*/!*<Language />*!/*/}
-                    {/*</IconButton>*/}
                     <img
                       alt={name}
-                      src={avatarImg}
+                      src={avatar}
                       className={
-                        classes.imgRaised +
-                        ' ' +
-                        classes.imgRounded +
-                        ' ' +
-                        classes.imgFluid
+                        `${classes.imgRaised
+                        } ${
+                        classes.imgRounded
+                        } ${
+                        classes.imgFluid}`
                       }
                     />
                   </div>
                   <div className={classes.menuUserName}>
-                    <p>{Username}</p>
+                    <p>{name}</p>
                   </div>
                   <div className={classes.menuBtnWrapLeft}>
                     <BottomNavigation
@@ -242,7 +241,10 @@ export default function withLayout(SubCompontents, showTop = true) {
                       onClose={this.handleCloseStatus}
                       TransitionComponent={Fade}
                     >
-                      <HealthCheck healthCheckResults={healthCheckResults} connections={connections} />
+                      <HealthCheck
+                        healthCheckResults={healthCheckResults}
+                        connections={connections}
+                      />
                     </Menu>
                     <Menu
                       id="menu-appbar"
@@ -310,16 +312,18 @@ export default function withLayout(SubCompontents, showTop = true) {
 
   ConnectedLayout.propTypes = {
     classes: PropTypes.object.isRequired,
+    usersInfo: PropTypes.array.isRequired,
+    connections: PropTypes.object.isRequired,
     orderStatus: PropTypes.string.isRequired,
-    workMode: PropTypes.bool,
+    workMode: PropTypes.string.isRequired,
     healthCheckResults: PropTypes.shape({}).isRequired
   };
 
   const mapStateToProps = (state, ownProps) => ({
     usersInfo: state.users,
     connections: state.connections,
-    orderStatus: state.operation.operationStatus,
-    workMode: state.workMode.workMode,
+    orderStatus: state.operations.operationStatus,
+    workMode: state.setting.operationSettings.workMode,
     healthCheckResults: state.healthCheckResults,
     ...ownProps
   });

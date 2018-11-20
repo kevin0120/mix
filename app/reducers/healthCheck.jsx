@@ -45,7 +45,7 @@ type actionType = {
   +isHealth: boolean
 };
 
-export default function healthChecks(
+export default function healthCheckResults(
   state: object = defaultHealthChecks,
   action: actionType
 ) {

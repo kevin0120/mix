@@ -3,24 +3,30 @@
 import { all } from 'redux-saga/effects';
 
 import { watchScanner } from './scanner';
-import { authFlow } from './cardAuth';
+// import { cardAuthFlow } from './cardAuth';
 import { sysInitFlow } from './systemInit';
 import { watchOperation, watchResults } from './operation';
 import { watchIO } from './io';
 import { watchHealth} from './health';
 import { shutDownDiagWorkFlow } from './shutDownDiag';
 import { toolFunctions } from './tools';
+import { loginFlow, logoutFlow } from './auth'
+import { healthzCheckFlow } from './healthzCheck'
 
 export default function* rootSaga() {
   yield all([
-    authFlow(),
+    // card auth
+    // cardAuthFlow(),
     watchScanner(),
     watchResults(),
     watchIO(),
     watchHealth(),
     shutDownDiagWorkFlow(),
     toolFunctions(),
-    watchOperation(),
-    sysInitFlow(),
+    // auth
+    loginFlow(),
+    logoutFlow(),
+    // healthz
+    healthzCheckFlow(),
   ]);
 }
