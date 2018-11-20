@@ -58,6 +58,9 @@ const withstyles = theme => ({
     height: '320px',
     borderRadius: '4px'
   },
+  cardGridItem: {
+    paddingRight: '30px',
+  },
   cardContent: {
     position: 'relative',
     padding: '50px 10px 0'
@@ -176,10 +179,9 @@ class ConnectedWelcome extends React.Component {
               container
               className={classes.container}
               justify="center"
-              spacing={24}
             >
-              {routeConfigs.slice(1, -1).map(route => (
-                <Grid key={route.name} item>
+              {routeConfigs.slice(1,-1).map(route => (
+                <Grid key={route.name} item className={classes.cardGridItem}>
                   <Card
                     key={route.name}
                     onClick={() => goto(route.url)}

@@ -28,7 +28,7 @@ class ConnectedHealthCheck extends React.Component {
           <I18n ns="translations">
             {t => (
               <ListItem
-                key={key}
+                key={displayTitle}
                 disableGutters={styleOptions.disableGutters}
                 className={classes.infoItem}
               >

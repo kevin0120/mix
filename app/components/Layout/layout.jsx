@@ -155,24 +155,24 @@ export default function withLayout(SubCompontents, showTop = true) {
         <I18n ns="translations">
           {t => (
             <div className={classes.layout}>
-              <ClickAwayListener onClickAway={() => this.toggleMenu(false)}>
-                <SwipeableDrawer
-                  anchor="right"
-                  open={isMenuOpen}
-                  disableSwipeToOpen={disableSwipeToOpen}
-                  onClose={() => this.toggleMenu(false)}
-                  onOpen={() => this.toggleMenu(true)}
-                >
-                  <div
-                    tabIndex={0}
-                    role="button"
-                    aria-hidden
-                    onClick={() => this.toggleMenu(false)}
-                  >
-                    <NavBar />
-                  </div>
-                </SwipeableDrawer>
-              </ClickAwayListener>
+              {/*<ClickAwayListener onClickAway={() => this.toggleMenu(false)}>*/}
+                {/*<SwipeableDrawer*/}
+                  {/*anchor="right"*/}
+                  {/*open={isMenuOpen}*/}
+                  {/*disableSwipeToOpen={disableSwipeToOpen}*/}
+                  {/*onClose={() => this.toggleMenu(false)}*/}
+                  {/*onOpen={() => this.toggleMenu(true)}*/}
+                {/*>*/}
+                  {/*<div*/}
+                    {/*tabIndex={0}*/}
+                    {/*role="button"*/}
+                    {/*aria-hidden*/}
+                    {/*onClick={() => this.toggleMenu(false)}*/}
+                  {/*>*/}
+                    {/*<NavBar />*/}
+                  {/*</div>*/}
+                {/*</SwipeableDrawer>*/}
+              {/*</ClickAwayListener>*/}
               <SubCompontents />
               <Notify />
               <AppBar position="fixed" className={classes.appBar}>
@@ -198,6 +198,7 @@ export default function withLayout(SubCompontents, showTop = true) {
                     >
                       {routeConfigs.slice(0, -1).map(route => (
                         <BottomNavigationAction
+                          key={route.name}
                           label={t(route.title)}
                           component="a"
                           href={`#${route.url}`}
@@ -230,11 +231,11 @@ export default function withLayout(SubCompontents, showTop = true) {
                       anchorEl={showStatus}
                       anchorOrigin={{
                         vertical: 'top',
-                        horizontal: 'right'
+                        horizontal: 'left',
                       }}
                       transformOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right'
+                        vertical: 'bottom',
+                        horizontal: 'left',
                       }}
                       open={openStatusMenu}
                       onClose={this.handleCloseStatus}
@@ -247,11 +248,11 @@ export default function withLayout(SubCompontents, showTop = true) {
                       anchorEl={anchorEl}
                       anchorOrigin={{
                         vertical: 'top',
-                        horizontal: 'right'
+                        horizontal: 'left',
                       }}
                       transformOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right'
+                        vertical: 'bottom',
+                        horizontal: 'left',
                       }}
                       open={open}
                       onClose={this.handleClose}
