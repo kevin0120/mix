@@ -2,10 +2,11 @@
 import React from 'react';
 
 // import Editor from '../containers/editor';
-// import Preferences from '../containers/preferences';
 // import Help from '../containers/help';
-// import Event from '../containers/event';
-// import ConnResult from '../containers/queryResult';
+import Preferences from '../containers/config';
+import Event from '../containers/event';
+import ConnResult from '../containers/result';
+import Working from '../containers/working';
 
 // icons
 import HomeIcon from '@material-ui/icons/Home';
@@ -47,16 +48,16 @@ export const routeConfigs = [
     icon: HomeIcon,
     color: grayColor
   },
-  // {
-  //   name: 'working',
-  //   url: '/working',
-  //   title: 'main.operation',
-  //   main: Working,
-  //   icon: BuildIcon,
-  //   color: grayColor,
-  //   image: WorkingImg,
-  //   enName: 'Operating',
-  // },
+  {
+    name: 'working',
+    url: '/working',
+    title: 'main.operation',
+    main: Working,
+    icon: BuildIcon,
+    color: grayColor,
+    image: WorkingImg,
+    enName: 'Operating',
+  },
   // {
   //   name: 'editor',
   //   url: '/editor',
@@ -67,36 +68,36 @@ export const routeConfigs = [
   //   image: editorImg,
   //   enName: 'Operation Instructions',
   // },
-  // {
-  //   name: 'preferences',
-  //   url: '/preferences',
-  //   title: 'main.preferences',
-  //   main: Preferences,
-  //   icon: SettingsApplicationsIcon,
-  //   color: grayColor,
-  //   image: settingImg,
-  //   enName: 'Preferences',
-  // },
-  // {
-  //   name: 'event',
-  //   url: '/events',
-  //   title: 'main.event',
-  //   main: Event,
-  //   icon: Mail,
-  //   color: grayColor,
-  //   image: LoginImg,
-  //   enName: 'Event Log',
-  // },
-  // {
-  //   name: 'result',
-  //   url: '/results',
-  //   title: 'main.resultQuery',
-  //   main: ConnResult,
-  //   icon: Save,
-  //   color: grayColor,
-  //   image: LoginImg,
-  //   enName: 'Query Results',
-  // },
+  {
+    name: 'preferences',
+    url: '/preferences',
+    title: 'main.preferences',
+    main: Preferences,
+    icon: SettingsApplicationsIcon,
+    color: grayColor,
+    image: settingImg,
+    enName: 'Preferences',
+  },
+  {
+    name: 'event',
+    url: '/events',
+    title: 'main.event',
+    main: Event,
+    icon: Mail,
+    color: grayColor,
+    image: LoginImg,
+    enName: 'Event Log',
+  },
+  {
+    name: 'result',
+    url: '/results',
+    title: 'main.resultQuery',
+    main: ConnResult,
+    icon: Save,
+    color: grayColor,
+    image: LoginImg,
+    enName: 'Query Results',
+  },
   // {
   //   name: 'lock',
   //   url: '/pages/lock-screen-page',

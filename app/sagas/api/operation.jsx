@@ -1,4 +1,22 @@
-import { defaultClient } from '../../common/utils';
+import axios from "axios";
+import axiosRetry from 'axios-retry';
+
+const defaultClient = axios.create({
+  timeout: 3000,
+  headers: {'Content-Type': 'application/json'}
+});
+
+axiosRetry(defaultClient, {
+  retries: 2,
+  retryDelay: axiosRetry.exponentialDelay,
+  retryCondition: (err) => {
+    if (err.message.indexOf("200") !== -1 || err.message.indexOf("409") !== -1) {
+      return false;
+    }
+
+    return true;
+  }
+});
 
 // 获取作业
 export function fetchRoutingWorkcenter(url, workCenterCode, carType, job) {
@@ -24,7 +42,7 @@ export function fetchRoutingWorkcenter(url, workCenterCode, carType, job) {
 
 // 获取工单
 export function fetchWorkorder(url, hmiSN, code) {
-  const fullUrl = `${url}/rush/v1/wokorders`;
+  const fullUrl = `${url}/rush/v1/workorder`;
 
   return defaultClient
     .get(fullUrl, {
@@ -69,7 +87,7 @@ export function controllerMode(url, mode, controllerSN) {
 }
 
 // pset
-export function pset(url, controllerSN, gunSN, resultID, count, userID) {
+export function pset(url, controllerSN, gunSN, resultID, count, userID, pset) {
   const fullUrl = `${url}/rush/v1/psets`;
   return defaultClient
     .put(fullUrl, {

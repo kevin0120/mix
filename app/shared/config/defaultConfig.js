@@ -1,3 +1,4 @@
+
 export const defaultConfigs = {
   version: 'v0.1',
   base: {
@@ -81,7 +82,7 @@ export const defaultConfigs = {
         {
           bit: 4,
           io: 'in',
-          function: 'RESET_KEY',
+          function: 'RESET',
           label: '复位钥匙'
         },
         {
@@ -107,31 +108,31 @@ export const defaultConfigs = {
         {
           bit: 0,
           io: 'out',
-          function: 'LED_GREEN',
+          function: 'LED_DOING',
           label: '绿灯'
         },
         {
           bit: 1,
           io: 'out',
-          function: 'LED_YELLOW',
+          function: 'LED_WARNING',
           label: '黄灯'
         },
         {
           bit: 2,
           io: 'out',
-          function: 'LED_RED',
+          function: 'LED_ERROR',
           label: '红灯'
         },
         {
           bit: 3,
           io: 'out',
-          function: 'LED_BLUE',
+          function: 'LED_INFO',
           label: '蓝灯'
         },
         {
           bit: 4,
           io: 'out',
-          function: 'BEEP',
+          function: 'LED_BEEP',
           label: '蜂鸣'
         },
         {
@@ -170,13 +171,13 @@ export const defaultConfigs = {
   },
   // 作业配置
   operationSettings: {
-    opMode: 'op', // 作业模式:        op 或 order
-    controllerMode: 'job', // 拧紧模式:        job 或 pset
+    opMode: 'order', // 作业模式:        op 或 order
+    controllerMode: 'pset', // 拧紧模式:        job 或 pset
     workMode: 'auto', // 工作模式:        auto 或 scanner 或 manual
-    flowTriggers: ['carType', 'carID'], // 工作流程触发条件:  carType:车型代码 carID:vin/knr/longpin
+    flowTriggers: ['carID'], // 工作流程触发条件:  carType:车型代码 carID:vin/knr/longpin
 
     // 作业前检测(order mode only)
-    preCheck: true,
+    preCheck: false,
 
     // 强制放行配置
     byPass: {

@@ -168,7 +168,7 @@ class ConnectedLockScreenPage extends React.Component {
 }
 
 ConnectedLockScreenPage.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.shape({}).isRequired,
   name: PropTypes.string.isRequired,
   avatarImg: PropTypes.string.isRequired
 };

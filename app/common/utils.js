@@ -28,9 +28,46 @@ export function showNoty(type, text) {
   });
 }
 
+export function isCarID(data) {
+  if (isVin(data) || isKnr(data) || isLongpin(data)) {
+    return true;
+  }
+
+  return false;
+}
+
 export function isVin(vin) {
   if (vin.length !== 17) return false;
   return getCheckDigit(vin) === vin[8];
+}
+
+function isKnr(data) {
+  if (data.length === 8 && checkNaturalnumber(data)){
+    return true;
+  }
+
+  return false
+}
+
+function isLongpin(data) {
+  if (data.length === 14) {
+    const year = data.substring(2, 6);
+    const knr = data.substring(6);
+
+    if (checkNaturalnumber(year) && isKnr(knr)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function checkNaturalnumber(data){
+  if(/^[0-9]+$/.test(data) && (data>0)){
+    return true;
+  }
+
+  return false;
 }
 
 // source: https://en.wikipedia.org/wiki/Vehicle_identification_number#Example_Code

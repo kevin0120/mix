@@ -223,7 +223,7 @@ class LoginPage extends React.Component {
 }
 
 LoginPage.propTypes = {
-  classes: PropTypes.object.isRequired
+  classes: PropTypes.shape({}).isRequired
 };
 
 export default withStyles(loginPageStyle)(LoginPage);

@@ -45,7 +45,7 @@ function CardBody({ ...props }) {
 }
 
 CardBody.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.shape({}).isRequired,
   className: PropTypes.string,
   background: PropTypes.bool,
   plain: PropTypes.bool,

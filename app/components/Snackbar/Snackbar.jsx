@@ -82,7 +82,7 @@ Snackbar.defaultProps = {
 };
 
 Snackbar.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.shape({}).isRequired,
   message: PropTypes.node.isRequired,
   color: PropTypes.oneOf([
     'info',

@@ -1,5 +1,7 @@
 import { OPERATION } from '../actions/actionTypes';
-import { isVin } from '../common/utils';
+import { isCarID } from '../common/utils';
+
+import { setLedStatusDoing, setLedError, setLedStatusReady, sOn, sBlinkOn } from '../actions/ioModbus';
 
 export const OPERATION_STATUS = {
   INIT: 'Init',
@@ -18,29 +20,30 @@ const defaultOperations = {
   operationStatus: 'Init',
   carID: '',
   carType: '',
-  activeResultIndex: -1,
-  failCount: -1,
-  jobID: -1,
+  activeResultIndex: 0,
+  failCount: 0,
+  jobID: 0,
   maxOpTimes: 30,
   workSheet: '',
   productID: -1,
   workcenterID: -1,
+  lnr: '',
   results: [
-    {
-      id: -1,
-      controller_sn: '',
-      gun_sn: '',
-      pset: -1,
-      max_redo_times: 3,
-      offset_x: 0,
-      offset_y: 0,
-      sequence: 0,
-      group_sequence: 0,
-      ti: 0,
-      mi: 0,
-      wi: 0,
-      result: ''
-    }
+    // {
+    //   id: -1,
+    //   controller_sn: '',
+    //   gun_sn: '',
+    //   pset: -1,
+    //   max_redo_times: 3,
+    //   offset_x: 0,
+    //   offset_y: 0,
+    //   sequence: 0,
+    //   group_sequence: 0,
+    //   ti: 0,
+    //   mi: 0,
+    //   wi: 0,
+    //   result: ''
+    // }
   ]
 };
 
@@ -69,15 +72,15 @@ export default function operations(
       return OperationFailed(state, action.data);
     case OPERATION.FINISHED:
       return OperationFinished(state, action.data);
-    case OPERATION.FORCE_FINISHED:
-      return ForceOperationFinished(state);
+    case OPERATION.CONTINUE:
+      return OperationContinue(state);
     default:
       return state;
   }
 }
 
 function NewTriggerData(state, data) {
-  if (isVin(data)) {
+  if (isCarID(data)) {
     return {
       ...state,
       carID: data
@@ -101,8 +104,8 @@ function NewOperation(state, mode, data) {
       productID: data.product_id,
       workcenterID: data.workcenter_id,
       results: data.points,
-      activeResultIndex: 0,
-      failCount: 0
+      // activeResultIndex: 0,
+      // failCount: 0
     };
   }
 
@@ -110,24 +113,35 @@ function NewOperation(state, mode, data) {
   return {
     ...state,
     jobID: data.job_id,
+    carType: data.model,
     maxOpTimes: data.max_op_time,
     workSheet: data.work_sheet,
     results: data.results,
-    activeResultIndex: 0,
-    failCount: 0
+    // activeResultIndex: 0,
+    // failCount: 0,
+    lnr: data.lnr,
   };
 }
 
 function OperationStarted(state) {
+  setLedStatusDoing();
+
   return {
     ...state,
+    failCount: 0,
+    activeResultIndex: 0,
     operationStatus: OPERATION_STATUS.DOING
   };
 }
 
 function mergeResults(state, data) {
   const rs = state.results;
-  for (let i = 0; i < data.length; i += 1) {
+
+  if (!data) {
+    return rs;
+  }
+
+  for(let i = 0; i < data.length; i++) {
     rs[i + state.activeResultIndex].ti = data[i].ti;
     rs[i + state.activeResultIndex].mi = data[i].mi;
     rs[i + state.activeResultIndex].wi = data[i].wi;
@@ -144,6 +158,7 @@ function OperationResultOK(state, data) {
     ...state,
     activeResultIndex: state.activeResultIndex + data.length,
     failCount: 0,
+    operationStatus: OPERATION_STATUS.DOING,
     results
   };
 }
@@ -159,6 +174,7 @@ function OperationResultNOK(state, data) {
 }
 
 function OperationFailed(state, data) {
+  setLedError(sOn);
   const results = mergeResults(state, data);
 
   return {
@@ -169,19 +185,36 @@ function OperationFailed(state, data) {
   };
 }
 
-function ForceOperationFinished(state) {
-  return {
-    ...state,
-    operationStatus: OPERATION_STATUS.READY
-  };
-}
-
 function OperationFinished(state, data) {
+  setLedStatusReady();
+
   const results = mergeResults(state, data);
 
   return {
     ...state,
     operationStatus: OPERATION_STATUS.READY,
     results
+  };
+}
+
+function OperationContinue(state) {
+  setLedStatusDoing();
+
+  const { activeResultIndex, results } = state;
+  let count = 1;
+  const ele = results[activeResultIndex + 1];
+  for(let i = activeResultIndex + 2; i < results.length; i++) {
+    if (ele.sequence === results[i].sequence) {
+      count += 1;
+    } else {
+      break;
+    }
+  }
+
+  return {
+    ...state,
+    operationStatus: OPERATION_STATUS.DOING,
+    activeResultIndex: activeResultIndex + count,
+    failCount: 0,
   };
 }

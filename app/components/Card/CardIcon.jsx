@@ -25,7 +25,7 @@ function CardIcon({ ...props }) {
 }
 
 CardIcon.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.shape({}).isRequired,
   className: PropTypes.string,
   color: PropTypes.oneOf([
     'warning',

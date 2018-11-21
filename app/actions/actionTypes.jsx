@@ -52,8 +52,13 @@ export const OPERATION = {
   },
   STARTED: 'OPERATION_STARTED', // switch to doing
   FINISHED: 'OPERATION_FINISHED', // switch to ready
-  FORCE_FINISHED: 'OPERATION_FORCE_FINISHED',
-  FAILED: 'OPERATION_FAILED'
+  FAILED: 'OPERATION_FAILED',
+  CONTINUE: 'OPERATION_CONTINUE',
+  VERIFIED: 'OPERATION_VERIFIED',
+};
+
+export const IO = {
+  FUNCTION: 'IO_FUNCTION',
 };
 
 export const CONNECTION = {
@@ -67,6 +72,15 @@ export const NOTIFY = {
 };
 
 export const SYSTEM_INIT = 'SYSTEM_INIT';
+
+// Health Checking Actions
+export const HEALTH = {
+  HEALTH: 'HEALTH',
+  MASTERPC: 'HEALTH_MASTERPC',
+  CONTROLLER: 'HEALTH_CONTROLLER',
+  RFID: 'HEALTH_RFID',
+  IO: 'HEALTH_IO',
+};
 
 export const HEALTHZ_CHECK = {
   SET: 'HEALTHZ_CHECK.SET',
@@ -89,4 +103,13 @@ export const SHUTDOWN_DIAG = {
 
 export const TOOLS = {
   ENABLE: 'TOOLS.ENABLE'
+};
+
+export const USER_CONFIGS = {
+  SAVE: 'USER_CONFIGS_SAVE',
+};
+
+export const TIMELINE_STORY = {
+  NEW: 'TIMELINE_STORY_NEW',
+  CLEAR: 'TIMELINE_STORY_CLEAR'
 };

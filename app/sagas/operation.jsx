@@ -2,14 +2,31 @@ import { select, put, take, call } from 'redux-saga/effects';
 import {
   fetchRoutingWorkcenter,
   fetchWorkorder,
-  jobManual
+  jobManual,
+  pset
 } from './api/operation';
-import { OPERATION, RUSH } from '../actions/actionTypes';
+import { OPERATION, RUSH, SHUTDOWN_DIAG } from '../actions/actionTypes';
 import { openShutdown } from '../actions/shutDownDiag';
 import { OPERATION_RESULT } from '../reducers/operations';
+import { closeDiag, confirmDiag, openDiag } from './shutDownDiag';
 
 const lodash = require('lodash');
 
+// 监听作业
+export function* watchOperation() {
+  while (true) {
+    const action = yield take([
+      OPERATION.VERIFIED,
+    ]);
+    switch (action.type) {
+      case OPERATION.VERIFIED:
+        yield call(startOperation, action.data);
+        break;
+      default:
+        break;
+    }
+  }
+}
 // 定位作业
 export function* getOperation() {
   const state = yield select();
@@ -35,6 +52,7 @@ export function* getOperation() {
     }
   } else {
     // 工单模式
+
     const hmiSN = state.setting.page.odooConnection.hmiSn.value;
     const code = state.operations.carID;
     try {
@@ -43,22 +61,24 @@ export function* getOperation() {
         fetchOK = true;
       }
     } catch (e) {
-      if (e.response.status === 409) {
-        yield put(openShutdown, 'verify', e.response.data);
+      const { preCheck } = state.setting.operationSettings;
+      resp = e.response;
+      if (resp.status === 409) {
+        fetchOK = true;
+
+        if (preCheck) {
+          yield put(openShutdown('verify', resp.data));
+          return;
+        }
       }
     }
   }
 
   if (fetchOK) {
     // 定位作业成功
-    yield put({
-      type: OPERATION.OPERATION.FETCH_OK,
-      mode: state.setting.operationSettings.opMode,
-      data: resp.data
-    });
-
     // 开始作业
-    yield call(startOperation);
+
+    yield call(startOperation, resp.data);
   } else {
     // 定位作业失败
     yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
@@ -66,8 +86,18 @@ export function* getOperation() {
 }
 
 // 开始作业
-export function* startOperation() {
-  const state = yield select();
+export function* startOperation(data) {
+
+  let state = yield select();
+
+  yield put({
+    type: OPERATION.OPERATION.FETCH_OK,
+    mode: state.setting.operationSettings.opMode,
+    data
+  });
+
+  state = yield select();
+
   const { controllerMode, workMode } = state.setting.operationSettings;
 
   const rushUrl = state.connections.masterpc;
@@ -83,8 +113,9 @@ export function* startOperation() {
       workcenterID,
       jobID,
       results,
-      hmiSn
     } = state.operations;
+
+    const { hmiSn } = state.setting.page.odooConnection;
     const userID = 1;
     const skip = false;
     const hasSet = false;
@@ -128,9 +159,42 @@ export function* doingOperation() {
 
   if (controllerMode === 'pset') {
     // pset模式
+
+    const { masterpc } = state.connections;
+    const { activeResultIndex, failCount, results } = state.operations;
+    const userID = 1;
+
+    const resp = yield call(
+      pset,
+      masterpc,
+      results[activeResultIndex].controller_sn,
+      results[activeResultIndex].gun_sn,
+      results[activeResultIndex].id,
+      failCount + 1,
+      userID,
+      results[activeResultIndex].pset);
+
+    if (resp.status !== 200) {
+      // 程序号设置失败
+      yield put({ type: OPERATION.PROGRAMME.SET_FAIL });
+      return false;
+    }
   }
 
   return true;
+}
+
+// 复位继续作业
+export function* continueOperation() {
+  const state = yield select();
+  const { operations } = state;
+
+  if (operations.activeResultIndex >= (operations.results.length - 1)) {
+    yield put({type: OPERATION.FINISHED});
+  } else {
+    yield put({type: OPERATION.CONTINUE});
+    yield call(doingOperation);
+  }
 }
 
 // 监听结果
@@ -175,7 +239,7 @@ export function* handleResults(data) {
     continueDoing = true;
   }
 
-  yield put({ type: rType, data });
+  yield put({type: rType, data});
   if (continueDoing) {
     yield call(doingOperation);
   }

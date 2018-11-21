@@ -10,14 +10,21 @@
 
 import { OPERATION } from './actionTypes';
 
-export function forceSwitch2Ready() {
+export function switch2Ready() {
   return {
-    type: OPERATION.FORCE_FINISHED
+    type: OPERATION.FINISHED
   };
 }
 
 export function switch2Doing() {
   return {
     type: OPERATION.STARTED
+  };
+}
+
+export function operationVerified(data) {
+  return {
+    type: OPERATION.VERIFIED,
+    data
   };
 }
