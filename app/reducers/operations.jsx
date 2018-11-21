@@ -12,6 +12,7 @@ import {
 export const OPERATION_STATUS = {
   INIT: 'Init',
   READY: 'Ready',
+  PREDOING: 'PreDoing',
   DOING: 'Doing',
   TIMEOUT: 'Timeout',
   FAIL: 'Fail'
@@ -22,8 +23,15 @@ export const OPERATION_RESULT = {
   NOK: 'NOK'
 };
 
+export const OPERATION_SOURCE = {
+  SCANNER: 'SCANNER',
+  RFID: 'RFID',
+  ANDON: 'ANDON',
+  MANUAL: 'MANUAL',
+};
+
 const defaultOperations = {
-  operationStatus: 'Init',
+  operationStatus: 'Ready',
   carID: '',
   carType: '',
   activeResultIndex: 0,
@@ -34,6 +42,7 @@ const defaultOperations = {
   productID: -1,
   workcenterID: -1,
   lnr: '',
+  source: '',
   results: [
     // {
     //   id: -1,
@@ -56,7 +65,8 @@ const defaultOperations = {
 type actionType = {
   +type: string,
   +data: object,
-  +force: boolean
+  +carID: string,
+  +carType: string
 };
 
 export default function operations(
@@ -65,7 +75,7 @@ export default function operations(
 ) {
   switch (action.type) {
     case OPERATION.TRIGGER.NEW_DATA:
-      return NewTriggerData(state, action.data);
+      return NewTriggerData(state, action.carID, action.carType);
     case OPERATION.OPERATION.FETCH_OK:
       return NewOperation(state, action.mode, action.data);
     case OPERATION.STARTED:
@@ -80,22 +90,18 @@ export default function operations(
       return OperationFinished(state, action.data);
     case OPERATION.CONTINUE:
       return OperationContinue(state);
+    case OPERATION.PREDOING:
+      return OperationPreDoing(state);
     default:
       return state;
   }
 }
 
-function NewTriggerData(state, data) {
-  if (isCarID(data)) {
-    return {
-      ...state,
-      carID: data
-    };
-  }
-
+function NewTriggerData(state, carID, carType) {
   return {
     ...state,
-    carType: data
+    carID: carID !== null ? carID : state.carID,
+    carType: carType !== null ? carType : state.carType,
   };
 }
 
@@ -222,5 +228,12 @@ function OperationContinue(state) {
     operationStatus: OPERATION_STATUS.DOING,
     activeResultIndex: activeResultIndex + count,
     failCount: 0
+  };
+}
+
+function OperationPreDoing(state) {
+  return {
+    ...state,
+    operationStatus: OPERATION_STATUS.PREDOING,
   };
 }

@@ -42,7 +42,7 @@ const mapStateToProps = (state, ownProps) => ({
   // masterpcUrl: state.connInfo.masterpc.connection,
   // hmiSn: state.userConfigs.odooConnection.hmiSn.value,
   // controllerSN: state.workingPage.infoTools.controllerSN,
-  // results: state.ongoingWorkOrder.results,
+  results: state.operations.results,
   // nextWorkorder: state.ongoingWorkOrder.nextWorkorder,
   ...ownProps
 });
@@ -63,12 +63,12 @@ class ConnectedResultDialog extends React.PureComponent {
   }
 
   componentDidUpdate(preProps, preState) {
-    // if (this.props.show && preProps.show !== this.props.show) {
-    //   // this.props.fetchNextWorkOrder(this.props.masterpcUrl, this.props.hmiSn);
-    //   this.setState({
-    //     isShow: true
-    //   })
-    // }
+    if (this.props.show && preProps.show !== this.props.show) {
+      // this.props.fetchNextWorkOrder(this.props.masterpcUrl, this.props.hmiSn);
+      this.setState({
+        isShow: true
+      })
+    }
   }
 
   handleClose = () => {
@@ -83,8 +83,10 @@ class ConnectedResultDialog extends React.PureComponent {
 
   render() {
     const {
-      classes
-      // show,  results, nextWorkorder
+      classes,
+      show,
+      results,
+      // nextWorkorder
     } = this.props;
 
     const { isShow } = this.state;
@@ -98,9 +100,9 @@ class ConnectedResultDialog extends React.PureComponent {
     // }
 
     const localResults = [];
-    // for (let i = 0; i < results.length; i++) {
-    //   localResults.push([results[i].pset, results[i].mi, results[i].wi, results[i].ti, results[i].result]);
-    // }
+    for (let i = 0; i < results.length; i++) {
+      localResults.push([results[i].pset, results[i].mi, results[i].wi, results[i].ti, results[i].result]);
+    }
 
     return (
       <I18n ns="translations">

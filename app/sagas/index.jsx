@@ -11,15 +11,19 @@ import { shutDownDiagWorkFlow } from './shutDownDiag';
 import { toolFunctions } from './tools';
 import { loginFlow, logoutFlow } from './auth';
 import { healthzCheckFlow } from './healthzCheck';
+import { watchAiis } from './aiis';
+import { watchRush } from './rush';
 
 export default function* rootSaga() {
   yield all([
     // card auth
     cardAuthFlow(),
     watchScanner(),
+    watchAiis(),
     watchOperation(),
     watchResults(),
     watchIO(),
+    watchRush(),
     shutDownDiagWorkFlow(),
     toolFunctions(),
     // auth

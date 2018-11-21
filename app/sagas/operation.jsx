@@ -1,4 +1,4 @@
-import { select, put, take, call, fork } from 'redux-saga/effects';
+import { select, put, take, call } from 'redux-saga/effects';
 import {
   fetchRoutingWorkcenter,
   fetchWorkorder,
@@ -8,15 +8,11 @@ import {
 import {
   OPERATION,
   RUSH,
-  SHUTDOWN_DIAG,
-  TIMELINE_STORY
 } from '../actions/actionTypes';
 import { openShutdown } from '../actions/shutDownDiag';
-import { OPERATION_RESULT } from '../reducers/operations';
-import { closeDiag, confirmDiag, openDiag } from './shutDownDiag';
-import { addNewStory } from './timeline';
-
-const lodash = require('lodash');
+import { OPERATION_RESULT, OPERATION_STATUS } from '../reducers/operations';
+import { addNewStory, clearStories } from './timeline';
+import { isCarID } from '../common/utils';
 
 // 监听作业
 export function* watchOperation() {
@@ -31,6 +27,53 @@ export function* watchOperation() {
     }
   }
 }
+
+// 触发作业
+export function* triggerOperation(data, source) {
+
+  let state = yield select();
+  switch (state.operations.operationStatus) {
+    case OPERATION_STATUS.DOING:
+      return;
+    case OPERATION_STATUS.READY:
+      yield call(clearStories);
+      yield put({type: OPERATION.PREDOING});
+      break;
+
+    default:
+      break;
+  }
+
+  yield call(
+    addNewStory,
+    'info',
+    source,
+    data
+  );
+
+  if (isCarID(data)) {
+    yield put({ type: OPERATION.TRIGGER.NEW_DATA, carID: data });
+  } else {
+    yield put({ type: OPERATION.TRIGGER.NEW_DATA, carType: data });
+  }
+
+
+  state = yield select();
+
+  const triggers = state.setting.operationSettings.flowTriggers;
+
+  let triggerFlagNum = 0;
+  for (let i = 0; i < triggers.length; i+=1) {
+    if (state.operations[triggers[i]] !== '') {
+      triggerFlagNum += 1;
+    }
+  }
+
+  if (triggerFlagNum === triggers.length) {
+    yield call(getOperation);
+  }
+}
+
 // 定位作业
 export function* getOperation() {
   const state = yield select();
@@ -213,19 +256,9 @@ export function* watchResults() {
 export function* handleResults(data) {
   const state = yield select();
 
-  // const hasFail = lodash.every(data, v => v.result === OPERATION_RESULT.NOK);
   let hasFail = false;
   let storyType = 'pass';
-  // lodash.forEach(data, (value) => {
-  //   if (value.result === OPERATION_RESULT.NOK) {
-  //     hasFail = true;
-  //     storyType = 'fail';
-  //   } else {
-  //     storyType = 'pass';
-  //   }
-  //
-  //   yield fork(addNewStory, storyType, '结果', `扭矩:${data[i].mi.toString()} 角度:${data[i].wi.toString()}`);
-  // });
+
   for (let i = 0; i < data.length; i += 1) {
     if (data[i].result === OPERATION_RESULT.NOK) {
       hasFail = true;
@@ -234,7 +267,7 @@ export function* handleResults(data) {
       storyType = 'pass';
     }
 
-    yield fork(
+    yield call(
       addNewStory,
       storyType,
       '结果',

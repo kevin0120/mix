@@ -107,7 +107,8 @@
     "Controller": "Controller",
     "IO": "IO Module",
     "RFID": "RFID",
-    "Odoo": "Backend Server"
+    "Odoo": "Backend Server",
+    "Andon": "Andon"
   },
   "Lock": {
     "Pwd": "Enter Password",

@@ -569,7 +569,20 @@ class ConnectedWorking extends React.Component {
     // this.props.setCarByPass(false);
   }
 
-  componentDidUpdate(prevProps, prevState) {
+
+
+  shouldComponentUpdate() {
+    return true;
+  }
+
+  componentDidUpdate(prevProps) {
+
+    const {
+      operations,
+      operationSettings
+    } = this.props;
+    this.switchResultDiagShow(prevProps.operations.operationStatus, operations.operationStatus, operationSettings.enableResultDialog);
+
     // const {
     //   masterpcUrl,
     //   orderStatus, userid, workcenterId,
@@ -578,7 +591,6 @@ class ConnectedWorking extends React.Component {
     //
     // const prevOrderstatus = prevProps.orderStatus;
     //
-    // this.switchResultDiagShow(prevOrderstatus, orderStatus);
     //
     // const resultInfo = results[activeResultIdIdx];
     //
@@ -611,10 +623,6 @@ class ConnectedWorking extends React.Component {
     // }
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return true;
-  }
-
   componentWillUnmount() {
     // this.props.setCarByPass(true);
   }
@@ -627,18 +635,17 @@ class ConnectedWorking extends React.Component {
     // this.props.setOrderStatus('Doing');
   };
 
-  // switchResultDiagShow = (prevOrderstatus, orderStatus) =>{
-  //   console.log('prev:', prevOrderstatus, " cur:",  orderStatus);
-  //   if ((prevOrderstatus === 'Done' || prevOrderstatus === 'Timeout' || prevOrderstatus === 'Fail') && (orderStatus === 'Ready')) {
-  //     this.setState({
-  //       resultShow: true
-  //     })
-  //   }else if (orderStatus === 'Doing' ) {
-  //     this.setState({
-  //       resultShow: false
-  //     })
-  //   }
-  // };
+  switchResultDiagShow = (prevOperationStatus, operationStatus, enable) =>{
+    if (operationStatus === OPERATION_STATUS.READY && prevOperationStatus === OPERATION_STATUS.DOING && enable) {
+      this.setState({
+        resultShow: true
+      });
+    } else if (operationStatus === OPERATION_STATUS.DOING && prevOperationStatus === OPERATION_STATUS.PREDOING) {
+      this.setState({
+        resultShow: false
+      });
+    }
+  };
 
   toggleOPMode() {
     const { isAutoMode } = this.props;
@@ -753,7 +760,7 @@ class ConnectedWorking extends React.Component {
     const { classes, operations, timeline } = this.props;
     //
     //
-    // const {inputName} = this.state;
+    const {inputName, resultShow} = this.state;
     //
     let batch = '0/0';
     let redoBatch = '0/0';
@@ -982,7 +989,7 @@ class ConnectedWorking extends React.Component {
                 </div>
               </Paper>
               <ShutdownDiag />
-              <ResultDialog show={this.state.resultShow} />
+              <ResultDialog show={resultShow} />
               <ManualDiag
                 show={this.state.manualDiagShow}
                 close={this.closeManualDiag}

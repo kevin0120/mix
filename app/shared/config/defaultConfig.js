@@ -53,6 +53,7 @@ export const defaultConfigs = {
       }
     },
     modbus: {
+      source: ['remote', 'controller'],
       in: [
         {
           bit: 0,

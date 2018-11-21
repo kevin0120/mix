@@ -37,8 +37,14 @@ const defaultHealthChecks = {
     isHealth: false,
     displayTitle: 'HealthCheck.RFID'
   },
-  odoo: {
+  andon: {
     displayOrder: 41,
+    optionInfo: '',
+    isHealth: false,
+    displayTitle: 'HealthCheck.Andon'
+  },
+  odoo: {
+    displayOrder: 51,
     optionInfo: '',
     isHealth: false,
     displayTitle: 'HealthCheck.Odoo'

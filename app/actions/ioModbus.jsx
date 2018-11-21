@@ -4,6 +4,7 @@ import userConfigs from '../shared/config';
 
 import { HEALTH, IO } from './actionTypes';
 import { IO_FUNCTION } from '../reducers/io';
+import { setHealthzCheck } from './healthCheck';
 
 const Reconnect = require('node-net-reconnect');
 const net = require('net');
@@ -183,11 +184,8 @@ export function initIOModbus(dispatch, state) {
   }
 
   client.on('connect', () => {
-    dispatch({
-      type: HEALTH.HEALTH,
-      category: HEALTH.IO,
-      isHealth: true
-    });
+
+    dispatch(setHealthzCheck('modbus', true));
 
     keyMonitorTimer = setInterval(() => {
       // set health = true
@@ -223,7 +221,7 @@ export function initIOModbus(dispatch, state) {
           }
           currentKeyStatus = newKeyStatus;
         })
-        .catch(error => {
+        .catch(() => {
           // console.log(error);
           client.destroy();
           clearInterval(keyMonitorTimer);
@@ -243,7 +241,7 @@ export function initIOModbus(dispatch, state) {
       modbusClient
         .writeMultipleCoils(0, lights)
         .then()
-        .catch(error => {
+        .catch(() => {
           // console.log(error);
           client.destroy();
           clearInterval(senderTimer);
@@ -262,29 +260,17 @@ export function initIOModbus(dispatch, state) {
   });
 
   client.on('end', () => {
-    dispatch({
-      type: HEALTH.HEALTH,
-      category: HEALTH.IO,
-      isHealth: false
-    });
+    dispatch(setHealthzCheck('modbus', false));
 
     client.end();
   });
 
   client.on('close', () => {
-    dispatch({
-      type: HEALTH.HEALTH,
-      category: HEALTH.IO,
-      isHealth: false
-    });
+    dispatch(setHealthzCheck('modbus', false));
   });
 
   client.on('error', () => {
-    dispatch({
-      type: HEALTH.HEALTH,
-      category: HEALTH.IO,
-      isHealth: false
-    });
+    dispatch(setHealthzCheck('modbus', false));
   });
 }
 
