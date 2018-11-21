@@ -17,22 +17,31 @@ import { setNewNotification } from '../actions/notification';
 
 const lodash = require('lodash');
 
+const getHealthz = state => state.healthCheckResults;
+
+
 function* healthzCheckTask(url, controllers) {
   while (true) {
     try {
       const [mHealthz, cHealthzs] = yield all([
         call(masterPCHealthCheck, url),
-        call(controllerHealthCheck(url, controllers))
+        call(controllerHealthCheck,url, controllers)
       ]);
-      yield put(setHealthzCheck('masterpc', mHealthz.status === 204));
-      const statusCode = cHealthzs.status;
-      if (statusCode === 200) {
-        yield put(
-          setHealthzCheck('controller', cHealthzs.data[0].status === 'online')
-        );
-      } else {
-        yield put(setHealthzCheck('controller', false));
+      const healthzStatus = yield select(getHealthz); // 获取整个healthz
+      if( !lodash.isEqual(healthzStatus.masterpc.isHealth, mHealthz.status === 204)){
+        // 如果不相等 更新
+        yield put(setHealthzCheck('masterpc', mHealthz.status === 204));
       }
+      // 控制器healthz check
+      const statusCode = cHealthzs.status;
+      let controllerHealthzStatus = false;
+      if (statusCode === 200) {
+        controllerHealthzStatus = cHealthzs.data[0].status === 'online';
+      }
+      if( !lodash.isEqual(healthzStatus.controller.isHealth, controllerHealthzStatus)){
+        yield put(setHealthzCheck('controller', controllerHealthzStatus));
+      }
+
     } catch (e) {
       yield put(setNewNotification('error', e.toString()));
     }

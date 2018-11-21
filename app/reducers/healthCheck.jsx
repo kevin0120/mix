@@ -60,7 +60,7 @@ export default function healthCheckResults(
       if (!lodash.has(state, action.section)) return state;
       return {
         ...state,
-        [action.section]: { ...[action.section], isHealth: action.isHealth }
+        [action.section]: { ...state[action.section], isHealth: action.isHealth }
       };
     default:
       return state;
