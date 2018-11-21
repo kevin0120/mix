@@ -27,7 +27,6 @@ export function* watchOperation() {
     }
   }
 }
-
 // 定位作业
 export function* getOperation() {
   const state = yield select();

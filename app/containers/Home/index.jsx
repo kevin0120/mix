@@ -5,7 +5,6 @@ import classNames from 'classnames';
 
 import { bindActionCreators } from 'redux';
 
-
 import Grid from '@material-ui/core/Grid';
 
 import { I18n } from 'react-i18next';
@@ -19,7 +18,7 @@ import ExitToApp from '@material-ui/icons/ExitToApp';
 
 import { withStyles } from '@material-ui/core/styles';
 
-import {openShutdown as OpenShutdown} from '../../actions/shutDownDiag';
+import { openShutdown as OpenShutdown } from '../../actions/shutDownDiag';
 import * as AuthActions from '../../actions/userAuth';
 
 import withLayout from '../../components/Layout/layout';
@@ -34,7 +33,7 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 function mapDispatchToProps(dispatch) {
-  return bindActionCreators({...AuthActions, OpenShutdown}, dispatch);
+  return bindActionCreators({ ...AuthActions, OpenShutdown }, dispatch);
 }
 
 const withstyles = theme => ({
@@ -45,7 +44,8 @@ const withstyles = theme => ({
     width: '100%',
     height: '100%',
     backgroundColor: '#232c39',
-    backgroundImage: 'linear-gradient(45deg, rgba(0, 216, 255, 0.5) 10%, rgba(0, 1, 127, 0.7))',
+    backgroundImage:
+      'linear-gradient(45deg, rgba(0, 216, 255, 0.5) 10%, rgba(0, 1, 127, 0.7))'
   },
   container: {
     padding: '40px 10px',
@@ -57,6 +57,9 @@ const withstyles = theme => ({
     minWidth: '280px',
     height: '320px',
     borderRadius: '4px'
+  },
+  cardGridItem: {
+    paddingRight: '30px',
   },
   cardContent: {
     position: 'relative',
@@ -176,10 +179,9 @@ class ConnectedWelcome extends React.Component {
               container
               className={classes.container}
               justify="center"
-              spacing={24}
             >
-              {routeConfigs.slice(1, -1).map(route => (
-                <Grid key={route.name} item>
+              {routeConfigs.slice(1,-1).map(route => (
+                <Grid key={route.name} item className={classes.cardGridItem}>
                   <Card
                     key={route.name}
                     onClick={() => goto(route.url)}
@@ -237,7 +239,7 @@ ConnectedWelcome.propTypes = {
   // functions
   doUserAuth: PropTypes.func.isRequired,
   OpenShutdown: PropTypes.func.isRequired,
-  userLogOut: PropTypes.func.isRequired,
+  userLogOut: PropTypes.func.isRequired
 };
 
 const Welcome = connect(

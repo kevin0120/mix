@@ -6,19 +6,28 @@
  * Vestibulum commodo. Ut rhoncus gravida arcu.
  */
 
-
 // @flow
 
-import { HEALTHZ_CHECK } from './actionTypes'
+import { HEALTHZ_CHECK } from './actionTypes';
 
-export function startHealthzCheck() {
+export function startHealthzCheck(url = null, controllers = null) {
   return {
-    type: HEALTHZ_CHECK.START
-  }
+    type: HEALTHZ_CHECK.START,
+    url,
+    controllers
+  };
 }
 
-export function stopHealthzCheck() {
+export function restartHealthzCheck() {
   return {
-    type: HEALTHZ_CHECK.STOP
-  }
+    type: HEALTHZ_CHECK.RESTART
+  };
+}
+
+export function setHealthzCheck(section, isHealth) {
+  return {
+    type: HEALTHZ_CHECK.SET,
+    section,
+    isHealth
+  };
 }

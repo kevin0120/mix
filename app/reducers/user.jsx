@@ -8,20 +8,19 @@
 
 // @flow
 
-import { USER } from '../actions/actionTypes'
+import { USER } from '../actions/actionTypes';
 
 import defaultAvatarImg from '../../resources/imgs/default-avatar.jpg';
-
 
 const lodash = require('lodash');
 
 const defaultUsers = [
   {
-    uuid: "11",
-    name: "dummy",
+    uuid: '11',
+    name: 'dummy',
     avatar: defaultAvatarImg,
-    uid: 10,
-  },
+    uid: 10
+  }
 ];
 
 // type actionType = {
@@ -32,17 +31,14 @@ const defaultUsers = [
 //   +uuid: string
 // };
 
-export default function users(
-  state: Array = defaultUsers,
-  action
-) {
+export default function users(state: Array = defaultUsers, action) {
   switch (action.type) {
-    case USER.LOGIN_SUCCESS:{
-      const { uid, name, uuid, avatar} = action;
+    case USER.LOGIN_SUCCESS: {
+      const { uid, name, uuid, avatar } = action;
       if (state.length === 1 && state[0].name === 'dummy') {
-        return [ {uid, name, uuid, avatar} ];
+        return [{ uid, name, uuid, avatar }];
       }
-      return [...state, {uid, name, uuid, avatar} ];
+      return [...state, { uid, name, uuid, avatar }];
     }
     case USER.LOGOUT_SUCCESS: {
       return action.data;

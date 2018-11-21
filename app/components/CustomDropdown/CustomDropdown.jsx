@@ -14,9 +14,9 @@ import Grow from '@material-ui/core/Grow';
 import Divider from '@material-ui/core/Divider';
 import Popper from '@material-ui/core/Popper';
 // core components
-import Button from '../../components/CustomButtons/Button.jsx';
+import Button from '../CustomButtons/Button';
 
-import customDropdownStyle from '../../common/jss/components/customDropdownStyle.jsx';
+import customDropdownStyle from '../../common/jss/components/customDropdownStyle';
 
 class CustomDropdown extends React.Component {
   constructor(props) {
@@ -30,12 +30,14 @@ class CustomDropdown extends React.Component {
   }
 
   handleClick() {
-    var x = (this.state.clicks + 1) % 2;
+    const x = (this.state.clicks + 1) % 2;
     this.setState({ open: true, clicks: x });
   }
+
   handleClose() {
     this.setState({ open: false, clicks: 0 });
   }
+
   render() {
     const { open } = this.state;
     const {
@@ -62,7 +64,7 @@ class CustomDropdown extends React.Component {
     });
     const dropdownItem = classNames({
       [classes.dropdownItem]: true,
-      [classes[hoverColor + 'Hover']]: true,
+      [classes[`${hoverColor  }Hover`]]: true,
       [classes.noLiPadding]: noLiPadding,
       [classes.dropdownItemRTL]: rtlActive
     });
@@ -85,7 +87,7 @@ class CustomDropdown extends React.Component {
                 className={classes.dropdownDividerItem}
               />
             );
-          } else if (prop.ref === 'multi') {
+          } if (prop.ref === 'multi') {
             return (
               <MenuItem
                 key={key}

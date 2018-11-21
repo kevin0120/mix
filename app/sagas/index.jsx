@@ -9,8 +9,8 @@ import { watchOperation, watchResults } from './operation';
 import { watchIO } from './io';
 import { shutDownDiagWorkFlow } from './shutDownDiag';
 import { toolFunctions } from './tools';
-import { loginFlow, logoutFlow } from './auth'
-import { healthzCheckFlow } from './healthzCheck'
+import { loginFlow, logoutFlow } from './auth';
+import { healthzCheckFlow } from './healthzCheck';
 
 export default function* rootSaga() {
   yield all([

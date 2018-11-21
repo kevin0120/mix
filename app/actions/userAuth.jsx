@@ -6,23 +6,21 @@
  * Vestibulum commodo. Ut rhoncus gravida arcu.
  */
 
-
 // @flow
 
 import { USER } from './actionTypes';
 
-
-export function doUserAuth(user=null, password= null) {
+export function doUserAuth(user = null, password = null) {
   return {
     type: USER.LOGIN_REQUEST,
     user,
     password
-  }
+  };
 }
 
-export function userLogOut(user=null) {
+export function userLogOut(user = null) {
   return {
     type: USER.LOGOUT,
-    user,
-  }
+    user
+  };
 }

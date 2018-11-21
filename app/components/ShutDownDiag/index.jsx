@@ -11,7 +11,6 @@ import Slide from '@material-ui/core/Slide';
 import { I18n } from 'react-i18next';
 import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
 
-
 // import Dialog from '@material-ui/core/Dialog';
 // import DialogActions from '@material-ui/core/DialogActions';
 // import DialogContent from '@material-ui/core/DialogContent';
@@ -94,7 +93,6 @@ class ConnectedShutdownDiag extends React.Component {
         break;
     }
 
-
     return (
       <I18n ns="translations">
         {t =>
@@ -145,9 +143,8 @@ class ConnectedShutdownDiag extends React.Component {
 
 ConnectedShutdownDiag.propTypes = {
   show: PropTypes.bool.isRequired,
-  msg: PropTypes.string.isRequired,
+  msg: PropTypes.string.isRequired
 };
-
 
 const ShutdownDiag = connect(
   mapStateToProps,

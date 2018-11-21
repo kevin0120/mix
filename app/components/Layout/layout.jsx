@@ -24,15 +24,14 @@ import Fade from '@material-ui/core/Fade';
 
 import MenuIcon from '@material-ui/icons/Menu';
 
-
 import Divider from '@material-ui/core/Divider';
 
 import Flag from 'react-flags';
 
 import BottomNavigation from '@material-ui/core/BottomNavigation';
 import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
-import Notify from "../Notify";
-import NavBar from "../NavBar";
+import Notify from '../Notify';
+import NavBar from '../NavBar';
 
 import styles from './styles';
 
@@ -62,7 +61,6 @@ export default function withLayout(SubCompontents, showTop = true) {
       this.handleCloseStatus = this.handleCloseStatus.bind(this);
     }
 
-
     shouldComponentUpdate(nextProps, nextState) {
       return true;
     }
@@ -76,7 +74,10 @@ export default function withLayout(SubCompontents, showTop = true) {
       const { orderStatus, workMode } = this.props;
       const isAutoMode = workMode === 'auto';
       if (
-        lodash.includes(['Ready', 'PreDoing', 'Timeout', 'Init'], orderStatus) ||
+        lodash.includes(
+          ['Ready', 'PreDoing', 'Timeout', 'Init'],
+          orderStatus
+        ) ||
         !isAutoMode
       ) {
         shouldProcessing = false;
@@ -88,7 +89,6 @@ export default function withLayout(SubCompontents, showTop = true) {
         });
       }
     }
-
 
     handleMenu(event) {
       this.setState({ anchorEl: event.currentTarget });
@@ -129,8 +129,14 @@ export default function withLayout(SubCompontents, showTop = true) {
         usersInfo
       } = this.props;
       const isAutoMode = workMode === 'auto';
-      const {uid, name, uuid, avatar } = usersInfo[0];
-      if (lodash.includes(['Ready', 'PreDoing', 'Timeout', 'Init'], orderStatus) || !isAutoMode) {
+      const { uid, name, uuid, avatar } = usersInfo[0];
+      if (
+        lodash.includes(
+          ['Ready', 'PreDoing', 'Timeout', 'Init'],
+          orderStatus
+        ) ||
+        !isAutoMode
+      ) {
         shouldProcessing = false;
       }
 
@@ -149,24 +155,24 @@ export default function withLayout(SubCompontents, showTop = true) {
         <I18n ns="translations">
           {t => (
             <div className={classes.layout}>
-              <ClickAwayListener onClickAway={() => this.toggleMenu(false)}>
-                <SwipeableDrawer
-                  anchor="right"
-                  open={isMenuOpen}
-                  disableSwipeToOpen={disableSwipeToOpen}
-                  onClose={() => this.toggleMenu(false)}
-                  onOpen={() => this.toggleMenu(true)}
-                >
-                  <div
-                    tabIndex={0}
-                    role="button"
-                    aria-hidden
-                    onClick={() => this.toggleMenu(false)}
-                  >
-                    <NavBar />
-                  </div>
-                </SwipeableDrawer>
-              </ClickAwayListener>
+              {/*<ClickAwayListener onClickAway={() => this.toggleMenu(false)}>*/}
+                {/*<SwipeableDrawer*/}
+                  {/*anchor="right"*/}
+                  {/*open={isMenuOpen}*/}
+                  {/*disableSwipeToOpen={disableSwipeToOpen}*/}
+                  {/*onClose={() => this.toggleMenu(false)}*/}
+                  {/*onOpen={() => this.toggleMenu(true)}*/}
+                {/*>*/}
+                  {/*<div*/}
+                    {/*tabIndex={0}*/}
+                    {/*role="button"*/}
+                    {/*aria-hidden*/}
+                    {/*onClick={() => this.toggleMenu(false)}*/}
+                  {/*>*/}
+                    {/*<NavBar />*/}
+                  {/*</div>*/}
+                {/*</SwipeableDrawer>*/}
+              {/*</ClickAwayListener>*/}
               <SubCompontents />
               <Notify />
               <AppBar position="fixed" className={classes.appBar}>
@@ -175,13 +181,9 @@ export default function withLayout(SubCompontents, showTop = true) {
                     <img
                       alt={name}
                       src={avatar}
-                      className={
-                        `${classes.imgRaised
-                        } ${
-                        classes.imgRounded
-                        } ${
-                        classes.imgFluid}`
-                      }
+                      className={`${classes.imgRaised} ${classes.imgRounded} ${
+                        classes.imgFluid
+                      }`}
                     />
                   </div>
                   <div className={classes.menuUserName}>
@@ -196,6 +198,7 @@ export default function withLayout(SubCompontents, showTop = true) {
                     >
                       {routeConfigs.slice(0, -1).map(route => (
                         <BottomNavigationAction
+                          key={route.name}
                           label={t(route.title)}
                           component="a"
                           href={`#${route.url}`}
@@ -228,28 +231,28 @@ export default function withLayout(SubCompontents, showTop = true) {
                       anchorEl={showStatus}
                       anchorOrigin={{
                         vertical: 'top',
-                        horizontal: 'right'
+                        horizontal: 'left',
                       }}
                       transformOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right'
+                        vertical: 'bottom',
+                        horizontal: 'left',
                       }}
                       open={openStatusMenu}
                       onClose={this.handleCloseStatus}
                       TransitionComponent={Fade}
                     >
-                      <HealthCheck healthCheckResults={healthCheckResults}/>
+                      <HealthCheck healthCheckResults={healthCheckResults} />
                     </Menu>
                     <Menu
                       id="menu-appbar"
                       anchorEl={anchorEl}
                       anchorOrigin={{
                         vertical: 'top',
-                        horizontal: 'right'
+                        horizontal: 'left',
                       }}
                       transformOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right'
+                        vertical: 'bottom',
+                        horizontal: 'left',
                       }}
                       open={open}
                       onClose={this.handleClose}
