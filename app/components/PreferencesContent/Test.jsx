@@ -14,11 +14,11 @@ import { I18n } from 'react-i18next';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 
-import Utils from '../../common/utils';
+import { sortObj } from '../../common/utils';
 import styles from './styles';
 
 const mapStateToProps = (state, ownProps) => ({
-  connInfo: state.connInfo,
+  connInfo: state.connections,
   ...ownProps,
 });
 
@@ -108,34 +108,35 @@ class ConnectedTest extends React.PureComponent {
   }
 
   formatConnInfo(connInfo) {
+    const { aiisUrl } = this.props;
     return {
       masterPcUrl: {
         displayOrder: 0,
-        value: String(connInfo.masterpc.connection),
+        value: String(connInfo.masterpc),
         displayTitle: 'MasterPC URL',
         test: this.testMasterPC,
       },
       aiisUrl: {
         displayOrder: 50,
-        value: String(connInfo.aiisUrl),
+        value: String(aiisUrl),
         displayTitle: 'Aiis服务 URL',
         test: this.testAiis,
       },
       controllerSn: {
         displayOrder: 100,
-        value: String(connInfo.controllers),
+        value: String(connInfo.controllers[0].serial_no),
         displayTitle: '控制器序列号',
       },
       rfidUrl: {
         displayOrder: 200,
-        value: String(connInfo.rfid.connection),
+        value: String(connInfo.rfid),
         displayTitle: 'RFID 链接地址',
       },
       ioUrl: {
         displayOrder: 300,
-        value: `http://${connInfo.io.host}:${connInfo.io.port}`,
+        value: String(connInfo.io),
         displayTitle: 'IO 模块链接地址',
-        test: this.testModbus,
+        // test: this.testModbus,
       },
     };
   }
@@ -147,7 +148,6 @@ class ConnectedTest extends React.PureComponent {
     })
       .then(response => {
         this.setState({
-          ...this.state,
           testStatus: {
             ...this.state.testStatus,
             aiisUrl: false,
@@ -156,7 +156,6 @@ class ConnectedTest extends React.PureComponent {
       })
       .catch(() => {
         this.setState({
-          ...this.state,
           testStatus: {
             ...this.state.testStatus,
             aiisUrl: false,
@@ -172,7 +171,6 @@ class ConnectedTest extends React.PureComponent {
     })
       .then(response => {
         this.setState({
-          ...this.state,
           testStatus: {
             ...this.state.testStatus,
             masterPcUrl: response.status === 204,
@@ -181,7 +179,6 @@ class ConnectedTest extends React.PureComponent {
       })
       .catch(() => {
         this.setState({
-          ...this.state,
           testStatus: {
             ...this.state.testStatus,
             masterPcUrl: false
@@ -192,7 +189,6 @@ class ConnectedTest extends React.PureComponent {
 
   testModbus() {
     this.setState({
-      ...this.state,
       testStatus: {
         ...this.state.testStatus,
         ioUrl: true,
@@ -203,7 +199,7 @@ class ConnectedTest extends React.PureComponent {
   render() {
     const { classes } = this.props;
     const { data, btnGroupStatus,testStatus } = this.state;
-    const inputsItems = t => Utils.sortObj(data, 'displayOrder').map(({ key, value: item }) => {
+    const inputsItems = t => sortObj(data, 'displayOrder').map(({ key, value: item }) => {
       const testPart = t => item.test ? (
         <div>
           <Button

@@ -11,7 +11,7 @@ import {
   successColor,
   warningColor,
   dangerColor
-} from '../material-react-pro.jsx';
+} from '../material-react-pro';
 
 const buttonStyle = {
   button: {

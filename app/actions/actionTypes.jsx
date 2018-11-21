@@ -106,6 +106,7 @@ export const TOOLS = {
 };
 
 export const USER_CONFIGS = {
+  PRE_SAVE: 'USER_CONFIGS_PRE_SAVE',
   SAVE: 'USER_CONFIGS_SAVE',
 };
 

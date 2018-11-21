@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import { get, cloneDeep } from 'lodash';
 
-import Button from '../../components/CustomButtons/Button';
 import Paper from '@material-ui/core/Paper';
 import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
@@ -14,9 +13,9 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import SaveIcon from '@material-ui/icons/Save';
 import { I18n } from 'react-i18next';
+import Button from "../CustomButtons/Button";
 
 import saveConfigs from '../../actions/userConfigs';
-import { initHmiConnInfo } from '../../actions/sysInit';
 
 
 import { sortObj } from '../../common/utils';
@@ -27,15 +26,11 @@ import styles from './styles';
 
 const mapStateToProps = (state, ownProps) => ({
   storedConfigs: state.setting.page.odooConnection,
-  section: 'odooConnection',
-  ControlMode: state.ControlMode,
-  // psetContinueMode: state.userConfigs.psetContinueMode,
   ...ownProps,
 });
 
 const mapDispatchToProps = {
   saveConfigs,
-  initHmiConnInfo,
 };
 
 /* eslint-disable react/prefer-stateless-function */
@@ -45,6 +40,7 @@ class ConnectedConnect extends React.PureComponent {
     this.state = {
       isDataValid: true,
       data: props.storedConfigs,
+      section: 'odooConnection',
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -52,19 +48,19 @@ class ConnectedConnect extends React.PureComponent {
   }
 
   handleChange(e, key) {
-    const tempData = cloneDeep(this.state.data);
+    const { data } = this.state;
+    const tempData = cloneDeep(data);
     tempData[key].value = get(e, 'target.value', '').trim();
     this.setState({
-      ...this.state,
       data: tempData,
       isDataValid: this.validateData(tempData),
     });
   }
 
   handleSubmit() {
-    const {saveConfigs, initHmiConnInfo } = this.props;
-    saveConfigs(this.props.section, this.state.data);
-    // initHmiConnInfo(this.state.data.odooUrl.value, this.state.data.hmiSn.value, true, this.state.ControlMode)
+    const {saveConfigs } = this.props;
+    const { section, data } = this.state;
+    saveConfigs(section, data);
   }
 
   validateData(data = this.state.data) {
@@ -125,7 +121,7 @@ class ConnectedConnect extends React.PureComponent {
                 {t('Common.Test')}
               </h3>
               <Paper className={classes.paperWrap} elevation={1}>
-                <Test />
+                <Test aiisUrl={data.aiisUrl.value} />
               </Paper>
             </section>
           )
@@ -140,9 +136,7 @@ ConnectedConnect.propTypes = {
   }).isRequired,
   storedConfigs: PropTypes.shape({
   }).isRequired,
-  section: PropTypes.string.isRequired,
   saveConfigs: PropTypes.func.isRequired,
-  // initHmiConnInfo: PropTypes.func.isRequired,
 };
 
 const Connect = connect(mapStateToProps, mapDispatchToProps)(ConnectedConnect);

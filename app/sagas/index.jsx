@@ -11,6 +11,7 @@ import { shutDownDiagWorkFlow } from './shutDownDiag';
 import { toolFunctions } from './tools';
 import { loginFlow, logoutFlow } from './auth';
 import { healthzCheckFlow } from './healthzCheck';
+import { watchSettingPreSave } from './setting';
 
 export default function* rootSaga() {
   yield all([
@@ -28,5 +29,6 @@ export default function* rootSaga() {
     // healthz
     healthzCheckFlow(),
     sysInitFlow(),
+    watchSettingPreSave(),
   ]);
 }

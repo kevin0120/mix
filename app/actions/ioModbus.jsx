@@ -1,16 +1,17 @@
 // import net from 'net';
 import modbus from 'jsmodbus';
+import { cloneDeep } from 'lodash';
 import userConfigs from '../shared/config';
 
 import { HEALTH, IO } from './actionTypes';
 import { IO_FUNCTION } from '../reducers/io';
+import { setNewNotification } from "./notification";
+
 
 const Reconnect = require('node-net-reconnect');
 const net = require('net');
 
 const lodash = require('lodash');
-
-// import { cloneDeep } from 'lodash';
 
 // import {
 //   RESET_PAGE_STATUS,
@@ -36,21 +37,21 @@ let timeStamp = null;
 
 const byPassTimeout = 3;
 
-let oInfo = 0;
-let oDoing = 1;
-let oWarning = 2;
-let oError = 3;
+let oWhite = 0;
+let oYellow = 1;
+let oGreen = 2;
+let oRed = 3;
 let oBeep = 4;
 
 let iResetKey = 0;
 let iBypass = 1;
 let iModeSelect = 2;
 
-// let iPrevRed = iRed;
-// let iPrevYellow = iYellow;
-// let iPrevGreen = iGreen;
-// let iPrevBlue = iBlue;
-// let iPrevBeep = iBeep;
+let iPrevWhite = oWhite;
+let iPrevYellow = oYellow;
+let iPrevGreen = oGreen;
+let iPrevRed = oRed;
+let iPrevBeep = oBeep;
 
 export const sOff = 0;
 export const sOn = 1;
@@ -65,20 +66,22 @@ export function setFail(f) {
 
 function setOutBit(obj) {
   switch (obj.function) {
-    case IO_FUNCTION.OUT.LED_ERROR:
-      oError = obj.bit;
+    case IO_FUNCTION.OUT.LED_RED:
+      oRed = obj.bit;
       break;
-    case IO_FUNCTION.OUT.LED_WARNING:
-      oWarning = obj.bit;
+    case IO_FUNCTION.OUT.LED_GREEN:
+      oGreen = obj.bit;
       break;
-    case IO_FUNCTION.OUT.LED_DOING:
-      oDoing = obj.bit;
+    case IO_FUNCTION.OUT.LED_YELLOW:
+      oYellow = obj.bit;
       break;
-    case IO_FUNCTION.OUT.LED_INFO:
-      oInfo = obj.bit;
+    case IO_FUNCTION.OUT.LED_WHITE:
+      oWhite = obj.bit;
       break;
     case IO_FUNCTION.OUT.BEEP:
       oBeep = obj.bit;
+      break;
+    default:
       break;
   }
 }
@@ -94,6 +97,8 @@ function setInBit(obj) {
     case IO_FUNCTION.IN.MODE_SELECT:
       iModeSelect = obj.bit;
       break;
+    default:
+      break;
   }
 }
 
@@ -104,50 +109,48 @@ function initModBusIO(modusConfig) {
   lodash.forEach(modbusInConfig, setInBit);
 }
 
-// export function resetIO(modusConfig) {
-//   return dispatch => {
-//     const moddusOutConfig = modusConfig.out;
-//     const modbusInConfig = modusConfig.in;
-//     lodash.forEach(moddusOutConfig, setOutBit);
-//     lodash.forEach(modbusInConfig, setInBit);
-//     const preioStatus = cloneDeep(ioStatus);
-//     ioStatus[iRed] = preioStatus[iPrevRed];
-//     ioStatus[iBlue] = preioStatus[iPrevBlue];
-//     ioStatus[iGreen] = preioStatus[iPrevGreen];
-//     ioStatus[iYellow] = preioStatus[iPrevYellow];
-//
-//     iPrevRed = iRed;
-//     iPrevYellow = iYellow;
-//     iPrevGreen = iGreen;
-//     iPrevBlue = iBlue;
-//     iPrevBeep = iBeep;
-//   };
-// }
+export function resetIO(modusConfig) {
+    const moddusOutConfig = modusConfig.out;
+    const modbusInConfig = modusConfig.in;
+    lodash.forEach(moddusOutConfig, setOutBit);
+    lodash.forEach(modbusInConfig, setInBit);
+    const preioStatus = cloneDeep(ioStatus);
+    ioStatus[oWhite] = preioStatus[iPrevWhite];
+    ioStatus[oYellow] = preioStatus[iPrevYellow];
+    ioStatus[oGreen] = preioStatus[iPrevGreen];
+    ioStatus[oRed] = preioStatus[iPrevRed];
+
+    iPrevWhite = oWhite;
+    iPrevYellow = oYellow;
+    iPrevGreen = oGreen;
+    iPrevRed = oRed;
+    iPrevBeep = oBeep;
+}
 
 export function setLedStatusReady() {
-  ioStatus[oError] = sOff;
-  ioStatus[oInfo] = sOff;
-  ioStatus[oDoing] = sBlinkOn;
-  ioStatus[oWarning] = sOff;
+  ioStatus[oRed] = sOff;
+  ioStatus[oWhite] = sOff;
+  ioStatus[oYellow] = sBlinkOn;
+  ioStatus[oGreen] = sOff;
 }
 
 export function setLedStatusDoing() {
-  ioStatus[oError] = sOff;
-  ioStatus[oDoing] = sOn;
-  ioStatus[oInfo] = sOn;
-  ioStatus[oWarning] = sOff;
+  ioStatus[oRed] = sOff;
+  ioStatus[oYellow] = sOn;
+  ioStatus[oWhite] = sOn;
+  ioStatus[oGreen] = sOff;
 }
 
 export function setLedInfo(flag) {
-  ioStatus[oInfo] = flag;
+  ioStatus[oWhite] = flag;
 }
 
 export function setLedWarning(flag) {
-  ioStatus[oWarning] = flag;
+  ioStatus[oGreen] = flag;
 }
 
 export function setLedError(flag) {
-  ioStatus[oError] = flag;
+  ioStatus[oRed] = flag;
 }
 
 export function initIOModbus(dispatch, state) {
@@ -225,8 +228,8 @@ export function initIOModbus(dispatch, state) {
           }
         }
         currentKeyStatus = newKeyStatus;
-      }).catch(error => {
-        // console.log(error);
+      }).catch(e => {
+        dispatch(setNewNotification('error', e.toString()));
         client.destroy();
         clearInterval(keyMonitorTimer);
       });
@@ -303,5 +306,23 @@ export function closeAll() {
   }
   if (client) {
     client.destroy();
+  }
+}
+
+export function testIO(io, idx) {
+  switch (io) {
+    case 'out': {
+      modbusClient.readCoils(idx, 1).then( resp => {
+        const got = resp.response.body.valuesAsArray[0];
+        modbusClient.writeSingleCoil(idx, got === 0);
+        return true;
+      }).catch(() => 'fail');
+      break;
+    }
+    case 'in': {
+      return modbusClient.readDiscreteInputs(idx, 1);
+    }
+    default:
+      break;
   }
 }
