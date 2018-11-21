@@ -6,6 +6,7 @@ import React from 'react';
 import Preferences from '../containers/config';
 import Event from '../containers/event';
 import ConnResult from '../containers/result';
+import Working from '../containers/working';
 
 // icons
 import HomeIcon from '@material-ui/icons/Home';
@@ -47,16 +48,16 @@ export const routeConfigs = [
     icon: HomeIcon,
     color: grayColor
   },
-  // {
-  //   name: 'working',
-  //   url: '/working',
-  //   title: 'main.operation',
-  //   main: Working,
-  //   icon: BuildIcon,
-  //   color: grayColor,
-  //   image: WorkingImg,
-  //   enName: 'Operating',
-  // },
+  {
+    name: 'working',
+    url: '/working',
+    title: 'main.operation',
+    main: Working,
+    icon: BuildIcon,
+    color: grayColor,
+    image: WorkingImg,
+    enName: 'Operating',
+  },
   // {
   //   name: 'editor',
   //   url: '/editor',

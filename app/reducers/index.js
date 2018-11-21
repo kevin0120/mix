@@ -10,6 +10,7 @@ import workMode from './workmode';
 import operations from './operations';
 import shutDownDiag from './shutDownDiag';
 import healthCheckResults from './healthCheck';
+import timeline from './timeline';
 
 export default function createRootReducer(history: {}) {
   const routerReducer = connectRouter(history)(() => {});
@@ -24,7 +25,8 @@ export default function createRootReducer(history: {}) {
       workMode,
       operations,
       healthCheckResults,
-      shutDownDiag
+      shutDownDiag,
+      timeline
     })
   );
 }

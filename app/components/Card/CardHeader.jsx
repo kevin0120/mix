@@ -45,7 +45,7 @@ function CardHeader({ ...props }) {
 }
 
 CardHeader.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.shape({}).isRequired,
   className: PropTypes.string,
   color: PropTypes.oneOf([
     'warning',

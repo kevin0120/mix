@@ -120,7 +120,7 @@ class PagesHeader extends React.Component {
 }
 
 PagesHeader.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.shape({}).isRequired,
   color: PropTypes.oneOf(['primary', 'info', 'success', 'warning', 'danger'])
 };
 

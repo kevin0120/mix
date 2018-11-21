@@ -93,7 +93,7 @@ function CustomInput({ ...props }) {
 }
 
 CustomInput.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.shape({}).isRequired,
   labelText: PropTypes.node,
   labelProps: PropTypes.object,
   id: PropTypes.string,

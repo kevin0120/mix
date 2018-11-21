@@ -14,9 +14,10 @@ import Clock from 'react-live-clock';
 import styles from './styles';
 
 const mapStateToProps = (state, ownProps) => ({
-  name: state.userInfo.name,
-  secondaryInfo: state.userInfo.login, // email or role etc
-  avatarImg: state.userInfo.image_small,
+  users: state.users,
+  // name: state.userInfo.name,
+  // secondaryInfo: state.userInfo.login, // email or role etc
+  // avatarImg: state.userInfo.image_small,
   ...ownProps,
 });
 
@@ -26,9 +27,11 @@ const mapDispatchToProps = {
 function ConnectedLeftMenuWithAvatar(props) {
   const {
     classes,
-    name,
-    secondaryInfo,
-    avatarImg,
+    // name,
+    // secondaryInfo,
+    // avatarImg,
+    users,
+    children
   } = props;
 
   return (
@@ -40,17 +43,17 @@ function ConnectedLeftMenuWithAvatar(props) {
     >
       <div className={classes.toolbar} />
 
-      {props.children}
+      {children}
 
       <div className={classes.baseInfo}>
         <List>
           <ListItem className={classes.userInfo}>
             <Avatar
-              alt={name}
-              src={avatarImg}
+              alt={users[0].name}
+              src={users[0].avatar}
               className={classes.avatar}
             />
-            <ListItemText className={classes.userText} primary={name} secondary={secondaryInfo} />
+            <ListItemText className={classes.userText} primary={users[0].name} secondary={users[0].name} />
           </ListItem>
           <ListItem className={classes.timeWrap}>
             <Clock
@@ -69,9 +72,10 @@ function ConnectedLeftMenuWithAvatar(props) {
 ConnectedLeftMenuWithAvatar.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   children: PropTypes.shape({}).isRequired,
-  name: PropTypes.string.isRequired,
-  secondaryInfo: PropTypes.string.isRequired,
-  avatarImg: PropTypes.string.isRequired,
+  // name: PropTypes.string.isRequired,
+  // secondaryInfo: PropTypes.string.isRequired,
+  // avatarImg: PropTypes.string.isRequired,
+  users: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
 };
 
 const LeftMenuWithAvatar = connect(

@@ -234,7 +234,7 @@ class HeaderLinks extends React.Component {
 }
 
 HeaderLinks.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.shape({}).isRequired,
   rtlActive: PropTypes.bool
 };
 

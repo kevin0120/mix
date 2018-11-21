@@ -77,7 +77,7 @@ class Pages extends React.Component {
 }
 
 Pages.propTypes = {
-  classes: PropTypes.object.isRequired
+  classes: PropTypes.shape({}).isRequired
 };
 
 export default withStyles(pagesStyle)(Pages);

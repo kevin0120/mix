@@ -19,7 +19,7 @@ import saveConfigs from '../../actions/userConfigs';
 import { initHmiConnInfo } from '../../actions/sysInit';
 
 
-import Utils from '../../common/utils';
+import { sortObj } from '../../common/utils';
 import Test from './Test';
 import styles from './styles';
 
@@ -76,7 +76,7 @@ class ConnectedConnect extends React.PureComponent {
     const { classes } = this.props;
     const { data, isDataValid } = this.state;
 
-    const baseItems = t => Utils.sortObj(data, 'displayOrder').map(({ key, value: item }) => (
+    const baseItems = t => sortObj(data, 'displayOrder').map(({ key, value: item }) => (
       <div key={key}>
         <ListItem className={classes.inputItem}>
           <InputLabel

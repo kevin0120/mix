@@ -107,3 +107,8 @@ export const TOOLS = {
 export const USER_CONFIGS = {
   SAVE: 'USER_CONFIGS_SAVE',
 };
+
+export const TIMELINE_STORY = {
+  NEW: 'TIMELINE_STORY_NEW',
+  CLEAR: 'TIMELINE_STORY_CLEAR'
+};

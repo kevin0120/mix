@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import { get, cloneDeep } from 'lodash';
 
-import Button from '../../components/CustomButtons/Button';
+import Button from '../CustomButtons/Button';
 import Paper from '@material-ui/core/Paper';
 import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
@@ -20,12 +20,12 @@ import Fade from '@material-ui/core/Fade';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 
-import Utils from '../../common/utils';
 
 import { css } from 'react-emotion';
 // First way to import
 import { GridLoader } from 'react-spinners';
 
+import { sortObj } from '../../common/utils';
 import saveConfigs from '../../actions/userConfigs';
 
 import styles from './styles';
@@ -70,7 +70,7 @@ function renderSSIDs( ssid , index, classes) {
 
 
 const mapStateToProps = (state, ownProps) => ({
-  storedConfigs: state.setting.base.network,
+  storedConfigs: state.setting.page.network,
   section: 'network',
   ...ownProps,
 });
@@ -265,7 +265,7 @@ class ConnectedNet extends React.PureComponent {
 
     const submitDisabled = ssid === "" || Object.values(validateData).some(v => v.value === "");
 
-    const inputsItems = t => Utils.sortObj(data, 'displayOrder').slice(1).map(({ key, value: item }) => (
+    const inputsItems = t => sortObj(data, 'displayOrder').slice(1).map(({ key, value: item }) => (
       <div key={key}>
         <ListItem className={classes.inputItem}>
           <InputLabel

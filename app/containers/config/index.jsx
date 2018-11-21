@@ -1,12 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import withLayout from '../../components/Layout/layout';
-import LeftMenuWithAvatar from '../../components/LeftMenuWithAvatar';
-import AppBarBack from '../../components/AppBarBack';
-import Net from '../../components/PreferencesContent/Net';
-import Io from '../../components/PreferencesContent/Io';
-import Connect from '../../components/PreferencesContent/Connect';
 
 import { withStyles } from '@material-ui/core/styles';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -17,6 +11,13 @@ import ViewModuleIcon from '@material-ui/icons/ViewModule';
 import SettingsRemoteIcon from '@material-ui/icons/SettingsRemote';
 import { I18n } from 'react-i18next';
 
+import withLayout from '../../components/Layout/layout';
+import LeftMenuWithAvatar from '../../components/LeftMenuWithAvatar';
+import AppBarBack from '../../components/AppBarBack';
+import Net from '../../components/PreferencesContent/Net';
+import Io from '../../components/PreferencesContent/Io';
+import Connect from '../../components/PreferencesContent/Connect';
+
 import {
   initHmiConnInfo,
 } from '../../actions/sysInit';
@@ -25,8 +26,8 @@ import {
 import styles from './styles';
 
 const mapStateToProps = (state, ownProps) => ({
-  odooUrl: state.userConfigs.odooConnection.odooUrl.value,
-  hmiSn: state.userConfigs.odooConnection.hmiSn.value,
+  odooUrl: state.setting.page.odooConnection.odooUrl.value,
+  hmiSn: state.setting.page.odooConnection.hmiSn.value,
   ...ownProps,
 });
 
@@ -127,7 +128,7 @@ ConnectedPreferences.propTypes = {
   }).isRequired,
   odooUrl: PropTypes.string.isRequired,
   hmiSn: PropTypes.string.isRequired,
-  initHmiConnInfo: PropTypes.func.isRequired,
+  // initHmiConnInfo: PropTypes.func.isRequired,
 };
 
 const Preferences = connect(mapStateToProps, mapDispatchToProps)(ConnectedPreferences);

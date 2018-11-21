@@ -100,7 +100,7 @@ function Header({ ...props }) {
 }
 
 Header.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.shape({}).isRequired,
   color: PropTypes.oneOf(['primary', 'info', 'success', 'warning', 'danger']),
   rtlActive: PropTypes.bool
 };

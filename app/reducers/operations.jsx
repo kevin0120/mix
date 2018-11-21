@@ -20,29 +20,30 @@ const defaultOperations = {
   operationStatus: 'Init',
   carID: '',
   carType: '',
-  activeResultIndex: -1,
-  failCount: -1,
-  jobID: -1,
+  activeResultIndex: 0,
+  failCount: 0,
+  jobID: 0,
   maxOpTimes: 30,
   workSheet: '',
   productID: -1,
   workcenterID: -1,
+  lnr: '',
   results: [
-    {
-      id: -1,
-      controller_sn: '',
-      gun_sn: '',
-      pset: -1,
-      max_redo_times: 3,
-      offset_x: 0,
-      offset_y: 0,
-      sequence: 0,
-      group_sequence: 0,
-      ti: 0,
-      mi: 0,
-      wi: 0,
-      result: ''
-    }
+    // {
+    //   id: -1,
+    //   controller_sn: '',
+    //   gun_sn: '',
+    //   pset: -1,
+    //   max_redo_times: 3,
+    //   offset_x: 0,
+    //   offset_y: 0,
+    //   sequence: 0,
+    //   group_sequence: 0,
+    //   ti: 0,
+    //   mi: 0,
+    //   wi: 0,
+    //   result: ''
+    // }
   ]
 };
 
@@ -103,8 +104,8 @@ function NewOperation(state, mode, data) {
       productID: data.product_id,
       workcenterID: data.workcenter_id,
       results: data.points,
-      activeResultIndex: 0,
-      failCount: 0
+      // activeResultIndex: 0,
+      // failCount: 0
     };
   }
 
@@ -112,11 +113,13 @@ function NewOperation(state, mode, data) {
   return {
     ...state,
     jobID: data.job_id,
+    carType: data.model,
     maxOpTimes: data.max_op_time,
     workSheet: data.work_sheet,
     results: data.results,
-    activeResultIndex: 0,
-    failCount: 0
+    // activeResultIndex: 0,
+    // failCount: 0,
+    lnr: data.lnr,
   };
 }
 
@@ -125,6 +128,8 @@ function OperationStarted(state) {
 
   return {
     ...state,
+    failCount: 0,
+    activeResultIndex: 0,
     operationStatus: OPERATION_STATUS.DOING
   };
 }
@@ -188,8 +193,6 @@ function OperationFinished(state, data) {
   return {
     ...state,
     operationStatus: OPERATION_STATUS.READY,
-    failCount: 0,
-    activeResultIndex: -1,
     results
   };
 }
@@ -201,7 +204,7 @@ function OperationContinue(state) {
   let count = 1;
   const ele = results[activeResultIndex + 1];
   for(let i = activeResultIndex + 2; i < results.length; i++) {
-    if (ele.group_sequence === results[i].group_sequence) {
+    if (ele.sequence === results[i].sequence) {
       count += 1;
     } else {
       break;

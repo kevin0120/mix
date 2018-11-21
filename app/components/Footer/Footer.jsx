@@ -41,7 +41,7 @@ function Footer(props) {
 }
 
 Footer.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.shape({}).isRequired,
   theme: PropTypes.oneOf(['dark', 'white', 'transparent']),
   big: PropTypes.bool,
   content: PropTypes.node.isRequired

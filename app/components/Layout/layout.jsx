@@ -305,9 +305,9 @@ export default function withLayout(SubCompontents, showTop = true) {
   /* eslint-disable react/forbid-prop-types */
 
   ConnectedLayout.propTypes = {
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({}).isRequired,
     usersInfo: PropTypes.array.isRequired,
-    connections: PropTypes.object.isRequired,
+    connections: PropTypes.shape({}).isRequired,
     orderStatus: PropTypes.string.isRequired,
     workMode: PropTypes.string.isRequired,
     healthCheckResults: PropTypes.shape({}).isRequired

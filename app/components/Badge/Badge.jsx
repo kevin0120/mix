@@ -14,7 +14,7 @@ function Badge({ ...props }) {
 }
 
 Badge.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.shape({}).isRequired,
   color: PropTypes.oneOf([
     'primary',
     'warning',
