@@ -110,6 +110,7 @@ export const TOOLS = {
 };
 
 export const USER_CONFIGS = {
+  PRE_SAVE: 'USER_CONFIGS_PRE_SAVE',
   SAVE: 'USER_CONFIGS_SAVE'
 };
 
@@ -119,5 +120,5 @@ export const TIMELINE_STORY = {
 };
 
 export const ANDON = {
-  NEW_DATA: 'ANDON_NEW_DATA',
+  NEW_DATA: 'ANDON_NEW_DATA'
 };

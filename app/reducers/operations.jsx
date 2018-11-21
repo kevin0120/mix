@@ -27,7 +27,7 @@ export const OPERATION_SOURCE = {
   SCANNER: 'SCANNER',
   RFID: 'RFID',
   ANDON: 'ANDON',
-  MANUAL: 'MANUAL',
+  MANUAL: 'MANUAL'
 };
 
 const defaultOperations = {
@@ -101,7 +101,7 @@ function NewTriggerData(state, carID, carType) {
   return {
     ...state,
     carID: carID !== null ? carID : state.carID,
-    carType: carType !== null ? carType : state.carType,
+    carType: carType !== null ? carType : state.carType
   };
 }
 
@@ -234,6 +234,6 @@ function OperationContinue(state) {
 function OperationPreDoing(state) {
   return {
     ...state,
-    operationStatus: OPERATION_STATUS.PREDOING,
+    operationStatus: OPERATION_STATUS.PREDOING
   };
 }

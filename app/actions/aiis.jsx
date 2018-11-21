@@ -3,7 +3,8 @@ import userConfigs from '../shared/config';
 import { job } from './jobs';
 import {
   fetchRoutingWorkcenterbyCarType,
-  fetchRoutingWorkcenterbyJobId, invalidRoutingWorkcenter,
+  fetchRoutingWorkcenterbyJobId,
+  invalidRoutingWorkcenter,
   receiveRoutingWorkcenter
 } from './ongoingRoutingWorkcenter';
 
@@ -15,23 +16,29 @@ let ws = null;
 
 const WebSocket = require('@oznu/ws-connect');
 
-
-import { GENERAL_NEW_TASK, WEBSOCKET_CLOSED, WEBSOCKET_STARTED, WEBSOCKET_STARTINT, GENERAL_NEW_JOB } from "./index";
+import {
+  GENERAL_NEW_TASK,
+  WEBSOCKET_CLOSED,
+  WEBSOCKET_STARTED,
+  WEBSOCKET_STARTINT,
+  GENERAL_NEW_JOB
+} from './index';
 // import { WorkMode, AutoMode } from './commonActions'
-import { RECEIVE_NEW_CAR , RECEIVE_EMPTY_CAR} from "./actionTypes";
+import { RECEIVE_NEW_CAR, RECEIVE_EMPTY_CAR } from './actionTypes';
 import { toolEnable } from './tools';
 import { setHealthzCheck } from './healthCheck';
 
-
 export function stopAiisWebsocket() {
-  if (ws.ws.readyState === OWebSocket.OPEN || ws.ws.readyState === OWebSocket.CONNECTING) {
+  if (
+    ws.ws.readyState === OWebSocket.OPEN ||
+    ws.ws.readyState === OWebSocket.CONNECTING
+  ) {
     ws.close();
   }
   ws = null;
 }
 
 export function initAiis(dispatch, aiisUrl, hmiSN) {
-
   if (ws) {
     stopAiisWebsocket();
   }
@@ -39,19 +46,20 @@ export function initAiis(dispatch, aiisUrl, hmiSN) {
   ws = new WebSocket(aiisUrl);
   ws.on('open', () => {
     // reg msg
-    ws.sendJson({ hmi_sn: hmiSN },
-      err => {
-        if (err) {
-          ws.close();
-        }
-      });
+    ws.sendJson({ hmi_sn: hmiSN }, err => {
+      if (err) {
+        ws.close();
+      }
+    });
 
     dispatch(setHealthzCheck('Andon', true));
   });
 
   ws.on('close', (code, reason) => {
     dispatch(setHealthzCheck('Andon', false));
-    console.log(`websocket disconnected. retry in 1s code: ${code}, reason: ${reason}`);
+    console.log(
+      `websocket disconnected. retry in 1s code: ${code}, reason: ${reason}`
+    );
   });
 
   ws.on('error', () => {
@@ -71,7 +79,7 @@ export function initAiis(dispatch, aiisUrl, hmiSN) {
     const data = dataArray.slice(-1);
     const json = JSON.parse(data);
 
-    dispatch({type: ANDON.NEW_DATA, json});
+    dispatch({ type: ANDON.NEW_DATA, json });
 
     // const currentState = getState();
     //

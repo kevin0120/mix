@@ -108,26 +108,26 @@ export const defaultConfigs = {
         {
           bit: 0,
           io: 'out',
-          function: 'LED_DOING',
-          label: '绿灯'
+          function: 'LED_WHITE',
+          label: '白灯'
         },
         {
           bit: 1,
           io: 'out',
-          function: 'LED_WARNING',
+          function: 'LED_YELLOW',
           label: '黄灯'
         },
         {
           bit: 2,
           io: 'out',
-          function: 'LED_ERROR',
-          label: '红灯'
+          function: 'LED_GREEN',
+          label: '绿灯'
         },
         {
           bit: 3,
           io: 'out',
-          function: 'LED_INFO',
-          label: '蓝灯'
+          function: 'LED_RED',
+          label: '红灯'
         },
         {
           bit: 4,

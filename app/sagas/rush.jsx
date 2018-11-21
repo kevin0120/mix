@@ -1,6 +1,6 @@
 import OWebSocket from 'ws';
 import { call, take, put, select, fork } from 'redux-saga/effects';
-import { eventChannel } from 'redux-saga'
+import { eventChannel } from 'redux-saga';
 import { RUSH } from '../actions/actionTypes';
 import { NewResults } from '../actions/rush';
 
@@ -25,10 +25,7 @@ export function* watchRush() {
 function* initRush() {
   const state = yield select();
 
-  const {
-    connections,
-    setting
-  } = state;
+  const { connections, setting } = state;
 
   if (connections.masterpc === '') {
     return;
@@ -42,7 +39,11 @@ function* initRush() {
   }
 
   rushWS = new WebSocket(wsURL);
-  rushChannel = yield call(createRushChannel, rushWS, setting.page.odooConnection.hmiSn.value);
+  rushChannel = yield call(
+    createRushChannel,
+    rushWS,
+    setting.page.odooConnection.hmiSn.value
+  );
 
   yield fork(watchRushChannel);
 }
@@ -68,9 +69,7 @@ function createRushChannel(ws, hmiSN) {
       });
     });
 
-    ws.on('close', () => {
-
-    });
+    ws.on('close', () => {});
 
     ws.on('error', () => {
       // console.log('websocket error. reconnect after 1s');
@@ -82,12 +81,11 @@ function createRushChannel(ws, hmiSN) {
       // console.log(' receive pong Msg');
     });
 
-    ws.on('message', (dataRaw) => {
+    ws.on('message', dataRaw => {
       emit(dataRaw);
     });
 
-    return () => {
-    };
+    return () => {};
   });
 }
 

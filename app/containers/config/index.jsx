@@ -18,19 +18,7 @@ import Net from '../../components/PreferencesContent/Net';
 import Io from '../../components/PreferencesContent/Io';
 import Connect from '../../components/PreferencesContent/Connect';
 
-import { initHmiConnInfo } from '../../actions/sysInit';
-
 import styles from './styles';
-
-const mapStateToProps = (state, ownProps) => ({
-  odooUrl: state.setting.page.odooConnection.odooUrl.value,
-  hmiSn: state.setting.page.odooConnection.hmiSn.value,
-  ...ownProps
-});
-
-const mapDispatchToProps = {
-  initHmiConnInfo
-};
 
 const menuContents = [
   {
@@ -113,15 +101,7 @@ class ConnectedPreferences extends React.Component {
 }
 
 ConnectedPreferences.propTypes = {
-  classes: PropTypes.shape({}).isRequired,
-  odooUrl: PropTypes.string.isRequired,
-  hmiSn: PropTypes.string.isRequired
-  // initHmiConnInfo: PropTypes.func.isRequired,
+  classes: PropTypes.shape({}).isRequired
 };
 
-const Preferences = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ConnectedPreferences);
-
-export default withLayout(withStyles(styles)(Preferences), false);
+export default withLayout(withStyles(styles)(ConnectedPreferences), false);

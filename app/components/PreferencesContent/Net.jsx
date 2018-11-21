@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import { get, cloneDeep } from 'lodash';
 
-import Button from '../CustomButtons/Button';
 import Paper from '@material-ui/core/Paper';
 import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
@@ -23,6 +22,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import { css } from 'react-emotion';
 // First way to import
 import { GridLoader } from 'react-spinners';
+import Button from '../CustomButtons/Button';
 
 import { sortObj } from '../../common/utils';
 import saveConfigs from '../../actions/userConfigs';
@@ -72,7 +72,6 @@ function renderSSIDs(ssid, index, classes) {
 
 const mapStateToProps = (state, ownProps) => ({
   storedConfigs: state.setting.page.network,
-  section: 'network',
   ...ownProps
 });
 
@@ -85,6 +84,7 @@ class ConnectedNet extends React.PureComponent {
     super(props);
     this.state = {
       loading: false,
+      section: 'network',
       data: props.storedConfigs,
       ssid: '',
       ssidSelectOpen: false,
@@ -98,12 +98,13 @@ class ConnectedNet extends React.PureComponent {
     const tempData = cloneDeep(this.state.data);
     tempData[key].value = get(e, 'target.value', '').trim();
     this.setState({
-      ...this.state,
       data: tempData
     });
   }
 
   handleSubmit() {
+    const { section } = this.state;
+    const { saveConfigs } = this.props;
     this.setState({
       loading: true
     });
@@ -150,7 +151,7 @@ class ConnectedNet extends React.PureComponent {
                 loading: false
               });
               if (ret === 0) {
-                this.props.saveConfigs(this.props.section, tempData);
+                saveConfigs(section, tempData);
                 exec('nmcli con up default');
               }
             });
@@ -174,7 +175,7 @@ class ConnectedNet extends React.PureComponent {
   }
 
   getSSIDs = () => {
-    let ret = [];
+    const ret = [];
     const { exec } = require('child_process');
     exec('nmcli dev wifi', (error, stdout, stderr) => {
       if (error) {
@@ -189,7 +190,7 @@ class ConnectedNet extends React.PureComponent {
             isHeader = false;
           } else {
             const line = lines[i].toString();
-            let x = lodash.words(line, /[^, ]+/g);
+            const x = lodash.words(line, /[^, ]+/g);
             if (x[0] === '*') {
               ret.push(x[1]);
             } else {
@@ -219,7 +220,7 @@ class ConnectedNet extends React.PureComponent {
 
   componentDidMount() {
     const tempData = cloneDeep(this.state);
-    let ret = [];
+    const ret = [];
     const { exec } = require('child_process');
     exec('nmcli dev wifi', (error, stdout, stderr) => {
       if (error) {
@@ -234,7 +235,7 @@ class ConnectedNet extends React.PureComponent {
             isHeader = false;
           } else {
             const line = lines[i].toString();
-            let x = lodash.words(line, /[^, ]+/g);
+            const x = lodash.words(line, /[^, ]+/g);
             if (x[0] === '*') {
               ret.push(x[1]);
             } else {
@@ -304,9 +305,9 @@ class ConnectedNet extends React.PureComponent {
             >
               <GridLoader
                 className={override}
-                sizeUnit={'px'}
+                sizeUnit="px"
                 size={50}
-                color={'#36D7B7'}
+                color="#36D7B7"
                 loading={this.state.loading}
               />
             </Dialog>
@@ -352,13 +353,13 @@ class ConnectedNet extends React.PureComponent {
                           renderSSIDs(item, idx, classes)
                         )}
                       </Select>
-                      {/*<Input*/}
-                      {/*id="ssid"*/}
-                      {/*placeholder={t('Common.isRequired')}*/}
-                      {/*className={classes.input}*/}
-                      {/*value={this.state.ssid}*/}
-                      {/*onChange={e => this.handleChangeSSID(e)}*/}
-                      {/*/>*/}
+                      {/* <Input */}
+                      {/* id="ssid" */}
+                      {/* placeholder={t('Common.isRequired')} */}
+                      {/* className={classes.input} */}
+                      {/* value={this.state.ssid} */}
+                      {/* onChange={e => this.handleChangeSSID(e)} */}
+                      {/* /> */}
                     </ListItem>
                     <li>
                       <Divider />
@@ -387,7 +388,6 @@ class ConnectedNet extends React.PureComponent {
 ConnectedNet.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   storedConfigs: PropTypes.shape({}).isRequired,
-  section: PropTypes.string.isRequired,
   saveConfigs: PropTypes.func.isRequired
 };
 

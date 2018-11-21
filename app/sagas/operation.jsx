@@ -5,10 +5,7 @@ import {
   jobManual,
   pset
 } from './api/operation';
-import {
-  OPERATION,
-  RUSH,
-} from '../actions/actionTypes';
+import { OPERATION, RUSH } from '../actions/actionTypes';
 import { openShutdown } from '../actions/shutDownDiag';
 import { OPERATION_RESULT, OPERATION_STATUS } from '../reducers/operations';
 import { addNewStory, clearStories } from './timeline';
@@ -30,26 +27,20 @@ export function* watchOperation() {
 
 // 触发作业
 export function* triggerOperation(data, source) {
-
   let state = yield select();
   switch (state.operations.operationStatus) {
     case OPERATION_STATUS.DOING:
       return;
     case OPERATION_STATUS.READY:
       yield call(clearStories);
-      yield put({type: OPERATION.PREDOING});
+      yield put({ type: OPERATION.PREDOING });
       break;
 
     default:
       break;
   }
 
-  yield call(
-    addNewStory,
-    'info',
-    source,
-    data
-  );
+  yield call(addNewStory, 'info', source, data);
 
   if (isCarID(data)) {
     yield put({ type: OPERATION.TRIGGER.NEW_DATA, carID: data });
@@ -57,13 +48,12 @@ export function* triggerOperation(data, source) {
     yield put({ type: OPERATION.TRIGGER.NEW_DATA, carType: data });
   }
 
-
   state = yield select();
 
   const triggers = state.setting.operationSettings.flowTriggers;
 
   let triggerFlagNum = 0;
-  for (let i = 0; i < triggers.length; i+=1) {
+  for (let i = 0; i < triggers.length; i += 1) {
     if (state.operations[triggers[i]] !== '') {
       triggerFlagNum += 1;
     }

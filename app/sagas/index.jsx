@@ -12,6 +12,7 @@ import { toolFunctions } from './tools';
 import { loginFlow, logoutFlow } from './auth';
 import { healthzCheckFlow } from './healthzCheck';
 import { watchAiis } from './aiis';
+import { watchSettingPreSave } from './setting';
 import { watchRush } from './rush';
 
 export default function* rootSaga() {
@@ -31,6 +32,7 @@ export default function* rootSaga() {
     logoutFlow(),
     // healthz
     healthzCheckFlow(),
+    watchSettingPreSave(),
     sysInitFlow()
   ]);
 }

@@ -1,4 +1,4 @@
-import customSelectStyle from '../../common/jss/customSelectStyle.jsx';
+import customSelectStyle from '../../common/jss/customSelectStyle';
 
 export default theme => ({
   ...customSelectStyle,
@@ -7,6 +7,7 @@ export default theme => ({
   },
   sectionTitle: {
     fontSize: 14,
+    marginTop: 0,
     marginBottom: 10,
     marginLeft: 20
   },

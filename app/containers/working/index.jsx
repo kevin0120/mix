@@ -569,19 +569,17 @@ class ConnectedWorking extends React.Component {
     // this.props.setCarByPass(false);
   }
 
-
-
   shouldComponentUpdate() {
     return true;
   }
 
   componentDidUpdate(prevProps) {
-
-    const {
-      operations,
-      operationSettings
-    } = this.props;
-    this.switchResultDiagShow(prevProps.operations.operationStatus, operations.operationStatus, operationSettings.enableResultDialog);
+    const { operations, operationSettings } = this.props;
+    this.switchResultDiagShow(
+      prevProps.operations.operationStatus,
+      operations.operationStatus,
+      operationSettings.enableResultDialog
+    );
 
     // const {
     //   masterpcUrl,
@@ -635,12 +633,19 @@ class ConnectedWorking extends React.Component {
     // this.props.setOrderStatus('Doing');
   };
 
-  switchResultDiagShow = (prevOperationStatus, operationStatus, enable) =>{
-    if (operationStatus === OPERATION_STATUS.READY && prevOperationStatus === OPERATION_STATUS.DOING && enable) {
+  switchResultDiagShow = (prevOperationStatus, operationStatus, enable) => {
+    if (
+      operationStatus === OPERATION_STATUS.READY &&
+      prevOperationStatus === OPERATION_STATUS.DOING &&
+      enable
+    ) {
       this.setState({
         resultShow: true
       });
-    } else if (operationStatus === OPERATION_STATUS.DOING && prevOperationStatus === OPERATION_STATUS.PREDOING) {
+    } else if (
+      operationStatus === OPERATION_STATUS.DOING &&
+      prevOperationStatus === OPERATION_STATUS.PREDOING
+    ) {
       this.setState({
         resultShow: false
       });
@@ -760,7 +765,7 @@ class ConnectedWorking extends React.Component {
     const { classes, operations, timeline } = this.props;
     //
     //
-    const {inputName, resultShow} = this.state;
+    const { inputName, resultShow } = this.state;
     //
     let batch = '0/0';
     let redoBatch = '0/0';

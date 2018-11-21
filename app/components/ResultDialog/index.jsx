@@ -67,7 +67,7 @@ class ConnectedResultDialog extends React.PureComponent {
       // this.props.fetchNextWorkOrder(this.props.masterpcUrl, this.props.hmiSn);
       this.setState({
         isShow: true
-      })
+      });
     }
   }
 
@@ -85,7 +85,7 @@ class ConnectedResultDialog extends React.PureComponent {
     const {
       classes,
       show,
-      results,
+      results
       // nextWorkorder
     } = this.props;
 
@@ -101,7 +101,13 @@ class ConnectedResultDialog extends React.PureComponent {
 
     const localResults = [];
     for (let i = 0; i < results.length; i++) {
-      localResults.push([results[i].pset, results[i].mi, results[i].wi, results[i].ti, results[i].result]);
+      localResults.push([
+        results[i].pset,
+        results[i].mi,
+        results[i].wi,
+        results[i].ti,
+        results[i].result
+      ]);
     }
 
     return (

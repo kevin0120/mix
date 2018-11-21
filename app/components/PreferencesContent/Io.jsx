@@ -3,9 +3,8 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import { withStyles } from '@material-ui/core/styles';
-import { get, cloneDeep, isEqual } from 'lodash';
+import { get, cloneDeep } from 'lodash';
 
-import Button from '../../components/CustomButtons/Button';
 import Paper from '@material-ui/core/Paper';
 import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
@@ -18,26 +17,24 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
+import { bindActionCreators } from 'redux';
+import Button from '../CustomButtons/Button';
 
 import saveConfigs from '../../actions/userConfigs';
 import { IO_FUNCTION } from '../../reducers/io';
 
-import { testModbus, resetIO } from '../../actions/ioModbus';
+import { testIO, resetIO } from '../../actions/ioModbus';
 
 import styles from './styles';
 
 const mapStateToProps = (state, ownProps) => ({
   storedConfigs: state.setting.page.modbus,
-  section: 'modbus',
-  ioTestRsp: state.ioTestRsp,
   ...ownProps
 });
 
-const mapDispatchToProps = {
-  saveConfigs,
-  testModbus,
-  resetIO
-};
+function mapDispatchToProps(dispatch) {
+  return bindActionCreators({ saveConfigs }, dispatch);
+}
 
 /* eslint-disable react/prefer-stateless-function */
 class ConnectedIo extends React.PureComponent {
@@ -70,7 +67,9 @@ class ConnectedIo extends React.PureComponent {
     this.state = {
       isDataValid: true,
       data: props.storedConfigs,
-      btnGroupStatus: {}
+      btnGroupStatus: {},
+      section: 'modbus',
+      ioTestRsp: Array(props.storedConfigs.in.length).fill(0)
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -81,40 +80,72 @@ class ConnectedIo extends React.PureComponent {
   }
 
   handleChange(e, idx, io, key) {
-    const tempData = cloneDeep(this.state.data[io]);
+    const { data } = this.state;
+    const tempData = cloneDeep(data[io]);
     tempData[idx][key] = get(e, 'target.value', '').trim();
     this.setState({
-      ...this.state,
       data: {
-        ...this.state.data,
+        ...data,
         [io]: tempData
       },
       isDataValid: this.validateData({
-        ...this.state.data,
+        ...data,
         [io]: tempData
       })
     });
   }
 
   handleSubmit() {
-    this.props.resetIO(this.state.data);
-    this.props.saveConfigs(this.props.section, this.state.data);
+    const { saveConfigs } = this.props;
+    const { data, section } = this.state;
+    resetIO(data);
+    saveConfigs(section, data);
   }
 
   handleTest(obj) {
-    this.props.testModbus(obj.io, obj.bit);
+    const { ioTestRsp } = this.state;
+    switch (obj.io) {
+      case 'in': {
+        testIO(obj.io, obj.bit)
+          .then(resp => {
+            const d = resp.response.body.valuesAsArray[0];
+            const [...retIO] = ioTestRsp;
+            retIO[obj.bit] = d;
+            this.setState({
+              ioTestRsp: retIO
+            });
+            return true;
+          })
+          .catch(() => {
+            const [...retIO] = ioTestRsp;
+            retIO[obj.bit] = 'fail';
+            this.setState({
+              ioTestRsp: retIO
+            });
+            return true;
+          });
+        break;
+      }
+      case 'out': {
+        return testIO(obj.io, obj.bit);
+      }
+      default:
+        break;
+    }
   }
+
   validateData(data = this.state.data) {
     // return Object.keys(data).every(io => data[io].every(item => item.label && item.function));
     return true;
   }
+
   generatorItems(data, t) {
-    const { classes, ioTestRsp } = this.props;
-    const { btnGroupStatus } = this.state;
+    const { classes } = this.props;
+    const { btnGroupStatus, ioTestRsp } = this.state;
     return data.map((item, idx) => {
       const options = get(
         this.IO_FUNCTION,
-        String.prototype.toLowerCase.call(item.io),
+        String.prototype.toUpperCase.call(item.io),
         this.IO_FUNCTION.IN
       );
       const selectItems = options.map(v => (
@@ -133,14 +164,16 @@ class ConnectedIo extends React.PureComponent {
               <span className={classes.infoText}>OFF</span>
             </div>
           );
-        } else if (ioTestRsp[item.bit] === 1) {
+        }
+        if (ioTestRsp[item.bit] === 1) {
           return (
             <div className={classes.statusWrap}>
               <span className={`${classes.statusCircle} ${classes.success}`} />
               <span className={classes.successText}>ON</span>
             </div>
           );
-        } else if (ioTestRsp[item.bit] === 'fail') {
+        }
+        if (ioTestRsp[item.bit] === 'fail') {
           return (
             <div className={classes.statusWrap}>
               <span className={`${classes.statusCircle} ${classes.fail}`} />
@@ -237,10 +270,9 @@ class ConnectedIo extends React.PureComponent {
 ConnectedIo.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   storedConfigs: PropTypes.shape({}).isRequired,
-  section: PropTypes.string.isRequired,
-  ioTestRsp: PropTypes.shape({}).isRequired,
-  saveConfigs: PropTypes.func.isRequired,
-  testModbus: PropTypes.func.isRequired
+  in: PropTypes.array,
+  out: PropTypes.array,
+  saveConfigs: PropTypes.func.isRequired
 };
 
 const Io = connect(

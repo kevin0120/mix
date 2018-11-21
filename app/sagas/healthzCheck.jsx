@@ -19,16 +19,20 @@ const lodash = require('lodash');
 
 const getHealthz = state => state.healthCheckResults;
 
-
 function* healthzCheckTask(url, controllers) {
   while (true) {
     try {
       const [mHealthz, cHealthzs] = yield all([
         call(masterPCHealthCheck, url),
-        call(controllerHealthCheck,url, controllers)
+        call(controllerHealthCheck, url, controllers)
       ]);
       const healthzStatus = yield select(getHealthz); // 获取整个healthz
-      if( !lodash.isEqual(healthzStatus.masterpc.isHealth, mHealthz.status === 204)){
+      if (
+        !lodash.isEqual(
+          healthzStatus.masterpc.isHealth,
+          mHealthz.status === 204
+        )
+      ) {
         // 如果不相等 更新
         yield put(setHealthzCheck('masterpc', mHealthz.status === 204));
       }
@@ -38,10 +42,14 @@ function* healthzCheckTask(url, controllers) {
       if (statusCode === 200) {
         controllerHealthzStatus = cHealthzs.data[0].status === 'online';
       }
-      if( !lodash.isEqual(healthzStatus.controller.isHealth, controllerHealthzStatus)){
+      if (
+        !lodash.isEqual(
+          healthzStatus.controller.isHealth,
+          controllerHealthzStatus
+        )
+      ) {
         yield put(setHealthzCheck('controller', controllerHealthzStatus));
       }
-
     } catch (e) {
       yield put(setNewNotification('error', e.toString()));
     }

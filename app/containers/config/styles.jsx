@@ -6,7 +6,7 @@ export default theme => ({
     position: 'relative',
     display: 'flex',
     color: '#333',
-    minHeight: 'calc(100% - 64px)'
+    maxHeight: 'calc(100% - 64px)'
   },
   content: {
     flexGrow: 1,

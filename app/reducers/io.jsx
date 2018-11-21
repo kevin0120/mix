@@ -1,14 +1,4 @@
 export const IO_FUNCTION = {
-  IN: {
-    RESET: 'RESET',
-    BYPASS: 'BYPASS',
-    MODE_SELECT: 'MODE_SELECT'
-  },
-  OUT: {
-    LED_INFO: 'LED_INFO',
-    LED_DOING: 'LED_DOING',
-    LED_WARNING: 'LED_WARNING',
-    LED_ERROR: 'LED_ERROR',
-    BEEP: 'LED_BEEP'
-  }
+  IN: ['RESET', 'BYPASS', 'MODE_SELECT'],
+  OUT: ['LED_WHITE', 'LED_YELLOW', 'LED_GREEN', 'LED_RED', 'LED_BEEP']
 };
