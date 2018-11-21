@@ -19,8 +19,8 @@ class ConnectedHealthCheck extends React.Component {
 
     return Utils.sortObj(healthCheckResults, 'displayOrder').map(
       ({ key, value: item }) => {
-        const { health, displayTitle } = item;
-        const statusClassName = health
+        const { isHealth, displayTitle } = item;
+        const statusClassName = isHealth
           ? classes.infoSuccess
           : classes.infoError;
 
