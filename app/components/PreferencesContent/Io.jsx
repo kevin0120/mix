@@ -22,11 +22,7 @@ import Select from '@material-ui/core/Select';
 import saveConfigs from '../../actions/userConfigs';
 import { IO_FUNCTION } from '../../reducers/io';
 
-
-import {
-  testModbus,
-  resetIO,
-} from '../../actions/ioModbus';
+import { testModbus, resetIO } from '../../actions/ioModbus';
 
 import styles from './styles';
 
@@ -34,28 +30,38 @@ const mapStateToProps = (state, ownProps) => ({
   storedConfigs: state.setting.page.modbus,
   section: 'modbus',
   ioTestRsp: state.ioTestRsp,
-  ...ownProps,
+  ...ownProps
 });
 
 const mapDispatchToProps = {
   saveConfigs,
   testModbus,
-  resetIO,
+  resetIO
 };
 
 /* eslint-disable react/prefer-stateless-function */
 class ConnectedIo extends React.PureComponent {
   // 获取 btns 的状态集
   static getBtnStatus(data) {
-    const checkEveryBtns = items => items.reduce((pre, item) => ({
-      ...pre,
-      [item.bit]: !(get(item, 'label', '').length === 0 || get(item, 'function', '').length === 0),
-    }), {});
+    const checkEveryBtns = items =>
+      items.reduce(
+        (pre, item) => ({
+          ...pre,
+          [item.bit]: !(
+            get(item, 'label', '').length === 0 ||
+            get(item, 'function', '').length === 0
+          )
+        }),
+        {}
+      );
 
-    const status = Object.keys(data).reduce((pre, io) => ({
-      ...pre,
-      [io]: checkEveryBtns(data[io]),
-    }), {});
+    const status = Object.keys(data).reduce(
+      (pre, io) => ({
+        ...pre,
+        [io]: checkEveryBtns(data[io])
+      }),
+      {}
+    );
     return status;
   }
 
@@ -64,7 +70,7 @@ class ConnectedIo extends React.PureComponent {
     this.state = {
       isDataValid: true,
       data: props.storedConfigs,
-      btnGroupStatus: {},
+      btnGroupStatus: {}
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -81,12 +87,12 @@ class ConnectedIo extends React.PureComponent {
       ...this.state,
       data: {
         ...this.state.data,
-        [io]: tempData,
+        [io]: tempData
       },
       isDataValid: this.validateData({
         ...this.state.data,
-        [io]: tempData,
-      }),
+        [io]: tempData
+      })
     });
   }
 
@@ -100,7 +106,7 @@ class ConnectedIo extends React.PureComponent {
   }
   validateData(data = this.state.data) {
     // return Object.keys(data).every(io => data[io].every(item => item.label && item.function));
-    return true
+    return true;
   }
   generatorItems(data, t) {
     const { classes, ioTestRsp } = this.props;
@@ -109,9 +115,13 @@ class ConnectedIo extends React.PureComponent {
       const options = get(
         this.IO_FUNCTION,
         String.prototype.toLowerCase.call(item.io),
-        this.IO_FUNCTION.IN,
+        this.IO_FUNCTION.IN
       );
-      const selectItems = options.map(v => (<MenuItem key={v} value={v}>{v}</MenuItem>));
+      const selectItems = options.map(v => (
+        <MenuItem key={v} value={v}>
+          {v}
+        </MenuItem>
+      ));
 
       const generatorStatus = () => {
         if (item.io === 'out') return null;
@@ -144,10 +154,7 @@ class ConnectedIo extends React.PureComponent {
       return (
         <div key={`${item.io}_${item.bit}`}>
           <ListItem className={classes.inputItem}>
-            <InputLabel
-              className={classes.ioInputLabel}
-              htmlFor="name-simple"
-            >
+            <InputLabel className={classes.ioInputLabel} htmlFor="name-simple">
               {item.bit}
             </InputLabel>
             <Input
@@ -164,12 +171,10 @@ class ConnectedIo extends React.PureComponent {
               name="function"
               className={classes.ioFunctionSelect}
             >
-              <MenuItem key="dummy" value=""/>
+              <MenuItem key="dummy" value="" />
               {selectItems}
             </Select>
-            <span>
-              {String.prototype.toUpperCase.call(item.io)}
-            </span>
+            <span>{String.prototype.toUpperCase.call(item.io)}</span>
             <Button
               color="info"
               onClick={() => this.handleTest(item)}
@@ -196,55 +201,51 @@ class ConnectedIo extends React.PureComponent {
 
     return (
       <I18n ns="translations">
-        {
-          t => (
-            <section>
-              <h3 className={classes.sectionTitle}>
-                {t('Configuration.IO.INname')}
-              </h3>
-              <Paper className={classes.paperWrap} elevation={1}>
-                <List>
-                  {inItems(t)}
-                </List>
-              </Paper>
-              <h3 className={`${classes.sectionTitle} ${classes.sectionTitleInner}`}>
-                {t('Configuration.IO.OUTname')}
-              </h3>
-              <Paper className={classes.paperWrap} elevation={1}>
-                <List>
-                  {outItems(t)}
-                </List>
-                <Button
-                  variant="contained"
-                  disabled={!isDataValid}
-                  color="primary"
-                  onClick={this.handleSubmit}
-                  className={classes.button}
-                >
-                  <SaveIcon className={classes.leftIcon} />
-                  {t('Common.Submit')}
-                </Button>
-              </Paper>
-            </section>
-          )
-        }
+        {t => (
+          <section>
+            <h3 className={classes.sectionTitle}>
+              {t('Configuration.IO.INname')}
+            </h3>
+            <Paper className={classes.paperWrap} elevation={1}>
+              <List>{inItems(t)}</List>
+            </Paper>
+            <h3
+              className={`${classes.sectionTitle} ${classes.sectionTitleInner}`}
+            >
+              {t('Configuration.IO.OUTname')}
+            </h3>
+            <Paper className={classes.paperWrap} elevation={1}>
+              <List>{outItems(t)}</List>
+              <Button
+                variant="contained"
+                disabled={!isDataValid}
+                color="primary"
+                onClick={this.handleSubmit}
+                className={classes.button}
+              >
+                <SaveIcon className={classes.leftIcon} />
+                {t('Common.Submit')}
+              </Button>
+            </Paper>
+          </section>
+        )}
       </I18n>
     );
   }
 }
 
 ConnectedIo.propTypes = {
-  classes: PropTypes.shape({
-  }).isRequired,
-  storedConfigs: PropTypes.shape({
-  }).isRequired,
+  classes: PropTypes.shape({}).isRequired,
+  storedConfigs: PropTypes.shape({}).isRequired,
   section: PropTypes.string.isRequired,
-  ioTestRsp: PropTypes.shape({
-  }).isRequired,
+  ioTestRsp: PropTypes.shape({}).isRequired,
   saveConfigs: PropTypes.func.isRequired,
-  testModbus: PropTypes.func.isRequired,
+  testModbus: PropTypes.func.isRequired
 };
 
-const Io = connect(mapStateToProps, mapDispatchToProps)(ConnectedIo);
+const Io = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ConnectedIo);
 
 export default withStyles(styles)(Io);

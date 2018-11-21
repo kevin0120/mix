@@ -54,11 +54,11 @@ export const OPERATION = {
   FINISHED: 'OPERATION_FINISHED', // switch to ready
   FAILED: 'OPERATION_FAILED',
   CONTINUE: 'OPERATION_CONTINUE',
-  VERIFIED: 'OPERATION_VERIFIED',
+  VERIFIED: 'OPERATION_VERIFIED'
 };
 
 export const IO = {
-  FUNCTION: 'IO_FUNCTION',
+  FUNCTION: 'IO_FUNCTION'
 };
 
 export const CONNECTION = {
@@ -79,7 +79,7 @@ export const HEALTH = {
   MASTERPC: 'HEALTH_MASTERPC',
   CONTROLLER: 'HEALTH_CONTROLLER',
   RFID: 'HEALTH_RFID',
-  IO: 'HEALTH_IO',
+  IO: 'HEALTH_IO'
 };
 
 export const HEALTHZ_CHECK = {
@@ -106,7 +106,7 @@ export const TOOLS = {
 };
 
 export const USER_CONFIGS = {
-  SAVE: 'USER_CONFIGS_SAVE',
+  SAVE: 'USER_CONFIGS_SAVE'
 };
 
 export const TIMELINE_STORY = {

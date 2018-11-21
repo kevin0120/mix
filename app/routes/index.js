@@ -56,7 +56,7 @@ export const routeConfigs = [
     icon: BuildIcon,
     color: grayColor,
     image: WorkingImg,
-    enName: 'Operating',
+    enName: 'Operating'
   },
   // {
   //   name: 'editor',
@@ -76,7 +76,7 @@ export const routeConfigs = [
     icon: SettingsApplicationsIcon,
     color: grayColor,
     image: settingImg,
-    enName: 'Preferences',
+    enName: 'Preferences'
   },
   {
     name: 'event',
@@ -86,7 +86,7 @@ export const routeConfigs = [
     icon: Mail,
     color: grayColor,
     image: LoginImg,
-    enName: 'Event Log',
+    enName: 'Event Log'
   },
   {
     name: 'result',
@@ -96,7 +96,7 @@ export const routeConfigs = [
     icon: Save,
     color: grayColor,
     image: LoginImg,
-    enName: 'Query Results',
+    enName: 'Query Results'
   },
   // {
   //   name: 'lock',

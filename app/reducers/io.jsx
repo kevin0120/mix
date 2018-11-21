@@ -1,9 +1,8 @@
-
 export const IO_FUNCTION = {
   IN: {
-    RESET: "RESET",
-    BYPASS: "BYPASS",
-    MODE_SELECT: "MODE_SELECT",
+    RESET: 'RESET',
+    BYPASS: 'BYPASS',
+    MODE_SELECT: 'MODE_SELECT'
   },
   OUT: {
     LED_INFO: 'LED_INFO',

@@ -3,11 +3,11 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 // import { fetchNextWorkOrder } from '../../actions/ongoingWorkOrder';
 
-import SweetAlert from "react-bootstrap-sweetalert";
+import SweetAlert from 'react-bootstrap-sweetalert';
 
-import withStyles from "@material-ui/core/styles/withStyles";
+import withStyles from '@material-ui/core/styles/withStyles';
 
-import sweetAlertStyle from "../../common/jss/views/sweetAlertStyle.jsx";
+import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle.jsx';
 
 // import { IOSet } from "../../actions/controllerIO";
 
@@ -16,16 +16,16 @@ import Slide from '@material-ui/core/Slide';
 import { I18n } from 'react-i18next';
 
 // import { setShutdown, switchReady } from '../../actions/commonActions';
-import customSelectStyle from "../../common/jss/customSelectStyle.jsx";
+import customSelectStyle from '../../common/jss/customSelectStyle.jsx';
 import GridContainer from '../Grid/GridContainer';
 import GridItem from '../Grid/GridItem';
 import Card from '../Card/Card';
 import CardHeader from '../Card/CardHeader';
 import CardIcon from '../Card/CardIcon';
-import Assignment from "@material-ui/icons/Assignment";
+import Assignment from '@material-ui/icons/Assignment';
 import CardBody from '../Card/CardBody';
-import Table from "../Table/Table";
-import ReactTable from "react-table";
+import Table from '../Table/Table';
+import ReactTable from 'react-table';
 import { cardTitle } from '../../common/jss/material-react-pro';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -36,7 +36,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '../CustomButtons/Button';
 import Dialog from '@material-ui/core/Dialog';
-import FormLabel from "@material-ui/core/FormLabel";
+import FormLabel from '@material-ui/core/FormLabel';
 
 const mapStateToProps = (state, ownProps) => ({
   // masterpcUrl: state.connInfo.masterpc.connection,
@@ -44,7 +44,7 @@ const mapStateToProps = (state, ownProps) => ({
   // controllerSN: state.workingPage.infoTools.controllerSN,
   // results: state.ongoingWorkOrder.results,
   // nextWorkorder: state.ongoingWorkOrder.nextWorkorder,
-  ...ownProps,
+  ...ownProps
 });
 
 const mapDispatchToProps = {
@@ -74,7 +74,7 @@ class ConnectedResultDialog extends React.PureComponent {
   handleClose = () => {
     this.setState({
       isShow: false
-    })
+    });
   };
 
   Transition = props => {
@@ -82,11 +82,12 @@ class ConnectedResultDialog extends React.PureComponent {
   };
 
   render() {
-    const { classes,
+    const {
+      classes
       // show,  results, nextWorkorder
     } = this.props;
 
-    const {isShow} = this.state;
+    const { isShow } = this.state;
 
     console.log('isShow', isShow);
 
@@ -103,77 +104,86 @@ class ConnectedResultDialog extends React.PureComponent {
 
     return (
       <I18n ns="translations">
-        {
-          t => (
-
-            <Dialog
-              classes={{
-                root: classes.modalRoot,
-                paper: classes.modal + " " + classes.modalLarge,
-              }}
-              TransitionComponent={this.Transition}
-              keepMounted
-              open={isShow && show }
-              onClose={this.handleClose}
-              aria-labelledby="form-dialog-title"
-              scroll="paper"
+        {t => (
+          <Dialog
+            classes={{
+              root: classes.modalRoot,
+              paper: classes.modal + ' ' + classes.modalLarge
+            }}
+            TransitionComponent={this.Transition}
+            keepMounted
+            open={isShow && show}
+            onClose={this.handleClose}
+            aria-labelledby="form-dialog-title"
+            scroll="paper"
+          >
+            <DialogTitle id="form-dialog-title" className={classes.modalHeader}>
+              {t('Common.Result')}
+            </DialogTitle>
+            <DialogContent className={classes.modalBody}>
+              <div>
+                <GridContainer className={classes.root}>
+                  <GridItem xs={12}>
+                    <Card>
+                      <CardHeader color="primary" icon>
+                        <CardIcon color="primary">
+                          <Assignment />
+                        </CardIcon>
+                        <h4 className={classes.cardIconTitle}>
+                          {t('main.resultQuery')}
+                        </h4>
+                      </CardHeader>
+                      <CardBody>
+                        <Table
+                          tableHeaderColor="primary"
+                          tableHead={['程序号', '扭矩', '角度', '用时', '结果']}
+                          tableData={localResults}
+                          colorsColls={['primary']}
+                        />
+                      </CardBody>
+                    </Card>
+                  </GridItem>
+                </GridContainer>
+              </div>
+              <div>
+                <GridContainer className={classes.root}>
+                  <GridItem xs={12}>
+                    <Card>
+                      <CardHeader color="primary" icon>
+                        <CardIcon color="primary">
+                          <Assignment />
+                        </CardIcon>
+                        <h4 className={classes.cardIconTitle}>
+                          {t('main.nextOrder')}
+                        </h4>
+                      </CardHeader>
+                      <CardBody>
+                        <Table
+                          tableHeaderColor="primary"
+                          tableHead={['Vin', '车型', '车序', 'Knr', 'LongPin']}
+                          tableData={nw}
+                          colorsColls={['primary']}
+                        />
+                      </CardBody>
+                    </Card>
+                  </GridItem>
+                </GridContainer>
+              </div>
+            </DialogContent>
+            <DialogActions
+              className={classes.modalFooter + ' ' + classes.modalFooterCenter}
             >
-              <DialogTitle id="form-dialog-title" className={classes.modalHeader} >{t('Common.Result')}</DialogTitle>
-              <DialogContent　className={classes.modalBody}>
-                <div>
-                  <GridContainer className={classes.root}>
-                    <GridItem xs={12}>
-                      <Card>
-                        <CardHeader color="primary" icon>
-                          <CardIcon color="primary">
-                            <Assignment/>
-                          </CardIcon>
-                          <h4 className={classes.cardIconTitle}>{t('main.resultQuery')}</h4>
-                        </CardHeader>
-                        <CardBody>
-                          <Table
-                            tableHeaderColor="primary"
-                            tableHead={["程序号", "扭矩", "角度", "用时", "结果"]}
-                            tableData={localResults}
-                            colorsColls={["primary"]}
-                          />
-                        </CardBody>
-                      </Card>
-                    </GridItem>
-                  </GridContainer>
-                </div>
-                <div>
-                  <GridContainer className={classes.root}>
-                    <GridItem xs={12}>
-                      <Card>
-                        <CardHeader color="primary" icon>
-                          <CardIcon color="primary">
-                            <Assignment/>
-                          </CardIcon>
-                          <h4 className={classes.cardIconTitle}>{t('main.nextOrder')}</h4>
-                        </CardHeader>
-                        <CardBody>
-                          <Table
-                            tableHeaderColor="primary"
-                            tableHead={["Vin", "车型", "车序", "Knr", "LongPin"]}
-                            tableData={nw}
-                            colorsColls={["primary"]}
-                          />
-                        </CardBody>
-                      </Card>
-                    </GridItem>
-                  </GridContainer>
-
-                </div>
-              </DialogContent>
-              <DialogActions className={classes.modalFooter + " " + classes.modalFooterCenter}>
-                <Button onClick={this.handleClose} color="primary" autoFocus round>
-                  {t('Common.Close')}
-                </Button>
-              </DialogActions>
-            </Dialog>
-          )
-        }
+              <Button
+                onClick={this.handleClose}
+                color="primary"
+                autoFocus
+                round
+              >
+                {t('Common.Close')}
+              </Button>
+            </DialogActions>
+          </Dialog>
+        )}
       </I18n>
     );
   }
@@ -189,6 +199,9 @@ ConnectedResultDialog.propTypes = {
   // fetchNextWorkOrder: PropTypes.func.isRequired,
 };
 
-const ResultDialog = connect(mapStateToProps, mapDispatchToProps)(ConnectedResultDialog);
+const ResultDialog = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ConnectedResultDialog);
 
 export default withStyles(customSelectStyle)(ResultDialog);

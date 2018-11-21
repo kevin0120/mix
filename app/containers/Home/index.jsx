@@ -59,7 +59,7 @@ const withstyles = theme => ({
     borderRadius: '4px'
   },
   cardGridItem: {
-    paddingRight: '30px',
+    paddingRight: '30px'
   },
   cardContent: {
     position: 'relative',
@@ -175,12 +175,8 @@ class ConnectedWelcome extends React.Component {
       <I18n ns="translations">
         {t => (
           <div className={classes.root}>
-            <Grid
-              container
-              className={classes.container}
-              justify="center"
-            >
-              {routeConfigs.slice(1,-1).map(route => (
+            <Grid container className={classes.container} justify="center">
+              {routeConfigs.slice(1, -1).map(route => (
                 <Grid key={route.name} item className={classes.cardGridItem}>
                   <Card
                     key={route.name}

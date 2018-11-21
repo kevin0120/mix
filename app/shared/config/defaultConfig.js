@@ -1,4 +1,3 @@
-
 export const defaultConfigs = {
   version: 'v0.1',
   base: {

@@ -1,5 +1,4 @@
-import { keyframes } from 'react-emotion'
-
+import { keyframes } from 'react-emotion';
 
 const TOPHEIGHT = '150px';
 
@@ -26,40 +25,40 @@ import {
   grayColor,
   warningColor,
   title
-} from "../../common/jss/material-react-pro.jsx";
+} from '../../common/jss/material-react-pro.jsx';
 
 export default () => ({
   sWorkingInitializing: {
-    backgroundColor: grayColor,
+    backgroundColor: grayColor
     // animation: `${ripple} 0.5s infinite cubic-bezier(1, 1, 1, 1)`,
   },
   sWorkingDoing: {
-    backgroundColor: successColor,
+    backgroundColor: successColor
   },
   sWorkingReady: {
     backgroundColor: successColor,
-    animation: `${twinkling} 1s infinite cubic-bezier(1, 1, 1, 1)`,
+    animation: `${twinkling} 1s infinite cubic-bezier(1, 1, 1, 1)`
   },
   sWorkingFail: {
-    backgroundColor: warningColor,
+    backgroundColor: warningColor
   },
   sWorkingError: {
-    backgroundColor: dangerColor,
+    backgroundColor: dangerColor
   },
   sWorkingTimeout: {
-    backgroundColor: warningColor,
+    backgroundColor: warningColor
   },
   sWorkingContinue: {
-    backgroundColor: successColor,
+    backgroundColor: successColor
   },
   statusContainer: {
-    padding: '10px 10px 10px 0',
+    padding: '10px 10px 10px 0'
   },
   progress: {
     boxSizing: 'border-box',
     height: '100%',
     backgroundColor: '#fff',
-    border: '4px solid #00aaf2',
+    border: '4px solid #00aaf2'
   },
   // progressRoot: {
   //   background: 'primary',//'linear-gradient(to right, #00E676 30%, #FFEB3B, #FF5722 90%)',
@@ -73,7 +72,7 @@ export default () => ({
   progressMote: {
     borderRadius: 3,
     border: 0,
-    height: '100%',
+    height: '100%'
     // boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
   },
   paperStatus: {
@@ -85,11 +84,11 @@ export default () => ({
     boxSizing: 'border-box',
     fontSize: '44px',
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#fff'
   },
   progressWrap: {
     height: '100%',
-    position: 'relative',
+    position: 'relative'
   },
   progressText: {
     position: 'absolute',
@@ -106,6 +105,6 @@ export default () => ({
     background: 'transparent',
     boxShadow: 'none',
     fontWeight: 'bold',
-    whiteSpace: 'nowrap',
-  },
+    whiteSpace: 'nowrap'
+  }
 });

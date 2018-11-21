@@ -5,7 +5,7 @@ export default function saveConfigs(section, newConfigs) {
     type: USER_CONFIGS.SAVE,
     data: {
       section,
-      newConfigs,
-    },
+      newConfigs
+    }
   };
 }

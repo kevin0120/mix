@@ -20,8 +20,6 @@ const lodash = require('lodash');
 //   IO_TEST_RESPONSE,
 // } from 'actions/actionTypes';
 
-
-
 let keyMonitorTimer = null;
 let senderTimer = null;
 
@@ -151,7 +149,6 @@ export function setLedError(flag) {
 }
 
 export function initIOModbus(dispatch, state) {
-
   // 第一步先关闭所有连接
   closeAll();
 
@@ -192,45 +189,45 @@ export function initIOModbus(dispatch, state) {
       isHealth: true
     });
 
-
     keyMonitorTimer = setInterval(() => {
       // set health = true
-      modbusClient.readDiscreteInputs(iResetKey, 1).then(resp => {
-        const newKeyStatus = resp.response.body.valuesAsArray[0];
-        if (currentKeyStatus !== null && currentKeyStatus !== newKeyStatus) {
+      modbusClient
+        .readDiscreteInputs(iResetKey, 1)
+        .then(resp => {
+          const newKeyStatus = resp.response.body.valuesAsArray[0];
+          if (currentKeyStatus !== null && currentKeyStatus !== newKeyStatus) {
+            if (newKeyStatus === 1) {
+              // on
 
-          if (newKeyStatus === 1) {
-            // on
+              timeStamp = new Date().getTime();
+            } else {
+              // off
 
-            timeStamp = new Date().getTime();
-          } else {
-            // off
-
-            const diff = (new Date().getTime() - timeStamp) / 1000;
-            if (diff >= byPassTimeout) {
-              // 钥匙延迟3秒放行
-              if (userConfigs.operationSettings.byPass.type === 'sleep') {
+              const diff = (new Date().getTime() - timeStamp) / 1000;
+              if (diff >= byPassTimeout) {
+                // 钥匙延迟3秒放行
+                if (userConfigs.operationSettings.byPass.type === 'sleep') {
+                  dispatch({
+                    type: IO.FUNCTION,
+                    data: IO_FUNCTION.IN.BYPASS
+                  });
+                }
+              } else {
+                // 复位动作
                 dispatch({
                   type: IO.FUNCTION,
-                  data: IO_FUNCTION.IN.BYPASS
+                  data: IO_FUNCTION.IN.RESET
                 });
               }
-            } else {
-              // 复位动作
-              dispatch({
-                type: IO.FUNCTION,
-                data: IO_FUNCTION.IN.RESET
-              });
             }
           }
-        }
-        currentKeyStatus = newKeyStatus;
-      }).catch(error => {
-        // console.log(error);
-        client.destroy();
-        clearInterval(keyMonitorTimer);
-      });
-
+          currentKeyStatus = newKeyStatus;
+        })
+        .catch(error => {
+          // console.log(error);
+          client.destroy();
+          clearInterval(keyMonitorTimer);
+        });
     }, 500);
 
     senderTimer = setInterval(() => {
@@ -243,11 +240,14 @@ export function initIOModbus(dispatch, state) {
         }
         return v;
       });
-      modbusClient.writeMultipleCoils(0, lights).then().catch(error => {
-        // console.log(error);
-        client.destroy();
-        clearInterval(senderTimer);
-      });
+      modbusClient
+        .writeMultipleCoils(0, lights)
+        .then()
+        .catch(error => {
+          // console.log(error);
+          client.destroy();
+          clearInterval(senderTimer);
+        });
 
       ioStatus = ioStatus.map(v => {
         if (v === sBlinkOff) {
@@ -258,9 +258,7 @@ export function initIOModbus(dispatch, state) {
         }
         return v;
       });
-
     }, 500);
-
   });
 
   client.on('end', () => {
@@ -291,7 +289,7 @@ export function initIOModbus(dispatch, state) {
 }
 
 export function closeAll() {
-  if (keyMonitorTimer){
+  if (keyMonitorTimer) {
     clearInterval(keyMonitorTimer);
   }
   if (senderTimer) {

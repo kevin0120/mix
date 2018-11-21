@@ -13,13 +13,12 @@ import ListItem from '@material-ui/core/ListItem';
 import SaveIcon from '@material-ui/icons/Save';
 import { I18n } from 'react-i18next';
 import Dialog from '@material-ui/core/Dialog';
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
 import Fade from '@material-ui/core/Fade';
 
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
-
 
 import { css } from 'react-emotion';
 // First way to import
@@ -33,14 +32,18 @@ import styles from './styles';
 const lodash = require('lodash');
 
 const override = css`
-    display: block;
-    margin: auto;
-    border-color: red;
+  display: block;
+  margin: auto;
+  border-color: red;
 `;
 
-const netmask2CIDR = (netmask) => (netmask.split('.').map(Number)
-  .map(part => (part >>> 0).toString(2))
-  .join('')).split('1').length -1;
+const netmask2CIDR = netmask =>
+  netmask
+    .split('.')
+    .map(Number)
+    .map(part => (part >>> 0).toString(2))
+    .join('')
+    .split('1').length - 1;
 //
 // const CDIR2netmask = (bitCount) => {
 //   let mask=[];
@@ -52,8 +55,7 @@ const netmask2CIDR = (netmask) => (netmask.split('.').map(Number)
 //   return mask.join('.');
 // };
 
-
-function renderSSIDs( ssid , index, classes) {
+function renderSSIDs(ssid, index, classes) {
   return (
     <MenuItem
       key={ssid}
@@ -68,15 +70,14 @@ function renderSSIDs( ssid , index, classes) {
   );
 }
 
-
 const mapStateToProps = (state, ownProps) => ({
   storedConfigs: state.setting.page.network,
   section: 'network',
-  ...ownProps,
+  ...ownProps
 });
 
 const mapDispatchToProps = {
-  saveConfigs,
+  saveConfigs
 };
 
 class ConnectedNet extends React.PureComponent {
@@ -85,7 +86,7 @@ class ConnectedNet extends React.PureComponent {
     this.state = {
       loading: false,
       data: props.storedConfigs,
-      ssid: "",
+      ssid: '',
       ssidSelectOpen: false,
       ssids: []
     };
@@ -98,7 +99,7 @@ class ConnectedNet extends React.PureComponent {
     tempData[key].value = get(e, 'target.value', '').trim();
     this.setState({
       ...this.state,
-      data: tempData,
+      data: tempData
     });
   }
 
@@ -110,65 +111,71 @@ class ConnectedNet extends React.PureComponent {
     const tempData = cloneDeep(this.state.data);
     const mask = netmask2CIDR(tempData.netmask.value);
     tempData.ssid.value = this.state.ssid;
-    const {exec} = require('child_process');
+    const { exec } = require('child_process');
     exec('nmcli con delete default', () => {
-      exec(`nmcli dev wifi connect ${tempData.ssid.value} password ${tempData.password.value} name default`, (error, stdout, stderr) => {
-        if (error) {
-          console.error(`exec error: ${error}`);
-          ret = -1;
-        }
-        if (stderr) {
-          console.log(`stderr: ${stderr}`);
-          ret = -1;
-        }
+      exec(
+        `nmcli dev wifi connect ${tempData.ssid.value} password ${
+          tempData.password.value
+        } name default`,
+        (error, stdout, stderr) => {
+          if (error) {
+            console.error(`exec error: ${error}`);
+            ret = -1;
+          }
+          if (stderr) {
+            console.log(`stderr: ${stderr}`);
+            ret = -1;
+          }
 
-        if (ret < 0) {
-          this.setState({
-            loading: false
-          });
-          return;
-        }
-        exec('nmcli con down default', () => {
-          const cmd = `nmcli con mod default ipv4.method manual ipv4.address ${tempData.ipAddress.value}/${mask} ipv4.gateway ${tempData.gateway.value}`;
-          exec(cmd, (error, stdout, stderr) => {
-            if (error) {
-              console.error(`exec error: ${error}`);
-              ret = -1;
-            }
-            if (stderr) {
-              console.log(`stderr: ${stderr}`);
-              ret = -1;
-            }
+          if (ret < 0) {
             this.setState({
               loading: false
             });
-            if (ret === 0) {
-              this.props.saveConfigs(this.props.section, tempData);
-              exec('nmcli con up default');
-            }
+            return;
+          }
+          exec('nmcli con down default', () => {
+            const cmd = `nmcli con mod default ipv4.method manual ipv4.address ${
+              tempData.ipAddress.value
+            }/${mask} ipv4.gateway ${tempData.gateway.value}`;
+            exec(cmd, (error, stdout, stderr) => {
+              if (error) {
+                console.error(`exec error: ${error}`);
+                ret = -1;
+              }
+              if (stderr) {
+                console.log(`stderr: ${stderr}`);
+                ret = -1;
+              }
+              this.setState({
+                loading: false
+              });
+              if (ret === 0) {
+                this.props.saveConfigs(this.props.section, tempData);
+                exec('nmcli con up default');
+              }
+            });
           });
-        });
-      });
+        }
+      );
     });
   }
 
   handleChangeSSID(e) {
     this.setState({
       ssid: e.target.value
-    })
+    });
   }
 
   validateData(data = this.state) {
     if (lodash.isEmpty(data.ssid)) {
       return false;
     }
-    return Object.values(data.data)
-      .every(v => v.value);
+    return Object.values(data.data).every(v => v.value);
   }
 
   getSSIDs = () => {
     let ret = [];
-    const {exec} = require('child_process');
+    const { exec } = require('child_process');
     exec('nmcli dev wifi', (error, stdout, stderr) => {
       if (error) {
         console.error(`exec error: ${error}`);
@@ -177,7 +184,7 @@ class ConnectedNet extends React.PureComponent {
       if (stdout) {
         const lines = stdout.toString().split('\n');
         let isHeader = true;
-        for (let i = 0; i < lines.length-1; i++) {
+        for (let i = 0; i < lines.length - 1; i++) {
           if (isHeader) {
             isHeader = false;
           } else {
@@ -185,41 +192,35 @@ class ConnectedNet extends React.PureComponent {
             let x = lodash.words(line, /[^, ]+/g);
             if (x[0] === '*') {
               ret.push(x[1]);
-            }else {
+            } else {
               ret.push(x[0]);
             }
           }
         }
-        this.setState(
-          {
-            ssids: lodash.uniq(ret),
-            ssidSelectOpen: true
-          }
-        )
+        this.setState({
+          ssids: lodash.uniq(ret),
+          ssidSelectOpen: true
+        });
       }
-      if (stderr){
-        this.setState(
-          {
-            ssids: [],
-            ssidSelectOpen: true
-          }
-        )
+      if (stderr) {
+        this.setState({
+          ssids: [],
+          ssidSelectOpen: true
+        });
       }
     });
   };
 
   handleCloseSSID = () => {
-    this.setState(
-      {
-        ssidSelectOpen: false
-      }
-    )
+    this.setState({
+      ssidSelectOpen: false
+    });
   };
 
   componentDidMount() {
     const tempData = cloneDeep(this.state);
     let ret = [];
-    const {exec} = require('child_process');
+    const { exec } = require('child_process');
     exec('nmcli dev wifi', (error, stdout, stderr) => {
       if (error) {
         console.error(`exec error: ${error}`);
@@ -247,11 +248,10 @@ class ConnectedNet extends React.PureComponent {
         }
         this.setState({
           ...tempData
-        })
+        });
       }
     });
-
-  };
+  }
 
   Transition(props) {
     return <Fade {...props} timeout={500} />;
@@ -261,144 +261,139 @@ class ConnectedNet extends React.PureComponent {
     const { classes } = this.props;
     const { data, ssid } = this.state;
 
-    const validateData =lodash.omit(data, ['ssid']);
+    const validateData = lodash.omit(data, ['ssid']);
 
-    const submitDisabled = ssid === "" || Object.values(validateData).some(v => v.value === "");
+    const submitDisabled =
+      ssid === '' || Object.values(validateData).some(v => v.value === '');
 
-    const inputsItems = t => sortObj(data, 'displayOrder').slice(1).map(({ key, value: item }) => (
-      <div key={key}>
-        <ListItem className={classes.inputItem}>
-          <InputLabel
-            className={classes.inputLabel}
-            htmlFor="name-simple"
-          >
-            {t(item.displayTitle)}
-          </InputLabel>
-          <Input
-            id="name-simple"
-            placeholder={t('Common.isRequired')}
-            className={classes.input}
-            value={item.value}
-            onChange={e => this.handleChange(e, key)}
-          />
-        </ListItem>
-        <li>
-          <Divider />
-        </li>
-      </div>
-    ));
+    const inputsItems = t =>
+      sortObj(data, 'displayOrder')
+        .slice(1)
+        .map(({ key, value: item }) => (
+          <div key={key}>
+            <ListItem className={classes.inputItem}>
+              <InputLabel className={classes.inputLabel} htmlFor="name-simple">
+                {t(item.displayTitle)}
+              </InputLabel>
+              <Input
+                id="name-simple"
+                placeholder={t('Common.isRequired')}
+                className={classes.input}
+                value={item.value}
+                onChange={e => this.handleChange(e, key)}
+              />
+            </ListItem>
+            <li>
+              <Divider />
+            </li>
+          </div>
+        ));
 
     return (
       <I18n ns="translations">
-        {
-          t => (
-            <div>
-              <Dialog fullScreen
-                      classes={{
-                        root: classes.loadModal,
-                      }}
-                      open={this.state.loading}
-                      style={ {opacity: 0.7} }
-                      TransitionComponent={this.Transition}
-              >
-                <GridLoader
-                  className={override}
-                  sizeUnit={"px"}
-                  size={50}
-                  color={'#36D7B7'}
-                  loading={this.state.loading}
-                />
-              </Dialog>
-              <section>
-                <h3 className={classes.sectionTitle}>
-                  {t('Configuration.network.name')}
-                </h3>
-                <Paper className={classes.paperWrap} elevation={1}>
-                  <List>
-                    <div >
-                      <ListItem className={classes.inputItem}>
-                        <InputLabel
-                          className={classes.inputLabel}
-                          htmlFor="ssid"
+        {t => (
+          <div>
+            <Dialog
+              fullScreen
+              classes={{
+                root: classes.loadModal
+              }}
+              open={this.state.loading}
+              style={{ opacity: 0.7 }}
+              TransitionComponent={this.Transition}
+            >
+              <GridLoader
+                className={override}
+                sizeUnit={'px'}
+                size={50}
+                color={'#36D7B7'}
+                loading={this.state.loading}
+              />
+            </Dialog>
+            <section>
+              <h3 className={classes.sectionTitle}>
+                {t('Configuration.network.name')}
+              </h3>
+              <Paper className={classes.paperWrap} elevation={1}>
+                <List>
+                  <div>
+                    <ListItem className={classes.inputItem}>
+                      <InputLabel className={classes.inputLabel} htmlFor="ssid">
+                        {t('Configuration.network.SSID')}
+                      </InputLabel>
+                      <Select
+                        displayEmpty
+                        MenuProps={{
+                          className: classes.selectMenu
+                        }}
+                        classes={{
+                          select: classes.select
+                        }}
+                        value={this.state.ssid}
+                        onChange={e => this.handleChangeSSID(e)}
+                        open={this.state.ssidSelectOpen}
+                        onOpen={this.getSSIDs}
+                        onClose={this.handleCloseSSID}
+                        inputProps={{
+                          name: 'ssid',
+                          id: 'ssid',
+                          className: classes.input
+                        }}
+                      >
+                        <MenuItem
+                          disabled
+                          classes={{
+                            root: classes.selectMenuItem
+                          }}
                         >
                           {t('Configuration.network.SSID')}
-                        </InputLabel>
-                        <Select
-                          displayEmpty
-                          MenuProps={{
-                            className: classes.selectMenu
-                          }}
-                          classes={{
-                            select: classes.select
-                          }}
-                          value={this.state.ssid}
-                          onChange={e => this.handleChangeSSID(e)}
-                          open={ this.state.ssidSelectOpen}
-                          onOpen={this.getSSIDs}
-                          onClose={this.handleCloseSSID}
-                          inputProps={{
-                            name: "ssid",
-                            id: "ssid",
-                            className: classes.input
-                          }}
-                        >
-                          <MenuItem
-                            disabled
-                            classes={{
-                              root: classes.selectMenuItem
-                            }}
-                          >
-                            {t('Configuration.network.SSID')}
-                          </MenuItem>
-                          {
-                            (
-                              this.state.ssids.map((item, idx) =>
-                                renderSSIDs(item, idx, classes)
-                              ))
-                          }
-                        </Select>
-                        {/*<Input*/}
-                        {/*id="ssid"*/}
-                        {/*placeholder={t('Common.isRequired')}*/}
-                        {/*className={classes.input}*/}
-                        {/*value={this.state.ssid}*/}
-                        {/*onChange={e => this.handleChangeSSID(e)}*/}
-                        {/*/>*/}
-                      </ListItem>
-                      <li>
-                        <Divider />
-                      </li>
-                    </div>
-                    {inputsItems(t)}
-                  </List>
-                  <Button
-                    disabled={submitDisabled}
-                    color="primary"
-                    onClick={this.handleSubmit}
-                    className={classes.button}
-                  >
-                    <SaveIcon className={classes.leftIcon} />
-                    {t('Common.Submit')}
-                  </Button>
-                </Paper>
-              </section>
-            </div>
-          )
-        }
+                        </MenuItem>
+                        {this.state.ssids.map((item, idx) =>
+                          renderSSIDs(item, idx, classes)
+                        )}
+                      </Select>
+                      {/*<Input*/}
+                      {/*id="ssid"*/}
+                      {/*placeholder={t('Common.isRequired')}*/}
+                      {/*className={classes.input}*/}
+                      {/*value={this.state.ssid}*/}
+                      {/*onChange={e => this.handleChangeSSID(e)}*/}
+                      {/*/>*/}
+                    </ListItem>
+                    <li>
+                      <Divider />
+                    </li>
+                  </div>
+                  {inputsItems(t)}
+                </List>
+                <Button
+                  disabled={submitDisabled}
+                  color="primary"
+                  onClick={this.handleSubmit}
+                  className={classes.button}
+                >
+                  <SaveIcon className={classes.leftIcon} />
+                  {t('Common.Submit')}
+                </Button>
+              </Paper>
+            </section>
+          </div>
+        )}
       </I18n>
     );
   }
 }
 
 ConnectedNet.propTypes = {
-  classes: PropTypes.shape({
-  }).isRequired,
-  storedConfigs: PropTypes.shape({
-  }).isRequired,
+  classes: PropTypes.shape({}).isRequired,
+  storedConfigs: PropTypes.shape({}).isRequired,
   section: PropTypes.string.isRequired,
-  saveConfigs: PropTypes.func.isRequired,
+  saveConfigs: PropTypes.func.isRequired
 };
 
-const Net = connect(mapStateToProps, mapDispatchToProps)(ConnectedNet);
+const Net = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ConnectedNet);
 
 export default withStyles(styles)(Net);

@@ -1,7 +1,13 @@
 import { OPERATION } from '../actions/actionTypes';
 import { isCarID } from '../common/utils';
 
-import { setLedStatusDoing, setLedError, setLedStatusReady, sOn, sBlinkOn } from '../actions/ioModbus';
+import {
+  setLedStatusDoing,
+  setLedError,
+  setLedStatusReady,
+  sOn,
+  sBlinkOn
+} from '../actions/ioModbus';
 
 export const OPERATION_STATUS = {
   INIT: 'Init',
@@ -103,7 +109,7 @@ function NewOperation(state, mode, data) {
       workSheet: data.img,
       productID: data.product_id,
       workcenterID: data.workcenter_id,
-      results: data.points,
+      results: data.points
       // activeResultIndex: 0,
       // failCount: 0
     };
@@ -119,7 +125,7 @@ function NewOperation(state, mode, data) {
     results: data.results,
     // activeResultIndex: 0,
     // failCount: 0,
-    lnr: data.lnr,
+    lnr: data.lnr
   };
 }
 
@@ -141,7 +147,7 @@ function mergeResults(state, data) {
     return rs;
   }
 
-  for(let i = 0; i < data.length; i++) {
+  for (let i = 0; i < data.length; i++) {
     rs[i + state.activeResultIndex].ti = data[i].ti;
     rs[i + state.activeResultIndex].mi = data[i].mi;
     rs[i + state.activeResultIndex].wi = data[i].wi;
@@ -203,7 +209,7 @@ function OperationContinue(state) {
   const { activeResultIndex, results } = state;
   let count = 1;
   const ele = results[activeResultIndex + 1];
-  for(let i = activeResultIndex + 2; i < results.length; i++) {
+  for (let i = activeResultIndex + 2; i < results.length; i++) {
     if (ele.sequence === results[i].sequence) {
       count += 1;
     } else {
@@ -215,6 +221,6 @@ function OperationContinue(state) {
     ...state,
     operationStatus: OPERATION_STATUS.DOING,
     activeResultIndex: activeResultIndex + count,
-    failCount: 0,
+    failCount: 0
   };
 }

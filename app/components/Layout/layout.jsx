@@ -156,22 +156,22 @@ export default function withLayout(SubCompontents, showTop = true) {
           {t => (
             <div className={classes.layout}>
               {/*<ClickAwayListener onClickAway={() => this.toggleMenu(false)}>*/}
-                {/*<SwipeableDrawer*/}
-                  {/*anchor="right"*/}
-                  {/*open={isMenuOpen}*/}
-                  {/*disableSwipeToOpen={disableSwipeToOpen}*/}
-                  {/*onClose={() => this.toggleMenu(false)}*/}
-                  {/*onOpen={() => this.toggleMenu(true)}*/}
-                {/*>*/}
-                  {/*<div*/}
-                    {/*tabIndex={0}*/}
-                    {/*role="button"*/}
-                    {/*aria-hidden*/}
-                    {/*onClick={() => this.toggleMenu(false)}*/}
-                  {/*>*/}
-                    {/*<NavBar />*/}
-                  {/*</div>*/}
-                {/*</SwipeableDrawer>*/}
+              {/*<SwipeableDrawer*/}
+              {/*anchor="right"*/}
+              {/*open={isMenuOpen}*/}
+              {/*disableSwipeToOpen={disableSwipeToOpen}*/}
+              {/*onClose={() => this.toggleMenu(false)}*/}
+              {/*onOpen={() => this.toggleMenu(true)}*/}
+              {/*>*/}
+              {/*<div*/}
+              {/*tabIndex={0}*/}
+              {/*role="button"*/}
+              {/*aria-hidden*/}
+              {/*onClick={() => this.toggleMenu(false)}*/}
+              {/*>*/}
+              {/*<NavBar />*/}
+              {/*</div>*/}
+              {/*</SwipeableDrawer>*/}
               {/*</ClickAwayListener>*/}
               <SubCompontents />
               <Notify />
@@ -231,11 +231,11 @@ export default function withLayout(SubCompontents, showTop = true) {
                       anchorEl={showStatus}
                       anchorOrigin={{
                         vertical: 'top',
-                        horizontal: 'left',
+                        horizontal: 'left'
                       }}
                       transformOrigin={{
                         vertical: 'bottom',
-                        horizontal: 'left',
+                        horizontal: 'left'
                       }}
                       open={openStatusMenu}
                       onClose={this.handleCloseStatus}
@@ -248,11 +248,11 @@ export default function withLayout(SubCompontents, showTop = true) {
                       anchorEl={anchorEl}
                       anchorOrigin={{
                         vertical: 'top',
-                        horizontal: 'left',
+                        horizontal: 'left'
                       }}
                       transformOrigin={{
                         vertical: 'bottom',
-                        horizontal: 'left',
+                        horizontal: 'left'
                       }}
                       open={open}
                       onClose={this.handleClose}

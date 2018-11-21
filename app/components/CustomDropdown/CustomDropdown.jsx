@@ -64,7 +64,7 @@ class CustomDropdown extends React.Component {
     });
     const dropdownItem = classNames({
       [classes.dropdownItem]: true,
-      [classes[`${hoverColor  }Hover`]]: true,
+      [classes[`${hoverColor}Hover`]]: true,
       [classes.noLiPadding]: noLiPadding,
       [classes.dropdownItemRTL]: rtlActive
     });
@@ -87,7 +87,8 @@ class CustomDropdown extends React.Component {
                 className={classes.dropdownDividerItem}
               />
             );
-          } if (prop.ref === 'multi') {
+          }
+          if (prop.ref === 'multi') {
             return (
               <MenuItem
                 key={key}

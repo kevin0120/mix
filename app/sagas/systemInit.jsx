@@ -8,7 +8,7 @@
 
 // @flow
 
-import { call, take, put, select } from 'redux-saga/effects'
+import { call, take, put, select } from 'redux-saga/effects';
 
 import { CONNECTION, SYSTEM_INIT } from '../actions/actionTypes';
 
@@ -37,10 +37,9 @@ export function* fetchConnectionFlow(baseUrl, hmiSN, dispatch) {
     // 初始化io
     const state = yield select();
     yield call(initIOModbus, dispatch, state);
-
   }
 
-  yield put({type: OPERATION_STATUS.READY, data:[]});
+  yield put({ type: OPERATION_STATUS.READY, data: [] });
 }
 
 export function* sysInitFlow() {

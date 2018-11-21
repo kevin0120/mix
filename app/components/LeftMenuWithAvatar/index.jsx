@@ -18,11 +18,10 @@ const mapStateToProps = (state, ownProps) => ({
   // name: state.userInfo.name,
   // secondaryInfo: state.userInfo.login, // email or role etc
   // avatarImg: state.userInfo.image_small,
-  ...ownProps,
+  ...ownProps
 });
 
-const mapDispatchToProps = {
-};
+const mapDispatchToProps = {};
 
 function ConnectedLeftMenuWithAvatar(props) {
   const {
@@ -38,7 +37,7 @@ function ConnectedLeftMenuWithAvatar(props) {
     <Drawer
       variant="permanent"
       classes={{
-        paper: classes.drawerPaper,
+        paper: classes.drawerPaper
       }}
     >
       <div className={classes.toolbar} />
@@ -53,7 +52,11 @@ function ConnectedLeftMenuWithAvatar(props) {
               src={users[0].avatar}
               className={classes.avatar}
             />
-            <ListItemText className={classes.userText} primary={users[0].name} secondary={users[0].name} />
+            <ListItemText
+              className={classes.userText}
+              primary={users[0].name}
+              secondary={users[0].name}
+            />
           </ListItem>
           <ListItem className={classes.timeWrap}>
             <Clock
@@ -75,12 +78,12 @@ ConnectedLeftMenuWithAvatar.propTypes = {
   // name: PropTypes.string.isRequired,
   // secondaryInfo: PropTypes.string.isRequired,
   // avatarImg: PropTypes.string.isRequired,
-  users: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  users: PropTypes.arrayOf(PropTypes.shape({})).isRequired
 };
 
 const LeftMenuWithAvatar = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 )(ConnectedLeftMenuWithAvatar);
 
 export default withStyles(styles)(LeftMenuWithAvatar);

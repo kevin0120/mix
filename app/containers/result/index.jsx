@@ -1,50 +1,50 @@
-import React from "react";
+import React from 'react';
 import { connect } from 'react-redux';
-import ReactTable from "react-table";
+import ReactTable from 'react-table';
 
 import Divider from '@material-ui/core/Divider';
 
 import { I18n } from 'react-i18next';
 
-import SweetAlert from "react-bootstrap-sweetalert";
+import SweetAlert from 'react-bootstrap-sweetalert';
 import { cardTitle } from '../../common/jss/material-react-pro';
-import withLayout from "../../components/Layout/layout";
+import withLayout from '../../components/Layout/layout';
 
-import sweetAlertStyle from "../../common/jss/views/sweetAlertStyle";
+import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
 
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 
 // @material-ui/core components
-import withStyles from "@material-ui/core/styles/withStyles";
+import withStyles from '@material-ui/core/styles/withStyles';
 // @material-ui/icons
-import Assignment from "@material-ui/icons/Assignment";
-import Dvr from "@material-ui/icons/Dvr";
+import Assignment from '@material-ui/icons/Assignment';
+import Dvr from '@material-ui/icons/Dvr';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 // core components
-import GridContainer from "../../components/Grid/GridContainer";
-import GridItem from "../../components/Grid/GridItem";
-import Button from "../../components/CustomButtons/Button";
-import Card from "../../components/Card/Card";
-import CardBody from "../../components/Card/CardBody";
-import CardIcon from "../../components/Card/CardIcon";
-import CardHeader from "../../components/Card/CardHeader";
+import GridContainer from '../../components/Grid/GridContainer';
+import GridItem from '../../components/Grid/GridItem';
+import Button from '../../components/CustomButtons/Button';
+import Card from '../../components/Card/Card';
+import CardBody from '../../components/Card/CardBody';
+import CardIcon from '../../components/Card/CardIcon';
+import CardHeader from '../../components/Card/CardHeader';
 
 const lodash = require('lodash');
 const dayjs = require('dayjs');
 
 const defaultInstance = axios.create({
   timeout: 3000,
-  headers: {'Content-Type': 'application/json'}
+  headers: { 'Content-Type': 'application/json' }
 });
 
 axiosRetry(defaultInstance, {
   retries: 2,
   retryDelay: axiosRetry.exponentialDelay,
-  retryCondition: (err) => {
-    if (err.message.indexOf("200") !== -1) {
+  retryCondition: err => {
+    if (err.message.indexOf('200') !== -1) {
       return false;
     }
 
@@ -65,30 +65,28 @@ const styles = {
   },
   cardIconTitle: {
     ...cardTitle,
-    marginTop: "15px",
-    marginBottom: "0px"
+    marginTop: '15px',
+    marginBottom: '0px'
   }
 };
-
 
 const mapStateToProps = (state, ownProps) => ({
   masterpcUrl: state.connections.masterpc,
   hmiSn: state.setting.page.odooConnection.hmiSn.value,
-  ...ownProps,
+  ...ownProps
 });
 
-const mapDispatchToProps = {
-
-};
-
+const mapDispatchToProps = {};
 
 function requestData(masterpcUrl, hmiSN) {
   const url = `${masterpcUrl}/rush/v1/local-results`;
-  return defaultInstance.get(url, {params: {
+  return defaultInstance.get(url, {
+    params: {
       hmi_sn: hmiSN,
       filters: 'vin,job_id,batch,torque,angle,timestamp,vehicle_type',
       limit: 500
-    }})
+    }
+  });
 }
 
 class Result extends React.Component {
@@ -97,10 +95,10 @@ class Result extends React.Component {
     this.state = {
       data: [],
       isShow: false,
-      selectObj: null,
+      selectObj: null
     };
     this.fetchData = this.fetchData.bind(this);
-  };
+  }
 
   componentDidMount() {
     this.fetchData();
@@ -108,15 +106,15 @@ class Result extends React.Component {
 
   fetchData() {
     const { masterpcUrl, hmiSn } = this.props;
-    requestData(masterpcUrl ,hmiSn)
+    requestData(masterpcUrl, hmiSn)
       .then(res => {
         const statusCode = res.status;
         if (statusCode === 200) {
           this.setState({
-            data: res.data.map((item,key) => {
+            data: res.data.map((item, key) => {
               return {
                 id: key,
-                timestamp: dayjs(item.timestamp).format("YYYY MM-DD HH:mm:ss"),
+                timestamp: dayjs(item.timestamp).format('YYYY MM-DD HH:mm:ss'),
                 vin: item.vin,
                 torque: item.torque,
                 angle: item.angle,
@@ -136,36 +134,36 @@ class Result extends React.Component {
                         this.setState({
                           isShow: true,
                           selectObj: obj
-                        })
+                        });
                       }}
                       color="warning"
                       className="edit"
                     >
                       <Dvr />
-                    </Button>{" "}
+                    </Button>{' '}
                   </div>
                 )
-              }
+              };
             })
-          })
+          });
         }
       })
       .catch(error => {
-        console.log("get error" + error.toString());
+        console.log('get error' + error.toString());
       });
-  };
+  }
 
   handleClose = () => {
     this.setState({
       isShow: false
-    })
+    });
   };
 
   render() {
     const { classes } = this.props;
     const { data, isShow, selectObj } = this.state;
 
-    const Msg = selectObj ?
+    const Msg = selectObj ? (
       <div>
         <List>
           <ListItem>
@@ -195,117 +193,128 @@ class Result extends React.Component {
           </ListItem>
         </List>
       </div>
-      : " ";
+    ) : (
+      ' '
+    );
 
     return (
       <I18n ns="translations">
-        {
-          t => (
-            <div>
-              <GridContainer className={classes.root}>
-                <GridItem xs={12}>
-                  <Card>
-                    <CardHeader color="primary" icon>
-                      <CardIcon color="primary">
-                        <Assignment/>
-                      </CardIcon>
-                      <h4 className={classes.cardIconTitle}>{t('main.resultQuery')}</h4>
-                    </CardHeader>
-                    <CardBody>
-                      <ReactTable
-                        data={data}
-                        filterable
-                        columns={[
-                          {
-                            Header: "VIN",
-                            accessor: "vin",
-                            filterMethod: (filter, row) =>
-                              lodash.includes(lodash.toUpper(row[filter.id]), lodash.toUpper(filter.value))
-                          },
-                          {
-                            Header: "车型",
-                            accessor: "vehicle_type",
-                            filterMethod: (filter, row) =>
-                              lodash.includes(lodash.toUpper(row[filter.id]), lodash.toUpper(filter.value))
-                          },
-                          {
-                            Header: "程序号",
-                            accessor: "job_id",
-                            sortable: false,
-                          },
-                          {
-                            Header: "扭矩",
-                            accessor: "torque",
-                            sortable: false,
-                            filterable: false
-                          },
-                          {
-                            Header: "角度",
-                            accessor: "angle",
-                            sortable: false,
-                            filterable: false
-                          },
-                          {
-                            Header: "批次",
-                            accessor: "batch",
-                            sortable: false,
-                            filterable: false
-                          },
-                          {
-                            Header: "拧紧时间",
-                            accessor: "timestamp",
-                            filterable: false,
-                            filterMethod: (filter, row) =>
-                              lodash.includes(lodash.toUpper(row[filter.id]), lodash.toUpper(filter.value))
-                          },
-                          {
-                            Header: "Actions",
-                            accessor: "actions",
-                            sortable: false,
-                            filterable: false
-                          }
-                        ]}
-                        defaultPageSize={10}
-                        showPaginationTop
-                        showPaginationBottom={false}
-                        className="-striped -highlight"
-                      />
-                    </CardBody>
-                  </Card>
-                </GridItem>
-              </GridContainer>
-              {
-                isShow?
-                  <SweetAlert
-                    info
-                    show={isShow}
-                    style={{ display: "block", marginTop: "-100px" }}
-                    title="事件详情"
-                    onConfirm={this.handleClose}
-                    onCancel={this.handleClose}
-                    confirmBtnCssClass={
-                      this.props.classes.button + " " + this.props.classes.success
-                    }
-                    cancelBtnCssClass={
-                      this.props.classes.button + " " + this.props.classes.danger
-                    }
-                    confirmBtnText={t('Common.Yes')}
-                    cancelBtnText={t('Common.No')}
-                    showCancel
-                  >
-                    {Msg}
-                  </SweetAlert>
-                  :null
-              }
-            </div>
-          )
-        }
+        {t => (
+          <div>
+            <GridContainer className={classes.root}>
+              <GridItem xs={12}>
+                <Card>
+                  <CardHeader color="primary" icon>
+                    <CardIcon color="primary">
+                      <Assignment />
+                    </CardIcon>
+                    <h4 className={classes.cardIconTitle}>
+                      {t('main.resultQuery')}
+                    </h4>
+                  </CardHeader>
+                  <CardBody>
+                    <ReactTable
+                      data={data}
+                      filterable
+                      columns={[
+                        {
+                          Header: 'VIN',
+                          accessor: 'vin',
+                          filterMethod: (filter, row) =>
+                            lodash.includes(
+                              lodash.toUpper(row[filter.id]),
+                              lodash.toUpper(filter.value)
+                            )
+                        },
+                        {
+                          Header: '车型',
+                          accessor: 'vehicle_type',
+                          filterMethod: (filter, row) =>
+                            lodash.includes(
+                              lodash.toUpper(row[filter.id]),
+                              lodash.toUpper(filter.value)
+                            )
+                        },
+                        {
+                          Header: '程序号',
+                          accessor: 'job_id',
+                          sortable: false
+                        },
+                        {
+                          Header: '扭矩',
+                          accessor: 'torque',
+                          sortable: false,
+                          filterable: false
+                        },
+                        {
+                          Header: '角度',
+                          accessor: 'angle',
+                          sortable: false,
+                          filterable: false
+                        },
+                        {
+                          Header: '批次',
+                          accessor: 'batch',
+                          sortable: false,
+                          filterable: false
+                        },
+                        {
+                          Header: '拧紧时间',
+                          accessor: 'timestamp',
+                          filterable: false,
+                          filterMethod: (filter, row) =>
+                            lodash.includes(
+                              lodash.toUpper(row[filter.id]),
+                              lodash.toUpper(filter.value)
+                            )
+                        },
+                        {
+                          Header: 'Actions',
+                          accessor: 'actions',
+                          sortable: false,
+                          filterable: false
+                        }
+                      ]}
+                      defaultPageSize={10}
+                      showPaginationTop
+                      showPaginationBottom={false}
+                      className="-striped -highlight"
+                    />
+                  </CardBody>
+                </Card>
+              </GridItem>
+            </GridContainer>
+            {isShow ? (
+              <SweetAlert
+                info
+                show={isShow}
+                style={{ display: 'block', marginTop: '-100px' }}
+                title="事件详情"
+                onConfirm={this.handleClose}
+                onCancel={this.handleClose}
+                confirmBtnCssClass={
+                  this.props.classes.button + ' ' + this.props.classes.success
+                }
+                cancelBtnCssClass={
+                  this.props.classes.button + ' ' + this.props.classes.danger
+                }
+                confirmBtnText={t('Common.Yes')}
+                cancelBtnText={t('Common.No')}
+                showCancel
+              >
+                {Msg}
+              </SweetAlert>
+            ) : null}
+          </div>
+        )}
       </I18n>
     );
   }
 }
 
-const ConnResult = connect(mapStateToProps, mapDispatchToProps)(Result);
-
+const ConnResult = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Result);
 
 export default withLayout(withStyles(styles)(ConnResult), false);

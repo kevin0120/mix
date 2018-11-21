@@ -3,16 +3,15 @@ import { IO, OPERATION } from '../actions/actionTypes';
 import { IO_FUNCTION } from '../reducers/io';
 import { continueOperation } from './operation';
 
-
 export function* watchIO() {
-  while (true){
+  while (true) {
     const { data } = yield take(IO.FUNCTION);
-    yield call(handleIOFunction, data)
+    yield call(handleIOFunction, data);
   }
 }
 
 export function* handleIOFunction(data) {
-  switch(data) {
+  switch (data) {
     case IO_FUNCTION.IN.RESET: {
       // 复位
 
@@ -22,7 +21,7 @@ export function* handleIOFunction(data) {
     case IO_FUNCTION.IN.BYPASS: {
       // 强制放行
 
-      yield put({type: OPERATION.FINISHED, data:[]});
+      yield put({ type: OPERATION.FINISHED, data: [] });
       break;
     }
     case IO_FUNCTION.IN.MODE_SELECT: {

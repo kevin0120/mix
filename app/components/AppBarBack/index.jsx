@@ -19,31 +19,31 @@ function AppBarBack(props) {
 
   return (
     <I18n ns="translations">
-      {
-        t => (
-          <AppBar position="absolute" color="default" className={classes.root}>
-            <Toolbar className={classes.appBarTool} variant="dense">
-              <Button className={classes.backButton} onClick={() => gotoWelcome()}>
-                <Apps className={classes.leftIcon} />
-                {t('Back')}
-              </Button>
-              {props.children}
-            </Toolbar>
-          </AppBar>
-        )
-      }
+      {t => (
+        <AppBar position="absolute" color="default" className={classes.root}>
+          <Toolbar className={classes.appBarTool} variant="dense">
+            <Button
+              className={classes.backButton}
+              onClick={() => gotoWelcome()}
+            >
+              <Apps className={classes.leftIcon} />
+              {t('Back')}
+            </Button>
+            {props.children}
+          </Toolbar>
+        </AppBar>
+      )}
     </I18n>
   );
 }
 
 AppBarBack.propTypes = {
-  classes: PropTypes.shape({
-  }).isRequired,
-  children: PropTypes.shape({}),
+  classes: PropTypes.shape({}).isRequired,
+  children: PropTypes.shape({})
 };
 
 AppBarBack.defaultProps = {
-  children: null,
+  children: null
 };
 
 export default withStyles(styles)(AppBarBack);
