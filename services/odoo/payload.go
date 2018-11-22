@@ -15,7 +15,7 @@ type ODOOMOCreated struct {
 }
 
 type ODOOConsume struct {
-	Seq                int64   `json:"seq"`
+	Seq                int64   `json:"sequence"`
 	ControllerSN       string  `json:"controller_sn"`
 	GunSN              string  `json:"gun_sn"`
 	ToleranceMinDegree float64 `json:"tolerance_min_degree"`
@@ -131,6 +131,7 @@ type RoutingOperation struct {
 	Name           string      `json:"name"`
 	Img            string      `json:"img"`
 	ProductId      int64       `json:"product_id"`
+	WorkcenterID   int64   `json:"workcenter_id"`
 	ProductType    string      `json:"product_type"`
 	WorkcenterCode string      `json:"workcenter_code"`
 	VehicleTypeImg string      `json:"vehicleTypeImg"`

@@ -274,7 +274,9 @@ func (h *Handlers) handleResult(result *ControllerResult, dbresult *storage.Resu
 	wsResult.WI = result.ResultValue.Wi
 	wsResult.TI = result.ResultValue.Ti
 	//wsResult.Seq = dbresult.Seq
-	ws_str, _ := json.Marshal(wsResult)
+	wsResults := []wsnotify.WSResult{}
+	wsResults = append(wsResults, wsResult)
+	ws_str, _ := json.Marshal(wsResults)
 
 	h.controllerService.diag.Debug("Websocket推送结果到HMI")
 

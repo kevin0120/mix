@@ -101,6 +101,7 @@ type RoutingOperations struct {
 	Name           string `xorm:"varchar(256) 'name'"`
 	Img            string `xorm:"text 'img'"`
 	ProductId      int64  `xorm:"bigint 'product_id'"`
+	WorkcenterID   int64 `xorm:"bigint 'workcenter_id'"`
 	ProductType    string `xorm:"varchar(256) 'product_type'"`
 	WorkcenterCode string `xorm:"varchar(256) 'workcenter_code'"`
 	VehicleTypeImg string `xorm:"text 'vehicle_type_img'"`

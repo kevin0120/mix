@@ -216,6 +216,7 @@ func (m *Methods) putSyncRoutingOpertions(ctx iris.Context) {
 	db_ro.Name = ro.Name
 	db_ro.MaxOpTime = ro.MaxOpTime
 	db_ro.Job = ro.Job
+	db_ro.WorkcenterID = ro.WorkcenterID
 
 	if err != nil {
 		// 新增

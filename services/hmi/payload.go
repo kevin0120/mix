@@ -86,7 +86,7 @@ type Result struct {
 	PSet          int     `json:"pset"`
 	MaxRedoTimes  int     `json:"max_redo_times"`
 	X             float64 `json:"offset_x"`
-	Y             float64 `json:"offset_Y"`
+	Y             float64 `json:"offset_y"`
 	Seq           int     `json:"sequence"`
 }
 
@@ -124,7 +124,7 @@ type JobControl struct {
 
 type RoutingOperationPoint struct {
 	Seq           int     `json:"sequence"`
-	MaxOpTime     int     `json:"max_op_time"`
+	MaxOpTime     int     `json:"max_redo_times"`
 	PSet          int     `json:"pset"`
 	X             float64 `json:"offset_x"`
 	Y             float64 `json:"offset_Y"`

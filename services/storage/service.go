@@ -665,7 +665,7 @@ func (s *Service) ResetTightning(controller_sn string) error {
 }
 
 func (s *Service) UpdateRoutingOperations(ro *RoutingOperations) error {
-	sql := "update `routing_operations` set job = ?, max_op_time = ?, name = ?, img = ?, product_id = ?, product_type = ?, workcenter_code = ?, vehicle_type_img = ?, points = ? where operation_id = ?"
+	sql := "update `routing_operations` set job = ?, max_op_time = ?, name = ?, img = ?, product_id = ?, product_type = ?, workcenter_code = ?, vehicle_type_img = ?, points = ?, workcenter_id = ? where operation_id = ?"
 	_, err := s.eng.Exec(sql,
 		ro.Job,
 		ro.MaxOpTime,
@@ -676,6 +676,7 @@ func (s *Service) UpdateRoutingOperations(ro *RoutingOperations) error {
 		ro.WorkcenterCode,
 		ro.VehicleTypeImg,
 		ro.Points,
+		ro.WorkcenterID,
 		ro.OperationID)
 
 	if err != nil {

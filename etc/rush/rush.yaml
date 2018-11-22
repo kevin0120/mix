@@ -44,7 +44,7 @@ aiis:
   grpc_server: 192.168.4.3:9093
 odoo:
   urls:
-  - http://127.0.0.1:8069
+  - http://192.168.4.3:8069
   timeout: 8s
   interval: 1s
   max_retry: 3
@@ -97,15 +97,21 @@ controller_service:
   controllers:
 #  - serial_no: 0001
 #    protocol: OpenProtocol
-#    remote_ip: 192.168.1.101
-#    port: 4700
-#    channel: 51
+#    remote_ip: 192.168.4.101
+#    port: 4545
+#    channel: 1
 
-  - serial_no: 0002
+  - serial_no: 0001
     protocol: Audi/VW
-    remote_ip: 192.168.4.102
+    remote_ip: 192.168.4.101
     port: 4700
     channel: 1
+
+#  - serial_no: 0002
+#    protocol: Audi/VW
+#    remote_ip: 192.168.4.102
+#    port: 4700
+#    channel: 1
 
 #  - serial_no: 0001
 #    protocol: OpenProtocol
