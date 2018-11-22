@@ -26,6 +26,7 @@ import {
 
 import { keyframes } from 'react-emotion';
 import classNames from 'classnames';
+import { OPERATION_RESULT } from '../../reducers/operations';
 
 const ripple = keyframes`
   0% {transform:scale(0.5); }
@@ -138,7 +139,7 @@ class ConnectedImageStick extends React.PureComponent {
 
     let idx = 0;
 
-    const statusDisplay = operations.results.map(item => {
+    const statusDisplay = operations.results.map((item, i) => {
       const display = operations.activeResultIndex >= idx;
 
       const postionStyle = {
@@ -148,9 +149,20 @@ class ConnectedImageStick extends React.PureComponent {
 
       idx += 1;
 
+      let status = 'waiting';
+      if (operations.activeResultIndex === i) {
+        status = 'waitingActive';
+      }
+
+      if (item.result === OPERATION_RESULT.OK) {
+        status = 'success';
+      } else if (item.result === OPERATION_RESULT.NOK) {
+        status = 'error';
+      }
+
       return (
         <div key={item.id} style={postionStyle} className={classes.imgInfo}>
-          <span className={`${classes.circleStatus} ${classes[item.status]}`}>
+          <span className={`${classes.circleStatus} ${classes[status]}`}>
             {item.sequence}
           </span>
           {display ? (
