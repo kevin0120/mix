@@ -10,7 +10,7 @@ import IconButton from '@material-ui/core/IconButton';
 // @material-ui/icons
 import Close from '@material-ui/icons/Close';
 
-import snackbarContentStyle from '../../common/jss/components/snackbarContentStyle.jsx';
+import snackbarContentStyle from '../../common/jss/components/snackbarContentStyle';
 
 function Snackbar({ ...props }) {
   const { classes, message, color, close, icon, place, open } = props;
@@ -38,8 +38,8 @@ function Snackbar({ ...props }) {
     [classes.warningIcon]: color === 'warning',
     [classes.dangerIcon]: color === 'danger',
     [classes.primaryIcon]: color === 'primary',
-    [classes.roseIcon]: color === 'rose',
-    [classes.errorIcon]: color === 'error'
+    [classes.errorIcon]: color === 'error',
+    [classes.roseIcon]: color === 'rose'
   });
   return (
     <Snack
@@ -57,9 +57,7 @@ function Snackbar({ ...props }) {
               ? 'center'
               : 'right'
       }}
-      autoHideDuration={5000}
       open={open}
-      onClose={() => props.closeNotification()}
       message={
         <div>
           {icon !== undefined ? <props.icon className={iconClasses} /> : null}
@@ -82,16 +80,16 @@ Snackbar.defaultProps = {
 };
 
 Snackbar.propTypes = {
-  classes: PropTypes.shape({}).isRequired,
+  classes: PropTypes.object.isRequired,
   message: PropTypes.node.isRequired,
   color: PropTypes.oneOf([
     'info',
     'success',
+    'error',
     'warning',
     'danger',
     'primary',
-    'rose',
-    'error'
+    'rose'
   ]),
   close: PropTypes.bool,
   icon: PropTypes.func,

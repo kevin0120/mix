@@ -2,7 +2,7 @@
 import React from 'react';
 
 // import Editor from '../containers/editor';
-// import Help from '../containers/help';
+import Help from '../containers/help';
 import Preferences from '../containers/config';
 import Event from '../containers/event';
 import ConnResult from '../containers/result';
@@ -56,7 +56,7 @@ export const routeConfigs = [
     icon: BuildIcon,
     color: grayColor,
     image: WorkingImg,
-    enName: 'Operating'
+    enName: 'Operation'
   },
   // {
   //   name: 'editor',
@@ -76,7 +76,7 @@ export const routeConfigs = [
     icon: SettingsApplicationsIcon,
     color: grayColor,
     image: settingImg,
-    enName: 'Preferences'
+    enName: 'Preference'
   },
   {
     name: 'event',
@@ -96,28 +96,28 @@ export const routeConfigs = [
     icon: Save,
     color: grayColor,
     image: LoginImg,
-    enName: 'Query Results'
+    enName: 'Result'
   },
-  // {
-  //   name: 'lock',
-  //   url: '/pages/lock-screen-page',
-  //   title: 'main.lock',
-  //   main: Pages,
-  //   icon: LockIcon,
-  //   color: grayColor,
-  //   image: LockingImg,
-  //   enName: 'Lock',
-  // },
-  // {
-  //   name: 'help',
-  //   url: '/help',
-  //   title: 'main.help',
-  //   main: Help,
-  //   icon: HelpIcon,
-  //   color: grayColor,
-  //   image: helpImg,
-  //   enName: 'Help',
-  // },
+  {
+    name: 'lock',
+    url: '/pages/lock-screen-page',
+    title: 'main.lock',
+    main: Pages,
+    icon: LockIcon,
+    color: grayColor,
+    image: LockingImg,
+    enName: 'Lock'
+  },
+  {
+    name: 'help',
+    url: '/help',
+    title: 'main.help',
+    main: Help,
+    icon: HelpIcon,
+    color: grayColor,
+    image: helpImg,
+    enName: 'Help'
+  },
   {
     name: 'login',
     url: '/pages/login',

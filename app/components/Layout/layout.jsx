@@ -1,6 +1,6 @@
 // @flow
 import React from 'react';
-import {connect} from "react-redux";
+import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
@@ -119,7 +119,7 @@ export default function withLayout(SubCompontents, showTop = true) {
       return lodash.every(healthCheckResults, { isHealth: true });
     }
 
-    handleRouterSwitch = (e) => {
+    handleRouterSwitch = e => {
       console.log(e.target);
     };
 
@@ -161,22 +161,22 @@ export default function withLayout(SubCompontents, showTop = true) {
           {t => (
             <div className={classes.layout}>
               {/* <ClickAwayListener onClickAway={() => this.toggleMenu(false)}> */}
-                {/* <SwipeableDrawer */}
-                  {/* anchor="right" */}
-                  {/* open={isMenuOpen} */}
-                  {/* disableSwipeToOpen={disableSwipeToOpen} */}
-                  {/* onClose={() => this.toggleMenu(false)} */}
-                  {/* onOpen={() => this.toggleMenu(true)} */}
-                {/* > */}
-                  {/* <div */}
-                    {/* tabIndex={0} */}
-                    {/* role="button" */}
-                    {/* aria-hidden */}
-                    {/* onClick={() => this.toggleMenu(false)} */}
-                  {/* > */}
-                    {/* <NavBar /> */}
-                  {/* </div> */}
-                {/* </SwipeableDrawer> */}
+              {/* <SwipeableDrawer */}
+              {/* anchor="right" */}
+              {/* open={isMenuOpen} */}
+              {/* disableSwipeToOpen={disableSwipeToOpen} */}
+              {/* onClose={() => this.toggleMenu(false)} */}
+              {/* onOpen={() => this.toggleMenu(true)} */}
+              {/* > */}
+              {/* <div */}
+              {/* tabIndex={0} */}
+              {/* role="button" */}
+              {/* aria-hidden */}
+              {/* onClick={() => this.toggleMenu(false)} */}
+              {/* > */}
+              {/* <NavBar /> */}
+              {/* </div> */}
+              {/* </SwipeableDrawer> */}
               {/* </ClickAwayListener> */}
               <SubCompontents />
               <Notify />
@@ -202,15 +202,15 @@ export default function withLayout(SubCompontents, showTop = true) {
                       className={classes.BottomNavigation}
                     >
                       {routeConfigs.slice(0, -1).map(route => (
-                          <BottomNavigationAction
-                            key={route.name}
-                            component={Link}
-                            to={route.url}
-                            label={t(route.title)}
-                            icon={<route.icon />}
-                            className={classes.BottomNavigationIcon}
-                            disabled={shouldProcessing}
-                          />
+                        <BottomNavigationAction
+                          key={route.name}
+                          component={Link}
+                          to={route.url}
+                          label={t(route.title)}
+                          icon={<route.icon />}
+                          className={classes.BottomNavigationIcon}
+                          disabled={shouldProcessing}
+                        />
                       ))}
                     </BottomNavigation>
                   </div>

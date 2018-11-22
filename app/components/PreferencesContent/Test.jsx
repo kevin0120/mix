@@ -83,7 +83,7 @@ class ConnectedTest extends React.PureComponent {
   componentDidUpdate() {
     this.setBtnsStatus();
     const { connInfo } = this.props;
-    const {data} = this.state;
+    const { data } = this.state;
     const formatedData = this.formatConnInfo(connInfo);
 
     if (isEqual(formatedData, data)) return;
@@ -93,18 +93,18 @@ class ConnectedTest extends React.PureComponent {
 
   // 设置 btns 的状态集
   setBtnsStatus(tData) {
-    const {btnGroupStatus, data} = this.state;
+    const { btnGroupStatus, data } = this.state;
     const testData = arguments.length > 0 ? tData : data;
     if (isEqual(btnGroupStatus, ConnectedTest.getBtnStatus(testData))) return;
 
     this.setState({
-      btnGroupStatus: ConnectedTest.getBtnStatus(testData),
+      btnGroupStatus: ConnectedTest.getBtnStatus(testData)
     });
   }
 
   updateState(connInfo) {
     this.setState({
-      data: this.formatConnInfo(connInfo),
+      data: this.formatConnInfo(connInfo)
     });
   }
 
@@ -125,8 +125,10 @@ class ConnectedTest extends React.PureComponent {
       },
       controllerSn: {
         displayOrder: 100,
-        value: isNil(connInfo.controllers[0].serial_no) ? '' : String(connInfo.controllers[0].serial_no),
-        displayTitle: '控制器序列号',
+        value: isNil(connInfo.controllers[0].serial_no)
+          ? ''
+          : String(connInfo.controllers[0].serial_no),
+        displayTitle: '控制器序列号'
       },
       rfidUrl: {
         displayOrder: 200,
@@ -152,7 +154,7 @@ class ConnectedTest extends React.PureComponent {
         this.setState({
           testStatus: {
             ...testStatus,
-            aiisUrl: false,
+            aiisUrl: false
           }
         });
       })
@@ -160,7 +162,7 @@ class ConnectedTest extends React.PureComponent {
         this.setState({
           testStatus: {
             ...testStatus,
-            aiisUrl: false,
+            aiisUrl: false
           }
         });
       });
@@ -176,7 +178,7 @@ class ConnectedTest extends React.PureComponent {
         this.setState({
           testStatus: {
             ...testStatus,
-            masterPcUrl: response.status === 204,
+            masterPcUrl: response.status === 204
           }
         });
       })
@@ -195,7 +197,7 @@ class ConnectedTest extends React.PureComponent {
     this.setState({
       testStatus: {
         ...testStatus,
-        ioUrl: true,
+        ioUrl: true
       }
     });
   }

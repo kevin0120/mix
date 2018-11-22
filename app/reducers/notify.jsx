@@ -2,7 +2,6 @@
 
 import { NOTIFY } from '../actions/actionTypes';
 
-
 const defaultNotify = {
   variant: 'success', // 'error', 'warning', 'info'
   message: '',
@@ -12,7 +11,7 @@ const defaultNotify = {
 type actionType = {
   +type: string,
   +variant: string,
-  +message: string,
+  +message: string
 };
 
 export default function notify(
@@ -20,12 +19,12 @@ export default function notify(
   action: actionType
 ) {
   switch (action.type) {
-    case NOTIFY.NEW_NOTIFICATION:{
-      const {variant, message} = action;
-      return {variant, message, isShow: true};
+    case NOTIFY.NEW_NOTIFICATION: {
+      const { variant, message } = action;
+      return { variant, message, isShow: true };
     }
     case NOTIFY.CLOSE: {
-      return {...state, isShow: false};
+      return { ...state, isShow: false };
     }
     default:
       return state;

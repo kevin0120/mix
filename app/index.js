@@ -2,7 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
 
-import blue from '@material-ui/core/colors/blue'
+import blue from '@material-ui/core/colors/blue';
 
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
@@ -14,7 +14,7 @@ import Root from './containers/Root';
 import { configureStore, history } from './store/configureStore';
 import rootSaga from './sagas';
 import './app.global.css';
-import { primaryColor, secondaryColor} from './common/jss/material-react-pro'
+import { primaryColor, secondaryColor } from './common/jss/material-react-pro';
 
 const store = configureStore(); // 创建默认state
 store.runSaga(rootSaga);
@@ -23,7 +23,7 @@ const theme = createMuiTheme({
   palette: {
     primary: blue,
     secondary: {
-      main: primaryColor,
+      main: primaryColor
     },
     status: {
       danger: 'orange'
