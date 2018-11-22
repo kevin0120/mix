@@ -10,7 +10,7 @@ import {
   warningBoxShadow,
   dangerBoxShadow,
   roseBoxShadow
-} from '../material-react-pro.jsx';
+} from '../material-react-pro';
 
 const snackbarContentStyle = {
   root: {
@@ -48,15 +48,15 @@ const snackbarContentStyle = {
     color: '#ffffff',
     ...warningBoxShadow
   },
-  error: {
-    backgroundColor: '#ffa21a',
-    color: '#ffffff',
-    ...warningBoxShadow
-  },
   danger: {
     backgroundColor: '#f55a4e',
     color: '#ffffff',
     ...dangerBoxShadow
+  },
+  error: {
+    backgroundColor: '#ffa21a',
+    color: '#ffffff',
+    ...warningBoxShadow
   },
   primary: {
     backgroundColor: '#af2cc5',
@@ -74,21 +74,17 @@ const snackbarContentStyle = {
     maxWidth: '89%'
   },
   close: {
-    width: '25px',
-    height: '25px'
+    width: '11px',
+    height: '11px'
   },
   iconButton: {
-    width: '35px',
-    height: '35px'
+    width: '24px',
+    height: '24px',
+    padding: '0'
   },
   icon: {
-    // display: "block",
-    // left: "15px",
-    // position: "absolute",
-    // top: "50%",
-    // marginTop: "-15px",
-    width: '20px',
-    height: '20px',
+    width: '38px',
+    height: '38px',
     display: 'block',
     left: '15px',
     position: 'absolute',
@@ -110,6 +106,9 @@ const snackbarContentStyle = {
   warningIcon: {
     color: '#ffa21a'
   },
+  errorIcon: {
+    color: '#ffa21a'
+  },
   dangerIcon: {
     color: '#f55a4e'
   },
@@ -118,9 +117,6 @@ const snackbarContentStyle = {
   },
   roseIcon: {
     color: '#eb3573'
-  },
-  errorIcon: {
-    color: '#ffa21a'
   },
   iconMessage: {
     paddingLeft: '50px',

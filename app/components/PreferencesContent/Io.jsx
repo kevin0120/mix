@@ -148,7 +148,11 @@ class ConnectedIo extends React.PureComponent {
         String.prototype.toUpperCase.call(item.io),
         this.IO_FUNCTION.IN
       );
-      const selectItems = Object.keys(options).map(v => (<MenuItem key={v} value={v}>{v}</MenuItem>));
+      const selectItems = Object.keys(options).map(v => (
+        <MenuItem key={v} value={v}>
+          {v}
+        </MenuItem>
+      ));
 
       const generatorStatus = () => {
         if (item.io === 'out') return null;
@@ -231,7 +235,7 @@ class ConnectedIo extends React.PureComponent {
     return (
       <I18n ns="translations">
         {t => (
-          <section>
+          <section className={classes.content}>
             <h3 className={classes.sectionTitle}>
               {t('Configuration.IO.INname')}
             </h3>

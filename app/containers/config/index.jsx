@@ -1,5 +1,4 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import { withStyles } from '@material-ui/core/styles';
@@ -89,10 +88,10 @@ class ConnectedPreferences extends React.Component {
             <LeftMenuWithAvatar>
               <MenuList>{menuList(t)}</MenuList>
             </LeftMenuWithAvatar>
-            <main className={classes.content}>
+            <div className={classes.content}>
               <div className={classes.toolbar} />
               {menuContents[currentComponentIdx].component}
-            </main>
+            </div>
           </div>
         )}
       </I18n>

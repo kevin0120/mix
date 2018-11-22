@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -61,7 +61,7 @@ const withstyles = theme => ({
     borderRadius: '4px'
   },
   cardActionArea: {
-    height: '100%',
+    height: '100%'
   },
   cardGridItem: {
     paddingRight: '30px'
@@ -185,7 +185,11 @@ class ConnectedWelcome extends React.Component {
                     className={classes.card}
                     style={{ backgroundColor: route.color }}
                   >
-                    <CardActionArea component={Link} to={route.url} className={classes.cardActionArea}>
+                    <CardActionArea
+                      component={Link}
+                      to={route.url}
+                      className={classes.cardActionArea}
+                    >
                       <div
                         className={classes.media}
                         style={{ backgroundImage: `url(${route.image})` }}
@@ -217,7 +221,7 @@ class ConnectedWelcome extends React.Component {
                 color="primary"
                 className={fabLeftClassName}
                 component={Link}
-                to='/pages/login'
+                to="/pages/login"
               >
                 <ExitToApp className={classes.extendedIcon} />
                 {t('Common.Logout')}

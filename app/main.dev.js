@@ -17,7 +17,7 @@ import url from 'url';
 import path from 'path';
 import MenuBuilder from './menu';
 
-import configs  from './shared/config';
+import configs from './shared/config';
 
 export default class AppUpdater {
   constructor() {
