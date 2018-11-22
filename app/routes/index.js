@@ -46,7 +46,7 @@ export const routeConfigs = [
     title: 'main.home',
     main: HomePage,
     icon: HomeIcon,
-    color: grayColor
+    color: '#00abf3',
   },
   {
     name: 'working',
@@ -54,7 +54,7 @@ export const routeConfigs = [
     title: 'main.operation',
     main: Working,
     icon: BuildIcon,
-    color: grayColor,
+    color: '#00abbf',
     image: WorkingImg,
     enName: 'Operation'
   },
@@ -74,7 +74,7 @@ export const routeConfigs = [
     title: 'main.preferences',
     main: Preferences,
     icon: SettingsApplicationsIcon,
-    color: grayColor,
+    color: '#fba53d',
     image: settingImg,
     enName: 'Preference'
   },
@@ -84,7 +84,7 @@ export const routeConfigs = [
     title: 'main.event',
     main: Event,
     icon: Mail,
-    color: grayColor,
+    color: '#008adf',
     image: LoginImg,
     enName: 'Event Log'
   },
@@ -95,7 +95,7 @@ export const routeConfigs = [
     main: ConnResult,
     icon: Save,
     color: grayColor,
-    image: LoginImg,
+    image: LockingImg,
     enName: 'Result'
   },
   // {
@@ -114,7 +114,7 @@ export const routeConfigs = [
     title: 'main.help',
     main: Help,
     icon: HelpIcon,
-    color: grayColor,
+    color: '#8a6c63',
     image: helpImg,
     enName: 'Help'
   },

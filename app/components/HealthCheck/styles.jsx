@@ -1,4 +1,8 @@
+
+import popoverStyles from '../../common/jss/popoverStyles';
+
 export default () => ({
+  ...popoverStyles,
   infoStatus: {
     padding: '10px',
     cursor: 'pointer',
@@ -55,11 +59,13 @@ export default () => ({
       marginTop: 300
     },
     padding: '0 20px',
-    marginTop: 18
+    marginTop: 18,
+    color: '#FFFFFF',
   },
   infoText: {
     '&>span': {
-      fontSize: 14
+      fontSize: 14,
+      color: '#FFFFFF',
     }
   }
 });

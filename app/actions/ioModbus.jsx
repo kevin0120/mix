@@ -151,9 +151,11 @@ export function setLedError(flag) {
   ioStatus[oRed] = flag;
 }
 
-export function initIOModbus(dispatch, state) {
+export function initIOModbus(dispatch, getState) {
   // 第一步先关闭所有连接
   closeAll();
+
+  const state = getState();
 
   const modbusConfig = state.setting.page.modbus;
   initModBusIO(modbusConfig);
@@ -262,17 +264,29 @@ export function initIOModbus(dispatch, state) {
   });
 
   client.on('end', () => {
-    dispatch(setHealthzCheck('modbus', false));
+    const { healthzStatus } = getState().healthCheckResults;
+    if (healthzStatus.modbus.isHealth) {
+      // 如果不相等 更新
+      dispatch(setHealthzCheck('modbus', false));
+    }
 
     client.end();
   });
 
   client.on('close', () => {
-    dispatch(setHealthzCheck('modbus', false));
+    const { healthzStatus } = getState().healthCheckResults;
+    if (healthzStatus.modbus.isHealth) {
+      // 如果不相等 更新
+      dispatch(setHealthzCheck('modbus', false));
+    }
   });
 
   client.on('error', () => {
-    dispatch(setHealthzCheck('modbus', false));
+    const { healthzStatus } = getState().healthCheckResults;
+    if (healthzStatus.modbus.isHealth) {
+      // 如果不相等 更新
+      dispatch(setHealthzCheck('modbus', false));
+    }
   });
 }
 

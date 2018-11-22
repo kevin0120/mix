@@ -18,7 +18,7 @@ import { initIOModbus, setLedStatusReady } from '../actions/ioModbus';
 import { startHealthzCheck } from '../actions/healthCheck';
 import { setNewNotification } from '../actions/notification';
 
-export function* fetchConnectionFlow(baseUrl, hmiSN, dispatch) {
+export function* fetchConnectionFlow(baseUrl, hmiSN, dispatch, getState) {
   const fullUrl = `${baseUrl}/hmi.connections/${hmiSN}`;
   const resp = yield call(fetchConnectionInfo, fullUrl);
 
@@ -35,8 +35,7 @@ export function* fetchConnectionFlow(baseUrl, hmiSN, dispatch) {
     yield put({ type: RUSH.INIT });
 
     // 初始化io
-    const state = yield select();
-    yield call(initIOModbus, dispatch, state);
+    yield call(initIOModbus, dispatch, getState);
 
     // 初始化aiis
   }
@@ -45,9 +44,9 @@ export function* fetchConnectionFlow(baseUrl, hmiSN, dispatch) {
 }
 
 export function* sysInitFlow() {
-  const { baseUrl, hmiSN, dispatch } = yield take(SYSTEM_INIT); // 只获取一次
+  const { baseUrl, hmiSN, dispatch, getState } = yield take(SYSTEM_INIT); // 只获取一次
   try {
-    yield call(fetchConnectionFlow, baseUrl, hmiSN, dispatch);
+    yield call(fetchConnectionFlow, baseUrl, hmiSN, dispatch, getState);
   } catch (e) {
     yield put(setNewNotification('error', e.toString()));
   }

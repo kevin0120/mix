@@ -232,7 +232,7 @@ export default function withLayout(SubCompontents, showTop = true) {
                       <Language />
                     </IconButton>
                     <Menu
-                      id="menu-appbar"
+                      id="menu-healthz"
                       anchorEl={showStatus}
                       anchorOrigin={{
                         vertical: 'top',
@@ -245,11 +245,15 @@ export default function withLayout(SubCompontents, showTop = true) {
                       open={openStatusMenu}
                       onClose={this.handleCloseStatus}
                       TransitionComponent={Fade}
+                      classes={{
+                        paper: classes.popover,
+                        disabled: 'disabled', }
+                      }
                     >
                       <HealthCheck healthCheckResults={healthCheckResults} />
                     </Menu>
                     <Menu
-                      id="menu-appbar"
+                      id="menu-i18n"
                       anchorEl={anchorEl}
                       anchorOrigin={{
                         vertical: 'top',
