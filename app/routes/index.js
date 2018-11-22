@@ -98,16 +98,16 @@ export const routeConfigs = [
     image: LoginImg,
     enName: 'Result'
   },
-  {
-    name: 'lock',
-    url: '/pages/lock-screen-page',
-    title: 'main.lock',
-    main: Pages,
-    icon: LockIcon,
-    color: grayColor,
-    image: LockingImg,
-    enName: 'Lock'
-  },
+  // {
+  //   name: 'lock',
+  //   url: '/pages/lock-screen-page',
+  //   title: 'main.lock',
+  //   main: Pages,
+  //   icon: LockIcon,
+  //   color: grayColor,
+  //   image: LockingImg,
+  //   enName: 'Lock'
+  // },
   {
     name: 'help',
     url: '/help',
