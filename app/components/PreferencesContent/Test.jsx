@@ -19,11 +19,10 @@ import styles from './styles';
 
 const mapStateToProps = (state, ownProps) => ({
   connInfo: state.connections,
-  ...ownProps,
+  ...ownProps
 });
 
-const mapDispatchToProps = {
-};
+const mapDispatchToProps = {};
 
 function handleTest(obj) {
   obj.test(obj.value);
@@ -33,10 +32,13 @@ function handleTest(obj) {
 class ConnectedTest extends React.PureComponent {
   // 获取 btns 的状态集
   static getBtnStatus(data) {
-    return Object.keys(data).reduce((pre, key) => ({
-      ...pre,
-      [key]: data[key].value === 0 || !!data[key].value,
-    }), {});
+    return Object.keys(data).reduce(
+      (pre, key) => ({
+        ...pre,
+        [key]: data[key].value === 0 || !!data[key].value
+      }),
+      {}
+    );
   }
 
   constructor(props) {
@@ -53,12 +55,11 @@ class ConnectedTest extends React.PureComponent {
       testStatus: {
         masterPcUrl: 99,
         ioUrl: 99,
-        aiisUrl: 99,
+        aiisUrl: 99
       },
       data: this.formatConnInfo(connInfo),
-      btnGroupStatus: {},
+      btnGroupStatus: {}
     };
-
   }
 
   // 重新获取 props 时修改 btnGroupStatus
@@ -114,13 +115,13 @@ class ConnectedTest extends React.PureComponent {
         displayOrder: 0,
         value: String(connInfo.masterpc),
         displayTitle: 'MasterPC URL',
-        test: this.testMasterPC,
+        test: this.testMasterPC
       },
       aiisUrl: {
         displayOrder: 50,
         value: String(aiisUrl),
         displayTitle: 'Aiis服务 URL',
-        test: this.testAiis,
+        test: this.testAiis
       },
       controllerSn: {
         displayOrder: 100,
@@ -130,14 +131,14 @@ class ConnectedTest extends React.PureComponent {
       rfidUrl: {
         displayOrder: 200,
         value: String(connInfo.rfid),
-        displayTitle: 'RFID 链接地址',
+        displayTitle: 'RFID 链接地址'
       },
       ioUrl: {
         displayOrder: 300,
         value: String(connInfo.io),
-        displayTitle: 'IO 模块链接地址',
+        displayTitle: 'IO 模块链接地址'
         // test: this.testModbus,
-      },
+      }
     };
   }
 
@@ -145,7 +146,7 @@ class ConnectedTest extends React.PureComponent {
     const url = `${conn}/aiis/v1/healthz`;
     const { testStatus } = this.state;
     fetch(url, {
-      timeout: 3000,
+      timeout: 3000
     })
       .then(() => {
         this.setState({
@@ -169,7 +170,7 @@ class ConnectedTest extends React.PureComponent {
     const url = `${conn}/rush/v1/healthz`;
     const { testStatus } = this.state;
     fetch(url, {
-      timeout: 3000,
+      timeout: 3000
     })
       .then(response => {
         this.setState({
@@ -201,70 +202,73 @@ class ConnectedTest extends React.PureComponent {
 
   render() {
     const { classes } = this.props;
-    const { data, btnGroupStatus,testStatus } = this.state;
-    const inputsItems = t => sortObj(data, 'displayOrder').map(({ key, value: item }) => {
-      const testPart = t => item.test ? (
-        <div>
-          <Button
-            variant="outlined"
-            disabled={!btnGroupStatus[key]}
-            size="small"
-            color="primary"
-            onClick={() => handleTest(item)}
-            className={classes.testButton}
-          >
-            {t('Common.Test')}
-          </Button>
-          {testStatus[key] !== 99 ? <span className={`${classes.statusCircle} ${testStatus[key] ? classes.success : classes.fail}`} /> : null}
-        </div>
-      ) : null;
+    const { data, btnGroupStatus, testStatus } = this.state;
+    const inputsItems = t =>
+      sortObj(data, 'displayOrder').map(({ key, value: item }) => {
+        const testPart = t =>
+          item.test ? (
+            <div>
+              <Button
+                variant="outlined"
+                disabled={!btnGroupStatus[key]}
+                size="small"
+                color="primary"
+                onClick={() => handleTest(item)}
+                className={classes.testButton}
+              >
+                {t('Common.Test')}
+              </Button>
+              {testStatus[key] !== 99 ? (
+                <span
+                  className={`${classes.statusCircle} ${
+                    testStatus[key] ? classes.success : classes.fail
+                  }`}
+                />
+              ) : null}
+            </div>
+          ) : null;
 
-      return (
-        <div key={key}>
-          <ListItem className={classes.inputItem}>
-            <InputLabel
-              className={classes.inputLabel}
-            >
-              {item.displayTitle}
-            </InputLabel>
-            <Input
-              disabled
-              placeholder={t('Common.isRequired')}
-              className={classes.input}
-              value={item.value}
-            />
-            {testPart(t)}
-          </ListItem>
-          <li>
-            <Divider />
-          </li>
-        </div>
-      );
-    });
+        return (
+          <div key={key}>
+            <ListItem className={classes.inputItem}>
+              <InputLabel className={classes.inputLabel}>
+                {item.displayTitle}
+              </InputLabel>
+              <Input
+                disabled
+                placeholder={t('Common.isRequired')}
+                className={classes.input}
+                value={item.value}
+              />
+              {testPart(t)}
+            </ListItem>
+            <li>
+              <Divider />
+            </li>
+          </div>
+        );
+      });
 
     return (
       <I18n ns="translations">
-        {
-          t => (
-            <Paper className={classes.paperWrap} elevation={1}>
-              <List>
-                {inputsItems(t)}
-              </List>
-            </Paper>
-          )
-        }
+        {t => (
+          <Paper className={classes.paperWrap} elevation={1}>
+            <List>{inputsItems(t)}</List>
+          </Paper>
+        )}
       </I18n>
     );
   }
 }
 
 ConnectedTest.propTypes = {
-  classes: PropTypes.shape({
-  }).isRequired,
-  connInfo: PropTypes.shape({
-  }).isRequired,
+  classes: PropTypes.shape({}).isRequired,
+  connInfo: PropTypes.shape({}).isRequired
 };
 
-const Test = connect(mapStateToProps, mapDispatchToProps)(ConnectedTest);
+const Test = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ConnectedTest);
 
 export default withStyles(styles)(Test);

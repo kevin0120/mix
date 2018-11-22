@@ -9,9 +9,8 @@
 // @flow
 
 import { select, takeEvery, put } from 'redux-saga/effects';
-import { USER_CONFIGS } from "../actions/actionTypes";
-import { setNewNotification } from "../actions/notification";
-
+import { USER_CONFIGS } from '../actions/actionTypes';
+import { setNewNotification } from '../actions/notification';
 
 const eSetting = require('electron-settings');
 
@@ -22,25 +21,23 @@ function* saveConfiguration(action) {
 
   const setting = yield select(getSetting);
 
-  try{
-    yield put({type: USER_CONFIGS.SAVE, section, newConfigs});
-    eSetting.setAll({...setting, [section]: newConfigs});
+  try {
+    yield put({ type: USER_CONFIGS.SAVE, section, newConfigs });
+    eSetting.setAll({ ...setting, [section]: newConfigs });
     yield put(setNewNotification('success', '配置文件保存成功'));
-  }catch (e) {
+  } catch (e) {
     yield put(setNewNotification('error', '配置文件保存失败'));
   }
 
   switch (section) {
     case 'odooConnection': {
-
       break;
     }
     default:
       break;
   }
-
 }
 
 export function* watchSettingPreSave() {
-  yield takeEvery(USER_CONFIGS.PRE_SAVE, saveConfiguration)
+  yield takeEvery(USER_CONFIGS.PRE_SAVE, saveConfiguration);
 }

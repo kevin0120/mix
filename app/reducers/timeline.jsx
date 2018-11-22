@@ -25,15 +25,16 @@ const defaultTimeline = {
 
 type actionType = {
   +type: string,
+  +story: object
 };
 
-export default function timeline (
+export default function timeline(
   state: object = defaultTimeline,
   action: actionType
 ) {
   switch (action.type) {
     case TIMELINE_STORY.NEW:
-      return NewStory(state, action.data);
+      return NewStory(state, action.story);
     case TIMELINE_STORY.CLEAR:
       return ClearStory(state);
     default:
@@ -44,16 +45,13 @@ export default function timeline (
 export function NewStory(state, story) {
   return {
     ...state,
-    stories: [
-      story,
-      ...state.stories,
-    ],
-  }
+    stories: [story, ...state.stories]
+  };
 }
 
 export function ClearStory(state) {
   return {
     ...state,
     stories: []
-  }
+  };
 }

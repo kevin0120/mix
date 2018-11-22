@@ -37,8 +37,14 @@ const defaultHealthChecks = {
     isHealth: false,
     displayTitle: 'HealthCheck.RFID'
   },
-  odoo: {
+  andon: {
     displayOrder: 41,
+    optionInfo: '',
+    isHealth: false,
+    displayTitle: 'HealthCheck.Andon'
+  },
+  odoo: {
+    displayOrder: 51,
     optionInfo: '',
     isHealth: false,
     displayTitle: 'HealthCheck.Odoo'
@@ -60,7 +66,10 @@ export default function healthCheckResults(
       if (!lodash.has(state, action.section)) return state;
       return {
         ...state,
-        [action.section]: { ...state[action.section], isHealth: action.isHealth }
+        [action.section]: {
+          ...state[action.section],
+          isHealth: action.isHealth
+        }
       };
     default:
       return state;

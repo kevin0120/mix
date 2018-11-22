@@ -6,21 +6,21 @@ export default theme => ({
     position: 'relative',
     display: 'flex',
     color: '#333',
-    maxHeight: 'calc(100% - 64px)',
+    maxHeight: 'calc(100% - 64px)'
   },
   content: {
     flexGrow: 1,
     // backgroundColor: theme.palette.background.default,
     background: '#f2f2f2',
     padding: theme.spacing.unit * 3,
-    minWidth: 0, // So the Typography noWrap works
+    minWidth: 0 // So the Typography noWrap works
   },
   toolbar: theme.mixins.toolbar,
   menuItem: {
-    fontSize: 14,
+    fontSize: 14
   },
   itemText: {
     fontSize: 14,
-    padding: 0,
-  },
+    padding: 0
+  }
 });

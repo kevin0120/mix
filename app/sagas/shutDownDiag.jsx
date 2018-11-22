@@ -12,7 +12,11 @@ import { select, put, call, take } from 'redux-saga/effects';
 
 import { SHUTDOWN_DIAG } from '../actions/actionTypes';
 
-import { switch2Ready, switch2Doing, operationVerified } from '../actions/operation';
+import {
+  switch2Ready,
+  switch2Doing,
+  operationVerified
+} from '../actions/operation';
 import { Info } from '../logger';
 import { toolDisable } from '../actions/tools';
 

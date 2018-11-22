@@ -33,7 +33,6 @@ export default function shutDownDiag(
       return { show: true, type: dType, msg };
     }
     case SHUTDOWN_DIAG.OPEN: {
-
     }
     default:
       return state;

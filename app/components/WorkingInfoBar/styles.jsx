@@ -5,21 +5,21 @@ export default () => ({
     flex: 'initial',
     color: '#888',
     fontSize: 14,
-    marginBottom: '0',
+    marginBottom: '0'
   },
   infoItem: {
     width: '100%',
     '&:first-child': {
-      marginTop: '5px',
+      marginTop: '5px'
     },
     '&:last-child': {
-      marginBottom: '5px',
+      marginBottom: '5px'
     },
     padding: '0 20px',
     marginBottom: '10px',
-    marginTop: '10px',
+    marginTop: '10px'
   },
   itemIitle: {
-    fontSize: 14,
-  },
+    fontSize: 14
+  }
 });

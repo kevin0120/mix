@@ -9,69 +9,63 @@ import ListItemText from '@material-ui/core/ListItemText';
 
 import styles from './styles';
 
-
 const mapStateToProps = (state, ownProps) => ({
-  infos: ownProps.infos,
+  infos: ownProps.infos
 });
 
-const mapDispatchToProps = {
-};
+const mapDispatchToProps = {};
 
 function ConnectedWorkingInfoBar(props) {
   const { classes, styleOptions, infos } = props;
 
-  return (
-    infos.map(info => {
-      const { key, value, displayTitle } = info;
-      if (key === 'taotong') {
-        return;
-      }
-      return (
-        <ListItem
-          key={key}
-          disableGutters={styleOptions.disableGutters}
-          className={classes.infoItem}
-        >
-          <ListItemText
-            className={classes.itemIitle}
-            primary={displayTitle}
-          />
+  return infos.map(info => {
+    const { key, value, displayTitle } = info;
+    if (key === 'taotong') {
+      return;
+    }
+    return (
+      <ListItem
+        key={key}
+        disableGutters={styleOptions.disableGutters}
+        className={classes.infoItem}
+      >
+        <ListItemText className={classes.itemIitle} primary={displayTitle} />
 
-          <p className={classes.infoText}>
-            {value}
-          </p>
-        </ListItem>
-      );
-    }));
+        <p className={classes.infoText}>{value}</p>
+      </ListItem>
+    );
+  });
 }
 
 ConnectedWorkingInfoBar.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   styleOptions: PropTypes.shape({
-    disableGutters: PropTypes.bool,
+    disableGutters: PropTypes.bool
   }),
   options: PropTypes.shape({
-    enableDebugLog: PropTypes.bool,
+    enableDebugLog: PropTypes.bool
   }),
-  infos: PropTypes.arrayOf(PropTypes.shape({
-    key: PropTypes.string.isRequired,
-    value: PropTypes.string,
-    displayTitle: PropTypes.string.isRequired,
-  })).isRequired,
+  infos: PropTypes.arrayOf(
+    PropTypes.shape({
+      key: PropTypes.string.isRequired,
+      value: PropTypes.string,
+      displayTitle: PropTypes.string.isRequired
+    })
+  ).isRequired
 };
 
 ConnectedWorkingInfoBar.defaultProps = {
   styleOptions: {
-    disableGutters: false,
+    disableGutters: false
   },
   options: {
-    enableDebugLog: false,
-  },
+    enableDebugLog: false
+  }
 };
 
 const WorkingInfoBar = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 )(ConnectedWorkingInfoBar);
 
 export default withStyles(styles)(WorkingInfoBar);

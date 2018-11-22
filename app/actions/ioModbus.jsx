@@ -5,8 +5,8 @@ import userConfigs from '../shared/config';
 
 import { HEALTH, IO } from './actionTypes';
 import { IO_FUNCTION } from '../reducers/io';
-import { setNewNotification } from "./notification";
-
+import { setHealthzCheck } from './healthCheck';
+import { setNewNotification } from './notification';
 
 const Reconnect = require('node-net-reconnect');
 const net = require('net');
@@ -20,8 +20,6 @@ const lodash = require('lodash');
 // import {
 //   IO_TEST_RESPONSE,
 // } from 'actions/actionTypes';
-
-
 
 let keyMonitorTimer = null;
 let senderTimer = null;
@@ -110,21 +108,21 @@ function initModBusIO(modusConfig) {
 }
 
 export function resetIO(modusConfig) {
-    const moddusOutConfig = modusConfig.out;
-    const modbusInConfig = modusConfig.in;
-    lodash.forEach(moddusOutConfig, setOutBit);
-    lodash.forEach(modbusInConfig, setInBit);
-    const preioStatus = cloneDeep(ioStatus);
-    ioStatus[oWhite] = preioStatus[iPrevWhite];
-    ioStatus[oYellow] = preioStatus[iPrevYellow];
-    ioStatus[oGreen] = preioStatus[iPrevGreen];
-    ioStatus[oRed] = preioStatus[iPrevRed];
+  const moddusOutConfig = modusConfig.out;
+  const modbusInConfig = modusConfig.in;
+  lodash.forEach(moddusOutConfig, setOutBit);
+  lodash.forEach(modbusInConfig, setInBit);
+  const preioStatus = cloneDeep(ioStatus);
+  ioStatus[oWhite] = preioStatus[iPrevWhite];
+  ioStatus[oYellow] = preioStatus[iPrevYellow];
+  ioStatus[oGreen] = preioStatus[iPrevGreen];
+  ioStatus[oRed] = preioStatus[iPrevRed];
 
-    iPrevWhite = oWhite;
-    iPrevYellow = oYellow;
-    iPrevGreen = oGreen;
-    iPrevRed = oRed;
-    iPrevBeep = oBeep;
+  iPrevWhite = oWhite;
+  iPrevYellow = oYellow;
+  iPrevGreen = oGreen;
+  iPrevRed = oRed;
+  iPrevBeep = oBeep;
 }
 
 export function setLedStatusReady() {
@@ -154,7 +152,6 @@ export function setLedError(flag) {
 }
 
 export function initIOModbus(dispatch, state) {
-
   // 第一步先关闭所有连接
   closeAll();
 
@@ -189,51 +186,48 @@ export function initIOModbus(dispatch, state) {
   }
 
   client.on('connect', () => {
-    dispatch({
-      type: HEALTH.HEALTH,
-      category: HEALTH.IO,
-      isHealth: true
-    });
-
+    dispatch(setHealthzCheck('modbus', true));
 
     keyMonitorTimer = setInterval(() => {
       // set health = true
-      modbusClient.readDiscreteInputs(iResetKey, 1).then(resp => {
-        const newKeyStatus = resp.response.body.valuesAsArray[0];
-        if (currentKeyStatus !== null && currentKeyStatus !== newKeyStatus) {
+      modbusClient
+        .readDiscreteInputs(iResetKey, 1)
+        .then(resp => {
+          const newKeyStatus = resp.response.body.valuesAsArray[0];
+          if (currentKeyStatus !== null && currentKeyStatus !== newKeyStatus) {
+            if (newKeyStatus === 1) {
+              // on
 
-          if (newKeyStatus === 1) {
-            // on
+              timeStamp = new Date().getTime();
+            } else {
+              // off
 
-            timeStamp = new Date().getTime();
-          } else {
-            // off
-
-            const diff = (new Date().getTime() - timeStamp) / 1000;
-            if (diff >= byPassTimeout) {
-              // 钥匙延迟3秒放行
-              if (userConfigs.operationSettings.byPass.type === 'sleep') {
+              const diff = (new Date().getTime() - timeStamp) / 1000;
+              if (diff >= byPassTimeout) {
+                // 钥匙延迟3秒放行
+                if (userConfigs.operationSettings.byPass.type === 'sleep') {
+                  dispatch({
+                    type: IO.FUNCTION,
+                    data: IO_FUNCTION.IN.BYPASS
+                  });
+                }
+              } else {
+                // 复位动作
                 dispatch({
                   type: IO.FUNCTION,
-                  data: IO_FUNCTION.IN.BYPASS
+                  data: IO_FUNCTION.IN.RESET
                 });
               }
-            } else {
-              // 复位动作
-              dispatch({
-                type: IO.FUNCTION,
-                data: IO_FUNCTION.IN.RESET
-              });
             }
           }
-        }
-        currentKeyStatus = newKeyStatus;
-      }).catch(e => {
-        dispatch(setNewNotification('error', e.toString()));
-        client.destroy();
-        clearInterval(keyMonitorTimer);
-      });
-
+          currentKeyStatus = newKeyStatus;
+        })
+        .catch(e => {
+          dispatch(setNewNotification('error', e.toString()));
+          // console.log(error);
+          client.destroy();
+          clearInterval(keyMonitorTimer);
+        });
     }, 500);
 
     senderTimer = setInterval(() => {
@@ -246,11 +240,14 @@ export function initIOModbus(dispatch, state) {
         }
         return v;
       });
-      modbusClient.writeMultipleCoils(0, lights).then().catch(error => {
-        // console.log(error);
-        client.destroy();
-        clearInterval(senderTimer);
-      });
+      modbusClient
+        .writeMultipleCoils(0, lights)
+        .then()
+        .catch(() => {
+          // console.log(error);
+          client.destroy();
+          clearInterval(senderTimer);
+        });
 
       ioStatus = ioStatus.map(v => {
         if (v === sBlinkOff) {
@@ -261,40 +258,26 @@ export function initIOModbus(dispatch, state) {
         }
         return v;
       });
-
     }, 500);
-
   });
 
   client.on('end', () => {
-    dispatch({
-      type: HEALTH.HEALTH,
-      category: HEALTH.IO,
-      isHealth: false
-    });
+    dispatch(setHealthzCheck('modbus', false));
 
     client.end();
   });
 
   client.on('close', () => {
-    dispatch({
-      type: HEALTH.HEALTH,
-      category: HEALTH.IO,
-      isHealth: false
-    });
+    dispatch(setHealthzCheck('modbus', false));
   });
 
   client.on('error', () => {
-    dispatch({
-      type: HEALTH.HEALTH,
-      category: HEALTH.IO,
-      isHealth: false
-    });
+    dispatch(setHealthzCheck('modbus', false));
   });
 }
 
 export function closeAll() {
-  if (keyMonitorTimer){
+  if (keyMonitorTimer) {
     clearInterval(keyMonitorTimer);
   }
   if (senderTimer) {
@@ -312,11 +295,14 @@ export function closeAll() {
 export function testIO(io, idx) {
   switch (io) {
     case 'out': {
-      modbusClient.readCoils(idx, 1).then( resp => {
-        const got = resp.response.body.valuesAsArray[0];
-        modbusClient.writeSingleCoil(idx, got === 0);
-        return true;
-      }).catch(() => 'fail');
+      modbusClient
+        .readCoils(idx, 1)
+        .then(resp => {
+          const got = resp.response.body.valuesAsArray[0];
+          modbusClient.writeSingleCoil(idx, got === 0);
+          return true;
+        })
+        .catch(() => 'fail');
       break;
     }
     case 'in': {

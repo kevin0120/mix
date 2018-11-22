@@ -17,23 +17,19 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
-import { bindActionCreators } from "redux";
-import Button from "../CustomButtons/Button";
+import { bindActionCreators } from 'redux';
+import Button from '../CustomButtons/Button';
 
 import saveConfigs from '../../actions/userConfigs';
 import { IO_FUNCTION } from '../../reducers/io';
 
-
-import {
-  testIO,
-  resetIO,
-} from '../../actions/ioModbus';
+import { testIO, resetIO } from '../../actions/ioModbus';
 
 import styles from './styles';
 
 const mapStateToProps = (state, ownProps) => ({
   storedConfigs: state.setting.page.modbus,
-  ...ownProps,
+  ...ownProps
 });
 
 function mapDispatchToProps(dispatch) {
@@ -44,15 +40,25 @@ function mapDispatchToProps(dispatch) {
 class ConnectedIo extends React.PureComponent {
   // 获取 btns 的状态集
   static getBtnStatus(data) {
-    const checkEveryBtns = items => items.reduce((pre, item) => ({
-      ...pre,
-      [item.bit]: !(get(item, 'label', '').length === 0 || get(item, 'function', '').length === 0),
-    }), {});
+    const checkEveryBtns = items =>
+      items.reduce(
+        (pre, item) => ({
+          ...pre,
+          [item.bit]: !(
+            get(item, 'label', '').length === 0 ||
+            get(item, 'function', '').length === 0
+          )
+        }),
+        {}
+      );
 
-    const status = Object.keys(data).reduce((pre, io) => ({
-      ...pre,
-      [io]: checkEveryBtns(data[io]),
-    }), {});
+    const status = Object.keys(data).reduce(
+      (pre, io) => ({
+        ...pre,
+        [io]: checkEveryBtns(data[io])
+      }),
+      {}
+    );
     return status;
   }
 
@@ -63,7 +69,7 @@ class ConnectedIo extends React.PureComponent {
       data: props.storedConfigs,
       btnGroupStatus: {},
       section: 'modbus',
-      ioTestRsp:Array(props.storedConfigs.in.length).fill(0),
+      ioTestRsp: Array(props.storedConfigs.in.length).fill(0)
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -74,24 +80,24 @@ class ConnectedIo extends React.PureComponent {
   }
 
   handleChange(e, idx, io, key) {
-    const {data } = this.state;
+    const { data } = this.state;
     const tempData = cloneDeep(data[io]);
     tempData[idx][key] = get(e, 'target.value', '').trim();
     this.setState({
       data: {
         ...data,
-        [io]: tempData,
+        [io]: tempData
       },
       isDataValid: this.validateData({
         ...data,
-        [io]: tempData,
-      }),
+        [io]: tempData
+      })
     });
   }
 
   handleSubmit() {
     const { saveConfigs } = this.props;
-    const {data, section} = this.state;
+    const { data, section } = this.state;
     resetIO(data);
     saveConfigs(section, data);
   }
@@ -100,26 +106,28 @@ class ConnectedIo extends React.PureComponent {
     const { ioTestRsp } = this.state;
     switch (obj.io) {
       case 'in': {
-        testIO(obj.io, obj.bit).then(resp => {
-          const d = resp.response.body.valuesAsArray[0];
-          const [...retIO] = ioTestRsp;
-          retIO[obj.bit] = d;
-          this.setState({
-            ioTestRsp: retIO
+        testIO(obj.io, obj.bit)
+          .then(resp => {
+            const d = resp.response.body.valuesAsArray[0];
+            const [...retIO] = ioTestRsp;
+            retIO[obj.bit] = d;
+            this.setState({
+              ioTestRsp: retIO
+            });
+            return true;
+          })
+          .catch(() => {
+            const [...retIO] = ioTestRsp;
+            retIO[obj.bit] = 'fail';
+            this.setState({
+              ioTestRsp: retIO
+            });
+            return true;
           });
-          return true;
-        }).catch(() => {
-          const [...retIO] = ioTestRsp;
-          retIO[obj.bit] = 'fail';
-          this.setState({
-            ioTestRsp: retIO
-          });
-          return true;
-        });
         break;
       }
       case 'out': {
-        return testIO(obj.io, obj.bit)
+        return testIO(obj.io, obj.bit);
       }
       default:
         break;
@@ -128,7 +136,7 @@ class ConnectedIo extends React.PureComponent {
 
   validateData(data = this.state.data) {
     // return Object.keys(data).every(io => data[io].every(item => item.label && item.function));
-    return true
+    return true;
   }
 
   generatorItems(data, t) {
@@ -138,7 +146,7 @@ class ConnectedIo extends React.PureComponent {
       const options = get(
         this.IO_FUNCTION,
         String.prototype.toUpperCase.call(item.io),
-        this.IO_FUNCTION.IN,
+        this.IO_FUNCTION.IN
       );
       const selectItems = Object.keys(options).map(v => (<MenuItem key={v} value={v}>{v}</MenuItem>));
 
@@ -152,14 +160,16 @@ class ConnectedIo extends React.PureComponent {
               <span className={classes.infoText}>OFF</span>
             </div>
           );
-        } if (ioTestRsp[item.bit] === 1) {
+        }
+        if (ioTestRsp[item.bit] === 1) {
           return (
             <div className={classes.statusWrap}>
               <span className={`${classes.statusCircle} ${classes.success}`} />
               <span className={classes.successText}>ON</span>
             </div>
           );
-        } if (ioTestRsp[item.bit] === 'fail') {
+        }
+        if (ioTestRsp[item.bit] === 'fail') {
           return (
             <div className={classes.statusWrap}>
               <span className={`${classes.statusCircle} ${classes.fail}`} />
@@ -173,10 +183,7 @@ class ConnectedIo extends React.PureComponent {
       return (
         <div key={`${item.io}_${item.bit}`}>
           <ListItem className={classes.inputItem}>
-            <InputLabel
-              className={classes.ioInputLabel}
-              htmlFor="name-simple"
-            >
+            <InputLabel className={classes.ioInputLabel} htmlFor="name-simple">
               {item.bit}
             </InputLabel>
             <Input
@@ -193,12 +200,10 @@ class ConnectedIo extends React.PureComponent {
               name="function"
               className={classes.ioFunctionSelect}
             >
-              <MenuItem key="dummy" value=""/>
+              <MenuItem key="dummy" value="" />
               {selectItems}
             </Select>
-            <span>
-              {String.prototype.toUpperCase.call(item.io)}
-            </span>
+            <span>{String.prototype.toUpperCase.call(item.io)}</span>
             <Button
               color="info"
               onClick={() => this.handleTest(item)}
@@ -225,53 +230,50 @@ class ConnectedIo extends React.PureComponent {
 
     return (
       <I18n ns="translations">
-        {
-          t => (
-            <section>
-              <h3 className={classes.sectionTitle}>
-                {t('Configuration.IO.INname')}
-              </h3>
-              <Paper className={classes.paperWrap} elevation={1}>
-                <List>
-                  {inItems(t)}
-                </List>
-              </Paper>
-              <h3 className={`${classes.sectionTitle} ${classes.sectionTitleInner}`}>
-                {t('Configuration.IO.OUTname')}
-              </h3>
-              <Paper className={classes.paperWrap} elevation={1}>
-                <List>
-                  {outItems(t)}
-                </List>
-                <Button
-                  variant="contained"
-                  disabled={!isDataValid}
-                  color="primary"
-                  onClick={this.handleSubmit}
-                  className={classes.button}
-                >
-                  <SaveIcon className={classes.leftIcon} />
-                  {t('Common.Submit')}
-                </Button>
-              </Paper>
-            </section>
-          )
-        }
+        {t => (
+          <section>
+            <h3 className={classes.sectionTitle}>
+              {t('Configuration.IO.INname')}
+            </h3>
+            <Paper className={classes.paperWrap} elevation={1}>
+              <List>{inItems(t)}</List>
+            </Paper>
+            <h3
+              className={`${classes.sectionTitle} ${classes.sectionTitleInner}`}
+            >
+              {t('Configuration.IO.OUTname')}
+            </h3>
+            <Paper className={classes.paperWrap} elevation={1}>
+              <List>{outItems(t)}</List>
+              <Button
+                variant="contained"
+                disabled={!isDataValid}
+                color="primary"
+                onClick={this.handleSubmit}
+                className={classes.button}
+              >
+                <SaveIcon className={classes.leftIcon} />
+                {t('Common.Submit')}
+              </Button>
+            </Paper>
+          </section>
+        )}
       </I18n>
     );
   }
 }
 
 ConnectedIo.propTypes = {
-  classes: PropTypes.shape({
-  }).isRequired,
-  storedConfigs: PropTypes.shape({
-    'in': PropTypes.array,
-    'out':PropTypes.array,
-  }).isRequired,
-  saveConfigs: PropTypes.func.isRequired,
+  classes: PropTypes.shape({}).isRequired,
+  storedConfigs: PropTypes.shape({}).isRequired,
+  in: PropTypes.array,
+  out: PropTypes.array,
+  saveConfigs: PropTypes.func.isRequired
 };
 
-const Io = connect(mapStateToProps, mapDispatchToProps)(ConnectedIo);
+const Io = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ConnectedIo);
 
 export default withStyles(styles)(Io);

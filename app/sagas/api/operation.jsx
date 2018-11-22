@@ -1,16 +1,19 @@
-import axios from "axios";
+import axios from 'axios';
 import axiosRetry from 'axios-retry';
 
 const defaultClient = axios.create({
   timeout: 3000,
-  headers: {'Content-Type': 'application/json'}
+  headers: { 'Content-Type': 'application/json' }
 });
 
 axiosRetry(defaultClient, {
   retries: 2,
   retryDelay: axiosRetry.exponentialDelay,
-  retryCondition: (err) => {
-    if (err.message.indexOf("200") !== -1 || err.message.indexOf("409") !== -1) {
+  retryCondition: err => {
+    if (
+      err.message.indexOf('200') !== -1 ||
+      err.message.indexOf('409') !== -1
+    ) {
       return false;
     }
 

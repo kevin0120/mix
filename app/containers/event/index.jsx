@@ -1,35 +1,35 @@
-import React from "react";
+import React from 'react';
 // react component for creating dynamic tables
-import ReactTable from "react-table";
+import ReactTable from 'react-table';
 
 // @material-ui/core components
-import withStyles from "@material-ui/core/styles/withStyles";
+import withStyles from '@material-ui/core/styles/withStyles';
 // @material-ui/icons
-import Assignment from "@material-ui/icons/Assignment";
-import Dvr from "@material-ui/icons/Dvr";
+import Assignment from '@material-ui/icons/Assignment';
+import Dvr from '@material-ui/icons/Dvr';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 import Divider from '@material-ui/core/Divider';
 import { I18n } from 'react-i18next';
-import SweetAlert from "react-bootstrap-sweetalert";
+import SweetAlert from 'react-bootstrap-sweetalert';
 
 // core components
-import GridContainer from "../../components/Grid/GridContainer";
-import GridItem from "../../components/Grid/GridItem";
-import Button from "../../components/CustomButtons/Button";
-import Card from "../../components/Card/Card";
-import CardBody from "../../components/Card/CardBody";
-import CardIcon from "../../components/Card/CardIcon";
-import CardHeader from "../../components/Card/CardHeader";
+import GridContainer from '../../components/Grid/GridContainer';
+import GridItem from '../../components/Grid/GridItem';
+import Button from '../../components/CustomButtons/Button';
+import Card from '../../components/Card/Card';
+import CardBody from '../../components/Card/CardBody';
+import CardIcon from '../../components/Card/CardIcon';
+import CardHeader from '../../components/Card/CardHeader';
 
-import { Query, CreateDailyLogger, Warn } from "../../logger"
+import { Query, CreateDailyLogger, Warn } from '../../logger';
 
-import { cardTitle } from "../../common/jss/material-react-pro";
-import withLayout from "../../components/Layout/layout";
+import { cardTitle } from '../../common/jss/material-react-pro';
+import withLayout from '../../components/Layout/layout';
 
-import sweetAlertStyle from "../../common/jss/views/sweetAlertStyle";
+import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
 
 const lodash = require('lodash');
 const dayjs = require('dayjs');
@@ -47,26 +47,21 @@ const styles = {
   },
   cardIconTitle: {
     ...cardTitle,
-    marginTop: "15px",
-    marginBottom: "0px"
+    marginTop: '15px',
+    marginBottom: '0px'
   }
 };
-
-
-
 
 //
 // Find items logged between today and yesterday.
 //
-
-
 
 const requestData = () => {
   return new Promise((resolve, reject) => {
     // You can retrieve your data however you want, in this case, we will just use some local data.
 
     const options = {
-      from: new Date() - (24 * 60 * 60 * 1000),
+      from: new Date() - 24 * 60 * 60 * 1000,
       until: new Date(),
       limit: 600,
       start: 0,
@@ -77,7 +72,7 @@ const requestData = () => {
     Query(options, (err, results) => {
       if (err) {
         /* TODO: handle me */
-        console.log(err.toString())
+        console.log(err.toString());
       }
 
       resolve(results);
@@ -91,10 +86,10 @@ class Event extends React.Component {
     this.state = {
       data: [],
       isShow: false,
-      selectObj: null,
+      selectObj: null
     };
     this.fetchData = this.fetchData.bind(this);
-  };
+  }
 
   componentDidMount() {
     CreateDailyLogger();
@@ -105,14 +100,13 @@ class Event extends React.Component {
     // Whenever the table model changes, or the user sorts or changes pages, this method gets called and passed the current table model.
     // You can set the `loading` prop of the table to true to use the built-in one or show you're own loading bar if you want.
     // Request the data however you want.  Here, we'll use our mocked service we created earlier
-    requestData(
-    ).then(res => {
+    requestData().then(res => {
       // Now just get the rows of data to your React Table (and update anything else like total pages or loading)
       this.setState({
-        data: res.info.map((item,key) => {
+        data: res.info.map((item, key) => {
           return {
             id: key,
-            timestamp: dayjs(item.timestamp).format("YYYY MM-DD HH:mm:ss"),
+            timestamp: dayjs(item.timestamp).format('YYYY MM-DD HH:mm:ss'),
             level: item.level,
             message: item.message,
             actions: (
@@ -128,32 +122,32 @@ class Event extends React.Component {
                     this.setState({
                       isShow: true,
                       selectObj: obj
-                    })
+                    });
                   }}
                   color="warning"
                   className="edit"
                 >
                   <Dvr />
-                </Button>{" "}
+                </Button>{' '}
               </div>
             )
-          }
+          };
         })
-      })
-    })
-  };
+      });
+    });
+  }
 
   handleClose = () => {
     this.setState({
       isShow: false
-    })
+    });
   };
 
   render() {
     const { classes } = this.props;
     const { data, isShow, selectObj } = this.state;
 
-    const Msg = selectObj ?
+    const Msg = selectObj ? (
       <div>
         <List>
           <ListItem>
@@ -163,119 +157,126 @@ class Event extends React.Component {
             <Divider inset />
           </li>
           <ListItem>
-
-            <ListItemText primary={`事件等级: ${selectObj.level === 'info'? "日常信息": "报警事件"}`} />
+            <ListItemText
+              primary={`事件等级: ${
+                selectObj.level === 'info' ? '日常信息' : '报警事件'
+              }`}
+            />
           </ListItem>
           <Divider inset component="li" />
           <ListItem>
-
             <ListItemText primary={`消息: ${selectObj.message}`} />
           </ListItem>
         </List>
       </div>
-      : " ";
+    ) : (
+      ' '
+    );
 
     return (
       <I18n ns="translations">
-        {
-          t => (
-            <div>
-              <GridContainer className={classes.root}>
-                <GridItem xs={12}>
-                  <Card>
-                    <CardHeader color="primary" icon>
-                      <CardIcon color="primary">
-                        <Assignment/>
-                      </CardIcon>
-                      <h4 className={classes.cardIconTitle}>{t('main.event')}</h4>
-                    </CardHeader>
-                    <CardBody>
-                      <ReactTable
-                        data={data}
-                        filterable
-                        columns={[
-                          {
-                            Header: "Time",
-                            accessor: "timestamp",
-                            filterable: false,
-                            filterMethod: (filter, row) =>
-                              lodash.includes(lodash.toUpper(row[filter.id]), lodash.toUpper(filter.value))
-                          },
-                          {
-                            Header: "Level",
-                            accessor: "level",
-                            filterMethod: (filter, row) => {
-                              if (filter.value === "all") {
-                                return true;
-                              }
-                              if (filter.value === "info") {
-                                return row[filter.id] === "info";
-                              }
-                              if (filter.value === "alarm") {
-                                return row[filter.id] === "warn";
-                              }
+        {t => (
+          <div>
+            <GridContainer className={classes.root}>
+              <GridItem xs={12}>
+                <Card>
+                  <CardHeader color="primary" icon>
+                    <CardIcon color="primary">
+                      <Assignment />
+                    </CardIcon>
+                    <h4 className={classes.cardIconTitle}>{t('main.event')}</h4>
+                  </CardHeader>
+                  <CardBody>
+                    <ReactTable
+                      data={data}
+                      filterable
+                      columns={[
+                        {
+                          Header: 'Time',
+                          accessor: 'timestamp',
+                          filterable: false,
+                          filterMethod: (filter, row) =>
+                            lodash.includes(
+                              lodash.toUpper(row[filter.id]),
+                              lodash.toUpper(filter.value)
+                            )
+                        },
+                        {
+                          Header: 'Level',
+                          accessor: 'level',
+                          filterMethod: (filter, row) => {
+                            if (filter.value === 'all') {
                               return true;
-                            },
-                            Filter: ({ filter, onChange }) =>
-                              <select
-                                onChange={event => onChange(event.target.value)}
-                                style={{ width: "100%" }}
-                                value={filter ? filter.value : "all"}
-                              >
-                                <option value="all">All</option>
-                                <option value="info">Info</option>
-                                <option value="alarm">Alarm</option>
-                              </select>
+                            }
+                            if (filter.value === 'info') {
+                              return row[filter.id] === 'info';
+                            }
+                            if (filter.value === 'alarm') {
+                              return row[filter.id] === 'warn';
+                            }
+                            return true;
                           },
-                          {
-                            Header: "Message",
-                            accessor: "message",
-                            sortable: false,
-                            filterMethod: (filter, row) =>
-                              lodash.includes(lodash.toUpper(row[filter.id]), lodash.toUpper(filter.value))
-                          },
-                          {
-                            Header: "Actions",
-                            accessor: "actions",
-                            sortable: false,
-                            filterable: false
-                          }
-                        ]}
-                        defaultPageSize={10}
-                        showPaginationTop
-                        showPaginationBottom={false}
-                        className="-striped -highlight"
-                      />
-                    </CardBody>
-                  </Card>
-                </GridItem>
-              </GridContainer>
-              {
-                isShow?
-                  <SweetAlert
-                    warning
-                    show={isShow}
-                    style={{ display: "block", marginTop: "-100px" }}
-                    title="事件详情"
-                    onConfirm={this.handleClose}
-                    onCancel={this.handleClose}
-                    confirmBtnCssClass={
-                      this.props.classes.button + " " + this.props.classes.success
-                    }
-                    cancelBtnCssClass={
-                      this.props.classes.button + " " + this.props.classes.danger
-                    }
-                    confirmBtnText={t('Common.Yes')}
-                    cancelBtnText={t('Common.No')}
-                    showCancel
-                  >
-                    {Msg}
-                  </SweetAlert>
-                  :null
-              }
-            </div>
-          )
-        }
+                          Filter: ({ filter, onChange }) => (
+                            <select
+                              onChange={event => onChange(event.target.value)}
+                              style={{ width: '100%' }}
+                              value={filter ? filter.value : 'all'}
+                            >
+                              <option value="all">All</option>
+                              <option value="info">Info</option>
+                              <option value="alarm">Alarm</option>
+                            </select>
+                          )
+                        },
+                        {
+                          Header: 'Message',
+                          accessor: 'message',
+                          sortable: false,
+                          filterMethod: (filter, row) =>
+                            lodash.includes(
+                              lodash.toUpper(row[filter.id]),
+                              lodash.toUpper(filter.value)
+                            )
+                        },
+                        {
+                          Header: 'Actions',
+                          accessor: 'actions',
+                          sortable: false,
+                          filterable: false
+                        }
+                      ]}
+                      defaultPageSize={10}
+                      showPaginationTop
+                      showPaginationBottom={false}
+                      className="-striped -highlight"
+                    />
+                  </CardBody>
+                </Card>
+              </GridItem>
+            </GridContainer>
+            {isShow ? (
+              <SweetAlert
+                warning
+                show={isShow}
+                style={{ display: 'block', marginTop: '-100px' }}
+                title="事件详情"
+                onConfirm={this.handleClose}
+                onCancel={this.handleClose}
+                confirmBtnCssClass={
+                  this.props.classes.button + ' ' + this.props.classes.success
+                }
+                cancelBtnCssClass={
+                  this.props.classes.button + ' ' + this.props.classes.danger
+                }
+                confirmBtnText={t('Common.Yes')}
+                cancelBtnText={t('Common.No')}
+                showCancel
+              >
+                {Msg}
+              </SweetAlert>
+            ) : null}
+          </div>
+        )}
       </I18n>
     );
   }

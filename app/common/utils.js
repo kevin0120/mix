@@ -42,11 +42,11 @@ export function isVin(vin) {
 }
 
 function isKnr(data) {
-  if (data.length === 8 && checkNaturalnumber(data)){
+  if (data.length === 8 && checkNaturalnumber(data)) {
     return true;
   }
 
-  return false
+  return false;
 }
 
 function isLongpin(data) {
@@ -62,8 +62,8 @@ function isLongpin(data) {
   return false;
 }
 
-function checkNaturalnumber(data){
-  if(/^[0-9]+$/.test(data) && (data>0)){
+function checkNaturalnumber(data) {
+  if (/^[0-9]+$/.test(data) && data > 0) {
     return true;
   }
 

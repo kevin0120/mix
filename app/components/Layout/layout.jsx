@@ -236,11 +236,11 @@ export default function withLayout(SubCompontents, showTop = true) {
                       anchorEl={showStatus}
                       anchorOrigin={{
                         vertical: 'top',
-                        horizontal: 'left',
+                        horizontal: 'left'
                       }}
                       transformOrigin={{
                         vertical: 'bottom',
-                        horizontal: 'left',
+                        horizontal: 'left'
                       }}
                       open={openStatusMenu}
                       onClose={this.handleCloseStatus}
@@ -253,11 +253,11 @@ export default function withLayout(SubCompontents, showTop = true) {
                       anchorEl={anchorEl}
                       anchorOrigin={{
                         vertical: 'top',
-                        horizontal: 'left',
+                        horizontal: 'left'
                       }}
                       transformOrigin={{
                         vertical: 'bottom',
-                        horizontal: 'left',
+                        horizontal: 'left'
                       }}
                       open={open}
                       onClose={this.handleClose}

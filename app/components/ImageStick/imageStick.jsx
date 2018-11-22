@@ -18,11 +18,15 @@ import { withStyles } from '@material-ui/core/styles';
 
 import popoverStyles from '../../common/jss/popoverStyles';
 
-
-import { successColor, warningColor, dangerColor } from '../../common/jss/material-react-pro';
+import {
+  successColor,
+  warningColor,
+  dangerColor
+} from '../../common/jss/material-react-pro';
 
 import { keyframes } from 'react-emotion';
 import classNames from 'classnames';
+import { OPERATION_RESULT } from '../../reducers/operations';
 
 const ripple = keyframes`
   0% {transform:scale(0.5); }
@@ -35,8 +39,7 @@ const mapStateToProps = (state, ownProps) => ({
   ...ownProps
 });
 
-const mapDispatchToProps = {
-};
+const mapDispatchToProps = {};
 
 const circleRadius = 30;
 
@@ -75,7 +78,6 @@ const withstyles = () => ({
     // backgroundSize: 'contain',
     // backgroundPosition: 'center',
     // backgroundRepeat: 'no-repeat',
-
   },
   heightFirst: {
     height: '100%'
@@ -124,27 +126,20 @@ const withstyles = () => ({
   error: {
     background: dangerColor
   }
-
 });
 
 /* eslint-disable react/prefer-stateless-function */
 class ConnectedImageStick extends React.PureComponent {
-  componentDidMount() {
-  }
+  componentDidMount() {}
 
-  componentDidUpdate() {
-  }
+  componentDidUpdate() {}
 
   render() {
-    const {
-      classes,
-      operations
-    } = this.props;
+    const { classes, operations } = this.props;
 
     let idx = 0;
 
-    const statusDisplay = operations.results.map(item => {
-
+    const statusDisplay = operations.results.map((item, i) => {
       const display = operations.activeResultIndex >= idx;
 
       const postionStyle = {
@@ -154,39 +149,49 @@ class ConnectedImageStick extends React.PureComponent {
 
       idx += 1;
 
-      return (
-        <div
-          key={item.id}
-          style={postionStyle}
-          className={classes.imgInfo}
-        >
-          <span
-            className={`${classes.circleStatus} ${classes[item.status]}`}
+      let status = 'waiting';
+      if (operations.activeResultIndex === i) {
+        status = 'waitingActive';
+      }
 
-          >{item.sequence}
+      if (item.result === OPERATION_RESULT.OK) {
+        status = 'success';
+      } else if (item.result === OPERATION_RESULT.NOK) {
+        status = 'error';
+      }
+
+      return (
+        <div key={item.id} style={postionStyle} className={classes.imgInfo}>
+          <span className={`${classes.circleStatus} ${classes[status]}`}>
+            {item.sequence}
           </span>
-          {
-            display ? <div className={classes.popover}>
+          {display ? (
+            <div className={classes.popover}>
               <div className={classes.popoverBody}>
                 <p>角度: {item.wi || '-'}</p>
                 <p>扭矩: {item.mi || '-'}</p>
                 <p>时间: {item.ti || '-'}</p>
               </div>
-            </div> : null
-          }
-
+            </div>
+          ) : null}
         </div>
       );
     });
     return (
       <div elevation={4} className={classes.picWrap}>
-        <div className={classes.imgBlock} style={{
-          backgroundImage: `url(${operations.workSheet})`
-        }}>
-          <img src={operations.workSheet} className={classes.imgSheet} alt={''}/>
+        <div
+          className={classes.imgBlock}
+          style={{
+            backgroundImage: `url(${operations.workSheet})`
+          }}
+        >
+          <img
+            src={operations.workSheet}
+            className={classes.imgSheet}
+            alt={''}
+          />
           {statusDisplay}
         </div>
-
       </div>
     );
   }
@@ -197,8 +202,7 @@ ConnectedImageStick.propTypes = {
   operations: PropTypes.shape({}).isRequired
 };
 
-ConnectedImageStick.defaultProps = {
-};
+ConnectedImageStick.defaultProps = {};
 
 const ImageStick = connect(
   mapStateToProps,

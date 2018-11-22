@@ -18,33 +18,31 @@ import Net from '../../components/PreferencesContent/Net';
 import Io from '../../components/PreferencesContent/Io';
 import Connect from '../../components/PreferencesContent/Connect';
 
-
-
 import styles from './styles';
-
-
 
 const menuContents = [
   {
     text: 'Configuration.network.name',
     icon: <RssFeedIcon style={{ fill: '#009688' }} />,
-    component: <Net />,
-  }, {
+    component: <Net />
+  },
+  {
     text: 'Configuration.IO.name',
     icon: <ViewModuleIcon style={{ fill: '#ff9800' }} />,
-    component: <Io />,
-  }, {
+    component: <Io />
+  },
+  {
     text: 'Configuration.connections.name',
     icon: <SettingsRemoteIcon style={{ fill: '#3492ff' }} />,
-    component: <Connect />,
-  },
+    component: <Connect />
+  }
 ];
 
 class ConnectedPreferences extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      activeMenu: 'Configuration.network.name',
+      activeMenu: 'Configuration.network.name'
     };
 
     this.handleChangeMenu = this.handleChangeMenu.bind(this);
@@ -57,14 +55,16 @@ class ConnectedPreferences extends React.Component {
 
   handleChangeMenu(text) {
     this.setState({
-      activeMenu: text,
+      activeMenu: text
     });
   }
 
   render() {
     const { classes } = this.props;
     const { activeMenu } = this.state;
-    const currentComponentIdx = menuContents.findIndex(ele => activeMenu === ele.text);
+    const currentComponentIdx = menuContents.findIndex(
+      ele => activeMenu === ele.text
+    );
 
     const menuList = t => {
       const menus = menuContents.map(item => (
@@ -74,48 +74,34 @@ class ConnectedPreferences extends React.Component {
           className={classes.menuItem}
           onClick={() => this.handleChangeMenu(item.text)}
         >
-          <ListItemIcon>
-            {item.icon}
-          </ListItemIcon>
-          <span className={classes.itemText}>
-            {t(item.text)}
-          </span>
+          <ListItemIcon>{item.icon}</ListItemIcon>
+          <span className={classes.itemText}>{t(item.text)}</span>
         </MenuItem>
       ));
-      return (
-        <div>
-          {menus}
-        </div>
-      );
+      return <div>{menus}</div>;
     };
 
     return (
       <I18n ns="translations">
-        {
-          t => (
-            <div className={classes.root}>
-              <AppBarBack />
-              <LeftMenuWithAvatar>
-                <MenuList>
-                  {menuList(t)}
-                </MenuList>
-              </LeftMenuWithAvatar>
-              <main className={classes.content}>
-                <div className={classes.toolbar} />
-                {menuContents[currentComponentIdx].component}
-              </main>
-            </div>
-          )
-        }
+        {t => (
+          <div className={classes.root}>
+            <AppBarBack />
+            <LeftMenuWithAvatar>
+              <MenuList>{menuList(t)}</MenuList>
+            </LeftMenuWithAvatar>
+            <main className={classes.content}>
+              <div className={classes.toolbar} />
+              {menuContents[currentComponentIdx].component}
+            </main>
+          </div>
+        )}
       </I18n>
     );
   }
 }
 
 ConnectedPreferences.propTypes = {
-  classes: PropTypes.shape({
-  }).isRequired,
+  classes: PropTypes.shape({}).isRequired
 };
-
 
 export default withLayout(withStyles(styles)(ConnectedPreferences), false);

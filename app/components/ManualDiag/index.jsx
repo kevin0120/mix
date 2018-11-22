@@ -6,7 +6,6 @@ import { connect } from 'react-redux';
 import Button from '../../components/CustomButtons/Button.jsx';
 import { withStyles } from '@material-ui/core/styles';
 
-
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -15,30 +14,29 @@ import Slide from '@material-ui/core/Slide';
 
 import { SVWManualNewCar } from '../../actions/scannerDevice';
 
-import customSelectStyle from "../../common/jss/customSelectStyle.jsx";
-
+import customSelectStyle from '../../common/jss/customSelectStyle.jsx';
 
 import { I18n } from 'react-i18next';
 import InputAdornment from '@material-ui/core/InputAdornment';
-import Face from "@material-ui/icons/Face";
+import Face from '@material-ui/icons/Face';
 import CustomInput from '../CustomInput/CustomInput';
-import Keyboard from "react-simple-keyboard";
+import Keyboard from 'react-simple-keyboard';
 
 const lodash = require('lodash');
 
 const mapStateToProps = (state, ownProps) => ({
-  ...ownProps,
+  ...ownProps
 });
 
 const mapDispatchToProps = {
-  SVWManualNewCar,
+  SVWManualNewCar
 };
 
 const customerStyles = theme => ({
   ...customSelectStyle(theme),
   bigInput: {
-    "&,&::placeholder": {
-      fontSize: '50px',
+    '&,&::placeholder': {
+      fontSize: '50px'
     }
   }
 });
@@ -51,7 +49,7 @@ class ConnectedManualDiag extends React.Component {
 
     this.state = {
       vin: '',
-      layoutName: "default",
+      layoutName: 'default'
     };
     this.handleClose = this.handleClose.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -67,39 +65,37 @@ class ConnectedManualDiag extends React.Component {
     this.props.close();
   };
 
-  setActiveInput = (event) => {
+  setActiveInput = event => {
     // this.setState({
     //   vin: event.target.id
     // });
   };
 
-  handleInput = (input) => {
+  handleInput = input => {
     // console.log(input);
     const { vin } = this.state;
 
-    this.setState(
-      {
-        ... vin,
-        vin: input
-      }
-    );
+    this.setState({
+      ...vin,
+      vin: input
+    });
   };
 
-  handlePress = (press) => {
-    const { vin} = this.state;
-    if (lodash.isEqual(press, '{enter}') && vin.length !== 0 ){
+  handlePress = press => {
+    const { vin } = this.state;
+    if (lodash.isEqual(press, '{enter}') && vin.length !== 0) {
       this.handleSubmit();
     }
     if (lodash.isEqual(press, '{shift}')) {
       const layoutName = this.state.layoutName;
 
       this.setState({
-        layoutName: layoutName === "default" ? "shift" : "default"
+        layoutName: layoutName === 'default' ? 'shift' : 'default'
       });
     }
   };
 
-  handleChangeInputValue = (event) => {
+  handleChangeInputValue = event => {
     this.setState({
       vin: event.target.value
     });
@@ -111,69 +107,80 @@ class ConnectedManualDiag extends React.Component {
   }
 
   render() {
-    const { show, classes }  = this.props;
+    const { show, classes } = this.props;
 
-    const {vin} = this.state;
+    const { vin } = this.state;
 
-    const submitEnable = vin.length !== 0 ;
+    const submitEnable = vin.length !== 0;
 
     return (
       <I18n ns="translations">
-        {
-          t => (
-            <Dialog
-              classes={{
-                root: classes.modalRoot,
-                paper: classes.modal + " " + classes.modalLarge,
-              }}
-              TransitionComponent={this.Transition}
-              keepMounted
-              open={show}
-              onClose={this.handleClose}
-              aria-labelledby="form-dialog-title"
-              scroll="paper"
+        {t => (
+          <Dialog
+            classes={{
+              root: classes.modalRoot,
+              paper: classes.modal + ' ' + classes.modalLarge
+            }}
+            TransitionComponent={this.Transition}
+            keepMounted
+            open={show}
+            onClose={this.handleClose}
+            aria-labelledby="form-dialog-title"
+            scroll="paper"
+          >
+            <DialogTitle id="form-dialog-title" className={classes.modalHeader}>
+              {t('ManualDiag.title')}
+            </DialogTitle>
+            <DialogContent className={classes.modalBody}>
+              <CustomInput
+                large
+                labelText={t('VIN/KNR')}
+                id="vin"
+                formControlProps={{
+                  fullWidth: true,
+                  required: true
+                }}
+                inputProps={{
+                  onFocus: this.setActiveInput,
+                  required: true,
+                  value: vin || '',
+                  onChange: this.handleChangeInputValue
+                }}
+              />
+            </DialogContent>
+            <DialogActions
+              className={classes.modalFooter + ' ' + classes.modalFooterCenter}
             >
-              <DialogTitle id="form-dialog-title" className={classes.modalHeader} >{t('ManualDiag.title')}</DialogTitle>
-              <DialogContent　className={classes.modalBody}>
-                <CustomInput
-                  large
-                  labelText={t('VIN/KNR')}
-                  id="vin"
-                  formControlProps={{
-                    fullWidth: true,
-                    required: true
-                  }}
-                  inputProps={{
-                    onFocus: this.setActiveInput,
-                    required: true,
-                    value: (vin || ""),
-                    onChange: this.handleChangeInputValue
-                  }}
-
+              <Button
+                onClick={this.handleClose}
+                color="primary"
+                autoFocus
+                round
+              >
+                {t('Common.Close')}
+              </Button>
+              <Button
+                onClick={this.handleSubmit}
+                color="success"
+                round
+                disabled={!submitEnable}
+              >
+                {t('Common.Submit')}
+              </Button>
+            </DialogActions>
+            {
+              <div className={classes.keyboard}>
+                <Keyboard
+                  ref={r => (this.keyboard = r)}
+                  inputName={'vin'}
+                  layoutName={this.state.layoutName}
+                  onChange={this.handleInput}
+                  onKeyPress={this.handlePress}
                 />
-              </DialogContent>
-              <DialogActions className={classes.modalFooter + " " + classes.modalFooterCenter}>
-                <Button onClick={this.handleClose} color="primary" autoFocus round>
-                  {t('Common.Close')}
-                </Button>
-                <Button onClick={this.handleSubmit} color="success" round disabled={!submitEnable}>
-                  {t('Common.Submit')}
-                </Button>
-              </DialogActions>
-              {
-                <div className={classes.keyboard} >
-                  <Keyboard
-                    ref={r => this.keyboard = r}
-                    inputName={'vin'}
-                    layoutName={this.state.layoutName}
-                    onChange={this.handleInput}
-                    onKeyPress={this.handlePress}
-                  />
-                </div>
-              }
-            </Dialog>
-          )
-        }
+              </div>
+            }
+          </Dialog>
+        )}
       </I18n>
     );
   }
@@ -181,9 +188,12 @@ class ConnectedManualDiag extends React.Component {
 
 ConnectedManualDiag.propTypes = {
   show: PropTypes.bool.isRequired,
-  close: PropTypes.func.isRequired,
+  close: PropTypes.func.isRequired
 };
 
-const ManualDiag = connect(mapStateToProps, mapDispatchToProps)(ConnectedManualDiag);
+const ManualDiag = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ConnectedManualDiag);
 
 export default withStyles(customerStyles)(ManualDiag);

@@ -13,24 +13,21 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import SaveIcon from '@material-ui/icons/Save';
 import { I18n } from 'react-i18next';
-import Button from "../CustomButtons/Button";
+import Button from '../CustomButtons/Button';
 
 import saveConfigs from '../../actions/userConfigs';
-
 
 import { sortObj } from '../../common/utils';
 import Test from './Test';
 import styles from './styles';
 
-
-
 const mapStateToProps = (state, ownProps) => ({
   storedConfigs: state.setting.page.odooConnection,
-  ...ownProps,
+  ...ownProps
 });
 
 const mapDispatchToProps = {
-  saveConfigs,
+  saveConfigs
 };
 
 /* eslint-disable react/prefer-stateless-function */
@@ -40,7 +37,7 @@ class ConnectedConnect extends React.PureComponent {
     this.state = {
       isDataValid: true,
       data: props.storedConfigs,
-      section: 'odooConnection',
+      section: 'odooConnection'
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -53,92 +50,88 @@ class ConnectedConnect extends React.PureComponent {
     tempData[key].value = get(e, 'target.value', '').trim();
     this.setState({
       data: tempData,
-      isDataValid: this.validateData(tempData),
+      isDataValid: this.validateData(tempData)
     });
   }
 
   handleSubmit() {
-    const {saveConfigs } = this.props;
+    const { saveConfigs } = this.props;
     const { section, data } = this.state;
     saveConfigs(section, data);
   }
 
   validateData(data = this.state.data) {
-    return Object.values(data)
-      .every(v => v.value);
+    return Object.values(data).every(v => v.value);
   }
 
   render() {
     const { classes } = this.props;
     const { data, isDataValid } = this.state;
 
-    const baseItems = t => sortObj(data, 'displayOrder').map(({ key, value: item }) => (
-      <div key={key}>
-        <ListItem className={classes.inputItem}>
-          <InputLabel
-            className={classes.inputLabel}
-            htmlFor={key}
-          >
-            {t(item.displayTitle)}
-          </InputLabel>
-          <Input
-            id={key}
-            placeholder={t('Common.isRequired')}
-            className={classes.input}
-            value={item.value}
-            onChange={e => this.handleChange(e, key)}
-          />
-        </ListItem>
-        <li>
-          <Divider />
-        </li>
-      </div>
-    ));
+    const baseItems = t =>
+      sortObj(data, 'displayOrder').map(({ key, value: item }) => (
+        <div key={key}>
+          <ListItem className={classes.inputItem}>
+            <InputLabel className={classes.inputLabel} htmlFor={key}>
+              {t(item.displayTitle)}
+            </InputLabel>
+            <Input
+              id={key}
+              placeholder={t('Common.isRequired')}
+              className={classes.input}
+              value={item.value}
+              onChange={e => this.handleChange(e, key)}
+            />
+          </ListItem>
+          <li>
+            <Divider />
+          </li>
+        </div>
+      ));
 
     return (
       <I18n ns="translations">
-        {
-          t => (
-            <section>
-              <h3 className={classes.sectionTitle}>
-                {t('Configuration.connections.name')}
-              </h3>
-              <Paper className={classes.paperWrap} elevation={1}>
-                <List>
-                  {baseItems(t)}
-                </List>
-                <Button
-                  disabled={!isDataValid}
-                  color="primary"
-                  onClick={this.handleSubmit}
-                  className={classes.button}
-                >
-                  <SaveIcon className={classes.leftIcon} />
-                  {t('Common.Submit')}
-                </Button>
-              </Paper>
-              <h3 className={`${classes.sectionTitle} ${classes.sectionTitleInner}`}>
-                {t('Common.Test')}
-              </h3>
-              <Paper className={classes.paperWrap} elevation={1}>
-                <Test aiisUrl={data.aiisUrl.value} />
-              </Paper>
-            </section>
-          )
-        }
+        {t => (
+          <section>
+            <h3 className={classes.sectionTitle}>
+              {t('Configuration.connections.name')}
+            </h3>
+            <Paper className={classes.paperWrap} elevation={1}>
+              <List>{baseItems(t)}</List>
+              <Button
+                disabled={!isDataValid}
+                color="primary"
+                onClick={this.handleSubmit}
+                className={classes.button}
+              >
+                <SaveIcon className={classes.leftIcon} />
+                {t('Common.Submit')}
+              </Button>
+            </Paper>
+            <h3
+              className={`${classes.sectionTitle} ${classes.sectionTitleInner}`}
+            >
+              {t('Common.Test')}
+            </h3>
+            <Paper className={classes.paperWrap} elevation={1}>
+              <Test aiisUrl={data.aiisUrl.value} />
+            </Paper>
+          </section>
+        )}
       </I18n>
     );
   }
 }
 
 ConnectedConnect.propTypes = {
-  classes: PropTypes.shape({
-  }).isRequired,
-  storedConfigs: PropTypes.shape({
-  }).isRequired,
-  saveConfigs: PropTypes.func.isRequired,
+  classes: PropTypes.shape({}).isRequired,
+  storedConfigs: PropTypes.shape({}).isRequired,
+  saveConfigs: PropTypes.func.isRequired
 };
 
-const Connect = connect(mapStateToProps, mapDispatchToProps)(ConnectedConnect);
+const Connect = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ConnectedConnect);
 
 export default withStyles(styles)(Connect);

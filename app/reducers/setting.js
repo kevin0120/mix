@@ -2,7 +2,7 @@
 
 import configs from '../shared/config';
 
-import { USER_CONFIGS } from "../actions/actionTypes";
+import { USER_CONFIGS } from '../actions/actionTypes';
 
 type actionType = {
   +type: string,
@@ -12,10 +12,10 @@ type actionType = {
 
 export default function setting(state: object = configs, action: actionType) {
   switch (action.type) {
-    case USER_CONFIGS.SAVE:{
+    case USER_CONFIGS.SAVE: {
       const { section, newConfigs } = action;
-      return { ...state, page: {...state.page, [section]: newConfigs }};
-      }
+      return { ...state, page: { ...state.page, [section]: newConfigs } };
+    }
     default:
       return state;
   }

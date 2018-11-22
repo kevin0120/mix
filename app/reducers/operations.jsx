@@ -1,11 +1,18 @@
 import { OPERATION } from '../actions/actionTypes';
 import { isCarID } from '../common/utils';
 
-import { setLedStatusDoing, setLedError, setLedStatusReady, sOn, sBlinkOn } from '../actions/ioModbus';
+import {
+  setLedStatusDoing,
+  setLedError,
+  setLedStatusReady,
+  sOn,
+  sBlinkOn
+} from '../actions/ioModbus';
 
 export const OPERATION_STATUS = {
   INIT: 'Init',
   READY: 'Ready',
+  PREDOING: 'PreDoing',
   DOING: 'Doing',
   TIMEOUT: 'Timeout',
   FAIL: 'Fail'
@@ -16,8 +23,15 @@ export const OPERATION_RESULT = {
   NOK: 'NOK'
 };
 
+export const OPERATION_SOURCE = {
+  SCANNER: 'SCANNER',
+  RFID: 'RFID',
+  ANDON: 'ANDON',
+  MANUAL: 'MANUAL'
+};
+
 const defaultOperations = {
-  operationStatus: 'Init',
+  operationStatus: 'Ready',
   carID: '',
   carType: '',
   activeResultIndex: 0,
@@ -28,6 +42,7 @@ const defaultOperations = {
   productID: -1,
   workcenterID: -1,
   lnr: '',
+  source: '',
   results: [
     // {
     //   id: -1,
@@ -50,7 +65,8 @@ const defaultOperations = {
 type actionType = {
   +type: string,
   +data: object,
-  +force: boolean
+  +carID: string,
+  +carType: string
 };
 
 export default function operations(
@@ -59,7 +75,7 @@ export default function operations(
 ) {
   switch (action.type) {
     case OPERATION.TRIGGER.NEW_DATA:
-      return NewTriggerData(state, action.data);
+      return NewTriggerData(state, action.carID, action.carType);
     case OPERATION.OPERATION.FETCH_OK:
       return NewOperation(state, action.mode, action.data);
     case OPERATION.STARTED:
@@ -74,22 +90,18 @@ export default function operations(
       return OperationFinished(state, action.data);
     case OPERATION.CONTINUE:
       return OperationContinue(state);
+    case OPERATION.PREDOING:
+      return OperationPreDoing(state);
     default:
       return state;
   }
 }
 
-function NewTriggerData(state, data) {
-  if (isCarID(data)) {
-    return {
-      ...state,
-      carID: data
-    };
-  }
-
+function NewTriggerData(state, carID, carType) {
   return {
     ...state,
-    carType: data
+    carID: carID !== null ? carID : state.carID,
+    carType: carType !== null ? carType : state.carType
   };
 }
 
@@ -103,7 +115,7 @@ function NewOperation(state, mode, data) {
       workSheet: data.img,
       productID: data.product_id,
       workcenterID: data.workcenter_id,
-      results: data.points,
+      results: data.points
       // activeResultIndex: 0,
       // failCount: 0
     };
@@ -119,7 +131,7 @@ function NewOperation(state, mode, data) {
     results: data.results,
     // activeResultIndex: 0,
     // failCount: 0,
-    lnr: data.lnr,
+    lnr: data.lnr
   };
 }
 
@@ -141,7 +153,7 @@ function mergeResults(state, data) {
     return rs;
   }
 
-  for(let i = 0; i < data.length; i++) {
+  for (let i = 0; i < data.length; i++) {
     rs[i + state.activeResultIndex].ti = data[i].ti;
     rs[i + state.activeResultIndex].mi = data[i].mi;
     rs[i + state.activeResultIndex].wi = data[i].wi;
@@ -203,7 +215,7 @@ function OperationContinue(state) {
   const { activeResultIndex, results } = state;
   let count = 1;
   const ele = results[activeResultIndex + 1];
-  for(let i = activeResultIndex + 2; i < results.length; i++) {
+  for (let i = activeResultIndex + 2; i < results.length; i++) {
     if (ele.sequence === results[i].sequence) {
       count += 1;
     } else {
@@ -215,6 +227,13 @@ function OperationContinue(state) {
     ...state,
     operationStatus: OPERATION_STATUS.DOING,
     activeResultIndex: activeResultIndex + count,
-    failCount: 0,
+    failCount: 0
+  };
+}
+
+function OperationPreDoing(state) {
+  return {
+    ...state,
+    operationStatus: OPERATION_STATUS.PREDOING
   };
 }

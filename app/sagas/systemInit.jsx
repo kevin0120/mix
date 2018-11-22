@@ -8,14 +8,13 @@
 
 // @flow
 
-import { call, take, put, select } from 'redux-saga/effects'
+import { call, take, put, select } from 'redux-saga/effects';
 
-import { CONNECTION, SYSTEM_INIT } from '../actions/actionTypes';
+import { CONNECTION, SYSTEM_INIT, RUSH } from '../actions/actionTypes';
 
 import { fetchConnectionInfo } from './api/systemInit';
 import { initRush } from '../actions/rush';
-import { initIOModbus } from '../actions/ioModbus';
-import { OPERATION_STATUS } from '../reducers/operations';
+import { initIOModbus, setLedStatusReady } from '../actions/ioModbus';
 import { startHealthzCheck } from '../actions/healthCheck';
 import { setNewNotification } from '../actions/notification';
 
@@ -32,15 +31,15 @@ export function* fetchConnectionFlow(baseUrl, hmiSN, dispatch) {
     yield put(startHealthzCheck(url, controllers)); // 启动healthzcheck 定时器
 
     // 初始化rush
-    yield call(initRush, dispatch, resp.data.masterpc.connection, hmiSN);
+    // yield call(initRush, dispatch, resp.data.masterpc.connection, hmiSN);
+    yield put({ type: RUSH.INIT });
 
     // 初始化io
     const state = yield select();
     yield call(initIOModbus, dispatch, state);
-
   }
 
-  yield put({type: OPERATION_STATUS.READY, data:[]});
+  setLedStatusReady();
 }
 
 export function* sysInitFlow() {

@@ -1,4 +1,3 @@
-
 export const defaultConfigs = {
   version: 'v0.1',
   base: {
@@ -54,6 +53,7 @@ export const defaultConfigs = {
       }
     },
     modbus: {
+      source: ['remote', 'controller'],
       in: [
         {
           bit: 0,

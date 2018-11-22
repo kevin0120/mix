@@ -5,19 +5,16 @@ import {
   jobManual,
   pset
 } from './api/operation';
-import { OPERATION, RUSH, SHUTDOWN_DIAG } from '../actions/actionTypes';
+import { OPERATION, RUSH } from '../actions/actionTypes';
 import { openShutdown } from '../actions/shutDownDiag';
-import { OPERATION_RESULT } from '../reducers/operations';
-import { closeDiag, confirmDiag, openDiag } from './shutDownDiag';
-
-const lodash = require('lodash');
+import { OPERATION_RESULT, OPERATION_STATUS } from '../reducers/operations';
+import { addNewStory, clearStories } from './timeline';
+import { isCarID } from '../common/utils';
 
 // 监听作业
 export function* watchOperation() {
   while (true) {
-    const action = yield take([
-      OPERATION.VERIFIED,
-    ]);
+    const action = yield take([OPERATION.VERIFIED]);
     switch (action.type) {
       case OPERATION.VERIFIED:
         yield call(startOperation, action.data);
@@ -27,6 +24,46 @@ export function* watchOperation() {
     }
   }
 }
+
+// 触发作业
+export function* triggerOperation(data, source) {
+  let state = yield select();
+  switch (state.operations.operationStatus) {
+    case OPERATION_STATUS.DOING:
+      return;
+    case OPERATION_STATUS.READY:
+      yield call(clearStories);
+      yield put({ type: OPERATION.PREDOING });
+      break;
+
+    default:
+      break;
+  }
+
+  yield call(addNewStory, 'info', source, data);
+
+  if (isCarID(data)) {
+    yield put({ type: OPERATION.TRIGGER.NEW_DATA, carID: data });
+  } else {
+    yield put({ type: OPERATION.TRIGGER.NEW_DATA, carType: data });
+  }
+
+  state = yield select();
+
+  const triggers = state.setting.operationSettings.flowTriggers;
+
+  let triggerFlagNum = 0;
+  for (let i = 0; i < triggers.length; i += 1) {
+    if (state.operations[triggers[i]] !== '') {
+      triggerFlagNum += 1;
+    }
+  }
+
+  if (triggerFlagNum === triggers.length) {
+    yield call(getOperation);
+  }
+}
+
 // 定位作业
 export function* getOperation() {
   const state = yield select();
@@ -87,7 +124,6 @@ export function* getOperation() {
 
 // 开始作业
 export function* startOperation(data) {
-
   let state = yield select();
 
   yield put({
@@ -112,7 +148,7 @@ export function* startOperation(data) {
       productID,
       workcenterID,
       jobID,
-      results,
+      results
     } = state.operations;
 
     const { hmiSn } = state.setting.page.odooConnection;
@@ -172,7 +208,8 @@ export function* doingOperation() {
       results[activeResultIndex].id,
       failCount + 1,
       userID,
-      results[activeResultIndex].pset);
+      results[activeResultIndex].pset
+    );
 
     if (resp.status !== 200) {
       // 程序号设置失败
@@ -189,10 +226,10 @@ export function* continueOperation() {
   const state = yield select();
   const { operations } = state;
 
-  if (operations.activeResultIndex >= (operations.results.length - 1)) {
-    yield put({type: OPERATION.FINISHED});
+  if (operations.activeResultIndex >= operations.results.length - 1) {
+    yield put({ type: OPERATION.FINISHED });
   } else {
-    yield put({type: OPERATION.CONTINUE});
+    yield put({ type: OPERATION.CONTINUE });
     yield call(doingOperation);
   }
 }
@@ -209,7 +246,24 @@ export function* watchResults() {
 export function* handleResults(data) {
   const state = yield select();
 
-  const hasFail = lodash.every(data, v => v.result === OPERATION_RESULT.NOK);
+  let hasFail = false;
+  let storyType = 'pass';
+
+  for (let i = 0; i < data.length; i += 1) {
+    if (data[i].result === OPERATION_RESULT.NOK) {
+      hasFail = true;
+      storyType = 'fail';
+    } else {
+      storyType = 'pass';
+    }
+
+    yield call(
+      addNewStory,
+      storyType,
+      '结果',
+      `扭矩:${data[i].mi.toString()} 角度:${data[i].wi.toString()}`
+    );
+  }
 
   let rType = '';
   let continueDoing = false;
@@ -239,7 +293,7 @@ export function* handleResults(data) {
     continueDoing = true;
   }
 
-  yield put({type: rType, data});
+  yield put({ type: rType, data });
   if (continueDoing) {
     yield call(doingOperation);
   }
