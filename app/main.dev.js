@@ -66,7 +66,7 @@ app.on('window-all-closed', () => {
 app.on('will-quit', () => {
   if (process.env.NODE_ENV === 'production') {
     const { exec } = require('child_process');
-    // exec('shutdown -h now');
+    exec('shutdown -h now');
   }
 });
 

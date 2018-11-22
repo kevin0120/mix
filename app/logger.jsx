@@ -5,7 +5,7 @@ const fse = require('fs-extra');
 const path = require('path');
 const os = require('os');
 
-const getAppDirectory = () => {
+export const getAppDirectory = () => {
   switch (process.platform) {
     case 'darwin':
       return process.execPath.substring(

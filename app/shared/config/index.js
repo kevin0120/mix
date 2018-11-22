@@ -1,6 +1,10 @@
 import { defaultConfigs } from './defaultConfig';
+import {getAppDirectory} from '../../logger';
 
+const path = require('path');
 const settings = require('electron-settings');
+
+settings.setPath(path.join(getAppDirectory(), 'setting.json'));
 
 if (
   process.env.NODE_ENV === 'development' ||
