@@ -1,6 +1,6 @@
 import { defaultConfigs } from './defaultConfig';
 
-const settings = window.require('electron-settings');
+const settings = require('electron-settings');
 
 if (
   process.env.NODE_ENV === 'development' ||

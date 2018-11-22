@@ -1,4 +1,5 @@
 import React from 'react';
+import {Link} from 'react-router-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -11,6 +12,7 @@ import { I18n } from 'react-i18next';
 
 // import ButtonBase from '@material-ui/core/ButtonBase';
 import Card from '@material-ui/core/Card';
+import CardActionArea from '@material-ui/core/CardActionArea';
 import Button from '@material-ui/core/Button';
 import CardContent from '@material-ui/core/CardContent';
 import PowerSettingIcon from '@material-ui/icons/PowerSettingsNew';
@@ -57,6 +59,9 @@ const withstyles = theme => ({
     minWidth: '280px',
     height: '320px',
     borderRadius: '4px'
+  },
+  cardActionArea: {
+    height: '100%',
   },
   cardGridItem: {
     paddingRight: '30px',
@@ -167,9 +172,6 @@ class ConnectedWelcome extends React.Component {
     const { classes, authEnable } = this.props;
     const fabRightClassName = classNames(classes.fabRight);
     const fabLeftClassName = classNames(classes.fabLeft);
-    function goto(url) {
-      window.location.href = `#${url}`;
-    }
 
     return (
       <I18n ns="translations">
@@ -184,21 +186,22 @@ class ConnectedWelcome extends React.Component {
                 <Grid key={route.name} item className={classes.cardGridItem}>
                   <Card
                     key={route.name}
-                    onClick={() => goto(route.url)}
                     className={classes.card}
                     style={{ backgroundColor: route.color }}
                   >
-                    <div
-                      className={classes.media}
-                      style={{ backgroundImage: `url(${route.image})` }}
-                    />
-                    <CardContent className={classes.cardContent}>
-                      <div className={styles.iconWrap}>
-                        <route.icon />
-                      </div>
-                      <h1 className={classes.title}>{t(route.title)}</h1>
-                      <p className={classes.subTitle}>{route.enName}</p>
-                    </CardContent>
+                    <CardActionArea component={Link} to={route.url} className={classes.cardActionArea}>
+                      <div
+                        className={classes.media}
+                        style={{ backgroundImage: `url(${route.image})` }}
+                      />
+                      <CardContent className={classes.cardContent}>
+                        <div className={styles.iconWrap}>
+                          <route.icon />
+                        </div>
+                        <h1 className={classes.title}>{t(route.title)}</h1>
+                        <p className={classes.subTitle}>{route.enName}</p>
+                      </CardContent>
+                    </CardActionArea>
                   </Card>
                 </Grid>
               ))}
@@ -217,7 +220,8 @@ class ConnectedWelcome extends React.Component {
                 variant="extendedFab"
                 color="primary"
                 className={fabLeftClassName}
-                onClick={() => goto('/pages/login')}
+                component={Link}
+                to='/pages/login'
               >
                 <ExitToApp className={classes.extendedIcon} />
                 {t('Common.Logout')}

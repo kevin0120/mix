@@ -9,5 +9,5 @@ export const setNewNotification = (variant: string, message: string) => ({
 });
 
 export const closeNotification = () => ({
-  type: NOTIFY.NEW_NOTIFICATION
+  type: NOTIFY.CLOSE
 });
