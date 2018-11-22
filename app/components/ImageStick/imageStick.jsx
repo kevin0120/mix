@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { connect } from 'react-redux';
-
 import Paper from '@material-ui/core/Paper';
 import { withStyles } from '@material-ui/core/styles';
 
@@ -34,12 +32,6 @@ const ripple = keyframes`
   100% {transform:scale(1.75); opacity:0;}
 `;
 
-const mapStateToProps = (state, ownProps) => ({
-  operations: state.operations,
-  ...ownProps
-});
-
-const mapDispatchToProps = {};
 
 const circleRadius = 30;
 
@@ -129,7 +121,7 @@ const withstyles = () => ({
 });
 
 /* eslint-disable react/prefer-stateless-function */
-class ConnectedImageStick extends React.PureComponent {
+class ConnectedImageStick extends React.Component {
   componentDidMount() {}
 
   componentDidUpdate() {}
@@ -204,9 +196,5 @@ ConnectedImageStick.propTypes = {
 
 ConnectedImageStick.defaultProps = {};
 
-const ImageStick = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ConnectedImageStick);
 
-export default withStyles(withstyles)(ImageStick);
+export default withStyles(withstyles)(ConnectedImageStick);
