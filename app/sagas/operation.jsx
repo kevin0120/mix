@@ -8,7 +8,7 @@ import {
 import { OPERATION, RUSH } from '../actions/actionTypes';
 import { openShutdown } from '../actions/shutDownDiag';
 import { OPERATION_RESULT, OPERATION_STATUS } from '../reducers/operations';
-import { addNewStory, clearStories } from './timeline';
+import { addNewStory, clearStories, STORY_TYPE } from './timeline';
 import { isCarID } from '../common/utils';
 
 // 监听作业
@@ -40,7 +40,7 @@ export function* triggerOperation(data, source) {
       break;
   }
 
-  yield call(addNewStory, 'info', source, data);
+  yield call(addNewStory, STORY_TYPE.INFO, source, data);
 
   if (isCarID(data)) {
     yield put({ type: OPERATION.TRIGGER.NEW_DATA, carID: data });
@@ -247,14 +247,14 @@ export function* handleResults(data) {
   const state = yield select();
 
   let hasFail = false;
-  let storyType = 'pass';
+  let storyType = STORY_TYPE.PASS;
 
   for (let i = 0; i < data.length; i += 1) {
     if (data[i].result === OPERATION_RESULT.NOK) {
       hasFail = true;
-      storyType = 'fail';
+      storyType = STORY_TYPE.FAIL;
     } else {
-      storyType = 'pass';
+      storyType = STORY_TYPE.PASS;
     }
 
     yield call(

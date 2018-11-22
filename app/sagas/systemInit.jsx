@@ -37,6 +37,8 @@ export function* fetchConnectionFlow(baseUrl, hmiSN, dispatch) {
     // 初始化io
     const state = yield select();
     yield call(initIOModbus, dispatch, state);
+
+    // 初始化aiis
   }
 
   setLedStatusReady();

@@ -153,10 +153,10 @@ const withstyles = theme => ({
 });
 /* eslint-disable no-unused-vars */
 class ConnectedWelcome extends React.Component {
-  componentDidMount() {
-    const { doUserAuth, userUUID } = this.props;
-    doUserAuth(userUUID);
-  }
+  // componentDidMount() {
+  //   const { doUserAuth, userUUID } = this.props;
+  //   doUserAuth(userUUID);
+  // }
 
   handleClickOpen = () => {
     const { OpenShutdown } = this.props;

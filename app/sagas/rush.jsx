@@ -3,6 +3,7 @@ import { call, take, put, select, fork } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
 import { RUSH } from '../actions/actionTypes';
 import { NewResults } from '../actions/rush';
+import { NewCar } from '../actions/scannerDevice';
 
 let rushWS = null;
 let rushChannel = null;
@@ -99,15 +100,20 @@ export function* watchRushChannel() {
     const data = dataArray.slice(-1);
     const json = JSON.parse(data);
 
+    const state = yield select();
     switch (event) {
       case 'job':
         break;
       case 'io':
+        if (json.inputs) {
+
+        }
         break;
       case 'result':
         yield put(NewResults(json));
         break;
       case 'scanner':
+        yield put(NewCar(json.barcode));
         break;
       default:
         break;

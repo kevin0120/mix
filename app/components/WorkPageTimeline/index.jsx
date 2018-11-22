@@ -71,7 +71,7 @@ function Timeline({ ...props }) {
 
 Timeline.propTypes = {
   classes: PropTypes.shape({}).isRequired,
-  stories: PropTypes.arrayOf(PropTypes.object).isRequired,
+  stories: PropTypes.array.isRequired,
   simple: PropTypes.bool
 };
 
