@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import { isEqual } from 'lodash';
+import { isEqual, isNil } from 'lodash';
 
 import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
@@ -83,31 +83,28 @@ class ConnectedTest extends React.PureComponent {
   componentDidUpdate() {
     this.setBtnsStatus();
     const { connInfo } = this.props;
+    const {data} = this.state;
     const formatedData = this.formatConnInfo(connInfo);
 
-    if (isEqual(formatedData, this.state.data)) return;
+    if (isEqual(formatedData, data)) return;
 
     this.updateState(connInfo);
   }
 
   // 设置 btns 的状态集
-  setBtnsStatus(data) {
-    const testData = arguments.length > 0 ? data : this.state.data;
-    if (
-      isEqual(this.state.btnGroupStatus, ConnectedTest.getBtnStatus(testData))
-    )
-      return;
+  setBtnsStatus(tData) {
+    const {btnGroupStatus, data} = this.state;
+    const testData = arguments.length > 0 ? tData : data;
+    if (isEqual(btnGroupStatus, ConnectedTest.getBtnStatus(testData))) return;
 
     this.setState({
-      ...this.state,
-      btnGroupStatus: ConnectedTest.getBtnStatus(testData)
+      btnGroupStatus: ConnectedTest.getBtnStatus(testData),
     });
   }
 
   updateState(connInfo) {
     this.setState({
-      ...this.state,
-      data: this.formatConnInfo(connInfo)
+      data: this.formatConnInfo(connInfo),
     });
   }
 
@@ -128,8 +125,8 @@ class ConnectedTest extends React.PureComponent {
       },
       controllerSn: {
         displayOrder: 100,
-        value: String(connInfo.controllers[0].serial_no),
-        displayTitle: '控制器序列号'
+        value: isNil(connInfo.controllers[0].serial_no) ? '' : String(connInfo.controllers[0].serial_no),
+        displayTitle: '控制器序列号',
       },
       rfidUrl: {
         displayOrder: 200,
@@ -147,22 +144,23 @@ class ConnectedTest extends React.PureComponent {
 
   testAiis(conn) {
     const url = `${conn}/aiis/v1/healthz`;
+    const { testStatus } = this.state;
     fetch(url, {
       timeout: 3000
     })
-      .then(response => {
+      .then(() => {
         this.setState({
           testStatus: {
-            ...this.state.testStatus,
-            aiisUrl: false
+            ...testStatus,
+            aiisUrl: false,
           }
         });
       })
       .catch(() => {
         this.setState({
           testStatus: {
-            ...this.state.testStatus,
-            aiisUrl: false
+            ...testStatus,
+            aiisUrl: false,
           }
         });
       });
@@ -170,21 +168,22 @@ class ConnectedTest extends React.PureComponent {
 
   testMasterPC(conn) {
     const url = `${conn}/rush/v1/healthz`;
+    const { testStatus } = this.state;
     fetch(url, {
       timeout: 3000
     })
       .then(response => {
         this.setState({
           testStatus: {
-            ...this.state.testStatus,
-            masterPcUrl: response.status === 204
+            ...testStatus,
+            masterPcUrl: response.status === 204,
           }
         });
       })
       .catch(() => {
         this.setState({
           testStatus: {
-            ...this.state.testStatus,
+            ...testStatus,
             masterPcUrl: false
           }
         });
@@ -192,10 +191,11 @@ class ConnectedTest extends React.PureComponent {
   }
 
   testModbus() {
+    const { testStatus } = this.state;
     this.setState({
       testStatus: {
-        ...this.state.testStatus,
-        ioUrl: true
+        ...testStatus,
+        ioUrl: true,
       }
     });
   }

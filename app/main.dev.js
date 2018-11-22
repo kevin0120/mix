@@ -17,7 +17,7 @@ import url from 'url';
 import path from 'path';
 import MenuBuilder from './menu';
 
-import { defaultConfigs } from './shared/config/defaultConfig';
+import configs  from './shared/config';
 
 export default class AppUpdater {
   constructor() {
@@ -66,7 +66,7 @@ app.on('window-all-closed', () => {
 app.on('will-quit', () => {
   if (process.env.NODE_ENV === 'production') {
     const { exec } = require('child_process');
-    exec('shutdown -h now');
+    // exec('shutdown -h now');
   }
 });
 
@@ -92,7 +92,7 @@ app.on('ready', async () => {
     minimizable: false
   });
 
-  if (defaultConfigs.systemSettings.authEnable) {
+  if (configs.systemSettings.authEnable) {
     mainWindow.loadURL(
       url.format({
         pathname: path.join(__dirname, 'app.html'),
