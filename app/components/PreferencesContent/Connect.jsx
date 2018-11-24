@@ -57,10 +57,10 @@ class ConnectedConnect extends React.PureComponent {
   }
 
   handleSubmit() {
-    const { saveConfigs, systemInit } = this.props;
+    const { saveConfigs, systemInit, storedConfigs } = this.props;
     const { section, data } = this.state;
     saveConfigs(section, data);
-    systemInit();
+    systemInit(storedConfigs.odooUrl.value, storedConfigs.hmiSn.value);
   }
 
   validateData(data = this.state.data) {

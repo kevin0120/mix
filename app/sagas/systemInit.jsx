@@ -41,7 +41,7 @@ export function* fetchConnectionFlow(baseUrl, hmiSN) {
     if (state.setting.systemSettings.modbusEnable) {
       yield put(initIO());
     }
-    
+
     // 初始化rfid
     if (state.setting.systemSettings.rfidEnabled) {
       yield put({type: RFID.INIT});
@@ -58,7 +58,7 @@ export function* fetchConnectionFlow(baseUrl, hmiSN) {
 
 export function* sysInitFlow() {
   while(true) {
-    const { baseUrl, hmiSN, dispatch } = yield take(SYSTEM_INIT); // 只获取一次
+    const { baseUrl, hmiSN } = yield take(SYSTEM_INIT); // 只获取一次
     try {
       yield call(fetchConnectionFlow, baseUrl, hmiSN);
     } catch (e) {

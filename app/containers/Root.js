@@ -22,10 +22,7 @@ export default class Root extends Component<Props> {
     store.dispatch(
       systemInit(
         connectionInfo.odooUrl.value,
-        connectionInfo.aiisUrl.value,
-        connectionInfo.hmiSn.value,
-        store.dispatch,
-        store.getState, // getState方法
+        connectionInfo.hmiSn.value
       )
     ); // 初始化获取默认值
     return (
