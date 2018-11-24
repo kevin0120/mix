@@ -74,6 +74,7 @@ import { OPERATION_STATUS } from '../../reducers/operations';
 const mapStateToProps = (state, ownProps) => ({
   operations: state.operations,
   operationSettings: state.setting.operationSettings,
+  workMode: state.workMode,
   timeline: state.timeline,
   ...ownProps
 });
@@ -687,11 +688,11 @@ class ConnectedWorking extends React.Component {
   };
 
   orderInfo = t => {
-    const { operations, operationSettings } = this.props;
+    const { operations, workMode } = this.props;
 
     // const showButtonInfo = isAutoMode? 'Common.Auto':'Common.Manual';
     let programme = operations.jobID.toString();
-    if (operationSettings.controllerMode === 'pset') {
+    if (workMode.controllerMode === 'pset') {
       if (operations.results.length > 0) {
         programme = operations.results[
           operations.activeResultIndex
@@ -702,7 +703,7 @@ class ConnectedWorking extends React.Component {
     return [
       {
         key: '工作模式',
-        value: t(operationSettings.workMode),
+        value: t(workMode.workMode),
         displayTitle: '工作模式'
       },
       {
@@ -973,7 +974,8 @@ ConnectedWorking.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   operations: PropTypes.shape({}).isRequired,
   operationSettings: PropTypes.shape({}).isRequired,
-  timeline: PropTypes.array.isRequired
+  workMode: PropTypes.shape({}).isRequired,
+  timeline: PropTypes.arrayOf(PropTypes.shape({})).isRequired
 };
 
 const Working = connect(

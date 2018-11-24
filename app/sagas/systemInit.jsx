@@ -10,10 +10,9 @@
 
 import { call, take, put, select } from 'redux-saga/effects';
 
-import { CONNECTION, SYSTEM_INIT, RUSH } from '../actions/actionTypes';
+import { CONNECTION, SYSTEM_INIT, RUSH, RFID } from '../actions/actionTypes';
 
 import { fetchConnectionInfo } from './api/systemInit';
-import { initRush } from '../actions/rush';
 import { initIOModbus, setLedStatusReady } from '../actions/ioModbus';
 import { startHealthzCheck } from '../actions/healthCheck';
 import { setNewNotification } from '../actions/notification';
@@ -23,6 +22,7 @@ export function* fetchConnectionFlow(baseUrl, hmiSN, dispatch, getState) {
   const resp = yield call(fetchConnectionInfo, fullUrl);
 
   if (resp.status === 200) {
+    const state = yield select();
     yield put({ type: CONNECTION.FETCH_OK, data: resp.data });
 
     const url = resp.data.masterpc.connection;
@@ -31,23 +31,34 @@ export function* fetchConnectionFlow(baseUrl, hmiSN, dispatch, getState) {
     yield put(startHealthzCheck(url, controllers)); // 启动healthzcheck 定时器
 
     // 初始化rush
-    // yield call(initRush, dispatch, resp.data.masterpc.connection, hmiSN);
     yield put({ type: RUSH.INIT });
 
     // 初始化io
-    yield call(initIOModbus, dispatch, getState);
+    if (state.setting.systemSettings.modbusEnable) {
+      yield call(initIOModbus, dispatch, getState);
+    }
 
-    // 初始化aiis
+    // 初始化rfid
+    if (state.setting.systemSettings.rfidEnabled) {
+      yield put({type: RFID.INIT});
+    }
+
+    // 初始化aiis(andon)
+    if (state.setting.systemSettings.andonEnable) {
+
+    }
   }
 
   setLedStatusReady();
 }
 
 export function* sysInitFlow() {
-  const { baseUrl, hmiSN, dispatch, getState } = yield take(SYSTEM_INIT); // 只获取一次
-  try {
-    yield call(fetchConnectionFlow, baseUrl, hmiSN, dispatch, getState);
-  } catch (e) {
-    yield put(setNewNotification('error', e.toString()));
+  while(true) {
+    const { baseUrl, hmiSN, dispatch, getState } = yield take(SYSTEM_INIT); // 只获取一次
+    try {
+      yield call(fetchConnectionFlow, baseUrl, hmiSN, dispatch, getState);
+    } catch (e) {
+      yield put(setNewNotification('error', e.toString()));
+    }
   }
 }

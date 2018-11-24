@@ -14,6 +14,7 @@ import { healthzCheckFlow } from './healthzCheck';
 import { watchAiis } from './aiis';
 import { watchSettingPreSave } from './setting';
 import { watchRush } from './rush';
+import { watchRfid} from './rfid';
 
 export default function* rootSaga() {
   yield all([
@@ -25,6 +26,7 @@ export default function* rootSaga() {
     watchResults(),
     watchIO(),
     watchRush(),
+    watchRfid(),
     shutDownDiagWorkFlow(),
     toolFunctions(),
     // auth

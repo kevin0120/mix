@@ -42,8 +42,8 @@ let oRed = 3;
 let oBeep = 4;
 
 let iResetKey = 0;
-let iBypass = 1;
-let iModeSelect = 2;
+export let iBypass = 1;
+export let iModeSelect = 2;
 
 let iPrevWhite = oWhite;
 let iPrevYellow = oYellow;
