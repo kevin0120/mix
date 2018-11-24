@@ -74,51 +74,14 @@ import { OPERATION_STATUS } from '../../reducers/operations';
 const mapStateToProps = (state, ownProps) => ({
   operations: state.operations,
   operationSettings: state.setting.operationSettings,
+  workMode: state.workMode,
   timeline: state.timeline,
-  // odooUrl: state.userConfigs.odooConnection.odooUrl.value,
-  // hmiSn: state.userConfigs.odooConnection.hmiSn.value,
-  // masterpcUrl: state.connInfo.masterpc.connection,
-  // controllerSN: state.workingPage.infoTools.controllerSN.value,
-  // workcenterId: state.workingPage.infoUser.workcenter.id,
-  // activeResultIdIdx: state.orderProgress.activeResultIdIdx,
-  // failCnt: state.orderProgress.failCnt,
-  // results: state.ongoingWorkOrder.results,
-  // userid: state.userInfo.id,
-  // name: state.userInfo.name,
-  // secondaryInfo: state.userInfo.login, // email or role etc
-  // avatarImg: state.userInfo.image_small,
-  // infos: state.workingPage, // stories在其中
-  // orderStatus: state.orderProgress.orderStatus,
-  // showSwitchMode: state.userConfigs.showSwitchMode,
-  // switchAutoManual: state.userConfigs.switchAutoManual,
-  // oeeFuncEnable: state.userConfigs.oeeFuncEnable,
-  // isAutoMode: state.isAutoMode,
-  // workFlow: state.userConfigs.workFlow,
-  // carID: state.orderProgress.carID,
-  // carType: state.orderProgress.carType,
-  // lnr: state.orderProgress.lnr,
-  // isEmptyCar: state.orderProgress.isEmptyCar,
-  // jobID: state.ongoingWorkOrder.jobID,
-  // byPassJob: state.userConfigs.byPassJob,
-  // bypassInfo: state.userConfigs.bypass,
-  // ControlMode: state.ControlMode,
-  // productID: state.ongoingWorkOrder.productID,
-  // maxOpTime: state.ongoingWorkOrder.maxOpTime,
   ...ownProps
 });
 
 const TOPHEIGHT = '150px';
 
 const mapDispatchToProps = {
-  // setAutoMode,
-  // openOeeDiag,
-  // // job,
-  // // pset,
-  // setCarByPass,
-  // // IOSet,
-  // // setOrderStatus,
-  // progressCountingStarted,
-  // progressCountingStopped
 };
 
 // 与 style 里的变量相同
@@ -725,11 +688,11 @@ class ConnectedWorking extends React.Component {
   };
 
   orderInfo = t => {
-    const { operations, operationSettings } = this.props;
+    const { operations, workMode } = this.props;
 
     // const showButtonInfo = isAutoMode? 'Common.Auto':'Common.Manual';
     let programme = operations.jobID.toString();
-    if (operationSettings.controllerMode === 'pset') {
+    if (workMode.controllerMode === 'pset') {
       if (operations.results.length > 0) {
         programme = operations.results[
           operations.activeResultIndex
@@ -740,7 +703,7 @@ class ConnectedWorking extends React.Component {
     return [
       {
         key: '工作模式',
-        value: t(operationSettings.workMode),
+        value: t(workMode.workMode),
         displayTitle: '工作模式'
       },
       {
@@ -906,7 +869,7 @@ class ConnectedWorking extends React.Component {
                 <Grid item xs={12} className={classes.MainWrapper}>
                   <Paper className={classes.LeftBottomTab}>
                     <div className={classes.ImgTabContiner}>
-                      <ImageStick />
+                      <ImageStick operations={operations} />
                     </div>
                   </Paper>
                 </Grid>
@@ -988,7 +951,7 @@ class ConnectedWorking extends React.Component {
               <Paper className={classes.InfoTabTimeLine}>
                 <div className={classes.InfoTabContiner}>
                   <div className={classes.InfoTabContiner}>
-                    <TimeLine simple stories={timeline.stories} />
+                    <TimeLine simple stories={timeline} />
                     {/*<TimeLine simple stories={teststory} />*/}
                   </div>
                 </div>
@@ -1009,51 +972,10 @@ class ConnectedWorking extends React.Component {
 
 ConnectedWorking.propTypes = {
   classes: PropTypes.shape({}).isRequired,
-  // orderStatus: PropTypes.string.isRequired,
-  // odooUrl: PropTypes.string.isRequired,
-  // hmiSn: PropTypes.string.isRequired,
-  // masterpcUrl: PropTypes.string.isRequired,
-  // // workFlow: PropTypes.string.isRequired,
-  // // shouldPset: PropTypes.bool.isRequired,
-  // activeResultIdIdx: PropTypes.number.isRequired,
-  // failCnt: PropTypes.number.isRequired,
-  // userid: PropTypes.number.isRequired,
-  // showSwitchMode: PropTypes.bool.isRequired,
-  // results: PropTypes.arrayOf(PropTypes.shape({
-  //   id: PropTypes.number,
-  // }).isRequired).isRequired,
-  // infos: PropTypes.shape({
-  //   infoTools: PropTypes.shape({
-  //     controllerSN: PropTypes.shape({}).isRequired,
-  //   }).isRequired,
-  //   workorder: PropTypes.shape({
-  //     pset: PropTypes.number,
-  //     result_ids: PropTypes.arrayOf(PropTypes.number),
-  //   }),
-  //   carID: PropTypes.string.isRequired,
-  //   progress: PropTypes.shape({
-  //     resultIdIdx: PropTypes.number.isRequired,
-  //     status: PropTypes.string.isRequired,
-  //   }).isRequired,
-  // }).isRequired,
-  // openOeeDiag: PropTypes.func.isRequired,
-  // pset: PropTypes.func.isRequired,
-  // job: PropTypes.func.isRequired,
-  // IOSet: PropTypes.func.isRequired,
-  // name: PropTypes.string.isRequired,
-  // secondaryInfo: PropTypes.string.isRequired,
-  // avatarImg: PropTypes.string.isRequired,
-  // workFlow: PropTypes.string.isRequired,
-  // controllerSN: PropTypes.string,
-  // carType: PropTypes.string,
-  // carID: PropTypes.string,
-  // ControlMode: PropTypes.string,
-  // productID: PropTypes.number,
-  // lnr: PropTypes.string,
-  // maxOpTime: PropTypes.number,
   operations: PropTypes.shape({}).isRequired,
   operationSettings: PropTypes.shape({}).isRequired,
-  timeline: PropTypes.shape({}).isRequired
+  workMode: PropTypes.shape({}).isRequired,
+  timeline: PropTypes.arrayOf(PropTypes.shape({})).isRequired
 };
 
 const Working = connect(

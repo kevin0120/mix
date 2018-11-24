@@ -1,9 +1,24 @@
 import pagesStyle from '../../common/jss/layouts/pagesStyle';
 import imagesStyles from '../../common/jss/imagesStyles';
+import popoverStyles from "../../common/jss/popoverStyles";
+import {dangerColor} from "../../common/jss/material-react-pro";
+
+import { keyframes } from 'react-emotion';
+
+
+const twinkling = keyframes`
+  0% {
+    opacity: .1;
+  }
+  100% {
+    opacity: 1;
+  }
+`;
 
 export default theme => ({
   ...pagesStyle,
   ...imagesStyles,
+  ...popoverStyles,
   layout: {
     height: '100%',
     flexGrow: 1
@@ -54,9 +69,10 @@ export default theme => ({
     marginRight: '20px'
   },
   menuStatusFail: {
-    background: '#ff8000',
+    background: dangerColor,
     fontSize: '18px',
-    marginRight: '20px'
+    marginRight: '20px',
+    animation: `${twinkling} 2s infinite cubic-bezier(1, 1, 1, 1)`
   },
   itemWrap: {
     margin: '0 8px'

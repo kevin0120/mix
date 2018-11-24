@@ -10,6 +10,29 @@ export const setCardAuthListener = dispatch => {
   pcscd.on('reader', reader => {
     readerProcess(reader, dispatch);
     dispatch(cardAuthReaderInserted());
+
+    reader.on('error', (err) => {
+      dispatch(cardAuthError(err));
+    });
+
+    reader.on('status', (status) => {
+      /* check what has changed */
+      const changes = reader.state ^ status.state;
+      if (changes) {
+        if ((changes & reader.SCARD_STATE_EMPTY) && (status.state & reader.SCARD_STATE_EMPTY)) {
+          /* card removed */
+          return cardAuthReaderStateChange('card removed', reader, dispatch);
+        } else if ((changes & reader.SCARD_STATE_PRESENT) && (status.state & reader.SCARD_STATE_PRESENT)) {
+          /* card inserted */
+          return cardAuthReaderStateChange('card inserted', reader, dispatch);
+        }
+      }
+    });
+
+    reader.on('end', () => {
+      console.log('Reader', 'removed');
+      dispatch(cardAuthReaderRemoved());
+    });
   });
 
   pcscd.on('error', err => {
@@ -40,8 +63,9 @@ export const cardAuthReaderReadStarted = () => ({
 });
 
 // 授权卡读取成功
-export const cardAuthReaderReadSuccess = () => ({
-  type: CARD_AUTH.CARD.READ.SUCCESS
+export const cardAuthReaderReadSuccess = (data) => ({
+  type: CARD_AUTH.CARD.READ.SUCCESS,
+  data
 });
 
 // 授权卡错误
@@ -52,10 +76,50 @@ export const cardAuthError = error => {
   };
 };
 
+// 授权卡状态变化
+export const cardAuthReaderStateChange = (state, reader, dispatch) => {
+  if (state === 'card removed') {
+    dispatch({
+      type: CARD_AUTH.CARD.REMOVED
+    });
+    // dispatch(lockScreen());
+    reader.disconnect(reader.SCARD_LEAVE_CARD, (err) => {
+      if (err) {
+        dispatch(cardAuthError(err));
+      } else {
+        // console.log('disconnected');
+      }
+    });
+
+  } else {
+    dispatch({
+      type: CARD_AUTH.CARD.INSERTED
+    });
+    reader.connect({ share_mode: reader.SCARD_SHARE_SHARED }, (err, protocol) => {
+      if (err) {
+        dispatch(cardAuthError());
+      } else {
+        // read data
+        dispatch(cardAuthReaderReadStarted());
+        reader.transmit(new Buffer([0xff, 0xb2, 0x00, 0x00, 0x04]), 40, protocol, (err, data) => {
+          if (err) {
+            dispatch(cardAuthError(err));
+          } else {
+            const uuid = parseBuffer(data);
+            dispatch(cardAuthReaderReadSuccess(uuid));
+            // dispatch(login(uuid));
+          }
+        });
+      }
+    });
+
+  }
+};
+
 const parseBuffer = data => {
-  let uuid = '112233';
-  console.log(data.toString('utf8', 0, -2));
-  //uuid=data.toString('utf8',0,-2);
+  let uuid='112233';
+  console.log(data.toString('utf8',0,-2));
+  // uuid=data.toString('utf8',0,-2);
   // TODO
 
   return uuid;

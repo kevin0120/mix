@@ -10,26 +10,23 @@
 
 import { call, take, put, select } from 'redux-saga/effects';
 
-
+import { CONNECTION, SYSTEM_INIT, RUSH, RFID } from '../actions/actionTypes';
 
 import { fetchConnectionInfo } from './api/systemInit';
-
 import {setLedStatusReady} from './io';
 
-// actions
-import { CONNECTION, SYSTEM_INIT, RUSH } from '../actions/actionTypes';
 // import { initRush } from '../actions/rush';
 import { startHealthzCheck } from '../actions/healthCheck';
 import { setNewNotification } from '../actions/notification';
 import { initIO } from '../actions/ioModbus';
 import {initAiis}from '../actions/aiis'
 
-export function* fetchConnectionFlow(baseUrl, aiisUrl, hmiSN, dispatch) {
+export function* fetchConnectionFlow(baseUrl, hmiSN) {
   const fullUrl = `${baseUrl}/hmi.connections/${hmiSN}`;
   const resp = yield call(fetchConnectionInfo, fullUrl);
 
   if (resp.status === 200) {
-    console.log('resp ok');
+    const state = yield select();
     yield put({ type: CONNECTION.FETCH_OK, data: resp.data });
 
     const url = resp.data.masterpc.connection;
@@ -38,24 +35,34 @@ export function* fetchConnectionFlow(baseUrl, aiisUrl, hmiSN, dispatch) {
     yield put(startHealthzCheck(url, controllers)); // 启动healthzcheck 定时器
 
     // 初始化rush
-    // yield call(initRush, dispatch, resp.data.masterpc.connection, hmiSN);
     yield put({ type: RUSH.INIT });
 
     // 初始化io
-    yield put(initIO());
+    if (state.setting.systemSettings.modbusEnable) {
+      yield put(initIO());
+    }
+    
+    // 初始化rfid
+    if (state.setting.systemSettings.rfidEnabled) {
+      yield put({type: RFID.INIT});
+    }
 
-    // 初始化aiis
-    yield put(initAiis(aiisUrl,hmiSN));
+    // 初始化aiis(andon)
+    if (state.setting.systemSettings.andonEnable) {
+      yield put(initAiis(state.setting.page.odooConnection.aiisUrl.value, hmiSN));
+    }
   }
 
   setLedStatusReady();
 }
 
 export function* sysInitFlow() {
-  const { baseUrl, hmiSN, dispatch, aiisUrl } = yield take(SYSTEM_INIT); // 只获取一次
-  try {
-    yield call(fetchConnectionFlow, baseUrl, aiisUrl, hmiSN, dispatch);
-  } catch (e) {
-    yield put(setNewNotification('error', e.toString()));
+  while(true) {
+    const { baseUrl, hmiSN, dispatch } = yield take(SYSTEM_INIT); // 只获取一次
+    try {
+      yield call(fetchConnectionFlow, baseUrl, hmiSN);
+    } catch (e) {
+      yield put(setNewNotification('error', e.toString()));
+    }
   }
 }

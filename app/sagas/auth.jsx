@@ -1,7 +1,7 @@
 // @flow
 
 import { take, put, call, fork, select, takeEvery } from 'redux-saga/effects';
-import { push } from 'connected-react-router';
+import { push, goBack, go } from 'connected-react-router';
 
 import { getUserInfo } from './api/user';
 
@@ -35,6 +35,7 @@ function* authorize(user, password) {
         uuid,
         avatar: image_small
       });
+      yield put(push('/welcome'));
     }
   } catch (e) {
     yield put(setNewNotification('error', e));

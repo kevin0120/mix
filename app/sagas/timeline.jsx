@@ -7,6 +7,12 @@ import { put } from 'redux-saga/effects';
 
 import { TIMELINE_STORY } from '../actions/actionTypes';
 
+export const STORY_TYPE = {
+  INFO: 'info',
+  PASS: 'pass',
+  FAIL: 'fail'
+};
+
 export function* addNewStory(level, title, msg) {
   const story = createNewStory(level, title, msg);
   yield put({ type: TIMELINE_STORY.NEW, story });
@@ -20,15 +26,15 @@ function createNewStory(level, title, msg) {
   let icon = null;
   let badgeColor = null;
   switch (level) {
-    case 'pass':
+    case STORY_TYPE.PASS:
       icon = CheckCircle;
       badgeColor = 'success';
       break;
-    case 'fail':
+    case STORY_TYPE.FAIL:
       icon = Close;
       badgeColor = 'warning';
       break;
-    case 'info':
+    case STORY_TYPE.INFO:
       icon = InfoRounded;
       badgeColor = 'info';
       break;

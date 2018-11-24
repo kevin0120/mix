@@ -8,6 +8,8 @@ import { IO_FUNCTION } from '../reducers/io';
 import { setHealthzCheck } from './healthCheck';
 import { setNewNotification } from './notification';
 
+// const state = getState();
+
 
 export function initIO(){
   return{
@@ -306,6 +308,10 @@ export function resetIO(modbusConfig){
 //   }
 // }
 
+    // const { healthzStatus } = getState().healthCheckResults;
+    // if (healthzStatus.modbus.isHealth) {
+    //   // 如果不相等 更新
+    // }
 
 
 // export function testIO(io, idx) {

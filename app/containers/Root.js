@@ -24,7 +24,8 @@ export default class Root extends Component<Props> {
         connectionInfo.odooUrl.value,
         connectionInfo.aiisUrl.value,
         connectionInfo.hmiSn.value,
-        store.dispatch
+        store.dispatch,
+        store.getState, // getState方法
       )
     ); // 初始化获取默认值
     return (

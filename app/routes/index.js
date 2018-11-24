@@ -2,7 +2,7 @@
 import React from 'react';
 
 // import Editor from '../containers/editor';
-// import Help from '../containers/help';
+import Help from '../containers/help';
 import Preferences from '../containers/config';
 import Event from '../containers/event';
 import ConnResult from '../containers/result';
@@ -46,7 +46,7 @@ export const routeConfigs = [
     title: 'main.home',
     main: HomePage,
     icon: HomeIcon,
-    color: grayColor
+    color: '#00abf3',
   },
   {
     name: 'working',
@@ -54,9 +54,9 @@ export const routeConfigs = [
     title: 'main.operation',
     main: Working,
     icon: BuildIcon,
-    color: grayColor,
+    color: '#00abbf',
     image: WorkingImg,
-    enName: 'Operating'
+    enName: 'Operation'
   },
   // {
   //   name: 'editor',
@@ -74,9 +74,9 @@ export const routeConfigs = [
     title: 'main.preferences',
     main: Preferences,
     icon: SettingsApplicationsIcon,
-    color: grayColor,
+    color: '#fba53d',
     image: settingImg,
-    enName: 'Preferences'
+    enName: 'Preference'
   },
   {
     name: 'event',
@@ -84,7 +84,7 @@ export const routeConfigs = [
     title: 'main.event',
     main: Event,
     icon: Mail,
-    color: grayColor,
+    color: '#008adf',
     image: LoginImg,
     enName: 'Event Log'
   },
@@ -95,8 +95,8 @@ export const routeConfigs = [
     main: ConnResult,
     icon: Save,
     color: grayColor,
-    image: LoginImg,
-    enName: 'Query Results'
+    image: LockingImg,
+    enName: 'Result'
   },
   // {
   //   name: 'lock',
@@ -106,18 +106,18 @@ export const routeConfigs = [
   //   icon: LockIcon,
   //   color: grayColor,
   //   image: LockingImg,
-  //   enName: 'Lock',
+  //   enName: 'Lock'
   // },
-  // {
-  //   name: 'help',
-  //   url: '/help',
-  //   title: 'main.help',
-  //   main: Help,
-  //   icon: HelpIcon,
-  //   color: grayColor,
-  //   image: helpImg,
-  //   enName: 'Help',
-  // },
+  {
+    name: 'help',
+    url: '/help',
+    title: 'main.help',
+    main: Help,
+    icon: HelpIcon,
+    color: '#8a6c63',
+    image: helpImg,
+    enName: 'Help'
+  },
   {
     name: 'login',
     url: '/pages/login',

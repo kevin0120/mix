@@ -3,22 +3,35 @@ import {
   fetchRoutingWorkcenter,
   fetchWorkorder,
   jobManual,
-  pset
+  pset,
 } from './api/operation';
 import { OPERATION, RUSH } from '../actions/actionTypes';
 import { openShutdown } from '../actions/shutDownDiag';
 import { OPERATION_RESULT, OPERATION_STATUS } from '../reducers/operations';
-import { addNewStory, clearStories } from './timeline';
-import { isCarID } from '../common/utils';
+import { addNewStory, clearStories, STORY_TYPE } from './timeline';
+import { toolEnable, toolDisable } from '../actions/tools'
 
 // 监听作业
 export function* watchOperation() {
   while (true) {
-    const action = yield take([OPERATION.VERIFIED]);
+    const action = yield take([OPERATION.VERIFIED, OPERATION.FINISHED]);
+    const state = yield select();
+    const { workMode } = state;
+
     switch (action.type) {
       case OPERATION.VERIFIED:
         yield call(startOperation, action.data);
         break;
+
+      case OPERATION.FINISHED:
+        if (workMode.controllerMode === 'job') {
+          // 工具禁用
+          yield put(toolDisable());
+        }
+
+        // yield put({ type: OPERATION.FINISHED});
+        break;
+
       default:
         break;
     }
@@ -26,7 +39,7 @@ export function* watchOperation() {
 }
 
 // 触发作业
-export function* triggerOperation(data, source) {
+export function* triggerOperation(carID, carType, job, source) {
   let state = yield select();
   switch (state.operations.operationStatus) {
     case OPERATION_STATUS.DOING:
@@ -40,12 +53,14 @@ export function* triggerOperation(data, source) {
       break;
   }
 
-  yield call(addNewStory, 'info', source, data);
+  if (carID) {
+    yield call(addNewStory, STORY_TYPE.INFO, source, carID);
+    yield put({ type: OPERATION.TRIGGER.NEW_DATA, carID });
+  }
 
-  if (isCarID(data)) {
-    yield put({ type: OPERATION.TRIGGER.NEW_DATA, carID: data });
-  } else {
-    yield put({ type: OPERATION.TRIGGER.NEW_DATA, carType: data });
+  if (carType) {
+    yield call(addNewStory, STORY_TYPE.INFO, source, carType);
+    yield put({ type: OPERATION.TRIGGER.NEW_DATA, carType });
   }
 
   state = yield select();
@@ -60,52 +75,72 @@ export function* triggerOperation(data, source) {
   }
 
   if (triggerFlagNum === triggers.length) {
-    yield call(getOperation);
+    yield call(getOperation, job);
   }
 }
 
 // 定位作业
-export function* getOperation() {
+export function* getOperation(job) {
   const state = yield select();
 
   const rushUrl = state.connections.masterpc;
+  const { workcenterCode } = state.connections;
 
   let fetchOK = false;
   let resp = null;
-  if (state.setting.operationSettings.opMode === 'op') {
-    // 作业模式
 
-    const { workcenterCode } = state.connections;
-    const { carType } = state.operations;
-    resp = yield call(
-      fetchRoutingWorkcenter,
-      rushUrl,
-      workcenterCode,
-      carType,
-      null
-    );
-    if (resp.status === 200) {
-      fetchOK = true;
-    }
-  } else {
-    // 工单模式
+  if (state.workMode.workMode === 'manual') {
+    // 手动模式
 
-    const hmiSN = state.setting.page.odooConnection.hmiSn.value;
-    const code = state.operations.carID;
-    try {
-      resp = yield call(fetchWorkorder, rushUrl, hmiSN, code);
+    if (job) {
+      resp = yield call(
+        fetchRoutingWorkcenter,
+        rushUrl,
+        workcenterCode,
+        null,
+        job
+      );
       if (resp.status === 200) {
         fetchOK = true;
       }
-    } catch (e) {
-      const { preCheck } = state.setting.operationSettings;
-      resp = e.response;
-      if (resp.status === 409) {
-        fetchOK = true;
+    }
 
-        if (preCheck) {
-          yield put(openShutdown('verify', resp.data));
-          return;
+  } else {
+
+    if (state.setting.operationSettings.opMode === 'op') {
+      // 作业模式
+
+      const { carType } = state.operations;
+      resp = yield call(
+        fetchRoutingWorkcenter,
+        rushUrl,
+        workcenterCode,
+        carType,
+        null
+      );
+      if (resp.status === 200) {
+        fetchOK = true;
+      }
+    } else {
+      // 工单模式
+
+      const hmiSN = state.setting.page.odooConnection.hmiSn.value;
+      const code = state.operations.carID;
+      try {
+        resp = yield call(fetchWorkorder, rushUrl, hmiSN, code);
+        if (resp.status === 200) {
+          fetchOK = true;
+        }
+      } catch (e) {
+        const { preCheck } = state.setting.operationSettings;
+        resp = e.response;
+        if (resp.status === 409) {
+          fetchOK = true;
+
+          if (preCheck) {
+            yield put(openShutdown('verify', resp.data));
+            return;
+          }
         }
       }
     }
@@ -134,7 +169,7 @@ export function* startOperation(data) {
 
   state = yield select();
 
-  const { controllerMode, workMode } = state.setting.operationSettings;
+  const { controllerMode, workMode } = state.workMode;
 
   const rushUrl = state.connections.masterpc;
 
@@ -154,7 +189,10 @@ export function* startOperation(data) {
     const { hmiSn } = state.setting.page.odooConnection;
     const userID = 1;
     const skip = false;
-    const hasSet = false;
+    let hasSet = false;
+    if (state.setting.operationSettings.workMode === 'manual') {
+      hasSet = true;
+    }
 
     const resp = yield call(
       jobManual,
@@ -175,6 +213,9 @@ export function* startOperation(data) {
 
     if (resp.status === 200) {
       // 程序号设置成功
+
+      // 启动用具
+      yield put(toolEnable());
       yield put({ type: OPERATION.STARTED });
     } else {
       // 程序号设置失败
@@ -191,7 +232,7 @@ export function* startOperation(data) {
 // 处理作业过程
 export function* doingOperation() {
   const state = yield select();
-  const { controllerMode } = state.setting.operationSettings;
+  const { controllerMode } = state.workMode;
 
   if (controllerMode === 'pset') {
     // pset模式
@@ -247,14 +288,14 @@ export function* handleResults(data) {
   const state = yield select();
 
   let hasFail = false;
-  let storyType = 'pass';
+  let storyType = STORY_TYPE.PASS;
 
   for (let i = 0; i < data.length; i += 1) {
     if (data[i].result === OPERATION_RESULT.NOK) {
       hasFail = true;
-      storyType = 'fail';
+      storyType = STORY_TYPE.FAIL;
     } else {
-      storyType = 'pass';
+      storyType = STORY_TYPE.PASS;
     }
 
     yield call(

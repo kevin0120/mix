@@ -7,7 +7,8 @@ import { USER_CONFIGS } from '../actions/actionTypes';
 type actionType = {
   +type: string,
   +section: string,
-  +newConfigs: object
+  +newConfigs: object,
+  +uuid: string
 };
 
 export default function setting(state: object = configs, action: actionType) {
@@ -15,6 +16,20 @@ export default function setting(state: object = configs, action: actionType) {
     case USER_CONFIGS.SAVE: {
       const { section, newConfigs } = action;
       return { ...state, page: { ...state.page, [section]: newConfigs } };
+    }
+
+    case USER_CONFIGS.SET_UUID:{
+      const { uuid } = action;
+      return {
+        ...state,
+        base: {
+          ...state.base,
+          userInfo: {
+            ...state.base.userInfo,
+            uuid
+          }
+        }
+      };
     }
     default:
       return state;

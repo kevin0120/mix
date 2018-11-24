@@ -1,16 +1,13 @@
 import { OPERATION } from '../actions/actionTypes';
-import { isCarID } from '../common/utils';
 
 import {
   setLedStatusDoing,
   setLedError,
   setLedStatusReady,
   sOn,
-  sBlinkOn
 } from '../sagas/io';
 
 export const OPERATION_STATUS = {
-  INIT: 'Init',
   READY: 'Ready',
   PREDOING: 'PreDoing',
   DOING: 'Doing',
@@ -75,29 +72,29 @@ export default function operations(
 ) {
   switch (action.type) {
     case OPERATION.TRIGGER.NEW_DATA:
-      return NewTriggerData(state, action.carID, action.carType);
+      return newTriggerData(state, action.carID, action.carType);
     case OPERATION.OPERATION.FETCH_OK:
-      return NewOperation(state, action.mode, action.data);
+      return newOperation(state, action.mode, action.data);
     case OPERATION.STARTED:
-      return OperationStarted(state);
+      return operationStarted(state);
     case OPERATION.RESULT.OK:
-      return OperationResultOK(state, action.data);
+      return operationResultOK(state, action.data);
     case OPERATION.RESULT.NOK:
-      return OperationResultNOK(state, action.data);
+      return operationResultNOK(state, action.data);
     case OPERATION.FAILED:
-      return OperationFailed(state, action.data);
+      return operationFailed(state, action.data);
     case OPERATION.FINISHED:
-      return OperationFinished(state, action.data);
+      return operationFinished(state, action.data);
     case OPERATION.CONTINUE:
-      return OperationContinue(state);
+      return operationContinue(state);
     case OPERATION.PREDOING:
-      return OperationPreDoing(state);
+      return operationPreDoing(state);
     default:
       return state;
   }
 }
 
-function NewTriggerData(state, carID, carType) {
+function newTriggerData(state, carID, carType) {
   return {
     ...state,
     carID: carID !== null ? carID : state.carID,
@@ -105,7 +102,7 @@ function NewTriggerData(state, carID, carType) {
   };
 }
 
-function NewOperation(state, mode, data) {
+function newOperation(state, mode, data) {
   if (mode === 'op') {
     // 作业模式
     return {
@@ -116,8 +113,6 @@ function NewOperation(state, mode, data) {
       productID: data.product_id,
       workcenterID: data.workcenter_id,
       results: data.points
-      // activeResultIndex: 0,
-      // failCount: 0
     };
   }
 
@@ -129,13 +124,11 @@ function NewOperation(state, mode, data) {
     maxOpTimes: data.max_op_time,
     workSheet: data.work_sheet,
     results: data.results,
-    // activeResultIndex: 0,
-    // failCount: 0,
     lnr: data.lnr
   };
 }
 
-function OperationStarted(state) {
+function operationStarted(state) {
   setLedStatusDoing();
 
   return {
@@ -153,7 +146,7 @@ function mergeResults(state, data) {
     return rs;
   }
 
-  for (let i = 0; i < data.length; i++) {
+  for (let i = 0; i < data.length; i+=1) {
     rs[i + state.activeResultIndex].ti = data[i].ti;
     rs[i + state.activeResultIndex].mi = data[i].mi;
     rs[i + state.activeResultIndex].wi = data[i].wi;
@@ -163,7 +156,7 @@ function mergeResults(state, data) {
   return rs;
 }
 
-function OperationResultOK(state, data) {
+function operationResultOK(state, data) {
   const results = mergeResults(state, data);
 
   return {
@@ -175,7 +168,7 @@ function OperationResultOK(state, data) {
   };
 }
 
-function OperationResultNOK(state, data) {
+function operationResultNOK(state, data) {
   const results = mergeResults(state, data);
 
   return {
@@ -185,7 +178,7 @@ function OperationResultNOK(state, data) {
   };
 }
 
-function OperationFailed(state, data) {
+function operationFailed(state, data) {
   setLedError(sOn);
   const results = mergeResults(state, data);
 
@@ -197,7 +190,7 @@ function OperationFailed(state, data) {
   };
 }
 
-function OperationFinished(state, data) {
+function operationFinished(state, data) {
   setLedStatusReady();
 
   const results = mergeResults(state, data);
@@ -209,13 +202,13 @@ function OperationFinished(state, data) {
   };
 }
 
-function OperationContinue(state) {
+function operationContinue(state) {
   setLedStatusDoing();
 
   const { activeResultIndex, results } = state;
   let count = 1;
   const ele = results[activeResultIndex + 1];
-  for (let i = activeResultIndex + 2; i < results.length; i++) {
+  for (let i = activeResultIndex + 2; i < results.length; i+=1) {
     if (ele.sequence === results[i].sequence) {
       count += 1;
     } else {
@@ -231,7 +224,7 @@ function OperationContinue(state) {
   };
 }
 
-function OperationPreDoing(state) {
+function operationPreDoing(state) {
   return {
     ...state,
     operationStatus: OPERATION_STATUS.PREDOING

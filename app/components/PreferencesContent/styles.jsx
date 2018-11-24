@@ -10,6 +10,9 @@ export default theme => ({
   paperWrap: {
     fontSize: 14
   },
+  content: {
+    height: '100%'
+  },
   sectionTitle: {
     fontSize: 14,
     marginTop: 0,
@@ -92,8 +95,6 @@ export default theme => ({
   },
   // test
   testButton: {
-    margin: 'auto 40px',
-    width: 80,
-    padding: '5px 0'
+    margin: 'auto 40px'
   }
 });

@@ -10,7 +10,7 @@ import IconButton from '@material-ui/core/IconButton';
 // @material-ui/icons
 import Close from '@material-ui/icons/Close';
 
-import snackbarContentStyle from '../../common/jss/components/snackbarContentStyle.jsx';
+import snackbarContentStyle from '../../common/jss/components/snackbarContentStyle';
 
 function SnackbarContent({ ...props }) {
   const { classes, message, color, close, icon } = props;
@@ -61,7 +61,7 @@ SnackbarContent.defaultProps = {
 };
 
 SnackbarContent.propTypes = {
-  classes: PropTypes.shape({}).isRequired,
+  classes: PropTypes.object.isRequired,
   message: PropTypes.node.isRequired,
   color: PropTypes.oneOf([
     'info',
@@ -76,3 +76,6 @@ SnackbarContent.propTypes = {
 };
 
 export default withStyles(snackbarContentStyle)(SnackbarContent);
+
+// WEBPACK FOOTER //
+// ./src/components/Snackbar/SnackbarContent.jsx

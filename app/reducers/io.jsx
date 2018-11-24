@@ -9,6 +9,6 @@ export const IO_FUNCTION = {
     LED_YELLOW: 'LED_YELLOW',
     LED_GREEN: 'LED_GREEN',
     LED_RED: 'LED_RED',
-    LED_BEEP: 'LED_BEEP'
+    BEEP: 'BEEP'
   }
 };

@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { connect } from 'react-redux';
-
 import Paper from '@material-ui/core/Paper';
 import { withStyles } from '@material-ui/core/styles';
 
@@ -26,6 +24,7 @@ import {
 
 import { keyframes } from 'react-emotion';
 import classNames from 'classnames';
+import { OPERATION_RESULT } from '../../reducers/operations';
 
 const ripple = keyframes`
   0% {transform:scale(0.5); }
@@ -33,12 +32,6 @@ const ripple = keyframes`
   100% {transform:scale(1.75); opacity:0;}
 `;
 
-const mapStateToProps = (state, ownProps) => ({
-  operations: state.operations,
-  ...ownProps
-});
-
-const mapDispatchToProps = {};
 
 const circleRadius = 30;
 
@@ -128,7 +121,7 @@ const withstyles = () => ({
 });
 
 /* eslint-disable react/prefer-stateless-function */
-class ConnectedImageStick extends React.PureComponent {
+class ConnectedImageStick extends React.Component {
   componentDidMount() {}
 
   componentDidUpdate() {}
@@ -138,7 +131,7 @@ class ConnectedImageStick extends React.PureComponent {
 
     let idx = 0;
 
-    const statusDisplay = operations.results.map(item => {
+    const statusDisplay = operations.results.map((item, i) => {
       const display = operations.activeResultIndex >= idx;
 
       const postionStyle = {
@@ -148,9 +141,20 @@ class ConnectedImageStick extends React.PureComponent {
 
       idx += 1;
 
+      let status = 'waiting';
+      if (operations.activeResultIndex === i) {
+        status = 'waitingActive';
+      }
+
+      if (item.result === OPERATION_RESULT.OK) {
+        status = 'success';
+      } else if (item.result === OPERATION_RESULT.NOK) {
+        status = 'error';
+      }
+
       return (
         <div key={item.id} style={postionStyle} className={classes.imgInfo}>
-          <span className={`${classes.circleStatus} ${classes[item.status]}`}>
+          <span className={`${classes.circleStatus} ${classes[status]}`}>
             {item.sequence}
           </span>
           {display ? (
@@ -192,9 +196,5 @@ ConnectedImageStick.propTypes = {
 
 ConnectedImageStick.defaultProps = {};
 
-const ImageStick = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ConnectedImageStick);
 
-export default withStyles(withstyles)(ImageStick);
+export default withStyles(withstyles)(ConnectedImageStick);

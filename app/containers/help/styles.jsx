@@ -1,27 +1,30 @@
 export default theme => ({
   root: {
-    flexGrow: 1,
     zIndex: 1,
+    height: '100%',
     overflow: 'hidden',
     position: 'relative',
     display: 'flex',
-    color: '#333',
-    overflowY:'scroll',
-    maxHeight: 'calc(100% - 64px)'
+    color: '#333'
   },
   content: {
     flexGrow: 1,
-    // backgroundColor: theme.palette.background.default,
     background: '#f2f2f2',
-    padding: theme.spacing.unit * 2,
+    padding: theme.spacing.unit * 3,
     minWidth: 0 // So the Typography noWrap works
   },
   toolbar: theme.mixins.toolbar,
-  menuItem: {
-    fontSize: 14
+  item: {
+    height: '64px'
   },
-  itemText: {
-    fontSize: 14,
-    padding: 0
+  title: {
+    fontSize: 20,
+    marginBottom: 10,
+    marginLeft: 20
+  },
+  wrap: {
+    width: 872,
+    margin: '10px auto 0',
+    fontSize: 14
   }
 });

@@ -236,7 +236,7 @@ class ConnectedIo extends React.PureComponent {
     return (
       <I18n ns="translations">
         {t => (
-          <section className={classes.section}>
+          <section className={classes.content}>
             <h3 className={classes.sectionTitle}>
               {t('Configuration.IO.INname')}
             </h3>

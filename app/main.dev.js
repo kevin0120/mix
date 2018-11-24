@@ -17,7 +17,7 @@ import url from 'url';
 import path from 'path';
 import MenuBuilder from './menu';
 
-import { defaultConfigs } from './shared/config/defaultConfig';
+import configs from './shared/config';
 
 export default class AppUpdater {
   constructor() {
@@ -93,7 +93,7 @@ app.on('ready', async () => {
     minimizable: false
   });
 
-  if (defaultConfigs.systemSettings.authEnable) {
+  if (configs.systemSettings.authEnable) {
     mainWindow.loadURL(
       url.format({
         pathname: path.join(__dirname, 'app.html'),
