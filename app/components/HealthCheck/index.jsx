@@ -33,6 +33,7 @@ class ConnectedHealthCheck extends React.Component {
                 className={classes.infoItem}
               >
                 <ListItemText
+                  key={displayTitle}
                   className={classes.infoText}
                   primary={t(displayTitle)}
                 />

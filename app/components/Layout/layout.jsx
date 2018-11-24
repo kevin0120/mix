@@ -32,7 +32,7 @@ import Flag from 'react-flags';
 import BottomNavigation from '@material-ui/core/BottomNavigation';
 import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
 import Notify from '../Notify';
-import NavBar from '../NavBar';
+import SysInfo from '../sysInfo';
 
 import styles from './styles';
 
@@ -53,13 +53,16 @@ export default function withLayout(SubCompontents, showTop = true) {
         isMenuOpen: false,
         anchorEl: null,
         value: 'recents',
-        showStatus: null
+        showStatus: null,
+        showSysInfo: null,
       };
       this.toggleMenu = this.toggleMenu.bind(this);
       this.handleMenu = this.handleMenu.bind(this);
       this.handleClose = this.handleClose.bind(this);
       this.handleStatus = this.handleStatus.bind(this);
       this.handleCloseStatus = this.handleCloseStatus.bind(this);
+      this.handleSysInfo = this.handleSysInfo.bind(this);
+      this.handleCloseSysInfo = this.handleCloseSysInfo.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -110,8 +113,19 @@ export default function withLayout(SubCompontents, showTop = true) {
       });
     }
 
+    handleSysInfo(event) {
+      this.setState({
+        showSysInfo: event.currentTarget
+      });
+    }
+
+
     handleCloseStatus() {
       this.setState({ showStatus: null });
+    }
+
+    handleCloseSysInfo() {
+      this.setState({ showSysInfo: null });
     }
 
     HealthCheckOk() {
@@ -130,11 +144,10 @@ export default function withLayout(SubCompontents, showTop = true) {
         classes,
         workMode,
         healthCheckResults,
-        connections,
         usersInfo
       } = this.props;
       const isAutoMode = workMode === 'auto';
-      const { uid, name, uuid, avatar } = usersInfo[0];
+      const { name, avatar } = usersInfo[0];
       if (
         lodash.includes(
           ['Ready', 'PreDoing', 'Timeout', 'Init'],
@@ -145,10 +158,12 @@ export default function withLayout(SubCompontents, showTop = true) {
         shouldProcessing = false;
       }
 
-      const { anchorEl, value, showStatus, isMenuOpen } = this.state;
+      const { anchorEl, value, showStatus, isMenuOpen, showSysInfo } = this.state;
       const open = Boolean(anchorEl);
 
       const openStatusMenu = Boolean(showStatus);
+
+      const openSysInfo = Boolean(showSysInfo);
 
       const disableSwipeToOpen = false;
 
@@ -216,10 +231,16 @@ export default function withLayout(SubCompontents, showTop = true) {
                   </div>
                   <div className={classes.menuBtnWrapRight}>
                     <Button
+                      onClick={this.handleSysInfo}
+                      className={`${statusClassName}`}
+                    >
+                      {'系统'}
+                    </Button>
+                    <Button
                       onClick={this.handleStatus}
                       className={`${statusClassName}`}
                     >
-                      {'连接信息'}
+                      {'连接'}
                     </Button>
 
                     <IconButton
@@ -231,6 +252,26 @@ export default function withLayout(SubCompontents, showTop = true) {
                     >
                       <Language />
                     </IconButton>
+                    <Menu
+                      id="menu-sysInfo"
+                      anchorEl={showSysInfo}
+                      anchorOrigin={{
+                        vertical: 'top',
+                        horizontal: 'left'
+                      }}
+                      transformOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      open={openSysInfo}
+                      onClose={this.handleCloseSysInfo}
+                      TransitionComponent={Fade}
+                      classes={{
+                        paper: classes.popover }
+                      }
+                    >
+                      <SysInfo />
+                    </Menu>
                     <Menu
                       id="menu-healthz"
                       anchorEl={showStatus}
@@ -246,8 +287,7 @@ export default function withLayout(SubCompontents, showTop = true) {
                       onClose={this.handleCloseStatus}
                       TransitionComponent={Fade}
                       classes={{
-                        paper: classes.popover,
-                        disabled: 'disabled', }
+                        paper: classes.popover}
                       }
                     >
                       <HealthCheck healthCheckResults={healthCheckResults} />

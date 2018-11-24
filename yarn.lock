@@ -13512,6 +13512,10 @@ sync-rpc@^1.2.1:
   dependencies:
     get-port "^3.1.0"
 
+systeminformation@^3.50.2:
+  version "3.50.2"
+  resolved "http://registry.npm.taobao.org/systeminformation/download/systeminformation-3.50.2.tgz#7d3be288cf53f079e6afd44f2d7566cd0ad87058"
+
 table-parser@^0.1.3:
   version "0.1.3"
   resolved "https://registry.npmjs.org/table-parser/-/table-parser-0.1.3.tgz#0441cfce16a59481684c27d1b5a67ff15a43c7b0"
