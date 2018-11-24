@@ -106,7 +106,6 @@ export function* watchRushChannel() {
         break;
       case 'io':
         if (json.inputs) {
-
         }
         break;
       case 'result':

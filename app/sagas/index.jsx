@@ -14,7 +14,7 @@ import { healthzCheckFlow } from './healthzCheck';
 import { watchAiis } from './aiis';
 import { watchSettingPreSave } from './setting';
 import { watchRush } from './rush';
-import {watchNotification} from './notification'
+import { watchNotification } from './notification';
 
 export default function* rootSaga() {
   yield all([

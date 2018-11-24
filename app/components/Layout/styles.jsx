@@ -1,10 +1,9 @@
 import pagesStyle from '../../common/jss/layouts/pagesStyle';
 import imagesStyles from '../../common/jss/imagesStyles';
-import popoverStyles from "../../common/jss/popoverStyles";
-import {dangerColor} from "../../common/jss/material-react-pro";
+import popoverStyles from '../../common/jss/popoverStyles';
+import { dangerColor } from '../../common/jss/material-react-pro';
 
 import { keyframes } from 'react-emotion';
-
 
 const twinkling = keyframes`
   0% {

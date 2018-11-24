@@ -1,4 +1,5 @@
 import React from 'react';
+
 const Color = require('color');
 
 export default class Circle extends React.Component {

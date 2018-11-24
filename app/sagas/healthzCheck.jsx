@@ -28,12 +28,7 @@ function* healthzCheckTask(url, controllers) {
       ]);
       const healthzStatus = yield select(getHealthz); // 获取整个healthz
       const s = mHealthz.status === 204;
-      if (
-        !lodash.isEqual(
-          healthzStatus.masterpc.isHealth,
-          s
-        )
-      ) {
+      if (!lodash.isEqual(healthzStatus.masterpc.isHealth, s)) {
         // 如果不相等 更新
         yield put(setHealthzCheck('masterpc', s));
         yield put(setNewNotification('info', `masterPC连接状态更新: ${s}`));
@@ -51,7 +46,12 @@ function* healthzCheckTask(url, controllers) {
         )
       ) {
         yield put(setHealthzCheck('controller', controllerHealthzStatus));
-        yield put(setNewNotification('info', `控制器连接状态更新: ${controllerHealthzStatus}`));
+        yield put(
+          setNewNotification(
+            'info',
+            `控制器连接状态更新: ${controllerHealthzStatus}`
+          )
+        );
       }
     } catch (e) {
       // yield put(setNewNotification('error', e.toString()));

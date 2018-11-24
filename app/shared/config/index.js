@@ -1,5 +1,5 @@
 import { defaultConfigs } from './defaultConfig';
-import {getAppDirectory} from '../../logger';
+import { getAppDirectory } from '../../logger';
 
 const path = require('path');
 const settings = require('electron-settings');

@@ -66,7 +66,7 @@ app.on('window-all-closed', () => {
 app.on('will-quit', () => {
   if (process.env.NODE_ENV === 'production') {
     const { exec } = require('child_process');
-    exec('shutdown -h now');
+    // exec('shutdown -h now');
   }
 });
 
@@ -118,9 +118,9 @@ app.on('ready', async () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
-    if (process.env.NODE_ENV === 'production') {
-      mainWindow.setKiosk(true); // 只有生产环境才全屏
-    }
+    // if (process.env.NODE_ENV === 'production') {
+    //   mainWindow.setKiosk(true); // 只有生产环境才全屏
+    // }
     if (process.env.START_MINIMIZED) {
       mainWindow.minimize();
     } else {

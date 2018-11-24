@@ -80,8 +80,7 @@ const mapStateToProps = (state, ownProps) => ({
 
 const TOPHEIGHT = '150px';
 
-const mapDispatchToProps = {
-};
+const mapDispatchToProps = {};
 
 // 与 style 里的变量相同
 // const TOPHEIGHT = '150px';

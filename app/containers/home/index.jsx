@@ -13,7 +13,7 @@ import { I18n } from 'react-i18next';
 // import ButtonBase from '@material-ui/core/ButtonBase';
 import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
-import Button from '@material-ui/core/Button';
+import Button from '../../components/CustomButtons/Button';
 import CardContent from '@material-ui/core/CardContent';
 import PowerSettingIcon from '@material-ui/icons/PowerSettingsNew';
 import ExitToApp from '@material-ui/icons/ExitToApp';
@@ -36,7 +36,6 @@ const mapStateToProps = (state, ownProps) => ({
 function mapDispatchToProps(dispatch) {
   return bindActionCreators({ OpenShutdown }, dispatch);
 }
-
 
 /* eslint-disable no-unused-vars */
 class ConnectedWelcome extends React.Component {
@@ -83,7 +82,7 @@ class ConnectedWelcome extends React.Component {
                       />
                       <CardContent className={classes.cardContent}>
                         <div className={classes.iconWrap}>
-                          <route.icon className={classes.icon}/>
+                          <route.icon className={classes.icon} />
                         </div>
                         <h1 className={classes.title}>{t(route.title)}</h1>
                         <p className={classes.subTitle}>{route.enName}</p>
@@ -94,7 +93,8 @@ class ConnectedWelcome extends React.Component {
               ))}
             </Grid>
             <Button
-              variant="extendedFab"
+              round
+              size="lg"
               color="secondary"
               className={fabRightClassName}
               onClick={this.handleClickOpen}
@@ -104,7 +104,8 @@ class ConnectedWelcome extends React.Component {
             </Button>
             {authEnable ? (
               <Button
-                variant="extendedFab"
+                round
+                size="lg"
                 color="primary"
                 className={fabLeftClassName}
                 component={Link}
@@ -127,7 +128,7 @@ ConnectedWelcome.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   authEnable: PropTypes.bool.isRequired,
   // functions
-  OpenShutdown: PropTypes.func.isRequired,
+  OpenShutdown: PropTypes.func.isRequired
 };
 
 const Welcome = connect(
