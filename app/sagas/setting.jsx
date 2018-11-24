@@ -8,9 +8,10 @@
 
 // @flow
 
-import { select, takeEvery, put } from 'redux-saga/effects';
+import { select, takeEvery, put, call } from 'redux-saga/effects';
 import { USER_CONFIGS } from '../actions/actionTypes';
 import { setNewNotification } from '../actions/notification';
+import { initIO } from '../actions/ioModbus';
 
 const eSetting = require('electron-settings');
 
@@ -25,6 +26,7 @@ function* saveConfiguration(action) {
     yield put({ type: USER_CONFIGS.SAVE, section, newConfigs });
     eSetting.setAll({ ...setting, [section]: newConfigs });
     yield put(setNewNotification('success', '配置文件保存成功'));
+    yield put(initIO());
   } catch (e) {
     yield put(setNewNotification('error', '配置文件保存失败'));
   }

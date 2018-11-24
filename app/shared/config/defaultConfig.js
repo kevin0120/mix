@@ -43,7 +43,7 @@ export const defaultConfigs = {
       },
       hmiSn: {
         displayOrder: 2,
-        value: '1122334455667788',
+        value: '112233445566778899',
         displayTitle: 'Configuration.connections.HMI'
       },
       aiisUrl: {
@@ -173,7 +173,7 @@ export const defaultConfigs = {
   operationSettings: {
     opMode: 'order', // 作业模式:        op 或 order
     controllerMode: 'pset', // 拧紧模式:        job 或 pset
-    workMode: 'auto', // 工作模式:        auto 或 scanner 或 manual
+    workMode: 'auto', // 工作模式:        auto 或 manual
     flowTriggers: ['carID'], // 工作流程触发条件:  carType:车型代码 carID:vin/knr/longpin
 
     // 作业前检测(order mode only)
@@ -184,6 +184,9 @@ export const defaultConfigs = {
       enable: true,
       type: 'sleep' // sleep or press
     },
+
+    // 空车job
+    emptyCarJob: 250,
 
     // 结果对话框
     enableResultDialog: true
@@ -198,6 +201,7 @@ export const defaultConfigs = {
     oeeFuncEnable: false,
     modbusEnable: true,
     rfidEnabled: false,
+    andonEnable: true,
     psetContinueMode: false
   }
 };

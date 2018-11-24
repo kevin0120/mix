@@ -16,6 +16,7 @@ import { I18n } from 'react-i18next';
 import Button from '../CustomButtons/Button';
 
 import saveConfigs from '../../actions/userConfigs';
+import { systemInit } from '../../actions/sysInit';
 
 import { sortObj } from '../../common/utils';
 import Test from './Test';
@@ -27,7 +28,8 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = {
-  saveConfigs
+  saveConfigs,
+  systemInit
 };
 
 /* eslint-disable react/prefer-stateless-function */
@@ -55,9 +57,10 @@ class ConnectedConnect extends React.PureComponent {
   }
 
   handleSubmit() {
-    const { saveConfigs } = this.props;
+    const { saveConfigs, systemInit } = this.props;
     const { section, data } = this.state;
     saveConfigs(section, data);
+    systemInit();
   }
 
   validateData(data = this.state.data) {
@@ -126,7 +129,8 @@ class ConnectedConnect extends React.PureComponent {
 ConnectedConnect.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   storedConfigs: PropTypes.shape({}).isRequired,
-  saveConfigs: PropTypes.func.isRequired
+  saveConfigs: PropTypes.func.isRequired,
+  systemInit: PropTypes.func.isRequired,
 };
 
 const Connect = connect(

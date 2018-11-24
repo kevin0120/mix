@@ -23,7 +23,8 @@ import Button from '../CustomButtons/Button';
 import saveConfigs from '../../actions/userConfigs';
 import { IO_FUNCTION } from '../../reducers/io';
 
-import { testIO, resetIO } from '../../actions/ioModbus';
+import { testIO } from '../../sagas/io';
+import { resetIO } from '../../actions/ioModbus';
 
 import styles from './styles';
 
@@ -33,7 +34,7 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 function mapDispatchToProps(dispatch) {
-  return bindActionCreators({ saveConfigs }, dispatch);
+  return bindActionCreators({ saveConfigs, resetIO }, dispatch);
 }
 
 /* eslint-disable react/prefer-stateless-function */

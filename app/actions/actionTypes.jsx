@@ -37,6 +37,10 @@ export const RUSH = {
   NEW_RESULTS: 'RUSH_NEW_RESULTS'
 };
 
+export const RFID = {
+  INIT: 'RFID_INIT',
+};
+
 export const OPERATION = {
   OPERATION: {
     FETCH_OK: 'OPERATION_OPERATION_FETCH_OK',
@@ -58,11 +62,14 @@ export const OPERATION = {
   FAILED: 'OPERATION_FAILED',
   CONTINUE: 'OPERATION_CONTINUE',
   PREDOING: 'OPERATION_PREDOING',
-  VERIFIED: 'OPERATION_VERIFIED'
+  VERIFIED: 'OPERATION_VERIFIED',
 };
 
 export const IO = {
-  FUNCTION: 'IO_FUNCTION'
+  FUNCTION: 'IO_FUNCTION',
+  INIT:'IO_INIT',
+  TEST:'IO_TEST',
+  RESET:'IO_RESET'
 };
 
 export const CONNECTION = {
@@ -123,4 +130,8 @@ export const TIMELINE_STORY = {
 
 export const ANDON = {
   NEW_DATA: 'ANDON_NEW_DATA'
+};
+
+export const AIIS = {
+  INIT: 'AIIS_INIT'
 };

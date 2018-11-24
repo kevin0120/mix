@@ -1,9 +1,12 @@
 import OWebSocket from 'ws';
 import { call, take, put, select, fork } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
-import { RUSH } from '../actions/actionTypes';
+import { OPERATION, RUSH, WORK_MODE } from '../actions/actionTypes';
 import { NewResults } from '../actions/rush';
 import { NewCar } from '../actions/scannerDevice';
+import { iBypass, iModeSelect } from '../actions/ioModbus';
+import { triggerOperation } from './operation';
+import { OPERATION_SOURCE } from '../reducers/operations';
 
 let rushWS = null;
 let rushChannel = null;
@@ -91,7 +94,7 @@ function createRushChannel(ws, hmiSN) {
 }
 
 export function* watchRushChannel() {
-  while (true) {
+  while (rushWS !== null) {
     const payload = yield take(rushChannel);
 
     const dataArray = payload.split(';');
@@ -103,9 +106,29 @@ export function* watchRushChannel() {
     const state = yield select();
     switch (event) {
       case 'job':
+        if (state.workMode.workMode === 'manual' && json.job_id) {
+          yield call(triggerOperation, null, null, json.job_id, OPERATION_SOURCE.MANUAL);
+        }
+
         break;
       case 'io':
+        if (state.setting.systemSettings.modbusEnable) {
+          break;
+        }
+
         if (json.inputs) {
+          if (json.inputs[iBypass] === '1') {
+            // 强制放行
+            yield put({ type: OPERATION.FINISHED, data: [] });
+          }
+
+          if (json.inputs[iModeSelect] === '1') {
+            // 切换到手动模式
+            yield put({ type: WORK_MODE.SWITCH_WM, mode: 'manual'});
+          } else {
+            // 切换到自动模式
+            yield put({ type: WORK_MODE.SWITCH_WM, mode: 'auto'});
+          }
         }
         break;
       case 'result':

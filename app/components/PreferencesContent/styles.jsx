@@ -2,6 +2,11 @@ import customSelectStyle from '../../common/jss/customSelectStyle';
 
 export default theme => ({
   ...customSelectStyle,
+  section: {
+    // overflowY: 'scroll',
+    flex: 1,
+    height:'auto'
+  },
   paperWrap: {
     fontSize: 14
   },
