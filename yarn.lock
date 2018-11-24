@@ -5538,6 +5538,10 @@ eslint-plugin-react@^7.10.0:
     jsx-ast-utils "^2.0.1"
     prop-types "^15.6.2"
 
+eslint-plugin-redux-saga@^0.10.0:
+  version "0.10.0"
+  resolved "http://registry.npm.taobao.org/eslint-plugin-redux-saga/download/eslint-plugin-redux-saga-0.10.0.tgz#62001c4e235b4607c9d7ac3dc087f9c5b173c91d"
+
 eslint-plugin-testcafe@^0.2.1:
   version "0.2.1"
   resolved "https://registry.npmjs.org/eslint-plugin-testcafe/-/eslint-plugin-testcafe-0.2.1.tgz#4089f646dadb69b1376a01d7e608184907e6036b"

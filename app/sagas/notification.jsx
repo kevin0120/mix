@@ -6,8 +6,6 @@
  * Vestibulum commodo. Ut rhoncus gravida arcu.
  */
 
-
-
 // @flow
 
 import { takeEvery, put } from 'redux-saga/effects';
@@ -19,7 +17,7 @@ import { Info, Warn, Error } from '../logger';
 function* notificationAlways(action) {
   const { variant, message } = action;
   yield put(NewNotificationOK(variant, message));
-  switch (variant){
+  switch (variant) {
     case 'info':
       Info(message);
       break;
@@ -35,5 +33,5 @@ function* notificationAlways(action) {
 }
 
 export function* watchNotification() {
-  yield takeEvery(NOTIFY.PRE_NEW_NOTIFICATION,notificationAlways );
+  yield takeEvery(NOTIFY.PRE_NEW_NOTIFICATION, notificationAlways);
 }

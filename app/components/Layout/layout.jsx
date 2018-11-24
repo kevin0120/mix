@@ -54,7 +54,7 @@ export default function withLayout(SubCompontents, showTop = true) {
         anchorEl: null,
         value: 'recents',
         showStatus: null,
-        showSysInfo: null,
+        showSysInfo: null
       };
       this.toggleMenu = this.toggleMenu.bind(this);
       this.handleMenu = this.handleMenu.bind(this);
@@ -119,7 +119,6 @@ export default function withLayout(SubCompontents, showTop = true) {
       });
     }
 
-
     handleCloseStatus() {
       this.setState({ showStatus: null });
     }
@@ -158,7 +157,13 @@ export default function withLayout(SubCompontents, showTop = true) {
         shouldProcessing = false;
       }
 
-      const { anchorEl, value, showStatus, isMenuOpen, showSysInfo } = this.state;
+      const {
+        anchorEl,
+        value,
+        showStatus,
+        isMenuOpen,
+        showSysInfo
+      } = this.state;
       const open = Boolean(anchorEl);
 
       const openStatusMenu = Boolean(showStatus);
@@ -267,8 +272,8 @@ export default function withLayout(SubCompontents, showTop = true) {
                       onClose={this.handleCloseSysInfo}
                       TransitionComponent={Fade}
                       classes={{
-                        paper: classes.popover }
-                      }
+                        paper: classes.popover
+                      }}
                     >
                       <SysInfo />
                     </Menu>
@@ -287,8 +292,8 @@ export default function withLayout(SubCompontents, showTop = true) {
                       onClose={this.handleCloseStatus}
                       TransitionComponent={Fade}
                       classes={{
-                        paper: classes.popover}
-                      }
+                        paper: classes.popover
+                      }}
                     >
                       <HealthCheck healthCheckResults={healthCheckResults} />
                     </Menu>

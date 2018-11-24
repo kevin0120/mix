@@ -2,11 +2,6 @@
 import React from 'react';
 
 // import Editor from '../containers/editor';
-import Help from '../containers/help';
-import Preferences from '../containers/config';
-import Event from '../containers/event';
-import ConnResult from '../containers/result';
-import Working from '../containers/working';
 
 // icons
 import HomeIcon from '@material-ui/icons/Home';
@@ -18,8 +13,13 @@ import LockIcon from '@material-ui/icons/Lock';
 import Fingerprint from '@material-ui/icons/Fingerprint';
 import Mail from '@material-ui/icons/Mail';
 import Save from '@material-ui/icons/Save';
+import Working from '../containers/working';
+import ConnResult from '../containers/result';
+import Event from '../containers/event';
+import Preferences from '../containers/config';
+import Help from '../containers/help';
 import Pages from '../layouts/Pages';
-import HomePage from '../containers/Home';
+import HomePage from '../containers/home';
 
 // imgs
 import helpImg from '../../resources/imgs/help.png';
@@ -46,7 +46,7 @@ export const routeConfigs = [
     title: 'main.home',
     main: HomePage,
     icon: HomeIcon,
-    color: '#00abf3',
+    color: '#00abf3'
   },
   {
     name: 'working',

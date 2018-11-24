@@ -38,7 +38,7 @@ class ProgressBar extends React.Component {
   readyCounter = () => {
     this.setState({
       counterState: this.counterStates.ready,
-      //timeRemaining: this.props.time,
+      // timeRemaining: this.props.time,
       startAnimation: -1
     });
   };
@@ -48,7 +48,7 @@ class ProgressBar extends React.Component {
     this.setState(
       {
         counterState: this.counterStates.stop,
-        //timeRemaining: this.props.time,
+        // timeRemaining: this.props.time,
         startAnimation: -1
       },
       () => {
@@ -64,7 +64,7 @@ class ProgressBar extends React.Component {
     this.setState(
       {
         counterState: this.counterStates.finish,
-        //timeRemaining: this.props.time,
+        // timeRemaining: this.props.time,
         startAnimation: -1
       },
       () => {

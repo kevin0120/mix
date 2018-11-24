@@ -22,16 +22,15 @@ import styles from './styles';
 const si = require('systeminformation');
 
 class SysInfo extends React.Component {
-
-  constructor(){
+  constructor() {
     super();
     this.timer = null;
     this.state = {
       cpustat: null,
       fsstat: null,
       memstat: null,
-      batterystat: null,
-    }
+      batterystat: null
+    };
   }
 
   componentDidMount() {
@@ -71,7 +70,7 @@ class SysInfo extends React.Component {
             <ListItemText
               className={classes.infoText}
               primary="111"
-              secondary='2222'
+              secondary="2222"
             />
           </ListItem>
         )}
@@ -82,9 +81,8 @@ class SysInfo extends React.Component {
 
 SysInfo.propTypes = {
   // styles
-  classes: PropTypes.shape({}).isRequired,
+  classes: PropTypes.shape({}).isRequired
   // functions
 };
-
 
 export default withStyles(styles)(SysInfo);

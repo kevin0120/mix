@@ -1,4 +1,3 @@
-
 import popoverStyles from '../../common/jss/popoverStyles';
 
 export default () => ({
@@ -60,12 +59,12 @@ export default () => ({
     },
     padding: '0 20px',
     marginTop: 18,
-    color: '#FFFFFF',
+    color: '#FFFFFF'
   },
   infoText: {
     '&>span': {
       fontSize: 14,
-      color: '#FFFFFF',
+      color: '#FFFFFF'
     }
   }
 });

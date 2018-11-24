@@ -12,7 +12,7 @@ const styles = theme => ({
   wrap: {
     backgroundColor: '#f2f2f2',
     height: 'calc(100% - 64px)',
-    overflowX: 'hidden',
+    overflowX: 'hidden'
   },
   iconWrap: {
     position: 'absolute',
@@ -25,7 +25,7 @@ const styles = theme => ({
     borderRadius: '99%',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   root: {
     display: 'flex',
@@ -34,7 +34,8 @@ const styles = theme => ({
     width: '100%',
     height: '100%',
     backgroundColor: '#232c39',
-    backgroundImage: 'linear-gradient(45deg, rgba(150, 216, 255, 0.5) 10%, rgba(150, 160, 187, 0.7))'
+    backgroundImage:
+      'linear-gradient(45deg, rgba(150, 216, 255, 0.5) 10%, rgba(150, 160, 187, 0.7))'
   },
   container: {
     padding: '40px 10px',
@@ -96,7 +97,7 @@ const styles = theme => ({
     color: '#fff'
   },
   icon: {
-    fontSize: '50px',
+    fontSize: '50px'
   },
   btnWrap: {
     position: 'relative',

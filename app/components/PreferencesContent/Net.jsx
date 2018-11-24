@@ -103,15 +103,15 @@ class ConnectedNet extends React.PureComponent {
   }
 
   handleSubmit() {
-    const { section } = this.state;
+    const { section, ssid, data, } = this.state;
     const { saveConfigs } = this.props;
     this.setState({
       loading: true
     });
     let ret = 0;
-    const tempData = cloneDeep(this.state.data);
+    const tempData = cloneDeep(data);
     const mask = netmask2CIDR(tempData.netmask.value);
-    tempData.ssid.value = this.state.ssid;
+    tempData.ssid.value = ssid;
     const { exec } = require('child_process');
     exec('nmcli con delete default', () => {
       exec(
@@ -219,6 +219,7 @@ class ConnectedNet extends React.PureComponent {
   };
 
   componentDidMount() {
+    const {data} = this.state;
     const tempData = cloneDeep(this.state);
     const ret = [];
     const { exec } = require('child_process');
@@ -230,7 +231,7 @@ class ConnectedNet extends React.PureComponent {
       if (stdout) {
         const lines = stdout.toString().split('\n');
         let isHeader = true;
-        for (let i = 0; i < lines.length - 1; i++) {
+        for (let i = 0; i < lines.length - 1; i+=1) {
           if (isHeader) {
             isHeader = false;
           } else {
@@ -244,8 +245,8 @@ class ConnectedNet extends React.PureComponent {
           }
         }
         tempData.ssids = lodash.uniq(ret);
-        if (lodash.includes(ret, this.state.data.ssid.value)) {
-          tempData.ssid = this.state.data.ssid.value;
+        if (lodash.includes(ret, data.ssid.value)) {
+          tempData.ssid = data.ssid.value;
         }
         this.setState({
           ...tempData
@@ -260,7 +261,7 @@ class ConnectedNet extends React.PureComponent {
 
   render() {
     const { classes } = this.props;
-    const { data, ssid } = this.state;
+    const { data, ssid, loading,ssidSelectOpen, ssids } = this.state;
 
     const validateData = lodash.omit(data, ['ssid']);
 
@@ -299,7 +300,7 @@ class ConnectedNet extends React.PureComponent {
               classes={{
                 root: classes.loadModal
               }}
-              open={this.state.loading}
+              open={loading}
               style={{ opacity: 0.7 }}
               TransitionComponent={this.Transition}
             >
@@ -308,7 +309,7 @@ class ConnectedNet extends React.PureComponent {
                 sizeUnit="px"
                 size={50}
                 color="#36D7B7"
-                loading={this.state.loading}
+                loading={loading}
               />
             </Dialog>
             <section>
@@ -330,9 +331,9 @@ class ConnectedNet extends React.PureComponent {
                         classes={{
                           select: classes.select
                         }}
-                        value={this.state.ssid}
+                        value={ssid}
                         onChange={e => this.handleChangeSSID(e)}
-                        open={this.state.ssidSelectOpen}
+                        open={ssidSelectOpen}
                         onOpen={this.getSSIDs}
                         onClose={this.handleCloseSSID}
                         inputProps={{
@@ -349,7 +350,7 @@ class ConnectedNet extends React.PureComponent {
                         >
                           {t('Configuration.network.SSID')}
                         </MenuItem>
-                        {this.state.ssids.map((item, idx) =>
+                        {ssids.map((item, idx) =>
                           renderSSIDs(item, idx, classes)
                         )}
                       </Select>

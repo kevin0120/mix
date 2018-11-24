@@ -32,7 +32,6 @@ const ripple = keyframes`
   100% {transform:scale(1.75); opacity:0;}
 `;
 
-
 const circleRadius = 30;
 
 const withstyles = () => ({
@@ -195,6 +194,5 @@ ConnectedImageStick.propTypes = {
 };
 
 ConnectedImageStick.defaultProps = {};
-
 
 export default withStyles(withstyles)(ConnectedImageStick);

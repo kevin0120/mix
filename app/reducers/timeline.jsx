@@ -41,7 +41,7 @@ export default function timeline(
 }
 
 export function NewStory(state, story) {
-  return  [story, ...state];
+  return [story, ...state];
 }
 
 export function ClearStory() {

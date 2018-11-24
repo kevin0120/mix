@@ -18,7 +18,7 @@ export default function setting(state: object = configs, action: actionType) {
       return { ...state, page: { ...state.page, [section]: newConfigs } };
     }
 
-    case USER_CONFIGS.SET_UUID:{
+    case USER_CONFIGS.SET_UUID: {
       const { uuid } = action;
       return {
         ...state,
