@@ -7,7 +7,7 @@ import {
   setLedStatusReady,
   sOn,
   sBlinkOn
-} from '../actions/ioModbus';
+} from '../sagas/io';
 
 export const OPERATION_STATUS = {
   INIT: 'Init',

@@ -43,7 +43,7 @@ export const defaultConfigs = {
       },
       hmiSn: {
         displayOrder: 2,
-        value: '1122334455667788',
+        value: '112233445566778899',
         displayTitle: 'Configuration.connections.HMI'
       },
       aiisUrl: {

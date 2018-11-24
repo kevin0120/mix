@@ -22,6 +22,7 @@ export default class Root extends Component<Props> {
     store.dispatch(
       systemInit(
         connectionInfo.odooUrl.value,
+        connectionInfo.aiisUrl.value,
         connectionInfo.hmiSn.value,
         store.dispatch
       )

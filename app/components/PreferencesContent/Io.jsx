@@ -23,7 +23,8 @@ import Button from '../CustomButtons/Button';
 import saveConfigs from '../../actions/userConfigs';
 import { IO_FUNCTION } from '../../reducers/io';
 
-import { testIO, resetIO } from '../../actions/ioModbus';
+import { testIO } from '../../sagas/io';
+import { resetIO } from '../../actions/ioModbus';
 
 import styles from './styles';
 
@@ -33,7 +34,7 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 function mapDispatchToProps(dispatch) {
-  return bindActionCreators({ saveConfigs }, dispatch);
+  return bindActionCreators({ saveConfigs, resetIO }, dispatch);
 }
 
 /* eslint-disable react/prefer-stateless-function */
@@ -148,7 +149,7 @@ class ConnectedIo extends React.PureComponent {
         String.prototype.toUpperCase.call(item.io),
         this.IO_FUNCTION.IN
       );
-      const selectItems = options.map(v => (
+      const selectItems = Object.keys(options).map(v => (
         <MenuItem key={v} value={v}>
           {v}
         </MenuItem>
@@ -235,7 +236,7 @@ class ConnectedIo extends React.PureComponent {
     return (
       <I18n ns="translations">
         {t => (
-          <section>
+          <section className={classes.section}>
             <h3 className={classes.sectionTitle}>
               {t('Configuration.IO.INname')}
             </h3>

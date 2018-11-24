@@ -10,19 +10,26 @@
 
 import { call, take, put, select } from 'redux-saga/effects';
 
-import { CONNECTION, SYSTEM_INIT, RUSH } from '../actions/actionTypes';
+
 
 import { fetchConnectionInfo } from './api/systemInit';
-import { initRush } from '../actions/rush';
-import { initIOModbus, setLedStatusReady } from '../actions/ioModbus';
+
+import {setLedStatusReady} from './io';
+
+// actions
+import { CONNECTION, SYSTEM_INIT, RUSH } from '../actions/actionTypes';
+// import { initRush } from '../actions/rush';
 import { startHealthzCheck } from '../actions/healthCheck';
 import { setNewNotification } from '../actions/notification';
+import { initIO } from '../actions/ioModbus';
+import {initAiis}from '../actions/aiis'
 
-export function* fetchConnectionFlow(baseUrl, hmiSN, dispatch) {
+export function* fetchConnectionFlow(baseUrl, aiisUrl, hmiSN, dispatch) {
   const fullUrl = `${baseUrl}/hmi.connections/${hmiSN}`;
   const resp = yield call(fetchConnectionInfo, fullUrl);
 
   if (resp.status === 200) {
+    console.log('resp ok');
     yield put({ type: CONNECTION.FETCH_OK, data: resp.data });
 
     const url = resp.data.masterpc.connection;
@@ -35,17 +42,19 @@ export function* fetchConnectionFlow(baseUrl, hmiSN, dispatch) {
     yield put({ type: RUSH.INIT });
 
     // 初始化io
-    const state = yield select();
-    yield call(initIOModbus, dispatch, state);
+    yield put(initIO());
+
+    // 初始化aiis
+    yield put(initAiis(aiisUrl,hmiSN));
   }
 
   setLedStatusReady();
 }
 
 export function* sysInitFlow() {
-  const { baseUrl, hmiSN, dispatch } = yield take(SYSTEM_INIT); // 只获取一次
+  const { baseUrl, hmiSN, dispatch, aiisUrl } = yield take(SYSTEM_INIT); // 只获取一次
   try {
-    yield call(fetchConnectionFlow, baseUrl, hmiSN, dispatch);
+    yield call(fetchConnectionFlow, baseUrl, aiisUrl, hmiSN, dispatch);
   } catch (e) {
     yield put(setNewNotification('error', e.toString()));
   }
