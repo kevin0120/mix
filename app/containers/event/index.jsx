@@ -26,7 +26,7 @@ import CardHeader from '../../components/Card/CardHeader';
 
 import { Query, CreateDailyLogger, Warn } from '../../logger';
 
-import { cardTitle } from '../../common/jss/material-react-pro';
+import { cardTitle,infoColor,warningColor, dangerColor } from '../../common/jss/material-react-pro';
 import withLayout from '../../components/Layout/layout';
 
 import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
@@ -56,8 +56,7 @@ const styles = {
 // Find items logged between today and yesterday.
 //
 
-const requestData = () => {
-  return new Promise((resolve, reject) => {
+const requestData = () => new Promise((resolve, reject) => {
     // You can retrieve your data however you want, in this case, we will just use some local data.
 
     const options = {
@@ -78,13 +77,13 @@ const requestData = () => {
       resolve(results);
     });
   });
-};
 
 class Event extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       data: [],
+      loading: true,
       isShow: false,
       selectObj: null
     };
@@ -103,8 +102,8 @@ class Event extends React.Component {
     requestData().then(res => {
       // Now just get the rows of data to your React Table (and update anything else like total pages or loading)
       this.setState({
-        data: res.info.map((item, key) => {
-          return {
+        loading: false,
+        data: res.info.map((item, key) => ({
             id: key,
             timestamp: dayjs(item.timestamp).format('YYYY MM-DD HH:mm:ss'),
             level: item.level,
@@ -118,7 +117,7 @@ class Event extends React.Component {
                   round
                   simple
                   onClick={() => {
-                    let obj = this.state.data.find(o => o.id === key);
+                    const obj = this.state.data.find(o => o.id === key);
                     this.setState({
                       isShow: true,
                       selectObj: obj
@@ -131,8 +130,7 @@ class Event extends React.Component {
                 </Button>{' '}
               </div>
             )
-          };
-        })
+          }))
       });
     });
   }
@@ -145,7 +143,7 @@ class Event extends React.Component {
 
   render() {
     const { classes } = this.props;
-    const { data, isShow, selectObj } = this.state;
+    const { data, isShow, selectObj, loading } = this.state;
 
     const Msg = selectObj ? (
       <div>
@@ -188,7 +186,33 @@ class Event extends React.Component {
                   </CardHeader>
                   <CardBody>
                     <ReactTable
+                      loading={loading}
                       data={data}
+                      getTrProps={(state, rowInfo) => {
+                        if(rowInfo) {
+                          let color = infoColor;
+                          switch(rowInfo.row.level) {
+                            case "warn":
+                              color = warningColor;
+                              break;
+
+                            case "error":
+                              color = dangerColor;
+                              break;
+                            default:
+                              break;
+                          }
+
+                          return {
+                            style: {
+                              background: color
+                            }
+                          };
+                        }
+
+                        return {}
+
+                      }}
                       filterable
                       columns={[
                         {
@@ -214,6 +238,9 @@ class Event extends React.Component {
                             if (filter.value === 'alarm') {
                               return row[filter.id] === 'warn';
                             }
+                            if (filter.value === 'error') {
+                              return row[filter.id] === 'error';
+                            }
                             return true;
                           },
                           Filter: ({ filter, onChange }) => (
@@ -225,6 +252,7 @@ class Event extends React.Component {
                               <option value="all">All</option>
                               <option value="info">Info</option>
                               <option value="alarm">Alarm</option>
+                              <option value="error">Error</option>
                             </select>
                           )
                         },
@@ -263,10 +291,10 @@ class Event extends React.Component {
                 onConfirm={this.handleClose}
                 onCancel={this.handleClose}
                 confirmBtnCssClass={
-                  this.props.classes.button + ' ' + this.props.classes.success
+                  `${this.props.classes.button  } ${  this.props.classes.success}`
                 }
                 cancelBtnCssClass={
-                  this.props.classes.button + ' ' + this.props.classes.danger
+                  `${this.props.classes.button  } ${  this.props.classes.danger}`
                 }
                 confirmBtnText={t('Common.Yes')}
                 cancelBtnText={t('Common.No')}
