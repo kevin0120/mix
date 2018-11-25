@@ -25,7 +25,7 @@ import { openShutdown as OpenShutdown } from '../../actions/shutDownDiag';
 
 import withLayout from '../../components/Layout/layout';
 import ShutdownDiag from '../../components/ShutDownDiag';
-import { routeConfigs } from '../../routes';
+import { routeConfigs } from '../../routes/index';
 import styles from './styles';
 
 const mapStateToProps = (state, ownProps) => ({

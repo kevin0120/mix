@@ -36,7 +36,7 @@ import SysInfo from '../sysInfo';
 
 import styles from './styles';
 
-import { routeConfigs } from '../../routes';
+import { routeConfigs } from '../../routes/index';
 
 import i18n from '../../i18n';
 import HealthCheck from '../HealthCheck';

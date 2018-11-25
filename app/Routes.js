@@ -2,7 +2,7 @@ import React from 'react';
 import { Switch, Route } from 'react-router';
 import App from './containers/App';
 
-import indexRoutes, { routeConfigs } from './routes';
+import indexRoutes, { routeConfigs } from './routes/index';
 
 const lodash = require('lodash');
 
@@ -13,10 +13,10 @@ export default () => (
     <Switch>
       {i.map(route => (
         <Route
-          key={route.url || route.path}
+          key={route.url}
           exact
-          path={route.url || route.path}
-          component={route.component || route.main}
+          path={route.url}
+          component={route.main}
         />
       ))}
     </Switch>
