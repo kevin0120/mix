@@ -4,7 +4,7 @@ import { eventChannel } from 'redux-saga';
 import { OPERATION, RUSH, WORK_MODE } from '../actions/actionTypes';
 import { NewResults } from '../actions/rush';
 import { NewCar } from '../actions/scannerDevice';
-import { iBypass, iModeSelect } from '../actions/ioModbus';
+import { getIBypass, getIModeSelect } from './io';
 import { triggerOperation } from './operation';
 import { OPERATION_SOURCE } from '../reducers/operations';
 
@@ -117,12 +117,12 @@ export function* watchRushChannel() {
         }
 
         if (json.inputs) {
-          if (json.inputs[iBypass] === '1') {
+          if (json.inputs[getIBypass()] === '1') {
             // 强制放行
             yield put({ type: OPERATION.FINISHED, data: [] });
           }
 
-          if (json.inputs[iModeSelect] === '1') {
+          if (json.inputs[getIModeSelect()] === '1') {
             // 切换到手动模式
             yield put({ type: WORK_MODE.SWITCH_WM, mode: 'manual'});
           } else {

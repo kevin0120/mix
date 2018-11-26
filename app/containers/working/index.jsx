@@ -542,7 +542,7 @@ class ConnectedWorking extends React.Component {
       operations.operationStatus,
       operationSettings.enableResultDialog
     );
-
+    this.setState({prevOperationStatus:prevProps.operations.operationStatus})
     // const {
     //   masterpcUrl,
     //   orderStatus, userid, workcenterId,
@@ -727,7 +727,7 @@ class ConnectedWorking extends React.Component {
     const { classes, operations, timeline } = this.props;
     //
     //
-    const { inputName, resultShow } = this.state;
+    const { inputName, resultShow, prevOperationStatus } = this.state;
     //
     let batch = '0/0';
     let redoBatch = '0/0';
@@ -793,7 +793,7 @@ class ConnectedWorking extends React.Component {
     // if (this.props.orderStatus === 'Ready' || this.props.orderStatus === 'PreDoing' || this.props.orderStatus === 'Timeout' || this.props.orderStatus === 'Init' || (!this.props.isAutoMode)){
     //   shouldProcessing = false;
     // }
-
+    console.log(operations);
     return (
       <I18n ns="translations">
         {t => (
@@ -883,7 +883,9 @@ class ConnectedWorking extends React.Component {
                       lodash.includes(
                         [OPERATION_STATUS.DOING],
                         operations.operationStatus
-                      )
+                        // predoing -> doing
+                      ) &&
+                      prevOperationStatus===OPERATION_STATUS.PREDOING
                     }
                     shouldCounterStop={() =>
                       lodash.includes(

@@ -34,7 +34,11 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 function mapDispatchToProps(dispatch) {
-  return bindActionCreators({ saveConfigs, resetIO }, dispatch);
+  return {
+    saveConfigs:(...args)=>dispatch(saveConfigs(...args)),
+    resetIO:(...args)=>dispatch(resetIO(...args)),
+  };
+
 }
 
 /* eslint-disable react/prefer-stateless-function */
@@ -97,10 +101,10 @@ class ConnectedIo extends React.PureComponent {
   }
 
   handleSubmit() {
-    const { saveConfigs } = this.props;
+    // const { saveConfigs, resetIO } = this.props;
     const { data, section } = this.state;
-    resetIO(data);
-    saveConfigs(section, data);
+    this.props.resetIO(data);
+    this.props.saveConfigs(section, data);
   }
 
   handleTest(obj) {
@@ -273,7 +277,8 @@ ConnectedIo.propTypes = {
   storedConfigs: PropTypes.shape({}).isRequired,
   in: PropTypes.array,
   out: PropTypes.array,
-  saveConfigs: PropTypes.func.isRequired
+  saveConfigs: PropTypes.func.isRequired,
+  resetIO:PropTypes.func.isRequired,
 };
 
 const Io = connect(

@@ -38,7 +38,7 @@ export const defaultConfigs = {
     odooConnection: {
       odooUrl: {
         displayOrder: 1,
-        value: 'http://192.168.4.3:8069/api/v1',
+        value: 'http://192.168.1.3:8069/api/v1',
         displayTitle: 'Configuration.connections.Odoo'
       },
       hmiSn: {
@@ -48,7 +48,7 @@ export const defaultConfigs = {
       },
       aiisUrl: {
         displayOrder: 3,
-        value: 'http://192.168.4.3:9092/aiis/v1',
+        value: 'http://192.168.1.3:9092/aiis/v1',
         displayTitle: 'Configuration.connections.AIIS'
       }
     },
