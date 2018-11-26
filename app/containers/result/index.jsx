@@ -7,8 +7,6 @@ import Divider from '@material-ui/core/Divider';
 import { I18n } from 'react-i18next';
 
 import SweetAlert from 'react-bootstrap-sweetalert';
-import axios from 'axios';
-import axiosRetry from 'axios-retry';
 import withStyles from '@material-ui/core/styles/withStyles';
 import Assignment from '@material-ui/icons/Assignment';
 import Dvr from '@material-ui/icons/Dvr';
@@ -34,26 +32,12 @@ import CardIcon from '../../components/Card/CardIcon';
 import CardHeader from '../../components/Card/CardHeader';
 
 
+import { defaultClient } from '../../common/utils';
+
+
 const lodash = require('lodash');
 const dayjs = require('dayjs');
 
-
-const defaultInstance = axios.create({
-  timeout: 3000,
-  headers: { 'Content-Type': 'application/json' }
-});
-
-axiosRetry(defaultInstance, {
-  retries: 2,
-  retryDelay: axiosRetry.exponentialDelay,
-  retryCondition: err => {
-    if (err.message.indexOf('200') !== -1) {
-      return false;
-    }
-
-    return true;
-  }
-});
 
 const styles = {
   ...sweetAlertStyle,
@@ -84,9 +68,11 @@ const mapDispatchToProps = {};
 function requestData(masterpcUrl, hmiSN) {
   const url = `${masterpcUrl}/rush/v1/local-results`;
   if (!isURL(url, { require_protocol: true })) {
-    throw new Error('conn is Error!');
+    return new Promise(() => {
+      throw new Error('conn is Error!');
+    })
   }
-  return defaultInstance.get(url, {
+  return defaultClient.get(url, {
     params: {
       hmi_sn: hmiSN,
       filters: 'vin,job_id,batch,torque,angle,timestamp,vehicle_type',
@@ -112,6 +98,7 @@ class Result extends React.Component {
 
   fetchData() {
     const { masterpcUrl, hmiSn } = this.props;
+    const {data} = this.state;
     requestData(masterpcUrl, hmiSn)
       .then(res => {
         const statusCode = res.status;
@@ -135,7 +122,7 @@ class Result extends React.Component {
                       round
                       simple
                       onClick={() => {
-                        const obj = this.state.data.find(o => o.id === key);
+                        const obj = data.find(o => o.id === key);
                         this.setState({
                           isShow: true,
                           selectObj: obj
@@ -153,7 +140,7 @@ class Result extends React.Component {
         }
       })
       .catch(error => {
-        console.log(`get error${  error.toString()}`);
+        console.log(`get error: ${  error.toString()}`);
       });
   }
 
@@ -297,10 +284,10 @@ class Result extends React.Component {
                 onConfirm={this.handleClose}
                 onCancel={this.handleClose}
                 confirmBtnCssClass={
-                  `${this.props.classes.button  } ${  this.props.classes.success}`
+                  `${classes.button  } ${  classes.success}`
                 }
                 cancelBtnCssClass={
-                  `${this.props.classes.button  } ${  this.props.classes.danger}`
+                  `${classes.button  } ${  classes.danger}`
                 }
                 confirmBtnText={t('Common.Yes')}
                 cancelBtnText={t('Common.No')}
