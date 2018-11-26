@@ -12,12 +12,7 @@ export default () => (
   <App>
     <Switch>
       {i.map(route => (
-        <Route
-          key={route.url}
-          exact
-          path={route.url}
-          component={route.main}
-        />
+        <Route key={route.url} exact path={route.url} component={route.main} />
       ))}
     </Switch>
   </App>

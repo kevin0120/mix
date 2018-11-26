@@ -6,7 +6,7 @@ export default theme => ({
     position: 'relative',
     display: 'flex',
     color: '#333',
-    overflowY:'scroll',
+    overflowY: 'scroll',
     maxHeight: 'calc(100% - 64px)'
   },
   content: {

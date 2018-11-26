@@ -13,13 +13,13 @@ import { call, take, put, select } from 'redux-saga/effects';
 import { CONNECTION, SYSTEM_INIT, RUSH, RFID } from '../actions/actionTypes';
 
 import { fetchConnectionInfo } from './api/systemInit';
-import {setLedStatusReady} from './io';
+import { setLedStatusReady } from './io';
 
 // import { initRush } from '../actions/rush';
 import { startHealthzCheck } from '../actions/healthCheck';
 import { setNewNotification } from '../actions/notification';
 import { initIO } from '../actions/ioModbus';
-import {initAiis}from '../actions/aiis'
+import { initAiis } from '../actions/aiis';
 
 export function* fetchConnectionFlow(baseUrl, hmiSN) {
   const fullUrl = `${baseUrl}/hmi.connections/${hmiSN}`;
@@ -45,24 +45,25 @@ export function* fetchConnectionFlow(baseUrl, hmiSN) {
 
       // 初始化rfid
       if (state.setting.systemSettings.rfidEnabled) {
-        yield put({type: RFID.INIT});
+        yield put({ type: RFID.INIT });
       }
 
       // 初始化aiis(andon)
       if (state.setting.systemSettings.andonEnable) {
-        yield put(initAiis(state.setting.page.odooConnection.aiisUrl.value, hmiSN));
+        yield put(
+          initAiis(state.setting.page.odooConnection.aiisUrl.value, hmiSN)
+        );
       }
     }
 
     setLedStatusReady();
-  }catch (e) {
+  } catch (e) {
     yield put(setNewNotification('error', e.toString()));
   }
-
 }
 
 export function* sysInitFlow() {
-  while(true) {
+  while (true) {
     try {
       const { baseUrl, hmiSN } = yield take(SYSTEM_INIT); // 只获取一次
       yield call(fetchConnectionFlow, baseUrl, hmiSN);

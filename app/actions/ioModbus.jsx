@@ -10,16 +10,15 @@ import { setNewNotification } from './notification';
 
 // const state = getState();
 
-
-export function initIO(){
-  return{
-    type:IO.INIT,
+export function initIO() {
+  return {
+    type: IO.INIT
   };
 }
 
-export function resetIO(modbusConfig){
-  return{
-    type:IO.RESET,
+export function resetIO(modbusConfig) {
+  return {
+    type: IO.RESET,
     modbusConfig
   };
 }
@@ -308,11 +307,10 @@ export function resetIO(modbusConfig){
 //   }
 // }
 
-    // const { healthzStatus } = getState().healthCheckResults;
-    // if (healthzStatus.modbus.isHealth) {
-    //   // 如果不相等 更新
-    // }
-
+// const { healthzStatus } = getState().healthCheckResults;
+// if (healthzStatus.modbus.isHealth) {
+//   // 如果不相等 更新
+// }
 
 // export function testIO(io, idx) {
 //   switch (io) {

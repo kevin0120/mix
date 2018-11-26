@@ -1,6 +1,13 @@
 import { eventChannel, END } from 'redux-saga';
-import { take, call, race, put, cancelled, cancel, fork } from 'redux-saga/effects';
-
+import {
+  take,
+  call,
+  race,
+  put,
+  cancelled,
+  cancel,
+  fork
+} from 'redux-saga/effects';
 
 function intervalChannel(ms) {
   return eventChannel(emit => {
@@ -19,32 +26,31 @@ export function* Interval(ms, { onStart, onStop, onCancel, onTick }) {
   if (onStart) {
     yield call(...onStart);
   }
-  let onTickTasks=[];
+  let onTickTasks = [];
   try {
     while (true) {
       yield take(chan);
       // console.log('Tick');
       if (onTick) {
         onTickTasks.push(yield fork(...onTick));
-        for(let task in onTickTasks ){
-          if(!onTickTasks[task].isRunning()){
-            onTickTasks.splice(task,1);
+        for (let task in onTickTasks) {
+          if (!onTickTasks[task].isRunning()) {
+            onTickTasks.splice(task, 1);
           }
         }
       }
     }
   } finally {
-    if(onTickTasks&&onTickTasks.length>0){
+    if (onTickTasks && onTickTasks.length > 0) {
       yield cancel(...onTickTasks);
-      onTickTasks=null;
+      onTickTasks = null;
     }
     if (!(yield cancelled())) {
       console.log('Interval Stopped');
       if (onStop) {
         yield call(...onStop);
       }
-    }
-    else if (onCancel) {
+    } else if (onCancel) {
       console.log('Interval Cancelled');
       yield call(...onCancel);
     }

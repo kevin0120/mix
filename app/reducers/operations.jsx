@@ -4,7 +4,7 @@ import {
   setLedStatusDoing,
   setLedError,
   setLedStatusReady,
-  sOn,
+  sOn
 } from '../sagas/io';
 
 export const OPERATION_STATUS = {
@@ -146,7 +146,7 @@ function mergeResults(state, data) {
     return rs;
   }
 
-  for (let i = 0; i < data.length; i+=1) {
+  for (let i = 0; i < data.length; i += 1) {
     rs[i + state.activeResultIndex].ti = data[i].ti;
     rs[i + state.activeResultIndex].mi = data[i].mi;
     rs[i + state.activeResultIndex].wi = data[i].wi;
@@ -208,7 +208,7 @@ function operationContinue(state) {
   const { activeResultIndex, results } = state;
   let count = 1;
   const ele = results[activeResultIndex + 1];
-  for (let i = activeResultIndex + 2; i < results.length; i+=1) {
+  for (let i = activeResultIndex + 2; i < results.length; i += 1) {
     if (ele.sequence === results[i].sequence) {
       count += 1;
     } else {

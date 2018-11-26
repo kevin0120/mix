@@ -3,13 +3,13 @@ import {
   fetchRoutingWorkcenter,
   fetchWorkorder,
   jobManual,
-  pset,
+  pset
 } from './api/operation';
 import { OPERATION, RUSH } from '../actions/actionTypes';
 import { openShutdown } from '../actions/shutDownDiag';
 import { OPERATION_RESULT, OPERATION_STATUS } from '../reducers/operations';
 import { addNewStory, clearStories, STORY_TYPE } from './timeline';
-import { toolEnable, toolDisable } from '../actions/tools'
+import { toolEnable, toolDisable } from '../actions/tools';
 
 // 监听作业
 export function* watchOperation() {
@@ -104,9 +104,7 @@ export function* getOperation(job) {
         fetchOK = true;
       }
     }
-
   } else {
-
     if (state.setting.operationSettings.opMode === 'op') {
       // 作业模式
 

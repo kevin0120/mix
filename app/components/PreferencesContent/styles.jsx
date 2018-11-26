@@ -5,7 +5,7 @@ export default theme => ({
   section: {
     // overflowY: 'scroll',
     flex: 1,
-    height:'auto'
+    height: 'auto'
   },
   paperWrap: {
     fontSize: 14

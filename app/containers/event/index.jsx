@@ -26,7 +26,12 @@ import CardHeader from '../../components/Card/CardHeader';
 
 import { Query, CreateDailyLogger, Warn } from '../../logger';
 
-import { cardTitle,infoColor,warningColor, dangerColor } from '../../common/jss/material-react-pro';
+import {
+  cardTitle,
+  infoColor,
+  warningColor,
+  dangerColor
+} from '../../common/jss/material-react-pro';
 import withLayout from '../../components/Layout/layout';
 
 import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
@@ -56,7 +61,8 @@ const styles = {
 // Find items logged between today and yesterday.
 //
 
-const requestData = () => new Promise((resolve, reject) => {
+const requestData = () =>
+  new Promise((resolve, reject) => {
     // You can retrieve your data however you want, in this case, we will just use some local data.
 
     const options = {
@@ -104,33 +110,33 @@ class Event extends React.Component {
       this.setState({
         loading: false,
         data: res.info.map((item, key) => ({
-            id: key,
-            timestamp: dayjs(item.timestamp).format('YYYY MM-DD HH:mm:ss'),
-            level: item.level,
-            message: item.message,
-            actions: (
-              // we've added some custom button actions
-              <div className="actions-right">
-                {/* use this button to add a like kind of action */}
-                <Button
-                  justIcon
-                  round
-                  simple
-                  onClick={() => {
-                    const obj = this.state.data.find(o => o.id === key);
-                    this.setState({
-                      isShow: true,
-                      selectObj: obj
-                    });
-                  }}
-                  color="warning"
-                  className="edit"
-                >
-                  <Dvr />
-                </Button>{' '}
-              </div>
-            )
-          }))
+          id: key,
+          timestamp: dayjs(item.timestamp).format('YYYY MM-DD HH:mm:ss'),
+          level: item.level,
+          message: item.message,
+          actions: (
+            // we've added some custom button actions
+            <div className="actions-right">
+              {/* use this button to add a like kind of action */}
+              <Button
+                justIcon
+                round
+                simple
+                onClick={() => {
+                  const obj = this.state.data.find(o => o.id === key);
+                  this.setState({
+                    isShow: true,
+                    selectObj: obj
+                  });
+                }}
+                color="warning"
+                className="edit"
+              >
+                <Dvr />
+              </Button>{' '}
+            </div>
+          )
+        }))
       });
     });
   }
@@ -189,14 +195,14 @@ class Event extends React.Component {
                       loading={loading}
                       data={data}
                       getTrProps={(state, rowInfo) => {
-                        if(rowInfo) {
+                        if (rowInfo) {
                           let color = infoColor;
-                          switch(rowInfo.row.level) {
-                            case "warn":
+                          switch (rowInfo.row.level) {
+                            case 'warn':
                               color = warningColor;
                               break;
 
-                            case "error":
+                            case 'error':
                               color = dangerColor;
                               break;
                             default:
@@ -210,8 +216,7 @@ class Event extends React.Component {
                           };
                         }
 
-                        return {}
-
+                        return {};
                       }}
                       filterable
                       columns={[
@@ -290,12 +295,12 @@ class Event extends React.Component {
                 title="事件详情"
                 onConfirm={this.handleClose}
                 onCancel={this.handleClose}
-                confirmBtnCssClass={
-                  `${this.props.classes.button  } ${  this.props.classes.success}`
-                }
-                cancelBtnCssClass={
-                  `${this.props.classes.button  } ${  this.props.classes.danger}`
-                }
+                confirmBtnCssClass={`${this.props.classes.button} ${
+                  this.props.classes.success
+                }`}
+                cancelBtnCssClass={`${this.props.classes.button} ${
+                  this.props.classes.danger
+                }`}
                 confirmBtnText={t('Common.Yes')}
                 cancelBtnText={t('Common.No')}
                 showCancel

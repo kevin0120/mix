@@ -1,5 +1,5 @@
 import { call, take, select, put, fork } from 'redux-saga/effects';
-import OWebSocket from "ws";
+import OWebSocket from 'ws';
 import { eventChannel } from 'redux-saga';
 import { ANDON, AIIS } from '../actions/actionTypes';
 import { jobManual } from './api/operation';
@@ -9,13 +9,13 @@ let ws = null;
 
 const WebSocket = require('@oznu/ws-connect');
 
-const AIIS_WS_CHANNEL={
-  OPEN:'AIIS_WS_CHANNEL_OPEN',
-  CLOSE:'AIIS_WS_CHANNEL_CLOSE',
-  ERROR:'AIIS_WS_CHANNEL_ERROR',
-  PING:'AIIS_WS_CHANNEL_PING',
-  PONG:'AIIS_WS_CHANNEL_PONG',
-  MESSAGE:'AIIS_WS_CHANNEL_PONG'
+const AIIS_WS_CHANNEL = {
+  OPEN: 'AIIS_WS_CHANNEL_OPEN',
+  CLOSE: 'AIIS_WS_CHANNEL_CLOSE',
+  ERROR: 'AIIS_WS_CHANNEL_ERROR',
+  PING: 'AIIS_WS_CHANNEL_PING',
+  PONG: 'AIIS_WS_CHANNEL_PONG',
+  MESSAGE: 'AIIS_WS_CHANNEL_PONG'
 };
 
 export function* watchAiis() {
@@ -26,7 +26,7 @@ export function* watchAiis() {
         yield call(handleAiisData, action.json);
         break;
       case AIIS.INIT:
-        yield fork(initAiis,action.aiisUrl,action.hmiSN);
+        yield fork(initAiis, action.aiisUrl, action.hmiSN);
         break;
       default:
         break;
@@ -34,13 +34,13 @@ export function* watchAiis() {
   }
 }
 
-function* initAiis(aiisUrl,hmiSN){
+function* initAiis(aiisUrl, hmiSN) {
   if (ws) {
     yield call(stopAiisWebsocket);
   }
   ws = new WebSocket(aiisUrl);
 
-  yield fork(aiisWSListener,hmiSN);
+  yield fork(aiisWSListener, hmiSN);
   yield call(wsOnOpen, hmiSN);
 }
 
@@ -49,7 +49,13 @@ export function* handleAiisData(data) {
   if (state.operations.operationStatus !== OPERATION_STATUS.DOING) {
     if (data.vin_code.length) {
       // 车辆拧紧作业
-      yield call(triggerOperation, data.vin_code, data.cartype_code, null, OPERATION_SOURCE.ANDON);
+      yield call(
+        triggerOperation,
+        data.vin_code,
+        data.cartype_code,
+        null,
+        OPERATION_SOURCE.ANDON
+      );
     } else {
       // 空车信息
 
@@ -96,14 +102,13 @@ export function* handleAiisData(data) {
 
 function aiisWSChannel() {
   return eventChannel(emit => {
-
     ws.on('open', () => {
       emit({ type: AIIS_WS_CHANNEL.OPEN });
     });
 
     ws.on('close', (code, reason) => {
       emit({
-        type: AIIS_WS_CHANNEL.CLOSE ,
+        type: AIIS_WS_CHANNEL.CLOSE,
         code,
         reason
       });
@@ -121,15 +126,14 @@ function aiisWSChannel() {
       emit({ type: AIIS_WS_CHANNEL.PONG });
     });
 
-    ws.on('message', (dataRaw) => {
+    ws.on('message', dataRaw => {
       emit({
-        type: AIIS_WS_CHANNEL.PONG ,
+        type: AIIS_WS_CHANNEL.PONG,
         dataRaw
       });
     });
 
-    return () => {
-    };
+    return () => {};
   });
 }
 
@@ -140,12 +144,14 @@ function* aiisWSListener(hmiSN) {
       const chanAction = yield take(chan);
       switch (chanAction.type) {
         case AIIS_WS_CHANNEL.OPEN:
-          yield call(wsOnOpen,hmiSN);
+          yield call(wsOnOpen, hmiSN);
           break;
         case AIIS_WS_CHANNEL.CLOSE:
           yield put(setHealthzCheck('Andon', false));
           console.log(
-            `websocket disconnected. retry in 1s code: ${chanAction.code}, reason: ${chanAction.reason}`
+            `websocket disconnected. retry in 1s code: ${
+              chanAction.code
+            }, reason: ${chanAction.reason}`
           );
           break;
         case AIIS_WS_CHANNEL.ERROR:
@@ -159,19 +165,18 @@ function* aiisWSListener(hmiSN) {
           console.log(' receive pong Msg');
           break;
         case AIIS_WS_CHANNEL.MESSAGE:
-          yield call(wsOnMessage,chanAction.dataRaw);
+          yield call(wsOnMessage, chanAction.dataRaw);
           break;
         default:
           break;
       }
     }
-  }
-  finally {
+  } finally {
     console.log('aiisWSListener finished');
   }
 }
 
-function* wsOnOpen(hmiSN){
+function* wsOnOpen(hmiSN) {
   ws.sendJson({ hmi_sn: hmiSN }, err => {
     if (err) {
       console.log('aiis ws sendJson error');
@@ -199,5 +204,3 @@ function stopAiisWebsocket() {
   }
   ws = null;
 }
-
-

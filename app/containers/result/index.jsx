@@ -19,7 +19,6 @@ import withLayout from '../../components/Layout/layout';
 
 import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
 
-
 // @material-ui/core components
 // @material-ui/icons
 // core components
@@ -31,13 +30,10 @@ import CardBody from '../../components/Card/CardBody';
 import CardIcon from '../../components/Card/CardIcon';
 import CardHeader from '../../components/Card/CardHeader';
 
-
 import { defaultClient } from '../../common/utils';
-
 
 const lodash = require('lodash');
 const dayjs = require('dayjs');
-
 
 const styles = {
   ...sweetAlertStyle,
@@ -70,7 +66,7 @@ function requestData(masterpcUrl, hmiSN) {
   if (!isURL(url, { require_protocol: true })) {
     return new Promise(() => {
       throw new Error('conn is Error!');
-    })
+    });
   }
   return defaultClient.get(url, {
     params: {
@@ -98,49 +94,49 @@ class Result extends React.Component {
 
   fetchData() {
     const { masterpcUrl, hmiSn } = this.props;
-    const {data} = this.state;
+    const { data } = this.state;
     requestData(masterpcUrl, hmiSn)
       .then(res => {
         const statusCode = res.status;
         if (statusCode === 200) {
           this.setState({
             data: res.data.map((item, key) => ({
-                id: key,
-                timestamp: dayjs(item.timestamp).format('YYYY MM-DD HH:mm:ss'),
-                vin: item.vin,
-                torque: item.torque,
-                angle: item.angle,
-                job_id: item.job_id,
-                batch: item.batch,
-                vehicle_type: item.vehicle_type,
-                actions: (
-                  // we've added some custom button actions
-                  <div className="actions-right">
-                    {/* use this button to add a like kind of action */}
-                    <Button
-                      justIcon
-                      round
-                      simple
-                      onClick={() => {
-                        const obj = data.find(o => o.id === key);
-                        this.setState({
-                          isShow: true,
-                          selectObj: obj
-                        });
-                      }}
-                      color="warning"
-                      className="edit"
-                    >
-                      <Dvr />
-                    </Button>{' '}
-                  </div>
-                )
-              }))
+              id: key,
+              timestamp: dayjs(item.timestamp).format('YYYY MM-DD HH:mm:ss'),
+              vin: item.vin,
+              torque: item.torque,
+              angle: item.angle,
+              job_id: item.job_id,
+              batch: item.batch,
+              vehicle_type: item.vehicle_type,
+              actions: (
+                // we've added some custom button actions
+                <div className="actions-right">
+                  {/* use this button to add a like kind of action */}
+                  <Button
+                    justIcon
+                    round
+                    simple
+                    onClick={() => {
+                      const obj = data.find(o => o.id === key);
+                      this.setState({
+                        isShow: true,
+                        selectObj: obj
+                      });
+                    }}
+                    color="warning"
+                    className="edit"
+                  >
+                    <Dvr />
+                  </Button>{' '}
+                </div>
+              )
+            }))
           });
         }
       })
       .catch(error => {
-        console.log(`get error: ${  error.toString()}`);
+        console.log(`get error: ${error.toString()}`);
       });
   }
 
@@ -283,12 +279,8 @@ class Result extends React.Component {
                 title="事件详情"
                 onConfirm={this.handleClose}
                 onCancel={this.handleClose}
-                confirmBtnCssClass={
-                  `${classes.button  } ${  classes.success}`
-                }
-                cancelBtnCssClass={
-                  `${classes.button  } ${  classes.danger}`
-                }
+                confirmBtnCssClass={`${classes.button} ${classes.success}`}
+                cancelBtnCssClass={`${classes.button} ${classes.danger}`}
                 confirmBtnText={t('Common.Yes')}
                 cancelBtnText={t('Common.No')}
                 showCancel

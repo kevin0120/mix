@@ -1,4 +1,3 @@
-
 import { call, take, put, select, fork } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
 import { RFID } from '../actions/actionTypes';
@@ -59,10 +58,7 @@ function* initRFID() {
   client.setEncoding('ascii');
   client.connect(options);
 
-  rfidChannel = yield call(
-    createRfidChannel,
-    client
-  );
+  rfidChannel = yield call(createRfidChannel, client);
 
   yield fork(watchRfidChannel);
 }
@@ -121,11 +117,22 @@ export function* watchRfidChannel() {
       const dataValue = _.trim(code);
 
       if (isCarID(dataValue)) {
-        yield call(triggerOperation, dataValue, null, null, OPERATION_SOURCE.RFID);
+        yield call(
+          triggerOperation,
+          dataValue,
+          null,
+          null,
+          OPERATION_SOURCE.RFID
+        );
       } else {
-        yield call(triggerOperation, null, dataValue, null, OPERATION_SOURCE.RFID);
+        yield call(
+          triggerOperation,
+          null,
+          dataValue,
+          null,
+          OPERATION_SOURCE.RFID
+        );
       }
     }
-
   }
 }

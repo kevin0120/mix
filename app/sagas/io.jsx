@@ -1,6 +1,15 @@
 // redux-saga
 import { eventChannel, channel, delay } from 'redux-saga';
-import { take, put, call, fork, all, select, cancel, cancelled } from 'redux-saga/effects';
+import {
+  take,
+  put,
+  call,
+  fork,
+  all,
+  select,
+  cancel,
+  cancelled
+} from 'redux-saga/effects';
 
 //
 import { cloneDeep } from 'lodash';
@@ -23,7 +32,6 @@ import userConfigs from '../shared/config';
 const Reconnect = require('node-net-reconnect');
 const net = require('net');
 const lodash = require('lodash');
-
 
 const CLIENT_CHANNEL = {
   CONNECT: 'CLIENT_CHANNEL_CONNECT',
@@ -64,7 +72,6 @@ let ioStatus = [sOn, sOn, sOn, sOn];
 
 let timeStamp = null;
 const byPassTimeout = 3;
-
 
 export function* watchIO() {
   try {
@@ -152,6 +159,9 @@ function* initIOModbus() {
     setModBusIO(modbusConfig);
 
     const modbusIOUrl = state.connections.io;
+    if (lodash.isNil(modbusIOUrl) || !modbusIOUrl.length) {
+      return;
+    }
     const kvs = modbusIOUrl.split('://');
     const hostPorts = kvs[1].split(':');
     const host = hostPorts[0];
@@ -164,12 +174,10 @@ function* initIOModbus() {
       retryAlways: true // retry even if the connection was closed on purpose
     };
 
-
     io.client = new net.Socket();
     io.recon = new Reconnect(io.client, options);
     io.client.setTimeout(1000);
     io.modbusClient = new modbus.client.TCP(io.client);
-
 
     try {
       io.client.connect(options);
@@ -179,7 +187,6 @@ function* initIOModbus() {
       return;
     }
     io.runningTask = yield fork(ioClientListener);
-
   } catch (e) {
     console.log(e);
   }
@@ -187,7 +194,6 @@ function* initIOModbus() {
 
 function ioClientChannel() {
   return eventChannel(emit => {
-
     io.client.on('connect', () => {
       emit({ type: CLIENT_CHANNEL.CONNECT });
     });
@@ -204,8 +210,7 @@ function ioClientChannel() {
       emit({ type: CLIENT_CHANNEL.ERROR });
     });
 
-    return () => {
-    };
+    return () => {};
   });
 }
 
@@ -231,11 +236,9 @@ function* ioClientListener() {
           break;
       }
     }
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err);
-  }
-  finally {
+  } finally {
     console.log('ioClientListener finished');
   }
 }
@@ -243,10 +246,7 @@ function* ioClientListener() {
 function* senderReceiver() {
   try {
     while (true) {
-      yield all([
-        call(keyMonitorTask),
-        call(senderTask)
-      ]);
+      yield all([call(keyMonitorTask), call(senderTask)]);
       yield delay(500);
     }
   } catch (err) {
@@ -258,14 +258,18 @@ function* senderReceiver() {
 
 function* keyMonitorTask() {
   try {
-    const { response, error } = yield call(() => io.modbusClient
-      .readDiscreteInputs(io.i.resetKey, 1)
-      .then(resp => ({ response: resp }))
-      .catch(err => ({ error: err }))
+    const { response, error } = yield call(() =>
+      io.modbusClient
+        .readDiscreteInputs(io.i.resetKey, 1)
+        .then(resp => ({ response: resp }))
+        .catch(err => ({ error: err }))
     );
     if (response) {
       const newKeyStatus = response.response.body.valuesAsArray[0];
-      if (io.currentKeyStatus !== null && io.currentKeyStatus !== newKeyStatus) {
+      if (
+        io.currentKeyStatus !== null &&
+        io.currentKeyStatus !== newKeyStatus
+      ) {
         if (newKeyStatus === 1) {
           // on
           timeStamp = new Date().getTime();
@@ -285,13 +289,14 @@ function* keyMonitorTask() {
       }
       io.currentKeyStatus = newKeyStatus;
     } else if (error) {
-      yield put(setNewNotification('error', error ? error.toString() : 'unknown error'));
+      yield put(
+        setNewNotification('error', error ? error.toString() : 'unknown error')
+      );
       yield cancel(io.senderReceiver);
       io.senderReceiver = null;
       io.client.destroy();
     }
-  }
-  finally {
+  } finally {
     if (yield cancelled()) {
       console.log('keyMonitorOnTick canceled');
     }
@@ -314,7 +319,7 @@ function* senderTask() {
       io.modbusClient
         .writeMultipleCoils(0, lights)
         .then()
-        .catch((err) => ({ error: err }))
+        .catch(err => ({ error: err }))
     );
 
     if (error) {
@@ -336,7 +341,6 @@ function* senderTask() {
   } catch (err) {
     console.log(err);
   }
-
 }
 
 function* setHealth(health) {
@@ -398,16 +402,16 @@ function setModBusIO(modbusConfig) {
 function resetIO(modbusConfig) {
   const preIOStatus = cloneDeep(ioStatus);
   const preO = cloneDeep(io.o);
-  const {o}=io;
+  const { o } = io;
 
   setModBusIO(modbusConfig);
-  for(const key in o){
-    ioStatus[o[key]]=preIOStatus[preO[key]];
+  for (const key in o) {
+    ioStatus[o[key]] = preIOStatus[preO[key]];
   }
 }
 
 export function setLedStatusReady() {
-  const {o}=io;
+  const { o } = io;
   ioStatus[o.red] = sOff;
   ioStatus[o.white] = sOff;
   ioStatus[o.yellow] = sBlinkOn;
@@ -415,7 +419,7 @@ export function setLedStatusReady() {
 }
 
 export function setLedStatusDoing() {
-  const {o}=io;
+  const { o } = io;
   ioStatus[o.red] = sOff;
   ioStatus[o.yellow] = sOn;
   ioStatus[o.white] = sOn;

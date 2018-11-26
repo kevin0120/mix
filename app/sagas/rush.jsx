@@ -107,7 +107,13 @@ export function* watchRushChannel() {
     switch (event) {
       case 'job':
         if (state.workMode.workMode === 'manual' && json.job_id) {
-          yield call(triggerOperation, null, null, json.job_id, OPERATION_SOURCE.MANUAL);
+          yield call(
+            triggerOperation,
+            null,
+            null,
+            json.job_id,
+            OPERATION_SOURCE.MANUAL
+          );
         }
 
         break;
@@ -124,10 +130,10 @@ export function* watchRushChannel() {
 
           if (json.inputs[getIModeSelect()] === '1') {
             // 切换到手动模式
-            yield put({ type: WORK_MODE.SWITCH_WM, mode: 'manual'});
+            yield put({ type: WORK_MODE.SWITCH_WM, mode: 'manual' });
           } else {
             // 切换到自动模式
-            yield put({ type: WORK_MODE.SWITCH_WM, mode: 'auto'});
+            yield put({ type: WORK_MODE.SWITCH_WM, mode: 'auto' });
           }
         }
         break;

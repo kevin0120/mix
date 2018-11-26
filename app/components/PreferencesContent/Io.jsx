@@ -35,10 +35,9 @@ const mapStateToProps = (state, ownProps) => ({
 
 function mapDispatchToProps(dispatch) {
   return {
-    saveConfigs:(...args)=>dispatch(saveConfigs(...args)),
-    resetIO:(...args)=>dispatch(resetIO(...args)),
+    saveConfigs: (...args) => dispatch(saveConfigs(...args)),
+    resetIO: (...args) => dispatch(resetIO(...args))
   };
-
 }
 
 /* eslint-disable react/prefer-stateless-function */
@@ -278,7 +277,7 @@ ConnectedIo.propTypes = {
   in: PropTypes.array,
   out: PropTypes.array,
   saveConfigs: PropTypes.func.isRequired,
-  resetIO:PropTypes.func.isRequired,
+  resetIO: PropTypes.func.isRequired
 };
 
 const Io = connect(

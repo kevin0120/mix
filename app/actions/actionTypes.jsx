@@ -38,7 +38,7 @@ export const RUSH = {
 };
 
 export const RFID = {
-  INIT: 'RFID_INIT',
+  INIT: 'RFID_INIT'
 };
 
 export const OPERATION = {
@@ -62,14 +62,14 @@ export const OPERATION = {
   FAILED: 'OPERATION_FAILED',
   CONTINUE: 'OPERATION_CONTINUE',
   PREDOING: 'OPERATION_PREDOING',
-  VERIFIED: 'OPERATION_VERIFIED',
+  VERIFIED: 'OPERATION_VERIFIED'
 };
 
 export const IO = {
   FUNCTION: 'IO_FUNCTION',
-  INIT:'IO_INIT',
-  TEST:'IO_TEST',
-  RESET:'IO_RESET'
+  INIT: 'IO_INIT',
+  TEST: 'IO_TEST',
+  RESET: 'IO_RESET'
 };
 
 export const CONNECTION = {

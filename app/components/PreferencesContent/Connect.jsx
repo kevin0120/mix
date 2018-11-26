@@ -130,7 +130,7 @@ ConnectedConnect.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   storedConfigs: PropTypes.shape({}).isRequired,
   saveConfigs: PropTypes.func.isRequired,
-  systemInit: PropTypes.func.isRequired,
+  systemInit: PropTypes.func.isRequired
 };
 
 const Connect = connect(

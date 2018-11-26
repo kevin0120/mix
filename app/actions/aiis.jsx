@@ -36,7 +36,6 @@ export function initAiis(aiisUrl, hmiSN) {
   };
 }
 
-
 // export function stopAiisWebsocket() {
 //   if (
 //     ws.ws.readyState === OWebSocket.OPEN ||
@@ -46,7 +45,6 @@ export function initAiis(aiisUrl, hmiSN) {
 //   }
 //   ws = null;
 // }
-
 
 // export function initAiis(dispatch, aiisUrl, hmiSN) {
 //   if (ws) {

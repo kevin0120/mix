@@ -103,7 +103,7 @@ class ConnectedNet extends React.PureComponent {
   }
 
   handleSubmit() {
-    const { section, ssid, data, } = this.state;
+    const { section, ssid, data } = this.state;
     const { saveConfigs } = this.props;
     this.setState({
       loading: true
@@ -219,7 +219,7 @@ class ConnectedNet extends React.PureComponent {
   };
 
   componentDidMount() {
-    const {data} = this.state;
+    const { data } = this.state;
     const tempData = cloneDeep(this.state);
     const ret = [];
     const { exec } = require('child_process');
@@ -231,7 +231,7 @@ class ConnectedNet extends React.PureComponent {
       if (stdout) {
         const lines = stdout.toString().split('\n');
         let isHeader = true;
-        for (let i = 0; i < lines.length - 1; i+=1) {
+        for (let i = 0; i < lines.length - 1; i += 1) {
           if (isHeader) {
             isHeader = false;
           } else {
@@ -261,7 +261,7 @@ class ConnectedNet extends React.PureComponent {
 
   render() {
     const { classes } = this.props;
-    const { data, ssid, loading,ssidSelectOpen, ssids } = this.state;
+    const { data, ssid, loading, ssidSelectOpen, ssids } = this.state;
 
     const validateData = lodash.omit(data, ['ssid']);
 

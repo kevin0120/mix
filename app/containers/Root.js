@@ -20,10 +20,7 @@ export default class Root extends Component<Props> {
     setCardAuthListener(store.dispatch);
     const connectionInfo = store.getState().setting.page.odooConnection;
     store.dispatch(
-      systemInit(
-        connectionInfo.odooUrl.value,
-        connectionInfo.hmiSn.value
-      )
+      systemInit(connectionInfo.odooUrl.value, connectionInfo.hmiSn.value)
     ); // 初始化获取默认值
     return (
       <Provider store={store}>
