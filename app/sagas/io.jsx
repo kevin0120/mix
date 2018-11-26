@@ -458,15 +458,15 @@ function resetIO(modbusConfig) {
 export function setLedStatusReady() {
   ioStatus[oRed] = sOff;
   ioStatus[oWhite] = sOff;
-  ioStatus[oYellow] = sBlinkOn;
-  ioStatus[oGreen] = sOff;
+  ioStatus[oYellow] = sOff;
+  ioStatus[oGreen] = sBlinkOn;
 }
 
 export function setLedStatusDoing() {
   ioStatus[oRed] = sOff;
-  ioStatus[oYellow] = sOn;
+  ioStatus[oYellow] = sOff;
   ioStatus[oWhite] = sOn;
-  ioStatus[oGreen] = sOff;
+  ioStatus[oGreen] = sOn;
 }
 
 export function setLedInfo(flag) {
