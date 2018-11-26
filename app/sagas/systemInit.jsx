@@ -23,43 +23,48 @@ import {initAiis}from '../actions/aiis'
 
 export function* fetchConnectionFlow(baseUrl, hmiSN) {
   const fullUrl = `${baseUrl}/hmi.connections/${hmiSN}`;
-  const resp = yield call(fetchConnectionInfo, fullUrl);
+  try {
+    const resp = yield call(fetchConnectionInfo, fullUrl);
 
-  if (resp.status === 200) {
-    const state = yield select();
-    yield put({ type: CONNECTION.FETCH_OK, data: resp.data });
+    if (resp.status === 200) {
+      const state = yield select();
+      yield put({ type: CONNECTION.FETCH_OK, data: resp.data });
 
-    const url = resp.data.masterpc.connection;
-    const controllers = resp.data.controllers.map(i => i.serial_no);
+      const url = resp.data.masterpc.connection;
+      const controllers = resp.data.controllers.map(i => i.serial_no);
 
-    yield put(startHealthzCheck(url, controllers)); // 启动healthzcheck 定时器
+      yield put(startHealthzCheck(url, controllers)); // 启动healthzcheck 定时器
 
-    // 初始化rush
-    yield put({ type: RUSH.INIT });
+      // 初始化rush
+      yield put({ type: RUSH.INIT });
 
-    // 初始化io
-    if (state.setting.systemSettings.modbusEnable) {
-      yield put(initIO());
+      // 初始化io
+      if (state.setting.systemSettings.modbusEnable) {
+        yield put(initIO());
+      }
+
+      // 初始化rfid
+      if (state.setting.systemSettings.rfidEnabled) {
+        yield put({type: RFID.INIT});
+      }
+
+      // 初始化aiis(andon)
+      if (state.setting.systemSettings.andonEnable) {
+        yield put(initAiis(state.setting.page.odooConnection.aiisUrl.value, hmiSN));
+      }
     }
 
-    // 初始化rfid
-    if (state.setting.systemSettings.rfidEnabled) {
-      yield put({type: RFID.INIT});
-    }
-
-    // 初始化aiis(andon)
-    if (state.setting.systemSettings.andonEnable) {
-      yield put(initAiis(state.setting.page.odooConnection.aiisUrl.value, hmiSN));
-    }
+    setLedStatusReady();
+  }catch (e) {
+    yield put(setNewNotification('error', e.toString()));
   }
 
-  setLedStatusReady();
 }
 
 export function* sysInitFlow() {
   while(true) {
-    const { baseUrl, hmiSN } = yield take(SYSTEM_INIT); // 只获取一次
     try {
+      const { baseUrl, hmiSN } = yield take(SYSTEM_INIT); // 只获取一次
       yield call(fetchConnectionFlow, baseUrl, hmiSN);
     } catch (e) {
       yield put(setNewNotification('error', e.toString()));

@@ -132,7 +132,7 @@ export const defaultConfigs = {
         {
           bit: 4,
           io: 'out',
-          function: 'LED_BEEP',
+          function: 'BEEP',
           label: '蜂鸣'
         },
         {

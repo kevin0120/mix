@@ -298,12 +298,8 @@ function* keyMonitorOnTick() {
     // set health = true
     const { response, error } = yield call(() => io.modbusClient
       .readDiscreteInputs(iResetKey, 1)
-      .then(resp => {
-        return ({ response: resp });
-      })
-      .catch(err => {
-        return ({ error: err });
-      })
+      .then(resp => ({ response: resp }))
+      .catch(err => ({ error: err }))
     );
     if (response) {
       const newKeyStatus = response.response.body.valuesAsArray[0];
@@ -374,8 +370,7 @@ function* senderOnTick() {
       .catch((err) => ({ error: err }))
   );
 
-  if (response) {
-  } else if (error) {
+  if (error) {
     console.log(error);
     io.client.destroy();
     yield put(io.channel, { type: IO_CHANNEL.SENDER.CLOSE });
@@ -411,7 +406,7 @@ function setOutBit(obj) {
     case IO_FUNCTION.OUT.LED_WHITE:
       oWhite = obj.bit;
       break;
-    case IO_FUNCTION.OUT.LED_BEEP:
+    case IO_FUNCTION.OUT.BEEP:
       oBeep = obj.bit;
       break;
     default:
