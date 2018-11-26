@@ -131,8 +131,8 @@ export const routeConfigs = [
 ];
 
 const indexRoutes = [
-  { path: '/pages', component: Pages },
-  { path: '/', component: HomePage }
+  { url: '/pages', main: Pages },
+  { url: '/', main: HomePage }
 ];
 
 export default indexRoutes;

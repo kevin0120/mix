@@ -125,7 +125,7 @@ class ConnectedTest extends React.PureComponent {
       },
       controllerSn: {
         displayOrder: 100,
-        value: isNil(connInfo.controllers[0].serial_no)
+        value: isNil(connInfo.controllers[0])
           ? ''
           : String(connInfo.controllers[0].serial_no),
         displayTitle: '控制器序列号'

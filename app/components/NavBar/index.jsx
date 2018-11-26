@@ -8,7 +8,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
 
-import { routeConfigs } from '../../routes';
+import { routeConfigs } from '../../routes/index';
 
 import styles from './styles';
 
