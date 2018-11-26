@@ -7,22 +7,23 @@ import Divider from '@material-ui/core/Divider';
 import { I18n } from 'react-i18next';
 
 import SweetAlert from 'react-bootstrap-sweetalert';
-import { cardTitle } from '../../common/jss/material-react-pro';
-import withLayout from '../../components/Layout/layout';
-
-import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
-
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
-
-// @material-ui/core components
 import withStyles from '@material-ui/core/styles/withStyles';
-// @material-ui/icons
 import Assignment from '@material-ui/icons/Assignment';
 import Dvr from '@material-ui/icons/Dvr';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import isURL from 'validator/lib/isURL';
+import { cardTitle } from '../../common/jss/material-react-pro';
+import withLayout from '../../components/Layout/layout';
+
+import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
+
+
+// @material-ui/core components
+// @material-ui/icons
 // core components
 import GridContainer from '../../components/Grid/GridContainer';
 import GridItem from '../../components/Grid/GridItem';
@@ -32,8 +33,10 @@ import CardBody from '../../components/Card/CardBody';
 import CardIcon from '../../components/Card/CardIcon';
 import CardHeader from '../../components/Card/CardHeader';
 
+
 const lodash = require('lodash');
 const dayjs = require('dayjs');
+
 
 const defaultInstance = axios.create({
   timeout: 3000,
@@ -80,6 +83,9 @@ const mapDispatchToProps = {};
 
 function requestData(masterpcUrl, hmiSN) {
   const url = `${masterpcUrl}/rush/v1/local-results`;
+  if (!isURL(url, { require_protocol: true })) {
+    throw new Error('conn is Error!');
+  }
   return defaultInstance.get(url, {
     params: {
       hmi_sn: hmiSN,
@@ -111,8 +117,7 @@ class Result extends React.Component {
         const statusCode = res.status;
         if (statusCode === 200) {
           this.setState({
-            data: res.data.map((item, key) => {
-              return {
+            data: res.data.map((item, key) => ({
                 id: key,
                 timestamp: dayjs(item.timestamp).format('YYYY MM-DD HH:mm:ss'),
                 vin: item.vin,
@@ -130,7 +135,7 @@ class Result extends React.Component {
                       round
                       simple
                       onClick={() => {
-                        let obj = this.state.data.find(o => o.id === key);
+                        const obj = this.state.data.find(o => o.id === key);
                         this.setState({
                           isShow: true,
                           selectObj: obj
@@ -143,13 +148,12 @@ class Result extends React.Component {
                     </Button>{' '}
                   </div>
                 )
-              };
-            })
+              }))
           });
         }
       })
       .catch(error => {
-        console.log('get error' + error.toString());
+        console.log(`get error${  error.toString()}`);
       });
   }
 
@@ -293,10 +297,10 @@ class Result extends React.Component {
                 onConfirm={this.handleClose}
                 onCancel={this.handleClose}
                 confirmBtnCssClass={
-                  this.props.classes.button + ' ' + this.props.classes.success
+                  `${this.props.classes.button  } ${  this.props.classes.success}`
                 }
                 cancelBtnCssClass={
-                  this.props.classes.button + ' ' + this.props.classes.danger
+                  `${this.props.classes.button  } ${  this.props.classes.danger}`
                 }
                 confirmBtnText={t('Common.Yes')}
                 cancelBtnText={t('Common.No')}

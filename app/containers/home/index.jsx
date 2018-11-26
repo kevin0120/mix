@@ -95,7 +95,7 @@ class ConnectedWelcome extends React.Component {
             <Button
               round
               size="lg"
-              color="secondary"
+              color="danger"
               className={fabRightClassName}
               onClick={this.handleClickOpen}
             >
@@ -106,7 +106,7 @@ class ConnectedWelcome extends React.Component {
               <Button
                 round
                 size="lg"
-                color="primary"
+                color="info"
                 className={fabLeftClassName}
                 component={Link}
                 to="/pages/login"
