@@ -542,7 +542,7 @@ class ConnectedWorking extends React.Component {
       operations.operationStatus,
       operationSettings.enableResultDialog
     );
-
+    this.prevOperationStatus = prevProps.operations.operationStatus;
     // const {
     //   masterpcUrl,
     //   orderStatus, userid, workcenterId,
@@ -695,7 +695,7 @@ class ConnectedWorking extends React.Component {
       if (operations.results.length > 0) {
         programme = operations.results[
           operations.activeResultIndex
-        ].pset.toString();
+          ].pset.toString();
       }
     }
 
@@ -727,7 +727,7 @@ class ConnectedWorking extends React.Component {
     const { classes, operations, timeline } = this.props;
     //
     //
-    const { inputName, resultShow } = this.state;
+    const { inputName, resultShow} = this.state;
     //
     let batch = '0/0';
     let redoBatch = '0/0';
@@ -793,7 +793,7 @@ class ConnectedWorking extends React.Component {
     // if (this.props.orderStatus === 'Ready' || this.props.orderStatus === 'PreDoing' || this.props.orderStatus === 'Timeout' || this.props.orderStatus === 'Init' || (!this.props.isAutoMode)){
     //   shouldProcessing = false;
     // }
-
+    console.log(operations);
     return (
       <I18n ns="translations">
         {t => (
@@ -868,7 +868,7 @@ class ConnectedWorking extends React.Component {
                 <Grid item xs={12} className={classes.MainWrapper}>
                   <Paper className={classes.LeftBottomTab}>
                     <div className={classes.ImgTabContiner}>
-                      <ImageStick operations={operations} />
+                      <ImageStick operations={operations}/>
                     </div>
                   </Paper>
                 </Grid>
@@ -883,7 +883,9 @@ class ConnectedWorking extends React.Component {
                       lodash.includes(
                         [OPERATION_STATUS.DOING],
                         operations.operationStatus
-                      )
+                        // predoing -> doing
+                      ) &&
+                      this.prevOperationStatus === OPERATION_STATUS.PREDOING
                     }
                     shouldCounterStop={() =>
                       lodash.includes(
@@ -943,20 +945,20 @@ class ConnectedWorking extends React.Component {
                       key="divider-infoUser"
                       light
                     />
-                    <WorkingInfoBar key="infoOrder" infos={this.orderInfo(t)} />
+                    <WorkingInfoBar key="infoOrder" infos={this.orderInfo(t)}/>
                   </List>
                 </div>
               </Paper>
               <Paper className={classes.InfoTabTimeLine}>
                 <div className={classes.InfoTabContiner}>
                   <div className={classes.InfoTabContiner}>
-                    <TimeLine simple stories={timeline} />
+                    <TimeLine simple stories={timeline}/>
                     {/*<TimeLine simple stories={teststory} />*/}
                   </div>
                 </div>
               </Paper>
-              <ShutdownDiag />
-              <ResultDialog show={resultShow} />
+              <ShutdownDiag/>
+              <ResultDialog show={resultShow}/>
               <ManualDiag
                 show={this.state.manualDiagShow}
                 close={this.closeManualDiag}

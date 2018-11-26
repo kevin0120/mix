@@ -1,37 +1,29 @@
-import { eventChannel, channel } from 'redux-saga';
+// redux-saga
+import { eventChannel, channel, delay } from 'redux-saga';
 import { take, put, call, fork, all, select, cancel, cancelled } from 'redux-saga/effects';
-import modbus from 'jsmodbus';
-import { cloneDeep } from 'lodash';
-import { IO, OPERATION } from '../actions/actionTypes';
-import { IO_FUNCTION } from '../reducers/io';
-import { continueOperation } from './operation';
 
+//
+import { cloneDeep } from 'lodash';
+import modbus from 'jsmodbus';
+
+// actions
+import { IO, OPERATION } from '../actions/actionTypes';
 import { setHealthzCheck } from '../actions/healthCheck';
-import userConfigs from '../shared/config';
 import { setNewNotification } from '../actions/notification';
 
-import { Interval } from './timer';
+// reducers
+import { IO_FUNCTION } from '../reducers/io';
+
+// sagas
+import { continueOperation } from './operation';
+
+// config
+import userConfigs from '../shared/config';
 
 const Reconnect = require('node-net-reconnect');
 const net = require('net');
-
 const lodash = require('lodash');
 
-const IO_CHANNEL = {
-  KEY_MONITOR: {
-    ON_TICK: 'IO_CHANNEL_KEY_MONITOR_ON_TICK',
-    CLOSE: 'IO_CHANNEL_KEY_MONITOR_CLOSE'
-  },
-  CLOSE_ALL: 'IO_CHANNEL_CLOSE_ALL',
-  SENDER: {
-    ON_TICK: 'IO_CHANNEL_SENDER_ON_TICK',
-    CLOSE: 'IO_CHANNEL_SENDER_CLOSE'
-  },
-  RECON: {
-    CLOSE: 'IO_CHANNEL_RECON_CLOSE'
-  },
-  FUNCTION: 'IO_CHANNEL_FUNCTION'
-};
 
 const CLIENT_CHANNEL = {
   CONNECT: 'CLIENT_CHANNEL_CONNECT',
@@ -39,14 +31,6 @@ const CLIENT_CHANNEL = {
   CLOSE: 'CLIENT_CHANNEL_CLOSE',
   ERROR: 'CLIENT_CHANNEL_ERROR'
 };
-// let fail = false;
-
-
-let oWhite = 0;
-let oYellow = 1;
-let oGreen = 2;
-let oRed = 3;
-let oBeep = 4;
 
 const io = {
   channel: null,
@@ -54,19 +38,22 @@ const io = {
   recon: null,
   currentKeyStatus: null,
   modbusClient: null,
-  keyMonitorTask: null,
-  senderTask: null,
-  runningTask: null
+  senderReceiver: null,
+  runningTask: null,
+  health: false,
+  i: {
+    resetKey: 0,
+    byPass: 1,
+    modeSelect: 2
+  },
+  o: {
+    white: 0,
+    yellow: 1,
+    green: 2,
+    red: 3,
+    beep: 4
+  }
 };
-let iResetKey = 0;
-let iBypass = 1;
-let iModeSelect = 2;
-
-let iPrevWhite = oWhite;
-let iPrevYellow = oYellow;
-let iPrevGreen = oGreen;
-let iPrevRed = oRed;
-let iPrevBeep = oBeep;
 
 export const sOff = 0;
 export const sOn = 1;
@@ -80,155 +67,122 @@ const byPassTimeout = 3;
 
 
 export function* watchIO() {
-  io.channel = yield call(channel);
-  while (true) {
-    const action = yield take([IO.INIT, IO.TEST, IO.RESET]);
-    switch (action.type) {
-      // case IO.FUNCTION:
-      //   yield call(handleIOFunction, action.data);
-      //   break;
-      case IO.INIT:
-        yield fork(initIOModbus);
-        break;
-      // case IO.TEST:
-      //   yield fork(testIO, action.io, action.idx);
-      //   break;
-      case IO.RESET:
-        yield fork(resetIO, action.modbusConfig);
-        break;
-      default:
-        break;
-    }
-  }
-}
-
-function* watchIOChannel() {
   try {
+    io.channel = yield call(channel);
     while (true) {
-      const action = yield take(io.channel);
+      const action = yield take([IO.INIT, IO.TEST, IO.RESET]);
       switch (action.type) {
-        case IO_CHANNEL.FUNCTION:
-          yield call(handleIOFunction, action.data);
+        case IO.INIT:
+          yield fork(initIOModbus);
           break;
-        case IO_CHANNEL.CLOSE_ALL:
-          if (io.keyMonitorTask) {
-            yield cancel(io.keyMonitorTask);
-            io.keyMonitorTask = null;
-          }
-          if (io.senderTask) {
-            yield cancel(io.senderTask);
-            io.senderTask = null;
-          }
-          if (io.recon) {
-            io.recon.end();
-            io.recon = null;
-          }
-          if (io.client) {
-            io.client.destroy();
-          }
-          if (io.runningTask) {
-            yield cancel(io.runningTask);
-            io.runningTask = null;
-          }
-          break;
-        case IO_CHANNEL.SENDER.CLOSE:
-          if (io.senderTask) {
-            yield cancel(io.senderTask);
-            io.senderTask = null;
-          }
-          break;
-        case IO_CHANNEL.KEY_MONITOR.CLOSE:
-          if (io.keyMonitorTask) {
-            yield cancel(io.keyMonitorTask);
-            io.keyMonitorTask = null;
-          }
+        // case IO.TEST:
+        //   yield fork(testIO, action.io, action.idx);
+        //   break;
+        case IO.RESET:
+          console.log('resetIO');
+          yield fork(resetIO, action.modbusConfig);
           break;
         default:
           break;
       }
     }
-  } finally {
-    console.log('watchIOChannel finished');
+  } catch (e) {
+    console.log(e);
   }
+}
 
+function* closeAll() {
+  try {
+    if (io.senderReceiver) {
+      yield cancel(io.senderReceiver);
+      io.senderReceiver = null;
+    }
+    if (io.recon) {
+      io.recon.end();
+      io.recon = null;
+    }
+    if (io.client) {
+      io.client.destroy();
+    }
+    if (io.runningTask) {
+      yield cancel(io.runningTask);
+      io.runningTask = null;
+    }
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 function* handleIOFunction(data) {
-  switch (data) {
-    case IO_FUNCTION.IN.RESET: {
-      // 复位
-
-      yield call(continueOperation);
-      break;
-    }
-    case IO_FUNCTION.IN.BYPASS: {
-      // 强制放行
-
-      yield put({ type: OPERATION.FINISHED, data: [] });
-      break;
-    }
-    case IO_FUNCTION.IN.MODE_SELECT: {
-      // 模式选择
-
-      break;
-    }
-
-    default:
-      break;
-  }
-}
-
-function* runIO() {
   try {
-    io.channel.flush(()=>{});
-    yield all([
-      call(ioClientListener),
-      call(watchIOChannel)
-    ]);
-  } finally {
-    console.log('io running finished');
+    switch (data) {
+      case IO_FUNCTION.IN.RESET: {
+        // 复位
+
+        yield call(continueOperation);
+        break;
+      }
+      case IO_FUNCTION.IN.BYPASS: {
+        // 强制放行
+
+        yield put({ type: OPERATION.FINISHED, data: [] });
+        break;
+      }
+      case IO_FUNCTION.IN.MODE_SELECT: {
+        // 模式选择
+
+        break;
+      }
+
+      default:
+        break;
+    }
+  } catch (e) {
+    console.log(e);
   }
 }
 
 function* initIOModbus() {
-  const state = yield select();
-
-
-  yield put(io.channel, { type: IO_CHANNEL.CLOSE_ALL });
-
-  const modbusConfig = state.setting.page.modbus;
-  initModBusIO(modbusConfig);
-
-  const modbusIOUrl = state.connections.io;
-  const kvs = modbusIOUrl.split('://');
-  const hostPorts = kvs[1].split(':');
-  const host = hostPorts[0];
-  const port = parseInt(hostPorts[1].split('/')[0], 10);
-
-  const options = {
-    host,
-    port,
-    retryTime: 1000, // 1s for every retry
-    retryAlways: true // retry even if the connection was closed on purpose
-  };
-
-
-  io.client = new net.Socket();
-  io.recon = new Reconnect(io.client, options);
-  io.client.setTimeout(1000);
-  io.modbusClient = new modbus.client.TCP(io.client);
-
-
-
   try {
-    io.client.connect(options);
-  } catch (error) {
-    io.client = null;
-    console.log(error);
-    return;
-  }
-  io.runningTask = yield fork(runIO);
+    const state = yield select();
 
+    yield call(closeAll);
+
+    const modbusConfig = state.setting.page.modbus;
+    setModBusIO(modbusConfig);
+
+    const modbusIOUrl = state.connections.io;
+    const kvs = modbusIOUrl.split('://');
+    const hostPorts = kvs[1].split(':');
+    const host = hostPorts[0];
+    const port = parseInt(hostPorts[1].split('/')[0], 10);
+
+    const options = {
+      host,
+      port,
+      retryTime: 1000, // 1s for every retry
+      retryAlways: true // retry even if the connection was closed on purpose
+    };
+
+
+    io.client = new net.Socket();
+    io.recon = new Reconnect(io.client, options);
+    io.client.setTimeout(1000);
+    io.modbusClient = new modbus.client.TCP(io.client);
+
+
+    try {
+      io.client.connect(options);
+    } catch (error) {
+      io.client = null;
+      console.log(error);
+      return;
+    }
+    io.runningTask = yield fork(ioClientListener);
+
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 function ioClientChannel() {
@@ -256,48 +210,56 @@ function ioClientChannel() {
 }
 
 function* ioClientListener() {
-  const chan = yield call(ioClientChannel);
   try {
+    const chan = yield call(ioClientChannel);
     while (true) {
       const chanAction = yield take(chan);
       switch (chanAction.type) {
         case CLIENT_CHANNEL.CONNECT:
-          yield call(ioClientOnConnect);
+          yield fork(setHealth, true);
+          io.senderReceiver = yield fork(senderReceiver);
           break;
         case CLIENT_CHANNEL.END:
           io.client.end();
-          yield put(setHealthzCheck('modbus', false));
+          yield fork(setHealth, false);
           break;
         case CLIENT_CHANNEL.CLOSE:
         case CLIENT_CHANNEL.ERROR:
-          yield put(setHealthzCheck('modbus', false));
+          yield fork(setHealth, false);
           break;
         default:
           break;
       }
     }
   }
+  catch (err) {
+    console.log(err);
+  }
   finally {
     console.log('ioClientListener finished');
   }
 }
 
-function* ioClientOnConnect() {
-  yield put(setHealthzCheck('modbus', true));
-
-  io.keyMonitorTask = yield fork(Interval, 500, {
-    onTick: [keyMonitorOnTick]
-  });
-  io.senderTask = yield fork(Interval, 500, {
-    onTick: [senderOnTick]
-  });
+function* senderReceiver() {
+  try {
+    while (true) {
+      yield all([
+        call(keyMonitorTask),
+        call(senderTask)
+      ]);
+      yield delay(500);
+    }
+  } catch (err) {
+    console.log(err);
+  } finally {
+    console.log('senderReceiver finished');
+  }
 }
 
-function* keyMonitorOnTick() {
+function* keyMonitorTask() {
   try {
-    // set health = true
     const { response, error } = yield call(() => io.modbusClient
-      .readDiscreteInputs(iResetKey, 1)
+      .readDiscreteInputs(io.i.resetKey, 1)
       .then(resp => ({ response: resp }))
       .catch(err => ({ error: err }))
     );
@@ -313,101 +275,97 @@ function* keyMonitorOnTick() {
           if (diff >= byPassTimeout) {
             // 钥匙延迟3秒放行
             if (userConfigs.operationSettings.byPass.type === 'sleep') {
-              // yield put({
-              //   type: IO.FUNCTION,
-              //   data: IO_FUNCTION.IN.BYPASS
-              // });
-              yield put(io.channel, {
-                type: IO_CHANNEL.FUNCTION,
-                data: IO_FUNCTION.IN.BYPASS
-              });
+              yield call(handleIOFunction, IO_FUNCTION.IN.BYPASS);
             }
           } else {
             // 复位动作
-            // yield put({
-            //   type: IO.FUNCTION,
-            //   data: IO_FUNCTION.IN.RESET
-            // });
-            yield put(io.channel, {
-              type: IO_CHANNEL.FUNCTION,
-              data: IO_FUNCTION.IN.RESET
-            });
+            yield call(handleIOFunction, IO_FUNCTION.IN.RESET);
           }
         }
       }
-// eslint-disable-next-line no-param-reassign
       io.currentKeyStatus = newKeyStatus;
     } else if (error) {
       yield put(setNewNotification('error', error ? error.toString() : 'unknown error'));
-      yield cancel(io.keyMonitorTask);
+      yield cancel(io.senderReceiver);
+      io.senderReceiver = null;
       io.client.destroy();
-      yield put(io.channel, IO_CHANNEL.KEY_MONITOR.CLOSE);
     }
   }
   finally {
     if (yield cancelled()) {
       console.log('keyMonitorOnTick canceled');
     }
-
   }
 }
 
-function* senderOnTick() {
-  const lights = ioStatus.map(v => {
-    if (v === sBlinkOff) {
-      return sOff;
-    }
-    if (v === sBlinkOn) {
-      return sOn;
-    }
-    return v;
-  });
+function* senderTask() {
+  try {
+    const lights = ioStatus.map(v => {
+      if (v === sBlinkOff) {
+        return sOff;
+      }
+      if (v === sBlinkOn) {
+        return sOn;
+      }
+      return v;
+    });
 
-  const { response, error } = yield call(() =>
-    io.modbusClient
-      .writeMultipleCoils(0, lights)
-      .then()
-      .catch((err) => ({ error: err }))
-  );
+    const { error } = yield call(() =>
+      io.modbusClient
+        .writeMultipleCoils(0, lights)
+        .then()
+        .catch((err) => ({ error: err }))
+    );
 
-  if (error) {
-    console.log(error);
-    io.client.destroy();
-    yield put(io.channel, { type: IO_CHANNEL.SENDER.CLOSE });
+    if (error) {
+      console.log(error);
+      yield cancel(io.senderReceiver);
+      io.senderReceiver = null;
+      io.client.destroy();
+    }
+
+    ioStatus = ioStatus.map(v => {
+      if (v === sBlinkOff) {
+        return sBlinkOn;
+      }
+      if (v === sBlinkOn) {
+        return sBlinkOff;
+      }
+      return v;
+    });
+  } catch (err) {
+    console.log(err);
   }
 
-  ioStatus = ioStatus.map(v => {
-    if (v === sBlinkOff) {
-      return sBlinkOn;
-    }
-    if (v === sBlinkOn) {
-      return sBlinkOff;
-    }
-    return v;
-  });
 }
 
-
-// export function setFail(f) {
-//   fail = f;
-// }
+function* setHealth(health) {
+  try {
+    if (health !== io.health) {
+      io.health = health;
+      yield put(setHealthzCheck('modbus', health));
+    }
+  } catch (err) {
+    console.log(err);
+  }
+}
 
 function setOutBit(obj) {
   switch (obj.function) {
     case IO_FUNCTION.OUT.LED_RED:
-      oRed = obj.bit;
+      io.o.red = obj.bit;
       break;
     case IO_FUNCTION.OUT.LED_GREEN:
-      oGreen = obj.bit;
+      io.o.green = obj.bit;
       break;
     case IO_FUNCTION.OUT.LED_YELLOW:
-      oYellow = obj.bit;
+      io.o.yellow = obj.bit;
       break;
     case IO_FUNCTION.OUT.LED_WHITE:
-      oWhite = obj.bit;
+      io.o.white = obj.bit;
       break;
     case IO_FUNCTION.OUT.BEEP:
-      oBeep = obj.bit;
+      io.o.beep = obj.bit;
       break;
     default:
       break;
@@ -417,20 +375,20 @@ function setOutBit(obj) {
 function setInBit(obj) {
   switch (obj.function) {
     case IO_FUNCTION.IN.RESET:
-      iResetKey = obj.bit;
+      io.i.resetKey = obj.bit;
       break;
     case IO_FUNCTION.IN.BYPASS:
-      iBypass = obj.bit;
+      io.i.byPass = obj.bit;
       break;
     case IO_FUNCTION.IN.MODE_SELECT:
-      iModeSelect = obj.bit;
+      io.i.modeSelect = obj.bit;
       break;
     default:
       break;
   }
 }
 
-function initModBusIO(modbusConfig) {
+function setModBusIO(modbusConfig) {
   const modbusOutConfig = modbusConfig.out;
   const modbusInConfig = modbusConfig.in;
   lodash.forEach(modbusOutConfig, setOutBit);
@@ -438,47 +396,42 @@ function initModBusIO(modbusConfig) {
 }
 
 function resetIO(modbusConfig) {
-  const modbusOutConfig = modbusConfig.out;
-  const modbusInConfig = modbusConfig.in;
-  lodash.forEach(modbusOutConfig, setOutBit);
-  lodash.forEach(modbusInConfig, setInBit);
   const preIOStatus = cloneDeep(ioStatus);
-  ioStatus[oWhite] = preIOStatus[iPrevWhite];
-  ioStatus[oYellow] = preIOStatus[iPrevYellow];
-  ioStatus[oGreen] = preIOStatus[iPrevGreen];
-  ioStatus[oRed] = preIOStatus[iPrevRed];
+  const preO = cloneDeep(io.o);
+  const {o}=io;
 
-  iPrevWhite = oWhite;
-  iPrevYellow = oYellow;
-  iPrevGreen = oGreen;
-  iPrevRed = oRed;
-  iPrevBeep = oBeep;
+  setModBusIO(modbusConfig);
+  for(const key in o){
+    ioStatus[o[key]]=preIOStatus[preO[key]];
+  }
 }
 
 export function setLedStatusReady() {
-  ioStatus[oRed] = sOff;
-  ioStatus[oWhite] = sOff;
-  ioStatus[oYellow] = sBlinkOn;
-  ioStatus[oGreen] = sOff;
+  const {o}=io;
+  ioStatus[o.red] = sOff;
+  ioStatus[o.white] = sOff;
+  ioStatus[o.yellow] = sBlinkOn;
+  ioStatus[o.green] = sOff;
 }
 
 export function setLedStatusDoing() {
-  ioStatus[oRed] = sOff;
-  ioStatus[oYellow] = sOn;
-  ioStatus[oWhite] = sOn;
-  ioStatus[oGreen] = sOff;
+  const {o}=io;
+  ioStatus[o.red] = sOff;
+  ioStatus[o.yellow] = sOn;
+  ioStatus[o.white] = sOn;
+  ioStatus[o.green] = sOff;
 }
 
 export function setLedInfo(flag) {
-  ioStatus[oWhite] = flag;
+  ioStatus[io.o.white] = flag;
 }
 
 export function setLedWarning(flag) {
-  ioStatus[oGreen] = flag;
+  ioStatus[io.o.green] = flag;
 }
 
 export function setLedError(flag) {
-  ioStatus[oRed] = flag;
+  ioStatus[io.o.red] = flag;
 }
 
 export function testIO(ioConfig, idx) {
@@ -500,4 +453,12 @@ export function testIO(ioConfig, idx) {
     default:
       break;
   }
+}
+
+export function getIBypass() {
+  return io.i.bypass;
+}
+
+export function getIModeSelect() {
+  return io.i.modeSelect;
 }
