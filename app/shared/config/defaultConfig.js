@@ -43,7 +43,7 @@ export const defaultConfigs = {
       },
       hmiSn: {
         displayOrder: 2,
-        value: '112233445566778899',
+        value: '1122334455667788',
         displayTitle: 'Configuration.connections.HMI'
       },
       aiisUrl: {
@@ -132,7 +132,7 @@ export const defaultConfigs = {
         {
           bit: 4,
           io: 'out',
-          function: 'LED_BEEP',
+          function: 'BEEP',
           label: '蜂鸣'
         },
         {

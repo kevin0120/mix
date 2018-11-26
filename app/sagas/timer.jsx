@@ -4,9 +4,7 @@ import { take, call, race, put, cancelled, cancel, fork } from 'redux-saga/effec
 
 function intervalChannel(ms) {
   return eventChannel(emit => {
-    let ticks = 0;
     const iv = setInterval(() => {
-      //ticks += 1;
       emit('tick');
     }, ms);
 
