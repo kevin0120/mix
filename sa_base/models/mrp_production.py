@@ -114,6 +114,10 @@ class MrpWorkorder(models.Model):
 
     consu_bom_line_ids = fields.One2many('mrp.wo.consu', 'workorder_id', string='Consume Product')
 
+    @api.multi
+    def unlink(self):
+        raise ValidationError(u'不允许删除工单')
+
 
 class MrpProduction(models.Model):
     _inherit = 'mrp.production'
@@ -302,5 +306,9 @@ class MrpProduction(models.Model):
         if len(consume_bom_line_vals):
             consume_bom_lines._bulk_create(consume_bom_line_vals)
         return workorders
+
+    @api.multi
+    def unlink(self):
+        raise ValidationError(u'不允许删除生产订单')
 
 

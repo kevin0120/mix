@@ -457,3 +457,7 @@ class OperationResult(models.HyperModel):
                 inv_value = float_round(line['__count'] / count, precision_digits=3)
                 line['__count'] = inv_value
         return res
+
+    @api.multi
+    def unlink(self):
+        raise ValidationError(u'不允许删除结果数据')
