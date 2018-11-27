@@ -61,8 +61,12 @@ class PushWorkorder(AbstractModel):
 
             vals = {
                 'id': order.id,
-                'hmi': {'id': order.workcenter_id.hmi_id.id, 'uuid': order.workcenter_id.hmi_id.serial_no},
+                'hmi': {'id': order.workcenter_id.hmi_id.id, 'uuid': order.workcenter_id.hmi_id.serial_no} if order.workcenter_id else None,
+                'workcenter': {'name': order.workcenter_id.name,
+                               'code': order.workcenter_id.code} if order.workcenter_id else None,
                 'worksheet': u'data:{0};base64,{1}'.format('image/png', order.operation_id.worksheet_img) if order.operation_id.worksheet_img else "",
+                'vehicleTypeImg': u'data:{0};base64,{1}'.format('image/png',
+                                                                order.product_id.image_small) if order.product_id.image_small else "",
                 'max_op_time': order.operation_id.max_op_time,
                 'vin': order.production_id.vin,
                 'knr': order.production_id.knr,

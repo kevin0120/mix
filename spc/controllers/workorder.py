@@ -60,7 +60,8 @@ class ApiMrpWorkorder(http.Controller):
 
             ret = {
                 'id': order.id,
-                'hmi': {'id': order.workcenter_id.hmi_id.id, 'uuid': order.workcenter_id.hmi_id.serial_no},
+                'hmi': {'id': order.workcenter_id.hmi_id.id, 'uuid': order.workcenter_id.hmi_id.serial_no} if order.workcenter_id else None,
+                'workcenter': {'name': order.workcenter_id.name, 'code': order.workcenter_id.code} if order.workcenter_id else None,
                 'vehicleTypeImg': u'data:{0};base64,{1}'.format('image/png', order.product_id.image_small) if order.product_id.image_small else None,
                 'worksheet': u'data:{0};base64,{1}'.format('image/png', order.operation_id.worksheet_img) if order.operation_id.worksheet_img else "",
                 # 'max_redo_times': order.operation_id.max_redo_times,
@@ -106,6 +107,14 @@ class ApiMrpWorkorder(http.Controller):
                 body = json.dumps({'msg': 'Can not found hmi'})
                 return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
                                 status=405)
+        if 'workcenter' in kw:
+            code = kw['workcenter']
+            workcenter_id = env['mrp.workcenter'].search(['|', ('code', '=', code), ('name', '=', code)], limit=1)
+            if not workcenter_id:
+                body = json.dumps({'msg':'Can not found Workcenter'})
+                return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=405)
+            domain += [('workcenter_id', 'in', workcenter_id.ids)]  # 添加查询域
+
         if 'code' in kw:
             code = kw['code']
             domain += ['|', '|', ('production_id.long_pin', '=', code), ('production_id.knr', '=', code), ('production_id.vin', '=', code)]
@@ -155,6 +164,7 @@ class ApiMrpWorkorder(http.Controller):
             _ret.append({
                 'id': order.id,
                 'hmi': {'id': workcenter_id.hmi_id.id, 'uuid': workcenter_id.hmi_id.serial_no} if workcenter_id else None ,
+                'workcenter': {'name': workcenter_id.name, 'code': workcenter_id.code} if workcenter_id else None ,
                 'vehicleTypeImg': u'data:{0};base64,{1}'.format('image/png', order.product_id.image_small) if order.product_id.image_small else None,
                 'worksheet': u'data:{0};base64,{1}'.format('image/png', order.operation_id.worksheet_img) if order.operation_id.worksheet_img else "",
                 # 'max_redo_times': order.operation_id.max_redo_times,
