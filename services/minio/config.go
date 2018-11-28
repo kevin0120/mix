@@ -1,10 +1,10 @@
 package minio
 
 import (
-	"github.com/masami10/rush/toml"
 	"github.com/pkg/errors"
 	"net"
 	"time"
+	"github.com/masami10/aiis/toml"
 )
 
 type Config struct {
