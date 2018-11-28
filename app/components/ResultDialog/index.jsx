@@ -60,6 +60,10 @@ class ConnectedResultDialog extends React.Component {
     return <Slide direction="up" {...props} />;
   };
 
+  handleClose = (e) => {
+
+  };
+
   render() {
     const {
       classes,
@@ -158,7 +162,7 @@ class ConnectedResultDialog extends React.Component {
               className={classes.modalFooter + ' ' + classes.modalFooterCenter}
             >
               <Button
-                onClick={this.handleClose}
+                onClick={(e) => this.handleClose(e)}
                 color="primary"
                 autoFocus
                 round
