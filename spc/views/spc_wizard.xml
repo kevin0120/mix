@@ -199,6 +199,20 @@
             </field>
         </record>
 
+        <record id="sa_spc_quality_point_form_view" model="ir.ui.view">
+            <field name="name">sa_spc_quality_point_form_view</field>
+            <field name="model">quality.point</field>
+            <field name="inherit_id" ref="quality.quality_point_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_see_quality_checks']" position="replace">
+                    <button string="Results" name="action_see_result" type="object" icon="fa-table" class="oe_stat_button" groups="spc.group_spc_user, spc.group_spc_manager"/>
+                </xpath>
+                <xpath expr="//button[@name='action_see_spc_control']" position="replace">
+                    <button string="SPC" name="action_see_spc_control" type="object" icon="fa-bars" class="oe_stat_button" groups="spc.group_spc_user, spc.group_spc_manager"/>
+                </xpath>
+            </field>
+        </record>
+
 
 
         <record id="sa_spc_workcenter_tree_view" model="ir.ui.view">
