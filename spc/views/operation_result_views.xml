@@ -127,6 +127,7 @@
         <field name="arch" type="xml">
             <tree default_order="quality_state asc" decoration-muted="quality_state == 'none'" decoration-success="quality_state == 'pass'" decoration-danger="quality_state == 'fail'" decoration-warning="quality_state == 'exception'"  create="0" edit="0">
                 <field name="product_id"/>
+                <field name="production_id" />
                 <field name="vin"/>
                 <field name="consu_product_id" />
                 <field name="workcenter_id" />

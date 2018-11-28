@@ -31,8 +31,6 @@
             <field name="model">operation.result</field>
             <field name="inherit_id" ref="spc.operation_result_view_search"/>
             <field name="arch" type="xml">
-                <field name="workorder_id" position="replace">
-                </field>
                 <field name="production_id" position="replace">
                 </field>
                 <field name="program_id" position="replace">
