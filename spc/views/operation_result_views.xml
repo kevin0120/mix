@@ -138,6 +138,8 @@
                 <field name="measure_result" />
                 <field name="quality_state" groups="base.group_no_one"/>
                 <field name="batch"/>
+                <field name="program_id"/>
+                <field name="job"/>
                 <field name="sent" groups="base.group_no_one"/>
             </tree>
         </field>

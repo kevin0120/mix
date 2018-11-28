@@ -75,6 +75,10 @@ class OperationResult(models.HyperModel):
 
     consu_bom_line_id = fields.Many2one('mrp.wo.consu')
 
+    program_id = fields.Many2one('controller.program')
+
+    job = fields.Char(string='Job')
+
     consu_product_id = fields.Many2one('product.product')
 
     control_date = fields.Datetime('Control Date')

@@ -193,7 +193,8 @@
             <field name="inherit_id" ref="sa_base.sa_mrp_workcenter_form_view"/>
             <field name="arch" type="xml">
                 <xpath expr="//div[@class='oe_button_box']" position="inside">
-                    <button string="SPC" name="action_see_spc_control" type="object" icon="fa-bars" class="oe_stat_button" groups="spc.group_spc_user, spc.group_spc_manager"/>
+                    <button string="SPC" name="action_see_spc_control" type="object" icon="fa-bars" class="oe_stat_button" attrs="{'invisible': [('type', '=', 'rework')]}" groups="spc.group_spc_user, spc.group_spc_manager"/>
+                    <button string="Results" name="action_see_result" type="object" icon="fa-table" class="oe_stat_button" attrs="{'invisible': [('type', '=', 'rework')]}" groups="spc.group_spc_user, spc.group_spc_manager"/>
                 </xpath>
             </field>
         </record>

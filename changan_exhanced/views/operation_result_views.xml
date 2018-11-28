@@ -35,6 +35,8 @@
                 </field>
                 <field name="production_id" position="replace">
                 </field>
+                <field name="program_id" position="replace">
+                </field>
             </field>
         </record>
     </data>

@@ -53,6 +53,7 @@ class MrpWorkorder(models.Model):
                          'consu_bom_line_id': consu.id,
                          'gun_id': consu.gun_id.id or None,
                          'consu_product_id': consu.product_id.id,
+                         'program_id': consu.program_id.id,
                          'time': production.date_planned_start or fields.Datetime.now(),
                          'control_date': fields.Datetime.now()}
 

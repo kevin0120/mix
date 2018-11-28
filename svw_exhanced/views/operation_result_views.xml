@@ -17,6 +17,8 @@
             <field name="arch" type="xml">
                 <field name="vin" position="replace">
                 </field>
+                <field name="job" position="replace">
+                </field>
             </field>
         </record>
 

@@ -15,3 +15,13 @@ class MrpWorkcenter(models.Model):
             }
         })
         return action
+
+    @api.multi
+    def action_see_result(self):
+        action = self.env.ref('spc.operation_result_action_main').read()[0]
+        action.update({
+            'context': {
+                'search_default_workcenter_id': self.id
+            }
+        })
+        return action
