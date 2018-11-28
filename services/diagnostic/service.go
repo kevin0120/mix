@@ -87,6 +87,12 @@ func (s *Service) NewFisHandler() *FisHandler {
 	}
 }
 
+func (s *Service) NewMasterPLCHandler() *MasterPLCHandler {
+	return &MasterPLCHandler{
+		l: s.Logger.With(String("service", "masterplc")),
+	}
+}
+
 func (s *Service) NewChanganHandler() *ChanganHandler {
 	return &ChanganHandler{
 		l: s.Logger.With(String("service", "fis")),
@@ -96,6 +102,12 @@ func (s *Service) NewChanganHandler() *ChanganHandler {
 func (s *Service) NewWebsocketHandler() *WsHandler {
 	return &WsHandler{
 		l: s.Logger.With(String("service", "websocket")),
+	}
+}
+
+func (s *Service) NewMinioHandler() *MinioHandler {
+	return &MinioHandler{
+		l: s.Logger.With(String("service", "minio")),
 	}
 }
 

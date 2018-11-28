@@ -18,6 +18,8 @@ import (
 	"github.com/masami10/aiis/services/rush"
 	"github.com/masami10/aiis/services/wsnotify"
 	"github.com/pkg/errors"
+	"github.com/masami10/aiis/services/masterplc"
+	"github.com/masami10/aiis/services/minio"
 )
 
 type Config struct {
@@ -42,6 +44,10 @@ type Config struct {
 
 	Rush rush.Config `yaml:"rush"`
 
+	MasterPLC masterplc.Config `yaml:"masterplc"`
+
+	Minio minio.Config `yaml:"minio"`
+
 	Commander command.Commander `yaml:"-"`
 }
 
@@ -60,6 +66,8 @@ func NewConfig() *Config {
 	c.Rush = rush.NewConfig()
 	c.Ws = wsnotify.NewConfig()
 	c.Changan = changan.NewConfig()
+	c.MasterPLC = masterplc.NewConfig()
+	c.Minio = minio.NewConfig()
 
 	return c
 }
@@ -117,6 +125,14 @@ func (c *Config) Validate() error {
 
 	if err := c.Rush.Validate(); err != nil {
 		return errors.Wrap(err, "rush")
+	}
+
+	if err := c.MasterPLC.Validate(); err != nil {
+		return errors.Wrap(err, "masterplc")
+	}
+
+	if err := c.Minio.Validate(); err != nil {
+		return errors.Wrap(err, "minio")
 	}
 
 	return nil

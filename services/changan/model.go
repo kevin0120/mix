@@ -12,17 +12,17 @@ type TighteningResults struct {
 	ToolSn         string
 	Result         string
 	Exception      string
-	Torque         float32
-	Angle          float32
+	Torque         float64
+	Angle          float64
 	Spent          int
 	UpdateTime     time.Time
 	Strategy       string
-	TorqueMax      float32
-	TorqueMin      float32
-	TorqueTarget   float32
-	AngleMax       float32
-	AngleMin       float32
-	AngleTarget    float32
+	TorqueMax      float64
+	TorqueMin      float64
+	TorqueTarget   float64
+	AngleMax       float64
+	AngleMin       float64
+	AngleTarget    float64
 	Batch          string
 	Mode           string
 	Vin            string

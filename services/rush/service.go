@@ -24,11 +24,11 @@ type Diagnostic interface {
 }
 
 type CResult struct {
-	r      *storage.OperationResult
-	id     int64
-	ip     string
-	port   string
-	stream *aiis.RPCAiis_RPCNodeServer
+	Result      *storage.OperationResult
+	ID     int64
+	IP     string
+	Port   string
+	Stream *aiis.RPCAiis_RPCNodeServer
 }
 
 type RushResult struct {
@@ -173,9 +173,9 @@ func (s *Service) OnRPCRecv(stream *aiis.RPCAiis_RPCNodeServer, payload string) 
 	}
 
 	cr := CResult{
-		r:      &op_result.Result,
-		id:     op_result.ResultID,
-		stream: stream,
+		Result:      &op_result.Result,
+		ID:     op_result.ResultID,
+		Stream: stream,
 	}
 
 	s.AddResultTask(cr)
@@ -243,10 +243,10 @@ func (s *Service) onConnect(c websocket.Connection) {
 			}
 
 			cr := CResult{
-				r:    &op_result.Result,
-				id:   op_result.ResultID,
-				ip:   rush_ip,
-				port: op_result.Port,
+				Result:    &op_result.Result,
+				ID:   op_result.ResultID,
+				IP:   rush_ip,
+				Port: op_result.Port,
 			}
 
 			s.chResult <- cr
@@ -315,10 +315,10 @@ func (s *Service) getResultUpdate(ctx iris.Context) {
 	rush_ip := ctx.GetHeader("rush_ip")
 
 	cr := CResult{
-		r:    &r,
-		id:   resultId,
-		ip:   rush_ip,
-		port: rush_port,
+		Result:    &r,
+		ID:   resultId,
+		IP:   rush_ip,
+		Port: rush_port,
 	}
 
 	s.chResult <- cr
@@ -474,7 +474,7 @@ func (s *Service) HandleResult(cr *CResult) {
 	// 结果推送fis
 	sent := 1
 	if s.Fis != nil {
-		fisResult := s.OperationToFisResult(cr.r)
+		fisResult := s.OperationToFisResult(cr.Result)
 
 		e := s.Fis.PushResult(&fisResult)
 		if e != nil {
@@ -484,23 +484,23 @@ func (s *Service) HandleResult(cr *CResult) {
 	}
 
 	if s.Changan != nil {
-		changanResult := s.OperationToChanganResult(cr.r)
+		changanResult := s.OperationToChanganResult(cr.Result)
 
 		if !s.Changan.AndonDB.InsertResult(&changanResult) {
 			s.diag.Error("insert andon result failed", nil)
 		}
 	}
 
-	json_str, _ := json.Marshal(cr.r)
+	json_str, _ := json.Marshal(cr.Result)
 	json_obj := map[string]interface{}{}
 	json.Unmarshal(json_str, &json_obj)
 	result := &storage.ResultObject{
 		OR:     json_obj,
-		ID:     cr.id,
+		ID:     cr.ID,
 		Send:   sent,
-		IP:     cr.ip,
-		Port:   cr.port,
-		Stream: cr.stream,
+		IP:     cr.IP,
+		Port:   cr.Port,
+		Stream: cr.Stream,
 	}
 
 	s.AddResult(result)
@@ -532,7 +532,10 @@ func (s *Service) TaskResultsBatchSave() {
 			if len(results) > 0 {
 				if s.StorageService.BatchSave(results) == nil {
 					for _, v := range results {
-						s.PatchResultFlag(v.Stream, int64(v.OR["id"].(float64)), true, v.IP, v.Port)
+						resultID := int64(v.OR["id"].(float64))
+						if resultID > 0 {
+							s.PatchResultFlag(v.Stream, int64(v.OR["id"].(float64)), true, v.IP, v.Port)
+						}
 					}
 				}
 				results = []*storage.ResultObject{}
@@ -544,7 +547,10 @@ func (s *Service) TaskResultsBatchSave() {
 			if len(results) == s.Config().BatchSaveRowsLimit {
 				if s.StorageService.BatchSave(results) == nil {
 					for _, v := range results {
-						s.PatchResultFlag(v.Stream, int64(v.OR["id"].(float64)), true, v.IP, v.Port)
+						resultID := int64(v.OR["id"].(float64))
+						if resultID > 0 {
+							s.PatchResultFlag(v.Stream, int64(v.OR["id"].(float64)), true, v.IP, v.Port)
+						}
 					}
 				}
 				results = []*storage.ResultObject{}

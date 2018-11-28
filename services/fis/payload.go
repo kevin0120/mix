@@ -92,7 +92,7 @@ func (fr *FisResult) Serialize() string {
 
 type FisResultValue struct {
 	ID      int64   //结果值序号
-	Value   float32 //结果值(扭矩/角度)
+	Value   float64 //结果值(扭矩/角度)
 	Unit    string  //结果单位(Nm/DEG)
 	Measure int     //检测结果(0: OK 1: NOK)
 }

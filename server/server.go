@@ -13,6 +13,8 @@ import (
 	"github.com/masami10/aiis/services/rush"
 	"github.com/masami10/aiis/services/storage"
 	"github.com/masami10/aiis/services/wsnotify"
+	"github.com/masami10/aiis/services/masterplc"
+	"github.com/masami10/aiis/services/minio"
 )
 
 type BuildInfo struct {
@@ -43,9 +45,13 @@ type Server struct {
 	FisService     *fis.Service
 	ChanganService *changan.Service
 	OdooService    *odoo.Service
+	RushService  *rush.Service
 
 	StorageService  *storage.Service
 	WSNotifyService *wsnotify.Service
+
+	MasterplcService *masterplc.Service
+	MinioService    *minio.Service
 
 	config *Config
 	// List of services in startup order
@@ -94,11 +100,15 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.appendPmonService()
 
+	s.appendMinioService()
+
 	s.appendFisService()
 
 	s.appendChanganService()
 
 	s.appendRushService() //必须后于http & storage
+
+	s.appendMasterplcService()
 
 	s.appendHTTPDService()
 
@@ -112,6 +122,8 @@ func (s *Server) appendRushService() {
 	srv.StorageService = s.StorageService
 	srv.Fis = s.FisService
 	srv.Changan = s.ChanganService
+
+	s.RushService = srv
 
 	s.AppendService("rush", srv)
 }
@@ -191,6 +203,36 @@ func (s *Server) appendFisService() error {
 		srv.Odoo = s.OdooService
 		s.FisService = srv
 		s.AppendService("fis", srv)
+	}
+
+	return nil
+}
+
+func (s *Server) appendMinioService() error {
+	c := s.config.Minio
+	d := s.DiagService.NewMinioHandler()
+
+	srv := minio.NewService(c, d)
+
+	if c.Enable {
+		s.MinioService = srv
+		s.AppendService("minio", srv)
+	}
+
+	return nil
+}
+
+func (s *Server) appendMasterplcService() error {
+	d := s.DiagService.NewMasterPLCHandler()
+	c := s.config.MasterPLC
+
+	srv := masterplc.NewService(d, c)
+	srv.Rush = s.RushService
+	srv.Minio = s.MinioService
+
+	if c.Enable {
+		s.MasterplcService = srv
+		s.AppendService("masterplc", srv)
 	}
 
 	return nil

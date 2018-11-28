@@ -108,15 +108,26 @@ func (s *Service) BatchSave(results []*ResultObject) error {
 		}
 	}
 
-	arrSKeys := []string{}
-	for _, v := range KEYS {
-		arrSKeys = append(arrSKeys, fmt.Sprintf("s.%s", v))
-	}
-	strKeys := fmt.Sprintf("(%s)", strings.Join(KEYS, ","))
-	strSKeys := fmt.Sprintf("(%s)", strings.Join(arrSKeys, ","))
 
 	// 更新
 	if len(updateResults) > 0 {
+
+		arrKeys := []string{}
+		for _, v := range KEYS {
+			if v == "workcenter_id" || v == "product_id" || v == "gun_id" || v == "time" {
+				continue
+			}
+
+			arrKeys = append(arrKeys, v)
+		}
+
+		arrSKeys := []string{}
+		for _, v := range arrKeys {
+			arrSKeys = append(arrSKeys, fmt.Sprintf("s.%s", v))
+		}
+		strKeys := fmt.Sprintf("(%s)", strings.Join(arrKeys, ","))
+		strSKeys := fmt.Sprintf("(%s)", strings.Join(arrSKeys, ","))
+
 		arrValues := []string{}
 		for _, v := range updateResults {
 			if v == nil {
@@ -124,7 +135,7 @@ func (s *Service) BatchSave(results []*ResultObject) error {
 			}
 
 			arrValue := []string{}
-			for _, k := range KEYS {
+			for _, k := range arrKeys {
 				if k == "id" {
 					arrValue = append(arrValue, fmt.Sprintf("%d", v.ID))
 					continue
@@ -181,6 +192,12 @@ func (s *Service) BatchSave(results []*ResultObject) error {
 
 	// 新增
 	if len(insertResults) > 0 {
+		arrSKeys := []string{}
+		for _, v := range KEYS {
+			arrSKeys = append(arrSKeys, fmt.Sprintf("s.%s", v))
+		}
+		strKeys := fmt.Sprintf("(%s)", strings.Join(KEYS, ","))
+
 		arrInsertValues := []string{}
 		for _, v := range insertResults {
 			if v == nil {
@@ -216,7 +233,7 @@ func (s *Service) BatchSave(results []*ResultObject) error {
 				}
 
 				if k == "time" {
-					arrValue = append(arrValue, fmt.Sprintf("'%s'", reflect.ValueOf(v.OR["control_date"]).String()))
+					arrValue = append(arrValue, fmt.Sprintf("date '%s'", reflect.ValueOf(v.OR["control_date"]).String()))
 					continue
 				}
 

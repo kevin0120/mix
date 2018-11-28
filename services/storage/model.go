@@ -82,30 +82,30 @@ var KEYS = []string{
 type OperationResultModel struct {
 	Id              int64     `gorm:"column:id;PRIMARY_KEY"`
 	CreateTime      time.Time `gorm:"column:time"`
-	PsetMThreshold  float32   `gorm:"column:pset_m_threshold"`
-	PsetMMax        float32   `gorm:"column:pset_m_max"`
+	PsetMThreshold  float64   `gorm:"column:pset_m_threshold"`
+	PsetMMax        float64   `gorm:"column:pset_m_max"`
 	FinalPass       string    `gorm:"column:final_pass"`
 	OneTimePass     string    `gorm:"column:one_time_pass"`
-	MeasureDegree   float32   `gorm:"column:measure_degree"`
-	MeasureTorque   float32   `gorm:"column:measure_torque"`
+	MeasureDegree   float64   `gorm:"column:measure_degree"`
+	MeasureTorque   float64   `gorm:"column:measure_torque"`
 	MeasureResult   string    `gorm:"column:measure_result"`
-	PsetWMax        float32   `gorm:"column:pset_w_max"`
+	PsetWMax        float64   `gorm:"column:pset_w_max"`
 	UserId          int64     `gorm:"column:user_id"`
 	WorkcenterId    int64     `gorm:"column:workcenter_id"`
 	Sent            int       `gorm:"column:sent"`
-	PsetWTarget     float32   `gorm:"column:pset_w_target"`
+	PsetWTarget     float64   `gorm:"column:pset_w_target"`
 	Lacking         string    `gorm:"column:lacking"`
 	QualityState    string    `gorm:"column:quality_state"`
 	PsetStrategy    string    `gorm:"column:pset_strategy"`
-	PsetMTarget     float32   `gorm:"column:pset_m_target"`
-	PsetWMin        float32   `gorm:"column:pset_w_min"`
+	PsetMTarget     float64   `gorm:"column:pset_m_target"`
+	PsetWMin        float64   `gorm:"column:pset_w_min"`
 	ProductId       int64     `gorm:"column:product_id"`
 	ControlDate     time.Time `gorm:"column:control_date"`
 	Name            string    `gorm:"column:name"`
-	PsetWThreshold  float32   `gorm:"column:pset_w_threshold"`
+	PsetWThreshold  float64   `gorm:"column:pset_w_threshold"`
 	CurObjects      string    `gorm:"column:cur_objects"`
-	PsetMMin        float32   `gorm:"column:pset_m_min"`
-	MeasureTDon     float32   `gorm:"column:measure_t_don"`
+	PsetMMin        float64   `gorm:"column:pset_m_min"`
+	MeasureTDon     float64   `gorm:"column:measure_t_don"`
 	OpTime          int       `gorm:"column:op_time"`
 	ExceptionReason string    `gorm:"column:exception_reason"`
 	GunID           int64     `gorm:"column:gun_id"`
@@ -124,25 +124,25 @@ type ResultObject struct {
 
 type OperationResult struct {
 	ID              int64       `json:"id"`
-	PsetMThreshold  float32     `json:"pset_m_threshold"`
-	PsetMMax        float32     `json:"pset_m_max"`
+	PsetMThreshold  float64     `json:"pset_m_threshold"`
+	PsetMMax        float64     `json:"pset_m_max"`
 	ControlDate     time.Time   `json:"control_date"`
-	PsetWMax        float32     `json:"pset_w_max"`
+	PsetWMax        float64     `json:"pset_w_max"`
 	UserId          int64       `json:"user_id"`
 	OneTimePass     string      `json:"one_time_pass"`
 	PsetStrategy    string      `json:"pset_strategy"`
-	PsetWThreshold  float32     `json:"pset_w_threshold"`
+	PsetWThreshold  float64     `json:"pset_w_threshold"`
 	CurObjects      []CURObject `json:"cur_objects"`
-	PsetMTarget     float32     `json:"pset_m_target"`
-	PsetMMin        float32     `json:"pset_m_min"`
+	PsetMTarget     float64     `json:"pset_m_target"`
+	PsetMMin        float64     `json:"pset_m_min"`
 	FinalPass       string      `json:"final_pass"`
-	MeasureDegree   float32     `json:"measure_degree"`
-	MeasureTDone    float32     `json:"measure_t_don"` //操作所用的时间
-	MeasureTorque   float32     `json:"measure_torque"`
+	MeasureDegree   float64     `json:"measure_degree"`
+	MeasureTDone    float64     `json:"measure_t_don"` //操作所用的时间
+	MeasureTorque   float64     `json:"measure_torque"`
 	MeasureResult   string      `json:"measure_result"`
 	OPTime          int         `json:"op_time"`
-	PsetWMin        float32     `json:"pset_w_min"`
-	PsetWTarget     float32     `json:"pset_w_target"`
+	PsetWMin        float64     `json:"pset_w_min"`
+	PsetWTarget     float64     `json:"pset_w_target"`
 	QualityState    string      `json:"quality_state"`
 	ExceptionReason string      `json:"exception_reason"`
 	Seq             int         `json:"seq"`

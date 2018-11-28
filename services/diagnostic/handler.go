@@ -326,6 +326,19 @@ func (h *FisHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
 
+type MasterPLCHandler struct {
+	l Logger
+}
+
+func (h *MasterPLCHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+func (h *MasterPLCHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}
+
+
 type WsHandler struct {
 	l Logger
 }
@@ -360,4 +373,12 @@ func (h *WsHandler) OnMessage(msg string) {
 
 func (h *WsHandler) Closed() {
 	h.l.Info("ws server closed")
+}
+
+type MinioHandler struct {
+	l Logger
+}
+
+func (h *MinioHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
 }
