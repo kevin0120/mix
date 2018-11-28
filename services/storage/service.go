@@ -422,11 +422,11 @@ func (s *Service) GetWorkorder(id int64, raw bool) (Workorders, error) {
 	}
 }
 
-func (s *Service) FindWorkorder(hmi_sn string, code string) (Workorders, error) {
+func (s *Service) FindWorkorder(hmi_sn string, workcenter_code string, code string) (Workorders, error) {
 
 	var workorder Workorders
 
-	rt, err := s.eng.Alias("w").Where("w.hmi_sn = ?", hmi_sn).And("w.long_pin = ? or w.vin = ? or w.knr = ?", code, code, code).Get(&workorder)
+	rt, err := s.eng.Alias("w").Where("w.hmi_sn = ? or w.workcenter_code = ?", hmi_sn, workcenter_code).And("w.long_pin = ? or w.vin = ? or w.knr = ?", code, code, code).Get(&workorder)
 
 	if err != nil {
 		return workorder, err

@@ -409,7 +409,14 @@
             "in": "query",
             "description": "hmi序列号",
             "type": "string",
-            "required": true
+            "required": false
+          },
+          {
+            "name": "workcenter_code",
+            "in": "query",
+            "description": "工位序列号",
+            "type": "string",
+            "required": false
           },
           {
             "name": "code",

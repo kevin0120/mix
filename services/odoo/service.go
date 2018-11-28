@@ -134,13 +134,22 @@ func (s *Service) Close() error {
 	return nil
 }
 
-func (s *Service) GetWorkorder(masterpa_sn string, hmi_sn string, code string) ([]byte, error) {
+func (s *Service) GetWorkorder(masterpa_sn string, hmi_sn string, workcenter_code, code string) ([]byte, error) {
 
 	var err error
 	var body []byte
 	endpoints := s.GetEndpoints("getWorkorder")
 	for _, endpoint := range endpoints {
-		body, err = s.getWorkorder(fmt.Sprintf(endpoint.url, hmi_sn, code), endpoint.method)
+		url := fmt.Sprintf(endpoint.url, code)
+		if hmi_sn != "" {
+			url += fmt.Sprintf("&hmi=%s", hmi_sn)
+		}
+
+		if workcenter_code != "" {
+			url += fmt.Sprintf("&workcenter=%s", workcenter_code)
+		}
+
+		body, err = s.getWorkorder(url, endpoint.method)
 		if err == nil {
 			// 如果第一次就成功，推出循环
 			return body, nil
@@ -245,6 +254,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 		o.Status = "ready"
 		o.WorkorderID = v.ID
 		o.HMISN = v.HMI.UUID
+		o.WorkcenterCode = v.Workcenter.Code
 		o.Knr = v.KNR
 		o.LongPin = v.LongPin
 		o.Vin = v.VIN

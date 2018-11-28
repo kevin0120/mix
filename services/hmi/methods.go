@@ -747,11 +747,12 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 
 	var err error
 	hmi_sn := ctx.URLParam("hmi_sn")
+	workcenterCode := ctx.URLParam("workcenter_code")
 	code := ctx.URLParam("code")
 
-	if hmi_sn == "" {
+	if hmi_sn == "" && workcenterCode == "" {
 		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("hmi_sn is required")
+		ctx.WriteString("hmi_sn or workcenter_code is required")
 		return
 	}
 
@@ -761,10 +762,10 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 		return
 	}
 
-	workorder, err := m.service.DB.FindWorkorder(hmi_sn, code)
+	workorder, err := m.service.DB.FindWorkorder(hmi_sn, workcenterCode, code)
 	if err != nil {
 		// 通过odoo定位并创建工单
-		body, e := m.service.ODOO.GetWorkorder("", hmi_sn, code)
+		body, e := m.service.ODOO.GetWorkorder("", hmi_sn, workcenterCode, code)
 		if e != nil {
 			ctx.StatusCode(iris.StatusBadRequest)
 			ctx.WriteString("cannot find workorder")

@@ -3,12 +3,13 @@ package storage
 import "time"
 
 type Workorders struct {
-	Id          int64  `xorm:"pk autoincr notnull 'id'"`
-	WorkorderID int64  `xorm:"bigint 'x_workorder_id'"`
-	HMISN       string `xorm:"varchar(64) 'hmi_sn'"`
-	Vin         string `xorm:"varchar(64) 'vin'"`
-	Knr         string `xorm:"varchar(64) 'knr'"`
-	LongPin     string `xorm:"varchar(64) 'long_pin'"`
+	Id             int64  `xorm:"pk autoincr notnull 'id'"`
+	WorkorderID    int64  `xorm:"bigint 'x_workorder_id'"`
+	HMISN          string `xorm:"varchar(64) 'hmi_sn'"`
+	WorkcenterCode string `xorm:"varchar(64) 'workcenter_code'"`
+	Vin            string `xorm:"varchar(64) 'vin'"`
+	Knr            string `xorm:"varchar(64) 'knr'"`
+	LongPin        string `xorm:"varchar(64) 'long_pin'"`
 
 	MaxOpTime      int       `xorm:"int 'max_op_time'"`
 	MaxSeq         int       `xorm:"int 'max_seq'"`
@@ -101,7 +102,7 @@ type RoutingOperations struct {
 	Name           string `xorm:"varchar(256) 'name'"`
 	Img            string `xorm:"text 'img'"`
 	ProductId      int64  `xorm:"bigint 'product_id'"`
-	WorkcenterID   int64 `xorm:"bigint 'workcenter_id'"`
+	WorkcenterID   int64  `xorm:"bigint 'workcenter_id'"`
 	ProductType    string `xorm:"varchar(256) 'product_type'"`
 	WorkcenterCode string `xorm:"varchar(256) 'workcenter_code'"`
 	VehicleTypeImg string `xorm:"text 'vehicle_type_img'"`

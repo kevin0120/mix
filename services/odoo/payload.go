@@ -40,6 +40,11 @@ type ODOOWorkorder struct {
 		UUID string `json:"uuid"`
 	} `json:"hmi"`
 
+	Workcenter struct {
+		Code string `json:"code"`
+		Name string `json:"name"`
+	} `json:"workcenter"`
+
 	VehicleTypeImg string        `json:"vehicleTypeImg"`
 	Worksheet      string        `json:"worksheet"`
 	KNR            string        `json:"knr"`
@@ -48,6 +53,7 @@ type ODOOWorkorder struct {
 	UpdateTime     time.Time     `json:"update_time"`
 	Consumes       []ODOOConsume `json:"consumes"`
 	Job            string        `json:"job"`
+
 	// mo相关信息
 	MO_EquipemntName  string `json:"equipment_name"` // 设备名
 	MO_FactoryName    string `json:"factory_name"`   // 工厂代码
@@ -131,7 +137,7 @@ type RoutingOperation struct {
 	Name           string      `json:"name"`
 	Img            string      `json:"img"`
 	ProductId      int64       `json:"product_id"`
-	WorkcenterID   int64   `json:"workcenter_id"`
+	WorkcenterID   int64       `json:"workcenter_id"`
 	ProductType    string      `json:"product_type"`
 	WorkcenterCode string      `json:"workcenter_code"`
 	VehicleTypeImg string      `json:"vehicleTypeImg"`

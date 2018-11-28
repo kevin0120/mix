@@ -59,7 +59,7 @@ type Server struct {
 	Services []Service
 
 	ServicesByName map[string]int
-	err            chan error
+	err            chan error ``
 
 	BuildInfo   BuildInfo
 	Commander   command.Commander
