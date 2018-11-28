@@ -439,6 +439,50 @@
         }
       }
     },
+    "/next-workorder": {
+      "get": {
+        "tags": [
+          "HMI"
+        ],
+        "summary": "获取下一张工单",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "hmi_sn",
+            "in": "query",
+            "description": "hmi序列号",
+            "type": "string",
+            "required": false
+          },
+          {
+            "name": "workcenter_code",
+            "in": "query",
+            "description": "工位序列号",
+            "type": "string",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "返回下张工单",
+            "schema": {
+              "$ref": "#/definitions/nextWorkorder"
+            }
+          },
+          "400": {
+            "description": "获取失败"
+          },
+          "404": {
+            "description": "不存在"
+          }
+        }
+      }
+    },
     "/hmi-results": {
       "get": {
         "tags": [
@@ -534,7 +578,14 @@
             "in": "query",
             "description": "hmi序列号",
             "type": "string",
-            "required": true
+            "required": false
+          },
+          {
+            "name": "workcenter_code",
+            "in": "query",
+            "description": "工位序列号",
+            "type": "string",
+            "required": false
           },
           {
             "name": "status",
@@ -1432,6 +1483,36 @@
           "items": {
             "$ref": "#/definitions/OrderReulst"
           }
+        }
+      }
+    },
+    "nextWorkorder": {
+      "type": "object",
+      "properties": {
+        "vin": {
+          "type": "string",
+          "description": "车辆识别号",
+          "example": "LSV2A8CA2JN508198"
+        },
+        "knr": {
+          "type": "string",
+          "description": "车辆装配代码",
+          "example": "64235375"
+        },
+        "long_pin": {
+          "type": "string",
+          "description": "long_pin",
+          "example": "64235375"
+        },
+        "lnr": {
+          "type": "string",
+          "description": "车序",
+          "example": "0001"
+        },
+        "model": {
+          "type": "string",
+          "description": "车型代码",
+          "example": "BR24J3"
         }
       }
     },

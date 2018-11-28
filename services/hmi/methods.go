@@ -715,15 +715,22 @@ func (m *Methods) insertResultsForPSet(pset *PSetManual) error {
 func (m *Methods) getNextWorkorder(ctx iris.Context) {
 	var err error = nil
 	hmi_sn := ctx.URLParam("hmi_sn")
+	workcenterCode := ctx.URLParam("workcenter_code")
 
-	if hmi_sn == "" {
+	if hmi_sn == "" && workcenterCode == "" {
 		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("hmi_sn is required")
+		ctx.WriteString("hmi_sn or workcenter_code is required")
 		return
 	}
 
-	workorder, err := m.service.DB.FindNextWorkorder(hmi_sn)
+	workorder, err := m.service.DB.FindNextWorkorder(hmi_sn, workcenterCode)
 	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			ctx.StatusCode(iris.StatusNotFound)
+			ctx.WriteString(err.Error())
+			return
+		}
+
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString(err.Error())
 		return
@@ -821,7 +828,7 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 		reasons = append(reasons, "done")
 	}
 
-	next_workorder, err := m.service.DB.FindNextWorkorder(hmi_sn)
+	next_workorder, err := m.service.DB.FindNextWorkorder(hmi_sn, workcenterCode)
 	if err == nil {
 		if code != next_workorder.Knr && code != next_workorder.LongPin && code != next_workorder.Vin {
 			// 车辆校验失败
@@ -1128,13 +1135,15 @@ func (m *Methods) getLocalResults(ctx iris.Context) {
 func (m *Methods) listWorkorders(ctx iris.Context) {
 	status := ctx.URLParam("status")
 	hmi_sn := ctx.URLParam("hmi_sn")
-	if hmi_sn == "" {
+	workcenterCode := ctx.URLParam("workcenter_code")
+
+	if hmi_sn == "" && workcenterCode == ""{
 		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("hmi_sn is required")
+		ctx.WriteString("hmi_sn or workcenter_code is required")
 		return
 	}
 
-	workorders, err := m.service.DB.ListWorkorders(hmi_sn, status)
+	workorders, err := m.service.DB.ListWorkorders(hmi_sn, workcenterCode, status)
 	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("find workorders failed")

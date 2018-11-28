@@ -385,10 +385,10 @@ func (s *Service) GetResult(resultId int64, count int) (Results, error) {
 	}
 }
 
-func (s *Service) ListWorkorders(hmi_sn string, status string) ([]Workorders, error) {
+func (s *Service) ListWorkorders(hmi_sn string, workcenterCode string, status string) ([]Workorders, error) {
 	var workorders []Workorders
 
-	sql := fmt.Sprintf("select * from workorders where hmi_sn = '%s'", hmi_sn)
+	sql := fmt.Sprintf("select * from workorders where hmi_sn = '%s' or workcenter_code = '%s'", hmi_sn, workcenterCode)
 	if status != "" {
 		sql = sql + fmt.Sprintf(" and workorders.status = '%s'", status)
 	}
@@ -439,17 +439,17 @@ func (s *Service) FindWorkorder(hmi_sn string, workcenter_code string, code stri
 	}
 }
 
-func (s *Service) FindNextWorkorder(hmi_sn string) (Workorders, error) {
+func (s *Service) FindNextWorkorder(hmi_sn string, workcenter_code string) (Workorders, error) {
 
 	var workorder Workorders
 
-	rt, err := s.eng.Alias("w").Where("w.hmi_sn = ?", hmi_sn).And("w.status = ?", "ready").Asc("w.update_time").Get(&workorder)
+	rt, err := s.eng.Alias("w").Where("w.hmi_sn = ? or w.workcenter_code = ?", hmi_sn, workcenter_code).And("w.status = ?", "ready").Asc("w.update_time").Get(&workorder)
 
 	if err != nil {
 		return workorder, err
 	} else {
 		if !rt {
-			return workorder, errors.New("workorder does not exist")
+			return workorder, errors.New("workorder not found")
 		} else {
 			return workorder, nil
 		}
