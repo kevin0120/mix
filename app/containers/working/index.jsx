@@ -2,7 +2,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import Button from '../../components/CustomButtons/Button.jsx';
 import classNames from 'classnames';
 
 import List from '@material-ui/core/List';
@@ -15,6 +14,14 @@ import PlayArrowOutlined from '@material-ui/icons/PlayArrowOutlined';
 import FiberManualRecord from '@material-ui/icons/FiberManualRecord';
 import Autorenew from '@material-ui/icons/Autorenew.js';
 
+import Clock from 'react-live-clock';
+import CardTravel from '@material-ui/icons/CardTravel';
+import { I18n } from 'react-i18next';
+import { withStyles } from '@material-ui/core/styles';
+import Grid from '@material-ui/core/Grid';
+import Divider from '@material-ui/core/Divider';
+import Keyboard from 'react-simple-keyboard';
+import Paper from '@material-ui/core/Paper';
 import WorkProgressBar from '../../components/ProgressBar/ProgressBar';
 // import WorkStatusLed from '../../components/StatusLED/StatusLED';
 import ImageStick from '../../components/ImageStick/imageStick';
@@ -24,11 +31,8 @@ import ImageStick from '../../components/ImageStick/imageStick';
 // import SwitchModeBar from '../../components/SwitchModeBar';
 import ShutdownDiag from '../../components/ShutDownDiag';
 
-import Clock from 'react-live-clock';
 
-import CardTravel from '@material-ui/icons/CardTravel';
 
-import { I18n } from 'react-i18next';
 
 // actions
 // import { IOSet } from "../../actions/controllerIO";
@@ -41,20 +45,13 @@ import { I18n } from 'react-i18next';
 
 // import { setOrderStatus } from "../../actions/ongoingWorkOrder";
 
-//components
-import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
+// components
 
-import Divider from '@material-ui/core/Divider';
 import withLayout from '../../components/Layout/layout';
 
 import WorkingInfoBar from '../../components/WorkingInfoBar';
 
-import HealthCheck from '../../components/HealthCheck';
 
-import Keyboard from 'react-simple-keyboard';
-
-const lodash = require('lodash');
 
 import {
   container,
@@ -65,10 +62,11 @@ import ResultDialog from '../../components/ResultDialog';
 import ManualDiag from '../../components/ManualDiag';
 
 import TimeLine from '../../components/WorkPageTimeline';
-import Paper from '@material-ui/core/Paper';
 
 import ProgressBar from '../../components/ProgressBar/Progress';
 import { OPERATION_STATUS } from '../../reducers/operations';
+
+const lodash = require('lodash');
 // import { progressCountingStarted, progressCountingStopped } from '../../actions/progressCounting';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -76,6 +74,7 @@ const mapStateToProps = (state, ownProps) => ({
   operationSettings: state.setting.operationSettings,
   workMode: state.workMode,
   timeline: state.timeline,
+  reworkWorkCenter: state.connections.rework_workcenter,
   ...ownProps
 });
 
@@ -452,14 +451,14 @@ const withstyles = theme => ({
   CountDownContainer: {
     position: 'absolute',
     height: '90%',
-    //marginTop: '10px',
+    // marginTop: '10px',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
     color: '#E5F0FA'
-    //top: '15px',
-    //bottom: '15px',
+    // top: '15px',
+    // bottom: '15px',
   },
   TurnPaper: {
     textAlign: 'center',
@@ -495,19 +494,19 @@ const withstyles = theme => ({
   }
 });
 
-function sortInfoToDisplay(infos, t) {
-  return Object.keys(infos)
-    .sort((a, b) => infos[a].displayOrder - infos[b].displayOrder)
-    .map(name => {
-      const { value, displayTitle } = infos[name];
-      const d = t(displayTitle);
-      return {
-        key: name,
-        value,
-        displayTitle: d
-      };
-    });
-}
+// function sortInfoToDisplay(infos, t) {
+//   return Object.keys(infos)
+//     .sort((a, b) => infos[a].displayOrder - infos[b].displayOrder)
+//     .map(name => {
+//       const { value, displayTitle } = infos[name];
+//       const d = t(displayTitle);
+//       return {
+//         key: name,
+//         value,
+//         displayTitle: d
+//       };
+//     });
+// }
 
 class ConnectedWorking extends React.Component {
   constructor(props) {
@@ -521,7 +520,6 @@ class ConnectedWorking extends React.Component {
       vehicle: '',
       vin: '',
       manualDiagShow: false,
-      resultShow: false
     };
 
     this.toggleOPMode = this.toggleOPMode.bind(this);
@@ -535,53 +533,53 @@ class ConnectedWorking extends React.Component {
     return true;
   }
 
-  componentDidUpdate(prevProps) {
-    const { operations, operationSettings } = this.props;
-    this.switchResultDiagShow(
-      prevProps.operations.operationStatus,
-      operations.operationStatus,
-      operationSettings.enableResultDialog
-    );
-    this.prevOperationStatus = prevProps.operations.operationStatus;
-    // const {
-    //   masterpcUrl,
-    //   orderStatus, userid, workcenterId,
-    //   results, activeResultIdIdx, failCnt, pset, workFlow, controllerSN, carType, carID, job, jobID, hmiSn, ControlMode, isAutoMode, IOSet, productID, isEmptyCar,byPassJob, bypassInfo
-    // } = this.props;
-    //
-    // const prevOrderstatus = prevProps.orderStatus;
-    //
-    //
-    // const resultInfo = results[activeResultIdIdx];
-    //
-    // const manualJob = !isAutoMode;
-    // let isLast = false;
-    // console.log('isEmptyCar',isEmptyCar);
-    // if (isEmptyCar !== prevProps.isEmptyCar && isEmptyCar) {
-    //   //发送空车信息
-    //   job(masterpcUrl, controllerSN, carType, carID, userid, byPassJob, results, hmiSn, productID, workcenterId, true, manualJob);
-    //   return;
-    // }
-    // if (lodash.includes(['Doing' ,'Continue','Done'], orderStatus) && results.length) {
-    //   if (activeResultIdIdx + 1 >= results.length) {
-    //     isLast = true;
-    //   }
-    //
-    //   if (workFlow === 'VW') {
-    //     pset(masterpcUrl, resultInfo, failCnt, userid, isLast);
-    //   } else {
-    //     if (orderStatus === 'Doing') {
-    //
-    //       if (ControlMode === 'job') {
-    //         job(masterpcUrl, controllerSN, carType, carID, userid, jobID, results, hmiSn, productID, workcenterId, false, manualJob);
-    //       }
-    //     }
-    //   }
-    // }
-    // if (orderStatus === 'PreDoing' && bypassInfo.enable) {
-    //   IOSet(masterpcUrl, controllerSN, bypassInfo.output, 'off')
-    // }
-  }
+  // componentDidUpdate(prevProps) {
+  //   const { operations, operationSettings } = this.props;
+  //   this.switchResultDiagShow(
+  //     prevProps.operations.operationStatus,
+  //     operations.operationStatus,
+  //     operationSettings.enableResultDialog
+  //   );
+  //   // this.prevOperationStatus = prevProps.operations.operationStatus;
+  //   // const {
+  //   //   masterpcUrl,
+  //   //   orderStatus, userid, workcenterId,
+  //   //   results, activeResultIdIdx, failCnt, pset, workFlow, controllerSN, carType, carID, job, jobID, hmiSn, ControlMode, isAutoMode, IOSet, productID, isEmptyCar,byPassJob, bypassInfo
+  //   // } = this.props;
+  //   //
+  //   // const prevOrderstatus = prevProps.orderStatus;
+  //   //
+  //   //
+  //   // const resultInfo = results[activeResultIdIdx];
+  //   //
+  //   // const manualJob = !isAutoMode;
+  //   // let isLast = false;
+  //   // console.log('isEmptyCar',isEmptyCar);
+  //   // if (isEmptyCar !== prevProps.isEmptyCar && isEmptyCar) {
+  //   //   //发送空车信息
+  //   //   job(masterpcUrl, controllerSN, carType, carID, userid, byPassJob, results, hmiSn, productID, workcenterId, true, manualJob);
+  //   //   return;
+  //   // }
+  //   // if (lodash.includes(['Doing' ,'Continue','Done'], orderStatus) && results.length) {
+  //   //   if (activeResultIdIdx + 1 >= results.length) {
+  //   //     isLast = true;
+  //   //   }
+  //   //
+  //   //   if (workFlow === 'VW') {
+  //   //     pset(masterpcUrl, resultInfo, failCnt, userid, isLast);
+  //   //   } else {
+  //   //     if (orderStatus === 'Doing') {
+  //   //
+  //   //       if (ControlMode === 'job') {
+  //   //         job(masterpcUrl, controllerSN, carType, carID, userid, jobID, results, hmiSn, productID, workcenterId, false, manualJob);
+  //   //       }
+  //   //     }
+  //   //   }
+  //   // }
+  //   // if (orderStatus === 'PreDoing' && bypassInfo.enable) {
+  //   //   IOSet(masterpcUrl, controllerSN, bypassInfo.output, 'off')
+  //   // }
+  // }
 
   componentWillUnmount() {
     // this.props.setCarByPass(true);
@@ -595,24 +593,26 @@ class ConnectedWorking extends React.Component {
     // this.props.setOrderStatus('Doing');
   };
 
-  switchResultDiagShow = (prevOperationStatus, operationStatus, enable) => {
-    if (
-      operationStatus === OPERATION_STATUS.READY &&
-      prevOperationStatus === OPERATION_STATUS.DOING &&
-      enable
-    ) {
-      this.setState({
-        resultShow: true
-      });
-    } else if (
-      operationStatus === OPERATION_STATUS.DOING &&
-      prevOperationStatus === OPERATION_STATUS.PREDOING
-    ) {
-      this.setState({
-        resultShow: false
-      });
-    }
-  };
+  // switchResultDiagShow = (prevOperationStatus, operationStatus, enable) => {
+  //   if (
+  //     operationStatus === OPERATION_STATUS.READY &&
+  //     prevOperationStatus === OPERATION_STATUS.DOING &&
+  //     enable
+  //   ) {
+  //     // doing -> ready
+  //     this.setState({
+  //       resultShow: true
+  //     });
+  //   } else if (
+  //     operationStatus === OPERATION_STATUS.DOING &&
+  //     prevOperationStatus === OPERATION_STATUS.PREDOING
+  //   ) {
+  //     // predong -> doing
+  //     this.setState({
+  //       resultShow: false
+  //     });
+  //   }
+  // };
 
   toggleOPMode() {
     const { isAutoMode } = this.props;
@@ -659,7 +659,7 @@ class ConnectedWorking extends React.Component {
       });
     }
     if (lodash.isEqual(press, '{shift}')) {
-      const layoutName = this.state.layoutName;
+      const{ layoutName } = this.state;
 
       this.setState({
         layoutName: layoutName === 'default' ? 'shift' : 'default'
@@ -686,6 +686,17 @@ class ConnectedWorking extends React.Component {
     });
   };
 
+  workSiteInfo = t => {
+    const { reworkWorkCenter } = this.props;
+    return [
+      {
+        key: 'rework',
+        value: reworkWorkCenter,
+        displayTitle: t('Operation.Info.ReworkWorkCenter'),
+      },
+    ];
+  };
+
   orderInfo = t => {
     const { operations, workMode } = this.props;
 
@@ -701,14 +712,14 @@ class ConnectedWorking extends React.Component {
 
     return [
       {
-        key: '工作模式',
-        value: t(workMode.workMode),
-        displayTitle: '工作模式'
+        key: 'WorkMode',
+        value: workMode.workMode,
+        displayTitle: t('Operation.Info.WorkMode')
       },
       {
-        key: '工作状态',
+        key: 'WorkStatus',
         value: operations.operationStatus,
-        displayTitle: '工作状态'
+        displayTitle: t('Operation.Info.WorkStatus')
       },
       // {
       //   key: '控制模式',
@@ -716,9 +727,9 @@ class ConnectedWorking extends React.Component {
       //   displayTitle: '控制模式',
       // },
       {
-        key: '程序号',
+        key: 'Job',
         value: programme,
-        displayTitle: '程序号'
+        displayTitle: t('Operation.Info.Job')
       }
     ];
   };
@@ -727,7 +738,7 @@ class ConnectedWorking extends React.Component {
     const { classes, operations, timeline } = this.props;
     //
     //
-    const { inputName, resultShow } = this.state;
+    const { inputName, manualDiagShow } = this.state;
     //
     let batch = '0/0';
     let redoBatch = '0/0';
@@ -736,13 +747,13 @@ class ConnectedWorking extends React.Component {
       maxRedoTimes =
         operations.results[operations.activeResultIndex].max_redo_times;
       batch =
-        (operations.activeResultIndex + 1).toString() +
-        '/' +
-        operations.results.length.toString();
+        `${(operations.activeResultIndex + 1).toString() 
+        }/${ 
+        operations.results.length.toString()}`;
       redoBatch =
-        (maxRedoTimes - operations.failCount).toString() +
-        '/' +
-        maxRedoTimes.toString();
+        `${(maxRedoTimes - operations.failCount).toString() 
+        }/${ 
+        maxRedoTimes.toString()}`;
     }
     //
     // const fabClassName = classNames(classes.fab);
@@ -793,7 +804,6 @@ class ConnectedWorking extends React.Component {
     // if (this.props.orderStatus === 'Ready' || this.props.orderStatus === 'PreDoing' || this.props.orderStatus === 'Timeout' || this.props.orderStatus === 'Init' || (!this.props.isAutoMode)){
     //   shouldProcessing = false;
     // }
-    console.log(operations);
     return (
       <I18n ns="translations">
         {t => (
@@ -936,10 +946,10 @@ class ConnectedWorking extends React.Component {
               <Paper className={classes.InfoTab}>
                 <div className={classes.InfoTabContiner}>
                   <List>
-                    {/*<WorkingInfoBar*/}
-                    {/*key="infoUser"*/}
-                    {/*infos={sortInfoToDisplay(infos.infoUser, t)}*/}
-                    {/*/>*/}
+                    <WorkingInfoBar
+                    key="infoUser"
+                    infos={this.workSiteInfo(t)}
+                    />
                     <Divider
                       className={classes.divider}
                       key="divider-infoUser"
@@ -950,17 +960,15 @@ class ConnectedWorking extends React.Component {
                 </div>
               </Paper>
               <Paper className={classes.InfoTabTimeLine}>
-                <div className={classes.InfoTabContiner}>
                   <div className={classes.InfoTabContiner}>
                     <TimeLine simple stories={timeline} />
-                    {/*<TimeLine simple stories={teststory} />*/}
-                  </div>
+                    {/* <TimeLine simple stories={teststory} /> */}
                 </div>
               </Paper>
               <ShutdownDiag />
-              <ResultDialog show={resultShow} />
+              <ResultDialog />
               <ManualDiag
-                show={this.state.manualDiagShow}
+                show={manualDiagShow}
                 close={this.closeManualDiag}
               />
             </Grid>
@@ -976,7 +984,8 @@ ConnectedWorking.propTypes = {
   operations: PropTypes.shape({}).isRequired,
   operationSettings: PropTypes.shape({}).isRequired,
   workMode: PropTypes.shape({}).isRequired,
-  timeline: PropTypes.arrayOf(PropTypes.shape({})).isRequired
+  timeline: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  reworkWorkCenter: PropTypes.string.isRequired,
 };
 
 const Working = connect(

@@ -126,6 +126,12 @@
       "Fail": "达到最大拧接次数",
       "Error": "系统异常"
     },
+    "Info": {
+      "ReworkWorkCenter": "返修工位",
+      "WorkMode": "工作模式",
+      "WorkStatus": "工作状态",
+      "Job": "程序号"
+    },
     "Display": {
       "Init": "启动中",
       "Ready": "就绪",

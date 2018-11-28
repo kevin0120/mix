@@ -12,7 +12,8 @@ axiosRetry(defaultClient, {
   retryCondition: err => {
     if (
       err.message.indexOf('200') !== -1 ||
-      err.message.indexOf('409') !== -1
+      err.message.indexOf('409') !== -1 ||
+      err.message.indexOf('404') !== -1
     ) {
       return false;
     }
@@ -20,6 +21,18 @@ axiosRetry(defaultClient, {
     return true;
   }
 });
+
+export function fetchNextWorkOrder(baseURL, workcenterCode) {
+  const fullUrl = `${baseURL}/rush/v1/next-workorder`;
+
+  return defaultClient.get(fullUrl, { params: {
+      workcenter_code: workcenterCode,
+      } })
+      .then(resp => resp)
+      .catch(e => {
+        throw e.toString();
+      });
+}
 
 // 获取作业
 export function fetchRoutingWorkcenter(url, workCenterCode, carType, job) {
@@ -44,13 +57,13 @@ export function fetchRoutingWorkcenter(url, workCenterCode, carType, job) {
 }
 
 // 获取工单
-export function fetchWorkorder(url, hmiSN, code) {
+export function fetchWorkorder(url, workcenterCode, code) {
   const fullUrl = `${url}/rush/v1/workorder`;
 
   return defaultClient
     .get(fullUrl, {
       params: {
-        hmi_sn: hmiSN,
+        workcenter_code: workcenterCode,
         code
       }
     })

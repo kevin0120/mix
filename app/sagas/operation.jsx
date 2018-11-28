@@ -3,24 +3,34 @@ import {
   fetchRoutingWorkcenter,
   fetchWorkorder,
   jobManual,
-  pset
+  pset,
+  fetchNextWorkOrder,
 } from './api/operation';
 import { OPERATION, RUSH } from '../actions/actionTypes';
 import { openShutdown } from '../actions/shutDownDiag';
 import { OPERATION_RESULT, OPERATION_STATUS } from '../reducers/operations';
 import { addNewStory, clearStories, STORY_TYPE } from './timeline';
 import { toolEnable, toolDisable } from '../actions/tools';
+import { setResultDiagShow } from '../actions/resultDiag';
+import {fetchOngoingOperationOK, cleanOngoingOperation} from '../actions/ongoingOperation';
+
+const lodash = require('lodash');
+
 
 // 监听作业
 export function* watchOperation() {
   while (true) {
-    const action = yield take([OPERATION.VERIFIED, OPERATION.FINISHED]);
+    const action = yield take([OPERATION.STARTED,OPERATION.VERIFIED, OPERATION.FINISHED]);
     const state = yield select();
     const { workMode } = state;
 
     switch (action.type) {
       case OPERATION.VERIFIED:
         yield call(startOperation, action.data);
+        break;
+      case OPERATION.STARTED:
+        yield put(setResultDiagShow(false));
+        yield put(cleanOngoingOperation());
         break;
 
       case OPERATION.FINISHED:
@@ -29,12 +39,27 @@ export function* watchOperation() {
           yield put(toolDisable());
         }
 
-        // yield put({ type: OPERATION.FINISHED});
+        yield call(getNextWorkOrderandShow);
+        yield put(setResultDiagShow(true));
         break;
 
       default:
         break;
     }
+  }
+}
+
+function* getNextWorkOrderandShow() {
+  const state = yield select();
+
+  const rushUrl = state.connections.masterpc;
+  const { workcenterCode } = state.connections;
+  const resp = yield call(
+    fetchNextWorkOrder,
+    rushUrl,
+    workcenterCode);
+  if (resp.status === 200) {
+    yield put(fetchOngoingOperationOK(resp.data));
   }
 }
 
@@ -125,7 +150,7 @@ export function* getOperation(job) {
       const hmiSN = state.setting.page.odooConnection.hmiSn.value;
       const code = state.operations.carID;
       try {
-        resp = yield call(fetchWorkorder, rushUrl, hmiSN, code);
+        resp = yield call(fetchWorkorder, rushUrl, workcenterCode, code);
         if (resp.status === 200) {
           fetchOK = true;
         }

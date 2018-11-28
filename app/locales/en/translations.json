@@ -126,6 +126,12 @@
       "Fail": "Max Times Reached",
       "Error": "System Error"
     },
+    "Info": {
+      "ReworkWorkCenter": "Rework Work Center",
+      "WorkMode": "WorkMode",
+      "WorkStatus": "WorkStatus",
+      "Job": "Job"
+    },
     "Display": {
       "Init": "Initialing",
       "Ready": "Ready",

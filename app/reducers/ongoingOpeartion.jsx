@@ -6,31 +6,34 @@
  * Vestibulum commodo. Ut rhoncus gravida arcu.
  */
 
-import { SHUTDOWN_DIAG } from '../actions/actionTypes';
+// @flow
 
-const defaultShutDownDiag = {
-  show: false,
-  type: '', // 显示的类型
-  msg: ''
+import { ONGOING_OPERATION } from '../actions/actionTypes';
+
+const defaultOngoingOperation = {
+  vin: '',
+  model: '',
+  lnr: '',
+  knr: '',
+  long_pin: '',
 };
 
 type actionType = {
   +type: string,
-  +msg: string,
-  +dType: string
+  +data: object
 };
 
-export default function shutDownDiag(
-  state: object = defaultShutDownDiag,
+export default function ongoingOperation(
+  state: object = defaultOngoingOperation,
   action: actionType
 ) {
   switch (action.type) {
-    case SHUTDOWN_DIAG.CLOSE: {
-      return { ...state, show: false };
+    case ONGOING_OPERATION.FETCH_OK: {
+      const { vin, model,lnr,knr, long_pin} = action.data;
+      return { vin, model,lnr,knr, long_pin};
     }
-    case SHUTDOWN_DIAG.OPEN_WITH_MSG: {
-      const { dType, msg } = action;
-      return { show: true, type: dType, msg };
+    case ONGOING_OPERATION.CLEAN: {
+      return defaultOngoingOperation;
     }
     default:
       return state;

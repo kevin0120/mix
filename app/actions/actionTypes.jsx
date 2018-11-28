@@ -114,7 +114,8 @@ export const SHUTDOWN_DIAG = {
 };
 
 export const TOOLS = {
-  ENABLE: 'TOOLS.ENABLE'
+  ENABLE: 'TOOLS.ENABLE',
+  DISABLE: 'TOOLS.DISABLE'
 };
 
 export const USER_CONFIGS = {
@@ -134,4 +135,13 @@ export const ANDON = {
 
 export const AIIS = {
   INIT: 'AIIS_INIT'
+};
+
+export const RESULT_DIAG = {
+  SHOW: "RESULT_DIAG.SHOW",
+};
+
+export const ONGOING_OPERATION = {
+  FETCH_OK: "ONGOING_OPERATION.FETCH_OK",
+  CLEAN: "ONGOING_OPERATION.CLEAN",
 };

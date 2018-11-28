@@ -6,31 +6,25 @@
  * Vestibulum commodo. Ut rhoncus gravida arcu.
  */
 
-import { SHUTDOWN_DIAG } from '../actions/actionTypes';
+import { RESULT_DIAG } from '../actions/actionTypes';
 
-const defaultShutDownDiag = {
+const defaultResultDiag = {
   show: false,
-  type: '', // 显示的类型
-  msg: ''
 };
 
 type actionType = {
   +type: string,
-  +msg: string,
-  +dType: string
+  +show: boolean
 };
 
-export default function shutDownDiag(
-  state: object = defaultShutDownDiag,
+export default function resultDiag(
+  state: object = defaultResultDiag,
   action: actionType
 ) {
   switch (action.type) {
-    case SHUTDOWN_DIAG.CLOSE: {
-      return { ...state, show: false };
-    }
-    case SHUTDOWN_DIAG.OPEN_WITH_MSG: {
-      const { dType, msg } = action;
-      return { show: true, type: dType, msg };
+    case RESULT_DIAG.SHOW: {
+      const {show} = action;
+      return { show } ;
     }
     default:
       return state;

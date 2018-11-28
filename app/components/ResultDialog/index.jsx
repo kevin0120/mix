@@ -3,11 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 // import { fetchNextWorkOrder } from '../../actions/ongoingWorkOrder';
 
-import SweetAlert from 'react-bootstrap-sweetalert';
-
 import withStyles from '@material-ui/core/styles/withStyles';
-
-import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle.jsx';
 
 // import { IOSet } from "../../actions/controllerIO";
 
@@ -16,7 +12,7 @@ import Slide from '@material-ui/core/Slide';
 import { I18n } from 'react-i18next';
 
 // import { setShutdown, switchReady } from '../../actions/commonActions';
-import customSelectStyle from '../../common/jss/customSelectStyle.jsx';
+import customSelectStyle from '../../common/jss/customSelectStyle';
 import GridContainer from '../Grid/GridContainer';
 import GridItem from '../Grid/GridItem';
 import Card from '../Card/Card';
@@ -36,14 +32,11 @@ import MenuItem from '@material-ui/core/MenuItem';
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '../CustomButtons/Button';
 import Dialog from '@material-ui/core/Dialog';
-import FormLabel from '@material-ui/core/FormLabel';
 
 const mapStateToProps = (state, ownProps) => ({
-  // masterpcUrl: state.connInfo.masterpc.connection,
-  // hmiSn: state.userConfigs.odooConnection.hmiSn.value,
-  // controllerSN: state.workingPage.infoTools.controllerSN,
+  show: state.resultDiag.show,
   results: state.operations.results,
-  // nextWorkorder: state.ongoingWorkOrder.nextWorkorder,
+  nextWorkorder: state.ongoingOperation,
   ...ownProps
 });
 
@@ -52,30 +45,16 @@ const mapDispatchToProps = {
 };
 
 /* eslint-disable react/prefer-stateless-function */
-class ConnectedResultDialog extends React.PureComponent {
+class ConnectedResultDialog extends React.Component {
   constructor(props) {
     super(props);
-    this.handleClose = this.handleClose.bind(this);
     this.Transition = this.Transition.bind(this);
-    this.state = {
-      isShow: false
-    };
   }
 
-  componentDidUpdate(preProps, preState) {
-    if (this.props.show && preProps.show !== this.props.show) {
-      // this.props.fetchNextWorkOrder(this.props.masterpcUrl, this.props.hmiSn);
-      this.setState({
-        isShow: true
-      });
-    }
+  shouldComponentUpdate(nextProps,nextState) {
+    const {show} = this.props;
+    return nextProps.show !== show;
   }
-
-  handleClose = () => {
-    this.setState({
-      isShow: false
-    });
-  };
 
   Transition = props => {
     return <Slide direction="up" {...props} />;
@@ -85,19 +64,16 @@ class ConnectedResultDialog extends React.PureComponent {
     const {
       classes,
       show,
-      results
-      // nextWorkorder
+      results,
+      nextWorkorder,
     } = this.props;
 
-    const { isShow } = this.state;
-
-    console.log('isShow', isShow);
 
     const nw = [];
 
-    // if (nextWorkorder) {
-    //   nw.push([nextWorkorder.vin, nextWorkorder.model, nextWorkorder.lnr, nextWorkorder.knr, nextWorkorder.long_pin]);
-    // }
+    if (nextWorkorder) {
+      nw.push([nextWorkorder.vin, nextWorkorder.model, nextWorkorder.lnr, nextWorkorder.knr, nextWorkorder.long_pin]);
+    }
 
     const localResults = [];
     for (let i = 0; i < results.length; i++) {
@@ -120,7 +96,7 @@ class ConnectedResultDialog extends React.PureComponent {
             }}
             TransitionComponent={this.Transition}
             keepMounted
-            open={isShow && show}
+            open={show}
             onClose={this.handleClose}
             aria-labelledby="form-dialog-title"
             scroll="paper"
@@ -198,12 +174,11 @@ class ConnectedResultDialog extends React.PureComponent {
 }
 
 ConnectedResultDialog.propTypes = {
-  // show: PropTypes.bool.isRequired,
-  // hmiSn: PropTypes.string.isRequired,
-  // masterpcUrl: PropTypes.string.isRequired,
-  // results: PropTypes.arrayOf(PropTypes.shape({
-  //   id: PropTypes.number,
-  // }).isRequired).isRequired,
+  show: PropTypes.bool.isRequired,
+  nextWorkorder: PropTypes.shape({}).isRequired,
+  results: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.number,
+  }).isRequired).isRequired,
   // fetchNextWorkOrder: PropTypes.func.isRequired,
 };
 

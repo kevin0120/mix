@@ -263,6 +263,7 @@ const cardLink = {
 export {
   //variables
   drawerWidth,
+  description,
   drawerMiniWidth,
   transition,
   container,
