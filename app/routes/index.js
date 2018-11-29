@@ -1,7 +1,6 @@
 /* eslint flowtype-errors/show-errors: 0 */
 import React from 'react';
 
-// import Editor from '../containers/editor';
 
 // icons
 import HomeIcon from '@material-ui/icons/Home';
@@ -13,6 +12,7 @@ import LockIcon from '@material-ui/icons/Lock';
 import Fingerprint from '@material-ui/icons/Fingerprint';
 import Mail from '@material-ui/icons/Mail';
 import Save from '@material-ui/icons/Save';
+import WorkOrders from '../containers/orders';
 import Working from '../containers/working';
 import ConnResult from '../containers/result';
 import Event from '../containers/event';
@@ -39,7 +39,11 @@ import {
   dangerColor
 } from '../common/jss/material-react-pro';
 
-export const routeConfigs = [
+const lodash = require('lodash');
+
+import configs from '../shared/config/index';
+
+const routes = [
   {
     name: 'welcome',
     url: '/welcome',
@@ -58,16 +62,16 @@ export const routeConfigs = [
     image: WorkingImg,
     enName: 'Operation'
   },
-  // {
-  //   name: 'editor',
-  //   url: '/editor',
-  //   title: 'main.worksheet_img',
-  //   main: Editor,
-  //   icon: CollectionsIcon,
-  //   color: grayColor,
-  //   image: editorImg,
-  //   enName: 'Operation Instructions',
-  // },
+  {
+    name: 'orders',
+    url: '/orders',
+    title: 'main.orders',
+    main: WorkOrders,
+    icon: CollectionsIcon,
+    color: warningColor,
+    image: editorImg,
+    enName: 'Vehicle Queue',
+  },
   {
     name: 'preferences',
     url: '/preferences',
@@ -129,6 +133,8 @@ export const routeConfigs = [
     enName: 'Login'
   }
 ];
+
+export const routeConfigs = lodash.filter(routes, (ele) => !(configs.operationSettings.opMode !== 'order' && ele.name === 'orders'));
 
 const indexRoutes = [
   { url: '/pages', main: Pages },

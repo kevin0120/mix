@@ -7,6 +7,7 @@
   "Back": "Back",
   "main": {
     "operation": "Operation",
+    "orders": "Vehicle Queue",
     "home": "Home",
     "worksheet_img": "SOP",
     "preferences": "Config",
@@ -15,7 +16,8 @@
     "event": "Event",
     "resultQuery": "Result",
     "login": "Login",
-    "nextOrder": "Next Order"
+    "currentOrder": "Current Vehicle",
+    "nextOrder": "Next Vehicle"
   },
   "OEE": {
     "title": "Failure Record",

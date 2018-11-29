@@ -1,8 +1,16 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+/*
+ * Copyright (c) 2018. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+ * Morbi non lorem porttitor neque feugiat blandit. Ut vitae ipsum eget quam lacinia accumsan.
+ * Etiam sed turpis ac ipsum condimentum fringilla. Maecenas magna.
+ * Proin dapibus sapien vel ante. Aliquam erat volutpat. Pellentesque sagittis ligula eget metus.
+ * Vestibulum commodo. Ut rhoncus gravida arcu.
+ */
 
+import React from 'react';
 import { connect } from 'react-redux';
 import ReactTable from 'react-table';
+import PropTypes from 'prop-types';
+
 
 import Divider from '@material-ui/core/Divider';
 
@@ -35,7 +43,6 @@ import CardHeader from '../../components/Card/CardHeader';
 import { defaultClient } from '../../common/utils';
 
 const lodash = require('lodash');
-const dayjs = require('dayjs');
 
 const styles = {
   ...sweetAlertStyle,
@@ -57,14 +64,14 @@ const styles = {
 
 const mapStateToProps = (state, ownProps) => ({
   masterpcUrl: state.connections.masterpc,
-  hmiSn: state.setting.page.odooConnection.hmiSn.value,
+  workcenterCode: state.connections.workcenterCode,
   ...ownProps
 });
 
 const mapDispatchToProps = {};
 
-function requestData(masterpcUrl, hmiSN) {
-  const url = `${masterpcUrl}/rush/v1/local-results`;
+function requestData(masterpcUrl, workcenterCode) {
+  const url = `${masterpcUrl}/rush/v1/workorders`;
   if (!isURL(url, { require_protocol: true })) {
     return new Promise(() => {
       throw new Error('conn is Error!');
@@ -72,14 +79,14 @@ function requestData(masterpcUrl, hmiSN) {
   }
   return defaultClient.get(url, {
     params: {
-      hmi_sn: hmiSN,
-      filters: 'vin,job_id,batch,torque,angle,timestamp,vehicle_type',
-      limit: 500
+      workcenter_code: workcenterCode,
+      status: 'ready',
+      limit: 100
     }
   });
 }
 
-class Result extends React.Component {
+class WorkOrder extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -95,22 +102,20 @@ class Result extends React.Component {
   }
 
   fetchData() {
-    const { masterpcUrl, hmiSn } = this.props;
-    const { data } = this.state;
-    requestData(masterpcUrl, hmiSn)
+    const { masterpcUrl, workcenterCode } = this.props;
+    requestData(masterpcUrl, workcenterCode)
       .then(res => {
         const statusCode = res.status;
         if (statusCode === 200) {
           this.setState({
             data: res.data.map((item, key) => ({
               id: key,
-              timestamp: dayjs(item.timestamp).format('YYYY MM-DD HH:mm:ss'),
+              // timestamp: dayjs(item.timestamp).format('YYYY MM-DD HH:mm:ss'),
               vin: item.vin,
-              torque: item.torque,
-              angle: item.angle,
-              job_id: item.job_id,
-              batch: item.batch,
-              vehicle_type: item.vehicle_type,
+              model: item.model,
+              long_pin: item.long_pin,
+              knr: item.knr,
+              lnr: item.lnr,
               actions: (
                 // we've added some custom button actions
                 <div className="actions-right">
@@ -120,7 +125,7 @@ class Result extends React.Component {
                     round
                     simple
                     onClick={() => {
-                      const obj = data.find(o => o.id === key);
+                      const obj = this.state.data.find(o => o.id === key);
                       this.setState({
                         isShow: true,
                         selectObj: obj
@@ -160,25 +165,21 @@ class Result extends React.Component {
           </ListItem>
           <Divider inset component="li" />
           <ListItem>
-            <ListItemText primary={`车型:   ${selectObj.vehicle_type}`} />
+            <ListItemText primary={`车型:   ${selectObj.model}`} />
           </ListItem>
           <li>
             <Divider inset />
           </li>
           <ListItem>
-            <ListItemText primary={`扭矩: ${selectObj.torque}`} />
+            <ListItemText primary={`KNR: ${selectObj.knr}`} />
           </ListItem>
           <Divider inset component="li" />
           <ListItem>
-            <ListItemText primary={`角度: ${selectObj.angle}`} />
+            <ListItemText primary={`LNR: ${selectObj.lnr}`} />
           </ListItem>
           <Divider inset component="li" />
           <ListItem>
-            <ListItemText primary={`批次:   ${selectObj.batch}`} />
-          </ListItem>
-          <Divider inset component="li" />
-          <ListItem>
-            <ListItemText primary={`拧紧时间:   ${selectObj.timestamp}`} />
+            <ListItemText primary={`LongPIN:   ${selectObj.long_pin}`} />
           </ListItem>
         </List>
       </div>
@@ -198,7 +199,7 @@ class Result extends React.Component {
                       <Assignment />
                     </CardIcon>
                     <h4 className={classes.cardIconTitle}>
-                      {t('main.resultQuery')}
+                      {t('main.orders')}
                     </h4>
                   </CardHeader>
                   <CardBody>
@@ -217,7 +218,7 @@ class Result extends React.Component {
                         },
                         {
                           Header: '车型',
-                          accessor: 'vehicle_type',
+                          accessor: 'model',
                           filterMethod: (filter, row) =>
                             lodash.includes(
                               lodash.toUpper(row[filter.id]),
@@ -225,38 +226,33 @@ class Result extends React.Component {
                             )
                         },
                         {
-                          Header: '程序号',
-                          accessor: 'job_id',
-                          sortable: false
-                        },
-                        {
-                          Header: '扭矩',
-                          accessor: 'torque',
+                          Header: 'KNR',
+                          accessor: 'knr',
                           sortable: false,
                           filterable: false
                         },
                         {
-                          Header: '角度',
-                          accessor: 'angle',
+                          Header: 'LNR',
+                          accessor: 'lnr',
                           sortable: false,
                           filterable: false
                         },
                         {
-                          Header: '批次',
-                          accessor: 'batch',
+                          Header: 'LongPIN',
+                          accessor: 'long_pin',
                           sortable: false,
                           filterable: false
                         },
-                        {
-                          Header: '拧紧时间',
-                          accessor: 'timestamp',
-                          filterable: false,
-                          filterMethod: (filter, row) =>
-                            lodash.includes(
-                              lodash.toUpper(row[filter.id]),
-                              lodash.toUpper(filter.value)
-                            )
-                        },
+                        // {
+                        //   Header: '拧紧时间',
+                        //   accessor: 'timestamp',
+                        //   filterable: false,
+                        //   filterMethod: (filter, row) =>
+                        //     lodash.includes(
+                        //       lodash.toUpper(row[filter.id]),
+                        //       lodash.toUpper(filter.value)
+                        //     )
+                        // },
                         {
                           Header: 'Actions',
                           accessor: 'actions',
@@ -278,7 +274,7 @@ class Result extends React.Component {
                 info
                 show={isShow}
                 style={{ display: 'block', marginTop: '-100px' }}
-                title="事件详情"
+                title="车辆详情"
                 onConfirm={this.handleClose}
                 onCancel={this.handleClose}
                 confirmBtnCssClass={`${classes.button} ${classes.success}`}
@@ -297,15 +293,15 @@ class Result extends React.Component {
   }
 }
 
-Result.propTypes = {
+WorkOrder.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   masterpcUrl: PropTypes.string.isRequired,
-  hmiSn: PropTypes.string.isRequired,
+  workcenterCode: PropTypes.string.isRequired,
 };
 
-const ConnResult = connect(
+const ConnWorkOrders = connect(
   mapStateToProps,
   mapDispatchToProps
-)(Result);
+)(WorkOrder);
 
-export default withLayout(withStyles(styles)(ConnResult), false);
+export default withLayout(withStyles(styles)(ConnWorkOrders), false);

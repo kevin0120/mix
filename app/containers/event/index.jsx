@@ -1,6 +1,7 @@
 import React from 'react';
 // react component for creating dynamic tables
 import ReactTable from 'react-table';
+import PropTypes from 'prop-types';
 
 // @material-ui/core components
 import withStyles from '@material-ui/core/styles/withStyles';
@@ -184,8 +185,8 @@ class Event extends React.Component {
             <GridContainer className={classes.root}>
               <GridItem xs={12}>
                 <Card>
-                  <CardHeader color="primary" icon>
-                    <CardIcon color="primary">
+                  <CardHeader color="info" icon>
+                    <CardIcon color="info">
                       <Assignment />
                     </CardIcon>
                     <h4 className={classes.cardIconTitle}>{t('main.event')}</h4>
@@ -314,5 +315,9 @@ class Event extends React.Component {
     );
   }
 }
+
+Event.propTypes = {
+  classes: PropTypes.shape({}).isRequired
+};
 
 export default withLayout(withStyles(styles)(Event), false);

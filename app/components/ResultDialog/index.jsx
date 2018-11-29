@@ -113,20 +113,20 @@ class ConnectedResultDialog extends React.Component {
                 <GridContainer className={classes.root}>
                   <GridItem xs={12}>
                     <Card>
-                      <CardHeader color="primary" icon>
-                        <CardIcon color="primary">
+                      <CardHeader color="info" icon>
+                        <CardIcon color="info">
                           <Assignment />
                         </CardIcon>
-                        <h4 className={classes.cardIconTitle}>
-                          {t('main.resultQuery')}
+                        <h4 style={{color: '#000'}}>
+                          {t('main.currentOrder')}
                         </h4>
                       </CardHeader>
                       <CardBody>
                         <Table
-                          tableHeaderColor="primary"
+                          tableHeaderColor="info"
                           tableHead={['程序号', '扭矩', '角度', '用时', '结果']}
                           tableData={localResults}
-                          colorsColls={['primary']}
+                          colorsColls={['info']}
                         />
                       </CardBody>
                     </Card>
@@ -137,20 +137,20 @@ class ConnectedResultDialog extends React.Component {
                 <GridContainer className={classes.root}>
                   <GridItem xs={12}>
                     <Card>
-                      <CardHeader color="primary" icon>
-                        <CardIcon color="primary">
+                      <CardHeader color="info" icon>
+                        <CardIcon color="info">
                           <Assignment />
                         </CardIcon>
-                        <h4 className={classes.cardIconTitle}>
+                        <h4 style={{color: '#000'}}>
                           {t('main.nextOrder')}
                         </h4>
                       </CardHeader>
                       <CardBody>
                         <Table
-                          tableHeaderColor="primary"
+                          tableHeaderColor="info"
                           tableHead={['Vin', '车型', '车序', 'Knr', 'LongPin']}
                           tableData={nw}
-                          colorsColls={['primary']}
+                          colorsColls={['info']}
                         />
                       </CardBody>
                     </Card>
@@ -163,7 +163,7 @@ class ConnectedResultDialog extends React.Component {
             >
               <Button
                 onClick={(e) => this.handleClose(e)}
-                color="primary"
+                color="info"
                 autoFocus
                 round
               >
