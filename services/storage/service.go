@@ -393,7 +393,7 @@ func (s *Service) ListWorkorders(hmi_sn string, workcenterCode string, status st
 		sql = sql + fmt.Sprintf(" and workorders.status = '%s'", status)
 	}
 
-	sql = sql + " order by lnr asc"
+	sql = sql + " order by update_time, lnr asc"
 
 	err := s.eng.SQL(sql).Find(&workorders)
 
@@ -443,7 +443,7 @@ func (s *Service) FindNextWorkorder(hmi_sn string, workcenter_code string) (Work
 
 	var workorder Workorders
 
-	rt, err := s.eng.Alias("w").Where("w.hmi_sn = ? or w.workcenter_code = ?", hmi_sn, workcenter_code).And("w.status = ?", "ready").Asc("w.update_time").Get(&workorder)
+	rt, err := s.eng.Alias("w").Where("w.hmi_sn = ? or w.workcenter_code = ?", hmi_sn, workcenter_code).And("w.status = ?", "ready").Asc("w.update_time").Asc("w.lnr").Get(&workorder)
 
 	if err != nil {
 		return workorder, err
