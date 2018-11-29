@@ -41,6 +41,8 @@ import CardIcon from '../../components/Card/CardIcon';
 import CardHeader from '../../components/Card/CardHeader';
 
 import { defaultClient } from '../../common/utils';
+import Input from '@material-ui/core/Input';
+import withKeyboard from '../../components/Keyboard';
 
 const lodash = require('lodash');
 
@@ -59,6 +61,13 @@ const styles = {
     ...cardTitle,
     marginTop: '15px',
     marginBottom: '0px'
+  },
+  InputRoot:{
+    width: "100%" ,height:'36px',
+    overflow:'hidden'
+  },
+  InputInput:{
+    width: "100%" ,height:'100%',
   }
 };
 
@@ -210,20 +219,58 @@ class WorkOrder extends React.Component {
                         {
                           Header: 'VIN',
                           accessor: 'vin',
-                          filterMethod: (filter, row) =>
-                            lodash.includes(
-                              lodash.toUpper(row[filter.id]),
-                              lodash.toUpper(filter.value)
-                            )
+                          filterMethod: (filter, row) => {
+                            return lodash.includes(lodash.toUpper(row[filter.id]), lodash.toUpper(this.state.vinFilter||''));
+                          },
+                          Filter: ({ filter, onChange }) =>
+                            <Input
+                              onClick={()=>{
+                                this.props.keyboardInput({
+                                  onSubmit:(text)=>{
+                                    this.setState({vinFilter:text},()=>{
+                                      onChange(this.state.vinFilter);
+                                    });
+                                  },
+                                  text:this.state.vinFilter,
+                                  title:'VIN',
+                                  label:'VIN'
+                                });
+                              }}
+                              classes={{
+                                root:classes.InputRoot,
+                                input:classes.InputInput,
+                              }}
+                              // style={{ width: "100%" ,height:'36px'}}
+                              value={this.state.vinFilter || ""}
+                            />
                         },
                         {
                           Header: '车型',
                           accessor: 'model',
-                          filterMethod: (filter, row) =>
-                            lodash.includes(
-                              lodash.toUpper(row[filter.id]),
-                              lodash.toUpper(filter.value)
-                            )
+                          filterMethod: (filter, row) => {
+                            return lodash.includes(lodash.toUpper(row[filter.id]), lodash.toUpper(this.state.vehicleTypeFilter||''));
+                          },
+                          Filter: ({ filter, onChange }) =>
+                            <Input
+                              onClick={()=>{
+                                this.props.keyboardInput({
+                                  onSubmit:(text)=>{
+                                    this.setState({vehicleTypeFilter:text},()=>{
+                                      onChange(this.state.vehicleTypeFilter);
+                                    });
+                                  },
+                                  text:this.state.vehicleTypeFilter,
+                                  title:'车型',
+                                  label:'车型'
+                                });
+                              }}
+                              classes={{
+                                root:classes.InputRoot,
+                                input:classes.InputInput,
+                              }}
+                              // style={{ width: "100%" ,height:'36px'}}
+                              value={this.state.vehicleTypeFilter || ""}
+                            />
                         },
                         {
                           Header: 'KNR',
@@ -304,4 +351,4 @@ const ConnWorkOrders = connect(
   mapDispatchToProps
 )(WorkOrder);
 
-export default withLayout(withStyles(styles)(ConnWorkOrders), false);
+export default withLayout(withKeyboard(withStyles(styles)(ConnWorkOrders)), false);

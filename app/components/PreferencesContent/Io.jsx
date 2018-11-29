@@ -27,6 +27,7 @@ import { testIO } from '../../sagas/io';
 import { resetIO } from '../../actions/ioModbus';
 
 import styles from './styles';
+import withKeyboard from '../Keyboard';
 
 const mapStateToProps = (state, ownProps) => ({
   storedConfigs: state.setting.page.modbus,
@@ -199,7 +200,29 @@ class ConnectedIo extends React.PureComponent {
               placeholder={t('Common.isRequired')}
               className={classes.ioInput}
               value={item.label}
-              onChange={e => this.handleChange(e, idx, item.io, 'label')}
+              onClick={()=>{
+                this.props.keyboardInput({
+                  onSubmit:(text)=>{
+                    const tempData = cloneDeep(this.state.data[item.io]);
+                    tempData[idx]['label'] = text;
+                    this.setState({
+                      ...this.state,
+                      data: {
+                        ...this.state.data,
+                        [item.io]: tempData,
+                      },
+                      isDataValid: this.validateData({
+                        ...this.state.data,
+                        [item.io]: tempData,
+                      }),
+                    });
+                  },
+                  text:item.label,
+                  title:item.bit,
+                  label:item.bit
+                })
+              }}
+              // onChange={e => this.handleChange(e, idx, item.io, 'label')}
             />
             <Select
               value={item.function}
@@ -285,4 +308,4 @@ const Io = connect(
   mapDispatchToProps
 )(ConnectedIo);
 
-export default withStyles(styles)(Io);
+export default withKeyboard(withStyles(styles)(Io));

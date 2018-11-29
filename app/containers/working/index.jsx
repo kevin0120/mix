@@ -30,7 +30,7 @@ import ImageStick from '../../components/ImageStick/imageStick';
 // import ManualBar from '../../components/ManualBar';
 // import SwitchModeBar from '../../components/SwitchModeBar';
 import ShutdownDiag from '../../components/ShutDownDiag';
-
+import { SVWManualNewCar } from '../../actions/scannerDevice';
 
 
 
@@ -65,6 +65,7 @@ import TimeLine from '../../components/WorkPageTimeline';
 
 import ProgressBar from '../../components/ProgressBar/Progress';
 import { OPERATION_STATUS } from '../../reducers/operations';
+import withKeyboard from '../../components/Keyboard';
 
 const lodash = require('lodash');
 // import { progressCountingStarted, progressCountingStopped } from '../../actions/progressCounting';
@@ -80,7 +81,9 @@ const mapStateToProps = (state, ownProps) => ({
 
 const TOPHEIGHT = '150px';
 
-const mapDispatchToProps = {};
+const mapDispatchToProps = {
+  SVWManualNewCar
+};
 
 // 与 style 里的变量相同
 // const TOPHEIGHT = '150px';
@@ -681,8 +684,16 @@ class ConnectedWorking extends React.Component {
 
   openManualDiag = e => {
     e.preventDefault();
-    this.setState({
-      manualDiagShow: true
+    // this.setState({
+    //   manualDiagShow: true
+    // });
+    this.props.keyboardInput({
+      onSubmit: (text) => {
+        // this.props.SVWManualNewCar(text);
+      },
+      text: this.props.operations.carID,
+      title: 'VIN/KNR',
+      label: 'VIN/KNR'
     });
   };
 
@@ -986,6 +997,7 @@ ConnectedWorking.propTypes = {
   workMode: PropTypes.shape({}).isRequired,
   timeline: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   reworkWorkCenter: PropTypes.string.isRequired,
+  keyboardInput:PropTypes.func.isRequired
 };
 
 const Working = connect(
@@ -994,4 +1006,4 @@ const Working = connect(
 )(ConnectedWorking);
 
 // export default Index;
-export default withLayout(withStyles(withstyles)(Working));
+export default withLayout(withKeyboard(withStyles(withstyles)(Working)));

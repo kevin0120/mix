@@ -21,6 +21,7 @@ import { systemInit } from '../../actions/sysInit';
 import { sortObj } from '../../common/utils';
 import Test from './Test';
 import styles from './styles';
+import withKeyboard from '../Keyboard';
 
 const mapStateToProps = (state, ownProps) => ({
   storedConfigs: state.setting.page.odooConnection,
@@ -83,7 +84,22 @@ class ConnectedConnect extends React.PureComponent {
               placeholder={t('Common.isRequired')}
               className={classes.input}
               value={item.value}
-              onChange={e => this.handleChange(e, key)}
+              // onChange={e => this.handleChange(e, key)}
+              onClick={()=>{
+                this.props.keyboardInput({
+                  onSubmit:(text)=>{
+                    const tempData = cloneDeep(this.state.data);
+                    tempData[key].value = text;
+                    this.setState({
+                      ...this.state,
+                      data: tempData,
+                    });
+                  },
+                  text:item.value,
+                  title:item.displayTitle,
+                  label:item.displayTitle
+                })
+              }}
             />
           </ListItem>
           <li>
@@ -130,7 +146,8 @@ ConnectedConnect.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   storedConfigs: PropTypes.shape({}).isRequired,
   saveConfigs: PropTypes.func.isRequired,
-  systemInit: PropTypes.func.isRequired
+  systemInit: PropTypes.func.isRequired,
+  keyboardInput:PropTypes.func.isRequired
 };
 
 const Connect = connect(
@@ -138,4 +155,4 @@ const Connect = connect(
   mapDispatchToProps
 )(ConnectedConnect);
 
-export default withStyles(styles)(Connect);
+export default withKeyboard(withStyles(styles)(Connect));

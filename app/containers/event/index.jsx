@@ -24,6 +24,7 @@ import Card from '../../components/Card/Card';
 import CardBody from '../../components/Card/CardBody';
 import CardIcon from '../../components/Card/CardIcon';
 import CardHeader from '../../components/Card/CardHeader';
+import Input from "@material-ui/core/Input";
 
 import { Query, CreateDailyLogger, Warn } from '../../logger';
 
@@ -36,6 +37,7 @@ import {
 import withLayout from '../../components/Layout/layout';
 
 import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
+import withKeyboard from '../../components/Keyboard';
 
 const lodash = require('lodash');
 const dayjs = require('dayjs');
@@ -55,6 +57,13 @@ const styles = {
     ...cardTitle,
     marginTop: '15px',
     marginBottom: '0px'
+  },
+  InputRoot:{
+    width: "100%" ,height:'36px',
+    overflow:'hidden'
+  },
+  InputInput:{
+    width: "100%" ,height:'100%',
   }
 };
 
@@ -266,11 +275,30 @@ class Event extends React.Component {
                           Header: 'Message',
                           accessor: 'message',
                           sortable: false,
-                          filterMethod: (filter, row) =>
-                            lodash.includes(
-                              lodash.toUpper(row[filter.id]),
-                              lodash.toUpper(filter.value)
-                            )
+                          filterMethod: (filter, row) => {
+                            return lodash.includes(lodash.toUpper(row[filter.id]), lodash.toUpper(this.state.messageFilter||''));
+                          },
+                          Filter: ({ filter, onChange }) =>
+                            <Input
+                              onClick={()=>{
+                                this.props.keyboardInput({
+                                  onSubmit:(text)=>{
+                                    this.setState({messageFilter:text},()=>{
+                                      onChange(this.state.messageFilter);
+                                    });
+                                  },
+                                  text:this.state.messageFilter,
+                                  title:'Message',
+                                  label:'Message'
+                                });
+                              }}
+                              classes={{
+                                root:classes.InputRoot,
+                                input:classes.InputInput,
+                              }}
+                              // style={{ width: "100%" ,height:'36px'}}
+                              value={this.state.messageFilter || ""}
+                            />
                         },
                         {
                           Header: 'Actions',
@@ -320,4 +348,4 @@ Event.propTypes = {
   classes: PropTypes.shape({}).isRequired
 };
 
-export default withLayout(withStyles(styles)(Event), false);
+export default withLayout(withKeyboard(withStyles(styles)(Event)), false);

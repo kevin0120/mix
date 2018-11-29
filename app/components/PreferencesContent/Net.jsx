@@ -28,7 +28,7 @@ import { sortObj } from '../../common/utils';
 import saveConfigs from '../../actions/userConfigs';
 
 import styles from './styles';
-
+import withKeyboard from '../Keyboard';
 const lodash = require('lodash');
 
 const override = css`
@@ -282,7 +282,22 @@ class ConnectedNet extends React.PureComponent {
                 placeholder={t('Common.isRequired')}
                 className={classes.input}
                 value={item.value}
-                onChange={e => this.handleChange(e, key)}
+                onClick={()=>{
+                  this.props.keyboardInput({
+                    onSubmit:(text)=>{
+                      const tempData = cloneDeep(this.state.data);
+                      tempData[key].value = text;
+                      this.setState({
+                        ...this.state,
+                        data: tempData,
+                      });
+                    },
+                    text:item.value,
+                    title:item.displayTitle,
+                    label:item.displayTitle
+                  })
+                }}
+                // onChange={e => this.handleChange(e, key)}
               />
             </ListItem>
             <li>
@@ -397,4 +412,4 @@ const Net = connect(
   mapDispatchToProps
 )(ConnectedNet);
 
-export default withStyles(styles)(Net);
+export default withKeyboard(withStyles(styles)(Net));
