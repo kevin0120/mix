@@ -21,7 +21,7 @@ class QualityPoint(models.Model):
         action = self.env.ref('spc.operation_result_action_main').read()[0]
         action.update({
             'context': {
-                'search_default_workcenter_id': self.id
+                'search_default_qcp_id': self.id
             }
         })
         return action
