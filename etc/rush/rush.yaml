@@ -67,7 +67,7 @@ websocket:
   read_buf_size: 4096
   write_buf_size: 4096
 storage:
-  db_url: 127.0.0.1:5432
+  db_url: 192.168.1.151:5432
   db_name: rush
   db_user: admin
   db_pwd: admin
@@ -101,11 +101,11 @@ controller_service:
 #    port: 4545
 #    channel: 1
 
-  - serial_no: 0001
-    protocol: Audi/VW
-    remote_ip: 192.168.1.101
-    port: 4700
-    channel: 1
+#  - serial_no: 0001
+#    protocol: Audi/VW
+#    remote_ip: 192.168.1.101
+#    port: 4700
+#    channel: 1
 
 #  - serial_no: 0002
 #    protocol: Audi/VW

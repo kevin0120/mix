@@ -12,7 +12,7 @@ import (
 	"gopkg.in/resty.v1"
 	"net/http"
 	"strings"
-)
+	)
 
 type Diagnostic interface {
 	Error(msg string, err error)
@@ -247,6 +247,40 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	aiisResult.MO_Lnr = dbWorkorder.MO_Lnr
 	aiisResult.MO_NutNo = result.NutNo
 	aiisResult.MO_Model = dbWorkorder.MO_Model
+	aiisResult.Batch = result.Batch
+
+	if result.Result == storage.RESULT_OK {
+		aiisResult.Final_pass =  ODOO_RESULT_PASS
+		if result.Count == 1 {
+			aiisResult.One_time_pass = ODOO_RESULT_PASS
+		} else {
+			aiisResult.One_time_pass = ODOO_RESULT_FAIL
+		}
+
+		if (resultValue.Mi >= result.ToleranceMin && resultValue.Mi <= result.ToleranceMax) &&
+			(resultValue.Wi >= result.ToleranceMinDegree && resultValue.Wi <= result.ToleranceMaxDegree) {
+			aiisResult.QualityState = QUALITY_STATE_PASS
+			aiisResult.ExceptionReason = ""
+		} else {
+			aiisResult.QualityState = QUALITY_STATE_EX
+			aiisResult.ExceptionReason = QUALITY_STATE_EX
+		}
+
+	} else {
+		aiisResult.Final_pass = ODOO_RESULT_FAIL
+		aiisResult.One_time_pass = ODOO_RESULT_FAIL
+
+		if (resultValue.Mi >= result.ToleranceMin && resultValue.Mi <= result.ToleranceMax) &&
+			(resultValue.Wi >= result.ToleranceMinDegree && resultValue.Wi <= result.ToleranceMaxDegree) {
+
+			aiisResult.QualityState = QUALITY_STATE_EX
+			aiisResult.ExceptionReason = QUALITY_STATE_EX
+		} else {
+			aiisResult.QualityState = QUALITY_STATE_FAIL
+			aiisResult.ExceptionReason = ""
+		}
+
+	}
 
 	return aiisResult, nil
 }
@@ -259,6 +293,10 @@ func (s *Service) ResultUploadManager() error {
 			for _, v := range results {
 				aiisResult, err := s.ResultToAiisResult(&v)
 				if err == nil {
+					if aiisResult.UserID == 0 {
+						aiisResult.UserID = 1
+					}
+
 					s.PutResult(v.ResultId, aiisResult)
 				}
 			}

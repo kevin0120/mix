@@ -5,6 +5,19 @@ const (
 	WS_RESULT = "result"
 )
 
+const (
+	ODOO_RESULT_PASS = "pass"
+	ODOO_RESULT_FAIL = "fail"
+
+	QUALITY_STATE_PASS = "pass"
+	QUALITY_STATE_FAIL = "fail"
+	QUALITY_STATE_EX   = "exception"
+
+	HANDLER_TYPE_CURVE = "curve"
+	HANDLER_TYPE_AIIS  = "aiis"
+)
+
+
 type AIISResult struct {
 	ID               int64   `json:"id"`
 	Pset_m_threshold float64 `json:"pset_m_threshold"`
