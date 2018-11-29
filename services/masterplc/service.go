@@ -12,7 +12,7 @@ import (
 	"sync"
 	"github.com/pkg/errors"
 	"github.com/masami10/aiis/services/minio"
-	"github.com/masami10/aiis/services/storage"
+		"github.com/masami10/aiis/services/storage"
 	"encoding/json"
 )
 
@@ -217,19 +217,29 @@ func (s *Service) HandleProcess() {
 		case msg := <-s.handleBuffer:
 
 			// 处理结果
+			//fmt.Printf("%s\n", msg)
+			s.diag.Debug(fmt.Sprintf("masterplc result: %s\n", msg))
+			cvi3Result := CVI3Result{}
+			err := xml.Unmarshal([]byte(msg), &cvi3Result)
+			if err != nil {
+				s.diag.Error(fmt.Sprint("HandlerMsg err:", msg), err)
+				return
+			}
+
+			// 结果数据
+			opResult := storage.OperationResult{}
+			XML2Result(&cvi3Result, &opResult)
+
+			cr := rush.CResult{
+				Result:      &opResult,
+				ID:     0,
+				Stream: nil,
+			}
+
+			s.Rush.AddResultTask(cr)
+
+			// 处理曲线
 			if strings.Contains(msg, XML_RESULT_KEY) {
-				//fmt.Printf("%s\n", msg)
-				cvi3Result := CVI3Result{}
-				err := xml.Unmarshal([]byte(msg), &cvi3Result)
-				if err != nil {
-					s.diag.Error(fmt.Sprint("HandlerMsg err:", msg), err)
-					return
-				}
-
-				// 结果数据
-				opResult := storage.OperationResult{}
-				XML2Result(&cvi3Result, &opResult)
-
 				curveFile := fmt.Sprintf("masterplc_%d.json", opResult.TighteningId)
 				cur := storage.CURObject {
 					File: curveFile,
@@ -237,14 +247,6 @@ func (s *Service) HandleProcess() {
 				}
 
 				opResult.CurObjects = append(opResult.CurObjects, cur)
-
-				cr := rush.CResult{
-					Result:      &opResult,
-					ID:     0,
-					Stream: nil,
-				}
-
-				s.Rush.AddResultTask(cr)
 
 				// 波形文件
 				controllerCurveFile := ControllerCurveFile{}
@@ -261,6 +263,8 @@ func (s *Service) HandleProcess() {
 					s.diag.Debug("对象存储保存成功")
 				}
 			}
+
+
 
 			// 处理事件
 			if strings.Contains(msg, XML_EVENT_KEY) {

@@ -190,7 +190,9 @@ type TIP struct {
 	PSet int    `xml:"PRG"`
 	Date string `xml:"DAT"`
 	Time string `xml:"TIM"`
+	Result string `xml:"STA"`
 	BLC  []BLC  `xml:"BLC"`
+	ProductID int64 `xml:"TNR"`
 }
 
 type GRP struct {
@@ -198,16 +200,17 @@ type GRP struct {
 }
 
 type FAS struct {
-	UserID int64 `xml:"FAP"`
+	//UserID int64 `xml:"FAP"`
+	WorkcenterID int64 `xml:"WID"`
 	GRP    GRP   `xml:"GRP"`
 }
 
 type PAR struct {
 	SN           string `xml:"PRT"`
-	Workorder_id int64  `xml:"PI1"`
-	Result_id    string `xml:"PI2"`
-	Count        int    `xml:"STC"`
-	Result       string `xml:"PSC"`
+	Vin 		string  `xml:"PI1"`
+	//Result_id    string `xml:"PI2"`
+	//Count        int    `xml:"STC"`
+	//Result       string `xml:"PSC"`
 	FAS          FAS    `xml:"FAS"`
 }
 
@@ -294,7 +297,7 @@ func GeneratePacket(seq uint32, typ uint, xmlpacket string) (string, uint32) {
 }
 
 func XML2Curve(result *CVI3Result, cur_result *ControllerCurveFile) {
-	cur_result.Result = result.PRC_SST.PAR.Result
+	cur_result.Result = result.PRC_SST.PAR.FAS.GRP.TIP.Result
 	if cur_result.Result == "IO" {
 		cur_result.Result = RESULT_OK
 	} else if cur_result.Result == "NIO" {
@@ -347,7 +350,7 @@ func XML2Result(result *CVI3Result, rr *storage.OperationResult) {
 	rr.ControllerSN = result.PRC_SST.PAR.SN
 	rr.ToolSN = result.PRC_SST.PAR.FAS.GRP.TIP.TOOLSN
 
-	rr.MeasureResult = result.PRC_SST.PAR.Result
+	rr.MeasureResult = result.PRC_SST.PAR.FAS.GRP.TIP.Result
 	if rr.MeasureResult == "IO" {
 		rr.MeasureResult = RESULT_OK
 		rr.FinalPass = "pass"
@@ -361,8 +364,12 @@ func XML2Result(result *CVI3Result, rr *storage.OperationResult) {
 		rr.ExceptionReason = "exception"
 	}
 
-	//rr.Workorder_ID = result.PRC_SST.PAR.Workorder_id
-	//rr.UserID = result.PRC_SST.PAR.FAS.UserID
+	rr.WorkcenterID = result.PRC_SST.PAR.FAS.WorkcenterID
+	rr.ProductID = result.PRC_SST.PAR.FAS.GRP.TIP.ProductID
+	rr.Vin = strings.TrimSpace(result.PRC_SST.PAR.Vin)
+	rr.UserId = 1
+	rr.GunID = 4
+
 	dt := fmt.Sprintf("%s %s", result.PRC_SST.PAR.FAS.GRP.TIP.Date, result.PRC_SST.PAR.FAS.GRP.TIP.Time)
 	loc, _ := time.LoadLocation("Local")
 	rr.ControlDate, _ = time.ParseInLocation("2006-01-02 15:04:05", dt, loc)

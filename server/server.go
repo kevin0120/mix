@@ -227,10 +227,10 @@ func (s *Server) appendMasterplcService() error {
 	c := s.config.MasterPLC
 
 	srv := masterplc.NewService(d, c)
-	srv.Rush = s.RushService
-	srv.Minio = s.MinioService
 
 	if c.Enable {
+		srv.Rush = s.RushService
+		srv.Minio = s.MinioService
 		s.MasterplcService = srv
 		s.AppendService("masterplc", srv)
 	}
