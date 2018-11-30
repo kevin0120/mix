@@ -36,7 +36,7 @@ class PushResult(AbstractModel):
                     'measure_degree': result.measure_degree
                 }
                 try:
-                    ret = Requests.put(url, data=json.dumps(data), headers={'Content-Type': 'application/json'})
+                    ret = Requests.put(url + AIIS_RESULT_API, data=json.dumps(data), headers={'Content-Type': 'application/json'})
                     if ret.status_code == 200:
                         result.write({'sent': True})  ### 更新发送结果
                 except ConnectionError:

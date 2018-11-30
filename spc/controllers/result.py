@@ -5,6 +5,7 @@ from odoo.http import request,Response
 from dateutil import parser
 import requests as Requests
 from requests import ConnectionError, RequestException
+from odoo.addons.spc.model.push_result import AIIS_RESULT_API
 
 DEFAULT_LIMIT = 80
 
@@ -35,7 +36,7 @@ def _post_aiis_result_package(aiis_urls, results):
                 'measure_degree': result.measure_degree
             }
             try:
-                ret = Requests.put(url, data=json.dumps(data), headers={'Content-Type': 'application/json'})
+                ret = Requests.put(url + AIIS_RESULT_API, data=json.dumps(data), headers={'Content-Type': 'application/json'})
                 if ret.status_code == 200:
                     if not result.sent:
                         result.write({'sent': True})  ### 更新发送结果
