@@ -5,6 +5,8 @@ import { withStyles } from '@material-ui/core/styles';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import MenuList from '@material-ui/core/MenuList';
 import MenuItem from '@material-ui/core/MenuItem';
+import Card from '@material-ui/core/Card';
+import CardActionArea from '@material-ui/core/CardActionArea';
 import RssFeedIcon from '@material-ui/icons/RssFeed';
 import ViewModuleIcon from '@material-ui/icons/ViewModule';
 import SettingsRemoteIcon from '@material-ui/icons/SettingsRemote';
@@ -22,18 +24,18 @@ import styles from './styles';
 const menuContents = [
   {
     text: 'Configuration.network.name',
-    icon: <RssFeedIcon style={{ fill: '#009688' }} />,
-    component: <Net />
+    icon: (selected)=><RssFeedIcon style={{ margin:5,fill: selected?'#FAFAFA':'#009688' }}/>,
+    component: <Net/>
   },
   {
     text: 'Configuration.IO.name',
-    icon: <ViewModuleIcon style={{ fill: '#ff9800' }} />,
-    component: <Io />
+    icon: (selected)=><ViewModuleIcon style={{ margin:5,fill: selected?'#FAFAFA':'#ff9800' }}/>,
+    component: <Io/>
   },
   {
     text: 'Configuration.connections.name',
-    icon: <SettingsRemoteIcon style={{ fill: '#3492ff' }} />,
-    component: <Connect />
+    icon: (selected)=><SettingsRemoteIcon style={{ margin:5,fill: selected?'#FAFAFA':'#3492ff' }}/>,
+    component: <Connect/>
   }
 ];
 
@@ -65,26 +67,42 @@ class ConnectedPreferences extends React.Component {
       ele => activeMenu === ele.text
     );
 
+
     const menuList = t => {
       const menus = menuContents.map(item => (
         <MenuItem
           selected={activeMenu === item.text}
           key={item.text}
           className={classes.menuItem}
-          onClick={() => this.handleChangeMenu(item.text)}
-        >
-          <ListItemIcon>{item.icon}</ListItemIcon>
-          <span className={classes.itemText}>{t(item.text)}</span>
-        </MenuItem>
+          component=
+            {() => (
+              <Card
+                onClick={() => this.handleChangeMenu(item.text)}
+                className={activeMenu === item.text ?
+                    classes.menuItemSelected : classes.menuItem}>
+                <CardActionArea
+                  classes={{
+                    root: activeMenu === item.text ?
+                      classes.cardActionAreaSelected : classes.cardActionArea
+                  }}>
+                  {item.icon(activeMenu === item.text)}
+                  <span className={classes.itemText}>{t(item.text)}</span>
+                </CardActionArea>
+
+              </Card>
+            )}
+        />
+
+        // </MenuItem>
       ));
-      return <div >{menus}</div>;
+      return <div>{menus}</div>;
     };
 
     return (
       <I18n ns="translations">
         {t => (
           <div className={classes.root}>
-            <AppBarBack />
+            <AppBarBack/>
             <LeftMenuWithAvatar>
               <MenuList>{menuList(t)}</MenuList>
             </LeftMenuWithAvatar>
