@@ -3,9 +3,10 @@ import customSelectStyle from '../../common/jss/customSelectStyle';
 export default theme => ({
   ...customSelectStyle,
   section: {
-    // overflowY: 'scroll',
-    flex: 1,
-    height: 'auto'
+    overflowY: 'scroll',
+    // flex: 1,
+    height: '100%',
+
   },
   paperWrap: {
     fontSize: 14
@@ -82,12 +83,13 @@ export default theme => ({
     width: 80
   },
   ioInput: {
-    width: 250
+    width: 250,
   },
   ioFunctionSelect: {
     margin: '0 70px',
     width: 150,
-    fontSize: 14
+    fontSize: 14,
+    height:32
   },
   // Connect
   sectionTitleInner: {

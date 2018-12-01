@@ -77,7 +77,7 @@ class ConnectedPreferences extends React.Component {
           <span className={classes.itemText}>{t(item.text)}</span>
         </MenuItem>
       ));
-      return <div>{menus}</div>;
+      return <div >{menus}</div>;
     };
 
     return (
@@ -89,7 +89,7 @@ class ConnectedPreferences extends React.Component {
               <MenuList>{menuList(t)}</MenuList>
             </LeftMenuWithAvatar>
             <div className={classes.content}>
-              <div className={classes.toolbar} />
+              {/*<div className={classes.toolbar} />*/}
               {menuContents[currentComponentIdx].component}
             </div>
           </div>

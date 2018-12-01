@@ -111,7 +111,7 @@ class ConnectedConnect extends React.PureComponent {
     return (
       <I18n ns="translations">
         {t => (
-          <section>
+          <section className={classes.section}>
             <h3 className={classes.sectionTitle}>
               {t('Configuration.connections.name')}
             </h3>

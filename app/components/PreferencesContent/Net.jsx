@@ -327,7 +327,7 @@ class ConnectedNet extends React.PureComponent {
                 loading={loading}
               />
             </Dialog>
-            <section>
+            <section className={classes.section}>
               <h3 className={classes.sectionTitle}>
                 {t('Configuration.network.name')}
               </h3>
