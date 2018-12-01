@@ -8,6 +8,9 @@ import Keyboard from 'react-simple-keyboard';
 import { I18n } from 'react-i18next';
 import { withStyles } from '@material-ui/core/styles';
 import Slide from '@material-ui/core/Slide';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import IconButton from '@material-ui/core/IconButton';
+import Clear from '@material-ui/icons/Clear';
 import customSelectStyle from '../../common/jss/customSelectStyle';
 import Button from '../CustomButtons/Button';
 import CustomInput from '../CustomInput/CustomInput';
@@ -138,7 +141,21 @@ export default function withKeyboard(SubComponents) {
                       // onFocus: this.setActiveInput,
                       required: config.required,
                       value: text || '',
-                      onChange: this.onChangeInput
+                      onChange: this.onChangeInput,
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="clear input"
+                            onClick={() => {
+                              this.setState({ text: '' }, () => {
+                                this.keyboard.setInput('');
+                              });
+                            }}
+                          >
+                            <Clear />
+                          </IconButton>
+                        </InputAdornment>
+                      )
                     }}
                   />
                 </DialogContent>
