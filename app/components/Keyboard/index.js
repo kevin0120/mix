@@ -10,7 +10,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Slide from '@material-ui/core/Slide';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import IconButton from '@material-ui/core/IconButton';
-import Clear from '@material-ui/icons/Clear';
+import Clear from '@material-ui/icons/CancelOutlined';
 import customSelectStyle from '../../common/jss/customSelectStyle';
 import Button from '../CustomButtons/Button';
 import CustomInput from '../CustomInput/CustomInput';
