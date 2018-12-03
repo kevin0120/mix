@@ -1,5 +1,11 @@
+
+// @flow
+
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
+import isURL from 'validator/lib/isURL';
+
+const lodash = require('lodash');
 
 const defaultClient = axios.create({
   timeout: 3000,
@@ -38,6 +44,12 @@ export function fetchNextWorkOrder(baseURL, workcenterCode) {
 export function fetchRoutingWorkcenter(url, workCenterCode, carType, job) {
   const fullUrl = `${url}/rush/v1/operation/${workCenterCode}`;
 
+  if (workCenterCode === '' || !isURL(url, { require_protocol: true })) {
+    return new Promise(() => {
+      throw new Error('fetchRoutingWorkcenter param is Error!');
+    });
+  }
+
   let paramObj = {
     carType
   };
@@ -58,6 +70,12 @@ export function fetchRoutingWorkcenter(url, workCenterCode, carType, job) {
 
 // 获取工单
 export function fetchWorkorder(url, workcenterCode, code) {
+  if (!isURL(url, { require_protocol: true })) {
+    return new Promise(() => {
+      throw new Error('conn is Error!');
+    });
+  }
+
   const fullUrl = `${url}/rush/v1/workorder`;
 
   return defaultClient

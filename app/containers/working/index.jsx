@@ -2,20 +2,9 @@ import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import classNames from 'classnames';
-
 import List from '@material-ui/core/List';
-import Avatar from '@material-ui/core/Avatar';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
 
-import NoteAddOutlined from '@material-ui/icons/NoteAddOutlined';
-import PlayArrowOutlined from '@material-ui/icons/PlayArrowOutlined';
-import FiberManualRecord from '@material-ui/icons/FiberManualRecord';
-import Autorenew from '@material-ui/icons/Autorenew.js';
 
-import Clock from 'react-live-clock';
-import CardTravel from '@material-ui/icons/CardTravel';
 import { I18n } from 'react-i18next';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -23,27 +12,12 @@ import Divider from '@material-ui/core/Divider';
 import Keyboard from 'react-simple-keyboard';
 import Paper from '@material-ui/core/Paper';
 import WorkProgressBar from '../../components/ProgressBar/ProgressBar';
-// import WorkStatusLed from '../../components/StatusLED/StatusLED';
 import ImageStick from '../../components/ImageStick/imageStick';
-// import OeeDiag from '../../components/OeeDiag';
 
-// import ManualBar from '../../components/ManualBar';
-// import SwitchModeBar from '../../components/SwitchModeBar';
 import ShutdownDiag from '../../components/ShutDownDiag';
-import { SVWManualNewCar } from '../../actions/scannerDevice';
+import { NewCar } from '../../actions/scannerDevice';
 
-
-
-// actions
-// import { IOSet } from "../../actions/controllerIO";
-
-// import {
-//   openOeeDiag,
-//   setAutoMode,
-//   setCarByPass,
-// } from '../../actions/commonActions';
-
-// import { setOrderStatus } from "../../actions/ongoingWorkOrder";
+import configs from '../../shared/config/index'
 
 // components
 
@@ -68,7 +42,6 @@ import { OPERATION_STATUS } from '../../reducers/operations';
 import withKeyboard from '../../components/Keyboard';
 
 const lodash = require('lodash');
-// import { progressCountingStarted, progressCountingStopped } from '../../actions/progressCounting';
 
 const mapStateToProps = (state, ownProps) => ({
   operations: state.operations,
@@ -82,7 +55,7 @@ const mapStateToProps = (state, ownProps) => ({
 const TOPHEIGHT = '150px';
 
 const mapDispatchToProps = {
-  SVWManualNewCar
+  NewCar
 };
 
 // 与 style 里的变量相同
@@ -497,19 +470,6 @@ const withstyles = theme => ({
   }
 });
 
-// function sortInfoToDisplay(infos, t) {
-//   return Object.keys(infos)
-//     .sort((a, b) => infos[a].displayOrder - infos[b].displayOrder)
-//     .map(name => {
-//       const { value, displayTitle } = infos[name];
-//       const d = t(displayTitle);
-//       return {
-//         key: name,
-//         value,
-//         displayTitle: d
-//       };
-//     });
-// }
 
 class ConnectedWorking extends React.Component {
   constructor(props) {
@@ -536,53 +496,6 @@ class ConnectedWorking extends React.Component {
     return true;
   }
 
-  // componentDidUpdate(prevProps) {
-  //   const { operations, operationSettings } = this.props;
-  //   this.switchResultDiagShow(
-  //     prevProps.operations.operationStatus,
-  //     operations.operationStatus,
-  //     operationSettings.enableResultDialog
-  //   );
-  //   // this.prevOperationStatus = prevProps.operations.operationStatus;
-  //   // const {
-  //   //   masterpcUrl,
-  //   //   orderStatus, userid, workcenterId,
-  //   //   results, activeResultIdIdx, failCnt, pset, workFlow, controllerSN, carType, carID, job, jobID, hmiSn, ControlMode, isAutoMode, IOSet, productID, isEmptyCar,byPassJob, bypassInfo
-  //   // } = this.props;
-  //   //
-  //   // const prevOrderstatus = prevProps.orderStatus;
-  //   //
-  //   //
-  //   // const resultInfo = results[activeResultIdIdx];
-  //   //
-  //   // const manualJob = !isAutoMode;
-  //   // let isLast = false;
-  //   // console.log('isEmptyCar',isEmptyCar);
-  //   // if (isEmptyCar !== prevProps.isEmptyCar && isEmptyCar) {
-  //   //   //发送空车信息
-  //   //   job(masterpcUrl, controllerSN, carType, carID, userid, byPassJob, results, hmiSn, productID, workcenterId, true, manualJob);
-  //   //   return;
-  //   // }
-  //   // if (lodash.includes(['Doing' ,'Continue','Done'], orderStatus) && results.length) {
-  //   //   if (activeResultIdIdx + 1 >= results.length) {
-  //   //     isLast = true;
-  //   //   }
-  //   //
-  //   //   if (workFlow === 'VW') {
-  //   //     pset(masterpcUrl, resultInfo, failCnt, userid, isLast);
-  //   //   } else {
-  //   //     if (orderStatus === 'Doing') {
-  //   //
-  //   //       if (ControlMode === 'job') {
-  //   //         job(masterpcUrl, controllerSN, carType, carID, userid, jobID, results, hmiSn, productID, workcenterId, false, manualJob);
-  //   //       }
-  //   //     }
-  //   //   }
-  //   // }
-  //   // if (orderStatus === 'PreDoing' && bypassInfo.enable) {
-  //   //   IOSet(masterpcUrl, controllerSN, bypassInfo.output, 'off')
-  //   // }
-  // }
 
   componentWillUnmount() {
     // this.props.setCarByPass(true);
@@ -596,26 +509,6 @@ class ConnectedWorking extends React.Component {
     // this.props.setOrderStatus('Doing');
   };
 
-  // switchResultDiagShow = (prevOperationStatus, operationStatus, enable) => {
-  //   if (
-  //     operationStatus === OPERATION_STATUS.READY &&
-  //     prevOperationStatus === OPERATION_STATUS.DOING &&
-  //     enable
-  //   ) {
-  //     // doing -> ready
-  //     this.setState({
-  //       resultShow: true
-  //     });
-  //   } else if (
-  //     operationStatus === OPERATION_STATUS.DOING &&
-  //     prevOperationStatus === OPERATION_STATUS.PREDOING
-  //   ) {
-  //     // predong -> doing
-  //     this.setState({
-  //       resultShow: false
-  //     });
-  //   }
-  // };
 
   toggleOPMode() {
     const { isAutoMode } = this.props;
@@ -682,18 +575,16 @@ class ConnectedWorking extends React.Component {
     });
   };
 
-  openManualDiag = e => {
+  openManualDiag = (e,input) => {
     e.preventDefault();
-    // this.setState({
-    //   manualDiagShow: true
-    // });
-    this.props.keyboardInput({
+    const {keyboardInput, NewCar} = this.props;
+    keyboardInput({
       onSubmit: (text) => {
-        // this.props.SVWManualNewCar(text);
+        NewCar(text);
       },
-      text: this.props.operations.carID,
-      title: 'VIN/KNR',
-      label: 'VIN/KNR'
+      text: e.target.value,
+      title: input === 'vin'?'VIN/KNR': 'VEHICLE TYPE',
+      label: input === 'vin'?'VIN/KNR': 'VEHICLE TYPE',
     });
   };
 
@@ -766,6 +657,11 @@ class ConnectedWorking extends React.Component {
         }/${ 
         maxRedoTimes.toString()}`;
     }
+
+    const showResultDiag = configs.operationSettings.opMode === 'order';
+
+    const showManualCarType = configs.operationSettings.opMode === 'op';
+
     //
     // const fabClassName = classNames(classes.fab);
     // const fabOEEClassName = switchAutoManual? classNames(classes.fabOEE) :classNames(classes.fab);
@@ -840,7 +736,12 @@ class ConnectedWorking extends React.Component {
                   </Paper>
                 </Grid>
                 <Grid item xs={3} className={classes.LeftTop2}>
-                  <Paper className={classes.LeftTopTab}>
+                  <Paper
+                    className={classes.LeftTopTab}
+                    component="button"
+                    onClick={e => this.openManualDiag(e,'carType')}
+                    disabled={!showManualCarType}
+                    >
                     <div className={classes.LeftTabContiner}>
                       <h4 className={classes.LeftTopDes}>
                         <p
@@ -861,7 +762,7 @@ class ConnectedWorking extends React.Component {
                   <Paper
                     className={classes.LeftTopTab}
                     component="button"
-                    onClick={e => this.openManualDiag(e)}
+                    onClick={e => this.openManualDiag(e,'vin')}
                     disabled={false}
                   >
                     <div className={classes.LeftTabContiner}>
@@ -977,7 +878,9 @@ class ConnectedWorking extends React.Component {
                 </div>
               </Paper>
               <ShutdownDiag />
-              <ResultDialog />
+              {
+                showResultDiag?<ResultDialog /> : null
+              }
               <ManualDiag
                 show={manualDiagShow}
                 close={this.closeManualDiag}

@@ -1,37 +1,35 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-// import { fetchNextWorkOrder } from '../../actions/ongoingWorkOrder';
 
 import withStyles from '@material-ui/core/styles/withStyles';
 
-// import { IOSet } from "../../actions/controllerIO";
 
 import Slide from '@material-ui/core/Slide';
 
 import { I18n } from 'react-i18next';
 
-// import { setShutdown, switchReady } from '../../actions/commonActions';
-import customSelectStyle from '../../common/jss/customSelectStyle';
+import Assignment from '@material-ui/icons/Assignment';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import CardActionArea from '@material-ui/core/CardActionArea';
+
+import DialogActions from '@material-ui/core/DialogActions';
+import Dialog from '@material-ui/core/Dialog';
+import { bindActionCreators } from "redux";
 import GridContainer from '../Grid/GridContainer';
 import GridItem from '../Grid/GridItem';
 import Card from '../Card/Card';
 import CardHeader from '../Card/CardHeader';
 import CardIcon from '../Card/CardIcon';
-import Assignment from '@material-ui/icons/Assignment';
 import CardBody from '../Card/CardBody';
 import Table from '../Table/Table';
-import ReactTable from 'react-table';
-import { cardTitle } from '../../common/jss/material-react-pro';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
-import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
-import DialogActions from '@material-ui/core/DialogActions';
 import Button from '../CustomButtons/Button';
-import Dialog from '@material-ui/core/Dialog';
+
+import { setResultDiagShow } from '../../actions/resultDiag';
+import { NewCar}  from '../../actions/scannerDevice';
+
+import resultDiagStyles from './styles';
 
 const mapStateToProps = (state, ownProps) => ({
   show: state.resultDiag.show,
@@ -40,9 +38,8 @@ const mapStateToProps = (state, ownProps) => ({
   ...ownProps
 });
 
-const mapDispatchToProps = {
-  // fetchNextWorkOrder
-};
+const mapDispatchToProps = dispatch =>
+  bindActionCreators({setResultDiagShow, NewCar} , dispatch);
 
 /* eslint-disable react/prefer-stateless-function */
 class ConnectedResultDialog extends React.Component {
@@ -56,12 +53,19 @@ class ConnectedResultDialog extends React.Component {
     return nextProps.show !== show;
   }
 
-  Transition = props => {
-    return <Slide direction="up" {...props} />;
-  };
+  Transition = props => <Slide direction="up" {...props} />;
 
   handleClose = (e) => {
+    e.preventDefault();
+    const {setResultDiagShow} = this.props;
+    setResultDiagShow(false);
+  };
 
+  handleClickNewWorkOrder = (e) => {
+    e.preventDefault();
+    const {NewCar} = this.props;
+    const {nextWorkorder} = this.state;
+    NewCar(nextWorkorder.vin);
   };
 
   render() {
@@ -96,7 +100,7 @@ class ConnectedResultDialog extends React.Component {
           <Dialog
             classes={{
               root: classes.modalRoot,
-              paper: classes.modal + ' ' + classes.modalLarge
+              paper: `${classes.modal  } ${  classes.modalLarge}`
             }}
             TransitionComponent={this.Transition}
             keepMounted
@@ -145,21 +149,27 @@ class ConnectedResultDialog extends React.Component {
                           {t('main.nextOrder')}
                         </h4>
                       </CardHeader>
-                      <CardBody>
-                        <Table
-                          tableHeaderColor="info"
-                          tableHead={['Vin', '车型', '车序', 'Knr', 'LongPin']}
-                          tableData={nw}
-                          colorsColls={['info']}
-                        />
-                      </CardBody>
+                      <CardActionArea
+                        component={Button}
+                        onClick={(e) => this.handleClickNewWorkOrder(e)}
+                        className={classes.cardActionArea}
+                      >
+                        <CardBody>
+                          <Table
+                            tableHeaderColor="info"
+                            tableHead={['Vin', '车型', '车序', 'Knr', 'LongPin']}
+                            tableData={nw}
+                            colorsColls={['info']}
+                          />
+                        </CardBody>
+                      </CardActionArea>
                     </Card>
                   </GridItem>
                 </GridContainer>
               </div>
             </DialogContent>
             <DialogActions
-              className={classes.modalFooter + ' ' + classes.modalFooterCenter}
+              className={`${classes.modalFooter  } ${  classes.modalFooterCenter}`}
             >
               <Button
                 onClick={(e) => this.handleClose(e)}
@@ -183,7 +193,8 @@ ConnectedResultDialog.propTypes = {
   results: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.number,
   }).isRequired).isRequired,
-  // fetchNextWorkOrder: PropTypes.func.isRequired,
+  setResultDiagShow: PropTypes.func.isRequired,
+  NewCar: PropTypes.func.isRequired,
 };
 
 const ResultDialog = connect(
@@ -191,4 +202,4 @@ const ResultDialog = connect(
   mapDispatchToProps
 )(ConnectedResultDialog);
 
-export default withStyles(customSelectStyle)(ResultDialog);
+export default withStyles(resultDiagStyles)(ResultDialog);

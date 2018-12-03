@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
 
-import Button from '../../components/CustomButtons/Button.jsx';
+import Button from '../../components/CustomButtons/Button';
 import { withStyles } from '@material-ui/core/styles';
 
 import DialogContent from '@material-ui/core/DialogContent';
@@ -12,9 +12,9 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
 import Slide from '@material-ui/core/Slide';
 
-import { SVWManualNewCar } from '../../actions/scannerDevice';
+import { NewCar } from '../../actions/scannerDevice';
 
-import customSelectStyle from '../../common/jss/customSelectStyle.jsx';
+import customSelectStyle from '../../common/jss/customSelectStyle';
 
 import { I18n } from 'react-i18next';
 import InputAdornment from '@material-ui/core/InputAdornment';
@@ -29,7 +29,7 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = {
-  SVWManualNewCar
+  NewCar
 };
 
 const customerStyles = theme => ({
@@ -61,7 +61,7 @@ class ConnectedManualDiag extends React.Component {
   };
 
   handleSubmit = () => {
-    this.props.SVWManualNewCar(this.state.vin);
+    this.props.NewCar(this.state.vin);
     this.props.close();
   };
 

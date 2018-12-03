@@ -13,12 +13,12 @@ import { I18n } from 'react-i18next';
 // import ButtonBase from '@material-ui/core/ButtonBase';
 import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
-import Button from '../../components/CustomButtons/Button';
 import CardContent from '@material-ui/core/CardContent';
 import PowerSettingIcon from '@material-ui/icons/PowerSettingsNew';
 import ExitToApp from '@material-ui/icons/ExitToApp';
 
 import { withStyles } from '@material-ui/core/styles';
+import Button from '../../components/CustomButtons/Button';
 
 import { openShutdown as OpenShutdown } from '../../actions/shutDownDiag';
 // import * as AuthActions from '../../actions/userAuth';
