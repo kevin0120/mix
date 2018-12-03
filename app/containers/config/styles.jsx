@@ -21,14 +21,14 @@ export default theme => ({
   menuItem: {
     fontSize: 14,
     height: 120,
-    margin:5,
+    margin: 5
   },
   menuItemSelected: {
     fontSize: 14,
     backgroundColor: '#8e24aa',
-    height:120,
-    color:'#FAFAFA',
-    margin:5,
+    height: 120,
+    color: '#FAFAFA',
+    margin: 5
   },
   itemText: {
     fontSize: 14,
@@ -36,23 +36,22 @@ export default theme => ({
   },
   cardActionArea: {
     flex: 1,
-    color:'#00352c',
-    width:'100%',
-    height:'100%',
-    display:'flex',
-    flexDirection:'column',
-    justifyContent:'center',
-    alignItems:'center',
+    color: '#00352c',
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   cardActionAreaSelected: {
     flex: 1,
-    color:'white',
-    width:'100%',
-    height:'100%',
-    display:'flex',
-    flexDirection:'column',
-    justifyContent:'center',
-    alignItems:'center',
-  },
-
+    color: 'white',
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
+  }
 });

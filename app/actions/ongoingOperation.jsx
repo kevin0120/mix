@@ -8,18 +8,17 @@
 
 // @flow
 
-import {ONGOING_OPERATION} from './actionTypes'
+import { ONGOING_OPERATION } from './actionTypes';
 
-export function fetchOngoingOperationOK(data){
+export function fetchOngoingOperationOK(data) {
   return {
     type: ONGOING_OPERATION.FETCH_OK,
-    data,
-  }
+    data
+  };
 }
 
-
-export function cleanOngoingOperation(){
+export function cleanOngoingOperation() {
   return {
-    type: ONGOING_OPERATION.CLEAN,
-  }
+    type: ONGOING_OPERATION.CLEAN
+  };
 }

@@ -1,7 +1,6 @@
 /* eslint flowtype-errors/show-errors: 0 */
 import React from 'react';
 
-
 // icons
 import HomeIcon from '@material-ui/icons/Home';
 import SettingsApplicationsIcon from '@material-ui/icons/SettingsApplications';
@@ -70,7 +69,7 @@ const routes = [
     icon: CollectionsIcon,
     color: warningColor,
     image: editorImg,
-    enName: 'Vehicle Queue',
+    enName: 'Vehicle Queue'
   },
   {
     name: 'preferences',
@@ -134,7 +133,11 @@ const routes = [
   }
 ];
 
-export const routeConfigs = lodash.filter(routes, (ele) => !(configs.operationSettings.opMode !== 'order' && ele.name === 'orders'));
+export const routeConfigs = lodash.filter(
+  routes,
+  ele =>
+    !(configs.operationSettings.opMode !== 'order' && ele.name === 'orders')
+);
 
 const indexRoutes = [
   { url: '/pages', main: Pages },

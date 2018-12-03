@@ -14,6 +14,14 @@ export function sortObj(obj, orderKey) {
   }));
 }
 
+export function normalSortObj(obj) {
+  const orderedKey = Object.keys(obj);
+  return orderedKey.map(key => ({
+    key,
+    value: cloneDeep(obj[key])
+  }));
+}
+
 // type: default、error、warning、success、info
 export function showNoty(type, text) {
   toast(text, {

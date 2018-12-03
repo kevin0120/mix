@@ -282,20 +282,20 @@ class ConnectedNet extends React.PureComponent {
                 placeholder={t('Common.isRequired')}
                 className={classes.input}
                 value={item.value}
-                onClick={()=>{
+                onClick={() => {
                   this.props.keyboardInput({
-                    onSubmit:(text)=>{
+                    onSubmit: text => {
                       const tempData = cloneDeep(this.state.data);
                       tempData[key].value = text;
                       this.setState({
                         ...this.state,
-                        data: tempData,
+                        data: tempData
                       });
                     },
-                    text:item.value,
-                    title:item.displayTitle,
-                    label:item.displayTitle
-                  })
+                    text: item.value,
+                    title: item.displayTitle,
+                    label: item.displayTitle
+                  });
                 }}
                 // onChange={e => this.handleChange(e, key)}
               />

@@ -200,27 +200,27 @@ class ConnectedIo extends React.PureComponent {
               placeholder={t('Common.isRequired')}
               className={classes.ioInput}
               value={item.label}
-              onClick={()=>{
+              onClick={() => {
                 this.props.keyboardInput({
-                  onSubmit:(text)=>{
+                  onSubmit: text => {
                     const tempData = cloneDeep(this.state.data[item.io]);
                     tempData[idx]['label'] = text;
                     this.setState({
                       ...this.state,
                       data: {
                         ...this.state.data,
-                        [item.io]: tempData,
+                        [item.io]: tempData
                       },
                       isDataValid: this.validateData({
                         ...this.state.data,
-                        [item.io]: tempData,
-                      }),
+                        [item.io]: tempData
+                      })
                     });
                   },
-                  text:item.label,
-                  title:item.bit,
-                  label:item.bit
-                })
+                  text: item.label,
+                  title: item.bit,
+                  label: item.bit
+                });
               }}
               // onChange={e => this.handleChange(e, idx, item.io, 'label')}
             />

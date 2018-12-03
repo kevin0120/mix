@@ -15,7 +15,7 @@ const defaultOngoingOperation = {
   model: '',
   lnr: '',
   knr: '',
-  long_pin: '',
+  long_pin: ''
 };
 
 type actionType = {
@@ -29,8 +29,8 @@ export default function ongoingOperation(
 ) {
   switch (action.type) {
     case ONGOING_OPERATION.FETCH_OK: {
-      const { vin, model,lnr,knr, long_pin} = action.data;
-      return { vin, model,lnr,knr, long_pin};
+      const { vin, model, lnr, knr, long_pin } = action.data;
+      return { vin, model, lnr, knr, long_pin };
     }
     case ONGOING_OPERATION.CLEAN: {
       return defaultOngoingOperation;

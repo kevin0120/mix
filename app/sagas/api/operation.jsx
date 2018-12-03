@@ -1,4 +1,3 @@
-
 // @flow
 
 import axios from 'axios';
@@ -31,13 +30,16 @@ axiosRetry(defaultClient, {
 export function fetchNextWorkOrder(baseURL, workcenterCode) {
   const fullUrl = `${baseURL}/rush/v1/next-workorder`;
 
-  return defaultClient.get(fullUrl, { params: {
-      workcenter_code: workcenterCode,
-      } })
-      .then(resp => resp)
-      .catch(e => {
-        throw e.toString();
-      });
+  return defaultClient
+    .get(fullUrl, {
+      params: {
+        workcenter_code: workcenterCode
+      }
+    })
+    .then(resp => resp)
+    .catch(e => {
+      throw e.toString();
+    });
 }
 
 // 获取作业

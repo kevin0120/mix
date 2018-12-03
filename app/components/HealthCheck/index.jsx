@@ -6,6 +6,7 @@ import { withStyles } from '@material-ui/core/styles';
 
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import MenuList from '@material-ui/core/MenuList';
 
 import * as Utils from '../../common/utils';
 
@@ -27,18 +28,20 @@ class ConnectedHealthCheck extends React.Component {
         return (
           <I18n ns="translations">
             {t => (
-              <ListItem
-                key={displayTitle}
-                disableGutters={styleOptions.disableGutters}
-                className={classes.infoItem}
-              >
-                <ListItemText
-                  key={displayTitle}
-                  className={classes.infoText}
-                  primary={t(displayTitle)}
-                />
-                <div className={`${classes.infoStatus} ${statusClassName}`} />
-              </ListItem>
+              <MenuList key={key}>
+                <ListItem
+                  key={key}
+                  disableGutters={styleOptions.disableGutters}
+                  className={classes.infoItem}
+                >
+                  <ListItemText
+                    key={key}
+                    className={classes.infoText}
+                    primary={t(displayTitle)}
+                  />
+                  <div className={`${classes.infoStatus} ${statusClassName}`} />
+                </ListItem>
+              </MenuList>
             )}
           </I18n>
         );

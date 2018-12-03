@@ -9,7 +9,7 @@
 import { RESULT_DIAG } from '../actions/actionTypes';
 
 const defaultResultDiag = {
-  show: false,
+  show: false
 };
 
 type actionType = {
@@ -23,8 +23,8 @@ export default function resultDiag(
 ) {
   switch (action.type) {
     case RESULT_DIAG.SHOW: {
-      const {show} = action;
-      return { show } ;
+      const { show } = action;
+      return { show };
     }
     default:
       return state;

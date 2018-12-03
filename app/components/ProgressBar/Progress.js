@@ -184,7 +184,7 @@ class ProgressBar extends React.Component {
           endColor="#F7E600"
           textColor="#F7E600"
           textStyle={{
-            font: '20rem Helvetica, Arial, sans-serif'
+            font: '30rem Helvetica, Arial, sans-serif'
           }}
           roundedStroke
         />

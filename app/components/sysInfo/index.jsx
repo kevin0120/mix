@@ -14,6 +14,9 @@ import { withStyles } from '@material-ui/core/styles';
 
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import Paper from '@material-ui/core/Paper';
+import MenuList from '@material-ui/core/MenuList';
+
 
 import * as Utils from '../../common/utils';
 
@@ -26,28 +29,41 @@ class SysInfo extends React.Component {
     super();
     this.timer = null;
     this.state = {
-      cpustat: null,
-      fsstat: null,
-      memstat: null,
-      batterystat: null
+      cpustat: {avgload: 100.0},
+      fsstat: {used: 100, size: 100},
+      memstat: {used: 100, total: 100},
+      batterystat: {currentcapacity: 0, maxcapacity: 100},
     };
   }
 
   componentDidMount() {
     this.timer = setInterval(() => {
       si.currentLoad().then(data => {
-        console.log(data);
+        this.setState({
+          cpustat: {avgload: data.avgload}
+        })
       });
       si.fsSize().then(data => {
         console.log(data);
       });
       si.mem().then(data => {
-        console.log(data);
+        this.setState({
+          memstat: {used: data.used, total: data.total}
+        })
       });
       si.battery().then(data => {
         console.log(data);
       });
-    }, 2000);
+      si.networkInterfaces().then(data => {
+        console.log(data);
+      });
+    }, 5000);
+  }
+
+
+  shouldComponentUpdate(nextProps, nextState) {
+    console.log(nextProps, nextState);
+    return this.state !== nextState || this.props !== nextProps;
   }
 
   componentWillUnmount() {
@@ -59,22 +75,34 @@ class SysInfo extends React.Component {
 
     const styleOptions = { disableGutters: false };
 
-    return (
-      <I18n ns="translations">
-        {t => (
-          <ListItem
-            key="1"
-            disableGutters={styleOptions.disableGutters}
-            className={classes.infoItem}
-          >
-            <ListItemText
-              className={classes.infoText}
-              primary="111"
-              secondary="2222"
-            />
-          </ListItem>
-        )}
-      </I18n>
+    return Utils.normalSortObj(this.state).map(
+      ({ key, value: item }) => {
+        const { isHealth, displayTitle } = item;
+        const statusClassName = isHealth
+          ? classes.infoSuccess
+          : classes.infoError;
+
+        return (
+          <I18n ns="translations">
+            {t => (
+              <MenuList key={key}>
+                <ListItem
+                  key={displayTitle}
+                  disableGutters={styleOptions.disableGutters}
+                  className={classes.infoItem}
+                >
+                  <ListItemText
+                    key={displayTitle}
+                    className={classes.infoText}
+                    primary={t(displayTitle)}
+                  />
+                  <div className={`${classes.infoStatus} ${statusClassName}`} />
+                </ListItem>
+              </MenuList>
+            )}
+          </I18n>
+        );
+      }
     );
   }
 }

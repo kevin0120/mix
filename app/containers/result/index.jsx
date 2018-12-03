@@ -55,12 +55,14 @@ const styles = {
     marginTop: '15px',
     marginBottom: '0px'
   },
-  InputRoot:{
-    width: "100%" ,height:'36px',
-    overflow:'hidden'
+  InputRoot: {
+    width: '100%',
+    height: '36px',
+    overflow: 'hidden'
   },
-  InputInput:{
-    width: "100%" ,height:'100%',
+  InputInput: {
+    width: '100%',
+    height: '100%'
   }
 };
 
@@ -219,86 +221,101 @@ class Result extends React.Component {
                           Header: 'VIN',
                           accessor: 'vin',
                           filterMethod: (filter, row) => {
-                            return lodash.includes(lodash.toUpper(row[filter.id]), lodash.toUpper(this.state.vinFilter||''));
+                            return lodash.includes(
+                              lodash.toUpper(row[filter.id]),
+                              lodash.toUpper(this.state.vinFilter || '')
+                            );
                           },
-                          Filter: ({ filter, onChange }) =>
+                          Filter: ({ filter, onChange }) => (
                             <Input
-                              onClick={()=>{
+                              onClick={() => {
                                 this.props.keyboardInput({
-                                  onSubmit:(text)=>{
-                                    this.setState({vinFilter:text},()=>{
+                                  onSubmit: text => {
+                                    this.setState({ vinFilter: text }, () => {
                                       onChange(this.state.vinFilter);
                                     });
                                   },
-                                  text:this.state.vinFilter,
-                                  title:'VIN',
-                                  label:'VIN'
+                                  text: this.state.vinFilter,
+                                  title: 'VIN',
+                                  label: 'VIN'
                                 });
                               }}
                               classes={{
-                                root:classes.InputRoot,
-                                input:classes.InputInput,
+                                root: classes.InputRoot,
+                                input: classes.InputInput
                               }}
                               // style={{ width: "100%" ,height:'36px'}}
-                              value={this.state.vinFilter || ""}
+                              value={this.state.vinFilter || ''}
                             />
+                          )
                         },
                         {
                           Header: '车型',
                           accessor: 'vehicle_type',
                           filterMethod: (filter, row) => {
-                            return lodash.includes(lodash.toUpper(row[filter.id]), lodash.toUpper(this.state.vehicleTypeFilter||''));
+                            return lodash.includes(
+                              lodash.toUpper(row[filter.id]),
+                              lodash.toUpper(this.state.vehicleTypeFilter || '')
+                            );
                           },
-                          Filter: ({ filter, onChange }) =>
+                          Filter: ({ filter, onChange }) => (
                             <Input
-                              onClick={()=>{
+                              onClick={() => {
                                 this.props.keyboardInput({
-                                  onSubmit:(text)=>{
-                                    this.setState({vehicleTypeFilter:text},()=>{
-                                      onChange(this.state.vehicleTypeFilter);
-                                    });
+                                  onSubmit: text => {
+                                    this.setState(
+                                      { vehicleTypeFilter: text },
+                                      () => {
+                                        onChange(this.state.vehicleTypeFilter);
+                                      }
+                                    );
                                   },
-                                  text:this.state.vehicleTypeFilter,
-                                  title:'车型',
-                                  label:'车型'
+                                  text: this.state.vehicleTypeFilter,
+                                  title: '车型',
+                                  label: '车型'
                                 });
                               }}
                               classes={{
-                                root:classes.InputRoot,
-                                input:classes.InputInput,
+                                root: classes.InputRoot,
+                                input: classes.InputInput
                               }}
                               // style={{ width: "100%" ,height:'36px'}}
-                              value={this.state.vehicleTypeFilter || ""}
+                              value={this.state.vehicleTypeFilter || ''}
                             />
+                          )
                         },
                         {
                           Header: '程序号',
                           accessor: 'job_id',
                           sortable: false,
                           filterMethod: (filter, row) => {
-                            return lodash.includes(lodash.toUpper(row[filter.id]), lodash.toUpper(this.state.jobIdFilter||''));
+                            return lodash.includes(
+                              lodash.toUpper(row[filter.id]),
+                              lodash.toUpper(this.state.jobIdFilter || '')
+                            );
                           },
-                          Filter: ({ filter, onChange }) =>
+                          Filter: ({ filter, onChange }) => (
                             <Input
-                              onClick={()=>{
+                              onClick={() => {
                                 this.props.keyboardInput({
-                                  onSubmit:(text)=>{
-                                    this.setState({jobIdFilter:text},()=>{
+                                  onSubmit: text => {
+                                    this.setState({ jobIdFilter: text }, () => {
                                       onChange(this.state.jobIdFilter);
                                     });
                                   },
-                                  text:this.state.jobIdFilter,
-                                  title:'程序号',
-                                  label:'程序号'
+                                  text: this.state.jobIdFilter,
+                                  title: '程序号',
+                                  label: '程序号'
                                 });
                               }}
                               classes={{
-                                root:classes.InputRoot,
-                                input:classes.InputInput,
+                                root: classes.InputRoot,
+                                input: classes.InputInput
                               }}
                               // style={{ width: "100%" ,height:'36px'}}
-                              value={this.state.jobIdFilter || ""}
+                              value={this.state.jobIdFilter || ''}
                             />
+                          )
                         },
                         {
                           Header: '扭矩',
@@ -321,7 +338,7 @@ class Result extends React.Component {
                         {
                           Header: '拧紧时间',
                           accessor: 'timestamp',
-                          filterable: false,
+                          filterable: false
                           // filterMethod: (filter, row) =>
                           //   lodash.includes(
                           //     lodash.toUpper(row[filter.id]),
@@ -371,7 +388,7 @@ class Result extends React.Component {
 Result.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   masterpcUrl: PropTypes.string.isRequired,
-  hmiSn: PropTypes.string.isRequired,
+  hmiSn: PropTypes.string.isRequired
 };
 
 const ConnResult = connect(

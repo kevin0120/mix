@@ -8,7 +8,7 @@
 
 // @flow
 
-import { RESULT_DIAG } from "./actionTypes";
+import { RESULT_DIAG } from './actionTypes';
 
 export function setResultDiagShow(show: boolean) {
   return {

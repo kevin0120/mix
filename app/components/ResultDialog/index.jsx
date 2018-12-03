@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 
 import withStyles from '@material-ui/core/styles/withStyles';
 
-
 import Slide from '@material-ui/core/Slide';
 
 import { I18n } from 'react-i18next';
@@ -16,7 +15,7 @@ import CardActionArea from '@material-ui/core/CardActionArea';
 
 import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
-import { bindActionCreators } from "redux";
+import { bindActionCreators } from 'redux';
 import GridContainer from '../Grid/GridContainer';
 import GridItem from '../Grid/GridItem';
 import Card from '../Card/Card';
@@ -27,9 +26,11 @@ import Table from '../Table/Table';
 import Button from '../CustomButtons/Button';
 
 import { setResultDiagShow } from '../../actions/resultDiag';
-import { NewCar}  from '../../actions/scannerDevice';
+import { NewCar } from '../../actions/scannerDevice';
 
 import resultDiagStyles from './styles';
+
+const lodash = require('lodash');
 
 const mapStateToProps = (state, ownProps) => ({
   show: state.resultDiag.show,
@@ -39,7 +40,7 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch =>
-  bindActionCreators({setResultDiagShow, NewCar} , dispatch);
+  bindActionCreators({ setResultDiagShow, NewCar }, dispatch);
 
 /* eslint-disable react/prefer-stateless-function */
 class ConnectedResultDialog extends React.Component {
@@ -48,39 +49,41 @@ class ConnectedResultDialog extends React.Component {
     this.Transition = this.Transition.bind(this);
   }
 
-  shouldComponentUpdate(nextProps,nextState) {
-    const {show} = this.props;
+  shouldComponentUpdate(nextProps, nextState) {
+    const { show } = this.props;
     return nextProps.show !== show;
   }
 
   Transition = props => <Slide direction="up" {...props} />;
 
-  handleClose = (e) => {
+  handleClose = e => {
     e.preventDefault();
-    const {setResultDiagShow} = this.props;
+    const { setResultDiagShow } = this.props;
     setResultDiagShow(false);
   };
 
-  handleClickNewWorkOrder = (e) => {
+  handleClickNewWorkOrder = e => {
     e.preventDefault();
-    const {NewCar} = this.props;
-    const {nextWorkorder} = this.state;
-    NewCar(nextWorkorder.vin);
+    const { NewCar } = this.props;
+    const { vin } = this.state.nextWorkorder;
+    if (!lodash.isNil(vin) || vin !== ''){
+      NewCar(vin);
+    }
   };
 
   render() {
-    const {
-      classes,
-      show,
-      results,
-      nextWorkorder,
-    } = this.props;
-
+    const { classes, show, results, nextWorkorder } = this.props;
 
     const nw = [];
 
     if (nextWorkorder) {
-      nw.push([nextWorkorder.vin, nextWorkorder.model, nextWorkorder.lnr, nextWorkorder.knr, nextWorkorder.long_pin]);
+      nw.push([
+        nextWorkorder.vin,
+        nextWorkorder.model,
+        nextWorkorder.lnr,
+        nextWorkorder.knr,
+        nextWorkorder.long_pin
+      ]);
     }
 
     const localResults = [];
@@ -100,7 +103,7 @@ class ConnectedResultDialog extends React.Component {
           <Dialog
             classes={{
               root: classes.modalRoot,
-              paper: `${classes.modal  } ${  classes.modalLarge}`
+              paper: `${classes.modal} ${classes.modalLarge}`
             }}
             TransitionComponent={this.Transition}
             keepMounted
@@ -121,7 +124,7 @@ class ConnectedResultDialog extends React.Component {
                         <CardIcon color="info">
                           <Assignment />
                         </CardIcon>
-                        <h4 style={{color: '#000'}}>
+                        <h4 style={{ color: '#000' }}>
                           {t('main.currentOrder')}
                         </h4>
                       </CardHeader>
@@ -145,19 +148,23 @@ class ConnectedResultDialog extends React.Component {
                         <CardIcon color="info">
                           <Assignment />
                         </CardIcon>
-                        <h4 style={{color: '#000'}}>
-                          {t('main.nextOrder')}
-                        </h4>
+                        <h4 style={{ color: '#000' }}>{t('main.nextOrder')}</h4>
                       </CardHeader>
                       <CardActionArea
                         component={Button}
-                        onClick={(e) => this.handleClickNewWorkOrder(e)}
+                        onClick={e => this.handleClickNewWorkOrder(e)}
                         className={classes.cardActionArea}
                       >
                         <CardBody>
                           <Table
                             tableHeaderColor="info"
-                            tableHead={['Vin', '车型', '车序', 'Knr', 'LongPin']}
+                            tableHead={[
+                              'Vin',
+                              '车型',
+                              '车序',
+                              'Knr',
+                              'LongPin'
+                            ]}
                             tableData={nw}
                             colorsColls={['info']}
                           />
@@ -169,10 +176,10 @@ class ConnectedResultDialog extends React.Component {
               </div>
             </DialogContent>
             <DialogActions
-              className={`${classes.modalFooter  } ${  classes.modalFooterCenter}`}
+              className={`${classes.modalFooter} ${classes.modalFooterCenter}`}
             >
               <Button
-                onClick={(e) => this.handleClose(e)}
+                onClick={e => this.handleClose(e)}
                 color="info"
                 autoFocus
                 round
@@ -190,11 +197,13 @@ class ConnectedResultDialog extends React.Component {
 ConnectedResultDialog.propTypes = {
   show: PropTypes.bool.isRequired,
   nextWorkorder: PropTypes.shape({}).isRequired,
-  results: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.number,
-  }).isRequired).isRequired,
+  results: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number
+    }).isRequired
+  ).isRequired,
   setResultDiagShow: PropTypes.func.isRequired,
-  NewCar: PropTypes.func.isRequired,
+  NewCar: PropTypes.func.isRequired
 };
 
 const ResultDialog = connect(

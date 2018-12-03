@@ -85,20 +85,20 @@ class ConnectedConnect extends React.PureComponent {
               className={classes.input}
               value={item.value}
               // onChange={e => this.handleChange(e, key)}
-              onClick={()=>{
+              onClick={() => {
                 this.props.keyboardInput({
-                  onSubmit:(text)=>{
+                  onSubmit: text => {
                     const tempData = cloneDeep(this.state.data);
                     tempData[key].value = text;
                     this.setState({
                       ...this.state,
-                      data: tempData,
+                      data: tempData
                     });
                   },
-                  text:item.value,
-                  title:item.displayTitle,
-                  label:item.displayTitle
-                })
+                  text: item.value,
+                  title: item.displayTitle,
+                  label: item.displayTitle
+                });
               }}
             />
           </ListItem>
@@ -147,7 +147,7 @@ ConnectedConnect.propTypes = {
   storedConfigs: PropTypes.shape({}).isRequired,
   saveConfigs: PropTypes.func.isRequired,
   systemInit: PropTypes.func.isRequired,
-  keyboardInput:PropTypes.func.isRequired
+  keyboardInput: PropTypes.func.isRequired
 };
 
 const Connect = connect(
