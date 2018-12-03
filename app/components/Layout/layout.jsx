@@ -272,7 +272,8 @@ export default function withLayout(SubCompontents, showTop = true) {
                       onClose={this.handleCloseSysInfo}
                       TransitionComponent={Fade}
                       classes={{
-                        paper: classes.popover
+                        paper: classes.popover,
+
                       }}
                     >
                       <SysInfo />

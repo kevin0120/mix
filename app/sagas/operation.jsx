@@ -4,7 +4,7 @@ import {
   fetchWorkorder,
   jobManual,
   pset,
-  fetchNextWorkOrder,
+  fetchNextWorkOrder
 } from './api/operation';
 import { OPERATION, RUSH } from '../actions/actionTypes';
 import { openShutdown } from '../actions/shutDownDiag';
@@ -12,15 +12,21 @@ import { OPERATION_RESULT, OPERATION_STATUS } from '../reducers/operations';
 import { addNewStory, clearStories, STORY_TYPE } from './timeline';
 import { toolEnable, toolDisable } from '../actions/tools';
 import { setResultDiagShow } from '../actions/resultDiag';
-import {fetchOngoingOperationOK, cleanOngoingOperation} from '../actions/ongoingOperation';
+import {
+  fetchOngoingOperationOK,
+  cleanOngoingOperation
+} from '../actions/ongoingOperation';
 
 const lodash = require('lodash');
-
 
 // 监听作业
 export function* watchOperation() {
   while (true) {
-    const action = yield take([OPERATION.STARTED,OPERATION.VERIFIED, OPERATION.FINISHED]);
+    const action = yield take([
+      OPERATION.STARTED,
+      OPERATION.VERIFIED,
+      OPERATION.FINISHED
+    ]);
     const state = yield select();
     const { workMode } = state;
 

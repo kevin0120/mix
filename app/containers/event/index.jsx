@@ -24,7 +24,7 @@ import Card from '../../components/Card/Card';
 import CardBody from '../../components/Card/CardBody';
 import CardIcon from '../../components/Card/CardIcon';
 import CardHeader from '../../components/Card/CardHeader';
-import Input from "@material-ui/core/Input";
+import Input from '@material-ui/core/Input';
 
 import { Query, CreateDailyLogger, Warn } from '../../logger';
 
@@ -58,12 +58,14 @@ const styles = {
     marginTop: '15px',
     marginBottom: '0px'
   },
-  InputRoot:{
-    width: "100%" ,height:'36px',
-    overflow:'hidden'
+  InputRoot: {
+    width: '100%',
+    height: '36px',
+    overflow: 'hidden'
   },
-  InputInput:{
-    width: "100%" ,height:'100%',
+  InputInput: {
+    width: '100%',
+    height: '100%'
   }
 };
 
@@ -276,29 +278,36 @@ class Event extends React.Component {
                           accessor: 'message',
                           sortable: false,
                           filterMethod: (filter, row) => {
-                            return lodash.includes(lodash.toUpper(row[filter.id]), lodash.toUpper(this.state.messageFilter||''));
+                            return lodash.includes(
+                              lodash.toUpper(row[filter.id]),
+                              lodash.toUpper(this.state.messageFilter || '')
+                            );
                           },
-                          Filter: ({ filter, onChange }) =>
+                          Filter: ({ filter, onChange }) => (
                             <Input
-                              onClick={()=>{
+                              onClick={() => {
                                 this.props.keyboardInput({
-                                  onSubmit:(text)=>{
-                                    this.setState({messageFilter:text},()=>{
-                                      onChange(this.state.messageFilter);
-                                    });
+                                  onSubmit: text => {
+                                    this.setState(
+                                      { messageFilter: text },
+                                      () => {
+                                        onChange(this.state.messageFilter);
+                                      }
+                                    );
                                   },
-                                  text:this.state.messageFilter,
-                                  title:'Message',
-                                  label:'Message'
+                                  text: this.state.messageFilter,
+                                  title: 'Message',
+                                  label: 'Message'
                                 });
                               }}
                               classes={{
-                                root:classes.InputRoot,
-                                input:classes.InputInput,
+                                root: classes.InputRoot,
+                                input: classes.InputInput
                               }}
                               // style={{ width: "100%" ,height:'36px'}}
-                              value={this.state.messageFilter || ""}
+                              value={this.state.messageFilter || ''}
                             />
+                          )
                         },
                         {
                           Header: 'Actions',

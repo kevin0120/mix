@@ -11,7 +11,7 @@ import customSelectStyle from '../../common/jss/customSelectStyle';
 const resultDiagStyles = {
   ...customSelectStyle,
   cardActionArea: {
-    backgroundColor: 'transparent',
+    backgroundColor: 'transparent'
   }
 };
 

@@ -12,14 +12,13 @@ import { CONNECTION } from '../../actions/actionTypes';
 
 const lodash = require('lodash');
 
-
 const defaultConnInfo = {
   masterpc: '',
   rfid: '',
   controllers: [],
   io: '',
   workcenterCode: '',
-  rework_workcenter: '',
+  rework_workcenter: ''
 };
 
 type actionType = {
@@ -36,12 +35,12 @@ export default function connections(
       const { masterpc, rfid, io, controllers, info } = action.data;
       return {
         ...state,
-        masterpc: masterpc.connection? masterpc.connection : '',
-        rfid: rfid.connection? rfid.connection : '',
-        io: io.connection?io.connection: '',
-        workcenterCode: info.workcenter_code? info.workcenter_code : '',
-        qc_workcenter: info.qc_workcenter? info.qc_workcenter : '',
-        controllers: lodash.isArray(controllers)? controllers : [],
+        masterpc: masterpc.connection ? masterpc.connection : '',
+        rfid: rfid.connection ? rfid.connection : '',
+        io: io.connection ? io.connection : '',
+        workcenterCode: info.workcenter_code ? info.workcenter_code : '',
+        qc_workcenter: info.qc_workcenter ? info.qc_workcenter : '',
+        controllers: lodash.isArray(controllers) ? controllers : []
       };
     }
     default:

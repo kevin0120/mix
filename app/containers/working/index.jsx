@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 
 import List from '@material-ui/core/List';
 
-
 import { I18n } from 'react-i18next';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -17,15 +16,13 @@ import ImageStick from '../../components/ImageStick/imageStick';
 import ShutdownDiag from '../../components/ShutDownDiag';
 import { NewCar } from '../../actions/scannerDevice';
 
-import configs from '../../shared/config/index'
+import configs from '../../shared/config/index';
 
 // components
 
 import withLayout from '../../components/Layout/layout';
 
 import WorkingInfoBar from '../../components/WorkingInfoBar';
-
-
 
 import {
   container,
@@ -422,7 +419,7 @@ const withstyles = theme => ({
     height: '75px',
     marginTop: '0px',
     width: '100%',
-    color: '#E5F0FA'
+    color: '#F7E600'
   },
   CountDownContainer: {
     position: 'absolute',
@@ -440,13 +437,13 @@ const withstyles = theme => ({
     textAlign: 'center',
     height: '120px',
     position: 'relative',
-    background: '#66AECE'
+    background: '#111111'
   },
   RetryPaper: {
     textAlign: 'center',
     height: '120px',
     position: 'relative',
-    background: '#6B70BD'
+    background: '#111111'
   },
   RightDescription: {
     fontSize: '20px',
@@ -454,7 +451,8 @@ const withstyles = theme => ({
   },
   RightNum: {
     fontSize: '60px',
-    fontWeight: '600'
+    fontWeight: '600',
+    paddingTop: '15px'
   },
   MarginTop5: {
     marginTop: '5px'
@@ -470,7 +468,6 @@ const withstyles = theme => ({
   }
 });
 
-
 class ConnectedWorking extends React.Component {
   constructor(props) {
     super(props);
@@ -482,7 +479,7 @@ class ConnectedWorking extends React.Component {
       layoutName: 'default',
       vehicle: '',
       vin: '',
-      manualDiagShow: false,
+      manualDiagShow: false
     };
 
     this.toggleOPMode = this.toggleOPMode.bind(this);
@@ -496,7 +493,6 @@ class ConnectedWorking extends React.Component {
     return true;
   }
 
-
   componentWillUnmount() {
     // this.props.setCarByPass(true);
   }
@@ -508,7 +504,6 @@ class ConnectedWorking extends React.Component {
   handleClickResume = e => {
     // this.props.setOrderStatus('Doing');
   };
-
 
   toggleOPMode() {
     const { isAutoMode } = this.props;
@@ -555,7 +550,7 @@ class ConnectedWorking extends React.Component {
       });
     }
     if (lodash.isEqual(press, '{shift}')) {
-      const{ layoutName } = this.state;
+      const { layoutName } = this.state;
 
       this.setState({
         layoutName: layoutName === 'default' ? 'shift' : 'default'
@@ -575,16 +570,16 @@ class ConnectedWorking extends React.Component {
     });
   };
 
-  openManualDiag = (e,input) => {
+  openManualDiag = (e, input) => {
     e.preventDefault();
-    const {keyboardInput, NewCar} = this.props;
+    const { keyboardInput, NewCar } = this.props;
     keyboardInput({
-      onSubmit: (text) => {
+      onSubmit: text => {
         NewCar(text);
       },
       text: e.target.value,
-      title: input === 'vin'?'VIN/KNR': 'VEHICLE TYPE',
-      label: input === 'vin'?'VIN/KNR': 'VEHICLE TYPE',
+      title: input === 'vin' ? 'VIN/KNR' : 'VEHICLE TYPE',
+      label: input === 'vin' ? 'VIN/KNR' : 'VEHICLE TYPE'
     });
   };
 
@@ -594,8 +589,8 @@ class ConnectedWorking extends React.Component {
       {
         key: 'rework',
         value: reworkWorkCenter,
-        displayTitle: t('Operation.Info.ReworkWorkCenter'),
-      },
+        displayTitle: t('Operation.Info.ReworkWorkCenter')
+      }
     ];
   };
 
@@ -648,19 +643,25 @@ class ConnectedWorking extends React.Component {
     if (operations.results.length > 0) {
       maxRedoTimes =
         operations.results[operations.activeResultIndex].max_redo_times;
-      batch =
-        `${(operations.activeResultIndex + 1).toString() 
-        }/${ 
-        operations.results.length.toString()}`;
-      redoBatch =
-        `${(maxRedoTimes - operations.failCount).toString() 
-        }/${ 
-        maxRedoTimes.toString()}`;
+      batch = `${(
+        operations.activeResultIndex + 1
+      ).toString()}/${operations.results.length.toString()}`;
+      redoBatch = `${(
+        maxRedoTimes - operations.failCount
+      ).toString()}/${maxRedoTimes.toString()}`;
+    }
+
+    if (operations.operationStatus === 'Ready') {
+      redoBatch = "0";
     }
 
     const showResultDiag = configs.operationSettings.opMode === 'order';
 
     const showManualCarType = configs.operationSettings.opMode === 'op';
+
+    const carTypeSize= configs.operationSettings.opMode === 'op'? 5: 3;
+
+    const carTypeClass= configs.operationSettings.opMode === 'op'? classes.LeftTop1: classes.LeftTop2;
 
     //
     // const fabClassName = classNames(classes.fab);
@@ -717,31 +718,34 @@ class ConnectedWorking extends React.Component {
           <Grid container spacing={24} className={classes.root}>
             <Grid item xs={9} className={classes.LeftWrapper}>
               <Grid container spacing={24} className={classes.LeftTopWrapper}>
-                <Grid item xs={2} className={classes.LeftTop1}>
-                  <Paper className={classes.LeftTopTab}>
-                    <div className={classes.LeftTabContiner}>
-                      <h4 className={classes.LeftTopDes}>
-                        <p
-                          href="#pablo"
-                          className={classes.MarginTopBottom5}
-                          onClick={e => e.preventDefault()}
-                        >
-                          车序:
-                        </p>
-                      </h4>
-                      <p className={classes.cardDescription}>
-                        {operations.lnr}
-                      </p>
-                    </div>
-                  </Paper>
-                </Grid>
-                <Grid item xs={3} className={classes.LeftTop2}>
+              {
+                showResultDiag?
+                    <Grid item xs={2} className={classes.LeftTop1}>
+                      <Paper className={classes.LeftTopTab}>
+                        <div className={classes.LeftTabContiner}>
+                          <h4 className={classes.LeftTopDes}>
+                            <p
+                              href="#pablo"
+                              className={classes.MarginTopBottom5}
+                              onClick={e => e.preventDefault()}
+                            >
+                              车序:
+                            </p>
+                          </h4>
+                          <p className={classes.cardDescription}>
+                            {operations.lnr}
+                          </p>
+                        </div>
+                      </Paper>
+                    </Grid>: null
+              }
+                <Grid item xs={carTypeSize} className={carTypeClass}>
                   <Paper
                     className={classes.LeftTopTab}
                     component="button"
-                    onClick={e => this.openManualDiag(e,'carType')}
+                    onClick={e => this.openManualDiag(e, 'carType')}
                     disabled={!showManualCarType}
-                    >
+                  >
                     <div className={classes.LeftTabContiner}>
                       <h4 className={classes.LeftTopDes}>
                         <p
@@ -762,7 +766,7 @@ class ConnectedWorking extends React.Component {
                   <Paper
                     className={classes.LeftTopTab}
                     component="button"
-                    onClick={e => this.openManualDiag(e,'vin')}
+                    onClick={e => this.openManualDiag(e, 'vin')}
                     disabled={false}
                   >
                     <div className={classes.LeftTabContiner}>
@@ -859,8 +863,8 @@ class ConnectedWorking extends React.Component {
                 <div className={classes.InfoTabContiner}>
                   <List>
                     <WorkingInfoBar
-                    key="infoUser"
-                    infos={this.workSiteInfo(t)}
+                      key="infoUser"
+                      infos={this.workSiteInfo(t)}
                     />
                     <Divider
                       className={classes.divider}
@@ -872,19 +876,14 @@ class ConnectedWorking extends React.Component {
                 </div>
               </Paper>
               <Paper className={classes.InfoTabTimeLine}>
-                  <div className={classes.InfoTabContiner}>
-                    <TimeLine simple stories={timeline} />
-                    {/* <TimeLine simple stories={teststory} /> */}
+                <div className={classes.InfoTabContiner}>
+                  <TimeLine simple stories={timeline} />
+                  {/* <TimeLine simple stories={teststory} /> */}
                 </div>
               </Paper>
               <ShutdownDiag />
-              {
-                showResultDiag?<ResultDialog /> : null
-              }
-              <ManualDiag
-                show={manualDiagShow}
-                close={this.closeManualDiag}
-              />
+              {showResultDiag ? <ResultDialog /> : null}
+              <ManualDiag show={manualDiagShow} close={this.closeManualDiag} />
             </Grid>
           </Grid>
         )}
@@ -900,7 +899,7 @@ ConnectedWorking.propTypes = {
   workMode: PropTypes.shape({}).isRequired,
   timeline: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   reworkWorkCenter: PropTypes.string.isRequired,
-  keyboardInput:PropTypes.func.isRequired
+  keyboardInput: PropTypes.func.isRequired
 };
 
 const Working = connect(

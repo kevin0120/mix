@@ -11,7 +11,6 @@ import { connect } from 'react-redux';
 import ReactTable from 'react-table';
 import PropTypes from 'prop-types';
 
-
 import Divider from '@material-ui/core/Divider';
 
 import { I18n } from 'react-i18next';
@@ -62,12 +61,14 @@ const styles = {
     marginTop: '15px',
     marginBottom: '0px'
   },
-  InputRoot:{
-    width: "100%" ,height:'36px',
-    overflow:'hidden'
+  InputRoot: {
+    width: '100%',
+    height: '36px',
+    overflow: 'hidden'
   },
-  InputInput:{
-    width: "100%" ,height:'100%',
+  InputInput: {
+    width: '100%',
+    height: '100%'
   }
 };
 
@@ -220,57 +221,68 @@ class WorkOrder extends React.Component {
                           Header: 'VIN',
                           accessor: 'vin',
                           filterMethod: (filter, row) => {
-                            return lodash.includes(lodash.toUpper(row[filter.id]), lodash.toUpper(this.state.vinFilter||''));
+                            return lodash.includes(
+                              lodash.toUpper(row[filter.id]),
+                              lodash.toUpper(this.state.vinFilter || '')
+                            );
                           },
-                          Filter: ({ filter, onChange }) =>
+                          Filter: ({ filter, onChange }) => (
                             <Input
-                              onClick={()=>{
+                              onClick={() => {
                                 this.props.keyboardInput({
-                                  onSubmit:(text)=>{
-                                    this.setState({vinFilter:text},()=>{
+                                  onSubmit: text => {
+                                    this.setState({ vinFilter: text }, () => {
                                       onChange(this.state.vinFilter);
                                     });
                                   },
-                                  text:this.state.vinFilter,
-                                  title:'VIN',
-                                  label:'VIN'
+                                  text: this.state.vinFilter,
+                                  title: 'VIN',
+                                  label: 'VIN'
                                 });
                               }}
                               classes={{
-                                root:classes.InputRoot,
-                                input:classes.InputInput,
+                                root: classes.InputRoot,
+                                input: classes.InputInput
                               }}
                               // style={{ width: "100%" ,height:'36px'}}
-                              value={this.state.vinFilter || ""}
+                              value={this.state.vinFilter || ''}
                             />
+                          )
                         },
                         {
                           Header: '车型',
                           accessor: 'model',
                           filterMethod: (filter, row) => {
-                            return lodash.includes(lodash.toUpper(row[filter.id]), lodash.toUpper(this.state.vehicleTypeFilter||''));
+                            return lodash.includes(
+                              lodash.toUpper(row[filter.id]),
+                              lodash.toUpper(this.state.vehicleTypeFilter || '')
+                            );
                           },
-                          Filter: ({ filter, onChange }) =>
+                          Filter: ({ filter, onChange }) => (
                             <Input
-                              onClick={()=>{
+                              onClick={() => {
                                 this.props.keyboardInput({
-                                  onSubmit:(text)=>{
-                                    this.setState({vehicleTypeFilter:text},()=>{
-                                      onChange(this.state.vehicleTypeFilter);
-                                    });
+                                  onSubmit: text => {
+                                    this.setState(
+                                      { vehicleTypeFilter: text },
+                                      () => {
+                                        onChange(this.state.vehicleTypeFilter);
+                                      }
+                                    );
                                   },
-                                  text:this.state.vehicleTypeFilter,
-                                  title:'车型',
-                                  label:'车型'
+                                  text: this.state.vehicleTypeFilter,
+                                  title: '车型',
+                                  label: '车型'
                                 });
                               }}
                               classes={{
-                                root:classes.InputRoot,
-                                input:classes.InputInput,
+                                root: classes.InputRoot,
+                                input: classes.InputInput
                               }}
                               // style={{ width: "100%" ,height:'36px'}}
-                              value={this.state.vehicleTypeFilter || ""}
+                              value={this.state.vehicleTypeFilter || ''}
                             />
+                          )
                         },
                         {
                           Header: 'KNR',
@@ -343,7 +355,7 @@ class WorkOrder extends React.Component {
 WorkOrder.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   masterpcUrl: PropTypes.string.isRequired,
-  workcenterCode: PropTypes.string.isRequired,
+  workcenterCode: PropTypes.string.isRequired
 };
 
 const ConnWorkOrders = connect(
@@ -351,4 +363,7 @@ const ConnWorkOrders = connect(
   mapDispatchToProps
 )(WorkOrder);
 
-export default withLayout(withKeyboard(withStyles(styles)(ConnWorkOrders)), false);
+export default withLayout(
+  withKeyboard(withStyles(styles)(ConnWorkOrders)),
+  false
+);

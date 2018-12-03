@@ -24,18 +24,30 @@ import styles from './styles';
 const menuContents = [
   {
     text: 'Configuration.network.name',
-    icon: (selected)=><RssFeedIcon style={{ margin:5,fill: selected?'#FAFAFA':'#009688' }}/>,
-    component: <Net/>
+    icon: selected => (
+      <RssFeedIcon
+        style={{ margin: 5, fill: selected ? '#FAFAFA' : '#009688' }}
+      />
+    ),
+    component: <Net />
   },
   {
     text: 'Configuration.IO.name',
-    icon: (selected)=><ViewModuleIcon style={{ margin:5,fill: selected?'#FAFAFA':'#ff9800' }}/>,
-    component: <Io/>
+    icon: selected => (
+      <ViewModuleIcon
+        style={{ margin: 5, fill: selected ? '#FAFAFA' : '#ff9800' }}
+      />
+    ),
+    component: <Io />
   },
   {
     text: 'Configuration.connections.name',
-    icon: (selected)=><SettingsRemoteIcon style={{ margin:5,fill: selected?'#FAFAFA':'#3492ff' }}/>,
-    component: <Connect/>
+    icon: selected => (
+      <SettingsRemoteIcon
+        style={{ margin: 5, fill: selected ? '#FAFAFA' : '#3492ff' }}
+      />
+    ),
+    component: <Connect />
   }
 ];
 
@@ -67,30 +79,34 @@ class ConnectedPreferences extends React.Component {
       ele => activeMenu === ele.text
     );
 
-
     const menuList = t => {
       const menus = menuContents.map(item => (
         <MenuItem
           selected={activeMenu === item.text}
           key={item.text}
           className={classes.menuItem}
-          component=
-            {() => (
-              <Card
-                onClick={() => this.handleChangeMenu(item.text)}
-                className={activeMenu === item.text ?
-                    classes.menuItemSelected : classes.menuItem}>
-                <CardActionArea
-                  classes={{
-                    root: activeMenu === item.text ?
-                      classes.cardActionAreaSelected : classes.cardActionArea
-                  }}>
-                  {item.icon(activeMenu === item.text)}
-                  <span className={classes.itemText}>{t(item.text)}</span>
-                </CardActionArea>
-
-              </Card>
-            )}
+          component={() => (
+            <Card
+              onClick={() => this.handleChangeMenu(item.text)}
+              className={
+                activeMenu === item.text
+                  ? classes.menuItemSelected
+                  : classes.menuItem
+              }
+            >
+              <CardActionArea
+                classes={{
+                  root:
+                    activeMenu === item.text
+                      ? classes.cardActionAreaSelected
+                      : classes.cardActionArea
+                }}
+              >
+                {item.icon(activeMenu === item.text)}
+                <span className={classes.itemText}>{t(item.text)}</span>
+              </CardActionArea>
+            </Card>
+          )}
         />
 
         // </MenuItem>
@@ -102,7 +118,7 @@ class ConnectedPreferences extends React.Component {
       <I18n ns="translations">
         {t => (
           <div className={classes.root}>
-            <AppBarBack/>
+            <AppBarBack />
             <LeftMenuWithAvatar>
               <MenuList>{menuList(t)}</MenuList>
             </LeftMenuWithAvatar>
