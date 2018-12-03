@@ -35,13 +35,25 @@ export function* watchAiis() {
 }
 
 function* initAiis(aiisUrl, hmiSN) {
-  if (ws) {
-    yield call(stopAiisWebsocket);
-  }
-  ws = new WebSocket(aiisUrl);
+  try {
+    if (ws) {
+      yield call(stopAiisWebsocket);
+    }
 
-  yield fork(aiisWSListener, hmiSN);
-  yield call(wsOnOpen, hmiSN);
+    const uris = aiisUrl.split('://');
+    if (uris.length > 1) {
+      const url = `ws://${uris[1]}/aiis/v1/ws`;
+      console.log(url);
+      ws = new WebSocket(url);
+
+      yield fork(aiisWSListener, hmiSN);
+      yield call(wsOnOpen, hmiSN);
+    }
+  } catch (e) {
+    console.log(e);
+  }
+
+
 }
 
 export function* handleAiisData(data) {
@@ -144,10 +156,11 @@ function* aiisWSListener(hmiSN) {
       const chanAction = yield take(chan);
       switch (chanAction.type) {
         case AIIS_WS_CHANNEL.OPEN:
+          yield put(setHealthzCheck('andon', true));
           yield call(wsOnOpen, hmiSN);
           break;
         case AIIS_WS_CHANNEL.CLOSE:
-          yield put(setHealthzCheck('Andon', false));
+          yield put(setHealthzCheck('andon', false));
           console.log(
             `websocket disconnected. retry in 1s code: ${
               chanAction.code
@@ -155,7 +168,7 @@ function* aiisWSListener(hmiSN) {
           );
           break;
         case AIIS_WS_CHANNEL.ERROR:
-          yield put(setHealthzCheck('Andon', false));
+          yield put(setHealthzCheck('andon', false));
           console.log('websocket error. reconnect after 1s');
           break;
         case AIIS_WS_CHANNEL.PING:
@@ -183,7 +196,6 @@ function* wsOnOpen(hmiSN) {
       ws.close();
     }
   });
-  yield put(setHealthzCheck('andon', true));
 }
 
 function* wsOnMessage(dataRaw) {

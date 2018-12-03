@@ -31,8 +31,8 @@ function* staticToolEnable(action: actionType) {
   if (controller === undefined) {
     return;
   }
-  const fullUrl = `${mUrl}/rush/v1/tool-enable`;
-  yield call(toolEnable, fullUrl, controller.serial_no, action.enable);
+
+  yield call(toolEnable, mUrl, controller.serial_no, action.enable);
 }
 
 export function* toolFunctions() {

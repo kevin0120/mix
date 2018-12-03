@@ -414,16 +414,16 @@ export function setLedStatusReady() {
   const { o } = io;
   ioStatus[o.red] = sOff;
   ioStatus[o.white] = sOff;
-  ioStatus[o.yellow] = sBlinkOn;
-  ioStatus[o.green] = sOff;
+  ioStatus[o.yellow] = sOff;
+  ioStatus[o.green] = sBlinkOn;
 }
 
 export function setLedStatusDoing() {
   const { o } = io;
   ioStatus[o.red] = sOff;
-  ioStatus[o.yellow] = sOn;
+  ioStatus[o.yellow] = sOff;
   ioStatus[o.white] = sOn;
-  ioStatus[o.green] = sOff;
+  ioStatus[o.green] = sOn;
 }
 
 export function setLedInfo(flag) {

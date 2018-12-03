@@ -26,7 +26,6 @@ function* saveConfiguration(action) {
     yield put({ type: USER_CONFIGS.SAVE, section, newConfigs });
     eSetting.setAll({ ...setting, [section]: newConfigs });
     yield put(setNewNotification('success', '配置文件保存成功'));
-    yield put(initIO());
   } catch (e) {
     yield put(setNewNotification('error', '配置文件保存失败'));
   }

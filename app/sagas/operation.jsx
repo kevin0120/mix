@@ -50,17 +50,22 @@ export function* watchOperation() {
 }
 
 function* getNextWorkOrderandShow() {
-  const state = yield select();
+  try {
+    const state = yield select();
 
-  const rushUrl = state.connections.masterpc;
-  const { workcenterCode } = state.connections;
-  const resp = yield call(
-    fetchNextWorkOrder,
-    rushUrl,
-    workcenterCode);
-  if (resp.status === 200) {
-    yield put(fetchOngoingOperationOK(resp.data));
+    const rushUrl = state.connections.masterpc;
+    const { workcenterCode } = state.connections;
+    const resp = yield call(
+      fetchNextWorkOrder,
+      rushUrl,
+      workcenterCode);
+    if (resp.status === 200) {
+      yield put(fetchOngoingOperationOK(resp.data));
+    }
+  } catch (e) {
+    console.log(e);
   }
+
 }
 
 // 触发作业
@@ -80,12 +85,12 @@ export function* triggerOperation(carID, carType, job, source) {
 
   if (carID) {
     yield call(addNewStory, STORY_TYPE.INFO, source, carID);
-    yield put({ type: OPERATION.TRIGGER.NEW_DATA, carID });
+    yield put({ type: OPERATION.TRIGGER.NEW_DATA, source, carID, carType: null });
   }
 
   if (carType) {
     yield call(addNewStory, STORY_TYPE.INFO, source, carType);
-    yield put({ type: OPERATION.TRIGGER.NEW_DATA, carType });
+    yield put({ type: OPERATION.TRIGGER.NEW_DATA, source, carID: null, carType });
   }
 
   state = yield select();
@@ -192,7 +197,7 @@ export function* startOperation(data) {
 
   state = yield select();
 
-  const { controllerMode, workMode } = state.workMode;
+  const { controllerMode } = state.workMode;
 
   const rushUrl = state.connections.masterpc;
 
@@ -206,7 +211,8 @@ export function* startOperation(data) {
       productID,
       workcenterID,
       jobID,
-      results
+      results,
+      source
     } = state.operations;
 
     const { hmiSn } = state.setting.page.odooConnection;
@@ -231,7 +237,7 @@ export function* startOperation(data) {
       workcenterID,
       skip,
       hasSet,
-      workMode
+      source
     );
 
     if (resp.status === 200) {

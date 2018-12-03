@@ -63,8 +63,7 @@ class ConnectedResultDialog extends React.Component {
 
   handleClickNewWorkOrder = (e) => {
     e.preventDefault();
-    const {NewCar} = this.props;
-    const {nextWorkorder} = this.state;
+    const {NewCar, nextWorkorder} = this.props;
     NewCar(nextWorkorder.vin);
   };
 
