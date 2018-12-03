@@ -5,7 +5,9 @@ from odoo.http import request,Response
 from dateutil import parser
 import requests as Requests
 from requests import ConnectionError, RequestException
-from odoo.addons.spc.model.push_result import AIIS_RESULT_API
+# from odoo.addons.spc.model.push_result import AIIS_RESULT_API
+
+AIIS_RESULT_API = '/aiis/v1/fis.results'
 
 DEFAULT_LIMIT = 80
 

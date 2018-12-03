@@ -8,11 +8,9 @@ from odoo.models import AbstractModel
 import requests as Requests
 from requests import ConnectionError, RequestException
 import json
+from ..controllers.result import AIIS_RESULT_API
 
 _logger = logging.getLogger(__name__)
-
-
-AIIS_RESULT_API = '/aiis/v1/fis.results'
 
 
 class PushResult(AbstractModel):
