@@ -149,7 +149,7 @@ func (c *Controller) Start() {
 	c.Connect()
 
 	// 订阅数据
-	c.subscribe()
+	//c.subscribe()
 }
 
 func (c *Controller) manage() {
@@ -264,6 +264,10 @@ func (c *Controller) Connect() error {
 		if err != nil {
 			c.Srv.diag.Error("connect err", err)
 		} else {
+
+			// 订阅数据
+			c.subscribe()
+
 			break
 		}
 
