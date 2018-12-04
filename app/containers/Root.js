@@ -18,10 +18,7 @@ export default class Root extends Component<Props> {
     const { store, history } = this.props;
     listenToNewCar(store.dispatch, store.getState);
     setCardAuthListener(store.dispatch);
-    const connectionInfo = store.getState().setting.page.odooConnection;
-    store.dispatch(
-      systemInit(connectionInfo.odooUrl.value, connectionInfo.hmiSn.value)
-    ); // 初始化获取默认值
+    store.dispatch(systemInit()); // 初始化
     return (
       <Provider store={store}>
         <ConnectedRouter history={history}>

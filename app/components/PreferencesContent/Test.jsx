@@ -2,34 +2,33 @@ import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import { isEqual, isNil } from 'lodash';
+import { isEqual, isNil, cloneDeep } from 'lodash';
 
-import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import { I18n } from 'react-i18next';
 
+import SaveIcon from '@material-ui/icons/Save';
+
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
+import Button from '../CustomButtons/Button';
 
 import { sortObj } from '../../common/utils';
 import styles from './styles';
+import saveConfigs from "../../actions/userConfigs";
+import withKeyboard from "../Keyboard";
+import { systemInit } from "../../actions/sysInit";
 
-const mapStateToProps = (state, ownProps) => ({
-  connInfo: state.connections,
-  ...ownProps
-});
-
-const mapDispatchToProps = {};
 
 function handleTest(obj) {
   obj.test(obj.value);
 }
 
 /* eslint-disable react/prefer-stateless-function */
-class ConnectedTest extends React.PureComponent {
+class ConnectedTest extends React.Component {
   // 获取 btns 的状态集
   static getBtnStatus(data) {
     return Object.keys(data).reduce(
@@ -43,13 +42,12 @@ class ConnectedTest extends React.PureComponent {
 
   constructor(props) {
     super(props);
-
-    const { connInfo } = this.props;
-
+    console.log(this.props, props);
     // this.handleTest = this.handleTest.bind(this);
     this.testMasterPC = this.testMasterPC.bind(this);
     this.testModbus = this.testModbus.bind(this);
     this.testAiis = this.testAiis.bind(this);
+    this.handleSave = this.handleSave.bind(this);
 
     this.state = {
       testStatus: {
@@ -57,38 +55,27 @@ class ConnectedTest extends React.PureComponent {
         ioUrl: 99,
         aiisUrl: 99
       },
-      data: this.formatConnInfo(connInfo),
-      btnGroupStatus: {}
+      data: this.formatConnInfo(this.props.connInfoData),
+      btnGroupStatus: {},
     };
   }
 
-  // 重新获取 props 时修改 btnGroupStatus
-  // https://github.com/reactjs/reactjs.org/issues/721
-  //
-  // static getDerivedStateFromProps(props, currentState) {
-  //   console.log('getDerivedStateFromProps', props, currentState);
-
-  //   if (currentState.value !== props.value) {
-  //     return {
-  //       value: props.value,
-  //       btnGroupStatus: getBtns(props.value)
-  //     }
-  //   }
-  // }
 
   componentDidMount() {
+    console.log(this.props);
+    this.setState({data: this.formatConnInfo(this.props.connInfoData)});
     this.setBtnsStatus();
   }
 
   componentDidUpdate() {
     this.setBtnsStatus();
-    const { connInfo } = this.props;
+    const { connInfoData } = this.props;
     const { data } = this.state;
-    const formatedData = this.formatConnInfo(connInfo);
+    const formatedData = this.formatConnInfo(connInfoData);
 
     if (isEqual(formatedData, data)) return;
 
-    this.updateState(connInfo);
+    this.updateState(connInfoData);
   }
 
   // 设置 btns 的状态集
@@ -109,21 +96,23 @@ class ConnectedTest extends React.PureComponent {
   }
 
   formatConnInfo(connInfo) {
-    const { aiisUrl } = this.props;
     return {
       masterPcUrl: {
+        key: 'masterpc',
         displayOrder: 0,
         value: String(connInfo.masterpc),
         displayTitle: 'MasterPC URL',
         test: this.testMasterPC
       },
       aiisUrl: {
+        key: 'aiis',
         displayOrder: 50,
-        value: String(aiisUrl),
+        value: String(connInfo.aiis),
         displayTitle: 'Aiis服务 URL',
         test: this.testAiis
       },
       controllerSn: {
+        key: 'controllers',
         displayOrder: 100,
         value: isNil(connInfo.controllers[0])
           ? ''
@@ -131,18 +120,48 @@ class ConnectedTest extends React.PureComponent {
         displayTitle: '控制器序列号'
       },
       rfidUrl: {
+        key: 'rfid',
         displayOrder: 200,
         value: String(connInfo.rfid),
         displayTitle: 'RFID 链接地址'
       },
       ioUrl: {
+        key: 'io',
         displayOrder: 300,
         value: String(connInfo.io),
         displayTitle: 'IO 模块链接地址'
         // test: this.testModbus,
-      }
+      },
+      workCenterCode: {
+        key: 'workcenter',
+        displayOrder: 200,
+        value: String(connInfo.workcenterCode),
+        displayTitle: '工位'
+      },
+      rework: {
+        key: 'rework',
+        displayOrder: 200,
+        value: String(connInfo.rework_workcenter),
+        displayTitle: '返修工位'
+      },
     };
   }
+
+  handleSave() {
+    const { saveConfigs, systemInit } = this.props;
+    const { data } = this.state;
+    const section='connections';
+    saveConfigs(section, {masterpc: data.masterPcUrl.value,
+      aiis: data.aiisUrl.value,
+      controllers: [{serial_no: data.controllerSn.value}],
+      rfid: data.rfidUrl.value,
+      io: data.ioUrl.value,
+      workcenterCode: data.workCenterCode.value,
+      rework_workcenter: data.rework.value,
+    });
+    systemInit()
+  }
+
 
   testAiis(conn) {
     const url = `${conn}/aiis/v1/healthz`;
@@ -213,8 +232,8 @@ class ConnectedTest extends React.PureComponent {
               <Button
                 variant="outlined"
                 disabled={!btnGroupStatus[key]}
-                size="small"
-                color="primary"
+                size="sm"
+                color="warning"
                 onClick={() => handleTest(item)}
                 className={classes.testButton}
               >
@@ -237,10 +256,24 @@ class ConnectedTest extends React.PureComponent {
                 {item.displayTitle}
               </InputLabel>
               <Input
-                disabled
+                key={item.key}
                 placeholder={t('Common.isRequired')}
                 className={classes.input}
                 value={item.value}
+                onClick={() => {
+                  this.props.keyboardInput({
+                    onSubmit: text => {
+                      const tempData = cloneDeep(this.state.data);
+                      tempData[key].value = text;
+                      this.setState({
+                        data: tempData
+                      });
+                    },
+                    text: item.value,
+                    title: item.displayTitle,
+                    label: item.displayTitle
+                  });
+                }}
               />
               {testPart(t)}
             </ListItem>
@@ -256,6 +289,14 @@ class ConnectedTest extends React.PureComponent {
         {t => (
           <Paper className={classes.paperWrap} elevation={1}>
             <List>{inputsItems(t)}</List>
+            <Button
+              color="info"
+              onClick={this.handleSave}
+              className={classes.button}
+            >
+              <SaveIcon className={classes.leftIcon} />
+              {t('Common.Save')}
+            </Button>
           </Paper>
         )}
       </I18n>
@@ -265,12 +306,8 @@ class ConnectedTest extends React.PureComponent {
 
 ConnectedTest.propTypes = {
   classes: PropTypes.shape({}).isRequired,
-  connInfo: PropTypes.shape({}).isRequired
+  // connInfoData: PropTypes.shape({}).isRequired,
 };
 
-const Test = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ConnectedTest);
 
-export default withStyles(styles)(Test);
+export default withKeyboard(withStyles(styles)(ConnectedTest));

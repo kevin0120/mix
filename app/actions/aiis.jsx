@@ -28,11 +28,9 @@ import { AIIS } from './actionTypes';
 // import { toolEnable } from './tools';
 // import { setHealthzCheck } from './healthCheck';
 
-export function initAiis(aiisUrl, hmiSN) {
+export function initAiis() {
   return {
-    type: AIIS.INIT,
-    aiisUrl,
-    hmiSN
+    type: AIIS.INIT
   };
 }
 
