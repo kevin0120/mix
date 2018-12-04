@@ -47,7 +47,7 @@ class OperationViews(http.Controller):
                 'sequence': point.sequence,
                 'group_sequence': point.group_sequence,
                 'offset_x': point.x_offset,
-                'offset_Y': point.y_offset,
+                'offset_y': point.y_offset,
                 'max_op_time': point.max_redo_times
             })
 

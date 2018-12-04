@@ -25,7 +25,7 @@ class MrpRoutingWorkcenter(models.Model):
                     'sequence': point.sequence,
                     'group_sequence': point.group_sequence,
                     'offset_x': point.x_offset,
-                    'offset_Y': point.y_offset,
+                    'offset_y': point.y_offset,
                     'max_redo_times': point.max_redo_times
                 })
 
