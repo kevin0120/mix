@@ -12,13 +12,17 @@ import * as Utils from '../../common/utils';
 
 import styles from './styles';
 
+const lodash =require('lodash');
+
 class ConnectedHealthCheck extends React.Component {
   render() {
     const { classes, healthCheckResults } = this.props;
 
+    const results = lodash.filter(healthCheckResults, 'enable');
+
     const styleOptions = { disableGutters: false };
 
-    return Utils.sortObj(healthCheckResults, 'displayOrder').map(
+    return Utils.sortObj(results, 'displayOrder').map(
       ({ key, value: item }) => {
         const { isHealth, displayTitle } = item;
         const statusClassName = isHealth

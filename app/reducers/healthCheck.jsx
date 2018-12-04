@@ -12,42 +12,51 @@ import { HEALTHZ_CHECK } from '../actions/actionTypes';
 
 const lodash = require('lodash');
 
+import configs from '../shared/config/index'
+
+
 const defaultHealthChecks = {
   masterpc: {
     displayOrder: 1,
     optionInfo: '',
     isHealth: false,
-    displayTitle: 'HealthCheck.MasterPC'
+    displayTitle: 'HealthCheck.MasterPC',
+    enable: true
   },
   controller: {
     displayOrder: 11,
     optionInfo: '',
     isHealth: false,
-    displayTitle: 'HealthCheck.Controller'
+    displayTitle: 'HealthCheck.Controller',
+    enable: true
   },
   modbus: {
     displayOrder: 21,
     optionInfo: '',
     isHealth: false,
-    displayTitle: 'HealthCheck.IO'
+    displayTitle: 'HealthCheck.IO',
+    enable: configs.systemSettings.modbusEnable
   },
   rfid: {
     displayOrder: 31,
     optionInfo: '',
     isHealth: false,
-    displayTitle: 'HealthCheck.RFID'
+    displayTitle: 'HealthCheck.RFID',
+    enable: configs.systemSettings.rfidEnabled,
   },
   andon: {
     displayOrder: 41,
     optionInfo: '',
     isHealth: false,
-    displayTitle: 'HealthCheck.Andon'
+    displayTitle: 'HealthCheck.Andon',
+    enable: configs.systemSettings.andonEnable,
   },
   odoo: {
     displayOrder: 51,
     optionInfo: '',
     isHealth: false,
-    displayTitle: 'HealthCheck.Odoo'
+    displayTitle: 'HealthCheck.Odoo',
+    enable: true
   }
 };
 

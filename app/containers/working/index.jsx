@@ -723,7 +723,7 @@ class ConnectedWorking extends React.Component {
               {
                 showResultDiag?
                     <Grid item xs={2} className={classes.LeftTop1}>
-                      <Paper className={classes.LeftTopTab}>
+                      <Paper className={classes.LeftTopTab} component="button" disabled>
                         <div className={classes.LeftTabContiner}>
                           <h4 className={classes.LeftTopDes}>
                             <p
