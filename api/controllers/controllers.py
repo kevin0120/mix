@@ -27,3 +27,6 @@ class BaseApi(http.Controller):
         body = json.dumps(ret)
         return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=200)
 
+    @http.route('/api/v1/healthz', type='http', auth='none', cors='*', csrf=False)
+    def _healthz(self):
+        return Response(status=204)
