@@ -99,7 +99,7 @@ export default function withKeyboard(SubComponents) {
     Transition = props => <Slide direction="down" {...props} />;
 
     render() {
-      const { classes, restProps } = this.props;
+      const { classes, ...restProps } = this.props;
       const { text, config, layoutName, show } = this.state;
       const submitEnable = config.required ? text.length !== 0 : true;
       return (
