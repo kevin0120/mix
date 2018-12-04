@@ -17,7 +17,7 @@ import {
   cleanOngoingOperation
 } from '../actions/ongoingOperation';
 
-const lodash = require('lodash');
+// const lodash = require('lodash');
 
 // 监听作业
 export function* watchOperation() {
@@ -44,8 +44,9 @@ export function* watchOperation() {
           // 工具禁用
           yield put(toolDisable());
         }
-
-        yield call(getNextWorkOrderandShow);
+        if(state.setting.operationSettings.opMode === 'order'){
+          yield call(getNextWorkOrderandShow);
+        }
         yield put(setResultDiagShow(true));
         break;
 

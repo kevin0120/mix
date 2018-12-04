@@ -655,6 +655,8 @@ class ConnectedWorking extends React.Component {
       redoBatch = "0";
     }
 
+    const {enableResultDialog} = configs.operationSettings;
+
     const showResultDiag = configs.operationSettings.opMode === 'order';
 
     const showManualCarType = configs.operationSettings.opMode === 'op';
@@ -882,7 +884,7 @@ class ConnectedWorking extends React.Component {
                 </div>
               </Paper>
               <ShutdownDiag />
-              {showResultDiag ? <ResultDialog /> : null}
+              {enableResultDialog? <ResultDialog />: null}
               <ManualDiag show={manualDiagShow} close={this.closeManualDiag} />
             </Grid>
           </Grid>

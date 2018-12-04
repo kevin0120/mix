@@ -29,6 +29,7 @@ import { setResultDiagShow } from '../../actions/resultDiag';
 import { NewCar } from '../../actions/scannerDevice';
 
 import resultDiagStyles from './styles';
+import configs from "../../shared/config";
 
 const lodash = require('lodash');
 
@@ -73,6 +74,8 @@ class ConnectedResultDialog extends React.Component {
 
   render() {
     const { classes, show, results, nextWorkorder } = this.props;
+
+    const showNextVehicle = configs.operationSettings.opMode === 'order';
 
     const nw = [];
 
@@ -140,40 +143,42 @@ class ConnectedResultDialog extends React.Component {
                   </GridItem>
                 </GridContainer>
               </div>
-              <div>
-                <GridContainer className={classes.root}>
-                  <GridItem xs={12}>
-                    <Card>
-                      <CardHeader color="info" icon>
-                        <CardIcon color="info">
-                          <Assignment />
-                        </CardIcon>
-                        <h4 style={{ color: '#000' }}>{t('main.nextOrder')}</h4>
-                      </CardHeader>
-                      <CardActionArea
-                        component={Button}
-                        onClick={e => this.handleClickNewWorkOrder(e)}
-                        className={classes.cardActionArea}
-                      >
-                        <CardBody>
-                          <Table
-                            tableHeaderColor="info"
-                            tableHead={[
-                              'Vin',
-                              '车型',
-                              '车序',
-                              'Knr',
-                              'LongPin'
-                            ]}
-                            tableData={nw}
-                            colorsColls={['info']}
-                          />
-                        </CardBody>
-                      </CardActionArea>
-                    </Card>
-                  </GridItem>
-                </GridContainer>
-              </div>
+              {
+                showNextVehicle? <div>
+                  <GridContainer className={classes.root}>
+                    <GridItem xs={12}>
+                      <Card>
+                        <CardHeader color="info" icon>
+                          <CardIcon color="info">
+                            <Assignment />
+                          </CardIcon>
+                          <h4 style={{ color: '#000' }}>{t('main.nextOrder')}</h4>
+                        </CardHeader>
+                        <CardActionArea
+                          component={Button}
+                          onClick={e => this.handleClickNewWorkOrder(e)}
+                          className={classes.cardActionArea}
+                        >
+                          <CardBody>
+                            <Table
+                              tableHeaderColor="info"
+                              tableHead={[
+                                'Vin',
+                                '车型',
+                                '车序',
+                                'Knr',
+                                'LongPin'
+                              ]}
+                              tableData={nw}
+                              colorsColls={['info']}
+                            />
+                          </CardBody>
+                        </CardActionArea>
+                      </Card>
+                    </GridItem>
+                  </GridContainer>
+                </div>: null
+              }
             </DialogContent>
             <DialogActions
               className={`${classes.modalFooter} ${classes.modalFooterCenter}`}
