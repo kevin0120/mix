@@ -1170,7 +1170,7 @@
           "description": "点位x坐标",
           "example": 100
         },
-        "offset_Y": {
+        "offset_y": {
           "type": "number",
           "description": "点位y坐标",
           "example": 200
