@@ -77,10 +77,10 @@ odoo.define('web_widget_darkroom.image_editor', function (require) {
             }).draggable({
                 addClasses: false,
                 // stop: function(event, ui){console.log(event, ui)},
-                // stop: this.MarkerDragstop.bind(this),
+                stop: this.MarkerDragstop.bind(this),
                 containment: "parent"
             }).appendTo(self.$el.find('#img_container'));
-            e.on('draggable:stop',function(event, ui){console.log(event, ui)});
+            // e.on('draggable:stop',function(event, ui){console.log(event, ui)});
             this.markPoints.push({sequence: this.markPoints.length + 1, x_offset: 0, y_offset: 0});
         },
 
