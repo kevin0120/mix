@@ -405,7 +405,7 @@ function resetIO(modbusConfig) {
   const { o } = io;
 
   setModBusIO(modbusConfig);
-  for (const key in o) {
+  for (const key of o) {
     ioStatus[o[key]] = preIOStatus[preO[key]];
   }
 }
@@ -460,7 +460,7 @@ export function testIO(ioConfig, idx) {
 }
 
 export function getIBypass() {
-  return io.i.bypass;
+  return io.i.byPass;
 }
 
 export function getIModeSelect() {

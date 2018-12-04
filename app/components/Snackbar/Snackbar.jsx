@@ -14,7 +14,7 @@ import snackbarContentStyle from '../../common/jss/components/snackbarContentSty
 
 function Snackbar({ ...props }) {
   const { classes, message, color, close, icon, place, open } = props;
-  var action = [];
+  let action = [];
   const messageClasses = cx({
     [classes.iconMessage]: icon !== undefined
   });
@@ -58,16 +58,18 @@ function Snackbar({ ...props }) {
               : 'right'
       }}
       open={open}
+      onClose={() => props.closeNotification()}
       message={
         <div>
           {icon !== undefined ? <props.icon className={iconClasses} /> : null}
           <span className={messageClasses}>{message}</span>
         </div>
       }
+      autoHideDuration={10000}
       action={action}
       ContentProps={{
         classes: {
-          root: classes.root + ' ' + classes[color],
+          root: `${classes.root  } ${  classes[color]}`,
           message: classes.message
         }
       }}

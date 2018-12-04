@@ -58,14 +58,14 @@ export const defaultConfigs = {
         {
           bit: 0,
           io: 'in',
-          function: '',
-          label: ''
+          function: 'MODE_SELECT',
+          label: '模式选中'
         },
         {
           bit: 1,
           io: 'in',
-          function: '',
-          label: ''
+          function: 'BYPASS',
+          label: '强制放行'
         },
         {
           bit: 2,
