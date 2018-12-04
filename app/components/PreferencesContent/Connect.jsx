@@ -24,6 +24,8 @@ import Test from './Test';
 import styles from './styles';
 import withKeyboard from '../Keyboard';
 
+const lodash = require('lodash');
+
 const mapStateToProps = (state, ownProps) => ({
   storedConfigs: state.setting.page.odooConnection,
   connInfo: state.setting.system.connections,
@@ -60,12 +62,35 @@ class ConnectedConnect extends React.Component {
     });
   }
 
+  handleTestKeyBoardSubmit = (key, text) => {
+    const {connInfoData} = this.state;
+    this.setState({
+      connInfoData: {
+        ...connInfoData,
+        [key]: text
+      }
+    })
+  };
+
   handleSubmit() {
     const { saveConfigs, connInfo } = this.props;
     const { section, data } = this.state;
     const fullUrl = `${data.odooUrl.value}/hmi.connections/${data.hmiSn.value}`;
     defaultClient.get(fullUrl)
-      .then(resp => this.setState({connInfoData: {...resp.data, aiis: connInfo.aiis}}))
+      .then(resp => {
+        const { masterpc, rfid, io, controllers, info } = resp.data;
+        const d = {
+          masterpc: masterpc.connection ? masterpc.connection : '',
+          aiis: connInfo.aiis,
+          rfid: rfid.connection ? rfid.connection : '',
+          io: io.connection ? io.connection : '',
+          workcenterCode: info.workcenter_code ? info.workcenter_code : '',
+          rework_workcenter: info.qc_workcenter ? info.qc_workcenter : '',
+          controllers: lodash.isArray(controllers) ? controllers : []
+        };
+        this.setState({
+          connInfoData: d
+        })})
       .catch(e => console.log(e.toString()));
     saveConfigs(section, data);
   }
@@ -138,7 +163,10 @@ class ConnectedConnect extends React.Component {
               {t('Common.Test')}
             </h3>
             <Paper className={classes.paperWrap} elevation={1}>
-              <Test connInfoData={connInfoData} systemInit={systemInit} saveConfigs={saveConfigs}/>
+              <Test connInfoData={connInfoData}
+                    systemInit={systemInit}
+                    saveConfigs={saveConfigs}
+                    keyBoardSubmit={this.handleTestKeyBoardSubmit}/>
             </Paper>
           </section>
         )}

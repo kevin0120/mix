@@ -7,10 +7,14 @@ import { NewCar } from '../actions/scannerDevice';
 import { getIBypass, getIModeSelect } from './io';
 import { triggerOperation } from './operation';
 import { OPERATION_SOURCE } from '../reducers/operations';
+import { setHealthzCheck } from "../actions/healthCheck";
+import { setNewNotification } from "../actions/notification";
 
 let rushWS = null;
 let rushChannel = null;
 const WebSocket = require('@oznu/ws-connect');
+
+const lodash = require('lodash');
 
 export function* watchRush() {
   while (true) {
@@ -93,6 +97,9 @@ function createRushChannel(ws, hmiSN) {
   });
 }
 
+const getHealthz = state => state.healthCheckResults;
+
+
 export function* watchRushChannel() {
   while (rushWS !== null) {
     const payload = yield take(rushChannel);
@@ -117,6 +124,25 @@ export function* watchRushChannel() {
         }
 
         break;
+      case 'odoo': {
+        const odooHealthzStatus = json.status === 'online';
+        const healthzStatus = yield select(getHealthz); // 获取整个healthz
+        if (
+          !lodash.isEqual(
+            healthzStatus.odoo.isHealth,
+            odooHealthzStatus
+          )
+        ) {
+          yield put(setHealthzCheck('odoo', odooHealthzStatus));
+          yield put(
+            setNewNotification(
+              'info',
+              `后台连接状态更新: ${odooHealthzStatus}`
+            )
+          );
+        }
+        break;
+      }
       case 'io':
         if (state.setting.systemSettings.modbusEnable) {
           break;

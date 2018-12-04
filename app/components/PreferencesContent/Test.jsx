@@ -42,7 +42,6 @@ class ConnectedTest extends React.Component {
 
   constructor(props) {
     super(props);
-    console.log(this.props, props);
     // this.handleTest = this.handleTest.bind(this);
     this.testMasterPC = this.testMasterPC.bind(this);
     this.testModbus = this.testModbus.bind(this);
@@ -55,15 +54,13 @@ class ConnectedTest extends React.Component {
         ioUrl: 99,
         aiisUrl: 99
       },
-      data: this.formatConnInfo(this.props.connInfoData),
+      data: this.formatConnInfo(props.connInfoData),
       btnGroupStatus: {},
     };
   }
 
 
   componentDidMount() {
-    console.log(this.props);
-    this.setState({data: this.formatConnInfo(this.props.connInfoData)});
     this.setBtnsStatus();
   }
 
@@ -100,12 +97,14 @@ class ConnectedTest extends React.Component {
       masterPcUrl: {
         key: 'masterpc',
         displayOrder: 0,
+        disabled: false,
         value: String(connInfo.masterpc),
         displayTitle: 'MasterPC URL',
         test: this.testMasterPC
       },
       aiisUrl: {
         key: 'aiis',
+        disabled: false,
         displayOrder: 50,
         value: String(connInfo.aiis),
         displayTitle: 'Aiis服务 URL',
@@ -113,6 +112,7 @@ class ConnectedTest extends React.Component {
       },
       controllerSn: {
         key: 'controllers',
+        disabled: true,
         displayOrder: 100,
         value: isNil(connInfo.controllers[0])
           ? ''
@@ -121,26 +121,30 @@ class ConnectedTest extends React.Component {
       },
       rfidUrl: {
         key: 'rfid',
+        disabled: false,
         displayOrder: 200,
         value: String(connInfo.rfid),
         displayTitle: 'RFID 链接地址'
       },
       ioUrl: {
         key: 'io',
+        disabled: false,
         displayOrder: 300,
         value: String(connInfo.io),
         displayTitle: 'IO 模块链接地址'
         // test: this.testModbus,
       },
       workCenterCode: {
-        key: 'workcenter',
-        displayOrder: 200,
+        key: 'workcenterCode',
+        disabled: true,
+        displayOrder: 400,
         value: String(connInfo.workcenterCode),
         displayTitle: '工位'
       },
       rework: {
-        key: 'rework',
-        displayOrder: 200,
+        key: 'rework_workcenter',
+        disabled: true,
+        displayOrder: 500,
         value: String(connInfo.rework_workcenter),
         displayTitle: '返修工位'
       },
@@ -257,22 +261,27 @@ class ConnectedTest extends React.Component {
               </InputLabel>
               <Input
                 key={item.key}
+                disabled={item.disabled}
                 placeholder={t('Common.isRequired')}
                 className={classes.input}
                 value={item.value}
                 onClick={() => {
-                  this.props.keyboardInput({
-                    onSubmit: text => {
-                      const tempData = cloneDeep(this.state.data);
-                      tempData[key].value = text;
-                      this.setState({
-                        data: tempData
-                      });
-                    },
-                    text: item.value,
-                    title: item.displayTitle,
-                    label: item.displayTitle
-                  });
+                  if (!item.disabled){
+                    this.props.keyboardInput({
+                      onSubmit: text => {
+                        const tempData = cloneDeep(this.state.data);
+                        tempData[key].value = text;
+                        this.setState({
+                          data: tempData
+                        });
+                        const d = item.key === 'controllers'? [{serial_no: text}]: text;
+                        this.props.keyBoardSubmit(item.key, d);
+                      },
+                      text: item.value,
+                      title: item.displayTitle,
+                      label: item.displayTitle
+                    });
+                  }
                 }}
               />
               {testPart(t)}
@@ -306,7 +315,7 @@ class ConnectedTest extends React.Component {
 
 ConnectedTest.propTypes = {
   classes: PropTypes.shape({}).isRequired,
-  // connInfoData: PropTypes.shape({}).isRequired,
+  connInfoData: PropTypes.shape({}).isRequired,
 };
 
 
