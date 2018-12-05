@@ -5,6 +5,10 @@ import { ANDON, AIIS } from '../actions/actionTypes';
 import { jobManual } from './api/operation';
 import { setHealthzCheck } from '../actions/healthCheck';
 
+import {triggerOperation} from './operation';
+
+import {OPERATION_STATUS, OPERATION_SOURCE } from '../reducers/operations';
+
 let ws = null;
 
 const WebSocket = require('@oznu/ws-connect');
@@ -46,7 +50,7 @@ function* initAiis() {
     const uris = aiisUrl.split('://');
     if (uris.length > 1) {
       const url = `ws://${uris[1]}/aiis/v1/ws`;
-      ws = new WebSocket(url);
+      ws = new WebSocket(url, {reconnectInterval: 3000});
 
       yield fork(aiisWSListener, hmiSN);
       yield call(wsOnOpen, hmiSN);

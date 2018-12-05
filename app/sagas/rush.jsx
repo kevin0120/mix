@@ -46,7 +46,7 @@ function* initRush() {
     yield call(stopRush);
   }
 
-  rushWS = new WebSocket(wsURL);
+  rushWS = new WebSocket(wsURL, {reconnectInterval: 3000});
   rushChannel = yield call(
     createRushChannel,
     rushWS,
@@ -142,7 +142,7 @@ export function* watchRushChannel() {
             break;
           case 'odoo': {
             const odooHealthzStatus = json.status === 'online';
-            const healthzStatus = yield select(getHealthz); // 获取整个healthz
+            const healthzStatus = state.healthCheckResults; // 获取整个healthz
             if (
               !lodash.isEqual(
                 healthzStatus.odoo.isHealth,
@@ -187,7 +187,7 @@ export function* watchRushChannel() {
             break;
           case 'controller': {
             const healthzStatus = state.healthCheckResults; // 获取整个healthz
-            const controllerHealthzStatus = payload.status === 'online';
+            const controllerHealthzStatus = json.status === 'online';
             if (!lodash.isEqual(healthzStatus.controller.isHealth, controllerHealthzStatus)) {
               // 如果不相等 更新
               yield put(setHealthzCheck('controller', controllerHealthzStatus));
