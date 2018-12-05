@@ -31,7 +31,7 @@ const timelineStyle = theme => ({
     }
   },
   timelineSimple: {
-    padding: '0 0 20px',
+    padding: '0 0 10px',
     '&:before': {
       left: '5%'
     },
@@ -59,7 +59,7 @@ const timelineStyle = theme => ({
     fontSize: '1.4em',
     textAlign: 'center',
     position: 'absolute',
-    top: '16px',
+    top: '10px',
     left: '50%',
     marginLeft: '-5px',
     zIndex: '100',
@@ -129,7 +129,7 @@ const timelineStyle = theme => ({
     background: '#fff',
     '&:before': {
       position: 'absolute',
-      top: '26px',
+      top: '20px',
       right: '-15px',
       display: 'inline-block',
       borderTop: '15px solid transparent',
@@ -140,7 +140,7 @@ const timelineStyle = theme => ({
     },
     '&:after': {
       position: 'absolute',
-      top: '27px',
+      top: '20px',
       right: '-14px',
       display: 'inline-block',
       borderTop: '14px solid transparent',
@@ -172,11 +172,15 @@ const timelineStyle = theme => ({
     }
   },
   timelineHeading: {
-    marginBottom: '15px'
+    marginBottom: '10px'
   },
   timelineBody: {
     fontSize: '14px',
-    lineHeight: '21px'
+    lineHeight: '21px',
+    '& p': {
+      fontSize: '14px',
+      marginBottom: '5px'
+    }
   },
   timelineFooter: {
     zIndex: '1000',
