@@ -236,7 +236,7 @@ class ConnectedIo extends React.PureComponent {
             </Select>
             <span>{String.prototype.toUpperCase.call(item.io)}</span>
             <Button
-              color="info"
+              color="warning"
               onClick={() => this.handleTest(item)}
               className={classes.testButton}
               disabled={!get(btnGroupStatus, `${item.io}.${item.bit}`, [])}
@@ -279,7 +279,7 @@ class ConnectedIo extends React.PureComponent {
               <Button
                 variant="contained"
                 disabled={!isDataValid}
-                color="primary"
+                color="info"
                 onClick={this.handleSubmit}
                 className={classes.button}
               >

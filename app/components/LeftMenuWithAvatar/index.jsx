@@ -14,7 +14,7 @@ import Clock from 'react-live-clock';
 import styles from './styles';
 
 const mapStateToProps = (state, ownProps) => ({
-  users: state.users,
+  // users: state.users,
   // name: state.userInfo.name,
   // secondaryInfo: state.userInfo.login, // email or role etc
   // avatarImg: state.userInfo.image_small,
@@ -46,18 +46,18 @@ function ConnectedLeftMenuWithAvatar(props) {
 
       <div className={classes.baseInfo}>
         <List>
-          <ListItem className={classes.userInfo}>
-            <Avatar
-              alt={users[0].name}
-              src={users[0].avatar}
-              className={classes.avatar}
-            />
-            <ListItemText
-              className={classes.userText}
-              primary={users[0].name}
-              secondary={users[0].name}
-            />
-          </ListItem>
+          {/*<ListItem className={classes.userInfo}>*/}
+            {/*<Avatar*/}
+              {/*alt={users[0].name}*/}
+              {/*src={users[0].avatar}*/}
+              {/*className={classes.avatar}*/}
+            {/*/>*/}
+            {/*<ListItemText*/}
+              {/*className={classes.userText}*/}
+              {/*primary={users[0].name}*/}
+              {/*secondary={users[0].name}*/}
+            {/*/>*/}
+          {/*</ListItem>*/}
           <ListItem className={classes.timeWrap}>
             <Clock
               className={classes.timeContent}
@@ -78,7 +78,7 @@ ConnectedLeftMenuWithAvatar.propTypes = {
   // name: PropTypes.string.isRequired,
   // secondaryInfo: PropTypes.string.isRequired,
   // avatarImg: PropTypes.string.isRequired,
-  users: PropTypes.arrayOf(PropTypes.shape({})).isRequired
+  // users: PropTypes.arrayOf(PropTypes.shape({})).isRequired
 };
 
 const LeftMenuWithAvatar = connect(
