@@ -311,6 +311,10 @@ func (h *MinioHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
 
+func (h *MinioHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}
+
 // Websocket Handler
 
 type WsHandler struct {

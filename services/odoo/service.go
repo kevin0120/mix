@@ -299,7 +299,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 			r.UpdateTime = time.Now()
 			r.PSetDefine = ""
 			r.ResultValue = ""
-			r.Count = 0
+			r.Count = 1
 
 			for _, result_id := range consu.ResultIDs {
 				result_count++
@@ -314,7 +314,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 			}
 		}
 
-		o.LastResultID = results[len(results)-1].ResultId
+		//o.LastResultID = results[len(results)-1].Id
 
 		e := s.DB.InsertWorkorder(&o, &results, true, true, true)
 		if e != nil {

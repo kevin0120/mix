@@ -611,7 +611,7 @@ func (rd *ResultData) DeserializeOld(str string) error {
 	var err error = nil
 
 	rd.TightingID = str[2:12]
-	rd.VIN = str[14:39]
+	rd.VIN = strings.TrimSpace(str[14:39])
 	rd.JobID, err = strconv.Atoi(str[41:45])
 	if err != nil {
 		return err
@@ -677,9 +677,9 @@ func (rd *ResultData) DeserializeOld(str string) error {
 	rd.ToolSerialNumber = strings.TrimSpace(str[171:285])
 	rd.TorqueUnit = str[208:209]
 	rd.ResultType = str[211:213]
-	rd.ID2 = str[215:240]
-	rd.ID3 = str[242:267]
-	rd.ID4 = str[269:294]
+	rd.ID2 = strings.TrimSpace(str[215:240])
+	rd.ID3 = strings.TrimSpace(str[242:267])
+	rd.ID4 = strings.TrimSpace(str[269:294])
 
 	return nil
 }
@@ -698,7 +698,7 @@ func (rd *ResultData) Deserialize(str string) error {
 	}
 
 	rd.ControllerName = str[12:37]
-	rd.VIN = str[39:64]
+	rd.VIN = strings.TrimSpace(str[39:64])
 
 	rd.JobID, err = strconv.Atoi(str[66:70])
 	if err != nil {
@@ -801,9 +801,9 @@ func (rd *ResultData) Deserialize(str string) error {
 
 	rd.TorqueUnit = str[394:395]
 	rd.ResultType = str[397:399]
-	rd.ID2 = str[401:426]
-	rd.ID3 = str[428:453]
-	rd.ID4 = str[455:480]
+	rd.ID2 = strings.TrimSpace(str[401:426])
+	rd.ID3 = strings.TrimSpace(str[428:453])
+	rd.ID4 = strings.TrimSpace(str[455:480])
 
 	rd.NumberOfStages, err = strconv.Atoi(str[508:510])
 	if err != nil {

@@ -234,6 +234,22 @@ func (s *Service) GetGun(serial string) (Guns, error) {
 	}
 }
 
+func (s *Service) GetOperation(id int64) (RoutingOperations, error) {
+	var op RoutingOperations
+
+	rt, err := s.eng.Alias("g").Where("g.operation_id = ?", id).Get(&op)
+
+	if err != nil {
+		return op, err
+	} else {
+		if !rt {
+			return op, errors.New("found op failed")
+		} else {
+			return op, nil
+		}
+	}
+}
+
 func (s *Service) UpdateCurve(curve *Curves) (*Curves, error) {
 
 	sql := "update `curves` set has_upload = ?, curve_file = ?, curve_data = ? where id = ?"
@@ -456,18 +472,27 @@ func (s *Service) FindNextWorkorder(hmi_sn string, workcenter_code string) (Work
 	}
 }
 
-func (s *Service) UpdateResultUpload(upload bool, r_id int64) (int64, error) {
-	sql := "update `results` set has_upload = ? where x_result_id = ?"
+//func (s *Service) UpdateResultUpload(upload bool, r_id int64) (int64, error) {
+//	sql := "update `results` set has_upload = ? where x_result_id = ?"
+//
+//	r, err := s.eng.Exec(sql, upload, r_id)
+//
+//	id, _ := r.RowsAffected()
+//	if err != nil {
+//
+//		return id, errors.Wrapf(err, "Update result upload status fail for id : %d", id)
+//	} else {
+//		return id, nil
+//	}
+//}
 
-	r, err := s.eng.Exec(sql, upload, r_id)
+func (s *Service) UpdateResultUserID(id int64, userID int64) error {
+	sql := "update `results` set user_id = ? where id = ?"
+	_, err := s.eng.Exec(sql,
+		userID,
+		id)
 
-	id, _ := r.RowsAffected()
-	if err != nil {
-
-		return id, errors.Wrapf(err, "Update result upload status fail for id : %d", id)
-	} else {
-		return id, nil
-	}
+	return err
 }
 
 func (s *Service) UpdateResult(result *Results) (int64, error) {
@@ -491,7 +516,6 @@ func (s *Service) UpdateResult(result *Results) (int64, error) {
 
 		return 0, errors.Wrapf(err, "Update result fail for id : %d", result.Id)
 	} else {
-
 		id, _ := r.RowsAffected()
 		return id, nil
 	}
@@ -769,6 +793,31 @@ func (s *Service) GetController(sn string) (interface{}, error) {
 		} else {
 			return rt_controller, nil
 		}
+	}
+}
+
+func (s *Service) ResetResult(id int64) error {
+	sql := "update `results` set result = ?, has_upload = ?, stage = ?, count = ? where id = ?"
+
+	_, err := s.eng.Exec(sql,
+		RESULT_NONE,
+		false,
+		RESULT_STAGE_INIT,
+		1,
+		id)
+
+	return err
+}
+
+func (s *Service) DeleteCurvesByResult(id int64) error {
+
+	sql := fmt.Sprintf("delete from `curves` where result_id = %d", id)
+	_, err := s.eng.Exec(sql)
+
+	if err != nil {
+		return err
+	} else {
+		return nil
 	}
 }
 

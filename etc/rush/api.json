@@ -1225,11 +1225,10 @@
           "description": "job是否已设置",
           "example": false
         },
-        "points": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/job_point"
-          }
+        "operation_id": {
+          "type": "integer",
+          "description": "作业id",
+          "example": 1
         }
       },
       "required": [

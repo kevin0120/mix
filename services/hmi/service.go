@@ -1,12 +1,15 @@
 package hmi
 
 import (
+	"encoding/json"
+	"github.com/kataras/iris/websocket"
 	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/openprotocol"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/wsnotify"
 )
 
 type Diagnostic interface {
@@ -41,6 +44,8 @@ func NewService(d Diagnostic) *Service {
 }
 
 func (s *Service) Open() error {
+
+	s.ControllerService.WS.OnNewClient = s.OnNewHmiClient
 
 	var r httpd.Route
 
@@ -229,4 +234,35 @@ func (s *Service) Close() error {
 	s.diag.Closed()
 
 	return nil
+}
+
+func (s *Service) resetResult(id int64) error {
+	// 重置结果
+	err := s.DB.ResetResult(id)
+	if err != nil {
+		return err
+	}
+
+	// 删除对应曲线
+	err = s.DB.DeleteCurvesByResult(id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) OnNewHmiClient(c websocket.Connection) {
+	controllers := s.ControllerService.GetControllers()
+
+	for k, v := range *controllers {
+		s := wsnotify.WSStatus{
+			SN:     k,
+			Status: string(v.Status()),
+		}
+
+		msg, _ := json.Marshal(s)
+
+		c.Emit(wsnotify.WS_EVENT_CONTROLLER, string(msg))
+	}
 }

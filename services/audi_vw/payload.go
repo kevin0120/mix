@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"github.com/masami10/rush/services/controller"
+	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/storage"
 	"strconv"
 	"strings"
@@ -230,27 +231,28 @@ func GeneratePacket(seq uint32, typ uint, xmlpacket string) (string, uint32) {
 	return fmt.Sprintf("%s%s", headerStr, xmlpacket), header.MID
 }
 
-func XML2Curve(result *CVI3Result, cur_result *controller.ControllerCurveFile) {
-	cur_result.Result = result.PRC_SST.PAR.Result
-	if cur_result.Result == "IO" {
-		cur_result.Result = storage.RESULT_OK
-	} else if cur_result.Result == "NIO" {
-		cur_result.Result = storage.RESULT_NOK
+func XML2Curve(result *CVI3Result, cur_result *minio.ControllerCurve) {
+	cur_result.CurveContent = minio.ControllerCurveFile{}
+	cur_result.CurveContent.Result = result.PRC_SST.PAR.Result
+	if cur_result.CurveContent.Result == "IO" {
+		cur_result.CurveContent.Result = storage.RESULT_OK
+	} else if cur_result.CurveContent.Result == "NIO" {
+		cur_result.CurveContent.Result = storage.RESULT_NOK
 	}
 
 	blc := result.PRC_SST.PAR.FAS.GRP.TIP.BLC
 	cur_ms := strings.Split(blc[len(blc)-1].CUR.SMP.CUR_M, " ")
-	cur_result.CUR_M = make([]float64, blc[len(blc)-1].CUR.CNT)
+	cur_result.CurveContent.CUR_M = make([]float64, blc[len(blc)-1].CUR.CNT)
 	for k, v := range cur_ms {
 		m, _ := strconv.ParseFloat(v, 64)
-		cur_result.CUR_M[k] = m
+		cur_result.CurveContent.CUR_M[k] = m
 	}
 
 	cur_ws := strings.Split(blc[len(blc)-1].CUR.SMP.CUR_W, " ")
-	cur_result.CUR_W = make([]float64, blc[len(blc)-1].CUR.CNT)
+	cur_result.CurveContent.CUR_W = make([]float64, blc[len(blc)-1].CUR.CNT)
 	for k, v := range cur_ws {
 		w, _ := strconv.ParseFloat(v, 64)
-		cur_result.CUR_W[k] = w
+		cur_result.CurveContent.CUR_W[k] = w
 	}
 
 	stp := blc[len(blc)-1].CUR.STP
@@ -260,14 +262,14 @@ func XML2Curve(result *CVI3Result, cur_result *controller.ControllerCurveFile) {
 			x := float64(i)*stp + stv
 			//t,_ := big.NewFloat(x).SetPrec(5).Float64()
 			t, _ := strconv.ParseFloat(fmt.Sprintf("%.5f", x), 64)
-			cur_result.CUR_T = append(cur_result.CUR_T, t)
+			cur_result.CurveContent.CUR_T = append(cur_result.CurveContent.CUR_T, t)
 		}
 	} else {
 		cur_ts := strings.Split(blc[len(blc)-1].CUR.SMP.CUR_T, " ")
-		cur_result.CUR_T = make([]float64, blc[len(blc)-1].CUR.CNT)
+		cur_result.CurveContent.CUR_T = make([]float64, blc[len(blc)-1].CUR.CNT)
 		for k, v := range cur_ts {
 			w, _ := strconv.ParseFloat(v, 64)
-			cur_result.CUR_T[k] = w
+			cur_result.CurveContent.CUR_T[k] = w
 		}
 	}
 

@@ -31,7 +31,7 @@ minio:
   reupload_interval: 24h
 aiis:
   urls:
-  - http://192.168.1.3:9092
+  - http://127.0.0.1:9092
   headers:
     Content-Type: application/json
   result_push_url: /aiis/v1/operation.results/%d
@@ -41,7 +41,7 @@ aiis:
   max_retry: 3
   ws_result_route: /aiis/v1/ws/results
   ResultUploadInteval: 1h
-  grpc_server: 192.168.1.3:9093
+  grpc_server: 127.0.0.1:9093
 odoo:
   urls:
   - http://192.168.1.3:8069
@@ -67,7 +67,7 @@ websocket:
   read_buf_size: 4096
   write_buf_size: 4096
 storage:
-  db_url: 192.168.1.151:5432
+  db_url: 127.0.0.1:5432
   db_name: rush
   db_user: admin
   db_pwd: admin
@@ -95,17 +95,17 @@ openprotocol:
 controller_service:
   workers: 4
   controllers:
-#  - serial_no: 0001
-#    protocol: OpenProtocol
-#    remote_ip: 192.168.4.101
-#    port: 4545
-#    channel: 1
-
   - serial_no: 0001
-    protocol: Audi/VW
+    protocol: OpenProtocol
     remote_ip: 192.168.1.101
-    port: 4700
+    port: 4546
     channel: 51
+
+#  - serial_no: 0001
+#    protocol: Audi/VW
+#    remote_ip: 192.168.1.101
+#    port: 4700
+#    channel: 51
 
 #  - serial_no: 0002
 #    protocol: Audi/VW

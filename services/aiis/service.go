@@ -12,7 +12,7 @@ import (
 	"gopkg.in/resty.v1"
 	"net/http"
 	"strings"
-	)
+)
 
 type Diagnostic interface {
 	Error(msg string, err error)
@@ -112,7 +112,12 @@ func (s *Service) Close() error {
 func (s *Service) OnRPCRecv(payload string) {
 	rp := ResultPatch{}
 	json.Unmarshal([]byte(payload), &rp)
-	s.DB.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
+	err := s.DB.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
+	if err == nil {
+		s.diag.Debug(fmt.Sprintf("结果上传成功 ID:%d", rp.ID))
+	} else {
+		s.diag.Error(fmt.Sprintf("结果上传失败 ID:%d", rp.ID), err)
+	}
 }
 
 func (s *Service) PutResult(result_id int64, body interface{}) error {
@@ -209,7 +214,7 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 		return aiisResult, err
 	}
 
-	curves, err := s.DB.ListCurvesByResult(result.ResultId)
+	curves, err := s.DB.ListCurvesByResult(result.Id)
 	if err == nil {
 		aiisCurve := CURObject{}
 		for _, v := range curves {
@@ -249,8 +254,17 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	aiisResult.MO_Model = dbWorkorder.MO_Model
 	aiisResult.Batch = result.Batch
 
+	gun, err := s.DB.GetGun(result.GunSN)
+	if err != nil {
+		gun.GunID = 0
+	}
+
+	aiisResult.GunID = gun.GunID
+	aiisResult.WorkcenterID = dbWorkorder.WorkcenterID
+	aiisResult.ProductID = dbWorkorder.ProductID
+
 	if result.Result == storage.RESULT_OK {
-		aiisResult.Final_pass =  ODOO_RESULT_PASS
+		aiisResult.Final_pass = ODOO_RESULT_PASS
 		if result.Count == 1 {
 			aiisResult.One_time_pass = ODOO_RESULT_PASS
 		} else {
@@ -279,7 +293,6 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 			aiisResult.QualityState = QUALITY_STATE_FAIL
 			aiisResult.ExceptionReason = ""
 		}
-
 	}
 
 	return aiisResult, nil
@@ -293,10 +306,6 @@ func (s *Service) ResultUploadManager() error {
 			for _, v := range results {
 				aiisResult, err := s.ResultToAiisResult(&v)
 				if err == nil {
-					if aiisResult.UserID == 0 {
-						aiisResult.UserID = 1
-					}
-
 					s.PutResult(v.ResultId, aiisResult)
 				}
 			}

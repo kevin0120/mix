@@ -17,7 +17,6 @@ const (
 	HANDLER_TYPE_AIIS  = "aiis"
 )
 
-
 type AIISResult struct {
 	ID               int64   `json:"id"`
 	Pset_m_threshold float64 `json:"pset_m_threshold"`
@@ -41,9 +40,6 @@ type AIISResult struct {
 	QualityState     string  `json:"quality_state"`
 	ExceptionReason  string  `json:"exception_reason"`
 	Seq              int     `json:"seq"`
-	ProductID        int64   `json:"product_id"`
-	WorkcenterID     int64   `json:"workcenter_id"`
-	GunID            int64   `json:"gun_id"`
 	Batch            string  `json:"batch"`
 	Mode             string  `json:"mode"`
 	ControllerSN     string  `json:"controller_sn"`
@@ -52,6 +48,12 @@ type AIISResult struct {
 	WorkcenterCode   string  `json:"workcenter_code"`
 
 	CURObjects []CURObject `json:"cur_objects"`
+
+	//fk
+	ProductID    int64 `json:"product_id"`
+	WorkcenterID int64 `json:"workcenter_id"`
+	GunID        int64 `json:"gun_id"`
+	NutID        int64 `json:"nut_id"`
 
 	// mo相关信息
 	MO_EquipemntName  string `json:"equipment_name"` // 设备名

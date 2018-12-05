@@ -9,6 +9,12 @@ type WSStatus struct {
 	Status string `json:"status"`
 }
 
+type WSMsgPackage struct {
+	SN      string
+	Event   string
+	Payload string
+}
+
 type WSResult struct {
 	Result_id int64 `json:"result_id"`
 	//Seq       int     `json:"sequence"`
