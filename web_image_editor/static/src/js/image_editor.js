@@ -70,15 +70,17 @@ odoo.define('web_widget_darkroom.image_editor', function (require) {
         add_new_mask: function (event) {
             var self = this;
             var t = _.str.sprintf('<div class="oe_mark_circle">%s</div>', _.str.escapeHTML(this.markPoints.length + 1));
-            $(t).css({
+            var e = $(t).css({
                 'left': "" + 0 + "%",
                 'top': "" + 0 + "%",
                 'z-index': "" + (this.markPoints.length + 1)
             }).draggable({
                 addClasses: false,
+                // stop: function(event, ui){console.log(event, ui)},
                 stop: this.MarkerDragstop.bind(this),
                 containment: "parent"
             }).appendTo(self.$el.find('#img_container'));
+            // e.on('draggable:stop',function(event, ui){console.log(event, ui)});
             this.markPoints.push({sequence: this.markPoints.length + 1, x_offset: 0, y_offset: 0});
         },
 
@@ -142,8 +144,6 @@ odoo.define('web_widget_darkroom.image_editor', function (require) {
 
             var self = this;
 
-            console.log(self);
-
             this.$('> img').remove();
             if (self.options.size) {
                 $img.css("width", "" + self.options.size[0] + "px");
@@ -160,6 +160,7 @@ odoo.define('web_widget_darkroom.image_editor', function (require) {
                         self.inline_add_new_mask(ele.y_offset, ele.x_offset);
                     })
                 });
+            // this.$el.droppable('enable');
         }
     });
 

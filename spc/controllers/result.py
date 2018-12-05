@@ -13,6 +13,7 @@ DEFAULT_LIMIT = 80
 
 NORMAL_RESULT_FIELDS_READ = ['workorder_id', 'id', 'product_id', 'consu_product_id', 'op_time', 'measure_result', 'workcenter_id']
 
+from urlparse import urljoin
 
 def str_time_to_rfc3339(s_time):
     sp = s_time.split(' ')
@@ -38,7 +39,7 @@ def _post_aiis_result_package(aiis_urls, results):
                 'measure_degree': result.measure_degree
             }
             try:
-                ret = Requests.put(url + AIIS_RESULT_API, data=json.dumps(data), headers={'Content-Type': 'application/json'})
+                ret = Requests.put(urljoin(url, AIIS_RESULT_API), data=json.dumps(data), headers={'Content-Type': 'application/json'})
                 if ret.status_code == 200:
                     if not result.sent:
                         result.write({'sent': True})  ### 更新发送结果
