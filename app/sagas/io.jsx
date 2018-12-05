@@ -29,6 +29,8 @@ import { continueOperation } from './operation';
 // config
 import userConfigs from '../shared/config';
 
+import {openShutdown} from '../actions/shutDownDiag';
+
 const Reconnect = require('node-net-reconnect');
 const net = require('net');
 const lodash = require('lodash');
@@ -120,7 +122,7 @@ function* closeAll() {
   }
 }
 
-function* handleIOFunction(data) {
+export function* handleIOFunction(data) {
   try {
     switch (data) {
       case IO_FUNCTION.IN.RESET: {
@@ -132,7 +134,8 @@ function* handleIOFunction(data) {
       case IO_FUNCTION.IN.BYPASS: {
         // 强制放行
 
-        yield put({ type: OPERATION.FINISHED, data: [] });
+        // yield put({ type: OPERATION.FINISHED, data: [] });
+        yield put(openShutdown('bypass'));
         break;
       }
       case IO_FUNCTION.IN.MODE_SELECT: {

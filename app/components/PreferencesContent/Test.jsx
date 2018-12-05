@@ -172,11 +172,11 @@ class ConnectedTest extends React.Component {
     fetch(url, {
       timeout: 3000
     })
-      .then(() => {
+      .then(response => {
         this.setState({
           testStatus: {
             ...testStatus,
-            aiisUrl: false
+            aiisUrl: response.status === 204
           }
         });
       })

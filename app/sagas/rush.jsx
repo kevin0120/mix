@@ -4,9 +4,10 @@ import { eventChannel } from 'redux-saga';
 import { OPERATION, RUSH, WORK_MODE } from '../actions/actionTypes';
 import { NewResults } from '../actions/rush';
 import { NewCar } from '../actions/scannerDevice';
-import { getIBypass, getIModeSelect } from './io';
+import { getIBypass, getIModeSelect, handleIOFunction } from './io';
 import { triggerOperation } from './operation';
 import { OPERATION_SOURCE } from '../reducers/operations';
+import { IO_FUNCTION } from '../reducers/io';
 import { setHealthzCheck } from "../actions/healthCheck";
 import { setNewNotification } from "../actions/notification";
 
@@ -167,7 +168,8 @@ export function* watchRushChannel() {
             if (json.inputs) {
               if (json.inputs[getIBypass()] === '1') {
                 // 强制放行
-                yield put({ type: OPERATION.FINISHED, data: [] });
+            // yield put({ type: OPERATION.FINISHED, data: [] });
+            yield call(handleIOFunction, IO_FUNCTION.IN.BYPASS);
               }
 
               if (json.inputs[getIModeSelect()] === '1') {

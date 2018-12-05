@@ -14,6 +14,7 @@ import { withStyles } from '@material-ui/core/styles';
 //   fetchRoutingWorkcenterbyJobId
 // } from '../../actions/ongoingRoutingWorkcenter';
 
+import { keyframes } from 'react-emotion';
 import popoverStyles from '../../common/jss/popoverStyles';
 
 import {
@@ -22,8 +23,7 @@ import {
   dangerColor
 } from '../../common/jss/material-react-pro';
 
-import { keyframes } from 'react-emotion';
-import classNames from 'classnames';
+import {OPERATION_STATUS} from '../../reducers/operations';
 import { OPERATION_RESULT } from '../../reducers/operations';
 
 const ripple = keyframes`
@@ -141,7 +141,7 @@ class ConnectedImageStick extends React.Component {
       idx += 1;
 
       let status = 'waiting';
-      if (operations.activeResultIndex === i) {
+      if (operations.activeResultIndex === i && operations.operationStatus === OPERATION_STATUS.DOING) {
         status = 'waitingActive';
       }
 
@@ -179,7 +179,7 @@ class ConnectedImageStick extends React.Component {
           <img
             src={operations.workSheet}
             className={classes.imgSheet}
-            alt={''}
+            alt=""
           />
           {statusDisplay}
         </div>

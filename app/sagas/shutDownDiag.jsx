@@ -24,7 +24,7 @@ const { ipcRenderer } = require('electron');
 
 const getOperations = state => state.operations;
 
-export function* openDiag(dType, data) {
+function* openDiag(dType, data) {
   const state = yield select();
   const { enable } = state.setting.operationSettings.byPass;
   if (dType === 'bypass' && !enable) {
@@ -35,7 +35,7 @@ export function* openDiag(dType, data) {
   yield put({ type: SHUTDOWN_DIAG.OPEN_WITH_MSG, dType, msg });
 }
 
-export function* closeDiag(dType) {
+function* closeDiag(dType) {
   if (dType === 'verify') {
     yield put(switch2Ready);
   }
@@ -43,7 +43,7 @@ export function* closeDiag(dType) {
   yield put({ type: SHUTDOWN_DIAG.CLOSE });
 }
 
-export function* confirmDiag(dType, data) {
+function* confirmDiag(dType, data) {
   switch (dType) {
     case 'shutdown': {
       ipcRenderer.send('asynchronous-message', 'shutdown');
@@ -54,7 +54,7 @@ export function* confirmDiag(dType, data) {
       const { carID } = op;
       Info(`车辆已放行 车辆ID:${carID}`);
       yield put(toolDisable());
-      yield put(switch2Ready);
+      yield put(switch2Ready());
       break;
     }
     case 'verify': {
