@@ -206,9 +206,10 @@ export default function withLayout(SubCompontents, showTop = true) {
                     <img
                       alt={name}
                       src={avatar}
-                      className={`${classes.imgRaised} ${classes.imgRounded} ${
+                      className={`${classes.imgRaised} ${classes.imgRoundedCircle} ${
                         classes.imgFluid
                       }`}
+                      style={{height: '100%'}}
                     />
                   </div>
                   <div className={classes.menuUserName}>

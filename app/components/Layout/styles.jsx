@@ -30,20 +30,27 @@ export default theme => ({
     background: '#353744'
   },
   BottomNavigation: {
-    background: 'transparent'
+    background: 'transparent',
+    '& a:last-child': {
+      marginRight: '20px'
+    },
     // width: '600px',
   },
   menuBtnWrapAvatar: {
     width: '50px',
-    marginRight: '15px'
+    // marginRight: '15px',
+    height: '50px',
   },
   menuUserName: {
-    width: '100px',
-    height: '64px',
+    width: '80px',
+    height: '100%',
+    lineHeight: '100%',
     '& p': {
-      marginTop: '25px',
+      // marginTop: '25px',
       fontSize: '16px',
-      textAlign: 'left'
+      lineHeight: '100%',
+      textAlign: 'center',
+      margin: '0',
     }
   },
   BottomNavigationIcon: {
@@ -51,12 +58,14 @@ export default theme => ({
     marginLeft: '20px'
   },
   menuBtnWrapLeft: {
-    marginLeft: '20px',
+    marginRight: 'auto',
+    marginLeft: 'auto',
     flex: 1,
-    textAlign: 'left'
+    // textAlign: 'center'
   },
   menuBtnWrapRight: {
     flex: 1,
+    maxWidth: '30%',
     textAlign: 'right'
   },
   menuBtn: {

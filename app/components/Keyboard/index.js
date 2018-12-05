@@ -23,6 +23,13 @@ const customerStyles = theme => ({
     '&,&::placeholder': {
       fontSize: '50px'
     }
+  },
+  leftButton: {
+    marginLeft: '40%',
+    marginRight: '40%',
+  },
+  rightButton: {
+    marginLeft: '40%',
   }
 });
 
@@ -165,16 +172,22 @@ export default function withKeyboard(SubComponents) {
                   }`}
                 >
                   <Button
+                    // className={classes.modalFooterCenter}
+                    style={{margin: '0 80px'}}
                     onClick={this.handleClose}
                     color="danger"
+                    // size='lg'
                     autoFocus
                     round
                   >
                     {t('Common.Close')}
                   </Button>
                   <Button
+                    // className={classes.modalFooterCenter}
+                    style={{margin: '0 80px'}}
                     onClick={this.handleSubmit}
                     color="success"
+                    // size='lg'
                     round
                     disabled={!submitEnable}
                   >

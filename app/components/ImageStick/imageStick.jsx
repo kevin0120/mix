@@ -48,10 +48,10 @@ const withstyles = () => ({
     overflow: 'hidden'
   },
   imgBlock: {
-    maxHeight: '100%',
-    maxWidth: '100%',
-    // width:'100%',
-    // height:'100%',
+    // maxHeight: '100%',
+    // maxWidth: '100%',
+    width:'100%',
+    height:'100%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -176,11 +176,11 @@ class ConnectedImageStick extends React.Component {
             backgroundImage: `url(${operations.workSheet})`
           }}
         >
-          <img
-            src={operations.workSheet}
-            className={classes.imgSheet}
-            alt=""
-          />
+          {/*<img*/}
+            {/*src={operations.workSheet}*/}
+            {/*className={classes.imgSheet}*/}
+            {/*alt=""*/}
+          {/*/>*/}
           {statusDisplay}
         </div>
       </div>
