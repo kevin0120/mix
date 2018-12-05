@@ -408,7 +408,7 @@ const withstyles = theme => ({
     background: '#FFFFFF',
     marginTop: '10px',
     borderRadius: '0',
-    height: 'calc(85% - 385px)'
+    height: 'calc(85% - 386px)'
   },
   InfoTabContiner: {
     height: '100%',

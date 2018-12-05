@@ -166,7 +166,7 @@ export default function withKeyboard(SubComponents) {
                 >
                   <Button
                     onClick={this.handleClose}
-                    color="primary"
+                    color="danger"
                     autoFocus
                     round
                   >
