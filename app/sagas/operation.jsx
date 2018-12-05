@@ -199,6 +199,8 @@ export function* getOperation(job) {
 
 // 开始作业
 export function* startOperation(data) {
+  yield put(setResultDiagShow(false));
+
   let state = yield select();
 
   yield put({
@@ -263,10 +265,8 @@ export function* startOperation(data) {
       yield put({ type: OPERATION.PROGRAMME.SET_FAIL });
     }
   } else {
-    const rt = yield call(doingOperation);
-    if (rt) {
-      yield put({ type: OPERATION.STARTED });
-    }
+    yield put({ type: OPERATION.STARTED });
+    yield call(doingOperation);
   }
 }
 

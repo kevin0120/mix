@@ -199,8 +199,8 @@ export const defaultConfigs = {
     authEnable: true,
     switchAutoManual: false,
     oeeFuncEnable: false,
-    modbusEnable: true,
-    rfidEnabled: true,
+    modbusEnable: false,
+    rfidEnabled: false,
     andonEnable: true,
     psetContinueMode: false
   }

@@ -42,7 +42,7 @@ function* initAiis() {
   try {
     const state = yield select();
     const aiisUrl = state.setting.system.connections.aiis;
-    const hmiSN = state.setting.page.odooConnection.hmiSn;
+    const hmiSN = state.setting.page.odooConnection.hmiSn.value;
     if (ws) {
       yield call(stopAiisWebsocket);
     }
