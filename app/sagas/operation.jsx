@@ -118,78 +118,83 @@ export function* triggerOperation(carID, carType, job, source) {
 
 // 定位作业
 export function* getOperation(job) {
-  const state = yield select();
+  try {
+    const state = yield select();
 
-  const rushUrl = state.connections.masterpc;
-  const { workcenterCode } = state.connections;
+    const rushUrl = state.connections.masterpc;
+    const { workcenterCode } = state.connections;
 
-  let fetchOK = false;
-  let resp = null;
+    let fetchOK = false;
+    let resp = null;
 
-  if (state.workMode.workMode === 'manual') {
-    // 手动模式
+    if (state.workMode.workMode === 'manual') {
+      // 手动模式
 
-    if (job) {
-      resp = yield call(
-        fetchRoutingWorkcenter,
-        rushUrl,
-        workcenterCode,
-        null,
-        job
-      );
-      if (resp.status === 200) {
-        fetchOK = true;
-      }
-    }
-  } else {
-    if (state.setting.operationSettings.opMode === 'op') {
-      // 作业模式
-
-      const { carType } = state.operations;
-      resp = yield call(
-        fetchRoutingWorkcenter,
-        rushUrl,
-        workcenterCode,
-        carType,
-        null
-      );
-      if (resp.status === 200) {
-        fetchOK = true;
-      }
-    } else {
-      // 工单模式
-
-      const hmiSN = state.setting.page.odooConnection.hmiSn.value;
-      const code = state.operations.carID;
-      try {
-        resp = yield call(fetchWorkorder, rushUrl, workcenterCode, code);
+      if (job) {
+        resp = yield call(
+          fetchRoutingWorkcenter,
+          rushUrl,
+          workcenterCode,
+          null,
+          job
+        );
         if (resp.status === 200) {
           fetchOK = true;
         }
-      } catch (e) {
-        const { preCheck } = state.setting.operationSettings;
-        resp = e.response;
-        if (resp.status === 409) {
-          fetchOK = true;
+      }
+    } else {
+      if (state.setting.operationSettings.opMode === 'op') {
+        // 作业模式
 
-          if (preCheck) {
-            yield put(openShutdown('verify', resp.data));
-            return;
+        const { carType } = state.operations;
+        resp = yield call(
+          fetchRoutingWorkcenter,
+          rushUrl,
+          workcenterCode,
+          carType,
+          null
+        );
+        if (resp.status === 200) {
+          fetchOK = true;
+        }
+      } else {
+        // 工单模式
+
+        const hmiSN = state.setting.page.odooConnection.hmiSn.value;
+        const code = state.operations.carID;
+        try {
+          resp = yield call(fetchWorkorder, rushUrl, workcenterCode, code);
+          if (resp.status === 200) {
+            fetchOK = true;
+          }
+        } catch (e) {
+          const { preCheck } = state.setting.operationSettings;
+          resp = e.response;
+          if (resp.status === 409) {
+            fetchOK = true;
+
+            if (preCheck) {
+              yield put(openShutdown('verify', resp.data));
+              return;
+            }
           }
         }
       }
     }
+
+    if (fetchOK) {
+      // 定位作业成功
+      // 开始作业
+
+      yield call(startOperation, resp.data);
+    } else {
+      // 定位作业失败
+      yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
+    }
+  } catch (e) {
+    console.log(e);
   }
 
-  if (fetchOK) {
-    // 定位作业成功
-    // 开始作业
-
-    yield call(startOperation, resp.data);
-  } else {
-    // 定位作业失败
-    yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
-  }
 }
 
 // 开始作业
