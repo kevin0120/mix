@@ -35,7 +35,7 @@ export default function* rootSaga() {
     loginFlow(),
     logoutFlow(),
     // healthz
-    healthzCheckFlow(),
+    // healthzCheckFlow(),
     watchSettingPreSave(),
     sysInitFlow()
   ]);

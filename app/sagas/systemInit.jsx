@@ -13,25 +13,22 @@ import { call, takeLatest, put, select } from 'redux-saga/effects';
 import { CONNECTION, SYSTEM_INIT, RUSH, RFID, USER_CONFIGS } from "../actions/actionTypes";
 
 
-import { fetchConnectionInfo } from './api/systemInit';
 import { setLedStatusReady } from './io';
 
-// import { initRush } from '../actions/rush';
-import { startHealthzCheck } from '../actions/healthCheck';
 import { setNewNotification } from '../actions/notification';
 import { initIO } from '../actions/ioModbus';
 import { initAiis } from '../actions/aiis';
 
-const lodash = require('lodash');
+// const lodash = require('lodash');
 
 function* sysInit() {
   try {
     const state = yield select();
-    const {connections} = state.setting.system;
-    const url = connections.masterpc.connection;
-    const controllers = connections.controllers.map(i => i.serial_no);
+    // const {connections} = state.setting.system;
+    // const url = connections.masterpc.connection;
+    // const controllers = connections.controllers.map(i => i.serial_no);
 
-    yield put(startHealthzCheck(url, controllers)); // 启动healthzcheck 定时器
+    // yield put(startHealthzCheck(url, controllers)); // 启动healthzcheck 定时器
 
     // 初始化rush
     yield put({ type: RUSH.INIT });
@@ -58,31 +55,31 @@ function* sysInit() {
   }
 }
 
-export function* fetchConnectionFlow(baseUrl, hmiSN, aiis) {
-  try {
-    const fullUrl = `${baseUrl}/hmi.connections/${hmiSN}`;
-
-    const resp = yield call(fetchConnectionInfo, fullUrl);
-
-    if (resp.status === 200) {
-      // yield put({ type: CONNECTION.FETCH_OK, data: resp.data });
-      const { masterpc, rfid, io, controllers, info } = resp.data;
-      const data =  {
-        masterpc: masterpc.connection ? masterpc.connection : '',
-        rfid: rfid.connection ? rfid.connection : '',
-        io: io.connection ? io.connection : '',
-        workcenterCode: info.workcenter_code ? info.workcenter_code : '',
-        rework_workcenter: info.qc_workcenter ? info.qc_workcenter : '',
-        aiis,
-        controllers: lodash.isArray(controllers) ? controllers : []
-      };
-      yield put({ type: USER_CONFIGS.SAVE, section:'connections', newConfigs: data }); // 修改配置中的信息
-    }
-
-  } catch (e) {
-    yield put(setNewNotification('error', e.toString()));
-  }
-}
+// export function* fetchConnectionFlow(baseUrl, hmiSN, aiis) {
+//   try {
+//     const fullUrl = `${baseUrl}/hmi.connections/${hmiSN}`;
+//
+//     const resp = yield call(fetchConnectionInfo, fullUrl);
+//
+//     if (resp.status === 200) {
+//       // yield put({ type: CONNECTION.FETCH_OK, data: resp.data });
+//       const { masterpc, rfid, io, controllers, info } = resp.data;
+//       const data =  {
+//         masterpc: masterpc.connection ? masterpc.connection : '',
+//         rfid: rfid.connection ? rfid.connection : '',
+//         io: io.connection ? io.connection : '',
+//         workcenterCode: info.workcenter_code ? info.workcenter_code : '',
+//         rework_workcenter: info.qc_workcenter ? info.qc_workcenter : '',
+//         aiis,
+//         controllers: lodash.isArray(controllers) ? controllers : []
+//       };
+//       yield put({ type: USER_CONFIGS.SAVE, section:'connections', newConfigs: data }); // 修改配置中的信息
+//     }
+//
+//   } catch (e) {
+//     yield put(setNewNotification('error', e.toString()));
+//   }
+// }
 
 export function* sysInitFlow() {
   try {

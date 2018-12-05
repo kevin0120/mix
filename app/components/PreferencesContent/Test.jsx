@@ -152,7 +152,7 @@ class ConnectedTest extends React.Component {
   }
 
   handleSave() {
-    const { saveConfigs, systemInit } = this.props;
+    const { saveConfigs } = this.props;
     const { data } = this.state;
     const section='connections';
     saveConfigs(section, {masterpc: data.masterPcUrl.value,
@@ -163,7 +163,6 @@ class ConnectedTest extends React.Component {
       workcenterCode: data.workCenterCode.value,
       rework_workcenter: data.rework.value,
     });
-    systemInit()
   }
 
 
@@ -236,7 +235,7 @@ class ConnectedTest extends React.Component {
               <Button
                 variant="outlined"
                 disabled={!btnGroupStatus[key]}
-                size="sm"
+                size="lg"
                 color="warning"
                 onClick={() => handleTest(item)}
                 className={classes.testButton}

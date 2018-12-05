@@ -46,7 +46,7 @@ export default function connections(
         aiis,
         rfid,
         io,
-        controllers: [{serial_no: controllers[0]}],
+        controllers,
         workcenterCode,
         rework_workcenter
       };

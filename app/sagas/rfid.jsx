@@ -4,6 +4,8 @@ import { RFID } from '../actions/actionTypes';
 import { triggerOperation } from './operation';
 import { OPERATION_SOURCE } from '../reducers/operations';
 import { isCarID } from '../common/utils';
+import { setHealthzCheck } from "../actions/healthCheck";
+import { setNewNotification } from "../actions/notification";
 
 const _ = require('lodash');
 
@@ -13,6 +15,8 @@ let rfidChannel = null;
 
 const net = require('net');
 const Reconnect = require('node-net-reconnect');
+
+const lodash = require('lodash');
 
 export function* watchRfid() {
   while (true) {
@@ -79,23 +83,26 @@ function createRfidChannel(rfidClient) {
   return eventChannel(emit => {
     rfidClient.on('connect', () => {
       // health
+      emit({type:'healthz', payload:true});
     });
 
     rfidClient.on('data', data => {
-      emit(data);
+      emit({type:'data', payload: data});
     });
 
     rfidClient.on('end', () => {
-      // unhealth
+      emit({type:'healthz', payload:false})
     });
 
     rfidClient.on('close', () => {
       // unhealth
+      emit({type:'healthz', payload:false});
       rfidClient.end(); // try to reconnect
     });
 
     rfidClient.on('error', () => {
       // unhealth
+      emit({type:'healthz', payload:false});
       rfidClient.end(); // try to reconnect
     });
 
@@ -107,32 +114,55 @@ function createRfidChannel(rfidClient) {
   });
 }
 
+
+const getHealthz = state => state.healthCheckResults;
+
 export function* watchRfidChannel() {
   while (client !== null) {
-    const payload = yield take(rfidChannel);
+    const data = yield take(rfidChannel);
 
-    if (payload !== 'NoRead') {
-      const buf2 = Buffer.from(_.trim(payload), 'hex');
-      const code = buf2.toString();
-      const dataValue = _.trim(code);
+    const {type, payload} = data;
 
-      if (isCarID(dataValue)) {
-        yield call(
-          triggerOperation,
-          dataValue,
-          null,
-          null,
-          OPERATION_SOURCE.RFID
-        );
-      } else {
-        yield call(
-          triggerOperation,
-          null,
-          dataValue,
-          null,
-          OPERATION_SOURCE.RFID
-        );
+    switch (type){
+      case 'healthz': {
+        const healthzStatus = yield select(getHealthz); // 获取整个healthz
+        if (!lodash.isEqual(healthzStatus.rfid.isHealth, payload)) {
+          // 如果不相等 更新
+          yield put(setHealthzCheck('rfid', payload));
+          yield put(setNewNotification('info', `rfid连接状态更新: ${payload}`));
+        }
+        break;
       }
+      case 'data': {
+        if (payload !== 'NoRead') {
+          const buf2 = Buffer.from(_.trim(payload), 'hex');
+          const code = buf2.toString();
+          const dataValue = _.trim(code);
+
+          if (isCarID(dataValue)) {
+            yield call(
+              triggerOperation,
+              dataValue,
+              null,
+              null,
+              OPERATION_SOURCE.RFID
+            );
+          } else {
+            yield call(
+              triggerOperation,
+              null,
+              dataValue,
+              null,
+              OPERATION_SOURCE.RFID
+            );
+          }
+        }
+        break;
+      }
+      default:
+        break;
     }
+
+
   }
 }
