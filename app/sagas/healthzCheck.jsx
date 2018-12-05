@@ -19,6 +19,8 @@ const lodash = require('lodash');
 
 const getHealthz = state => state.healthCheckResults;
 
+let task = null;
+
 function* healthzCheckTask(url, controllers) {
   while (true) {
     try {
@@ -69,6 +71,9 @@ function* getConnectionInfo() {
 }
 
 function* startHealthzCheck(url, controllers) {
+  if(!lodash.isNil(task)){
+    yield cancel(task);
+  }
   let U = url;
   let C = controllers;
   if (lodash.isNil(url) || lodash.isNil(controllers)) {
@@ -78,18 +83,15 @@ function* startHealthzCheck(url, controllers) {
   }
   yield call(healthzCheckTask, U, C);
 }
-
-function* restartHealthzCheck() {
-  const { u, c } = yield call(getConnectionInfo);
-  yield put({ type: HEALTHZ_CHECK.START, u, c }); // 启动healthzCheck
-}
+//
+// function* restartHealthzCheck() {
+//   const { u, c } = yield call(getConnectionInfo);
+//   yield put({ type: HEALTHZ_CHECK.START, u, c }); // 启动healthzCheck
+// }
 
 export function* healthzCheckFlow() {
   while (true) {
     const { url, controllers } = yield take(HEALTHZ_CHECK.START);
-    const task = yield fork(startHealthzCheck, url, controllers);
-    yield take(HEALTHZ_CHECK.RESTART);
-    yield cancel(task);
-    yield call(restartHealthzCheck);
+    task = yield fork(startHealthzCheck, url, controllers);
   }
 }

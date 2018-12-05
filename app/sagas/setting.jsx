@@ -11,7 +11,8 @@
 import { select, takeEvery, put, call } from 'redux-saga/effects';
 import { USER_CONFIGS, CONNECTION } from '../actions/actionTypes';
 import { setNewNotification } from '../actions/notification';
-import { fetchConnectionFlow } from './systemInit';
+import { systemInit } from '../actions/sysInit'
+  ;
 
 const eSetting = require('electron-settings');
 
@@ -35,6 +36,7 @@ function* saveConfiguration(action) {
     case 'connections': {
       eSetting.setAll({ ...setting, system: { ...setting.system, [section]: newConfigs } });
       yield put({type: CONNECTION.MANUAL_MODIFICATION, data: newConfigs});
+      yield put(systemInit());
       break;
     }
     case 'odooConnection': {

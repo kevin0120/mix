@@ -3,8 +3,16 @@ import { getAppDirectory } from '../../logger';
 
 const path = require('path');
 const settings = require('electron-settings');
+const fse = require('fs-extra');
+const fs = require('fs');
 
-settings.setPath(path.join(getAppDirectory(), 'setting.json'));
+const dir = getAppDirectory();
+const isExist = fs.existsSync(dir);
+if (!isExist) {
+  fse.mkdirpSync(dir);
+}
+
+settings.setPath(path.join(dir, 'setting.json'));
 
 if (
   process.env.NODE_ENV === 'development' ||

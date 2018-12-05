@@ -224,16 +224,16 @@ function* ioClientListener() {
       const chanAction = yield take(chan);
       switch (chanAction.type) {
         case CLIENT_CHANNEL.CONNECT:
-          yield fork(setHealth, true);
+          yield call(setHealth, true);
           io.senderReceiver = yield fork(senderReceiver);
           break;
         case CLIENT_CHANNEL.END:
           io.client.end();
-          yield fork(setHealth, false);
+          yield call(setHealth, false);
           break;
         case CLIENT_CHANNEL.CLOSE:
         case CLIENT_CHANNEL.ERROR:
-          yield fork(setHealth, false);
+          yield call(setHealth, false);
           break;
         default:
           break;

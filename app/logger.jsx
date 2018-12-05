@@ -25,9 +25,7 @@ const dir = path.join(homeDir, 'logs');
 
 let gLogger = null;
 
-const cpFormate = info => {
-  return `${info.timestamp} ${info.level}: ${info.message}`;
-};
+const cpFormate = info => `${info.timestamp} ${info.level}: ${info.message}`;
 
 export function CreateDailyLogger() {
   const isExist = fs.existsSync(dir);
