@@ -154,19 +154,22 @@ export const defaultConfigs = {
   system: {
     device: {
       scanner: {
-        vendorId: 3118,
-        mode: 'HID' // HID or BT_HID
-        // vendorId: 1504
+        // vendorId: 3118,
+        // mode: 'HID' // HID or BT_HID
+        mode: 'BT_HID',
+        vendorId: 1504
       }
     },
     connections: {
-      masterpc: '',
-      rfid: '',
-      aiis: '',
-      controllers: [],
-      io: '',
-      workcenterCode: '',
-      rework_workcenter: ''
+      masterpc: 'http://192.168.1.9:8082',
+      rfid: 'tcp://192.168.1.120:2112',
+      aiis: 'http://127.0.0.1:9092',
+      controllers: [{
+        'serial_no': '0001',
+      }],
+      io: 'modbustcp://192.168.1.122:502/0',
+      workcenterCode: '1122334455667788',
+      rework_workcenter: 'qrk'
     }
   },
   // 作业配置

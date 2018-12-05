@@ -148,10 +148,8 @@ export function jobManual(
   vin,
   userID,
   jobID,
-  points,
   hmiSn,
-  productID,
-  workcenterId,
+  opID,
   skip,
   manualJob,
   mode
@@ -165,10 +163,8 @@ export function jobManual(
       car_type: carType,
       vin,
       mode,
-      points,
       hmi_sn: hmiSn,
-      workcenter_id: workcenterId,
-      product_id: productID,
+      operation_id: opID,
       skip,
       has_set: manualJob
     })

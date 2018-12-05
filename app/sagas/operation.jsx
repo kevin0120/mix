@@ -220,12 +220,10 @@ export function* startOperation(data) {
 
     const controllerSN = state.connections.controllers[0].serial_no;
     const {
+      operationID,
       carType,
       carID,
-      productID,
-      workcenterID,
       jobID,
-      results,
       source
     } = state.operations;
 
@@ -245,10 +243,8 @@ export function* startOperation(data) {
       carID,
       userID,
       jobID,
-      results,
       hmiSn.value,
-      productID,
-      workcenterID,
+      operationID,
       skip,
       hasSet,
       source
