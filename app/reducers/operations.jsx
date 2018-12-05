@@ -29,6 +29,7 @@ export const OPERATION_SOURCE = {
 };
 
 const defaultOperations = {
+  operationID: 0,
   operationStatus: 'Ready',
   carID: '',
   carType: '',
@@ -110,6 +111,7 @@ function newOperation(state, mode, data) {
     // 作业模式
     return {
       ...state,
+      operationID: data.id,
       jobID: data.job,
       maxOpTimes: data.max_op_time,
       workSheet: data.img,
