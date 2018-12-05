@@ -46,11 +46,6 @@ export const defaultConfigs = {
         value: '1122334455667788',
         displayTitle: 'Configuration.connections.HMI'
       },
-      aiisUrl: {
-        displayOrder: 3,
-        value: 'http://127.0.0.1:9092',
-        displayTitle: 'Configuration.connections.AIIS'
-      }
     },
     modbus: {
       source: ['remote', 'controller'],
@@ -162,11 +157,16 @@ export const defaultConfigs = {
         vendorId: 3118,
         mode: 'HID' // HID or BT_HID
         // vendorId: 1504
-      },
-      rfid: {
-        host: '192.168.1.120',
-        port: 2112
       }
+    },
+    connections: {
+      masterpc: '',
+      rfid: '',
+      aiis: '',
+      controllers: [],
+      io: '',
+      workcenterCode: '',
+      rework_workcenter: ''
     }
   },
   // 作业配置

@@ -74,6 +74,7 @@
     "Controller": "Controller",
     "isRequired": "Required",
     "Submit": "Submit",
+    "Save": "Save",
     "Test": "Test",
     "Shutdown": "Power Off",
     "Logout": "Log Out",

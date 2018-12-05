@@ -10,16 +10,11 @@
 
 import { CONNECTION } from '../../actions/actionTypes';
 
+import configs from '../../shared/config/index';
+
 const lodash = require('lodash');
 
-const defaultConnInfo = {
-  masterpc: '',
-  rfid: '',
-  controllers: [],
-  io: '',
-  workcenterCode: '',
-  rework_workcenter: ''
-};
+const defaultConnInfo = configs.system.connections;
 
 type actionType = {
   +type: string,
@@ -39,8 +34,21 @@ export default function connections(
         rfid: rfid.connection ? rfid.connection : '',
         io: io.connection ? io.connection : '',
         workcenterCode: info.workcenter_code ? info.workcenter_code : '',
-        qc_workcenter: info.qc_workcenter ? info.qc_workcenter : '',
+        rework_workcenter: info.qc_workcenter ? info.qc_workcenter : '',
         controllers: lodash.isArray(controllers) ? controllers : []
+      };
+    }
+    case CONNECTION.MANUAL_MODIFICATION: {
+      const { masterpc, rfid, io, controllers, aiis,workcenterCode, rework_workcenter} = action.data;
+      return {
+        ...state,
+        masterpc,
+        aiis,
+        rfid,
+        io,
+        controllers: [{serial_no: controllers[0]}],
+        workcenterCode,
+        rework_workcenter
       };
     }
     default:

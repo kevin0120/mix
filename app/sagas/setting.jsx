@@ -9,9 +9,9 @@
 // @flow
 
 import { select, takeEvery, put, call } from 'redux-saga/effects';
-import { USER_CONFIGS } from '../actions/actionTypes';
+import { USER_CONFIGS, CONNECTION } from '../actions/actionTypes';
 import { setNewNotification } from '../actions/notification';
-import { initIO } from '../actions/ioModbus';
+import { fetchConnectionFlow } from './systemInit';
 
 const eSetting = require('electron-settings');
 
@@ -20,21 +20,29 @@ const getSetting = state => state.setting;
 function* saveConfiguration(action) {
   const { section, newConfigs } = action.data;
 
-  const setting = yield select(getSetting);
+  const state = yield select();
+
+  const {setting} = state;
 
   try {
     yield put({ type: USER_CONFIGS.SAVE, section, newConfigs });
-    eSetting.setAll({ ...setting, [section]: newConfigs });
     yield put(setNewNotification('success', '配置文件保存成功'));
   } catch (e) {
     yield put(setNewNotification('error', '配置文件保存失败'));
   }
 
   switch (section) {
+    case 'connections': {
+      eSetting.setAll({ ...setting, system: { ...setting.system, [section]: newConfigs } });
+      yield put({type: CONNECTION.MANUAL_MODIFICATION, data: newConfigs});
+      break;
+    }
     case 'odooConnection': {
+      eSetting.setAll({ ...setting, system: { ...setting.system, [section]: newConfigs } });
       break;
     }
     default:
+      eSetting.setAll({ ...setting, page: { ...setting.page, [section]: newConfigs } });
       break;
   }
 }

@@ -16,31 +16,36 @@ import { I18n } from 'react-i18next';
 import Button from '../CustomButtons/Button';
 
 import saveConfigs from '../../actions/userConfigs';
-import { systemInit } from '../../actions/sysInit';
+import { systemInit } from "../../actions/sysInit";
 
-import { sortObj } from '../../common/utils';
+
+import { sortObj,defaultClient } from '../../common/utils';
 import Test from './Test';
 import styles from './styles';
 import withKeyboard from '../Keyboard';
 
+const lodash = require('lodash');
+
 const mapStateToProps = (state, ownProps) => ({
   storedConfigs: state.setting.page.odooConnection,
+  connInfo: state.setting.system.connections,
   ...ownProps
 });
 
 const mapDispatchToProps = {
   saveConfigs,
-  systemInit
+  systemInit,
 };
 
 /* eslint-disable react/prefer-stateless-function */
-class ConnectedConnect extends React.PureComponent {
+class ConnectedConnect extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       isDataValid: true,
       data: props.storedConfigs,
-      section: 'odooConnection'
+      section: 'odooConnection',
+      connInfoData: props.connInfo,
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -57,11 +62,37 @@ class ConnectedConnect extends React.PureComponent {
     });
   }
 
+  handleTestKeyBoardSubmit = (key, text) => {
+    const {connInfoData} = this.state;
+    this.setState({
+      connInfoData: {
+        ...connInfoData,
+        [key]: text
+      }
+    })
+  };
+
   handleSubmit() {
-    const { saveConfigs, systemInit, storedConfigs } = this.props;
+    const { saveConfigs, connInfo } = this.props;
     const { section, data } = this.state;
+    const fullUrl = `${data.odooUrl.value}/hmi.connections/${data.hmiSn.value}`;
+    defaultClient.get(fullUrl)
+      .then(resp => {
+        const { masterpc, rfid, io, controllers, info } = resp.data;
+        const d = {
+          masterpc: masterpc.connection ? masterpc.connection : '',
+          aiis: connInfo.aiis,
+          rfid: rfid.connection ? rfid.connection : '',
+          io: io.connection ? io.connection : '',
+          workcenterCode: info.workcenter_code ? info.workcenter_code : '',
+          rework_workcenter: info.qc_workcenter ? info.qc_workcenter : '',
+          controllers: lodash.isArray(controllers) ? controllers : []
+        };
+        this.setState({
+          connInfoData: d
+        })})
+      .catch(e => console.log(e.toString()));
     saveConfigs(section, data);
-    systemInit(storedConfigs.odooUrl.value, storedConfigs.hmiSn.value);
   }
 
   validateData(data = this.state.data) {
@@ -69,8 +100,8 @@ class ConnectedConnect extends React.PureComponent {
   }
 
   render() {
-    const { classes } = this.props;
-    const { data, isDataValid } = this.state;
+    const { classes,systemInit, saveConfigs } = this.props;
+    const { data, isDataValid, connInfoData } = this.state;
 
     const baseItems = t =>
       sortObj(data, 'displayOrder').map(({ key, value: item }) => (
@@ -91,7 +122,6 @@ class ConnectedConnect extends React.PureComponent {
                     const tempData = cloneDeep(this.state.data);
                     tempData[key].value = text;
                     this.setState({
-                      ...this.state,
                       data: tempData
                     });
                   },
@@ -119,7 +149,7 @@ class ConnectedConnect extends React.PureComponent {
               <List>{baseItems(t)}</List>
               <Button
                 disabled={!isDataValid}
-                color="primary"
+                color="info"
                 onClick={this.handleSubmit}
                 className={classes.button}
               >
@@ -133,7 +163,10 @@ class ConnectedConnect extends React.PureComponent {
               {t('Common.Test')}
             </h3>
             <Paper className={classes.paperWrap} elevation={1}>
-              <Test aiisUrl={data.aiisUrl.value} />
+              <Test connInfoData={connInfoData}
+                    systemInit={systemInit}
+                    saveConfigs={saveConfigs}
+                    keyBoardSubmit={this.handleTestKeyBoardSubmit}/>
             </Paper>
           </section>
         )}
@@ -146,7 +179,7 @@ ConnectedConnect.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   storedConfigs: PropTypes.shape({}).isRequired,
   saveConfigs: PropTypes.func.isRequired,
-  systemInit: PropTypes.func.isRequired,
+  connInfo: PropTypes.shape({}).isRequired,
   keyboardInput: PropTypes.func.isRequired
 };
 

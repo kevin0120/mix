@@ -26,7 +26,7 @@ export function* watchAiis() {
         yield call(handleAiisData, action.json);
         break;
       case AIIS.INIT:
-        yield fork(initAiis, action.aiisUrl, action.hmiSN);
+        yield fork(initAiis);
         break;
       default:
         break;
@@ -34,8 +34,11 @@ export function* watchAiis() {
   }
 }
 
-function* initAiis(aiisUrl, hmiSN) {
+function* initAiis() {
   try {
+    const state = yield select();
+    const aiisUrl = state.setting.system.connections.aiis;
+    const hmiSN = state.setting.page.odooConnection.hmiSn;
     if (ws) {
       yield call(stopAiisWebsocket);
     }
@@ -43,7 +46,6 @@ function* initAiis(aiisUrl, hmiSN) {
     const uris = aiisUrl.split('://');
     if (uris.length > 1) {
       const url = `ws://${uris[1]}/aiis/v1/ws`;
-      console.log(url);
       ws = new WebSocket(url);
 
       yield fork(aiisWSListener, hmiSN);
