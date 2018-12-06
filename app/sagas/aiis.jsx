@@ -146,7 +146,7 @@ function aiisWSChannel() {
 
     ws.on('message', dataRaw => {
       emit({
-        type: AIIS_WS_CHANNEL.PONG,
+        type: AIIS_WS_CHANNEL.MESSAGE,
         dataRaw
       });
     });
