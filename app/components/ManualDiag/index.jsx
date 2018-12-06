@@ -61,6 +61,7 @@ class ConnectedManualDiag extends React.Component {
   };
 
   handleSubmit = () => {
+    console.log('manual scanner');
     this.props.NewCar(this.state.vin);
     this.props.close();
   };

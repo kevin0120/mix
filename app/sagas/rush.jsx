@@ -185,7 +185,11 @@ export function* watchRushChannel() {
             yield put(NewResults(json));
             break;
           case 'scanner':
-            yield put(NewCar(json.barcode));
+            // console.log('rush scanner:', json);
+            const { workMode } = state.workMode;
+            if (workMode === 'scanner') {
+              yield put(NewCar(json.barcode));
+            }
             break;
           case 'controller': {
             const healthzStatus = state.healthCheckResults; // 获取整个healthz
