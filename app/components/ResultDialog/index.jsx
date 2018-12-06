@@ -101,6 +101,7 @@ class ConnectedResultDialog extends React.Component {
           results[i].mi,
           results[i].wi,
           results[i].ti,
+          results[i].batch,
           results[i].result
         ]);
       }else {
@@ -109,6 +110,7 @@ class ConnectedResultDialog extends React.Component {
           results[i].mi,
           results[i].wi,
           results[i].ti,
+          results[i].batch,
           results[i].result
         ]);
       }
@@ -149,7 +151,7 @@ class ConnectedResultDialog extends React.Component {
                       <CardBody>
                         <Table
                           tableHeaderColor="info"
-                          tableHead={['程序号', '扭矩', '角度', '用时', '结果']}
+                          tableHead={['程序号', '扭矩', '角度', '用时', '批次', '结果']}
                           tableData={localResults}
                           colorsColls={['info']}
                         />
