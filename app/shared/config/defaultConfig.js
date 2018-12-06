@@ -154,10 +154,10 @@ export const defaultConfigs = {
   system: {
     device: {
       scanner: {
-        // vendorId: 3118,
-        // mode: 'HID' // HID or BT_HID
-        mode: 'BT_HID',
-        vendorId: 1504
+        vendorId: 3118,
+        mode: 'HID' // HID or BT_HID
+        // mode: 'BT_HID',
+        // vendorId: 1504
       }
     },
     connections: {
@@ -176,7 +176,7 @@ export const defaultConfigs = {
   operationSettings: {
     opMode: 'op', // 作业模式:        op 或 order
     controllerMode: 'job', // 拧紧模式:        job 或 pset
-    workMode: 'auto', // 工作模式:        auto 或 manual
+    workMode: 'auto', // 工作模式:        auto 或 manual 或 scanner
     flowTriggers: ['carID', 'carType'], // 工作流程触发条件:  carType:车型代码 carID:vin/knr/longpin
 
     // 作业前检测(order mode only)

@@ -31,6 +31,9 @@ import { NewCar } from '../../actions/scannerDevice';
 import resultDiagStyles from './styles';
 import configs from "../../shared/config";
 
+import { OPERATION_STATUS, OPERATION_SOURCE } from '../../reducers/operations';
+
+
 const lodash = require('lodash');
 
 const mapStateToProps = (state, ownProps) => ({
@@ -68,7 +71,7 @@ class ConnectedResultDialog extends React.Component {
     const { NewCar } = this.props;
     const { vin } = this.state.nextWorkorder;
     if (!lodash.isNil(vin) || vin !== ''){
-      NewCar(vin);
+      NewCar(vin, OPERATION_SOURCE.MANUAL);
     }
   };
 

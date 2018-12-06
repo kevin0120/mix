@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
 import List from '@material-ui/core/List';
 
@@ -8,13 +9,15 @@ import { I18n } from 'react-i18next';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Divider from '@material-ui/core/Divider';
-import Keyboard from 'react-simple-keyboard';
 import Paper from '@material-ui/core/Paper';
-import WorkProgressBar from '../../components/ProgressBar/ProgressBar';
+import FiberManualRecord from'@material-ui/icons/FiberManualRecord'
+import Autorenew from'@material-ui/icons/Autorenew'
+import Button from "../../components/CustomButtons/Button";
 import ImageStick from '../../components/ImageStick/imageStick';
 
 import ShutdownDiag from '../../components/ShutDownDiag';
 import { NewCar } from '../../actions/scannerDevice';
+import  {switchWorkMode} from '../../actions/workMode';
 
 import configs from '../../shared/config/index';
 
@@ -35,7 +38,7 @@ import ManualDiag from '../../components/ManualDiag';
 import TimeLine from '../../components/WorkPageTimeline';
 
 import ProgressBar from '../../components/ProgressBar/Progress';
-import { OPERATION_STATUS } from '../../reducers/operations';
+import { OPERATION_STATUS, OPERATION_SOURCE } from '../../reducers/operations';
 import withKeyboard from '../../components/Keyboard';
 
 const lodash = require('lodash');
@@ -52,7 +55,8 @@ const mapStateToProps = (state, ownProps) => ({
 const TOPHEIGHT = '150px';
 
 const mapDispatchToProps = {
-  NewCar
+  NewCar,
+  switchWorkMode
 };
 
 // 与 style 里的变量相同
@@ -161,7 +165,7 @@ const withstyles = theme => ({
   },
   fab: {
     position: 'fixed',
-    bottom: theme.spacing.unit * 2,
+    bottom: theme.spacing.unit * 10,
     right: theme.spacing.unit * 2,
     width: '150px'
   },
@@ -497,6 +501,10 @@ class ConnectedWorking extends React.Component {
     // this.props.setCarByPass(true);
   }
 
+  componentDidUpdate(prevProps){
+    this.prevOperationStatus=prevProps.operations.operationStatus;
+  }
+
   handleClickOpenOee = e => {
     // this.props.openOeeDiag(true);
   };
@@ -570,12 +578,13 @@ class ConnectedWorking extends React.Component {
     });
   };
 
-  openManualDiag = (e, input) => {
+
+openManualDiag = (e, input) => {
     e.preventDefault();
     const { keyboardInput, NewCar } = this.props;
     keyboardInput({
       onSubmit: text => {
-        NewCar(text);
+        NewCar(text, OPERATION_SOURCE.MANUAL);
       },
       text: e.target.value,
       title: input === 'vin' ? 'VIN/KNR' : 'VEHICLE TYPE',
@@ -592,6 +601,15 @@ class ConnectedWorking extends React.Component {
         displayTitle: t('Operation.Info.ReworkWorkCenter')
       }
     ];
+  };
+
+  toggleAutoScannerMode = (e) => {
+    const { workMode, switchWorkMode } = this.props;
+    let mode = 'auto';
+    if (workMode.workMode === 'auto') {
+      mode = 'scanner'
+    }
+    switchWorkMode(mode);
   };
 
   orderInfo = t => {
@@ -632,7 +650,7 @@ class ConnectedWorking extends React.Component {
   };
 
   render() {
-    const { classes, operations, timeline } = this.props;
+    const { classes, operations, timeline, workMode } = this.props;
     //
     //
     const { inputName, manualDiagShow } = this.state;
@@ -659,14 +677,16 @@ class ConnectedWorking extends React.Component {
 
     const showResultDiag = configs.operationSettings.opMode === 'order';
 
-    const showManualCarType = configs.operationSettings.opMode === 'op';
+    // const showManualCarType = configs.operationSettings.opMode === 'op';
 
     const carTypeSize= configs.operationSettings.opMode === 'op'? 5: 3;
 
     const carTypeClass= configs.operationSettings.opMode === 'op'? classes.LeftTop1: classes.LeftTop2;
 
+    const manualEnable = (configs.operationSettings.opMode === 'op' && workMode.workMode === 'manual') || (configs.operationSettings.opMode === 'order');
+
     //
-    // const fabClassName = classNames(classes.fab);
+    const fabClassName = classNames(classes.fab);
     // const fabOEEClassName = switchAutoManual? classNames(classes.fabOEE) :classNames(classes.fab);
     // let statusShow = lodash.includes(['Init', 'Ready', 'PreDoing', 'Timeout'],orderStatus);
     //
@@ -682,7 +702,7 @@ class ConnectedWorking extends React.Component {
     //
     // const showAutoManual = statusShow && switchAutoManual;
     //
-    // const showButtonInfo = isAutoMode? 'Common.Manual':'Common.Auto';
+    const showButtonInfo = workMode.workMode === 'auto' ? 'Common.Scanner':'Common.Auto';
     //
     // const showManualInfo = !isAutoMode || workFlow === 'General';
     //
@@ -746,7 +766,7 @@ class ConnectedWorking extends React.Component {
                     className={classes.LeftTopTab}
                     component="button"
                     onClick={e => this.openManualDiag(e, 'carType')}
-                    disabled={!showManualCarType}
+                    disabled={!manualEnable}
                   >
                     <div className={classes.LeftTabContiner}>
                       <h4 className={classes.LeftTopDes}>
@@ -769,7 +789,7 @@ class ConnectedWorking extends React.Component {
                     className={classes.LeftTopTab}
                     component="button"
                     onClick={e => this.openManualDiag(e, 'vin')}
-                    disabled={false}
+                    disabled={!manualEnable}
                   >
                     <div className={classes.LeftTabContiner}>
                       <h4 className={classes.LeftTopDes}>
@@ -807,14 +827,11 @@ class ConnectedWorking extends React.Component {
                 <div className={classes.CountDownContainer}>
                   <ProgressBar
                     time={operations.maxOpTimes}
-                    shouldCounterStart={() =>
-                      lodash.includes(
-                        [OPERATION_STATUS.DOING],
-                        operations.operationStatus
-                        // predoing -> doing
-                      ) &&
-                      this.prevOperationStatus === OPERATION_STATUS.PREDOING
-                    }
+                    shouldCounterStart={() =>{
+                      // predoing -> doing
+                      return operations.operationStatus===OPERATION_STATUS.DOING &&
+                      this.prevOperationStatus === OPERATION_STATUS.PREDOING;
+                    }}
                     shouldCounterStop={() =>
                       lodash.includes(
                         [OPERATION_STATUS.READY],
@@ -883,6 +900,17 @@ class ConnectedWorking extends React.Component {
                   {/* <TimeLine simple stories={teststory} /> */}
                 </div>
               </Paper>
+              {
+                !manualEnable && configs.operationSettings.opMode === 'op'?
+                  <Button color="rose" disabled={manualEnable} round className={fabClassName} size="lg" onClick={this.toggleAutoScannerMode} >
+                    {workMode.workMode === 'auto' ?
+                      <FiberManualRecord className={classes.extendedIcon} />:
+                      <Autorenew className={classes.extendedIcon} />
+                    }
+                    {t(showButtonInfo)}
+                  </Button>
+                  : null
+              }
               <ShutdownDiag />
               {enableResultDialog? <ResultDialog />: null}
               <ManualDiag show={manualDiagShow} close={this.closeManualDiag} />
@@ -901,7 +929,9 @@ ConnectedWorking.propTypes = {
   workMode: PropTypes.shape({}).isRequired,
   timeline: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   reworkWorkCenter: PropTypes.string.isRequired,
-  keyboardInput: PropTypes.func.isRequired
+  keyboardInput: PropTypes.func.isRequired,
+  switchWorkMode: PropTypes.func.isRequired,
+  NewCar: PropTypes.func.isRequired,
 };
 
 const Working = connect(
