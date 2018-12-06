@@ -107,7 +107,6 @@ class Result extends React.Component {
 
   fetchData() {
     const { masterpcUrl, hmiSn } = this.props;
-    const { data } = this.state;
     requestData(masterpcUrl, hmiSn)
       .then(res => {
         const statusCode = res.status;
@@ -131,7 +130,7 @@ class Result extends React.Component {
                     round
                     simple
                     onClick={() => {
-                      const obj = data.find(o => o.id === key);
+                      const obj = this.state.data.find(o => o.id === key);
                       this.setState({
                         isShow: true,
                         selectObj: obj
@@ -366,7 +365,7 @@ class Result extends React.Component {
                 info
                 show={isShow}
                 style={{ display: 'block', marginTop: '-100px' , top: '35%'}}
-                title="事件详情"
+                title="结果详情"
                 onConfirm={this.handleClose}
                 onCancel={this.handleClose}
                 confirmBtnCssClass={`${classes.button} ${classes.success}`}
