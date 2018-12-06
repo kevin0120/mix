@@ -26,5 +26,14 @@
           </field>
         </field>
       </record>
+      <record model="ir.ui.view" id="sa_changan_sa_mrp_routing_form_view_inherit">
+        <field name="name">sa_changan_sa_mrp_routing_form_view_inherit</field>
+        <field name="model">mrp.routing</field>
+        <field name="inherit_id" ref="sa_base.sa_mrp_routing_form_view"/>
+        <field name="arch" type="xml">
+          <xpath expr="//page/field[@name='operation_ids']/tree/field[@name='group_id']" position="replace">
+          </xpath>
+        </field>
+      </record>
   </data>
 </odoo>

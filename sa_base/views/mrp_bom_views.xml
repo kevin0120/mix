@@ -51,7 +51,7 @@
                                     <field name="operation_id" required="1"  readonly="1" options="{'no_quick_create':True,'no_create_edit':True}"/>
                                     <!--<field name="group_id" readonly="1"/>-->
                                     <field name="program_id" required="1"/>
-                                    <!--<field name="workcenter_id" readonly="1"/>-->
+                                    <field name="op_job_id" readonly="1"/>
                                     <field name="masterpc_id" readonly="1"/>
                                     <field name="controller_id" domain="controller_id_domain" options="{'no_quick_create':True,'no_create_edit':True}"/>
                                     <field name="gun_id" domain="gun_id_domain" options="{'no_quick_create':True,'no_create_edit':True}"/>
