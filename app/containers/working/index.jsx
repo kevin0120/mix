@@ -501,6 +501,10 @@ class ConnectedWorking extends React.Component {
     // this.props.setCarByPass(true);
   }
 
+  componentDidUpdate(prevProps){
+    this.prevOperationStatus=prevProps.operations.operationStatus;
+  }
+
   handleClickOpenOee = e => {
     // this.props.openOeeDiag(true);
   };
@@ -823,14 +827,11 @@ openManualDiag = (e, input) => {
                 <div className={classes.CountDownContainer}>
                   <ProgressBar
                     time={operations.maxOpTimes}
-                    shouldCounterStart={() =>
-                      lodash.includes(
-                        [OPERATION_STATUS.DOING],
-                        operations.operationStatus
-                        // predoing -> doing
-                      ) &&
-                      this.prevOperationStatus === OPERATION_STATUS.PREDOING
-                    }
+                    shouldCounterStart={() =>{
+                      // predoing -> doing
+                      return operations.operationStatus===OPERATION_STATUS.DOING &&
+                      this.prevOperationStatus === OPERATION_STATUS.PREDOING;
+                    }}
                     shouldCounterStop={() =>
                       lodash.includes(
                         [OPERATION_STATUS.READY],
