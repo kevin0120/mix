@@ -39,6 +39,7 @@ const lodash = require('lodash');
 const mapStateToProps = (state, ownProps) => ({
   show: state.resultDiag.show,
   results: state.operations.results,
+  jobID: state.operations.jobID,
   nextWorkorder: state.ongoingOperation,
   ...ownProps
 });
@@ -76,7 +77,7 @@ class ConnectedResultDialog extends React.Component {
   };
 
   render() {
-    const { classes, show, results, nextWorkorder } = this.props;
+    const { classes, show, results, nextWorkorder, jobID } = this.props;
 
     const showNextVehicle = configs.operationSettings.opMode === 'order';
 
@@ -94,13 +95,24 @@ class ConnectedResultDialog extends React.Component {
 
     const localResults = [];
     for (let i = 0; i < results.length; i++) {
-      localResults.push([
-        results[i].pset,
-        results[i].mi,
-        results[i].wi,
-        results[i].ti,
-        results[i].result
-      ]);
+      if(showNextVehicle){
+        localResults.push([
+          results[i].pset,
+          results[i].mi,
+          results[i].wi,
+          results[i].ti,
+          results[i].result
+        ]);
+      }else {
+        localResults.push([
+          jobID,
+          results[i].mi,
+          results[i].wi,
+          results[i].ti,
+          results[i].result
+        ]);
+      }
+
     }
 
     return (
@@ -205,6 +217,7 @@ class ConnectedResultDialog extends React.Component {
 ConnectedResultDialog.propTypes = {
   show: PropTypes.bool.isRequired,
   nextWorkorder: PropTypes.shape({}).isRequired,
+  jobID: PropTypes.number.isRequired,
   results: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.number
