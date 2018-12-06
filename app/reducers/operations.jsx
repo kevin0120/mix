@@ -56,7 +56,8 @@ const defaultOperations = {
     //   ti: 0,
     //   mi: 0,
     //   wi: 0,
-    //   result: ''
+    //   result: '',
+    //   batch:''
     // }
   ]
 };
@@ -156,6 +157,7 @@ function mergeResults(state, data) {
     rs[i + state.activeResultIndex].mi = data[i].mi;
     rs[i + state.activeResultIndex].wi = data[i].wi;
     rs[i + state.activeResultIndex].result = data[i].result;
+    rs[i + state.activeResultIndex].batch = data[i].batch;
   }
 
   return rs;
