@@ -8,7 +8,7 @@ from itertools import groupby
 
 
 class ReportTightResultReport(models.AbstractModel):
-    _inherit = 'spc.report_result_tighting'
+    _inherit = 'report.spc.report_result_tighting'
 
     @api.model
     def render_html(self, docids, data=None):

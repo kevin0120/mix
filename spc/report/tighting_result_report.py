@@ -37,7 +37,7 @@ class TightResultReport(models.TransientModel):
 
 
 class ReportTightResultReport(models.AbstractModel):
-    _name = 'spc.report_result_tighting'
+    _name = 'report.spc.report_result_tighting'
 
     @api.model
     def render_html(self, docids, data=None):
