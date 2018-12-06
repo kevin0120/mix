@@ -766,7 +766,7 @@ openManualDiag = (e, input) => {
                     className={classes.LeftTopTab}
                     component="button"
                     onClick={e => this.openManualDiag(e, 'carType')}
-                    disabled={!manualEnable}
+                    disabled={!manualEnable || (configs.operationSettings.opMode === 'order')}
                   >
                     <div className={classes.LeftTabContiner}>
                       <h4 className={classes.LeftTopDes}>
