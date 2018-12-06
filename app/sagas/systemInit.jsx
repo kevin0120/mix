@@ -13,7 +13,7 @@ import { call, takeLatest, put, select } from 'redux-saga/effects';
 import { CONNECTION, SYSTEM_INIT, RUSH, RFID, USER_CONFIGS } from "../actions/actionTypes";
 
 
-import { setLedStatusReady } from './io';
+import { setLedStatusReady, setModBusIO } from './io';
 
 import { setNewNotification } from '../actions/notification';
 import { initIO } from '../actions/ioModbus';
@@ -34,6 +34,9 @@ function* sysInit() {
     yield put({ type: RUSH.INIT });
 
     // 初始化io
+    const modbusConfig = state.setting.page.modbus;
+    setModBusIO(modbusConfig);
+
     if (state.setting.systemSettings.modbusEnable) {
       yield put(initIO());
     }

@@ -130,7 +130,7 @@ export function* watchRushChannel() {
 
         switch (event) {
           case 'job':
-            if (state.workMode.workMode === 'manual' && json.job_id) {
+            if (state.workMode.workMode === 'manual' && json.job_id > 0) {
               yield call(
                 triggerOperation,
                 null,
@@ -168,8 +168,8 @@ export function* watchRushChannel() {
             if (json.inputs) {
               if (json.inputs[getIBypass()] === '1') {
                 // 强制放行
-            // yield put({ type: OPERATION.FINISHED, data: [] });
-            yield call(handleIOFunction, IO_FUNCTION.IN.BYPASS);
+                // yield put({ type: OPERATION.FINISHED, data: [] });
+                yield call(handleIOFunction, IO_FUNCTION.IN.BYPASS);
               }
 
               if (json.inputs[getIModeSelect()] === '1') {

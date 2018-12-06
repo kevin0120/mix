@@ -1,7 +1,7 @@
 import { call, take, select, put, fork } from 'redux-saga/effects';
 import OWebSocket from 'ws';
 import { eventChannel } from 'redux-saga';
-import { ANDON, AIIS } from '../actions/actionTypes';
+import { ANDON, AIIS, OPERATION } from '../actions/actionTypes';
 import { jobManual } from './api/operation';
 import { setHealthzCheck } from '../actions/healthCheck';
 
@@ -19,7 +19,7 @@ const AIIS_WS_CHANNEL = {
   ERROR: 'AIIS_WS_CHANNEL_ERROR',
   PING: 'AIIS_WS_CHANNEL_PING',
   PONG: 'AIIS_WS_CHANNEL_PONG',
-  MESSAGE: 'AIIS_WS_CHANNEL_PONG'
+  MESSAGE: 'AIIS_WS_CHANNEL_MESSAGE'
 };
 
 export function* watchAiis() {
@@ -80,12 +80,9 @@ export function* handleAiisData(data) {
       const {
         carType,
         carID,
-        productID,
-        workcenterID,
-        results
       } = state.operations;
 
-      const { jobID } = state.setting.operationSettings.emptyCarJob;
+      const { emptyCarJob } = state.setting.operationSettings;
 
       const controllerSN = state.connections.controllers[0].serial_no;
       const rushUrl = state.connections.masterpc;
@@ -101,11 +98,9 @@ export function* handleAiisData(data) {
         carType,
         carID,
         userID,
-        jobID,
-        results,
+        emptyCarJob,
         hmiSn.value,
-        productID,
-        workcenterID,
+        0,
         skip,
         hasSet,
         ''
@@ -145,8 +140,9 @@ function aiisWSChannel() {
     });
 
     ws.on('message', dataRaw => {
+
       emit({
-        type: AIIS_WS_CHANNEL.PONG,
+        type: AIIS_WS_CHANNEL.MESSAGE,
         dataRaw
       });
     });
@@ -184,6 +180,7 @@ function* aiisWSListener(hmiSN) {
           console.log(' receive pong Msg');
           break;
         case AIIS_WS_CHANNEL.MESSAGE:
+
           yield call(wsOnMessage, chanAction.dataRaw);
           break;
         default:

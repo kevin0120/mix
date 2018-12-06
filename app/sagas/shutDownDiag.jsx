@@ -44,30 +44,34 @@ function* closeDiag(dType) {
 }
 
 function* confirmDiag(dType, data) {
-  switch (dType) {
-    case 'shutdown': {
-      ipcRenderer.send('asynchronous-message', 'shutdown');
-      break;
+  try {
+    switch (dType) {
+      case 'shutdown': {
+        ipcRenderer.send('asynchronous-message', 'shutdown');
+        break;
+      }
+      case 'bypass': {
+        const op = yield select(getOperations);
+        const { carID } = op;
+        Info(`车辆已放行 车辆ID:${carID}`);
+        yield put(switch2Ready());
+        break;
+      }
+      case 'verify': {
+        // 冲突确认，继续作业
+        yield put(operationVerified(data));
+        break;
+      }
+      default: {
+        yield put(switch2Doing());
+      }
     }
-    case 'bypass': {
-      const op = yield select(getOperations);
-      const { carID } = op;
-      Info(`车辆已放行 车辆ID:${carID}`);
-      yield put(toolDisable());
-      yield put(switch2Ready());
-      break;
-    }
-    case 'verify': {
-      // 冲突确认，继续作业
-      yield put(operationVerified(data));
-      break;
-    }
-    default: {
-      yield put(switch2Doing());
-    }
+
+    yield put({ type: SHUTDOWN_DIAG.CLOSE });
+  } catch (e) {
+
   }
 
-  yield put({ type: SHUTDOWN_DIAG.CLOSE });
 }
 
 export function* shutDownDiagWorkFlow() {

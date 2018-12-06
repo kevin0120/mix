@@ -395,7 +395,7 @@ function setInBit(obj) {
   }
 }
 
-function setModBusIO(modbusConfig) {
+export function setModBusIO(modbusConfig) {
   const modbusOutConfig = modbusConfig.out;
   const modbusInConfig = modbusConfig.in;
   lodash.forEach(modbusOutConfig, setOutBit);

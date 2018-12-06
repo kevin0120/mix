@@ -111,7 +111,7 @@ export function* triggerOperation(carID, carType, job, source) {
     }
   }
 
-  if (triggerFlagNum === triggers.length) {
+  if (triggerFlagNum === triggers.length || state.workMode.workMode === 'manual') {
     yield call(getOperation, job);
   }
 }
