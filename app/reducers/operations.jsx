@@ -228,6 +228,7 @@ function operationFinished(state, data) {
     operationStatus: OPERATION_STATUS.READY,
     carID: '',
     carType: '',
+    lnr: '',
     results
   };
 }
