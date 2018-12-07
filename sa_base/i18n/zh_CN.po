@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0+e-20171123\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-11-12 02:58+0000\n"
-"PO-Revision-Date: 2018-11-12 02:58+0000\n"
+"POT-Creation-Date: 2018-12-07 01:41+0000\n"
+"PO-Revision-Date: 2018-12-07 01:41+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -18,12 +18,12 @@ msgstr ""
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_quality_check_view_form_small_inherit
 msgid "<span>Deg</span>"
-msgstr "<span>Deg</span>"
+msgstr "<span>角度</span>"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_quality_check_view_form_small_inherit
 msgid "<span>NM</span>"
-msgstr "<span>NM</span>"
+msgstr "<span>牛米</span>"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_quality_point_view_form_inherit_mrp
@@ -122,14 +122,12 @@ msgstr "<strong>工作中心</strong>"
 
 #. module: sa_base
 #: code:addons/sa_base/models/product.py:30
-#: sql_constraint:product.product:0
 #, python-format
 msgid "A Screw Code can only be assigned to one SCREW !"
 msgstr "同样的螺栓编号只能分配给一种螺栓！"
 
 #. module: sa_base
 #: code:addons/sa_base/models/product.py:31
-#: sql_constraint:product.product:0
 #, python-format
 msgid "A Vehicle Code can only be assigned to one Vehicle !"
 msgstr "同样的车型代码只能分配给一种车型！"
@@ -196,7 +194,7 @@ msgstr "自动创建质量控制点"
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_product_normal_form_view
 msgid "BOM"
-msgstr "BOM"
+msgstr "物料清单"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.report_mrporder_pin
@@ -252,9 +250,9 @@ msgid "Cancel"
 msgstr "取消"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_category_name_4053
+#: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_category_name_4055
 msgid "Category name"
-msgstr "分类名称"
+msgstr "类别名称"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_child_ids
@@ -382,6 +380,7 @@ msgstr "控制器"
 #. module: sa_base
 #: model:ir.actions.act_window,name:sa_base.sa_job_form_action
 #: model:ir.model,name:sa_base.model_controller_job
+#: model:ir.ui.menu,name:sa_base.sa_menu_job_action
 #: model:ir.ui.view,arch_db:sa_base.sa_job_form_view
 msgid "Controller Job"
 msgstr "控制器装配过程"
@@ -389,7 +388,6 @@ msgstr "控制器装配过程"
 #. module: sa_base
 #: model:ir.actions.act_window,name:sa_base.sa_program_form_action
 #: model:ir.model,name:sa_base.model_controller_program
-#: model:ir.ui.menu,name:sa_base.sa_menu_program_action
 #: model:ir.ui.view,arch_db:sa_base.sa_program_form_view
 msgid "Controller Program"
 msgstr "控制器程序"
@@ -533,28 +531,28 @@ msgstr "设备"
 #: code:addons/sa_base/models/maintenance.py:146
 #, python-format
 msgid "Error ! You cannot create recursive Equipments."
-msgstr "Error ! You cannot create recursive Equipments."
+msgstr "错误! 你不能创建递归的设备."
 
 #. module: sa_base
 #: sql_constraint:res.users:0
 msgid "Every User unique UUID"
-msgstr "Every User unique UUID"
+msgstr "每个用户拥有唯一的UUID"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_external_url
 #: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_external_url
 msgid "External URL"
-msgstr "External URL"
+msgstr "外部URL"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.view_users_form
 msgid "Extra Info"
-msgstr "Extra Info"
+msgstr "额外信息"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_production_factory_name
 msgid "Factory Name"
-msgstr "Factory Name"
+msgstr "工厂名称"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_equipment_connection_form_view
@@ -579,17 +577,17 @@ msgstr "分组..."
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_group_sequence_3911
 msgid "Group Sequence for Multi Spindle"
-msgstr "Group Sequence for Multi Spindle"
+msgstr "多轴拧紧作业组序列"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_group_id_3910
 msgid "Group id"
-msgstr "Group id"
+msgstr "拧紧作业组ID"
 
 #. module: sa_base
 #: model:maintenance.equipment.category,name:sa_base.equipment_Gun
 msgid "Gun"
-msgstr "Gun"
+msgstr "拧紧枪"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_bom_line_gun_id_domain
@@ -616,7 +614,7 @@ msgstr "HTTP"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_healthz_url
 msgid "Healthz Check URL"
-msgstr "Healthz Check URL"
+msgstr "心跳检查URL"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_controller_job_id
@@ -651,22 +649,23 @@ msgid "If the active field is set to False, it will allow you to hide the bills 
 msgstr "如果去掉“启用”的勾，可以不用删除就隐藏物料清单"
 
 #. module: sa_base
+#: model:ir.model.fields,field_description:sa_base.field_mrp_bom_line_op_job_id
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_workcenter_op_job_id
 #: model:ir.model.fields,help:sa_base.field_controller_job_code
 #: model:ir.ui.view,arch_db:sa_base.sa_job_form_view
 #: model:ir.ui.view,arch_db:sa_base.sa_job_tree_view
 msgid "Job"
-msgstr "Job"
+msgstr "程序号(job)"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_controller_job_code
 msgid "Job Code"
-msgstr "Job Code"
+msgstr "程序号代码(job)"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_controller_job_name
 msgid "Job Name"
-msgstr "Job Name"
+msgstr "程序号名称(job)"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_production_knr
@@ -722,7 +721,7 @@ msgstr "左父项"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_production_lnr
 msgid "Line Number"
-msgstr "Line Number"
+msgstr "线号"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_production_long_pin
@@ -732,7 +731,7 @@ msgstr "LongPIN"
 #. module: sa_base
 #: selection:controller.program,strategy:0
 msgid "Loosening"
-msgstr "Loosening"
+msgstr "松脱"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_product_normal_form_view
@@ -743,12 +742,12 @@ msgstr "制造"
 #: model:ir.model,name:sa_base.model_mrp_production
 #: model:ir.ui.view,arch_db:sa_base.view_sa_config
 msgid "Manufacturing Order"
-msgstr "生产订单"
+msgstr "制造订单"
 
 #. module: sa_base
 #: model:ir.model,name:sa_base.model_mrp_routing_group
 msgid "Manufacutre Routing Group"
-msgstr "Manufacutre Routing Group"
+msgstr "工艺路线组"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_bom_line_masterpc_id
@@ -766,12 +765,12 @@ msgstr "Masterpc"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_workcenter_max_op_time
 msgid "Max Operation time(second)"
-msgstr "Max Operation time(second)"
+msgstr "最大作业时间(秒)"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_quality_check_measure_degree
 msgid "Measure Degree"
-msgstr "Measure Degree"
+msgstr "测量角度"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_image_medium
@@ -796,7 +795,7 @@ msgstr "ModbusTCP"
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_view_mrp_workassembly_search
 msgid "Mrp Assembly Line"
-msgstr "Mrp Assembly Line"
+msgstr "MRP组装线"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_view_mrp_workcenter_search_inherit
@@ -807,10 +806,11 @@ msgstr "MRP 工作中心"
 #: model:ir.ui.view,arch_db:sa_base.sa_view_mrp_workcenter_search_inherit
 #: model:ir.ui.view,arch_db:sa_base.sa_view_mrp_worksegment_search
 msgid "Mrp Worksegment"
-msgstr "Mrp Worksegment"
+msgstr "MRP工段"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_view_mrp_bom_filter
+#: selection:mrp.workcenter,type:0
 msgid "Normal"
 msgstr "一般"
 
@@ -894,29 +894,29 @@ msgstr "作业"
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_workcenter_max_redo_times
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_max_redo_times
 msgid "Operation Max Redo Times"
-msgstr "Operation Max Redo Times"
+msgstr "拧紧作业最大重试次数"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_group_name
 msgid "Operation Point Group"
-msgstr "Operation Point Group"
+msgstr "拧紧作业组"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_name
 msgid "Operation Point Name"
-msgstr "Operation Point Name"
+msgstr "拧紧作业点名称"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_workcenter_operation_point_ids
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_routing_workcenter_form_view
 msgid "Operation Points"
-msgstr "Operation Points"
+msgstr "拧紧作业点"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_workcenter_operation_point_group_ids
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_routing_workcenter_form_view
 msgid "Operation Points Group(multi-spindle)"
-msgstr "Operation Points Group(multi-spindle)"
+msgstr "拧紧作业点组(多轴)"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_group_operation_id
@@ -953,17 +953,17 @@ msgstr "PIN # :"
 #. module: sa_base
 #: model:ir.actions.report.xml,name:sa_base.action_report_vin_production_order
 msgid "PIN Production Order"
-msgstr "PIN Production Order"
+msgstr "PIN生产订单"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_production_pin_check_code
 msgid "PIN check Code"
-msgstr "PIN check Code"
+msgstr "PIN码"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_parent_id
 msgid "Parent Equipment"
-msgstr "Parent Equipment"
+msgstr "父设备"
 
 #. module: sa_base
 #: sql_constraint:mrp.routing.workcenter:0
@@ -973,13 +973,13 @@ msgstr "Per Routing only has one unique Routing group per Work Center!"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_group_operation_point_ids
 msgid "Points"
-msgstr "Points"
+msgstr "作业点"
 
 #. module: sa_base
 #: code:addons/sa_base/models/maintenance.py:60
 #, python-format
 msgid "Port must be greater than ZERO!"
-msgstr "Port must be greater than ZERO!"
+msgstr "端口号必须大于0!"
 
 #. module: sa_base
 #: model:ir.model,name:sa_base.model_product_product
@@ -1005,12 +1005,12 @@ msgstr "数量"
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_product_normal_form_view
 msgid "Product Routing"
-msgstr "Product Routing"
+msgstr "产品工艺路线"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_product_normal_form_view
 msgid "Product Specification Description"
-msgstr "Product Specification Description"
+msgstr "产品规格描述"
 
 #. module: sa_base
 #: model:ir.model,name:sa_base.model_product_template
@@ -1021,7 +1021,7 @@ msgstr "产品模板"
 #: code:addons/sa_base/models/product.py:40
 #, python-format
 msgid "Product can not be copy by User!"
-msgstr "Product can not be copy by User!"
+msgstr "产品不能被用户复制!"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_routing_search_view
@@ -1031,7 +1031,7 @@ msgstr "生产位置"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_production_production_routings
 msgid "Production Routings"
-msgstr "Production Routings"
+msgstr "生产工艺路线"
 
 #. module: sa_base
 #: model:ir.ui.menu,name:sa_base.menu_product_form
@@ -1042,34 +1042,39 @@ msgstr "产品"
 #: model:ir.ui.view,arch_db:sa_base.sa_program_form_view
 #: model:ir.ui.view,arch_db:sa_base.sa_program_tree_view
 msgid "Program"
-msgstr "Program"
+msgstr "程序号(pset)"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_controller_program_code
 msgid "Program Code"
-msgstr "Program Code"
+msgstr "程序号代码(pset)"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_controller_program_name
 msgid "Program Name"
-msgstr "Program Name"
+msgstr "程序号名称(pset)"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_program_id
 msgid "Program id"
-msgstr "Program id"
+msgstr "程序号(pset)"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_connection_protocol
 #: model:ir.ui.view,arch_db:sa_base.sa_equipment_connection_form_view
 msgid "Protocol"
-msgstr "Protocol"
+msgstr "通讯协议"
 
 #. module: sa_base
 #: model:ir.model,name:sa_base.model_quality_check
 #: model:ir.ui.view,arch_db:sa_base.sa_product_normal_form_view
 msgid "Quality Check"
 msgstr "质量检查"
+
+#. module: sa_base
+#: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_qc_workcenter_id
+msgid "Quality Check Work Center"
+msgstr "质量检查工位"
 
 #. module: sa_base
 #: model:ir.model,name:sa_base.model_quality_point
@@ -1080,7 +1085,7 @@ msgstr "质量点"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_product_product_qp_count
 msgid "Quality Point Count"
-msgstr "Quality Point Count"
+msgstr "质量控制点计数"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_bom_form_view
@@ -1098,7 +1103,7 @@ msgstr "RFID"
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_bom_form_view
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_routing_workcenter_form_view
 msgid "ReSequence"
-msgstr "ReSequence"
+msgstr "重新排序"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_assemblyline_code
@@ -1110,17 +1115,22 @@ msgstr "参照"
 #: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_io_id
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_workcenter_form_view
 msgid "Remote IO"
-msgstr "Remote IO"
+msgstr "远程IO"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_quality_point_times
 msgid "Repeat times"
-msgstr "Repeat times"
+msgstr "重试次数"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_sa_config_settings_generate_result_sequence
 msgid "Result Sequences"
-msgstr "Result Sequences"
+msgstr "结果序列"
+
+#. module: sa_base
+#: selection:mrp.workcenter,type:0
+msgid "Rework"
+msgstr "返修"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_parent_right
@@ -1138,7 +1148,7 @@ msgstr "工艺路线"
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_routing_form_view
 #: model:ir.ui.view,arch_db:sa_base.sa_product_normal_form_view
 msgid "Routing Code"
-msgstr "Routing Code"
+msgstr "工艺路线代码"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_bom_line_group_id
@@ -1146,33 +1156,32 @@ msgstr "Routing Code"
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_workcenter_group_id
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_routing_group_tree_view
 msgid "Routing Group"
-msgstr "Routing Group"
+msgstr "工艺路线组"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_group_code
 msgid "Routing Group Rerence"
-msgstr "Routing Group Rerence"
+msgstr "工艺路线组参照"
 
 #. module: sa_base
 #: sql_constraint:mrp.routing.group:0
 msgid "Routing Group code must be unique!"
-msgstr "Routing Group code must be unique!"
+msgstr "工艺路线组代码必须是唯一的!"
 
 #. module: sa_base
 #: sql_constraint:mrp.routing.group:0
 msgid "Routing Group name must be unique!"
-msgstr "Routing Group name must be unique!"
+msgstr "工艺路线组名称必须是唯一的!"
 
 #. module: sa_base
 #: model:ir.actions.act_window,name:sa_base.sa_mrp_routing_group_action
-#: model:ir.ui.menu,name:sa_base.menu_mrp_routing_group_action
 msgid "Routing Groups"
-msgstr "Routing Groups"
+msgstr "工艺路线组"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_routing_form_view
 msgid "Routing Name"
-msgstr "Routing Name"
+msgstr "工艺路线名称"
 
 #. module: sa_base
 #: model:ir.actions.act_window,name:sa_base.sa_mrp_routing_workcenter_action
@@ -1224,7 +1233,7 @@ msgstr "搜索物料清单"
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_view_mrp_workassembly_search
 msgid "Search for mrp Assembly Line"
-msgstr "Search for mrp Assembly Line"
+msgstr "MRP装配线的搜索"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_view_mrp_workcenter_search_inherit
@@ -1234,17 +1243,17 @@ msgstr "MRP工作中心的搜索"
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_view_mrp_worksegment_search
 msgid "Search for mrp worksegment"
-msgstr "Search for mrp worksegment"
+msgstr "MRP工段的搜索"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_worksegament_name
 msgid "Segament"
-msgstr "Segament"
+msgstr "工段"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_workassembly_form_view
 msgid "Segments"
-msgstr "Segments"
+msgstr "工段"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_sequence
@@ -1254,7 +1263,7 @@ msgstr "序号"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_connection_tty
 msgid "Serial TTY"
-msgstr "Serial TTY"
+msgstr "串口TTY"
 
 #. module: sa_base
 #: selection:sa.config.settings,generate_result_sequence:0
@@ -1264,14 +1273,14 @@ msgstr "Set Sequence by Operation(default)"
 #. module: sa_base
 #: selection:sa.config.settings,generate_result_sequence:0
 msgid "Set Sequence by Per Vehicle"
-msgstr "Set Sequence by Per Vehicle"
+msgstr "每个车型设置序列"
 
 #. module: sa_base
 #: model:ir.ui.menu,name:sa_base.menu_mrp_sa_setting
 #: model:ir.ui.view,arch_db:sa_base.sa_job_form_view
 #: model:ir.ui.view,arch_db:sa_base.sa_program_form_view
 msgid "Setting"
-msgstr "Setting"
+msgstr "设置"
 
 #. module: sa_base
 #: model:ir.ui.menu,name:sa_base.menu_sa_config_configuration
@@ -1281,17 +1290,17 @@ msgstr "设置"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_workcenter_socket
 msgid "Socket No"
-msgstr "Socket No"
+msgstr "套筒"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_product_normal_form_view
 msgid "Specification"
-msgstr "Specification"
+msgstr "规格书"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_controller_program_strategy
 msgid "Strategy"
-msgstr "Strategy"
+msgstr "策略"
 
 #. module: sa_base
 #: selection:maintenance.equipment.connection,protocol:0
@@ -1301,7 +1310,7 @@ msgstr "TCP"
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_maintenance_equipment_view_form_inherit
 msgid "Test"
-msgstr "Test"
+msgstr "测试"
 
 #. module: sa_base
 #: code:addons/sa_base/models/mrp_bom.py:49
@@ -1366,6 +1375,7 @@ msgid "Torque/Angle tightening"
 msgstr "Torque/Angle tightening"
 
 #. module: sa_base
+#: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_type
 #: model:ir.ui.view,arch_db:sa_base.product_search_form_view_sa
 msgid "Type"
 msgstr "类型"
@@ -1399,7 +1409,7 @@ msgstr "VIN"
 #. module: sa_base
 #: selection:product.template,sa_type:0
 msgid "Vechile"
-msgstr "Vechile"
+msgstr "车辆"
 
 #. module: sa_base
 #: model:ir.actions.act_window,name:sa_base.product_product_action_vehicle
@@ -1409,18 +1419,23 @@ msgid "Vehicle"
 msgstr "车辆"
 
 #. module: sa_base
+#: model:ir.ui.view,arch_db:sa_base.sa_mrp_workcenter_form_view
+msgid "Work Area"
+msgstr "工作区域"
+
+#. module: sa_base
 #: model:ir.model,name:sa_base.model_mrp_assemblyline
 #: model:ir.model.fields,field_description:sa_base.field_mrp_worksegament_workassembly_id
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_workassembly_form_view
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_workassembly_tree_view
 msgid "Work Assembly Line"
-msgstr "Work Assembly Line"
+msgstr "工作装配线"
 
 #. module: sa_base
 #: model:ir.actions.act_window,name:sa_base.sa_mrp_workassembly_action
 #: model:ir.ui.menu,name:sa_base.menu_mrp_workassembly_form_action
 msgid "Work Assembly Lines"
-msgstr "Work Assembly Lines"
+msgstr "工作装配线"
 
 #. module: sa_base
 #: model:ir.model,name:sa_base.model_mrp_workcenter
@@ -1433,7 +1448,7 @@ msgstr "工作中心"
 #. module: sa_base
 #: model:ir.actions.report.xml,name:sa_base.report_workcenter_labels
 msgid "Work Center Labels"
-msgstr "Work Center Labels"
+msgstr "工作重心标签"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_workcenter_form_view
@@ -1475,17 +1490,16 @@ msgstr "工单"
 
 #. module: sa_base
 #: model:ir.model,name:sa_base.model_mrp_worksegament
-#: model:ir.ui.view,arch_db:sa_base.sa_mrp_workcenter_form_view
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_worksegment_form_view
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_worksegment_tree_view
 #: model:ir.ui.view,arch_db:sa_base.sa_view_mrp_workcenter_search_inherit
 msgid "Work Segment"
-msgstr "Work Segment"
+msgstr "工段"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_worksegment_form_view
 msgid "Work Segment Name"
-msgstr "Work Segment Name"
+msgstr "工段名字"
 
 #. module: sa_base
 #: model:ir.actions.act_window,name:sa_base.sa_mrp_worksegment_action
@@ -1494,12 +1508,12 @@ msgstr "Work Segment Name"
 #: model:ir.ui.menu,name:sa_base.menu_mrp_worksegment_form_action
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_workassembly_form_view
 msgid "Work Segments"
-msgstr "Work Segments"
+msgstr "工段"
 
 #. module: sa_base
 #: model:ir.ui.menu,name:sa_base.menu_mrp_worksite_form
 msgid "Work Site"
-msgstr "Work Site"
+msgstr "工段"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_workorder_id
@@ -1509,12 +1523,12 @@ msgstr "工单ID"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_worksegment_id
 msgid "Worksegment id"
-msgstr "Worksegment id"
+msgstr "工段"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_production_year
 msgid "Year"
-msgstr "Year"
+msgstr "年"
 
 #. module: sa_base
 #: model:ir.actions.act_window,help:sa_base.product_product_action_screw
@@ -1535,7 +1549,7 @@ msgstr "[%s] %s"
 #: code:addons/sa_base/models/maintenance.py:58
 #, python-format
 msgid "is NOT valid IP Address!"
-msgstr "is NOT valid IP Address!"
+msgstr "不是有效的IP地址!"
 
 #. module: sa_base
 #: model:ir.model,name:sa_base.model_mrp_bom_line
@@ -1560,7 +1574,7 @@ msgstr "operation.point.group"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_connection_port
 msgid "port"
-msgstr "port"
+msgstr "端口"
 
 #. module: sa_base
 #: model:ir.model,name:sa_base.model_sa_config_settings
@@ -1570,7 +1584,7 @@ msgstr "sa.config.settings"
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.product_search_form_view_sa
 msgid "sa_type"
-msgstr "sa_type"
+msgstr "类型"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_group_sequence
@@ -1581,17 +1595,17 @@ msgstr "序列"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_workcenter_worksheet_img
 msgid "worksheet_img"
-msgstr "worksheet_img"
+msgstr "作业图"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_x_offset
-msgid "x axis offset from left(px)"
-msgstr "x axis offset from left(px)"
+msgid "x axis offset from left(%)"
+msgstr "x axis offset from left(%)"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_y_offset
-msgid "y axis offset from top(px)"
-msgstr "y axis offset from top(px)"
+msgid "y axis offset from top(%)"
+msgstr "y axis offset from top(%)"
 
 #. module: sa_base
 #: model:maintenance.equipment,name:sa_base.hmi_0

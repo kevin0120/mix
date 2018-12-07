@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0+e-20171123\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-12 06:15+0000\n"
-"PO-Revision-Date: 2018-10-12 06:15+0000\n"
+"POT-Creation-Date: 2018-12-07 02:06+0000\n"
+"PO-Revision-Date: 2018-12-07 02:06+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -19,11 +19,6 @@ msgstr ""
 #: model:ir.ui.view,arch_db:spc.report_result_tighting
 msgid "<strong>Date</strong>"
 msgstr "<strong>日期</strong>"
-
-#. module: spc
-#: model:ir.ui.view,arch_db:spc.report_result_tighting
-msgid "<strong>Job号</strong>"
-msgstr "<strong>Job号</strong>"
 
 #. module: spc
 #: model:ir.ui.view,arch_db:spc.report_result_tighting
@@ -76,6 +71,26 @@ msgstr "应用"
 #: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_assembly_line_id
 msgid "Assembly Line"
 msgstr "组装生产线"
+
+#. module: spc
+#: model:ir.ui.view,arch_db:spc.operation_result_view_tree
+msgid "Avg. Degree"
+msgstr "Avg. Degree"
+
+#. module: spc
+#: model:ir.ui.view,arch_db:spc.operation_result_view_tree
+msgid "Avg. Operation Duration"
+msgstr "Avg. Operation Duration"
+
+#. module: spc
+#: model:ir.ui.view,arch_db:spc.operation_result_view_tree
+msgid "Avg. Torque"
+msgstr "Avg. Torque"
+
+#. module: spc
+#: model:ir.model.fields,field_description:spc.field_operation_result_batch
+msgid "Batch"
+msgstr "批次"
 
 #. module: spc
 #: model:ir.ui.view,arch_db:spc.view_aiis_config_settings
@@ -137,7 +152,7 @@ msgid "Current Month"
 msgstr "本月"
 
 #. module: spc
-#: code:addons/spc/models/result.py:90
+#: code:addons/spc/models/result.py:97
 #: model:ir.ui.view,arch_db:spc.operation_result_view_search
 #: selection:operation.result,lacking:0
 #, python-format
@@ -162,7 +177,6 @@ msgstr "角度"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_aiis_config_settings_display_name
-#: model:ir.model.fields,field_description:spc.field_report_spc_report_result_tighting_display_name
 #: model:ir.model.fields,field_description:spc.field_result_push_display_name
 #: model:ir.model.fields,field_description:spc.field_result_sync_display_name
 #: model:ir.model.fields,field_description:spc.field_spc_config_settings_display_name
@@ -213,8 +227,8 @@ msgid "Fail"
 msgstr "失败"
 
 #. module: spc
-#: code:addons/spc/models/result.py:96
-#: code:addons/spc/models/result.py:99
+#: code:addons/spc/models/result.py:103
+#: code:addons/spc/models/result.py:106
 #: model:ir.ui.view,arch_db:spc.operation_result_view_search
 #: selection:operation.result,final_pass:0
 #: selection:operation.result,one_time_pass:0
@@ -230,17 +244,11 @@ msgid "Final Pass"
 msgstr "最终通过"
 
 #. module: spc
-#: code:addons/spc/models/result.py:98
+#: code:addons/spc/models/result.py:105
 #: selection:operation.result,final_pass:0
 #, python-format
 msgid "Final Passed"
 msgstr "最终通过"
-
-#. module: spc
-#: code:addons/spc/report/tighting_result_report.py:46
-#, python-format
-msgid "Form content is missing, this report cannot be printed."
-msgstr "表单内容缺失,此报告无法打印."
 
 #. module: spc
 #: model:ir.ui.view,arch_db:spc.operation_result_view_search
@@ -261,12 +269,11 @@ msgstr "已发送给MasterPC"
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_sent
 msgid "Have sent to aiis"
-msgstr "已被发送给AIIS(FIS)"
+msgstr "已被发送给外部系统(FIS)"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_aiis_config_settings_id
 #: model:ir.model.fields,field_description:spc.field_operation_result_id
-#: model:ir.model.fields,field_description:spc.field_report_spc_report_result_tighting_id
 #: model:ir.model.fields,field_description:spc.field_result_push_id
 #: model:ir.model.fields,field_description:spc.field_result_sync_id
 #: model:ir.model.fields,field_description:spc.field_spc_config_settings_id
@@ -287,6 +294,11 @@ msgid "Inverted"
 msgstr "反转"
 
 #. module: spc
+#: model:ir.model.fields,field_description:spc.field_operation_result_job
+msgid "Job"
+msgstr "程序号(job)"
+
+#. module: spc
 #: model:ir.ui.view,arch_db:spc.operation_result_view_search
 msgid "KNR/VIN"
 msgstr "KNR/VIN"
@@ -298,7 +310,6 @@ msgstr "数据丢失"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_aiis_config_settings___last_update
-#: model:ir.model.fields,field_description:spc.field_report_spc_report_result_tighting___last_update
 #: model:ir.model.fields,field_description:spc.field_result_push___last_update
 #: model:ir.model.fields,field_description:spc.field_result_sync___last_update
 #: model:ir.model.fields,field_description:spc.field_spc_config_settings___last_update
@@ -407,11 +418,11 @@ msgid "Need render"
 msgstr "Need render"
 
 #. module: spc
-#: code:addons/spc/models/result.py:58
-#: code:addons/spc/models/result.py:158
-#: code:addons/spc/models/result.py:159
-#: code:addons/spc/models/result.py:170
-#: code:addons/spc/models/result.py:171
+#: code:addons/spc/models/result.py:61
+#: code:addons/spc/models/result.py:167
+#: code:addons/spc/models/result.py:168
+#: code:addons/spc/models/result.py:179
+#: code:addons/spc/models/result.py:180
 #, python-format
 msgid "New"
 msgstr "新建"
@@ -422,7 +433,7 @@ msgid "No measure"
 msgstr "未测量"
 
 #. module: spc
-#: code:addons/spc/models/result.py:91
+#: code:addons/spc/models/result.py:98
 #: selection:operation.result,lacking:0
 #, python-format
 msgid "Normal"
@@ -457,7 +468,7 @@ msgid "One Time Pass"
 msgstr "一次通过"
 
 #. module: spc
-#: code:addons/spc/models/result.py:95
+#: code:addons/spc/models/result.py:102
 #: selection:operation.result,one_time_pass:0
 #, python-format
 msgid "One Time Passed"
@@ -525,6 +536,11 @@ msgid "Production Order"
 msgstr "生产单"
 
 #. module: spc
+#: model:ir.model.fields,field_description:spc.field_operation_result_program_id
+msgid "Program id"
+msgstr "程序号(pset)"
+
+#. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_pset_strategy
 msgid "Pset strategy"
 msgstr "Pset策略"
@@ -539,6 +555,16 @@ msgstr "Qcp id"
 #: model:ir.ui.view,arch_db:spc.operation_result_view_pivot
 msgid "Quality Check Analysis"
 msgstr "质量检查分析"
+
+#. module: spc
+#: model:ir.ui.view,arch_db:spc.operation_result_view_search
+msgid "Quality Check Point"
+msgstr "质量控制点"
+
+#. module: spc
+#: model:ir.model,name:spc.model_quality_point
+msgid "Quality Point"
+msgstr "质量点"
 
 #. module: spc
 #: model:ir.ui.view,arch_db:spc.sa_spc_form_tor_ang
@@ -602,6 +628,8 @@ msgstr "过程控制分析(SPC)"
 #. module: spc
 #: model:ir.ui.view,arch_db:spc.sa_mrp_production_form_inherit
 #: model:ir.ui.view,arch_db:spc.sa_mrp_workorder_view_form_inherit_mrp
+#: model:ir.ui.view,arch_db:spc.sa_spc_quality_point_form_view
+#: model:ir.ui.view,arch_db:spc.sa_spc_workcenter_form_view
 msgid "Results"
 msgstr "结果"
 
@@ -612,6 +640,7 @@ msgstr "结果"
 #: model:ir.ui.menu,name:spc.menu_spc_scope_root
 #: model:ir.ui.view,arch_db:spc.sa_mrp_production_form_inherit
 #: model:ir.ui.view,arch_db:spc.sa_spc_equipment_form_view
+#: model:ir.ui.view,arch_db:spc.sa_spc_quality_point_form_view
 #: model:ir.ui.view,arch_db:spc.sa_spc_workcenter_form_view
 msgid "SPC"
 msgstr "过程控制分析(SPC)"
@@ -646,7 +675,7 @@ msgstr "螺栓类型"
 #. module: spc
 #: model:ir.ui.view,arch_db:spc.operation_result_view_form
 msgid "Send to AIIS"
-msgstr "发送至AIIS(FIS)"
+msgstr "发送至外部系统"
 
 #. module: spc
 #: model:ir.actions.server,name:spc.operation_result_server_action
@@ -731,8 +760,33 @@ msgstr "本年度"
 
 #. module: spc
 #: model:ir.ui.view,arch_db:spc.operation_result_view_search
-msgid "Tightening Date"
-msgstr "拧紧日期"
+msgid "Tightening Date Day"
+msgstr "趋势分析按天(横坐标)"
+
+#. module: spc
+#: model:ir.ui.view,arch_db:spc.operation_result_view_search
+msgid "Tightening Date Month"
+msgstr "趋势分析按月(横坐标)"
+
+#. module: spc
+#: model:ir.ui.view,arch_db:spc.operation_result_view_search
+msgid "Tightening Date Quarter"
+msgstr "趋势分析按季度(横坐标)"
+
+#. module: spc
+#: model:ir.ui.view,arch_db:spc.operation_result_view_search
+msgid "Tightening Date Week"
+msgstr "趋势分析按周(横坐标)"
+
+#. module: spc
+#: model:ir.ui.view,arch_db:spc.operation_result_view_search
+msgid "Tightening Date Year"
+msgstr "趋势分析按年(横坐标)"
+
+#. module: spc
+#: model:ir.ui.view,arch_db:spc.operation_result_view_search
+msgid "Tightening Gun"
+msgstr "拧紧枪"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_time
@@ -800,6 +854,11 @@ msgid "Vehicle Type"
 msgstr "车辆类型"
 
 #. module: spc
+#: model:ir.model.fields,field_description:spc.field_operation_result_vin
+msgid "Vin"
+msgstr "VIN"
+
+#. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_cur_objects
 msgid "Waveform Files"
 msgstr "曲线文件"
@@ -860,7 +919,7 @@ msgid "aiis.config.settings"
 msgstr "aiis.config.settings"
 
 #. module: spc
-#: code:addons/spc/models/result.py:90
+#: code:addons/spc/models/result.py:97
 #, python-format
 msgid "lack"
 msgstr "缺失"
@@ -871,25 +930,25 @@ msgid "mrp.wo.consu"
 msgstr "mrp.wo.consu"
 
 #. module: spc
-#: code:addons/spc/models/result.py:88
+#: code:addons/spc/models/result.py:95
 #, python-format
 msgid "nok"
 msgstr "NOK"
 
 #. module: spc
-#: code:addons/spc/models/result.py:86
+#: code:addons/spc/models/result.py:93
 #, python-format
 msgid "none"
 msgstr "未测量"
 
 #. module: spc
-#: code:addons/spc/models/result.py:91
+#: code:addons/spc/models/result.py:98
 #, python-format
 msgid "normal"
 msgstr "正常"
 
 #. module: spc
-#: code:addons/spc/models/result.py:87
+#: code:addons/spc/models/result.py:94
 #, python-format
 msgid "ok"
 msgstr "OK"
@@ -904,11 +963,6 @@ msgstr "operation.result"
 #: model:ir.ui.view,arch_db:spc.view_spc_config_settings
 msgid "or"
 msgstr "或"
-
-#. module: spc
-#: model:ir.model,name:spc.model_report_spc_report_result_tighting
-msgid "report.spc.report_result_tighting"
-msgstr "report.spc.report_result_tighting"
 
 #. module: spc
 #: model:ir.model,name:spc.model_result_push
@@ -929,6 +983,11 @@ msgstr "序列"
 #: model:ir.model,name:spc.model_spc_config_settings
 msgid "spc.config.settings"
 msgstr "spc.config.settings"
+
+#. module: spc
+#: model:ir.model,name:spc.model_spc_report_result_tighting
+msgid "spc.report_result_tighting"
+msgstr "spc.report_result_tighting"
 
 #. module: spc
 #: model:ir.model,name:spc.model_workorder_push

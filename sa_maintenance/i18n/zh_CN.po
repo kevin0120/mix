@@ -1,0 +1,256 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* sa_maintenance
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 10.0+e-20171123\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-12-07 02:00+0000\n"
+"PO-Revision-Date: 2018-12-07 02:00+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: sa_maintenance
+#: model:ir.ui.view,arch_db:sa_maintenance.sa_maintenance_request_view_form_inherit_hr
+msgid "Add an internal note..."
+msgstr "增加一个内部文档..."
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_name
+msgid "CP Name"
+msgstr "检查点名称"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_category_id
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_category_id_4257
+msgid "Category id"
+msgstr "类别"
+
+#. module: sa_maintenance
+#: model:ir.ui.view,arch_db:sa_maintenance.sa_maintenance_request_view_form_inherit_hr
+msgid "Check List"
+msgstr "检查清单"
+
+#. module: sa_maintenance
+#: model:ir.ui.view,arch_db:sa_maintenance.sa_maintenance_request_view_form_inherit_hr
+msgid "Check Point Action Lines"
+msgstr "检查作业"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_category_code
+msgid "Check Point Code"
+msgstr "检查点代码"
+
+#. module: sa_maintenance
+#: model:ir.ui.view,arch_db:sa_maintenance.sa_maintenance_equipment_view_form_inherit_hr
+msgid "Check Point Lines"
+msgstr "检查点"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_category_name
+msgid "Check Point Name"
+msgstr "检查点名称"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_request_check_point_action_ids
+msgid "Check point action ids"
+msgstr "检查作业"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_equipment_check_point_ids
+msgid "Check point ids"
+msgstr "Check point ids"
+
+#. module: sa_maintenance
+#: model:ir.ui.view,arch_db:sa_maintenance.sa_maintenance_equipment_view_form_inherit_hr
+msgid "CheckPoints"
+msgstr "检查点"
+
+#. module: sa_maintenance
+#. openerp-web
+#: code:addons/sa_maintenance/static/src/js/equipment_kanban_record.js:25
+#, python-format
+msgid "Connecting"
+msgstr "已连接"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_create_uid
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_category_create_uid
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_create_uid
+msgid "Created by"
+msgstr "创建人"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_create_date
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_category_create_date
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_create_date
+msgid "Created on"
+msgstr "创建时间"
+
+#. module: sa_maintenance
+#: model:ir.ui.view,arch_db:sa_maintenance.sa_maintenance_request_view_form_inherit_hr
+msgid "Description"
+msgstr "说明"
+
+#. module: sa_maintenance
+#. openerp-web
+#: code:addons/sa_maintenance/static/src/js/equipment_kanban_record.js:31
+#: code:addons/sa_maintenance/static/src/js/equipment_kanban_record.js:52
+#, python-format
+msgid "Disconnect"
+msgstr "未连接"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_display_name
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_category_display_name
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_display_name
+msgid "Display Name"
+msgstr "显示名称"
+
+#. module: sa_maintenance
+#: model:ir.model,name:sa_maintenance.model_maintenance_equipment
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_equipment_id
+msgid "Equipment"
+msgstr "设备"
+
+#. module: sa_maintenance
+#: model:ir.model,name:sa_maintenance.model_maintenance_cp
+msgid "Equipment Checklist for each maintenance request "
+msgstr "每个设备维护请求的检查清单 "
+
+#. module: sa_maintenance
+#. openerp-web
+#: code:addons/sa_maintenance/static/src/js/equipment_kanban_view.js:16
+#, python-format
+msgid "Equipment Dashboard"
+msgstr "设备看板"
+
+#. module: sa_maintenance
+#: model:ir.ui.view,arch_db:sa_maintenance.report_request_document
+#: selection:maintenance.cp.action,measure_success:0
+msgid "Fail"
+msgstr "失败"
+
+#. module: sa_maintenance
+#: model:ir.ui.view,arch_db:sa_maintenance.sa_maintenance_request_view_form_inherit_hr
+msgid "I take it"
+msgstr "我来做"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_id
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_category_id
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_id
+msgid "ID"
+msgstr "ID"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp___last_update
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action___last_update
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_category___last_update
+msgid "Last Modified on"
+msgstr "最后修改日"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_write_uid
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_category_write_uid
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_write_uid
+msgid "Last Updated by"
+msgstr "最后更新人"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_write_date
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_category_write_date
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_write_date
+msgid "Last Updated on"
+msgstr "最后更新时间"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_description
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_description
+msgid "Maintenance Check Point Description"
+msgstr "维护检查点描述"
+
+#. module: sa_maintenance
+#: model:ir.actions.report.xml,name:sa_maintenance.maintenance_request
+msgid "Maintenance Report"
+msgstr "维护报告"
+
+#. module: sa_maintenance
+#: model:ir.model,name:sa_maintenance.model_maintenance_request
+msgid "Maintenance Requests"
+msgstr "维护申请"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_tolerance_max
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_tolerance_max
+msgid "Max Tolerance"
+msgstr "最大偏差"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_measure
+#: selection:maintenance.cp.action,test_type:0
+#: selection:maintenance.cp.category,test_type:0
+msgid "Measure"
+msgstr "测量"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_measure_success
+msgid "Measure Success"
+msgstr "测量成功"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_tolerance_min
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_tolerance_min
+msgid "Min Tolerance"
+msgstr "最小偏差"
+
+#. module: sa_maintenance
+#: selection:maintenance.cp.action,measure_success:0
+msgid "No measure"
+msgstr "未测量"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_norm
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_norm
+msgid "Normal"
+msgstr "正常"
+
+#. module: sa_maintenance
+#: model:ir.ui.view,arch_db:sa_maintenance.report_request_document
+#: selection:maintenance.cp.action,measure_success:0
+msgid "Pass"
+msgstr "通过"
+
+#. module: sa_maintenance
+#: selection:maintenance.cp.action,test_type:0
+#: selection:maintenance.cp.category,test_type:0
+msgid "Pass - Fail"
+msgstr "通过 - 失败"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_request_id
+msgid "Request"
+msgstr "请求"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_test_type
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_category_test_type
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_test_type
+msgid "Test Type"
+msgstr "测试类型"
+
+#. module: sa_maintenance
+#: model:ir.model,name:sa_maintenance.model_maintenance_cp_action
+msgid "maintenance.cp.action"
+msgstr "maintenance.cp.action"
+
+#. module: sa_maintenance
+#: model:ir.model,name:sa_maintenance.model_maintenance_cp_category
+msgid "maintenance.cp.category"
+msgstr "maintenance.cp.category"
+
