@@ -166,6 +166,15 @@ function mergeResults(state, data) {
 function operationResultOK(state, data) {
   const results = mergeResults(state, data);
 
+  if (state.operationStatus === OPERATION_STATUS.READY) {
+    return {
+      ...state,
+      activeResultIndex: state.activeResultIndex + data.length,
+      failCount: 0,
+      results
+    };
+  }
+
   return {
     ...state,
     activeResultIndex: state.activeResultIndex + data.length,
