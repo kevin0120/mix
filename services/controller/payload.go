@@ -29,19 +29,20 @@ const (
 	CONTROLLER_CVIL2 = "cvil2"
 )
 
-type ControllerCurve struct {
-	ResultID  int64
-	CurveFile string
-	CurveData string
-	Count     int
-}
-
-type ControllerCurveFile struct {
-	Result string    `json:"result"`
-	CUR_M  []float64 `json:"cur_m"`
-	CUR_W  []float64 `json:"cur_w"`
-	CUR_T  []float64 `json:"cur_t"`
-}
+//type ControllerCurve struct {
+//	ResultID     int64
+//	CurveFile    string
+//	CurveContent ControllerCurveFile
+//	Count        int
+//	UpdateTime   string
+//}
+//
+//type ControllerCurveFile struct {
+//	Result string    `json:"result"`
+//	CUR_M  []float64 `json:"cur_m"`
+//	CUR_W  []float64 `json:"cur_w"`
+//	CUR_T  []float64 `json:"cur_t"`
+//}
 
 type ControllerResult struct {
 	Result_id     int64      `json:"result_id"`
@@ -55,8 +56,13 @@ type ControllerResult struct {
 	Batch         string     `json:"batch"`
 	Count         int        `json:"count"`
 	PSetDefine    PSetDefine `json:"pset_define"`
+	GunSN         string
 
-	ResultValue ResultValue `json:"result_value"`
+	ResultValue  ResultValue `json:"result_value"`
+	TighteningID string
+
+	NeedPushAiis bool
+	NeedPushHmi  bool
 
 	ExceptionReason string
 }

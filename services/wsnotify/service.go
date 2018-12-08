@@ -10,13 +10,14 @@ import (
 )
 
 const (
-	WS_EVENT_STATUS   = "status"
-	WS_EVENT_RESULT   = "result"
-	WS_EVENT_REG      = "regist"
-	WS_EVENT_SELECTOR = "selector"
-	WS_EVENT_JOB      = "job"
-	WS_EVENT_SCANNER  = "scanner"
-	WS_EVENT_IO       = "io"
+	WS_EVENT_CONTROLLER = "controller"
+	WS_EVENT_RESULT     = "result"
+	WS_EVENT_REG        = "regist"
+	WS_EVENT_SELECTOR   = "selector"
+	WS_EVENT_JOB        = "job"
+	WS_EVENT_SCANNER    = "scanner"
+	WS_EVENT_IO         = "io"
+	WS_EVENT_ODOO       = "odoo"
 )
 
 type Diagnostic interface {
@@ -27,6 +28,8 @@ type Diagnostic interface {
 	Closed()
 }
 
+type OnNewClient func(c websocket.Connection)
+
 type Service struct {
 	configValue atomic.Value
 	diag        Diagnostic
@@ -36,6 +39,9 @@ type Service struct {
 	Httpd *httpd.Service
 
 	clientManager WSClientManager
+	msgBuffer     chan string
+
+	OnNewClient OnNewClient
 }
 
 func (s *Service) Config() Config {
@@ -77,6 +83,10 @@ func (s *Service) onConnect(c websocket.Connection) {
 			if err != nil {
 				c.Emit(WS_EVENT_REG, msg)
 			}
+
+			if s.OnNewClient != nil {
+				s.OnNewClient(c)
+			}
 		}
 	})
 
@@ -102,6 +112,7 @@ func NewService(c Config, d Diagnostic) *Service {
 			ReadTimeout:     websocket.DefaultWebsocketPongTimeout, //此作为readtimeout, 默认 如果有ping没有发送也成为read time out
 		}),
 		clientManager: WSClientManager{},
+		msgBuffer:     make(chan string, 1024),
 	}
 
 	s.clientManager.Init()
@@ -142,8 +153,13 @@ func (s *Service) Close() error {
 	return nil
 }
 
+func (s *Service) sendProcess() {
+
+}
+
 // ws推送结果到指定控制器
 func (s *Service) WSSendResult(sn string, payload string) {
+
 	c, exist := s.clientManager.GetClient(sn)
 	if exist {
 		c.Emit(WS_EVENT_RESULT, payload)
@@ -156,7 +172,7 @@ func (s *Service) WSSend(evt string, payload string) {
 
 // ws群发控制器状态
 func (s *Service) WSSendControllerStatus(payload string) {
-	s.clientManager.NotifyALL(WS_EVENT_STATUS, payload)
+	s.clientManager.NotifyALL(WS_EVENT_CONTROLLER, payload)
 }
 
 // ws群发控制器套筒状态

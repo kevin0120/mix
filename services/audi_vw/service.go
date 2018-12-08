@@ -288,12 +288,13 @@ func (p *Service) HandleProcess() {
 				// 结果数据
 				controllerResult := controller.ControllerResult{}
 				XML2Result(&cvi3Result, &controllerResult)
+				controllerResult.NeedPushHmi = true
 
-				// 波形文件
-				controllerCurveFile := controller.ControllerCurveFile{}
-				XML2Curve(&cvi3Result, &controllerCurveFile)
+				// 曲线数据
+				controllerCurve := minio.ControllerCurve{}
+				XML2Curve(&cvi3Result, &controllerCurve)
 
-				p.Parent.Handle(controllerResult, controllerCurveFile)
+				p.Parent.Handle(&controllerResult, &controllerCurve)
 			}
 
 			// 处理事件

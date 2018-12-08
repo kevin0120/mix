@@ -247,6 +247,8 @@ func (s *Server) appendOdooService() error {
 	s.OdooService = srv
 	srv.DB = s.StorageServie
 	srv.HTTPDService = s.HTTPDService
+	srv.Aiis = s.AiisService
+	srv.WS = s.WSNotifyService
 
 	s.AppendService("odoo", srv)
 

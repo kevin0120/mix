@@ -31,7 +31,7 @@ minio:
   reupload_interval: 24h
 aiis:
   urls:
-  - http://192.168.1.3:9092
+  - http://127.0.0.1:9092
   headers:
     Content-Type: application/json
   result_push_url: /aiis/v1/operation.results/%d
@@ -40,8 +40,8 @@ aiis:
   push_interval: 1s
   max_retry: 3
   ws_result_route: /aiis/v1/ws/results
-  ResultUploadInteval: 1h
-  grpc_server: 192.168.1.3:9093
+  ResultUploadInteval: 1s
+  grpc_server: 127.0.0.1:9093
 odoo:
   urls:
   - http://192.168.1.3:8069

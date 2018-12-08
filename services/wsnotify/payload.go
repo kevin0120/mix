@@ -9,6 +9,12 @@ type WSStatus struct {
 	Status string `json:"status"`
 }
 
+type WSMsgPackage struct {
+	SN      string
+	Event   string
+	Payload string
+}
+
 type WSResult struct {
 	Result_id int64 `json:"result_id"`
 	//Seq       int     `json:"sequence"`
@@ -18,6 +24,7 @@ type WSResult struct {
 	MI       float64 `json:"mi"`
 	WI       float64 `json:"wi"`
 	TI       float64 `json:"ti"`
+	Batch    string  `json:"batch"`
 }
 
 type WSSelector struct {
@@ -39,4 +46,8 @@ type WSScanner struct {
 
 type WSRegistMsg struct {
 	Msg string `json:"msg"`
+}
+
+type WSOdooStatus struct {
+	Status string `json:"status"`
 }

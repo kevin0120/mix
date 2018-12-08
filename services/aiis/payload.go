@@ -15,43 +15,47 @@ const (
 
 	HANDLER_TYPE_CURVE = "curve"
 	HANDLER_TYPE_AIIS  = "aiis"
+
+	ODOO_STATUS_ONLINE  = "online"
+	ODOO_STATUS_OFFLINE = "offline"
 )
 
-
 type AIISResult struct {
-	ID               int64   `json:"id"`
-	Pset_m_threshold float64 `json:"pset_m_threshold"`
-	Pset_w_threshold float64 `json:"pset_w_threshold"`
-	UserID           int64   `json:"user_id"`
-	Pset_m_max       float64 `json:"pset_m_max"`
-	Pset_m_min       float64 `json:"pset_m_min"`
-	Control_date     string  `json:"control_date"`
-	Pset_w_max       float64 `json:"pset_w_max"`
-	Pset_strategy    string  `json:"pset_strategy"`
-	Pset_m_target    float64 `json:"pset_m_target"`
-	Measure_degree   float64 `json:"measure_degree"`
-	Measure_t_don    float64 `json:"measure_t_don"`
-	Measure_torque   float64 `json:"measure_torque"`
-	Measure_result   string  `json:"measure_result"`
-	Op_time          int     `json:"op_time"`
-	Pset_w_min       float64 `json:"pset_w_min"`
-	Pset_w_target    float64 `json:"pset_w_target"`
-	Final_pass       string  `json:"final_pass"`
-	One_time_pass    string  `json:"one_time_pass"`
-	QualityState     string  `json:"quality_state"`
-	ExceptionReason  string  `json:"exception_reason"`
-	Seq              int     `json:"seq"`
-	ProductID        int64   `json:"product_id"`
-	WorkcenterID     int64   `json:"workcenter_id"`
-	GunID            int64   `json:"gun_id"`
-	Batch            string  `json:"batch"`
-	Mode             string  `json:"mode"`
-	ControllerSN     string  `json:"controller_sn"`
-	TighteningId     int64   `json:"tightening_id"`
-	ToolSN           string  `json:"tool_sn"`
-	WorkcenterCode   string  `json:"workcenter_code"`
+	// local_id
+	ID int64 `json:"id"`
 
-	CURObjects []CURObject `json:"cur_objects"`
+	// db
+	Vin              string      `json:"vin"`
+	Pset_strategy    string      `json:"pset_strategy"`
+	Pset_m_max       float64     `json:"pset_m_max"`
+	Pset_m_min       float64     `json:"pset_m_min"`
+	Pset_m_threshold float64     `json:"pset_m_threshold"`
+	Pset_m_target    float64     `json:"pset_m_target"`
+	Pset_w_max       float64     `json:"pset_w_max"`
+	Pset_w_min       float64     `json:"pset_w_min"`
+	Pset_w_threshold float64     `json:"pset_w_threshold"`
+	Pset_w_target    float64     `json:"pset_w_target"`
+	CURObjects       []CURObject `json:"cur_objects"`
+	QualityState     string      `json:"quality_state"`
+	ExceptionReason  string      `json:"exception_reason"`
+	Job              string      `json:"job"`
+	Control_date     string      `json:"control_date"`
+	Measure_torque   float64     `json:"measure_torque"`
+	Measure_degree   float64     `json:"measure_degree"`
+	Measure_t_don    float64     `json:"measure_t_don"`
+	Measure_result   string      `json:"measure_result"`
+	Lacking          string      `json:"lacking"`
+	Op_time          int         `json:"op_time"`
+	One_time_pass    string      `json:"one_time_pass"`
+	Final_pass       string      `json:"final_pass"`
+	Batch            string      `json:"batch"`
+
+	//db_fk
+	UserID       int64 `json:"user_id"`
+	ProductID    int64 `json:"product_id"`
+	WorkcenterID int64 `json:"workcenter_id"`
+	GunID        int64 `json:"gun_id"`
+	NutID        int64 `json:"nut_id"`
 
 	// mo相关信息
 	MO_EquipemntName  string `json:"equipment_name"` // 设备名
@@ -64,7 +68,13 @@ type AIISResult struct {
 	MO_NutNo          string `json:"nut_no"`
 	MO_Model          string `json:"model"`
 
-	Vin string `json:"vin"`
+	// others
+	Seq            int    `json:"seq"`
+	Mode           string `json:"mode"`
+	ControllerSN   string `json:"controller_sn"`
+	TighteningId   int64  `json:"tightening_id"`
+	ToolSN         string `json:"tool_sn"`
+	WorkcenterCode string `json:"workcenter_code"`
 }
 
 type CURObject struct {
@@ -107,4 +117,8 @@ type ResultValue struct {
 type ResultPatch struct {
 	ID        int64 `json:"id"`
 	HasUpload bool  `json:"has_upload"`
+}
+
+type ODOOStatus struct {
+	Status string `json:"status"`
 }

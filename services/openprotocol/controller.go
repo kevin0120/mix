@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kataras/iris/core/errors"
-	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
@@ -226,33 +225,16 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 	}
 }
 
-//var g_group
-
 func (c *Controller) handleResult(result_data *ResultData) {
 
-	result_data.VIN = strings.TrimSpace(result_data.VIN)
-
-	// raw workorder id
-	result_data.ID2 = strings.TrimSpace(result_data.ID2)
-
-	result_data.ID3 = strings.TrimSpace(result_data.ID3)
-
-	result_data.ID4 = strings.TrimSpace(result_data.ID4)
+	if c.Srv.config().SkipJob == result_data.JobID {
+		return
+	}
 
 	c.Srv.DB.UpdateTightning(c.dbController.Id, result_data.TightingID)
 
 	controllerResult := controller.ControllerResult{}
-	c.Srv.diag.Info(fmt.Sprintf("vin:%s raw workorder_id:%s user_id:%s", result_data.VIN, result_data.ID2, result_data.ID3))
-
-	id_info := result_data.VIN + result_data.ID2 + result_data.ID3
-	if id_info == "" {
-		c.Srv.diag.Error(id_info, errors.New("invalid id"))
-		return
-	}
-
-	kvs := strings.Split(id_info, "-")
-
-	//controllerResult.Batch = fmt.Sprintf("%d/%d", result_data.BatchCount, result_data.BatchSize)
+	controllerResult.TighteningID = result_data.TightingID
 
 	dat_kvs := strings.Split(result_data.TimeStamp, ":")
 	controllerResult.Dat = fmt.Sprintf("%s %s:%s:%s", dat_kvs[0], dat_kvs[1], dat_kvs[2], dat_kvs[3])
@@ -293,168 +275,141 @@ func (c *Controller) handleResult(result_data *ResultData) {
 
 	controllerResult.ExceptionReason = result_data.TighteningErrorStatus
 
-	if kvs[0] != "auto" {
-		if c.Srv.config().SkipJob == result_data.JobID {
-			return
-		}
-
-		// 手动模式 [vin-hmisn-cartype-userid]
-
-		// vin:cartype:hmisn
-		//key := result_data.VIN + ":" + result_data.ID3 + ":" + result_data.ID2
-		targetID := result_data.VIN
-		switch c.Srv.config().DataIndex {
-		case 1:
-			targetID = result_data.ID2
-		case 2:
-			targetID = result_data.ID3
-		case 3:
-			targetID = result_data.ID4
-		}
-
-		raw_id, _ := strconv.ParseInt(targetID, 10, 64)
-		db_workorder, err := c.Srv.DB.GetWorkorder(raw_id, true)
-		db_result, err := c.Srv.DB.FindTargetResultForJobManual(raw_id)
-		if err != nil {
-			c.Srv.diag.Error("FindTargetResultForJobManual failed", err)
-		}
-
-		if err == nil {
-			db_result.Spent = (c.TriggerStop.UnixNano() - c.TriggerStart.UnixNano()) / 1000000
-		}
-		//db_result := storage.Results{}
-		controllerResult.Batch = fmt.Sprintf("%d/%d", db_result.Seq, db_workorder.MaxSeq)
-		db_result.Batch = controllerResult.Batch
-		db_result.GunSN = result_data.ToolSerialNumber
-
-		if controllerResult.Result == storage.RESULT_OK {
-			db_result.Stage = storage.RESULT_STAGE_FINAL
-		}
-
-		// 结果推送hmi
-		wsResult := wsnotify.WSResult{}
-		wsResult.Result_id = controllerResult.Result_id
-		wsResult.Count = controllerResult.Count
-		wsResult.Result = controllerResult.Result
-		wsResult.MI = controllerResult.ResultValue.Mi
-		wsResult.WI = controllerResult.ResultValue.Wi
-		wsResult.TI = controllerResult.ResultValue.Ti
-		//wsResult.Seq = db_result.Seq
-		wsResult.GroupSeq = db_result.GroupSeq
-
-		wsResults := []wsnotify.WSResult{}
-		wsResults = append(wsResults, wsResult)
-		ws_str, _ := json.Marshal(wsResults)
-
-		c.Srv.diag.Debug(fmt.Sprintf("results:%s", string(ws_str)))
-
-		c.Srv.WS.WSSendResult(db_workorder.HMISN, string(ws_str))
-
-		// 结果缓存数据库
-		c.Srv.Parent.Handlers.SaveResult(&controllerResult, &db_result, false)
-
-		// 结果推送aiis
-		aiisResult := aiis.AIISResult{}
-
-		aiisResult.ID = db_result.Id
-		aiisResult.MO_Model = db_workorder.MO_Model
-		aiisResult.Batch = controllerResult.Batch
-		aiisResult.Mode = db_workorder.Mode
-		aiisResult.WorkcenterCode = db_workorder.HMISN
-		aiisResult.ControllerSN = db_result.ControllerSN
-		aiisResult.ToolSN = db_result.GunSN
-		aiisResult.TighteningId, _ = strconv.ParseInt(result_data.TightingID, 10, 64)
-
-		if controllerResult.ExceptionReason != "" {
-			aiisResult.ExceptionReason = controllerResult.ExceptionReason + aiisResult.ExceptionReason
-		}
-
-		gun, err := c.Srv.DB.GetGun(result_data.ToolSerialNumber)
-		if err != nil {
-			odoo_gun, err := c.Srv.Odoo.GetGun(result_data.ToolSerialNumber)
-			if err == nil {
-				gun.GunID = odoo_gun.ID
-				gun.Serial = odoo_gun.Serial
-				c.Srv.DB.Store(gun)
-
-			}
-		}
-
-		aiisResult.GunID = gun.GunID
-		aiisResult.Control_date = time.Now().Format(time.RFC3339)
-
-		aiisResult.Vin = db_workorder.Vin
-		aiisResult.Measure_degree = controllerResult.ResultValue.Wi
-		aiisResult.Measure_result = strings.ToLower(controllerResult.Result)
-		aiisResult.Measure_t_don = controllerResult.ResultValue.Ti
-		aiisResult.Measure_torque = controllerResult.ResultValue.Mi
-		aiisResult.Op_time = controllerResult.Count
-		aiisResult.Pset_m_max = controllerResult.PSetDefine.Mp
-		aiisResult.Pset_m_min = controllerResult.PSetDefine.Mm
-		aiisResult.Pset_m_target = controllerResult.PSetDefine.Ma
-		aiisResult.Pset_m_threshold = controllerResult.PSetDefine.Ms
-		aiisResult.Pset_strategy = controllerResult.PSetDefine.Strategy
-		aiisResult.Pset_w_max = controllerResult.PSetDefine.Wp
-		aiisResult.Pset_w_min = controllerResult.PSetDefine.Wm
-		aiisResult.Pset_w_target = controllerResult.PSetDefine.Wa
-		aiisResult.Pset_w_threshold = 1
-
-		aiisResult.QualityState = controller.QUALITY_STATE_PASS
-		if controllerResult.ExceptionReason != "" {
-			aiisResult.QualityState = controller.QUALITY_STATE_EX
-		}
-
-		aiisResult.ProductID = db_workorder.ProductID
-		aiisResult.WorkcenterID = db_workorder.WorkcenterID
-		aiisResult.UserID = db_workorder.UserID
-		//ks := strings.Split(result_data.ID4, ":")
-
-		c.Srv.diag.Debug("推送结果数据到AIIS ...")
-
-		err = c.Srv.Aiis.PutResult(0, aiisResult)
-		if err == nil {
-			c.Srv.diag.Debug("推送AIIS成功，更新本地结果标识")
-		} else {
-			c.Srv.diag.Error("推送AIIS失败", err)
-		}
-
-		return
+	targetID := result_data.VIN
+	switch c.Srv.config().DataIndex {
+	case 1:
+		targetID = result_data.ID2
+	case 2:
+		targetID = result_data.ID3
+	case 3:
+		targetID = result_data.ID4
 	}
 
-	//if len(kvs) == 2 {
-	//	// job模式
-	//
-	//	controllerResult.Workorder_ID, _ = strconv.ParseInt(kvs[0], 10, 64)
-	//	controllerResult.UserID, _ = strconv.ParseInt(kvs[1], 10, 64)
-	//
-	//	db_result, err := c.Srv.DB.FindTargetResultForJob(controllerResult.Workorder_ID)
-	//	if err != nil {
-	//		c.Srv.diag.Error("FindTargetResultForJob failed", err)
-	//	}
-	//
-	//	controllerResult.Count = db_result.Count + 1
-	//	controllerResult.Result_id = db_result.ResultId
-	//
-	//} else if len(kvs) == 3 {
-	//	// pset模式
-	//
-	//	// 结果id-拧接次数-用户id
-	//	controllerResult.Result_id, _ = strconv.ParseInt(kvs[0], 10, 64)
-	//	controllerResult.Count, _ = strconv.Atoi(kvs[1])
-	//	controllerResult.UserID, _ = strconv.ParseInt(kvs[2], 10, 64)
-	//
-	//	db_result, err := c.Srv.DB.GetResult(controllerResult.Result_id, 0)
-	//	if err != nil {
-	//		c.Srv.diag.Error("GetResult failed", err)
-	//	}
-	//
-	//	controllerResult.Workorder_ID = db_result.WorkorderID
-	//} else {
-	//	c.Srv.diag.Error(id_info, errors.New("invalid id"))
-	//	return
+	controllerResult.Workorder_ID, _ = strconv.ParseInt(targetID, 10, 64)
+	controllerResult.NeedPushHmi = true
+	controllerResult.NeedPushAiis = true
+
+	controllerResult.GunSN = result_data.ToolSerialNumber
+
+	gun, err := c.Srv.DB.GetGun(result_data.ToolSerialNumber)
+	if err != nil {
+		odoo_gun, err := c.Srv.Odoo.GetGun(result_data.ToolSerialNumber)
+		if err == nil {
+			gun.GunID = odoo_gun.ID
+			gun.Serial = odoo_gun.Serial
+			c.Srv.DB.Store(gun)
+		}
+	}
+
+	c.Srv.Parent.Handlers.Handle(&controllerResult, nil)
+
+	//raw_id, _ := strconv.ParseInt(targetID, 10, 64)
+	//db_workorder, err := c.Srv.DB.GetWorkorder(raw_id, true)
+	//db_result, err := c.Srv.DB.FindTargetResultForJobManual(raw_id)
+	//if err != nil {
+	//	c.Srv.diag.Error("FindTargetResultForJobManual failed", err)
 	//}
 	//
-	//c.Srv.Parent.Handle(controllerResult, nil)
+	//if err == nil {
+	//	db_result.Spent = (c.TriggerStop.UnixNano() - c.TriggerStart.UnixNano()) / 1000000
+	//}
+	////db_result := storage.Results{}
+	//controllerResult.Batch = fmt.Sprintf("%d/%d", db_result.Seq, db_workorder.MaxSeq)
+	//db_result.Batch = controllerResult.Batch
+	//db_result.GunSN = result_data.ToolSerialNumber
+	//
+	//if controllerResult.Result == storage.RESULT_OK {
+	//	db_result.Stage = storage.RESULT_STAGE_FINAL
+	//}
+	//
+	//// 结果推送hmi
+	//wsResult := wsnotify.WSResult{}
+	//wsResult.Result_id = controllerResult.Result_id
+	//wsResult.Count = controllerResult.Count
+	//wsResult.Result = controllerResult.Result
+	//wsResult.MI = controllerResult.ResultValue.Mi
+	//wsResult.WI = controllerResult.ResultValue.Wi
+	//wsResult.TI = controllerResult.ResultValue.Ti
+	////wsResult.Seq = db_result.Seq
+	//wsResult.GroupSeq = db_result.GroupSeq
+	//
+	//wsResults := []wsnotify.WSResult{}
+	//wsResults = append(wsResults, wsResult)
+	//ws_str, _ := json.Marshal(wsResults)
+	//
+	//c.Srv.diag.Debug(fmt.Sprintf("results:%s", string(ws_str)))
+	//
+	//c.Srv.WS.WSSendResult(db_workorder.HMISN, string(ws_str))
+	//
+	//// 结果缓存数据库
+	////c.Srv.Parent.Handlers.SaveResult(&controllerResult, &db_result, false)
+	//
+	//// 结果推送aiis
+	//aiisResult := aiis.AIISResult{}
+	//
+	//aiisResult.ID = db_result.Id
+	//aiisResult.MO_Model = db_workorder.MO_Model
+	//aiisResult.Batch = controllerResult.Batch
+	//aiisResult.Mode = db_workorder.Mode
+	//aiisResult.WorkcenterCode = db_workorder.HMISN
+	//aiisResult.ControllerSN = db_result.ControllerSN
+	//aiisResult.ToolSN = db_result.GunSN
+	//aiisResult.TighteningId, _ = strconv.ParseInt(result_data.TightingID, 10, 64)
+	//
+	//if controllerResult.ExceptionReason != "" {
+	//	aiisResult.ExceptionReason = controllerResult.ExceptionReason + aiisResult.ExceptionReason
+	//}
+	//
+	//gun, err := c.Srv.DB.GetGun(result_data.ToolSerialNumber)
+	//if err != nil {
+	//	odoo_gun, err := c.Srv.Odoo.GetGun(result_data.ToolSerialNumber)
+	//	if err == nil {
+	//		gun.GunID = odoo_gun.ID
+	//		gun.Serial = odoo_gun.Serial
+	//		c.Srv.DB.Store(gun)
+	//
+	//	}
+	//}
+	//
+	//aiisResult.GunID = gun.GunID
+	//aiisResult.Control_date = time.Now().Format(time.RFC3339)
+	//
+	//aiisResult.Vin = db_workorder.Vin
+	//aiisResult.Measure_degree = controllerResult.ResultValue.Wi
+	//aiisResult.Measure_result = strings.ToLower(controllerResult.Result)
+	//aiisResult.Measure_t_don = controllerResult.ResultValue.Ti
+	//aiisResult.Measure_torque = controllerResult.ResultValue.Mi
+	//aiisResult.Op_time = controllerResult.Count
+	//aiisResult.Pset_m_max = controllerResult.PSetDefine.Mp
+	//aiisResult.Pset_m_min = controllerResult.PSetDefine.Mm
+	//aiisResult.Pset_m_target = controllerResult.PSetDefine.Ma
+	//aiisResult.Pset_m_threshold = controllerResult.PSetDefine.Ms
+	//aiisResult.Pset_strategy = controllerResult.PSetDefine.Strategy
+	//aiisResult.Pset_w_max = controllerResult.PSetDefine.Wp
+	//aiisResult.Pset_w_min = controllerResult.PSetDefine.Wm
+	//aiisResult.Pset_w_target = controllerResult.PSetDefine.Wa
+	//aiisResult.Pset_w_threshold = 1
+	//
+	//aiisResult.QualityState = controller.QUALITY_STATE_PASS
+	//if controllerResult.ExceptionReason != "" {
+	//	aiisResult.QualityState = controller.QUALITY_STATE_EX
+	//}
+	//
+	//aiisResult.ProductID = db_workorder.ProductID
+	//aiisResult.WorkcenterID = db_workorder.WorkcenterID
+	//aiisResult.UserID = db_workorder.UserID
+	////ks := strings.Split(result_data.ID4, ":")
+	//
+	//c.Srv.diag.Debug("推送结果数据到AIIS ...")
+	//
+	//err = c.Srv.Aiis.PutResult(0, aiisResult)
+	//if err == nil {
+	//	c.Srv.diag.Debug("推送AIIS成功，更新本地结果标识")
+	//} else {
+	//	c.Srv.diag.Error("推送AIIS失败", err)
+	//}
+	//
+	//return
 }
 
 func (c *Controller) Start() {

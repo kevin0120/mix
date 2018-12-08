@@ -3,14 +3,21 @@ package odoo
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
 	"gopkg.in/resty.v1"
 	"net/http"
 	"strconv"
 	"sync/atomic"
 	"time"
+)
+
+const (
+	ODOO_STATUS_ONLINE  = "online"
+	ODOO_STATUS_OFFLINE = "offline"
 )
 
 type Diagnostic interface {
@@ -44,6 +51,9 @@ type Service struct {
 	httpClient  *resty.Client
 	endpoints   []*Endpoint
 	configValue atomic.Value
+	status      string
+	WS          *wsnotify.Service
+	Aiis        *aiis.Service
 }
 
 func NewService(c Config, d Diagnostic) *Service {
@@ -52,12 +62,29 @@ func NewService(c Config, d Diagnostic) *Service {
 		diag:      d,
 		methods:   Methods{},
 		endpoints: e,
+		status:    ODOO_STATUS_OFFLINE,
 	}
 
 	s.methods.service = s
 	s.configValue.Store(c)
 
 	return s
+}
+
+func (s *Service) UpdateStatus(status string) {
+	if s.status != status {
+		s.status = status
+		s.PushStatus()
+	}
+}
+
+func (s *Service) PushStatus() {
+	odooStatus := wsnotify.WSOdooStatus{
+		Status: s.status,
+	}
+
+	str, _ := json.Marshal(odooStatus)
+	s.WS.WSSend(wsnotify.WS_EVENT_ODOO, string(str))
 }
 
 func (s *Service) GetEndpoints(name string) []Endpoint {
@@ -126,6 +153,8 @@ func (s *Service) Open() error {
 		HandlerFunc: s.methods.putSyncRoutingOpertions,
 	}
 	handler.AddRoute(r)
+
+	s.Aiis.OnOdooStatus = s.OnStatus
 
 	return nil
 }
@@ -299,7 +328,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 			r.UpdateTime = time.Now()
 			r.PSetDefine = ""
 			r.ResultValue = ""
-			r.Count = 0
+			r.Count = 1
 
 			for _, result_id := range consu.ResultIDs {
 				result_count++
@@ -314,7 +343,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 			}
 		}
 
-		o.LastResultID = results[len(results)-1].ResultId
+		//o.LastResultID = results[len(results)-1].Id
 
 		e := s.DB.InsertWorkorder(&o, &results, true, true, true)
 		if e != nil {
@@ -325,4 +354,12 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 	}
 
 	return dbWorkorders, finalErr
+}
+
+func (s *Service) OnStatus(status string) {
+	s.UpdateStatus(status)
+}
+
+func (s *Service) Status() string {
+	return s.status
 }

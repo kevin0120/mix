@@ -54,6 +54,7 @@ type Results struct {
 	Count              int       `xorm:"int 'count'"`
 	PSet               int       `xorm:"int 'pset'"`
 	NutNo              string    `xorm:"varchar(64) 'nut_no'"`
+	ConsuProductID     int64     `xorm:"bigint 'consu_product_id'"`
 	ToleranceMinDegree float64   `xorm:"Double 'tolerance_min_degree'"`
 	ToleranceMaxDegree float64   `xorm:"Double 'tolerance_max_degree'"`
 	ToleranceMax       float64   `xorm:"Double 'tolerance_max'"`
@@ -64,6 +65,7 @@ type Results struct {
 	Batch              string    `xorm:"varchar(32) 'batch'"`
 	ExInfo             string    `xorm:"text 'exinfo'"`
 	Spent              int64     `xorm:"bigint 'spent'"`
+	TighteningID       string    `xorm:"varchar(128) 'tightening_id'"`
 }
 
 type ResultsWorkorders struct {

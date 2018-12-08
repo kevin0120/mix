@@ -11,8 +11,9 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/resty.v1"
 	"net/http"
+	"strconv"
 	"strings"
-	)
+)
 
 type Diagnostic interface {
 	Error(msg string, err error)
@@ -35,6 +36,8 @@ func NewEndpoint(url string, headers map[string]string, method string) *Endpoint
 	}
 }
 
+type OnOdooStatus func(status string)
+
 type Service struct {
 	configValue atomic.Value
 	diag        Diagnostic
@@ -44,8 +47,11 @@ type Service struct {
 	DB          *storage.Service
 	ws          utils.RecConn
 	//ws			websocket.Client
-	SN  string
-	rpc GRPCClient
+	//LocalWSServer *wsnotify.Service
+	//Odoo 		*odoo.Service
+	OnOdooStatus OnOdooStatus
+	SN           string
+	rpc          GRPCClient
 }
 
 func NewService(c Config, d Diagnostic, rush_port string) *Service {
@@ -110,9 +116,32 @@ func (s *Service) Close() error {
 }
 
 func (s *Service) OnRPCRecv(payload string) {
-	rp := ResultPatch{}
-	json.Unmarshal([]byte(payload), &rp)
-	s.DB.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
+	rpcPayload := RPCPayload{}
+	json.Unmarshal([]byte(payload), &rpcPayload)
+	str_data, _ := json.Marshal(rpcPayload.Data)
+
+	switch rpcPayload.Type {
+	case TYPE_RESULT:
+		rp := ResultPatch{}
+		json.Unmarshal(str_data, &rp)
+		err := s.DB.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
+		if err == nil {
+			s.diag.Debug(fmt.Sprintf("结果上传成功 ID:%d", rp.ID))
+		} else {
+			s.diag.Error(fmt.Sprintf("结果上传失败 ID:%d", rp.ID), err)
+		}
+		break
+
+	case TYPE_ODOO_STATUS:
+		status := ODOOStatus{}
+		json.Unmarshal(str_data, &status)
+
+		if s.OnOdooStatus != nil {
+			s.OnOdooStatus(status.Status)
+		}
+		break
+	}
+
 }
 
 func (s *Service) PutResult(result_id int64, body interface{}) error {
@@ -209,7 +238,7 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 		return aiisResult, err
 	}
 
-	curves, err := s.DB.ListCurvesByResult(result.ResultId)
+	curves, err := s.DB.ListCurvesByResult(result.Id)
 	if err == nil {
 		aiisCurve := CURObject{}
 		for _, v := range curves {
@@ -248,9 +277,30 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	aiisResult.MO_NutNo = result.NutNo
 	aiisResult.MO_Model = dbWorkorder.MO_Model
 	aiisResult.Batch = result.Batch
+	aiisResult.Vin = dbWorkorder.Vin
+
+	aiisResult.Mode = dbWorkorder.Mode
+	aiisResult.TighteningId, _ = strconv.ParseInt(result.TighteningID, 10, 64)
+	aiisResult.Lacking = "normal"
+
+	gun, err := s.DB.GetGun(result.GunSN)
+	if err != nil {
+		gun.GunID = 0
+	}
+
+	aiisResult.GunID = gun.GunID
+	aiisResult.WorkcenterID = dbWorkorder.WorkcenterID
+	aiisResult.ProductID = dbWorkorder.ProductID
+	aiisResult.NutID = result.ConsuProductID
+
+	aiisResult.WorkcenterCode = dbWorkorder.WorkcenterCode
+	aiisResult.ToolSN = result.GunSN
+	aiisResult.ControllerSN = result.ControllerSN
+
+	aiisResult.Job = fmt.Sprintf("%d", dbWorkorder.JobID)
 
 	if result.Result == storage.RESULT_OK {
-		aiisResult.Final_pass =  ODOO_RESULT_PASS
+		aiisResult.Final_pass = ODOO_RESULT_PASS
 		if result.Count == 1 {
 			aiisResult.One_time_pass = ODOO_RESULT_PASS
 		} else {
@@ -279,7 +329,6 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 			aiisResult.QualityState = QUALITY_STATE_FAIL
 			aiisResult.ExceptionReason = ""
 		}
-
 	}
 
 	return aiisResult, nil
@@ -293,10 +342,6 @@ func (s *Service) ResultUploadManager() error {
 			for _, v := range results {
 				aiisResult, err := s.ResultToAiisResult(&v)
 				if err == nil {
-					if aiisResult.UserID == 0 {
-						aiisResult.UserID = 1
-					}
-
 					s.PutResult(v.ResultId, aiisResult)
 				}
 			}

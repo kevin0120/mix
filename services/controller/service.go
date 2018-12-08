@@ -9,6 +9,11 @@ import (
 	"sync"
 )
 
+const (
+	HANDLE_TYPE_RESULT = "result"
+	HANDLE_TYPE_CURVE  = "curve"
+)
+
 type Diagnostic interface {
 	Error(msg string, err error)
 	Debug(msg string)
@@ -29,8 +34,8 @@ type Protocol interface {
 }
 
 type HandlerPackage struct {
-	Result interface{}
-	Curve  interface{}
+	result interface{}
+	curve  interface{}
 }
 
 type Service struct {
@@ -48,7 +53,7 @@ type Service struct {
 	wg       sync.WaitGroup
 	closing  chan struct{}
 
-	handle_buffer chan HandlerPackage
+	handle_buffer chan *HandlerPackage
 
 	diag Diagnostic
 }
@@ -60,7 +65,7 @@ func NewService(cs Config, d Diagnostic, pAudi Protocol, pOpenprotocol Protocol)
 		Controllers:   map[string]Controller{},
 		protocols:     map[string]Protocol{},
 		Handlers:      Handlers{},
-		handle_buffer: make(chan HandlerPackage, 1024),
+		handle_buffer: make(chan *HandlerPackage, 1024),
 		wg:            sync.WaitGroup{},
 		closing:       make(chan struct{}, 1),
 	}
@@ -119,25 +124,23 @@ func (s *Service) Open() error {
 
 func (s *Service) Handle(result interface{}, curve interface{}) {
 	pkg := HandlerPackage{
-		Result: result,
-		Curve:  curve,
+		result: result,
+		curve:  curve,
 	}
 
-	s.handle_buffer <- pkg
+	s.handle_buffer <- &pkg
 }
 
 func (s *Service) HandleProcess() {
 	for {
 		select {
-		case msg := <-s.handle_buffer:
-			s.Handlers.Handle(msg.Result, msg.Curve)
-
+		case data := <-s.handle_buffer:
+			s.Handlers.Handle(data.result, data.curve)
 		case <-s.closing:
 			s.wg.Done()
 			return
 		}
 	}
-
 }
 
 func (s *Service) Close() error {
@@ -146,4 +149,8 @@ func (s *Service) Close() error {
 		s.diag.Debug(fmt.Sprintf("stop handler process:%d", i+1))
 	}
 	return nil
+}
+
+func (s *Service) GetControllers() *map[string]Controller {
+	return &s.Controllers
 }

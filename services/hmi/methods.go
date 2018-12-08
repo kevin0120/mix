@@ -136,6 +136,15 @@ func (m *Methods) putPSets(ctx iris.Context) {
 		return
 	}
 
+	if pset.Count == 1 {
+		err = m.service.resetResult(result.Id)
+		if err != nil {
+			m.service.diag.Error("reset result failed", err)
+		}
+	}
+
+	m.service.DB.UpdateResultUserID(result.Id, pset.UserID)
+
 	// 通过控制器设定程序
 	c, exist := m.service.ControllerService.Controllers[pset.Controller_SN]
 	if !exist {
@@ -650,29 +659,42 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 }
 
 func (m *Methods) insertResultsForJob(job *JobManual) (*storage.Workorders, error) {
-	if len(job.Points) == 0 {
+	op, err := m.service.DB.GetOperation(job.OperationID)
+	if err != nil {
+		return nil, err
+	}
+
+	points := []RoutingOperationPoint{}
+	err = json.Unmarshal([]byte(op.Points), &points)
+	if err != nil {
 		return nil, errors.New("points is required")
 	}
 
-	//key := fmt.Sprintf("%s:%s:%s:%d:%d", job.Vin, job.HmiSN, job.ProductID, job.WorkcenterID, job.UserID)
-	//err := m.service.DB.DeleteResultsForJob(key)
-
 	max_seq := 0
 	db_results := []storage.Results{}
-	for _, v := range job.Points {
-		if v.Seq > max_seq {
-			max_seq = v.Seq
+	for k, v := range points {
+		if v.GroupSequence > max_seq {
+			max_seq = v.GroupSequence
 		}
 		r := storage.Results{}
 		r.PSet = v.PSet
-		r.GroupSeq = v.GroupSeq
+		r.GroupSeq = v.GroupSequence
 		r.OffsetX = v.X
 		r.OffsetY = v.Y
 		r.Seq = v.Seq
-		r.MaxRedoTimes = v.MaxOpTime
+		r.MaxRedoTimes = v.MaxRedoTimes
 		r.Stage = storage.RESULT_STAGE_INIT
 		r.Result = storage.RESULT_NONE
 		r.ControllerSN = job.Controller_SN
+		r.UserID = job.UserID
+		r.ToleranceMax = v.ToleranceMax
+		r.ToleranceMin = v.ToleranceMin
+		r.ToleranceMaxDegree = v.ToleranceMaxDegree
+		r.ToleranceMinDegree = v.ToleranceMinDegree
+		r.ConsuProductID = v.ConsuProductID
+		r.Batch = fmt.Sprintf("%d/%d", k+1, len(points))
+		r.UpdateTime = time.Now()
+		r.Count = 1
 
 		db_results = append(db_results, r)
 	}
@@ -681,15 +703,16 @@ func (m *Methods) insertResultsForJob(job *JobManual) (*storage.Workorders, erro
 	db_workorder.Vin = job.Vin
 	db_workorder.JobID = job.Job
 	db_workorder.HMISN = job.HmiSN
-	db_workorder.ProductID = job.ProductID
-	db_workorder.WorkcenterID = job.WorkcenterID
+	db_workorder.ProductID = op.ProductId
+	db_workorder.WorkcenterID = op.WorkcenterID
 	db_workorder.MaxSeq = max_seq
 	db_workorder.UserID = job.UserID
 	db_workorder.MO_Model = job.CarType
 	db_workorder.Mode = job.Mode
 	db_workorder.UpdateTime = time.Now()
+	db_workorder.WorkcenterCode = op.WorkcenterCode
 
-	err := m.service.DB.InsertWorkorder(&db_workorder, &db_results, false, false, true)
+	err = m.service.DB.InsertWorkorder(&db_workorder, &db_results, false, false, true)
 
 	return &db_workorder, err
 }
@@ -1137,7 +1160,7 @@ func (m *Methods) listWorkorders(ctx iris.Context) {
 	hmi_sn := ctx.URLParam("hmi_sn")
 	workcenterCode := ctx.URLParam("workcenter_code")
 
-	if hmi_sn == "" && workcenterCode == ""{
+	if hmi_sn == "" && workcenterCode == "" {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("hmi_sn or workcenter_code is required")
 		return
