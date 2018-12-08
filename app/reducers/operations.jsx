@@ -166,11 +166,13 @@ function mergeResults(state, data) {
 function operationResultOK(state, data) {
   const results = mergeResults(state, data);
 
-  if (state.operationStatus === OPERATION_STATUS.READY) {
+  if (state.operationStatus === OPERATION_STATUS.READY){
+    // 等待车辆状态下 收到结果也无法在进入其他状态
     return {
       ...state,
       activeResultIndex: state.activeResultIndex + data.length,
       failCount: 0,
+      // operationStatus: OPERATION_STATUS.DOING,
       results
     };
   }
@@ -195,8 +197,18 @@ function operationResultNOK(state, data) {
 }
 
 function operationFailed(state, data) {
-  setLedError(sOn);
   const results = mergeResults(state, data);
+
+  if (state.operationStatus === OPERATION_STATUS.READY){
+    // 等待车辆状态下 收到结果也无法在进入其他状态
+    return {
+      ...state,
+      failCount: state.failCount + 1,
+      // operationStatus: OPERATION_STATUS.FAIL,
+      results
+    };
+  }
+  setLedError(sOn);
 
   return {
     ...state,
@@ -216,11 +228,16 @@ function operationFinished(state, data) {
     operationStatus: OPERATION_STATUS.READY,
     carID: '',
     carType: '',
+    lnr: '',
     results
   };
 }
 
 function operationContinue(state) {
+  if (state.operationStatus === OPERATION_STATUS.READY){
+    // 等待车辆状态下 收到结果也无法在进入其他状态,直接返回
+    return state;
+  }
   setLedStatusDoing();
 
   const { activeResultIndex, results } = state;
