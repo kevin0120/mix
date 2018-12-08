@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0+e-20171123\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-07 01:41+0000\n"
-"PO-Revision-Date: 2018-12-07 01:41+0000\n"
+"POT-Creation-Date: 2018-12-08 04:31+0000\n"
+"PO-Revision-Date: 2018-12-08 04:31+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -122,12 +122,14 @@ msgstr "<strong>工作中心</strong>"
 
 #. module: sa_base
 #: code:addons/sa_base/models/product.py:30
+#: sql_constraint:product.product:0
 #, python-format
 msgid "A Screw Code can only be assigned to one SCREW !"
 msgstr "同样的螺栓编号只能分配给一种螺栓！"
 
 #. module: sa_base
 #: code:addons/sa_base/models/product.py:31
+#: sql_constraint:product.product:0
 #, python-format
 msgid "A Vehicle Code can only be assigned to one Vehicle !"
 msgstr "同样的车型代码只能分配给一种车型！"
@@ -250,9 +252,9 @@ msgid "Cancel"
 msgstr "取消"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_category_name_4055
+#: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_category_name_4056
 msgid "Category name"
-msgstr "类别名称"
+msgstr "Category name"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_child_ids
@@ -732,11 +734,6 @@ msgstr "LongPIN"
 #: selection:controller.program,strategy:0
 msgid "Loosening"
 msgstr "松脱"
-
-#. module: sa_base
-#: model:ir.ui.view,arch_db:sa_base.sa_product_normal_form_view
-msgid "Manufacturing"
-msgstr "制造"
 
 #. module: sa_base
 #: model:ir.model,name:sa_base.model_mrp_production
@@ -1419,6 +1416,11 @@ msgid "Vehicle"
 msgstr "车辆"
 
 #. module: sa_base
+#: model:ir.actions.report.xml,name:sa_base.report_vehicle_labels
+msgid "Vehicle Labels"
+msgstr "车型标签"
+
+#. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_workcenter_form_view
 msgid "Work Area"
 msgstr "工作区域"
@@ -1448,7 +1450,7 @@ msgstr "工作中心"
 #. module: sa_base
 #: model:ir.actions.report.xml,name:sa_base.report_workcenter_labels
 msgid "Work Center Labels"
-msgstr "工作重心标签"
+msgstr "工作中心标签"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_workcenter_form_view

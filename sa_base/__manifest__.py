@@ -52,6 +52,7 @@
         'report/mrp_production_pin_template.xml',
         'report/workcenter_report_template.xml',
         'report/equipment_report_template.xml',
+        'report/product_product_tempaltes.xml',
         'views/sa_config_setting.xml'
     ],
 }

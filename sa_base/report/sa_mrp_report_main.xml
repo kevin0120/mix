@@ -26,5 +26,13 @@
             name="sa_base.report_equipmentlabel"
             file="sa_base.report_equipmentlabel"/>
 
+        <report
+            id="report_vehicle_labels"
+            string="Vehicle Labels"
+            model="product.product"
+            report_type="qweb-pdf"
+            name="sa_base.report_productlabel"
+            file="sa_base.report_productlabel"/>
+
     </data>
 </odoo>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="report_simple_label">
+    <template id="report_workcenter_label">
         <div class="col-xs-6" style="padding:0;">
             <table style="border-spacing:0;margin-bottom:0;height:600px;" class="table">
                 <thead>
@@ -35,7 +35,7 @@
         <t t-call="report.html_container">
             <div class="page">
                 <t t-foreach="docs" t-as="workcenter">
-                    <t t-call="sa_base.report_simple_label">
+                    <t t-call="sa_base.report_workcenter_label">
                         <t t-set="workcenter" t-value="workcenter"/>
                     </t>
                 </t>
