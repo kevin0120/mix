@@ -92,7 +92,9 @@ export default function operations(
     case OPERATION.CONTINUE:
       return operationContinue(state);
     case OPERATION.PREDOING:
-      return operationPreDoing(state);
+      return switchOperationPredoing(state, OPERATION_STATUS.PREDOING);
+    case OPERATION.TIMEOUT:
+      return switchOperationTimeout(state, OPERATION_STATUS.TIMEOUT);
     default:
       return state;
   }
@@ -259,9 +261,19 @@ function operationContinue(state) {
   };
 }
 
-function operationPreDoing(state) {
+function switchOperationPredoing(state) {
   return {
     ...state,
-    operationStatus: OPERATION_STATUS.PREDOING
+    operationStatus: OPERATION_STATUS.PREDOING,
+  };
+}
+
+function switchOperationTimeout(state, status) {
+  return {
+    ...state,
+    operationStatus: status,
+    carID: '',
+    carType: '',
+    lnr: '',
   };
 }

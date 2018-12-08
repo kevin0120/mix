@@ -28,3 +28,10 @@ export function operationVerified(data) {
     data
   };
 }
+
+
+export function switch2Timeout() {
+  return {
+    type: OPERATION.TIMEOUT
+  };
+}
