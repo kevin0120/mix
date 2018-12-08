@@ -65,6 +65,7 @@ type Results struct {
 	Batch              string    `xorm:"varchar(32) 'batch'"`
 	ExInfo             string    `xorm:"text 'exinfo'"`
 	Spent              int64     `xorm:"bigint 'spent'"`
+	TighteningID       string    `xorm:"varchar(128) 'tightening_id'"`
 }
 
 type ResultsWorkorders struct {

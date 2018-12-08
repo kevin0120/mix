@@ -164,6 +164,7 @@ func (h *Handlers) saveResult(data *SavePackage) {
 			WI:       data.controllerResult.ResultValue.Wi,
 			TI:       data.controllerResult.ResultValue.Ti,
 			GroupSeq: data.dbResult.GroupSeq,
+			Batch: data.dbResult.Batch,
 		}
 
 		wsResults := []wsnotify.WSResult{}
@@ -178,7 +179,9 @@ func (h *Handlers) saveResult(data *SavePackage) {
 func (h *Handlers) handleSaveResult(data *SavePackage) {
 
 	loc, _ := time.LoadLocation("Local")
-	data.dbResult.UpdateTime, _ = time.ParseInLocation("2006-01-02 15:04:05", data.controllerResult.Dat, loc)
+	dt, _ := time.ParseInLocation("2006-01-02 15:04:05", data.controllerResult.Dat, loc)
+	data.dbResult.UpdateTime = dt.UTC()
+
 	data.dbResult.Result = data.controllerResult.Result
 	data.dbResult.ControllerSN = data.controllerResult.Controller_SN
 	s_value, _ := json.Marshal(data.controllerResult.ResultValue)
@@ -186,6 +189,7 @@ func (h *Handlers) handleSaveResult(data *SavePackage) {
 
 	data.dbResult.ResultValue = string(s_value)
 	data.dbResult.PSetDefine = string(s_pset)
+	data.dbResult.TighteningID = data.controllerResult.TighteningID
 
 	if data.dbResult.Batch == "" {
 		data.dbResult.Batch = fmt.Sprintf("%d/%d", data.dbResult.Seq, data.dbWorkorder.MaxSeq)

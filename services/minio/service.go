@@ -103,13 +103,15 @@ func (s *Service) handleSave(curve *ControllerCurve) {
 	loc, _ := time.LoadLocation("Local")
 	dt, _ := time.ParseInLocation("2006-01-02 15:04:05", curve.UpdateTime, loc)
 
+	//utc, _ := time.LoadLocation("")
+
 	dbCurve := storage.Curves{
 		ResultID:   curve.ResultID,
 		Count:      curve.Count,
 		CurveFile:  curve.CurveFile,
 		CurveData:  str_content,
 		HasUpload:  has_upload,
-		UpdateTime: dt,
+		UpdateTime: dt.UTC(),
 	}
 
 	err = s.DB.Store(dbCurve)

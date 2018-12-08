@@ -64,7 +64,7 @@ type JobPoint struct {
 	Seq                int     `json:"sequence"`
 	PSet               int     `json:"pset"`
 	X                  float64 `json:"offset_x"`
-	Y                  float64 `json:"offset_Y"`
+	Y                  float64 `json:"offset_y"`
 	MaxRedoTimes       int     `json:"max_redo_times"`
 	GroupSeq           int     `json:"group_sequence"`
 	ConsuProductID     int64   `json:"consu_product_id"`
@@ -132,7 +132,7 @@ type RoutingOperationPoint struct {
 	MaxRedoTimes       int     `json:"max_redo_times"`
 	PSet               int     `json:"pset"`
 	X                  float64 `json:"offset_x"`
-	Y                  float64 `json:"offset_Y"`
+	Y                  float64 `json:"offset_y"`
 	GroupSequence      int     `json:"group_sequence"`
 	ConsuProductID     int64   `json:"consu_product_id"`
 	ToleranceMin       float64 `json:"tolerance_min"`

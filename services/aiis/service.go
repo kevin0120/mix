@@ -12,6 +12,7 @@ import (
 	"gopkg.in/resty.v1"
 	"net/http"
 	"strings"
+	"strconv"
 )
 
 type Diagnostic interface {
@@ -253,6 +254,10 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	aiisResult.MO_NutNo = result.NutNo
 	aiisResult.MO_Model = dbWorkorder.MO_Model
 	aiisResult.Batch = result.Batch
+	aiisResult.Vin = dbWorkorder.Vin
+
+	aiisResult.Mode = dbWorkorder.Mode
+	aiisResult.TighteningId, _ = strconv.ParseInt(result.TighteningID, 10, 64)
 
 	gun, err := s.DB.GetGun(result.GunSN)
 	if err != nil {
@@ -262,6 +267,13 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	aiisResult.GunID = gun.GunID
 	aiisResult.WorkcenterID = dbWorkorder.WorkcenterID
 	aiisResult.ProductID = dbWorkorder.ProductID
+	aiisResult.NutID = result.ConsuProductID
+
+	aiisResult.WorkcenterCode = dbWorkorder.WorkcenterCode
+	aiisResult.ToolSN = result.GunSN
+	aiisResult.ControllerSN = result.ControllerSN
+
+	aiisResult.Job = fmt.Sprintf("%d", dbWorkorder.JobID)
 
 	if result.Result == storage.RESULT_OK {
 		aiisResult.Final_pass = ODOO_RESULT_PASS

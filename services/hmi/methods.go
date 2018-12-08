@@ -672,7 +672,7 @@ func (m *Methods) insertResultsForJob(job *JobManual) (*storage.Workorders, erro
 
 	max_seq := 0
 	db_results := []storage.Results{}
-	for _, v := range points {
+	for k, v := range points {
 		if v.GroupSequence > max_seq {
 			max_seq = v.GroupSequence
 		}
@@ -692,6 +692,7 @@ func (m *Methods) insertResultsForJob(job *JobManual) (*storage.Workorders, erro
 		r.ToleranceMaxDegree = v.ToleranceMaxDegree
 		r.ToleranceMinDegree = v.ToleranceMinDegree
 		r.ConsuProductID = v.ConsuProductID
+		r.Batch = fmt.Sprintf("%d/%d", k+1, len(points))
 		r.UpdateTime = time.Now()
 		r.Count = 1
 
@@ -709,6 +710,7 @@ func (m *Methods) insertResultsForJob(job *JobManual) (*storage.Workorders, erro
 	db_workorder.MO_Model = job.CarType
 	db_workorder.Mode = job.Mode
 	db_workorder.UpdateTime = time.Now()
+	db_workorder.WorkcenterCode = op.WorkcenterCode
 
 	err = m.service.DB.InsertWorkorder(&db_workorder, &db_results, false, false, true)
 

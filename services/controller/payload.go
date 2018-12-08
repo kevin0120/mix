@@ -59,6 +59,7 @@ type ControllerResult struct {
 	GunSN         string
 
 	ResultValue ResultValue `json:"result_value"`
+	TighteningID string
 
 	NeedPushAiis bool
 	NeedPushHmi  bool

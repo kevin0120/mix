@@ -67,6 +67,7 @@ type AIISResult struct {
 	MO_Model          string `json:"model"`
 
 	Vin string `json:"vin"`
+	Job string `json:"job"`
 }
 
 type CURObject struct {
