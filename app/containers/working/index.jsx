@@ -19,6 +19,8 @@ import ShutdownDiag from '../../components/ShutDownDiag';
 import { NewCar } from '../../actions/scannerDevice';
 import  {switchWorkMode} from '../../actions/workMode';
 
+import {switch2Timeout} from '../../actions/operation';
+
 import configs from '../../shared/config/index';
 
 // components
@@ -56,7 +58,8 @@ const TOPHEIGHT = '150px';
 
 const mapDispatchToProps = {
   NewCar,
-  switchWorkMode
+  switchWorkMode,
+  switch2Timeout,
 };
 
 // 与 style 里的变量相同
@@ -827,19 +830,18 @@ openManualDiag = (e, input) => {
                 <div className={classes.CountDownContainer}>
                   <ProgressBar
                     time={operations.maxOpTimes}
-                    shouldCounterStart={() =>{
+                    shouldCounterStart={() =>
                       // predoing -> doing
-                      return operations.operationStatus===OPERATION_STATUS.DOING &&
-                      this.prevOperationStatus === OPERATION_STATUS.PREDOING;
-                    }}
+                       operations.operationStatus===OPERATION_STATUS.DOING &&
+                      this.prevOperationStatus === OPERATION_STATUS.PREDOING
+                    }
                     shouldCounterStop={() =>
                       lodash.includes(
                         [OPERATION_STATUS.READY],
                         operations.operationStatus
                       )
                     }
-                    // onStart={()=>this.props.progressCountingStarted()}
-                    // onFinish={()=>this.props.progressCountingStopped()}
+                    onFinish={()=>this.props.switch2Timeout()}
                     gridClassName={classes.progressWrap}
                   />
                 </div>
@@ -931,6 +933,7 @@ ConnectedWorking.propTypes = {
   reworkWorkCenter: PropTypes.string.isRequired,
   keyboardInput: PropTypes.func.isRequired,
   switchWorkMode: PropTypes.func.isRequired,
+  switch2Timeout: PropTypes.func.isRequired,
   NewCar: PropTypes.func.isRequired,
 };
 
