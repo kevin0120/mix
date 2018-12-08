@@ -25,7 +25,8 @@ export function* watchOperation() {
     const action = yield take([
       OPERATION.STARTED,
       OPERATION.VERIFIED,
-      OPERATION.FINISHED
+      OPERATION.FINISHED,
+      OPERATION.RESET
     ]);
     const state = yield select();
     const { workMode } = state;
@@ -49,7 +50,9 @@ export function* watchOperation() {
         }
         yield put(setResultDiagShow(true));
         break;
-
+      case OPERATION.RESET:
+        yield put({ type: OPERATION.FINISHED });
+        break;
       default:
         break;
     }
@@ -151,16 +154,21 @@ export function* getOperation(job) {
         // 作业模式
 
         const { carType } = state.operations;
-        resp = yield call(
-          fetchRoutingWorkcenter,
-          rushUrl,
-          workcenterCode,
-          carType,
-          null
-        );
-        if (resp.status === 200) {
-          fetchOK = true;
+        try {
+          resp = yield call(
+            fetchRoutingWorkcenter,
+            rushUrl,
+            workcenterCode,
+            carType,
+            null
+          );
+          if (resp.status === 200) {
+            fetchOK = true;
+          }
+        } catch (e) {
+
         }
+
       } else {
         // 工单模式
 
@@ -194,7 +202,7 @@ export function* getOperation(job) {
     } else {
       // 定位作业失败
       yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
-      yield put({ type: OPERATION.FINISHED});
+      // yield put({ type: OPERATION.RESET });
     }
   } catch (e) {
     console.log(e);
@@ -204,71 +212,79 @@ export function* getOperation(job) {
 
 // 开始作业
 export function* startOperation(data) {
-  yield put(setResultDiagShow(false));
+  try {
+    yield put(setResultDiagShow(false));
 
-  let state = yield select();
+    let state = yield select();
 
-  yield put({
-    type: OPERATION.OPERATION.FETCH_OK,
-    mode: state.setting.operationSettings.opMode,
-    data
-  });
+    yield put({
+      type: OPERATION.OPERATION.FETCH_OK,
+      mode: state.setting.operationSettings.opMode,
+      data
+    });
 
-  state = yield select();
+    state = yield select();
 
-  const { controllerMode } = state.workMode;
+    const { controllerMode } = state.workMode;
 
-  const rushUrl = state.connections.masterpc;
+    const rushUrl = state.connections.masterpc;
 
-  if (controllerMode === 'job') {
-    // job模式
+    if (controllerMode === 'job') {
+      // job模式
 
-    const controllerSN = state.connections.controllers[0].serial_no;
-    const {
-      operationID,
-      carType,
-      carID,
-      jobID,
-      source
-    } = state.operations;
+      const controllerSN = state.connections.controllers[0].serial_no;
+      const {
+        operationID,
+        carType,
+        carID,
+        jobID,
+        source
+      } = state.operations;
 
-    const { hmiSn } = state.setting.page.odooConnection;
-    const userID = 1;
-    const skip = false;
-    let hasSet = false;
-    if (state.setting.operationSettings.workMode === 'manual') {
-      hasSet = true;
-    }
+      const { hmiSn } = state.setting.page.odooConnection;
+      const userID = 1;
+      const skip = false;
+      let hasSet = false;
+      if (state.setting.operationSettings.workMode === 'manual') {
+        hasSet = true;
+      }
 
-    const resp = yield call(
-      jobManual,
-      rushUrl,
-      controllerSN,
-      carType,
-      carID,
-      userID,
-      jobID,
-      hmiSn.value,
-      operationID,
-      skip,
-      hasSet,
-      source
-    );
+      try {
+        const resp = yield call(
+          jobManual,
+          rushUrl,
+          controllerSN,
+          carType,
+          carID,
+          userID,
+          jobID,
+          hmiSn.value,
+          operationID,
+          skip,
+          hasSet,
+          source
+        );
 
-    if (resp.status === 200) {
-      // 程序号设置成功
+        if (resp.status === 200) {
+          // 程序号设置成功
 
-      // 启动用具
-      yield put(toolEnable());
-      yield put({ type: OPERATION.STARTED });
+          // 启动用具
+          yield put(toolEnable());
+          yield put({ type: OPERATION.STARTED });
+        }
+      } catch (e) {
+        // 程序号设置失败
+        yield put({ type: OPERATION.PROGRAMME.SET_FAIL });
+        // yield put({ type: OPERATION.RESET });
+      }
     } else {
-      // 程序号设置失败
-      yield put({ type: OPERATION.PROGRAMME.SET_FAIL });
+      yield put({ type: OPERATION.STARTED });
+      yield call(doingOperation);
     }
-  } else {
-    yield put({ type: OPERATION.STARTED });
-    yield call(doingOperation);
+  } catch (e) {
+
   }
+
 }
 
 // 处理作业过程

@@ -43,7 +43,7 @@ export const defaultConfigs = {
       },
       hmiSn: {
         displayOrder: 2,
-        value: '112233445566778899',
+        value: '1122334455667788',
         displayTitle: 'Configuration.connections.HMI'
       },
     },
@@ -168,7 +168,7 @@ export const defaultConfigs = {
         'serial_no': '0001',
       }],
       io: 'modbustcp://192.168.1.122:502/0',
-      workcenterCode: '112233445566778899',
+      workcenterCode: '1122334455667788',
       rework_workcenter: 'qrk'
     }
   },
