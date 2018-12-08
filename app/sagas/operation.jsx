@@ -86,6 +86,10 @@ export function* triggerOperation(carID, carType, job, source) {
       yield put({ type: OPERATION.PREDOING });
       break;
 
+    case OPERATION_STATUS.TIMEOUT:
+      yield put({ type: OPERATION.PREDOING });
+      break;
+
     default:
       break;
   }
@@ -190,6 +194,7 @@ export function* getOperation(job) {
     } else {
       // 定位作业失败
       yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
+      yield put({ type: OPERATION.FINISHED});
     }
   } catch (e) {
     console.log(e);
