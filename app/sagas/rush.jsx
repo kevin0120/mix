@@ -1,5 +1,5 @@
 import OWebSocket from 'ws';
-import { call, take, put, select, fork } from 'redux-saga/effects';
+import { call, take, takeLatest, put, select, fork, cancel } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
 import { OPERATION, RUSH, WORK_MODE } from '../actions/actionTypes';
 import { NewResults } from '../actions/rush';
@@ -11,63 +11,59 @@ import { IO_FUNCTION } from '../reducers/io';
 import { setHealthzCheck } from "../actions/healthCheck";
 import { setNewNotification } from "../actions/notification";
 
-let rushWS = null;
-let rushChannel = null;
+
+let task = null;
+let ws = null;
 const WebSocket = require('@oznu/ws-connect');
 
 const lodash = require('lodash');
 
 export function* watchRush() {
-  while (true) {
-    const { type } = yield take(RUSH.INIT);
-    switch (type) {
-      case RUSH.INIT:
-        yield call(initRush);
-        break;
-
-      default:
-        break;
-    }
-  }
+  yield takeLatest(RUSH.INIT, initRush);
 }
 
 function* initRush() {
-  const state = yield select();
+  try {
+    const state = yield select();
 
-  const { connections, setting } = state;
+    const { connections } = state;
 
-  if (connections.masterpc === '') {
-    return;
+    if (connections.masterpc === '') {
+      return;
+    }
+
+    const conn = connections.masterpc.split('://')[1];
+    const wsURL = `ws://${conn}/rush/v1/ws`;
+
+    if (task) {
+      yield cancel(task);
+    }
+
+    if (ws) {
+      yield call(stopRush);
+    }
+
+    ws = new WebSocket(wsURL, {reconnectInterval: 3000});
+
+    task = yield fork(watchRushChannel, state.setting.page.odooConnection.hmiSn.value);
+  } catch (e) {
+    console.log(e);
   }
 
-  const conn = connections.masterpc.split('://')[1];
-  const wsURL = `ws://${conn}/rush/v1/ws`;
-
-  if (rushWS) {
-    yield call(stopRush);
-  }
-
-  rushWS = new WebSocket(wsURL, {reconnectInterval: 3000});
-  rushChannel = yield call(
-    createRushChannel,
-    rushWS,
-    setting.page.odooConnection.hmiSn.value
-  );
-
-  yield fork(watchRushChannel);
 }
 
 function stopRush() {
   if (
-    rushWS.ws.readyState === OWebSocket.OPEN ||
-    rushWS.ws.readyState === OWebSocket.CONNECTING
+    ws.ws.readyState === OWebSocket.OPEN ||
+    ws.ws.readyState === OWebSocket.CONNECTING
   ) {
-    rushWS.close();
+
+    ws.close();
   }
-  rushWS = null;
+  ws = null;
 }
 
-function createRushChannel(ws, hmiSN) {
+function createRushChannel(hmiSN) {
   return eventChannel(emit => {
     ws.on('open', () => {
       emit({type:'healthz', payload:true});
@@ -105,110 +101,116 @@ function createRushChannel(ws, hmiSN) {
 // const getHealthz = state => state.healthCheckResults;
 
 
-export function* watchRushChannel() {
-  while (rushWS !== null) {
-    const data = yield take(rushChannel);
-    const state = yield select();
+export function* watchRushChannel(hmiSN) {
+  const chan = yield call(createRushChannel, hmiSN);
+  try {
+    while (true) {
+      const data = yield take(chan);
+      const state = yield select();
 
-    const {type, payload} = data;
+      const {type, payload} = data;
 
-    switch (type) {
-      case 'healthz': {
-        const healthzStatus = state.healthCheckResults; // 获取整个healthz
-        if (!lodash.isEqual(healthzStatus.masterpc.isHealth, payload)) {
-          // 如果不相等 更新
-          yield put(setHealthzCheck('masterpc', payload));
-          yield put(setNewNotification('info', `masterPC连接状态更新: ${payload}`));
-        }
-        break;
-      }
-      case 'data': {
-        const dataArray = payload.split(';');
-        const event = dataArray[0].split(':').slice(-1)[0];
-
-        const json = JSON.parse(dataArray.slice(-1));
-
-        switch (event) {
-          case 'job':
-            if (state.workMode.workMode === 'manual' && json.job_id > 0) {
-              yield call(
-                triggerOperation,
-                null,
-                null,
-                json.job_id,
-                OPERATION_SOURCE.MANUAL
-              );
-            }
-
-            break;
-          case 'odoo': {
-            const odooHealthzStatus = json.status === 'online';
-            const healthzStatus = state.healthCheckResults; // 获取整个healthz
-            if (
-              !lodash.isEqual(
-                healthzStatus.odoo.isHealth,
-                odooHealthzStatus
-              )
-            ) {
-              yield put(setHealthzCheck('odoo', odooHealthzStatus));
-              yield put(
-                setNewNotification(
-                  'info',
-                  `后台连接状态更新: ${odooHealthzStatus}`
-                )
-              );
-            }
-            break;
+      switch (type) {
+        case 'healthz': {
+          const healthzStatus = state.healthCheckResults; // 获取整个healthz
+          if (!lodash.isEqual(healthzStatus.masterpc.isHealth, payload)) {
+            // 如果不相等 更新
+            yield put(setHealthzCheck('masterpc', payload));
+            yield put(setNewNotification('info', `masterPC连接状态更新: ${payload}`));
           }
-          case 'io':
-            if (state.setting.systemSettings.modbusEnable) {
+          break;
+        }
+        case 'data': {
+          const dataArray = payload.split(';');
+          const event = dataArray[0].split(':').slice(-1)[0];
+
+          const json = JSON.parse(dataArray.slice(-1));
+
+          switch (event) {
+            case 'job':
+              if (state.workMode.workMode === 'manual' && json.job_id > 0) {
+                yield call(
+                  triggerOperation,
+                  null,
+                  null,
+                  json.job_id,
+                  OPERATION_SOURCE.MANUAL
+                );
+              }
+
+              break;
+            case 'odoo': {
+              const odooHealthzStatus = json.status === 'online';
+              const healthzStatus = state.healthCheckResults; // 获取整个healthz
+              if (
+                !lodash.isEqual(
+                  healthzStatus.odoo.isHealth,
+                  odooHealthzStatus
+                )
+              ) {
+                yield put(setHealthzCheck('odoo', odooHealthzStatus));
+                yield put(
+                  setNewNotification(
+                    'info',
+                    `后台连接状态更新: ${odooHealthzStatus}`
+                  )
+                );
+              }
               break;
             }
-
-            if (json.inputs) {
-              if (json.inputs[getIBypass()] === '1') {
-                // 强制放行
-                // yield put({ type: OPERATION.FINISHED, data: [] });
-                yield call(handleIOFunction, IO_FUNCTION.IN.BYPASS);
+            case 'io':
+              if (state.setting.systemSettings.modbusEnable) {
+                break;
               }
 
-              if (json.inputs[getIModeSelect()] === '1') {
-                // 切换到手动模式
-                yield put({ type: WORK_MODE.SWITCH_WM, mode: 'manual' });
-              } else {
-                // 切换到自动模式
-                yield put({ type: WORK_MODE.SWITCH_WM, mode: 'auto' });
+              if (json.inputs) {
+                if (json.inputs[getIBypass()] === '1') {
+                  // 强制放行
+                  // yield put({ type: OPERATION.FINISHED, data: [] });
+                  yield call(handleIOFunction, IO_FUNCTION.IN.BYPASS);
+                }
+
+                if (json.inputs[getIModeSelect()] === '1') {
+                  // 切换到手动模式
+                  yield put({ type: WORK_MODE.SWITCH_WM, mode: 'manual' });
+                } else {
+                  // 切换到自动模式
+                  yield put({ type: WORK_MODE.SWITCH_WM, mode: 'auto' });
+                }
               }
+              break;
+            case 'result':
+              yield put(NewResults(json));
+              break;
+            case 'scanner':
+              // console.log('rush scanner:', json);
+              const { workMode } = state.workMode;
+              if (workMode === 'scanner') {
+                yield put(NewCar(json.barcode));
+              }
+              break;
+            case 'controller': {
+              const healthzStatus = state.healthCheckResults; // 获取整个healthz
+              const controllerHealthzStatus = json.status === 'online';
+              if (!lodash.isEqual(healthzStatus.controller.isHealth, controllerHealthzStatus)) {
+                // 如果不相等 更新
+                yield put(setHealthzCheck('controller', controllerHealthzStatus));
+                yield put(setNewNotification('info', `controller连接状态更新: ${controllerHealthzStatus}`));
+              }
+              break;
             }
-            break;
-          case 'result':
-            yield put(NewResults(json));
-            break;
-          case 'scanner':
-            // console.log('rush scanner:', json);
-            const { workMode } = state.workMode;
-            if (workMode === 'scanner') {
-              yield put(NewCar(json.barcode));
-            }
-            break;
-          case 'controller': {
-            const healthzStatus = state.healthCheckResults; // 获取整个healthz
-            const controllerHealthzStatus = json.status === 'online';
-            if (!lodash.isEqual(healthzStatus.controller.isHealth, controllerHealthzStatus)) {
-              // 如果不相等 更新
-              yield put(setHealthzCheck('controller', controllerHealthzStatus));
-              yield put(setNewNotification('info', `controller连接状态更新: ${controllerHealthzStatus}`));
-            }
-            break;
+            default:
+              break;
           }
-          default:
-            break;
+          break;
         }
-        break;
+        default:
+          break;
       }
-      default:
-        break;
-    }
 
+    }
+  } catch (e) {
+    console.log(e);
   }
+
 }

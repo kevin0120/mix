@@ -1,4 +1,4 @@
-import { call, take, select, put, fork } from 'redux-saga/effects';
+import { call, take, takeLatest, takeEvery, select, put, fork, cancel } from 'redux-saga/effects';
 import OWebSocket from 'ws';
 import { eventChannel } from 'redux-saga';
 import { ANDON, AIIS, OPERATION } from '../actions/actionTypes';
@@ -8,6 +8,8 @@ import { setHealthzCheck } from '../actions/healthCheck';
 import {triggerOperation} from './operation';
 
 import {OPERATION_STATUS, OPERATION_SOURCE } from '../reducers/operations';
+
+let task = null;
 
 let ws = null;
 
@@ -23,19 +25,8 @@ const AIIS_WS_CHANNEL = {
 };
 
 export function* watchAiis() {
-  while (true) {
-    const action = yield take([ANDON.NEW_DATA, AIIS.INIT]);
-    switch (action.type) {
-      case ANDON.NEW_DATA:
-        yield call(handleAiisData, action.json);
-        break;
-      case AIIS.INIT:
-        yield fork(initAiis);
-        break;
-      default:
-        break;
-    }
-  }
+  yield takeLatest(AIIS.INIT, initAiis);
+  yield takeEvery(ANDON.NEW_DATA, handleAiisData);
 }
 
 function* initAiis() {
@@ -43,6 +34,11 @@ function* initAiis() {
     const state = yield select();
     const aiisUrl = state.setting.system.connections.aiis;
     const hmiSN = state.setting.page.odooConnection.hmiSn.value;
+
+    if (task) {
+      yield cancel(task);
+    }
+
     if (ws) {
       yield call(stopAiisWebsocket);
     }
@@ -52,17 +48,16 @@ function* initAiis() {
       const url = `ws://${uris[1]}/aiis/v1/ws`;
       ws = new WebSocket(url, {reconnectInterval: 3000});
 
-      yield fork(aiisWSListener, hmiSN);
-      yield call(wsOnOpen, hmiSN);
+      task = yield fork(aiisWSListener, hmiSN);
+      // yield call(wsOnOpen, hmiSN);
     }
   } catch (e) {
     console.log(e);
   }
-
-
 }
 
-export function* handleAiisData(data) {
+export function* handleAiisData(action) {
+  const data = action.json;
   const state = yield select();
   if (state.operations.operationStatus !== OPERATION_STATUS.DOING) {
     if (data.vin_code.length) {

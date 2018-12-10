@@ -157,13 +157,13 @@ export const defaultConfigs = {
         vendorId: 3118,
         mode: 'HID' // HID or BT_HID
         // mode: 'BT_HID',
-        // vendorId: 1504
+          // vendorId: 1504
       }
     },
     connections: {
       masterpc: 'http://127.0.0.1:8082',
       rfid: 'tcp://192.168.1.120:2112',
-      aiis: 'http://192.168.1.9:9092',
+      aiis: 'http://127.0.0.1:9092',
       controllers: [{
         'serial_no': '0001',
       }],
@@ -174,13 +174,13 @@ export const defaultConfigs = {
   },
   // 作业配置
   operationSettings: {
-    opMode: 'op', // 作业模式:        op 或 order
-    controllerMode: 'job', // 拧紧模式:        job 或 pset
+    opMode: 'order', // 作业模式:        op 或 order
+    controllerMode: 'pset', // 拧紧模式:        job 或 pset
     workMode: 'auto', // 工作模式:        auto 或 manual 或 scanner
-    flowTriggers: ['carID', 'carType'], // 工作流程触发条件:  carType:车型代码 carID:vin/knr/longpin
+    flowTriggers: ['carID'], // 工作流程触发条件:  carType:车型代码 carID:vin/knr/longpin
 
     // 作业前检测(order mode only)
-    preCheck: false,
+    preCheck: true,
 
     // 强制放行配置
     byPass: {
@@ -202,8 +202,8 @@ export const defaultConfigs = {
     authEnable: true,
     switchAutoManual: false,
     oeeFuncEnable: false,
-    modbusEnable: false,
-    rfidEnabled: false,
+    modbusEnable: true,
+    rfidEnabled: true,
     andonEnable: true,
     psetContinueMode: false
   }
