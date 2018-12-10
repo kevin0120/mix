@@ -9,7 +9,7 @@ import requests as Requests
 from requests import ConnectionError, RequestException
 import json
 from ..controllers.result import AIIS_RESULT_API
-
+import validators
 from urlparse import urljoin
 
 _logger = logging.getLogger(__name__)
@@ -36,12 +36,17 @@ class PushResult(AbstractModel):
                     'measure_degree': result.measure_degree
                 }
                 try:
-                    ret = Requests.put(urljoin(url, AIIS_RESULT_API), data=json.dumps(data), headers={'Content-Type': 'application/json'})
+                    u = urljoin(url, AIIS_RESULT_API)
+                    if isinstance(validators.url(u), validators.ValidationFailure):
+                        break
+                    ret = Requests.put(u, data=json.dumps(data), headers={'Content-Type': 'application/json'})
                     if ret.status_code == 200:
                         result.write({'sent': True})  ### 更新发送结果
                 except ConnectionError:
                     break  # 此url的结果都不需要上传
                 except RequestException as e:
+                    print(e)
+                except Exception as e:
                     print(e)
         return True
 
