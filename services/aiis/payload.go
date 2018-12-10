@@ -55,7 +55,7 @@ type AIISResult struct {
 	ProductID    int64 `json:"product_id"`
 	WorkcenterID int64 `json:"workcenter_id"`
 	GunID        int64 `json:"gun_id"`
-	NutID        int64 `json:"nut_id"`
+	NutID        int64 `json:"consu_product_id"`
 
 	// mo相关信息
 	MO_EquipemntName  string `json:"equipment_name"` // 设备名
