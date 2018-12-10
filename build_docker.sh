@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version="0.2.18"
+version="0.2.19"
 
 docker_repo="linshenqi/rush"
 

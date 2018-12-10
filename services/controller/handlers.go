@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"github.com/masami10/rush/services/aiis"
 )
 
 const (
@@ -76,7 +77,10 @@ func (h *Handlers) Handle(result interface{}, curve interface{}) {
 		curveFileName := fmt.Sprintf("%s_%s_%d_%d_%d.json",
 			dbWorkorder.MO_Model, dbResult.NutNo, dbResult.Seq, dbResult.ResultId, dbResult.Count)
 
-		controllerResult.CurFile = curveFileName
+		controllerResult.CurFile = aiis.CURObject{
+			File: curveFileName,
+			OP: dbResult.Count,
+		}
 
 		controllerCurve.CurveFile = curveFileName
 		controllerCurve.ResultID = dbResult.Id
@@ -198,7 +202,7 @@ func (h *Handlers) handleSaveResult(data *SavePackage) {
 	// 推送aiis
 	if data.controllerResult.NeedPushAiis || data.dbResult.Stage == storage.RESULT_STAGE_FINAL {
 
-		aiisResult, err := h.controllerService.Aiis.ResultToAiisResult(data.dbResult)
+		aiisResult, err := h.controllerService.Aiis.ResultToAiisResult(data.dbResult, &data.controllerResult.CurFile)
 
 		if err == nil {
 			h.controllerService.Aiis.PutResult(data.dbResult.ResultId, aiisResult)

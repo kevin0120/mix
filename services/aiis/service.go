@@ -224,7 +224,7 @@ func (s *Service) putResult(body interface{}, url string, method string) error {
 	return nil
 }
 
-func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error) {
+func (s *Service) ResultToAiisResult(result *storage.Results, curve interface{}) (AIISResult, error) {
 	aiisResult := AIISResult{}
 
 	resultValue := ResultValue{}
@@ -238,10 +238,20 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 		return aiisResult, err
 	}
 
+	if curve != nil {
+		aiisResult.CURObjects = append(aiisResult.CURObjects, *curve.(*CURObject))
+	}
+
 	curves, err := s.DB.ListCurvesByResult(result.Id)
 	if err == nil {
 		aiisCurve := CURObject{}
 		for _, v := range curves {
+			if curve != nil {
+				if curve.(*CURObject).File == v.CurveFile {
+					continue
+				}
+			}
+
 			aiisCurve.OP = v.Count
 			aiisCurve.File = v.CurveFile
 			aiisResult.CURObjects = append(aiisResult.CURObjects, aiisCurve)
@@ -340,7 +350,7 @@ func (s *Service) ResultUploadManager() error {
 		results, err := s.DB.ListUnuploadResults()
 		if err == nil {
 			for _, v := range results {
-				aiisResult, err := s.ResultToAiisResult(&v)
+				aiisResult, err := s.ResultToAiisResult(&v, nil)
 				if err == nil {
 					s.PutResult(v.ResultId, aiisResult)
 				}

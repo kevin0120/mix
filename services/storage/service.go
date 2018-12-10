@@ -405,6 +405,7 @@ func (s *Service) ListWorkorders(hmi_sn string, workcenterCode string, status st
 	var workorders []Workorders
 
 	sql := fmt.Sprintf("select * from workorders where hmi_sn = '%s' or workcenter_code = '%s'", hmi_sn, workcenterCode)
+	sql = sql + fmt.Sprintf(" and workorders.x_workorder_id > 0 ")
 	if status != "" {
 		sql = sql + fmt.Sprintf(" and workorders.status = '%s'", status)
 	}
@@ -442,7 +443,7 @@ func (s *Service) FindWorkorder(hmi_sn string, workcenter_code string, code stri
 
 	var workorder Workorders
 
-	rt, err := s.eng.Alias("w").Where("w.hmi_sn = ? or w.workcenter_code = ?", hmi_sn, workcenter_code).And("w.long_pin = ? or w.vin = ? or w.knr = ?", code, code, code).Get(&workorder)
+	rt, err := s.eng.Alias("w").Where("w.hmi_sn = ? or w.workcenter_code = ?", hmi_sn, workcenter_code).And("w.long_pin = ? or w.vin = ? or w.knr = ?", code, code, code).And("w.x_workorder_id > ?", 0).Get(&workorder)
 
 	if err != nil {
 		return workorder, err
@@ -459,7 +460,7 @@ func (s *Service) FindNextWorkorder(hmi_sn string, workcenter_code string) (Work
 
 	var workorder Workorders
 
-	rt, err := s.eng.Alias("w").Where("w.hmi_sn = ? or w.workcenter_code = ?", hmi_sn, workcenter_code).And("w.status = ?", "ready").Asc("w.update_time").Asc("w.lnr").Get(&workorder)
+	rt, err := s.eng.Alias("w").Where("w.hmi_sn = ? or w.workcenter_code = ?", hmi_sn, workcenter_code).And("w.status = ?", "ready").And("w.x_workorder_id > ?", 0).Asc("w.update_time").Asc("w.lnr").Get(&workorder)
 
 	if err != nil {
 		return workorder, err

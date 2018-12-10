@@ -1,5 +1,7 @@
 package controller
 
+import "github.com/masami10/rush/services/aiis"
+
 const (
 	AUDIPROTOCOL         = "Audi/VW"
 	OPENPROTOCOL         = "OpenProtocol"
@@ -49,7 +51,7 @@ type ControllerResult struct {
 	Controller_SN string     `json:"controller_sn"`
 	Workorder_ID  int64      `json:"workorder_id"`
 	UserID        int64      `json:"user_id"`
-	CurFile       string     `json:"cur_file"`
+	CurFile       aiis.CURObject
 	Result        string     `json:"result"`
 	Dat           string     `json:"dat"`
 	PSet          int        `json:"pset"`
