@@ -338,7 +338,6 @@ func (h *MasterPLCHandler) Debug(msg string) {
 	h.l.Debug(msg)
 }
 
-
 type WsHandler struct {
 	l Logger
 }

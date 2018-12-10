@@ -1,10 +1,10 @@
 package minio
 
 import (
+	"github.com/masami10/aiis/toml"
 	"github.com/pkg/errors"
 	"net"
 	"time"
-	"github.com/masami10/aiis/toml"
 )
 
 type Config struct {
@@ -14,7 +14,7 @@ type Config struct {
 	Secret      string        `yaml:"secret"`
 	Secure      bool          `yaml:"secure"`
 	ReuploadItv toml.Duration `yaml:"reupload_interval"`
-	Enable bool `yaml:"enable"`
+	Enable      bool          `yaml:"enable"`
 }
 
 func NewConfig() Config {
@@ -25,7 +25,7 @@ func NewConfig() Config {
 		Secret:      "secret",
 		Secure:      false,
 		ReuploadItv: toml.Duration(time.Duration(24 * time.Hour)),
-		Enable:		 true,
+		Enable:      true,
 	}
 }
 

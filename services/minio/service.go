@@ -2,9 +2,9 @@ package minio
 
 import (
 	"fmt"
+	"github.com/minio/minio-go"
 	"strings"
 	"sync/atomic"
-	"github.com/minio/minio-go"
 )
 
 type Diagnostic interface {

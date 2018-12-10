@@ -18,3 +18,7 @@ type ODOOMO struct {
 	//Date_planned_start string   `json:"date_planned_start"`
 	Prs []ODOOPR `json:"prs"`
 }
+
+type ODOOStatus struct {
+	Status string `json:"status"`
+}

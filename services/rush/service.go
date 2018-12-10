@@ -9,6 +9,7 @@ import (
 	"github.com/masami10/aiis/services/changan"
 	"github.com/masami10/aiis/services/fis"
 	"github.com/masami10/aiis/services/httpd"
+	"github.com/masami10/aiis/services/odoo"
 	"github.com/masami10/aiis/services/storage"
 	"github.com/masami10/aiis/services/wsnotify"
 	"gopkg.in/resty.v1"
@@ -24,7 +25,7 @@ type Diagnostic interface {
 }
 
 type CResult struct {
-	Result      *storage.OperationResult
+	Result *storage.OperationResult
 	ID     int64
 	IP     string
 	Port   string
@@ -59,6 +60,7 @@ type Service struct {
 	Changan *changan.Service
 
 	results chan *storage.ResultObject
+	Odoo    *odoo.Service
 	diag    Diagnostic
 
 	rpc aiis.GRPCServer
@@ -157,10 +159,24 @@ func (s *Service) Open() error {
 
 	s.Opened = true
 
+	s.Odoo.OnStatus = s.OnOdooStatus
+
 	return nil
 }
 
 func (s *Service) OnRPCNewClinet(stream *aiis.RPCAiis_RPCNodeServer) {
+
+	odoo_status := odoo.ODOOStatus{
+		Status: s.Odoo.Status(),
+	}
+
+	payload := aiis.RPCPayload{
+		Type: aiis.TYPE_ODOO_STATUS,
+		Data: odoo_status,
+	}
+
+	str, _ := json.Marshal(payload)
+	s.rpc.RPCSend(stream, string(str))
 	s.diag.Info("new rpc client")
 }
 
@@ -173,7 +189,7 @@ func (s *Service) OnRPCRecv(stream *aiis.RPCAiis_RPCNodeServer, payload string) 
 	}
 
 	cr := CResult{
-		Result:      &op_result.Result,
+		Result: &op_result.Result,
 		ID:     op_result.ResultID,
 		Stream: stream,
 	}
@@ -243,10 +259,10 @@ func (s *Service) onConnect(c websocket.Connection) {
 			}
 
 			cr := CResult{
-				Result:    &op_result.Result,
-				ID:   op_result.ResultID,
-				IP:   rush_ip,
-				Port: op_result.Port,
+				Result: &op_result.Result,
+				ID:     op_result.ResultID,
+				IP:     rush_ip,
+				Port:   op_result.Port,
 			}
 
 			s.chResult <- cr
@@ -315,10 +331,10 @@ func (s *Service) getResultUpdate(ctx iris.Context) {
 	rush_ip := ctx.GetHeader("rush_ip")
 
 	cr := CResult{
-		Result:    &r,
-		ID:   resultId,
-		IP:   rush_ip,
-		Port: rush_port,
+		Result: &r,
+		ID:     resultId,
+		IP:     rush_ip,
+		Port:   rush_port,
 	}
 
 	s.chResult <- cr
@@ -463,7 +479,12 @@ func (s *Service) PatchResultFlag(stream *aiis.RPCAiis_RPCNodeServer, result_id 
 		HasUpload: has_upload,
 	}
 
-	str, _ := json.Marshal(rushResult)
+	payload := aiis.RPCPayload{
+		Type: aiis.TYPE_RESULT,
+		Data: rushResult,
+	}
+
+	str, _ := json.Marshal(payload)
 	s.rpc.RPCSend(stream, string(str))
 
 	return nil
@@ -557,4 +578,18 @@ func (s *Service) TaskResultsBatchSave() {
 			}
 		}
 	}
+}
+
+func (s *Service) OnOdooStatus(status string) {
+	odoo_status := odoo.ODOOStatus{
+		Status: status,
+	}
+
+	payload := aiis.RPCPayload{
+		Type: aiis.TYPE_ODOO_STATUS,
+		Data: odoo_status,
+	}
+
+	str, _ := json.Marshal(payload)
+	s.rpc.RPCSendAll(string(str))
 }

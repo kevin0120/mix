@@ -1,19 +1,19 @@
 package masterplc
 
 import (
-	"sync/atomic"
-	"github.com/masami10/aiis/services/rush"
-	"github.com/masami10/aiis/socket_listener"
+	"encoding/json"
+	"encoding/xml"
 	"fmt"
+	"github.com/masami10/aiis/services/minio"
+	"github.com/masami10/aiis/services/rush"
+	"github.com/masami10/aiis/services/storage"
+	"github.com/masami10/aiis/socket_listener"
+	"github.com/pkg/errors"
+	"io"
 	"net"
 	"strings"
-	"io"
-	"encoding/xml"
 	"sync"
-	"github.com/pkg/errors"
-	"github.com/masami10/aiis/services/minio"
-		"github.com/masami10/aiis/services/storage"
-	"encoding/json"
+	"sync/atomic"
 )
 
 type Diagnostic interface {
@@ -22,20 +22,20 @@ type Diagnostic interface {
 }
 
 type Service struct {
-	diag           Diagnostic
-	configValue    atomic.Value
-	Rush			*rush.Service
-	Minio			*minio.Service
-	listener      *socket_listener.SocketListener
+	diag         Diagnostic
+	configValue  atomic.Value
+	Rush         *rush.Service
+	Minio        *minio.Service
+	listener     *socket_listener.SocketListener
 	handleBuffer chan string
-	wg            sync.WaitGroup
-	closing       chan struct{}
+	wg           sync.WaitGroup
+	closing      chan struct{}
 }
 
 func NewService(d Diagnostic, c Config) *Service {
 	if c.Enable {
 		s := &Service{
-			diag:      d,
+			diag:    d,
 			wg:      sync.WaitGroup{},
 			closing: make(chan struct{}, 1),
 		}
@@ -49,7 +49,6 @@ func NewService(d Diagnostic, c Config) *Service {
 
 		return s
 	}
-
 
 	return nil
 }
@@ -68,7 +67,7 @@ func (s *Service) Open() error {
 	s.wg.Add(1)
 
 	for i := 0; i < s.Config().Workers; i++ {
-		s.diag.Debug(fmt.Sprintf("init masterplc worker %d\n", i + 1))
+		s.diag.Debug(fmt.Sprintf("init masterplc worker %d\n", i+1))
 		go s.HandleProcess()
 	}
 
@@ -231,7 +230,7 @@ func (s *Service) HandleProcess() {
 			XML2Result(&cvi3Result, &opResult)
 
 			cr := rush.CResult{
-				Result:      &opResult,
+				Result: &opResult,
 				ID:     0,
 				Stream: nil,
 			}
@@ -241,9 +240,9 @@ func (s *Service) HandleProcess() {
 			// 处理曲线
 			if strings.Contains(msg, XML_RESULT_KEY) {
 				curveFile := fmt.Sprintf("masterplc_%d.json", opResult.TighteningId)
-				cur := storage.CURObject {
+				cur := storage.CURObject{
 					File: curveFile,
-					OP: 1,
+					OP:   1,
 				}
 
 				opResult.CurObjects = append(opResult.CurObjects, cur)
@@ -263,8 +262,6 @@ func (s *Service) HandleProcess() {
 					s.diag.Debug("对象存储保存成功")
 				}
 			}
-
-
 
 			// 处理事件
 			if strings.Contains(msg, XML_EVENT_KEY) {

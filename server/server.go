@@ -8,13 +8,13 @@ import (
 	"github.com/masami10/aiis/services/diagnostic"
 	"github.com/masami10/aiis/services/fis"
 	"github.com/masami10/aiis/services/httpd"
+	"github.com/masami10/aiis/services/masterplc"
+	"github.com/masami10/aiis/services/minio"
 	"github.com/masami10/aiis/services/odoo"
 	"github.com/masami10/aiis/services/pmon"
 	"github.com/masami10/aiis/services/rush"
 	"github.com/masami10/aiis/services/storage"
 	"github.com/masami10/aiis/services/wsnotify"
-	"github.com/masami10/aiis/services/masterplc"
-	"github.com/masami10/aiis/services/minio"
 )
 
 type BuildInfo struct {
@@ -45,13 +45,13 @@ type Server struct {
 	FisService     *fis.Service
 	ChanganService *changan.Service
 	OdooService    *odoo.Service
-	RushService  *rush.Service
+	RushService    *rush.Service
 
 	StorageService  *storage.Service
 	WSNotifyService *wsnotify.Service
 
 	MasterplcService *masterplc.Service
-	MinioService    *minio.Service
+	MinioService     *minio.Service
 
 	config *Config
 	// List of services in startup order
@@ -122,6 +122,7 @@ func (s *Server) appendRushService() {
 	srv.StorageService = s.StorageService
 	srv.Fis = s.FisService
 	srv.Changan = s.ChanganService
+	srv.Odoo = s.OdooService
 
 	s.RushService = srv
 

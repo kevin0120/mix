@@ -1,12 +1,11 @@
 package masterplc
 
-
 import (
 	"encoding/xml"
 	"fmt"
+	"github.com/masami10/aiis/services/storage"
 	"strconv"
 	"strings"
-	"github.com/masami10/aiis/services/storage"
 	"time"
 )
 
@@ -185,14 +184,14 @@ type BLC struct {
 }
 
 type TIP struct {
-	TOOLSN string `xml:"SID"`
-	TID int64 `xml:"TID"`
-	PSet int    `xml:"PRG"`
-	Date string `xml:"DAT"`
-	Time string `xml:"TIM"`
-	Result string `xml:"STA"`
-	BLC  []BLC  `xml:"BLC"`
-	ProductID int64 `xml:"TNR"`
+	TOOLSN    string `xml:"SID"`
+	TID       int64  `xml:"TID"`
+	PSet      int    `xml:"PRG"`
+	Date      string `xml:"DAT"`
+	Time      string `xml:"TIM"`
+	Result    string `xml:"STA"`
+	BLC       []BLC  `xml:"BLC"`
+	ProductID int64  `xml:"TNR"`
 }
 
 type GRP struct {
@@ -202,16 +201,16 @@ type GRP struct {
 type FAS struct {
 	//UserID int64 `xml:"FAP"`
 	WorkcenterID int64 `xml:"WID"`
-	GRP    GRP   `xml:"GRP"`
+	GRP          GRP   `xml:"GRP"`
 }
 
 type PAR struct {
-	SN           string `xml:"PRT"`
-	Vin 		string  `xml:"PI1"`
+	SN  string `xml:"PRT"`
+	Vin string `xml:"PI1"`
 	//Result_id    string `xml:"PI2"`
 	//Count        int    `xml:"STC"`
 	//Result       string `xml:"PSC"`
-	FAS          FAS    `xml:"FAS"`
+	FAS FAS `xml:"FAS"`
 }
 
 type PRC_SST struct {
@@ -371,7 +370,7 @@ func XML2Result(result *CVI3Result, rr *storage.OperationResult) {
 	rr.GunID = 4
 
 	dt := fmt.Sprintf("%s %s", result.PRC_SST.PAR.FAS.GRP.TIP.Date, result.PRC_SST.PAR.FAS.GRP.TIP.Time)
-	loc, _ := time.LoadLocation("Local")
+	loc, _ := time.LoadLocation("")
 	rr.ControlDate, _ = time.ParseInLocation("2006-01-02 15:04:05", dt, loc)
 	//result_id := result.PRC_SST.PAR.Result_id
 	//rid, _ := strconv.Atoi(result_id)

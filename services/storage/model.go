@@ -76,7 +76,9 @@ var KEYS = []string{
 	"workcenter_id",
 	"gun_id",
 	"product_id",
+	"consu_product_id",
 	"vin",
+	"job",
 }
 
 type OperationResultModel struct {
@@ -149,6 +151,7 @@ type OperationResult struct {
 	ProductID       int64       `json:"product_id"`
 	WorkcenterID    int64       `json:"workcenter_id"`
 	Vin             string      `json:"vin"`
+	Job             string      `json:"job"`
 	GunID           int64       `json:"gun_id"`
 	Batch           string      `json:"batch"`
 	Mode            string      `json:"mode"`
@@ -156,6 +159,7 @@ type OperationResult struct {
 	TighteningId    int64       `json:"tightening_id"`
 	ToolSN          string      `json:"tool_sn"`
 	WorkcenterCode  string      `json:"workcenter_code"`
+	NutID int64 `json:"consu_product_id"`
 
 	// mo相关信息
 	EquipemntName  string `json:"equipment_name"` // 设备名
@@ -167,6 +171,8 @@ type OperationResult struct {
 	Lnr            string `json:"lnr"`
 	NutNo          string `json:"nut_no"`
 	Model          string `json:"model"`
+
+	Lacking string `json:"lacking"`
 }
 
 type CURObject struct {
