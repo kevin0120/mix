@@ -137,4 +137,4 @@ ConnectedPreferences.propTypes = {
   classes: PropTypes.shape({}).isRequired
 };
 
-export default withLayout(withStyles(styles)(ConnectedPreferences), false);
+export default withStyles(styles)(ConnectedPreferences);

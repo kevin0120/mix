@@ -943,4 +943,4 @@ const Working = connect(
 )(ConnectedWorking);
 
 // export default Index;
-export default withLayout(withKeyboard(withStyles(withstyles)(Working)));
+export default withKeyboard(withStyles(withstyles)(Working));

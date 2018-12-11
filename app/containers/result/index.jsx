@@ -395,4 +395,4 @@ const ConnResult = connect(
   mapDispatchToProps
 )(Result);
 
-export default withLayout(withKeyboard(withStyles(styles)(ConnResult)), false);
+export default withKeyboard(withStyles(styles)(ConnResult));

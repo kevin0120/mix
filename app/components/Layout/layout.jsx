@@ -45,8 +45,8 @@ import Button from '../CustomButtons/Button';
 const lodash = require('lodash');
 
 /* eslint-disable react/prefer-stateless-function */
-export default function withLayout(SubCompontents, showTop = true) {
-  class ConnectedLayout extends React.Component {
+// export default function withLayout(SubCompontents, showTop = true) {
+  class ConnectedLayout extends React.PureComponent {
     constructor(props) {
       super(props);
       this.state = {
@@ -65,9 +65,9 @@ export default function withLayout(SubCompontents, showTop = true) {
       this.handleCloseSysInfo = this.handleCloseSysInfo.bind(this);
     }
 
-    shouldComponentUpdate(nextProps, nextState) {
-      return true;
-    }
+    // shouldComponentUpdate(nextProps, nextState) {
+    //   return true;
+    // }
 
     handleChange = (event, value) => {
       this.setState({ value });
@@ -175,190 +175,195 @@ export default function withLayout(SubCompontents, showTop = true) {
       const statusClassName = this.HealthCheckOk()
         ? classes.menuStatusOK
         : classes.menuStatusFail;
-
-      return (
-        <I18n ns="translations">
-          {t => (
-            <div className={classes.layout}>
-              {/* <ClickAwayListener onClickAway={() => this.toggleMenu(false)}> */}
-              {/* <SwipeableDrawer */}
-              {/* anchor="right" */}
-              {/* open={isMenuOpen} */}
-              {/* disableSwipeToOpen={disableSwipeToOpen} */}
-              {/* onClose={() => this.toggleMenu(false)} */}
-              {/* onOpen={() => this.toggleMenu(true)} */}
-              {/* > */}
-              {/* <div */}
-              {/* tabIndex={0} */}
-              {/* role="button" */}
-              {/* aria-hidden */}
-              {/* onClick={() => this.toggleMenu(false)} */}
-              {/* > */}
-              {/* <NavBar /> */}
-              {/* </div> */}
-              {/* </SwipeableDrawer> */}
-              {/* </ClickAwayListener> */}
-              <SubCompontents />
-              <Notify />
-              <AppBar position="fixed" className={classes.appBar}>
-                <Toolbar className={classes.topBar}>
-                  <div className={classes.menuBtnWrapAvatar}>
-                    <img
-                      alt={name}
-                      src={avatar}
-                      className={`${classes.imgRaised} ${classes.imgRoundedCircle} ${
-                        classes.imgFluid
-                      }`}
-                      style={{height: '100%'}}
-                    />
-                  </div>
-                  <div className={classes.menuUserName}>
-                    <p>{name}</p>
-                  </div>
-                  <div className={classes.menuBtnWrapLeft}>
-                    <BottomNavigation
-                      value={value}
-                      onChange={this.handleChange}
-                      showLabels
-                      className={classes.BottomNavigation}
-                    >
-                      {routeConfigs.slice(0, -1).map(route => (
-                        <BottomNavigationAction
-                          key={route.name}
-                          component={Link}
-                          to={route.url}
-                          label={t(route.title)}
-                          icon={<route.icon />}
-                          className={classes.BottomNavigationIcon}
-                          disabled={shouldProcessing}
-                        />
-                      ))}
-                    </BottomNavigation>
-                  </div>
-                  <div className={classes.menuBtnWrapRight}>
-                    <Button
-                      onClick={this.handleSysInfo}
-                      className={`${statusClassName}`}
-                    >
-                      {'系统'}
-                    </Button>
-                    <Button
-                      onClick={this.handleStatus}
-                      className={`${statusClassName}`}
-                    >
-                      {'连接'}
-                    </Button>
-
-                    <IconButton
-                      aria-owns={open ? 'menu-appbar' : null}
-                      aria-haspopup="true"
-                      onClick={this.handleMenu}
-                      color="inherit"
-                      disabled={shouldProcessing}
-                    >
-                      <Language />
-                    </IconButton>
-                    <Menu
-                      id="menu-sysInfo"
-                      anchorEl={showSysInfo}
-                      anchorOrigin={{
-                        vertical: 'top',
-                        horizontal: 'left'
-                      }}
-                      transformOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      open={openSysInfo}
-                      onClose={this.handleCloseSysInfo}
-                      TransitionComponent={Fade}
-                      classes={{
-                        paper: classes.popover,
-
-                      }}
-                    >
-                      <SysInfo />
-                    </Menu>
-                    <Menu
-                      id="menu-healthz"
-                      anchorEl={showStatus}
-                      anchorOrigin={{
-                        vertical: 'top',
-                        horizontal: 'left'
-                      }}
-                      transformOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      open={openStatusMenu}
-                      onClose={this.handleCloseStatus}
-                      TransitionComponent={Fade}
-                      classes={{
-                        paper: classes.popover
-                      }}
-                    >
-                      <HealthCheck healthCheckResults={healthCheckResults} />
-                    </Menu>
-                    <Menu
-                      id="menu-i18n"
-                      anchorEl={anchorEl}
-                      anchorOrigin={{
-                        vertical: 'top',
-                        horizontal: 'left'
-                      }}
-                      transformOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      open={open}
-                      onClose={this.handleClose}
-                      TransitionComponent={Fade}
-                    >
-                      <MenuItem
-                        className={classes.menuItem}
-                        onClick={() => this.handleChangeLng('en')}
+      console.log('shouldRender:',this.props.shouldRender);
+      if(!this.props.shouldRender){
+        return null;
+      }else{
+        return (
+          <I18n ns="translations">
+            {t => (
+              <div className={classes.layout}>
+                {/* <ClickAwayListener onClickAway={() => this.toggleMenu(false)}> */}
+                {/* <SwipeableDrawer */}
+                {/* anchor="right" */}
+                {/* open={isMenuOpen} */}
+                {/* disableSwipeToOpen={disableSwipeToOpen} */}
+                {/* onClose={() => this.toggleMenu(false)} */}
+                {/* onOpen={() => this.toggleMenu(true)} */}
+                {/* > */}
+                {/* <div */}
+                {/* tabIndex={0} */}
+                {/* role="button" */}
+                {/* aria-hidden */}
+                {/* onClick={() => this.toggleMenu(false)} */}
+                {/* > */}
+                {/* <NavBar /> */}
+                {/* </div> */}
+                {/* </SwipeableDrawer> */}
+                {/* </ClickAwayListener> */}
+                {/*<SubCompontents />*/}
+                <Notify />
+                <AppBar position="fixed" className={classes.appBar}>
+                  <Toolbar className={classes.topBar}>
+                    <div className={classes.menuBtnWrapAvatar}>
+                      <img
+                        alt={name}
+                        src={avatar}
+                        className={`${classes.imgRaised} ${classes.imgRoundedCircle} ${
+                          classes.imgFluid
+                          }`}
+                        style={{height: '100%'}}
+                      />
+                    </div>
+                    <div className={classes.menuUserName}>
+                      <p>{name}</p>
+                    </div>
+                    <div className={classes.menuBtnWrapLeft}>
+                      <BottomNavigation
+                        value={value}
+                        onChange={this.handleChange}
+                        showLabels
+                        className={classes.BottomNavigation}
                       >
-                        <ListItemIcon className={classes.icon}>
-                          <Flag
-                            name="GB"
-                            format="png"
-                            pngSize={24}
-                            basePath="./flags"
+                        {routeConfigs.slice(0, -1).map(route => (
+                          <BottomNavigationAction
+                            key={route.name}
+                            component={Link}
+                            to={route.url}
+                            label={t(route.title)}
+                            icon={<route.icon />}
+                            className={classes.BottomNavigationIcon}
+                            disabled={shouldProcessing}
                           />
-                        </ListItemIcon>
-                        <ListItemText
-                          classes={{ primary: classes.primary }}
-                          inset
-                          primary={t('Language.en')}
-                        />
-                      </MenuItem>
-                      <Divider />
-                      <MenuItem
-                        className={classes.menuItem}
-                        onClick={() => this.handleChangeLng('zh_CN')}
+                        ))}
+                      </BottomNavigation>
+                    </div>
+                    <div className={classes.menuBtnWrapRight}>
+                      <Button
+                        onClick={this.handleSysInfo}
+                        className={`${statusClassName}`}
                       >
-                        <ListItemIcon className={classes.icon}>
-                          <Flag
-                            name="CN"
-                            format="png"
-                            pngSize={24}
-                            basePath="./flags"
+                        {'系统'}
+                      </Button>
+                      <Button
+                        onClick={this.handleStatus}
+                        className={`${statusClassName}`}
+                      >
+                        {'连接'}
+                      </Button>
+
+                      <IconButton
+                        aria-owns={open ? 'menu-appbar' : null}
+                        aria-haspopup="true"
+                        onClick={this.handleMenu}
+                        color="inherit"
+                        disabled={shouldProcessing}
+                      >
+                        <Language />
+                      </IconButton>
+                      <Menu
+                        id="menu-sysInfo"
+                        anchorEl={showSysInfo}
+                        anchorOrigin={{
+                          vertical: 'top',
+                          horizontal: 'left'
+                        }}
+                        transformOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        open={openSysInfo}
+                        onClose={this.handleCloseSysInfo}
+                        TransitionComponent={Fade}
+                        classes={{
+                          paper: classes.popover,
+
+                        }}
+                      >
+                        <SysInfo />
+                      </Menu>
+                      <Menu
+                        id="menu-healthz"
+                        anchorEl={showStatus}
+                        anchorOrigin={{
+                          vertical: 'top',
+                          horizontal: 'left'
+                        }}
+                        transformOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        open={openStatusMenu}
+                        onClose={this.handleCloseStatus}
+                        TransitionComponent={Fade}
+                        classes={{
+                          paper: classes.popover
+                        }}
+                      >
+                        <HealthCheck healthCheckResults={healthCheckResults} />
+                      </Menu>
+                      <Menu
+                        id="menu-i18n"
+                        anchorEl={anchorEl}
+                        anchorOrigin={{
+                          vertical: 'top',
+                          horizontal: 'left'
+                        }}
+                        transformOrigin={{
+                          vertical: 'bottom',
+                          horizontal: 'left'
+                        }}
+                        open={open}
+                        onClose={this.handleClose}
+                        TransitionComponent={Fade}
+                      >
+                        <MenuItem
+                          className={classes.menuItem}
+                          onClick={() => this.handleChangeLng('en')}
+                        >
+                          <ListItemIcon className={classes.icon}>
+                            <Flag
+                              name="GB"
+                              format="png"
+                              pngSize={24}
+                              basePath="./flags"
+                            />
+                          </ListItemIcon>
+                          <ListItemText
+                            classes={{ primary: classes.primary }}
+                            inset
+                            primary={t('Language.en')}
                           />
-                        </ListItemIcon>
-                        <ListItemText
-                          classes={{ primary: classes.primary }}
-                          inset
-                          primary={t('Language.zh_CN')}
-                        />
-                      </MenuItem>
-                    </Menu>
-                  </div>
-                </Toolbar>
-              </AppBar>
-            </div>
-          )}
-        </I18n>
-      );
+                        </MenuItem>
+                        <Divider />
+                        <MenuItem
+                          className={classes.menuItem}
+                          onClick={() => this.handleChangeLng('zh_CN')}
+                        >
+                          <ListItemIcon className={classes.icon}>
+                            <Flag
+                              name="CN"
+                              format="png"
+                              pngSize={24}
+                              basePath="./flags"
+                            />
+                          </ListItemIcon>
+                          <ListItemText
+                            classes={{ primary: classes.primary }}
+                            inset
+                            primary={t('Language.zh_CN')}
+                          />
+                        </MenuItem>
+                      </Menu>
+                    </div>
+                  </Toolbar>
+                </AppBar>
+              </div>
+            )}
+          </I18n>
+        );
+      }
+
     }
   }
   /* eslint-disable react/forbid-prop-types */
@@ -381,7 +386,7 @@ export default function withLayout(SubCompontents, showTop = true) {
     ...ownProps
   });
 
-  return withStyles(styles, { withTheme: true })(
+  export default withStyles(styles, { withTheme: true })(
     connect(mapStateToProps)(ConnectedLayout)
   );
-}
+// }

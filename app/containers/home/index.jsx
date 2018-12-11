@@ -136,4 +136,4 @@ const Welcome = connect(
   mapDispatchToProps
 )(ConnectedWelcome);
 
-export default withLayout(withStyles(styles)(Welcome));
+export default withStyles(styles)(Welcome);

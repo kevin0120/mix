@@ -97,4 +97,4 @@ Help.propTypes = {
   classes: PropTypes.shape({}).isRequired
 };
 
-export default withLayout(withStyles(styles)(Help), false);
+export default withStyles(styles)(Help);

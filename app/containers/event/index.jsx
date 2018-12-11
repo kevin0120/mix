@@ -357,4 +357,4 @@ Event.propTypes = {
   classes: PropTypes.shape({}).isRequired
 };
 
-export default withLayout(withKeyboard(withStyles(styles)(Event)), false);
+export default withKeyboard(withStyles(styles)(Event));
