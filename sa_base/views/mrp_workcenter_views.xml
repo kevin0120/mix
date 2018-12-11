@@ -38,7 +38,7 @@
                             <group>
                                 <field name="code"/>
                                 <field name="type" required="1" />
-                                <field name="calendar_id"/>
+                                <field name="calendar_id" groups="base.group_system"/>
                                 <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
                             </group>
                         </group>
