@@ -28,16 +28,21 @@ func (m *Methods) postWorkorders(ctx iris.Context) {
 		return
 	}
 
-	_, err = m.service.CreateWorkorders(workorders)
+	m.service.workordersChannel <- &workorders
 
-	if err != nil {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString(err.Error())
-		return
-	} else {
-		ctx.StatusCode(iris.StatusCreated)
-		return
-	}
+	//_, err = m.service.CreateWorkorders(workorders)
+	//
+	//if err != nil {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString(err.Error())
+	//	return
+	//} else {
+	//	ctx.StatusCode(iris.StatusCreated)
+	//	return
+	//}
+
+	ctx.StatusCode(iris.StatusCreated)
+	return
 }
 
 func (m *Methods) getResults(ctx iris.Context) {

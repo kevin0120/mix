@@ -7,15 +7,15 @@ import (
 	"github.com/masami10/rush/cmd/rushd/run"
 	"github.com/masami10/rush/services/diagnostic"
 	"io"
+	"log"
 	"math/rand"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
 	"time"
-	"log"
-	"net/http"
-	_ "net/http/pprof"
 )
 
 type Diagnostic run.Diagnostic

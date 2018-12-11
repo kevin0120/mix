@@ -45,14 +45,15 @@ type ODOOWorkorder struct {
 		Name string `json:"name"`
 	} `json:"workcenter"`
 
-	VehicleTypeImg string        `json:"vehicleTypeImg"`
-	Worksheet      string        `json:"worksheet"`
-	KNR            string        `json:"knr"`
-	VIN            string        `json:"vin"`
-	LongPin        string        `json:"long_pin"`
-	UpdateTime     time.Time     `json:"update_time"`
-	Consumes       []ODOOConsume `json:"consumes"`
-	Job            string        `json:"job"`
+	VehicleTypeImg string `json:"vehicleTypeImg"`
+	//Worksheet      string        `json:"worksheet"`
+	ImageOPID  int64         `json:"img_op_id"`
+	KNR        string        `json:"knr"`
+	VIN        string        `json:"vin"`
+	LongPin    string        `json:"long_pin"`
+	UpdateTime time.Time     `json:"update_time"`
+	Consumes   []ODOOConsume `json:"consumes"`
+	Job        string        `json:"job"`
 
 	// mo相关信息
 	MO_EquipemntName  string `json:"equipment_name"` // 设备名

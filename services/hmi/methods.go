@@ -824,11 +824,16 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 	resp.LongPin = workorder.LongPin
 	resp.Status = workorder.Status
 	resp.MaxOpTime = workorder.MaxOpTime
-	resp.WorkSheet = workorder.WorkSheet
+	//resp.WorkSheet = workorder.WorkSheet
 	resp.Job = workorder.JobID
 	resp.VehicleTypeImg = workorder.VehicleTypeImg
 	resp.Lnr = workorder.MO_Lnr
 	resp.Model = workorder.MO_Model
+
+	op, err := m.service.DB.GetOperation(workorder.ImageOPID)
+	if err == nil {
+		resp.WorkSheet = op.Img
+	}
 
 	for _, v := range results {
 		r := Result{}

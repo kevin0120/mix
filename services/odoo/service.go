@@ -10,7 +10,9 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/resty.v1"
 	"net/http"
+	"runtime/debug"
 	"strconv"
+	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -48,21 +50,26 @@ type Service struct {
 	HTTPDService interface {
 		GetHandlerByName(version string) (*httpd.Handler, error)
 	}
-	httpClient  *resty.Client
-	endpoints   []*Endpoint
-	configValue atomic.Value
-	status      string
-	WS          *wsnotify.Service
-	Aiis        *aiis.Service
+	httpClient        *resty.Client
+	endpoints         []*Endpoint
+	configValue       atomic.Value
+	status            string
+	WS                *wsnotify.Service
+	Aiis              *aiis.Service
+	workordersChannel chan interface{}
+	wg                sync.WaitGroup
+	closing           chan struct{}
 }
 
 func NewService(c Config, d Diagnostic) *Service {
 	e, _ := c.index()
 	s := &Service{
-		diag:      d,
-		methods:   Methods{},
-		endpoints: e,
-		status:    ODOO_STATUS_OFFLINE,
+		diag:              d,
+		methods:           Methods{},
+		endpoints:         e,
+		status:            ODOO_STATUS_OFFLINE,
+		workordersChannel: make(chan interface{}, c.Workers),
+		closing:           make(chan struct{}),
 	}
 
 	s.methods.service = s
@@ -156,10 +163,21 @@ func (s *Service) Open() error {
 
 	s.Aiis.OnOdooStatus = s.OnStatus
 
+	for i := 0; i < s.Config().Workers; i++ {
+		s.wg.Add(1)
+		go s.taskSaveWorkorders()
+	}
+
 	return nil
 }
 
 func (s *Service) Close() error {
+	for i := 0; i < s.Config().Workers; i++ {
+		s.closing <- struct{}{}
+	}
+
+	s.wg.Wait()
+
 	return nil
 }
 
@@ -288,7 +306,8 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 		o.LongPin = v.LongPin
 		o.Vin = v.VIN
 		o.MaxOpTime = v.Max_op_time
-		o.WorkSheet = v.Worksheet
+		//o.WorkSheet = v.Worksheet
+		o.ImageOPID = v.ImageOPID
 		o.VehicleTypeImg = v.VehicleTypeImg
 		o.UpdateTime = time.Now()
 		o.JobID, _ = strconv.Atoi(v.Job)
@@ -362,4 +381,26 @@ func (s *Service) OnStatus(status string) {
 
 func (s *Service) Status() string {
 	return s.status
+}
+
+func (s *Service) taskSaveWorkorders() {
+	for {
+		for {
+			select {
+			case payload := <-s.workordersChannel:
+				s.handleSaveWorkorders(payload)
+
+			case <-s.closing:
+				s.wg.Done()
+				return
+			}
+		}
+	}
+}
+
+func (s *Service) handleSaveWorkorders(payload interface{}) {
+	defer debug.FreeOSMemory()
+
+	workorders := payload.(*[]ODOOWorkorder)
+	s.CreateWorkorders(*workorders)
 }

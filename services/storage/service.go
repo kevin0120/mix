@@ -456,6 +456,23 @@ func (s *Service) FindWorkorder(hmi_sn string, workcenter_code string, code stri
 	}
 }
 
+func (s *Service) GetOperationByID(opid int64) (RoutingOperations, error) {
+
+	var routingOp RoutingOperations
+
+	rt, err := s.eng.Alias("r").Where("r.id = ?", opid).Get(&routingOp)
+
+	if err != nil {
+		return routingOp, err
+	} else {
+		if !rt {
+			return routingOp, errors.New("workorder does not exist")
+		} else {
+			return routingOp, nil
+		}
+	}
+}
+
 func (s *Service) FindNextWorkorder(hmi_sn string, workcenter_code string) (Workorders, error) {
 
 	var workorder Workorders

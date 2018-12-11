@@ -15,6 +15,7 @@ type Config struct {
 	Timeout   toml.Duration  `yaml:"timeout"`
 	Interval  toml.Duration  `yaml:"interval"`
 	MaxRetry  int            `yaml:"max_retry"` // api最大尝试次数
+	Workers   int            `yaml:"workers"`
 	Endpoints []EndpointConf `yaml:"endpoints"`
 }
 

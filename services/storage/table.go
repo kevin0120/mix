@@ -11,11 +11,12 @@ type Workorders struct {
 	Knr            string `xorm:"varchar(64) 'knr'"`
 	LongPin        string `xorm:"varchar(64) 'long_pin'"`
 
-	MaxOpTime      int       `xorm:"int 'max_op_time'"`
-	MaxSeq         int       `xorm:"int 'max_seq'"`
-	Status         string    `xorm:"varchar(32) 'status'"`
-	LastResultID   int64     `xorm:"bigint 'last_result_id'"`
-	WorkSheet      string    `xorm:"text 'work_sheet'"`
+	MaxOpTime    int    `xorm:"int 'max_op_time'"`
+	MaxSeq       int    `xorm:"int 'max_seq'"`
+	Status       string `xorm:"varchar(32) 'status'"`
+	LastResultID int64  `xorm:"bigint 'last_result_id'"`
+	//WorkSheet      string    `xorm:"text 'work_sheet'"`
+	ImageOPID      int64     `xorm:"bigint 'img_op_id'"`
 	VehicleTypeImg string    `xorm:"text 'vehicle_type_img'"`
 	UpdateTime     time.Time `xorm:"datetime 'update_time'"`
 	ProductID      int64     `xorm:"bigint 'product_id'"`

@@ -3,13 +3,13 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"strings"
 	"sync"
 	"time"
-	"github.com/masami10/rush/services/aiis"
 )
 
 const (
@@ -79,7 +79,7 @@ func (h *Handlers) Handle(result interface{}, curve interface{}) {
 
 		controllerResult.CurFile = aiis.CURObject{
 			File: curveFileName,
-			OP: dbResult.Count,
+			OP:   dbResult.Count,
 		}
 
 		controllerCurve.CurveFile = curveFileName

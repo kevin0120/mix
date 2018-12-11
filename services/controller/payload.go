@@ -47,10 +47,10 @@ const (
 //}
 
 type ControllerResult struct {
-	Result_id     int64      `json:"result_id"`
-	Controller_SN string     `json:"controller_sn"`
-	Workorder_ID  int64      `json:"workorder_id"`
-	UserID        int64      `json:"user_id"`
+	Result_id     int64  `json:"result_id"`
+	Controller_SN string `json:"controller_sn"`
+	Workorder_ID  int64  `json:"workorder_id"`
+	UserID        int64  `json:"user_id"`
 	CurFile       aiis.CURObject
 	Result        string     `json:"result"`
 	Dat           string     `json:"dat"`
