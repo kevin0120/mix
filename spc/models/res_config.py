@@ -21,6 +21,22 @@ class AiisSettings(models.TransientModel):
         self.env['ir.config_parameter'].set_param("aiis.urls",self.aiis_urls,groups=['base.group_system'])
 
 
+class SaConfigSettings(models.TransientModel):
+    _name = 'wo.config.settings'
+    _inherit = 'res.config.settings'
+
+    push_wo_number = fields.Integer('Push WorkOrder Count ', default=80)
+
+    def get_default_all(self, fields):
+        push_wo_number = int(self.env["ir.config_parameter"].get_param("sa.wo.push.num", default=80))
+
+        return dict(push_wo_number=push_wo_number,)
+
+    # push_wo_number
+    def set_push_wo_number(self):
+        self.env['ir.config_parameter'].set_param("sa.wo.push.num", self.push_wo_number, groups=['base.group_system'])
+
+
 class SPCSetting(models.TransientModel):
     _name = 'spc.config.settings'
     _inherit = 'res.config.settings'

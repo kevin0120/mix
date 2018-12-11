@@ -23,6 +23,7 @@
                 <form string="Routing Work Centers">
                     <header>
                         <button string="ReSequence" type="object" name="button_resequence"  class="oe_highlight"/>
+                        <button string="下发作业" type="object" name="button_send_mrp_routing_workcenter"  class="oe_highlight"/>
                     </header>
                     <sheet>
                         <group>
