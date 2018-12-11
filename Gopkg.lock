@@ -98,6 +98,20 @@
   version = "v0.7.0"
 
 [[projects]]
+  digest = "1:4c0989ca0bcd10799064318923b9bc2db6b4d6338dd75f3f2d86c3511aaaf5cf"
+  name = "github.com/golang/protobuf"
+  packages = [
+    "proto",
+    "ptypes",
+    "ptypes/any",
+    "ptypes/duration",
+    "ptypes/timestamp",
+  ]
+  pruneopts = "UT"
+  revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
+  version = "v1.2.0"
+
+[[projects]]
   digest = "1:43dd08a10854b2056e615d1b1d22ac94559d822e1f8b6fcc92c1a1057e85188e"
   name = "github.com/gorilla/websocket"
   packages = ["."]
@@ -390,14 +404,19 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:47462c69e4af18cd0170dd0d6e43ccc4059137c8460bdf85bcd8d6c583a3873c"
+  digest = "1:d01b9128e4b4f6a40f6be17c114f0fcd17080f441c2679724a69e611de9846f0"
   name = "golang.org/x/net"
   packages = [
+    "context",
     "html",
     "html/atom",
     "http/httpguts",
+    "http2",
+    "http2/hpack",
     "idna",
+    "internal/timeseries",
     "publicsuffix",
+    "trace",
   ]
   pruneopts = "UT"
   revision = "1e491301e022f8f977054da4c2d852decd59571f"
@@ -436,6 +455,54 @@
   pruneopts = "UT"
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
   version = "v0.3.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:077c1c599507b3b3e9156d17d36e1e61928ee9b53a5b420f10f28ebd4a0b275c"
+  name = "google.golang.org/genproto"
+  packages = ["googleapis/rpc/status"]
+  pruneopts = "UT"
+  revision = "bd91e49a0898e27abb88c339b432fa53d7497ac0"
+
+[[projects]]
+  digest = "1:9edd250a3c46675d0679d87540b30c9ed253b19bd1fd1af08f4f5fb3c79fc487"
+  name = "google.golang.org/grpc"
+  packages = [
+    ".",
+    "balancer",
+    "balancer/base",
+    "balancer/roundrobin",
+    "binarylog/grpc_binarylog_v1",
+    "codes",
+    "connectivity",
+    "credentials",
+    "credentials/internal",
+    "encoding",
+    "encoding/proto",
+    "grpclog",
+    "internal",
+    "internal/backoff",
+    "internal/binarylog",
+    "internal/channelz",
+    "internal/envconfig",
+    "internal/grpcrand",
+    "internal/grpcsync",
+    "internal/syscall",
+    "internal/transport",
+    "keepalive",
+    "metadata",
+    "naming",
+    "peer",
+    "resolver",
+    "resolver/dns",
+    "resolver/passthrough",
+    "stats",
+    "status",
+    "tap",
+  ]
+  pruneopts = "UT"
+  revision = "df014850f6dee74ba2fc94874043a9f3f75fbfd8"
+  version = "v1.17.0"
 
 [[projects]]
   digest = "1:7849dff11be3defef1f33a9e469329f8786afb4649d115d7b2027717fe4eb4eb"
@@ -477,6 +544,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/go-xorm/xorm",
+    "github.com/golang/protobuf/proto",
     "github.com/gorilla/websocket",
     "github.com/iris-contrib/middleware/cors",
     "github.com/kataras/iris",
@@ -487,6 +555,8 @@
     "github.com/minio/minio-go",
     "github.com/pkg/errors",
     "github.com/satori/go.uuid",
+    "golang.org/x/net/context",
+    "google.golang.org/grpc",
     "gopkg.in/resty.v1",
     "gopkg.in/yaml.v2",
   ]

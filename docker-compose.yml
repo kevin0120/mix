@@ -5,6 +5,7 @@ services:
     ports:
       - "8082:8082"
       - "4710:4710"
+      - "6060:6060"
     volumes:
       - /data/rush/conf:/etc/rush/conf
       - /data/rush/log:/etc/rush/log
