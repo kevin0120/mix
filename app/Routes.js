@@ -27,7 +27,6 @@ export default class Routes extends React.Component {
             if (RouteConfig.showLayout !== this.state.showLayout) {
               this.setState({ showLayout: RouteConfig.showLayout });
             }
-            console.log(this.showLayout);
             return <RouteConfig.main/>;
           }}/>
         ))}

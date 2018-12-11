@@ -52,7 +52,7 @@ const lodash = require('lodash');
       this.state = {
         isMenuOpen: false,
         anchorEl: null,
-        value: 'recents',
+        value: 'welcome',
         showStatus: null,
         showSysInfo: null
       };
@@ -175,7 +175,7 @@ const lodash = require('lodash');
       const statusClassName = this.HealthCheckOk()
         ? classes.menuStatusOK
         : classes.menuStatusFail;
-      console.log('shouldRender:',this.props.shouldRender);
+      // console.log('shouldRender:',this.props.shouldRender);
       if(!this.props.shouldRender){
         return null;
       }else{
@@ -228,6 +228,7 @@ const lodash = require('lodash');
                         {routeConfigs.slice(0, -1).map(route => (
                           <BottomNavigationAction
                             key={route.name}
+                            value={route.name}
                             component={Link}
                             to={route.url}
                             label={t(route.title)}
