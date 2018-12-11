@@ -13,6 +13,9 @@ import (
 	"strings"
 	"syscall"
 	"time"
+	"log"
+	"net/http"
+	_ "net/http/pprof"
 )
 
 type Diagnostic run.Diagnostic
@@ -54,6 +57,9 @@ func NewMain() *Main {
 }
 
 func main() {
+	go func() {
+		log.Println(http.ListenAndServe("0.0.0.0:6060", nil))
+	}()
 
 	//agent := stackimpact.Start(stackimpact.Options{
 	//	AgentKey: "d0d6faa73ea9bb5981d6fd91410fe21b575a09fc",
