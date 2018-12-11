@@ -5,9 +5,6 @@
         <field name="model">mrp.routing.workcenter</field>
         <field name="inherit_id" ref="sa_base.sa_mrp_routing_workcenter_form_view"/>
         <field name="arch" type="xml">
-          <xpath expr="//header" position="inside">
-             <button string="下发作业" type="object" name="button_send_mrp_routing_workcenter"  class="oe_highlight"/>
-          </xpath>
           <field name="op_job_id" position="attributes">
               <attribute name="required">1</attribute>
           </field>
