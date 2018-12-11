@@ -9,6 +9,7 @@ services:
     volumes:
       - /data/aiis/conf:/etc/aiis/conf
       - /data/aiis/log:/etc/aiis/log
+      - /etc/localtime:/etc/localtime:ro
     restart: "always"
     healthcheck:
       test: curl -f --silent --fail http://127.0.0.1:9092/aiis/v1/healthz || exit 1
