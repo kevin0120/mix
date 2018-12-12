@@ -21,6 +21,9 @@ class ReportTightResultReport(models.AbstractModel):
 
         holidays_report = Report._get_report_from_name('spc.report_result_tighting')
         results = self.env['operation.result'].search([('control_date', '>=', date_from), ('control_date', '<=', date_to ) ])
+        #
+        # if not results:
+        #     return True
 
         for vin, lines in groupby(results, lambda r: r.vin):
             if report_pages[-1] and report_pages[-1][-1]['name']:

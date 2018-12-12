@@ -30,10 +30,10 @@
                                 </tr>
                             </thead>
                             <tr t-foreach="docs" t-as="line">
-                                <td>
+                                <td  t-if="line">
                                     <span t-esc="line[0]['name']"/>
                                 </td>
-                                <td t-if="line[0]['lines']">
+                                <td t-if="line">
                                     <table class="table table-condensed" t-if="line[0]['lines']">
                                         <thead>
                                             <tr>
