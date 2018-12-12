@@ -1135,6 +1135,7 @@ func (m *Methods) getLocalResults(ctx iris.Context) {
 
 	rt := []LocalResults{}
 	sr := controller.ResultValue{}
+	loc, _ := time.LoadLocation("Local")
 	for _, v := range results {
 		json.Unmarshal([]byte(v.ResultValue), &sr)
 		lr := LocalResults{
@@ -1145,7 +1146,7 @@ func (m *Methods) getLocalResults(ctx iris.Context) {
 			Result:       m.filterValue(filters, "result", string(v.Result)),
 			Torque:       m.filterValue(filters, "torque", float64(sr.Mi)),
 			Angle:        m.filterValue(filters, "angle", float64(sr.Wi)),
-			TimeStamp:    m.filterValue(filters, "timestamp", string(v.Results.UpdateTime.Format(time.RFC3339))),
+			TimeStamp:    m.filterValue(filters, "timestamp", string(v.Results.UpdateTime.In(loc).Format(time.RFC3339))),
 			Batch:        m.filterValue(filters, "batch", string(v.Batch)),
 			VehicleType:  m.filterValue(filters, "vehicle_type", string(v.MO_Model)),
 			JobID:        m.filterValue(filters, "job_id", int(v.JobID)),
