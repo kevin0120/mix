@@ -345,6 +345,8 @@ export function* watchResults() {
 export function* handleResults(data) {
   const state = yield select();
 
+  const { operations } = state;
+
   let hasFail = false;
   let storyType = STORY_TYPE.PASS;
 
@@ -356,11 +358,15 @@ export function* handleResults(data) {
       storyType = STORY_TYPE.PASS;
     }
 
+    const eti  = data[i].ti? data[i].ti.toString() : 'nil';
+
+    const batch = `${(operations.activeResultIndex + 1).toString()}/${operations.results.length.toString()}`;
+
     yield call(
       addNewStory,
       storyType,
       '结果',
-      `扭矩:${data[i].mi.toString()} 角度:${data[i].wi.toString()}`
+      `扭矩:${data[i].mi.toString()} 角度:${data[i].wi.toString()} 耗时:${eti} 批次:${batch}`
     );
   }
 
@@ -369,8 +375,8 @@ export function* handleResults(data) {
 
   if (hasFail) {
     if (
-      state.operations.failCount + 1 >=
-      state.operations.results[state.operations.activeResultIndex]
+      operations.failCount + 1 >=
+      operations.results[operations.activeResultIndex]
         .max_redo_times
     ) {
       // 作业失败
@@ -381,8 +387,8 @@ export function* handleResults(data) {
       continueDoing = true;
     }
   } else if (
-    state.operations.activeResultIndex + data.length >=
-    state.operations.results.length
+    operations.activeResultIndex + data.length >=
+    operations.results.length
   ) {
     // 作业完成
     rType = OPERATION.FINISHED;

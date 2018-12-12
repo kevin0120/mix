@@ -46,7 +46,7 @@ a {
 }
 
 a:hover {
-  color: #555;
+  color: gray;
   opacity: 1;
   text-decoration: none;
   cursor: pointer;

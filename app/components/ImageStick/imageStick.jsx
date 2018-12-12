@@ -131,7 +131,7 @@ class ConnectedImageStick extends React.Component {
     let idx = 0;
 
     const statusDisplay = operations.results.map((item, i) => {
-      const display = operations.activeResultIndex >= idx;
+      // const display = operations.activeResultIndex >= idx;
 
       const postionStyle = {
         top: `calc(${item.offset_y}% - 30px)`,
@@ -156,15 +156,15 @@ class ConnectedImageStick extends React.Component {
           <span className={`${classes.circleStatus} ${classes[status]}`}>
             {item.sequence}
           </span>
-          {display ? (
-            <div className={classes.popover}>
-              <div className={classes.popoverBody}>
-                <p>角度: {item.wi || '-'}</p>
-                <p>扭矩: {item.mi || '-'}</p>
-                <p>时间: {item.ti || '-'}</p>
-              </div>
-            </div>
-          ) : null}
+          {/*{display ? (*/}
+            {/*<div className={classes.popover}>*/}
+              {/*<div className={classes.popoverBody}>*/}
+                {/*<p>角度: {item.wi || '-'}</p>*/}
+                {/*<p>扭矩: {item.mi || '-'}</p>*/}
+                {/*<p>时间: {item.ti || '-'}</p>*/}
+              {/*</div>*/}
+            {/*</div>*/}
+          {/*) : null}*/}
         </div>
       );
     });

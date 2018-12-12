@@ -19,7 +19,7 @@ export default class Routes extends React.Component {
   }
 
   render() {
-    console.log('rerender');
+    // console.log('rerender');
     return (<App>
       <Switch>
         {i.map(RouteConfig => (
