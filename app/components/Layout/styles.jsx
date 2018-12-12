@@ -19,7 +19,7 @@ export default theme => ({
   ...imagesStyles,
   ...popoverStyles,
   layout: {
-    height: '100%',
+    // height: '100%',
     flexGrow: 1
   },
   appBar: {
