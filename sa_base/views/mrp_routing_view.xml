@@ -16,6 +16,23 @@
                 </tree>
             </field>
         </record>
+
+        <record id="operation_download_action" model="ir.actions.server">
+            <field name="name">Download Operation</field>
+            <field name="model_id" ref="mrp.model_mrp_routing_workcenter"/>
+            <field name="state">code</field>
+            <field name="code">records.button_send_mrp_routing_workcenter()</field>
+        </record>
+
+        <record id="run_operation_download_action" model="ir.values">
+            <field name="model_id" ref="mrp.model_mrp_routing_workcenter"/>
+            <field name="name">Download Operation</field>
+            <field name="key2">client_action_multi</field>
+            <field name="key">action</field>
+            <field name="model">mrp.routing.workcenter</field>
+            <field name="value" eval="'ir.actions.server,' + str(ref('operation_download_action'))" />
+        </record>
+
         <record id="sa_mrp_routing_workcenter_form_view" model="ir.ui.view">
             <field name="name">sa_mrp_routing_workcenter_form_view</field>
             <field name="model">mrp.routing.workcenter</field>
@@ -23,7 +40,7 @@
                 <form string="Routing Work Centers">
                     <header>
                         <button string="ReSequence" type="object" name="button_resequence"  class="oe_highlight"/>
-                        <button string="下发作业" type="object" name="button_send_mrp_routing_workcenter"  class="oe_highlight"/>
+                        <button string="Download Operation" type="object" name="button_send_mrp_routing_workcenter"  class="oe_highlight"/>
                     </header>
                     <sheet>
                         <group>
