@@ -277,7 +277,9 @@ func (p *Service) HandleProcess() {
 
 			// 处理结果
 			if strings.Contains(msg, XML_RESULT_KEY) {
-				//fmt.Printf("%s\n", msg)
+
+				p.diag.Info(fmt.Sprintf("收到结果: %s\n", msg))
+
 				cvi3Result := CVI3Result{}
 				err := xml.Unmarshal([]byte(msg), &cvi3Result)
 				if err != nil {

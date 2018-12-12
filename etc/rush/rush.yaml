@@ -3,7 +3,7 @@ data_dir: /home/linshenqi/.rush
 serial_no: 1qaz2wsx
 doc_path: ./etc/rush/api.json
 logging:
-  file: STDERR
+  file: /home/linshenqi/rush.log
   level: DEBUG
 httpd:
   bind-address: :8082
@@ -41,7 +41,7 @@ aiis:
   max_retry: 3
   ws_result_route: /aiis/v1/ws/results
   ResultUploadInteval: 1s
-  grpc_server: 192.168.1.3:9093
+  grpc_server: 127.0.0.1:9093
 odoo:
   urls:
   - http://192.168.1.3:8069
@@ -102,11 +102,11 @@ controller_service:
   #    port: 4545
   #    channel: 1
 
-#  - serial_no: 0001
-#    protocol: Audi/VW
-#    remote_ip: 192.168.1.101
-#    port: 4700
-#    channel: 51
+  - serial_no: 0001
+    protocol: Audi/VW
+    remote_ip: 192.168.1.101
+    port: 4700
+    channel: 51
 
 #  - serial_no: 0002
 #    protocol: Audi/VW

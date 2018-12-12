@@ -125,6 +125,7 @@ type BLC struct {
 }
 
 type TIP struct {
+	TID string `xml:"TID"`
 	PSet int    `xml:"PRG"`
 	Date string `xml:"DAT"`
 	Time string `xml:"TIM"`
@@ -279,6 +280,7 @@ func XML2Result(result *CVI3Result, rr *controller.ControllerResult) {
 
 	blcs := result.PRC_SST.PAR.FAS.GRP.TIP.BLC
 
+	rr.TighteningID = result.PRC_SST.PAR.FAS.GRP.TIP.TID
 	rr.Controller_SN = result.PRC_SST.PAR.SN
 	rr.Result = result.PRC_SST.PAR.Result
 	if rr.Result == "IO" {

@@ -1135,8 +1135,10 @@ func (m *Methods) getLocalResults(ctx iris.Context) {
 
 	rt := []LocalResults{}
 	sr := controller.ResultValue{}
-	loc, _ := time.LoadLocation("Local")
 	for _, v := range results {
+		stime := v.Results.UpdateTime.Format("2006-01-02 15:04:05")
+		dt, _ := time.Parse("2006-01-02 15:04:05", stime)
+
 		json.Unmarshal([]byte(v.ResultValue), &sr)
 		lr := LocalResults{
 			HmiSN:        m.filterValue(filters, "hmi_sn", string(v.HMISN)),
@@ -1146,7 +1148,7 @@ func (m *Methods) getLocalResults(ctx iris.Context) {
 			Result:       m.filterValue(filters, "result", string(v.Result)),
 			Torque:       m.filterValue(filters, "torque", float64(sr.Mi)),
 			Angle:        m.filterValue(filters, "angle", float64(sr.Wi)),
-			TimeStamp:    m.filterValue(filters, "timestamp", string(v.Results.UpdateTime.In(loc).Format(time.RFC3339))),
+			TimeStamp:    m.filterValue(filters, "timestamp", dt.Local()),
 			Batch:        m.filterValue(filters, "batch", string(v.Batch)),
 			VehicleType:  m.filterValue(filters, "vehicle_type", string(v.MO_Model)),
 			JobID:        m.filterValue(filters, "job_id", int(v.JobID)),
