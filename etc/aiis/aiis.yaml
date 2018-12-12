@@ -1,7 +1,7 @@
 hostname: localhost
 data_dir: /home/linshenqi/.aiis
 logging:
-  file: STDERR
+  file: /home/linshenqi/aiis.log
   level: DEBUG
 httpd:
   bind-address: :9092

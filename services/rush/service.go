@@ -181,6 +181,8 @@ func (s *Service) OnRPCNewClinet(stream *aiis.RPCAiis_RPCNodeServer) {
 }
 
 func (s *Service) OnRPCRecv(stream *aiis.RPCAiis_RPCNodeServer, payload string) {
+	s.diag.Info(fmt.Sprintf("收到结果: %s\n", payload))
+
 	op_result := WSOpResult{}
 	err := json.Unmarshal([]byte(payload), &op_result)
 	if err != nil {
