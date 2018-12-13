@@ -3,8 +3,10 @@ data_dir: /home/linshenqi/.rush
 serial_no: 1qaz2wsx
 doc_path: ./etc/rush/api.json
 logging:
-  file: /home/linshenqi/rush.log
+  file: /home/linshenqi/rush.log_%Y-%m-%d
   level: DEBUG
+  max_age: 1m
+  rotate: 1m
 httpd:
   bind-address: :8082
   log-enabled: true
