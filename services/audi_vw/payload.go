@@ -125,7 +125,7 @@ type BLC struct {
 }
 
 type TIP struct {
-	TID string `xml:"TID"`
+	TID  string `xml:"TID"`
 	PSet int    `xml:"PRG"`
 	Date string `xml:"DAT"`
 	Time string `xml:"TIM"`

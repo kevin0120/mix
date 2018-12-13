@@ -165,6 +165,7 @@ type LocalResults struct {
 	Result       interface{} `json:"result,omitempty"`
 	Torque       interface{} `json:"torque,omitempty"`
 	Angle        interface{} `json:"angle,omitempty"`
+	Spent        interface{} `json:"spent,omitempty"`
 	TimeStamp    interface{} `json:"timestamp,omitempty"`
 	Batch        interface{} `json:"batch,omitempty"`
 }

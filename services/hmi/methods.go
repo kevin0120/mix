@@ -1148,6 +1148,7 @@ func (m *Methods) getLocalResults(ctx iris.Context) {
 			Result:       m.filterValue(filters, "result", string(v.Result)),
 			Torque:       m.filterValue(filters, "torque", float64(sr.Mi)),
 			Angle:        m.filterValue(filters, "angle", float64(sr.Wi)),
+			Spent:        m.filterValue(filters, "spent", float64(sr.Ti)),
 			TimeStamp:    m.filterValue(filters, "timestamp", dt.Local()),
 			Batch:        m.filterValue(filters, "batch", string(v.Batch)),
 			VehicleType:  m.filterValue(filters, "vehicle_type", string(v.MO_Model)),
