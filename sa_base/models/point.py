@@ -47,6 +47,8 @@ class OperationPointsGoup(models.Model):
 class OperationPoints(models.Model):
     _name = 'operation.point'
 
+    _inherit = ['mail.thread']
+
     _order = "sequence"
 
     active = fields.Boolean(
@@ -75,6 +77,15 @@ class OperationPoints(models.Model):
 
     max_redo_times = fields.Integer('Operation Max Redo Times', default=3)  # 此项重试业务逻辑在HMI中实现
 
+    # @api.multi
+    # def _track_subtype(self, init_values):
+    #     self.ensure_one()
+    #     if 'max_redo_times' in init_values:
+    #         return 'sa_base.mt_op_point_max_redo_time'
+    #     elif 'program_id' in init_values:
+    #         return 'sa_base.mt_op_program_id'
+    #     return super(OperationPoints, self)._track_subtype(init_values)
+
     @api.multi
     def name_get(self):
         res = []
@@ -97,8 +108,8 @@ class OperationPoints(models.Model):
 
     @api.multi
     def unlink(self):
-        if self.env.uid != SUPERUSER_ID:
-            raise UserError(_(u"Only SuperUser can delete program"))
+        for point in self:
+            point.operation_id.message_post(body=_("#%s operation point has been delete") % (point.sequence), subject=_('Routing Operation Point Deleted'))
         return super(OperationPoints, self).unlink()
 
     @api.one
@@ -107,3 +118,21 @@ class OperationPoints(models.Model):
         if bom_line_id:
             bom_line_id.toggle_active()
         return super(OperationPoints, self).toggle_active()
+
+    @api.multi
+    def write(self, vals):
+        ret = None
+        tracked_fields = self.env['operation.point'].fields_get(['max_redo_times', 'program_id'])
+        for point in self:
+            if 'max_redo_times' in vals or 'program_id' in vals:
+                old_values = {
+                    'max_redo_times': point.max_redo_times,
+                    'program_id': point.program_id
+                }
+                ret = super(OperationPoints, point).write(vals)  #修改数据
+
+                dummy, tracking_value_ids = point._message_track(tracked_fields, old_values)
+                point.operation_id.message_post(body=_("#%s operation point has been modified") % (point.sequence), tracking_value_ids=tracking_value_ids, subject=_('Routing Operation Point Modification'))
+        return ret
+
+        # return super(OperationPoints, self).write(vals)
