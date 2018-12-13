@@ -14,7 +14,7 @@ import defaultAvatarImg from '../../resources/imgs/image_placeholder.jpg';
 
 const lodash = require('lodash');
 
-const defaultUsers = [
+export const defaultUsers = [
   {
     uuid: '11',
     name: 'dummy',
@@ -43,6 +43,9 @@ export default function users(state: Array = defaultUsers, action) {
       return [...state, { uid, name, uuid, avatar: img }];
     }
     case USER.LOGOUT_SUCCESS: {
+      if (action.data.length === 0) {
+        return defaultUsers
+      }
       return action.data;
     }
     default:

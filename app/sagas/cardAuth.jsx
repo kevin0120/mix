@@ -16,5 +16,5 @@ export function* cardReadSuccess(action) {
 }
 
 export function* cardRemoved() {
-  yield put(userLogOut());
+  yield put(userLogOut('112233')); //默认uuid112233 登出
 }
