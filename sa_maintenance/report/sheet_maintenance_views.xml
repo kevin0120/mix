@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <template id="report_request_document">
+        <template id="sheet_request_document">
             <t t-call="report.html_container">
                 <t t-call="report.external_layout">
                     <div class="page">
                         <h2>
-                        维护报告
+                        维护作业单
                         </h2>
                         <table class="table table-condensed">
                             <thead>
@@ -53,21 +53,16 @@
                                                 最大值: <span t-field="point.tolerance_max"/><br/>
                                                 正常值: <span t-field="point.norm"/>
                                             </td>
-                                            <td>
-                                                <span t-field="point.measure"/>
-                                            </td>
+                                            <td></td>
                                         </tr>
                                     </table>
                                 </td>
                                 <td t-else="">
                                     <span t-field="point.description"/>
                                 </td>
-
-                                <td t-if="point.measure_success == 'pass'">
-                                    <span style="color: green;" t-field="point.measure_success"/>
-                                </td>
-                                <td t-else="">
-                                    <span style="color: red;" t-field="point.measure_success"/>
+                                <td>
+                                    <input name="pass" type="checkbox" /> Pass
+                                    <input name="fail" type="checkbox" /> Fail
                                 </td>
                             </tr>
                             <tr><td></td></tr>
@@ -77,11 +72,14 @@
              </t>
         </template>
 
-        <template id="report_request">
+
+        <template id="sheet_request">
             <t t-foreach="docs" t-as="o">
-                <t t-call="sa_maintenance.report_request_document" />
+                <t t-call="sa_maintenance.sheet_request_document" />
             </t>
         </template>
+
+
 
     </data>
 </odoo>
