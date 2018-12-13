@@ -178,7 +178,7 @@ const timelineStyle = theme => ({
     fontSize: '14px',
     lineHeight: '21px',
     '& p': {
-      fontSize: '14px',
+      fontSize: '24px',
       marginBottom: '5px'
     }
   },

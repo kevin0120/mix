@@ -365,8 +365,8 @@ export function* handleResults(data) {
     yield call(
       addNewStory,
       storyType,
-      '结果',
-      `扭矩:${data[i].mi.toString()} 角度:${data[i].wi.toString()} 耗时:${eti} 批次:${batch}`
+      `结果 ${batch}`,
+      `T:${data[i].mi.toString()} W:${data[i].wi.toString()}`
     );
   }
 

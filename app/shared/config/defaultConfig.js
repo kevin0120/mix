@@ -203,8 +203,8 @@ export const defaultConfigs = {
     switchAutoManual: false,
     oeeFuncEnable: false,
     modbusEnable: true,
-    rfidEnabled: true,
-    andonEnable: true,
+    rfidEnabled: false,
+    andonEnable: false,
     psetContinueMode: false
   }
 };
