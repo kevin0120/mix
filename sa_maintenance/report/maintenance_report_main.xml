@@ -2,6 +2,15 @@
 <odoo>
     <data>
         <report auto="False"
+            string="Maintenance Sheet"
+            id="maintenance_sheet"
+            model="maintenance.request"
+            name="sa_maintenance.sheet_request"
+            file="sa_maintenance.sheet_request"
+            report_type="qweb-pdf"
+        />
+
+        <report auto="False"
             string="Maintenance Report"
             id="maintenance_request"
             model="maintenance.request"

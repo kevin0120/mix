@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0+e-20171123\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-07 02:00+0000\n"
-"PO-Revision-Date: 2018-12-07 02:00+0000\n"
+"POT-Creation-Date: 2018-12-13 05:34+0000\n"
+"PO-Revision-Date: 2018-12-13 05:34+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -184,6 +184,11 @@ msgstr "维护报告"
 #: model:ir.model,name:sa_maintenance.model_maintenance_request
 msgid "Maintenance Requests"
 msgstr "维护申请"
+
+#. module: sa_maintenance
+#: model:ir.actions.report.xml,name:sa_maintenance.maintenance_sheet
+msgid "Maintenance Sheet"
+msgstr "维护作业单"
 
 #. module: sa_maintenance
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_tolerance_max

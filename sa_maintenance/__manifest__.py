@@ -29,7 +29,8 @@
         'views/mrp_maintenance_template.xml',
         'views/equipment_view.xml',
         'report/maintenance_report_main.xml',
-        'report/report_maintenance_views.xml'
+        'report/report_maintenance_views.xml',
+        'report/sheet_maintenance_views.xml'
     ],
     # 'qweb': [
     #     "static/src/xml/mrp_maintenance_template.xml",
