@@ -141,7 +141,7 @@ class ConnectedImageStick extends React.Component {
       idx += 1;
 
       let status = 'waiting';
-      if (operations.activeResultIndex === i && operations.operationStatus === OPERATION_STATUS.DOING) {
+      if (operations.results[operations.activeResultIndex].group_sequence === item.group_sequence && operations.operationStatus === OPERATION_STATUS.DOING) {
         status = 'waitingActive';
       }
 
