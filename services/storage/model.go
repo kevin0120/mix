@@ -159,7 +159,7 @@ type OperationResult struct {
 	TighteningId    int64       `json:"tightening_id"`
 	ToolSN          string      `json:"tool_sn"`
 	WorkcenterCode  string      `json:"workcenter_code"`
-	NutID int64 `json:"consu_product_id"`
+	NutID           int64       `json:"consu_product_id"`
 
 	// mo相关信息
 	EquipemntName  string `json:"equipment_name"` // 设备名

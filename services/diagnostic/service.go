@@ -2,13 +2,12 @@ package diagnostic
 
 import (
 	"errors"
+	"fmt"
+	"github.com/lestrrat-go/file-rotatelogs"
 	"io"
 	"os"
-	"path"
 	"strings"
 	"sync"
-	"github.com/lestrrat-go/file-rotatelogs"
-	"fmt"
 	"time"
 )
 
