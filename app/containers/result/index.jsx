@@ -183,6 +183,9 @@ class Result extends React.Component {
           <ListItem>
             <ListItemText primary={`角度: ${selectObj.angle}`} />
           </ListItem>
+          <ListItem>
+            <ListItemText primary={`耗时(ms): ${selectObj.spent}`} />
+          </ListItem>
           <Divider inset component="li" />
           <ListItem>
             <ListItemText primary={`批次:   ${selectObj.batch}`} />
@@ -318,21 +321,21 @@ class Result extends React.Component {
                           )
                         },
                         {
-                          Header: '扭矩',
+                          Header: '扭矩(N·M)',
                           accessor: 'torque',
-                          sortable: false,
+                          sortable: true,
                           filterable: false
                         },
                         {
-                          Header: '角度',
+                          Header: '角度(Deg)',
                           accessor: 'angle',
                           sortable: false,
                           filterable: false
                         },
                         {
-                          Header: '耗时',
+                          Header: '耗时(ms)',
                           accessor: 'spent',
-                          sortable: false,
+                          sortable: true,
                           filterable: false
                         },
                         {
@@ -352,7 +355,7 @@ class Result extends React.Component {
                           //   )
                         },
                         {
-                          Header: 'Actions',
+                          Header: '动作',
                           accessor: 'actions',
                           sortable: false,
                           filterable: false

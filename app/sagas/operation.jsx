@@ -358,7 +358,7 @@ export function* handleResults(data) {
       storyType = STORY_TYPE.PASS;
     }
 
-    const eti  = data[i].ti? data[i].ti.toString() : 'nil';
+    // const eti  = data[i].ti? data[i].ti.toString() : 'nil';
 
     const batch = `${(operations.activeResultIndex + 1).toString()}/${operations.results.length.toString()}`;
 
@@ -366,7 +366,7 @@ export function* handleResults(data) {
       addNewStory,
       storyType,
       `结果 ${batch}`,
-      `T:${data[i].mi.toString()} W:${data[i].wi.toString()}`
+      `T(N·M):${data[i].mi.toString()} A(Deg):${data[i].wi.toString()}`
     );
   }
 
