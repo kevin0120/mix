@@ -317,6 +317,10 @@ func (h *RushHandler) Info(msg string) {
 	h.l.Info(msg)
 }
 
+func (h *RushHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}
+
 // Fis Handler
 type FisHandler struct {
 	l Logger
