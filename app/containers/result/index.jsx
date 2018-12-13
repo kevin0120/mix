@@ -84,7 +84,7 @@ function requestData(masterpcUrl, hmiSN) {
   return defaultClient.get(url, {
     params: {
       hmi_sn: hmiSN,
-      filters: 'vin,job_id,batch,torque,angle,timestamp,vehicle_type',
+      filters: 'vin,job_id,batch,torque,angle,spent,timestamp,vehicle_type',
       limit: 500
     }
   });
@@ -118,6 +118,7 @@ class Result extends React.Component {
               vin: item.vin,
               torque: item.torque,
               angle: item.angle,
+              spent: item.spent,
               job_id: item.job_id,
               batch: item.batch,
               vehicle_type: item.vehicle_type,
@@ -325,6 +326,12 @@ class Result extends React.Component {
                         {
                           Header: '角度',
                           accessor: 'angle',
+                          sortable: false,
+                          filterable: false
+                        },
+                        {
+                          Header: '耗时',
+                          accessor: 'spent',
                           sortable: false,
                           filterable: false
                         },
