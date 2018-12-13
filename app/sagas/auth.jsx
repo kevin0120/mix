@@ -46,11 +46,12 @@ function* logout(action) {
   const { user } = action;
   const state = yield select();
   const { users } = state;
-  const ret = lodash.remove(users, i => i.name === user || i.uuid === user); // 检测是否已经登录
-  if (ret.length === 0) {
+  let deepUsers = lodash.cloneDeep(users);
+  lodash.remove(deepUsers, i => i.name === user || i.uuid === user); // 检测是否已经登录
+  if (deepUsers.length === 0) {
     yield put(push('/pages/login'));
   }
-  yield put({ type: USER.LOGOUT_SUCCESS, data: ret });
+  yield put({ type: USER.LOGOUT_SUCCESS, data: deepUsers });
 }
 
 export function* loginFlow() {
