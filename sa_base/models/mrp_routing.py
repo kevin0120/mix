@@ -20,7 +20,7 @@ class MrpRoutingWorkcenter(models.Model):
 
     socket = fields.Char(string='Socket No')
 
-    op_job_id = fields.Many2one('controller.job', string='Job')
+    op_job_id = fields.Many2one('controller.job', string='Job', track_visibility="onchange")
 
     operation_point_ids = fields.One2many('operation.point', 'operation_id', string='Operation Points')
 
@@ -28,16 +28,43 @@ class MrpRoutingWorkcenter(models.Model):
                                                 string='Operation Points Group(multi-spindle)')
 
     group_id = fields.Many2one('mrp.routing.group', string='Routing Group')
-    max_redo_times = fields.Integer('Operation Max Redo Times', default=3)  # 此项重试业务逻辑在HMI中实现
+    max_redo_times = fields.Integer('Operation Max Redo Times', default=3, track_visibility="onchange")  # 此项重试业务逻辑在HMI中实现
 
     worksheet_img = fields.Binary('worksheet_img')
 
     sync_download_time = fields.Datetime(string=u'同步下发时间')
 
-    max_op_time = fields.Integer('Max Operation time(second)', default=60)
+    max_op_time = fields.Integer('Max Operation time(second)', default=60, track_visibility="onchange")
+
+    routing_tracking_count = fields.Integer(compute='_compute_routing_tracking_count', string="Routing Modification")
 
     _sql_constraints = [('routing_group_wc_uniq', 'unique(routing_id,group_id, workcenter_id)',
                          'Per Routing only has one unique Routing group per Work Center!')]
+
+    @api.multi
+    def action_sa_view_routing_tracking(self):
+        self.ensure_one()
+        action = self.env.ref('mail.action_view_mail_message').read()[0]
+        # # workcenter_id = self.env.ref('sa_base.cunrong_default_workcenter').id
+        # ids = self.ids
+        # # bom specific to this variant or global to template
+        action['context'] = {
+            'search_default_model': 'mrp.routing.workcenter',
+            'search_default_res_id': self.id
+        }
+        # action['domain'] = [('routing_id', 'in', [self.ids])]
+        return action
+
+    @api.multi
+    def _track_subtype(self, init_values):
+        # if 'op_job_id' in init_values:
+        #     return 'account_voucher.mt_voucher_state_change'
+        return super(MrpRoutingWorkcenter, self)._track_subtype(init_values)
+
+    @api.multi
+    def _compute_routing_tracking_count(self):
+        for routing in self:
+            routing.routing_tracking_count = len(routing.message_ids)
 
     @api.one
     def _push_mrp_routing_workcenter(self, url):
