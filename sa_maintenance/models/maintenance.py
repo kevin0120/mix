@@ -63,8 +63,7 @@ class MaintenanceCheckPointAction(models.Model):
     measure_success = fields.Selection([
         ('none', 'No measure'),
         ('pass', 'Pass'),
-        ('fail', 'Fail')], string="Measure Success", compute="_compute_measure_success",
-        readonly=True, store=True)
+        ('fail', 'Fail')], string="Measure Success", compute="_compute_measure_success", store=True)
 
     @api.one
     @api.depends('measure')
