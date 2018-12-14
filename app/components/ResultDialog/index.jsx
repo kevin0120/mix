@@ -151,7 +151,7 @@ class ConnectedResultDialog extends React.Component {
                       <CardBody>
                         <Table
                           tableHeaderColor="info"
-                          tableHead={['程序号', '扭矩', '角度', '用时', '批次', '结果']}
+                          tableHead={['程序号', '扭矩(N·M)', '角度(Deg)', '用时(ms)', '批次', '结果']}
                           tableData={localResults}
                           colorsColls={['info']}
                         />
