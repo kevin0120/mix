@@ -1,5 +1,5 @@
 hostname: localhost
-data_dir: /home/linshenqi/.rush
+data_dir: /home/gubin/.rush
 serial_no: 1qaz2wsx
 doc_path: ./etc/rush/api.json
 logging:
