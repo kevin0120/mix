@@ -65,7 +65,7 @@ func (s *Service) Open() error {
 	//s.eng = engine
 
 	urls := strings.Split(s.Config().Url, ":")
-	sConn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable",
+	sConn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable connect_timeout=10",
 		urls[0],
 		urls[1],
 		s.Config().User,
@@ -97,8 +97,8 @@ func (s *Service) Close() error {
 
 func (s *Service) BatchSave(results []*ResultObject) error {
 
-	updateResults := []*ResultObject{}
-	insertResults := []*ResultObject{}
+	var updateResults []*ResultObject
+	var insertResults []*ResultObject
 
 	for _, v := range results {
 		if v.ID == 0 {
@@ -111,7 +111,7 @@ func (s *Service) BatchSave(results []*ResultObject) error {
 	// 更新
 	if len(updateResults) > 0 {
 
-		arrKeys := []string{}
+		var arrKeys []string
 		for _, v := range KEYS {
 			if v == "workcenter_id" || v == "product_id" || v == "gun_id" || v == "time" || v == "consu_product_id" {
 				continue
@@ -120,7 +120,7 @@ func (s *Service) BatchSave(results []*ResultObject) error {
 			arrKeys = append(arrKeys, v)
 		}
 
-		arrSKeys := []string{}
+		var arrSKeys []string
 		for _, v := range arrKeys {
 			arrSKeys = append(arrSKeys, fmt.Sprintf("s.%s", v))
 		}
