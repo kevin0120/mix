@@ -198,18 +198,14 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 		wsResults := []wsnotify.WSResult{}
 		wsResult := wsnotify.WSResult{}
 		for _, v := range ms.Spindles {
-			wsResult.Result_id = 1
-			wsResult.Count = 1
 			wsResult.Result = v.Result
 			wsResult.MI = v.Torque
 			wsResult.WI = v.Angle
-			wsResult.TI = 0
-			wsResult.GroupSeq = 1
 			wsResults = append(wsResults, wsResult)
 		}
 
-		//ws_str, _ := json.Marshal(wsResults)
-		////c.Srv.WS.WSSendResult("1122334455667788", string(ws_str))
+		ws_str, _ := json.Marshal(wsResults)
+		c.Srv.WS.WSSend(wsnotify.WS_EVENT_RESULT, string(ws_str))
 
 	case MID_0052_VIN:
 		// 收到条码

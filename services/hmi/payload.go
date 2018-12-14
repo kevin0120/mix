@@ -93,6 +93,7 @@ type Result struct {
 	X             float64 `json:"offset_x"`
 	Y             float64 `json:"offset_y"`
 	Seq           int     `json:"sequence"`
+	GroupSeq      int     `json:"group_sequence"`
 }
 
 type Workorder struct {

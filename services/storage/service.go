@@ -785,6 +785,24 @@ func (s *Service) FindLocalResults(hmi_sn string, limit int) ([]ResultsWorkorder
 	return results, err
 }
 
+func (s *Service) IsMultiResult(workorderID int64, batch string) bool {
+	var results []Results
+
+	ss := s.eng.Alias("r").Where("r.x_workorder_id = ?", workorderID).And("r.batch = ?", batch)
+
+	e := ss.Find(&results)
+
+	if e != nil {
+		return false
+	} else {
+		if len(results) > 1 {
+			return true
+		} else {
+			return false
+		}
+	}
+}
+
 func (s *Service) UpdateResultTriggerTime(trigger_type string, trigger_time time.Time, controller_sn string) error {
 
 	sql := fmt.Sprintf("update `controllers` set %s = ? where controller_sn = ?", trigger_type, trigger_time)

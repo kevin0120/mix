@@ -672,7 +672,7 @@ func (m *Methods) insertResultsForJob(job *JobManual) (*storage.Workorders, erro
 
 	max_seq := 0
 	db_results := []storage.Results{}
-	for k, v := range points {
+	for _, v := range points {
 		if v.GroupSequence > max_seq {
 			max_seq = v.GroupSequence
 		}
@@ -692,7 +692,7 @@ func (m *Methods) insertResultsForJob(job *JobManual) (*storage.Workorders, erro
 		r.ToleranceMaxDegree = v.ToleranceMaxDegree
 		r.ToleranceMinDegree = v.ToleranceMinDegree
 		r.ConsuProductID = v.ConsuProductID
-		r.Batch = fmt.Sprintf("%d/%d", k+1, len(points))
+		r.Batch = fmt.Sprintf("%d/%d", v.GroupSequence, points[len(points)-1].GroupSequence)
 		r.UpdateTime = time.Now()
 		r.Count = 1
 
@@ -845,6 +845,7 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 		r.Y = v.OffsetY
 		r.MaxRedoTimes = v.MaxRedoTimes
 		r.Seq = v.Seq
+		r.GroupSeq = v.Seq
 
 		resp.Results = append(resp.Results, r)
 	}
@@ -1032,6 +1033,21 @@ func (m *Methods) putIOInputTest(ctx iris.Context) {
 
 	str, _ := json.Marshal(inputs)
 	m.service.OpenProtocol.WS.WSSendIOInput(string(str))
+}
+
+func (m *Methods) putResultTest(ctx iris.Context) {
+	results := []wsnotify.WSResult{}
+	err := ctx.ReadJSON(&results)
+
+	if err != nil {
+		// 传输结构错误
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+
+	str, _ := json.Marshal(results)
+	m.service.OpenProtocol.WS.WSSend(wsnotify.WS_EVENT_RESULT, string(str))
 }
 
 func (m *Methods) putJobControll(ctx iris.Context) {

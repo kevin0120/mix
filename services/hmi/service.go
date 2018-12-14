@@ -196,6 +196,14 @@ func (s *Service) Open() error {
 	r = httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
 		Method:      "PUT",
+		Pattern:     "/result-test",
+		HandlerFunc: s.methods.putResultTest,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "PUT",
 		Pattern:     "/job-control",
 		HandlerFunc: s.methods.putJobControll,
 	}

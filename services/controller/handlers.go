@@ -133,7 +133,7 @@ func (h *Handlers) saveResult(data *SavePackage) {
 	h.saveBuffer <- data
 
 	// 推送hmi
-	if data.controllerResult.NeedPushHmi {
+	if data.controllerResult.NeedPushHmi && !h.controllerService.DB.IsMultiResult(data.dbResult.WorkorderID, data.dbResult.Batch) {
 		wsResult := wsnotify.WSResult{
 			Result:   data.controllerResult.Result,
 			MI:       data.controllerResult.ResultValue.Mi,
