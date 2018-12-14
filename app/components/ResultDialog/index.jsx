@@ -101,7 +101,7 @@ class ConnectedResultDialog extends React.Component {
           results[i].mi,
           results[i].wi,
           results[i].ti,
-          results[i].batch,
+          `${results[i].group_sequence}/${results[results.length - 1].group_sequence}`,
           results[i].result
         ]);
       }else {
@@ -110,7 +110,7 @@ class ConnectedResultDialog extends React.Component {
           results[i].mi,
           results[i].wi,
           results[i].ti,
-          results[i].batch,
+          `${results[i].group_sequence}/${results[results.length - 1].group_sequence}`,
           results[i].result
         ]);
       }

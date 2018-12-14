@@ -360,13 +360,13 @@ export function* handleResults(data) {
 
     const eti  = data[i].ti? data[i].ti.toString() : 'nil';
 
-    const batch = `${(operations.activeResultIndex + 1).toString()}/${operations.results.length.toString()}`;
+    const batch = `${(operations.activeResultIndex + 1).toString()}/${operations.results[operations.results.length - 1].group_sequence.toString()}`;
 
     yield call(
       addNewStory,
       storyType,
       `结果 ${batch}`,
-      `T:${data[i].mi.toString()} W:${data[i].wi.toString()}`
+      `T=${data[i].mi.toString()}Nm A=${data[i].wi.toString()}`
     );
   }
 
