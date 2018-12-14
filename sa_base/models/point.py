@@ -109,7 +109,8 @@ class OperationPoints(models.Model):
     @api.multi
     def unlink(self):
         for point in self:
-            point.operation_id.message_post(body=_("#%s operation point has been delete") % (point.sequence), subject=_('Routing Operation Point Deleted'))
+            msg = _("#%s operation point has been delete") % (point.id)
+            point.operation_id.message_post(body=msg, subject=msg, message_type='comment')
         return super(OperationPoints, self).unlink()
 
     @api.one
@@ -132,7 +133,8 @@ class OperationPoints(models.Model):
                 ret = super(OperationPoints, point).write(vals)  #修改数据
 
                 dummy, tracking_value_ids = point._message_track(tracked_fields, old_values)
-                point.operation_id.message_post(body=_("#%s operation point has been modified") % (point.sequence), tracking_value_ids=tracking_value_ids, subject=_('Routing Operation Point Modification'))
+                msg = _("#%s operation point has been modified") % (point.id)
+                point.operation_id.message_post(body=msg, message_type='comment',tracking_value_ids=tracking_value_ids, subject=msg)
         return ret
 
         # return super(OperationPoints, self).write(vals)

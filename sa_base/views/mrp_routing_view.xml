@@ -70,6 +70,7 @@
                                  <field name="operation_point_ids" widget="one2many_list" colspan="4" nolabel="1" mode="tree" context="{'default_operation_id':active_id, 'search_operation_ids': [active_id]}">
                                     <tree string="Operation Points" editable="bottom" delete="false">
                                         <field name="sequence" widget="handle"/>
+                                        <field name="id" readonly="1" groups="base.group_no_one"/>
                                         <field name="product_id" context="{'default_type': 'product'}" domain="[('sa_type', '=', 'screw')]" options="{'no_create_edit': True,'no_open': True}"/>
                                         <field name="product_qty"/>
                                         <field name="program_id" options="{'no_create_edit': True,'no_open': True}"/>
