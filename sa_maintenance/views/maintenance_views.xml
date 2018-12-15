@@ -22,7 +22,7 @@
                 </page>
                 <page string="Check List" >
                   <field name="check_point_action_ids" nolabel="1" widget="one2many_list" mode="tree" context="{'default_request_id': active_id}">
-                    <tree string="Check Point Action Lines" editable="bottom">
+                    <tree string="Check Point Action Lines" editable="bottom" decoration-success="measure_success == 'pass'" decoration-danger="measure_success == 'fail'">
                         <field name="category_id" required="1"/>
                         <field name="test_type" />
                         <field name="description" />
@@ -30,7 +30,7 @@
                         <field name="tolerance_min" />
                         <field name="tolerance_max" />
                         <field name="measure" />
-                        <field name="measure_success" />
+                        <field name="measure_success" attrs="{'readonly': [('test_type', '=', 'measure')]}" />
                     </tree>
                 </field>
                 </page>
