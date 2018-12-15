@@ -104,7 +104,9 @@ class OperationView(http.Controller):
                     env['operation.point'].create(val)
                 else:
                     # 更新
-                    point_id.write(val)
+                    ret = point_id.write(val)
+                    if not ret:
+                        print(u'更新点位失败')
                     if points_map.has_key(point_id.id):
                         del points_map[point_id.id]
 

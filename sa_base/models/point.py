@@ -135,6 +135,8 @@ class OperationPoints(models.Model):
                 dummy, tracking_value_ids = point._message_track(tracked_fields, old_values)
                 msg = _("#%s operation point has been modified") % (point.id)
                 point.operation_id.message_post(body=msg, message_type='comment',tracking_value_ids=tracking_value_ids, subject=msg)
+            else:
+                ret = super(OperationPoints, point).write(vals)  # 修改数据
         return ret
 
         # return super(OperationPoints, self).write(vals)
