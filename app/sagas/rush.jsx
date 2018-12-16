@@ -1,5 +1,13 @@
 import OWebSocket from 'ws';
-import { call, take, takeLatest, put, select, fork, cancel } from 'redux-saga/effects';
+import {
+  call,
+  take,
+  takeLatest,
+  put,
+  select,
+  fork,
+  cancel
+} from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
 import { OPERATION, RUSH, WORK_MODE } from '../actions/actionTypes';
 import { NewResults } from '../actions/rush';
@@ -8,9 +16,8 @@ import { getIBypass, getIModeSelect, handleIOFunction } from './io';
 import { triggerOperation } from './operation';
 import { OPERATION_SOURCE } from '../reducers/operations';
 import { IO_FUNCTION } from '../reducers/io';
-import { setHealthzCheck } from "../actions/healthCheck";
-import { setNewNotification } from "../actions/notification";
-
+import { setHealthzCheck } from '../actions/healthCheck';
+import { setNewNotification } from '../actions/notification';
 
 let task = null;
 let ws = null;
@@ -43,13 +50,15 @@ function* initRush() {
       yield call(stopRush);
     }
 
-    ws = new WebSocket(wsURL, {reconnectInterval: 3000});
+    ws = new WebSocket(wsURL, { reconnectInterval: 3000 });
 
-    task = yield fork(watchRushChannel, state.setting.page.odooConnection.hmiSn.value);
+    task = yield fork(
+      watchRushChannel,
+      state.setting.page.odooConnection.hmiSn.value
+    );
   } catch (e) {
     console.log(e);
   }
-
 }
 
 function stopRush() {
@@ -57,7 +66,6 @@ function stopRush() {
     ws.ws.readyState === OWebSocket.OPEN ||
     ws.ws.readyState === OWebSocket.CONNECTING
   ) {
-
     ws.close();
   }
   ws = null;
@@ -66,7 +74,7 @@ function stopRush() {
 function createRushChannel(hmiSN) {
   return eventChannel(emit => {
     ws.on('open', () => {
-      emit({type:'healthz', payload:true});
+      emit({ type: 'healthz', payload: true });
       // reg msg
       ws.sendJson({ hmi_sn: hmiSN }, err => {
         if (err) {
@@ -76,11 +84,11 @@ function createRushChannel(hmiSN) {
     });
 
     ws.on('close', () => {
-      emit({type:'healthz', payload:false});
+      emit({ type: 'healthz', payload: false });
     });
 
     ws.on('error', () => {
-      emit({type:'healthz', payload:false});
+      emit({ type: 'healthz', payload: false });
       // console.log('websocket error. reconnect after 1s');
     });
     ws.on('ping', () => {
@@ -91,7 +99,7 @@ function createRushChannel(hmiSN) {
     });
 
     ws.on('message', data => {
-      emit({type:'data', payload: data});
+      emit({ type: 'data', payload: data });
     });
 
     return () => {};
@@ -100,7 +108,6 @@ function createRushChannel(hmiSN) {
 
 // const getHealthz = state => state.healthCheckResults;
 
-
 export function* watchRushChannel(hmiSN) {
   const chan = yield call(createRushChannel, hmiSN);
   try {
@@ -108,7 +115,7 @@ export function* watchRushChannel(hmiSN) {
       const data = yield take(chan);
       const state = yield select();
 
-      const {type, payload} = data;
+      const { type, payload } = data;
 
       switch (type) {
         case 'healthz': {
@@ -116,7 +123,9 @@ export function* watchRushChannel(hmiSN) {
           if (!lodash.isEqual(healthzStatus.masterpc.isHealth, payload)) {
             // 如果不相等 更新
             yield put(setHealthzCheck('masterpc', payload));
-            yield put(setNewNotification('info', `masterPC连接状态更新: ${payload}`));
+            yield put(
+              setNewNotification('info', `masterPC连接状态更新: ${payload}`)
+            );
           }
           break;
         }
@@ -143,10 +152,7 @@ export function* watchRushChannel(hmiSN) {
               const odooHealthzStatus = json.status === 'online';
               const healthzStatus = state.healthCheckResults; // 获取整个healthz
               if (
-                !lodash.isEqual(
-                  healthzStatus.odoo.isHealth,
-                  odooHealthzStatus
-                )
+                !lodash.isEqual(healthzStatus.odoo.isHealth, odooHealthzStatus)
               ) {
                 yield put(setHealthzCheck('odoo', odooHealthzStatus));
                 yield put(
@@ -182,7 +188,7 @@ export function* watchRushChannel(hmiSN) {
             case 'result':
               yield put(NewResults(json));
               break;
-            case 'scanner':{
+            case 'scanner': {
               // console.log('rush scanner:', json);
               const { workMode } = state.workMode;
               if (workMode === 'scanner') {
@@ -193,10 +199,22 @@ export function* watchRushChannel(hmiSN) {
             case 'controller': {
               const healthzStatus = state.healthCheckResults; // 获取整个healthz
               const controllerHealthzStatus = json.status === 'online';
-              if (!lodash.isEqual(healthzStatus.controller.isHealth, controllerHealthzStatus)) {
+              if (
+                !lodash.isEqual(
+                  healthzStatus.controller.isHealth,
+                  controllerHealthzStatus
+                )
+              ) {
                 // 如果不相等 更新
-                yield put(setHealthzCheck('controller', controllerHealthzStatus));
-                yield put(setNewNotification('info', `controller连接状态更新: ${controllerHealthzStatus}`));
+                yield put(
+                  setHealthzCheck('controller', controllerHealthzStatus)
+                );
+                yield put(
+                  setNewNotification(
+                    'info',
+                    `controller连接状态更新: ${controllerHealthzStatus}`
+                  )
+                );
               }
               break;
             }
@@ -208,10 +226,8 @@ export function* watchRushChannel(hmiSN) {
         default:
           break;
       }
-
     }
   } catch (e) {
     console.log(e);
   }
-
 }

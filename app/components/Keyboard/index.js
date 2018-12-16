@@ -26,10 +26,10 @@ const customerStyles = theme => ({
   },
   leftButton: {
     marginLeft: '40%',
-    marginRight: '40%',
+    marginRight: '40%'
   },
   rightButton: {
-    marginLeft: '40%',
+    marginLeft: '40%'
   }
 });
 
@@ -173,7 +173,7 @@ export default function withKeyboard(SubComponents) {
                 >
                   <Button
                     // className={classes.modalFooterCenter}
-                    style={{margin: '0 80px'}}
+                    style={{ margin: '0 80px' }}
                     onClick={this.handleClose}
                     color="danger"
                     // size='lg'
@@ -184,7 +184,7 @@ export default function withKeyboard(SubComponents) {
                   </Button>
                   <Button
                     // className={classes.modalFooterCenter}
-                    style={{margin: '0 80px'}}
+                    style={{ margin: '0 80px' }}
                     onClick={this.handleSubmit}
                     color="success"
                     // size='lg'

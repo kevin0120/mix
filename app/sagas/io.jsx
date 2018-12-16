@@ -29,7 +29,7 @@ import { continueOperation } from './operation';
 // config
 import userConfigs from '../shared/config';
 
-import {openShutdown} from '../actions/shutDownDiag';
+import { openShutdown } from '../actions/shutDownDiag';
 
 const Reconnect = require('node-net-reconnect');
 const net = require('net');

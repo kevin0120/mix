@@ -8,7 +8,6 @@ import Circle from './Circle';
 // import { Line, Circle } from 'react-es6-progressbar.js';
 
 class ProgressBar extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -23,19 +22,35 @@ class ProgressBar extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { shouldCounterReady, shouldCounterStart, shouldCounterStop } = nextProps;
+    const {
+      shouldCounterReady,
+      shouldCounterStart,
+      shouldCounterStop
+    } = nextProps;
     const { counterState } = this.state;
     // console.log('will receive props');
-    if (shouldCounterReady && shouldCounterReady() && counterState !== this.counterStates.ready
-      && counterState !== this.counterStates.start) {
+    if (
+      shouldCounterReady &&
+      shouldCounterReady() &&
+      counterState !== this.counterStates.ready &&
+      counterState !== this.counterStates.start
+    ) {
       this.readyCounter(nextProps);
     }
-    if (shouldCounterStart && shouldCounterStart() && counterState !== this.counterStates.ticking) {
+    if (
+      shouldCounterStart &&
+      shouldCounterStart() &&
+      counterState !== this.counterStates.ticking
+    ) {
       // console.log('should start');
       console.log(nextProps);
       this.startCounter(nextProps);
     }
-    if (shouldCounterStop && shouldCounterStop() && counterState !== this.counterStates.stop) {
+    if (
+      shouldCounterStop &&
+      shouldCounterStop() &&
+      counterState !== this.counterStates.stop
+    ) {
       this.stopCounter(nextProps);
     }
   }
@@ -63,49 +78,57 @@ class ProgressBar extends React.Component {
 
   stopCounter = () => {
     console.log('counter stop');
-    this.setState({
-      counterState: this.counterStates.stop,
-      timeRemaining: 0
-    }, () => {
-      clearInterval(this.timer);
-      this.timer = null;
-    });
+    this.setState(
+      {
+        counterState: this.counterStates.stop,
+        timeRemaining: 0
+      },
+      () => {
+        clearInterval(this.timer);
+        this.timer = null;
+      }
+    );
   };
 
   finishCounter = () => {
     const { onFinish } = this.props;
     console.log('counter finish');
-    this.setState({
-      counterState: this.counterStates.finish
-    }, () => {
-      clearInterval(this.timer);
-      this.timer = null;
-      onFinish();
-    });
+    this.setState(
+      {
+        counterState: this.counterStates.finish
+      },
+      () => {
+        clearInterval(this.timer);
+        this.timer = null;
+        onFinish();
+      }
+    );
   };
 
-  startCounter = (props) => {
+  startCounter = props => {
     console.log('counter start');
 
-    this.setState({
-      counterState: this.counterStates.ticking,
-      timeRemaining: props.time
-    }, () => {
-      console.log('set state:',this.state);
-      this.timer = setInterval(() => {
-        const { timeRemaining } = this.state;
-        console.log(timeRemaining);
-        if (timeRemaining <= 0) {
-          this.finishCounter();
-        }else{
-          this.setState({
-            timeRemaining: timeRemaining - 1
-          });
-        }
-      }, 1000);
-    });
+    this.setState(
+      {
+        counterState: this.counterStates.ticking,
+        timeRemaining: props.time
+      },
+      () => {
+        console.log('set state:', this.state);
+        this.timer = setInterval(() => {
+          const { timeRemaining } = this.state;
+          console.log(timeRemaining);
+          if (timeRemaining <= 0) {
+            this.finishCounter();
+          } else {
+            this.setState({
+              timeRemaining: timeRemaining - 1
+            });
+          }
+        }, 1000);
+      }
+    );
   };
-
 
   render() {
     const { time, gridClassName } = this.props;
@@ -115,8 +138,8 @@ class ProgressBar extends React.Component {
       responsive: true,
       animate: true,
       animationDuration: 1,
-      size:  150 ,
-      lineWidth:  50 ,
+      size: 150,
+      lineWidth: 50,
       progress: time > 0 ? (time - timeRemaining) / time : 0,
       bgColor: '#FFFFFF',
       startColor: '#F7FFA2',
@@ -129,7 +152,8 @@ class ProgressBar extends React.Component {
     };
     return (
       <Grid item className={gridClassName}>
-        <Circle {...circleProps}
+        <Circle
+          {...circleProps}
           // text={timeRemaining}
           // responsive
           // animate
@@ -148,9 +172,7 @@ class ProgressBar extends React.Component {
         />
       </Grid>
     );
-
   }
-
 }
 
 ProgressBar.propTypes = {
@@ -163,14 +185,10 @@ ProgressBar.propTypes = {
 };
 
 ProgressBar.defaultProps = {
-  shouldCounterReady: () => {
-  },
-  shouldCounterStart: () => {
-  },
-  shouldCounterStop: () => {
-  },
-  onFinish: () => {
-  }
+  shouldCounterReady: () => {},
+  shouldCounterStart: () => {},
+  shouldCounterStop: () => {},
+  onFinish: () => {}
 };
 
 export default withStyles(styles)(ProgressBar);

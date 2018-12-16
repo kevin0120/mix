@@ -68,10 +68,7 @@ function* confirmDiag(dType, data) {
     }
 
     yield put({ type: SHUTDOWN_DIAG.CLOSE });
-  } catch (e) {
-
-  }
-
+  } catch (e) {}
 }
 
 export function* shutDownDiagWorkFlow() {

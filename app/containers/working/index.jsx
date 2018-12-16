@@ -10,16 +10,16 @@ import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Divider from '@material-ui/core/Divider';
 import Paper from '@material-ui/core/Paper';
-import FiberManualRecord from'@material-ui/icons/FiberManualRecord'
-import Autorenew from'@material-ui/icons/Autorenew'
-import Button from "../../components/CustomButtons/Button";
+import FiberManualRecord from '@material-ui/icons/FiberManualRecord';
+import Autorenew from '@material-ui/icons/Autorenew';
+import Button from '../../components/CustomButtons/Button';
 import ImageStick from '../../components/ImageStick/imageStick';
 
 import ShutdownDiag from '../../components/ShutDownDiag';
 import { NewCar } from '../../actions/scannerDevice';
-import  {switchWorkMode} from '../../actions/workMode';
+import { switchWorkMode } from '../../actions/workMode';
 
-import {switch2Timeout} from '../../actions/operation';
+import { switch2Timeout } from '../../actions/operation';
 
 import configs from '../../shared/config/index';
 
@@ -59,7 +59,7 @@ const TOPHEIGHT = '150px';
 const mapDispatchToProps = {
   NewCar,
   switchWorkMode,
-  switch2Timeout,
+  switch2Timeout
 };
 
 // 与 style 里的变量相同
@@ -504,8 +504,8 @@ class ConnectedWorking extends React.Component {
     // this.props.setCarByPass(true);
   }
 
-  componentDidUpdate(prevProps){
-    this.prevOperationStatus=prevProps.operations.operationStatus;
+  componentDidUpdate(prevProps) {
+    this.prevOperationStatus = prevProps.operations.operationStatus;
   }
 
   handleClickOpenOee = e => {
@@ -581,8 +581,7 @@ class ConnectedWorking extends React.Component {
     });
   };
 
-
-openManualDiag = (e, input) => {
+  openManualDiag = (e, input) => {
     e.preventDefault();
     const { keyboardInput, NewCar } = this.props;
     keyboardInput({
@@ -606,11 +605,11 @@ openManualDiag = (e, input) => {
     ];
   };
 
-  toggleAutoScannerMode = (e) => {
+  toggleAutoScannerMode = e => {
     const { workMode, switchWorkMode } = this.props;
     let mode = 'auto';
     if (workMode.workMode === 'auto') {
-      mode = 'scanner'
+      mode = 'scanner';
     }
     switchWorkMode(mode);
   };
@@ -673,20 +672,26 @@ openManualDiag = (e, input) => {
     }
 
     if (operations.operationStatus === 'Ready') {
-      redoBatch = "0";
+      redoBatch = '0';
     }
 
-    const {enableResultDialog} = configs.operationSettings;
+    const { enableResultDialog } = configs.operationSettings;
 
     const showResultDiag = configs.operationSettings.opMode === 'order';
 
     // const showManualCarType = configs.operationSettings.opMode === 'op';
 
-    const carTypeSize= configs.operationSettings.opMode === 'op'? 5: 3;
+    const carTypeSize = configs.operationSettings.opMode === 'op' ? 5 : 3;
 
-    const carTypeClass= configs.operationSettings.opMode === 'op'? classes.LeftTop1: classes.LeftTop2;
+    const carTypeClass =
+      configs.operationSettings.opMode === 'op'
+        ? classes.LeftTop1
+        : classes.LeftTop2;
 
-    const manualEnable = (configs.operationSettings.opMode === 'op' && workMode.workMode === 'manual') || (configs.operationSettings.opMode === 'order');
+    const manualEnable =
+      (configs.operationSettings.opMode === 'op' &&
+        workMode.workMode === 'manual') ||
+      configs.operationSettings.opMode === 'order';
 
     //
     const fabClassName = classNames(classes.fab);
@@ -705,7 +710,8 @@ openManualDiag = (e, input) => {
     //
     // const showAutoManual = statusShow && switchAutoManual;
     //
-    const showButtonInfo = workMode.workMode === 'auto' ? 'Common.Scanner':'Common.Auto';
+    const showButtonInfo =
+      workMode.workMode === 'auto' ? 'Common.Scanner' : 'Common.Auto';
     //
     // const showManualInfo = !isAutoMode || workFlow === 'General';
     //
@@ -743,33 +749,39 @@ openManualDiag = (e, input) => {
           <Grid container spacing={24} className={classes.root}>
             <Grid item xs={9} className={classes.LeftWrapper}>
               <Grid container spacing={24} className={classes.LeftTopWrapper}>
-              {
-                showResultDiag?
-                    <Grid item xs={2} className={classes.LeftTop1}>
-                      <Paper className={classes.LeftTopTab} component="button" disabled>
-                        <div className={classes.LeftTabContiner}>
-                          <h4 className={classes.LeftTopDes}>
-                            <p
-                              href="#pablo"
-                              className={classes.MarginTopBottom5}
-                              onClick={e => e.preventDefault()}
-                            >
-                              车序:
-                            </p>
-                          </h4>
-                          <p className={classes.cardDescription}>
-                            {operations.lnr}
+                {showResultDiag ? (
+                  <Grid item xs={2} className={classes.LeftTop1}>
+                    <Paper
+                      className={classes.LeftTopTab}
+                      component="button"
+                      disabled
+                    >
+                      <div className={classes.LeftTabContiner}>
+                        <h4 className={classes.LeftTopDes}>
+                          <p
+                            href="#pablo"
+                            className={classes.MarginTopBottom5}
+                            onClick={e => e.preventDefault()}
+                          >
+                            车序:
                           </p>
-                        </div>
-                      </Paper>
-                    </Grid>: null
-              }
+                        </h4>
+                        <p className={classes.cardDescription}>
+                          {operations.lnr}
+                        </p>
+                      </div>
+                    </Paper>
+                  </Grid>
+                ) : null}
                 <Grid item xs={carTypeSize} className={carTypeClass}>
                   <Paper
                     className={classes.LeftTopTab}
                     component="button"
                     onClick={e => this.openManualDiag(e, 'carType')}
-                    disabled={!manualEnable || (configs.operationSettings.opMode === 'order')}
+                    disabled={
+                      !manualEnable ||
+                      configs.operationSettings.opMode === 'order'
+                    }
                   >
                     <div className={classes.LeftTabContiner}>
                       <h4 className={classes.LeftTopDes}>
@@ -832,7 +844,7 @@ openManualDiag = (e, input) => {
                     time={operations.maxOpTimes}
                     shouldCounterStart={() =>
                       // predoing -> doing
-                       operations.operationStatus===OPERATION_STATUS.DOING &&
+                      operations.operationStatus === OPERATION_STATUS.DOING &&
                       this.prevOperationStatus === OPERATION_STATUS.PREDOING
                     }
                     shouldCounterStop={() =>
@@ -841,7 +853,7 @@ openManualDiag = (e, input) => {
                         operations.operationStatus
                       )
                     }
-                    onFinish={()=>this.props.switch2Timeout()}
+                    onFinish={() => this.props.switch2Timeout()}
                     gridClassName={classes.progressWrap}
                   />
                 </div>
@@ -902,19 +914,25 @@ openManualDiag = (e, input) => {
                   {/* <TimeLine simple stories={teststory} /> */}
                 </div>
               </Paper>
-              {
-                !manualEnable && configs.operationSettings.opMode === 'op'?
-                  <Button color="rose" disabled={manualEnable} round className={fabClassName} size="lg" onClick={this.toggleAutoScannerMode} >
-                    {workMode.workMode === 'auto' ?
-                      <FiberManualRecord className={classes.extendedIcon} />:
-                      <Autorenew className={classes.extendedIcon} />
-                    }
-                    {t(showButtonInfo)}
-                  </Button>
-                  : null
-              }
+              {!manualEnable && configs.operationSettings.opMode === 'op' ? (
+                <Button
+                  color="rose"
+                  disabled={manualEnable}
+                  round
+                  className={fabClassName}
+                  size="lg"
+                  onClick={this.toggleAutoScannerMode}
+                >
+                  {workMode.workMode === 'auto' ? (
+                    <FiberManualRecord className={classes.extendedIcon} />
+                  ) : (
+                    <Autorenew className={classes.extendedIcon} />
+                  )}
+                  {t(showButtonInfo)}
+                </Button>
+              ) : null}
               <ShutdownDiag />
-              {enableResultDialog? <ResultDialog />: null}
+              {enableResultDialog ? <ResultDialog /> : null}
               <ManualDiag show={manualDiagShow} close={this.closeManualDiag} />
             </Grid>
           </Grid>
@@ -934,7 +952,7 @@ ConnectedWorking.propTypes = {
   keyboardInput: PropTypes.func.isRequired,
   switchWorkMode: PropTypes.func.isRequired,
   switch2Timeout: PropTypes.func.isRequired,
-  NewCar: PropTypes.func.isRequired,
+  NewCar: PropTypes.func.isRequired
 };
 
 const Working = connect(

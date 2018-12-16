@@ -11,8 +11,7 @@
 import { select, takeEvery, put, call } from 'redux-saga/effects';
 import { USER_CONFIGS, CONNECTION } from '../actions/actionTypes';
 import { setNewNotification } from '../actions/notification';
-import { systemInit } from '../actions/sysInit'
-  ;
+import { systemInit } from '../actions/sysInit';
 
 const eSetting = require('electron-settings');
 
@@ -23,7 +22,7 @@ function* saveConfiguration(action) {
 
   const state = yield select();
 
-  const {setting} = state;
+  const { setting } = state;
 
   try {
     yield put({ type: USER_CONFIGS.SAVE, section, newConfigs });
@@ -34,17 +33,26 @@ function* saveConfiguration(action) {
 
   switch (section) {
     case 'connections': {
-      eSetting.setAll({ ...setting, system: { ...setting.system, [section]: newConfigs } });
-      yield put({type: CONNECTION.MANUAL_MODIFICATION, data: newConfigs});
+      eSetting.setAll({
+        ...setting,
+        system: { ...setting.system, [section]: newConfigs }
+      });
+      yield put({ type: CONNECTION.MANUAL_MODIFICATION, data: newConfigs });
       yield put(systemInit());
       break;
     }
     case 'odooConnection': {
-      eSetting.setAll({ ...setting, system: { ...setting.system, [section]: newConfigs } });
+      eSetting.setAll({
+        ...setting,
+        system: { ...setting.system, [section]: newConfigs }
+      });
       break;
     }
     default:
-      eSetting.setAll({ ...setting, page: { ...setting.page, [section]: newConfigs } });
+      eSetting.setAll({
+        ...setting,
+        page: { ...setting.page, [section]: newConfigs }
+      });
       break;
   }
 }

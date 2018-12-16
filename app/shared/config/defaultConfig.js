@@ -45,7 +45,7 @@ export const defaultConfigs = {
         displayOrder: 2,
         value: '1122334455667788',
         displayTitle: 'Configuration.connections.HMI'
-      },
+      }
     },
     modbus: {
       source: ['remote', 'controller'],
@@ -157,16 +157,18 @@ export const defaultConfigs = {
         vendorId: 3118,
         mode: 'HID' // HID or BT_HID
         // mode: 'BT_HID',
-          // vendorId: 1504
+        // vendorId: 1504
       }
     },
     connections: {
       masterpc: 'http://127.0.0.1:8082',
       rfid: 'tcp://192.168.1.120:2112',
       aiis: 'http://127.0.0.1:9092',
-      controllers: [{
-        'serial_no': '0001',
-      }],
+      controllers: [
+        {
+          serial_no: '0001'
+        }
+      ],
       io: 'modbustcp://192.168.1.122:502/0',
       workcenterCode: '1122334455667788',
       rework_workcenter: 'qrk'

@@ -3,7 +3,7 @@ import popoverStyles from '../../common/jss/popoverStyles';
 export default () => ({
   ...popoverStyles,
   menuList: {
-    backgroundColor: 'transparent',
+    backgroundColor: 'transparent'
   },
   infoStatus: {
     padding: '10px',

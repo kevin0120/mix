@@ -12,7 +12,7 @@ const lodash = require('lodash');
 export function* watchScanner() {
   while (true) {
     const { data, source } = yield take(SCANNER.READ_NEW_DATA);
-    if ( !lodash.isNil(data) && data !== ''){
+    if (!lodash.isNil(data) && data !== '') {
       if (isCarID(data)) {
         yield call(triggerOperation, data, null, null, source);
       } else {

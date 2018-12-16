@@ -50,7 +50,7 @@ const routes = [
     main: HomePage,
     icon: HomeIcon,
     color: '#00abf3',
-    showLayout:true
+    showLayout: true
   },
   {
     name: 'working',
@@ -61,7 +61,7 @@ const routes = [
     color: '#00abbf',
     image: WorkingImg,
     enName: 'Operation',
-    showLayout:true
+    showLayout: true
   },
   {
     name: 'orders',
@@ -72,7 +72,7 @@ const routes = [
     color: warningColor,
     image: editorImg,
     enName: 'Vehicle Queue',
-    showLayout:true
+    showLayout: true
   },
   {
     name: 'preferences',
@@ -83,7 +83,7 @@ const routes = [
     color: '#fba53d',
     image: settingImg,
     enName: 'Preference',
-    showLayout:true
+    showLayout: true
   },
   {
     name: 'event',
@@ -94,7 +94,7 @@ const routes = [
     color: '#008adf',
     image: LoginImg,
     enName: 'Event Log',
-    showLayout:true
+    showLayout: true
   },
   {
     name: 'result',
@@ -105,7 +105,7 @@ const routes = [
     color: grayColor,
     image: LockingImg,
     enName: 'Result',
-    showLayout:true
+    showLayout: true
   },
   // {
   //   name: 'lock',
@@ -126,7 +126,7 @@ const routes = [
     color: '#8a6c63',
     image: helpImg,
     enName: 'Help',
-    showLayout:true
+    showLayout: true
   },
   {
     name: 'login',
@@ -137,7 +137,7 @@ const routes = [
     color: grayColor,
     image: LoginImg,
     enName: 'Login',
-    showLayout:false
+    showLayout: false
   }
 ];
 
@@ -148,8 +148,8 @@ export const routeConfigs = lodash.filter(
 );
 
 const indexRoutes = [
-  { url: '/pages', main: Pages, showLayout:false },
-  { url: '/', main: HomePage, showLayout:true }
+  { url: '/pages', main: Pages, showLayout: false },
+  { url: '/', main: HomePage, showLayout: true }
 ];
 
 export default indexRoutes;

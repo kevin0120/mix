@@ -168,7 +168,7 @@ function mergeResults(state, data) {
 function operationResultOK(state, data) {
   const results = mergeResults(state, data);
 
-  if (state.operationStatus === OPERATION_STATUS.READY){
+  if (state.operationStatus === OPERATION_STATUS.READY) {
     // 等待车辆状态下 收到结果也无法在进入其他状态
     return {
       ...state,
@@ -201,7 +201,7 @@ function operationResultNOK(state, data) {
 function operationFailed(state, data) {
   const results = mergeResults(state, data);
 
-  if (state.operationStatus === OPERATION_STATUS.READY){
+  if (state.operationStatus === OPERATION_STATUS.READY) {
     // 等待车辆状态下 收到结果也无法在进入其他状态
     return {
       ...state,
@@ -236,7 +236,7 @@ function operationFinished(state, data) {
 }
 
 function operationContinue(state) {
-  if (state.operationStatus === OPERATION_STATUS.READY){
+  if (state.operationStatus === OPERATION_STATUS.READY) {
     // 等待车辆状态下 收到结果也无法在进入其他状态,直接返回
     return state;
   }
@@ -264,7 +264,7 @@ function operationContinue(state) {
 function switchOperationPredoing(state) {
   return {
     ...state,
-    operationStatus: OPERATION_STATUS.PREDOING,
+    operationStatus: OPERATION_STATUS.PREDOING
   };
 }
 
@@ -274,6 +274,6 @@ function switchOperationTimeout(state, status) {
     operationStatus: status,
     carID: '',
     carType: '',
-    lnr: '',
+    lnr: ''
   };
 }

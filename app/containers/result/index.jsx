@@ -364,7 +364,7 @@ class Result extends React.Component {
               <SweetAlert
                 info
                 show={isShow}
-                style={{ display: 'block', marginTop: '-100px' , top: '35%'}}
+                style={{ display: 'block', marginTop: '-100px', top: '35%' }}
                 title="结果详情"
                 onConfirm={this.handleClose}
                 onCancel={this.handleClose}

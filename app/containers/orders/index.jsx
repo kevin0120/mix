@@ -363,5 +363,4 @@ const ConnWorkOrders = connect(
   mapDispatchToProps
 )(WorkOrder);
 
-export default
-  withKeyboard(withStyles(styles)(ConnWorkOrders));
+export default withKeyboard(withStyles(styles)(ConnWorkOrders));

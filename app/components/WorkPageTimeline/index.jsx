@@ -6,39 +6,29 @@ import PropTypes from 'prop-types';
 import withStyles from '@material-ui/core/styles/withStyles';
 
 // core components
+import { Scrollbars } from 'react-custom-scrollbars';
 import Badge from '../Badge/Badge';
 
 import timelineStyle from '../../common/jss/components/timelineStyle';
 
-import { Scrollbars } from 'react-custom-scrollbars';
-
 function Timeline({ ...props }) {
   const { classes, stories, simple } = props;
-  const timelineClass =
-    classes.timeline +
-    ' ' +
-    cx({
-      [classes.timelineSimple]: simple
-    });
+  const timelineClass = `${classes.timeline} ${cx({
+    [classes.timelineSimple]: simple
+  })}`;
   return (
     <Scrollbars>
       <ul className={timelineClass}>
         {stories.map((prop, key) => {
-          const panelClasses =
-            classes.timelinePanel +
-            ' ' +
-            cx({
-              [classes.timelinePanelInverted]: prop.inverted,
-              [classes.timelineSimplePanel]: simple
-            });
-          const timelineBadgeClasses =
-            classes.timelineBadge +
-            ' ' +
-            classes[prop.badgeColor] +
-            ' ' +
-            cx({
-              [classes.timelineSimpleBadge]: simple
-            });
+          const panelClasses = `${classes.timelinePanel} ${cx({
+            [classes.timelinePanelInverted]: prop.inverted,
+            [classes.timelineSimplePanel]: simple
+          })}`;
+          const timelineBadgeClasses = `${classes.timelineBadge} ${
+            classes[prop.badgeColor]
+          } ${cx({
+            [classes.timelineSimpleBadge]: simple
+          })}`;
           return (
             <li className={classes.item} key={key}>
               {prop.badgeIcon ? (

@@ -33,13 +33,13 @@ export default theme => ({
     background: 'transparent',
     '& a:last-child': {
       marginRight: '20px'
-    },
+    }
     // width: '600px',
   },
   menuBtnWrapAvatar: {
     width: '50px',
     // marginRight: '15px',
-    height: '50px',
+    height: '50px'
   },
   menuUserName: {
     width: '80px',
@@ -50,7 +50,7 @@ export default theme => ({
       fontSize: '16px',
       lineHeight: '100%',
       textAlign: 'center',
-      margin: '0',
+      margin: '0'
     }
   },
   BottomNavigationIcon: {
@@ -60,7 +60,7 @@ export default theme => ({
   menuBtnWrapLeft: {
     marginRight: 'auto',
     marginLeft: 'auto',
-    flex: 1,
+    flex: 1
     // textAlign: 'center'
   },
   menuBtnWrapRight: {

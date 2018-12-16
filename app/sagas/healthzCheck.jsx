@@ -71,7 +71,7 @@ function* getConnectionInfo() {
 }
 
 function* startHealthzCheck(url, controllers) {
-  if(!lodash.isNil(task)){
+  if (!lodash.isNil(task)) {
     yield cancel(task);
   }
   let U = url;

@@ -10,8 +10,13 @@
 
 import { call, takeLatest, put, select } from 'redux-saga/effects';
 
-import { CONNECTION, SYSTEM_INIT, RUSH, RFID, USER_CONFIGS } from "../actions/actionTypes";
-
+import {
+  CONNECTION,
+  SYSTEM_INIT,
+  RUSH,
+  RFID,
+  USER_CONFIGS
+} from '../actions/actionTypes';
 
 import { setLedStatusReady, setModBusIO } from './io';
 
@@ -52,8 +57,7 @@ function* sysInit() {
     }
 
     setLedStatusReady();
-
-  }catch (e) {
+  } catch (e) {
     yield put(setNewNotification('error', e.toString()));
   }
 }

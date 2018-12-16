@@ -23,7 +23,7 @@ import {
   dangerColor
 } from '../../common/jss/material-react-pro';
 
-import {OPERATION_STATUS} from '../../reducers/operations';
+import { OPERATION_STATUS } from '../../reducers/operations';
 import { OPERATION_RESULT } from '../../reducers/operations';
 
 const ripple = keyframes`
@@ -50,8 +50,8 @@ const withstyles = () => ({
   imgBlock: {
     // maxHeight: '100%',
     // maxWidth: '100%',
-    width:'100%',
-    height:'100%',
+    width: '100%',
+    height: '100%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -141,7 +141,10 @@ class ConnectedImageStick extends React.Component {
       idx += 1;
 
       let status = 'waiting';
-      if (operations.activeResultIndex === i && operations.operationStatus === OPERATION_STATUS.DOING) {
+      if (
+        operations.activeResultIndex === i &&
+        operations.operationStatus === OPERATION_STATUS.DOING
+      ) {
         status = 'waitingActive';
       }
 
@@ -157,13 +160,13 @@ class ConnectedImageStick extends React.Component {
             {item.sequence}
           </span>
           {/*{display ? (*/}
-            {/*<div className={classes.popover}>*/}
-              {/*<div className={classes.popoverBody}>*/}
-                {/*<p>角度: {item.wi || '-'}</p>*/}
-                {/*<p>扭矩: {item.mi || '-'}</p>*/}
-                {/*<p>时间: {item.ti || '-'}</p>*/}
-              {/*</div>*/}
-            {/*</div>*/}
+          {/*<div className={classes.popover}>*/}
+          {/*<div className={classes.popoverBody}>*/}
+          {/*<p>角度: {item.wi || '-'}</p>*/}
+          {/*<p>扭矩: {item.mi || '-'}</p>*/}
+          {/*<p>时间: {item.ti || '-'}</p>*/}
+          {/*</div>*/}
+          {/*</div>*/}
           {/*) : null}*/}
         </div>
       );
@@ -177,9 +180,9 @@ class ConnectedImageStick extends React.Component {
           }}
         >
           {/*<img*/}
-            {/*src={operations.workSheet}*/}
-            {/*className={classes.imgSheet}*/}
-            {/*alt=""*/}
+          {/*src={operations.workSheet}*/}
+          {/*className={classes.imgSheet}*/}
+          {/*alt=""*/}
           {/*/>*/}
           {statusDisplay}
         </div>

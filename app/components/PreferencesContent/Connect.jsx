@@ -16,10 +16,9 @@ import { I18n } from 'react-i18next';
 import Button from '../CustomButtons/Button';
 
 import saveConfigs from '../../actions/userConfigs';
-import { systemInit } from "../../actions/sysInit";
+import { systemInit } from '../../actions/sysInit';
 
-
-import { sortObj,defaultClient } from '../../common/utils';
+import { sortObj, defaultClient } from '../../common/utils';
 import Test from './Test';
 import styles from './styles';
 import withKeyboard from '../Keyboard';
@@ -34,7 +33,7 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = {
   saveConfigs,
-  systemInit,
+  systemInit
 };
 
 /* eslint-disable react/prefer-stateless-function */
@@ -45,7 +44,7 @@ class ConnectedConnect extends React.Component {
       isDataValid: true,
       data: props.storedConfigs,
       section: 'odooConnection',
-      connInfoData: props.connInfo,
+      connInfoData: props.connInfo
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -63,20 +62,21 @@ class ConnectedConnect extends React.Component {
   }
 
   handleTestKeyBoardSubmit = (key, text) => {
-    const {connInfoData} = this.state;
+    const { connInfoData } = this.state;
     this.setState({
       connInfoData: {
         ...connInfoData,
         [key]: text
       }
-    })
+    });
   };
 
   handleSubmit() {
     const { saveConfigs, connInfo } = this.props;
     const { section, data } = this.state;
     const fullUrl = `${data.odooUrl.value}/hmi.connections/${data.hmiSn.value}`;
-    defaultClient.get(fullUrl)
+    defaultClient
+      .get(fullUrl)
       .then(resp => {
         const { masterpc, rfid, io, controllers, info } = resp.data;
         const d = {
@@ -90,7 +90,8 @@ class ConnectedConnect extends React.Component {
         };
         this.setState({
           connInfoData: d
-        })})
+        });
+      })
       .catch(e => console.log(e.toString()));
     saveConfigs(section, data);
   }
@@ -100,7 +101,7 @@ class ConnectedConnect extends React.Component {
   }
 
   render() {
-    const { classes,systemInit, saveConfigs } = this.props;
+    const { classes, systemInit, saveConfigs } = this.props;
     const { data, isDataValid, connInfoData } = this.state;
 
     const baseItems = t =>
@@ -163,10 +164,12 @@ class ConnectedConnect extends React.Component {
               {t('Common.Test')}
             </h3>
             <Paper className={classes.paperWrap} elevation={1}>
-              <Test connInfoData={connInfoData}
-                    systemInit={systemInit}
-                    saveConfigs={saveConfigs}
-                    keyBoardSubmit={this.handleTestKeyBoardSubmit}/>
+              <Test
+                connInfoData={connInfoData}
+                systemInit={systemInit}
+                saveConfigs={saveConfigs}
+                keyBoardSubmit={this.handleTestKeyBoardSubmit}
+              />
             </Paper>
           </section>
         )}

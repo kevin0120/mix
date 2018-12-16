@@ -18,10 +18,9 @@ import Button from '../CustomButtons/Button';
 
 import { sortObj } from '../../common/utils';
 import styles from './styles';
-import saveConfigs from "../../actions/userConfigs";
-import withKeyboard from "../Keyboard";
-import { systemInit } from "../../actions/sysInit";
-
+import saveConfigs from '../../actions/userConfigs';
+import withKeyboard from '../Keyboard';
+import { systemInit } from '../../actions/sysInit';
 
 function handleTest(obj) {
   obj.test(obj.value);
@@ -55,10 +54,9 @@ class ConnectedTest extends React.Component {
         aiisUrl: 99
       },
       data: this.formatConnInfo(props.connInfoData),
-      btnGroupStatus: {},
+      btnGroupStatus: {}
     };
   }
-
 
   componentDidMount() {
     this.setBtnsStatus();
@@ -147,24 +145,24 @@ class ConnectedTest extends React.Component {
         displayOrder: 500,
         value: String(connInfo.rework_workcenter),
         displayTitle: '返修工位'
-      },
+      }
     };
   }
 
   handleSave() {
     const { saveConfigs } = this.props;
     const { data } = this.state;
-    const section='connections';
-    saveConfigs(section, {masterpc: data.masterPcUrl.value,
+    const section = 'connections';
+    saveConfigs(section, {
+      masterpc: data.masterPcUrl.value,
       aiis: data.aiisUrl.value,
-      controllers: [{serial_no: data.controllerSn.value}],
+      controllers: [{ serial_no: data.controllerSn.value }],
       rfid: data.rfidUrl.value,
       io: data.ioUrl.value,
       workcenterCode: data.workCenterCode.value,
-      rework_workcenter: data.rework.value,
+      rework_workcenter: data.rework.value
     });
   }
-
 
   testAiis(conn) {
     const url = `${conn}/aiis/v1/healthz`;
@@ -265,7 +263,7 @@ class ConnectedTest extends React.Component {
                 className={classes.input}
                 value={item.value}
                 onClick={() => {
-                  if (!item.disabled){
+                  if (!item.disabled) {
                     this.props.keyboardInput({
                       onSubmit: text => {
                         const tempData = cloneDeep(this.state.data);
@@ -273,7 +271,10 @@ class ConnectedTest extends React.Component {
                         this.setState({
                           data: tempData
                         });
-                        const d = item.key === 'controllers'? [{serial_no: text}]: text;
+                        const d =
+                          item.key === 'controllers'
+                            ? [{ serial_no: text }]
+                            : text;
                         this.props.keyBoardSubmit(item.key, d);
                       },
                       text: item.value,
@@ -314,8 +315,7 @@ class ConnectedTest extends React.Component {
 
 ConnectedTest.propTypes = {
   classes: PropTypes.shape({}).isRequired,
-  connInfoData: PropTypes.shape({}).isRequired,
+  connInfoData: PropTypes.shape({}).isRequired
 };
-
 
 export default withKeyboard(withStyles(styles)(ConnectedTest));

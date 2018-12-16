@@ -12,8 +12,7 @@ import { HEALTHZ_CHECK } from '../actions/actionTypes';
 
 const lodash = require('lodash');
 
-import configs from '../shared/config/index'
-
+import configs from '../shared/config/index';
 
 const defaultHealthChecks = {
   masterpc: {
@@ -42,14 +41,14 @@ const defaultHealthChecks = {
     optionInfo: '',
     isHealth: false,
     displayTitle: 'HealthCheck.RFID',
-    enable: configs.systemSettings.rfidEnabled,
+    enable: configs.systemSettings.rfidEnabled
   },
   andon: {
     displayOrder: 41,
     optionInfo: '',
     isHealth: false,
     displayTitle: 'HealthCheck.Andon',
-    enable: configs.systemSettings.andonEnable,
+    enable: configs.systemSettings.andonEnable
   },
   odoo: {
     displayOrder: 51,

@@ -44,7 +44,7 @@ export default function users(state: Array = defaultUsers, action) {
     }
     case USER.LOGOUT_SUCCESS: {
       if (action.data.length === 0) {
-        return defaultUsers
+        return defaultUsers;
       }
       return action.data;
     }

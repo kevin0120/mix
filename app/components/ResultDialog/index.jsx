@@ -29,10 +29,9 @@ import { setResultDiagShow } from '../../actions/resultDiag';
 import { NewCar } from '../../actions/scannerDevice';
 
 import resultDiagStyles from './styles';
-import configs from "../../shared/config";
+import configs from '../../shared/config';
 
 import { OPERATION_STATUS, OPERATION_SOURCE } from '../../reducers/operations';
-
 
 const lodash = require('lodash');
 
@@ -71,7 +70,7 @@ class ConnectedResultDialog extends React.Component {
     e.preventDefault();
     const { NewCar } = this.props;
     const { vin } = this.state.nextWorkorder;
-    if (!lodash.isNil(vin) || vin !== ''){
+    if (!lodash.isNil(vin) || vin !== '') {
       NewCar(vin, OPERATION_SOURCE.MANUAL);
     }
   };
@@ -95,7 +94,7 @@ class ConnectedResultDialog extends React.Component {
 
     const localResults = [];
     for (let i = 0; i < results.length; i++) {
-      if(showNextVehicle){
+      if (showNextVehicle) {
         localResults.push([
           results[i].pset,
           results[i].mi,
@@ -104,7 +103,7 @@ class ConnectedResultDialog extends React.Component {
           results[i].batch,
           results[i].result
         ]);
-      }else {
+      } else {
         localResults.push([
           jobID,
           results[i].mi,
@@ -114,7 +113,6 @@ class ConnectedResultDialog extends React.Component {
           results[i].result
         ]);
       }
-
     }
 
     return (
@@ -151,7 +149,14 @@ class ConnectedResultDialog extends React.Component {
                       <CardBody>
                         <Table
                           tableHeaderColor="info"
-                          tableHead={['程序号', '扭矩', '角度', '用时', '批次', '结果']}
+                          tableHead={[
+                            '程序号',
+                            '扭矩',
+                            '角度',
+                            '用时',
+                            '批次',
+                            '结果'
+                          ]}
                           tableData={localResults}
                           colorsColls={['info']}
                         />
@@ -160,8 +165,8 @@ class ConnectedResultDialog extends React.Component {
                   </GridItem>
                 </GridContainer>
               </div>
-              {
-                showNextVehicle? <div>
+              {showNextVehicle ? (
+                <div>
                   <GridContainer className={classes.root}>
                     <GridItem xs={12}>
                       <Card>
@@ -169,7 +174,9 @@ class ConnectedResultDialog extends React.Component {
                           <CardIcon color="info">
                             <Assignment />
                           </CardIcon>
-                          <h4 style={{ color: '#000' }}>{t('main.nextOrder')}</h4>
+                          <h4 style={{ color: '#000' }}>
+                            {t('main.nextOrder')}
+                          </h4>
                         </CardHeader>
                         <CardActionArea
                           component={Button}
@@ -194,8 +201,8 @@ class ConnectedResultDialog extends React.Component {
                       </Card>
                     </GridItem>
                   </GridContainer>
-                </div>: null
-              }
+                </div>
+              ) : null}
             </DialogContent>
             <DialogActions
               className={`${classes.modalFooter} ${classes.modalFooterCenter}`}

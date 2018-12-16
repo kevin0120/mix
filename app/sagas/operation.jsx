@@ -45,7 +45,7 @@ export function* watchOperation() {
           // 工具禁用
           yield put(toolDisable());
         }
-        if(state.setting.operationSettings.opMode === 'order'){
+        if (state.setting.operationSettings.opMode === 'order') {
           yield call(getNextWorkOrderandShow);
         }
         yield put(setResultDiagShow(true));
@@ -65,17 +65,13 @@ function* getNextWorkOrderandShow() {
 
     const rushUrl = state.connections.masterpc;
     const { workcenterCode } = state.connections;
-    const resp = yield call(
-      fetchNextWorkOrder,
-      rushUrl,
-      workcenterCode);
+    const resp = yield call(fetchNextWorkOrder, rushUrl, workcenterCode);
     if (resp.status === 200) {
       yield put(fetchOngoingOperationOK(resp.data));
     }
   } catch (e) {
     console.log(e);
   }
-
 }
 
 // 触发作业
@@ -99,12 +95,22 @@ export function* triggerOperation(carID, carType, job, source) {
 
   if (carID) {
     yield call(addNewStory, STORY_TYPE.INFO, source, carID);
-    yield put({ type: OPERATION.TRIGGER.NEW_DATA, source, carID, carType: null });
+    yield put({
+      type: OPERATION.TRIGGER.NEW_DATA,
+      source,
+      carID,
+      carType: null
+    });
   }
 
   if (carType) {
     yield call(addNewStory, STORY_TYPE.INFO, source, carType);
-    yield put({ type: OPERATION.TRIGGER.NEW_DATA, source, carID: null, carType });
+    yield put({
+      type: OPERATION.TRIGGER.NEW_DATA,
+      source,
+      carID: null,
+      carType
+    });
   }
 
   state = yield select();
@@ -118,7 +124,10 @@ export function* triggerOperation(carID, carType, job, source) {
     }
   }
 
-  if (triggerFlagNum === triggers.length || state.workMode.workMode === 'manual') {
+  if (
+    triggerFlagNum === triggers.length ||
+    state.workMode.workMode === 'manual'
+  ) {
     yield call(getOperation, job);
   }
 }
@@ -165,10 +174,7 @@ export function* getOperation(job) {
           if (resp.status === 200) {
             fetchOK = true;
           }
-        } catch (e) {
-
-        }
-
+        } catch (e) {}
       } else {
         // 工单模式
 
@@ -207,7 +213,6 @@ export function* getOperation(job) {
   } catch (e) {
     console.log(e);
   }
-
 }
 
 // 开始作业
@@ -233,13 +238,7 @@ export function* startOperation(data) {
       // job模式
 
       const controllerSN = state.connections.controllers[0].serial_no;
-      const {
-        operationID,
-        carType,
-        carID,
-        jobID,
-        source
-      } = state.operations;
+      const { operationID, carType, carID, jobID, source } = state.operations;
 
       const { hmiSn } = state.setting.page.odooConnection;
       const userID = 1;
@@ -281,10 +280,7 @@ export function* startOperation(data) {
       yield put({ type: OPERATION.STARTED });
       yield call(doingOperation);
     }
-  } catch (e) {
-
-  }
-
+  } catch (e) {}
 }
 
 // 处理作业过程
@@ -358,15 +354,19 @@ export function* handleResults(data) {
       storyType = STORY_TYPE.PASS;
     }
 
-    const eti  = data[i].ti? data[i].ti.toString() : 'nil';
+    const eti = data[i].ti ? data[i].ti.toString() : 'nil';
 
-    const batch = `${(operations.activeResultIndex + 1).toString()}/${operations.results.length.toString()}`;
+    const batch = `${(
+      operations.activeResultIndex + 1
+    ).toString()}/${operations.results.length.toString()}`;
 
     yield call(
       addNewStory,
       storyType,
       '结果',
-      `扭矩:${data[i].mi.toString()} 角度:${data[i].wi.toString()} 耗时:${eti} 批次:${batch}`
+      `扭矩:${data[i].mi.toString()} 角度:${data[
+        i
+      ].wi.toString()} 耗时:${eti} 批次:${batch}`
     );
   }
 
@@ -376,8 +376,7 @@ export function* handleResults(data) {
   if (hasFail) {
     if (
       operations.failCount + 1 >=
-      operations.results[operations.activeResultIndex]
-        .max_redo_times
+      operations.results[operations.activeResultIndex].max_redo_times
     ) {
       // 作业失败
       rType = OPERATION.FAILED;

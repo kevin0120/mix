@@ -39,7 +39,15 @@ export default function connections(
       };
     }
     case CONNECTION.MANUAL_MODIFICATION: {
-      const { masterpc, rfid, io, controllers, aiis,workcenterCode, rework_workcenter} = action.data;
+      const {
+        masterpc,
+        rfid,
+        io,
+        controllers,
+        aiis,
+        workcenterCode,
+        rework_workcenter
+      } = action.data;
       return {
         ...state,
         masterpc,

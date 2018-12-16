@@ -47,16 +47,16 @@ function ConnectedLeftMenuWithAvatar(props) {
       <div className={classes.baseInfo}>
         <List>
           {/*<ListItem className={classes.userInfo}>*/}
-            {/*<Avatar*/}
-              {/*alt={users[0].name}*/}
-              {/*src={users[0].avatar}*/}
-              {/*className={classes.avatar}*/}
-            {/*/>*/}
-            {/*<ListItemText*/}
-              {/*className={classes.userText}*/}
-              {/*primary={users[0].name}*/}
-              {/*secondary={users[0].name}*/}
-            {/*/>*/}
+          {/*<Avatar*/}
+          {/*alt={users[0].name}*/}
+          {/*src={users[0].avatar}*/}
+          {/*className={classes.avatar}*/}
+          {/*/>*/}
+          {/*<ListItemText*/}
+          {/*className={classes.userText}*/}
+          {/*primary={users[0].name}*/}
+          {/*secondary={users[0].name}*/}
+          {/*/>*/}
           {/*</ListItem>*/}
           <ListItem className={classes.timeWrap}>
             <Clock
@@ -74,7 +74,7 @@ function ConnectedLeftMenuWithAvatar(props) {
 
 ConnectedLeftMenuWithAvatar.propTypes = {
   classes: PropTypes.shape({}).isRequired,
-  children: PropTypes.shape({}).isRequired,
+  children: PropTypes.shape({}).isRequired
   // name: PropTypes.string.isRequired,
   // secondaryInfo: PropTypes.string.isRequired,
   // avatarImg: PropTypes.string.isRequired,

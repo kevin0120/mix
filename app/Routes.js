@@ -20,18 +20,25 @@ export default class Routes extends React.Component {
 
   render() {
     // console.log('rerender');
-    return (<App>
-      <Switch>
-        {i.map(RouteConfig => (
-          <Route key={RouteConfig.url} exact path={RouteConfig.url} render={() => {
-            if (RouteConfig.showLayout !== this.state.showLayout) {
-              this.setState({ showLayout: RouteConfig.showLayout });
-            }
-            return <RouteConfig.main/>;
-          }}/>
-        ))}
-      </Switch>
-      <Layout shouldRender={this.state.showLayout}/>
-    </App>);
+    return (
+      <App>
+        <Switch>
+          {i.map(RouteConfig => (
+            <Route
+              key={RouteConfig.url}
+              exact
+              path={RouteConfig.url}
+              render={() => {
+                if (RouteConfig.showLayout !== this.state.showLayout) {
+                  this.setState({ showLayout: RouteConfig.showLayout });
+                }
+                return <RouteConfig.main />;
+              }}
+            />
+          ))}
+        </Switch>
+        <Layout shouldRender={this.state.showLayout} />
+      </App>
+    );
   }
-};
+}

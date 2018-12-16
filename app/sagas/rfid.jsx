@@ -4,8 +4,8 @@ import { RFID } from '../actions/actionTypes';
 import { triggerOperation } from './operation';
 import { OPERATION_SOURCE } from '../reducers/operations';
 import { isCarID } from '../common/utils';
-import { setHealthzCheck } from "../actions/healthCheck";
-import { setNewNotification } from "../actions/notification";
+import { setHealthzCheck } from '../actions/healthCheck';
+import { setNewNotification } from '../actions/notification';
 
 const _ = require('lodash');
 
@@ -83,26 +83,26 @@ function createRfidChannel(rfidClient) {
   return eventChannel(emit => {
     rfidClient.on('connect', () => {
       // health
-      emit({type:'healthz', payload:true});
+      emit({ type: 'healthz', payload: true });
     });
 
     rfidClient.on('data', data => {
-      emit({type:'data', payload: data});
+      emit({ type: 'data', payload: data });
     });
 
     rfidClient.on('end', () => {
-      emit({type:'healthz', payload:false})
+      emit({ type: 'healthz', payload: false });
     });
 
     rfidClient.on('close', () => {
       // unhealth
-      emit({type:'healthz', payload:false});
+      emit({ type: 'healthz', payload: false });
       rfidClient.end(); // try to reconnect
     });
 
     rfidClient.on('error', () => {
       // unhealth
-      emit({type:'healthz', payload:false});
+      emit({ type: 'healthz', payload: false });
       rfidClient.end(); // try to reconnect
     });
 
@@ -114,16 +114,15 @@ function createRfidChannel(rfidClient) {
   });
 }
 
-
 const getHealthz = state => state.healthCheckResults;
 
 export function* watchRfidChannel() {
   while (client !== null) {
     const data = yield take(rfidChannel);
 
-    const {type, payload} = data;
+    const { type, payload } = data;
 
-    switch (type){
+    switch (type) {
       case 'healthz': {
         const healthzStatus = yield select(getHealthz); // 获取整个healthz
         if (!lodash.isEqual(healthzStatus.rfid.isHealth, payload)) {
@@ -162,7 +161,5 @@ export function* watchRfidChannel() {
       default:
         break;
     }
-
-
   }
 }

@@ -15,9 +15,12 @@ export default function setting(state: object = configs, action: actionType) {
   switch (action.type) {
     case USER_CONFIGS.SAVE: {
       const { section, newConfigs } = action;
-      switch (section){
+      switch (section) {
         case 'connections':
-          return { ...state, system: { ...state.system, [section]: newConfigs } };
+          return {
+            ...state,
+            system: { ...state.system, [section]: newConfigs }
+          };
         default:
           return { ...state, page: { ...state.page, [section]: newConfigs } };
       }

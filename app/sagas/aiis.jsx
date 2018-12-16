@@ -1,13 +1,22 @@
-import { call, take, takeLatest, takeEvery, select, put, fork, cancel } from 'redux-saga/effects';
+import {
+  call,
+  take,
+  takeLatest,
+  takeEvery,
+  select,
+  put,
+  fork,
+  cancel
+} from 'redux-saga/effects';
 import OWebSocket from 'ws';
 import { eventChannel } from 'redux-saga';
 import { ANDON, AIIS, OPERATION } from '../actions/actionTypes';
 import { jobManual } from './api/operation';
 import { setHealthzCheck } from '../actions/healthCheck';
 
-import {triggerOperation} from './operation';
+import { triggerOperation } from './operation';
 
-import {OPERATION_STATUS, OPERATION_SOURCE } from '../reducers/operations';
+import { OPERATION_STATUS, OPERATION_SOURCE } from '../reducers/operations';
 
 let task = null;
 
@@ -46,7 +55,7 @@ function* initAiis() {
     const uris = aiisUrl.split('://');
     if (uris.length > 1) {
       const url = `ws://${uris[1]}/aiis/v1/ws`;
-      ws = new WebSocket(url, {reconnectInterval: 3000});
+      ws = new WebSocket(url, { reconnectInterval: 3000 });
 
       task = yield fork(aiisWSListener, hmiSN);
       // yield call(wsOnOpen, hmiSN);
@@ -72,10 +81,7 @@ export function* handleAiisData(action) {
     } else {
       // 空车信息
 
-      const {
-        carType,
-        carID,
-      } = state.operations;
+      const { carType, carID } = state.operations;
 
       const { emptyCarJob } = state.setting.operationSettings;
 
@@ -135,7 +141,6 @@ function aiisWSChannel() {
     });
 
     ws.on('message', dataRaw => {
-
       emit({
         type: AIIS_WS_CHANNEL.MESSAGE,
         dataRaw
@@ -175,7 +180,6 @@ function* aiisWSListener(hmiSN) {
           console.log(' receive pong Msg');
           break;
         case AIIS_WS_CHANNEL.MESSAGE:
-
           yield call(wsOnMessage, chanAction.dataRaw);
           break;
         default:

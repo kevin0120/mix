@@ -64,7 +64,7 @@ export const OPERATION = {
   PREDOING: 'OPERATION_PREDOING',
   TIMEOUT: 'OPERATION_TIMEOUT',
   VERIFIED: 'OPERATION_VERIFIED',
-  RESET: 'OPERATION_RESET', // predoing to ready
+  RESET: 'OPERATION_RESET' // predoing to ready
 };
 
 export const IO = {

@@ -17,7 +17,6 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Paper from '@material-ui/core/Paper';
 import MenuList from '@material-ui/core/MenuList';
 
-
 import * as Utils from '../../common/utils';
 
 import styles from './styles';
@@ -29,10 +28,10 @@ class SysInfo extends React.Component {
     super();
     this.timer = null;
     this.state = {
-      cpustat: {avgload: 100.0},
-      fsstat: {used: 100, size: 100},
-      memstat: {used: 100, total: 100},
-      batterystat: {currentcapacity: 0, maxcapacity: 100},
+      cpustat: { avgload: 100.0 },
+      fsstat: { used: 100, size: 100 },
+      memstat: { used: 100, total: 100 },
+      batterystat: { currentcapacity: 0, maxcapacity: 100 }
     };
   }
 
@@ -40,16 +39,16 @@ class SysInfo extends React.Component {
     this.timer = setInterval(() => {
       si.currentLoad().then(data => {
         this.setState({
-          cpustat: {avgload: data.avgload}
-        })
+          cpustat: { avgload: data.avgload }
+        });
       });
       si.fsSize().then(data => {
         console.log(data);
       });
       si.mem().then(data => {
         this.setState({
-          memstat: {used: data.used, total: data.total}
-        })
+          memstat: { used: data.used, total: data.total }
+        });
       });
       si.battery().then(data => {
         console.log(data);
@@ -59,7 +58,6 @@ class SysInfo extends React.Component {
       });
     }, 5000);
   }
-
 
   shouldComponentUpdate(nextProps, nextState) {
     console.log(nextProps, nextState);
@@ -75,35 +73,33 @@ class SysInfo extends React.Component {
 
     const styleOptions = { disableGutters: false };
 
-    return Utils.normalSortObj(this.state).map(
-      ({ key, value: item }) => {
-        const { isHealth, displayTitle } = item;
-        const statusClassName = isHealth
-          ? classes.infoSuccess
-          : classes.infoError;
+    return Utils.normalSortObj(this.state).map(({ key, value: item }) => {
+      const { isHealth, displayTitle } = item;
+      const statusClassName = isHealth
+        ? classes.infoSuccess
+        : classes.infoError;
 
-        return (
-          <I18n ns="translations">
-            {t => (
-              <MenuList key={key}>
-                <ListItem
+      return (
+        <I18n ns="translations">
+          {t => (
+            <MenuList key={key}>
+              <ListItem
+                key={displayTitle}
+                disableGutters={styleOptions.disableGutters}
+                className={classes.infoItem}
+              >
+                <ListItemText
                   key={displayTitle}
-                  disableGutters={styleOptions.disableGutters}
-                  className={classes.infoItem}
-                >
-                  <ListItemText
-                    key={displayTitle}
-                    className={classes.infoText}
-                    primary={t(displayTitle)}
-                  />
-                  <div className={`${classes.infoStatus} ${statusClassName}`} />
-                </ListItem>
-              </MenuList>
-            )}
-          </I18n>
-        );
-      }
-    );
+                  className={classes.infoText}
+                  primary={t(displayTitle)}
+                />
+                <div className={`${classes.infoStatus} ${statusClassName}`} />
+              </ListItem>
+            </MenuList>
+          )}
+        </I18n>
+      );
+    });
   }
 }
 

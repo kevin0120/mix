@@ -12,7 +12,7 @@ import * as Utils from '../../common/utils';
 
 import styles from './styles';
 
-const lodash =require('lodash');
+const lodash = require('lodash');
 
 class ConnectedHealthCheck extends React.Component {
   render() {

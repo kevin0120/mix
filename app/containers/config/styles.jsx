@@ -1,5 +1,4 @@
-
-import {warningColor} from '../../common/jss/material-react-pro'
+import { warningColor } from '../../common/jss/material-react-pro';
 
 export default theme => ({
   root: {

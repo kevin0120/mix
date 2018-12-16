@@ -4,7 +4,6 @@ import { SCANNER } from './actionTypes';
 
 import { OPERATION_SOURCE } from '../reducers/operations';
 
-
 let scanner = null;
 
 const usbDetect = require('usb-detection');
@@ -32,7 +31,10 @@ function getBarcode(mode, chunk) {
   }
 }
 
-export function NewCar(aBarcode: string, source: string = OPERATION_SOURCE.SCANNER) {
+export function NewCar(
+  aBarcode: string,
+  source: string = OPERATION_SOURCE.SCANNER
+) {
   return {
     type: SCANNER.READ_NEW_DATA,
     data: aBarcode,

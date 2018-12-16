@@ -6,14 +6,13 @@
  * Vestibulum commodo. Ut rhoncus gravida arcu.
  */
 
-
 // @flow
 
-import {WORK_MODE} from './actionTypes'
+import { WORK_MODE } from './actionTypes';
 
 export function switchWorkMode(mode: string) {
   return {
     type: WORK_MODE.SWITCH_WM,
     mode
-  }
+  };
 }

@@ -29,7 +29,6 @@ export function operationVerified(data) {
   };
 }
 
-
 export function switch2Timeout() {
   return {
     type: OPERATION.TIMEOUT
