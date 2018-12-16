@@ -25,7 +25,8 @@ import {
 
 import { OPERATION_STATUS, OPERATION_RESULT } from '../../reducers/operations';
 
-import Card from '../../components/Card/Card'
+import Card from "../Card/Card"
+import imagesStyles from "../../common/jss/imagesStyles";
 
 const ripple = keyframes`
   0% {transform:scale(0.5); }
@@ -36,8 +37,9 @@ const ripple = keyframes`
 const circleRadius = 30;
 const scaleRate = 2;
 
-const withstyles = () => ({
+const imgStickStyles = () => ({
   ...popoverStyles,
+  ...imagesStyles,
   picWrap: {
     position: 'relative',
     // marginTop: '10px',
@@ -63,8 +65,19 @@ const withstyles = () => ({
     height: `${circleRadius * 2}px`,
     borderRadius: '99%',
     textAlign: 'center',
-    lineHeight: '60px',
-    fontSize: '40px',
+    lineHeight: `${circleRadius * 2}px`,
+    fontSize: `${(circleRadius-10) * 2}px`,
+    overflow: 'hidden',
+    background: '#dbdbdb'
+  },
+  circleSmallStatus: {
+    display: 'inline-block',
+    width: `${circleRadius}px`,
+    height: `${circleRadius}px`,
+    borderRadius: '99%',
+    textAlign: 'center',
+    lineHeight: `${circleRadius}px`,
+    fontSize: `${(circleRadius-10)}px`,
     overflow: 'hidden',
     background: '#dbdbdb'
   },
@@ -72,6 +85,14 @@ const withstyles = () => ({
     margin: '20px',
     position: 'absolute',
     color: '#333'
+  },
+  imgSmallBlock: {
+    position: 'absolute',
+    width:'30%',
+    height:'30%',
+    bottom:0,
+    left:0,
+    marginBottom: '5px'
   },
   imgStausInfo: {
     padding: '5px 10px',
@@ -117,7 +138,7 @@ class ConnectedImageStick extends React.Component {
   render() {
     const { classes, operations } = this.props;
 
-    let idx = 0;
+    // let idx = 0;
 
     if (operations.results.length === 0) {
       this.doFocus({
@@ -144,13 +165,15 @@ class ConnectedImageStick extends React.Component {
       });
       this.focused=true;
     }
-    const statusDisplay = operations.results.map((item, i) => {
+    const statusDisplay = (small=false) => operations.results.map((item, i) => {
       // const display = operations.activeResultIndex >= idx;
 
       const postionStyle = {
         top: `calc(${item.offset_y}% - ${this.focused ? circleRadius * scaleRate : circleRadius}px)`,
         left: `calc(${item.offset_x}% - ${this.focused ? circleRadius * scaleRate : circleRadius}px)`
       };
+
+      const circleStatus = small? classes.circleStatus: classes.circleStatus;
 
       idx += 1;
 
@@ -167,7 +190,7 @@ class ConnectedImageStick extends React.Component {
 
       return (
         <div key={item.id} style={postionStyle} className={classes.imgInfo}>
-          <span className={`${classes.circleStatus} ${classes[status]}`}>
+          <span className={`${circleStatus} ${classes[status]}`}>
             {item.sequence}
           </span>
           {/* {display ? ( */}
@@ -195,20 +218,14 @@ class ConnectedImageStick extends React.Component {
             transition: 'transform 1s'
           }}
         >
-          {statusDisplay}
+          {statusDisplay(false)}
         </Image>
-        <Card plain raised style={{
-          position:'absolute',
-          width:'30%',
-          height:'30%',
-          bottom:0,
-          left:0
-        }}>
-          <Image
+        <Card plain raised className={classes.imgSmallBlock}>
+          <Image className={classes.imgCard}
             src={operations.workSheet}
             alt=""
           >
-            {statusDisplay}
+            {statusDisplay(true)}
           </Image>
         </Card>
       </div>
@@ -223,4 +240,4 @@ ConnectedImageStick.propTypes = {
 
 ConnectedImageStick.defaultProps = {};
 
-export default withStyles(withstyles)(ConnectedImageStick);
+export default withStyles(imgStickStyles)(ConnectedImageStick);
