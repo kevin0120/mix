@@ -7,8 +7,9 @@ import {
   primaryColor,
   successColor,
   dangerColor,
-  warningColor
-} from '../material-react-pro.jsx';
+  warningColor,
+  grayColor
+} from '../material-react-pro';
 const timelineStyle = theme => ({
   timeline: {
     [theme.breakpoints.down('sm')]: {
@@ -172,13 +173,22 @@ const timelineStyle = theme => ({
     }
   },
   timelineHeading: {
-    marginBottom: '10px'
+    marginBottom: '10px',
+    float: 'right'
+  },
+  timelineTS: {
+    marginBottom: '10px',
+    float: 'left',
+    '& span': {
+      color: grayColor,
+      fontSize: '12px'
+    }
   },
   timelineBody: {
     fontSize: '14px',
     lineHeight: '21px',
     '& p': {
-      fontSize: '14px',
+      fontSize: '21px',
       marginBottom: '5px'
     }
   },

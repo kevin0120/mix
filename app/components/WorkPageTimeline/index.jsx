@@ -42,6 +42,9 @@ function Timeline({ ...props }) {
                     <Badge color={prop.titleColor}>{prop.title}</Badge>
                   </div>
                 ) : null}
+                <div className={classes.timelineTS}>
+                  <Badge>{prop.timestamp}</Badge>
+                </div>
                 <div className={classes.timelineBody}>{prop.body}</div>
                 {prop.footerTitle ? (
                   <h6 className={classes.footerTitle}>{prop.footerTitle}</h6>

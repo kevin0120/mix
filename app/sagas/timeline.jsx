@@ -3,6 +3,8 @@ import CheckCircle from '@material-ui/icons/CheckCircle';
 import Close from '@material-ui/icons/Close';
 import InfoRounded from '@material-ui/icons/InfoRounded';
 
+const dayjs = require('dayjs');
+
 import { put } from 'redux-saga/effects';
 
 import { TIMELINE_STORY } from '../actions/actionTypes';
@@ -49,6 +51,7 @@ function createNewStory(level, title, msg) {
     badgeColor,
     badgeIcon: icon,
     title,
+    timestamp: dayjs().format('YYYY-MM-DD HH:mm:ss'),
     titleColor: badgeColor,
     body: <p>{msg}</p>
   };

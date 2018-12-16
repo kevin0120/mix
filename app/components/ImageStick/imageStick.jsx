@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
 import Paper from '@material-ui/core/Paper';
 import { withStyles } from '@material-ui/core/styles';
 
@@ -15,6 +14,7 @@ import { withStyles } from '@material-ui/core/styles';
 // } from '../../actions/ongoingRoutingWorkcenter';
 
 import { keyframes } from 'react-emotion';
+import Image from './Image';
 import popoverStyles from '../../common/jss/popoverStyles';
 
 import {
@@ -23,8 +23,9 @@ import {
   dangerColor
 } from '../../common/jss/material-react-pro';
 
-import { OPERATION_STATUS } from '../../reducers/operations';
-import { OPERATION_RESULT } from '../../reducers/operations';
+import { OPERATION_STATUS, OPERATION_RESULT } from '../../reducers/operations';
+
+import Card from '../../components/Card/Card'
 
 const ripple = keyframes`
   0% {transform:scale(0.5); }
@@ -33,6 +34,7 @@ const ripple = keyframes`
 `;
 
 const circleRadius = 30;
+const scaleRate = 2;
 
 const withstyles = () => ({
   ...popoverStyles,
@@ -41,34 +43,13 @@ const withstyles = () => ({
     // marginTop: '10px',
     // marginLeft: '10px',
     height: '100%',
+    width: '100%',
     // height: 'calc(100% - 50px)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden'
-  },
-  imgBlock: {
-    // maxHeight: '100%',
-    // maxWidth: '100%',
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
     overflow: 'hidden',
-    position: 'relative',
-    backgroundSize: 'contain',
-    backgroundRepeat: 'no-repeat',
-    backgroundPosition: 'center'
-  },
-  imgSheet: {
-    position: 'relative',
-    maxWidth: '100%',
-    maxHeight: '100%',
-    textAlign: 'center'
-    // backgroundSize: 'contain',
-    // backgroundPosition: 'center',
-    // backgroundRepeat: 'no-repeat',
+    padding: 'auto'
   },
   heightFirst: {
     height: '100%'
@@ -121,30 +102,60 @@ const withstyles = () => ({
 
 /* eslint-disable react/prefer-stateless-function */
 class ConnectedImageStick extends React.Component {
-  componentDidMount() {}
+  constructor(props) {
+    super(props);
+    this.imageTransform = 'none';
+  }
 
-  componentDidUpdate() {}
+  focused = false;
+
+  doFocus({ transform, scale }) {
+    this.imageTransform = `translate(calc(${transform.x || 0}% - ${transform.x && circleRadius * scaleRate
+      }px),calc(${transform.y || 0}% - ${transform.y && circleRadius * scaleRate}px)) scale(${scale.x},${scale.y})`;
+  }
 
   render() {
     const { classes, operations } = this.props;
 
     let idx = 0;
 
+    if (operations.results.length === 0) {
+      this.doFocus({
+        transform: {
+          x: 0,
+          y: 0
+        },
+        scale: {
+          x: 1,
+          y: 1
+        }
+      });
+      this.focused=false;
+    } else {
+      this.doFocus({
+        transform: {
+          x: (50 - operations.results[operations.activeResultIndex].offset_x) * 2,
+          y: (50 - operations.results[operations.activeResultIndex].offset_y) * 2
+        },
+        scale: {
+          x: 2,
+          y: 2
+        }
+      });
+      this.focused=true;
+    }
     const statusDisplay = operations.results.map((item, i) => {
       // const display = operations.activeResultIndex >= idx;
 
       const postionStyle = {
-        top: `calc(${item.offset_y}% - 30px)`,
-        left: `calc(${item.offset_x}% - 30px)`
+        top: `calc(${item.offset_y}% - ${this.focused ? circleRadius * scaleRate : circleRadius}px)`,
+        left: `calc(${item.offset_x}% - ${this.focused ? circleRadius * scaleRate : circleRadius}px)`
       };
 
       idx += 1;
 
       let status = 'waiting';
-      if (
-        operations.activeResultIndex === i &&
-        operations.operationStatus === OPERATION_STATUS.DOING
-      ) {
+      if (operations.results[operations.activeResultIndex].group_sequence === item.group_sequence && operations.operationStatus === OPERATION_STATUS.DOING) {
         status = 'waitingActive';
       }
 
@@ -159,33 +170,47 @@ class ConnectedImageStick extends React.Component {
           <span className={`${classes.circleStatus} ${classes[status]}`}>
             {item.sequence}
           </span>
-          {/*{display ? (*/}
-          {/*<div className={classes.popover}>*/}
-          {/*<div className={classes.popoverBody}>*/}
-          {/*<p>角度: {item.wi || '-'}</p>*/}
-          {/*<p>扭矩: {item.mi || '-'}</p>*/}
-          {/*<p>时间: {item.ti || '-'}</p>*/}
-          {/*</div>*/}
-          {/*</div>*/}
-          {/*) : null}*/}
+          {/* {display ? ( */}
+          {/* <div className={classes.popover}> */}
+          {/* <div className={classes.popoverBody}> */}
+          {/* <p>角度: {item.wi || '-'}</p> */}
+          {/* <p>扭矩: {item.mi || '-'}</p> */}
+          {/* <p>时间: {item.ti || '-'}</p> */}
+          {/* </div> */}
+          {/* </div> */}
+          {/* ) : null} */}
         </div>
       );
     });
+
+
+
     return (
       <div elevation={4} className={classes.picWrap}>
-        <div
-          className={classes.imgBlock}
+        <Image
+          src={operations.workSheet}
+          alt=""
           style={{
-            backgroundImage: `url(${operations.workSheet})`
+            transform: this.imageTransform,
+            transition: 'transform 1s'
           }}
         >
-          {/*<img*/}
-          {/*src={operations.workSheet}*/}
-          {/*className={classes.imgSheet}*/}
-          {/*alt=""*/}
-          {/*/>*/}
           {statusDisplay}
-        </div>
+        </Image>
+        <Card plain raised style={{
+          position:'absolute',
+          width:'30%',
+          height:'30%',
+          bottom:0,
+          left:0
+        }}>
+          <Image
+            src={operations.workSheet}
+            alt=""
+          >
+            {statusDisplay}
+          </Image>
+        </Card>
       </div>
     );
   }

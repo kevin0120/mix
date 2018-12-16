@@ -36,7 +36,7 @@ const defaultOperations = {
   activeResultIndex: 0,
   failCount: 0,
   jobID: 0,
-  maxOpTimes: 30,
+  maxOpTimes: 0,
   workSheet: defaultWorkingImg,
   productID: -1,
   workcenterID: -1,
@@ -231,6 +231,7 @@ function operationFinished(state, data) {
     carID: '',
     carType: '',
     lnr: '',
+    maxOpTimes: 0,
     results
   };
 }

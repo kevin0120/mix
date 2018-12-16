@@ -665,7 +665,7 @@ class ConnectedWorking extends React.Component {
         operations.results[operations.activeResultIndex].max_redo_times;
       batch = `${(
         operations.activeResultIndex + 1
-      ).toString()}/${operations.results.length.toString()}`;
+      ).toString()}/${operations.results[operations.results.length - 1].group_sequence.toString()}`;
       redoBatch = `${(
         maxRedoTimes - operations.failCount
       ).toString()}/${maxRedoTimes.toString()}`;

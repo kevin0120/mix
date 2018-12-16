@@ -84,7 +84,7 @@ function requestData(masterpcUrl, hmiSN) {
   return defaultClient.get(url, {
     params: {
       hmi_sn: hmiSN,
-      filters: 'vin,job_id,batch,torque,angle,timestamp,vehicle_type',
+      filters: 'vin,job_id,batch,torque,angle,spent,timestamp,vehicle_type',
       limit: 500
     }
   });
@@ -118,6 +118,7 @@ class Result extends React.Component {
               vin: item.vin,
               torque: item.torque,
               angle: item.angle,
+              spent: item.spent,
               job_id: item.job_id,
               batch: item.batch,
               vehicle_type: item.vehicle_type,
@@ -181,6 +182,9 @@ class Result extends React.Component {
           <Divider inset component="li" />
           <ListItem>
             <ListItemText primary={`角度: ${selectObj.angle}`} />
+          </ListItem>
+          <ListItem>
+            <ListItemText primary={`耗时(ms): ${selectObj.spent}`} />
           </ListItem>
           <Divider inset component="li" />
           <ListItem>
@@ -317,15 +321,21 @@ class Result extends React.Component {
                           )
                         },
                         {
-                          Header: '扭矩',
+                          Header: '扭矩(N·M)',
                           accessor: 'torque',
+                          sortable: true,
+                          filterable: false
+                        },
+                        {
+                          Header: '角度(Deg)',
+                          accessor: 'angle',
                           sortable: false,
                           filterable: false
                         },
                         {
-                          Header: '角度',
-                          accessor: 'angle',
-                          sortable: false,
+                          Header: '耗时(ms)',
+                          accessor: 'spent',
+                          sortable: true,
                           filterable: false
                         },
                         {
@@ -345,7 +355,7 @@ class Result extends React.Component {
                           //   )
                         },
                         {
-                          Header: 'Actions',
+                          Header: '动作',
                           accessor: 'actions',
                           sortable: false,
                           filterable: false
