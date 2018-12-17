@@ -1,5 +1,8 @@
 import React from 'react';
 import { Switch, Route } from 'react-router';
+
+// import { AnimatedSwitch } from 'react-router-transition';
+
 import App from './containers/App';
 
 import indexRoutes, { routeConfigs } from './routes/index';
@@ -18,8 +21,17 @@ export default class Routes extends React.Component {
     };
   }
 
+  dummyFunction = (RouteConfig) => {
+    const {showLayout} = this.state;
+    if (RouteConfig.showLayout !== showLayout) {
+      this.setState({ showLayout: RouteConfig.showLayout });
+    }
+
+    return <RouteConfig.main />;
+  };
+
   render() {
-    // console.log('rerender');
+    const {showLayout} = this.state;
     return (
       <App>
         <Switch>
@@ -28,16 +40,11 @@ export default class Routes extends React.Component {
               key={RouteConfig.url}
               exact
               path={RouteConfig.url}
-              render={() => {
-                if (RouteConfig.showLayout !== this.state.showLayout) {
-                  this.setState({ showLayout: RouteConfig.showLayout });
-                }
-                return <RouteConfig.main />;
-              }}
+              render={() => this.dummyFunction(RouteConfig)}
             />
           ))}
         </Switch>
-        <Layout shouldRender={this.state.showLayout} />
+        <Layout shouldRender={showLayout} />
       </App>
     );
   }

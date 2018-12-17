@@ -1,18 +1,11 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+
 // import popoverStyles from '../../common/jss/popoverStyles';
 // import { dangerColor, successColor, warningColor } from '../../common/jss/material-react-pro';
 import { withStyles } from '@material-ui/core/styles';
 
 const styles = () => ({
-  imgBlock: {
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    position: 'relative',
-  },
   imgSheet: {
     maxHeight: '100%',
     maxWidth: '100%',
@@ -60,7 +53,7 @@ class Image extends React.Component {
 
 
   render() {
-    const { style, src, alt, children, classes} = this.props;
+    const { style, src, alt, children, classes, className} = this.props;
     this.updateImgSize();
 
     return (
@@ -68,7 +61,7 @@ class Image extends React.Component {
         ref={r => {
           this.containerRef = r;
         }}
-        className={classes.imgBlock}
+        className={className}
         style={style}
       >
         <img
@@ -90,4 +83,11 @@ class Image extends React.Component {
     );
   }
 }
+
+Image.propTypes = {
+  classes: PropTypes.shape({}).isRequired,
+  className: PropTypes.string,
+
+};
+
 export default withStyles(styles)(Image);
