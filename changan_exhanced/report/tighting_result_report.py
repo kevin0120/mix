@@ -34,8 +34,8 @@ class ReportTightResultReport(models.AbstractModel):
         #         'lines': list(lines)
         #     })
 
-        query = "select tb.vin, json_agg(json_build_array(tb.control_date, tb.code, tb.measure_result)) " \
-                "from (select ors.vin as vin, ors.control_date as control_date, ors.measure_result as measure_result, cps.code as code from operation_result ors join controller_program cps on cps.id = ors.program_id where ors.control_date >= '%s' and ors.control_date <= '%s' order by ors.control_date) tb " \
+        query = "select tb.vin, json_agg(json_build_array(tb.control_date, tb.job, tb.measure_result)) " \
+                "from (select ors.vin as vin, ors.control_date as control_date, ors.measure_result as measure_result, ors.job as job from operation_result ors where ors.control_date >= '%s' and ors.control_date <= '%s' order by ors.control_date) tb " \
                 "group by tb.vin" % (
                     date_from,
                     date_to
