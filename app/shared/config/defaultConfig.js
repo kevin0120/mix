@@ -194,7 +194,10 @@ export const defaultConfigs = {
     emptyCarJob: 250,
 
     // 结果对话框
-    enableResultDialog: true
+    enableResultDialog: true,
+
+    // 手动模式下是否启用freestyle
+    manualFreestyle: true
   },
 
   systemSettings: {

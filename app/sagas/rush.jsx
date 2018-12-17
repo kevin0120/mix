@@ -138,6 +138,10 @@ export function* watchRushChannel(hmiSN) {
           switch (event) {
             case 'job':
               if (state.workMode.workMode === 'manual' && json.job_id > 0) {
+                if (state.setting.operationSettings.manualFreestyle) {
+                  yield put({ type: OPERATION.FINISHED });
+                }
+
                 yield call(
                   triggerOperation,
                   null,
