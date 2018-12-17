@@ -20,6 +20,8 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 
 import { css } from 'react-emotion';
+
+
 // First way to import
 import { GridLoader } from 'react-spinners';
 import Button from '../CustomButtons/Button';
@@ -29,7 +31,11 @@ import saveConfigs from '../../actions/userConfigs';
 
 import styles from './styles';
 import withKeyboard from '../Keyboard';
+
 const lodash = require('lodash');
+
+const { exec } = require('child_process');
+
 
 const override = css`
   display: block;
@@ -112,7 +118,6 @@ class ConnectedNet extends React.PureComponent {
     const tempData = cloneDeep(data);
     const mask = netmask2CIDR(tempData.netmask.value);
     tempData.ssid.value = ssid;
-    const { exec } = require('child_process');
     exec('nmcli con delete default', () => {
       exec(
         `nmcli dev wifi connect ${tempData.ssid.value} password ${
@@ -176,7 +181,6 @@ class ConnectedNet extends React.PureComponent {
 
   getSSIDs = () => {
     const ret = [];
-    const { exec } = require('child_process');
     exec('nmcli dev wifi', (error, stdout, stderr) => {
       if (error) {
         console.error(`exec error: ${error}`);
@@ -185,7 +189,7 @@ class ConnectedNet extends React.PureComponent {
       if (stdout) {
         const lines = stdout.toString().split('\n');
         let isHeader = true;
-        for (let i = 0; i < lines.length - 1; i++) {
+        for (let i = 0; i < lines.length - 1; i+= 1) {
           if (isHeader) {
             isHeader = false;
           } else {
@@ -218,11 +222,10 @@ class ConnectedNet extends React.PureComponent {
     });
   };
 
-  componentDidMount() {
+  componentWillMount() {
     const { data } = this.state;
     const tempData = cloneDeep(this.state);
     const ret = [];
-    const { exec } = require('child_process');
     exec('nmcli dev wifi', (error, stdout, stderr) => {
       if (error) {
         console.error(`exec error: ${error}`);
@@ -288,7 +291,6 @@ class ConnectedNet extends React.PureComponent {
                       const tempData = cloneDeep(this.state.data);
                       tempData[key].value = text;
                       this.setState({
-                        ...this.state,
                         data: tempData
                       });
                     },
