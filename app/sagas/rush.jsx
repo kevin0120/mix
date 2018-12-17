@@ -61,11 +61,24 @@ function* initRush() {
   }
 }
 
-function stopRush() {
+function* stopRush() {
   if (
     ws.ws.readyState === OWebSocket.OPEN ||
     ws.ws.readyState === OWebSocket.CONNECTING
   ) {
+    yield put(setHealthzCheck('masterpc', false));
+    yield put(
+      setNewNotification('info', `masterPC连接状态更新: ${false}`)
+    );
+    yield put(
+      setHealthzCheck('controller', false)
+    );
+    yield put(
+      setNewNotification(
+        'info',
+        `controller连接状态更新: ${false}`
+      )
+    );
     ws.close();
   }
   ws = null;
@@ -125,6 +138,17 @@ export function* watchRushChannel(hmiSN) {
             yield put(setHealthzCheck('masterpc', payload));
             yield put(
               setNewNotification('info', `masterPC连接状态更新: ${payload}`)
+            );
+          }
+          if(!payload) {
+            yield put(
+              setHealthzCheck('controller', false)
+            );
+            yield put(
+              setNewNotification(
+                'info',
+                `controller连接状态更新: ${false}`
+              )
             );
           }
           break;
