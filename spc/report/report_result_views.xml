@@ -31,10 +31,10 @@
                             </thead>
                             <tr t-foreach="docs" t-as="line">
                                 <td  t-if="line">
-                                    <span t-esc="line[0]['name']"/>
+                                    <span t-esc="line[0]"/>
                                 </td>
                                 <td t-if="line">
-                                    <table class="table table-condensed" t-if="line[0]['lines']">
+                                    <table class="table table-condensed" t-if="line[1]">
                                         <thead>
                                             <tr>
                                                 <th><strong>拧紧时间</strong></th>
@@ -42,10 +42,10 @@
                                                 <th><strong>结果</strong></th>
                                             </tr>
                                         </thead>
-                                        <tr t-foreach="line[0]['lines']" t-as="result">
-                                            <td><span t-field="result.control_date"/></td>
-                                            <td><span t-esc="1"/></td>
-                                            <td><span t-field="result.measure_result"/></td>
+                                        <tr t-foreach="line[1]" t-as="result">
+                                            <td><span t-esc="result[0]"/></td>
+                                            <td><span t-esc="result[1]"/></td>
+                                            <td><span t-esc="result[2]"/></td>
                                         </tr>
                                     </table>
                                 </td>
