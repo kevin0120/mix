@@ -144,8 +144,12 @@ class ConnectedImageStick extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { operations, enableFocus } = this.props;
-    if (operations.results.length === 0 || nextProps.operations.operationStatus === OPERATION_STATUS.READY || !enableFocus) {
+    const { operations,enableFocus } = this.props;
+    if (!enableFocus){
+      this.focused = false;
+      return;
+    }
+    if (operations.results.length === 0 || nextProps.operations.operationStatus === OPERATION_STATUS.READY) {
       // 当接受到的结果为空,没有拧紧点, 或者工单进入ready阶段(代表着上一个作业结束)
       this.doFocus({
         transform: {
@@ -249,11 +253,8 @@ class ConnectedImageStick extends React.Component {
           {this.statusDisplay(false)}
         </Image>
         {
-          (() => {
-            if (enableFocus) {
-              return <Fade in={smallImgDisplay}
-                           {...(smallImgDisplay ? { timeout: 1000 } : {})}
-              >
+          enableFocus? <Fade in={smallImgDisplay}
+                           {...(smallImgDisplay ? { timeout: 1000 } : {})}>
                 <Card plain raised className={classes.imgSmallBlock}>
                   <Image className={classes.imgBlock}
                          src={operations.workSheet}
@@ -262,11 +263,7 @@ class ConnectedImageStick extends React.Component {
                     {this.statusDisplay(true)}
                   </Image>
                 </Card>
-              </Fade>;
-            } else {
-              return null;
-            }
-          })()
+              </Fade>:null
         }
       </div>
     );
