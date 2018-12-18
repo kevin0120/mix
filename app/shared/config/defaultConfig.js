@@ -207,6 +207,7 @@ export const defaultConfigs = {
     modbusEnable: false,
     rfidEnabled: false,
     andonEnable: false,
-    psetContinueMode: false
+    psetContinueMode: false,
+    enableFocus:false,
   }
 };

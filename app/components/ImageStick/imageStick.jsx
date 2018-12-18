@@ -1,7 +1,7 @@
-import React from "react";
-import PropTypes from "prop-types";
-import Paper from "@material-ui/core/Paper";
-import { withStyles } from "@material-ui/core/styles";
+import React from 'react';
+import PropTypes from 'prop-types';
+import Paper from '@material-ui/core/Paper';
+import { withStyles } from '@material-ui/core/styles';
 import Fade from '@material-ui/core/Fade';
 
 // import {
@@ -14,20 +14,20 @@ import Fade from '@material-ui/core/Fade';
 //   fetchRoutingWorkcenterbyJobId
 // } from '../../actions/ongoingRoutingWorkcenter';
 
-import { keyframes } from "react-emotion";
-import Image from "./Image";
-import popoverStyles from "../../common/jss/popoverStyles";
+import { keyframes } from 'react-emotion';
+import Image from './Image';
+import popoverStyles from '../../common/jss/popoverStyles';
 
 import {
   successColor,
   warningColor,
   dangerColor
-} from "../../common/jss/material-react-pro";
+} from '../../common/jss/material-react-pro';
 
-import { OPERATION_STATUS, OPERATION_RESULT } from "../../reducers/operations";
+import { OPERATION_STATUS, OPERATION_RESULT } from '../../reducers/operations';
 
-import Card from "../Card/Card";
-import imagesStyles from "../../common/jss/imagesStyles";
+import Card from '../Card/Card';
+import imagesStyles from '../../common/jss/imagesStyles';
 
 const ripple = keyframes`
   0% {transform:scale(0.5); }
@@ -35,7 +35,7 @@ const ripple = keyframes`
   100% {transform:scale(1.75); opacity:0;}
 `;
 
-const lodash = require("lodash");
+const lodash = require('lodash');
 
 const circleRadius = 30;
 const scaleRate = 2;
@@ -44,78 +44,78 @@ const imgStickStyles = () => ({
   ...popoverStyles,
   ...imagesStyles,
   picWrap: {
-    position: "relative",
+    position: 'relative',
     // marginTop: '10px',
     // marginLeft: '10px',
-    height: "100%",
-    width: "100%",
+    height: '100%',
+    width: '100%',
     // height: 'calc(100% - 50px)',
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-    padding: "auto"
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    padding: 'auto'
   },
   heightFirst: {
-    height: "100%"
+    height: '100%'
   },
   widthFirst: {
-    width: "100%"
+    width: '100%'
   },
   circleStatus: {
-    display: "inline-block",
+    display: 'inline-block',
     width: `${circleRadius * 2}px`,
     height: `${circleRadius * 2}px`,
-    borderRadius: "99%",
-    textAlign: "center",
+    borderRadius: '99%',
+    textAlign: 'center',
     lineHeight: `${circleRadius * 2}px`,
     fontSize: `${(circleRadius - 10) * 2}px`,
-    overflow: "hidden",
-    background: "#dbdbdb"
+    overflow: 'hidden',
+    background: '#dbdbdb'
   },
   circleSmallStatus: {
-    display: "inline-block",
+    display: 'inline-block',
     width: `${circleRadius}px`,
     height: `${circleRadius}px`,
-    borderRadius: "99%",
-    textAlign: "center",
+    borderRadius: '99%',
+    textAlign: 'center',
     lineHeight: `${circleRadius}px`,
     fontSize: `${(circleRadius - 10)}px`,
-    overflow: "hidden",
-    background: "#dbdbdb"
+    overflow: 'hidden',
+    background: '#dbdbdb'
   },
   imgInfo: {
-    margin: "20px",
-    position: "absolute",
-    color: "#333"
+    margin: '20px',
+    position: 'absolute',
+    color: '#333'
   },
   imgSmallBlock: {
-    position: "absolute",
-    width: "30%",
-    height: "30%",
+    position: 'absolute',
+    width: '30%',
+    height: '30%',
     bottom: 0,
     left: 0,
-    marginBottom: "5px"
+    marginBottom: '5px'
   },
   imgBlock: {
     ...imagesStyles.imgCard,
-    width: "100%",
-    height: "100%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-    position: "relative"
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    position: 'relative'
   },
   imgStausInfo: {
-    padding: "5px 10px",
-    borderRadius: "4px",
-    background: "#fff",
-    boxShadow: "1px 1px 2px #dbdbdb inset",
-    fontSize: "18px",
-    marginTop: "0",
+    padding: '5px 10px',
+    borderRadius: '4px',
+    background: '#fff',
+    boxShadow: '1px 1px 2px #dbdbdb inset',
+    fontSize: '18px',
+    marginTop: '0',
 
-    "&>p": {
+    '&>p': {
       lineHeight: 2
     }
   },
@@ -138,14 +138,14 @@ const imgStickStyles = () => ({
 class ConnectedImageStick extends React.Component {
   constructor(props) {
     super(props);
-    this.imageTransform = "none";
+    this.imageTransform = 'none';
     this.focused = false;
 
   }
 
   componentWillReceiveProps(nextProps) {
-    const { operations } = this.props;
-    if (operations.results.length === 0 || nextProps.operations.operationStatus === OPERATION_STATUS.READY) {
+    const { operations, enableFocus } = this.props;
+    if (operations.results.length === 0 || nextProps.operations.operationStatus === OPERATION_STATUS.READY || !enableFocus) {
       // 当接受到的结果为空,没有拧紧点, 或者工单进入ready阶段(代表着上一个作业结束)
       this.doFocus({
         transform: {
@@ -160,8 +160,7 @@ class ConnectedImageStick extends React.Component {
       this.focused = false;
     } else if (nextProps.operations.operationStatus === OPERATION_STATUS.PREDOING) {
       // do nothing
-    }
-    else {
+    } else {
       this.doFocus({
         transform: {
           x: (50 - operations.results[nextProps.operations.activeResultIndex].offset_x) * 2,
@@ -190,7 +189,7 @@ class ConnectedImageStick extends React.Component {
     return operations.results.map((item, i) => {
       // const display = operations.activeResultIndex >= idx;
 
-      const cR = small? circleRadius /2 : circleRadius;
+      const cR = small ? circleRadius / 2 : circleRadius;
 
       const postionStyle = {
         top: `calc(${item.offset_y}% - ${this.focused ? cR * scaleRate : cR}px)`,
@@ -201,15 +200,15 @@ class ConnectedImageStick extends React.Component {
 
       // idx += 1;
 
-      let status = "waiting";
+      let status = 'waiting';
       if (operations.results[operations.activeResultIndex].group_sequence === item.group_sequence && operations.operationStatus === OPERATION_STATUS.DOING) {
-        status = "waitingActive";
+        status = 'waitingActive';
       }
 
       if (item.result === OPERATION_RESULT.OK) {
-        status = "success";
+        status = 'success';
       } else if (item.result === OPERATION_RESULT.NOK) {
-        status = "error";
+        status = 'error';
       }
 
       return (
@@ -232,9 +231,9 @@ class ConnectedImageStick extends React.Component {
   };
 
   render() {
-    const { classes, operations } = this.props;
+    const { classes, operations, enableFocus } = this.props;
 
-    const smallImgDisplay = operations.operationStatus !== "Ready" && operations.operationStatus !== "PreDoing";
+    const smallImgDisplay = operations.operationStatus !== 'Ready' && operations.operationStatus !== 'PreDoing';
 
 
     return (
@@ -244,24 +243,30 @@ class ConnectedImageStick extends React.Component {
                alt=""
                style={{
                  transform: this.imageTransform,
-                 transition: "transform 1s"
+                 transition: 'transform 1s'
                }}
         >
           {this.statusDisplay(false)}
         </Image>
         {
-          <Fade in={smallImgDisplay}
-                {...(smallImgDisplay ? { timeout: 1000 } : {})}
-          >
-            <Card plain raised className={classes.imgSmallBlock}>
-              <Image className={classes.imgBlock}
-                     src={operations.workSheet}
-                     alt=""
+          (() => {
+            if (enableFocus) {
+              return <Fade in={smallImgDisplay}
+                           {...(smallImgDisplay ? { timeout: 1000 } : {})}
               >
-                {this.statusDisplay(true)}
-              </Image>
-            </Card>
-          </Fade>
+                <Card plain raised className={classes.imgSmallBlock}>
+                  <Image className={classes.imgBlock}
+                         src={operations.workSheet}
+                         alt=""
+                  >
+                    {this.statusDisplay(true)}
+                  </Image>
+                </Card>
+              </Fade>;
+            } else {
+              return null;
+            }
+          })()
         }
       </div>
     );
