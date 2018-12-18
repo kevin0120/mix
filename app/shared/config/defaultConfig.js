@@ -53,7 +53,7 @@ export const defaultConfigs = {
         {
           bit: 0,
           io: 'in',
-          function: 'MODE_SELECT',
+          function: '',
           label: '模式选中'
         },
         {
@@ -77,7 +77,7 @@ export const defaultConfigs = {
         {
           bit: 4,
           io: 'in',
-          function: 'RESET',
+          function: 'MODE_SELECT',
           label: '复位钥匙'
         },
         {
@@ -208,6 +208,6 @@ export const defaultConfigs = {
     rfidEnabled: false,
     andonEnable: false,
     psetContinueMode: false,
-    enableFocus:false,
+    enableFocus:true,
   }
 };
