@@ -68,7 +68,8 @@ class Image extends React.Component {
     if (focus && focus.do === true) {
       style = {
         transform: `translate(${focus.transform.x || 0}%,${focus.transform.y || 0
-          }%) scale(${focus.scale},${focus.scale})`
+          }%) scale(${focus.scale},${focus.scale})`,
+        transition: 'transform 1s'
       };
     }
 
