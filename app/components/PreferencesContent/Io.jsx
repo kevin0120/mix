@@ -101,10 +101,10 @@ class ConnectedIo extends React.PureComponent {
   }
 
   handleSubmit() {
-    // const { saveConfigs, resetIO } = this.props;
+    const { saveConfigs, resetIO } = this.props;
     const { data, section } = this.state;
-    this.props.resetIO(data);
-    this.props.saveConfigs(section, data);
+    resetIO(data);
+    saveConfigs(section, data);
   }
 
   handleTest(obj) {
@@ -297,8 +297,8 @@ class ConnectedIo extends React.PureComponent {
 ConnectedIo.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   storedConfigs: PropTypes.shape({}).isRequired,
-  in: PropTypes.array,
-  out: PropTypes.array,
+  // in: PropTypes.array,
+  // out: PropTypes.array,
   saveConfigs: PropTypes.func.isRequired,
   resetIO: PropTypes.func.isRequired
 };

@@ -70,7 +70,7 @@ export const sOn = 1;
 export const sBlinkOff = 10;
 export const sBlinkOn = 11;
 
-let ioStatus = [sOn, sOn, sOn, sOn];
+let ioStatus = [sOff, sOff, sOff, sOff,sOff, sOff, sOff, sOff]; // 默认为关闭
 
 let timeStamp = null;
 const byPassTimeout = 3;
@@ -88,7 +88,6 @@ export function* watchIO() {
         //   yield fork(testIO, action.io, action.idx);
         //   break;
         case IO.RESET:
-          console.log('resetIO');
           yield fork(resetIO, action.modbusConfig);
           break;
         default:
@@ -408,7 +407,9 @@ function resetIO(modbusConfig) {
   const { o } = io;
 
   setModBusIO(modbusConfig);
-  for (const key of o) {
+  const keys = Object.keys(o);
+  for (const key of keys) {
+    ioStatus[o[key]] = sOff; // 首先复位为关闭
     ioStatus[o[key]] = preIOStatus[preO[key]];
   }
 }
