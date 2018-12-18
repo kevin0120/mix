@@ -831,9 +831,9 @@ class ConnectedWorking extends React.Component {
               >
                 <Grid item xs={12} className={classes.MainWrapper}>
                   <Paper className={classes.LeftBottomTab}>
-                    <div className={classes.ImgTabContiner}>
+                    {/*<div className={classes.ImgTabContiner}>*/}
                       <ImageStick operations={operations} enableFocus={enableFocus}/>
-                    </div>
+                    {/*</div>*/}
                   </Paper>
                 </Grid>
               </Grid>

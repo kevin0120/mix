@@ -6,6 +6,15 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 
 const styles = () => ({
+  imgBlock: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    position: 'relative'
+  },
   imgSheet: {
     maxHeight: '100%',
     maxWidth: '100%',
@@ -18,9 +27,9 @@ const styles = () => ({
 class Image extends React.Component {
   constructor(props) {
     super(props);
-    this.imageSize= {
-        height: 0,
-        width: 0
+    this.imageSize = {
+      height: 0,
+      width: 0
     };
     this.imageRef = React.createRef();
     this.containerRef = React.createRef();
@@ -44,23 +53,32 @@ class Image extends React.Component {
   }
 
   updateImgSize() {
+    const { focus } = this.props;
     if (this.containerRef.offsetHeight !== 0 && this.containerRef.offsetWidth !== 0) {
-      this.imageSize={
-          height: (this.imageRef.offsetHeight || 0) / this.containerRef.offsetHeight * 100,
-          width: (this.imageRef.offsetWidth || 0) / this.containerRef.offsetWidth * 100
-        };
+      this.imageSize = {
+        height: (this.imageRef.offsetHeight || 0) / this.containerRef.offsetHeight * 100,
+        width: (this.imageRef.offsetWidth || 0) / this.containerRef.offsetWidth * 100
+      };
     }
   }
 
   render() {
-    const { style, src, alt, children, classes, className } = this.props;
+    const { src, alt, children, classes, focus } = this.props;
+    let style={};
+    if (focus && focus.do === true) {
+      style = {
+        transform: `translate(${focus.transform.x || 0}%,${focus.transform.y || 0
+          }%) scale(${focus.scale},${focus.scale})`
+      };
+    }
+
     return (
       <div
         ref={r => {
           this.containerRef = r;
         }}
-        className={className}
-        style={style}
+        className={classes.imgBlock}
+
       >
         <img
           ref={r => {
@@ -69,15 +87,17 @@ class Image extends React.Component {
           src={src}
           className={classes.imgSheet}
           alt={alt}
-          onLoad={()=>{
+          onLoad={() => {
             this.handleResize();
           }}
+          style={style}
         />
         <div
           style={{
             width: `${this.imageSize.width || 0}%`,
             height: `${this.imageSize.height || 0}%`,
-            position: 'absolute'
+            position: 'absolute',
+            ...style
           }}>
           {children}
         </div>
