@@ -51,6 +51,7 @@ const mapStateToProps = (state, ownProps) => ({
   workMode: state.workMode,
   timeline: state.timeline,
   reworkWorkCenter: state.connections.rework_workcenter,
+  enableFocus:state.setting.systemSettings.enableFocus,
   ...ownProps
 });
 
@@ -652,7 +653,7 @@ class ConnectedWorking extends React.Component {
   };
 
   render() {
-    const { classes, operations, timeline, workMode } = this.props;
+    const { classes, operations, timeline, workMode,enableFocus } = this.props;
     //
     //
     const { inputName, manualDiagShow } = this.state;
@@ -831,7 +832,7 @@ class ConnectedWorking extends React.Component {
                 <Grid item xs={12} className={classes.MainWrapper}>
                   <Paper className={classes.LeftBottomTab}>
                     <div className={classes.ImgTabContiner}>
-                      <ImageStick operations={operations} />
+                      <ImageStick operations={operations} enableFocus={enableFocus}/>
                     </div>
                   </Paper>
                 </Grid>
