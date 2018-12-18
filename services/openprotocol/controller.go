@@ -294,15 +294,15 @@ func (c *Controller) handleResult(result_data *ResultData) {
 
 	controllerResult.GunSN = result_data.ToolSerialNumber
 
-	gun, err := c.Srv.DB.GetGun(result_data.ToolSerialNumber)
-	if err != nil {
-		odoo_gun, err := c.Srv.Odoo.GetGun(result_data.ToolSerialNumber)
-		if err == nil {
-			gun.GunID = odoo_gun.ID
-			gun.Serial = odoo_gun.Serial
-			c.Srv.DB.Store(gun)
-		}
-	}
+	//gun, err := c.Srv.DB.GetGun(result_data.ToolSerialNumber)
+	//if err != nil {
+	//	odoo_gun, err := c.Srv.Odoo.GetGun(result_data.ToolSerialNumber)
+	//	if err == nil {
+	//		gun.GunID = odoo_gun.ID
+	//		gun.Serial = odoo_gun.Serial
+	//		c.Srv.DB.Store(gun)
+	//	}
+	//}
 
 	c.Srv.Parent.Handlers.Handle(&controllerResult, nil)
 

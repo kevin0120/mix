@@ -162,6 +162,7 @@ func (s *Service) Open() error {
 	handler.AddRoute(r)
 
 	s.Aiis.OnOdooStatus = s.OnStatus
+	s.Aiis.SyncGun = s.GetGunID
 
 	for i := 0; i < s.Config().Workers; i++ {
 		s.wg.Add(1)
@@ -251,6 +252,28 @@ func (s *Service) GetGun(serial string) (ODOOGun, error) {
 	}
 
 	return gun, errors.Wrap(err, "Get gun fail")
+}
+
+func (s *Service) GetGunID(serial string) (int64, error) {
+
+	var err error
+	//var gun ODOOGun
+	endpoints := s.GetEndpoints("getGun")
+	for _, endpoint := range endpoints {
+		body, err := s.getGun(fmt.Sprintf(endpoint.url, serial), endpoint.method)
+		if err == nil {
+			// 如果第一次就成功，推出循环
+			var guns []ODOOGun
+			err = json.Unmarshal(body, &guns)
+			if err != nil || len(guns) == 0 {
+				return 0, errors.Wrap(err, "Get gun fail")
+			}
+
+			return guns[0].ID, nil
+		}
+	}
+
+	return 0, errors.Wrap(err, "Get gun fail")
 }
 
 func (s *Service) getGun(url string, method string) ([]byte, error) {

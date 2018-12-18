@@ -38,6 +38,8 @@ func NewEndpoint(url string, headers map[string]string, method string) *Endpoint
 
 type OnOdooStatus func(status string)
 
+type SyncGun func(string) (int64, error)
+
 type Service struct {
 	configValue atomic.Value
 	diag        Diagnostic
@@ -50,6 +52,7 @@ type Service struct {
 	//LocalWSServer *wsnotify.Service
 	//Odoo 		*odoo.Service
 	OnOdooStatus OnOdooStatus
+	SyncGun SyncGun
 	SN           string
 	rpc          GRPCClient
 }
@@ -295,7 +298,14 @@ func (s *Service) ResultToAiisResult(result *storage.Results, curve interface{})
 
 	gun, err := s.DB.GetGun(result.GunSN)
 	if err != nil {
-		gun.GunID = 0
+		gid, err := s.SyncGun(result.GunSN)
+		if err == nil {
+			gun.GunID = gid
+			gun.Serial = result.GunSN
+			s.DB.Store(gun)
+		} else {
+			gun.GunID = 0
+		}
 	}
 
 	aiisResult.GunID = gun.GunID
