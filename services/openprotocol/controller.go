@@ -289,7 +289,7 @@ func (c *Controller) handleResult(result_data *ResultData) {
 	}
 
 	controllerResult.Workorder_ID, _ = strconv.ParseInt(targetID, 10, 64)
-	controllerResult.NeedPushHmi = true
+	controllerResult.NeedPushHmi = false
 	controllerResult.NeedPushAiis = true
 
 	controllerResult.GunSN = result_data.ToolSerialNumber
