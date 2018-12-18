@@ -201,11 +201,11 @@ func (s *Service) BatchSave(results []*ResultObject) error {
 
 	// 新增
 	if len(insertResults) > 0 {
+
 		arrSKeys := []string{}
 		for _, v := range KEYS {
-			arrSKeys = append(arrSKeys, fmt.Sprintf("s.%s", v))
+			arrSKeys = append(arrSKeys, v)
 		}
-		strKeys := fmt.Sprintf("(%s)", strings.Join(KEYS, ","))
 
 		arrInsertValues := []string{}
 		for _, v := range insertResults {
@@ -224,6 +224,19 @@ func (s *Service) BatchSave(results []*ResultObject) error {
 				//	arrValue = append(arrValue, "'normal'")
 				//	continue
 				//}
+
+				if k == "gun_id" {
+					//fmt.Printf("%s:%d\n", k, v.OR[k])
+					if reflect.ValueOf(v.OR[k]).Float() == 0 {
+						for n, m := range arrSKeys {
+							if m == k {
+								kk := n + 1
+								arrSKeys = append(arrSKeys[:n], arrSKeys[kk:]...)
+							}
+						}
+						continue
+					}
+				}
 
 				if k == "sent" {
 					if v.Send == 1 {
@@ -272,6 +285,7 @@ func (s *Service) BatchSave(results []*ResultObject) error {
 
 		strInsertValues := strings.Join(arrInsertValues, ",")
 
+		strKeys := fmt.Sprintf("(%s)", strings.Join(arrSKeys, ","))
 		insertSql := fmt.Sprintf("INSERT INTO \"operation_result\" %s VALUES %s RETURNING id", strKeys, strInsertValues)
 
 		insertResult := s.eng.Exec(insertSql)

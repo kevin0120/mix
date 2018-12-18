@@ -1,7 +1,7 @@
 hostname: localhost
 data_dir: /home/linshenqi/.aiis
 logging:
-  file: /home/linshenqi/aiis.log_%Y-%m-%d
+  file: STDOUT
   level: DEBUG
   max_age: 1m
   rotate: 1m
