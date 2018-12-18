@@ -42,6 +42,10 @@ type Controller struct {
 	protocol          string
 }
 
+func (c *Controller) Inputs() string {
+	return ""
+}
+
 func (c *Controller) KeepAliveCount() int32 {
 	return atomic.LoadInt32(&c.keepAliveCount)
 }

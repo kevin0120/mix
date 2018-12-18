@@ -47,6 +47,7 @@ type Controller struct {
 	Mode              atomic.Value
 	TriggerStart      time.Time
 	TriggerStop       time.Time
+	inputs            string
 }
 
 func NewController(c Config) Controller {
@@ -68,6 +69,10 @@ func NewController(c Config) Controller {
 
 func (c *Controller) LoadController(controller *storage.Controllers) {
 	c.dbController = controller
+}
+
+func (c *Controller) Inputs() string {
+	return c.inputs
 }
 
 func (c *Controller) handlerProcess() {
@@ -177,6 +182,8 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 		inputs.Deserialize(pkg.Body)
 
 		inputs.ControllerSN = c.cfg.SN
+
+		c.inputs = inputs.Inputs
 
 		str, _ := json.Marshal(inputs)
 		go c.Srv.WS.WSSendIOInput(string(str))

@@ -24,6 +24,7 @@ type Controller interface {
 	Close() error
 	Status() string
 	Protocol() string
+	Inputs() string
 	LoadController(controller *storage.Controllers)
 }
 

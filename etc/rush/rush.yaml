@@ -100,9 +100,9 @@ controller_service:
   controllers:
     - serial_no: 0001
       protocol: OpenProtocol
-      remote_ip: 192.168.5.212
-      port: 4545
-      channel: 1
+      remote_ip: 192.168.1.101
+      port: 4546
+      channel: 51
 
 #  - serial_no: 0001
 #    protocol: Audi/VW

@@ -272,6 +272,14 @@ func (s *Service) OnNewHmiClient(c websocket.Connection) {
 		msg, _ := json.Marshal(s)
 
 		c.Emit(wsnotify.WS_EVENT_CONTROLLER, string(msg))
+
+		inputs := openprotocol.IOMonitor{
+			ControllerSN: k,
+			Inputs:       v.Inputs(),
+		}
+
+		msg, _ = json.Marshal(inputs)
+		c.Emit(wsnotify.WS_EVENT_IO, string(msg))
 	}
 
 	odooStatus := wsnotify.WSOdooStatus{
