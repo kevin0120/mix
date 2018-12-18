@@ -17,6 +17,7 @@ import { setHealthzCheck } from '../actions/healthCheck';
 import { triggerOperation } from './operation';
 
 import { OPERATION_STATUS, OPERATION_SOURCE } from '../reducers/operations';
+import { setNewNotification } from "../actions/notification";
 
 let task = null;
 
@@ -163,21 +164,21 @@ function* aiisWSListener(hmiSN) {
           break;
         case AIIS_WS_CHANNEL.CLOSE:
           yield put(setHealthzCheck('andon', false));
-          console.log(
-            `websocket disconnected. retry in 1s code: ${
-              chanAction.code
-            }, reason: ${chanAction.reason}`
+          yield put(
+            setNewNotification('info', `andon连接状态更新: ${false}`)
           );
           break;
         case AIIS_WS_CHANNEL.ERROR:
           yield put(setHealthzCheck('andon', false));
-          console.log('websocket error. reconnect after 1s');
+          yield put(
+            setNewNotification('info', `masterPC连接状态更新: ${false}`)
+          );
           break;
         case AIIS_WS_CHANNEL.PING:
-          console.log(' receive ping Msg');
+          // console.log(' receive ping Msg');
           break;
         case AIIS_WS_CHANNEL.PONG:
-          console.log(' receive pong Msg');
+          // console.log(' receive pong Msg');
           break;
         case AIIS_WS_CHANNEL.MESSAGE:
           yield call(wsOnMessage, chanAction.dataRaw);
@@ -209,11 +210,15 @@ function* wsOnMessage(dataRaw) {
   yield put({ type: ANDON.NEW_DATA, json });
 }
 
-function stopAiisWebsocket() {
+function*  stopAiisWebsocket() {
   if (
     ws.ws.readyState === OWebSocket.OPEN ||
     ws.ws.readyState === OWebSocket.CONNECTING
   ) {
+    yield put(setHealthzCheck('andon', false));
+    yield put(
+      setNewNotification('info', `andon连接状态更新: ${false}`)
+    );
     ws.close();
   }
   ws = null;
