@@ -26,7 +26,6 @@
                             <thead>
                                 <tr>
                                     <th><strong>VIN</strong></th>
-                                    <!--<th class="text-right"><strong>Quantity</strong></th>-->
                                 </tr>
                             </thead>
                             <tr t-foreach="docs" t-as="line">
