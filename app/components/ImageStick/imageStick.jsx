@@ -199,8 +199,8 @@ class ConnectedImageStick extends React.Component {
       const cR = small ? circleRadius  : circleRadius*2;
 
       const postionStyle = {
-        top: `calc(${item.offset_y}% - ${this.focused ? cR * scaleRate : cR}px)`,
-        left: `calc(${item.offset_x}% - ${this.focused ? cR * scaleRate : cR}px)`
+        top: `calc(${item.offset_y}% - ${this.focused ? cR  : cR}px)`,
+        left: `calc(${item.offset_x}% - ${this.focused ? cR  : cR}px)`
       };
       const circleStatus = small ? classes.circleSmallStatus : classes.circleStatus;
 
