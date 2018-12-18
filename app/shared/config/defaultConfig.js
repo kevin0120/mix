@@ -211,6 +211,6 @@ export const defaultConfigs = {
     rfidEnabled: false,
     andonEnable: true,
     psetContinueMode: false,
-    enableFocus:false,
+    enableFocus:true,
   }
 };

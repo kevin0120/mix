@@ -144,9 +144,14 @@ class ConnectedImageStick extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { operations, enableFocus } = this.props;
-    if (operations.results.length === 0 || nextProps.operations.operationStatus === OPERATION_STATUS.READY || !enableFocus) {
+    const { operations,enableFocus } = this.props;
+    if (!enableFocus){
+      this.focused = false;
+      return;
+    }
+    if (operations.results.length === 0 || nextProps.operations.operationStatus === OPERATION_STATUS.READY) {
       // 当接受到的结果为空,没有拧紧点, 或者工单进入ready阶段(代表着上一个作业结束)
+      this.focused = false;
       this.doFocus({
         transform: {
           x: 0,
@@ -157,10 +162,12 @@ class ConnectedImageStick extends React.Component {
           y: 1
         }
       });
-      this.focused = false;
+
     } else if (nextProps.operations.operationStatus === OPERATION_STATUS.PREDOING) {
       // do nothing
-    } else {
+    }
+    else {
+      this.focused = true;
       this.doFocus({
         transform: {
           x: (50 - operations.results[nextProps.operations.activeResultIndex].offset_x) * 2,
@@ -171,7 +178,7 @@ class ConnectedImageStick extends React.Component {
           y: 2
         }
       });
-      this.focused = true;
+
     }
   }
 
@@ -189,13 +196,12 @@ class ConnectedImageStick extends React.Component {
     return operations.results.map((item, i) => {
       // const display = operations.activeResultIndex >= idx;
 
-      const cR = small ? circleRadius / 2 : circleRadius;
+      const cR = small ? circleRadius  : circleRadius*2;
 
       const postionStyle = {
-        top: `calc(${item.offset_y}% - ${this.focused ? cR * scaleRate : cR}px)`,
-        left: `calc(${item.offset_x}% - ${this.focused ? cR * scaleRate : cR}px)`
+        top: `calc(${item.offset_y}% - ${this.focused ? cR  : cR}px)`,
+        left: `calc(${item.offset_x}% - ${this.focused ? cR  : cR}px)`
       };
-
       const circleStatus = small ? classes.circleSmallStatus : classes.circleStatus;
 
       // idx += 1;
@@ -249,11 +255,8 @@ class ConnectedImageStick extends React.Component {
           {this.statusDisplay(false)}
         </Image>
         {
-          (() => {
-            if (enableFocus) {
-              return <Fade in={smallImgDisplay}
-                           {...(smallImgDisplay ? { timeout: 1000 } : {})}
-              >
+          enableFocus? <Fade in={smallImgDisplay}
+                           {...(smallImgDisplay ? { timeout: 1000 } : {})}>
                 <Card plain raised className={classes.imgSmallBlock}>
                   <Image className={classes.imgBlock}
                          src={operations.workSheet}
@@ -262,11 +265,7 @@ class ConnectedImageStick extends React.Component {
                     {this.statusDisplay(true)}
                   </Image>
                 </Card>
-              </Fade>;
-            } else {
-              return null;
-            }
-          })()
+              </Fade>:null
         }
       </div>
     );
