@@ -76,60 +76,65 @@ function* getNextWorkOrderandShow() {
 
 // 触发作业
 export function* triggerOperation(carID, carType, job, source) {
-  let state = yield select();
-  switch (state.operations.operationStatus) {
-    case OPERATION_STATUS.DOING:
-      return;
-    case OPERATION_STATUS.READY:
-      yield call(clearStories);
-      yield put({ type: OPERATION.PREDOING });
-      break;
+  try {
+    let state = yield select();
+    switch (state.operations.operationStatus) {
+      case OPERATION_STATUS.DOING:
+        return;
+      case OPERATION_STATUS.READY:
+        yield call(clearStories);
+        yield put({ type: OPERATION.PREDOING });
+        break;
 
-    case OPERATION_STATUS.TIMEOUT:
-      yield put({ type: OPERATION.PREDOING });
-      break;
+      case OPERATION_STATUS.TIMEOUT:
+        yield put({ type: OPERATION.PREDOING });
+        break;
 
-    default:
-      break;
-  }
-
-  if (carID) {
-    yield call(addNewStory, STORY_TYPE.INFO, source, carID);
-    yield put({
-      type: OPERATION.TRIGGER.NEW_DATA,
-      source,
-      carID,
-      carType: null
-    });
-  }
-
-  if (carType) {
-    yield call(addNewStory, STORY_TYPE.INFO, source, carType);
-    yield put({
-      type: OPERATION.TRIGGER.NEW_DATA,
-      source,
-      carID: null,
-      carType
-    });
-  }
-
-  state = yield select();
-
-  const triggers = state.setting.operationSettings.flowTriggers;
-
-  let triggerFlagNum = 0;
-  for (let i = 0; i < triggers.length; i += 1) {
-    if (state.operations[triggers[i]] !== '') {
-      triggerFlagNum += 1;
+      default:
+        break;
     }
+
+    yield put({ type: OPERATION.SOURCE.SET, source });
+
+    if (carID) {
+      yield call(addNewStory, STORY_TYPE.INFO, source, carID);
+      yield put({
+        type: OPERATION.TRIGGER.NEW_DATA,
+        carID,
+        carType: null
+      });
+    }
+
+    if (carType) {
+      yield call(addNewStory, STORY_TYPE.INFO, source, carType);
+      yield put({
+        type: OPERATION.TRIGGER.NEW_DATA,
+        carID: null,
+        carType
+      });
+    }
+
+    state = yield select();
+
+    const triggers = state.setting.operationSettings.flowTriggers;
+
+    let triggerFlagNum = 0;
+    for (let i = 0; i < triggers.length; i += 1) {
+      if (state.operations[triggers[i]] !== '') {
+        triggerFlagNum += 1;
+      }
+    }
+
+    if (
+      triggerFlagNum === triggers.length ||
+      state.workMode.workMode === 'manual'
+    ) {
+      yield call(getOperation, job);
+    }
+  } catch (e) {
+    console.log(e);
   }
 
-  if (
-    triggerFlagNum === triggers.length ||
-    state.workMode.workMode === 'manual'
-  ) {
-    yield call(getOperation, job);
-  }
 }
 
 // 定位作业

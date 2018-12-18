@@ -53,7 +53,7 @@ export const defaultConfigs = {
         {
           bit: 0,
           io: 'in',
-          function: 'MODE_SELECT',
+          function: '',
           label: '模式选中'
         },
         {
@@ -77,7 +77,7 @@ export const defaultConfigs = {
         {
           bit: 4,
           io: 'in',
-          function: 'RESET',
+          function: 'MODE_SELECT',
           label: '复位钥匙'
         },
         {
@@ -163,7 +163,7 @@ export const defaultConfigs = {
     connections: {
       masterpc: 'http://192.168.1.151:8082',
       rfid: 'tcp://192.168.1.120:2112',
-      aiis: 'http://127.0.0.1:9092',
+      aiis: 'http://192.168.1.3:9092',
       controllers: [
         {
           serial_no: '0001'
@@ -209,7 +209,7 @@ export const defaultConfigs = {
     oeeFuncEnable: false,
     modbusEnable: false,
     rfidEnabled: false,
-    andonEnable: false,
+    andonEnable: true,
     psetContinueMode: false
   }
 };

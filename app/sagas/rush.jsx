@@ -166,10 +166,11 @@ export function* watchRushChannel(hmiSN) {
                   yield put({ type: OPERATION.FINISHED });
                 }
 
+                const { carID, carType } = state.operations;
                 yield call(
                   triggerOperation,
-                  null,
-                  null,
+                  carID,
+                  carType,
                   json.job_id,
                   OPERATION_SOURCE.MANUAL
                 );

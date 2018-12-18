@@ -76,7 +76,9 @@ export default function operations(
 ) {
   switch (action.type) {
     case OPERATION.TRIGGER.NEW_DATA:
-      return newTriggerData(state, action.source, action.carID, action.carType);
+      return newTriggerData(state, action.carID, action.carType);
+    case OPERATION.SOURCE.SET:
+      return setSource(state, action.source);
     case OPERATION.OPERATION.FETCH_OK:
       return newOperation(state, action.mode, action.data);
     case OPERATION.STARTED:
@@ -100,12 +102,18 @@ export default function operations(
   }
 }
 
-function newTriggerData(state, source, carID, carType) {
+function newTriggerData(state, carID, carType) {
   return {
     ...state,
-    source,
     carID: carID !== null ? carID : state.carID,
     carType: carType !== null ? carType : state.carType
+  };
+}
+
+function setSource(state, source) {
+  return {
+    ...state,
+    source
   };
 }
 
