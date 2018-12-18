@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"path"
 )
 
 type nopCloser struct {
@@ -152,23 +153,23 @@ func (s *Service) Open() error {
 	case "STDOUT":
 		s.f = &nopCloser{f: s.stdout}
 	default:
-		//dir := path.Dir(s.c.File)
-		//if _, err := os.Stat(dir); os.IsNotExist(err) {
-		//	err := os.MkdirAll(dir, 0755)
-		//	if err != nil {
-		//		return err
-		//	}
-		//}
+		dir := path.Dir(s.c.File)
+		if _, err := os.Stat(dir); os.IsNotExist(err) {
+			err := os.MkdirAll(dir, 0755)
+			if err != nil {
+				return err
+			}
+		}
 		//
 		//f, err := os.OpenFile(s.c.File, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0640)
-		//if err != nil {
-		//	return err
-		//}
 
-		rl, _ := rotatelogs.New(
+		rl, err := rotatelogs.New(
 			fmt.Sprintf("%s", s.c.File),
 			rotatelogs.WithMaxAge(time.Duration(s.c.MaxAge)),
 			rotatelogs.WithRotationTime(time.Duration(s.c.Rotate)))
+		if err != nil {
+			return err
+		}
 
 		s.f = rl
 	}
