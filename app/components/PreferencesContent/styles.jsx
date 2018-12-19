@@ -96,6 +96,7 @@ export default theme => ({
   },
   // test
   testButton: {
+    // padding: '18px 30px',
     margin: 'auto 40px'
   }
 });

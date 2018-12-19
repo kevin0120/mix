@@ -237,6 +237,7 @@ class ConnectedIo extends React.PureComponent {
             <span>{String.prototype.toUpperCase.call(item.io)}</span>
             <Button
               color="warning"
+              size="lg"
               onClick={() => this.handleTest(item)}
               className={classes.testButton}
               disabled={!get(btnGroupStatus, `${item.io}.${item.bit}`, [])}
