@@ -73,12 +73,13 @@ func (s *GRPCServer) RPCNode(stream RPCAiis_RPCNodeServer) error {
 			return err
 		}
 
-		//fmt.Printf("%s\n", in.Payload)
-
-		if s.RPCRecv != nil {
-			s.RPCRecv(&stream, in.Payload)
+		if in.Payload == RPC_PING {
+			s.RPCSend(&stream, RPC_PONG)
+		} else {
+			if s.RPCRecv != nil {
+				s.RPCRecv(&stream, in.Payload)
+			}
 		}
-
 	}
 
 	return nil

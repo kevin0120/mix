@@ -6,10 +6,10 @@ import (
 	"github.com/lestrrat-go/file-rotatelogs"
 	"io"
 	"os"
+	"path"
 	"strings"
 	"sync"
 	"time"
-	"path"
 )
 
 type nopCloser struct {
