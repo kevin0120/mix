@@ -52,7 +52,7 @@ type Service struct {
 	//LocalWSServer *wsnotify.Service
 	//Odoo 		*odoo.Service
 	OnOdooStatus OnOdooStatus
-	SyncGun SyncGun
+	SyncGun      SyncGun
 	SN           string
 	rpc          GRPCClient
 }
@@ -66,6 +66,7 @@ func NewService(c Config, d Diagnostic, rush_port string) *Service {
 		rpc:       GRPCClient{},
 	}
 	s.rpc.RPCRecv = s.OnRPCRecv
+	s.rpc.OnRPCStatus = s.OnRPCStatus
 	s.rpc.srv = s
 	s.configValue.Store(c)
 	return s
@@ -116,6 +117,15 @@ func (s *Service) Open() error {
 
 func (s *Service) Close() error {
 	return nil
+}
+
+func (s *Service) OnRPCStatus(status string) {
+	if status == RPC_OFFLINE {
+
+		if s.OnOdooStatus != nil {
+			s.OnOdooStatus(ODOO_STATUS_OFFLINE)
+		}
+	}
 }
 
 func (s *Service) OnRPCRecv(payload string) {
