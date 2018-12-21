@@ -45,6 +45,7 @@ export default theme => ({
     width: '80px',
     height: '100%',
     lineHeight: '100%',
+    marginLeft: '10px',
     '& p': {
       // marginTop: '25px',
       fontSize: '16px',
@@ -52,6 +53,13 @@ export default theme => ({
       textAlign: 'center',
       margin: '0'
     }
+  },
+  menuClock: {
+    fontSize: '20px',
+    width: '100px',
+    height: '100%',
+    lineHeight: '100%',
+    marginLeft: '15px',
   },
   BottomNavigationIcon: {
     color: '#FFFFFF',

@@ -63,10 +63,10 @@ const imgStickStyles = () => ({
     width: '100%'
   },
   circleStatus: {
-    display: 'inline-block',
+    display: 'block',
     width: `${circleRadius * 2}px`,
     height: `${circleRadius * 2}px`,
-    borderRadius: '99%',
+    borderRadius: '50%',
     textAlign: 'center',
     lineHeight: `${circleRadius * 2}px`,
     fontSize: `${(circleRadius - 10) * 2}px`,
@@ -74,10 +74,10 @@ const imgStickStyles = () => ({
     background: '#dbdbdb'
   },
   circleSmallStatus: {
-    display: 'inline-block',
+    display: 'block',
     width: `${circleRadius}px`,
     height: `${circleRadius}px`,
-    borderRadius: '99%',
+    borderRadius: '50%',
     textAlign: 'center',
     lineHeight: `${circleRadius}px`,
     fontSize: `${(circleRadius - 10)}px`,
@@ -85,7 +85,7 @@ const imgStickStyles = () => ({
     background: '#dbdbdb'
   },
   imgInfo: {
-    margin: '20px',
+    margin: '0',
     position: 'absolute',
     color: '#333'
   },
@@ -193,7 +193,7 @@ class ConnectedImageStick extends React.Component {
     // let idx = 0;
     return operations.results.map((item, i) => {
       // const display = operations.activeResultIndex >= idx;
-      const cR = small ? circleRadius : circleRadius * 2;
+      const cR = small ? circleRadius/2 : circleRadius ;
       const postionStyle = {
         top: `calc(${item.offset_y}% - ${cR}px)`,
         left: `calc(${item.offset_x}% - ${cR}px)`
