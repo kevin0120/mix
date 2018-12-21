@@ -10,13 +10,13 @@ from pyecharts import Bar , Pie
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
-    sa_type = fields.Selection([('screw', 'Screw'), ('vehicle', 'Vechile')], default='vehicle', string='产品类型')
+    sa_type = fields.Selection([('screw', 'Screw'), ('vehicle', 'Vehcile')], default='vehicle', string='产品类型')
 
 
 class ProductProduct(models.Model):
     _inherit = 'product.product'
 
-    sa_type = fields.Selection(related='product_tmpl_id.sa_type')
+    sa_type = fields.Selection(related='product_tmpl_id.sa_type', store=True)
     screw_type_code = fields.Char(string='螺栓编号', copy=False)
     vehicle_type_code = fields.Char(string="车型编码", copy=False)
     qp_count = fields.Integer(string='Quality Point Count', compute='_compute_product_quality_point_count')
