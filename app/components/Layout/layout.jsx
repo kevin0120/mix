@@ -13,7 +13,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+import Clock from 'react-live-clock';
 
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
@@ -206,6 +206,14 @@ class ConnectedLayout extends React.PureComponent {
                   <div className={classes.menuUserName}>
                     <p>{name}</p>
                   </div>
+                  <div className={classes.menuClock}>
+                    <Clock
+                      className={classes.timeContent}
+                      format="HH:mm:ss"
+                      ticking
+                      timezone="Asia/Shanghai"
+                    />
+                  </div>
                   <div className={classes.menuBtnWrapLeft}>
                     <BottomNavigation
                       value={value}
@@ -228,12 +236,12 @@ class ConnectedLayout extends React.PureComponent {
                     </BottomNavigation>
                   </div>
                   <div className={classes.menuBtnWrapRight}>
-                    <Button
-                      onClick={this.handleSysInfo}
-                      className={`${statusClassName}`}
-                    >
-                      {'系统'}
-                    </Button>
+                    {/*<Button*/}
+                      {/*onClick={this.handleSysInfo}*/}
+                      {/*className={`${statusClassName}`}*/}
+                    {/*>*/}
+                      {/*{'系统'}*/}
+                    {/*</Button>*/}
                     <Button
                       onClick={this.handleStatus}
                       className={`${statusClassName}`}
@@ -250,26 +258,26 @@ class ConnectedLayout extends React.PureComponent {
                     >
                       <Language />
                     </IconButton>
-                    <Menu
-                      id="menu-sysInfo"
-                      anchorEl={showSysInfo}
-                      anchorOrigin={{
-                        vertical: 'top',
-                        horizontal: 'left'
-                      }}
-                      transformOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      open={openSysInfo}
-                      onClose={this.handleCloseSysInfo}
-                      TransitionComponent={Fade}
-                      classes={{
-                        paper: classes.popover
-                      }}
-                    >
-                      <SysInfo />
-                    </Menu>
+                    {/*<Menu*/}
+                      {/*id="menu-sysInfo"*/}
+                      {/*anchorEl={showSysInfo}*/}
+                      {/*anchorOrigin={{*/}
+                        {/*vertical: 'top',*/}
+                        {/*horizontal: 'left'*/}
+                      {/*}}*/}
+                      {/*transformOrigin={{*/}
+                        {/*vertical: 'bottom',*/}
+                        {/*horizontal: 'left'*/}
+                      {/*}}*/}
+                      {/*open={openSysInfo}*/}
+                      {/*onClose={this.handleCloseSysInfo}*/}
+                      {/*TransitionComponent={Fade}*/}
+                      {/*classes={{*/}
+                        {/*paper: classes.popover*/}
+                      {/*}}*/}
+                    {/*>*/}
+                      {/*<SysInfo />*/}
+                    {/*</Menu>*/}
                     <Menu
                       id="menu-healthz"
                       anchorEl={showStatus}
