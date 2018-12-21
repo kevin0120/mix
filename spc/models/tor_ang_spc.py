@@ -37,6 +37,9 @@ class TorAngSPCReport(models.TransientModel):
 
     need_render = fields.Boolean(default=False)
 
+    cmk = fields.Float(string='CMK', store=False, compute='_compute_dist')
+    cpk = fields.Float(string='CPK', store=False, compute='_compute_dist')
+
     @api.depends('need_render')
     def _compute_dist(self):
         if self.need_render:
@@ -48,7 +51,7 @@ class TorAngSPCReport(models.TransientModel):
             std = np.std(data)
             data_min = np.min(data)
             data_max = np.max(data)
-            self.normal_dist = self._get_normal_dist(data=data, mean=mean, std=std, gMin=data_min, gMax=data_max)
+            self.normal_dist, self.cmk, self.cpk = self._get_normal_dist(data=data, mean=mean, std=std, gMin=data_min, gMax=data_max)
             scale_parameter = self.env['ir.config_parameter'].sudo().get_param('weibull.scale', default=1.0)
             shape_parameter = self.env['ir.config_parameter'].sudo().get_param('weibull.shape', default=5.0)
             self.weibull_dist = self._get_weibull_dist(len(data), mean=mean, std=std,
@@ -149,7 +152,7 @@ class TorAngSPCReport(models.TransientModel):
         overlap.add(line)
         overlap.add(bar)
         pyecharts.configure(force_js_embed=True)
-        return overlap.render_embed()
+        return overlap.render_embed(), CMK, CPK
 
     def _get_scatter(self,  data):
         qty = len(data)
