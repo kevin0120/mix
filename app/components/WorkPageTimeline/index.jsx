@@ -8,6 +8,7 @@ import withStyles from '@material-ui/core/styles/withStyles';
 // core components
 import { Scrollbars } from 'react-custom-scrollbars';
 import Badge from '../Badge/Badge';
+import Grow from '@material-ui/core/Grow';
 
 import timelineStyle from '../../common/jss/components/timelineStyle';
 
@@ -16,6 +17,7 @@ function Timeline({ ...props }) {
   const timelineClass = `${classes.timeline} ${cx({
     [classes.timelineSimple]: simple
   })}`;
+  const length=stories.length;
   return (
     <Scrollbars>
       <ul className={timelineClass}>
@@ -30,6 +32,7 @@ function Timeline({ ...props }) {
             [classes.timelineSimpleBadge]: simple
           })}`;
           return (
+            <Grow in timeout ={800} key={`timeline-${length-key-1}`}>
             <li className={classes.item} key={key}>
               {prop.badgeIcon ? (
                 <div className={timelineBadgeClasses}>
@@ -55,6 +58,7 @@ function Timeline({ ...props }) {
                 ) : null}
               </div>
             </li>
+            </Grow>
           );
         })}
       </ul>
