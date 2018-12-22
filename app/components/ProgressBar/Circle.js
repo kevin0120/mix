@@ -13,13 +13,25 @@ export default class Circle extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const mixRate = 1 - (nextProps.progress * 0.6 + 0.4);
-    this.setState({
-      progressColor: Color(nextProps.startColor).mix(
-        Color(nextProps.endColor),
-        mixRate
-      )
-    });
+    const {progress, startColor,endColor,midColor}=nextProps;
+    if(progress>0.5){
+      const mixRate = progress*2-1;
+      this.setState({
+        progressColor: Color(midColor).mix(
+          Color(endColor),
+          mixRate
+        )
+      });
+    }else{
+      const mixRate = progress*2;
+      this.setState({
+        progressColor: Color(startColor).mix(
+          Color(midColor),
+          mixRate
+        )
+      });
+    }
+
   }
 
   setSizes = lineWidth => {
@@ -105,7 +117,7 @@ export default class Circle extends React.Component {
         />
         <text
           style={textStyle}
-          fill={textColor}
+          fill={progressColor}
           x={radius}
           y={radius}
           textAnchor="middle"
@@ -124,6 +136,7 @@ Circle.propTypes = {
   bgColor: PropTypes.string.isRequired,
   progress: PropTypes.number.isRequired,
   startColor: PropTypes.string.isRequired,
+  midColor: PropTypes.string.isRequired,
   endColor: PropTypes.string.isRequired,
   textColor: PropTypes.string.isRequired,
   animate: PropTypes.bool,

@@ -401,7 +401,7 @@ const withstyles = theme => ({
     justifyContent: 'center',
     alignItems: 'center',
     height: '15%',
-    background: '#2A2A2A'
+    background: '#111111'
   },
   InfoTab: {
     textAlign: 'center',
