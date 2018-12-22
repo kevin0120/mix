@@ -4,6 +4,7 @@ import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import styles from './styles';
 import Circle from './Circle';
+import { dangerColor, warningColor, successColor } from '../../common/jss/material-react-pro';
 
 // import { Line, Circle } from 'react-es6-progressbar.js';
 
@@ -139,37 +140,21 @@ class ProgressBar extends React.Component {
       animate: true,
       animationDuration: 1,
       size: 150,
-      lineWidth: 50,
+      lineWidth: 60,
       progress: time > 0 ? (time - timeRemaining) / time : 0,
-      bgColor: '#FFFFFF',
-      startColor: '#F7FFA2',
-      endColor: '#F7E600',
-      textColor: '#F7E600',
+      bgColor: '#E0E0E0',
+      startColor: '#8bc34a',
+      endColor: '#f44336',
+      midColor: '#ffeb3b',
       textStyle: {
-        font: '30rem Helvetica, Arial, sans-serif'
+        font: '30rem Helvetica, Arial, sans-serif',
+        fontWeight:600
       },
       roundedStroke: true
     };
     return (
       <Grid item className={gridClassName}>
-        <Circle
-          {...circleProps}
-          // text={timeRemaining}
-          // responsive
-          // animate
-          // animationDuration="1"
-          // size={150}
-          // lineWidth={50}
-          // progress={time > 0 ? (time - timeRemaining) / time : 0}
-          // bgColor="#FFFFFF"
-          // startColor="#F7FFA2"
-          // endColor="#F7E600"
-          // textColor="#F7E600"
-          // textStyle={{
-          //   font: '20rem Helvetica, Arial, sans-serif'
-          // }}
-          // roundedStroke
-        />
+        <Circle {...circleProps}/>
       </Grid>
     );
   }
@@ -185,10 +170,14 @@ ProgressBar.propTypes = {
 };
 
 ProgressBar.defaultProps = {
-  shouldCounterReady: () => {},
-  shouldCounterStart: () => {},
-  shouldCounterStop: () => {},
-  onFinish: () => {}
+  shouldCounterReady: () => {
+  },
+  shouldCounterStart: () => {
+  },
+  shouldCounterStop: () => {
+  },
+  onFinish: () => {
+  }
 };
 
 export default withStyles(styles)(ProgressBar);

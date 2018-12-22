@@ -1,7 +1,7 @@
 import pagesStyle from '../../common/jss/layouts/pagesStyle';
 import imagesStyles from '../../common/jss/imagesStyles';
 import popoverStyles from '../../common/jss/popoverStyles';
-import { dangerColor } from '../../common/jss/material-react-pro';
+import { dangerColor, successColor } from '../../common/jss/material-react-pro';
 
 import { keyframes } from 'react-emotion';
 
@@ -59,7 +59,7 @@ export default theme => ({
     width: '100px',
     height: '100%',
     lineHeight: '100%',
-    marginLeft: '15px',
+    marginLeft: '15px'
   },
   BottomNavigationIcon: {
     color: '#FFFFFF',
@@ -80,15 +80,26 @@ export default theme => ({
     width: 'auto'
   },
   menuStatusOK: {
-    background: 'transparent',
+    background: successColor,
     fontSize: '18px',
-    marginRight: '20px'
+    marginRight: '20px',
+    '&,&:focus,&:hover': {
+      background: successColor,
+      fontSize: '18px',
+      marginRight: '20px',
+    }
   },
   menuStatusFail: {
     background: dangerColor,
     fontSize: '18px',
     marginRight: '20px',
-    animation: `${twinkling} 2s infinite cubic-bezier(1, 1, 1, 1)`
+    animation: `${twinkling} 2s infinite cubic-bezier(1, 1, 1, 1)`,
+    '&,&:focus,&:hover': {
+      background: dangerColor,
+      fontSize: '18px',
+      marginRight: '20px',
+      animation: `${twinkling} 2s infinite cubic-bezier(1, 1, 1, 1)`
+    }
   },
   itemWrap: {
     margin: '0 8px'

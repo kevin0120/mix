@@ -126,7 +126,8 @@ class ConnectedLayout extends React.PureComponent {
 
   HealthCheckOk() {
     const { healthCheckResults } = this.props;
-    return lodash.every(healthCheckResults, { isHealth: true });
+    const results = lodash.filter(healthCheckResults, 'enable');
+    return lodash.every(results, [ 'isHealth', true]);
   }
 
   handleRouterSwitch = e => {
