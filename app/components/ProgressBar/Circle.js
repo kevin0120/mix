@@ -54,7 +54,6 @@ export default class Circle extends React.Component {
       roundedStroke,
       responsive,
       textStyle,
-      textColor
     } = this.props;
     const { viewSize, radius, diameter, getOffset } = this;
     const { progressColor } = this.state;
@@ -138,7 +137,6 @@ Circle.propTypes = {
   startColor: PropTypes.string.isRequired,
   midColor: PropTypes.string.isRequired,
   endColor: PropTypes.string.isRequired,
-  textColor: PropTypes.string.isRequired,
   animate: PropTypes.bool,
   animationDuration: PropTypes.number,
   roundedStroke: PropTypes.bool,

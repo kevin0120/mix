@@ -401,7 +401,7 @@ const withstyles = theme => ({
     justifyContent: 'center',
     alignItems: 'center',
     height: '15%',
-    background: '#111111'
+    background: '#212121'
   },
   InfoTab: {
     textAlign: 'center',
@@ -427,7 +427,7 @@ const withstyles = theme => ({
     height: '75px',
     marginTop: '0px',
     width: '100%',
-    color: '#F7E600'
+    color: '#ffeb3b'
   },
   CountDownContainer: {
     position: 'absolute',
@@ -445,13 +445,13 @@ const withstyles = theme => ({
     textAlign: 'center',
     height: '120px',
     position: 'relative',
-    background: '#111111'
+    background: '#212121'
   },
   RetryPaper: {
     textAlign: 'center',
     height: '120px',
     position: 'relative',
-    background: '#111111'
+    background: '#212121'
   },
   RightDescription: {
     fontSize: '20px',

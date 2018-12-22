@@ -140,15 +140,15 @@ class ProgressBar extends React.Component {
       animate: true,
       animationDuration: 1,
       size: 150,
-      lineWidth: 50,
+      lineWidth: 60,
       progress: time > 0 ? (time - timeRemaining) / time : 0,
-      bgColor: '#FFFFFF',
-      startColor: '#4caf50',
-      endColor: '#ff3030',
-      midColor: '#F7E600',
-      textColor: '#F7E600',
+      bgColor: '#E0E0E0',
+      startColor: '#8bc34a',
+      endColor: '#f44336',
+      midColor: '#ffeb3b',
       textStyle: {
-        font: '30rem Helvetica, Arial, sans-serif'
+        font: '30rem Helvetica, Arial, sans-serif',
+        fontWeight:600
       },
       roundedStroke: true
     };
