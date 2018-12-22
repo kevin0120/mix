@@ -30,16 +30,14 @@ class ConnectedHealthCheck extends React.Component {
           : classes.infoError;
 
         return (
-          <I18n ns="translations">
+          <I18n ns="translations" key={`health-check-${key}`}>
             {t => (
-              <MenuList key={key}>
+              <MenuList>
                 <ListItem
-                  key={key}
                   disableGutters={styleOptions.disableGutters}
                   className={classes.infoItem}
                 >
                   <ListItemText
-                    key={key}
                     className={classes.infoText}
                     primary={t(displayTitle)}
                   />
