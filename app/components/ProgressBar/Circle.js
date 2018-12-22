@@ -116,7 +116,7 @@ export default class Circle extends React.Component {
         />
         <text
           style={textStyle}
-          fill={progressColor}
+          fill={`rgb(${color.red},${color.green},${color.blue})`}
           x={radius}
           y={radius}
           textAnchor="middle"
