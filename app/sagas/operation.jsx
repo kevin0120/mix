@@ -78,6 +78,11 @@ function* getNextWorkOrderandShow() {
 export function* triggerOperation(carID, carType, job, source) {
   try {
     let state = yield select();
+
+    if (state.router.location.pathname !== '/working') {
+      return;
+    }
+
     switch (state.operations.operationStatus) {
       case OPERATION_STATUS.DOING:
         return;
@@ -326,12 +331,15 @@ export function* continueOperation() {
   const state = yield select();
   const { operations } = state;
 
-  if (operations.activeResultIndex >= operations.results.length - 1) {
-    yield put({ type: OPERATION.FINISHED });
-  } else {
-    yield put({ type: OPERATION.CONTINUE });
-    yield call(doingOperation);
+  if (state.operations.operationStatus === OPERATION_STATUS.FAIL) {
+    if (operations.activeResultIndex >= operations.results.length - 1) {
+      yield put({ type: OPERATION.FINISHED });
+    } else {
+      yield put({ type: OPERATION.CONTINUE });
+      yield call(doingOperation);
+    }
   }
+
 }
 
 // 监听结果

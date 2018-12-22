@@ -16,7 +16,8 @@ import { cloneDeep } from 'lodash';
 import modbus from 'jsmodbus';
 
 // actions
-import { IO, OPERATION } from '../actions/actionTypes';
+import { OPERATION_STATUS } from '../reducers/operations';
+import { IO } from '../actions/actionTypes';
 import { setHealthzCheck } from '../actions/healthCheck';
 import { setNewNotification } from '../actions/notification';
 
@@ -134,7 +135,12 @@ export function* handleIOFunction(data) {
         // 强制放行
 
         // yield put({ type: OPERATION.FINISHED, data: [] });
-        yield put(openShutdown('bypass'));
+        const state = yield select();
+        if (state.router.location.pathname === '/working' &&
+          [OPERATION_STATUS.DOING, OPERATION_STATUS.FAIL, OPERATION_STATUS.TIMEOUT].includes(state.operations.operationStatus)) {
+          yield put(openShutdown('bypass'));
+        }
+
         break;
       }
       case IO_FUNCTION.IN.MODE_SELECT: {
