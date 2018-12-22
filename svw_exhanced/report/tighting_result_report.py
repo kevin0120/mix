@@ -6,6 +6,8 @@ from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from itertools import groupby
 
+MAX_RESULT = 5000
+
 
 class ReportTightResultReport(models.AbstractModel):
     _inherit = 'report.spc.report_result_tighting'
@@ -34,18 +36,10 @@ class ReportTightResultReport(models.AbstractModel):
         cr.execute(query)
         results = cr.fetchall()
 
-        #
-        # if not results:
-        #     return True
+        length = len(results)
 
-        # for category, lines in groupby(results, lambda r: r[1]):
-        #     if report_pages[-1] and report_pages[-1][-1]['name']:
-        #         report_pages.append([])
-        #         # Append category to current report page
-        #     report_pages[-1].append({
-        #         'name': lines[0][0] and lines[0][0] or 'Uncategorized',
-        #         'lines': list(lines)
-        #     })
+        if length > MAX_RESULT:
+            raise UserError(u'请缩小时间范围,当前报告数量过大:{0}'.format(length))
 
         docargs = {
             'doc_ids': self.ids,
