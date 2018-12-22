@@ -41,7 +41,7 @@ class ProgressBar extends React.Component {
     if (
       shouldCounterStart &&
       shouldCounterStart() &&
-      counterState !== this.counterStates.ticking
+      counterState == this.counterStates.ready
     ) {
       // console.log('should start');
       console.log(nextProps);
@@ -118,7 +118,7 @@ class ProgressBar extends React.Component {
         console.log('set state:', this.state);
         this.timer = setInterval(() => {
           const { timeRemaining } = this.state;
-          console.log(timeRemaining);
+          // console.log(timeRemaining);
           if (timeRemaining <= 0) {
             this.finishCounter();
           } else {

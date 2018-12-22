@@ -126,6 +126,10 @@ const imgStickStyles = () => ({
     background: warningColor,
     animation: `${ripple} 1.0s infinite cubic-bezier(1, 1, 1, 1)`
   },
+  failActive: {
+    background: dangerColor,
+    animation: `${ripple} 1.0s infinite cubic-bezier(1, 1, 1, 1)`
+  },
   success: {
     background: successColor
   },
@@ -201,14 +205,46 @@ class ConnectedImageStick extends React.Component {
       const circleStatus = small ? classes.circleSmallStatus : classes.circleStatus;
       // idx += 1;
       let status = 'waiting';
-      if (operations.results[operations.activeResultIndex].group_sequence === item.group_sequence && operations.operationStatus === OPERATION_STATUS.DOING) {
-        status = 'waitingActive';
-      }
-      if (item.result === OPERATION_RESULT.OK) {
-        status = 'success';
-      } else if (item.result === OPERATION_RESULT.NOK) {
+      if (item.result === OPERATION_RESULT.NOK) {
         status = 'error';
+      } else if(item.result === OPERATION_RESULT.OK){
+        status = 'success';
       }
+      if (operations.results[operations.activeResultIndex].group_sequence === item.group_sequence) {
+        switch (operations.operationStatus) {
+          // case OPERATION_STATUS.TIMEOUT:
+          case OPERATION_STATUS.DOING: {
+            status = 'waitingActive';
+            if (item.result === OPERATION_RESULT.NOK) {
+              status = 'failActive';
+            }
+            break;
+          }
+          case OPERATION_STATUS.FAIL:
+            status = 'error';
+            break;
+          default:
+            break;
+        }
+      }
+      //   if (operations.operationStatus === OPERATION_STATUS.DOING) {
+      //     status = 'waitingActive';
+      //     if  (item.result === OPERATION_RESULT.NOK) {
+      //       status = 'failActive';
+      //     }else {
+      //       status = 'success';
+      //     }
+      //   } else if(operations.operationStatus === OPERATION_STATUS.FAIL) {
+      //     status = 'error';
+      //   }
+      // }
+
+      // if (item.result === OPERATION_RESULT.OK) {
+      //   status = 'success';
+      // } else if (item.result === OPERATION_RESULT.NOK) {
+      //   status = 'failActive';
+      // }
+
       return (
         <div key={item.id} style={postionStyle} className={classes.imgInfo}>
           <span className={`${circleStatus} ${classes[status]}`}>
