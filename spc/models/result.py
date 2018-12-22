@@ -460,6 +460,9 @@ class OperationResult(models.HyperModel):
                 count = _cache[k]
                 inv_value = float_round(line['__count'] / count, precision_digits=3)
                 line['__count'] = inv_value
+
+        res = sorted(res, key=lambda l: next(v for (line_key, v) in l.iteritems() if '_count' in line_key), reverse=True)
+
         return res
 
     @api.multi
