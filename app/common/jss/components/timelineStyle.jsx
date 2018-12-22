@@ -173,12 +173,10 @@ const timelineStyle = theme => ({
     }
   },
   timelineHeading: {
-    marginBottom: '10px',
-    float: 'right'
+    // float: 'right'
   },
   timelineTS: {
-    marginBottom: '10px',
-    float: 'left',
+    // float: 'left',
     '& span': {
       color: grayColor,
       fontSize: '12px'
