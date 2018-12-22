@@ -69,7 +69,6 @@ class Image extends React.Component {
       style = {
         transform: `translate(${focus.transform.x || 0}%,${focus.transform.y || 0
           }%) scale(${focus.scale},${focus.scale})`,
-        transition: 'transform 1s'
       };
     }
 
@@ -91,14 +90,15 @@ class Image extends React.Component {
           onLoad={() => {
             this.handleResize();
           }}
-          style={style}
+          style={{...style,transition: 'transform 1s'}}
         />
         <div
           style={{
             width: `${this.imageSize.width || 0}%`,
             height: `${this.imageSize.height || 0}%`,
             position: 'absolute',
-            ...style
+            ...style,
+            transition: 'transform 1s'
           }}>
           {children}
         </div>
