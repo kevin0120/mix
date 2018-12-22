@@ -14,19 +14,20 @@ export default class Circle extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     const {progress, startColor,endColor,midColor}=nextProps;
+    console.log(progress);
     if(progress>0.5){
       const mixRate = progress*2-1;
       this.setState({
-        progressColor: Color(midColor).mix(
-          Color(endColor),
+        progressColor: Color(endColor).mix(
+          Color(midColor),
           mixRate
         )
       });
     }else{
       const mixRate = progress*2;
       this.setState({
-        progressColor: Color(startColor).mix(
-          Color(midColor),
+        progressColor: Color(midColor).mix(
+          Color(startColor),
           mixRate
         )
       });

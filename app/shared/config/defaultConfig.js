@@ -43,7 +43,7 @@ export const defaultConfigs = {
       },
       hmiSn: {
         displayOrder: 2,
-        value: '1122334455667788',
+        value: '112233445566778899',
         displayTitle: 'Configuration.connections.HMI'
       }
     },
@@ -77,7 +77,7 @@ export const defaultConfigs = {
         {
           bit: 4,
           io: 'in',
-          function: 'MODE_SELECT',
+          function: 'RESET',
           label: '复位钥匙'
         },
         {
@@ -161,7 +161,7 @@ export const defaultConfigs = {
       }
     },
     connections: {
-      masterpc: 'http://192.168.1.151:8082',
+      masterpc: 'http://192.168.1.152:8082',
       rfid: 'tcp://192.168.1.120:2112',
       aiis: 'http://192.168.1.3:9092',
       controllers: [
@@ -170,19 +170,19 @@ export const defaultConfigs = {
         }
       ],
       io: 'modbustcp://192.168.1.122:502/0',
-      workcenterCode: '1122334455667788',
+      workcenterCode: '112233445566778899',
       rework_workcenter: 'qrk'
     }
   },
   // 作业配置
   operationSettings: {
-    opMode: 'op', // 作业模式:        op 或 order
-    controllerMode: 'job', // 拧紧模式:        job 或 pset
+    opMode: 'order', // 作业模式:        op 或 order
+    controllerMode: 'pset', // 拧紧模式:        job 或 pset
     workMode: 'auto', // 工作模式:        auto 或 manual 或 scanner
-    flowTriggers: ['carID', 'carType'], // 工作流程触发条件:  carType:车型代码 carID:vin/knr/longpin
+    flowTriggers: ['carID'], // 工作流程触发条件:  carType:车型代码 carID:vin/knr/longpin
 
     // 作业前检测(order mode only)
-    preCheck: false,
+    preCheck: true,
 
     // 强制放行配置
     byPass: {
@@ -207,9 +207,9 @@ export const defaultConfigs = {
     authEnable: true,
     switchAutoManual: false,
     oeeFuncEnable: false,
-    modbusEnable: false,
+    modbusEnable: true,
     rfidEnabled: false,
-    andonEnable: true,
+    andonEnable: false,
     psetContinueMode: false,
     enableFocus:true,
   }
