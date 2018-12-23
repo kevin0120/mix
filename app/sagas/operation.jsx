@@ -139,7 +139,6 @@ export function* triggerOperation(carID, carType, job, source) {
   } catch (e) {
     console.log(e);
   }
-
 }
 
 // 定位作业
@@ -341,7 +340,6 @@ export function* continueOperation() {
     yield put({ type: OPERATION.CONTINUE });
     yield call(doingOperation);
   }
-
 }
 
 // 监听结果
@@ -371,7 +369,11 @@ export function* handleResults(data) {
 
     // const eti  = data[i].ti? data[i].ti.toString() : 'nil';
 
-    const batch = `${(operations.activeResultIndex + 1).toString()}/${operations.results[operations.results.length - 1].group_sequence.toString()}`;
+    const batch = `${(
+      operations.activeResultIndex + 1
+    ).toString()}/${operations.results[
+      operations.results.length - 1
+    ].group_sequence.toString()}`;
 
     yield call(
       addNewStory,

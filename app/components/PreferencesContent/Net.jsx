@@ -21,7 +21,6 @@ import InputLabel from '@material-ui/core/InputLabel';
 
 import { css } from 'react-emotion';
 
-
 // First way to import
 import { GridLoader } from 'react-spinners';
 import Button from '../CustomButtons/Button';
@@ -35,7 +34,6 @@ import withKeyboard from '../Keyboard';
 const lodash = require('lodash');
 
 const { exec } = require('child_process');
-
 
 const override = css`
   display: block;
@@ -189,7 +187,7 @@ class ConnectedNet extends React.PureComponent {
       if (stdout) {
         const lines = stdout.toString().split('\n');
         let isHeader = true;
-        for (let i = 0; i < lines.length - 1; i+= 1) {
+        for (let i = 0; i < lines.length - 1; i += 1) {
           if (isHeader) {
             isHeader = false;
           } else {

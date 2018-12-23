@@ -86,7 +86,7 @@ export default theme => ({
     '&,&:focus,&:hover': {
       background: successColor,
       fontSize: '18px',
-      marginRight: '20px',
+      marginRight: '20px'
     }
   },
   menuStatusFail: {

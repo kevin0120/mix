@@ -80,7 +80,7 @@ const imgStickStyles = () => ({
     borderRadius: '50%',
     textAlign: 'center',
     lineHeight: `${circleRadius}px`,
-    fontSize: `${(circleRadius - 10)}px`,
+    fontSize: `${circleRadius - 10}px`,
     overflow: 'hidden',
     background: '#dbdbdb'
   },
@@ -151,7 +151,6 @@ class ConnectedImageStick extends React.Component {
       },
       scale: 1
     };
-
   }
 
   componentWillReceiveProps(nextProps) {
@@ -161,7 +160,10 @@ class ConnectedImageStick extends React.Component {
       this.focus.do = false;
       return;
     }
-    if (nextOperations.results.length === 0 || nextOperations.operationStatus === OPERATION_STATUS.READY) {
+    if (
+      nextOperations.results.length === 0 ||
+      nextOperations.operationStatus === OPERATION_STATUS.READY
+    ) {
       // 当接受到的结果为空,没有拧紧点, 或者工单进入ready阶段(代表着上一个作业结束)
       this.doFocus({
         do: false,
@@ -171,21 +173,27 @@ class ConnectedImageStick extends React.Component {
         },
         scale: 1
       });
-
     } else if (nextOperations.operationStatus === OPERATION_STATUS.PREDOING) {
       // do nothing
     } else {
       this.doFocus({
         do: true,
         transform: {
-          x: (50 - nextOperations.results[nextProps.operations.activeResultIndex].offset_x) * 2,
-          y: (50 - nextOperations.results[nextProps.operations.activeResultIndex].offset_y) * 2
+          x:
+            (50 -
+              nextOperations.results[nextProps.operations.activeResultIndex]
+                .offset_x) *
+            2,
+          y:
+            (50 -
+              nextOperations.results[nextProps.operations.activeResultIndex]
+                .offset_y) *
+            2
         },
         scale: 2
       });
     }
   }
-
 
   doFocus(focus) {
     this.focus = focus;
@@ -197,20 +205,25 @@ class ConnectedImageStick extends React.Component {
     // let idx = 0;
     return operations.results.map((item, i) => {
       // const display = operations.activeResultIndex >= idx;
-      const cR = small ? circleRadius/2 : circleRadius ;
+      const cR = small ? circleRadius / 2 : circleRadius;
       const postionStyle = {
         top: `calc(${item.offset_y}% - ${cR}px)`,
         left: `calc(${item.offset_x}% - ${cR}px)`
       };
-      const circleStatus = small ? classes.circleSmallStatus : classes.circleStatus;
+      const circleStatus = small
+        ? classes.circleSmallStatus
+        : classes.circleStatus;
       // idx += 1;
       let status = 'waiting';
       if (item.result === OPERATION_RESULT.NOK) {
         status = 'error';
-      } else if(item.result === OPERATION_RESULT.OK){
+      } else if (item.result === OPERATION_RESULT.OK) {
         status = 'success';
       }
-      if (operations.results[operations.activeResultIndex].group_sequence === item.group_sequence) {
+      if (
+        operations.results[operations.activeResultIndex].group_sequence ===
+        item.group_sequence
+      ) {
         switch (operations.operationStatus) {
           // case OPERATION_STATUS.TIMEOUT:
           case OPERATION_STATUS.DOING: {
@@ -267,31 +280,27 @@ class ConnectedImageStick extends React.Component {
   render() {
     const { classes, operations, enableFocus } = this.props;
 
-    const smallImgDisplay = operations.operationStatus !== 'Ready' && operations.operationStatus !== 'PreDoing';
-
+    const smallImgDisplay =
+      operations.operationStatus !== 'Ready' &&
+      operations.operationStatus !== 'PreDoing';
 
     return (
       <div className={classes.picWrap}>
-        <Image
-          src={operations.workSheet}
-          alt=""
-          focus={this.focus}
-        >
+        <Image src={operations.workSheet} alt="" focus={this.focus}>
           {this.statusDisplay(false)}
         </Image>
-        {
-          enableFocus ? <Fade in={smallImgDisplay}
-                              {...(smallImgDisplay ? { timeout: 1000 } : {})}>
+        {enableFocus ? (
+          <Fade
+            in={smallImgDisplay}
+            {...(smallImgDisplay ? { timeout: 1000 } : {})}
+          >
             <Card plain raised className={classes.imgSmallBlock}>
-              <Image
-                src={operations.workSheet}
-                alt=""
-              >
+              <Image src={operations.workSheet} alt="">
                 {this.statusDisplay(true)}
               </Image>
             </Card>
-          </Fade> : null
-        }
+          </Fade>
+        ) : null}
       </div>
     );
   }

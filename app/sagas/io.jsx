@@ -71,7 +71,7 @@ export const sOn = 1;
 export const sBlinkOff = 10;
 export const sBlinkOn = 11;
 
-let ioStatus = [sOff, sOff, sOff, sOff,sOff, sOff, sOff, sOff]; // 默认为关闭
+let ioStatus = [sOff, sOff, sOff, sOff, sOff, sOff, sOff, sOff]; // 默认为关闭
 
 let timeStamp = null;
 const byPassTimeout = 3;
@@ -124,23 +124,29 @@ function* closeAll() {
 
 export function* handleIOFunction(data) {
   try {
+    const state = yield select();
+    if (state.router.location.pathname !== '/working') {
+      return;
+    }
     switch (data) {
       case IO_FUNCTION.IN.RESET: {
         // 复位
-
-        yield call(continueOperation);
+        if (state.operations.operationStatus === OPERATION_STATUS.FAIL) {
+          // 只有在fail阶段可以执行复位功能
+          yield call(continueOperation);
+        }
         break;
       }
       case IO_FUNCTION.IN.BYPASS: {
         // 强制放行
-
         // yield put({ type: OPERATION.FINISHED, data: [] });
-        const state = yield select();
-        if (state.router.location.pathname === '/working' &&
-          [OPERATION_STATUS.DOING, OPERATION_STATUS.FAIL, OPERATION_STATUS.TIMEOUT].includes(state.operations.operationStatus)) {
+        if (
+          [OPERATION_STATUS.DOING, OPERATION_STATUS.FAIL].includes(
+            state.operations.operationStatus
+          )
+        ) {
           yield put(openShutdown('bypass'));
         }
-
         break;
       }
       case IO_FUNCTION.IN.MODE_SELECT: {

@@ -35,7 +35,6 @@ class Image extends React.Component {
     this.containerRef = React.createRef();
     this.updateImgSize = this.updateImgSize.bind(this);
     this.handleResize = this.handleResize.bind(this);
-
   }
 
   componentDidMount() {
@@ -54,21 +53,28 @@ class Image extends React.Component {
 
   updateImgSize() {
     const { focus } = this.props;
-    if (this.containerRef.offsetHeight !== 0 && this.containerRef.offsetWidth !== 0) {
+    if (
+      this.containerRef.offsetHeight !== 0 &&
+      this.containerRef.offsetWidth !== 0
+    ) {
       this.imageSize = {
-        height: (this.imageRef.offsetHeight || 0) / this.containerRef.offsetHeight * 100,
-        width: (this.imageRef.offsetWidth || 0) / this.containerRef.offsetWidth * 100
+        height:
+          ((this.imageRef.offsetHeight || 0) / this.containerRef.offsetHeight) *
+          100,
+        width:
+          ((this.imageRef.offsetWidth || 0) / this.containerRef.offsetWidth) *
+          100
       };
     }
   }
 
   render() {
     const { src, alt, children, classes, focus } = this.props;
-    let style={};
+    let style = {};
     if (focus && focus.do === true) {
       style = {
-        transform: `translate(${focus.transform.x || 0}%,${focus.transform.y || 0
-          }%) scale(${focus.scale},${focus.scale})`,
+        transform: `translate(${focus.transform.x || 0}%,${focus.transform.y ||
+          0}%) scale(${focus.scale},${focus.scale})`
       };
     }
 
@@ -78,7 +84,6 @@ class Image extends React.Component {
           this.containerRef = r;
         }}
         className={classes.imgBlock}
-
       >
         <img
           ref={r => {
@@ -90,7 +95,7 @@ class Image extends React.Component {
           onLoad={() => {
             this.handleResize();
           }}
-          style={{...style,transition: 'transform 1s'}}
+          style={{ ...style, transition: 'transform 1s' }}
         />
         <div
           style={{
@@ -99,7 +104,8 @@ class Image extends React.Component {
             position: 'absolute',
             ...style,
             transition: 'transform 1s'
-          }}>
+          }}
+        >
           {children}
         </div>
       </div>
@@ -110,7 +116,6 @@ class Image extends React.Component {
 Image.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   className: PropTypes.string
-
 };
 
 export default withStyles(styles)(Image);

@@ -4,7 +4,11 @@ import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import styles from './styles';
 import Circle from './Circle';
-import { dangerColor, warningColor, successColor } from '../../common/jss/material-react-pro';
+import {
+  dangerColor,
+  warningColor,
+  successColor
+} from '../../common/jss/material-react-pro';
 
 // import { Line, Circle } from 'react-es6-progressbar.js';
 
@@ -148,13 +152,13 @@ class ProgressBar extends React.Component {
       midColor: '#ffeb3b',
       textStyle: {
         font: '30rem Helvetica, Arial, sans-serif',
-        fontWeight:600
+        fontWeight: 600
       },
       roundedStroke: true
     };
     return (
       <Grid item className={gridClassName}>
-        <Circle {...circleProps}/>
+        <Circle {...circleProps} />
       </Grid>
     );
   }
@@ -170,14 +174,10 @@ ProgressBar.propTypes = {
 };
 
 ProgressBar.defaultProps = {
-  shouldCounterReady: () => {
-  },
-  shouldCounterStart: () => {
-  },
-  shouldCounterStop: () => {
-  },
-  onFinish: () => {
-  }
+  shouldCounterReady: () => {},
+  shouldCounterStart: () => {},
+  shouldCounterStop: () => {},
+  onFinish: () => {}
 };
 
 export default withStyles(styles)(ProgressBar);

@@ -28,7 +28,7 @@ function Timeline({ ...props }) {
           })}`;
           const timelineBadgeClasses = `${classes.timelineBadge} ${
             classes[prop.badgeColor]
-            } ${cx({
+          } ${cx({
             [classes.timelineSimpleBadge]: simple
           })}`;
           return (
@@ -36,17 +36,18 @@ function Timeline({ ...props }) {
               <li className={classes.item} key={key}>
                 {prop.badgeIcon ? (
                   <div className={timelineBadgeClasses}>
-                    <prop.badgeIcon className={classes.badgeIcon}/>
+                    <prop.badgeIcon className={classes.badgeIcon} />
                   </div>
                 ) : null}
                 <div className={panelClasses}>
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    marginBottom: '10px'
-                  }}>
-
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      marginBottom: '10px'
+                    }}
+                  >
                     <div className={classes.timelineTS}>
                       <Badge>{prop.timestamp}</Badge>
                     </div>
@@ -60,7 +61,7 @@ function Timeline({ ...props }) {
                   {prop.footerTitle ? (
                     <h6 className={classes.footerTitle}>{prop.footerTitle}</h6>
                   ) : null}
-                  {prop.footer ? <hr className={classes.footerLine}/> : null}
+                  {prop.footer ? <hr className={classes.footerLine} /> : null}
                   {prop.footer ? (
                     <div className={classes.timelineFooter}>{prop.footer}</div>
                   ) : null}

@@ -67,18 +67,9 @@ function* stopRush() {
     ws.ws.readyState === OWebSocket.CONNECTING
   ) {
     yield put(setHealthzCheck('masterpc', false));
-    yield put(
-      setNewNotification('info', `masterPC连接状态更新: ${false}`)
-    );
-    yield put(
-      setHealthzCheck('controller', false)
-    );
-    yield put(
-      setNewNotification(
-        'info',
-        `controller连接状态更新: ${false}`
-      )
-    );
+    yield put(setNewNotification('info', `masterPC连接状态更新: ${false}`));
+    yield put(setHealthzCheck('controller', false));
+    yield put(setNewNotification('info', `controller连接状态更新: ${false}`));
     ws.close();
   }
   ws = null;
@@ -140,15 +131,10 @@ export function* watchRushChannel(hmiSN) {
               setNewNotification('info', `masterPC连接状态更新: ${payload}`)
             );
           }
-          if(!payload) {
+          if (!payload) {
+            yield put(setHealthzCheck('controller', false));
             yield put(
-              setHealthzCheck('controller', false)
-            );
-            yield put(
-              setNewNotification(
-                'info',
-                `controller连接状态更新: ${false}`
-              )
+              setNewNotification('info', `controller连接状态更新: ${false}`)
             );
           }
           break;

@@ -127,7 +127,7 @@ class ConnectedLayout extends React.PureComponent {
   HealthCheckOk() {
     const { healthCheckResults } = this.props;
     const results = lodash.filter(healthCheckResults, 'enable');
-    return lodash.every(results, [ 'isHealth', true]);
+    return lodash.every(results, ['isHealth', true]);
   }
 
   handleRouterSwitch = e => {
@@ -238,10 +238,10 @@ class ConnectedLayout extends React.PureComponent {
                   </div>
                   <div className={classes.menuBtnWrapRight}>
                     {/*<Button*/}
-                      {/*onClick={this.handleSysInfo}*/}
-                      {/*className={`${statusClassName}`}*/}
+                    {/*onClick={this.handleSysInfo}*/}
+                    {/*className={`${statusClassName}`}*/}
                     {/*>*/}
-                      {/*{'系统'}*/}
+                    {/*{'系统'}*/}
                     {/*</Button>*/}
                     <Button
                       onClick={this.handleStatus}
@@ -260,24 +260,24 @@ class ConnectedLayout extends React.PureComponent {
                       <Language />
                     </IconButton>
                     {/*<Menu*/}
-                      {/*id="menu-sysInfo"*/}
-                      {/*anchorEl={showSysInfo}*/}
-                      {/*anchorOrigin={{*/}
-                        {/*vertical: 'top',*/}
-                        {/*horizontal: 'left'*/}
-                      {/*}}*/}
-                      {/*transformOrigin={{*/}
-                        {/*vertical: 'bottom',*/}
-                        {/*horizontal: 'left'*/}
-                      {/*}}*/}
-                      {/*open={openSysInfo}*/}
-                      {/*onClose={this.handleCloseSysInfo}*/}
-                      {/*TransitionComponent={Fade}*/}
-                      {/*classes={{*/}
-                        {/*paper: classes.popover*/}
-                      {/*}}*/}
+                    {/*id="menu-sysInfo"*/}
+                    {/*anchorEl={showSysInfo}*/}
+                    {/*anchorOrigin={{*/}
+                    {/*vertical: 'top',*/}
+                    {/*horizontal: 'left'*/}
+                    {/*}}*/}
+                    {/*transformOrigin={{*/}
+                    {/*vertical: 'bottom',*/}
+                    {/*horizontal: 'left'*/}
+                    {/*}}*/}
+                    {/*open={openSysInfo}*/}
+                    {/*onClose={this.handleCloseSysInfo}*/}
+                    {/*TransitionComponent={Fade}*/}
+                    {/*classes={{*/}
+                    {/*paper: classes.popover*/}
+                    {/*}}*/}
                     {/*>*/}
-                      {/*<SysInfo />*/}
+                    {/*<SysInfo />*/}
                     {/*</Menu>*/}
                     <Menu
                       id="menu-healthz"

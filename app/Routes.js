@@ -21,8 +21,8 @@ export default class Routes extends React.Component {
     };
   }
 
-  dummyFunction = (RouteConfig) => {
-    const {showLayout} = this.state;
+  dummyFunction = RouteConfig => {
+    const { showLayout } = this.state;
     if (RouteConfig.showLayout !== showLayout) {
       this.setState({ showLayout: RouteConfig.showLayout });
     }
@@ -31,7 +31,7 @@ export default class Routes extends React.Component {
   };
 
   render() {
-    const {showLayout} = this.state;
+    const { showLayout } = this.state;
     return (
       <App>
         <Switch>

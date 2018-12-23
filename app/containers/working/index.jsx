@@ -51,7 +51,7 @@ const mapStateToProps = (state, ownProps) => ({
   workMode: state.workMode,
   timeline: state.timeline,
   reworkWorkCenter: state.connections.rework_workcenter,
-  enableFocus:state.setting.systemSettings.enableFocus,
+  enableFocus: state.setting.systemSettings.enableFocus,
   ...ownProps
 });
 
@@ -653,7 +653,7 @@ class ConnectedWorking extends React.Component {
   };
 
   render() {
-    const { classes, operations, timeline, workMode,enableFocus } = this.props;
+    const { classes, operations, timeline, workMode, enableFocus } = this.props;
     //
     //
     const { inputName, manualDiagShow } = this.state;
@@ -666,7 +666,9 @@ class ConnectedWorking extends React.Component {
         operations.results[operations.activeResultIndex].max_redo_times;
       batch = `${(
         operations.activeResultIndex + 1
-      ).toString()}/${operations.results[operations.results.length - 1].group_sequence.toString()}`;
+      ).toString()}/${operations.results[
+        operations.results.length - 1
+      ].group_sequence.toString()}`;
       redoBatch = `${(
         maxRedoTimes - operations.failCount
       ).toString()}/${maxRedoTimes.toString()}`;
@@ -832,7 +834,10 @@ class ConnectedWorking extends React.Component {
                 <Grid item xs={12} className={classes.MainWrapper}>
                   <Paper className={classes.LeftBottomTab}>
                     {/*<div className={classes.ImgTabContiner}>*/}
-                      <ImageStick operations={operations} enableFocus={enableFocus}/>
+                    <ImageStick
+                      operations={operations}
+                      enableFocus={enableFocus}
+                    />
                     {/*</div>*/}
                   </Paper>
                 </Grid>
@@ -854,7 +859,7 @@ class ConnectedWorking extends React.Component {
                         operations.operationStatus
                       )
                     }
-                    shouldCounterReady={()=>
+                    shouldCounterReady={() =>
                       operations.operationStatus === OPERATION_STATUS.READY
                     }
                     // onFinish={() => this.props.switch2Timeout()}

@@ -100,7 +100,9 @@ class ConnectedResultDialog extends React.Component {
           results[i].mi,
           results[i].wi,
           results[i].ti,
-          `${results[i].group_sequence}/${results[results.length - 1].group_sequence}`,
+          `${results[i].group_sequence}/${
+            results[results.length - 1].group_sequence
+          }`,
           results[i].result
         ]);
       } else {
@@ -109,7 +111,9 @@ class ConnectedResultDialog extends React.Component {
           results[i].mi,
           results[i].wi,
           results[i].ti,
-          `${results[i].group_sequence}/${results[results.length - 1].group_sequence}`,
+          `${results[i].group_sequence}/${
+            results[results.length - 1].group_sequence
+          }`,
           results[i].result
         ]);
       }
@@ -149,7 +153,14 @@ class ConnectedResultDialog extends React.Component {
                       <CardBody>
                         <Table
                           tableHeaderColor="info"
-                          tableHead={['程序号', '扭矩(N·M)', '角度(Deg)', '用时(ms)', '批次', '结果']}
+                          tableHead={[
+                            '程序号',
+                            '扭矩(N·M)',
+                            '角度(Deg)',
+                            '用时(ms)',
+                            '批次',
+                            '结果'
+                          ]}
                           tableData={localResults}
                           colorsColls={['info']}
                         />
