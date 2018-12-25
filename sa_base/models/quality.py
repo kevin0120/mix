@@ -10,11 +10,11 @@ class QualityPoint(models.Model):
 
     operation_id = fields.Many2one('mrp.routing.workcenter', 'Operation')
 
-    tolerance_min = fields.Float('Torque Min Tolerance', digits=dp.get_precision('Quality Tests'))
-    tolerance_max = fields.Float('Torque Max Tolerance', digits=dp.get_precision('Quality Tests'))
+    tolerance_min = fields.Float('Torque Min Tolerance', digits=dp.get_precision('Quality Tests'), default=0.0)
+    tolerance_max = fields.Float('Torque Max Tolerance', digits=dp.get_precision('Quality Tests'), default=0.0)
 
-    tolerance_min_degree = fields.Float('Degree Min Tolerance', digits=dp.get_precision('Quality Tests'))
-    tolerance_max_degree = fields.Float('Degree Max Tolerance', digits=dp.get_precision('Quality Tests'))
+    tolerance_min_degree = fields.Float('Degree Min Tolerance', digits=dp.get_precision('Quality Tests'), default=0.0)
+    tolerance_max_degree = fields.Float('Degree Max Tolerance', digits=dp.get_precision('Quality Tests'), default=0.0)
 
     times = fields.Integer('Repeat times', default=1)
 
