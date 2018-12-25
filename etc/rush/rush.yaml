@@ -82,7 +82,7 @@ audi/vw:
   max_connection: 1024
   read_buf: 65535
   req_time_out: 300ms
-  keep_alive_period: 5s
+  keep_alive_period: 2s
 
 openprotocol:
   keep_alive_period: 10s

@@ -275,7 +275,7 @@ func (c *Controller) Connect() error {
 			break
 		}
 
-		time.Sleep(time.Duration(c.req_timeout))
+		time.Sleep(time.Duration(c.Srv.config().KeepAlivePeriod * 3))
 	}
 
 	c.updateStatus(controller.STATUS_ONLINE)
