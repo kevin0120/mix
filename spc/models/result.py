@@ -371,15 +371,17 @@ class OperationResult(models.HyperModel):
         return True
 
     @api.multi
-    def get_torques(self, args, limit=1000):
+    def get_torques(self, args, limit=1000, order=None):
         query = self._where_calc(args)
         self._apply_ir_rules(query, 'read')
         from_clause, where_clause, where_clause_params = query.get_sql()
 
+        order_by = self._generate_order_by(order, query)
+
         where_str = where_clause and (" WHERE %s" % where_clause) or ''
 
         limit_str = limit and ' limit %d' % limit or ''
-        query_str = 'SELECT "%s".measure_torque FROM ' % self._table + from_clause + where_str + limit_str
+        query_str = 'SELECT "%s".measure_torque FROM ' % self._table + from_clause + where_str + order_by + limit_str
         self._cr.execute(query_str, where_clause_params)
         res = self._cr.fetchall()
 
@@ -393,15 +395,17 @@ class OperationResult(models.HyperModel):
         return _uniquify_list([x[0] for x in res])
 
     @api.multi
-    def get_angles(self, args, limit=1000):
+    def get_angles(self, args, limit=1000, order=None):
         query = self._where_calc(args)
         self._apply_ir_rules(query, 'read')
         from_clause, where_clause, where_clause_params = query.get_sql()
 
         where_str = where_clause and (" WHERE %s" % where_clause) or ''
 
+        order_by = self._generate_order_by(order, query)
+
         limit_str = limit and ' limit %d' % limit or ''
-        query_str = 'SELECT "%s".measure_degree FROM ' % self._table + from_clause + where_str + limit_str
+        query_str = 'SELECT "%s".measure_degree FROM ' % self._table + from_clause + where_str + order_by + limit_str
         self._cr.execute(query_str, where_clause_params)
         res = self._cr.fetchall()
 

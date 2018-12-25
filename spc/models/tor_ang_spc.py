@@ -13,6 +13,8 @@ from dateutil.relativedelta import relativedelta
 import datetime
 import pytz
 
+from ..utils import spc
+
 DEFAULT_LIMIT = 5000
 MIN_LIMIT = 1000
 
@@ -37,6 +39,10 @@ class TorAngSPCReport(models.TransientModel):
 
     need_render = fields.Boolean(default=False)
 
+    usl = fields.Float(string='规格上限(USL)')
+
+    lsl = fields.Float(string='规格下限(LSL)')
+
     cmk = fields.Float(string='CMK', store=False, compute='_compute_dist')
     cpk = fields.Float(string='CPK', store=False, compute='_compute_dist')
 
@@ -49,9 +55,7 @@ class TorAngSPCReport(models.TransientModel):
                 return
             mean = np.mean(data)
             std = np.std(data)
-            data_min = np.min(data)
-            data_max = np.max(data)
-            self.normal_dist, self.cmk, self.cpk = self._get_normal_dist(data=data, mean=mean, std=std, gMin=data_min, gMax=data_max)
+            self.normal_dist, self.cmk, self.cpk = self._get_normal_dist(data=data, mean=mean, std=std, lsl=self.lsl, usl=self.usl)
             scale_parameter = self.env['ir.config_parameter'].sudo().get_param('weibull.scale', default=1.0)
             shape_parameter = self.env['ir.config_parameter'].sudo().get_param('weibull.shape', default=5.0)
             self.weibull_dist = self._get_weibull_dist(len(data), mean=mean, std=std,
@@ -111,13 +115,8 @@ class TorAngSPCReport(models.TransientModel):
         pyecharts.configure(force_js_embed=True)
         return line.render_embed()
 
-    def _get_normal_dist(self, data, mean=None, std=None, gMin=None, gMax=None):
-        T = gMax - gMin
-        U = (gMax + gMin) / 2
-        CP = T / 6 / std
-        CPK = min((gMax - mean) / 3 / std, (mean - gMin) / 3 / std)
-        miu = abs(T / 2 - mean)
-        CMK = (T - 2 * miu) / 6 / std
+    def _get_normal_dist(self, data, mean=None, std=None, lsl=None, usl=None):
+        CPK, CMK = spc.get_cpk_cmk(data, lsl, usl)
         STEP = 0.25 * std
         length = len(data)
         norm_data = norm(mean, std)
@@ -198,9 +197,8 @@ class TorAngSPCReport(models.TransientModel):
     #     return result
 
     def _get_data(self):
-        domain = [('measure_result', 'in', ['ok', 'nok'])]
-        fields = ['measure_torque']
-        order = 'measure_torque desc'
+        domain = [('measure_result', '=', 'ok')]
+        order = 'control_date desc'
         if self.query_date_from:
             domain += [('control_date', '>=', self.query_date_from)]
         if self.query_date_to:
@@ -212,10 +210,10 @@ class TorAngSPCReport(models.TransientModel):
         if self.assembly_line_id:
             domain += [('assembly_line_id', '=', self.assembly_line_id.id)]
         if self.spc_target == 'torque':
-            _data = self.env['operation.result'].sudo().get_torques(domain, limit=self.limit)
+            _data = self.env['operation.result'].sudo().get_torques(domain, limit=self.limit, order=order)
             data = {'measure_torque': _data}
         else:
-            _data = self.env['operation.result'].sudo().get_angles(domain, limit=self.limit)
+            _data = self.env['operation.result'].sudo().get_angles(domain, limit=self.limit, order=order)
             data = {'measure_degree': _data}
         length = len(_data)
         if length < self.limit and length < 100:
