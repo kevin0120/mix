@@ -284,19 +284,26 @@ func (p *Service) HandleProcess() {
 				err := xml.Unmarshal([]byte(msg), &cvi3Result)
 				if err != nil {
 					p.diag.Error(fmt.Sprint("HandlerMsg err:", msg), err)
-					return
+				} else {
+
+					// 结果数据
+					controllerResult := controller.ControllerResult{}
+					XML2Result(&cvi3Result, &controllerResult)
+					controllerResult.NeedPushHmi = true
+
+					if strings.Contains(msg, XML_CURVE_KEY) {
+
+						// 曲线数据
+						controllerCurve := minio.ControllerCurve{}
+						XML2Curve(&cvi3Result, &controllerCurve)
+
+						p.Parent.Handle(&controllerResult, &controllerCurve)
+					} else {
+
+						p.Parent.Handle(&controllerResult, nil)
+					}
 				}
 
-				// 结果数据
-				controllerResult := controller.ControllerResult{}
-				XML2Result(&cvi3Result, &controllerResult)
-				controllerResult.NeedPushHmi = true
-
-				// 曲线数据
-				controllerCurve := minio.ControllerCurve{}
-				XML2Curve(&cvi3Result, &controllerCurve)
-
-				p.Parent.Handle(&controllerResult, &controllerCurve)
 			}
 
 			// 处理事件
@@ -307,7 +314,6 @@ func (p *Service) HandleProcess() {
 				err := xml.Unmarshal([]byte(msg), &evt)
 				if err != nil {
 					p.diag.Error(fmt.Sprint("HandlerMsg err:", msg), err)
-					return
 				}
 
 				// 拧紧枪状态变化

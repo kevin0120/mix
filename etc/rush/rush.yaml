@@ -25,7 +25,7 @@ httpd:
     - 'OPTIONS'
 
 minio:
-  url: 127.0.0.1:9000
+  url: 192.168.1.3:9000
   bucket: curves
   access: minio
   secret: minio123
@@ -70,7 +70,7 @@ websocket:
   read_buf_size: 4096
   write_buf_size: 4096
 storage:
-  db_url: 127.0.0.1:5432
+  db_url: 192.168.1.152:5432
   db_name: rush
   db_user: admin
   db_pwd: admin
@@ -82,7 +82,7 @@ audi/vw:
   max_connection: 1024
   read_buf: 65535
   req_time_out: 300ms
-  keep_alive_period: 7s
+  keep_alive_period: 5s
 
 openprotocol:
   keep_alive_period: 10s
@@ -104,7 +104,7 @@ controller_service:
 #      port: 4546
 #      channel: 1
 
-  - serial_no: 0001
+  - serial_no: 0002
     protocol: Audi/VW
     remote_ip: 192.168.1.101
     port: 4700

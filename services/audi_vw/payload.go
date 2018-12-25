@@ -39,7 +39,8 @@ const (
 	// RSD
 	header_rsd = "0000"
 
-	XML_RESULT_KEY = "<CUR>"
+	XML_CURVE_KEY  = "<CUR>"
+	XML_RESULT_KEY = "<MAR>"
 	XML_EVENT_KEY  = "<EVT>"
 	XML_NUT_KEY    = "<NUT"
 	XML_STATUS_KEY = "<RDY>"
