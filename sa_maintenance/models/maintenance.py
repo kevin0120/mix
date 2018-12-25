@@ -4,7 +4,7 @@ from odoo import models, fields, api, _
 import odoo.addons.decimal_precision as dp
 from odoo.exceptions import UserError
 from itertools import groupby
-import json
+import uuid
 
 class MaintenanceCheckPointCategory(models.Model):
     _name = 'maintenance.cp.category'
@@ -151,6 +151,11 @@ class MaintenanceCheckPointAction(models.Model):
 class MaintenanceRequest(models.Model):
     _inherit = 'maintenance.request'
 
+    def _default_access_token(self):
+        return uuid.uuid4().hex
+
+    access_token = fields.Char('Invitation Token', default=_default_access_token)
+
     check_point_action_ids = fields.One2many('maintenance.cp.action', 'request_id')
 
     @api.model
@@ -174,6 +179,19 @@ class MaintenanceRequest(models.Model):
             if len(actions) > 0:
                 self.env['maintenance.cp.action'].sudo().bulk_create(actions)
 
+            template_id = self.env.ref('sa_maintenance.new_maintenance_request_email_template', False)
+            if template_id:
+                rendering_context = dict(self._context)
+                rendering_context.update({
+                    'dbname': self._cr.dbname,
+                    'base_url': self.env['ir.config_parameter'].sudo().get_param('web.base.url',
+                                                                                 default='http://localhost:8069')
+                })
+                template_id = template_id.with_context(rendering_context)
+                mail_id = template_id.send_mail(ret.id)  # 先不要发送,之后调用send方法发送邮件
+                # current_mail = self.env['mail.mail'].browse(mail_id)
+                self.env["celery.task"].call_task("mail.mail", "send_async_by_id", mail_id=mail_id)
+                # current_mail.send()  # 发送邮件
         return ret
 
 
