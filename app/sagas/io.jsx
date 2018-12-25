@@ -266,6 +266,9 @@ function* senderReceiver() {
   } catch (err) {
     console.log(err);
   } finally {
+    yield cancel(io.senderReceiver);
+    io.senderReceiver = null;
+    io.client.destroy();
     console.log('senderReceiver finished');
   }
 }
@@ -304,11 +307,9 @@ function* keyMonitorTask() {
       io.currentKeyStatus = newKeyStatus;
     } else if (error) {
       yield put(
-        setNewNotification('error', error ? error.toString() : 'unknown error')
+        setNewNotification('error', 'readDiscreteInputs failed')
       );
-      yield cancel(io.senderReceiver);
-      io.senderReceiver = null;
-      io.client.destroy();
+
     }
   } finally {
     if (yield cancelled()) {

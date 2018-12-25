@@ -69,6 +69,7 @@ const styles = {
 const mapStateToProps = (state, ownProps) => ({
   masterpcUrl: state.connections.masterpc,
   hmiSn: state.setting.page.odooConnection.hmiSn.value,
+  controllerMode: state.setting.operationSettings.controllerMode,
   ...ownProps
 });
 
@@ -84,7 +85,7 @@ function requestData(masterpcUrl, hmiSN) {
   return defaultClient.get(url, {
     params: {
       hmi_sn: hmiSN,
-      filters: 'vin,job_id,batch,torque,angle,spent,timestamp,vehicle_type',
+      filters: 'vin,job_id,pset_id,batch,torque,angle,spent,timestamp,vehicle_type',
       limit: 500
     }
   });
@@ -120,6 +121,7 @@ class Result extends React.Component {
               angle: item.angle,
               spent: item.spent,
               job_id: item.job_id,
+              pset_id: item.pset_id,
               batch: item.batch,
               vehicle_type: item.vehicle_type,
               actions: (
@@ -160,8 +162,13 @@ class Result extends React.Component {
   };
 
   render() {
-    const { classes } = this.props;
+    const { classes, controllerMode } = this.props;
     const { data, isShow, selectObj } = this.state;
+
+    let pgAccessor = 'job_id';
+    if (controllerMode === 'pset') {
+      pgAccessor = 'pset_id';
+    }
 
     const Msg = selectObj ? (
       <div>
@@ -289,7 +296,7 @@ class Result extends React.Component {
                         },
                         {
                           Header: '程序号',
-                          accessor: 'job_id',
+                          accessor: pgAccessor,
                           sortable: false,
                           filterMethod: (filter, row) => {
                             return lodash.includes(
@@ -397,7 +404,8 @@ class Result extends React.Component {
 Result.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   masterpcUrl: PropTypes.string.isRequired,
-  hmiSn: PropTypes.string.isRequired
+  hmiSn: PropTypes.string.isRequired,
+  controllerMode: PropTypes.string.isRequired,
 };
 
 const ConnResult = connect(
