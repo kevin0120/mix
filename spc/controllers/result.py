@@ -37,7 +37,8 @@ def _post_aiis_result_package(aiis_urls, results):
                 'control_date': str_time_to_rfc3339(result.control_date),
                 'measure_result': result.measure_result.upper(),
                 'measure_torque': result.measure_torque,
-                'measure_degree': result.measure_degree
+                'measure_degree': result.measure_degree,
+                'model': result.production_id.product_id.vehicle_type_code
             }
             try:
                 u = urljoin(url, AIIS_RESULT_API)
