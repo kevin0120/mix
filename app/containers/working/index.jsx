@@ -860,7 +860,7 @@ class ConnectedWorking extends React.Component {
                       )
                     }
                     shouldCounterReady={() =>
-                      operations.operationStatus === OPERATION_STATUS.READY
+                      operations.operationStatus === OPERATION_STATUS.PREDOING
                     }
                     // onFinish={() => this.props.switch2Timeout()}
                     gridClassName={classes.progressWrap}

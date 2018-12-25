@@ -33,28 +33,25 @@ class ProgressBar extends React.Component {
       shouldCounterStop
     } = nextProps;
     const { counterState } = this.state;
-    // console.log('will receive props');
     if (
       shouldCounterReady &&
       shouldCounterReady() &&
       counterState !== this.counterStates.ready &&
-      counterState !== this.counterStates.start
+      counterState !== this.counterStates.ticking
     ) {
       this.readyCounter(nextProps);
     }
     if (
       shouldCounterStart &&
       shouldCounterStart() &&
-      counterState == this.counterStates.ready
+      counterState === this.counterStates.ready
     ) {
-      // console.log('should start');
-      console.log(nextProps);
       this.startCounter(nextProps);
     }
     if (
       shouldCounterStop &&
       shouldCounterStop() &&
-      counterState !== this.counterStates.stop
+      counterState === this.counterStates.ticking
     ) {
       this.stopCounter(nextProps);
     }
@@ -82,7 +79,6 @@ class ProgressBar extends React.Component {
   };
 
   stopCounter = () => {
-    console.log('counter stop');
     this.setState(
       {
         counterState: this.counterStates.stop,
@@ -97,7 +93,6 @@ class ProgressBar extends React.Component {
 
   finishCounter = () => {
     const { onFinish } = this.props;
-    console.log('counter finish');
     this.setState(
       {
         counterState: this.counterStates.finish
@@ -111,18 +106,14 @@ class ProgressBar extends React.Component {
   };
 
   startCounter = props => {
-    console.log('counter start');
-
     this.setState(
       {
         counterState: this.counterStates.ticking,
         timeRemaining: props.time
       },
       () => {
-        console.log('set state:', this.state);
         this.timer = setInterval(() => {
           const { timeRemaining } = this.state;
-          // console.log(timeRemaining);
           if (timeRemaining <= 0) {
             this.finishCounter();
           } else {
