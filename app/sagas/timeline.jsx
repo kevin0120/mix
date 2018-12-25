@@ -3,11 +3,11 @@ import CheckCircle from '@material-ui/icons/CheckCircle';
 import Close from '@material-ui/icons/Close';
 import InfoRounded from '@material-ui/icons/InfoRounded';
 
-const dayjs = require('dayjs');
-
 import { put } from 'redux-saga/effects';
 
 import { TIMELINE_STORY } from '../actions/actionTypes';
+
+const dayjs = require('dayjs');
 
 export const STORY_TYPE = {
   INFO: 'info',

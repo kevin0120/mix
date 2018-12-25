@@ -81,6 +81,8 @@ export default function operations(
       return setSource(state, action.source);
     case OPERATION.OPERATION.FETCH_OK:
       return newOperation(state, action.mode, action.data);
+    case OPERATION.OPERATION.FETCH_FAIL:
+      return operationSwitchReady(state);
     case OPERATION.STARTED:
       return operationStarted(state);
     case OPERATION.RESULT.OK:
@@ -141,6 +143,20 @@ function newOperation(state, mode, data) {
     workSheet: data.work_sheet,
     results: data.results,
     lnr: data.lnr
+  };
+}
+
+function operationSwitchReady(state) {
+  setLedStatusReady();
+
+  return {
+    ...state,
+    operationStatus: OPERATION_STATUS.READY,
+    carID: '',
+    carType: '',
+    lnr: '',
+    maxOpTimes: 0,
+    results: [],
   };
 }
 

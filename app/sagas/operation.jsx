@@ -16,6 +16,7 @@ import {
   fetchOngoingOperationOK,
   cleanOngoingOperation
 } from '../actions/ongoingOperation';
+import { Error } from "../logger";
 
 // const lodash = require('lodash');
 
@@ -172,18 +173,16 @@ export function* getOperation(job) {
         // 作业模式
 
         const { carType } = state.operations;
-        try {
-          resp = yield call(
-            fetchRoutingWorkcenter,
-            rushUrl,
-            workcenterCode,
-            carType,
-            null
-          );
-          if (resp.status === 200) {
-            fetchOK = true;
-          }
-        } catch (e) {}
+        resp = yield call(
+          fetchRoutingWorkcenter,
+          rushUrl,
+          workcenterCode,
+          carType,
+          null
+        );
+        if (resp.status === 200) {
+          fetchOK = true;
+        }
       } else {
         // 工单模式
 
@@ -204,6 +203,10 @@ export function* getOperation(job) {
               yield put(openShutdown('verify', resp.data));
               return;
             }
+          }else {
+            Error(`获取工单失败:${  e.message}`);
+            yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
+            yield call(clearStories);
           }
         }
       }
@@ -216,11 +219,16 @@ export function* getOperation(job) {
       yield call(startOperation, resp.data);
     } else {
       // 定位作业失败
+      Error('获取工单失败');
       yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
+      yield call(clearStories);
       // yield put({ type: OPERATION.RESET });
     }
   } catch (e) {
     console.log(e);
+    Error(`获取工单失败:${  e.message}`);
+    yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
+    yield call(clearStories);
   }
 }
 
