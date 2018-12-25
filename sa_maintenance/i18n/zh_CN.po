@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0+e-20171123\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-13 05:34+0000\n"
-"PO-Revision-Date: 2018-12-13 05:34+0000\n"
+"POT-Creation-Date: 2018-12-25 05:01+0000\n"
+"PO-Revision-Date: 2018-12-25 05:01+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -64,7 +64,7 @@ msgstr "检查作业"
 #. module: sa_maintenance
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_equipment_check_point_ids
 msgid "Check point ids"
-msgstr "Check point ids"
+msgstr "检测点"
 
 #. module: sa_maintenance
 #: model:ir.ui.view,arch_db:sa_maintenance.sa_maintenance_equipment_view_form_inherit_hr
@@ -131,7 +131,7 @@ msgid "Equipment Dashboard"
 msgstr "设备看板"
 
 #. module: sa_maintenance
-#: model:ir.ui.view,arch_db:sa_maintenance.report_request_document
+#: model:ir.ui.view,arch_db:sa_maintenance.sheet_request_document
 #: selection:maintenance.cp.action,measure_success:0
 msgid "Fail"
 msgstr "失败"
@@ -226,7 +226,7 @@ msgid "Normal"
 msgstr "正常"
 
 #. module: sa_maintenance
-#: model:ir.ui.view,arch_db:sa_maintenance.report_request_document
+#: model:ir.ui.view,arch_db:sa_maintenance.sheet_request_document
 #: selection:maintenance.cp.action,measure_success:0
 msgid "Pass"
 msgstr "通过"

@@ -6,6 +6,9 @@
             <field name="model">quality.point</field>
             <field name="inherit_id" ref="quality.quality_point_view_tree"/>
             <field name="arch" type="xml">
+                <xpath expr="//tree" position="attributes">
+                    <attribute name="create">false</attribute>
+                </xpath>
                 <field name="picking_type_id" position="replace">
                     <field name="operation_id" />
                     <field name="bom_line_id" groups="base.group_no_one"/>
@@ -23,6 +26,9 @@
             <field name="model">quality.point</field>
             <field name="inherit_id" ref="quality.quality_point_view_form"/>
             <field name="arch" type="xml">
+                <xpath expr="//form" position="attributes">
+                    <attribute name="create">false</attribute>
+                </xpath>
                 <field name="workcenter_id" position="after">
                     <field name="operation_id_domain" invisible="1"/>
                     <field name="operation_id" domain="operation_id_domain" attrs="{'invisible': [('workcenter_id', '=', False)],'required': [('workcenter_id', '!=', False)]}"/>

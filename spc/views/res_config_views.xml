@@ -95,7 +95,7 @@
 
         <menuitem id="menu_spc_settings"
               name="Configuration"
-              groups="spc.group_spc_user"
+              groups="base.group_system"
               parent="menu_spc_scope_root" sequence="50"/>
 
 

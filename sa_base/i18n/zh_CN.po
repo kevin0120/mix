@@ -6,14 +6,26 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0+e-20171123\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-08 04:31+0000\n"
-"PO-Revision-Date: 2018-12-08 04:31+0000\n"
+"POT-Creation-Date: 2018-12-25 04:53+0000\n"
+"PO-Revision-Date: 2018-12-25 04:53+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
+
+#. module: sa_base
+#: code:addons/sa_base/models/point.py:112
+#, python-format
+msgid "#%s operation point has been delete"
+msgstr "#%s operation point has been delete"
+
+#. module: sa_base
+#: code:addons/sa_base/models/point.py:136
+#, python-format
+msgid "#%s operation point has been modified"
+msgstr "#%s operation point has been modified"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_quality_check_view_form_small_inherit
@@ -122,14 +134,12 @@ msgstr "<strong>工作中心</strong>"
 
 #. module: sa_base
 #: code:addons/sa_base/models/product.py:30
-#: sql_constraint:product.product:0
 #, python-format
 msgid "A Screw Code can only be assigned to one SCREW !"
 msgstr "同样的螺栓编号只能分配给一种螺栓！"
 
 #. module: sa_base
 #: code:addons/sa_base/models/product.py:31
-#: sql_constraint:product.product:0
 #, python-format
 msgid "A Vehicle Code can only be assigned to one Vehicle !"
 msgstr "同样的车型代码只能分配给一种车型！"
@@ -196,7 +206,7 @@ msgstr "自动创建质量控制点"
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_product_normal_form_view
 msgid "BOM"
-msgstr "物料清单"
+msgstr "BOM"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.report_mrporder_pin
@@ -243,8 +253,8 @@ msgstr "BOM行ID"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_routing_form_view
-msgid "Budget Items"
-msgstr "***Budget Items"
+msgid "Operation Items"
+msgstr "生产作业"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.view_sa_config
@@ -252,9 +262,9 @@ msgid "Cancel"
 msgstr "取消"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_category_name_4056
+#: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_category_name_4055
 msgid "Category name"
-msgstr "Category name"
+msgstr "类别名称"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_child_ids
@@ -382,7 +392,6 @@ msgstr "控制器"
 #. module: sa_base
 #: model:ir.actions.act_window,name:sa_base.sa_job_form_action
 #: model:ir.model,name:sa_base.model_controller_job
-#: model:ir.ui.menu,name:sa_base.sa_menu_job_action
 #: model:ir.ui.view,arch_db:sa_base.sa_job_form_view
 msgid "Controller Job"
 msgstr "控制器装配过程"
@@ -390,6 +399,7 @@ msgstr "控制器装配过程"
 #. module: sa_base
 #: model:ir.actions.act_window,name:sa_base.sa_program_form_action
 #: model:ir.model,name:sa_base.model_controller_program
+#: model:ir.ui.menu,name:sa_base.sa_menu_program_action
 #: model:ir.ui.view,arch_db:sa_base.sa_program_form_view
 msgid "Controller Program"
 msgstr "控制器程序"
@@ -498,6 +508,12 @@ msgid "Display Name"
 msgstr "显示名称"
 
 #. module: sa_base
+#: model:ir.actions.server,name:sa_base.operation_download_action
+#: model:ir.ui.view,arch_db:sa_base.sa_mrp_routing_workcenter_form_view
+msgid "Download Operation"
+msgstr "Download Operation"
+
+#. module: sa_base
 #: model:ir.model,name:sa_base.model_maintenance_equipment
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_connection_equipment_id
 #: model:ir.ui.view,arch_db:sa_base.sa_equipment_connection_search
@@ -589,7 +605,7 @@ msgstr "拧紧作业组ID"
 #. module: sa_base
 #: model:maintenance.equipment.category,name:sa_base.equipment_Gun
 msgid "Gun"
-msgstr "拧紧枪"
+msgstr "Gun"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_bom_line_gun_id_domain
@@ -606,7 +622,7 @@ msgstr "Gun ids domain"
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_workcenter_form_view
 #: model:maintenance.equipment.category,name:sa_base.equipment_hmi
 msgid "HMI"
-msgstr "HMI"
+msgstr "人机交互"
 
 #. module: sa_base
 #: selection:maintenance.equipment.connection,protocol:0
@@ -635,7 +651,7 @@ msgstr "ID"
 #. module: sa_base
 #: model:maintenance.equipment.category,name:sa_base.equipment_IO
 msgid "IO"
-msgstr "IO"
+msgstr "输入/输出模块"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_connection_ip
@@ -736,10 +752,15 @@ msgid "Loosening"
 msgstr "松脱"
 
 #. module: sa_base
+#: model:ir.ui.view,arch_db:sa_base.sa_product_normal_form_view
+msgid "Manufacturing"
+msgstr "制造"
+
+#. module: sa_base
 #: model:ir.model,name:sa_base.model_mrp_production
 #: model:ir.ui.view,arch_db:sa_base.view_sa_config
 msgid "Manufacturing Order"
-msgstr "制造订单"
+msgstr "生产订单"
 
 #. module: sa_base
 #: model:ir.model,name:sa_base.model_mrp_routing_group
@@ -752,12 +773,12 @@ msgstr "工艺路线组"
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_workcenter_form_view
 #: model:maintenance.equipment.category,name:sa_base.equipment_MasterPC
 msgid "MasterPC"
-msgstr "MasterPC"
+msgstr "工位控制器(MasterPC)"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_maintenance_equipment_view_search_inherit
 msgid "Masterpc"
-msgstr "Masterpc"
+msgstr "工位控制器(MasterPC)"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_workcenter_max_op_time
@@ -829,14 +850,13 @@ msgid "Odoo uses these BoMs to automatically propose manufacturing\n"
 msgstr "根据补货规则Odoo用BOM自动的生产生产订单"
 
 #. module: sa_base
-#: code:addons/sa_base/models/mrp_routing.py:117
+#: code:addons/sa_base/models/mrp_routing.py:217
 #, python-format
 msgid "Only SuperUser can delete Job ID"
 msgstr "Only SuperUser can delete Job ID"
 
 #. module: sa_base
-#: code:addons/sa_base/models/mrp_routing.py:150
-#: code:addons/sa_base/models/point.py:101
+#: code:addons/sa_base/models/mrp_routing.py:250
 #, python-format
 msgid "Only SuperUser can delete program"
 msgstr "Only SuperUser can delete program"
@@ -1094,7 +1114,7 @@ msgstr "数量"
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_workcenter_form_view
 #: model:maintenance.equipment.category,name:sa_base.equipment_RFID
 msgid "RFID"
-msgstr "RFID"
+msgstr "无线射频识别(RFID)"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_bom_form_view
@@ -1172,8 +1192,14 @@ msgstr "工艺路线组名称必须是唯一的!"
 
 #. module: sa_base
 #: model:ir.actions.act_window,name:sa_base.sa_mrp_routing_group_action
+#: model:ir.ui.menu,name:sa_base.menu_mrp_routing_group_action
 msgid "Routing Groups"
 msgstr "工艺路线组"
+
+#. module: sa_base
+#: model:ir.model.fields,field_description:sa_base.field_mrp_routing_workcenter_routing_tracking_count
+msgid "Routing Modification"
+msgstr "Routing Modification"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_routing_form_view
@@ -1292,7 +1318,7 @@ msgstr "套筒"
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_product_normal_form_view
 msgid "Specification"
-msgstr "规格书"
+msgstr "规格"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_controller_program_strategy
@@ -1344,12 +1370,12 @@ msgstr "Time tightening"
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_quality_check_view_form_small_inherit
 msgid "Torque Measure"
-msgstr "Torque Measure"
+msgstr "扭矩测量值"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_quality_point_view_form_inherit_mrp
 msgid "Torque Tolerance"
-msgstr "Torque Tolerance"
+msgstr "扭矩公差"
 
 #. module: sa_base
 #: selection:controller.program,strategy:0
@@ -1405,15 +1431,15 @@ msgstr "VIN"
 
 #. module: sa_base
 #: selection:product.template,sa_type:0
-msgid "Vechile"
-msgstr "车辆"
+msgid "Vehcile"
+msgstr "车型"
 
 #. module: sa_base
 #: model:ir.actions.act_window,name:sa_base.product_product_action_vehicle
 #: model:ir.ui.menu,name:sa_base.menu_mrp_vehicle_form
 #: model:ir.ui.view,arch_db:sa_base.product_search_form_view_sa
 msgid "Vehicle"
-msgstr "车辆"
+msgstr "车型"
 
 #. module: sa_base
 #: model:ir.actions.report.xml,name:sa_base.report_vehicle_labels
@@ -1542,7 +1568,7 @@ msgstr "所有你要卖的东西都要定义为产品，不管是实体，消耗
 
 #. module: sa_base
 #: code:addons/sa_base/models/point.py:43
-#: code:addons/sa_base/models/point.py:82
+#: code:addons/sa_base/models/point.py:93
 #, python-format
 msgid "[%s] %s"
 msgstr "[%s] %s"
@@ -1586,7 +1612,7 @@ msgstr "sa.config.settings"
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.product_search_form_view_sa
 msgid "sa_type"
-msgstr "类型"
+msgstr "sa_type"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_group_sequence

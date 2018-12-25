@@ -46,6 +46,19 @@ class TorAngSPCReport(models.TransientModel):
     cmk = fields.Float(string='CMK', store=False, compute='_compute_dist')
     cpk = fields.Float(string='CPK', store=False, compute='_compute_dist')
 
+    @api.onchange('screw_id', 'spc_target')
+    def _onchange_usl_lsl(self):
+        self.ensure_one()
+        qcp_id = self.env['quality.point'].sudo().search([('bom_line_id.product_id', '=', self.screw_id.id)], limit=1)
+        if not qcp_id:
+            return
+        if self.spc_target == 'torque':
+            self.usl = qcp_id.tolerance_max
+            self.lsl = qcp_id.tolerance_min
+        else:
+            self.usl = qcp_id.tolerance_max_degree
+            self.lsl = qcp_id.tolerance_min_degree
+
     @api.depends('need_render')
     def _compute_dist(self):
         if self.need_render:

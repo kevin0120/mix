@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0+e-20171123\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-07 02:06+0000\n"
-"PO-Revision-Date: 2018-12-07 02:06+0000\n"
+"POT-Creation-Date: 2018-12-25 05:02+0000\n"
+"PO-Revision-Date: 2018-12-25 05:02+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -62,6 +62,7 @@ msgstr "角度拧紧(AW)"
 
 #. module: spc
 #: model:ir.ui.view,arch_db:spc.view_aiis_config_settings
+#: model:ir.ui.view,arch_db:spc.view_smart_config_settings
 #: model:ir.ui.view,arch_db:spc.view_spc_config_settings
 msgid "Apply"
 msgstr "应用"
@@ -75,17 +76,17 @@ msgstr "组装生产线"
 #. module: spc
 #: model:ir.ui.view,arch_db:spc.operation_result_view_tree
 msgid "Avg. Degree"
-msgstr "Avg. Degree"
+msgstr "角度(平均)"
 
 #. module: spc
 #: model:ir.ui.view,arch_db:spc.operation_result_view_tree
 msgid "Avg. Operation Duration"
-msgstr "Avg. Operation Duration"
+msgstr "作业时长(平均)"
 
 #. module: spc
 #: model:ir.ui.view,arch_db:spc.operation_result_view_tree
 msgid "Avg. Torque"
-msgstr "Avg. Torque"
+msgstr "扭矩(平均)"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_batch
@@ -93,8 +94,19 @@ msgid "Batch"
 msgstr "批次"
 
 #. module: spc
+#: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_cmk
+msgid "CMK"
+msgstr "CMK"
+
+#. module: spc
+#: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_cpk
+msgid "CPK"
+msgstr "CPK"
+
+#. module: spc
 #: model:ir.ui.view,arch_db:spc.view_aiis_config_settings
 #: model:ir.ui.view,arch_db:spc.view_report_tighting_detail
+#: model:ir.ui.view,arch_db:spc.view_smart_config_settings
 #: model:ir.ui.view,arch_db:spc.view_spc_config_settings
 msgid "Cancel"
 msgstr "取消"
@@ -135,6 +147,7 @@ msgstr "控制点"
 #: model:ir.model.fields,field_description:spc.field_spc_config_settings_create_uid
 #: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_create_uid
 #: model:ir.model.fields,field_description:spc.field_tight_result_report_create_uid
+#: model:ir.model.fields,field_description:spc.field_wo_config_settings_create_uid
 msgid "Created by"
 msgstr "创建人"
 
@@ -143,6 +156,7 @@ msgstr "创建人"
 #: model:ir.model.fields,field_description:spc.field_spc_config_settings_create_date
 #: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_create_date
 #: model:ir.model.fields,field_description:spc.field_tight_result_report_create_date
+#: model:ir.model.fields,field_description:spc.field_wo_config_settings_create_date
 msgid "Created on"
 msgstr "创建时间"
 
@@ -177,11 +191,13 @@ msgstr "角度"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_aiis_config_settings_display_name
+#: model:ir.model.fields,field_description:spc.field_report_spc_report_result_tighting_display_name
 #: model:ir.model.fields,field_description:spc.field_result_push_display_name
 #: model:ir.model.fields,field_description:spc.field_result_sync_display_name
 #: model:ir.model.fields,field_description:spc.field_spc_config_settings_display_name
 #: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_display_name
 #: model:ir.model.fields,field_description:spc.field_tight_result_report_display_name
+#: model:ir.model.fields,field_description:spc.field_wo_config_settings_display_name
 #: model:ir.model.fields,field_description:spc.field_workorder_push_display_name
 msgid "Display Name"
 msgstr "显示名称"
@@ -264,7 +280,7 @@ msgstr "单枪分析"
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_mrp_workorder_sent
 msgid "Have sent to Masterpc"
-msgstr "已发送给MasterPC"
+msgstr "已发送给工位控制器(MasterPC)"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_sent
@@ -274,11 +290,13 @@ msgstr "已被发送给外部系统(FIS)"
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_aiis_config_settings_id
 #: model:ir.model.fields,field_description:spc.field_operation_result_id
+#: model:ir.model.fields,field_description:spc.field_report_spc_report_result_tighting_id
 #: model:ir.model.fields,field_description:spc.field_result_push_id
 #: model:ir.model.fields,field_description:spc.field_result_sync_id
 #: model:ir.model.fields,field_description:spc.field_spc_config_settings_id
 #: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_id
 #: model:ir.model.fields,field_description:spc.field_tight_result_report_id
+#: model:ir.model.fields,field_description:spc.field_wo_config_settings_id
 #: model:ir.model.fields,field_description:spc.field_workorder_push_id
 msgid "ID"
 msgstr "ID"
@@ -310,11 +328,13 @@ msgstr "数据丢失"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_aiis_config_settings___last_update
+#: model:ir.model.fields,field_description:spc.field_report_spc_report_result_tighting___last_update
 #: model:ir.model.fields,field_description:spc.field_result_push___last_update
 #: model:ir.model.fields,field_description:spc.field_result_sync___last_update
 #: model:ir.model.fields,field_description:spc.field_spc_config_settings___last_update
 #: model:ir.model.fields,field_description:spc.field_ta_spc_wizard___last_update
 #: model:ir.model.fields,field_description:spc.field_tight_result_report___last_update
+#: model:ir.model.fields,field_description:spc.field_wo_config_settings___last_update
 #: model:ir.model.fields,field_description:spc.field_workorder_push___last_update
 msgid "Last Modified on"
 msgstr "最后修改日"
@@ -324,6 +344,7 @@ msgstr "最后修改日"
 #: model:ir.model.fields,field_description:spc.field_spc_config_settings_write_uid
 #: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_write_uid
 #: model:ir.model.fields,field_description:spc.field_tight_result_report_write_uid
+#: model:ir.model.fields,field_description:spc.field_wo_config_settings_write_uid
 msgid "Last Updated by"
 msgstr "最后更新人"
 
@@ -332,6 +353,7 @@ msgstr "最后更新人"
 #: model:ir.model.fields,field_description:spc.field_spc_config_settings_write_date
 #: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_write_date
 #: model:ir.model.fields,field_description:spc.field_tight_result_report_write_date
+#: model:ir.model.fields,field_description:spc.field_wo_config_settings_write_date
 msgid "Last Updated on"
 msgstr "最后更新时间"
 
@@ -546,6 +568,11 @@ msgid "Pset strategy"
 msgstr "Pset策略"
 
 #. module: spc
+#: model:ir.model.fields,field_description:spc.field_wo_config_settings_push_wo_number
+msgid "Push WorkOrder Count "
+msgstr "Push WorkOrder Count "
+
+#. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_qcp_id
 msgid "Qcp id"
 msgstr "Qcp id"
@@ -565,6 +592,11 @@ msgstr "质量控制点"
 #: model:ir.model,name:spc.model_quality_point
 msgid "Quality Point"
 msgstr "质量点"
+
+#. module: spc
+#: model:ir.ui.view,arch_db:spc.sa_spc_form_tor_ang
+msgid "Quality SPC"
+msgstr "质量控制(SPC)"
 
 #. module: spc
 #: model:ir.ui.view,arch_db:spc.sa_spc_form_tor_ang
@@ -738,6 +770,26 @@ msgid "Settings SPC"
 msgstr "SPC设置"
 
 #. module: spc
+#: model:ir.ui.view,arch_db:spc.view_smart_config_settings
+msgid "Settings Smart Assembly"
+msgstr "Settings Smart Assembly"
+
+#. module: spc
+#: model:ir.ui.menu,name:spc.menu_sa_param_settings
+msgid "Smart Assembly"
+msgstr "Smart Assembly"
+
+#. module: spc
+#: model:ir.actions.act_window,name:spc.action_smart_settings
+msgid "Smart Assembly Settings"
+msgstr "Smart Assembly Settings"
+
+#. module: spc
+#: model:ir.ui.view,arch_db:spc.sa_spc_form_tor_ang
+msgid "Standard Setting(规格设定)"
+msgstr "规格设定"
+
+#. module: spc
 #: model:ir.model.fields,field_description:spc.field_tight_result_report_date_from
 msgid "Start Date"
 msgstr "开始日期"
@@ -840,7 +892,7 @@ msgstr "用户"
 #: model:ir.model.fields,field_description:spc.field_operation_result_product_id
 #: model:ir.ui.view,arch_db:spc.operation_result_view_search
 msgid "Vehicle"
-msgstr "车辆"
+msgstr "车型"
 
 #. module: spc
 #: model:ir.actions.act_window,name:spc.action_spc_vehicle_form
@@ -895,6 +947,7 @@ msgstr "工作中心"
 
 #. module: spc
 #: model:ir.model,name:spc.model_mrp_workorder
+#: model:ir.ui.view,arch_db:spc.view_smart_config_settings
 msgid "Work Order"
 msgstr "工单"
 
@@ -960,9 +1013,15 @@ msgstr "operation.result"
 
 #. module: spc
 #: model:ir.ui.view,arch_db:spc.view_aiis_config_settings
+#: model:ir.ui.view,arch_db:spc.view_smart_config_settings
 #: model:ir.ui.view,arch_db:spc.view_spc_config_settings
 msgid "or"
 msgstr "或"
+
+#. module: spc
+#: model:ir.model,name:spc.model_report_spc_report_result_tighting
+msgid "report.spc.report_result_tighting"
+msgstr "report.spc.report_result_tighting"
 
 #. module: spc
 #: model:ir.model,name:spc.model_result_push
@@ -990,7 +1049,22 @@ msgid "spc.report_result_tighting"
 msgstr "spc.report_result_tighting"
 
 #. module: spc
+#: model:ir.model,name:spc.model_wo_config_settings
+msgid "wo.config.settings"
+msgstr "wo.config.settings"
+
+#. module: spc
 #: model:ir.model,name:spc.model_workorder_push
 msgid "workorder.push"
 msgstr "workorder.push"
+
+#. module: spc
+#: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_usl
+msgid "规格上限(USL)"
+msgstr "规格上限(USL)"
+
+#. module: spc
+#: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_lsl
+msgid "规格下限(LSL)"
+msgstr "规格下限(LSL)"
 
