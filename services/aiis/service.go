@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type Diagnostic interface {
@@ -55,21 +56,78 @@ type Service struct {
 	SyncGun      SyncGun
 	SN           string
 	rpc          GRPCClient
+
+	updateQueue map[int64]time.Time
+	mtx         sync.Mutex
 }
 
 func NewService(c Config, d Diagnostic, rush_port string) *Service {
 	e, _ := c.index()
 	s := &Service{
-		diag:      d,
-		endpoints: e,
-		rush_port: rush_port,
-		rpc:       GRPCClient{},
+		diag:        d,
+		endpoints:   e,
+		rush_port:   rush_port,
+		rpc:         GRPCClient{},
+		updateQueue: map[int64]time.Time{},
+		mtx:         sync.Mutex{},
 	}
 	s.rpc.RPCRecv = s.OnRPCRecv
 	s.rpc.OnRPCStatus = s.OnRPCStatus
 	s.rpc.srv = s
 	s.configValue.Store(c)
 	return s
+}
+
+func (s *Service) AddToQueue(id int64) error {
+	defer s.mtx.Unlock()
+	s.mtx.Lock()
+
+	_, e := s.updateQueue[id]
+	if e {
+		return errors.New("exist")
+	}
+
+	s.updateQueue[id] = time.Now()
+
+	return nil
+}
+
+func (s *Service) RemoveFromQueue(id int64) error {
+	defer s.mtx.Unlock()
+	s.mtx.Lock()
+
+	_, e := s.updateQueue[id]
+	if !e {
+		return errors.New("not found")
+	}
+
+	delete(s.updateQueue, id)
+
+	return nil
+}
+
+func (s *Service) timeoutCheck() {
+	defer s.mtx.Unlock()
+	s.mtx.Lock()
+
+	wait4Delete := []int64{}
+	for k, v := range s.updateQueue {
+		if time.Since(v) > time.Duration(s.Config().Timeout) {
+			wait4Delete = append(wait4Delete, k)
+		}
+	}
+
+	for _, id := range wait4Delete {
+		delete(s.updateQueue, id)
+	}
+}
+
+func (s *Service) taskUpdateTimeoutCheck() {
+	for {
+		s.timeoutCheck()
+
+		time.Sleep(time.Duration(s.Config().Timeout))
+	}
 }
 
 func (s *Service) Config() Config {
@@ -108,6 +166,7 @@ func (s *Service) Open() error {
 	//
 	//s.ws.Dial(url.String(), nil)
 
+	go s.taskUpdateTimeoutCheck()
 	go s.ResultUploadManager()
 
 	s.rpc.Start()
@@ -139,6 +198,7 @@ func (s *Service) OnRPCRecv(payload string) {
 		json.Unmarshal(str_data, &rp)
 		err := s.DB.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
 		if err == nil {
+			s.RemoveFromQueue(rp.ID)
 			s.diag.Debug(fmt.Sprintf("结果上传成功 ID:%d", rp.ID))
 		} else {
 			s.diag.Error(fmt.Sprintf("结果上传失败 ID:%d", rp.ID), err)
@@ -187,10 +247,15 @@ func (s *Service) PutResult(result_id int64, body interface{}) error {
 		Port:     s.rush_port,
 	}
 
-	str, _ := json.Marshal(result)
-	err := s.rpc.RPCSend(string(str))
+	err := s.AddToQueue(result.Result.ID)
 	if err != nil {
-		fmt.Printf("grpc err: %s\n", err.Error())
+		return nil
+	}
+
+	str, _ := json.Marshal(result)
+	err = s.rpc.RPCSend(string(str))
+	if err != nil {
+		s.diag.Error("grpc err", err)
 	}
 
 	return err

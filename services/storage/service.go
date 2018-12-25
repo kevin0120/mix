@@ -515,7 +515,7 @@ func (s *Service) UpdateResultUserID(id int64, userID int64) error {
 
 func (s *Service) UpdateResult(result *Results) (int64, error) {
 
-	sql := "update `results` set controller_sn = ?, result = ?, has_upload = ?, stage = ?, update_time = ?, pset_define = ?, result_value = ?, count = ?, batch = ?, gun_sn = ?, spent = ? where id = ?"
+	sql := "update `results` set controller_sn = ?, result = ?, has_upload = ?, stage = ?, update_time = ?, pset_define = ?, result_value = ?, count = ?, batch = ?, gun_sn = ?, spent = ?, tightening_id = ? where id = ?"
 	r, err := s.eng.Exec(sql,
 		result.ControllerSN,
 		result.Result,
@@ -528,6 +528,7 @@ func (s *Service) UpdateResult(result *Results) (int64, error) {
 		result.Batch,
 		result.GunSN,
 		result.Spent,
+		result.TighteningID,
 		result.Id)
 
 	if err != nil {
