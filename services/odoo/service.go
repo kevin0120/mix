@@ -346,6 +346,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 
 		results := []storage.Results{}
 		result_count := 0
+		ignore := false
 		for k, consu := range v.Consumes {
 			if len(consu.ResultIDs) == 0 {
 				// 忽略没有结果的消耗品
@@ -371,6 +372,12 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 			r.PSetDefine = ""
 			r.ResultValue = ""
 			r.Count = 1
+			r.UserID = 1
+
+			if len(consu.ResultIDs) == 0 {
+				ignore = true
+				break
+			}
 
 			for _, result_id := range consu.ResultIDs {
 				result_count++
@@ -387,12 +394,15 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 
 		//o.LastResultID = results[len(results)-1].Id
 
-		e := s.DB.InsertWorkorder(&o, &results, true, true, true)
-		if e != nil {
-			finalErr = e
+		if !ignore {
+			e := s.DB.InsertWorkorder(&o, &results, true, true, true)
+			if e != nil {
+				finalErr = e
+			}
+
+			dbWorkorders[i] = o
 		}
 
-		dbWorkorders[i] = o
 	}
 
 	return dbWorkorders, finalErr
