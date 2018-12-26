@@ -330,6 +330,10 @@ func (h *FisHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
 
+func (h *FisHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}
+
 type MasterPLCHandler struct {
 	l Logger
 }

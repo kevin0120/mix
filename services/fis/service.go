@@ -24,6 +24,7 @@ const (
 
 type Diagnostic interface {
 	Error(msg string, err error)
+	Debug(msg string)
 }
 
 type Service struct {
@@ -35,15 +36,17 @@ type Service struct {
 	keepAliveCount int32
 	status         string
 	mtxStatus      sync.Mutex
+	missionBuf     chan string
 }
 
 func NewService(d Diagnostic, c Config, pmon *pmon.Service) *Service {
 	if c.Enable {
 		s := &Service{
-			diag:      d,
-			mtxFile:   sync.Mutex{},
-			status:    FIS_STATUS_OFFLINE,
-			mtxStatus: sync.Mutex{},
+			diag:       d,
+			mtxFile:    sync.Mutex{},
+			status:     FIS_STATUS_OFFLINE,
+			mtxStatus:  sync.Mutex{},
+			missionBuf: make(chan string, 2048),
 		}
 
 		s.Pmon = pmon
@@ -75,6 +78,7 @@ func (s *Service) Open() error {
 	s.Pmon.PmonRegistryEvent(s.OnPmonEventMission, c.CHRecvMission, nil)
 	s.Pmon.PmonRegistryEvent(s.OnPmonEventHeartbeat, c.CHRecvHeartbeat, nil)
 
+	go s.TaskMission()
 	go s.HeartbeatCheck()
 
 	return nil
@@ -89,9 +93,8 @@ func (s *Service) OnPmonEventMission(err error, data []rune, obj interface{}) {
 	if err != nil {
 		s.diag.Error("pmon event mission error", err)
 	} else {
-		// 处理pmon收到的数据
-		msg := string(data)
-		s.HandleMO(msg)
+
+		s.missionBuf <- string(data)
 	}
 }
 
@@ -164,6 +167,18 @@ func (s *Service) SaveRestartPoint(restartPoint string, ch string) {
 	}
 }
 
+func (s *Service) TaskMission() {
+	for {
+		select {
+		case msg := <-s.missionBuf:
+			s.diag.Debug(fmt.Sprintf("receive fis mission: %s\n", msg))
+			s.HandleMO(msg)
+
+			time.Sleep(time.Duration(s.Config().MissionItv))
+		}
+	}
+}
+
 func (s *Service) HandleMO(str string) {
 
 	msg := strings.TrimSpace(str)
@@ -196,7 +211,6 @@ func (s *Service) HandleMO(str string) {
 
 	// 装配代码校验位
 	mo.Pin_check_code, _ = strconv.Atoi(msg[28:29])
-	time.Sleep(100 * time.Millisecond)
 
 	// 流水线
 	mo.Assembly_line = msg[30:32]
@@ -218,13 +232,16 @@ func (s *Service) HandleMO(str string) {
 		pr.Pr_group = s.Config().PRS[i]
 		pr.Pr_value = sPrs[step : step+LEN_PR_VALUE]
 
-		mo.Prs = append(mo.Prs, pr)
+		if strings.TrimSpace(pr.Pr_value) != "" {
+			mo.Prs = append(mo.Prs, pr)
+		}
+
 		step += LEN_PR_VALUE + 1
 	}
 
 	err := s.Odoo.CreateMO(mo)
 	if err != nil {
-		s.diag.Error("create mo err", err)
+		s.diag.Error(str, err)
 	}
 }
 

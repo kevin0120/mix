@@ -78,10 +78,10 @@ func (s *Service) CreateMO(body interface{}) error {
 
 	resp, err := r.Post(s.route)
 	if err != nil {
-		return fmt.Errorf("Create MO Post fail: %s\n", err)
+		return fmt.Errorf("Create MO Post fail: %s\n", err.Error())
 	} else {
 		if resp.StatusCode() != http.StatusCreated {
-			return fmt.Errorf("Create MO Post fail: %s\n", resp.Status())
+			return fmt.Errorf("Create MO Post fail: %s\n", string(resp.Body()))
 		}
 	}
 

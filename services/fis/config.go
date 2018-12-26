@@ -16,6 +16,7 @@ type Config struct {
 	PRS             []string      `yaml:"prs"`
 	HeartbeatItv    toml.Duration `yaml:"heartbeat_interval"`
 	Enable          bool          `yaml:"enable"`
+	MissionItv      toml.Duration `yaml:"mission_itv"`
 }
 
 func NewConfig() Config {
@@ -33,6 +34,7 @@ func NewConfig() Config {
 		PRS:             prs,
 		HeartbeatItv:    toml.Duration(time.Minute * 1),
 		Enable:          false,
+		MissionItv:      toml.Duration(10 * time.Millisecond),
 	}
 }
 
