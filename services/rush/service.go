@@ -391,7 +391,7 @@ func (s *Service) OperationToFisResult(r *storage.OperationResult) fis.FisResult
 	result.Pin = r.Pin
 	result.PinCheckCode = r.Pin_check_code
 	result.AssemblyLine = r.AssemblyLine
-	result.ResultID = fmt.Sprintf("%s-%s-%s-%02d", r.Model, s.Fis.Config().FactoryCode, r.NutNo, r.Seq)
+	result.ResultID = fmt.Sprintf("%s", r.NutNo)
 	result.Lnr = r.Lnr
 
 	valueResult := 1
