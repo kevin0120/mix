@@ -27,6 +27,7 @@ import Button from '../CustomButtons/Button';
 
 import { setResultDiagShow } from '../../actions/resultDiag';
 import { NewCar } from '../../actions/scannerDevice';
+import { switch2Ready } from '../../actions/operation';
 
 import resultDiagStyles from './styles';
 import configs from '../../shared/config';
@@ -44,7 +45,7 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch =>
-  bindActionCreators({ setResultDiagShow, NewCar }, dispatch);
+  bindActionCreators({ setResultDiagShow, NewCar, switch2Ready }, dispatch);
 
 /* eslint-disable react/prefer-stateless-function */
 class ConnectedResultDialog extends React.Component {
@@ -68,10 +69,11 @@ class ConnectedResultDialog extends React.Component {
 
   handleClickNewWorkOrder = e => {
     e.preventDefault();
-    const { NewCar } = this.props;
-    const { vin } = this.state.nextWorkorder;
+    const { NewCar, switch2Ready } = this.props;
+    const { vin, long_pin } = this.props.nextWorkorder;
     if (!lodash.isNil(vin) || vin !== '') {
-      NewCar(vin, OPERATION_SOURCE.MANUAL);
+      switch2Ready();
+      NewCar(long_pin, OPERATION_SOURCE.MANUAL);
     }
   };
 
@@ -237,7 +239,8 @@ ConnectedResultDialog.propTypes = {
     }).isRequired
   ).isRequired,
   setResultDiagShow: PropTypes.func.isRequired,
-  NewCar: PropTypes.func.isRequired
+  NewCar: PropTypes.func.isRequired,
+  switch2Ready: PropTypes.func.isRequired
 };
 
 const ResultDialog = connect(

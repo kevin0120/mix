@@ -142,6 +142,7 @@ function newOperation(state, mode, data) {
     maxOpTimes: data.max_op_time,
     workSheet: data.work_sheet,
     results: data.results,
+    activeResultIndex: 0,
     lnr: data.lnr
   };
 }

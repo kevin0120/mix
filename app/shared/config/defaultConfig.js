@@ -38,12 +38,12 @@ export const defaultConfigs = {
     odooConnection: {
       odooUrl: {
         displayOrder: 1,
-        value: 'http://192.168.1.3:8069/api/v1',
+        value: 'http://172.29.61.190:8069/api/v1',
         displayTitle: 'Configuration.connections.Odoo'
       },
       hmiSn: {
         displayOrder: 2,
-        value: '112233445566778899',
+        value: '1122334455667788',
         displayTitle: 'Configuration.connections.HMI'
       }
     },
@@ -161,16 +161,16 @@ export const defaultConfigs = {
       }
     },
     connections: {
-      masterpc: 'http://192.168.1.152:8082',
+      masterpc: 'http://172.17.0.1:8082',
       rfid: 'tcp://192.168.1.120:2112',
-      aiis: 'http://192.168.1.3:9092',
+      aiis: 'http://172.29.61.190:9092',
       controllers: [
         {
           serial_no: '0001'
         }
       ],
       io: 'modbustcp://192.168.1.122:502/0',
-      workcenterCode: '112233445566778899',
+      workcenterCode: '1122334455667788',
       rework_workcenter: 'qrk'
     }
   },

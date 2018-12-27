@@ -294,8 +294,11 @@ export function* startOperation(data) {
         // yield put({ type: OPERATION.RESET });
       }
     } else {
-      yield put({ type: OPERATION.STARTED });
-      yield call(doingOperation);
+      const rt = yield call(doingOperation);
+      if (rt) {
+        yield put({ type: OPERATION.STARTED });
+      }
+
     }
   } catch (e) {}
 }
