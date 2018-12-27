@@ -70,7 +70,7 @@ websocket:
   read_buf_size: 4096
   write_buf_size: 4096
 storage:
-  db_url: 192.168.1.152:5432
+  db_url: 127.0.0.1:5432
   db_name: rush
   db_user: admin
   db_pwd: admin

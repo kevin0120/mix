@@ -315,6 +315,31 @@ func (h *MinioHandler) Debug(msg string) {
 	h.l.Debug(msg)
 }
 
+// hmi handler
+type HmiHandler struct {
+	l Logger
+}
+
+func (h *HmiHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+func (h *HmiHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}
+
+func (h *HmiHandler) Close() {
+	h.l.Info("hmi server closing")
+}
+
+func (h *HmiHandler) Closed() {
+	h.l.Info("hmi server closed")
+}
+
+func (h *HmiHandler) Disconnect(id string) {
+	h.l.Info("hmi Connection disconnected", String("ID", id))
+}
+
 // Websocket Handler
 
 type WsHandler struct {

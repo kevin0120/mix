@@ -87,6 +87,9 @@ func (m *Methods) putPSets(ctx iris.Context) {
 		return
 	}
 
+	str, _ := json.Marshal(pset)
+	m.service.diag.Debug(fmt.Sprintf("new pset:%s", str))
+
 	if pset.UserID == 0 {
 		pset.UserID = DEFAULT_USER_ID
 	}

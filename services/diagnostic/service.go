@@ -102,8 +102,8 @@ func (s *Service) NewWebsocketHandler() *WsHandler {
 	}
 }
 
-func (s *Service) NewHMIHandler() *WsHandler {
-	return &WsHandler{
+func (s *Service) NewHMIHandler() *HmiHandler {
+	return &HmiHandler{
 		l: s.Logger.With(String("service", "hmi")),
 	}
 }
