@@ -64,7 +64,7 @@ func (s *Service) UpdateStatus(status string) {
 
 	if s.status != status {
 		s.status = status
-		fmt.Printf("fis status:%s\n", status)
+		s.diag.Debug(fmt.Sprintf("fis status:%s\n", status))
 	}
 }
 
