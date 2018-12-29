@@ -189,9 +189,9 @@ class MaintenanceRequest(models.Model):
                 })
                 template_id = template_id.with_context(rendering_context)
                 mail_id = template_id.send_mail(ret.id)  # 先不要发送,之后调用send方法发送邮件
-                # current_mail = self.env['mail.mail'].browse(mail_id)
-                self.env["celery.task"].call_task("mail.mail", "send_async_by_id", mail_id=mail_id)
-                # current_mail.send()  # 发送邮件
+                current_mail = self.env['mail.mail'].browse(mail_id)
+                # self.env["celery.task"].call_task("mail.mail", "send_async_by_id", mail_id=mail_id)
+                current_mail.send()  # 发送邮件
         return ret
 
 

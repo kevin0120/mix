@@ -163,9 +163,9 @@ class MrpProduction(models.Model):
                                                               order.bom_id.product_uom_id) / order.bom_id.product_qty
             boms, lines = order.bom_id.explode(order.product_id, quantity, picking_type=order.bom_id.picking_type_id)
             order._generate_workorders_by_prs(boms)
-        for production in self:
-            if not production.workorder_ids.mapped('check_ids'):
-                production.workorder_ids._create_checks()
+        # for production in self:
+        #     if not production.workorder_ids.mapped('check_ids'):
+        #         production.workorder_ids._create_checks()
         return orders_to_plan.write({'state': 'planned'})
 
     @api.multi

@@ -75,18 +75,18 @@ class MrpRoutingWorkcenter(models.Model):
             return True
         _points = []
         for point in operation_id.operation_point_ids:
-            bom_line = self.env['mrp.bom.line'].search([('operation_id', '=', operation_id.id), ('operation_point_id', '=', point.id)])
-            qcp = self.env['quality.point'].search([('operation_id', '=', operation_id.id), ('bom_line_id', '=', bom_line.id)])
+            # bom_line = self.env['mrp.bom.line'].search([('operation_id', '=', operation_id.id), ('operation_point_id', '=', point.id)])
+            # qcp = self.env['quality.point'].search([('operation_id', '=', operation_id.id), ('bom_line_id', '=', bom_line.id)])
             _points.append({
                 'sequence': point.sequence,
                 'group_sequence': point.group_sequence,
                 'offset_x': point.x_offset,
                 'offset_y': point.y_offset,
                 'max_redo_times': point.max_redo_times,
-                'tolerance_min': qcp.tolerance_min,
-                'tolerance_max': qcp.tolerance_max,
-                'tolerance_min_degree': qcp.tolerance_min_degree,
-                'tolerance_max_degree': qcp.tolerance_max_degree,
+                # 'tolerance_min': qcp.tolerance_min,
+                # 'tolerance_max': qcp.tolerance_max,
+                # 'tolerance_min_degree': qcp.tolerance_min_degree,
+                # 'tolerance_max_degree': qcp.tolerance_max_degree,
                 'consu_product_id': point.product_id.id if point.product_id.id else 0
             })
 

@@ -20,7 +20,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['mrp_maintenance', 'sa_base', 'celery_async'],
+    'depends': ['mrp_maintenance', 'sa_base'],
 
     # always loaded
     'data': [

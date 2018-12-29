@@ -32,7 +32,7 @@
         'data/maintenance_data.xml',
         'data/point_data.xml',
         'data/mail_template.xml',
-        'data/test_data.xml',   # 测试数据
+        # 'data/test_data.xml',   # 测试数据
         'views/res_user_views.xml',
         'views/menu_hide_views.xml',
         'views/sa_views_menus.xml',
