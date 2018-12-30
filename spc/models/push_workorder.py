@@ -56,7 +56,7 @@ class PushWorkorder(AbstractModel):
                     'tolerance_max': _qcps.tolerance_max if _qcps else 0.0,
                     'tolerance_min_degree': _qcps.tolerance_min_degree if _qcps else 0.0,
                     'tolerance_max_degree': _qcps.tolerance_max_degree if _qcps else 0.0,
-                    "result_ids": consu.result_ids.ids
+                    # "result_ids": consu.result_ids.ids
                 })
 
             vals = {

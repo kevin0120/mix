@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding='UTF-8'?>
+<!-- Copyright 2018 Nova Code (http://www.novacode.nl)
+License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl.html) -->
+
+<odoo>
+    <data>
+	<record id="view_celery_example_tree" model="ir.ui.view">
+	    <field name="name">celery.example.tree</field>
+	    <field name="model">celery.example</field>
+	    <field name="arch" type="xml">
+                <tree string="Celery Example">
+                    <field name="name"/>
+                    <field name="lines"/>                    
+                    <button name="action_queue_example_line" type="object" string="Queue create Line"/>
+                    <button name="action_queue_countdown_example_line" type="object" string="Queue create Line with countdown (10 sec)"/>
+                </tree>
+            </field>
+        </record>
+        
+	<record id="view_celery_example_form" model="ir.ui.view">
+	    <field name="name">celery.example.form</field>
+	    <field name="model">celery.example</field>
+	    <field name="type">form</field>
+	    <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <button name="refresh_view" class="pull-right" type="object" icon="fa-retweet">Refresh view</button>
+                        <div class="oe_title">
+                            <h1><field name="name" nolabel="1"/></h1>
+                        </div>
+                        <button name="action_queue_example_line" type="object" string="Queue create Line"/>
+                        <button name="action_queue_countdown_example_line" type="object" string="Queue create Line with countdown (10 sec)"/>
+                        <notebook>
+                            <page name="lines" string="Lines">
+                                <field name="lines">
+                                    <tree>
+                                        <field name="name"/>
+                                        <field name="example_id"/>
+                                        <field name="create_date"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_celery_example" model="ir.actions.act_window">
+            <field name="name">Celery Example</field>
+            <field name="res_model">celery.example</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_celery_example_tree"/>
+        </record>
+        
+        <menuitem
+            id="menu_celery_example"
+            name="Example Task"
+            parent="celery_async.menu_celery_root"
+            action="action_celery_example"/>
+     </data>
+</odoo>
