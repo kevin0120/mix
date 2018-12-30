@@ -157,6 +157,7 @@ function operationSwitchReady(state) {
     carType: '',
     lnr: '',
     maxOpTimes: 0,
+    failCount: 0,
     results: [],
   };
 }
@@ -257,6 +258,7 @@ function operationFinished(state, data) {
     carType: '',
     lnr: '',
     maxOpTimes: 0,
+    failCount: 0,
     results
   };
 }
@@ -303,3 +305,4 @@ function switchOperationTimeout(state, status) {
     lnr: ''
   };
 }
+

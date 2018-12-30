@@ -17,6 +17,7 @@ import {
   cleanOngoingOperation
 } from '../actions/ongoingOperation';
 import { Error } from "../logger";
+import { setNewNotification } from '../actions/notification';
 
 // const lodash = require('lodash');
 
@@ -315,20 +316,23 @@ export function* doingOperation() {
     const { activeResultIndex, failCount, results } = state.operations;
     const userID = 1;
 
-    const resp = yield call(
-      pset,
-      masterpc,
-      results[activeResultIndex].controller_sn,
-      results[activeResultIndex].gun_sn,
-      results[activeResultIndex].id,
-      failCount + 1,
-      userID,
-      results[activeResultIndex].pset
-    );
-
-    if (resp.status !== 200) {
+    try {
+      const resp = yield call(
+        pset,
+        masterpc,
+        results[activeResultIndex].controller_sn,
+        results[activeResultIndex].gun_sn,
+        results[activeResultIndex].id,
+        failCount + 1,
+        userID,
+        results[activeResultIndex].pset
+      );
+    } catch (e) {
       // 程序号设置失败
       yield put({ type: OPERATION.PROGRAMME.SET_FAIL });
+      yield put(
+        setNewNotification('error', 'pset failed')
+      );
       return false;
     }
   }
@@ -363,66 +367,71 @@ export function* watchResults() {
 
 // 处理结果
 export function* handleResults(data) {
-  const state = yield select();
+  try {
+    const state = yield select();
 
-  const { operations } = state;
+    const { operations } = state;
 
-  let hasFail = false;
-  let storyType = STORY_TYPE.PASS;
+    let hasFail = false;
+    let storyType = STORY_TYPE.PASS;
 
-  for (let i = 0; i < data.length; i += 1) {
-    if (data[i].result === OPERATION_RESULT.NOK) {
-      hasFail = true;
-      storyType = STORY_TYPE.FAIL;
-    } else {
-      storyType = STORY_TYPE.PASS;
+    for (let i = 0; i < data.length; i += 1) {
+      if (data[i].result === OPERATION_RESULT.NOK) {
+        hasFail = true;
+        storyType = STORY_TYPE.FAIL;
+      } else {
+        storyType = STORY_TYPE.PASS;
+      }
+
+      // const eti  = data[i].ti? data[i].ti.toString() : 'nil';
+
+      const batch = `${(
+        operations.activeResultIndex + 1
+      ).toString()}/${operations.results[
+      operations.results.length - 1
+        ].group_sequence.toString()}`;
+
+      yield call(
+        addNewStory,
+        storyType,
+        `结果 ${batch}`,
+        `T=${data[i].mi.toString()}Nm A=${data[i].wi.toString()}°`
+      );
     }
 
-    // const eti  = data[i].ti? data[i].ti.toString() : 'nil';
+    let rType = '';
+    let continueDoing = false;
 
-    const batch = `${(
-      operations.activeResultIndex + 1
-    ).toString()}/${operations.results[
-      operations.results.length - 1
-    ].group_sequence.toString()}`;
-
-    yield call(
-      addNewStory,
-      storyType,
-      `结果 ${batch}`,
-      `T=${data[i].mi.toString()}Nm A=${data[i].wi.toString()}°`
-    );
-  }
-
-  let rType = '';
-  let continueDoing = false;
-
-  if (hasFail) {
-    if (
-      operations.failCount + 1 >=
-      operations.results[operations.activeResultIndex].max_redo_times
+    if (hasFail) {
+      if (
+        operations.failCount + 1 >=
+        operations.results[operations.activeResultIndex].max_redo_times
+      ) {
+        // 作业失败
+        rType = OPERATION.FAILED;
+      } else {
+        // 重试
+        rType = OPERATION.RESULT.NOK;
+        continueDoing = true;
+      }
+    } else if (
+      operations.activeResultIndex + data.length >=
+      operations.results.length
     ) {
-      // 作业失败
-      rType = OPERATION.FAILED;
+      // 作业完成
+      rType = OPERATION.FINISHED;
     } else {
-      // 重试
-      rType = OPERATION.RESULT.NOK;
+      // 继续作业
+      rType = OPERATION.RESULT.OK;
       continueDoing = true;
     }
-  } else if (
-    operations.activeResultIndex + data.length >=
-    operations.results.length
-  ) {
-    // 作业完成
-    rType = OPERATION.FINISHED;
-  } else {
-    // 继续作业
-    rType = OPERATION.RESULT.OK;
-    continueDoing = true;
+
+    yield put({ type: rType, data });
+    if (continueDoing) {
+      yield call(doingOperation);
+    }
+  } catch (e) {
+    console.log(e);
   }
 
-  yield put({ type: rType, data });
-  if (continueDoing) {
-    yield call(doingOperation);
-  }
 }
