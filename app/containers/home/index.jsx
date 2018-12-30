@@ -85,7 +85,7 @@ class ConnectedWelcome extends React.Component {
                           <route.icon className={classes.icon} />
                         </div>
                         <h1 className={classes.title}>{t(route.title)}</h1>
-                        <p className={classes.subTitle}>{route.enName}</p>
+                        <p className={classes.subTitle}>{t(route.title,{lng:'Language.en'})}</p>
                       </CardContent>
                     </CardActionArea>
                   </Card>

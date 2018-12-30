@@ -199,7 +199,9 @@ export const defaultConfigs = {
     // 手动模式下是否启用freestyle
     manualFreestyle: true
   },
-
+  cvinetweb: {
+    url: ''
+  },
   systemSettings: {
     enableDebugInfo: false,
     showSwitchMode: false, // 切换pset or job 模式

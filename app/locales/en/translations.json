@@ -17,7 +17,8 @@
     "resultQuery": "Result",
     "login": "Login",
     "currentOrder": "Current Vehicle",
-    "nextOrder": "Next Vehicle"
+    "nextOrder": "Next Vehicle",
+    "curve": "Curve"
   },
   "OEE": {
     "title": "Failure Record",

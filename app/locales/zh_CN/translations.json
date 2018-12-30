@@ -17,7 +17,8 @@
     "resultQuery": "结果查询",
     "login": "登出",
     "currentOrder": "当前车辆",
-    "nextOrder": "下一车辆"
+    "nextOrder": "下一车辆",
+    "curve": "曲线"
   },
   "OEE": {
     "title": "故障记录",
