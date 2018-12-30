@@ -90,9 +90,10 @@ class OperationResult(models.HyperModel):
     measure_t_don = fields.Float('Measure Time Done(ms)', default=0.0, digits=dp.get_precision('Operation Result'), group_operator="avg")
 
     measure_result = fields.Selection([
-        (_('none'), 'No measure'),
-        (_('ok'), 'OK'),
-        (_('nok'), 'NOK')], string="Measure Success", default='none')
+        ('none', _('No measure')),
+        ('ln', _('LSN')),
+        ('ok', _('OK')),
+        ('nok', _('NOK'))], string="Measure Success", default='none')
 
     lacking = fields.Selection([(_('lack'), _('Data Lacking')),
         (_('normal'), _('Normal'))], string='Lacking', default='lack')
