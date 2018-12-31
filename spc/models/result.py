@@ -92,6 +92,7 @@ class OperationResult(models.HyperModel):
     measure_result = fields.Selection([
         ('none', _('No measure')),
         ('ln', _('LSN')),
+        ('ak2', _('AK2')),
         ('ok', _('OK')),
         ('nok', _('NOK'))], string="Measure Success", default='none')
 
@@ -112,81 +113,89 @@ class OperationResult(models.HyperModel):
 
     def init(self):
         self.env.cr.execute("""
-        CREATE OR REPLACE FUNCTION create_operation_result(pset_m_threshold numeric, pset_m_max numeric,
-                                                   control_data     timestamp without time zone, pset_w_max numeric,
-                                                   user_id          bigint, one_time_pass boolean,
-                                                   pset_strategy    varchar, measure_result varchar,
-                                                   pset_w_threshold numeric, cur_objects varchar,
-                                                   pset_m_target    numeric, pset_m_min numeric,
-                                                   final_pass       varchar, measure_degree numeric,
-                                                   measure_t_done   numeric, measure_torque numeric, op_time integer,
-                                                   pset_w_min       numeric, pset_w_target numeric, lacking varchar,
-                                                   quality_state    varchar, exception_reason varchar, sent boolean,
-                                                   batch            varchar,
-                                                   order_id      bigint, consu_product_id bigint
-
-)
-  returns BIGINT as $$
-DECLARE
-  result_id       BIGINT;
-  vin_code        varchar;
-  qcp_id          BIGINT;
-  consu_bom_id    BIGINT;
-  r_production_id BIGINT;
-  r_workcenter_id BIGINT;
-  r_gun_id        BIGINT;
-  r_product_id    BIGINT;
-  r_program_id    BIGINT;
-  r_assembly_id   BIGINT;
-  r_measure_result varchar;
-BEGIN
-  case pset_strategy
-    when 'LN'
-    then r_measure_result = 'ln';
-  ELSE r_measure_result = measure_result;
-  end case;
-
-  select
-    mp.vin,
-    qp.id,
-    co.id,
-    mp.id,
-    wo.workcenter_id,
-    co.gun_id,
-    mp.product_id,
-    co.program_id,
-    mp.assembly_line_id
-  into vin_code, qcp_id, consu_bom_id, r_production_id, r_workcenter_id, r_gun_id, r_product_id, r_program_id, r_assembly_id
-  from public.mrp_workorder wo,
-    public.mrp_wo_consu co,
-    public.quality_point qp,
-    public.mrp_production mp
-  where wo.id = order_id and
-        co.workorder_id = order_id and co.product_id = consu_product_id and co.bom_line_id = qp.bom_line_id and
-        wo.production_id = mp.id;
-
-  INSERT INTO public.operation_result (pset_m_threshold, pset_m_max, control_date, pset_w_max, user_id,
-                                       one_time_pass, pset_strategy, measure_result, pset_w_threshold,
-                                       cur_objects, pset_m_target, pset_m_min, final_pass, measure_degree, measure_t_don,
-                                       measure_torque, op_time, pset_w_min, pset_w_target, lacking, quality_state, exception_reason, sent, batch, vin,
-                                       qcp_id, point_id, workorder_id, consu_product_id, consu_bom_line_id, production_id, gun_id, program_id, product_id, assembly_line_id, workcenter_id, time)
-  VALUES
-    (pset_m_threshold, pset_m_max, control_data, pset_w_max, user_id, one_time_pass, pset_strategy, r_measure_result,
-                       pset_w_threshold, cur_objects, pset_m_target, pset_m_min, final_pass, measure_degree,
-                                                                     measure_t_done, measure_torque, op_time,
-                                                                     pset_w_min, pset_w_target, lacking, quality_state,
-      exception_reason, sent, batch, vin_code,
-      qcp_id, qcp_id, order_id,
-      consu_product_id, consu_bom_id, r_production_id, r_gun_id, r_program_id, r_product_id, r_assembly_id,
-     r_workcenter_id,
-     NOW());
-
-  result_id = lastval();
-
-  RETURN result_id;
-
-END; $$
-LANGUAGE plpgsql;
+            CREATE OR REPLACE FUNCTION create_operation_result(pset_m_threshold numeric, pset_m_max numeric,
+                                                               control_data timestamp without time zone, pset_w_max numeric,
+                                                               user_id bigint, one_time_pass boolean,
+                                                               pset_strategy varchar, measure_result varchar,
+                                                               pset_w_threshold numeric, cur_objects varchar,
+                                                               pset_m_target numeric, pset_m_min numeric,
+                                                               final_pass varchar, measure_degree numeric,
+                                                               measure_t_done numeric, measure_torque numeric, op_time integer,
+                                                               pset_w_min numeric, pset_w_target numeric, lacking varchar,
+                                                               quality_state varchar, exception_reason varchar, sent boolean,
+                                                               batch varchar,
+                                                               order_id bigint, nut_no varchar)
+              returns BIGINT as
+            $$
+            DECLARE
+              result_id          BIGINT;
+              vin_code           varchar;
+              qcp_id             BIGINT;
+              consu_bom_id       BIGINT;
+              r_consu_product_id BIGINT;
+              r_production_id    BIGINT;
+              r_workcenter_id    BIGINT;
+              r_gun_id           BIGINT;
+              r_product_id       BIGINT;
+              r_program_id       BIGINT;
+              r_assembly_id      BIGINT;
+              r_measure_result   varchar;
+            BEGIN
+              case pset_strategy
+                when 'LN'
+                  then r_measure_result = 'ln';
+                ELSE r_measure_result = measure_result;
+                end case;
+            
+              select mp.vin,
+                     qp.id,
+                     co.id,
+                     mp.id,
+                     wo.workcenter_id,
+                     co.gun_id,
+                     mp.product_id,
+                     co.program_id,
+                     co.product_id,
+                     mp.assembly_line_id
+                     into vin_code, qcp_id, consu_bom_id, r_production_id, r_workcenter_id, r_gun_id, r_product_id,r_program_id,r_consu_product_id,r_assembly_id
+              from public.mrp_workorder wo,
+                   public.mrp_wo_consu co,
+                   public.quality_point qp,
+                   public.mrp_production mp,
+                   public.product_product pp
+              where wo.id = order_id
+                and co.workorder_id = order_id
+                and pp.screw_type_code = nut_no
+                and co.bom_line_id = qp.bom_line_id
+                and wo.production_id = mp.id
+                and co.product_id = pp.id;
+            
+              INSERT INTO public.operation_result (pset_m_threshold, pset_m_max, control_date, pset_w_max, user_id,
+                                                   one_time_pass, pset_strategy, measure_result, pset_w_threshold,
+                                                   cur_objects, pset_m_target, pset_m_min, final_pass, measure_degree,
+                                                   measure_t_don,
+                                                   measure_torque, op_time, pset_w_min, pset_w_target, lacking, quality_state,
+                                                   exception_reason, sent, batch, vin,
+                                                   qcp_id, point_id, workorder_id, consu_product_id, consu_bom_line_id,
+                                                   production_id, gun_id, program_id, product_id, assembly_line_id, workcenter_id,
+                                                   time)
+              VALUES (pset_m_threshold, pset_m_max, control_data, pset_w_max, user_id, one_time_pass, pset_strategy,
+                      r_measure_result,
+                      pset_w_threshold, cur_objects, pset_m_target, pset_m_min, final_pass, measure_degree,
+                      measure_t_done, measure_torque, op_time, pset_w_min, pset_w_target, lacking, quality_state, exception_reason,
+                      sent, batch, vin_code,
+                      qcp_id, qcp_id, order_id,
+                      r_consu_product_id, consu_bom_id, r_production_id, r_gun_id, r_program_id, r_product_id, r_assembly_id,
+                      r_workcenter_id,
+                      NOW());
+            
+              result_id = lastval();
+            
+              RETURN result_id;
+            
+            END;
+            $$
+              LANGUAGE plpgsql;
             """)
 
     @api.multi

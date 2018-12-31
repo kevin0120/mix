@@ -43,6 +43,7 @@ class PushWorkorder(AbstractModel):
                                                          limit=1)
 
                 _consumes.append({
+                    # "consu_product_id": consu.product_id,
                     "sequence": consu.bom_line_id.operation_point_id.sequence,
                     "group_sequence": consu.bom_line_id.operation_point_id.group_sequence,
                     'max_redo_times': consu.bom_line_id.operation_point_id.max_redo_times,
