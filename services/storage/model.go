@@ -118,7 +118,7 @@ type OperationResultModel struct {
 type ResultObject struct {
 	OR     map[string]interface{}
 	ID     int64
-	Send   int
+	Send   bool
 	Port   string
 	IP     string
 	Stream *aiis.RPCAiis_RPCNodeServer
@@ -173,6 +173,9 @@ type OperationResult struct {
 	Model          string `json:"model"`
 
 	Lacking string `json:"lacking"`
+
+	Stage string `json:"stage"`
+	WorkorderID     int64     `json:"workorder_id"`
 }
 
 type CURObject struct {

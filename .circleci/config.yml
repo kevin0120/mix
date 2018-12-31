@@ -4,6 +4,7 @@ jobs:
     branches:
       only:
         - master
+        - test-svw-ningbo
     docker:
       - image: circleci/golang:latest
     steps:

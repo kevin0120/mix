@@ -85,7 +85,7 @@ changan:
     max_connection: 60
 
 odoo:
-  url: http://192.168.1.3:8069
+  url: http://127.0.0.1:8069
   route: /api/v1/mrp.productions
   headers:
     Content-Type: application/json
@@ -94,7 +94,7 @@ odoo:
   max_retry: 1
   enable: true
 storage:
-  db_url: 192.168.1.3:5432
+  db_url: 127.0.0.1:5432
   db_name: sa
   db_user: admin
   db_pwd: admin
@@ -114,6 +114,6 @@ rush:
   ws_read_buf_size: 4096
   ws_write_buf_size: 4096
   batch_save_rows_limit: 100
-  batch_save_time_limit: 5s
+  batch_save_time_limit: 2s
   grpc_port: 9093
 

@@ -496,13 +496,13 @@ func (s *Service) PatchResultFlag(stream *aiis.RPCAiis_RPCNodeServer, result_id 
 func (s *Service) HandleResult(cr *CResult) {
 
 	// 结果推送fis
-	sent := 1
+	sent := true
 	if s.Fis != nil {
 		fisResult := s.OperationToFisResult(cr.Result)
 
 		e := s.Fis.PushResult(&fisResult)
 		if e != nil {
-			sent = 0
+			sent = false
 			s.diag.Error("push result to fis error", e)
 		}
 	}
