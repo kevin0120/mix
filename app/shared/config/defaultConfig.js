@@ -175,7 +175,7 @@ export const defaultConfigs = {
         }
       ],
       io: 'modbustcp://192.168.1.122:502/0',
-      workcenterCode: '1122334455667788',
+      workcenterCode: '69',
       rework_workcenter: 'qrk'
     }
   },
