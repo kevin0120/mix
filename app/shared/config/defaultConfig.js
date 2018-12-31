@@ -12,27 +12,32 @@ export const defaultConfigs = {
       ssid: {
         displayOrder: 1,
         value: '',
-        displayTitle: 'Configuration.network.SSID'
+        displayTitle: 'Configuration.network.SSID',
+        isPWD: false
       },
       password: {
         displayOrder: 100,
         value: '',
-        displayTitle: 'Configuration.network.PWD'
+        displayTitle: 'Configuration.network.PWD',
+        isPWD: true
       },
       ipAddress: {
         displayOrder: 200,
         value: '192.168.1.5',
-        displayTitle: 'Configuration.network.Addr'
+        displayTitle: 'Configuration.network.Addr',
+        isPWD: false
       },
       netmask: {
         displayOrder: 300,
         value: '255.255.255.0',
-        displayTitle: 'Configuration.network.Mask'
+        displayTitle: 'Configuration.network.Mask',
+        isPWD: false
       },
       gateway: {
         displayOrder: 400,
         value: '192.168.1.1',
-        displayTitle: 'Configuration.network.Gateway'
+        displayTitle: 'Configuration.network.Gateway',
+        isPWD: false
       }
     },
     odooConnection: {
