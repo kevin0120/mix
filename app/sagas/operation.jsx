@@ -381,8 +381,10 @@ export function* handleResults(data) {
       if (data[i].result === OPERATION_RESULT.NOK) {
         hasFail = true;
         storyType = STORY_TYPE.FAIL;
-      } else {
+      } else if  (data[i].result === OPERATION_RESULT.OK){
         storyType = STORY_TYPE.PASS;
+      }else {
+        return
       }
 
       // const eti  = data[i].ti? data[i].ti.toString() : 'nil';

@@ -18,7 +18,8 @@ export const OPERATION_STATUS = {
 
 export const OPERATION_RESULT = {
   OK: 'OK',
-  NOK: 'NOK'
+  NOK: 'NOK',
+  LN: 'LSN'
 };
 
 export const OPERATION_SOURCE = {
