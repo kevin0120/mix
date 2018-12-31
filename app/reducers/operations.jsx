@@ -29,6 +29,7 @@ export const OPERATION_SOURCE = {
 };
 
 const defaultOperations = {
+  workorderID: 0,
   operationID: 0,
   operationStatus: 'Ready',
   carID: '',
@@ -143,7 +144,8 @@ function newOperation(state, mode, data) {
     workSheet: data.work_sheet,
     results: data.results,
     activeResultIndex: 0,
-    lnr: data.lnr
+    lnr: data.lnr,
+    workorderID: data.workorder_id
   };
 }
 

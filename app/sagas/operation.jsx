@@ -313,7 +313,7 @@ export function* doingOperation() {
     // pset模式
 
     const { masterpc } = state.connections;
-    const { activeResultIndex, failCount, results } = state.operations;
+    const { activeResultIndex, failCount, results, workorderID } = state.operations;
     const userID = 1;
 
     try {
@@ -322,10 +322,12 @@ export function* doingOperation() {
         masterpc,
         results[activeResultIndex].controller_sn,
         results[activeResultIndex].gun_sn,
-        results[activeResultIndex].id,
+        0,
         failCount + 1,
         userID,
-        results[activeResultIndex].pset
+        results[activeResultIndex].pset,
+        workorderID,
+        results[activeResultIndex].group_sequence
       );
     } catch (e) {
       // 程序号设置失败
