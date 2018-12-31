@@ -302,7 +302,7 @@ func (s *Service) putResult(body interface{}, url string, method string) error {
 	return nil
 }
 
-func (s *Service) ResultToAiisResult(result *storage.Results, curve interface{}) (AIISResult, error) {
+func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error) {
 	aiisResult := AIISResult{}
 
 	resultValue := ResultValue{}
@@ -316,27 +316,12 @@ func (s *Service) ResultToAiisResult(result *storage.Results, curve interface{})
 		return aiisResult, err
 	}
 
-	if curve != nil {
-		aiisResult.CURObjects = append(aiisResult.CURObjects, *curve.(*CURObject))
-	}
-
-	curves, err := s.DB.ListCurvesByResult(result.Id)
-	if err == nil {
-		aiisCurve := CURObject{}
-		for _, v := range curves {
-			if curve != nil {
-				if curve.(*CURObject).File == v.CurveFile {
-					continue
-				}
-			}
-
-			aiisCurve.OP = v.Count
-			aiisCurve.File = v.CurveFile
-			aiisResult.CURObjects = append(aiisResult.CURObjects, aiisCurve)
-		}
+	if result.ExInfo != "" {
+		aiisResult.CURObjects = append(aiisResult.CURObjects, CURObject{OP: result.Count, File: result.ExInfo})
 	}
 
 	aiisResult.ID = result.Id
+	aiisResult.WorkorderID = dbWorkorder.WorkorderID
 	aiisResult.Control_date = result.UpdateTime.Format(time.RFC3339)
 	aiisResult.Measure_degree = resultValue.Wi
 	aiisResult.Measure_result = strings.ToLower(result.Result)
@@ -393,6 +378,7 @@ func (s *Service) ResultToAiisResult(result *storage.Results, curve interface{})
 	aiisResult.ControllerSN = result.ControllerSN
 
 	aiisResult.Job = fmt.Sprintf("%d", dbWorkorder.JobID)
+	aiisResult.Stage = result.Stage
 
 	if result.Result == storage.RESULT_OK {
 		aiisResult.Final_pass = ODOO_RESULT_PASS
@@ -435,7 +421,7 @@ func (s *Service) ResultUploadManager() error {
 		results, err := s.DB.ListUnuploadResults()
 		if err == nil {
 			for _, v := range results {
-				aiisResult, err := s.ResultToAiisResult(&v, nil)
+				aiisResult, err := s.ResultToAiisResult(&v)
 				if err == nil {
 					s.PutResult(v.ResultId, aiisResult)
 				}

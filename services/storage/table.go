@@ -26,6 +26,8 @@ type Workorders struct {
 	JobID int    `xorm:"bigint 'job_id'"`
 	Mode  string `xorm:"varchar(64) 'mode'"`
 
+	Consumes string `xorm:"text 'consumes'"`
+
 	// mo相关信息
 	MO_EquipemntName  string `xorm:"varchar(64) 'equipment_name'"` // 设备名
 	MO_FactoryName    string `xorm:"varchar(64) 'factory_name'"`   // 工厂代码
@@ -93,9 +95,12 @@ type Controllers struct {
 }
 
 type Guns struct {
-	Id     int64  `xorm:"pk autoincr notnull 'id'"`
-	GunID  int64  `xorm:"bigint 'gun_id'"`
-	Serial string `xorm:"varchar(128) 'serial'"`
+	Id          int64  `xorm:"pk autoincr notnull 'id'"`
+	GunID       int64  `xorm:"bigint 'gun_id'"`
+	Serial      string `xorm:"varchar(128) 'serial'"`
+	WorkorderID int64  `xorm:"bigint 'workorder_id'"`
+	Seq         int    `xorm:"bigint 'sequence'"`
+	Count       int    `xorm:"int 'count'"`
 }
 
 type RoutingOperations struct {

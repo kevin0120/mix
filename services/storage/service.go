@@ -52,6 +52,8 @@ func (s *Service) Open() error {
 		return errors.Wrapf(err, "Create postgres engine fail")
 	}
 
+	//engine.TZLocation, _ = time.LoadLocation("UTC")
+
 	exist, err := engine.IsTableExist("Workorders")
 	if err == nil {
 		if !exist {
@@ -179,7 +181,7 @@ func (s *Service) FindUnuploadResults(result_upload bool, result []string) ([]Re
 func (s *Service) ListUnuploadResults() ([]Results, error) {
 	var results []Results
 
-	ss := s.eng.Alias("r").Where("r.has_upload = ?", false).And("r.stage = ?", "final")
+	ss := s.eng.Alias("r").Where("r.has_upload = ?", false)
 
 	e := ss.Find(&results)
 
@@ -232,6 +234,31 @@ func (s *Service) GetGun(serial string) (Guns, error) {
 			return rt_gun, nil
 		}
 	}
+}
+
+func (s *Service) UpdateGun(gun *Guns) error {
+	g, err := s.GetGun(gun.Serial)
+	if err == nil {
+		// update
+		_, err := s.eng.Id(g.Id).Update(gun)
+		if err != nil {
+			return err
+		}
+	} else {
+		// insert
+		_, err := s.eng.Insert(gun)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+
+}
+
+func (s *Service) CreateResult(result *Results) error {
+	_, err := s.eng.Insert(result)
+	return err
 }
 
 func (s *Service) GetOperation(id int64) (RoutingOperations, error) {
@@ -504,8 +531,8 @@ func (s *Service) FindNextWorkorder(hmi_sn string, workcenter_code string) (Work
 //	}
 //}
 
-func (s *Service) UpdateResultUserID(id int64, userID int64) error {
-	sql := "update `results` set user_id = ? where id = ?"
+func (s *Service) UpdateWorkorderUserID(id int64, userID int64) error {
+	sql := "update `workorders` set user_id = ? where id = ?"
 	_, err := s.eng.Exec(sql,
 		userID,
 		id)
@@ -768,7 +795,7 @@ func (s *Service) FindRoutingOperations(workcenter_code string, cartype string, 
 func (s *Service) FindLocalResults(hmi_sn string, limit int) ([]ResultsWorkorders, error) {
 	var results []ResultsWorkorders
 
-	sql := "select * from results, workorders where results.x_workorder_id = workorders.id and results.stage = 'final' "
+	sql := "select * from results, workorders where results.x_workorder_id = workorders.id "
 	if hmi_sn != "" {
 		sql = sql + fmt.Sprintf(" and workorders.hmi_sn = '%s'", hmi_sn)
 	}

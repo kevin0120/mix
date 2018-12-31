@@ -24,6 +24,7 @@ const (
 	STRATEGY_AD  = "AD"
 	STRATEGY_AW  = "AW"
 	STRATEGY_ADW = "ADW"
+	STRATEGY_LN = "LN"
 )
 
 const (
@@ -89,4 +90,21 @@ type ResultValue struct {
 type CurveObject struct {
 	File  string
 	Count int
+}
+
+type Consume struct {
+	Seq                int     `json:"sequence"`
+	GroupSeq           int     `json:"group_sequence"`
+	ControllerSN       string  `json:"controller_sn"`
+	GunSN              string  `json:"gun_sn"`
+	ToleranceMinDegree float64 `json:"tolerance_min_degree"`
+	ToleranceMaxDegree float64 `json:"tolerance_max_degree"`
+	ToleranceMax       float64 `json:"tolerance_max"`
+	ToleranceMin       float64 `json:"tolerance_min"`
+	PSet               string  `json:"pset"`
+	NutNo              string  `json:"nut_no"`
+	Max_redo_times     int     `json:"max_redo_times"`
+	X                  float64 `json:"offset_x"`
+	Y                  float64 `json:"offset_y"`
+	ResultIDs          []int64 `json:"result_ids"`
 }

@@ -330,6 +330,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 		o.Vin = v.VIN
 		o.MaxOpTime = v.Max_op_time
 		//o.WorkSheet = v.Worksheet
+		o.UserID = 1
 		o.ImageOPID = v.ImageOPID
 		o.VehicleTypeImg = v.VehicleTypeImg
 		o.UpdateTime = time.Now()
@@ -343,65 +344,65 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 		o.MO_EquipemntName = v.MO_EquipemntName
 		o.MO_Lnr = v.MO_Lnr
 		o.MO_Model = v.MO_Model
+		sConsumes, _ := json.Marshal(v.Consumes)
+		o.Consumes = string(sConsumes)
 
-		results := []storage.Results{}
-		result_count := 0
-		ignore := false
-		for k, consu := range v.Consumes {
-			if len(consu.ResultIDs) == 0 {
-				// 忽略没有结果的消耗品
-				continue
-			}
-
-			r := storage.Results{}
-			r.ControllerSN = consu.ControllerSN
-			r.GunSN = consu.GunSN
-			r.PSet, _ = strconv.Atoi(consu.PSet)
-			r.ToleranceMax = consu.ToleranceMax
-			r.ToleranceMin = consu.ToleranceMin
-			r.ToleranceMaxDegree = consu.ToleranceMaxDegree
-			r.ToleranceMinDegree = consu.ToleranceMinDegree
-			r.NutNo = consu.NutNo
-			r.Batch = fmt.Sprintf("%d/%d", k+1, len(v.Consumes))
-
-			//r.WorkorderID = o.WorkorderID
-			r.Result = storage.RESULT_NONE
-			r.HasUpload = false
-			r.Stage = storage.RESULT_STAGE_INIT
-			r.UpdateTime = time.Now()
-			r.PSetDefine = ""
-			r.ResultValue = ""
-			r.Count = 1
-			r.UserID = 1
-
-			if len(consu.ResultIDs) == 0 {
-				ignore = true
-				break
-			}
-
-			for _, result_id := range consu.ResultIDs {
-				result_count++
-
-				r.OffsetX = consu.X
-				r.OffsetY = consu.Y
-
-				r.Seq = result_count
-				r.ResultId = result_id
-				r.MaxRedoTimes = consu.Max_redo_times
-				results = append(results, r)
-			}
-		}
+		//results := []storage.Results{}
+		//result_count := 0
+		//ignore := false
+		//for k, consu := range v.Consumes {
+		//	if len(consu.ResultIDs) == 0 {
+		//		// 忽略没有结果的消耗品
+		//		continue
+		//	}
+		//
+		//	r := storage.Results{}
+		//	r.ControllerSN = consu.ControllerSN
+		//	r.GunSN = consu.GunSN
+		//	r.PSet, _ = strconv.Atoi(consu.PSet)
+		//	r.ToleranceMax = consu.ToleranceMax
+		//	r.ToleranceMin = consu.ToleranceMin
+		//	r.ToleranceMaxDegree = consu.ToleranceMaxDegree
+		//	r.ToleranceMinDegree = consu.ToleranceMinDegree
+		//	r.NutNo = consu.NutNo
+		//	r.Batch = fmt.Sprintf("%d/%d", k+1, len(v.Consumes))
+		//
+		//	//r.WorkorderID = o.WorkorderID
+		//	r.Result = storage.RESULT_NONE
+		//	r.HasUpload = false
+		//	r.Stage = storage.RESULT_STAGE_INIT
+		//	r.UpdateTime = time.Now()
+		//	r.PSetDefine = ""
+		//	r.ResultValue = ""
+		//	r.Count = 1
+		//	r.UserID = 1
+		//
+		//	if len(consu.ResultIDs) == 0 {
+		//		ignore = true
+		//		break
+		//	}
+		//
+		//	for _, result_id := range consu.ResultIDs {
+		//		result_count++
+		//
+		//		r.OffsetX = consu.X
+		//		r.OffsetY = consu.Y
+		//
+		//		r.Seq = result_count
+		//		r.ResultId = result_id
+		//		r.MaxRedoTimes = consu.Max_redo_times
+		//		results = append(results, r)
+		//	}
+		//}
 
 		//o.LastResultID = results[len(results)-1].Id
 
-		if !ignore {
-			e := s.DB.InsertWorkorder(&o, &results, true, true, true)
-			if e != nil {
-				finalErr = e
-			}
-
-			dbWorkorders[i] = o
+		e := s.DB.InsertWorkorder(&o, nil, true, false, true)
+		if e != nil {
+			finalErr = e
 		}
+
+		dbWorkorders[i] = o
 
 	}
 

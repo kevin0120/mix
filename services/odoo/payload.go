@@ -15,7 +15,8 @@ type ODOOMOCreated struct {
 }
 
 type ODOOConsume struct {
-	Seq                int64   `json:"sequence"`
+	Seq                int     `json:"sequence"`
+	GroupSeq           int     `json:"group_sequence"`
 	ControllerSN       string  `json:"controller_sn"`
 	GunSN              string  `json:"gun_sn"`
 	ToleranceMinDegree float64 `json:"tolerance_min_degree"`

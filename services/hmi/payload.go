@@ -11,6 +11,8 @@ type PSet struct {
 	Result_id     int64  `json:"result_id"`
 	Count         int    `json:"count"`
 	UserID        int64  `json:"user_id"`
+	GroupSeq      int    `json:"group_sequence"`
+	WorkorderID   int64  `json:"workorder_id"`
 }
 
 type PSetManual struct {

@@ -7,6 +7,7 @@ import (
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -26,8 +27,11 @@ const (
 
 type SavePackage struct {
 	controllerResult *ControllerResult
-	dbResult         *storage.Results
 	dbWorkorder      *storage.Workorders
+	consume          *Consume
+	count            int
+	batch            string
+	curveFile        string
 }
 
 type Handlers struct {
@@ -57,55 +61,60 @@ func (h *Handlers) Release() {
 func (h *Handlers) Handle(result interface{}, curve interface{}) {
 	controllerResult := result.(*ControllerResult)
 
+	// 取得工具信息
+	gun, err := h.controllerService.DB.GetGun(controllerResult.GunSN)
+	if err != nil {
+		h.controllerService.diag.Error("get gun failed", err)
+		return
+	}
+
 	// 取得工单
-	dbWorkorder, err := h.controllerService.DB.GetWorkorder(controllerResult.Workorder_ID, true)
+	dbWorkorder, err := h.controllerService.DB.GetWorkorder(gun.WorkorderID, true)
 	if err != nil {
 		h.controllerService.diag.Error("get workorder failed", err)
 		return
 	}
 
-	// 取得结果
-	dbResult, err := h.controllerService.DB.FindTargetResultForJobManual(controllerResult.Workorder_ID)
-	if err != nil {
-		h.controllerService.diag.Error("get result failed", err)
-		return
+	consumes := []Consume{}
+	json.Unmarshal([]byte(dbWorkorder.Consumes), &consumes)
+
+	targetConsume := consumes[0]
+	for _, v := range consumes {
+		if v.GroupSeq == gun.Seq {
+			targetConsume = v
+		}
 	}
 
 	// 处理曲线
+	curveFileName := ""
 	if curve != nil {
 		controllerCurve := curve.(*minio.ControllerCurve)
-		curveFileName := fmt.Sprintf("%s_%s_%d_%d_%d.json",
-			dbWorkorder.MO_Model, dbResult.NutNo, dbResult.Seq, dbResult.ResultId, dbResult.Count)
+		curveFileName = fmt.Sprintf("%s_%s_%d_%d_%d.json",
+			dbWorkorder.MO_Model, targetConsume.NutNo, dbWorkorder.WorkorderID, gun.Seq, gun.Count)
 
 		controllerResult.CurFile = aiis.CURObject{
 			File: curveFileName,
-			OP:   dbResult.Count,
+			OP:   gun.Count,
 		}
 
 		controllerCurve.CurveFile = curveFileName
-		controllerCurve.ResultID = dbResult.Id
-		controllerCurve.Count = dbResult.Count
+		//controllerCurve.ResultID = dbResult.Id
+		controllerCurve.Count = gun.Count
 		controllerCurve.UpdateTime = controllerResult.Dat
 
 		h.handleCurve(controllerCurve)
 	}
 
 	// 处理结果
-	h.handleResult(controllerResult, &dbResult, &dbWorkorder)
+	h.saveResult(&SavePackage{
+		controllerResult: controllerResult,
+		dbWorkorder:      &dbWorkorder,
+		consume:          &targetConsume,
+		count:            gun.Count,
+		batch:            fmt.Sprintf("%d/%d", targetConsume.GroupSeq, len(consumes)),
+		curveFile:        curveFileName,
+	})
 
-}
-
-// 处理结果数据
-func (h *Handlers) handleResult(result *ControllerResult, dbResult *storage.Results, dbWorkorder *storage.Workorders) {
-
-	// 保存结果
-	pkg := SavePackage{
-		controllerResult: result,
-		dbResult:         dbResult,
-		dbWorkorder:      dbWorkorder,
-	}
-
-	h.saveResult(&pkg)
 }
 
 // 处理曲线数据
@@ -133,14 +142,14 @@ func (h *Handlers) saveResult(data *SavePackage) {
 	h.saveBuffer <- data
 
 	// 推送hmi
-	if data.controllerResult.NeedPushHmi && !h.controllerService.DB.IsMultiResult(data.dbResult.WorkorderID, data.dbResult.Batch) {
+	if data.controllerResult.NeedPushHmi {
 		wsResult := wsnotify.WSResult{
 			Result:   data.controllerResult.Result,
 			MI:       data.controllerResult.ResultValue.Mi,
 			WI:       data.controllerResult.ResultValue.Wi,
 			TI:       data.controllerResult.ResultValue.Ti,
-			GroupSeq: data.dbResult.GroupSeq,
-			Batch:    data.dbResult.Batch,
+			GroupSeq: data.consume.GroupSeq,
+			Batch:    data.batch,
 		}
 
 		wsResults := []wsnotify.WSResult{}
@@ -151,48 +160,68 @@ func (h *Handlers) saveResult(data *SavePackage) {
 
 }
 
+func  magicTrick(t time.Time) time.Time {
+	return t.Add(-8 * time.Hour)
+}
+
 // 处理保存结果
 func (h *Handlers) handleSaveResult(data *SavePackage) {
 
-	loc, _ := time.LoadLocation("Local")
-	dt, _ := time.ParseInLocation("2006-01-02 15:04:05", data.controllerResult.Dat, loc)
-	data.dbResult.UpdateTime = dt.UTC()
+	dbResult := storage.Results{}
 
-	data.dbResult.Result = data.controllerResult.Result
-	data.dbResult.ControllerSN = data.controllerResult.Controller_SN
+	loc, _ := time.LoadLocation("Local")
+	dt, _ := time.ParseInLocation("2006-01-02 15:04:05", data.controllerResult.Dat,loc)
+	dbResult.UpdateTime = magicTrick(dt.UTC())
+
+	//dbResult.UpdateTime = dt.UTC()
+
+	dbResult.Result = data.controllerResult.Result
+	dbResult.ControllerSN = data.controllerResult.Controller_SN
 	s_value, _ := json.Marshal(data.controllerResult.ResultValue)
 	s_pset, _ := json.Marshal(data.controllerResult.PSetDefine)
 
-	data.dbResult.ResultValue = string(s_value)
-	data.dbResult.PSetDefine = string(s_pset)
-	data.dbResult.TighteningID = data.controllerResult.TighteningID
+	dbResult.ResultValue = string(s_value)
+	dbResult.PSetDefine = string(s_pset)
+	dbResult.TighteningID = data.controllerResult.TighteningID
+	dbResult.Batch = data.batch
+	dbResult.GunSN = data.controllerResult.GunSN
+	dbResult.ExInfo = data.curveFile
 
-	if data.dbResult.Batch == "" {
-		data.dbResult.Batch = fmt.Sprintf("%d/%d", data.dbResult.Seq, data.dbWorkorder.MaxSeq)
-	}
+	dbResult.PSet, _ = strconv.Atoi(data.consume.PSet)
+	dbResult.ToleranceMax = data.consume.ToleranceMax
+	dbResult.ToleranceMin = data.consume.ToleranceMin
+	dbResult.ToleranceMaxDegree = data.consume.ToleranceMaxDegree
+	dbResult.ToleranceMinDegree = data.consume.ToleranceMinDegree
+	dbResult.NutNo = data.consume.NutNo
 
-	if data.dbResult.GunSN == "" {
-		data.dbResult.GunSN = data.controllerResult.GunSN
-	}
+	dbResult.HasUpload = false
+	dbResult.Count = data.count
+	dbResult.UserID = 1
 
-	if data.dbResult.Count >= int(data.dbResult.MaxRedoTimes) || data.dbResult.Result == storage.RESULT_OK {
-		data.dbResult.Stage = storage.RESULT_STAGE_FINAL
+	dbResult.OffsetX = data.consume.X
+	dbResult.OffsetY = data.consume.Y
 
-		if data.dbResult.Batch != "" {
-			kvs := strings.Split(data.dbResult.Batch, "/")
-			if kvs[0] == kvs[1] {
-				h.controllerService.diag.Debug("工单已完成")
-				data.dbWorkorder.Status = "done"
-				h.controllerService.DB.UpdateWorkorder(data.dbWorkorder)
-			}
+	dbResult.GroupSeq = data.consume.GroupSeq
+	dbResult.Seq = data.consume.Seq
+	dbResult.MaxRedoTimes = data.consume.Max_redo_times
+	dbResult.WorkorderID = data.dbWorkorder.Id
+
+	if data.count >= int(data.consume.Max_redo_times) || dbResult.Result == storage.RESULT_OK {
+		dbResult.Stage = storage.RESULT_STAGE_FINAL
+
+		kvs := strings.Split(dbResult.Batch, "/")
+		if kvs[0] == kvs[1] {
+			h.controllerService.diag.Debug("工单已完成")
+			data.dbWorkorder.Status = "done"
+			h.controllerService.DB.UpdateWorkorder(data.dbWorkorder)
 		}
 	} else {
 
-		data.dbResult.Count += 1
+		dbResult.Stage = storage.RESULT_STAGE_INIT
 	}
 
 	// 保存结果
-	_, err := h.controllerService.DB.UpdateResult(data.dbResult)
+	err := h.controllerService.DB.CreateResult(&dbResult)
 	if err != nil {
 		h.controllerService.diag.Error("缓存结果失败", err)
 	} else {
@@ -200,12 +229,9 @@ func (h *Handlers) handleSaveResult(data *SavePackage) {
 	}
 
 	// 推送aiis
-	if data.controllerResult.NeedPushAiis || data.dbResult.Stage == storage.RESULT_STAGE_FINAL {
+	aiisResult, err := h.controllerService.Aiis.ResultToAiisResult(&dbResult)
 
-		aiisResult, err := h.controllerService.Aiis.ResultToAiisResult(data.dbResult, &data.controllerResult.CurFile)
-
-		if err == nil {
-			h.controllerService.Aiis.PutResult(data.dbResult.ResultId, aiisResult)
-		}
+	if err == nil {
+		h.controllerService.Aiis.PutResult(dbResult.ResultId, aiisResult)
 	}
 }

@@ -75,6 +75,8 @@ type AIISResult struct {
 	TighteningId   int64  `json:"tightening_id"`
 	ToolSN         string `json:"tool_sn"`
 	WorkcenterCode string `json:"workcenter_code"`
+	Stage          string `json:"stage"`
+	WorkorderID     int64     `json:"workorder_id"`
 }
 
 type CURObject struct {

@@ -90,13 +90,15 @@ func (m *Methods) putPSets(ctx iris.Context) {
 	str, _ := json.Marshal(pset)
 	m.service.diag.Debug(fmt.Sprintf("new pset:%s", str))
 
-	if pset.UserID == 0 {
-		pset.UserID = DEFAULT_USER_ID
-	}
-
 	if pset.Controller_SN == "" {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("controller_sn is required")
+		return
+	}
+
+	if pset.GunSN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("gun_sn is required")
 		return
 	}
 
@@ -118,35 +120,33 @@ func (m *Methods) putPSets(ctx iris.Context) {
 		return
 	}
 
-	if pset.Result_id == 0 {
+	if pset.WorkorderID == 0 {
 		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("result_id is required")
+		ctx.WriteString("workorder_id is required")
 		return
 	}
 
 	// 检测count
 	if pset.Count < 1 {
 		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("tightning count should be greater than 0")
+		ctx.WriteString("tightening count should be greater than 0")
 		return
 	}
 
-	// 检测结果id
-	result, err := m.service.DB.GetResult(pset.Result_id, 0)
+	// 检测工单
+	workorder, err := m.service.DB.GetWorkorder(pset.WorkorderID, true)
 	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString(err.Error())
 		return
 	}
 
-	if pset.Count == 1 {
-		err = m.service.resetResult(result.Id)
-		if err != nil {
-			m.service.diag.Error("reset result failed", err)
-		}
-	}
-
-	m.service.DB.UpdateResultUserID(result.Id, pset.UserID)
+	m.service.DB.UpdateGun(&storage.Guns{
+		Serial:      pset.GunSN,
+		WorkorderID: workorder.Id,
+		Seq:         pset.GroupSeq,
+		Count:       pset.Count,
+	})
 
 	// 通过控制器设定程序
 	c, exist := m.service.ControllerService.Controllers[pset.Controller_SN]
@@ -158,7 +158,7 @@ func (m *Methods) putPSets(ctx iris.Context) {
 
 	switch c.Protocol() {
 	case controller.AUDIPROTOCOL:
-		err = m.service.AudiVw.PSet(pset.Controller_SN, pset.PSet, result.WorkorderID, pset.Result_id, pset.Count, pset.UserID)
+		err = m.service.AudiVw.PSet(pset.Controller_SN, pset.PSet, workorder.WorkorderID, pset.Result_id, pset.Count, pset.UserID)
 	case controller.OPENPROTOCOL:
 		err = m.service.OpenProtocol.PSet(pset.Controller_SN, pset.PSet, pset.Result_id, pset.Count, pset.UserID)
 
@@ -817,11 +817,11 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 		}
 	}
 
-	results, err := m.service.DB.FindResultsByWorkorder(workorder.Id)
+	//results, err := m.service.DB.FindResultsByWorkorder(workorder.Id)
 
 	resp := Workorder{}
 	resp.HMI_sn = workorder.HMISN
-	resp.Workorder_id = workorder.WorkorderID
+	resp.Workorder_id = workorder.Id
 	resp.Vin = workorder.Vin
 	resp.Knr = workorder.Knr
 	resp.LongPin = workorder.LongPin
@@ -838,17 +838,19 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 		resp.WorkSheet = op.Img
 	}
 
-	for _, v := range results {
+	consumes := []odoo.ODOOConsume{}
+	json.Unmarshal([]byte(workorder.Consumes), &consumes)
+
+	for _, v := range consumes {
 		r := Result{}
-		r.PSet = v.PSet
+		r.PSet, _ = strconv.Atoi(v.PSet)
 		r.GunSN = v.GunSN
-		r.ID = v.ResultId
 		r.Controller_SN = v.ControllerSN
-		r.X = v.OffsetX
-		r.Y = v.OffsetY
-		r.MaxRedoTimes = v.MaxRedoTimes
+		r.X = v.X
+		r.Y = v.Y
+		r.MaxRedoTimes = v.Max_redo_times
 		r.Seq = v.Seq
-		r.GroupSeq = v.Seq
+		r.GroupSeq = v.GroupSeq
 
 		resp.Results = append(resp.Results, r)
 	}
@@ -1159,6 +1161,7 @@ func (m *Methods) getLocalResults(ctx iris.Context) {
 		dt, _ := time.Parse("2006-01-02 15:04:05", stime)
 
 		json.Unmarshal([]byte(v.ResultValue), &sr)
+
 		lr := LocalResults{
 			HmiSN:        m.filterValue(filters, "hmi_sn", string(v.HMISN)),
 			Vin:          m.filterValue(filters, "vin", string(v.Vin)),

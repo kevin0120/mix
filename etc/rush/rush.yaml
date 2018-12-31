@@ -25,7 +25,7 @@ httpd:
     - 'OPTIONS'
 
 minio:
-  url: 192.168.1.3:9000
+  url: 127.0.0.1:9000
   bucket: curves
   access: minio
   secret: minio123
@@ -38,12 +38,12 @@ aiis:
     Content-Type: application/json
   result_push_url: /aiis/v1/operation.results/%d
   push_method: PUT
-  timeout: 10s
+  timeout: 4s
   push_interval: 5s
   max_retry: 3
   ws_result_route: /aiis/v1/ws/results
-  result_upload_inteval: 1s
-  grpc_server: 192.168.1.3:9093
+  result_upload_inteval: 2s
+  grpc_server: 127.0.0.1:9093
 odoo:
   urls:
   - http://127.0.0.1:8069
@@ -104,7 +104,7 @@ controller_service:
 #      port: 4546
 #      channel: 1
 
-  - serial_no: 0002
+  - serial_no: 12345
     protocol: Audi/VW
     remote_ip: 192.168.1.101
     port: 4700

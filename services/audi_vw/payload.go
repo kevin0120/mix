@@ -126,11 +126,13 @@ type BLC struct {
 }
 
 type TIP struct {
-	TID  string `xml:"TID"`
-	PSet int    `xml:"PRG"`
-	Date string `xml:"DAT"`
-	Time string `xml:"TIM"`
-	BLC  []BLC  `xml:"BLC"`
+	ToolSN string `xml:"SID"`
+	TID    string `xml:"TID"`
+	PSet   int    `xml:"PRG"`
+	Date   string `xml:"DAT"`
+	Time   string `xml:"TIM"`
+	STA string `xml:"STA"`
+	BLC    []BLC  `xml:"BLC"`
 }
 
 type GRP struct {
@@ -283,6 +285,7 @@ func XML2Result(result *CVI3Result, rr *controller.ControllerResult) {
 
 	rr.TighteningID = result.PRC_SST.PAR.FAS.GRP.TIP.TID
 	rr.Controller_SN = result.PRC_SST.PAR.SN
+	rr.GunSN = result.PRC_SST.PAR.FAS.GRP.TIP.ToolSN
 	rr.Result = result.PRC_SST.PAR.Result
 	if rr.Result == "IO" {
 		rr.Result = storage.RESULT_OK
@@ -298,7 +301,14 @@ func XML2Result(result *CVI3Result, rr *controller.ControllerResult) {
 	rid, _ := strconv.Atoi(result_id)
 	rr.Result_id = int64(rid)
 	//rr.CurFile = fmt.Sprintf("%s_%d_%s_%s.json", rr.Controller_SN, rr.Workorder_ID, result_id, utils.GenerateID())
-	rr.PSetDefine.Strategy = blcs[len(blcs)-1].PRO.Strategy
+
+	if result.PRC_SST.PAR.FAS.GRP.TIP.STA == "LSN" {
+		rr.PSetDefine.Strategy = controller.STRATEGY_LN
+		rr.Result = "LSN"
+	} else {
+		rr.PSetDefine.Strategy = blcs[len(blcs)-1].PRO.Strategy
+	}
+
 	rr.Count = result.PRC_SST.PAR.Count
 
 	result_values := blcs[len(blcs)-1].PRO.Values
