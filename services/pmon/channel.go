@@ -30,10 +30,11 @@ type Channel struct {
 	Service        *Service
 	RestartPoint   string
 	MtxRestarPoint sync.Mutex
+	diag            Diagnostic
 	ud             interface{} //user data,回调时注入
 }
 
-func NewChannel(c cChannel) *Channel {
+func NewChannel(c cChannel, d Diagnostic) *Channel {
 	return &Channel{
 		cChannel:       c,
 		mux:            new(sync.Mutex),
@@ -43,6 +44,7 @@ func NewChannel(c cChannel) *Channel {
 		e:              nil,
 		ud:             nil,
 		BlockCount:     1,
+		diag: 				d,
 		MtxRestarPoint: sync.Mutex{},
 	}
 }
@@ -145,6 +147,7 @@ func (ch *Channel) Write(buf []byte, msgType PMONSMGTYPE) error {
 			return fmt.Errorf("channel %s is closed can not send SD and send SO %d times", ch.Ch, i)
 		}
 	}
+	ch.diag.Debug(fmt.Sprintf("send msg:%s",string(buf)))
 	err := ch.conn.Write(buf, ch.WriteTimeout)
 	if err != nil && msgType == PMONMSGSD {
 		ch.SethasSD(true)

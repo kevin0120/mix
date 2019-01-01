@@ -275,6 +275,10 @@ func (h *PmonHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
 
+func (h *PmonHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}
+
 // Odoo Handler
 
 type OdooHandler struct {

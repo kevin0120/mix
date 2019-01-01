@@ -11,6 +11,7 @@ import (
 
 type Diagnostic interface {
 	Error(msg string, err error)
+	Debug(msg string)
 }
 
 type Service struct {
@@ -68,7 +69,7 @@ func (s *Service) Open() error {
 	}
 	for cname, channel := range c.Channels {
 		connectKey := fmt.Sprintf("Port%d", channel.Port)
-		s.Channels[cname] = NewChannel(channel) //因为从远端传来的T/R相反，所以进行反转
+		s.Channels[cname] = NewChannel(channel, s.diag) //因为从远端传来的T/R相反，所以进行反转
 		s.Channels[cname].SetConnection(connections[connectKey])
 		if _, ok := s.Config().RestartPoints[cname]; ok {
 			s.Channels[cname].RestartPoint = s.Config().RestartPoints[cname]
@@ -160,5 +161,6 @@ func (s *Service) Dispatch(pkg PmonPackage, chName string) {
 		log.Printf("not found channel %s", chName)
 		return
 	}
+	s.diag.Debug(fmt.Sprintf("channel:%s, recv msg: %s",chName, string(pkg.data)))
 	s.Channels[chName].recvBuf <- pkg //将数据发送到通道中
 }

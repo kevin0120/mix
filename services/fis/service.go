@@ -75,6 +75,28 @@ func (s *Service) Config() Config {
 func (s *Service) Open() error {
 
 	c := s.Config()
+	if len(c.CHRecvHeartbeat) > 0 {
+		e := s.Pmon.SendPmonMessage(pmon.PMONMSGSO, c.CHRecvHeartbeat,"")
+		if e != nil {
+			s.diag.Error("Send PMON SO msg fail",e)
+			return e
+		}
+	}
+	if len(c.CHRecvMission) > 0 {
+		e := s.Pmon.SendPmonMessage(pmon.PMONMSGSO, c.CHRecvMission,"")
+		if e != nil {
+			s.diag.Error("Send PMON SO msg fail",e)
+			return e
+		}
+	}
+	if len(c.CHSendResult) > 0 {
+		e := s.Pmon.SendPmonMessage(pmon.PMONMSGSO, c.CHSendResult,"")
+		if e != nil {
+			s.diag.Error("Send PMON SO msg fail",e)
+			return e
+		}
+	}
+
 	s.Pmon.PmonRegistryEvent(s.OnPmonEventMission, c.CHRecvMission, nil)
 	s.Pmon.PmonRegistryEvent(s.OnPmonEventHeartbeat, c.CHRecvHeartbeat, nil)
 
@@ -187,6 +209,9 @@ func (s *Service) HandleMO(str string) {
 
 	numPrs := len(c.PRS)
 	prsEnd := PRS_START + (LEN_PR_VALUE*numPrs + numPrs - 1)
+	if len(msg) < prsEnd {
+		return
+	}
 	sPrs := msg[PRS_START:prsEnd]
 
 	len_mo := prsEnd + LEN_MO_TAIL
