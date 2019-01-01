@@ -35,11 +35,11 @@ type Channel struct {
 }
 
 func NewChannel(c cChannel, d Diagnostic) *Channel {
-	return &Channel{
+	cc := &Channel{
 		cChannel:       c,
 		mux:            new(sync.Mutex),
 		recvBuf:        make(chan PmonPackage, 10),
-		closed:         make(chan struct{}),
+		closed:         make(chan struct{},2),
 		status:         STATUSCLOSE,
 		e:              nil,
 		ud:             nil,
@@ -47,6 +47,10 @@ func NewChannel(c cChannel, d Diagnostic) *Channel {
 		diag: 				d,
 		MtxRestarPoint: sync.Mutex{},
 	}
+
+	cc.SethasSD(false)
+
+	return cc
 }
 
 func (c *Channel) RefreshRestartPoint(restartPoint string) {
