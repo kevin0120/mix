@@ -85,7 +85,7 @@ changan:
     max_connection: 60
 
 odoo:
-  url: http://127.0.0.1:8069
+  url: http://192.168.1.100
   route: /api/v1/mrp.productions
   headers:
     Content-Type: application/json

@@ -92,7 +92,7 @@ func (s *Service) Healthz() error {
 	if s.httpClient == nil {
 		return errors.New("Odoo Http client is nil ")
 	}
-	r := s.httpClient.R()
+	r := s.httpClient.R().SetHeader("Content-Type", "text/html")
 
 	url := fmt.Sprintf("%s/api/v1/healthz", s.Config().URL)
 	_, err := r.Get(url)
