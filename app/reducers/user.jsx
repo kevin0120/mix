@@ -19,7 +19,8 @@ export const defaultUsers = [
     uuid: '11',
     name: 'dummy',
     avatar: defaultAvatarImg,
-    uid: 10
+    uid: 10,
+    role:'user'
   }
 ];
 
@@ -34,13 +35,13 @@ export const defaultUsers = [
 export default function users(state: Array = defaultUsers, action) {
   switch (action.type) {
     case USER.LOGIN_SUCCESS: {
-      const { uid, name, uuid, avatar } = action;
+      const { uid, name, uuid, avatar, role } = action;
       const img =
         lodash.isNil(avatar) || avatar === '' ? defaultAvatarImg : avatar;
       if (state.length === 1 && state[0].name === 'dummy') {
         return [{ uid, name, uuid, avatar: img }];
       }
-      return [...state, { uid, name, uuid, avatar: img }];
+      return [...state, { uid, name, uuid, avatar: img ,role}];
     }
     case USER.LOGOUT_SUCCESS: {
       if (action.data.length === 0) {

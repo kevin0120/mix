@@ -27,15 +27,25 @@ import withLayout from '../../components/Layout/layout';
 import ShutdownDiag from '../../components/ShutDownDiag';
 import { routeConfigs } from '../../routes/index';
 import styles from './styles';
+import { push } from "connected-react-router";
+import { setNewNotification } from '../../actions/notification';
+const lodash = require('lodash');
 
 const mapStateToProps = (state, ownProps) => ({
+  usersInfo: state.users,
   authEnable: state.setting.systemSettings.authEnable,
   ...ownProps
 });
 
-function mapDispatchToProps(dispatch) {
-  return bindActionCreators({ OpenShutdown }, dispatch);
-}
+const mapDispatchToProps = {
+  doPush: push,
+  notification:setNewNotification,
+  OpenShutdown
+};
+
+// function mapDispatchToProps(dispatch) {
+//   return bindActionCreators({ OpenShutdown }, dispatch);
+// }
 
 /* eslint-disable no-unused-vars */
 class ConnectedWelcome extends React.Component {
@@ -55,10 +65,10 @@ class ConnectedWelcome extends React.Component {
   };
 
   render() {
-    const { classes, authEnable } = this.props;
+    const { classes, authEnable,doPush,notification,usersInfo } = this.props;
     const fabRightClassName = classNames(classes.fabRight);
     const fabLeftClassName = classNames(classes.fabLeft);
-
+    const { role } = usersInfo[0];
     return (
       <I18n ns="translations">
         {t => (
@@ -72,8 +82,15 @@ class ConnectedWelcome extends React.Component {
                     style={{ backgroundColor: route.color }}
                   >
                     <CardActionArea
-                      component={Link}
-                      to={route.url}
+                      // component={Link}
+                      // to={route.url}
+                      onClick={() => {
+                        if (route.roles && lodash.includes(route.roles, role)) {
+                          doPush(route.url);
+                        } else {
+                          notification('error','没有访问权限');
+                        }
+                      }}
                       className={classes.cardActionArea}
                     >
                       <div
