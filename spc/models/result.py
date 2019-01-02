@@ -113,6 +113,10 @@ class OperationResult(models.HyperModel):
 
     tightening_id = fields.Integer('TighteningID')
 
+    _sql_constraints = [('tid_vin_gun_uniq', 'unique(gun_id, tightening_id, vin,time)', 'Per Screw Gun tighening ID VIN must different'),
+                        ('tid_wo_gun_uniq', 'unique(gun_id, tightening_id, workorder_id,time)',
+                         'Per Screw Gun tighening ID  WO must different')]
+
     def init(self):
         self.env.cr.execute("""
             CREATE OR REPLACE FUNCTION create_operation_result(pset_m_threshold numeric, pset_m_max numeric,
