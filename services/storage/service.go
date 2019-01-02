@@ -137,6 +137,9 @@ func (s *Service) BatchSave(results []*ResultObject) error {
 
 		err := s.eng.Exec(sql)
 		if err.Error != nil {
+			if strings.HasSuffix(err.Error.Error(),"tid_vin_gun_uniq\"") || strings.HasSuffix(err.Error.Error(),"tid_wo_gun_uniq\"" ) {
+				return nil
+			}
 			return err.Error
 		}
 	}
