@@ -73,6 +73,7 @@
                         <field name="measure_torque"/>
                         <field name="measure_degree"/>
                         <field name="measure_t_don" />
+                        <field name="tightening_id" />
                         <field name="one_time_pass" groups="base.group_no_one"/>
                         <field name="final_pass" groups="base.group_no_one"/>
                         <field name="lacking" groups="base.group_no_one" />
@@ -137,6 +138,7 @@
                 <field name="measure_degree" avg="Avg. Degree" />
                 <field name="measure_t_don" avg="Avg. Operation Duration" />
                 <field name="measure_result" />
+                <field name="tightening_id" />
                 <field name="quality_state" groups="base.group_no_one"/>
                 <field name="batch"/>
                 <field name="program_id"/>

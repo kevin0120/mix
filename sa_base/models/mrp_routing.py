@@ -87,7 +87,8 @@ class MrpRoutingWorkcenter(models.Model):
                 # 'tolerance_max': qcp.tolerance_max,
                 # 'tolerance_min_degree': qcp.tolerance_min_degree,
                 # 'tolerance_max_degree': qcp.tolerance_max_degree,
-                'consu_product_id': point.product_id.id if point.product_id.id else 0
+                'consu_product_id': point.product_id.id if point.product_id.id else 0,
+                'nut_no': point.product_id.screw_type_code if point.product_id else '',
             })
 
         for bom_id in bom_ids:
@@ -111,7 +112,7 @@ class MrpRoutingWorkcenter(models.Model):
             try:
                 ret = Requests.put(url, data=json.dumps(val), headers={'Content-Type': 'application/json'}, timeout=1)
                 if ret.status_code == 200:
-                    operation_id.write({'sync_download_time': fields.Datetime.now()})  ### 更新发送结果
+                    # operation_id.write({'sync_download_time': fields.Datetime.now()})  ### 更新发送结果
                     self.env.user.notify_info(u'下发工艺成功')
             except ConnectionError as e:
                 self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))

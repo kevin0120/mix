@@ -16,9 +16,11 @@ NORMAL_RESULT_FIELDS_READ = ['workorder_id', 'id', 'product_id', 'consu_product_
 
 from urlparse import urljoin
 
+
 def str_time_to_rfc3339(s_time):
     sp = s_time.split(' ')
     return sp[0] + 'T' + sp[1] + 'Z'
+
 
 def _post_aiis_result_package(aiis_urls, results):
     if not aiis_urls:
@@ -44,7 +46,7 @@ def _post_aiis_result_package(aiis_urls, results):
                 u = urljoin(url, AIIS_RESULT_API)
                 if isinstance(validators.url(u), validators.ValidationFailure):
                     break
-                ret = Requests.put(u, data=json.dumps(data), headers={'Content-Type': 'application/json'})
+                ret = Requests.put(u, data=json.dumps(data), headers={'Content-Type': 'application/json'}, timeout=1)
                 if ret.status_code == 200:
                     if not result.sent:
                         result.write({'sent': True})  ### 更新发送结果

@@ -8,6 +8,7 @@
         <field name="arch" type="xml">
             <xpath expr="//header/button[@name='archive_equipment_request']" position="before">
                 <button name="assign_ticket_to_self" string="I take it" type="object" class="oe_highlight"/>
+                <button name="post_maintenance_req" string="发送维护请求到用户界面" type="object" class="oe_highlight"/>
             </xpath>
           <xpath expr="//field[@name='production_id']" position="replace">
               <field name="production_id" invisible="1"/>
