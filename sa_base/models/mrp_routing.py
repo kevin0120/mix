@@ -70,9 +70,9 @@ class MrpRoutingWorkcenter(models.Model):
     def _push_mrp_routing_workcenter(self, url):
         self.ensure_one()
         operation_id = self
-        bom_id = self.env['mrp.bom'].search([('operation_ids', 'in', operation_id.ids)], limit=1)
-        if not bom_id:
-            return True
+        bom_ids = self.env['mrp.bom'].search([('operation_ids', 'in', operation_id.ids)])
+        if not bom_ids:
+            return
         _points = []
         for point in operation_id.operation_point_ids:
             # bom_line = self.env['mrp.bom.line'].search([('operation_id', '=', operation_id.id), ('operation_point_id', '=', point.id)])
@@ -90,32 +90,34 @@ class MrpRoutingWorkcenter(models.Model):
                 'consu_product_id': point.product_id.id if point.product_id.id else 0
             })
 
-        val = {
-            "id": operation_id.id,
-            "workcenter_id": operation_id.workcenter_id.id,
-            "job": int(operation_id.op_job_id.code) if operation_id.op_job_id else 0,
-            "max_op_time": operation_id.max_op_time,
-            "name": u"[{0}]{1}@{2}/{3}".format(operation_id.name, operation_id.group_id.code,
-                                               operation_id.workcenter_id.name,
-                                               operation_id.routing_id.name),
-            "img": u'data:{0};base64,{1}'.format('image/png',
-                                                 operation_id.worksheet_img) if operation_id.worksheet_img else "",
-            "product_id": bom_id.product_id.id if bom_id else 0,
-            "product_type": bom_id.product_id.vehicle_type_code if bom_id else "",
-            "workcenter_code": operation_id.workcenter_id.code if operation_id.workcenter_id else "",
-            'vehicleTypeImg': u'data:{0};base64,{1}'.format('image/png',
-                                                            bom_id.product_id.image_small) if bom_id.product_id.image_small else "",
-            "points": _points
-        }
-        try:
-            ret = Requests.put(url, data=json.dumps(val), headers={'Content-Type': 'application/json'}, timeout=1)
-            if ret.status_code == 200:
-                operation_id.write({'sync_download_time': fields.Datetime.now()})  ### 更新发送结果
-                self.env.user.notify_info(u'下发工艺成功')
-        except ConnectionError as e:
-            self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
-        except RequestException as e:
-            self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
+        for bom_id in bom_ids:
+            val = {
+                "id": operation_id.id,
+                "workcenter_id": operation_id.workcenter_id.id,
+                "job": int(operation_id.op_job_id.code) if operation_id.op_job_id else 0,
+                "max_op_time": operation_id.max_op_time,
+                "name": u"[{0}]{1}@{2}/{3}".format(operation_id.name, operation_id.group_id.code,
+                                                   operation_id.workcenter_id.name,
+                                                   operation_id.routing_id.name),
+                "img": u'data:{0};base64,{1}'.format('image/png',
+                                                     operation_id.worksheet_img) if operation_id.worksheet_img else "",
+                "product_id": bom_id.product_id.id if bom_id else 0,
+                "product_type": bom_id.product_id.vehicle_type_code if bom_id else "",
+                "workcenter_code": operation_id.workcenter_id.code if operation_id.workcenter_id else "",
+                'vehicleTypeImg': u'data:{0};base64,{1}'.format('image/png',
+                                                                bom_id.product_id.image_small) if bom_id.product_id.image_small else "",
+                "points": _points
+            }
+            try:
+                ret = Requests.put(url, data=json.dumps(val), headers={'Content-Type': 'application/json'}, timeout=1)
+                if ret.status_code == 200:
+                    operation_id.write({'sync_download_time': fields.Datetime.now()})  ### 更新发送结果
+                    self.env.user.notify_info(u'下发工艺成功')
+            except ConnectionError as e:
+                self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
+            except RequestException as e:
+                self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
+
         return True
 
     @api.multi
