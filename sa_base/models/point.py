@@ -49,7 +49,7 @@ class OperationPoints(models.Model):
 
     _inherit = ['mail.thread']
 
-    _order = "sequence"
+    _order = "group_sequence, sequence"
 
     active = fields.Boolean(
         'Active', default=True,
