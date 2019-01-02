@@ -174,8 +174,8 @@ type OperationResult struct {
 
 	Lacking string `json:"lacking"`
 
-	Stage string `json:"stage"`
-	WorkorderID     int64     `json:"workorder_id"`
+	Stage       string `json:"stage"`
+	WorkorderID int64  `json:"workorder_id"`
 }
 
 type CURObject struct {

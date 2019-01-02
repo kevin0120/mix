@@ -76,23 +76,23 @@ func (s *Service) Open() error {
 
 	c := s.Config()
 	if len(c.CHRecvHeartbeat) > 0 {
-		e := s.Pmon.SendPmonMessage(pmon.PMONMSGSO, c.CHRecvHeartbeat,"")
+		e := s.Pmon.SendPmonMessage(pmon.PMONMSGSO, c.CHRecvHeartbeat, "")
 		if e != nil {
-			s.diag.Error("Send PMON SO msg fail",e)
+			s.diag.Error("Send PMON SO msg fail", e)
 			return e
 		}
 	}
 	if len(c.CHRecvMission) > 0 {
-		e := s.Pmon.SendPmonMessage(pmon.PMONMSGSO, c.CHRecvMission,"")
+		e := s.Pmon.SendPmonMessage(pmon.PMONMSGSO, c.CHRecvMission, "")
 		if e != nil {
-			s.diag.Error("Send PMON SO msg fail",e)
+			s.diag.Error("Send PMON SO msg fail", e)
 			return e
 		}
 	}
 	if len(c.CHSendResult) > 0 {
-		e := s.Pmon.SendPmonMessage(pmon.PMONMSGSO, c.CHSendResult,"")
+		e := s.Pmon.SendPmonMessage(pmon.PMONMSGSO, c.CHSendResult, "")
 		if e != nil {
-			s.diag.Error("Send PMON SO msg fail",e)
+			s.diag.Error("Send PMON SO msg fail", e)
 			return e
 		}
 	}

@@ -396,11 +396,14 @@ func (s *Service) OperationToFisResult(r *storage.OperationResult) fis.FisResult
 
 	valueResult := 1
 
-	if strings.ToUpper(r.MeasureResult) == "OK" {
+	tr := strings.ToUpper(r.MeasureResult)
+	if tr == "OK" {
 		result.ResultValue = "IO__"
-	} else {
+	} else if tr == "NOK" {
 		result.ResultValue = "NIO_"
 		valueResult = 0
+	} else if tr == "LSN" {
+		result.ResultValue = "LSN_"
 	}
 
 	result.Dat = r.ControlDate

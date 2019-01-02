@@ -161,6 +161,6 @@ func (s *Service) Dispatch(pkg PmonPackage, chName string) {
 		log.Printf("not found channel %s", chName)
 		return
 	}
-	s.diag.Debug(fmt.Sprintf("channel:%s, recv msg: %s",chName, string(pkg.data)))
+	s.diag.Debug(fmt.Sprintf("channel:%s, recv msg: %s", chName, string(pkg.data)))
 	s.Channels[chName].recvBuf <- pkg //将数据发送到通道中
 }
