@@ -111,6 +111,8 @@ class OperationResult(models.HyperModel):
 
     batch = fields.Char('Batch')  # 批次信息
 
+    tightening_id = fields.Integer('TighteningID')
+
     def init(self):
         self.env.cr.execute("""
             CREATE OR REPLACE FUNCTION create_operation_result(pset_m_threshold numeric, pset_m_max numeric,
