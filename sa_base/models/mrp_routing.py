@@ -111,7 +111,7 @@ class MrpRoutingWorkcenter(models.Model):
             try:
                 ret = Requests.put(url, data=json.dumps(val), headers={'Content-Type': 'application/json'}, timeout=1)
                 if ret.status_code == 200:
-                    operation_id.write({'sync_download_time': fields.Datetime.now()})  ### 更新发送结果
+                    # operation_id.write({'sync_download_time': fields.Datetime.now()})  ### 更新发送结果
                     self.env.user.notify_info(u'下发工艺成功')
             except ConnectionError as e:
                 self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))

@@ -6,6 +6,15 @@ from odoo.exceptions import UserError
 from itertools import groupby
 import uuid
 
+import requests as Requests
+import json
+from requests import ConnectionError, RequestException, exceptions
+import logging
+PUSH_MAINTENANCE_REQ_URL = '/rush/v1/maintenance'
+
+logger = logging.getLogger(__name__)
+
+
 class MaintenanceCheckPointCategory(models.Model):
     _name = 'maintenance.cp.category'
 
@@ -158,6 +167,40 @@ class MaintenanceRequest(models.Model):
 
     check_point_action_ids = fields.One2many('maintenance.cp.action', 'request_id')
 
+    @api.multi
+    def assign_ticket_to_self(self):
+        for r in self:
+            r.technician_user_id = self.env.uid
+
+    @api.multi
+    def post_maintenance_req(self):
+        self.ensure_one()
+        ret = self.equipment_id
+        if not ret:
+            return
+        if ret.category_name == 'Gun':
+            master = ret._get_parent_masterpc()[0]
+            if not master:
+                return
+            connections = master.connection_ids.filtered(lambda r: r.protocol == 'http') if master.connection_ids else None
+            if not connections:
+                return
+            url = ['http://{0}:{1}{2}'.format(connect.ip, connect.port, PUSH_MAINTENANCE_REQ_URL) for connect in
+                   connections][0]
+            val = {
+                "type": ret.category_name,
+                "name": ret.display_name,
+                "expire_time": fields.Date.today()
+            }
+            try:
+                Requests.post(url, data=json.dumps(val), headers={'Content-Type': 'application/json'}, timeout=3)
+            except ConnectionError as e:
+                logger.debug(u'发送维护请求失败, 错误原因:{0}'.format(e.message))
+            except RequestException as e:
+                logger.debug(u'发送维护请求失败, 错误原因:{0}'.format(e.message))
+            finally:
+                return
+
     @api.model
     def create(self, vals):
         ret = super(MaintenanceRequest, self).create(vals)
@@ -179,19 +222,20 @@ class MaintenanceRequest(models.Model):
             if len(actions) > 0:
                 self.env['maintenance.cp.action'].sudo().bulk_create(actions)
 
-            template_id = self.env.ref('sa_maintenance.new_maintenance_request_email_template', False)
-            if template_id:
-                rendering_context = dict(self._context)
-                rendering_context.update({
-                    'dbname': self._cr.dbname,
-                    'base_url': self.env['ir.config_parameter'].sudo().get_param('web.base.url',
-                                                                                 default='http://localhost:8069')
-                })
-                template_id = template_id.with_context(rendering_context)
-                mail_id = template_id.send_mail(ret.id)  # 先不要发送,之后调用send方法发送邮件
-                current_mail = self.env['mail.mail'].browse(mail_id)
-                # self.env["celery.task"].call_task("mail.mail", "send_async_by_id", mail_id=mail_id)
-                current_mail.send()  # 发送邮件
+            ret.post_maintenance_req()  # 主动发送维护请求到HMI
+            # template_id = self.env.ref('sa_maintenance.new_maintenance_request_email_template', False)
+            # if template_id:
+            #     rendering_context = dict(self._context)
+            #     rendering_context.update({
+            #         'dbname': self._cr.dbname,
+            #         'base_url': self.env['ir.config_parameter'].sudo().get_param('web.base.url',
+            #                                                                      default='http://localhost:8069')
+            #     })
+            #     template_id = template_id.with_context(rendering_context)
+            #     mail_id = template_id.send_mail(ret.id)  # 先不要发送,之后调用send方法发送邮件
+            #     current_mail = self.env['mail.mail'].browse(mail_id)
+            #     # self.env["celery.task"].call_task("mail.mail", "send_async_by_id", mail_id=mail_id)
+            #     current_mail.send()  # 发送邮件
         return ret
 
 
@@ -199,4 +243,13 @@ class MaintenanceEquipment(models.Model):
     _inherit = 'maintenance.equipment'
 
     check_point_ids = fields.One2many('maintenance.cp', 'equipment_id')
+
+    @api.one
+    def _get_parent_masterpc(self):
+        cat = self
+        while cat:
+            if cat.category_name == 'MasterPC':
+                return cat
+            cat = cat.parent_id
+        return None
 
