@@ -377,6 +377,12 @@ export function* handleResults(data) {
     let hasFail = false;
     let storyType = STORY_TYPE.PASS;
 
+    const batch = `${(
+      operations.activeResultIndex + 1
+    ).toString()}/${operations.results[
+    operations.results.length - 1
+      ].group_sequence.toString()}`;
+
     for (let i = 0; i < data.length; i += 1) {
       if (data[i].result === OPERATION_RESULT.NOK) {
         hasFail = true;
@@ -384,16 +390,16 @@ export function* handleResults(data) {
       } else if  (data[i].result === OPERATION_RESULT.OK){
         storyType = STORY_TYPE.PASS;
       }else {
+        yield call(
+          addNewStory,
+          STORY_TYPE.FAIL,
+          `结果 ${batch}`,
+          `执行策略 ${data[i].result}`
+        );
         return
       }
 
       // const eti  = data[i].ti? data[i].ti.toString() : 'nil';
-
-      const batch = `${(
-        operations.activeResultIndex + 1
-      ).toString()}/${operations.results[
-      operations.results.length - 1
-        ].group_sequence.toString()}`;
 
       yield call(
         addNewStory,
