@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kataras/iris"
-	"github.com/kataras/iris/core/errors"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/openprotocol"
@@ -158,7 +157,7 @@ func (m *Methods) putPSets(ctx iris.Context) {
 
 	switch c.Protocol() {
 	case controller.AUDIPROTOCOL:
-		err = m.service.AudiVw.PSet(pset.Controller_SN, pset.PSet, workorder.WorkorderID, pset.Result_id, pset.Count, pset.UserID)
+		err = m.service.AudiVw.PSet(pset.Controller_SN, pset.PSet, workorder.WorkorderID, int64(pset.GroupSeq), pset.Count, pset.UserID)
 	case controller.OPENPROTOCOL:
 		err = m.service.OpenProtocol.PSet(pset.Controller_SN, pset.PSet, pset.Result_id, pset.Count, pset.UserID)
 
@@ -662,45 +661,45 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 }
 
 func (m *Methods) insertResultsForJob(job *JobManual) (*storage.Workorders, error) {
-	op, err := m.service.DB.GetOperation(job.OperationID)
+	op, err := m.service.DB.GetOperation(job.OperationID, job.CarType)
 	if err != nil {
 		return nil, err
 	}
 
-	points := []RoutingOperationPoint{}
-	err = json.Unmarshal([]byte(op.Points), &points)
-	if err != nil {
-		return nil, errors.New("points is required")
-	}
-
-	max_seq := 0
-	db_results := []storage.Results{}
-	for _, v := range points {
-		if v.GroupSequence > max_seq {
-			max_seq = v.GroupSequence
-		}
-		r := storage.Results{}
-		r.PSet = v.PSet
-		r.GroupSeq = v.GroupSequence
-		r.OffsetX = v.X
-		r.OffsetY = v.Y
-		r.Seq = v.Seq
-		r.MaxRedoTimes = v.MaxRedoTimes
-		r.Stage = storage.RESULT_STAGE_INIT
-		r.Result = storage.RESULT_NONE
-		r.ControllerSN = job.Controller_SN
-		r.UserID = job.UserID
-		r.ToleranceMax = v.ToleranceMax
-		r.ToleranceMin = v.ToleranceMin
-		r.ToleranceMaxDegree = v.ToleranceMaxDegree
-		r.ToleranceMinDegree = v.ToleranceMinDegree
-		r.ConsuProductID = v.ConsuProductID
-		r.Batch = fmt.Sprintf("%d/%d", v.GroupSequence, points[len(points)-1].GroupSequence)
-		r.UpdateTime = time.Now()
-		r.Count = 1
-
-		db_results = append(db_results, r)
-	}
+	//points := []RoutingOperationPoint{}
+	//err = json.Unmarshal([]byte(op.Points), &points)
+	//if err != nil {
+	//	return nil, errors.New("points is required")
+	//}
+	//
+	//max_seq := 0
+	//db_results := []storage.Results{}
+	//for _, v := range points {
+	//	if v.GroupSequence > max_seq {
+	//		max_seq = v.GroupSequence
+	//	}
+	//	r := storage.Results{}
+	//	r.PSet = v.PSet
+	//	r.GroupSeq = v.GroupSequence
+	//	r.OffsetX = v.X
+	//	r.OffsetY = v.Y
+	//	r.Seq = v.Seq
+	//	r.MaxRedoTimes = v.MaxRedoTimes
+	//	r.Stage = storage.RESULT_STAGE_INIT
+	//	r.Result = storage.RESULT_NONE
+	//	r.ControllerSN = job.Controller_SN
+	//	r.UserID = job.UserID
+	//	r.ToleranceMax = v.ToleranceMax
+	//	r.ToleranceMin = v.ToleranceMin
+	//	r.ToleranceMaxDegree = v.ToleranceMaxDegree
+	//	r.ToleranceMinDegree = v.ToleranceMinDegree
+	//	r.ConsuProductID = v.ConsuProductID
+	//	r.Batch = fmt.Sprintf("%d/%d", v.GroupSequence, points[len(points)-1].GroupSequence)
+	//	r.UpdateTime = time.Now()
+	//	r.Count = 1
+	//
+	//	db_results = append(db_results, r)
+	//}
 
 	db_workorder := storage.Workorders{}
 	db_workorder.Vin = job.Vin
@@ -708,14 +707,15 @@ func (m *Methods) insertResultsForJob(job *JobManual) (*storage.Workorders, erro
 	db_workorder.HMISN = job.HmiSN
 	db_workorder.ProductID = op.ProductId
 	db_workorder.WorkcenterID = op.WorkcenterID
-	db_workorder.MaxSeq = max_seq
+	//db_workorder.MaxSeq = max_seq
 	db_workorder.UserID = job.UserID
 	db_workorder.MO_Model = job.CarType
 	db_workorder.Mode = job.Mode
 	db_workorder.UpdateTime = time.Now()
 	db_workorder.WorkcenterCode = op.WorkcenterCode
+	db_workorder.Consumes = op.Points
 
-	err = m.service.DB.InsertWorkorder(&db_workorder, &db_results, false, false, true)
+	err = m.service.DB.InsertWorkorder(&db_workorder, nil, false, false, true)
 
 	return &db_workorder, err
 }
@@ -833,7 +833,7 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 	resp.Lnr = workorder.MO_Lnr
 	resp.Model = workorder.MO_Model
 
-	op, err := m.service.DB.GetOperation(workorder.ImageOPID)
+	op, err := m.service.DB.GetOperation(workorder.ImageOPID, workorder.MO_Model)
 	if err == nil {
 		resp.WorkSheet = op.Img
 	}
@@ -1220,4 +1220,27 @@ func (m *Methods) listWorkorders(ctx iris.Context) {
 	body, _ := json.Marshal(rtWorkorders)
 	ctx.Header("content-type", "application/json")
 	ctx.Write(body)
+}
+
+func (m *Methods) testProtocol(ctx iris.Context) {
+
+	tp := TestProtocol{
+		ProtocolType: "op",
+		Payload:      "0516006109981       010000020103工作组-test           04                         0500020600207000800000090001100000111122131141151161171181191200000000000210001002200000023000000240003232500720263600027000002802154290000030000003100000320003300034000350000003600000037000000380000003900000040000000410000000005420000043000004418C45596      452018-09-29:11:45:3346                   47                         481490250                      34051                         52                         53    540000005500000000005600570058",
+	}
+	err := ctx.ReadJSON(&tp)
+
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("struct err")
+		return
+	}
+
+	switch tp.ProtocolType {
+	case "vw":
+		m.service.AudiVw.Parse(tp.Payload)
+
+	case "op":
+		m.service.ControllerService.Controllers["0001"].(*openprotocol.Controller).Parse(tp.Payload)
+	}
 }

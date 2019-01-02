@@ -815,7 +815,7 @@ func (rd *ResultData) Deserialize(str string) error {
 		return err
 	}
 
-	rd.StageResult = str[516:527]
+	//rd.StageResult = str[516:527]
 
 	return nil
 }

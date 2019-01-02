@@ -172,3 +172,8 @@ type LocalResults struct {
 	TimeStamp    interface{} `json:"timestamp,omitempty"`
 	Batch        interface{} `json:"batch,omitempty"`
 }
+
+type TestProtocol struct {
+	ProtocolType string `json:"type"`
+	Payload      string `json:"payload"`
+}

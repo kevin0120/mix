@@ -131,7 +131,7 @@ type TIP struct {
 	PSet   int    `xml:"PRG"`
 	Date   string `xml:"DAT"`
 	Time   string `xml:"TIM"`
-	STA string `xml:"STA"`
+	STA    string `xml:"STA"`
 	BLC    []BLC  `xml:"BLC"`
 }
 
@@ -297,9 +297,9 @@ func XML2Result(result *CVI3Result, rr *controller.ControllerResult) {
 	rr.Workorder_ID = result.PRC_SST.PAR.Workorder_id
 	rr.UserID = result.PRC_SST.PAR.FAS.UserID
 	rr.Dat = fmt.Sprintf("%s %s", result.PRC_SST.PAR.FAS.GRP.TIP.Date, result.PRC_SST.PAR.FAS.GRP.TIP.Time)
-	result_id := result.PRC_SST.PAR.Result_id
-	rid, _ := strconv.Atoi(result_id)
-	rr.Result_id = int64(rid)
+
+	seq, _ := strconv.Atoi(result.PRC_SST.PAR.Result_id)
+	rr.Seq = seq
 	//rr.CurFile = fmt.Sprintf("%s_%d_%s_%s.json", rr.Controller_SN, rr.Workorder_ID, result_id, utils.GenerateID())
 
 	if result.PRC_SST.PAR.FAS.GRP.TIP.STA == "LSN" {

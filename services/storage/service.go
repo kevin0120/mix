@@ -261,10 +261,10 @@ func (s *Service) CreateResult(result *Results) error {
 	return err
 }
 
-func (s *Service) GetOperation(id int64) (RoutingOperations, error) {
+func (s *Service) GetOperation(id int64, model string) (RoutingOperations, error) {
 	var op RoutingOperations
 
-	rt, err := s.eng.Alias("g").Where("g.operation_id = ?", id).Get(&op)
+	rt, err := s.eng.Alias("g").Where("g.operation_id = ?", id).And("g.product_type = ?", model).Get(&op)
 
 	if err != nil {
 		return op, err
@@ -668,7 +668,7 @@ func (s *Service) FindTargetResultForJob(workorder_id int64) (Results, error) {
 func (s *Service) FindTargetResultForJobManual(raw_workorder_id int64) (Results, error) {
 	var results []Results
 
-	ss := s.eng.Alias("r").Where("r.x_workorder_id = ?", raw_workorder_id).And("r.stage = ? or r.seq = ?", RESULT_STAGE_INIT, 0).OrderBy("r.seq")
+	ss := s.eng.Alias("r").Where("r.x_workorder_id = ?", raw_workorder_id).OrderBy("r.update_time").Desc("r.update_time")
 
 	e := ss.Find(&results)
 
@@ -735,7 +735,7 @@ func (s *Service) ResetTightning(controller_sn string) error {
 }
 
 func (s *Service) UpdateRoutingOperations(ro *RoutingOperations) error {
-	sql := "update `routing_operations` set job = ?, max_op_time = ?, name = ?, img = ?, product_id = ?, product_type = ?, workcenter_code = ?, vehicle_type_img = ?, points = ?, workcenter_id = ? where operation_id = ?"
+	sql := "update `routing_operations` set job = ?, max_op_time = ?, name = ?, img = ?, product_id = ?, product_type = ?, workcenter_code = ?, vehicle_type_img = ?, points = ?, workcenter_id = ? where operation_id = ? and product_type = ?"
 	_, err := s.eng.Exec(sql,
 		ro.Job,
 		ro.MaxOpTime,
@@ -747,7 +747,8 @@ func (s *Service) UpdateRoutingOperations(ro *RoutingOperations) error {
 		ro.VehicleTypeImg,
 		ro.Points,
 		ro.WorkcenterID,
-		ro.OperationID)
+		ro.OperationID,
+		ro.ProductType)
 
 	if err != nil {
 		return err
@@ -756,11 +757,11 @@ func (s *Service) UpdateRoutingOperations(ro *RoutingOperations) error {
 	}
 }
 
-func (s *Service) GetRoutingOperations(op_id int64) (RoutingOperations, error) {
+func (s *Service) GetRoutingOperations(op_id int64, model string) (RoutingOperations, error) {
 
 	var ro RoutingOperations
 
-	rt, err := s.eng.Alias("r").Where("r.operation_id = ?", op_id).Get(&ro)
+	rt, err := s.eng.Alias("r").Where("r.operation_id = ?", op_id).And("r.product_type = ?", model).Get(&ro)
 
 	if err != nil {
 		return ro, err

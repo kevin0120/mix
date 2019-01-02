@@ -24,7 +24,7 @@ const (
 	STRATEGY_AD  = "AD"
 	STRATEGY_AW  = "AW"
 	STRATEGY_ADW = "ADW"
-	STRATEGY_LN = "LN"
+	STRATEGY_LN  = "LN"
 )
 
 const (
@@ -53,10 +53,11 @@ type ControllerResult struct {
 	Workorder_ID  int64  `json:"workorder_id"`
 	UserID        int64  `json:"user_id"`
 	CurFile       aiis.CURObject
-	Result        string     `json:"result"`
-	Dat           string     `json:"dat"`
-	PSet          int        `json:"pset"`
-	Batch         string     `json:"batch"`
+	Result        string `json:"result"`
+	Dat           string `json:"dat"`
+	PSet          int    `json:"pset"`
+	Batch         string `json:"batch"`
+	Seq           int
 	Count         int        `json:"count"`
 	PSetDefine    PSetDefine `json:"pset_define"`
 	GunSN         string

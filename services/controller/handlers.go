@@ -62,14 +62,14 @@ func (h *Handlers) Handle(result interface{}, curve interface{}) {
 	controllerResult := result.(*ControllerResult)
 
 	// 取得工具信息
-	gun, err := h.controllerService.DB.GetGun(controllerResult.GunSN)
-	if err != nil {
-		h.controllerService.diag.Error("get gun failed", err)
-		return
-	}
+	//gun, err := h.controllerService.DB.GetGun(controllerResult.GunSN)
+	//if err != nil {
+	//	h.controllerService.diag.Error("get gun failed", err)
+	//	return
+	//}
 
 	// 取得工单
-	dbWorkorder, err := h.controllerService.DB.GetWorkorder(gun.WorkorderID, true)
+	dbWorkorder, err := h.controllerService.DB.GetWorkorder(controllerResult.Workorder_ID, true)
 	if err != nil {
 		h.controllerService.diag.Error("get workorder failed", err)
 		return
@@ -80,7 +80,7 @@ func (h *Handlers) Handle(result interface{}, curve interface{}) {
 
 	targetConsume := consumes[0]
 	for _, v := range consumes {
-		if v.GroupSeq == gun.Seq {
+		if v.GroupSeq == controllerResult.Seq {
 			targetConsume = v
 		}
 	}
@@ -90,16 +90,16 @@ func (h *Handlers) Handle(result interface{}, curve interface{}) {
 	if curve != nil {
 		controllerCurve := curve.(*minio.ControllerCurve)
 		curveFileName = fmt.Sprintf("%s_%s_%d_%d_%d.json",
-			dbWorkorder.MO_Model, targetConsume.NutNo, dbWorkorder.WorkorderID, gun.Seq, gun.Count)
+			dbWorkorder.MO_Model, targetConsume.NutNo, dbWorkorder.WorkorderID, controllerResult.Seq, controllerResult.Count)
 
 		controllerResult.CurFile = aiis.CURObject{
 			File: curveFileName,
-			OP:   gun.Count,
+			OP:   controllerResult.Count,
 		}
 
 		controllerCurve.CurveFile = curveFileName
 		//controllerCurve.ResultID = dbResult.Id
-		controllerCurve.Count = gun.Count
+		controllerCurve.Count = controllerResult.Count
 		controllerCurve.UpdateTime = controllerResult.Dat
 
 		h.handleCurve(controllerCurve)
@@ -110,7 +110,7 @@ func (h *Handlers) Handle(result interface{}, curve interface{}) {
 		controllerResult: controllerResult,
 		dbWorkorder:      &dbWorkorder,
 		consume:          &targetConsume,
-		count:            gun.Count,
+		count:            controllerResult.Count,
 		batch:            fmt.Sprintf("%d/%d", targetConsume.GroupSeq, len(consumes)),
 		curveFile:        curveFileName,
 	})
@@ -160,7 +160,7 @@ func (h *Handlers) saveResult(data *SavePackage) {
 
 }
 
-func  magicTrick(t time.Time) time.Time {
+func magicTrick(t time.Time) time.Time {
 	return t.Add(-8 * time.Hour)
 }
 
@@ -170,7 +170,7 @@ func (h *Handlers) handleSaveResult(data *SavePackage) {
 	dbResult := storage.Results{}
 
 	loc, _ := time.LoadLocation("Local")
-	dt, _ := time.ParseInLocation("2006-01-02 15:04:05", data.controllerResult.Dat,loc)
+	dt, _ := time.ParseInLocation("2006-01-02 15:04:05", data.controllerResult.Dat, loc)
 	dbResult.UpdateTime = magicTrick(dt.UTC())
 
 	//dbResult.UpdateTime = dt.UTC()
