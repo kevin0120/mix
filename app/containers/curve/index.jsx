@@ -2,6 +2,19 @@ import React from 'react';
 import configs from '../../shared/config';
 
 export default class Curve extends React.Component {
+  constructor(props) {
+    super(props);
+    this.webview = null;
+  }
+
+  componentDidMount(): void {
+    this.webview.addEventListener('new-window', e => {
+      e.preventDefault();
+      console.log(e);
+      this.webview.setAttribute('src', e.url);
+    });
+  }
+
   render() {
     return (
       <div
@@ -10,15 +23,19 @@ export default class Curve extends React.Component {
           height: 'calc(100% - 64px)'
         }}
       >
-        <iframe
+        <webview
+          ref={r => {
+            this.webview = r;
+          }}
+          id="cvinetweb"
           title="cvinetweb"
           src={configs.cvinetweb.url}
-          frameBorder={0}
           style={{
-            display: 'flex',
-            flex: 1
+            height: '100%',
+            width: '100%'
           }}
-          seamless
+          // frameBorder="0"
+          // sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation allow-presentation"
         />
       </div>
     );
