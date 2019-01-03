@@ -157,7 +157,7 @@ func (m *Methods) putPSets(ctx iris.Context) {
 
 	switch c.Protocol() {
 	case controller.AUDIPROTOCOL:
-		err = m.service.AudiVw.PSet(pset.Controller_SN, pset.PSet, workorder.WorkorderID, int64(pset.GroupSeq), pset.Count, pset.UserID)
+		err = m.service.AudiVw.PSet(pset.Controller_SN, pset.PSet, workorder.Id, int64(pset.GroupSeq), pset.Count, pset.UserID)
 	case controller.OPENPROTOCOL:
 		err = m.service.OpenProtocol.PSet(pset.Controller_SN, pset.PSet, pset.Result_id, pset.Count, pset.UserID)
 
