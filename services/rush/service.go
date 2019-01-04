@@ -500,7 +500,7 @@ func (s *Service) HandleResult(cr *CResult) {
 
 	// 结果推送fis
 	sent := true
-	if s.Fis != nil {
+	if s.Fis != nil && cr.Result.Stage == "final" {
 		fisResult := s.OperationToFisResult(cr.Result)
 
 		e := s.Fis.PushResult(&fisResult)
