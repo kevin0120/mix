@@ -51,9 +51,14 @@ const (
 	resultTemplate = "%s--%s--%s-%d-%d=%d-%s%06s**%s%s%05d##%03d*%s*%-20s*%-10s*%-6s*%s*%s*%s*%-6s*%03d*%06d%-20f%-10s%d*%06d%-20f%-10s%d***"
 )
 
+func magicTrick(t time.Time) time.Time {
+	return t.Add(8 * time.Hour)
+}
+
 func (fr *FisResult) Serialize() string {
 
-	resultTime := fr.Dat.Format("20060102150405")
+	loc, _ := time.LoadLocation("Local")
+	resultTime := time.Now().In(loc).Format("20060102150405")
 
 	l := len(fr.Values)
 	sFisResult := fmt.Sprintf(resultTemplate,
