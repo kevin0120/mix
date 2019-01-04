@@ -82,7 +82,7 @@ func (c *GRPCClient) addKeepAliveCount() {
 }
 
 func (c *GRPCClient) updateKeepAliveDeadLine() {
-	c.keepaliveDeadLine.Store(time.Now().Add(PING_ITV))
+	c.keepaliveDeadLine.Store(time.Now().Add(time.Duration(c.srv.Config().KeepAlive)))
 }
 
 func (c *GRPCClient) KeepAliveDeadLine() time.Time {
@@ -90,10 +90,6 @@ func (c *GRPCClient) KeepAliveDeadLine() time.Time {
 }
 
 func (c *GRPCClient) sendPing() {
-	if c.Status() == RPC_OFFLINE {
-		return
-	}
-
 	c.RPCSend(RPC_PING)
 }
 
