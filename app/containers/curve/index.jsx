@@ -10,7 +10,6 @@ export default class Curve extends React.Component {
   componentDidMount(): void {
     this.webview.addEventListener('new-window', e => {
       e.preventDefault();
-      console.log(e);
       this.webview.setAttribute('src', e.url);
     });
   }
