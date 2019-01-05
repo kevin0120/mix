@@ -9,6 +9,7 @@ import HelpIcon from '@material-ui/icons/Help';
 import CollectionsIcon from '@material-ui/icons/Collections';
 import LockIcon from '@material-ui/icons/Lock';
 import Fingerprint from '@material-ui/icons/Fingerprint';
+import Trend from '@material-ui/icons/TrendingUp';
 import Mail from '@material-ui/icons/Mail';
 import Save from '@material-ui/icons/Save';
 import WorkOrders from '../containers/orders';
@@ -19,7 +20,7 @@ import Preferences from '../containers/config';
 import Help from '../containers/help';
 import Pages from '../layouts/Pages';
 import HomePage from '../containers/home';
-
+import Curve from '../containers/curve'
 // imgs
 import helpImg from '../../resources/imgs/help.png';
 import editorImg from '../../resources/imgs/operaIns.png';
@@ -50,7 +51,11 @@ const routes = [
     main: HomePage,
     icon: HomeIcon,
     color: '#00abf3',
-    showLayout: true
+    showLayout: true,
+    roles:[
+      'user',
+      'admin'
+    ]
   },
   {
     name: 'working',
@@ -60,8 +65,11 @@ const routes = [
     icon: BuildIcon,
     color: '#00abbf',
     image: WorkingImg,
-    enName: 'Operation',
-    showLayout: true
+    showLayout: true,
+    roles:[
+      'user',
+      'admin'
+    ]
   },
   {
     name: 'orders',
@@ -71,8 +79,11 @@ const routes = [
     icon: CollectionsIcon,
     color: warningColor,
     image: editorImg,
-    enName: 'Vehicle Queue',
-    showLayout: true
+    showLayout: true,
+    roles:[
+      'user',
+      'admin'
+    ]
   },
   {
     name: 'preferences',
@@ -82,8 +93,10 @@ const routes = [
     icon: SettingsApplicationsIcon,
     color: '#fba53d',
     image: settingImg,
-    enName: 'Preference',
-    showLayout: true
+    showLayout: true,
+    roles:[
+      'admin'
+    ]
   },
   {
     name: 'event',
@@ -93,8 +106,11 @@ const routes = [
     icon: Mail,
     color: '#008adf',
     image: LoginImg,
-    enName: 'Event Log',
-    showLayout: true
+    showLayout: true,
+    roles:[
+      'user',
+      'admin'
+    ]
   },
   {
     name: 'result',
@@ -104,8 +120,25 @@ const routes = [
     icon: Save,
     color: grayColor,
     image: LockingImg,
-    enName: 'Result',
-    showLayout: true
+    showLayout: true,
+    roles:[
+      'user',
+      'admin'
+    ]
+  },
+  {
+    name: 'curve',
+    url: '/curves',
+    title: 'main.curve',
+    main: Curve,
+    icon: Trend,
+    color: '#009688',
+    image: LockingImg,
+    showLayout: true,
+    roles:[
+      'user',
+      'admin'
+    ]
   },
   // {
   //   name: 'lock',
@@ -125,8 +158,11 @@ const routes = [
     icon: HelpIcon,
     color: '#8a6c63',
     image: helpImg,
-    enName: 'Help',
-    showLayout: true
+    showLayout: true,
+    roles:[
+      'user',
+      'admin'
+    ]
   },
   {
     name: 'login',
@@ -136,8 +172,11 @@ const routes = [
     icon: Fingerprint,
     color: grayColor,
     image: LoginImg,
-    enName: 'Login',
-    showLayout: false
+    showLayout: false,
+    roles:[
+      'user',
+      'admin'
+    ]
   }
 ];
 

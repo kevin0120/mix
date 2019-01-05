@@ -31,6 +31,7 @@ import Flag from 'react-flags';
 
 import BottomNavigation from '@material-ui/core/BottomNavigation';
 import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
+import { push } from 'connected-react-router';
 import Notify from '../Notify';
 import SysInfo from '../sysInfo';
 
@@ -42,9 +43,11 @@ import i18n from '../../i18n';
 import HealthCheck from '../HealthCheck';
 import Button from '../CustomButtons/Button';
 
+import {setNewNotification} from '../../actions/notification'
 const lodash = require('lodash');
 
 /* eslint-disable react/prefer-stateless-function */
+
 // export default function withLayout(SubCompontents, showTop = true) {
 class ConnectedLayout extends React.PureComponent {
   constructor(props) {
@@ -141,10 +144,12 @@ class ConnectedLayout extends React.PureComponent {
       classes,
       workMode,
       healthCheckResults,
-      usersInfo
+      usersInfo,
+      doPush,
+      notification
     } = this.props;
     const isAutoMode = workMode === 'auto';
-    const { name, avatar } = usersInfo[0];
+    const { name, avatar, role } = usersInfo[0];
     if (
       lodash.includes(['Ready', 'PreDoing', 'Timeout', 'Init'], orderStatus) ||
       !isAutoMode
@@ -167,7 +172,7 @@ class ConnectedLayout extends React.PureComponent {
     // console.log('shouldRender:',this.props.shouldRender);
     if (!this.props.shouldRender) {
       return null;
-    } else {
+    } 
       return (
         <I18n ns="translations">
           {t => (
@@ -190,8 +195,8 @@ class ConnectedLayout extends React.PureComponent {
               {/* </div> */}
               {/* </SwipeableDrawer> */}
               {/* </ClickAwayListener> */}
-              {/*<SubCompontents />*/}
-              <Notify />
+              {/* <SubCompontents /> */}
+              <Notify/>
               <AppBar position="fixed" className={classes.appBar}>
                 <Toolbar className={classes.topBar}>
                   <div className={classes.menuBtnWrapAvatar}>
@@ -200,7 +205,7 @@ class ConnectedLayout extends React.PureComponent {
                       src={avatar}
                       className={`${classes.imgRaised} ${
                         classes.imgRoundedCircle
-                      } ${classes.imgFluid}`}
+                        } ${classes.imgFluid}`}
                       style={{ height: '100%' }}
                     />
                   </div>
@@ -226,10 +231,17 @@ class ConnectedLayout extends React.PureComponent {
                         <BottomNavigationAction
                           key={route.name}
                           value={route.name}
-                          component={Link}
-                          to={route.url}
+                          // component={Link}
+                          // to={route.url}
+                          onClick={() => {
+                            if (route.roles && lodash.includes(route.roles, role)) {
+                              doPush(route.url);
+                            } else {
+                              notification('error','没有访问权限');
+                            }
+                          }}
                           label={t(route.title)}
-                          icon={<route.icon />}
+                          icon={<route.icon/>}
                           className={classes.BottomNavigationIcon}
                           disabled={shouldProcessing}
                         />
@@ -237,12 +249,12 @@ class ConnectedLayout extends React.PureComponent {
                     </BottomNavigation>
                   </div>
                   <div className={classes.menuBtnWrapRight}>
-                    {/*<Button*/}
-                    {/*onClick={this.handleSysInfo}*/}
-                    {/*className={`${statusClassName}`}*/}
-                    {/*>*/}
-                    {/*{'系统'}*/}
-                    {/*</Button>*/}
+                    {/* <Button */}
+                    {/* onClick={this.handleSysInfo} */}
+                    {/* className={`${statusClassName}`} */}
+                    {/* > */}
+                    {/* {'系统'} */}
+                    {/* </Button> */}
                     <Button
                       onClick={this.handleStatus}
                       className={`${statusClassName}`}
@@ -257,28 +269,28 @@ class ConnectedLayout extends React.PureComponent {
                       color="inherit"
                       disabled={shouldProcessing}
                     >
-                      <Language />
+                      <Language/>
                     </IconButton>
-                    {/*<Menu*/}
-                    {/*id="menu-sysInfo"*/}
-                    {/*anchorEl={showSysInfo}*/}
-                    {/*anchorOrigin={{*/}
-                    {/*vertical: 'top',*/}
-                    {/*horizontal: 'left'*/}
-                    {/*}}*/}
-                    {/*transformOrigin={{*/}
-                    {/*vertical: 'bottom',*/}
-                    {/*horizontal: 'left'*/}
-                    {/*}}*/}
-                    {/*open={openSysInfo}*/}
-                    {/*onClose={this.handleCloseSysInfo}*/}
-                    {/*TransitionComponent={Fade}*/}
-                    {/*classes={{*/}
-                    {/*paper: classes.popover*/}
-                    {/*}}*/}
-                    {/*>*/}
-                    {/*<SysInfo />*/}
-                    {/*</Menu>*/}
+                    {/* <Menu */}
+                    {/* id="menu-sysInfo" */}
+                    {/* anchorEl={showSysInfo} */}
+                    {/* anchorOrigin={{ */}
+                    {/* vertical: 'top', */}
+                    {/* horizontal: 'left' */}
+                    {/* }} */}
+                    {/* transformOrigin={{ */}
+                    {/* vertical: 'bottom', */}
+                    {/* horizontal: 'left' */}
+                    {/* }} */}
+                    {/* open={openSysInfo} */}
+                    {/* onClose={this.handleCloseSysInfo} */}
+                    {/* TransitionComponent={Fade} */}
+                    {/* classes={{ */}
+                    {/* paper: classes.popover */}
+                    {/* }} */}
+                    {/* > */}
+                    {/* <SysInfo /> */}
+                    {/* </Menu> */}
                     <Menu
                       id="menu-healthz"
                       anchorEl={showStatus}
@@ -297,7 +309,7 @@ class ConnectedLayout extends React.PureComponent {
                         paper: classes.popover
                       }}
                     >
-                      <HealthCheck healthCheckResults={healthCheckResults} />
+                      <HealthCheck healthCheckResults={healthCheckResults}/>
                     </Menu>
                     <Menu
                       id="menu-i18n"
@@ -332,7 +344,7 @@ class ConnectedLayout extends React.PureComponent {
                           primary={t('Language.en')}
                         />
                       </MenuItem>
-                      <Divider />
+                      <Divider/>
                       <MenuItem
                         className={classes.menuItem}
                         onClick={() => this.handleChangeLng('zh_CN')}
@@ -359,9 +371,10 @@ class ConnectedLayout extends React.PureComponent {
           )}
         </I18n>
       );
-    }
+    
   }
 }
+
 /* eslint-disable react/forbid-prop-types */
 
 ConnectedLayout.propTypes = {
@@ -382,7 +395,12 @@ const mapStateToProps = (state, ownProps) => ({
   ...ownProps
 });
 
+const mapDispatchToProps = {
+  doPush: push,
+  notification:setNewNotification
+};
+
 export default withStyles(styles, { withTheme: true })(
-  connect(mapStateToProps)(ConnectedLayout)
+  connect(mapStateToProps,mapDispatchToProps)(ConnectedLayout)
 );
 // }
