@@ -165,6 +165,7 @@ class ConnectedNet extends React.PureComponent {
   }
 
   handleChangeSSID(e) {
+    console.log(e);
     this.setState({
       ssid: e.target.value
     });
@@ -186,20 +187,15 @@ class ConnectedNet extends React.PureComponent {
       }
       if (stdout) {
         const lines = stdout.toString().split('\n');
-        let isHeader = true;
         for (let i = 0; i < lines.length - 1; i += 1) {
-          if (isHeader) {
-            isHeader = false;
-          } else {
-            const line = lines[i].toString();
-            // const x = lodash.words(line, /[^, ]+/g);
-            // if (x[0] === '*') {
-            //   ret.push(x[1]);
-            // } else {
-            //   ret.push(x[0]);
-            // }
-            ret.push(line);
-          }
+          const line = lines[i].toString();
+          // const x = lodash.words(line, /[^, ]+/g);
+          // if (x[0] === '*') {
+          //   ret.push(x[1]);
+          // } else {
+          //   ret.push(x[0]);
+          // }
+          ret.push(line);
         }
         this.setState({
           ssids: lodash.uniq(ret),
@@ -225,32 +221,68 @@ class ConnectedNet extends React.PureComponent {
     const { data } = this.state;
     const tempData = cloneDeep(this.state);
     const ret = [];
-    exec('nmcli -f ssid -t dev wifi', (error, stdout, stderr) => {
+
+    // exec('nmcli -f ssid -t dev wifi', (error, stdout, stderr) => {
+    //   if (error) {
+    //     console.error(`exec error: ${error}`);
+    //     return;
+    //   }
+    //   if (stdout) {
+    //     const lines = stdout.toString().split('\n');
+    //     let isHeader = true;
+    //     for (let i = 0; i < lines.length - 1; i += 1) {
+    //       if (isHeader) {
+    //         isHeader = false;
+    //       } else {
+    //         const line = lines[i].toString();
+    //         // const x = lodash.words(line, /[^, ]+/g);
+    //         // if (x[0] === '*') {
+    //         //   ret.push(x[1]);
+    //         // } else {
+    //         //   ret.push(x[0]);
+    //         // }
+    //         ret.push(line);
+    //       }
+    //     }
+    //     tempData.ssids = lodash.uniq(ret);
+    //     if (lodash.includes(ret, data.ssid.value)) {
+    //       tempData.ssid = data.ssid.value;
+    //     }
+    //     this.setState({
+    //       ...tempData
+    //     });
+    //   }
+    // });
+
+    exec('nmcli -t -s con show default', (error, stdout, stderr) => {
       if (error) {
         console.error(`exec error: ${error}`);
         return;
       }
       if (stdout) {
-        const lines = stdout.toString().split('\n');
-        let isHeader = true;
-        for (let i = 0; i < lines.length - 1; i += 1) {
-          if (isHeader) {
-            isHeader = false;
-          } else {
-            const line = lines[i].toString();
-            // const x = lodash.words(line, /[^, ]+/g);
-            // if (x[0] === '*') {
-            //   ret.push(x[1]);
-            // } else {
-            //   ret.push(x[0]);
-            // }
-            ret.push(line);
-          }
+        const result = stdout.toString();
+        const ssid=/802-11-wireless.ssid:(.+)\n/.exec(result)[1]||'';
+        const password=/802-11-wireless-security.psk:(.+)\n/.exec(result)[1]||'';
+        const addresses=/ipv4.addresses:(.+)\/(.+)\n/.exec(result)||'';
+        const address=addresses[1]||'';
+        const gateway=/ipv4.gateway:(.+)\n/.exec(result)[1]||'';
+        const mask=parseInt(addresses[2],10)||'';
+        let maskStr='';
+        if(mask){
+          const B2D=(B)=>parseInt(B,2);
+          const maskB=`${Array(1+mask).join(1)}${
+            Array(32-mask+1).join(0)}`;
+          maskStr=`${B2D(maskB.slice(0,8))}.${B2D(maskB.slice(8,16))}.${
+            B2D(maskB.slice(16,24))}.${B2D(maskB.slice(24,32))}`;
         }
-        tempData.ssids = lodash.uniq(ret);
-        if (lodash.includes(ret, data.ssid.value)) {
-          tempData.ssid = data.ssid.value;
-        }
+
+        tempData.ssid = ssid;
+        tempData.data.gateway.value=gateway;
+        tempData.data.ipAddress.value=address;
+        tempData.data.netmask.value=maskStr;
+        tempData.data.password.value=password;
+        tempData.data.ssid.value=ssid;
+
         this.setState({
           ...tempData
         });
@@ -353,6 +385,7 @@ class ConnectedNet extends React.PureComponent {
                         open={ssidSelectOpen}
                         onOpen={this.getSSIDs}
                         onClose={this.handleCloseSSID}
+                        renderValue={(v)=>v}
                         inputProps={{
                           name: 'ssid',
                           id: 'ssid',
