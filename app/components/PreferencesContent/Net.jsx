@@ -118,9 +118,9 @@ class ConnectedNet extends React.PureComponent {
     tempData.ssid.value = ssid;
     exec('nmcli con delete default', () => {
       exec(
-        `nmcli dev wifi connect ${tempData.ssid.value} password ${
+        `nmcli dev wifi connect '${tempData.ssid.value}' password '${
           tempData.password.value
-        } name default`,
+        }' name default`,
         (error, stdout, stderr) => {
           if (error) {
             console.error(`exec error: ${error}`);
@@ -179,7 +179,7 @@ class ConnectedNet extends React.PureComponent {
 
   getSSIDs = () => {
     const ret = [];
-    exec('nmcli dev wifi', (error, stdout, stderr) => {
+    exec('nmcli -f ssid -t dev wifi', (error, stdout, stderr) => {
       if (error) {
         console.error(`exec error: ${error}`);
         return;
@@ -192,12 +192,13 @@ class ConnectedNet extends React.PureComponent {
             isHeader = false;
           } else {
             const line = lines[i].toString();
-            const x = lodash.words(line, /[^, ]+/g);
-            if (x[0] === '*') {
-              ret.push(x[1]);
-            } else {
-              ret.push(x[0]);
-            }
+            // const x = lodash.words(line, /[^, ]+/g);
+            // if (x[0] === '*') {
+            //   ret.push(x[1]);
+            // } else {
+            //   ret.push(x[0]);
+            // }
+            ret.push(line);
           }
         }
         this.setState({
@@ -224,7 +225,7 @@ class ConnectedNet extends React.PureComponent {
     const { data } = this.state;
     const tempData = cloneDeep(this.state);
     const ret = [];
-    exec('nmcli dev wifi', (error, stdout, stderr) => {
+    exec('nmcli -f ssid -t dev wifi', (error, stdout, stderr) => {
       if (error) {
         console.error(`exec error: ${error}`);
         return;
@@ -237,12 +238,13 @@ class ConnectedNet extends React.PureComponent {
             isHeader = false;
           } else {
             const line = lines[i].toString();
-            const x = lodash.words(line, /[^, ]+/g);
-            if (x[0] === '*') {
-              ret.push(x[1]);
-            } else {
-              ret.push(x[0]);
-            }
+            // const x = lodash.words(line, /[^, ]+/g);
+            // if (x[0] === '*') {
+            //   ret.push(x[1]);
+            // } else {
+            //   ret.push(x[0]);
+            // }
+            ret.push(line);
           }
         }
         tempData.ssids = lodash.uniq(ret);

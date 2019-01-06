@@ -20,7 +20,7 @@ export const defaultUsers = [
     name: 'dummy',
     avatar: defaultAvatarImg,
     uid: 10,
-    role:'user'
+    role:'admin'
   }
 ];
 
