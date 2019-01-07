@@ -33,7 +33,7 @@ function Snackbar({ ...props }) {
   }
   const iconClasses = cx({
     [classes.icon]: classes.icon,
-    [classes.infoIcon]: color === 'info',
+    [classes.infoIcon]: color === 'info'||color === 'maintenance',
     [classes.successIcon]: color === 'success',
     [classes.warningIcon]: color === 'warning',
     [classes.dangerIcon]: color === 'danger',
@@ -91,7 +91,8 @@ Snackbar.propTypes = {
     'warning',
     'danger',
     'primary',
-    'rose'
+    'rose',
+    'maintenance',
   ]),
   close: PropTypes.bool,
   icon: PropTypes.func,

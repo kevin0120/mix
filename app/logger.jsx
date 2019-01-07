@@ -1,9 +1,10 @@
-const { Logger, transports } = require('winston');
-
+// const { Logger, transports } = require('winston');
+const winston= require('winston');
 const fs = require('fs');
 const fse = require('fs-extra');
 const path = require('path');
 const os = require('os');
+
 
 export const getAppDirectory = () => {
   switch (process.platform) {
@@ -33,10 +34,10 @@ export function CreateDailyLogger() {
     fse.mkdirpSync(dir);
   }
   if (gLogger === null) {
-    gLogger = new Logger({
+    gLogger = new winston.Logger({
       level: 'info',
       transports: [
-        new transports.File({
+        new winston.transports.File({
           name: 'info',
           filename: path.join(homeDir, 'logs/event.log'),
           level: 'info',
@@ -57,7 +58,15 @@ export function CreateDailyLogger() {
         //   zippedArchive: true
         // }),
       ],
-      exitOnError: false
+      exitOnError: false,
+      levels:{ error: 0, warn: 1, maintenance: 2, info: 3, }
+    });
+    winston.addColors({
+      error:'#ffa21a',
+      warn:'#ffa21a',
+      info:'#00d3ee',
+      maintenance:'#ffa21a',
+      query:'#00d3ee'
     });
   }
 }
@@ -70,6 +79,11 @@ export function Info(msg) {
 export function Warn(msg) {
   if (gLogger === null) return;
   gLogger.warn(msg);
+}
+
+export function Maintenance(msg) {
+  if (gLogger === null) return;
+  gLogger.maintenance(msg);
 }
 
 export function Error(msg) {

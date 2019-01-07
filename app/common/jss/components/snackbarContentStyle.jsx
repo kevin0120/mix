@@ -48,6 +48,11 @@ const snackbarContentStyle = {
     color: '#ffffff',
     ...warningBoxShadow
   },
+  maintenance: {
+    backgroundColor: '#ffa21a',
+    color: '#ffffff',
+    ...warningBoxShadow
+  },
   danger: {
     backgroundColor: '#f55a4e',
     color: '#ffffff',
