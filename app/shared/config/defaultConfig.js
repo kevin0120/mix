@@ -12,27 +12,32 @@ export const defaultConfigs = {
       ssid: {
         displayOrder: 1,
         value: '',
-        displayTitle: 'Configuration.network.SSID'
+        displayTitle: 'Configuration.network.SSID',
+        isPWD: false
       },
       password: {
         displayOrder: 100,
         value: '',
-        displayTitle: 'Configuration.network.PWD'
+        displayTitle: 'Configuration.network.PWD',
+        isPWD: true
       },
       ipAddress: {
         displayOrder: 200,
         value: '192.168.1.5',
-        displayTitle: 'Configuration.network.Addr'
+        displayTitle: 'Configuration.network.Addr',
+        isPWD: false
       },
       netmask: {
         displayOrder: 300,
         value: '255.255.255.0',
-        displayTitle: 'Configuration.network.Mask'
+        displayTitle: 'Configuration.network.Mask',
+        isPWD: false
       },
       gateway: {
         displayOrder: 400,
         value: '192.168.1.1',
-        displayTitle: 'Configuration.network.Gateway'
+        displayTitle: 'Configuration.network.Gateway',
+        isPWD: false
       }
     },
     odooConnection: {
@@ -59,7 +64,7 @@ export const defaultConfigs = {
         {
           bit: 1,
           io: 'in',
-          function: 'BYPASS',
+          function: '',
           label: '强制放行'
         },
         {
@@ -71,13 +76,13 @@ export const defaultConfigs = {
         {
           bit: 3,
           io: 'in',
-          function: '',
+          function: 'BYPASS',
           label: ''
         },
         {
           bit: 4,
           io: 'in',
-          function: 'RESET',
+          function: 'MODE_SELECT',
           label: '复位钥匙'
         },
         {
@@ -163,26 +168,26 @@ export const defaultConfigs = {
     connections: {
       masterpc: 'http://172.17.0.1:8082',
       rfid: 'tcp://192.168.1.120:2112',
-      aiis: 'http://172.29.61.190:9092',
+      aiis: 'http://127.0.0.1:9092',
       controllers: [
         {
           serial_no: '0001'
         }
       ],
       io: 'modbustcp://192.168.1.122:502/0',
-      workcenterCode: '1122334455667788',
+      workcenterCode: '69',
       rework_workcenter: 'qrk'
     }
   },
   // 作业配置
   operationSettings: {
-    opMode: 'order', // 作业模式:        op 或 order
-    controllerMode: 'pset', // 拧紧模式:        job 或 pset
+    opMode: 'op', // 作业模式:        op 或 order
+    controllerMode: 'job', // 拧紧模式:        job 或 pset
     workMode: 'auto', // 工作模式:        auto 或 manual 或 scanner
-    flowTriggers: ['carID'], // 工作流程触发条件:  carType:车型代码 carID:vin/knr/longpin
+    flowTriggers: ['carID', 'carType'], // 工作流程触发条件:  carType:车型代码 carID:vin/knr/longpin
 
     // 作业前检测(order mode only)
-    preCheck: true,
+    preCheck: false,
 
     // 强制放行配置
     byPass: {
@@ -209,9 +214,9 @@ export const defaultConfigs = {
     authEnable: true,
     switchAutoManual: false,
     oeeFuncEnable: false,
-    modbusEnable: true,
+    modbusEnable: false,
     rfidEnabled: false,
-    andonEnable: false,
+    andonEnable: true,
     psetContinueMode: false,
     enableFocus: true
   }

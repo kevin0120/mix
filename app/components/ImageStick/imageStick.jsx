@@ -259,7 +259,7 @@ class ConnectedImageStick extends React.Component {
       // }
 
       return (
-        <div key={item.id} style={postionStyle} className={classes.imgInfo}>
+        <div key={i} style={postionStyle} className={classes.imgInfo}>
           <span className={`${circleStatus} ${classes[status]}`}>
             {item.sequence}
           </span>
