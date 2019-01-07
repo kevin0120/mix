@@ -567,7 +567,6 @@ class OperationResult(models.HyperModel):
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=False):
 
         _cache = {}
-
         if 'measure_result' in fields and 'measure_result' not in groupby:
             groupby.append('measure_result')
         res = super(OperationResult, self).read_group(domain, fields, groupby, offset=offset, limit=limit,
@@ -590,6 +589,7 @@ class OperationResult(models.HyperModel):
                         last_domain = d
                 k = repr(_domain)
                 if k not in _cache.keys():
+                    _domain += [('measure_result', 'in', ['ok', 'nok'])]
                     _cache[k] = self.search_count(_domain)
                 count = _cache[k]
                 inv_value = float_round(line['__count'] / count, precision_digits=3)

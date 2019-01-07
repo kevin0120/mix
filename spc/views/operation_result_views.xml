@@ -193,6 +193,8 @@
                 <separator/>
                 <filter string="OK" domain="[('measure_result', '=', 'ok')]" name="ok"/>
                 <filter string="NOK" domain="[('measure_result', '=', 'nok')]" name="nok"/>
+                <filter string="松脱" domain="[('measure_result', '=', 'lsn')]" name="lsn"/>
+                <filter string="强制放行" domain="[('measure_result', '=', 'ak2')]" name="ak2"/>
                 <separator/>
                 <filter string="Data Lacking" domain="[('lacking', '=', 'lack')]" name="lacking"/>
                 <filter string="Date Using" domain="[('lacking', '=', 'normal')]" name="using"/>
@@ -229,6 +231,7 @@
         <field name="res_model">operation.result</field>
         <field name="view_type">form</field>
         <field name="view_mode">tree,form,kanban,pivot,graph</field>
+        <!--<field name="context">{'search_default_ok': 1,'search_default_nok': 1}</field>-->
         <field name="help" type="html">
             <p>
               Operation Result is the execution of a quality control in some point
@@ -241,6 +244,7 @@
         <field name="res_model">operation.result</field>
         <field name="view_type">form</field>
         <field name="view_mode">graph</field>
+        <field name="domain">[('measure_result', 'in', ['ok', 'nok'])]</field>
         <field name="view_id" ref="operation_result_view_graph"/>
     </record>
 

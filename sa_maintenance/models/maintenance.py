@@ -3,7 +3,7 @@
 from odoo import models, fields, api, _
 import odoo.addons.decimal_precision as dp
 from odoo.exceptions import UserError
-from itertools import groupby
+from urlparse import urljoin
 import uuid
 
 import requests as Requests
@@ -193,7 +193,7 @@ class MaintenanceRequest(models.Model):
                 "expire_time": fields.Date.today()
             }
             try:
-                Requests.post(url, data=json.dumps(val), headers={'Content-Type': 'application/json'}, timeout=3)
+                Requests.post(urljoin(url, PUSH_MAINTENANCE_REQ_URL), data=json.dumps(val), headers={'Content-Type': 'application/json'}, timeout=3)
             except ConnectionError as e:
                 logger.debug(u'发送维护请求失败, 错误原因:{0}'.format(e.message))
             except RequestException as e:
