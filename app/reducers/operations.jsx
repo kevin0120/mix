@@ -130,6 +130,7 @@ function newOperation(state, mode, data) {
       ...state,
       operationID: data.id,
       jobID: data.job,
+      carType: data.product_type,
       maxOpTimes: data.max_op_time,
       workSheet: data.img,
       productID: data.product_id,
