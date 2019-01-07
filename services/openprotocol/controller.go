@@ -250,6 +250,10 @@ func (c *Controller) handleResult(result_data *ResultData) {
 		controllerResult.Result = storage.RESULT_OK
 	}
 
+	if result_data.ResultType == "02" {
+		controllerResult.Result = storage.RESULT_LSN
+	}
+
 	controllerResult.ResultValue.Mi = result_data.Torque / 100
 	controllerResult.ResultValue.Wi = result_data.Angle
 	//controllerResult.ResultValue.Ti = result_data.

@@ -128,7 +128,7 @@ func (c *GRPCClient) manage() {
 	//nextWriteThreshold := time.Now()
 	for {
 		select {
-		case <-time.After(PING_ITV):
+		case <-time.After(time.Duration(c.srv.Config().KeepAlive)):
 			if c.Status() == RPC_OFFLINE {
 				continue
 			}

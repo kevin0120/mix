@@ -668,9 +668,11 @@ func (s *Service) FindTargetResultForJob(workorder_id int64) (Results, error) {
 func (s *Service) FindTargetResultForJobManual(raw_workorder_id int64) (Results, error) {
 	var results []Results
 
-	ss := s.eng.Alias("r").Where("r.x_workorder_id = ?", raw_workorder_id).OrderBy("r.update_time").Desc("r.update_time")
+	//ss := s.eng.Alias("r").Where("r.x_workorder_id = ?", raw_workorder_id).OrderBy("r.update_time").OrderBy("r.seq").OrderBy("r.count").Desc("r.update_time").Desc("r.seq").Desc("r.count")
 
-	e := ss.Find(&results)
+	sql := fmt.Sprintf("select * from results where results.x_workorder_id = %d order by results.update_time desc, results.seq desc, results.count desc", raw_workorder_id)
+
+	e := s.eng.SQL(sql).Find(&results)
 
 	if e != nil {
 		return Results{}, e

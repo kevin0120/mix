@@ -4,6 +4,7 @@ const (
 	RESULT_NONE = "NONE"
 	RESULT_OK   = "OK"
 	RESULT_NOK  = "NOK"
+	RESULT_LSN  = "LSN"
 )
 
 const (

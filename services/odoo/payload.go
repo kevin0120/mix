@@ -145,3 +145,9 @@ type RoutingOperation struct {
 	VehicleTypeImg string      `json:"vehicleTypeImg"`
 	Points         interface{} `json:"points"`
 }
+
+type Maintenance struct {
+	Type   string `json:"type"`
+	Name   string `json:"name"`
+	Expire string `json:"expire_time"`
+}

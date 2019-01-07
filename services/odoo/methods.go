@@ -6,6 +6,7 @@ import (
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/wsnotify"
 	"strconv"
 	"strings"
 	"time"
@@ -231,4 +232,18 @@ func (m *Methods) putSyncRoutingOpertions(ctx iris.Context) {
 		// 更新
 		m.service.DB.UpdateRoutingOperations(&db_ro)
 	}
+}
+
+func (m *Methods) postMaintenance(ctx iris.Context) {
+	maintanence := Maintenance{}
+
+	err := ctx.ReadJSON(&maintanence)
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+
+	msg, _ := json.Marshal(maintanence)
+	m.service.WS.WSSend(wsnotify.WS_EVENT_MAINTENANCE, string(msg))
 }

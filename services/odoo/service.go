@@ -161,6 +161,14 @@ func (s *Service) Open() error {
 	}
 	handler.AddRoute(r)
 
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "POST",
+		Pattern:     "/maintenance",
+		HandlerFunc: s.methods.postMaintenance,
+	}
+	handler.AddRoute(r)
+
 	s.Aiis.OnOdooStatus = s.OnStatus
 	s.Aiis.SyncGun = s.GetGunID
 
