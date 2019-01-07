@@ -76,45 +76,49 @@ function* stopRush() {
 }
 
 function createRushChannel(hmiSN) {
-  return eventChannel(emit => {
-    ws.on('open', () => {
-      emit({ type: 'healthz', payload: true });
-      // reg msg
-      ws.sendJson({ hmi_sn: hmiSN }, err => {
-        if (err) {
-          ws.close();
-        }
+
+    return eventChannel(emit => {
+
+      ws.on('open', () => {
+        emit({ type: 'healthz', payload: true });
+        // reg msg
+        ws.sendJson({ hmi_sn: hmiSN }, err => {
+          if (err) {
+            ws.close();
+          }
+        });
       });
+
+      ws.on('close', () => {
+        emit({ type: 'healthz', payload: false });
+      });
+
+      ws.on('error', () => {
+        emit({ type: 'healthz', payload: false });
+        // console.log('websocket error. reconnect after 1s');
+      });
+      ws.on('ping', () => {
+        // console.log(' receive ping Msg');
+      });
+      ws.on('pong', () => {
+        // console.log(' receive pong Msg');
+      });
+
+      ws.on('message', data => {
+        emit({ type: 'data', payload: data });
+      });
+
+      return () => {};
     });
 
-    ws.on('close', () => {
-      emit({ type: 'healthz', payload: false });
-    });
 
-    ws.on('error', () => {
-      emit({ type: 'healthz', payload: false });
-      // console.log('websocket error. reconnect after 1s');
-    });
-    ws.on('ping', () => {
-      // console.log(' receive ping Msg');
-    });
-    ws.on('pong', () => {
-      // console.log(' receive pong Msg');
-    });
-
-    ws.on('message', data => {
-      emit({ type: 'data', payload: data });
-    });
-
-    return () => {};
-  });
 }
 
 // const getHealthz = state => state.healthCheckResults;
 
 export function* watchRushChannel(hmiSN) {
-  const chan = yield call(createRushChannel, hmiSN);
   try {
+    const chan = yield call(createRushChannel, hmiSN);
     while (true) {
       const data = yield take(chan);
       const state = yield select();

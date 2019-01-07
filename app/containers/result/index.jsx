@@ -85,7 +85,7 @@ function requestData(masterpcUrl, hmiSN) {
   return defaultClient.get(url, {
     params: {
       hmi_sn: hmiSN,
-      filters: 'vin,job_id,pset_id,batch,torque,angle,spent,timestamp,vehicle_type',
+      filters: 'vin,job_id,pset_id,batch,torque,angle,spent,timestamp,vehicle_type,result',
       limit: 500
     }
   });
@@ -123,6 +123,7 @@ class Result extends React.Component {
               job_id: item.job_id,
               pset_id: item.pset_id,
               batch: item.batch,
+              result: item.result,
               vehicle_type: item.vehicle_type,
               actions: (
                 // we've added some custom button actions
@@ -189,6 +190,10 @@ class Result extends React.Component {
           <Divider inset component="li" />
           <ListItem>
             <ListItemText primary={`角度: ${selectObj.angle}`} />
+          </ListItem>
+          <Divider inset component="li" />
+          <ListItem>
+            <ListItemText primary={`结果: ${selectObj.result}`} />
           </ListItem>
           <ListItem>
             <ListItemText primary={`耗时(ms): ${selectObj.spent}`} />
@@ -337,6 +342,12 @@ class Result extends React.Component {
                           Header: '角度(Deg)',
                           accessor: 'angle',
                           sortable: false,
+                          filterable: false
+                        },
+                        {
+                          Header: '结果',
+                          accessor: 'result',
+                          sortable: true,
                           filterable: false
                         },
                         {

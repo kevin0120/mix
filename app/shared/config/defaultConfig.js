@@ -12,27 +12,32 @@ export const defaultConfigs = {
       ssid: {
         displayOrder: 1,
         value: '',
-        displayTitle: 'Configuration.network.SSID'
+        displayTitle: 'Configuration.network.SSID',
+        isPWD: false
       },
       password: {
         displayOrder: 100,
         value: '',
-        displayTitle: 'Configuration.network.PWD'
+        displayTitle: 'Configuration.network.PWD',
+        isPWD: true
       },
       ipAddress: {
         displayOrder: 200,
         value: '192.168.1.5',
-        displayTitle: 'Configuration.network.Addr'
+        displayTitle: 'Configuration.network.Addr',
+        isPWD: false
       },
       netmask: {
         displayOrder: 300,
         value: '255.255.255.0',
-        displayTitle: 'Configuration.network.Mask'
+        displayTitle: 'Configuration.network.Mask',
+        isPWD: false
       },
       gateway: {
         displayOrder: 400,
         value: '192.168.1.1',
-        displayTitle: 'Configuration.network.Gateway'
+        displayTitle: 'Configuration.network.Gateway',
+        isPWD: false
       }
     },
     odooConnection: {
@@ -163,14 +168,14 @@ export const defaultConfigs = {
     connections: {
       masterpc: 'http://172.17.0.1:8082',
       rfid: 'tcp://192.168.1.120:2112',
-      aiis: 'http://172.29.61.190:9092',
+      aiis: 'http:/127.0.0.1:9092',
       controllers: [
         {
-          serial_no: '0001'
+          serial_no: '12345'
         }
       ],
       io: 'modbustcp://192.168.1.122:502/0',
-      workcenterCode: '1122334455667788',
+      workcenterCode: '69',
       rework_workcenter: 'qrk'
     }
   },
