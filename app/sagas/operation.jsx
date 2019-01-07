@@ -313,7 +313,7 @@ export function* doingOperation() {
     // pset模式
 
     const { masterpc } = state.connections;
-    const { activeResultIndex, failCount, results } = state.operations;
+    const { activeResultIndex, failCount, results, workorderID } = state.operations;
     const userID = 1;
 
     try {
@@ -322,10 +322,12 @@ export function* doingOperation() {
         masterpc,
         results[activeResultIndex].controller_sn,
         results[activeResultIndex].gun_sn,
-        results[activeResultIndex].id,
+        0,
         failCount + 1,
         userID,
-        results[activeResultIndex].pset
+        results[activeResultIndex].pset,
+        workorderID,
+        results[activeResultIndex].group_sequence
       );
     } catch (e) {
       // 程序号设置失败
@@ -375,21 +377,29 @@ export function* handleResults(data) {
     let hasFail = false;
     let storyType = STORY_TYPE.PASS;
 
+    const batch = `${(
+      operations.activeResultIndex + 1
+    ).toString()}/${operations.results[
+    operations.results.length - 1
+      ].group_sequence.toString()}`;
+
     for (let i = 0; i < data.length; i += 1) {
       if (data[i].result === OPERATION_RESULT.NOK) {
         hasFail = true;
         storyType = STORY_TYPE.FAIL;
-      } else {
+      } else if  (data[i].result === OPERATION_RESULT.OK){
         storyType = STORY_TYPE.PASS;
+      }else {
+        yield call(
+          addNewStory,
+          STORY_TYPE.FAIL,
+          `结果 ${batch}`,
+          `执行策略 ${data[i].result}`
+        );
+        return
       }
 
       // const eti  = data[i].ti? data[i].ti.toString() : 'nil';
-
-      const batch = `${(
-        operations.activeResultIndex + 1
-      ).toString()}/${operations.results[
-      operations.results.length - 1
-        ].group_sequence.toString()}`;
 
       yield call(
         addNewStory,

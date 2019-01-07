@@ -314,6 +314,7 @@ class ConnectedNet extends React.PureComponent {
               </InputLabel>
               <Input
                 id="name-simple"
+                type={item.isPWD? "password": null}
                 placeholder={t('Common.isRequired')}
                 className={classes.input}
                 value={item.value}

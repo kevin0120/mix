@@ -123,16 +123,18 @@ export function controllerMode(url, mode, controllerSN) {
 }
 
 // pset
-export function pset(url, controllerSN, gunSN, resultID, count, userID, pset) {
+export function pset(url, controllerSN, gunSN, resultID, count, userID, pset, workorderID, groupSeq) {
   const fullUrl = `${url}/rush/v1/psets`;
   return defaultClient
     .put(fullUrl, {
       pset,
       controller_sn: controllerSN,
       gun_sn: gunSN,
-      result_id: resultID,
+      // result_id: resultID,
       count,
-      user_id: userID
+      user_id: userID,
+      workorder_id: workorderID,
+      group_sequence: groupSeq
     })
     .then(resp => resp)
     .catch(e => {

@@ -8,6 +8,8 @@ import {
   sOn
 } from '../sagas/io';
 
+import sortObj from '../common/utils'
+
 export const OPERATION_STATUS = {
   READY: 'Ready',
   PREDOING: 'PreDoing',
@@ -18,7 +20,8 @@ export const OPERATION_STATUS = {
 
 export const OPERATION_RESULT = {
   OK: 'OK',
-  NOK: 'NOK'
+  NOK: 'NOK',
+  LN: 'LSN'
 };
 
 export const OPERATION_SOURCE = {
@@ -29,6 +32,7 @@ export const OPERATION_SOURCE = {
 };
 
 const defaultOperations = {
+  workorderID: 0,
   operationID: 0,
   operationStatus: 'Ready',
   carID: '',
@@ -130,7 +134,7 @@ function newOperation(state, mode, data) {
       workSheet: data.img,
       productID: data.product_id,
       workcenterID: data.workcenter_id,
-      results: data.points
+      results: data.points.sort((a,b) => a.group_sequence - b.group_sequence),
     };
   }
 
@@ -141,9 +145,10 @@ function newOperation(state, mode, data) {
     carType: data.model,
     maxOpTimes: data.max_op_time,
     workSheet: data.work_sheet,
-    results: data.results,
+    results: data.results.sort((a,b) => a.group_sequence - b.group_sequence),
     activeResultIndex: 0,
-    lnr: data.lnr
+    lnr: data.lnr,
+    workorderID: data.workorder_id
   };
 }
 

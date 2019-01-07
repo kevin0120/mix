@@ -8,8 +8,8 @@ i18n
   .use(LngDetector)
   .use(reactI18nextModule)
   .init({
-    lng: 'en',
-    fallbackLng: 'en',
+    lng: 'zh_CN',
+    fallbackLng: 'zh_CN',
     initImmediate: false,
     load: ['en', 'zh_CN'],
     // have a common namespace used around the full app
