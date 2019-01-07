@@ -165,7 +165,6 @@ class ConnectedNet extends React.PureComponent {
   }
 
   handleChangeSSID(e) {
-    console.log(e);
     this.setState({
       ssid: e.target.value
     });
