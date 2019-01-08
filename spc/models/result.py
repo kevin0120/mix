@@ -564,11 +564,17 @@ class OperationResult(models.HyperModel):
             return self.do_pass()
 
     @api.model
+    def read_group_lacking(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+        pass
+
+    @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=False):
 
         _cache = {}
         if 'measure_result' in fields and 'measure_result' not in groupby:
             groupby.append('measure_result')
+        elif 'lacking' in fields:
+            self.read_group_lacking(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
         res = super(OperationResult, self).read_group(domain, fields, groupby, offset=offset, limit=limit,
                                                       orderby=orderby, lazy=lazy)
         if 'measure_result' in fields:
