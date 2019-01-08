@@ -329,7 +329,7 @@ func (p *Service) GenerateIDInfo(info string) string {
 	ids := ""
 	for i := 0; i < 4; i++ {
 		if i == p.config().DataIndex {
-			ids += fmt.Sprintf("%25s", info)
+			ids += fmt.Sprintf("%-25s", info)
 		} else {
 			ids += fmt.Sprintf("%25s", "")
 		}

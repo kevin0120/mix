@@ -101,12 +101,6 @@ func (m *Methods) putPSets(ctx iris.Context) {
 		return
 	}
 
-	if pset.GunSN == "" {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("gun_sn is required")
-		return
-	}
-
 	if pset.PSet == 0 {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("pset is required")
@@ -624,6 +618,8 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 		return
 	}
 
+	var workorderID int64 = 0
+
 	switch c.Protocol() {
 	case controller.OPENPROTOCOL:
 
@@ -636,6 +632,8 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 				ctx.WriteString(err.Error())
 				return
 			}
+
+			workorderID = db_workorder.Id
 
 			//vin-cartype-hmisn-userid
 			ex_info = m.service.OpenProtocol.GenerateIDInfo(fmt.Sprintf("%d", db_workorder.Id))
@@ -658,6 +656,13 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 		ctx.WriteString(err.Error())
 		return
 	}
+
+	body, _ := json.Marshal(NewWorkorder{
+		WorkorderID: workorderID,
+	})
+
+	ctx.Header("content-type", "application/json")
+	ctx.Write(body)
 }
 
 func (m *Methods) insertResultsForJob(job *JobManual) (*storage.Workorders, error) {
@@ -1053,6 +1058,68 @@ func (m *Methods) putResultTest(ctx iris.Context) {
 
 	str, _ := json.Marshal(results)
 	m.service.OpenProtocol.WS.WSSend(wsnotify.WS_EVENT_RESULT, string(str))
+}
+
+func (m *Methods) postAK2(ctx iris.Context) {
+	cr := controller.ControllerResult{}
+	err := ctx.ReadJSON(&cr)
+
+	if err != nil {
+		// 传输结构错误
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+
+	if cr.Controller_SN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller_sn is required")
+		return
+	}
+
+	if cr.GunSN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("gun_sn is required")
+		return
+	}
+
+	if cr.PSet == 0 {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("pset is required")
+		return
+	}
+
+	if cr.Count == 0 {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("count is required")
+		return
+	}
+
+	if cr.Seq == 0 {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("seq is required")
+		return
+	}
+
+	if cr.Workorder_ID == 0 {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("workorder_id is required")
+		return
+	}
+
+	_, exist := m.service.ControllerService.Controllers[cr.Controller_SN]
+	if !exist {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller not found")
+		return
+	}
+
+	cr.NeedPushHmi = false
+	cr.NeedPushAiis = true
+	cr.Result = storage.RESULT_AK2
+	cr.PSetDefine.Strategy = controller.STRATEGY_AK2
+
+	m.service.ControllerService.Handle(&cr, nil)
 }
 
 func (m *Methods) putJobControll(ctx iris.Context) {

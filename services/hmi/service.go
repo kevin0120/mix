@@ -234,6 +234,14 @@ func (s *Service) Open() error {
 	}
 	s.Httpd.Handler[0].AddRoute(r)
 
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "POST",
+		Pattern:     "/ak2",
+		HandlerFunc: s.methods.postAK2,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
 	//r = httpd.Route{
 	//	RouteType:   httpd.ROUTE_TYPE_HTTP,
 	//	Method:      "PUT",

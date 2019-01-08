@@ -28,6 +28,7 @@ const (
 type SavePackage struct {
 	controllerResult *ControllerResult
 	dbWorkorder      *storage.Workorders
+	dbResult         *storage.Results
 	consume          *Consume
 	count            int
 	batch            string
@@ -105,15 +106,21 @@ func (h *Handlers) Handle(result interface{}, curve interface{}) {
 		h.handleCurve(controllerCurve)
 	}
 
-	// 处理结果
-	h.saveResult(&SavePackage{
+	pkg := SavePackage{
 		controllerResult: controllerResult,
 		dbWorkorder:      &dbWorkorder,
 		consume:          &targetConsume,
 		count:            controllerResult.Count,
 		batch:            fmt.Sprintf("%d/%d", targetConsume.GroupSeq, len(consumes)),
 		curveFile:        curveFileName,
-	})
+	}
+
+	dbResult := h.doSaveResult(&pkg)
+
+	pkg.dbResult = &dbResult
+
+	// 处理结果
+	h.saveResult(&pkg)
 
 }
 
@@ -167,13 +174,24 @@ func magicTrick(t time.Time) time.Time {
 // 处理保存结果
 func (h *Handlers) handleSaveResult(data *SavePackage) {
 
+	// 推送aiis
+	aiisResult, err := h.controllerService.Aiis.ResultToAiisResult(data.dbResult)
+
+	if err == nil {
+		h.controllerService.Aiis.PutResult(data.dbResult.ResultId, aiisResult)
+	}
+}
+
+func (h *Handlers) doSaveResult(data *SavePackage) storage.Results {
 	dbResult := storage.Results{}
 
-	loc, _ := time.LoadLocation("Local")
-	dt, _ := time.ParseInLocation("2006-01-02 15:04:05", data.controllerResult.Dat, loc)
-	dbResult.UpdateTime = magicTrick(dt.UTC())
+	dt := time.Now()
+	if data.controllerResult.Dat != "" {
+		loc, _ := time.LoadLocation("Local")
+		dt, _ = time.ParseInLocation("2006-01-02 15:04:05", data.controllerResult.Dat, loc)
+	}
 
-	//dbResult.UpdateTime = dt.UTC()
+	dbResult.UpdateTime = magicTrick(dt.UTC())
 
 	dbResult.Result = data.controllerResult.Result
 	dbResult.ControllerSN = data.controllerResult.Controller_SN
@@ -228,10 +246,5 @@ func (h *Handlers) handleSaveResult(data *SavePackage) {
 		h.controllerService.diag.Debug("缓存结果成功")
 	}
 
-	// 推送aiis
-	aiisResult, err := h.controllerService.Aiis.ResultToAiisResult(&dbResult)
-
-	if err == nil {
-		h.controllerService.Aiis.PutResult(dbResult.ResultId, aiisResult)
-	}
+	return dbResult
 }

@@ -228,15 +228,26 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 	}
 }
 
+func ArrayContains(s []int, e int) bool {
+	for _, v := range s {
+		if v == e {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (c *Controller) handleResult(result_data *ResultData) {
 
-	if c.Srv.config().SkipJob == result_data.JobID {
+	if ArrayContains(c.Srv.config().SkipJobs, result_data.JobID) {
 		return
 	}
 
 	c.Srv.DB.UpdateTightning(c.dbController.Id, result_data.TightingID)
 
 	controllerResult := controller.ControllerResult{}
+	controllerResult.NeedPushHmi = false
 	controllerResult.TighteningID = result_data.TightingID
 
 	dat_kvs := strings.Split(result_data.TimeStamp, ":")
@@ -248,10 +259,6 @@ func (c *Controller) handleResult(result_data *ResultData) {
 		controllerResult.Result = storage.RESULT_NOK
 	} else {
 		controllerResult.Result = storage.RESULT_OK
-	}
-
-	if result_data.ResultType == "02" {
-		controllerResult.Result = storage.RESULT_LSN
 	}
 
 	controllerResult.ResultValue.Mi = result_data.Torque / 100
@@ -270,6 +277,12 @@ func (c *Controller) handleResult(result_data *ResultData) {
 
 	case "04":
 		controllerResult.PSetDefine.Strategy = controller.STRATEGY_AD
+	}
+
+	if result_data.ResultType == "02" {
+		controllerResult.Result = storage.RESULT_LSN
+		controllerResult.NeedPushHmi = true
+		controllerResult.PSetDefine.Strategy = controller.STRATEGY_LN
 	}
 
 	controllerResult.PSetDefine.Mp = result_data.TorqueMax / 100
@@ -293,7 +306,6 @@ func (c *Controller) handleResult(result_data *ResultData) {
 	}
 
 	controllerResult.Workorder_ID, _ = strconv.ParseInt(targetID, 10, 64)
-	controllerResult.NeedPushHmi = false
 	controllerResult.NeedPushAiis = true
 
 	controllerResult.GunSN = result_data.ToolSerialNumber

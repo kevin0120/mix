@@ -5,6 +5,7 @@ const (
 	RESULT_OK   = "OK"
 	RESULT_NOK  = "NOK"
 	RESULT_LSN  = "LSN"
+	RESULT_AK2  = "AK2"
 )
 
 const (

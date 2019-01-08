@@ -38,13 +38,14 @@ aiis:
     Content-Type: application/json
   result_push_url: /aiis/v1/operation.results/%d
   push_method: PUT
-  timeout: 4s
+  timeout: 6s
   push_interval: 5s
   max_retry: 3
   ws_result_route: /aiis/v1/ws/results
   result_upload_inteval: 2s
   grpc_server: 127.0.0.1:9093
   keep_alive: 3s
+  recheck: false
 odoo:
   urls:
   - http://192.168.1.100:8069
@@ -89,7 +90,9 @@ openprotocol:
   keep_alive_period: 10s
   read_buf: 65535
   req_time_out: 300ms
-  skip_job: 250
+  skip_jobs:
+  - 250
+  - 240
   io_trigger: 7
 
   # 0:vin 1:id2 2:id3 3:id4
@@ -97,13 +100,13 @@ openprotocol:
 
 # 协议类型: Audi/VW, OpenProtocol
 controller_service:
-  workers: 4
+  workers: 1
   controllers:
     - serial_no: 0001
       protocol: OpenProtocol
       remote_ip: 192.168.1.101
       port: 4546
-      channel: 1
+      channel: 51
 #
 #    - serial_no: 12345
 #      protocol: Audi/VW

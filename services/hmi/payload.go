@@ -177,3 +177,7 @@ type TestProtocol struct {
 	ProtocolType string `json:"type"`
 	Payload      string `json:"payload"`
 }
+
+type NewWorkorder struct {
+	WorkorderID int64 `json:"workorder_id"`
+}

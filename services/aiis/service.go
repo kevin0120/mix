@@ -388,28 +388,23 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 			aiisResult.One_time_pass = ODOO_RESULT_FAIL
 		}
 
-		if (resultValue.Mi >= result.ToleranceMin && resultValue.Mi <= result.ToleranceMax) &&
-			(resultValue.Wi >= result.ToleranceMinDegree && resultValue.Wi <= result.ToleranceMaxDegree) {
+		if s.Config().Recheck {
+			if (resultValue.Mi >= result.ToleranceMin && resultValue.Mi <= result.ToleranceMax) &&
+				(resultValue.Wi >= result.ToleranceMinDegree && resultValue.Wi <= result.ToleranceMaxDegree) {
+				aiisResult.QualityState = QUALITY_STATE_PASS
+				aiisResult.ExceptionReason = ""
+			} else {
+				aiisResult.QualityState = QUALITY_STATE_EX
+				aiisResult.ExceptionReason = QUALITY_STATE_EX
+			}
+		} else {
 			aiisResult.QualityState = QUALITY_STATE_PASS
 			aiisResult.ExceptionReason = ""
-		} else {
-			aiisResult.QualityState = QUALITY_STATE_EX
-			aiisResult.ExceptionReason = QUALITY_STATE_EX
 		}
 
 	} else {
 		aiisResult.Final_pass = ODOO_RESULT_FAIL
 		aiisResult.One_time_pass = ODOO_RESULT_FAIL
-
-		if (resultValue.Mi >= result.ToleranceMin && resultValue.Mi <= result.ToleranceMax) &&
-			(resultValue.Wi >= result.ToleranceMinDegree && resultValue.Wi <= result.ToleranceMaxDegree) {
-
-			aiisResult.QualityState = QUALITY_STATE_EX
-			aiisResult.ExceptionReason = QUALITY_STATE_EX
-		} else {
-			aiisResult.QualityState = QUALITY_STATE_FAIL
-			aiisResult.ExceptionReason = ""
-		}
 	}
 
 	return aiisResult, nil
