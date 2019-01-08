@@ -514,6 +514,7 @@ func (s *Service) HandleResult(cr *CResult) {
 		changanResult := s.OperationToChanganResult(cr.Result)
 
 		if !s.Changan.AndonDB.InsertResult(&changanResult) {
+			sent = false
 			s.diag.Error("insert andon result failed", nil)
 		}
 	}

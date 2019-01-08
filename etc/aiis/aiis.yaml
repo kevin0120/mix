@@ -56,7 +56,7 @@ fis:
     - SIH
     - HBV
     - AGM
-  enable: true
+  enable: false
 masterplc:
   enable: false
   port: 4721
