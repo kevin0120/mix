@@ -10,6 +10,9 @@ import requests as Requests
 import json
 from requests import ConnectionError, RequestException, exceptions
 import logging
+
+from dateutil.relativedelta import relativedelta
+
 PUSH_MAINTENANCE_REQ_URL = '/rush/v1/maintenance'
 
 logger = logging.getLogger(__name__)
@@ -244,6 +247,11 @@ class MaintenanceEquipment(models.Model):
 
     check_point_ids = fields.One2many('maintenance.cp', 'equipment_id')
 
+    effective_date = fields.Date('Effective Date', default=fields.Date.context_today, required=True, help="Date at which the equipment became effective. This date will be used to compute the Mean Time Between Failure.")
+
+    mttf = fields.Integer(compute='_compute_maintenance_request', string='MTTF',
+                          help='Mean Time TO Failure, computed based on done corrective maintenances.')
+
     @api.one
     def _get_parent_masterpc(self):
         cat = self
@@ -252,4 +260,27 @@ class MaintenanceEquipment(models.Model):
                 return cat
             cat = cat.parent_id
         return None
+
+    @api.multi
+    def _compute_maintenance_request(self):
+        for equipment in self:
+            maintenance_requests = equipment.maintenance_ids.filtered(lambda x: x.maintenance_type == 'corrective' and x.stage_id.done)
+            mttr_days = 0
+            for maintenance in maintenance_requests:
+                if maintenance.stage_id.done and maintenance.close_date:
+                    mttr_days += (fields.Date.from_string(maintenance.close_date) - fields.Date.from_string(maintenance.create_date)).days
+            equipment.mttr = len(maintenance_requests) and (mttr_days / len(maintenance_requests)) or 0
+
+            maintenance = maintenance_requests.sorted()
+            if len(maintenance) > 1:
+                equipment.mtbf = (fields.Date.from_string(maintenance[0].create_date) - fields.Date.from_string(equipment.effective_date)).days / len(maintenance)
+            else:
+                equipment.mtbf = 0
+            equipment.latest_failure_date = maintenance and maintenance[0].create_date or False
+            if equipment.mtbf:
+                equipment.estimated_next_failure = fields.Datetime.from_string(equipment.latest_failure_date) + relativedelta(days=equipment.mtbf)
+            else:
+                equipment.estimated_next_failure = False
+            equipment.mttf = equipment.mtbf - equipment.mttr
+
 
