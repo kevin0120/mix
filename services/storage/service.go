@@ -48,11 +48,12 @@ func (s *Service) Open() error {
 		c.DBName)
 	engine, err := xorm.NewEngine("postgres", info)
 
+	engine.DatabaseTZ = time.UTC
+	engine.TZLocation = time.UTC
+
 	if err != nil {
 		return errors.Wrapf(err, "Create postgres engine fail")
 	}
-
-	//engine.TZLocation, _ = time.LoadLocation("UTC")
 
 	exist, err := engine.IsTableExist("Workorders")
 	if err == nil {

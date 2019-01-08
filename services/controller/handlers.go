@@ -167,10 +167,6 @@ func (h *Handlers) saveResult(data *SavePackage) {
 
 }
 
-func magicTrick(t time.Time) time.Time {
-	return t.Add(-8 * time.Hour)
-}
-
 // 处理保存结果
 func (h *Handlers) handleSaveResult(data *SavePackage) {
 
@@ -191,7 +187,7 @@ func (h *Handlers) doSaveResult(data *SavePackage) storage.Results {
 		dt, _ = time.ParseInLocation("2006-01-02 15:04:05", data.controllerResult.Dat, loc)
 	}
 
-	dbResult.UpdateTime = magicTrick(dt.UTC())
+	dbResult.UpdateTime = dt.UTC()
 
 	dbResult.Result = data.controllerResult.Result
 	dbResult.ControllerSN = data.controllerResult.Controller_SN
