@@ -12,7 +12,7 @@ import { takeEvery, put } from 'redux-saga/effects';
 
 import { NOTIFY } from '../actions/actionTypes';
 import { NewNotificationOK } from '../actions/notification';
-import { Info, Warn, Error } from '../logger';
+import { Info, Warn, Error, Maintenance } from '../logger';
 
 function* notificationAlways(action) {
   const { variant, message } = action;
@@ -23,6 +23,9 @@ function* notificationAlways(action) {
       break;
     case 'warning':
       Warn(message);
+      break;
+    case 'maintenance':
+      Maintenance(message);
       break;
     case 'error':
       Error(message);

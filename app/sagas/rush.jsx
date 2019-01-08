@@ -150,6 +150,12 @@ export function* watchRushChannel(hmiSN) {
           const json = JSON.parse(dataArray.slice(-1));
 
           switch (event) {
+            case 'maintenance':
+              yield put(setNewNotification(
+                'maintenance',
+                `新维护请求: ${json.type},${json.name}`
+              ));
+              break;
             case 'job':
               if (state.workMode.workMode === 'manual' && json.job_id > 0) {
                 if (state.setting.operationSettings.manualFreestyle) {

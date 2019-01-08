@@ -141,7 +141,7 @@ class Event extends React.Component {
                     selectObj: obj
                   });
                 }}
-                color="warning"
+                color="rose"
                 className="edit"
               >
                 <Dvr />
@@ -175,7 +175,8 @@ class Event extends React.Component {
           <ListItem>
             <ListItemText
               primary={`事件等级: ${
-                selectObj.level === 'info' ? '日常信息' : '报警事件'
+                selectObj.level === 'info' ? '日常信息' :
+                selectObj.level === 'maintenance'? '维护请求': '报警事件'
               }`}
             />
           </ListItem>
@@ -213,7 +214,9 @@ class Event extends React.Component {
                             case 'warn':
                               color = warningColor;
                               break;
-
+                            case 'maintenance':
+                              color = warningColor;
+                              break;
                             case 'error':
                               color = dangerColor;
                               break;
@@ -252,8 +255,11 @@ class Event extends React.Component {
                             if (filter.value === 'info') {
                               return row[filter.id] === 'info';
                             }
-                            if (filter.value === 'alarm') {
+                            if (filter.value === 'warn') {
                               return row[filter.id] === 'warn';
+                            }
+                            if (filter.value === 'maintenance') {
+                              return row[filter.id] === 'maintenance';
                             }
                             if (filter.value === 'error') {
                               return row[filter.id] === 'error';
@@ -268,7 +274,8 @@ class Event extends React.Component {
                             >
                               <option value="all">All</option>
                               <option value="info">Info</option>
-                              <option value="alarm">Alarm</option>
+                              <option value="maintenance">Maintenance</option>
+                              <option value="warn">Warn</option>
                               <option value="error">Error</option>
                             </select>
                           )
@@ -334,7 +341,7 @@ class Event extends React.Component {
                 onConfirm={this.handleClose}
                 onCancel={this.handleClose}
                 confirmBtnCssClass={`${this.props.classes.button} ${
-                  this.props.classes.success
+                  this.props.classes.successWarn
                 }`}
                 cancelBtnCssClass={`${this.props.classes.button} ${
                   this.props.classes.danger
