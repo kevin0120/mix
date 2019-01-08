@@ -67,52 +67,57 @@ function* initAiis() {
 }
 
 export function* handleAiisData(action) {
-  const data = action.json;
-  const state = yield select();
-  if (state.operations.operationStatus !== OPERATION_STATUS.DOING) {
-    if (data.vin_code.length) {
-      // 车辆拧紧作业
-      yield call(
-        triggerOperation,
-        data.vin_code,
-        data.cartype_code,
-        null,
-        OPERATION_SOURCE.ANDON
-      );
-    } else {
-      // 空车信息
+  try {
+    const data = action.json;
+    const state = yield select();
+    if (state.operations.operationStatus !== OPERATION_STATUS.DOING) {
+      if (data.vin_code.length) {
+        // 车辆拧紧作业
+        yield call(
+          triggerOperation,
+          data.vin_code,
+          data.cartype_code,
+          null,
+          OPERATION_SOURCE.ANDON
+        );
+      } else {
+        // 空车信息
 
-      const { carType, carID } = state.operations;
+        const { carType, carID } = state.operations;
 
-      const { emptyCarJob } = state.setting.operationSettings;
+        const { emptyCarJob } = state.setting.operationSettings;
 
-      const controllerSN = state.connections.controllers[0].serial_no;
-      const rushUrl = state.connections.masterpc;
-      const { hmiSn } = state.setting.page.odooConnection;
-      const userID = 1;
-      const skip = true;
-      const hasSet = false;
+        const controllerSN = state.connections.controllers[0].serial_no;
+        const rushUrl = state.connections.masterpc;
+        const { hmiSn } = state.setting.page.odooConnection;
+        const userID = 1;
+        const skip = true;
+        const hasSet = false;
 
-      const resp = yield call(
-        jobManual,
-        rushUrl,
-        controllerSN,
-        carType,
-        carID,
-        userID,
-        emptyCarJob,
-        hmiSn.value,
-        0,
-        skip,
-        hasSet,
-        ''
-      );
+        const resp = yield call(
+          jobManual,
+          rushUrl,
+          controllerSN,
+          carType,
+          carID,
+          userID,
+          emptyCarJob,
+          hmiSn.value,
+          0,
+          skip,
+          hasSet,
+          ''
+        );
 
-      if (resp.statusCode !== 200) {
-        yield put({ type: OPERATION.PROGRAMME.SET_FAIL });
+        if (resp.statusCode !== 200) {
+          yield put({ type: OPERATION.PROGRAMME.SET_FAIL });
+        }
       }
     }
+  } catch (e) {
+    console.log("handleAiisData:", e);
   }
+
 }
 
 function aiisWSChannel() {

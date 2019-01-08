@@ -18,25 +18,30 @@ import { watchRfid } from './rfid';
 import { watchNotification } from './notification';
 
 export default function* rootSaga() {
-  yield all([
-    // card auth
-    cardAuthFlow(),
-    watchScanner(),
-    watchNotification(),
-    watchAiis(),
-    watchOperation(),
-    watchResults(),
-    watchIO(),
-    watchRush(),
-    watchRfid(),
-    shutDownDiagWorkFlow(),
-    toolFunctions(),
-    // auth
-    loginFlow(),
-    logoutFlow(),
-    // healthz
-    // healthzCheckFlow(),
-    watchSettingPreSave(),
-    sysInitFlow()
-  ]);
+  try {
+    yield all([
+      // card auth
+      cardAuthFlow(),
+      watchScanner(),
+      watchNotification(),
+      watchAiis(),
+      watchOperation(),
+      watchResults(),
+      watchIO(),
+      watchRush(),
+      watchRfid(),
+      shutDownDiagWorkFlow(),
+      toolFunctions(),
+      // auth
+      loginFlow(),
+      logoutFlow(),
+      // healthz
+      // healthzCheckFlow(),
+      watchSettingPreSave(),
+      sysInitFlow()
+    ]);
+  } catch (e) {
+    console.log("rootSaga:", e);
+  }
+
 }
