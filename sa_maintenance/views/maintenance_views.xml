@@ -51,6 +51,12 @@
                     <field name="mttf" class="oe_read_only"/> days
                 </div>
             </xpath>
+            <xpath expr="//group[@name='maintenance']" position="inside">
+                <label for="maintenance_lead_time" string="Maintenance Lead Time"/>
+                <div class="o_row">
+                    <field name="maintenance_lead_time" /> days
+                </div>
+            </xpath>
         </field>
       </record>
 
