@@ -213,6 +213,7 @@ class MrpProduction(models.Model):
                 'production_id': self.id,
                 'workcenter_id': operation.workcenter_id.id,
                 'operation_id': operation.id,
+                'date_planned_start': self.date_planned_start,
                 # 'duration_expected': duration_expected,
                 'state': len(workorders) == 0 and 'ready' or 'pending',
                 'qty_producing': quantity,
