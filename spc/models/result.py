@@ -801,7 +801,7 @@ class OperationResult(models.HyperModel):
                 inv_value = float_round(line['__count'] / count, precision_digits=3)
                 line['__count'] = inv_value
 
-        res = sorted(res, key=lambda l: next(v for (line_key, v) in l.iteritems() if '__count' in line_key), reverse=True)
+        res = sorted(res, key=lambda l: next(v for (line_key, v) in l.iteritems() if '__count' or '_count' in line_key), reverse=True)
 
         return res
 
