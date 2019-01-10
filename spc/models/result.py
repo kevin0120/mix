@@ -718,7 +718,7 @@ class OperationResult(models.HyperModel):
                       group by control_date
                       order by control_date) d2
         ''' % {
-            'interval': annotated_groupbys[0]['groupby'].split(':')[-1],
+            'interval': annotated_groupbys[0]['groupby'].split(':')[-1] if annotated_groupbys[0]['field'] == 'control_date' else annotated_groupbys[1]['groupby'].split(':')[-1],
         }
 
         if where_clause == '':
@@ -772,7 +772,7 @@ class OperationResult(models.HyperModel):
             groupby.append('measure_result')
             res = super(OperationResult, self).read_group(domain, fields, groupby, offset=offset, limit=limit,
                                                           orderby=orderby, lazy=lazy)
-        elif 'lacking' in fields:
+        elif 'lacking' in fields and len(groupby) >= 2:
             res = self.read_group_lacking(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
         else:
             res = super(OperationResult, self).read_group(domain, fields, groupby, offset=offset, limit=limit,
