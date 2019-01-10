@@ -798,7 +798,10 @@ class OperationResult(models.HyperModel):
                     _domain += [('measure_result', 'in', ['ok', 'nok'])]
                     _cache[k] = self.search_count(_domain)
                 count = _cache[k]
-                inv_value = float_round(line['__count'] / count, precision_digits=3)
+                try:
+                    inv_value = float_round(line['__count'] / count, precision_digits=3)
+                except ZeroDivisionError:
+                    inv_value = 0
                 line['__count'] = inv_value
 
         res = sorted(res, key=lambda l: next(v for (line_key, v) in l.iteritems() if '__count' or '_count' in line_key), reverse=True)
