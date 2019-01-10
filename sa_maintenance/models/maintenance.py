@@ -297,6 +297,6 @@ class MaintenanceEquipment(models.Model):
                 equipment.estimated_next_failure = fields.Datetime.from_string(equipment.latest_failure_date) + relativedelta(days=equipment.mtbf)
             else:
                 equipment.estimated_next_failure = False
-            equipment.mttf = equipment.mtbf - equipment.mttr
+            # equipment.mttf = equipment.mtbf - equipment.mttr
 
 
