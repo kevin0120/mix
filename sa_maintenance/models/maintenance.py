@@ -284,15 +284,15 @@ class MaintenanceEquipment(models.Model):
             mttr_days = 0
             for maintenance in maintenance_requests:
                 if maintenance.stage_id.done and maintenance.close_date:
-                    mttr_days += (fields.Date.from_string(maintenance.close_date) - fields.Date.from_string(maintenance.create_date)).days
+                    mttr_days += (fields.Date.from_string(maintenance.close_date) - fields.Date.from_string(maintenance.request_date)).days
             equipment.mttr = len(maintenance_requests) and (mttr_days / len(maintenance_requests)) or 0
 
-            maintenance = maintenance_requests.sorted()
+            maintenance = maintenance_requests.sorted(lambda x: x.request_date)
             if len(maintenance) > 1:
-                equipment.mtbf = (fields.Date.from_string(maintenance[0].create_date) - fields.Date.from_string(equipment.effective_date)).days / len(maintenance)
+                equipment.mtbf = (fields.Date.from_string(maintenance[-1].request_date) - fields.Date.from_string(equipment.effective_date)).days / len(maintenance)
             else:
                 equipment.mtbf = 0
-            equipment.latest_failure_date = maintenance and maintenance[0].create_date or False
+            equipment.latest_failure_date = maintenance and maintenance[-1].request_date or False
             if equipment.mtbf:
                 equipment.estimated_next_failure = fields.Datetime.from_string(equipment.latest_failure_date) + relativedelta(days=equipment.mtbf)
             else:
