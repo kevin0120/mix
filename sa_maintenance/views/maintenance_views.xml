@@ -45,10 +45,16 @@
         <field name="model">maintenance.equipment</field>
         <field name="inherit_id" ref="maintenance.hr_equipment_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//group[@name='statistisc']" position="inside">
-                <label for="mttf" string="Mean Time To Failure"/>
+            <!--<xpath expr="//group[@name='statistisc']" position="inside">-->
+                <!--<label for="mttf" string="Mean Time To Failure"/>-->
+                <!--<div class="o_row">-->
+                    <!--<field name="mttf" class="oe_read_only"/> days-->
+                <!--</div>-->
+            <!--</xpath>-->
+            <xpath expr="//group[@name='maintenance']" position="inside">
+                <label for="maintenance_lead_time" string="Maintenance Lead Time"/>
                 <div class="o_row">
-                    <field name="mttf" class="oe_read_only"/> days
+                    <field name="maintenance_lead_time" /> days
                 </div>
             </xpath>
         </field>

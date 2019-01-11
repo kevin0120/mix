@@ -247,10 +247,26 @@ class MaintenanceEquipment(models.Model):
 
     check_point_ids = fields.One2many('maintenance.cp', 'equipment_id')
 
+    maintenance_lead_time = fields.Integer('Lead Days', default=5)
+
     effective_date = fields.Date('Effective Date', default=fields.Date.context_today, required=True, help="Date at which the equipment became effective. This date will be used to compute the Mean Time Between Failure.")
 
     mttf = fields.Integer(compute='_compute_maintenance_request', string='MTTF',
                           help='Mean Time TO Failure, computed based on done corrective maintenances.')
+
+    @api.model
+    def _cron_generate_requests(self):
+        """
+            Generates maintenance request on the next_action_date or today if none exists
+        """
+        for equipment in self.search([('period', '>', 0)]):
+            next_requests = self.env['maintenance.request'].search([('stage_id.done', '=', False),
+                                                                    ('equipment_id', '=', equipment.id),
+                                                                    ('maintenance_type', '=', 'preventive'),
+                                                                    ('request_date', '=', equipment.next_action_date)])
+            need_action = (fields.Date.from_string(equipment.next_action_date) - fields.Date.from_string(fields.Date.context_today(self))).days <= equipment.maintenance_lead_time
+            if not next_requests and need_action:
+                equipment._create_new_request(equipment.next_action_date)
 
     @api.one
     def _get_parent_masterpc(self):
@@ -268,19 +284,19 @@ class MaintenanceEquipment(models.Model):
             mttr_days = 0
             for maintenance in maintenance_requests:
                 if maintenance.stage_id.done and maintenance.close_date:
-                    mttr_days += (fields.Date.from_string(maintenance.close_date) - fields.Date.from_string(maintenance.create_date)).days
+                    mttr_days += (fields.Date.from_string(maintenance.close_date) - fields.Date.from_string(maintenance.request_date)).days
             equipment.mttr = len(maintenance_requests) and (mttr_days / len(maintenance_requests)) or 0
 
-            maintenance = maintenance_requests.sorted()
+            maintenance = maintenance_requests.sorted(lambda x: x.request_date)
             if len(maintenance) > 1:
-                equipment.mtbf = (fields.Date.from_string(maintenance[0].create_date) - fields.Date.from_string(equipment.effective_date)).days / len(maintenance)
+                equipment.mtbf = (fields.Date.from_string(maintenance[-1].request_date) - fields.Date.from_string(equipment.effective_date)).days / len(maintenance)
             else:
                 equipment.mtbf = 0
-            equipment.latest_failure_date = maintenance and maintenance[0].create_date or False
+            equipment.latest_failure_date = maintenance and maintenance[-1].request_date or False
             if equipment.mtbf:
                 equipment.estimated_next_failure = fields.Datetime.from_string(equipment.latest_failure_date) + relativedelta(days=equipment.mtbf)
             else:
                 equipment.estimated_next_failure = False
-            equipment.mttf = equipment.mtbf - equipment.mttr
+            # equipment.mttf = equipment.mtbf - equipment.mttr
 
 
