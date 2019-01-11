@@ -4,14 +4,14 @@ import configs from '../../shared/config';
 export default class Curve extends React.Component {
   constructor(props) {
     super(props);
-    this.webview = null;
+    // this.webview = null;
   }
 
   componentDidMount(): void {
-    this.webview.addEventListener('new-window', e => {
-      e.preventDefault();
-      this.webview.setAttribute('src', e.url);
-    });
+    // this.webview.addEventListener('new-window', e => {
+    //   e.preventDefault();
+    //   this.webview.setAttribute('src', e.url);
+    // });
   }
 
   render() {
@@ -22,10 +22,10 @@ export default class Curve extends React.Component {
           height: 'calc(100% - 64px)'
         }}
       >
-        <webview
-          ref={r => {
-            this.webview = r;
-          }}
+        <iframe
+          // ref={r => {
+          //   this.webview = r;
+          // }}
           id="cvinetweb"
           title="cvinetweb"
           src={configs.cvinetweb.url}
@@ -33,7 +33,7 @@ export default class Curve extends React.Component {
             height: '100%',
             width: '100%'
           }}
-          // frameBorder="0"
+          frameBorder="0"
           // sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-top-navigation allow-presentation"
         />
       </div>
