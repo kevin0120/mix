@@ -12,6 +12,7 @@ import Fingerprint from '@material-ui/icons/Fingerprint';
 import Trend from '@material-ui/icons/TrendingUp';
 import Mail from '@material-ui/icons/Mail';
 import Save from '@material-ui/icons/Save';
+
 import WorkOrders from '../containers/orders';
 import Working from '../containers/working';
 import ConnResult from '../containers/result';
@@ -21,6 +22,8 @@ import Help from '../containers/help';
 import Pages from '../layouts/Pages';
 import HomePage from '../containers/home';
 import Curve from '../containers/curve'
+import Viewer from '../containers/viewer'
+
 // imgs
 import helpImg from '../../resources/imgs/help.png';
 import editorImg from '../../resources/imgs/operaIns.png';
@@ -62,6 +65,20 @@ const routes = [
     url: '/working',
     title: 'main.operation',
     main: Working,
+    icon: BuildIcon,
+    color: '#00abbf',
+    image: WorkingImg,
+    showLayout: true,
+    roles:[
+      'user',
+      'admin'
+    ]
+  },
+  {
+    name: 'viewer',
+    url: '/viewer',
+    title: 'main.operationViewer',
+    main: Viewer,
     icon: BuildIcon,
     color: '#00abbf',
     image: WorkingImg,

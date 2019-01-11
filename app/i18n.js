@@ -11,7 +11,8 @@ i18n
     lng: 'zh_CN',
     fallbackLng: 'zh_CN',
     initImmediate: false,
-    load: ['en', 'zh_CN'],
+    load: 'all',
+    preload: ['en', 'zh_CN'],
     // have a common namespace used around the full app
     ns: ['translations'],
     defaultNS: 'translations',

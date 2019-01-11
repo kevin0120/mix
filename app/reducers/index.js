@@ -13,6 +13,7 @@ import resultDiag from './reusltDiag';
 import ongoingOperation from './ongoingOpeartion';
 import healthCheckResults from './healthCheck';
 import timeline from './timeline';
+import operationViewer from './operationViewer';
 
 export default function createRootReducer(history: {}) {
   const routerReducer = connectRouter(history)(() => {});
@@ -30,7 +31,8 @@ export default function createRootReducer(history: {}) {
       shutDownDiag,
       resultDiag,
       ongoingOperation,
-      timeline
+      timeline,
+      operationViewer
     })
   );
 }
