@@ -216,7 +216,7 @@ export function* watchRushChannel(hmiSN) {
             case 'scanner': {
               // console.log('rush scanner:', json);
               const { workMode } = state.workMode;
-              if (workMode === 'scanner') {
+              if (workMode === 'scanner' || workMode === 'manual') {
                 yield put(NewCar(json.barcode));
               }
               break;

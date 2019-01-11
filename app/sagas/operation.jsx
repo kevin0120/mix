@@ -8,7 +8,7 @@ import {
 } from './api/operation';
 import { OPERATION, RUSH } from '../actions/actionTypes';
 import { openShutdown } from '../actions/shutDownDiag';
-import { OPERATION_RESULT, OPERATION_STATUS } from '../reducers/operations';
+import { OPERATION_RESULT, OPERATION_SOURCE, OPERATION_STATUS } from "../reducers/operations";
 import { addNewStory, clearStories, STORY_TYPE } from './timeline';
 import { toolEnable, toolDisable } from '../actions/tools';
 import { setResultDiagShow } from '../actions/resultDiag';
@@ -79,26 +79,10 @@ function* getNextWorkOrderandShow() {
 // 触发作业
 export function* triggerOperation(carID, carType, job, source) {
   try {
-    let state = yield select();
+    const state = yield select();
 
     if (state.router.location.pathname !== '/working') {
       return;
-    }
-
-    switch (state.operations.operationStatus) {
-      case OPERATION_STATUS.DOING:
-        return;
-      case OPERATION_STATUS.READY:
-        yield call(clearStories);
-        yield put({ type: OPERATION.PREDOING });
-        break;
-
-      case OPERATION_STATUS.TIMEOUT:
-        yield put({ type: OPERATION.PREDOING });
-        break;
-
-      default:
-        break;
     }
 
     yield put({ type: OPERATION.SOURCE.SET, source });
@@ -121,7 +105,26 @@ export function* triggerOperation(carID, carType, job, source) {
       });
     }
 
-    state = yield select();
+    if (source === OPERATION_SOURCE.SCANNER && state.workMode.workMode === 'manual'){
+      // 手动模式下,扫码枪接收到讯息,不获取作业以及切换工作状态
+      return;
+    }
+
+    switch (state.operations.operationStatus) {
+      case OPERATION_STATUS.DOING:
+        return;
+      case OPERATION_STATUS.READY:
+        yield call(clearStories);
+        yield put({ type: OPERATION.PREDOING });
+        break;
+
+      case OPERATION_STATUS.TIMEOUT:
+        yield put({ type: OPERATION.PREDOING });
+        break;
+
+      default:
+        break;
+    }
 
     const triggers = state.setting.operationSettings.flowTriggers;
 
@@ -133,8 +136,7 @@ export function* triggerOperation(carID, carType, job, source) {
     }
 
     if (
-      triggerFlagNum === triggers.length ||
-      state.workMode.workMode === 'manual'
+      triggerFlagNum === triggers.length
     ) {
       yield call(getOperation, job);
     }
