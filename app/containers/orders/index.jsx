@@ -10,7 +10,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import ReactTable from 'react-table';
 import PropTypes from 'prop-types';
-
+import { push } from 'connected-react-router';
 import Divider from '@material-ui/core/Divider';
 
 import { I18n } from 'react-i18next';
@@ -23,10 +23,11 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import isURL from 'validator/lib/isURL';
+import Input from '@material-ui/core/Input';
 import { cardTitle } from '../../common/jss/material-react-pro';
-import withLayout from '../../components/Layout/layout';
-
 import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
+import { NewCar } from '../../actions/scannerDevice';
+
 
 // @material-ui/core components
 // @material-ui/icons
@@ -40,7 +41,6 @@ import CardIcon from '../../components/Card/CardIcon';
 import CardHeader from '../../components/Card/CardHeader';
 
 import { defaultClient } from '../../common/utils';
-import Input from '@material-ui/core/Input';
 import withKeyboard from '../../components/Keyboard';
 
 const lodash = require('lodash');
@@ -69,6 +69,11 @@ const styles = {
   InputInput: {
     width: '100%',
     height: '100%'
+  },
+  alertPosition: {
+    top: '25%',
+    display: 'block',
+    marginTop: '-100px'
   }
 };
 
@@ -78,7 +83,10 @@ const mapStateToProps = (state, ownProps) => ({
   ...ownProps
 });
 
-const mapDispatchToProps = {};
+const mapDispatchToProps = {
+  dispatchNewCar: NewCar,
+  dispatchPush: push
+};
 
 function requestData(masterpcUrl, workcenterCode) {
   const url = `${masterpcUrl}/rush/v1/workorders`;
@@ -101,8 +109,9 @@ class WorkOrder extends React.Component {
     super(props);
     this.state = {
       data: [],
-      isShow: false,
-      selectObj: null
+      selectObj: null,
+      confirmInfo: null,
+      alert: 'none'  // '车辆详情',''
     };
     this.fetchData = this.fetchData.bind(this);
   }
@@ -134,17 +143,23 @@ class WorkOrder extends React.Component {
                     justIcon
                     round
                     simple
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
                       const obj = this.state.data.find(o => o.id === key);
                       this.setState({
-                        isShow: true,
+                        alert:'车辆详情',
                         selectObj: obj
                       });
+                    }}
+                    style={{
+                      width: 100,
+                      height: '100%'
                     }}
                     color="warning"
                     className="edit"
                   >
-                    <Dvr />
+                    <Dvr/>
                   </Button>{' '}
                 </div>
               )
@@ -159,43 +174,139 @@ class WorkOrder extends React.Component {
 
   handleClose = () => {
     this.setState({
-      isShow: false
+      alert:'none',
     });
+  };
+
+  handleRowClick = (rowInfo) => {
+    this.setState({
+      alert:'确认选择',
+      confirmInfo: rowInfo.original
+    });
+  };
+
+  handleRowConfirm = () => {
+    const { dispatchNewCar, dispatchPush } = this.props;
+    const { confirmInfo } = this.state;
+    dispatchPush('/working');
+    dispatchNewCar(confirmInfo.long_pin);
+  };
+
+  Msg = (selectObj) => selectObj ? (
+    <div>
+      <List>
+        <ListItem>
+          <ListItemText primary={`VIN:   ${selectObj.vin}`}/>
+        </ListItem>
+        <Divider inset component="li"/>
+        <ListItem>
+          <ListItemText primary={`车型:   ${selectObj.model}`}/>
+        </ListItem>
+        <li>
+          <Divider inset/>
+        </li>
+        <ListItem>
+          <ListItemText primary={`KNR: ${selectObj.knr}`}/>
+        </ListItem>
+        <Divider inset component="li"/>
+        <ListItem>
+          <ListItemText primary={`LNR: ${selectObj.lnr}`}/>
+        </ListItem>
+        <Divider inset component="li"/>
+        <ListItem>
+          <ListItemText primary={`LongPIN:   ${selectObj.long_pin}`}/>
+        </ListItem>
+      </List>
+    </div>
+  ) : (
+    ' '
+  );
+
+  ConfirmInfo = (info) => info ? (
+    <div>
+      <List>
+        <ListItem>
+          <ListItemText primary={`VIN:   ${info.vin}`}/>
+        </ListItem>
+        <Divider inset component="li"/>
+        <ListItem>
+          <ListItemText primary={`车型:   ${info.model}`}/>
+        </ListItem>
+        <li>
+          <Divider inset/>
+        </li>
+        <ListItem>
+          <ListItemText primary={`KNR: ${info.knr}`}/>
+        </ListItem>
+        <Divider inset component="li"/>
+        <ListItem>
+          <ListItemText primary={`LNR: ${info.lnr}`}/>
+        </ListItem>
+        <Divider inset component="li"/>
+        <ListItem>
+          <ListItemText primary={`LongPIN:   ${info.long_pin}`}/>
+        </ListItem>
+      </List>
+    </div>
+  ) : (
+    ' '
+  );
+
+  Alert = (type,t) => {
+    if(type==='none'){
+      return null;
+    }
+    const { classes } = this.props;
+    const { selectObj, confirmInfo } = this.state;
+    let AlertSettings = {};
+    let content = null;
+    switch (type) {
+      case '车辆详情':
+        AlertSettings = {
+          info: true,
+          show: true,
+          title: '车辆详情',
+          onConfirm: this.handleClose,
+          onCancel: this.handleClose,
+          confirmBtnCssClass: `${classes.button} ${classes.success}`,
+          cancelBtnCssClass: `${classes.button} ${classes.danger}`,
+          confirmBtnText: t('Common.Yes'),
+          cancelBtnText: t('Common.No'),
+          showCancel: false
+        };
+        content = this.Msg(selectObj);
+        break;
+      case '确认选择':
+        AlertSettings = {
+          info: true,
+          show: true,
+          title: '确认选择',
+          onConfirm: this.handleRowConfirm,
+          onCancel: this.handleClose,
+          confirmBtnCssClass: `${classes.button} ${classes.success}`,
+          cancelBtnCssClass: `${classes.button} ${classes.danger}`,
+          confirmBtnText: t('Common.Yes'),
+          cancelBtnText: t('Common.No'),
+          showCancel: true
+        };
+        content = this.ConfirmInfo(confirmInfo);
+        break;
+      default:
+        return null;
+    }
+    return (
+      <SweetAlert
+        {...AlertSettings}
+        style={styles.alertPosition}
+      >
+        {content}
+      </SweetAlert>
+    );
   };
 
   render() {
     const { classes } = this.props;
-    const { data, isShow, selectObj } = this.state;
-
-    const Msg = selectObj ? (
-      <div>
-        <List>
-          <ListItem>
-            <ListItemText primary={`VIN:   ${selectObj.vin}`} />
-          </ListItem>
-          <Divider inset component="li" />
-          <ListItem>
-            <ListItemText primary={`车型:   ${selectObj.model}`} />
-          </ListItem>
-          <li>
-            <Divider inset />
-          </li>
-          <ListItem>
-            <ListItemText primary={`KNR: ${selectObj.knr}`} />
-          </ListItem>
-          <Divider inset component="li" />
-          <ListItem>
-            <ListItemText primary={`LNR: ${selectObj.lnr}`} />
-          </ListItem>
-          <Divider inset component="li" />
-          <ListItem>
-            <ListItemText primary={`LongPIN:   ${selectObj.long_pin}`} />
-          </ListItem>
-        </List>
-      </div>
-    ) : (
-      ' '
-    );
+    const { data, alert } = this.state;
 
     return (
       <I18n ns="translations">
@@ -206,7 +317,7 @@ class WorkOrder extends React.Component {
                 <Card>
                   <CardHeader color="info" icon>
                     <CardIcon color="info">
-                      <Assignment />
+                      <Assignment/>
                     </CardIcon>
                     <h4 className={classes.cardIconTitle}>
                       {t('main.orders')}
@@ -214,6 +325,24 @@ class WorkOrder extends React.Component {
                   </CardHeader>
                   <CardBody>
                     <ReactTable
+                      getTrProps={(state, rowInfo, column, instance) => {
+                        return {
+                          onClick: (e, handleOriginal) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            this.handleRowClick(rowInfo);
+                            // IMPORTANT! React-Table uses onClick internally to trigger
+                            // events like expanding SubComponents and pivots.
+                            // By default a custom 'onClick' handler will override this functionality.
+                            // If you want to fire the original onClick handler, call the
+                            // 'handleOriginal' function.
+                            if (handleOriginal) {
+                              handleOriginal();
+                            }
+                          }
+                        };
+                      }}
                       data={data}
                       filterable
                       columns={[
@@ -328,23 +457,7 @@ class WorkOrder extends React.Component {
                 </Card>
               </GridItem>
             </GridContainer>
-            {isShow ? (
-              <SweetAlert
-                info
-                show={isShow}
-                style={{ display: 'block', marginTop: '-100px' }}
-                title="车辆详情"
-                onConfirm={this.handleClose}
-                onCancel={this.handleClose}
-                confirmBtnCssClass={`${classes.button} ${classes.success}`}
-                cancelBtnCssClass={`${classes.button} ${classes.danger}`}
-                confirmBtnText={t('Common.Yes')}
-                cancelBtnText={t('Common.No')}
-                showCancel
-              >
-                {Msg}
-              </SweetAlert>
-            ) : null}
+            {this.Alert(alert,t)}
           </div>
         )}
       </I18n>
