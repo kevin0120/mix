@@ -56,7 +56,7 @@ const styles = theme => ({
   },
   cardContent: {
     position: 'relative',
-    padding: '50px 10px 0'
+    padding: '50px 10px'
   },
   fabLeft: {
     position: 'absolute',
