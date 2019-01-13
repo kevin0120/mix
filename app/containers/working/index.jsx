@@ -47,6 +47,7 @@ const lodash = require('lodash');
 
 const mapStateToProps = (state, ownProps) => ({
   operations: state.operations,
+  logo:state.logo,
   operationSettings: state.setting.operationSettings,
   workMode: state.workMode,
   timeline: state.timeline,
@@ -653,7 +654,7 @@ class ConnectedWorking extends React.Component {
   };
 
   render() {
-    const { classes, operations, timeline, workMode, enableFocus } = this.props;
+    const { classes, operations, timeline, workMode, enableFocus, logo } = this.props;
     //
     //
     const { inputName, manualDiagShow } = this.state;
@@ -835,6 +836,7 @@ class ConnectedWorking extends React.Component {
                   <Paper className={classes.LeftBottomTab}>
                     {/*<div className={classes.ImgTabContiner}>*/}
                     <ImageStick
+                      logo={logo}
                       operations={operations}
                       enableFocus={enableFocus}
                     />

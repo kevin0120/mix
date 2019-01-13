@@ -14,6 +14,7 @@ import ongoingOperation from './ongoingOpeartion';
 import healthCheckResults from './healthCheck';
 import timeline from './timeline';
 import operationViewer from './operationViewer';
+import logo from './logo';
 
 export default function createRootReducer(history: {}) {
   const routerReducer = connectRouter(history)(() => {});
@@ -32,7 +33,8 @@ export default function createRootReducer(history: {}) {
       resultDiag,
       ongoingOperation,
       timeline,
-      operationViewer
+      operationViewer,
+      logo
     })
   );
 }

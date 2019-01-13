@@ -278,7 +278,7 @@ class ConnectedImageStick extends React.Component {
   };
 
   render() {
-    const { classes, operations, enableFocus } = this.props;
+    const { classes, operations, enableFocus, logo } = this.props;
 
     const smallImgDisplay =
       operations.operationStatus !== 'Ready' &&
@@ -286,7 +286,7 @@ class ConnectedImageStick extends React.Component {
 
     return (
       <div className={classes.picWrap}>
-        <Image src={operations.workSheet} alt="" focus={this.focus}>
+        <Image src={operations.workSheet||logo} alt="" focus={this.focus}>
           {this.statusDisplay(false)}
         </Image>
         {enableFocus ? (
@@ -295,7 +295,7 @@ class ConnectedImageStick extends React.Component {
             {...(smallImgDisplay ? { timeout: 1000 } : {})}
           >
             <Card plain raised className={classes.imgSmallBlock}>
-              <Image src={operations.workSheet} alt="">
+              <Image src={operations.workSheet||logo} alt="">
                 {this.statusDisplay(true)}
               </Image>
             </Card>

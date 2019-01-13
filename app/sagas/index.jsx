@@ -17,6 +17,7 @@ import { watchRush } from './rush';
 import { watchRfid } from './rfid';
 import { watchNotification } from './notification';
 import watchOperationViewer from './operationViewer';
+import logo from './logo';
 
 export default function* rootSaga() {
   try {
@@ -40,7 +41,8 @@ export default function* rootSaga() {
       // healthzCheckFlow(),
       watchSettingPreSave(),
       sysInitFlow(),
-      watchOperationViewer()
+      watchOperationViewer(),
+      logo()
     ]);
   } catch (e) {
     console.log('rootSaga:', e);

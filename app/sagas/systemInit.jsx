@@ -15,7 +15,8 @@ import {
   SYSTEM_INIT,
   RUSH,
   RFID,
-  USER_CONFIGS
+  USER_CONFIGS,
+  LOGO
 } from '../actions/actionTypes';
 
 import { setLedStatusReady, setModBusIO } from './io';
@@ -55,6 +56,11 @@ function* sysInit() {
     if (state.setting.systemSettings.andonEnable) {
       yield put(initAiis());
     }
+
+    // 获取logo
+    yield put({
+      type:LOGO.FETCH_START
+    });
 
     setLedStatusReady();
   } catch (e) {

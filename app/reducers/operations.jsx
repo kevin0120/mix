@@ -1,5 +1,4 @@
 import { OPERATION } from '../actions/actionTypes';
-import defaultWorkingImg from '../../resources/imgs/defaultWorking.jpg';
 
 import {
   setLedStatusDoing,
@@ -41,7 +40,7 @@ const defaultOperations = {
   failCount: 0,
   jobID: 0,
   maxOpTimes: 0,
-  workSheet: defaultWorkingImg,
+  workSheet: null,
   productID: -1,
   workcenterID: -1,
   lnr: '',
