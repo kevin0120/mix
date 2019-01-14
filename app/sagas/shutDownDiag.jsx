@@ -20,6 +20,8 @@ import {
 import { Info } from '../logger';
 import { toolDisable } from '../actions/tools';
 
+import { ak2 } from './operation';
+
 const { ipcRenderer } = require('electron');
 
 const getOperations = state => state.operations;
@@ -53,6 +55,11 @@ function* confirmDiag(dType, data) {
       case 'bypass': {
         const op = yield select(getOperations);
         const { carID } = op;
+        const state = yield select();
+        const enableAk2 = state.setting.operationSettings.manualFreestyle;
+        if (enableAk2) {
+          yield call(ak2);
+        }
         Info(`车辆已放行 车辆ID:${carID}`);
         yield put(switch2Ready());
         break;
@@ -68,7 +75,8 @@ function* confirmDiag(dType, data) {
     }
 
     yield put({ type: SHUTDOWN_DIAG.CLOSE });
-  } catch (e) {}
+  } catch (e) {
+  }
 }
 
 export function* shutDownDiagWorkFlow() {

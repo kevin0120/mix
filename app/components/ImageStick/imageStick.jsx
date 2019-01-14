@@ -283,7 +283,7 @@ class ConnectedImageStick extends React.Component {
     const smallImgDisplay =
       operations.operationStatus !== 'Ready' &&
       operations.operationStatus !== 'PreDoing';
-
+console.log(operations.workSheet);
     return (
       <div className={classes.picWrap}>
         <Image src={operations.workSheet||logo} alt="" focus={this.focus}>

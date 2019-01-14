@@ -4,11 +4,11 @@ import {
   fetchWorkorder,
   jobManual,
   pset,
-  fetchNextWorkOrder
+  fetchNextWorkOrder, ak2Api
 } from './api/operation';
 import { OPERATION, RUSH } from '../actions/actionTypes';
 import { openShutdown } from '../actions/shutDownDiag';
-import { OPERATION_RESULT, OPERATION_SOURCE, OPERATION_STATUS } from "../reducers/operations";
+import { OPERATION_RESULT, OPERATION_SOURCE, OPERATION_STATUS } from '../reducers/operations';
 import { addNewStory, clearStories, STORY_TYPE } from './timeline';
 import { toolEnable, toolDisable } from '../actions/tools';
 import { setResultDiagShow } from '../actions/resultDiag';
@@ -16,7 +16,7 @@ import {
   fetchOngoingOperationOK,
   cleanOngoingOperation
 } from '../actions/ongoingOperation';
-import { Error } from "../logger";
+import { Error } from '../logger';
 import { setNewNotification } from '../actions/notification';
 
 // const lodash = require('lodash');
@@ -105,7 +105,7 @@ export function* triggerOperation(carID, carType, job, source) {
       });
     }
 
-    if (source === OPERATION_SOURCE.SCANNER && state.workMode.workMode === 'manual'){
+    if (source === OPERATION_SOURCE.SCANNER && state.workMode.workMode === 'manual') {
       // 手动模式下,扫码枪接收到讯息,不获取作业以及切换工作状态
       return;
     }
@@ -206,8 +206,8 @@ export function* getOperation(job) {
               yield put(openShutdown('verify', resp.data));
               return;
             }
-          }else {
-            Error(`获取工单失败:${  e.message}`);
+          } else {
+            Error(`获取工单失败:${e.message}`);
             yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
             yield call(clearStories);
           }
@@ -229,7 +229,7 @@ export function* getOperation(job) {
     }
   } catch (e) {
     console.log(e);
-    Error(`获取工单失败:${  e.message}`);
+    Error(`获取工单失败:${e.message}`);
     yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
     yield call(clearStories);
   }
@@ -287,6 +287,11 @@ export function* startOperation(data) {
         if (resp.status === 200) {
           // 程序号设置成功
 
+          // 设置workorder_id
+          yield put({
+            type: OPERATION.JOB_MANUAL.OK,
+            workorderID: resp.data.workorder_id
+          });
           // 启动用具
           yield put(toolEnable());
           yield put({ type: OPERATION.STARTED });
@@ -303,7 +308,8 @@ export function* startOperation(data) {
       }
 
     }
-  } catch (e) {}
+  } catch (e) {
+  }
 }
 
 // 处理作业过程
@@ -389,16 +395,16 @@ export function* handleResults(data) {
       if (data[i].result === OPERATION_RESULT.NOK) {
         hasFail = true;
         storyType = STORY_TYPE.FAIL;
-      } else if  (data[i].result === OPERATION_RESULT.OK){
+      } else if (data[i].result === OPERATION_RESULT.OK) {
         storyType = STORY_TYPE.PASS;
-      }else {
+      } else {
         yield call(
           addNewStory,
           STORY_TYPE.FAIL,
           `结果 ${batch}`,
           `执行策略 ${data[i].result}`
         );
-        return
+        return;
       }
 
       // const eti  = data[i].ti? data[i].ti.toString() : 'nil';
@@ -446,4 +452,29 @@ export function* handleResults(data) {
     console.log(e);
   }
 
+}
+
+
+export function* ak2() {
+  try {
+    const {
+      workorderID,
+      results,
+      activeResultIndex,
+      failCount
+    } = yield select(state => state.operations);
+    const { odooUrl: { value: baseUrl } } = yield select(state => state.setting.page.odooConnection);
+    const resp = yield call(
+      ak2Api,
+      baseUrl,
+      results[activeResultIndex].controller_sn,
+      results[activeResultIndex].gun_sn,
+      workorderID,
+      results[activeResultIndex].pset,
+      results[activeResultIndex].group_sequence,
+      failCount
+    );
+  } catch (e) {
+    console.log(e);
+  }
 }

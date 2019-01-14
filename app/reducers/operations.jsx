@@ -84,6 +84,8 @@ export default function operations(
       return setSource(state, action.source);
     case OPERATION.OPERATION.FETCH_OK:
       return newOperation(state, action.mode, action.data);
+    case OPERATION.JOB_MANUAL.OK:
+      return setWorkorderID(state,action.workorderID);
     case OPERATION.OPERATION.FETCH_FAIL:
       return operationSwitchReady(state);
     case OPERATION.STARTED:
@@ -150,6 +152,13 @@ function newOperation(state, mode, data) {
     lnr: data.lnr,
     workorderID: data.workorder_id
   };
+}
+
+function setWorkorderID(state,workorderID){
+  return {
+    ...state,
+    workorderID
+  }
 }
 
 function operationSwitchReady(state) {

@@ -175,3 +175,29 @@ export function jobManual(
       throw e.toString();
     });
 }
+
+// ak2
+export function ak2Api(
+  baseUrl,
+  controllerSN,
+  gunSN,
+  workorderID,
+  _pset,
+  groutSequence,
+  count
+){
+  const fullUrl = `${baseUrl}/rush/v1/ak2`;
+  return defaultClient
+    .post(fullUrl, {
+      controller_sn:controllerSN,
+      gun_sn:gunSN,
+      workorder_id: workorderID,
+      pset:_pset,
+      group_sequence:groutSequence,
+      count
+    })
+    .then(resp => resp)
+    .catch(e => {
+      throw e.toString();
+    });
+}

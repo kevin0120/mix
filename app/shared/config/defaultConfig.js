@@ -202,7 +202,10 @@ export const defaultConfigs = {
     enableResultDialog: true,
 
     // 手动模式下是否启用freestyle
-    manualFreestyle: true
+    manualFreestyle: true,
+
+    // 启用ak2
+    enableAk2:true
   },
   cvinetweb: {
     url: ''
