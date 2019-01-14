@@ -1083,11 +1083,11 @@ func (m *Methods) postAK2(ctx iris.Context) {
 		return
 	}
 
-	if cr.PSet == 0 {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("pset is required")
-		return
-	}
+	//if cr.PSet == 0 {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("pset is required")
+	//	return
+	//}
 
 	if cr.Count == 0 {
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -1101,11 +1101,15 @@ func (m *Methods) postAK2(ctx iris.Context) {
 		return
 	}
 
-	if cr.Workorder_ID == 0 {
+	workorder, err := m.service.DB.GetWorkorder(cr.Workorder_ID, true)
+	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("workorder_id is required")
+		ctx.WriteString("workorder not found")
 		return
 	}
+
+	workorder.Status = "done"
+	m.service.DB.UpdateWorkorder(&workorder)
 
 	_, exist := m.service.ControllerService.Controllers[cr.Controller_SN]
 	if !exist {
