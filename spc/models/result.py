@@ -246,7 +246,7 @@ class OperationResult(models.HyperModel):
 
     @api.multi
     def sent_aiis(self):
-        results = self.filtered(lambda r: r.measure_result in ['ok', 'nok', 'lsn'])
+        results = self.filtered(lambda r: r.measure_result in ['ok', 'nok'])
         if not results:
             return True
         aiis_urls = self.env['ir.config_parameter'].sudo().get_param('aiis.urls')

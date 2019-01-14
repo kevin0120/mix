@@ -2,19 +2,49 @@
 from odoo import http, fields,api, SUPERUSER_ID
 import json
 from odoo.http import request,Response
+from urlparse import urljoin
+import logging
+import validators
+import requests as Requests
+from requests import ConnectionError, RequestException
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_LIMIT = 80
 
 DEFAULT_ORDER_BY = 'production_date DESC'
+URGE_REQ_URL = '/aiis/v1/fis.urgs'
+
 
 def str_time_to_rfc3339(s_time):
     sp = s_time.split(' ')
     return sp[0] + 'T' + sp[1] + 'Z'
 
+def urget_request_mo(urls, longpin):
+    ret = False
+    if not longpin:
+        return ret
+    for url in urls:
+        u = urljoin(url, URGE_REQ_URL)
+        try:
+            if isinstance(validators.url(u), validators.ValidationFailure):
+                break
+            data = {
+                "code": longpin,
+            }
+            ret = Requests.post(u, data=json.dumps(data), headers={'Content-Type': 'application/json'}, timeout=2)
+            if ret.status_code == 201:
+                logger.info(u"快速请求创建longpin:{0}生产订单成功",longpin)
+                ret = True
+        except ConnectionError:
+            logger.debug(u"快速请求创建longpin:{0} ConnectionError", longpin)
+        except RequestException as e:
+            logger.debug(u"快速请求创建longpin:{0}, error: {1}", e.message)
+        except Exception as e:
+            logger.debug(u"快速请求创建longpin:{0}, error: {1}", e.message)
+    return ret
+
 class ApiMrpWorkorder(http.Controller):
-    def str_time_to_rfc3339(s_time):
-        sp = s_time.split(' ')
-        return sp[0] + 'T' + sp[1] + 'Z'
 
     @http.route(['/api/v1/mrp.workorders/<int:order_id>', '/api/v1/mrp.workorders'], type='http', methods=['GET'], auth='none', cors='*', csrf=False)
     def _get_workorders(self, order_id=None, **kw):
@@ -35,16 +65,15 @@ class ApiMrpWorkorder(http.Controller):
             _consumes = list()
             if order.consu_bom_line_ids:
                 for consu in order.consu_bom_line_ids:
-
                     # 定位消耗品的qcp
                     _qcps = env['quality.point'].search([('bom_line_id', '=', consu.bom_line_id.id),
-                                                              ('operation_id', '=', order.operation_id.id)],
-                                                             limit=1)
+                                                         ('operation_id', '=', order.operation_id.id)],
+                                                        limit=1)
 
                     _consumes.append({
                         "sequence": consu.bom_line_id.operation_point_id.sequence,
                         "group_sequence": consu.bom_line_id.operation_point_id.group_sequence,
-                        'max_redo_times':consu.bom_line_id.operation_point_id.max_redo_times,
+                        'max_redo_times': consu.bom_line_id.operation_point_id.max_redo_times,
                         'offset_x': consu.bom_line_id.operation_point_id.x_offset,
                         'offset_y': consu.bom_line_id.operation_point_id.y_offset,
                         "pset": consu.bom_line_id.program_id.code,
@@ -60,8 +89,10 @@ class ApiMrpWorkorder(http.Controller):
 
             ret = {
                 'id': order.id,
-                'hmi': {'id': order.workcenter_id.hmi_id.id, 'uuid': order.workcenter_id.hmi_id.serial_no} if order.workcenter_id else None,
-                'workcenter': {'name': order.workcenter_id.name, 'code': order.workcenter_id.code} if order.workcenter_id else None,
+                'hmi': {'id': order.workcenter_id.hmi_id.id,
+                        'uuid': order.workcenter_id.hmi_id.serial_no} if order.workcenter_id else None,
+                'workcenter': {'name': order.workcenter_id.name,
+                               'code': order.workcenter_id.code} if order.workcenter_id else None,
                 # 'vehicleTypeImg': u'data:{0};base64,{1}'.format('image/png', order.product_id.image_small) if order.product_id.image_small else None,
                 # 'worksheet': u'data:{0};base64,{1}'.format('image/png', order.operation_id.worksheet_img) if order.operation_id.worksheet_img else "",
                 # 'max_redo_times': order.operation_id.max_redo_times,
@@ -90,13 +121,14 @@ class ApiMrpWorkorder(http.Controller):
             body = json.dumps(ret)
             return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
                             status=200)
-        domain =[]
+        domain = []
         if 'masterpc' in kw:
             masterpc_uuid = kw['masterpc']
             workcenter_id = env['mrp.workcenter'].search([('masterpc_id.serial_no', '=', masterpc_uuid)], limit=1)
             if not workcenter_id:
-                body = json.dumps({'msg':'Can not found Workcenter'})
-                return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=405)
+                body = json.dumps({'msg': 'Can not found Workcenter'})
+                return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
+                                status=405)
             domain += [('workcenter_id', 'in', workcenter_id.ids)]  # 添加查询域
 
         if 'hmi' in kw:
@@ -112,13 +144,15 @@ class ApiMrpWorkorder(http.Controller):
             code = kw['workcenter']
             workcenter_id = env['mrp.workcenter'].search(['|', ('code', '=', code), ('name', '=', code)], limit=1)
             if not workcenter_id:
-                body = json.dumps({'msg':'Can not found Workcenter'})
-                return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=405)
+                body = json.dumps({'msg': 'Can not found Workcenter'})
+                return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
+                                status=405)
             domain += [('workcenter_id', 'in', workcenter_id.ids)]  # 添加查询域
 
         if 'code' in kw:
             code = kw['code']
-            domain += ['|', '|', ('production_id.long_pin', '=', code), ('production_id.knr', '=', code), ('production_id.vin', '=', code)]
+            domain += ['|', '|', ('production_id.long_pin', '=', code), ('production_id.knr', '=', code),
+                       ('production_id.vin', '=', code)]
         if 'limit' in kw.keys():
             limit = int(kw['limit'])
         else:
@@ -129,6 +163,22 @@ class ApiMrpWorkorder(http.Controller):
             order_by = DEFAULT_ORDER_BY
 
         workorder_ids = env['mrp.workorder'].search(domain, limit=limit, order=order_by)
+        if not workorder_ids:
+            logger.info(u"未发现工单,调用快速请求进行创建")
+            _aiis_urls = self.env['ir.config_parameter'].sudo().get_param('aiis.urls')
+            if not _aiis_urls:
+                body = json.dumps({'msg': 'Can not found AIIS, can not request '})
+                return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
+                                status=405)
+            aiis_urls = _aiis_urls.split(',')
+            ret = urget_request_mo(aiis_urls, kw['code'] if 'code' in kw else None)
+            if ret:
+                ### 创建成功
+                workorder_ids = env['mrp.workorder'].search(domain, limit=limit, order=order_by)  # 重新尝试获取工单
+            else:
+                body = json.dumps({'msg': 'Can not found workorder'})
+                return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
+                                status=404)
         _ret = list()
         for order in workorder_ids:
             # points = env['point.point'].search_read(
@@ -139,16 +189,15 @@ class ApiMrpWorkorder(http.Controller):
             _consumes = list()
             if order.consu_bom_line_ids:
                 for consu in order.consu_bom_line_ids:
-
                     # 定位消耗品的qcp
                     _qcps = env['quality.point'].search([('bom_line_id', '=', consu.bom_line_id.id),
-                                                          ('operation_id', '=', order.operation_id.id)],
-                                                          limit=1)
+                                                         ('operation_id', '=', order.operation_id.id)],
+                                                        limit=1)
 
                     _consumes.append({
                         "sequence": consu.bom_line_id.operation_point_id.sequence,
                         "group_sequence": consu.bom_line_id.operation_point_id.group_sequence,
-                        'max_redo_times':consu.bom_line_id.operation_point_id.max_redo_times,
+                        'max_redo_times': consu.bom_line_id.operation_point_id.max_redo_times,
                         'offset_x': consu.bom_line_id.operation_point_id.x_offset,
                         'offset_y': consu.bom_line_id.operation_point_id.y_offset,
                         "pset": consu.bom_line_id.program_id.code,
@@ -164,9 +213,11 @@ class ApiMrpWorkorder(http.Controller):
 
             _ret.append({
                 'id': order.id,
-                'hmi': {'id': workcenter_id.hmi_id.id, 'uuid': workcenter_id.hmi_id.serial_no} if workcenter_id else None ,
-                'workcenter': {'name': workcenter_id.name, 'code': workcenter_id.code} if workcenter_id else None ,
-                'vehicleTypeImg': u'data:{0};base64,{1}'.format('image/png', order.product_id.image_small) if order.product_id.image_small else None,
+                'hmi': {'id': workcenter_id.hmi_id.id,
+                        'uuid': workcenter_id.hmi_id.serial_no} if workcenter_id else None,
+                'workcenter': {'name': workcenter_id.name, 'code': workcenter_id.code} if workcenter_id else None,
+                'vehicleTypeImg': u'data:{0};base64,{1}'.format('image/png',
+                                                                order.product_id.image_small) if order.product_id.image_small else None,
                 # 'worksheet': u'data:{0};base64,{1}'.format('image/png', order.operation_id.worksheet_img) if order.operation_id.worksheet_img else "",
                 'img_op_id': order.operation_id.id,
                 # 'max_redo_times': order.operation_id.max_redo_times,
