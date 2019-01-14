@@ -836,6 +836,28 @@
         }
       }
     },
+    "/ak2": {
+      "post": {
+        "tags": [
+          "HMI"
+        ],
+        "description": "放行AK2",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/ak2"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          }
+        }
+      }
+    },
     "/scanner": {
       "put": {
         "tags": [
@@ -1886,6 +1908,41 @@
           "type": "string",
           "description": "车型代码",
           "example": "CAR111"
+        }
+      }
+    },
+    "ak2": {
+      "type": "object",
+      "properties": {
+        "pset": {
+          "type": "integer",
+          "description": "程序号",
+          "example": 1
+        },
+        "controller_sn": {
+          "type": "string",
+          "description": "控制器序列号",
+          "example": "0001"
+        },
+        "gun_sn": {
+          "type": "string",
+          "description": "拧紧枪序列号",
+          "example": "123456"
+        },
+        "workorder_id": {
+          "type": "integer",
+          "description": "对应的工单id",
+          "example": 1
+        },
+        "count": {
+          "type": "integer",
+          "description": "拧紧次数",
+          "example": 1
+        },
+        "group_sequence": {
+          "type": "integer",
+          "description": "序号",
+          "example": 1
         }
       }
     }
