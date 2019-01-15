@@ -278,8 +278,6 @@ func (p *Service) HandleProcess() {
 			// 处理结果
 			if strings.Contains(msg, XML_RESULT_KEY) {
 
-				p.diag.Debug(fmt.Sprintf("收到结果: %s\n", msg))
-
 				cvi3Result := CVI3Result{}
 				err := xml.Unmarshal([]byte(msg), &cvi3Result)
 				if err != nil {
@@ -290,6 +288,7 @@ func (p *Service) HandleProcess() {
 					controllerResult := controller.ControllerResult{}
 					XML2Result(&cvi3Result, &controllerResult)
 					controllerResult.NeedPushHmi = true
+					controllerResult.Raw = msg
 
 					if strings.Contains(msg, XML_CURVE_KEY) {
 

@@ -170,6 +170,8 @@ func (h *Handlers) saveResult(data *SavePackage) {
 // 处理保存结果
 func (h *Handlers) handleSaveResult(data *SavePackage) {
 
+	h.controllerService.diag.Debug(fmt.Sprintf("receive result: %s\n", data.controllerResult.Raw))
+
 	// 推送aiis
 	aiisResult, err := h.controllerService.Aiis.ResultToAiisResult(data.dbResult)
 

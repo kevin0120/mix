@@ -70,6 +70,8 @@ type ControllerResult struct {
 	NeedPushHmi  bool
 
 	ExceptionReason string
+
+	Raw string
 }
 
 type PSetDefine struct {
