@@ -137,18 +137,21 @@ func (ch *Channel) gethasSD() bool {
 func (ch *Channel) writeSD(buf []byte) error {
 	timeout := ch.WriteTimeout
 	before := time.Now()
-	select {
-	case <- time.After(timeout / 40):
-		if ch.gethasSD() {
-			// 之前有發送SD但沒有收到AD
-			if time.Now().After(before.Add(timeout)) {
-				ch.diag.Debug("send SD timeout, cause no AD msg")
-				return errors.New("send SD timeout, cause no AD msg")
+	for {
+		select {
+		case <- time.After(timeout / 40):
+			if ch.gethasSD() {
+				// 之前有發送SD但沒有收到AD
+				if time.Now().After(before.Add(timeout)) {
+					ch.diag.Debug("send SD timeout, cause no AD msg")
+					return errors.New("send SD timeout, cause no AD msg")
+				}
+			}else {
+				return ch.conn.Write(buf, timeout)
 			}
-		}else {
-			return ch.conn.Write(buf, timeout)
 		}
 	}
+
 	return nil
 }
 
