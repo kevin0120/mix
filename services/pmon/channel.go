@@ -6,8 +6,7 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
-	"time"
-	"unicode/utf8"
+		"unicode/utf8"
 )
 
 type PmonChannelStatus string
@@ -134,25 +133,25 @@ func (ch *Channel) gethasSD() bool {
 }
 
 func (ch *Channel) Write(buf []byte, msgType PMONSMGTYPE) error {
-	if msgType == PMONMSGSD && ch.GetStatus() == STATUSCLOSE {
-		i := 0
-		msg, err := ch.PMONGenerateMsg(PMONMSGSO, "")
-		if err != nil {
-			ch.Service.diag.Error(fmt.Sprintf("Generation %s msg fail", msgType), err)
-			return errors.Wrap(err, "Channel.Write")
-		}
-
-		ch.conn.Write([]byte(msg[0]), ch.WriteTimeout) //发送此SO忽略错误
-		ch.diag.Debug(fmt.Sprintf("send msg:%s", msg[0]))
-		time.Sleep(150 * time.Millisecond)             //sleep 150 ms
-		for ch.GetStatus() == STATUSCLOSE && i < 6 {
-			time.Sleep(100 * time.Millisecond) //sleep 100 ms
-			i++
-		}
-		if ch.GetStatus() == STATUSCLOSE {
-			return fmt.Errorf("channel %s is closed can not send SD and send SO %d times", ch.Ch, i)
-		}
-	}
+	//if msgType == PMONMSGSD && ch.GetStatus() == STATUSCLOSE {
+	//	i := 0
+	//	msg, err := ch.PMONGenerateMsg(PMONMSGSO, "")
+	//	if err != nil {
+	//		ch.Service.diag.Error(fmt.Sprintf("Generation %s msg fail", msgType), err)
+	//		return errors.Wrap(err, "Channel.Write")
+	//	}
+	//
+	//	ch.conn.Write([]byte(msg[0]), ch.WriteTimeout) //发送此SO忽略错误
+	//	ch.diag.Debug(fmt.Sprintf("send msg:%s", msg[0]))
+	//	time.Sleep(150 * time.Millisecond)             //sleep 150 ms
+	//	for ch.GetStatus() == STATUSCLOSE && i < 6 {
+	//		time.Sleep(100 * time.Millisecond) //sleep 100 ms
+	//		i++
+	//	}
+	//	if ch.GetStatus() == STATUSCLOSE {
+	//		return fmt.Errorf("channel %s is closed can not send SD and send SO %d times", ch.Ch, i)
+	//	}
+	//}
 	ch.diag.Debug(fmt.Sprintf("send msg:%s", string(buf)))
 	err := ch.conn.Write(buf, ch.WriteTimeout)
 	if err != nil && msgType == PMONMSGSD {
