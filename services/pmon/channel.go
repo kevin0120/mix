@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -134,6 +135,7 @@ func (ch *Channel) gethasSD() bool {
 }
 
 func (ch *Channel) Write(buf []byte, msgType PMONSMGTYPE) error {
+	targetBuf := buf
 	if msgType == PMONMSGSD && ch.GetStatus() == STATUSCLOSE {
 		i := 0
 		msg, err := ch.PMONGenerateMsg(PMONMSGSO, "")
@@ -151,14 +153,29 @@ func (ch *Channel) Write(buf []byte, msgType PMONSMGTYPE) error {
 		}
 		if ch.GetStatus() == STATUSCLOSE {
 			return fmt.Errorf("channel %s is closed can not send SD and send SO %d times", ch.Ch, i)
+		} else {
+			bc := ch.GetBlockCount()
+			strTargetBuf := string(targetBuf)
+			arr := strings.Split(strTargetBuf, PMONMSGSD)
+			targetBuf = []byte(arr[0] + PMONMSGSD + fmt.Sprintf("%04d", bc) + arr[1][4:])
 		}
 	}
 
-	ch.diag.Debug(fmt.Sprintf("send msg:%s", string(buf)))
-	err := ch.conn.Write(buf, ch.WriteTimeout)
+	ch.diag.Debug(fmt.Sprintf("send msg:%s", string(targetBuf)))
+	err := ch.conn.Write(targetBuf, ch.WriteTimeout)
 	if err != nil && msgType == PMONMSGSD {
 		ch.SethasSD(true)
+
+		// 等待AD
+		for i := 0; i < ch.Service.GetRawConfig().RecvADCheckCount; i++ {
+			if !ch.gethasSD() {
+				break
+			}
+
+			time.Sleep(100 * time.Millisecond)
+		}
 	}
+
 	return err
 }
 

@@ -33,10 +33,11 @@ const (
 )
 
 type Config struct {
-	Path           string `yaml:"path"`
-	Workers        int    `yaml:"workers"`
-	Enable         bool   `yaml:"enable"`
-	SendCheckCount int    `yaml:"send_check_count"`
+	Path             string `yaml:"path"`
+	Workers          int    `yaml:"workers"`
+	Enable           bool   `yaml:"enable"`
+	SendCheckCount   int    `yaml:"send_check_count"`
+	RecvADCheckCount int    `yaml:"recv_ad_check_count"`
 }
 
 type PmonConfig struct {
@@ -195,10 +196,11 @@ func parseConnection(key *ini.Key) cConnection {
 
 func NewConfig() Config {
 	return Config{
-		Path:           "/etc/pmon/PMON.CFG",
-		Workers:        4,
-		Enable:         true,
-		SendCheckCount: 10,
+		Path:             "/etc/pmon/PMON.CFG",
+		Workers:          4,
+		Enable:           true,
+		SendCheckCount:   10,
+		RecvADCheckCount: 10,
 	}
 }
 
