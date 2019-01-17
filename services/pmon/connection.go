@@ -1,6 +1,7 @@
 package pmon
 
 import (
+	"fmt"
 	"github.com/masami10/aiis/services/pmon/udp_driver"
 	"github.com/pkg/errors"
 	"log"
@@ -34,6 +35,7 @@ type Connection struct {
 	closing     chan struct{}
 	DispatchBuf chan DispatchPkg
 	Dispatcher
+	service *Service
 }
 
 func NewConnection(addr string, name string, deadline time.Duration, workers int) *Connection {
@@ -106,6 +108,10 @@ func (c *Connection) SetDispatcher(d Dispatcher) error {
 	return nil
 }
 
+func (c *Connection) SetService(srv *Service) {
+	c.service = srv
+}
+
 func (c *Connection) AppendChannel(name string, sNoT string, sNoR string) {
 	ch := channelInfo{
 		name: name,
@@ -126,6 +132,9 @@ func (c *Connection) dispatch(buf []byte) error {
 	rNoR := string(buf[9:13])
 	for _, ch := range c.channels {
 		if ch.sNoR == rNoT && ch.sNoT == rNoR {
+
+			c.service.diag.Debug(fmt.Sprintf("channel:%s, recv msg: %s", ch.name, string(buf)))
+
 			p := PMONParseMsg(buf)
 
 			pkg := DispatchPkg{

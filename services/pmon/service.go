@@ -70,6 +70,7 @@ func (s *Service) Open() error {
 		addr := fmt.Sprintf("udp://%s:%d", conn.Address[0], conn.Port)
 		connections[name] = NewConnection(addr, name, c.WaitResp, conf.Workers) //waitResponse 作为其读取Timeout
 		connections[name].SetDispatcher(s)                                      //将服务注入进行通道分发
+		connections[name].SetService(s)
 	}
 	for cname, channel := range c.Channels {
 		connectKey := fmt.Sprintf("Port%d", channel.Port)
@@ -165,6 +166,6 @@ func (s *Service) Dispatch(pkg PmonPackage, chName string) {
 		log.Printf("not found channel %s", chName)
 		return
 	}
-	s.diag.Debug(fmt.Sprintf("channel:%s, recv msg: %s", chName, string(pkg.data)))
+
 	s.Channels[chName].recvBuf <- pkg //将数据发送到通道中
 }
