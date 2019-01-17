@@ -138,7 +138,7 @@ func (ch *Channel) writeSD(buf []byte) error {
 	timeout := ch.WriteTimeout
 	before := time.Now()
 	select {
-	case <- time.After(timeout / 5):
+	case <- time.After(timeout / 40):
 		if ch.gethasSD() {
 			// 之前有發送SD但沒有收到AD
 			if time.Now().After(before.Add(timeout)) {
