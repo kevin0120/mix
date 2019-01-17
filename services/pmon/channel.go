@@ -134,8 +134,27 @@ func (ch *Channel) gethasSD() bool {
 	return ch.hasSendSD.Load().(bool)
 }
 
+func (ch *Channel) writeSD(buf []byte) error {
+	timeout := ch.WriteTimeout
+	before := time.Now()
+	select {
+	case <- time.After(timeout / 5):
+		if ch.gethasSD() {
+			// 之前有發送SD但沒有收到AD
+			if time.Now().After(before.Add(timeout)) {
+				ch.diag.Debug("send SD timeout, cause no AD msg")
+				return errors.New("send SD timeout, cause no AD msg")
+			}
+		}else {
+			return ch.conn.Write(buf, timeout)
+		}
+	}
+	return nil
+}
+
 func (ch *Channel) Write(buf []byte, msgType PMONSMGTYPE) error {
 	targetBuf := buf
+	var err error = nil
 	if msgType == PMONMSGSD && ch.GetStatus() == STATUSCLOSE {
 		i := 0
 		msg, err := ch.PMONGenerateMsg(PMONMSGSO, "")
@@ -167,8 +186,12 @@ func (ch *Channel) Write(buf []byte, msgType PMONSMGTYPE) error {
 	}
 
 	ch.diag.Debug(fmt.Sprintf("send msg:%s", string(targetBuf)))
-	err := ch.conn.Write(targetBuf, ch.WriteTimeout)
-	if err != nil && msgType == PMONMSGSD {
+	if msgType == PMONMSGSD {
+		err = ch.writeSD(targetBuf) //此方法可能導致阻塞
+	}else{
+		err = ch.conn.Write(targetBuf, ch.WriteTimeout)
+	}
+	if err == nil && msgType == PMONMSGSD {
 		ch.SethasSD(true)
 	}
 
