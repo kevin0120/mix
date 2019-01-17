@@ -29,6 +29,7 @@ pmon:
   path: /home/linshenqi/go/src/github.com/masami10/aiis/etc/pmon/PMON.CFG
   workers: 4
   enable: true
+  send_check_count: 10
 fis:
   ch_recv_mission: 90
   ch_send_result: 93

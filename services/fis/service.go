@@ -128,21 +128,21 @@ func (s *Service) Open() error {
 			return e
 		}
 	}
-	if len(c.CHSendResult) > 0 {
-		e := s.Pmon.SendPmonMessage(pmon.PMONMSGSO, c.CHSendResult, "")
-		if e != nil {
-			s.diag.Error("Send PMON SO msg fail", e)
-			return e
-		}
-	}
-
-	if len(c.CHSendUrg) > 0 {
-		e := s.Pmon.SendPmonMessage(pmon.PMONMSGSO, c.CHSendUrg, "")
-		if e != nil {
-			s.diag.Error("Send PMON SO msg fail", e)
-			return e
-		}
-	}
+	//if len(c.CHSendResult) > 0 {
+	//	e := s.Pmon.SendPmonMessage(pmon.PMONMSGSO, c.CHSendResult, "")
+	//	if e != nil {
+	//		s.diag.Error("Send PMON SO msg fail", e)
+	//		return e
+	//	}
+	//}
+	//
+	//if len(c.CHSendUrg) > 0 {
+	//	e := s.Pmon.SendPmonMessage(pmon.PMONMSGSO, c.CHSendUrg, "")
+	//	if e != nil {
+	//		s.diag.Error("Send PMON SO msg fail", e)
+	//		return e
+	//	}
+	//}
 
 	if len(c.CHRecvUrg) > 0 {
 		e := s.Pmon.SendPmonMessage(pmon.PMONMSGSO, c.CHRecvUrg, "")

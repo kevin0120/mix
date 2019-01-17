@@ -39,6 +39,10 @@ func NewService(conf Config, d Diagnostic) (*Service, error) {
 	return s, nil
 }
 
+func (s *Service) GetRawConfig() Config {
+	return s.rawConf.Load().(Config)
+}
+
 func (s *Service) Config() PmonConfig {
 	return s.configValue.Load().(PmonConfig)
 }
