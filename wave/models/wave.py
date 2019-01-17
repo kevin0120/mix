@@ -136,7 +136,7 @@ class Wave(models.TransientModel):
             return [], None
         else:
             ret = _datas[0]['wave']
-        ret = ret.sort_values(by=['cur_w'])
+        # ret = ret.sort_values(by=['cur_w'])
         return _datas, ret
 
     @api.multi
