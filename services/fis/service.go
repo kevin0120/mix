@@ -40,6 +40,7 @@ type Service struct {
 	missionBuf     chan string
 	urgRequest     map[string]string
 	mtxUrg         sync.Mutex
+	resultsBuf     chan string
 }
 
 func NewService(d Diagnostic, c Config, pmon *pmon.Service) *Service {
@@ -52,6 +53,7 @@ func NewService(d Diagnostic, c Config, pmon *pmon.Service) *Service {
 			missionBuf: make(chan string, 2048),
 			urgRequest: map[string]string{},
 			mtxUrg:     sync.Mutex{},
+			resultsBuf: make(chan string, 2048),
 		}
 
 		s.Pmon = pmon
@@ -61,6 +63,16 @@ func NewService(d Diagnostic, c Config, pmon *pmon.Service) *Service {
 	}
 
 	return nil
+}
+
+func (s *Service) manageResults() {
+	for {
+		select {
+		case data := <-s.resultsBuf:
+			s.Pmon.SendPmonMessage(pmon.PMONMSGSD, s.Config().CHSendResult, data)
+			time.Sleep(time.Duration(s.Config().ADTimeout))
+		}
+	}
 }
 
 func (s *Service) UpdateUrg(longpin string, result string) {
@@ -157,6 +169,7 @@ func (s *Service) Open() error {
 	s.Pmon.PmonRegistryEvent(s.OnPmonEventUrg, c.CHRecvUrg, nil)
 
 	go s.TaskMission()
+	go s.manageResults()
 	go s.HeartbeatCheck()
 
 	return nil
@@ -353,7 +366,8 @@ func (s *Service) HandleMO(str string) (string, error) {
 }
 
 func (s *Service) PushResult(result *FisResult) error {
-	return s.Pmon.SendPmonMessage(pmon.PMONMSGSD, s.Config().CHSendResult, result.Serialize())
+	s.resultsBuf <- result.Serialize()
+	return nil
 }
 
 func (s *Service) PushUrgRequest(urg *FisUrgRequest) error {

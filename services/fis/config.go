@@ -21,6 +21,7 @@ type Config struct {
 	Enable          bool          `yaml:"enable"`
 	MissionItv      toml.Duration `yaml:"mission_itv"`
 	UrgTimeout      toml.Duration `yaml:"urg_timeout"`
+	ADTimeout       toml.Duration `yaml:"ad_timeout"`
 }
 
 func NewConfig() Config {
@@ -43,6 +44,7 @@ func NewConfig() Config {
 		Enable:          false,
 		MissionItv:      toml.Duration(10 * time.Millisecond),
 		UrgTimeout:      toml.Duration(300 * time.Millisecond),
+		ADTimeout:       toml.Duration(1 * time.Second),
 	}
 }
 

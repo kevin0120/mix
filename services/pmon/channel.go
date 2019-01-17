@@ -154,10 +154,15 @@ func (ch *Channel) Write(buf []byte, msgType PMONSMGTYPE) error {
 		if ch.GetStatus() == STATUSCLOSE {
 			return fmt.Errorf("channel %s is closed can not send SD and send SO %d times", ch.Ch, i)
 		} else {
-			bc := ch.GetBlockCount()
 			strTargetBuf := string(targetBuf)
-			arr := strings.Split(strTargetBuf, PMONMSGSD)
-			targetBuf = []byte(arr[0] + PMONMSGSD + fmt.Sprintf("%04d", bc) + arr[1][4:])
+			sdIdx := strings.Index(strTargetBuf, PMONMSGSD)
+			msgID, _ := strconv.Atoi(strTargetBuf[sdIdx-12 : sdIdx-8])
+			strData := strTargetBuf[sdIdx+16 : len(strTargetBuf)-3]
+
+			sds, err := ch.generateSD(msgID, strData)
+			if err == nil {
+				targetBuf = []byte(sds[0])
+			}
 		}
 	}
 
@@ -165,15 +170,6 @@ func (ch *Channel) Write(buf []byte, msgType PMONSMGTYPE) error {
 	err := ch.conn.Write(targetBuf, ch.WriteTimeout)
 	if err != nil && msgType == PMONMSGSD {
 		ch.SethasSD(true)
-
-		// 等待AD
-		for i := 0; i < ch.Service.GetRawConfig().RecvADCheckCount; i++ {
-			if !ch.gethasSD() {
-				break
-			}
-
-			time.Sleep(100 * time.Millisecond)
-		}
 	}
 
 	return err

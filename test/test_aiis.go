@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 func main() {
@@ -39,7 +40,9 @@ func main() {
 	//}
 
 	sd := "\x02002000050093SD00020222000222SR3J--V001--C6-2019-9010001=4-01000220**ERGEBNIS00200182##001*RESULT*_VW416_1-62-7199-03 *Screwer   *1.0   *IO__*20190117180147*AUTO*VALUE *002*0000010.039               Nm        1*000002360.6               DEG       1***\x10\x039"
-	//sdidx := strings.Index(sd, "SD")
+	sdidx := strings.Index(sd, "SD")
+	//msgid := sd[sdidx - 12: sdidx-8]
+	data := sd[sdidx+16 : len(sd)-3]
 	//bcStart := sdidx+len("SD")
 	//newBC := fmt.Sprintf("%04d", 1)
 	//for i := bcStart; i < bcStart+4 ; i++ {
@@ -49,5 +52,5 @@ func main() {
 	//arr := strings.Split(sd, "SD")
 	//new := arr[0] + "SD" + fmt.Sprintf("%04d", 1) + arr[1][4:]
 
-	fmt.Printf("%s", sd)
+	fmt.Printf("%s", data)
 }

@@ -30,7 +30,6 @@ pmon:
   workers: 4
   enable: true
   send_check_count: 10
-  recv_ad_check_count: 10
 fis:
   ch_recv_mission: 90
   ch_send_result: 93
@@ -45,6 +44,7 @@ fis:
   heartbeat_interval: 2m
   mission_itv: 10ms
   urg_timeout: 100ms
+  ad_timeout: 1s
   prs:
     - GSP
     - SAB
