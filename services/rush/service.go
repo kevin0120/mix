@@ -120,6 +120,14 @@ func (s *Service) Open() error {
 
 	r = httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "POST",
+		Pattern:     "/fis.urgs",
+		HandlerFunc: s.postUrgRequest,
+	}
+	s.HTTPDService.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
 		Method:      "GET",
 		Pattern:     "/healthz",
 		HandlerFunc: s.getHealthz,
@@ -309,7 +317,47 @@ func (s *Service) putFisResult(ctx iris.Context) {
 			ctx.StatusCode(iris.StatusOK)
 		}
 	}
+}
 
+func (s *Service) postUrgRequest(ctx iris.Context) {
+	urg := fis.UrgRequest{}
+
+	err := ctx.ReadJSON(&urg)
+	if err != nil {
+		ctx.Writef("invalid struct")
+		ctx.StatusCode(iris.StatusBadRequest)
+		return
+	}
+
+	urgRequest := fis.FisUrgRequest{}
+	err = urgRequest.Deserialize(urg.Code)
+	if err != nil {
+		ctx.Writef(err.Error())
+		ctx.StatusCode(iris.StatusBadRequest)
+		return
+	}
+
+	defer s.Fis.RemoveUrg(urg.Code)
+	s.Fis.UpdateUrg(urg.Code, "")
+	s.Fis.PushUrgRequest(&urgRequest)
+
+	result := ""
+	for i := 0; i < fis.FIS_URG_MAX_REPLY_COUNT; i++ {
+		result = s.Fis.GetUrg(urg.Code)
+		if result != "" {
+			break
+		}
+
+		time.Sleep(time.Duration(s.Fis.Config().UrgTimeout))
+	}
+
+	if result == fis.FIS_URG_SUCCESS {
+		ctx.StatusCode(iris.StatusCreated)
+	} else {
+		ctx.StatusCode(iris.StatusBadRequest)
+	}
+
+	return
 }
 
 func (s *Service) getResultUpdate(ctx iris.Context) {

@@ -2,21 +2,27 @@ package fis
 
 import (
 	"fmt"
+	"github.com/kataras/iris/core/errors"
+	"strconv"
 	"time"
 )
 
 const (
-	FIS_VER        = "V001"
-	FIS_TAG        = "ERGEBNIS"
-	FIS_RESULT_VER = "002"
-	FIS_RESULT_NUM = 1
-	FIS_RESULT_KEY = "RESULT"
-	FIS_VALUE_KEY  = "VALUE"
-	FIS_RESULT_LEN = 182
-	FIS_UNIT_NM    = "Nm"
-	FIS_UNIT_DEG   = "DEG"
-	FIS_ID_NM      = 1
-	FIS_ID_DEG     = 2
+	FIS_VER                 = "V001"
+	FIS_TAG                 = "ERGEBNIS"
+	FIS_RESULT_VER          = "002"
+	FIS_RESULT_NUM          = 1
+	FIS_RESULT_KEY          = "RESULT"
+	FIS_VALUE_KEY           = "VALUE"
+	FIS_RESULT_LEN          = 182
+	FIS_UNIT_NM             = "Nm"
+	FIS_UNIT_DEG            = "DEG"
+	FIS_ID_NM               = 1
+	FIS_ID_DEG              = 2
+	FIS_LEN_LONGPIN         = 14
+	FIS_URG_MAX_REPLY_COUNT = 5
+	FIS_URG_SUCCESS         = "success"
+	FIS_URG_FAIL            = "fail"
 
 	// 1. 设备名(4位）
 	// 2. 协议版本（4位）
@@ -48,7 +54,7 @@ const (
 	// 28. 角度单位（10位，左对齐，右补空格）
 	// 29. 角度测量结果（1位）
 	//				  1   2   3  4  5  6  7 8     9 1011    12   13 14    15    16   17 18 19 20   21   22  23   24   25 26  27   28   29
-	resultTemplate = "%s--%s--%s-%d-%d=%d-%s%06s**%s%s%05d##%03d*%s*%-20s*%-10s*%-6s*%s*%s*%s*%-6s*%03d*%06d%-20f%-10s%d*%06d%-20f%-10s%d***"
+	resultTemplate = "%s--%s--%s-%d-%d=%d-%s%06s**%s%s%05d##%03d*%s*%-20s*%-10s*%-6s*%s*%s*%s*%-6s*%03d*%06d%-20s%-10s%d*%06d%-20s%-10s%d***"
 )
 
 func magicTrick(t time.Time) time.Time {
@@ -84,11 +90,11 @@ func (fr *FisResult) Serialize() string {
 		FIS_VALUE_KEY,
 		l,
 		fr.Values[0].ID,
-		fr.Values[0].Value,
+		strconv.FormatFloat(fr.Values[0].Value, 'f', -1, 64),
 		fr.Values[0].Unit,
 		fr.Values[0].Measure,
 		fr.Values[1].ID,
-		fr.Values[1].Value,
+		strconv.FormatFloat(fr.Values[1].Value, 'f', -1, 64),
 		fr.Values[1].Unit,
 		fr.Values[1].Measure)
 
@@ -134,4 +140,54 @@ func (fr *FisResult) Init() {
 	fr.ResultNum = FIS_RESULT_NUM
 	fr.ResultKey = FIS_RESULT_KEY
 	fr.ValueKey = FIS_VALUE_KEY
+}
+
+type FisUrgRequest struct {
+	EquipemntName string
+	FactoryName   string //工厂代码
+	Year          int64  //订单年份
+	Pin           int64  //车辆装配代码
+	PinCheckCode  int64  //校验位
+}
+
+func (fur *FisUrgRequest) Serialize() string {
+	return fmt.Sprintf("%s--%s--%s-%d-%d=%d-00000000**",
+		fur.EquipemntName,
+		FIS_VER,
+		fur.FactoryName,
+		fur.Year,
+		fur.Pin,
+		fur.PinCheckCode)
+}
+
+func (fur *FisUrgRequest) Deserialize(urg string) error {
+	if len(urg) != FIS_LEN_LONGPIN {
+		return errors.New("longpin len error")
+	}
+
+	fur.FactoryName = urg[0:2]
+
+	year, err := strconv.Atoi(urg[2:6])
+	if err != nil {
+		return errors.New("year error")
+	}
+	fur.Year = int64(year)
+
+	pin, err := strconv.Atoi(urg[6:13])
+	if err != nil {
+		return errors.New("pin error")
+	}
+	fur.Pin = int64(pin)
+
+	pinCheck, err := strconv.Atoi(urg[13:14])
+	if err != nil {
+		return errors.New("pin check error")
+	}
+	fur.PinCheckCode = int64(pinCheck)
+
+	return nil
+}
+
+type UrgRequest struct {
+	Code string `json:"code"`
 }

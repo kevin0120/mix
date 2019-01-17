@@ -2,6 +2,7 @@ package fis
 
 import (
 	"fmt"
+	"github.com/kataras/iris/core/errors"
 	"github.com/masami10/aiis/services/odoo"
 	"github.com/masami10/aiis/services/pmon"
 	"github.com/willf/pad"
@@ -37,6 +38,8 @@ type Service struct {
 	status         string
 	mtxStatus      sync.Mutex
 	missionBuf     chan string
+	urgRequest     map[string]string
+	mtxUrg         sync.Mutex
 }
 
 func NewService(d Diagnostic, c Config, pmon *pmon.Service) *Service {
@@ -47,6 +50,8 @@ func NewService(d Diagnostic, c Config, pmon *pmon.Service) *Service {
 			status:     FIS_STATUS_OFFLINE,
 			mtxStatus:  sync.Mutex{},
 			missionBuf: make(chan string, 2048),
+			urgRequest: map[string]string{},
+			mtxUrg:     sync.Mutex{},
 		}
 
 		s.Pmon = pmon
@@ -56,6 +61,40 @@ func NewService(d Diagnostic, c Config, pmon *pmon.Service) *Service {
 	}
 
 	return nil
+}
+
+func (s *Service) UpdateUrg(longpin string, result string) {
+	defer s.mtxUrg.Unlock()
+	s.mtxUrg.Lock()
+
+	_, e := s.urgRequest[longpin]
+	if e {
+		return
+	}
+
+	s.urgRequest[longpin] = result
+}
+
+func (s *Service) GetUrg(longpin string) string {
+	defer s.mtxUrg.Unlock()
+	s.mtxUrg.Lock()
+
+	result, e := s.urgRequest[longpin]
+	if e {
+		return result
+	}
+
+	return ""
+}
+
+func (s *Service) RemoveUrg(longpin string) {
+	defer s.mtxUrg.Unlock()
+	s.mtxUrg.Lock()
+
+	_, e := s.urgRequest[longpin]
+	if e {
+		delete(s.urgRequest, longpin)
+	}
 }
 
 func (s *Service) UpdateStatus(status string) {
@@ -89,8 +128,24 @@ func (s *Service) Open() error {
 			return e
 		}
 	}
-	if len(c.CHSendResult) > 0 {
-		e := s.Pmon.SendPmonMessage(pmon.PMONMSGSO, c.CHSendResult, "")
+	//if len(c.CHSendResult) > 0 {
+	//	e := s.Pmon.SendPmonMessage(pmon.PMONMSGSO, c.CHSendResult, "")
+	//	if e != nil {
+	//		s.diag.Error("Send PMON SO msg fail", e)
+	//		return e
+	//	}
+	//}
+	//
+	//if len(c.CHSendUrg) > 0 {
+	//	e := s.Pmon.SendPmonMessage(pmon.PMONMSGSO, c.CHSendUrg, "")
+	//	if e != nil {
+	//		s.diag.Error("Send PMON SO msg fail", e)
+	//		return e
+	//	}
+	//}
+
+	if len(c.CHRecvUrg) > 0 {
+		e := s.Pmon.SendPmonMessage(pmon.PMONMSGSO, c.CHRecvUrg, "")
 		if e != nil {
 			s.diag.Error("Send PMON SO msg fail", e)
 			return e
@@ -99,6 +154,7 @@ func (s *Service) Open() error {
 
 	s.Pmon.PmonRegistryEvent(s.OnPmonEventMission, c.CHRecvMission, nil)
 	s.Pmon.PmonRegistryEvent(s.OnPmonEventHeartbeat, c.CHRecvHeartbeat, nil)
+	s.Pmon.PmonRegistryEvent(s.OnPmonEventUrg, c.CHRecvUrg, nil)
 
 	go s.TaskMission()
 	go s.HeartbeatCheck()
@@ -123,6 +179,23 @@ func (s *Service) OnPmonEventMission(err error, data []rune, obj interface{}) {
 func (s *Service) OnPmonEventHeartbeat(err error, data []rune, obj interface{}) {
 	s.UpdateStatus(FIS_STATUS_ONLINE)
 	s.updateKeepAliveCount(0)
+}
+
+func (s *Service) OnPmonEventUrg(err error, data []rune, obj interface{}) {
+	if err != nil {
+		s.diag.Error("pmon event urg error", err)
+	} else {
+
+		msg := string(data)
+		s.diag.Debug(fmt.Sprintf("receive urg mission: %s\n", msg))
+		longpin, handleErr := s.HandleMO(msg)
+		if handleErr != nil {
+			s.UpdateUrg(longpin, FIS_URG_FAIL)
+			return
+		}
+
+		s.UpdateUrg(longpin, FIS_URG_SUCCESS)
+	}
 }
 
 func (s *Service) KeepAliveCount() int32 {
@@ -201,7 +274,7 @@ func (s *Service) TaskMission() {
 	}
 }
 
-func (s *Service) HandleMO(str string) {
+func (s *Service) HandleMO(str string) (string, error) {
 
 	msg := strings.TrimSpace(str)
 
@@ -210,14 +283,14 @@ func (s *Service) HandleMO(str string) {
 	numPrs := len(c.PRS)
 	prsEnd := PRS_START + (LEN_PR_VALUE*numPrs + numPrs - 1)
 	if len(msg) < prsEnd {
-		return
+		return "", errors.New("prs len error")
 	}
 	sPrs := msg[PRS_START:prsEnd]
 
 	len_mo := prsEnd + LEN_MO_TAIL
 	if len_mo != len(msg) {
 		s.diag.Error(msg, fmt.Errorf("msg len err:%d", len(msg)))
-		return
+		return "", errors.New("msg len error")
 	}
 
 	var mo odoo.ODOOMO
@@ -264,12 +337,26 @@ func (s *Service) HandleMO(str string) {
 		step += LEN_PR_VALUE + 1
 	}
 
+	longpin := fmt.Sprint("%s%d%d%d", mo.Factory_name, mo.Year, mo.Pin, mo.Pin_check_code)
+
 	err := s.Odoo.CreateMO(mo)
 	if err != nil {
+		if strings.Contains(err.Error(), "already") {
+			return longpin, nil
+		}
+
+		return "", err
 		s.diag.Error(str, err)
 	}
+
+	return longpin, nil
 }
 
 func (s *Service) PushResult(result *FisResult) error {
 	return s.Pmon.SendPmonMessage(pmon.PMONMSGSD, s.Config().CHSendResult, result.Serialize())
+}
+
+func (s *Service) PushUrgRequest(urg *FisUrgRequest) error {
+	urg.EquipemntName = s.Config().EquipmentName
+	return s.Pmon.SendPmonMessage(pmon.PMONMSGSD, s.Config().CHSendUrg, urg.Serialize())
 }

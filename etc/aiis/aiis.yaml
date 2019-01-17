@@ -30,15 +30,19 @@ pmon:
   workers: 4
   enable: true
 fis:
-  ch_recv_mission: 21
-  ch_send_result: 24
-  ch_recv_heartbeat: 20
-  system_type: screw
+  ch_recv_mission: 90
+  ch_send_result: 93
+  ch_recv_heartbeat: 89
+  ch_send_urg: 91
+  ch_recv_urg: 92
+  equipment_name: SR3J
+  system_type: Screwer
   software_version: 1.0
   mode: AUTO
   factory_code: 20
   heartbeat_interval: 2m
   mission_itv: 10ms
+  urg_timeout: 100ms
   prs:
     - GSP
     - SAB
@@ -56,7 +60,7 @@ fis:
     - SIH
     - HBV
     - AGM
-  enable: false
+  enable: true
 masterplc:
   enable: false
   port: 4721
@@ -72,7 +76,7 @@ minio:
   enable: false
 changan:
   andon_addr: tcp://127.0.0.1:9002
-  enable: true
+  enable: false
   keepalive_period: 3s
   read_timeout: 10s
   read_buffer_size: 65535
@@ -94,7 +98,7 @@ odoo:
   max_retry: 1
   enable: true
 storage:
-  db_url: 127.0.0.1:5432
+  db_url: 172.29.61.190:5432
   db_name: sa
   db_user: admin
   db_pwd: admin
