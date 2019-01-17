@@ -690,23 +690,30 @@ class OperationResult(models.HyperModel):
 
         prefix_terms = lambda prefix, terms: (prefix + " " + ",".join(terms)) if terms else ''
         prefix_term = lambda prefix, term: ('%s %s' % (prefix, term)) if term else ''
+
+        if where_clause == '':
+            pass
+        else:
+            if where_clause.find('''"operation_result"."control_date"''') > 0:
+                where_clause = where_clause.replace('''"operation_result"."control_date"''', '''"mw"."date_planned_start"''')
+                where_clause_params.extend(where_clause_params[:])
         from_clause = '''
                             (select id as equip_id,serial_no as equip_sn, name as equip_name
                               from maintenance_equipment, d1
                               where category_id = d1.gc_id
                              ) a1
-                               left join (select gun_id,count(sequence) as sequence
-                                          from mrp_wo_consu
+                        left join (select a.gun_id,count(a.sequence)  as sequence from mrp_wo_consu a
+                                          left join mrp_workorder mw on a.workorder_id = mw.id
+                                          %(where)s
                                           group by gun_id) a on a1.equip_id = a.gun_id
-                               left join (
-                          select gun_id,count(batch) as sequence
-                          from (
-                                 select distinct workorder_id,gun_id,batch
-                                 from operation_result
-                               ) a
-                          group by gun_id) b
-                                         on a.gun_id = b.gun_id
-                '''
+                        left join (select gun_id,count(batch) as sequence from
+                                          (select distinct r1.workorder_id,r1.gun_id,r1.batch from operation_result r1
+                                                left join mrp_workorder mw on r1.workorder_id = mw.id
+                                                %(where)s
+                                          ) a group by gun_id) b   on a.gun_id = b.gun_id
+                ''' % {
+            'where': prefix_term('WHERE', where_clause),
+        }
 
         query = """
                     with d1 as ( select id as gc_id from maintenance_equipment_category where name = 'Gun')
