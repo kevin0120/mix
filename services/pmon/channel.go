@@ -141,7 +141,9 @@ func (ch *Channel) Write(buf []byte, msgType PMONSMGTYPE) error {
 			ch.Service.diag.Error(fmt.Sprintf("Generation %s msg fail", msgType), err)
 			return errors.Wrap(err, "Channel.Write")
 		}
+
 		ch.conn.Write([]byte(msg[0]), ch.WriteTimeout) //发送此SO忽略错误
+		ch.diag.Debug(fmt.Sprintf("send msg:%s", msg[0]))
 		time.Sleep(150 * time.Millisecond)             //sleep 150 ms
 		for ch.GetStatus() == STATUSCLOSE && i < 6 {
 			time.Sleep(100 * time.Millisecond) //sleep 100 ms
