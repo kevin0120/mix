@@ -244,38 +244,42 @@ func XML2Curve(result *CVI3Result, cur_result *minio.ControllerCurve) {
 		cur_result.CurveContent.Result = storage.RESULT_NOK
 	}
 
-	blc := result.PRC_SST.PAR.FAS.GRP.TIP.BLC
-	cur_ms := strings.Split(blc[len(blc)-1].CUR.SMP.CUR_M, " ")
-	cur_result.CurveContent.CUR_M = make([]float64, blc[len(blc)-1].CUR.CNT)
-	for k, v := range cur_ms {
-		m, _ := strconv.ParseFloat(v, 64)
-		cur_result.CurveContent.CUR_M[k] = m
-	}
+	blcs := result.PRC_SST.PAR.FAS.GRP.TIP.BLC
 
-	cur_ws := strings.Split(blc[len(blc)-1].CUR.SMP.CUR_W, " ")
-	cur_result.CurveContent.CUR_W = make([]float64, blc[len(blc)-1].CUR.CNT)
-	for k, v := range cur_ws {
-		w, _ := strconv.ParseFloat(v, 64)
-		cur_result.CurveContent.CUR_W[k] = w
-	}
-
-	stp := blc[len(blc)-1].CUR.STP
-	stv := blc[len(blc)-1].CUR.STV
-	if blc[len(blc)-1].CUR.SMP.CUR_T == "" {
-		for i := 0; i < blc[len(blc)-1].CUR.CNT; i++ {
-			x := float64(i)*stp + stv
-			//t,_ := big.NewFloat(x).SetPrec(5).Float64()
-			t, _ := strconv.ParseFloat(fmt.Sprintf("%.5f", x), 64)
-			cur_result.CurveContent.CUR_T = append(cur_result.CurveContent.CUR_T, t)
+	for _, blc := range blcs {
+		cur_ms := strings.Split(blc.CUR.SMP.CUR_M, " ")
+		//cur_result.CurveContent.CUR_M = make([]float64, blc.CUR.CNT)
+		for _, v := range cur_ms {
+			m, _ := strconv.ParseFloat(v, 64)
+			cur_result.CurveContent.CUR_M = append(cur_result.CurveContent.CUR_M, m)
 		}
-	} else {
-		cur_ts := strings.Split(blc[len(blc)-1].CUR.SMP.CUR_T, " ")
-		cur_result.CurveContent.CUR_T = make([]float64, blc[len(blc)-1].CUR.CNT)
-		for k, v := range cur_ts {
+
+		cur_ws := strings.Split(blc.CUR.SMP.CUR_W, " ")
+		//cur_result.CurveContent.CUR_W = make([]float64, blc.CUR.CNT)
+		for _, v := range cur_ws {
 			w, _ := strconv.ParseFloat(v, 64)
-			cur_result.CurveContent.CUR_T[k] = w
+			cur_result.CurveContent.CUR_W = append(cur_result.CurveContent.CUR_W, w)
+		}
+
+		stp := blc.CUR.STP
+		stv := blc.CUR.STV
+		if blc.CUR.SMP.CUR_T == "" {
+			for i := 0; i < blc.CUR.CNT; i++ {
+				x := float64(i)*stp + stv
+				//t,_ := big.NewFloat(x).SetPrec(5).Float64()
+				t, _ := strconv.ParseFloat(fmt.Sprintf("%.5f", x), 64)
+				cur_result.CurveContent.CUR_T = append(cur_result.CurveContent.CUR_T, t)
+			}
+		} else {
+			cur_ts := strings.Split(blc.CUR.SMP.CUR_T, " ")
+			//cur_result.CurveContent.CUR_T = make([]float64, blc.CUR.CNT)
+			for _, v := range cur_ts {
+				w, _ := strconv.ParseFloat(v, 64)
+				cur_result.CurveContent.CUR_T = append(cur_result.CurveContent.CUR_T, w)
+			}
 		}
 	}
+
 
 }
 
