@@ -4,7 +4,7 @@
     "version": "0.0.1",
     "title": "AIIS API"
   },
-  "host": "192.168.1.3:9092",
+  "host": "172.29.61.190:9092",
   "basePath": "/aiis/v1",
   "schemes": [
     "http"
@@ -108,11 +108,52 @@
           }
         }
       }
+    },
+    "/fis.urgs": {
+      "post": {
+        "tags": [
+          "Fis"
+        ],
+        "summary": "FIS发送快速请求测试",
+        "description": "FIS发送快速请求测试",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/urg"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "成功"
+          },
+          "400": {
+            "description": "失败"
+          }
+        }
+      }
     }
   },
   "definitions": {
     "andon": {
       "type": "object"
+    },
+    "urg": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "code"
+        }
+      }
     }
   }
 }
