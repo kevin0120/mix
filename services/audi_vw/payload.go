@@ -280,7 +280,6 @@ func XML2Curve(result *CVI3Result, cur_result *minio.ControllerCurve) {
 		}
 	}
 
-
 }
 
 func XML2Result(result *CVI3Result, rr *controller.ControllerResult) {

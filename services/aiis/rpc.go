@@ -50,6 +50,7 @@ func (c *GRPCClient) Start() error {
 	c.updateKeepAliveDeadLine()
 
 	go c.Connect()
+	go c.manage()
 
 	return nil
 }
@@ -177,7 +178,6 @@ func (c *GRPCClient) Connect() {
 	c.stream, _ = c.rpcClient.RPCNode(context.Background())
 
 	go c.RecvProcess()
-	go c.manage()
 }
 
 func (c *GRPCClient) RecvProcess() {
