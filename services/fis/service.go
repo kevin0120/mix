@@ -350,7 +350,7 @@ func (s *Service) HandleMO(str string) (string, error) {
 		step += LEN_PR_VALUE + 1
 	}
 
-	longpin := fmt.Sprint("%s%d%d%d", mo.Factory_name, mo.Year, mo.Pin, mo.Pin_check_code)
+	longpin := fmt.Sprintf("%s%d%d%d", mo.Factory_name, mo.Year, mo.Pin, mo.Pin_check_code)
 
 	err := s.Odoo.CreateMO(mo)
 	if err != nil {
@@ -359,7 +359,8 @@ func (s *Service) HandleMO(str string) (string, error) {
 		}
 
 		return "", err
-		s.diag.Error(str, err)
+	} else {
+		s.diag.Debug(fmt.Sprintf("create mo success: %s", longpin))
 	}
 
 	return longpin, nil
