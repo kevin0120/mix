@@ -463,16 +463,16 @@ export function* ak2() {
       activeResultIndex,
       failCount
     } = yield select(state => state.operations);
-    const { odooUrl: { value: baseUrl } } = yield select(state => state.setting.page.odooConnection);
+    const { masterpc } = yield select(state => state.connections);
     const resp = yield call(
       ak2Api,
-      baseUrl,
+      masterpc,
       results[activeResultIndex].controller_sn,
       results[activeResultIndex].gun_sn,
       workorderID,
       results[activeResultIndex].pset,
       results[activeResultIndex].group_sequence,
-      failCount
+      failCount + 1
     );
   } catch (e) {
     console.log(e);
