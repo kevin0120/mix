@@ -529,7 +529,7 @@ func (c *Controller) GetJobDetail(job int) (JobDetail, error) {
 }
 
 func (c *Controller) SolveOldResults() {
-	if c.dbController.LastID == "0" {
+	if c.dbController == nil || c.dbController.LastID == "0" {
 		return
 	}
 
