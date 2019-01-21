@@ -1,14 +1,20 @@
+/* eslint-disable no-lonely-if */
 import { select, put, take, call } from 'redux-saga/effects';
 import {
   fetchRoutingWorkcenter,
   fetchWorkorder,
   jobManual,
   pset,
-  fetchNextWorkOrder, ak2Api
+  fetchNextWorkOrder,
+  ak2Api
 } from './api/operation';
 import { OPERATION, RUSH } from '../actions/actionTypes';
 import { openShutdown } from '../actions/shutDownDiag';
-import { OPERATION_RESULT, OPERATION_SOURCE, OPERATION_STATUS } from '../reducers/operations';
+import {
+  OPERATION_RESULT,
+  OPERATION_SOURCE,
+  OPERATION_STATUS
+} from '../reducers/operations';
 import { addNewStory, clearStories, STORY_TYPE } from './timeline';
 import { toolEnable, toolDisable } from '../actions/tools';
 import { setResultDiagShow } from '../actions/resultDiag';
@@ -23,41 +29,45 @@ import { setNewNotification } from '../actions/notification';
 
 // 监听作业
 export function* watchOperation() {
-  while (true) {
-    const action = yield take([
-      OPERATION.STARTED,
-      OPERATION.VERIFIED,
-      OPERATION.FINISHED,
-      OPERATION.RESET
-    ]);
-    const state = yield select();
-    const { workMode } = state;
+  try {
+    while (true) {
+      const action = yield take([
+        OPERATION.STARTED,
+        OPERATION.VERIFIED,
+        OPERATION.FINISHED,
+        OPERATION.RESET
+      ]);
+      const state = yield select();
+      const { workMode } = state;
 
-    switch (action.type) {
-      case OPERATION.VERIFIED:
-        yield call(startOperation, action.data);
-        break;
-      case OPERATION.STARTED:
-        yield put(setResultDiagShow(false));
-        yield put(cleanOngoingOperation());
-        break;
+      switch (action.type) {
+        case OPERATION.VERIFIED:
+          yield call(startOperation, action.data);
+          break;
+        case OPERATION.STARTED:
+          yield put(setResultDiagShow(false));
+          yield put(cleanOngoingOperation());
+          break;
 
-      case OPERATION.FINISHED:
-        if (workMode.controllerMode === 'job') {
-          // 工具禁用
-          yield put(toolDisable());
-        }
-        if (state.setting.operationSettings.opMode === 'order') {
-          yield call(getNextWorkOrderandShow);
-        }
-        yield put(setResultDiagShow(true));
-        break;
-      case OPERATION.RESET:
-        yield put({ type: OPERATION.FINISHED });
-        break;
-      default:
-        break;
+        case OPERATION.FINISHED:
+          if (workMode.controllerMode === 'job') {
+            // 工具禁用
+            yield put(toolDisable());
+          }
+          if (state.setting.operationSettings.opMode === 'order') {
+            yield call(getNextWorkOrderandShow);
+          }
+          yield put(setResultDiagShow(true));
+          break;
+        case OPERATION.RESET:
+          yield put({ type: OPERATION.FINISHED });
+          break;
+        default:
+          break;
+      }
     }
+  } catch (e) {
+    console.log(e);
   }
 }
 
@@ -105,7 +115,10 @@ export function* triggerOperation(carID, carType, job, source) {
       });
     }
 
-    if (source === OPERATION_SOURCE.SCANNER && state.workMode.workMode === 'manual') {
+    if (
+      source === OPERATION_SOURCE.SCANNER &&
+      state.workMode.workMode === 'manual'
+    ) {
       // 手动模式下,扫码枪接收到讯息,不获取作业以及切换工作状态
       return;
     }
@@ -135,9 +148,7 @@ export function* triggerOperation(carID, carType, job, source) {
       }
     }
 
-    if (
-      triggerFlagNum === triggers.length
-    ) {
+    if (triggerFlagNum === triggers.length) {
       yield call(getOperation, job);
     }
   } catch (e) {
@@ -189,7 +200,7 @@ export function* getOperation(job) {
       } else {
         // 工单模式
 
-        const hmiSN = state.setting.page.odooConnection.hmiSn.value;
+        // const hmiSN = state.setting.page.odooConnection.hmiSn.value;
         const code = state.operations.carID;
         try {
           resp = yield call(fetchWorkorder, rushUrl, workcenterCode, code);
@@ -306,72 +317,87 @@ export function* startOperation(data) {
       if (rt) {
         yield put({ type: OPERATION.STARTED });
       }
-
     }
   } catch (e) {
+    console.log(e);
   }
 }
 
 // 处理作业过程
 export function* doingOperation() {
-  const state = yield select();
-  const { controllerMode } = state.workMode;
+  try {
+    const state = yield select();
+    const { controllerMode } = state.workMode;
 
-  if (controllerMode === 'pset') {
-    // pset模式
+    if (controllerMode === 'pset') {
+      // pset模式
 
-    const { masterpc } = state.connections;
-    const { activeResultIndex, failCount, results, workorderID } = state.operations;
-    const userID = 1;
+      const { masterpc } = state.connections;
+      const {
+        activeResultIndex,
+        failCount,
+        results,
+        workorderID
+      } = state.operations;
+      const userID = 1;
 
-    try {
-      const resp = yield call(
-        pset,
-        masterpc,
-        results[activeResultIndex].controller_sn,
-        results[activeResultIndex].gun_sn,
-        0,
-        failCount + 1,
-        userID,
-        results[activeResultIndex].pset,
-        workorderID,
-        results[activeResultIndex].group_sequence
-      );
-    } catch (e) {
-      // 程序号设置失败
-      yield put({ type: OPERATION.PROGRAMME.SET_FAIL });
-      yield put(
-        setNewNotification('error', 'pset failed')
-      );
-      return false;
+      try {
+        yield call(
+          pset,
+          masterpc,
+          results[activeResultIndex].controller_sn,
+          results[activeResultIndex].gun_sn,
+          0,
+          failCount + 1,
+          userID,
+          results[activeResultIndex].pset,
+          workorderID,
+          results[activeResultIndex].group_sequence
+        );
+      } catch (e) {
+        // 程序号设置失败
+        yield put({ type: OPERATION.PROGRAMME.SET_FAIL });
+        yield put(setNewNotification('error', 'pset failed'));
+        return false;
+      }
     }
-  }
 
-  return true;
+    return true;
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 // 复位继续作业
 export function* continueOperation() {
-  const state = yield select();
-  const { operations } = state;
+  try {
+    const state = yield select();
+    const { operations } = state;
 
-  // if (state.operations.operationStatus === OPERATION_STATUS.FAIL) {
-  //
-  // }
+    // if (state.operations.operationStatus === OPERATION_STATUS.FAIL) {
+    //
+    // }
 
-  if (operations.activeResultIndex >= operations.results.length - 1) {
-    yield put({ type: OPERATION.FINISHED });
-  } else {
-    yield put({ type: OPERATION.CONTINUE });
-    yield call(doingOperation);
+    if (operations.activeResultIndex >= operations.results.length - 1) {
+      yield put({ type: OPERATION.FINISHED });
+    } else {
+      yield put({ type: OPERATION.CONTINUE });
+      yield call(doingOperation);
+    }
+  } catch (e) {
+    console.log(e);
   }
 }
 
 // 监听结果
 export function* watchResults() {
-  while (true) {
-    const { data } = yield take(RUSH.NEW_RESULTS);
-    yield call(handleResults, data);
+  try {
+    while (true) {
+      const { data } = yield take(RUSH.NEW_RESULTS);
+      yield call(handleResults, data);
+    }
+  } catch (e) {
+    console.log(e);
   }
 }
 
@@ -388,8 +414,8 @@ export function* handleResults(data) {
     const batch = `${(
       operations.activeResultIndex + 1
     ).toString()}/${operations.results[
-    operations.results.length - 1
-      ].group_sequence.toString()}`;
+      operations.results.length - 1
+    ].group_sequence.toString()}`;
 
     for (let i = 0; i < data.length; i += 1) {
       if (data[i].result === OPERATION_RESULT.NOK) {
@@ -451,20 +477,15 @@ export function* handleResults(data) {
   } catch (e) {
     console.log(e);
   }
-
 }
-
 
 export function* ak2() {
   try {
-    const {
-      workorderID,
-      results,
-      activeResultIndex,
-      failCount
-    } = yield select(state => state.operations);
+    const { workorderID, results, activeResultIndex, failCount } = yield select(
+      state => state.operations
+    );
     const { masterpc } = yield select(state => state.connections);
-    const resp = yield call(
+    yield call(
       ak2Api,
       masterpc,
       results[activeResultIndex].controller_sn,
