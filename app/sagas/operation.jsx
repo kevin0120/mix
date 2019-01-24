@@ -1,3 +1,4 @@
+/* eslint-disable no-lonely-if */
 import { select, put, take, call } from 'redux-saga/effects';
 import {
   fetchRoutingWorkcenter,
@@ -89,9 +90,9 @@ function* getNextWorkOrderandShow() {
 // 触发作业
 export function* triggerOperation(carID, carType, job, source) {
   try {
-    const state = yield select();
+    const rState = yield select();
 
-    if (state.router.location.pathname !== '/working') {
+    if (rState.router.location.pathname !== '/working') {
       return;
     }
 
@@ -117,13 +118,13 @@ export function* triggerOperation(carID, carType, job, source) {
 
     if (
       source === OPERATION_SOURCE.SCANNER &&
-      state.workMode.workMode === 'manual'
+      rState.workMode.workMode === 'manual'
     ) {
       // 手动模式下,扫码枪接收到讯息,不获取作业以及切换工作状态
       return;
     }
 
-    switch (state.operations.operationStatus) {
+    switch (rState.operations.operationStatus) {
       case OPERATION_STATUS.DOING:
         return;
       case OPERATION_STATUS.READY:
@@ -139,11 +140,13 @@ export function* triggerOperation(carID, carType, job, source) {
         break;
     }
 
-    const triggers = state.setting.operationSettings.flowTriggers;
+    const triggers = rState.setting.operationSettings.flowTriggers;
+
+    const operations = yield select(state => state.operations);
 
     let triggerFlagNum = 0;
     for (let i = 0; i < triggers.length; i += 1) {
-      if (state.operations[triggers[i]] !== '') {
+      if (operations[triggers[i]] !== '') {
         triggerFlagNum += 1;
       }
     }
@@ -200,7 +203,7 @@ export function* getOperation(job) {
       } else {
         // 工单模式
 
-        const hmiSN = state.setting.page.odooConnection.hmiSn.value;
+        // const hmiSN = state.setting.page.odooConnection.hmiSn.value;
         const code = state.operations.carID;
         try {
           resp = yield call(fetchWorkorder, rushUrl, workcenterCode, code);
@@ -355,9 +358,11 @@ export function* doingOperation(controllerMode) {
       yield put(setNewNotification('error', 'pset failed'));
       return false;
     }
-  }
 
-  return true;
+    return true;
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 // 复位继续作业
