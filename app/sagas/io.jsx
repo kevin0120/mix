@@ -306,10 +306,7 @@ function* keyMonitorTask() {
       }
       io.currentKeyStatus = newKeyStatus;
     } else if (error) {
-      yield put(
-        setNewNotification('error', 'readDiscreteInputs failed')
-      );
-
+      yield put(setNewNotification('error', 'readDiscreteInputs failed'));
     }
   } finally {
     if (yield cancelled()) {

@@ -59,7 +59,7 @@ function* sysInit() {
 
     // 获取logo
     yield put({
-      type:LOGO.FETCH_START
+      type: LOGO.FETCH_START
     });
 
     setLedStatusReady();

@@ -1,4 +1,12 @@
-import { call, take, put, select, fork } from 'redux-saga/effects';
+import {
+  call,
+  take,
+  put,
+  select,
+  fork,
+  takeLatest,
+  debounce
+} from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
 import { RFID } from '../actions/actionTypes';
 import { triggerOperation } from './operation';
@@ -35,7 +43,9 @@ export function* watchRfid() {
 function* initRFID() {
   const state = yield select();
 
-  const { connections } = state;
+  const { connections, operationSettings } = state;
+
+  const { regExp } = operationSettings;
 
   if (connections.rfid === '') {
     return;
@@ -64,7 +74,7 @@ function* initRFID() {
 
   rfidChannel = yield call(createRfidChannel, client);
 
-  yield fork(watchRfidChannel);
+  yield fork(watchRfidChannel, regExp);
 }
 
 export function stopRFID() {
@@ -116,10 +126,8 @@ function createRfidChannel(rfidClient) {
 
 const getHealthz = state => state.healthCheckResults;
 
-export function* watchRfidChannel() {
-  while (client !== null) {
-    const data = yield take(rfidChannel);
-
+function* RFIDHandler(data, reg) {
+  try {
     const { type, payload } = data;
 
     switch (type) {
@@ -134,11 +142,22 @@ export function* watchRfidChannel() {
       }
       case 'data': {
         if (payload !== 'NoRead') {
-          const buf2 = Buffer.from(_.trim(payload), 'hex');
+          const buf2 = Buffer.from(payload, 'hex');
           const code = buf2.toString();
           const dataValue = _.trim(code);
 
-          if (isCarID(dataValue)) {
+          if (!reg.test(dataValue)) {
+            yield put(
+              setNewNotification(
+                'error',
+                `RFID data can not match: ${dataValue}`
+              )
+            );
+          }
+          const targetValue = reg.exec(dataValue)[0];
+          // yield put(setNewNotification('info', `new rfid value: ${targetValue}`));
+
+          if (isCarID(targetValue)) {
             yield call(
               triggerOperation,
               dataValue,
@@ -160,6 +179,19 @@ export function* watchRfidChannel() {
       }
       default:
         break;
+    }
+  } catch (err) {
+    console.log(`rfid error msg:${err.message}`);
+  }
+}
+
+export function* watchRfidChannel(regExp) {
+  const e = new RegExp(regExp, 'i'); // 正則表達式,大小寫不敏感
+  while (client !== null) {
+    try {
+      yield debounce(3000, rfidChannel, RFIDHandler, e); // RFID 因为频繁触发所以进行防抖动处理,默认3秒
+    } catch (err) {
+      console.error(`watchRfidChannel: ${err.message}`);
     }
   }
 }

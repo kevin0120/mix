@@ -285,7 +285,7 @@ class ConnectedImageStick extends React.Component {
       operations.operationStatus !== 'PreDoing';
     return (
       <div className={classes.picWrap}>
-        <Image src={operations.workSheet||logo} alt="" focus={this.focus}>
+        <Image src={operations.workSheet || logo} alt="" focus={this.focus}>
           {this.statusDisplay(false)}
         </Image>
         {enableFocus ? (
@@ -294,7 +294,7 @@ class ConnectedImageStick extends React.Component {
             {...(smallImgDisplay ? { timeout: 1000 } : {})}
           >
             <Card plain raised className={classes.imgSmallBlock}>
-              <Image src={operations.workSheet||logo} alt="">
+              <Image src={operations.workSheet || logo} alt="">
                 {this.statusDisplay(true)}
               </Image>
             </Card>

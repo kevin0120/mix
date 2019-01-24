@@ -39,6 +39,7 @@ const lodash = require('lodash');
 const mapStateToProps = (state, ownProps) => ({
   show: state.resultDiag.show,
   results: state.operations.results,
+  carID: state.operations.carID,
   jobID: state.operations.jobID,
   nextWorkorder: state.ongoingOperation,
   ...ownProps
@@ -78,7 +79,7 @@ class ConnectedResultDialog extends React.Component {
   };
 
   render() {
-    const { classes, show, results, nextWorkorder, jobID } = this.props;
+    const { classes, show, results, nextWorkorder, jobID, carID } = this.props;
 
     const showNextVehicle = configs.operationSettings.opMode === 'order';
 
@@ -86,9 +87,9 @@ class ConnectedResultDialog extends React.Component {
 
     if (nextWorkorder) {
       nw.push([
+        nextWorkorder.lnr,
         nextWorkorder.vin,
         nextWorkorder.model,
-        nextWorkorder.lnr,
         nextWorkorder.knr,
         nextWorkorder.long_pin
       ]);
@@ -149,7 +150,7 @@ class ConnectedResultDialog extends React.Component {
                           <Assignment />
                         </CardIcon>
                         <h4 style={{ color: '#000' }}>
-                          {t('main.currentOrder')}
+                          {`${t('main.currentOrder')}: ${carID}`}
                         </h4>
                       </CardHeader>
                       <CardBody>
@@ -193,9 +194,9 @@ class ConnectedResultDialog extends React.Component {
                             <Table
                               tableHeaderColor="info"
                               tableHead={[
-                                'Vin',
-                                '车型',
                                 '车序',
+                                'VIN',
+                                '车型',
                                 'Knr',
                                 'LongPin'
                               ]}
@@ -240,6 +241,7 @@ ConnectedResultDialog.propTypes = {
   ).isRequired,
   setResultDiagShow: PropTypes.func.isRequired,
   NewCar: PropTypes.func.isRequired,
+  carID: PropTypes.string.isRequired,
   switch2Ready: PropTypes.func.isRequired
 };
 

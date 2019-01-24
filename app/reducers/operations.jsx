@@ -7,7 +7,7 @@ import {
   sOn
 } from '../sagas/io';
 
-import sortObj from '../common/utils'
+import sortObj from '../common/utils';
 
 export const OPERATION_STATUS = {
   READY: 'Ready',
@@ -37,7 +37,7 @@ const defaultOperations = {
   carID: '',
   carType: '',
   activeResultIndex: 0,
-  failCount: 0,
+  failCount: 0, // 失敗的次數
   jobID: 0,
   maxOpTimes: 0,
   workSheet: null,
@@ -85,7 +85,7 @@ export default function operations(
     case OPERATION.OPERATION.FETCH_OK:
       return newOperation(state, action.mode, action.data);
     case OPERATION.JOB_MANUAL.OK:
-      return setWorkorderID(state,action.workorderID);
+      return setWorkorderID(state, action.workorderID);
     case OPERATION.OPERATION.FETCH_FAIL:
       return operationSwitchReady(state);
     case OPERATION.STARTED:
@@ -136,7 +136,8 @@ function newOperation(state, mode, data) {
       workSheet: data.img,
       productID: data.product_id,
       workcenterID: data.workcenter_id,
-      results: data.points.sort((a,b) => a.group_sequence - b.group_sequence),
+      activeResultIndex: 0,
+      results: data.points.sort((a, b) => a.group_sequence - b.group_sequence)
     };
   }
 
@@ -147,18 +148,18 @@ function newOperation(state, mode, data) {
     carType: data.model,
     maxOpTimes: data.max_op_time,
     workSheet: data.work_sheet,
-    results: data.results.sort((a,b) => a.group_sequence - b.group_sequence),
+    results: data.results.sort((a, b) => a.group_sequence - b.group_sequence),
     activeResultIndex: 0,
     lnr: data.lnr,
     workorderID: data.workorder_id
   };
 }
 
-function setWorkorderID(state,workorderID){
+function setWorkorderID(state, workorderID) {
   return {
     ...state,
     workorderID
-  }
+  };
 }
 
 function operationSwitchReady(state) {
@@ -172,7 +173,7 @@ function operationSwitchReady(state) {
     lnr: '',
     maxOpTimes: 0,
     failCount: 0,
-    results: [],
+    results: []
   };
 }
 
@@ -319,4 +320,3 @@ function switchOperationTimeout(state, status) {
     lnr: ''
   };
 }
-

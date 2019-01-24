@@ -21,8 +21,8 @@ import Preferences from '../containers/config';
 import Help from '../containers/help';
 import Pages from '../layouts/Pages';
 import HomePage from '../containers/home';
-import Curve from '../containers/curve'
-import Viewer from '../containers/viewer'
+import Curve from '../containers/curve';
+import Viewer from '../containers/viewer';
 
 // imgs
 import helpImg from '../../resources/imgs/help.png';
@@ -55,10 +55,7 @@ const routes = [
     icon: HomeIcon,
     color: '#00abf3',
     showLayout: true,
-    roles:[
-      'user',
-      'admin'
-    ]
+    roles: ['user', 'admin']
   },
   {
     name: 'working',
@@ -69,10 +66,7 @@ const routes = [
     color: '#00abbf',
     image: WorkingImg,
     showLayout: true,
-    roles:[
-      'user',
-      'admin'
-    ]
+    roles: ['user', 'admin']
   },
   {
     name: 'viewer',
@@ -83,10 +77,7 @@ const routes = [
     color: '#00abbf',
     image: WorkingImg,
     showLayout: true,
-    roles:[
-      'user',
-      'admin'
-    ]
+    roles: ['user', 'admin']
   },
   {
     name: 'orders',
@@ -97,10 +88,7 @@ const routes = [
     color: warningColor,
     image: editorImg,
     showLayout: true,
-    roles:[
-      'user',
-      'admin'
-    ]
+    roles: ['user', 'admin']
   },
   {
     name: 'preferences',
@@ -111,9 +99,7 @@ const routes = [
     color: '#fba53d',
     image: settingImg,
     showLayout: true,
-    roles:[
-      'admin'
-    ]
+    roles: ['admin']
   },
   {
     name: 'event',
@@ -124,10 +110,7 @@ const routes = [
     color: '#008adf',
     image: LoginImg,
     showLayout: true,
-    roles:[
-      'user',
-      'admin'
-    ]
+    roles: ['user', 'admin']
   },
   {
     name: 'result',
@@ -138,10 +121,7 @@ const routes = [
     color: grayColor,
     image: LockingImg,
     showLayout: true,
-    roles:[
-      'user',
-      'admin'
-    ]
+    roles: ['user', 'admin']
   },
   {
     name: 'curve',
@@ -152,10 +132,7 @@ const routes = [
     color: '#009688',
     image: LockingImg,
     showLayout: true,
-    roles:[
-      'user',
-      'admin'
-    ]
+    roles: ['user', 'admin']
   },
   // {
   //   name: 'lock',
@@ -176,10 +153,7 @@ const routes = [
     color: '#8a6c63',
     image: helpImg,
     showLayout: true,
-    roles:[
-      'user',
-      'admin'
-    ]
+    roles: ['user', 'admin']
   },
   {
     name: 'login',
@@ -190,10 +164,7 @@ const routes = [
     color: grayColor,
     image: LoginImg,
     showLayout: false,
-    roles:[
-      'user',
-      'admin'
-    ]
+    roles: ['user', 'admin']
   }
 ];
 

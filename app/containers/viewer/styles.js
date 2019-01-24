@@ -35,7 +35,7 @@ export default theme => ({
   itemText: {
     fontSize: 14,
     padding: 0,
-    margin:12
+    margin: 12
   },
   cardActionArea: {
     flex: 1,

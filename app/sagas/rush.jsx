@@ -18,6 +18,7 @@ import { OPERATION_SOURCE } from '../reducers/operations';
 import { IO_FUNCTION } from '../reducers/io';
 import { setHealthzCheck } from '../actions/healthCheck';
 import { setNewNotification } from '../actions/notification';
+import { switch2Ready } from '../actions/operation';
 
 let task = null;
 let ws = null;
@@ -76,42 +77,38 @@ function* stopRush() {
 }
 
 function createRushChannel(hmiSN) {
-
-    return eventChannel(emit => {
-
-      ws.on('open', () => {
-        emit({ type: 'healthz', payload: true });
-        // reg msg
-        ws.sendJson({ hmi_sn: hmiSN }, err => {
-          if (err) {
-            ws.close();
-          }
-        });
+  return eventChannel(emit => {
+    ws.on('open', () => {
+      emit({ type: 'healthz', payload: true });
+      // reg msg
+      ws.sendJson({ hmi_sn: hmiSN }, err => {
+        if (err) {
+          ws.close();
+        }
       });
-
-      ws.on('close', () => {
-        emit({ type: 'healthz', payload: false });
-      });
-
-      ws.on('error', () => {
-        emit({ type: 'healthz', payload: false });
-        // console.log('websocket error. reconnect after 1s');
-      });
-      ws.on('ping', () => {
-        // console.log(' receive ping Msg');
-      });
-      ws.on('pong', () => {
-        // console.log(' receive pong Msg');
-      });
-
-      ws.on('message', data => {
-        emit({ type: 'data', payload: data });
-      });
-
-      return () => {};
     });
 
+    ws.on('close', () => {
+      emit({ type: 'healthz', payload: false });
+    });
 
+    ws.on('error', () => {
+      emit({ type: 'healthz', payload: false });
+      // console.log('websocket error. reconnect after 1s');
+    });
+    ws.on('ping', () => {
+      // console.log(' receive ping Msg');
+    });
+    ws.on('pong', () => {
+      // console.log(' receive pong Msg');
+    });
+
+    ws.on('message', data => {
+      emit({ type: 'data', payload: data });
+    });
+
+    return () => {};
+  });
 }
 
 // const getHealthz = state => state.healthCheckResults;
@@ -151,15 +148,17 @@ export function* watchRushChannel(hmiSN) {
 
           switch (event) {
             case 'maintenance':
-              yield put(setNewNotification(
-                'maintenance',
-                `新维护请求: ${json.type},${json.name}`
-              ));
+              yield put(
+                setNewNotification(
+                  'maintenance',
+                  `新维护请求: ${json.type},${json.name}`
+                )
+              );
               break;
             case 'job':
               if (state.workMode.workMode === 'manual' && json.job_id > 0) {
                 if (state.setting.operationSettings.manualFreestyle) {
-                  yield put({ type: OPERATION.FINISHED });
+                  yield put(switch2Ready());
                 }
 
                 const { carID, carType } = state.operations;

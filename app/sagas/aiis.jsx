@@ -115,9 +115,8 @@ export function* handleAiisData(action) {
       }
     }
   } catch (e) {
-    console.log("handleAiisData:", e);
+    console.log('handleAiisData:', e);
   }
-
 }
 
 function aiisWSChannel() {

@@ -8,7 +8,7 @@ export default function logo(
 ) {
   switch (action.type) {
     case LOGO.FETCH_OK: {
-      return action.logo||defaultWorkingImg;
+      return action.logo || defaultWorkingImg;
     }
     default:
       return defaultWorkingImg;
