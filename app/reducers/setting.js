@@ -21,6 +21,8 @@ export default function setting(state: object = configs, action: actionType) {
             ...state,
             system: { ...state.system, [section]: newConfigs }
           };
+        case 'network':
+          return state;
         default:
           return { ...state, page: { ...state.page, [section]: newConfigs } };
       }

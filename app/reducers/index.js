@@ -15,6 +15,8 @@ import healthCheckResults from './healthCheck';
 import timeline from './timeline';
 import operationViewer from './operationViewer';
 import logo from './logo';
+import network from './network';
+import battery from './battery';
 
 export default function createRootReducer(history: {}) {
   const routerReducer = connectRouter(history)(() => {});
@@ -34,7 +36,9 @@ export default function createRootReducer(history: {}) {
       ongoingOperation,
       timeline,
       operationViewer,
-      logo
+      logo,
+      network,
+      battery
     })
   );
 }

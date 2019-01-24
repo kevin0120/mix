@@ -9,7 +9,7 @@
 // @flow
 
 import { select, takeEvery, put, call } from 'redux-saga/effects';
-import { USER_CONFIGS, CONNECTION } from '../actions/actionTypes';
+import { USER_CONFIGS, CONNECTION, NETWORK } from '../actions/actionTypes';
 import { setNewNotification } from '../actions/notification';
 import { systemInit } from '../actions/sysInit';
 
@@ -48,6 +48,16 @@ function* saveConfiguration(action) {
       });
       break;
     }
+    case 'network':
+      // yield put({
+      //   type:NETWORK.SET,
+      //   config:newConfigs
+      // });
+      eSetting.setAll({
+        ...setting,
+        page: { ...setting.page, [section]: newConfigs }
+      });
+      break;
     default:
       eSetting.setAll({
         ...setting,

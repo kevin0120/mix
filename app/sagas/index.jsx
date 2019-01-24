@@ -18,6 +18,8 @@ import { watchRfid } from './rfid';
 import { watchNotification } from './notification';
 import watchOperationViewer from './operationViewer';
 import logo from './logo';
+import watchNetwork from './network';
+import watchBattery from './battery';
 
 export default function* rootSaga() {
   try {
@@ -42,7 +44,9 @@ export default function* rootSaga() {
       watchSettingPreSave(),
       sysInitFlow(),
       watchOperationViewer(),
-      logo()
+      logo(),
+      watchNetwork(),
+      watchBattery()
     ]);
   } catch (e) {
     console.log('rootSaga:', e);

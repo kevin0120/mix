@@ -53,6 +53,17 @@ const pagesHeaderStyle = theme => ({
       color: '#FFFFFF'
     }
   },
+  indicator: {
+    ...defaultFont,
+    fontSize: '14px',
+    borderRadius: '3px',
+    textTransform: 'none',
+    color: '#FFFFFF',
+    '&:hover,&:focus': {
+      background: 'transparent',
+      color: '#FFFFFF'
+    }
+  },
   appResponsive: {
     top: '8px'
   },
@@ -93,9 +104,12 @@ const pagesHeaderStyle = theme => ({
     paddingBottom: '0'
   },
   listItem: {
-    float: 'left',
-    position: 'relative',
-    display: 'block',
+    // float: 'left',
+    // position: 'relative',
+    display: 'flex',
+    flexDirection:'row',
+    justifyContent:'center',
+    alignItems:'center',
     width: 'auto',
     margin: '0',
     padding: '0',
@@ -106,17 +120,18 @@ const pagesHeaderStyle = theme => ({
     }
   },
   navLink: {
+    display: 'flex',
+    flexDirection:'row',
+    justifyContent:'center',
+    alignItems:'center',
     color: '#FFFFFF',
     margin: '0 5px',
     paddingTop: '15px',
     paddingBottom: '15px',
     fontWeight: '500',
-    fontSize: '12px',
+    fontSize: '14px',
     textTransform: 'uppercase',
     borderRadius: '3px',
-    lineHeight: '20px',
-    position: 'relative',
-    display: 'block',
     padding: '10px 15px',
     textDecoration: 'none',
     '&:hover,&:focus': {
@@ -125,23 +140,16 @@ const pagesHeaderStyle = theme => ({
     }
   },
   listItemIcon: {
-    marginTop: '-3px',
-    top: '0px',
     position: 'relative',
     marginRight: '3px',
-    width: '20px',
-    height: '20px',
-    verticalAlign: 'middle',
+    width: '24px',
+    height: '24px',
     color: 'inherit',
-    display: 'inline-block'
   },
   listItemText: {
     flex: 'none',
     padding: '0',
-    minWidth: '0',
     margin: 0,
-    display: 'inline-block',
-    position: 'relative',
     whiteSpace: 'nowrap'
   },
   navLinkActive: {

@@ -27,37 +27,18 @@ import Button from '../CustomButtons/Button';
 
 import { sortObj } from '../../common/utils';
 import saveConfigs from '../../actions/userConfigs';
+import { networkScan, networkCheck, networkSet } from '../../actions/network';
 
 import styles from './styles';
 import withKeyboard from '../Keyboard';
 
 const lodash = require('lodash');
 
-const { exec } = require('child_process');
-
 const override = css`
   display: block;
   margin: auto;
   border-color: red;
 `;
-
-const netmask2CIDR = netmask =>
-  netmask
-    .split('.')
-    .map(Number)
-    .map(part => (part >>> 0).toString(2))
-    .join('')
-    .split('1').length - 1;
-//
-// const CDIR2netmask = (bitCount) => {
-//   let mask=[];
-//   for(let i=0;i<4;i++) {
-//     let n = Math.min(bitCount, 8);
-//     mask.push(256 - Math.pow(2, 8-n));
-//     bitCount -= n;
-//   }
-//   return mask.join('.');
-// };
 
 function renderSSIDs(ssid, index, classes) {
   return (
@@ -76,30 +57,38 @@ function renderSSIDs(ssid, index, classes) {
 
 const mapStateToProps = (state, ownProps) => ({
   storedConfigs: state.setting.page.network,
+  network: state.network,
   ...ownProps
 });
 
 const mapDispatchToProps = {
-  saveConfigs
+  saveConfigs,
+  doNetworkScan: networkScan,
+  doNetworkCheck: networkCheck,
+  doNetworkSet: networkSet
 };
+
+const filter = (value, defaultValue) => value === undefined ? defaultValue : value;
 
 class ConnectedNet extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      loading: false,
-      section: 'network',
-      data: props.storedConfigs,
-      ssid: '',
-      ssidSelectOpen: false,
-      ssids: []
+      data: {},
+      ssidSelectOpen: false
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
+  componentDidMount() {
+    const { doNetworkCheck } = this.props;
+    doNetworkCheck();
+  }
+
   handleChange(e, key) {
-    const tempData = cloneDeep(this.state.data);
+    const { data } = this.state;
+    const tempData = cloneDeep(data);
     tempData[key].value = get(e, 'target.value', '').trim();
     this.setState({
       data: tempData
@@ -107,66 +96,22 @@ class ConnectedNet extends React.PureComponent {
   }
 
   handleSubmit() {
-    const { section, ssid, data } = this.state;
-    const { saveConfigs } = this.props;
-    this.setState({
-      loading: true
+    const { data } = this.state;
+    const { doNetworkSet, network } = this.props;
+    const tempData = cloneDeep(network.config);
+    Object.keys(data).forEach((key) => {
+      tempData[key].value = data[key];
     });
-    let ret = 0;
-    const tempData = cloneDeep(data);
-    const mask = netmask2CIDR(tempData.netmask.value);
-    tempData.ssid.value = ssid;
-    exec('nmcli con delete default', () => {
-      exec(
-        `nmcli dev wifi connect '${tempData.ssid.value}' password '${
-          tempData.password.value
-        }' name default`,
-        (error, stdout, stderr) => {
-          if (error) {
-            console.error(`exec error: ${error}`);
-            ret = -1;
-          }
-          if (stderr) {
-            console.log(`stderr: ${stderr}`);
-            ret = -1;
-          }
-
-          if (ret < 0) {
-            this.setState({
-              loading: false
-            });
-            return;
-          }
-          exec('nmcli con down default', () => {
-            const cmd = `nmcli con mod default ipv4.method manual ipv4.address ${
-              tempData.ipAddress.value
-            }/${mask} ipv4.gateway ${tempData.gateway.value}`;
-            exec(cmd, (error, stdout, stderr) => {
-              if (error) {
-                console.error(`exec error: ${error}`);
-                ret = -1;
-              }
-              if (stderr) {
-                console.log(`stderr: ${stderr}`);
-                ret = -1;
-              }
-              this.setState({
-                loading: false
-              });
-              if (ret === 0) {
-                saveConfigs(section, tempData);
-                exec('nmcli con up default');
-              }
-            });
-          });
-        }
-      );
-    });
+    doNetworkSet(tempData);
   }
 
   handleChangeSSID(e) {
+    const { data } = this.state;
     this.setState({
-      ssid: e.target.value
+      data: {
+        ...data,
+        ssid: e.target.value
+      }
     });
   }
 
@@ -178,35 +123,10 @@ class ConnectedNet extends React.PureComponent {
   }
 
   getSSIDs = () => {
-    const ret = [];
-    exec('nmcli -f ssid -t dev wifi', (error, stdout, stderr) => {
-      if (error) {
-        console.error(`exec error: ${error}`);
-        return;
-      }
-      if (stdout) {
-        const lines = stdout.toString().split('\n');
-        for (let i = 0; i < lines.length - 1; i += 1) {
-          const line = lines[i].toString();
-          // const x = lodash.words(line, /[^, ]+/g);
-          // if (x[0] === '*') {
-          //   ret.push(x[1]);
-          // } else {
-          //   ret.push(x[0]);
-          // }
-          ret.push(line);
-        }
-        this.setState({
-          ssids: lodash.uniq(ret),
-          ssidSelectOpen: true
-        });
-      }
-      if (stderr) {
-        this.setState({
-          ssids: [],
-          ssidSelectOpen: true
-        });
-      }
+    const { doNetworkScan } = this.props;
+    doNetworkScan();
+    this.setState({
+      ssidSelectOpen: true
     });
   };
 
@@ -216,94 +136,24 @@ class ConnectedNet extends React.PureComponent {
     });
   };
 
-  componentWillMount() {
-    const { data } = this.state;
-    const tempData = cloneDeep(this.state);
-    const ret = [];
-
-    // exec('nmcli -f ssid -t dev wifi', (error, stdout, stderr) => {
-    //   if (error) {
-    //     console.error(`exec error: ${error}`);
-    //     return;
-    //   }
-    //   if (stdout) {
-    //     const lines = stdout.toString().split('\n');
-    //     let isHeader = true;
-    //     for (let i = 0; i < lines.length - 1; i += 1) {
-    //       if (isHeader) {
-    //         isHeader = false;
-    //       } else {
-    //         const line = lines[i].toString();
-    //         // const x = lodash.words(line, /[^, ]+/g);
-    //         // if (x[0] === '*') {
-    //         //   ret.push(x[1]);
-    //         // } else {
-    //         //   ret.push(x[0]);
-    //         // }
-    //         ret.push(line);
-    //       }
-    //     }
-    //     tempData.ssids = lodash.uniq(ret);
-    //     if (lodash.includes(ret, data.ssid.value)) {
-    //       tempData.ssid = data.ssid.value;
-    //     }
-    //     this.setState({
-    //       ...tempData
-    //     });
-    //   }
-    // });
-
-    exec('nmcli -t -s con show default', (error, stdout, stderr) => {
-      if (error) {
-        console.error(`exec error: ${error}`);
-        return;
-      }
-      if (stdout) {
-        const result = stdout.toString();
-        const ssid=/802-11-wireless.ssid:(.+)\n/.exec(result)[1]||'';
-        const password=/802-11-wireless-security.psk:(.+)\n/.exec(result)[1]||'';
-        const addresses=/ipv4.addresses:(.+)\/(.+)\n/.exec(result)||'';
-        const address=addresses[1]||'';
-        const gateway=/ipv4.gateway:(.+)\n/.exec(result)[1]||'';
-        const mask=parseInt(addresses[2],10)||'';
-        let maskStr='';
-        if(mask){
-          const B2D=(B)=>parseInt(B,2);
-          const maskB=`${Array(1+mask).join(1)}${
-            Array(32-mask+1).join(0)}`;
-          maskStr=`${B2D(maskB.slice(0,8))}.${B2D(maskB.slice(8,16))}.${
-            B2D(maskB.slice(16,24))}.${B2D(maskB.slice(24,32))}`;
-        }
-
-        tempData.ssid = ssid;
-        tempData.data.gateway.value=gateway;
-        tempData.data.ipAddress.value=address;
-        tempData.data.netmask.value=maskStr;
-        tempData.data.password.value=password;
-        tempData.data.ssid.value=ssid;
-
-        this.setState({
-          ...tempData
-        });
-      }
-    });
-  }
 
   Transition(props) {
-    return <Fade {...props} timeout={500} />;
+    return <Fade {...props} timeout={500}/>;
   }
 
   render() {
-    const { classes } = this.props;
-    const { data, ssid, loading, ssidSelectOpen, ssids } = this.state;
+    const { classes, network, keyboardInput } = this.props;
+    const { data, ssidSelectOpen } = this.state;
 
     const validateData = lodash.omit(data, ['ssid']);
 
     const submitDisabled =
-      ssid === '' || Object.values(validateData).some(v => v.value === '');
+      Object.values(validateData).some(v => v === '');
+
+
 
     const inputsItems = t =>
-      sortObj(data, 'displayOrder')
+      sortObj(network.config, 'displayOrder')
         .slice(1)
         .map(({ key, value: item }) => (
           <div key={key}>
@@ -313,20 +163,20 @@ class ConnectedNet extends React.PureComponent {
               </InputLabel>
               <Input
                 id="name-simple"
-                type={item.isPWD? "password": null}
+                type={item.isPWD ? 'password' : null}
                 placeholder={t('Common.isRequired')}
                 className={classes.input}
-                value={item.value}
+                value={filter(data[key], item.value)}
                 onClick={() => {
-                  this.props.keyboardInput({
+                  keyboardInput({
                     onSubmit: text => {
-                      const tempData = cloneDeep(this.state.data);
-                      tempData[key].value = text;
+                      const tempData = cloneDeep(data);
+                      tempData[key] = text;
                       this.setState({
                         data: tempData
                       });
                     },
-                    text: item.value,
+                    text: filter(data[key], item.value),
                     title: item.displayTitle,
                     label: item.displayTitle
                   });
@@ -335,7 +185,7 @@ class ConnectedNet extends React.PureComponent {
               />
             </ListItem>
             <li>
-              <Divider />
+              <Divider/>
             </li>
           </div>
         ));
@@ -349,7 +199,7 @@ class ConnectedNet extends React.PureComponent {
               classes={{
                 root: classes.loadModal
               }}
-              open={loading}
+              open={network.connecting}
               style={{ opacity: 0.7 }}
               TransitionComponent={this.Transition}
             >
@@ -358,7 +208,7 @@ class ConnectedNet extends React.PureComponent {
                 sizeUnit="px"
                 size={50}
                 color="#36D7B7"
-                loading={loading}
+                loading={network.connecting}
               />
             </Dialog>
             <section className={classes.section}>
@@ -380,12 +230,12 @@ class ConnectedNet extends React.PureComponent {
                         classes={{
                           select: classes.select
                         }}
-                        value={ssid}
+                        value={filter(data.ssid, network.config.ssid.value)}
                         onChange={e => this.handleChangeSSID(e)}
                         open={ssidSelectOpen}
                         onOpen={this.getSSIDs}
                         onClose={this.handleCloseSSID}
-                        renderValue={(v)=>v}
+                        renderValue={(v) => v}
                         inputProps={{
                           name: 'ssid',
                           id: 'ssid',
@@ -400,7 +250,7 @@ class ConnectedNet extends React.PureComponent {
                         >
                           {t('Configuration.network.SSID')}
                         </MenuItem>
-                        {ssids.map((item, idx) =>
+                        {network.ssidList.map((item, idx) =>
                           renderSSIDs(item, idx, classes)
                         )}
                       </Select>
@@ -413,7 +263,7 @@ class ConnectedNet extends React.PureComponent {
                       {/* /> */}
                     </ListItem>
                     <li>
-                      <Divider />
+                      <Divider/>
                     </li>
                   </div>
                   {inputsItems(t)}
@@ -424,7 +274,7 @@ class ConnectedNet extends React.PureComponent {
                   onClick={this.handleSubmit}
                   className={classes.button}
                 >
-                  <SaveIcon className={classes.leftIcon} />
+                  <SaveIcon className={classes.leftIcon}/>
                   {t('Common.Submit')}
                 </Button>
               </Paper>
