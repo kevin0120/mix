@@ -247,6 +247,10 @@ func XML2Curve(result *CVI3Result, cur_result *minio.ControllerCurve) {
 	blcs := result.PRC_SST.PAR.FAS.GRP.TIP.BLC
 
 	for _, blc := range blcs {
+		if blc.CUR.CNT == 0 {
+			continue
+		}
+
 		cur_ms := strings.Split(blc.CUR.SMP.CUR_M, " ")
 		//cur_result.CurveContent.CUR_M = make([]float64, blc.CUR.CNT)
 		for _, v := range cur_ms {
