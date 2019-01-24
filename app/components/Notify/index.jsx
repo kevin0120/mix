@@ -67,8 +67,14 @@ ConnectedNoty.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   message: PropTypes.string.isRequired,
   isShow: PropTypes.bool.isRequired,
-  variant: PropTypes.oneOf(['success', 'warning', 'error', 'info', 'danger','maintenance'])
-    .isRequired,
+  variant: PropTypes.oneOf([
+    'success',
+    'warning',
+    'error',
+    'info',
+    'danger',
+    'maintenance'
+  ]).isRequired,
   closeNotification: PropTypes.func.isRequired
 };
 

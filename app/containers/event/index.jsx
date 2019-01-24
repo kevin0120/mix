@@ -175,8 +175,11 @@ class Event extends React.Component {
           <ListItem>
             <ListItemText
               primary={`事件等级: ${
-                selectObj.level === 'info' ? '日常信息' :
-                selectObj.level === 'maintenance'? '维护请求': '报警事件'
+                selectObj.level === 'info'
+                  ? '日常信息'
+                  : selectObj.level === 'maintenance'
+                    ? '维护请求'
+                    : '报警事件'
               }`}
             />
           </ListItem>

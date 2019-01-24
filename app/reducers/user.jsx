@@ -20,7 +20,7 @@ export const defaultUsers = [
     name: 'dummy',
     avatar: defaultAvatarImg,
     uid: 10,
-    role:'admin'
+    role: 'admin'
   }
 ];
 
@@ -41,7 +41,7 @@ export default function users(state: Array = defaultUsers, action) {
       if (state.length === 1 && state[0].name === 'dummy') {
         return [{ uid, name, uuid, avatar: img }];
       }
-      return [...state, { uid, name, uuid, avatar: img ,role}];
+      return [...state, { uid, name, uuid, avatar: img, role }];
     }
     case USER.LOGOUT_SUCCESS: {
       if (action.data.length === 0) {

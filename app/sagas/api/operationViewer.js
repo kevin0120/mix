@@ -1,6 +1,5 @@
 import { defaultClient } from '../../common/utils';
 
-
 export function operationListApi(baseURL, hmiSn) {
   const fullUrl = `${baseURL}/mrp.routing.workcenter`;
 
@@ -26,4 +25,3 @@ export function operationDetailApi(baseURL, operationID) {
       throw e.toString();
     });
 }
-

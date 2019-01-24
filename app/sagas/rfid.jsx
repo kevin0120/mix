@@ -1,4 +1,12 @@
-import { call, take, put, select, fork, takeLatest, debounce } from 'redux-saga/effects';
+import {
+  call,
+  take,
+  put,
+  select,
+  fork,
+  takeLatest,
+  debounce
+} from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
 import { RFID } from '../actions/actionTypes';
 import { triggerOperation } from './operation';
@@ -37,7 +45,7 @@ function* initRFID() {
 
   const { connections, operationSettings } = state;
 
-  const {regExp} = operationSettings;
+  const { regExp } = operationSettings;
 
   if (connections.rfid === '') {
     return;
@@ -66,7 +74,7 @@ function* initRFID() {
 
   rfidChannel = yield call(createRfidChannel, client);
 
-  yield fork(watchRfidChannel,regExp);
+  yield fork(watchRfidChannel, regExp);
 }
 
 export function stopRFID() {
@@ -118,8 +126,7 @@ function createRfidChannel(rfidClient) {
 
 const getHealthz = state => state.healthCheckResults;
 
-
-function* RFIDHandler(data,reg) {
+function* RFIDHandler(data, reg) {
   try {
     const { type, payload } = data;
 
@@ -140,7 +147,12 @@ function* RFIDHandler(data,reg) {
           const dataValue = _.trim(code);
 
           if (!reg.test(dataValue)) {
-            yield put(setNewNotification('error', `RFID data can not match: ${dataValue}`));
+            yield put(
+              setNewNotification(
+                'error',
+                `RFID data can not match: ${dataValue}`
+              )
+            );
           }
           const targetValue = reg.exec(dataValue)[0];
           // yield put(setNewNotification('info', `new rfid value: ${targetValue}`));
@@ -168,7 +180,7 @@ function* RFIDHandler(data,reg) {
       default:
         break;
     }
-  }catch (err) {
+  } catch (err) {
     console.log(`rfid error msg:${err.message}`);
   }
 }
@@ -177,9 +189,8 @@ export function* watchRfidChannel(regExp) {
   const e = new RegExp(regExp, 'i'); // 正則表達式,大小寫不敏感
   while (client !== null) {
     try {
-      yield debounce(3000, rfidChannel,RFIDHandler,e); // RFID 因为频繁触发所以进行防抖动处理,默认3秒
-
-    }catch (err) {
+      yield debounce(3000, rfidChannel, RFIDHandler, e); // RFID 因为频繁触发所以进行防抖动处理,默认3秒
+    } catch (err) {
       console.error(`watchRfidChannel: ${err.message}`);
     }
   }

@@ -34,7 +34,7 @@ function* authorize(user, password) {
         name,
         uuid,
         avatar: image_small,
-        role:'admin'
+        role: 'admin'
       });
       yield put(push('/welcome'));
     }

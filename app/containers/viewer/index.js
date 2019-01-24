@@ -23,7 +23,6 @@ import {
   fetchOperationDetailStart
 } from '../../actions/operationViewer';
 
-
 class Viewer extends React.Component {
   constructor(props) {
     super(props);
@@ -36,9 +35,7 @@ class Viewer extends React.Component {
   componentDidMount(): void {
     const { operationList } = this.props;
     operationList();
-
   }
-
 
   handleChangeMenu = (index, operationID) => {
     const { operationDetail } = this.props;
@@ -55,32 +52,29 @@ class Viewer extends React.Component {
     const { currentMenuItem } = this.state;
     const menus = data.list.map((item, index) => {
       const selected = currentMenuItem === index;
-      return <MenuItem
-        selected={selected}
-        key={item.id}
-        className={classes.menuItem}
-        component={() => (
-          <Card
-            onClick={() => this.handleChangeMenu(index, item.id)}
-            className={
-              selected
-                ? classes.menuItemSelected
-                : classes.menuItem
-            }
-          >
-            <CardActionArea
-              classes={{
-                root:
-                  selected
+      return (
+        <MenuItem
+          selected={selected}
+          key={item.id}
+          className={classes.menuItem}
+          component={() => (
+            <Card
+              onClick={() => this.handleChangeMenu(index, item.id)}
+              className={selected ? classes.menuItemSelected : classes.menuItem}
+            >
+              <CardActionArea
+                classes={{
+                  root: selected
                     ? classes.cardActionAreaSelected
                     : classes.cardActionArea
-              }}
-            >
-              <span className={classes.itemText}>{t(item.name)}</span>
-            </CardActionArea>
-          </Card>
-        )}
-      />;
+                }}
+              >
+                <span className={classes.itemText}>{t(item.name)}</span>
+              </CardActionArea>
+            </Card>
+          )}
+        />
+      );
     });
     return <div>{menus}</div>;
   };
@@ -88,16 +82,16 @@ class Viewer extends React.Component {
   render() {
     const { classes, data, odooUrl } = this.props;
     const { currentMenuItem, currentTab } = this.state;
-    const odooHost=new URL(odooUrl.value).host;
+    const odooHost = new URL(odooUrl.value).host;
     return (
       <I18n ns="translations">
         {t => (
           <div className={classes.root}>
-            <AppBarBack/>
+            <AppBarBack />
             <LeftMenuWithAvatar>
               <MenuList>{this.genMenuList(t)}</MenuList>
             </LeftMenuWithAvatar>
-            {currentMenuItem !== -1 ?
+            {currentMenuItem !== -1 ? (
               <div className={classes.content}>
                 <Tabs
                   value={currentTab}
@@ -107,25 +101,27 @@ class Viewer extends React.Component {
                     flex: 1
                   }}
                 >
-                  <Tab label="Image"/>
-                  <Tab label="File"/>
+                  <Tab label="Image" />
+                  <Tab label="File" />
                 </Tabs>
-                {currentTab === 0 &&
-                <img
-                  alt="operation image"
-                  src={data.detail.img}
-                  style={{
-                    display: 'flex',
-                    flex: 1,
-                    maxHeight: '100%',
-                    maxWidth: '100%'
-                  }}
-                />}
-                {
-                  currentTab === 1 &&
+                {currentTab === 0 && (
+                  <img
+                    alt="operation image"
+                    src={data.detail.img}
+                    style={{
+                      display: 'flex',
+                      flex: 1,
+                      maxHeight: '100%',
+                      maxWidth: '100%'
+                    }}
+                  />
+                )}
+                {currentTab === 1 && (
                   <iframe
                     title="worksheet"
-                    src={`http://${odooHost}/web/static/lib/pdfjs/web/viewer.html?file=%2Fapi%2Fv1%2Fworksheet%3Fmodel%3Dmrp.routing.workcenter%26field%3Dworksheet%26id%3D${data.detail.id}`}
+                    src={`http://${odooHost}/web/static/lib/pdfjs/web/viewer.html?file=%2Fapi%2Fv1%2Fworksheet%3Fmodel%3Dmrp.routing.workcenter%26field%3Dworksheet%26id%3D${
+                      data.detail.id
+                    }`}
                     // file={pdf}
                     // src={`/home/cosine/文档/001.课程/大四上/储能技术/储能技术的核心问题.pdf`}
                     style={{
@@ -134,10 +130,9 @@ class Viewer extends React.Component {
                     }}
                     // plugins
                   />
-                }
+                )}
               </div>
-              : null
-            }
+            ) : null}
           </div>
         )}
       </I18n>

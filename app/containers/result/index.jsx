@@ -85,7 +85,8 @@ function requestData(masterpcUrl, hmiSN) {
   return defaultClient.get(url, {
     params: {
       hmi_sn: hmiSN,
-      filters: 'vin,job_id,pset_id,batch,torque,angle,spent,timestamp,vehicle_type,result',
+      filters:
+        'vin,job_id,pset_id,batch,torque,angle,spent,timestamp,vehicle_type,result',
       limit: 500
     }
   });
@@ -416,7 +417,7 @@ Result.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   masterpcUrl: PropTypes.string.isRequired,
   hmiSn: PropTypes.string.isRequired,
-  controllerMode: PropTypes.string.isRequired,
+  controllerMode: PropTypes.string.isRequired
 };
 
 const ConnResult = connect(

@@ -28,7 +28,6 @@ import { cardTitle } from '../../common/jss/material-react-pro';
 import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
 import { NewCar } from '../../actions/scannerDevice';
 
-
 // @material-ui/core components
 // @material-ui/icons
 // core components
@@ -111,7 +110,7 @@ class WorkOrder extends React.Component {
       data: [],
       selectObj: null,
       confirmInfo: null,
-      alert: 'none'  // '车辆详情',''
+      alert: 'none' // '车辆详情',''
     };
     this.fetchData = this.fetchData.bind(this);
   }
@@ -143,12 +142,12 @@ class WorkOrder extends React.Component {
                     justIcon
                     round
                     simple
-                    onClick={(e) => {
+                    onClick={e => {
                       e.preventDefault();
                       e.stopPropagation();
                       const obj = this.state.data.find(o => o.id === key);
                       this.setState({
-                        alert:'车辆详情',
+                        alert: '车辆详情',
                         selectObj: obj
                       });
                     }}
@@ -159,7 +158,7 @@ class WorkOrder extends React.Component {
                     color="warning"
                     className="edit"
                   >
-                    <Dvr/>
+                    <Dvr />
                   </Button>{' '}
                 </div>
               )
@@ -174,13 +173,13 @@ class WorkOrder extends React.Component {
 
   handleClose = () => {
     this.setState({
-      alert:'none',
+      alert: 'none'
     });
   };
 
-  handleRowClick = (rowInfo) => {
+  handleRowClick = rowInfo => {
     this.setState({
-      alert:'确认选择',
+      alert: '确认选择',
       confirmInfo: rowInfo.original
     });
   };
@@ -192,68 +191,70 @@ class WorkOrder extends React.Component {
     dispatchNewCar(confirmInfo.long_pin);
   };
 
-  Msg = (selectObj) => selectObj ? (
-    <div>
-      <List>
-        <ListItem>
-          <ListItemText primary={`车序: ${selectObj.lnr}`}/>
-        </ListItem>
-        <Divider inset component="li"/>
-        <ListItem>
-          <ListItemText primary={`VIN:   ${selectObj.vin}`}/>
-        </ListItem>
-        <Divider inset component="li"/>
-        <ListItem>
-          <ListItemText primary={`车型:   ${selectObj.model}`}/>
-        </ListItem>
-        <li>
-          <Divider inset/>
-        </li>
-        <ListItem>
-          <ListItemText primary={`KNR: ${selectObj.knr}`}/>
-        </ListItem>
-        <Divider inset component="li"/>
-        <ListItem>
-          <ListItemText primary={`LongPIN:   ${selectObj.long_pin}`}/>
-        </ListItem>
-      </List>
-    </div>
-  ) : (
-    ' '
-  );
+  Msg = selectObj =>
+    selectObj ? (
+      <div>
+        <List>
+          <ListItem>
+            <ListItemText primary={`车序: ${selectObj.lnr}`} />
+          </ListItem>
+          <Divider inset component="li" />
+          <ListItem>
+            <ListItemText primary={`VIN:   ${selectObj.vin}`} />
+          </ListItem>
+          <Divider inset component="li" />
+          <ListItem>
+            <ListItemText primary={`车型:   ${selectObj.model}`} />
+          </ListItem>
+          <li>
+            <Divider inset />
+          </li>
+          <ListItem>
+            <ListItemText primary={`KNR: ${selectObj.knr}`} />
+          </ListItem>
+          <Divider inset component="li" />
+          <ListItem>
+            <ListItemText primary={`LongPIN:   ${selectObj.long_pin}`} />
+          </ListItem>
+        </List>
+      </div>
+    ) : (
+      ' '
+    );
 
-  ConfirmInfo = (info) => info ? (
-    <div>
-      <List>
-        <ListItem>
-          <ListItemText primary={`VIN:   ${info.vin}`}/>
-        </ListItem>
-        <Divider inset component="li"/>
-        <ListItem>
-          <ListItemText primary={`车型:   ${info.model}`}/>
-        </ListItem>
-        <li>
-          <Divider inset/>
-        </li>
-        <ListItem>
-          <ListItemText primary={`KNR: ${info.knr}`}/>
-        </ListItem>
-        <Divider inset component="li"/>
-        <ListItem>
-          <ListItemText primary={`车序: ${info.lnr}`}/>
-        </ListItem>
-        <Divider inset component="li"/>
-        <ListItem>
-          <ListItemText primary={`LongPIN:   ${info.long_pin}`}/>
-        </ListItem>
-      </List>
-    </div>
-  ) : (
-    ' '
-  );
+  ConfirmInfo = info =>
+    info ? (
+      <div>
+        <List>
+          <ListItem>
+            <ListItemText primary={`VIN:   ${info.vin}`} />
+          </ListItem>
+          <Divider inset component="li" />
+          <ListItem>
+            <ListItemText primary={`车型:   ${info.model}`} />
+          </ListItem>
+          <li>
+            <Divider inset />
+          </li>
+          <ListItem>
+            <ListItemText primary={`KNR: ${info.knr}`} />
+          </ListItem>
+          <Divider inset component="li" />
+          <ListItem>
+            <ListItemText primary={`车序: ${info.lnr}`} />
+          </ListItem>
+          <Divider inset component="li" />
+          <ListItem>
+            <ListItemText primary={`LongPIN:   ${info.long_pin}`} />
+          </ListItem>
+        </List>
+      </div>
+    ) : (
+      ' '
+    );
 
-  Alert = (type,t) => {
-    if(type==='none'){
+  Alert = (type, t) => {
+    if (type === 'none') {
       return null;
     }
     const { classes } = this.props;
@@ -295,10 +296,7 @@ class WorkOrder extends React.Component {
         return null;
     }
     return (
-      <SweetAlert
-        {...AlertSettings}
-        style={styles.alertPosition}
-      >
+      <SweetAlert {...AlertSettings} style={styles.alertPosition}>
         {content}
       </SweetAlert>
     );
@@ -317,7 +315,7 @@ class WorkOrder extends React.Component {
                 <Card>
                   <CardHeader color="info" icon>
                     <CardIcon color="info">
-                      <Assignment/>
+                      <Assignment />
                     </CardIcon>
                     <h4 className={classes.cardIconTitle}>
                       {t('main.orders')}
@@ -457,7 +455,7 @@ class WorkOrder extends React.Component {
                 </Card>
               </GridItem>
             </GridContainer>
-            {this.Alert(alert,t)}
+            {this.Alert(alert, t)}
           </div>
         )}
       </I18n>

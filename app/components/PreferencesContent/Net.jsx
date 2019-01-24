@@ -260,27 +260,30 @@ class ConnectedNet extends React.PureComponent {
       }
       if (stdout) {
         const result = stdout.toString();
-        const ssid=/802-11-wireless.ssid:(.+)\n/.exec(result)[1]||'';
-        const password=/802-11-wireless-security.psk:(.+)\n/.exec(result)[1]||'';
-        const addresses=/ipv4.addresses:(.+)\/(.+)\n/.exec(result)||'';
-        const address=addresses[1]||'';
-        const gateway=/ipv4.gateway:(.+)\n/.exec(result)[1]||'';
-        const mask=parseInt(addresses[2],10)||'';
-        let maskStr='';
-        if(mask){
-          const B2D=(B)=>parseInt(B,2);
-          const maskB=`${Array(1+mask).join(1)}${
-            Array(32-mask+1).join(0)}`;
-          maskStr=`${B2D(maskB.slice(0,8))}.${B2D(maskB.slice(8,16))}.${
-            B2D(maskB.slice(16,24))}.${B2D(maskB.slice(24,32))}`;
+        const ssid = /802-11-wireless.ssid:(.+)\n/.exec(result)[1] || '';
+        const password =
+          /802-11-wireless-security.psk:(.+)\n/.exec(result)[1] || '';
+        const addresses = /ipv4.addresses:(.+)\/(.+)\n/.exec(result) || '';
+        const address = addresses[1] || '';
+        const gateway = /ipv4.gateway:(.+)\n/.exec(result)[1] || '';
+        const mask = parseInt(addresses[2], 10) || '';
+        let maskStr = '';
+        if (mask) {
+          const B2D = B => parseInt(B, 2);
+          const maskB = `${Array(1 + mask).join(1)}${Array(32 - mask + 1).join(
+            0
+          )}`;
+          maskStr = `${B2D(maskB.slice(0, 8))}.${B2D(maskB.slice(8, 16))}.${B2D(
+            maskB.slice(16, 24)
+          )}.${B2D(maskB.slice(24, 32))}`;
         }
 
         tempData.ssid = ssid;
-        tempData.data.gateway.value=gateway;
-        tempData.data.ipAddress.value=address;
-        tempData.data.netmask.value=maskStr;
-        tempData.data.password.value=password;
-        tempData.data.ssid.value=ssid;
+        tempData.data.gateway.value = gateway;
+        tempData.data.ipAddress.value = address;
+        tempData.data.netmask.value = maskStr;
+        tempData.data.password.value = password;
+        tempData.data.ssid.value = ssid;
 
         this.setState({
           ...tempData
@@ -313,7 +316,7 @@ class ConnectedNet extends React.PureComponent {
               </InputLabel>
               <Input
                 id="name-simple"
-                type={item.isPWD? "password": null}
+                type={item.isPWD ? 'password' : null}
                 placeholder={t('Common.isRequired')}
                 className={classes.input}
                 value={item.value}
@@ -385,7 +388,7 @@ class ConnectedNet extends React.PureComponent {
                         open={ssidSelectOpen}
                         onOpen={this.getSSIDs}
                         onClose={this.handleCloseSSID}
-                        renderValue={(v)=>v}
+                        renderValue={v => v}
                         inputProps={{
                           name: 'ssid',
                           id: 'ssid',

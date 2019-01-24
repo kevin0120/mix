@@ -47,5 +47,4 @@ export default function* rootSaga() {
   } catch (e) {
     console.log('rootSaga:', e);
   }
-
 }

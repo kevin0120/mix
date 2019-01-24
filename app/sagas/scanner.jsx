@@ -9,7 +9,6 @@ import { isCarID } from '../common/utils';
 
 const lodash = require('lodash');
 
-
 function* scannerHandler(action) {
   try {
     const { data, source } = action;
@@ -20,11 +19,11 @@ function* scannerHandler(action) {
         yield call(triggerOperation, null, data, null, source);
       }
     }
-  }catch (e) {
+  } catch (e) {
     console.log(e.message);
   }
 }
 
 export function* watchScanner() {
-  yield takeLatest(SCANNER.READ_NEW_DATA,scannerHandler);
+  yield takeLatest(SCANNER.READ_NEW_DATA, scannerHandler);
 }

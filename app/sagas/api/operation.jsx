@@ -123,7 +123,17 @@ export function controllerMode(url, mode, controllerSN) {
 }
 
 // pset
-export function pset(url, controllerSN, gunSN, resultID, count, userID, pset, workorderID, groupSeq) {
+export function pset(
+  url,
+  controllerSN,
+  gunSN,
+  resultID,
+  count,
+  userID,
+  pset,
+  workorderID,
+  groupSeq
+) {
   const fullUrl = `${url}/rush/v1/psets`;
   return defaultClient
     .put(fullUrl, {
@@ -185,15 +195,15 @@ export function ak2Api(
   _pset,
   groutSequence,
   count
-){
+) {
   const fullUrl = `${baseUrl}/rush/v1/ak2`;
   return defaultClient
     .post(fullUrl, {
-      controller_sn:controllerSN,
-      gun_sn:gunSN,
+      controller_sn: controllerSN,
+      gun_sn: gunSN,
       workorder_id: workorderID,
-      pset:_pset,
-      group_sequence:groutSequence,
+      pset: _pset,
+      group_sequence: groutSequence,
       count
     })
     .then(resp => resp)

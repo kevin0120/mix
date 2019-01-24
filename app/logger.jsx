@@ -1,10 +1,9 @@
 // const { Logger, transports } = require('winston');
-const winston= require('winston');
+const winston = require('winston');
 const fs = require('fs');
 const fse = require('fs-extra');
 const path = require('path');
 const os = require('os');
-
 
 export const getAppDirectory = () => {
   switch (process.platform) {
@@ -59,14 +58,14 @@ export function CreateDailyLogger() {
         // }),
       ],
       exitOnError: false,
-      levels:{ error: 0, warn: 1, maintenance: 2, info: 3, }
+      levels: { error: 0, warn: 1, maintenance: 2, info: 3 }
     });
     winston.addColors({
-      error:'#ffa21a',
-      warn:'#ffa21a',
-      info:'#00d3ee',
-      maintenance:'#ffa21a',
-      query:'#00d3ee'
+      error: '#ffa21a',
+      warn: '#ffa21a',
+      info: '#00d3ee',
+      maintenance: '#ffa21a',
+      query: '#00d3ee'
     });
   }
 }

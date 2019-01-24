@@ -205,7 +205,9 @@ export const defaultConfigs = {
     manualFreestyle: true,
 
     // 启用ak2
-    enableAk2:true
+    enableAk2: true,
+
+    regExp: 'C6\\d{12}' // rfid正則表達式,SVW
   },
   cvinetweb: {
     url: ''

@@ -4,15 +4,20 @@ import {
   fetchWorkorder,
   jobManual,
   pset,
-  fetchNextWorkOrder, ak2Api
+  fetchNextWorkOrder,
+  ak2Api
 } from './api/operation';
 import { OPERATION, RUSH } from '../actions/actionTypes';
 import { openShutdown } from '../actions/shutDownDiag';
-import { OPERATION_RESULT, OPERATION_SOURCE, OPERATION_STATUS } from '../reducers/operations';
+import {
+  OPERATION_RESULT,
+  OPERATION_SOURCE,
+  OPERATION_STATUS
+} from '../reducers/operations';
 import { addNewStory, clearStories, STORY_TYPE } from './timeline';
 import { toolEnable, toolDisable } from '../actions/tools';
 import { setResultDiagShow } from '../actions/resultDiag';
-import {switch2Ready} from '../actions/operation';
+import { switch2Ready } from '../actions/operation';
 import {
   fetchOngoingOperationOK,
   cleanOngoingOperation
@@ -61,10 +66,9 @@ export function* watchOperation() {
           break;
       }
     }
-  }catch (e) {
+  } catch (e) {
     console.error(`watchOperation: ${e.message}`);
   }
-
 }
 
 function* getNextWorkOrderandShow() {
@@ -111,7 +115,10 @@ export function* triggerOperation(carID, carType, job, source) {
       });
     }
 
-    if (source === OPERATION_SOURCE.SCANNER && state.workMode.workMode === 'manual') {
+    if (
+      source === OPERATION_SOURCE.SCANNER &&
+      state.workMode.workMode === 'manual'
+    ) {
       // 手动模式下,扫码枪接收到讯息,不获取作业以及切换工作状态
       return;
     }
@@ -141,9 +148,7 @@ export function* triggerOperation(carID, carType, job, source) {
       }
     }
 
-    if (
-      triggerFlagNum === triggers.length
-    ) {
+    if (triggerFlagNum === triggers.length) {
       yield call(getOperation, job);
     }
   } catch (e) {
@@ -308,11 +313,10 @@ export function* startOperation(data) {
         // yield put({ type: OPERATION.RESET });
       }
     } else {
-      const rt = yield call(doingOperation,controllerMode);
+      const rt = yield call(doingOperation, controllerMode);
       if (rt) {
         yield put({ type: OPERATION.STARTED });
       }
-
     }
   } catch (e) {
     console.error(`startOperation ${e.message}`);
@@ -326,7 +330,12 @@ export function* doingOperation(controllerMode) {
     try {
       const state = yield select();
       const { masterpc } = state.connections;
-      const { activeResultIndex, failCount, results, workorderID } = state.operations;
+      const {
+        activeResultIndex,
+        failCount,
+        results,
+        workorderID
+      } = state.operations;
       const userID = 1;
       yield call(
         pset,
@@ -343,9 +352,7 @@ export function* doingOperation(controllerMode) {
     } catch (e) {
       // 程序号设置失败
       yield put({ type: OPERATION.PROGRAMME.SET_FAIL });
-      yield put(
-        setNewNotification('error', 'pset failed')
-      );
+      yield put(setNewNotification('error', 'pset failed'));
       return false;
     }
   }
@@ -358,7 +365,7 @@ export function* continueOperation() {
   try {
     const state = yield select();
     const { operations } = state;
-    const {controllerMode} = state.workMode;
+    const { controllerMode } = state.workMode;
 
     // if (state.operations.operationStatus === OPERATION_STATUS.FAIL) {
     //
@@ -368,12 +375,11 @@ export function* continueOperation() {
       yield put(switch2Ready());
     } else {
       yield put({ type: OPERATION.CONTINUE });
-      yield call(doingOperation,controllerMode);
+      yield call(doingOperation, controllerMode);
     }
-  }catch (e) {
+  } catch (e) {
     console.log(`continueOperation fail: ${e.message}`);
   }
-
 }
 
 // 监听结果
@@ -383,10 +389,9 @@ export function* watchResults() {
       const { data } = yield take(RUSH.NEW_RESULTS);
       yield call(handleResults, data);
     }
-  }catch (e) {
-    console.log(`watchResults: ${e.message}`);
+  } catch (e) {
+    console.error(`watchResults: ${e.message}`);
   }
-
 }
 
 // 处理结果
@@ -404,8 +409,8 @@ export function* handleResults(data) {
     const batch = `${(
       operations.activeResultIndex + 1
     ).toString()}/${operations.results[
-    operations.results.length - 1
-      ].group_sequence.toString()}`;
+      operations.results.length - 1
+    ].group_sequence.toString()}`;
 
     for (let i = 0; i < data.length; i += 1) {
       if (data[i].result === OPERATION_RESULT.NOK) {
@@ -462,23 +467,18 @@ export function* handleResults(data) {
 
     yield put({ type: rType, data });
     if (continueDoing) {
-      yield call(doingOperation,controllerMode);
+      yield call(doingOperation, controllerMode);
     }
   } catch (e) {
-    console.log(e);
+    console.error(`handleResults: ${e.message}`);
   }
-
 }
-
 
 export function* ak2() {
   try {
-    const {
-      workorderID,
-      results,
-      activeResultIndex,
-      failCount
-    } = yield select(state => state.operations);
+    const { workorderID, results, activeResultIndex, failCount } = yield select(
+      state => state.operations
+    );
     const { masterpc } = yield select(state => state.connections);
     yield call(
       ak2Api,
@@ -491,6 +491,6 @@ export function* ak2() {
       failCount + 1
     );
   } catch (e) {
-    console.log(e);
+    console.error(`ak2: ${e.message}`);
   }
 }

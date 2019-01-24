@@ -27,7 +27,7 @@ import withLayout from '../../components/Layout/layout';
 import ShutdownDiag from '../../components/ShutDownDiag';
 import { routeConfigs } from '../../routes/index';
 import styles from './styles';
-import { push } from "connected-react-router";
+import { push } from 'connected-react-router';
 import { setNewNotification } from '../../actions/notification';
 const lodash = require('lodash');
 
@@ -39,7 +39,7 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = {
   doPush: push,
-  notification:setNewNotification,
+  notification: setNewNotification,
   OpenShutdown
 };
 
@@ -65,7 +65,7 @@ class ConnectedWelcome extends React.Component {
   };
 
   render() {
-    const { classes, authEnable,doPush,notification,usersInfo } = this.props;
+    const { classes, authEnable, doPush, notification, usersInfo } = this.props;
     const fabRightClassName = classNames(classes.fabRight);
     const fabLeftClassName = classNames(classes.fabLeft);
     const { role } = usersInfo[0];
@@ -88,7 +88,7 @@ class ConnectedWelcome extends React.Component {
                         if (route.roles && lodash.includes(route.roles, role)) {
                           doPush(route.url);
                         } else {
-                          notification('error','没有访问权限');
+                          notification('error', '没有访问权限');
                         }
                       }}
                       className={classes.cardActionArea}
@@ -102,7 +102,9 @@ class ConnectedWelcome extends React.Component {
                           <route.icon className={classes.icon} />
                         </div>
                         <h1 className={classes.title}>{t(route.title)}</h1>
-                        <p className={classes.subTitle}>{t(route.title,{lng:'en'})}</p>
+                        <p className={classes.subTitle}>
+                          {t(route.title, { lng: 'en' })}
+                        </p>
                       </CardContent>
                     </CardActionArea>
                   </Card>
