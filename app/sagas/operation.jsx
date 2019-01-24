@@ -12,6 +12,7 @@ import { OPERATION_RESULT, OPERATION_SOURCE, OPERATION_STATUS } from '../reducer
 import { addNewStory, clearStories, STORY_TYPE } from './timeline';
 import { toolEnable, toolDisable } from '../actions/tools';
 import { setResultDiagShow } from '../actions/resultDiag';
+import {switch2Ready} from '../actions/operation';
 import {
   fetchOngoingOperationOK,
   cleanOngoingOperation
@@ -23,42 +24,47 @@ import { setNewNotification } from '../actions/notification';
 
 // 监听作业
 export function* watchOperation() {
-  while (true) {
-    const action = yield take([
-      OPERATION.STARTED,
-      OPERATION.VERIFIED,
-      OPERATION.FINISHED,
-      OPERATION.RESET
-    ]);
-    const state = yield select();
-    const { workMode } = state;
+  try {
+    while (true) {
+      const action = yield take([
+        OPERATION.STARTED,
+        OPERATION.VERIFIED,
+        OPERATION.FINISHED,
+        OPERATION.RESET
+      ]);
+      const state = yield select();
+      const { workMode } = state;
 
-    switch (action.type) {
-      case OPERATION.VERIFIED:
-        yield call(startOperation, action.data);
-        break;
-      case OPERATION.STARTED:
-        yield put(setResultDiagShow(false));
-        yield put(cleanOngoingOperation());
-        break;
+      switch (action.type) {
+        case OPERATION.VERIFIED:
+          yield call(startOperation, action.data);
+          break;
+        case OPERATION.STARTED:
+          yield put(setResultDiagShow(false));
+          yield put(cleanOngoingOperation());
+          break;
 
-      case OPERATION.FINISHED:
-        if (workMode.controllerMode === 'job') {
-          // 工具禁用
-          yield put(toolDisable());
-        }
-        if (state.setting.operationSettings.opMode === 'order') {
-          yield call(getNextWorkOrderandShow);
-        }
-        yield put(setResultDiagShow(true));
-        break;
-      case OPERATION.RESET:
-        yield put({ type: OPERATION.FINISHED });
-        break;
-      default:
-        break;
+        case OPERATION.FINISHED:
+          if (workMode.controllerMode === 'job') {
+            // 工具禁用
+            yield put(toolDisable());
+          }
+          if (state.setting.operationSettings.opMode === 'order') {
+            yield call(getNextWorkOrderandShow);
+          }
+          yield put(setResultDiagShow(true));
+          break;
+        case OPERATION.RESET:
+          yield put(switch2Ready());
+          break;
+        default:
+          break;
+      }
     }
+  }catch (e) {
+    console.error(`watchOperation: ${e.message}`);
   }
+
 }
 
 function* getNextWorkOrderandShow() {
@@ -72,7 +78,7 @@ function* getNextWorkOrderandShow() {
       yield put(fetchOngoingOperationOK(resp.data));
     }
   } catch (e) {
-    console.log(e);
+    console.error(`getNextWorkOrderandShow ${e.message}`);
   }
 }
 
@@ -208,6 +214,7 @@ export function* getOperation(job) {
             }
           } else {
             Error(`获取工单失败:${e.message}`);
+            yield put(setNewNotification('error', `获取工单失败:${e.message}`));
             yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
             yield call(clearStories);
           }
@@ -222,14 +229,15 @@ export function* getOperation(job) {
       yield call(startOperation, resp.data);
     } else {
       // 定位作业失败
-      Error('获取工单失败');
+      Error('获取作业失败');
+      yield put(setNewNotification('error', '获取工单失败'));
       yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
       yield call(clearStories);
       // yield put({ type: OPERATION.RESET });
     }
   } catch (e) {
-    console.log(e);
-    Error(`获取工单失败:${e.message}`);
+    Error(`获取作业失败:${e.message}`);
+    yield put(setNewNotification('error', `获取作业失败:${e.message}`));
     yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
     yield call(clearStories);
   }
@@ -240,15 +248,13 @@ export function* startOperation(data) {
   try {
     yield put(setResultDiagShow(false));
 
-    let state = yield select();
-
     yield put({
       type: OPERATION.OPERATION.FETCH_OK,
       mode: state.setting.operationSettings.opMode,
       data
     });
 
-    state = yield select();
+    const state = yield select();
 
     const { controllerMode } = state.workMode;
 
@@ -302,30 +308,27 @@ export function* startOperation(data) {
         // yield put({ type: OPERATION.RESET });
       }
     } else {
-      const rt = yield call(doingOperation);
+      const rt = yield call(doingOperation,controllerMode);
       if (rt) {
         yield put({ type: OPERATION.STARTED });
       }
 
     }
   } catch (e) {
+    console.error(`startOperation ${e.message}`);
   }
 }
 
 // 处理作业过程
-export function* doingOperation() {
-  const state = yield select();
-  const { controllerMode } = state.workMode;
-
+export function* doingOperation(controllerMode) {
   if (controllerMode === 'pset') {
     // pset模式
-
-    const { masterpc } = state.connections;
-    const { activeResultIndex, failCount, results, workorderID } = state.operations;
-    const userID = 1;
-
     try {
-      const resp = yield call(
+      const state = yield select();
+      const { masterpc } = state.connections;
+      const { activeResultIndex, failCount, results, workorderID } = state.operations;
+      const userID = 1;
+      yield call(
         pset,
         masterpc,
         results[activeResultIndex].controller_sn,
@@ -352,27 +355,38 @@ export function* doingOperation() {
 
 // 复位继续作业
 export function* continueOperation() {
-  const state = yield select();
-  const { operations } = state;
+  try {
+    const state = yield select();
+    const { operations } = state;
+    const {controllerMode} = state.workMode;
 
-  // if (state.operations.operationStatus === OPERATION_STATUS.FAIL) {
-  //
-  // }
+    // if (state.operations.operationStatus === OPERATION_STATUS.FAIL) {
+    //
+    // }
 
-  if (operations.activeResultIndex >= operations.results.length - 1) {
-    yield put({ type: OPERATION.FINISHED });
-  } else {
-    yield put({ type: OPERATION.CONTINUE });
-    yield call(doingOperation);
+    if (operations.activeResultIndex >= operations.results.length - 1) {
+      yield put(switch2Ready());
+    } else {
+      yield put({ type: OPERATION.CONTINUE });
+      yield call(doingOperation,controllerMode);
+    }
+  }catch (e) {
+    console.log(`continueOperation fail: ${e.message}`);
   }
+
 }
 
 // 监听结果
 export function* watchResults() {
-  while (true) {
-    const { data } = yield take(RUSH.NEW_RESULTS);
-    yield call(handleResults, data);
+  try {
+    while (true) {
+      const { data } = yield take(RUSH.NEW_RESULTS);
+      yield call(handleResults, data);
+    }
+  }catch (e) {
+    console.log(`watchResults: ${e.message}`);
   }
+
 }
 
 // 处理结果
@@ -381,6 +395,8 @@ export function* handleResults(data) {
     const state = yield select();
 
     const { operations } = state;
+
+    const { controllerMode } = state.workMode;
 
     let hasFail = false;
     let storyType = STORY_TYPE.PASS;
@@ -446,7 +462,7 @@ export function* handleResults(data) {
 
     yield put({ type: rType, data });
     if (continueDoing) {
-      yield call(doingOperation);
+      yield call(doingOperation,controllerMode);
     }
   } catch (e) {
     console.log(e);
@@ -463,16 +479,16 @@ export function* ak2() {
       activeResultIndex,
       failCount
     } = yield select(state => state.operations);
-    const { odooUrl: { value: baseUrl } } = yield select(state => state.setting.page.odooConnection);
-    const resp = yield call(
+    const { masterpc } = yield select(state => state.connections);
+    yield call(
       ak2Api,
-      baseUrl,
+      masterpc,
       results[activeResultIndex].controller_sn,
       results[activeResultIndex].gun_sn,
       workorderID,
       results[activeResultIndex].pset,
       results[activeResultIndex].group_sequence,
-      failCount
+      failCount + 1
     );
   } catch (e) {
     console.log(e);

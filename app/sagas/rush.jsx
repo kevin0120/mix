@@ -18,6 +18,7 @@ import { OPERATION_SOURCE } from '../reducers/operations';
 import { IO_FUNCTION } from '../reducers/io';
 import { setHealthzCheck } from '../actions/healthCheck';
 import { setNewNotification } from '../actions/notification';
+import {switch2Ready} from '../actions/operation';
 
 let task = null;
 let ws = null;
@@ -159,7 +160,7 @@ export function* watchRushChannel(hmiSN) {
             case 'job':
               if (state.workMode.workMode === 'manual' && json.job_id > 0) {
                 if (state.setting.operationSettings.manualFreestyle) {
-                  yield put({ type: OPERATION.FINISHED });
+                  yield put(switch2Ready());
                 }
 
                 const { carID, carType } = state.operations;

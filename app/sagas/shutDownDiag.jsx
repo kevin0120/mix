@@ -56,7 +56,7 @@ function* confirmDiag(dType, data) {
         const op = yield select(getOperations);
         const { carID } = op;
         const state = yield select();
-        const enableAk2 = state.setting.operationSettings.enableAk2;
+        const { enableAk2 } = state.setting.operationSettings;
         if (enableAk2) {
           yield call(ak2);
         }

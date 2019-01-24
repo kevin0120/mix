@@ -196,6 +196,10 @@ class WorkOrder extends React.Component {
     <div>
       <List>
         <ListItem>
+          <ListItemText primary={`车序: ${selectObj.lnr}`}/>
+        </ListItem>
+        <Divider inset component="li"/>
+        <ListItem>
           <ListItemText primary={`VIN:   ${selectObj.vin}`}/>
         </ListItem>
         <Divider inset component="li"/>
@@ -207,10 +211,6 @@ class WorkOrder extends React.Component {
         </li>
         <ListItem>
           <ListItemText primary={`KNR: ${selectObj.knr}`}/>
-        </ListItem>
-        <Divider inset component="li"/>
-        <ListItem>
-          <ListItemText primary={`LNR: ${selectObj.lnr}`}/>
         </ListItem>
         <Divider inset component="li"/>
         <ListItem>
@@ -240,7 +240,7 @@ class WorkOrder extends React.Component {
         </ListItem>
         <Divider inset component="li"/>
         <ListItem>
-          <ListItemText primary={`LNR: ${info.lnr}`}/>
+          <ListItemText primary={`车序: ${info.lnr}`}/>
         </ListItem>
         <Divider inset component="li"/>
         <ListItem>
@@ -347,6 +347,12 @@ class WorkOrder extends React.Component {
                       filterable
                       columns={[
                         {
+                          Header: '车序',
+                          accessor: 'lnr',
+                          sortable: true,
+                          filterable: false
+                        },
+                        {
                           Header: 'VIN',
                           accessor: 'vin',
                           filterMethod: (filter, row) => {
@@ -416,12 +422,6 @@ class WorkOrder extends React.Component {
                         {
                           Header: 'KNR',
                           accessor: 'knr',
-                          sortable: false,
-                          filterable: false
-                        },
-                        {
-                          Header: 'LNR',
-                          accessor: 'lnr',
                           sortable: false,
                           filterable: false
                         },

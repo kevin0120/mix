@@ -37,7 +37,7 @@ const defaultOperations = {
   carID: '',
   carType: '',
   activeResultIndex: 0,
-  failCount: 0,
+  failCount: 0, // 失敗的次數
   jobID: 0,
   maxOpTimes: 0,
   workSheet: null,
@@ -136,6 +136,7 @@ function newOperation(state, mode, data) {
       workSheet: data.img,
       productID: data.product_id,
       workcenterID: data.workcenter_id,
+      activeResultIndex: 0,
       results: data.points.sort((a,b) => a.group_sequence - b.group_sequence),
     };
   }
