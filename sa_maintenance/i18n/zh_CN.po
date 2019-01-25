@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0+e-20171123\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-25 05:01+0000\n"
-"PO-Revision-Date: 2018-12-25 05:01+0000\n"
+"POT-Creation-Date: 2019-01-25 07:48+0000\n"
+"PO-Revision-Date: 2019-01-25 07:48+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,9 +16,70 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: sa_maintenance
+#: model:mail.template,subject:sa_maintenance.new_maintenance_request_email_template
+msgid "${object.display_name}"
+msgstr "${object.display_name}"
+
+#. module: sa_maintenance
+#: model:mail.template,body_html:sa_maintenance.new_maintenance_request_email_template
+msgid "<?xml version=\"1.0\"?>\n"
+"<div style=\"max-width:600px; height:auto; margin-left:30px;\">\n"
+"            <div style=\"margin-left:30px;align=center;\">\n"
+"                This is an automatic message:<br/>\n"
+"                Dear ${object.sudo().technician_user_id.name or 'Madam, Sir'},\n"
+"            </div>\n"
+"            <div style=\"margin-left:30px;align=center;\" width=\"60%\">\n"
+"                Your request\n"
+"                % if object.access_token:\n"
+"                <a href=\"/maintenance/requests/${object.id}/${object.access_token}?db=${'dbname' in ctx and ctx['dbname'] or ''}\">${object.name}</a>\n"
+"                % endif\n"
+"                has been received and is being reviewed by our ${object.maintenance_team_id.name or ''} team.\n"
+"                The reference of your maintenance request is ${object.id}.\n"
+"                <br/>To add additional comments, reply to this email.\n"
+"            </div><br/>\n"
+"            <span style=\"margin-left:30px;font-weight:normal;\">Thank you </span>\n"
+"            <span style=\"margin-left:30px;font-weight:normal;\">${object.maintenance_team_id.name or 'Maintenance'} Team.</span>\n"
+"        </div>\n"
+"                "
+msgstr "<?xml version=\"1.0\"?>\n"
+"<div style=\"max-width:600px; height:auto; margin-left:30px;\">\n"
+"            <div style=\"margin-left:30px;align=center;\">\n"
+"                This is an automatic message:<br/>\n"
+"                Dear ${object.sudo().technician_user_id.name or 'Madam, Sir'},\n"
+"            </div>\n"
+"            <div style=\"margin-left:30px;align=center;\" width=\"60%\">\n"
+"                Your request\n"
+"                % if object.access_token:\n"
+"                <a href=\"/maintenance/requests/${object.id}/${object.access_token}?db=${'dbname' in ctx and ctx['dbname'] or ''}\">${object.name}</a>\n"
+"                % endif\n"
+"                has been received and is being reviewed by our ${object.maintenance_team_id.name or ''} team.\n"
+"                The reference of your maintenance request is ${object.id}.\n"
+"                <br/>To add additional comments, reply to this email.\n"
+"            </div><br/>\n"
+"            <span style=\"margin-left:30px;font-weight:normal;\">Thank you </span>\n"
+"            <span style=\"margin-left:30px;font-weight:normal;\">${object.maintenance_team_id.name or 'Maintenance'} Team.</span>\n"
+"        </div>\n"
+"                "
+
+#. module: sa_maintenance
 #: model:ir.ui.view,arch_db:sa_maintenance.sa_maintenance_request_view_form_inherit_hr
 msgid "Add an internal note..."
 msgstr "增加一个内部文档..."
+
+#. module: sa_maintenance
+#: model:ir.ui.view,arch_db:sa_maintenance.view_sa_maintenance_config
+msgid "Apply"
+msgstr "应用"
+
+#. module: sa_maintenance
+#: model:ir.ui.view,arch_db:sa_maintenance.sa_maintenance_equipment_view_form_inherit
+msgid "Before Calibration Times"
+msgstr "标定拧紧次数"
+
+#. module: sa_maintenance
+#: model:ir.ui.view,arch_db:sa_maintenance.sa_maintenance_equipment_view_form_inherit
+msgid "Before Preventive Times"
+msgstr "保养拧紧次数"
 
 #. module: sa_maintenance
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_name
@@ -26,8 +87,29 @@ msgid "CP Name"
 msgstr "检查点名称"
 
 #. module: sa_maintenance
+#: model:ir.ui.view,arch_db:sa_maintenance.sa_maintenance_equipment_view_form_inherit
+msgid "Calibration"
+msgstr "标定"
+
+#. module: sa_maintenance
+#: code:addons/sa_maintenance/models/maintenance.py:392
+#, python-format
+msgid "Calibration Maintenance - %s"
+msgstr "标定 - %s"
+
+#. module: sa_maintenance
+#: model:ir.ui.view,arch_db:sa_maintenance.sa_maintenance_equipment_view_form_inherit
+msgid "Calibration Maintenance Frequency"
+msgstr "标定周期(天)"
+
+#. module: sa_maintenance
+#: model:ir.ui.view,arch_db:sa_maintenance.view_sa_maintenance_config
+msgid "Cancel"
+msgstr "取消"
+
+#. module: sa_maintenance
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_category_id
-#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_category_id_4257
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_category_id_4291
 msgid "Category id"
 msgstr "类别"
 
@@ -64,12 +146,17 @@ msgstr "检查作业"
 #. module: sa_maintenance
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_equipment_check_point_ids
 msgid "Check point ids"
-msgstr "检测点"
+msgstr "Check point ids"
 
 #. module: sa_maintenance
 #: model:ir.ui.view,arch_db:sa_maintenance.sa_maintenance_equipment_view_form_inherit_hr
 msgid "CheckPoints"
 msgstr "检查点"
+
+#. module: sa_maintenance
+#: model:ir.ui.view,arch_db:sa_maintenance.view_sa_maintenance_config
+msgid "Configure"
+msgstr "配置"
 
 #. module: sa_maintenance
 #. openerp-web
@@ -82,6 +169,7 @@ msgstr "已连接"
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_create_uid
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_category_create_uid
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_create_uid
+#: model:ir.model.fields,field_description:sa_maintenance.field_sa_maintenance_settings_create_uid
 msgid "Created by"
 msgstr "创建人"
 
@@ -89,8 +177,24 @@ msgstr "创建人"
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_create_date
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_category_create_date
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_create_date
+#: model:ir.model.fields,field_description:sa_maintenance.field_sa_maintenance_settings_create_date
 msgid "Created on"
 msgstr "创建时间"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,help:sa_maintenance.field_maintenance_equipment_effective_date
+msgid "Date at which the equipment became effective. This date will be used to compute the Mean Time Between Failure."
+msgstr "Date at which the equipment became effective. This date will be used to compute the Mean Time Between Failure."
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_equipment_next_calibration_action_date
+msgid "Date of the next calibration maintenance"
+msgstr "Date of the next calibration maintenance"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_equipment_calibration_period
+msgid "Days between each calibration maintenance"
+msgstr "Days between each calibration maintenance"
 
 #. module: sa_maintenance
 #: model:ir.ui.view,arch_db:sa_maintenance.sa_maintenance_request_view_form_inherit_hr
@@ -109,8 +213,14 @@ msgstr "未连接"
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_display_name
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_category_display_name
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_display_name
+#: model:ir.model.fields,field_description:sa_maintenance.field_sa_maintenance_settings_display_name
 msgid "Display Name"
 msgstr "显示名称"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_equipment_effective_date
+msgid "Effective Date"
+msgstr "Effective Date"
 
 #. module: sa_maintenance
 #: model:ir.model,name:sa_maintenance.model_maintenance_equipment
@@ -145,13 +255,20 @@ msgstr "我来做"
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_id
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_category_id
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_id
+#: model:ir.model.fields,field_description:sa_maintenance.field_sa_maintenance_settings_id
 msgid "ID"
 msgstr "ID"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_request_access_token
+msgid "Invitation Token"
+msgstr "Invitation Token"
 
 #. module: sa_maintenance
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp___last_update
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action___last_update
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_category___last_update
+#: model:ir.model.fields,field_description:sa_maintenance.field_sa_maintenance_settings___last_update
 msgid "Last Modified on"
 msgstr "最后修改日"
 
@@ -159,6 +276,7 @@ msgstr "最后修改日"
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_write_uid
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_category_write_uid
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_write_uid
+#: model:ir.model.fields,field_description:sa_maintenance.field_sa_maintenance_settings_write_uid
 msgid "Last Updated by"
 msgstr "最后更新人"
 
@@ -166,14 +284,36 @@ msgstr "最后更新人"
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_write_date
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_category_write_date
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_write_date
+#: model:ir.model.fields,field_description:sa_maintenance.field_sa_maintenance_settings_write_date
 msgid "Last Updated on"
 msgstr "最后更新时间"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_equipment_maintenance_lead_time
+msgid "Lead Days"
+msgstr "前置天数"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_equipment_mttf
+msgid "MTTF"
+msgstr "MTTF"
 
 #. module: sa_maintenance
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_description
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_description
 msgid "Maintenance Check Point Description"
 msgstr "维护检查点描述"
+
+#. module: sa_maintenance
+#: model:ir.actions.act_window,name:sa_maintenance.action_sa_maintenance_configuration
+#: model:ir.ui.menu,name:sa_maintenance.menu_sa_maintenance_configuration
+msgid "Maintenance Configure"
+msgstr "设备保养配置"
+
+#. module: sa_maintenance
+#: model:ir.ui.view,arch_db:sa_maintenance.sa_maintenance_equipment_view_form_inherit
+msgid "Maintenance Lead Time"
+msgstr "保养前置时间"
 
 #. module: sa_maintenance
 #: model:ir.actions.report.xml,name:sa_maintenance.maintenance_request
@@ -191,10 +331,20 @@ msgid "Maintenance Sheet"
 msgstr "维护作业单"
 
 #. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_equipment_times_margin
+msgid "Margin Times between each maintenance"
+msgstr "标定/保养边界次数(margin)"
+
+#. module: sa_maintenance
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_tolerance_max
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_tolerance_max
 msgid "Max Tolerance"
 msgstr "最大偏差"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,help:sa_maintenance.field_maintenance_equipment_mttf
+msgid "Mean Time TO Failure, computed based on done corrective maintenances."
+msgstr "Mean Time TO Failure, computed based on done corrective maintenances."
 
 #. module: sa_maintenance
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_measure
@@ -213,6 +363,21 @@ msgstr "测量成功"
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_tolerance_min
 msgid "Min Tolerance"
 msgstr "最小偏差"
+
+#. module: sa_maintenance
+#: model:ir.ui.view,arch_db:sa_maintenance.sa_maintenance_equipment_view_form_inherit
+msgid "Next Calibration Maintenance"
+msgstr "下次标定"
+
+#. module: sa_maintenance
+#: model:ir.ui.view,arch_db:sa_maintenance.sa_maintenance_equipment_view_form_inherit
+msgid "Next Calibration Maintenance Tightening Times"
+msgstr "下次标定拧紧次数"
+
+#. module: sa_maintenance
+#: model:ir.ui.view,arch_db:sa_maintenance.sa_maintenance_equipment_view_form_inherit
+msgid "Next Preventive Maintenance Tightening Times"
+msgstr "下次保养拧紧次数"
 
 #. module: sa_maintenance
 #: selection:maintenance.cp.action,measure_success:0
@@ -243,11 +408,47 @@ msgid "Request"
 msgstr "请求"
 
 #. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_sa_maintenance_settings_res_field
+#: model:ir.ui.view,arch_db:sa_maintenance.view_sa_maintenance_config
+msgid "Result Related Field"
+msgstr "Result Related Field"
+
+#. module: sa_maintenance
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_action_test_type
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_category_test_type
 #: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_cp_test_type
 msgid "Test Type"
 msgstr "测试类型"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_equipment_calibration_times
+msgid "Times between each calibration maintenance"
+msgstr "标定拧紧次数(间隔)"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_equipment_times
+msgid "Times between each preventive maintenance"
+msgstr "保养拧紧次数(间隔)"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_equipment_next_calibration_action_times
+msgid "Times of the next calibration maintenance"
+msgstr "下次标定拧紧次数"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_equipment_next_action_times
+msgid "Times of the next preventive maintenance"
+msgstr "下次保养拧紧次数"
+
+#. module: sa_maintenance
+#: model:ir.model.fields,field_description:sa_maintenance.field_maintenance_request_action_times
+msgid "Times to Actions Maintenance"
+msgstr "维修时拧紧次数"
+
+#. module: sa_maintenance
+#: model:ir.ui.view,arch_db:sa_maintenance.sa_maintenance_equipment_view_form_inherit
+msgid "days"
+msgstr "天"
 
 #. module: sa_maintenance
 #: model:ir.model,name:sa_maintenance.model_maintenance_cp_action
@@ -258,4 +459,9 @@ msgstr "maintenance.cp.action"
 #: model:ir.model,name:sa_maintenance.model_maintenance_cp_category
 msgid "maintenance.cp.category"
 msgstr "maintenance.cp.category"
+
+#. module: sa_maintenance
+#: model:ir.model,name:sa_maintenance.model_sa_maintenance_settings
+msgid "sa.maintenance.settings"
+msgstr "sa.maintenance.settings"
 

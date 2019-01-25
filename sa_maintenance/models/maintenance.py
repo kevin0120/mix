@@ -274,7 +274,7 @@ class MaintenanceEquipment(models.Model):
                                                    string='Times of the next calibration maintenance', store=True)
 
     next_action_times = fields.Integer(compute='_compute_next_action_times',
-                                       string='Times of the next corrective maintenance', store=True)
+                                       string='Times of the next preventive maintenance', store=True)
 
     times = fields.Integer('Times between each preventive maintenance')
 

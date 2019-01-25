@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0+e-20171123\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-25 04:53+0000\n"
-"PO-Revision-Date: 2018-12-25 04:53+0000\n"
+"POT-Creation-Date: 2019-01-25 07:43+0000\n"
+"PO-Revision-Date: 2019-01-25 07:43+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -134,12 +134,14 @@ msgstr "<strong>工作中心</strong>"
 
 #. module: sa_base
 #: code:addons/sa_base/models/product.py:30
+#: sql_constraint:product.product:0
 #, python-format
 msgid "A Screw Code can only be assigned to one SCREW !"
 msgstr "同样的螺栓编号只能分配给一种螺栓！"
 
 #. module: sa_base
 #: code:addons/sa_base/models/product.py:31
+#: sql_constraint:product.product:0
 #, python-format
 msgid "A Vehicle Code can only be assigned to one Vehicle !"
 msgstr "同样的车型代码只能分配给一种车型！"
@@ -206,7 +208,7 @@ msgstr "自动创建质量控制点"
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_product_normal_form_view
 msgid "BOM"
-msgstr "BOM"
+msgstr "物料清单"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.report_mrporder_pin
@@ -252,19 +254,14 @@ msgid "Bom line id"
 msgstr "BOM行ID"
 
 #. module: sa_base
-#: model:ir.ui.view,arch_db:sa_base.sa_mrp_routing_form_view
-msgid "Operation Items"
-msgstr "生产作业"
-
-#. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.view_sa_config
 msgid "Cancel"
 msgstr "取消"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_category_name_4055
+#: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_category_name_4077
 msgid "Category name"
-msgstr "类别名称"
+msgstr "Category name"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_child_ids
@@ -511,7 +508,7 @@ msgstr "显示名称"
 #: model:ir.actions.server,name:sa_base.operation_download_action
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_routing_workcenter_form_view
 msgid "Download Operation"
-msgstr "Download Operation"
+msgstr "下发作业"
 
 #. module: sa_base
 #: model:ir.model,name:sa_base.model_maintenance_equipment
@@ -593,14 +590,14 @@ msgid "Group By..."
 msgstr "分组..."
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_operation_point_group_sequence_3911
+#: model:ir.model.fields,field_description:sa_base.field_operation_point_group_sequence_3927
 msgid "Group Sequence for Multi Spindle"
-msgstr "多轴拧紧作业组序列"
+msgstr "次序组(多轴)"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_operation_point_group_id_3910
+#: model:ir.model.fields,field_description:sa_base.field_operation_point_group_id_3925
 msgid "Group id"
-msgstr "拧紧作业组ID"
+msgstr "Group id"
 
 #. module: sa_base
 #: model:maintenance.equipment.category,name:sa_base.equipment_Gun
@@ -651,7 +648,7 @@ msgstr "ID"
 #. module: sa_base
 #: model:maintenance.equipment.category,name:sa_base.equipment_IO
 msgid "IO"
-msgstr "输入/输出模块"
+msgstr "IO"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_connection_ip
@@ -752,15 +749,10 @@ msgid "Loosening"
 msgstr "松脱"
 
 #. module: sa_base
-#: model:ir.ui.view,arch_db:sa_base.sa_product_normal_form_view
-msgid "Manufacturing"
-msgstr "制造"
-
-#. module: sa_base
 #: model:ir.model,name:sa_base.model_mrp_production
 #: model:ir.ui.view,arch_db:sa_base.view_sa_config
 msgid "Manufacturing Order"
-msgstr "生产订单"
+msgstr "制造订单"
 
 #. module: sa_base
 #: model:ir.model,name:sa_base.model_mrp_routing_group
@@ -850,13 +842,13 @@ msgid "Odoo uses these BoMs to automatically propose manufacturing\n"
 msgstr "根据补货规则Odoo用BOM自动的生产生产订单"
 
 #. module: sa_base
-#: code:addons/sa_base/models/mrp_routing.py:217
+#: code:addons/sa_base/models/mrp_routing.py:220
 #, python-format
 msgid "Only SuperUser can delete Job ID"
 msgstr "Only SuperUser can delete Job ID"
 
 #. module: sa_base
-#: code:addons/sa_base/models/mrp_routing.py:250
+#: code:addons/sa_base/models/mrp_routing.py:253
 #, python-format
 msgid "Only SuperUser can delete program"
 msgstr "Only SuperUser can delete program"
@@ -906,6 +898,11 @@ msgstr "Only one quailty point per product bom line is allowed"
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_routing_form_view
 msgid "Operation"
 msgstr "作业"
+
+#. module: sa_base
+#: model:ir.ui.view,arch_db:sa_base.sa_mrp_routing_form_view
+msgid "Operation Items"
+msgstr "生产作业"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_workcenter_max_redo_times
@@ -1318,7 +1315,7 @@ msgstr "套筒"
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_product_normal_form_view
 msgid "Specification"
-msgstr "规格"
+msgstr "规格书"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_controller_program_strategy
@@ -1439,7 +1436,7 @@ msgstr "车型"
 #: model:ir.ui.menu,name:sa_base.menu_mrp_vehicle_form
 #: model:ir.ui.view,arch_db:sa_base.product_search_form_view_sa
 msgid "Vehicle"
-msgstr "车型"
+msgstr "车辆"
 
 #. module: sa_base
 #: model:ir.actions.report.xml,name:sa_base.report_vehicle_labels
@@ -1612,7 +1609,7 @@ msgstr "sa.config.settings"
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.product_search_form_view_sa
 msgid "sa_type"
-msgstr "sa_type"
+msgstr "类型"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_group_sequence
@@ -1634,49 +1631,4 @@ msgstr "x axis offset from left(%)"
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_y_offset
 msgid "y axis offset from top(%)"
 msgstr "y axis offset from top(%)"
-
-#. module: sa_base
-#: model:maintenance.equipment,name:sa_base.hmi_0
-msgid "测试HMI1"
-msgstr "测试HMI1"
-
-#. module: sa_base
-#: model:maintenance.equipment,name:sa_base.hmi_1
-msgid "测试HMI2"
-msgstr "测试HMI2"
-
-#. module: sa_base
-#: model:maintenance.equipment,name:sa_base.hmi_2
-msgid "测试HMI3"
-msgstr "测试HMI3"
-
-#. module: sa_base
-#: model:maintenance.equipment,name:sa_base.io_0
-msgid "测试IO0"
-msgstr "测试IO0"
-
-#. module: sa_base
-#: model:maintenance.equipment,name:sa_base.io_1
-msgid "测试IO1"
-msgstr "测试IO1"
-
-#. module: sa_base
-#: model:maintenance.equipment,name:sa_base.rfid_0
-msgid "测试RFID0"
-msgstr "测试RFID0"
-
-#. module: sa_base
-#: model:maintenance.equipment,name:sa_base.rfid_1
-msgid "测试RFID1"
-msgstr "测试RFID1"
-
-#. module: sa_base
-#: model:maintenance.equipment,name:sa_base.masterpc_0
-msgid "测试masterpc1"
-msgstr "测试masterpc1"
-
-#. module: sa_base
-#: model:maintenance.equipment,name:sa_base.masterpc_1
-msgid "测试masterpc2"
-msgstr "测试masterpc2"
 
