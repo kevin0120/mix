@@ -12,6 +12,7 @@
             </xpath>
           <xpath expr="//field[@name='production_id']" position="replace">
               <field name="production_id" invisible="1"/>
+              <field name="action_times" required="1" />
           </xpath>
           <xpath expr="//field[@name='workorder_id']" position="replace">
               <field name="workorder_id" invisible="1"/>
@@ -52,10 +53,24 @@
                 <!--</div>-->
             <!--</xpath>-->
             <xpath expr="//group[@name='maintenance']" position="inside">
+                <field name="next_action_times" class="oe_read_only" string="Next Preventive Maintenance Tightening Times"/>
                 <label for="maintenance_lead_time" string="Maintenance Lead Time"/>
                 <div class="o_row">
                     <field name="maintenance_lead_time" /> days
                 </div>
+                <field name="times" string="Before Preventive Times"/>
+                <field name="times_margin" required="1" />
+            </xpath>
+            <xpath expr="//group[@name='maintenance']" position="after">
+                <group name="calibration" string="Calibration">
+                    <field name="next_calibration_action_times" class="oe_read_only" string="Next Calibration Maintenance Tightening Times"/>
+                    <field name="next_calibration_action_date" class="oe_read_only" string="Next Calibration Maintenance"/>
+                    <field name="calibration_times" string="Before Calibration Times"/>
+                    <label for="calibration_period" string="Calibration Maintenance Frequency"/>
+                    <div class="o_row">
+                        <field name="calibration_period"/> days
+                    </div>
+                </group>
             </xpath>
         </field>
       </record>

@@ -691,12 +691,16 @@ class OperationResult(models.HyperModel):
         prefix_terms = lambda prefix, terms: (prefix + " " + ",".join(terms)) if terms else ''
         prefix_term = lambda prefix, term: ('%s %s' % (prefix, term)) if term else ''
 
+        where_clause2 = '''r1.measure_result in ('ok', 'nok')'''  # 初始化为空
+
         if where_clause == '':
-            pass
+            where_clause2 = '''r1.measure_result in ('ok', 'nok')'''
         else:
             if where_clause.find('''"operation_result"."control_date"''') > 0:
                 where_clause = where_clause.replace('''"operation_result"."control_date"''', '''"mw"."date_planned_start"''')
+
                 where_clause_params.extend(where_clause_params[:])
+            where_clause2 = where_clause + '''AND r1.measure_result in ('ok', 'nok')'''
         from_clause = '''
                             (select id as equip_id,serial_no as equip_sn, name as equip_name
                               from maintenance_equipment, d1
@@ -709,10 +713,11 @@ class OperationResult(models.HyperModel):
                         left join (select gun_id,count(batch) as sequence from
                                           (select distinct r1.workorder_id,r1.gun_id,r1.batch from operation_result r1
                                                 left join mrp_workorder mw on r1.workorder_id = mw.id
-                                                %(where)s
+                                                %(where2)s
                                           ) a group by gun_id) b   on a.gun_id = b.gun_id
                 ''' % {
             'where': prefix_term('WHERE', where_clause),
+            'where2': prefix_term('WHERE', where_clause2),
         }
 
         query = """
