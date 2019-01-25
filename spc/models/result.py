@@ -636,6 +636,119 @@ class OperationResult(models.HyperModel):
         return data
 
     @api.model
+    def read_group_lacking_by_gun(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+        self.check_access_rights('read')
+        query = self._where_calc(domain)
+        fields = fields or [f.name for f in self._fields.itervalues() if f.store]
+
+        groupby = [groupby] if isinstance(groupby, basestring) else list(OrderedSet(groupby))
+        groupby_list = groupby[:1] if lazy else groupby
+        annotated_groupbys = [self._read_group_process_groupby(gb, query) for gb in groupby_list]
+        for gb in annotated_groupbys:
+            if gb['field'] == 'lacking':
+                gb['qualified_field'] = "\'lack\'"
+            if gb['field'] == 'gun_id':
+                gb['qualified_field'] = "a1.equip_id"
+        groupby_fields = [g['field'] for g in annotated_groupbys]
+        order = orderby or ','.join([g for g in groupby_list])
+        groupby_dict = {gb['groupby']: gb for gb in annotated_groupbys}
+
+        self._apply_ir_rules(query, 'read')
+        for gb in groupby_fields:
+            assert gb in fields, "Fields in 'groupby' must appear in the list of fields to read (perhaps it's missing in the list view?)"
+            assert gb in self._fields, "Unknown field %r in 'groupby'" % gb
+            gb_field = self._fields[gb].base_field
+            assert gb_field.store and gb_field.column_type, "Fields in 'groupby' must be regular database-persisted fields (no function or related fields), or function fields with store=True"
+
+        aggregated_fields = [
+            f for f in fields
+            if f != 'sequence'
+            if f not in groupby_fields
+            for field in [self._fields.get(f)]
+            if field
+            if field.group_operator
+            if field.base_field.store and field.base_field.column_type
+        ]
+
+        field_formatter = lambda f: (
+            self._fields[f].group_operator,
+            self._inherits_join_calc(self._table, f, query),
+            f,
+        )
+        select_terms = ['%s(%s) AS "%s" ' % field_formatter(f) for f in aggregated_fields]
+
+        for gb in annotated_groupbys:
+            select_terms.append('%s as "%s" ' % (gb['qualified_field'], gb['groupby']))
+
+        groupby_terms, orderby_terms = self._read_group_prepare(order, aggregated_fields, annotated_groupbys, query)
+        from_clause, where_clause, where_clause_params = query.get_sql()
+        if lazy and (len(groupby_fields) >= 2 or not self._context.get('group_by_no_leaf')):
+            count_field = groupby_fields[0] if len(groupby_fields) >= 1 else '_'
+        else:
+            count_field = '_'
+        count_field += '_count'
+
+        prefix_terms = lambda prefix, terms: (prefix + " " + ",".join(terms)) if terms else ''
+        prefix_term = lambda prefix, term: ('%s %s' % (prefix, term)) if term else ''
+
+        if where_clause == '':
+            pass
+        else:
+            if where_clause.find('''"operation_result"."control_date"''') > 0:
+                where_clause = where_clause.replace('''"operation_result"."control_date"''', '''"mw"."date_planned_start"''')
+                where_clause_params.extend(where_clause_params[:])
+        from_clause = '''
+                            (select id as equip_id,serial_no as equip_sn, name as equip_name
+                              from maintenance_equipment, d1
+                              where category_id = d1.gc_id
+                             ) a1
+                        left join (select a.gun_id,count(a.sequence)  as sequence from mrp_wo_consu a
+                                          left join mrp_workorder mw on a.workorder_id = mw.id
+                                          %(where)s
+                                          group by gun_id) a on a1.equip_id = a.gun_id
+                        left join (select gun_id,count(batch) as sequence from
+                                          (select distinct r1.workorder_id,r1.gun_id,r1.batch from operation_result r1
+                                                left join mrp_workorder mw on r1.workorder_id = mw.id
+                                                %(where)s
+                                          ) a group by gun_id) b   on a.gun_id = b.gun_id
+                ''' % {
+            'where': prefix_term('WHERE', where_clause),
+        }
+
+        query = """
+                    with d1 as ( select id as gc_id from maintenance_equipment_category where name = 'Gun')
+                    SELECT  round(round(COALESCE(a.sequence, 0) - COALESCE(b.sequence, 0), 2) / COALESCE(a.sequence, 1) * 100.0, 2) AS "%(count_field)s" %(extra_fields)s
+                            FROM %(from)s
+                            %(orderby)s
+                            %(limit)s
+                            %(offset)s
+                        """ % {
+            'table': self._table,
+            'count_field': count_field,
+            'extra_fields': prefix_terms(',', select_terms),
+            'from': from_clause,
+            # 'where': prefix_term('WHERE', where_clause),
+            'orderby': 'ORDER BY ' + count_field,
+            'limit': prefix_term('LIMIT', int(limit) if limit else None),
+            'offset': prefix_term('OFFSET', int(offset) if limit else None),
+        }
+        self._cr.execute(query, where_clause_params)
+        fetched_data = self._cr.dictfetchall()
+
+        if not groupby_fields:
+            return fetched_data
+
+        for d in fetched_data:
+            n = {'gun_id': self.env['maintenance.equipment'].browse(d['gun_id']).name_get()[0]}
+            d.update(n)
+
+        data = map(lambda r: {k: self._read_group_prepare_data(k, v, groupby_dict) for k, v in r.iteritems()},
+                   fetched_data)
+        result = [self._read_group_format_result_centron(d, annotated_groupbys, groupby, domain) for d in data]
+
+        return result
+
+    @api.model
     def read_group_lacking(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         self.check_access_rights('read')
         query = self._where_calc(domain)
@@ -773,7 +886,12 @@ class OperationResult(models.HyperModel):
             res = super(OperationResult, self).read_group(domain, fields, groupby, offset=offset, limit=limit,
                                                           orderby=orderby, lazy=lazy)
         elif 'lacking' in fields and len(groupby) >= 2:
-            res = self.read_group_lacking(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+            if 'gun_id' in groupby:
+                # res = super(OperationResult, self).read_group(domain, fields, groupby, offset=offset, limit=limit,
+                #                                               orderby=orderby, lazy=lazy)
+                res = self.read_group_lacking_by_gun(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+            else:
+                res = self.read_group_lacking(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
         else:
             res = super(OperationResult, self).read_group(domain, fields, groupby, offset=offset, limit=limit,
                                                       orderby=orderby, lazy=lazy)
