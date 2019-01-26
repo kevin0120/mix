@@ -21,6 +21,7 @@ import styles from './styles';
 import saveConfigs from '../../actions/userConfigs';
 import withKeyboard from '../Keyboard';
 import { systemInit } from '../../actions/sysInit';
+import { toggleRFID } from "../../actions/rfid";
 
 function handleTest(obj) {
   obj.test(obj.value);
@@ -45,13 +46,15 @@ class ConnectedTest extends React.Component {
     this.testMasterPC = this.testMasterPC.bind(this);
     this.testModbus = this.testModbus.bind(this);
     this.testAiis = this.testAiis.bind(this);
+    this.doToggleRFID = this.doToggleRFID.bind(this);
     this.handleSave = this.handleSave.bind(this);
 
     this.state = {
       testStatus: {
         masterPcUrl: 99,
         ioUrl: 99,
-        aiisUrl: 99
+        aiisUrl: 99,
+        rfidUrl:props.rfidEnabled,
       },
       data: this.formatConnInfo(props.connInfoData),
       btnGroupStatus: {}
@@ -62,10 +65,22 @@ class ConnectedTest extends React.Component {
     this.setBtnsStatus();
   }
 
+  componentWillReceiveProps(nextProps){
+    const { rfidEnabled } = nextProps;
+    const {testStatus} = this.state;
+    this.setState({
+      testStatus:{
+        ...testStatus,
+        rfidUrl:rfidEnabled
+      }
+    });
+  }
+
   componentDidUpdate() {
     this.setBtnsStatus();
-    const { connInfoData } = this.props;
+    const { connInfoData} = this.props;
     const { data } = this.state;
+
     const formatedData = this.formatConnInfo(connInfoData);
 
     if (isEqual(formatedData, data)) return;
@@ -122,7 +137,8 @@ class ConnectedTest extends React.Component {
         disabled: false,
         displayOrder: 200,
         value: String(connInfo.rfid),
-        displayTitle: 'RFID 链接地址'
+        displayTitle: 'RFID 链接地址',
+        test: this.doToggleRFID
       },
       ioUrl: {
         key: 'io',
@@ -162,6 +178,12 @@ class ConnectedTest extends React.Component {
       workcenterCode: data.workCenterCode.value,
       rework_workcenter: data.rework.value
     });
+  }
+
+  doToggleRFID() {
+    // enable/disable rfid
+    const {toggleRFID} = this.props;
+    toggleRFID();
   }
 
   testAiis(conn) {
@@ -315,6 +337,9 @@ class ConnectedTest extends React.Component {
 
 ConnectedTest.propTypes = {
   classes: PropTypes.shape({}).isRequired,
+  rfidEnabled: PropTypes.bool.isRequired,
+  toggleRFID: PropTypes.func.isRequired,
+  saveConfigs: PropTypes.func.isRequired,
   connInfoData: PropTypes.shape({}).isRequired
 };
 

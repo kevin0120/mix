@@ -1,5 +1,4 @@
 import { BATTERY } from '../actions/actionTypes';
-import configs from '../shared/config';
 import { genReducers } from './utils';
 
 const initBattery = {

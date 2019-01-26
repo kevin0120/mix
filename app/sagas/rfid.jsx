@@ -130,9 +130,17 @@ function* RFIDHandler(data, reg) {
   try {
     const { type, payload } = data;
 
+    const state = yield select();
+
+    const { rfidEnabled } = state.setting.systemSettings;
+
+    if (!rfidEnabled) {
+      // 未使能rfid
+      return
+    }
     switch (type) {
       case 'healthz': {
-        const healthzStatus = yield select(getHealthz); // 获取整个healthz
+        const {healthCheckResults: healthzStatus} = state; // 获取整个healthz
         if (!lodash.isEqual(healthzStatus.rfid.isHealth, payload)) {
           // 如果不相等 更新
           yield put(setHealthzCheck('rfid', payload));

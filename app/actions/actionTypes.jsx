@@ -38,7 +38,8 @@ export const RUSH = {
 };
 
 export const RFID = {
-  INIT: 'RFID_INIT'
+  INIT: 'RFID_INIT',
+  TOGGLE_STATUS: 'RFID_TOGGLE_STATUS'
 };
 
 export const OPERATION = {
@@ -184,3 +185,5 @@ export const BATTERY={
   CHECK:'BATTERY_CHECK',
   CHECK_OK: 'BATTERY_CHECK_OK',
 };
+
+

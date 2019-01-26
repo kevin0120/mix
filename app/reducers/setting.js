@@ -2,7 +2,7 @@
 
 import configs from '../shared/config';
 
-import { USER_CONFIGS } from '../actions/actionTypes';
+import { USER_CONFIGS,RFID } from '../actions/actionTypes';
 
 type actionType = {
   +type: string,
@@ -40,6 +40,15 @@ export default function setting(state: object = configs, action: actionType) {
           }
         }
       };
+    }
+    case RFID.TOGGLE_STATUS: {
+      return {
+        ...state,
+        systemSettings: {
+          ...state.systemSettings,
+          rfidEnabled: !state.systemSettings.rfidEnabled
+        }
+      }
     }
     default:
       return state;

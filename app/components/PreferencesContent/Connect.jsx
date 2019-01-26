@@ -18,6 +18,8 @@ import Button from '../CustomButtons/Button';
 import saveConfigs from '../../actions/userConfigs';
 import { systemInit } from '../../actions/sysInit';
 
+import {toggleRFID} from '../../actions/rfid';
+
 import { sortObj, defaultClient } from '../../common/utils';
 import Test from './Test';
 import styles from './styles';
@@ -28,12 +30,14 @@ const lodash = require('lodash');
 const mapStateToProps = (state, ownProps) => ({
   storedConfigs: state.setting.page.odooConnection,
   connInfo: state.setting.system.connections,
+  rfidEnabled: state.setting.systemSettings.rfidEnabled,
   ...ownProps
 });
 
 const mapDispatchToProps = {
   saveConfigs,
-  systemInit
+  systemInit,
+  toggleRFID
 };
 
 /* eslint-disable react/prefer-stateless-function */
@@ -101,7 +105,7 @@ class ConnectedConnect extends React.Component {
   }
 
   render() {
-    const { classes, systemInit, saveConfigs } = this.props;
+    const { classes, systemInit, saveConfigs,toggleRFID,rfidEnabled } = this.props;
     const { data, isDataValid, connInfoData } = this.state;
 
     const baseItems = t =>
@@ -166,8 +170,10 @@ class ConnectedConnect extends React.Component {
             <Paper className={classes.paperWrap} elevation={1}>
               <Test
                 connInfoData={connInfoData}
+                rfidEnabled={rfidEnabled}
                 systemInit={systemInit}
                 saveConfigs={saveConfigs}
+                toggleRFID={toggleRFID}
                 keyBoardSubmit={this.handleTestKeyBoardSubmit}
               />
             </Paper>
@@ -182,6 +188,8 @@ ConnectedConnect.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   storedConfigs: PropTypes.shape({}).isRequired,
   saveConfigs: PropTypes.func.isRequired,
+  rfidEnabled: PropTypes.bool.isRequired,
+  toggleRFID: PropTypes.func.isRequired,
   connInfo: PropTypes.shape({}).isRequired,
   keyboardInput: PropTypes.func.isRequired
 };

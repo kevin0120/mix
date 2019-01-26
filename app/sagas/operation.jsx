@@ -358,10 +358,7 @@ export function* doingOperation(controllerMode) {
       yield put(setNewNotification('error', 'pset failed'));
       return false;
     }
-
     return true;
-  } catch (e) {
-    console.log(e);
   }
 }
 
