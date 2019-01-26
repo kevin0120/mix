@@ -5,9 +5,10 @@ import {
   select,
   fork,
   takeLatest,
-  debounce
+  // debounce,
+  // delay
 } from 'redux-saga/effects';
-import { eventChannel } from 'redux-saga';
+import { eventChannel,delay } from 'redux-saga';
 import { RFID } from '../actions/actionTypes';
 import { triggerOperation } from './operation';
 import { OPERATION_SOURCE } from '../reducers/operations';
@@ -42,8 +43,7 @@ export function* watchRfid() {
 
 function* initRFID() {
   const state = yield select();
-
-  const { connections, operationSettings } = state;
+  const { connections ,setting:{operationSettings}} = state;
 
   const { regExp } = operationSettings;
 
@@ -194,10 +194,14 @@ function* RFIDHandler(data, reg) {
 }
 
 export function* watchRfidChannel(regExp) {
-  const e = new RegExp(regExp, 'i'); // 正則表達式,大小寫不敏感
+  const reg = new RegExp(regExp, 'i'); // 正則表達式,大小寫不敏感
   while (client !== null) {
     try {
-      yield debounce(3000, rfidChannel, RFIDHandler, e); // RFID 因为频繁触发所以进行防抖动处理,默认3秒
+
+      // yield debounce(3000, rfidChannel, RFIDHandler, reg); // RFID 因为频繁触发所以进行防抖动处理,默认3秒
+      const action =yield take(rfidChannel);
+      yield fork(RFIDHandler,action,reg);
+      yield delay(3000);
     } catch (err) {
       console.error(`watchRfidChannel: ${err.message}`);
     }

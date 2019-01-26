@@ -169,7 +169,7 @@ class PagesHeader extends React.Component {
               {signalLevel(signal)}
               <span style={{marginRight:'7px'}}>{`${ssid || '无连接'}`}</span>
               {batteryLevel(batteryPercentage)}
-              <span>{`${batteryPercentage}%` || '电池检测中'}</span>
+              <span>{batteryPercentage>=0?`${batteryPercentage}%` : '电池检测中'}</span>
             </Button>
           </div>
           {/* <Hidden mdUp> */}
