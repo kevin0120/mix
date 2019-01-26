@@ -70,7 +70,7 @@ class SaMaintenance(http.Controller):
     def _try_create_maintenance_requests(self):
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         kw = request.jsonrequest
-        if 'serial_no' not in kw or 'times' not in kw:
+        if 'serial_no' not in kw or 'times' not in kw or 'sin_last_service' not in kw:
             body = json.dumps({'msg': "payload must contain serial number!!!!"})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=405, headers=headers)
@@ -80,10 +80,15 @@ class SaMaintenance(http.Controller):
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=404, headers=headers)
         total_times = kw['times']
-        if total_times > gun_id.next_action_times + gun_id.times_margin:
-            mType = 'preventive'
-        elif total_times > gun_id.next_calibration_action_times + gun_id.times_margin:
+        times_since_last_service = kw['sin_last_service']
+        if total_times > gun_id.next_calibration_action_times + gun_id.times_margin:
             mType = 'calibration'
+        elif times_since_last_service > 0 and times_since_last_service > gun_id.calibration_times:
+            mType = 'calibration'
+        elif total_times > gun_id.next_action_times + gun_id.times_margin:
+            mType = 'preventive'
+        elif times_since_last_service > 0 and times_since_last_service > gun_id.times:
+            mType = 'preventive'
         else:
             # body = json.dumps({'msg': "do not need create maintenance request!!!!"})
             headers = [('Content-Type', 'application/json')]
