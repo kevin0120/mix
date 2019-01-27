@@ -14155,6 +14155,10 @@ typeface-noto-sans-sc@^0.0.71:
   version "0.0.71"
   resolved "http://registry.npm.taobao.org/typeface-noto-sans-sc/download/typeface-noto-sans-sc-0.0.71.tgz#214f27e781f59535a7a4d63de6d490124e8076b2"
 
+typeface-noto-sans@^0.0.54:
+  version "0.0.54"
+  resolved "http://registry.npm.taobao.org/typeface-noto-sans/download/typeface-noto-sans-0.0.54.tgz#16989ef56a5220b0503495ab8c1036f66b517b55"
+
 typescript-compare@^0.0.2:
   version "0.0.2"
   resolved "http://registry.npm.taobao.org/typescript-compare/download/typescript-compare-0.0.2.tgz#7ee40a400a406c2ea0a7e551efd3309021d5f425"

@@ -33,6 +33,7 @@ const theme = createMuiTheme({
     useNextVariants: true,
     // Use the system font instead of the default Roboto font.
     fontFamily: [
+      'Noto Sans',
       'Noto Sans SC',
       '"Segoe UI"',
       'Roboto',

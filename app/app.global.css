@@ -5,12 +5,13 @@
 @import '~@fortawesome/fontawesome-free/css/all.css';
 @import '~simple-keyboard/build/css/index.css';
 @import './common/static/material-react-pro.css';
-
+@import "~typeface-noto-sans/index.css";
 @import "~typeface-noto-sans-sc/index.css";
 
 body {
   position: relative;
   height: 100vh;
+  font-family: Noto Sans,Noto Sans SC,Arial, Helvetica, Helvetica Neue, serif;
   overflow-y: hidden;
 }
 

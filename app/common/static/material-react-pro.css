@@ -2727,7 +2727,7 @@ body {
   background-color: #eee;
   color: #3c4858;
   margin: 0;
-  font-family: Roboto, Helvetica, Arial, sans-serif;
+  font-family: Noto Sans,Noto Sans SC,Roboto, Helvetica, Arial, sans-serif;
   font-weight: 300;
   line-height: 1.5em;
 }
@@ -2739,7 +2739,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  font-family: 'Noto Sans','Noto Sans SC','Roboto', 'Helvetica', 'Arial', sans-serif;
   font-weight: 300;
   line-height: 1.5em;
 }
