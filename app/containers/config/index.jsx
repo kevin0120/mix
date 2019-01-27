@@ -26,7 +26,7 @@ const menuContents = [
     text: 'Configuration.network.name',
     icon: selected => (
       <RssFeedIcon
-        style={{ margin: 5, fill: selected ? '#FAFAFA' : '#009688' }}
+        style={{ fontSize:45, margin: 5, fill: selected ? '#FAFAFA' : '#009688' }}
       />
     ),
     component: <Net />
@@ -35,7 +35,7 @@ const menuContents = [
     text: 'Configuration.IO.name',
     icon: selected => (
       <ViewModuleIcon
-        style={{ margin: 5, fill: selected ? '#FAFAFA' : '#ff9800' }}
+        style={{ fontSize:45, margin: 5, fill: selected ? '#FAFAFA' : '#ff9800' }}
       />
     ),
     component: <Io />
@@ -44,7 +44,7 @@ const menuContents = [
     text: 'Configuration.connections.name',
     icon: selected => (
       <SettingsRemoteIcon
-        style={{ margin: 5, fill: selected ? '#FAFAFA' : '#3492ff' }}
+        style={{ fontSize:45, margin: 5, fill: selected ? '#FAFAFA' : '#3492ff' }}
       />
     ),
     component: <Connect />

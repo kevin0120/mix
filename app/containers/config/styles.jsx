@@ -23,17 +23,17 @@ export default theme => ({
   menuItem: {
     fontSize: 14,
     height: 120,
-    margin: 5
+    margin: '15px 5px'
   },
   menuItemSelected: {
     fontSize: 14,
     backgroundColor: warningColor,
     height: 120,
     color: '#FAFAFA',
-    margin: 5
+    margin: '15px 5px'
   },
   itemText: {
-    fontSize: 14,
+    fontSize: 20,
     padding: 0
   },
   cardActionArea: {

@@ -81,7 +81,7 @@ const card = {
 
 const defaultFont = {
   fontFamily: '"Noto Sans","Noto Sans SC","Roboto", "Helvetica", "Arial", sans-serif',
-  fontWeight: '300',
+  fontWeight: 'bold',
   lineHeight: '1.5em'
 };
 

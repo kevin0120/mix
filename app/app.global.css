@@ -11,7 +11,8 @@
 body {
   position: relative;
   height: 100vh;
-  font-family: Noto Sans,Noto Sans SC,Arial, Helvetica, Helvetica Neue, serif;
+  font-family: Noto Sans SC, serif;
+  /*font-weight: bold;*/
   overflow-y: hidden;
 }
 

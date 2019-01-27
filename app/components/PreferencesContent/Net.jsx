@@ -269,6 +269,7 @@ class ConnectedNet extends React.PureComponent {
                   {inputsItems(t)}
                 </List>
                 <Button
+                  size="lg"
                   disabled={submitDisabled}
                   color="info"
                   onClick={this.handleSubmit}

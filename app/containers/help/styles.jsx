@@ -15,16 +15,16 @@ export default theme => ({
   },
   toolbar: theme.mixins.toolbar,
   item: {
-    height: '64px'
+    height: '80px'
   },
   title: {
-    fontSize: 20,
+    fontSize: 40,
     marginBottom: 10,
     marginLeft: 20
   },
   wrap: {
     width: 872,
     margin: '10px auto 0',
-    fontSize: 14
+    fontSize: 30
   }
 });

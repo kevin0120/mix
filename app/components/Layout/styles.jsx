@@ -63,7 +63,9 @@ export default theme => ({
   },
   BottomNavigationIcon: {
     color: '#FFFFFF',
-    marginLeft: '20px'
+    marginLeft: '20px',
+    fontSize: '20px',
+    fontWeight: 'bold'
   },
   menuBtnWrapLeft: {
     marginRight: 'auto',

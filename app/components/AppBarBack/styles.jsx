@@ -6,7 +6,8 @@ export default theme => ({
     padding: 0
   },
   backButton: {
-    width: 100,
+    width: 130,
+    height: 60,
     borderRight: '1px solid #bdbdbd',
     borderRadius: 0,
     justifyContent: 'space-around'

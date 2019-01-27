@@ -33,17 +33,13 @@ const theme = createMuiTheme({
     useNextVariants: true,
     // Use the system font instead of the default Roboto font.
     fontFamily: [
-      'Noto Sans',
       'Noto Sans SC',
-      '"Segoe UI"',
-      'Roboto',
-      '"Helvetica Neue"',
-      'Arial',
-      'sans-serif',
-      '"Apple Color Emoji"',
-      '"Segoe UI Emoji"',
-      '"Segoe UI Symbol"'
-    ].join(',')
+      'sans-serif'
+    ].join(','),
+    // fontWeightRegular: 'bold',
+    button: {
+      fontSize: '20px'
+    }
   }
 });
 

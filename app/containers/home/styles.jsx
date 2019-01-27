@@ -59,6 +59,7 @@ const styles = theme => ({
     padding: '50px 10px'
   },
   fabLeft: {
+    fontSize: 20,
     position: 'absolute',
     bottom: theme.spacing.unit * 10,
     left: theme.spacing.unit * 2
@@ -66,7 +67,8 @@ const styles = theme => ({
   fabRight: {
     position: 'absolute',
     bottom: theme.spacing.unit * 10,
-    right: theme.spacing.unit * 2
+    right: theme.spacing.unit * 2,
+    fontSize: 20
   },
   fabMoveUp: {
     transform: 'translate3d(0, -46px, 0)',

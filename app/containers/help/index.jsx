@@ -15,12 +15,12 @@ const fakeHelp = [
   {
     key: 'Version',
     displayTitle: '版本',
-    value: 'v1.0.1'
+    value: 'v1.0.1-beta'
   },
   {
     key: 'ReleaseDate',
     displayTitle: '发布时间',
-    value: '2018-07-09'
+    value: '2019-01-23'
   },
   {
     key: 'Contact',
@@ -35,12 +35,12 @@ const fakeHelp = [
   {
     key: 'ContactPerson',
     displayTitle: '联系人',
-    value: '顾斌'
+    value: 'Henry Cai'
   },
   {
     key: 'ContactCellPhone',
     displayTitle: '联系人电话',
-    value: '18701858084'
+    value: '18701858083'
   }
 ];
 
@@ -82,7 +82,7 @@ class Help extends React.PureComponent {
         <main className={classes.content}>
           <div className={classes.toolbar} />
           <div className={classes.wrap}>
-            <h2 className={classes.title}>帮助</h2>
+            <h2 className={classes.title}>帮助信息</h2>
             <Paper elevation={1}>
               <List>{helpList}</List>
             </Paper>
