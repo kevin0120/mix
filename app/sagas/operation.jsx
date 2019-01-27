@@ -140,7 +140,7 @@ export function* triggerOperation(carID, carType, job, source) {
         break;
     }
 
-    const triggers = rState.setting.operationSettings.flowTriggers;
+    const triggers = rState.workMode.workMode === 'manual'? ['carID']:rState.setting.operationSettings.flowTriggers; // 手动模式下，只需要车辆信息即可触发作业
 
     const operations = yield select(state => state.operations);
 

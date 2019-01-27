@@ -5,7 +5,7 @@ import {
   select,
   fork,
   takeLatest,
-  debounce
+  throttle
 } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
 import { RFID } from '../actions/actionTypes';
@@ -124,11 +124,10 @@ function createRfidChannel(rfidClient) {
   });
 }
 
-const getHealthz = state => state.healthCheckResults;
+// const getHealthz = state => state.healthCheckResults;
 
-function* RFIDHandler(data, reg) {
+function* RFIDHandler(reg, action) {
   try {
-    const { type, payload } = data;
 
     const state = yield select();
 
@@ -138,6 +137,9 @@ function* RFIDHandler(data, reg) {
       // 未使能rfid
       return
     }
+    const {data} = action;
+    const { type, payload } = data;
+
     switch (type) {
       case 'healthz': {
         const {healthCheckResults: healthzStatus} = state; // 获取整个healthz
@@ -197,9 +199,9 @@ export function* watchRfidChannel(regExp) {
   const e = new RegExp(regExp, 'i'); // 正則表達式,大小寫不敏感
   while (client !== null) {
     try {
-      yield debounce(3000, rfidChannel, RFIDHandler, e); // RFID 因为频繁触发所以进行防抖动处理,默认3秒
+      yield throttle(2000, rfidChannel, RFIDHandler, e); // RFID 因为频繁触发所以进行限流处理,默认2秒
     } catch (err) {
-      console.error(`watchRfidChannel: ${err.message}`);
+      console.error(`watchRFIDChannel: ${err.message}`);
     }
   }
 }
