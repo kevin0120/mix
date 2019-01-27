@@ -76,13 +76,13 @@ func NewService(cs Config, d Diagnostic, pAudi Protocol, pOpenprotocol Protocol)
 	for _, c := range cs.Configs {
 		switch c.Protocol {
 		case AUDIPROTOCOL:
-			new_controller := pAudi.AddNewController(c)
-			s.Controllers[c.SN] = new_controller
+			newController := pAudi.AddNewController(c)
+			s.Controllers[c.SN] = newController
 			s.protocols[c.SN] = pAudi
 
 		case OPENPROTOCOL:
-			new_controller := pOpenprotocol.AddNewController(c)
-			s.Controllers[c.SN] = new_controller
+			newController := pOpenprotocol.AddNewController(c)
+			s.Controllers[c.SN] = newController
 			s.protocols[c.SN] = pOpenprotocol
 
 		default:

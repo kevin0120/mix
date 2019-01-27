@@ -59,7 +59,7 @@ func (p *Service) Write(sn string, buf []byte) error {
 
 func (p *Service) AddNewController(cfg controller.ControllerConfig) controller.Controller {
 	config := p.config()
-	c := NewController(config)
+	c := NewController(config, p.diag)
 	c.Srv = p //服务注入
 	c.cfg = cfg
 
@@ -336,4 +336,8 @@ func (p *Service) GenerateIDInfo(info string) string {
 	}
 
 	return ids
+}
+
+func (p *Service)TryCreateMaintenance(info ToolInfo) error {
+	return p.Odoo.TryCreateMaintenance(info)
 }

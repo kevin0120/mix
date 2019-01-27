@@ -36,6 +36,7 @@ type Controller struct {
 	keepAliveCount    int32
 	keep_period       time.Duration
 	req_timeout       time.Duration
+	getToolInfoPeriod time.Duration
 	Response          ResponseQueue
 	Srv               *Service
 	dbController      *storage.Controllers
@@ -48,18 +49,21 @@ type Controller struct {
 	TriggerStart      time.Time
 	TriggerStop       time.Time
 	inputs            string
+	diag              Diagnostic
 }
 
-func NewController(c Config) Controller {
+func NewController(c Config, d Diagnostic) Controller {
 
 	cont := Controller{
-		buffer:      make(chan []byte, 1024),
-		closing:     make(chan chan struct{}),
-		keep_period: time.Duration(c.KeepAlivePeriod),
-		req_timeout: time.Duration(c.ReqTimeout),
-		Response:    ResponseQueue{},
-		handlerBuf:  make(chan handlerPkg, 1024),
-		protocol:    controller.OPENPROTOCOL,
+		diag:              d,
+		buffer:            make(chan []byte, 1024),
+		closing:           make(chan chan struct{}),
+		keep_period:       time.Duration(c.KeepAlivePeriod),
+		req_timeout:       time.Duration(c.ReqTimeout),
+		getToolInfoPeriod: time.Duration(c.GetToolInfoPeriod),
+		Response:          ResponseQueue{},
+		handlerBuf:        make(chan handlerPkg, 1024),
+		protocol:          controller.OPENPROTOCOL,
 	}
 
 	cont.StatusValue.Store(controller.STATUS_OFFLINE)
@@ -79,12 +83,15 @@ func (c *Controller) handlerProcess() {
 	for {
 		select {
 		case pkg := <-c.handlerBuf:
-			c.HandleMsg(&pkg)
+			err := c.HandleMsg(&pkg)
+			if err != nil {
+				c.diag.Error("OP protocol HandleMsg fail",err)
+			}
 		}
 	}
 }
 
-func (c *Controller) HandleMsg(pkg *handlerPkg) {
+func (c *Controller) HandleMsg(pkg *handlerPkg) error {
 	c.Srv.diag.Debug(fmt.Sprintf("%s%s\n", pkg.Header.Serialize(), pkg.Body))
 
 	switch pkg.Header.MID {
@@ -93,7 +100,7 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 
 		result_data := ResultData{}
 		result_data.Deserialize(pkg.Body)
-		c.handleResult(&result_data)
+		return c.handleResult(&result_data)
 
 	case MID_0065_OLD_DATA:
 		// 历史结果数据
@@ -118,7 +125,7 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 				result_data.FinalAngleTarget = pset_detail.AngleTarget
 			}
 
-			c.handleResult(&result_data)
+			return c.handleResult(&result_data)
 		}
 
 	case MID_0013_PSET_DETAIL_REPLY:
@@ -202,17 +209,21 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 		ms := MultiSpindleResult{}
 		ms.Deserialize(pkg.Body)
 
-		wsResults := []wsnotify.WSResult{}
-		wsResult := wsnotify.WSResult{}
-		for _, v := range ms.Spindles {
-			wsResult.Result = v.Result
-			wsResult.MI = v.Torque
-			wsResult.WI = v.Angle
-			wsResults = append(wsResults, wsResult)
+		wsResults := make([]wsnotify.WSResult, len(ms.Spindles),len(ms.Spindles))
+		//wsResult := wsnotify.WSResult{}
+		for idx, v := range ms.Spindles {
+			wsResults[idx].Result = v.Result
+			wsResults[idx].MI = v.Torque
+			wsResults[idx].WI = v.Angle
+			//wsResults = append(wsResults, wsResult)
 		}
 
-		ws_str, _ := json.Marshal(wsResults)
-		c.Srv.WS.WSSend(wsnotify.WS_EVENT_RESULT, string(ws_str))
+		wsStrs, err := json.Marshal(wsResults)
+		if err == nil {
+			c.Srv.WS.WSSend(wsnotify.WS_EVENT_RESULT, string(wsStrs))
+		}
+
+		return err
 
 	case MID_0052_VIN:
 		// 收到条码
@@ -225,7 +236,41 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) {
 		str, _ := json.Marshal(barcode)
 
 		c.Srv.WS.WSSend(wsnotify.WS_EVENT_SCANNER, string(str))
+	case MID_0071_ALARM:
+		// 收到报警信息
+		var ai AlarmInfo
+		err := ai.Deserialize(pkg.Body)
+		if err != nil {
+			c.diag.Error("alarm info deserialize fail", err)
+			return err
+		} else {
+			// 参见 项目管理,长安项目中文件:http://116.62.21.97/web#id=325&view_type=form&model=ir.attachment&active_id=3&menu_id=90
+			// 第11页,错误代码:Tool calibration required:E305
+			if ai.ErrorCode == "E305" {
+				// do nothing,当前未确认是否为这个错误代码
+			}
+		}
+		return nil
+	case MID_0041_TOOL_INFO_REPLY:
+		// 收到工具信息
+		var ti ToolInfo
+		err := ti.Deserialize(pkg.Body)
+		if err != nil {
+			c.diag.Error("tool info deserialize fail", err)
+		} else {
+			// 将数据通过api传给odoo
+			if ti.SerialNo == "" {
+				return errors.New("Tool Serial Number is empty string")
+			}
+
+			if ti.TotalTighteningCount == 0 || ti.CountSinLastService == 0{
+				//不需要尝试创建维修/标定单据
+				return nil
+			}
+			go c.Srv.TryCreateMaintenance(ti) // 协程处理
+		}
 	}
+	return nil
 }
 
 func ArrayContains(s []int, e int) bool {
@@ -238,10 +283,10 @@ func ArrayContains(s []int, e int) bool {
 	return false
 }
 
-func (c *Controller) handleResult(result_data *ResultData) {
+func (c *Controller) handleResult(result_data *ResultData) error {
 
 	if ArrayContains(c.Srv.config().SkipJobs, result_data.JobID) {
-		return
+		return nil
 	}
 
 	c.Srv.DB.UpdateTightning(c.dbController.Id, result_data.TightingID)
@@ -313,6 +358,8 @@ func (c *Controller) handleResult(result_data *ResultData) {
 
 	c.Srv.Parent.Handlers.Handle(&controllerResult, nil)
 
+	return nil
+
 }
 
 // seq, count
@@ -375,13 +422,30 @@ func (c *Controller) Connect() error {
 	c.IOInputSubscribe()
 	c.MultiSpindleResultSubscribe()
 	c.VinSubscribe()
+
+	c.AlarmSubcribe()
 	//c.DataSubscribeCurve()
 	// 启动发送
 	go c.manage()
 
 	go c.SolveOldResults()
 
+	go c.getTighteningCount()
+
 	return nil
+}
+
+func (c *Controller) getTighteningCount() {
+	for {
+		select {
+		case <-time.After(c.getToolInfoPeriod):
+			req := GeneratePackage(MID_0040_TOOL_INFO_REQUEST, "002", "", DEFAULT_MSG_END)
+			c.Write([]byte(req))
+		case stopDone := <-c.closing:
+			close(stopDone)
+			return //退出manage协程
+		}
+	}
 }
 
 func (c *Controller) GetPSetList() ([]int, error) {
@@ -645,7 +709,7 @@ func (c *Controller) updateStatus(status string) {
 func (c *Controller) Read(conn net.Conn) {
 	defer conn.Close()
 
-	len_header := LEN_HEADER
+	lenHeader := LEN_HEADER
 	rest := 0
 	body := ""
 	header_rest := 0
@@ -669,10 +733,10 @@ func (c *Controller) Read(conn net.Conn) {
 		for off < n {
 			if rest == 0 {
 				len_msg := n - off
-				if len_msg < len_header-header_rest {
+				if len_msg < lenHeader-header_rest {
 					//长度不够
 					if header_rest == 0 {
-						header_rest = len_header - len_msg
+						header_rest = lenHeader - len_msg
 					} else {
 						header_rest -= len_msg
 					}
@@ -681,8 +745,8 @@ func (c *Controller) Read(conn net.Conn) {
 				} else {
 					//完整
 					if header_rest == 0 {
-						header_buffer = msg[off : off+len_header]
-						off += len_header
+						header_buffer = msg[off : off+lenHeader]
+						off += lenHeader
 					} else {
 						header_buffer += msg[off : off+header_rest]
 						off += header_rest
@@ -749,10 +813,14 @@ func (c *Controller) Parse(msg string) {
 
 func (c *Controller) Close() error {
 
-	closed := make(chan struct{})
-	c.closing <- closed
+	for i := 0; i < 2; i++ {
+		//两个协程需要关闭
+		closed := make(chan struct{})
+		c.closing <- closed
 
-	<-closed
+		<-closed
+	}
+
 	return c.w.Close()
 }
 
@@ -852,9 +920,9 @@ func (c *Controller) ToolControl(enable bool) error {
 	c.Response.Add(s_cmd, nil)
 	defer c.Response.remove(s_cmd)
 
-	s_send := GeneratePackage(s_cmd, "001", "", DEFAULT_MSG_END)
+	sSend := GeneratePackage(s_cmd, "001", "", DEFAULT_MSG_END)
 
-	c.Write([]byte(s_send))
+	c.Write([]byte(sSend))
 
 	var reply interface{} = nil
 	for i := 0; i < MAX_REPLY_COUNT; i++ {
@@ -870,9 +938,9 @@ func (c *Controller) ToolControl(enable bool) error {
 		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
 	}
 
-	s_reply := reply.(string)
-	if s_reply != request_errors["00"] {
-		return errors.New(s_reply)
+	sReply := reply.(string)
+	if sReply != request_errors["00"] {
+		return errors.New(sReply)
 	}
 
 	return nil
@@ -1082,6 +1150,18 @@ func (c *Controller) ResultSubcribe() error {
 	return nil
 }
 
+func (c *Controller) AlarmSubcribe() error {
+	if c.Status() == controller.STATUS_OFFLINE {
+		return errors.New("status offline")
+	}
+
+	payload := GeneratePackage(MID_0070_ALARM_SUBSCRIBE, "001", "", DEFAULT_MSG_END)
+
+	c.Write([]byte(payload))
+
+	return nil
+}
+
 func (c *Controller) CurveSubscribe() error {
 	if c.Status() == controller.STATUS_OFFLINE {
 		return errors.New("status offline")
@@ -1232,9 +1312,9 @@ func (c *Controller) JobAbort() error {
 		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
 	}
 
-	s_reply := reply.(string)
-	if s_reply != request_errors["00"] {
-		return errors.New(s_reply)
+	sReply := reply.(string)
+	if sReply != request_errors["00"] {
+		return errors.New(sReply)
 	}
 
 	return nil

@@ -2,6 +2,7 @@ package openprotocol
 
 import (
 	"fmt"
+	"github.com/juju/errors"
 	"github.com/masami10/rush/utils/biu"
 	"strconv"
 	"strings"
@@ -40,6 +41,8 @@ const (
 	MID_0010_PSET_LIST_REQUEST       = "0010"
 	MID_0011_PSET_LIST_REPLY         = "0011"
 	MID_0034_JOB_INFO_SUBSCRIBE      = "0034"
+	MID_0040_TOOL_INFO_REQUEST       = "0040"
+	MID_0041_TOOL_INFO_REPLY         = "0041"
 	MID_0060_LAST_RESULT_SUBSCRIBE   = "0060"
 	MID_7408_LAST_CURVE_SUBSCRIBE    = "7408"
 	MID_0151_IDENTIFIER_SUBSCRIBE    = "0151"
@@ -47,6 +50,8 @@ const (
 	MID_0038_JOB_SELECT              = "0038"
 	MID_0064_OLD_SUBSCRIBE           = "0064"
 	MID_0065_OLD_DATA                = "0065"
+	MID_0070_ALARM_SUBSCRIBE         = "0070"
+	MID_0071_ALARM                   = "0071"
 	MID_0130_JOB_OFF                 = "0130"
 	MID_0250_SELECTOR_SUBSCRIBE      = "0250"
 	MID_0042_TOOL_DISABLE            = "0042"
@@ -483,6 +488,24 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 		h.Spindle = ""
 		h.Spare = ""
 
+		return h.Serialize() + end
+	case MID_0070_ALARM_SUBSCRIBE:
+		h.MID = MID_0051_VIN_SUBSCRIBE
+		h.LEN = LEN_HEADER
+		h.Revision = rev
+		h.NoAck = "1" //不需要ack
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
+		return h.Serialize() + end
+	case MID_0040_TOOL_INFO_REQUEST:
+		h.MID = MID_0040_TOOL_INFO_REQUEST
+		h.LEN = LEN_HEADER
+		h.Revision = rev
+		h.NoAck = ""
+		h.Station = ""
+		h.Spindle = ""
+		h.Spare = ""
 		return h.Serialize() + end
 	}
 
@@ -1049,6 +1072,54 @@ func (p *JobDetail) Deserialize(str string) error {
 	}
 
 	return nil
+}
+
+type AlarmInfo struct {
+	ErrorCode      string
+	isControllerOK bool
+	isToolOK       bool
+}
+
+func (ai *AlarmInfo) Deserialize(msg string) error {
+
+	var err error = nil
+
+	if len(msg) < 20 {
+		return errors.New("alarm info msg len is not enough")
+	}
+
+	ai.ErrorCode = msg[2:6] //4位为错误码
+
+	ai.isControllerOK, err = strconv.ParseBool(msg[8:9])
+
+	ai.isToolOK, err = strconv.ParseBool(msg[11:12])
+
+	return err
+
+}
+
+type ToolInfo struct {
+	SerialNo             string `json:"serial_no"`
+	TotalTighteningCount int `json:"times"`
+	CountSinLastService  int `json:"sin_last_service"`
+}
+
+func (ti *ToolInfo) Deserialize(msg string) error {
+
+	var err error = nil
+
+	if len(msg) < 20 {
+		return errors.New("alarm info msg len is not enough")
+	}
+
+	ti.SerialNo = strings.TrimSpace(msg[2:16]) //去除空格获取序列号
+
+	ti.TotalTighteningCount, err = strconv.Atoi(msg[18:28])
+
+	ti.CountSinLastService, err = strconv.Atoi(msg[92:102])
+
+	return err
+
 }
 
 type JobInfo struct {

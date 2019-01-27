@@ -297,6 +297,10 @@ func (h *OdooHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
 
+func (h *OdooHandler) Info(msg string) {
+	h.l.Info(msg)
+}
+
 func (h *OdooHandler) CreateWOSuccess(id int64) {
 	h.l.Debug(fmt.Sprintf("Create WO successful %d", id))
 }

@@ -24,6 +24,7 @@ const (
 
 type Diagnostic interface {
 	Error(msg string, err error)
+	Info(msg string)
 	CreateWOSuccess(id int64)
 }
 
@@ -441,8 +442,41 @@ func (s *Service) taskSaveWorkorders() {
 }
 
 func (s *Service) handleSaveWorkorders(payload interface{}) {
-	defer debug.FreeOSMemory()
+	defer debug.FreeOSMemory() //快速释放不必要的内存
 
 	workorders := payload.(*[]ODOOWorkorder)
 	s.CreateWorkorders(*workorders)
+}
+
+func (s *Service) TryCreateMaintenance(body interface{}) error {
+	var err error = nil
+	endpoints := s.GetEndpoints("tryCreateMaintenance")
+	for _, endpoint := range endpoints {
+		url := endpoint.url
+
+		r := s.httpClient.R().SetBody(body)
+		var resp *resty.Response
+
+		switch endpoint.method {
+		case "POST":
+			resp, err = r.Post(url)
+			if err != nil {
+				return fmt.Errorf("TryCreateMaintenance: %s", err.Error())
+			} else {
+				status := resp.StatusCode()
+				if status > 400 {
+					return fmt.Errorf("TryCreateMaintenance return status code: %d", status)
+				} else if status == http.StatusCreated {
+					s.diag.Info("create Maintenance")
+					return nil
+				}else {
+					return nil
+				}
+			}
+		default:
+			return errors.New("TryCreateMaintenance :the Method is wrong")
+		}
+
+	}
+	return err
 }
