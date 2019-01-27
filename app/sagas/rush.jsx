@@ -43,13 +43,7 @@ function* initRush() {
     const conn = connections.masterpc.split('://')[1];
     const wsURL = `ws://${conn}/rush/v1/ws`;
 
-    if (task) {
-      yield cancel(task);
-    }
-
-    if (ws) {
-      yield call(stopRush);
-    }
+    yield call(stopRush);
 
     ws = new WebSocket(wsURL, { reconnectInterval: 3000 });
 
@@ -63,17 +57,28 @@ function* initRush() {
 }
 
 function* stopRush() {
-  if (
-    ws.ws.readyState === OWebSocket.OPEN ||
-    ws.ws.readyState === OWebSocket.CONNECTING
-  ) {
-    yield put(setHealthzCheck('masterpc', false));
-    yield put(setNewNotification('info', `masterPC连接状态更新: ${false}`));
-    yield put(setHealthzCheck('controller', false));
-    yield put(setNewNotification('info', `controller连接状态更新: ${false}`));
-    ws.close();
+  try {
+    if (ws){
+      if (
+        ws.ws.readyState === OWebSocket.OPEN ||
+        ws.ws.readyState === OWebSocket.CONNECTING
+      ) {
+        yield put(setHealthzCheck('masterpc', false));
+        yield put(setNewNotification('info', `masterPC连接状态更新: ${false}`));
+        yield put(setHealthzCheck('controller', false));
+        yield put(setNewNotification('info', `controller连接状态更新: ${false}`));
+        ws.close();
+      }
+      ws = null;
+    }
+    if (task) {
+      yield cancel(task);
+    }
+  }catch (e) {
+    console.error(`stopRush error: ${e.message}`)
   }
-  ws = null;
+
+
 }
 
 function createRushChannel(hmiSN) {

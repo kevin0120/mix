@@ -31,7 +31,6 @@ function* fetchOperationList() {
     const state = yield select();
     const { hmiSn, odooUrl } = state.setting.page.odooConnection;
     const response = yield call(operationListApi, odooUrl.value, hmiSn.value);
-    console.log('fetchOperationList:', response);
     yield put({
       type: OPERATION_VIEWER.LIST_FETCH_OK,
       data: response.data
@@ -50,7 +49,6 @@ function* fetchOperationDetail(operationID) {
       type: OPERATION_VIEWER.DETAIL_FETCH_OK,
       data: response.data
     });
-    console.log('fetchOperationDetail:', response);
   } catch (e) {
     console.log(e);
   }

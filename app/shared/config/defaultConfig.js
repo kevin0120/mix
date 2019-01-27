@@ -220,7 +220,7 @@ export const defaultConfigs = {
     switchAutoManual: false,
     oeeFuncEnable: false,
     modbusEnable: false,
-    rfidEnabled: false,
+    rfidEnabled: true,
     andonEnable: true,
     psetContinueMode: false,
     enableFocus: true

@@ -4,8 +4,9 @@ import {
   put,
   select,
   fork,
-  takeLatest,
-  throttle
+  cancel,
+  // debounce,
+  delay
 } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
 import { RFID } from '../actions/actionTypes';
@@ -19,7 +20,8 @@ const _ = require('lodash');
 
 let client = null;
 let recon = null;
-let rfidChannel = null;
+
+let watchChannelTask = null;
 
 const net = require('net');
 const Reconnect = require('node-net-reconnect');
@@ -42,8 +44,7 @@ export function* watchRfid() {
 
 function* initRFID() {
   const state = yield select();
-
-  const { connections, operationSettings } = state;
+  const { connections ,setting:{operationSettings}} = state;
 
   const { regExp } = operationSettings;
 
@@ -72,21 +73,29 @@ function* initRFID() {
   client.setEncoding('ascii');
   client.connect(options);
 
-  rfidChannel = yield call(createRfidChannel, client);
+  const rfidChannel = yield call(createRfidChannel, client);
 
-  yield fork(watchRfidChannel, regExp);
+  watchChannelTask = yield fork(watchRfidChannel, rfidChannel, regExp);
 }
 
-export function stopRFID() {
-  if (recon != null) {
-    recon.end();
-    recon = null;
+export function* stopRFID() {
+  try {
+    if (recon != null) {
+      recon.end();
+      recon = null;
+    }
+
+    if (client) {
+      client.destroy();
+      client = null;
+    }
+    if (watchChannelTask){
+      yield cancel(watchChannelTask);
+    }
+  }catch (e) {
+    console.error(`stopRFID error: ${e.message}`)
   }
 
-  if (client) {
-    client.destroy();
-    client = null;
-  }
 }
 
 function createRfidChannel(rfidClient) {
@@ -126,7 +135,7 @@ function createRfidChannel(rfidClient) {
 
 // const getHealthz = state => state.healthCheckResults;
 
-function* RFIDHandler(reg, action) {
+function* RFIDHandler(reg, data) {
   try {
 
     const state = yield select();
@@ -137,7 +146,6 @@ function* RFIDHandler(reg, action) {
       // 未使能rfid
       return
     }
-    const {data} = action;
     const { type, payload } = data;
 
     switch (type) {
@@ -195,11 +203,14 @@ function* RFIDHandler(reg, action) {
   }
 }
 
-export function* watchRfidChannel(regExp) {
-  const e = new RegExp(regExp, 'i'); // 正則表達式,大小寫不敏感
+export function* watchRfidChannel(channel,regExp) {
+  const reg = new RegExp(regExp, 'i'); // 正則表達式,大小寫不敏感
   while (client !== null) {
     try {
-      yield throttle(2000, rfidChannel, RFIDHandler, e); // RFID 因为频繁触发所以进行限流处理,默认2秒
+      // yield debounce(3000, rfidChannel, RFIDHandler, reg); // RFID 因为频繁触发所以进行防抖动处理,默认3秒
+      const data =yield take(channel);
+      yield fork(RFIDHandler,data,reg);
+      yield delay(2000);
     } catch (err) {
       console.error(`watchRFIDChannel: ${err.message}`);
     }
