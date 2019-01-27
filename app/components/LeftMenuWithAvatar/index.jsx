@@ -58,14 +58,14 @@ function ConnectedLeftMenuWithAvatar(props) {
           {/*secondary={users[0].name}*/}
           {/*/>*/}
           {/*</ListItem>*/}
-          <ListItem className={classes.timeWrap}>
-            <Clock
-              className={classes.timeContent}
-              format="HH:mm:ss"
-              ticking
-              timezone="Asia/Shanghai"
-            />
-          </ListItem>
+          {/*<ListItem className={classes.timeWrap}>*/}
+            {/*<Clock*/}
+              {/*className={classes.timeContent}*/}
+              {/*format="HH:mm:ss"*/}
+              {/*ticking*/}
+              {/*timezone="Asia/Shanghai"*/}
+            {/*/>*/}
+          {/*</ListItem>*/}
         </List>
       </div>
     </Drawer>

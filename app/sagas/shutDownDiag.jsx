@@ -10,7 +10,9 @@
 
 import { select, put, call, take } from 'redux-saga/effects';
 
-import { SHUTDOWN_DIAG } from '../actions/actionTypes';
+import { openShutDownDiagwMsg, closeShutDownDiag} from '../actions/shutDownDiag';
+
+import {SHUTDOWN_DIAG } from '../actions/actionTypes'
 
 import {
   switch2Ready,
@@ -18,13 +20,13 @@ import {
   operationVerified
 } from '../actions/operation';
 import { Info } from '../logger';
-import { toolDisable } from '../actions/tools';
+// import { toolDisable } from '../actions/tools';
 
 import { ak2 } from './operation';
 
 const { ipcRenderer } = require('electron');
 
-const getOperations = state => state.operations;
+// const getOperations = state => state.operations;
 
 function* openDiag(dType, data) {
   const state = yield select();
@@ -34,29 +36,37 @@ function* openDiag(dType, data) {
     return;
   }
   const msg = data !== null ? data.reasons.join(',') : '';
-  yield put({ type: SHUTDOWN_DIAG.OPEN_WITH_MSG, dType, msg });
+  yield put(openShutDownDiagwMsg(dType,msg));
 }
 
 function* closeDiag(dType) {
-  if (dType === 'verify') {
-    yield put(switch2Ready);
+  try {
+    if (dType === 'verify') {
+      yield put(switch2Ready());
+    }
+
+    yield put(closeShutDownDiag());
+  }catch (e) {
+    console.error(`closeDiag error: ${e.message}`)
   }
 
-  yield put({ type: SHUTDOWN_DIAG.CLOSE });
 }
 
 function* confirmDiag(dType, data) {
+
   try {
+
+    const state = yield select();
+
     switch (dType) {
       case 'shutdown': {
         ipcRenderer.send('asynchronous-message', 'shutdown');
         break;
       }
       case 'bypass': {
-        const op = yield select(getOperations);
+        const {operations:op } = state;
         const { carID } = op;
-        const state = yield select();
-        const { enableAk2 } = state.setting.operationSettings;
+        const { enableAk2=true } = state.setting.operationSettings;
         if (enableAk2) {
           yield call(ak2);
         }
@@ -66,7 +76,11 @@ function* confirmDiag(dType, data) {
       }
       case 'verify': {
         // 冲突确认，继续作业
-        yield put(operationVerified(data));
+        const {enableConflictOP=false} = state.setting.systemSettings;
+        if(enableConflictOP){
+          yield put(operationVerified(data));
+
+        }
         break;
       }
       default: {
@@ -74,27 +88,34 @@ function* confirmDiag(dType, data) {
       }
     }
 
-    yield put({ type: SHUTDOWN_DIAG.CLOSE });
-  } catch (e) {}
+    yield put(closeShutDownDiag());
+  } catch (e) {
+    console.error(`confirmDiag error: ${e.message}`)
+  }
 }
 
 export function* shutDownDiagWorkFlow() {
-  while (true) {
-    const { dType, data } = yield take(SHUTDOWN_DIAG.OPEN);
-    yield call(openDiag, dType, data);
-    const action = yield take([
-      SHUTDOWN_DIAG.CLOSE_START,
-      SHUTDOWN_DIAG.CONFIRM
-    ]);
-    switch (action.type) {
-      case SHUTDOWN_DIAG.CLOSE_START:
-        yield call(closeDiag, dType);
-        break;
-      case SHUTDOWN_DIAG.CONFIRM:
-        yield call(confirmDiag, dType, data);
-        break;
-      default:
-        break;
+  try {
+    while (true) {
+      const { dType, data } = yield take(SHUTDOWN_DIAG.OPEN);
+      yield call(openDiag, dType, data);
+      const action = yield take([
+        SHUTDOWN_DIAG.CLOSE_START,
+        SHUTDOWN_DIAG.CONFIRM
+      ]);
+      switch (action.type) {
+        case SHUTDOWN_DIAG.CLOSE_START:
+          yield call(closeDiag, dType);
+          break;
+        case SHUTDOWN_DIAG.CONFIRM:
+          yield call(confirmDiag, dType, data);
+          break;
+        default:
+          break;
+      }
     }
+  }catch (e) {
+    console.error(`shutDownDiagWorkFlow error: ${e.message}`)
   }
+
 }

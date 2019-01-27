@@ -34,3 +34,9 @@ export function switch2Timeout() {
     type: OPERATION.TIMEOUT
   };
 }
+
+export function switch2PreDoing() {
+  return {
+    type: OPERATION.PREDOING
+  };
+}

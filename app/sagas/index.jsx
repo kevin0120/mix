@@ -10,7 +10,7 @@ import { watchIO } from './io';
 import { shutDownDiagWorkFlow } from './shutDownDiag';
 import { toolFunctions } from './tools';
 import { loginFlow, logoutFlow } from './auth';
-import { healthzCheckFlow } from './healthzCheck';
+// import { healthzCheckFlow } from './healthzCheck';
 import { watchAiis } from './aiis';
 import { watchSettingPreSave } from './setting';
 import { watchRush } from './rush';
@@ -30,8 +30,8 @@ export default function* rootSaga() {
       watchNotification(),
       watchAiis(),
       watchOperation(),
-      watchResults(),
-      watchIO(),
+      watchResults(), // 监听结果
+      watchIO(), // 监听IO数据
       watchRush(),
       watchRfid(),
       shutDownDiagWorkFlow(),

@@ -18,10 +18,16 @@ export function openShutdown(dType, data = null) {
   };
 }
 
-export function closeShutDownDiag(dType) {
+export function precloseShutDownDiag(dType) {
   return {
     type: SHUTDOWN_DIAG.CLOSE_START,
     dType
+  };
+}
+
+export function closeShutDownDiag() {
+  return {
+    type: SHUTDOWN_DIAG.CLOSE,
   };
 }
 
@@ -30,4 +36,12 @@ export function confirmShutDownDiag(dType) {
     type: SHUTDOWN_DIAG.CONFIRM,
     dType
   };
+}
+
+export function openShutDownDiagwMsg( dType, msg) {
+  return {
+    type:SHUTDOWN_DIAG.OPEN_WITH_MSG,
+    dType,
+    msg
+  }
 }

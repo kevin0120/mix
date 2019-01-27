@@ -44,8 +44,8 @@ class ConnectedShutdownDiag extends React.Component {
   }
 
   handleClose = () => {
-    const { type, closeShutDownDiag } = this.props;
-    closeShutDownDiag(type); // 關閉窗口
+    const { type, precloseShutDownDiag } = this.props;
+    precloseShutDownDiag(type); // 關閉窗口
   };
 
   handleConfirm = () => {
@@ -143,7 +143,9 @@ class ConnectedShutdownDiag extends React.Component {
 
 ConnectedShutdownDiag.propTypes = {
   show: PropTypes.bool.isRequired,
-  msg: PropTypes.string.isRequired
+  msg: PropTypes.string.isRequired,
+  precloseShutDownDiag: PropTypes.func.isRequired
+
 };
 
 const ShutdownDiag = connect(

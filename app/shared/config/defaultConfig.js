@@ -214,6 +214,7 @@ export const defaultConfigs = {
   },
   systemSettings: {
     enableDebugInfo: false,
+    enableConflictOP: false,
     showSwitchMode: false, // 切换pset or job 模式
     defaultControllerSN: '0001',
     authEnable: true,

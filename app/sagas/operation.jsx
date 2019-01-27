@@ -18,7 +18,7 @@ import {
 import { addNewStory, clearStories, STORY_TYPE } from './timeline';
 import { toolEnable, toolDisable } from '../actions/tools';
 import { setResultDiagShow } from '../actions/resultDiag';
-import { switch2Ready } from '../actions/operation';
+import { switch2Ready,switch2PreDoing } from '../actions/operation';
 import {
   fetchOngoingOperationOK,
   cleanOngoingOperation
@@ -76,8 +76,7 @@ function* getNextWorkOrderandShow() {
   try {
     const state = yield select();
 
-    const rushUrl = state.connections.masterpc;
-    const { workcenterCode } = state.connections;
+    const {masterpc: rushUrl, workcenterCode }= state.connections;
     const resp = yield call(fetchNextWorkOrder, rushUrl, workcenterCode);
     if (resp.status === 200) {
       yield put(fetchOngoingOperationOK(resp.data));
@@ -93,6 +92,7 @@ export function* triggerOperation(carID, carType, job, source) {
     const rState = yield select();
 
     if (rState.router.location.pathname !== '/working') {
+      // 不在作业页面，直接返回
       return;
     }
 
@@ -129,11 +129,11 @@ export function* triggerOperation(carID, carType, job, source) {
         return;
       case OPERATION_STATUS.READY:
         yield call(clearStories);
-        yield put({ type: OPERATION.PREDOING });
+        yield put(switch2PreDoing());
         break;
 
       case OPERATION_STATUS.TIMEOUT:
-        yield put({ type: OPERATION.PREDOING });
+        yield put(switch2PreDoing());
         break;
 
       default:
@@ -164,8 +164,7 @@ export function* getOperation(job) {
   try {
     const state = yield select();
 
-    const rushUrl = state.connections.masterpc;
-    const { workcenterCode } = state.connections;
+    const { masterpc:rushUrl, workcenterCode } = state.connections;
 
     let fetchOK = false;
     let resp = null;
