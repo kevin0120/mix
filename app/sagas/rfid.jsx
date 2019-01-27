@@ -5,7 +5,7 @@ import {
   select,
   fork,
   cancel,
-  // debounce,
+  throttle,
   delay
 } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
@@ -29,53 +29,64 @@ const Reconnect = require('node-net-reconnect');
 const lodash = require('lodash');
 
 export function* watchRfid() {
-  while (true) {
-    const { type } = yield take(RFID.INIT);
-    switch (type) {
-      case RFID.INIT:
-        yield call(initRFID);
-        break;
+  try {
+    while (true) {
+      const { type } = yield take(RFID.INIT);
+      switch (type) {
+        case RFID.INIT:
+          yield call(initRFID);
+          break;
 
-      default:
-        break;
+        default:
+          break;
+      }
     }
+  }catch (e) {
+    console.error(`watchRFID error: ${e.message}`)
   }
+
 }
 
 function* initRFID() {
-  const state = yield select();
-  const { connections ,setting:{operationSettings}} = state;
+  try {
+    const state = yield select();
+    const { connections ,setting:{operationSettings}} = state;
 
-  const { regExp } = operationSettings;
+    const { regExp } = operationSettings;
 
-  if (connections.rfid === '') {
-    return;
+    if (connections.rfid === '') {
+      return;
+    }
+
+    const rfidURL = connections.rfid;
+    const kvs = rfidURL.split('://');
+    const hostPorts = kvs[1].split(':');
+    const host = hostPorts[0];
+    const port = parseInt(hostPorts[1].split('/')[0], 10);
+
+    yield call(stopRFID);
+
+    client = new net.Socket();
+    const options = {
+      host,
+      port,
+      retryTime: 1000, // 1s for every retry
+      retryAlways: true // retry even if the connection was closed on purpose
+    };
+
+    recon = new Reconnect(client, options);
+    client.setTimeout(10000);
+    client.setEncoding('ascii');
+    client.connect(options);
+
+    const rfidChannel = yield call(createRfidChannel, client);
+
+    watchChannelTask = yield fork(watchRfidChannel, rfidChannel, regExp);
+
+  }catch (e) {
+    console.error(`initRFID error: ${e.message}`)
   }
 
-  const rfidURL = connections.rfid;
-  const kvs = rfidURL.split('://');
-  const hostPorts = kvs[1].split(':');
-  const host = hostPorts[0];
-  const port = parseInt(hostPorts[1].split('/')[0], 10);
-
-  yield call(stopRFID);
-
-  client = new net.Socket();
-  const options = {
-    host,
-    port,
-    retryTime: 1000, // 1s for every retry
-    retryAlways: true // retry even if the connection was closed on purpose
-  };
-
-  recon = new Reconnect(client, options);
-  client.setTimeout(10000);
-  client.setEncoding('ascii');
-  client.connect(options);
-
-  const rfidChannel = yield call(createRfidChannel, client);
-
-  watchChannelTask = yield fork(watchRfidChannel, rfidChannel, regExp);
 }
 
 export function* stopRFID() {
@@ -205,9 +216,9 @@ function* RFIDHandler(reg, data) {
 
 export function* watchRfidChannel(channel,regExp) {
   const reg = new RegExp(regExp, 'i'); // 正則表達式,大小寫不敏感
-  while (client !== null) {
+  while (client !== null && channel !== null) {
     try {
-      // yield debounce(3000, rfidChannel, RFIDHandler, reg); // RFID 因为频繁触发所以进行防抖动处理,默认3秒
+      // yield throttle(3000, channel, RFIDHandler, reg); // RFID 因为频繁触发所以进行防抖动处理,默认3秒
       const data =yield take(channel);
       yield fork(RFIDHandler,data,reg);
       yield delay(2000);
