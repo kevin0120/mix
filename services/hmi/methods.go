@@ -40,11 +40,11 @@ func (m *Methods) putToolControl(ctx iris.Context) {
 		return
 	}
 
-	//if te.GunSN == "" {
-	//	ctx.StatusCode(iris.StatusBadRequest)
-	//	ctx.WriteString("gun_sn is required")
-	//	return
-	//}
+	if te.GunSN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("gun_sn is required")
+		return
+	}
 
 	// 通过控制器设定程序
 	c, exist := m.service.ControllerService.Controllers[te.Controller_SN]
@@ -56,9 +56,9 @@ func (m *Methods) putToolControl(ctx iris.Context) {
 
 	switch c.Protocol() {
 	case controller.AUDIPROTOCOL:
-		err = m.service.AudiVw.ToolControl(te.Controller_SN, te.Enable)
+		err = m.service.AudiVw.ToolControl(te.Controller_SN, te.GunSN, te.Enable)
 	case controller.OPENPROTOCOL:
-		err = m.service.OpenProtocol.ToolControl(te.Controller_SN, te.Enable)
+		err = m.service.OpenProtocol.ToolControl(te.Controller_SN, te.GunSN, te.Enable)
 
 	default:
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -151,9 +151,9 @@ func (m *Methods) putPSets(ctx iris.Context) {
 
 	switch c.Protocol() {
 	case controller.AUDIPROTOCOL:
-		err = m.service.AudiVw.PSet(pset.Controller_SN, pset.PSet, workorder.Id, int64(pset.GroupSeq), pset.Count, pset.UserID)
+		err = m.service.AudiVw.PSet(pset.Controller_SN, pset.GunSN, pset.PSet, workorder.Id, int64(pset.GroupSeq), pset.Count, pset.UserID)
 	case controller.OPENPROTOCOL:
-		err = m.service.OpenProtocol.PSet(pset.Controller_SN, pset.PSet, pset.Result_id, pset.Count, pset.UserID)
+		err = m.service.OpenProtocol.PSet(pset.Controller_SN, pset.GunSN,pset.PSet, pset.Result_id, pset.Count, pset.UserID)
 
 	default:
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -240,8 +240,8 @@ func (m *Methods) putManualPSets(ctx iris.Context) {
 			return
 		}
 
-		ex_info := fmt.Sprintf("%25s%25s%25s%25d", pset.Vin, pset.HmiSN, pset.CarType, pset.UserID)
-		err = m.service.OpenProtocol.PSetManual(pset.Controller_SN, pset.PSet, pset.UserID, ex_info, pset.Count)
+		exInfo := fmt.Sprintf("%25s%25s%25s%25d", pset.Vin, pset.HmiSN, pset.CarType, pset.UserID)
+		err = m.service.OpenProtocol.PSetManual(pset.Controller_SN, pset.GunSN, pset.PSet, pset.UserID, exInfo, pset.Count)
 
 	default:
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -582,6 +582,12 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 		return
 	}
 
+	if job.GunSN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("gun_sn is required")
+		return
+	}
+
 	if job.Job == 0 {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("job is required")
@@ -640,7 +646,7 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 		}
 
 		if !job.HasSet {
-			err = m.service.OpenProtocol.JobSetManual(job.Controller_SN, job.Job, job.UserID, ex_info)
+			err = m.service.OpenProtocol.JobSetManual(job.Controller_SN, job.GunSN, job.Job, job.UserID, ex_info)
 		} else {
 			m.service.OpenProtocol.IDSet(job.Controller_SN, ex_info)
 		}

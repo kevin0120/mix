@@ -48,6 +48,7 @@ type Job struct {
 
 type JobManual struct {
 	Controller_SN string `json:"controller_sn"`
+	GunSN string `json:"gun_sn"`
 	Job           int    `json:"job_id"`
 	UserID        int64  `json:"user_id"`
 	CarType       string `json:"car_type"`

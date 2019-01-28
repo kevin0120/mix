@@ -125,7 +125,9 @@ controller_service:
     protocol: Audi/VW
     remote_ip: 192.168.3.101
     port: 4700
-    channel: 51
+    tools:
+      - gun_serial: 18G46139
+        channel: 51
 
 #  - serial_no: 0001
 #    protocol: OpenProtocol

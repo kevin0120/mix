@@ -8,10 +8,15 @@ import (
 )
 
 type ControllerConfig struct {
-	SN          string `yaml:"serial_no"`
-	Protocol    string `yaml:"protocol"`
-	RemoteIP    string `yaml:"remote_ip"`
-	Port        int    `yaml:"port"`
+	SN       string       `yaml:"serial_no"`
+	Protocol string       `yaml:"protocol"`
+	RemoteIP string       `yaml:"remote_ip"`
+	Port     int          `yaml:"port"`
+	Tools    []ToolConfig `yaml:"tools"`
+}
+
+type ToolConfig struct {
+	SerialNO    string `yaml:"gun_serial"`
 	ToolChannel int    `yaml:"channel"`
 }
 
@@ -26,17 +31,27 @@ func init() {
 	Protocols = []string{AUDIPROTOCOL, OPENPROTOCOL}
 }
 
-func NewConfig() Config {
+func newControllerConf() ControllerConfig {
 	_sn, _ := uuid.NewV4()
-	configs := []ControllerConfig{}
 
-	configs = append(configs, ControllerConfig{
-		SN:          _sn.String(),
-		Protocol:    AUDIPROTOCOL,
-		RemoteIP:    "127.0.0.1",
-		Port:        4700,
+	gunConf := ToolConfig{
+		SerialNO:    "",
 		ToolChannel: DEFAULT_TOOL_CHANNEL,
-	})
+	}
+
+	return ControllerConfig{
+		SN:       _sn.String(),
+		Protocol: AUDIPROTOCOL,
+		RemoteIP: "127.0.0.1",
+		Port:     4700,
+		Tools:    []ToolConfig{gunConf},
+	}
+}
+
+func NewConfig() Config {
+	var configs []ControllerConfig
+
+	configs = append(configs, newControllerConf())
 
 	return Config{
 		Workers: 4,

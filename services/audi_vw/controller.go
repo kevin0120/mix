@@ -178,11 +178,11 @@ func (c *Controller) manage() {
 				c.updateKeepAliveDeadLine() //更新keepalivedeadline
 				c.addKeepAliveCount()
 			}
-		//case <-time.After(c.toolInfo_period):
-		//	if c.Status() == controller.STATUS_OFFLINE {
-		//		continue
-		//	}
-		//	c.getToolInfo()
+		case <-time.After(c.toolInfo_period):
+			if c.Status() == controller.STATUS_OFFLINE {
+				continue
+			}
+			c.getToolInfo()
 
 		case v := <-c.buffer:
 			for nextWriteThreshold.After(time.Now()) {
@@ -450,7 +450,23 @@ func (c *Controller) PSet(pset int, workorder_id int64, reseult_id int64, count 
 
 func (c *Controller) audiVW2OPToolInfo(ti toolInfoCNT) openprotocol.ToolInfo {
 	var info openprotocol.ToolInfo
-	info.SerialNo = c.cfg.SN //没有枪的序列号,无法进行
+
+	var t controller.ToolConfig
+
+	var toolExist = false
+
+	for _, t = range c.cfg.Tools {
+		if t.ToolChannel == int(ti.MSL_MSG.KNR) {
+			toolExist = true
+			break
+		}
+	}
+
+	if !toolExist {
+		c.Srv.diag.Error("audiVW2OPToolInfo",errors.New(fmt.Sprintf(" tool serial number:%s", t.SerialNO)))
+	}
+
+	info.SerialNo = t.SerialNO
 	info.CountSinLastService = int(ti.MSL_MSG.CSR)
 	info.TotalTighteningCount = int(ti.MSL_MSG.CLT)
 

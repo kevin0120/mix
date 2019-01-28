@@ -21,11 +21,12 @@ import (
 )
 
 const (
-	ERR_CVI3_NOT_FOUND     = "CIV3 SN is invalid"
-	ERR_CVI3_OFFLINE       = "cvi3 offline"
-	ERR_CVI3_REQUEST       = "request to cvi3 failed"
-	ERR_CVI3_REPLY_TIMEOUT = "cvi3 reply timeout"
-	ERR_CVI3_REPLY         = "cvi3 reply contains error"
+	ERR_CVI3_NOT_FOUND      = "CIV3 SN is invalid"
+	ERR_CVI3_TOOL_NOT_FOUND = "CIV3 TOOL SN is invalid"
+	ERR_CVI3_OFFLINE        = "cvi3 offline"
+	ERR_CVI3_REQUEST        = "request to cvi3 failed"
+	ERR_CVI3_REPLY_TIMEOUT  = "cvi3 reply timeout"
+	ERR_CVI3_REPLY          = "cvi3 reply contains error"
 )
 
 type Diagnostic interface {
@@ -112,7 +113,7 @@ func (p *Service) Open() error {
 
 	err := p.listener.Start()
 	if err != nil {
-		return errors.Wrapf(err, "Open Protocol %s Listener fail", p.name)
+		return errors.Wrapf(err, "AudiVW XML Protocol %s Listener fail", p.name)
 	}
 
 	for _, w := range p.Parent.Controllers {
@@ -386,9 +387,9 @@ func (p *Service) GetControllersStatus(sns []string) ([]ControllerStatus, error)
 }
 
 // 设置拧接程序
-func (p *Service) PSet(sn string, pset int, workorderId int64, resultId int64, count int, userId int64) error {
+func (p *Service) PSet(controller_sn string, tool_sn string, pset int, workorderId int64, resultId int64, count int, userId int64) error {
 	// 判断控制器是否存在
-	v, exist := p.Parent.Controllers[sn]
+	v, exist := p.Parent.Controllers[controller_sn]
 	if !exist {
 		// SN对应控制器不存在
 		return errors.New(ERR_CVI3_NOT_FOUND)
@@ -396,13 +397,28 @@ func (p *Service) PSet(sn string, pset int, workorderId int64, resultId int64, c
 
 	c := v.(*Controller)
 
+	var t controller.ToolConfig
+
+	var toolExist = false
+
+	for _, t = range c.cfg.Tools {
+		if t.SerialNO == tool_sn {
+			toolExist = true
+			break
+		}
+	}
+
+	if !toolExist {
+		return errors.New(fmt.Sprintf(ERR_CVI3_NOT_FOUND+" tool serial number:%s", tool_sn))
+	}
+
 	if c.Status() == controller.STATUS_OFFLINE {
 		// 控制器离线
 		return errors.New(ERR_CVI3_OFFLINE)
 	}
 
 	// 设定pset并判断控制器响应
-	_, err := c.PSet(pset, workorderId, resultId, count, userId, c.cfg.ToolChannel)
+	_, err := c.PSet(pset, workorderId, resultId, count, userId, t.ToolChannel)
 	if err != nil {
 		// 控制器请求失败
 		return err
@@ -413,7 +429,7 @@ func (p *Service) PSet(sn string, pset int, workorderId int64, resultId int64, c
 }
 
 // 拧紧抢使能控制
-func (p *Service) ToolControl(sn string, enable bool) error {
+func (p *Service) ToolControl(sn string, tool_sn string, enable bool) error {
 	// 判断控制器是否存在
 	v, exist := p.Parent.Controllers[sn]
 	if !exist {
@@ -423,13 +439,28 @@ func (p *Service) ToolControl(sn string, enable bool) error {
 
 	c := v.(*Controller)
 
+	var t controller.ToolConfig
+
+	var toolExist = false
+
+	for _, t = range c.cfg.Tools {
+		if t.SerialNO == tool_sn {
+			toolExist = true
+			break
+		}
+	}
+
+	if !toolExist {
+		return errors.New(fmt.Sprintf(ERR_CVI3_NOT_FOUND+" tool serial number:%s", tool_sn))
+	}
+
 	if c.Status() == controller.STATUS_OFFLINE {
 		// 控制器离线
 		return errors.New(ERR_CVI3_OFFLINE)
 	}
 
 	// 使能控制
-	err := c.ToolControl(enable, c.cfg.ToolChannel)
+	err := c.ToolControl(enable, t.ToolChannel)
 	if err != nil {
 		// 控制器请求失败
 		return err
