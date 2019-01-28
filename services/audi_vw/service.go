@@ -14,6 +14,7 @@ import (
 	"encoding/xml"
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/minio"
+	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"io"
@@ -48,6 +49,7 @@ type Service struct {
 	DB            *storage.Service
 	WS            *wsnotify.Service
 	Aiis          *aiis.Service
+	Odoo          *odoo.Service
 	Minio         *minio.Service
 	wg            sync.WaitGroup
 	closing       chan struct{}
@@ -278,7 +280,7 @@ func (p *Service) HandleProcess() {
 			// 处理结果
 			if strings.Contains(msg, XML_RESULT_KEY) {
 
-				cvi3Result := CVI3Result{}
+				var cvi3Result CVI3Result
 				err := xml.Unmarshal([]byte(msg), &cvi3Result)
 				if err != nil {
 					p.diag.Error(fmt.Sprint("HandlerMsg err:", msg), err)
@@ -309,7 +311,7 @@ func (p *Service) HandleProcess() {
 			if strings.Contains(msg, XML_EVENT_KEY) {
 
 				//fmt.Printf("xml evt:%s\n", msg)
-				evt := Evt{}
+				var evt Evt
 				err := xml.Unmarshal([]byte(msg), &evt)
 				if err != nil {
 					p.diag.Error(fmt.Sprint("HandlerMsg err:", msg), err)
@@ -334,6 +336,16 @@ func (p *Service) HandleProcess() {
 				//
 				//	p.WS.WSSendControllerSelectorStatus(string(ws_str))
 				//}
+			}
+
+			if strings.Contains(msg, XML_CNT_KEY) {
+				var info toolInfoCNT
+				err := xml.Unmarshal([]byte(msg), &info)
+				if err != nil {
+					p.diag.Error(fmt.Sprint("HandlerMsg err:", msg), err)
+				}
+
+				//go p.TryCreateMaintenance(info)
 			}
 
 		case <-p.closing:
@@ -374,7 +386,7 @@ func (p *Service) GetControllersStatus(sns []string) ([]ControllerStatus, error)
 }
 
 // 设置拧接程序
-func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64, count int, user_id int64) error {
+func (p *Service) PSet(sn string, pset int, workorderId int64, resultId int64, count int, userId int64) error {
 	// 判断控制器是否存在
 	v, exist := p.Parent.Controllers[sn]
 	if !exist {
@@ -390,7 +402,7 @@ func (p *Service) PSet(sn string, pset int, workorder_id int64, result_id int64,
 	}
 
 	// 设定pset并判断控制器响应
-	_, err := c.PSet(pset, workorder_id, result_id, count, user_id, c.cfg.ToolChannel)
+	_, err := c.PSet(pset, workorderId, resultId, count, userId, c.cfg.ToolChannel)
 	if err != nil {
 		// 控制器请求失败
 		return err
@@ -425,4 +437,10 @@ func (p *Service) ToolControl(sn string, enable bool) error {
 
 	return nil
 
+}
+
+func (p *Service) TryCreateMaintenance(info toolInfoCNT) error {
+	return nil
+	//i := audiVW2OPToolInfo(ino)
+	//return p.Odoo.TryCreateMaintenance(info)
 }

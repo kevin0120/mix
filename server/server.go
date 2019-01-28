@@ -164,6 +164,7 @@ func (s *Server) appendAudiVWService() {
 	s.AudiVWService.Aiis = s.AiisService
 	s.AudiVWService.WS = s.WSNotifyService
 	s.AudiVWService.DB = s.StorageServie
+	s.AudiVWService.Odoo = s.OdooService
 	s.AudiVWService.Parent = s.ControllerService
 
 	s.AppendService("audi/vw", s.AudiVWService)

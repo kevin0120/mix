@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/masami10/rush/services/controller"
+	"github.com/masami10/rush/services/openprotocol"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/socket_writer"
@@ -34,6 +35,7 @@ type Controller struct {
 	Response          ResponseQueue
 	mux_seq           sync.Mutex
 	keep_period       time.Duration
+	toolInfo_period   time.Duration
 	req_timeout       time.Duration
 	recv_flag         bool
 	keepaliveDeadLine atomic.Value
@@ -122,14 +124,15 @@ func (c *Controller) updateStatus(status string) {
 func NewController(c Config) Controller {
 
 	cont := Controller{
-		buffer:      make(chan []byte, 1024),
-		response:    make(chan string),
-		closing:     make(chan chan struct{}),
-		sequence:    MINSEQUENCE,
-		mux_seq:     sync.Mutex{},
-		keep_period: time.Duration(c.KeepAlivePeriod),
-		req_timeout: time.Duration(c.ReqTimeout),
-		protocol:    controller.AUDIPROTOCOL,
+		buffer:          make(chan []byte, 1024),
+		response:        make(chan string),
+		closing:         make(chan chan struct{}),
+		sequence:        MINSEQUENCE,
+		mux_seq:         sync.Mutex{},
+		keep_period:     time.Duration(c.KeepAlivePeriod),
+		toolInfo_period: time.Duration(c.GetToolInfoPeriod),
+		req_timeout:     time.Duration(c.ReqTimeout),
+		protocol:        controller.AUDIPROTOCOL,
 	}
 
 	cont.StatusValue.Store(controller.STATUS_OFFLINE)
@@ -175,6 +178,12 @@ func (c *Controller) manage() {
 				c.updateKeepAliveDeadLine() //更新keepalivedeadline
 				c.addKeepAliveCount()
 			}
+		//case <-time.After(c.toolInfo_period):
+		//	if c.Status() == controller.STATUS_OFFLINE {
+		//		continue
+		//	}
+		//	c.getToolInfo()
+
 		case v := <-c.buffer:
 			for nextWriteThreshold.After(time.Now()) {
 				time.Sleep(time.Microsecond * 100)
@@ -191,6 +200,12 @@ func (c *Controller) manage() {
 			return //退出manage协程
 		}
 	}
+}
+
+func (c *Controller) getToolInfo() {
+	seq := c.Sequence()
+	p, seq := GeneratePacket(seq, Header_type_request_with_reply, Xml_get_total_count)
+	c.Write([]byte(p), seq)
 }
 
 func (c *Controller) sendKeepalive() {
@@ -431,4 +446,18 @@ func (c *Controller) PSet(pset int, workorder_id int64, reseult_id int64, count 
 	}
 
 	return seq, nil
+}
+
+func (c *Controller) audiVW2OPToolInfo(ti toolInfoCNT) openprotocol.ToolInfo {
+	var info openprotocol.ToolInfo
+	info.SerialNo = c.cfg.SN //没有枪的序列号,无法进行
+	info.CountSinLastService = int(ti.MSL_MSG.CSR)
+	info.TotalTighteningCount = int(ti.MSL_MSG.CLT)
+
+	return info
+}
+
+func (c *Controller) TryCreateMaintenance(ti toolInfoCNT) error {
+	info := c.audiVW2OPToolInfo(ti)
+	return c.Srv.Odoo.TryCreateMaintenance(info)
 }

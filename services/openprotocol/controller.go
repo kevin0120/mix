@@ -85,7 +85,7 @@ func (c *Controller) handlerProcess() {
 		case pkg := <-c.handlerBuf:
 			err := c.HandleMsg(&pkg)
 			if err != nil {
-				c.diag.Error("OP protocol HandleMsg fail",err)
+				c.diag.Error("OP protocol HandleMsg fail", err)
 			}
 		}
 	}
@@ -209,7 +209,7 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) error {
 		ms := MultiSpindleResult{}
 		ms.Deserialize(pkg.Body)
 
-		wsResults := make([]wsnotify.WSResult, len(ms.Spindles),len(ms.Spindles))
+		wsResults := make([]wsnotify.WSResult, len(ms.Spindles), len(ms.Spindles))
 		//wsResult := wsnotify.WSResult{}
 		for idx, v := range ms.Spindles {
 			wsResults[idx].Result = v.Result
@@ -263,7 +263,7 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) error {
 				return errors.New("Tool Serial Number is empty string")
 			}
 
-			if ti.TotalTighteningCount == 0 || ti.CountSinLastService == 0{
+			if ti.TotalTighteningCount == 0 || ti.CountSinLastService == 0 {
 				//不需要尝试创建维修/标定单据
 				return nil
 			}
@@ -439,6 +439,9 @@ func (c *Controller) getTighteningCount() {
 	for {
 		select {
 		case <-time.After(c.getToolInfoPeriod):
+			if c.Status() == controller.STATUS_OFFLINE {
+				continue
+			}
 			req := GeneratePackage(MID_0040_TOOL_INFO_REQUEST, "002", "", DEFAULT_MSG_END)
 			c.Write([]byte(req))
 		case stopDone := <-c.closing:

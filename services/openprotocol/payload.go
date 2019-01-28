@@ -1100,8 +1100,8 @@ func (ai *AlarmInfo) Deserialize(msg string) error {
 
 type ToolInfo struct {
 	SerialNo             string `json:"serial_no"`
-	TotalTighteningCount int `json:"times"`
-	CountSinLastService  int `json:"sin_last_service"`
+	TotalTighteningCount int    `json:"times"`
+	CountSinLastService  int    `json:"sin_last_service"`
 }
 
 func (ti *ToolInfo) Deserialize(msg string) error {

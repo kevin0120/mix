@@ -469,7 +469,7 @@ func (s *Service) TryCreateMaintenance(body interface{}) error {
 				} else if status == http.StatusCreated {
 					s.diag.Info("create Maintenance")
 					return nil
-				}else {
+				} else {
 					return nil
 				}
 			}

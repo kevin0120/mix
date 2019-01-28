@@ -89,6 +89,7 @@ audi/vw:
   read_buf: 65535
   req_time_out: 300ms
   keep_alive_period: 2s
+  tool_info_period: 12h
 
 openprotocol:
   keep_alive_period: 10s

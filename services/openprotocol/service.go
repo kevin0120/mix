@@ -254,12 +254,12 @@ func (p *Service) GetPSetList(sn string) ([]int, error) {
 
 	c := v.(*Controller)
 
-	pset_list, err := c.GetPSetList()
+	psetLists, err := c.GetPSetList()
 	if err != nil {
 		return []int{}, err
 	}
 
-	return pset_list, nil
+	return psetLists, nil
 }
 
 func (p *Service) GetPSetDetail(sn string, pset int) (PSetDetail, error) {
@@ -271,12 +271,12 @@ func (p *Service) GetPSetDetail(sn string, pset int) (PSetDetail, error) {
 
 	c := v.(*Controller)
 
-	pset_detail, err := c.GetPSetDetail(pset)
+	psetDetail, err := c.GetPSetDetail(pset)
 	if err != nil {
 		return PSetDetail{}, err
 	}
 
-	return pset_detail, nil
+	return psetDetail, nil
 }
 
 func (p *Service) GetJobList(sn string) ([]int, error) {
@@ -288,12 +288,12 @@ func (p *Service) GetJobList(sn string) ([]int, error) {
 
 	c := v.(*Controller)
 
-	job_list, err := c.GetJobList()
+	jobLists, err := c.GetJobList()
 	if err != nil {
 		return []int{}, err
 	}
 
-	return job_list, nil
+	return jobLists, nil
 }
 
 func (p *Service) GetJobDetail(sn string, job int) (JobDetail, error) {
@@ -305,12 +305,12 @@ func (p *Service) GetJobDetail(sn string, job int) (JobDetail, error) {
 
 	c := v.(*Controller)
 
-	job_detail, err := c.GetJobDetail(job)
+	jobDetail, err := c.GetJobDetail(job)
 	if err != nil {
 		return JobDetail{}, err
 	}
 
-	return job_detail, nil
+	return jobDetail, nil
 }
 
 func (p *Service) IOSet(sn string, ios *[]IOStatus) error {
@@ -336,8 +336,4 @@ func (p *Service) GenerateIDInfo(info string) string {
 	}
 
 	return ids
-}
-
-func (p *Service)TryCreateMaintenance(info ToolInfo) error {
-	return p.Odoo.TryCreateMaintenance(info)
 }

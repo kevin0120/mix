@@ -2,6 +2,7 @@ package audi_vw
 
 import (
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/minio"
@@ -42,6 +43,7 @@ const (
 	XML_CURVE_KEY  = "<CUR>"
 	XML_RESULT_KEY = "<MAR>"
 	XML_EVENT_KEY  = "<EVT>"
+	XML_CNT_KEY    = "<CLT>"
 	XML_NUT_KEY    = "<NUT"
 	XML_STATUS_KEY = "<RDY>"
 )
@@ -81,6 +83,23 @@ type Evt struct {
 				} `xml:"ONC"`
 			} `xml:"STS"`
 		} `xml:"EVT"`
+	} `xml:"MSL_MSG"`
+}
+
+type KAN struct {
+	KNR uint8  `xml:"KNR"` //通道
+	CSR uint32 `xml:"CSR"` //服务计数
+	CLT uint32 `xml:"CLT"` //总拧紧计数
+}
+
+type CNT struct {
+	KAN `xml:"KAN"`
+}
+
+type toolInfoCNT struct {
+	XMLName xml.Name `xml:"ROOT"`
+	MSL_MSG struct {
+		CNT `xml:"CNT"`
 	} `xml:"MSL_MSG"`
 }
 
@@ -197,11 +216,15 @@ func (header *CVI3Header) Serialize() string {
 		header.RSD)
 }
 
-func (header *CVI3Header) Deserialize(headerStr string) {
+func (header *CVI3Header) Deserialize(headerStr string) error {
 	header.Init()
 
 	var n uint64
-	var err error
+	var err error = nil
+
+	if len(headerStr) < 24 {
+		return errors.New(fmt.Sprintf("headerStr is not long enough: %d", len(headerStr)))
+	}
 
 	n, err = strconv.ParseUint(headerStr[4:8], 10, 32)
 	if err == nil {
@@ -222,6 +245,8 @@ func (header *CVI3Header) Deserialize(headerStr string) {
 	if err == nil {
 		header.COD = uint(n)
 	}
+
+	return err
 }
 
 func GeneratePacket(seq uint32, typ uint, xmlpacket string) (string, uint32) {
