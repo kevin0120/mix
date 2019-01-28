@@ -145,14 +145,13 @@
                                 <field name="query_date_to"/>
                             </group>
                             <group string="Product">
-                                <field name="screw_id" options="
-                                    {'no_create_edit': True , 'no_open': True}" required="1"/>
-                                <field name="vehicle_id" options="
-                                    {'no_create_edit': True , 'no_open': True}"/>
+                                <field name="screw_id" widget="selection" required="1"/>
+                                <field name="vehicle_code" attrs="{'invisible': [('vehicle_id','!=', False)]}"/>
+                                <field name="vehicle_id" widget="selection" attrs="{'invisible': [('vehicle_code','!=', False)]}"/>
+                                <field name="gun_id" widget="selection"/>
                             </group>
                             <group string="Manufacture">
-                                <field name="assembly_line_id" options="
-                                    {'no_create_edit': True , 'no_open': True}"/>
+                                <field name="assembly_line_id" widget="selection"/>
                             </group>
                             <group>
                                 <field name="limit" required="1"/>
