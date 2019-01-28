@@ -25,14 +25,21 @@ type controllerType = {
 };
 
 function* staticToolEnable(action: actionType) {
-  const state = yield select();
-  const mUrl = state.connections.masterpc;
-  const controller: controllerType = state.connections.controllers[0];
-  if (controller === undefined) {
-    return;
+  try {
+    const state = yield select();
+    const mUrl = state.connections.masterpc;
+    const controller: controllerType = state.connections.controllers[0];
+    if (controller === undefined) {
+      return;
+    }
+
+    const toolSN = state.setting.systemSettings.defaultToolSN || '';
+
+    yield call(toolEnable, mUrl, controller.serial_no,toolSN, action.enable);
+  }catch (e) {
+    console.error(`staticToolEnable error: ${e.message}`);
   }
 
-  yield call(toolEnable, mUrl, controller.serial_no, action.enable);
 }
 
 export function* toolFunctions() {

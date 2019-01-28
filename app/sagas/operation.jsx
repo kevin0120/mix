@@ -274,6 +274,8 @@ export function* startOperation(data) {
       const { operationID, carType, carID, jobID, source } = state.operations;
 
       const { hmiSn } = state.setting.page.odooConnection;
+
+      const toolSN = state.setting.systemSettings.defaultToolSN || ""
       const userID = 1;
       const skip = false;
       let hasSet = false;
@@ -286,6 +288,7 @@ export function* startOperation(data) {
           jobManual,
           rushUrl,
           controllerSN,
+          toolSN,
           carType,
           carID,
           userID,
