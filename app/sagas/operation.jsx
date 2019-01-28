@@ -275,7 +275,7 @@ export function* startOperation(data) {
 
       const { hmiSn } = state.setting.page.odooConnection;
 
-      const toolSN = state.setting.systemSettings.defaultToolSN || ""
+      const toolSN = state.setting.systemSettings.defaultToolSN || "";
       const userID = 1;
       const skip = false;
       let hasSet = false;

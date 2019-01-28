@@ -131,14 +131,14 @@ export function pset(
   resultID,
   count,
   userID,
-  pset_num,
+  psetID,
   workorderID,
   groupSeq
 ) {
   const fullUrl = `${url}/rush/v1/psets`;
   return defaultClient
     .put(fullUrl, {
-      pset: pset_num,
+      pset: psetID,
       controller_sn: controllerSN,
       gun_sn: gunSN,
       // result_id: resultID,
