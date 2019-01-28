@@ -2719,7 +2719,7 @@ fieldset[disabled] .rbc-toolbar button.active {
 }
 
 html * {
-  -webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing: subpixel-antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
@@ -2739,7 +2739,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: 'Noto Sans SC', sans-serif;
+  font-family: 'Noto Sans CJK SC Medium',Roboto, sans-serif;
   /*font-weight: bold;*/
   line-height: 1.5em;
 }
