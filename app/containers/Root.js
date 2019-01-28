@@ -5,7 +5,6 @@ import { ConnectedRouter } from 'connected-react-router';
 import type { Store } from '../reducers/types';
 import Routes from '../Routes';
 import { listenToNewCar } from '../actions/scannerDevice';
-import { setCardAuthListener } from '../actions/cardAuth';
 import { systemInit } from '../actions/sysInit';
 
 type Props = {
@@ -17,7 +16,6 @@ export default class Root extends Component<Props> {
   render() {
     const { store, history } = this.props;
     listenToNewCar(store.dispatch, store.getState);
-    setCardAuthListener(store.dispatch);
     store.dispatch(systemInit()); // 初始化
     return (
       <Provider store={store}>

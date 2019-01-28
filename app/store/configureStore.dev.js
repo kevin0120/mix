@@ -5,7 +5,6 @@ import { routerMiddleware, routerActions } from 'connected-react-router';
 import { createLogger } from 'redux-logger';
 import createRootReducer from '../reducers';
 import * as scannerActions from '../actions/scannerDevice';
-import * as authActions from '../actions/cardAuth';
 
 import type { StateType } from '../reducers/types';
 
@@ -41,7 +40,6 @@ const configureStore = (initialState?: StateType) => {
   // Redux DevTools Configuration
   const actionCreators = {
     ...scannerActions,
-    ...authActions,
     ...routerActions
   };
   // If Redux DevTools Extension is installed use it, otherwise use Redux compose

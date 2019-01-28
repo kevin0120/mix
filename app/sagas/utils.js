@@ -12,3 +12,16 @@ export function genWatcher(workers) {
     }
   }
 }
+
+export function watchChannel(channel,workers) {
+  return function* watcher(){
+    try {
+      while (true) {
+        const action = yield take(channel);
+        yield fork(workers[action.type],action);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+}
