@@ -740,11 +740,11 @@ func (m *Methods) insertResultsForPSet(pset *PSetManual) error {
 	r.PSet = pset.PSet
 	r.Stage = storage.RESULT_STAGE_INIT
 
-	db_reuslt := []storage.Results{}
-	db_reuslt = append(db_reuslt, r)
+	ri := []storage.Results{r}
+	//db_reuslt = append(db_reuslt, r)
 
 	err := m.service.DB.DeleteResultsForJob(key)
-	err = m.service.DB.InsertWorkorder(nil, &db_reuslt, false, false, true)
+	err = m.service.DB.InsertWorkorder(nil, &ri, false, false, true)
 
 	return err
 }
@@ -849,7 +849,7 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 		resp.WorkSheet = op.Img
 	}
 
-	consumes := []odoo.ODOOConsume{}
+	var consumes []odoo.ODOOConsume
 	json.Unmarshal([]byte(workorder.Consumes), &consumes)
 
 	for _, v := range consumes {
@@ -866,16 +866,16 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 		resp.Results = append(resp.Results, r)
 	}
 
-	reasons := []string{}
+	var reasons []string
 	if workorder.Status == "done" {
 		// 工单已完成
 		ctx.StatusCode(iris.StatusConflict)
 		reasons = append(reasons, "done")
 	}
 
-	next_workorder, err := m.service.DB.FindNextWorkorder(hmi_sn, workcenterCode)
+	nextWorkorder, err := m.service.DB.FindNextWorkorder(hmi_sn, workcenterCode)
 	if err == nil {
-		if code != next_workorder.Knr && code != next_workorder.LongPin && code != next_workorder.Vin {
+		if code != nextWorkorder.Knr && code != nextWorkorder.LongPin && code != nextWorkorder.Vin {
 			// 车辆校验失败
 			ctx.StatusCode(iris.StatusConflict)
 			reasons = append(reasons, "conflict")

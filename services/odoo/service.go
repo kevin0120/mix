@@ -191,19 +191,19 @@ func (s *Service) Close() error {
 	return nil
 }
 
-func (s *Service) GetWorkorder(masterpa_sn string, hmi_sn string, workcenter_code, code string) ([]byte, error) {
+func (s *Service) GetWorkorder(masterpcSn string, hmiSn string, workcenterCode, code string) ([]byte, error) {
 
 	var err error
 	var body []byte
 	endpoints := s.GetEndpoints("getWorkorder")
 	for _, endpoint := range endpoints {
 		url := fmt.Sprintf(endpoint.url, code)
-		if hmi_sn != "" {
-			url += fmt.Sprintf("&hmi=%s", hmi_sn)
+		if hmiSn != "" {
+			url += fmt.Sprintf("&hmi=%s", hmiSn)
 		}
 
-		if workcenter_code != "" {
-			url += fmt.Sprintf("&workcenter=%s", workcenter_code)
+		if workcenterCode != "" {
+			url += fmt.Sprintf("&workcenter=%s", workcenterCode)
 		}
 
 		body, err = s.getWorkorder(url, endpoint.method)
