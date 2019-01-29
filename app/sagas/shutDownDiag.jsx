@@ -23,6 +23,7 @@ import { Info } from '../logger';
 // import { toolDisable } from '../actions/tools';
 
 import { ak2 } from './operation';
+import { setNewNotification } from "../actions/notification";
 
 const { ipcRenderer } = require('electron');
 
@@ -79,7 +80,9 @@ function* confirmDiag(dType, data) {
         const {enableConflictOP=false} = state.setting.systemSettings;
         if(enableConflictOP){
           yield put(operationVerified(data));
-
+        }else {
+          yield put(setNewNotification('warning', `设定为不允许重复拧紧同一张工单 VIN: ${data.vin}`));
+          return; // 直接返回, 不关闭模式对话框
         }
         break;
       }

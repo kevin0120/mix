@@ -210,7 +210,7 @@ export function* getOperation(job) {
             fetchOK = true;
           }
         } catch (e) {
-          const { preCheck } = state.setting.operationSettings;
+          const { preCheck=false } = state.setting.operationSettings;
           resp = e.response;
           if (resp.status === 409) {
             fetchOK = true;
