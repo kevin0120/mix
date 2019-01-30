@@ -22,6 +22,11 @@ const (
 )
 
 const (
+	EVT_TOOL_CONNECTED    = "connected"
+	EVT_TOOL_DISCONNECTED = "disconnected"
+)
+
+const (
 	STRATEGY_AD  = "AD"
 	STRATEGY_AW  = "AW"
 	STRATEGY_ADW = "ADW"

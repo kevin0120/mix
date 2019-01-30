@@ -144,6 +144,7 @@ type RoutingOperationPoint struct {
 	ToleranceMinDegree float64 `json:"tolerance_min_degree"`
 	ToleranceMaxDegree float64 `json:"tolerance_max_degree"`
 	GunSN              string  `json:"gun_sn"`
+	Controller_SN      string  `json:"controller_sn"`
 }
 
 type RoutingOperation struct {

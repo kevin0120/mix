@@ -18,6 +18,12 @@ const (
 	IO_STATUS_FLASHING = "flashing"
 )
 
+const (
+	EVT_CONTROLLER_NO_ERR          = "E000"
+	EVT_CONTROLLER_TOOL_DISCONNECT = "I003"
+	EVT_CONTROLLER_TOOL_CONNECT    = "I002"
+)
+
 type IOStatus struct {
 	No     int    `json:"no"`
 	Status string `json:"status"`
@@ -52,6 +58,7 @@ const (
 	MID_0065_OLD_DATA                = "0065"
 	MID_0070_ALARM_SUBSCRIBE         = "0070"
 	MID_0071_ALARM                   = "0071"
+	MID_0076_ALARM_STATUS            = "0076"
 	MID_0130_JOB_OFF                 = "0130"
 	MID_0250_SELECTOR_SUBSCRIBE      = "0250"
 	MID_0042_TOOL_DISABLE            = "0042"
@@ -490,7 +497,7 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 
 		return h.Serialize() + end
 	case MID_0070_ALARM_SUBSCRIBE:
-		h.MID = MID_0051_VIN_SUBSCRIBE
+		h.MID = MID_0070_ALARM_SUBSCRIBE
 		h.LEN = LEN_HEADER
 		h.Revision = rev
 		h.NoAck = "1" //不需要ack
@@ -1249,4 +1256,15 @@ func (msr *MultiSpindleResult) Deserialize(str string) {
 
 		msr.Spindles = append(msr.Spindles, sp)
 	}
+}
+
+type AlarmStatus struct {
+	Status string
+	AlarmInfo
+}
+
+func (ai *AlarmStatus) Deserialize(msg string) error {
+	ai.Status = msg[2:3]    //1位状态码
+	ai.ErrorCode = msg[5:9] //4为错误码
+	return nil
 }

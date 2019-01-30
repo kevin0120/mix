@@ -477,3 +477,9 @@ func (c *Controller) TryCreateMaintenance(ti toolInfoCNT) error {
 	info := c.audiVW2OPToolInfo(ti)
 	return c.Srv.Odoo.TryCreateMaintenance(info)
 }
+
+func (c *Controller) Tools() map[string]string {
+	rt := map[string]string{}
+
+	return rt
+}

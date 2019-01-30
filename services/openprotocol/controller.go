@@ -50,6 +50,8 @@ type Controller struct {
 	TriggerStop       time.Time
 	inputs            string
 	diag              Diagnostic
+
+	toolStatus atomic.Value
 }
 
 func NewController(c Config, d Diagnostic) Controller {
@@ -67,8 +69,36 @@ func NewController(c Config, d Diagnostic) Controller {
 	}
 
 	cont.StatusValue.Store(controller.STATUS_OFFLINE)
+	cont.toolStatus.Store(controller.EVT_TOOL_DISCONNECTED)
 
 	return cont
+}
+
+func (c *Controller) Tools() map[string]string {
+	rt := map[string]string{}
+
+	toolStatus := c.toolStatus.Load().(string)
+	for _, v := range c.cfg.Tools {
+		rt[v.SerialNO] = toolStatus
+	}
+
+	return rt
+}
+
+func (c *Controller) UpdateToolStatus(status string) {
+	s := c.toolStatus.Load().(string)
+	if s != status {
+		c.toolStatus.Store(status)
+
+		// 推送工具状态
+		ts := wsnotify.WSToolStatus{
+			ToolSN: c.cfg.Tools[0].SerialNO,
+			Status: status,
+		}
+
+		str, _ := json.Marshal(ts)
+		c.Srv.WS.WSSend(wsnotify.WS_EVETN_TOOL, string(str))
+	}
 }
 
 func (c *Controller) LoadController(controller *storage.Controllers) {
@@ -246,11 +276,35 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) error {
 		} else {
 			// 参见 项目管理,长安项目中文件:http://116.62.21.97/web#id=325&view_type=form&model=ir.attachment&active_id=3&menu_id=90
 			// 第11页,错误代码:Tool calibration required:E305
-			if ai.ErrorCode == "E305" {
-				// do nothing,当前未确认是否为这个错误代码
+			//if ai.ErrorCode == "E305" {
+			//	// do nothing,当前未确认是否为这个错误代码
+			//}
+
+			switch ai.ErrorCode {
+			case EVT_CONTROLLER_TOOL_CONNECT:
+				c.UpdateToolStatus(controller.EVT_TOOL_CONNECTED)
+
+			case EVT_CONTROLLER_TOOL_DISCONNECT:
+				c.UpdateToolStatus(controller.EVT_TOOL_DISCONNECTED)
 			}
 		}
 		return nil
+
+	case MID_0076_ALARM_STATUS:
+		var as AlarmStatus
+		err := as.Deserialize(pkg.Body)
+		if err != nil {
+			c.diag.Error("alarm status deserialize fail", err)
+		} else {
+			switch as.ErrorCode {
+			case EVT_CONTROLLER_NO_ERR:
+				c.UpdateToolStatus(controller.EVT_TOOL_CONNECTED)
+
+			case EVT_CONTROLLER_TOOL_DISCONNECT:
+				c.UpdateToolStatus(controller.EVT_TOOL_DISCONNECTED)
+			}
+		}
+
 	case MID_0041_TOOL_INFO_REPLY:
 		// 收到工具信息
 		var ti ToolInfo

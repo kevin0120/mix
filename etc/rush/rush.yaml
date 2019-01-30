@@ -127,7 +127,7 @@ controller_service:
     port: 4545
     tools:
       - gun_serial: 18G46139
-        channel: 51
+        channel: 1
 
 #  - serial_no: 0001
 #    protocol: OpenProtocol

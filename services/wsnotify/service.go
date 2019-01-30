@@ -19,6 +19,7 @@ const (
 	WS_EVENT_IO          = "io"
 	WS_EVENT_ODOO        = "odoo"
 	WS_EVENT_MAINTENANCE = "maintenance"
+	WS_EVETN_TOOL        = "tool"
 )
 
 type Diagnostic interface {

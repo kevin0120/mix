@@ -51,3 +51,8 @@ type WSRegistMsg struct {
 type WSOdooStatus struct {
 	Status string `json:"status"`
 }
+
+type WSToolStatus struct {
+	ToolSN string `json:"tool_sn"`
+	Status string `json:"status"`
+}

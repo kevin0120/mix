@@ -26,6 +26,7 @@ type Controller interface {
 	Protocol() string
 	Inputs() string
 	LoadController(controller *storage.Controllers)
+	Tools() map[string]string
 }
 
 type Protocol interface {

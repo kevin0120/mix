@@ -297,6 +297,18 @@ func (s *Service) OnNewHmiClient(c websocket.Connection) {
 
 		msg, _ = json.Marshal(inputs)
 		c.Emit(wsnotify.WS_EVENT_IO, string(msg))
+
+		// 推送工具状态
+		tools := v.Tools()
+		for sn, status := range tools {
+			ts := wsnotify.WSToolStatus{
+				ToolSN: sn,
+				Status: status,
+			}
+			msg, _ = json.Marshal(ts)
+
+			c.Emit(wsnotify.WS_EVETN_TOOL, string(msg))
+		}
 	}
 
 	odooStatus := wsnotify.WSOdooStatus{
