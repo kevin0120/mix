@@ -1818,6 +1818,10 @@
         "sequence": {
           "type": "integer",
           "description": "序号"
+        },
+        "gun_sn": {
+          "type": "string",
+          "description": "工具序列号"
         }
       }
     },

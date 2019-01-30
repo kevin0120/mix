@@ -109,7 +109,7 @@ func (p *Service) ToolControl(sn string, tool_sn string, enable bool) error {
 	}
 
 	if !toolExist {
-		return errors.New(fmt.Sprintf(controller.ERR_TOOL_NOT_FOUND +" tool serial number:%s", tool_sn))
+		return errors.New(fmt.Sprintf(controller.ERR_TOOL_NOT_FOUND+" tool serial number:%s", tool_sn))
 	}
 
 	// 工具使能
@@ -122,7 +122,7 @@ func (p *Service) ToolControl(sn string, tool_sn string, enable bool) error {
 	return nil
 }
 
-func (p *Service) PSet(sn string, tool_sn string,pset int, result_id int64, count int, user_id int64) error {
+func (p *Service) PSet(sn string, tool_sn string, pset int, result_id int64, count int, user_id int64) error {
 	// 判断控制器是否存在
 	v, exist := p.Parent.Controllers[sn]
 	if !exist {
@@ -131,7 +131,6 @@ func (p *Service) PSet(sn string, tool_sn string,pset int, result_id int64, coun
 	}
 
 	c := v.(*Controller)
-
 
 	var t controller.ToolConfig
 
@@ -145,7 +144,7 @@ func (p *Service) PSet(sn string, tool_sn string,pset int, result_id int64, coun
 	}
 
 	if !toolExist {
-		return errors.New(fmt.Sprintf(controller.ERR_TOOL_NOT_FOUND +" tool serial number:%s", tool_sn))
+		return errors.New(fmt.Sprintf(controller.ERR_TOOL_NOT_FOUND+" tool serial number:%s", tool_sn))
 	}
 
 	ex_info := fmt.Sprintf("%s-%d-%d-%d", controller.AUTO_MODE, result_id, count, user_id)
@@ -160,7 +159,7 @@ func (p *Service) PSet(sn string, tool_sn string,pset int, result_id int64, coun
 	return nil
 }
 
-func (p *Service) PSetManual(sn string, tool_sn string,pset int, user_id int64, ex_info string, count int) error {
+func (p *Service) PSetManual(sn string, tool_sn string, pset int, user_id int64, ex_info string, count int) error {
 	// 判断控制器是否存在
 	v, exist := p.Parent.Controllers[sn]
 	if !exist {
@@ -182,7 +181,7 @@ func (p *Service) PSetManual(sn string, tool_sn string,pset int, user_id int64, 
 	}
 
 	if !toolExist {
-		return errors.New(fmt.Sprintf(controller.ERR_TOOL_NOT_FOUND +" tool serial number:%s", tool_sn))
+		return errors.New(fmt.Sprintf(controller.ERR_TOOL_NOT_FOUND+" tool serial number:%s", tool_sn))
 	}
 
 	// 设定pset并判断控制器响应
@@ -255,7 +254,7 @@ func (p *Service) JobSetManual(sn string, tool_sn string, job int, user_id int64
 	}
 
 	if !toolExist {
-		return errors.New(fmt.Sprintf(controller.ERR_TOOL_NOT_FOUND +" tool serial number:%s", tool_sn))
+		return errors.New(fmt.Sprintf(controller.ERR_TOOL_NOT_FOUND+" tool serial number:%s", tool_sn))
 	}
 
 	return c.JobSet(ex_info, job)

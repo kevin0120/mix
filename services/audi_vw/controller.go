@@ -463,7 +463,7 @@ func (c *Controller) audiVW2OPToolInfo(ti toolInfoCNT) openprotocol.ToolInfo {
 	}
 
 	if !toolExist {
-		c.Srv.diag.Error("audiVW2OPToolInfo",errors.New(fmt.Sprintf(" tool serial number:%s", t.SerialNO)))
+		c.Srv.diag.Error("audiVW2OPToolInfo", errors.New(fmt.Sprintf(" tool serial number:%s", t.SerialNO)))
 	}
 
 	info.SerialNo = t.SerialNO

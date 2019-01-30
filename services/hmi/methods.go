@@ -153,7 +153,7 @@ func (m *Methods) putPSets(ctx iris.Context) {
 	case controller.AUDIPROTOCOL:
 		err = m.service.AudiVw.PSet(pset.Controller_SN, pset.GunSN, pset.PSet, workorder.Id, int64(pset.GroupSeq), pset.Count, pset.UserID)
 	case controller.OPENPROTOCOL:
-		err = m.service.OpenProtocol.PSet(pset.Controller_SN, pset.GunSN,pset.PSet, pset.Result_id, pset.Count, pset.UserID)
+		err = m.service.OpenProtocol.PSet(pset.Controller_SN, pset.GunSN, pset.PSet, pset.Result_id, pset.Count, pset.UserID)
 
 	default:
 		ctx.StatusCode(iris.StatusBadRequest)

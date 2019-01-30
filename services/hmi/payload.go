@@ -48,7 +48,7 @@ type Job struct {
 
 type JobManual struct {
 	Controller_SN string `json:"controller_sn"`
-	GunSN string `json:"gun_sn"`
+	GunSN         string `json:"gun_sn"`
 	Job           int    `json:"job_id"`
 	UserID        int64  `json:"user_id"`
 	CarType       string `json:"car_type"`
@@ -143,6 +143,7 @@ type RoutingOperationPoint struct {
 	ToleranceMax       float64 `json:"tolerance_max"`
 	ToleranceMinDegree float64 `json:"tolerance_min_degree"`
 	ToleranceMaxDegree float64 `json:"tolerance_max_degree"`
+	GunSN              string  `json:"gun_sn"`
 }
 
 type RoutingOperation struct {
