@@ -193,7 +193,7 @@ class OperationResult(models.HyperModel):
                       and pp.screw_type_code = nut_no
                       and co.bom_line_id = qp.bom_line_id
                       and wo.production_id = mp.id
-                      and mbl.bom_line_id = co.bom_line_id
+                      and mbl.id = co.bom_line_id
                       and co.product_id = pp.id;
               else
                 r_vin_code = vin_code;
