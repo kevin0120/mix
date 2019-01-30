@@ -1,6 +1,6 @@
 import { call, put,} from 'redux-saga/effects';
 import { BATTERY } from '../actions/actionTypes';
-import { genWatcher } from './utils';
+import { watch } from './utils';
 import { batteryCheckOK } from '../actions/battery';
 
 const util = require('util');
@@ -10,7 +10,7 @@ const workers = {
   [BATTERY.CHECK]: doCheckBattery
 };
 
-export default genWatcher(workers);
+export default watch(workers);
 
 
 function* doCheckBattery() {
