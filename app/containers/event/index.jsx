@@ -17,6 +17,7 @@ import { I18n } from 'react-i18next';
 import SweetAlert from 'react-bootstrap-sweetalert';
 
 // core components
+import Input from '@material-ui/core/Input';
 import GridContainer from '../../components/Grid/GridContainer';
 import GridItem from '../../components/Grid/GridItem';
 import Button from '../../components/CustomButtons/Button';
@@ -24,7 +25,6 @@ import Card from '../../components/Card/Card';
 import CardBody from '../../components/Card/CardBody';
 import CardIcon from '../../components/Card/CardIcon';
 import CardHeader from '../../components/Card/CardHeader';
-import Input from '@material-ui/core/Input';
 
 import { Query, CreateDailyLogger, Warn } from '../../logger';
 
@@ -113,7 +113,7 @@ class Event extends React.Component {
     this.fetchData();
   }
 
-  fetchData(state, instance) {
+  fetchData() {
     // Whenever the table model changes, or the user sorts or changes pages, this method gets called and passed the current table model.
     // You can set the `loading` prop of the table to true to use the built-in one or show you're own loading bar if you want.
     // Request the data however you want.  Here, we'll use our mocked service we created earlier
@@ -144,13 +144,13 @@ class Event extends React.Component {
                 color="rose"
                 className="edit"
               >
-                <Dvr />
+                <Dvr/>
               </Button>{' '}
             </div>
           )
         }))
       });
-    });
+    }).catch((e)=>console.error(e));
   }
 
   handleClose = () => {
@@ -160,35 +160,40 @@ class Event extends React.Component {
   };
 
   render() {
-    const { classes } = this.props;
-    const { data, isShow, selectObj, loading } = this.state;
+    const { classes, keyboardInput } = this.props;
+    const { data, isShow, selectObj, loading, messageFilter } = this.state;
 
     const Msg = selectObj ? (
-      <div>
-        <List>
-          <ListItem>
-            <ListItemText primary={`时间:   ${selectObj.timestamp}`} />
-          </ListItem>
-          <li>
-            <Divider inset />
-          </li>
-          <ListItem>
-            <ListItemText
-              primary={`事件等级: ${
-                selectObj.level === 'info'
-                  ? '日常信息'
-                  : selectObj.level === 'maintenance'
-                    ? '维护请求'
-                    : '报警事件'
-              }`}
-            />
-          </ListItem>
-          <Divider inset component="li" />
-          <ListItem>
-            <ListItemText primary={`消息: ${selectObj.message}`} />
-          </ListItem>
-        </List>
-      </div>
+      <I18n ns="translations">
+        {t => (
+          <div>
+            <List>
+              <ListItem>
+                <ListItemText primary={`${t('Event.Time')}:   ${selectObj.timestamp}`}/>
+              </ListItem>
+              <li>
+                <Divider inset/>
+              </li>
+              <ListItem>
+                <ListItemText
+                  primary={`${t('Event.Level')}: ${
+                    selectObj.level === 'info'
+                      ? t('Event.Info')
+                      : selectObj.level === 'maintenance'
+                      ? t('Event.Maintenance')
+                      : t('Event.Alert')
+                    }`}
+                />
+              </ListItem>
+              <Divider inset component="li"/>
+              <ListItem>
+                <ListItemText primary={`${t('Event.Message')}: ${selectObj.message}`}/>
+              </ListItem>
+            </List>
+          </div>
+        )}
+      </I18n>
+
     ) : (
       ' '
     );
@@ -202,7 +207,7 @@ class Event extends React.Component {
                 <Card>
                   <CardHeader color="info" icon>
                     <CardIcon color="info">
-                      <Assignment />
+                      <Assignment/>
                     </CardIcon>
                     <h4 className={classes.cardIconTitle}>{t('main.event')}</h4>
                   </CardHeader>
@@ -239,7 +244,7 @@ class Event extends React.Component {
                       filterable
                       columns={[
                         {
-                          Header: 'Time',
+                          Header: t('Event.Time'),
                           accessor: 'timestamp',
                           filterable: false,
                           filterMethod: (filter, row) =>
@@ -249,7 +254,7 @@ class Event extends React.Component {
                             )
                         },
                         {
-                          Header: 'Level',
+                          Header: t('Event.Level'),
                           accessor: 'level',
                           filterMethod: (filter, row) => {
                             if (filter.value === 'all') {
@@ -275,37 +280,35 @@ class Event extends React.Component {
                               style={{ width: '100%' }}
                               value={filter ? filter.value : 'all'}
                             >
-                              <option value="all">All</option>
-                              <option value="info">Info</option>
-                              <option value="maintenance">Maintenance</option>
-                              <option value="warn">Warn</option>
-                              <option value="error">Error</option>
+                              <option value="all">{t('Event.All')}</option>
+                              <option value="info">{t('Event.Info')}</option>
+                              <option value="maintenance">{t('Event.Maintenance')}</option>
+                              <option value="warn">{t('Event.Warn')}</option>
+                              <option value="error">{t('Event.Error')}</option>
                             </select>
                           )
                         },
                         {
-                          Header: 'Message',
+                          Header: t('Event.Message'),
                           accessor: 'message',
                           sortable: false,
-                          filterMethod: (filter, row) => {
-                            return lodash.includes(
+                          filterMethod: (filter, row) => lodash.includes(
                               lodash.toUpper(row[filter.id]),
-                              lodash.toUpper(this.state.messageFilter || '')
-                            );
-                          },
-                          Filter: ({ filter, onChange }) => (
+                              lodash.toUpper(messageFilter || '')
+                            ),
+                          Filter: ({ onChange }) => (
                             <Input
                               onClick={() => {
-                                this.props.keyboardInput({
+                                keyboardInput({
                                   onSubmit: text => {
                                     this.setState(
                                       { messageFilter: text },
                                       () => {
-                                        onChange(this.state.messageFilter);
+                                        onChange(messageFilter);
                                       }
                                     );
                                   },
-                                  text: this.state.messageFilter,
+                                  text: messageFilter,
                                   title: 'Message',
                                   label: 'Message'
                                 });
@@ -315,12 +318,12 @@ class Event extends React.Component {
                                 input: classes.InputInput
                               }}
                               // style={{ width: "100%" ,height:'36px'}}
-                              value={this.state.messageFilter || ''}
+                              value={messageFilter || ''}
                             />
                           )
                         },
                         {
-                          Header: 'Actions',
+                          Header: t('Event.Actions'),
                           accessor: 'actions',
                           sortable: false,
                           filterable: false
@@ -340,15 +343,15 @@ class Event extends React.Component {
                 warning
                 show={isShow}
                 style={{ display: 'block', marginTop: '-100px', top: '35%' }}
-                title="事件详情"
+                title={t('Event.Detail')}
                 onConfirm={this.handleClose}
                 onCancel={this.handleClose}
-                confirmBtnCssClass={`${this.props.classes.button} ${
-                  this.props.classes.successWarn
-                }`}
-                cancelBtnCssClass={`${this.props.classes.button} ${
-                  this.props.classes.danger
-                }`}
+                confirmBtnCssClass={`${classes.button} ${
+                  classes.successWarn
+                  }`}
+                cancelBtnCssClass={`${classes.button} ${
+                  classes.danger
+                  }`}
                 confirmBtnText={t('Common.Yes')}
                 cancelBtnText={t('Common.No')}
                 showCancel

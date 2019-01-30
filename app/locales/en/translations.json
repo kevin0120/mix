@@ -147,5 +147,18 @@
       "Timeout": "Timeout",
       "Continue": "Doing"
     }
+  },
+  "Event": {
+    "Time": "Time",
+    "Level": "Level",
+    "Message": "Message",
+    "Actions": "Actions",
+    "Detail": "Detail",
+    "Info": "Info",
+    "Maintenance": "Maintenance",
+    "Alert": "Alert",
+    "All": "All",
+    "Warn": "Warn",
+    "Error": "Error"
   }
 }
