@@ -34,7 +34,11 @@ class OperationResult(models.HyperModel):
 
     assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line', readonly=True)
 
-    qcp_id = fields.Many2one('quality.point')
+    qcp_id = fields.Many2one('quality.point', 'Quality Control Point')
+
+    operation_point_id = fields.Many2one('operation.point', string='Tightening Operation Point')
+
+    bom_line_id = fields.Many2one('mrp.bom.line')
 
     gun_id = fields.Many2one('maintenance.equipment', string='Screw Gun', copy=False)
 
@@ -64,7 +68,7 @@ class OperationResult(models.HyperModel):
     cur_objects = fields.Char(string='Waveform Files')
 
     name = fields.Char('Name', default=lambda self: _('New'))
-    point_id = fields.Many2one('quality.point', 'Control Point')
+    point_id = fields.Many2one('quality.point', 'Quality Control Point')
     quality_state = fields.Selection([
         ('none', 'To do'),
         ('exception', 'Exception'),
@@ -78,7 +82,7 @@ class OperationResult(models.HyperModel):
     product_id = fields.Many2one('product.product', 'Vehicle',
                                  domain="[('sa_type', '=', 'vehicle')]")
 
-    consu_bom_line_id = fields.Many2one('mrp.wo.consu')
+    consu_bom_line_id = fields.Many2one('mrp.wo.consu', 'Consume BOM line')
 
     program_id = fields.Many2one('controller.program')
 
@@ -152,6 +156,8 @@ class OperationResult(models.HyperModel):
               r_product_id       BIGINT;
               r_program_id       BIGINT;
               r_assembly_id    BIGINT;
+              r_bom_line_id    BIGINT = null;
+              r_operation_point_id BIGINT = null;
               r_measure_result varchar;
             BEGIN
               case pset_strategy
@@ -172,18 +178,22 @@ class OperationResult(models.HyperModel):
                   mp.product_id,
                   co.program_id,
                   co.product_id,
-                  mp.assembly_line_id
-                into r_vin_code, qcp_id, consu_bom_id, r_production_id, r_workcenter_id, r_gun_id, r_product_id, r_program_id, r_consu_product_id, r_assembly_id
+                  mp.assembly_line_id,
+                  mbl.id,
+                  mbl.operation_point_id
+                into r_vin_code, qcp_id, consu_bom_id, r_production_id, r_workcenter_id, r_gun_id, r_product_id, r_program_id, r_consu_product_id, r_assembly_id,r_bom_line_id,r_operation_point_id
                 from public.mrp_workorder wo,
                   public.mrp_wo_consu co,
                   public.quality_point qp,
                   public.mrp_production mp,
-                  public.product_product pp
+                  public.product_product pp,
+                  public.mrp_bom_line mbl
                 where wo.id = order_id
                       and co.workorder_id = order_id
                       and pp.screw_type_code = nut_no
                       and co.bom_line_id = qp.bom_line_id
                       and wo.production_id = mp.id
+                      and mbl.bom_line_id = co.bom_line_id
                       and co.product_id = pp.id;
               else
                 r_vin_code = vin_code;
@@ -194,14 +204,17 @@ class OperationResult(models.HyperModel):
                   job2.code,
                   op.workcenter_id,
                   dd.cou_gid,
-                  qp2.id
-                into r_product_id, r_consu_product_id,r_job, r_workcenter_id,r_gun_id,qcp_id
+                  qp2.id,
+                  dd.cou_bom_id,
+                  dd.operation_point_id
+                into r_product_id, r_consu_product_id,r_job, r_workcenter_id,r_gun_id,qcp_id,r_bom_line_id,r_operation_point_id
                 from (select
                         pp.id            pid,
                         mbl.product_id   cou_pid,
                         mbl.operation_id cou_opd,
                         mbl.gun_id       cou_gid,
-                        mbl.id           cou_bom_id
+                        mbl.id           cou_bom_id,
+                        mbl.operation_point_id operation_point_id
                       from public.product_product pp,
                         public.mrp_bom_line mbl,
                         public.mrp_bom bom
@@ -218,7 +231,7 @@ class OperationResult(models.HyperModel):
                                                    measure_t_don,
                                                    measure_torque, op_time, pset_w_min, pset_w_target, lacking, quality_state,
                                                    exception_reason, sent, batch, vin,
-                                                   qcp_id, point_id, workorder_id, consu_product_id, consu_bom_line_id,
+                                                   qcp_id, point_id,bom_line_id,operation_point_id, workorder_id, consu_product_id, consu_bom_line_id,
                                                    production_id, gun_id, program_id, product_id, assembly_line_id, workcenter_id, tightening_id,job,
                                                    time)
               VALUES (pset_m_threshold, pset_m_max, control_data, pset_w_max, user_id, one_time_pass, pset_strategy,
@@ -228,7 +241,7 @@ class OperationResult(models.HyperModel):
                                                                                       pset_w_min, pset_w_target, lacking,
                                                                                       quality_state, exception_reason,
                                                                                                      sent, batch, r_vin_code,
-                                                                                                     qcp_id, qcp_id, order_id,
+                                                                                                     qcp_id, qcp_id,r_bom_line_id,r_operation_point_id,order_id,
                                                                                                      r_consu_product_id,
                                                                                                      consu_bom_id, r_production_id,
                       r_gun_id, r_program_id, r_product_id, r_assembly_id,

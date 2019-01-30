@@ -83,6 +83,7 @@ class MrpRoutingWorkcenter(models.Model):
                 'offset_x': point.x_offset,
                 'offset_y': point.y_offset,
                 'max_redo_times': point.max_redo_times,
+                'gun_sn': '',  # 默认模式下这里传送的枪的序列号是空字符串
                 # 'tolerance_min': qcp.tolerance_min,
                 # 'tolerance_max': qcp.tolerance_max,
                 # 'tolerance_min_degree': qcp.tolerance_min_degree,

@@ -10,7 +10,7 @@ from odoo.addons import decimal_precision as dp
 import json
 
 
-class OperationPointsGoup(models.Model):
+class OperationPointsGroup(models.Model):
     _name = 'operation.point.group'
 
     _order = "sequence"
