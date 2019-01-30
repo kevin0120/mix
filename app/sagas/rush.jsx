@@ -247,6 +247,11 @@ export function* watchRushChannel(hmiSN) {
               }
               break;
             }
+
+            case 'tool': {
+              console.log(json);
+              break;
+            }
             default:
               break;
           }

@@ -28,14 +28,17 @@ function* staticToolEnable(action: actionType) {
   try {
     const state = yield select();
     const mUrl = state.connections.masterpc;
-    const controller: controllerType = state.connections.controllers[0];
-    if (controller === undefined) {
-      return;
-    }
+    // const controller: controllerType = state.connections.controllers[0];
+    // if (controller === undefined) {
+    //   return;
+    // }
 
-    const toolSN = state.setting.systemSettings.defaultToolSN || '';
+    // const toolSN = state.setting.systemSettings.defaultToolSN || '';
 
-    yield call(toolEnable, mUrl, controller.serial_no,toolSN, action.enable);
+    const { results } = state.operations;
+    const targetResult = results[0];
+
+    yield call(toolEnable, mUrl, targetResult.controller_sn, targetResult.gun_sn, action.enable);
   }catch (e) {
     console.error(`staticToolEnable error: ${e.message}`);
   }

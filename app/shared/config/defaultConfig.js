@@ -216,13 +216,13 @@ export const defaultConfigs = {
     enableDebugInfo: false,
     enableConflictOP: false,
     showSwitchMode: false, // 切换pset or job 模式
-    defaultControllerSN: '0001',
+    defaultControllerSN: '27091400470',
     defaultToolSN: '0001',
     authEnable: true,
     switchAutoManual: false,
     oeeFuncEnable: false,
     modbusEnable: false,
-    rfidEnabled: true,
+    rfidEnabled: false,
     andonEnable: true,
     psetContinueMode: false,
     enableFocus: true

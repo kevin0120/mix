@@ -26,6 +26,7 @@ import {
 import { Error } from '../logger';
 import { setNewNotification } from '../actions/notification';
 
+import configs from '../shared/config/index'
 // const lodash = require('lodash');
 
 // 监听作业
@@ -257,7 +258,7 @@ export function* startOperation(data) {
 
     yield put({
       type: OPERATION.OPERATION.FETCH_OK,
-      mode: state.setting.operationSettings.opMode,
+      mode: configs.operationSettings.opMode,
       data
     });
 
@@ -270,12 +271,14 @@ export function* startOperation(data) {
     if (controllerMode === 'job') {
       // job模式
 
-      const controllerSN = state.connections.controllers[0].serial_no;
-      const { operationID, carType, carID, jobID, source } = state.operations;
+      // const controllerSN = state.connections.controllers[0].serial_no;
+      const { operationID, carType, carID, jobID, source, results } = state.operations;
 
       const { hmiSn } = state.setting.page.odooConnection;
 
-      const toolSN = state.setting.systemSettings.defaultToolSN || "";
+      // const toolSN = state.setting.systemSettings.defaultToolSN || "";
+
+      const targetResult = results[0];
       const userID = 1;
       const skip = false;
       let hasSet = false;
@@ -287,8 +290,8 @@ export function* startOperation(data) {
         const resp = yield call(
           jobManual,
           rushUrl,
-          controllerSN,
-          toolSN,
+          targetResult.controller_sn,
+          targetResult.gun_sn,
           carType,
           carID,
           userID,
