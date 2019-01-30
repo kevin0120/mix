@@ -146,7 +146,8 @@ class ConnectedLayout extends React.PureComponent {
       healthCheckResults,
       usersInfo,
       doPush,
-      notification
+      notification,
+      path
     } = this.props;
     const isAutoMode = workMode === 'auto';
     const { name, avatar, role } = usersInfo[0];
@@ -222,15 +223,15 @@ class ConnectedLayout extends React.PureComponent {
                 </div>
                 <div className={classes.menuBtnWrapLeft}>
                   <BottomNavigation
-                    value={value}
-                    onChange={this.handleChange}
+                    value={path}
+                    // onChange={this.handleChange}
                     showLabels
                     className={classes.BottomNavigation}
                   >
                     {routeConfigs.slice(0, -1).map(route => (
                       <BottomNavigationAction
                         key={route.name}
-                        value={route.name}
+                        value={route.url}
                         // component={Link}
                         // to={route.url}
                         onClick={() => {
@@ -394,6 +395,7 @@ const mapStateToProps = (state, ownProps) => ({
   orderStatus: state.operations.operationStatus,
   workMode: state.setting.operationSettings.workMode,
   healthCheckResults: state.healthCheckResults,
+  path:state.router.location.pathname,
   ...ownProps
 });
 
@@ -408,4 +410,3 @@ export default withStyles(styles, { withTheme: true })(
     mapDispatchToProps
   )(ConnectedLayout)
 );
-// }
