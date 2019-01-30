@@ -94,11 +94,12 @@ export function fetchWorkorder(url, workcenterCode, code) {
 }
 
 // 拧紧枪使能控制
-export function toolEnable(url, controllerSN, enable) {
+export function toolEnable(url, controllerSN, toolSN, enable) {
   const fullUrl = `${url}/rush/v1/tool-enable`;
   return defaultClient
     .put(fullUrl, {
       controller_sn: controllerSN,
+      gun_sn: toolSN,
       enable
     })
     .then(resp => resp)
@@ -130,14 +131,14 @@ export function pset(
   resultID,
   count,
   userID,
-  pset,
+  psetID,
   workorderID,
   groupSeq
 ) {
   const fullUrl = `${url}/rush/v1/psets`;
   return defaultClient
     .put(fullUrl, {
-      pset,
+      pset: psetID,
       controller_sn: controllerSN,
       gun_sn: gunSN,
       // result_id: resultID,
@@ -156,6 +157,7 @@ export function pset(
 export function jobManual(
   url,
   controllerSN,
+  gunSN,
   carType,
   vin,
   userID,
@@ -171,6 +173,7 @@ export function jobManual(
     .put(fullUrl, {
       job_id: jobID,
       controller_sn: controllerSN,
+      gun_sn: gunSN,
       user_id: userID,
       car_type: carType,
       vin,
