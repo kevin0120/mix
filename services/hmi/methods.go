@@ -816,14 +816,19 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 			return
 		} else {
 			var odooWorkorders []odoo.ODOOWorkorder
-			json.Unmarshal(body, &odooWorkorders)
+			err := json.Unmarshal(body, &odooWorkorders)
+			if err != nil {
+				ctx.StatusCode(iris.StatusBadRequest)
+				ctx.WriteString(fmt.Sprintf("get workorder failed:%s", err.Error()))
+				return
+			}
 			o, e := m.service.ODOO.CreateWorkorders(odooWorkorders)
 			if e != nil {
 				ctx.StatusCode(iris.StatusBadRequest)
 				ctx.WriteString(fmt.Sprintf("save workorder failed:%s", e.Error()))
 				return
 			} else {
-				workorder = o[0]
+				workorder = o[0] // 拥有获取的是第一张工单信息
 			}
 		}
 	}

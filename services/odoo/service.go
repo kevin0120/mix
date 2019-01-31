@@ -318,6 +318,8 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 
 	for i, v := range workorders {
 
+		o := storage.Workorders{}
+
 		if len(v.Consumes) == 0 {
 			// 忽略没有消耗品的工单
 			continue
@@ -326,92 +328,94 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 		exist, _ := s.DB.WorkorderExists(v.ID)
 		if exist {
 			// 忽略已存在的工单
-			continue
+			o, err := s.DB.GetWorkorder(v.ID,false)
+			if err != nil {
+				continue
+			}
+			dbWorkorders[i] = o
+		}else {
+			o.Status = "ready"
+			o.WorkorderID = v.ID
+			o.HMISN = v.HMI.UUID
+			o.WorkcenterCode = v.Workcenter.Code
+			o.Knr = v.KNR
+			o.LongPin = v.LongPin
+			o.Vin = v.VIN
+			o.MaxOpTime = v.Max_op_time
+			//o.WorkSheet = v.Worksheet
+			o.UserID = 1
+			o.ImageOPID = v.ImageOPID
+			o.VehicleTypeImg = v.VehicleTypeImg
+			o.UpdateTime = time.Now()
+			o.JobID, _ = strconv.Atoi(v.Job)
+
+			o.MO_Year = v.MO_Year
+			o.MO_Pin_check_code = v.MO_Pin_check_code
+			o.MO_Pin = v.MO_Pin
+			o.MO_FactoryName = v.MO_FactoryName
+			o.MO_AssemblyLine = v.MO_AssemblyLine
+			o.MO_EquipemntName = v.MO_EquipemntName
+			o.MO_Lnr = v.MO_Lnr
+			o.MO_Model = v.MO_Model
+			sConsumes, _ := json.Marshal(v.Consumes)
+			o.Consumes = string(sConsumes)
+
+			//results := []storage.Results{}
+			//result_count := 0
+			//ignore := false
+			//for k, consu := range v.Consumes {
+			//	if len(consu.ResultIDs) == 0 {
+			//		// 忽略没有结果的消耗品
+			//		continue
+			//	}
+			//
+			//	r := storage.Results{}
+			//	r.ControllerSN = consu.ControllerSN
+			//	r.GunSN = consu.GunSN
+			//	r.PSet, _ = strconv.Atoi(consu.PSet)
+			//	r.ToleranceMax = consu.ToleranceMax
+			//	r.ToleranceMin = consu.ToleranceMin
+			//	r.ToleranceMaxDegree = consu.ToleranceMaxDegree
+			//	r.ToleranceMinDegree = consu.ToleranceMinDegree
+			//	r.NutNo = consu.NutNo
+			//	r.Batch = fmt.Sprintf("%d/%d", k+1, len(v.Consumes))
+			//
+			//	//r.WorkorderID = o.WorkorderID
+			//	r.Result = storage.RESULT_NONE
+			//	r.HasUpload = false
+			//	r.Stage = storage.RESULT_STAGE_INIT
+			//	r.UpdateTime = time.Now()
+			//	r.PSetDefine = ""
+			//	r.ResultValue = ""
+			//	r.Count = 1
+			//	r.UserID = 1
+			//
+			//	if len(consu.ResultIDs) == 0 {
+			//		ignore = true
+			//		break
+			//	}
+			//
+			//	for _, result_id := range consu.ResultIDs {
+			//		result_count++
+			//
+			//		r.OffsetX = consu.X
+			//		r.OffsetY = consu.Y
+			//
+			//		r.Seq = result_count
+			//		r.ResultId = result_id
+			//		r.MaxRedoTimes = consu.Max_redo_times
+			//		results = append(results, r)
+			//	}
+			//}
+
+			//o.LastResultID = results[len(results)-1].Id
+
+			e := s.DB.InsertWorkorder(&o, nil, true, false, true)
+			if e != nil {
+				finalErr = e
+			}
+			dbWorkorders[i] = o
 		}
-
-		o := storage.Workorders{}
-		o.Status = "ready"
-		o.WorkorderID = v.ID
-		o.HMISN = v.HMI.UUID
-		o.WorkcenterCode = v.Workcenter.Code
-		o.Knr = v.KNR
-		o.LongPin = v.LongPin
-		o.Vin = v.VIN
-		o.MaxOpTime = v.Max_op_time
-		//o.WorkSheet = v.Worksheet
-		o.UserID = 1
-		o.ImageOPID = v.ImageOPID
-		o.VehicleTypeImg = v.VehicleTypeImg
-		o.UpdateTime = time.Now()
-		o.JobID, _ = strconv.Atoi(v.Job)
-
-		o.MO_Year = v.MO_Year
-		o.MO_Pin_check_code = v.MO_Pin_check_code
-		o.MO_Pin = v.MO_Pin
-		o.MO_FactoryName = v.MO_FactoryName
-		o.MO_AssemblyLine = v.MO_AssemblyLine
-		o.MO_EquipemntName = v.MO_EquipemntName
-		o.MO_Lnr = v.MO_Lnr
-		o.MO_Model = v.MO_Model
-		sConsumes, _ := json.Marshal(v.Consumes)
-		o.Consumes = string(sConsumes)
-
-		//results := []storage.Results{}
-		//result_count := 0
-		//ignore := false
-		//for k, consu := range v.Consumes {
-		//	if len(consu.ResultIDs) == 0 {
-		//		// 忽略没有结果的消耗品
-		//		continue
-		//	}
-		//
-		//	r := storage.Results{}
-		//	r.ControllerSN = consu.ControllerSN
-		//	r.GunSN = consu.GunSN
-		//	r.PSet, _ = strconv.Atoi(consu.PSet)
-		//	r.ToleranceMax = consu.ToleranceMax
-		//	r.ToleranceMin = consu.ToleranceMin
-		//	r.ToleranceMaxDegree = consu.ToleranceMaxDegree
-		//	r.ToleranceMinDegree = consu.ToleranceMinDegree
-		//	r.NutNo = consu.NutNo
-		//	r.Batch = fmt.Sprintf("%d/%d", k+1, len(v.Consumes))
-		//
-		//	//r.WorkorderID = o.WorkorderID
-		//	r.Result = storage.RESULT_NONE
-		//	r.HasUpload = false
-		//	r.Stage = storage.RESULT_STAGE_INIT
-		//	r.UpdateTime = time.Now()
-		//	r.PSetDefine = ""
-		//	r.ResultValue = ""
-		//	r.Count = 1
-		//	r.UserID = 1
-		//
-		//	if len(consu.ResultIDs) == 0 {
-		//		ignore = true
-		//		break
-		//	}
-		//
-		//	for _, result_id := range consu.ResultIDs {
-		//		result_count++
-		//
-		//		r.OffsetX = consu.X
-		//		r.OffsetY = consu.Y
-		//
-		//		r.Seq = result_count
-		//		r.ResultId = result_id
-		//		r.MaxRedoTimes = consu.Max_redo_times
-		//		results = append(results, r)
-		//	}
-		//}
-
-		//o.LastResultID = results[len(results)-1].Id
-
-		e := s.DB.InsertWorkorder(&o, nil, true, false, true)
-		if e != nil {
-			finalErr = e
-		}
-
-		dbWorkorders[i] = o
 
 	}
 

@@ -473,15 +473,12 @@ func (s *Service) FindWorkorder(hmi_sn string, workcenter_code string, code stri
 
 	rt, err := s.eng.Alias("w").Where("w.hmi_sn = ? or w.workcenter_code = ?", hmi_sn, workcenter_code).And("w.long_pin = ? or w.vin = ? or w.knr = ?", code, code, code).And("w.x_workorder_id > ?", 0).Get(&workorder)
 
-	if err != nil {
-		return workorder, err
-	} else {
-		if !rt {
-			return workorder, errors.New("workorder does not exist")
-		} else {
-			return workorder, nil
-		}
+	if workorder.LongPin == "" {
+		return workorder, errors.New("workorder does not exist")
+	} else if !rt || err != nil{
+		return workorder, errors.New("workorder does not exist")
 	}
+	return workorder, nil
 }
 
 func (s *Service) GetOperationByID(opid int64) (RoutingOperations, error) {

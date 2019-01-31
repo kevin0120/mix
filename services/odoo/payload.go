@@ -11,6 +11,7 @@ type ODOOMOCreated struct {
 	VIN          string `json:"vin"`
 	ProductID    int    `json:"product_id"`
 	Result_IDs   []int  `json:"result_ids"`
+	WokrOrderIDs []int  `json:"workorder_ids"`
 	AssembleLine int    `json:"assembly_line_id"`
 }
 
