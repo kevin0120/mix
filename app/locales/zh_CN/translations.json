@@ -136,7 +136,8 @@
       "ReworkWorkCenter": "返修工位",
       "WorkMode": "工作模式",
       "WorkStatus": "工作状态",
-      "Job": "程序号"
+      "Job": "程序号",
+      "Tool": "拧紧枪"
     },
     "Display": {
       "Init": "启动中",

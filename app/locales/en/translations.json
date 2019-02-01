@@ -136,7 +136,8 @@
       "ReworkWorkCenter": "Rework Work Center",
       "WorkMode": "WorkMode",
       "WorkStatus": "WorkStatus",
-      "Job": "Job"
+      "Job": "Job",
+      "Tool": "GUN"
     },
     "Display": {
       "Init": "Initialing",

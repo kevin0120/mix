@@ -193,7 +193,6 @@ function* RFIDHandler(data) {
           }
           const targetValue = reg.exec(dataValue)[0];
           // yield put(setNewNotification('info', `new rfid value: ${targetValue}`));
-          console.log(targetValue);
           if (isCarID(targetValue)) {
             yield put(
               operationTrigger(

@@ -8,11 +8,14 @@
 
 // @flow
 
-import { call, takeEvery, select } from 'redux-saga/effects';
+import { call, takeEvery, select, put } from 'redux-saga/effects';
 
 import { TOOLS } from '../actions/actionTypes';
 
 import { toolEnable } from './api/operation';
+import { watch } from './utils';
+import { toolStatusChange } from '../actions/tools';
+import { setNewNotification } from '../actions/notification';
 
 type actionType = {
   +type: string,
@@ -39,12 +42,33 @@ function* staticToolEnable(action: actionType) {
     const targetResult = results[0];
 
     yield call(toolEnable, mUrl, targetResult.controller_sn, targetResult.gun_sn, action.enable);
-  }catch (e) {
+  } catch (e) {
     console.error(`staticToolEnable error: ${e.message}`);
   }
 
 }
 
-export function* toolFunctions() {
-  yield takeEvery(TOOLS.ENABLE, staticToolEnable);
+function* onToolStatusChange(action){
+  try{
+    const {toolSN,status}=action;
+    yield put(
+      setNewNotification(
+        'info',
+        `拧紧枪状态更新（${toolSN}）：${status}`
+      )
+    );
+  }catch (e) {
+    console.error('onToolStatusChange:',e);
+  }
 }
+
+const workers = {
+  [TOOLS.ENABLE]: staticToolEnable,
+  [TOOLS.STATUS_CHANGE]:onToolStatusChange
+};
+
+export const toolFunctions = watch(workers);
+
+// export function* toolFunctions() {
+//   yield takeEvery(TOOLS.ENABLE, staticToolEnable);
+// }

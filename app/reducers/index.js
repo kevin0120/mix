@@ -16,6 +16,7 @@ import operationViewer from './operationViewer';
 import logo from './logo';
 import network from './network';
 import battery from './battery';
+import tools from './tools';
 
 export default function createRootReducer(history: {}) {
   const routerReducer = connectRouter(history)(() => {});
@@ -36,7 +37,8 @@ export default function createRootReducer(history: {}) {
       operationViewer,
       logo,
       network,
-      battery
+      battery,
+      tools
     })
   );
 }

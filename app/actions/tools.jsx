@@ -23,3 +23,11 @@ export function toolDisable() {
     enable: false
   };
 }
+
+export function toolStatusChange(toolSN,status){
+  return{
+    type:TOOLS.STATUS_CHANGE,
+    toolSN,
+    status
+  }
+}

@@ -60,7 +60,8 @@ const mapStateToProps = (state, ownProps) => ({
   timeline: state.timeline,
   reworkWorkCenter: state.connections.rework_workcenter,
   enableFocus: state.setting.systemSettings.enableFocus,
-  enableConflictOP:state.setting.systemSettings.enableConflictOP,
+  enableConflictOP: state.setting.systemSettings.enableConflictOP,
+  tools:state.tools,
   ...ownProps
 });
 
@@ -430,7 +431,8 @@ const withstyles = theme => ({
     background: '#FFFFFF',
     marginTop: '10px',
     borderRadius: '0',
-    height: 'calc(85% - 386px)'
+    // height: 'calc(85% - 386px)'
+    height: 'calc(85% - 440px)'
   },
   InfoTabContiner: {
     height: '100%',
@@ -630,7 +632,7 @@ class ConnectedWorking extends React.Component {
   };
 
   orderInfo = t => {
-    const { operations, workMode } = this.props;
+    const { operations, workMode,tools } = this.props;
 
     // const showButtonInfo = isAutoMode? 'Common.Auto':'Common.Manual';
     let programme = operations.jobID.toString();
@@ -662,6 +664,11 @@ class ConnectedWorking extends React.Component {
         key: 'Job',
         value: programme,
         displayTitle: t('Operation.Info.Job')
+      },
+      {
+        key: 'Gun',
+        value: tools.status,
+        displayTitle: t('Operation.Info.Tool')
       }
     ];
   };
@@ -694,7 +701,7 @@ class ConnectedWorking extends React.Component {
   });
 
   confirmConflict = () => {
-    const { doConfirmConflict,operations } = this.props;
+    const { doConfirmConflict, operations } = this.props;
     if (this.autoCancel) {
       clearTimeout(this.autoCancel);
     }
@@ -710,11 +717,11 @@ class ConnectedWorking extends React.Component {
   };
 
   conflictDiag = (t) => {
-    const {enableConflictOP,operations}=this.props;
+    const { enableConflictOP, operations } = this.props;
     this.autoCancel = setTimeout(() => {
       this.cancelConflict();
     }, 5000);
-    if(enableConflictOP){
+    if (enableConflictOP) {
       return {
         show: true,
         title: t('Common.VerifyCar'),
@@ -992,26 +999,26 @@ class ConnectedWorking extends React.Component {
                 </Grid>
               </Grid>
               <Paper className={classes.InfoTab}>
-                <div className={classes.InfoTabContiner}>
-                  <List>
-                    <WorkingInfoBar
-                      key="infoUser"
-                      infos={this.workSiteInfo(t)}
-                    />
-                    <Divider
-                      className={classes.divider}
-                      key="divider-infoUser"
-                      light
-                    />
-                    <WorkingInfoBar key="infoOrder" infos={this.orderInfo(t)}/>
-                  </List>
-                </div>
+                {/*<div className={classes.InfoTabContiner}>*/}
+                <List>
+                  <WorkingInfoBar
+                    key="infoUser"
+                    infos={this.workSiteInfo(t)}
+                  />
+                  <Divider
+                    className={classes.divider}
+                    key="divider-infoUser"
+                    light
+                  />
+                  <WorkingInfoBar key="infoOrder" infos={this.orderInfo(t)}/>
+                </List>
+                {/*</div>*/}
               </Paper>
               <Paper className={classes.InfoTabTimeLine}>
-                <div className={classes.InfoTabContiner}>
-                  <TimeLine simple stories={timeline}/>
-                  {/* <TimeLine simple stories={teststory} /> */}
-                </div>
+                {/*<div className={classes.InfoTabContiner}>*/}
+                <TimeLine simple stories={timeline}/>
+                {/* <TimeLine simple stories={teststory} /> */}
+                {/*</div>*/}
               </Paper>
               {!manualEnable && configs.operationSettings.opMode === 'op' ? (
                 <Button

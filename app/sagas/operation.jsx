@@ -29,6 +29,7 @@ import {
 import { Error, Info } from '../logger';
 import { setNewNotification } from '../actions/notification';
 import { watch } from './utils';
+import configs from '../shared/config';
 // const lodash = require('lodash');
 
 // // 监听作业
@@ -76,7 +77,7 @@ import { watch } from './utils';
 // }
 
 const operationWorkers = {
-  [OPERATION.STARTED]: [fork, operationStarted],
+  [OPERATION.STARTED]: [call, operationStarted],
   [OPERATION.FINISHED]: [fork, operationFinished],
   [OPERATION.RESET]: [put, switch2Ready],
   [OPERATION.TRIGGER.TRIGGER]: [fork, triggerOperation],
@@ -137,7 +138,7 @@ export function* triggerOperation(action) {
     const { carID, carType, job, source } = action;
     const rState = yield select();
 
-    if (rState.router.location.pathname !== '/working') {
+    if (rState.router.location.pathname !== '/working' || rState.operations.operationStatus === OPERATION_STATUS.DOING) {
       // 不在作业页面，直接返回
       return;
     }
@@ -278,8 +279,7 @@ export function* getOperation(job) {
     if (fetchOK) {
       // 定位作业成功
       // 开始作业
-
-      yield call(startOperation, resp.data);
+      yield call(startOperation, { data: resp.data });
     } else {
       // 定位作业失败
       Error('获取作业失败');
@@ -330,7 +330,6 @@ export function* startOperation(action) {
       if (state.setting.operationSettings.workMode === 'manual') {
         hasSet = true;
       }
-
       try {
         const resp = yield call(
           jobManual,

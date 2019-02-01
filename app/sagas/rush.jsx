@@ -18,6 +18,7 @@ import { IO_FUNCTION } from '../reducers/io';
 import { setHealthzCheck } from '../actions/healthCheck';
 import { setNewNotification } from '../actions/notification';
 import { switch2Ready, operationTrigger } from '../actions/operation';
+import { toolStatusChange } from '../actions/tools';
 
 let task = null;
 let ws = null;
@@ -249,6 +250,7 @@ export function* watchRushChannel(hmiSN) {
 
             case 'tool': {
               console.log(json);
+              yield put(toolStatusChange(json.tool_sn, json.status));
               break;
             }
             default:
