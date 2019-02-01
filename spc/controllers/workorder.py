@@ -165,7 +165,7 @@ class ApiMrpWorkorder(http.Controller):
         workorder_ids = env['mrp.workorder'].search(domain, limit=limit, order=order_by)
         if not workorder_ids:
             logger.info(u"未发现工单,调用快速请求进行创建")
-            _aiis_urls = self.env['ir.config_parameter'].sudo().get_param('aiis.urls')
+            _aiis_urls = env['ir.config_parameter'].sudo().get_param('aiis.urls')
             if not _aiis_urls:
                 body = json.dumps({'msg': 'Can not found AIIS, can not request '})
                 return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
