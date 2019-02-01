@@ -123,7 +123,6 @@ function* getNextWorkOrderandShow() {
 
     const { masterpc: rushUrl, workcenterCode } = state.connections;
     const resp = yield call(fetchNextWorkOrder, rushUrl, workcenterCode);
-    console.log(resp);
     if (resp.status === 200) {
       yield put(fetchOngoingOperationOK(resp.data));
     }
@@ -306,7 +305,7 @@ export function* startOperation(action) {
 
     yield put({
       type: OPERATION.OPERATION.FETCH_OK,
-      mode: state.setting.operationSettings.opMode,
+      mode: configs.operationSettings.opMode,
       data
     });
 
@@ -317,12 +316,14 @@ export function* startOperation(action) {
     if (controllerMode === 'job') {
       // job模式
 
-      const controllerSN = state.connections.controllers[0].serial_no;
-      const { operationID, carType, carID, jobID, source } = state.operations;
+      // const controllerSN = state.connections.controllers[0].serial_no;
+      const { operationID, carType, carID, jobID, source, results } = state.operations;
 
       const { hmiSn } = state.setting.page.odooConnection;
 
-      const toolSN = state.setting.systemSettings.defaultToolSN || '';
+      // const toolSN = state.setting.systemSettings.defaultToolSN || "";
+
+      const targetResult = results[0];
       const userID = 1;
       const skip = false;
       let hasSet = false;
@@ -334,8 +335,8 @@ export function* startOperation(action) {
         const resp = yield call(
           jobManual,
           rushUrl,
-          controllerSN,
-          toolSN,
+          targetResult.controller_sn,
+          targetResult.gun_sn,
           carType,
           carID,
           userID,
