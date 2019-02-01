@@ -8,7 +8,6 @@ import Configuration from './configuration';
 import users from './user';
 import workMode from './workmode';
 import operations from './operations';
-import shutDownDiag from './shutDownDiag';
 import resultDiag from './reusltDiag';
 import ongoingOperation from './ongoingOpeartion';
 import healthCheckResults from './healthCheck';
@@ -31,7 +30,6 @@ export default function createRootReducer(history: {}) {
       workMode,
       operations,
       healthCheckResults,
-      shutDownDiag,
       resultDiag,
       ongoingOperation,
       timeline,

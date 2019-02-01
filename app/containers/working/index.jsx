@@ -19,7 +19,13 @@ import ShutdownDiag from '../../components/ShutDownDiag';
 import { NewCar } from '../../actions/scannerDevice';
 import { switchWorkMode } from '../../actions/workMode';
 
-import { switch2Timeout } from '../../actions/operation';
+import {
+  switch2Timeout,
+  operationBypassConfirm,
+  operationBypassCancel,
+  operationConflictConfirm,
+  operationConflictCancel
+} from '../../actions/operation';
 
 import configs from '../../shared/config/index';
 
@@ -42,6 +48,7 @@ import TimeLine from '../../components/WorkPageTimeline';
 import ProgressBar from '../../components/ProgressBar/Progress';
 import { OPERATION_STATUS, OPERATION_SOURCE } from '../../reducers/operations';
 import withKeyboard from '../../components/Keyboard';
+import SweetAlert from 'react-bootstrap-sweetalert';
 
 const lodash = require('lodash');
 
@@ -53,6 +60,7 @@ const mapStateToProps = (state, ownProps) => ({
   timeline: state.timeline,
   reworkWorkCenter: state.connections.rework_workcenter,
   enableFocus: state.setting.systemSettings.enableFocus,
+  enableConflictOP:state.setting.systemSettings.enableConflictOP,
   ...ownProps
 });
 
@@ -61,7 +69,12 @@ const TOPHEIGHT = '150px';
 const mapDispatchToProps = {
   NewCar,
   switchWorkMode,
-  switch2Timeout
+  switch2Timeout,
+  doConfirmBypass: operationBypassConfirm,
+  doCancelBypass: operationBypassCancel,
+  doConfirmConflict: operationConflictConfirm,
+  doCancelConflict: operationConflictCancel
+
 };
 
 // 与 style 里的变量相同
@@ -625,7 +638,7 @@ class ConnectedWorking extends React.Component {
       if (operations.results.length > 0) {
         programme = operations.results[
           operations.activeResultIndex
-        ].pset.toString();
+          ].pset.toString();
       }
     }
 
@@ -653,6 +666,74 @@ class ConnectedWorking extends React.Component {
     ];
   };
 
+  confirmBypass = () => {
+    const { doConfirmBypass } = this.props;
+    doConfirmBypass();
+  };
+
+  cancelBypass = () => {
+    const { doCancelBypass } = this.props;
+    doCancelBypass();
+  };
+
+  bypassDiag = (t) => ({
+    show: true,
+    title: t('Common.Bypass'),
+    onConfirm: this.confirmBypass,
+    onCancel: this.cancelBypass,
+    content: (
+      <div>
+        <h3>{t('Common.QuestBypass')} </h3>
+        <h4 style={{ textAlign: 'center' }}> OR </h4>
+        {/* <Button onClick={() => this.handleReset} color="danger" round> */}
+        {/* {t('Common.Reset')} */}
+        {/* </Button> */}
+      </div>
+    ),
+    showCancel: true
+  });
+
+  confirmConflict = () => {
+    const { doConfirmConflict,operations } = this.props;
+    if (this.autoCancel) {
+      clearTimeout(this.autoCancel);
+    }
+    doConfirmConflict(operations.conflict.data);
+  };
+
+  cancelConflict = () => {
+    const { doCancelConflict } = this.props;
+    if (this.autoCancel) {
+      clearTimeout(this.autoCancel);
+    }
+    doCancelConflict();
+  };
+
+  conflictDiag = (t) => {
+    const {enableConflictOP,operations}=this.props;
+    this.autoCancel = setTimeout(() => {
+      this.cancelConflict();
+    }, 5000);
+    if(enableConflictOP){
+      return {
+        show: true,
+        title: t('Common.VerifyCar'),
+        onConfirm: this.confirmConflict,
+        onCancel: this.cancelConflict,
+        content: t('Common.QuestConfirmCarInfo'),
+        showCancel: true
+      };
+    }
+    return {
+      show: true,
+      title: t('Common.VerifyCar'),
+      onConfirm: this.cancelConflict,
+      onCancel: this.cancelConflict,
+      content: `设定为不允许重复拧紧同一张工单 VIN:${operations.conflict.data.vin}`,
+      showCancel: false
+    };
+  };
+
   render() {
     const {
       classes,
@@ -675,8 +756,8 @@ class ConnectedWorking extends React.Component {
       batch = `${(
         operations.activeResultIndex + 1
       ).toString()}/${operations.results[
-        operations.results.length - 1
-      ].group_sequence.toString()}`;
+      operations.results.length - 1
+        ].group_sequence.toString()}`;
       redoBatch = `${(
         maxRedoTimes - operations.failCount
       ).toString()}/${maxRedoTimes.toString()}`;
@@ -922,13 +1003,13 @@ class ConnectedWorking extends React.Component {
                       key="divider-infoUser"
                       light
                     />
-                    <WorkingInfoBar key="infoOrder" infos={this.orderInfo(t)} />
+                    <WorkingInfoBar key="infoOrder" infos={this.orderInfo(t)}/>
                   </List>
                 </div>
               </Paper>
               <Paper className={classes.InfoTabTimeLine}>
                 <div className={classes.InfoTabContiner}>
-                  <TimeLine simple stories={timeline} />
+                  <TimeLine simple stories={timeline}/>
                   {/* <TimeLine simple stories={teststory} /> */}
                 </div>
               </Paper>
@@ -942,16 +1023,25 @@ class ConnectedWorking extends React.Component {
                   onClick={this.toggleAutoScannerMode}
                 >
                   {workMode.workMode === 'auto' ? (
-                    <FiberManualRecord className={classes.extendedIcon} />
+                    <FiberManualRecord className={classes.extendedIcon}/>
                   ) : (
-                    <Autorenew className={classes.extendedIcon} />
+                    <Autorenew className={classes.extendedIcon}/>
                   )}
                   {t(showButtonInfo)}
                 </Button>
               ) : null}
-              <ShutdownDiag />
-              {enableResultDialog ? <ResultDialog /> : null}
-              <ManualDiag show={manualDiagShow} close={this.closeManualDiag} />
+              {operations.bypassToConfirm ?
+                <ShutdownDiag
+                  {...this.bypassDiag(t)}
+                /> : null
+              }
+              {operations.conflict.toConfirm ?
+                <ShutdownDiag
+                  {...this.conflictDiag(t)}
+                /> : null
+              }
+              {enableResultDialog ? <ResultDialog/> : null}
+              <ManualDiag show={manualDiagShow} close={this.closeManualDiag}/>
             </Grid>
           </Grid>
         )}

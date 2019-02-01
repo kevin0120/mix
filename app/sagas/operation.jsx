@@ -1,5 +1,5 @@
 /* eslint-disable no-lonely-if */
-import { select, put, take, call } from 'redux-saga/effects';
+import { select, put, take, call, fork, cancel } from 'redux-saga/effects';
 import {
   fetchRoutingWorkcenter,
   fetchWorkorder,
@@ -9,7 +9,6 @@ import {
   ak2Api
 } from './api/operation';
 import { OPERATION, RUSH } from '../actions/actionTypes';
-import { openShutdown } from '../actions/shutDownDiag';
 import {
   OPERATION_RESULT,
   OPERATION_SOURCE,
@@ -18,57 +17,103 @@ import {
 import { addNewStory, clearStories, STORY_TYPE } from './timeline';
 import { toolEnable, toolDisable } from '../actions/tools';
 import { setResultDiagShow } from '../actions/resultDiag';
-import { switch2Ready,switch2PreDoing } from '../actions/operation';
+import {
+  switch2Ready,
+  switch2PreDoing,
+  operationConflictDetected
+} from '../actions/operation';
 import {
   fetchOngoingOperationOK,
   cleanOngoingOperation
 } from '../actions/ongoingOperation';
-import { Error } from '../logger';
+import { Error, Info } from '../logger';
 import { setNewNotification } from '../actions/notification';
-
+import { watch } from './utils';
 // const lodash = require('lodash');
 
-// 监听作业
-export function* watchOperation() {
+// // 监听作业
+// export function* watchOperation() {
+//   try {
+//     while (true) {
+//       const action = yield take([
+//         OPERATION.STARTED,
+//         OPERATION.VERIFIED,
+//         OPERATION.FINISHED,
+//         OPERATION.RESET
+//       ]);
+//       const state = yield select();
+//       const { workMode } = state;
+//
+//       switch (action.type) {
+//         case OPERATION.VERIFIED:
+//           yield call(startOperation, action);
+//           break;
+//         case OPERATION.STARTED:
+//           yield put(setResultDiagShow(false));
+//           yield put(cleanOngoingOperation());
+//           break;
+//
+//         case OPERATION.FINISHED:
+//           if (workMode.controllerMode === 'job') {
+//             // 工具禁用
+//             yield put(toolDisable());
+//           }
+//           if (state.setting.operationSettings.opMode === 'order') {
+//             yield call(getNextWorkOrderandShow);
+//           }
+//           yield put(setResultDiagShow(true));
+//           break;
+//         case OPERATION.RESET:
+//           yield put(switch2Ready());
+//           break;
+//         default:
+//           break;
+//       }
+//     }
+//   } catch (e) {
+//     console.error(`watchOperation: ${e.message}`);
+//   }
+// }
+
+const operationWorkers = {
+  [OPERATION.STARTED]: [fork, operationStarted],
+  [OPERATION.FINISHED]: [fork, operationFinished],
+  [OPERATION.RESET]: [put, switch2Ready],
+  [OPERATION.TRIGGER.TRIGGER]: [fork, triggerOperation],
+  // bypass
+  [OPERATION.BYPASS.CONFIRM]: [fork, bypassConfirm],
+  // conflict
+  [OPERATION.CONFLICT.DETECTED]: [fork, conflictDetected],
+  [OPERATION.CONFLICT.CONFIRM]: [fork, startOperation],
+  [OPERATION.CONFLICT.CANCEL]: [fork, conflictCanceled]
+};
+
+export const watchOperation = watch(operationWorkers);
+
+function* operationStarted() {
   try {
-    while (true) {
-      const action = yield take([
-        OPERATION.STARTED,
-        OPERATION.VERIFIED,
-        OPERATION.FINISHED,
-        OPERATION.RESET
-      ]);
-      const state = yield select();
-      const { workMode } = state;
-
-      switch (action.type) {
-        case OPERATION.VERIFIED:
-          yield call(startOperation, action.data);
-          break;
-        case OPERATION.STARTED:
-          yield put(setResultDiagShow(false));
-          yield put(cleanOngoingOperation());
-          break;
-
-        case OPERATION.FINISHED:
-          if (workMode.controllerMode === 'job') {
-            // 工具禁用
-            yield put(toolDisable());
-          }
-          if (state.setting.operationSettings.opMode === 'order') {
-            yield call(getNextWorkOrderandShow);
-          }
-          yield put(setResultDiagShow(true));
-          break;
-        case OPERATION.RESET:
-          yield put(switch2Ready());
-          break;
-        default:
-          break;
-      }
-    }
+    yield put(setResultDiagShow(false));
+    yield put(cleanOngoingOperation());
   } catch (e) {
-    console.error(`watchOperation: ${e.message}`);
+    console.error(e);
+  }
+}
+
+function* operationFinished() {
+  try {
+    const state = yield select();
+    const { workMode } = state;
+
+    if (workMode.controllerMode === 'job') {
+      // 工具禁用
+      yield put(toolDisable());
+    }
+    if (state.setting.operationSettings.opMode === 'order') {
+      yield call(getNextWorkOrderandShow);
+    }
+    yield put(setResultDiagShow(true));
+  } catch (e) {
+    console.error(e);
   }
 }
 
@@ -76,8 +121,9 @@ function* getNextWorkOrderandShow() {
   try {
     const state = yield select();
 
-    const {masterpc: rushUrl, workcenterCode }= state.connections;
+    const { masterpc: rushUrl, workcenterCode } = state.connections;
     const resp = yield call(fetchNextWorkOrder, rushUrl, workcenterCode);
+    console.log(resp);
     if (resp.status === 200) {
       yield put(fetchOngoingOperationOK(resp.data));
     }
@@ -87,8 +133,9 @@ function* getNextWorkOrderandShow() {
 }
 
 // 触发作业
-export function* triggerOperation(carID, carType, job, source) {
+export function* triggerOperation(action) {
   try {
+    const { carID, carType, job, source } = action;
     const rState = yield select();
 
     if (rState.router.location.pathname !== '/working') {
@@ -140,7 +187,7 @@ export function* triggerOperation(carID, carType, job, source) {
         break;
     }
 
-    const triggers = rState.workMode.workMode === 'manual'? ['carID']:rState.setting.operationSettings.flowTriggers; // 手动模式下，只需要车辆信息即可触发作业
+    const triggers = rState.workMode.workMode === 'manual' ? ['carID'] : rState.setting.operationSettings.flowTriggers; // 手动模式下，只需要车辆信息即可触发作业
 
     const operations = yield select(state => state.operations);
 
@@ -164,7 +211,7 @@ export function* getOperation(job) {
   try {
     const state = yield select();
 
-    const { masterpc:rushUrl, workcenterCode } = state.connections;
+    const { masterpc: rushUrl, workcenterCode } = state.connections;
 
     let fetchOK = false;
     let resp = null;
@@ -210,13 +257,13 @@ export function* getOperation(job) {
             fetchOK = true;
           }
         } catch (e) {
-          const { preCheck=false } = state.setting.operationSettings;
+          const { preCheck = false } = state.setting.operationSettings;
           resp = e.response;
           if (resp.status === 409) {
             fetchOK = true;
 
             if (preCheck) {
-              yield put(openShutdown('verify', resp.data));
+              yield put(operationConflictDetected(resp.data));
               return;
             }
           } else {
@@ -251,8 +298,10 @@ export function* getOperation(job) {
 }
 
 // 开始作业
-export function* startOperation(data) {
+export function* startOperation(action) {
   try {
+    const { data } = action;
+    const state = yield select();
     yield put(setResultDiagShow(false));
 
     yield put({
@@ -260,8 +309,6 @@ export function* startOperation(data) {
       mode: state.setting.operationSettings.opMode,
       data
     });
-
-    const state = yield select();
 
     const { controllerMode } = state.workMode;
 
@@ -275,7 +322,7 @@ export function* startOperation(data) {
 
       const { hmiSn } = state.setting.page.odooConnection;
 
-      const toolSN = state.setting.systemSettings.defaultToolSN || "";
+      const toolSN = state.setting.systemSettings.defaultToolSN || '';
       const userID = 1;
       const skip = false;
       let hasSet = false;
@@ -413,8 +460,8 @@ export function* handleResults(data) {
     const batch = `${(
       operations.activeResultIndex + 1
     ).toString()}/${operations.results[
-      operations.results.length - 1
-    ].group_sequence.toString()}`;
+    operations.results.length - 1
+      ].group_sequence.toString()}`;
 
     for (let i = 0; i < data.length; i += 1) {
       if (data[i].result === OPERATION_RESULT.NOK) {
@@ -496,5 +543,44 @@ export function* ak2() {
     );
   } catch (e) {
     console.error(`ak2: ${e.message}`);
+  }
+}
+
+function* bypassConfirm() {
+  try {
+    const state = yield select();
+    const { operations: op } = state;
+    const { carID } = op;
+    const { enableAk2 = true } = state.setting.operationSettings;
+    if (enableAk2) {
+      yield call(ak2);
+    }
+    Info(`车辆已放行 车辆ID:${carID}`);
+    yield put(switch2Ready());
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function* conflictDetected(action) {
+  try {
+    // 冲突确认，继续作业
+    const state = yield select();
+    const { data } = action;
+    const { enableConflictOP = false } = state.setting.systemSettings;
+    if (!enableConflictOP) {
+      yield put(setNewNotification('warning', `设定为不允许重复拧紧同一张工单 VIN: ${data.vin}`));
+      // return; // 直接返回, 不关闭模式对话框
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function* conflictCanceled() {
+  try {
+    yield put(switch2Ready());
+  } catch (e) {
+    console.error(e);
   }
 }

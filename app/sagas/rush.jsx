@@ -13,12 +13,11 @@ import { OPERATION, RUSH, WORK_MODE } from '../actions/actionTypes';
 import { NewResults } from '../actions/rush';
 import { NewCar } from '../actions/scannerDevice';
 import { getIBypass, getIModeSelect, handleIOFunction } from './io';
-import { triggerOperation } from './operation';
 import { OPERATION_SOURCE } from '../reducers/operations';
 import { IO_FUNCTION } from '../reducers/io';
 import { setHealthzCheck } from '../actions/healthCheck';
 import { setNewNotification } from '../actions/notification';
-import { switch2Ready } from '../actions/operation';
+import { switch2Ready, operationTrigger } from '../actions/operation';
 
 let task = null;
 let ws = null;
@@ -58,7 +57,7 @@ function* initRush() {
 
 function* stopRush() {
   try {
-    if (ws){
+    if (ws) {
       if (
         ws.ws.readyState === OWebSocket.OPEN ||
         ws.ws.readyState === OWebSocket.CONNECTING
@@ -74,8 +73,8 @@ function* stopRush() {
     if (task) {
       yield cancel(task);
     }
-  }catch (e) {
-    console.error(`stopRush error: ${e.message}`)
+  } catch (e) {
+    console.error(`stopRush error: ${e.message}`);
   }
 
 
@@ -112,7 +111,8 @@ function createRushChannel(hmiSN) {
       emit({ type: 'data', payload: data });
     });
 
-    return () => {};
+    return () => {
+    };
   });
 }
 
@@ -167,13 +167,12 @@ export function* watchRushChannel(hmiSN) {
                 }
 
                 const { carID, carType } = state.operations;
-                yield call(
-                  triggerOperation,
+                yield put(operationTrigger(
                   carID,
                   carType,
                   json.job_id,
                   OPERATION_SOURCE.MANUAL
-                );
+                ));
               }
 
               break;

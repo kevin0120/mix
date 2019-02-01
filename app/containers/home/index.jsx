@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-
 import { bindActionCreators } from 'redux';
 
 import Grid from '@material-ui/core/Grid';
@@ -18,17 +17,17 @@ import PowerSettingIcon from '@material-ui/icons/PowerSettingsNew';
 import ExitToApp from '@material-ui/icons/ExitToApp';
 
 import { withStyles } from '@material-ui/core/styles';
+import { push } from 'connected-react-router';
 import Button from '../../components/CustomButtons/Button';
 
-import { openShutdown as OpenShutdown } from '../../actions/shutDownDiag';
 // import * as AuthActions from '../../actions/userAuth';
 
-import withLayout from '../../components/Layout/layout';
 import ShutdownDiag from '../../components/ShutDownDiag';
 import { routeConfigs } from '../../routes/index';
 import styles from './styles';
-import { push } from 'connected-react-router';
+import {shutDownAction} from '../../actions/power';
 import { setNewNotification } from '../../actions/notification';
+
 const lodash = require('lodash');
 
 const mapStateToProps = (state, ownProps) => ({
@@ -40,7 +39,8 @@ const mapStateToProps = (state, ownProps) => ({
 const mapDispatchToProps = {
   doPush: push,
   notification: setNewNotification,
-  OpenShutdown
+  // OpenShutdown
+  shutDown:shutDownAction
 };
 
 // function mapDispatchToProps(dispatch) {
@@ -49,14 +49,25 @@ const mapDispatchToProps = {
 
 /* eslint-disable no-unused-vars */
 class ConnectedWelcome extends React.Component {
-  // componentDidMount() {
-  //   const { doUserAuth, userUUID } = this.props;
-  //   doUserAuth(userUUID);
-  // }
+  constructor(props) {
+    super(props);
+    this.state = {
+      showDiag: false
+    };
+  }
 
   handleClickOpen = () => {
-    const { OpenShutdown } = this.props;
-    OpenShutdown('shutdown');
+    this.setState({ showDiag: true });
+  };
+
+  handleShutDown=()=>{
+    const {shutDown}=this.props;
+    this.setState({ showDiag: false });
+    shutDown();
+  };
+
+  handleCloseDiag=()=>{
+    this.setState({ showDiag: false });
   };
 
   handleLogOut = () => {
@@ -66,6 +77,7 @@ class ConnectedWelcome extends React.Component {
 
   render() {
     const { classes, authEnable, doPush, notification, usersInfo } = this.props;
+    const { showDiag } = this.state;
     const fabRightClassName = classNames(classes.fabRight);
     const fabLeftClassName = classNames(classes.fabLeft);
     const { role } = usersInfo[0];
@@ -99,7 +111,7 @@ class ConnectedWelcome extends React.Component {
                       />
                       <CardContent className={classes.cardContent}>
                         <div className={classes.iconWrap}>
-                          <route.icon className={classes.icon} />
+                          <route.icon className={classes.icon}/>
                         </div>
                         <h1 className={classes.title}>{t(route.title)}</h1>
                         <p className={classes.subTitle}>
@@ -116,9 +128,11 @@ class ConnectedWelcome extends React.Component {
               size="lg"
               color="danger"
               className={fabRightClassName}
-              onClick={this.handleClickOpen}
+              onClick={()=>{
+                this.handleClickOpen();
+              }}
             >
-              <PowerSettingIcon className={classes.extendedIcon} />
+              <PowerSettingIcon className={classes.extendedIcon}/>
               {t('Common.Shutdown')}
             </Button>
             {authEnable ? (
@@ -130,24 +144,32 @@ class ConnectedWelcome extends React.Component {
                 component={Link}
                 to="/pages/login"
               >
-                <ExitToApp className={classes.extendedIcon} />
+                <ExitToApp className={classes.extendedIcon}/>
                 {t('Common.Logout')}
               </Button>
             ) : null}
 
-            <ShutdownDiag />
+            <ShutdownDiag
+              show={showDiag}
+              title={t('Common.Shutdown')}
+              onConfirm={this.handleShutDown}
+              onCancel={this.handleCloseDiag}
+              content={t('Common.QuestShutdown')}
+              showCancel
+            />
           </div>
         )}
       </I18n>
     );
   }
 }
+
 /* eslint-enable no-unused-vars */
 ConnectedWelcome.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   authEnable: PropTypes.bool.isRequired,
   // functions
-  OpenShutdown: PropTypes.func.isRequired
+  shutDown: PropTypes.func.isRequired
 };
 
 const Welcome = connect(

@@ -20,6 +20,7 @@ import { OPERATION_STATUS } from '../reducers/operations';
 import { IO } from '../actions/actionTypes';
 import { setHealthzCheck } from '../actions/healthCheck';
 import { setNewNotification } from '../actions/notification';
+import { operationBypassIO } from '../actions/operation';
 
 // reducers
 import { IO_FUNCTION } from '../reducers/io';
@@ -29,8 +30,6 @@ import { continueOperation } from './operation';
 
 // config
 import userConfigs from '../shared/config';
-
-import { openShutdown } from '../actions/shutDownDiag';
 
 const Reconnect = require('node-net-reconnect');
 const net = require('net');
@@ -145,7 +144,11 @@ export function* handleIOFunction(data) {
             state.operations.operationStatus
           )
         ) {
-          yield put(openShutdown('bypass'));
+          // yield put(openShutdown('bypass'));
+          if(state.setting.operationSettings.byPass){
+            yield put(operationBypassIO());
+
+          }
         }
         break;
       }
@@ -224,7 +227,8 @@ function ioClientChannel() {
       emit({ type: CLIENT_CHANNEL.ERROR });
     });
 
-    return () => {};
+    return () => {
+    };
   });
 }
 

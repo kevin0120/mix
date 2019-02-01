@@ -7,7 +7,6 @@ import { cardAuthFlow } from './cardAuth';
 import { sysInitFlow } from './systemInit';
 import { watchOperation, watchResults } from './operation';
 import { watchIO } from './io';
-import { shutDownDiagWorkFlow } from './shutDownDiag';
 import { toolFunctions } from './tools';
 import { loginFlow, logoutFlow } from './auth';
 // import { healthzCheckFlow } from './healthzCheck';
@@ -20,6 +19,7 @@ import watchOperationViewer from './operationViewer';
 import logo from './logo';
 import watchNetwork from './network';
 import watchBattery from './battery';
+import watchPower from './power';
 
 export default function* rootSaga() {
   try {
@@ -34,7 +34,6 @@ export default function* rootSaga() {
       watchIO(), // 监听IO数据
       watchRush(),
       watchRfid(),
-      shutDownDiagWorkFlow(),
       toolFunctions(),
       // auth
       loginFlow(),
@@ -46,7 +45,8 @@ export default function* rootSaga() {
       watchOperationViewer(),
       logo(),
       watchNetwork(),
-      watchBattery()
+      watchBattery(),
+      watchPower()
     ]);
   } catch (e) {
     console.log('rootSaga:', e);

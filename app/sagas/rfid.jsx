@@ -10,7 +10,7 @@ import {
 } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
 import { RFID } from '../actions/actionTypes';
-import { triggerOperation } from './operation';
+import { operationTrigger } from '../actions/operation';
 import { OPERATION_SOURCE } from '../reducers/operations';
 import { isCarID } from '../common/utils';
 import { setHealthzCheck } from '../actions/healthCheck';
@@ -22,6 +22,8 @@ let client = null;
 let recon = null;
 
 let watchChannelTask = null;
+
+let pervDataValue='';
 
 const net = require('net');
 const Reconnect = require('node-net-reconnect');
@@ -41,8 +43,8 @@ export function* watchRfid() {
           break;
       }
     }
-  }catch (e) {
-    console.error(`watchRFID error: ${e.message}`)
+  } catch (e) {
+    console.error(`watchRFID error: ${e.message}`);
   }
 
 }
@@ -50,9 +52,7 @@ export function* watchRfid() {
 function* initRFID() {
   try {
     const state = yield select();
-    const { connections ,setting:{operationSettings}} = state;
-
-    const { regExp } = operationSettings;
+    const { connections } = state;
 
     if (connections.rfid === '') {
       return;
@@ -81,10 +81,10 @@ function* initRFID() {
 
     const rfidChannel = yield call(createRfidChannel, client);
 
-    watchChannelTask = yield fork(watchRfidChannel, rfidChannel, regExp);
+    watchChannelTask = yield fork(watchRfidChannel, rfidChannel);
 
-  }catch (e) {
-    console.error(`initRFID error: ${e.message}`)
+  } catch (e) {
+    console.error(`initRFID error: ${e.message}`);
   }
 
 }
@@ -100,11 +100,11 @@ export function* stopRFID() {
       client.destroy();
       client = null;
     }
-    if (watchChannelTask){
+    if (watchChannelTask) {
       yield cancel(watchChannelTask);
     }
-  }catch (e) {
-    console.error(`stopRFID error: ${e.message}`)
+  } catch (e) {
+    console.error(`stopRFID error: ${e.message}`);
   }
 
 }
@@ -140,28 +140,31 @@ function createRfidChannel(rfidClient) {
       // timeout
     });
 
-    return () => {};
+    return () => {
+    };
   });
 }
 
 // const getHealthz = state => state.healthCheckResults;
 
-function* RFIDHandler(reg, data) {
+function* RFIDHandler(data) {
   try {
 
     const state = yield select();
-
+    const { setting: { operationSettings: { regExp } } } = state;
     const { rfidEnabled } = state.setting.systemSettings;
+
+    const reg = new RegExp(regExp, 'i'); // 正則表達式,大小寫不敏感
 
     if (!rfidEnabled) {
       // 未使能rfid
-      return
+      return;
     }
     const { type, payload } = data;
 
     switch (type) {
       case 'healthz': {
-        const {healthCheckResults: healthzStatus} = state; // 获取整个healthz
+        const { healthCheckResults: healthzStatus } = state; // 获取整个healthz
         if (!lodash.isEqual(healthzStatus.rfid.isHealth, payload)) {
           // 如果不相等 更新
           yield put(setHealthzCheck('rfid', payload));
@@ -175,6 +178,11 @@ function* RFIDHandler(reg, data) {
           const code = buf2.toString();
           const dataValue = _.trim(code);
 
+          // if(pervDataValue===dataValue){
+          //   return;
+          // }
+          // pervDataValue=dataValue;
+
           if (!reg.test(dataValue)) {
             yield put(
               setNewNotification(
@@ -185,23 +193,23 @@ function* RFIDHandler(reg, data) {
           }
           const targetValue = reg.exec(dataValue)[0];
           // yield put(setNewNotification('info', `new rfid value: ${targetValue}`));
-
+          console.log(targetValue);
           if (isCarID(targetValue)) {
-            yield call(
-              triggerOperation,
-              dataValue,
-              null,
-              null,
-              OPERATION_SOURCE.RFID
-            );
+            yield put(
+              operationTrigger(
+                targetValue,
+                null,
+                null,
+                OPERATION_SOURCE.RFID
+              ));
           } else {
-            yield call(
-              triggerOperation,
-              null,
-              dataValue,
-              null,
-              OPERATION_SOURCE.RFID
-            );
+            yield put(
+              operationTrigger(
+                null,
+                targetValue,
+                null,
+                OPERATION_SOURCE.RFID
+              ));
           }
         }
         break;
@@ -214,13 +222,12 @@ function* RFIDHandler(reg, data) {
   }
 }
 
-export function* watchRfidChannel(channel,regExp) {
-  const reg = new RegExp(regExp, 'i'); // 正則表達式,大小寫不敏感
+export function* watchRfidChannel(channel) {
   while (client !== null && channel !== null) {
     try {
       // yield throttle(3000, channel, RFIDHandler, reg); // RFID 因为频繁触发所以进行防抖动处理,默认3秒
-      const data =yield take(channel);
-      yield fork(RFIDHandler,data,reg);
+      const data = yield take(channel);
+      yield fork(RFIDHandler, data);
       yield delay(2000);
     } catch (err) {
       console.error(`watchRFIDChannel: ${err.message}`);

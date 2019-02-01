@@ -8,6 +8,7 @@ import {
 } from '../sagas/io';
 
 import sortObj from '../common/utils';
+import { genReducers } from './utils';
 
 export const OPERATION_STATUS = {
   READY: 'Ready',
@@ -45,6 +46,11 @@ const defaultOperations = {
   workcenterID: -1,
   lnr: '',
   source: '',
+  bypassToConfirm: false,
+  conflict: {
+    toConfirm: false,
+    data: {}
+  },
   results: [
     // {
     //   id: -1,
@@ -73,43 +79,121 @@ type actionType = {
   +source: string
 };
 
-export default function operations(
-  state: object = defaultOperations,
-  action: actionType
-) {
-  switch (action.type) {
-    case OPERATION.TRIGGER.NEW_DATA:
-      return newTriggerData(state, action.carID, action.carType);
-    case OPERATION.SOURCE.SET:
-      return setSource(state, action.source);
-    case OPERATION.OPERATION.FETCH_OK:
-      return newOperation(state, action.mode, action.data);
-    case OPERATION.JOB_MANUAL.OK:
-      return setWorkorderID(state, action.workorderID);
-    case OPERATION.OPERATION.FETCH_FAIL:
-      return operationSwitchReady(state);
-    case OPERATION.STARTED:
-      return operationStarted(state);
-    case OPERATION.RESULT.OK:
-      return operationResultOK(state, action.data);
-    case OPERATION.RESULT.NOK:
-      return operationResultNOK(state, action.data);
-    case OPERATION.FAILED:
-      return operationFailed(state, action.data);
-    case OPERATION.FINISHED:
-      return operationFinished(state, action.data);
-    case OPERATION.CONTINUE:
-      return operationContinue(state);
-    case OPERATION.PREDOING:
-      return switchOperationPredoing(state, OPERATION_STATUS.PREDOING);
-    case OPERATION.TIMEOUT:
-      return switchOperationTimeout(state, OPERATION_STATUS.TIMEOUT);
-    default:
-      return state;
-  }
+const reducers = {
+  [OPERATION.TRIGGER.NEW_DATA]: newTriggerData,
+  [OPERATION.SOURCE.SET]: setSource,
+  [OPERATION.OPERATION.FETCH_OK]: newOperation,
+  [OPERATION.JOB_MANUAL.OK]: setWorkorderID,
+  [OPERATION.OPERATION.FETCH_FAIL]: operationSwitchReady,
+  [OPERATION.STARTED]: operationStarted,
+  [OPERATION.RESULT.OK]: operationResultOK,
+  [OPERATION.RESULT.NOK]: operationResultNOK,
+  [OPERATION.FAILED]: operationFailed,
+  [OPERATION.FINISHED]: operationFinished,
+  [OPERATION.CONTINUE]: operationContinue,
+  [OPERATION.PREDOING]: switchOperationPredoing,
+  [OPERATION.TIMEOUT]: switchOperationTimeout,
+  [OPERATION.BYPASS.IO]: operationBypassIO,
+  [OPERATION.BYPASS.CONFIRM]: operationBypassConfirmed,
+  [OPERATION.CONFLICT.CONFIRM]: operationConflictConfirm,
+  [OPERATION.CONFLICT.DETECTED]: operationConflictDetected,
+  [OPERATION.CONFLICT.CANCEL]: operationConflictCanceled
+};
+
+export default genReducers(reducers, defaultOperations);
+
+// export default function operations(
+//   state: object = defaultOperations,
+//   action: actionType
+// ) {
+//   switch (action.type) {
+//     case OPERATION.TRIGGER.NEW_DATA:
+//       return newTriggerData(state, action.carID, action.carType);
+//     case OPERATION.SOURCE.SET:
+//       return setSource(state, action.source);
+//     case OPERATION.OPERATION.FETCH_OK:
+//       return newOperation(state, action.mode, action.data);
+//     case OPERATION.JOB_MANUAL.OK:
+//       return setWorkorderID(state, action.workorderID);
+//     case OPERATION.OPERATION.FETCH_FAIL:
+//       return operationSwitchReady(state);
+//     case OPERATION.STARTED:
+//       return operationStarted(state);
+//     case OPERATION.RESULT.OK:
+//       return operationResultOK(state, action.data);
+//     case OPERATION.RESULT.NOK:
+//       return operationResultNOK(state, action.data);
+//     case OPERATION.FAILED:
+//       return operationFailed(state, action.data);
+//     case OPERATION.FINISHED:
+//       return operationFinished(state, action.data);
+//     case OPERATION.CONTINUE:
+//       return operationContinue(state);
+//     case OPERATION.PREDOING:
+//       return switchOperationPredoing(state, OPERATION_STATUS.PREDOING);
+//     case OPERATION.TIMEOUT:
+//       return switchOperationTimeout(state, OPERATION_STATUS.TIMEOUT);
+//     case OPERATION.BYPASS.IO:
+//       return operationBypassIO(state);
+//     case OPERATION.BYPASS.CONFIRM:
+//       return operationBypassConfirmed(state);
+//     case OPERATION.CONFLICT.CONFIRM:
+//       return operationConflictConfirm(state);
+//     case OPERATION.CONFLICT.DETECTED:
+//       return operationConflictDetected(state,action);
+//       case OPERATION.CONFLICT.CANCEL:
+//       return operationConflictCanceled(state,action);
+//     default:
+//       return state;
+//   }
+// }
+
+function operationConflictCanceled(state, action) {
+  return {
+    ...state,
+    conflict: {
+      data: action.data,
+      toConfirm: false
+    }
+  };
 }
 
-function newTriggerData(state, carID, carType) {
+function operationConflictDetected(state, action) {
+  return {
+    ...state,
+    conflict: {
+      data: action.data,
+      toConfirm: true
+    }
+  };
+}
+
+function operationConflictConfirm(state) {
+  return {
+    ...state,
+    conflict: {
+      data: {},
+      toConfirm: false
+    }
+  };
+}
+
+function operationBypassConfirmed(state) {
+  return {
+    ...state,
+    bypassToConfirm: false
+  };
+}
+
+function operationBypassIO(state) {
+  return {
+    ...state,
+    bypassToConfirm: true
+  };
+}
+
+function newTriggerData(state, action) {
+  const { carID, carType } = action;
   return {
     ...state,
     carID: carID !== null ? carID : state.carID,
@@ -117,14 +201,16 @@ function newTriggerData(state, carID, carType) {
   };
 }
 
-function setSource(state, source) {
+function setSource(state, action) {
+  const { source } = action;
   return {
     ...state,
     source
   };
 }
 
-function newOperation(state, mode, data) {
+function newOperation(state, action) {
+  const { mode, data } = action;
   if (mode === 'op') {
     // 作业模式
     return {
@@ -155,7 +241,8 @@ function newOperation(state, mode, data) {
   };
 }
 
-function setWorkorderID(state, workorderID) {
+function setWorkorderID(state, action) {
+  const { workorderID } = action;
   return {
     ...state,
     workorderID
@@ -206,7 +293,8 @@ function mergeResults(state, data) {
   return rs;
 }
 
-function operationResultOK(state, data) {
+function operationResultOK(state, action) {
+  const { data } = action;
   const results = mergeResults(state, data);
 
   if (state.operationStatus === OPERATION_STATUS.READY) {
@@ -229,7 +317,8 @@ function operationResultOK(state, data) {
   };
 }
 
-function operationResultNOK(state, data) {
+function operationResultNOK(state, action) {
+  const { data } = action;
   const results = mergeResults(state, data);
 
   return {
@@ -239,7 +328,8 @@ function operationResultNOK(state, data) {
   };
 }
 
-function operationFailed(state, data) {
+function operationFailed(state, action) {
+  const { data } = action;
   const results = mergeResults(state, data);
 
   if (state.operationStatus === OPERATION_STATUS.READY) {
@@ -261,7 +351,9 @@ function operationFailed(state, data) {
   };
 }
 
-function operationFinished(state, data) {
+function operationFinished(state, action) {
+  const { data } = action;
+
   setLedStatusReady();
 
   const results = mergeResults(state, data);
@@ -311,10 +403,10 @@ function switchOperationPredoing(state) {
   };
 }
 
-function switchOperationTimeout(state, status) {
+function switchOperationTimeout(state) {
   return {
     ...state,
-    operationStatus: status,
+    operationStatus: OPERATION_STATUS.TIMEOUT,
     carID: '',
     carType: '',
     lnr: ''

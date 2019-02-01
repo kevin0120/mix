@@ -13,8 +13,8 @@ import { eventChannel } from 'redux-saga';
 import { ANDON, AIIS, OPERATION } from '../actions/actionTypes';
 import { jobManual } from './api/operation';
 import { setHealthzCheck } from '../actions/healthCheck';
-
-import { triggerOperation } from './operation';
+import { operationTrigger } from '../actions/operation';
+import { o } from './operation';
 
 import { OPERATION_STATUS, OPERATION_SOURCE } from '../reducers/operations';
 import { setNewNotification } from '../actions/notification';
@@ -73,13 +73,12 @@ export function* handleAiisData(action) {
     if (state.operations.operationStatus !== OPERATION_STATUS.DOING) {
       if (data.vin_code.length) {
         // 车辆拧紧作业
-        yield call(
-          triggerOperation,
+        yield put(operationTrigger(
           data.vin_code,
           data.cartype_code,
           null,
           OPERATION_SOURCE.ANDON
-        );
+        ));
       } else {
         // 空车信息
 
@@ -152,7 +151,8 @@ function aiisWSChannel() {
       });
     });
 
-    return () => {};
+    return () => {
+    };
   });
 }
 
