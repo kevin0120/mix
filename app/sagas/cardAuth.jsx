@@ -4,7 +4,7 @@ import { put, call, fork } from 'redux-saga/effects';
 import { channel } from 'redux-saga';
 import { CARD_AUTH } from '../actions/actionTypes';
 import { doUserAuth, userLogOut } from '../actions/userAuth';
-import { watchChannel } from './utils';
+import { watch } from './utils';
 
 const pcscLite = require('pcsclite');
 
@@ -52,7 +52,7 @@ const pcscdWorkers = {
 export function* cardAuthFlow() {
   try {
     pcscd = yield call(pcscLite);
-    yield fork(pcscdListener);
+    yield call(pcscdListener);
   } catch (e) {
     console.error(e);
   } finally {
@@ -71,7 +71,7 @@ export function* onCardRemoved() {
 function* pcscdListener() {
   try {
     pcscdChannel = yield call(creatPcscdChannel);
-    yield call(watchChannel(pcscdChannel, pcscdWorkers));
+    yield call(watch(pcscdWorkers,pcscdChannel));
   } catch (err) {
     console.error(err);
   }
@@ -82,7 +82,7 @@ function* pcscdReaderConnect(action) {
     // eslint-disable-next-line prefer-destructuring
     reader = action.reader;
     readerChannel = yield call(creatReaderChannel);
-    yield fork(watchChannel(readerChannel, readerWorkers));
+    yield fork(watch(readerWorkers,readerChannel));
   } catch (e) {
     console.error(e);
   }

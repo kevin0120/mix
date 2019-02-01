@@ -147,5 +147,18 @@
       "Timeout": "超时",
       "Continue": "作业中"
     }
+  },
+  "Event": {
+    "Time": "时间",
+    "Level": "事件等级",
+    "Message": "消息",
+    "Actions": "动作",
+    "Detail": "事件详情",
+    "Info": "日常信息",
+    "Maintenance": "维护请求",
+    "Alert": "报警事件",
+    "All": "全部",
+    "Warn": "警告",
+    "Error": "错误"
   }
 }

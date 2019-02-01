@@ -1,24 +1,17 @@
-import { take, call, put, select, fork } from 'redux-saga/effects';
+import { take, fork } from 'redux-saga/effects';
 
-export function genWatcher(workers) {
+export function watch(workers, channel) {
   return function* watcher(){
     try {
       while (true) {
-        const action = yield take(Object.keys(workers));
-        yield fork(workers[action.type],action);
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  }
-}
-
-export function watchChannel(channel,workers) {
-  return function* watcher(){
-    try {
-      while (true) {
-        const action = yield take(channel);
-        yield fork(workers[action.type],action);
+        const action = yield take(channel || Object.keys(workers));
+        if(workers[action.type].length>1){
+          const effect=workers[action.type][0];
+          const worker=workers[action.type][1];
+          yield effect(worker,action);
+        }else{
+          yield fork(workers[action.type],action);
+        }
       }
     } catch (e) {
       console.log(e);

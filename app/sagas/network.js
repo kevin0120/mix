@@ -3,7 +3,7 @@ import { take, call, put, select, fork } from 'redux-saga/effects';
 import { cloneDeep } from 'lodash';
 import { NETWORK } from '../actions/actionTypes';
 import saveConfigs from '../actions/userConfigs';
-import {genWatcher} from './utils';
+import {watch} from './utils';
 
 const lodash = require('lodash');
 const util = require('util');
@@ -38,7 +38,7 @@ const workers={
   [NETWORK.SIGNAL]:doCheckActiveSignal,
 };
 
-export default genWatcher(workers);
+export default watch(workers);
 
 function* doCheckCurrentConnection() {
   try {

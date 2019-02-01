@@ -31,6 +31,7 @@ import withKeyboard from '../Keyboard';
 
 const mapStateToProps = (state, ownProps) => ({
   storedConfigs: state.setting.page.modbus,
+  ioEnabled: state.setting.systemSettings.modbusEnable,
   ...ownProps
 });
 
@@ -145,7 +146,7 @@ class ConnectedIo extends React.PureComponent {
   }
 
   generatorItems(data, t) {
-    const { classes } = this.props;
+    const { classes, ioEnabled } = this.props;
     const { btnGroupStatus, ioTestRsp } = this.state;
     return data.map((item, idx) => {
       const options = get(
@@ -165,7 +166,7 @@ class ConnectedIo extends React.PureComponent {
         if (ioTestRsp[item.bit] === 0) {
           return (
             <div className={classes.statusWrap}>
-              <span className={`${classes.statusCircle} ${classes.info}`} />
+              <span className={`${classes.statusCircle} ${classes.info}`}/>
               <span className={classes.infoText}>OFF</span>
             </div>
           );
@@ -173,7 +174,7 @@ class ConnectedIo extends React.PureComponent {
         if (ioTestRsp[item.bit] === 1) {
           return (
             <div className={classes.statusWrap}>
-              <span className={`${classes.statusCircle} ${classes.success}`} />
+              <span className={`${classes.statusCircle} ${classes.success}`}/>
               <span className={classes.successText}>ON</span>
             </div>
           );
@@ -181,14 +182,13 @@ class ConnectedIo extends React.PureComponent {
         if (ioTestRsp[item.bit] === 'fail') {
           return (
             <div className={classes.statusWrap}>
-              <span className={`${classes.statusCircle} ${classes.fail}`} />
+              <span className={`${classes.statusCircle} ${classes.fail}`}/>
               <span className={classes.failText}>Fail</span>
             </div>
           );
         }
         return null;
       };
-
       return (
         <div key={`${item.io}_${item.bit}`}>
           <ListItem className={classes.inputItem}>
@@ -231,7 +231,7 @@ class ConnectedIo extends React.PureComponent {
               name="function"
               className={classes.ioFunctionSelect}
             >
-              <MenuItem key="dummy" value="" />
+              <MenuItem key="dummy" value=""/>
               {selectItems}
             </Select>
             <span>{String.prototype.toUpperCase.call(item.io)}</span>
@@ -240,14 +240,14 @@ class ConnectedIo extends React.PureComponent {
               size="lg"
               onClick={() => this.handleTest(item)}
               className={classes.testButton}
-              disabled={!get(btnGroupStatus, `${item.io}.${item.bit}`, [])}
+              disabled={(!get(btnGroupStatus, `${item.io}.${item.bit}`, [])) || !ioEnabled}
             >
               {t('Common.Test')}
             </Button>
             {generatorStatus()}
           </ListItem>
           <li>
-            <Divider />
+            <Divider/>
           </li>
         </div>
       );
@@ -255,7 +255,7 @@ class ConnectedIo extends React.PureComponent {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes,ioEnabled } = this.props;
     const { data, isDataValid } = this.state;
     const inItems = t => this.generatorItems(data.in, t);
     const outItems = t => this.generatorItems(data.out, t);
@@ -279,12 +279,12 @@ class ConnectedIo extends React.PureComponent {
               <List>{outItems(t)}</List>
               <Button
                 variant="contained"
-                disabled={!isDataValid}
+                disabled={!isDataValid|| !ioEnabled}
                 color="info"
                 onClick={this.handleSubmit}
                 className={classes.button}
               >
-                <SaveIcon className={classes.leftIcon} />
+                <SaveIcon className={classes.leftIcon}/>
                 {t('Common.Submit')}
               </Button>
             </Paper>
