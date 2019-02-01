@@ -3,7 +3,7 @@
 import { put, takeLatest } from 'redux-saga/effects';
 
 import { SCANNER } from '../actions/actionTypes';
-import { operationTrigger } from '../actions/operation';
+import { operationTrigger, operationTriggerBlock } from '../actions/operation';
 // import { OPERATION_SOURCE } from '../reducers/operations';
 import { isCarID } from '../common/utils';
 
@@ -18,6 +18,8 @@ function* scannerHandler(action) {
       } else {
         yield put(operationTrigger( null, data, null, source));
       }
+      yield put(operationTriggerBlock(false));
+
     }
   } catch (e) {
     console.log(e.message);

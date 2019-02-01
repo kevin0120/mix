@@ -5,7 +5,7 @@ import { all } from 'redux-saga/effects';
 import { watchScanner } from './scanner';
 import { cardAuthFlow } from './cardAuth';
 import { sysInitFlow } from './systemInit';
-import { watchOperation, watchResults } from './operation';
+import { operationFlow, watchResults } from './operation';
 import { watchIO } from './io';
 import { toolFunctions } from './tools';
 import { loginFlow, logoutFlow } from './auth';
@@ -29,7 +29,7 @@ export default function* rootSaga() {
       watchScanner(),
       watchNotification(),
       watchAiis(),
-      watchOperation(),
+      operationFlow(),
       watchResults(), // 监听结果
       watchIO(), // 监听IO数据
       watchRush(),
@@ -46,7 +46,7 @@ export default function* rootSaga() {
       logo(),
       watchNetwork(),
       watchBattery(),
-      watchPower()
+      watchPower(),
     ]);
   } catch (e) {
     console.log('rootSaga:', e);

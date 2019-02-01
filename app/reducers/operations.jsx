@@ -51,6 +51,9 @@ const defaultOperations = {
     toConfirm: false,
     data: {}
   },
+  trigger: {
+    block: false
+  },
   results: [
     // {
     //   id: -1,
@@ -97,7 +100,8 @@ const reducers = {
   [OPERATION.BYPASS.CONFIRM]: operationBypassConfirmed,
   [OPERATION.CONFLICT.CONFIRM]: operationConflictConfirm,
   [OPERATION.CONFLICT.DETECTED]: operationConflictDetected,
-  [OPERATION.CONFLICT.CANCEL]: operationConflictCanceled
+  [OPERATION.CONFLICT.CANCEL]: operationConflictCanceled,
+  [OPERATION.TRIGGER.BLOCK]: operationTriggerBlocker
 };
 
 export default genReducers(reducers, defaultOperations);
@@ -147,6 +151,17 @@ export default genReducers(reducers, defaultOperations);
 //       return state;
 //   }
 // }
+
+function operationTriggerBlocker(state, action) {
+  const { block } = action;
+  return {
+    ...state,
+    trigger: {
+      ...state.trigger,
+      block
+    }
+  };
+}
 
 function operationConflictCanceled(state, action) {
   return {

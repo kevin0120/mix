@@ -392,12 +392,6 @@ const withstyles = theme => ({
     padding: '2px 10px',
     position: 'relative'
   },
-  ImgTabContiner: {
-    height: '100%',
-    width: '100%',
-    padding: '0px 0px',
-    position: 'absolute'
-  },
   LeftTopDes: {
     marginBottom: '0',
     color: '#979797',
@@ -433,10 +427,6 @@ const withstyles = theme => ({
     borderRadius: '0',
     // height: 'calc(85% - 386px)'
     height: 'calc(85% - 440px)'
-  },
-  InfoTabContiner: {
-    height: '100%',
-    width: '100%'
   },
   CutDownContainer: {
     position: 'absolute',
@@ -500,9 +490,6 @@ class ConnectedWorking extends React.Component {
 
     this.state = {
       inputName: '',
-      layoutName: 'default',
-      vehicle: '',
-      vin: '',
       manualDiagShow: false
     };
 
@@ -537,60 +524,6 @@ class ConnectedWorking extends React.Component {
     const { isAutoMode } = this.props;
     // this.props.setAutoMode(!isAutoMode);
   }
-
-  handleChangeInput = input => {
-    const { inputName } = this.state;
-    if (inputName === 'vehicle') {
-      this.setState({
-        vehicle: input
-      });
-    }
-    if (inputName === 'vin') {
-      this.setState({
-        vin: input
-      });
-    }
-  };
-
-  handleChangeInputValue = event => {
-    const { inputName } = this.state;
-    if (inputName === 'vehicle') {
-      this.setState({
-        vehicle: event.target.value
-      });
-    }
-    if (inputName === 'vin') {
-      this.setState({
-        vin: event.target.value
-      });
-    }
-    this.keyboard.setInput(event.target.value, inputName);
-  };
-
-  handlePress = press => {
-    const { vehicle, vin } = this.state;
-    if (
-      lodash.isEqual(press, '{enter}') &&
-      (vehicle.length !== 0 || vin.length !== 0)
-    ) {
-      this.setState({
-        inputName: ''
-      });
-    }
-    if (lodash.isEqual(press, '{shift}')) {
-      const { layoutName } = this.state;
-
-      this.setState({
-        layoutName: layoutName === 'default' ? 'shift' : 'default'
-      });
-    }
-  };
-
-  handleInputName = ref => {
-    this.setState({
-      inputName: ref
-    });
-  };
 
   closeManualDiag = () => {
     this.setState({
@@ -750,10 +683,9 @@ class ConnectedWorking extends React.Component {
       enableFocus,
       logo
     } = this.props;
-    //
-    //
+
     const { inputName, manualDiagShow } = this.state;
-    //
+
     let batch = '0/0';
     let redoBatch = '0/0';
     let maxRedoTimes = 0;
@@ -792,7 +724,7 @@ class ConnectedWorking extends React.Component {
         workMode.workMode === 'manual') ||
       configs.operationSettings.opMode === 'order';
 
-    //
+
     const fabClassName = classNames(classes.fab);
     // const fabOEEClassName = switchAutoManual? classNames(classes.fabOEE) :classNames(classes.fab);
     // let statusShow = lodash.includes(['Init', 'Ready', 'PreDoing', 'Timeout'],orderStatus);
@@ -929,13 +861,11 @@ class ConnectedWorking extends React.Component {
               >
                 <Grid item xs={12} className={classes.MainWrapper}>
                   <Paper className={classes.LeftBottomTab}>
-                    {/*<div className={classes.ImgTabContiner}>*/}
                     <ImageStick
                       logo={logo}
                       operations={operations}
                       enableFocus={enableFocus}
                     />
-                    {/*</div>*/}
                   </Paper>
                 </Grid>
               </Grid>
@@ -999,7 +929,6 @@ class ConnectedWorking extends React.Component {
                 </Grid>
               </Grid>
               <Paper className={classes.InfoTab}>
-                {/*<div className={classes.InfoTabContiner}>*/}
                 <List>
                   <WorkingInfoBar
                     key="infoUser"
@@ -1012,13 +941,10 @@ class ConnectedWorking extends React.Component {
                   />
                   <WorkingInfoBar key="infoOrder" infos={this.orderInfo(t)}/>
                 </List>
-                {/*</div>*/}
               </Paper>
               <Paper className={classes.InfoTabTimeLine}>
-                {/*<div className={classes.InfoTabContiner}>*/}
                 <TimeLine simple stories={timeline}/>
                 {/* <TimeLine simple stories={teststory} /> */}
-                {/*</div>*/}
               </Paper>
               {!manualEnable && configs.operationSettings.opMode === 'op' ? (
                 <Button

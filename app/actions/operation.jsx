@@ -89,3 +89,10 @@ export function operationConflictCancel(){
     type:OPERATION.CONFLICT.CANCEL
   }
 }
+
+export function operationTriggerBlock(block){
+  return{
+    type:OPERATION.TRIGGER.BLOCK,
+    block
+  }
+}

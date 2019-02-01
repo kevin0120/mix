@@ -1,5 +1,5 @@
 /* eslint-disable no-lonely-if */
-import { select, put, take, call, fork, cancel } from 'redux-saga/effects';
+import { select, put, take, call, fork, takeLeading } from 'redux-saga/effects';
 import {
   fetchRoutingWorkcenter,
   fetchWorkorder,
@@ -8,7 +8,7 @@ import {
   fetchNextWorkOrder,
   ak2Api
 } from './api/operation';
-import { OPERATION, RUSH } from '../actions/actionTypes';
+import { OPERATION, RUSH, SCANNER } from '../actions/actionTypes';
 import {
   OPERATION_RESULT,
   OPERATION_SOURCE,
@@ -20,7 +20,8 @@ import { setResultDiagShow } from '../actions/resultDiag';
 import {
   switch2Ready,
   switch2PreDoing,
-  operationConflictDetected
+  operationConflictDetected,
+  operationTriggerBlock
 } from '../actions/operation';
 import {
   fetchOngoingOperationOK,
@@ -76,11 +77,14 @@ import configs from '../shared/config';
 //   }
 // }
 
-const operationWorkers = {
+const operationMainProgress = {
   [OPERATION.STARTED]: [call, operationStarted],
-  [OPERATION.FINISHED]: [fork, operationFinished],
+  [OPERATION.FINISHED]: [call, operationFinished],
   [OPERATION.RESET]: [put, switch2Ready],
-  [OPERATION.TRIGGER.TRIGGER]: [fork, triggerOperation],
+
+};
+
+const operationWorkers={
   // bypass
   [OPERATION.BYPASS.CONFIRM]: [fork, bypassConfirm],
   // conflict
@@ -89,8 +93,15 @@ const operationWorkers = {
   [OPERATION.CONFLICT.CANCEL]: [fork, conflictCanceled]
 };
 
-export const watchOperation = watch(operationWorkers);
-
+export function* operationFlow() {
+  try{
+    yield fork(watch(operationMainProgress));
+    yield fork(watch(operationWorkers));
+    yield takeLeading(OPERATION.TRIGGER.TRIGGER, triggerOperation);
+  }catch (e) {
+    console.error(e);
+  }
+}
 function* operationStarted() {
   try {
     yield put(setResultDiagShow(false));
@@ -102,6 +113,8 @@ function* operationStarted() {
 
 function* operationFinished() {
   try {
+    yield put(operationTriggerBlock(false));
+
     const state = yield select();
     const { workMode } = state;
 
@@ -133,14 +146,32 @@ function* getNextWorkOrderandShow() {
 }
 
 // 触发作业
-export function* triggerOperation(action) {
+function* triggerOperation(action) {
   try {
+
     const { carID, carType, job, source } = action;
     const rState = yield select();
 
-    if (rState.router.location.pathname !== '/working' || rState.operations.operationStatus === OPERATION_STATUS.DOING) {
+    if (rState.router.location.pathname !== '/working') {
       // 不在作业页面，直接返回
       return;
+    }
+    if(rState.operations.trigger.block && source==='RFID'){
+      return;
+    }
+
+    switch (rState.operations.operationStatus) {
+      case OPERATION_STATUS.DOING:
+        return;
+      case OPERATION_STATUS.READY:
+        yield call(clearStories);
+        yield put(switch2PreDoing());
+        break;
+      case OPERATION_STATUS.TIMEOUT:
+        yield put(switch2PreDoing());
+        break;
+      default:
+        break;
     }
 
     yield put({ type: OPERATION.SOURCE.SET, source });
@@ -171,21 +202,7 @@ export function* triggerOperation(action) {
       return;
     }
 
-    switch (rState.operations.operationStatus) {
-      case OPERATION_STATUS.DOING:
-        return;
-      case OPERATION_STATUS.READY:
-        yield call(clearStories);
-        yield put(switch2PreDoing());
-        break;
 
-      case OPERATION_STATUS.TIMEOUT:
-        yield put(switch2PreDoing());
-        break;
-
-      default:
-        break;
-    }
 
     const triggers = rState.workMode.workMode === 'manual' ? ['carID'] : rState.setting.operationSettings.flowTriggers; // 手动模式下，只需要车辆信息即可触发作业
 
@@ -564,7 +581,7 @@ function* bypassConfirm() {
 
 function* conflictDetected(action) {
   try {
-    // 冲突确认，继续作业
+    yield put(operationTriggerBlock(true));
     const state = yield select();
     const { data } = action;
     const { enableConflictOP = false } = state.setting.systemSettings;
@@ -579,6 +596,8 @@ function* conflictDetected(action) {
 
 function* conflictCanceled() {
   try {
+    yield put(operationTriggerBlock(false));
+
     yield put(switch2Ready());
   } catch (e) {
     console.error(e);
