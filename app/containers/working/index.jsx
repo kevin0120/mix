@@ -486,6 +486,7 @@ class ConnectedWorking extends React.Component {
   constructor(props) {
     super(props);
 
+    this.autoCancel = null;
     this.keyboard = null;
 
     this.state = {
@@ -637,6 +638,7 @@ class ConnectedWorking extends React.Component {
     const { doConfirmConflict, operations } = this.props;
     if (this.autoCancel) {
       clearTimeout(this.autoCancel);
+      this.autoCancel = null;
     }
     doConfirmConflict(operations.conflict.data);
   };
@@ -645,15 +647,19 @@ class ConnectedWorking extends React.Component {
     const { doCancelConflict } = this.props;
     if (this.autoCancel) {
       clearTimeout(this.autoCancel);
+      this.autoCancel = null;
     }
     doCancelConflict();
   };
 
   conflictDiag = (t) => {
-    const { enableConflictOP, operations } = this.props;
-    this.autoCancel = setTimeout(() => {
-      this.cancelConflict();
-    }, 5000);
+    const { enableConflictOP, operations, doCancelConflict } = this.props;
+    if (!this.autoCancel) {
+      this.autoCancel = setTimeout(() => {
+        doCancelConflict();
+      }, 5000);
+    }
+
     if (enableConflictOP) {
       return {
         show: true,

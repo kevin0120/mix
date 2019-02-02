@@ -116,12 +116,10 @@ function* operationFinished() {
     yield put(operationTriggerBlock(false));
 
     const state = yield select();
-    const { workMode } = state;
 
-    if (workMode.controllerMode === 'job') {
-      // 工具禁用
-      yield put(toolDisable());
-    }
+    // 工具禁用
+    yield put(toolDisable());
+
     if (state.setting.operationSettings.opMode === 'order') {
       yield call(getNextWorkOrderandShow);
     }
@@ -156,6 +154,8 @@ function* triggerOperation(action) {
       // 不在作业页面，直接返回
       return;
     }
+    console.log(rState.operations.trigger.block , source);
+
     if(rState.operations.trigger.block && source==='RFID'){
       return;
     }
