@@ -10,7 +10,6 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/resty.v1"
 	"net/http"
-	"runtime/debug"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -25,6 +24,7 @@ const (
 type Diagnostic interface {
 	Error(msg string, err error)
 	Info(msg string)
+	Debug(msg string)
 	CreateWOSuccess(id int64)
 }
 
@@ -432,21 +432,20 @@ func (s *Service) Status() string {
 
 func (s *Service) taskSaveWorkorders() {
 	for {
-		for {
-			select {
-			case payload := <-s.workordersChannel:
-				s.handleSaveWorkorders(payload)
+		select {
+		case payload := <-s.workordersChannel:
+			s.handleSaveWorkorders(payload)
 
-			case <-s.closing:
-				s.wg.Done()
-				return
-			}
+		case <-s.closing:
+			s.diag.Info("taskSaveWorkorders closed")
+			s.wg.Done()
+			return
 		}
 	}
 }
 
 func (s *Service) handleSaveWorkorders(payload interface{}) {
-	defer debug.FreeOSMemory() //快速释放不必要的内存
+	//defer debug.FreeOSMemory() //快速释放不必要的内存
 
 	workorders := payload.(*[]ODOOWorkorder)
 	s.CreateWorkorders(*workorders)

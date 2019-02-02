@@ -397,3 +397,7 @@ func (p *Service) GenerateIDInfo(info string) string {
 
 	return ids
 }
+
+func (p *Service) TryCreateMaintenance(info ToolInfo) error  {
+	return p.Odoo.TryCreateMaintenance(info)
+}

@@ -321,7 +321,7 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) error {
 				//不需要尝试创建维修/标定单据
 				return nil
 			}
-			//go c.Srv.TryCreateMaintenance(ti) // 协程处理
+			go c.Srv.TryCreateMaintenance(ti) // 协程处理
 		}
 	}
 	return nil

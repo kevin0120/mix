@@ -21,6 +21,8 @@ func (m *Methods) postWorkorders(ctx iris.Context) {
 	var workorders []ODOOWorkorder
 	err := ctx.ReadJSON(&workorders)
 
+	//m.service.diag.Debug("postWorkorders start")
+
 	if err != nil {
 		// 传输结构错误
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -29,7 +31,12 @@ func (m *Methods) postWorkorders(ctx iris.Context) {
 		return
 	}
 
+	//m.service.diag.Debug("postWorkorders finsh try to send to workordersChannel")
+
+
 	m.service.workordersChannel <- &workorders
+
+	//m.service.diag.Debug("postWorkorders finsh send to workordersChannel")
 
 	//_, err = m.service.CreateWorkorders(workorders)
 	//

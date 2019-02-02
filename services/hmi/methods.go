@@ -788,6 +788,7 @@ func (m *Methods) getNextWorkorder(ctx iris.Context) {
 
 // 根据hmi序列号以及vin或knr取得工单
 func (m *Methods) getWorkorder(ctx iris.Context) {
+	//m.service.diag.Debug("getWorkorder start")
 
 	var err error
 	hmi_sn := ctx.URLParam("hmi_sn")
@@ -892,6 +893,8 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 	body, _ := json.Marshal(resp)
 	ctx.Header("content-type", "application/json")
 	ctx.Write(body)
+
+	//m.service.diag.Debug(fmt.Sprintf("getWorkorder finish with body:%s", string(body)))
 }
 
 func (m *Methods) getHealthz(ctx iris.Context) {
