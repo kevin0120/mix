@@ -107,11 +107,11 @@ func (m *Methods) putPSets(ctx iris.Context) {
 		return
 	}
 
-	if pset.Count == 0 {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("count is required")
-		return
-	}
+	//if pset.Count == 0 {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("count is required")
+	//	return
+	//}
 
 	if pset.WorkorderID == 0 {
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -197,9 +197,11 @@ func (m *Methods) putManualPSets(ctx iris.Context) {
 		return
 	}
 
-	//if pset.GunSN == "" {
-	//	pset.GunSN = ""
-	//}
+	if pset.GunSN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("tool(gun) sn is required")
+		return
+	}
 
 	if pset.PSet == 0 {
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -594,9 +596,9 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 		return
 	}
 
-	//if job.CarType == "" {
+	//if job.CarType == "" && job.Vin == ""{
 	//	ctx.StatusCode(iris.StatusBadRequest)
-	//	ctx.WriteString("car type is required")
+	//	ctx.WriteString("car type or vin(carID) is required")
 	//	return
 	//}
 
