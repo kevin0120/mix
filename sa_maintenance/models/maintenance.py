@@ -215,6 +215,7 @@ class MaintenanceRequest(models.Model):
                 "expire_time": fields.Date.today()
             }
             try:
+                # logger.debug("try to push maintenance request to masterpc:{0}".format(url))
                 Requests.post(urljoin(url, PUSH_MAINTENANCE_REQ_URL), data=json.dumps(val), headers={'Content-Type': 'application/json'}, timeout=3)
             except ConnectionError as e:
                 logger.debug(u'发送维护请求失败, 错误原因:{0}'.format(e.message))
