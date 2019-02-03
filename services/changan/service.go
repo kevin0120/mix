@@ -7,7 +7,6 @@ import (
 	"github.com/masami10/aiis/services/httpd"
 	"github.com/masami10/aiis/services/wsnotify"
 	"io"
-	"log"
 	"net"
 	"strings"
 	"sync/atomic"
@@ -135,6 +134,7 @@ func (s *Service) Close() error {
 
 	<-stopping
 	s.Conn = nil
+	s.Opened = false
 
 	return nil
 }
@@ -157,7 +157,7 @@ func (s *Service) Connect(spl []string) {
 
 	// 注册aiis 服务到andon系统中
 	if err = s.write(PakcageMsg(MSG_REGIST, s.GetSequenceNum(), nil)); err != nil {
-		s.diag.Error("Regist to Andon fail", err)
+		s.diag.Error("Registry to Andon fail", err)
 		//return err
 	}
 
@@ -178,10 +178,10 @@ func (s *Service) write(buf []byte) error {
 	_, err := s.Conn.Write(buf)
 	if err != nil {
 		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-			log.Printf("D! Timeout in Write: %s", err)
+			s.diag.Error(fmt.Sprintf("D! Timeout in Write: %s",err.Error()), err)
 			return err
 		} else if netErr != nil && !strings.HasSuffix(err.Error(), ": use of closed network connection") {
-			log.Printf(" %s", err)
+			s.diag.Error(fmt.Sprintf("D!: %s",err.Error()), err)
 			return err
 		}
 	}
@@ -248,6 +248,7 @@ func (s *Service) manage() {
 }
 
 func (s *Service) readHandler(c net.Conn) {
+	defer s.Open()
 	defer s.Close()
 
 	conf := s.configValue.Load().(Config)
@@ -269,8 +270,10 @@ func (s *Service) readHandler(c net.Conn) {
 				continue
 			} else if netErr != nil && !strings.HasSuffix(err.Error(), ": use of closed network connection") {
 				s.diag.Error("using closing connection", err)
+				return
 			} else if err == io.EOF {
 				s.diag.Error("network Connection EOF ", err)
+				return
 			}
 			break
 		}
