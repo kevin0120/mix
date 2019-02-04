@@ -19,6 +19,9 @@ func (adb *AndonDB) StartService() error {
 		adb.cfg.DBName)
 
 	_db, err := gorm.Open("mssql", sConn)
+	if err != nil {
+		return fmt.Errorf("andondb startService open db fail: %s",err.Error())
+	}
 
 	_db.AutoMigrate(&TighteningResults{})
 
@@ -28,13 +31,18 @@ func (adb *AndonDB) StartService() error {
 }
 
 func (adb *AndonDB) StopService() error {
-	adb.eng.Close()
+	var err error = nil
+	if adb.eng != nil {
+		err = adb.eng.Close()
+	}
 
-	return nil
+	return err
 }
 
 func (adb *AndonDB) InsertResult(result *TighteningResults) bool {
-	adb.eng.Create(result)
+	if adb.eng != nil {
+		adb.eng.Create(result)
+	}
 
 	return true
 }

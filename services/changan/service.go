@@ -56,6 +56,7 @@ func NewService(d Diagnostic, c Config, h *httpd.Service, ws *wsnotify.Service) 
 		ReadTimeout:     time.Duration(c.ReadTimeout),
 		AndonDB: &AndonDB{
 			cfg: &c.DB,
+			eng: nil,
 		},
 	}
 
@@ -178,10 +179,10 @@ func (s *Service) write(buf []byte) error {
 	_, err := s.Conn.Write(buf)
 	if err != nil {
 		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-			s.diag.Error(fmt.Sprintf("D! Timeout in Write: %s",err.Error()), err)
+			s.diag.Error(fmt.Sprintf("D! Timeout in Write: %s", err.Error()), err)
 			return err
 		} else if netErr != nil && !strings.HasSuffix(err.Error(), ": use of closed network connection") {
-			s.diag.Error(fmt.Sprintf("D!: %s",err.Error()), err)
+			s.diag.Error(fmt.Sprintf("D!: %s", err.Error()), err)
 			return err
 		}
 	}
