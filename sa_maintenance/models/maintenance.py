@@ -302,12 +302,12 @@ class MaintenanceEquipment(models.Model):
                 need_pre_calc = True
             next_maintenance_todo = self.env['maintenance.request'].search([
                 ('equipment_id', '=', equipment.id),
-                ('maintenance_type', 'in', ['preventive', 'calibration']),
+                ('maintenance_type', 'in', ['preventive']),
                 ('stage_id.done', '!=', True),
                 ('action_times', '!=', False)], order="action_times asc", limit=1)
             last_maintenance_done = self.env['maintenance.request'].search([
                 ('equipment_id', '=', equipment.id),
-                ('maintenance_type', 'in', ['preventive', 'calibration']),
+                ('maintenance_type', 'in', ['preventive']),
                 ('stage_id.done', '=', True),
                 ('action_times', '!=', False)], order="action_times desc", limit=1)
             if next_maintenance_todo and last_maintenance_done:
@@ -429,7 +429,7 @@ class MaintenanceEquipment(models.Model):
     def _get_parent_masterpc(self):
         cat = self
         while cat:
-            if cat.category_name == 'MasterPC':
+            if cat.category_id.id == self.env.ref('sa_base.equipment_MasterPC').id:
                 return cat
             cat = cat.parent_id
         return None
