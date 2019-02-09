@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0+e-20171123\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-25 07:43+0000\n"
-"PO-Revision-Date: 2019-01-25 07:43+0000\n"
+"POT-Creation-Date: 2019-02-08 11:42+0000\n"
+"PO-Revision-Date: 2019-02-08 11:42+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -331,7 +331,7 @@ msgstr "连接名称"
 
 #. module: sa_base
 #: code:addons/sa_base/models/maintenance.py:48
-#: code:addons/sa_base/models/maintenance.py:119
+#: code:addons/sa_base/models/maintenance.py:139
 #, python-format
 msgid "Connection Test Failed! Here is what we got instead:\n"
 " %s"
@@ -340,14 +340,14 @@ msgstr "连接测试失败! 原因:\n"
 
 #. module: sa_base
 #: code:addons/sa_base/models/maintenance.py:46
-#: code:addons/sa_base/models/maintenance.py:117
+#: code:addons/sa_base/models/maintenance.py:137
 #, python-format
 msgid "Connection Test Failed! Here is what we got instead: %d!"
 msgstr "连接测试失败! 原因: %d!"
 
 #. module: sa_base
 #: code:addons/sa_base/models/maintenance.py:44
-#: code:addons/sa_base/models/maintenance.py:115
+#: code:addons/sa_base/models/maintenance.py:135
 #, python-format
 msgid "Connection Test Succeeded! Everything seems properly set up!"
 msgstr "连接测试成功! 一切正常!"
@@ -389,6 +389,7 @@ msgstr "控制器"
 #. module: sa_base
 #: model:ir.actions.act_window,name:sa_base.sa_job_form_action
 #: model:ir.model,name:sa_base.model_controller_job
+#: model:ir.ui.menu,name:sa_base.sa_menu_job_action
 #: model:ir.ui.view,arch_db:sa_base.sa_job_form_view
 msgid "Controller Job"
 msgstr "控制器装配过程"
@@ -396,7 +397,6 @@ msgstr "控制器装配过程"
 #. module: sa_base
 #: model:ir.actions.act_window,name:sa_base.sa_program_form_action
 #: model:ir.model,name:sa_base.model_controller_program
-#: model:ir.ui.menu,name:sa_base.sa_menu_program_action
 #: model:ir.ui.view,arch_db:sa_base.sa_program_form_view
 msgid "Controller Program"
 msgstr "控制器程序"
@@ -543,7 +543,7 @@ msgid "Equipments"
 msgstr "设备"
 
 #. module: sa_base
-#: code:addons/sa_base/models/maintenance.py:146
+#: code:addons/sa_base/models/maintenance.py:166
 #, python-format
 msgid "Error ! You cannot create recursive Equipments."
 msgstr "错误! 你不能创建递归的设备."
@@ -752,7 +752,7 @@ msgstr "松脱"
 #: model:ir.model,name:sa_base.model_mrp_production
 #: model:ir.ui.view,arch_db:sa_base.view_sa_config
 msgid "Manufacturing Order"
-msgstr "制造订单"
+msgstr "生产订单"
 
 #. module: sa_base
 #: model:ir.model,name:sa_base.model_mrp_routing_group
@@ -842,13 +842,13 @@ msgid "Odoo uses these BoMs to automatically propose manufacturing\n"
 msgstr "根据补货规则Odoo用BOM自动的生产生产订单"
 
 #. module: sa_base
-#: code:addons/sa_base/models/mrp_routing.py:220
+#: code:addons/sa_base/models/mrp_routing.py:222
 #, python-format
 msgid "Only SuperUser can delete Job ID"
 msgstr "Only SuperUser can delete Job ID"
 
 #. module: sa_base
-#: code:addons/sa_base/models/mrp_routing.py:253
+#: code:addons/sa_base/models/mrp_routing.py:255
 #, python-format
 msgid "Only SuperUser can delete program"
 msgstr "Only SuperUser can delete program"
@@ -978,6 +978,11 @@ msgstr "PIN码"
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_parent_id
 msgid "Parent Equipment"
 msgstr "父设备"
+
+#. module: sa_base
+#: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_parent_id_domain
+msgid "Parent id domain"
+msgstr "Parent id domain"
 
 #. module: sa_base
 #: sql_constraint:mrp.routing.workcenter:0
@@ -1189,7 +1194,6 @@ msgstr "工艺路线组名称必须是唯一的!"
 
 #. module: sa_base
 #: model:ir.actions.act_window,name:sa_base.sa_mrp_routing_group_action
-#: model:ir.ui.menu,name:sa_base.menu_mrp_routing_group_action
 msgid "Routing Groups"
 msgstr "工艺路线组"
 

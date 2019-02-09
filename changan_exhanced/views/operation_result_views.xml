@@ -25,5 +25,26 @@
                 </field>
             </field>
         </record>
+
+        <record model="ir.ui.view" id="sa_changan_operation_result_view_filter_inherit">
+            <field name="name">sa_changan_operation_result_view_filter_inherit</field>
+            <field name="model">operation.result</field>
+            <field name="inherit_id" ref="spc.operation_result_view_search"/>
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='lacking']"  position="replace">
+                </xpath>
+                <xpath expr="//filter[@name='using']"  position="replace">
+                </xpath>
+                <xpath expr="//filter[@name='group_by_lacking']" position="replace">
+                </xpath>
+                <field name="name" position="replace">
+                    <field name="name" string="VIN/零件号" filter_domain="[('vin','ilike',self)]"/>
+                </field>
+                <xpath expr="//group[last()]" position="inside">
+                    <separator/>
+                    <filter string="VIN/零件号" context="{'group_by': 'vin'}"/>
+                </xpath>
+            </field>
+        </record>
     </data>
 </odoo>

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0+e-20171123\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-28 03:51+0000\n"
-"PO-Revision-Date: 2019-01-28 03:51+0000\n"
+"POT-Creation-Date: 2019-02-08 11:38+0000\n"
+"PO-Revision-Date: 2019-02-08 11:38+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -36,7 +36,7 @@ msgid "AIIS URLs"
 msgstr "AIIS URLs"
 
 #. module: spc
-#: code:addons/spc/models/result.py:100
+#: code:addons/spc/models/result.py:104
 #: selection:operation.result,measure_result:0
 #, python-format
 msgid "AK2"
@@ -101,6 +101,11 @@ msgid "Batch"
 msgstr "批次"
 
 #. module: spc
+#: model:ir.model.fields,field_description:spc.field_operation_result_bom_line_id
+msgid "Bom line id"
+msgstr "BOM行ID"
+
+#. module: spc
 #: model:ir.model.fields,field_description:spc.field_ta_spc_wizard_cmk
 msgid "CMK"
 msgstr "CMK"
@@ -130,24 +135,19 @@ msgid "Configuration"
 msgstr "配置"
 
 #. module: spc
-#: model:ir.model.fields,field_description:spc.field_operation_result_consu_bom_line_id
-msgid "Consu bom line id"
-msgstr "Consu bom line id"
-
-#. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_consu_product_id
 msgid "Consu product id"
 msgstr "螺栓"
 
 #. module: spc
+#: model:ir.model.fields,field_description:spc.field_operation_result_consu_bom_line_id
+msgid "Consume BOM line"
+msgstr "Consume BOM line"
+
+#. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_control_date
 msgid "Control Date"
 msgstr "控制日期"
-
-#. module: spc
-#: model:ir.model.fields,field_description:spc.field_operation_result_point_id
-msgid "Control Point"
-msgstr "控制点"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_aiis_config_settings_create_uid
@@ -173,7 +173,7 @@ msgid "Current Month"
 msgstr "本月"
 
 #. module: spc
-#: code:addons/spc/models/result.py:104
+#: code:addons/spc/models/result.py:108
 #: model:ir.ui.view,arch_db:spc.operation_result_view_search
 #: selection:operation.result,lacking:0
 #, python-format
@@ -250,8 +250,8 @@ msgid "Fail"
 msgstr "失败"
 
 #. module: spc
-#: code:addons/spc/models/result.py:110
-#: code:addons/spc/models/result.py:113
+#: code:addons/spc/models/result.py:114
+#: code:addons/spc/models/result.py:117
 #: model:ir.ui.view,arch_db:spc.operation_result_view_search
 #: selection:operation.result,final_pass:0
 #: selection:operation.result,one_time_pass:0
@@ -267,7 +267,7 @@ msgid "Final Pass"
 msgstr "最终通过"
 
 #. module: spc
-#: code:addons/spc/models/result.py:112
+#: code:addons/spc/models/result.py:116
 #: selection:operation.result,final_pass:0
 #, python-format
 msgid "Final Passed"
@@ -329,7 +329,7 @@ msgid "KNR/VIN"
 msgstr "VIN"
 
 #. module: spc
-#: code:addons/spc/models/result.py:99
+#: code:addons/spc/models/result.py:103
 #: selection:operation.result,measure_result:0
 #, python-format
 msgid "LSN"
@@ -438,7 +438,7 @@ msgid "Month"
 msgstr "月"
 
 #. module: spc
-#: code:addons/spc/models/result.py:102
+#: code:addons/spc/models/result.py:106
 #: model:ir.ui.view,arch_db:spc.operation_result_view_search
 #: selection:operation.result,measure_result:0
 #, python-format
@@ -456,24 +456,24 @@ msgid "Need render"
 msgstr "Need render"
 
 #. module: spc
-#: code:addons/spc/models/result.py:66
-#: code:addons/spc/models/result.py:302
-#: code:addons/spc/models/result.py:303
-#: code:addons/spc/models/result.py:314
+#: code:addons/spc/models/result.py:70
 #: code:addons/spc/models/result.py:315
+#: code:addons/spc/models/result.py:316
+#: code:addons/spc/models/result.py:327
+#: code:addons/spc/models/result.py:328
 #, python-format
 msgid "New"
 msgstr "新建"
 
 #. module: spc
-#: code:addons/spc/models/result.py:98
+#: code:addons/spc/models/result.py:102
 #: selection:operation.result,measure_result:0
 #, python-format
 msgid "No measure"
 msgstr "未测量"
 
 #. module: spc
-#: code:addons/spc/models/result.py:105
+#: code:addons/spc/models/result.py:109
 #: selection:operation.result,lacking:0
 #, python-format
 msgid "Normal"
@@ -496,7 +496,7 @@ msgid "Number of Pulses tightening"
 msgstr "脉冲扭矩(AN)"
 
 #. module: spc
-#: code:addons/spc/models/result.py:101
+#: code:addons/spc/models/result.py:105
 #: model:ir.ui.view,arch_db:spc.operation_result_view_search
 #: selection:operation.result,measure_result:0
 #, python-format
@@ -510,7 +510,7 @@ msgid "One Time Pass"
 msgstr "一次通过"
 
 #. module: spc
-#: code:addons/spc/models/result.py:109
+#: code:addons/spc/models/result.py:113
 #: selection:operation.result,one_time_pass:0
 #, python-format
 msgid "One Time Passed"
@@ -603,11 +603,6 @@ msgid "Push WorkOrder Count "
 msgstr "推送工单总数限制 "
 
 #. module: spc
-#: model:ir.model.fields,field_description:spc.field_operation_result_qcp_id
-msgid "Qcp id"
-msgstr "Qcp id"
-
-#. module: spc
 #: model:ir.ui.view,arch_db:spc.operation_result_view_graph
 #: model:ir.ui.view,arch_db:spc.operation_result_view_pivot
 msgid "Quality Check Analysis"
@@ -617,6 +612,12 @@ msgstr "质量检查分析"
 #: model:ir.ui.view,arch_db:spc.operation_result_view_search
 msgid "Quality Check Point"
 msgstr "质量控制点"
+
+#. module: spc
+#: model:ir.model.fields,field_description:spc.field_operation_result_point_id
+#: model:ir.model.fields,field_description:spc.field_operation_result_qcp_id
+msgid "Quality Control Point"
+msgstr "Quality Control Point"
 
 #. module: spc
 #: model:ir.model,name:spc.model_quality_point
@@ -872,9 +873,19 @@ msgid "Tightening Gun"
 msgstr "拧紧枪"
 
 #. module: spc
+#: model:ir.model.fields,field_description:spc.field_operation_result_operation_point_id
+msgid "Tightening Operation Point"
+msgstr "作业点(拧紧点)"
+
+#. module: spc
+#: model:ir.ui.view,arch_db:spc.operation_result_view_search
+msgid "Tightening Point"
+msgstr "作业点(拧紧点)"
+
+#. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_tightening_id
 msgid "TighteningID"
-msgstr "TighteningID"
+msgstr "控制器拧紧ID"
 
 #. module: spc
 #: model:ir.model.fields,field_description:spc.field_operation_result_time
@@ -932,7 +943,6 @@ msgstr "车辆"
 
 #. module: spc
 #: model:ir.actions.act_window,name:spc.action_spc_vehicle_form
-#: model:ir.ui.menu,name:spc.menu_spc_vehicle
 msgid "Vehicle Analyze"
 msgstr "单车分析(生产订单)"
 
@@ -1013,7 +1023,7 @@ msgid "aiis.config.settings"
 msgstr "aiis.config.settings"
 
 #. module: spc
-#: code:addons/spc/models/result.py:104
+#: code:addons/spc/models/result.py:108
 #, python-format
 msgid "lack"
 msgstr "缺失"
@@ -1024,7 +1034,7 @@ msgid "mrp.wo.consu"
 msgstr "mrp.wo.consu"
 
 #. module: spc
-#: code:addons/spc/models/result.py:105
+#: code:addons/spc/models/result.py:109
 #, python-format
 msgid "normal"
 msgstr "正常"

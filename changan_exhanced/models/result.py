@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
 from odoo import fields,models,api,_
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError,UserError
 import odoo.addons.decimal_precision as dp
 from datetime import datetime, timedelta, date
 from dateutil.relativedelta import relativedelta
@@ -87,32 +87,51 @@ class OperationResult(models.HyperModel):
             data['__context'] = {'group_by': groupby[len(annotated_groupbys):]}
         return data
 
-
-
-
-
-
-
     def read_group_qualified(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         self.check_access_rights('read')
+        # gun_filter = []
+        w_clause_centron_part2 = ""
+        w_clause_centron_part1 = ""
+        d = list()
+        for r in domain:
+            if r[0] == 'measure_result':
+                continue
+            if r[0] == 'gun_id':
+                # gun_filter = [r[2]] if isinstance(r[2], int) else r[2]
+                if len(w_clause_centron_part1):
+                    w_clause_centron_part1 += 'and gun_id = {0}'.format(r[2])
+                else:
+                    w_clause_centron_part1 += 'where gun_id = {0}'.format(r[2])
+                w_clause_centron_part2 += 'and r1.gun_id = {0}'.format(r[2])
+                continue
+            if r[0] == 'vin':
+                #过滤vin
+                if len(w_clause_centron_part1):
+                    w_clause_centron_part1 += "and vin ilike \'%{0}%\'".format(r[2])
+                else:
+                    w_clause_centron_part1 += "where vin ilike \'%{0}%\'".format(r[2])
+                w_clause_centron_part2 += "and r1.vin ilike \'%{0}%\'".format(r[2])
+                continue
+            d.append(r)
+        domain = d
         query = self._where_calc(domain)
         fields = fields or [f.name for f in self._fields.itervalues() if f.store]
 
         groupby = [groupby] if isinstance(groupby, basestring) else list(OrderedSet(groupby))
         groupby_list = groupby[:1] if lazy else groupby
         annotated_groupbys1 = [self._read_group_process_groupby(gb, query) for gb in groupby_list]
-        one_time_pass_state = 0
+        one_time_pass_state = False
         for gb in annotated_groupbys1:
             if gb['field'] == 'final_pass':
                 gb['qualified_field'] = "\'final\'"
             if gb['field'] == 'one_time_pass':
-                one_time_pass_state = 1
-                gb['qualified_field'] = "\'once\'"
+                one_time_pass_state = True
+                gb['qualified_field'] = "\'one time\'"
             if gb['field'] == 'control_date':
                 gb['qualified_field'] = "d1.control_date"
                 gb['tz_convert'] = False
 
-        if one_time_pass_state == 1:
+        if one_time_pass_state:
             annotated_groupbys = [gb for gb in annotated_groupbys1 if gb['field'] != 'final_pass']
         else:
             annotated_groupbys = [gb for gb in annotated_groupbys1 if gb['field'] != 'one_time_pass']
@@ -160,30 +179,32 @@ class OperationResult(models.HyperModel):
         prefix_term = lambda prefix, term: ('%s %s' % (prefix, term)) if term else ''
 
         from_clause = """
-                            (select sum(b.sequence) as sequence, date_trunc('%(interval)s', timezone('Asia/Chongqing', timezone('UTC', mw.date_planned_start))) as control_date from
-                            (select  vin,product_id,min(control_date) as date_planned_start  from operation_result
-                            group by vin,product_id) mw
-                            left join
-                            (select  a.product_id,count(*) as sequence from mrp_bom a
-                            left join mrp_bom_line b on a.id=b.bom_id
-                            group by a.product_id) b on mw.product_id=b.product_id
-                            group by control_date
-                            ) d1
-                           ,
-                            (SELECT  count (mw.batch) as sequence,  date_trunc('%(interval)s', timezone('Asia/Chongqing', timezone('UTC', mw.date_planned_start))) as control_date FROM
-                            (select DISTINCT mw.date_planned_start,r1.VIN,r1.batch from operation_result r1
-                            LEFT JOIN (select  vin,product_id,min(control_date) as date_planned_start  from operation_result
-                            group by vin,product_id) mw ON R1.vin=MW.vin
-                            where   %(interval2)s   and  r1.measure_result in ('ok','nok')) mw
-                            group by control_date
-                            ) d2 
-                        """ % {
+                                        (select sum(b.sequence) as sequence, date_trunc('%(interval)s', timezone('Asia/Chongqing', timezone('UTC', mw.date_planned_start))) as control_date from
+                                        (select  vin,product_id,min(control_date) as date_planned_start  from operation_result
+                                        %(where_clause_part1)s
+                                        group by vin,product_id) mw
+                                        left join
+                                        (select  a.product_id,count(*) as sequence from mrp_bom a
+                                        left join mrp_bom_line b on a.id=b.bom_id
+                                        group by a.product_id) b on mw.product_id=b.product_id
+                                        group by control_date
+                                        ) d1
+                                       ,
+                                        (SELECT  count (mw.batch) as sequence,  date_trunc('%(interval)s', timezone('Asia/Chongqing', timezone('UTC', mw.date_planned_start))) as control_date FROM
+                                        (select DISTINCT mw.date_planned_start,r1.VIN,r1.batch from operation_result r1
+                                        LEFT JOIN (select  vin,product_id,min(control_date) as date_planned_start  from operation_result
+                                        group by vin,product_id) mw ON R1.vin=MW.vin
+                                        where   %(interval2)s and  r1.measure_result in ('ok','nok') %(where_clause_part2)s) mw
+                                        group by control_date
+                                        ) d2 
+                                    """ % {
             'interval': annotated_groupbys[0]['groupby'].split(':')[-1] if annotated_groupbys[0][
                                                                                'field'] == 'control_date' else
             annotated_groupbys[1]['groupby'].split(':')[-1],
-            'interval2': ''' r1.one_time_pass='true' ''' if one_time_pass_state == 1 else ''' r1.final_pass='pass' ''',
+            'interval2': ''' r1.one_time_pass='pass' ''' if one_time_pass_state else ''' r1.final_pass='pass' ''',
+            'where_clause_part1': w_clause_centron_part1,
+            'where_clause_part2': w_clause_centron_part2
         }
-
         if where_clause == '':
             where_clause = 'd1.control_date = d2.control_date'
         else:
@@ -231,31 +252,33 @@ class OperationResult(models.HyperModel):
 
     def read_group_qualified_byvin(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         self.check_access_rights('read')
-        domain1=[]
-        for gb in domain:
-            if 'vin'in gb:
-                domain1 =gb
-        if domain1 == []:
-            query = self._where_calc(domain)
-        else:
-            query = self._where_calc([domain1])
-
+        w_clause_centron_part2 = ""
+        d = list()
+        for r in domain:
+            if r[0] == 'measure_result':
+                continue
+            if r[0] == 'gun_id':
+                w_clause_centron_part2 += 'and r1.gun_id = {0}'.format(r[2])
+                continue
+            d.append(r)
+        domain = d
+        query = self._where_calc(domain)
         fields = fields or [f.name for f in self._fields.itervalues() if f.store]
 
         groupby = [groupby] if isinstance(groupby, basestring) else list(OrderedSet(groupby))
         groupby_list = groupby[:1] if lazy else groupby
         annotated_groupbys1 = [self._read_group_process_groupby(gb, query) for gb in groupby_list]
-        one_time_pass_state = 0
+        one_time_pass_state = False
         for gb in annotated_groupbys1:
             if gb['field'] == 'final_pass':
                 gb['qualified_field'] = "\'final\'"
             if gb['field'] == 'one_time_pass':
-                one_time_pass_state = 1
-                gb['qualified_field'] = "\'once\'"
+                one_time_pass_state = True
+                gb['qualified_field'] = "\'one time\'"
             if gb['field'] == 'vin':
                 gb['qualified_field'] = "d1.vin"
 
-        if one_time_pass_state == 1:
+        if one_time_pass_state:
             annotated_groupbys = [gb for gb in annotated_groupbys1 if gb['field'] != 'final_pass']
         else:
             annotated_groupbys = [gb for gb in annotated_groupbys1 if gb['field'] != 'one_time_pass']
@@ -312,13 +335,14 @@ class OperationResult(models.HyperModel):
                     ,
                     (select  a.VIN,count (a.*) as sequence  from (
                     select distinct r1.VIN,r1.point_id,r1.batch from operation_result r1
-                    where  %(interval2)s  and  r1.measure_result in ('ok','nok')) a
+                    where  %(interval2)s  and  r1.measure_result in ('ok','nok') %(where_clause)s) a
                     group by a.VIN) d2 
                     ,
                     (select  vin,min(control_date) as control_date  from operation_result
                       group by vin) d3
                         """ % {
-            'interval2': ''' r1.one_time_pass='true' ''' if one_time_pass_state == 1 else ''' r1.final_pass='pass' ''',
+            'interval2': ''' r1.one_time_pass='pass' ''' if one_time_pass_state else ''' r1.final_pass='pass' ''',
+            'where_clause': w_clause_centron_part2
         }
 
         if where_clause == '':
@@ -375,6 +399,10 @@ class OperationResult(models.HyperModel):
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=False):
         _cache = {}
+        if 'vin' in groupby:
+            domain_fields = [r[0] for r in domain]
+            if 'vin' not in domain_fields:
+                raise UserError(u"通过VIN号分组,必须添加VIN过滤")
         if 'measure_result' in fields and 'measure_result' not in groupby:
             groupby.append('measure_result')
             res = super(OperationResult, self).read_group(domain, fields, groupby, offset=offset, limit=limit,
