@@ -43,7 +43,7 @@ export const defaultConfigs = {
     odooConnection: {
       odooUrl: {
         displayOrder: 1,
-        value: 'http://172.29.61.190:8069/api/v1',
+        value: 'http://127.0.0.1/api/v1',
         displayTitle: 'Configuration.connections.Odoo'
       },
       hmiSn: {

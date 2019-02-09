@@ -27,8 +27,9 @@ import { initAiis } from '../actions/aiis';
 
 // const lodash = require('lodash');
 
-function* sysInit() {
+function* sysInit(action) {
   try {
+    const {section='all'} = action;
     const state = yield select();
     // const {connections} = state.setting.system;
     // const url = connections.masterpc.connection;
@@ -58,9 +59,11 @@ function* sysInit() {
     }
 
     // 获取logo
-    yield put({
-      type: LOGO.FETCH_START
-    });
+    if (section === 'all'){
+      yield put({
+        type: LOGO.FETCH_START
+      });
+    }
 
     setLedStatusReady();
   } catch (e) {

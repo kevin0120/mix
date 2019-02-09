@@ -16,7 +16,7 @@ import { watchRush } from './rush';
 import { watchRfid } from './rfid';
 import { watchNotification } from './notification';
 import watchOperationViewer from './operationViewer';
-import logo from './logo';
+import logoFlow from './logo';
 import watchNetwork from './network';
 import watchBattery from './battery';
 import watchPower from './power';
@@ -43,7 +43,7 @@ export default function* rootSaga() {
       watchSettingPreSave(),
       sysInitFlow(),
       watchOperationViewer(),
-      logo(),
+      logoFlow(),
       watchNetwork(),
       watchBattery(),
       watchPower(),
