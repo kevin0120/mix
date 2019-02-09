@@ -208,14 +208,14 @@
                 <filter name="last_year" string="Last Year" domain="[('control_date','&gt;=', (context_today() - relativedelta(years=1)).strftime('%Y-1-1')),('control_date','&lt;', context_today().strftime('%Y-1-1') )]"/>
                 <group expand="1" string="Group By">
                     <filter string="Result" context="{'group_by': 'measure_result'}"/>
-                    <!--<filter string="Production" context="{'group_by': 'production_id'}"/>-->
+                    <filter string="Tightening Point" context="{'group_by': 'operation_point_id'}"/>
                     <filter string="Vehicle" context="{'group_by': 'product_id'}"/>
                     <filter string="Screw" context="{'group_by': 'consu_product_id'}"/>
                     <filter string="WorkCenter" context="{'group_by': 'workcenter_id'}"/>
                     <filter string="One Time Pass" context="{'group_by': 'one_time_pass'}"/>
                     <filter string="Final Pass" context="{'group_by': 'final_pass'}"/>
-                    <filter string="Data Lacking" context="{'group_by': 'lacking'}"/>
-                    <filter string="Screw Gun" context="{'group_by': 'gun_id'}"/>
+                    <filter string="Data Lacking" context="{'group_by': 'lacking'}" name="group_by_lacking"/>
+                    <filter string="Screw Gun" context="{'group_by': 'gun_id'}" name="group_by_gun"/>
                     <separator/>
                     <filter string="Tightening Date Day" context="{'group_by': 'control_date:day'}"/>
                     <filter string="Tightening Date Week" context="{'group_by': 'control_date:week'}"/>
@@ -245,7 +245,7 @@
         <field name="res_model">operation.result</field>
         <field name="view_type">form</field>
         <field name="view_mode">graph</field>
-        <field name="domain">[('measure_result', 'in', ['ok', 'nok'])]</field>
+        <!--<field name="domain">[('measure_result', 'in', ['ok', 'nok'])]</field>-->
         <field name="view_id" ref="operation_result_view_graph"/>
     </record>
 

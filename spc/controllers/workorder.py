@@ -20,30 +20,6 @@ def str_time_to_rfc3339(s_time):
     sp = s_time.split(' ')
     return sp[0] + 'T' + sp[1] + 'Z'
 
-def urget_request_mo(urls, longpin):
-    ret = False
-    if not longpin:
-        return ret
-    for url in urls:
-        u = urljoin(url, URGE_REQ_URL)
-        try:
-            if isinstance(validators.url(u), validators.ValidationFailure):
-                break
-            data = {
-                "code": longpin,
-            }
-            ret = Requests.post(u, data=json.dumps(data), headers={'Content-Type': 'application/json'}, timeout=2)
-            if ret.status_code == 201:
-                logger.info(u"快速请求创建longpin:{0}生产订单成功",longpin)
-                ret = True
-        except ConnectionError:
-            logger.debug(u"快速请求创建longpin:{0} ConnectionError", longpin)
-        except RequestException as e:
-            logger.debug(u"快速请求创建longpin:{0}, error: {1}", e.message)
-        except Exception as e:
-            logger.debug(u"快速请求创建longpin:{0}, error: {1}", e.message)
-    return ret
-
 class ApiMrpWorkorder(http.Controller):
 
     @http.route(['/api/v1/mrp.workorders/<int:order_id>', '/api/v1/mrp.workorders'], type='http', methods=['GET'], auth='none', cors='*', csrf=False)
@@ -165,20 +141,9 @@ class ApiMrpWorkorder(http.Controller):
         workorder_ids = env['mrp.workorder'].search(domain, limit=limit, order=order_by)
         if not workorder_ids:
             logger.info(u"未发现工单,调用快速请求进行创建")
-            _aiis_urls = env['ir.config_parameter'].sudo().get_param('aiis.urls')
-            if not _aiis_urls:
-                body = json.dumps({'msg': 'Can not found AIIS, can not request '})
-                return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
-                                status=405)
-            aiis_urls = _aiis_urls.split(',')
-            ret = urget_request_mo(aiis_urls, kw['code'] if 'code' in kw else None)
-            if ret:
-                ### 创建成功
-                workorder_ids = env['mrp.workorder'].search(domain, limit=limit, order=order_by)  # 重新尝试获取工单
-            else:
-                body = json.dumps({'msg': 'Can not found workorder'})
-                return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
-                                status=404)
+            body = json.dumps({'msg': 'Can not found workorder'})
+            return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
+                            status=404)
         _ret = list()
         for order in workorder_ids:
             # points = env['point.point'].search_read(
