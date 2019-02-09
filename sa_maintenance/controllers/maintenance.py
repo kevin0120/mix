@@ -81,14 +81,14 @@ class SaMaintenance(http.Controller):
             return Response(body, status=404, headers=headers)
         total_times = kw['times']
         times_since_last_service = kw['sin_last_service']
-        if total_times > gun_id.next_calibration_action_times + gun_id.times_margin and gun_id.calibration_times > 0:
-            mType = 'calibration'
-        elif times_since_last_service > 0 and times_since_last_service > gun_id.calibration_times and gun_id.calibration_times >0:
-            mType = 'calibration'
-        elif total_times > gun_id.next_action_times + gun_id.times_margin and gun_id.times >0:
+        if total_times > gun_id.next_action_times + gun_id.times_margin and gun_id.times >0:
             mType = 'preventive'
-        elif times_since_last_service > 0 and times_since_last_service > gun_id.times and gun_id.times >0:
+        elif times_since_last_service > gun_id.times and gun_id.times >0:
             mType = 'preventive'
+        elif total_times > gun_id.next_calibration_action_times + gun_id.times_margin and gun_id.calibration_times > 0:
+            mType = 'calibration'
+        elif times_since_last_service > gun_id.calibration_times and gun_id.calibration_times >0:
+            mType = 'calibration'
         else:
             # body = json.dumps({'msg': "do not need create maintenance request!!!!"})
             headers = [('Content-Type', 'application/json')]
