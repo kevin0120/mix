@@ -43,7 +43,7 @@ export const defaultConfigs = {
     odooConnection: {
       odooUrl: {
         displayOrder: 1,
-        value: 'http://127.0.0.1/api/v1',
+        value: 'http://127.0.0.1:8069/api/v1',
         displayTitle: 'Configuration.connections.Odoo'
       },
       hmiSn: {
@@ -166,8 +166,8 @@ export const defaultConfigs = {
       }
     },
     connections: {
-      masterpc: 'http://172.17.0.1:8082',
-      rfid: 'tcp://192.168.1.120:2112',
+      masterpc: 'http://127.0.0.1:8082',
+      rfid: 'tcp://127.0.0.1:2112',
       aiis: 'http://127.0.0.1:9092',
       controllers: [
         {
@@ -181,13 +181,13 @@ export const defaultConfigs = {
   },
   // 作业配置
   operationSettings: {
-    opMode: 'op', // 作业模式:        op 或 order
-    controllerMode: 'job', // 拧紧模式:        job 或 pset
+    opMode: 'order', // 作业模式:        op 或 order
+    controllerMode: 'pset', // 拧紧模式:        job 或 pset
     workMode: 'auto', // 工作模式:        auto 或 manual 或 scanner
-    flowTriggers: ['carID', 'carType'], // 工作流程触发条件:  carType:车型代码 carID:vin/knr/longpin
+    flowTriggers: ['carID'], // 工作流程触发条件:  carType:车型代码 carID:vin/knr/longpin
 
     // 作业前检测(order mode only)
-    preCheck: false,
+    preCheck: true,
 
     // 强制放行配置
     byPass: {
@@ -214,7 +214,7 @@ export const defaultConfigs = {
   },
   systemSettings: {
     enableDebugInfo: false,
-    enableConflictOP: false,
+    enableConflictOP: true,
     showSwitchMode: false, // 切换pset or job 模式
     defaultControllerSN: '27091400470',
     defaultToolSN: '0001',
@@ -222,7 +222,7 @@ export const defaultConfigs = {
     switchAutoManual: false,
     oeeFuncEnable: false,
     modbusEnable: false,
-    rfidEnabled: false,
+    rfidEnabled: true,
     andonEnable: true,
     psetContinueMode: false,
     enableFocus: true
