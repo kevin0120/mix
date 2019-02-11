@@ -1,9 +1,8 @@
 import { LOGO } from '../actions/actionTypes';
 import defaultWorkingImg from '../../resources/imgs/defaultWorking.jpg';
 
-const initOperationViewer = defaultWorkingImg;
 export default function logo(
-  state: object = initOperationViewer,
+  state: object = defaultWorkingImg,
   action: actionType
 ) {
   switch (action.type) {
@@ -11,6 +10,6 @@ export default function logo(
       return action.logo || defaultWorkingImg;
     }
     default:
-      return defaultWorkingImg;
+      return state;
   }
 }
