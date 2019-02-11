@@ -3,7 +3,7 @@ import { take, call, put, select, fork } from 'redux-saga/effects';
 import { cloneDeep } from 'lodash';
 import { NETWORK } from '../actions/actionTypes';
 import saveConfigs from '../actions/userConfigs';
-import {watch} from './utils';
+import { watch } from './utils';
 
 const lodash = require('lodash');
 const util = require('util');
@@ -31,11 +31,11 @@ const CDIR2netmask = (bitCount) => {
   return mask.join('.');
 };
 
-const workers={
-  [NETWORK.CHECK]:doCheckCurrentConnection,
-  [NETWORK.SCAN]:doScan,
-  [NETWORK.SET]:doSet,
-  [NETWORK.SIGNAL]:doCheckActiveSignal,
+const workers = {
+  [NETWORK.CHECK]: doCheckCurrentConnection,
+  [NETWORK.SCAN]: doScan,
+  [NETWORK.SET]: doSet,
+  [NETWORK.SIGNAL]: doCheckActiveSignal
 };
 
 export default watch(workers);
@@ -79,7 +79,7 @@ function* doCheckCurrentConnection() {
   }
 }
 
-function* doCheckActiveSignal(){
+function* doCheckActiveSignal() {
   try {
     const { error, stdout, stderr } = yield call(execNmcli, 'LANG=eng nmcli -f active,ssid,signal -t -e no dev wifi');
     if (error) {
@@ -92,16 +92,22 @@ function* doCheckActiveSignal(){
     }
     if (stdout) {
       const result = /(yes):(.*):(\d*)/.exec(stdout);
-      if(result){
+      if (result) {
         const ssid = result[2];
         const signal = result[3];
         yield put({
-          type:NETWORK.SIGNAL_OK,
+          type: NETWORK.SIGNAL_OK,
           ssid,
           signal
-        })
+        });
+        return;
       }
     }
+    yield put({
+      type: NETWORK.SIGNAL_OK,
+      ssid: '',
+      signal: 0
+    });
   } catch (e) {
     console.log(e);
   }
@@ -109,7 +115,7 @@ function* doCheckActiveSignal(){
 
 function* doSet(action) {
   try {
-    const {data}=action;
+    const { data } = action;
     let ret = 0;
     const mask = netmask2CIDR(data.netmask.value);
     yield call(execNmcli, 'nmcli con delete default');
@@ -127,7 +133,7 @@ function* doSet(action) {
     }
     if (stdout) {
       console.log(`stdout: ${stdout}`);
-      if(!/successfully activated/.test(stdout)){
+      if (!/successfully activated/.test(stdout)) {
         console.log(`connect failed`);
         ret = -1;
       }
@@ -160,7 +166,7 @@ function* doSet(action) {
       });
       yield put(saveConfigs(section, data));
       yield call(execNmcli, 'nmcli con up default');
-    }else{
+    } else {
       yield call(execNmcli, 'nmcli con delete default');
       yield put({
         type: NETWORK.SET_FAIL

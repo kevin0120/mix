@@ -181,13 +181,13 @@ export const defaultConfigs = {
   },
   // 作业配置
   operationSettings: {
-    opMode: 'order', // 作业模式:        op 或 order
-    controllerMode: 'pset', // 拧紧模式:        job 或 pset
+    opMode: 'op', // 作业模式:        op 或 order
+    controllerMode: 'job', // 拧紧模式:        job 或 pset
     workMode: 'auto', // 工作模式:        auto 或 manual 或 scanner
-    flowTriggers: ['carID'], // 工作流程触发条件:  carType:车型代码 carID:vin/knr/longpin
+    flowTriggers: ['carID', 'carType'], // 工作流程触发条件:  carType:车型代码 carID:vin/knr/longpin
 
     // 作业前检测(order mode only)
-    preCheck: true,
+    preCheck: false,
 
     // 强制放行配置
     byPass: {
@@ -225,6 +225,6 @@ export const defaultConfigs = {
     rfidEnabled: true,
     andonEnable: true,
     psetContinueMode: false,
-    enableFocus: true
+    enableFocus: false
   }
 };

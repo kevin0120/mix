@@ -31,7 +31,7 @@ import { Error, Info } from '../logger';
 import { setNewNotification } from '../actions/notification';
 import { watch } from './utils';
 import configs from '../shared/config';
-// const lodash = require('lodash');
+const lodash = require('lodash');
 
 // // 监听作业
 // export function* watchOperation() {
@@ -316,15 +316,16 @@ export function* getOperation(job) {
 // 开始作业
 export function* startOperation(action) {
   try {
-    const { data } = action;
-    const state = yield select();
     yield put(setResultDiagShow(false));
 
+    const { data } = action;
     yield put({
       type: OPERATION.OPERATION.FETCH_OK,
       mode: configs.operationSettings.opMode,
       data
     });
+
+    const state = yield select();
 
     const { controllerMode } = state.workMode;
 
@@ -340,7 +341,19 @@ export function* startOperation(action) {
 
       // const toolSN = state.setting.systemSettings.defaultToolSN || "";
 
-      const targetResult = results[0];
+      const {controller_sn, gun_sn }= lodash.reduce(results,(result, value)=>{
+        if(result.controller_sn && value.controller_sn!==result.controller_sn){
+          console.error('结果中的controller_sn不匹配');
+        }
+        if(result.gun_sn && value.gun_sn!==result.gun_sn){
+          console.error('结果中的gun_sn不匹配');
+        }
+        return {
+          controller_sn:value.controller_sn||result.controller_sn,
+          gun_sn:value.gun_sn||result.gun_sn
+        }
+      },{});
+
       const userID = 1;
       const skip = false;
       let hasSet = false;
@@ -351,8 +364,8 @@ export function* startOperation(action) {
         const resp = yield call(
           jobManual,
           rushUrl,
-          targetResult.controller_sn,
-          targetResult.gun_sn,
+          controller_sn,
+          gun_sn,
           carType,
           carID,
           userID,
@@ -378,6 +391,7 @@ export function* startOperation(action) {
         }
       } catch (e) {
         // 程序号设置失败
+        console.error(e);
         yield put({ type: OPERATION.PROGRAMME.SET_FAIL });
         // yield put({ type: OPERATION.RESET });
       }

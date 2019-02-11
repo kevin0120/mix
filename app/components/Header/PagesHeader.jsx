@@ -87,10 +87,14 @@ class PagesHeader extends React.Component {
 
   componentDidMount(): void {
     // check wifi signal
+    this.handleStatusCheck();
+  }
+
+  handleStatusCheck=()=>{
     const { doNetworkSignal, doBatteryCheck } = this.props;
     doNetworkSignal();
     doBatteryCheck();
-  }
+  };
 
   handleDrawerToggle = () => {
     const { open } = this.state;
@@ -165,7 +169,7 @@ class PagesHeader extends React.Component {
                 {list}
               </Hidden>
             </div>
-            <Button className={classes.indicator} color="transparent">
+            <Button className={classes.indicator} color="transparent" onClick={this.handleStatusCheck}>
               {signalLevel(signal)}
               <span style={{marginRight:'7px'}}>{`${ssid || '无连接'}`}</span>
               {batteryLevel(batteryPercentage)}
