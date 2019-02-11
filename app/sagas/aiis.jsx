@@ -92,11 +92,12 @@ export function* handleAiisData(action) {
         const userID = 1;
         const skip = true;
         const hasSet = false;
-
+        console.log(state.operations);
         const resp = yield call(
           jobManual,
           rushUrl,
           controllerSN,
+          "",
           carType,
           carID,
           userID,
