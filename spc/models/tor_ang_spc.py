@@ -25,7 +25,9 @@ class TorAngSPCReport(models.TransientModel):
     query_date_from = fields.Datetime(string='Query Date From')
     query_date_to = fields.Datetime(string='Query Date to', default=fields.Datetime.now())
     vehicle_id = fields.Many2one('product.product', string='Vehicle Type', domain=[('sa_type', '=', 'vehicle')])
+    vehicle_code = fields.Char(string='Vehicle Type Code(support Fuzzy search,case-insensitive)')
     screw_id = fields.Many2one('product.product', string='Screw Type', domain=[('sa_type', '=', 'screw')])
+    gun_id = fields.Many2one('maintenance.equipment',string='Tightening Gun', domain=lambda self: [('category_id.id', '=', self.env.ref('sa_base.equipment_Gun').id)])
     assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line')
     limit = fields.Integer('Query Limit', default=DEFAULT_LIMIT)
     spc_target = fields.Selection([('torque', 'Torque'), ('angle', 'Angle')], string='统计对象', default='torque')
@@ -216,10 +218,16 @@ class TorAngSPCReport(models.TransientModel):
             domain += [('control_date', '>=', self.query_date_from)]
         if self.query_date_to:
             domain += [('control_date', '<=', self.query_date_to)]
+        if self.vehicle_code:
+            product_id = self.env['product.product'].sudo().search([('vehicle_type_code', 'ilike', self.vehicle_code)], limit=1)
+            if product_id:
+                domain += [('product_id', '=', product_id.id)]
         if self.vehicle_id:
             domain += [('product_id', '=', self.vehicle_id.id)]
         if self.screw_id:
             domain += [('consu_product_id', '=', self.screw_id.id)]
+        if self.gun_id:
+            domain += [('gun_id', '=', self.gun_id.id)]
         if self.assembly_line_id:
             domain += [('assembly_line_id', '=', self.assembly_line_id.id)]
         if self.spc_target == 'torque':
@@ -229,7 +237,7 @@ class TorAngSPCReport(models.TransientModel):
             _data = self.env['operation.result'].sudo().get_angles(domain, limit=self.limit, order=order)
             data = {'measure_degree': _data}
         length = len(_data)
-        if length < self.limit and length < 100:
+        if length < self.limit and length < 25:
             return DataFrame(), length
         df = DataFrame.from_records(data)
         df = df['measure_degree'] if self.spc_target == 'angle' else df['measure_torque']

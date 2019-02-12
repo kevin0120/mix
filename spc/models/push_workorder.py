@@ -8,6 +8,9 @@ from odoo.models import AbstractModel
 import requests as Requests
 from requests import ConnectionError, RequestException
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 MASTER_WROKORDERS_API = '/rush/v1/workorders'
 headers = {'Content-Type': 'application/json'}
@@ -87,6 +90,7 @@ class PushWorkorder(AbstractModel):
             }
             r.append(vals)
         try:
+            logger.debug("try to push workorder to masterpc:{0}".format(url))
             ret = Requests.post(url, data=json.dumps(r), headers=headers)
             if ret.status_code == 201:
                 orders.write({'sent': True})

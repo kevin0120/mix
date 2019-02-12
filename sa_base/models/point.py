@@ -10,7 +10,7 @@ from odoo.addons import decimal_precision as dp
 import json
 
 
-class OperationPointsGoup(models.Model):
+class OperationPointsGroup(models.Model):
     _name = 'operation.point.group'
 
     _order = "sequence"
@@ -90,7 +90,7 @@ class OperationPoints(models.Model):
     def name_get(self):
         res = []
         for point in self:
-            res.append((point.id, _('[%s] %s') % (point.operation_id.name, point.sequence)))
+            res.append((point.id, _('[%s] %s') % (point.operation_id.name, point.name)))
         return res
 
     @api.model

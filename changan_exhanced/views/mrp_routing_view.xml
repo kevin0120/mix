@@ -8,12 +8,16 @@
           <field name="op_job_id" position="attributes">
               <attribute name="required">1</attribute>
           </field>
+          <field name="op_job_id" position="after">
+              <field name="gun_id" required="1" widget="selection"/>
+          </field>
           <xpath expr="//sheet/group/group/field[@name='group_id']" position="replace">
           </xpath>
           <xpath expr="//page/field[@name='operation_point_ids']/tree/field[@name='program_id']" position="replace">
           </xpath>
         </field>
     </record>
+
       <record model="ir.ui.view" id="sa_changan_sa_mrp_routing_workcenter_tree_view_inherit">
         <field name="name">sa_changan_sa_mrp_routing_workcenter_tree_view_inherit</field>
         <field name="model">mrp.routing.workcenter</field>

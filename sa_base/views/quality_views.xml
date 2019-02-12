@@ -29,6 +29,9 @@
                 <xpath expr="//form" position="attributes">
                     <attribute name="create">false</attribute>
                 </xpath>
+                <xpath expr="//label[@for='tolerance_min']" position="attributes">
+                    <attribute name="string">Torque Tolerance</attribute>
+                </xpath>
                 <field name="workcenter_id" position="after">
                     <field name="operation_id_domain" invisible="1"/>
                     <field name="operation_id" domain="operation_id_domain" attrs="{'invisible': [('workcenter_id', '=', False)],'required': [('workcenter_id', '!=', False)]}"/>

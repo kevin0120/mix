@@ -6,7 +6,7 @@ import pyecharts
 from minio import Minio
 from urlparse import urlsplit
 import json
-from pandas import DataFrame
+from pandas import DataFrame, merge_ordered, merge_asof
 import itertools
 from boltons.cacheutils import LRU
 
@@ -89,16 +89,18 @@ class Wave(models.TransientModel):
         except Exception as e:
             return None, None
 
-    def _get_echart_data(self,datas,ret):
-        line = Line(u"{0}".format(u'Waveform'), u"{0}-{1}".format(self.query_date_from, self.query_date_to), width=1920,height=1080)
+    def _get_echart_data(self,datas,ret, mark_line_coords):
+        line = Line(u"{0}".format(u'Curve'), u"{0}-{1}".format(self.query_date_from, self.query_date_to), width=1920,height=1080)
         for index, data in enumerate(datas):
             line.add(data['name'].split('.')[0], ret['cur_w'].values, ret[u'{0}'.format(data['name'])].values,
-                     is_smooth=True, line_width=2, is_datazoom_show=True,
+                     is_smooth=True, line_width=2, is_datazoom_show=True, is_stack=True, mark_line_coords=mark_line_coords,
                      datazoom_type='both', tooltip_tragger='axis', mark_line=["min", "max"])
             line.options.get('series')[index].update({'connectNulls': True})
         # line.print_echarts_options()
         pyecharts.configure(force_js_embed=True)
-        return line.render_embed()
+        ret = line.render_embed()
+        print(ret)
+        return ret
 
     @api.multi
     def read(self, fields=None, load='_classic_`'):
@@ -107,7 +109,7 @@ class Wave(models.TransientModel):
     def _get_data(self, data):
         client, bucket = self._recreate_minio_client()
         if not client or not bucket:
-            return [], None  ### 返回无结果数值
+            return [], None, []  ### 返回无结果数值
         cur_objects = data.mapped('cur_objects')
         _objects = [x for x in cur_objects if x]
         objects = []
@@ -128,16 +130,19 @@ class Wave(models.TransientModel):
         try:
             _datas.extend(map(lambda x: _create_wave_result_dict(x, client.get_object(bucket, x).data.decode('utf-8')), need_fetch_objects)) # 合并结果
         except Exception as e:
-            return [], None
+            return [], None, []
         if len(_datas) > 1:
             for i in range(len(_datas) -1):
                 ret = _datas[i]['wave'].merge(_datas[i+1]['wave'],how='outer', on='cur_w') if i == 0 else ret.merge(_datas[i+1]['wave'],how='outer', on='cur_w')
         elif len(_datas) == 0:
-            return [], None
+            return [], None, []
         else:
             ret = _datas[0]['wave']
         # ret = ret.sort_values(by=['cur_w'])
-        return _datas, ret
+        # mark_line_coords =  [[100, 1], [400, 2]]
+        mark_line_coords = []
+
+        return _datas, ret, mark_line_coords
 
     @api.multi
     def button_show(self):

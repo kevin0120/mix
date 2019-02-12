@@ -75,6 +75,7 @@
                                         <field name="sequence" widget="handle"/>
                                         <field name="sequence" readonly="1"/>
                                         <field name="id" readonly="1" groups="base.group_no_one"/>
+                                        <field name="name" string="Description" />
                                         <field name="product_id" context="{'default_type': 'product'}" domain="[('sa_type', '=', 'screw')]" options="{'no_create_edit': True,'no_open': True}"/>
                                         <field name="product_qty"/>
                                         <field name="program_id" options="{'no_create_edit': True,'no_open': True}"/>

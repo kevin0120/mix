@@ -141,7 +141,8 @@ class SaConfiguration(http.Controller):
             'knr': production.knr,
             'product_id': production.product_id.id,
             'assembly_line_id': production.assembly_line_id.id,
-            'result_ids': production.result_ids.ids,
+            'result_ids': production.result_ids.ids if production.result_ids else [],
+            'workorder_ids': production.workorder_ids.ids if production.workorder_ids else [],
         }
         body = json.dumps(vals)
         return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=201)

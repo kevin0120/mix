@@ -14,6 +14,11 @@ from urlparse import urljoin
 from odoo.addons.spc.controllers.result import _post_aiis_result_package
 
 
+DEFAULT_RESULT_PUSH_LIMIT = 80
+
+DEFAULT_RESULT_PUSH_ORDER = 'control_date desc'
+
+
 _logger = logging.getLogger(__name__)
 
 
@@ -55,7 +60,8 @@ class PushResult(AbstractModel):
     @api.multi
     def result_push(self):
         domain = [('measure_result', 'in', ['ok', 'nok'])]
-        results = self.env['operation.result'].sudo().search(domain)
+        limit = self.env['ir.config_parameter'].sudo().get_param('sa.result.push.num', default=DEFAULT_RESULT_PUSH_LIMIT)
+        results = self.env['operation.result'].sudo().search(domain, limit=limit, order=DEFAULT_RESULT_PUSH_ORDER)
         if not results:
             return True
         _aiis_urls = self.env['ir.config_parameter'].sudo().get_param('aiis.urls')

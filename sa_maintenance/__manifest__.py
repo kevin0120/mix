@@ -28,6 +28,7 @@
         'views/maintenance_views.xml',
         'views/mrp_maintenance_template.xml',
         'views/equipment_view.xml',
+        'views/res_config_views.xml',
         'report/maintenance_report_main.xml',
         'report/report_maintenance_views.xml',
         'report/sheet_maintenance_views.xml'

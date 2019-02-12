@@ -7,7 +7,7 @@
                 <form string="Scope">
                     <header>
                         <button string="Query" type="object" name="button_query"  class="oe_highlight"/>
-                        <button string="Show WaveForm" type="object" name="button_show" class="oe_highlight"/>
+                        <button string="Show Curve" type="object" name="button_show" class="oe_highlight"/>
                     </header>
                     <sheet>
                         <group string="Query Parameters">
@@ -47,8 +47,8 @@
                             </field>
 
                         </page>
-                        <page string="WaveForm">
-                            <label for="wave" string="WaveForm"/>
+                        <page string="Curve">
+                            <label for="wave" string="Curve"/>
                             <div>
                                 <field name="wave" widget="echart"/>
                             </div>
@@ -60,7 +60,7 @@
         </record>
 
         <record id="action_wave_form" model="ir.actions.act_window">
-            <field name="name">Waveform</field>
+            <field name="name">Curve</field>
             <field name="res_model">wave.wave</field>
             <field name="view_mode">form</field>
             <field name="target">inline</field>

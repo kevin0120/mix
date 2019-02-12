@@ -9,7 +9,7 @@ from odoo.tools import html2text, ustr
 import requests as Requests
 
 import urllib
-
+import json
 
 HEALTHZ_URL = 'api/v1/healthz'
 
@@ -103,6 +103,26 @@ class MaintenanceEquipment(models.Model):
 
     image_medium = fields.Binary("Medium-sized image", attachment=True)
 
+    parent_id_domain = fields.Char(
+        compute="_compute_parent_id_domain",
+        readonly=True,
+        store=False,
+    )
+
+    @api.multi
+    @api.depends('category_id')
+    def _compute_parent_id_domain(self):
+        for rec in self:
+            if rec.category_id.id == self.env.ref('sa_base.equipment_Gun').id:
+                child_ids = self.env['maintenance.equipment'].sudo().search([('category_id', '=',self.env.ref('sa_base.equipment_screw_controller').id)])
+                rec.parent_id_domain = json.dumps([('id', 'in', child_ids.ids)])
+            elif rec.category_id.id == self.env.ref('sa_base.equipment_screw_controller').id:
+                child_ids = self.env['maintenance.equipment'].sudo().search(
+                    [('category_id', '=', self.env.ref('sa_base.equipment_MasterPC').id)])
+                rec.parent_id_domain = json.dumps([('id', 'in', child_ids.ids)])
+            else:
+                rec.parent_id_domain = json.dumps([])
+
     @api.multi
     def button_check_healthz(self):
         for e in self:
@@ -170,9 +190,9 @@ class MaintenanceEquipment(models.Model):
             equipment_names = name.split(' / ')
             parents = list(equipment_names)
             child = parents.pop()
-            domain = [('name', operator, child)]
+            domain = ['|', ('name', operator, child), ('serial_no', operator, child)]
             if parents:
-                names_ids = self.name_search(' / '.join(parents), args=args, operator='ilike', limit=limit)
+                names_ids = super(MaintenanceEquipment, self).name_search(' / '.join(parents), args=args, operator='ilike', limit=limit)
                 equipment_ids = [name_id[0] for name_id in names_ids]
                 if operator in expression.NEGATIVE_TERM_OPERATORS:
                     equipments = self.search([('id', 'not in', equipment_ids)])
