@@ -538,10 +538,13 @@ func (s *Service) PatchResultFlag(stream *aiis.RPCAiis_RPCNodeServer, result_id 
 		Data: rushResult,
 	}
 
-	str, _ := json.Marshal(payload)
-	s.rpc.RPCSend(stream, string(str))
+	str, err := json.Marshal(payload)
+	if err != nil {
+		s.diag.Error("PatchResultFlag Marshal fail", err)
+		return err
+	}
+	return s.rpc.RPCSend(stream, string(str))
 
-	return nil
 }
 
 func (s *Service) HandleResult(cr *CResult) {
@@ -567,11 +570,15 @@ func (s *Service) HandleResult(cr *CResult) {
 		}
 	}
 
-	json_str, _ := json.Marshal(cr.Result)
-	json_obj := map[string]interface{}{}
-	json.Unmarshal(json_str, &json_obj)
+	jsonStrs, _ := json.Marshal(cr.Result)
+	jsonObjs := map[string]interface{}{}
+	err := json.Unmarshal(jsonStrs, &jsonObjs)
+	if err != nil {
+		s.diag.Error("json unmarshal result obj fail", err)
+		return
+	}
 	result := &storage.ResultObject{
-		OR:     json_obj,
+		OR:     jsonObjs,
 		ID:     cr.ID,
 		Send:   sent,
 		IP:     cr.IP,
@@ -597,54 +604,63 @@ func (s *Service) AddResult(r *storage.ResultObject) {
 }
 
 func (s *Service) TaskResultsBatchSave() {
-	//idx := 0
+	idx := 0
 	c := s.configValue.Load().(Config)
-	//results := make([]*storage.ResultObject, c.BatchSaveRowsLimit)
-	results := []*storage.ResultObject{}
+	results := make([]*storage.ResultObject, 2 *c.BatchSaveRowsLimit) //2倍的数据大小,确保大小足够
+	//results := []*storage.ResultObject{}
 
 	for {
 		select {
 		case <-time.After(time.Duration(c.BatchSaveTimeLimit)):
-			if len(results) > 0 {
-				if s.StorageService.BatchSave(results) == nil {
-					for _, v := range results {
+			if idx > 0 {
+				rs := results[:idx]
+				if s.StorageService.BatchSave(rs) == nil {
+					for _, v := range rs {
 						resultID := int64(v.OR["id"].(float64))
 						if resultID > 0 {
-							s.PatchResultFlag(v.Stream, int64(v.OR["id"].(float64)), true, v.IP, v.Port)
+							go s.PatchResultFlag(v.Stream, int64(v.OR["id"].(float64)), true, v.IP, v.Port)
 						}
 					}
 				}
-				results = []*storage.ResultObject{}
+				idx = 0
 			}
 
 		case data := <-s.results:
-			results = append(results, data)
+			results[idx] = data
+			idx += 1
 
-			if len(results) == s.Config().BatchSaveRowsLimit {
-				if s.StorageService.BatchSave(results) == nil {
-					for _, v := range results {
+			if idx >= c.BatchSaveRowsLimit {
+				rs := results[:idx]
+				if s.StorageService.BatchSave(rs) == nil {
+					for _, v := range rs {
 						resultID := int64(v.OR["id"].(float64))
 						if resultID > 0 {
-							s.PatchResultFlag(v.Stream, int64(v.OR["id"].(float64)), true, v.IP, v.Port)
+							go s.PatchResultFlag(v.Stream, int64(v.OR["id"].(float64)), true, v.IP, v.Port)
 						}
 					}
 				}
-				results = []*storage.ResultObject{}
+				idx = 0
 			}
 		}
 	}
 }
 
 func (s *Service) OnOdooStatus(status string) {
-	odoo_status := odoo.ODOOStatus{
+	odooStatus :=  odoo.ODOOStatus{
 		Status: status,
 	}
 
 	payload := aiis.RPCPayload{
 		Type: aiis.TYPE_ODOO_STATUS,
-		Data: odoo_status,
+		Data: odooStatus,
 	}
 
-	str, _ := json.Marshal(payload)
-	s.rpc.RPCSendAll(string(str))
+	str, err := json.Marshal(payload)
+	if err != nil {
+		s.diag.Error("OnOdooStatus Marshal fail",err)
+	}
+	err = s.rpc.RPCSendAll(string(str))
+	if err != nil {
+		s.diag.Error("OnOdooStatus RPCSendAll fail",err)
+	}
 }
