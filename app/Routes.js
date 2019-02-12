@@ -17,10 +17,11 @@ export default class Routes extends React.Component {
 
   renderRoute = RouteConfig => {
     return (
-    <React.Fragment>
-      <RouteConfig.main />
-      <Layout shouldRender={RouteConfig.showLayout} />
-    </React.Fragment>
+      <React.Fragment>
+        <Layout shouldRender={RouteConfig.showLayout}>
+          <RouteConfig.main/>
+        </Layout>
+      </React.Fragment>
     );
   };
 

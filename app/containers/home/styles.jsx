@@ -11,7 +11,8 @@
 const styles = theme => ({
   wrap: {
     backgroundColor: '#f2f2f2',
-    height: 'calc(100% - 64px)',
+    // height: 'calc(100% - 64px)',
+    height:'100%',
     overflowX: 'hidden'
   },
   iconWrap: {

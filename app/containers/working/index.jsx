@@ -12,6 +12,7 @@ import Divider from '@material-ui/core/Divider';
 import Paper from '@material-ui/core/Paper';
 import FiberManualRecord from '@material-ui/icons/FiberManualRecord';
 import Autorenew from '@material-ui/icons/Autorenew';
+import SweetAlert from 'react-bootstrap-sweetalert';
 import Button from '../../components/CustomButtons/Button';
 import ImageStick from '../../components/ImageStick/imageStick';
 
@@ -48,7 +49,6 @@ import TimeLine from '../../components/WorkPageTimeline';
 import ProgressBar from '../../components/ProgressBar/Progress';
 import { OPERATION_STATUS, OPERATION_SOURCE } from '../../reducers/operations';
 import withKeyboard from '../../components/Keyboard';
-import SweetAlert from 'react-bootstrap-sweetalert';
 
 const lodash = require('lodash');
 
@@ -61,7 +61,7 @@ const mapStateToProps = (state, ownProps) => ({
   reworkWorkCenter: state.connections.rework_workcenter,
   enableFocus: state.setting.systemSettings.enableFocus,
   enableConflictOP: state.setting.systemSettings.enableConflictOP,
-  tools:state.tools,
+  tools: state.tools,
   ...ownProps
 });
 
@@ -96,7 +96,7 @@ const withstyles = theme => ({
     flexWrap: 'nowrap'
   },
   root: {
-    position: 'relative',
+    // position: 'relative',
     height: '100%',
     width: '100%',
     margin: '0',
@@ -349,8 +349,8 @@ const withstyles = theme => ({
     height: '500px'
   },
   LeftWrapper: {
-    height: '100%',
-    padding: '20px 5px 0 20px!important'
+    height: '100%'
+    // padding: '20px 5px 0 20px!important'
   },
   LeftTopWrapper: {
     marginTop: '0'
@@ -363,13 +363,13 @@ const withstyles = theme => ({
     height: 'calc(100% - 160px)'
   },
   LeftTop1: {
-    padding: '0 5px 0px 12px!important'
+    // padding: '0 5px 0px 12px!important',
   },
   LeftTop2: {
-    padding: '0 5px 0 5px!important'
+    // padding: '0 5px 0 5px!important'
   },
   LeftTop3: {
-    padding: '0 12px 0 5px!important'
+    // padding: '0 12px 0 5px!important'
   },
   LeftTopTab: {
     textAlign: 'left',
@@ -377,14 +377,15 @@ const withstyles = theme => ({
     background: '#FFFFFF',
     borderRadius: '0',
     width: '100%',
-    height: '100px'
+    height: '100%'
   },
   LeftBottomTab: {
     textAlign: 'left',
     position: 'relative',
     background: '#FFFFFF',
     borderRadius: '0',
-    height: '100%'
+    height: '100%',
+    width: '100%'
   },
   LeftTabContiner: {
     height: '100%',
@@ -400,8 +401,8 @@ const withstyles = theme => ({
     }
   },
   RightWrapper: {
-    height: '100%',
-    padding: '20px 20px 0 5px!important'
+    height: '100%'
+    // padding: '20px 20px 0 5px!important'
   },
   CutDownPaper: {
     textAlign: 'center',
@@ -409,31 +410,36 @@ const withstyles = theme => ({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    height: '15%',
+    height: '100%',
+    width: '100%',
     background: '#212121'
   },
   InfoTab: {
     textAlign: 'center',
     position: 'relative',
     background: '#FFFFFF',
-    marginTop: '17px',
-    borderRadius: '0'
+    borderRadius: '0',
+    height: '100%',
+    width: '100%'
   },
   InfoTabTimeLine: {
     textAlign: 'center',
     position: 'relative',
     background: '#FFFFFF',
-    marginTop: '10px',
     borderRadius: '0',
-    // height: 'calc(85% - 386px)'
-    height: 'calc(85% - 440px)'
+    height: '100%',
+    width: '100%'
   },
   CutDownContainer: {
     position: 'absolute',
-    height: '75px',
+    height: '100%',
     marginTop: '0px',
     width: '100%',
-    color: '#ffeb3b'
+    color: '#ffeb3b',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   CountDownContainer: {
     position: 'absolute',
@@ -444,29 +450,30 @@ const withstyles = theme => ({
     alignItems: 'center',
     width: '100%',
     color: '#E5F0FA'
-    // top: '15px',
-    // bottom: '15px',
   },
   TurnPaper: {
     textAlign: 'center',
-    height: '120px',
+    height: '100%',
+    width: '100%',
     position: 'relative',
     background: '#212121'
   },
   RetryPaper: {
     textAlign: 'center',
-    height: '120px',
+    height: '100%',
+    width: '100%',
     position: 'relative',
     background: '#212121'
   },
   RightDescription: {
-    fontSize: '20px',
+    fontSize: '2vh',
     marginBottom: '0'
   },
   RightNum: {
-    fontSize: '60px',
+    fontSize: '6vh',
     fontWeight: '600',
-    paddingTop: '15px'
+    padding: 0,
+    margin: 0
   },
   MarginTop5: {
     marginTop: '5px'
@@ -505,12 +512,12 @@ class ConnectedWorking extends React.Component {
     return true;
   }
 
-  componentWillUnmount() {
-    // this.props.setCarByPass(true);
-  }
-
   componentDidUpdate(prevProps) {
     this.prevOperationStatus = prevProps.operations.operationStatus;
+  }
+
+  componentWillUnmount() {
+    // this.props.setCarByPass(true);
   }
 
   handleClickOpenOee = e => {
@@ -566,7 +573,7 @@ class ConnectedWorking extends React.Component {
   };
 
   orderInfo = t => {
-    const { operations, workMode,tools } = this.props;
+    const { operations, workMode, tools } = this.props;
 
     // const showButtonInfo = isAutoMode? 'Common.Auto':'Common.Manual';
     let programme = operations.jobID.toString();
@@ -783,205 +790,231 @@ class ConnectedWorking extends React.Component {
     return (
       <I18n ns="translations">
         {t => (
-          <Grid container spacing={24} className={classes.root}>
-            <Grid item xs={9} className={classes.LeftWrapper}>
-              <Grid container spacing={24} className={classes.LeftTopWrapper}>
-                {showResultDiag ? (
-                  <Grid item xs={2} className={classes.LeftTop1}>
-                    <Paper
-                      className={classes.LeftTopTab}
-                      component="button"
-                      disabled
-                    >
-                      <div className={classes.LeftTabContiner}>
-                        <h4 className={classes.LeftTopDes}>
-                          <p
-                            href="#pablo"
-                            className={classes.MarginTopBottom5}
-                            onClick={e => e.preventDefault()}
-                          >
-                            车序:
-                          </p>
-                        </h4>
-                        <p className={classes.cardDescription}>
-                          {operations.lnr}
-                        </p>
-                      </div>
-                    </Paper>
-                  </Grid>
-                ) : null}
-                <Grid item xs={carTypeSize} className={carTypeClass}>
+          <Grid container spacing={16} className={classes.root} justify="center">
+            <Grid item xs={9} container spacing={8}>
+              {showResultDiag ? (
+                <Grid item xs={2} style={{ height: '13%' }}>
                   <Paper
                     className={classes.LeftTopTab}
                     component="button"
-                    onClick={e => this.openManualDiag(e, 'carType')}
-                    disabled={
-                      !manualEnable ||
-                      configs.operationSettings.opMode === 'order'
-                    }
+                    disabled
                   >
                     <div className={classes.LeftTabContiner}>
                       <h4 className={classes.LeftTopDes}>
                         <p
-                          href="#pablo"
+                          // href="#pablo"
                           className={classes.MarginTopBottom5}
-                          onClick={e => e.preventDefault()}
+                          // onClick={e => e.preventDefault()}
                         >
-                          车型:
+                          车序:
                         </p>
                       </h4>
                       <p className={classes.cardDescription}>
-                        {operations.carType}
+                        {operations.lnr}
                       </p>
                     </div>
                   </Paper>
                 </Grid>
-                <Grid item xs={7} className={classes.LeftTop3}>
-                  <Paper
-                    className={classes.LeftTopTab}
-                    component="button"
-                    onClick={e => this.openManualDiag(e, 'vin')}
-                    disabled={!manualEnable}
-                  >
-                    <div className={classes.LeftTabContiner}>
-                      <h4 className={classes.LeftTopDes}>
-                        <p
-                          href="#pablo"
-                          className={classes.MarginTopBottom5}
-                          onClick={e => e.preventDefault()}
-                        >
-                          VIN/KNR:
-                        </p>
-                      </h4>
-                      <p className={classes.cardDescription}>
-                        {operations.carID}
+              ) : null}
+              <Grid item xs={carTypeSize} style={{ height: '13%' }}>
+                <Paper
+                  className={classes.LeftTopTab}
+                  component="button"
+                  onClick={e => this.openManualDiag(e, 'carType')}
+                  disabled={
+                    !manualEnable ||
+                    configs.operationSettings.opMode === 'order'
+                  }
+                >
+                  <div className={classes.LeftTabContiner}>
+                    <h4 className={classes.LeftTopDes}>
+                      <p
+                        // href="#pablo"
+                        className={classes.MarginTopBottom5}
+                        // onClick={e => e.preventDefault()}
+                      >
+                        车型:
                       </p>
-                    </div>
-                  </Paper>
-                </Grid>
+                    </h4>
+                    <p className={classes.cardDescription}>
+                      {operations.carType}
+                    </p>
+                  </div>
+                </Paper>
               </Grid>
-              <Grid
-                container
-                spacing={24}
-                className={classes.LeftBottomWrapper}
-              >
-                <Grid item xs={12} className={classes.MainWrapper}>
-                  <Paper className={classes.LeftBottomTab}>
-                    <ImageStick
-                      logo={logo}
-                      operations={operations}
-                      enableFocus={enableFocus}
-                    />
-                  </Paper>
-                </Grid>
+              <Grid item xs={7} style={{ height: '13%' }}>
+                <Paper
+                  className={classes.LeftTopTab}
+                  component="button"
+                  onClick={e => this.openManualDiag(e, 'vin')}
+                  disabled={!manualEnable}
+                >
+                  <div className={classes.LeftTabContiner}>
+                    <h4 className={classes.LeftTopDes}>
+                      <p
+                        // href="#pablo"
+                        className={classes.MarginTopBottom5}
+                        // onClick={e => e.preventDefault()}
+                      >
+                        VIN/KNR:
+                      </p>
+                    </h4>
+                    <p className={classes.cardDescription}>
+                      {operations.carID}
+                    </p>
+                  </div>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} style={{ height: '87%' }}>
+                <Paper className={classes.LeftBottomTab}>
+                  <ImageStick
+                    logo={logo}
+                    operations={operations}
+                    enableFocus={enableFocus}
+                  />
+                </Paper>
               </Grid>
             </Grid>
-            <Grid item xs={3} className={classes.RightWrapper}>
-              <Paper className={classes.CutDownPaper}>
-                <div className={classes.CountDownContainer}>
-                  <ProgressBar
-                    time={operations.maxOpTimes}
-                    shouldCounterStart={() =>
-                      // predoing -> doing
-                      operations.operationStatus === OPERATION_STATUS.DOING &&
-                      this.prevOperationStatus === OPERATION_STATUS.PREDOING
-                    }
-                    shouldCounterStop={() =>
-                      lodash.includes(
-                        [OPERATION_STATUS.READY],
-                        operations.operationStatus
-                      )
-                    }
-                    shouldCounterReady={() =>
-                      operations.operationStatus === OPERATION_STATUS.PREDOING
-                    }
-                    // onFinish={() => this.props.switch2Timeout()}
-                    gridClassName={classes.progressWrap}
-                  />
-                </div>
-              </Paper>
-              <Grid container spacing={24} className={classes.MarginTop5}>
-                <Grid item xs={6} className={classes.LeftPadding}>
-                  <Paper className={classes.TurnPaper}>
-                    <div className={classes.CutDownContainer}>
-                      <h4>
-                        <p
-                          href="#pablo"
-                          className={classes.RightDescription}
-                          onClick={e => e.preventDefault()}
-                        >
-                          拧紧点
-                        </p>
-                      </h4>
+            <Grid item xs={3} container spacing={8} alignContent="flex-start" alignItems="flex-start">
+              <Grid item xs={12} style={{ height: '18%' }}>
+                <Paper className={classes.CutDownPaper}>
+                  <div className={classes.CountDownContainer}>
+                    <ProgressBar
+                      time={operations.maxOpTimes}
+                      shouldCounterStart={() =>
+                        // predoing -> doing
+                        operations.operationStatus === OPERATION_STATUS.DOING &&
+                        this.prevOperationStatus === OPERATION_STATUS.PREDOING
+                      }
+                      shouldCounterStop={() =>
+                        lodash.includes(
+                          [OPERATION_STATUS.READY],
+                          operations.operationStatus
+                        )
+                      }
+                      shouldCounterReady={() =>
+                        operations.operationStatus === OPERATION_STATUS.PREDOING
+                      }
+                      // onFinish={() => this.props.switch2Timeout()}
+                      gridClassName={classes.progressWrap}
+                    />
+                  </div>
+                </Paper>
+              </Grid>
+              <Grid item xs={6} style={{ height: '15%' }}>
+                <Paper className={classes.TurnPaper}>
+                  <div className={classes.CutDownContainer}>
+                    <div style={{
+                      height: '20%',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      display: 'flex',
+                      flexDirection: 'column'
+                    }}>
+                      <p
+                        // href="#pablo"
+                        className={classes.RightDescription}
+                        // onClick={e => e.preventDefault()}
+                      >
+                        拧紧点
+                      </p>
+                    </div>
+                    <div style={{
+                      height: '60%',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      display: 'flex',
+                      flexDirection: 'column'
+                    }}>
+
                       <p className={classes.RightNum}>{batch}</p>
                     </div>
-                  </Paper>
-                </Grid>
-                <Grid item xs={6} className={classes.RightPadding}>
-                  <Paper className={classes.RetryPaper}>
-                    <div className={classes.CutDownContainer}>
-                      <h4>
-                        <p
-                          href="#pablo"
-                          className={classes.RightDescription}
-                          onClick={e => e.preventDefault()}
-                        >
-                          可拧紧次数
-                        </p>
-                      </h4>
+                  </div>
+                </Paper>
+              </Grid>
+              <Grid item xs={6} style={{ height: '15%' }}>
+                <Paper className={classes.RetryPaper}>
+                  <div className={classes.CutDownContainer}>
+                    <div style={{
+                      height: '20%',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      display: 'flex',
+                      flexDirection: 'column'
+                    }}>
+                      <p
+                        // href="#pablo"
+                        className={classes.RightDescription}
+                        // onClick={e => e.preventDefault()}
+                      >
+                        可拧紧次数
+                      </p>
+                    </div>
+                    <div style={{
+                      height: '60%',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      display: 'flex',
+                      flexDirection: 'column'
+                    }}>
+
                       <p className={classes.RightNum}>{redoBatch}</p>
                     </div>
-                  </Paper>
-                </Grid>
+                  </div>
+                </Paper>
               </Grid>
-              <Paper className={classes.InfoTab}>
-                <List>
-                  <WorkingInfoBar
-                    key="infoUser"
-                    infos={this.workSiteInfo(t)}
-                  />
-                  <Divider
-                    className={classes.divider}
-                    key="divider-infoUser"
-                    light
-                  />
-                  <WorkingInfoBar key="infoOrder" infos={this.orderInfo(t)}/>
-                </List>
-              </Paper>
-              <Paper className={classes.InfoTabTimeLine}>
-                <TimeLine simple stories={timeline}/>
-                {/* <TimeLine simple stories={teststory} /> */}
-              </Paper>
-              {!manualEnable && configs.operationSettings.opMode === 'op' ? (
-                <Button
-                  color="rose"
-                  disabled={manualEnable}
-                  round
-                  className={fabClassName}
-                  size="lg"
-                  onClick={this.toggleAutoScannerMode}
-                >
-                  {workMode.workMode === 'auto' ? (
-                    <FiberManualRecord className={classes.extendedIcon}/>
-                  ) : (
-                    <Autorenew className={classes.extendedIcon}/>
-                  )}
-                  {t(showButtonInfo)}
-                </Button>
-              ) : null}
-              {operations.bypassToConfirm ?
-                <ShutdownDiag
-                  {...this.bypassDiag(t)}
-                /> : null
-              }
-              {operations.conflict.toConfirm ?
-                <ShutdownDiag
-                  {...this.conflictDiag(t)}
-                /> : null
-              }
-              {enableResultDialog ? <ResultDialog/> : null}
-              <ManualDiag show={manualDiagShow} close={this.closeManualDiag}/>
+              <Grid item xs={12} style={{ height: '27%' }}>
+                <Paper className={classes.InfoTab}>
+                  <List style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <WorkingInfoBar
+                      key="infoUser"
+                      infos={this.workSiteInfo(t)}
+                    />
+                    <Divider
+                      className={classes.divider}
+                      key="divider-infoUser"
+                      light
+                    />
+                    <WorkingInfoBar key="infoOrder" infos={this.orderInfo(t)}/>
+                  </List>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} style={{ height: '40%' }}>
+                <Paper className={classes.InfoTabTimeLine}>
+                  <TimeLine simple stories={timeline}/>
+                  {/* <TimeLine simple stories={teststory} /> */}
+                </Paper>
+              </Grid>
             </Grid>
+            {!manualEnable && configs.operationSettings.opMode === 'op' ? (
+              <Button
+                color="rose"
+                disabled={manualEnable}
+                round
+                className={fabClassName}
+                size="lg"
+                onClick={this.toggleAutoScannerMode}
+              >
+                {workMode.workMode === 'auto' ? (
+                  <FiberManualRecord className={classes.extendedIcon}/>
+                ) : (
+                  <Autorenew className={classes.extendedIcon}/>
+                )}
+                {t(showButtonInfo)}
+              </Button>
+            ) : null}
+            {operations.bypassToConfirm ?
+              <ShutdownDiag
+                {...this.bypassDiag(t)}
+              /> : null
+            }
+            {operations.conflict.toConfirm ?
+              <ShutdownDiag
+                {...this.conflictDiag(t)}
+              /> : null
+            }
+            {enableResultDialog ? <ResultDialog/> : null}
+            <ManualDiag show={manualDiagShow} close={this.closeManualDiag}/>
           </Grid>
         )}
       </I18n>

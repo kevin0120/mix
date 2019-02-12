@@ -19,14 +19,13 @@ export default theme => ({
   ...imagesStyles,
   ...popoverStyles,
   layout: {
-    // height: '100%',
+    height: '64px',
     flexGrow: 1
   },
   appBar: {
     height: '64px',
     width: '100%',
-    top: 'auto',
-    bottom: 0,
+    position:'relative',
     background: '#353744'
   },
   BottomNavigation: {

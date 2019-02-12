@@ -9,17 +9,19 @@ export default () => ({
   },
   infoItem: {
     width: '100%',
-    '&:first-child': {
-      marginTop: '5px'
-    },
-    '&:last-child': {
-      marginBottom: '5px'
-    },
+    flex:1,
+    // '&:first-child': {
+    //   marginTop: '5px'
+    // },
+    // '&:last-child': {
+    //   marginBottom: '5px'
+    // },
     padding: '0 20px',
-    marginBottom: '10px',
-    marginTop: '10px'
+    // marginBottom: '10px',
+    // marginTop: '10px'
   },
   itemIitle: {
+    height:'80%',
     fontSize: 14
   }
 });

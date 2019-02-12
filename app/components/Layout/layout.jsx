@@ -172,12 +172,12 @@ class ConnectedLayout extends React.PureComponent {
       : classes.menuStatusFail;
     // console.log('shouldRender:',this.props.shouldRender);
     if (!this.props.shouldRender) {
-      return null;
+      return this.props.children;
     }
     return (
       <I18n ns="translations">
         {t => (
-          <div className={classes.layout}>
+          <React.Fragment>
             {/* <ClickAwayListener onClickAway={() => this.toggleMenu(false)}> */}
             {/* <SwipeableDrawer */}
             {/* anchor="right" */}
@@ -198,7 +198,10 @@ class ConnectedLayout extends React.PureComponent {
             {/* </ClickAwayListener> */}
             {/* <SubCompontents /> */}
             <Notify />
-            <AppBar position="fixed" className={classes.appBar}>
+            <div style={{height:'calc(100% - 64px)'}}>
+              {this.props.children}
+            </div>
+            <AppBar  className={classes.appBar}>
               <Toolbar className={classes.topBar}>
                 <div className={classes.menuBtnWrapAvatar}>
                   <img
@@ -371,7 +374,7 @@ class ConnectedLayout extends React.PureComponent {
                 </div>
               </Toolbar>
             </AppBar>
-          </div>
+          </React.Fragment>
         )}
       </I18n>
     );

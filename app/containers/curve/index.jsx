@@ -19,7 +19,7 @@ export default class Curve extends React.Component {
       <div
         style={{
           display: 'flex',
-          height: 'calc(100% - 64px)'
+          height: '100%'
         }}
       >
         <iframe

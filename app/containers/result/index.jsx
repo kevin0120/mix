@@ -44,7 +44,7 @@ const styles = {
   root: {
     flexGrow: 1,
     zIndex: 1,
-    height: 'calc(100% - 64px)',
+    height: '100%',
     overflow: 'hidden',
     position: 'relative',
     display: 'flex',
