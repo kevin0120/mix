@@ -183,7 +183,7 @@
                 <field name="consu_product_id" filter_domain="['|', ('consu_product_id.name','ilike',self), ('consu_product_id.screw_type_code','ilike',self)]"/>
                 <field name="workorder_id" string="Operation"/>
                 <field name="workcenter_id" string="Work Center"/>
-                <field name="gun_id" string="Tightening Gun"/>
+                <field name="gun_id" string="Tightening Gun" widget="selection"/>
                 <field name="qcp_id" string="Quality Check Point"/>
                 <field name="production_id" string="Production"/>
                 <field name="quality_state"/>

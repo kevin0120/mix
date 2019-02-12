@@ -190,9 +190,9 @@ class MaintenanceEquipment(models.Model):
             equipment_names = name.split(' / ')
             parents = list(equipment_names)
             child = parents.pop()
-            domain = [('name', operator, child)]
+            domain = ['|', ('name', operator, child), ('serial_no', operator, child)]
             if parents:
-                names_ids = self.name_search(' / '.join(parents), args=args, operator='ilike', limit=limit)
+                names_ids = super(MaintenanceEquipment, self).name_search(' / '.join(parents), args=args, operator='ilike', limit=limit)
                 equipment_ids = [name_id[0] for name_id in names_ids]
                 if operator in expression.NEGATIVE_TERM_OPERATORS:
                     equipments = self.search([('id', 'not in', equipment_ids)])
