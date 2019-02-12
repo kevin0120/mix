@@ -22,10 +22,10 @@ function* scannerHandler(action) {
 
     }
   } catch (e) {
-    console.log(e.message);
+    console.error(e);
   }
 }
 
-export function* watchScanner() {
+export default function* watchScanner() {
   yield takeLatest(SCANNER.READ_NEW_DATA, scannerHandler);
 }

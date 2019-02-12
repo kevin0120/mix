@@ -52,7 +52,7 @@ function* initRush() {
       state.setting.page.odooConnection.hmiSn.value
     );
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -263,6 +263,6 @@ export function* watchRushChannel(hmiSN) {
       }
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }

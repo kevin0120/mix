@@ -14,7 +14,6 @@ import { ANDON, AIIS, OPERATION } from '../actions/actionTypes';
 import { jobManual } from './api/operation';
 import { setHealthzCheck } from '../actions/healthCheck';
 import { operationTrigger } from '../actions/operation';
-import { o } from './operation';
 
 import { OPERATION_STATUS, OPERATION_SOURCE } from '../reducers/operations';
 import { setNewNotification } from '../actions/notification';
@@ -62,7 +61,7 @@ function* initAiis() {
       // yield call(wsOnOpen, hmiSN);
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -97,7 +96,7 @@ export function* handleAiisData(action) {
           jobManual,
           rushUrl,
           controllerSN,
-          "",
+          '',
           carType,
           carID,
           userID,
@@ -115,7 +114,7 @@ export function* handleAiisData(action) {
       }
     }
   } catch (e) {
-    console.log('handleAiisData:', e);
+    console.error('handleAiisData:', e);
   }
 }
 
@@ -158,8 +157,8 @@ function aiisWSChannel() {
 }
 
 function* aiisWSListener(hmiSN) {
-  const chan = yield call(aiisWSChannel);
   try {
+    const chan = yield call(aiisWSChannel);
     while (true) {
       const chanAction = yield take(chan);
       switch (chanAction.type) {
@@ -190,37 +189,47 @@ function* aiisWSListener(hmiSN) {
           break;
       }
     }
-  } finally {
+  } catch (e) {
+    console.error(e);
+  }finally {
     console.log('aiisWSListener finished');
   }
 }
 
-function* wsOnOpen(hmiSN) {
+function wsOnOpen(hmiSN) {
   ws.sendJson({ hmi_sn: hmiSN }, err => {
     if (err) {
-      console.log('aiis ws sendJson error');
+      console.error('aiis ws sendJson error:', err);
       ws.close();
     }
   });
 }
 
 function* wsOnMessage(dataRaw) {
-  const dataArray = dataRaw.split(';');
+  try{
+    const dataArray = dataRaw.split(';');
 
-  const data = dataArray.slice(-1);
-  const json = JSON.parse(data);
+    const data = dataArray.slice(-1);
+    const json = JSON.parse(data);
 
-  yield put({ type: ANDON.NEW_DATA, json });
+    yield put({ type: ANDON.NEW_DATA, json });
+  }catch (e) {
+    console.error(e);
+  }
 }
 
 function* stopAiisWebsocket() {
-  if (
-    ws.ws.readyState === OWebSocket.OPEN ||
-    ws.ws.readyState === OWebSocket.CONNECTING
-  ) {
-    yield put(setHealthzCheck('andon', false));
-    yield put(setNewNotification('info', `andon连接状态更新: ${false}`));
-    ws.close();
+  try {
+    if (
+      ws.ws.readyState === OWebSocket.OPEN ||
+      ws.ws.readyState === OWebSocket.CONNECTING
+    ) {
+      yield put(setHealthzCheck('andon', false));
+      yield put(setNewNotification('info', `andon连接状态更新: ${false}`));
+      ws.close();
+    }
+    ws = null;
+  } catch (e) {
+    console.error(e);
   }
-  ws = null;
 }

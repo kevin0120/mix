@@ -75,7 +75,7 @@ function* doCheckCurrentConnection() {
       });
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -109,7 +109,7 @@ function* doCheckActiveSignal() {
       signal: 0
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -173,7 +173,7 @@ function* doSet(action) {
       });
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -200,7 +200,7 @@ function* doScan() {
       console.log(stderr);
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 

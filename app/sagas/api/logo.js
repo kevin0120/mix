@@ -1,8 +1,8 @@
+import isURL from 'validator/lib/isURL';
 import { defaultClient } from '../../common/utils';
 
-import isURL from 'validator/lib/isURL';
 
-export function fetchLogo(baseURL) {
+export default function fetchLogo(baseURL) {
   if (!isURL(baseURL, { require_protocol: true })) {
     throw new Error('fetchLogo baseURL is empty');
   }
@@ -12,6 +12,6 @@ export function fetchLogo(baseURL) {
     .get(fullUrl)
     .then(resp => resp)
     .catch(e => {
-      throw e.toString();
+      throw e;
     });
 }

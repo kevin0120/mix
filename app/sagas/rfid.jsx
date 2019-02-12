@@ -5,7 +5,6 @@ import {
   select,
   fork,
   cancel,
-  throttle,
   delay
 } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
@@ -22,8 +21,6 @@ let client = null;
 let recon = null;
 
 let watchChannelTask = null;
-
-let pervDataValue='';
 
 const net = require('net');
 const Reconnect = require('node-net-reconnect');
@@ -217,7 +214,7 @@ function* RFIDHandler(data) {
         break;
     }
   } catch (err) {
-    console.log(`rfid error msg:${err.message}`);
+    console.error(`rfid error msg:${err.message}`);
   }
 }
 

@@ -1,4 +1,4 @@
-/* eslint-disable no-lonely-if */
+/* eslint-disable no-lonely-if,camelcase */
 import { select, put, take, call, fork, takeLeading } from 'redux-saga/effects';
 import {
   fetchRoutingWorkcenter,
@@ -31,6 +31,7 @@ import { Error, Info } from '../logger';
 import { setNewNotification } from '../actions/notification';
 import { watch } from './utils';
 import configs from '../shared/config';
+
 const lodash = require('lodash');
 
 // // 监听作业
@@ -154,7 +155,6 @@ function* triggerOperation(action) {
       // 不在作业页面，直接返回
       return;
     }
-    console.log(rState.operations.trigger.block , source);
 
     if(rState.operations.trigger.block && source==='RFID'){
       return;
@@ -219,7 +219,7 @@ function* triggerOperation(action) {
       yield call(getOperation, job);
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -460,7 +460,7 @@ export function* continueOperation() {
       yield call(doingOperation, controllerMode);
     }
   } catch (e) {
-    console.log(`continueOperation fail: ${e.message}`);
+    console.error(`continueOperation fail: ${e.message}`);
   }
 }
 

@@ -1,5 +1,5 @@
 // redux-saga
-import { eventChannel, channel, delay } from 'redux-saga';
+import { eventChannel, channel } from 'redux-saga';
 import {
   take,
   put,
@@ -8,11 +8,11 @@ import {
   all,
   select,
   cancel,
-  cancelled
+  cancelled,
+  delay
 } from 'redux-saga/effects';
 
 //
-import { cloneDeep } from 'lodash';
 import modbus from 'jsmodbus';
 
 // actions
@@ -95,7 +95,7 @@ export function* watchIO() {
       }
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -117,7 +117,7 @@ function* closeAll() {
       io.runningTask = null;
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -162,7 +162,7 @@ export function* handleIOFunction(data) {
         break;
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -205,7 +205,7 @@ function* initIOModbus() {
     }
     io.runningTask = yield fork(ioClientListener);
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -255,7 +255,7 @@ function* ioClientListener() {
       }
     }
   } catch (err) {
-    console.log(err);
+    console.error(err);
   } finally {
     console.log('ioClientListener finished');
   }
@@ -268,7 +268,7 @@ function* senderReceiver() {
       yield delay(500);
     }
   } catch (err) {
-    console.log(err);
+    console.error(err);
   } finally {
     yield cancel(io.senderReceiver);
     io.senderReceiver = null;
@@ -355,7 +355,7 @@ function* senderTask() {
       return v;
     });
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 }
 
@@ -366,7 +366,7 @@ function* setHealth(health) {
       yield put(setHealthzCheck('modbus', health));
     }
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 }
 
@@ -416,8 +416,8 @@ export function setModBusIO(modbusConfig) {
 }
 
 function resetIO(modbusConfig) {
-  const preIOStatus = cloneDeep(ioStatus);
-  const preO = cloneDeep(io.o);
+  const preIOStatus = lodash.cloneDeep(ioStatus);
+  const preO = lodash.cloneDeep(io.o);
   const { o } = io;
 
   setModBusIO(modbusConfig);

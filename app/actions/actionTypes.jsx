@@ -170,7 +170,6 @@ export const OPERATION_VIEWER = {
 };
 
 export const LOGO = {
-  FETCH_START: 'LOGO_FETCH_START',
   FETCH_OK: 'LOGO_FETCH_OK'
 };
 

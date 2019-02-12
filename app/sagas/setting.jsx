@@ -15,8 +15,6 @@ import { systemInit } from '../actions/sysInit';
 
 const eSetting = require('electron-settings');
 
-const getSetting = state => state.setting;
-
 function* saveConfiguration(action) {
   const { section, newConfigs } = action.data;
   try {

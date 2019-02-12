@@ -34,7 +34,7 @@ function* doCheckBattery() {
       yield put(batteryCheckOK(percentage));
     }
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 

@@ -2,14 +2,14 @@
 
 import { all } from 'redux-saga/effects';
 
-import { watchScanner } from './scanner';
+import watchScanner from './scanner';
 import { cardAuthFlow } from './cardAuth';
-import { sysInitFlow } from './systemInit';
+import sysInitFlow from './systemInit';
 import { operationFlow, watchResults } from './operation';
 import { watchIO } from './io';
 import { toolFunctions } from './tools';
 import { loginFlow, logoutFlow } from './auth';
-// import { healthzCheckFlow } from './healthzCheck';
+// import healthzCheckFlow from './healthzCheck';
 import { watchAiis } from './aiis';
 import { watchSettingPreSave } from './setting';
 import { watchRush } from './rush';
@@ -49,6 +49,6 @@ export default function* rootSaga() {
       watchPower(),
     ]);
   } catch (e) {
-    console.log('rootSaga:', e);
+    console.error('rootSaga:', e);
   }
 }

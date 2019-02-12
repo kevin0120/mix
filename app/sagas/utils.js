@@ -14,7 +14,7 @@ export function watch(workers, channel) {
         }
       }
     } catch (e) {
-      console.log(e);
+      console.error('saga watcher error:',e,workers,channel);
     }
   }
 }

@@ -1,4 +1,4 @@
-import { call, fork, put, select, take } from 'redux-saga/effects';
+import { call, put, select } from 'redux-saga/effects';
 
 import { OPERATION_VIEWER } from '../actions/actionTypes';
 import { operationDetailApi, operationListApi } from './api/operationViewer';
@@ -19,7 +19,7 @@ function* fetchOperationList() {
       data: response.data
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 
@@ -34,6 +34,6 @@ function* fetchOperationDetail(action) {
       data: response.data
     });
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }

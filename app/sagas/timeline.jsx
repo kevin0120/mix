@@ -16,12 +16,20 @@ export const STORY_TYPE = {
 };
 
 export function* addNewStory(level, title, msg) {
-  const story = createNewStory(level, title, msg);
-  yield put({ type: TIMELINE_STORY.NEW, story });
+  try{
+    const story = createNewStory(level, title, msg);
+    yield put({ type: TIMELINE_STORY.NEW, story });
+  }catch (e) {
+    console.error(e);
+  }
 }
 
 export function* clearStories() {
-  yield put({ type: TIMELINE_STORY.CLEAR });
+  try {
+    yield put({ type: TIMELINE_STORY.CLEAR });
+  }catch (e) {
+    console.error(e);
+  }
 }
 
 function createNewStory(level, title, msg) {

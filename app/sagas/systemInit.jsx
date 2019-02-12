@@ -16,7 +16,6 @@ import {
   RUSH,
   RFID,
   USER_CONFIGS,
-  LOGO
 } from '../actions/actionTypes';
 
 import { setLedStatusReady, setModBusIO } from './io';
@@ -29,7 +28,7 @@ import { initAiis } from '../actions/aiis';
 
 function* sysInit(action) {
   try {
-    const {section='all'} = action;
+    // const {section='all'} = action;
     const state = yield select();
     // const {connections} = state.setting.system;
     // const url = connections.masterpc.connection;
@@ -56,13 +55,6 @@ function* sysInit(action) {
     // 初始化aiis(andon)
     if (state.setting.systemSettings.andonEnable) {
       yield put(initAiis());
-    }
-
-    // 获取logo
-    if (section === 'all'){
-      yield put({
-        type: LOGO.FETCH_START
-      });
     }
 
     setLedStatusReady();
@@ -97,7 +89,7 @@ function* sysInit(action) {
 //   }
 // }
 
-export function* sysInitFlow() {
+export default function* sysInitFlow() {
   try {
     yield takeLatest(SYSTEM_INIT, sysInit);
     // yield call(fetchConnectionFlow);
