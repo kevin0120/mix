@@ -332,27 +332,27 @@ class OperationResult(models.HyperModel):
                     (select  a.product_id,count(*) as sequence from mrp_bom a
                     left join mrp_bom_line b on a.id=b.bom_id
                     group by a.product_id) b on a.product_id=b.product_id) d1
-                    ,
+                    left join 
                     (select  a.VIN,count (a.*) as sequence  from (
                     select distinct r1.VIN,r1.point_id,r1.batch from operation_result r1
                     where  %(interval2)s  and  r1.measure_result in ('ok','nok') %(where_clause)s) a
-                    group by a.VIN) d2 
-                    ,
+                    group by a.VIN) d2  on d1.VIN = d2.VIN
+                    left join 
                     (select  vin,min(control_date) as control_date  from operation_result
-                      group by vin) d3
+                      group by vin) d3 on d1.VIN = d3.VIN
                         """ % {
             'interval2': ''' r1.one_time_pass='pass' ''' if one_time_pass_state else ''' r1.final_pass='pass' ''',
             'where_clause': w_clause_centron_part2
         }
 
         if where_clause == '':
-            where_clause = 'd1.VIN = d2.VIN and d1.VIN = d3.VIN'
+            where_clause = ''
         else:
             if where_clause.find('''"operation_result"."vin"''') > 0:
                 where_clause = where_clause.replace('''"operation_result"."vin"''', '''"d1"."vin"''')
             if where_clause.find('''"operation_result"."control_date"''') > 0:
                 where_clause = where_clause.replace('''"operation_result"."control_date"''', '''"d3"."control_date"''')
-            where_clause += 'and d1.VIN = d2.VIN and d1.VIN = d3.VIN'
+            where_clause += ''
 
         query = """
                         SELECT round(round(d2.sequence,2)/ NULLIF(d1.sequence, 0) * 100.0, 4) AS "%(count_field)s" %(extra_fields)s
