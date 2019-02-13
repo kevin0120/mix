@@ -106,6 +106,7 @@ class MaintenanceEquipment(models.Model):
     parent_id_domain = fields.Char(
         compute="_compute_parent_id_domain",
         readonly=True,
+        default=json.dumps([]),
         store=False,
     )
 
@@ -113,6 +114,7 @@ class MaintenanceEquipment(models.Model):
     @api.depends('category_id')
     def _compute_parent_id_domain(self):
         for rec in self:
+            rec.parent_id_domain = json.dumps([])
             if rec.category_id.id == self.env.ref('sa_base.equipment_Gun').id:
                 child_ids = self.env['maintenance.equipment'].sudo().search([('category_id', '=',self.env.ref('sa_base.equipment_screw_controller').id)])
                 rec.parent_id_domain = json.dumps([('id', 'in', child_ids.ids)])
