@@ -5,7 +5,11 @@ export default () => ({
     flex: 'initial',
     color: '#888',
     fontSize: 14,
-    marginBottom: '0'
+    marginBottom: '0',
+    display:'flex',
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
   },
   infoItem: {
     width: '100%',
@@ -16,6 +20,10 @@ export default () => ({
     // '&:last-child': {
     //   marginBottom: '5px'
     // },
+    display:'flex',
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
     padding: '0 20px',
     // marginBottom: '10px',
     // marginTop: '10px'

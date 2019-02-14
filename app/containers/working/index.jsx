@@ -30,6 +30,7 @@ import {
 
 import configs from '../../shared/config/index';
 
+
 // components
 
 import withLayout from '../../components/Layout/layout';
@@ -39,7 +40,11 @@ import WorkingInfoBar from '../../components/WorkingInfoBar';
 import {
   container,
   cardTitle,
-  description
+  description,
+  infoColor,
+  warningColor,
+  dangerColor,
+  successColor
 } from '../../common/jss/material-react-pro';
 import ResultDialog from '../../components/ResultDialog';
 import ManualDiag from '../../components/ManualDiag';
@@ -608,7 +613,17 @@ class ConnectedWorking extends React.Component {
       },
       {
         key: 'Gun',
-        value: t(`Operation.Info.Tool.${tools.status}`),
+        value: (
+          <svg style={{ width: '2.5vh', height: '2.5vh' }}
+               fill={tools.status === 'connected' ? successColor : dangerColor}
+               viewBox="0 0 245.446 245.446"
+               enableBackground="new 0 0 245.446 245.446">
+            <g>
+              <path
+                d="m235.557,40.223h-210c-5.5,0-10.908,4.282-12.019,9.669l-12.962,63.162c-1.11,5.387 2.481,10.169 7.981,10.169h7.743l-16.066,71.99c-1.197,5.367 2.323,10.01 7.823,10.01h46c5.5,0 10.98-4.518 12.177-9.885l5.148-23.115h35.675c9.188,0 17.966-7.091 19.985-16.145l7.318-32.854h68.196c5.5,0 10.908-4.657 12.019-10.044l8.217-39.956h12.765c5.522,0 9.889-4.978 9.889-10.5v-13c-2.84217e-14-5.524-4.366-9.501-9.889-9.501zm-124.131,112.373c-0.394,1.763-2.64,3.627-4.369,3.627h-32.11l7.351-33h35.672l-6.544,29.373zm43.02-63.373h-82v-16h82v16z"/>
+            </g>
+          </svg>
+        ),
         displayTitle: t('Operation.Info.Tool.Title')
       }
     ];

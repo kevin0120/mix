@@ -31,7 +31,7 @@ function ConnectedWorkingInfoBar(props) {
       >
         <ListItemText className={classes.itemIitle} primary={displayTitle} />
 
-        <p className={classes.infoText}>{value}</p>
+        <span className={classes.infoText}>{value}</span>
       </ListItem>
     );
   });
@@ -48,7 +48,7 @@ ConnectedWorkingInfoBar.propTypes = {
   infos: PropTypes.arrayOf(
     PropTypes.shape({
       key: PropTypes.string.isRequired,
-      value: PropTypes.string,
+      value: PropTypes.all,
       displayTitle: PropTypes.string.isRequired
     })
   ).isRequired
