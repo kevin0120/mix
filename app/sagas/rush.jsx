@@ -251,7 +251,6 @@ export function* watchRushChannel(hmiSN) {
             }
 
             case 'tool': {
-              console.log(json);
               yield put(toolStatusChange(json.tool_sn, json.status));
               break;
             }

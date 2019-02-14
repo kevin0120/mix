@@ -188,8 +188,8 @@ const withstyles = theme => ({
     fontSize: 18
   },
   fab: {
-    position: 'fixed',
-    bottom: theme.spacing.unit * 10,
+    position: 'absolute',
+    bottom: theme.spacing.unit * 2,
     right: theme.spacing.unit * 2,
     width: '150px'
   },
@@ -494,6 +494,51 @@ const withstyles = theme => ({
   }
 });
 
+const toolSvg = (color) => (
+  <svg viewBox="0 0 512 512" style={{ width: '4vh', height: '4vh', }} fill={color}>
+    <g>
+      <g>
+        <path d="M501.801,145.642h-36.831c-4.941-23.925-26.172-41.967-51.54-41.967h-51.789c-1.792-2.932-5.012-4.896-8.7-4.896h-36.06
+			c-2.877-8.02-10.535-13.783-19.532-13.783H40.522c-20.318,0-36.847,16.529-36.847,36.847c0,15.835,10.04,29.37,24.091,34.57
+			L0.365,256.052c-0.278,1.012-0.399,2.061-0.357,3.111l5.13,128.769c1.001,21.909,18.965,39.071,40.898,39.071
+			c25.384,0,46.035-20.651,46.035-46.035v-40.34l12.863-6.653c3.387-1.751,5.514-5.246,5.514-9.059v-32.069h4.803v11.854
+			c0,5.632,4.566,10.199,10.199,10.199c5.633,0,10.199-4.567,10.199-10.199v-11.854h98.297c44.683,0,81.327-35.002,83.997-79.023
+			h34.999c3.687,0,6.908-1.963,8.7-4.896h51.789c25.69,0,47.125-18.507,51.708-42.887h36.663c5.633,0,10.199-4.567,10.199-10.199
+			S507.434,145.642,501.801,145.642z M233.947,272.448H100.25c-5.633,0-10.199,4.567-10.199,10.199v36.061l-12.863,6.653
+			c-3.387,1.751-5.514,5.246-5.514,9.059v46.547c0,14.136-11.501,25.637-25.638,25.637c-11.004,0-20.017-8.61-20.517-19.544
+			l-5.065-127.127l27.842-101.244h116.276c5.633,0,10.199-4.567,10.199-10.199c0-5.632-4.566-10.199-10.199-10.199H40.522
+			c-9.07,0-16.448-7.378-16.448-16.448c0-9.07,7.379-16.448,16.448-16.448H297.35c0.203,0,0.368,0.165,0.368,0.367v102.916h0
+			C297.718,243.841,269.11,272.448,233.947,272.448z M342.743,193.424h-24.627v-74.246h24.627V193.424z M413.43,188.529h-50.288
+			v-64.456h50.288c17.77,0,32.227,14.457,32.227,32.228C445.657,174.071,431.2,188.529,413.43,188.529z"/>
+      </g>
+    </g>
+    <g>
+      <g>
+        <path d="M204.084,138.291h-5.514c-5.633,0-10.199,4.567-10.199,10.199c0,5.632,4.566,10.199,10.199,10.199h5.514
+			c5.633,0,10.199-4.567,10.199-10.199C214.283,142.859,209.717,138.291,204.084,138.291z"/>
+      </g>
+    </g>
+    <g>
+      <g>
+        <path d="M233.487,243.76h-33.08c-5.633,0-10.199,4.567-10.199,10.199c0,5.632,4.566,10.199,10.199,10.199h33.08
+			c5.633,0,10.199-4.567,10.199-10.199C243.686,248.328,239.12,243.76,233.487,243.76z"/>
+      </g>
+    </g>
+    <g>
+      <g>
+        <path d="M233.487,215.275h-33.08c-5.633,0-10.199,4.567-10.199,10.199c0,5.632,4.566,10.199,10.199,10.199h33.08
+			c5.633,0,10.199-4.567,10.199-10.199C243.686,219.842,239.12,215.275,233.487,215.275z"/>
+      </g>
+    </g>
+    <g>
+      <g>
+        <path d="M233.487,186.79h-33.08c-5.633,0-10.199,4.567-10.199,10.199s4.566,10.199,10.199,10.199h33.08
+			c5.633,0,10.199-4.567,10.199-10.199S239.12,186.79,233.487,186.79z"/>
+      </g>
+    </g>
+  </svg>
+);
+
 class ConnectedWorking extends React.Component {
   constructor(props) {
     super(props);
@@ -613,17 +658,7 @@ class ConnectedWorking extends React.Component {
       },
       {
         key: 'Gun',
-        value: (
-          <svg style={{ width: '2.5vh', height: '2.5vh' }}
-               fill={tools.status === 'connected' ? successColor : dangerColor}
-               viewBox="0 0 245.446 245.446"
-               enableBackground="new 0 0 245.446 245.446">
-            <g>
-              <path
-                d="m235.557,40.223h-210c-5.5,0-10.908,4.282-12.019,9.669l-12.962,63.162c-1.11,5.387 2.481,10.169 7.981,10.169h7.743l-16.066,71.99c-1.197,5.367 2.323,10.01 7.823,10.01h46c5.5,0 10.98-4.518 12.177-9.885l5.148-23.115h35.675c9.188,0 17.966-7.091 19.985-16.145l7.318-32.854h68.196c5.5,0 10.908-4.657 12.019-10.044l8.217-39.956h12.765c5.522,0 9.889-4.978 9.889-10.5v-13c-2.84217e-14-5.524-4.366-9.501-9.889-9.501zm-124.131,112.373c-0.394,1.763-2.64,3.627-4.369,3.627h-32.11l7.351-33h35.672l-6.544,29.373zm43.02-63.373h-82v-16h82v16z"/>
-            </g>
-          </svg>
-        ),
+        value: toolSvg(tools.status === 'connected' ? successColor : dangerColor),
         displayTitle: t('Operation.Info.Tool.Title')
       }
     ];
@@ -886,7 +921,25 @@ class ConnectedWorking extends React.Component {
                     logo={logo}
                     operations={operations}
                     enableFocus={enableFocus}
-                  />
+                  >
+                    {!manualEnable && configs.operationSettings.opMode === 'op' ? (
+                      <Button
+                        color="rose"
+                        disabled={manualEnable}
+                        round
+                        className={fabClassName}
+                        size="lg"
+                        onClick={this.toggleAutoScannerMode}
+                      >
+                        {workMode.workMode === 'auto' ? (
+                          <FiberManualRecord className={classes.extendedIcon}/>
+                        ) : (
+                          <Autorenew className={classes.extendedIcon}/>
+                        )}
+                        {t(showButtonInfo)}
+                      </Button>
+                    ) : null}
+                  </ImageStick>
                 </Paper>
               </Grid>
             </Grid>
@@ -1001,23 +1054,7 @@ class ConnectedWorking extends React.Component {
                 </Paper>
               </Grid>
             </Grid>
-            {!manualEnable && configs.operationSettings.opMode === 'op' ? (
-              <Button
-                color="rose"
-                disabled={manualEnable}
-                round
-                className={fabClassName}
-                size="lg"
-                onClick={this.toggleAutoScannerMode}
-              >
-                {workMode.workMode === 'auto' ? (
-                  <FiberManualRecord className={classes.extendedIcon}/>
-                ) : (
-                  <Autorenew className={classes.extendedIcon}/>
-                )}
-                {t(showButtonInfo)}
-              </Button>
-            ) : null}
+
             {operations.bypassToConfirm ?
               <ShutdownDiag
                 {...this.bypassDiag(t)}

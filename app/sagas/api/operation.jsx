@@ -104,7 +104,7 @@ export function toolEnable(url, controllerSN, toolSN, enable) {
     })
     .then(resp => resp)
     .catch(e => {
-      throw e.toString();
+      throw e;
     });
 }
 

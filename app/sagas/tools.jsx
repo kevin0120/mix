@@ -40,31 +40,39 @@ function* staticToolEnable(action: actionType) {
 
     const { results } = state.operations;
     const targetResult = results[0];
-    console.log(results);
     yield call(toolEnable, mUrl, targetResult.controller_sn, targetResult.gun_sn, action.enable);
   } catch (e) {
-    console.error(`staticToolEnable error: ${e.message}`);
+    console.log(e.response.data);
+    const { data } = e.response || { data: '' };
+    if(/tool not found/.test(data)){
+      const state = yield select();
+      const { results } = state.operations;
+      const targetResult = results[0];
+
+      yield put(setNewNotification('warning', `工具序列号不匹配：${targetResult.gun_sn}`));
+    }
+    console.error(`staticToolEnable error:`, e);
   }
 
 }
 
-function* onToolStatusChange(action){
-  try{
-    const {toolSN,status}=action;
+function* onToolStatusChange(action) {
+  try {
+    const { toolSN, status } = action;
     yield put(
       setNewNotification(
         'info',
         `拧紧枪状态更新（${toolSN}）：${status}`
       )
     );
-  }catch (e) {
-    console.error('onToolStatusChange:',e);
+  } catch (e) {
+    console.error('onToolStatusChange:', e);
   }
 }
 
 const workers = {
   [TOOLS.ENABLE]: staticToolEnable,
-  [TOOLS.STATUS_CHANGE]:onToolStatusChange
+  [TOOLS.STATUS_CHANGE]: onToolStatusChange
 };
 
 export const toolFunctions = watch(workers);

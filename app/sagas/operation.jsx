@@ -165,7 +165,6 @@ function* triggerOperation(action) {
     if (rState.operations.trigger.block && source === 'RFID') {
       return;
     }
-    console.log('triggerOperation',action,rState);
     switch (rState.operations.operationStatus) {
       case OPERATION_STATUS.DOING:
         return;
@@ -205,7 +204,6 @@ function* triggerOperation(action) {
       rState.workMode.workMode === 'manual'
     ) {
       // 手动模式下,扫码枪接收到讯息,不获取作业以及切换工作状态
-      console.log('manual scanner return ')
       return;
     }
 
@@ -367,7 +365,6 @@ export function* startOperation(action) {
         hasSet = true;
       }
       try {
-        console.log('calling jobManual');
         const resp = yield call(
           jobManual,
           rushUrl,
@@ -461,7 +458,6 @@ export function* continueOperation() {
     // }
 
     if (operations.activeResultIndex >= operations.results.length - 1) {
-      console.log('continueOperation OPERATION.FINISHED');
 
       yield put(switch2Ready());
     } else {
@@ -550,7 +546,6 @@ export function* handleResults(data) {
     ) {
       // 作业完成
       rType = OPERATION.FINISHED;
-      console.log('handleResults OPERATION.FINISHED');
       payLoad.showDiag = true;
     } else {
       // 继续作业
@@ -598,7 +593,6 @@ function* bypassConfirm() {
       yield call(ak2);
     }
     Info(`车辆已放行 车辆ID:${carID}`);
-    console.log('bypassConfirm OPERATION.FINISHED');
 
     yield put(switch2Ready());
   } catch (e) {
@@ -624,7 +618,6 @@ function* conflictDetected(action) {
 function* conflictCanceled() {
   try {
     yield put(operationTriggerBlock(false));
-    console.log('conflictCanceled OPERATION.FINISHED');
 
     yield put(switch2Ready());
   } catch (e) {

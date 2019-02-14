@@ -278,7 +278,7 @@ class ConnectedImageStick extends React.Component {
   };
 
   render() {
-    const { classes, operations, enableFocus, logo } = this.props;
+    const { classes, operations, enableFocus, logo, children } = this.props;
 
     const smallImgDisplay =
       operations.operationStatus !== 'Ready' &&
@@ -300,6 +300,7 @@ class ConnectedImageStick extends React.Component {
             </Card>
           </Fade>
         ) : null}
+        {children}
       </div>
     );
   }
