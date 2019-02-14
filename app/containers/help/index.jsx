@@ -15,33 +15,33 @@ const fakeHelp = [
   {
     key: 'Version',
     displayTitle: '版本',
-    value: 'v1.0.1-beta'
+    value: 'v1.0.0-beta'
   },
   {
     key: 'ReleaseDate',
     displayTitle: '发布时间',
-    value: '2019-01-23'
+    value: '2019-02-14'
   },
-  {
-    key: 'Contact',
-    displayTitle: '售后电话',
-    value: '400-810-2333'
-  },
+  // {
+  //   key: 'Contact',
+  //   displayTitle: '售后电话',
+  //   value: '400-810-2333'
+  // },
   {
     key: 'Company',
     displayTitle: '公司',
     value: '上海途泰工具技术有限公司'
   },
-  {
-    key: 'ContactPerson',
-    displayTitle: '联系人',
-    value: 'Henry Cai'
-  },
-  {
-    key: 'ContactCellPhone',
-    displayTitle: '联系人电话',
-    value: '18701858083'
-  }
+  // {
+  //   key: 'ContactPerson',
+  //   displayTitle: '联系人',
+  //   value: 'Henry Cai'
+  // },
+  // {
+  //   key: 'ContactCellPhone',
+  //   displayTitle: '联系人电话',
+  //   value: '18701858083'
+  // }
 ];
 
 class Help extends React.PureComponent {
