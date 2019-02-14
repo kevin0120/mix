@@ -44,7 +44,7 @@ func main() {
 
 	servers := []*controller.CVI3Server{}
 
-	var sn int = SN_START
+	var sn = SN_START
 	for i := PORT_START; i < (PORT_START + v_num); i++ {
 		cfg := cvi3_cfg{
 			SN:       fmt.Sprintf("%04d", sn),
