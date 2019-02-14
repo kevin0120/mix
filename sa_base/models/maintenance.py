@@ -21,7 +21,7 @@ class EquipmentConnection(models.Model):
     _description = 'Equipment Connection'
 
     active = fields.Boolean(default=True)
-    name = fields.Char(string='Connection', required=True)
+    name = fields.Char(string='Connection', required=True, default='Connection')
     ip = fields.Char(string='IP')
     tty = fields.Char(string='Serial TTY')
 
