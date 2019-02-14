@@ -46,17 +46,12 @@ import LoginImg from '../../resources/imgs/login.jpeg';
 
 import {
   grayColor,
-  roseColor,
-  primaryColor,
-  infoColor,
-  successColor,
   warningColor,
-  dangerColor
 } from '../common/jss/material-react-pro';
 
 import configs from '../shared/config/index';
 
-const shade=500;
+const shade = 500;
 
 const lodash = require('lodash');
 
@@ -184,8 +179,14 @@ const routes = [
 
 export const routeConfigs = lodash.filter(
   routes,
-  ele =>
-    !(configs.operationSettings.opMode !== 'order' && ele.name === 'orders')
+  ele => {
+    return !(
+      (configs.operationSettings.opMode !== 'order' && ele.name === 'orders')
+      || (!configs.systemSettings.curveEnable && ele.name === 'curve')
+      || (!configs.systemSettings.viewerEnable && ele.name === 'viewer')
+      || (!configs.systemSettings.authEnable && ele.name === 'login')
+    );
+  }
 );
 
 const indexRoutes = [

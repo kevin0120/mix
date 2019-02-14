@@ -98,12 +98,13 @@ class Viewer extends React.Component {
                   onChange={this.handleChangeTab}
                   style={{
                     display: 'flex',
-                    flex: 1
+                    flex: 1,
                   }}
                 >
                   <Tab label="Image" />
                   <Tab label="File" />
                 </Tabs>
+                <div style={{display:'flex',flex:1,height:'calc(100% - 45px)'}}>
                 {currentTab === 0 && (
                   <img
                     alt="operation image"
@@ -131,6 +132,7 @@ class Viewer extends React.Component {
                     // plugins
                   />
                 )}
+                </div>
               </div>
             ) : null}
           </div>

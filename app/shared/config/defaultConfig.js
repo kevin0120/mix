@@ -183,7 +183,7 @@ export const defaultConfigs = {
   operationSettings: {
     opMode: 'op', // 作业模式:        op 或 order
     controllerMode: 'job', // 拧紧模式:        job 或 pset
-    workMode: 'auto', // 工作模式:        auto 或 manual 或 scanner
+    workMode: 'manual', // 工作模式:        auto 或 manual 或 scanner
     flowTriggers: ['carID', 'carType'], // 工作流程触发条件:  carType:车型代码 carID:vin/knr/longpin
 
     // 作业前检测(order mode only)
@@ -222,9 +222,11 @@ export const defaultConfigs = {
     switchAutoManual: false,
     oeeFuncEnable: false,
     modbusEnable: false,
-    rfidEnabled: true,
+    rfidEnabled: false,
     andonEnable: true,
     psetContinueMode: false,
-    enableFocus: false
+    enableFocus: false,
+    viewerEnable:true,
+    curveEnable:true,
   }
 };
