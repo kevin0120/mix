@@ -107,7 +107,7 @@ class ConnectedWelcome extends React.Component {
                     >
                       <div
                         className={classes.media}
-                        style={{ backgroundImage: `url(${route.image})` }}
+                        style={{ backgroundImage: `url(${route.image})`, backgroundSize:'cover' }}
                       />
                       <CardContent className={classes.cardContent}>
                         <div className={classes.iconWrap}>

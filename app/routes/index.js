@@ -12,6 +12,16 @@ import Fingerprint from '@material-ui/icons/Fingerprint';
 import Trend from '@material-ui/icons/TrendingUp';
 import Mail from '@material-ui/icons/Mail';
 import Save from '@material-ui/icons/Save';
+import ViewerIcon from '@material-ui/icons/Image';
+
+// color
+import cyan from '@material-ui/core/colors/cyan';
+import indigo from '@material-ui/core/colors/indigo';
+import blue from '@material-ui/core/colors/blue';
+import pink from '@material-ui/core/colors/pink';
+import teal from '@material-ui/core/colors/teal';
+import orange from '@material-ui/core/colors/orange';
+import lightGreen from '@material-ui/core/colors/lightGreen';
 
 import WorkOrders from '../containers/orders';
 import Working from '../containers/working';
@@ -26,10 +36,12 @@ import Viewer from '../containers/viewer';
 
 // imgs
 import helpImg from '../../resources/imgs/help.png';
+import viewerImg from '../../resources/imgs/craft.jpeg';
 import editorImg from '../../resources/imgs/operaIns.png';
 import WorkingImg from '../../resources/imgs/operation.png';
 import settingImg from '../../resources/imgs/setting.png';
 import LockingImg from '../../resources/imgs/lock.jpeg';
+import CurveImg from '../../resources/imgs/curveImg.jpeg';
 import LoginImg from '../../resources/imgs/login.jpeg';
 
 import {
@@ -42,9 +54,11 @@ import {
   dangerColor
 } from '../common/jss/material-react-pro';
 
-const lodash = require('lodash');
-
 import configs from '../shared/config/index';
+
+const shade=500;
+
+const lodash = require('lodash');
 
 const routes = [
   {
@@ -53,7 +67,7 @@ const routes = [
     title: 'main.home',
     main: HomePage,
     icon: HomeIcon,
-    color: '#00abf3',
+    color: indigo[shade],
     showLayout: true,
     roles: ['user', 'admin']
   },
@@ -63,7 +77,7 @@ const routes = [
     title: 'main.operation',
     main: Working,
     icon: BuildIcon,
-    color: '#00abbf',
+    color: cyan[shade],
     image: WorkingImg,
     showLayout: true,
     roles: ['user', 'admin']
@@ -73,9 +87,9 @@ const routes = [
     url: '/viewer',
     title: 'main.operationViewer',
     main: Viewer,
-    icon: BuildIcon,
-    color: '#00abbf',
-    image: WorkingImg,
+    icon: ViewerIcon,
+    color: lightGreen[shade],
+    image: viewerImg,
     showLayout: true,
     roles: ['user', 'admin']
   },
@@ -96,7 +110,7 @@ const routes = [
     title: 'main.preferences',
     main: Preferences,
     icon: SettingsApplicationsIcon,
-    color: '#fba53d',
+    color: orange[shade],
     image: settingImg,
     showLayout: true,
     roles: ['admin']
@@ -107,7 +121,7 @@ const routes = [
     title: 'main.event',
     main: Event,
     icon: Mail,
-    color: '#008adf',
+    color: blue[shade],
     image: LoginImg,
     showLayout: true,
     roles: ['user', 'admin']
@@ -129,8 +143,8 @@ const routes = [
     title: 'main.curve',
     main: Curve,
     icon: Trend,
-    color: '#009688',
-    image: LockingImg,
+    color: teal[shade],
+    image: CurveImg,
     showLayout: true,
     roles: ['user', 'admin']
   },
@@ -150,7 +164,7 @@ const routes = [
     title: 'main.help',
     main: Help,
     icon: HelpIcon,
-    color: '#8a6c63',
+    color: pink[shade],
     image: helpImg,
     showLayout: true,
     roles: ['user', 'admin']
