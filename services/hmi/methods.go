@@ -584,10 +584,12 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 		return
 	}
 
-	if job.GunSN == "" {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("gun_sn is required")
-		return
+	if !job.Skip {
+		if job.GunSN == "" {
+			ctx.StatusCode(iris.StatusBadRequest)
+			ctx.WriteString("gun_sn is required")
+			return
+		}
 	}
 
 	if job.Job == 0 {
@@ -648,7 +650,7 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 		}
 
 		if !job.HasSet {
-			err = m.service.OpenProtocol.JobSetManual(job.Controller_SN, job.GunSN, job.Job, job.UserID, ex_info)
+			err = m.service.OpenProtocol.JobSetManual(job.Controller_SN, job.GunSN, job.Job, job.UserID, ex_info, job.Skip)
 		} else {
 			m.service.OpenProtocol.IDSet(job.Controller_SN, ex_info)
 		}

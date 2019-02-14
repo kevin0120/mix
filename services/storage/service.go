@@ -475,7 +475,7 @@ func (s *Service) FindWorkorder(hmi_sn string, workcenter_code string, code stri
 
 	if workorder.LongPin == "" {
 		return workorder, errors.New("workorder does not exist")
-	} else if !rt || err != nil{
+	} else if !rt || err != nil {
 		return workorder, errors.New("workorder does not exist")
 	}
 	return workorder, nil

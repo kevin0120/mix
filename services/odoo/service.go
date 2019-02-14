@@ -328,12 +328,12 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 		exist, _ := s.DB.WorkorderExists(v.ID)
 		if exist {
 			// 忽略已存在的工单
-			o, err := s.DB.GetWorkorder(v.ID,false)
+			o, err := s.DB.GetWorkorder(v.ID, false)
 			if err != nil {
 				continue
 			}
 			dbWorkorders[i] = o
-		}else {
+		} else {
 			o.Status = "ready"
 			o.WorkorderID = v.ID
 			o.HMISN = v.HMI.UUID

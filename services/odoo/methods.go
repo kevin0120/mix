@@ -33,7 +33,6 @@ func (m *Methods) postWorkorders(ctx iris.Context) {
 
 	//m.service.diag.Debug("postWorkorders finsh try to send to workordersChannel")
 
-
 	m.service.workordersChannel <- &workorders
 
 	//m.service.diag.Debug("postWorkorders finsh send to workordersChannel")

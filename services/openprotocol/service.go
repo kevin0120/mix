@@ -233,7 +233,7 @@ func (p *Service) IDSet(sn string, str string) error {
 	return nil
 }
 
-func (p *Service) JobSetManual(sn string, tool_sn string, job int, user_id int64, ex_info string) error {
+func (p *Service) JobSetManual(sn string, tool_sn string, job int, user_id int64, ex_info string, skip bool) error {
 	v, exist := p.Parent.Controllers[sn]
 	if !exist {
 		// SN对应控制器不存在
@@ -253,7 +253,7 @@ func (p *Service) JobSetManual(sn string, tool_sn string, job int, user_id int64
 		}
 	}
 
-	if !toolExist {
+	if !toolExist && !skip {
 		return errors.New(fmt.Sprintf(controller.ERR_TOOL_NOT_FOUND+" tool serial number:%s", tool_sn))
 	}
 
@@ -398,6 +398,6 @@ func (p *Service) GenerateIDInfo(info string) string {
 	return ids
 }
 
-func (p *Service) TryCreateMaintenance(info ToolInfo) error  {
+func (p *Service) TryCreateMaintenance(info ToolInfo) error {
 	return p.Odoo.TryCreateMaintenance(info)
 }
