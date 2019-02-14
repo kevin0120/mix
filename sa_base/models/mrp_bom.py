@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api,_
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 import json
 
 
@@ -62,6 +62,8 @@ class MrpBom(models.Model):
         delta_operation = self.operation_ids - bom_line_operations
         for operation in delta_operation:
             for operation_point in operation.operation_point_ids:
+                if not operation_point.product_id:
+                    raise UserError(u'未定义作业点{0}的螺栓,请定义'.format(operation_point.name))
                 val = {
                     "operation_point_id": operation_point.id,
                     "product_id": operation_point.product_id.id,

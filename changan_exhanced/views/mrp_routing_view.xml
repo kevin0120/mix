@@ -9,7 +9,7 @@
               <attribute name="required">1</attribute>
           </field>
           <field name="op_job_id" position="after">
-              <field name="gun_id" required="1" widget="selection"/>
+              <field name="gun_id" required="1" options="{'no_edit': True, 'no_create': True}"/>
           </field>
           <xpath expr="//sheet/group/group/field[@name='group_id']" position="replace">
           </xpath>

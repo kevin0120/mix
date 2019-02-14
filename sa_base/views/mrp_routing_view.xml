@@ -52,9 +52,9 @@
                             <group name="description">
                                 <field name="name"/>
                                 <field name="routing_id" readonly="1"/>
-                                <field name="group_id"  options="{'no_create_edit': True}" />
-                                <field name="workcenter_id" />
-                                <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                                <field name="group_id"  options="{'no_edit': True, 'no_create': True}" />
+                                <field name="workcenter_id" options="{'no_edit': True, 'no_create': True}"/>
+                                <field name="company_id" options="{'no_edit': True, 'no_create': True}" groups="base.group_multi_company"/>
                             </group>
                             <group name="parameters">
                                 <field name="op_job_id"/>
@@ -76,7 +76,7 @@
                                         <field name="sequence" readonly="1"/>
                                         <field name="id" readonly="1" groups="base.group_no_one"/>
                                         <field name="name" string="Description" />
-                                        <field name="product_id" context="{'default_type': 'product'}" domain="[('sa_type', '=', 'screw')]" options="{'no_create_edit': True,'no_open': True}"/>
+                                        <field name="product_id" required="1" context="{'default_type': 'product'}" domain="[('sa_type', '=', 'screw')]" options="{'no_create_edit': True,'no_open': True}"/>
                                         <field name="product_qty"/>
                                         <field name="program_id" options="{'no_create_edit': True,'no_open': True}"/>
                                         <field name="max_redo_times" />
