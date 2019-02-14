@@ -134,10 +134,28 @@
     },
     "Info": {
       "ReworkWorkCenter": "返修工位",
-      "WorkMode": "工作模式",
-      "WorkStatus": "工作状态",
-      "Job": "程序号",
-      "Tool": "拧紧枪"
+      "WorkMode":{
+        "Title":"工作模式",
+        "auto": "自动模式",
+        "manual": "手动模式",
+        "scanner": "扫码枪模式"
+      },
+      "WorkStatus": {
+        "Title":"工作状态",
+        "Ready": "准备",
+        "PreDoing": "即将开始",
+        "Doing": "进行中",
+        "Timeout": "已超时",
+        "Fail": "失败"
+      },
+      "Job": {
+        "Title":"程序号"
+      },
+      "Tool": {
+        "Title":"拧紧枪",
+        "disconnected": "已断开",
+        "connected": "已连接"
+      }
     },
     "Display": {
       "Init": "启动中",

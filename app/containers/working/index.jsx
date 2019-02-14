@@ -588,13 +588,13 @@ class ConnectedWorking extends React.Component {
     return [
       {
         key: 'WorkMode',
-        value: workMode.workMode,
-        displayTitle: t('Operation.Info.WorkMode')
+        value: t(`Operation.Info.WorkMode.${workMode.workMode}`),
+        displayTitle: t('Operation.Info.WorkMode.Title')
       },
       {
         key: 'WorkStatus',
-        value: operations.operationStatus,
-        displayTitle: t('Operation.Info.WorkStatus')
+        value: t(`Operation.Info.WorkStatus.${operations.operationStatus}`),
+        displayTitle: t('Operation.Info.WorkStatus.Title')
       },
       // {
       //   key: '控制模式',
@@ -604,12 +604,12 @@ class ConnectedWorking extends React.Component {
       {
         key: 'Job',
         value: programme,
-        displayTitle: t('Operation.Info.Job')
+        displayTitle: t('Operation.Info.Job.Title')
       },
       {
         key: 'Gun',
-        value: tools.status,
-        displayTitle: t('Operation.Info.Tool')
+        value: t(`Operation.Info.Tool.${tools.status}`),
+        displayTitle: t('Operation.Info.Tool.Title')
       }
     ];
   };

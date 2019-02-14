@@ -81,11 +81,11 @@ const lodash = require('lodash');
 const operationMainProgress = {
   [OPERATION.STARTED]: [call, operationStarted],
   [OPERATION.FINISHED]: [call, operationFinished],
-  [OPERATION.RESET]: [put, switch2Ready],
+  [OPERATION.RESET]: [put, switch2Ready()]
 
 };
 
-const operationWorkers={
+const operationWorkers = {
   // bypass
   [OPERATION.BYPASS.CONFIRM]: [fork, bypassConfirm],
   // conflict
@@ -95,14 +95,15 @@ const operationWorkers={
 };
 
 export function* operationFlow() {
-  try{
+  try {
     yield fork(watch(operationMainProgress));
     yield fork(watch(operationWorkers));
     yield takeLeading(OPERATION.TRIGGER.TRIGGER, triggerOperation);
-  }catch (e) {
+  } catch (e) {
     console.error(e);
   }
 }
+
 function* operationStarted() {
   try {
     yield put(setResultDiagShow(false));
@@ -112,19 +113,24 @@ function* operationStarted() {
   }
 }
 
-function* operationFinished() {
+function* operationFinished(action) {
   try {
+    const { showDiag } = action;
     yield put(operationTriggerBlock(false));
 
     const state = yield select();
 
-    // 工具禁用
-    yield put(toolDisable());
 
     if (state.setting.operationSettings.opMode === 'order') {
       yield call(getNextWorkOrderandShow);
     }
-    yield put(setResultDiagShow(true));
+    if (showDiag) {
+      yield put(setResultDiagShow(true));
+      // 工具禁用
+
+      yield put(toolDisable());
+
+    }
   } catch (e) {
     console.error(e);
   }
@@ -156,10 +162,10 @@ function* triggerOperation(action) {
       return;
     }
 
-    if(rState.operations.trigger.block && source==='RFID'){
+    if (rState.operations.trigger.block && source === 'RFID') {
       return;
     }
-
+    console.log('triggerOperation',action,rState);
     switch (rState.operations.operationStatus) {
       case OPERATION_STATUS.DOING:
         return;
@@ -199,9 +205,9 @@ function* triggerOperation(action) {
       rState.workMode.workMode === 'manual'
     ) {
       // 手动模式下,扫码枪接收到讯息,不获取作业以及切换工作状态
+      console.log('manual scanner return ')
       return;
     }
-
 
 
     const triggers = rState.workMode.workMode === 'manual' ? ['carID'] : rState.setting.operationSettings.flowTriggers; // 手动模式下，只需要车辆信息即可触发作业
@@ -341,26 +347,27 @@ export function* startOperation(action) {
 
       // const toolSN = state.setting.systemSettings.defaultToolSN || "";
 
-      const {controller_sn, gun_sn }= lodash.reduce(results,(result, value)=>{
-        if(result.controller_sn && value.controller_sn!==result.controller_sn){
+      const { controller_sn, gun_sn } = lodash.reduce(results, (result, value) => {
+        if (result.controller_sn && value.controller_sn !== result.controller_sn) {
           console.error('结果中的controller_sn不匹配');
         }
-        if(result.gun_sn && value.gun_sn!==result.gun_sn){
+        if (result.gun_sn && value.gun_sn !== result.gun_sn) {
           console.error('结果中的gun_sn不匹配');
         }
         return {
-          controller_sn:value.controller_sn||result.controller_sn,
-          gun_sn:value.gun_sn||result.gun_sn
-        }
-      },{});
+          controller_sn: value.controller_sn || result.controller_sn,
+          gun_sn: value.gun_sn || result.gun_sn
+        };
+      }, {});
 
       const userID = 1;
       const skip = false;
       let hasSet = false;
-      if (state.setting.operationSettings.workMode === 'manual') {
+      if (state.workMode.workMode === 'manual') {
         hasSet = true;
       }
       try {
+        console.log('calling jobManual');
         const resp = yield call(
           jobManual,
           rushUrl,
@@ -454,6 +461,8 @@ export function* continueOperation() {
     // }
 
     if (operations.activeResultIndex >= operations.results.length - 1) {
+      console.log('continueOperation OPERATION.FINISHED');
+
       yield put(switch2Ready());
     } else {
       yield put({ type: OPERATION.CONTINUE });
@@ -522,7 +531,7 @@ export function* handleResults(data) {
 
     let rType = '';
     let continueDoing = false;
-
+    const payLoad = { data };
     if (hasFail) {
       if (
         operations.failCount + 1 >=
@@ -541,13 +550,15 @@ export function* handleResults(data) {
     ) {
       // 作业完成
       rType = OPERATION.FINISHED;
+      console.log('handleResults OPERATION.FINISHED');
+      payLoad.showDiag = true;
     } else {
       // 继续作业
       rType = OPERATION.RESULT.OK;
       continueDoing = true;
     }
 
-    yield put({ type: rType, data });
+    yield put({ type: rType, ...payLoad });
     if (continueDoing) {
       yield call(doingOperation, controllerMode);
     }
@@ -587,6 +598,8 @@ function* bypassConfirm() {
       yield call(ak2);
     }
     Info(`车辆已放行 车辆ID:${carID}`);
+    console.log('bypassConfirm OPERATION.FINISHED');
+
     yield put(switch2Ready());
   } catch (e) {
     console.error(e);
@@ -611,6 +624,7 @@ function* conflictDetected(action) {
 function* conflictCanceled() {
   try {
     yield put(operationTriggerBlock(false));
+    console.log('conflictCanceled OPERATION.FINISHED');
 
     yield put(switch2Ready());
   } catch (e) {

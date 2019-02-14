@@ -40,7 +40,7 @@ function* staticToolEnable(action: actionType) {
 
     const { results } = state.operations;
     const targetResult = results[0];
-
+    console.log(results);
     yield call(toolEnable, mUrl, targetResult.controller_sn, targetResult.gun_sn, action.enable);
   } catch (e) {
     console.error(`staticToolEnable error: ${e.message}`);

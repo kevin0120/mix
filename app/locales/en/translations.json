@@ -134,10 +134,28 @@
     },
     "Info": {
       "ReworkWorkCenter": "Rework Work Center",
-      "WorkMode": "WorkMode",
-      "WorkStatus": "WorkStatus",
-      "Job": "Job",
-      "Tool": "GUN"
+      "WorkMode":{
+        "Title":"WorkMode",
+        "auto": "auto",
+        "manual": "manual",
+        "scanner": "scanner"
+      },
+      "WorkStatus": {
+        "Title":"WorkStatus",
+        "Ready": "Ready",
+        "Predoing": "Predoing",
+        "Doing": "Doing",
+        "Timeout": "Timeout",
+        "Fail": "Fail"
+      },
+      "Job": {
+        "Title":"Job"
+      },
+      "Tool": {
+        "Title":"GUN",
+        "disconnected": "disconnected",
+        "connected": "connected"
+      }
     },
     "Display": {
       "Init": "Initialing",

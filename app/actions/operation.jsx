@@ -11,9 +11,10 @@
 import { OPERATION } from './actionTypes';
 import { OPERATION_SOURCE } from '../reducers/operations';
 
-export function switch2Ready() {
+export function switch2Ready(showDiag=true) {
   return {
-    type: OPERATION.FINISHED
+    type: OPERATION.FINISHED,
+    showDiag
   };
 }
 

@@ -166,9 +166,9 @@ export const defaultConfigs = {
       }
     },
     connections: {
-      masterpc: 'http://127.0.0.1:8082',
-      rfid: 'tcp://127.0.0.1:2112',
-      aiis: 'http://127.0.0.1:9092',
+      masterpc: 'http://192.168.1.9:8082',
+      rfid: 'tcp://192.168.1.9:2112',
+      aiis: 'http://192.168.1.9:9092',
       controllers: [
         {
           serial_no: '0001'

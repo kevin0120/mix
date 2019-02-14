@@ -162,9 +162,11 @@ export function* watchRushChannel(hmiSN) {
               );
               break;
             case 'job':
+              console.log(dataArray);
               if (state.workMode.workMode === 'manual' && json.job_id > 0) {
                 if (state.setting.operationSettings.manualFreestyle) {
-                  yield put(switch2Ready());
+                  console.log('watchRushChannel job switch2Ready');
+                  yield put(switch2Ready(false));
                 }
 
                 const { carID, carType } = state.operations;
