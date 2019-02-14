@@ -34,7 +34,7 @@
                     <button name="%(maintenance.hr_equipment_action)d"
                             class="oe_stat_button"
                             icon="fa-laptop"
-                            type="action" context="{'search_default_parent_id': active_id}" attrs="{'invisible': [('category_name', '!=', 'MasterPC')]}">
+                            type="action" context="{'search_default_parent_id': active_id}" attrs="{'invisible': [('child_equipments_count', '=', 0)]}">
                             <field string="Equipments" name="child_equipments_count" widget="statinfo"/>
                     </button>
                     <button name="%(sa_equipment_connection_action)d"
