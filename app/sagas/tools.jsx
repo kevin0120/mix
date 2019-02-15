@@ -42,7 +42,7 @@ function* staticToolEnable(action: actionType) {
     const targetResult = results[0];
     yield call(toolEnable, mUrl, targetResult.controller_sn, targetResult.gun_sn, action.enable);
   } catch (e) {
-    console.log(e.response.data);
+    console.error(`staticToolEnable error:`, e);
     const { data } = e.response || { data: '' };
     if(/tool not found/.test(data)){
       const state = yield select();
@@ -51,7 +51,6 @@ function* staticToolEnable(action: actionType) {
 
       yield put(setNewNotification('warning', `工具序列号不匹配：${targetResult.gun_sn}`));
     }
-    console.error(`staticToolEnable error:`, e);
   }
 
 }

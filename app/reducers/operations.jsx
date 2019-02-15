@@ -98,6 +98,7 @@ const reducers = {
   [OPERATION.TIMEOUT]: switchOperationTimeout,
   [OPERATION.BYPASS.IO]: operationBypassIO,
   [OPERATION.BYPASS.CONFIRM]: operationBypassConfirmed,
+  [OPERATION.BYPASS.CANCEL]: operationBypassCancel,
   [OPERATION.CONFLICT.CONFIRM]: operationConflictConfirm,
   [OPERATION.CONFLICT.DETECTED]: operationConflictDetected,
   [OPERATION.CONFLICT.CANCEL]: operationConflictCanceled,
@@ -194,6 +195,13 @@ function operationConflictConfirm(state) {
 }
 
 function operationBypassConfirmed(state) {
+  return {
+    ...state,
+    bypassToConfirm: false
+  };
+}
+
+function operationBypassCancel(state) {
   return {
     ...state,
     bypassToConfirm: false

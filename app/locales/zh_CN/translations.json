@@ -159,6 +159,7 @@
     "Display": {
       "Init": "启动中",
       "Ready": "就绪",
+      "PreDoing": "即将开始",
       "Doing": "作业中",
       "Fail": "失败",
       "Error": "异常",

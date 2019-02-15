@@ -48,7 +48,7 @@ export const defaultConfigs = {
       },
       hmiSn: {
         displayOrder: 2,
-        value: '1122334455667788',
+        value: '1560c527ac7f4f9f90e4900b50737929',
         displayTitle: 'Configuration.connections.HMI'
       }
     },
@@ -166,16 +166,16 @@ export const defaultConfigs = {
       }
     },
     connections: {
-      masterpc: 'http://192.168.1.9:8082',
-      rfid: 'tcp://192.168.1.9:2112',
-      aiis: 'http://192.168.1.9:9092',
+      masterpc: 'http://127.0.0.1:8082',
+      rfid: 'tcp://127.0.0.1:2112',
+      aiis: 'http://127.0.0.1:9092',
       controllers: [
         {
-          serial_no: '0001'
+          serial_no: 'b2a8d23b44ad4836be0be8ebca72b8a1'
         }
       ],
       io: 'modbustcp://192.168.1.122:502/0',
-      workcenterCode: '69',
+      workcenterCode: '1',
       rework_workcenter: 'qrk'
     }
   },
@@ -210,7 +210,7 @@ export const defaultConfigs = {
     regExp: '(C6\\d{12})' // rfid正則表達式,SVW
   },
   cvinetweb: {
-    url: ''
+    url: 'http://192.168.1.10:8080/CVINetWeb'
   },
   systemSettings: {
     enableDebugInfo: false,

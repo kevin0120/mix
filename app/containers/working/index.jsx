@@ -524,7 +524,7 @@ class ConnectedWorking extends React.Component {
     });
   };
 
-  openManualDiag = (e, input,t) => {
+  openManualDiag = (e, input, t) => {
     e.preventDefault();
     const { keyboardInput, NewCar } = this.props;
     keyboardInput({
@@ -593,7 +593,7 @@ class ConnectedWorking extends React.Component {
       },
       {
         key: 'Gun',
-        value: toolSvg(tools.status === 'connected' ? successColor : dangerColor,{ width: '4vh', height: '4vh', }),
+        value: toolSvg(tools.status === 'connected' ? successColor : dangerColor, { width: '4vh', height: '4vh' }),
         displayTitle: t('Operation.Info.Tool.Title')
       }
     ];
@@ -796,10 +796,10 @@ class ConnectedWorking extends React.Component {
                 <Paper
                   className={classes.LeftTopTab}
                   component="button"
-                  onClick={e => this.openManualDiag(e, 'carType',t)}
+                  onClick={e => this.openManualDiag(e, 'carType', t)}
                   disabled={
-                    !manualEnable ||
-                    configs.operationSettings.opMode === 'order'
+                    configs.operationSettings.opMode === 'order' ||
+                    configs.operationSettings.opMode === 'op'
                   }
                 >
                   <div className={classes.LeftTabContiner}>
@@ -818,7 +818,7 @@ class ConnectedWorking extends React.Component {
                 <Paper
                   className={classes.LeftTopTab}
                   component="button"
-                  onClick={e => this.openManualDiag(e, 'vin',t)}
+                  onClick={e => this.openManualDiag(e, 'vin', t)}
                   disabled={!manualEnable}
                 >
                   <div className={classes.LeftTabContiner}>

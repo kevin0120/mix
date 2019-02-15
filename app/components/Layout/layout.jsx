@@ -138,7 +138,7 @@ class ConnectedLayout extends React.PureComponent {
   };
 
   render() {
-    let shouldProcessing = true;
+    let disabled = true;
     const {
       orderStatus,
       classes,
@@ -147,15 +147,18 @@ class ConnectedLayout extends React.PureComponent {
       usersInfo,
       doPush,
       notification,
-      path
+      path,
+      shouldRender,
+      children
     } = this.props;
     const isAutoMode = workMode === 'auto';
     const { name, avatar, role } = usersInfo[0];
+    console.log(orderStatus,workMode);
     if (
-      lodash.includes(['Ready', 'PreDoing', 'Timeout', 'Init'], orderStatus) ||
-      !isAutoMode
+      lodash.includes(['Ready', 'PreDoing', 'Timeout', 'Init'], orderStatus)
+      // || !isAutoMode
     ) {
-      shouldProcessing = false;
+      disabled = false;
     }
 
     const { anchorEl, value, showStatus, isMenuOpen, showSysInfo } = this.state;
@@ -171,8 +174,8 @@ class ConnectedLayout extends React.PureComponent {
       ? classes.menuStatusOK
       : classes.menuStatusFail;
     // console.log('shouldRender:',this.props.shouldRender);
-    if (!this.props.shouldRender) {
-      return this.props.children;
+    if (!shouldRender) {
+      return children;
     }
     return (
       <I18n ns="translations">
@@ -199,9 +202,9 @@ class ConnectedLayout extends React.PureComponent {
             {/* <SubCompontents /> */}
             <Notify />
             <div style={{height:'calc(100% - 64px)'}}>
-              {this.props.children}
+              {children}
             </div>
-            <AppBar  className={classes.appBar}>
+            <AppBar className={classes.appBar}>
               <Toolbar className={classes.topBar}>
                 <div className={classes.menuBtnWrapAvatar}>
                   <img
@@ -238,6 +241,11 @@ class ConnectedLayout extends React.PureComponent {
                         // component={Link}
                         // to={route.url}
                         onClick={() => {
+                          console.log('route:',disabled);
+                          if(disabled){
+                            console.log('route return');
+                            return;
+                          }
                           if (
                             route.roles &&
                             lodash.includes(route.roles, role)
@@ -250,7 +258,7 @@ class ConnectedLayout extends React.PureComponent {
                         label={t(route.title)}
                         icon={<route.icon />}
                         className={classes.BottomNavigationIcon}
-                        disabled={shouldProcessing}
+                        // disabled={disabled}
                       />
                     ))}
                   </BottomNavigation>
@@ -274,7 +282,7 @@ class ConnectedLayout extends React.PureComponent {
                     aria-haspopup="true"
                     onClick={this.handleMenu}
                     color="inherit"
-                    disabled={shouldProcessing}
+                    disabled={disabled}
                   >
                     <Language />
                   </IconButton>
@@ -396,7 +404,7 @@ const mapStateToProps = (state, ownProps) => ({
   usersInfo: state.users,
   connections: state.connections,
   orderStatus: state.operations.operationStatus,
-  workMode: state.setting.operationSettings.workMode,
+  workMode: state.workMode.workMode,
   healthCheckResults: state.healthCheckResults,
   path:state.router.location.pathname,
   ...ownProps

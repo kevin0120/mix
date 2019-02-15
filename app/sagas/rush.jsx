@@ -9,7 +9,7 @@ import {
   cancel
 } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
-import { OPERATION, RUSH, WORK_MODE } from '../actions/actionTypes';
+import { RUSH, WORK_MODE } from '../actions/actionTypes';
 import { NewResults } from '../actions/rush';
 import { NewCar } from '../actions/scannerDevice';
 import { getIBypass, getIModeSelect, handleIOFunction } from './io';
@@ -19,6 +19,7 @@ import { setHealthzCheck } from '../actions/healthCheck';
 import { setNewNotification } from '../actions/notification';
 import { switch2Ready, operationTrigger } from '../actions/operation';
 import { toolStatusChange } from '../actions/tools';
+import { andonScanner } from '../actions/andon';
 
 let task = null;
 let ws = null;
@@ -124,7 +125,7 @@ export function* watchRushChannel(hmiSN) {
     const chan = yield call(createRushChannel, hmiSN);
     while (true) {
       const data = yield take(chan);
-      const state = yield select();
+      let state = yield select();
 
       const { type, payload } = data;
 
@@ -162,14 +163,14 @@ export function* watchRushChannel(hmiSN) {
               );
               break;
             case 'job':
-              console.log(dataArray);
+              console.log('job:',json);
               if (state.workMode.workMode === 'manual' && json.job_id > 0) {
                 if (state.setting.operationSettings.manualFreestyle) {
-                  console.log('watchRushChannel job switch2Ready');
                   yield put(switch2Ready(false));
+                  state=yield select();
                 }
+                const { carID,carType } = state.operations;
 
-                const { carID, carType } = state.operations;
                 yield put(operationTrigger(
                   carID,
                   carType,
@@ -220,8 +221,14 @@ export function* watchRushChannel(hmiSN) {
               yield put(NewResults(json));
               break;
             case 'scanner': {
-              // console.log('rush scanner:', json);
+              console.log('rush scanner:', json);
               const { workMode } = state.workMode;
+              const { andonEnable } = state.setting.systemSettings;
+
+              if (workMode === 'scanner' && andonEnable) {
+                yield put(andonScanner(json.barcode));
+                break;
+              }
               if (workMode === 'scanner' || workMode === 'manual') {
                 yield put(NewCar(json.barcode));
               }

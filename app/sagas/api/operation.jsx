@@ -38,7 +38,7 @@ export function fetchNextWorkOrder(baseURL, workcenterCode) {
     })
     .then(resp => resp)
     .catch(e => {
-      throw e.toString();
+      throw e;
     });
 }
 
@@ -66,7 +66,7 @@ export function fetchRoutingWorkcenter(url, workCenterCode, carType, job) {
     .get(fullUrl, { params: paramObj })
     .then(resp => resp)
     .catch(e => {
-      throw e.toString();
+      throw e;
     });
 }
 
@@ -119,7 +119,7 @@ export function controllerMode(url, mode, controllerSN) {
     .put(fullUrl, bodyData)
     .then(resp => resp)
     .catch(e => {
-      throw e.toString();
+      throw e;
     });
 }
 
@@ -149,7 +149,7 @@ export function pset(
     })
     .then(resp => resp)
     .catch(e => {
-      throw e.toString();
+      throw e;
     });
 }
 
@@ -185,7 +185,7 @@ export function jobManual(
     })
     .then(resp => resp)
     .catch(e => {
-      throw e.toString();
+      throw e;
     });
 }
 
@@ -211,6 +211,6 @@ export function ak2Api(
     })
     .then(resp => resp)
     .catch(e => {
-      throw e.toString();
+      throw e;
     });
 }

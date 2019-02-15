@@ -1,5 +1,5 @@
 /* eslint-disable no-lonely-if,camelcase */
-import { select, put, take, call, fork, takeLeading } from 'redux-saga/effects';
+import { select, put, take, call, fork, takeLatest } from 'redux-saga/effects';
 import {
   fetchRoutingWorkcenter,
   fetchWorkorder,
@@ -8,7 +8,7 @@ import {
   fetchNextWorkOrder,
   ak2Api
 } from './api/operation';
-import { OPERATION, RUSH, SCANNER } from '../actions/actionTypes';
+import { OPERATION, RUSH } from '../actions/actionTypes';
 import {
   OPERATION_RESULT,
   OPERATION_SOURCE,
@@ -82,7 +82,6 @@ const operationMainProgress = {
   [OPERATION.STARTED]: [call, operationStarted],
   [OPERATION.FINISHED]: [call, operationFinished],
   [OPERATION.RESET]: [put, switch2Ready()]
-
 };
 
 const operationWorkers = {
@@ -98,7 +97,7 @@ export function* operationFlow() {
   try {
     yield fork(watch(operationMainProgress));
     yield fork(watch(operationWorkers));
-    yield takeLeading(OPERATION.TRIGGER.TRIGGER, triggerOperation);
+    yield takeLatest(OPERATION.TRIGGER.TRIGGER, triggerOperation);
   } catch (e) {
     console.error(e);
   }
@@ -155,6 +154,7 @@ function* triggerOperation(action) {
   try {
 
     const { carID, carType, job, source } = action;
+    console.log(action);
     const rState = yield select();
 
     if (rState.router.location.pathname !== '/working') {
@@ -165,6 +165,7 @@ function* triggerOperation(action) {
     if (rState.operations.trigger.block && source === 'RFID') {
       return;
     }
+
     switch (rState.operations.operationStatus) {
       case OPERATION_STATUS.DOING:
         return;
@@ -304,7 +305,7 @@ export function* getOperation(job) {
     } else {
       // 定位作业失败
       Error('获取作业失败');
-      yield put(setNewNotification('error', '获取工单失败'));
+      yield put(setNewNotification('error', '获取作业失败'));
       yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
       yield call(clearStories);
       // yield put({ type: OPERATION.RESET });

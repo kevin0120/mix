@@ -146,7 +146,8 @@ export const TIMELINE_STORY = {
 };
 
 export const ANDON = {
-  NEW_DATA: 'ANDON_NEW_DATA'
+  NEW_DATA: 'ANDON_NEW_DATA',
+  SCANNER: 'ANDON_SCANNER'
 };
 
 export const AIIS = {

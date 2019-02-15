@@ -106,6 +106,7 @@ class ConnectedTest extends React.Component {
   }
 
   formatConnInfo(connInfo) {
+    const {rfidEnabled}=this.props;
     return {
       masterPcUrl: {
         key: 'masterpc',
@@ -135,6 +136,7 @@ class ConnectedTest extends React.Component {
       rfidUrl: {
         key: 'rfid',
         disabled: false,
+        hidden:!rfidEnabled,
         displayOrder: 200,
         value: String(connInfo.rfid),
         displayTitle: 'RFID 链接地址',
@@ -249,6 +251,9 @@ class ConnectedTest extends React.Component {
     const { data, btnGroupStatus, testStatus } = this.state;
     const inputsItems = t =>
       sortObj(data, 'displayOrder').map(({ key, value: item }) => {
+        if(item.hidden){
+          return null;
+        }
         const testPart = t =>
           item.test ? (
             <div>

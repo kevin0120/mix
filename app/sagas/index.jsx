@@ -1,6 +1,6 @@
 // @flow
 
-import { all } from 'redux-saga/effects';
+import { all, select } from 'redux-saga/effects';
 
 import watchScanner from './scanner';
 import { cardAuthFlow } from './cardAuth';
@@ -20,9 +20,12 @@ import logoFlow from './logo';
 import watchNetwork from './network';
 import watchBattery from './battery';
 import watchPower from './power';
+import andon from './andon';
 
 export default function* rootSaga() {
   try {
+    const state = yield select();
+    const { andonEnable } = state.setting.systemSettings;
     yield all([
       // card auth
       cardAuthFlow(),
@@ -47,6 +50,7 @@ export default function* rootSaga() {
       watchNetwork(),
       watchBattery(),
       watchPower(),
+      andonEnable ? andon() : null
     ]);
   } catch (e) {
     console.error('rootSaga:', e);

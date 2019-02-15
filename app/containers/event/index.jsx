@@ -48,7 +48,7 @@ const styles = {
     flexGrow: 1,
     zIndex: 1,
     height: '100%',
-    overflow: 'hidden',
+    overflow: 'scroll',
     position: 'relative',
     display: 'flex',
     width: '100%'
@@ -201,7 +201,7 @@ class Event extends React.Component {
     return (
       <I18n ns="translations">
         {t => (
-          <div>
+          <React.Fragment>
             <GridContainer className={classes.root}>
               <GridItem xs={12}>
                 <Card>
@@ -359,7 +359,7 @@ class Event extends React.Component {
                 {Msg}
               </SweetAlert>
             ) : null}
-          </div>
+          </React.Fragment>
         )}
       </I18n>
     );
