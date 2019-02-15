@@ -9,6 +9,7 @@ import (
 	"io"
 	"net"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -26,6 +27,7 @@ type Service struct {
 	ReadTimeout     time.Duration
 	diag            Diagnostic
 	Seq             int
+	mtxSeq          sync.Mutex
 	configValue     atomic.Value
 	Msgs            chan AndonMsg
 	requestTaskInfo chan string
@@ -34,6 +36,9 @@ type Service struct {
 }
 
 func (c *Service) GetSequenceNum() int {
+	defer c.mtxSeq.Unlock()
+	c.mtxSeq.Lock()
+
 	x := c.Seq
 	if x >= 9999 {
 		c.Seq = 1
@@ -58,6 +63,7 @@ func NewService(d Diagnostic, c Config, h *httpd.Service, ws *wsnotify.Service) 
 			cfg: &c.DB,
 			eng: nil,
 		},
+		mtxSeq: sync.Mutex{},
 	}
 
 	s.configValue.Store(c)
@@ -111,6 +117,14 @@ func (s *Service) Open() error {
 		Method:      "PUT",
 		Pattern:     "/andon-test",
 		HandlerFunc: s.andonTest,
+	}
+	s.HTTPDService.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "GET",
+		Pattern:     "/vehicle",
+		HandlerFunc: s.getVehicle,
 	}
 	s.HTTPDService.Handler[0].AddRoute(r)
 
@@ -233,6 +247,16 @@ func (s *Service) manage() {
 				d := AndonGUID{GUID: c.GUID}
 
 				s.write(PakcageMsg(MSG_GUID_REQ_ACK, s.GetSequenceNum(), d))
+			case MSG_VEHICLE_REQ_ACK:
+				if msg.Data != nil {
+					strData, _ := json.Marshal(msg.Data)
+					v := AndonTask{}
+					err := json.Unmarshal(strData, &v)
+					if err == nil {
+						t, _ := json.Marshal(v)
+						s.WS.WSSendTask(v.Workcenter, string(t))
+					}
+				}
 			default:
 				fmt.Println("not support msg type")
 			}
@@ -356,4 +380,23 @@ func (s *Service) andonTest(ctx iris.Context) {
 			//fmt.Printf("send task -- workcenter:%s payload:%s\n", v.Workcenter, string(t))
 		}
 	}
+}
+
+func (s *Service) getVehicle(ctx iris.Context) {
+	vin := ctx.URLParam("vin")
+	if vin == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("vin is required")
+		return
+	}
+
+	// 和andon通信，根据vin查询对应车辆, 通过websocket推送车辆信息给hmi
+	payload := PakcageMsg(MSG_VEHICLE_REQ, s.GetSequenceNum(), AndonVehicle{Vin: vin})
+	if err := s.write(payload); err != nil {
+		ctx.Writef(fmt.Sprintf("Try to get vehicle: %s", vin))
+		ctx.StatusCode(iris.StatusBadRequest)
+		return
+	}
+
+	ctx.StatusCode(iris.StatusNoContent)
 }

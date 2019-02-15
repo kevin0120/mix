@@ -3,16 +3,18 @@ package changan
 import "encoding/json"
 
 const (
-	MSG_TASK         = 1001
-	MSG_TASK_ACK     = 2001
-	MSG_HEART        = 1999
-	MSG_HEART_ACK    = 2999
-	MSG_GET_TASK     = 1002
-	MSG_GET_TASK_ACK = 2002
-	MSG_REGIST       = 1003
-	MSG_REGIST_ACK   = 2003
-	MSG_GUID_REQ     = 1004
-	MSG_GUID_REQ_ACK = 2004
+	MSG_TASK            = 1001
+	MSG_TASK_ACK        = 2001
+	MSG_HEART           = 1999
+	MSG_HEART_ACK       = 2999
+	MSG_GET_TASK        = 1002
+	MSG_GET_TASK_ACK    = 2002
+	MSG_REGIST          = 1003
+	MSG_REGIST_ACK      = 2003
+	MSG_GUID_REQ        = 1004
+	MSG_GUID_REQ_ACK    = 2004
+	MSG_VEHICLE_REQ     = 1005
+	MSG_VEHICLE_REQ_ACK = 2005
 )
 
 type AndonMsg struct {
@@ -36,6 +38,10 @@ type AndonGUID struct {
 
 type AndonWorkCenter struct {
 	Workcenter string `json:"workcenter_code"`
+}
+
+type AndonVehicle struct {
+	Vin string `json:"vin_code"`
 }
 
 func PakcageMsg(msgType int, seq int, info interface{}) []byte {
@@ -72,6 +78,16 @@ func PakcageMsg(msgType int, seq int, info interface{}) []byte {
 		}
 		ret, _ := json.Marshal(d)
 		return ret
+
+	case MSG_VEHICLE_REQ:
+		d := AndonMsg{
+			MsgType: MSG_VEHICLE_REQ,
+			Seq:     seq,
+			Data:    info,
+		}
+		ret, _ := json.Marshal(d)
+		return ret
 	}
+
 	return nil
 }

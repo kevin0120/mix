@@ -606,7 +606,7 @@ func (s *Service) AddResult(r *storage.ResultObject) {
 func (s *Service) TaskResultsBatchSave() {
 	idx := 0
 	c := s.configValue.Load().(Config)
-	results := make([]*storage.ResultObject, 2 *c.BatchSaveRowsLimit) //2倍的数据大小,确保大小足够
+	results := make([]*storage.ResultObject, 2*c.BatchSaveRowsLimit) //2倍的数据大小,确保大小足够
 	//results := []*storage.ResultObject{}
 
 	for {
@@ -646,7 +646,7 @@ func (s *Service) TaskResultsBatchSave() {
 }
 
 func (s *Service) OnOdooStatus(status string) {
-	odooStatus :=  odoo.ODOOStatus{
+	odooStatus := odoo.ODOOStatus{
 		Status: status,
 	}
 
@@ -657,10 +657,10 @@ func (s *Service) OnOdooStatus(status string) {
 
 	str, err := json.Marshal(payload)
 	if err != nil {
-		s.diag.Error("OnOdooStatus Marshal fail",err)
+		s.diag.Error("OnOdooStatus Marshal fail", err)
 	}
 	err = s.rpc.RPCSendAll(string(str))
 	if err != nil {
-		s.diag.Error("OnOdooStatus RPCSendAll fail",err)
+		s.diag.Error("OnOdooStatus RPCSendAll fail", err)
 	}
 }

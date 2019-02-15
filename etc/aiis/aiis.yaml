@@ -1,10 +1,11 @@
 hostname: localhost
-data_dir: /home/linshenqi/.aiis
+data_dir: /home/gubin/.aiis
 logging:
+#  file: ./logs/%Y%m%d.log
   file: STDOUT
   level: DEBUG
-  max_age: 1m
-  rotate: 1m
+  max_age: 3000h
+  rotate: 24h
 httpd:
   bind-address: :9092
   log-enabled: true
@@ -28,7 +29,7 @@ websocket:
 pmon:
   path: /home/linshenqi/go/src/github.com/masami10/aiis/etc/pmon/PMON.CFG
   workers: 4
-  enable: true
+  enable: false
   send_check_count: 10
 fis:
   ch_recv_mission: 90
@@ -62,14 +63,14 @@ fis:
     - SIH
     - HBV
     - AGM
-  enable: true
+  enable: false
 masterplc:
   enable: false
   port: 4721
   max_connection: 4096
   read_buf: 65535
 minio:
-  url: 172.17.0.1:9000
+  url: 127.0.0.1:9000
   bucket: curves
   access: minio
   secret: minio123
@@ -78,7 +79,7 @@ minio:
   enable: false
 changan:
   andon_addr: tcp://127.0.0.1:9002
-  enable: false
+  enable: true
   keepalive_period: 3s
   read_timeout: 10s
   read_buffer_size: 65535
@@ -100,7 +101,7 @@ odoo:
   max_retry: 1
   enable: true
 storage:
-  db_url: 172.29.61.190:5432
+  db_url: 127.0.0.1:5432
   db_name: sa
   db_user: admin
   db_pwd: admin
@@ -122,4 +123,3 @@ rush:
   batch_save_rows_limit: 100
   batch_save_time_limit: 2s
   grpc_port: 9093
-

@@ -20,7 +20,7 @@ func (adb *AndonDB) StartService() error {
 
 	_db, err := gorm.Open("mssql", sConn)
 	if err != nil {
-		return fmt.Errorf("andondb startService open db fail: %s",err.Error())
+		return fmt.Errorf("andondb startService open db fail: %s", err.Error())
 	}
 
 	_db.AutoMigrate(&TighteningResults{})

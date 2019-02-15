@@ -139,14 +139,14 @@ func (ch *Channel) writeSD(buf []byte) error {
 	before := time.Now()
 	for {
 		select {
-		case <- time.After(timeout / 40):
+		case <-time.After(timeout / 40):
 			if ch.gethasSD() {
 				// 之前有發送SD但沒有收到AD
 				if time.Now().After(before.Add(timeout)) {
 					ch.diag.Debug("send SD timeout, cause no AD msg")
 					return errors.New("send SD timeout, cause no AD msg")
 				}
-			}else {
+			} else {
 				return ch.conn.Write(buf, timeout)
 			}
 		}
@@ -191,7 +191,7 @@ func (ch *Channel) Write(buf []byte, msgType PMONSMGTYPE) error {
 	ch.diag.Debug(fmt.Sprintf("send msg:%s", string(targetBuf)))
 	if msgType == PMONMSGSD {
 		err = ch.writeSD(targetBuf) //此方法可能導致阻塞
-	}else{
+	} else {
 		err = ch.conn.Write(targetBuf, ch.WriteTimeout)
 	}
 	if err == nil && msgType == PMONMSGSD {
