@@ -126,6 +126,10 @@
     "Submit": "登录"
   },
   "Operation": {
+    "Input": {
+      "carType": "车型",
+      "vin": "VIN/KNR"
+    },
     "Processbar": {
       "Init": "系统启动中,请稍后...",
       "Ready": "等待车辆进站...",
@@ -141,12 +145,7 @@
         "scanner": "扫码枪模式"
       },
       "WorkStatus": {
-        "Title":"工作状态",
-        "Ready": "准备",
-        "PreDoing": "即将开始",
-        "Doing": "进行中",
-        "Timeout": "已超时",
-        "Fail": "失败"
+        "Title":"工作状态"
       },
       "Job": {
         "Title":"程序号"

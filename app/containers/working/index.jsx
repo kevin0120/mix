@@ -12,7 +12,6 @@ import Divider from '@material-ui/core/Divider';
 import Paper from '@material-ui/core/Paper';
 import FiberManualRecord from '@material-ui/icons/FiberManualRecord';
 import Autorenew from '@material-ui/icons/Autorenew';
-import SweetAlert from 'react-bootstrap-sweetalert';
 import Button from '../../components/CustomButtons/Button';
 import ImageStick from '../../components/ImageStick/imageStick';
 
@@ -33,16 +32,12 @@ import configs from '../../shared/config/index';
 
 // components
 
-import withLayout from '../../components/Layout/layout';
-
 import WorkingInfoBar from '../../components/WorkingInfoBar';
 
 import {
   container,
   cardTitle,
   description,
-  infoColor,
-  warningColor,
   dangerColor,
   successColor
 } from '../../common/jss/material-react-pro';
@@ -54,6 +49,8 @@ import TimeLine from '../../components/WorkPageTimeline';
 import ProgressBar from '../../components/ProgressBar/Progress';
 import { OPERATION_STATUS, OPERATION_SOURCE } from '../../reducers/operations';
 import withKeyboard from '../../components/Keyboard';
+
+import toolSvg from './toolSvg';
 
 const lodash = require('lodash');
 
@@ -494,51 +491,6 @@ const withstyles = theme => ({
   }
 });
 
-const toolSvg = (color) => (
-  <svg viewBox="0 0 512 512" style={{ width: '4vh', height: '4vh', }} fill={color}>
-    <g>
-      <g>
-        <path d="M501.801,145.642h-36.831c-4.941-23.925-26.172-41.967-51.54-41.967h-51.789c-1.792-2.932-5.012-4.896-8.7-4.896h-36.06
-			c-2.877-8.02-10.535-13.783-19.532-13.783H40.522c-20.318,0-36.847,16.529-36.847,36.847c0,15.835,10.04,29.37,24.091,34.57
-			L0.365,256.052c-0.278,1.012-0.399,2.061-0.357,3.111l5.13,128.769c1.001,21.909,18.965,39.071,40.898,39.071
-			c25.384,0,46.035-20.651,46.035-46.035v-40.34l12.863-6.653c3.387-1.751,5.514-5.246,5.514-9.059v-32.069h4.803v11.854
-			c0,5.632,4.566,10.199,10.199,10.199c5.633,0,10.199-4.567,10.199-10.199v-11.854h98.297c44.683,0,81.327-35.002,83.997-79.023
-			h34.999c3.687,0,6.908-1.963,8.7-4.896h51.789c25.69,0,47.125-18.507,51.708-42.887h36.663c5.633,0,10.199-4.567,10.199-10.199
-			S507.434,145.642,501.801,145.642z M233.947,272.448H100.25c-5.633,0-10.199,4.567-10.199,10.199v36.061l-12.863,6.653
-			c-3.387,1.751-5.514,5.246-5.514,9.059v46.547c0,14.136-11.501,25.637-25.638,25.637c-11.004,0-20.017-8.61-20.517-19.544
-			l-5.065-127.127l27.842-101.244h116.276c5.633,0,10.199-4.567,10.199-10.199c0-5.632-4.566-10.199-10.199-10.199H40.522
-			c-9.07,0-16.448-7.378-16.448-16.448c0-9.07,7.379-16.448,16.448-16.448H297.35c0.203,0,0.368,0.165,0.368,0.367v102.916h0
-			C297.718,243.841,269.11,272.448,233.947,272.448z M342.743,193.424h-24.627v-74.246h24.627V193.424z M413.43,188.529h-50.288
-			v-64.456h50.288c17.77,0,32.227,14.457,32.227,32.228C445.657,174.071,431.2,188.529,413.43,188.529z"/>
-      </g>
-    </g>
-    <g>
-      <g>
-        <path d="M204.084,138.291h-5.514c-5.633,0-10.199,4.567-10.199,10.199c0,5.632,4.566,10.199,10.199,10.199h5.514
-			c5.633,0,10.199-4.567,10.199-10.199C214.283,142.859,209.717,138.291,204.084,138.291z"/>
-      </g>
-    </g>
-    <g>
-      <g>
-        <path d="M233.487,243.76h-33.08c-5.633,0-10.199,4.567-10.199,10.199c0,5.632,4.566,10.199,10.199,10.199h33.08
-			c5.633,0,10.199-4.567,10.199-10.199C243.686,248.328,239.12,243.76,233.487,243.76z"/>
-      </g>
-    </g>
-    <g>
-      <g>
-        <path d="M233.487,215.275h-33.08c-5.633,0-10.199,4.567-10.199,10.199c0,5.632,4.566,10.199,10.199,10.199h33.08
-			c5.633,0,10.199-4.567,10.199-10.199C243.686,219.842,239.12,215.275,233.487,215.275z"/>
-      </g>
-    </g>
-    <g>
-      <g>
-        <path d="M233.487,186.79h-33.08c-5.633,0-10.199,4.567-10.199,10.199s4.566,10.199,10.199,10.199h33.08
-			c5.633,0,10.199-4.567,10.199-10.199S239.12,186.79,233.487,186.79z"/>
-      </g>
-    </g>
-  </svg>
-);
-
 class ConnectedWorking extends React.Component {
   constructor(props) {
     super(props);
@@ -547,15 +499,10 @@ class ConnectedWorking extends React.Component {
     this.keyboard = null;
 
     this.state = {
-      inputName: '',
       manualDiagShow: false
     };
 
     this.toggleOPMode = this.toggleOPMode.bind(this);
-  }
-
-  componentDidMount() {
-    // this.props.setCarByPass(false);
   }
 
   shouldComponentUpdate() {
@@ -565,18 +512,6 @@ class ConnectedWorking extends React.Component {
   componentDidUpdate(prevProps) {
     this.prevOperationStatus = prevProps.operations.operationStatus;
   }
-
-  componentWillUnmount() {
-    // this.props.setCarByPass(true);
-  }
-
-  handleClickOpenOee = e => {
-    // this.props.openOeeDiag(true);
-  };
-
-  handleClickResume = e => {
-    // this.props.setOrderStatus('Doing');
-  };
 
   toggleOPMode() {
     const { isAutoMode } = this.props;
@@ -589,7 +524,7 @@ class ConnectedWorking extends React.Component {
     });
   };
 
-  openManualDiag = (e, input) => {
+  openManualDiag = (e, input,t) => {
     e.preventDefault();
     const { keyboardInput, NewCar } = this.props;
     keyboardInput({
@@ -597,8 +532,8 @@ class ConnectedWorking extends React.Component {
         NewCar(text, OPERATION_SOURCE.MANUAL);
       },
       text: e.target.value,
-      title: input === 'vin' ? 'VIN/KNR' : 'VEHICLE TYPE',
-      label: input === 'vin' ? 'VIN/KNR' : 'VEHICLE TYPE'
+      title: t(`Operation.Input.${input}`),
+      label: t(`Operation.Input.${input}`)
     });
   };
 
@@ -643,7 +578,7 @@ class ConnectedWorking extends React.Component {
       },
       {
         key: 'WorkStatus',
-        value: t(`Operation.Info.WorkStatus.${operations.operationStatus}`),
+        value: t(`Operation.Display.${operations.operationStatus}`),
         displayTitle: t('Operation.Info.WorkStatus.Title')
       },
       // {
@@ -658,7 +593,7 @@ class ConnectedWorking extends React.Component {
       },
       {
         key: 'Gun',
-        value: toolSvg(tools.status === 'connected' ? successColor : dangerColor),
+        value: toolSvg(tools.status === 'connected' ? successColor : dangerColor,{ width: '4vh', height: '4vh', }),
         displayTitle: t('Operation.Info.Tool.Title')
       }
     ];
@@ -747,7 +682,7 @@ class ConnectedWorking extends React.Component {
       logo
     } = this.props;
 
-    const { inputName, manualDiagShow } = this.state;
+    const { manualDiagShow } = this.state;
 
     let batch = '0/0';
     let redoBatch = '0/0';
@@ -776,11 +711,6 @@ class ConnectedWorking extends React.Component {
     // const showManualCarType = configs.operationSettings.opMode === 'op';
 
     const carTypeSize = configs.operationSettings.opMode === 'op' ? 5 : 3;
-
-    const carTypeClass =
-      configs.operationSettings.opMode === 'op'
-        ? classes.LeftTop1
-        : classes.LeftTop2;
 
     const manualEnable =
       (configs.operationSettings.opMode === 'op' &&
@@ -851,11 +781,7 @@ class ConnectedWorking extends React.Component {
                   >
                     <div className={classes.LeftTabContiner}>
                       <h4 className={classes.LeftTopDes}>
-                        <p
-                          // href="#pablo"
-                          className={classes.MarginTopBottom5}
-                          // onClick={e => e.preventDefault()}
-                        >
+                        <p className={classes.MarginTopBottom5}>
                           车序:
                         </p>
                       </h4>
@@ -870,7 +796,7 @@ class ConnectedWorking extends React.Component {
                 <Paper
                   className={classes.LeftTopTab}
                   component="button"
-                  onClick={e => this.openManualDiag(e, 'carType')}
+                  onClick={e => this.openManualDiag(e, 'carType',t)}
                   disabled={
                     !manualEnable ||
                     configs.operationSettings.opMode === 'order'
@@ -878,11 +804,7 @@ class ConnectedWorking extends React.Component {
                 >
                   <div className={classes.LeftTabContiner}>
                     <h4 className={classes.LeftTopDes}>
-                      <p
-                        // href="#pablo"
-                        className={classes.MarginTopBottom5}
-                        // onClick={e => e.preventDefault()}
-                      >
+                      <p className={classes.MarginTopBottom5}>
                         车型:
                       </p>
                     </h4>
@@ -896,16 +818,12 @@ class ConnectedWorking extends React.Component {
                 <Paper
                   className={classes.LeftTopTab}
                   component="button"
-                  onClick={e => this.openManualDiag(e, 'vin')}
+                  onClick={e => this.openManualDiag(e, 'vin',t)}
                   disabled={!manualEnable}
                 >
                   <div className={classes.LeftTabContiner}>
                     <h4 className={classes.LeftTopDes}>
-                      <p
-                        // href="#pablo"
-                        className={classes.MarginTopBottom5}
-                        // onClick={e => e.preventDefault()}
-                      >
+                      <p className={classes.MarginTopBottom5}>
                         VIN/KNR:
                       </p>
                     </h4>
@@ -979,11 +897,7 @@ class ConnectedWorking extends React.Component {
                       display: 'flex',
                       flexDirection: 'column'
                     }}>
-                      <p
-                        // href="#pablo"
-                        className={classes.RightDescription}
-                        // onClick={e => e.preventDefault()}
-                      >
+                      <p className={classes.RightDescription}>
                         拧紧点
                       </p>
                     </div>
@@ -1010,11 +924,7 @@ class ConnectedWorking extends React.Component {
                       display: 'flex',
                       flexDirection: 'column'
                     }}>
-                      <p
-                        // href="#pablo"
-                        className={classes.RightDescription}
-                        // onClick={e => e.preventDefault()}
-                      >
+                      <p className={classes.RightDescription}>
                         可拧紧次数
                       </p>
                     </div>
