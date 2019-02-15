@@ -140,6 +140,8 @@ class MrpRoutingWorkcenter(models.Model):
 
     @api.multi
     def get_operation_points(self):
+        if not self:
+            return []
         self.ensure_one()
         vals = []
         for point in self.operation_point_ids:
