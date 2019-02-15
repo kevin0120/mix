@@ -28,6 +28,7 @@ type Service struct {
 	diag            Diagnostic
 	Seq             int
 	mtxSeq          sync.Mutex
+	responses       ResponseQueue
 	configValue     atomic.Value
 	Msgs            chan AndonMsg
 	requestTaskInfo chan string
@@ -63,9 +64,11 @@ func NewService(d Diagnostic, c Config, h *httpd.Service, ws *wsnotify.Service) 
 			cfg: &c.DB,
 			eng: nil,
 		},
-		mtxSeq: sync.Mutex{},
+		mtxSeq:    sync.Mutex{},
+		responses: ResponseQueue{},
 	}
 
+	s.responses.Init()
 	s.configValue.Store(c)
 	return s
 
@@ -249,8 +252,9 @@ func (s *Service) manage() {
 				s.write(PakcageMsg(MSG_GUID_REQ_ACK, s.GetSequenceNum(), d))
 			case MSG_VEHICLE_REQ_ACK:
 				if msg.Data != nil {
+					workcenterCode := s.responses.getAndRemove(msg.Seq)
 					strData, _ := json.Marshal(msg.Data)
-					v := AndonTask{}
+					v := AndonTask{Workcenter: workcenterCode.(string)}
 					err := json.Unmarshal(strData, &v)
 					if err == nil {
 						t, _ := json.Marshal(v)
@@ -390,8 +394,17 @@ func (s *Service) getVehicle(ctx iris.Context) {
 		return
 	}
 
-	// 和andon通信，根据vin查询对应车辆, 通过websocket推送车辆信息给hmi
-	payload := PakcageMsg(MSG_VEHICLE_REQ, s.GetSequenceNum(), AndonVehicle{Vin: vin})
+	workcenterCode := ctx.URLParam("workcenter_code")
+	if workcenterCode == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("workcenter_code is required")
+		return
+	}
+
+	// 和andon通信，根据vin查询对应车辆, 收到响应后通过websocket推送车辆信息给hmi
+	seq := s.GetSequenceNum()
+	s.responses.update(seq, workcenterCode)
+	payload := PakcageMsg(MSG_VEHICLE_REQ, seq, AndonVehicle{Vin: vin})
 	if err := s.write(payload); err != nil {
 		ctx.Writef(fmt.Sprintf("Try to get vehicle: %s", vin))
 		ctx.StatusCode(iris.StatusBadRequest)
