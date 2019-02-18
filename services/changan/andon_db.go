@@ -12,7 +12,7 @@ type AndonDB struct {
 }
 
 func (adb *AndonDB) StartService() error {
-	sConn := fmt.Sprintf("sqlserver://%s:%s@%s?database=%s",
+	sConn := fmt.Sprintf("sqlserver://%s:%s@%s?database=%s&connection+timeout=6",
 		adb.cfg.User,
 		adb.cfg.Password,
 		adb.cfg.Url,
