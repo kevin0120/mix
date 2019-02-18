@@ -6,6 +6,7 @@ import { jobManual } from './api/operation';
 import { ANDON, OPERATION } from '../actions/actionTypes';
 import { watch } from './utils';
 import { setNewNotification } from '../actions/notification';
+import { addNewStory, STORY_TYPE } from './timeline';
 
 const workers = {
   [ANDON.NEW_DATA]: [call, handleAndonData],
@@ -74,6 +75,12 @@ function* handleAndonScanner(action) {
       return;
     }
     const { vin } = action;
+    yield call(addNewStory, STORY_TYPE.INFO, 'scanner', vin);
+    yield put({
+      type: OPERATION.TRIGGER.NEW_DATA,
+      carID:vin,
+      carType: null
+    });
     const { aiis, workcenterCode } = state.setting.system.connections;
     const resp = yield call(andonVehicleApi, aiis, vin, workcenterCode);
     if (resp) {

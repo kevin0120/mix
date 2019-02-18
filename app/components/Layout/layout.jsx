@@ -153,7 +153,6 @@ class ConnectedLayout extends React.PureComponent {
     } = this.props;
     const isAutoMode = workMode === 'auto';
     const { name, avatar, role } = usersInfo[0];
-    console.log(orderStatus,workMode);
     if (
       lodash.includes(['Ready', 'PreDoing', 'Timeout', 'Init'], orderStatus)
       // || !isAutoMode
@@ -241,9 +240,7 @@ class ConnectedLayout extends React.PureComponent {
                         // component={Link}
                         // to={route.url}
                         onClick={() => {
-                          console.log('route:',disabled);
                           if(disabled){
-                            console.log('route return');
                             return;
                           }
                           if (

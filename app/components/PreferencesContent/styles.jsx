@@ -3,7 +3,7 @@ import customSelectStyle from '../../common/jss/customSelectStyle';
 export default theme => ({
   ...customSelectStyle,
   section: {
-    overflowY: 'scroll',
+    overflowY: 'auto',
     // flex: 1,
     height: '100%'
   },
@@ -26,7 +26,7 @@ export default theme => ({
     margin: '10px 20px'
   },
   modalRoot: {
-    overflow: 'auto',
+    overflowY: 'auto',
     display: 'block'
   },
   inputItem: {

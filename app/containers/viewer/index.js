@@ -87,7 +87,7 @@ class Viewer extends React.Component {
       <I18n ns="translations">
         {t => (
           <div className={classes.root}>
-            <AppBarBack />
+            <AppBarBack/>
             <LeftMenuWithAvatar>
               <MenuList>{this.genMenuList(t)}</MenuList>
             </LeftMenuWithAvatar>
@@ -98,40 +98,39 @@ class Viewer extends React.Component {
                   onChange={this.handleChangeTab}
                   style={{
                     display: 'flex',
-                    flex: 1,
+                    flex: 1
                   }}
                 >
-                  <Tab label="Image" />
-                  <Tab label="File" />
+                  <Tab label={t('Viewer.Image')}/>
+                  <Tab label={t('Viewer.File')}/>
                 </Tabs>
-                <div style={{display:'flex',flex:1,height:'calc(100% - 45px)'}}>
-                {currentTab === 0 && (
-                  <img
-                    alt="operation image"
-                    src={data.detail.img}
-                    style={{
-                      display: 'flex',
-                      flex: 1,
-                      maxHeight: '100%',
-                      maxWidth: '100%'
-                    }}
-                  />
-                )}
-                {currentTab === 1 && (
-                  <iframe
-                    title="worksheet"
-                    src={`http://${odooHost}/web/static/lib/pdfjs/web/viewer.html?file=%2Fapi%2Fv1%2Fworksheet%3Fmodel%3Dmrp.routing.workcenter%26field%3Dworksheet%26id%3D${
-                      data.detail.id
-                    }`}
-                    // file={pdf}
-                    // src={`/home/cosine/文档/001.课程/大四上/储能技术/储能技术的核心问题.pdf`}
-                    style={{
-                      width: '100%',
-                      height: '100%'
-                    }}
-                    // plugins
-                  />
-                )}
+                <div style={{ display: 'flex', flex: 1, height: 'calc(100% - 45px)' }}>
+                  {currentTab === 0 && (
+                    <img
+                      alt="operation image"
+                      src={data.detail.img}
+                      style={{
+                        height: '100%',
+                        width: '100%',
+                        objectFit:'contain'
+                      }}
+                    />
+                  )}
+                  {currentTab === 1 && (
+                    <iframe
+                      title="worksheet"
+                      src={`http://${odooHost}/web/static/lib/pdfjs/web/viewer.html?file=%2Fapi%2Fv1%2Fworksheet%3Fmodel%3Dmrp.routing.workcenter%26field%3Dworksheet%26id%3D${
+                        data.detail.id
+                        }`}
+                      // file={pdf}
+                      // src={`/home/cosine/文档/001.课程/大四上/储能技术/储能技术的核心问题.pdf`}
+                      style={{
+                        width: '100%',
+                        height: '100%'
+                      }}
+                      // plugins
+                    />
+                  )}
                 </div>
               </div>
             ) : null}

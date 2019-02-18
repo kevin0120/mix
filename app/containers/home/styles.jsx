@@ -41,19 +41,20 @@ const styles = theme => ({
   container: {
     padding: '40px 10px',
     textAlign: 'center',
+    overflowY:'auto',
     marginTop: 0
   },
   card: {
-    width: '15%',
-    minWidth: '280px',
-    height: '320px',
+    width:'22vw',
+    maxWidth:'280px',
+    maxHeight: '320px',
     borderRadius: '4px'
   },
   cardActionArea: {
     height: '100%'
   },
   cardGridItem: {
-    paddingRight: '60px'
+    padding:'1vw'
   },
   cardContent: {
     position: 'relative',

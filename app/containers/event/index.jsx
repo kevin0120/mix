@@ -48,7 +48,7 @@ const styles = {
     flexGrow: 1,
     zIndex: 1,
     height: '100%',
-    overflow: 'scroll',
+    overflowY: 'auto',
     position: 'relative',
     display: 'flex',
     width: '100%'
