@@ -4,6 +4,8 @@ import { cloneDeep } from 'lodash';
 import { NETWORK } from '../actions/actionTypes';
 import saveConfigs from '../actions/userConfigs';
 import { watch } from './utils';
+import { setNewNotification } from '../actions/notification';
+
 
 const lodash = require('lodash');
 const util = require('util');
@@ -35,7 +37,8 @@ const workers = {
   [NETWORK.CHECK]: doCheckCurrentConnection,
   [NETWORK.SCAN]: doScan,
   [NETWORK.SET]: doSet,
-  [NETWORK.SIGNAL]: doCheckActiveSignal
+  [NETWORK.SIGNAL]: doCheckActiveSignal,
+  [NETWORK.SET_FAIL]:networkFail
 };
 
 export default watch(workers);
@@ -141,7 +144,8 @@ function* doSet(action) {
     if (ret < 0) {
       yield call(execNmcli, 'nmcli con delete default');
       yield put({
-        type: NETWORK.SET_FAIL
+        type: NETWORK.SET_FAIL,
+        message: '网络设置失败'
       });
       return;
     }
@@ -164,12 +168,13 @@ function* doSet(action) {
         type: NETWORK.SET_OK,
         data
       });
-      yield put(saveConfigs(section, data));
       yield call(execNmcli, 'nmcli con up default');
+      yield put(saveConfigs(section, data));
     } else {
       yield call(execNmcli, 'nmcli con delete default');
       yield put({
-        type: NETWORK.SET_FAIL
+        type: NETWORK.SET_FAIL,
+        message: '网络设置失败'
       });
     }
   } catch (e) {
@@ -200,6 +205,14 @@ function* doScan() {
       console.log(stderr);
     }
   } catch (e) {
+    console.error(e);
+  }
+}
+
+function* networkFail(action){
+  try{
+    yield put(setNewNotification('error',action.message||'无线网络错误'));
+  }catch (e) {
     console.error(e);
   }
 }
