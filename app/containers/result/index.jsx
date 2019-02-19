@@ -184,9 +184,7 @@ class Result extends React.Component {
           <ListItem>
             <ListItemText primary={`车型:   ${selectObj.vehicle_type}`}/>
           </ListItem>
-          <li>
-            <Divider inset/>
-          </li>
+          <Divider component="li"/>
           <ListItem>
             <ListItemText primary={`扭矩: ${selectObj.torque}`}/>
           </ListItem>
@@ -198,6 +196,7 @@ class Result extends React.Component {
           <ListItem>
             <ListItemText primary={`结果: ${selectObj.result}`}/>
           </ListItem>
+          <Divider component="li"/>
           <ListItem>
             <ListItemText primary={`耗时(ms): ${selectObj.spent}`}/>
           </ListItem>
