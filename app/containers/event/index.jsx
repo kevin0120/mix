@@ -15,6 +15,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Divider from '@material-ui/core/Divider';
 import { I18n } from 'react-i18next';
 import SweetAlert from 'react-bootstrap-sweetalert';
+import Alert from '../../components/Alert';
 
 // core components
 import Input from '@material-ui/core/Input';
@@ -151,7 +152,7 @@ class Event extends React.Component {
           )
         }))
       });
-    }).catch((e)=>console.error(e));
+    }).catch((e) => console.error(e));
   }
 
   handleClose = () => {
@@ -173,7 +174,7 @@ class Event extends React.Component {
                 <ListItemText primary={`${t('Event.Time')}:   ${selectObj.timestamp}`}/>
               </ListItem>
               <li>
-                <Divider inset/>
+                <Divider />
               </li>
               <ListItem>
                 <ListItemText
@@ -186,7 +187,7 @@ class Event extends React.Component {
                     }`}
                 />
               </ListItem>
-              <Divider inset component="li"/>
+              <Divider  component="li"/>
               <ListItem>
                 <ListItemText primary={`${t('Event.Message')}: ${selectObj.message}`}/>
               </ListItem>
@@ -342,27 +343,24 @@ class Event extends React.Component {
                 </Card>
               </GridItem>
             </GridContainer>
-            {isShow ? (
-              <SweetAlert
-                warning
-                show={isShow}
-                style={{ display: 'block', marginTop: '-100px', top: '35%' }}
-                title={t('Event.Detail')}
-                onConfirm={this.handleClose}
-                onCancel={this.handleClose}
-                confirmBtnCssClass={`${classes.button} ${
-                  classes.successWarn
-                  }`}
-                cancelBtnCssClass={`${classes.button} ${
-                  classes.danger
-                  }`}
-                confirmBtnText={t('Common.Yes')}
-                cancelBtnText={t('Common.No')}
-                showCancel
-              >
-                {Msg}
-              </SweetAlert>
-            ) : null}
+            <Alert
+              warning
+              show={isShow}
+              title={t('Event.Detail')}
+              onConfirm={this.handleClose}
+              onCancel={this.handleClose}
+              confirmBtnCssClass={`${classes.button} ${
+                classes.successWarn
+                }`}
+              cancelBtnCssClass={`${classes.button} ${
+                classes.danger
+                }`}
+              confirmBtnText={t('Common.Yes')}
+              cancelBtnText={t('Common.No')}
+              showCancel
+            >
+              {Msg}
+            </Alert>
           </React.Fragment>
         )}
       </I18n>

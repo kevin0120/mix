@@ -9,6 +9,7 @@ import Divider from '@material-ui/core/Divider';
 import { I18n } from 'react-i18next';
 
 import SweetAlert from 'react-bootstrap-sweetalert';
+import Alert from '../../components/Alert';
 import withStyles from '@material-ui/core/styles/withStyles';
 import Assignment from '@material-ui/icons/Assignment';
 import Dvr from '@material-ui/icons/Dvr';
@@ -179,7 +180,7 @@ class Result extends React.Component {
           <ListItem>
             <ListItemText primary={`VIN:   ${selectObj.vin}`}/>
           </ListItem>
-          <Divider inset component="li"/>
+          <Divider component="li"/>
           <ListItem>
             <ListItemText primary={`车型:   ${selectObj.vehicle_type}`}/>
           </ListItem>
@@ -189,22 +190,22 @@ class Result extends React.Component {
           <ListItem>
             <ListItemText primary={`扭矩: ${selectObj.torque}`}/>
           </ListItem>
-          <Divider inset component="li"/>
+          <Divider component="li"/>
           <ListItem>
             <ListItemText primary={`角度: ${selectObj.angle}`}/>
           </ListItem>
-          <Divider inset component="li"/>
+          <Divider component="li"/>
           <ListItem>
             <ListItemText primary={`结果: ${selectObj.result}`}/>
           </ListItem>
           <ListItem>
             <ListItemText primary={`耗时(ms): ${selectObj.spent}`}/>
           </ListItem>
-          <Divider inset component="li"/>
+          <Divider component="li"/>
           <ListItem>
             <ListItemText primary={`批次:   ${selectObj.batch}`}/>
           </ListItem>
-          <Divider inset component="li"/>
+          <Divider component="li"/>
           <ListItem>
             <ListItemText primary={`拧紧时间:   ${selectObj.timestamp}`}/>
           </ListItem>
@@ -392,23 +393,20 @@ class Result extends React.Component {
                 </Card>
               </GridItem>
             </GridContainer>
-            {isShow ? (
-              <SweetAlert
-                info
-                show={isShow}
-                style={{ display: 'block', marginTop: '-100px', top: '35%' }}
-                title="结果详情"
-                onConfirm={this.handleClose}
-                onCancel={this.handleClose}
-                confirmBtnCssClass={`${classes.button} ${classes.success}`}
-                cancelBtnCssClass={`${classes.button} ${classes.danger}`}
-                confirmBtnText={t('Common.Yes')}
-                cancelBtnText={t('Common.No')}
-                showCancel
-              >
-                {Msg}
-              </SweetAlert>
-            ) : null}
+            <Alert
+              info
+              show={isShow}
+              title="结果详情"
+              onConfirm={this.handleClose}
+              onCancel={this.handleClose}
+              confirmBtnCssClass={`${classes.button} ${classes.success}`}
+              cancelBtnCssClass={`${classes.button} ${classes.danger}`}
+              confirmBtnText={t('Common.Yes')}
+              cancelBtnText={t('Common.No')}
+              showCancel
+            >
+              {Msg}
+            </Alert>
           </React.Fragment>
         )}
       </I18n>
