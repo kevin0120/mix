@@ -183,5 +183,14 @@
   "Viewer": {
     "Image": "Image",
     "File": "File"
+  },
+  "Table": {
+    "Previous": "Previous",
+    "Next": "Next",
+    "Loading": "Loading...",
+    "NoRowsFound": "No rows found",
+    "Page": "Page",
+    "of": "of",
+    "rows": "rows"
   }
 }

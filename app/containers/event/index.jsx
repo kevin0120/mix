@@ -25,6 +25,7 @@ import Card from '../../components/Card/Card';
 import CardBody from '../../components/Card/CardBody';
 import CardIcon from '../../components/Card/CardIcon';
 import CardHeader from '../../components/Card/CardHeader';
+import CustomReactTable from '../../components/CustomReactTable';
 
 import { Query, CreateDailyLogger, Warn } from '../../logger';
 
@@ -212,7 +213,9 @@ class Event extends React.Component {
                     <h4 className={classes.cardIconTitle}>{t('main.event')}</h4>
                   </CardHeader>
                   <CardBody>
-                    <ReactTable
+                    <CustomReactTable
+                      translate={t}
+                      showPageJump={false}
                       loading={loading}
                       data={data}
                       getTrProps={(state, rowInfo) => {
@@ -292,35 +295,36 @@ class Event extends React.Component {
                           Header: t('Event.Message'),
                           accessor: 'message',
                           sortable: false,
-                          filterMethod: (filter, row) => lodash.includes(
-                              lodash.toUpper(row[filter.id]),
-                              lodash.toUpper(messageFilter || '')
-                            ),
-                          Filter: ({ onChange }) => (
-                            <Input
-                              onClick={() => {
-                                keyboardInput({
-                                  onSubmit: text => {
-                                    this.setState(
-                                      { messageFilter: text },
-                                      () => {
-                                        onChange(messageFilter);
-                                      }
-                                    );
-                                  },
-                                  text: messageFilter,
-                                  title: 'Message',
-                                  label: 'Message'
-                                });
-                              }}
-                              classes={{
-                                root: classes.InputRoot,
-                                input: classes.InputInput
-                              }}
-                              // style={{ width: "100%" ,height:'36px'}}
-                              value={messageFilter || ''}
-                            />
-                          )
+                          filterable: false
+                          // filterMethod: (filter, row) => lodash.includes(
+                          //     lodash.toUpper(row[filter.id]),
+                          //     lodash.toUpper(messageFilter || '')
+                          //   ),
+                          // Filter: ({ onChange }) => (
+                          //   <Input
+                          //     onClick={() => {
+                          //       keyboardInput({
+                          //         onSubmit: text => {
+                          //           this.setState(
+                          //             { messageFilter: text },
+                          //             () => {
+                          //               onChange(messageFilter);
+                          //             }
+                          //           );
+                          //         },
+                          //         text: messageFilter,
+                          //         title: 'Message',
+                          //         label: 'Message'
+                          //       });
+                          //     }}
+                          //     classes={{
+                          //       root: classes.InputRoot,
+                          //       input: classes.InputInput
+                          //     }}
+                          //     // style={{ width: "100%" ,height:'36px'}}
+                          //     value={messageFilter || ''}
+                          //   />
+                          // )
                         },
                         {
                           Header: t('Event.Actions'),

@@ -35,6 +35,7 @@ import CardHeader from '../../components/Card/CardHeader';
 import { defaultClient } from '../../common/utils';
 import Input from '@material-ui/core/Input';
 import withKeyboard from '../../components/Keyboard';
+import CustomReactTable from '../../components/CustomReactTable';
 
 const lodash = require('lodash');
 const dayjs = require('dayjs');
@@ -144,7 +145,7 @@ class Result extends React.Component {
                     color="warning"
                     className="edit"
                   >
-                    <Dvr />
+                    <Dvr/>
                   </Button>{' '}
                 </div>
               )
@@ -176,36 +177,36 @@ class Result extends React.Component {
       <div>
         <List>
           <ListItem>
-            <ListItemText primary={`VIN:   ${selectObj.vin}`} />
+            <ListItemText primary={`VIN:   ${selectObj.vin}`}/>
           </ListItem>
-          <Divider inset component="li" />
+          <Divider inset component="li"/>
           <ListItem>
-            <ListItemText primary={`车型:   ${selectObj.vehicle_type}`} />
+            <ListItemText primary={`车型:   ${selectObj.vehicle_type}`}/>
           </ListItem>
           <li>
-            <Divider inset />
+            <Divider inset/>
           </li>
           <ListItem>
-            <ListItemText primary={`扭矩: ${selectObj.torque}`} />
+            <ListItemText primary={`扭矩: ${selectObj.torque}`}/>
           </ListItem>
-          <Divider inset component="li" />
+          <Divider inset component="li"/>
           <ListItem>
-            <ListItemText primary={`角度: ${selectObj.angle}`} />
+            <ListItemText primary={`角度: ${selectObj.angle}`}/>
           </ListItem>
-          <Divider inset component="li" />
+          <Divider inset component="li"/>
           <ListItem>
-            <ListItemText primary={`结果: ${selectObj.result}`} />
+            <ListItemText primary={`结果: ${selectObj.result}`}/>
           </ListItem>
           <ListItem>
-            <ListItemText primary={`耗时(ms): ${selectObj.spent}`} />
+            <ListItemText primary={`耗时(ms): ${selectObj.spent}`}/>
           </ListItem>
-          <Divider inset component="li" />
+          <Divider inset component="li"/>
           <ListItem>
-            <ListItemText primary={`批次:   ${selectObj.batch}`} />
+            <ListItemText primary={`批次:   ${selectObj.batch}`}/>
           </ListItem>
-          <Divider inset component="li" />
+          <Divider inset component="li"/>
           <ListItem>
-            <ListItemText primary={`拧紧时间:   ${selectObj.timestamp}`} />
+            <ListItemText primary={`拧紧时间:   ${selectObj.timestamp}`}/>
           </ListItem>
         </List>
       </div>
@@ -222,14 +223,16 @@ class Result extends React.Component {
                 <Card>
                   <CardHeader color="info" icon>
                     <CardIcon color="info">
-                      <Assignment />
+                      <Assignment/>
                     </CardIcon>
                     <h4 className={classes.cardIconTitle}>
                       {t('main.resultQuery')}
                     </h4>
                   </CardHeader>
                   <CardBody>
-                    <ReactTable
+                    <CustomReactTable
+                      translate={t}
+                      showPageJump={false}
                       data={data}
                       filterable
                       columns={[
