@@ -805,7 +805,7 @@ class ConnectedWorking extends React.Component {
                   <div className={classes.LeftTabContiner}>
                     <h4 className={classes.LeftTopDes}>
                       <p className={classes.MarginTopBottom5}>
-                        车型:
+                        {t('Operation.Input.carType')}:
                       </p>
                     </h4>
                     <p className={classes.cardDescription}>
@@ -824,7 +824,7 @@ class ConnectedWorking extends React.Component {
                   <div className={classes.LeftTabContiner}>
                     <h4 className={classes.LeftTopDes}>
                       <p className={classes.MarginTopBottom5}>
-                        VIN/KNR:
+                        {t('Operation.Input.vin')}:
                       </p>
                     </h4>
                     <p className={classes.cardDescription}>

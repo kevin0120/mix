@@ -56,10 +56,10 @@
     }
   },
   "test": {
-    "masterPC": "MasterPC URL",
-    "HMI": "HMI序列号",
+    "masterPC": "工位控制器URL",
+    "HMI": "人机交互界面序列号",
     "RFID": "RFID链接地址",
-    "IO": "IO模块链接地址"
+    "IO": "输入/输出模块链接地址"
   },
   "editor": {
     "PicSelect": "插入新图片",
@@ -109,12 +109,12 @@
     "Job": "装配过程"
   },
   "HealthCheck": {
-    "MasterPC": "MasterPC",
-    "Controller": "控制器",
+    "MasterPC": "工位控制器",
+    "Controller": "拧紧控制器",
     "IO": "输入/输出模块",
     "RFID": "射频识别模块",
     "Odoo": "后台服务器",
-    "Andon": "Andon"
+    "Andon": "安灯系统"
   },
   "Lock": {
     "Pwd": "请输入密码...",
@@ -128,7 +128,7 @@
   "Operation": {
     "Input": {
       "carType": "车型",
-      "vin": "VIN/KNR"
+      "vin": "VIN/零件号"
     },
     "Processbar": {
       "Init": "系统启动中,请稍后...",
