@@ -71,7 +71,10 @@ const defaultOperations = {
     //   result: '',
     //   batch:''
     // }
-  ]
+  ],
+  previous: {
+    carID: ''
+  }
 };
 
 type actionType = {
@@ -87,7 +90,7 @@ const reducers = {
   [OPERATION.SOURCE.SET]: setSource,
   [OPERATION.OPERATION.FETCH_OK]: newOperation,
   [OPERATION.JOB_MANUAL.OK]: setWorkorderID,
-  [OPERATION.OPERATION.FETCH_FAIL]: operationSwitchReady,
+  [OPERATION.OPERATION.FETCH_FAIL]: operationFetchFail,
   [OPERATION.STARTED]: operationStarted,
   [OPERATION.RESULT.OK]: operationResultOK,
   [OPERATION.RESULT.NOK]: operationResultNOK,
@@ -272,7 +275,7 @@ function setWorkorderID(state, action) {
   };
 }
 
-function operationSwitchReady(state) {
+function operationFetchFail(state) {
   setLedStatusReady();
 
   return {
@@ -378,7 +381,7 @@ function operationFinished(state, action) {
   const { data } = action;
 
   setLedStatusReady();
-
+  const { carID } = state;
   const results = mergeResults(state, data);
 
   return {
@@ -389,7 +392,10 @@ function operationFinished(state, action) {
     lnr: '',
     maxOpTimes: 0,
     failCount: 0,
-    results
+    results,
+    previous: {
+      carID
+    }
   };
 }
 

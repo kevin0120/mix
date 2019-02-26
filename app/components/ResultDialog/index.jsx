@@ -39,7 +39,7 @@ const lodash = require('lodash');
 const mapStateToProps = (state, ownProps) => ({
   show: state.resultDiag.show,
   results: state.operations.results,
-  carID: state.operations.carID,
+  carID: state.operations.previous.carID,
   jobID: state.operations.jobID,
   nextWorkorder: state.ongoingOperation,
   ...ownProps
