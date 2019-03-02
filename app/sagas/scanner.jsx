@@ -1,6 +1,6 @@
 // @flow
 
-import { put, takeLatest } from 'redux-saga/effects';
+import { put, takeLatest, select } from 'redux-saga/effects';
 
 import { SCANNER } from '../actions/actionTypes';
 import { operationTrigger, operationTriggerBlock } from '../actions/operation';
@@ -12,14 +12,20 @@ const lodash = require('lodash');
 function* scannerHandler(action) {
   try {
     const { data, source } = action;
+    const state = yield select();
+    if (state.setting.operationSettings.opMode === 'op'
+      && state.workMode.workMode === 'manual'
+    ) {
+      yield put(operationTrigger(data, null, null, source));
+      return;
+    }
     if (!lodash.isNil(data) && data !== '') {
       if (isCarID(data)) {
-        yield put(operationTrigger( data, null, null, source));
+        yield put(operationTrigger(data, null, null, source));
       } else {
-        yield put(operationTrigger( null, data, null, source));
+        yield put(operationTrigger(null, data, null, source));
       }
       yield put(operationTriggerBlock(false));
-
     }
   } catch (e) {
     console.error(e);
