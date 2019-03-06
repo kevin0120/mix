@@ -498,10 +498,6 @@ class ConnectedWorking extends React.Component {
     this.autoCancel = null;
     this.keyboard = null;
 
-    this.state = {
-      manualDiagShow: false
-    };
-
     this.toggleOPMode = this.toggleOPMode.bind(this);
   }
 
@@ -517,12 +513,6 @@ class ConnectedWorking extends React.Component {
     const { isAutoMode } = this.props;
     // this.props.setAutoMode(!isAutoMode);
   }
-
-  closeManualDiag = () => {
-    this.setState({
-      manualDiagShow: false
-    });
-  };
 
   openManualDiag = (e, input, t) => {
     e.preventDefault();
@@ -681,8 +671,6 @@ class ConnectedWorking extends React.Component {
       enableFocus,
       logo
     } = this.props;
-
-    const { manualDiagShow } = this.state;
 
     let batch = '0/0';
     let redoBatch = '0/0';
@@ -976,7 +964,6 @@ class ConnectedWorking extends React.Component {
               /> : null
             }
             {enableResultDialog ? <ResultDialog/> : null}
-            <ManualDiag show={manualDiagShow} close={this.closeManualDiag}/>
           </Grid>
         )}
       </I18n>
