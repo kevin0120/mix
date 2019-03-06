@@ -167,13 +167,13 @@ export function* watchRushChannel(hmiSN) {
               if (state.workMode.workMode === 'manual' && json.job_id > 0) {
                 if (state.setting.operationSettings.manualFreestyle) {
                   yield put(switch2Ready(false));
-                  state=yield select();
+                  // state=yield select();
                 }
-                const { carID,carType } = state.operations;
+                const { carID } = state.operations;
 
                 yield put(operationTrigger(
                   carID,
-                  carType,
+                  "",
                   json.job_id,
                   OPERATION_SOURCE.MANUAL
                 ));
@@ -224,7 +224,6 @@ export function* watchRushChannel(hmiSN) {
               console.log('rush scanner:', json);
               const { workMode } = state.workMode;
               const { andonEnable } = state.setting.systemSettings;
-
               if (workMode === 'scanner' && andonEnable) {
                 yield put(andonScanner(json.barcode));
                 break;

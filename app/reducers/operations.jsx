@@ -281,9 +281,9 @@ function operationFetchFail(state) {
   return {
     ...state,
     operationStatus: OPERATION_STATUS.READY,
-    carID: '',
-    carType: '',
-    lnr: '',
+    // carID: '',
+    // carType: '',
+    // lnr: '',
     maxOpTimes: 0,
     failCount: 0,
     results: []

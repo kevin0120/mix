@@ -14,7 +14,7 @@ function* scannerHandler(action) {
     const { data, source } = action;
     const state = yield select();
     if (state.setting.operationSettings.opMode === 'op'
-      && state.workMode.workMode === 'manual'
+      // && state.workMode.workMode === 'manual'
     ) {
       yield put(operationTrigger(data, null, null, source));
       return;
