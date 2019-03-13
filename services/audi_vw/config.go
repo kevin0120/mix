@@ -12,6 +12,7 @@ type Config struct {
 	ReqTimeout        toml.Duration `yaml:"req_time_out"`
 	KeepAlivePeriod   toml.Duration `yaml:"keep_alive_period"`
 	GetToolInfoPeriod toml.Duration `yaml:"tool_info_period"`
+	Version           string        `yaml:"string"`
 }
 
 func NewConfig() Config {
@@ -22,6 +23,7 @@ func NewConfig() Config {
 		ReqTimeout:        toml.Duration(time.Microsecond * 3000),
 		KeepAlivePeriod:   toml.Duration(time.Second * 5), //协议层keepalive 周期
 		GetToolInfoPeriod: toml.Duration(time.Hour * 12),  // 半天
+		Version:           "20",
 	}
 }
 

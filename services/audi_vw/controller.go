@@ -204,7 +204,8 @@ func (c *Controller) manage() {
 
 func (c *Controller) getToolInfo() {
 	seq := c.Sequence()
-	p, seq := GeneratePacket(seq, Header_type_request_with_reply, Xml_get_total_count)
+	totalCount := fmt.Sprintf(Xml_get_total_count, c.Srv.config().Version)
+	p, seq := GeneratePacket(seq, Header_type_request_with_reply, totalCount)
 	c.Write([]byte(p), seq)
 }
 
@@ -214,7 +215,8 @@ func (c *Controller) sendKeepalive() {
 	}
 
 	seq := c.Sequence()
-	keepAlivePacket, seq := GeneratePacket(seq, Header_type_keep_alive, Xml_heart_beat)
+	heartBeat := fmt.Sprintf(Xml_heart_beat, c.Srv.config().Version)
+	keepAlivePacket, seq := GeneratePacket(seq, Header_type_keep_alive, heartBeat)
 	c.Write([]byte(keepAlivePacket), seq)
 }
 
@@ -243,7 +245,8 @@ func (c *Controller) sendKeepalive() {
 func (c *Controller) subscribe() {
 
 	seq := c.Sequence()
-	subscribePacket, seq := GeneratePacket(seq, Header_type_request_with_reply, Xml_subscribe)
+	subscribe := fmt.Sprintf(Xml_subscribe, c.Srv.config().Version)
+	subscribePacket, seq := GeneratePacket(seq, Header_type_request_with_reply, subscribe)
 
 	c.Write([]byte(subscribePacket), seq)
 
@@ -363,7 +366,7 @@ func (c *Controller) ToolControl(enable bool, channel int) error {
 		val_enable = 1
 	}
 
-	xmlEnable := fmt.Sprintf(Xml_enable, val_enable, tool_channel)
+	xmlEnable := fmt.Sprintf(Xml_enable, c.Srv.config().Version, val_enable, tool_channel)
 
 	seq := c.Sequence()
 	psetPacket, seq := GeneratePacket(seq, Header_type_request_with_reply, xmlEnable)
@@ -410,7 +413,7 @@ func (c *Controller) PSet(pset int, workorder_id int64, reseult_id int64, count 
 		tool_channel = fmt.Sprintf("<KNR>%d</KNR>", channel)
 	}
 
-	xmlPset := fmt.Sprintf(Xml_pset, c.cfg.SN, workorder_id, reseult_id, count, user_id, pset, tool_channel, tool_channel, tool_channel)
+	xmlPset := fmt.Sprintf(Xml_pset, c.Srv.config().Version, c.cfg.SN, workorder_id, reseult_id, count, user_id, pset, tool_channel, tool_channel, tool_channel)
 
 	seq := c.Sequence()
 	psetPacket, seq := GeneratePacket(seq, Header_type_request_with_reply, xmlPset)

@@ -91,6 +91,7 @@ audi/vw:
   req_time_out: 300ms
   keep_alive_period: 2s
   tool_info_period: 10s
+  version: 20
 
 openprotocol:
   keep_alive_period: 10s
@@ -117,9 +118,9 @@ controller_service:
 #      channel: 51
 #
     - serial_no: 27091400470
-      protocol: OpenProtocol
+      protocol: Audi/VW
       remote_ip: 172.10.1.3
-      port: 4545
+      port: 4700
       tools:
       - gun_serial: 15G01114
         channel: 1
