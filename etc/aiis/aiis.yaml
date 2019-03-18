@@ -78,17 +78,17 @@ minio:
   reupload_interval: 24h
   enable: false
 changan:
-  andon_addr: tcp://127.0.0.1:9002
+  andon_addr: tcp://10.144.13.69:9000
   enable: true
   keepalive_period: 3s
   read_timeout: 10s
   read_buffer_size: 65535
   GUID: 17e2735f-fe49-4d8e-bdb6-81d5af997559
   db:
-    db_url: 192.168.1.10:1433
+    db_url: 127.0.0.1:1433
     db_name: Alias_CVI_Net
     db_user: sa
-    db_pwd: alano+1234567
+    db_pwd: Password1
     max_connection: 60
 
 odoo:

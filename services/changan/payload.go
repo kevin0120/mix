@@ -3,6 +3,13 @@ package changan
 import "encoding/json"
 
 const (
+	ANDON_STATUS_ONLINE  = "online"
+	ANDON_STATUS_OFFLINE = "offline"
+
+	MAX_KEEP_ALIVE_CHECK = 3
+)
+
+const (
 	MSG_TASK            = 1001
 	MSG_TASK_ACK        = 2001
 	MSG_HEART           = 1999
@@ -37,7 +44,7 @@ type AndonGUID struct {
 }
 
 type AndonWorkCenter struct {
-	Workcenter string `json:"workcenter_code"`
+	Workcenters string `json:"workcenter_code"`
 }
 
 type AndonVehicle struct {
@@ -66,7 +73,7 @@ func PakcageMsg(msgType int, seq int, info interface{}) []byte {
 		d := AndonMsg{
 			MsgType: MSG_REGIST,
 			Seq:     seq,
-			Data:    nil,
+			Data:    info,
 		}
 		ret, _ := json.Marshal(d)
 		return ret

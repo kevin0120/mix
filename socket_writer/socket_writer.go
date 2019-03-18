@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+type OnRead func(c net.Conn)
+
 type Controller interface {
 	Read(c net.Conn)
 }
@@ -17,7 +19,7 @@ type SocketWriter struct {
 	KeepAlivePeriod time.Duration
 
 	net.Conn
-
+	OnRead OnRead
 	Controller
 }
 
@@ -87,7 +89,8 @@ func (sw *SocketWriter) Connect(timeout time.Duration) error {
 
 	sw.Conn = c
 
-	go sw.Controller.Read(c)
+	//go sw.Controller.Read(c)
+	go sw.OnRead(c)
 
 	return nil
 }
