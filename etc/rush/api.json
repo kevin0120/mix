@@ -956,6 +956,16 @@
           "type": "integer",
           "description": "用户id",
           "example": 1
+        },
+        "workorder_id": {
+          "type": "integer",
+          "description": "本地工单id",
+          "example": 1
+        },
+        "group_sequence": {
+          "type": "integer",
+          "description": "点位序号",
+          "example": 1
         }
       }
     },
