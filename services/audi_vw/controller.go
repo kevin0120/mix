@@ -249,7 +249,6 @@ func (c *Controller) subscribe() {
 	subscribePacket, seq := GeneratePacket(seq, Header_type_request_with_reply, subscribe)
 
 	c.Write([]byte(subscribePacket), seq)
-
 }
 
 func (c *Controller) Write(buf []byte, seq uint32) {
@@ -289,7 +288,6 @@ func (c *Controller) Connect() error {
 
 			// 订阅数据
 			c.subscribe()
-
 			break
 		}
 
@@ -347,10 +345,11 @@ func (c *Controller) Read(conn net.Conn) {
 		header.Deserialize(headerStr)
 
 		c.Response.update(header.MID, headerStr)
-		//if c.Response.HasResponse(header.MID) {
-		//	c.Response.update(header.MID, headerStr)
-		//	c.response <- headerStr
-		//}
+
+		if header.COD == Header_code_count_incorrect {
+			c.setSequence(MINSEQUENCE)
+		}
+
 	}
 }
 

@@ -307,6 +307,10 @@ func XML2Curve(result *CVI3Result, cur_result *minio.ControllerCurve) {
 				cur_result.CurveContent.CUR_T = append(cur_result.CurveContent.CUR_T, w)
 			}
 		}
+
+		if blc.CUR.SMP.CUR_W == "" {
+			cur_result.CurveContent.CUR_W = cur_result.CurveContent.CUR_T
+		}
 	}
 
 }
