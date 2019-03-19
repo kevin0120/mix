@@ -206,6 +206,7 @@ export function* watchRushChannel(hmiSN) {
                   // 强制放行
                   // yield put({ type: OPERATION.FINISHED, data: [] });
                   yield call(handleIOFunction, IO_FUNCTION.IN.BYPASS);
+                  break;
                 }
 
                 if (json.inputs[getIModeSelect()] === '1') {
