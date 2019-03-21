@@ -602,7 +602,7 @@ msgstr "次序组(多轴)"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_group_id_3925
 msgid "Group id"
-msgstr "Group id"
+msgstr "多轴组"
 
 #. module: sa_base
 #: model:maintenance.equipment.category,name:sa_base.equipment_Gun
@@ -1634,10 +1634,10 @@ msgstr "作业图"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_x_offset
 msgid "x axis offset from left(%)"
-msgstr "x axis offset from left(%)"
+msgstr "x方向拧紧点偏移(%)"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_y_offset
 msgid "y axis offset from top(%)"
-msgstr "y axis offset from top(%)"
+msgstr "y方向拧紧点偏移(%)"
 

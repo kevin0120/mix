@@ -123,12 +123,13 @@ class OperationPoints(models.Model):
     @api.multi
     def write(self, vals):
         ret = None
-        tracked_fields = self.env['operation.point'].fields_get(['max_redo_times', 'program_id'])
+        tracked_fields = self.env['operation.point'].fields_get(['max_redo_times', 'program_id', 'product_id'])
         for point in self:
-            if 'max_redo_times' in vals or 'program_id' in vals:
+            if 'max_redo_times' in vals or 'program_id' in vals or 'product_id' in vals:
                 old_values = {
                     'max_redo_times': point.max_redo_times,
-                    'program_id': point.program_id
+                    'program_id': point.program_id,
+                    'product_id': point.product_id
                 }
                 ret = super(OperationPoints, point).write(vals)  #修改数据
 
