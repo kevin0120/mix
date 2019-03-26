@@ -15,12 +15,12 @@ const fakeHelp = [
   {
     key: 'Version',
     displayTitle: '版本',
-    value: 'v1.0.0-rc5'
+    value: 'v1.0.0-rc6'
   },
   {
     key: 'ReleaseDate',
     displayTitle: '发布时间',
-    value: '2019-02-14'
+    value: '2019-03-26'
   },
   // {
   //   key: 'Contact',
