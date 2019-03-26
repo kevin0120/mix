@@ -25,3 +25,18 @@ export function operationDetailApi(baseURL, operationID) {
       throw e.toString();
     });
 }
+
+// 图片编辑
+export function imageEditApi(baseURL, operationID, points, img) {
+  const fullUrl = `${baseURL}/mrp.routing.workcenter/${operationID}/edit`;
+
+  return defaultClient
+    .put(fullUrl,{
+      points,
+      img
+    })
+    .then(resp => resp)
+    .catch(e => {
+      throw e.toString();
+    });
+}

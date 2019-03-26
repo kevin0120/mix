@@ -20,8 +20,12 @@ import LeftMenuWithAvatar from '../../components/LeftMenuWithAvatar';
 import styles from './styles';
 import {
   fetchOperationListStart,
-  fetchOperationDetailStart
+  fetchOperationDetailStart,
+  editOperation
 } from '../../actions/operationViewer';
+import ImageEditor from '../../components/ImageEditor';
+import { get } from 'lodash';
+
 
 class Viewer extends React.Component {
   constructor(props) {
@@ -80,7 +84,7 @@ class Viewer extends React.Component {
   };
 
   render() {
-    const { classes, data, odooUrl } = this.props;
+    const { classes, data, odooUrl, dispatchEditOperation } = this.props;
     const { currentMenuItem, currentTab } = this.state;
     const odooHost = new URL(odooUrl.value).host;
     return (
@@ -106,16 +110,25 @@ class Viewer extends React.Component {
                 </Tabs>
                 <div style={{ display: 'flex', flex: 1, height: 'calc(100% - 45px)' }}>
                   {currentTab === 0 && (
-                    <img
-                      alt="operation image"
-                      src={data.detail.img}
-                      style={{
-                        height: '100%',
-                        width: '100%',
-                        objectFit:'contain'
-                      }}
-                    />
+                    <React.Fragment>
+                      {/*<img*/}
+                        {/*alt="operation image"*/}
+                        {/*src={data.detail.img}*/}
+                        {/*style={{*/}
+                          {/*height: '100%',*/}
+                          {/*width: '100%',*/}
+                          {/*objectFit: 'contain'*/}
+                        {/*}}*/}
+                      {/*/>*/}
+                      <ImageEditor
+                        doEdit={dispatchEditOperation}
+                        points={data.detail?data.detail.points||[]:[]}
+                        img={data.detail.img}
+                      />
+                    </React.Fragment>
                   )}
+
+
                   {currentTab === 1 && (
                     <iframe
                       title="worksheet"
@@ -149,7 +162,8 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = {
   operationList: fetchOperationListStart,
-  operationDetail: fetchOperationDetailStart
+  operationDetail: fetchOperationDetailStart,
+  dispatchEditOperation: editOperation
 };
 
 const ConnectedViewer = connect(

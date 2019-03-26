@@ -106,7 +106,14 @@ class Image extends React.Component {
             transition: 'transform 1s'
           }}
         >
-          {children}
+          {React.Children.map(children,(child)=>(
+            React.cloneElement(child, {
+            imageSize: {
+              height:this.imageRef.offsetHeight,
+              width:this.imageRef.offsetWidth
+            }
+          })
+          ))}
         </div>
       </div>
     );
