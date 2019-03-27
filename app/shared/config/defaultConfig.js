@@ -227,6 +227,10 @@ export const defaultConfigs = {
     psetContinueMode: false,
     enableFocus: false,
     viewerEnable:true,
+    viewer:{
+      image:'editable',
+      file:true
+    },
     curveEnable:true,
   }
 };

@@ -17,9 +17,4 @@ export default () => ({
   img: {
     width: '100%',
   },
-  circleText:{
-
-  },
-  circleWrap: {
-  },
 });

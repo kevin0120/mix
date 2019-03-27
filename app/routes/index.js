@@ -183,7 +183,7 @@ export const routeConfigs = lodash.filter(
     return !(
       (configs.operationSettings.opMode !== 'order' && ele.name === 'orders')
       || (!configs.systemSettings.curveEnable && ele.name === 'curve')
-      || (!configs.systemSettings.viewerEnable && ele.name === 'viewer')
+      || (!Object.keys(configs.systemSettings.viewer)>0 && ele.name === 'viewer')
       || (!configs.systemSettings.authEnable && ele.name === 'login')
     );
   }

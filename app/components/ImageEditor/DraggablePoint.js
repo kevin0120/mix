@@ -15,11 +15,11 @@ class DraggablePoint extends React.Component {
   };
 
   render() {
-    const { imageSize, point, classes, radius } = this.props;
+    const { imageSize, point, classes, radius, disabled } = this.props;
     const diameter = radius * 2;
     const position = {
-      y: imageSize.height * point.y_offset / 100 - radius,
-      x: imageSize.width * point.x_offset / 100 - radius
+      y: point.y_offset ? imageSize.height * point.y_offset / 100 - radius : 0,
+      x: point.x_offset ? imageSize.width * point.x_offset / 100 - radius : 0
     };
 
     return (
@@ -31,9 +31,10 @@ class DraggablePoint extends React.Component {
         handle=".dragCircle"
         position={position}
         onStop={this.draggableStop}
+        disabled={disabled}
       >
         <div
-          className={'dragCircle'}
+          className="dragCircle"
           style={{
             width: diameter,
             height: diameter,
