@@ -80,9 +80,14 @@ func (h *Handlers) Handle(result interface{}, curve interface{}) {
 	json.Unmarshal([]byte(dbWorkorder.Consumes), &consumes)
 
 	targetConsume := consumes[0]
+	maxGroupSeq := 0
 	for _, v := range consumes {
 		if v.GroupSeq == controllerResult.Seq {
 			targetConsume = v
+		}
+
+		if v.GroupSeq >= maxGroupSeq {
+			maxGroupSeq = v.GroupSeq
 		}
 	}
 
@@ -111,7 +116,7 @@ func (h *Handlers) Handle(result interface{}, curve interface{}) {
 		dbWorkorder:      &dbWorkorder,
 		consume:          &targetConsume,
 		count:            controllerResult.Count,
-		batch:            fmt.Sprintf("%d/%d", targetConsume.GroupSeq, len(consumes)),
+		batch:            fmt.Sprintf("%d/%d", targetConsume.GroupSeq, maxGroupSeq),
 		curveFile:        curveFileName,
 	}
 
