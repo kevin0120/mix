@@ -86,7 +86,7 @@ changan:
   GUID: 17e2735f-fe49-4d8e-bdb6-81d5af997559
   db:
     db_url: 127.0.0.1:1433
-    db_name: Alias_CVI_Net
+    db_name: cvinet
     db_user: sa
     db_pwd: Password1
     max_connection: 60

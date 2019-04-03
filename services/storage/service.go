@@ -104,7 +104,7 @@ func (s *Service) BatchSave(results []*ResultObject) error {
 			oneTimePass = true
 		}
 
-		sql := fmt.Sprintf("SELECT create_operation_result(%v, %v, timestamp '%s', %v, %v, %v, '%s', '%s', %v, '%s', %v, %v, '%s', %v, %v, %v, %v, %v, %v, '%s', '%s', '%s', %v, '%s', %v, '%s', %v, '%s', '%s')",
+		sql := fmt.Sprintf("SELECT create_operation_result(%v, %v, timestamp '%s', %v, %v, %v, '%s', '%s', %v, '%s', %v, %v, '%s', %v, %v, %v, %v, %v, %v, '%s', '%s', '%s', %v, '%s', %v, '%s', %v, '%s', '%s', '%s')",
 			v.OR["pset_m_threshold"],
 			v.OR["pset_m_max"],
 			reflect.ValueOf(v.OR["control_date"]).String(),
@@ -133,7 +133,8 @@ func (s *Service) BatchSave(results []*ResultObject) error {
 			v.OR["nut_no"],
 			v.OR["tightening_id"],
 			reflect.ValueOf(v.OR["vin"]).String(),
-			reflect.ValueOf(v.OR["model"]).String())
+			reflect.ValueOf(v.OR["model"]).String(),
+			reflect.ValueOf(v.OR["tool_sn"]).String())
 
 		err := s.eng.Exec(sql)
 		if err.Error != nil {
