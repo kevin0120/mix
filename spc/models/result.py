@@ -140,7 +140,7 @@ class OperationResult(models.HyperModel):
                                                    quality_state varchar, exception_reason varchar, sent boolean,
                                                    batch varchar,
                                                    order_id bigint, nut_no varchar, r_tightening_id integer,
-                                                   vin_code varchar, vehicle_type varchar)
+                                                   vin_code varchar, vehicle_type varchar, gun_sn varchar)
   returns BIGINT as
 $$
 DECLARE
@@ -206,7 +206,7 @@ BEGIN
            dd.cou_pid,
            job2.code,
            op.workcenter_id,
-           dd.cou_gid,
+           gg.gun_id,
            qp2.id,
            dd.cou_bom_id,
            dd.operation_point_id
@@ -223,6 +223,9 @@ BEGIN
           where pp.id = bom.product_id
             and pp.vehicle_type_code = vehicle_type
             and bom.id = mbl.bom_id) as dd,
+         (select me.id gun_id
+          from public.maintenance_equipment me
+          where me.serial_no = gun_sn) as gg,
          public.product_product pp2,
          public.mrp_routing_workcenter op,
          public.quality_point qp2,
