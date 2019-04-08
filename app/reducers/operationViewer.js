@@ -18,9 +18,13 @@ const operationViewerReducers={
     detail: {},
     loading:false
   }),
-  [OPERATION_VIEWER.EDIT_START]: (state, action) => ({
+  [OPERATION_VIEWER.EDIT_START]: (state) => ({
     ...state,
     loading:true
+  }),
+  [OPERATION_VIEWER.EDIT_END]:(state)=>({
+    ...state,
+    loading:false,
   })
 };
 

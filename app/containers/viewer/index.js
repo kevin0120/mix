@@ -35,11 +35,7 @@ import {
 import ImageEditor from '../../components/ImageEditor';
 import { get } from 'lodash';
 
-const override = css`
-    display: block;
-    margin: auto;
-    border-color: red;
-`;
+
 
 class Viewer extends React.Component {
   constructor(props) {
@@ -111,6 +107,7 @@ class Viewer extends React.Component {
           }}
           points={data.detail ? data.detail.points || [] : []}
           img={data.detail.img}
+          loading={data.loading}
         />
       );
     }
@@ -200,22 +197,6 @@ class Viewer extends React.Component {
               <MenuList>{this.genMenuList(t)}</MenuList>
             </LeftMenuWithAvatar>
             {currentMenuItem !== -1 ? this.renderTabs(t) : null}
-            <Dialog fullScreen
-                    classes={{
-                      root: classes.loadModal
-                    }}
-                    open={data.loading}
-                    style={{ opacity: 0.7 }}
-                    TransitionComponent={this.Transition}
-            >
-              <GridLoader
-                className={override}
-                sizeUnit={'px'}
-                size={50}
-                color={'#36D7B7'}
-                loading={data.loading}
-              />
-            </Dialog>
           </div>
         )}
       </I18n>

@@ -59,10 +59,10 @@ class Image extends React.Component {
     ) {
       this.imageSize = {
         height:
-          ((this.imageRef.offsetHeight || 0) / this.containerRef.offsetHeight) *
+          ((this.imageRef.offsetHeight || this.containerRef.offsetHeight) / this.containerRef.offsetHeight) *
           100,
         width:
-          ((this.imageRef.offsetWidth || 0) / this.containerRef.offsetWidth) *
+          ((this.imageRef.offsetWidth || this.containerRef.offsetWidth) / this.containerRef.offsetWidth) *
           100
       };
     }
@@ -99,21 +99,21 @@ class Image extends React.Component {
         />
         <div
           style={{
-            width: `${this.imageSize.width || 0}%`,
-            height: `${this.imageSize.height || 0}%`,
+            width: `${this.imageSize.width || 100}%`,
+            height: `${this.imageSize.height || 100}%`,
             position: 'absolute',
             ...style,
             transition: 'transform 1s'
           }}
         >
-          {React.Children.map(children,(child)=>(
+          {React.Children.map(children,(child)=> (
             React.cloneElement(child, {
-            imageSize: {
-              height:this.imageRef.offsetHeight,
-              width:this.imageRef.offsetWidth
-            }
-          })
-          ))}
+              imageSize: {
+                height: this.imageRef.offsetHeight || this.containerRef.offsetHeight,
+                width: this.imageRef.offsetWidth || this.containerRef.offsetWidth
+              }
+            })
+            ))}
         </div>
       </div>
     );

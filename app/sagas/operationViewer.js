@@ -1,8 +1,15 @@
 import { call, put, select } from 'redux-saga/effects';
 
 import { OPERATION_VIEWER } from '../actions/actionTypes';
-import { fetchOperationDetailStart } from '../actions/operationViewer';
-import { operationDetailApi, operationListApi, imageEditApi } from './api/operationViewer';
+import {
+  fetchOperationDetailStart,
+  editOperationEnd,
+} from '../actions/operationViewer';
+import {
+  operationDetailApi,
+  operationListApi,
+  imageEditApi
+} from './api/operationViewer';
 import { watch } from './utils';
 import { setNewNotification } from '../actions/notification';
 
@@ -23,6 +30,11 @@ function* fetchOperationList() {
     });
   } catch (e) {
     console.error(e);
+    yield put(setNewNotification('error','获取作业信息失败'));
+    yield put({
+      type: OPERATION_VIEWER.LIST_FETCH_OK,
+      data: []
+    });
   }
 }
 
@@ -38,6 +50,11 @@ function* fetchOperationDetail(action) {
     });
   } catch (e) {
     console.error(e);
+    yield put(setNewNotification('error','获取作业信息失败'));
+    yield put({
+      type: OPERATION_VIEWER.DETAIL_FETCH_OK,
+      data: {}
+    });
   }
 }
 
@@ -58,16 +75,17 @@ function* editOperation(action) {
     const state = yield select();
     const { value: odooUrl } = state.setting.page.odooConnection.odooUrl;
     const response = yield call(imageEditApi, odooUrl, operationID, points, img);
-    console.log(response);
     if (response && response.status === 200) {
       yield put(fetchOperationDetailStart(operationID));
       yield put(setNewNotification('info','作业信息编辑成功'));
 
     }else{
+      yield put(editOperationEnd(false));
       yield put(setNewNotification('error','作业信息编辑失败'));
     }
   } catch (e) {
     console.error(e);
+    yield put(editOperationEnd(false));
     yield put(setNewNotification('error','作业信息编辑失败'));
   }
 }

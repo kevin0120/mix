@@ -15,10 +15,14 @@ import { css } from 'react-emotion';
 import styles from './styles';
 import Image from '../ImageStick/Image';
 import DraggablePoint from './DraggablePoint';
+
+// icons
 import InsertPhotoIcon from '@material-ui/icons/InsertPhoto';
 import QueueIcon from '@material-ui/icons/Queue';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import CancelIcon from '@material-ui/icons/Cancel';
+import EditIcon from '@material-ui/icons/Edit';
 
 const override = css`
     display: block;
@@ -38,16 +42,23 @@ class ImageEditor extends React.Component {
     super(props);
     this.state = {
       points: this.props.points,
-      editing: false
+      editing: false,
+      img: this.props.img
     };
   }
 
   componentWillReceiveProps(nextProps) {
-    const { points } = this.props;
-    if (JSON.stringify(nextProps.points) !== JSON.stringify(points)) {
+    const { points, img, loading } = this.props;
+    if (
+      JSON.stringify(nextProps.points) !== JSON.stringify(points) ||
+      nextProps.img !== img ||
+      nextProps.loading !== loading
+      && nextProps.loading === false
+    ) {
       this.setState({
         points: nextProps.points,
-        editing: false
+        editing: false,
+        img: nextProps.img
       });
     }
   }
@@ -64,10 +75,11 @@ class ImageEditor extends React.Component {
   // 编辑/取消
   switchEdit = () => {
     const { editing } = this.state;
-    const { points } = this.props;
+    const { points, img } = this.props;
     if (editing) {
       this.setState({
-        points
+        points,
+        img
       });
     }
     this.setState({
@@ -101,18 +113,41 @@ class ImageEditor extends React.Component {
 
   // 保存更改
   saveChanges = () => {
-    const { doEdit, img } = this.props;
-    const { points } = this.state;
+    const { doEdit } = this.props;
+    const { points, img, editing } = this.state;
     doEdit({
       points,
       img
     });
-    this.switchEdit();
+    // this.switchEdit();
+
+    this.setState({
+      editing: !editing
+    });
+  };
+
+  setImage = (img) => {
+    this.setState({
+      img
+    });
+  };
+
+  imgChange = (e) => {
+    const fileObj = e.target.files[0];
+    if (fileObj && /^image/.test(fileObj.type)) {
+      const reader = new FileReader();
+      reader.readAsDataURL(fileObj);
+      reader.onload = () => {
+        this.setImage(reader.result);
+      };
+    } else {
+      console.log('ERR! 选择的不是图片');
+    }
   };
 
   buttonsIdle = [
     {
-      icon: <InsertPhotoIcon style={{ fill: '#009688' }}/>,
+      icon: <EditIcon style={{ fill: '#03a9f4' }}/>,
       text: '编辑',
       onClick: this.switchEdit
     }
@@ -120,9 +155,14 @@ class ImageEditor extends React.Component {
 
   buttonsEditing = [
     {
-      icon: null,
+      icon: <CancelIcon style={{ fill: '#f44336' }}/>,
       text: '取消',
       onClick: this.switchEdit
+    },
+    {
+      text: '选择图片',
+      icon: <InsertPhotoIcon style={{ fill: '#009688' }}/>,
+      onClick: this.selectImage
     },
     {
       icon: <QueueIcon style={{ fill: '#ff9800' }}/>,
@@ -135,39 +175,67 @@ class ImageEditor extends React.Component {
       onClick: this.removePoint
     },
     {
-      icon: <CheckCircleIcon style={{ fill: '#f44336' }}/>,
+      icon: <CheckCircleIcon style={{ fill: '#4caf50' }}/>,
       text: '保存',
       onClick: this.saveChanges
     }
   ];
 
-  renderButton = (button,key) => (
-    <Button key={key} onClick={() => button.onClick()}>
-      {button.icon}
-      {button.text}
-    </Button>
-  );
+  renderButton = (button, key) => {
+    if (button.text === '选择图片') {
+      return (
+        <React.Fragment key={key}>
+          <input
+            accept="image/*"
+            id="contained-button-file"
+            type="file"
+            style={{ display: 'none' }}
+            onChange={this.imgChange}
+          />
+          <label htmlFor="contained-button-file">
+            <Button
+              key={key}
+              // variant="contained"
+              component="span"
+            >
+              {button.icon}
+              {button.text}
+            </Button>
+          </label>
+        </React.Fragment>
+      );
+    }
+    return (
+      <Button
+        key={key}
+        onClick={() => button.onClick()}
+      >
+        {button.icon}
+        {button.text}
+      </Button>
+    );
+  };
 
 
   render() {
-    const { classes, img } = this.props;
-    const { points, editing } = this.state;
+    const { classes, loading } = this.props;
+    const { points, editing, img } = this.state;
 
 
     return (
       <div className={classes.imageWrap}>
         <Toolbar>
-          {editing ? this.buttonsEditing.map((button,id) => (
-            this.renderButton(button,id)
-          )) : this.buttonsIdle.map((button,id) => (
-            this.renderButton(button,id)
+          {editing ? this.buttonsEditing.map((button, id) => (
+            this.renderButton(button, id)
+          )) : this.buttonsIdle.map((button, id) => (
+            this.renderButton(button, id)
           ))}
         </Toolbar>
         <div style={{ width: '100%', height: 'calc(100% - 64px)' }}>
           <Image src={img} alt="">
             {points.map((point, idx) => (
               <DraggablePoint
-                key={idx}
+                key={point.sequence}
                 point={point}
                 idx={idx}
                 radius={circleRadius}
@@ -177,6 +245,22 @@ class ImageEditor extends React.Component {
             ))}
           </Image>
         </div>
+        <Dialog fullScreen
+                classes={{
+                  root: classes.loadModal
+                }}
+                open={loading}
+                style={{ opacity: 0.7 }}
+                TransitionComponent={this.Transition}
+        >
+          <GridLoader
+            className={override}
+            sizeUnit={'px'}
+            size={50}
+            color={'#36D7B7'}
+            loading={loading}
+          />
+        </Dialog>
       </div>
     );
   }
