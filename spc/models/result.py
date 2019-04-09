@@ -178,7 +178,7 @@ BEGIN
            co.id,
            mp.id,
            wo.workcenter_id,
-           co.gun_id,
+           me.id,
            mp.product_id,
            co.program_id,
            co.product_id,
@@ -191,6 +191,7 @@ BEGIN
          public.quality_point qp,
          public.mrp_production mp,
          public.product_product pp,
+         public.maintenance_equipment me,
          public.mrp_bom_line mbl
     where wo.id = order_id
       and co.workorder_id = order_id
@@ -198,6 +199,7 @@ BEGIN
       and co.bom_line_id = qp.bom_line_id
       and wo.production_id = mp.id
       and mbl.id = co.bom_line_id
+      and me.serial_no = gun_sn
       and co.product_id = pp.id;
   else
     r_vin_code = vin_code;
