@@ -259,8 +259,17 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) error {
 		// 收到条码
 		ids := DeserializeIDS(pkg.Body)
 
+		bc := ""
+		for _, v := range c.Srv.config().VinIndex {
+			if v < 0 || v > (MAX_IDS_NUM-1) {
+				continue
+			}
+
+			bc += ids[v]
+		}
+
 		barcode := wsnotify.WSScanner{
-			Barcode: ids[0],
+			Barcode: bc,
 		}
 
 		str, _ := json.Marshal(barcode)

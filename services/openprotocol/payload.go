@@ -10,6 +10,7 @@ import (
 
 const (
 	JOB_ACTION_ABORT = "abort"
+	MAX_IDS_NUM      = 4
 )
 
 const (

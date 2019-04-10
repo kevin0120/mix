@@ -12,6 +12,7 @@ type Config struct {
 	SkipJobs          []int         `yaml:"skip_job"`
 	IOTrigger         int           `yaml:"io_trigger"`
 	DataIndex         int           `yaml:"data_index"`
+	VinIndex          []int         `yaml:"vin_index"`
 	GetToolInfoPeriod toml.Duration `yaml:"tool_info_period"`
 }
 
@@ -24,6 +25,7 @@ func NewConfig() Config {
 		SkipJobs:          []int{250},
 		IOTrigger:         0,
 		DataIndex:         1,
+		VinIndex:          []int{0, 1},
 		GetToolInfoPeriod: toml.Duration(time.Hour * 12), // 半天
 	}
 }

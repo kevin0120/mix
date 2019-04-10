@@ -82,7 +82,7 @@ storage:
   db_user: admin
   db_pwd: admin
   max_connection: 60
-  vacuum_period: 2160h0m0s
+  vacuum_period: 2160h
   data_keep: 2160h
 audi/vw:
   port: 4710
@@ -103,9 +103,12 @@ openprotocol:
   io_trigger: 7
 
   # 0:vin 1:id2 2:id3 3:id4
-  data_index: 1
+  data_index: 2
+  vin_index:
+    - 0
+    - 1
 
-  tool_info_period: 10s
+  tool_info_period: 10h
 
 # 协议类型: Audi/VW, OpenProtocol
 controller_service:
@@ -117,13 +120,13 @@ controller_service:
 #      port: 4546
 #      channel: 51
 #
-    - serial_no: 27091400470
-      protocol: OpenProtocol
-      remote_ip: 192.168.4.86
-      port: 4545
-      tools:
-      - gun_serial: 18G46139
-        channel: 1
+#    - serial_no: 27231800454
+#      protocol: OpenProtocol
+#      remote_ip: 192.168.4.86
+#      port: 4545
+#      tools:
+#      - gun_serial: 18B50451
+#        channel: 1
 
 #  - serial_no: 27091400470
 #    protocol: OpenProtocol
