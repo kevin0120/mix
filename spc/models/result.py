@@ -14,6 +14,7 @@ import logging
 from odoo.tools import float_round,frozendict, lazy_classproperty, lazy_property, ormcache, \
                    Collector, LastOrderedSet, OrderedSet
 
+from sa_base.models import base_model
 
 from collections import defaultdict, MutableMapping, OrderedDict
 from odoo.tools import frozendict
@@ -21,7 +22,7 @@ from odoo.tools import frozendict
 _logger = logging.getLogger(__name__)
 
 
-class OperationResult(models.HyperModel):
+class OperationResult(base_model.HyperModel):
     _name = "operation.result"
 
     sequence = fields.Integer('sequence', default=1)

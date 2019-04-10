@@ -4,9 +4,10 @@
 from odoo import fields,models,api,_
 from odoo.exceptions import ValidationError
 import odoo.addons.decimal_precision as dp
+from sa_base.models import base_model
 
 
-class OperationResult(models.HyperModel):
+class OperationResult(base_model.HyperModel):
     _inherit = "operation.result"
 
     @api.multi

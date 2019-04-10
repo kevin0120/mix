@@ -14,7 +14,8 @@ MASTER_WROKORDERS_API = '/rush/v1/mrp.routing.workcenter'
 
 
 class MrpRoutingWorkcenter(models.Model):
-    _inherit = 'mrp.routing.workcenter'
+    _name = 'mrp.routing.workcenter'
+    _inherit = ['mrp.routing.workcenter', 'mail.thread']
 
     workcenter_id = fields.Many2one('mrp.workcenter', copy=False)
 
