@@ -101,7 +101,3 @@ ENV/
 
 .idea/
 
-quality/
-quality_mrp/
-mrp_maintenance/
-mrp_workorder/
