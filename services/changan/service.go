@@ -314,7 +314,8 @@ func (s *Service) manage() {
 
 				for _, v := range tasks {
 					t, _ := json.Marshal(v)
-					s.WS.WSSendTask(v.Workcenter, string(t))
+					s.WS.WSSendTask(strings.TrimSpace(v.Workcenter)+ANDON_WORKCENTER_LEFT, string(t))
+					s.WS.WSSendTask(strings.TrimSpace(v.Workcenter)+ANDON_WORKCENTER_RIGHT, string(t))
 				}
 				s.Write(PakcageMsg(MSG_TASK_ACK, msg.Seq, nil))
 			case MSG_GET_TASK_ACK:

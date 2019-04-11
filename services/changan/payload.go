@@ -7,6 +7,9 @@ const (
 	ANDON_STATUS_OFFLINE = "offline"
 
 	MAX_KEEP_ALIVE_CHECK = 3
+
+	ANDON_WORKCENTER_LEFT  = "L"
+	ANDON_WORKCENTER_RIGHT = "R"
 )
 
 const (
