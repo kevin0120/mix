@@ -88,6 +88,7 @@ func (s *Service) Config() Config {
 }
 
 func (s *Service) Write(buf []byte) {
+	s.diag.Debug(fmt.Sprintf("andon send:%s\n", string(buf)))
 	s.writeBuffer <- buf
 }
 
@@ -273,7 +274,7 @@ func (s *Service) manage() {
 			if s.KeepAliveCount() >= MAX_KEEP_ALIVE_CHECK {
 				go s.updateStatus(ANDON_STATUS_OFFLINE)
 				s.updateKeepAliveCount(0)
-				continue
+				return
 			}
 			if s.KeepAliveDeadLine().Before(time.Now()) {
 				//到达了deadline
