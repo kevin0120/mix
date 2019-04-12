@@ -12,12 +12,11 @@ odoo.define('web_widget_echart', function (require) {
     var EChartWidget = form_common.AbstractField.extend({
         render_value: function () {
             var val = JSON.parse(this.get('value'));
-            console.log(val);
             var chart = echarts.init(this.el, null, {width: 900, height: 500});
             var xLabel = 'cur_w';
             var yLabel = 'cur_m';
 
-            let series = [];
+            var series = [];
             for (var v in val) {
                 if (val[v]) {
                     series.push({
@@ -34,7 +33,6 @@ odoo.define('web_widget_echart', function (require) {
                     })
                 }
             }
-            console.log(series);
             var option = {
                 title: {
                     text: ''
