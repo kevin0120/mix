@@ -15,18 +15,19 @@ minioClient = None
 _wave_cache = LRU(max_size=128)
 
 
-def _create_wave_result_dict(x,data):
-    _ret = dict()
-    _ret['name'] = x
+def _create_wave_result_dict(x, data):
+    # _ret = dict()
+    # _ret['name'] = x
     _data = json.loads(data)
-    _ret['result'] = _data['result']  # 不是dataframe 对象
-    _data.pop('result')
-    _data[u'{0}'.format(x)] = _data['cur_m']
-    _data.pop('cur_m')
-    _ret['wave'] = DataFrame.from_dict(_data)
-    _wave_cache[x] = _ret  # 将其加入缓存
+    # _ret['result'] = _data['result']  # 不是dataframe 对象
+    # _data.pop('result')
+    # _data[u'{0}'.format(x)] = _data['cur_m']
+    # _data.pop('cur_m')
+    # _ret['wave'] = DataFrame.from_dict(_data)
+    _data['name'] = x.split('.')[0]
+    _wave_cache[x] = _data  # 将其加入缓存
 
-    return _ret
+    return _data
 
 
 class Wave(models.TransientModel):
@@ -40,8 +41,8 @@ class Wave(models.TransientModel):
 
     query_date_from = fields.Datetime(string='Query Date From')
     query_date_to = fields.Datetime(string='Query Date to', default=fields.Datetime.now())
-    vehicle_id = fields.Many2one('product.product', string='Vehicle Type', domain=[('sa_type','=','vehicle')])
-    screw_id = fields.Many2one('product.product', string='Screw Type', domain=[('sa_type','=','screw')])
+    vehicle_id = fields.Many2one('product.product', string='Vehicle Type', domain=[('sa_type', '=', 'vehicle')])
+    screw_id = fields.Many2one('product.product', string='Screw Type', domain=[('sa_type', '=', 'screw')])
     assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line')
     segment_id = fields.Many2one('mrp.worksegament', string='Work Segment')
     knr_code = fields.Char(string='KNR')
@@ -67,7 +68,8 @@ class Wave(models.TransientModel):
         if not len(datas):
             self.env.user.notify_warning(u'查询获取结果:0,请重新定义查询参数或等待新结果数据')
             return
-        self.wave = self._get_echart_data(datas, ret)
+        # self.wave = self._get_echart_data(datas, ret)
+        self.wave = datas
 
     def _recreate_minio_client(self):
         global minioClient
@@ -80,20 +82,24 @@ class Wave(models.TransientModel):
                 return None, None
             secruity = False if urlsplit(minio_url).scheme == 'http' else True
             if not minioClient:
-                minioClient = Minio(minio_url.split('://')[-1], access_key=minio_access_key, secret_key=minio_secret_key, secure=secruity)
+                minioClient = Minio(minio_url.split('://')[-1], access_key=minio_access_key,
+                                    secret_key=minio_secret_key, secure=secruity)
             elif minioClient._endpoint_url != minio_url or minioClient._access_key != minio_access_key or minioClient._secret_key != minio_secret_key:
-                minioClient = Minio(minio_url.split('://')[-1], access_key=minio_access_key, secret_key=minio_secret_key, secure=secruity)
+                minioClient = Minio(minio_url.split('://')[-1], access_key=minio_access_key,
+                                    secret_key=minio_secret_key, secure=secruity)
             if not minioClient.bucket_exists(minio_bucket):
                 minioClient.make_bucket(minio_bucket)
             return minioClient, minio_bucket
         except Exception as e:
             return None, None
 
-    def _get_echart_data(self,datas,ret, mark_line_coords):
-        line = Line(u"{0}".format(u'Curve'), u"{0}-{1}".format(self.query_date_from, self.query_date_to), width=1920,height=1080)
+    def _get_echart_data(self, datas, ret, mark_line_coords):
+        line = Line(u"{0}".format(u'Curve'), u"{0}-{1}".format(self.query_date_from, self.query_date_to), width=1920,
+                    height=1080)
         for index, data in enumerate(datas):
             line.add(data['name'].split('.')[0], ret['cur_w'].values, ret[u'{0}'.format(data['name'])].values,
-                     is_smooth=True, line_width=2, is_datazoom_show=True, is_stack=True, mark_line_coords=mark_line_coords,
+                     is_smooth=True, line_width=2, is_datazoom_show=True, is_stack=True,
+                     mark_line_coords=mark_line_coords,
                      datazoom_type='both', tooltip_tragger='axis', mark_line=["min", "max"])
             line.options.get('series')[index].update({'connectNulls': True})
         # line.print_echarts_options()
@@ -128,21 +134,25 @@ class Wave(models.TransientModel):
             except KeyError as e:
                 need_fetch_objects.append(_t)
         try:
-            _datas.extend(map(lambda x: _create_wave_result_dict(x, client.get_object(bucket, x).data.decode('utf-8')), need_fetch_objects)) # 合并结果
+            _datas.extend(map(lambda x: _create_wave_result_dict(x, client.get_object(bucket, x).data.decode('utf-8')),
+                              need_fetch_objects))  # 合并结果
+            print(_datas)
         except Exception as e:
             return [], None, []
-        if len(_datas) > 1:
-            for i in range(len(_datas) -1):
-                ret = _datas[i]['wave'].merge(_datas[i+1]['wave'],how='outer', on='cur_w') if i == 0 else ret.merge(_datas[i+1]['wave'],how='outer', on='cur_w')
-        elif len(_datas) == 0:
-            return [], None, []
-        else:
-            ret = _datas[0]['wave']
-        # ret = ret.sort_values(by=['cur_w'])
-        # mark_line_coords =  [[100, 1], [400, 2]]
-        mark_line_coords = []
-
-        return _datas, ret, mark_line_coords
+        return _datas
+        # if len(_datas) > 1:
+        #     for i in range(len(_datas) - 1):
+        #         ret = _datas[i]['wave'].merge(_datas[i + 1]['wave'], how='outer', on='cur_w') if i == 0 else ret.merge(
+        #             _datas[i + 1]['wave'], how='outer', on='cur_w')
+        # elif len(_datas) == 0:
+        #     return [], None, []
+        # else:
+        #     ret = _datas[0]['wave']
+        # # ret = ret.sort_values(by=['cur_w'])
+        # # mark_line_coords =  [[100, 1], [400, 2]]
+        # mark_line_coords = []
+        #
+        # return _datas, ret, mark_line_coords
 
     @api.multi
     def button_show(self):
@@ -191,10 +201,9 @@ class Wave(models.TransientModel):
             return
 
         ids = self.env['operation.result.line'].sudo().bulk_create(datas)
-        target_ids = [x[0] for x in ids ]
+        target_ids = [x[0] for x in ids]
 
         self.sudo().write({'result_line_ids': [(6, 0, target_ids)]})
-
 
     @api.multi
     def button_query(self):

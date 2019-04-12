@@ -4,7 +4,8 @@
 from odoo import fields,models,api,_
 from odoo.exceptions import ValidationError
 import odoo.addons.decimal_precision as dp
-
+from sa_base.models import base_model
+import json
 
 class OperationResult(models.HyperModel):
     _inherit = "operation.result"
@@ -19,11 +20,13 @@ class OperationResult(models.HyperModel):
         wave_form = self.env.ref('wave.spc_compose_wave_wizard_form')
         if not wave_form:
             return None,None
-        datas, ret, mark_line_coords = wave_obj._get_data(self)
+        # datas, ret, mark_line_coords = wave_obj._get_data(self)
+        datas = wave_obj._get_data(self)
         if not len(datas):
             self.env.user.notify_warning(u'查询获取结果:0,请重新定义查询参数或等待新结果数据')
             return None,None
-        wave = wave_obj._get_echart_data(datas, ret,mark_line_coords)
+        # wave = wave_obj._get_echart_data(datas, ret,mark_line_coords)
+        wave = json.dumps(datas)
         wave_wizard_id = self.env['wave.compose.wave'].sudo().create({'wave': wave})
         if not wave_wizard_id:
             return None, None
