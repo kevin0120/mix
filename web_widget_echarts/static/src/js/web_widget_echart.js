@@ -12,11 +12,11 @@ odoo.define('web_widget_echart', function (require) {
     var EChartWidget = form_common.AbstractField.extend({
         render_value: function () {
             var val = JSON.parse(this.get('value'));
-            var chart = echarts.init(this.el, null, {width: 900, height: 500});
+            var chart = echarts.init(this.el, null, {width: 950, height: 600});
             var xLabel = 'cur_w';
             var yLabel = 'cur_m';
-
             var series = [];
+            var names=[];
             for (var v in val) {
                 if (val[v]) {
                     series.push({
@@ -29,8 +29,9 @@ odoo.define('web_widget_echart', function (require) {
                                 {type: 'max', name: '最大值'}
                             ]
                         },
-                        smooth: true
-                    })
+                        smooth: true,
+                    });
+                    names.push(val[v]['name']);
                 }
             }
             var option = {
@@ -64,6 +65,12 @@ odoo.define('web_widget_echart', function (require) {
                         filterMode: 'empty'
                     }
                 ],
+                legend: {
+                    type: 'scroll',
+                    left: 10,
+                    top: 0,
+                    data: names
+                },
                 series
             };
             chart.setOption(option);
