@@ -2,7 +2,7 @@
     <!-- Quality Control From Stock Picking -->
 
     <!-- For Laptop Customized -->
-    <record id="quality_point1" model="quality.point">
+    <record id="quality_point1" model="sa.quality.point">
         <field name="product_id" ref="product.product_product_27"/>
         <field name="product_tmpl_id" ref="product.product_product_27_product_template"/>
         <field name="picking_type_id" ref="stock.picking_type_in"/>
@@ -10,7 +10,7 @@
     </record>
 
     <!-- For Datacard -->
-    <record id="quality_point2" model="quality.point">
+    <record id="quality_point2" model="sa.quality.point">
         <field name="product_id" ref="product.product_delivery_02"/>
         <field name="product_tmpl_id" ref="product.product_delivery_02_product_template"/>
         <field name="picking_type_id" ref="stock.picking_type_in"/>

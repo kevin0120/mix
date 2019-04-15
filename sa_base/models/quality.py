@@ -6,7 +6,7 @@ import json
 
 
 class QualityPoint(models.Model):
-    _inherit = "quality.point"
+    _inherit = "sa.quality.point"
 
     operation_id = fields.Many2one('mrp.routing.workcenter', 'Operation')
 
@@ -49,7 +49,7 @@ class QualityPoint(models.Model):
 
 
 class QualityCheck(models.Model):
-    _inherit = "quality.check"
+    _inherit = "sa.quality.check"
 
     measure_degree = fields.Float('Measure Degree', default=0.0, digits=dp.get_precision('Quality Tests'),
                            track_visibility='onchange')

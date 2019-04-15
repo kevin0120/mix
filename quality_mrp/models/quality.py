@@ -5,14 +5,14 @@ from odoo import api, fields, models, _
 
 
 class QualityPoint(models.Model):
-    _inherit = "quality.point"
+    _inherit = "sa.quality.point"
 
     workcenter_id = fields.Many2one('mrp.workcenter', 'Workcenter')
     code = fields.Selection(related='picking_type_id.code')  # TDE FIXME: necessary ?
 
 
 class QualityAlert(models.Model):
-    _inherit = "quality.alert"
+    _inherit = "sa.quality.alert"
 
     operation_id = fields.Many2one('mrp.workorder', 'Operation')
     workcenter_id = fields.Many2one('mrp.workcenter', 'Work Center')
@@ -39,7 +39,7 @@ class QualityAlert(models.Model):
 
 
 class QualityCheck(models.Model):
-    _inherit = "quality.check"
+    _inherit = "sa.quality.check"
 
     workorder_id = fields.Many2one('mrp.workorder', 'Operation')
     workcenter_id = fields.Many2one('mrp.workcenter', related='workorder_id.workcenter_id', store=True, readonly=True)  # TDE: necessary ?

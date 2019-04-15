@@ -11,19 +11,19 @@ import odoo.addons.decimal_precision as dp
 
 
 class QualityPoint(models.Model):
-    _name = "quality.point"
+    _name = "sa.quality.point"
     _description = "Quality Point"
     _inherit = ['mail.thread']
 
     def __get_default_team_id(self):
-        return self.env['quality.alert.team'].search([], limit=1).id
+        return self.env['sa.quality.alert.team'].search([], limit=1).id
 
     name = fields.Char(
         'Reference', copy=False, default=lambda self: _('New'),
         readonly=True, required=True)
     title = fields.Char('Title')
     team_id = fields.Many2one(
-        'quality.alert.team', 'Team',
+        'sa.quality.alert.team', 'Team',
         default=__get_default_team_id, required=True)
     product_id = fields.Many2one(
         'product.product', 'Product Variant',
@@ -60,7 +60,7 @@ class QualityPoint(models.Model):
     reason = fields.Html('Note')
 
     def _compute_check_count(self):
-        check_data = self.env['quality.check'].read_group([('point_id', 'in', self.ids)], ['point_id'], ['point_id'])
+        check_data = self.env['sa.quality.check'].read_group([('point_id', 'in', self.ids)], ['point_id'], ['point_id'])
         result = dict((data['point_id'][0], data['point_id_count']) for data in check_data)
         for point in self:
             point.check_count = result.get(point.id, 0)
@@ -77,7 +77,7 @@ class QualityPoint(models.Model):
     @api.model
     def create(self, vals):
         if 'name' not in vals or vals['name'] == _('New'):
-            vals['name'] = self.env['ir.sequence'].next_by_code('quality.point') or _('New')
+            vals['name'] = self.env['ir.sequence'].next_by_code('sa.quality.point') or _('New')
         return super(QualityPoint, self).create(vals)
 
     @api.multi
@@ -110,7 +110,7 @@ class QualityPoint(models.Model):
             elif self.measure_frequency_unit == 'month':
                 delta = relativedelta(months=self.measure_frequency_unit_value)
             date_previous = datetime.today() - delta
-            checks = self.env['quality.check'].search([
+            checks = self.env['sa.quality.check'].search([
                 ('point_id', '=', self.id),
                 ('create_date', '>=', date_previous.strftime(DEFAULT_SERVER_DATETIME_FORMAT))], limit=1)
             return not(bool(checks))
@@ -118,7 +118,7 @@ class QualityPoint(models.Model):
 
 
 class QualityAlertTeam(models.Model):
-    _name = "quality.alert.team"
+    _name = "sa.quality.alert.team"
     _description = "Quality Alert Team"
     _inherit = ['mail.alias.mixin', 'mail.thread']
     _order = "sequence, id"
@@ -133,20 +133,20 @@ class QualityAlertTeam(models.Model):
 
     @api.multi
     def _compute_check_count(self):
-        check_data = self.env['quality.check'].read_group([('team_id', 'in', self.ids), ('quality_state', '=', 'none')], ['team_id'], ['team_id'])
+        check_data = self.env['sa.quality.check'].read_group([('team_id', 'in', self.ids), ('quality_state', '=', 'none')], ['team_id'], ['team_id'])
         check_result = dict((data['team_id'][0], data['team_id_count']) for data in check_data)
         for team in self:
             team.check_count = check_result.get(team.id, 0)
 
     @api.multi
     def _compute_alert_count(self):
-        alert_data = self.env['quality.alert'].read_group([('team_id', 'in', self.ids), ('stage_id.done', '=', False)], ['team_id'], ['team_id'])
+        alert_data = self.env['sa.quality.alert'].read_group([('team_id', 'in', self.ids), ('stage_id.done', '=', False)], ['team_id'], ['team_id'])
         alert_result = dict((data['team_id'][0], data['team_id_count']) for data in alert_data)
         for team in self:
             team.alert_count = alert_result.get(team.id, 0)
 
     def get_alias_model_name(self, vals):
-        return vals.get('alias_model', 'quality.alert')
+        return vals.get('alias_model', 'sa.quality.alert')
 
     def get_alias_values(self):
         values = super(QualityAlertTeam, self).get_alias_values()
@@ -155,14 +155,14 @@ class QualityAlertTeam(models.Model):
 
 
 class QualityReason(models.Model):
-    _name = "quality.reason"
+    _name = "sa.quality.reason"
     _description = "Quality Reason"
 
     name = fields.Char('Name', required=True)
 
 
 class QualityTag(models.Model):
-    _name = "quality.tag"
+    _name = "sa.quality.tag"
     _description = "Quality Tag"
 
     name = fields.Char('Name', required=True)
@@ -170,7 +170,7 @@ class QualityTag(models.Model):
 
 
 class QualityAlertStage(models.Model):
-    _name = "quality.alert.stage"
+    _name = "sa.quality.alert.stage"
     _description = "Quality Alert Stage"
     _order = "sequence, id"
     _fold_name = 'folded'
@@ -182,12 +182,12 @@ class QualityAlertStage(models.Model):
 
 
 class QualityCheck(models.Model):
-    _name = "quality.check"
+    _name = "sa.quality.check"
     _description = "Quality Check"
     _inherit = ['mail.thread']
 
     name = fields.Char('Name', default=lambda self: _('New'))
-    point_id = fields.Many2one('quality.point', 'Control Point')
+    point_id = fields.Many2one('sa.quality.point', 'Control Point')
     quality_state = fields.Selection([
         ('none', 'To do'),
         ('pass', 'Passed'),
@@ -200,9 +200,9 @@ class QualityCheck(models.Model):
     picking_id = fields.Many2one('stock.picking', 'Operation')
     lot_id = fields.Many2one('stock.production.lot', 'Lot', domain="[('product_id', '=', product_id)]")
     user_id = fields.Many2one('res.users', 'Responsible', track_visibility='onchange')
-    team_id = fields.Many2one('quality.alert.team', 'Team', required=True)
+    team_id = fields.Many2one('sa.quality.alert.team', 'Team', required=True)
     company_id = fields.Many2one('res.company', 'Company', default=lambda self: self.env.user.company_id)
-    alert_ids = fields.One2many('quality.alert', 'check_id', string='Alerts')
+    alert_ids = fields.One2many('sa.quality.alert', 'check_id', string='Alerts')
     alert_count = fields.Integer('# Quality Alerts', compute="_compute_alert_count")
     note = fields.Html(related='point_id.note', readonly=True)
     test_type = fields.Selection(related="point_id.test_type", readonly=True)
@@ -216,7 +216,7 @@ class QualityCheck(models.Model):
 
     @api.multi
     def _compute_alert_count(self):
-        alert_data = self.env['quality.alert'].read_group([('check_id', 'in', self.ids)], ['check_id'], ['check_id'])
+        alert_data = self.env['sa.quality.alert'].read_group([('check_id', 'in', self.ids)], ['check_id'], ['check_id'])
         alert_result = dict((data['check_id'][0], data['check_id_count']) for data in alert_data)
         for check in self:
             check.alert_count = alert_result.get(check.id, 0)
@@ -241,7 +241,7 @@ class QualityCheck(models.Model):
     @api.model
     def create(self, vals):
         if 'name' not in vals or vals['name'] == _('New'):
-            vals['name'] = self.env['ir.sequence'].next_by_code('quality.check') or _('New')
+            vals['name'] = self.env['ir.sequence'].next_by_code('sa.quality.check') or _('New')
         return super(QualityCheck, self).create(vals)
 
     @api.multi
@@ -269,7 +269,7 @@ class QualityCheck(models.Model):
     @api.multi
     def do_alert(self):
         self.ensure_one()
-        alert = self.env['quality.alert'].create({
+        alert = self.env['sa.quality.alert'].create({
             'check_id': self.id,
             'product_id': self.product_id.id,
             'product_tmpl_id': self.product_id.product_tmpl_id.id,
@@ -281,7 +281,7 @@ class QualityCheck(models.Model):
         return {
             'name': _('Quality Alert'),
             'type': 'ir.actions.act_window',
-            'res_model': 'quality.alert',
+            'res_model': 'sa.quality.alert',
             'views': [(self.env.ref('quality.quality_alert_view_form').id, 'form')],
             'res_id': alert.id,
             'context': {'default_check_id': self.id},
@@ -294,7 +294,7 @@ class QualityCheck(models.Model):
             return {
                 'name': _('Quality Alert'),
                 'type': 'ir.actions.act_window',
-                'res_model': 'quality.alert',
+                'res_model': 'sa.quality.alert',
                 'views': [(self.env.ref('quality.quality_alert_view_form').id, 'form')],
                 'res_id': self.alert_ids.ids[0],
                 'context': {'default_check_id': self.id},
@@ -317,28 +317,28 @@ class QualityCheck(models.Model):
 
 
 class QualityAlert(models.Model):
-    _name = "quality.alert"
+    _name = "sa.quality.alert"
     _description = "Quality Alert"
     _inherit = ['mail.thread']
 
     name = fields.Char('Name', default=lambda self: _('New'))
     description = fields.Text('Description')
-    stage_id = fields.Many2one('quality.alert.stage', 'Stage',
+    stage_id = fields.Many2one('sa.quality.alert.stage', 'Stage',
         group_expand='_read_group_stage_ids',
-        default=lambda self: self.env['quality.alert.stage'].search([], limit=1).id)
+        default=lambda self: self.env['sa.quality.alert.stage'].search([], limit=1).id)
     company_id = fields.Many2one('res.company', 'Company', default=lambda self: self.env.user.company_id)
-    reason_id = fields.Many2one('quality.reason', 'Root Cause')
-    tag_ids = fields.Many2many('quality.tag', string="Tags")
+    reason_id = fields.Many2one('sa.quality.reason', 'Root Cause')
+    tag_ids = fields.Many2many('sa.quality.tag', string="Tags")
     date_assign = fields.Datetime('Date Assigned')
     date_close = fields.Datetime('Date Closed')
     action_corrective = fields.Text('Corrective Action')
     action_preventive = fields.Text('Preventive Action')
     user_id = fields.Many2one('res.users', 'Responsible', default=lambda self: self.env.user)
     team_id = fields.Many2one(
-        'quality.alert.team', 'Team', required=True,
-        default=lambda x: x.env['quality.alert.team'].search([], limit=1))
+        'sa.quality.alert.team', 'Team', required=True,
+        default=lambda x: x.env['sa.quality.alert.team'].search([], limit=1))
     partner_id = fields.Many2one('res.partner', 'Vendor')
-    check_id = fields.Many2one('quality.check', 'Check')
+    check_id = fields.Many2one('sa.quality.check', 'Check')
     product_tmpl_id = fields.Many2one('product.template', 'Product', required=True)
     product_id = fields.Many2one(
         'product.product', 'Product Variant',
@@ -356,7 +356,7 @@ class QualityAlert(models.Model):
     @api.model
     def create(self, vals):
         if 'name' not in vals or vals['name'] == _('New'):
-            vals['name'] = self.env['ir.sequence'].next_by_code('quality.alert') or _('New')
+            vals['name'] = self.env['ir.sequence'].next_by_code('sa.quality.alert') or _('New')
         return super(QualityAlert, self).create(vals)
 
     @api.onchange('product_tmpl_id')
@@ -370,7 +370,7 @@ class QualityAlert(models.Model):
             'type': 'ir.actions.act_window',
             'view_type': 'form',
             'view_mode': 'form',
-            'res_model': 'quality.check',
+            'res_model': 'sa.quality.check',
             'target': 'current',
             'res_id': self.check_id.id,
         }

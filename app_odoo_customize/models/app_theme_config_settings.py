@@ -23,7 +23,7 @@ class AppThemeConfigSettings(models.TransientModel):
     app_show_account = fields.Boolean('Show My Account', help=u"When enable,User can login to your website")
     app_show_enterprise = fields.Boolean('Show Enterprise Tag', help=u"Uncheck to hide the Enterprise tag")
     app_show_share = fields.Boolean('Show Share Dashboard', help=u"Uncheck to hide the Odoo Share Dashboard")
-    app_show_poweredby = fields.Boolean('Show Powered by Odoo', help=u"Uncheck to hide the Powered by text")
+    app_show_poweredby = fields.Boolean('Show Powered by SATURN', help=u"Uncheck to hide the Powered by text")
     app_stop_subscribe = fields.Boolean('Stop Odoo Subscribe(Performance Improve)', help=u"Check to stop Odoo Subscribe function")
 
     app_documentation_url = fields.Char('Documentation Url')

@@ -10,7 +10,7 @@ class TestQualityCheck(TestQualityCommon):
         """Test quality check on incoming shipment."""
 
         # Create Quality Point for incoming shipment.
-        self.qality_point_test = self.env['quality.point'].create({
+        self.qality_point_test = self.env['sa.quality.point'].create({
             'product_id': self.product.id,
             'product_tmpl_id': self.product_tmpl_id,
             'picking_type_id': self.picking_type_id,

@@ -32,7 +32,7 @@ class StockMove(models.Model):
             for check in picking.sudo().check_ids:
                 point_key = (check.picking_id.id, check.point_id.id, check.team_id.id, check.product_id.id)
                 quality_points_list.add(point_key)
-            quality_points = self.env['quality.point'].sudo().search([
+            quality_points = self.env['sa.quality.point'].sudo().search([
                 ('picking_type_id', '=', picking.picking_type_id.id),
                 '|', ('product_id', 'in', moves.mapped('product_id').ids),
                 '&', ('product_id', '=', False), ('product_tmpl_id', 'in', moves.mapped('product_id').mapped('product_tmpl_id').ids)])
@@ -42,7 +42,7 @@ class StockMove(models.Model):
                         point_key = (picking.id, point.id, point.team_id.id, point.product_id.id)
                         if point_key in quality_points_list:
                             continue
-                        self.env['quality.check'].sudo().create({
+                        self.env['sa.quality.check'].sudo().create({
                             'picking_id': picking.id,
                             'point_id': point.id,
                             'team_id': point.team_id.id,
@@ -56,7 +56,7 @@ class StockMove(models.Model):
                             point_key = (picking.id, point.id, point.team_id.id, product.id)
                             if point_key in quality_points_list:
                                 continue
-                            self.env['quality.check'].sudo().create({
+                            self.env['sa.quality.check'].sudo().create({
                                 'picking_id': picking.id,
                                 'point_id': point.id,
                                 'team_id': point.team_id.id,

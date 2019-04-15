@@ -135,7 +135,7 @@ msgid "Aliased Model"
 msgstr "Aliasmalli"
 
 #. module: quality
-#: selection:quality.point,measure_frequency_type:0
+#: selection:sa.quality.point,measure_frequency_type:0
 msgid "All Operations"
 msgstr "Kaikki toiminnot"
 
@@ -290,7 +290,7 @@ msgid "Date Closed"
 msgstr "Sulkemispäivä"
 
 #. module: quality
-#: selection:quality.point,measure_frequency_unit:0
+#: selection:sa.quality.point,measure_frequency_unit:0
 msgid "Day(s)"
 msgstr "Päivä(t)"
 
@@ -354,13 +354,13 @@ msgstr "Sähköpostialias"
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_check_view_form
 #: model:ir.ui.view,arch_db:quality.quality_check_view_form_small
-#: selection:quality.check,measure_success:0
+#: selection:sa.quality.check,measure_success:0
 msgid "Fail"
 msgstr ""
 
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_check_view_search
-#: selection:quality.check,quality_state:0
+#: selection:sa.quality.check,quality_state:0
 msgid "Failed"
 msgstr "Epäonnistui"
 
@@ -387,7 +387,7 @@ msgid "Helps you manage your quality alerts and quality checks."
 msgstr ""
 
 #. module: quality
-#: selection:quality.alert,priority:0
+#: selection:sa.quality.alert,priority:0
 msgid "High"
 msgstr "Korkea"
 
@@ -461,7 +461,7 @@ msgid "Lot"
 msgstr "Erä"
 
 #. module: quality
-#: selection:quality.alert,priority:0
+#: selection:sa.quality.alert,priority:0
 msgid "Low"
 msgstr "Alin"
 
@@ -482,7 +482,7 @@ msgstr ""
 
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_quality_check_measure
-#: selection:quality.point,test_type:0
+#: selection:sa.quality.point,test_type:0
 msgid "Measure"
 msgstr "Määre"
 
@@ -507,7 +507,7 @@ msgid "Miscellaneous"
 msgstr "Sekalaiset"
 
 #. module: quality
-#: selection:quality.point,measure_frequency_unit:0
+#: selection:sa.quality.point,measure_frequency_unit:0
 msgid "Month(s)"
 msgstr "Kuukautta"
 
@@ -546,7 +546,7 @@ msgid "New"
 msgstr "Uusi"
 
 #. module: quality
-#: selection:quality.check,measure_success:0
+#: selection:sa.quality.check,measure_success:0
 msgid "No measure"
 msgstr ""
 
@@ -566,7 +566,7 @@ msgid "Norm"
 msgstr ""
 
 #. module: quality
-#: selection:quality.alert,priority:0
+#: selection:sa.quality.alert,priority:0
 msgid "Normal"
 msgstr "Normal"
 
@@ -623,18 +623,18 @@ msgstr ""
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_check_view_form
 #: model:ir.ui.view,arch_db:quality.quality_check_view_form_small
-#: selection:quality.check,measure_success:0
+#: selection:sa.quality.check,measure_success:0
 msgid "Pass"
 msgstr ""
 
 #. module: quality
-#: selection:quality.point,test_type:0
+#: selection:sa.quality.point,test_type:0
 msgid "Pass - Fail"
 msgstr ""
 
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_check_view_search
-#: selection:quality.check,quality_state:0
+#: selection:sa.quality.check,quality_state:0
 msgid "Passed"
 msgstr ""
 
@@ -649,7 +649,7 @@ msgid "Percentage"
 msgstr "Prosenttia"
 
 #. module: quality
-#: selection:quality.point,measure_frequency_type:0
+#: selection:sa.quality.point,measure_frequency_type:0
 msgid "Periodically"
 msgstr ""
 
@@ -709,7 +709,7 @@ msgstr ""
 #. module: quality
 #: code:addons/quality/models/quality.py:282
 #: code:addons/quality/models/quality.py:295
-#: model:ir.model,name:quality.model_quality_alert
+#: model:ir.model,name:quality.model_sa_quality_alert
 #: model:ir.ui.view,arch_db:quality.quality_alert_view_calendar
 #, python-format
 msgid "Quality Alert"
@@ -722,7 +722,7 @@ msgid "Quality Alert Analysis"
 msgstr ""
 
 #. module: quality
-#: model:ir.model,name:quality.model_quality_alert_stage
+#: model:ir.model,name:quality.model_sa_quality_alert_stage
 msgid "Quality Alert Stage"
 msgstr ""
 
@@ -733,7 +733,7 @@ msgid "Quality Alert Stages"
 msgstr ""
 
 #. module: quality
-#: model:ir.model,name:quality.model_quality_alert_team
+#: model:ir.model,name:quality.model_sa_quality_alert_team
 msgid "Quality Alert Team"
 msgstr ""
 
@@ -765,7 +765,7 @@ msgstr ""
 
 #. module: quality
 #: code:addons/quality/models/quality.py:369
-#: model:ir.model,name:quality.model_quality_check
+#: model:ir.model,name:quality.model_sa_quality_check
 #, python-format
 msgid "Quality Check"
 msgstr ""
@@ -829,17 +829,17 @@ msgid "Quality Dashboard"
 msgstr ""
 
 #. module: quality
-#: model:ir.model,name:quality.model_quality_point
+#: model:ir.model,name:quality.model_sa_quality_point
 msgid "Quality Point"
 msgstr ""
 
 #. module: quality
-#: model:ir.model,name:quality.model_quality_reason
+#: model:ir.model,name:quality.model_sa_quality_reason
 msgid "Quality Reason"
 msgstr ""
 
 #. module: quality
-#: model:ir.model,name:quality.model_quality_tag
+#: model:ir.model,name:quality.model_sa_quality_tag
 msgid "Quality Tag"
 msgstr ""
 
@@ -856,7 +856,7 @@ msgid ""
 msgstr ""
 
 #. module: quality
-#: selection:quality.point,measure_frequency_type:0
+#: selection:sa.quality.point,measure_frequency_type:0
 msgid "Randomly"
 msgstr ""
 
@@ -994,7 +994,7 @@ msgid "Title"
 msgstr "Titteli"
 
 #. module: quality
-#: selection:quality.check,quality_state:0
+#: selection:sa.quality.check,quality_state:0
 msgid "To do"
 msgstr "Tehtävänä"
 
@@ -1035,12 +1035,12 @@ msgid "Vendor"
 msgstr "Toimittaja"
 
 #. module: quality
-#: selection:quality.alert,priority:0
+#: selection:sa.quality.alert,priority:0
 msgid "Very High"
 msgstr "Erittäin korkea"
 
 #. module: quality
-#: selection:quality.point,measure_frequency_unit:0
+#: selection:sa.quality.point,measure_frequency_unit:0
 msgid "Week(s)"
 msgstr "Viikko(a)"
 

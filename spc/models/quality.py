@@ -4,7 +4,7 @@ from odoo import models, fields, api
 
 
 class QualityPoint(models.Model):
-    _inherit = "quality.point"
+    _inherit = "sa.quality.point"
 
     @api.multi
     def action_see_spc_control(self):

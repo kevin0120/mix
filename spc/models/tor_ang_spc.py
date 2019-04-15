@@ -51,7 +51,7 @@ class TorAngSPCReport(models.TransientModel):
     @api.onchange('screw_id', 'spc_target')
     def _onchange_usl_lsl(self):
         self.ensure_one()
-        qcp_id = self.env['quality.point'].sudo().search([('bom_line_id.product_id', '=', self.screw_id.id)], limit=1)
+        qcp_id = self.env['sa.quality.point'].sudo().search([('bom_line_id.product_id', '=', self.screw_id.id)], limit=1)
         if not qcp_id:
             return
         if self.spc_target == 'torque':

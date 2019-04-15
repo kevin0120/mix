@@ -146,7 +146,7 @@ msgid "Aliased Model"
 msgstr "Aliase Modell"
 
 #. module: quality
-#: selection:quality.point,measure_frequency_type:0
+#: selection:sa.quality.point,measure_frequency_type:0
 msgid "All Operations"
 msgstr "Alle Vorgänge"
 
@@ -301,7 +301,7 @@ msgid "Date Closed"
 msgstr "Datum Ende"
 
 #. module: quality
-#: selection:quality.point,measure_frequency_unit:0
+#: selection:sa.quality.point,measure_frequency_unit:0
 msgid "Day(s)"
 msgstr "Tag(e)"
 
@@ -365,13 +365,13 @@ msgstr "E-Mail Alias"
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_check_view_form
 #: model:ir.ui.view,arch_db:quality.quality_check_view_form_small
-#: selection:quality.check,measure_success:0
+#: selection:sa.quality.check,measure_success:0
 msgid "Fail"
 msgstr "Fehlgeschlagen"
 
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_check_view_search
-#: selection:quality.check,quality_state:0
+#: selection:sa.quality.check,quality_state:0
 msgid "Failed"
 msgstr "Fehlgeschlagen"
 
@@ -398,7 +398,7 @@ msgid "Helps you manage your quality alerts and quality checks."
 msgstr "Hilfe zum Verwalten von Qualitätsalarmen und -prüfungen."
 
 #. module: quality
-#: selection:quality.alert,priority:0
+#: selection:sa.quality.alert,priority:0
 msgid "High"
 msgstr "Hoch"
 
@@ -472,7 +472,7 @@ msgid "Lot"
 msgstr "Fertigungslos"
 
 #. module: quality
-#: selection:quality.alert,priority:0
+#: selection:sa.quality.alert,priority:0
 msgid "Low"
 msgstr "Niedrig"
 
@@ -493,7 +493,7 @@ msgstr "Toleranz (Höchstwert)"
 
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_quality_check_measure
-#: selection:quality.point,test_type:0
+#: selection:sa.quality.point,test_type:0
 msgid "Measure"
 msgstr "Werte"
 
@@ -518,7 +518,7 @@ msgid "Miscellaneous"
 msgstr "Sonstiges"
 
 #. module: quality
-#: selection:quality.point,measure_frequency_unit:0
+#: selection:sa.quality.point,measure_frequency_unit:0
 msgid "Month(s)"
 msgstr "Monat(e)"
 
@@ -557,7 +557,7 @@ msgid "New"
 msgstr "Neu"
 
 #. module: quality
-#: selection:quality.check,measure_success:0
+#: selection:sa.quality.check,measure_success:0
 msgid "No measure"
 msgstr "Keine Werte"
 
@@ -577,7 +577,7 @@ msgid "Norm"
 msgstr "Norm"
 
 #. module: quality
-#: selection:quality.alert,priority:0
+#: selection:sa.quality.alert,priority:0
 msgid "Normal"
 msgstr "Normal"
 
@@ -640,18 +640,18 @@ msgstr ""
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_check_view_form
 #: model:ir.ui.view,arch_db:quality.quality_check_view_form_small
-#: selection:quality.check,measure_success:0
+#: selection:sa.quality.check,measure_success:0
 msgid "Pass"
 msgstr "Bestanden"
 
 #. module: quality
-#: selection:quality.point,test_type:0
+#: selection:sa.quality.point,test_type:0
 msgid "Pass - Fail"
 msgstr ""
 
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_check_view_search
-#: selection:quality.check,quality_state:0
+#: selection:sa.quality.check,quality_state:0
 msgid "Passed"
 msgstr "Bestanden"
 
@@ -666,7 +666,7 @@ msgid "Percentage"
 msgstr "Prozentsatz"
 
 #. module: quality
-#: selection:quality.point,measure_frequency_type:0
+#: selection:sa.quality.point,measure_frequency_type:0
 msgid "Periodically"
 msgstr "Regelmäßig"
 
@@ -730,7 +730,7 @@ msgstr "Qualität"
 #. module: quality
 #: code:addons/quality/models/quality.py:282
 #: code:addons/quality/models/quality.py:295
-#: model:ir.model,name:quality.model_quality_alert
+#: model:ir.model,name:quality.model_sa_quality_alert
 #: model:ir.ui.view,arch_db:quality.quality_alert_view_calendar
 #, python-format
 msgid "Quality Alert"
@@ -743,7 +743,7 @@ msgid "Quality Alert Analysis"
 msgstr "Qualitätsalarmanalyse"
 
 #. module: quality
-#: model:ir.model,name:quality.model_quality_alert_stage
+#: model:ir.model,name:quality.model_sa_quality_alert_stage
 msgid "Quality Alert Stage"
 msgstr "Qualitätsalarmstufe"
 
@@ -754,7 +754,7 @@ msgid "Quality Alert Stages"
 msgstr "Qualitätsalarmstufen"
 
 #. module: quality
-#: model:ir.model,name:quality.model_quality_alert_team
+#: model:ir.model,name:quality.model_sa_quality_alert_team
 msgid "Quality Alert Team"
 msgstr "Qualitätsalarmteam"
 
@@ -788,7 +788,7 @@ msgstr ""
 
 #. module: quality
 #: code:addons/quality/models/quality.py:369
-#: model:ir.model,name:quality.model_quality_check
+#: model:ir.model,name:quality.model_sa_quality_check
 #, python-format
 msgid "Quality Check"
 msgstr "Qualitätskontrolle"
@@ -855,17 +855,17 @@ msgid "Quality Dashboard"
 msgstr "Qualitätsdashboard"
 
 #. module: quality
-#: model:ir.model,name:quality.model_quality_point
+#: model:ir.model,name:quality.model_sa_quality_point
 msgid "Quality Point"
 msgstr "Qualitätspunkt"
 
 #. module: quality
-#: model:ir.model,name:quality.model_quality_reason
+#: model:ir.model,name:quality.model_sa_quality_reason
 msgid "Quality Reason"
 msgstr "Qualitätsbegründung"
 
 #. module: quality
-#: model:ir.model,name:quality.model_quality_tag
+#: model:ir.model,name:quality.model_sa_quality_tag
 msgid "Quality Tag"
 msgstr "Qualitäts-Tag"
 
@@ -884,7 +884,7 @@ msgstr ""
 "entsprechend den Rollen (Teams), die sie benötigen."
 
 #. module: quality
-#: selection:quality.point,measure_frequency_type:0
+#: selection:sa.quality.point,measure_frequency_type:0
 msgid "Randomly"
 msgstr "Zufällig"
 
@@ -1032,7 +1032,7 @@ msgid "Title"
 msgstr "Titel"
 
 #. module: quality
-#: selection:quality.check,quality_state:0
+#: selection:sa.quality.check,quality_state:0
 msgid "To do"
 msgstr "Zu Erledigen"
 
@@ -1073,12 +1073,12 @@ msgid "Vendor"
 msgstr "Lieferant"
 
 #. module: quality
-#: selection:quality.alert,priority:0
+#: selection:sa.quality.alert,priority:0
 msgid "Very High"
 msgstr "Sehr hoch"
 
 #. module: quality
-#: selection:quality.point,measure_frequency_unit:0
+#: selection:sa.quality.point,measure_frequency_unit:0
 msgid "Week(s)"
 msgstr "Woche(n)"
 

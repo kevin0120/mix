@@ -8,9 +8,9 @@ from odoo.exceptions import UserError
 class MrpProduction(models.Model):
     _inherit = "mrp.production"
 
-    check_ids = fields.One2many('quality.check', 'production_id', string="Checks")
+    check_ids = fields.One2many('sa.quality.check', 'production_id', string="Checks")
     check_todo = fields.Boolean(compute='_compute_check_todo')
-    alert_ids = fields.One2many('quality.alert', "production_id", string="Alerts")
+    alert_ids = fields.One2many('sa.quality.alert', "production_id", string="Alerts")
     # TODO : No need alert ids field
     alert_count = fields.Integer(compute='_compute_alert_count')
 
@@ -23,7 +23,7 @@ class MrpProduction(models.Model):
     @api.multi
     def _compute_alert_count(self):
         # TODO: Check if we include those in the work orders
-        alert_data = self.env['quality.alert'].read_group([('production_id', 'in', self.ids)], ['production_id'], ['production_id'])
+        alert_data = self.env['sa.quality.alert'].read_group([('production_id', 'in', self.ids)], ['production_id'], ['production_id'])
         result = dict((data['production_id'][0], data['production_id_count']) for data in alert_data)
         for order in self:
             order.alert_count = result.get(order.id, 0)
@@ -33,11 +33,11 @@ class MrpProduction(models.Model):
         self.ensure_one()
         if self.alert_count == 1:
             view = self.env.ref('quality.quality_alert_view_form')
-            res_id = self.env['quality.alert'].search([('production_id', '=', self.id)])
+            res_id = self.env['sa.quality.alert'].search([('production_id', '=', self.id)])
             return {
                 'name': _('Quality Alerts'),
                 'type': 'ir.actions.act_window',
-                'res_model': 'quality.alert',
+                'res_model': 'sa.quality.alert',
                 'views': [(view.id, 'form')],
                 'res_id': res_id.id,
                 'context': {'production_id': self.ids},
@@ -74,13 +74,13 @@ class MrpProduction(models.Model):
     @api.multi
     def _generate_moves(self):
         for production in self:
-            points = self.env['quality.point'].search([('workcenter_id', '=', False), 
+            points = self.env['sa.quality.point'].search([('workcenter_id', '=', False), 
                                                            ('picking_type_id', '=', production.picking_type_id.id),
                                                            '|', ('product_id', '=', production.product_id.id), 
                                                            '&', ('product_id', '=', False), ('product_tmpl_id', '=', production.product_id.product_tmpl_id.id)])
             for point in points:
                 if point.check_execute_now():
-                    self.env['quality.check'].create({'workorder_id': False,
+                    self.env['sa.quality.check'].create({'workorder_id': False,
                                                       'production_id': production.id,
                                                       'point_id': point.id,
                                                       'team_id': point.team_id.id,

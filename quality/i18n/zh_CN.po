@@ -127,7 +127,7 @@ msgid "Aliased Model"
 msgstr "别名模型"
 
 #. module: quality
-#: selection:quality.point,measure_frequency_type:0
+#: selection:sa.quality.point,measure_frequency_type:0
 msgid "All Operations"
 msgstr "所有作业"
 
@@ -282,7 +282,7 @@ msgid "Date Closed"
 msgstr "关闭日期"
 
 #. module: quality
-#: selection:quality.point,measure_frequency_unit:0
+#: selection:sa.quality.point,measure_frequency_unit:0
 msgid "Day(s)"
 msgstr "天"
 
@@ -346,13 +346,13 @@ msgstr "Email别名"
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_check_view_form
 #: model:ir.ui.view,arch_db:quality.quality_check_view_form_small
-#: selection:quality.check,measure_success:0
+#: selection:sa.quality.check,measure_success:0
 msgid "Fail"
 msgstr "失败"
 
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_check_view_search
-#: selection:quality.check,quality_state:0
+#: selection:sa.quality.check,quality_state:0
 msgid "Failed"
 msgstr "失败的"
 
@@ -379,7 +379,7 @@ msgid "Helps you manage your quality alerts and quality checks."
 msgstr "帮你管理质量警告和质量检查."
 
 #. module: quality
-#: selection:quality.alert,priority:0
+#: selection:sa.quality.alert,priority:0
 msgid "High"
 msgstr "高"
 
@@ -451,7 +451,7 @@ msgid "Lot"
 msgstr "批次"
 
 #. module: quality
-#: selection:quality.alert,priority:0
+#: selection:sa.quality.alert,priority:0
 msgid "Low"
 msgstr "低"
 
@@ -472,7 +472,7 @@ msgstr "最大偏差"
 
 #. module: quality
 #: model:ir.model.fields,field_description:quality.field_quality_check_measure
-#: selection:quality.point,test_type:0
+#: selection:sa.quality.point,test_type:0
 msgid "Measure"
 msgstr "测量"
 
@@ -497,7 +497,7 @@ msgid "Miscellaneous"
 msgstr "杂项"
 
 #. module: quality
-#: selection:quality.point,measure_frequency_unit:0
+#: selection:sa.quality.point,measure_frequency_unit:0
 msgid "Month(s)"
 msgstr "月"
 
@@ -536,7 +536,7 @@ msgid "New"
 msgstr "新建"
 
 #. module: quality
-#: selection:quality.check,measure_success:0
+#: selection:sa.quality.check,measure_success:0
 msgid "No measure"
 msgstr "没有测量"
 
@@ -556,7 +556,7 @@ msgid "Norm"
 msgstr "正常"
 
 #. module: quality
-#: selection:quality.alert,priority:0
+#: selection:sa.quality.alert,priority:0
 msgid "Normal"
 msgstr "一般"
 
@@ -615,18 +615,18 @@ msgstr ""
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_check_view_form
 #: model:ir.ui.view,arch_db:quality.quality_check_view_form_small
-#: selection:quality.check,measure_success:0
+#: selection:sa.quality.check,measure_success:0
 msgid "Pass"
 msgstr "通过"
 
 #. module: quality
-#: selection:quality.point,test_type:0
+#: selection:sa.quality.point,test_type:0
 msgid "Pass - Fail"
 msgstr "通过 - 失败"
 
 #. module: quality
 #: model:ir.ui.view,arch_db:quality.quality_check_view_search
-#: selection:quality.check,quality_state:0
+#: selection:sa.quality.check,quality_state:0
 msgid "Passed"
 msgstr "通过的"
 
@@ -641,7 +641,7 @@ msgid "Percentage"
 msgstr "百分比"
 
 #. module: quality
-#: selection:quality.point,measure_frequency_type:0
+#: selection:sa.quality.point,measure_frequency_type:0
 msgid "Periodically"
 msgstr "周期性"
 
@@ -705,7 +705,7 @@ msgstr "质量"
 #. module: quality
 #: code:addons/quality/models/quality.py:282
 #: code:addons/quality/models/quality.py:295
-#: model:ir.model,name:quality.model_quality_alert
+#: model:ir.model,name:quality.model_sa_quality_alert
 #: model:ir.ui.view,arch_db:quality.quality_alert_view_calendar
 #, python-format
 msgid "Quality Alert"
@@ -718,7 +718,7 @@ msgid "Quality Alert Analysis"
 msgstr "质量警报分析"
 
 #. module: quality
-#: model:ir.model,name:quality.model_quality_alert_stage
+#: model:ir.model,name:quality.model_sa_quality_alert_stage
 msgid "Quality Alert Stage"
 msgstr "质量警报阶段"
 
@@ -729,7 +729,7 @@ msgid "Quality Alert Stages"
 msgstr "质量警报阶段"
 
 #. module: quality
-#: model:ir.model,name:quality.model_quality_alert_team
+#: model:ir.model,name:quality.model_sa_quality_alert_team
 msgid "Quality Alert Team"
 msgstr "质量警报团队"
 
@@ -761,7 +761,7 @@ msgstr ""
 
 #. module: quality
 #: code:addons/quality/models/quality.py:369
-#: model:ir.model,name:quality.model_quality_check
+#: model:ir.model,name:quality.model_sa_quality_check
 #, python-format
 msgid "Quality Check"
 msgstr "质量检查"
@@ -825,17 +825,17 @@ msgid "Quality Dashboard"
 msgstr "质量仪表板"
 
 #. module: quality
-#: model:ir.model,name:quality.model_quality_point
+#: model:ir.model,name:quality.model_sa_quality_point
 msgid "Quality Point"
 msgstr "质量点"
 
 #. module: quality
-#: model:ir.model,name:quality.model_quality_reason
+#: model:ir.model,name:quality.model_sa_quality_reason
 msgid "Quality Reason"
 msgstr "质量原因"
 
 #. module: quality
-#: model:ir.model,name:quality.model_quality_tag
+#: model:ir.model,name:quality.model_sa_quality_tag
 msgid "Quality Tag"
 msgstr "质量标签"
 
@@ -852,7 +852,7 @@ msgid ""
 msgstr ""
 
 #. module: quality
-#: selection:quality.point,measure_frequency_type:0
+#: selection:sa.quality.point,measure_frequency_type:0
 msgid "Randomly"
 msgstr "随机的"
 
@@ -992,7 +992,7 @@ msgid "Title"
 msgstr "称谓"
 
 #. module: quality
-#: selection:quality.check,quality_state:0
+#: selection:sa.quality.check,quality_state:0
 msgid "To do"
 msgstr "待办"
 
@@ -1033,12 +1033,12 @@ msgid "Vendor"
 msgstr "供应商"
 
 #. module: quality
-#: selection:quality.alert,priority:0
+#: selection:sa.quality.alert,priority:0
 msgid "Very High"
 msgstr "非常高"
 
 #. module: quality
-#: selection:quality.point,measure_frequency_unit:0
+#: selection:sa.quality.point,measure_frequency_unit:0
 msgid "Week(s)"
 msgstr "周"
 
