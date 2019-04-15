@@ -14,7 +14,6 @@ import logging
 from odoo.tools import float_round,frozendict, lazy_classproperty, lazy_property, ormcache, \
                    Collector, LastOrderedSet, OrderedSet
 
-from sa_base.models import base_model
 
 from collections import defaultdict, MutableMapping, OrderedDict
 from odoo.tools import frozendict
@@ -22,7 +21,7 @@ from odoo.tools import frozendict
 _logger = logging.getLogger(__name__)
 
 
-class OperationResult(base_model.HyperModel):
+class OperationResult(models.HyperModel):
     _name = "operation.result"
 
     sequence = fields.Integer('sequence', default=1)
@@ -35,7 +34,7 @@ class OperationResult(base_model.HyperModel):
 
     assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line', readonly=True)
 
-    qcp_id = fields.Many2one('quality.point', 'Quality Control Point')
+    qcp_id = fields.Many2one('sa.quality.point', 'Quality Control Point')
 
     operation_point_id = fields.Many2one('operation.point', string='Tightening Operation Point')
 
@@ -69,7 +68,7 @@ class OperationResult(base_model.HyperModel):
     cur_objects = fields.Char(string='Waveform Files')
 
     name = fields.Char('Name', default=lambda self: _('New'))
-    point_id = fields.Many2one('quality.point', 'Quality Control Point')
+    point_id = fields.Many2one('sa.quality.point', 'Quality Control Point')
     quality_state = fields.Selection([
         ('none', 'To do'),
         ('exception', 'Exception'),
@@ -330,7 +329,7 @@ $$
     @api.model
     def create(self, vals):
         if 'name' not in vals or vals['name'] == _('New'):
-            vals['name'] = self.env['ir.sequence'].next_by_code('quality.check') or _('New')
+            vals['name'] = self.env['ir.sequence'].next_by_code('sa.quality.check') or _('New')
         return super(OperationResult, self).create(vals)
 
     @api.model
@@ -342,7 +341,7 @@ $$
         all_updates = []
         for vals in all_vals:
             if 'name' not in vals or vals['name'] == _('New'):
-                vals['name'] = self.env['ir.sequence'].next_by_code('quality.check') or _('New')
+                vals['name'] = self.env['ir.sequence'].next_by_code('sa.quality.check') or _('New')
             # data of parent records to create or update, by model
             tocreate = {
                 parent_model: {'id': vals.pop(parent_field, None)}

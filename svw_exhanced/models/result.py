@@ -17,10 +17,8 @@ from odoo.tools import float_round,frozendict, lazy_classproperty, lazy_property
 from collections import defaultdict, MutableMapping, OrderedDict
 from odoo.tools import frozendict
 
-from sa_base.models import base_model
 
-
-class OperationResult(base_model.HyperModel):
+class OperationResult(models.HyperModel):
     _inherit = "operation.result"
 
 

@@ -34,7 +34,7 @@ class MrpWorkorder(models.Model):
             if not ir_values:
                 idx = 1  # 重置sequence
             production = wo.production_id
-            points = self.env['quality.point'].search([('workcenter_id', '=', wo.workcenter_id.id),
+            points = self.env['sa.quality.point'].search([('workcenter_id', '=', wo.workcenter_id.id),
                                                        ('operation_id','=', wo.operation_id.id),  # 定位到某个作业的质量控制点
                                                        ('picking_type_id', '=', production.picking_type_id.id),
                                                        '|', ('product_id', '=', production.product_id.id),

@@ -33,7 +33,7 @@ class ProductProduct(models.Model):
 
     def _compute_product_quality_point_count(self):
         for product in self:
-            product.qp_count = self.env['quality.point'].search_count([('product_id','=', product.id)])
+            product.qp_count = self.env['sa.quality.point'].search_count([('product_id','=', product.id)])
 
     @api.multi
     def copy(self, default=None):
@@ -85,9 +85,9 @@ class ProductProduct(models.Model):
     def button_create_qcp(self):
         self.ensure_one()
         # 首先删除所有的qcp
-        self.env['quality.point'].search([('product_id', '=', self.id)]).sudo().unlink()
+        self.env['sa.quality.point'].search([('product_id', '=', self.id)]).sudo().unlink()
         active_bom_line_ids = self.active_bom_line_ids
-        # point_type_ids = self.env['quality.point.type'].search([])
+        # point_type_ids = self.env['sa.quality.point.type'].search([])
         for line in active_bom_line_ids:
             vals = {
                 'product_id': self.id,
@@ -99,5 +99,5 @@ class ProductProduct(models.Model):
                 'times': line.product_qty,
                 'test_type': 'measure',
             }
-            self.env['quality.point'].create(vals)
+            self.env['sa.quality.point'].create(vals)
 

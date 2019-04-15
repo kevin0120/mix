@@ -1,7 +1,7 @@
 <odoo>
     <record id="quality_point_view_form_inherit_mrp" model="ir.ui.view">
-        <field name="name">quality.point.view.form.inherit.mrp</field>
-        <field name="model">quality.point</field>
+        <field name="name">sa.quality.point.view.form.inherit.mrp</field>
+        <field name="model">sa.quality.point</field>
         <field name="inherit_id" ref="quality.quality_point_view_form"/>
         <field name="arch" type="xml">
             <field name="picking_type_id" position="after">
@@ -12,8 +12,8 @@
     </record>
 
     <record id="quality_alert_view_form_inherit_mrp" model="ir.ui.view">
-        <field name="name">quality.alert.view.form.inherit.mrp</field>
-        <field name="model">quality.alert</field>
+        <field name="name">sa.quality.alert.view.form.inherit.mrp</field>
+        <field name="model">sa.quality.alert</field>
         <field name="inherit_id" ref="quality.quality_alert_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
@@ -27,8 +27,8 @@
     </record>
 
     <record id="quality_alert_view_search_inherit_mrp" model="ir.ui.view">
-        <field name="name">quality.alert.view.search.inherit.mrp</field>
-        <field name="model">quality.alert</field>
+        <field name="name">sa.quality.alert.view.search.inherit.mrp</field>
+        <field name="model">sa.quality.alert</field>
         <field name="inherit_id" ref="quality.quality_alert_view_search"/>
         <field name="arch" type="xml">
             <field name="user_id" position="after">
@@ -40,7 +40,7 @@
 
     <record id="quality_check_action_mo" model="ir.actions.act_window">
         <field name="name">Quality Checks</field>
-        <field name="res_model">quality.check</field>
+        <field name="res_model">sa.quality.check</field>
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('production_id', '=', active_id)]</field>
@@ -53,7 +53,7 @@
 
     <record id="quality_check_action_wo" model="ir.actions.act_window">
         <field name="name">Quality Checks</field>
-        <field name="res_model">quality.check</field>
+        <field name="res_model">sa.quality.check</field>
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('workorder_id', '=', active_id)]</field>

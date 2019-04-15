@@ -8,7 +8,7 @@ from odoo.exceptions import UserError
 class MrpProductionWorkcenterLine(models.Model):
     _inherit = "mrp.workorder"
 
-    check_ids = fields.One2many('quality.check', 'workorder_id')
+    check_ids = fields.One2many('sa.quality.check', 'workorder_id')
     check_todo = fields.Boolean(compute='_compute_check_todo')
     alert_count = fields.Integer(compute="_compute_alert_count")
 
@@ -21,7 +21,7 @@ class MrpProductionWorkcenterLine(models.Model):
 
     @api.multi
     def _compute_alert_count(self):
-        alert_data = self.env['quality.alert'].read_group([('operation_id', 'in', self.ids)], ['operation_id'], ['operation_id'])
+        alert_data = self.env['sa.quality.alert'].read_group([('operation_id', 'in', self.ids)], ['operation_id'], ['operation_id'])
         result = dict((data['operation_id'][0], data['operation_id_count']) for data in alert_data)
         for order in self:
             order.alert_count = result.get(order.id, 0)
@@ -30,12 +30,12 @@ class MrpProductionWorkcenterLine(models.Model):
     def open_quality_alert_wo(self):
         self.ensure_one()
         if self.alert_count == 1:
-            res_id = self.env['quality.alert'].search([('operation_id', '=', self.id)])
+            res_id = self.env['sa.quality.alert'].search([('operation_id', '=', self.id)])
             view = self.env.ref('quality.quality_alert_view_form')
             return {
                 'name': _('Quality Alerts'),
                 'type': 'ir.actions.act_window',
-                'res_model': 'quality.alert',
+                'res_model': 'sa.quality.alert',
                 'views': [(view.id, 'form')],
                 'res_id': res_id.id,
                 'context': {'operation_id': self.ids},
@@ -67,13 +67,13 @@ class MrpProductionWorkcenterLine(models.Model):
     def _create_checks(self):
         for wo in self:
             production = wo.production_id
-            points = self.env['quality.point'].search([('workcenter_id', '=', wo.workcenter_id.id), 
+            points = self.env['sa.quality.point'].search([('workcenter_id', '=', wo.workcenter_id.id), 
                                                        ('picking_type_id', '=', production.picking_type_id.id),
                                                        '|', ('product_id', '=', production.product_id.id), 
                                                        '&', ('product_id', '=', False), ('product_tmpl_id', '=', production.product_id.product_tmpl_id.id)])
             for point in points:
                 if point.check_execute_now():
-                    self.env['quality.check'].create({'workorder_id': wo.id,
+                    self.env['sa.quality.check'].create({'workorder_id': wo.id,
                                                   'point_id': point.id,
                                                   'team_id': point.team_id.id,
                                                   'product_id': production.product_id.id,

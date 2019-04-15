@@ -8,7 +8,7 @@ from odoo.exceptions import UserError
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
-    check_ids = fields.One2many('quality.check', 'picking_id', 'Checks')
+    check_ids = fields.One2many('sa.quality.check', 'picking_id', 'Checks')
     check_todo = fields.Boolean('Pending checks', compute='_compute_check_todo')
 
     @api.one

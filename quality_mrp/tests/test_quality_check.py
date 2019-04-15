@@ -10,7 +10,7 @@ class TestQualityCheck(TestQualityMrpCommon):
         """Test quality check on production order."""
 
         # Create Quality Point for product Laptop Customized with Manufacturing Picking Type.
-        self.qality_point_test1 = self.env['quality.point'].create({
+        self.qality_point_test1 = self.env['sa.quality.point'].create({
             'product_id': self.product_id,
             'product_tmpl_id': self.product_tmpl_id,
             'picking_type_id': self.picking_type_id,

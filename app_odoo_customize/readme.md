@@ -14,7 +14,7 @@ You can config odoo, make it look like your own platform.
 10. Standalone setting panel, easy to setup.
 11. Provide 236 country flags.
 12. Multi-language Support.
-13. Change Powered by Odoo in login screen.(Please change '../views/app_odoo_customize_view.xml' #15)
+13. Change Powered by SATURN in login screen.(Please change '../views/app_odoo_customize_view.xml' #15)
 14. Quick delete test data in Apps: Sales/POS/Purchase/MRP/Inventory/Accounting/Message/Workflow etc.
 15. Reset All the Sequence to beginning of 1: SO/PO/MO/Invoice...
 16. Fix odoo reload module translation bug while enable english language
@@ -40,7 +40,7 @@ http://www.sunpop.cn
 10. 单独设置面板，每个选项都可以自定义
 11. 提供236个国家的国旗文件（部份需要自行设置文件名）
 12. 多语言版本
-13. 自定义登陆界面中的 Powered by Odoo
+13. 自定义登陆界面中的 Powered by SATURN
 14. 快速删除测试数据，支持模块包括：销售/POS门店/采购/生产/库存/会计/消息与工作流等.
 15. 将各类单据的序号重置，从1开始，包括：SO/PO/MO/Invoice 等
 16. 修复odoo启用英文后模块不显示中文的Bug

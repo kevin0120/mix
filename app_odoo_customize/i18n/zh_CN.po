@@ -298,8 +298,8 @@ msgstr "显示我的帐户"
 
 #. module: app_odoo_customize
 #: model:ir.model.fields,field_description:app_odoo_customize.field_app_theme_config_settings_app_show_poweredby
-msgid "Show Powered by Odoo"
-msgstr "显示Powered by Odoo"
+msgid "Show Powered by SATURN"
+msgstr "显示Powered by SATURN"
 
 #. module: app_odoo_customize
 #: model:ir.model.fields,field_description:app_odoo_customize.field_app_theme_config_settings_app_show_debug

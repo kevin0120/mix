@@ -10,5 +10,4 @@ from . import mrp_bom
 from . import maintenance
 from . import quality
 from . import res_config
-from . import base_model
 # from . import report

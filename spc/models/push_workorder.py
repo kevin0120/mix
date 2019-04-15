@@ -41,7 +41,7 @@ class PushWorkorder(AbstractModel):
             _consumes = list()
             for consu in order.consu_bom_line_ids:
                 # 定位消耗品的qcp
-                _qcps = self.env['quality.point'].sudo().search([('bom_line_id', '=', consu.bom_line_id.id),
+                _qcps = self.env['sa.quality.point'].sudo().search([('bom_line_id', '=', consu.bom_line_id.id),
                                                           ('operation_id', '=', order.operation_id.id)],
                                                          limit=1)
 
