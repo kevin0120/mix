@@ -178,7 +178,7 @@ BEGIN
            co.id,
            mp.id,
            wo.workcenter_id,
-           me.id
+           me.id,
            mp.product_id,
            co.program_id,
            co.product_id,
