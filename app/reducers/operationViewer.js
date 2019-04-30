@@ -3,40 +3,29 @@ import { genReducers } from './utils';
 
 const initOperationViewer = {
   list: [],
-  detail: {}
+  detail: {},
+  loading:false,
 };
 
 const operationViewerReducers={
   [OPERATION_VIEWER.DETAIL_FETCH_OK]: (state, action) => ({
     ...state,
-    detail: action.data
+    detail: action.data,
+    loading:false
   }),
   [OPERATION_VIEWER.LIST_FETCH_OK]: (state, action) => ({
     list: action.data,
-    detail: {}
+    detail: {},
+    loading:false
+  }),
+  [OPERATION_VIEWER.EDIT_START]: (state) => ({
+    ...state,
+    loading:true
+  }),
+  [OPERATION_VIEWER.EDIT_END]:(state)=>({
+    ...state,
+    loading:false,
   })
 };
 
 export default genReducers(operationViewerReducers,initOperationViewer);
-
-// export default function operationViewer(
-//   state: object = initOperationViewer,
-//   action: actionType
-// ) {
-//   switch (action.type) {
-//     case OPERATION_VIEWER.DETAIL_FETCH_OK: {
-//       return {
-//         ...state,
-//         detail: action.data
-//       };
-//     }
-//     case OPERATION_VIEWER.LIST_FETCH_OK: {
-//       return {
-//         list: action.data,
-//         detail: {}
-//       };
-//     }
-//     default:
-//       return state;
-//   }
-// }

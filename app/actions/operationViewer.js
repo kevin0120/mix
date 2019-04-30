@@ -8,3 +8,15 @@ export const fetchOperationDetailStart = operationID => ({
   type: OPERATION_VIEWER.DETAIL_FETCH_START,
   operationID
 });
+
+export const editOperation = (operationID, points, img) => ({
+  type: OPERATION_VIEWER.EDIT_START,
+  operationID,
+  points,
+  img
+});
+
+export const editOperationEnd = (success) => ({
+  type: OPERATION_VIEWER.EDIT_END,
+  success
+});
