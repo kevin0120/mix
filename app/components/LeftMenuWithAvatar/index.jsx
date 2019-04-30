@@ -44,8 +44,8 @@ function ConnectedLeftMenuWithAvatar(props) {
 
       {children}
 
-      <div className={classes.baseInfo}>
-        <List>
+      {/*<div className={classes.baseInfo}>*/}
+        {/*<List>*/}
           {/*<ListItem className={classes.userInfo}>*/}
           {/*<Avatar*/}
           {/*alt={users[0].name}*/}
@@ -66,8 +66,8 @@ function ConnectedLeftMenuWithAvatar(props) {
               {/*timezone="Asia/Shanghai"*/}
             {/*/>*/}
           {/*</ListItem>*/}
-        </List>
-      </div>
+        {/*</List>*/}
+      {/*</div>*/}
     </Drawer>
   );
 }

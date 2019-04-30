@@ -21,7 +21,6 @@ class DraggablePoint extends React.Component {
       y: point.y_offset ? imageSize.height * point.y_offset / 100 - radius : 0,
       x: point.x_offset ? imageSize.width * point.x_offset / 100 - radius : 0
     };
-    console.log(position);
     return (
       <Draggable
         defaultClassName={classes.circleWrap}

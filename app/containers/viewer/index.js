@@ -2,7 +2,6 @@
 import React from 'react';
 
 
-
 // material-ui
 import { withStyles } from '@material-ui/core';
 import MenuList from '@material-ui/core/MenuList';
@@ -34,7 +33,8 @@ import {
 } from '../../actions/operationViewer';
 import ImageEditor from '../../components/ImageEditor';
 import { get } from 'lodash';
-
+import DraggablePoint from '../../components/ImageEditor/DraggablePoint';
+import Image from '../../components/ImageStick/Image';
 
 
 class Viewer extends React.Component {
@@ -70,7 +70,7 @@ class Viewer extends React.Component {
       return (
         <MenuItem
           selected={selected}
-          key={item.id}
+          key={index}
           className={classes.menuItem}
           component={() => (
             <Card
@@ -91,11 +91,13 @@ class Viewer extends React.Component {
         />
       );
     });
-    return <div>{menus}</div>;
+    return <MenuList>{menus}</MenuList>;
   };
 
   renderImage = () => {
     const { contents, data, dispatchEditOperation } = this.props;
+    const circleRadius = 30;
+
     if (!contents.image) {
       return null;
     }
@@ -112,15 +114,18 @@ class Viewer extends React.Component {
       );
     }
     return (
-      <img
-        alt="operation"
-        src={data.detail.img}
-        style={{
-          height: '100%',
-          width: '100%',
-          objectFit: 'contain'
-        }}
-      />
+      <Image src={data.detail.img} alt="">
+        {(data.detail ? data.detail.points || [] : []).map((point, idx) => (
+          <DraggablePoint
+            key={point.sequence}
+            point={point}
+            idx={idx}
+            radius={circleRadius}
+            onStop={this.pointDraggingStop}
+            disabled
+          />
+        ))}
+      </Image>
     );
   };
 
@@ -174,7 +179,7 @@ class Viewer extends React.Component {
             flex: 1
           }}
         >
-          {contentsArray.map((item,key) =>
+          {contentsArray.map((item, key) =>
             <Tab key={key} label={t(item.label)}/>
           )}
         </Tabs>
@@ -194,7 +199,7 @@ class Viewer extends React.Component {
           <div className={classes.root}>
             <AppBarBack/>
             <LeftMenuWithAvatar>
-              <MenuList>{this.genMenuList(t)}</MenuList>
+              {this.genMenuList(t)}
             </LeftMenuWithAvatar>
             {currentMenuItem !== -1 ? this.renderTabs(t) : null}
           </div>
