@@ -8,27 +8,25 @@
 
 // @flow
 
-import { takeEvery, put } from 'redux-saga/effects';
+import { takeEvery, select } from 'redux-saga/effects';
 
 import { NOTIFY } from '../actions/actionTypes';
-import { NewNotificationOK } from '../actions/notification';
 import { Info, Warn, Error, Maintenance } from '../logger';
 
 function* notificationAlways(action) {
-  const { variant, message } = action;
-  yield put(NewNotificationOK(variant, message));
+  const { variant, message, meta } = action;
   switch (variant) {
     case 'info':
-      Info(message);
+      Info(message,meta);
       break;
     case 'warning':
-      Warn(message);
+      Warn(message,meta);
       break;
     case 'maintenance':
-      Maintenance(message);
+      Maintenance(message,meta);
       break;
     case 'error':
-      Error(message);
+      Error(message,meta);
       break;
     default:
       break;
@@ -36,5 +34,5 @@ function* notificationAlways(action) {
 }
 
 export function* watchNotification() {
-  yield takeEvery(NOTIFY.PRE_NEW_NOTIFICATION, notificationAlways);
+  yield takeEvery(NOTIFY.NEW_NOTIFICATION, notificationAlways);
 }

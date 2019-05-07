@@ -9,6 +9,7 @@
 // @flow
 
 import isURL from 'validator/lib/isURL';
+import { Error } from '../../logger';
 
 const axios = require('axios');
 
@@ -27,6 +28,9 @@ export function masterPCHealthCheck(conn) {
     .get(fullUrl)
     .then(resp => resp)
     .catch(e => {
+      Error(e.toString(),{
+        at:masterPCHealthCheck.name
+      });
       throw e;
     });
 }
@@ -45,6 +49,9 @@ export function controllerHealthCheck(conn, controllers) {
     })
     .then(response => response)
     .catch(e => {
+      Error(e.toString(),{
+        at:controllerHealthCheck.name
+      });
       throw e;
     });
 }

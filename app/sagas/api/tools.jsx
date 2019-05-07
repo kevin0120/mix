@@ -9,11 +9,15 @@
 // @flow
 
 import { defaultClient } from '../../common/utils';
+import { Error } from '../../logger';
 
 export const apiToolEnable = (fullUrl, data) =>
   defaultClient
     .put(fullUrl, data)
     .then(resp => resp)
     .catch(e => {
+      Error(e.toString(),{
+        at:apiToolEnable.name
+      });
       throw e.toString();
     });

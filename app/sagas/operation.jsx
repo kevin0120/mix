@@ -289,8 +289,12 @@ export function* getOperation(job) {
               return;
             }
           } else {
-            Error(`获取工单失败:${e.message}`);
-            yield put(setNewNotification('error', `获取工单失败:${e.message}`));
+            yield put(setNewNotification('error', `获取工单失败:${e.message}`,{
+              workMode:state.workMode.workMode,
+              opMode:state.setting.operationSettings.opMode,
+              carID:code,
+              response:resp
+            }));
             yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
             yield call(clearStories);
           }
@@ -304,15 +308,23 @@ export function* getOperation(job) {
       yield call(startOperation, { data: resp.data });
     } else {
       // 定位作业失败
-      Error('获取作业失败');
-      yield put(setNewNotification('error', '获取作业失败'));
+      yield put(setNewNotification('error', '定位作业失败'),{
+        workMode:state.workMode.workMode,
+        opMode:state.setting.operationSettings.opMode,
+        carID:state.operations.carID,
+        response:resp
+      });
       yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
       yield call(clearStories);
       // yield put({ type: OPERATION.RESET });
     }
   } catch (e) {
-    Error(`获取作业失败:${e.message}`);
-    yield put(setNewNotification('error', `获取作业失败:${e.message}`));
+    const state = yield select();
+    yield put(setNewNotification('error', `获取作业失败:${e.message}`,{
+      workMode:state.workMode.workMode,
+      opMode:state.setting.operationSettings.opMode,
+      carID:state.operations.carID
+    }));
     yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
     yield call(clearStories);
   }
@@ -440,7 +452,11 @@ export function* doingOperation(controllerMode) {
     } catch (e) {
       // 程序号设置失败
       yield put({ type: OPERATION.PROGRAMME.SET_FAIL });
-      yield put(setNewNotification('error', 'pset failed'));
+      yield put(setNewNotification('error', 'pset failed'),{
+        workMode:state.workMode.workMode,
+        opMode:state.setting.operationSettings.opMode,
+        carID:state.operations.carID
+      });
       return false;
     }
     return true;

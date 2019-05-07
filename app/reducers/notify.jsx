@@ -2,10 +2,12 @@
 
 import { NOTIFY } from '../actions/actionTypes';
 
+// 当前工作模式、vin/零件号（如果有），车型代码、api及返回值、其他业务相关细信息
 const defaultNotify = {
   variant: 'success', // 'error', 'warning', 'info'
   message: '',
-  isShow: false
+  isShow: false,
+  meta:{}
 };
 
 type actionType = {
@@ -20,8 +22,11 @@ export default function notify(
 ) {
   switch (action.type) {
     case NOTIFY.NEW_NOTIFICATION: {
-      const { variant, message } = action;
-      return { variant, message, isShow: true };
+      const { type, ...data } = action;
+      return {
+        ...data,
+        isShow: true,
+      };
     }
     case NOTIFY.CLOSE: {
       return { ...state, isShow: false };

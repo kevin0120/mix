@@ -1,5 +1,6 @@
 import isURL from 'validator/lib/isURL';
 import { defaultClient } from '../../common/utils';
+import { Error } from '../../logger';
 
 
 export default function fetchLogo(baseURL) {
@@ -12,6 +13,10 @@ export default function fetchLogo(baseURL) {
     .get(fullUrl)
     .then(resp => resp)
     .catch(e => {
+      Error(e.toString(),{
+        at:fetchLogo.name
+      });
+      console.log(e);
       throw e;
     });
 }

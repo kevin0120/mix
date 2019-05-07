@@ -3,6 +3,7 @@
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import isURL from 'validator/lib/isURL';
+import { Error } from '../../logger';
 
 const lodash = require('lodash');
 
@@ -38,6 +39,9 @@ export function fetchNextWorkOrder(baseURL, workcenterCode) {
     })
     .then(resp => resp)
     .catch(e => {
+      Error(e.toString(),{
+        at:fetchNextWorkOrder.name
+      });
       throw e;
     });
 }
@@ -66,6 +70,9 @@ export function fetchRoutingWorkcenter(url, workCenterCode, carType, job) {
     .get(fullUrl, { params: paramObj })
     .then(resp => resp)
     .catch(e => {
+      Error(e.toString(),{
+        at:fetchRoutingWorkcenter.name
+      });
       throw e;
     });
 }
@@ -89,6 +96,9 @@ export function fetchWorkorder(url, workcenterCode, code) {
     })
     .then(resp => resp)
     .catch(e => {
+      Error(e.toString(),{
+        at:fetchWorkorder.name
+      });
       throw e;
     });
 }
@@ -104,6 +114,9 @@ export function toolEnable(url, controllerSN, toolSN, enable) {
     })
     .then(resp => resp)
     .catch(e => {
+      Error(e.toString(),{
+        at:toolEnable.name
+      });
       throw e;
     });
 }
@@ -119,6 +132,9 @@ export function controllerMode(url, mode, controllerSN) {
     .put(fullUrl, bodyData)
     .then(resp => resp)
     .catch(e => {
+      Error(e.toString(),{
+        at:controllerMode.name
+      });
       throw e;
     });
 }
@@ -149,6 +165,9 @@ export function pset(
     })
     .then(resp => resp)
     .catch(e => {
+      Error(e.toString(),{
+        at:pset.name
+      });
       throw e;
     });
 }
@@ -185,6 +204,9 @@ export function jobManual(
     })
     .then(resp => resp)
     .catch(e => {
+      Error(e.toString(),{
+        at:jobManual.name
+      });
       throw e;
     });
 }
@@ -211,6 +233,9 @@ export function ak2Api(
     })
     .then(resp => resp)
     .catch(e => {
+      Error(e.toString(),{
+        at:ak2Api.name
+      });
       throw e;
     });
 }

@@ -70,24 +70,24 @@ export function CreateDailyLogger() {
   }
 }
 
-export function Info(msg) {
+export function Info(msg,meta) {
   if (gLogger === null) return;
-  gLogger.info(msg);
+  gLogger.info(msg,{meta});
 }
 
-export function Warn(msg) {
+export function Warn(msg,meta) {
   if (gLogger === null) return;
-  gLogger.warn(msg);
+  gLogger.warn(msg,{meta});
 }
 
-export function Maintenance(msg) {
+export function Maintenance(msg,meta) {
   if (gLogger === null) return;
-  gLogger.maintenance(msg);
+  gLogger.maintenance(msg,{meta});
 }
 
-export function Error(msg) {
+export function Error(msg,meta) {
   if (gLogger === null) return;
-  gLogger.error(msg);
+  gLogger.error(msg,{meta});
 }
 
 export function Query(options, f) {

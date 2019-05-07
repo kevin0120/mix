@@ -9,11 +9,15 @@
 // @flow
 
 import { defaultClient } from '../../common/utils';
+import { Error } from '../../logger';
 
 export const fetchConnectionInfo = fullUrl =>
   defaultClient
     .get(fullUrl)
     .then(resp => resp)
     .catch(e => {
+      Error(e.toString(),{
+        at:fetchConnectionInfo.name
+      });
       throw e.toString();
     });

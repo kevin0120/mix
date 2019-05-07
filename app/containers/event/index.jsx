@@ -85,7 +85,7 @@ const requestData = () =>
       limit: 600,
       start: 0,
       order: 'desc',
-      fields: ['timestamp', 'level', 'message']
+      fields: ['timestamp', 'level', 'message', 'meta']
     };
 
     Query(options, (err, results) => {
@@ -128,6 +128,7 @@ class Event extends React.Component {
           timestamp: dayjs(item.timestamp).format('YYYY MM-DD HH:mm:ss'),
           level: item.level,
           message: item.message,
+          meta: item.meta,
           actions: (
             // we've added some custom button actions
             <div className="actions-right">
@@ -161,11 +162,26 @@ class Event extends React.Component {
     });
   };
 
-  render() {
-    const { classes, keyboardInput } = this.props;
-    const { data, isShow, selectObj, loading, messageFilter } = this.state;
+  renderMsg = (selectObj) => {
+    if (!selectObj) {
+      return ' ';
+    }
 
-    const Msg = selectObj ? (
+    let levelText = 'Event.Info';
+    switch (selectObj.level) {
+      case 'info':
+        levelText = 'Event.Info';
+        break;
+      case 'maintenance':
+        levelText = 'Event.Maintenance';
+        break;
+      default:
+        levelText = 'Event.Alert';
+        break;
+    }
+    console.log(selectObj);
+    const keys = Object.keys(selectObj.meta || {});
+    return (
       <I18n ns="translations">
         {t => (
           <div>
@@ -174,31 +190,38 @@ class Event extends React.Component {
                 <ListItemText primary={`${t('Event.Time')}:   ${selectObj.timestamp}`}/>
               </ListItem>
               <li>
-                <Divider />
+                <Divider/>
               </li>
               <ListItem>
                 <ListItemText
-                  primary={`${t('Event.Level')}: ${
-                    selectObj.level === 'info'
-                      ? t('Event.Info')
-                      : selectObj.level === 'maintenance'
-                      ? t('Event.Maintenance')
-                      : t('Event.Alert')
-                    }`}
+                  primary={`${t('Event.Level')}: ${t(levelText)}`}
                 />
               </ListItem>
-              <Divider  component="li"/>
+              <Divider component="li"/>
               <ListItem>
                 <ListItemText primary={`${t('Event.Message')}: ${selectObj.message}`}/>
               </ListItem>
+              {
+                keys.map((key) => (
+
+                  <React.Fragment>
+                    <Divider component="li"/>
+                    <ListItem>
+                      <ListItemText primary={`${t(key)}: ${selectObj.meta[key]}`}/>
+                    </ListItem>
+                  </React.Fragment>
+                ))
+              }
             </List>
           </div>
         )}
       </I18n>
-
-    ) : (
-      ' '
     );
+  };
+
+  render() {
+    const { classes, keyboardInput } = this.props;
+    const { data, isShow, selectObj, loading, messageFilter } = this.state;
 
     return (
       <I18n ns="translations">
@@ -359,7 +382,7 @@ class Event extends React.Component {
               cancelBtnText={t('Common.No')}
               showCancel
             >
-              {Msg}
+              {this.renderMsg(selectObj)}
             </Alert>
           </React.Fragment>
         )}

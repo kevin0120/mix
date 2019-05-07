@@ -1,4 +1,5 @@
 import axios from "axios";
+import { Error } from '../../logger';
 
 const defaultClient = axios.create({
   timeout: 3000,
@@ -17,6 +18,9 @@ export function andonVehicleApi(baseUrl, vin, workcenterCode) {
     })
     .then(resp => resp)
     .catch(e => {
+      Error(e.toString(),{
+        at:andonVehicleApi.name
+      });
       throw e;
     });
 }
