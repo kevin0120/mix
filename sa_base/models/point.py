@@ -111,6 +111,9 @@ class OperationPoints(models.Model):
         for point in self:
             msg = _("#%s operation point has been delete") % (point.id)
             point.operation_id.message_post(body=msg, subject=msg, message_type='comment')
+        lines = self.env['mrp.bom.line'].search([('operation_point_id', 'in', self.ids)])
+        if lines:
+            lines.unlink()
         return super(OperationPoints, self).unlink()
 
     @api.one
