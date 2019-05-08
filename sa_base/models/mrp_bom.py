@@ -2,7 +2,15 @@
 
 from odoo import models, fields, api,_
 from odoo.exceptions import ValidationError, UserError
+
+import requests as Requests
+
+from requests import ConnectionError, RequestException, exceptions
+
 import json
+
+
+MASTER_DEL_WROKORDERS_API = '/rush/v1/mrp.routing.workcenter.delete'
 
 
 class MrpBom(models.Model):
@@ -73,6 +81,11 @@ class MrpBom(models.Model):
 
     @api.model
     def create(self, vals):
+        auto_operation_inherit = self.env['ir.values'].get_default('sa.config.settings', 'auto_operation_inherit')
+        if auto_operation_inherit and 'routing_id' in vals:
+            routing_id = self.env['mrp.routing'].browse(vals['routing_id'])
+            operation_ids = routing_id.operation_ids
+            vals.update({'operation_ids': [(6, None, operation_ids.ids)]})
         ret = super(MrpBom, self).create(vals)
         if 'operation_ids' in vals:
             ret._onchange_operations()
@@ -84,6 +97,10 @@ class MrpBom(models.Model):
         if 'operation_ids' in vals:
             self._onchange_operations()
         return ret
+
+    @api.multi
+    def unlink(self):
+        raise ValidationError(u'不允许删除物料清单')
 
 
 class MrpBomLine(models.Model):
@@ -181,9 +198,37 @@ class MrpBomLine(models.Model):
                 rec.sudo().write({'times': line.product_qty})
         return res
 
+    @api.multi
+    def _push_del_routing_workcenter(self, line, url):
+        val = {
+            'product_id': line.bom_id.product_id.id,
+            "id": line.id,
+        }
+        try:
+            ret = Requests.put(url, data=json.dumps(val), headers={'Content-Type': 'application/json'}, timeout=1)
+            if ret.status_code == 204:
+                self.env.user.notify_info(u'删除工艺成功')
+                return True
+        except ConnectionError as e:
+            self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
+            return False
+        except RequestException as e:
+            self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
+            return False
 
     @api.multi
     def unlink(self):
+        for line in self:
+            master = line.workcenter_id.masterpc_id if line.workcenter_id else None
+            if not master:
+                raise UserError(u"未找到工位上的工位控制器")
+            connections = master.connection_ids.filtered(lambda r: r.protocol == 'http') if master.connection_ids else None
+            if not connections:
+                raise UserError(u"未找到工位上的工位控制器的连接信息")
+            url = ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_DEL_WROKORDERS_API) for connect in connections][0]
+            ret = self._push_del_routing_workcenter(line=line, url=url)
+            if not ret:
+                raise UserError(u"未删除物料清单行")
         quality_points = self.env['quality.point']
         for line in self:
             rec = self.env['quality.point'].search([('bom_line_id', '=', line.id)])

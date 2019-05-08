@@ -2,7 +2,7 @@
 
 from odoo import models, fields, api, _, SUPERUSER_ID
 
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError,ValidationError
 
 import requests as Requests
 
@@ -172,6 +172,11 @@ class MrpRoutingWorkcenter(models.Model):
             point.write({'group_sequence': group_idx + idx + 1})
         for idx, point in enumerate(self.operation_point_ids.sorted(key=lambda r: r.group_sequence)):
             point.write({'sequence': idx + 1})
+
+
+    @api.multi
+    def unlink(self):
+        raise ValidationError(u'不允许删除作业')
 
     @api.multi
     def name_get(self):
