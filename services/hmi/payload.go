@@ -184,3 +184,8 @@ type TestProtocol struct {
 type NewWorkorder struct {
 	WorkorderID int64 `json:"workorder_id"`
 }
+
+type RoutingOperationDelete struct {
+	OperationID int64  `json:"id"`
+	ProductType string `json:"product_type"`
+}

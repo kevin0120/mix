@@ -164,6 +164,14 @@ func (s *Service) Open() error {
 
 	r = httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "PUT",
+		Pattern:     "/mrp.routing.workcenter.delete",
+		HandlerFunc: s.methods.deleteRoutingOpertions,
+	}
+	handler.AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
 		Method:      "POST",
 		Pattern:     "/maintenance",
 		HandlerFunc: s.methods.postMaintenance,

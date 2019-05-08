@@ -12,3 +12,8 @@ const (
 	RESULT_STAGE_INIT  = "init"
 	RESULT_STAGE_FINAL = "final"
 )
+
+type RoutingOperationDelete struct {
+	OperationID int64  `json:"id"`
+	ProductType string `json:"product_type"`
+}

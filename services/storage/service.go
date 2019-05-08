@@ -597,6 +597,15 @@ func (s *Service) UpdateResultByCount(id int64, count int, flag bool) error {
 	}
 }
 
+func (s *Service) DeleteRoutingOperations(rds []RoutingOperationDelete) error {
+	for _, v := range rds {
+		sql := fmt.Sprintf("delete from `routing_operations` where operation_id = %d and product_type = '%s'", v.OperationID, v.ProductType)
+		s.eng.Exec(sql)
+	}
+
+	return nil
+}
+
 func (s *Service) DeleteInvalidResults(keep time.Time) error {
 	sql := fmt.Sprintf("delete from `results` where has_upload = true and update_time < '%s'", keep.Format("2006-01-02 15:04:05"))
 	_, err := s.eng.Exec(sql)

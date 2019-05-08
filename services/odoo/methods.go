@@ -2,6 +2,7 @@ package odoo
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/kataras/iris"
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/controller"
@@ -203,6 +204,23 @@ func (m *Methods) patchResult(ctx iris.Context) {
 		ctx.WriteString(e.Error())
 		return
 	}
+}
+
+func (m *Methods) deleteRoutingOpertions(ctx iris.Context) {
+	rds := []storage.RoutingOperationDelete{}
+	e := ctx.ReadJSON(&rds)
+	if e != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(e.Error())
+		return
+	}
+
+	rds_str, _ := json.Marshal(rds)
+	m.service.diag.Debug(fmt.Sprintf("remove local operations:%s", rds_str))
+
+	m.service.DB.DeleteRoutingOperations(rds)
+
+	ctx.StatusCode(iris.StatusNoContent)
 }
 
 func (m *Methods) putSyncRoutingOpertions(ctx iris.Context) {
