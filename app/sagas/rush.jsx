@@ -163,7 +163,7 @@ export function* watchRushChannel(hmiSN) {
               );
               break;
             case 'job':
-              console.log('job:',json);
+              console.log('job:', json);
               if (state.workMode.workMode === 'manual' && json.job_id > 0) {
                 if (state.setting.operationSettings.manualFreestyle) {
                   yield put(switch2Ready(false));
@@ -173,7 +173,7 @@ export function* watchRushChannel(hmiSN) {
 
                 yield put(operationTrigger(
                   carID,
-                  "",
+                  '',
                   json.job_id,
                   OPERATION_SOURCE.MANUAL
                 ));
@@ -258,7 +258,7 @@ export function* watchRushChannel(hmiSN) {
             }
 
             case 'tool': {
-              yield put(toolStatusChange(json.tool_sn, json.status));
+              yield put(toolStatusChange(json.tool_sn, json.status, json.reason));
               break;
             }
             default:

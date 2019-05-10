@@ -127,7 +127,7 @@ function* operationFinished(action) {
       yield put(setResultDiagShow(true));
       // 工具禁用
 
-      yield put(toolDisable());
+      yield put(toolDisable('作业结束'));
 
     }
   } catch (e) {
@@ -403,7 +403,7 @@ export function* startOperation(action) {
             workorderID: resp.data.workorder_id
           });
           // 启动用具
-          yield put(toolEnable());
+          yield put(toolEnable('开始作业'));
           yield put({ type: OPERATION.STARTED });
         }
       } catch (e) {

@@ -10,24 +10,27 @@
 
 import { TOOLS } from './actionTypes';
 
-export function toolEnable() {
+export function toolEnable(reason) {
   return {
     type: TOOLS.ENABLE,
-    enable: true
+    enable: true,
+    reason
   };
 }
 
-export function toolDisable() {
+export function toolDisable(reason) {
   return {
     type: TOOLS.ENABLE,
-    enable: false
+    enable: false,
+    reason
   };
 }
 
-export function toolStatusChange(toolSN,status){
+export function toolStatusChange(toolSN,status,reason){
   return{
     type:TOOLS.STATUS_CHANGE,
     toolSN,
-    status
+    status,
+    reason
   }
 }

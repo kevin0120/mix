@@ -107,13 +107,14 @@ export function fetchWorkorder(url, workcenterCode, code) {
 }
 
 // 拧紧枪使能控制
-export function toolEnable(url, controllerSN, toolSN, enable) {
+export function toolEnable(url, controllerSN, toolSN, enable,reason) {
   const fullUrl = `${url}/rush/v1/tool-enable`;
   return defaultClient
     .put(fullUrl, {
       controller_sn: controllerSN,
       gun_sn: toolSN,
-      enable
+      enable,
+      reason
     })
     .then(resp => resp)
     .catch(e => {

@@ -40,11 +40,11 @@ function* staticToolEnable(action: actionType) {
 
     const { results } = state.operations;
     const targetResult = results[0];
-    yield call(toolEnable, mUrl, targetResult.controller_sn, targetResult.gun_sn, action.enable);
+    yield call(toolEnable, mUrl, targetResult.controller_sn, targetResult.gun_sn, action.enable ,action.reason);
   } catch (e) {
     console.error(`staticToolEnable error:`, e);
     const { data } = e.response || { data: '' };
-    if(/tool not found/.test(data)){
+    if (/tool not found/.test(data)) {
       const state = yield select();
       const { results } = state.operations;
       const targetResult = results[0];
@@ -57,14 +57,15 @@ function* staticToolEnable(action: actionType) {
 
 function* onToolStatusChange(action) {
   try {
-    const { toolSN, status } = action;
+    const { toolSN, status, reason } = action;
     yield put(
       setNewNotification(
         'info',
-        `拧紧枪状态更新（${toolSN}）：${status}`
+        `拧紧枪状态更新（${toolSN}）： ${status}${reason ? `, ${reason}` : ''}`
       )
     );
-  } catch (e) {
+  }
+ catch (e) {
     console.error('onToolStatusChange:', e);
   }
 }
