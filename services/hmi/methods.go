@@ -71,6 +71,21 @@ func (m *Methods) putToolControl(ctx iris.Context) {
 		ctx.WriteString(err.Error())
 		return
 	}
+
+	strStatus := controller.STATUS_ENABLE
+	if !te.Enable {
+		strStatus = controller.STATUS_DISABLE
+	}
+
+	// websocket 推送通知
+	ts := wsnotify.WSToolStatus{
+		ToolSN: te.GunSN,
+		Status: strStatus,
+		Reason: te.Reason,
+	}
+
+	str, _ := json.Marshal(ts)
+	m.service.ControllerService.WS.WSSend(wsnotify.WS_EVETN_TOOL, string(str))
 }
 
 func (m *Methods) putPSets(ctx iris.Context) {

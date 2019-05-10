@@ -37,6 +37,7 @@ type ToolEnable struct {
 	Controller_SN string `json:"controller_sn"`
 	GunSN         string `json:"gun_sn"`
 	Enable        bool   `json:"enable"`
+	Reason        string `json:"reason"`
 }
 
 type Job struct {

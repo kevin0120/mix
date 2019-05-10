@@ -13,6 +13,9 @@ const (
 	STATUS_ONLINE  = "online"
 	STATUS_OFFLINE = "offline"
 
+	STATUS_ENABLE  = "enable"
+	STATUS_DISABLE = "disable"
+
 	ERR_CONTROLER_NOT_FOUND = "controller not found"
 	ERR_TOOL_NOT_FOUND      = "tool not found"
 	ERR_CONTROLER_TIMEOUT   = "controller timeout"

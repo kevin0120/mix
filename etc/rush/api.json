@@ -611,6 +611,41 @@
         }
       }
     },
+    "/mrp.routing.workcenter.delete": {
+      "put": {
+        "tags": [
+          "ODOO"
+        ],
+        "summary": "删除本地作业",
+        "description": "删除本地作业",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/rod"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "设置成功"
+          },
+          "400": {
+            "description": "设置失败"
+          }
+        }
+      }
+    },
     "/results": {
       "get": {
         "tags": [
@@ -1713,6 +1748,11 @@
           "type": "boolean",
           "description": "是否使能",
           "example": true
+        },
+        "reason": {
+          "type": "string",
+          "description": "使能原因",
+          "example": "out of bound"
         }
       },
       "required": [
@@ -1957,6 +1997,21 @@
           "type": "integer",
           "description": "序号",
           "example": 1
+        }
+      }
+    },
+    "rod": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "作业id",
+          "example": 1
+        },
+        "product_type": {
+          "type": "string",
+          "description": "车型代码",
+          "example": "car"
         }
       }
     }

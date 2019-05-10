@@ -55,4 +55,5 @@ type WSOdooStatus struct {
 type WSToolStatus struct {
 	ToolSN string `json:"tool_sn"`
 	Status string `json:"status"`
+	Reason string `json:"reason"`
 }

@@ -120,13 +120,13 @@ controller_service:
 #      port: 4546
 #      channel: 51
 #
-#    - serial_no: 27231800454
-#      protocol: OpenProtocol
-#      remote_ip: 192.168.4.86
-#      port: 4545
-#      tools:
-#      - gun_serial: 18B50451
-#        channel: 1
+    - serial_no: 27231800454
+      protocol: Audi/VW
+      remote_ip: 192.168.4.86
+      port: 4700
+      tools:
+      - gun_serial: 18B50451
+        channel: 1
 
 #  - serial_no: 27091400470
 #    protocol: OpenProtocol
