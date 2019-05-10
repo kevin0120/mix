@@ -14,9 +14,9 @@ export default function fetchLogo(baseURL) {
     .then(resp => resp)
     .catch(e => {
       Error(e.toString(),{
-        at:fetchLogo.name
+        at:fetchLogo.name,
+        response:e.response && e.response.data && JSON.stringify(e.response.data)
       });
-      console.log(e);
       throw e;
     });
 }

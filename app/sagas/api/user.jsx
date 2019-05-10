@@ -10,7 +10,8 @@ export function getUserInfo(url, uuid) {
     .then(resp => resp)
     .catch(e => {
       Error(e.toString(),{
-        at:getUserInfo.name
+        at:getUserInfo.name,
+        response:e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e.toString();
     });

@@ -19,7 +19,8 @@ export function andonVehicleApi(baseUrl, vin, workcenterCode) {
     .then(resp => resp)
     .catch(e => {
       Error(e.toString(),{
-        at:andonVehicleApi.name
+        at:andonVehicleApi.name,
+        response:e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e;
     });

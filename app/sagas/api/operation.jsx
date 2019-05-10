@@ -40,7 +40,8 @@ export function fetchNextWorkOrder(baseURL, workcenterCode) {
     .then(resp => resp)
     .catch(e => {
       Error(e.toString(),{
-        at:fetchNextWorkOrder.name
+        at:fetchNextWorkOrder.name,
+        response:e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e;
     });
@@ -71,7 +72,8 @@ export function fetchRoutingWorkcenter(url, workCenterCode, carType, job) {
     .then(resp => resp)
     .catch(e => {
       Error(e.toString(),{
-        at:fetchRoutingWorkcenter.name
+        at:fetchRoutingWorkcenter.name,
+        response:e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e;
     });
@@ -97,7 +99,8 @@ export function fetchWorkorder(url, workcenterCode, code) {
     .then(resp => resp)
     .catch(e => {
       Error(e.toString(),{
-        at:fetchWorkorder.name
+        at:fetchWorkorder.name,
+        response:e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e;
     });
@@ -115,7 +118,8 @@ export function toolEnable(url, controllerSN, toolSN, enable) {
     .then(resp => resp)
     .catch(e => {
       Error(e.toString(),{
-        at:toolEnable.name
+        at:toolEnable.name,
+        response:e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e;
     });
@@ -133,7 +137,8 @@ export function controllerMode(url, mode, controllerSN) {
     .then(resp => resp)
     .catch(e => {
       Error(e.toString(),{
-        at:controllerMode.name
+        at:controllerMode.name,
+        response:e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e;
     });
@@ -166,7 +171,8 @@ export function pset(
     .then(resp => resp)
     .catch(e => {
       Error(e.toString(),{
-        at:pset.name
+        at:pset.name,
+        response:e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e;
     });
@@ -205,7 +211,8 @@ export function jobManual(
     .then(resp => resp)
     .catch(e => {
       Error(e.toString(),{
-        at:jobManual.name
+        at:jobManual.name,
+        response:e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e;
     });
@@ -234,7 +241,8 @@ export function ak2Api(
     .then(resp => resp)
     .catch(e => {
       Error(e.toString(),{
-        at:ak2Api.name
+        at:ak2Api.name,
+        response:e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e;
     });

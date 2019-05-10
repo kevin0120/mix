@@ -17,7 +17,8 @@ export const apiToolEnable = (fullUrl, data) =>
     .then(resp => resp)
     .catch(e => {
       Error(e.toString(),{
-        at:apiToolEnable.name
+        at:apiToolEnable.name,
+        response:e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e.toString();
     });

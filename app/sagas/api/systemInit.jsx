@@ -17,7 +17,8 @@ export const fetchConnectionInfo = fullUrl =>
     .then(resp => resp)
     .catch(e => {
       Error(e.toString(),{
-        at:fetchConnectionInfo.name
+        at:fetchConnectionInfo.name,
+        response:e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e.toString();
     });

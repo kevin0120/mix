@@ -13,7 +13,8 @@ export function operationListApi(baseURL, hmiSn) {
     .then(resp => resp)
     .catch(e => {
       Error(e.toString(),{
-        at:operationListApi.name
+        at:operationListApi.name,
+        response:e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e.toString();
     });
@@ -27,7 +28,8 @@ export function operationDetailApi(baseURL, operationID) {
     .then(resp => resp)
     .catch(e => {
       Error(e.toString(),{
-        at:operationDetailApi.name
+        at:operationDetailApi.name,
+        response:e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e.toString();
     });
@@ -45,7 +47,8 @@ export function imageEditApi(baseURL, operationID, points, img) {
     .then(resp => resp)
     .catch(e => {
       Error(e.toString(),{
-        at:imageEditApi.name
+        at:imageEditApi.name,
+        response:e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e.toString();
     });

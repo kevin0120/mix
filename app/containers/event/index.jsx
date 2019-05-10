@@ -179,7 +179,6 @@ class Event extends React.Component {
         levelText = 'Event.Alert';
         break;
     }
-    console.log(selectObj);
     const keys = Object.keys(selectObj.meta || {});
     return (
       <I18n ns="translations">
