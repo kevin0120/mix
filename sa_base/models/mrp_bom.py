@@ -18,6 +18,27 @@ class MrpBom(models.Model):
 
     operation_ids = fields.Many2many('mrp.routing.workcenter', 'bom_operation_rel', 'bom_id', 'operation_id',
                                      string="Operations", copy=False)
+    #
+    # @api.multi
+    # def button_add_operation(self):
+    #     self.ensure_one()
+    #     compose_form = self.env.ref('sa_base.mrp_bom_operation_wizard_from', False)
+    #     ctx = dict(
+    #         self.env.context,
+    #         default_routing_id=self.routing_id.id if self.routing_id else False
+    #         )
+    #
+    #     return {
+    #         'name': _('MRP Operation Setting'),
+    #         'type': 'ir.actions.act_window',
+    #         'view_type': 'form',
+    #         'view_mode': 'form',
+    #         'res_model': 'mrp.routing.wc.form',
+    #         'views': [(compose_form.id, 'form')],
+    #         'view_id': compose_form.id,
+    #         'target': 'new',
+    #         'context': ctx,
+    #     }
 
     @api.multi
     def button_resequence(self):

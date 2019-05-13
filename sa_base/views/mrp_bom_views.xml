@@ -9,6 +9,7 @@
                 <form string="Bill of Material">
                     <header>
                         <button string="ReSequence" type="object" name="button_resequence"  class="oe_highlight"/>
+                        <!--<button string="Add Operations" type="object" name="button_add_operation" class="oe_highlight"/>-->
                     </header>
                     <sheet>
                         <div class="oe_button_box" name="button_box">
@@ -32,9 +33,9 @@
                             <field name="code"/>
                             <field name="type" readonly="1"/>
                         </group>
-                        <group>
-                            <field name="operation_ids" widget="many2many_tags" domain="[('routing_id', '=', routing_id)]" options="{'no_create': True, 'no_open':True}"/>
-                        </group>
+                    </group>
+                     <group>
+                        <field name="operation_ids" widget="many2many_tags" domain="[('routing_id', '=', routing_id)]" options="{'no_create': True, 'no_open':True}"/>
                     </group>
                     <notebook>
                         <page string="Components">
