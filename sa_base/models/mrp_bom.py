@@ -221,10 +221,10 @@ class MrpBomLine(models.Model):
 
     @api.multi
     def _push_del_routing_workcenter(self, line, url):
-        val = {
-            'product_id': line.bom_id.product_id.id,
-            "id": line.id,
-        }
+        val = [{
+            'product_type': line.bom_id.product_id.vehicle_type_code,
+            "id": line.operation_id.id,
+        }]
         try:
             ret = Requests.put(url, data=json.dumps(val), headers={'Content-Type': 'application/json'}, timeout=1)
             if ret.status_code == 204:
@@ -249,7 +249,7 @@ class MrpBomLine(models.Model):
             url = ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_DEL_WROKORDERS_API) for connect in connections][0]
             ret = self._push_del_routing_workcenter(line=line, url=url)
             if not ret:
-                raise UserError(u"未删除物料清单行")
+                self.env.user.notify_warning(u"未删除物料清单行")
         quality_points = self.env['quality.point']
         for line in self:
             rec = self.env['quality.point'].search([('bom_line_id', '=', line.id)])

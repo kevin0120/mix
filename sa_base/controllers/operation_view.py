@@ -119,7 +119,8 @@ class OperationView(http.Controller):
                         'operation_id': operation_id,
                         'sequence': val['sequence'],
                         'x_offset': val['x_offset'],
-                        'y_offset': val['y_offset']
+                        'y_offset': val['y_offset'],
+                        'product_id': env.ref('sa_base.product_product_screw_default').id  # 获取默认螺栓
                     })
                     env['operation.point'].create(val)
                 else:
@@ -130,8 +131,11 @@ class OperationView(http.Controller):
                     if points_map.has_key(point_id.id):
                         del points_map[point_id.id]
 
-            for k in points_map:
-                points_map[k].toggle_active()
+            need_delete_points = env['operation.point']
+            for p in points_map.values():
+                need_delete_points += p
+
+            need_delete_points.unlink()
 
             body = json.dumps({'msg': "Edit point success"})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]

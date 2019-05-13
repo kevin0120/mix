@@ -31,6 +31,7 @@
         'security/quality.xml',  # 权限
         'data/maintenance_data.xml',
         'data/point_data.xml',
+        'data/product_data.xml',
         'data/mail_template.xml',
         # 'data/test_data.xml',   # 测试数据
         # 'wizards/mrp_bom_wizard_views.xml',
