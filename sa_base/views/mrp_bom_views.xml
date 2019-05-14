@@ -8,8 +8,10 @@
             <field name="arch" type="xml">
                 <form string="Bill of Material">
                     <header>
+                        <field name="has_operations" invisible="1"/>
                         <button string="ReSequence" type="object" name="button_resequence"  class="oe_highlight"/>
                         <!--<button string="Add Operations" type="object" name="button_add_operation" class="oe_highlight"/>-->
+                        <button string="Download Operation" type="object" name="button_send_mrp_routing_workcenter" class="oe_highlight" attrs="{'invisible': [('has_operations', '=', False)]}"/>
                     </header>
                     <sheet>
                         <div class="oe_button_box" name="button_box">

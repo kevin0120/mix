@@ -52,12 +52,12 @@
                                     <group string="Equipments" name="equipment">
                                         <field name="controller_ids_domain" invisible="1" />
                                         <field name="gun_ids_domain" invisible="1" />
-                                        <field name="masterpc_id" string="MasterPC" attrs="{'required': [('type','=','normal')]}" domain="[('category_name','=','MasterPC')]"/>
-                                        <field name="controller_ids" widget="many2many_tags" string="Controller" domain="controller_ids_domain" attrs="{'invisible': [('masterpc_id','=',False)]}"/>
-                                        <field name="gun_ids" widget="many2many_tags" string="Screw Gun" domain="gun_ids_domain" attrs="{'invisible': [('controller_ids','=',False)],'required': [('type','=','normal')]}"/>
-                                        <field name="hmi_id" string="HMI" domain="[('category_name','=','HMI')]" attrs="{'required': [('type','=','normal')]}"/>
-                                        <field name="io_id" string="Remote IO" domain="[('category_name','=','IO')]"/>
-                                        <field name="rfid_id" string="RFID" domain="[('category_name','=','RFID')]"/>
+                                        <field name="masterpc_id" attrs="{'required': [('type','=','normal')]}" />
+                                        <field name="controller_ids" widget="many2many_tags" domain="controller_ids_domain" attrs="{'invisible': [('masterpc_id','=',False)]}"/>
+                                        <field name="gun_ids" widget="many2many_tags" domain="gun_ids_domain" attrs="{'invisible': [('controller_ids','=',False)],'required': [('type','=','normal')]}"/>
+                                        <field name="hmi_id"  attrs="{'required': [('type','=','normal')]}"/>
+                                        <field name="io_id" />
+                                        <field name="rfid_id" />
                                     </group>
                                 </group>
                                 <separator string="Description"/>

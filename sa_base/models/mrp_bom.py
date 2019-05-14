@@ -12,12 +12,23 @@ import json
 
 MASTER_DEL_WROKORDERS_API = '/rush/v1/mrp.routing.workcenter.delete'
 
+MASTER_WROKORDERS_API = '/rush/v1/mrp.routing.workcenter'
+
+
 
 class MrpBom(models.Model):
     _inherit = 'mrp.bom'
 
     operation_ids = fields.Many2many('mrp.routing.workcenter', 'bom_operation_rel', 'bom_id', 'operation_id',
                                      string="Operations", copy=False)
+
+    has_operations = fields.Boolean(compute='_compute_has_operations')
+
+    @api.multi
+    @api.depends('operation_ids')
+    def _compute_has_operations(self):
+        for bom_id in self:
+            bom_id.has_operations = True if len(bom_id.operation_ids) else False
     #
     # @api.multi
     # def button_add_operation(self):
@@ -123,6 +134,23 @@ class MrpBom(models.Model):
     def unlink(self):
         raise ValidationError(u'不允许删除物料清单')
 
+    @api.one
+    def button_send_mrp_routing_workcenter(self):
+        if not self.operation_ids:
+            return True
+        for operation in self.operation_ids:
+            master = operation.workcenter_id.masterpc_id if operation.workcenter_id else None
+            if not master:
+                continue
+            connections = master.connection_ids.filtered(
+                lambda r: r.protocol == 'http') if master.connection_ids else None
+            if not connections:
+                continue
+            url = ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_WROKORDERS_API) for connect in connections][0]
+
+            operation._push_mrp_routing_workcenter(url)
+        return True
+
 
 class MrpBomLine(models.Model):
     _inherit = 'mrp.bom.line'
@@ -147,9 +175,9 @@ class MrpBomLine(models.Model):
 
     workcenter_id = fields.Many2one('mrp.workcenter', related="operation_id.workcenter_id", string='Work Center')
 
-    masterpc_id = fields.Many2one('maintenance.equipment',  string='MasterPC', related="operation_id.workcenter_id.masterpc_id")
+    masterpc_id = fields.Many2one('maintenance.equipment', string='Work Center Controller(MasterPC)', related="operation_id.workcenter_id.masterpc_id")
 
-    controller_id = fields.Many2one('maintenance.equipment', string='Controller', copy=False)
+    controller_id = fields.Many2one('maintenance.equipment', string='Screw Controller', copy=False)
 
     gun_id = fields.Many2one('maintenance.equipment', string='Screw Gun', copy=False)
 

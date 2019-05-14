@@ -88,14 +88,19 @@ class MrpWorkCenter(models.Model):
     qc_workcenter_id = fields.Many2one('mrp.workcenter', string='Quality Check Work Center')
 
     worksegment_id = fields.Many2one('mrp.worksegament', copy=False)
-    hmi_id = fields.Many2one('maintenance.equipment',  string='HMI', copy=False)
-    masterpc_id = fields.Many2one('maintenance.equipment',  string='MasterPC', copy=False)
+    hmi_id = fields.Many2one('maintenance.equipment',  string='Human Machine Interface(HMI)', copy=False,
+                             domain=lambda self: [('category_id', '=', self.env.ref('sa_base.equipment_hmi').id)])
+    masterpc_id = fields.Many2one('maintenance.equipment',  string='Work Center Controller(MasterPC)', copy=False,
+                                  domain=lambda self: [('category_id', '=', self.env.ref('sa_base.equipment_MasterPC').id)])
 
-    io_id = fields.Many2one('maintenance.equipment',  string='Remote IO', copy=False)
+    io_id = fields.Many2one('maintenance.equipment',  string='Remote IO', copy=False,
+                            domain=lambda self: [('category_id', '=', self.env.ref('sa_base.equipment_IO').id)])
 
-    rfid_id = fields.Many2one('maintenance.equipment',  string='RFID', copy=False)
+    rfid_id = fields.Many2one('maintenance.equipment',  string='Radio Frequency Identification(RFID)', copy=False,
+                              domain=lambda self: [('category_id', '=', self.env.ref('sa_base.equipment_RFID').id)])
 
-    controller_ids = fields.Many2many('maintenance.equipment', 'controller_center_rel', 'center_id', 'controller_id', string='Controller', copy=False)
+    controller_ids = fields.Many2many('maintenance.equipment', 'controller_center_rel', 'center_id', 'controller_id',
+                                      string='Screw Controller', copy=False)
 
     gun_ids = fields.Many2many('maintenance.equipment', 'gun_center_rel', 'center_id', 'gun_id',
                                       string='Screw Gun', copy=False)
@@ -141,16 +146,18 @@ class MrpWorkCenter(models.Model):
     @api.multi
     @api.depends('masterpc_id')
     def _compute_controller_ids_domain(self):
+        category_id = self.env.ref('sa_base.equipment_screw_controller').id
         for rec in self:
-            rec.controller_ids_domain = json.dumps([('id', 'in', rec.masterpc_id.child_ids.ids), ('category_name', '=', 'Controller')])
+            rec.controller_ids_domain = json.dumps([('id', 'in', rec.masterpc_id.child_ids.ids), ('category_id', '=', category_id)])
             rec.controller_ids = [(5,)]  # 去除所有的枪 重新设置
 
     @api.multi
     @api.depends('controller_ids')
     def _compute_gun_ids_domain(self):
+        category_id = self.env.ref('sa_base.equipment_Gun').id
         for rec in self:
             child_ids = rec.controller_ids.mapped('child_ids')
-            rec.gun_ids_domain = json.dumps([('id', 'in', child_ids.ids), ('category_name', '=', 'Gun')])
+            rec.gun_ids_domain = json.dumps([('id', 'in', child_ids.ids), ('category_id', '=', category_id)])
             rec.gun_ids = [(5,)]  # 去除所有的枪 重新设置
 
     _sql_constraints = [('code_hmi', 'unique(hmi_id)', 'Only one HMI is allowed'),

@@ -57,6 +57,7 @@
               <separator/>
                   <filter string="Screw Gun" domain="[('category_name', '=', 'Gun')]" name="is_gun"/>
                  <filter string="Masterpc" domain="[('category_name', '=', 'MasterPC')]" name="is_masterpc"/>
+                <filter string="Screw Controller" domain="[('category_name', '=', 'Controller')]" name="is_controller"/>
             </field>
           </field>
         </record>

@@ -168,7 +168,7 @@ class MrpRoutingWorkcenter(models.Model):
                 need_add = False
                 group_idx += 1
         not_sort_list = self.operation_point_ids - has_sort_point_list
-        for idx, point in enumerate(not_sort_list):
+        for idx, point in enumerate(not_sort_list.sorted(key=lambda r: r.sequence)):
             point.write({'group_sequence': group_idx + idx + 1})
         for idx, point in enumerate(self.operation_point_ids.sorted(key=lambda r: r.group_sequence)):
             point.write({'sequence': idx + 1})

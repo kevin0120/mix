@@ -76,6 +76,17 @@ class EquipmentConnection(models.Model):
         return [(cat.id, get_names(cat)) for cat in self]
 
 
+class MaintenanceEquipmentCategory(models.Model):
+    _inherit = 'maintenance.equipment.category'
+
+    # code = fields.Char('code')
+    name = fields.Char('Category Name', required=True)
+
+#     @api.multi
+#     def name_get(self):
+#         return [(cat.id, cat.name) for cat in self]
+
+
 class MaintenanceEquipment(models.Model):
     _inherit = 'maintenance.equipment'
     _parent_name = "parent_id"
