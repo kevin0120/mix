@@ -12,6 +12,8 @@
                     </header>
                     <group string="Manufacturing Order">
                         <field name="generate_result_sequence" widget="radio"/>
+                        <field name="auto_operation_inherit" widget="radio"/>
+                        <field name="auto_operation_point_inherit" widget="radio"/>
                     </group>
                 </form>
             </field>

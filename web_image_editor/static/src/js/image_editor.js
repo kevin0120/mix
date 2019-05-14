@@ -138,33 +138,40 @@ odoo.define('web_widget_darkroom.image_editor', function (require) {
 
                 var target = event.target,
                     // keep the dragged position in the data-x/data-y attributes
-                    x = (parseFloat(target.getAttribute('data-x')) || 0),
-                    y = (parseFloat(target.getAttribute('data-y')) || 0);
+                    x = (parseFloat(target.getAttribute('current-data-x')) || 0),
+                    y = (parseFloat(target.getAttribute('current-data-y')) || 0);
 
                 self.markPoints[idx].x_offset = self.markPoints[idx].x_offset === 0 ?
                     (imgWidth ? (x + circleWidth / 2) / imgWidth * 100 : 0) :
-                    self.markPoints[idx].x_offset + (imgWidth ? x / imgWidth * 100 : 0);
+                    (imgWidth ? self.markPoints[idx].x_offset + x / imgWidth * 100 : 0);
                 self.markPoints[idx].y_offset = self.markPoints[idx].y_offset === 0 ?
                     (imgHeight ? (y + circleHeight / 2) / imgHeight * 100 : 0) :
-                    self.markPoints[idx].y_offset + (imgHeight ? y / imgHeight * 100 : 0);
+                    (imgHeight ? self.markPoints[idx].y_offset + y / imgHeight * 100 : 0);
+                target.setAttribute('current-data-x', 0);
+                target.setAttribute('current-data-y', 0);
                 // self.markPoints[idx].y_offset = imgHeight ? (ui.position.top + circleHeight / 2) / imgHeight * 100 : 0;
             },
 
             dragMoveListener: function (event) {
-                // console.log('move', event);
-                var target = event.target,
-                    // keep the dragged position in the data-x/data-y attributes
-                    x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
-                    y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                var target = event.target;
+                // keep the dragged position in the data-x/data-y attributes
+                var currentX = (parseFloat(target.getAttribute('current-data-x')) || 0) + event.dx;
+                var currentY = (parseFloat(target.getAttribute('current-data-y')) || 0) + event.dy;
+                var totalX = (parseFloat(target.getAttribute('total-data-x')) || 0) + event.dx;
+                var totalY = (parseFloat(target.getAttribute('total-data-y')) || 0) + event.dy;
+
 
                 // translate the element
                 target.style.webkitTransform =
                     target.style.transform =
-                        'translate(' + x + 'px, ' + y + 'px)';
+                        'translate(' + totalX + 'px, ' + totalY + 'px)';
 
                 // update the posiion attributes
-                target.setAttribute('data-x', x);
-                target.setAttribute('data-y', y);
+
+                target.setAttribute('total-data-x', totalX);
+                target.setAttribute('total-data-y', totalY);
+                target.setAttribute('current-data-x', currentX);
+                target.setAttribute('current-data-y', currentY);
             },
 
             remove_last_mask: function () {

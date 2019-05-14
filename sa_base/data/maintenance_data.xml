@@ -5,27 +5,33 @@
     <!-- Equipment categories -->
     <record id="equipment_hmi" model="maintenance.equipment.category">
         <field name="name">HMI</field>
+        <!--<field name="code">HMI</field>-->
         <!--<field name="alias_id" ref="maintenance.mail_alias_equipment"/>-->
     </record>
     <record id="equipment_screw_controller" model="maintenance.equipment.category">
         <field name="name">Controller</field>
+        <!--<field name="code">Controller</field>-->
         <!--<field name="alias_id" ref="maintenance.mail_alias_equipment"/>-->
     </record>
     <record id="equipment_MasterPC" model="maintenance.equipment.category">
         <field name="name">MasterPC</field>
+        <!--<field name="code">Controller</field>-->
         <!--<field name="alias_id" ref="maintenance.mail_alias_equipment"/>-->
     </record>
     <record id="equipment_Gun" model="maintenance.equipment.category">
         <field name="name">Gun</field>
+        <!--<field name="code">Gun</field>-->
         <!--<field name="alias_id" ref="maintenance.mail_alias_equipment"/>-->
     </record>
     <record id="equipment_IO" model="maintenance.equipment.category">
         <field name="name">IO</field>
+        <!--<field name="code">IO</field>-->
         <!--<field name="alias_id" ref="maintenance.mail_alias_equipment"/>-->
     </record>
 
     <record id="equipment_RFID" model="maintenance.equipment.category">
         <field name="name">RFID</field>
+        <!--<field name="code">RFID</field>-->
         <!--<field name="alias_id" ref="maintenance.mail_alias_equipment"/>-->
     </record>
 

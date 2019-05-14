@@ -111,6 +111,9 @@ class OperationPoints(models.Model):
         for point in self:
             msg = _("#%s operation point has been delete") % (point.id)
             point.operation_id.message_post(body=msg, subject=msg, message_type='comment')
+        lines = self.env['mrp.bom.line'].search([('operation_point_id', 'in', self.ids)])
+        if lines:
+            lines.unlink()
         return super(OperationPoints, self).unlink()
 
     @api.one
@@ -119,6 +122,22 @@ class OperationPoints(models.Model):
         if bom_line_id:
             bom_line_id.toggle_active()
         return super(OperationPoints, self).toggle_active()
+
+    @api.model
+    def create(self, vals):
+        ret = super(OperationPoints, self).create(vals)
+        auto_operation_point_inherit = self.env['ir.values'].get_default('sa.config.settings', 'auto_operation_point_inherit')
+        if auto_operation_point_inherit:
+            operation_id = ret.operation_id
+            bom_ids = self.env['mrp.bom'].search([('operation_ids', 'in', operation_id.ids)])
+            for bom in bom_ids:
+                val = {
+                    "operation_point_id": ret.id,
+                    "product_id": ret.product_id.id,
+                    "bom_id": bom.id,
+                }
+                self.env['mrp.bom.line'].sudo().create(val)
+        return ret
 
     @api.multi
     def write(self, vals):
@@ -135,7 +154,7 @@ class OperationPoints(models.Model):
 
                 dummy, tracking_value_ids = point._message_track(tracked_fields, old_values)
                 msg = _("#%s operation point has been modified") % (point.id)
-                point.operation_id.message_post(body=msg, message_type='comment',tracking_value_ids=tracking_value_ids, subject=msg)
+                point.operation_id.message_post(body=msg, message_type='comment', tracking_value_ids=tracking_value_ids, subject=msg)
             else:
                 ret = super(OperationPoints, point).write(vals)  # 修改数据
         return ret

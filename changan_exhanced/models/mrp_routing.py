@@ -23,6 +23,11 @@ class MrpRoutingWorkcenter(models.Model):
         gun_ids = self.workcenter_id.gun_ids
         self.gun_id = gun_ids.ids[0] if gun_ids else None
 
+    @api.multi
+    def name_get(self):
+        return [(operation.id, u"[{0}]{1}@{2}/{3}".format(operation.name, operation.op_job_id.code, operation.workcenter_id.name, operation.routing_id.name)) for operation in self]  # 强制可视化时候名称显示的是code
+
+
     @api.one
     def _push_mrp_routing_workcenter(self, url):
         self.ensure_one()
