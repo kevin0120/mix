@@ -12,7 +12,7 @@ type Config struct {
 	ReqTimeout        toml.Duration `yaml:"req_time_out"`
 	KeepAlivePeriod   toml.Duration `yaml:"keep_alive_period"`
 	GetToolInfoPeriod toml.Duration `yaml:"tool_info_period"`
-	Version           string        `yaml:"string"`
+	Version           string        `yaml:"version"`
 }
 
 func NewConfig() Config {

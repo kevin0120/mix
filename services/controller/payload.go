@@ -5,7 +5,7 @@ import "github.com/masami10/rush/services/aiis"
 const (
 	AUDIPROTOCOL         = "Audi/VW"
 	OPENPROTOCOL         = "OpenProtocol"
-	DEFAULT_TOOL_CHANNEL = 1
+	DEFAULT_TOOL_CHANNEL = 9999
 	AUTO_MODE            = "auto"
 )
 

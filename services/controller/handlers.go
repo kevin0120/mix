@@ -78,6 +78,10 @@ func (h *Handlers) Handle(result interface{}, curve interface{}) {
 
 	consumes := []Consume{}
 	json.Unmarshal([]byte(dbWorkorder.Consumes), &consumes)
+	if len(consumes) == 0 {
+		h.controllerService.diag.Error("consumes not found", err)
+		return
+	}
 
 	targetConsume := consumes[0]
 	maxGroupSeq := 0

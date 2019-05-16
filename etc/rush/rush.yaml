@@ -91,7 +91,7 @@ audi/vw:
   req_time_out: 300ms
   keep_alive_period: 2s
   tool_info_period: 10s
-  version: 20
+  version: 21
 
 openprotocol:
   keep_alive_period: 10s
@@ -120,27 +120,31 @@ controller_service:
 #      port: 4546
 #      channel: 51
 #
-    - serial_no: 27231800454
-      protocol: Audi/VW
-      remote_ip: 192.168.4.86
-      port: 4700
-      tools:
-      - gun_serial: 18B50451
-        channel: 1
+#    - serial_no: 27231800455
+#      protocol: Audi/VW
+#      remote_ip: 192.168.5.212
+#      port: 4700
+#      tools:
+#      - gun_serial: 15C92257 5.7.1
+#        channel: 1
+#      - gun_serial: 18G53917 5.8.2
+#        channel: 2
 
-#  - serial_no: 27091400470
+#  - serial_no: 27231800455_1
 #    protocol: OpenProtocol
-#    remote_ip: 172.10.1.3
+#    remote_ip: 192.168.5.212
 #    port: 4545
 #    tools:
-#      - gun_serial: 18G46139
+#      - gun_serial: 15C92257 5.7.1
 #        channel: 1
-
-#  - serial_no: 0001
+#
+#  - serial_no: 27231800455_2
 #    protocol: OpenProtocol
-#    remote_ip: 192.168.1.101
+#    remote_ip: 192.168.5.212
 #    port: 4546
-#    channel: 51
+#    tools:
+#      - gun_serial: 18G53917 5.8.2
+#        channel: 2
 
 #  - serial_no: 0002
 #    protocol: OpenProtocol
