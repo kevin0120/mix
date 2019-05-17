@@ -6,8 +6,15 @@ import datetime
 import json
 import urllib
 
+import requests as Requests
+
+from requests import ConnectionError, RequestException, exceptions
+
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
+
+DELETE_ALL_MASTER_WROKORDERS_API = '/rush/v1/mrp.routing.workcenter/all'
+
 
 
 class MrpWorkAssembly(models.Model):
@@ -136,6 +143,38 @@ class MrpWorkCenter(models.Model):
             org_list.extend(new_list)
             if len(set(org_list)) != new + org:
                 raise ValidationError('拧紧枪设置重复')
+
+    @api.one
+    def _delete_workcenter_all_opertaions(self, url):
+        try:
+            ret = Requests.delete(url, headers={'Content-Type': 'application/json'}, timeout=1)
+            if ret.status_code == 200:
+                # operation_id.write({'sync_download_time': fields.Datetime.now()})  ### 更新发送结果
+                self.env.user.notify_info(u'删除工艺成功')
+                return True
+        except ConnectionError as e:
+            self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
+            return False
+        except RequestException as e:
+            self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
+            return False
+        return False
+
+    @api.multi
+    def button_sync_operations(self):
+        for center in self:
+            master = center.masterpc_id
+            if not master:
+                continue
+            connections = master.connection_ids.filtered(
+                lambda r: r.protocol == 'http') if master.connection_ids else None
+            if not connections:
+                continue
+            url = ['http://{0}:{1}{2}'.format(connect.ip, connect.port, DELETE_ALL_MASTER_WROKORDERS_API) for connect in connections][0]
+            center._delete_workcenter_all_opertaions(url)
+            operations = self.env['mrp.routing.workcenter'].sudo().search([('workcenter_id', '=', center.id)])
+            for operation in operations:
+                operation.button_send_mrp_routing_workcenter()
 
     @api.multi
     def _compute_external_url(self):
