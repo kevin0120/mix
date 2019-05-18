@@ -4,7 +4,7 @@
         <!-- Top menu item -->
         <menuitem id="menu_sa_base_root"
             name="Configuration"
-            groups="mrp.group_mrp_user,mrp.group_mrp_manager"
+            groups="mrp.group_mrp_manager"
             icon="fa-cog"
             web_icon="mrp_repair,static/description/icon.png"
             sequence="50"/>
@@ -13,14 +13,14 @@
                 id="menu_product_form"
                 name="Products"
                 parent="menu_sa_base_root"
-                groups="mrp.group_mrp_user,mrp.group_mrp_manager,base.group_user"
+                groups="mrp.group_mrp_manager"
                 sequence="20"/>
 
         <menuitem
             id="menu_bom_form"
             name="Bill of materials"
             parent="menu_sa_base_root"
-            groups="mrp.group_mrp_user,mrp.group_mrp_manager,base.group_user"
+            groups="mrp.group_mrp_manager"
             sequence="30"/>
 
         <menuitem
