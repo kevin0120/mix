@@ -1353,9 +1353,11 @@ msgid "Strategy"
 msgstr "策略"
 
 #. module: sa_base
+#: model:ir.actions.server,name:sa_base.operation_sync_action
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_workcenter_form_view
 msgid "Sync Operation"
 msgstr "同步工位工艺信息"
+
 
 #. module: sa_base
 #: selection:maintenance.equipment.connection,protocol:0
