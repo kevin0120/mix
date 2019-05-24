@@ -178,6 +178,14 @@ func (s *Service) Open() error {
 	}
 	handler.AddRoute(r)
 
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "DELETE",
+		Pattern:     "/mrp.routing.workcenter/all",
+		HandlerFunc: s.methods.deleteAllRoutingOpertions,
+	}
+	handler.AddRoute(r)
+
 	s.Aiis.OnOdooStatus = s.OnStatus
 	s.Aiis.SyncGun = s.GetGunID
 

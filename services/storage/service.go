@@ -606,6 +606,12 @@ func (s *Service) DeleteRoutingOperations(rds []RoutingOperationDelete) error {
 	return nil
 }
 
+func (s *Service) DeleteAllRoutingOperations() error {
+	_, err := s.eng.Exec("delete from `routing_operations`")
+
+	return err
+}
+
 func (s *Service) DeleteInvalidResults(keep time.Time) error {
 	sql := fmt.Sprintf("delete from `results` where has_upload = true and update_time < '%s'", keep.Format("2006-01-02 15:04:05"))
 	_, err := s.eng.Exec(sql)

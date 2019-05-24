@@ -223,6 +223,18 @@ func (m *Methods) deleteRoutingOpertions(ctx iris.Context) {
 	ctx.StatusCode(iris.StatusNoContent)
 }
 
+func (m *Methods) deleteAllRoutingOpertions(ctx iris.Context) {
+	err := m.service.DB.DeleteAllRoutingOperations()
+
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+
+	ctx.StatusCode(iris.StatusOK)
+}
+
 func (m *Methods) putSyncRoutingOpertions(ctx iris.Context) {
 
 	ro := RoutingOperation{}
