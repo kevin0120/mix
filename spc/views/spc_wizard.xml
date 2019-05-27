@@ -268,6 +268,10 @@
                             icon="fa-bars" class="oe_stat_button" groups="spc.group_spc_user, spc.group_spc_manager"
                              attrs="{'invisible': [('category_name','!=','Gun')]}"/>
                 </xpath>
+                <xpath expr="//form" position="attributes">
+                    <attribute name="create">0</attribute>
+                    <attribute name="edit">0</attribute>
+                </xpath>
             </field>
         </record>
 
@@ -280,6 +284,10 @@
                 <field name="name" position="after">
                     <field name="category_name" />
                 </field>
+                <xpath expr="//tree" position="attributes">
+                    <attribute name="create">0</attribute>
+                    <attribute name="edit">0</attribute>
+                </xpath>
             </field>
         </record>
 
@@ -294,6 +302,7 @@
                           (0, 0, {'view_mode': 'tree', 'view_id': ref('sa_hr_equipment_view_tree_inherit')}),
                           (0, 0, {'view_mode': 'form', 'view_id': ref('sa_spc_equipment_form_view')})]"/>
             <!--<field name="target">inline</field>-->
+
         </record>
 
         <record id="action_spc_form" model="ir.actions.act_window">
