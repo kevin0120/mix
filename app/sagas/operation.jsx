@@ -308,12 +308,12 @@ export function* getOperation(job) {
       yield call(startOperation, { data: resp.data });
     } else {
       // 定位作业失败
-      yield put(setNewNotification('error', '定位作业失败'),{
+      yield put(setNewNotification('error', '定位作业失败',{
         workMode:state.workMode.workMode,
         opMode:state.setting.operationSettings.opMode,
         carID:state.operations.carID,
         response:resp
-      });
+      }));
       yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
       yield call(clearStories);
       // yield put({ type: OPERATION.RESET });
