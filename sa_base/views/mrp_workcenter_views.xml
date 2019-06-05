@@ -24,6 +24,9 @@
             <field eval="1" name="priority"/>
             <field name="arch" type="xml">
                 <form string="Work Center">
+                    <header>
+                        <button string="Sync Operation" type="object" name="button_sync_operations" class="oe_highlight" />
+                    </header>
                     <sheet>
                         <div class="oe_button_box" name="button_box">
                             <button class="oe_stat_button" name="toggle_active" type="object" icon="fa-archive" groups="base.group_system">
@@ -85,6 +88,22 @@
                     <field name="active" invisible="1"/>
                 </tree>
             </field>
+        </record>
+
+        <record id="operation_sync_action" model="ir.actions.server">
+            <field name="name">Sync Operation</field>
+            <field name="model_id" ref="mrp.model_mrp_workcenter"/>
+            <field name="state">code</field>
+            <field name="code">records.button_sync_operations()</field>
+        </record>
+
+        <record id="run_operation_sync_action" model="ir.values">
+            <field name="model_id" ref="mrp.model_mrp_workcenter"/>
+            <field name="name">Sync Operation</field>
+            <field name="key2">client_action_multi</field>
+            <field name="key">action</field>
+            <field name="model">mrp.workcenter</field>
+            <field name="value" eval="'ir.actions.server,' + str(ref('operation_sync_action'))" />
         </record>
 
         <record id="sa_view_mrp_workcenter_search_inherit" model="ir.ui.view">

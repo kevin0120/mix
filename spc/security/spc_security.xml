@@ -9,7 +9,7 @@
 
     <record id="group_spc_user" model="res.groups">
         <field name="name">User</field>
-        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="implied_ids" eval="[(4, ref('mrp.group_mrp_user')),(4, ref('maintenance.group_equipment_manager'))]"/>
         <field name="category_id" ref="base.module_category_spc"/>
     </record>
 
