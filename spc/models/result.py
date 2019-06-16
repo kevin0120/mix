@@ -188,7 +188,7 @@ BEGIN
            into r_vin_code, qcp_id, consu_bom_id, r_production_id, r_workcenter_id, r_gun_id, r_product_id, r_program_id, r_consu_product_id, r_assembly_id,r_bom_line_id,r_operation_point_id
     from public.mrp_workorder wo,
          public.mrp_wo_consu co,
-         public.quality_point qp,
+         public.sa_quality_point qp,
          public.mrp_production mp,
          public.product_product pp,
          public.mrp_bom_line mbl
@@ -228,7 +228,7 @@ BEGIN
           where me.serial_no = gun_sn) as gg,
          public.product_product pp2,
          public.mrp_routing_workcenter op,
-         public.quality_point qp2,
+         public.sa_quality_point qp2,
          public.controller_job job2
     where pp2.screw_type_code = nut_no
       and pp2.id = cou_pid
