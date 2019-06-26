@@ -1,18 +1,10 @@
-/*
- * Copyright (c) 2018. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
- * Morbi non lorem porttitor neque feugiat blandit. Ut vitae ipsum eget quam lacinia accumsan.
- * Etiam sed turpis ac ipsum condimentum fringilla. Maecenas magna.
- * Proin dapibus sapien vel ante. Aliquam erat volutpat. Pellentesque sagittis ligula eget metus.
- * Vestibulum commodo. Ut rhoncus gravida arcu.
- */
-
 // @flow
 
 import { HEALTHZ_CHECK } from '../actions/actionTypes';
 
-const lodash = require('lodash');
-
 import configs from '../shared/config/index';
+
+const lodash = require('lodash');
 
 const defaultHealthChecks = {
   masterpc: {
@@ -66,7 +58,7 @@ type actionType = {
 };
 
 export default function healthCheckResults(
-  state: object = defaultHealthChecks,
+  state: any = defaultHealthChecks,
   action: actionType
 ) {
   switch (action.type) {

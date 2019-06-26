@@ -1,4 +1,6 @@
-export const defaultConfigs = {
+// @flow
+
+const defaultConfigs = {
   version: 'v0.1',
   base: {
     userInfo: {
@@ -157,26 +159,34 @@ export const defaultConfigs = {
     }
   },
   system: {
-    device: {
-      scanner: {
-        vendorId: 3118,
-        mode: 'HID' // HID or BT_HID
-        // mode: 'BT_HID',
-        // vendorId: 1504
-      }
+    workcenter: {
+      code: '1',
+      rework_workcenter: 'qrk',
+      hardware: {
+        scanner: {
+          vendorId: 3118,
+          mode: 'HID' // HID or BT_HID
+          // mode: 'BT_HID',
+          // vendorId: 1504
+        },
+        io: {
+          serialNo: '111',
+          connection: 'modbustcp://192.168.1.122:502/0'
+        },
+        controllers: [
+          {
+            serialNo: 'b2a8d23b44ad4836be0be8ebca72b8a1',
+            guns: [
+              { serialNo: '1111' }
+            ]
+          }
+        ]
+      },
     },
     connections: {
-      masterpc: 'http://127.0.0.1:8082',
+      rush: 'http://127.0.0.1:8082',
       rfid: 'tcp://127.0.0.1:2112',
       aiis: 'http://127.0.0.1:9092',
-      controllers: [
-        {
-          serial_no: 'b2a8d23b44ad4836be0be8ebca72b8a1'
-        }
-      ],
-      io: 'modbustcp://192.168.1.122:502/0',
-      workcenterCode: '1',
-      rework_workcenter: 'qrk'
     }
   },
   // 作业配置
@@ -185,28 +195,28 @@ export const defaultConfigs = {
     controllerMode: 'job', // 拧紧模式:        job 或 pset
     workMode: 'manual', // 工作模式:        auto 或 manual 或 scanner
     flowTriggers: ['carID', 'carType'], // 工作流程触发条件:  carType:车型代码 carID:vin/knr/longpin
-
+    
     // 作业前检测(order mode only)
-    preCheck: false,
-
+    preCheck: false, // 开工检查
+    
     // 强制放行配置
     byPass: {
       enable: true,
       type: 'sleep' // sleep or press
     },
-
+    
     // 空车job
     emptyCarJob: 250,
-
+    
     // 结果对话框
     enableResultDialog: true,
-
+    
     // 手动模式下是否启用freestyle
     manualFreestyle: true,
-
+    
     // 启用ak2
     enableAk2: true,
-
+    
     regExp: '(C6\\d{12})' // rfid正則表達式,SVW
   },
   cvinetweb: {
@@ -214,23 +224,21 @@ export const defaultConfigs = {
   },
   systemSettings: {
     enableDebugInfo: false,
-    enableConflictOP: true,
     showSwitchMode: false, // 切换pset or job 模式
-    defaultControllerSN: '27091400470',
-    defaultToolSN: '0001',
-    authEnable: true,
+    authEnable: true, // 认证
     switchAutoManual: false,
     oeeFuncEnable: false,
     modbusEnable: false,
     rfidEnabled: false,
-    andonEnable: true,
-    psetContinueMode: false,
+    andonEnable: false,
     enableFocus: false,
-    viewerEnable:true,
-    viewer:{
-      image:'editable',
-      file:true
+    viewerEnable: true,
+    viewer: {
+      image: 'editable',
+      file: true
     },
-    curveEnable:true,
+    curveEnable: true
   }
 };
+
+export default defaultConfigs;

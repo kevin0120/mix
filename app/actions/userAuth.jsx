@@ -1,16 +1,24 @@
-/*
- * Copyright (c) 2018. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
- * Morbi non lorem porttitor neque feugiat blandit. Ut vitae ipsum eget quam lacinia accumsan.
- * Etiam sed turpis ac ipsum condimentum fringilla. Maecenas magna.
- * Proin dapibus sapien vel ante. Aliquam erat volutpat. Pellentesque sagittis ligula eget metus.
- * Vestibulum commodo. Ut rhoncus gravida arcu.
- */
-
 // @flow
 
 import { USER } from './actionTypes';
+import type { rActionUserType } from '../reducers/user';
 
-export function doUserAuth(user = null, password = null) {
+type tAuthLogin = {
+  +type: string,
+  +user: string,
+  +password: string
+};
+
+
+export type tAuthUserInfo = {
+  +name: string,
+  +avatar: string,
+  +uid: number,
+  +uuid: string,
+  +role: string
+};
+
+export function doUserAuth(user: string = '', password: string = ''): tAuthLogin {
   return {
     type: USER.LOGIN_REQUEST,
     user,
@@ -18,7 +26,21 @@ export function doUserAuth(user = null, password = null) {
   };
 }
 
-export function userLogOut(user = null) {
+export function loginSuccess(data: tAuthUserInfo): rActionUserType {
+  return {
+    type: USER.LOGIN_REQUEST,
+    ...data
+  };
+}
+
+export function logoutSuccess(data: tAuthUserInfo): rActionUserType {
+  return {
+    type: USER.LOGOUT_SUCCESS,
+    ...data
+  };
+}
+
+export function userLogOut(user: string = '') {
   return {
     type: USER.LOGOUT,
     user
