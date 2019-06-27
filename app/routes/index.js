@@ -29,7 +29,7 @@ import ConnResult from '../containers/result';
 import Event from '../containers/event';
 import Preferences from '../containers/config';
 import Help from '../containers/help';
-import Pages from '../layouts/Pages';
+import Pages from '../containers/layouts/Pages';
 import HomePage from '../containers/home';
 import Curve from '../containers/curve';
 import Viewer from '../containers/viewer';
@@ -64,7 +64,7 @@ const routes = [
     icon: HomeIcon,
     color: indigo[shade],
     showLayout: true,
-    roles: ['user', 'admin']
+    roles: ['saga.jsx', 'admin']
   },
   {
     name: 'working',
@@ -75,7 +75,7 @@ const routes = [
     color: cyan[shade],
     image: WorkingImg,
     showLayout: true,
-    roles: ['user', 'admin']
+    roles: ['saga.jsx', 'admin']
   },
   {
     name: 'viewer',
@@ -86,7 +86,7 @@ const routes = [
     color: lightGreen[shade],
     image: viewerImg,
     showLayout: true,
-    roles: ['user', 'admin']
+    roles: ['saga.jsx', 'admin']
   },
   {
     name: 'orders',
@@ -97,7 +97,7 @@ const routes = [
     color: warningColor,
     image: editorImg,
     showLayout: true,
-    roles: ['user', 'admin']
+    roles: ['saga.jsx', 'admin']
   },
   {
     name: 'preferences',
@@ -119,7 +119,7 @@ const routes = [
     color: blue[shade],
     image: LoginImg,
     showLayout: true,
-    roles: ['user', 'admin']
+    roles: ['saga.jsx', 'admin']
   },
   {
     name: 'result',
@@ -130,7 +130,7 @@ const routes = [
     color: grayColor,
     image: LockingImg,
     showLayout: true,
-    roles: ['user', 'admin']
+    roles: ['saga.jsx', 'admin']
   },
   {
     name: 'curve',
@@ -141,7 +141,7 @@ const routes = [
     color: teal[shade],
     image: CurveImg,
     showLayout: true,
-    roles: ['user', 'admin']
+    roles: ['saga.jsx', 'admin']
   },
   // {
   //   name: 'lock',
@@ -162,7 +162,7 @@ const routes = [
     color: pink[shade],
     image: helpImg,
     showLayout: true,
-    roles: ['user', 'admin']
+    roles: ['saga.jsx', 'admin']
   },
   {
     name: 'login',
@@ -173,7 +173,7 @@ const routes = [
     color: grayColor,
     image: LoginImg,
     showLayout: false,
-    roles: ['user', 'admin']
+    roles: ['saga.jsx', 'admin']
   }
 ];
 

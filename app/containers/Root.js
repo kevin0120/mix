@@ -2,10 +2,10 @@
 import React, { Component } from 'react';
 import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'connected-react-router';
-import type { Store } from '../reducers/types';
+import type { Store } from '../modules/indexReducer';
 import Routes from '../Routes';
-import { listenToNewCar } from '../actions/scannerDevice';
-import { systemInit } from '../actions/sysInit';
+import { listenToNewCar } from '../modules/scanner/action';
+import { systemInit } from '../modules/systemInit/action';
 
 type Props = {
   store: Store,

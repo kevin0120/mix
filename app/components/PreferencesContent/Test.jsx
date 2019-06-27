@@ -18,10 +18,10 @@ import Button from '../CustomButtons/Button';
 
 import { sortObj } from '../../common/utils';
 import styles from './styles';
-import saveConfigs from '../../actions/userConfigs';
+import saveConfigs from '../../modules/setting/action';
 import withKeyboard from '../Keyboard';
-import { systemInit } from '../../actions/sysInit';
-import { toggleRFID } from "../../actions/rfid";
+import { systemInit } from '../../modules/systemInit/action';
+import { toggleRFID } from "../../modules/rfid/action";
 
 function handleTest(obj) {
   obj.test(obj.value);

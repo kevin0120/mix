@@ -9,7 +9,7 @@ import InfoIcon from '@material-ui/icons/InfoOutlined';
 import WarningIcon from '@material-ui/icons/WarningOutlined';
 import { withStyles } from '@material-ui/core/styles';
 import Snackbar from '../Snackbar/Snackbar';
-import * as NotificationActions from '../../actions/notification';
+import * as NotificationActions from '../../modules/notification/notification';
 
 import notificationsStyle from '../../common/jss/views/notificationsStyle';
 

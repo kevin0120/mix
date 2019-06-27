@@ -38,8 +38,8 @@ import Button from '../CustomButtons/Button';
 
 import pagesHeaderStyle from '../../common/jss/components/pagesHeaderStyle';
 import connect from 'react-redux/es/connect/connect';
-import { networkCheck, networkSignal } from '../../actions/network';
-import { batteryCheck } from '../../actions/battery';
+import { networkCheck, networkSignal } from '../../modules/network/action';
+import { batteryCheck } from '../../modules/battery/action';
 
 const signalLevel = (signal) => {
   const size = 'large';

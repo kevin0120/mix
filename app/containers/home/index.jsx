@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { bindActionCreators } from 'redux';
 
 import Grid from '@material-ui/core/Grid';
 
@@ -25,8 +24,8 @@ import Button from '../../components/CustomButtons/Button';
 import ShutdownDiag from '../../components/ShutDownDiag';
 import { routeConfigs } from '../../routes/index';
 import styles from './styles';
-import {shutDownAction} from '../../actions/power';
-import { setNewNotification } from '../../actions/notification';
+import {shutDownAction} from '../../modules/power/action';
+import { setNewNotification } from '../../modules/notification/action';
 
 const lodash = require('lodash');
 

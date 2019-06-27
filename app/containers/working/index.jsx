@@ -16,8 +16,8 @@ import Button from '../../components/CustomButtons/Button';
 import ImageStick from '../../components/ImageStick/imageStick';
 
 import ShutdownDiag from '../../components/ShutDownDiag';
-import { NewCar } from '../../actions/scannerDevice';
-import { switchWorkMode } from '../../actions/workMode';
+import { NewCar } from '../../modules/scanner/action';
+import { switchWorkMode } from '../../modules/workmode/action';
 
 import {
   switch2Timeout,
@@ -25,7 +25,7 @@ import {
   operationBypassCancel,
   operationConflictConfirm,
   operationConflictCancel
-} from '../../actions/operation';
+} from '../../modules/operation/action';
 
 import configs from '../../shared/config/index';
 
@@ -47,7 +47,7 @@ import ManualDiag from '../../components/ManualDiag';
 import TimeLine from '../../components/WorkPageTimeline';
 
 import ProgressBar from '../../components/ProgressBar/Progress';
-import { OPERATION_STATUS, OPERATION_SOURCE } from '../../reducers/operations';
+import { OPERATION_STATUS, OPERATION_SOURCE } from '../../modules/operation/model';
 import withKeyboard from '../../components/Keyboard';
 
 import toolSvg from './toolSvg';

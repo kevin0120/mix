@@ -26,7 +26,7 @@ import isURL from 'validator/lib/isURL';
 import Input from '@material-ui/core/Input';
 import { cardTitle } from '../../common/jss/material-react-pro';
 import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
-import { NewCar } from '../../actions/scannerDevice';
+import { NewCar } from '../../modules/scanner/action';
 
 // @material-ui/core components
 // @material-ui/icons

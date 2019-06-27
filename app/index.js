@@ -8,13 +8,13 @@ import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 import { CreateDailyLogger, Info } from './logger';
 
-import { i18n } from './i18n'; // 初始化i18n配置
+import  i18n  from './i18n'; // 初始化i18n配置
 
 import Root from './containers/Root';
 import { configureStore, history } from './store/configureStore';
-import rootSaga from './sagas';
+import rootSaga from './modules/indexSaga';
 import './app.global.css';
-import { primaryColor, secondaryColor } from './common/jss/material-react-pro';
+import { primaryColor } from './common/jss/material-react-pro';
 
 const store = configureStore(); // 创建默认state
 store.runSaga(rootSaga);

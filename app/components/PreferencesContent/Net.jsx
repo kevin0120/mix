@@ -26,8 +26,8 @@ import { GridLoader } from 'react-spinners';
 import Button from '../CustomButtons/Button';
 
 import { sortObj } from '../../common/utils';
-import saveConfigs from '../../actions/userConfigs';
-import { networkScan, networkCheck, networkSet } from '../../actions/network';
+import saveConfigs from '../../modules/setting/userConfigs';
+import { networkScan, networkCheck, networkSet } from '../../modules/network/action';
 
 import styles from './styles';
 import withKeyboard from '../Keyboard';

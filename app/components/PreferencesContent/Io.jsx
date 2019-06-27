@@ -20,11 +20,11 @@ import Select from '@material-ui/core/Select';
 import { bindActionCreators } from 'redux';
 import Button from '../CustomButtons/Button';
 
-import saveConfigs from '../../actions/userConfigs';
-import { IO_FUNCTION } from '../../reducers/io';
+import saveConfigs from '../../modules/setting/userConfigs';
+import { IO_FUNCTION } from '../../modules/io/model';
 
-import { testIO } from '../../sagas/io';
-import { resetIO } from '../../actions/ioModbus';
+import { testIO } from '../../modules/io/saga';
+import { resetIO } from '../../modules/io/action';
 
 import styles from './styles';
 import withKeyboard from '../Keyboard';

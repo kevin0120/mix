@@ -4,8 +4,7 @@ import { createStore, applyMiddleware } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 import { createHashHistory } from 'history';
 import { routerMiddleware } from 'connected-react-router';
-import createRootReducer from '../reducers';
-import type { StateType } from '../reducers/types';
+import createRootReducer, { StateType } from '../modules/indexReducer';
 
 const history = createHashHistory();
 const rootReducer = createRootReducer(history);

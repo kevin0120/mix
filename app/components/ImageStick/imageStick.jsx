@@ -24,7 +24,7 @@ import {
   dangerColor
 } from '../../common/jss/material-react-pro';
 
-import { OPERATION_STATUS, OPERATION_RESULT } from '../../reducers/operations';
+import { OPERATION_STATUS, OPERATION_RESULT } from '../../modules/operation/model';
 
 import Card from '../Card/Card';
 import imagesStyles from '../../common/jss/imagesStyles';

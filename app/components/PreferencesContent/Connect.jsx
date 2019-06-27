@@ -15,10 +15,10 @@ import SaveIcon from '@material-ui/icons/Save';
 import { I18n } from 'react-i18next';
 import Button from '../CustomButtons/Button';
 
-import saveConfigs from '../../actions/userConfigs';
-import { systemInit } from '../../actions/sysInit';
+import saveConfigs from '../../modules/setting/action';
+import { systemInit } from '../../modules/systemInit/action';
 
-import {toggleRFID} from '../../actions/rfid';
+import {toggleRFID} from '../../modules/rfid/action';
 
 import { sortObj, defaultClient } from '../../common/utils';
 import Test from './Test';

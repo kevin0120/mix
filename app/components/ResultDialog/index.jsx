@@ -25,14 +25,14 @@ import CardBody from '../Card/CardBody';
 import Table from '../Table/Table';
 import Button from '../CustomButtons/Button';
 
-import { setResultDiagShow } from '../../actions/resultDiag';
-import { NewCar } from '../../actions/scannerDevice';
-import { switch2Ready } from '../../actions/operation';
+import { setResultDiagShow } from '../../modules/resultDiag/action';
+import { NewCar } from '../../modules/scanner/action';
+import { switch2Ready } from '../../modules/operation/action';
 
 import resultDiagStyles from './styles';
 import configs from '../../shared/config';
 
-import { OPERATION_STATUS, OPERATION_SOURCE } from '../../reducers/operations';
+import { OPERATION_STATUS, OPERATION_SOURCE } from '../../modules/operation/model';
 
 const lodash = require('lodash');
 

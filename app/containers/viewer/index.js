@@ -30,7 +30,7 @@ import {
   fetchOperationListStart,
   fetchOperationDetailStart,
   editOperation
-} from '../../actions/operationViewer';
+} from '../../modules/operationViewer/action';
 import ImageEditor from '../../components/ImageEditor';
 import { get } from 'lodash';
 import DraggablePoint from '../../components/ImageEditor/DraggablePoint';

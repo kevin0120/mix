@@ -3,10 +3,10 @@ import createSagaMiddleware from 'redux-saga';
 import { createHashHistory } from 'history';
 import { routerMiddleware, routerActions } from 'connected-react-router';
 import { createLogger } from 'redux-logger';
-import createRootReducer from '../reducers';
-import * as scannerActions from '../actions/scannerDevice';
+import createRootReducer from '../modules/indexReducer';
+import * as scannerActions from '../modules/scanner/action';
 
-import type { StateType } from '../reducers/types';
+import type { StateType } from '../modules/indexReducer';
 
 const history = createHashHistory();
 
@@ -61,9 +61,9 @@ const configureStore = (initialState?: StateType) => {
 
   if (module.hot) {
     module.hot.accept(
-      '../reducers',
+      '../modules/indexReducer',
       // eslint-disable-next-line global-require
-      () => store.replaceReducer(require('../reducers').default)
+      () => store.replaceReducer(require('../modules/indexReducer').default)
     );
   }
 

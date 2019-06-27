@@ -43,7 +43,7 @@ import i18n from '../../i18n';
 import HealthCheck from '../HealthCheck';
 import Button from '../CustomButtons/Button';
 
-import { setNewNotification } from '../../actions/notification';
+import { setNewNotification } from '../../modules/notification/notification';
 const lodash = require('lodash');
 
 /* eslint-disable react/prefer-stateless-function */
