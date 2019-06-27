@@ -20,7 +20,7 @@ import Select from '@material-ui/core/Select';
 import { bindActionCreators } from 'redux';
 import Button from '../CustomButtons/Button';
 
-import saveConfigs from '../../modules/setting/userConfigs';
+import saveConfigs from '../../modules/setting/action';
 import { IO_FUNCTION } from '../../modules/io/model';
 
 import { testIO } from '../../modules/io/saga';

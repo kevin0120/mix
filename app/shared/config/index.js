@@ -1,4 +1,4 @@
-import { defaultConfigs } from './defaultConfig';
+import defaultConfigs from './defaultConfig';
 import { getAppDirectory } from '../../logger';
 
 const path = require('path');

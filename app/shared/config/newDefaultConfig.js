@@ -1,13 +1,10 @@
 // @flow
 
+
 const defaultConfigs = {
-  version: 'v0.1',
-  base: {
-    userInfo: {
-      uuid: '1234'
-    },
-    psetPointDiameter: 30 // 编辑页面点位大小,未来不使用
-  },
+  // 用户信息
+  users: [],
+  // 页面配置
   pages: [
     {
       name: 'welcome',
@@ -50,6 +47,8 @@ const defaultConfigs = {
       roles: ['user', 'admin']
     }
   ],
+
+
   page: {
     // 配置页面不同的导航页
     network: {
@@ -223,12 +222,12 @@ const defaultConfigs = {
             ]
           }
         ]
-      },
+      }
     },
     connections: {
       rush: 'http://127.0.0.1:8082',
       rfid: 'tcp://127.0.0.1:2112',
-      aiis: 'http://127.0.0.1:9092',
+      aiis: 'http://127.0.0.1:9092'
     }
   },
   // 作业配置
@@ -237,28 +236,28 @@ const defaultConfigs = {
     controllerMode: 'job', // 拧紧模式:        job 或 pset
     workMode: 'manual', // 工作模式:        auto 或 manual 或 scanner
     flowTriggers: ['carID', 'carType'], // 工作流程触发条件:  carType:车型代码 carID:vin/knr/longpin
-    
+
     // 作业前检测(order mode only)
     preCheck: false, // 开工检查
-    
+
     // 强制放行配置
     byPass: {
       enable: true,
       type: 'sleep' // sleep or press
     },
-    
+
     // 空车job
     emptyCarJob: 250,
-    
+
     // 结果对话框
     enableResultDialog: true,
-    
+
     // 手动模式下是否启用freestyle
     manualFreestyle: true,
-    
+
     // 启用ak2
     enableAk2: true,
-    
+
     regExp: '(C6\\d{12})' // rfid正則表達式,SVW
   },
   cvinetweb: {

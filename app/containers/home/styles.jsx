@@ -12,8 +12,9 @@ const styles = theme => ({
   wrap: {
     backgroundColor: '#f2f2f2',
     // height: 'calc(100% - 64px)',
-    height:'100%',
-    overflowX: 'hidden'
+    // display: 'flex',
+    // flex: 1,
+    // overflowX: 'hidden'
   },
   iconWrap: {
     position: 'absolute',
@@ -29,11 +30,10 @@ const styles = theme => ({
     justifyContent: 'center'
   },
   root: {
-    display: 'flex',
     flexWrap: 'wrap',
     minWidth: 300,
-    width: '100%',
-    height: '100%',
+    display: 'flex',
+    flex: 1,
     backgroundColor: '#232c39',
     backgroundImage:
       'linear-gradient(45deg, rgba(150, 216, 255, 0.5) 10%, rgba(150, 160, 187, 0.7))'
@@ -41,12 +41,12 @@ const styles = theme => ({
   container: {
     padding: '40px 10px',
     textAlign: 'center',
-    overflowY:'auto',
+    overflowY: 'auto',
     marginTop: 0
   },
   card: {
-    width:'22vw',
-    maxWidth:'280px',
+    width: '22vw',
+    maxWidth: '280px',
     maxHeight: '320px',
     borderRadius: '4px'
   },
@@ -54,7 +54,7 @@ const styles = theme => ({
     height: '100%'
   },
   cardGridItem: {
-    padding:'1vw'
+    padding: '1vw'
   },
   cardContent: {
     position: 'relative',

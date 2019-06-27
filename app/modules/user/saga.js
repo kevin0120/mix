@@ -65,7 +65,7 @@ function* authorize(user: string, password: string) {
         role: 'admin'
       };
       yield put(loginSuccess(userInfo));
-      yield put(push('/welcome'));
+      yield put(push('/app/welcome'));
     }
   } catch (e) {
     yield put(setNewNotification('error', e));

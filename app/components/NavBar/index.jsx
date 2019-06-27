@@ -8,21 +8,21 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
 
-import { routeConfigs } from '../../routes/index';
 
 import styles from './styles';
+import filterRoutesByConfig from '../../containers/pages';
 
 /* eslint-disable react/prefer-stateless-function */
 class ConnectedNavBar extends React.Component {
   render() {
-    const { classes, styleOptions } = this.props;
+    const { classes, styleOptions,pagesConfig } = this.props;
 
     return (
       <I18n ns="translations">
         {t => (
           <div>
             <List className={classes.sideNav}>
-              {routeConfigs.slice(0, -1).map(route => (
+              {filterRoutesByConfig(pagesConfig).slice(1,-1).map(route => (
                 <li className={classes.itemWrap} key={route.name}>
                   <ListItem
                     button

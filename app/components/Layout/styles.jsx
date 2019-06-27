@@ -25,6 +25,7 @@ export default theme => ({
   appBar: {
     height: '64px',
     width: '100%',
+    bottom:0,
     position:'relative',
     background: '#353744'
   },

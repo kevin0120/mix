@@ -37,13 +37,12 @@ import SysInfo from '../sysInfo';
 
 import styles from './styles';
 
-import { routeConfigs } from '../../routes/index';
-
 import i18n from '../../i18n';
 import HealthCheck from '../HealthCheck';
 import Button from '../CustomButtons/Button';
 
-import { setNewNotification } from '../../modules/notification/notification';
+import { setNewNotification } from '../../modules/notification/action';
+
 const lodash = require('lodash');
 
 /* eslint-disable react/prefer-stateless-function */
@@ -149,7 +148,8 @@ class ConnectedLayout extends React.PureComponent {
       notification,
       path,
       shouldRender,
-      children
+      children,
+      pages
     } = this.props;
     const isAutoMode = workMode === 'auto';
     const { name, avatar, role } = usersInfo[0];
@@ -172,10 +172,7 @@ class ConnectedLayout extends React.PureComponent {
     const statusClassName = this.HealthCheckOk()
       ? classes.menuStatusOK
       : classes.menuStatusFail;
-    // console.log('shouldRender:',this.props.shouldRender);
-    if (!shouldRender) {
-      return children;
-    }
+    console.log('render');
     return (
       <I18n ns="translations">
         {t => (
@@ -200,9 +197,9 @@ class ConnectedLayout extends React.PureComponent {
             {/* </ClickAwayListener> */}
             {/* <SubCompontents /> */}
             <Notify />
-            <div style={{height:'calc(100% - 64px)'}}>
-              {children}
-            </div>
+            {/*<div style={{height:'calc(100% - 64px)'}}>*/}
+            {/*  {children}*/}
+            {/*</div>*/}
             <AppBar className={classes.appBar}>
               <Toolbar className={classes.topBar}>
                 <div className={classes.menuBtnWrapAvatar}>
@@ -233,7 +230,7 @@ class ConnectedLayout extends React.PureComponent {
                     showLabels
                     className={classes.BottomNavigation}
                   >
-                    {routeConfigs.slice(0, -1).map(route => (
+                    {pages.slice(1, -1).map(route => (
                       <BottomNavigationAction
                         key={route.name}
                         value={route.url}
@@ -391,7 +388,6 @@ class ConnectedLayout extends React.PureComponent {
 ConnectedLayout.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   usersInfo: PropTypes.array.isRequired,
-  connections: PropTypes.shape({}).isRequired,
   orderStatus: PropTypes.string.isRequired,
   workMode: PropTypes.string.isRequired,
   healthCheckResults: PropTypes.shape({}).isRequired
@@ -399,7 +395,6 @@ ConnectedLayout.propTypes = {
 
 const mapStateToProps = (state, ownProps) => ({
   usersInfo: state.users,
-  connections: state.connections,
   orderStatus: state.operations.operationStatus,
   workMode: state.workMode.workMode,
   healthCheckResults: state.healthCheckResults,

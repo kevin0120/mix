@@ -49,7 +49,7 @@ export function NewCar(
 
 export const listenToNewCar = (dispatch, getState) => {
   const config = getState().setting;
-  const { vendorId, mode } = config.system.device.scanner;
+  const { vendorId, mode } = config.system.workcenter.hardware.scanner;
   if (scanner == null) {
     try {
       const devices = HID.devices();

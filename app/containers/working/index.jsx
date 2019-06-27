@@ -60,7 +60,7 @@ const mapStateToProps = (state, ownProps) => ({
   operationSettings: state.setting.operationSettings,
   workMode: state.workMode,
   timeline: state.timeline,
-  reworkWorkCenter: state.connections.rework_workcenter,
+  reworkWorkCenter: state.setting.system.workcenter.rework_workcenter,
   enableFocus: state.setting.systemSettings.enableFocus,
   enableConflictOP: state.setting.systemSettings.enableConflictOP,
   tools: state.tools,
@@ -99,9 +99,9 @@ const withstyles = theme => ({
   },
   root: {
     // position: 'relative',
-    height: '100%',
-    width: '100%',
-    margin: '0',
+    display: 'flex',
+    flex: 1,
+    margin: 0,
     background: '#EFF4F7'
   },
   infoWrap: {

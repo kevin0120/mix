@@ -35,13 +35,13 @@ function* initRush() {
   try {
     const state = yield select();
 
-    const { connections } = state;
+    const { connections } = state.setting.system;
 
-    if (connections.masterpc === '') {
+    if (connections.rush === '') {
       return;
     }
 
-    const conn = connections.masterpc.split('://')[1];
+    const conn = connections.rush.split('://')[1];
     const wsURL = `ws://${conn}/rush/v1/ws`;
 
     yield call(stopRush);

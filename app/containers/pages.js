@@ -1,5 +1,4 @@
 /* eslint flowtype-errors/show-errors: 0 */
-import React from 'react';
 
 // icons
 import HomeIcon from '@material-ui/icons/Home';
@@ -23,16 +22,16 @@ import teal from '@material-ui/core/colors/teal';
 import orange from '@material-ui/core/colors/orange';
 import lightGreen from '@material-ui/core/colors/lightGreen';
 
-import WorkOrders from '../containers/orders';
-import Working from '../containers/working';
-import ConnResult from '../containers/result';
-import Event from '../containers/event';
-import Preferences from '../containers/config';
-import Help from '../containers/help';
-import Pages from '../containers/layouts/Pages';
-import HomePage from '../containers/home';
-import Curve from '../containers/curve';
-import Viewer from '../containers/viewer';
+import WorkOrders from './orders';
+import Working from './working';
+import ConnResult from './result';
+import Event from './event';
+import Preferences from './config';
+import Help from './help';
+import Pages from './layouts/Pages';
+import HomePage from './home';
+import Curve from './curve';
+import Viewer from './viewer';
 
 // imgs
 import helpImg from '../../resources/imgs/help.png';
@@ -46,105 +45,76 @@ import LoginImg from '../../resources/imgs/login.jpeg';
 
 import {
   grayColor,
-  warningColor,
+  warningColor
 } from '../common/jss/material-react-pro';
-
-import configs from '../shared/config/index';
 
 const shade = 500;
 
-const lodash = require('lodash');
-
-const routes = [
-  {
-    name: 'welcome',
-    url: '/welcome',
+export const pages = {
+  welcome: {
+    url: '/app/welcome',
     title: 'main.home',
     main: HomePage,
     icon: HomeIcon,
     color: indigo[shade],
-    showLayout: true,
-    roles: ['saga.jsx', 'admin']
   },
-  {
-    name: 'working',
-    url: '/working',
+  working: {
+    url: '/app/working',
     title: 'main.operation',
     main: Working,
     icon: BuildIcon,
     color: cyan[shade],
     image: WorkingImg,
-    showLayout: true,
-    roles: ['saga.jsx', 'admin']
   },
-  {
-    name: 'viewer',
-    url: '/viewer',
+  viewer: {
+    url: '/app/viewer',
     title: 'main.operationViewer',
     main: Viewer,
     icon: ViewerIcon,
     color: lightGreen[shade],
     image: viewerImg,
-    showLayout: true,
-    roles: ['saga.jsx', 'admin']
   },
-  {
-    name: 'orders',
-    url: '/orders',
+  orders: {
+    url: '/app/orders',
     title: 'main.orders',
     main: WorkOrders,
     icon: CollectionsIcon,
     color: warningColor,
     image: editorImg,
-    showLayout: true,
-    roles: ['saga.jsx', 'admin']
   },
-  {
-    name: 'preferences',
-    url: '/preferences',
+  preferences: {
+    url: '/app/preferences',
     title: 'main.preferences',
     main: Preferences,
     icon: SettingsApplicationsIcon,
     color: orange[shade],
     image: settingImg,
-    showLayout: true,
-    roles: ['admin']
   },
-  {
-    name: 'event',
-    url: '/events',
+  events: {
+    url: '/app/events',
     title: 'main.event',
     main: Event,
     icon: Mail,
     color: blue[shade],
     image: LoginImg,
-    showLayout: true,
-    roles: ['saga.jsx', 'admin']
   },
-  {
-    name: 'result',
-    url: '/results',
+  result: {
+    url: '/app/results',
     title: 'main.resultQuery',
     main: ConnResult,
     icon: Save,
     color: grayColor,
     image: LockingImg,
-    showLayout: true,
-    roles: ['saga.jsx', 'admin']
   },
-  {
-    name: 'curve',
-    url: '/curves',
+  curve: {
+    url: '/app/curves',
     title: 'main.curve',
     main: Curve,
     icon: Trend,
     color: teal[shade],
     image: CurveImg,
-    showLayout: true,
-    roles: ['saga.jsx', 'admin']
   },
-  // {
-  //   name: 'lock',
+  // lock: {
   //   url: '/pages/lock-screen-page',
   //   title: 'main.lock',
   //   main: Pages,
@@ -153,45 +123,31 @@ const routes = [
   //   image: LockingImg,
   //   enName: 'Lock'
   // },
-  {
-    name: 'help',
-    url: '/help',
+  help: {
+    url: '/app/help',
     title: 'main.help',
     main: Help,
     icon: HelpIcon,
     color: pink[shade],
     image: helpImg,
-    showLayout: true,
-    roles: ['saga.jsx', 'admin']
   },
-  {
-    name: 'login',
+  login: {
     url: '/pages/login',
     title: 'main.login',
     main: Pages,
     icon: Fingerprint,
     color: grayColor,
     image: LoginImg,
-    showLayout: false,
-    roles: ['saga.jsx', 'admin']
   }
-];
+};
 
-export const routeConfigs = lodash.filter(
-  routes,
-  ele => {
-    return !(
-      (configs.operationSettings.opMode !== 'order' && ele.name === 'orders')
-      || (!configs.systemSettings.curveEnable && ele.name === 'curve')
-      || (!Object.keys(configs.systemSettings.viewer)>0 && ele.name === 'viewer')
-      || (!configs.systemSettings.authEnable && ele.name === 'login')
-    );
-  }
-);
-
-const indexRoutes = [
-  { url: '/pages', main: Pages, showLayout: false },
-  { url: '/', main: HomePage, showLayout: true }
-];
-
-export default indexRoutes;
+export default function filterRoutesByConfig(config) {
+  const routeNames = Object.keys(pages);
+  return config.map((c) => {
+    const name= routeNames.find((n)=>n===c.name);
+    return {
+      ...pages[name],
+      roles:c.roles
+    };
+  });
+}

@@ -22,16 +22,17 @@ import Button from '../../components/CustomButtons/Button';
 // import * as AuthActions from '../../actions/userAuth';
 
 import ShutdownDiag from '../../components/ShutDownDiag';
-import { routeConfigs } from '../../routes/index';
 import styles from './styles';
-import {shutDownAction} from '../../modules/power/action';
+import { shutDownAction } from '../../modules/power/action';
 import { setNewNotification } from '../../modules/notification/action';
+import filterRoutesByConfig from '../pages';
 
 const lodash = require('lodash');
 
 const mapStateToProps = (state, ownProps) => ({
   usersInfo: state.users,
   authEnable: state.setting.systemSettings.authEnable,
+  pagesConfig: state.setting.pages,
   ...ownProps
 });
 
@@ -39,7 +40,7 @@ const mapDispatchToProps = {
   doPush: push,
   notification: setNewNotification,
   // OpenShutdown
-  shutDown:shutDownAction
+  shutDown: shutDownAction
 };
 
 // function mapDispatchToProps(dispatch) {
@@ -59,13 +60,13 @@ class ConnectedWelcome extends React.Component {
     this.setState({ showDiag: true });
   };
 
-  handleShutDown=()=>{
-    const {shutDown}=this.props;
+  handleShutDown = () => {
+    const { shutDown } = this.props;
     this.setState({ showDiag: false });
     shutDown();
   };
 
-  handleCloseDiag=()=>{
+  handleCloseDiag = () => {
     this.setState({ showDiag: false });
   };
 
@@ -75,7 +76,7 @@ class ConnectedWelcome extends React.Component {
   };
 
   render() {
-    const { classes, authEnable, doPush, notification, usersInfo } = this.props;
+    const { classes, authEnable, doPush, notification, usersInfo, pagesConfig } = this.props;
     const { showDiag } = this.state;
     const fabRightClassName = classNames(classes.fabRight);
     const fabLeftClassName = classNames(classes.fabLeft);
@@ -85,7 +86,7 @@ class ConnectedWelcome extends React.Component {
         {t => (
           <div className={classes.root}>
             <Grid container className={classes.container} justify="center">
-              {routeConfigs.slice(1, -1).map(route => (
+              {filterRoutesByConfig(pagesConfig).slice(1, -1).map(route => (
                 <Grid key={route.name} item className={classes.cardGridItem}>
                   <Card
                     key={route.name}
@@ -96,7 +97,9 @@ class ConnectedWelcome extends React.Component {
                       // component={Link}
                       // to={route.url}
                       onClick={() => {
+                        console.log(route, role);
                         if (route.roles && lodash.includes(route.roles, role)) {
+
                           doPush(route.url);
                         } else {
                           notification('error', '没有访问权限');
@@ -106,7 +109,7 @@ class ConnectedWelcome extends React.Component {
                     >
                       <div
                         className={classes.media}
-                        style={{ backgroundImage: `url(${route.image})`, backgroundSize:'cover' }}
+                        style={{ backgroundImage: `url(${route.image})`, backgroundSize: 'cover' }}
                       />
                       <CardContent className={classes.cardContent}>
                         <div className={classes.iconWrap}>
@@ -127,7 +130,7 @@ class ConnectedWelcome extends React.Component {
               size="lg"
               color="danger"
               className={fabRightClassName}
-              onClick={()=>{
+              onClick={() => {
                 this.handleClickOpen();
               }}
             >
