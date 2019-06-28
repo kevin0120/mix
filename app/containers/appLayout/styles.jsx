@@ -39,6 +39,8 @@ export default theme => ({
     flex:1,
     maxWidth:'60%',
     background: 'transparent',
+    display:'flex',
+    justifyContent:'space-around',
   },
   menuBtnWrapAvatar: {
     display:'flex',
