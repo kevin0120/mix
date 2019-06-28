@@ -28,12 +28,11 @@ import ConnResult from './result';
 import Event from './event';
 import Preferences from './config';
 import Help from './help';
-import Pages from './layouts/Pages';
-import HomePage from './home';
+import LockLayout from './lockLayout';
+import LoginPage from './login';
 import Curve from './curve';
 import Viewer from './viewer';
-import Layout from './Layout/layout';
-import page from './layouts/Pages';
+import Layout from './appLayout';
 
 // imgs
 import helpImg from '../../resources/imgs/help.png';
@@ -52,16 +51,9 @@ import {
 
 const shade = 500;
 
-export const pages = {
+export default {
   '/app': {
     component: Layout,
-    // '/welcome': {
-    //   title: 'main.home',
-    //   component: HomePage,
-    //   icon: HomeIcon,
-    //   color: indigo[shade],
-    //   exact: true
-    // },
     '/working': {
       title: 'main.operation',
       component: Working,
@@ -135,10 +127,10 @@ export const pages = {
     }
   },
   '/pages': {
-    component: page,
+    component: LockLayout,
     '/login': {
       title: 'main.login',
-      component: Pages,
+      component: LoginPage,
       icon: Fingerprint,
       color: grayColor,
       image: LoginImg,
@@ -155,35 +147,3 @@ export const pages = {
     // },
   }
 };
-
-
-
-function flattenRoutes(route) {
-  console.log('flattenRoutes');
-  const subRouteUrls = Object.keys(route).filter((key) => /^\//.test(key));
-  const subRouteList = subRouteUrls.map(u => {
-    return {
-      ...route[u],
-      url: (route.url || '') + u,
-      name: u.slice(1),
-    };
-  });
-  let flatRoutes = subRouteList;
-  subRouteList.forEach((subRoute) => {
-    flatRoutes = flatRoutes.concat(flattenRoutes(subRoute));
-  });
-  return flatRoutes;
-}
-
-
-
-export default function filterRoutesByConfig(config) {
-
-  return config.map((c) => {
-    const p = pages.find((p) => p.name === c.name);
-    return {
-      ...p,
-      roles: c.roles
-    };
-  });
-}

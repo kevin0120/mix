@@ -156,7 +156,6 @@ class ConnectedLayout extends React.PureComponent {
     const statusClassName = this.HealthCheckOk()
       ? classes.menuStatusOK
       : classes.menuStatusFail;
-    console.log(this.props);
     return (
       <I18n ns="translations">
         {t => (
@@ -184,16 +183,13 @@ class ConnectedLayout extends React.PureComponent {
             <div style={{ height: 'calc(100% - 64px)' }}>
               {path === '/app' ? <HomePage childRoutes={childRoutes}/> : children}
             </div>
-            <AppBar className={classes.appBar}>
-              <Toolbar className={classes.topBar}>
-                <div className={classes.menuBtnWrapAvatar}>
+            <div className={classes.appBar}>
+                <div className={classes.menuBtnWrapAvatar} >
                   <img
                     alt={name}
                     src={avatar}
-                    className={`${classes.imgRaised} ${
-                      classes.imgRoundedCircle
-                      } ${classes.imgFluid}`}
-                    style={{ height: '100%' }}
+                    className={`${classes.imgRaised} ${classes.imgFluid}`}
+                    style={{ minHeight: '100%',minWidth:'100%' }}
                   />
                 </div>
                 <div className={classes.menuUserName}>
@@ -207,7 +203,6 @@ class ConnectedLayout extends React.PureComponent {
                     timezone="Asia/Shanghai"
                   />
                 </div>
-                <div className={classes.menuBtnWrapLeft}>
                   <BottomNavigation
                     value={path}
                     showLabels
@@ -234,8 +229,6 @@ class ConnectedLayout extends React.PureComponent {
                       />
                     ))}
                   </BottomNavigation>
-                </div>
-                <div className={classes.menuBtnWrapRight}>
                   {/* <Button */}
                   {/* onClick={this.handleSysInfo} */}
                   {/* className={`${statusClassName}`} */}
@@ -351,9 +344,7 @@ class ConnectedLayout extends React.PureComponent {
                       />
                     </MenuItem>
                   </Menu>
-                </div>
-              </Toolbar>
-            </AppBar>
+            </div>
           </React.Fragment>
         )}
       </I18n>

@@ -18,7 +18,6 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import isURL from 'validator/lib/isURL';
 import { cardTitle } from '../../common/jss/material-react-pro';
-import withLayout from '../Layout/layout';
 
 import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
 

@@ -1,5 +1,4 @@
 import React from 'react';
-import { Switch, Route, Redirect } from 'react-router-dom';
 
 import PropTypes from 'prop-types';
 
@@ -9,8 +8,6 @@ import withStyles from '@material-ui/core/styles/withStyles';
 // core components
 import PagesHeader from '../../components/Header/PagesHeader';
 import Footer from '../../components/Footer/Footer';
-
-import pagesRoutes from '../../routes/pages';
 
 import pagesStyle from '../../common/jss/layouts/pagesStyle';
 
@@ -24,8 +21,8 @@ class Pages extends React.Component {
   }
 
   render() {
-    const { classes, ...rest } = this.props;
-
+    const { classes, children, ...rest } = this.props;
+    console.log(children);
     const anchor = `${classes.a} ${classes.whiteColor}`;
     return (
       <div>
@@ -35,29 +32,7 @@ class Pages extends React.Component {
             className={classes.fullPage}
             style={{ backgroundImage: `url(${bgImage})` }}
           >
-            <Switch>
-              {pagesRoutes.map(prop => {
-                if (prop.collapse) {
-                  return null;
-                }
-                if (prop.redirect) {
-                  return (
-                    <Redirect
-                      from={prop.path}
-                      to={prop.pathTo}
-                      key={prop.path}
-                    />
-                  );
-                }
-                return (
-                  <Route
-                    path={prop.path}
-                    component={prop.component}
-                    key={prop.path}
-                  />
-                );
-              })}
-            </Switch>
+            {children}
             <Footer
               white
               content={

@@ -1,7 +1,6 @@
 import React from 'react';
 import { Route } from 'react-router';
-import filterRoutesByConfig from './pages';
-import { pages } from './pages';
+import pages from './pages';
 
 function renderRoute(R, subRouteList) {
   if (!R) {
@@ -12,10 +11,10 @@ function renderRoute(R, subRouteList) {
                 path={R.url}
                 render={() => R.component ?
                   <R.component {...R.props} childRoutes={subRouteList}>
-                    {subRouteList&&subRouteList.map(subRoute => renderRoute(subRoute)) || null}
+                    {subRouteList && subRouteList.map(subRoute => renderRoute(subRoute)) || null}
                   </R.component> : null}
   />;
-};
+}
 
 function parseRouteTree(routesObj, parentUrl, filter) {
   const routeUrls = Object.keys(routesObj).filter((key) => /^\//.test(key));
@@ -37,7 +36,7 @@ function parseRouteTree(routesObj, parentUrl, filter) {
   return [routeList, renderedRoute];
 }
 
-class Routes extends React.Component {
+export default class Routes extends React.Component {
 
   render() {
     const { pagesConfig } = this.props;
@@ -49,5 +48,3 @@ class Routes extends React.Component {
     );
   }
 }
-
-export default Routes;

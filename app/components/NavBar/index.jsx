@@ -10,7 +10,6 @@ import Divider from '@material-ui/core/Divider';
 
 
 import styles from './styles';
-import filterRoutesByConfig from '../../containers/pages';
 
 /* eslint-disable react/prefer-stateless-function */
 class ConnectedNavBar extends React.Component {

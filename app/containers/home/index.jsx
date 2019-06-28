@@ -25,7 +25,6 @@ import ShutdownDiag from '../../components/ShutDownDiag';
 import styles from './styles';
 import { shutDownAction } from '../../modules/power/action';
 import { setNewNotification } from '../../modules/notification/action';
-import filterRoutesByConfig from '../pages';
 
 const lodash = require('lodash');
 

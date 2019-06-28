@@ -27,27 +27,38 @@ export default theme => ({
     width: '100%',
     bottom:0,
     position:'relative',
-    background: '#353744'
+    background: '#353744',
+    color: '#FFFFFF',
+    padding: '0 30px',
+    display:'flex',
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center'
   },
   BottomNavigation: {
+    flex:1,
+    maxWidth:'60%',
     background: 'transparent',
-    '& a:last-child': {
-      marginRight: '20px'
-    }
-    // width: '600px',
   },
   menuBtnWrapAvatar: {
+    display:'flex',
     width: '50px',
-    // marginRight: '15px',
-    height: '50px'
+    height: '50px',
+    borderStyle:'solid',
+    borderRadius:'50%',
+    borderWidth:'1px',
+    overflow:'hidden'
   },
   menuUserName: {
-    width: '80px',
+    // width: '80px',
     height: '100%',
     lineHeight: '100%',
-    marginLeft: '10px',
+    display:'flex',
+    justifyContent:'center',
+    alignItems:'center',
+    marginLeft:'5px',
+    marginRight:'5px',
     '& p': {
-      // marginTop: '25px',
       fontSize: '16px',
       lineHeight: '100%',
       textAlign: 'center',
@@ -55,23 +66,29 @@ export default theme => ({
     }
   },
   menuClock: {
+    display:'flex',
+    justifyContent:'center',
+    alignItems:'center',
     fontSize: '20px',
-    width: '100px',
+    // width: '100px',
+    marginLeft:'5px',
+    marginRight:'5px',
     height: '100%',
     lineHeight: '100%',
-    marginLeft: '15px'
   },
   BottomNavigationIcon: {
     color: '#FFFFFF',
-    marginLeft: '1vw',
+    // marginLeft: '1vw',
     fontSize: '20px',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    paddingLeft: 0,
+    paddingRight:0,
+    maxWidth: '5vw'
   },
   menuBtnWrapLeft: {
     marginRight: 'auto',
     marginLeft: 'auto',
     flex: 1
-    // textAlign: 'center'
   },
   menuBtnWrapRight: {
     flex: 1,
@@ -84,30 +101,23 @@ export default theme => ({
   menuStatusOK: {
     background: successColor,
     fontSize: '18px',
-    marginRight: '20px',
     '&,&:focus,&:hover': {
       background: successColor,
       fontSize: '18px',
-      marginRight: '20px'
     }
   },
   menuStatusFail: {
     background: dangerColor,
     fontSize: '18px',
-    marginRight: '20px',
     animation: `${twinkling} 2s infinite cubic-bezier(1, 1, 1, 1)`,
     '&,&:focus,&:hover': {
       background: dangerColor,
       fontSize: '18px',
-      marginRight: '20px',
       animation: `${twinkling} 2s infinite cubic-bezier(1, 1, 1, 1)`
     }
   },
   itemWrap: {
     margin: '0 8px'
-  },
-  topBar: {
-    padding: '0 30px'
   },
   navTitle: {
     fontSize: '24px'

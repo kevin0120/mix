@@ -32,8 +32,8 @@ const styles = theme => ({
   root: {
     flexWrap: 'wrap',
     minWidth: 300,
-    display: 'flex',
-    flex: 1,
+    width:'100%',
+    height:'100%',
     backgroundColor: '#232c39',
     backgroundImage:
       'linear-gradient(45deg, rgba(150, 216, 255, 0.5) 10%, rgba(150, 160, 187, 0.7))'

@@ -36,7 +36,6 @@ import {
   warningColor,
   dangerColor
 } from '../../common/jss/material-react-pro';
-import withLayout from '../Layout/layout';
 
 import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
 import withKeyboard from '../../components/Keyboard';
