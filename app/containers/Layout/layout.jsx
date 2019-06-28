@@ -1,7 +1,6 @@
 // @flow
 import React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 /* eslint-disable no-unused-vars */
@@ -13,33 +12,28 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import Clock from 'react-live-clock';
-
-import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
-
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import Language from '@material-ui/icons/LanguageRounded';
 import Fade from '@material-ui/core/Fade';
-
-import MenuIcon from '@material-ui/icons/Menu';
-
 import Divider from '@material-ui/core/Divider';
 
 import Flag from 'react-flags';
+import Clock from 'react-live-clock';
 
 import BottomNavigation from '@material-ui/core/BottomNavigation';
 import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
 import { push } from 'connected-react-router';
-import Notify from '../Notify';
-import SysInfo from '../sysInfo';
+import Notify from '../../components/Notify';
+import SysInfo from '../../components/sysInfo';
+import HomePage from '../home';
 
 import styles from './styles';
 
 import i18n from '../../i18n';
-import HealthCheck from '../HealthCheck';
-import Button from '../CustomButtons/Button';
+import HealthCheck from '../../components/HealthCheck';
+import Button from '../../components/CustomButtons/Button';
 
 import { setNewNotification } from '../../modules/notification/action';
 
@@ -47,7 +41,6 @@ const lodash = require('lodash');
 
 /* eslint-disable react/prefer-stateless-function */
 
-// export default function withLayout(SubCompontents, showTop = true) {
 class ConnectedLayout extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -66,14 +59,6 @@ class ConnectedLayout extends React.PureComponent {
     this.handleSysInfo = this.handleSysInfo.bind(this);
     this.handleCloseSysInfo = this.handleCloseSysInfo.bind(this);
   }
-
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   return true;
-  // }
-
-  handleChange = (event, value) => {
-    this.setState({ value });
-  };
 
   toggleMenu(open, e) {
     let shouldProcessing = true;
@@ -147,15 +132,14 @@ class ConnectedLayout extends React.PureComponent {
       doPush,
       notification,
       path,
-      shouldRender,
       children,
-      pages
+      childRoutes
     } = this.props;
     const isAutoMode = workMode === 'auto';
     const { name, avatar, role } = usersInfo[0];
     if (
       lodash.includes(['Ready', 'PreDoing', 'Timeout', 'Init'], orderStatus)
-      // || !isAutoMode
+    // || !isAutoMode
     ) {
       disabled = false;
     }
@@ -172,7 +156,7 @@ class ConnectedLayout extends React.PureComponent {
     const statusClassName = this.HealthCheckOk()
       ? classes.menuStatusOK
       : classes.menuStatusFail;
-    console.log('render');
+    console.log(this.props);
     return (
       <I18n ns="translations">
         {t => (
@@ -196,10 +180,10 @@ class ConnectedLayout extends React.PureComponent {
             {/* </SwipeableDrawer> */}
             {/* </ClickAwayListener> */}
             {/* <SubCompontents /> */}
-            <Notify />
-            {/*<div style={{height:'calc(100% - 64px)'}}>*/}
-            {/*  {children}*/}
-            {/*</div>*/}
+            <Notify/>
+            <div style={{ height: 'calc(100% - 64px)' }}>
+              {path === '/app' ? <HomePage childRoutes={childRoutes}/> : children}
+            </div>
             <AppBar className={classes.appBar}>
               <Toolbar className={classes.topBar}>
                 <div className={classes.menuBtnWrapAvatar}>
@@ -208,7 +192,7 @@ class ConnectedLayout extends React.PureComponent {
                     src={avatar}
                     className={`${classes.imgRaised} ${
                       classes.imgRoundedCircle
-                    } ${classes.imgFluid}`}
+                      } ${classes.imgFluid}`}
                     style={{ height: '100%' }}
                   />
                 </div>
@@ -226,31 +210,25 @@ class ConnectedLayout extends React.PureComponent {
                 <div className={classes.menuBtnWrapLeft}>
                   <BottomNavigation
                     value={path}
-                    // onChange={this.handleChange}
                     showLabels
                     className={classes.BottomNavigation}
                   >
-                    {pages.slice(1, -1).map(route => (
+                    {childRoutes.map(route => (
                       <BottomNavigationAction
                         key={route.name}
                         value={route.url}
-                        // component={Link}
-                        // to={route.url}
                         onClick={() => {
-                          if(disabled){
+                          if (disabled) {
                             return;
                           }
-                          if (
-                            route.roles &&
-                            lodash.includes(route.roles, role)
-                          ) {
+                          if (route.role && lodash.includes(route.role, role)) {
                             doPush(route.url);
                           } else {
                             notification('error', '没有访问权限');
                           }
                         }}
                         label={t(route.title)}
-                        icon={<route.icon />}
+                        icon={<route.icon/>}
                         className={classes.BottomNavigationIcon}
                         // disabled={disabled}
                       />
@@ -278,7 +256,7 @@ class ConnectedLayout extends React.PureComponent {
                     color="inherit"
                     disabled={disabled}
                   >
-                    <Language />
+                    <Language/>
                   </IconButton>
                   {/* <Menu */}
                   {/* id="menu-sysInfo" */}
@@ -318,7 +296,7 @@ class ConnectedLayout extends React.PureComponent {
                       paper: classes.popover
                     }}
                   >
-                    <HealthCheck healthCheckResults={healthCheckResults} />
+                    <HealthCheck healthCheckResults={healthCheckResults}/>
                   </Menu>
                   <Menu
                     id="menu-i18n"
@@ -353,7 +331,7 @@ class ConnectedLayout extends React.PureComponent {
                         primary={t('Language.en')}
                       />
                     </MenuItem>
-                    <Divider />
+                    <Divider/>
                     <MenuItem
                       className={classes.menuItem}
                       onClick={() => this.handleChangeLng('zh_CN')}
@@ -398,7 +376,7 @@ const mapStateToProps = (state, ownProps) => ({
   orderStatus: state.operations.operationStatus,
   workMode: state.workMode.workMode,
   healthCheckResults: state.healthCheckResults,
-  path:state.router.location.pathname,
+  path: state.router.location.pathname,
   ...ownProps
 });
 

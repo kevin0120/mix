@@ -97,7 +97,7 @@ function* getNextWorkOrderandShow() {
   try {
     const state = yield select();
 
-    const { masterpc: rushUrl, workcenterCode } = state.connections;
+    const { rush: rushUrl, workcenterCode } = state.connections;
     const resp = yield call(fetchNextWorkOrder, rushUrl, workcenterCode);
     if (resp.status === 200) {
       yield put(fetchOngoingOperationOK(resp.data));
@@ -191,7 +191,7 @@ export function* getOperation(job) {
   try {
     const state = yield select();
 
-    const { masterpc: rushUrl, workcenterCode } = state.connections;
+    const { rush: rushUrl, workcenterCode } = state.connections;
 
     let fetchOK = false;
     let resp = null;
@@ -304,7 +304,7 @@ export function* startOperation(action) {
 
     const { controllerMode } = state.workMode;
 
-    const rushUrl = state.connections.masterpc;
+    const rushUrl = state.connections.rush;
 
     if (controllerMode === 'job') {
       // job模式
@@ -387,7 +387,7 @@ export function* doingOperation(controllerMode) {
     // pset模式
     try {
       const state = yield select();
-      const { masterpc } = state.connections;
+      const { rush } = state.connections;
       const {
         activeResultIndex,
         failCount,
@@ -397,7 +397,7 @@ export function* doingOperation(controllerMode) {
       const userID = 1;
       yield call(
         pset,
-        masterpc,
+        rush,
         results[activeResultIndex].controller_sn,
         results[activeResultIndex].gun_sn,
         0,
@@ -542,10 +542,10 @@ export function* ak2() {
     const { workorderID, results, activeResultIndex, failCount } = yield select(
       state => state.operations
     );
-    const { masterpc } = yield select(state => state.connections);
+    const { rush } = yield select(state => state.connections);
     yield call(
       ak2Api,
-      masterpc,
+      rush,
       results[activeResultIndex].controller_sn,
       results[activeResultIndex].gun_sn,
       workorderID,

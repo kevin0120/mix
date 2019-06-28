@@ -12,7 +12,7 @@ import ViewModuleIcon from '@material-ui/icons/ViewModule';
 import SettingsRemoteIcon from '@material-ui/icons/SettingsRemote';
 import { I18n } from 'react-i18next';
 
-import withLayout from '../../components/Layout/layout';
+import withLayout from '../Layout/layout';
 import LeftMenuWithAvatar from '../../components/LeftMenuWithAvatar';
 import AppBarBack from '../../components/AppBarBack';
 import Net from '../../components/PreferencesContent/Net';

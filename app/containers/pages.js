@@ -32,6 +32,8 @@ import Pages from './layouts/Pages';
 import HomePage from './home';
 import Curve from './curve';
 import Viewer from './viewer';
+import Layout from './Layout/layout';
+import page from './layouts/Pages';
 
 // imgs
 import helpImg from '../../resources/imgs/help.png';
@@ -51,103 +53,137 @@ import {
 const shade = 500;
 
 export const pages = {
-  welcome: {
-    url: '/app/welcome',
-    title: 'main.home',
-    main: HomePage,
-    icon: HomeIcon,
-    color: indigo[shade],
+  '/app': {
+    component: Layout,
+    // '/welcome': {
+    //   title: 'main.home',
+    //   component: HomePage,
+    //   icon: HomeIcon,
+    //   color: indigo[shade],
+    //   exact: true
+    // },
+    '/working': {
+      title: 'main.operation',
+      component: Working,
+      icon: BuildIcon,
+      color: cyan[shade],
+      image: WorkingImg,
+      exact: true
+    },
+    '/viewer': {
+      title: 'main.operationViewer',
+      component: Viewer,
+      icon: ViewerIcon,
+      color: lightGreen[shade],
+      image: viewerImg,
+      exact: true
+
+    },
+    '/order': {
+      title: 'main.orders',
+      component: WorkOrders,
+      icon: CollectionsIcon,
+      color: warningColor,
+      image: editorImg,
+      exact: true
+
+    },
+    '/preference': {
+      title: 'main.preferences',
+      component: Preferences,
+      icon: SettingsApplicationsIcon,
+      color: orange[shade],
+      image: settingImg,
+      exact: true
+
+    },
+    '/event': {
+      title: 'main.event',
+      component: Event,
+      icon: Mail,
+      color: blue[shade],
+      image: LoginImg,
+      exact: true
+
+    },
+    '/result': {
+      title: 'main.resultQuery',
+      component: ConnResult,
+      icon: Save,
+      color: grayColor,
+      image: LockingImg,
+      exact: true
+
+    },
+    '/curve': {
+      title: 'main.curve',
+      component: Curve,
+      icon: Trend,
+      color: teal[shade],
+      image: CurveImg,
+      exact: true
+
+    },
+    '/help': {
+      title: 'main.help',
+      component: Help,
+      icon: HelpIcon,
+      color: pink[shade],
+      image: helpImg,
+      exact: true
+
+    }
   },
-  working: {
-    url: '/app/working',
-    title: 'main.operation',
-    main: Working,
-    icon: BuildIcon,
-    color: cyan[shade],
-    image: WorkingImg,
-  },
-  viewer: {
-    url: '/app/viewer',
-    title: 'main.operationViewer',
-    main: Viewer,
-    icon: ViewerIcon,
-    color: lightGreen[shade],
-    image: viewerImg,
-  },
-  orders: {
-    url: '/app/orders',
-    title: 'main.orders',
-    main: WorkOrders,
-    icon: CollectionsIcon,
-    color: warningColor,
-    image: editorImg,
-  },
-  preferences: {
-    url: '/app/preferences',
-    title: 'main.preferences',
-    main: Preferences,
-    icon: SettingsApplicationsIcon,
-    color: orange[shade],
-    image: settingImg,
-  },
-  events: {
-    url: '/app/events',
-    title: 'main.event',
-    main: Event,
-    icon: Mail,
-    color: blue[shade],
-    image: LoginImg,
-  },
-  result: {
-    url: '/app/results',
-    title: 'main.resultQuery',
-    main: ConnResult,
-    icon: Save,
-    color: grayColor,
-    image: LockingImg,
-  },
-  curve: {
-    url: '/app/curves',
-    title: 'main.curve',
-    main: Curve,
-    icon: Trend,
-    color: teal[shade],
-    image: CurveImg,
-  },
-  // lock: {
-  //   url: '/pages/lock-screen-page',
-  //   title: 'main.lock',
-  //   main: Pages,
-  //   icon: LockIcon,
-  //   color: grayColor,
-  //   image: LockingImg,
-  //   enName: 'Lock'
-  // },
-  help: {
-    url: '/app/help',
-    title: 'main.help',
-    main: Help,
-    icon: HelpIcon,
-    color: pink[shade],
-    image: helpImg,
-  },
-  login: {
-    url: '/pages/login',
-    title: 'main.login',
-    main: Pages,
-    icon: Fingerprint,
-    color: grayColor,
-    image: LoginImg,
+  '/pages': {
+    component: page,
+    '/login': {
+      title: 'main.login',
+      component: Pages,
+      icon: Fingerprint,
+      color: grayColor,
+      image: LoginImg,
+      exact: true
+    }
+    // lock: {
+    //   url: '/pages/lock-screen-page',
+    //   title: 'main.lock',
+    //   component: Pages,
+    //   icon: LockIcon,
+    //   color: grayColor,
+    //   image: LockingImg,
+    //   enName: 'Lock'
+    // },
   }
 };
 
-export default function filterRoutesByConfig(config) {
-  const routeNames = Object.keys(pages);
-  return config.map((c) => {
-    const name= routeNames.find((n)=>n===c.name);
+
+
+function flattenRoutes(route) {
+  console.log('flattenRoutes');
+  const subRouteUrls = Object.keys(route).filter((key) => /^\//.test(key));
+  const subRouteList = subRouteUrls.map(u => {
     return {
-      ...pages[name],
-      roles:c.roles
+      ...route[u],
+      url: (route.url || '') + u,
+      name: u.slice(1),
+    };
+  });
+  let flatRoutes = subRouteList;
+  subRouteList.forEach((subRoute) => {
+    flatRoutes = flatRoutes.concat(flattenRoutes(subRoute));
+  });
+  return flatRoutes;
+}
+
+
+
+export default function filterRoutesByConfig(config) {
+
+  return config.map((c) => {
+    const p = pages.find((p) => p.name === c.name);
+    return {
+      ...p,
+      roles: c.roles
     };
   });
 }

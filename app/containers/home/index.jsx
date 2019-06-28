@@ -76,7 +76,7 @@ class ConnectedWelcome extends React.Component {
   };
 
   render() {
-    const { classes, authEnable, doPush, notification, usersInfo, pagesConfig } = this.props;
+    const { classes, authEnable, doPush, notification, usersInfo, childRoutes } = this.props;
     const { showDiag } = this.state;
     const fabRightClassName = classNames(classes.fabRight);
     const fabLeftClassName = classNames(classes.fabLeft);
@@ -86,7 +86,7 @@ class ConnectedWelcome extends React.Component {
         {t => (
           <div className={classes.root}>
             <Grid container className={classes.container} justify="center">
-              {filterRoutesByConfig(pagesConfig).slice(1, -1).map(route => (
+              {childRoutes.map(route => (
                 <Grid key={route.name} item className={classes.cardGridItem}>
                   <Card
                     key={route.name}
@@ -98,7 +98,7 @@ class ConnectedWelcome extends React.Component {
                       // to={route.url}
                       onClick={() => {
                         console.log(route, role);
-                        if (route.roles && lodash.includes(route.roles, role)) {
+                        if (route.role && lodash.includes(route.role, role)) {
 
                           doPush(route.url);
                         } else {

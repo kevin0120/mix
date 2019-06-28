@@ -22,7 +22,7 @@ class ConnectedNavBar extends React.Component {
         {t => (
           <div>
             <List className={classes.sideNav}>
-              {filterRoutesByConfig(pagesConfig).slice(1,-1).map(route => (
+              {[].map(route => (
                 <li className={classes.itemWrap} key={route.name}>
                   <ListItem
                     button

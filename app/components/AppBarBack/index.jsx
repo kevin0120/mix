@@ -14,7 +14,7 @@ function AppBarBack(props) {
   const { classes } = props;
 
   function gotoWelcome() {
-    window.location.href = '#/welcome';
+    window.location.href = '#/app';
   }
 
   return (
