@@ -327,12 +327,13 @@ class OperationResult(models.HyperModel):
         prefix_term = lambda prefix, term: ('%s %s' % (prefix, term)) if term else ''
 
         from_clause = """
-                    (select a.vin,b.sequence from
+                    (select a.vin,sum(COALESCE(b.sequence, 0)) as sequence from
                     (select  distinct  vin,product_id from operation_result) a
                     left join
                     (select  a.product_id,count(*) as sequence from mrp_bom a
                     left join mrp_bom_line b on a.id=b.bom_id
-                    group by a.product_id) b on a.product_id=b.product_id) d1
+                    group by a.product_id) b on a.product_id=b.product_id
+                    group by a.vin) d1
                     left join 
                     (select  a.VIN,count (a.*) as sequence  from (
                     select distinct r1.VIN,r1.point_id,r1.batch from operation_result r1
