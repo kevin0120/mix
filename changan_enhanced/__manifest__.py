@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "changan_exhanced",
+    'name': "changan_enhanced",
 
     'summary': """
         Short (1 phrase/line) summary of the module's purpose, used as

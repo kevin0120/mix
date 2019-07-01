@@ -267,6 +267,7 @@ class MrpBomLine(models.Model):
 
     @api.multi
     def unlink(self):
+        quality_points = self.env['sa.quality.point']
         for line in self:
             master = line.workcenter_id.masterpc_id if line.workcenter_id else None
             if not master:
