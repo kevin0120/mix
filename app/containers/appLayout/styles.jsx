@@ -85,7 +85,7 @@ export default theme => ({
     fontWeight: 'bold',
     paddingLeft: 0,
     paddingRight:0,
-    maxWidth: '5vw'
+    minWidth:'56px'
   },
   menuBtnWrapLeft: {
     marginRight: 'auto',
