@@ -110,6 +110,9 @@ openprotocol:
 
   tool_info_period: 10h
 
+scanner:
+  enable: true
+
 # 协议类型: Audi/VW, OpenProtocol
 controller_service:
   workers: 1

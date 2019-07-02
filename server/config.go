@@ -5,6 +5,7 @@ import (
 	"github.com/masami10/rush/command"
 	"github.com/masami10/rush/services/diagnostic"
 	"github.com/masami10/rush/services/httpd"
+	"github.com/masami10/rush/services/scanner"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -48,6 +49,8 @@ type Config struct {
 
 	Contollers controller.Config `yaml:"controller_service"`
 
+	Scanner scanner.Config `yaml:"scanner"`
+
 	Commander command.Commander `yaml:"-"`
 }
 
@@ -68,6 +71,7 @@ func NewConfig() *Config {
 	c.AudiVW = audi_vw.NewConfig()
 	c.OpenProtocol = openprotocol.NewConfig()
 	c.Odoo = odoo.NewConfig()
+	c.Scanner = scanner.NewConfig()
 
 	c.Contollers = controller.NewConfig()
 
@@ -128,6 +132,10 @@ func (c *Config) Validate() error {
 
 	if err := c.Contollers.Validate(); err != nil {
 		return errors.Wrap(err, "controller")
+	}
+
+	if err := c.Scanner.Validate(); err != nil {
+		return errors.Wrap(err, "scanner")
 	}
 
 	return nil

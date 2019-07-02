@@ -114,6 +114,12 @@ func (s *Service) NewStorageHandler() *StorageHandler {
 	}
 }
 
+func (s *Service) NewScannerHandler() *ScannerHandler {
+	return &ScannerHandler{
+		l: s.Logger.With(String("service", "scanner")),
+	}
+}
+
 func BootstrapMainHandler() *CmdHandler {
 	s := NewService(NewConfig(), nil, os.Stderr)
 	// Should never error

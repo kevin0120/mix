@@ -452,3 +452,15 @@ func (h *ControllerHandler) Error(msg string, err error) {
 func (h *ControllerHandler) Debug(msg string) {
 	h.l.Debug(msg)
 }
+
+type ScannerHandler struct {
+	l Logger
+}
+
+func (h *ScannerHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+func (h *ScannerHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}

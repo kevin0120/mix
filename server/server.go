@@ -13,6 +13,7 @@ import (
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/openprotocol"
+	"github.com/masami10/rush/services/scanner"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
@@ -53,6 +54,8 @@ type Server struct {
 	WSNotifyService *wsnotify.Service
 	AiisService     *aiis.Service
 	MinioService    *minio.Service
+
+	ScannerService *scanner.Service
 
 	config *Config
 	// List of services in startup order
@@ -117,6 +120,8 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	s.appendOpenProtocolService()
 
 	s.appendHMIService()
+
+	s.AppendScannerService()
 
 	s.appendHTTPDService()
 
@@ -294,6 +299,17 @@ func (s *Server) appendStorageService() error {
 	s.StorageServie = srv
 
 	s.AppendService("storage", srv)
+
+	return nil
+}
+
+func (s *Server) AppendScannerService() error {
+	c := s.config.Scanner
+	d := s.DiagService.NewScannerHandler()
+
+	srv := scanner.NewService(c, d)
+	s.ScannerService = srv
+	s.AppendService("scanner", srv)
 
 	return nil
 }
