@@ -2,12 +2,6 @@
 
 const defaultConfigs = {
   version: 'v0.1',
-  base: {
-    userInfo: {
-      uuid: '1234'
-    },
-    psetPointDiameter: 30 // 编辑页面点位大小,未来不使用
-  },
   pages: {
     app: {
       working: ['user', 'admin'],
@@ -16,13 +10,21 @@ const defaultConfigs = {
       preference: ['user', 'admin'],
       event: ['user', 'admin'],
       result: ['user', 'admin'],
-      curve: ['user', 'admin'],
+      // curve: ['user', 'admin'],
       help: ['user', 'admin']
     },
     pages: {
       login: ['user', 'admin']
     }
   },
+  users:{
+    'userName':{
+      password:'password',
+      role:'admin',
+      uuid:'uuid'
+    }
+  },
+
   page: {
     // 配置页面不同的导航页
     network: {
@@ -192,8 +194,7 @@ const defaultConfigs = {
           }
         ]
     }
-  }
-  ,
+  },
   system: {
     workcenter: {
       code: '1',
@@ -225,8 +226,7 @@ const defaultConfigs = {
           ]
         }
 
-    }
-    ,
+    },
     connections: {
       rush: 'http://127.0.0.1:8082',
       rfid:
@@ -234,8 +234,7 @@ const defaultConfigs = {
       aiis:
         'http://127.0.0.1:9092'
     }
-  }
-  ,
+  },
 // 作业配置
   operationSettings: {
     opMode: 'op', // 作业模式:        op 或 order
@@ -254,61 +253,41 @@ const defaultConfigs = {
     byPass:
       {
         enable: true,
-        type:
-          'sleep' // sleep or press
-      }
-    ,
+        type: 'sleep' // sleep or press
+      },
 
     // 空车job
     emptyCarJob: 250,
 
     // 结果对话框
-    enableResultDialog:
-      true,
+    enableResultDialog: true,
 
     // 手动模式下是否启用freestyle
-    manualFreestyle:
-      true,
+    manualFreestyle: true,
 
     // 启用ak2
-    enableAk2:
-      true,
+    enableAk2: true,
 
-    regExp:
-      '(C6\\d{12})' // rfid正則表達式,SVW
-  }
-  ,
+    regExp: '(C6\\d{12})' // rfid正則表達式,SVW
+  },
   cvinetweb: {
     url: 'http://192.168.1.10:8080/CVINetWeb'
-  }
-  ,
+  },
   systemSettings: {
     enableDebugInfo: false,
-    showSwitchMode:
-      false, // 切换pset or job 模式
-    authEnable:
-      true, // 认证
-    switchAutoManual:
-      false,
-    oeeFuncEnable:
-      false,
-    modbusEnable:
-      false,
-    rfidEnabled:
-      false,
-    andonEnable:
-      false,
-    enableFocus:
-      false,
-    viewerEnable:
-      true,
-    viewer:
-      {
-        image: 'editable',
-        file:
-          true
-      }
-    ,
+    showSwitchMode: false, // 切换pset or job 模式
+    authEnable: true, // 认证
+    switchAutoManual: false,
+    oeeFuncEnable: false,
+    modbusEnable: false,
+    rfidEnabled: false,
+    andonEnable: false,
+    enableFocus: false,
+    viewerEnable: true,
+    viewer: {
+      image: 'editable',
+      file: true
+    },
     curveEnable: true
   }
 };

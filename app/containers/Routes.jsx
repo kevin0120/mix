@@ -1,6 +1,11 @@
+// @flow
 import React from 'react';
 import { Route } from 'react-router';
 import pages from './pages';
+
+type Props = {
+  pagesConfig: {}
+};
 
 function renderRoute(R, subRouteList) {
   if (!R) {
@@ -10,7 +15,7 @@ function renderRoute(R, subRouteList) {
                 exact={R.exact || false}
                 path={R.url}
                 render={() => R.component ?
-                  <R.component {...R.props} childRoutes={subRouteList}>
+                  <R.component self={R} childRoutes={subRouteList}>
                     {subRouteList && subRouteList.map(subRoute => renderRoute(subRoute)) || null}
                   </R.component> : null}
   />;
@@ -36,11 +41,10 @@ function parseRouteTree(routesObj, parentUrl, filter) {
   return [routeList, renderedRoute];
 }
 
-export default class Routes extends React.Component {
+export default class Routes extends React.Component <Props>{
 
   render() {
     const { pagesConfig } = this.props;
-    console.log(pagesConfig);
     return (
       <React.Fragment>
         {parseRouteTree(pages, '', pagesConfig)[1]}

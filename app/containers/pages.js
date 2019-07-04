@@ -1,26 +1,10 @@
 /* eslint flowtype-errors/show-errors: 0 */
 
-// icons
-import HomeIcon from '@material-ui/icons/Home';
-import SettingsApplicationsIcon from '@material-ui/icons/SettingsApplications';
-import BuildIcon from '@material-ui/icons/Build';
-import HelpIcon from '@material-ui/icons/Help';
-import CollectionsIcon from '@material-ui/icons/Collections';
-import LockIcon from '@material-ui/icons/Lock';
-import Fingerprint from '@material-ui/icons/Fingerprint';
-import Trend from '@material-ui/icons/TrendingUp';
-import Mail from '@material-ui/icons/Mail';
-import Save from '@material-ui/icons/Save';
-import ViewerIcon from '@material-ui/icons/Image';
-
 // color
-import cyan from '@material-ui/core/colors/cyan';
-import indigo from '@material-ui/core/colors/indigo';
-import blue from '@material-ui/core/colors/blue';
-import pink from '@material-ui/core/colors/pink';
-import teal from '@material-ui/core/colors/teal';
-import orange from '@material-ui/core/colors/orange';
-import lightGreen from '@material-ui/core/colors/lightGreen';
+import * as colors from '@material-ui/core/colors';
+
+// icons
+import * as icons from '@material-ui/icons'
 
 import WorkOrders from './orders';
 import Working from './working';
@@ -51,22 +35,32 @@ import {
 
 const shade = 500;
 
+
 export default {
   '/app': {
     component: Layout,
+    title: 'main.home',
+      icon: icons.Home,
+      color: colors.indigo[shade],
+    // '/welcome': {
+    //   title: 'main.home',
+    //   icon: HomeIcon,
+    //   color: indigo[shade],
+    //   showLayout: true
+    // },
     '/working': {
       title: 'main.operation',
       component: Working,
-      icon: BuildIcon,
-      color: cyan[shade],
+      icon: icons.Build,
+      color: colors.cyan[shade],
       image: WorkingImg,
       exact: true
     },
     '/viewer': {
       title: 'main.operationViewer',
       component: Viewer,
-      icon: ViewerIcon,
-      color: lightGreen[shade],
+      icon: icons.Image,
+      color: colors.lightGreen[shade],
       image: viewerImg,
       exact: true
 
@@ -74,7 +68,7 @@ export default {
     '/order': {
       title: 'main.orders',
       component: WorkOrders,
-      icon: CollectionsIcon,
+      icon: icons.Collections,
       color: warningColor,
       image: editorImg,
       exact: true
@@ -83,8 +77,8 @@ export default {
     '/preference': {
       title: 'main.preferences',
       component: Preferences,
-      icon: SettingsApplicationsIcon,
-      color: orange[shade],
+      icon: icons.SettingsApplications,
+      color: colors.orange[shade],
       image: settingImg,
       exact: true
 
@@ -92,8 +86,8 @@ export default {
     '/event': {
       title: 'main.event',
       component: Event,
-      icon: Mail,
-      color: blue[shade],
+      icon: icons.Mail,
+      color: colors.blue[shade],
       image: LoginImg,
       exact: true
 
@@ -101,7 +95,7 @@ export default {
     '/result': {
       title: 'main.resultQuery',
       component: ConnResult,
-      icon: Save,
+      icon: icons.Save,
       color: grayColor,
       image: LockingImg,
       exact: true
@@ -110,8 +104,8 @@ export default {
     '/curve': {
       title: 'main.curve',
       component: Curve,
-      icon: Trend,
-      color: teal[shade],
+      icon: icons.TrendingUp,
+      color: colors.teal[shade],
       image: CurveImg,
       exact: true
 
@@ -119,8 +113,8 @@ export default {
     '/help': {
       title: 'main.help',
       component: Help,
-      icon: HelpIcon,
-      color: pink[shade],
+      icon: icons.Help,
+      color: colors.pink[shade],
       image: helpImg,
       exact: true
 
@@ -131,7 +125,7 @@ export default {
     '/login': {
       title: 'main.login',
       component: LoginPage,
-      icon: Fingerprint,
+      icon: icons.Fingerprint,
       color: grayColor,
       image: LoginImg,
       exact: true

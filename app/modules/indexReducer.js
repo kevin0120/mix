@@ -47,7 +47,6 @@ export function genReducers(reducers, initState = {}) {
 export default function createRootReducer(history: {}) {
   const routerReducer = connectRouter(history)(() => {
   });
-  console.log('creating root reducer',history);
   return connectRouter(history)(
     combineReducers({
       router: routerReducer,

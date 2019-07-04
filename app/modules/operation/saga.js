@@ -112,7 +112,6 @@ function* triggerOperation(action) {
   try {
 
     const { carID, carType, job, source } = action;
-    console.log(action);
     const rState = yield select();
 
     if (rState.router.location.pathname !== '/working') {

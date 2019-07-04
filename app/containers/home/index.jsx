@@ -85,7 +85,7 @@ class ConnectedWelcome extends React.Component {
         {t => (
           <div className={classes.root}>
             <Grid container className={classes.container} justify="center">
-              {childRoutes.map(route => (
+              {childRoutes.map(route => route?(
                 <Grid key={route.name} item className={classes.cardGridItem}>
                   <Card
                     key={route.name}
@@ -122,7 +122,7 @@ class ConnectedWelcome extends React.Component {
                     </CardActionArea>
                   </Card>
                 </Grid>
-              ))}
+              ):null)}
             </Grid>
             <Button
               round

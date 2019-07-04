@@ -1,5 +1,5 @@
 import { OPERATION } from './action';
-
+import { OPERATION_STATUS } from './model';
 import {
   setLedStatusDoing,
   setLedError,
@@ -9,7 +9,6 @@ import {
 
 import sortObj from '../../common/utils';
 import { genReducers } from '../indexReducer';
-
 
 
 const defaultOperations = {

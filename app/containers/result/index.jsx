@@ -9,14 +9,15 @@ import Divider from '@material-ui/core/Divider';
 import { I18n } from 'react-i18next';
 
 import SweetAlert from 'react-bootstrap-sweetalert';
-import Alert from '../../components/Alert';
-import withStyles from '@material-ui/core/styles/withStyles';
 import Assignment from '@material-ui/icons/Assignment';
 import Dvr from '@material-ui/icons/Dvr';
 import List from '@material-ui/core/List';
+import withStyles from '@material-ui/core/styles/withStyles';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import isURL from 'validator/lib/isURL';
+import Input from '@material-ui/core/Input';
+import Alert from '../../components/Alert';
 import { cardTitle } from '../../common/jss/material-react-pro';
 
 import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
@@ -33,7 +34,6 @@ import CardIcon from '../../components/Card/CardIcon';
 import CardHeader from '../../components/Card/CardHeader';
 
 import { defaultClient } from '../../common/utils';
-import Input from '@material-ui/core/Input';
 import withKeyboard from '../../components/Keyboard';
 import CustomReactTable from '../../components/CustomReactTable';
 
@@ -238,12 +238,10 @@ class Result extends React.Component {
                         {
                           Header: 'VIN',
                           accessor: 'vin',
-                          filterMethod: (filter, row) => {
-                            return lodash.includes(
+                          filterMethod: (filter, row) => lodash.includes(
                               lodash.toUpper(row[filter.id]),
                               lodash.toUpper(this.state.vinFilter || '')
-                            );
-                          },
+                            ),
                           Filter: ({ filter, onChange }) => (
                             <Input
                               onClick={() => {
@@ -270,12 +268,10 @@ class Result extends React.Component {
                         {
                           Header: '车型',
                           accessor: 'vehicle_type',
-                          filterMethod: (filter, row) => {
-                            return lodash.includes(
+                          filterMethod: (filter, row) => lodash.includes(
                               lodash.toUpper(row[filter.id]),
                               lodash.toUpper(this.state.vehicleTypeFilter || '')
-                            );
-                          },
+                            ),
                           Filter: ({ filter, onChange }) => (
                             <Input
                               onClick={() => {
@@ -306,12 +302,10 @@ class Result extends React.Component {
                           Header: '程序号',
                           accessor: pgAccessor,
                           sortable: false,
-                          filterMethod: (filter, row) => {
-                            return lodash.includes(
+                          filterMethod: (filter, row) => lodash.includes(
                               lodash.toUpper(row[filter.id]),
                               lodash.toUpper(this.state.jobIdFilter || '')
-                            );
-                          },
+                            ),
                           Filter: ({ filter, onChange }) => (
                             <Input
                               onClick={() => {
