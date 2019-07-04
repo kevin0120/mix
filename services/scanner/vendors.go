@@ -1,5 +1,7 @@
 package scanner
 
+import "fmt"
+
 const (
 	MODEL_HONEYWELL_1900    = "MODEL_HONEYWELL_1900"
 	MODEL_DATALOGIC_GBT4400 = "MODEL_DATALOGIC_GBT4400"
@@ -22,6 +24,12 @@ type HONEYWELL struct {
 }
 
 func (v *HONEYWELL) Parse(buf []byte) string {
+	fmt.Printf("%d\n", len(buf))
+	switch v.model {
+	case MODEL_HONEYWELL_1900:
+		return string(buf)
+	}
+
 	return string(buf)
 }
 

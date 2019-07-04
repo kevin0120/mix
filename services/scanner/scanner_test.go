@@ -19,7 +19,7 @@ func TestScanner(t *testing.T) {
 		return
 	}
 
-	buf := make([]byte, 128)
+	buf := make([]byte, 256)
 	for {
 		n, err := dev.Read(buf)
 		if err != nil {
@@ -28,7 +28,7 @@ func TestScanner(t *testing.T) {
 		}
 
 		if n > 0 {
-			fmt.Printf("read:%s\n", string(buf)[0:n])
+			fmt.Printf("read:%s\n", string(buf[0:n]))
 		}
 	}
 

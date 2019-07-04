@@ -45,22 +45,23 @@ func (s *Scanner) Status() string {
 }
 
 func (s *Scanner) connect() {
-	buf := make([]byte, SCANNER_BUF_LEN)
-
-	var dev *hid.Device
 	for {
 		d, err := s.devInfo.Open()
 		if err == nil {
 			// device online
 			s.status.Store(SCANNER_STATUS_ONLINE)
 			s.notify.OnStatus(s.ID(), SCANNER_STATUS_ONLINE)
-			dev = d
+			s.recv(d)
 			break
 		} else {
 			time.Sleep(SCANNER_OPEN_ITV)
 			continue
 		}
 	}
+}
+
+func (s *Scanner) recv(dev *hid.Device) {
+	buf := make([]byte, SCANNER_BUF_LEN)
 
 	for {
 		n, err := dev.Read(buf)
@@ -68,7 +69,7 @@ func (s *Scanner) connect() {
 			// device offline
 			s.status.Store(SCANNER_STATUS_OFFLINE)
 			s.notify.OnStatus(s.ID(), SCANNER_STATUS_OFFLINE)
-			break
+			return
 		}
 
 		if n > 0 {
@@ -77,5 +78,4 @@ func (s *Scanner) connect() {
 			s.notify.OnRecv(s.ID(), str)
 		}
 	}
-
 }

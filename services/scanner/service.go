@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/karalabe/hid"
 	"github.com/kataras/iris/core/errors"
+	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -24,6 +25,7 @@ type Diagnostic interface {
 type Service struct {
 	configValue atomic.Value
 	scanners    map[string]*Scanner
+	mtxScanners sync.Mutex
 
 	diag Diagnostic
 	ScannerNotify
@@ -33,6 +35,8 @@ func NewService(c Config, d Diagnostic) *Service {
 
 	s := &Service{
 		diag: d,
+		mtxScanners: sync.Mutex{},
+		scanners: map[string]*Scanner{},
 	}
 
 	s.configValue.Store(c)
@@ -80,15 +84,31 @@ func (s *Service) newDevice(model string, dev *hid.DeviceInfo) {
 		notify:  s,
 		vendor:  VENDOR_MODELS[model],
 	}
+	s.addScanner(&scanner)
+}
+
+func (s *Service) addScanner(scanner *Scanner) {
+	defer s.mtxScanners.Unlock()
+	s.mtxScanners.Lock()
 
 	if _, ok := s.scanners[scanner.ID()]; !ok {
-		s.scanners[scanner.ID()] = &scanner
+		s.scanners[scanner.ID()] = scanner
 		scanner.Start()
 	}
 }
 
+func (s *Service) removeScanner(id string) {
+	defer s.mtxScanners.Unlock()
+	s.mtxScanners.Lock()
+
+	delete(s.scanners, id)
+}
+
 func (s *Service) OnStatus(id string, status string) {
 	s.diag.Debug(fmt.Sprintf("scanner %s status: %s\n", id, status))
+	if status == SCANNER_STATUS_OFFLINE {
+		s.removeScanner(id)
+	}
 }
 
 func (s *Service) OnRecv(id string, str string) {
