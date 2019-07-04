@@ -120,6 +120,12 @@ func (s *Service) NewScannerHandler() *ScannerHandler {
 	}
 }
 
+func (s *Service) NewIOHandler() *IOHandler {
+	return &IOHandler{
+		l: s.Logger.With(String("service", "io")),
+	}
+}
+
 func BootstrapMainHandler() *CmdHandler {
 	s := NewService(NewConfig(), nil, os.Stderr)
 	// Should never error

@@ -10,6 +10,7 @@ import (
 	"github.com/masami10/rush/services/diagnostic"
 	"github.com/masami10/rush/services/hmi"
 	"github.com/masami10/rush/services/httpd"
+	"github.com/masami10/rush/services/io"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/openprotocol"
@@ -56,6 +57,7 @@ type Server struct {
 	MinioService    *minio.Service
 
 	ScannerService *scanner.Service
+	IOService      *io.Service
 
 	config *Config
 	// List of services in startup order
@@ -122,6 +124,7 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	s.appendHMIService()
 
 	s.AppendScannerService()
+	s.AppendIOService()
 
 	s.appendHTTPDService()
 
@@ -310,6 +313,17 @@ func (s *Server) AppendScannerService() error {
 	srv := scanner.NewService(c, d)
 	s.ScannerService = srv
 	s.AppendService("scanner", srv)
+
+	return nil
+}
+
+func (s *Server) AppendIOService() error {
+	c := s.config.IO
+	d := s.DiagService.NewIOHandler()
+
+	srv := io.NewService(c, d)
+	s.IOService = srv
+	s.AppendService("io", srv)
 
 	return nil
 }

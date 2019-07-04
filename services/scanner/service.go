@@ -34,9 +34,9 @@ type Service struct {
 func NewService(c Config, d Diagnostic) *Service {
 
 	s := &Service{
-		diag: d,
+		diag:        d,
 		mtxScanners: sync.Mutex{},
-		scanners: map[string]*Scanner{},
+		scanners:    map[string]*Scanner{},
 	}
 
 	s.configValue.Store(c)

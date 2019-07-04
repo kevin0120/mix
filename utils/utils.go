@@ -49,3 +49,11 @@ func GetDateTime() (string, string) {
 func RushRound(x, unit float64) float64 {
 	return float64(int64(x/unit+0.5)) * unit
 }
+
+func ReverseString(raw string) string {
+	rt := ""
+	for _, v := range raw {
+		rt = string(v) + rt
+	}
+	return rt
+}
