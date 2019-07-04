@@ -160,6 +160,14 @@
   revision = "c7d06af17c68cd34c835053720b21f6549d9b0ee"
 
 [[projects]]
+  digest = "1:c2bd38766f2cee8f75a690eaa7205ffc15de8a0529e0f2abf07a97058a5f7ed1"
+  name = "github.com/karalabe/hid"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "6bbb8df5a4e3ebed3398a30bdbeb80682ffb76f8"
+  version = "v1.0.0"
+
+[[projects]]
   branch = "master"
   digest = "1:f17dfd7df684b802076e8b0b316f27788763f647f8dbee368c98b2cb933d8657"
   name = "github.com/kataras/golog"
@@ -566,6 +574,8 @@
     "github.com/golang/protobuf/proto",
     "github.com/gorilla/websocket",
     "github.com/iris-contrib/middleware/cors",
+    "github.com/juju/errors",
+    "github.com/karalabe/hid",
     "github.com/kataras/iris",
     "github.com/kataras/iris/context",
     "github.com/kataras/iris/core/errors",
