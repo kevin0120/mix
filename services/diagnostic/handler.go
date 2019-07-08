@@ -464,3 +464,15 @@ func (h *ScannerHandler) Error(msg string, err error) {
 func (h *ScannerHandler) Debug(msg string) {
 	h.l.Debug(msg)
 }
+
+type IOHandler struct {
+	l Logger
+}
+
+func (h *IOHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+func (h *IOHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}
