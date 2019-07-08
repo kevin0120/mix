@@ -2,11 +2,10 @@ package scanner
 
 import (
 	"fmt"
+	"github.com/bep/debounce"
+	"github.com/pkg/errors"
 	"sync/atomic"
 	"time"
-
-	"github.com/google/gousb"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -17,7 +16,7 @@ const (
 )
 
 type DeviceService interface {
-	Parse([]byte) string
+	Parse([]byte) (string, error)
 	//
 	//isOpen() bool
 	//
@@ -59,12 +58,15 @@ type Scanner struct {
 	diag   Diagnostic
 	notify Notify
 	status atomic.Value
+
+	debounced       func(f func())
+	debounceTrigger bool
 }
 
-func NewScanner(vid, pid ID, d Diagnostic) *Scanner {
+func NewScanner(vid, pid ID, d Diagnostic, dev *USBDevice) *Scanner {
 	di := NewDevice(vid, pid, d)
 
-	return &Scanner{devInfo: di, diag: d}
+	return &Scanner{devInfo: di, diag: d, device: dev, debounceTrigger: false}
 }
 
 func (s *Scanner) Start() {
@@ -77,8 +79,7 @@ func (s *Scanner) Stop() error {
 }
 
 func (s *Scanner) ID() string {
-	di := s.devInfo
-	return fmt.Sprintf("VID:%d, PID:%d, interface: %s", di.VendorID, di.ProductID, di.Channel)
+	return fmt.Sprintf("%s", s.device.String())
 }
 
 func (s *Scanner) getID() (ID, ID) {
@@ -93,23 +94,27 @@ func (s *Scanner) Status() string {
 	return s.status.Load().(string)
 }
 
-func (s *Scanner) open(ctx *gousb.Context) (*USBDevice, error) {
+func (s *Scanner) open() (*USBDevice, error) {
 	vid, pid := s.getID()
 	if vid == 0 || pid == 0 {
 		return nil, errors.New("Device Info is Empty\n")
 	}
-	d, err := ctx.OpenDeviceWithVIDPID(vid, pid)
+
+	err := s.device.SetAutoDetach(true)
 	if err != nil {
-		return nil, errors.Errorf("Open Device vid:%d, pid: %d fail", vid, pid)
+		return nil, err
 	}
+
 	di := s.devInfo
 	if di == nil {
 		return nil, errors.New("DeviceInfo is Empty")
 	}
-	if err := di.NewReader(d); err != nil {
+	di.updateDeviceService()
+	if err := di.NewReader(s.device); err != nil {
 		return nil, err
 	}
-	return d, err
+
+	return s.device, err
 }
 
 func (s *Scanner) close() error {
@@ -131,19 +136,15 @@ func (s *Scanner) close() error {
 
 func (s *Scanner) manage() {
 	for {
-		err := s.connectAndRecv()
-		if err != nil {
-			time.Sleep(SCANNER_OPEN_ITV)
-		} else {
-			return
-		}
+		_ = s.connectAndRecv()
+		time.Sleep(SCANNER_OPEN_ITV)
 	}
 }
 
 func (s *Scanner) connectAndRecv() error {
-	ctx := gousb.NewContext()
-	defer ctx.Close()
-	d, err := s.open(ctx)
+	//ctx := gousb.NewContext()
+	//defer ctx.Close()
+	d, err := s.open()
 	if err == nil {
 		// device online
 		s.device = d
@@ -156,6 +157,17 @@ func (s *Scanner) connectAndRecv() error {
 	}
 }
 
+func (s *Scanner) resetDebounce() {
+	s.debounceTrigger = true
+}
+
+func (s *Scanner) triggerDebounce() {
+	if !s.debounceTrigger {
+		s.debounced = debounce.New(300 * time.Millisecond)
+		s.debounceTrigger = false
+	}
+}
+
 func (s *Scanner) recv() {
 	buf := make([]byte, SCANNER_BUF_LEN)
 	di := s.devInfo
@@ -163,9 +175,11 @@ func (s *Scanner) recv() {
 		return
 	}
 
+	strRecv := ""
 	for {
 		n, err := di.Read(buf)
 		if err != nil {
+			s.diag.Error("read failed", err)
 			// device offline
 			s.status.Store(SCANNER_STATUS_OFFLINE)
 			s.notify.OnStatus(s.ID(), SCANNER_STATUS_OFFLINE)
@@ -177,9 +191,21 @@ func (s *Scanner) recv() {
 				errors.Errorf("Scanner: %s ", s.device.String()))
 			continue
 		}
+
 		if n > 0 {
-			str := s.devInfo.Parse(buf[0:n])
-			s.notify.OnRecv(s.ID(), str)
+			s.triggerDebounce()
+			str, err := s.devInfo.Parse(buf[0:n])
+			if err == nil {
+				strRecv += str
+			}
+
+			s.debounced(func() {
+				if strRecv != "" {
+					s.notify.OnRecv(s.ID(), strRecv)
+					s.resetDebounce()
+					strRecv = ""
+				}
+			})
 		}
 	}
 }

@@ -1,7 +1,7 @@
 hostname: localhost
 data_dir: /home/gubin/.rush
 serial_no: 1qaz2wsx
-doc_path: ./etc/rush/api.json
+doc_path: /home/linshenqi/go/src/github.com/masami10/rush/etc/rush/api.json
 logging:
 #  file: ./logs/%Y%m%d.log
   file: STDOUT

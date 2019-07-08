@@ -2,6 +2,7 @@ package scanner
 
 import (
 	"fmt"
+	"github.com/google/gousb"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -47,7 +48,6 @@ func (s *Service) config() Config {
 }
 
 func (s *Service) Open() error {
-
 	go s.search()
 
 	return nil
@@ -59,7 +59,21 @@ func (s *Service) Close() error {
 }
 
 func (s *Service) search() {
+	ctx := gousb.NewContext()
+	defer ctx.Close()
+
 	for {
+		for _, v := range vendors {
+			devs, err := ctx.OpenDevices(func(desc *gousb.DeviceDesc) bool {
+				return desc.Vendor == v.VendorID && desc.Product == v.ProductID
+			})
+
+			if err == nil {
+				for _, d := range devs {
+					s.addScanner(NewScanner(v.VendorID, v.ProductID, s.diag, d))
+				}
+			}
+		}
 
 		time.Sleep(SEARCH_ITV)
 	}
@@ -71,6 +85,7 @@ func (s *Service) addScanner(scanner *Scanner) {
 
 	if _, ok := s.scanners[scanner.ID()]; !ok {
 		s.scanners[scanner.ID()] = scanner
+		scanner.notify = s
 		scanner.Start()
 	}
 }
