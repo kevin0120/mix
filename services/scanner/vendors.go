@@ -1,60 +1,76 @@
 package scanner
 
-import "fmt"
-
-const (
-	MODEL_HONEYWELL_1900    = "MODEL_HONEYWELL_1900"
-	MODEL_DATALOGIC_GBT4400 = "MODEL_DATALOGIC_GBT4400"
+import (
+	"errors"
+	"fmt"
 )
 
-var VENDOR_MODELS = map[string]Vendor{
-	MODEL_HONEYWELL_1900:    &HONEYWELL{model: MODEL_HONEYWELL_1900},
-	MODEL_DATALOGIC_GBT4400: &DATALOGIC{model: MODEL_DATALOGIC_GBT4400},
+const (
+	VendorHoneyWell = 3118
+	VendorDataLogic = 1529
+)
+
+type commonHoneywellScanner struct {
+	cfg *USBConfig
+	Interface  *USBInterface
+	InEndpoint *USBInEndpoint
 }
 
-type Vendor interface {
-	Parse([]byte) string
-
-	// vendorID, productID
-	ModelInfo() (uint16, uint16)
+type commonDataLogicScanner struct {
 }
 
-type HONEYWELL struct {
-	model string
+func (d *DeviceInfo) updateDeviceService() {
+	switch d.VendorID {
+	case VendorHoneyWell:
+		d.DeviceService = &commonHoneywellScanner{}
+	//case VendorDataLogic:
+	//	d.DeviceService = &commonDataLogicScanner{}
+	}
 }
 
-func (v *HONEYWELL) Parse(buf []byte) string {
+func (v *commonHoneywellScanner) NewReader(dev *USBDevice) error {
+	cfg, err := dev.Config(2)
+	if err != nil {
+		return err
+	}
+	v.cfg = cfg
+	intf, err := cfg.Interface(3, 0)
+	if err != nil {
+		return err
+	}
+	v.Interface = intf
+	epIn, err := intf.InEndpoint(6)
+	if err != nil {
+		return err
+	}
+	v.InEndpoint = epIn
+
+	return nil
+}
+
+func (v *commonHoneywellScanner) Read(buf []byte) (int, error) {
+	if v.InEndpoint == nil {
+		return 0, errors.New("not Reader")
+	}
+	return v.InEndpoint.Read(buf)
+}
+
+func (v *commonHoneywellScanner) Close() error {
+	var err error
+	if v.cfg != nil {
+		err = v.cfg.Close()
+	}
+	if v.Interface != nil {
+		v.Interface.Close()
+	}
+	return err
+}
+
+func (v *commonHoneywellScanner) Parse(buf []byte) string {
 	fmt.Printf("%d\n", len(buf))
-	switch v.model {
-	case MODEL_HONEYWELL_1900:
-		return string(buf)
-	}
-
 	return string(buf)
 }
 
-func (v *HONEYWELL) ModelInfo() (uint16, uint16) {
-	switch v.model {
-	case MODEL_HONEYWELL_1900:
-		return 3118, 2311
-	}
-
-	return 0, 0
-}
-
-type DATALOGIC struct {
-	model string
-}
-
-func (v *DATALOGIC) Parse(buf []byte) string {
+func (v *commonDataLogicScanner) Parse(buf []byte) string {
 	return string(buf)
-}
-
-func (v *DATALOGIC) ModelInfo() (uint16, uint16) {
-	switch v.model {
-	case MODEL_DATALOGIC_GBT4400:
-		return 1529, 8714
-	}
-
-	return 0, 0
 }

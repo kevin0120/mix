@@ -2,8 +2,6 @@ package scanner
 
 import (
 	"fmt"
-	"github.com/karalabe/hid"
-	"github.com/kataras/iris/core/errors"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -28,15 +26,15 @@ type Service struct {
 	mtxScanners sync.Mutex
 
 	diag Diagnostic
-	ScannerNotify
+	Notify
 }
 
 func NewService(c Config, d Diagnostic) *Service {
 
 	s := &Service{
-		diag: d,
+		diag:        d,
 		mtxScanners: sync.Mutex{},
-		scanners: map[string]*Scanner{},
+		scanners:    map[string]*Scanner{},
 	}
 
 	s.configValue.Store(c)
@@ -50,10 +48,6 @@ func (s *Service) config() Config {
 
 func (s *Service) Open() error {
 
-	if !hid.Supported() {
-		return errors.New("scanner service not supported")
-	}
-
 	go s.search()
 
 	return nil
@@ -66,25 +60,9 @@ func (s *Service) Close() error {
 
 func (s *Service) search() {
 	for {
-		for k, v := range VENDOR_MODELS {
-			vid, pid := v.ModelInfo()
-			devs := hid.Enumerate(vid, pid)
-			for _, dev := range devs {
-				s.newDevice(k, &dev)
-			}
-		}
 
 		time.Sleep(SEARCH_ITV)
 	}
-}
-
-func (s *Service) newDevice(model string, dev *hid.DeviceInfo) {
-	scanner := Scanner{
-		devInfo: dev,
-		notify:  s,
-		vendor:  VENDOR_MODELS[model],
-	}
-	s.addScanner(&scanner)
 }
 
 func (s *Service) addScanner(scanner *Scanner) {
