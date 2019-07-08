@@ -4,14 +4,15 @@ const defaultConfigs = {
   version: 'v0.1',
   pages: {
     app: {
-      working: ['user', 'admin'],
-      viewer: ['user', 'admin'],
-      order: ['user', 'admin'],
-      preference: ['user', 'admin'],
-      event: ['user', 'admin'],
-      result: ['user', 'admin'],
+      // working: ['user', 'admin'],
+      stepWorking: ['user', 'admin'],
+      // viewer: ['user', 'admin'],
+      // order: ['user', 'admin'],
+      // preference: ['user', 'admin'],
+      // event: ['user', 'admin'],
+      // result: ['user', 'admin'],
       // curve: ['user', 'admin'],
-      help: ['user', 'admin']
+      // help: ['user', 'admin']
     },
     pages: {
       login: ['user', 'admin']

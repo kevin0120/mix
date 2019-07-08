@@ -8,6 +8,7 @@ import * as icons from '@material-ui/icons'
 
 import WorkOrders from './orders';
 import Working from './working';
+import StepWorking from './stepWorking';
 import ConnResult from './result';
 import Event from './event';
 import Preferences from './config';
@@ -42,15 +43,17 @@ export default {
     title: 'main.home',
       icon: icons.Home,
       color: colors.indigo[shade],
-    // '/welcome': {
-    //   title: 'main.home',
-    //   icon: HomeIcon,
-    //   color: indigo[shade],
-    //   showLayout: true
-    // },
     '/working': {
       title: 'main.operation',
       component: Working,
+      icon: icons.Build,
+      color: colors.cyan[shade],
+      image: WorkingImg,
+      exact: true
+    },
+    '/stepWorking': {
+      title: 'main.operation',
+      component: StepWorking,
       icon: icons.Build,
       color: colors.cyan[shade],
       image: WorkingImg,

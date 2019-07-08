@@ -19,7 +19,7 @@ import watchNetwork from './network/saga';
 import watchBattery from './battery/saga';
 import watchPower from './power/saga';
 import andon from './andon/saga';
-
+import order from './order/saga';
 // import healthzCheckFlow from './healthzCheck';
 
 
@@ -71,7 +71,8 @@ export default function* rootSaga() {
       watchNetwork(),
       watchBattery(),
       watchPower(),
-      andonEnable ? andon() : null
+      andonEnable ? andon() : null,
+      order()
     ]);
   } catch (e) {
     console.error('rootSaga:', e);

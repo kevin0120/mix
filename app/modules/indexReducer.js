@@ -17,6 +17,7 @@ import logo from './logo/reducer';
 import network from './network/reducer';
 import battery from './battery/reducer';
 import tools from './tools/reducer';
+import order from './order/reducer';
 import type { Dispatch as ReduxDispatch, Store as ReduxStore } from 'redux';
 
 export type StateType = {
@@ -64,7 +65,8 @@ export default function createRootReducer(history: {}) {
       logo,
       network,
       battery,
-      tools
+      tools,
+      order
     })
   );
 }
