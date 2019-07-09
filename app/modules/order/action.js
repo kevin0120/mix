@@ -49,11 +49,11 @@ export const orderActions = {
     type: ORDER.TRIGGER,
     order
   }),
-  finishOrder:()=>({
-    type:ORDER.FINISH
+  finishOrder: () => ({
+    type: ORDER.FINISH
   }),
-  failOrder:()=>({
-    type:ORDER.FAIL
+  failOrder: () => ({
+    type: ORDER.FAIL
   }),
   nextStep: () => ({
     type: ORDER.STEP.NEXT
@@ -87,8 +87,10 @@ export const orderActions = {
   pushStep: () => ({
     type: ORDER.STEP.PUSH
   }),
-  tryPushStep: () => ({
-    type: ORDER.STEP.TRY_PUSH
+  tryPushStep: (payload, parallelId) => ({
+    type: ORDER.STEP.TRY_PUSH,
+    payload,
+    parallelId
   })
 
 };

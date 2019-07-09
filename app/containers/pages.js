@@ -18,7 +18,7 @@ import LoginPage from './login';
 import Curve from './curve';
 import Viewer from './viewer';
 import Layout from './appLayout';
-
+import WorkingTemplate from './workingTemplate'
 // imgs
 import helpImg from '../../resources/imgs/help.png';
 import viewerImg from '../../resources/imgs/craft.jpeg';
@@ -45,20 +45,20 @@ export default {
       color: colors.indigo[shade],
     '/working': {
       title: 'main.operation',
-      component: Working,
+      component: WorkingTemplate,
       icon: icons.Build,
       color: colors.cyan[shade],
       image: WorkingImg,
       exact: true
     },
-    '/stepWorking': {
-      title: 'main.operation',
-      component: StepWorking,
-      icon: icons.Build,
-      color: colors.cyan[shade],
-      image: WorkingImg,
-      exact: true
-    },
+    // '/stepWorking': {
+    //   title: 'main.operation',
+    //   component: StepWorking,
+    //   icon: icons.Build,
+    //   color: colors.cyan[shade],
+    //   image: WorkingImg,
+    //   exact: true
+    // },
     '/viewer': {
       title: 'main.operationViewer',
       component: Viewer,

@@ -1,6 +1,7 @@
 import { ORDER } from './action';
 import { genReducers } from '../indexReducer';
 import { ORDER_STEP_STATUS, hasSubStep } from './model';
+import { demoOrder, demoOrder2 } from './demoData';
 
 const initState = {
   currentOrder: null,
@@ -8,7 +9,8 @@ const initState = {
   currentProcessingStep: {},
   currentViewingIndex: [],
   currentViewingStep: {},
-  status: ''
+  status: '',
+  list: [demoOrder, demoOrder2]
 };
 
 function setStepStatus(state, status) {

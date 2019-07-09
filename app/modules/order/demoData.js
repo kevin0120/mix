@@ -1,6 +1,7 @@
 export const demoOrder = {
   name: 'fill info',
   info: 'this is a demo order',
+  type:'step',
   steps: [
     {
       name: '姓名',
@@ -69,5 +70,56 @@ export const demoOrder = {
       ]
     }
 
+  ]
+};
+
+export const demoOrder2 = {
+  name: '扫码触发 拧紧作业',
+  type:'screw',
+  steps: [
+    {
+      name: '拧紧作业-扫码模式',
+      type: 'screw-scanner',
+      payload: {},
+      steps: [
+        {
+          name: '扫码',
+          steps: [
+            [
+              {
+                name: 'carID',
+                type: 'scanner',
+                payload: {}
+              },
+              {
+                name: 'CarType',
+                type: 'scanner',
+                payload: {}
+              }
+            ]
+          ]
+        }, {
+          name: '获取作业',
+          type: 'getOperation',
+          payload: {
+            keys: ['carID', 'carType']
+          }
+        }, {
+          name:'进行作业',
+          type:'doScrew',
+          payload:{
+
+          }
+        },{
+          name:'显示结果',
+          type:'showResult',
+          payload:{
+            keys:[
+
+            ]
+          }
+        }
+      ]
+    }
   ]
 };

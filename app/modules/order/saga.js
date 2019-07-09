@@ -23,6 +23,10 @@ function* doOrder() {
       const action = yield take(ORDER.STEP.TRY_PUSH);
       const state = yield select();
       const { currentOrder, currentProcessingIndex, currentProcessingStep } = state.order;
+      if(currentProcessingStep instanceof Array){
+        console.log(action.parallelId);
+
+      }
       switch (currentProcessingStep.status) {
         case ORDER_STEP_STATUS.READY:
           yield put(orderActions.enterStep());
@@ -46,11 +50,10 @@ function* doOrder() {
           yield put(orderActions.enterStep());
           break;
       }
-      // switch () {
-      //
-      // }
     }
   } catch (e) {
     console.error(e);
   }
 }
+
+

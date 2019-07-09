@@ -4,20 +4,21 @@ import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepButton from '@material-ui/core/StepButton';
 import StepLabel from '@material-ui/core/StepLabel';
+import Working from '../working'
 import {
   orderActions
 } from '../../modules/order/action';
-import { demoOrder } from '../../modules/order/demoData';
+import { demoOrder,demoOrder2 } from '../../modules/order/demoData';
 import InputStep from '../../components/InputStep';
 
 const stepTypes = {
   input: {
     component: InputStep,
     props: (props) => ({
-      onSubmit: (value) => props.pushState(value),
+      onSubmit: (value) => props.pushState(value, props.parallelId),
       label: props.payload.label
     })
-  }
+  },
 };
 
 class ConnectedStepWorking extends React.Component {
@@ -45,8 +46,8 @@ class ConnectedStepWorking extends React.Component {
     if (step && step.type && stepTypes[step.type] && stepTypes[step.type].component) {
       StepContent = stepTypes[step.type].component;
       props = stepTypes[step.type].props && stepTypes[step.type].props({
-        pushState: work,
         parallelId,
+        pushState: work,
         payload: step.payload || {}
       }) || props;
       return StepContent && <StepContent {...props} isCurrent={isCurrent} stepStatus={step.status || 'ready'}/>;
@@ -61,14 +62,14 @@ class ConnectedStepWorking extends React.Component {
       order,
       trigger,
       next,
-      previous,
+      previous
     } = this.props;
     const { currentOrder, currentViewingIndex, currentViewingStep, currentProcessingStep } = order;
     return <div>
       {(currentOrder &&
         currentOrder.steps &&
         this.renderSteps(currentOrder.steps, currentViewingIndex)) || null}
-      <button type="button" onClick={() => trigger(demoOrder)}>
+      <button type="button" onClick={() => trigger(demoOrder2)}>
         trigger
       </button>
       <button type="button" onClick={() => previous()}>view previous</button>

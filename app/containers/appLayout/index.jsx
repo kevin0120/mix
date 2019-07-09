@@ -36,6 +36,7 @@ import HealthCheck from '../../components/HealthCheck';
 import Button from '../../components/CustomButtons/Button';
 
 import { setNewNotification } from '../../modules/notification/action';
+import HomeOperationList from '../HomeOperationList';
 
 const lodash = require('lodash');
 
@@ -182,7 +183,7 @@ class ConnectedLayout extends React.PureComponent {
             {/* <SubCompontents /> */}
             <Notify/>
             <div style={{ height: 'calc(100% - 64px)' }}>
-              {path === '/app' ? <HomePage childRoutes={childRoutes}/> : children}
+              {path === '/app' ? <HomeOperationList childRoutes={childRoutes}/> : children}
             </div>
             <div className={classes.appBar}>
               <div className={classes.menuBtnWrapAvatar}>
