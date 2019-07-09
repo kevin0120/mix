@@ -1,6 +1,8 @@
 import React from 'react';
+import { inputStepAtions } from '../../modules/inputStep/action';
+import { connect } from 'react-redux';
 
-export default class InputStep extends React.Component {
+class InputStep extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -8,8 +10,17 @@ export default class InputStep extends React.Component {
     };
   }
 
+  onSubmit = (value) => {
+    const { submit } = this.props;
+    this.setState({
+      value: ''
+    });
+    submit(value);
+
+  };
+
   render(): React.ReactElement<any> | string | number | {} | React.ReactNodeArray | React.ReactPortal | boolean | null | undefined {
-    const { label, onSubmit, isCurrent } = this.props;
+    const { label, submit, isCurrent } = this.props;
     const { value } = this.state;
     return <div>
       {label}
@@ -22,10 +33,22 @@ export default class InputStep extends React.Component {
       />
       <button
         type="button"
-        onClick={() => onSubmit(value)}
+        onClick={() => submit(value)}
         disabled={!isCurrent}
       >submit
       </button>
     </div>;
   }
 }
+
+
+const mapState = (state, props) => ({
+  order: state.order,
+  ...props
+});
+
+const mapDispatch = {
+  submit: inputStepAtions.submit
+};
+
+export default connect(mapState, mapDispatch)(InputStep);

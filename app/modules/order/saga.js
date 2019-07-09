@@ -1,7 +1,7 @@
 import { take, call, race, fork, select, put } from 'redux-saga/effects';
 import { ORDER_STEP_STATUS } from './model';
 import { ORDER, orderActions } from './action';
-
+import stepTypes from '../stepTypes';
 
 export default function* root() {
   try {
@@ -10,7 +10,6 @@ export default function* root() {
       const action = yield take(ORDER.TRIGGER);
       // do order
       yield call(doOrder);
-
     }
   } catch (e) {
     console.error(e);
@@ -20,35 +19,16 @@ export default function* root() {
 function* doOrder() {
   try {
     while (true) {
-      const action = yield take(ORDER.STEP.TRY_PUSH);
       const state = yield select();
-      const { currentOrder, currentProcessingIndex, currentProcessingStep } = state.order;
-      if(currentProcessingStep instanceof Array){
-        console.log(action.parallelId);
-
-      }
-      switch (currentProcessingStep.status) {
-        case ORDER_STEP_STATUS.READY:
-          yield put(orderActions.enterStep());
-          break;
-        case ORDER_STEP_STATUS.ENTERING:
-          yield put(orderActions.enteredStep());
-          break;
-        case ORDER_STEP_STATUS.DOING:
-          yield put(orderActions.leaveStep());
-          break;
-        case ORDER_STEP_STATUS.LEAVING:
-          yield put(orderActions.finishStep());
-          break;
-        case ORDER_STEP_STATUS.FINISHED:
-          yield put(orderActions.pushStep());
-          break;
-        case ORDER_STEP_STATUS.FAIL:
-
-          break;
-        default:
-          yield put(orderActions.enterStep());
-          break;
+      const { currentProcessingStep } = state.order;
+      if (!currentProcessingStep || !currentProcessingStep.type) {
+        throw(new Error('invalid step'));
+      }else if(!currentProcessingStep.type){
+        throw(new Error('step has no type'));
+      }else if(!stepTypes[currentProcessingStep.type]){
+        throw(new Error(`step type has no handler: ${currentProcessingStep.type}`));
+      }else {
+        yield race([call(stepTypes[currentProcessingStep.type], ORDER, orderActions), take(ORDER.STEP.PUSH)]);
       }
     }
   } catch (e) {

@@ -50,7 +50,7 @@ function stepNext(index, order) {
   } else if (depthHasNextBrother >= 0) {
     const backDepth = depth - depthHasNextBrother;
     newIndex.push(newIndex.splice(-backDepth, backDepth)[0] + 1);
-    newIndex = firstChildIndex(newIndex, order);
+    // newIndex = firstChildIndex(newIndex, order);
   }
   return newIndex;
 }
@@ -72,7 +72,7 @@ function stepPrevious(index, order) {
   if (depthHasPreviousBrother >= 0) {
     const backDepth = depth - depthHasPreviousBrother;
     newIndex.push(newIndex.splice(-backDepth, backDepth)[0] - 1);
-    newIndex = lastChildIndex(newIndex, order);
+    // newIndex = lastChildIndex(newIndex, order);
   }
   return newIndex;
 }

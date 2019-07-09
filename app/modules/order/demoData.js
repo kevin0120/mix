@@ -22,6 +22,7 @@ export const demoOrder = {
     {
       name: '联系方式',
       info: 'this step collects 2 inputs',
+      type:'parallel_input',
       steps: [
         [{
           name: '座机',
@@ -75,7 +76,7 @@ export const demoOrder = {
 
 export const demoOrder2 = {
   name: '扫码触发 拧紧作业',
-  type: 'step',
+  type: 'screw',
   steps: [
     {
       name: '扫码',
