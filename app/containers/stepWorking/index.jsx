@@ -4,11 +4,9 @@ import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepButton from '@material-ui/core/StepButton';
 import StepLabel from '@material-ui/core/StepLabel';
-import Working from '../working'
 import {
   orderActions
 } from '../../modules/order/action';
-import { demoOrder,demoOrder2 } from '../../modules/order/demoData';
 import InputStep from '../../components/InputStep';
 
 const stepTypes = {
@@ -24,7 +22,7 @@ const stepTypes = {
 class ConnectedStepWorking extends React.Component {
   renderSteps(steps, currentStep) {
     const { jumpTo } = this.props;
-    return <Stepper nonLinear activeStep={currentStep[0]}>
+    return <Stepper nonLinear activeStep={currentStep}>
       {steps.map((s, id) => {
         const stepProps = {};
         const labelProps = {};
@@ -69,13 +67,8 @@ class ConnectedStepWorking extends React.Component {
       {(currentOrder &&
         currentOrder.steps &&
         this.renderSteps(currentOrder.steps, currentViewingIndex)) || null}
-      <button type="button" onClick={() => trigger(demoOrder2)}>
-        trigger
-      </button>
       <button type="button" onClick={() => previous()}>view previous</button>
       <button type="button" onClick={() => next()}>view next</button>
-      {/* <button type="button" onClick={() => work()}>work</button> */}
-      {/* <button type="button">finish</button> */}
       <div>
         {JSON.stringify(currentViewingStep)}
         {
