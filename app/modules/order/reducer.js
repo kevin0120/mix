@@ -112,15 +112,17 @@ function firstChildIndex(index, order) {
 }
 
 const orderReducer = {
-  [ORDER.TRIGGER]: (state, action) => ({
+  [ORDER.TRIGGER]: (state, action) => {
+    const firstIndex=firstChildIndex([],action.order);
+    return {
     ...state,
     currentOrder: action.order || null,
-    currentViewingIndex: [0],
-    currentViewingStep: getStepByIndex([0], action.order),
-    currentProcessingIndex: [0],
-    currentProcessingStep: getStepByIndex([0], action.order)
+    currentViewingIndex: firstIndex,
+    currentViewingStep: getStepByIndex(firstIndex, action.order),
+    currentProcessingIndex: firstIndex,
+    currentProcessingStep: getStepByIndex(firstIndex, action.order)
 
-  }),
+  }},
 
   [ORDER.STEP.NEXT]: (state) => {
     const { currentViewingIndex, currentOrder } = state;

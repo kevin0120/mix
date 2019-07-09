@@ -242,7 +242,7 @@ const defaultConfigs = {
     controllerMode:
       'job', // 拧紧模式:        job 或 pset
     workMode:
-      'manual', // 工作模式:        auto 或 manual 或 scanner
+      'auto', // 工作模式:        auto 或 manual 或 scanner
     flowTriggers:
       ['carID', 'carType'], // 工作流程触发条件:  carType:车型代码 carID:vin/knr/longpin
 
