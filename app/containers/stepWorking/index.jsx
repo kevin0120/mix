@@ -28,7 +28,7 @@ class ConnectedStepWorking extends React.Component {
         const labelProps = {};
         return (
           <Step key={s.name} {...stepProps}>
-            <StepButton completed={s.status === 'finish'} onClick={() => jumpTo([id])}>
+            <StepButton completed={s.status === 'finish'} onClick={() => jumpTo(id)}>
               <StepLabel {...labelProps}>{s.name}</StepLabel>
             </StepButton>
           </Step>
