@@ -1,12 +1,13 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { inputStepAtions } from '../../modules/inputStep/action';
+import { inputStepActions } from '../../modules/inputStep/action';
 
-type Props={
+type Props = {
   label: string,
   isCurrent: boolean,
   submit: ()=>{}
 };
+
 class InputStep extends React.Component<Props> {
   constructor(props) {
     super(props);
@@ -30,12 +31,13 @@ class InputStep extends React.Component<Props> {
     const { value } = this.state;
     return <div>
       {label}
-      <input onChange={(e) => {
-        this.setState({
-          value: e.target.value
-        });
-      }}
-             value={value}
+      <input
+        onChange={(e) => {
+          this.setState({
+            value: e.target.value
+          });
+        }}
+        value={value}
       />
       <button
         type="button"
@@ -54,7 +56,7 @@ const mapState = (state, props) => ({
 });
 
 const mapDispatch = {
-  submit: inputStepAtions.submit
+  submit: inputStepActions.submit
 };
 
 export default connect(mapState, mapDispatch)(InputStep);

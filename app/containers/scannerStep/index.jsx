@@ -19,9 +19,9 @@ class scannerStep extends React.Component<Props> {
   }
 }
 
-const mapState = () => {
-
-};
+const mapState = (state,props) => ({
+  ...props
+});
 
 const mapDispatch = {};
 

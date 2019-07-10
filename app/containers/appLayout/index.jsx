@@ -37,7 +37,7 @@ import Button from '../../components/CustomButtons/Button';
 
 import { setNewNotification } from '../../modules/notification/action';
 import HomeOperationList from '../HomeOperationList';
-
+import Avatar from '../../components/Avatar';
 const lodash = require('lodash');
 
 /* eslint-disable react/prefer-stateless-function */
@@ -186,14 +186,15 @@ class ConnectedLayout extends React.PureComponent {
               {path === '/app' ? <HomeOperationList childRoutes={childRoutes}/> : children}
             </div>
             <div className={classes.appBar}>
-              <div className={classes.menuBtnWrapAvatar}>
-                <img
-                  alt={name}
-                  src={avatar}
-                  className={`${classes.imgRaised} ${classes.imgFluid}`}
-                  style={{ minHeight: '100%', minWidth: '100%' }}
-                />
-              </div>
+              <Avatar className={classes.menuBtnWrapAvatar} avatars={[avatar,avatar]} />
+              {/*<div className={classes.menuBtnWrapAvatar}>*/}
+              {/*  <img*/}
+              {/*    alt={name}*/}
+              {/*    src={avatar}*/}
+              {/*    className={`${classes.imgRaised} ${classes.imgFluid}`}*/}
+              {/*    style={{ minHeight: '100%', minWidth: '100%' }}*/}
+              {/*  />*/}
+              {/*</div>*/}
               <div className={classes.menuUserName}>
                 <p>{name}</p>
               </div>

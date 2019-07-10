@@ -1,9 +1,9 @@
+import { keyframes } from 'react-emotion';
 import pagesStyle from '../../common/jss/layouts/pagesStyle';
 import imagesStyles from '../../common/jss/imagesStyles';
 import popoverStyles from '../../common/jss/popoverStyles';
 import { dangerColor, successColor } from '../../common/jss/material-react-pro';
 
-import { keyframes } from 'react-emotion';
 
 const twinkling = keyframes`
   0% {
@@ -44,12 +44,8 @@ export default theme => ({
   },
   menuBtnWrapAvatar: {
     display:'flex',
-    width: '50px',
+    width: '70px',
     height: '50px',
-    borderStyle:'solid',
-    borderRadius:'50%',
-    borderWidth:'1px',
-    overflow:'hidden'
   },
   menuUserName: {
     // width: '80px',
