@@ -39,7 +39,7 @@ func (s *IOModule) Start(srv *Service) error {
 	switch vendor.Type() {
 	case IO_MODBUSTCP:
 		s.client = &ModbusTcp{
-			cfg:    s.cfg,
+			cfg:    *s.cfg,
 			notify: srv,
 			vendor: vendor,
 		}

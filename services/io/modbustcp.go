@@ -10,15 +10,13 @@ import (
 	"time"
 )
 
-const ()
-
 const (
 	TIMEOUT  = 3 * time.Second
 	READ_ITV = 500 * time.Millisecond
 )
 
 type ModbusTcp struct {
-	cfg    *ConfigIO
+	cfg    ConfigIO
 	status atomic.Value
 
 	inputs  atomic.Value
@@ -67,6 +65,7 @@ func (s *ModbusTcp) connect() {
 		if err != nil {
 			continue
 		} else {
+			// online
 			s.status.Store(IO_STATUS_ONLINE)
 			s.notify.OnStatus(s.cfg.SN, IO_STATUS_ONLINE)
 			s.client = modbus.NewClient(s.handler)

@@ -118,7 +118,10 @@ io:
   ios:
     - sn: 1
       model: MOXA_E1212
-      address: 192.168.127.254:502
+      address: 192.168.127.201:502
+    - sn: 2
+      model: MOXA_E1212
+      address: 192.168.127.202:502
 
 # 协议类型: Audi/VW, OpenProtocol
 controller_service:
