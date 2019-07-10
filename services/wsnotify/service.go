@@ -2,6 +2,7 @@ package wsnotify
 
 import (
 	"github.com/kataras/iris/websocket"
+	"sync"
 
 	"encoding/json"
 	"fmt"
@@ -32,6 +33,10 @@ type Diagnostic interface {
 
 type OnNewClient func(c websocket.Connection)
 
+type WSNotify interface {
+	OnWSMsg(data []byte)
+}
+
 type Service struct {
 	configValue atomic.Value
 	diag        Diagnostic
@@ -44,6 +49,9 @@ type Service struct {
 	msgBuffer     chan string
 
 	OnNewClient OnNewClient
+
+	notifies    []WSNotify
+	mtxNotifies sync.Mutex
 }
 
 func (s *Service) Config() Config {
@@ -53,6 +61,8 @@ func (s *Service) Config() Config {
 func (s *Service) onConnect(c websocket.Connection) {
 
 	c.OnMessage(func(data []byte) {
+		go s.notify(data)
+
 		s.diag.OnMessage(string(data))
 		reg := WSRegist{}
 		err := json.Unmarshal(data, &reg)
@@ -115,6 +125,8 @@ func NewService(c Config, d Diagnostic) *Service {
 		}),
 		clientManager: WSClientManager{},
 		msgBuffer:     make(chan string, 1024),
+		notifies:      []WSNotify{},
+		mtxNotifies:   sync.Mutex{},
 	}
 
 	s.clientManager.Init()
@@ -157,6 +169,22 @@ func (s *Service) Close() error {
 
 func (s *Service) sendProcess() {
 
+}
+
+func (s *Service) AddNotify(n WSNotify) {
+	defer s.mtxNotifies.Unlock()
+	s.mtxNotifies.Lock()
+
+	s.notifies = append(s.notifies, n)
+}
+
+func (s *Service) notify(data []byte) {
+	defer s.mtxNotifies.Unlock()
+	s.mtxNotifies.Lock()
+
+	for _, v := range s.notifies {
+		v.OnWSMsg(data)
+	}
 }
 
 // ws推送结果到指定控制器
