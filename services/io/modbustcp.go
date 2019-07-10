@@ -12,7 +12,7 @@ import (
 
 const (
 	TIMEOUT  = 3 * time.Second
-	READ_ITV = 500 * time.Millisecond
+	READ_ITV = 300 * time.Millisecond
 )
 
 type ModbusTcp struct {
@@ -148,6 +148,10 @@ func (s *ModbusTcp) Read() (string, string, error) {
 }
 
 func (s *ModbusTcp) Write(index uint16, status uint16) error {
+	if s.Status() == IO_STATUS_OFFLINE {
+		return errors.New(IO_STATUS_OFFLINE)
+	}
+
 	if index > (s.vendor.Cfg().OutputNum - 1) {
 		return errors.New("invalid index")
 	}
@@ -161,7 +165,7 @@ func (s *ModbusTcp) Write(index uint16, status uint16) error {
 
 	switch s.vendor.Cfg().WriteType {
 	case WRITE_TYPE_SINGLE_COIL:
-		_, err = client.WriteSingleCoil(index, index)
+		_, err = client.WriteSingleCoil(index, status)
 	}
 
 	return err

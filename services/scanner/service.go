@@ -8,9 +8,9 @@ import (
 	"time"
 )
 
-// 编译windows版本
+// 在linux上编译windows版本
 // 1. 安装mingw-w64： apt-get install mingw-w64
-// 2. 添加编译参数：CC=i686-w64-mingw32-gcc;CGO_ENABLED=1;GOOS=windows;GOARCH=386
+// 2. 添加编译参数：CC=x86_64-w64-mingw32-gcc;CGO_LDFLAGS=-L/home/linshenqi/tools/libusb -lusb-1.0;GOOS=windows;CGO_ENABLED=1
 
 const (
 	SEARCH_ITV = 500 * time.Millisecond
