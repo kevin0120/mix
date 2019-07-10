@@ -1,8 +1,13 @@
 import React from 'react';
-import { inputStepAtions } from '../../modules/inputStep/action';
 import { connect } from 'react-redux';
+import { inputStepAtions } from '../../modules/inputStep/action';
 
-class InputStep extends React.Component {
+type Props={
+  label: string,
+  isCurrent: boolean,
+  submit: ()=>{}
+};
+class InputStep extends React.Component<Props> {
   constructor(props) {
     super(props);
     this.state = {
@@ -19,8 +24,9 @@ class InputStep extends React.Component {
 
   };
 
+  // eslint-disable-next-line flowtype/no-weak-types
   render(): React.ReactElement<any> | string | number | {} | React.ReactNodeArray | React.ReactPortal | boolean | null | undefined {
-    const { label, submit, isCurrent } = this.props;
+    const { label, isCurrent } = this.props;
     const { value } = this.state;
     return <div>
       {label}
@@ -33,7 +39,7 @@ class InputStep extends React.Component {
       />
       <button
         type="button"
-        onClick={() => submit(value)}
+        onClick={() => this.onSubmit(value)}
         disabled={!isCurrent}
       >submit
       </button>

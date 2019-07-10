@@ -1,5 +1,5 @@
-import InputStep from '../../components/InputStep';
-import Working from '../working';
+import InputStep from '../InputStep';
+import ScannerStep from '../ScannerStep';
 
 export default {
   input: {
@@ -8,6 +8,9 @@ export default {
       onSubmit: (value) => props.pushState(value, props.parallelId),
       label: props.payload.label
     })
+  },
+  scanner:{
+    component:ScannerStep
   }
 };
 

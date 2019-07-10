@@ -10,6 +10,7 @@ export default function* root() {
       const action = yield take(ORDER.TRIGGER);
       // do order
       yield call(doOrder);
+      console.log('order finished');
     }
   } catch (e) {
     console.error(e);
@@ -21,14 +22,25 @@ function* doOrder() {
     while (true) {
       const state = yield select();
       const { currentProcessingStep } = state.order;
-      if (!currentProcessingStep || !currentProcessingStep.type) {
+      if (!currentProcessingStep) {
         throw(new Error('invalid step'));
-      }else if(!currentProcessingStep.type){
+      } else if (!currentProcessingStep.type) {
         throw(new Error('step has no type'));
-      }else if(!stepTypes[currentProcessingStep.type]){
+      } else if (!stepTypes[currentProcessingStep.type]) {
         throw(new Error(`step type has no handler: ${currentProcessingStep.type}`));
-      }else {
-        yield race([call(stepTypes[currentProcessingStep.type], ORDER, orderActions), take(ORDER.STEP.PUSH)]);
+      } else {
+        const { next } = yield race({
+          finish: call(stepTypes[currentProcessingStep.type], ORDER, orderActions),
+          next: take(ORDER.STEP.PUSH)
+        });
+        console.log(next);
+        if (next) {
+          const newState = yield select();
+          const { currentProcessingIndex, currentOrder } = newState.order;
+          if (currentProcessingIndex >= currentOrder.steps.length) {
+            return;
+          }
+        }
       }
     }
   } catch (e) {

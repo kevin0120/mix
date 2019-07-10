@@ -6,7 +6,7 @@ export const demoOrder = {
     {
       name: '姓名',
       info: 'this step does one checking',
-      type: 'input', // check,collect,instruct,enable,...
+      type: 'input',
       payload: {
         label: 'name'
       }
@@ -14,62 +14,70 @@ export const demoOrder = {
     {
       name: '地址',
       info: 'this step collects a input',
-      type: 'input', // check,collect,instruct,enable,...
+      type: 'input',
       payload: {
         label: 'address'
       }
     },
     {
-      name: '联系方式',
-      info: 'this step collects 2 inputs',
-      type:'parallel_input',
-      steps: [
-        [{
-          name: '座机',
-          info: 'this step collects a input',
-          type: 'input', // check,collect,instruct,enable,...
-          payload: {
-            label: 'phone'
-          }
-        }, {
-          name: '手机',
-          info: 'this step collects another input',
-          type: 'input', // check,collect,instruct,enable,...
-          payload: {
-            label: 'mobile'
-          }
-        }],
-        {
-          name: '电子邮箱',
-          info: 'this step collects another input',
-          type: 'input', // check,collect,instruct,enable,...
-          payload: {
-            label: 'email'
-          }
-        }
-      ]
+      name: '扫码',
+      info: 'this step collects a input',
+      type: 'scanner',
+      payload: {
+        label: 'address'
+      }
     },
-    {
-      name: '评价',
-      info: 'this step collects 2 inputs',
-      steps: [
-        {
-          name: '打分',
-          info: 'this step collects a input',
-          type: 'input', // check,collect,instruct,enable,...
-          payload: {
-            label: 'score'
-          }
-        }, {
-          name: '评论',
-          info: 'this step collects another input',
-          type: 'input', // check,collect,instruct,enable,...
-          payload: {
-            label: 'comment'
-          }
-        }
-      ]
-    }
+    // {
+    //   name: '联系方式',
+    //   info: 'this step collects 2 inputs',
+    //   type:'parallel_input',
+    //   steps: [
+    //     [{
+    //       name: '座机',
+    //       info: 'this step collects a input',
+    //       type: 'input', // check,collect,instruct,enable,...
+    //       payload: {
+    //         label: 'phone'
+    //       }
+    //     }, {
+    //       name: '手机',
+    //       info: 'this step collects another input',
+    //       type: 'input', // check,collect,instruct,enable,...
+    //       payload: {
+    //         label: 'mobile'
+    //       }
+    //     }],
+    //     {
+    //       name: '电子邮箱',
+    //       info: 'this step collects another input',
+    //       type: 'input', // check,collect,instruct,enable,...
+    //       payload: {
+    //         label: 'email'
+    //       }
+    //     }
+    //   ]
+    // },
+    // {
+    //   name: '评价',
+    //   info: 'this step collects 2 inputs',
+    //   steps: [
+    //     {
+    //       name: '打分',
+    //       info: 'this step collects a input',
+    //       type: 'input', // check,collect,instruct,enable,...
+    //       payload: {
+    //         label: 'score'
+    //       }
+    //     }, {
+    //       name: '评论',
+    //       info: 'this step collects another input',
+    //       type: 'input', // check,collect,instruct,enable,...
+    //       payload: {
+    //         label: 'comment'
+    //       }
+    //     }
+    //   ]
+    // }
 
   ]
 };

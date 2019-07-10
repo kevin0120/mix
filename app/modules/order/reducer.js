@@ -35,6 +35,13 @@ function getStepByIndex(index, order) {
   return order.steps && order.steps[index];
 }
 
+function nextIndex(index,order){
+  return index + 1 < order.steps.length ? index + 1 : index
+}
+
+function prevIndex(index){
+  return index - 1 >= 0 ? index - 1 : 0
+}
 
 const orderReducer = {
   [ORDER.TRIGGER]: (state, action) => {
@@ -52,7 +59,7 @@ const orderReducer = {
 
   [ORDER.STEP.NEXT]: (state) => {
     const { currentViewingIndex, currentOrder } = state;
-    const newIndex = currentViewingIndex + 1 <= currentOrder.steps.length ? currentViewingIndex + 1 : currentViewingIndex;
+    const newIndex = nextIndex(currentViewingIndex,currentOrder);
     return {
       ...state,
       currentViewingIndex: newIndex,
@@ -62,7 +69,7 @@ const orderReducer = {
 
   [ORDER.STEP.PREVIOUS]: (state) => {
     const { currentViewingIndex, currentOrder } = state;
-    const newIndex = currentViewingIndex - 1 >= 0 ? currentViewingIndex - 1 : 0;
+    const newIndex = prevIndex(currentViewingIndex,currentOrder);
     return {
       ...state,
       currentViewingIndex: newIndex,
@@ -89,7 +96,7 @@ const orderReducer = {
   //
   [ORDER.STEP.PUSH]: (state) => {
     const { currentProcessingIndex, currentOrder, currentViewingStep, currentProcessingStep } = state;
-    const newIndex = currentProcessingIndex + 1;
+    const newIndex = nextIndex(currentProcessingIndex,currentOrder);
     const newProcessingStep = getStepByIndex(newIndex, currentOrder);
     const newState = {
       ...state,

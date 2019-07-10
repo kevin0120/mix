@@ -16,8 +16,8 @@ export default class Root extends Component<Props> {
   render() {
     const { store, history } = this.props;
     const {pages}=store.getState().setting;
-    listenToNewCar(store.dispatch, store.getState);
-    store.dispatch(systemInit()); // 初始化
+    // listenToNewCar(store.dispatch, store.getState);
+    // store.dispatch(systemInit()); // 初始化
     return (
       <Provider store={store}>
         <ConnectedRouter history={history}>

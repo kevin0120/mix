@@ -1,0 +1,59 @@
+import React from 'react';
+import { connect } from 'react-redux';
+import { push } from 'connected-react-router';
+import { withStyles } from '@material-ui/core/styles';
+import Grid from '@material-ui/core/Grid';
+import Card from '@material-ui/core/Card';
+import CardActionArea from '@material-ui/core/CardActionArea';
+import Typography from '@material-ui/core/Typography';
+import { orderActions } from '../../modules/order/action';
+
+import styles from './styles';
+
+type Props = {
+  classes: {},
+  orderList: [],
+  trigger: ()=>{},
+  doPush: ()=>{}
+};
+
+class HomeOperationList extends React.Component<Props> {
+  onCardClick = (order) => {
+    const { trigger, doPush } = this.props;
+    trigger(order);
+    doPush('/app/working');
+  };
+
+  render() {
+    const { classes, orderList } = this.props;
+    return <div className={classes.root}>
+      <Grid container className={classes.container} justify="center" spacing={24}>
+        {orderList.map((order) => <Grid item xs={3} key={order.name}>
+          <Card>
+            <CardActionArea className={classes.orderCard} onClick={() => this.onCardClick(order)}>
+              <Typography gutterBottom variant="h5" component="h2">
+                {order.name}
+              </Typography>
+              <Typography variant="body2" color="textSecondary" component="p">
+                {order.info}
+              </Typography>
+            </CardActionArea>
+          </Card>
+        </Grid>)}
+      </Grid>
+    </div>;
+  }
+
+}
+
+const mapState = (state, props) => ({
+  ...props,
+  orderList: state.order.list
+});
+
+const mapDispatch = {
+  trigger: orderActions.trigger,
+  doPush: push
+};
+
+export default withStyles(styles)(connect(mapState, mapDispatch)(HomeOperationList));
