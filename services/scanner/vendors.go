@@ -8,6 +8,7 @@ const (
 	VendorHoneyWell  = 3118
 	ProductHoneyWell = 2305
 	VendorDataLogic  = 1529
+	ProductDataLogic = 8714
 )
 
 const (
@@ -43,16 +44,26 @@ var keymap = map[byte][]string{
 	27: {"x", "X"},
 	28: {"y", "Y"},
 	29: {"z", "Z"},
-	30: {"1", ""},
-	31: {"2", ""},
-	32: {"3", ""},
-	33: {"4", ""},
-	34: {"5", ""},
-	35: {"6", ""},
-	36: {"7", ""},
-	37: {"8", ""},
-	38: {"9", ""},
-	39: {"0", ""},
+	30: {"1", "!"},
+	31: {"2", "@"},
+	32: {"3", "#"},
+	33: {"4", "$"},
+	34: {"5", "%"},
+	35: {"6", "^"},
+	36: {"7", "&"},
+	37: {"8", "*"},
+	38: {"9", "("},
+	39: {"0", ")"},
+	51: {";", ":"},
+	53: {"`", "~"},
+	45: {"-", "_"},
+	46: {"=", "+"},
+	47: {"[", "{"},
+	48: {"]", "}"},
+	52: {"'", "\""},
+	54: {",", "<"},
+	55: {".", ">"},
+	56: {"/", "?"},
 }
 
 type vendor struct {
@@ -65,6 +76,10 @@ var vendors = []vendor{
 		VendorID:  VendorHoneyWell,
 		ProductID: ProductHoneyWell,
 	},
+	{
+		VendorID:  VendorDataLogic,
+		ProductID: ProductDataLogic,
+	},
 }
 
 type commonHoneywellScanner struct {
@@ -73,15 +88,12 @@ type commonHoneywellScanner struct {
 	InEndpoint *USBInEndpoint
 }
 
-type commonDataLogicScanner struct {
-}
-
 func (d *DeviceInfo) updateDeviceService() {
 	switch d.VendorID {
 	case VendorHoneyWell:
 		d.DeviceService = &commonHoneywellScanner{}
-		//case VendorDataLogic:
-		//	d.DeviceService = &commonDataLogicScanner{}
+	case VendorDataLogic:
+		d.DeviceService = &commonDataLogicScanner{}
 	}
 }
 
@@ -105,7 +117,12 @@ func (v *commonHoneywellScanner) NewReader(dev *USBDevice) error {
 	return nil
 }
 
+//func (v *commonHoneywellScanner) Debounce() (time.Duration, time.Duration) {
+//	return 300 * time.Millisecond, 300 * time.Millisecond
+//}
+
 func (v *commonHoneywellScanner) Read(buf []byte) (int, error) {
+
 	if v.InEndpoint == nil {
 		return 0, errors.New("not Reader")
 	}
@@ -123,21 +140,73 @@ func (v *commonHoneywellScanner) Close() error {
 	return err
 }
 
-func (v *commonHoneywellScanner) Parse(buf []byte) (string, error) {
-	//fmt.Println(buf)
-	//fmt.Printf("%d\n", len(buf))
-	if buf[INDEX_TARGET] == 0 {
+func commonParse(buf []byte) (string, error) {
+	v := buf[INDEX_TARGET]
+	if v == 0 || keymap[v] == nil {
 		return "", errors.New("invalid byte")
 	}
 
-	str := keymap[buf[INDEX_TARGET]][0]
+	str := keymap[v][0]
 	if buf[INDEX_SHIFT] == KEY_SHIFT {
-		str = keymap[buf[INDEX_TARGET]][1]
+		str = keymap[v][1]
 	}
 
 	return str, nil
 }
 
-func (v *commonDataLogicScanner) Parse(buf []byte) string {
-	return string(buf)
+func (v *commonHoneywellScanner) Parse(buf []byte) (string, error) {
+	//fmt.Println(buf)
+	return commonParse(buf)
 }
+
+type commonDataLogicScanner struct {
+	cfg        *USBConfig
+	Interface  *USBInterface
+	InEndpoint *USBInEndpoint
+}
+
+func (v *commonDataLogicScanner) NewReader(dev *USBDevice) error {
+	cfg, err := dev.Config(1)
+	if err != nil {
+		return err
+	}
+	v.cfg = cfg
+	intf, err := cfg.Interface(0, 0)
+	if err != nil {
+		return err
+	}
+	v.Interface = intf
+	epIn, err := intf.InEndpoint(2)
+	if err != nil {
+		return err
+	}
+	v.InEndpoint = epIn
+
+	return nil
+}
+
+func (v *commonDataLogicScanner) Read(buf []byte) (int, error) {
+	if v.InEndpoint == nil {
+		return 0, errors.New("not Reader")
+	}
+	return v.InEndpoint.Read(buf)
+}
+
+func (v *commonDataLogicScanner) Close() error {
+	var err error
+	if v.cfg != nil {
+		err = v.cfg.Close()
+	}
+	if v.Interface != nil {
+		v.Interface.Close()
+	}
+	return err
+}
+
+func (v *commonDataLogicScanner) Parse(buf []byte) (string, error) {
+	return commonParse(buf)
+}
+
+//func (v *commonDataLogicScanner) Debounce() (time.Duration, time.Duration) {
+//	return 300 * time.Millisecond, 300 * time.Millisecond
+//}

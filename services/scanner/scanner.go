@@ -26,6 +26,8 @@ type DeviceService interface {
 	Read([]byte) (int, error)
 
 	Close() error
+
+	//Debounce() (time.Duration, time.Duration)
 }
 
 type DeviceInfo struct {
@@ -61,12 +63,13 @@ type Scanner struct {
 
 	debounced       func(f func())
 	debounceTrigger bool
+	init            bool
 }
 
 func NewScanner(vid, pid ID, d Diagnostic, dev *USBDevice) *Scanner {
 	di := NewDevice(vid, pid, d)
 
-	return &Scanner{devInfo: di, diag: d, device: dev, debounceTrigger: false}
+	return &Scanner{devInfo: di, diag: d, device: dev, debounceTrigger: false, init: true}
 }
 
 func (s *Scanner) Start() {
@@ -158,13 +161,23 @@ func (s *Scanner) connectAndRecv() error {
 }
 
 func (s *Scanner) resetDebounce() {
-	s.debounceTrigger = true
+	if s.init {
+		s.init = false
+	}
+
+	s.debounceTrigger = false
 }
 
 func (s *Scanner) triggerDebounce() {
 	if !s.debounceTrigger {
-		s.debounced = debounce.New(300 * time.Millisecond)
-		s.debounceTrigger = false
+		//debInit, debCommon := s.devInfo.Debounce()
+		//deb := debCommon
+		//if s.init {
+		//	deb = debInit
+		//}
+
+		s.debounced = debounce.New(100 * time.Millisecond)
+		s.debounceTrigger = true
 	}
 }
 

@@ -1,7 +1,5 @@
 package io
 
-import ()
-
 const (
 	MODEL_MOXA_E1212 = "MOXA_E1212"
 )

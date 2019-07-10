@@ -72,6 +72,8 @@ func (s *Service) search() {
 				for _, d := range devs {
 					s.addScanner(NewScanner(v.VendorID, v.ProductID, s.diag, d))
 				}
+			} else {
+				fmt.Println(err.Error())
 			}
 		}
 
