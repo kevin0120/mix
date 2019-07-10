@@ -311,6 +311,8 @@ func (s *Server) AppendScannerService() error {
 	d := s.DiagService.NewScannerHandler()
 
 	srv := scanner.NewService(c, d)
+	srv.WS = s.WSNotifyService
+
 	s.ScannerService = srv
 	s.AppendService("scanner", srv)
 
@@ -322,6 +324,8 @@ func (s *Server) AppendIOService() error {
 	d := s.DiagService.NewIOHandler()
 
 	srv := io.NewService(c, d)
+	srv.WS = s.WSNotifyService
+
 	s.IOService = srv
 	s.AppendService("io", srv)
 

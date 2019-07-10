@@ -57,3 +57,8 @@ type WSToolStatus struct {
 	Status string `json:"status"`
 	Reason string `json:"reason"`
 }
+
+type WSMsg struct {
+	Type string      `json:"type"`
+	Data interface{} `json:"data"`
+}

@@ -195,3 +195,7 @@ func (s *Service) WSSendScanner(payload string) {
 func (s *Service) WSSendIOInput(payload string) {
 	s.clientManager.NotifyALL(WS_EVENT_IO, payload)
 }
+
+func (s *Service) WSSendIO(payload string) {
+	s.clientManager.NotifyALL(WS_EVENT_IO, payload)
+}

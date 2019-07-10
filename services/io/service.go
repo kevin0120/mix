@@ -1,7 +1,9 @@
 package io
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/masami10/rush/services/wsnotify"
 	"sync/atomic"
 )
 
@@ -14,7 +16,7 @@ type Service struct {
 	configValue atomic.Value
 	ios         map[string]*IOModule
 	diag        Diagnostic
-
+	WS          *wsnotify.Service
 	IONotify
 }
 
@@ -66,8 +68,29 @@ func (s *Service) Write(sn string, index uint16, status uint16) error {
 
 func (s *Service) OnStatus(sn string, status string) {
 	s.diag.Debug(fmt.Sprintf("sn:%s status:%s", sn, status))
+
+	io, _ := json.Marshal(wsnotify.WSMsg{
+		Type: WS_IO_STATUS,
+		Data: IO_STATUS{
+			SN:     sn,
+			Status: status,
+		},
+	})
+
+	s.WS.WSSendIO(string(io))
 }
 
 func (s *Service) OnIOStatus(sn string, t string, status string) {
 	s.diag.Debug(fmt.Sprintf("sn:%s type:%s status:%s", sn, t, status))
+
+	io, _ := json.Marshal(wsnotify.WSMsg{
+		Type: WS_IO_CONTACT,
+		Data: IO_CONTACT{
+			SN:      sn,
+			Type:    t,
+			CONTACT: status,
+		},
+	})
+
+	s.WS.WSSendIO(string(io))
 }

@@ -1,8 +1,10 @@
 package scanner
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/google/gousb"
+	"github.com/masami10/rush/services/wsnotify"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -28,6 +30,8 @@ type Service struct {
 
 	diag Diagnostic
 	Notify
+
+	WS *wsnotify.Service
 }
 
 func NewService(c Config, d Diagnostic) *Service {
@@ -104,8 +108,27 @@ func (s *Service) OnStatus(id string, status string) {
 	if status == SCANNER_STATUS_OFFLINE {
 		s.removeScanner(id)
 	}
+
+	barcode, _ := json.Marshal(wsnotify.WSMsg{
+		Type: WS_SCANNER_STATUS,
+		Data: ScannerStatus{
+			ID:     id,
+			Status: status,
+		},
+	})
+
+	s.WS.WSSendScanner(string(barcode))
 }
 
 func (s *Service) OnRecv(id string, str string) {
 	s.diag.Debug(fmt.Sprintf("scanner %s recv: %s\n", id, str))
+	barcode, _ := json.Marshal(wsnotify.WSMsg{
+		Type: WS_SCANNER_READ,
+		Data: ScannerRead{
+			ID:      id,
+			Barcode: str,
+		},
+	})
+
+	s.WS.WSSendScanner(string(barcode))
 }
