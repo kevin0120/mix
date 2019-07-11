@@ -112,7 +112,9 @@ func (s *Scanner) open() (*USBDevice, error) {
 	if di == nil {
 		return nil, errors.New("DeviceInfo is Empty")
 	}
-	di.updateDeviceService()
+	if err := di.updateDeviceService(); err != nil {
+		return nil, err
+	}
 	if err := di.NewReader(s.device); err != nil {
 		return nil, err
 	}

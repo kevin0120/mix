@@ -88,13 +88,16 @@ type commonHoneywellScanner struct {
 	InEndpoint *USBInEndpoint
 }
 
-func (d *DeviceInfo) updateDeviceService() {
+func (d *DeviceInfo) updateDeviceService() error {
 	switch d.VendorID {
 	case VendorHoneyWell:
 		d.DeviceService = &commonHoneywellScanner{}
 	case VendorDataLogic:
 		d.DeviceService = &commonDataLogicScanner{}
+	default:
+		return errors.New("updateDeviceService Fail")
 	}
+	return nil
 }
 
 func (v *commonHoneywellScanner) NewReader(dev *USBDevice) error {
