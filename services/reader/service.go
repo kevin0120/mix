@@ -137,6 +137,7 @@ func (s *Service) search() {
 					if err != nil {
 						// card lost
 						//s.diag.Debug("card lost")
+						_ = card.Disconnect(scard.ResetCard)
 						break
 					}
 
