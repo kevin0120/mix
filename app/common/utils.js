@@ -156,3 +156,11 @@ export class HttpClient {
 }
 
 export const defaultClient = HttpClient.getInstance();
+
+export const guard = (fun, msg) => (...args) => {
+  try {
+    return fun(...args);
+  } catch (e) {
+    throw new Error(msg, fun, ...args, e);
+  }
+};

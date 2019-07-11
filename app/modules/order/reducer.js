@@ -1,55 +1,34 @@
 import { ORDER } from './action';
 import { genReducers } from '../indexReducer';
-import { ORDER_STEP_STATUS, hasSubStep } from './model';
+import { ORDER_STEP_STATUS } from './model';
 import { demoOrder, demoOrder2 } from './demoData';
+import { viewingStep, processingStep, processingIndex, currentOrderLength, viewingIndex, currentOrder } from './selector';
 
 const initState = {
   currentOrder: null,
-  currentProcessingIndex: 0,
-  currentProcessingStep: {},
-  currentViewingIndex: 0,
-  currentViewingStep: {},
+  processingIndex: 0,
+  viewingIndex: 0,
   status: '',
   list: [demoOrder, demoOrder2]
 };
 
 function setStepStatus(state, status) {
-  const { currentProcessingIndex, currentOrder, currentViewingIndex } = state;
   const newState = {
-    ...state,
-    currentOrder: {
-      ...currentOrder
-    }
+    ...state
   };
-  const newStep = getStepByIndex(currentProcessingIndex, newState.currentOrder);
+  const newStep = processingStep(newState);
   newStep.status = status;
-  return {
-    ...newState,
-    currentProcessingStep: newStep,
-    currentViewingStep: getStepByIndex(currentViewingIndex, newState.currentOrder)
-  };
+  return newState;
 }
 
-function getStepByIndex(index, order) {
-  return order.steps && order.steps[index];
-}
-
-function nextIndex(index) {
-  return index + 1;
-}
-
-function limitIndex(index, order) {
+function limitIndex(index, state) {
   if (index < 0) {
     return 0;
   }
-  if (index >= order.steps.length) {
-    return order.steps.length - 1;
+  if (index >= currentOrderLength(state)) {
+    return currentOrderLength(state) - 1;
   }
   return index;
-}
-
-function prevIndex(index) {
-  return index - 1;
 }
 
 const orderReducer = {
@@ -58,31 +37,24 @@ const orderReducer = {
     return {
       ...state,
       currentOrder: action.order || null,
-      currentViewingIndex: firstIndex,
-      currentViewingStep: getStepByIndex(firstIndex, action.order),
-      currentProcessingIndex: firstIndex,
-      currentProcessingStep: getStepByIndex(firstIndex, action.order)
-
+      viewingIndex: firstIndex,
+      processingIndex: firstIndex
     };
   },
 
   [ORDER.STEP.NEXT]: (state) => {
-    const { currentViewingIndex, currentOrder } = state;
-    const newIndex = limitIndex(nextIndex(currentViewingIndex), currentOrder);
+    const newIndex = limitIndex(viewingIndex(state) + 1, state);
     return {
       ...state,
-      currentViewingIndex: newIndex,
-      currentViewingStep: getStepByIndex(newIndex, currentOrder)
+      viewingIndex: newIndex
     };
   },
 
   [ORDER.STEP.PREVIOUS]: (state) => {
-    const { currentViewingIndex, currentOrder } = state;
-    const newIndex = limitIndex(prevIndex(currentViewingIndex), currentOrder);
+    const newIndex = limitIndex(viewingIndex(state) - 1, state);
     return {
       ...state,
-      currentViewingIndex: newIndex,
-      currentViewingStep: getStepByIndex(newIndex, currentOrder)
+      viewingIndex: newIndex
     };
   },
 
@@ -90,8 +62,7 @@ const orderReducer = {
     const { stepId } = action;
     return {
       ...state,
-      currentViewingIndex: stepId,
-      currentViewingStep: getStepByIndex(stepId, state.currentOrder)
+      viewingIndex: stepId
     };
   },
 
@@ -104,21 +75,22 @@ const orderReducer = {
   [ORDER.STEP.RESET]: (state) => setStepStatus(state, ORDER_STEP_STATUS.READY),
   //
   [ORDER.STEP.PUSH]: (state) => {
-    const { currentProcessingIndex, currentOrder, currentViewingStep, currentProcessingStep } = state;
-    const newIndex = nextIndex(currentProcessingIndex);
-    const newProcessingStep = getStepByIndex(newIndex, currentOrder);
-    const newState = {
+    const newIndex = processingIndex(state) + 1;
+    return {
       ...state,
-      currentProcessingIndex: newIndex,
-      currentProcessingStep: newProcessingStep
+      processingIndex: newIndex,
+      viewingIndex: processingStep(state) === viewingStep(state) ? newIndex : viewingIndex(state)
     };
-    if (currentProcessingStep === currentViewingStep) {
-      newState.currentViewingStep = newProcessingStep;
-      newState.currentViewingIndex = newIndex;
-    }
-    return newState;
+  },
+  [ORDER.STEP.UPDATE]: (state, action) => {
+    const { newStep } = action;
+    const newOrder = currentOrder(state).slice();
+    newOrder.splice(processingIndex(state), 1, newStep);
+    return {
+      ...state,
+      currentOrder: newOrder
+    };
   }
-  // [ORDER.FINISH]:
 };
 
 export default genReducers(orderReducer, initState);

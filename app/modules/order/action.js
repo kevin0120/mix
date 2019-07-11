@@ -19,7 +19,9 @@ export const ORDER = {
     RESET: 'ORDER_STEP_RESET',
     // 步进、步退
     PUSH: 'ORDER_STEP_PUSH',
-    REVOKE: 'ORDER_STEP_REVOKE'
+    REVOKE: 'ORDER_STEP_REVOKE',
+    // 修改store
+    UPDATE: 'ORDER_STEP_UPDATE'
   }
 };
 
@@ -71,5 +73,8 @@ export const orderActions = {
   pushStep: () => ({
     type: ORDER.STEP.PUSH
   }),
-
+  updateStep:(newStep)=>({
+    type:ORDER.STEP.UPDATE,
+    newStep
+  })
 };

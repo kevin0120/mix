@@ -9,6 +9,7 @@ import Button from '@material-ui/core/es/Button/Button';
 import {
   orderActions
 } from '../../modules/order/action';
+import { currentOrder, orderSteps, processingStep, viewingIndex, viewingStep } from '../../modules/order/selector';
 import stepTypes from '../steps/stepTypes';
 import styles from './styles';
 
@@ -50,18 +51,18 @@ class StepWorking extends React.Component {
       next,
       previous
     } = this.props;
-    const { currentOrder, currentViewingIndex, currentViewingStep, currentProcessingStep } = order;
+    // const { currentOrder, currentViewingIndex, currentViewingStep, currentProcessingStep } = order;
     return <div className={classes.root}>
-      {(currentOrder &&
-        currentOrder.steps &&
-        this.renderSteps(currentOrder.steps, currentViewingIndex)) || null}
+      {(currentOrder(order) &&
+        currentOrder(order).steps &&
+        this.renderSteps(orderSteps(order), viewingIndex(order))) || null}
       <div className={classes.buttonsContainer}>
         <Button type="button" onClick={() => previous()}>view previous</Button>
         <Button type="button" onClick={() => next()}>view next</Button>
       </div>
       {/* {JSON.stringify(currentViewingStep)} */}
       <div className={classes.contentContainer}>
-        {this.renderStepContents(currentViewingStep, currentProcessingStep === currentViewingStep)}
+        {this.renderStepContents(viewingStep(order), viewingStep(order) === processingStep(order))}
       </div>
     </div>;
   }
