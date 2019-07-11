@@ -1,10 +1,13 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core/styles';
-import styles from './styles';
 import Button from '@material-ui/core/es/Button/Button';
+import { SvgIcon } from '@material-ui/core';
+import styles from './styles';
 import { scannerStepAction } from '../../../modules/steps/scannerStep/action';
+import QRCode from './qrcode-scan.svg';
 
+console.log(QRCode);
 type Props = {
   classes: {},
   submit: ()=>{}
@@ -17,7 +20,7 @@ class scannerStep extends React.Component<Props> {
   render(): React.ReactElement<any> | string | number | {} | React.ReactNodeArray | React.ReactPortal | boolean | null | undefined {
     const { classes, submit, isCurrent } = this.props;
     return <div className={classes.root}>
-      {'code icon here'}
+      <QRCode width="200" height="200" viewBox="0 0 24 24"/>
       <Button onClick={() => submit()} disabled={!isCurrent}>submit</Button>
     </div>;
   }

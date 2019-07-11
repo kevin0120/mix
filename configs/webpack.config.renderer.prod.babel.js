@@ -154,11 +154,27 @@ export default merge.smart(baseConfig, {
         test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
         use: {
           loader: 'url-loader',
+          exclude: [path.resolve(__dirname, '..', 'app')],
           options: {
             limit: 10000,
             mimetype: 'image/svg+xml'
           }
         }
+      },
+      {
+        test: /\.svg$/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: "babel-loader"
+          },
+          {
+            loader: "react-svg-loader",
+            options: {
+              jsx: true // true outputs JSX tags
+            }
+          }
+        ]
       },
       // Common Image Formats
       {
