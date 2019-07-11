@@ -1,9 +1,4 @@
-package scanner
-
-type DeviceConfig struct {
-	VendorID  int `yaml:"vendorID"`
-	ProductID int `yaml:"productID"`
-}
+package reader
 
 type Config struct {
 	Enable bool `yaml:"enable"`

@@ -6,6 +6,7 @@ import (
 	"github.com/masami10/rush/services/diagnostic"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/io"
+	"github.com/masami10/rush/services/reader"
 	"github.com/masami10/rush/services/scanner"
 	"os"
 	"os/user"
@@ -54,6 +55,8 @@ type Config struct {
 
 	IO io.Config `yaml:"io"`
 
+	Reader reader.Config `yaml:"reader"`
+
 	Commander command.Commander `yaml:"-"`
 }
 
@@ -76,6 +79,7 @@ func NewConfig() *Config {
 	c.Odoo = odoo.NewConfig()
 	c.Scanner = scanner.NewConfig()
 	c.IO = io.NewConfig()
+	c.Reader = reader.NewConfig()
 
 	c.Contollers = controller.NewConfig()
 
@@ -144,6 +148,10 @@ func (c *Config) Validate() error {
 
 	if err := c.IO.Validate(); err != nil {
 		return errors.Wrap(err, "io")
+	}
+
+	if err := c.Reader.Validate(); err != nil {
+		return errors.Wrap(err, "reader")
 	}
 
 	return nil

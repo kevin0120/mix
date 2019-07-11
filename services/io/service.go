@@ -39,6 +39,9 @@ func (s *Service) config() Config {
 }
 
 func (s *Service) Open() error {
+	if !s.config().Enable {
+		return nil
+	}
 
 	cfgs := s.config().IOS
 	for _, v := range cfgs {

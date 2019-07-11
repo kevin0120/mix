@@ -52,6 +52,10 @@ func (s *Service) config() Config {
 }
 
 func (s *Service) Open() error {
+	if !s.config().Enable {
+		return nil
+	}
+
 	go s.search()
 
 	return nil

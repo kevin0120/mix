@@ -21,6 +21,7 @@ const (
 	WS_EVENT_ODOO        = "odoo"
 	WS_EVENT_MAINTENANCE = "maintenance"
 	WS_EVETN_TOOL        = "tool"
+	WS_EVENT_READER      = "reader"
 )
 
 type Diagnostic interface {
@@ -226,4 +227,8 @@ func (s *Service) WSSendIOInput(payload string) {
 
 func (s *Service) WSSendIO(payload string) {
 	s.clientManager.NotifyALL(WS_EVENT_IO, payload)
+}
+
+func (s *Service) WSSendReader(payload string) {
+	s.clientManager.NotifyALL(WS_EVENT_READER, payload)
 }

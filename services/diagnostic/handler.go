@@ -476,3 +476,15 @@ func (h *IOHandler) Error(msg string, err error) {
 func (h *IOHandler) Debug(msg string) {
 	h.l.Debug(msg)
 }
+
+type ReaderHandler struct {
+	l Logger
+}
+
+func (h *ReaderHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+func (h *ReaderHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}

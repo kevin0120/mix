@@ -126,6 +126,12 @@ func (s *Service) NewIOHandler() *IOHandler {
 	}
 }
 
+func (s *Service) NewReaderHandler() *ReaderHandler {
+	return &ReaderHandler{
+		l: s.Logger.With(String("service", "reader")),
+	}
+}
+
 func BootstrapMainHandler() *CmdHandler {
 	s := NewService(NewConfig(), nil, os.Stderr)
 	// Should never error
