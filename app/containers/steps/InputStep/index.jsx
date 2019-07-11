@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { inputStepActions } from '../../modules/inputStep/action';
+import Button from '@material-ui/core/es/Button/Button';
+import { inputStepActions } from '../../../modules/steps/inputStep/action';
 
 type Props = {
   label: string,
@@ -39,12 +40,12 @@ class InputStep extends React.Component<Props> {
         }}
         value={value}
       />
-      <button
+      <Button
         type="button"
         onClick={() => this.onSubmit(value)}
         disabled={!isCurrent}
       >submit
-      </button>
+      </Button>
     </div>;
   }
 }

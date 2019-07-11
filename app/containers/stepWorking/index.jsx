@@ -9,11 +9,11 @@ import Button from '@material-ui/core/es/Button/Button';
 import {
   orderActions
 } from '../../modules/order/action';
-import stepTypes from './stepTypes';
+import stepTypes from '../steps/stepTypes';
 import styles from './styles';
 
 
-class ConnectedStepWorking extends React.Component {
+class StepWorking extends React.Component {
   renderSteps(steps, currentStep) {
     const { jumpTo } = this.props;
     return <Stepper nonLinear activeStep={currentStep}>
@@ -55,8 +55,10 @@ class ConnectedStepWorking extends React.Component {
       {(currentOrder &&
         currentOrder.steps &&
         this.renderSteps(currentOrder.steps, currentViewingIndex)) || null}
-      <Button type="button" onClick={() => previous()}>view previous</Button>
-      <Button type="button" onClick={() => next()}>view next</Button>
+      <div className={classes.buttonsContainer}>
+        <Button type="button" onClick={() => previous()}>view previous</Button>
+        <Button type="button" onClick={() => next()}>view next</Button>
+      </div>
       {/* {JSON.stringify(currentViewingStep)} */}
       <div className={classes.contentContainer}>
         {this.renderStepContents(currentViewingStep, currentProcessingStep === currentViewingStep)}
@@ -76,4 +78,4 @@ const mapDispatch = {
   jumpTo: orderActions.jumpToStep
 };
 
-export default withStyles(styles)(connect(mapState, mapDispatch)(ConnectedStepWorking));
+export default withStyles(styles)(connect(mapState, mapDispatch)(StepWorking));

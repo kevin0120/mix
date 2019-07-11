@@ -18,24 +18,8 @@ export const ORDER = {
     FAIL: 'ORDER_STEP_FAIL',
     RESET: 'ORDER_STEP_RESET',
     // 步进、步退
-    TRY_PUSH: 'ORDER_STEP_TRY_PUSH',
     PUSH: 'ORDER_STEP_PUSH',
     REVOKE: 'ORDER_STEP_REVOKE'
-  },
-  // JOB:{
-  //   START:'ORDER_JOB_START',
-  //   SUCCESS:'ORDER_JOB_SUCCESS',
-  //   FAIL:'ORDER_JOB_FAIL',
-  // },
-  CHECK: {
-    START: 'ORDER_CHECK_START',
-    SUCCESS: 'ORDER_CHECK_SUCCESS',
-    FAIL: 'ORDER_CHECK_FAIL'
-  },
-  COLLECT: {
-    START: 'ORDER_COLLECT_START',
-    SUCCESS: 'ORDER_COLLECT_SUCCESS',
-    FAIL: 'ORDER_COLLECT_FAIL'
   }
 };
 
@@ -87,18 +71,5 @@ export const orderActions = {
   pushStep: () => ({
     type: ORDER.STEP.PUSH
   }),
-  tryPushStep: (payload, parallelId) => ({
-    type: ORDER.STEP.TRY_PUSH,
-    payload,
-    parallelId
-  })
 
 };
-
-// export const orderStartJob = () => ({
-//   type: ORDER.JOB.START
-// });
-//
-// export const orderRevokeJob = () => ({
-//   type: ORDER.JOB.REVOKE
-// });

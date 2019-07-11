@@ -7,7 +7,7 @@ import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
 import Typography from '@material-ui/core/Typography';
 import { orderActions } from '../../modules/order/action';
-
+import { ORDER_STATUS } from '../../modules/order/model';
 import styles from './styles';
 
 type Props = {
@@ -36,6 +36,9 @@ class HomeOperationList extends React.Component<Props> {
               </Typography>
               <Typography variant="body2" color="textSecondary" component="p">
                 {order.info}
+              </Typography>
+              <Typography variant="body2" color="textSecondary" component="p">
+                {order.status || ORDER_STATUS.READY}
               </Typography>
             </CardActionArea>
           </Card>

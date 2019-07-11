@@ -1,8 +1,17 @@
 export default {
   root:{
-    flex:1
+    width:'100%',
+    height:'100%',
+    display: 'flex',
+    flexDirection: 'column'
   },
   contentContainer:{
-    flex:1
+    flex:1,
+  },
+  buttonsContainer:{
+    height:'70px',
+    display:'flex',
+    flexDirection:'row',
+    justifyContent:'space-between'
   }
 }

@@ -15,6 +15,13 @@ export const ORDER_STEP_STATUS = {
   FINISHED: 'ORDER_STEP_STATUS_FINISHED'
 };
 
+export const ORDER_STATUS={
+  READY:'ready',
+  IN_PROGRESS:'in progress',
+  FINISHED:'finished',
+  FAILED:'failed',
+};
+
 export type Step = {
   +name: string,
   info: string,

@@ -1,5 +1,5 @@
-import InputStep from '../InputStep';
-import ScannerStep from '../ScannerStep';
+import InputStep from './InputStep';
+import ScannerStep from './scannerStep';
 
 export default {
   input: {

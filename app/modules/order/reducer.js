@@ -21,7 +21,6 @@ function setStepStatus(state, status) {
       ...currentOrder
     }
   };
-
   const newStep = getStepByIndex(currentProcessingIndex, newState.currentOrder);
   newStep.status = status;
   return {
@@ -35,12 +34,22 @@ function getStepByIndex(index, order) {
   return order.steps && order.steps[index];
 }
 
-function nextIndex(index,order){
-  return index + 1 < order.steps.length ? index + 1 : index
+function nextIndex(index) {
+  return index + 1;
 }
 
-function prevIndex(index){
-  return index - 1 >= 0 ? index - 1 : 0
+function limitIndex(index, order) {
+  if (index < 0) {
+    return 0;
+  }
+  if (index >= order.steps.length) {
+    return order.steps.length - 1;
+  }
+  return index;
+}
+
+function prevIndex(index) {
+  return index - 1;
 }
 
 const orderReducer = {
@@ -59,7 +68,7 @@ const orderReducer = {
 
   [ORDER.STEP.NEXT]: (state) => {
     const { currentViewingIndex, currentOrder } = state;
-    const newIndex = nextIndex(currentViewingIndex,currentOrder);
+    const newIndex = limitIndex(nextIndex(currentViewingIndex), currentOrder);
     return {
       ...state,
       currentViewingIndex: newIndex,
@@ -69,7 +78,7 @@ const orderReducer = {
 
   [ORDER.STEP.PREVIOUS]: (state) => {
     const { currentViewingIndex, currentOrder } = state;
-    const newIndex = prevIndex(currentViewingIndex,currentOrder);
+    const newIndex = limitIndex(prevIndex(currentViewingIndex), currentOrder);
     return {
       ...state,
       currentViewingIndex: newIndex,
@@ -96,7 +105,7 @@ const orderReducer = {
   //
   [ORDER.STEP.PUSH]: (state) => {
     const { currentProcessingIndex, currentOrder, currentViewingStep, currentProcessingStep } = state;
-    const newIndex = nextIndex(currentProcessingIndex,currentOrder);
+    const newIndex = nextIndex(currentProcessingIndex);
     const newProcessingStep = getStepByIndex(newIndex, currentOrder);
     const newState = {
       ...state,
@@ -109,6 +118,7 @@ const orderReducer = {
     }
     return newState;
   }
+  // [ORDER.FINISH]:
 };
 
 export default genReducers(orderReducer, initState);

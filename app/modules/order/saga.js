@@ -1,16 +1,38 @@
 import { take, call, race, fork, select, put } from 'redux-saga/effects';
 import { ORDER_STEP_STATUS } from './model';
 import { ORDER, orderActions } from './action';
-import stepTypes from '../stepTypes';
+import stepTypes from '../steps/stepTypes';
+import { push } from 'connected-react-router';
+
+const mapping = {
+  onOrderFinish:returnHome,
+};
+
+
+function* returnHome(){
+  try {
+    yield put(push('/app'));
+  } catch (e) {
+    console.error('returnHome error', e);
+  }
+}
 
 export default function* root() {
   try {
     while (true) {
       // take trigger action
-      const action = yield take(ORDER.TRIGGER);
+      yield take(ORDER.TRIGGER);
       // do order
-      yield call(doOrder);
+      const { exit, finish, fail } = yield race({
+        exit: call(doOrder),
+        finish: take(ORDER.FINISH),
+        fail: take(ORDER.FAIL)
+      });
       console.log('order finished');
+      if (finish) {
+        yield call(mapping.onOrderFinish);
+      }
+
     }
   } catch (e) {
     console.error(e);
@@ -30,15 +52,14 @@ function* doOrder() {
         throw(new Error(`step type has no handler: ${currentProcessingStep.type}`));
       } else {
         const { next } = yield race({
-          finish: call(stepTypes[currentProcessingStep.type], ORDER, orderActions),
+          exit: call(stepTypes[currentProcessingStep.type], ORDER, orderActions),
           next: take(ORDER.STEP.PUSH)
         });
-        console.log(next);
         if (next) {
           const newState = yield select();
           const { currentProcessingIndex, currentOrder } = newState.order;
           if (currentProcessingIndex >= currentOrder.steps.length) {
-            return;
+            yield put(orderActions.finishOrder());
           }
         }
       }
