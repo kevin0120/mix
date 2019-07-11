@@ -41,7 +41,7 @@ function parseRouteTree(routesObj, parentUrl, filter) {
   return [routeList, renderedRoute];
 }
 
-export default class Routes extends React.Component <Props>{
+export default class Routes extends React.Component <Props> {
 
   render() {
     const { pagesConfig } = this.props;

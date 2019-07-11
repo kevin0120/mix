@@ -29,7 +29,7 @@ export type rActionUserType = {
 
 export default function users(state: array = defaultUsers, action: rActionUserType) {
   switch (action.type) {
-    case USER.LOGIN_SUCCESS: {
+    case USER.LOGIN.SUCCESS: {
       const { uid, name, uuid, avatar, role } = action;
       const img =
         lodash.isNil(avatar) || avatar === '' ? defaultAvatarImg : avatar;
@@ -39,7 +39,7 @@ export default function users(state: array = defaultUsers, action: rActionUserTy
       }
       return [...state, { uid, name, uuid, avatar: img, role }];
     }
-    case USER.LOGOUT_SUCCESS: {
+    case USER.LOGOUT.SUCCESS: {
       const { uid } = action;
       return lodash.remove(state, i => i.name === uid || i.uuid === uid);
     }

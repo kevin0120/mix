@@ -47,7 +47,7 @@ function* authorize(user: string, password: string) {
     const isExisted =
       lodash.some(users, { uuid: u }) || lodash.some(users, { name: u }); // 检测是否已经登录
     if (isExisted) return;
-    
+
     const response = yield call(
       getUserInfo,
       setting.page.odooConnection.odooUrl.value,
@@ -94,11 +94,41 @@ function* logout(action: tAuthLogout): Saga<void> {
   }
 }
 
+const loginMethodMap = {
+  local: loginLocal,
+  online: authorize
+};
+
+function* loginLocal(user, password) {
+  try {
+    const state = yield select();
+    const { localUsers } = state.setting.authorization;
+    const success = !!localUsers[user] && localUsers[user].password === password;
+
+    if (success) {
+      const userInfo: tAuthUserInfo = {
+        uid: localUsers[user].uid,
+        name: user,
+        uuid: localUsers[user].uuid,
+        avatar: localUsers[user].avatar,
+        role: localUsers[user].role
+      };
+      yield put(loginSuccess(userInfo));
+      yield put(push('/app'));
+
+    }
+
+  } catch (e) {
+    console.error(e);
+    yield put(setNewNotification('local login error', e));
+  }
+}
+
 export function* loginFlow(): Saga<void> {
   try {
     while (true) {
-      const { user, password }: tAuthInfo = yield take(USER.LOGIN_REQUEST);
-      yield fork(authorize, user, password);
+      const { user, password, method }: tAuthInfo = yield take(USER.LOGIN.REQUEST);
+      yield fork(loginMethodMap[method], user, password);
     }
   } catch (e) {
     console.error(e);
@@ -106,5 +136,5 @@ export function* loginFlow(): Saga<void> {
 }
 
 export function* logoutFlow(): Saga<void> {
-  yield takeEvery(USER.LOGOUT, logout);
+  yield takeEvery(USER.LOGOUT.REQUEST, logout);
 }

@@ -38,28 +38,6 @@ const styles = theme => ({
     backgroundImage:
       'linear-gradient(45deg, rgba(150, 216, 255, 0.5) 10%, rgba(150, 160, 187, 0.7))'
   },
-  container: {
-    padding: '40px 10px',
-    textAlign: 'center',
-    overflowY: 'auto',
-    marginTop: 0
-  },
-  card: {
-    width: '22vw',
-    maxWidth: '280px',
-    maxHeight: '320px',
-    borderRadius: '4px'
-  },
-  cardActionArea: {
-    height: '100%'
-  },
-  cardGridItem: {
-    padding: '1vw'
-  },
-  cardContent: {
-    position: 'relative',
-    padding: '50px 10px'
-  },
   fabLeft: {
     fontSize: 20,
     position: 'absolute',
@@ -85,23 +63,6 @@ const styles = theme => ({
       duration: theme.transitions.duration.leavingScreen,
       easing: theme.transitions.easing.sharp
     })
-  },
-  media: {
-    background: '#ddd',
-    paddingTop: '50%', // 16:9
-    width: '100%'
-  },
-  title: {
-    fontSize: '34px',
-    color: '#fff',
-    marginBottom: '20px'
-  },
-  subTitle: {
-    fontSize: '16px',
-    color: '#fff'
-  },
-  icon: {
-    fontSize: '50px'
   },
   btnWrap: {
     position: 'relative',

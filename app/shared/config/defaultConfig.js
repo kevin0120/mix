@@ -4,8 +4,7 @@ const defaultConfigs = {
   version: 'v0.1',
   pages: {
     app: {
-      working: ['user', 'admin'],
-      // stepWorking: ['user', 'admin'],
+      working: ['user', 'admin']
       // viewer: ['user', 'admin'],
       // order: ['user', 'admin'],
       // preference: ['user', 'admin'],
@@ -18,13 +17,20 @@ const defaultConfigs = {
       login: ['user', 'admin']
     }
   },
-  users:{
-    'userName':{
-      password:'password',
-      role:'admin',
-      uuid:'uuid'
-    }
+  authorization: {
+    localUsers: {
+      'userName': {
+        password: 'password',
+        role: 'admin',
+        uuid: 'uuid',
+        uid: 'uid',
+        avatar: ''
+      }
+    },
+    // verify: 'local',//'online
+    maxUsers: 0 // 0:no limit
   },
+
 
   page: {
     // 配置页面不同的导航页

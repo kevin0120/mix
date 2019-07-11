@@ -5,15 +5,14 @@ import PropTypes from 'prop-types';
 // @material-ui/core components
 import withStyles from '@material-ui/core/styles/withStyles';
 
+
+import { connect } from 'react-redux';
 // core components
 import PagesHeader from '../../components/Header/PagesHeader';
 import Footer from '../../components/Footer/Footer';
-
 import pagesStyle from '../../common/jss/layouts/pagesStyle';
-
 import bgImage from '../../../resources/imgs/lock.jpeg';
-
-// var ps;
+import { loginRequest } from '../../modules/user/action';
 
 class Pages extends React.Component {
   componentDidMount() {
@@ -21,12 +20,12 @@ class Pages extends React.Component {
   }
 
   render() {
-    const { classes, children, ...rest } = this.props;
+    const { classes, children, login, ...rest } = this.props;
     console.log(children);
     const anchor = `${classes.a} ${classes.whiteColor}`;
     return (
       <div>
-        <PagesHeader {...rest} />
+        <PagesHeader login={() => login('userName', 'password', 'local')} {...rest} />
         <div className={classes.wrapper}>
           <div
             className={classes.fullPage}
@@ -55,4 +54,14 @@ Pages.propTypes = {
   classes: PropTypes.shape({}).isRequired
 };
 
-export default withStyles(pagesStyle)(Pages);
+const mapState = (state, props) => {
+  return {
+    ...props
+
+  };
+};
+const mapDispatch = {
+  login: loginRequest
+};
+
+export default withStyles(pagesStyle)(connect(mapState, mapDispatch)(Pages));

@@ -2,7 +2,7 @@
 // @flow
 import { put, call, fork } from 'redux-saga/effects';
 import { channel } from 'redux-saga';
-import { doUserAuth, userLogOut } from '../user/action';
+import { loginRequest, logoutRequest } from '../user/action';
 import { watch } from '../indexSaga';
 import {CARD_AUTH} from './action';
 
@@ -63,7 +63,7 @@ export function* cardAuthFlow() {
 
 export function* onCardRemoved() {
   try {
-    yield put(userLogOut('112233')); // 默认uuid 112233 登出
+    yield put(logoutRequest('112233')); // 默认uuid 112233 登出
   } catch (e) {
     console.error(e);
   }

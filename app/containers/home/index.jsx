@@ -25,11 +25,13 @@ import ShutdownDiag from '../../components/ShutDownDiag';
 import styles from './styles';
 import { shutDownAction } from '../../modules/power/action';
 import { setNewNotification } from '../../modules/notification/action';
+import { logoutRequest } from '../../modules/user/action';
+import PageEntrance from '../../components/pageEntrance';
 
 const lodash = require('lodash');
 
 const mapStateToProps = (state, ownProps) => ({
-  usersInfo: state.users,
+  users: state.users,
   authEnable: state.setting.systemSettings.authEnable,
   pagesConfig: state.setting.pages,
   ...ownProps
@@ -38,6 +40,7 @@ const mapStateToProps = (state, ownProps) => ({
 const mapDispatchToProps = {
   doPush: push,
   notification: setNewNotification,
+  logout:logoutRequest,
   // OpenShutdown
   shutDown: shutDownAction
 };
@@ -70,60 +73,32 @@ class ConnectedWelcome extends React.Component {
   };
 
   handleLogOut = () => {
-    const { userLogOut } = this.props;
-    userLogOut();
+    const { logout } = this.props;
+    logout();
   };
 
   render() {
-    const { classes, authEnable, doPush, notification, usersInfo, childRoutes } = this.props;
+    const { classes, authEnable, doPush, notification, users, childRoutes } = this.props;
     const { showDiag } = this.state;
     const fabRightClassName = classNames(classes.fabRight);
     const fabLeftClassName = classNames(classes.fabLeft);
-    const { role } = usersInfo[0];
     return (
       <I18n ns="translations">
         {t => (
           <div className={classes.root}>
-            <Grid container className={classes.container} justify="center">
-              {childRoutes.map(route => route?(
-                <Grid key={route.name} item className={classes.cardGridItem}>
-                  <Card
-                    key={route.name}
-                    className={classes.card}
-                    style={{ backgroundColor: route.color }}
-                  >
-                    <CardActionArea
-                      // component={Link}
-                      // to={route.url}
-                      onClick={() => {
-                        console.log(route, role);
-                        if (route.role && lodash.includes(route.role, role)) {
-
-                          doPush(route.url);
-                        } else {
-                          notification('error', '没有访问权限');
-                        }
-                      }}
-                      className={classes.cardActionArea}
-                    >
-                      <div
-                        className={classes.media}
-                        style={{ backgroundImage: `url(${route.image})`, backgroundSize: 'cover' }}
-                      />
-                      <CardContent className={classes.cardContent}>
-                        <div className={classes.iconWrap}>
-                          <route.icon className={classes.icon}/>
-                        </div>
-                        <h1 className={classes.title}>{t(route.title)}</h1>
-                        <p className={classes.subTitle}>
-                          {t(route.title, { lng: 'en' })}
-                        </p>
-                      </CardContent>
-                    </CardActionArea>
-                  </Card>
-                </Grid>
-              ):null)}
-            </Grid>
+            <PageEntrance
+              type="card"
+              routes={childRoutes}
+              onItemClick={(route) => {
+                if (!route.role || route.role.length === 0 || users.some((u) => lodash.includes(route.role, u.role))) {
+                  doPush(route.url);
+                } else {
+                  notification('error', '没有访问权限');
+                }
+              }}
+              navigationClassName={classes.BottomNavigation}
+              ActionClassName={classes.BottomNavigationIcon}
+            />
             <Button
               round
               size="lg"

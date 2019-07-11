@@ -4,12 +4,8 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 /* eslint-disable no-unused-vars */
-import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
-import Slide from '@material-ui/core/Slide';
 import { I18n, Trans } from 'react-i18next';
 
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import IconButton from '@material-ui/core/IconButton';
@@ -22,8 +18,6 @@ import Divider from '@material-ui/core/Divider';
 import Flag from 'react-flags';
 import Clock from 'react-live-clock';
 
-import BottomNavigation from '@material-ui/core/BottomNavigation';
-import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
 import { push } from 'connected-react-router';
 import Notify from '../../components/Notify';
 import SysInfo from '../../components/sysInfo';
@@ -38,6 +32,9 @@ import Button from '../../components/CustomButtons/Button';
 import { setNewNotification } from '../../modules/notification/action';
 import HomeOperationList from '../HomeOperationList';
 import Avatar from '../../components/Avatar';
+import { logoutRequest } from '../../modules/user/action';
+import PageEntrance from '../../components/pageEntrance';
+
 const lodash = require('lodash');
 
 /* eslint-disable react/prefer-stateless-function */
@@ -129,16 +126,18 @@ class ConnectedLayout extends React.PureComponent {
       classes,
       workMode,
       healthCheckResults,
-      usersInfo,
+      users,
       doPush,
       notification,
       path,
       children,
       childRoutes,
-      self
+      self,
+      logout
     } = this.props;
+    const { DefaultContent } = self;
     const isAutoMode = workMode === 'auto';
-    const { name, avatar, role } = usersInfo[0];
+    // const { name, avatar, role } = users[0];
     if (
       lodash.includes(['Ready', 'PreDoing', 'Timeout', 'Init'], orderStatus)
     // || !isAutoMode
@@ -183,21 +182,17 @@ class ConnectedLayout extends React.PureComponent {
             {/* <SubCompontents /> */}
             <Notify/>
             <div style={{ height: 'calc(100% - 64px)' }}>
-              {path === '/app' ? <HomeOperationList childRoutes={childRoutes}/> : children}
+              {path === '/app' ? <DefaultContent childRoutes={childRoutes}/> : children}
             </div>
             <div className={classes.appBar}>
-              <Avatar className={classes.menuBtnWrapAvatar} avatars={[avatar,avatar]} />
-              {/*<div className={classes.menuBtnWrapAvatar}>*/}
-              {/*  <img*/}
-              {/*    alt={name}*/}
-              {/*    src={avatar}*/}
-              {/*    className={`${classes.imgRaised} ${classes.imgFluid}`}*/}
-              {/*    style={{ minHeight: '100%', minWidth: '100%' }}*/}
-              {/*  />*/}
+              <Avatar
+                className={classes.menuBtnWrapAvatar}
+                users={users}
+                onClickAvatar={logout}
+              />
+              {/*<div className={classes.menuUserName}>*/}
+              {/*  <p>{name}</p>*/}
               {/*</div>*/}
-              <div className={classes.menuUserName}>
-                <p>{name}</p>
-              </div>
               <div className={classes.menuClock}>
                 <Clock
                   className={classes.timeContent}
@@ -206,32 +201,23 @@ class ConnectedLayout extends React.PureComponent {
                   timezone="Asia/Shanghai"
                 />
               </div>
-              <BottomNavigation
+              <PageEntrance
+                type="navigation"
                 value={path}
-                showLabels
-                className={classes.BottomNavigation}
-              >
-                {[self, ...childRoutes].map(route => route ? (
-                  <BottomNavigationAction
-                    key={route.name}
-                    value={route.url}
-                    onClick={() => {
-                      if (disabled) {
-                        return;
-                      }
-                      if (!route.role || route.role.length === 0 || lodash.includes(route.role, role)) {
-                        doPush(route.url);
-                      } else {
-                        notification('error', '没有访问权限');
-                      }
-                    }}
-                    label={t(route.title)}
-                    icon={<route.icon/>}
-                    className={classes.BottomNavigationIcon}
-                    // disabled={disabled}
-                  />
-                ) : null)}
-              </BottomNavigation>
+                routes={[self, ...childRoutes]}
+                onItemClick={(route) => {
+                  if (disabled) {
+                    return;
+                  }
+                  if (!route.role || route.role.length === 0 || users.some((u) => lodash.includes(route.role, u.role))) {
+                    doPush(route.url);
+                  } else {
+                    notification('error', '没有访问权限');
+                  }
+                }}
+                navigationClassName={classes.BottomNavigation}
+                ActionClassName={classes.BottomNavigationIcon}
+              />
               {/* <Button */}
               {/* onClick={this.handleSysInfo} */}
               {/* className={`${statusClassName}`} */}
@@ -359,14 +345,14 @@ class ConnectedLayout extends React.PureComponent {
 
 ConnectedLayout.propTypes = {
   classes: PropTypes.shape({}).isRequired,
-  usersInfo: PropTypes.array.isRequired,
+  users: PropTypes.array.isRequired,
   orderStatus: PropTypes.string.isRequired,
   workMode: PropTypes.string.isRequired,
   healthCheckResults: PropTypes.shape({}).isRequired
 };
 
 const mapStateToProps = (state, ownProps) => ({
-  usersInfo: state.users,
+  users: state.users,
   orderStatus: state.operations.operationStatus,
   workMode: state.workMode.workMode,
   healthCheckResults: state.healthCheckResults,
@@ -376,7 +362,8 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = {
   doPush: push,
-  notification: setNewNotification
+  notification: setNewNotification,
+  logout: logoutRequest
 };
 
 export default withStyles(styles, { withTheme: true })(

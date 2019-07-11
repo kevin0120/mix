@@ -19,6 +19,9 @@ import Curve from './curve';
 import Viewer from './viewer';
 import Layout from './appLayout';
 import WorkingTemplate from './workingTemplate'
+import HomeOperationList from './HomeOperationList';
+import HomePage from './home';
+
 // imgs
 import helpImg from '../../resources/imgs/help.png';
 import viewerImg from '../../resources/imgs/craft.jpeg';
@@ -40,6 +43,7 @@ const shade = 500;
 export default {
   '/app': {
     component: Layout,
+    DefaultContent: HomeOperationList,
     title: 'main.home',
       icon: icons.Home,
       color: colors.indigo[shade],
@@ -51,14 +55,6 @@ export default {
       image: WorkingImg,
       exact: true
     },
-    // '/stepWorking': {
-    //   title: 'main.operation',
-    //   component: StepWorking,
-    //   icon: icons.Build,
-    //   color: colors.cyan[shade],
-    //   image: WorkingImg,
-    //   exact: true
-    // },
     '/viewer': {
       title: 'main.operationViewer',
       component: Viewer,

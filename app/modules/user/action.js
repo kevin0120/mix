@@ -3,10 +3,14 @@
 import type { rActionUserType } from './reducer';
 
 export const USER = {
-  LOGIN_REQUEST: 'USER.LOGIN_REQUEST',
-  LOGIN_SUCCESS: 'USER.LOGIN_SUCCESS',
-  LOGOUT: 'USER.LOGOUT',
-  LOGOUT_SUCCESS: 'USER.LOGOUT_SUCCESS'
+  LOGIN: {
+    REQUEST: 'USER_LOGIN_REQUEST',
+    SUCCESS: 'USER_LOGIN_SUCCESS'
+  },
+  LOGOUT: {
+    REQUEST: 'USER_LOGOUT_REQUEST',
+    SUCCESS: 'USER_LOGOUT_SUCCESS'
+  }
 };
 
 type tAuthLogin = {
@@ -14,7 +18,6 @@ type tAuthLogin = {
   +user: string,
   +password: string
 };
-
 
 export type tAuthUserInfo = {
   +name: string,
@@ -24,31 +27,33 @@ export type tAuthUserInfo = {
   +role: string
 };
 
-export function doUserAuth(user: string = '', password: string = ''): tAuthLogin {
+export function loginRequest(user: string = '', password: string = '', method: string = 'local'): tAuthLogin {
   return {
-    type: USER.LOGIN_REQUEST,
+    type: USER.LOGIN.REQUEST,
     user,
-    password
+    password,
+    method
   };
 }
 
 export function loginSuccess(data: tAuthUserInfo): rActionUserType {
   return {
-    type: USER.LOGIN_REQUEST,
+    type: USER.LOGIN.SUCCESS,
     ...data
+  };
+}
+
+export function logoutRequest(user: string = '') {
+  return {
+    type: USER.LOGOUT.REQUEST,
+    user
   };
 }
 
 export function logoutSuccess(data: tAuthUserInfo): rActionUserType {
   return {
-    type: USER.LOGOUT_SUCCESS,
+    type: USER.LOGOUT.SUCCESS,
     ...data
   };
 }
 
-export function userLogOut(user: string = '') {
-  return {
-    type: USER.LOGOUT,
-    user
-  };
-}

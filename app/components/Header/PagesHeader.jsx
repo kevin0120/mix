@@ -114,7 +114,7 @@ class PagesHeader extends React.Component {
   // }
 
   render() {
-    const { classes, color, ssid, signal, batteryPercentage } = this.props;
+    const { classes, color,login, ssid, signal, batteryPercentage } = this.props;
     const { open } = this.state;
     const appBarClasses = cx({
       [` ${classes[color]}`]: color
@@ -122,7 +122,7 @@ class PagesHeader extends React.Component {
     const list = (
       <List className={classes.list}>
         <ListItem className={classes.listItem}>
-          <NavLink to="/app" className={classes.navLink}>
+          <div onClick={()=>login()} className={classes.navLink}>
             <ListItemIcon className={classes.listItemIcon}>
               <Dashboard/>
             </ListItemIcon>
@@ -131,7 +131,7 @@ class PagesHeader extends React.Component {
               disableTypography
               className={classes.listItemText}
             />
-          </NavLink>
+          </div>
         </ListItem>
       </List>
     );
@@ -225,7 +225,8 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = {
   doNetworkCheck: networkCheck,
   doNetworkSignal: networkSignal,
-  doBatteryCheck: batteryCheck
+  doBatteryCheck: batteryCheck,
+
 };
 
 const ConnectedPagesHeader = connect(
