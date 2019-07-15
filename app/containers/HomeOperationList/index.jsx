@@ -24,25 +24,39 @@ class HomeOperationList extends React.Component<Props> {
     doPush('/app/working');
   };
 
+  renderOrders = (orders, size) => {
+    const { classes } = this.props;
+    return orders.map((order) => <Grid item xs={size} key={order.name} >
+      <Card>
+        <CardActionArea className={classes.orderCard} onClick={() => this.onCardClick(order)}>
+          <Typography gutterBottom variant="h5" component="h2">
+            {order.name}
+          </Typography>
+          <Typography variant="body2" color="textSecondary" component="p">
+            {order.info}
+          </Typography>
+          <Typography variant="body2" color="textSecondary" component="p">
+            {order.status || ORDER_STATUS.READY}
+          </Typography>
+        </CardActionArea>
+      </Card>
+    </Grid>);
+  };
+
   render() {
     const { classes, orderList } = this.props;
     return <div className={classes.root}>
-      <Grid container className={classes.container} justify="center" spacing={5}>
-        {orderList.map((order) => <Grid item xs={3} key={order.name}>
-          <Card>
-            <CardActionArea className={classes.orderCard} onClick={() => this.onCardClick(order)}>
-              <Typography gutterBottom variant="h5" component="h2">
-                {order.name}
-              </Typography>
-              <Typography variant="body2" color="textSecondary" component="p">
-                {order.info}
-              </Typography>
-              <Typography variant="body2" color="textSecondary" component="p">
-                {order.status || ORDER_STATUS.READY}
-              </Typography>
-            </CardActionArea>
-          </Card>
-        </Grid>)}
+      <Grid container className={classes.container} justify="center" spacing={4}>
+        <Grid item container xs={6} spacing={1} alignItems={'flex-start'} alignContent={'flex-start'} justify={'flex-start' } direction={'row'}>
+          {this.renderOrders(orderList, 6)}
+        </Grid>
+        <Grid item container xs={3} spacing={1} alignItems={'flex-start'} alignContent={'flex-start'} justify={'flex-start'} direction={'row'}>
+          {this.renderOrders(orderList, 12)}
+
+        </Grid>
+        <Grid item container xs={3} spacing={1} alignItems={'flex-start'} alignContent={'flex-start'} justify={'flex-start'} direction={'row'}>
+          {this.renderOrders(orderList, 12)}
+        </Grid>
       </Grid>
     </div>;
   }
