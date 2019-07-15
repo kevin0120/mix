@@ -257,7 +257,6 @@
     "@fortawesome/fontawesome-free": "^5.2.0",
     "@material-ui/core": "^4.2.0",
     "@material-ui/icons": "^4.2.1",
-    "@material-ui/styles": "^4.2.0",
     "@oznu/ws-connect": "^0.0.4",
     "axios": "^0.18.0",
     "axios-retry": "^3.1.1",

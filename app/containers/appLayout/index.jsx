@@ -185,7 +185,7 @@ class ConnectedLayout extends React.PureComponent {
             {/* <SubCompontents /> */}
 
             <Notify/>
-            <div style={{ height: 'calc(100% - 64px)' }}>
+            <div style={{ height: 'calc(100% - 64px)', display: 'flex' }}>
               <LayoutDrawer/>
               {path === '/app' ? <DefaultContent childRoutes={childRoutes}/> : children}
             </div>
