@@ -43,6 +43,7 @@ const shade = 500;
 export default {
   '/app': {
     component: Layout,
+    navBarContents:['clock','pages','language'],
     DefaultContent: HomeOperationList,
     title: 'main.home',
       icon: icons.Home,

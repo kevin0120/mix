@@ -34,6 +34,9 @@ import HomeOperationList from '../HomeOperationList';
 import Avatar from '../../components/Avatar';
 import { logoutRequest } from '../../modules/user/action';
 import PageEntrance from '../../components/pageEntrance';
+import NavBar from '../../components/NavBar';
+
+import LayoutDrawer from '../../components/LayoutDrawer';
 
 const lodash = require('lodash');
 
@@ -172,168 +175,25 @@ class ConnectedLayout extends React.PureComponent {
             {/* <div */}
             {/* tabIndex={0} */}
             {/* role="button" */}
-            {/* aria-hidden */}
+            {/* aria-hidden *}
             {/* onClick={() => this.toggleMenu(false)} */}
             {/* > */}
-            {/* <NavBar /> */}
+            {/*<NavBar/>*/}
             {/* </div> */}
             {/* </SwipeableDrawer> */}
             {/* </ClickAwayListener> */}
             {/* <SubCompontents /> */}
+
             <Notify/>
             <div style={{ height: 'calc(100% - 64px)' }}>
+              <LayoutDrawer/>
               {path === '/app' ? <DefaultContent childRoutes={childRoutes}/> : children}
             </div>
-            <div className={classes.appBar}>
-              <Avatar
-                className={classes.menuBtnWrapAvatar}
-                users={users}
-                onClickAvatar={logout}
-              />
-              {/*<div className={classes.menuUserName}>*/}
-              {/*  <p>{name}</p>*/}
-              {/*</div>*/}
-              <div className={classes.menuClock}>
-                <Clock
-                  className={classes.timeContent}
-                  format="HH:mm:ss"
-                  ticking
-                  timezone="Asia/Shanghai"
-                />
-              </div>
-              <PageEntrance
-                type="navigation"
-                value={path}
-                routes={[self, ...childRoutes]}
-                onItemClick={(route) => {
-                  if (disabled) {
-                    return;
-                  }
-                  if (!route.role || route.role.length === 0 || users.some((u) => lodash.includes(route.role, u.role))) {
-                    doPush(route.url);
-                  } else {
-                    notification('error', '没有访问权限');
-                  }
-                }}
-                navigationClassName={classes.BottomNavigation}
-                ActionClassName={classes.BottomNavigationIcon}
-              />
-              {/* <Button */}
-              {/* onClick={this.handleSysInfo} */}
-              {/* className={`${statusClassName}`} */}
-              {/* > */}
-              {/* {'系统'} */}
-              {/* </Button> */}
-              <Button
-                onClick={this.handleStatus}
-                className={`${statusClassName}`}
-              >
-                {'连接'}
-              </Button>
-
-              <IconButton
-                aria-owns={open ? 'menu-appbar' : null}
-                aria-haspopup="true"
-                onClick={this.handleMenu}
-                color="inherit"
-                disabled={disabled}
-              >
-                <Language/>
-              </IconButton>
-              {/* <Menu */}
-              {/* id="menu-sysInfo" */}
-              {/* anchorEl={showSysInfo} */}
-              {/* anchorOrigin={{ */}
-              {/* vertical: 'top', */}
-              {/* horizontal: 'left' */}
-              {/* }} */}
-              {/* transformOrigin={{ */}
-              {/* vertical: 'bottom', */}
-              {/* horizontal: 'left' */}
-              {/* }} */}
-              {/* open={openSysInfo} */}
-              {/* onClose={this.handleCloseSysInfo} */}
-              {/* TransitionComponent={Fade} */}
-              {/* classes={{ */}
-              {/* paper: classes.popover */}
-              {/* }} */}
-              {/* > */}
-              {/* <SysInfo /> */}
-              {/* </Menu> */}
-              <Menu
-                id="menu-healthz"
-                anchorEl={showStatus}
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'left'
-                }}
-                transformOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                open={openStatusMenu}
-                onClose={this.handleCloseStatus}
-                TransitionComponent={Fade}
-                classes={{
-                  paper: classes.popover
-                }}
-              >
-                <HealthCheck healthCheckResults={healthCheckResults}/>
-              </Menu>
-              <Menu
-                id="menu-i18n"
-                anchorEl={anchorEl}
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'left'
-                }}
-                transformOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                open={open}
-                onClose={this.handleClose}
-                TransitionComponent={Fade}
-              >
-                <MenuItem
-                  className={classes.menuItem}
-                  onClick={() => this.handleChangeLng('en')}
-                >
-                  <ListItemIcon className={classes.icon}>
-                    <Flag
-                      name="GB"
-                      format="png"
-                      pngSize={24}
-                      basePath="./flags"
-                    />
-                  </ListItemIcon>
-                  <ListItemText
-                    classes={{ primary: classes.primary }}
-                    inset
-                    primary={t('Language.en')}
-                  />
-                </MenuItem>
-                <Divider/>
-                <MenuItem
-                  className={classes.menuItem}
-                  onClick={() => this.handleChangeLng('zh_CN')}
-                >
-                  <ListItemIcon className={classes.icon}>
-                    <Flag
-                      name="CN"
-                      format="png"
-                      pngSize={24}
-                      basePath="./flags"
-                    />
-                  </ListItemIcon>
-                  <ListItemText
-                    classes={{ primary: classes.primary }}
-                    inset
-                    primary={t('Language.zh_CN')}
-                  />
-                </MenuItem>
-              </Menu>
-            </div>
+            <NavBar
+              contents={self.navBarContents}
+              self={self}
+              childRoutes={childRoutes}
+            />
           </React.Fragment>
         )}
       </I18n>
