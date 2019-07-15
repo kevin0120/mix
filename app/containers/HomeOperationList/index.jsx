@@ -27,7 +27,7 @@ class HomeOperationList extends React.Component<Props> {
   render() {
     const { classes, orderList } = this.props;
     return <div className={classes.root}>
-      <Grid container className={classes.container} justify="center" spacing={24}>
+      <Grid container className={classes.container} justify="center" spacing={5}>
         {orderList.map((order) => <Grid item xs={3} key={order.name}>
           <Card>
             <CardActionArea className={classes.orderCard} onClick={() => this.onCardClick(order)}>

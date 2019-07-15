@@ -103,7 +103,7 @@ export default function withKeyboard(SubComponents) {
       );
     };
 
-    Transition = props => <Slide direction="down" {...props} />;
+    Transition = React.forwardRef((props, ref) => <Slide direction="down" {...props} ref={ref}/>);
 
     render() {
       const { classes, ...restProps } = this.props;
@@ -159,7 +159,7 @@ export default function withKeyboard(SubComponents) {
                               });
                             }}
                           >
-                            <Clear />
+                            <Clear/>
                           </IconButton>
                         </InputAdornment>
                       )
@@ -169,7 +169,7 @@ export default function withKeyboard(SubComponents) {
                 <DialogActions
                   className={`${classes.modalFooter} ${
                     classes.modalFooterCenter
-                  }`}
+                    }`}
                 >
                   <Button
                     // className={classes.modalFooterCenter}

@@ -52,7 +52,6 @@ const mapDispatchToProps = dispatch =>
 class ConnectedResultDialog extends React.Component {
   constructor(props) {
     super(props);
-    this.Transition = this.Transition.bind(this);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -60,7 +59,7 @@ class ConnectedResultDialog extends React.Component {
     return nextProps.show !== show;
   }
 
-  Transition = props => <Slide direction="up" {...props} />;
+  Transition = React.forwardRef((props,ref) => <Slide direction="up" {...props} ref={ref} />);
 
   handleClose = e => {
     e.preventDefault();
@@ -172,8 +171,7 @@ class ConnectedResultDialog extends React.Component {
                   </GridItem>
                 </GridContainer>
               </div>
-              {showNextVehicle ? (
-                <div>
+              {showNextVehicle ? (<div>
                   <GridContainer className={classes.root}>
                     <GridItem xs={12}>
                       <Card>

@@ -7,7 +7,6 @@ import styles from './styles';
 import { scannerStepAction } from '../../../modules/steps/scannerStep/action';
 import QRCode from './qrcode-scan.svg';
 
-console.log(QRCode);
 type Props = {
   classes: {},
   submit: ()=>{}

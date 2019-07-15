@@ -20,7 +20,7 @@ export default theme => ({
     marginLeft: 20
   },
   leftIcon: {
-    marginRight: theme.spacing.unit
+    marginRight: theme.spacing(1)
   },
   button: {
     margin: '10px 20px'

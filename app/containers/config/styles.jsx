@@ -14,7 +14,7 @@ export default theme => ({
     flex: 1,
     // backgroundColor: theme.palette.background.default,
     background: '#f2f2f2',
-    padding: theme.spacing.unit * 2,
+    padding: theme.spacing(2),
     minWidth: 0, // So the Typography noWrap works
     height: '100%',
     paddingTop: '64px'

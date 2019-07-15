@@ -41,13 +41,13 @@ const styles = theme => ({
   fabLeft: {
     fontSize: 20,
     position: 'absolute',
-    bottom: theme.spacing.unit * 10,
-    left: theme.spacing.unit * 2
+    bottom: theme.spacing(10),
+    left: theme.spacing(2)
   },
   fabRight: {
     position: 'absolute',
-    bottom: theme.spacing.unit * 10,
-    right: theme.spacing.unit * 2,
+    bottom: theme.spacing(10),
+    right: theme.spacing(2),
     fontSize: 20
   },
   fabMoveUp: {
@@ -84,7 +84,7 @@ const styles = theme => ({
   },
   focusVisible: {},
   extendedIcon: {
-    marginRight: theme.spacing.unit
+    marginRight: theme.spacing()
   },
   itemButton: {
     display: 'flex',
@@ -94,8 +94,8 @@ const styles = theme => ({
   },
   navTitle: {
     position: 'relative',
-    padding: `${theme.spacing.unit * 2}px ${theme.spacing.unit * 4}px ${theme
-      .spacing.unit + 6}px`
+    padding: `${theme.spacing(2)}px ${theme.spacing(4)}px ${theme
+      .spacing(1) + 6}px`
   },
   titleMarked: {
     height: 3,

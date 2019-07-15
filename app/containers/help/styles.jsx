@@ -10,7 +10,7 @@ export default theme => ({
   content: {
     flexGrow: 1,
     background: '#f2f2f2',
-    padding: theme.spacing.unit * 3,
+    padding: theme.spacing(3),
     minWidth: 0 // So the Typography noWrap works
   },
   toolbar: theme.mixins.toolbar,

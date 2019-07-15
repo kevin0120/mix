@@ -98,18 +98,18 @@ const withstyles = theme => ({
   },
   fab: {
     position: 'absolute',
-    bottom: theme.spacing.unit * 2,
-    right: theme.spacing.unit * 2,
+    bottom: theme.spacing(2),
+    right: theme.spacing(2),
     width: '150px'
   },
   fabOEE: {
     position: 'fixed',
-    bottom: theme.spacing.unit * 15,
-    right: theme.spacing.unit * 2,
+    bottom: theme.spacing(2),
+    right: theme.spacing(2),
     width: '150px'
   },
   extendedIcon: {
-    marginRight: theme.spacing.unit
+    marginRight: theme.spacing()
   },
   cardDescription: {
     ...description,
@@ -461,8 +461,8 @@ class ConnectedWorking extends React.Component {
     return (
       <I18n ns="translations">
         {t => (
-          <Grid container spacing={16} className={classes.root} justify="center">
-            <Grid item xs={9} container spacing={8}>
+          <Grid container spacing={1} className={classes.root} justify="center">
+            <Grid item xs={9} container spacing={1}>
               {showResultDiag ? (
                 <Grid item xs={2} style={{ height: '13%' }}>
                   <Paper
@@ -552,7 +552,7 @@ class ConnectedWorking extends React.Component {
                 </Paper>
               </Grid>
             </Grid>
-            <Grid item xs={3} container spacing={8} alignContent="flex-start" alignItems="flex-start">
+            <Grid item xs={3} container spacing={1} alignContent="flex-start" alignItems="flex-start">
               <Grid item xs={12} style={{ height: '18%' }}>
                 <Paper className={classes.CutDownPaper}>
                   <div className={classes.CountDownContainer}>

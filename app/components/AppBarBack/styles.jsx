@@ -13,6 +13,6 @@ export default theme => ({
     justifyContent: 'space-around'
   },
   leftIcon: {
-    marginRight: theme.spacing.unit
+    marginRight: theme.spacing(1)
   }
 });
