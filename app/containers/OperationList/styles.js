@@ -24,13 +24,13 @@ export default (theme) => ({
     height: cardHeight,
     display:'flex',
     flexDirection:'row',
-    justifyContent:'flex-start'
+    justifyContent:'flex-start',
   },
   bgOdd: {
-    backgroundColor: 'rgb(135,135,135)'
+    backgroundColor: '#747474'
   },
   bgEven: {
-    backgroundColor: 'rgb(143,143,143)'
+    backgroundColor: '#7c7c7c'
   },
   image: {
     height:cardHeight,

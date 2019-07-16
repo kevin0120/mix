@@ -24,14 +24,14 @@ const renderStepContents = (step, isCurrent) => {
   }
 };
 
-const renderSteps = (steps, currentStep, onClick) => (
-  <Stepper nonLinear activeStep={currentStep}>
+const renderSteps = (steps, currentStep, onClick, classes) => (
+  <Stepper nonLinear activeStep={currentStep} orientation="vertical" className={classes.stepper}>
     {steps.map((s, id) => {
       const stepProps = {};
       const labelProps = {};
       return (
         <Step key={s.name} {...stepProps}>
-          <StepButton completed={s.status === 'finish'} onClick={() => onClick(id)}>
+          <StepButton completed={s.status === 'finish'} onClick={() => onClick(id)} className={classes.stepButton}>
             <StepLabel {...labelProps}>{s.name}</StepLabel>
           </StepButton>
         </Step>
@@ -40,21 +40,35 @@ const renderSteps = (steps, currentStep, onClick) => (
   </Stepper>
 );
 
+const renderTimer = () => 'here is a timer';
+
 function StepWorking(props) {
   const { order, next, previous, jumpTo } = props;
   const classes = makeStyles(styles)();
 
   return (
     <div className={classes.root}>
-      {(currentOrder(order) &&
-        currentOrder(order).steps &&
-        renderSteps(orderSteps(order), viewingIndex(order), jumpTo)) || null}
-      <div className={classes.buttonsContainer}>
-        <Button type="button" onClick={() => previous()}>view previous</Button>
-        <Button type="button" onClick={() => next()}>view next</Button>
+      <div className={classes.leftContainer}>
+        <div className={classes.orderInfoContainer}>
+        </div>
+        <div className={classes.buttonsContainer}>
+            <Button type="button" onClick={() => previous()}>view previous</Button>
+            <Button type="button" onClick={() => next()}>view next</Button>
+        </div>
+
+        <div className={classes.contentContainer}>
+          {renderStepContents(viewingStep(order), viewingStep(order) === processingStep(order))}
+        </div>
       </div>
-      <div className={classes.contentContainer}>
-        {renderStepContents(viewingStep(order), viewingStep(order) === processingStep(order))}
+      <div className={classes.rightContainer}>
+        <div className={classes.timerContainer}>
+          {renderTimer()}
+        </div>
+        <div className={classes.stepperContainer}>
+          {(currentOrder(order) &&
+            currentOrder(order).steps &&
+            renderSteps(orderSteps(order), viewingIndex(order), jumpTo, classes)) || null}
+        </div>
       </div>
     </div>
   );
