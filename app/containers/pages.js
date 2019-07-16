@@ -143,12 +143,11 @@ const pages = {
 
 export const getContentByUrl = (url) => {
   const arr = url.split('/').filter((u) => u !== '');
-  console.log(arr);
   const page = arr.reduce((p, r) => (p && p[`/${r}`]) || null, pages);
-  console.log(page);
   return page && {
     ...page,
-    url
+    url,
+    name:url.slice(-1)[0]
   };
 };
 

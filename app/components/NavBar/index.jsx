@@ -54,9 +54,9 @@ class ConnectedNavBar extends React.Component<Props> {
       : classes.menuStatusFail;
     const { showSysInfo } = this.state;
     const openSysInfo = Boolean(showSysInfo);
-    return <React.Fragment>
+    return <React.Fragment key={key}>
       <Button
-        key={key}
+
         onClick={this.handleSysInfo}
         className={`${statusClassName}`}
       >
@@ -92,9 +92,9 @@ class ConnectedNavBar extends React.Component<Props> {
     } = this.props;
     const { showStatus } = this.state;
     const openStatusMenu = Boolean(showStatus);
-    return <React.Fragment>
+    return <React.Fragment key={key}>
       <Button
-        key={key}
+
         onClick={this.handleStatus}
         className={`${statusClassName}`}
       >
@@ -127,11 +127,10 @@ class ConnectedNavBar extends React.Component<Props> {
     const { classes, disabled } = this.props;
     const { anchorEl } = this.state;
     const open = Boolean(anchorEl);
-    return <I18n ns="translations">
+    return <I18n ns="translations" key={key}>
       {t => (
-        <React.Fragment>
+        <React.Fragment key={key}>
           <IconButton
-            key={key}
             aria-owns={open ? 'menu-appbar' : null}
             aria-haspopup="true"
             onClick={this.handleMenu}
@@ -218,7 +217,6 @@ class ConnectedNavBar extends React.Component<Props> {
         if (disabled) {
           return;
         }
-        console.log(route);
         if (!route.role || route.role.length === 0 || users.some((u) => lodash.includes(route.role, u.role))) {
           doPush(route.url);
         } else {

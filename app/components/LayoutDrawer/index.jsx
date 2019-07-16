@@ -66,7 +66,7 @@ export default function LayoutDrawer(props) {
         <Divider/>
         <List>
           {contents.map((C) => (
-            <ListItem button>
+            <ListItem button key={`${C.label}`}>
               <ListItemAvatar>
                 {C.icon}
               </ListItemAvatar>
