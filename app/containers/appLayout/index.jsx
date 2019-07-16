@@ -6,34 +6,16 @@ import { withStyles } from '@material-ui/core/styles';
 /* eslint-disable no-unused-vars */
 import { I18n, Trans } from 'react-i18next';
 
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import IconButton from '@material-ui/core/IconButton';
-import MenuItem from '@material-ui/core/MenuItem';
-import Menu from '@material-ui/core/Menu';
-import Language from '@material-ui/icons/LanguageRounded';
-import Fade from '@material-ui/core/Fade';
-import Divider from '@material-ui/core/Divider';
-
-import Flag from 'react-flags';
-import Clock from 'react-live-clock';
-
 import { push } from 'connected-react-router';
 import Notify from '../../components/Notify';
-import SysInfo from '../../components/sysInfo';
-import HomePage from '../home';
 
 import styles from './styles';
 
 import i18n from '../../i18n';
-import HealthCheck from '../../components/HealthCheck';
-import Button from '../../components/CustomButtons/Button';
+import Avatar from '@material-ui/core/Avatar';
 
 import { setNewNotification } from '../../modules/notification/action';
-import HomeOperationList from '../HomeOperationList';
-import Avatar from '../../components/Avatar';
 import { logoutRequest } from '../../modules/user/action';
-import PageEntrance from '../../components/pageEntrance';
 import NavBar from '../../components/NavBar';
 
 import LayoutDrawer from '../../components/LayoutDrawer';
@@ -186,7 +168,14 @@ class ConnectedLayout extends React.PureComponent {
 
             <Notify/>
             <div style={{ height: 'calc(100% - 64px)', display: 'flex' }}>
-              <LayoutDrawer/>
+              <LayoutDrawer
+                contents={users.map((u) => {
+                  return {
+                    icon: u.avatar ? <Avatar src={u.avatar}/> : <Avatar>{u.name.slice(2)}</Avatar>,
+                    label: u.name
+                  };
+                })}
+              />
               {path === '/app' ? <DefaultContent childRoutes={childRoutes}/> : children}
             </div>
             <NavBar

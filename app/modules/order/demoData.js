@@ -1,6 +1,6 @@
 export const demoOrder = {
   name: 'fill info',
-  info: 'this is a demo order',
+  info: 'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
   type: 'step',
   steps: [
     {

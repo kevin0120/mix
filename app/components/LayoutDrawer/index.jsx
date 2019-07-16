@@ -7,92 +7,28 @@ import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import MailIcon from '@material-ui/icons/Mail';
 import clsx from 'clsx';
 
-const drawerWidth = 240;
+import { ListItemAvatar } from '@material-ui/core';
+import styles from './styles';
 
-const useStyles = makeStyles(theme => {
-  console.log(theme);
-  return {
-    root: {
-      display: 'flex'
-    },
-    appBar: {
-      zIndex: theme.zIndex.drawer + 1,
-      transition: theme.transitions.create(['width', 'margin'], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      })
-    },
-    appBarShift: {
-      marginLeft: drawerWidth,
-      width: `calc(100% - ${drawerWidth}px)`,
-      transition: theme.transitions.create(['width', 'margin'], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen
-      })
-    },
-    menuButton: {
-    },
-    hide: {
-      display: 'none'
-    },
-    drawer: {
-      width: drawerWidth,
-      flexShrink: 0,
-      whiteSpace: 'nowrap'
-    },
-    drawerOpen: {
-      width: drawerWidth,
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen
-      })
-    },
-    drawerClose: {
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      }),
-      overflowX: 'hidden',
-      width: theme.spacing(7) + 1,
-      [theme.breakpoints.up('sm')]: {
-        width: theme.spacing(9) + 1
-      }
-    },
-    toolbar: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-start',
-      padding: '0 8px',
-      ...theme.mixins.toolbar
-    },
-    content: {
-      flexGrow: 1,
-      padding: theme.spacing(3)
-    }
-  };
-});
-
-export default function LayoutDrawer() {
-  const classes = useStyles();
+export default function LayoutDrawer(props) {
+  const { contents } = props;
+  const classes = makeStyles(styles)();
   const theme = createMuiTheme({
     overrides: {
       MuiDrawer: {
         root: {
           zIndex: '0'
         },
-        paper:{
-          zIndex:'0'
+        paper: {
+          zIndex: '0'
         }
       }
     }
   });
-  ;
+
   const [open, setOpen] = React.useState(false);
 
   function toggleDrawer() {
@@ -101,7 +37,6 @@ export default function LayoutDrawer() {
 
   return (
     <MuiThemeProvider theme={theme}>
-
       <Drawer
         variant="permanent"
         className={clsx(classes.drawer, {
@@ -130,22 +65,18 @@ export default function LayoutDrawer() {
         </div>
         <Divider/>
         <List>
-          {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>{index % 2 === 0 ? <InboxIcon/> : <MailIcon/>}</ListItemIcon>
-              <ListItemText primary={text}/>
+          {contents.map((C) => (
+            <ListItem button>
+              <ListItemAvatar>
+                {C.icon}
+              </ListItemAvatar>
+              <ListItemText>
+                {C.label}
+              </ListItemText>
             </ListItem>
           ))}
         </List>
         <Divider/>
-        <List>
-          {['All mail', 'Trash', 'Spam'].map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>{index % 2 === 0 ? <InboxIcon/> : <MailIcon/>}</ListItemIcon>
-              <ListItemText primary={text}/>
-            </ListItem>
-          ))}
-        </List>
       </Drawer>
     </MuiThemeProvider>
   );

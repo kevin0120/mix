@@ -8,17 +8,16 @@ type Props = {
 };
 
 function renderRoute(R, subRouteList) {
-  if (!R) {
-    return null;
-  }
-  return <Route key={R.url}
-                exact={R.exact || false}
-                path={R.url}
-                render={() => R.component ?
-                  <R.component self={R} childRoutes={subRouteList}>
-                    {subRouteList && subRouteList.map(subRoute => renderRoute(subRoute)) || null}
-                  </R.component> : null}
-  />;
+  return R ?
+    <Route
+      key={R.url}
+      exact={R.exact || false}
+      path={R.url}
+      render={() => R.component ?
+        <R.component self={R} childRoutes={subRouteList}>
+          {subRouteList && subRouteList.map(subRoute => renderRoute(subRoute)) || null}
+        </R.component> : null}
+    /> : null;
 }
 
 function parseRouteTree(routesObj, parentUrl, filter) {
@@ -41,14 +40,12 @@ function parseRouteTree(routesObj, parentUrl, filter) {
   return [routeList, renderedRoute];
 }
 
-export default class Routes extends React.Component <Props> {
+export default function Routes(props: Props) {
+  const { pagesConfig } = props;
+  return (
+    <React.Fragment>
+      {parseRouteTree(pages, '', pagesConfig)[1]}
+    </React.Fragment>
+  );
 
-  render() {
-    const { pagesConfig } = this.props;
-    return (
-      <React.Fragment>
-        {parseRouteTree(pages, '', pagesConfig)[1]}
-      </React.Fragment>
-    );
-  }
 }

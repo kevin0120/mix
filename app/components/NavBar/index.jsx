@@ -25,6 +25,8 @@ import styles from './styles';
 import Avatar from '../Avatar';
 import SysInfo from '../sysInfo';
 
+import { getContentByUrl } from '../../containers/pages';
+
 type Props = {
   classes: {},
   disabled: boolean,
@@ -211,11 +213,12 @@ class ConnectedNavBar extends React.Component<Props> {
       key={key}
       type="navigation"
       value={path}
-      routes={[self, ...childRoutes]}
+      routes={[self, ...childRoutes, getContentByUrl('/pages/login')]}
       onItemClick={(route) => {
         if (disabled) {
           return;
         }
+        console.log(route);
         if (!route.role || route.role.length === 0 || users.some((u) => lodash.includes(route.role, u.role))) {
           doPush(route.url);
         } else {

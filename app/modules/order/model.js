@@ -16,10 +16,11 @@ export const ORDER_STEP_STATUS = {
 };
 
 export const ORDER_STATUS={
-  READY:'ready',
-  IN_PROGRESS:'in progress',
-  FINISHED:'finished',
-  FAILED:'failed',
+  TODO:'TODO',
+  WIP:'WIP',
+  DONE:'DONE',
+  CANCEL:'CANCEL',
+  PENDING:'PENDING',
 };
 
 export type Step = {

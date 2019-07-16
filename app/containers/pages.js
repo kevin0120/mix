@@ -4,7 +4,7 @@
 import * as colors from '@material-ui/core/colors';
 
 // icons
-import * as icons from '@material-ui/icons'
+import * as icons from '@material-ui/icons';
 
 import WorkOrders from './orders';
 import Working from './working';
@@ -18,8 +18,8 @@ import LoginPage from './login';
 import Curve from './curve';
 import Viewer from './viewer';
 import Layout from './appLayout';
-import WorkingTemplate from './workingTemplate'
-import HomeOperationList from './HomeOperationList';
+import WorkingTemplate from './workingTemplate';
+import OperationList from './OperationList';
 import HomePage from './home';
 
 // imgs
@@ -39,15 +39,14 @@ import {
 
 const shade = 500;
 
-
-export default {
+const pages = {
   '/app': {
     component: Layout,
-    navBarContents:['clock','pages','language'],
-    DefaultContent: HomeOperationList,
+    navBarContents: ['clock', 'pages', 'language'],
+    DefaultContent: OperationList,
     title: 'main.home',
-      icon: icons.Home,
-      color: colors.indigo[shade],
+    icon: icons.Home,
+    color: colors.indigo[shade],
     '/working': {
       title: 'main.operation',
       component: WorkingTemplate,
@@ -141,3 +140,17 @@ export default {
     // },
   }
 };
+
+export const getContentByUrl = (url) => {
+  const arr = url.split('/').filter((u) => u !== '');
+  console.log(arr);
+  const page = arr.reduce((p, r) => (p && p[`/${r}`]) || null, pages);
+  console.log(page);
+  return page && {
+    ...page,
+    url
+  };
+};
+
+
+export default pages;

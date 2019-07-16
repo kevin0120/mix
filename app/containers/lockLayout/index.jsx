@@ -21,7 +21,6 @@ class Pages extends React.Component {
 
   render() {
     const { classes, children, login, ...rest } = this.props;
-    console.log(children);
     const anchor = `${classes.a} ${classes.whiteColor}`;
     return (
       <div>
