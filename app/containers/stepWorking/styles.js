@@ -1,12 +1,10 @@
-export default {
+const layout = {
   root: {
     width: '100%',
     height: '100%',
     display: 'flex',
     flexDirection: 'row',
-    backgroundColor: 'rgb(74,84,89)',
-    backdropFilter: 'blur(2px)',
-
+    backdropFilter: 'blur(2px)'
   },
   background: {},
   rightContainer: {
@@ -14,17 +12,12 @@ export default {
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
-    width: '30%',
+    width: '30%'
     // padding:3,
-    backgroundColor: 'rgb(74,84,89)'
-
   },
-
   leftContainer: {
     flex: 7,
-    margin: 3,
-    backgroundColor: 'rgb(74,84,89)'
-
+    margin: 3
   },
   timerContainer: {
     flex: 1,
@@ -36,14 +29,6 @@ export default {
     flex: 4
 
   },
-  stepButton: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    height: 50
-  },
-  stepper: {},
   contentContainer: {
     flex: 1
   },
@@ -56,8 +41,23 @@ export default {
   buttonsContainer: {
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    background: 'hsla(0,0%,100%,.3)',
-    backdropFilter: 'blur(2px)',
+    justifyContent: 'space-between'
   }
 };
+
+const stepper = {
+  stepper: {},
+  stepButton: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    height: 50
+  }
+};
+
+export default {
+  layout,
+  stepper
+};
+

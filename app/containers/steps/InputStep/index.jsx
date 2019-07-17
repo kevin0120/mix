@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import Button from '@material-ui/core/es/Button/Button';
 import { inputStepActions } from '../../../modules/steps/inputStep/action';
@@ -6,53 +6,45 @@ import { inputStepActions } from '../../../modules/steps/inputStep/action';
 type Props = {
   label: string,
   isCurrent: boolean,
-  submit: ()=>{}
+  submit: ()=>{},
+  bindAction: ()=>{},
+  step: {}
 };
 
-class InputStep extends React.Component<Props> {
-  constructor(props) {
-    super(props);
-    this.state = {
-      value: ''
-    };
-  }
+function InputStep({ step, label, isCurrent, submit, bindAction }: Props) {
+  const [value, setValue] = useState('');
 
-  onSubmit = (value) => {
-    const { submit } = this.props;
-    this.setState({
-      value: ''
-    });
-    submit(value);
-
+  const onSubmit = (v) => {
+    setValue('');
+    submit(v);
   };
 
-  // eslint-disable-next-line flowtype/no-weak-types
-  render(): React.ReactElement<any> | string | number | {} | React.ReactNodeArray | React.ReactPortal | boolean | null | undefined {
-    const { label, isCurrent } = this.props;
-    const { value } = this.state;
-    return <div>
-      {label}
-      <input
-        onChange={(e) => {
-          this.setState({
-            value: e.target.value
-          });
-        }}
-        value={value}
-      />
-      <Button
-        type="button"
-        onClick={() => this.onSubmit(value)}
-        disabled={!isCurrent}
-      >submit
-      </Button>
-    </div>;
-  }
+  useEffect(() => {
+    bindAction(<Button
+      type="button"
+      onClick={() => onSubmit(value)}
+      disabled={!isCurrent}
+    >submit</Button>);
+    return () => bindAction(null);
+  }, [step]);
+
+  useEffect(() => {
+    setValue('');
+  }, [step]);
+
+  return <div>
+    {label}
+    <input
+      onChange={(e) => {
+        setValue(e.target.value);
+      }}
+      value={value}
+    />
+  </div>;
 }
 
 
 const mapState = (state, props) => ({
-  order: state.order,
   ...props
 });
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import Stepper from '@material-ui/core/Stepper';
@@ -12,39 +12,48 @@ import stepTypes from '../steps/stepTypes';
 import styles from './styles';
 
 
-const renderStepContents = (step, isCurrent) => {
-  let StepContent = null;
+const StepContents = ({ step, isCurrent, bindAction }) => {
   let stepProps = {};
   if (step && step.type && stepTypes[step.type] && stepTypes[step.type].component) {
-    StepContent = stepTypes[step.type].component;
+    const StepContent = stepTypes[step.type].component;
     stepProps = stepTypes[step.type].props && stepTypes[step.type].props({
       payload: step.payload || {}
     }) || stepProps;
-    return StepContent && <StepContent {...stepProps} isCurrent={isCurrent} stepStatus={step.status || 'ready'}/>;
+    return StepContent &&
+      <StepContent
+        step={step}
+        {...stepProps}
+        isCurrent={isCurrent}
+        stepStatus={step.status || 'ready'}
+        bindAction={bindAction}
+      />;
   }
 };
 
-const renderSteps = (steps, currentStep, onClick, classes) => (
-  <Stepper nonLinear activeStep={currentStep} orientation="vertical" className={classes.stepper}>
-    {steps.map((s, id) => {
-      const stepProps = {};
-      const labelProps = {};
-      return (
-        <Step key={s.name} {...stepProps}>
-          <StepButton completed={s.status === 'finish'} onClick={() => onClick(id)} className={classes.stepButton}>
-            <StepLabel {...labelProps}>{s.name}</StepLabel>
-          </StepButton>
-        </Step>
-      );
-    })}
-  </Stepper>
-);
+const StepperLayout = ({ steps, currentStep, onClick }) => {
+  const classes = makeStyles(styles.stepper)();
+  return (
+    <Stepper nonLinear activeStep={currentStep} orientation="vertical" className={classes.stepper}>
+      {steps.map((s, id) => {
+        const stepProps = {};
+        const labelProps = {};
+        return (
+          <Step key={s.name} {...stepProps}>
+            <StepButton completed={s.status === 'finish'} onClick={() => onClick(id)} className={classes.stepButton}>
+              <StepLabel {...labelProps}>{s.name}</StepLabel>
+            </StepButton>
+          </Step>
+        );
+      })}
+    </Stepper>
+  );
+};
 
 const renderTimer = () => 'here is a timer';
 
-function StepWorking(props) {
-  const { order, next, previous, jumpTo } = props;
-  const classes = makeStyles(styles)();
+function StepWorking({ order, next, previous, jumpTo }) {
+  const classes = makeStyles(styles.layout)();
+  const [action, bindAction] = useState(null);
 
   return (
     <div className={classes.root}>
@@ -52,12 +61,20 @@ function StepWorking(props) {
         <div className={classes.orderInfoContainer}>
         </div>
         <div className={classes.buttonsContainer}>
-            <Button type="button" onClick={() => previous()}>view previous</Button>
-            <Button type="button" onClick={() => next()}>view next</Button>
+          <div>
+            <Button type="button" onClick={() => previous()}>{'<<'}</Button>
+            <Button type="button" onClick={() => next()}>{'>>'}</Button>
+          </div>
+          <div>
+            {action}
+          </div>
         </div>
-
         <div className={classes.contentContainer}>
-          {renderStepContents(viewingStep(order), viewingStep(order) === processingStep(order))}
+          <StepContents
+            step={viewingStep(order)}
+            isCurrent={viewingStep(order) === processingStep(order)}
+            bindAction={bindAction}
+          />
         </div>
       </div>
       <div className={classes.rightContainer}>
@@ -67,7 +84,12 @@ function StepWorking(props) {
         <div className={classes.stepperContainer}>
           {(currentOrder(order) &&
             currentOrder(order).steps &&
-            renderSteps(orderSteps(order), viewingIndex(order), jumpTo, classes)) || null}
+            <StepperLayout
+              steps={orderSteps(order)}
+              currentStep={viewingIndex(order)}
+              jumpTo={jumpTo}
+            />
+          ) || null}
         </div>
       </div>
     </div>
