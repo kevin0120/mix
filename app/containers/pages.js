@@ -7,8 +7,6 @@ import * as colors from '@material-ui/core/colors';
 import * as icons from '@material-ui/icons';
 
 import WorkOrders from './orders';
-import Working from './working';
-import StepWorking from './stepWorking';
 import ConnResult from './result';
 import Event from './event';
 import Preferences from './config';
