@@ -290,6 +290,7 @@
     "react-custom-scrollbars": "^4.2.1",
     "react-dom": "^16.8.6",
     "react-draggable": "^3.0.5",
+    "react-emotion": "^10.0.0",
     "react-es6-progressbar.js": "git+https://github.com/masami10/react-es6-progressbar.js.git",
     "react-flags": "^0.1.13",
     "react-hot-loader": "^4.8.8",

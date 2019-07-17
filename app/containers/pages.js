@@ -42,7 +42,7 @@ const shade = 500;
 const pages = {
   '/app': {
     component: Layout,
-    navBarContents: ['clock', 'pages', 'language'],
+    navBarContents: ['clock', 'pages', 'language'], //'avatar','clock', 'pages', 'language', 'sysInfo', 'healthCheck'
     DefaultContent: OperationList,
     title: 'main.home',
     icon: icons.Home,
@@ -147,7 +147,7 @@ export const getContentByUrl = (url) => {
   return page && {
     ...page,
     url,
-    name:url.slice(-1)[0]
+    name: url.slice(-1)[0]
   };
 };
 
