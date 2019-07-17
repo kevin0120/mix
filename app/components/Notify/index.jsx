@@ -53,7 +53,7 @@ class ConnectedNoty extends React.PureComponent {
       <Snackbar
         place="tl"
         color={variant}
-        icon={()=>Icon}
+        icon={Icon}
         message={message}
         open={isShow}
         closeNotification={this.handleClose}
