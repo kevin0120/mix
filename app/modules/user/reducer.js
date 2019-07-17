@@ -1,22 +1,11 @@
 // @flow
 
-import { array } from 'prop-types';
 import { USER } from './action';
-
 import defaultAvatarImg from '../../../resources/imgs/image_placeholder.jpg';
-import { push } from "connected-react-router";
 
 const lodash = require('lodash');
 
-export const defaultUsers = [
-  {
-    uuid: '11',
-    name: 'dummy',
-    avatar: defaultAvatarImg,
-    uid: 10,
-    role: 'admin'
-  }
-];
+const defaultUsers = [];
 
 export type rActionUserType = {
   +type: string,
@@ -27,21 +16,24 @@ export type rActionUserType = {
   +role: string
 };
 
-export default function users(state: array = defaultUsers, action: rActionUserType) {
+export default function users(
+  state: array = defaultUsers,
+  action: rActionUserType
+) {
   switch (action.type) {
     case USER.LOGIN.SUCCESS: {
       const { uid, name, uuid, avatar, role } = action;
       const img =
         lodash.isNil(avatar) || avatar === '' ? defaultAvatarImg : avatar;
-      if (state.length === 1 && state[0].name === 'dummy') {
-        // 默认用户
-        return [{ uid, name, uuid, avatar: img, role }];
+      const idx = state.findIndex(u => u.uid === uid);
+      if (idx >= 0) {
+        return [...state];
       }
       return [...state, { uid, name, uuid, avatar: img, role }];
     }
     case USER.LOGOUT.SUCCESS: {
       const { uid } = action;
-      return lodash.remove(state, i => i.name === uid || i.uuid === uid);
+      return lodash.remove(state, i => i.uid === uid);
     }
     default:
       return state;
