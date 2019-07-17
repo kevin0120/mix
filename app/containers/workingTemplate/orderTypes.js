@@ -2,10 +2,13 @@ import Working from '../working';
 import StepWorking from '../stepWorking';
 
 export default {
-  'screw':{
+  screw:{
     container:Working,
   },
-  'step':{
+  step:{
+    container:StepWorking
+  },
+  default:{
     container:StepWorking
   }
 }

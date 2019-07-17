@@ -1,19 +1,11 @@
 import { connect } from 'react-redux';
 import React from 'react';
 import orderTypes from './orderTypes';
-import StepWorking from '../stepWorking';
 
-class ConnectedWorkingTemplate extends React.Component {
-
-  render() {
-    const { order } = this.props;
-    if (order.currentOrder && order.currentOrder.type) {
-      const WorkingPage = orderTypes[order.currentOrder.type] && orderTypes[order.currentOrder.type].container || StepWorking;
-      return <WorkingPage/>;
-    } else {
-      return null;
-    }
-  }
+function ConnectedWorkingTemplate({ order }) {
+  const orderType = order.currentOrder && order.currentOrder.type || 'default';
+  const WorkingPage = (orderTypes[orderType] && orderTypes[orderType].container);
+  return <WorkingPage/>;
 }
 
 const mapState = (state, props) => ({

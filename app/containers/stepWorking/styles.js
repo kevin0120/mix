@@ -6,7 +6,6 @@ const layout = {
     flexDirection: 'row',
     backdropFilter: 'blur(2px)'
   },
-  background: {},
   rightContainer: {
     flex: 3,
     display: 'flex',
@@ -17,7 +16,7 @@ const layout = {
   },
   leftContainer: {
     flex: 7,
-    margin: 3
+    margin: 3,
   },
   timerContainer: {
     flex: 1,
@@ -36,7 +35,9 @@ const layout = {
     height: 60,
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+    padding:'0 10px',
+    alignItems: 'center'
   },
   buttonsContainer: {
     display: 'flex',

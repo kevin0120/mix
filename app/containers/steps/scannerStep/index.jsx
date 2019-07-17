@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
-import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/es/Button/Button';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import styles from './styles';
@@ -14,19 +13,17 @@ type Props = {
   bindAction: ()=>{}
 };
 
-function scannerStep({ step, submit, isCurrent, bindAction }: Props) {
+function ScannerStep({ step, submit, isCurrent, bindAction }: Props) {
   const classes = makeStyles(styles)();
 
   useEffect(() => {
     bindAction(<Button onClick={() => submit()} disabled={!isCurrent}>submit</Button>);
     return () => bindAction(null);
-  }, [step]);
+  }, [bindAction, isCurrent, step, submit]);
 
-  return (
-    <div className={classes.root}>
-      <QRCode width="200" height="200" viewBox="0 0 24 24"/>
-    </div>
-  );
+  return <div className={classes.root}>
+    <QRCode width="200" height="200" viewBox="0 0 24 24"/>
+  </div>;
 }
 
 const mapState = (state, props) => ({
@@ -37,4 +34,4 @@ const mapDispatch = {
   submit: scannerStepAction.submit
 };
 
-export default withStyles(styles)(connect(mapState, mapDispatch)(scannerStep));
+export default connect(mapState, mapDispatch)(ScannerStep);
