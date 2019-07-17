@@ -95,7 +95,7 @@ Snackbar.propTypes = {
     'maintenance'
   ]),
   close: PropTypes.bool,
-  icon: PropTypes.func,
+  icon: PropTypes.object,
   place: PropTypes.oneOf(['tl', 'tr', 'tc', 'br', 'bl', 'bc']),
   open: PropTypes.bool
 };

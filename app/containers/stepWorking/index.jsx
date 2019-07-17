@@ -6,14 +6,14 @@ import Step from '@material-ui/core/Step';
 import StepButton from '@material-ui/core/StepButton';
 import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/es/Button/Button';
-import { Typography, Paper } from '@material-ui/core';
+import { Typography, Paper, StepContent } from '@material-ui/core';
 import { orderActions } from '../../modules/order/action';
 import { currentOrder, orderSteps, processingStep, viewingIndex, viewingStep } from '../../modules/order/selector';
 import stepTypes from '../steps/stepTypes';
 import styles from './styles';
 
 
-const StepContents = ({ step, isCurrent, bindAction }) => {
+const StepPage = ({ step, isCurrent, bindAction }) => {
   let stepProps = {};
   if (step && step.type && stepTypes[step.type] && stepTypes[step.type].component) {
     const StepContent = stepTypes[step.type].component;
@@ -45,6 +45,11 @@ const StepperLayout = ({ steps, currentStep, jumpTo }) => {
             <StepButton completed={s.status === 'finish'} onClick={() => jumpTo(id)} className={classes.stepButton}>
               <StepLabel {...labelProps}>{s.name}</StepLabel>
             </StepButton>
+            <StepContent>
+              <Typography>
+              {s.info}
+              </Typography>
+            </StepContent>
           </Step>
         );
       })}
@@ -62,12 +67,12 @@ function StepWorking({ currentOrder, viewingStep, processingStep, viewingIndex, 
 
   return (
     <div className={classes.root}>
-      <Paper square className={classes.leftContainer}>
-        <div className={classes.orderInfoContainer}>
+      <Paper square className={classes.leftContainer} classes={{ root: classes.leftContainer }}>
+        <Paper square className={classes.orderInfoContainer}>
           <Typography variant="h5">
             {currentOrder && currentOrder.name}
           </Typography>
-        </div>
+        </Paper>
         <div className={classes.buttonsContainer}>
           <div>
             <Button disabled={noPrevious} type="button" onClick={() => previous()}>{'<<'}</Button>
@@ -78,7 +83,7 @@ function StepWorking({ currentOrder, viewingStep, processingStep, viewingIndex, 
           </div>
         </div>
         <div className={classes.contentContainer}>
-          <StepContents
+          <StepPage
             step={viewingStep}
             isCurrent={viewingStep === processingStep}
             bindAction={bindAction}

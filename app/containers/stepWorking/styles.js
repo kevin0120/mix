@@ -16,7 +16,7 @@ const layout = {
   },
   leftContainer: {
     flex: 7,
-    margin: 3,
+    margin: 3
   },
   timerContainer: {
     flex: 1,
@@ -25,8 +25,8 @@ const layout = {
   },
   stepperContainer: {
     margin: 3,
-    flex: 4
-
+    flex: 4,
+    overflowY:'scroll',
   },
   contentContainer: {
     flex: 1
@@ -36,13 +36,16 @@ const layout = {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding:'0 10px',
+    padding: '0 10px',
     alignItems: 'center'
   },
   buttonsContainer: {
+    height:60,
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+    padding: '0 10px',
+    alignItems: 'center'
   }
 };
 
@@ -52,7 +55,7 @@ const stepper = {
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'flex-start !important',
     height: 50
   }
 };
