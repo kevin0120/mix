@@ -1,29 +1,41 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
-import Button from '@material-ui/core/es/Button/Button';
+import Button from '@material-ui/core/Button';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import styles from './styles';
 import { scannerStepAction } from '../../../modules/steps/scannerStep/action';
 import QRCode from './qrcode-scan.svg';
+import { StepContent } from '../types';
 
 type Props = {
-  submit: ()=>{},
-  isCurrent: boolean,
-  step: {},
-  bindAction: ()=>{}
+  submit: () => {}
 };
 
-function ScannerStep({ step, submit, isCurrent, bindAction }: Props) {
+function ScannerStep({
+  step,
+  submit,
+  isCurrent,
+  bindAction
+}: Props | StepContent) {
   const classes = makeStyles(styles)();
 
-  useEffect(() => {
-    bindAction(<Button onClick={() => submit()} disabled={!isCurrent}>submit</Button>);
-    return () => bindAction(null);
-  }, [bindAction, isCurrent, step, submit]);
+  useEffect(
+    () => {
+      bindAction(
+        <Button onClick={() => submit()} disabled={!isCurrent}>
+          submit
+        </Button>
+      );
+      return () => bindAction(null);
+    },
+    [bindAction, isCurrent, step, submit]
+  );
 
-  return <div className={classes.root}>
-    <QRCode width="200" height="200" viewBox="0 0 24 24"/>
-  </div>;
+  return (
+    <div className={classes.root}>
+      <QRCode width="200" height="200" viewBox="0 0 24 24" />
+    </div>
+  );
 }
 
 const mapState = (state, props) => ({
@@ -34,4 +46,7 @@ const mapDispatch = {
   submit: scannerStepAction.submit
 };
 
-export default connect(mapState, mapDispatch)(ScannerStep);
+export default connect(
+  mapState,
+  mapDispatch
+)(ScannerStep);
