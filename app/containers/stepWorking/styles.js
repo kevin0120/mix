@@ -21,7 +21,11 @@ const layout = {
   timerContainer: {
     flex: 1,
     margin: 3,
-    zIndex: 1
+    zIndex: 1,
+    display:'flex',
+    flexDirection:'row',
+    alignItems:'center',
+    justifyContent:'center',
   },
   stepperContainer: {
     margin: 3,

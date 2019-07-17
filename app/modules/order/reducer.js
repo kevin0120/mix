@@ -82,6 +82,14 @@ const orderReducer = {
       viewingIndex: processingStep(state) === viewingStep(state) ? newIndex : viewingIndex(state)
     };
   },
+  [ORDER.STEP.REVOKE]:(state)=>{
+    const newIndex = processingIndex(state) - 1;
+    return {
+      ...state,
+      processingIndex: newIndex,
+      viewingIndex: processingStep(state) === viewingStep(state) ? newIndex : viewingIndex(state)
+    };
+  },
   [ORDER.STEP.UPDATE]: (state, action) => {
     const { newStep } = action;
     const newOrder = currentOrder(state).slice();

@@ -7,11 +7,11 @@ import StepButton from '@material-ui/core/StepButton';
 import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/es/Button/Button';
 import { Typography, Paper, StepContent } from '@material-ui/core';
+import Timer from 'react-compound-timer';
 import { orderActions } from '../../modules/order/action';
 import { currentOrder, orderSteps, processingStep, viewingIndex, viewingStep } from '../../modules/order/selector';
 import stepTypes from '../steps/stepTypes';
 import styles from './styles';
-
 
 const StepPage = ({ step, isCurrent, bindAction }) => {
   let stepProps = {};
@@ -47,7 +47,7 @@ const StepperLayout = ({ steps, currentStep, jumpTo }) => {
             </StepButton>
             <StepContent>
               <Typography>
-              {s.info}
+                {s.info}
               </Typography>
             </StepContent>
           </Step>
@@ -57,7 +57,14 @@ const StepperLayout = ({ steps, currentStep, jumpTo }) => {
   );
 };
 
-const renderTimer = () => 'here is a timer';
+const renderTimer = () =>
+  <Typography variant="h2">
+    <Timer formatValue={(v)=>`0${v}`.slice(-2)}>
+      <Timer.Hours/>:
+      <Timer.Minutes/>:
+      <Timer.Seconds/>
+    </Timer>
+  </Typography>;
 
 function StepWorking({ currentOrder, viewingStep, processingStep, viewingIndex, steps, next, previous, jumpTo }) {
   const classes = makeStyles(styles.layout)();

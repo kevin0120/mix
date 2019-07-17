@@ -13234,6 +13234,13 @@ react-bootstrap-sweetalert@^4.4.1:
   dependencies:
     object-assign "^4.1.0"
 
+react-compound-timer@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/react-compound-timer/-/react-compound-timer-1.1.1.tgz#4ef45d1c9ee356e0b33a3e7bca7d8884b2a77f6e"
+  integrity sha512-ZWdmUTn8HZkEv0gl+q0H18urwIlPDafOMhueS9I5PtNYUM0ykfeJO8aXREt1mw0xTkwx9WVemZHgRg4/nelAQQ==
+  dependencies:
+    react "^16.8.6"
+
 react-custom-scrollbars@^4.2.1:
   version "4.2.1"
   resolved "http://registry.npm.taobao.org/react-custom-scrollbars/download/react-custom-scrollbars-4.2.1.tgz#830fd9502927e97e8a78c2086813899b2a8b66db"
