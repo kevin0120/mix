@@ -1,24 +1,10 @@
 
-const drawerWidth = 240;
+const drawerWidth = 260;
+const drawerWidthClose=theme=>theme.spacing(9) + 1;
 
 export default theme => ({
   root: {
     display: 'flex'
-  },
-  appBar: {
-    zIndex: theme.zIndex.drawer + 1,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen
-    })
-  },
-  appBarShift: {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen
-    })
   },
   menuButton: {},
   hide: {
@@ -27,7 +13,7 @@ export default theme => ({
   drawer: {
     width: drawerWidth,
     flexShrink: 0,
-    whiteSpace: 'nowrap'
+    whiteSpace: 'nowrap',
   },
   drawerOpen: {
     width: drawerWidth,
@@ -42,16 +28,14 @@ export default theme => ({
       duration: theme.transitions.duration.leavingScreen
     }),
     overflowX: 'hidden',
-    width: theme.spacing(7) + 1,
-    [theme.breakpoints.up('sm')]: {
-      width: theme.spacing(9) + 1
-    }
+    width: drawerWidthClose(theme),
   },
   toolbar: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'flex-start',
-    padding: '0 8px',
+    justifyContent: 'center',
+    padding: '0',
+    width:drawerWidthClose(theme),
     ...theme.mixins.toolbar
   },
   content: {

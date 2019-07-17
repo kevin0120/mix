@@ -19,7 +19,7 @@ import { logoutRequest } from '../../modules/user/action';
 import NavBar from '../../components/NavBar';
 
 import LayoutDrawer from '../../components/LayoutDrawer';
-
+import {Button} from '@material-ui/core'
 const lodash = require('lodash');
 
 /* eslint-disable react/prefer-stateless-function */
@@ -172,7 +172,12 @@ class ConnectedLayout extends React.PureComponent {
                 contents={users.map((u) => {
                   return {
                     icon: u.avatar ? <Avatar src={u.avatar}/> : <Avatar>{u.name.slice(2)}</Avatar>,
-                    label: u.name
+                    label: (<div style={{display:'flex',flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}>
+                        {u.name}
+                        <Button color="secondary" size="small" variant="contained">
+                          Logout
+                        </Button>
+                    </div>)
                   };
                 })}
               />

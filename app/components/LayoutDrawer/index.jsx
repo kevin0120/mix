@@ -56,9 +56,7 @@ export default function LayoutDrawer(props) {
             color="inherit"
             aria-label="Open drawer"
             onClick={toggleDrawer}
-            className={clsx(classes.menuButton, {
-              // [classes.hide]: open,
-            })}
+            className={classes.menuButton}
           >
             <MenuIcon/>
           </IconButton>
@@ -66,7 +64,7 @@ export default function LayoutDrawer(props) {
         <Divider/>
         <List>
           {contents.map((C) => (
-            <ListItem button key={`${C.label}`}>
+            <ListItem key={`${C.label}`}>
               <ListItemAvatar>
                 {C.icon}
               </ListItemAvatar>
