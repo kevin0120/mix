@@ -4,10 +4,10 @@ const defaultConfigs = {
   version: 'v0.1',
   pages: {
     app: {
-      working: ['user', 'admin']
+      working: ['user', 'admin'],
       // viewer: ['user', 'admin'],
       // order: ['user', 'admin'],
-      // preference: ['user', 'admin'],
+      preference: ['user', 'admin'],
       // event: ['user', 'admin'],
       // result: ['user', 'admin'],
       // curve: ['user', 'admin'],
@@ -215,14 +215,12 @@ const defaultConfigs = {
               'HID' // HID or BT_HID
             // mode: 'BT_HID',
             // vendorId: 1504
-          }
-          ,
+          },
           io: {
             serialNo: '111',
             connection:
               'modbustcp://192.168.1.122:502/0'
-          }
-          ,
+          },
           controllers: [
             {
               serialNo: 'b2a8d23b44ad4836be0be8ebca72b8a1',
@@ -236,10 +234,8 @@ const defaultConfigs = {
     },
     connections: {
       rush: 'http://127.0.0.1:8082',
-      rfid:
-        'tcp://127.0.0.1:2112',
-      aiis:
-        'http://127.0.0.1:9092'
+      rfid: 'tcp://127.0.0.1:2112',
+      aiis: 'http://127.0.0.1:9092'
     }
   },
 // 作业配置

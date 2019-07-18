@@ -8,7 +8,8 @@ export default theme => ({
     position: 'relative',
     display: 'flex',
     color: '#333',
-    height: '100%'
+    height: '100%',
+    width:'100%',
   },
   content: {
     flex: 1,

@@ -1,23 +1,23 @@
 /* eslint-disable react/no-this-in-sfc */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Keyboard from 'react-simple-keyboard';
-import { I18n } from 'react-i18next';
-import { withStyles } from '@material-ui/core/styles';
 import Slide from '@material-ui/core/Slide';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import IconButton from '@material-ui/core/IconButton';
 import Clear from '@material-ui/icons/CancelOutlined';
+import makeStyles from '@material-ui/core/styles/makeStyles';
+import i18n from '../../i18n';
 import customSelectStyle from '../../common/jss/customSelectStyle';
 import Button from '../CustomButtons/Button';
 import CustomInput from '../CustomInput/CustomInput';
 
 const lodash = require('lodash');
 
-const customerStyles = theme => ({
+const customStyles = theme => ({
   ...customSelectStyle(theme),
   bigInput: {
     '&,&::placeholder': {
@@ -34,184 +34,148 @@ const customerStyles = theme => ({
 });
 
 export default function withKeyboard(SubComponents) {
-  class KeyboardDialog extends React.Component {
-    constructor(props) {
-      super(props);
-      this.state = {
-        layoutName: 'default',
-        text: '',
-        show: false,
-        config: {
-          onSubmit: null,
-          title: '',
-          label: '',
-          required: false
-        }
-      };
-    }
+  function KeyboardDialog(props) {
+    let keyboard = null;
+    const [layout, setLayout] = useState('default');
+    const [text, setText] = useState('');
+    const [config, setConfig] = useState({
+      onSubmit: null,
+      title: '',
+      label: '',
+      required: false
+    });
+    const [show, setShow] = useState(false);
 
-    handleSubmit = () => {
-      const { text, config } = this.state;
+    useEffect(() => {
+      if (keyboard) {
+        keyboard.keyboard.setInput(text || '');
+      }
+    }, [keyboard, text]);
+
+    const handleSubmit = () => {
       config.onSubmit(text);
-      this.handleClose();
+      setShow(false);
     };
 
-    handleClose = () => {
-      const { onClose } = this.state;
-      this.setState({ show: false }, () => {
-        // eslint-disable-next-line no-unused-expressions
-        onClose && onClose();
-      });
-    };
-
-    onKeyPress = press => {
-      const { text } = this.state;
+    const onKeyPress = press => {
       if (lodash.isEqual(press, '{enter}') && text.length !== 0) {
-        this.handleSubmit();
+        handleSubmit();
       }
       if (lodash.isEqual(press, '{shift}')) {
-        const { layoutName } = this.state;
-
-        this.setState({
-          layoutName: layoutName === 'default' ? 'shift' : 'default'
-        });
+        setLayout(layout === 'default' ? 'shift' : 'default');
       }
     };
 
-    onChange = text => {
-      this.setState({ text });
+    const bindKeyboardInput = c => {
+      setConfig(c);
+      setText(c.text || '');
+      setShow(true);
     };
 
-    bindKeyboardInput = config => {
-      this.keyboard.setInput(config.text || '');
-      this.setState({
-        show: true,
-        config,
-        text: config.text || ''
-      });
+    const onChangeInput = event => {
+      const tx = event.target.value;
+      setText(tx);
+      keyboard.setInput(tx);
     };
 
-    onChangeInput = event => {
-      const text = event.target.value;
-      this.setState(
-        {
-          text
-        },
-        () => {
-          this.keyboard.setInput(text);
-        }
-      );
-    };
-
-    Transition = React.forwardRef((props, ref) => <Slide direction="down" {...props} ref={ref}/>);
-
-    render() {
-      const { classes, ...restProps } = this.props;
-      const { text, config, layoutName, show } = this.state;
-      const submitEnable = config.required ? text.length !== 0 : true;
-      return (
-        <div style={{ width: '100%', height: '100%' }}>
-          <SubComponents
-            keyboardInput={c => this.bindKeyboardInput(c)}
-            {...restProps}
-          />
-          <I18n ns="translations">
-            {t => (
-              <Dialog
-                classes={{
-                  root: classes.modalRoot,
-                  paper: `${classes.modal} ${classes.modalLarge}`
-                }}
-                TransitionComponent={this.Transition}
-                keepMounted
-                open={show}
-                onClose={this.handleClose}
-                aria-labelledby="form-dialog-title"
-                scroll="paper"
-              >
-                <DialogTitle
-                  id="form-dialog-title"
-                  className={classes.modalHeader}
-                >
-                  {t(config.title)}
-                </DialogTitle>
-                <DialogContent className={classes.modalBody}>
-                  <CustomInput
-                    large
-                    labelText={t(config.label)}
-                    id="keyboard-dialog-input"
-                    formControlProps={{
-                      fullWidth: true,
-                      required: config.required
-                    }}
-                    inputProps={{
-                      // onFocus: this.setActiveInput,
-                      required: config.required,
-                      value: text || '',
-                      onChange: this.onChangeInput,
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            aria-label="clear input"
-                            onClick={() => {
-                              this.setState({ text: '' }, () => {
-                                this.keyboard.setInput('');
-                              });
-                            }}
-                          >
-                            <Clear/>
-                          </IconButton>
-                        </InputAdornment>
-                      )
-                    }}
-                  />
-                </DialogContent>
-                <DialogActions
-                  className={`${classes.modalFooter} ${
-                    classes.modalFooterCenter
-                    }`}
-                >
-                  <Button
-                    // className={classes.modalFooterCenter}
-                    style={{ margin: '0 80px' }}
-                    onClick={this.handleClose}
-                    color="danger"
-                    // size='lg'
-                    autoFocus
-                    round
-                  >
-                    {t('Common.Close')}
-                  </Button>
-                  <Button
-                    // className={classes.modalFooterCenter}
-                    style={{ margin: '0 80px' }}
-                    onClick={this.handleSubmit}
-                    color="success"
-                    // size='lg'
-                    round
-                    disabled={!submitEnable}
-                  >
-                    {t('Common.Submit')}
-                  </Button>
-                </DialogActions>
-                <div className={classes.keyboard}>
-                  <Keyboard
-                    ref={r => {
-                      this.keyboard = r;
-                    }}
-                    inputName="keyboard-dialog-input"
-                    layoutName={layoutName}
-                    onChange={this.onChange}
-                    onKeyPress={this.onKeyPress}
-                  />
-                </div>
-              </Dialog>
-            )}
-          </I18n>
-        </div>
-      );
-    }
+    const { ...restProps } = props;
+    const classes = makeStyles(customStyles)();
+    const submitEnable = config.required ? text.length !== 0 : true;
+    return (
+      <React.Fragment>
+        <SubComponents
+          keyboardInput={c => bindKeyboardInput(c)}
+          {...restProps}
+        />
+        <Dialog
+          classes={{
+            root: classes.modalRoot,
+            paper: `${classes.modal} ${classes.modalLarge}`
+          }}
+          TransitionComponent={Slide}
+          keepMounted
+          open={show}
+          onClose={() => setShow(false)}
+          aria-labelledby="form-dialog-title"
+          scroll="paper"
+        >
+          <DialogTitle
+            id="form-dialog-title"
+            className={classes.modalHeader}
+          >
+            {i18n.t(config.title)}
+          </DialogTitle>
+          <DialogContent className={classes.modalBody}>
+            <CustomInput
+              large
+              labelText={i18n.t(config.label)}
+              id="keyboard-dialog-input"
+              formControlProps={{
+                fullWidth: true,
+                required: config.required
+              }}
+              inputProps={{
+                // onFocus: setActiveInput,
+                required: config.required,
+                value: text || '',
+                onChange: onChangeInput,
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="clear input"
+                      onClick={() => {
+                        setText('');
+                        keyboard.setInput('');
+                      }}
+                    >
+                      <Clear/>
+                    </IconButton>
+                  </InputAdornment>
+                )
+              }}
+            />
+          </DialogContent>
+          <DialogActions
+            className={`${classes.modalFooter} ${
+              classes.modalFooterCenter
+              }`}
+          >
+            <Button
+              // className={classes.modalFooterCenter}
+              style={{ margin: '0 80px' }}
+              onClick={() => setShow(false)}
+              color="danger"
+              // size='lg'
+              autoFocus
+              round
+            >
+              {i18n.t('Common.Close')}
+            </Button>
+            <Button
+              style={{ margin: '0 80px' }}
+              onClick={handleSubmit}
+              color="success"
+              round
+              disabled={!submitEnable}
+            >
+              {i18n.t('Common.Submit')}
+            </Button>
+          </DialogActions>
+          <div className={classes.keyboard}>
+            <Keyboard
+              ref={r => {
+                keyboard = r;
+              }}
+              inputName="keyboard-dialog-input"
+              layoutName={layout}
+              onChange={setText}
+              onKeyPress={onKeyPress}
+            />
+          </div>
+        </Dialog>
+      </React.Fragment>
+    );
   }
 
-  return withStyles(customerStyles)(KeyboardDialog);
+  return KeyboardDialog;
 }

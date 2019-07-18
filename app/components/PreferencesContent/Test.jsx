@@ -124,15 +124,15 @@ class ConnectedTest extends React.Component {
         displayTitle: 'Aiis服务 URL',
         test: this.testAiis
       },
-      controllerSn: {
-        key: 'controllers',
-        disabled: true,
-        displayOrder: 100,
-        value: isNil(connInfo.controllers[0])
-          ? ''
-          : String(connInfo.controllers[0].serial_no),
-        displayTitle: '控制器序列号'
-      },
+      // controllerSn: {
+      //   key: 'controllers',
+      //   disabled: true,
+      //   displayOrder: 100,
+      //   value: isNil(connInfo.controllers[0])
+      //     ? ''
+      //     : String(connInfo.controllers[0].serial_no),
+      //   displayTitle: '控制器序列号'
+      // },
       rfidUrl: {
         key: 'rfid',
         disabled: false,

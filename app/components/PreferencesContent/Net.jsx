@@ -137,9 +137,7 @@ class ConnectedNet extends React.PureComponent {
   };
 
 
-  Transition(props) {
-    return <Fade {...props} timeout={500}/>;
-  }
+  Transition = React.forwardRef((p, r) => <Fade {...p} timeout={500} ref={r}/>);
 
   render() {
     const { classes, network, keyboardInput } = this.props;
@@ -149,7 +147,6 @@ class ConnectedNet extends React.PureComponent {
 
     const submitDisabled =
       Object.values(validateData).some(v => v === '');
-
 
 
     const inputsItems = t =>

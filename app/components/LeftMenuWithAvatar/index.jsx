@@ -40,7 +40,7 @@ function ConnectedLeftMenuWithAvatar(props) {
         paper: classes.drawerPaper
       }}
     >
-      <div className={classes.toolbar} />
+      {/*<div className={classes.toolbar} />*/}
 
       {children}
 

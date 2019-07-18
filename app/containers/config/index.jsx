@@ -1,8 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-
-import { withStyles } from '@material-ui/core/styles';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import MenuList from '@material-ui/core/MenuList';
 import MenuItem from '@material-ui/core/MenuItem';
 import Card from '@material-ui/core/Card';
@@ -10,10 +7,9 @@ import CardActionArea from '@material-ui/core/CardActionArea';
 import RssFeedIcon from '@material-ui/icons/RssFeed';
 import ViewModuleIcon from '@material-ui/icons/ViewModule';
 import SettingsRemoteIcon from '@material-ui/icons/SettingsRemote';
-import { I18n } from 'react-i18next';
-
+import makeStyles from '@material-ui/core/styles/makeStyles';
+import i18n from '../../i18n';
 import LeftMenuWithAvatar from '../../components/LeftMenuWithAvatar';
-import AppBarBack from '../../components/AppBarBack';
 import Net from '../../components/PreferencesContent/Net';
 import Io from '../../components/PreferencesContent/Io';
 import Connect from '../../components/PreferencesContent/Connect';
@@ -25,115 +21,85 @@ const menuContents = [
     text: 'Configuration.network.name',
     icon: selected => (
       <RssFeedIcon
-        style={{ fontSize:45, margin: 5, fill: selected ? '#FAFAFA' : '#009688' }}
+        style={{ fontSize: 45, margin: 5, fill: selected ? '#FAFAFA' : '#009688' }}
       />
     ),
-    component: <Net />
+    component: <Net/>
   },
   {
     text: 'Configuration.IO.name',
     icon: selected => (
       <ViewModuleIcon
-        style={{ fontSize:45, margin: 5, fill: selected ? '#FAFAFA' : '#ff9800' }}
+        style={{ fontSize: 45, margin: 5, fill: selected ? '#FAFAFA' : '#ff9800' }}
       />
     ),
-    component: <Io />
+    component: <Io/>
   },
   {
     text: 'Configuration.connections.name',
     icon: selected => (
       <SettingsRemoteIcon
-        style={{ fontSize:45, margin: 5, fill: selected ? '#FAFAFA' : '#3492ff' }}
+        style={{ fontSize: 45, margin: 5, fill: selected ? '#FAFAFA' : '#3492ff' }}
       />
     ),
-    component: <Connect />
+    component: <Connect/>
   }
 ];
 
-class ConnectedPreferences extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      activeMenu: 'Configuration.network.name'
-    };
+function ConnectedPreferences() {
+  const [activeMenu, setMenu] = useState('Configuration.network.name');
+  const classes = makeStyles(styles)();
 
-    this.handleChangeMenu = this.handleChangeMenu.bind(this);
-  }
+  const currentComponentIdx = menuContents.findIndex(
+    ele => activeMenu === ele.text
+  );
 
-  componentDidMount() {
-    // const { odooUrl, hmiSn } = this.props;
-    // this.props.initHmiConnInfo(odooUrl, hmiSn, false);
-  }
-
-  handleChangeMenu(text) {
-    this.setState({
-      activeMenu: text
-    });
-  }
-
-  render() {
-    const { classes } = this.props;
-    const { activeMenu } = this.state;
-    const currentComponentIdx = menuContents.findIndex(
-      ele => activeMenu === ele.text
-    );
-
-    const menuList = t => {
-      const menus = menuContents.map(item => (
-        <MenuItem
-          selected={activeMenu === item.text}
-          key={item.text}
-          className={classes.menuItem}
-          component={() => (
-            <Card
-              onClick={() => this.handleChangeMenu(item.text)}
-              className={
+  const menuItems = () => menuContents.map(item => (
+    <MenuItem
+      selected={activeMenu === item.text}
+      key={item.text}
+      className={classes.menuItem}
+      component={React.forwardRef((p, r) => (
+        <Card
+          onClick={() => setMenu(item.text)}
+          className={
+            activeMenu === item.text
+              ? classes.menuItemSelected
+              : classes.menuItem
+          }
+          ref={r}
+        >
+          <CardActionArea
+            classes={{
+              root:
                 activeMenu === item.text
-                  ? classes.menuItemSelected
-                  : classes.menuItem
-              }
-            >
-              <CardActionArea
-                classes={{
-                  root:
-                    activeMenu === item.text
-                      ? classes.cardActionAreaSelected
-                      : classes.cardActionArea
-                }}
-              >
-                {item.icon(activeMenu === item.text)}
-                <span className={classes.itemText}>{t(item.text)}</span>
-              </CardActionArea>
-            </Card>
-          )}
-        />
+                  ? classes.cardActionAreaSelected
+                  : classes.cardActionArea
+            }}
+          >
+            {item.icon(activeMenu === item.text)}
+            <span className={classes.itemText}>{i18n.t(item.text)}</span>
+          </CardActionArea>
+        </Card>
+      ))}
+    />
+  ));
 
-        // </MenuItem>
-      ));
-      return <div>{menus}</div>;
-    };
-
-    return (
-      <I18n ns="translations">
-        {t => (
-          <div className={classes.root}>
-            <AppBarBack />
-            <LeftMenuWithAvatar>
-              <MenuList>{menuList(t)}</MenuList>
-            </LeftMenuWithAvatar>
-            <div className={classes.content}>
-              {/*<div className={classes.toolbar} />*/}
-              {menuContents[currentComponentIdx].component}
-            </div>
-          </div>
-        )}
-      </I18n>
-    );
-  }
+  return (
+    <div className={classes.root}>
+      {/*<AppBarBack />*/}
+      <LeftMenuWithAvatar>
+        <MenuList>{menuItems()}</MenuList>
+      </LeftMenuWithAvatar>
+      <div className={classes.content}>
+        {menuContents[currentComponentIdx].component}
+      </div>
+    </div>
+  );
 }
 
 ConnectedPreferences.propTypes = {
   classes: PropTypes.shape({}).isRequired
 };
 
-export default withStyles(styles)(ConnectedPreferences);
+export default ConnectedPreferences;
