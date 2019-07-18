@@ -17,9 +17,9 @@ import styles from './styles';
 
 const StepPage = ({ step, isCurrent, bindAction }) => {
   let stepProps = {};
-  if (step && step.type && stepTypes[step.type] && stepTypes[step.type].component) {
+  if (stepTypes?.[step?.type]?.component) {
     const StepComponent = stepTypes[step.type].component;
-    stepProps = stepTypes[step.type].props && stepTypes[step.type].props({
+    stepProps = stepTypes?.[step?.type]?.props({
       payload: step.payload || {}
     }) || stepProps;
     return StepComponent &&
@@ -78,12 +78,11 @@ function StepWorking({ currentOrder, viewingStep, processingStep, viewingIndex, 
 
   return (
     <StylesProvider injectFirst>
-
       <div className={classes.root}>
         <Paper square className={classes.leftContainer} classes={{ root: classes.leftContainer }}>
           <Paper square className={classes.orderInfoContainer}>
             <Typography variant="h5">
-              {currentOrder && currentOrder.name}
+              {currentOrder?.name}
             </Typography>
           </Paper>
           <div className={classes.buttonsContainer}>
@@ -121,26 +120,14 @@ function StepWorking({ currentOrder, viewingStep, processingStep, viewingIndex, 
   );
 }
 
-const mapState = (state, props) => {
-  if (currentOrder(state.order)) {
-    return {
-      currentOrder: currentOrder(state.order),
-      viewingStep: viewingStep(state.order),
-      processingStep: processingStep(state.order),
-      steps: orderSteps(state.order),
-      viewingIndex: viewingIndex(state.order),
+const mapState = (state, props) => ({
+      currentOrder: currentOrder(state.order)||{},
+      viewingStep: viewingStep(state.order)||{},
+      processingStep: processingStep(state.order)||{},
+      steps: orderSteps(state.order)||[],
+      viewingIndex: viewingIndex(state.order)||0,
       ...props
-    };
-  }
-  return {
-    currentOrder: {},
-    viewingStep: {},
-    processingStep: {},
-    steps: [],
-    viewingIndex: 0,
-    ...props
-  };
-};
+    });
 
 const mapDispatch = {
   next: orderActions.nextStep,

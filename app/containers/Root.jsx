@@ -44,7 +44,6 @@ class Root extends Component<Props> {
   render() {
     const { store, history } = this.props;
     const { pages } = store.getState().setting;
-    console.log(pages);
     // listenToNewCar(store.dispatch, store.getState);
     // store.dispatch(systemInit()); // 初始化
     return (
