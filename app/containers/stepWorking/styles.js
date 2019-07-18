@@ -59,7 +59,7 @@ const stepper = {
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'flex-start !important',
     height: 50,
     padding:0
   }
