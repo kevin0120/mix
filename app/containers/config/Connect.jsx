@@ -13,7 +13,7 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import SaveIcon from '@material-ui/icons/Save';
 import { I18n } from 'react-i18next';
-import Button from '../CustomButtons/Button';
+import Button from '../../components/CustomButtons/Button';
 
 import saveConfigs from '../../modules/setting/action';
 import { systemInit } from '../../modules/systemInit/action';
@@ -23,7 +23,7 @@ import {toggleRFID} from '../../modules/rfid/action';
 import { sortObj, defaultClient } from '../../common/utils';
 import Test from './Test';
 import styles from './styles';
-import withKeyboard from '../Keyboard';
+import withKeyboard from '../../components/Keyboard';
 
 const lodash = require('lodash');
 
@@ -199,4 +199,4 @@ const Connect = connect(
   mapDispatchToProps
 )(ConnectedConnect);
 
-export default withKeyboard(withStyles(styles)(Connect));
+export default withKeyboard(withStyles(styles.content)(Connect));

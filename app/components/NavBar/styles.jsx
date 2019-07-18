@@ -1,4 +1,4 @@
-import { keyframes } from 'react-emotion';
+import { keyframes } from '@emotion/core';
 import pagesStyle from '../../common/jss/layouts/pagesStyle';
 import imagesStyles from '../../common/jss/imagesStyles';
 import popoverStyles from '../../common/jss/popoverStyles';

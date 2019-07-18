@@ -18,7 +18,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import { bindActionCreators } from 'redux';
-import Button from '../CustomButtons/Button';
+import Button from '../../components/CustomButtons/Button';
 
 import saveConfigs from '../../modules/setting/action';
 import { IO_FUNCTION } from '../../modules/io/model';
@@ -27,7 +27,7 @@ import { testIO } from '../../modules/io/saga';
 import { resetIO } from '../../modules/io/action';
 
 import styles from './styles';
-import withKeyboard from '../Keyboard';
+import withKeyboard from '../../components/Keyboard';
 
 const mapStateToProps = (state, ownProps) => ({
   storedConfigs: state.setting.page.modbus,
@@ -309,4 +309,4 @@ const Io = connect(
   mapDispatchToProps
 )(ConnectedIo);
 
-export default withKeyboard(withStyles(styles)(Io));
+export default withKeyboard(withStyles(styles.content)(Io));

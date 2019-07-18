@@ -7,7 +7,11 @@ const defaultConfigs = {
       working: ['user', 'admin'],
       // viewer: ['user', 'admin'],
       // order: ['user', 'admin'],
-      preference: ['user', 'admin'],
+      preference: {
+        Net:['user', 'admin'],
+        IO:['user', 'admin'],
+        Connect:['user', 'admin'],
+      },
       // event: ['user', 'admin'],
       // result: ['user', 'admin'],
       // curve: ['user', 'admin'],

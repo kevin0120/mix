@@ -5,7 +5,6 @@ import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'connected-react-router';
 import blue from '@material-ui/core/colors/blue';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-import { AppContainer } from 'react-hot-loader';
 import type { Store } from '../modules/indexReducer';
 import Routes from './Routes';
 import { listenToNewCar } from '../modules/scanner/action';
@@ -45,6 +44,7 @@ class Root extends Component<Props> {
   render() {
     const { store, history } = this.props;
     const { pages } = store.getState().setting;
+    console.log(pages);
     // listenToNewCar(store.dispatch, store.getState);
     // store.dispatch(systemInit()); // 初始化
     return (

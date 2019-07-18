@@ -16,7 +16,7 @@ import Dialog from '@material-ui/core/Dialog';
 import { GridLoader } from 'react-spinners';
 
 // react-emotion
-import { css } from 'react-emotion';
+import { css } from '@emotion/styled';
 
 // I18n
 import { I18n } from 'react-i18next';

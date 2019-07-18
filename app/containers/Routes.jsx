@@ -14,8 +14,8 @@ function renderRoute(R, subRouteList) {
       exact={R.exact || false}
       path={R.url}
       render={() => R.component ?
-        <R.component self={R} childRoutes={subRouteList}>
-          {subRouteList && subRouteList.map(subRoute => renderRoute(subRoute)) || null}
+        <R.component self={R} childRoutes={subRouteList[0]}>
+          {subRouteList[1]}
         </R.component> : null}
     /> : null;
 }
@@ -35,16 +35,18 @@ function parseRouteTree(routesObj, parentUrl, filter) {
     if (!route) {
       return null;
     }
-    return renderRoute(route, parseRouteTree(route, route.url, filter[route.name])[0]);
+    const childRoutes=parseRouteTree(route, route.url, filter[route.name]);
+    return renderRoute(route, childRoutes);
   });
   return [routeList, renderedRoute];
 }
 
 export default function Routes(props: Props) {
   const { pagesConfig } = props;
+  const RoutesParsed = parseRouteTree(pages, '', pagesConfig);
   return (
     <React.Fragment>
-      {parseRouteTree(pages, '', pagesConfig)[1]}
+      {RoutesParsed[1]}
     </React.Fragment>
   );
 

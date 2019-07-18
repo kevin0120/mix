@@ -9,7 +9,7 @@ import { StylesProvider } from '@material-ui/styles';
 
 import Button from '@material-ui/core/es/Button/Button';
 import { Typography, Paper, StepContent } from '@material-ui/core';
-import Timer from 'react-compound-timer';
+// import CoumpoundTimer from 'react-compound-timer';
 import { orderActions } from '../../modules/order/action';
 import { currentOrder, orderSteps, processingStep, viewingIndex, viewingStep } from '../../modules/order/selector';
 import stepTypes from '../steps/stepTypes';
@@ -60,14 +60,15 @@ const StepperLayout = ({ steps, currentStep, jumpTo }) => {
   );
 };
 
-const renderTimer = () =>
-  <Typography variant="h2">
-    <Timer formatValue={(v) => `0${v}`.slice(-2)}>
-      <Timer.Hours/>:
-      <Timer.Minutes/>:
-      <Timer.Seconds/>
-    </Timer>
-  </Typography>;
+const renderTimer = () =>null;
+// const renderTimer = () =>
+//   <Typography variant="h2">
+//     <CoumpoundTimer formatValue={(v) => `0${v}`.slice(-2)}>
+//       <CoumpoundTimer.Hours/>:
+//       <CoumpoundTimer.Minutes/>:
+//       <CoumpoundTimer.Seconds/>
+//     </CoumpoundTimer>
+//   </Typography>;
 
 function StepWorking({ currentOrder, viewingStep, processingStep, viewingIndex, steps, next, previous, jumpTo }) {
   const classes = makeStyles(styles.layout)();

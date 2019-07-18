@@ -14,12 +14,12 @@ import SaveIcon from '@material-ui/icons/Save';
 
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
-import Button from '../CustomButtons/Button';
+import Button from '../../components/CustomButtons/Button';
 
 import { sortObj } from '../../common/utils';
 import styles from './styles';
 import saveConfigs from '../../modules/setting/action';
-import withKeyboard from '../Keyboard';
+import withKeyboard from '../../components/Keyboard';
 import { systemInit } from '../../modules/systemInit/action';
 import { toggleRFID } from "../../modules/rfid/action";
 
@@ -348,4 +348,4 @@ ConnectedTest.propTypes = {
   connInfoData: PropTypes.shape({}).isRequired
 };
 
-export default withKeyboard(withStyles(styles)(ConnectedTest));
+export default withKeyboard(withStyles(styles.content)(ConnectedTest));

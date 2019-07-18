@@ -14,7 +14,7 @@ import Fade from '@material-ui/core/Fade';
 //   fetchRoutingWorkcenterbyJobId
 // } from '../../actions/ongoingRoutingWorkcenter';
 
-import { keyframes } from 'react-emotion';
+import { keyframes } from '@emotion/core';
 import Image from './Image';
 import popoverStyles from '../../common/jss/popoverStyles';
 

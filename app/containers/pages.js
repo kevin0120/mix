@@ -19,6 +19,10 @@ import Layout from './appLayout';
 import WorkingTemplate from './workingTemplate';
 import OperationList from './OperationList';
 import HomePage from './home';
+import Net from './config/Net';
+import IO from './config/Io';
+import Connect from './config/Connect';
+
 
 // imgs
 import helpImg from '../../resources/imgs/help.png';
@@ -77,8 +81,31 @@ const pages = {
       icon: icons.SettingsApplications,
       color: colors.orange[shade],
       image: settingImg,
-      exact: true
-
+      exact: false,
+      '/Net':{
+        // component:null,
+        component:Net,
+        icon:icons.RssFeed,
+        title:'Configuration.network.name',
+        color:'#009688',
+        exact: true,
+      },
+      '/IO':{
+        // component:null,
+        component:IO,
+        icon:icons.ViewModule,
+        title:'Configuration.IO.name',
+        color:'#ff9800',
+        exact: true,
+      },
+      '/Connect':{
+        // component:null,
+        component:Connect,
+        icon:icons.SettingsRemote,
+        title:'Configuration.connections.name',
+        color:'#3492ff',
+        exact: true,
+      }
     },
     '/event': {
       title: 'main.event',

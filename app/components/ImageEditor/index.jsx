@@ -10,11 +10,8 @@ import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import Fade from '@material-ui/core/Fade';
 import { GridLoader } from 'react-spinners';
-import { css } from 'react-emotion';
+import { css } from '@emotion/core';
 
-import styles from './styles';
-import Image from '../ImageStick/Image';
-import DraggablePoint from './DraggablePoint';
 
 // icons
 import InsertPhotoIcon from '@material-ui/icons/InsertPhoto';
@@ -23,6 +20,9 @@ import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CancelIcon from '@material-ui/icons/Cancel';
 import EditIcon from '@material-ui/icons/Edit';
+import DraggablePoint from './DraggablePoint';
+import Image from '../ImageStick/Image';
+import styles from './styles';
 
 const override = css`
     display: block;
@@ -255,9 +255,9 @@ class ImageEditor extends React.Component {
         >
           <GridLoader
             className={override}
-            sizeUnit={'px'}
+            sizeUnit="px"
             size={50}
-            color={'#36D7B7'}
+            color="#36D7B7"
             loading={loading}
           />
         </Dialog>
