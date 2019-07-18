@@ -457,6 +457,10 @@ type ScannerHandler struct {
 	l Logger
 }
 
+func (h *ScannerHandler) Info(msg string) {
+	h.l.Info(msg)
+}
+
 func (h *ScannerHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }

@@ -93,6 +93,10 @@ type commonHoneywellScanner struct {
 }
 
 func (d *DeviceInfo) updateDeviceService() error {
+	if runtime.GOOS == "windows" {
+		d.DeviceService = &commonUSBSerialScanner{}
+		return nil
+	}
 	switch d.VendorID {
 	case VendorHoneyWell:
 		d.DeviceService = &commonHoneywellScanner{}
@@ -193,6 +197,10 @@ type commonDataLogicScanner struct {
 	InEndpoint *USBInEndpoint
 }
 
+type commonUSBSerialScanner struct {
+	dev        USBDevice
+}
+
 func (v *commonDataLogicScanner) NewReader(dev USBDevice) error {
 	v.dev = dev
 	if runtime.GOOS != "windows" {
@@ -216,14 +224,13 @@ func (v *commonDataLogicScanner) NewReader(dev USBDevice) error {
 		return nil
 	}
 	return nil
-
 }
 
 func (v *commonDataLogicScanner) Read(buf []byte) (int, error) {
 	if runtime.GOOS == "windows" {
 		d := v.dev.(*serial.Port)
 		return d.Read(buf)
-	}else {
+	} else {
 		// unix and linux
 		if v.InEndpoint == nil {
 			return 0, errors.New("not Reader")
@@ -260,3 +267,23 @@ func (v *commonDataLogicScanner) Parse(buf []byte) (string, error) {
 //func (v *commonDataLogicScanner) Debounce() (time.Duration, time.Duration) {
 //	return 300 * time.Millisecond, 300 * time.Millisecond
 //}
+
+
+func (v *commonUSBSerialScanner) NewReader(d USBDevice) error {
+	v.dev = d
+	return nil
+}
+
+func (v *commonUSBSerialScanner) Parse(buf []byte) (string, error) {
+	return string(buf), nil
+}
+
+func (v *commonUSBSerialScanner) Close() error {
+	d := v.dev.(*serial.Port)
+	return d.Close()
+}
+
+func (v *commonUSBSerialScanner) Read(buf []byte) (int, error) {
+	d := v.dev.(*serial.Port)
+	return d.Read(buf)
+}

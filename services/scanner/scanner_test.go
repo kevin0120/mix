@@ -2,34 +2,28 @@ package scanner
 
 import (
 	"fmt"
-	"github.com/karalabe/hid"
+	"github.com/stretchr/testify/assert"
 	"testing"
 	//"time"
 )
 
-func TestScanner(t *testing.T) {
-	fmt.Println(hid.Supported())
+type TestDiag struct {
+}
 
-	devinfos := hid.Enumerate(3118, 2311)
-	devinfo := devinfos[0]
+func (td *TestDiag) Info(msg string) {
+	fmt.Printf("info：%s", msg)
+}
 
-	dev, err := devinfo.Open()
-	if err != nil {
-		fmt.Printf("open failed:%s\n", err.Error())
-		return
-	}
+func (td *TestDiag) Debug(msg string) {
+	fmt.Printf("debug：%s", msg)
+}
 
-	buf := make([]byte, 256)
-	for {
-		n, err := dev.Read(buf)
-		if err != nil {
-			fmt.Printf("read failed:%s\n", err.Error())
-			break
-		}
+func (td *TestDiag) Error(msg string, err error) {
+	fmt.Printf("error: %s", err.Error())
+}
 
-		if n > 0 {
-			fmt.Printf("read:%s\n", string(buf[0:n]))
-		}
-	}
-
+func TestNewDevice(t *testing.T) {
+	diag := &TestDiag{}
+	d := NewDevice("COM5", diag)
+	assert.NotNil(t, d)
 }

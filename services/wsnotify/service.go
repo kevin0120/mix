@@ -46,7 +46,7 @@ type Service struct {
 
 	Httpd *httpd.Service
 
-	clientManager WSClientManager
+	clientManager *WSClientManager
 	msgBuffer     chan string
 
 	OnNewClient OnNewClient
@@ -124,7 +124,7 @@ func NewService(c Config, d Diagnostic) *Service {
 			ReadBufferSize:  c.ReadBufferSize,
 			ReadTimeout:     websocket.DefaultWebsocketPongTimeout, //此作为readtimeout, 默认 如果有ping没有发送也成为read time out
 		}),
-		clientManager: WSClientManager{},
+		clientManager: &WSClientManager{},
 		msgBuffer:     make(chan string, 1024),
 		notifies:      []WSNotify{},
 		mtxNotifies:   sync.Mutex{},
@@ -218,17 +218,29 @@ func (s *Service) WSSendJob(payload string) {
 
 // ws群发扫码信息
 func (s *Service) WSSendScanner(payload string) {
+	if s == nil || s.clientManager == nil {
+		return
+	}
 	s.clientManager.NotifyALL(WS_EVENT_SCANNER, payload)
 }
 
 func (s *Service) WSSendIOInput(payload string) {
+	if s == nil || s.clientManager == nil {
+		return
+	}
 	s.clientManager.NotifyALL(WS_EVENT_IO, payload)
 }
 
 func (s *Service) WSSendIO(payload string) {
+	if s == nil || s.clientManager == nil {
+		return
+	}
 	s.clientManager.NotifyALL(WS_EVENT_IO, payload)
 }
 
 func (s *Service) WSSendReader(payload string) {
+	if s == nil || s.clientManager == nil {
+		return
+	}
 	s.clientManager.NotifyALL(WS_EVENT_READER, payload)
 }

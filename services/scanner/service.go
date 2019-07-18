@@ -19,10 +19,11 @@ import (
 // 2. 添加编译参数：CC=x86_64-w64-mingw32-gcc;CGO_LDFLAGS=-L/home/linshenqi/tools/libusb -lusb-1.0;GOOS=windows;CGO_ENABLED=1
 
 const (
-	SEARCH_ITV = 500 * time.Millisecond
+	ServiceSearchItv = 2000 * time.Millisecond
 )
 
 type Diagnostic interface {
+	Info(msg string)
 	Error(msg string, err error)
 	Debug(msg string)
 }
@@ -87,8 +88,19 @@ func (s *Service) search() {
 		pid, _ = strconv.ParseInt(ls[1], 10, 16)
 	}
 
-	for {
-		if runtime.GOOS == "windows" {
+	for ; ;{
+		var scanner *Scanner
+		if len(s.scanners) > 0 {
+			for _, ss := range s.scanners {
+				scanner = ss
+				break
+			}
+		}
+		if scanner != nil && scanner.Status() == SCANNER_STATUS_ONLINE {
+			time.Sleep(ServiceSearchItv)
+			continue
+		}
+		if runtime.GOOS != "windows" {
 			d, err := ctx.OpenDeviceWithVIDPID(ID(vid), ID(pid))
 			if err == nil {
 				s.addScanner(NewScanner(label, s.diag, d))
@@ -96,7 +108,7 @@ func (s *Service) search() {
 				fmt.Println(err.Error())
 			}
 		} else {
-			// unix or linux
+			// windows
 			c := &serial.Config{Name: label}
 			d, err := serial.OpenPort(c)
 			if err == nil {
@@ -105,7 +117,7 @@ func (s *Service) search() {
 				fmt.Println(err.Error())
 			}
 		}
-		time.Sleep(SEARCH_ITV)
+		time.Sleep(ServiceSearchItv)
 	}
 }
 
@@ -124,7 +136,13 @@ func (s *Service) removeScanner(id string) {
 	defer s.mtxScanners.Unlock()
 	s.mtxScanners.Lock()
 
-	delete(s.scanners, id)
+	if _, ok := s.scanners[id]; ok {
+		scanner := s.scanners[id]
+		if err := scanner.Stop(); err != nil {
+			delete(s.scanners, id)
+		}
+	}
+
 }
 
 func (s *Service) OnStatus(id string, status string) {
@@ -132,7 +150,6 @@ func (s *Service) OnStatus(id string, status string) {
 	if status == SCANNER_STATUS_OFFLINE {
 		s.removeScanner(id)
 	}
-
 	barcode, _ := json.Marshal(wsnotify.WSMsg{
 		Type: WS_SCANNER_STATUS,
 		Data: ScannerStatus{
@@ -140,7 +157,6 @@ func (s *Service) OnStatus(id string, status string) {
 			Status: status,
 		},
 	})
-
 	s.WS.WSSendScanner(string(barcode))
 }
 

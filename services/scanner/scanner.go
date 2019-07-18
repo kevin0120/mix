@@ -91,7 +91,7 @@ func (s *Scanner) Start() {
 }
 
 func (s *Scanner) Stop() error {
-	return nil
+	return s.close()
 }
 
 func (s *Scanner) Channel() string {
@@ -133,9 +133,9 @@ func (s *Scanner) open() (USBDevice, error) {
 		if err != nil {
 			return nil, err
 		}
-		if err := di.updateDeviceService(); err != nil {
-			return nil, err
-		}
+	}
+	if err := di.updateDeviceService(); err != nil {
+		return nil, err
 	}
 	if err := di.NewReader(s.device); err != nil {
 		return nil, err
@@ -174,7 +174,7 @@ func (s *Scanner) connectAndRecv() error {
 		s.device = d
 		s.status.Store(SCANNER_STATUS_ONLINE)
 		s.notify.OnStatus(s.Channel(), SCANNER_STATUS_ONLINE)
-		s.recv()
+		s.recv() //阻塞接收数据
 		return nil
 	} else {
 		return err
@@ -213,7 +213,7 @@ func (s *Scanner) recv() {
 	for {
 		n, err := di.Read(buf)
 		if err != nil {
-			s.diag.Error("read failed", err)
+			s.diag.Error("Read Fail", err)
 			// device offline
 			s.status.Store(SCANNER_STATUS_OFFLINE)
 			s.notify.OnStatus(s.Channel(), SCANNER_STATUS_OFFLINE)
