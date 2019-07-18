@@ -5,6 +5,8 @@ import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepButton from '@material-ui/core/StepButton';
 import StepLabel from '@material-ui/core/StepLabel';
+import { StylesProvider } from '@material-ui/styles';
+
 import Button from '@material-ui/core/es/Button/Button';
 import { Typography, Paper, StepContent } from '@material-ui/core';
 import Timer from 'react-compound-timer';
@@ -16,12 +18,12 @@ import styles from './styles';
 const StepPage = ({ step, isCurrent, bindAction }) => {
   let stepProps = {};
   if (step && step.type && stepTypes[step.type] && stepTypes[step.type].component) {
-    const StepContent = stepTypes[step.type].component;
+    const StepComponent = stepTypes[step.type].component;
     stepProps = stepTypes[step.type].props && stepTypes[step.type].props({
       payload: step.payload || {}
     }) || stepProps;
-    return StepContent &&
-      <StepContent
+    return StepComponent &&
+      <StepComponent
         step={step}
         {...stepProps}
         isCurrent={isCurrent}
@@ -36,6 +38,7 @@ const StepPage = ({ step, isCurrent, bindAction }) => {
 const StepperLayout = ({ steps, currentStep, jumpTo }) => {
   const classes = makeStyles(styles.stepper)();
   return (
+
     <Stepper nonLinear activeStep={currentStep} orientation="vertical" className={classes.stepper}>
       {steps.map((s, id) => {
         const stepProps = {};
@@ -59,7 +62,7 @@ const StepperLayout = ({ steps, currentStep, jumpTo }) => {
 
 const renderTimer = () =>
   <Typography variant="h2">
-    <Timer formatValue={(v)=>`0${v}`.slice(-2)}>
+    <Timer formatValue={(v) => `0${v}`.slice(-2)}>
       <Timer.Hours/>:
       <Timer.Minutes/>:
       <Timer.Seconds/>
@@ -73,43 +76,47 @@ function StepWorking({ currentOrder, viewingStep, processingStep, viewingIndex, 
   const noNext = steps.length <= 0 || viewingIndex >= steps.length - 1;
 
   return (
-    <div className={classes.root}>
-      <Paper square className={classes.leftContainer} classes={{ root: classes.leftContainer }}>
-        <Paper square className={classes.orderInfoContainer}>
-          <Typography variant="h5">
-            {currentOrder && currentOrder.name}
-          </Typography>
-        </Paper>
-        <div className={classes.buttonsContainer}>
-          <div>
-            <Button disabled={noPrevious} type="button" onClick={() => previous()}>{'<<'}</Button>
-            <Button disabled={noNext} type="button" onClick={() => next()}>{'>>'}</Button>
+    <StylesProvider injectFirst>
+
+      <div className={classes.root}>
+        <Paper square className={classes.leftContainer} classes={{ root: classes.leftContainer }}>
+          <Paper square className={classes.orderInfoContainer}>
+            <Typography variant="h5">
+              {currentOrder && currentOrder.name}
+            </Typography>
+          </Paper>
+          <div className={classes.buttonsContainer}>
+            <div>
+              <Button disabled={noPrevious} type="button" onClick={() => previous()}>{'<<'}</Button>
+              <Button disabled={noNext} type="button" onClick={() => next()}>{'>>'}</Button>
+            </div>
+            <div>
+              {action}
+            </div>
           </div>
-          <div>
-            {action}
+          <div className={classes.contentContainer}>
+            <StepPage
+              step={viewingStep}
+              isCurrent={viewingStep === processingStep}
+              bindAction={bindAction}
+            />
           </div>
-        </div>
-        <div className={classes.contentContainer}>
-          <StepPage
-            step={viewingStep}
-            isCurrent={viewingStep === processingStep}
-            bindAction={bindAction}
-          />
-        </div>
-      </Paper>
-      <div className={classes.rightContainer}>
-        <Paper square className={classes.timerContainer}>
-          {renderTimer()}
         </Paper>
-        <Paper square className={classes.stepperContainer}>
-          <StepperLayout
-            steps={steps}
-            currentStep={viewingIndex}
-            jumpTo={jumpTo}
-          />
-        </Paper>
+        <div className={classes.rightContainer}>
+          <Paper square className={classes.timerContainer}>
+            {renderTimer()}
+          </Paper>
+          <Paper square className={classes.stepperContainer}>
+            <StepperLayout
+              steps={steps}
+              currentStep={viewingIndex}
+              jumpTo={jumpTo}
+            />
+          </Paper>
+        </div>
       </div>
-    </div>
+    </StylesProvider>
+
   );
 }
 

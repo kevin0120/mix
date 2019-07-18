@@ -59,8 +59,9 @@ const stepper = {
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-start !important',
-    height: 50
+    justifyContent: 'flex-start',
+    height: 50,
+    padding:0
   }
 };
 

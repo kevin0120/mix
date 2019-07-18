@@ -8,10 +8,12 @@ import CardActionArea from '@material-ui/core/CardActionArea';
 import CardContent from '@material-ui/core/CardContent';
 import { withStyles } from '@material-ui/core/styles';
 import { cardStyles } from './styles';
+import makeStyles from '@material-ui/core/styles/makeStyles';
 
 
-const renderCard = withStyles(cardStyles)((props) => {
-  const { routes, onItemClick, classes } = props;
+const renderCard = (props) => {
+  const classes=makeStyles(cardStyles)();
+  const { routes, onItemClick } = props;
   return <I18n ns="translations">
     {t => (<Grid container className={classes.container} justify="center">
       {routes.map(route => route ? (
@@ -44,7 +46,7 @@ const renderCard = withStyles(cardStyles)((props) => {
       ) : null)}
     </Grid>)}
   </I18n>;
-});
+};
 
 const renderNavigation = (props) => {
   const { routes, onItemClick, navigationClassName, ActionClassName, value } = props;
@@ -52,7 +54,10 @@ const renderNavigation = (props) => {
     {t => (<BottomNavigation
       value={value}
       showLabels
-      className={navigationClassName}
+      // className={navigationClassName}
+      classes={{
+        root:navigationClassName
+      }}
     >
       {routes.map(route => route ? (
         <BottomNavigationAction
@@ -61,7 +66,10 @@ const renderNavigation = (props) => {
           onClick={() => onItemClick(route)}
           label={t(route.title)}
           icon={<route.icon/>}
-          className={ActionClassName}
+          // className={ActionClassName}
+          classes={{
+            root:ActionClassName
+          }}
         />
       ) : null)}
     </BottomNavigation>)}
