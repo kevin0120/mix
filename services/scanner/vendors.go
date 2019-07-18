@@ -2,6 +2,9 @@ package scanner
 
 import (
 	"errors"
+	"github.com/google/gousb"
+	"github.com/tarm/serial"
+	"runtime"
 )
 
 const (
@@ -83,6 +86,7 @@ var vendors = []vendor{
 }
 
 type commonHoneywellScanner struct {
+	dev        USBDevice
 	cfg        *USBConfig
 	Interface  *USBInterface
 	InEndpoint *USBInEndpoint
@@ -100,22 +104,28 @@ func (d *DeviceInfo) updateDeviceService() error {
 	return nil
 }
 
-func (v *commonHoneywellScanner) NewReader(dev *USBDevice) error {
-	cfg, err := dev.Config(1)
-	if err != nil {
-		return err
+func (v *commonHoneywellScanner) NewReader(dev USBDevice) error {
+	v.dev = dev
+	if runtime.GOOS != "windows" {
+		dev := dev.(*gousb.Device)
+		cfg, err := dev.Config(1)
+		if err != nil {
+			return err
+		}
+		v.cfg = cfg
+		intf, err := cfg.Interface(0, 0)
+		if err != nil {
+			return err
+		}
+		v.Interface = intf
+		epIn, err := intf.InEndpoint(4)
+		if err != nil {
+			return err
+		}
+		v.InEndpoint = epIn
+
+		return nil
 	}
-	v.cfg = cfg
-	intf, err := cfg.Interface(0, 0)
-	if err != nil {
-		return err
-	}
-	v.Interface = intf
-	epIn, err := intf.InEndpoint(4)
-	if err != nil {
-		return err
-	}
-	v.InEndpoint = epIn
 
 	return nil
 }
@@ -125,20 +135,34 @@ func (v *commonHoneywellScanner) NewReader(dev *USBDevice) error {
 //}
 
 func (v *commonHoneywellScanner) Read(buf []byte) (int, error) {
-
-	if v.InEndpoint == nil {
-		return 0, errors.New("not Reader")
+	if runtime.GOOS == "windows" {
+		d := v.dev.(*serial.Port)
+		return d.Read(buf)
+	} else {
+		if v.InEndpoint == nil {
+			return 0, errors.New("not Reader")
+		}
+		return v.InEndpoint.Read(buf)
 	}
-	return v.InEndpoint.Read(buf)
+
 }
 
 func (v *commonHoneywellScanner) Close() error {
 	var err error
-	if v.cfg != nil {
-		err = v.cfg.Close()
-	}
-	if v.Interface != nil {
-		v.Interface.Close()
+	if runtime.GOOS == "windows" {
+		d := v.dev.(*serial.Port)
+		err = d.Close()
+	} else {
+		d := v.dev.(*gousb.Device)
+		if v.cfg != nil {
+			err = v.cfg.Close()
+		}
+		if v.Interface != nil {
+			v.Interface.Close()
+		}
+		if err := d.Close(); err != nil {
+			return err
+		}
 	}
 	return err
 }
@@ -163,47 +187,70 @@ func (v *commonHoneywellScanner) Parse(buf []byte) (string, error) {
 }
 
 type commonDataLogicScanner struct {
+	dev        USBDevice
 	cfg        *USBConfig
 	Interface  *USBInterface
 	InEndpoint *USBInEndpoint
 }
 
-func (v *commonDataLogicScanner) NewReader(dev *USBDevice) error {
-	cfg, err := dev.Config(1)
-	if err != nil {
-		return err
-	}
-	v.cfg = cfg
-	intf, err := cfg.Interface(0, 0)
-	if err != nil {
-		return err
-	}
-	v.Interface = intf
-	epIn, err := intf.InEndpoint(2)
-	if err != nil {
-		return err
-	}
-	v.InEndpoint = epIn
+func (v *commonDataLogicScanner) NewReader(dev USBDevice) error {
+	v.dev = dev
+	if runtime.GOOS != "windows" {
+		dev := dev.(*gousb.Device)
+		cfg, err := dev.Config(1)
+		if err != nil {
+			return err
+		}
+		v.cfg = cfg
+		intf, err := cfg.Interface(0, 0)
+		if err != nil {
+			return err
+		}
+		v.Interface = intf
+		epIn, err := intf.InEndpoint(2)
+		if err != nil {
+			return err
+		}
+		v.InEndpoint = epIn
 
+		return nil
+	}
 	return nil
+
 }
 
 func (v *commonDataLogicScanner) Read(buf []byte) (int, error) {
-	if v.InEndpoint == nil {
-		return 0, errors.New("not Reader")
+	if runtime.GOOS == "windows" {
+		d := v.dev.(*serial.Port)
+		return d.Read(buf)
+	}else {
+		// unix and linux
+		if v.InEndpoint == nil {
+			return 0, errors.New("not Reader")
+		}
+		return v.InEndpoint.Read(buf)
 	}
-	return v.InEndpoint.Read(buf)
 }
 
 func (v *commonDataLogicScanner) Close() error {
 	var err error
-	if v.cfg != nil {
-		err = v.cfg.Close()
-	}
-	if v.Interface != nil {
-		v.Interface.Close()
+	if runtime.GOOS == "windows" {
+		d := v.dev.(*serial.Port)
+		return d.Close()
+	} else {
+		d := v.dev.(*gousb.Device)
+		if v.cfg != nil {
+			err = v.cfg.Close()
+		}
+		if v.Interface != nil {
+			v.Interface.Close()
+		}
+		if err := d.Close(); err != nil {
+			return err
+		}
 	}
 	return err
+
 }
 
 func (v *commonDataLogicScanner) Parse(buf []byte) (string, error) {

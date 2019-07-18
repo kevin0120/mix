@@ -2,7 +2,12 @@ package scanner
 
 import "github.com/google/gousb"
 
-type USBDevice = gousb.Device
+//type USBDevice = gousb.Device
+
+type USBDevice interface {
+	//SetAutoDetach(bool ) error
+	Close() error
+}
 type ID = gousb.ID
 type USBConfig = gousb.Config
 type USBInterface = gousb.Interface

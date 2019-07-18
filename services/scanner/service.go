@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"github.com/google/gousb"
 	"github.com/masami10/rush/services/wsnotify"
+	"github.com/tarm/serial"
+	"runtime"
+	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -62,7 +66,6 @@ func (s *Service) Open() error {
 }
 
 func (s *Service) Close() error {
-
 	return nil
 }
 
@@ -70,21 +73,38 @@ func (s *Service) search() {
 	ctx := gousb.NewContext()
 	defer ctx.Close()
 
-	for {
-		for _, v := range vendors {
-			devs, err := ctx.OpenDevices(func(desc *gousb.DeviceDesc) bool {
-				return desc.Vendor == v.VendorID && desc.Product == v.ProductID
-			})
+	label := s.config().EntityLabel
+	var vid, pid int64
 
+	if runtime.GOOS == "windows" {
+		// COM 口 通过串口打开
+	} else {
+		ls := strings.Split(label, ":")
+		if len(ls) != 2 {
+			return
+		}
+		vid, _ = strconv.ParseInt(ls[0], 10, 16)
+		pid, _ = strconv.ParseInt(ls[1], 10, 16)
+	}
+
+	for {
+		if runtime.GOOS == "windows" {
+			d, err := ctx.OpenDeviceWithVIDPID(ID(vid), ID(pid))
 			if err == nil {
-				for _, d := range devs {
-					s.addScanner(NewScanner(v.VendorID, v.ProductID, s.diag, d))
-				}
+				s.addScanner(NewScanner(label, s.diag, d))
+			} else {
+				fmt.Println(err.Error())
+			}
+		} else {
+			// unix or linux
+			c := &serial.Config{Name: label}
+			d, err := serial.OpenPort(c)
+			if err == nil {
+				s.addScanner(NewScanner(label, s.diag, d))
 			} else {
 				fmt.Println(err.Error())
 			}
 		}
-
 		time.Sleep(SEARCH_ITV)
 	}
 }
@@ -93,8 +113,8 @@ func (s *Service) addScanner(scanner *Scanner) {
 	defer s.mtxScanners.Unlock()
 	s.mtxScanners.Lock()
 
-	if _, ok := s.scanners[scanner.ID()]; !ok {
-		s.scanners[scanner.ID()] = scanner
+	if _, ok := s.scanners[scanner.Channel()]; !ok {
+		s.scanners[scanner.Channel()] = scanner
 		scanner.notify = s
 		scanner.Start()
 	}

@@ -1,9 +1,12 @@
 package scanner
 
 import (
-	"fmt"
 	"github.com/bep/debounce"
+	"github.com/google/gousb"
 	"github.com/pkg/errors"
+	"runtime"
+	"strconv"
+	"strings"
 	"sync/atomic"
 	"time"
 )
@@ -21,7 +24,7 @@ type DeviceService interface {
 	//isOpen() bool
 	//
 	//// vendorID, productID
-	NewReader(d *USBDevice) error
+	NewReader(d USBDevice) error
 
 	Read([]byte) (int, error)
 
@@ -38,11 +41,21 @@ type DeviceInfo struct {
 	DeviceService
 }
 
-func NewDevice(vid, pid ID, d Diagnostic) *DeviceInfo {
+func NewDevice(channel string, d Diagnostic) *DeviceInfo {
 	ret := &DeviceInfo{
-		VendorID:  vid,
-		ProductID: pid,
-		diag:      d,
+		Channel: channel,
+		diag:    d,
+	}
+	if runtime.GOOS != "windows" {
+		var vid, pid int64
+		ls := strings.Split(channel, ":")
+		if len(ls) != 2 {
+			return ret
+		}
+		vid, _ = strconv.ParseInt(ls[0], 10, 16)
+		pid, _ = strconv.ParseInt(ls[1], 10, 16)
+		ret.VendorID = ID(vid)
+		ret.ProductID = ID(pid)
 	}
 
 	return ret
@@ -55,7 +68,7 @@ type Notify interface {
 
 type Scanner struct {
 	devInfo *DeviceInfo
-	device  *USBDevice
+	device  USBDevice // maybe gousb, or serial
 
 	diag   Diagnostic
 	notify Notify
@@ -66,8 +79,8 @@ type Scanner struct {
 	init            bool
 }
 
-func NewScanner(vid, pid ID, d Diagnostic, dev *USBDevice) *Scanner {
-	di := NewDevice(vid, pid, d)
+func NewScanner(channel string, d Diagnostic, dev USBDevice) *Scanner {
+	di := NewDevice(channel, d)
 
 	return &Scanner{devInfo: di, diag: d, device: dev, debounceTrigger: false, init: true}
 }
@@ -81,11 +94,11 @@ func (s *Scanner) Stop() error {
 	return nil
 }
 
-func (s *Scanner) ID() string {
-	return fmt.Sprintf("%s", s.device.String())
+func (s *Scanner) Channel() string {
+	return s.devInfo.Channel
 }
 
-func (s *Scanner) getID() (ID, ID) {
+func (s *Scanner) getVIDPID() (ID, ID) {
 	di := s.devInfo
 	if di == nil {
 		return 0, 0
@@ -97,29 +110,38 @@ func (s *Scanner) Status() string {
 	return s.status.Load().(string)
 }
 
-func (s *Scanner) open() (*USBDevice, error) {
-	vid, pid := s.getID()
-	if vid == 0 || pid == 0 {
-		return nil, errors.New("Device Info is Empty\n")
-	}
-
-	err := s.device.SetAutoDetach(true)
-	if err != nil {
-		return nil, err
-	}
-
+func (s *Scanner) open() (USBDevice, error) {
 	di := s.devInfo
 	if di == nil {
 		return nil, errors.New("DeviceInfo is Empty")
 	}
-	if err := di.updateDeviceService(); err != nil {
-		return nil, err
+	label := s.Channel()
+	if label == "" {
+		return nil, errors.New("Device Info Label is Empty\n")
+	}
+	if runtime.GOOS != "windows" {
+		// 通过 gousb 创建vid, pid
+		vid, pid := s.getVIDPID()
+		if vid == 0 || pid == 0 {
+			return nil, errors.New("Device Info is Empty\n")
+		}
+		d := s.device.(*gousb.Device)
+		if d == nil {
+			return nil, errors.New("Device is Empty\n")
+		}
+		err := d.SetAutoDetach(true)
+		if err != nil {
+			return nil, err
+		}
+		if err := di.updateDeviceService(); err != nil {
+			return nil, err
+		}
 	}
 	if err := di.NewReader(s.device); err != nil {
 		return nil, err
 	}
 
-	return s.device, err
+	return s.device, nil
 }
 
 func (s *Scanner) close() error {
@@ -132,9 +154,6 @@ func (s *Scanner) close() error {
 		if err := di.Close(); err != nil {
 			return err
 		}
-	}
-	if err := d.Close(); err != nil {
-		return err
 	}
 	return nil
 }
@@ -154,7 +173,7 @@ func (s *Scanner) connectAndRecv() error {
 		// device online
 		s.device = d
 		s.status.Store(SCANNER_STATUS_ONLINE)
-		s.notify.OnStatus(s.ID(), SCANNER_STATUS_ONLINE)
+		s.notify.OnStatus(s.Channel(), SCANNER_STATUS_ONLINE)
 		s.recv()
 		return nil
 	} else {
@@ -197,13 +216,13 @@ func (s *Scanner) recv() {
 			s.diag.Error("read failed", err)
 			// device offline
 			s.status.Store(SCANNER_STATUS_OFFLINE)
-			s.notify.OnStatus(s.ID(), SCANNER_STATUS_OFFLINE)
+			s.notify.OnStatus(s.Channel(), SCANNER_STATUS_OFFLINE)
 			return
 		}
 
 		if s.devInfo == nil {
 			s.diag.Error("Recv Fail, Plz init device info first",
-				errors.Errorf("Scanner: %s ", s.device.String()))
+				errors.Errorf("Scanner: %s ", s.Channel()))
 			continue
 		}
 
@@ -216,7 +235,7 @@ func (s *Scanner) recv() {
 
 			s.debounced(func() {
 				if strRecv != "" {
-					s.notify.OnRecv(s.ID(), strRecv)
+					s.notify.OnRecv(s.Channel(), strRecv)
 					s.resetDebounce()
 					strRecv = ""
 				}
