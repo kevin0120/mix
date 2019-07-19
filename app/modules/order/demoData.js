@@ -1,8 +1,9 @@
 export const demoOrder = {
   name: 'fill info',
-  info: 'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
+  info:
+    'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
   type: 'step',
-  status:'TODO',
+  status: 'TODO',
   steps: [
     {
       name: '姓名',
@@ -21,13 +22,45 @@ export const demoOrder = {
       }
     },
     {
+      name: '地址',
+      info: 'this step collects a input',
+      type: 'input',
+      payload: {
+        label: 'address'
+      }
+    },
+    {
+      name: '地址',
+      info: 'this step collects a input',
+      type: 'input',
+      payload: {
+        label: 'address'
+      }
+    },
+    {
+      name: '地址',
+      info: 'this step collects a input',
+      type: 'input',
+      payload: {
+        label: 'address'
+      }
+    },
+    {
+      name: '地址',
+      info: 'this step collects a input',
+      type: 'input',
+      payload: {
+        label: 'address'
+      }
+    },
+    {
       name: '扫码',
       info: 'this step collects a input',
       type: 'scanner',
       payload: {
         label: 'address'
       }
-    },
+    }
     // {
     //   name: '联系方式',
     //   info: 'this step collects 2 inputs',
@@ -79,7 +112,6 @@ export const demoOrder = {
     //     }
     //   ]
     // }
-
   ]
 };
 
@@ -103,17 +135,20 @@ export const demoOrder2 = {
           }
         ]
       ]
-    }, {
+    },
+    {
       name: '获取作业',
       type: 'getOperation',
       payload: {
         keys: ['carID', 'carType']
       }
-    }, {
+    },
+    {
       name: '进行作业',
       type: 'doScrew',
       payload: {}
-    }, {
+    },
+    {
       name: '显示结果',
       type: 'showResult',
       payload: {

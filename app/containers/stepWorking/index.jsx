@@ -11,47 +11,66 @@ import Button from '@material-ui/core/es/Button/Button';
 import { Typography, Paper, StepContent } from '@material-ui/core';
 // import CoumpoundTimer from 'react-compound-timer';
 import { orderActions } from '../../modules/order/action';
-import { currentOrder, orderSteps, processingStep, viewingIndex, viewingStep } from '../../modules/order/selector';
+import * as orderSelectors from '../../modules/order/selector';
 import stepTypes from '../steps/stepTypes';
 import styles from './styles';
+import { ORDER_STEP_STATUS } from '../../modules/order/model';
 
 const StepPage = ({ step, isCurrent, bindAction }) => {
   let stepProps = {};
   if (stepTypes?.[step?.type]?.component) {
     const StepComponent = stepTypes[step.type].component;
-    stepProps = stepTypes?.[step?.type]?.genProps?.({
-      payload: step.payload || {}
-    }) || stepProps;
-    return StepComponent &&
-      <StepComponent
-        step={step}
-        {...stepProps}
-        isCurrent={isCurrent}
-        stepStatus={step.status || 'ready'}
-        bindAction={bindAction}
-      />
-      || null;
+    stepProps =
+      stepTypes?.[step?.type]?.genProps?.({
+        payload: step.payload || {}
+      }) || stepProps;
+    return (
+      (StepComponent && (
+        <StepComponent
+          step={step}
+          {...stepProps}
+          isCurrent={isCurrent}
+          stepStatus={step.status || 'ready'}
+          bindAction={bindAction}
+        />
+      )) ||
+      null
+    );
   }
   return null;
 };
 
-const StepperLayout = ({ steps, currentStep, jumpTo }) => {
+type StepperLayoutProps = {
+  steps: [],
+  currentStep: {},
+  jumpTo: () => {}
+};
+
+const StepperLayout = ({ steps, currentStep, jumpTo }: StepperLayoutProps) => {
   const classes = makeStyles(styles.stepper)();
   return (
-
-    <Stepper nonLinear activeStep={currentStep} orientation="vertical" className={classes.stepper}>
+    <Stepper
+      nonLinear
+      activeStep={currentStep}
+      orientation="vertical"
+      className={classes.stepper}
+    >
       {steps.map((s, id) => {
         const stepProps = {};
-        const labelProps = {};
+        const labelProps = {
+          error: s.status === ORDER_STEP_STATUS.FAIL
+        };
         return (
           <Step key={s.name} {...stepProps}>
-            <StepButton completed={s.status === 'finish'} onClick={() => jumpTo(id)} className={classes.stepButton}>
+            <StepButton
+              completed={s.status === ORDER_STEP_STATUS.FINISHED}
+              onClick={() => jumpTo(id)}
+              className={classes.stepButton}
+            >
               <StepLabel {...labelProps}>{s.name}</StepLabel>
             </StepButton>
             <StepContent>
-              <Typography>
-                {s.info}
-              </Typography>
+              <Typography>{s.info}</Typography>
             </StepContent>
           </Step>
         );
@@ -70,7 +89,27 @@ const renderTimer = () => null;
 //     </CoumpoundTimer>
 //   </Typography>;
 
-function StepWorking({ currentOrder, viewingStep, processingStep, viewingIndex, steps, next, previous, jumpTo }) {
+type StepWorkingProps = {
+  currentOrder: {},
+  viewingStep: {},
+  processingStep: {},
+  viewingIndex: number,
+  steps: [],
+  next: () => {},
+  previous: () => {},
+  jumpTo: () => {}
+};
+
+function StepWorking({
+  currentOrder,
+  viewingStep,
+  processingStep,
+  viewingIndex,
+  steps,
+  next,
+  previous,
+  jumpTo
+}: StepWorkingProps) {
   const classes = makeStyles(styles.layout)();
   const [action, bindAction] = useState(null);
   const noPrevious = steps.length <= 0 || viewingIndex <= 0;
@@ -79,20 +118,28 @@ function StepWorking({ currentOrder, viewingStep, processingStep, viewingIndex, 
   return (
     <StylesProvider injectFirst>
       <div className={classes.root}>
-        <Paper square className={classes.leftContainer} classes={{ root: classes.leftContainer }}>
+        <Paper
+          square
+          className={classes.leftContainer}
+          classes={{ root: classes.leftContainer }}
+        >
           <Paper square className={classes.orderInfoContainer}>
-            <Typography variant="h5">
-              {currentOrder?.name}
-            </Typography>
+            <Typography variant="h5">{currentOrder?.name}</Typography>
           </Paper>
           <div className={classes.buttonsContainer}>
             <div>
-              <Button disabled={noPrevious} type="button" onClick={() => previous()}>{'<<'}</Button>
-              <Button disabled={noNext} type="button" onClick={() => next()}>{'>>'}</Button>
+              <Button
+                disabled={noPrevious}
+                type="button"
+                onClick={() => previous()}
+              >
+                {'<<'}
+              </Button>
+              <Button disabled={noNext} type="button" onClick={() => next()}>
+                {'>>'}
+              </Button>
             </div>
-            <div>
-              {action}
-            </div>
+            <div>{action}</div>
           </div>
           <div className={classes.contentContainer}>
             <StepPage
@@ -116,16 +163,15 @@ function StepWorking({ currentOrder, viewingStep, processingStep, viewingIndex, 
         </div>
       </div>
     </StylesProvider>
-
   );
 }
 
 const mapState = (state, props) => ({
-  currentOrder: currentOrder(state.order) || {},
-  viewingStep: viewingStep(state.order) || {},
-  processingStep: processingStep(state.order) || {},
-  steps: orderSteps(state.order) || [],
-  viewingIndex: viewingIndex(state.order) || 0,
+  currentOrder: orderSelectors.currentOrder(state.order) || {},
+  viewingStep: orderSelectors.viewingStep(state.order) || {},
+  processingStep: orderSelectors.processingStep(state.order) || {},
+  steps: orderSelectors.orderSteps(state.order) || [],
+  viewingIndex: orderSelectors.viewingIndex(state.order) || 0,
   ...props
 });
 
@@ -135,4 +181,7 @@ const mapDispatch = {
   jumpTo: orderActions.jumpToStep
 };
 
-export default connect(mapState, mapDispatch)(StepWorking);
+export default connect(
+  mapState,
+  mapDispatch
+)(StepWorking);
