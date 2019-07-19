@@ -158,11 +158,11 @@ func (v *commonHoneywellScanner) Close() error {
 		err = d.Close()
 	} else {
 		d := v.dev.(*gousb.Device)
-		if v.cfg != nil {
-			err = v.cfg.Close()
-		}
 		if v.Interface != nil {
 			v.Interface.Close()
+		}
+		if v.cfg != nil {
+			err = v.cfg.Close()
 		}
 		if err := d.Close(); err != nil {
 			return err
@@ -246,11 +246,11 @@ func (v *commonDataLogicScanner) Close() error {
 		return d.Close()
 	} else {
 		d := v.dev.(*gousb.Device)
-		if v.cfg != nil {
-			err = v.cfg.Close()
-		}
 		if v.Interface != nil {
 			v.Interface.Close()
+		}
+		if v.cfg != nil {
+			err = v.cfg.Close()
 		}
 		if err := d.Close(); err != nil {
 			return err

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/google/gousb"
 	"github.com/masami10/rush/services/wsnotify"
+	"github.com/pkg/errors"
 	"github.com/tarm/serial"
 	"runtime"
 	"strconv"
@@ -102,10 +103,13 @@ func (s *Service) search() {
 		}
 		if runtime.GOOS != "windows" {
 			d, err := ctx.OpenDeviceWithVIDPID(ID(vid), ID(pid))
-			if err == nil {
+			if err == nil && d != nil{
+				s.diag.Debug(fmt.Sprintf("Search Success: %s", label))
 				s.addScanner(NewScanner(label, s.diag, d))
-			} else {
+			} else if err != nil {
 				s.diag.Error("Search Fail", err)
+			}else {
+				s.diag.Error("Search Fail", errors.New(fmt.Sprintf("Open Fail VID:%d, PID:%d",vid, pid)))
 			}
 		} else {
 			// windows
