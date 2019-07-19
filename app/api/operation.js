@@ -5,8 +5,6 @@ import axiosRetry from 'axios-retry';
 import isURL from 'validator/lib/isURL';
 import { Error } from '../logger';
 
-const lodash = require('lodash');
-
 const defaultClient = axios.create({
   timeout: 3000,
   headers: { 'Content-Type': 'application/json' }
@@ -39,9 +37,10 @@ export function fetchNextWorkOrder(baseURL, workcenterCode) {
     })
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(),{
-        at:fetchNextWorkOrder.name,
-        response:e.response && e.response.data && JSON.stringify(e.response.data)
+      Error(e.toString(), {
+        at: 'fetchNextWorkOrder',
+        response:
+          e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e;
     });
@@ -71,9 +70,10 @@ export function fetchRoutingWorkcenter(url, workCenterCode, carType, job) {
     .get(fullUrl, { params: paramObj })
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(),{
-        at:fetchRoutingWorkcenter.name,
-        response:e.response && e.response.data && JSON.stringify(e.response.data)
+      Error(e.toString(), {
+        at: 'fetchRoutingWorkcenter',
+        response:
+          e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e;
     });
@@ -98,16 +98,17 @@ export function fetchWorkorder(url, workcenterCode, code) {
     })
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(),{
-        at:fetchWorkorder.name,
-        response:e.response && e.response.data && JSON.stringify(e.response.data)
+      Error(e.toString(), {
+        at: 'fetchWorkorder',
+        response:
+          e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e;
     });
 }
 
 // 拧紧枪使能控制
-export function toolEnable(url, controllerSN, toolSN, enable,reason) {
+export function toolEnable(url, controllerSN, toolSN, enable, reason) {
   const fullUrl = `${url}/rush/v1/tool-enable`;
   return defaultClient
     .put(fullUrl, {
@@ -118,9 +119,10 @@ export function toolEnable(url, controllerSN, toolSN, enable,reason) {
     })
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(),{
-        at:toolEnable.name,
-        response:e.response && e.response.data && JSON.stringify(e.response.data)
+      Error(e.toString(), {
+        at: 'toolEnable',
+        response:
+          e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e;
     });
@@ -137,9 +139,10 @@ export function controllerMode(url, mode, controllerSN) {
     .put(fullUrl, bodyData)
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(),{
-        at:controllerMode.name,
-        response:e.response && e.response.data && JSON.stringify(e.response.data)
+      Error(e.toString(), {
+        at: 'controllerMode',
+        response:
+          e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e;
     });
@@ -171,9 +174,10 @@ export function pset(
     })
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(),{
-        at:pset.name,
-        response:e.response && e.response.data && JSON.stringify(e.response.data)
+      Error(e.toString(), {
+        at: 'pset',
+        response:
+          e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e;
     });
@@ -211,9 +215,10 @@ export function jobManual(
     })
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(),{
-        at:jobManual.name,
-        response:e.response && e.response.data && JSON.stringify(e.response.data)
+      Error(e.toString(), {
+        at: 'jobManual',
+        response:
+          e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e;
     });
@@ -241,9 +246,10 @@ export function ak2Api(
     })
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(),{
-        at:ak2Api.name,
-        response:e.response && e.response.data && JSON.stringify(e.response.data)
+      Error(e.toString(), {
+        at: 'ak2Api',
+        response:
+          e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e;
     });

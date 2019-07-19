@@ -12,9 +12,10 @@ export function operationListApi(baseURL, hmiSn) {
     })
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(),{
-        at:operationListApi.name,
-        response:e.response && e.response.data && JSON.stringify(e.response.data)
+      Error(e.toString(), {
+        at: 'operationListApi',
+        response:
+          e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e.toString();
     });
@@ -27,9 +28,10 @@ export function operationDetailApi(baseURL, operationID) {
     .get(fullUrl)
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(),{
-        at:operationDetailApi.name,
-        response:e.response && e.response.data && JSON.stringify(e.response.data)
+      Error(e.toString(), {
+        at: 'operationDetailApi',
+        response:
+          e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e.toString();
     });
@@ -40,15 +42,16 @@ export function imageEditApi(baseURL, operationID, points, img) {
   const fullUrl = `${baseURL}/mrp.routing.workcenter/${operationID}/edit`;
 
   return defaultClient
-    .put(fullUrl,{
+    .put(fullUrl, {
       points,
       img
     })
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(),{
-        at:imageEditApi.name,
-        response:e.response && e.response.data && JSON.stringify(e.response.data)
+      Error(e.toString(), {
+        at: 'imageEditApi',
+        response:
+          e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e.toString();
     });

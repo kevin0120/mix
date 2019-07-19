@@ -28,9 +28,10 @@ export function masterPCHealthCheck(conn) {
     .get(fullUrl)
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(),{
-        at:masterPCHealthCheck.name,
-        response:e.response && e.response.data && JSON.stringify(e.response.data)
+      Error(e.toString(), {
+        at: 'masterPCHealthCheck',
+        response:
+          e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e;
     });
@@ -50,9 +51,10 @@ export function controllerHealthCheck(conn, controllers) {
     })
     .then(response => response)
     .catch(e => {
-      Error(e.toString(),{
-        at:controllerHealthCheck.name,
-        response:e.response && e.response.data && JSON.stringify(e.response.data)
+      Error(e.toString(), {
+        at: 'controllerHealthCheck',
+        response:
+          e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e;
     });

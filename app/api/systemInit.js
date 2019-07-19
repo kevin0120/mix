@@ -11,14 +11,16 @@
 import { defaultClient } from '../common/utils';
 import { Error } from '../logger';
 
+// eslint-disable-next-line import/prefer-default-export
 export const fetchConnectionInfo = fullUrl =>
   defaultClient
     .get(fullUrl)
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(),{
-        at:fetchConnectionInfo.name,
-        response:e.response && e.response.data && JSON.stringify(e.response.data)
+      Error(e.toString(), {
+        at: 'fetchConnectionInfo',
+        response:
+          e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e.toString();
     });
