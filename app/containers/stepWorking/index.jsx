@@ -19,7 +19,7 @@ const StepPage = ({ step, isCurrent, bindAction }) => {
   let stepProps = {};
   if (stepTypes?.[step?.type]?.component) {
     const StepComponent = stepTypes[step.type].component;
-    stepProps = stepTypes?.[step?.type]?.props({
+    stepProps = stepTypes?.[step?.type]?.genProps?.({
       payload: step.payload || {}
     }) || stepProps;
     return StepComponent &&
@@ -60,7 +60,7 @@ const StepperLayout = ({ steps, currentStep, jumpTo }) => {
   );
 };
 
-const renderTimer = () =>null;
+const renderTimer = () => null;
 // const renderTimer = () =>
 //   <Typography variant="h2">
 //     <CoumpoundTimer formatValue={(v) => `0${v}`.slice(-2)}>
@@ -121,13 +121,13 @@ function StepWorking({ currentOrder, viewingStep, processingStep, viewingIndex, 
 }
 
 const mapState = (state, props) => ({
-      currentOrder: currentOrder(state.order)||{},
-      viewingStep: viewingStep(state.order)||{},
-      processingStep: processingStep(state.order)||{},
-      steps: orderSteps(state.order)||[],
-      viewingIndex: viewingIndex(state.order)||0,
-      ...props
-    });
+  currentOrder: currentOrder(state.order) || {},
+  viewingStep: viewingStep(state.order) || {},
+  processingStep: processingStep(state.order) || {},
+  steps: orderSteps(state.order) || [],
+  viewingIndex: viewingIndex(state.order) || 0,
+  ...props
+});
 
 const mapDispatch = {
   next: orderActions.nextStep,

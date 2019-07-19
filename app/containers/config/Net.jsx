@@ -112,7 +112,7 @@ function ConnectedNet({ doNetworkScan, doNetworkCheck, doNetworkSet, network, ke
   };
 
   const handleCloseSSID = () => {
-    setSSIDSelectOpen(true);
+    setSSIDSelectOpen(false);
   };
 
 

@@ -14,7 +14,7 @@ import styles from './styles';
 function Preference({ children, childRoutes, doPush, path }) {
   const classes = makeStyles(styles.config)();
 
-  const menuItems = () => childRoutes.map(r => (
+  const menuItems = () => childRoutes.map(r => r && (
     <I18n ns="translations" key={r.title}>
       {t => (
         <MenuItem

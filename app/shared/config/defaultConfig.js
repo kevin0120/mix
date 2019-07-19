@@ -11,6 +11,7 @@ const defaultConfigs = {
         Net:['user', 'admin'],
         IO:['user', 'admin'],
         Connect:['user', 'admin'],
+        help:['user','admin']
       },
       // event: ['user', 'admin'],
       // result: ['user', 'admin'],

@@ -82,29 +82,37 @@ const pages = {
       color: colors.orange[shade],
       image: settingImg,
       exact: false,
-      '/Net':{
+      '/Net': {
         // component:null,
-        component:Net,
-        icon:icons.RssFeed,
-        title:'Configuration.network.name',
-        color:'#009688',
-        exact: true,
+        component: Net,
+        icon: icons.RssFeed,
+        title: 'Configuration.network.name',
+        color: '#009688',
+        exact: true
       },
-      '/IO':{
+      '/IO': {
         // component:null,
-        component:IO,
-        icon:icons.ViewModule,
-        title:'Configuration.IO.name',
-        color:'#ff9800',
-        exact: true,
+        component: IO,
+        icon: icons.ViewModule,
+        title: 'Configuration.IO.name',
+        color: '#ff9800',
+        exact: true
       },
-      '/Connect':{
+      '/Connect': {
         // component:null,
-        component:Connect,
-        icon:icons.SettingsRemote,
-        title:'Configuration.connections.name',
-        color:'#3492ff',
-        exact: true,
+        component: Connect,
+        icon: icons.SettingsRemote,
+        title: 'Configuration.connections.name',
+        color: '#3492ff',
+        exact: true
+      },
+      '/help': {
+        title: 'main.help',
+        component: Help,
+        icon: icons.Help,
+        color: colors.pink[shade],
+        image: helpImg,
+        exact: true
       }
     },
     '/event': {
@@ -133,16 +141,8 @@ const pages = {
       image: CurveImg,
       exact: true
 
-    },
-    '/help': {
-      title: 'main.help',
-      component: Help,
-      icon: icons.Help,
-      color: colors.pink[shade],
-      image: helpImg,
-      exact: true
-
     }
+
   },
   '/pages': {
     component: LockLayout,
