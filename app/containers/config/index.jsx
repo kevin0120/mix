@@ -6,7 +6,7 @@ import CardActionArea from '@material-ui/core/CardActionArea';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import { push } from 'connected-react-router';
 import { connect } from 'react-redux';
-import i18n from '../../i18n';
+import { I18n } from 'react-i18next';
 import LeftMenuWithAvatar from '../../components/LeftMenuWithAvatar';
 
 import styles from './styles';
@@ -15,34 +15,37 @@ function Preference({ children, childRoutes, doPush, path }) {
   const classes = makeStyles(styles.config)();
 
   const menuItems = () => childRoutes.map(r => (
-    <MenuItem
-      selected={path === r.url}
-      key={r.title}
-      className={classes.menuItem}
-      component={React.forwardRef((p, ref) => (
-        <Card
-          onClick={() => doPush(r.url)}
-          className={
-            path === r.url
-              ? classes.menuItemSelected
-              : classes.menuItem
-          }
-          ref={ref}
-        >
-          <CardActionArea
-            classes={{
-              root:
+    <I18n ns="translations" key={r.title}>
+      {t => (
+        <MenuItem
+          selected={path === r.url}
+
+          className={classes.menuItem}
+          component={React.forwardRef((p, ref) => (
+            <Card
+              onClick={() => doPush(r.url)}
+              className={
                 path === r.url
-                  ? classes.cardActionAreaSelected
-                  : classes.cardActionArea
-            }}
-          >
-            {<r.icon style={{ fontSize: 45, margin: 5, fill:  path === r.url? '#FAFAFA' : r.color }}/>}
-            <span className={classes.itemText}>{i18n.t(r.title)}</span>
-          </CardActionArea>
-        </Card>
-      ))}
-    />
+                  ? classes.menuItemSelected
+                  : classes.menuItem
+              }
+              ref={ref}
+            >
+              <CardActionArea
+                classes={{
+                  root:
+                    path === r.url
+                      ? classes.cardActionAreaSelected
+                      : classes.cardActionArea
+                }}
+              >
+                {<r.icon style={{ fontSize: 45, margin: 5, fill: path === r.url ? '#FAFAFA' : r.color }}/>}
+                <span className={classes.itemText}>{t(r.title)}</span>
+              </CardActionArea>
+            </Card>
+          ))}
+        />)}
+    </I18n>
   ));
 
   return (
