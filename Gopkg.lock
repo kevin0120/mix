@@ -39,6 +39,14 @@
   version = "v1.2.0"
 
 [[projects]]
+  digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  pruneopts = "UT"
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
+
+[[projects]]
   branch = "master"
   digest = "1:6f9339c912bbdda81302633ad7e99a28dfa5a639c864061f1929510a9a64aa74"
   name = "github.com/dustin/go-humanize"
@@ -198,14 +206,6 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "c7d06af17c68cd34c835053720b21f6549d9b0ee"
-
-[[projects]]
-  digest = "1:c2bd38766f2cee8f75a690eaa7205ffc15de8a0529e0f2abf07a97058a5f7ed1"
-  name = "github.com/karalabe/hid"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "6bbb8df5a4e3ebed3398a30bdbeb80682ffb76f8"
-  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -407,6 +407,14 @@
   version = "v0.8.0"
 
 [[projects]]
+  digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  pruneopts = "UT"
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:9695b472826ca23e521d650849fefac3102dddbf841c9a4b35fb9d3ed5d17011"
   name = "github.com/rs/cors"
   packages = ["."]
@@ -446,6 +454,14 @@
   pruneopts = "UT"
   revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
   version = "v1.0.5"
+
+[[projects]]
+  digest = "1:972c2427413d41a1e06ca4897e8528e5a1622894050e2f527b38ddf0f343f759"
+  name = "github.com/stretchr/testify"
+  packages = ["assert"]
+  pruneopts = "UT"
+  revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
+  version = "v1.3.0"
 
 [[projects]]
   branch = "master"
@@ -627,7 +643,6 @@
     "github.com/gorilla/websocket",
     "github.com/iris-contrib/middleware/cors",
     "github.com/juju/errors",
-    "github.com/karalabe/hid",
     "github.com/kataras/iris",
     "github.com/kataras/iris/context",
     "github.com/kataras/iris/core/errors",
@@ -637,6 +652,7 @@
     "github.com/minio/minio-go",
     "github.com/pkg/errors",
     "github.com/satori/go.uuid",
+    "github.com/stretchr/testify/assert",
     "github.com/tarm/serial",
     "golang.org/x/net/context",
     "google.golang.org/grpc",
