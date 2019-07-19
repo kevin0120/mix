@@ -9,6 +9,7 @@ export const demoOrder = {
       name: '姓名',
       info: 'this step does one checking',
       type: 'input',
+      skippable: true,
       payload: {
         label: 'name'
       }

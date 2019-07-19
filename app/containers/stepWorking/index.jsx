@@ -97,7 +97,8 @@ type StepWorkingProps = {
   steps: [],
   next: () => {},
   previous: () => {},
-  jumpTo: () => {}
+  jumpTo: () => {},
+  pushStep: () => {}
 };
 
 function StepWorking({
@@ -108,7 +109,8 @@ function StepWorking({
   steps,
   next,
   previous,
-  jumpTo
+  jumpTo,
+  pushStep
 }: StepWorkingProps) {
   const classes = makeStyles(styles.layout)();
   const [action, bindAction] = useState(null);
@@ -138,6 +140,15 @@ function StepWorking({
               <Button disabled={noNext} type="button" onClick={() => next()}>
                 {'>>'}
               </Button>
+              {viewingStep?.skippable && (
+                <Button
+                  disabled={noNext || viewingStep !== processingStep}
+                  type="button"
+                  onClick={() => pushStep()}
+                >
+                  {'skip'}
+                </Button>
+              )}
             </div>
             <div>{action}</div>
           </div>
@@ -177,6 +188,7 @@ const mapState = (state, props) => ({
 
 const mapDispatch = {
   next: orderActions.nextStep,
+  pushStep: orderActions.pushStep,
   previous: orderActions.previousStep,
   jumpTo: orderActions.jumpToStep
 };
