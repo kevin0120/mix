@@ -11,15 +11,15 @@ type TestDiag struct {
 }
 
 func (td *TestDiag) Info(msg string) {
-	fmt.Printf("info：%s", msg)
+	fmt.Printf("info：%s\n", msg)
 }
 
 func (td *TestDiag) Debug(msg string) {
-	fmt.Printf("debug：%s", msg)
+	fmt.Printf("debug：%s\n", msg)
 }
 
 func (td *TestDiag) Error(msg string, err error) {
-	fmt.Printf("error: %s", err.Error())
+	fmt.Printf("msg: %s, error: %s\n",msg, err.Error())
 }
 
 func TestNewDevice(t *testing.T) {

@@ -105,16 +105,17 @@ func (s *Service) search() {
 			if err == nil {
 				s.addScanner(NewScanner(label, s.diag, d))
 			} else {
-				fmt.Println(err.Error())
+				s.diag.Error("Search Fail", err)
 			}
 		} else {
 			// windows
 			c := &serial.Config{Name: label}
 			d, err := serial.OpenPort(c)
 			if err == nil {
+				s.diag.Debug(fmt.Sprintf("Search Success: %s", label))
 				s.addScanner(NewScanner(label, s.diag, d))
 			} else {
-				fmt.Println(err.Error())
+				s.diag.Error("Search Fail", err)
 			}
 		}
 		time.Sleep(ServiceSearchItv)
@@ -138,11 +139,10 @@ func (s *Service) removeScanner(id string) {
 
 	if _, ok := s.scanners[id]; ok {
 		scanner := s.scanners[id]
-		if err := scanner.Stop(); err != nil {
+		if err := scanner.Stop(); err == nil {
 			delete(s.scanners, id)
 		}
 	}
-
 }
 
 func (s *Service) OnStatus(id string, status string) {

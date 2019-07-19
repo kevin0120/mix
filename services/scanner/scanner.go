@@ -155,17 +155,35 @@ func (s *Scanner) close() error {
 			return err
 		}
 	}
+	s.device = nil
+	s.devInfo = nil
 	return nil
 }
 
 func (s *Scanner) manage() {
 	for {
-		_ = s.connectAndRecv()
+		if s.Status() == SCANNER_STATUS_OFFLINE {
+			_ = s.connect()
+		}
+		if s.Status() == SCANNER_STATUS_ONLINE {
+			s._recv()
+		}
 		time.Sleep(SCANNER_OPEN_ITV)
 	}
 }
 
-func (s *Scanner) connectAndRecv() error {
+func (s *Scanner) connect() error  {
+	d, err := s.open()
+	if err == nil {
+		// device online
+		s.device = d
+		s.status.Store(SCANNER_STATUS_ONLINE)
+		s.notify.OnStatus(s.Channel(), SCANNER_STATUS_ONLINE)
+	}
+	return err
+}
+
+func (s *Scanner) recv() error {
 	//ctx := gousb.NewContext()
 	//defer ctx.Close()
 	d, err := s.open()
@@ -174,7 +192,7 @@ func (s *Scanner) connectAndRecv() error {
 		s.device = d
 		s.status.Store(SCANNER_STATUS_ONLINE)
 		s.notify.OnStatus(s.Channel(), SCANNER_STATUS_ONLINE)
-		s.recv() //阻塞接收数据
+		s._recv() //阻塞接收数据
 		return nil
 	} else {
 		return err
@@ -202,7 +220,7 @@ func (s *Scanner) triggerDebounce() {
 	}
 }
 
-func (s *Scanner) recv() {
+func (s *Scanner) _recv() {
 	buf := make([]byte, SCANNER_BUF_LEN)
 	di := s.devInfo
 	if di == nil {
