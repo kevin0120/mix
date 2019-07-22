@@ -1,7 +1,7 @@
 import { ORDER } from './action';
 import { genReducers } from '../indexReducer';
 import { ORDER_STEP_STATUS, ORDER_STATUS } from './model';
-import { demoOrder, demoOrder2 } from './demoData';
+import { demoOrder, demoOrder2, demoOrderExcp } from './demoData';
 import {
   viewingStep,
   processingStep,
@@ -15,7 +15,7 @@ const initState = {
   currentOrder: null,
   processingIndex: 0,
   viewingIndex: 0,
-  list: [demoOrder, demoOrder2]
+  list: [demoOrder, demoOrder2, demoOrderExcp]
 };
 
 function setStepData(state, reducer) {
@@ -25,10 +25,10 @@ function setStepData(state, reducer) {
   return newState;
 }
 
-function setOrderStatus(state, status){
+function setOrderStatus(state, status) {
   const newState = { ...state };
-  const newOrder=currentOrder(newState);
-  newOrder.status=status;
+  const newOrder = currentOrder(newState);
+  newOrder.status = status;
   return newState;
 }
 
@@ -63,8 +63,14 @@ const orderReducer = {
       startTime: new Date()
     };
   },
-  [ORDER.FINISH]: (state) => setOrderStatus(state,ORDER_STATUS.DONE),
-  [ORDER.FAIL]: (state) => setOrderStatus(state,ORDER_STATUS.FAIL),
+  [ORDER.FINISH]: (state) => {
+    const newState = setOrderStatus(state, ORDER_STATUS.DONE);
+    return {
+      ...newState,
+      currentOrder: null
+    };
+  },
+  [ORDER.FAIL]: (state) => setOrderStatus(state, ORDER_STATUS.FAIL),
   [ORDER.STEP.NEXT]: (state) => {
     const newIndex = limitIndex(state, viewingIndex(state) + 1);
     return {

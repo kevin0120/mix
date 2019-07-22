@@ -49,7 +49,7 @@ export default (theme) => ({
   },
   statusIndicator:{
     display:'block',
-    width:'3px',
+    width:'5px',
     height:cardHeight
   },
   orderNameText:{
@@ -75,9 +75,12 @@ export default (theme) => ({
     backgroundColor:'green',
   },
   statusCancel:{
-    backgroundColor:'red',
+    backgroundColor:'yellow',
   },
   statusPending:{
     backgroundColor:'orange',
+  },
+  statusFail:{
+    backgroundColor:'red',
   },
 });

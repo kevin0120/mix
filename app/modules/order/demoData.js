@@ -10,10 +10,8 @@ export const demoOrder = {
       info: 'this step does one checking',
       type: 'input',
       skippable: true,
-      revocable:true,
-      data:{
-
-      },
+      revocable: true,
+      data: {},
       payload: {
         label: 'name'
       }
@@ -22,7 +20,7 @@ export const demoOrder = {
       name: '地址',
       info: 'this step collects a input',
       type: 'input',
-      revocable:true,
+      revocable: true,
 
       payload: {
         label: 'address'
@@ -59,15 +57,15 @@ export const demoOrder = {
       payload: {
         label: 'address'
       }
-    },
-    {
-      name: '扫码',
-      info: 'this step collects a input',
-      type: 'scanner',
-      payload: {
-        label: 'address'
-      }
     }
+    // {
+    //   name: '扫码',
+    //   info: 'this step collects a input',
+    //   type: 'scanner',
+    //   payload: {
+    //     label: 'address'
+    //   }
+    // }
     // {
     //   name: '联系方式',
     //   info: 'this step collects 2 inputs',
@@ -119,6 +117,27 @@ export const demoOrder = {
     //     }
     //   ]
     // }
+  ]
+};
+
+export const demoOrderExcp = {
+  name: 'fill info',
+  info:
+    'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
+  type: 'step',
+  status: 'FAIL',
+  steps: [
+    {
+      name: '姓名',
+      info: 'this step does one checking',
+      type: 'input',
+      skippable: true,
+      revocable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    }
   ]
 };
 

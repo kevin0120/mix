@@ -11,6 +11,7 @@ import clsx from 'clsx';
 import CardContent from '@material-ui/core/CardContent';
 import { orderActions } from '../../modules/order/action';
 import { ORDER_STATUS } from '../../modules/order/model';
+import { todoOrders, doneOrders, excpOrders } from '../../modules/order/selector';
 import styles from './styles';
 import settingImg from '../../../resources/imgs/setting.png';
 
@@ -35,9 +36,10 @@ function HomeOperationList(props: Props) {
     [ORDER_STATUS.WIP]: classes.statusWIP,
     [ORDER_STATUS.DONE]: classes.statusDone,
     [ORDER_STATUS.CANCEL]: classes.statusCancel,
-    [ORDER_STATUS.PENDING]: classes.statusPending
-
+    [ORDER_STATUS.PENDING]: classes.statusPending,
+    [ORDER_STATUS.FAIL]: classes.statusFail,
   };
+
   const renderOrders = (orders, size, title) => {
     return (
       <React.Fragment>
@@ -46,9 +48,10 @@ function HomeOperationList(props: Props) {
             {title}
           </Typography>
         </Grid>
-        {orders.map((order) => <Grid item xs={size} key={order.name}>
+        {orders?.map((order) => <Grid item xs={size} key={order.name}>
             <Paper square className={classes.orderCardContainer}>
               <CardActionArea className={classes.orderCard} onClick={() => onCardClick(order)}>
+                <div className={clsx(statusMap[order.status || ORDER_STATUS.TODO], classes.statusIndicator)}/>
                 <CardMedia
                   className={classes.image}
                   src={settingImg}
@@ -58,18 +61,17 @@ function HomeOperationList(props: Props) {
                   <Typography variant="body1" align="left" className={classes.orderNameText}>
                     {order.name}
                   </Typography>
-                  <Typography variant="body2" color="textSecondary" align="left"  className={classes.orderInfoText}>
+                  <Typography variant="body2" color="textSecondary" align="left" className={classes.orderInfoText}>
                     {order.info}
                   </Typography>
                   <Typography variant="body2" color="textSecondary" align="left" className={classes.orderStatusText}>
                     {order.status || ORDER_STATUS.TODO}
                   </Typography>
                 </CardContent>
-                <div className={clsx(statusMap[order.status || ORDER_STATUS.TODO], classes.statusIndicator)}/>
               </CardActionArea>
             </Paper>
           </Grid>
-        )}
+        ) || null}
       </React.Fragment>
     );
   };
@@ -78,15 +80,15 @@ function HomeOperationList(props: Props) {
     <Grid container className={clsx(classes.container, classes.bgEven)} justify="center" spacing={4}>
       <Grid item container xs={6} spacing={1} alignItems="flex-start" alignContent="flex-start"
             justify="flex-start" direction="row" className={classes.bgOdd}>
-        {renderOrders(orderList, 6, 'TODO')}
+        {renderOrders(todoOrders(orderList), 6, 'TODO')}
       </Grid>
       <Grid item container xs={3} spacing={1} alignItems="flex-start" alignContent="flex-start"
             justify="flex-start" direction="row" className={classes.bgEven}>
-        {renderOrders(orderList, 12, 'DONE')}
+        {renderOrders(doneOrders(orderList), 12, 'DONE')}
       </Grid>
       <Grid item container xs={3} spacing={1} alignItems="flex-start" alignContent="flex-start"
             justify="flex-start" direction="row" className={classes.bgOdd}>
-        {renderOrders(orderList, 12, 'EXCP')}
+        {renderOrders(excpOrders(orderList), 12, 'EXCP')}
       </Grid>
     </Grid>
   </div>;
