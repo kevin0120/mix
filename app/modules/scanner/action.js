@@ -11,7 +11,8 @@ export const SCANNER = {
 
 let scanner = null;
 
-const usbDetect = require('usb-detection');
+const usbDetect = null;
+// const usbDetect = require('usb-detection');
 const HID = require('node-hid');
 
 const lodash = require('lodash');

@@ -7,7 +7,8 @@ import { watch } from '../indexSaga';
 import {CARD_AUTH} from './action';
 
 
-const pcscLite = require('pcsclite');
+// const pcscLite = require('pcsclite');
+const pcscLite = null;
 
 let pcscd = null;
 let reader = null;
