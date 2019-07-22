@@ -9,7 +9,6 @@ import { StylesProvider } from '@material-ui/styles';
 
 import Button from '@material-ui/core/es/Button/Button';
 import { Typography, Paper, StepContent } from '@material-ui/core';
-// import CoumpoundTimer from 'react-compound-timer';
 import { orderActions } from '../../modules/order/action';
 import * as orderSelectors from '../../modules/order/selector';
 import stepTypes from '../steps/stepTypes';
@@ -80,14 +79,6 @@ const StepperLayout = ({ steps, currentStep, jumpTo }: StepperLayoutProps) => {
 };
 
 const renderTimer = () => null;
-// const renderTimer = () =>
-//   <Typography variant="h2">
-//     <CoumpoundTimer formatValue={(v) => `0${v}`.slice(-2)}>
-//       <CoumpoundTimer.Hours/>:
-//       <CoumpoundTimer.Minutes/>:
-//       <CoumpoundTimer.Seconds/>
-//     </CoumpoundTimer>
-//   </Typography>;
 
 type StepWorkingProps = {
   currentOrder: {},
@@ -98,20 +89,21 @@ type StepWorkingProps = {
   next: () => {},
   previous: () => {},
   jumpTo: () => {},
-  pushStep: () => {}
+  doNextStep: () => {}
 };
 
 function StepWorking({
-  currentOrder,
-  viewingStep,
-  processingStep,
-  viewingIndex,
-  steps,
-  next,
-  previous,
-  jumpTo,
-  pushStep
-}: StepWorkingProps) {
+                       currentOrder,
+                       viewingStep,
+                       processingStep,
+                       viewingIndex,
+                       steps,
+                       next,
+                       previous,
+                       jumpTo,
+                       doNextStep,
+                       doPreviousStep
+                     }: StepWorkingProps) {
   const classes = makeStyles(styles.layout)();
   const [action, bindAction] = useState(null);
   const noPrevious = steps.length <= 0 || viewingIndex <= 0;
@@ -144,9 +136,18 @@ function StepWorking({
                 <Button
                   disabled={noNext || viewingStep !== processingStep}
                   type="button"
-                  onClick={() => pushStep()}
+                  onClick={() => doNextStep()}
                 >
                   {'skip'}
+                </Button>
+              )}
+              {viewingStep?.revocable && (
+                <Button
+                  disabled={viewingStep !== processingStep}
+                  type="button"
+                  onClick={() => doPreviousStep()}
+                >
+                  {'revoke'}
                 </Button>
               )}
             </div>
@@ -188,9 +189,10 @@ const mapState = (state, props) => ({
 
 const mapDispatch = {
   next: orderActions.nextStep,
-  pushStep: orderActions.pushStep,
+  doNextStep: orderActions.doNextStep,
   previous: orderActions.previousStep,
-  jumpTo: orderActions.jumpToStep
+  jumpTo: orderActions.jumpToStep,
+  doPreviousStep: orderActions.doPreviousStep
 };
 
 export default connect(

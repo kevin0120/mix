@@ -1,16 +1,37 @@
 import { ORDER } from './action';
 import { genReducers } from '../indexReducer';
-import { ORDER_STEP_STATUS } from './model';
+import { ORDER_STEP_STATUS, ORDER_STATUS } from './model';
 import { demoOrder, demoOrder2 } from './demoData';
-import { viewingStep, processingStep, processingIndex, currentOrderLength, viewingIndex, currentOrder } from './selector';
+import {
+  viewingStep,
+  processingStep,
+  processingIndex,
+  currentOrderLength,
+  viewingIndex,
+  currentOrder
+} from './selector';
 
 const initState = {
   currentOrder: null,
   processingIndex: 0,
   viewingIndex: 0,
-  status: '',
   list: [demoOrder, demoOrder2]
 };
+
+function setStepData(state, reducer) {
+  const newState = { ...state };
+  const newStep = processingStep(newState);
+  newStep.data = reducer(newStep);
+  return newState;
+}
+
+function setOrderStatus(state, status){
+  const newState = { ...state };
+  const newOrder=currentOrder(newState);
+  newOrder.status=status;
+  return newState;
+}
+
 
 function setStepStatus(state, status) {
   const newState = {
@@ -21,7 +42,7 @@ function setStepStatus(state, status) {
   return newState;
 }
 
-function limitIndex(index, state) {
+function limitIndex(state, index) {
   if (index < 0) {
     return 0;
   }
@@ -38,12 +59,14 @@ const orderReducer = {
       ...state,
       currentOrder: action.order || null,
       viewingIndex: firstIndex,
-      processingIndex: firstIndex
+      processingIndex: firstIndex,
+      startTime: new Date()
     };
   },
-
+  [ORDER.FINISH]: (state) => setOrderStatus(state,ORDER_STATUS.DONE),
+  [ORDER.FAIL]: (state) => setOrderStatus(state,ORDER_STATUS.FAIL),
   [ORDER.STEP.NEXT]: (state) => {
-    const newIndex = limitIndex(viewingIndex(state) + 1, state);
+    const newIndex = limitIndex(state, viewingIndex(state) + 1);
     return {
       ...state,
       viewingIndex: newIndex
@@ -51,7 +74,7 @@ const orderReducer = {
   },
 
   [ORDER.STEP.PREVIOUS]: (state) => {
-    const newIndex = limitIndex(viewingIndex(state) - 1, state);
+    const newIndex = limitIndex(state, viewingIndex(state) - 1);
     return {
       ...state,
       viewingIndex: newIndex
@@ -74,7 +97,7 @@ const orderReducer = {
   [ORDER.STEP.FAIL]: (state) => setStepStatus(state, ORDER_STEP_STATUS.FAIL),
   [ORDER.STEP.RESET]: (state) => setStepStatus(state, ORDER_STEP_STATUS.READY),
   //
-  [ORDER.STEP.PUSH]: (state) => {
+  [ORDER.STEP.DO_NEXT]: (state) => {
     const newIndex = processingIndex(state) + 1;
     return {
       ...state,
@@ -82,22 +105,18 @@ const orderReducer = {
       viewingIndex: processingStep(state) === viewingStep(state) ? newIndex : viewingIndex(state)
     };
   },
-  [ORDER.STEP.REVOKE]:(state)=>{
-    const newIndex = processingIndex(state) - 1;
-    return {
+  [ORDER.STEP.DO_PREVIOUS]: (state) => {
+    const newIndex = limitIndex(state, processingIndex(state) - 1);
+    const revokedState = {
       ...state,
       processingIndex: newIndex,
       viewingIndex: processingStep(state) === viewingStep(state) ? newIndex : viewingIndex(state)
     };
+    return setStepStatus(revokedState, ORDER_STEP_STATUS.READY);
   },
-  [ORDER.STEP.UPDATE]: (state, action) => {
-    const { newStep } = action;
-    const newOrder = currentOrder(state).slice();
-    newOrder.splice(processingIndex(state), 1, newStep);
-    return {
-      ...state,
-      currentOrder: newOrder
-    };
+  [ORDER.STEP.DATA]: (state, action) => {
+    const { reducer } = action;
+    return setStepData(state, reducer);
   }
 };
 

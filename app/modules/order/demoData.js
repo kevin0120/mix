@@ -10,6 +10,10 @@ export const demoOrder = {
       info: 'this step does one checking',
       type: 'input',
       skippable: true,
+      revocable:true,
+      data:{
+
+      },
       payload: {
         label: 'name'
       }
@@ -18,6 +22,8 @@ export const demoOrder = {
       name: '地址',
       info: 'this step collects a input',
       type: 'input',
+      revocable:true,
+
       payload: {
         label: 'address'
       }

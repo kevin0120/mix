@@ -1,4 +1,4 @@
-import { take, call, race, fork, select, put } from 'redux-saga/effects';
+import { take, call, race, all, select, put } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 import { ORDER, orderActions } from './action';
 import stepTypes from '../steps/stepTypes';
@@ -46,10 +46,16 @@ function* doOrder() {
       if (!type) {
         throw new Error('step type not valid:', type);
       }
-      const { next } = yield race({
-        exit: call(stepTypes[type], ORDER, orderActions),
-        next: take(ORDER.STEP.PUSH)
+      console.log('doing order');
+      const { next, previous } = yield race({
+        exit: all([
+          call(stepTypes[type], ORDER, orderActions),
+          put(orderActions.enterStep())
+        ]),
+        next: take(ORDER.STEP.DO_NEXT),
+        previous: take(ORDER.STEP.DO_PREVIOUS)
       });
+
       if (next) {
         const order = yield select((state) => state.order);
         if (processingIndex(order) >= currentOrderLength(order)) {

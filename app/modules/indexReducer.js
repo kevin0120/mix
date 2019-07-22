@@ -2,6 +2,7 @@
 import { combineReducers } from 'redux';
 import { connectRouter } from 'connected-react-router';
 
+import type { Dispatch as ReduxDispatch, Store as ReduxStore } from 'redux';
 import setting from './setting/reducer';
 import notify from './notification/reducer';
 import Configuration from './connections/reducer';
@@ -18,7 +19,6 @@ import network from './network/reducer';
 import battery from './battery/reducer';
 import tools from './tools/reducer';
 import order from './order/reducer';
-import type { Dispatch as ReduxDispatch, Store as ReduxStore } from 'redux';
 
 export type StateType = {
   +notify: object,

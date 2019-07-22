@@ -21,6 +21,7 @@ export const ORDER_STATUS={
   DONE:'DONE',
   CANCEL:'CANCEL',
   PENDING:'PENDING',
+  FAIL:'FAIL'
 };
 
 export type Step = {
@@ -29,7 +30,7 @@ export type Step = {
   status: string,
   +type: string, // check,collect,instruct,enable,...
   payload: {},
-  stash: {},
+  data: {},
   steps: Array
 };
 

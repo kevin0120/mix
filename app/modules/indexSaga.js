@@ -72,7 +72,7 @@ export default function* rootSaga() {
       watchBattery(),
       watchPower(),
       andonEnable ? andon() : null,
-      order()
+      order(),
     ]);
   } catch (e) {
     console.error('rootSaga:', e);

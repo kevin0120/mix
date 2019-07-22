@@ -18,10 +18,10 @@ export const ORDER = {
     FAIL: 'ORDER_STEP_FAIL',
     RESET: 'ORDER_STEP_RESET',
     // 步进、步退
-    PUSH: 'ORDER_STEP_PUSH',
-    REVOKE: 'ORDER_STEP_REVOKE',
+    DO_NEXT: 'ORDER_STEP_DO_NEXT',
+    DO_PREVIOUS: 'ORDER_STEP_DO_PREVIOUS',
     // 修改store
-    UPDATE: 'ORDER_STEP_UPDATE'
+    DATA:'ORDER_STEP_DATA',
   }
 };
 
@@ -70,11 +70,14 @@ export const orderActions = {
   resetStep: () => ({
     type: ORDER.STEP.RESET
   }),
-  pushStep: () => ({
-    type: ORDER.STEP.PUSH
+  doNextStep: () => ({
+    type: ORDER.STEP.DO_NEXT
   }),
-  updateStep:(newStep)=>({
-    type:ORDER.STEP.UPDATE,
-    newStep
+  doPreviousStep: () => ({
+    type: ORDER.STEP.DO_PREVIOUS
+  }),
+  stepData:(data)=>({
+    type:ORDER.STEP.DATA,
+    data
   })
 };
