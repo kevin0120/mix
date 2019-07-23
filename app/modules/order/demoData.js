@@ -6,21 +6,20 @@ export const demoOrder = {
   status: 'TODO',
   steps: [
     {
-      name: '姓名',
-      info: 'this step does one checking',
+      name: 'skippable',
+      info: 'this step is skippable',
       type: 'input',
       skippable: true,
-      revocable: true,
       data: {},
       payload: {
         label: 'name'
       }
     },
     {
-      name: '地址',
-      info: 'this step collects a input',
+      name: 'undoable',
+      info: 'this step is undoable',
       type: 'input',
-      revocable: true,
+      undoable: true,
 
       payload: {
         label: 'address'
@@ -30,30 +29,8 @@ export const demoOrder = {
       name: '地址',
       info: 'this step collects a input',
       type: 'input',
-      payload: {
-        label: 'address'
-      }
-    },
-    {
-      name: '地址',
-      info: 'this step collects a input',
-      type: 'input',
-      payload: {
-        label: 'address'
-      }
-    },
-    {
-      name: '地址',
-      info: 'this step collects a input',
-      type: 'input',
-      payload: {
-        label: 'address'
-      }
-    },
-    {
-      name: '地址',
-      info: 'this step collects a input',
-      type: 'input',
+      revocable: true,
+
       payload: {
         label: 'address'
       }

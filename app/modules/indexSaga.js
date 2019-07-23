@@ -20,8 +20,8 @@ import watchBattery from './battery/saga';
 import watchPower from './power/saga';
 import andon from './andon/saga';
 import order from './order/saga';
+import dialog from './dialog/saga';
 // import healthzCheckFlow from './healthzCheck';
-
 
 export function watch(workers, channel) {
   return function* watcher() {
@@ -41,7 +41,6 @@ export function watch(workers, channel) {
     }
   };
 }
-
 
 export default function* rootSaga() {
   try {
@@ -73,6 +72,7 @@ export default function* rootSaga() {
       watchPower(),
       andonEnable ? andon() : null,
       order(),
+      dialog()
     ]);
   } catch (e) {
     console.error('rootSaga:', e);

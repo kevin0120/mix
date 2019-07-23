@@ -14,6 +14,8 @@ import * as orderSelectors from '../../modules/order/selector';
 import stepTypes from '../steps/stepTypes';
 import styles from './styles';
 import { ORDER_STEP_STATUS } from '../../modules/order/model';
+import Dialog from '../../components/Dialog';
+import type { Dispatch } from '../../modules/indexReducer';
 
 const StepPage = ({ step, isCurrent, bindAction }) => {
   let stepProps = {};
@@ -86,24 +88,25 @@ type StepWorkingProps = {
   processingStep: {},
   viewingIndex: number,
   steps: [],
-  next: () => {},
-  previous: () => {},
-  jumpTo: () => {},
-  doNextStep: () => {}
+  next: Dispatch,
+  previous: Dispatch,
+  jumpTo: Dispatch,
+  doNextStep: Dispatch,
+  doPreviousStep: Dispatch
 };
 
 function StepWorking({
-                       currentOrder,
-                       viewingStep,
-                       processingStep,
-                       viewingIndex,
-                       steps,
-                       next,
-                       previous,
-                       jumpTo,
-                       doNextStep,
-                       doPreviousStep
-                     }: StepWorkingProps) {
+  currentOrder,
+  viewingStep,
+  processingStep,
+  viewingIndex,
+  steps,
+  next,
+  previous,
+  jumpTo,
+  doNextStep,
+  doPreviousStep
+}: StepWorkingProps) {
   const classes = makeStyles(styles.layout)();
   const [action, bindAction] = useState(null);
   const noPrevious = steps.length <= 0 || viewingIndex <= 0;
@@ -112,6 +115,7 @@ function StepWorking({
   return (
     <StylesProvider injectFirst>
       <div className={classes.root}>
+        <Dialog />
         <Paper
           square
           className={classes.leftContainer}
@@ -141,13 +145,13 @@ function StepWorking({
                   {'skip'}
                 </Button>
               )}
-              {viewingStep?.revocable && (
+              {viewingStep?.undoable && (
                 <Button
                   disabled={viewingStep !== processingStep}
                   type="button"
                   onClick={() => doPreviousStep()}
                 >
-                  {'revoke'}
+                  {'undo'}
                 </Button>
               )}
             </div>
