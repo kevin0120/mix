@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import Button from '@material-ui/core/es/Button/Button';
-import { inputStepActions } from '../../../modules/steps/inputStep/action';
+import { inputStepActions } from '../../../modules/step/inputStep/action';
 import { StepContent } from '../types';
 
 type Props = {

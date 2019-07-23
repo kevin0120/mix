@@ -25,11 +25,11 @@ const customStyles = theme => ({
     }
   },
   leftButton: {
-    marginLeft: '40%',
-    marginRight: '40%'
+    // marginLeft: '40%',
+    // marginRight: '40%'
   },
   rightButton: {
-    marginLeft: '40%'
+    // marginLeft: '40%'
   }
 });
 

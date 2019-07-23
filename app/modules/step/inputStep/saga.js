@@ -1,5 +1,6 @@
 import { put, take } from 'redux-saga/effects';
 import { INPUT_STEP } from './action';
+import { STEP_STATUS } from '../../order/model';
 
 export default function* root(ORDER, orderActions) {
   try {
@@ -8,9 +9,9 @@ export default function* root(ORDER, orderActions) {
       const { payload } = yield take(INPUT_STEP.SUBMIT);
       if (payload) {
         if (payload === 'fail') {
-          yield put(orderActions.failStep());
+          yield put(orderActions.stepStatus(STEP_STATUS.FAIL));
         } else {
-          yield put(orderActions.finishStep());
+          yield put(orderActions.stepStatus(STEP_STATUS.FINISHED));
         }
       }
       yield put(orderActions.doNextStep());

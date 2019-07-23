@@ -11,12 +11,7 @@ export const ORDER = {
     PREVIOUS: 'ORDER_STEP_PREVIOUS',
     JUMP_TO: 'ORDER_STEP_JUMP_TO',
     // 修改step的状态
-    ENTER: 'ORDER_STEP_ENTER',
-    ENTERED: 'ORDER_STEP_ENTERED',
-    LEAVE: 'ORDER_STEP_LEAVE',
-    FINISH: 'ORDER_STEP_FINISH',
-    FAIL: 'ORDER_STEP_FAIL',
-    RESET: 'ORDER_STEP_RESET',
+    STATUS: 'ORDER_STEP_STATUS',
     // 步进、步退
     DO_NEXT: 'ORDER_STEP_DO_NEXT',
     DO_PREVIOUS: 'ORDER_STEP_DO_PREVIOUS',
@@ -47,28 +42,12 @@ export const orderActions = {
   previousStep: () => ({
     type: ORDER.STEP.PREVIOUS
   }),
-
   jumpToStep: (stepId) => ({
     type: ORDER.STEP.JUMP_TO,
     stepId
   }),
-  enterStep: () => ({
-    type: ORDER.STEP.ENTER
-  }),
-  enteredStep: () => ({
-    type: ORDER.STEP.ENTERED
-  }),
-  leaveStep: () => ({
-    type: ORDER.STEP.LEAVE
-  }),
-  finishStep: () => ({
-    type: ORDER.STEP.FINISH
-  }),
-  failStep: () => ({
-    type: ORDER.STEP.FAIL
-  }),
-  resetStep: () => ({
-    type: ORDER.STEP.RESET
+  stepStatus: () => ({
+    type: ORDER.STEP.STATUS
   }),
   doNextStep: () => ({
     type: ORDER.STEP.DO_NEXT
@@ -76,8 +55,8 @@ export const orderActions = {
   doPreviousStep: () => ({
     type: ORDER.STEP.DO_PREVIOUS
   }),
-  stepData:(data)=>({
+  stepData:(reducer)=>({
     type:ORDER.STEP.DATA,
-    data
+    reducer
   })
 };
