@@ -8,7 +8,8 @@ export const demoOrder = {
     {
       name: 'skippable',
       info: 'this step is skippable',
-      type: 'input',
+      description:'扫描二维码',
+      type: 'scanner',
       skippable: true,
       data: {},
       payload: {

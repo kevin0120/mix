@@ -7,7 +7,7 @@ const layout = {
     backdropFilter: 'blur(2px)'
   },
   rightContainer: {
-    flex: 3,
+    flex: 2,
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
@@ -16,7 +16,9 @@ const layout = {
   },
   leftContainer: {
     flex: 7,
-    margin: 3
+    margin: 3,
+    display:'flex',
+    flexDirection:'column',
   },
   timerContainer: {
     flex: 1,
@@ -33,7 +35,7 @@ const layout = {
     overflowY:'scroll',
   },
   contentContainer: {
-    flex: 1
+    flex: 1,
   },
   orderInfoContainer: {
     height: 60,
@@ -42,8 +44,26 @@ const layout = {
     justifyContent: 'space-between',
     padding: '0 10px',
     alignItems: 'center'
+  }
+};
+
+const stepperContainer = {
+  root: {
+    padding:16
   },
-  buttonsContainer: {
+  stepButton: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start !important',
+    height: 50,
+    padding:'0 0',
+    margin:'10px 0'
+  }
+};
+
+const buttonsContainer={
+  root: {
     height:60,
     display: 'flex',
     flexDirection: 'row',
@@ -53,20 +73,39 @@ const layout = {
   }
 };
 
-const stepper = {
-  stepper: {},
-  stepButton: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-start !important',
-    height: 50,
-    padding:0
-  }
+const stepPageContainer={
+  root:{
+    display:'flex',
+    flexDirection:'row',
+    flex:1
+  },
+  left:{
+    flex:3,
+    height:'100%',
+    display:'flex',
+    flexDirection:'column',
+  },
+  right:{
+    flex:1,
+    height:'100%',
+    display:'flex',
+    flexDirection:'column',
+  },
+  image:{
+    flex:1
+  },
+  description:{
+    flex:1
+  },
+  result:{
+    flex:2
+  },
 };
 
 export default {
   layout,
-  stepper
+  stepperContainer,
+  buttonsContainer,
+  stepPageContainer
 };
 
