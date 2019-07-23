@@ -2911,17 +2911,17 @@ aws4@^1.8.0:
   resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.8.0.tgz#f0e003d9ca9e7f59c7a508945d7b2ef9a04a542f"
   integrity sha512-ReZxvNHIOv88FlT7rxcXIIC0fPt4KZqZbOlivyWtXLt8ESx84zd3kMC6iK5jVeS2qt+g7ftS7ye4fi06X5rtRQ==
 
-axios-retry@^3.1.1:
+axios-retry@^3.1.2:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/axios-retry/-/axios-retry-3.1.2.tgz#4f4dcbefb0b434e22b72bd5e28a027d77b8a3458"
   integrity sha512-+X0mtJ3S0mmia1kTVi1eA3DAC+oWnT2A29g3CpkzcBPMT6vJm+hn/WiV9wPt/KXLHVmg5zev9mWqkPx7bHMovg==
   dependencies:
     is-retry-allowed "^1.1.0"
 
-axios@^0.18.0:
-  version "0.18.1"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-0.18.1.tgz#ff3f0de2e7b5d180e757ad98000f1081b87bcea3"
-  integrity sha512-0BfJq4NSfQXd+SkFdrvFbG7addhYSBA2mQwISr46pD6E5iqkWg02RAs8vyTT/j0RTnoYmeXauBuSv1qKwR179g==
+axios@^0.19.0:
+  version "0.19.0"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.19.0.tgz#8e09bff3d9122e133f7b8101c8fbdd00ed3d2ab8"
+  integrity sha512-1uvKqKQta3KBxIz14F2v06AEHZ/dIoeKfbTRkK1E5oqjDnuEerLmYTgJB5AiQZHJcljpg1TuRzdjDR06qNk0DQ==
   dependencies:
     follow-redirects "1.5.10"
     is-buffer "^2.0.2"
@@ -7611,7 +7611,7 @@ flow-runtime@^0.17.0:
   resolved "https://registry.yarnpkg.com/flow-runtime/-/flow-runtime-0.17.0.tgz#ff57dd22bd7b0682c7beff20c3590f6a4a8286e3"
   integrity sha512-x621HugMPrtU68ddiRX0TkNRif9PS6ml3oeP6oo0k+Kv2issqCmifC4ZX59XnLUh9dfmBcj4GoZJXu4oe8L28Q==
 
-flow-typed@^2.5.1:
+flow-typed@^2.6.0:
   version "2.6.0"
   resolved "https://registry.yarnpkg.com/flow-typed/-/flow-typed-2.6.0.tgz#504e6a7e7312ab31adc1717e6527b94014a459a6"
   integrity sha512-aTd2ygnb9e0/O4Rskzh/zYMU0NJR3PygoheTfiDEOCbEVdXS6mpX/TfcpcbpPVcJpqqV44+pjhOt36VXlYkLRA==
@@ -13424,13 +13424,6 @@ progress@^2.0.0:
   resolved "https://registry.yarnpkg.com/progress/-/progress-2.0.3.tgz#7e8cf8d8f5b8f239c1bc68beb4eb78567d572ef8"
   integrity sha512-7PiHtLll5LdnKIMw100I+8xJXR5gW2QwWYkT6iJva0bXitZKa/XMrSbdmg3r2Xnaidz9Qumd0VPaMrZlF9V9sA==
 
-progressbar.js@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/progressbar.js/-/progressbar.js-1.0.1.tgz#f7fbfc195240fe0bb32f6f7bdb2e7ff400ea71f9"
-  integrity sha1-9/v8GVJA/guzL2972y5/9ADqcfk=
-  dependencies:
-    shifty "^1.5.2"
-
 promise-inflight@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/promise-inflight/-/promise-inflight-1.0.1.tgz#98472870bf228132fcbdd868129bad12c3c029e3"
@@ -13818,24 +13811,17 @@ react-error-overlay@^5.1.6:
   resolved "https://registry.yarnpkg.com/react-error-overlay/-/react-error-overlay-5.1.6.tgz#0cd73407c5d141f9638ae1e0c63e7b2bf7e9929d"
   integrity sha512-X1Y+0jR47ImDVr54Ab6V9eGk0Hnu7fVWGeHQSOXHf/C2pF9c6uy3gef8QUeuUiWlNb0i08InPSE5a/KJzNzw1Q==
 
-"react-es6-progressbar.js@git+https://github.com/masami10/react-es6-progressbar.js.git":
-  version "1.0.10"
-  resolved "git+https://github.com/masami10/react-es6-progressbar.js.git#c01d61d6d6bf0165d7b96c0017f264d16e9800a8"
-  dependencies:
-    progressbar.js "^1.0.1"
-    react "^16.3.2"
-
-react-flags@^0.1.13:
+react-flags@^0.1.18:
   version "0.1.18"
   resolved "https://registry.yarnpkg.com/react-flags/-/react-flags-0.1.18.tgz#d763d7e802692a08e15d1802a51933a173f388fd"
   integrity sha512-fa8D6DIZS6DWRqLcmKGIHVT13r4viHAfIRth9cFO7cDyxEPfTBbZei6p0Xeao6of4C/K4XU/j35aMjPC15ePIg==
   dependencies:
     prop-types "^15.5.10"
 
-react-hot-loader@^4.8.8:
-  version "4.12.8"
-  resolved "https://registry.yarnpkg.com/react-hot-loader/-/react-hot-loader-4.12.8.tgz#90ecf2ef7d4005e110292760f135c95177e804c7"
-  integrity sha512-/Df2J3znMHzRzI6CW0dTOIWD2sjkVHxv56XCqujAo9mR+k2PVTiGjUgYBiGPGsix9zQzgCRfOKca93o9Zdj2vQ==
+react-hot-loader@^4.12.9:
+  version "4.12.9"
+  resolved "https://registry.yarnpkg.com/react-hot-loader/-/react-hot-loader-4.12.9.tgz#cb2a85731ca38366b0e9e28e7fd1dbd7dcacc1ef"
+  integrity sha512-lWT3JpWUN7nGHSoI9c4MV+42ov79bd8aqwDzhoyKev3owIh+hbEivT6Mb81lCV6tWuqm9trKo2/Th2/YDhFCdw==
   dependencies:
     fast-levenshtein "^2.0.6"
     global "^4.3.0"
@@ -13843,7 +13829,7 @@ react-hot-loader@^4.8.8:
     loader-utils "^1.1.0"
     prop-types "^15.6.1"
     react-lifecycles-compat "^3.0.4"
-    shallowequal "^1.0.2"
+    shallowequal "^1.1.0"
     source-map "^0.7.3"
 
 react-i18next@^7.10.1:
@@ -14009,12 +13995,12 @@ react-select@^2.0.0:
     react-input-autosize "^2.2.1"
     react-transition-group "^2.2.1"
 
-react-simple-keyboard@^1.3.14:
+react-simple-keyboard@^1.25.0:
   version "1.25.0"
   resolved "https://registry.yarnpkg.com/react-simple-keyboard/-/react-simple-keyboard-1.25.0.tgz#0e0121eaa8eb3b68feaeca815f6cf449abf579b7"
   integrity sha512-rqIsc6kX4Od6j2ld6z+ZQOQ5/VFWFlNfFkVr9nAg/zIjWqyFGCT8unwa5zONM6P7Rxfr+5jpOWx+uvgTOuS8XQ==
 
-react-spinners@^0.4.5:
+react-spinners@^0.4.8:
   version "0.4.8"
   resolved "https://registry.yarnpkg.com/react-spinners/-/react-spinners-0.4.8.tgz#4c66a527ebb57b485dcfba324ea8f7c2186c9afa"
   integrity sha512-4zBH3o4UYV9lnJV8c4u/8yuYMxDF/vk/g7s80ce8Wj3CoMGfapbtPyK+Tq6WyRoNKFwyH0n4NB09bbtaz9Oa6g==
@@ -14099,7 +14085,7 @@ react-transition-group@^4.0.0:
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
 
-react@^16.3.2, react@^16.8.6:
+react@^16.8.6:
   version "16.8.6"
   resolved "https://registry.yarnpkg.com/react/-/react-16.8.6.tgz#ad6c3a9614fd3a4e9ef51117f54d888da01f2bbe"
   integrity sha512-pC0uMkhLaHm11ZSJULfOBqV4tIZkx87ZLvbbQYunNixAAvjnC+snJCg0XQXn9VIsttVsbZP/H/ewzgsd5fxKXw==
@@ -14298,7 +14284,7 @@ redux-logger@^3.0.6:
   dependencies:
     deep-diff "^0.3.5"
 
-redux-saga@^1.0.0:
+redux-saga@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/redux-saga/-/redux-saga-1.0.5.tgz#03317261bc5fa7ee2ecb778f4e4848f573557bbb"
   integrity sha512-ytGFtaHyz6NQMQp7/LpQ/6CtOkbPRCcAeljUpc4c95hRm5U6dFvrRiZHeBPuQZ56L3oXfTX3hiYh8/3ZudsiNg==
@@ -15084,7 +15070,7 @@ shallow-clone@^1.0.0:
     kind-of "^5.0.0"
     mixin-object "^2.0.1"
 
-shallowequal@^1.0.2:
+shallowequal@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/shallowequal/-/shallowequal-1.1.0.tgz#188d521de95b9087404fd4dcb68b13df0ae4e7f8"
   integrity sha512-y0m1JoUZSlPAjXVtPPW70aZWfIL/dSP7AFkRnniLCrK/8MDKog3TySTBmckD+RObVxH0v4Tox67+F14PdED2oQ==
@@ -15124,11 +15110,6 @@ shellwords@^0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/shellwords/-/shellwords-0.1.1.tgz#d6b9181c1a48d397324c84871efbcfc73fc0654b"
   integrity sha512-vFwSUfQvqybiICwZY5+DAWIPLKsWO31Q91JSKl3UYv+K5c2QRPzn0qzec6QPu1Qc9eHYItiP3NdJqNVqetYAww==
-
-shifty@^1.5.2:
-  version "1.5.4"
-  resolved "https://registry.yarnpkg.com/shifty/-/shifty-1.5.4.tgz#d4362fc914dd280ddf6e522be408b21203208346"
-  integrity sha1-1DYvyRTdKA3fblIr5AiyEgMgg0Y=
 
 signal-exit@^3.0.0, signal-exit@^3.0.2:
   version "3.0.2"

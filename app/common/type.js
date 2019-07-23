@@ -1,12 +1,17 @@
 // @flow
 
-import type {AnyAction} from 'redux'
+import {Action} from 'redux'
+import { CommonLog } from './utils';
 
 const lodash = require('lodash');
 
 type tCommonActionType = {
   +type: string
 };
+
+interface AnyAction extends Action {
+  [extraProps: string]: any
+}
 
 
 type tDeviceNewData = {
@@ -22,17 +27,34 @@ interface IOutputDevice {
   validate(data: string | number): boolean
 }
 
+// eslint-disable-next-line no-unused-vars
+const defaultValidatorFunc = (data: string): boolean => true;
+
 class Device implements IInputDevice{
   source: string;
 
+  enable: boolean = false;
+
   dispatcher: () => AnyAction;
 
-  validator: (data: string | number) => ?boolean = null;
+  validator: (data: string | number) => ?boolean = defaultValidatorFunc;
 
   constructor(source: string) {
     this.source = source;
     this.validator = null;
     this.dispatcher = null;
+  }
+
+  Enable() {
+    this.enable = true;
+  }
+
+  Disable(){
+    this.enable = false;
+  }
+
+  Toggle() {
+    this.enable = !this.enable;
   }
 
   validate(data: string): boolean {
@@ -41,15 +63,20 @@ class Device implements IInputDevice{
     }
     // 有效的数据
     if (lodash.isNil(this.validator)) {
-      console.error("Scanner Validator is Nil, Please set Validator First")
-      return false;
+      // 没有验证器默认返回正确
+      return true;
     }
     return this.validator(data);
   }
 
   dispatch(): AnyAction {
+    if (!this.enable) {
+      const msg = `${this.source} Is Not Enable`;
+      CommonLog(msg);
+    }
     if (lodash.isNil(this.dispatcher)) {
-      console.error("Scanner Validator is Nil, Please set Validator First")
+      const msg = `${this.source} Validator is Nil, Please set Validator First`;
+      CommonLog(msg);
     }
     return this.dispatcher()
   }

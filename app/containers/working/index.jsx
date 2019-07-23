@@ -46,7 +46,6 @@ import ManualDiag from '../../components/ManualDiag';
 
 import TimeLine from '../../components/WorkPageTimeline';
 
-import ProgressBar from '../../components/ProgressBar/Progress';
 import { OPERATION_STATUS, OPERATION_SOURCE } from '../../modules/operation/model';
 import withKeyboard from '../../components/Keyboard';
 

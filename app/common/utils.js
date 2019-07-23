@@ -1,8 +1,9 @@
 import { cloneDeep } from 'lodash';
 import { toast } from 'react-toastify';
-
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
+import {Info, Error, Warn} from '../logger'
+
 
 const VINMAP = {
   A: 1,
@@ -164,3 +165,36 @@ export const guard = (fun, msg) => (...args) => {
     throw new Error(msg, fun, ...args, e);
   }
 };
+
+type CommonLogLvl = 'Warn' | 'Info' | 'Error';
+
+export function CommonLog(lvl: CommonLogLvl, msg: string) {
+  if (process.env.NODE_ENV !== 'production'){
+    switch (lvl) {
+      case 'Error':
+        console.error(msg);
+        break;
+      case 'Info':
+        console.info(msg);
+        break;
+      case 'Warn':
+        console.warn(msg);
+        break;
+      default:
+        break;
+    }
+  }
+  switch (lvl) {
+    case 'Error':
+      Error(msg);
+      break;
+    case 'Info':
+      Info(msg);
+      break;
+    case 'Warn':
+      Warn(msg);
+      break;
+    default:
+      break;
+  }
+}
