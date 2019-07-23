@@ -31,7 +31,6 @@ import { continueOperation } from '../operation/saga';
 // config
 import userConfigs from '../../shared/config';
 
-const Reconnect = require('node-net-reconnect');
 const net = require('net');
 const lodash = require('lodash');
 
@@ -192,7 +191,7 @@ function* initIOModbus() {
     };
 
     io.client = new net.Socket();
-    io.recon = new Reconnect(io.client, options);
+    io.recon = io.client;
     io.client.setTimeout(1000);
     io.modbusClient = new modbus.client.TCP(io.client);
 

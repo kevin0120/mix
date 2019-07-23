@@ -1,6 +1,8 @@
 // @flow
 
 import { take, fork, all, select } from 'redux-saga/effects';
+import type { Saga } from 'redux-saga';
+
 import watchScanner from './scanner/saga';
 import { cardAuthFlow } from './cardAuth/saga';
 import sysInitFlow from './systemInit/saga';
@@ -23,7 +25,7 @@ import order from './order/saga';
 import dialog from './dialog/saga';
 // import healthzCheckFlow from './healthzCheck';
 
-export function watch(workers, channel) {
+export function watch(workers, channel): Saga<void> {
   return function* watcher() {
     try {
       while (true) {
@@ -42,13 +44,13 @@ export function watch(workers, channel) {
   };
 }
 
-export default function* rootSaga() {
+export default function* rootSaga(): Saga<void> {
   try {
     const state = yield select();
     const { andonEnable } = state.setting.systemSettings;
     yield all([
       // card auth
-      cardAuthFlow(),
+      // cardAuthFlow(),
       watchScanner(),
       watchNotification(),
       watchAiis(),
@@ -63,7 +65,7 @@ export default function* rootSaga() {
       logoutFlow(),
       // healthz
       // healthzCheckFlow(),
-      watchSettingPreSave(),
+      // watchSettingPreSave(),
       sysInitFlow(),
       watchOperationViewer(),
       logoFlow(),

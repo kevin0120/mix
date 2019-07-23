@@ -11,7 +11,7 @@ import {
 import { eventChannel } from 'redux-saga';
 import { WORK_MODE } from '../workmode/action';
 import { RUSH, NewResults } from './action';
-import { NewCar } from '../scanner/action';
+import { ScannerNewData } from '../scanner/action';
 import { getIBypass, getIModeSelect, handleIOFunction } from '../io/saga';
 import { OPERATION_SOURCE } from '../operation/model';
 import { IO_FUNCTION } from '../io/model';
@@ -59,19 +59,20 @@ function* initRush() {
 
 function* stopRush() {
   try {
-    if (ws) {
-      if (
-        ws.ws.readyState === OWebSocket.OPEN ||
-        ws.ws.readyState === OWebSocket.CONNECTING
-      ) {
-        yield put(setHealthzCheck('masterpc', false));
-        yield put(setNewNotification('info', `masterPC连接状态更新: ${false}`));
-        yield put(setHealthzCheck('controller', false));
-        yield put(setNewNotification('info', `controller连接状态更新: ${false}`));
-        ws.close();
-      }
-      ws = null;
+    if (lodash.isNil(ws)){
+      return
     }
+    if (
+      ws.ws.readyState === OWebSocket.OPEN ||
+      ws.ws.readyState === OWebSocket.CONNECTING
+    ) {
+      yield put(setHealthzCheck('masterpc', false));
+      yield put(setNewNotification('info', `masterPC连接状态更新: ${false}`));
+      yield put(setHealthzCheck('controller', false));
+      yield put(setNewNotification('info', `controller连接状态更新: ${false}`));
+      ws.close();
+    }
+    ws = null;
     if (task) {
       yield cancel(task);
     }
@@ -230,7 +231,7 @@ export function* watchRushChannel(hmiSN) {
                 break;
               }
               if (workMode === 'scanner' || workMode === 'manual') {
-                yield put(NewCar(json.barcode));
+                yield put(ScannerNewData(json.barcode));
               }
               break;
             }

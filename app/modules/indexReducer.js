@@ -1,4 +1,5 @@
 // @flow
+
 import { combineReducers } from 'redux';
 import { connectRouter } from 'connected-react-router';
 
@@ -22,8 +23,8 @@ import order from './order/reducer';
 import dialog from './dialog/reducer';
 
 export type StateType = {
-  +notify: object,
-  +setting: object
+  +notify: Object,
+  +setting: Object
 };
 
 export type Action = {

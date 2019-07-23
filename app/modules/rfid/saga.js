@@ -23,7 +23,6 @@ let recon = null;
 let watchChannelTask = null;
 
 const net = require('net');
-const Reconnect = require('node-net-reconnect');
 
 const lodash = require('lodash');
 
@@ -71,7 +70,6 @@ function* initRFID() {
       retryAlways: true // retry even if the connection was closed on purpose
     };
 
-    recon = new Reconnect(client, options);
     client.setTimeout(10000);
     client.setEncoding('ascii');
     client.connect(options);

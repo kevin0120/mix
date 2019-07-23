@@ -1,6 +1,6 @@
 // @flow
 
-import type { rActionUserType } from './reducer';
+import type {tCommonActionType} from "../../common/type"
 
 export const USER = {
   LOGIN: {
@@ -36,7 +36,7 @@ export function loginRequest(user: string = '', password: string = '', method: s
   };
 }
 
-export function loginSuccess(data: tAuthUserInfo): rActionUserType {
+export function loginSuccess(data: tAuthUserInfo): tCommonActionType & tAuthUserInfo {
   return {
     type: USER.LOGIN.SUCCESS,
     ...data
@@ -50,7 +50,7 @@ export function logoutRequest(user: string = '') {
   };
 }
 
-export function logoutSuccess(data: tAuthUserInfo): rActionUserType {
+export function logoutSuccess(data: tAuthUserInfo): tCommonActionType & tAuthUserInfo {
   return {
     type: USER.LOGOUT.SUCCESS,
     ...data

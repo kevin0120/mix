@@ -1,4 +1,6 @@
-export const IO_FUNCTION = {
+// @flow
+
+const IO_FUNCTION = {
   IN: {
     RESET: 'RESET',
     BYPASS: 'BYPASS',
@@ -12,3 +14,5 @@ export const IO_FUNCTION = {
     BEEP: 'BEEP'
   }
 };
+
+export default IO_FUNCTION;

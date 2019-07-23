@@ -27,7 +27,8 @@ type tAuthRespData = {
 
 type tAuthInfo = {
   +user: string | null,
-  +password: string | null
+  +password: string | null,
+  +method: string
 };
 
 type tAuthLogout = {
