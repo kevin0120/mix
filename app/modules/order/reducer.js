@@ -32,7 +32,6 @@ function setOrderStatus(state, status) {
   return newState;
 }
 
-
 function setStepStatus(state, status) {
   const newState = {
     ...state
@@ -63,15 +62,21 @@ const orderReducer = {
       startTime: new Date()
     };
   },
-  [ORDER.FINISH]: (state) => {
+  [ORDER.FINISH]: state => {
     const newState = setOrderStatus(state, ORDER_STATUS.DONE);
     return {
       ...newState,
       currentOrder: null
     };
   },
-  [ORDER.FAIL]: (state) => setOrderStatus(state, ORDER_STATUS.FAIL),
-  [ORDER.STEP.NEXT]: (state) => {
+  [ORDER.FAIL]: state => {
+    const newState = setOrderStatus(state, ORDER_STATUS.FAIL);
+    return {
+      ...newState,
+      currentOrder: null
+    };
+  },
+  [ORDER.STEP.NEXT]: state => {
     const newIndex = limitIndex(state, viewingIndex(state) + 1);
     return {
       ...state,
@@ -79,7 +84,7 @@ const orderReducer = {
     };
   },
 
-  [ORDER.STEP.PREVIOUS]: (state) => {
+  [ORDER.STEP.PREVIOUS]: state => {
     const newIndex = limitIndex(state, viewingIndex(state) - 1);
     return {
       ...state,
@@ -96,27 +101,34 @@ const orderReducer = {
   },
 
   // 修改step的状态
-  [ORDER.STEP.ENTER]: (state) => setStepStatus(state, ORDER_STEP_STATUS.ENTERING),
-  [ORDER.STEP.ENTERED]: (state) => setStepStatus(state, ORDER_STEP_STATUS.DOING),
-  [ORDER.STEP.LEAVE]: (state) => setStepStatus(state, ORDER_STEP_STATUS.LEAVING),
-  [ORDER.STEP.FINISH]: (state) => setStepStatus(state, ORDER_STEP_STATUS.FINISHED),
-  [ORDER.STEP.FAIL]: (state) => setStepStatus(state, ORDER_STEP_STATUS.FAIL),
-  [ORDER.STEP.RESET]: (state) => setStepStatus(state, ORDER_STEP_STATUS.READY),
+  [ORDER.STEP.ENTER]: state => setStepStatus(state, ORDER_STEP_STATUS.ENTERING),
+  [ORDER.STEP.ENTERED]: state => setStepStatus(state, ORDER_STEP_STATUS.DOING),
+  [ORDER.STEP.LEAVE]: state => setStepStatus(state, ORDER_STEP_STATUS.LEAVING),
+  [ORDER.STEP.FINISH]: state =>
+    setStepStatus(state, ORDER_STEP_STATUS.FINISHED),
+  [ORDER.STEP.FAIL]: state => setStepStatus(state, ORDER_STEP_STATUS.FAIL),
+  [ORDER.STEP.RESET]: state => setStepStatus(state, ORDER_STEP_STATUS.READY),
   //
-  [ORDER.STEP.DO_NEXT]: (state) => {
+  [ORDER.STEP.DO_NEXT]: state => {
     const newIndex = processingIndex(state) + 1;
     return {
       ...state,
       processingIndex: newIndex,
-      viewingIndex: processingStep(state) === viewingStep(state) ? newIndex : viewingIndex(state)
+      viewingIndex:
+        processingStep(state) === viewingStep(state)
+          ? newIndex
+          : viewingIndex(state)
     };
   },
-  [ORDER.STEP.DO_PREVIOUS]: (state) => {
+  [ORDER.STEP.DO_PREVIOUS]: state => {
     const newIndex = limitIndex(state, processingIndex(state) - 1);
     const revokedState = {
       ...state,
       processingIndex: newIndex,
-      viewingIndex: processingStep(state) === viewingStep(state) ? newIndex : viewingIndex(state)
+      viewingIndex:
+        processingStep(state) === viewingStep(state)
+          ? newIndex
+          : viewingIndex(state)
     };
     return setStepStatus(revokedState, ORDER_STEP_STATUS.READY);
   },

@@ -1,7 +1,5 @@
 // @flow
 
-import { array } from 'prop-types';
-
 export class Order {
   steps: Array<Step>;
 }
@@ -15,13 +13,13 @@ export const ORDER_STEP_STATUS = {
   FINISHED: 'ORDER_STEP_STATUS_FINISHED'
 };
 
-export const ORDER_STATUS={
-  TODO:'TODO',
-  WIP:'WIP',
-  DONE:'DONE',
-  CANCEL:'CANCEL',
-  PENDING:'PENDING',
-  FAIL:'FAIL'
+export const ORDER_STATUS = {
+  TODO: 'TODO',
+  WIP: 'WIP',
+  DONE: 'DONE',
+  CANCEL: 'CANCEL',
+  PENDING: 'PENDING',
+  FAIL: 'FAIL'
 };
 
 export type Step = {
@@ -33,14 +31,3 @@ export type Step = {
   data: {},
   steps: Array
 };
-
-
-export function hasSubStep(step) {
-  return step.steps instanceof Array && step.steps.length > 0;
-}
-
-export function HasValidType(step): boolean {
-
-}
-
-

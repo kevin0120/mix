@@ -12,10 +12,9 @@ export default function* root(ORDER, orderActions) {
         } else {
           yield put(orderActions.finishStep());
         }
-        yield put(orderActions.doNextStep());
       }
+      yield put(orderActions.doNextStep());
     }
-
   } catch (e) {
     console.error(e);
   }

@@ -19,6 +19,7 @@ import network from './network/reducer';
 import battery from './battery/reducer';
 import tools from './tools/reducer';
 import order from './order/reducer';
+import dialog from './dialog/reducer';
 
 export type StateType = {
   +notify: object,
@@ -44,10 +45,8 @@ export function genReducers(reducers, initState = {}) {
   };
 }
 
-
 export default function createRootReducer(history: {}) {
-  const routerReducer = connectRouter(history)(() => {
-  });
+  const routerReducer = connectRouter(history)(() => {});
   return connectRouter(history)(
     combineReducers({
       router: routerReducer,
@@ -66,7 +65,8 @@ export default function createRootReducer(history: {}) {
       network,
       battery,
       tools,
-      order
+      order,
+      dialog
     })
   );
 }
