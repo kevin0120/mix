@@ -14,7 +14,7 @@ const modalStyle = theme => ({
     overflow: 'visible',
     maxHeight: 'unset',
     width: '100%',
-    marginTop: '130px !important'
+    // marginTop: '130px !important'
   },
   modalHeader: {
     borderBottom: 'none',

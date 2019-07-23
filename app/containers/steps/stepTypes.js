@@ -10,7 +10,10 @@ export default {
     })
   },
   scanner:{
-    component:ScannerStep
+    component:ScannerStep,
+    genProps:props=>({
+      label:props.payload.label
+    })
   }
 };
 

@@ -1,14 +1,15 @@
 import { take, call, race, all, select, put } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 import { ORDER, orderActions } from './action';
-import stepTypes from '../steps/stepTypes';
+import stepTypes from '../step/stepTypes';
 import {
   processingStep,
   processingIndex,
   stepType,
-  currentOrderLength
+  orderLength
 } from './selector';
 import dialogActions from '../dialog/action';
+import { STEP_STATUS } from './model';
 
 const mapping = {
   onOrderFinish: returnHome
@@ -59,7 +60,7 @@ function* doOrder() {
       const { next } = yield race({
         exit: all([
           call(stepTypes[type], ORDER, orderActions),
-          put(orderActions.enterStep())
+          put(orderActions.stepStatus(STEP_STATUS.ENTERING))
         ]),
         next: take(ORDER.STEP.DO_NEXT),
         previous: take(ORDER.STEP.DO_PREVIOUS)
@@ -67,7 +68,7 @@ function* doOrder() {
 
       if (next) {
         const order = yield select(state => state.order);
-        if (processingIndex(order) >= currentOrderLength(order)) {
+        if (processingIndex(order) >= orderLength(order)) {
           yield put(orderActions.finishOrder());
         }
       }

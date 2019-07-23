@@ -1,12 +1,12 @@
 import { ORDER } from './action';
 import { genReducers } from '../indexReducer';
-import { ORDER_STEP_STATUS, ORDER_STATUS } from './model';
+import { STEP_STATUS, ORDER_STATUS } from './model';
 import { demoOrder, demoOrder2, demoOrderExcp } from './demoData';
 import {
   viewingStep,
   processingStep,
   processingIndex,
-  currentOrderLength,
+  orderLength,
   viewingIndex,
   currentOrder
 } from './selector';
@@ -18,10 +18,10 @@ const initState = {
   list: [demoOrder, demoOrder2, demoOrderExcp]
 };
 
-function setStepData(state, reducer) {
+function reduceStepData(reducer, state, action) {
   const newState = { ...state };
   const newStep = processingStep(newState);
-  newStep.data = reducer(newStep);
+  newStep.data = reducer(newStep.data, action);
   return newState;
 }
 
@@ -32,12 +32,12 @@ function setOrderStatus(state, status) {
   return newState;
 }
 
-function setStepStatus(state, status) {
+function setStepStatus(state, action) {
   const newState = {
     ...state
   };
   const newStep = processingStep(newState);
-  newStep.status = status;
+  newStep.status = action.status;
   return newState;
 }
 
@@ -45,8 +45,8 @@ function limitIndex(state, index) {
   if (index < 0) {
     return 0;
   }
-  if (index >= currentOrderLength(state)) {
-    return currentOrderLength(state) - 1;
+  if (index >= orderLength(state)) {
+    return orderLength(state) - 1;
   }
   return index;
 }
@@ -101,13 +101,7 @@ const orderReducer = {
   },
 
   // 修改step的状态
-  [ORDER.STEP.ENTER]: state => setStepStatus(state, ORDER_STEP_STATUS.ENTERING),
-  [ORDER.STEP.ENTERED]: state => setStepStatus(state, ORDER_STEP_STATUS.DOING),
-  [ORDER.STEP.LEAVE]: state => setStepStatus(state, ORDER_STEP_STATUS.LEAVING),
-  [ORDER.STEP.FINISH]: state =>
-    setStepStatus(state, ORDER_STEP_STATUS.FINISHED),
-  [ORDER.STEP.FAIL]: state => setStepStatus(state, ORDER_STEP_STATUS.FAIL),
-  [ORDER.STEP.RESET]: state => setStepStatus(state, ORDER_STEP_STATUS.READY),
+  [ORDER.STEP.STATUS]: setStepStatus,
   //
   [ORDER.STEP.DO_NEXT]: state => {
     const newIndex = processingIndex(state) + 1;
@@ -130,11 +124,11 @@ const orderReducer = {
           ? newIndex
           : viewingIndex(state)
     };
-    return setStepStatus(revokedState, ORDER_STEP_STATUS.READY);
+    return setStepStatus(revokedState, STEP_STATUS.READY);
   },
   [ORDER.STEP.DATA]: (state, action) => {
     const { reducer } = action;
-    return setStepData(state, reducer);
+    return reduceStepData(reducer, state, action);
   }
 };
 

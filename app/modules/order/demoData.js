@@ -8,7 +8,7 @@ export const demoOrder = {
     {
       name: 'skippable',
       info: 'this step is skippable',
-      description:'扫描二维码',
+      description:'扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
       data: {},
@@ -21,7 +21,6 @@ export const demoOrder = {
       info: 'this step is undoable',
       type: 'input',
       undoable: true,
-
       payload: {
         label: 'address'
       }
