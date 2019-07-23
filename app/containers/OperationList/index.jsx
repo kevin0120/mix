@@ -11,7 +11,7 @@ import clsx from 'clsx';
 import CardContent from '@material-ui/core/CardContent';
 import { orderActions } from '../../modules/order/action';
 import { ORDER_STATUS } from '../../modules/order/model';
-import { todoOrders, doneOrders, excpOrders } from '../../modules/order/selector';
+import { todoOrders, doneOrders, exceptOrders } from '../../modules/order/selector';
 import styles from './styles';
 import settingImg from '../../../resources/imgs/setting.png';
 
@@ -88,7 +88,7 @@ function HomeOperationList(props: Props) {
       </Grid>
       <Grid item container xs={3} spacing={1} alignItems="flex-start" alignContent="flex-start"
             justify="flex-start" direction="row" className={classes.bgOdd}>
-        {renderOrders(excpOrders(orderList), 12, 'EXCP')}
+        {renderOrders(exceptOrders(orderList), 12, 'EXCP')}
       </Grid>
     </Grid>
   </div>;

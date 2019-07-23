@@ -26,7 +26,7 @@ import isURL from 'validator/lib/isURL';
 import Input from '@material-ui/core/Input';
 import { cardTitle } from '../../common/jss/material-react-pro';
 import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
-import { NewCar } from '../../modules/scanner/action';
+import { ScannerNewData } from '../../modules/scanner/action';
 
 // @material-ui/core components
 // @material-ui/icons
@@ -83,7 +83,7 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = {
-  dispatchNewCar: NewCar,
+  dispatchNewCar: ScannerNewData,
   dispatchPush: push
 };
 

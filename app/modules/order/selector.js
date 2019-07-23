@@ -12,6 +12,6 @@ export const viewingStep = order => orderSteps(order)?.[viewingIndex(order)];
 
 export const todoOrders = orderList => orderList?.filter((o) => o.status === ORDER_STATUS.TODO || !(o.status));
 export const doneOrders = orderList => orderList?.filter((o) => o.status === ORDER_STATUS.DONE);
-export const excpOrders = orderList => orderList?.filter(
+export const exceptOrders = orderList => orderList?.filter(
   (o) => o.status === ORDER_STATUS.PENDING || o.status === ORDER_STATUS.FAIL || o.status === ORDER_STATUS.CANCEL
 );

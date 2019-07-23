@@ -1,4 +1,6 @@
-export const CARD_AUTH = {
+// @flow
+
+const CARD_AUTH = {
   READER: {
     INSERTED: 'CARD_AUTH_READER_INSERTED',
     REMOVED: 'CARD_AUTH_READER_REMOVED'
@@ -14,3 +16,5 @@ export const CARD_AUTH = {
   },
   ERROR: 'CARD_AUTH_ERROR'
 };
+
+export default CARD_AUTH;

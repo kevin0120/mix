@@ -1,6 +1,7 @@
 // @flow
 
 import { put, takeLatest, select } from 'redux-saga/effects';
+import type { Saga } from 'redux-saga';
 
 import { SCANNER } from './action';
 import { operationTrigger, operationTriggerBlock } from '../operation/action';
@@ -18,7 +19,7 @@ function* scannerHandler(action) {
       yield put(operationTrigger(data, null, null, source));
       return;
     }
-    if (!lodash.isNil(data) && data !== '') {
+    if (!lodash.isNil(data) && !lodash.isEmpty(data)) {
       if (isCarID(data)) {
         yield put(operationTrigger(data, null, null, source));
       } else {
@@ -31,6 +32,6 @@ function* scannerHandler(action) {
   }
 }
 
-export default function* watchScanner() {
+export default function* watchScanner(): Saga<void> {
   yield takeLatest(SCANNER.READ_NEW_DATA, scannerHandler);
 }

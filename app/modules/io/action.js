@@ -1,3 +1,6 @@
+// @flow
+
+import type {tCommonActionType} from '../../common/type';
 
 export const IO = {
   FUNCTION: 'IO_FUNCTION',
@@ -6,13 +9,13 @@ export const IO = {
   RESET: 'IO_RESET'
 };
 
-export function initIO() {
+export function initIO(): tCommonActionType{
   return {
     type: IO.INIT
   };
 }
 
-export function resetIO(modbusConfig) {
+export function resetIO(modbusConfig: any) {
   return {
     type: IO.RESET,
     modbusConfig

@@ -1,24 +1,17 @@
 // @flow
 
-import { USER } from './action';
+import { USER} from './action';
 import defaultAvatarImg from '../../../resources/imgs/image_placeholder.jpg';
+import type {tCommonActionType} from '../../common/type';
+import type { tAuthUserInfo } from './action';
 
 const lodash = require('lodash');
 
 const defaultUsers = [];
 
-export type rActionUserType = {
-  +type: string,
-  +name: string,
-  +avatar: string,
-  +uid: number,
-  +uuid: string,
-  +role: string
-};
-
 export default function users(
-  state: array = defaultUsers,
-  action: rActionUserType
+  state: Array<tAuthUserInfo> = defaultUsers,
+  action: tCommonActionType & tAuthUserInfo
 ) {
   switch (action.type) {
     case USER.LOGIN.SUCCESS: {

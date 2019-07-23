@@ -1,8 +1,8 @@
 {
   "name": "ControlPanel-SA",
   "productName": "ControlPanel-SA",
-  "version": "1.0.0-rc6",
-  "description": "智能装配生产线-控制面板客户端",
+  "version": "2.0.0-alpha",
+  "description": "智能装配生产-控制面板客户端",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
     "build-dll": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.renderer.dev.dll.babel.js --colors",
@@ -11,7 +11,7 @@
     "build-renderer": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.renderer.prod.babel.js --colors",
     "dev": "cross-env START_HOT=1 node -r @babel/register ./internals/scripts/CheckPortInUse.js && cross-env START_HOT=1 yarn start-renderer-dev",
     "flow": "flow",
-    "flow-typed": "rimraf flow-typed/npm && flow-typed install --overwrite || true",
+    "flow-typed": "rimraf flow-typed/npm && flow-typed install --verbose || true",
     "lint": "cross-env NODE_ENV=development eslint --cache --format=pretty .",
     "lint-fix": "yarn --silent lint --fix; exit 0",
     "lint-styles": "stylelint --ignore-path .eslintignore '**/*.*(css|scss)' --syntax scss",
@@ -218,9 +218,9 @@
     "eslint-plugin-testcafe": "^0.2.1",
     "fbjs-scripts": "^0.8.3",
     "file-loader": "^1.1.11",
-    "flow-bin": "^0.77.0",
+    "flow-bin": "^0.99.1",
     "flow-runtime": "^0.17.0",
-    "flow-typed": "^2.5.1",
+    "flow-typed": "^2.5.2",
     "husky": "^0.14.3",
     "identity-obj-proxy": "^3.0.0",
     "lint-staged": "^7.2.0",
@@ -284,7 +284,6 @@
     "jsmodbus": "^3.0.0",
     "lodash": "^4.17.10",
     "node-hid": "^0.7.3",
-    "node-net-reconnect": "^0.2.1",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-bootstrap-sweetalert": "^4.4.1",
@@ -329,5 +328,5 @@
   "collective": {
     "url": "https://opencollective.com/electron-react-boilerplate-594"
   },
-  "browserslist": "electron 1.6"
+  "browserslist": ["electron 1.6"]
 }

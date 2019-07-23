@@ -16,7 +16,7 @@ import Button from '../../components/CustomButtons/Button';
 import ImageStick from '../../components/ImageStick/imageStick';
 
 import ShutdownDiag from '../../components/ShutDownDiag';
-import { NewCar } from '../../modules/scanner/action';
+import { ScannerNewData } from '../../modules/scanner/action';
 import { switchWorkMode } from '../../modules/workmode/action';
 
 import {
@@ -68,7 +68,7 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = {
-  NewCar,
+  NewCar: ScannerNewData,
   switchWorkMode,
   switch2Timeout,
   doConfirmBypass: operationBypassConfirm,

@@ -1,3 +1,7 @@
+// @flow
+
+import type {tCommonActionType} from "../../common/type"
+
 export const RUSH = {
   INIT: 'RUSH_INIT',
   STARTED: 'RUSH_STARTED',
@@ -5,7 +9,9 @@ export const RUSH = {
   NEW_RESULTS: 'RUSH_NEW_RESULTS'
 };
 
-export function NewResults(results) {
+
+
+export function NewResults(results: Array<any>): tCommonActionType {
   return {
     type: RUSH.NEW_RESULTS,
     data: results

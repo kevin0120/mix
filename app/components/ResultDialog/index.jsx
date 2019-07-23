@@ -26,7 +26,7 @@ import Table from '../Table/Table';
 import Button from '../CustomButtons/Button';
 
 import { setResultDiagShow } from '../../modules/resultDiag/action';
-import { NewCar } from '../../modules/scanner/action';
+import { ScannerNewData } from '../../modules/scanner/action';
 import { switch2Ready } from '../../modules/operation/action';
 
 import resultDiagStyles from './styles';
@@ -46,7 +46,7 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = dispatch =>
-  bindActionCreators({ setResultDiagShow, NewCar, switch2Ready }, dispatch);
+  bindActionCreators({ setResultDiagShow, NewCar: ScannerNewData, switch2Ready }, dispatch);
 
 /* eslint-disable react/prefer-stateless-function */
 class ConnectedResultDialog extends React.Component {

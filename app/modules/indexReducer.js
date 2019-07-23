@@ -1,4 +1,5 @@
 // @flow
+
 import { combineReducers } from 'redux';
 import { connectRouter } from 'connected-react-router';
 
@@ -21,8 +22,8 @@ import tools from './tools/reducer';
 import order from './order/reducer';
 
 export type StateType = {
-  +notify: object,
-  +setting: object
+  +notify: Object,
+  +setting: Object
 };
 
 export type Action = {
