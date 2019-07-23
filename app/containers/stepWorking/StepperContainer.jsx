@@ -27,8 +27,12 @@ type StepperLayoutProps = {
   jumpTo: () => {}
 };
 
-const StepperContainer = ({ steps, viewingIndex, jumpTo }: StepperLayoutProps) => {
-  const classes = makeStyles(styles.stepper)();
+const StepperContainer = ({
+  steps,
+  viewingIndex,
+  jumpTo
+}: StepperLayoutProps) => {
+  const classes = makeStyles(styles.stepperContainer)();
   return (
     <Stepper
       nonLinear
@@ -60,4 +64,7 @@ const StepperContainer = ({ steps, viewingIndex, jumpTo }: StepperLayoutProps) =
   );
 };
 
-export default connect(mapState, mapDispatch)(StepperContainer);
+export default connect(
+  mapState,
+  mapDispatch
+)(StepperContainer);
