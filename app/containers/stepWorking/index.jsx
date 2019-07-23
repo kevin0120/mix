@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Typography, Paper } from '@material-ui/core';
+import { StylesProvider } from '@material-ui/styles';
 import ButtonsContainer from './ButtonsContainer';
 import * as orderSelectors from '../../modules/order/selector';
 import styles from './styles';
@@ -21,6 +22,8 @@ function StepWorking({ currentOrder }: StepWorkingProps) {
   const [action, bindAction] = useState(null);
 
   return (
+    <StylesProvider injectFirst>
+
       <div className={classes.root}>
         <Dialog/>
         <Paper
@@ -43,6 +46,8 @@ function StepWorking({ currentOrder }: StepWorkingProps) {
           </Paper>
         </div>
       </div>
+    </StylesProvider>
+
   );
 }
 

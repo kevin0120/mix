@@ -35,7 +35,6 @@ const StepperContainer = ({
                           }: StepperLayoutProps) => {
   const classes = makeStyles(styles.stepperContainer)();
   return (
-    <StylesProvider injectFirst>
       <Stepper
         nonLinear
         activeStep={viewingIndex}
@@ -63,7 +62,6 @@ const StepperContainer = ({
           );
         })}
       </Stepper>
-    </StylesProvider>
   );
 };
 

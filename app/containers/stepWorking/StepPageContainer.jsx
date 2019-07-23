@@ -10,7 +10,7 @@ const mapState = (state, props) => ({
   ...props,
   step: orderSelectors.viewingStep(state.order) || {},
   processingStep: orderSelectors.processingStep(state.order) || {},
-  result: orderSelectors.stepData(orderSelectors.processingStep(state.order)).result,
+  result: orderSelectors.stepData(orderSelectors.processingStep(state.order))?.result,
 });
 const mapDispatch = {};
 
