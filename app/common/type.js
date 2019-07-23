@@ -1,12 +1,13 @@
 // @flow
 
-import type {Action} from 'redux'
+import type {AnyAction} from 'redux'
 
 const lodash = require('lodash');
 
 type tCommonActionType = {
   +type: string
 };
+
 
 type tDeviceNewData = {
   +data: string | number,
@@ -24,7 +25,7 @@ interface IOutputDevice {
 class Device implements IInputDevice{
   source: string;
 
-  dispatcher: (...args: any) => ?any = null;
+  dispatcher: () => AnyAction;
 
   validator: (data: string | number) => ?boolean = null;
 
@@ -46,7 +47,7 @@ class Device implements IInputDevice{
     return this.validator(data);
   }
 
-  dispatch(): Action {
+  dispatch(): AnyAction {
     if (lodash.isNil(this.dispatcher)) {
       console.error("Scanner Validator is Nil, Please set Validator First")
     }
@@ -62,7 +63,7 @@ class Device implements IInputDevice{
     return this.validator
   }
 
-  setDispatcher(dispatcher: (...args: any) => any): boolean{
+  setDispatcher(dispatcher: (...args: any) => AnyAction): boolean{
     this.dispatcher = dispatcher;
     return true;
   }
@@ -72,7 +73,7 @@ class Device implements IInputDevice{
     return true
   }
 
-  getDispatcher(): ?(...args: any) => any {
+  getDispatcher(): ?(...args: any) => AnyAction {
     return this.dispatcher
   }
 
@@ -82,4 +83,5 @@ class Device implements IInputDevice{
   }
 }
 
-export type {tCommonActionType,tDeviceNewData, IInputDevice, IOutputDevice, Device};
+export type {tCommonActionType,tDeviceNewData};
+export default Device;

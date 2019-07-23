@@ -1,9 +1,9 @@
 // @flow
 
-import { put, takeLatest, select } from 'redux-saga/effects';
+import { put, takeLatest } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import {SCANNER} from './action';
-import type Scanner from './model';
+import Scanner from './model';
 
 let scanner = new Scanner('Scanner');
 
