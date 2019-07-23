@@ -1,17 +1,15 @@
 // @flow
 
-import {Device, IInputDevice } from '../../common/type'
+import { Device } from '../../common/type'
+import { Info } from '../../logger';
 
-const lodash = require('lodash');
-
-class Scanner extends Device implements IInputDevice {
-  static validate(data: string): boolean {
-    if (lodash.isNil(data) || lodash.isEmpty(data)){
-      return false
-    }
-    // 有效的数据
-    return true
+class Scanner extends Device {
+  validate(data: string): boolean {
+    const ret: boolean =  super.validate(data);
+    Info(`Scanner validate return: ${ret}`);
+    return ret
   }
+
 }
 
 export default Scanner;

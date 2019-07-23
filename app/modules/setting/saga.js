@@ -63,6 +63,6 @@ function* saveConfiguration(action) {
   }
 }
 
-export default function* watchSettingPreSave(): Saga<void> {
+export default function* watchSettingPreSave() {
   yield takeEvery(USER_CONFIGS.PRE_SAVE, saveConfiguration);
 }
