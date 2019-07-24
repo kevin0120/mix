@@ -13,7 +13,7 @@ import (
 const (
 	WS_EVENT_CONTROLLER  = "controller"
 	WS_EVENT_RESULT      = "result"
-	WS_EVENT_REG         = "regist"
+	WS_EVENT_REG         = "register"
 	WS_EVENT_SELECTOR    = "selector"
 	WS_EVENT_JOB         = "job"
 	WS_EVENT_SCANNER     = "scanner"
