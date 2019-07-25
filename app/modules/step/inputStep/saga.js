@@ -1,11 +1,17 @@
 import { put, take } from 'redux-saga/effects';
 import { INPUT_STEP } from './action';
-import { STEP_STATUS } from '../../order/model';
+import { STEP_STATUS } from "../model";
 
-export default function* root(ORDER, orderActions) {
-  try {
-    console.log('input running');
-    while (true) {
+export default {
+  * [STEP_STATUS.ENTERING](ORDER, orderActions) {
+    try {
+      yield put(orderActions.stepStatus(STEP_STATUS.DOING));
+    } catch (e) {
+      console.error(e);
+    }
+  },
+  * [STEP_STATUS.DOING](ORDER, orderActions) {
+    try {
       const { payload } = yield take(INPUT_STEP.SUBMIT);
       if (payload) {
         if (payload === 'fail') {
@@ -14,9 +20,16 @@ export default function* root(ORDER, orderActions) {
           yield put(orderActions.stepStatus(STEP_STATUS.FINISHED));
         }
       }
-      yield put(orderActions.doNextStep());
+    } catch (e) {
+      console.error(e);
     }
-  } catch (e) {
-    console.error(e);
+  },
+  * [STEP_STATUS.FINISHED](ORDER, orderActions) {
+    try {
+      yield put(orderActions.doNextStep());
+    } catch (e) {
+      console.error(e);
+    }
   }
-}
+};
+

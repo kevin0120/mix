@@ -7,7 +7,7 @@ import StepButton from '@material-ui/core/StepButton';
 import StepLabel from '@material-ui/core/StepLabel';
 import React from 'react';
 import { StylesProvider } from '@material-ui/styles';
-import { STEP_STATUS } from '../../modules/order/model';
+import { STEP_STATUS } from '../../modules/step/model';
 import styles from './styles';
 import * as orderSelectors from '../../modules/order/selector';
 import { orderActions } from '../../modules/order/action';

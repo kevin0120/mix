@@ -1,5 +1,5 @@
 import { OPERATION_VIEWER } from './action';
-import { genReducers } from '../indexReducer';
+import { genReducers } from '../util';
 
 const initOperationViewer = {
   list: [],

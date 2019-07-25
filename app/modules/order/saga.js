@@ -1,7 +1,7 @@
 import { take, call, race, all, select, put } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 import { ORDER, orderActions } from './action';
-import stepTypes from '../step/stepTypes';
+import steps from '../step/saga';
 import {
   processingStep,
   processingIndex,
@@ -9,13 +9,12 @@ import {
   orderLength
 } from './selector';
 import dialogActions from '../dialog/action';
-import { STEP_STATUS } from './model';
 
 const mapping = {
-  onOrderFinish: returnHome
+  onOrderFinish: showResult
 };
 
-function* returnHome() {
+function* showResult() {
   try {
     yield put(
       dialogActions.showDialog({
@@ -34,10 +33,11 @@ export default function* root() {
       // take trigger action
       yield take(ORDER.TRIGGER);
       // do order
-      const { finish } = yield race({
+      const { finish, trigger } = yield race({
         exit: call(doOrder),
         finish: take(ORDER.FINISH),
-        fail: take(ORDER.FAIL)
+        fail: take(ORDER.FAIL),
+        trigger: take(ORDER.TRIGGER)
       });
       console.log('order finished');
       if (finish) {
@@ -58,10 +58,7 @@ function* doOrder() {
       }
       console.log('doing order');
       const { next } = yield race({
-        exit: all([
-          call(stepTypes[type], ORDER, orderActions),
-          put(orderActions.stepStatus(STEP_STATUS.ENTERING))
-        ]),
+        exit: call(steps, type, ORDER, orderActions),
         next: take(ORDER.STEP.DO_NEXT),
         previous: take(ORDER.STEP.DO_PREVIOUS)
       });

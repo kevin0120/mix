@@ -1,5 +1,5 @@
 import { BATTERY } from './action';
-import { genReducers } from '../indexReducer';
+import { genReducers } from '../util';
 
 const initBattery = {
   percentage: -1

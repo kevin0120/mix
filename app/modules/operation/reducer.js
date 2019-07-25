@@ -8,7 +8,7 @@ import {
 } from '../io/saga';
 
 import sortObj from '../../common/utils';
-import { genReducers } from '../indexReducer';
+import { genReducers } from '../util';
 
 
 const defaultOperations = {

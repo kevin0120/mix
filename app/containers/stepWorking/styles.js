@@ -45,7 +45,6 @@ const layout = {
     margin: 3,
     flex: 4,
     overflowY: 'auto',
-    display:'flex',
     backgroundImage: 'url("../resources/imgs/texture.png")',
     backgroundRepeat: 'repeat',
     backgroundColor: '#eee',

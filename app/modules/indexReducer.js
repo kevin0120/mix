@@ -37,14 +37,6 @@ export type Dispatch = ReduxDispatch<Action>;
 
 export type Store = ReduxStore<GetState, Action>;
 
-export function genReducers(reducers, initState = {}) {
-  return (state = initState, action) => {
-    if (reducers[action.type]) {
-      return reducers[action.type](state, action);
-    }
-    return state;
-  };
-}
 
 export default function createRootReducer(history: {}) {
   const routerReducer = connectRouter(history)(() => {});

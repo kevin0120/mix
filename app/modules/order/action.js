@@ -46,8 +46,9 @@ export const orderActions = {
     type: ORDER.STEP.JUMP_TO,
     stepId
   }),
-  stepStatus: () => ({
-    type: ORDER.STEP.STATUS
+  stepStatus: (status) => ({
+    type: ORDER.STEP.STATUS,
+    status
   }),
   doNextStep: () => ({
     type: ORDER.STEP.DO_NEXT

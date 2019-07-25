@@ -1,6 +1,7 @@
 import { ORDER } from './action';
-import { genReducers } from '../indexReducer';
-import { STEP_STATUS, ORDER_STATUS } from './model';
+import { genReducers } from '../util';
+import { ORDER_STATUS } from './model';
+import { STEP_STATUS } from '../step/model';
 import { demoOrder, demoOrder2, demoOrderExcp } from './demoData';
 import {
   viewingStep,

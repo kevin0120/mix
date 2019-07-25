@@ -1,4 +1,4 @@
-import { genReducers } from '../indexReducer';
+import { genReducers } from '../util';
 import { TOOLS } from './action';
 
 const initState = {
