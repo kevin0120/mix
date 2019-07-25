@@ -1,4 +1,4 @@
-import { take, call, race, all, select, put } from 'redux-saga/effects';
+import { take, call, race, fork, select, put, join } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 import { ORDER, orderActions } from './action';
 import steps from '../step/saga';
@@ -30,14 +30,16 @@ function* showResult() {
 export default function* root() {
   try {
     while (true) {
-      // take trigger action
-      yield take(ORDER.TRIGGER);
-      // do order
-      const { finish, trigger } = yield race({
+      const {order}=yield take(ORDER.TRIGGER);
+      const didSwitchOrder = yield fork(function* () {
+        yield take(ORDER.SWITCH);
+      });
+      yield put(orderActions.switchOrder(order));
+      yield join(didSwitchOrder);
+      const { finish } = yield race({
         exit: call(doOrder),
         finish: take(ORDER.FINISH),
-        fail: take(ORDER.FAIL),
-        trigger: take(ORDER.TRIGGER)
+        fail: take(ORDER.FAIL)
       });
       console.log('order finished');
       if (finish) {
@@ -52,11 +54,8 @@ export default function* root() {
 function* doOrder() {
   try {
     while (true) {
-      const type = yield select(state => stepType(processingStep(state.order)));
-      if (!type) {
-        throw new Error('step type not valid:', type);
-      }
       console.log('doing order');
+      const type = yield select(state => stepType(processingStep(state.order)));
       const { next } = yield race({
         exit: call(steps, type, ORDER, orderActions),
         next: take(ORDER.STEP.DO_NEXT),

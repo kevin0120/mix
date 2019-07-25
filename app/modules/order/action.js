@@ -5,6 +5,7 @@ export const ORDER = {
   TRIGGER: 'ORDER_TRIGGER',
   FINISH: 'ORDER_FINISH',
   FAIL: 'ORDER_FAIL',
+  SWITCH: 'ORDER_SWITCH',
   STEP: {
     // 仅移动指针，不修改step状态
     NEXT: 'ORDER_STEP_NEXT',
@@ -28,6 +29,10 @@ export type orderTriggerType = {
 export const orderActions = {
   trigger: (order: Order): orderTriggerType => ({
     type: ORDER.TRIGGER,
+    order
+  }),
+  switchOrder: (order: Order): orderTriggerType => ({
+    type: ORDER.SWITCH,
     order
   }),
   finishOrder: () => ({

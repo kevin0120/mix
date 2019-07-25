@@ -53,7 +53,7 @@ function limitIndex(state, index) {
 }
 
 const orderReducer = {
-  [ORDER.TRIGGER]: (state, action) => {
+  [ORDER.SWITCH]: (state, action) => {
     const firstIndex = 0;
     return {
       ...state,
