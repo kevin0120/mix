@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
-import { Typography, Paper } from '@material-ui/core';
+import { Typography, Paper, createMuiTheme, MuiThemeProvider } from '@material-ui/core';
 import { StylesProvider } from '@material-ui/styles';
 import ButtonsContainer from './ButtonsContainer';
 import * as orderSelectors from '../../modules/order/selector';
@@ -17,12 +17,23 @@ type StepWorkingProps = {
   currentOrder: {}
 };
 
+const theme = createMuiTheme({
+  overrides: {
+    MuiPaper: {
+      root: {
+        backgroundColor:'inherit'
+      },
+    }
+  }
+});
+
 function StepWorking({ currentOrder }: StepWorkingProps) {
   const classes = makeStyles(styles.layout)();
   const [action, bindAction] = useState(null);
 
   return (
     <StylesProvider injectFirst>
+      <MuiThemeProvider theme={theme}>
 
       <div className={classes.root}>
         <Dialog/>
@@ -46,6 +57,7 @@ function StepWorking({ currentOrder }: StepWorkingProps) {
           </Paper>
         </div>
       </div>
+      </MuiThemeProvider>
     </StylesProvider>
 
   );

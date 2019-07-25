@@ -13,7 +13,7 @@ import { stepData, processingStep } from '../../../modules/order/selector';
 
 const mapState = (state, props) => ({
   ...props,
-  result: stepData(processingStep(state.order)).result
+  result: stepData(processingStep(state.order))?.result || {}
 });
 
 const mapDispatch = {
@@ -53,7 +53,7 @@ function ScannerStep(
 
   return (
     <div className={classes.root}>
-      <QRCode width="200" height="200" viewBox="0 0 24 24"/>
+      <QRCode width="200" height="200" viewBox="0 0 24 24" fill={'#444'} />
       <TextField
         label={label}
         margin="normal"

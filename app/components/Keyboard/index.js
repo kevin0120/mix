@@ -14,6 +14,8 @@ import { I18n } from 'react-i18next';
 import customSelectStyle from '../../common/jss/customSelectStyle';
 import Button from '../CustomButtons/Button';
 import CustomInput from '../CustomInput/CustomInput';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core';
+import { StylesProvider } from "@material-ui/styles";
 
 const lodash = require('lodash');
 
@@ -30,6 +32,16 @@ const customStyles = theme => ({
   },
   rightButton: {
     // marginLeft: '40%'
+  }
+});
+
+const theme = createMuiTheme({
+  overrides: {
+    MuiPaper: {
+      root: {
+        backgroundColor:'#fff'
+      },
+    }
   }
 });
 
@@ -85,10 +97,13 @@ export default function withKeyboard(SubComponents) {
       <I18n ns="translations">
         {t => (
           <React.Fragment>
+
             <SubComponents
               keyboardInput={c => bindKeyboardInput(c)}
               {...restProps}
             />
+            <MuiThemeProvider theme={theme}>
+
             <Dialog
               classes={{
                 root: classes.modalRoot,
@@ -175,6 +190,7 @@ export default function withKeyboard(SubComponents) {
                 />
               </div>
             </Dialog>
+            </MuiThemeProvider>
           </React.Fragment>
         )}
       </I18n>

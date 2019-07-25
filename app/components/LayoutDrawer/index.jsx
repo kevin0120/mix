@@ -23,7 +23,11 @@ export default function LayoutDrawer(props) {
           zIndex: '0'
         },
         paper: {
-          zIndex: '0'
+          zIndex: '0',
+          backgroundImage: 'url("../resources/imgs/texture.png")',
+          backgroundRepeat: 'repeat',
+          backgroundColor: '#444',
+          color:'#ddd'
         }
       }
     }
