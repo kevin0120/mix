@@ -16,7 +16,7 @@ const initState = {
   currentOrder: null,
   processingIndex: 0,
   viewingIndex: 0,
-  list: [demoOrder, demoOrder2, demoOrderExcp]
+  list: [demoOrder, demoOrderExcp]
 };
 
 function reduceStepData(reducer, state, action) {

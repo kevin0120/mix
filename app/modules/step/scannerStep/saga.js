@@ -32,7 +32,7 @@ export default {
         yield take(SCANNER_STEP.SUBMIT);
         const result = yield select(s => stepData(processingStep(s.order))?.result);
         const label = yield select(s => stepPayload(processingStep(s.order))?.label);
-        if (result.hasOwnProperty(label)) {
+        if (Object.hasOwnProperty.call(result, label)) {
           yield put(orderActions.stepStatus(STEP_STATUS.FINISHED));
         }
       }
