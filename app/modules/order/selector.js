@@ -19,3 +19,4 @@ export const stepStatus = step => step?.status;
 export const stepType = step => step?.type;
 export const stepData = step => step?.data;
 export const stepPayload = step => step?.payload;
+export const startTime = step => step?.startTime;

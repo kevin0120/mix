@@ -130,6 +130,13 @@ const orderReducer = {
   [ORDER.STEP.DATA]: (state, action) => {
     const { reducer } = action;
     return reduceStepData(reducer, state, action);
+  },
+  [ORDER.STEP.START_TIME]: (state, action) => {
+    const { startTime } = action;
+    const newState = { ...state };
+    const newStep = processingStep(newState);
+    newStep.startTime = startTime;
+    return newState;
   }
 };
 

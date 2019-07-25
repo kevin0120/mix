@@ -1,4 +1,4 @@
-import { take, call, race, fork, select, put, join } from 'redux-saga/effects';
+import { take, call, race, fork, select, put, join, all } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 import { ORDER, orderActions } from './action';
 import steps from '../step/saga';
@@ -30,7 +30,7 @@ function* showResult() {
 export default function* root() {
   try {
     while (true) {
-      const {order}=yield take(ORDER.TRIGGER);
+      const { order } = yield take(ORDER.TRIGGER);
       const didSwitchOrder = yield fork(function* () {
         yield take(ORDER.SWITCH);
       });

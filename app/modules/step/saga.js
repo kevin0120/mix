@@ -1,6 +1,7 @@
 import { cancel, fork, join, put, take } from 'redux-saga/effects';
 import { STEP_STATUS } from './model';
 import stepTypes from './stepTypes';
+import { orderActions } from '../order/action';
 
 let stepTask = null;
 
@@ -33,6 +34,7 @@ export default function* (stepType, ORDER, orderActions) {
       }
     );
     yield put(orderActions.stepStatus(STEP_STATUS.ENTERING));
+    yield put(orderActions.stepStartTime(new Date()));
     yield join(step);
   } catch (e) {
     console.error(e);

@@ -1,4 +1,4 @@
-import { take, put, select, join, fork, cancel } from 'redux-saga/effects';
+import { take, put, select } from 'redux-saga/effects';
 import { SCANNER_STEP } from './action';
 import { processingStep, stepData, stepPayload } from '../../order/selector';
 import { STEP_STATUS } from '../model';
