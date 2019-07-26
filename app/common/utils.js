@@ -3,6 +3,7 @@ import { toast } from 'react-toastify';
 
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
+import moment from 'moment';
 
 const VINMAP = {
   A: 1,
@@ -164,3 +165,12 @@ export const guard = (fun, msg) => (...args) => {
     throw new Error(msg, fun, ...args, e);
   }
 };
+
+export const formatTime = t => `${t}`.length <= 2 ? `00${t}`.slice(-2) : t;
+
+export function durationString(duration) {
+  const h = moment.duration(duration).hours();
+  const m = moment.duration(duration).minutes();
+  const s = moment.duration(duration).seconds();
+  return `${formatTime(h)}:${formatTime(m)}:${formatTime(s)}`;
+}

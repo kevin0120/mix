@@ -12,12 +12,14 @@ export default {
   },
   * [STEP_STATUS.DOING](ORDER, orderActions) {
     try {
-      const { payload } = yield take(INPUT_STEP.SUBMIT);
-      if (payload) {
-        if (payload === 'fail') {
-          yield put(orderActions.stepStatus(STEP_STATUS.FAIL));
-        } else {
-          yield put(orderActions.stepStatus(STEP_STATUS.FINISHED));
+      while(true){
+        const { payload } = yield take(INPUT_STEP.SUBMIT);
+        if (payload) {
+          if (payload === 'fail') {
+            yield put(orderActions.stepStatus(STEP_STATUS.FAIL));
+          } else {
+            yield put(orderActions.stepStatus(STEP_STATUS.FINISHED));
+          }
         }
       }
     } catch (e) {

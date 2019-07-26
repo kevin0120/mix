@@ -1,32 +1,32 @@
 import { cancel, fork, join, put, take } from 'redux-saga/effects';
 import { STEP_STATUS } from './model';
 import stepTypes from './stepTypes';
-import { orderActions } from '../order/action';
+import { orderActions, ORDER } from '../order/action';
 
-let stepTask = null;
+let statusTask = null;
 
-function invalidStepStatus(stepType,status){
-  if(!stepType){
+function invalidStepStatus(stepType, status) {
+  if (!stepType) {
     throw Error(`invalid stepType ${stepType}`);
   }
-  if(!status){
+  if (!status) {
     throw Error(`trying to invalid status ${status} of ${stepType}`);
   }
   throw Error(`step type ${stepType}  has empty status ${status}`);
 }
 
 
-export default function* (stepType, ORDER, orderActions) {
+export default function* (stepType) {
   try {
     const step = yield fork(
       function* runStep() {
         try {
           while (true) {
             const { status } = yield take(ORDER.STEP.STATUS);
-            if (stepTask) {
-              yield cancel(stepTask);
+            if (statusTask) {
+              yield cancel(statusTask);
             }
-            stepTask = yield fork(stepTypes?.[stepType]?.[status] || (()=>invalidStepStatus(stepType,status)), ORDER, orderActions);
+            statusTask = yield fork(stepTypes?.[stepType]?.[status] || (() => invalidStepStatus(stepType, status)), ORDER, orderActions);
           }
         } catch (e) {
           console.error(e);
@@ -34,7 +34,6 @@ export default function* (stepType, ORDER, orderActions) {
       }
     );
     yield put(orderActions.stepStatus(STEP_STATUS.ENTERING));
-    yield put(orderActions.stepStartTime(new Date()));
     yield join(step);
   } catch (e) {
     console.error(e);

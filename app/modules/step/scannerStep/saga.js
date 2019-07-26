@@ -13,27 +13,26 @@ export default {
   },
   * [STEP_STATUS.DOING](ORDER, orderActions) {
     try {
-      const step = yield select(s => processingStep(s.order));
-      const action = yield take(SCANNER_STEP.GET_VALUE);
-      yield put(orderActions.stepData((data) => ({
-        ...data,
-        result: {
-          [step.payload.label]: action.value
-        }
-      })));
-      yield put(orderActions.stepStatus(STEP_STATUS.LEAVING));
-    } catch (e) {
-      console.error(e);
-    }
-  },
-  * [STEP_STATUS.LEAVING](ORDER, orderActions) {
-    try {
       while (true) {
-        yield take(SCANNER_STEP.SUBMIT);
+        const action = yield take([SCANNER_STEP.GET_VALUE, SCANNER_STEP.SUBMIT]);
         const result = yield select(s => stepData(processingStep(s.order))?.result);
         const label = yield select(s => stepPayload(processingStep(s.order))?.label);
-        if (Object.hasOwnProperty.call(result, label)) {
-          yield put(orderActions.stepStatus(STEP_STATUS.FINISHED));
+        switch (action.type) {
+          case(SCANNER_STEP.GET_VALUE):
+            yield put(orderActions.stepData((data) => ({
+              ...data,
+              result: {
+                [label]: action.value
+              }
+            })));
+            break;
+          case(SCANNER_STEP.SUBMIT):
+            if (Object.hasOwnProperty.call(result, label)) {
+              yield put(orderActions.stepStatus(STEP_STATUS.FINISHED));
+            }
+            break;
+          default:
+            break;
         }
       }
     } catch (e) {
@@ -43,7 +42,6 @@ export default {
   * [STEP_STATUS.FINISHED](ORDER, orderActions) {
     try {
       yield put(orderActions.doNextStep());
-
     } catch (e) {
       console.error(e);
     }

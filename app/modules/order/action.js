@@ -19,7 +19,8 @@ export const ORDER = {
     // 修改store
     DATA:'ORDER_STEP_DATA',
     // 记录开始时间
-    START_TIME:'ORDER_STEP_START_TIME'
+    START_TIME:'ORDER_STEP_START_TIME',
+    END_TIME:'ORDER_STEP_END_TIME'
   }
 };
 
@@ -67,8 +68,14 @@ export const orderActions = {
     type:ORDER.STEP.DATA,
     reducer
   }),
-  stepStartTime:(startTime)=>({
+  stepStartTime:(idx,startTime)=>({
     type:ORDER.STEP.START_TIME,
+    idx,
     startTime
+  }),
+  stepEndTime:(idx,endTime)=>({
+    type:ORDER.STEP.END_TIME,
+    idx,
+    endTime
   })
 };

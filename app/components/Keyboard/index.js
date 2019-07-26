@@ -15,7 +15,7 @@ import customSelectStyle from '../../common/jss/customSelectStyle';
 import Button from '../CustomButtons/Button';
 import CustomInput from '../CustomInput/CustomInput';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core';
-import { StylesProvider } from "@material-ui/styles";
+import { StylesProvider } from '@material-ui/styles';
 
 const lodash = require('lodash');
 
@@ -39,15 +39,15 @@ const theme = createMuiTheme({
   overrides: {
     MuiPaper: {
       root: {
-        backgroundColor:'#fff'
-      },
+        backgroundColor: '#fff'
+      }
     }
   }
 });
 
 export default function withKeyboard(SubComponents) {
   function KeyboardDialog(props) {
-    let keyboard = null;
+    const [keyboard, setKeyboard] = useState(null);
     const [layout, setLayout] = useState('default');
     const [text, setText] = useState('');
     const [config, setConfig] = useState({
@@ -87,7 +87,11 @@ export default function withKeyboard(SubComponents) {
     const onChangeInput = event => {
       const tx = event.target.value;
       setText(tx);
-      keyboard.setInput(tx);
+      if (keyboard?.keyboard?.setInput) {
+        keyboard.keyboard.setInput(tx);
+      } else {
+        console.error('no keyboard');
+      }
     };
 
     const { ...restProps } = props;
@@ -104,92 +108,92 @@ export default function withKeyboard(SubComponents) {
             />
             <MuiThemeProvider theme={theme}>
 
-            <Dialog
-              classes={{
-                root: classes.modalRoot,
-                paper: `${classes.modal} ${classes.modalLarge}`
-              }}
-              TransitionComponent={Slide}
-              keepMounted
-              open={show}
-              onClose={() => setShow(false)}
-              aria-labelledby="form-dialog-title"
-              scroll="paper"
-            >
-              <DialogTitle
-                id="form-dialog-title"
-                className={classes.modalHeader}
+              <Dialog
+                classes={{
+                  root: classes.modalRoot,
+                  paper: `${classes.modal} ${classes.modalLarge}`
+                }}
+                TransitionComponent={Slide}
+                keepMounted
+                open={show}
+                onClose={() => setShow(false)}
+                aria-labelledby="form-dialog-title"
+                scroll="paper"
               >
-                {t(config.title)}
-              </DialogTitle>
-              <DialogContent className={classes.modalBody}>
-                <CustomInput
-                  large
-                  labelText={t(config.label)}
-                  id="keyboard-dialog-input"
-                  formControlProps={{
-                    fullWidth: true,
-                    required: config.required
-                  }}
-                  inputProps={{
-                    // onFocus: setActiveInput,
-                    required: config.required,
-                    value: text || '',
-                    onChange: onChangeInput,
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="clear input"
-                          onClick={() => {
-                            setText('');
-                            keyboard.setInput('');
-                          }}
-                        >
-                          <Clear/>
-                        </IconButton>
-                      </InputAdornment>
-                    )
-                  }}
-                />
-              </DialogContent>
-              <DialogActions
-                className={`${classes.modalFooter} ${
-                  classes.modalFooterCenter
-                  }`}
-              >
-                <Button
-                  // className={classes.modalFooterCenter}
-                  style={{ margin: '0 80px' }}
-                  onClick={() => setShow(false)}
-                  color="danger"
-                  // size='lg'
-                  autoFocus
-                  round
+                <DialogTitle
+                  id="form-dialog-title"
+                  className={classes.modalHeader}
                 >
-                  {t('Common.Close')}
-                </Button>
-                <Button
-                  style={{ margin: '0 80px' }}
-                  onClick={handleSubmit}
-                  color="success"
-                  round
-                  disabled={!submitEnable}
+                  {t(config.title)}
+                </DialogTitle>
+                <DialogContent className={classes.modalBody}>
+                  <CustomInput
+                    large
+                    labelText={t(config.label)}
+                    id="keyboard-dialog-input"
+                    formControlProps={{
+                      fullWidth: true,
+                      required: config.required
+                    }}
+                    inputProps={{
+                      // onFocus: setActiveInput,
+                      required: config.required,
+                      value: text || '',
+                      onChange: onChangeInput,
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="clear input"
+                            onClick={() => {
+                              setText('');
+                              keyboard.setInput('');
+                            }}
+                          >
+                            <Clear/>
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }}
+                  />
+                </DialogContent>
+                <DialogActions
+                  className={`${classes.modalFooter} ${
+                    classes.modalFooterCenter
+                    }`}
                 >
-                  {t('Common.Submit')}
-                </Button>
-              </DialogActions>
-              <div className={classes.keyboard}>
-                <Keyboard
-                  ref={r => {
-                    keyboard = r;
-                  }}
-                  inputName="keyboard-dialog-input"
-                  layoutName={layout}
-                  onChange={setText}
-                  onKeyPress={onKeyPress}
-                />
-              </div>
-            </Dialog>
+                  <Button
+                    // className={classes.modalFooterCenter}
+                    style={{ margin: '0 80px' }}
+                    onClick={() => setShow(false)}
+                    color="danger"
+                    // size='lg'
+                    autoFocus
+                    round
+                  >
+                    {t('Common.Close')}
+                  </Button>
+                  <Button
+                    style={{ margin: '0 80px' }}
+                    onClick={handleSubmit}
+                    color="success"
+                    round
+                    disabled={!submitEnable}
+                  >
+                    {t('Common.Submit')}
+                  </Button>
+                </DialogActions>
+                <div className={classes.keyboard}>
+                  <Keyboard
+                    ref={r => {
+                      setKeyboard(r);
+                    }}
+                    inputName="keyboard-dialog-input"
+                    layoutName={layout}
+                    onChange={setText}
+                    onKeyPress={onKeyPress}
+                  />
+                </div>
+              </Dialog>
             </MuiThemeProvider>
           </React.Fragment>
         )}

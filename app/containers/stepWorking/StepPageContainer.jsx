@@ -5,6 +5,7 @@ import { makeStyles, Paper, Grid, Typography } from '@material-ui/core';
 import stepTypes from '../steps/stepTypes';
 import * as orderSelectors from '../../modules/order/selector';
 import styles from './styles';
+import type { tStep } from '../../modules/order/model';
 
 const mapState = (state, props) => ({
   ...props,
@@ -14,7 +15,14 @@ const mapState = (state, props) => ({
 });
 const mapDispatch = {};
 
-const StepPageContainer = ({ step, processingStep, bindAction, result }) => {
+type Props = {
+  step: tStep,
+  processingStep: tStep,
+  bindAction: ()=>{},
+  result: any
+};
+
+const StepPageContainer = ({ step, processingStep, bindAction, result }): Props => {
   let stepProps = {};
   const classes = makeStyles(styles.stepPageContainer)();
   if (stepTypes?.[step?.type]?.component) {
@@ -46,7 +54,7 @@ const StepPageContainer = ({ step, processingStep, bindAction, result }) => {
           <Grid item className={classes.description}>
             <Paper square className={classes.Paper}>
               <Typography>
-              {step.description}
+                {step.description}
               </Typography>
             </Paper>
           </Grid>

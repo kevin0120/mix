@@ -1,9 +1,18 @@
 // @flow
 
-export class Order {
-  steps: Array<Step>;
-}
+export type tOrder = {
+  steps: Array<tStep>,
+  status: string
+};
 
+export type tOrderStepIdx = number;
+
+export type tOrderState = {
+  currentOrder: tOrder,
+  processingIndex: tOrderStepIdx,
+  viewingIndex: tOrderStepIdx,
+  list: Array<tOrder>
+};
 
 
 export const ORDER_STATUS = {
@@ -15,12 +24,14 @@ export const ORDER_STATUS = {
   FAIL: 'FAIL'
 };
 
-export type Step = {
+export type tStep = {
   +name: string,
   info: string,
   status: string,
   +type: string, // check,collect,instruct,enable,...
   payload: {},
   data: {},
-  steps: Array
+  steps: Array,
+  startTime: Date,
+  endTime: Date
 };

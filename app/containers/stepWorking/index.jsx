@@ -10,21 +10,16 @@ import styles from './styles';
 import Dialog from '../../components/Dialog';
 import StepperContainer from './StepperContainer';
 import StepPageContainer from './StepPageContainer';
+import { durationString } from '../../common/utils';
 
-const format = t => `${t}`.length <= 2 ? `00${t}`.slice(-2) : t;
-
-const renderTimer = (duration) => {
-  const h = moment.duration(duration).hours();
-  const m = moment.duration(duration).minutes();
-  const s = moment.duration(duration).seconds();
-  return <Typography variant="h4">
-    {`${format(h)}:${format(m)}:${format(s)}`}
+const renderTimer = (duration) => <Typography variant="h4">
+    {durationString(duration)}
   </Typography>;
-};
 
 type StepWorkingProps = {
   currentOrder: {},
-  startTime: Date
+  startTime: Date,
+  endTime: Date
 };
 
 const theme = createMuiTheme({
@@ -37,20 +32,30 @@ const theme = createMuiTheme({
   }
 });
 
-function StepWorking({ currentOrder, startTime }: StepWorkingProps) {
+const getDuration = (start, end) => {
+  if (!start) {
+    return 0;
+  }
+  if (!end) {
+    return new Date() - start;
+  }
+  return end - start;
+};
+
+function StepWorking({ currentOrder, startTime, endTime }: StepWorkingProps) {
   const classes = makeStyles(styles.layout)();
   const [action, bindAction] = useState(null);
 
-  const [duration, setDuration] = useState(startTime ? new Date() - startTime : 0);
+  const [duration, setDuration] = useState(getDuration(startTime, endTime));
 
 
   useEffect(() => {
+    setDuration(getDuration(startTime, endTime));
     const interval = setInterval(() => {
-      const current = new Date();
-      setDuration(startTime ? current - startTime : 0);
+      setDuration(getDuration(startTime, endTime));
     }, 500);
     return () => clearInterval(interval);
-  }, [setDuration, startTime]);
+  }, [endTime, setDuration, startTime]);
 
   return (
     <StylesProvider injectFirst>
@@ -86,7 +91,8 @@ function StepWorking({ currentOrder, startTime }: StepWorkingProps) {
 const mapState = (state, props) => ({
   ...props,
   currentOrder: orderSelectors.currentOrder(state.order) || {},
-  startTime: orderSelectors.startTime(orderSelectors.processingStep(state.order)) || null
+  startTime: orderSelectors.startTime(orderSelectors.viewingStep(state.order)) || null,
+  endTime: orderSelectors.endTime(orderSelectors.viewingStep(state.order)) || null
 });
 
 const mapDispatch = {};
