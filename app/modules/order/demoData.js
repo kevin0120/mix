@@ -26,13 +26,11 @@ export const demoOrder = {
       }
     },
     {
-      name: '地址',
-      info: 'this step collects a input',
-      type: 'input',
-      revocable: true,
-
+      name: 'instruction',
+      info: 'this is an instruction step',
+      type: 'instruction',
       payload: {
-        label: 'address'
+        instruction: '根据这段文字进行作业'
       }
     }
     // {

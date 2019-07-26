@@ -1,5 +1,6 @@
 import InputStep from './InputStep';
 import ScannerStep from './scannerStep';
+import InstructionStep from './instructionStep';
 
 export default {
   input: {
@@ -13,6 +14,12 @@ export default {
     component:ScannerStep,
     genProps:props=>({
       label:props.payload.label
+    })
+  },
+  instruction:{
+    component:InstructionStep,
+    genProps:props=>({
+      instruction:props.payload.instruction
     })
   }
 };

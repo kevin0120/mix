@@ -27,7 +27,7 @@ export default {
             })));
             break;
           case(SCANNER_STEP.SUBMIT):
-            if (Object.hasOwnProperty.call(result, label)) {
+            if (Object.hasOwnProperty.call(result || {}, label)) {
               yield put(orderActions.stepStatus(STEP_STATUS.FINISHED));
             }
             break;
