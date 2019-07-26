@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import Button from '@material-ui/core/es/Button/Button';
+import { Typography } from '@material-ui/core';
 import { instructionStepActions } from '../../../modules/step/instructionStep/action';
 import { StepContent } from '../types';
-import { stepPayload, processingStep } from '../../../modules/order/selector';
-import { Typography } from '@material-ui/core';
+import { stepPayload, viewingStep } from '../../../modules/order/selector';
 
 const mapState = (state, props) => ({
-  ...props
+  ...props,
+  instruction: stepPayload(viewingStep(state.order))?.instruction || null
 });
 
 const mapDispatch = {

@@ -1,3 +1,5 @@
+import dataImg from '../../../resources/imgs/working-page-test-pic1.png';
+
 export const demoOrder = {
   name: 'fill info',
   info:
@@ -31,6 +33,15 @@ export const demoOrder = {
       type: 'instruction',
       payload: {
         instruction: '根据这段文字进行作业'
+      }
+    },
+    {
+      name: 'screw',
+      info: 'this is an screw step',
+      type: 'screw',
+      payload: {
+        points: [],
+        image:dataImg
       }
     }
     // {

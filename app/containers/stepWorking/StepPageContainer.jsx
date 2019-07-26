@@ -23,12 +23,9 @@ type Props = {
 };
 
 const StepPageContainer = ({ step, processingStep, bindAction, result }): Props => {
-  let stepProps = {};
   const classes = makeStyles(styles.stepPageContainer)();
   if (stepTypes?.[step?.type]?.component) {
     const StepComponent = stepTypes[step.type].component;
-    stepProps =
-      stepTypes?.[step?.type]?.genProps?.({ payload: step.payload || {} }) || stepProps;
 
     return (
       <Grid container spacing={1} className={classes.root}>
@@ -39,7 +36,6 @@ const StepPageContainer = ({ step, processingStep, bindAction, result }): Props 
                 (StepComponent && (
                   <StepComponent
                     step={step}
-                    {...stepProps}
                     isCurrent={step === processingStep}
                     bindAction={bindAction}
                   />

@@ -9,11 +9,12 @@ import QRCode from './qrcode-scan.svg';
 import { StepContent } from '../types';
 import withKeyboard from '../../../components/Keyboard';
 import type { Dispatch } from '../../../modules/indexReducer';
-import { stepData, processingStep } from '../../../modules/order/selector';
+import { stepData, stepPayload, viewingStep } from '../../../modules/order/selector';
 
 const mapState = (state, props) => ({
   ...props,
-  result: stepData(processingStep(state.order))?.result || {}
+  result: stepData(viewingStep(state.order))?.result || {},
+  label: stepPayload(viewingStep(state.order))?.label || ''
 });
 
 const mapDispatch = {
