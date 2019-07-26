@@ -39,8 +39,7 @@ const StepPageContainer = ({ step, processingStep, bindAction, result }): Props 
                     isCurrent={step === processingStep}
                     bindAction={bindAction}
                   />
-                )) ||
-                null
+                )) || null
               }
             </Paper>
           </Grid>

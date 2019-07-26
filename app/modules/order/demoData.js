@@ -8,42 +8,81 @@ export const demoOrder = {
   status: 'TODO',
   steps: [
     {
+      name: 'screw',
+      info: 'this is an screw step',
+      type: 'screw',
+      skippable: true,
+
+      payload: {
+        points: [
+          {
+            x: 10,
+            y: 10,
+            status: 'waiting'
+          },{
+            x: 20,
+            y: 20,
+            status: 'waitingActive'
+          },{
+            x: 30,
+            y: 30,
+            status: 'success'
+          },{
+            x: 40,
+            y: 40,
+            status: 'error'
+          },{
+            x: 50,
+            y: 50,
+            status: 'errorActive'
+          },
+        ],
+        image: dataImg
+      }
+    },
+    {
       name: 'skippable',
       info: 'this step is skippable',
-      description:'扫描二维码或在输入框中输入',
+      description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
       data: {},
       payload: {
         label: 'name'
       }
-    },
-    {
-      name: 'undoable',
-      info: 'this step is undoable',
-      type: 'input',
-      undoable: true,
+    }, {
+      name: 'skippable',
+      info: 'this step is skippable',
+      description: '扫描二维码或在输入框中输入',
+      type: 'scanner',
+      skippable: true,
+      data: {},
       payload: {
-        label: 'address'
-      }
-    },
-    {
-      name: 'instruction',
-      info: 'this is an instruction step',
-      type: 'instruction',
-      payload: {
-        instruction: '根据这段文字进行作业'
-      }
-    },
-    {
-      name: 'screw',
-      info: 'this is an screw step',
-      type: 'screw',
-      payload: {
-        points: [],
-        image:dataImg
+        label: 'name'
       }
     }
+    // {
+    //   name: 'undoable',
+    //   info: 'this step is undoable',
+    //   type: 'input',
+    //   undoable: true,
+    //   skippable: true,
+    //
+    //   payload: {
+    //     label: 'address'
+    //   }
+    // },
+    // {
+    //   name: 'instruction',
+    //   info: 'this is an instruction step',
+    //   type: 'instruction',
+    //   skippable: true,
+    //
+    //   payload: {
+    //     instruction: '根据这段文字进行作业'
+    //   }
+    // },
+
     // {
     //   name: '扫码',
     //   info: 'this step collects a input',

@@ -180,15 +180,9 @@ class ConnectedImageStick extends React.Component {
         do: true,
         transform: {
           x:
-            (50 -
-              nextOperations.results[nextProps.operations.activeResultIndex]
-                .offset_x) *
-            2,
+            (50 - nextOperations.results[nextProps.operations.activeResultIndex].offset_x) * 2,
           y:
-            (50 -
-              nextOperations.results[nextProps.operations.activeResultIndex]
-                .offset_y) *
-            2
+            (50 - nextOperations.results[nextProps.operations.activeResultIndex].offset_y) * 2
         },
         scale: 2
       });

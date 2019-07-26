@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core';
 import styles from './style';
 import { viewingStep, stepPayload } from '../../../modules/order/selector';
+import ScrewImage from '../../../components/ScrewImage';
 
 const mapState = (state, props) => ({
   ...props,
@@ -12,11 +13,14 @@ const mapState = (state, props) => ({
 
 const mapDispatch = {};
 
-function ScrewStep() {
-  const classes = makeStyles(styles.layout)();
+function ScrewStep({ image, points }) {
+  const classes = makeStyles(styles)();
 
-  return <div className={classes}>
-    screwStep
+  return <div className={classes.layout}>
+    <ScrewImage
+      image={image}
+      points={points}
+    />
   </div>;
 }
 

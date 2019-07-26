@@ -116,7 +116,8 @@ const stepPageContainer = {
     height: '100%',
   },
   image: {
-    flex: 1
+    flex: 1,
+    overflow:'hidden'
   },
   description: {
     flex: 1

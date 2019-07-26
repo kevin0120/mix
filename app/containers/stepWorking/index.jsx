@@ -1,25 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Typography, Paper, createMuiTheme, MuiThemeProvider } from '@material-ui/core';
 import { StylesProvider } from '@material-ui/styles';
-import moment from 'moment';
 import ButtonsContainer from './ButtonsContainer';
 import * as orderSelectors from '../../modules/order/selector';
 import styles from './styles';
 import Dialog from '../../components/Dialog';
 import StepperContainer from './StepperContainer';
 import StepPageContainer from './StepPageContainer';
-import { durationString } from '../../common/utils';
+import Timer from './Timer';
 
-const renderTimer = (duration) => <Typography variant="h4">
-    {durationString(duration)}
-  </Typography>;
 
 type StepWorkingProps = {
   currentOrder: {},
-  startTime: Date,
-  endTime: Date
 };
 
 const theme = createMuiTheme({
@@ -32,30 +26,11 @@ const theme = createMuiTheme({
   }
 });
 
-const getDuration = (start, end) => {
-  if (!start) {
-    return 0;
-  }
-  if (!end) {
-    return new Date() - start;
-  }
-  return end - start;
-};
 
-function StepWorking({ currentOrder, startTime, endTime }: StepWorkingProps) {
+
+function StepWorking({ currentOrder }: StepWorkingProps) {
   const classes = makeStyles(styles.layout)();
   const [action, bindAction] = useState(null);
-
-  const [duration, setDuration] = useState(getDuration(startTime, endTime));
-
-
-  useEffect(() => {
-    setDuration(getDuration(startTime, endTime));
-    const interval = setInterval(() => {
-      setDuration(getDuration(startTime, endTime));
-    }, 500);
-    return () => clearInterval(interval);
-  }, [endTime, setDuration, startTime]);
 
   return (
     <StylesProvider injectFirst>
@@ -75,7 +50,7 @@ function StepWorking({ currentOrder, startTime, endTime }: StepWorkingProps) {
           </Paper>
           <div className={classes.rightContainer}>
             <Paper square className={classes.timerContainer}>
-              {renderTimer(duration)}
+              <Timer/>
             </Paper>
             <Paper square className={classes.stepperContainer}>
               <StepperContainer/>
