@@ -19,7 +19,7 @@ func (td *TestDiag) Debug(msg string) {
 }
 
 func (td *TestDiag) Error(msg string, err error) {
-	fmt.Printf("msg: %s, error: %s\n",msg, err.Error())
+	fmt.Printf("msg: %s, error: %s\n", msg, err.Error())
 }
 
 func TestNewDevice(t *testing.T) {

@@ -172,7 +172,7 @@ func (s *Scanner) manage() {
 	}
 }
 
-func (s *Scanner) connect() error  {
+func (s *Scanner) connect() error {
 	d, err := s.open()
 	if err == nil {
 		// device online

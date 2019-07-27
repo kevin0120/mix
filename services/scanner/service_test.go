@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func NewSrv(label string) *Service{
+func NewSrv(label string) *Service {
 	c := NewConfig()
 	diag := &TestDiag{}
 	c.EntityLabel = label
