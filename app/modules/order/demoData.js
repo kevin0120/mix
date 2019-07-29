@@ -7,35 +7,42 @@ export const demoOrder = {
   type: 'step',
   status: 'TODO',
   steps: [
+
     {
       name: 'screw',
       info: 'this is an screw step',
       type: 'screw',
       skippable: true,
-
+      undoable: true,
       payload: {
+        maxRetryTimes:3,
         points: [
           {
+            id: 1,
             x: 10,
             y: 10,
             status: 'waiting'
-          },{
+          }, {
+            id: 2,
             x: 20,
             y: 20,
-            status: 'waitingActive'
-          },{
+            status: 'waiting'
+          }, {
+            id: 3,
             x: 30,
             y: 30,
-            status: 'success'
-          },{
+            status: 'waiting'
+          }, {
+            id: 4,
             x: 40,
             y: 40,
-            status: 'error'
-          },{
+            status: 'waiting'
+          }, {
+            id: 5,
             x: 50,
             y: 50,
-            status: 'errorActive'
-          },
+            status: 'waiting'
+          }
         ],
         image: dataImg
       }
@@ -50,7 +57,8 @@ export const demoOrder = {
       payload: {
         label: 'name'
       }
-    }, {
+    },
+    {
       name: 'skippable',
       info: 'this step is skippable',
       description: '扫描二维码或在输入框中输入',

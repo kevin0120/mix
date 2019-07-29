@@ -1,6 +1,5 @@
 import { dangerColor, successColor, warningColor } from '../../common/jss/material-react-pro';
 
-const circleRadius = 30;
 
 export default {
   image: {
@@ -11,7 +10,10 @@ export default {
       alignItems: 'center',
       justifyContent: 'center',
       overflow: 'hidden',
-      position: 'relative'
+      position: 'relative',
+      padding: 'auto',
+      objectFit: 'contain',
+
     },
     image: {
       maxHeight: '100%',
@@ -19,10 +21,11 @@ export default {
       textAlign: 'center',
       objectFit: 'contain',
       resize: 'both',
-      flex: 1
-    }
+      margin:0
+      // flex: 1
+    },
   },
-  point: {
+  point: (circleRadius,scale)=>({
     root: {
       display: 'block',
       width: `${circleRadius * 2}px`,
@@ -32,7 +35,8 @@ export default {
       lineHeight: `${circleRadius * 2}px`,
       fontSize: `${(circleRadius - 10) * 2}px`,
       overflow: 'hidden',
-      background: '#dbdbdb'
+      background: '#dbdbdb',
+      transform:`scale(${scale},${scale})`
     },
     active: {
       animation: '$activeRipple 1s infinite cubic-bezier(1, 1, 1, 1)'
@@ -59,5 +63,5 @@ export default {
     error: {
       background: dangerColor
     }
-  }
+  })
 };

@@ -1,5 +1,5 @@
 // @flow
-import { Order } from './model';
+import { tOrder } from './model';
 
 export const ORDER = {
   TRIGGER: 'ORDER_TRIGGER',
@@ -26,15 +26,15 @@ export const ORDER = {
 
 export type orderTriggerType = {
   type: string,
-  order: Order
+  order: tOrder
 };
 
 export const orderActions = {
-  trigger: (order: Order): orderTriggerType => ({
+  trigger: (order: tOrder): orderTriggerType => ({
     type: ORDER.TRIGGER,
     order
   }),
-  switchOrder: (order: Order): orderTriggerType => ({
+  switchOrder: (order: tOrder): orderTriggerType => ({
     type: ORDER.SWITCH,
     order
   }),
