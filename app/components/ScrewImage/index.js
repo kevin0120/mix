@@ -24,14 +24,20 @@ export default function ScrewImage({ image, points, focus, activePoint }) {
     }
   }
 
-  const [focusStyle, setFocusStyle] = useState({});
+  const [focusStyle, setFocusStyle] = useState({
+    transform: `translate(${0}%,${0}%) scale(${1},${1})`
+  });
 
   useEffect(() => {
-    if (focus) {
-      const transformX = (50 - points[activePoint].x) * 2;
-      const transformY = (50 - points[activePoint].y) * 2;
+    if (focus && points?.[activePoint]) {
+      const transformX = (50 - points?.[activePoint]?.x || 0) * 2;
+      const transformY = (50 - points?.[activePoint]?.y || 0) * 2;
       setFocusStyle({
         transform: `translate(${transformX || 0}%,${transformY || 0}%) scale(${focus},${focus})`
+      });
+    } else {
+      setFocusStyle({
+        transform: `translate(${0}%,${0}%) scale(${1},${1})`
       });
     }
   }, [activePoint, focus, points]);
