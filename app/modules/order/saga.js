@@ -16,7 +16,7 @@ import {
 import dialogActions from '../dialog/action';
 import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
-import { durationString } from '../../common/utils';
+import { durationString, timeCost } from '../../common/utils';
 
 const mapping = {
   onOrderFinish: showResult
@@ -27,7 +27,7 @@ function* showResult() {
     const workingOrderSteps = yield select((state => orderSteps(workingOrder(state.order))));
     const data = workingOrderSteps.map(s => ([
       s.name,
-      durationString((s.endTime && s.startTime) ? s.endTime - s.startTime : 0)
+      durationString(timeCost(s.times))
     ]));
     yield put(
       dialogActions.showDialog({

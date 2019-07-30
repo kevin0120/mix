@@ -27,7 +27,7 @@ function ScrewStep({ image, points, activeIndex, result, imageReady }) {
       activeIndex={activeIndex}
       focus={2}
       scale={1}
-      onClick={() => result([{status:'error'}])}
+      onClick={() => result([{status:'success'}])}
       onReady={imageReady}
       pointScale={0.5}
 
