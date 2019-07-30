@@ -9,21 +9,25 @@ import DialogContent from '@material-ui/core/DialogContent';
 import Button from '../../components/CustomButtons/Button';
 import styles from './styles';
 import type { Dispatch } from '../../modules/indexReducer';
-import * as orderSelectors from '../../modules/order/selector';
+import * as oSel from '../../modules/order/selector';
 import { orderActions } from '../../modules/order/action';
-import type { tStep, tStepArray } from '../../modules/order/model';
+import type { tOrder, tStep, tStepArray } from '../../modules/order/model';
 
-const mapState = (state, props) => ({
-  ...props,
-  viewingStep: orderSelectors.viewingStep(state.order) || {},
-  workingStep: orderSelectors.workingStep(state.order) || {},
-  steps: orderSelectors.orderSteps(orderSelectors.viewingOrder(state.order)) || [],
-  viewingIndex: orderSelectors.viewingIndex(state.order) || 0,
-  isPending: orderSelectors.isPending(orderSelectors.viewingOrder(state.order)),
-  isCancel: orderSelectors.isCancel(orderSelectors.viewingOrder(state.order)),
-  pendingable: orderSelectors.pendingable(orderSelectors.viewingOrder(state.order)),
-  cancelable: orderSelectors.cancelable(orderSelectors.viewingOrder(state.order))
-});
+const mapState = (state, props) => {
+  const vOrder = oSel.viewingOrder(state.order);
+  return {
+    ...props,
+    viewingOrder: vOrder,
+    viewingStep: oSel.viewingStep(state.order) || {},
+    workingStep: oSel.workingStep(oSel.workingOrder(state.order)) || {},
+    steps: oSel.orderSteps(vOrder) || [],
+    viewingIndex: oSel.viewingIndex(state.order) || 0,
+    isPending: oSel.isPending(vOrder),
+    isCancel: oSel.isCancel(vOrder),
+    pendingable: oSel.pendingable(vOrder),
+    cancelable: oSel.cancelable(vOrder)
+  };
+};
 
 const mapDispatch = {
   next: orderActions.nextStep,
@@ -31,10 +35,12 @@ const mapDispatch = {
   previous: orderActions.previousStep,
   doPreviousStep: orderActions.doPreviousStep,
   cancelOrder: orderActions.cancelOrder,
-  pendingOrder: orderActions.pendingOrder
+  pendingOrder: orderActions.pendingOrder,
+  workOn: orderActions.workOn
 };
 
 type ButtonsContainerProps = {
+  viewingOrder: tOrder,
   viewingIndex: number,
   viewingStep: tStep,
   workingStep: tStep,
@@ -50,10 +56,12 @@ type ButtonsContainerProps = {
   isPending: boolean,
   isCancel: boolean,
   pendingable: boolean,
-  cancelable: boolean
+  cancelable: boolean,
+  workOn: Dispatch
 };
 
 const ButtonsContainer = ({
+                            viewingOrder,
                             viewingStep,
                             workingStep,
                             next,
@@ -68,7 +76,8 @@ const ButtonsContainer = ({
                             isPending,
                             isCancel,
                             pendingable,
-                            cancelable
+                            cancelable,
+                            workOn
                           }: ButtonsContainerProps) => {
 
   const classes = makeStyles(styles.buttonsContainer)();
@@ -100,10 +109,10 @@ const ButtonsContainer = ({
                   {isPending ?
                     <Button
                       type="button"
-                      // onClick={() => {
-                      //   pendingOrder(true);
-                      //   setDialogOpen(false);
-                      // }}
+                      onClick={() => {
+                        workOn(viewingOrder);
+                        setDialogOpen(false);
+                      }}
                       variant="contained"
                       color="primary"
                       className={classes.bigButton}
@@ -115,7 +124,7 @@ const ButtonsContainer = ({
                     (pendingable && <Button
                       type="button"
                       onClick={() => {
-                        pendingOrder(true);
+                        pendingOrder(viewingOrder);
                         setDialogOpen(false);
                       }}
                       variant="contained"

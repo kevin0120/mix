@@ -166,6 +166,12 @@ export const guard = (fun, msg) => (...args) => {
   }
 };
 
+export const timeCost = (times) =>
+  ((times || []).length % 2 === 0 ? times || [] : [...times, new Date()])
+    .reduce((total, currentTime, idx) =>
+      idx % 2 === 0 ? total - currentTime : total - (0 - currentTime), 0);
+
+
 export const formatTime = t => `${t}`.length <= 2 ? `00${t}`.slice(-2) : t;
 
 export function durationString(duration) {

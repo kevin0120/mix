@@ -58,7 +58,7 @@ function ScannerStep(
 
   return (
     <div className={classes.root}>
-      <QRCode width="200" height="200" viewBox="0 0 24 24" fill={'#444'} />
+      <QRCode width="200" height="200" viewBox="0 0 24 24" fill="#444" />
       <TextField
         label={label}
         margin="normal"

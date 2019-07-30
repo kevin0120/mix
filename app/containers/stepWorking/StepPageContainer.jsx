@@ -3,15 +3,15 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { makeStyles, Paper, Grid, Typography } from '@material-ui/core';
 import stepTypes from '../steps/stepTypes';
-import * as orderSelectors from '../../modules/order/selector';
+import * as oSel from '../../modules/order/selector';
 import styles from './styles';
 import type { tStep } from '../../modules/order/model';
 
 const mapState = (state, props) => ({
   ...props,
-  step: orderSelectors.viewingStep(state.order) || {},
-  workingStep: orderSelectors.workingStep(state.order) || {},
-  result: orderSelectors.stepData(orderSelectors.workingStep(state.order))?.result
+  step: oSel.viewingStep(state.order) || {},
+  workingStep: oSel.workingStep(oSel.workingOrder(state.order)) || {},
+  result: oSel.stepData(oSel.workingStep(oSel.workingOrder(state.order)))?.result
 });
 const mapDispatch = {};
 

@@ -1,6 +1,6 @@
 import { put, select, take, call } from 'redux-saga/effects';
 import { STEP_STATUS } from '../model';
-import { stepPayload, workingStep, stepData } from '../../order/selector';
+import { stepPayload, workingStep, stepData, workingOrder } from '../../order/selector';
 import { SCREW_STEP } from './action';
 
 
@@ -74,7 +74,7 @@ const resultStatusTasks = (ORDER, orderActions, result) => ({
 export default {
   * [STEP_STATUS.ENTERING](ORDER, orderActions) {
     try {
-      const payload = yield select(s => stepPayload(workingStep(s.order)));
+      const payload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
       yield put(orderActions.stepData((data) => {
         const points = JSON.parse(JSON.stringify(payload?.points || []));
         return {
@@ -99,7 +99,7 @@ export default {
       while (true) {
         const { result } = yield take(SCREW_STEP.RESULT);
         console.log('result taken');
-        const data = yield select(s => stepData(workingStep(s.order)));
+        const data = yield select(s => stepData(workingStep(workingOrder(s.order))));
 
         const firstMatchResultStatus =
           resultStatusTasks(

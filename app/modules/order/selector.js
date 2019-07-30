@@ -4,13 +4,13 @@ import type { tOrder, tOrderState, tOrderStepIdx, tStep, tStepArray, tStepStatus
 
 export const workingOrder = (orderState: tOrderState): ?tOrder => orderState?.workingOrder;
 export const viewingOrder = (orderState: tOrderState): ?tOrder => orderState?.viewingOrder;
-export const workingIndex = (orderState: tOrderState): tOrderStepIdx => orderState?.workingIndex;
 export const viewingIndex = (orderState: tOrderState): tOrderStepIdx => orderState?.viewingIndex;
-export const workingStep = (orderState: tOrderState): ?tStep =>
-  orderSteps(workingOrder(orderState))?.[workingIndex(orderState)] || null;
 export const viewingStep = (orderState: tOrderState): ?tStep =>
   orderSteps(viewingOrder(orderState))?.[viewingIndex(orderState)] || null;
 
+export const workingIndex = (order: ?tOrder): tOrderStepIdx => order?.workingIndex ||0;
+export const workingStep = (order: ?tOrder): ?tStep =>
+  orderSteps(order)?.[workingIndex(order)] || null;
 
 export const orderSteps = (order: ?tOrder): ?tStepArray => order?.steps || null;
 export const orderLength = (order: ?tOrder): number => orderSteps(order)?.length || 0;
@@ -35,8 +35,9 @@ export const stepStatus = (step: ?tStep): ?tStepStatus => step?.status;
 export const stepType = (step: ?tStep): ?tStepType => step?.type;
 export const stepData = (step: ?tStep): ?Object => step?.data;
 export const stepPayload = (step: ?tStep): ?Object => step?.payload;
-export const startTime = (step: ?tStep): ?Date => step?.startTime;
-export const endTime = (step: ?tStep): ?Date => step?.endTime;
+// export const startTime = (step: ?tStep): ?Date => step?.startTime;
+// export const endTime = (step: ?tStep): ?Date => step?.endTime;
+export const times = (step: ?tStep): ?Array<Date> => step?.times;
 
 export const isPending = (order: ?tOrder): boolean => order?.status === ORDER_STATUS.PENDING || false;
 export const isCancel = (order: ?tOrder): boolean => order?.status === ORDER_STATUS.CANCEL || false;

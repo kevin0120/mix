@@ -93,21 +93,20 @@ function* doOrder() {
   try {
     while (true) {
       console.log('doing order');
-      const step = yield select(state => workingStep(state.order));
-      const idx = yield select(state => workingIndex(state.order));
+      const wOrder=yield select(state=>workingOrder(state.order));
+      const step = workingStep(wOrder);
+      const idx = workingIndex(wOrder);
       const type = stepType(step);
-      yield put(orderActions.stepStartTime(idx, new Date()));
-      yield put(orderActions.stepEndTime(idx, null));
-
+      yield put(orderActions.stepTime(idx, new Date()));
       const { next } = yield race({
         exit: call(steps, type),
         next: take(ORDER.STEP.DO_NEXT),
         previous: take(ORDER.STEP.DO_PREVIOUS)
       });
-      yield put(orderActions.stepEndTime(idx, new Date()));
+      yield put(orderActions.stepTime(idx, new Date()));
       if (next) {
-        const orderState = yield select(state => state.order);
-        if (workingIndex(orderState) >= orderLength(workingOrder(orderState))) {
+        const wOrder = yield select(state => workingOrder(state.order));
+        if (workingIndex(wOrder) >= orderLength(wOrder)) {
           yield put(orderActions.finishOrder());
         }
       }

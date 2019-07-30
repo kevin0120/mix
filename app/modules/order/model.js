@@ -4,7 +4,8 @@ export type tOrder = {
   steps: tStepArray,
   status: tOrderStatus,
   name: string,
-  info: string
+  info: string,
+  workingIndex: ?number
 };
 
 export type tOrderStepIdx = number;
@@ -12,7 +13,6 @@ export type tOrderStepIdx = number;
 export type tOrderState = {
   viewingOrder: tOrder | null,
   workingOrder: tOrder | null,
-  workingIndex: tOrderStepIdx,
   viewingIndex: tOrderStepIdx,
   list: Array<tOrder>
 };
@@ -37,8 +37,9 @@ export type tStep = {
   payload: {},
   data: {},
   steps: tStepArray,
-  startTime: Date,
-  endTime: Date,
+  // startTime: Date,
+  // endTime: Date,
+  times: Array<Date>,
   skippable: boolean,
   undoable: boolean,
   description: string

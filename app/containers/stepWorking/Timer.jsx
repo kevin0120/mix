@@ -2,42 +2,29 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Typography } from '@material-ui/core';
-import { durationString } from '../../common/utils';
+import { durationString, timeCost } from '../../common/utils';
 import * as orderSelectors from '../../modules/order/selector';
 
 const mapState = (state, props) => ({
   ...props,
-  start: orderSelectors.startTime(orderSelectors.viewingStep(state.order)) || null,
-  end: orderSelectors.endTime(orderSelectors.viewingStep(state.order)) || null
+  times: orderSelectors.times(orderSelectors.viewingStep(state.order)) || null,
 });
 
 const mapDispatch = {};
 
-const getDuration = (start, end) => {
-  if (!start) {
-    return 0;
-  }
-  if (!end) {
-    return new Date() - start;
-  }
-  return end - start;
-};
-
 type Props = {
-  start: Date,
-  end: Date
+  times: Array<Date>
 };
 
-function Timer({ start, end }: Props) {
-  const [duration, setDuration] = useState(getDuration(start, end));
-
+function Timer({ times }: Props) {
+  const [duration, setDuration] = useState(timeCost(times));
   useEffect(() => {
-    setDuration(getDuration(start, end));
+    setDuration(timeCost(times));
     const interval = setInterval(() => {
-      setDuration(getDuration(start, end));
+      setDuration(timeCost(times));
     }, 1000);
     return () => clearInterval(interval);
-  }, [end, start]);
+  }, [times]);
 
 
   return <Typography variant="h4">

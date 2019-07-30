@@ -20,8 +20,7 @@ export const ORDER = {
     // 修改store
     DATA: 'ORDER_STEP_DATA',
     // 记录开始时间
-    START_TIME: 'ORDER_STEP_START_TIME',
-    END_TIME: 'ORDER_STEP_END_TIME'
+    TIME: 'ORDER_STEP_TIME'
   }
 };
 
@@ -45,8 +44,9 @@ export const orderActions = {
   cancelOrder: () => ({
     type: ORDER.CANCEL
   }),
-  pendingOrder: () => ({
-    type: ORDER.PENDING
+  pendingOrder: (order: tOrder) => ({
+    type: ORDER.PENDING,
+    order
   }),
   nextStep: () => ({
     type: ORDER.STEP.NEXT
@@ -72,14 +72,9 @@ export const orderActions = {
     type: ORDER.STEP.DATA,
     reducer
   }),
-  stepStartTime: (idx: tOrderStepIdx, startTime: Date) => ({
-    type: ORDER.STEP.START_TIME,
+  stepTime: (idx: tOrderStepIdx, time: Date) => ({
+    type: ORDER.STEP.TIME,
     idx,
-    startTime
-  }),
-  stepEndTime: (idx: tOrderStepIdx, endTime: ?Date) => ({
-    type: ORDER.STEP.END_TIME,
-    idx,
-    endTime
+    time
   })
 };

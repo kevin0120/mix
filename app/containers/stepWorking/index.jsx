@@ -65,8 +65,6 @@ function StepWorking({ viewingOrder }: StepWorkingProps) {
 const mapState = (state, props) => ({
   ...props,
   viewingOrder: orderSelectors.viewingOrder(state.order) || {},
-  startTime: orderSelectors.startTime(orderSelectors.viewingStep(state.order)) || null,
-  endTime: orderSelectors.endTime(orderSelectors.viewingStep(state.order)) || null
 });
 
 const mapDispatch = {};

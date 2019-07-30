@@ -1,20 +1,20 @@
 // @flow
 import { ORDER } from './action';
 import { genReducers } from '../util';
+import type { tOrder, tOrderState, tOrderStepIdx, tStep } from './model';
 import { ORDER_STATUS } from './model';
 import { STEP_STATUS } from '../step/model';
-import { demoOrder, demoOrderPending, demoOrderCancel, demoOrderDone } from './demoData';
+import { demoOrder, demoOrderCancel, demoOrderDone, demoOrderPending } from './demoData';
 import {
-  viewingStep,
-  workingStep,
-  workingIndex,
+  getStep,
   orderLength,
   viewingIndex,
   viewingOrder,
+  viewingStep,
+  workingIndex,
   workingOrder,
-  getStep
+  workingStep
 } from './selector';
-import type { tOrder, tOrderState, tOrderStepIdx, tStep } from './model';
 
 const initState = {
   workingOrder: null,
@@ -26,18 +26,9 @@ const initState = {
 
 function reduceStepData(reducer, state: tOrderState, action): tOrderState {
   const newState = { ...state };
-  const newStep: ?tStep = workingStep(newState);
+  const newStep: ?tStep = workingStep(workingOrder(newState));
   if (newStep) {
     newStep.data = reducer(newStep?.data, action);
-  }
-  return newState;
-}
-
-function setOrderStatus(state: tOrderState, status, selector: (tOrderState)=>?tOrder): tOrderState {
-  const newState = { ...state };
-  const newOrder = selector(newState);
-  if (newOrder) {
-    newOrder.status = status;
   }
   return newState;
 }
@@ -46,8 +37,8 @@ function setStepStatus(state: tOrderState, action): tOrderState {
   const newState = {
     ...state
   };
-  const newStep = workingStep(newState);
-  if(newStep){
+  const newStep = workingStep(workingOrder(newState));
+  if (newStep) {
     newStep.status = action.status;
   }
   return newState;
@@ -66,60 +57,65 @@ function limitIndex(order: ?tOrder, index: tOrderStepIdx): tOrderStepIdx {
 
 const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: any })=>tOrderState } = {
   [ORDER.VIEW]: (state, action) => {
+    const { order } = action;
     const firstIndex = 0;
-    const newState = {
+    return {
       ...state,
-      viewingOrder: action?.order || null,
+      viewingOrder: order || null,
       viewingIndex: firstIndex,
       startTime: new Date()
-    };
-    const triggered = setOrderStatus(newState, ORDER_STATUS.WIP, workingOrder);
-    return {
-      ...triggered
     };
   },
   [ORDER.WORK_ON]: (state, action) => {
-    const firstIndex = state.workingIndex || 0;
-    const newState = {
-      ...state,
-      workingOrder: action.order || null,
-      viewingIndex: firstIndex,
-      workingIndex: firstIndex,
-      startTime: new Date()
-    };
-    const triggered = setOrderStatus(newState, ORDER_STATUS.WIP, workingOrder);
+    const { order } = action;
+    const startIndex = workingIndex(order);
+    order.status = ORDER_STATUS.WIP;
     return {
-      ...triggered
+      ...state,
+      workingOrder: order || null,
+      viewingIndex: startIndex
     };
   },
   [ORDER.FINISH]: (state) => {
-    const newState = setOrderStatus(state, ORDER_STATUS.DONE, workingOrder);
+    const wOrder = workingOrder(state);
+    if (wOrder) {
+      wOrder.status = ORDER_STATUS.DONE;
+    }
     return {
-      ...newState
+      ...state
     };
   },
   [ORDER.CANCEL]: (state) => {
-    const newState = setOrderStatus(state, ORDER_STATUS.CANCEL, viewingOrder);
+    const vOrder = viewingOrder(state);
+    if (vOrder) {
+      vOrder.status = ORDER_STATUS.CANCEL;
+    }
+    const wStep = workingStep(viewingOrder(state));
+    if (wStep && wStep.times && wStep.times.length % 2 === 1) {
+      wStep.times.push(new Date());
+    }
     return {
-      ...newState,
-      workingOrder: null,
-      workingIndex:0
+      ...state,
+      workingOrder: null
     };
   },
-  [ORDER.PENDING]: (state) => {
-    const newState = setOrderStatus(state, ORDER_STATUS.PENDING, viewingOrder);
+  [ORDER.PENDING]: (state, action) => {
+    const { order } = action;
+    order.status = ORDER_STATUS.PENDING;
+    const wStep = workingStep(order);
+    if (wStep && wStep.times && wStep.times.length % 2 === 1) {
+      wStep.times.push(new Date());
+    }
     return {
-      ...newState,
-      workingOrder: null,
-      workingIndex:0
+      ...state,
+      workingOrder: null
     };
   },
   [ORDER.STEP.NEXT]: (state) => {
     const newIndex = limitIndex(viewingOrder(state), viewingIndex(state) + 1);
     return {
       ...state,
-      viewingIndex: newIndex,
-      workingOrder: null
+      viewingIndex: newIndex
     };
   },
 
@@ -138,28 +134,32 @@ const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: a
       viewingIndex: stepId
     };
   },
-
   // 修改step的状态
   [ORDER.STEP.STATUS]: setStepStatus,
   //
   [ORDER.STEP.DO_NEXT]: (state) => {
-    const newIndex = workingIndex(state) + 1;
+    const wOrder = workingOrder(state);
+    const newIndex = workingIndex(wOrder) + 1;
+    const vIndex = workingStep(wOrder) === viewingStep(state) ? newIndex
+      : viewingIndex(state);
+    if (wOrder) {
+      wOrder.workingIndex = newIndex;
+    }
     return {
       ...state,
-      workingIndex: newIndex,
-      viewingIndex:
-        workingStep(state) === viewingStep(state)
-          ? newIndex
-          : viewingIndex(state)
+      viewingIndex: vIndex
     };
   },
   [ORDER.STEP.DO_PREVIOUS]: (state) => {
-    const newIndex = limitIndex(workingOrder(state), workingIndex(state) - 1);
+    const wOrder = workingOrder(state);
+    const newIndex = limitIndex(wOrder, workingIndex(wOrder) - 1);
+    if (wOrder) {
+      wOrder.workingIndex = newIndex;
+    }
     const revokedState = {
       ...state,
-      workingIndex: newIndex,
       viewingIndex:
-        workingStep(state) === viewingStep(state)
+        workingStep(wOrder) === viewingStep(state)
           ? newIndex
           : viewingIndex(state)
     };
@@ -169,22 +169,18 @@ const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: a
     const { reducer } = action;
     return reduceStepData(reducer, state, action);
   },
-  [ORDER.STEP.START_TIME]: (state, action) => {
-    const { idx, startTime } = action;
+  [ORDER.STEP.TIME]: (state, action) => {
+    const { idx, time } = action;
     const newState = { ...state };
     const newStep = getStep(workingOrder(newState), idx);
     if (newStep) {
-      newStep.startTime = newStep.startTime || startTime;
+      if (newStep.times) {
+        newStep.times.push(time);
+      } else {
+        newStep.times = [time];
+      }
     }
-    return newState;
-  },
-  [ORDER.STEP.END_TIME]: (state, action) => {
-    const { idx, endTime } = action;
-    const newState = { ...state };
-    const newStep = getStep(workingOrder(newState), idx);
-    if (newStep) {
-      newStep.endTime = endTime;
-    }
+    console.log(newStep?.times);
     return newState;
   }
 };

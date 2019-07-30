@@ -1,6 +1,6 @@
 import { take, put, select } from 'redux-saga/effects';
 import { SCANNER_STEP } from './action';
-import { workingStep, stepData, stepPayload } from '../../order/selector';
+import { workingStep, stepData, stepPayload, workingOrder } from '../../order/selector';
 import { STEP_STATUS } from '../model';
 
 export default {
@@ -15,8 +15,8 @@ export default {
     try {
       while (true) {
         const action = yield take([SCANNER_STEP.GET_VALUE, SCANNER_STEP.SUBMIT]);
-        const result = yield select(s => stepData(workingStep(s.order))?.result);
-        const label = yield select(s => stepPayload(workingStep(s.order))?.label);
+        const result = yield select(s => stepData(workingStep(workingOrder(s.order)))?.result);
+        const label = yield select(s => stepPayload(workingStep(workingOrder(s.order)))?.label);
         switch (action.type) {
           case(SCANNER_STEP.GET_VALUE):
             yield put(orderActions.stepData((data) => ({
