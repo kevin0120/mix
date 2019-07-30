@@ -1,3 +1,4 @@
+// @flow
 import dataImg from '../../../resources/imgs/working-page-test-pic1.png';
 
 export const demoOrder = {
@@ -153,17 +154,60 @@ export const demoOrder = {
   ]
 };
 
-export const demoOrderExcp = {
+export const demoOrderCancel = {
   name: 'fill info',
   info:
     'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
   type: 'step',
-  status: 'FAIL',
+  status: 'CANCEL',
   steps: [
     {
       name: '姓名',
       info: 'this step does one checking',
       type: 'input',
+      skippable: true,
+      revocable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    }
+  ]
+};
+
+export const demoOrderPending = {
+  name: 'fill info',
+  info:
+    'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
+  type: 'step',
+  status: 'PENDING',
+  steps: [
+    {
+      name: '姓名',
+      info: 'this step does one checking',
+      type:'input',
+
+      skippable: true,
+      revocable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    }
+  ]
+};
+
+export const demoOrderDone = {
+  name: 'fill info',
+  info:
+    'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
+  type: 'step',
+  status: 'DONE',
+  steps: [
+    {
+      name: '姓名',
+      info: 'this step does one checking',
+      type:'input',
       skippable: true,
       revocable: true,
       data: {},

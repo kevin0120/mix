@@ -10,19 +10,19 @@ import type { tStep } from '../../modules/order/model';
 const mapState = (state, props) => ({
   ...props,
   step: orderSelectors.viewingStep(state.order) || {},
-  processingStep: orderSelectors.processingStep(state.order) || {},
-  result: orderSelectors.stepData(orderSelectors.processingStep(state.order))?.result
+  workingStep: orderSelectors.workingStep(state.order) || {},
+  result: orderSelectors.stepData(orderSelectors.workingStep(state.order))?.result
 });
 const mapDispatch = {};
 
 type Props = {
   step: tStep,
-  processingStep: tStep,
+  workingStep: tStep,
   bindAction: ()=>{},
-  result: any
+  result: Object
 };
 
-const StepPageContainer = ({ step, processingStep, bindAction, result }: Props) => {
+const StepPageContainer = ({ step, workingStep, bindAction, result }: Props) => {
   const classes = makeStyles(styles.stepPageContainer)();
   if (stepTypes?.[step?.type]?.component) {
     const StepComponent = stepTypes[step.type].component;
@@ -35,7 +35,7 @@ const StepPageContainer = ({ step, processingStep, bindAction, result }: Props) 
               {(StepComponent && (
                   <StepComponent
                     step={step}
-                    isCurrent={step === processingStep}
+                    isCurrent={step === workingStep}
                     bindAction={bindAction}
                   />
                 )) || null}

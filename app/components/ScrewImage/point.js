@@ -7,10 +7,10 @@ import styles from './style';
 const pointRadius = 30;
 
 const isStatus = {
-  waiting: status => status === 'waiting' || status === 'waitingActive',
+  waiting: status => !status || status === 'waiting' || status === 'waitingActive',
   success: status => status === 'success',
   error: status => status === 'error' || status === 'failActive',
-  active: status => status === 'waitingActive' || status === 'failActive',
+  active: status => status === 'waitingActive' || status === 'failActive'
 };
 
 

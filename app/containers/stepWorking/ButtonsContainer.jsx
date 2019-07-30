@@ -2,22 +2,27 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
-import Button from '../../components/CustomButtons/Button';
+import { Menu } from '@material-ui/icons';
 import Dialog from '@material-ui/core/Dialog';
 import Typography from '@material-ui/core/Typography';
 import DialogContent from '@material-ui/core/DialogContent';
+import Button from '../../components/CustomButtons/Button';
 import styles from './styles';
 import type { Dispatch } from '../../modules/indexReducer';
 import * as orderSelectors from '../../modules/order/selector';
 import { orderActions } from '../../modules/order/action';
-import {Menu} from '@material-ui/icons';
+import type { tStep, tStepArray } from '../../modules/order/model';
 
 const mapState = (state, props) => ({
   ...props,
   viewingStep: orderSelectors.viewingStep(state.order) || {},
-  processingStep: orderSelectors.processingStep(state.order) || {},
-  steps: orderSelectors.orderSteps(state.order) || [],
-  viewingIndex: orderSelectors.viewingIndex(state.order) || 0
+  workingStep: orderSelectors.workingStep(state.order) || {},
+  steps: orderSelectors.orderSteps(orderSelectors.viewingOrder(state.order)) || [],
+  viewingIndex: orderSelectors.viewingIndex(state.order) || 0,
+  isPending: orderSelectors.isPending(orderSelectors.viewingOrder(state.order)),
+  isCancel: orderSelectors.isCancel(orderSelectors.viewingOrder(state.order)),
+  pendingable: orderSelectors.pendingable(orderSelectors.viewingOrder(state.order)),
+  cancelable: orderSelectors.cancelable(orderSelectors.viewingOrder(state.order))
 });
 
 const mapDispatch = {
@@ -31,22 +36,26 @@ const mapDispatch = {
 
 type ButtonsContainerProps = {
   viewingIndex: number,
-  viewingStep: {},
-  processingStep: {},
+  viewingStep: tStep,
+  workingStep: tStep,
   viewingIndex: number,
-  steps: [],
+  steps: tStepArray,
   next: Dispatch,
   action: Dispatch,
   previous: Dispatch,
   doNextStep: Dispatch,
   doPreviousStep: Dispatch,
   cancelOrder: Dispatch,
-  pendingOrder: Dispatch
+  pendingOrder: Dispatch,
+  isPending: boolean,
+  isCancel: boolean,
+  pendingable: boolean,
+  cancelable: boolean
 };
 
 const ButtonsContainer = ({
                             viewingStep,
-                            processingStep,
+                            workingStep,
                             next,
                             steps,
                             viewingIndex,
@@ -55,7 +64,11 @@ const ButtonsContainer = ({
                             doNextStep,
                             doPreviousStep,
                             cancelOrder,
-                            pendingOrder
+                            pendingOrder,
+                            isPending,
+                            isCancel,
+                            pendingable,
+                            cancelable
                           }: ButtonsContainerProps) => {
 
   const classes = makeStyles(styles.buttonsContainer)();
@@ -67,50 +80,73 @@ const ButtonsContainer = ({
 
 
   return <div className={classes.root}>
-    <Dialog
-      open={dialogOpen}
-      onClose={() => setDialogOpen(false)}
-    >
-      <div style={{ backgroundColor: 'white' }}>
-        <DialogContent className={classes.dialogContainer}>
-          <Button
-            type="button"
-            onClick={() => {
-              pendingOrder(true);
-              setDialogOpen(false);
-            }}
-            variant="contained"
-            color="warning"
-            className={classes.bigButton}
-          >
-            <Typography variant="h3">
-              pending
-            </Typography>
-          </Button>
-          <Button
-            type="button"
-            color="danger"
-            className={classes.bigButton}
-            onClick={() => {
-              cancelOrder(true);
-              setDialogOpen(false);
-            }}
-          >
-            <Typography variant="h3">
-              cancel
-            </Typography>
-          </Button>
-        </DialogContent>
-      </div>
-    </Dialog>
     <div>
-      <Button
-        type="button"
-        color="warning"
-        onClick={() => setDialogOpen(true)}
-      >
-        <Menu fontSize="large" className={classes.menuIcon}/>
-      </Button>
+      {
+        isPending || pendingable || cancelable ?
+          <React.Fragment>
+            <Button
+              type="button"
+              color="warning"
+              onClick={() => setDialogOpen(true)}
+            >
+              <Menu fontSize="large" className={classes.menuIcon}/>
+            </Button>
+            <Dialog
+              open={dialogOpen}
+              onClose={() => setDialogOpen(false)}
+            >
+              <div style={{ backgroundColor: 'white' }}>
+                <DialogContent className={classes.dialogContainer}>
+                  {isPending ?
+                    <Button
+                      type="button"
+                      // onClick={() => {
+                      //   pendingOrder(true);
+                      //   setDialogOpen(false);
+                      // }}
+                      variant="contained"
+                      color="primary"
+                      className={classes.bigButton}
+                    >
+                      <Typography variant="h3">
+                        continue
+                      </Typography>
+                    </Button> :
+                    (pendingable && <Button
+                      type="button"
+                      onClick={() => {
+                        pendingOrder(true);
+                        setDialogOpen(false);
+                      }}
+                      variant="contained"
+                      color="warning"
+                      className={classes.bigButton}
+                    >
+                      <Typography variant="h3">
+                        pending
+                      </Typography>
+                    </Button>) || null
+                  }
+                  {
+                    cancelable ? <Button
+                      type="button"
+                      color="danger"
+                      className={classes.bigButton}
+                      onClick={() => {
+                        cancelOrder(true);
+                        setDialogOpen(false);
+                      }}
+                    >
+                      <Typography variant="h3">
+                        cancel
+                      </Typography>
+                    </Button> : null
+                  }
+                </DialogContent>
+              </div>
+            </Dialog>
+          </React.Fragment> : null
+      }
       <Button
         color="primary"
         disabled={noPrevious}
@@ -127,26 +163,22 @@ const ButtonsContainer = ({
       >
         {'>>'}
       </Button>
-      {viewingStep?.skippable && (
-        <Button
-          disabled={noNext || viewingStep !== processingStep}
-          type="button"
-          onClick={() => doNextStep()}
-          color="primary"
-        >
-          {'skip'}
-        </Button>
-      )}
-      {viewingStep?.undoable && (
-        <Button
-          disabled={viewingStep !== processingStep}
-          type="button"
-          onClick={() => doPreviousStep()}
-          color="primary"
-        >
-          {'undo'}
-        </Button>
-      )}
+      <Button
+        disabled={noNext || viewingStep !== workingStep || !viewingStep?.skippable}
+        type="button"
+        onClick={() => doNextStep()}
+        color="primary"
+      >
+        {'skip'}
+      </Button>
+      <Button
+        disabled={viewingStep !== workingStep || !viewingStep?.undoable}
+        type="button"
+        onClick={() => doPreviousStep()}
+        color="primary"
+      >
+        {'undo'}
+      </Button>
     </div>
     <div>{action}</div>
   </div>;

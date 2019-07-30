@@ -1,12 +1,12 @@
 // @flow
-import { tOrder } from './model';
+import type { tOrder, tOrderStepIdx, tStepStatus } from './model';
 
 export const ORDER = {
-  TRIGGER: 'ORDER_TRIGGER',
+  WORK_ON: 'ORDER_WORK_ON',
+  VIEW: 'ORDER_VIEW',
   FINISH: 'ORDER_FINISH',
   CANCEL: 'ORDER_CANCEL',
   PENDING: 'ORDER_PENDING',
-  SWITCH: 'ORDER_SWITCH',
   STEP: {
     // 仅移动指针，不修改step状态
     NEXT: 'ORDER_STEP_NEXT',
@@ -18,10 +18,10 @@ export const ORDER = {
     DO_NEXT: 'ORDER_STEP_DO_NEXT',
     DO_PREVIOUS: 'ORDER_STEP_DO_PREVIOUS',
     // 修改store
-    DATA:'ORDER_STEP_DATA',
+    DATA: 'ORDER_STEP_DATA',
     // 记录开始时间
-    START_TIME:'ORDER_STEP_START_TIME',
-    END_TIME:'ORDER_STEP_END_TIME'
+    START_TIME: 'ORDER_STEP_START_TIME',
+    END_TIME: 'ORDER_STEP_END_TIME'
   }
 };
 
@@ -31,12 +31,12 @@ export type orderTriggerType = {
 };
 
 export const orderActions = {
-  trigger: (order: tOrder): orderTriggerType => ({
-    type: ORDER.TRIGGER,
+  view: (order: tOrder) => ({
+    type: ORDER.VIEW,
     order
   }),
-  switchOrder: (order: tOrder): orderTriggerType => ({
-    type: ORDER.SWITCH,
+  workOn: (order: tOrder): orderTriggerType => ({
+    type: ORDER.WORK_ON,
     order
   }),
   finishOrder: () => ({
@@ -54,11 +54,11 @@ export const orderActions = {
   previousStep: () => ({
     type: ORDER.STEP.PREVIOUS
   }),
-  jumpToStep: (stepId) => ({
+  jumpToStep: (stepId: tOrderStepIdx) => ({
     type: ORDER.STEP.JUMP_TO,
     stepId
   }),
-  stepStatus: (status) => ({
+  stepStatus: (status: tStepStatus) => ({
     type: ORDER.STEP.STATUS,
     status
   }),
@@ -68,17 +68,17 @@ export const orderActions = {
   doPreviousStep: () => ({
     type: ORDER.STEP.DO_PREVIOUS
   }),
-  stepData:(reducer)=>({
-    type:ORDER.STEP.DATA,
+  stepData: (reducer: ({})=>{}) => ({
+    type: ORDER.STEP.DATA,
     reducer
   }),
-  stepStartTime:(idx,startTime)=>({
-    type:ORDER.STEP.START_TIME,
+  stepStartTime: (idx: tOrderStepIdx, startTime: Date) => ({
+    type: ORDER.STEP.START_TIME,
     idx,
     startTime
   }),
-  stepEndTime:(idx,endTime)=>({
-    type:ORDER.STEP.END_TIME,
+  stepEndTime: (idx: tOrderStepIdx, endTime: ?Date) => ({
+    type: ORDER.STEP.END_TIME,
     idx,
     endTime
   })

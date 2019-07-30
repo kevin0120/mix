@@ -3,7 +3,7 @@ import React from 'react';
 import orderTypes from './orderTypes';
 
 function ConnectedWorkingTemplate({ order }) {
-  const orderType = order.currentOrder && order.currentOrder.type || 'default';
+  const orderType = order.viewingOrder && order.viewingOrder.type || 'default';
   const WorkingPage = (orderTypes[orderType] && orderTypes[orderType].container);
   return <WorkingPage/>;
 }

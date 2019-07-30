@@ -55,13 +55,13 @@ export default {
       }
     },
     waiting: {
-      background: warningColor
+      background: `${warningColor} !important`
     },
     success: {
-      background: successColor
+      background: `${successColor} !important`
     },
     error: {
-      background: dangerColor
+      background: `${dangerColor} !important`
     }
   })
 };

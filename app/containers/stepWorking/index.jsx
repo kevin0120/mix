@@ -11,9 +11,10 @@ import Dialog from '../../components/Dialog';
 import StepperContainer from './StepperContainer';
 import StepPageContainer from './StepPageContainer';
 import Timer from './Timer';
+import type { tOrder } from '../../modules/order/model';
 
 type StepWorkingProps = {
-  currentOrder: {}
+  viewingOrder: tOrder
 };
 
 const theme = createMuiTheme({
@@ -26,7 +27,7 @@ const theme = createMuiTheme({
   }
 });
 
-function StepWorking({ currentOrder }: StepWorkingProps) {
+function StepWorking({ viewingOrder }: StepWorkingProps) {
   const classes = makeStyles(styles.layout)();
   const [action, bindAction] = useState(null);
 
@@ -41,7 +42,7 @@ function StepWorking({ currentOrder }: StepWorkingProps) {
             classes={{ root: classes.leftContainer }}
           >
             <Paper square className={classes.orderInfoContainer}>
-              <Typography variant="h5">{currentOrder?.name}</Typography>
+              <Typography variant="h5">{viewingOrder?.name}</Typography>
             </Paper>
             <ButtonsContainer action={action}/>
             <StepPageContainer bindAction={bindAction}/>
@@ -63,7 +64,7 @@ function StepWorking({ currentOrder }: StepWorkingProps) {
 
 const mapState = (state, props) => ({
   ...props,
-  currentOrder: orderSelectors.currentOrder(state.order) || {},
+  viewingOrder: orderSelectors.viewingOrder(state.order) || {},
   startTime: orderSelectors.startTime(orderSelectors.viewingStep(state.order)) || null,
   endTime: orderSelectors.endTime(orderSelectors.viewingStep(state.order)) || null
 });

@@ -1,36 +1,50 @@
 // @flow
 
 export type tOrder = {
-  steps: Array<tStep>,
-  status: string
+  steps: tStepArray,
+  status: tOrderStatus,
+  name: string,
+  info: string
 };
 
 export type tOrderStepIdx = number;
 
 export type tOrderState = {
-  currentOrder: tOrder,
-  processingIndex: tOrderStepIdx,
+  viewingOrder: tOrder | null,
+  workingOrder: tOrder | null,
+  workingIndex: tOrderStepIdx,
   viewingIndex: tOrderStepIdx,
   list: Array<tOrder>
 };
 
+export type tOrderStatus = $Keys<typeof ORDER_STATUS>;
 
 export const ORDER_STATUS = {
   TODO: 'TODO',
   WIP: 'WIP',
   DONE: 'DONE',
   CANCEL: 'CANCEL',
-  PENDING: 'PENDING',
+  PENDING: 'PENDING'
 };
+
+export type tStepArray = Array<tStep>;
 
 export type tStep = {
   +name: string,
   info: string,
-  status: string,
-  +type: string, // check,collect,instruct,enable,...
+  status: tStepStatus,
+  +type: tStepType, // check,collect,instruct,enable,...
   payload: {},
   data: {},
-  steps: Array,
+  steps: tStepArray,
   startTime: Date,
-  endTime: Date
+  endTime: Date,
+  skippable: boolean,
+  undoable: boolean,
+  description: string
 };
+
+export type tStepType = string;
+
+
+export type tStepStatus = string;

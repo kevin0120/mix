@@ -111,7 +111,7 @@ const buttonsContainer = {
     alignItems:'center',
   },
   bigButton:{
-    width:'50%',
+    width:'20vw',
     height:'15vh'
   }
 };

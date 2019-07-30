@@ -1,14 +1,17 @@
-import { take, call, race, fork, select, put, join, all } from 'redux-saga/effects';
+// @flow
+import { take, call, race, select, put, all, takeLatest, takeEvery } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 import React from 'react';
-import moment from 'moment';
 import { ORDER, orderActions } from './action';
 import steps from '../step/saga';
 import {
-  processingStep,
-  processingIndex,
+  workingStep,
+  workingOrder,
+  workingIndex,
   stepType,
-  orderLength, orderSteps
+  orderLength,
+  orderSteps,
+  doable
 } from './selector';
 import dialogActions from '../dialog/action';
 import i18n from '../../i18n';
@@ -16,13 +19,13 @@ import Table from '../../components/Table/Table';
 import { durationString } from '../../common/utils';
 
 const mapping = {
-  onOrderFinish: showResult,
+  onOrderFinish: showResult
 };
 
 function* showResult() {
   try {
-    const currentOrderSteps = yield select((state => orderSteps(state.order)));
-    const data = currentOrderSteps.map(s => ([
+    const workingOrderSteps = yield select((state => orderSteps(workingOrder(state.order))));
+    const data = workingOrderSteps.map(s => ([
       s.name,
       durationString((s.endTime && s.startTime) ? s.endTime - s.startTime : 0)
     ]));
@@ -47,25 +50,39 @@ function* showResult() {
   }
 }
 
-export default function* root() {
+export default function* root(): any {
   try {
-    while (true) {
-      const { order } = yield take(ORDER.TRIGGER);
-      const didSwitchOrder = yield fork(function* orderDidSwitch() {
-        yield take(ORDER.SWITCH);
-      });
-      yield put(orderActions.switchOrder(order));
-      yield join(didSwitchOrder);
-      const { finish } = yield race({
-        exit: call(doOrder),
-        finish: take(ORDER.FINISH),
-        pending: take(ORDER.PENDING),
-        cancel: take(ORDER.CANCEL)
-      });
-      console.log('order finished');
-      if (finish) {
-        yield call(mapping.onOrderFinish);
-      }
+    yield all([
+      takeLatest(ORDER.WORK_ON, workOnOrder),
+      takeEvery(ORDER.VIEW, viewOrder)
+    ]);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function* viewOrder({ order }) {
+  try {
+    const WIPOrder = yield select(s => workingOrder(s.order));
+    if ((!WIPOrder || (WIPOrder === order)) && doable(order)) {
+      yield put(orderActions.workOn(order));
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function* workOnOrder() {
+  try {
+    const { finish } = yield race({
+      exit: call(doOrder),
+      finish: take(ORDER.FINISH),
+      pending: take(ORDER.PENDING),
+      cancel: take(ORDER.CANCEL)
+    });
+    console.log('order finished');
+    if (finish) {
+      yield call(mapping.onOrderFinish);
     }
   } catch (e) {
     console.error(e);
@@ -76,8 +93,8 @@ function* doOrder() {
   try {
     while (true) {
       console.log('doing order');
-      const step = yield select(state => processingStep(state.order));
-      const idx = yield select(state => processingIndex(state.order));
+      const step = yield select(state => workingStep(state.order));
+      const idx = yield select(state => workingIndex(state.order));
       const type = stepType(step);
       yield put(orderActions.stepStartTime(idx, new Date()));
       yield put(orderActions.stepEndTime(idx, null));
@@ -89,8 +106,8 @@ function* doOrder() {
       });
       yield put(orderActions.stepEndTime(idx, new Date()));
       if (next) {
-        const order = yield select(state => state.order);
-        if (processingIndex(order) >= orderLength(order)) {
+        const orderState = yield select(state => state.order);
+        if (workingIndex(orderState) >= orderLength(workingOrder(orderState))) {
           yield put(orderActions.finishOrder());
         }
       }

@@ -1,5 +1,5 @@
 // @flow
-import { createMuiTheme, makeStyles, StepContent, Typography } from '@material-ui/core';
+import {  makeStyles, StepContent, Typography } from '@material-ui/core';
 import { connect } from 'react-redux';
 
 import Stepper from '@material-ui/core/Stepper';
@@ -7,15 +7,16 @@ import Step from '@material-ui/core/Step';
 import StepButton from '@material-ui/core/StepButton';
 import StepLabel from '@material-ui/core/StepLabel';
 import React from 'react';
-import { StylesProvider } from '@material-ui/styles';
 import { STEP_STATUS } from '../../modules/step/model';
 import styles from './styles';
 import * as orderSelectors from '../../modules/order/selector';
 import { orderActions } from '../../modules/order/action';
+import type { Dispatch } from '../../modules/indexReducer';
+import type { tStepArray } from '../../modules/order/model';
 
 const mapState = (state, props) => ({
   ...props,
-  steps: orderSelectors.orderSteps(state.order) || [],
+  steps: orderSelectors.orderSteps(orderSelectors.viewingOrder(state.order)) || [],
   viewingIndex: orderSelectors.viewingIndex(state.order) || 0
 });
 
@@ -24,9 +25,9 @@ const mapDispatch = {
 };
 
 type StepperLayoutProps = {
-  steps: [],
+  steps: tStepArray,
   viewingIndex: {},
-  jumpTo: () => {}
+  jumpTo: Dispatch
 };
 
 const StepperContainer = ({
