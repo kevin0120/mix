@@ -37,7 +37,6 @@ function HomeOperationList(props: Props) {
     [ORDER_STATUS.DONE]: classes.statusDone,
     [ORDER_STATUS.CANCEL]: classes.statusCancel,
     [ORDER_STATUS.PENDING]: classes.statusPending,
-    [ORDER_STATUS.FAIL]: classes.statusFail,
   };
 
   const renderOrders = (orders, size, title) => {

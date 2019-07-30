@@ -16,7 +16,7 @@ import Table from '../../components/Table/Table';
 import { durationString } from '../../common/utils';
 
 const mapping = {
-  onOrderFinish: showResult
+  onOrderFinish: showResult,
 };
 
 function* showResult() {
@@ -59,7 +59,8 @@ export default function* root() {
       const { finish } = yield race({
         exit: call(doOrder),
         finish: take(ORDER.FINISH),
-        fail: take(ORDER.FAIL)
+        pending: take(ORDER.PENDING),
+        cancel: take(ORDER.CANCEL)
       });
       console.log('order finished');
       if (finish) {

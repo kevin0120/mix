@@ -1,3 +1,4 @@
+// @flow
 import { createMuiTheme, makeStyles, StepContent, Typography } from '@material-ui/core';
 import { connect } from 'react-redux';
 

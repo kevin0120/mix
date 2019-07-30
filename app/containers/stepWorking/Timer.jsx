@@ -1,3 +1,4 @@
+// @flow
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { Typography } from '@material-ui/core';
@@ -22,7 +23,12 @@ const getDuration = (start, end) => {
   return end - start;
 };
 
-function Timer({ start, end }) {
+type Props = {
+  start: Date,
+  end: Date
+};
+
+function Timer({ start, end }: Props) {
   const [duration, setDuration] = useState(getDuration(start, end));
 
   useEffect(() => {

@@ -1,3 +1,4 @@
+// @flow
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
@@ -11,9 +12,8 @@ import StepperContainer from './StepperContainer';
 import StepPageContainer from './StepPageContainer';
 import Timer from './Timer';
 
-
 type StepWorkingProps = {
-  currentOrder: {},
+  currentOrder: {}
 };
 
 const theme = createMuiTheme({
@@ -25,8 +25,6 @@ const theme = createMuiTheme({
     }
   }
 });
-
-
 
 function StepWorking({ currentOrder }: StepWorkingProps) {
   const classes = makeStyles(styles.layout)();

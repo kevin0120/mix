@@ -92,6 +92,27 @@ const buttonsContainer = {
     justifyContent: 'space-between',
     padding: '0 10px',
     alignItems: 'center',
+  },
+  menuIcon:{
+    padding:0,
+    margin: '0 !important',
+    fontSize: '30px !important'
+  },
+  menuButton:{
+
+  },
+  dialog:{
+
+  },
+  dialogContainer:{
+    display:'flex',
+    flexDirection:'row',
+    justifyContent:'center',
+    alignItems:'center',
+  },
+  bigButton:{
+    width:'50%',
+    height:'15vh'
   }
 };
 

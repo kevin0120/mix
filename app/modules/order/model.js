@@ -21,7 +21,6 @@ export const ORDER_STATUS = {
   DONE: 'DONE',
   CANCEL: 'CANCEL',
   PENDING: 'PENDING',
-  FAIL: 'FAIL'
 };
 
 export type tStep = {

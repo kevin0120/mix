@@ -22,7 +22,7 @@ type Props = {
   result: any
 };
 
-const StepPageContainer = ({ step, processingStep, bindAction, result }): Props => {
+const StepPageContainer = ({ step, processingStep, bindAction, result }: Props) => {
   const classes = makeStyles(styles.stepPageContainer)();
   if (stepTypes?.[step?.type]?.component) {
     const StepComponent = stepTypes[step.type].component;
@@ -32,19 +32,17 @@ const StepPageContainer = ({ step, processingStep, bindAction, result }): Props 
         <Grid item container className={classes.left} spacing={1}>
           <Grid item className={classes.left}>
             <Paper square className={classes.image}>
-              {
-                (StepComponent && (
+              {(StepComponent && (
                   <StepComponent
                     step={step}
                     isCurrent={step === processingStep}
                     bindAction={bindAction}
                   />
-                )) || null
-              }
+                )) || null}
             </Paper>
           </Grid>
         </Grid>
-        <Grid item container spacing={1} className={classes.right} direction={'column'}>
+        <Grid item container spacing={1} className={classes.right} direction="column">
 
           <Grid item className={classes.description}>
             <Paper square className={classes.Paper}>

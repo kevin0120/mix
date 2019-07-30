@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import Button from '@material-ui/core/es/Button/Button';
+import Button from '../../../components/CustomButtons/Button';
 import { inputStepActions } from '../../../modules/step/inputStep/action';
 import { StepContent } from '../types';
 import { stepPayload, viewingStep } from '../../../modules/order/selector';
@@ -37,6 +37,7 @@ function InputStep({
       bindAction(
         <Button
           type="button"
+          color="primary"
           onClick={() => {
             onSubmit(value);
           }}

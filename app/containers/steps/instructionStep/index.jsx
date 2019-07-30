@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import Button from '@material-ui/core/es/Button/Button';
+import Button from '../../../components/CustomButtons/Button';
 import { Typography } from '@material-ui/core';
 import { instructionStepActions } from '../../../modules/step/instructionStep/action';
 import { StepContent } from '../types';
@@ -25,6 +25,7 @@ function InstructionStep({ step, isCurrent, submit, bindAction, instruction }: P
     bindAction(
       <Button
         type="button"
+        color="primary"
         onClick={() => {
           submit();
         }}

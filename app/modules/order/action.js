@@ -4,7 +4,8 @@ import { tOrder } from './model';
 export const ORDER = {
   TRIGGER: 'ORDER_TRIGGER',
   FINISH: 'ORDER_FINISH',
-  FAIL: 'ORDER_FAIL',
+  CANCEL: 'ORDER_CANCEL',
+  PENDING: 'ORDER_PENDING',
   SWITCH: 'ORDER_SWITCH',
   STEP: {
     // 仅移动指针，不修改step状态
@@ -41,8 +42,11 @@ export const orderActions = {
   finishOrder: () => ({
     type: ORDER.FINISH
   }),
-  failOrder: () => ({
-    type: ORDER.FAIL
+  cancelOrder: () => ({
+    type: ORDER.CANCEL
+  }),
+  pendingOrder: () => ({
+    type: ORDER.PENDING
   }),
   nextStep: () => ({
     type: ORDER.STEP.NEXT

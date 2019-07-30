@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import Button from '@material-ui/core/Button';
+import Button from '../../../components/CustomButtons/Button';
 import TextField from '@material-ui/core/TextField';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import styles from './styles';
@@ -43,7 +43,11 @@ function ScannerStep(
   useEffect(
     () => {
       bindAction(
-        <Button onClick={() => submit()} disabled={!isCurrent}>
+        <Button
+          onClick={() => submit()}
+          disabled={!isCurrent}
+          color="primary"
+        >
           submit
         </Button>
       );

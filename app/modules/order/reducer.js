@@ -67,14 +67,21 @@ const orderReducer = {
   [ORDER.FINISH]: (state: tOrderState): tOrderState => {
     const newState = setOrderStatus(state, ORDER_STATUS.DONE);
     return {
-      ...newState
+      ...newState,
       // currentOrder: null
     };
   },
-  [ORDER.FAIL]: (state: tOrderState): tOrderState => {
-    const newState = setOrderStatus(state, ORDER_STATUS.FAIL);
+  [ORDER.CANCEL]: (state: tOrderState): tOrderState => {
+    const newState = setOrderStatus(state, ORDER_STATUS.CANCEL);
     return {
-      ...newState
+      ...newState,
+      // currentOrder: null
+    };
+  },
+  [ORDER.PENDING]: (state: tOrderState): tOrderState => {
+    const newState = setOrderStatus(state, ORDER_STATUS.PENDING);
+    return {
+      ...newState,
       // currentOrder: null
     };
   },
