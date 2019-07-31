@@ -1,6 +1,7 @@
 // @flow
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import { AppBar } from '@material-ui/core';
 import lodash from 'lodash';
 import Clock from 'react-live-clock';
 import { push } from 'connected-react-router';
@@ -132,9 +133,9 @@ function ConnectedNavBar(
 
   const classes = makeStyles(styles.root)();
   return (
-    <div className={classes.appBar}>
+    <AppBar className={classes.appBar}>
       {contents.map((c) => renderContentsMapping[c](c))}
-    </div>
+    </AppBar>
   );
 }
 

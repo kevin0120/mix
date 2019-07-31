@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import Button from '../../../components/CustomButtons/Button';
 import { Typography } from '@material-ui/core';
+import Button from '../../../components/CustomButtons/Button';
 import { instructionStepActions } from '../../../modules/step/instructionStep/action';
 import { StepContent } from '../types';
 import { stepPayload, viewingStep } from '../../../modules/order/selector';

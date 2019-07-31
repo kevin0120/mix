@@ -120,24 +120,24 @@ const pagesHeaderStyle = theme => ({
     }
   },
   navLink: {
-    display: 'flex',
-    flexDirection:'row',
-    justifyContent:'center',
-    alignItems:'center',
-    color: '#FFFFFF',
-    margin: '0 5px',
-    paddingTop: '15px',
-    paddingBottom: '15px',
-    fontWeight: '500',
-    fontSize: '14px',
-    textTransform: 'uppercase',
-    borderRadius: '3px',
-    padding: '10px 15px',
-    textDecoration: 'none',
-    '&:hover,&:focus': {
-      color: '#FFFFFF',
-      background: 'rgba(200, 200, 200, 0.2)'
-    }
+    // display: 'flex',
+    // flexDirection:'row',
+    // justifyContent:'center',
+    // alignItems:'center',
+    // color: '#FFFFFF',
+    // margin: '0 5px',
+    // paddingTop: '15px',
+    // paddingBottom: '15px',
+    fontWeight: '400',
+    // fontSize: '14px',
+    // textTransform: 'uppercase',
+    // borderRadius: '3px',
+    // padding: '10px 15px',
+    // textDecoration: 'none',
+    // '&:hover,&:focus': {
+    //   color: '#FFFFFF',
+    //   background: 'rgba(200, 200, 200, 0.2)'
+    // }
   },
   listItemIcon: {
     position: 'relative',

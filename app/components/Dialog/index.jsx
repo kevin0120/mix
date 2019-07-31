@@ -6,7 +6,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import Slide from '@material-ui/core/Slide';
 import { makeStyles } from '@material-ui/core/styles';
 import { I18n } from 'react-i18next';
-import { createMuiTheme, DialogActions, MuiThemeProvider } from '@material-ui/core';
+import { DialogActions } from '@material-ui/core';
 import styles from './style';
 import dialogActions from '../../modules/dialog/action';
 import Button from '../CustomButtons/Button';
@@ -37,16 +37,6 @@ type Props = {
   close: Dispatch
 };
 
-const theme = createMuiTheme({
-  overrides: {
-    MuiPaper: {
-      root: {
-        backgroundColor: '#fff'
-      }
-    }
-  }
-});
-
 function customDialog(props: Props) {
   const { config, open, cancel, ok, close } = props;
   const classes = makeStyles(styles)();
@@ -68,8 +58,6 @@ function customDialog(props: Props) {
   return (
     <I18n>
       {t => (
-        <MuiThemeProvider theme={theme}>
-
           <Dialog
             classes={{
               root: classes.modalRoot,
@@ -101,7 +89,6 @@ function customDialog(props: Props) {
               ) : null}
             </DialogActions>
           </Dialog>
-        </MuiThemeProvider>
       )}
     </I18n>
   );

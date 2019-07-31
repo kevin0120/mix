@@ -1,5 +1,5 @@
 
-const drawerWidth = 260;
+const drawerWidth = 280;
 const drawerWidthClose=theme=>theme.spacing(9) + 1;
 
 export default theme => ({

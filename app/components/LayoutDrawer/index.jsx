@@ -1,6 +1,7 @@
+// @flow
 import React from 'react';
 import { makeStyles, createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
-
+import PropTypes from 'prop-types';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
@@ -13,25 +14,18 @@ import clsx from 'clsx';
 import { ListItemAvatar } from '@material-ui/core';
 import styles from './styles';
 
-export default function LayoutDrawer(props) {
-  const { contents } = props;
+type tContent = {
+  key: string,
+  label: PropTypes.element,
+  icon: PropTypes.element
+};
+
+type tProps = {
+  contents: Array<tContent>
+};
+
+export default function LayoutDrawer({ contents }: tProps) {
   const classes = makeStyles(styles)();
-  const theme = createMuiTheme({
-    overrides: {
-      MuiDrawer: {
-        root: {
-          zIndex: '0'
-        },
-        paper: {
-          zIndex: '0',
-          backgroundImage: 'url("../resources/imgs/texture.png")',
-          backgroundRepeat: 'repeat',
-          backgroundColor: '#444',
-          color:'#ddd'
-        }
-      }
-    }
-  });
 
   const [open, setOpen] = React.useState(false);
 
@@ -40,7 +34,6 @@ export default function LayoutDrawer(props) {
   }
 
   return (
-    <MuiThemeProvider theme={theme}>
       <Drawer
         variant="permanent"
         className={clsx(classes.drawer, {
@@ -80,6 +73,5 @@ export default function LayoutDrawer(props) {
         </List>
         <Divider/>
       </Drawer>
-    </MuiThemeProvider>
   );
 }

@@ -42,7 +42,7 @@ import { networkCheck, networkSignal } from '../../modules/network/action';
 import { batteryCheck } from '../../modules/battery/action';
 
 const signalLevel = (signal) => {
-  const size = 'large';
+  const size = 'small';
   if (signal > 80)
     return <Signal4 fontSize={size}/>;
   else if (signal > 60)
@@ -56,7 +56,7 @@ const signalLevel = (signal) => {
 };
 
 const batteryLevel = (percentage) => {
-  const size = 'large';
+  const size = 'small';
   if (percentage > 99)
     return <BatteryFull fontSize={size}/>;
   else if (percentage >= 90)
@@ -90,7 +90,7 @@ class PagesHeader extends React.Component {
     this.handleStatusCheck();
   }
 
-  handleStatusCheck=()=>{
+  handleStatusCheck = () => {
     const { doNetworkSignal, doBatteryCheck } = this.props;
     doNetworkSignal();
     doBatteryCheck();
@@ -114,27 +114,11 @@ class PagesHeader extends React.Component {
   // }
 
   render() {
-    const { classes, color,login, ssid, signal, batteryPercentage } = this.props;
+    const { classes, color, login, ssid, signal, batteryPercentage } = this.props;
     const { open } = this.state;
     const appBarClasses = cx({
       [` ${classes[color]}`]: color
     });
-    const list = (
-      <List className={classes.list}>
-        <ListItem className={classes.listItem}>
-          <div onClick={()=>login()} className={classes.navLink}>
-            <ListItemIcon className={classes.listItemIcon}>
-              <Dashboard/>
-            </ListItemIcon>
-            <ListItemText
-              primary="Welcome"
-              disableTypography
-              className={classes.listItemText}
-            />
-          </div>
-        </ListItem>
-      </List>
-    );
     return (
       <AppBar position="static" className={classes.appBar + appBarClasses}>
         <Toolbar className={classes.container}>
@@ -158,22 +142,16 @@ class PagesHeader extends React.Component {
                   </Button>
                 </div>
               </Hidden>
-              {/* <Hidden mdUp> */}
-              {/* <div className={classes.flex}> */}
-              {/* <Button className={classes.title} color="transparent"> */}
-              {/* For Smart Assembly */}
-              {/* </Button> */}
-              {/* </div> */}
-              {/* </Hidden> */}
-              <Hidden smDown implementation="css">
-                {list}
-              </Hidden>
+              <Button simple onClick={() => login()} className={classes.navLink}>
+                <Dashboard fontSize="inherit"/>
+                Welcome
+              </Button>
             </div>
             <Button className={classes.indicator} color="transparent" onClick={this.handleStatusCheck}>
               {signalLevel(signal)}
-              <span style={{marginRight:'7px'}}>{`${ssid || '无连接'}`}</span>
+              <span style={{ marginRight: '7px' }}>{`${ssid || '无连接'}`}</span>
               {batteryLevel(batteryPercentage)}
-              <span>{batteryPercentage>=0?`${batteryPercentage}%` : '电池检测中'}</span>
+              <span>{batteryPercentage >= 0 ? `${batteryPercentage}%` : '电池检测中'}</span>
             </Button>
           </div>
           {/* <Hidden mdUp> */}
@@ -225,7 +203,7 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = {
   doNetworkCheck: networkCheck,
   doNetworkSignal: networkSignal,
-  doBatteryCheck: batteryCheck,
+  doBatteryCheck: batteryCheck
 
 };
 

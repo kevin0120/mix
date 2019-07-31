@@ -17,23 +17,21 @@ type StepWorkingProps = {
   viewingOrder: tOrder
 };
 
-const theme = createMuiTheme({
-  overrides: {
-    MuiPaper: {
-      root: {
-        backgroundColor: 'inherit'
-      }
-    }
-  }
-});
+// const theme = createMuiTheme({
+//   overrides: {
+//     MuiPaper: {
+//       root: {
+//         backgroundColor: 'inherit'
+//       }
+//     }
+//   }
+// });
 
 function StepWorking({ viewingOrder }: StepWorkingProps) {
   const classes = makeStyles(styles.layout)();
   const [action, bindAction] = useState(null);
 
   return (
-    <StylesProvider injectFirst>
-      <MuiThemeProvider theme={theme}>
         <div className={classes.root}>
           <Dialog/>
           <Paper
@@ -56,9 +54,6 @@ function StepWorking({ viewingOrder }: StepWorkingProps) {
             </Paper>
           </div>
         </div>
-      </MuiThemeProvider>
-    </StylesProvider>
-
   );
 }
 

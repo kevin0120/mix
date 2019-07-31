@@ -2,38 +2,27 @@
 // // // Button styles
 // #############################
 
-import {
-  grayColor,
-  roseColor,
-  primaryColor,
-  secondaryColor,
-  infoColor,
-  successColor,
-  warningColor,
-  dangerColor
-} from '../material-react-pro';
-
-const buttonStyle = {
+const buttonStyle = (theme)=>({
   button: {
     minHeight: 'auto',
     minWidth: 'auto',
-    backgroundColor: grayColor,
+    backgroundColor: theme.palette.gray.main,
     color: '#FFFFFF',
     boxShadow:
       '0 2px 2px 0 rgba(153, 153, 153, 0.14), 0 3px 1px -2px rgba(153, 153, 153, 0.2), 0 1px 5px 0 rgba(153, 153, 153, 0.12)',
     border: 'none',
-    borderRadius: '3px',
+    borderRadius: '0px',
     position: 'relative',
-    padding: '12px 30px',
+    padding: '16px 30px',
     margin: '.3125rem 1px',
-    fontSize: '12px',
-    fontWeight: '400',
+    // fontSize: '1rem',
+    // fontWeight: '400',
     textTransform: 'uppercase',
     letterSpacing: '0',
     willChange: 'box-shadow, transform',
     transition:
       'box-shadow 0.2s cubic-bezier(0.4, 0, 1, 1), background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-    lineHeight: '1.42857143',
+    lineHeight: '1',
     textAlign: 'center',
     whiteSpace: 'nowrap',
     verticalAlign: 'middle',
@@ -41,7 +30,7 @@ const buttonStyle = {
     cursor: 'pointer',
     '&:hover,&:focus': {
       color: '#FFFFFF',
-      backgroundColor: grayColor,
+      backgroundColor: theme.palette.gray.main,
       boxShadow:
         '0 14px 26px -12px rgba(153, 153, 153, 0.42), 0 4px 23px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(153, 153, 153, 0.2)'
     },
@@ -58,11 +47,9 @@ const buttonStyle = {
     '& svg': {
       position: 'relative',
       display: 'inline-block',
-      top: '0',
-      width: '18px',
-      height: '18px',
-      marginRight: '4px',
-      verticalAlign: 'middle'
+      marginLeft:'6px',
+      marginRight:'6px',
+      verticalAlign: 'middle',
     },
     '&$justIcon': {
       '& .fab,& .fas,& .far,& .fal': {
@@ -83,18 +70,18 @@ const buttonStyle = {
     width: '100%'
   },
   primary: {
-    backgroundColor: primaryColor,
+    backgroundColor: theme.palette.primary.main,
     boxShadow:
       '0 2px 2px 0 rgba(156, 39, 176, 0.14), 0 3px 1px -2px rgba(156, 39, 176, 0.2), 0 1px 5px 0 rgba(156, 39, 176, 0.12)',
     '&:hover,&:focus': {
-      backgroundColor: primaryColor,
+      backgroundColor: theme.palette.primary.main,
       boxShadow:
         '0 14px 26px -12px rgba(156, 39, 176, 0.42), 0 4px 23px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(156, 39, 176, 0.2)'
     }
   },
   secondary: {
-    color: 'rgba(0,0,0,.87)',
-    backgroundColor: secondaryColor,
+    // color: 'rgba(0,0,0,.87)',
+    backgroundColor: theme.palette.secondary.main,
     boxShadow:
       '0 2px 2px 0 hsla(0,0%,98%,.14), 0 3px 1px -2px hsla(0,0%,98%,.2), 0 1px 5px 0 hsla(0,0%,98%,.12)',
     '&:hover,&:focus': {
@@ -105,51 +92,51 @@ const buttonStyle = {
     }
   },
   info: {
-    backgroundColor: infoColor,
+    backgroundColor: theme.palette.info.main,
     boxShadow:
       '0 2px 2px 0 rgba(0, 188, 212, 0.14), 0 3px 1px -2px rgba(0, 188, 212, 0.2), 0 1px 5px 0 rgba(0, 188, 212, 0.12)',
     '&:hover,&:focus': {
-      backgroundColor: infoColor,
+      backgroundColor: theme.palette.info.main,
       boxShadow:
         '0 14px 26px -12px rgba(0, 188, 212, 0.42), 0 4px 23px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(0, 188, 212, 0.2)'
     }
   },
   success: {
-    backgroundColor: successColor,
+    backgroundColor: theme.palette.success.main,
     boxShadow:
       '0 2px 2px 0 rgba(76, 175, 80, 0.14), 0 3px 1px -2px rgba(76, 175, 80, 0.2), 0 1px 5px 0 rgba(76, 175, 80, 0.12)',
     '&:hover,&:focus': {
-      backgroundColor: successColor,
+      backgroundColor: theme.palette.success.main,
       boxShadow:
         '0 14px 26px -12px rgba(76, 175, 80, 0.42), 0 4px 23px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(76, 175, 80, 0.2)'
     }
   },
   warning: {
-    backgroundColor: warningColor,
+    backgroundColor: theme.palette.warning.main,
     boxShadow:
       '0 2px 2px 0 rgba(255, 152, 0, 0.14), 0 3px 1px -2px rgba(255, 152, 0, 0.2), 0 1px 5px 0 rgba(255, 152, 0, 0.12)',
     '&:hover,&:focus': {
-      backgroundColor: warningColor,
+      backgroundColor: theme.palette.warning.main,
       boxShadow:
         '0 14px 26px -12px rgba(255, 152, 0, 0.42), 0 4px 23px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(255, 152, 0, 0.2)'
     }
   },
   danger: {
-    backgroundColor: dangerColor,
+    backgroundColor: theme.palette.danger.main,
     boxShadow:
       '0 2px 2px 0 rgba(244, 67, 54, 0.14), 0 3px 1px -2px rgba(244, 67, 54, 0.2), 0 1px 5px 0 rgba(244, 67, 54, 0.12)',
     '&:hover,&:focus': {
-      backgroundColor: dangerColor,
+      backgroundColor: theme.palette.danger.main,
       boxShadow:
         '0 14px 26px -12px rgba(244, 67, 54, 0.42), 0 4px 23px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(244, 67, 54, 0.2)'
     }
   },
   rose: {
-    backgroundColor: roseColor,
+    backgroundColor: theme.palette.rose.main,
     boxShadow:
       '0 2px 2px 0 rgba(233, 30, 99, 0.14), 0 3px 1px -2px rgba(233, 30, 99, 0.2), 0 1px 5px 0 rgba(233, 30, 99, 0.12)',
     '&:hover,&:focus': {
-      backgroundColor: roseColor,
+      backgroundColor: theme.palette.rose.main,
       boxShadow:
         '0 14px 26px -12px rgba(233, 30, 99, 0.42), 0 4px 23px 0px rgba(0, 0, 0, 0.12), 0 8px 10px -5px rgba(233, 30, 99, 0.2)'
     }
@@ -157,7 +144,7 @@ const buttonStyle = {
   white: {
     '&,&:focus,&:hover': {
       backgroundColor: '#FFFFFF',
-      color: grayColor
+      color: theme.palette.gray.main
     }
   },
   twitter: {
@@ -312,32 +299,32 @@ const buttonStyle = {
     },
     '&$primary': {
       '&,&:focus,&:hover,&:visited': {
-        color: primaryColor
+        color: theme.palette.primary.main
       }
     },
     '&$info': {
       '&,&:focus,&:hover,&:visited': {
-        color: infoColor
+        color: theme.palette.info.main
       }
     },
     '&$success': {
       '&,&:focus,&:hover,&:visited': {
-        color: successColor
+        color: theme.palette.success.main
       }
     },
     '&$warning': {
       '&,&:focus,&:hover,&:visited': {
-        color: warningColor
+        color: theme.palette.warning.main
       }
     },
     '&$rose': {
       '&,&:focus,&:hover,&:visited': {
-        color: roseColor
+        color: theme.palette.rose.main
       }
     },
     '&$danger': {
       '&,&:focus,&:hover,&:visited': {
-        color: dangerColor
+        color: theme.palette.danger.main
       }
     },
     '&$twitter': {
@@ -416,13 +403,19 @@ const buttonStyle = {
     padding: '1.125rem 2.25rem',
     fontSize: '0.875rem',
     lineHeight: '1.333333',
-    borderRadius: '0.2rem'
+    // borderRadius: '0.2rem'
+  },
+  md: {
+    padding: '0.875rem 1.75rem',
+    fontSize: '0.725rem',
+    lineHeight: '1.333333',
+    // borderRadius: '0.2rem'
   },
   sm: {
     padding: '0.40625rem 1.25rem',
     fontSize: '0.6875rem',
     lineHeight: '1.5',
-    borderRadius: '0.2rem'
+    // borderRadius: '0.2rem'
   },
   round: {
     borderRadius: '30px'
@@ -478,7 +471,7 @@ const buttonStyle = {
   fileButton: {
     // display: "inline-block"
   }
-};
+});
 
 export default buttonStyle;
 

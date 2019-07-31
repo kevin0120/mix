@@ -9,36 +9,13 @@ import type { Store } from '../modules/indexReducer';
 import Routes from './Routes';
 // import { listenToNewCar } from '../modules/scanner/action';
 // import { systemInit } from '../modules/systemInit/action';
-import { primaryColor } from '../common/jss/material-react-pro';
+import { primaryColor, secondaryColor } from '../common/jss/material-react-pro';
+import theme from '../common/theme';
 
 type Props = {
   store: Store,
   history: {}
 };
-
-const theme = createMuiTheme({
-  palette: {
-    primary: blue,
-    secondary: {
-      main: primaryColor
-    },
-    status: {
-      danger: 'orange'
-    }
-  },
-  typography: {
-    useNextVariants: true,
-    // Use the system font instead of the default Roboto font.
-    fontFamily: [
-      'Noto Sans SC',
-      'sans-serif'
-    ].join(','),
-    // fontWeightRegular: 'bold',
-    button: {
-      fontSize: '20px'
-    }
-  }
-});
 
 class Root extends Component<Props> {
   render() {

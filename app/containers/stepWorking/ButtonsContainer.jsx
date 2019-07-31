@@ -98,7 +98,8 @@ const ButtonsContainer = ({
               color="warning"
               onClick={() => setDialogOpen(true)}
             >
-              <Menu fontSize="large" className={classes.menuIcon}/>
+                <Menu fontSize="inherit" className={classes.menuIcon}/>
+              {' '}
             </Button>
             <Dialog
               open={dialogOpen}
@@ -117,9 +118,7 @@ const ButtonsContainer = ({
                       color="primary"
                       className={classes.bigButton}
                     >
-                      <Typography variant="h3">
                         continue
-                      </Typography>
                     </Button> :
                     (pendingable && <Button
                       type="button"
@@ -131,9 +130,7 @@ const ButtonsContainer = ({
                       color="warning"
                       className={classes.bigButton}
                     >
-                      <Typography variant="h3">
                         pending
-                      </Typography>
                     </Button>) || null
                   }
                   {
@@ -146,9 +143,7 @@ const ButtonsContainer = ({
                         setDialogOpen(false);
                       }}
                     >
-                      <Typography variant="h3">
                         cancel
-                      </Typography>
                     </Button> : null
                   }
                 </DialogContent>

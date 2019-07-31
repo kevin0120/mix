@@ -17,6 +17,7 @@
 // ##############################
 // // // Variables - Styles that are used on more than one component
 // #############################
+import * as colors from '@material-ui/core/colors';
 
 const drawerWidth = 260;
 
@@ -85,11 +86,17 @@ const defaultFont = {
   lineHeight: '1.5em'
 };
 
-const primaryColor = '#9c27b0';
-const secondaryColor = '#36D7B7';
-const warningColor = '#ff9800';
-const dangerColor = '#f44336';
-const successColor = '#4caf50';
+// const primaryColor = '#9c27b0';
+// const secondaryColor = '#36D7B7';
+// const warningColor = '#ff9800';
+// const dangerColor = '#f44336';
+// const successColor = '#4caf50';
+
+const primaryColor = colors.cyan[700];
+const secondaryColor = colors.amber[700];
+const warningColor = colors.orange[800];
+const dangerColor = colors.red[700];
+const successColor = colors.lightGreen[500];
 const infoColor = '#00acc1';
 const roseColor = '#e88e63';
 const grayColor = '#999999';
