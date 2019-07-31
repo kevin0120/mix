@@ -12,14 +12,19 @@ import LayoutDrawer from '../../components/LayoutDrawer';
 import type { tUser } from '../../modules/user/model';
 import { logoutRequest } from '../../modules/user/action';
 import type { Dispatch } from '../../modules/indexReducer';
+import type { tRouteComponent, tRouteObj } from '../model';
 
 type Props = {
   users: Array<tUser>,
   path: string,
-  children: PropTypes.element,
-  childRoutes: [],
-  self: {},
-  logout: Dispatch
+  children: Array<tRouteComponent>,
+  childRoutes: Array<tRouteObj>,
+  self: tRouteObj & {
+    DefaultContent: PropTypes.element,
+    navBarContents: Array<string>
+  },
+  logout: Dispatch,
+  getContentByUrl: (string)=>tRouteObj
 };
 
 function AppLayout(
@@ -29,7 +34,8 @@ function AppLayout(
     children,
     childRoutes,
     self,
-    logout
+    logout,
+    getContentByUrl
   }: Props) {
   const { DefaultContent, navBarContents } = self;
   return (
@@ -61,6 +67,7 @@ function AppLayout(
         {path === '/app' ? <DefaultContent childRoutes={childRoutes}/> : children}
       </div>
       <NavBar
+        getContentByUrl={getContentByUrl}
         contents={navBarContents}
         self={self}
         childRoutes={childRoutes}
