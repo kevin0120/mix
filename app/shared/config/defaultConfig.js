@@ -27,10 +27,24 @@ const defaultConfigs = {
       'userName': {
         password: 'password',
         role: 'admin',
-        uuid: 'uuid',
+        uuid: 'demoUUID',
         uid: 'uid',
         avatar: ''
-      }
+      },
+      'ming': {
+        password: '123',
+        role: 'admin',
+        uuid: 'XiaoMing',
+        uid: 'uid',
+        avatar: ''
+      },
+      'hong': {
+        password: '123',
+        role: 'admin',
+        uuid: 'XiaoHong',
+        uid: 'uid',
+        avatar: ''
+      },
     },
     // verify: 'local',//'online
     maxUsers: 0 // 0:no limit

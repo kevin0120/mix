@@ -67,13 +67,13 @@ export default function LayoutDrawer(props) {
         </div>
         <Divider/>
         <List>
-          {contents.map((C) => (
-            <ListItem key={`${C.label}`}>
+          {contents.map((c) => (
+            <ListItem key={c.key}>
               <ListItemAvatar>
-                {C.icon}
+                {c.icon}
               </ListItemAvatar>
               <ListItemText>
-                {C.label}
+                {c.label}
               </ListItemText>
             </ListItem>
           ))}
