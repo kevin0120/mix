@@ -3,17 +3,17 @@
 import { take, fork, all, select } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 
-import watchScanner from './scanner/saga';
+import watchScannerEvent from './scanner/saga';
 import { cardAuthFlow } from './cardAuth/saga';
 import sysInitFlow from './systemInit/saga';
 import { operationFlow, watchResults } from './operation/saga';
-import { watchIO } from './io/saga';
+import { watchIOEvent } from './io/saga';
 import { toolFunctions } from './tools/saga';
 import user from './user/saga';
 import { watchAiis } from './aiis/saga';
 import { watchSettingPreSave } from './setting/saga';
-import { watchRush } from './rush/saga';
-import { watchRfid } from './rfid/saga';
+import { watchRushEvent } from './rush/saga';
+import watchRFIDEvent  from './rfid/saga';
 import { watchNotification } from './notification/saga';
 import watchOperationViewer from './operationViewer/saga';
 import logoFlow from './logo/saga';
@@ -23,6 +23,7 @@ import watchPower from './power/saga';
 import andon from './andon/saga';
 import order from './order/saga';
 import dialog from './dialog/saga';
+import { CommonLog } from '../common/utils';
 // import healthzCheckFlow from './healthzCheck';
 
 export function watch(workers, channel): Saga<void> {
@@ -51,14 +52,16 @@ export default function* rootSaga(): Saga<void> {
     yield all([
       // card auth
       // cardAuthFlow(),
-      watchScanner(),
+      // 硬件设备
+      watchScannerEvent(),
+      watchIOEvent(), // 监听IO数据
+      watchRFIDEvent(),
+
       watchNotification(),
       watchAiis(),
       operationFlow(),
       watchResults(), // 监听结果
-      watchIO(), // 监听IO数据
-      watchRush(),
-      watchRfid(),
+      watchRushEvent(),
       toolFunctions(),
       user(),// auth
       // healthz
@@ -75,6 +78,6 @@ export default function* rootSaga(): Saga<void> {
       dialog()
     ]);
   } catch (e) {
-    console.error('rootSaga:', e);
+    CommonLog.Error(e)
   }
 }

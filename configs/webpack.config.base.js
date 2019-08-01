@@ -7,7 +7,7 @@ import webpack from 'webpack';
 import { dependencies } from '../package.json';
 
 export default {
-  externals: [...Object.keys(dependencies || {})],
+  externals: [...Object.keys(dependencies || {}).filter(k=>k!=='lodash-es')],
 
   module: {
     rules: [

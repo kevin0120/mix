@@ -10,7 +10,7 @@ export const RUSH = {
 };
 
 
-
+// eslint-disable-next-line flowtype/no-weak-types
 export function NewResults(results: Array<any>): tCommonActionType {
   return {
     type: RUSH.NEW_RESULTS,

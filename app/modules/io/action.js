@@ -1,23 +1,31 @@
 // @flow
 
-import type {tCommonActionType} from '../../common/type';
+import type { tCommonActionType, tDeviceNewData } from '../../common/type';
+import type { tIOContact } from './type';
 
-export const IO = {
-  FUNCTION: 'IO_FUNCTION',
-  INIT: 'IO_INIT',
-  TEST: 'IO_TEST',
+export const IOACTION = {
+  DATA_ONCHANGE: 'IO_DATA_ON_CHANGE',
+  READ_DATA: 'IO_READ_DATA',
+  WRITE_DATA: 'IO_WRITE_DATA',
   RESET: 'IO_RESET'
 };
 
-export function initIO(): tCommonActionType{
+export function onchangeIO(data: tIOContact): tCommonActionType & tDeviceNewData {
   return {
-    type: IO.INIT
-  };
+    type: IOACTION.DATA_ONCHANGE,
+    data
+  }
 }
 
-export function resetIO(modbusConfig: any) {
+export function readIO(): tCommonActionType {
   return {
-    type: IO.RESET,
-    modbusConfig
-  };
+    type: IOACTION.READ_DATA,
+  }
 }
+
+// export function resetIO(modbusConfig: any):  {
+//   return {
+//     type: IO.RESET,
+//     modbusConfig
+//   };
+// }

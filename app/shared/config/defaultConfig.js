@@ -2,6 +2,12 @@
 
 const defaultConfigs = {
   version: 'v0.1',
+  devices: {
+    io: {
+      enable: true,
+
+    }
+  },
   pages: {
     app: {
       working: ['user', 'admin'],
@@ -116,7 +122,6 @@ const defaultConfigs = {
     }
     ,
     modbus: {
-      source: ['remote', 'controller'],
       in:
         [
           {
