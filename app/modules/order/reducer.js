@@ -21,7 +21,7 @@ const initState = {
   viewingOrder: null,
   workingIndex: 0,
   viewingIndex: 0,
-  list: [demoOrder,demoOrder2, demoOrderCancel, demoOrderPending, demoOrderDone]
+  list: [demoOrder, demoOrderCancel, demoOrderPending, demoOrderDone]
 };
 
 function reduceStepData(reducer, state: tOrderState, action): tOrderState {
@@ -180,7 +180,6 @@ const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: a
         newStep.times = [time];
       }
     }
-    console.log(newStep?.times);
     return newState;
   }
 };

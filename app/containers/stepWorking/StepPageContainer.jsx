@@ -11,7 +11,7 @@ const mapState = (state, props) => ({
   ...props,
   step: oSel.viewingStep(state.order) || {},
   workingStep: oSel.workingStep(oSel.workingOrder(state.order)) || {},
-  result: oSel.stepData(oSel.workingStep(oSel.workingOrder(state.order)))?.result
+  result: oSel.stepData(oSel.viewingStep(state.order))?.result
 });
 const mapDispatch = {};
 

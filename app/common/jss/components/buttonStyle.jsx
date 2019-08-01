@@ -2,7 +2,7 @@
 // // // Button styles
 // #############################
 
-const buttonStyle = (theme)=>({
+const buttonStyle = (theme) => ({
   button: {
     minHeight: 'auto',
     minWidth: 'auto',
@@ -47,9 +47,8 @@ const buttonStyle = (theme)=>({
     '& svg': {
       position: 'relative',
       display: 'inline-block',
-      marginLeft:'6px',
-      marginRight:'6px',
-      verticalAlign: 'middle',
+      marginRight: '6px',
+      verticalAlign: 'middle'
     },
     '&$justIcon': {
       '& .fab,& .fas,& .far,& .fal': {
@@ -62,14 +61,7 @@ const buttonStyle = (theme)=>({
         height: '100%',
         lineHeight: '41px',
         fontSize: '20px'
-      },
-      '& svg': {
-        position: 'absolute',
-        display: 'inline-block',
-        margin:'auto',
-        top:'auto',
-        verticalAlign: 'middle',
-      },
+      }
     }
   },
   fullWidth: {
@@ -408,19 +400,19 @@ const buttonStyle = (theme)=>({
   lg: {
     padding: '1.125rem 2.25rem',
     fontSize: '0.875rem',
-    lineHeight: '1.333333',
+    lineHeight: '1.333333'
     // borderRadius: '0.2rem'
   },
   md: {
     padding: '0.875rem 1.75rem',
     fontSize: '0.725rem',
-    lineHeight: '1.333333',
+    lineHeight: '1.333333'
     // borderRadius: '0.2rem'
   },
   sm: {
     padding: '0.40625rem 1.25rem',
     fontSize: '0.6875rem',
-    lineHeight: '1.5',
+    lineHeight: '1.5'
     // borderRadius: '0.2rem'
   },
   round: {
@@ -437,12 +429,6 @@ const buttonStyle = (theme)=>({
     }
   },
   justIcon: {
-    paddingLeft: '12px',
-    paddingRight: '12px',
-    fontSize: '20px',
-    height: '41px',
-    minWidth: '41px',
-    width: '41px',
     '& .fab,& .fas,& .far,& .fal,& svg': {
       marginRight: '0px'
     },
@@ -472,10 +458,18 @@ const buttonStyle = (theme)=>({
         width: '17px',
         height: '17px'
       }
+    },
+    '&$regular': {
+      '& svg': {
+        margin: 'auto',
+      }
     }
   },
+  regular: {
+    padding: '12px'
+  },
   fileButton: {
-    // display: "inline-block"
+    display: 'inline-block'
   }
 });
 

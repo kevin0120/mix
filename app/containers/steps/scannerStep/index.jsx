@@ -64,10 +64,11 @@ function ScannerStep(
       <QRcode value="This Is Demo QR Code" size={400}/>
       <TextField
         label={label}
+        disabled={!isCurrent}
         margin="normal"
         value={result?.[label] || ''}
         onClick={() => {
-          keyboardInput({
+          isCurrent && keyboardInput({
             onSubmit: text => {
               getValue(text);
             },

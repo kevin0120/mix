@@ -14,6 +14,7 @@ import SaveIcon from '@material-ui/icons/Save';
 
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
+import Typography from '@material-ui/core/Typography';
 import Button from '../../components/CustomButtons/Button';
 
 import { sortObj } from '../../common/utils';
@@ -21,7 +22,7 @@ import styles from './styles';
 import saveConfigs from '../../modules/setting/action';
 import withKeyboard from '../../components/Keyboard';
 import { systemInit } from '../../modules/systemInit/action';
-import { toggleRFID } from "../../modules/rfid/action";
+import { toggleRFID } from '../../modules/rfid/action';
 
 function handleTest(obj) {
   obj.test(obj.value);
@@ -54,7 +55,7 @@ class ConnectedTest extends React.Component {
         masterPcUrl: 99,
         ioUrl: 99,
         aiisUrl: 99,
-        rfidUrl:props.rfidEnabled,
+        rfidUrl: props.rfidEnabled
       },
       data: this.formatConnInfo(props.connInfoData),
       btnGroupStatus: {}
@@ -65,20 +66,20 @@ class ConnectedTest extends React.Component {
     this.setBtnsStatus();
   }
 
-  componentWillReceiveProps(nextProps){
+  componentWillReceiveProps(nextProps) {
     const { rfidEnabled } = nextProps;
-    const {testStatus} = this.state;
+    const { testStatus } = this.state;
     this.setState({
-      testStatus:{
+      testStatus: {
         ...testStatus,
-        rfidUrl:rfidEnabled
+        rfidUrl: rfidEnabled
       }
     });
   }
 
   componentDidUpdate() {
     this.setBtnsStatus();
-    const { connInfoData} = this.props;
+    const { connInfoData } = this.props;
     const { data } = this.state;
 
     const formatedData = this.formatConnInfo(connInfoData);
@@ -106,7 +107,7 @@ class ConnectedTest extends React.Component {
   }
 
   formatConnInfo(connInfo) {
-    const {rfidEnabled}=this.props;
+    const { rfidEnabled } = this.props;
     return {
       masterPcUrl: {
         key: 'masterpc',
@@ -136,7 +137,7 @@ class ConnectedTest extends React.Component {
       rfidUrl: {
         key: 'rfid',
         disabled: false,
-        hidden:!rfidEnabled,
+        hidden: !rfidEnabled,
         displayOrder: 200,
         value: String(connInfo.rfid),
         displayTitle: 'RFID 链接地址',
@@ -184,7 +185,7 @@ class ConnectedTest extends React.Component {
 
   doToggleRFID() {
     // enable/disable rfid
-    const {toggleRFID} = this.props;
+    const { toggleRFID } = this.props;
     toggleRFID();
   }
 
@@ -251,7 +252,7 @@ class ConnectedTest extends React.Component {
     const { data, btnGroupStatus, testStatus } = this.state;
     const inputsItems = t =>
       sortObj(data, 'displayOrder').map(({ key, value: item }) => {
-        if(item.hidden){
+        if (item.hidden) {
           return null;
         }
         const testPart = t =>
@@ -271,7 +272,7 @@ class ConnectedTest extends React.Component {
                 <span
                   className={`${classes.statusCircle} ${
                     testStatus[key] ? classes.success : classes.fail
-                  }`}
+                    }`}
                 />
               ) : null}
             </div>
@@ -281,7 +282,9 @@ class ConnectedTest extends React.Component {
           <div key={key}>
             <ListItem className={classes.inputItem}>
               <InputLabel className={classes.inputLabel}>
-                {item.displayTitle}
+                <Typography variant="body1">
+                  {item.displayTitle}
+                </Typography>
               </InputLabel>
               <Input
                 key={item.key}
@@ -314,7 +317,7 @@ class ConnectedTest extends React.Component {
               {testPart(t)}
             </ListItem>
             <li>
-              <Divider />
+              <Divider/>
             </li>
           </div>
         );
@@ -330,7 +333,7 @@ class ConnectedTest extends React.Component {
               onClick={this.handleSave}
               className={classes.button}
             >
-              <SaveIcon className={classes.leftIcon} />
+              <SaveIcon className={classes.leftIcon}/>
               {t('Common.Save')}
             </Button>
           </Paper>

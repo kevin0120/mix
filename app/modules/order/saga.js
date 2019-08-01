@@ -64,7 +64,7 @@ export default function* root(): any {
 function* viewOrder({ order }) {
   try {
     const WIPOrder = yield select(s => workingOrder(s.order));
-    if ((!WIPOrder || (WIPOrder === order)) && doable(order)) {
+    if ((!WIPOrder) && doable(order)) {
       yield put(orderActions.workOn(order));
     }
   } catch (e) {

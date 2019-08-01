@@ -23,13 +23,6 @@ const customStyles = theme => ({
     '&,&::placeholder': {
       fontSize: '50px'
     }
-  },
-  leftButton: {
-    // marginLeft: '40%',
-    // marginRight: '40%'
-  },
-  rightButton: {
-    // marginLeft: '40%'
   }
 });
 

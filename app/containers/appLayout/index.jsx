@@ -5,14 +5,15 @@ import { connect } from 'react-redux';
 import { push } from 'connected-react-router';
 import Button from '../../components/CustomButtons/Button';
 import Avatar from '@material-ui/core/Avatar';
+import Typography from '@material-ui/core/Typography';
 import Notify from '../../components/Notify';
-import { setNewNotification } from '../../modules/notification/action';
 import NavBar from '../../components/NavBar';
 import LayoutDrawer from '../../components/LayoutDrawer';
 import type { tUser } from '../../modules/user/model';
 import { logoutRequest } from '../../modules/user/action';
 import type { Dispatch } from '../../modules/indexReducer';
 import type { tRouteComponent, tRouteObj } from '../model';
+import Notifier from '../../components/Notifier';
 
 type Props = {
   users: Array<tUser>,
@@ -41,6 +42,7 @@ function AppLayout(
   return (
     <React.Fragment>
       <Notify/>
+      <Notifier/>
       <div style={{ height: 'calc(100% - 64px)', display: 'flex' }}>
         <LayoutDrawer
           contents={users.map((u) => ({
@@ -56,10 +58,13 @@ function AppLayout(
               <Button
                 color="warning"
                 size="md"
+                regular
                 variant="contained"
                 onClick={() => logout(u.uuid)}
               >
-                Logout
+                <Typography variant="body1">
+                  Logout
+                </Typography>
               </Button>
             </div>)
           }))}
@@ -85,8 +90,7 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = {
   logout: logoutRequest,
-  doPush: push,
-  notification: setNewNotification
+  doPush: push
 };
 
 export default connect(
