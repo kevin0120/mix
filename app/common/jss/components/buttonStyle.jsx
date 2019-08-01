@@ -53,8 +53,7 @@ const buttonStyle = (theme)=>({
     },
     '&$justIcon': {
       '& .fab,& .fas,& .far,& .fal': {
-        marginTop: '0px',
-        marginRight: '0px',
+        margin: '0px',
         position: 'absolute',
         width: '100%',
         transform: 'none',
@@ -63,7 +62,14 @@ const buttonStyle = (theme)=>({
         height: '100%',
         lineHeight: '41px',
         fontSize: '20px'
-      }
+      },
+      '& svg': {
+        position: 'absolute',
+        display: 'inline-block',
+        margin:'auto',
+        top:'auto',
+        verticalAlign: 'middle',
+      },
     }
   },
   fullWidth: {
