@@ -4,7 +4,7 @@
 
 import buttonStyle from '../../jss/components/buttonStyle.jsx';
 
-const sweetAlertStyle = {
+const sweetAlertStyle = theme=> ({
   cardTitle: {
     marginTop: '0',
     marginBottom: '3px',
@@ -20,8 +20,8 @@ const sweetAlertStyle = {
   left: {
     textAlign: 'left'
   },
-  ...buttonStyle
-};
+  ...buttonStyle(theme)
+});
 
 export default sweetAlertStyle;
 

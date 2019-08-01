@@ -37,7 +37,7 @@ const lodash = require('lodash');
 const dayjs = require('dayjs');
 
 const styles = theme=>({
-  ...sweetAlertStyle,
+  ...sweetAlertStyle(theme),
   root: {
     flexGrow: 1,
     zIndex: 1,
@@ -152,7 +152,7 @@ class Event extends React.Component {
                 className="edit"
               >
                 <Dvr/>
-              </Button>{' '}
+              </Button>
             </div>
           )
         }))

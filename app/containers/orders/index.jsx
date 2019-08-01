@@ -44,7 +44,7 @@ import withKeyboard from '../../components/Keyboard';
 const lodash = require('lodash');
 
 const styles = theme=>({
-  ...sweetAlertStyle,
+  ...sweetAlertStyle(theme),
   root: {
     flexGrow: 1,
     zIndex: 1,
