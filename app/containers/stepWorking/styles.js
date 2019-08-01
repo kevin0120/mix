@@ -61,7 +61,6 @@ const layout = (theme) => ({
 const stepperContainer = {
   root: {
     padding: 16,
-    backgroundColor: 'transparent'
   },
   stepButton: {
     display: 'flex',
@@ -84,9 +83,7 @@ const buttonsContainer = {
     alignItems: 'center'
   },
   menuIcon: {
-    // fontSize:'inherit !important'
-    // padding:0,
-    // margin: '0 !important',
+
   },
   menuButton: {},
   dialog: {},
@@ -104,12 +101,7 @@ const buttonsContainer = {
 
 const stepPageContainer = {
   root: {
-    // display: 'flex',
-    // flexDirection: 'row',
     flex: 1,
-    '& *': {
-      backgroundColor: 'transparent'
-    }
   },
 
   left: {

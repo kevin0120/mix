@@ -5,6 +5,8 @@ import styles from './style';
 import { viewingStep, stepPayload, stepData } from '../../../modules/order/selector';
 import ScrewImage from '../../../components/ScrewImage';
 import screwStepAction from '../../../modules/step/screwStep/action';
+import Card from '@material-ui/core/Card';
+import Paper from '@material-ui/core/Paper';
 
 const mapState = (state, props) => ({
   ...props,
@@ -31,8 +33,13 @@ function ScrewStep({ image, points, activeIndex, result, imageReady }) {
       onReady={imageReady}
 
     />
+      <Paper
+        square
+        style={{ position: 'absolute', bottom: 10, right: 10 ,width:'auto'}}
+      >
     <ScrewImage
-      style={{ width: '200px', height: '200px', position: 'absolute', bottom: 0, right: 0 }}
+      style={{ width: '200px', height: '200px' }}
+
       image={image}
       points={points}
       activeIndex={activeIndex}
@@ -40,6 +47,7 @@ function ScrewStep({ image, points, activeIndex, result, imageReady }) {
       onReady={imageReady}
       pointScale={0.5}
     />
+      </Paper>
   </div>;
 }
 

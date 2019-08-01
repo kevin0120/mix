@@ -10,7 +10,7 @@ export default {
       position: 'relative',
       padding: 'auto',
       objectFit: 'contain',
-
+      backgroundColor:'inherit'
     },
     image: {
       maxHeight: '100%',
