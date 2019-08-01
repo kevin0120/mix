@@ -36,7 +36,7 @@ import withKeyboard from '../../components/Keyboard';
 const lodash = require('lodash');
 const dayjs = require('dayjs');
 
-const styles = theme=>({
+const styles = theme => ({
   ...sweetAlertStyle(theme),
   root: {
     flexGrow: 1,
@@ -45,7 +45,11 @@ const styles = theme=>({
     overflowY: 'auto',
     position: 'relative',
     display: 'flex',
-    width: '100%'
+    width: '100%',
+    flexDirection: 'column'
+  },
+  page: {
+    flex:1,
   },
   cardIconTitle: {
     ...theme.title.card,
@@ -61,17 +65,17 @@ const styles = theme=>({
     width: '100%',
     height: '100%'
   },
-  infoTr:{
-    backgroundColor:theme.palette.info,
+  infoTr: {
+    backgroundColor: theme.palette.info
   },
-  warnTr:{
-    backgroundColor:theme.palette.warning,
+  warnTr: {
+    backgroundColor: theme.palette.warning
   },
-  maintenanceTr:{
-    backgroundColor:theme.palette.warning,
+  maintenanceTr: {
+    backgroundColor: theme.palette.warning
   },
-  errorTr:{
-    backgroundColor:theme.palette.danger,
+  errorTr: {
+    backgroundColor: theme.palette.danger
   }
 });
 
@@ -230,8 +234,8 @@ class Event extends React.Component {
       <I18n ns="translations">
         {t => (
           <React.Fragment>
-            <GridContainer className={classes.root}>
-              <GridItem xs={12}>
+            <div className={classes.root}>
+              <div className={classes.page}>
                 <Card>
                   <CardHeader color="info" icon>
                     <CardIcon color="info">
@@ -363,8 +367,8 @@ class Event extends React.Component {
                     />
                   </CardBody>
                 </Card>
-              </GridItem>
-            </GridContainer>
+              </div>
+            </div>
             <Alert
               warning
               show={isShow}
