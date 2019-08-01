@@ -2,18 +2,7 @@
 // // // Info component styles
 // #############################
 
-import {
-  primaryColor,
-  warningColor,
-  dangerColor,
-  successColor,
-  infoColor,
-  roseColor,
-  grayColor,
-  title
-} from '../material-react-pro.jsx';
-
-const infoStyle = {
+const infoStyle = theme=>({
   infoArea: {
     maxWidth: '360px',
     margin: '0 auto',
@@ -25,45 +14,45 @@ const infoStyle = {
     marginRight: '10px'
   },
   primary: {
-    color: primaryColor
+    color: theme.palette.primary.main
   },
   warning: {
-    color: warningColor
+    color: theme.palette.warning.main
   },
   danger: {
-    color: dangerColor
+    color: theme.palette.danger.main
   },
   success: {
-    color: successColor
+    color: theme.palette.success.main
   },
   info: {
-    color: infoColor
+    color: theme.palette.info.main
   },
   rose: {
-    color: roseColor
+    color: theme.palette.rose.main
   },
   gray: {
-    color: grayColor
+    color: theme.palette.gray.main
   },
   icon: {
     width: '36px',
     height: '36px'
   },
   descriptionWrapper: {
-    color: grayColor,
+    color: theme.palette.gray.main,
     overflow: 'hidden'
   },
   title: {
-    ...title,
+    ...theme.title.common,
     margin: '1.75rem 0 0.875rem !important',
     minHeight: 'unset'
   },
   description: {
-    color: grayColor,
+    color: theme.palette.gray.main,
     overflow: 'hidden',
     marginTop: '0px',
     '& p': {
-      color: grayColor,
+      color: theme.palette.gray.main,
       fontSize: '14px'
     }
   },
@@ -74,7 +63,7 @@ const infoStyle = {
     width: '61px',
     height: '61px'
   }
-};
+});
 
 export default infoStyle;
 

@@ -4,39 +4,15 @@ import React, { Component } from 'react';
 import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'connected-react-router';
 import blue from '@material-ui/core/colors/blue';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import type { Store } from '../modules/indexReducer';
 import Routes from './Routes';
-import { primaryColor } from '../common/jss/material-react-pro';
+import theme from '../common/theme';
 
 type Props = {
   store: Store,
   history: {}
 };
-
-const theme = createMuiTheme({
-  palette: {
-    primary: blue,
-    secondary: {
-      main: primaryColor
-    },
-    status: {
-      danger: 'orange'
-    }
-  },
-  typography: {
-    useNextVariants: true,
-    // Use the system font instead of the default Roboto font.
-    fontFamily: [
-      'Noto Sans SC',
-      'sans-serif'
-    ].join(','),
-    // fontWeightRegular: 'bold',
-    button: {
-      fontSize: '20px'
-    }
-  }
-});
 
 class Root extends Component<Props> {
   render() {

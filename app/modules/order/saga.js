@@ -1,26 +1,48 @@
-import { take, call, race, all, select, put } from 'redux-saga/effects';
+// @flow
+import { take, call, race, select, put, all, takeLatest, takeEvery } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
+import React from 'react';
 import { ORDER, orderActions } from './action';
-import stepTypes from '../step/stepTypes';
+import steps from '../step/saga';
 import {
-  processingStep,
-  processingIndex,
+  workingStep,
+  workingOrder,
+  workingIndex,
   stepType,
-  orderLength
+  orderLength,
+  orderSteps,
+  doable
 } from './selector';
 import dialogActions from '../dialog/action';
-import { STEP_STATUS } from './model';
+import i18n from '../../i18n';
+import Table from '../../components/Table/Table';
+import { durationString, timeCost } from '../../common/utils';
 
 const mapping = {
-  onOrderFinish: returnHome
+  onOrderFinish: showResult
 };
 
-function* returnHome() {
+function* showResult() {
   try {
+    const workingOrderSteps = yield select((state => orderSteps(workingOrder(state.order))));
+    const data = workingOrderSteps.map(s => ([
+      s.name,
+      durationString(timeCost(s.times))
+    ]));
     yield put(
       dialogActions.showDialog({
         hasOk: true,
-        closeAction: push('/app')
+        closeAction: push('/app'),
+        title: i18n.t('Common.Result'),
+        content: <Table
+          tableHeaderColor="info"
+          tableHead={[
+            '工步名称',
+            '耗时'
+          ]}
+          tableData={data}
+          colorsColls={['info']}
+        />
       })
     );
   } catch (e) {
@@ -28,21 +50,39 @@ function* returnHome() {
   }
 }
 
-export default function* root() {
+export default function* root(): any {
   try {
-    while (true) {
-      // take trigger action
-      yield take(ORDER.TRIGGER);
-      // do order
-      const { finish } = yield race({
-        exit: call(doOrder),
-        finish: take(ORDER.FINISH),
-        fail: take(ORDER.FAIL)
-      });
-      console.log('order finished');
-      if (finish) {
-        yield call(mapping.onOrderFinish);
-      }
+    yield all([
+      takeLatest(ORDER.WORK_ON, workOnOrder),
+      takeEvery(ORDER.VIEW, viewOrder)
+    ]);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function* viewOrder({ order }) {
+  try {
+    const WIPOrder = yield select(s => workingOrder(s.order));
+    if ((!WIPOrder || (WIPOrder === order)) && doable(order)) {
+      yield put(orderActions.workOn(order));
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function* workOnOrder() {
+  try {
+    const { finish } = yield race({
+      exit: call(doOrder),
+      finish: take(ORDER.FINISH),
+      pending: take(ORDER.PENDING),
+      cancel: take(ORDER.CANCEL)
+    });
+    console.log('order finished');
+    if (finish) {
+      yield call(mapping.onOrderFinish);
     }
   } catch (e) {
     console.error(e);
@@ -52,23 +92,21 @@ export default function* root() {
 function* doOrder() {
   try {
     while (true) {
-      const type = yield select(state => stepType(processingStep(state.order)));
-      if (!type) {
-        throw new Error('step type not valid:', type);
-      }
       console.log('doing order');
+      const wOrder=yield select(state=>workingOrder(state.order));
+      const step = workingStep(wOrder);
+      const idx = workingIndex(wOrder);
+      const type = stepType(step);
+      yield put(orderActions.stepTime(idx, new Date()));
       const { next } = yield race({
-        exit: all([
-          call(stepTypes[type], ORDER, orderActions),
-          put(orderActions.stepStatus(STEP_STATUS.ENTERING))
-        ]),
+        exit: call(steps, type),
         next: take(ORDER.STEP.DO_NEXT),
         previous: take(ORDER.STEP.DO_PREVIOUS)
       });
-
+      yield put(orderActions.stepTime(idx, new Date()));
       if (next) {
-        const order = yield select(state => state.order);
-        if (processingIndex(order) >= orderLength(order)) {
+        const wOrder = yield select(state => workingOrder(state.order));
+        if (workingIndex(wOrder) >= orderLength(wOrder)) {
           yield put(orderActions.finishOrder());
         }
       }

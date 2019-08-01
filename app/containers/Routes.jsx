@@ -1,20 +1,27 @@
 // @flow
 import React from 'react';
 import { Route } from 'react-router';
-import pages from './pages';
+import PropTypes from 'prop-types';
+import pages, { getContentByUrl } from './pages';
+import type {tRouteObj, tRouteComponent} from './model';
 
 type Props = {
   pagesConfig: {}
 };
 
-function renderRoute(R, subRouteList) {
+type tRouteList = [
+  ?Array<?tRouteObj>,
+  ?Array<?tRouteComponent>
+  ];
+
+function renderRoute(R: ?tRouteObj, subRouteList: tRouteList) {
   return R ?
     <Route
       key={R.url}
       exact={R.exact || false}
       path={R.url}
       render={() => R.component ?
-        <R.component self={R} childRoutes={subRouteList[0]}>
+        <R.component self={R} childRoutes={subRouteList[0]} getContentByUrl={getContentByUrl}>
           {subRouteList[1]}
         </R.component> : null}
     /> : null;
@@ -25,7 +32,7 @@ function parseRouteTree(routesObj, parentUrl, filter) {
   const routeList = routeUrls.map(u => {
     const name = u.slice(1);
     return filter[name] ? {
-      ...routesObj[u],
+      ...(routesObj[u] instanceof Object && !(routesObj[u] instanceof Array) ? routesObj[u] : {}),
       url: (parentUrl || '') + u,
       name,
       role: filter[name] instanceof Array ? filter[name] : []
@@ -35,7 +42,7 @@ function parseRouteTree(routesObj, parentUrl, filter) {
     if (!route) {
       return null;
     }
-    const childRoutes=parseRouteTree(route, route.url, filter[route.name]);
+    const childRoutes = parseRouteTree(route, route.url, filter[route.name]);
     return renderRoute(route, childRoutes);
   });
   return [routeList, renderedRoute];

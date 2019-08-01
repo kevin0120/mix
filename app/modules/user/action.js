@@ -1,6 +1,7 @@
 // @flow
 
-import type {tCommonActionType} from "../../common/type"
+import type { tCommonActionType } from '../../common/type';
+import type { tUserName, tUser, tUserLoginAction, tUuid } from './model';
 
 export const USER = {
   LOGIN: {
@@ -13,44 +14,31 @@ export const USER = {
   }
 };
 
-type tAuthLogin = {
-  +type: string,
-  +user: string,
-  +password: string
-};
 
-export type tAuthUserInfo = {
-  +name: string,
-  +avatar: string,
-  +uid: number,
-  +uuid: string,
-  +role: string
-};
-
-export function loginRequest(user: string = '', password: string = '', method: string = 'local'): tAuthLogin {
+export function loginRequest(name: tUserName, password: string = '', method: string = 'local'): tUserLoginAction {
   return {
     type: USER.LOGIN.REQUEST,
-    user,
+    name,
     password,
     method
   };
 }
 
-export function loginSuccess(data: tAuthUserInfo): tCommonActionType & tAuthUserInfo {
+export function loginSuccess(data: tUser): tCommonActionType & tUser {
   return {
     type: USER.LOGIN.SUCCESS,
     ...data
   };
 }
 
-export function logoutRequest(user: string = '') {
+export function logoutRequest(uuid: tUuid = '') {
   return {
     type: USER.LOGOUT.REQUEST,
-    user
+    uuid
   };
 }
 
-export function logoutSuccess(data: tAuthUserInfo): tCommonActionType & tAuthUserInfo {
+export function logoutSuccess(data: tUser): tCommonActionType & tUser {
   return {
     type: USER.LOGOUT.SUCCESS,
     ...data

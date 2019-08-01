@@ -1,10 +1,12 @@
 // @flow
-import { Order } from './model';
+import type { tOrder, tOrderStepIdx, tStepStatus } from './model';
 
 export const ORDER = {
-  TRIGGER: 'ORDER_TRIGGER',
+  WORK_ON: 'ORDER_WORK_ON',
+  VIEW: 'ORDER_VIEW',
   FINISH: 'ORDER_FINISH',
-  FAIL: 'ORDER_FAIL',
+  CANCEL: 'ORDER_CANCEL',
+  PENDING: 'ORDER_PENDING',
   STEP: {
     // 仅移动指针，不修改step状态
     NEXT: 'ORDER_STEP_NEXT',
@@ -16,25 +18,35 @@ export const ORDER = {
     DO_NEXT: 'ORDER_STEP_DO_NEXT',
     DO_PREVIOUS: 'ORDER_STEP_DO_PREVIOUS',
     // 修改store
-    DATA:'ORDER_STEP_DATA',
+    DATA: 'ORDER_STEP_DATA',
+    // 记录开始时间
+    TIME: 'ORDER_STEP_TIME'
   }
 };
 
 export type orderTriggerType = {
   type: string,
-  order: Order
+  order: tOrder
 };
 
 export const orderActions = {
-  trigger: (order: Order): orderTriggerType => ({
-    type: ORDER.TRIGGER,
+  view: (order: tOrder) => ({
+    type: ORDER.VIEW,
+    order
+  }),
+  workOn: (order: tOrder): orderTriggerType => ({
+    type: ORDER.WORK_ON,
     order
   }),
   finishOrder: () => ({
     type: ORDER.FINISH
   }),
-  failOrder: () => ({
-    type: ORDER.FAIL
+  cancelOrder: () => ({
+    type: ORDER.CANCEL
+  }),
+  pendingOrder: (order: tOrder) => ({
+    type: ORDER.PENDING,
+    order
   }),
   nextStep: () => ({
     type: ORDER.STEP.NEXT
@@ -42,12 +54,13 @@ export const orderActions = {
   previousStep: () => ({
     type: ORDER.STEP.PREVIOUS
   }),
-  jumpToStep: (stepId) => ({
+  jumpToStep: (stepId: tOrderStepIdx) => ({
     type: ORDER.STEP.JUMP_TO,
     stepId
   }),
-  stepStatus: () => ({
-    type: ORDER.STEP.STATUS
+  stepStatus: (status: tStepStatus) => ({
+    type: ORDER.STEP.STATUS,
+    status
   }),
   doNextStep: () => ({
     type: ORDER.STEP.DO_NEXT
@@ -55,8 +68,13 @@ export const orderActions = {
   doPreviousStep: () => ({
     type: ORDER.STEP.DO_PREVIOUS
   }),
-  stepData:(reducer)=>({
-    type:ORDER.STEP.DATA,
+  stepData: (reducer: ({})=>{}) => ({
+    type: ORDER.STEP.DATA,
     reducer
+  }),
+  stepTime: (idx: tOrderStepIdx, time: Date) => ({
+    type: ORDER.STEP.TIME,
+    idx,
+    time
   })
 };

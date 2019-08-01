@@ -1,5 +1,4 @@
-// const { Logger, transports } = require('winston');
-import { primaryColor, dangerColor, infoColor, warningColor, roseColor } from './common/jss/material-react-pro';
+import { primaryColor, dangerColor, infoColor, warningColor, roseColor } from './common/theme/palette';
 
 const winston = require('winston');
 const fs = require('fs');

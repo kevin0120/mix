@@ -34,22 +34,13 @@ import configs from '../../shared/config';
 
 import WorkingInfoBar from '../../components/WorkingInfoBar';
 
-import {
-  container,
-  cardTitle,
-  description,
-  dangerColor,
-  successColor
-} from '../../common/jss/material-react-pro';
 import ResultDialog from '../../components/ResultDialog';
-import ManualDiag from '../../components/ManualDiag';
 
 import TimeLine from '../../components/WorkPageTimeline';
 
 import { OPERATION_STATUS, OPERATION_SOURCE } from '../../modules/operation/model';
 import withKeyboard from '../../components/Keyboard';
-
-import toolSvg from './toolSvg';
+import ToolSvg from './tool.svg';
 
 const lodash = require('lodash');
 
@@ -82,9 +73,9 @@ const mapDispatchToProps = {
 const withstyles = theme => ({
   root: {
     margin: 0,
-    padding:0,
-    width:'100%',
-    height:'100%',
+    padding: 0,
+    width: '100%',
+    height: '100%',
     background: '#EFF4F7'
   },
   divider: {
@@ -111,7 +102,7 @@ const withstyles = theme => ({
     marginRight: theme.spacing()
   },
   cardDescription: {
-    ...description,
+    fontColor: theme.palette.text.hint,
     fontSize: '45px',
     fontFamily: 'Roboto, Helvetica, Arial, sans-serif',
     textAlign: 'center'
@@ -218,6 +209,12 @@ const withstyles = theme => ({
   },
   MarginTopBottom5: {
     margin: '0 0 5px'
+  },
+  toolStatusSuccess:{
+    fill:theme.palette.success.main
+  },
+  toolStatusError:{
+    fill:theme.palette.danger.main
   }
 });
 
@@ -272,7 +269,7 @@ class ConnectedWorking extends React.Component {
   };
 
   orderInfo = t => {
-    const { operations, workMode, tools } = this.props;
+    const { operations, workMode, tools,classes } = this.props;
 
     // const showButtonInfo = isAutoMode? 'Common.Auto':'Common.Manual';
     let programme = operations.jobID.toString();
@@ -307,7 +304,7 @@ class ConnectedWorking extends React.Component {
       },
       {
         key: 'Gun',
-        value: toolSvg(tools.status === 'connected' ? successColor : dangerColor, { width: '4vh', height: '4vh' }),
+        value: <ToolSvg className={tools.status === 'connected'?classes.toolStatusSuccess:classes.toolStatusError} width="4vh" height="4vh" viewBox="0 0 512 512"/>,
         displayTitle: t('Operation.Info.Tool.Title')
       }
     ];

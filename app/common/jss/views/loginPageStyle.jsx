@@ -2,18 +2,17 @@
 // // // LoginPage view styles
 // #############################
 
-import { container, cardTitle } from '../material-react-pro.jsx';
 
 const loginPageStyle = theme => ({
   container: {
-    ...container,
+    ...theme.container.common,
     zIndex: '4',
     [theme.breakpoints.down('sm')]: {
       paddingBottom: '100px'
     }
   },
   cardTitle: {
-    ...cardTitle,
+    ...theme.title.card,
     color: '#FFFFFF'
   },
   textCenter: {

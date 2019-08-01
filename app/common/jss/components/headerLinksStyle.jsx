@@ -2,8 +2,6 @@
 // // // HeaderLinks styles
 // #############################
 
-import { defaultFont, dangerColor } from '../material-react-pro.jsx';
-
 import customDropdownStyle from '../components/customDropdownStyle.jsx';
 
 const headerLinksStyle = theme => ({
@@ -34,7 +32,8 @@ const headerLinksStyle = theme => ({
   },
   linkText: {
     zIndex: '4',
-    ...defaultFont,
+    fontFamily:theme.typography.fontFamily,
+    fontWeight:theme.typography.fontWeightRegular,
     fontSize: '14px',
     margin: '0!important',
     textTransform: 'none'
@@ -96,7 +95,7 @@ const headerLinksStyle = theme => ({
       border: '1px solid #FFF',
       right: '5px',
       fontSize: '9px',
-      background: dangerColor,
+      background: theme.palette.danger.main,
       color: '#FFFFFF',
       minWidth: '16px',
       height: '16px',
@@ -107,7 +106,8 @@ const headerLinksStyle = theme => ({
       display: 'block'
     },
     [theme.breakpoints.down('sm')]: {
-      ...defaultFont,
+      fontFamily:theme.typography.fontFamily,
+      fontWeight:theme.typography.fontWeightRegular,
       fontSize: '14px',
       marginRight: '8px'
     }

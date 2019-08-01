@@ -1,3 +1,5 @@
+import type { dialogConfig } from './model';
+
 export const DIALOG = {
   SHOW: 'DIALOG_SHOW',
   CANCEL: 'DIALOG_CANCEL',
@@ -6,7 +8,7 @@ export const DIALOG = {
 };
 
 export default {
-  showDialog: config => ({
+  showDialog: (config: dialogConfig) => ({
     type: DIALOG.SHOW,
     config
   }),

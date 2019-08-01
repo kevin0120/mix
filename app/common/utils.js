@@ -5,6 +5,7 @@ import axios from 'axios';
 import axiosRetry, { exponentialDelay } from 'axios-retry';
 import {isNil, cloneDeep} from 'lodash-es';
 import {Info, Error, Warn, Debug} from '../logger'
+import moment, { DurationInputArg1 } from 'moment';
 
 const VINMap = {
   A: 1,
@@ -190,7 +191,7 @@ export class CommonLog {
 
 // eslint-disable-next-line no-underscore-dangle
 function _logger(lvl: CommonLogLvl, msg: string) {
-  if (process.env.NODE_ENV !== 'production'){
+  if (process.env.NODE_ENV !== 'production') {
     switch (lvl) {
       case 'Error':
         console.error(msg);
@@ -224,4 +225,18 @@ function _logger(lvl: CommonLogLvl, msg: string) {
     default:
       break;
   }
+}
+export const timeCost = (times) =>
+  ((times || []).length % 2 === 0 ? times || [] : [...times, new Date()])
+    .reduce((total, currentTime, idx) =>
+      idx % 2 === 0 ? total - currentTime : total - (0 - currentTime), 0);
+
+
+export const formatTime = (t) => `${t}`.length <= 2 ? `00${t}`.slice(-2) : t;
+
+export function durationString(duration: DurationInputArg1): string {
+  const h = moment.duration(duration).hours();
+  const m = moment.duration(duration).minutes();
+  const s = moment.duration(duration).seconds();
+  return `${formatTime(h)}:${formatTime(m)}:${formatTime(s)}`;
 }

@@ -1,19 +1,3 @@
-import {
-  defaultFont,
-  primaryColor,
-  primaryBoxShadow,
-  infoColor,
-  infoBoxShadow,
-  successColor,
-  successBoxShadow,
-  warningColor,
-  warningBoxShadow,
-  dangerColor,
-  dangerBoxShadow,
-  roseColor,
-  roseBoxShadow
-} from '../material-react-pro.jsx';
-
 const customDropdownStyle = theme => ({
   popperClose: {
     pointerEvents: 'none',
@@ -96,7 +80,7 @@ const customDropdownStyle = theme => ({
     }
   },
   dropdownItem: {
-    ...defaultFont,
+    fontFamily:theme.typography.fontFamily,
     fontSize: '13px',
     padding: '10px 20px',
     margin: '0 5px',
@@ -120,44 +104,44 @@ const customDropdownStyle = theme => ({
   },
   primaryHover: {
     '&:hover': {
-      backgroundColor: primaryColor,
+      backgroundColor: theme.palette.primary.main,
       color: '#FFFFFF',
-      ...primaryBoxShadow
+      ...theme.boxShadow.primary
     }
   },
   infoHover: {
     '&:hover': {
-      backgroundColor: infoColor,
+      backgroundColor: theme.palette.info.main,
       color: '#FFFFFF',
-      ...infoBoxShadow
+      ...theme.boxShadow.info
     }
   },
   successHover: {
     '&:hover': {
-      backgroundColor: successColor,
+      backgroundColor: theme.palette.success.main,
       color: '#FFFFFF',
-      ...successBoxShadow
+      ...theme.boxShadow.success
     }
   },
   warningHover: {
     '&:hover': {
-      backgroundColor: warningColor,
+      backgroundColor: theme.palette.warning.main,
       color: '#FFFFFF',
-      ...warningBoxShadow
+      ...theme.boxShadow.warning
     }
   },
   dangerHover: {
     '&:hover': {
-      backgroundColor: dangerColor,
+      backgroundColor: theme.palette.danger.main,
       color: '#FFFFFF',
-      ...dangerBoxShadow
+      ...theme.boxShadow.danger
     }
   },
   roseHover: {
     '&:hover': {
-      backgroundColor: roseColor,
+      backgroundColor: theme.palette.rose.main,
       color: '#FFFFFF',
-      ...roseBoxShadow
+      ...theme.boxShadow.rose
     }
   },
   dropdownItemRTL: {

@@ -1,18 +1,23 @@
 import InputStep from './InputStep';
 import ScannerStep from './scannerStep';
+import InstructionStep from './instructionStep';
+import ScrewStep from './screwStep';
 
 export default {
   input: {
-    component: InputStep,
-    genProps: (props) => ({
-      onSubmit: (value) => props.pushState(value, props.parallelId),
-      label: props.payload.label
-    })
+    component: InputStep
   },
   scanner:{
-    component:ScannerStep,
+    component:ScannerStep
+  },
+  instruction:{
+    component:InstructionStep,
+  },
+  screw:{
+    component:ScrewStep,
     genProps:props=>({
-      label:props.payload.label
+      points:props.payload.points,
+      image:props.payload.image
     })
   }
 };

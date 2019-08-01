@@ -1,3 +1,4 @@
+// @flow
 /* eslint flowtype-errors/show-errors: 0 */
 
 // color
@@ -18,7 +19,7 @@ import Viewer from './viewer';
 import Layout from './appLayout';
 import WorkingTemplate from './workingTemplate';
 import OperationList from './OperationList';
-import HomePage from './home';
+// import HomePage from './home';
 import Net from './config/Net';
 import IO from './config/Io';
 import Connect from './config/Connect';
@@ -33,18 +34,14 @@ import settingImg from '../../resources/imgs/setting.png';
 import LockingImg from '../../resources/imgs/lock.jpeg';
 import CurveImg from '../../resources/imgs/curveImg.jpeg';
 import LoginImg from '../../resources/imgs/login.jpeg';
-
-import {
-  grayColor,
-  warningColor
-} from '../common/jss/material-react-pro';
+import type { tRouteObj, tUrl } from './model';
 
 const shade = 500;
 
 const pages = {
   '/app': {
     component: Layout,
-    navBarContents: ['clock', 'pages', 'language'], //'avatar','clock', 'pages', 'language', 'sysInfo', 'healthCheck'
+    navBarContents: ['clock', 'pages', 'language'], // 'avatar','clock', 'pages', 'language', 'sysInfo', 'healthCheck'
     DefaultContent: OperationList,
     title: 'main.home',
     icon: icons.Home,
@@ -70,7 +67,7 @@ const pages = {
       title: 'main.orders',
       component: WorkOrders,
       icon: icons.Collections,
-      color: warningColor,
+      color: colors.deepOrange[shade],
       image: editorImg,
       exact: true
 
@@ -128,7 +125,7 @@ const pages = {
       title: 'main.resultQuery',
       component: ConnResult,
       icon: icons.Save,
-      color: grayColor,
+      color: colors.grey[shade],
       image: LockingImg,
       exact: true
 
@@ -150,7 +147,7 @@ const pages = {
       title: 'main.login',
       component: LoginPage,
       icon: icons.Fingerprint,
-      color: grayColor,
+      color: colors.grey[shade],
       image: LoginImg,
       exact: true
     }
@@ -166,7 +163,7 @@ const pages = {
   }
 };
 
-export const getContentByUrl = (url) => {
+export const getContentByUrl = (url: tUrl): tRouteObj => {
   const arr = url.split('/').filter((u) => u !== '');
   const page = arr.reduce((p, r) => (p && p[`/${r}`]) || null, pages);
   return page && {

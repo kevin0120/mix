@@ -1,3 +1,6 @@
+// @flow
+import dataImg from '../../../resources/imgs/working-page-test-pic1.png';
+
 export const demoOrder = {
   name: 'fill info',
   info:
@@ -5,10 +8,50 @@ export const demoOrder = {
   type: 'step',
   status: 'TODO',
   steps: [
+
+    {
+      name: 'screw',
+      info: 'this is an screw step',
+      type: 'screw',
+      skippable: true,
+      undoable: true,
+      payload: {
+        maxRetryTimes:3,
+        points: [
+          {
+            id: 1,
+            x: 10,
+            y: 10,
+            status: 'waiting'
+          }, {
+            id: 2,
+            x: 20,
+            y: 20,
+            status: 'waiting'
+          }, {
+            id: 3,
+            x: 30,
+            y: 30,
+            status: 'waiting'
+          }, {
+            id: 4,
+            x: 40,
+            y: 40,
+            status: 'waiting'
+          }, {
+            id: 5,
+            x: 50,
+            y: 50,
+            status: 'waiting'
+          }
+        ],
+        image: dataImg
+      }
+    },
     {
       name: 'skippable',
       info: 'this step is skippable',
-      description:'扫描二维码或在输入框中输入',
+      description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
       data: {},
@@ -17,24 +60,38 @@ export const demoOrder = {
       }
     },
     {
-      name: 'undoable',
-      info: 'this step is undoable',
-      type: 'input',
-      undoable: true,
+      name: 'skippable',
+      info: 'this step is skippable',
+      description: '扫描二维码或在输入框中输入',
+      type: 'scanner',
+      skippable: true,
+      data: {},
       payload: {
-        label: 'address'
-      }
-    },
-    {
-      name: '地址',
-      info: 'this step collects a input',
-      type: 'input',
-      revocable: true,
-
-      payload: {
-        label: 'address'
+        label: 'name'
       }
     }
+    // {
+    //   name: 'undoable',
+    //   info: 'this step is undoable',
+    //   type: 'input',
+    //   undoable: true,
+    //   skippable: true,
+    //
+    //   payload: {
+    //     label: 'address'
+    //   }
+    // },
+    // {
+    //   name: 'instruction',
+    //   info: 'this is an instruction step',
+    //   type: 'instruction',
+    //   skippable: true,
+    //
+    //   payload: {
+    //     instruction: '根据这段文字进行作业'
+    //   }
+    // },
+
     // {
     //   name: '扫码',
     //   info: 'this step collects a input',
@@ -97,17 +154,60 @@ export const demoOrder = {
   ]
 };
 
-export const demoOrderExcp = {
+export const demoOrderCancel = {
   name: 'fill info',
   info:
     'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
   type: 'step',
-  status: 'FAIL',
+  status: 'CANCEL',
   steps: [
     {
       name: '姓名',
       info: 'this step does one checking',
       type: 'input',
+      skippable: true,
+      revocable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    }
+  ]
+};
+
+export const demoOrderPending = {
+  name: 'fill info',
+  info:
+    'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
+  type: 'step',
+  status: 'PENDING',
+  steps: [
+    {
+      name: '姓名',
+      info: 'this step does one checking',
+      type:'input',
+
+      skippable: true,
+      revocable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    }
+  ]
+};
+
+export const demoOrderDone = {
+  name: 'fill info',
+  info:
+    'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
+  type: 'step',
+  status: 'DONE',
+  steps: [
+    {
+      name: '姓名',
+      info: 'this step does one checking',
+      type:'input',
       skippable: true,
       revocable: true,
       data: {},

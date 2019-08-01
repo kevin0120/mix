@@ -2,11 +2,6 @@
 // // // CustomSelects styles
 // #############################
 
-import {
-  primaryColor,
-  primaryBoxShadow,
-  title
-} from './material-react-pro.jsx';
 
 import modalStyle from './modalStyle.jsx';
 
@@ -32,7 +27,7 @@ const customSelectStyle = theme => ({
     }
   },
   title: {
-    ...title,
+    ...theme.title.common,
     marginTop: '10px',
     minHeight: '20px',
     marginLeft: '5px',
@@ -55,7 +50,7 @@ const customSelectStyle = theme => ({
         borderBottomColor: '#D2D2D2 !important'
       },
       '&:after': {
-        borderBottomColor: primaryColor + '!important'
+        borderBottomColor: `${theme.palette.primary.main  }!important`
       }
     }
   },
@@ -99,20 +94,20 @@ const customSelectStyle = theme => ({
     color: '#333',
     paddingRight: '30px',
     '&:hover': {
-      backgroundColor: primaryColor,
+      backgroundColor: theme.palette.primary.main,
       color: '#FFFFFF',
-      ...primaryBoxShadow
+      ...theme.boxShadow.primary
     }
   },
   selectMenuItemSelected: {
-    backgroundColor: primaryColor + '!important',
+    backgroundColor: theme.palette.primary.main + '!important',
     color: '#FFFFFF'
   },
   selectMenuItemSelectedMultiple: {
     '&:hover': {
-      backgroundColor: primaryColor + '!important',
+      backgroundColor: theme.palette.primary.main + '!important',
       color: '#FFFFFF',
-      ...primaryBoxShadow,
+      ...theme.boxShadow.primary,
       '&:after': {
         color: '#FFFFFF'
       }

@@ -18,8 +18,6 @@ import ListItemText from '@material-ui/core/ListItemText';
 import isURL from 'validator/lib/isURL';
 import Input from '@material-ui/core/Input';
 import Alert from '../../components/Alert';
-import { cardTitle } from '../../common/jss/material-react-pro';
-
 import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
 
 // @material-ui/core components
@@ -40,8 +38,8 @@ import CustomReactTable from '../../components/CustomReactTable';
 const lodash = require('lodash');
 const dayjs = require('dayjs');
 
-const styles = {
-  ...sweetAlertStyle,
+const styles = theme=>({
+  ...sweetAlertStyle(theme),
   root: {
     flexGrow: 1,
     zIndex: 1,
@@ -52,7 +50,7 @@ const styles = {
     width: '100%'
   },
   cardIconTitle: {
-    ...cardTitle,
+    ...theme.title.card,
     marginTop: '15px',
     marginBottom: '0px'
   },
@@ -65,7 +63,7 @@ const styles = {
     width: '100%',
     height: '100%'
   }
-};
+});
 
 const mapStateToProps = (state, ownProps) => ({
   masterpcUrl: state.connections.masterpc,

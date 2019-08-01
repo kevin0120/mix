@@ -1,7 +1,8 @@
+// @flow
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
-import { Typography, Paper } from '@material-ui/core';
+import { Typography, Paper, createMuiTheme, MuiThemeProvider } from '@material-ui/core';
 import { StylesProvider } from '@material-ui/styles';
 import ButtonsContainer from './ButtonsContainer';
 import * as orderSelectors from '../../modules/order/selector';
@@ -9,51 +10,56 @@ import styles from './styles';
 import Dialog from '../../components/Dialog';
 import StepperContainer from './StepperContainer';
 import StepPageContainer from './StepPageContainer';
-
-
-const renderTimer = () => null;
+import Timer from './Timer';
+import type { tOrder } from '../../modules/order/model';
 
 type StepWorkingProps = {
-  currentOrder: {}
+  viewingOrder: tOrder
 };
 
-function StepWorking({ currentOrder }: StepWorkingProps) {
+// const theme = createMuiTheme({
+//   overrides: {
+//     MuiPaper: {
+//       root: {
+//         backgroundColor: 'inherit'
+//       }
+//     }
+//   }
+// });
+
+function StepWorking({ viewingOrder }: StepWorkingProps) {
   const classes = makeStyles(styles.layout)();
   const [action, bindAction] = useState(null);
 
   return (
-    <StylesProvider injectFirst>
-
-      <div className={classes.root}>
-        <Dialog/>
-        <Paper
-          square
-          className={classes.leftContainer}
-          classes={{ root: classes.leftContainer }}
-        >
-          <Paper square className={classes.orderInfoContainer}>
-            <Typography variant="h5">{currentOrder?.name}</Typography>
+        <div className={classes.root}>
+          <Dialog/>
+          <Paper
+            square
+            className={classes.leftContainer}
+            classes={{ root: classes.leftContainer }}
+          >
+            <Paper square className={classes.orderInfoContainer}>
+              <Typography variant="h5">{viewingOrder?.name}</Typography>
+            </Paper>
+            <ButtonsContainer action={action}/>
+            <StepPageContainer bindAction={bindAction}/>
           </Paper>
-          <ButtonsContainer action={action}/>
-          <StepPageContainer bindAction={bindAction}/>
-        </Paper>
-        <div className={classes.rightContainer}>
-          <Paper square className={classes.timerContainer}>
-            {renderTimer()}
-          </Paper>
-          <Paper square className={classes.stepperContainer}>
-            <StepperContainer/>
-          </Paper>
+          <div className={classes.rightContainer}>
+            <Paper square className={classes.timerContainer}>
+              <Timer/>
+            </Paper>
+            <Paper square className={classes.stepperContainer}>
+              <StepperContainer/>
+            </Paper>
+          </div>
         </div>
-      </div>
-    </StylesProvider>
-
   );
 }
 
 const mapState = (state, props) => ({
   ...props,
-  currentOrder: orderSelectors.currentOrder(state.order) || {}
+  viewingOrder: orderSelectors.viewingOrder(state.order) || {},
 });
 
 const mapDispatch = {};

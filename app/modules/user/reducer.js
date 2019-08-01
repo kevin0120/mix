@@ -1,32 +1,33 @@
 // @flow
 
-import { USER} from './action';
+import { USER } from './action';
 import defaultAvatarImg from '../../../resources/imgs/image_placeholder.jpg';
-import type {tCommonActionType} from '../../common/type';
-import type { tAuthUserInfo } from './action';
+import type { tCommonActionType } from '../../common/type';
+import type { tUser } from './model';
 
 const lodash = require('lodash');
 
 const defaultUsers = [];
 
 export default function users(
-  state: Array<tAuthUserInfo> = defaultUsers,
-  action: tCommonActionType & tAuthUserInfo
+  state: Array<tUser> = defaultUsers,
+  action: tCommonActionType & tUser
 ) {
   switch (action.type) {
     case USER.LOGIN.SUCCESS: {
-      const { uid, name, uuid, avatar, role } = action;
-      const img =
-        lodash.isNil(avatar) || avatar === '' ? defaultAvatarImg : avatar;
-      const idx = state.findIndex(u => u.uid === uid);
+      const { uid, name, uuid, avatar, role }: tUser = action;
+      const idx = state.findIndex(u => u.uuid === uuid);
       if (idx >= 0) {
         return [...state];
       }
-      return [...state, { uid, name, uuid, avatar: img, role }];
+      return [...state, { uid, name, uuid, avatar, role }];
     }
     case USER.LOGOUT.SUCCESS: {
-      const { uid } = action;
-      return lodash.remove(state, i => i.uid === uid);
+      const { uuid } = action;
+      lodash.remove(state, i => i.uuid === uuid);
+      return [
+        ...state
+      ];
     }
     default:
       return state;

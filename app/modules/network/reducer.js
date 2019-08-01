@@ -1,6 +1,6 @@
 import { NETWORK } from './action';
 import configs from '../../shared/config';
-import { genReducers } from '../indexReducer';
+import { genReducers } from '../util';
 
 const initNetwork = {
   config: configs.page.network,

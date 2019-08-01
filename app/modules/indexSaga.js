@@ -9,7 +9,7 @@ import sysInitFlow from './systemInit/saga';
 import { operationFlow, watchResults } from './operation/saga';
 import { watchIOEvent } from './io/saga';
 import { toolFunctions } from './tools/saga';
-import { loginFlow, logoutFlow } from './user/saga';
+import user from './user/saga';
 import { watchAiis } from './aiis/saga';
 import { watchSettingPreSave } from './setting/saga';
 import { watchRushEvent } from './rush/saga';
@@ -63,9 +63,7 @@ export default function* rootSaga(): Saga<void> {
       watchResults(), // 监听结果
       watchRushEvent(),
       toolFunctions(),
-      // auth
-      loginFlow(),
-      logoutFlow(),
+      user(),// auth
       // healthz
       // healthzCheckFlow(),
       // watchSettingPreSave(),

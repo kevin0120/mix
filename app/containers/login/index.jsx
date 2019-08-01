@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
+import { connect } from 'react-redux';
 // @material-ui/core components
 import withStyles from '@material-ui/core/styles/withStyles';
 import InputAdornment from '@material-ui/core/InputAdornment';
@@ -24,6 +24,7 @@ import CardHeader from '../../components/Card/CardHeader';
 import CardFooter from '../../components/Card/CardFooter';
 
 import loginPageStyle from '../../common/jss/views/loginPageStyle';
+import { loginRequest } from '../../modules/user/action';
 
 const lodash = require('lodash');
 
@@ -97,6 +98,10 @@ class LoginPage extends React.Component {
   };
 
   handleSubmit = () => {
+    const { firstname, password } = this.state.allInput;
+    const { login } = this.props;
+    login(firstname, password);
+
     this.setState({
       inputName: '',
       allInput: {
@@ -104,6 +109,7 @@ class LoginPage extends React.Component {
         password: ''
       }
     });
+
   };
 
   handlePress = press => {
@@ -155,7 +161,7 @@ class LoginPage extends React.Component {
                         inputProps={{
                           endAdornment: (
                             <InputAdornment position="end">
-                              <Face className={classes.inputAdornmentIcon} />
+                              <Face className={classes.inputAdornmentIcon}/>
                             </InputAdornment>
                           ),
                           onFocus: this.setActiveInput,
@@ -195,7 +201,7 @@ class LoginPage extends React.Component {
                         round
                         onClick={this.handleSubmit}
                       >
-                        <Fingerprint />
+                        <Fingerprint/>
                         {t('Login.Submit')}
                       </Button>
                     </CardFooter>
@@ -226,7 +232,13 @@ LoginPage.propTypes = {
   classes: PropTypes.shape({}).isRequired
 };
 
-export default withStyles(loginPageStyle)(LoginPage);
+const mapState = (state, props) => ({});
+
+const mapDispatch = {
+  login: loginRequest
+};
+
+export default withStyles(loginPageStyle)(connect(mapState, mapDispatch)(LoginPage));
 
 // WEBPACK FOOTER //
 // ./src/views/Pages/LoginPage.jsx

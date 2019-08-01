@@ -1,6 +1,7 @@
 // @flow
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import { AppBar } from '@material-ui/core';
 import lodash from 'lodash';
 import Clock from 'react-live-clock';
 import { push } from 'connected-react-router';
@@ -13,15 +14,25 @@ import styles from './styles';
 import Avatar from '../Avatar';
 import SysInfo from '../sysInfo';
 
-import { getContentByUrl } from '../../containers/pages';
 import NavBarMenu from './NavBarMenu';
 import LanguageMenu from './LanguageMenu';
+import type { tRouteObj,tUrl } from '../../containers/model';
+import type { Dispatch } from '../../modules/indexReducer';
+import type { tUser } from '../../modules/user/model';
 
 type Props = {
   classes: {},
   disabled: boolean,
   contents: Array<string>,
-  childRoutes: Array
+  childRoutes: Array<tRouteObj>,
+  healthCheckResults: {},
+  users: Array<tUser>,
+  doPush: Dispatch,
+  notification: Dispatch,
+  path: string,
+  self: tRouteObj,
+  logout: Dispatch,
+  getContentByUrl: (tUrl)=>tRouteObj
 };
 
 function ConnectedNavBar(
@@ -35,7 +46,8 @@ function ConnectedNavBar(
     childRoutes,
     self,
     logout,
-    contents
+    contents,
+    getContentByUrl
   }: Props) {
 
   function HealthCheckOk() {
@@ -89,7 +101,7 @@ function ConnectedNavBar(
     />;
 
 
-  const clockClasses=makeStyles(styles.clock)();
+  const clockClasses = makeStyles(styles.clock)();
   const renderClock = (key) =>
     <div key={key} className={clockClasses.menuClock}>
       <Clock
@@ -101,7 +113,7 @@ function ConnectedNavBar(
     </div>;
 
 
-  const avatarClasses=makeStyles(styles.avatar)();
+  const avatarClasses = makeStyles(styles.avatar)();
   const renderAvatar = (key) => <Avatar
     key={key}
     className={avatarClasses.menuBtnWrapAvatar}
@@ -119,11 +131,11 @@ function ConnectedNavBar(
     avatar: renderAvatar
   };
 
-  const classes=makeStyles(styles.root)();
+  const classes = makeStyles(styles.root)();
   return (
-    <div className={classes.appBar}>
+    <AppBar className={classes.appBar}>
       {contents.map((c) => renderContentsMapping[c](c))}
-    </div>
+    </AppBar>
   );
 }
 

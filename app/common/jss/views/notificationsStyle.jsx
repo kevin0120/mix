@@ -2,7 +2,6 @@
 // // // Notifications view styles
 // #############################
 
-import { defaultFont } from '../material-react-pro.jsx';
 import modalStyle from '../modalStyle.jsx';
 
 const notificationsStyle = theme => ({
@@ -16,7 +15,8 @@ const notificationsStyle = theme => ({
     zIndex: '3'
   },
   cardSubtitle: {
-    ...defaultFont,
+    fontWeight:theme.typography.fontWeightRegular,
+    fontFamily:theme.typography.fontFamily,
     color: '#999999',
     fontSize: '14px',
     margin: '0 0 10px'

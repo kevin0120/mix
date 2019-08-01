@@ -2,15 +2,8 @@
 // // // Checkbox, Radio and Switch styles
 // #############################
 
-import {
-  primaryColor,
-  dangerColor,
-  roseColor,
-  grayColor,
-  title
-} from './material-react-pro.jsx';
 
-const customCheckboxRadioSwitch = {
+const customCheckboxRadioSwitch = theme => ({
   checkboxAndRadio: {
     position: 'relative',
     display: 'block',
@@ -31,10 +24,10 @@ const customCheckboxRadioSwitch = {
     marginLeft: '30px'
   },
   checked: {
-    color: primaryColor + '!important'
+    color: `${theme.palette.primary.main} !important`
   },
   title: {
-    ...title,
+    ...theme.title.common,
     marginTop: '10px',
     minHeight: '20px',
     marginLeft: '5px',
@@ -97,15 +90,15 @@ const customCheckboxRadioSwitch = {
     marginRight: '0'
   },
   labelError: {
-    color: dangerColor
+    color: theme.palette.dange.main
   },
   radio: {
-    color: roseColor + '!important'
+    color: `${theme.palette.rose.main}!important`
   },
   radioChecked: {
     width: '16px',
     height: '16px',
-    border: '1px solid ' + roseColor,
+    border: `1px solid ${theme.palette.rose.main}`,
     borderRadius: '50%'
   },
   radioUnchecked: {
@@ -121,7 +114,7 @@ const customCheckboxRadioSwitch = {
   iconCheckbox: {
     height: '116px',
     width: '116px',
-    color: grayColor,
+    color: theme.palette.gray.main,
     '& > span:first-child': {
       borderWidth: '4px',
       borderStyle: 'solid',
@@ -134,16 +127,16 @@ const customCheckboxRadioSwitch = {
       transition: 'all 0.2s'
     },
     '&:hover': {
-      color: roseColor,
+      color: theme.palette.rose.main,
       '& > span:first-child': {
-        borderColor: roseColor
+        borderColor: theme.palette.rose.main
       }
     }
   },
   iconCheckboxChecked: {
-    color: roseColor,
+    color: theme.palette.rose.main,
     '& > span:first-child': {
-      borderColor: roseColor
+      borderColor: theme.palette.rose.main
     }
   },
   iconCheckboxIcon: {
@@ -151,7 +144,7 @@ const customCheckboxRadioSwitch = {
     lineHeight: '111px'
   },
   switchBase: {
-    color: primaryColor + '!important'
+    color: `${theme.palette.primary.main}!important`
   },
   switchIcon: {
     boxShadow: '0 1px 3px 1px rgba(0, 0, 0, 0.4)',
@@ -175,7 +168,7 @@ const customCheckboxRadioSwitch = {
       backgroundColor: 'rgba(156, 39, 176, 1) !important'
     }
   }
-};
+});
 
 export default customCheckboxRadioSwitch;
 

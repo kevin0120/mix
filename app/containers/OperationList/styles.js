@@ -5,7 +5,7 @@ export default (theme) => ({
     width: '100%',
     height: '100%',
     // padding: '20px',
-    backgroundColor: '#232c39',
+    backgroundColor: '#7c7c7c',
     backgroundImage: 'linear-gradient(45deg, rgba(150, 216, 255, 0.5) 10%, rgba(150, 160, 187, 0.7))'
   },
   container: {
@@ -66,21 +66,18 @@ export default (theme) => ({
 
   },
   statusTodo:{
-    backgroundColor:'#aaaaaa',
+    backgroundColor:theme.palette.gray.main,
   },
   statusWIP:{
-    backgroundColor:'blue',
+    backgroundColor:theme.palette.primary.main,
   },
   statusDone:{
-    backgroundColor:'green',
+    backgroundColor:theme.palette.success.main,
   },
   statusCancel:{
-    backgroundColor:'yellow',
+    backgroundColor:theme.palette.danger.main,
   },
   statusPending:{
-    backgroundColor:'orange',
-  },
-  statusFail:{
-    backgroundColor:'red',
+    backgroundColor:theme.palette.warning.main,
   },
 });

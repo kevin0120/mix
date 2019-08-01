@@ -1,55 +1,63 @@
 // @flow
 import React from 'react';
 import { connect } from 'react-redux';
-import { makeStyles, Paper } from '@material-ui/core';
+import { makeStyles, Paper, Grid, Typography } from '@material-ui/core';
 import stepTypes from '../steps/stepTypes';
-import * as orderSelectors from '../../modules/order/selector';
+import * as oSel from '../../modules/order/selector';
 import styles from './styles';
+import type { tStep } from '../../modules/order/model';
 
 const mapState = (state, props) => ({
   ...props,
-  step: orderSelectors.viewingStep(state.order) || {},
-  processingStep: orderSelectors.processingStep(state.order) || {},
-  result: orderSelectors.stepData(orderSelectors.processingStep(state.order))?.result,
+  step: oSel.viewingStep(state.order) || {},
+  workingStep: oSel.workingStep(oSel.workingOrder(state.order)) || {},
+  result: oSel.stepData(oSel.workingStep(oSel.workingOrder(state.order)))?.result
 });
 const mapDispatch = {};
 
+type Props = {
+  step: tStep,
+  workingStep: tStep,
+  bindAction: ()=>{},
+  result: Object
+};
 
-const StepPageContainer = ({ step, processingStep, bindAction,result }) => {
-  let stepProps = {};
+const StepPageContainer = ({ step, workingStep, bindAction, result }: Props) => {
   const classes = makeStyles(styles.stepPageContainer)();
   if (stepTypes?.[step?.type]?.component) {
     const StepComponent = stepTypes[step.type].component;
-    stepProps =
-      stepTypes?.[step?.type]?.genProps?.({ payload: step.payload || {} }) || stepProps;
 
     return (
-      <div className={classes.root}>
-        <Paper square className={classes.left}>
+      <Grid container spacing={1} className={classes.root}>
+        <Grid item container className={classes.left} spacing={1}>
+          <Grid item className={classes.left}>
+            <Paper square className={classes.image}>
+              {(StepComponent && (
+                  <StepComponent
+                    step={step}
+                    isCurrent={step === workingStep}
+                    bindAction={bindAction}
+                  />
+                )) || null}
+            </Paper>
+          </Grid>
+        </Grid>
+        <Grid item container spacing={1} className={classes.right} direction="column">
 
-          <Paper square className={classes.image}>
-            {
-              (StepComponent && (
-                <StepComponent
-                  step={step}
-                  {...stepProps}
-                  isCurrent={step === processingStep}
-                  bindAction={bindAction}
-                />
-              )) ||
-              null
-            }
-          </Paper>
-        </Paper>
-        <Paper square className={classes.right}>
-          <Paper square className={classes.description}>
-            {step.description}
-          </Paper>
-          <Paper square className={classes.result}>
-            {JSON.stringify(result)}
-          </Paper>
-        </Paper>
-      </div>
+          <Grid item className={classes.description}>
+            <Paper square className={classes.Paper}>
+              <Typography>
+                {step.description}
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item className={classes.result}>
+            <Paper square className={classes.Paper}>
+              {JSON.stringify(result)}
+            </Paper>
+          </Grid>
+        </Grid>
+      </Grid>
     );
   }
   return null;

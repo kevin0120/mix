@@ -1,20 +1,59 @@
+// @flow
 import { ORDER_STATUS } from './model';
+import type { tOrder, tOrderState, tOrderStepIdx, tStep, tStepArray, tStepStatus, tStepType } from './model';
 
-export const currentOrder = orderState => orderState?.currentOrder;
-export const processingIndex = orderState => orderState?.processingIndex;
-export const viewingIndex = orderState => orderState?.viewingIndex;
-export const orderSteps = orderState => currentOrder(orderState)?.steps;
-export const orderLength = orderState => orderSteps(orderState)?.length;
-export const processingStep = orderState => orderSteps(orderState)?.[processingIndex(orderState)];
-export const viewingStep = orderState => orderSteps(orderState)?.[viewingIndex(orderState)];
+export const workingOrder = (orderState: tOrderState): ?tOrder => orderState?.workingOrder;
+export const viewingOrder = (orderState: tOrderState): ?tOrder => orderState?.viewingOrder;
+export const viewingIndex = (orderState: tOrderState): tOrderStepIdx => orderState?.viewingIndex;
+export const viewingStep = (orderState: tOrderState): ?tStep =>
+  orderSteps(viewingOrder(orderState))?.[viewingIndex(orderState)] || null;
+
+export const workingIndex = (order: ?tOrder): tOrderStepIdx => order?.workingIndex ||0;
+export const workingStep = (order: ?tOrder): ?tStep =>
+  orderSteps(order)?.[workingIndex(order)] || null;
+
+export const orderSteps = (order: ?tOrder): ?tStepArray => order?.steps || null;
+export const orderLength = (order: ?tOrder): number => orderSteps(order)?.length || 0;
+export const getStep = (order: ?tOrder, idx: tOrderStepIdx): ?tStep => orderSteps(order)?.[idx] || null;
+
+export const todoOrders = (orderList: Array<tOrder>): Array<tOrder> =>
+  orderList && orderList.filter((o) => o?.status === ORDER_STATUS.TODO || (o && !o?.status));
+
+export const doingOrders = (orderList: Array<tOrder>): Array<tOrder> =>
+  orderList && orderList.filter((o) => o?.status === ORDER_STATUS.WIP);
+
+export const doneOrders = (orderList: Array<tOrder>): Array<tOrder> =>
+  orderList && orderList.filter((o) => o?.status === ORDER_STATUS.DONE);
+
+export const exceptOrders = (orderList: Array<tOrder>): Array<tOrder> =>
+  orderList && orderList.filter((o) => (
+  o?.status === ORDER_STATUS.PENDING || o?.status === ORDER_STATUS.CANCEL)
+  );
 
 
-export const todoOrders = orderList => orderList?.filter((o) => o.status === ORDER_STATUS.TODO || !(o.status));
-export const doneOrders = orderList => orderList?.filter((o) => o.status === ORDER_STATUS.DONE);
-export const exceptOrders = orderList => orderList?.filter(
-  (o) => o.status === ORDER_STATUS.PENDING || o.status === ORDER_STATUS.FAIL || o.status === ORDER_STATUS.CANCEL
-);
+export const stepStatus = (step: ?tStep): ?tStepStatus => step?.status;
+export const stepType = (step: ?tStep): ?tStepType => step?.type;
+export const stepData = (step: ?tStep): ?Object => step?.data;
+export const stepPayload = (step: ?tStep): ?Object => step?.payload;
+// export const startTime = (step: ?tStep): ?Date => step?.startTime;
+// export const endTime = (step: ?tStep): ?Date => step?.endTime;
+export const times = (step: ?tStep): ?Array<Date> => step?.times;
 
-export const stepStatus = step => step?.status;
-export const stepType = step => step?.type;
-export const stepData = step => step?.data;
+export const isPending = (order: ?tOrder): boolean => order?.status === ORDER_STATUS.PENDING || false;
+export const isCancel = (order: ?tOrder): boolean => order?.status === ORDER_STATUS.CANCEL || false;
+export const doable = (order: ?tOrder): boolean =>
+  (order?.status === ORDER_STATUS.WIP ||
+    order?.status === ORDER_STATUS.TODO ||
+    (order && !order.status)) || false;
+
+export const pendingable = (order: ?tOrder): boolean =>
+  (order?.status && (
+    order?.status !== ORDER_STATUS.PENDING &&
+    order?.status !== ORDER_STATUS.CANCEL &&
+    order?.status !== ORDER_STATUS.DONE)) || false;
+
+export const cancelable = (order: ?tOrder): boolean =>
+  (order?.status && (
+    order?.status !== ORDER_STATUS.CANCEL &&
+    order?.status !== ORDER_STATUS.DONE
+  )) || false;

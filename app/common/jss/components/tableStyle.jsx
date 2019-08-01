@@ -2,38 +2,27 @@
 // // // Table styles
 // #############################
 
-import {
-  warningColor,
-  primaryColor,
-  dangerColor,
-  successColor,
-  infoColor,
-  roseColor,
-  grayColor,
-  defaultFont
-} from './pro.jsx';
-
 const tableStyle = theme => ({
   warning: {
-    color: warningColor
+    color: theme.palette.warning.main
   },
   primary: {
-    color: primaryColor
+    color: theme.palette.primary.main
   },
   danger: {
-    color: dangerColor
+    color: theme.palette.danger.main
   },
   success: {
-    color: successColor
+    color: theme.palette.success.main
   },
   info: {
-    color: infoColor
+    color: theme.palette.info.main
   },
   rose: {
-    color: roseColor
+    color: theme.palette.rose.main
   },
   gray: {
-    color: grayColor
+    color: theme.palette.gray.main
   },
   right: {
     textAlign: 'right'
@@ -59,7 +48,8 @@ const tableStyle = theme => ({
     border: 'none !important'
   },
   tableCell: {
-    ...defaultFont,
+    fontFamily:theme.typography.fontFamily,
+    fontWeight:theme.typography.fontWeightRegular,
     lineHeight: '1.42857143',
     padding: '12px 8px!important',
     verticalAlign: 'middle',

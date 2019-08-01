@@ -1,20 +1,30 @@
 // @flow
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { push } from 'connected-react-router';
-import Button from '@material-ui/core/Button';
+import Button from '../../components/CustomButtons/Button';
 import Avatar from '@material-ui/core/Avatar';
 import Notify from '../../components/Notify';
 import { setNewNotification } from '../../modules/notification/action';
 import NavBar from '../../components/NavBar';
 import LayoutDrawer from '../../components/LayoutDrawer';
+import type { tUser } from '../../modules/user/model';
+import { logoutRequest } from '../../modules/user/action';
+import type { Dispatch } from '../../modules/indexReducer';
+import type { tRouteComponent, tRouteObj } from '../model';
 
 type Props = {
-  users: [],
+  users: Array<tUser>,
   path: string,
-  children: {},
-  childRoutes: [],
-  self: {}
+  children: Array<tRouteComponent>,
+  childRoutes: Array<tRouteObj>,
+  self: tRouteObj & {
+    DefaultContent: PropTypes.element,
+    navBarContents: Array<string>
+  },
+  logout: Dispatch,
+  getContentByUrl: (string)=>tRouteObj
 };
 
 function AppLayout(
@@ -23,16 +33,19 @@ function AppLayout(
     path,
     children,
     childRoutes,
-    self
+    self,
+    logout,
+    getContentByUrl
   }: Props) {
-  const { DefaultContent } = self;
+  const { DefaultContent, navBarContents } = self;
   return (
     <React.Fragment>
       <Notify/>
       <div style={{ height: 'calc(100% - 64px)', display: 'flex' }}>
         <LayoutDrawer
           contents={users.map((u) => ({
-            icon: u.avatar ? <Avatar src={u.avatar}/> : <Avatar>{u.name.slice(2)}</Avatar>,
+            key: u.name,
+            icon: u.avatar ? <Avatar src={u.avatar}/> : <Avatar>{u.name.slice(0, 2)}</Avatar>,
             label: (<div style={{
               display: 'flex',
               flexDirection: 'row',
@@ -40,7 +53,12 @@ function AppLayout(
               alignItems: 'center'
             }}>
               {u.name}
-              <Button color="secondary" size="small" variant="contained">
+              <Button
+                color="warning"
+                size="md"
+                variant="contained"
+                onClick={() => logout(u.uuid)}
+              >
                 Logout
               </Button>
             </div>)
@@ -49,7 +67,8 @@ function AppLayout(
         {path === '/app' ? <DefaultContent childRoutes={childRoutes}/> : children}
       </div>
       <NavBar
-        contents={self.navBarContents}
+        getContentByUrl={getContentByUrl}
+        contents={navBarContents}
         self={self}
         childRoutes={childRoutes}
       />
@@ -65,6 +84,7 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = {
+  logout: logoutRequest,
   doPush: push,
   notification: setNewNotification
 };

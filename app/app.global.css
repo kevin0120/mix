@@ -13,7 +13,7 @@ body {
   height: 100vh;
   font-family: Noto Sans SC, serif;
   /*font-weight: bold;*/
-  overflow-y: hidden;
+  overflow: hidden !important;
   user-select: none ;
 }
 

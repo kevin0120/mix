@@ -1,16 +1,19 @@
 import { DIALOG } from './action';
+import type { dialogState } from './model';
 
-const initState = {
+const initState: dialogState = {
   open: false,
   config: {
     hasOk: false,
     hasCancel: true,
-    cancelAction: () => {},
-    okAction: () => {}
+    cancelAction: () => {
+    },
+    okAction: () => {
+    }
   }
 };
 
-export default function(state = initState, action) {
+export default function(state: dialogState = initState, action): dialogState {
   if (reducers[(action?.type)]) {
     return reducers[(action?.type)](state, action);
   }
@@ -18,7 +21,7 @@ export default function(state = initState, action) {
 }
 
 const reducers = {
-  [DIALOG.SHOW]: (state, action) => ({
+  [DIALOG.SHOW]: (state: dialogState, action) => ({
     open: true,
     config: action.config
   }),

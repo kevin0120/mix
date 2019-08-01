@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-// import popoverStyles from '../../common/jss/popoverStyles';
-// import { dangerColor, successColor, warningColor } from '../../common/jss/material-react-pro';
 import { withStyles } from '@material-ui/core/styles';
 
 const styles = () => ({

@@ -1,3 +1,4 @@
+// @flow
 import React from 'react';
 import { connect } from 'react-redux';
 import { push } from 'connected-react-router';
@@ -11,23 +12,25 @@ import clsx from 'clsx';
 import CardContent from '@material-ui/core/CardContent';
 import { orderActions } from '../../modules/order/action';
 import { ORDER_STATUS } from '../../modules/order/model';
-import { todoOrders, doneOrders, exceptOrders } from '../../modules/order/selector';
+import { todoOrders, doneOrders, exceptOrders, doingOrders } from '../../modules/order/selector';
 import styles from './styles';
 import settingImg from '../../../resources/imgs/setting.png';
+import type { Dispatch } from '../../modules/indexReducer';
+import type { tOrder } from '../../modules/order/model';
 
 type Props = {
   classes: {},
-  orderList: [],
-  trigger: ()=>{},
-  doPush: ()=>{}
+  orderList: Array<tOrder>,
+  view: Dispatch,
+  doPush: Dispatch
 };
 
 function HomeOperationList(props: Props) {
   const classes = makeStyles(styles)();
-  const { trigger, doPush, orderList } = props;
+  const { view, doPush, orderList } = props;
 
   const onCardClick = (order) => {
-    trigger(order);
+    view(order);
     doPush('/app/working');
   };
 
@@ -36,19 +39,17 @@ function HomeOperationList(props: Props) {
     [ORDER_STATUS.WIP]: classes.statusWIP,
     [ORDER_STATUS.DONE]: classes.statusDone,
     [ORDER_STATUS.CANCEL]: classes.statusCancel,
-    [ORDER_STATUS.PENDING]: classes.statusPending,
-    [ORDER_STATUS.FAIL]: classes.statusFail,
+    [ORDER_STATUS.PENDING]: classes.statusPending
   };
 
-  const renderOrders = (orders, size, title) => {
-    return (
+  const renderOrders = (orders, size, title) => (
       <React.Fragment>
         <Grid item xs={12} className={classes.listTitle}>
           <Typography gutterBottom variant="h6" align="left">
             {title}
           </Typography>
         </Grid>
-        {orders?.map((order) => <Grid item xs={size} key={order.name}>
+        {orders && orders.map((order, idx) => order ? (<Grid item xs={size} key={`${order.name}${idx}`}>
             <Paper square className={classes.orderCardContainer}>
               <CardActionArea className={classes.orderCard} onClick={() => onCardClick(order)}>
                 <div className={clsx(statusMap[order.status || ORDER_STATUS.TODO], classes.statusIndicator)}/>
@@ -70,17 +71,16 @@ function HomeOperationList(props: Props) {
                 </CardContent>
               </CardActionArea>
             </Paper>
-          </Grid>
+          </Grid>) : null
         ) || null}
       </React.Fragment>
     );
-  };
 
   return <div className={classes.root}>
     <Grid container className={clsx(classes.container, classes.bgEven)} justify="center" spacing={4}>
       <Grid item container xs={6} spacing={1} alignItems="flex-start" alignContent="flex-start"
             justify="flex-start" direction="row" className={classes.bgOdd}>
-        {renderOrders(todoOrders(orderList), 6, 'TODO')}
+        {renderOrders([...doingOrders(orderList), ...todoOrders(orderList)], 6, 'TODO')}
       </Grid>
       <Grid item container xs={3} spacing={1} alignItems="flex-start" alignContent="flex-start"
             justify="flex-start" direction="row" className={classes.bgEven}>
@@ -101,7 +101,7 @@ const mapState = (state, props) => ({
 });
 
 const mapDispatch = {
-  trigger: orderActions.trigger,
+  view: orderActions.view,
   doPush: push
 };
 

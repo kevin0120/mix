@@ -1,4 +1,3 @@
-import { customerColor } from './material-react-pro.jsx';
 
 const modalStyle = theme => ({
   modalRoot: {
@@ -77,7 +76,7 @@ const modalStyle = theme => ({
     maxWidth: '150px'
   },
   loadModal: {
-    backgroundColor: customerColor
+    backgroundColor: theme.palette.customer.main
   },
   modalLarge: {
     [theme.breakpoints.up('md')]: {

@@ -1,38 +1,47 @@
-const layout = {
+const layout = (theme)=>({
   root: {
     width: '100%',
     height: '100%',
     display: 'flex',
     flexDirection: 'row',
-    backdropFilter: 'blur(2px)'
+    backgroundImage: 'url("../resources/imgs/texture.png")',
+    backgroundRepeat: 'repeat',
+    backgroundColor: theme.palette.grey[100]
+
   },
   rightContainer: {
     flex: 2,
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
-    width: '30%'
+    width: '30%',
     // padding:3,
+
   },
   leftContainer: {
     flex: 7,
     margin: 3,
-    display:'flex',
-    flexDirection:'column',
+    display: 'flex',
+    flexDirection: 'column',
+    backgroundColor: theme.palette.common.white
   },
   timerContainer: {
     flex: 1,
     margin: 3,
     zIndex: 1,
-    display:'flex',
-    flexDirection:'row',
-    alignItems:'center',
-    justifyContent:'center',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.palette.common.white
   },
   stepperContainer: {
     margin: 3,
     flex: 4,
-    overflowY:'scroll',
+    overflowY: 'auto',
+
+    backgroundColor: theme.palette.common.white,
+    padding:0
   },
   contentContainer: {
     flex: 1,
@@ -43,13 +52,16 @@ const layout = {
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: '0 10px',
-    alignItems: 'center'
+    alignItems: 'center',
+
+    backgroundColor: theme.palette.common.white
   }
-};
+});
 
 const stepperContainer = {
   root: {
-    padding:16
+    padding: 16,
+    backgroundColor:'transparent'
   },
   stepButton: {
     display: 'flex',
@@ -57,49 +69,78 @@ const stepperContainer = {
     alignItems: 'center',
     justifyContent: 'flex-start !important',
     height: 50,
-    padding:'0 0',
-    margin:'10px 0'
+    padding: '0 0',
+    margin: '10px 0'
   }
 };
 
-const buttonsContainer={
+const buttonsContainer = {
   root: {
-    height:60,
+    height: 70,
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: '0 10px',
-    alignItems: 'center'
+    alignItems: 'center',
+  },
+  menuIcon:{
+    // fontSize:'inherit !important'
+    // padding:0,
+    // margin: '0 !important',
+  },
+  menuButton:{
+
+  },
+  dialog:{
+
+  },
+  dialogContainer:{
+    display:'flex',
+    flexDirection:'row',
+    justifyContent:'center',
+    alignItems:'center',
+  },
+  bigButton:{
+    width:'20vw',
+    height:'15vh'
   }
 };
 
-const stepPageContainer={
-  root:{
-    display:'flex',
-    flexDirection:'row',
-    flex:1
+const stepPageContainer = {
+  root: {
+    // display: 'flex',
+    // flexDirection: 'row',
+    flex: 1,
+    '& *':{
+      backgroundColor:'transparent',
+    }
   },
-  left:{
-    flex:3,
+
+  left: {
+    flex: 3,
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  right: {
+    flex: 1,
+    height: '100%',
+  },
+  image: {
+    flex: 1,
+    overflow:'hidden'
+  },
+  description: {
+    flex: 1
+  },
+  Paper:{
+    width:'100%',
     height:'100%',
-    display:'flex',
-    flexDirection:'column',
+    padding:6
   },
-  right:{
-    flex:1,
-    height:'100%',
-    display:'flex',
-    flexDirection:'column',
-  },
-  image:{
-    flex:1
-  },
-  description:{
-    flex:1
-  },
-  result:{
-    flex:2
-  },
+  result: {
+    flex: 2
+  }
 };
 
 export default {
