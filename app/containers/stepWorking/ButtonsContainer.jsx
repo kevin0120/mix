@@ -94,12 +94,12 @@ const ButtonsContainer = ({
         isPending || pendingable || cancelable ?
           <React.Fragment>
             <Button
+              justIcon
               type="button"
               color="warning"
               onClick={() => setDialogOpen(true)}
             >
                 <Menu fontSize="inherit" className={classes.menuIcon}/>
-              {' '}
             </Button>
             <Dialog
               open={dialogOpen}

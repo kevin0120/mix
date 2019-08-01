@@ -1,4 +1,4 @@
-const layout = (theme)=>({
+const layout = (theme) => ({
   root: {
     width: '100%',
     height: '100%',
@@ -14,7 +14,7 @@ const layout = (theme)=>({
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
-    width: '30%',
+    width: '30%'
     // padding:3,
 
   },
@@ -41,17 +41,17 @@ const layout = (theme)=>({
     overflowY: 'auto',
 
     backgroundColor: theme.palette.common.white,
-    padding:0
+    padding: 0
   },
   contentContainer: {
-    flex: 1,
+    flex: 1
   },
   orderInfoContainer: {
     height: 60,
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: '0 10px',
+    padding: `0 ${theme.spacing.unit * 2}px`,
     alignItems: 'center',
 
     backgroundColor: theme.palette.common.white
@@ -61,7 +61,7 @@ const layout = (theme)=>({
 const stepperContainer = {
   root: {
     padding: 16,
-    backgroundColor:'transparent'
+    backgroundColor: 'transparent'
   },
   stepButton: {
     display: 'flex',
@@ -81,28 +81,24 @@ const buttonsContainer = {
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: '0 10px',
-    alignItems: 'center',
+    alignItems: 'center'
   },
-  menuIcon:{
+  menuIcon: {
     // fontSize:'inherit !important'
     // padding:0,
     // margin: '0 !important',
   },
-  menuButton:{
-
+  menuButton: {},
+  dialog: {},
+  dialogContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
-  dialog:{
-
-  },
-  dialogContainer:{
-    display:'flex',
-    flexDirection:'row',
-    justifyContent:'center',
-    alignItems:'center',
-  },
-  bigButton:{
-    width:'20vw',
-    height:'15vh'
+  bigButton: {
+    width: '20vw',
+    height: '15vh'
   }
 };
 
@@ -111,8 +107,8 @@ const stepPageContainer = {
     // display: 'flex',
     // flexDirection: 'row',
     flex: 1,
-    '& *':{
-      backgroundColor:'transparent',
+    '& *': {
+      backgroundColor: 'transparent'
     }
   },
 
@@ -120,23 +116,23 @@ const stepPageContainer = {
     flex: 3,
     height: '100%',
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'column'
   },
   right: {
     flex: 1,
-    height: '100%',
+    height: '100%'
   },
   image: {
     flex: 1,
-    overflow:'hidden'
+    overflow: 'hidden'
   },
   description: {
     flex: 1
   },
-  Paper:{
-    width:'100%',
-    height:'100%',
-    padding:6
+  Paper: {
+    width: '100%',
+    height: '100%',
+    padding: 6
   },
   result: {
     flex: 2

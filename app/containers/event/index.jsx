@@ -143,6 +143,7 @@ class Event extends React.Component {
               {/* use this button to add a like kind of action */}
               <Button
                 justIcon
+                regular
                 round
                 simple
                 onClick={() => {

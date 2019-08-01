@@ -61,10 +61,11 @@ function ScannerStep(
       <QRCode width="200" height="200" viewBox="0 0 24 24" fill="#444" />
       <TextField
         label={label}
+        disabled={!isCurrent}
         margin="normal"
         value={result?.[label] || ''}
         onClick={() => {
-          keyboardInput({
+          isCurrent && keyboardInput({
             onSubmit: text => {
               getValue(text);
             },
