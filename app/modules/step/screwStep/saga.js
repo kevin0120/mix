@@ -1,5 +1,5 @@
 import { put, select, take, call } from 'redux-saga/effects';
-import { STEP_STATUS } from '../model';
+import STEP_STATUS from '../model';
 import { stepPayload, workingStep, stepData, workingOrder } from '../../order/selector';
 import { SCREW_STEP } from './action';
 

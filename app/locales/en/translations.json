@@ -1,5 +1,18 @@
 {
   "Title": "Welcome",
+  "OrderStatus": {
+    "TODO": "TODO",
+    "WIP": "WIP",
+    "CANCEL": "CANCEL",
+    "PENDING": "PENDING",
+    "DONE": "DONE",
+    "EXCP": "EXCEPT"
+  },
+  "StepWorking": {
+    "SKIP": "SKIP",
+    "UNDO": "UNDO",
+    "SUBMIT": "VALIDATE"
+  },
   "Language": {
     "en": "EN",
     "zh_CN": "zh_CN"
@@ -134,14 +147,14 @@
     },
     "Info": {
       "ReworkWorkCenter": "Rework Work Center",
-      "WorkMode":{
-        "Title":"WorkMode",
+      "WorkMode": {
+        "Title": "WorkMode",
         "auto": "auto",
         "manual": "manual",
         "scanner": "scanner"
       },
       "WorkStatus": {
-        "Title":"WorkStatus",
+        "Title": "WorkStatus",
         "Ready": "Ready",
         "Predoing": "Predoing",
         "Doing": "Doing",
@@ -149,10 +162,10 @@
         "Fail": "Fail"
       },
       "Job": {
-        "Title":"Job"
+        "Title": "Job"
       },
       "Tool": {
-        "Title":"GUN",
+        "Title": "GUN",
         "disconnected": "disconnected",
         "connected": "connected"
       }

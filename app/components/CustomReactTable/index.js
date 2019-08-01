@@ -1,6 +1,8 @@
+// @flow
+
 import ReactTable from 'react-table';
 import React from 'react';
-import { I18n } from '../../containers/event';
+import PropTypes from "prop-types";
 
 export default class CustomReactTable extends React.Component {
 
@@ -22,3 +24,7 @@ export default class CustomReactTable extends React.Component {
     );
   }
 }
+
+CustomReactTable.propTypes = {
+  translate: PropTypes.shape({}).isRequired
+};

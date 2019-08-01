@@ -14,6 +14,7 @@ export const getAppDirectory = () => {
     case 'win32':
       return path.join(os.homedir(), '.controlPanel_sa');
     default:
+      return path.join(os.homedir(), '.controlPanel_sa');
   }
 };
 

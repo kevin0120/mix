@@ -7,9 +7,11 @@ import Paper from '@material-ui/core/Paper';
 import CardActionArea from '@material-ui/core/CardActionArea';
 import CardMedia from '@material-ui/core/CardMedia';
 import Typography from '@material-ui/core/Typography';
-import { makeStyles, createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import CardContent from '@material-ui/core/CardContent';
+import { I18n } from 'react-i18next';
+import {sortBy} from 'lodash-es'
 import { orderActions } from '../../modules/order/action';
 import { ORDER_STATUS } from '../../modules/order/model';
 import { todoOrders, doneOrders, exceptOrders, doingOrders } from '../../modules/order/selector';
@@ -17,6 +19,7 @@ import styles from './styles';
 import settingImg from '../../../resources/imgs/setting.png';
 import type { Dispatch } from '../../modules/indexReducer';
 import type { tOrder } from '../../modules/order/model';
+
 
 type Props = {
   classes: {},
@@ -28,6 +31,8 @@ type Props = {
 function HomeOperationList(props: Props) {
   const classes = makeStyles(styles)();
   const { view, doPush, orderList } = props;
+
+  const retOrderList = sortBy(orderList, (o: tOrder) => new Date(o.plannedDateTime) || Date.now());
 
   const onCardClick = (order) => {
     view(order);
@@ -42,14 +47,15 @@ function HomeOperationList(props: Props) {
     [ORDER_STATUS.PENDING]: classes.statusPending
   };
 
-  const renderOrders = (orders, size, title) => (
+  const renderOrders = (t,orders, size, title) => (
       <React.Fragment>
         <Grid item xs={12} className={classes.listTitle}>
           <Typography gutterBottom variant="h6" align="left">
             {title}
           </Typography>
         </Grid>
-        {orders && orders.map((order, idx) => order ? (<Grid item xs={size} key={`${order.name}${idx}`}>
+        {/* eslint-disable-next-line react/no-array-index-key */}
+        {orders && orders.map((order: tOrder, idx: number) => order ? (<Grid item xs={size} key={`${order.name}${idx}`}>
             <Paper square className={classes.orderCardContainer}>
               <CardActionArea className={classes.orderCard} onClick={() => onCardClick(order)}>
                 <div className={clsx(statusMap[order.status || ORDER_STATUS.TODO], classes.statusIndicator)}/>
@@ -66,7 +72,7 @@ function HomeOperationList(props: Props) {
                     {order.info}
                   </Typography>
                   <Typography variant="body2" color="textSecondary" align="left" className={classes.orderStatusText}>
-                    {order.status || ORDER_STATUS.TODO}
+                    {t(order.status || ORDER_STATUS.TODO)}
                   </Typography>
                 </CardContent>
               </CardActionArea>
@@ -76,22 +82,25 @@ function HomeOperationList(props: Props) {
       </React.Fragment>
     );
 
-  return <div className={classes.root}>
-    <Grid container className={clsx(classes.container, classes.bgEven)} justify="center" spacing={4}>
-      <Grid item container xs={6} spacing={1} alignItems="flex-start" alignContent="flex-start"
-            justify="flex-start" direction="row" className={classes.bgOdd}>
-        {renderOrders([...doingOrders(orderList), ...todoOrders(orderList)], 6, 'TODO')}
-      </Grid>
-      <Grid item container xs={3} spacing={1} alignItems="flex-start" alignContent="flex-start"
-            justify="flex-start" direction="row" className={classes.bgEven}>
-        {renderOrders(doneOrders(orderList), 12, 'DONE')}
-      </Grid>
-      <Grid item container xs={3} spacing={1} alignItems="flex-start" alignContent="flex-start"
-            justify="flex-start" direction="row" className={classes.bgOdd}>
-        {renderOrders(exceptOrders(orderList), 12, 'EXCP')}
-      </Grid>
-    </Grid>
-  </div>;
+  return <I18n ns="translations">
+    {t => (
+      <div className={classes.root}>
+        <Grid container className={clsx(classes.container, classes.bgEven)} justify="center" spacing={4}>
+          <Grid item container xs={6} spacing={1} alignItems="flex-start" alignContent="flex-start"
+                justify="flex-start" direction="row" className={classes.bgOdd}>
+            {renderOrders(t,[...doingOrders(retOrderList), ...todoOrders(retOrderList)], 6, t('OrderStatus.WIP'))}
+          </Grid>
+          <Grid item container xs={3} spacing={1} alignItems="flex-start" alignContent="flex-start"
+                justify="flex-start" direction="row" className={classes.bgEven}>
+            {renderOrders(t, doneOrders(retOrderList), 12, t('OrderStatus.DONE'))}
+          </Grid>
+          <Grid item container xs={3} spacing={1} alignItems="flex-start" alignContent="flex-start"
+                justify="flex-start" direction="row" className={classes.bgOdd}>
+            {renderOrders(t, exceptOrders(retOrderList), 12, t('OrderStatus.EXCP'))}
+          </Grid>
+        </Grid>
+      </div>)}
+    </I18n>;
 
 }
 

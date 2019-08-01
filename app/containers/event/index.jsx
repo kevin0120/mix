@@ -1,6 +1,5 @@
 import React from 'react';
 // react component for creating dynamic tables
-import ReactTable from 'react-table';
 import PropTypes from 'prop-types';
 
 // @material-ui/core components
@@ -14,13 +13,9 @@ import ListItemText from '@material-ui/core/ListItemText';
 
 import Divider from '@material-ui/core/Divider';
 import { I18n } from 'react-i18next';
-import SweetAlert from 'react-bootstrap-sweetalert';
 import Alert from '../../components/Alert';
 
 // core components
-import Input from '@material-ui/core/Input';
-import GridContainer from '../../components/Grid/GridContainer';
-import GridItem from '../../components/Grid/GridItem';
 import Button from '../../components/CustomButtons/Button';
 import Card from '../../components/Card/Card';
 import CardBody from '../../components/Card/CardBody';
@@ -28,7 +23,7 @@ import CardIcon from '../../components/Card/CardIcon';
 import CardHeader from '../../components/Card/CardHeader';
 import CustomReactTable from '../../components/CustomReactTable';
 
-import { Query, CreateDailyLogger, Warn } from '../../logger';
+import { Query, CreateDailyLogger } from '../../logger';
 
 import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
 import withKeyboard from '../../components/Keyboard';
@@ -395,7 +390,7 @@ class Event extends React.Component {
 }
 
 Event.propTypes = {
-  classes: PropTypes.shape({}).isRequired
+  classes: PropTypes.instanceOf(styles).isRequired,
 };
 
 export default withKeyboard(withStyles(styles)(Event));

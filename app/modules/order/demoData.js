@@ -1,19 +1,20 @@
 // @flow
 import dataImg from '../../../resources/imgs/working-page-test-pic1.png';
+import { ORDER_STATUS }from './model';
 
 export const demoOrder = {
   name: 'fill info',
   info:
     'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
   type: 'step',
-  status: 'TODO',
+  status: ORDER_STATUS.TODO,
   steps: [
 
     {
       name: 'screw',
       info: 'this is an screw step',
       type: 'screw',
-      skippable: true,
+      skippable: false,
       undoable: true,
       payload: {
         maxRetryTimes:3,
@@ -159,7 +160,7 @@ export const demoOrderCancel = {
   info:
     'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
   type: 'step',
-  status: 'CANCEL',
+  status: ORDER_STATUS.CANCEL,
   steps: [
     {
       name: '姓名',
@@ -180,7 +181,7 @@ export const demoOrderPending = {
   info:
     'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
   type: 'step',
-  status: 'PENDING',
+  status: ORDER_STATUS.PENDING,
   steps: [
     {
       name: '姓名',
@@ -202,7 +203,7 @@ export const demoOrderDone = {
   info:
     'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
   type: 'step',
-  status: 'DONE',
+  status: ORDER_STATUS.DONE,
   steps: [
     {
       name: '姓名',

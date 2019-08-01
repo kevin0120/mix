@@ -1,7 +1,7 @@
 import { take, put, select } from 'redux-saga/effects';
 import { SCANNER_STEP } from './action';
 import { workingStep, stepData, stepPayload, workingOrder } from '../../order/selector';
-import { STEP_STATUS } from '../model';
+import STEP_STATUS  from '../model';
 
 export default {
   * [STEP_STATUS.ENTERING](ORDER, orderActions) {

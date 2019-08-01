@@ -1,11 +1,14 @@
 // @flow
 
+import STEP_STATUS from '../step/model';
+
 export type tOrder = {
-  steps: tStepArray,
-  status: tOrderStatus,
-  name: string,
-  info: string,
-  workingIndex: ?number
+  steps: tStepArray, // 工步
+  status: tOrderStatus, // 工单状态
+  plannedDateTime: string, // 计划时间
+  name: string, // 工单号
+  info: string, // 工单信息
+  workingIndex: ?number // 正在执行的工步索引
 };
 
 export type tOrderStepIdx = number;
@@ -20,32 +23,38 @@ export type tOrderState = {
 export type tOrderStatus = $Keys<typeof ORDER_STATUS>;
 
 export const ORDER_STATUS = {
-  TODO: 'TODO',
-  WIP: 'WIP',
-  DONE: 'DONE',
-  CANCEL: 'CANCEL',
-  PENDING: 'PENDING'
+  TODO: 'OrderStatus.TODO',
+  WIP: 'OrderStatus.WIP',
+  DONE: 'OrderStatus.DONE',
+  CANCEL: 'OrderStatus.CANCEL',
+  PENDING: 'OrderStatus.PENDING'
 };
 
 export type tStepArray = Array<tStep>;
+
+/* eslint-disable flowtype/no-weak-types */
+interface tStepPayload {
+  [key: string]: any
+}
+/* eslint-enable flowtype/no-weak-types */
+
 
 export type tStep = {
   +name: string,
   info: string,
   status: tStepStatus,
   +type: tStepType, // check,collect,instruct,enable,...
-  payload: {},
-  data: {},
+  payload: tStepPayload, // 工步的数据
+  data: tStepPayload, // 工步执行过程中生成的数据
   steps: tStepArray,
   // startTime: Date,
   // endTime: Date,
   times: Array<Date>,
-  skippable: boolean,
-  undoable: boolean,
+  skippable: boolean, // 此工步是否可跳过
+  undoable: boolean, // 是否可重做
   description: string
 };
 
-export type tStepType = string;
+export type tStepType = 'check' | 'collect' | 'instruct' | 'enable';
 
-
-export type tStepStatus = string;
+export type tStepStatus = STEP_STATUS.DOING | STEP_STATUS.ENTERING | STEP_STATUS.FAIL | STEP_STATUS.FINISHED | STEP_STATUS.LEAVING | STEP_STATUS.READY;

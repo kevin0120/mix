@@ -1,13 +1,15 @@
 // @flow
+
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Menu } from '@material-ui/icons';
 import Dialog from '@material-ui/core/Dialog';
-import Typography from '@material-ui/core/Typography';
 import DialogContent from '@material-ui/core/DialogContent';
+import { I18n } from 'react-i18next';
 import Button from '../../components/CustomButtons/Button';
 import styles from './styles';
+import actionStepWorkingDef from './type';
 import type { Dispatch } from '../../modules/indexReducer';
 import * as oSel from '../../modules/order/selector';
 import { orderActions } from '../../modules/order/action';
@@ -54,7 +56,7 @@ type ButtonsContainerProps = {
   cancelOrder: Dispatch,
   pendingOrder: Dispatch,
   isPending: boolean,
-  isCancel: boolean,
+  // isCancel: boolean,
   pendingable: boolean,
   cancelable: boolean,
   workOn: Dispatch
@@ -74,7 +76,6 @@ const ButtonsContainer = ({
                             cancelOrder,
                             pendingOrder,
                             isPending,
-                            isCancel,
                             pendingable,
                             cancelable,
                             workOn
@@ -88,7 +89,8 @@ const ButtonsContainer = ({
   const [dialogOpen, setDialogOpen] = useState(false);
 
 
-  return <div className={classes.root}>
+  return <I18n ns="translations">
+    {t => (<div className={classes.root}>
     <div>
       {
         isPending || pendingable || cancelable ?
@@ -168,12 +170,12 @@ const ButtonsContainer = ({
         {'>>'}
       </Button>
       <Button
-        disabled={noNext || viewingStep !== workingStep || !viewingStep?.skippable}
+        disabled={viewingStep !== workingStep || !viewingStep?.skippable}
         type="button"
         onClick={() => doNextStep()}
         color="primary"
       >
-        {'skip'}
+        {t(actionStepWorkingDef.SKIP)}
       </Button>
       <Button
         disabled={viewingStep !== workingStep || !viewingStep?.undoable}
@@ -181,11 +183,12 @@ const ButtonsContainer = ({
         onClick={() => doPreviousStep()}
         color="primary"
       >
-        {'undo'}
+        {t(actionStepWorkingDef.UNDO)}
       </Button>
     </div>
     <div>{action}</div>
-  </div>;
+  </div>)}
+  </I18n>
 };
 
 export default connect(mapState, mapDispatch)(ButtonsContainer);

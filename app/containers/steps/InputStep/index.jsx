@@ -1,3 +1,5 @@
+// @flow
+
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import Button from '../../../components/CustomButtons/Button';

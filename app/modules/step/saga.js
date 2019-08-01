@@ -1,5 +1,5 @@
 import { cancel, fork, join, put, take } from 'redux-saga/effects';
-import { STEP_STATUS } from './model';
+import STEP_STATUS from './model';
 import stepTypes from './stepTypes';
 import { orderActions, ORDER } from '../order/action';
 

@@ -1,15 +1,18 @@
+// @flow
+
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import Button from '../../../components/CustomButtons/Button';
 import TextField from '@material-ui/core/TextField';
 import makeStyles from '@material-ui/core/styles/makeStyles';
+import Button from '../../../components/CustomButtons/Button';
 import styles from './styles';
 import { scannerStepAction } from '../../../modules/step/scannerStep/action';
-import QRCode from './qrcode-scan.svg';
+// import QRCode from './qrcode-scan.svg';
 import { StepContent } from '../types';
 import withKeyboard from '../../../components/Keyboard';
 import type { Dispatch } from '../../../modules/indexReducer';
 import { stepData, stepPayload, viewingStep } from '../../../modules/order/selector';
+import QRcode from 'qrcode.react';
 
 const mapState = (state, props) => ({
   ...props,
@@ -58,7 +61,7 @@ function ScannerStep(
 
   return (
     <div className={classes.root}>
-      <QRCode width="200" height="200" viewBox="0 0 24 24" fill="#444" />
+      <QRcode value="This Is Demo QR Code" size={400}/>
       <TextField
         label={label}
         margin="normal"

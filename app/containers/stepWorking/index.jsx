@@ -17,16 +17,6 @@ type StepWorkingProps = {
   viewingOrder: tOrder
 };
 
-// const theme = createMuiTheme({
-//   overrides: {
-//     MuiPaper: {
-//       root: {
-//         backgroundColor: 'inherit'
-//       }
-//     }
-//   }
-// });
-
 function StepWorking({ viewingOrder }: StepWorkingProps) {
   const classes = makeStyles(styles.layout)();
   const [action, bindAction] = useState(null);
