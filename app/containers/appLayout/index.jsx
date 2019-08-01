@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import { push } from 'connected-react-router';
 import Button from '../../components/CustomButtons/Button';
 import Avatar from '@material-ui/core/Avatar';
+import Typography from '@material-ui/core/Typography';
 import Notify from '../../components/Notify';
 import NavBar from '../../components/NavBar';
 import LayoutDrawer from '../../components/LayoutDrawer';
@@ -57,10 +58,13 @@ function AppLayout(
               <Button
                 color="warning"
                 size="md"
+                regular
                 variant="contained"
                 onClick={() => logout(u.uuid)}
               >
-                Logout
+                <Typography variant="body1">
+                  Logout
+                </Typography>
               </Button>
             </div>)
           }))}
@@ -86,7 +90,7 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = {
   logout: logoutRequest,
-  doPush: push,
+  doPush: push
 };
 
 export default connect(

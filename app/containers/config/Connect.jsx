@@ -18,12 +18,13 @@ import Button from '../../components/CustomButtons/Button';
 import saveConfigs from '../../modules/setting/action';
 import { systemInit } from '../../modules/systemInit/action';
 
-import {toggleRFID} from '../../modules/rfid/action';
+import { toggleRFID } from '../../modules/rfid/action';
 
 import { sortObj, defaultClient } from '../../common/utils';
 import Test from './Test';
 import styles from './styles';
 import withKeyboard from '../../components/Keyboard';
+import Typography from '@material-ui/core/Typography';
 
 const lodash = require('lodash');
 
@@ -105,7 +106,7 @@ class ConnectedConnect extends React.Component {
   }
 
   render() {
-    const { classes, systemInit, saveConfigs,toggleRFID,rfidEnabled } = this.props;
+    const { classes, systemInit, saveConfigs, toggleRFID, rfidEnabled } = this.props;
     const { data, isDataValid, connInfoData } = this.state;
 
     const baseItems = t =>
@@ -113,7 +114,9 @@ class ConnectedConnect extends React.Component {
         <div key={key}>
           <ListItem className={classes.inputItem}>
             <InputLabel className={classes.inputLabel} htmlFor={key}>
-              {t(item.displayTitle)}
+              <Typography variant="body1">
+                {t(item.displayTitle)}
+              </Typography>
             </InputLabel>
             <Input
               id={key}
@@ -138,7 +141,7 @@ class ConnectedConnect extends React.Component {
             />
           </ListItem>
           <li>
-            <Divider />
+            <Divider/>
           </li>
         </div>
       ));
@@ -158,7 +161,7 @@ class ConnectedConnect extends React.Component {
                 onClick={this.handleSubmit}
                 className={classes.button}
               >
-                <SaveIcon className={classes.leftIcon} />
+                <SaveIcon className={classes.leftIcon}/>
                 {t('Common.Submit')}
               </Button>
             </Paper>

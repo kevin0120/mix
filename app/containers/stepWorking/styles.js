@@ -51,7 +51,7 @@ const layout = (theme) => ({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: `0 ${theme.spacing.unit * 2}px`,
+    padding: `0 ${theme.spacing(2)}px`,
     alignItems: 'center',
 
     backgroundColor: theme.palette.common.white

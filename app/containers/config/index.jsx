@@ -1,6 +1,7 @@
 import React from 'react';
 import MenuList from '@material-ui/core/MenuList';
 import MenuItem from '@material-ui/core/MenuItem';
+import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
 import makeStyles from '@material-ui/core/styles/makeStyles';
@@ -40,7 +41,11 @@ function Preference({ children, childRoutes, doPush, path }) {
                 }}
               >
                 {<r.icon style={{ fontSize: 45, margin: 5, fill: path === r.url ? '#FAFAFA' : r.color }}/>}
-                <span className={classes.itemText}>{t(r.title)}</span>
+                <span className={classes.itemText}>
+                  <Typography variant="h6">
+                  {t(r.title)}
+                  </Typography>
+                </span>
               </CardActionArea>
             </Card>
           ))}

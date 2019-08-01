@@ -11,6 +11,7 @@ import Dvr from '@material-ui/icons/Dvr';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import Typography from '@material-ui/core/Typography';
 
 import Divider from '@material-ui/core/Divider';
 import { I18n } from 'react-i18next';
@@ -242,7 +243,7 @@ class Event extends React.Component {
                     <CardIcon color="info">
                       <Assignment/>
                     </CardIcon>
-                    <h4 className={classes.cardIconTitle}>{t('main.event')}</h4>
+                    <Typography variant="h6" className={classes.cardIconTitle}>{t('main.event')}</Typography>
                   </CardHeader>
                   <CardBody>
                     <CustomReactTable

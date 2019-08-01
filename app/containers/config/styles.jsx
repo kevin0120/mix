@@ -131,7 +131,7 @@ const content = theme => ({
   },
   // Net
   inputLabel: {
-    width: 138
+    width: 160
   },
   input: {
     width: 300

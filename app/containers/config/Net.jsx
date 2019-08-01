@@ -9,6 +9,7 @@ import Paper from '@material-ui/core/Paper';
 import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
+import Typography from '@material-ui/core/Typography';
 import SaveIcon from '@material-ui/icons/Save';
 import { I18n } from 'react-i18next';
 import Dialog from '@material-ui/core/Dialog';
@@ -131,7 +132,9 @@ function ConnectedNet({ doNetworkScan, doNetworkCheck, doNetworkSet, network, ke
         <div key={key}>
           <ListItem className={classes.inputItem}>
             <InputLabel className={classes.inputLabel} htmlFor="name-simple">
-              {t(item.displayTitle)}
+              <Typography variant="body1">
+                {t(item.displayTitle)}
+              </Typography>
             </InputLabel>
             <Input
               id="name-simple"
@@ -190,7 +193,9 @@ function ConnectedNet({ doNetworkScan, doNetworkCheck, doNetworkSet, network, ke
                 <div>
                   <ListItem className={classes.inputItem}>
                     <InputLabel className={classes.inputLabel} htmlFor="ssid">
-                      {t('Configuration.network.SSID')}
+                      <Typography variant="body1">
+                        {t('Configuration.network.SSID')}
+                      </Typography>
                     </InputLabel>
                     <Select
                       displayEmpty
@@ -239,7 +244,6 @@ function ConnectedNet({ doNetworkScan, doNetworkCheck, doNetworkSet, network, ke
                 {inputsItems(t)}
               </List>
               <Button
-                size="lg"
                 disabled={submitDisabled}
                 color="info"
                 onClick={handleSubmit}
