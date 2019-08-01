@@ -6,13 +6,13 @@ import { push } from 'connected-react-router';
 import Button from '../../components/CustomButtons/Button';
 import Avatar from '@material-ui/core/Avatar';
 import Notify from '../../components/Notify';
-import { setNewNotification } from '../../modules/notification/action';
 import NavBar from '../../components/NavBar';
 import LayoutDrawer from '../../components/LayoutDrawer';
 import type { tUser } from '../../modules/user/model';
 import { logoutRequest } from '../../modules/user/action';
 import type { Dispatch } from '../../modules/indexReducer';
 import type { tRouteComponent, tRouteObj } from '../model';
+import Notifier from '../../components/Notifier';
 
 type Props = {
   users: Array<tUser>,
@@ -41,6 +41,7 @@ function AppLayout(
   return (
     <React.Fragment>
       <Notify/>
+      <Notifier/>
       <div style={{ height: 'calc(100% - 64px)', display: 'flex' }}>
         <LayoutDrawer
           contents={users.map((u) => ({
@@ -86,7 +87,6 @@ const mapStateToProps = (state, ownProps) => ({
 const mapDispatchToProps = {
   logout: logoutRequest,
   doPush: push,
-  notification: setNewNotification
 };
 
 export default connect(

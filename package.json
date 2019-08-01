@@ -261,6 +261,7 @@
     "jsmodbus": "^3.0.0",
     "lodash": "^4.17.10",
     "moment": "^2.24.0",
+    "notistack": "^0.8.9",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-bootstrap-sweetalert": "^4.4.1",

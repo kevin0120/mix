@@ -21,6 +21,7 @@ import battery from './battery/reducer';
 import tools from './tools/reducer';
 import order from './order/reducer';
 import dialog from './dialog/reducer';
+import Notifier from './Notifier/reducer';
 
 export type StateType = {
   +notify: Object,
@@ -59,7 +60,8 @@ export default function createRootReducer(history: {}) {
       battery,
       tools,
       order,
-      dialog
+      dialog,
+      Notifier
     })
   );
 }
