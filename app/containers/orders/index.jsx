@@ -24,7 +24,6 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import isURL from 'validator/lib/isURL';
 import Input from '@material-ui/core/Input';
-import { cardTitle } from '../../common/jss/material-react-pro';
 import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
 import { ScannerNewData } from '../../modules/scanner/action';
 
@@ -44,7 +43,7 @@ import withKeyboard from '../../components/Keyboard';
 
 const lodash = require('lodash');
 
-const styles = {
+const styles = theme=>({
   ...sweetAlertStyle,
   root: {
     flexGrow: 1,
@@ -56,7 +55,7 @@ const styles = {
     width: '100%'
   },
   cardIconTitle: {
-    ...cardTitle,
+    ...theme.title.card,
     marginTop: '15px',
     marginBottom: '0px'
   },
@@ -74,7 +73,7 @@ const styles = {
     display: 'block',
     marginTop: '-100px'
   }
-};
+});
 
 const mapStateToProps = (state, ownProps) => ({
   masterpcUrl: state.connections.masterpc,

@@ -1,11 +1,4 @@
-import {
-  primaryColor,
-  dangerColor,
-  successColor,
-  defaultFont
-} from '../material-react-pro.jsx';
-
-const customInputStyle = {
+const customInputStyle = theme=>({
   disabled: {
     '&:before': {
       borderColor: 'transparent !important'
@@ -17,21 +10,21 @@ const customInputStyle = {
       borderWidth: '1px !important'
     },
     '&:after': {
-      borderColor: primaryColor
+      borderColor: theme.palette.primary.main
     }
   },
   underlineError: {
     '&:after': {
-      borderColor: dangerColor
+      borderColor: theme.palette.danger.main
     }
   },
   underlineSuccess: {
     '&:after': {
-      borderColor: successColor
+      borderColor: theme.palette.success.main
     }
   },
   labelRoot: {
-    ...defaultFont,
+    fontFamily:theme.typography.fontFamily,
     color: '#AAAAAA !important',
     fontWeight: '400',
     fontSize: '14px',
@@ -42,10 +35,10 @@ const customInputStyle = {
     }
   },
   labelRootError: {
-    color: dangerColor + ' !important'
+    color: `${theme.palette.danger.main  } !important`
   },
   labelRootSuccess: {
-    color: successColor + ' !important'
+    color: `${theme.palette.success.main  } !important`
   },
   feedback: {
     position: 'absolute',
@@ -101,7 +94,7 @@ const customInputStyle = {
       opacity: '1'
     }
   }
-};
+});
 
 export default customInputStyle;
 

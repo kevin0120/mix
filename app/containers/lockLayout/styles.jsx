@@ -44,6 +44,3 @@ const pagesStyle = theme => ({
 });
 
 export default pagesStyle;
-
-// WEBPACK FOOTER //
-// ./src/assets/jss/material-dashboard-pro-react/layouts/pagesStyle.jsx

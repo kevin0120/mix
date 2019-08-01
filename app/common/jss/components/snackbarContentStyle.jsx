@@ -2,19 +2,10 @@
 // // // SnackbarContent styles
 // #############################
 
-import {
-  defaultFont,
-  primaryBoxShadow,
-  infoBoxShadow,
-  successBoxShadow,
-  warningBoxShadow,
-  dangerBoxShadow,
-  roseBoxShadow
-} from '../material-react-pro';
-
-const snackbarContentStyle = {
+const snackbarContentStyle = theme=>({
   root: {
-    ...defaultFont,
+    fontFamily:theme.typography.fontFamily,
+    fontWeight:theme.typography.fontWeightRegular,
     flexWrap: 'unset',
     position: 'relative',
     padding: '20px 15px',
@@ -36,42 +27,42 @@ const snackbarContentStyle = {
   info: {
     backgroundColor: '#00d3ee',
     color: '#ffffff',
-    ...infoBoxShadow
+    ...theme.boxShadow.info
   },
   success: {
     backgroundColor: '#5cb860',
     color: '#ffffff',
-    ...successBoxShadow
+    ...theme.boxShadow.success
   },
   warning: {
     backgroundColor: '#ffa21a',
     color: '#ffffff',
-    ...warningBoxShadow
+    ...theme.boxShadow.warning
   },
   maintenance: {
     backgroundColor: '#ffa21a',
     color: '#ffffff',
-    ...warningBoxShadow
+    ...theme.boxShadow.warning
   },
   danger: {
     backgroundColor: '#f55a4e',
     color: '#ffffff',
-    ...dangerBoxShadow
+    ...theme.boxShadow.danger
   },
   error: {
     backgroundColor: '#ffa21a',
     color: '#ffffff',
-    ...warningBoxShadow
+    ...theme.boxShadow.danger
   },
   primary: {
     backgroundColor: '#af2cc5',
     color: '#ffffff',
-    ...primaryBoxShadow
+    ...theme.boxShadow.primary
   },
   rose: {
     backgroundColor: '#eb3573',
     color: '#ffffff',
-    ...roseBoxShadow
+    ...theme.boxShadow.rose
   },
   message: {
     padding: '0',
@@ -96,7 +87,7 @@ const snackbarContentStyle = {
     marginTop: '-39px',
     fontSize: '20px',
     backgroundColor: '#FFFFFF',
-    padding: '9px',
+    padding: '6px',
     borderRadius: '50%',
     maxWidth: '38px',
     boxShadow:
@@ -127,7 +118,7 @@ const snackbarContentStyle = {
     paddingLeft: '50px',
     display: 'block'
   }
-};
+});
 
 export default snackbarContentStyle;
 

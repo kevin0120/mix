@@ -17,39 +17,29 @@ const ripple = keyframes`
   100% {transform:scale(1.25); opacity:0;}
 `;
 
-import {
-  primaryColor,
-  dangerColor,
-  roseColor,
-  successColor,
-  grayColor,
-  warningColor,
-  title
-} from '../../common/jss/material-react-pro.jsx';
-
-export default () => ({
+export default (theme) => ({
   sWorkingInitializing: {
-    backgroundColor: grayColor
+    backgroundColor: theme.palette.gray.main
     // animation: `${ripple} 0.5s infinite cubic-bezier(1, 1, 1, 1)`,
   },
   sWorkingDoing: {
-    backgroundColor: successColor
+    backgroundColor: theme.palette.success.main
   },
   sWorkingReady: {
-    backgroundColor: successColor,
+    backgroundColor: theme.palette.success.main,
     animation: `${twinkling} 1s infinite cubic-bezier(1, 1, 1, 1)`
   },
   sWorkingFail: {
-    backgroundColor: warningColor
+    backgroundColor: theme.palette.warning.main
   },
   sWorkingError: {
-    backgroundColor: dangerColor
+    backgroundColor: theme.palette.danger.main
   },
   sWorkingTimeout: {
-    backgroundColor: warningColor
+    backgroundColor: theme.palette.warning.main
   },
   sWorkingContinue: {
-    backgroundColor: successColor
+    backgroundColor: theme.palette.success.main
   },
   statusContainer: {
     padding: '10px 10px 10px 0'

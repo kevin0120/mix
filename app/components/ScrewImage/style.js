@@ -1,6 +1,3 @@
-import { dangerColor, successColor, warningColor } from '../../common/jss/material-react-pro';
-
-
 export default {
   image: {
     container: {
@@ -25,7 +22,7 @@ export default {
       // flex: 1
     },
   },
-  point: (circleRadius,scale)=>({
+  point: (circleRadius,scale)=>theme=>({
     root: {
       display: 'block',
       width: `${circleRadius * 2}px`,
@@ -55,13 +52,13 @@ export default {
       }
     },
     waiting: {
-      background: `${warningColor} !important`
+      background: `${theme.palette.warning.main} !important`
     },
     success: {
-      background: `${successColor} !important`
+      background: `${theme.palette.success.main} !important`
     },
     error: {
-      background: `${dangerColor} !important`
+      background: `${theme.palette.danger.main} !important`
     }
   })
 };

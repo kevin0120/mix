@@ -2,17 +2,7 @@
 // // // Badge component styles
 // #############################
 
-import {
-  primaryColor,
-  warningColor,
-  dangerColor,
-  successColor,
-  infoColor,
-  roseColor,
-  grayColor
-} from '../material-react-pro.jsx';
-
-const badgeStyle = {
+const badgeStyle = theme=>({
   badge: {
     borderRadius: '12px',
     padding: '5px 12px',
@@ -26,27 +16,27 @@ const badgeStyle = {
     display: 'inline-block'
   },
   primary: {
-    backgroundColor: primaryColor
+    backgroundColor: theme.palette.primary.main
   },
   warning: {
-    backgroundColor: warningColor
+    backgroundColor: theme.palette.warning.main
   },
   danger: {
-    backgroundColor: dangerColor
+    backgroundColor: theme.palette.danger.main
   },
   success: {
-    backgroundColor: successColor
+    backgroundColor: theme.palette.success.main
   },
   info: {
-    backgroundColor: infoColor
+    backgroundColor: theme.palette.info.main
   },
   rose: {
-    backgroundColor: roseColor
+    backgroundColor: theme.palette.rose.main
   },
   gray: {
-    backgroundColor: grayColor
+    backgroundColor: theme.palette.gray.main
   }
-};
+});
 
 export default badgeStyle;
 

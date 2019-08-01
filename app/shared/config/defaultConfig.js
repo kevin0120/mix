@@ -13,7 +13,7 @@ const defaultConfigs = {
         Connect:['user', 'admin'],
         help:['user','admin']
       },
-      // event: ['user', 'admin'],
+      event: ['user', 'admin'],
       // result: ['user', 'admin'],
       // curve: ['user', 'admin'],
       // help: ['user', 'admin']

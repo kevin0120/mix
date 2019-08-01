@@ -1,6 +1,4 @@
-import { grayColor } from '../material-react-pro.jsx';
-
-const cardStyle = {
+const cardStyle = theme=>({
   card: {
     border: '0',
     marginBottom: '30px',
@@ -149,7 +147,7 @@ const cardStyle = {
     color: '#FFFFFF'
   },
   gray: {
-    color: grayColor
+    color: theme.palette.gray.main
   },
   cardChart: {
     '& p': {
@@ -161,7 +159,7 @@ const cardStyle = {
     transform: 'translate3d(0, 0, 0)',
     transition: 'all 300ms linear'
   }
-};
+});
 
 export default cardStyle;
 

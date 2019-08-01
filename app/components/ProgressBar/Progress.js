@@ -4,11 +4,6 @@ import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import styles from './styles';
 import Circle from './Circle';
-import {
-  dangerColor,
-  warningColor,
-  successColor
-} from '../../common/jss/material-react-pro';
 
 // import { Line, Circle } from 'react-es6-progressbar.js';
 

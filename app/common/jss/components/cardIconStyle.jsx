@@ -1,12 +1,5 @@
-import {
-  warningCardHeader,
-  successCardHeader,
-  dangerCardHeader,
-  infoCardHeader,
-  primaryCardHeader,
-  roseCardHeader
-} from '../material-react-pro.jsx';
-const cardIconStyle = {
+
+const cardIconStyle = theme=>({
   cardIcon: {
     '&$warningCardHeader,&$successCardHeader,&$dangerCardHeader,&$infoCardHeader,&$primaryCardHeader,&$roseCardHeader': {
       borderRadius: '3px',
@@ -17,13 +10,13 @@ const cardIconStyle = {
       float: 'left'
     }
   },
-  warningCardHeader,
-  successCardHeader,
-  dangerCardHeader,
-  infoCardHeader,
-  primaryCardHeader,
-  roseCardHeader
-};
+  warningCardHeader:theme.cardHeader.warning,
+  successCardHeader:theme.cardHeader.success,
+  dangerCardHeader:theme.cardHeader.danger,
+  infoCardHeader:theme.cardHeader.info,
+  primaryCardHeader:theme.cardHeader.primary,
+  roseCardHeader:theme.cardHeader.rose
+});
 
 export default cardIconStyle;
 

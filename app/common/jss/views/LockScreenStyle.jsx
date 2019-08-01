@@ -2,12 +2,11 @@
 // // // LockScreenPage view styles
 // #############################
 
-import { cardTitle, container } from '../material-react-pro.jsx';
 
 const lockScreenPageStyle = theme => ({
-  cardTitle,
+  cardTitle:theme.title.card,
   container: {
-    ...container,
+    ...theme.container.common,
     zIndex: '4',
     [theme.breakpoints.down('sm')]: {
       paddingBottom: '100px'

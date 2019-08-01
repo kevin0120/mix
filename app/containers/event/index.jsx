@@ -30,20 +30,13 @@ import CustomReactTable from '../../components/CustomReactTable';
 
 import { Query, CreateDailyLogger, Warn } from '../../logger';
 
-import {
-  cardTitle,
-  infoColor,
-  warningColor,
-  dangerColor
-} from '../../common/jss/material-react-pro';
-
 import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
 import withKeyboard from '../../components/Keyboard';
 
 const lodash = require('lodash');
 const dayjs = require('dayjs');
 
-const styles = {
+const styles = theme=>({
   ...sweetAlertStyle,
   root: {
     flexGrow: 1,
@@ -55,7 +48,7 @@ const styles = {
     width: '100%'
   },
   cardIconTitle: {
-    ...cardTitle,
+    ...theme.title.card,
     marginTop: '15px',
     marginBottom: '0px'
   },
@@ -67,8 +60,20 @@ const styles = {
   InputInput: {
     width: '100%',
     height: '100%'
+  },
+  infoTr:{
+    backgroundColor:theme.palette.info,
+  },
+  warnTr:{
+    backgroundColor:theme.palette.warning,
+  },
+  maintenanceTr:{
+    backgroundColor:theme.palette.warning,
+  },
+  errorTr:{
+    backgroundColor:theme.palette.danger,
   }
-};
+});
 
 //
 // Find items logged between today and yesterday.
@@ -242,28 +247,24 @@ class Event extends React.Component {
                       data={data}
                       getTrProps={(state, rowInfo) => {
                         if (rowInfo) {
-                          let color = infoColor;
+                          let className = classes.infoTr;
                           switch (rowInfo.row.level) {
                             case 'warn':
-                              color = warningColor;
+                              className = classes.warnTr;
                               break;
                             case 'maintenance':
-                              color = warningColor;
+                              className = classes.maintenanceTr;
                               break;
                             case 'error':
-                              color = dangerColor;
+                              className = classes.errorTr;
                               break;
                             default:
                               break;
                           }
-
                           return {
-                            style: {
-                              background: color
-                            }
+                            className
                           };
                         }
-
                         return {};
                       }}
                       filterable

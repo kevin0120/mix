@@ -1,4 +1,3 @@
-import { warningColor } from '../../common/jss/material-react-pro';
 
 export default theme => ({
   root: {
@@ -27,7 +26,7 @@ export default theme => ({
   },
   menuItemSelected: {
     fontSize: 14,
-    backgroundColor: warningColor,
+    backgroundColor: theme.palette.warning.main,
     height: 120,
     color: '#FAFAFA',
     margin: 5

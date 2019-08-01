@@ -2,14 +2,8 @@
 // // // Footer styles
 // #############################
 
-import {
-  defaultFont,
-  container,
-  containerFluid,
-  primaryColor
-} from '../material-react-pro.jsx';
 
-const footerStyle = {
+const footerStyle = theme=>({
   block: {},
   left: {
     float: 'left!important',
@@ -25,21 +19,23 @@ const footerStyle = {
     bottom: '0',
     borderTop: '1px solid #e7e7e7',
     padding: '15px 0',
-    ...defaultFont,
+    fontFamily:theme.typography.fontFamily,
+    fontWeight:theme.typography.fontWeight,
+    fontSize:theme.typography.fontSize,
     zIndex: 4
   },
   container: {
     zIndex: 3,
-    ...container,
+    ...theme.container.common,
     position: 'relative'
   },
   containerFluid: {
     zIndex: 3,
-    ...containerFluid,
+    ...theme.container.fluid,
     position: 'relative'
   },
   a: {
-    color: primaryColor,
+    color: theme.palette.primary.main,
     textDecoration: 'none',
     backgroundColor: 'transparent'
   },
@@ -58,7 +54,7 @@ const footerStyle = {
       color: '#FFFFFF'
     }
   }
-};
+});
 export default footerStyle;
 
 // WEBPACK FOOTER //

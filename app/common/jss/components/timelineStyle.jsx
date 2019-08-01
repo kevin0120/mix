@@ -2,14 +2,6 @@
 // // // Timeline component styles
 // #############################
 
-import {
-  infoColor,
-  primaryColor,
-  successColor,
-  dangerColor,
-  warningColor,
-  grayColor
-} from '../material-react-pro';
 const timelineStyle = theme => ({
   timeline: {
     [theme.breakpoints.down('sm')]: {
@@ -73,27 +65,27 @@ const timelineStyle = theme => ({
     left: '5%'
   },
   info: {
-    backgroundColor: infoColor,
+    backgroundColor: theme.palette.info.main,
     boxShadow:
       '0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(0, 188, 212, 0.4)'
   },
   success: {
-    backgroundColor: successColor,
+    backgroundColor: theme.palette.success.main,
     boxShadow:
       '0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(76, 175, 80, 0.4)'
   },
   danger: {
-    backgroundColor: dangerColor,
+    backgroundColor: theme.palette.danger.main,
     boxShadow:
       '0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(244, 67, 54, 0.4)'
   },
   warning: {
-    backgroundColor: warningColor,
+    backgroundColor: theme.palette.warning.main,
     boxShadow:
       '0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(255, 152, 0, 0.4)'
   },
   primary: {
-    backgroundColor: primaryColor,
+    backgroundColor: theme.palette.primary.main,
     boxShadow:
       '0 4px 20px 0px rgba(0, 0, 0, 0.14), 0 7px 10px -5px rgba(156, 39, 176, 0.4)'
   },
@@ -178,7 +170,7 @@ const timelineStyle = theme => ({
   timelineTS: {
     // float: 'left',
     '& span': {
-      color: grayColor,
+      color: theme.palette.gray.main,
       fontSize: '12px'
     }
   },

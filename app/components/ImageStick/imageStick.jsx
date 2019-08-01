@@ -18,12 +18,6 @@ import { keyframes } from '@emotion/core';
 import Image from './Image';
 import popoverStyles from '../../common/jss/popoverStyles';
 
-import {
-  successColor,
-  warningColor,
-  dangerColor
-} from '../../common/jss/material-react-pro';
-
 import { OPERATION_STATUS, OPERATION_RESULT } from '../../modules/operation/model';
 
 import Card from '../Card/Card';
@@ -35,12 +29,9 @@ const ripple = keyframes`
   100% {transform:scale(1.75); opacity:0;}
 `;
 
-const lodash = require('lodash');
-
 const circleRadius = 30;
-const scaleRate = 2;
 
-const imgStickStyles = () => ({
+const imgStickStyles = (theme) => ({
   ...popoverStyles,
   ...imagesStyles,
   picWrap: {
@@ -120,21 +111,21 @@ const imgStickStyles = () => ({
     }
   },
   waiting: {
-    background: warningColor
+    background: theme.palette.warning.main
   },
   waitingActive: {
-    background: warningColor,
+    background: theme.palette.warning.main,
     animation: `${ripple} 1.0s infinite cubic-bezier(1, 1, 1, 1)`
   },
   failActive: {
-    background: dangerColor,
+    background: theme.palette.danger.main,
     animation: `${ripple} 1.0s infinite cubic-bezier(1, 1, 1, 1)`
   },
   success: {
-    background: successColor
+    background: theme.palette.success.main
   },
   error: {
-    background: dangerColor
+    background: theme.palette.danger.main
   }
 });
 

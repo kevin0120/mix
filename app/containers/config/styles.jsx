@@ -1,4 +1,3 @@
-import { warningColor } from '../../common/jss/material-react-pro';
 import customSelectStyle from '../../common/jss/customSelectStyle';
 
 const config = theme => ({
@@ -29,7 +28,7 @@ const config = theme => ({
   },
   menuItemSelected: {
     fontSize: 14,
-    backgroundColor: warningColor,
+    backgroundColor: theme.palette.warning.main,
     height: 120,
     color: '#FAFAFA',
     margin: '15px 5px'

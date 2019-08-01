@@ -2,17 +2,6 @@
 // // // Header styles
 // #############################
 
-import {
-  containerFluid,
-  defaultFont,
-  primaryColor,
-  defaultBoxShadow,
-  infoColor,
-  successColor,
-  warningColor,
-  dangerColor
-} from '../material-react-pro.jsx';
-
 const headerStyle = theme => ({
   appBar: {
     backgroundColor: 'transparent',
@@ -32,14 +21,15 @@ const headerStyle = theme => ({
     display: 'block'
   },
   container: {
-    ...containerFluid,
+    ...theme.container.fluid,
     minHeight: '50px'
   },
   flex: {
     flex: 1
   },
   title: {
-    ...defaultFont,
+    fontFamily:theme.typography.fontFamily,
+    fontWeight:theme.typography.fontWeightRegular,
     lineHeight: '30px',
     fontSize: '18px',
     borderRadius: '3px',
@@ -53,29 +43,29 @@ const headerStyle = theme => ({
     }
   },
   primary: {
-    backgroundColor: primaryColor,
+    backgroundColor: theme.palette.primary.main,
     color: '#FFFFFF',
-    ...defaultBoxShadow
+    ...theme.boxShadow.default
   },
   info: {
-    backgroundColor: infoColor,
+    backgroundColor: theme.palette.info.main,
     color: '#FFFFFF',
-    ...defaultBoxShadow
+    ...theme.boxShadow.default
   },
   success: {
-    backgroundColor: successColor,
+    backgroundColor: theme.palette.success.main,
     color: '#FFFFFF',
-    ...defaultBoxShadow
+    ...theme.boxShadow.default
   },
   warning: {
-    backgroundColor: warningColor,
+    backgroundColor: theme.palette.warning.main,
     color: '#FFFFFF',
-    ...defaultBoxShadow
+    ...theme.boxShadow.default
   },
   danger: {
-    backgroundColor: dangerColor,
+    backgroundColor: theme.palette.danger.main,
     color: '#FFFFFF',
-    ...defaultBoxShadow
+    ...theme.boxShadow.default
   },
   sidebarMinimize: {
     float: 'left',

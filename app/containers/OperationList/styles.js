@@ -1,5 +1,4 @@
 const cardHeight='120px';
-import {successColor, warningColor, dangerColor,grayColor,primaryColor} from '../../common/jss/material-react-pro';
 
 export default (theme) => ({
   root: {
@@ -67,18 +66,18 @@ export default (theme) => ({
 
   },
   statusTodo:{
-    backgroundColor:grayColor,
+    backgroundColor:theme.palette.gray.main,
   },
   statusWIP:{
-    backgroundColor:primaryColor,
+    backgroundColor:theme.palette.primary.main,
   },
   statusDone:{
-    backgroundColor:successColor,
+    backgroundColor:theme.palette.success.main,
   },
   statusCancel:{
-    backgroundColor:dangerColor,
+    backgroundColor:theme.palette.danger.main,
   },
   statusPending:{
-    backgroundColor:warningColor,
+    backgroundColor:theme.palette.warning.main,
   },
 });

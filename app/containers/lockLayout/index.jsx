@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 // core components
 import PagesHeader from '../../components/Header/PagesHeader';
 import Footer from '../../components/Footer/Footer';
-import pagesStyle from '../../common/jss/layouts/pagesStyle';
+import styles from './styles';
 import bgImage from '../../../resources/imgs/lock.jpeg';
 import { loginRequest } from '../../modules/user/action';
 
@@ -63,4 +63,4 @@ const mapDispatch = {
   login: loginRequest
 };
 
-export default withStyles(pagesStyle)(connect(mapState, mapDispatch)(Pages));
+export default withStyles(styles)(connect(mapState, mapDispatch)(Pages));

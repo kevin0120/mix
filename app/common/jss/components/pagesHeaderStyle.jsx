@@ -2,20 +2,6 @@
 // // // Pages Header styles
 // #############################
 
-import {
-  container,
-  defaultFont,
-  primaryColor,
-  defaultBoxShadow,
-  infoColor,
-  successColor,
-  warningColor,
-  dangerColor,
-  boxShadow,
-  drawerWidth,
-  transition
-} from '../material-react-pro.jsx';
-
 const pagesHeaderStyle = theme => ({
   appBar: {
     backgroundColor: 'transparent',
@@ -35,14 +21,15 @@ const pagesHeaderStyle = theme => ({
     display: 'block'
   },
   container: {
-    ...container,
+    ...theme.container.common,
     minHeight: '50px'
   },
   flex: {
     flex: 1
   },
   title: {
-    ...defaultFont,
+    fontWeight:theme.typography.fontWeightRegular,
+    fontFamily:theme.typography.fontFamily,
     lineHeight: '30px',
     fontSize: '18px',
     borderRadius: '3px',
@@ -54,7 +41,8 @@ const pagesHeaderStyle = theme => ({
     }
   },
   indicator: {
-    ...defaultFont,
+    fontWeight:theme.typography.fontWeightRegular,
+    fontFamily:theme.typography.fontFamily,
     fontSize: '14px',
     borderRadius: '3px',
     textTransform: 'none',
@@ -68,32 +56,33 @@ const pagesHeaderStyle = theme => ({
     top: '8px'
   },
   primary: {
-    backgroundColor: primaryColor,
+    backgroundColor: theme.palette.primary.main,
     color: '#FFFFFF',
-    ...defaultBoxShadow
+    ...theme.boxShadow.default
   },
   info: {
-    backgroundColor: infoColor,
+    backgroundColor: theme.palette.info.main,
     color: '#FFFFFF',
-    ...defaultBoxShadow
+    ...theme.boxShadow.default
   },
   success: {
-    backgroundColor: successColor,
+    backgroundColor: theme.palette.success.main,
     color: '#FFFFFF',
-    ...defaultBoxShadow
+    ...theme.boxShadow.default
   },
   warning: {
-    backgroundColor: warningColor,
+    backgroundColor: theme.palette.warning.main,
     color: '#FFFFFF',
-    ...defaultBoxShadow
+    ...theme.boxShadow.default
   },
   danger: {
-    backgroundColor: dangerColor,
+    backgroundColor: theme.palette.danger.main,
     color: '#FFFFFF',
-    ...defaultBoxShadow
+    ...theme.boxShadow.default
   },
   list: {
-    ...defaultFont,
+    fontWeight:theme.typography.fontWeightRegular,
+    fontFamily:theme.typography.fontFamily,
     fontSize: '14px',
     margin: 0,
     marginRight: '-15px',
@@ -161,9 +150,9 @@ const pagesHeaderStyle = theme => ({
     transitionProperty: 'top, bottom, width',
     transitionDuration: '.2s, .2s, .35s',
     transitionTimingFunction: 'linear, linear, ease',
-    ...boxShadow,
-    width: drawerWidth,
-    ...boxShadow,
+    ...theme.boxShadow.common,
+    width: theme.shape.drawerWidth,
+    ...theme.boxShadow.common,
     position: 'fixed',
     display: 'block',
     top: '0',
@@ -176,7 +165,7 @@ const pagesHeaderStyle = theme => ({
     textAlign: 'left',
     paddingRight: '0px',
     paddingLeft: '0',
-    ...transition,
+    ...theme.transitions.all,
     '&:before,&:after': {
       position: 'absolute',
       zIndex: '3',

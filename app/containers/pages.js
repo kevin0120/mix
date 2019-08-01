@@ -34,11 +34,6 @@ import settingImg from '../../resources/imgs/setting.png';
 import LockingImg from '../../resources/imgs/lock.jpeg';
 import CurveImg from '../../resources/imgs/curveImg.jpeg';
 import LoginImg from '../../resources/imgs/login.jpeg';
-
-import {
-  grayColor,
-  warningColor
-} from '../common/jss/material-react-pro';
 import type { tRouteObj, tUrl } from './model';
 
 const shade = 500;
@@ -72,7 +67,7 @@ const pages = {
       title: 'main.orders',
       component: WorkOrders,
       icon: icons.Collections,
-      color: warningColor,
+      color: colors.deepOrange[shade],
       image: editorImg,
       exact: true
 
@@ -130,7 +125,7 @@ const pages = {
       title: 'main.resultQuery',
       component: ConnResult,
       icon: icons.Save,
-      color: grayColor,
+      color: colors.grey[shade],
       image: LockingImg,
       exact: true
 
@@ -152,7 +147,7 @@ const pages = {
       title: 'main.login',
       component: LoginPage,
       icon: icons.Fingerprint,
-      color: grayColor,
+      color: colors.grey[shade],
       image: LoginImg,
       exact: true
     }

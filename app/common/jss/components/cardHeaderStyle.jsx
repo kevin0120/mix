@@ -1,12 +1,5 @@
-import {
-  warningCardHeader,
-  successCardHeader,
-  dangerCardHeader,
-  infoCardHeader,
-  primaryCardHeader,
-  roseCardHeader
-} from '../material-react-pro.jsx';
-const cardHeaderStyle = {
+
+const cardHeaderStyle = theme=>({
   cardHeader: {
     padding: '0.75rem 1.25rem',
     marginBottom: '0',
@@ -124,40 +117,40 @@ const cardHeaderStyle = {
   warningCardHeader: {
     color: '#FFFFFF',
     '&:not($cardHeaderText):not($cardHeaderIcon)': {
-      ...warningCardHeader
+      ...theme.cardHeader.warning
     }
   },
   successCardHeader: {
     color: '#FFFFFF',
     '&:not($cardHeaderText):not($cardHeaderIcon)': {
-      ...successCardHeader
+      ...theme.cardHeader.success
     }
   },
   dangerCardHeader: {
     color: '#FFFFFF',
     '&:not($cardHeaderText):not($cardHeaderIcon)': {
-      ...dangerCardHeader
+      ...theme.cardHeader.danger
     }
   },
   infoCardHeader: {
     color: '#FFFFFF',
     '&:not($cardHeaderText):not($cardHeaderIcon)': {
-      ...infoCardHeader
+      ...theme.cardHeader.info
     }
   },
   primaryCardHeader: {
     color: '#FFFFFF',
     '&:not($cardHeaderText):not($cardHeaderIcon)': {
-      ...primaryCardHeader
+      ...theme.cardHeader.primary
     }
   },
   roseCardHeader: {
     color: '#FFFFFF',
     '&:not($cardHeaderText):not($cardHeaderIcon)': {
-      ...roseCardHeader
+      ...theme.cardHeader.rose
     }
   }
-};
+});
 
 export default cardHeaderStyle;
 

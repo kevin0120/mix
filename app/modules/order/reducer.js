@@ -4,7 +4,7 @@ import { genReducers } from '../util';
 import type { tOrder, tOrderState, tOrderStepIdx, tStep } from './model';
 import { ORDER_STATUS } from './model';
 import { STEP_STATUS } from '../step/model';
-import { demoOrder, demoOrderCancel, demoOrderDone, demoOrderPending } from './demoData';
+import { demoOrder, demoOrderCancel, demoOrderDone, demoOrderPending, demoOrder2 } from './demoData';
 import {
   getStep,
   orderLength,
@@ -21,7 +21,7 @@ const initState = {
   viewingOrder: null,
   workingIndex: 0,
   viewingIndex: 0,
-  list: [demoOrder, demoOrderCancel, demoOrderPending, demoOrderDone]
+  list: [demoOrder,demoOrder2, demoOrderCancel, demoOrderPending, demoOrderDone]
 };
 
 function reduceStepData(reducer, state: tOrderState, action): tOrderState {

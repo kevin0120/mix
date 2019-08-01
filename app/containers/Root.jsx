@@ -4,12 +4,9 @@ import React, { Component } from 'react';
 import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'connected-react-router';
 import blue from '@material-ui/core/colors/blue';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 import type { Store } from '../modules/indexReducer';
 import Routes from './Routes';
-// import { listenToNewCar } from '../modules/scanner/action';
-// import { systemInit } from '../modules/systemInit/action';
-import { primaryColor, secondaryColor } from '../common/jss/material-react-pro';
 import theme from '../common/theme';
 
 type Props = {

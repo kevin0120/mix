@@ -1,9 +1,6 @@
 import { keyframes } from '@emotion/core';
-import pagesStyle from '../../common/jss/layouts/pagesStyle';
 import imagesStyles from '../../common/jss/imagesStyles';
 import popoverStyles from '../../common/jss/popoverStyles';
-import { dangerColor, successColor } from '../../common/jss/material-react-pro';
-
 
 const twinkling = keyframes`
   0% {
@@ -74,7 +71,7 @@ const languageMenu = {
   }
 };
 
-const NavBarMenu = {
+const NavBarMenu = theme=>({
   ...popoverStyles,
   menuStatusOK: {
     background: `successColor`,
@@ -85,16 +82,16 @@ const NavBarMenu = {
     }
   },
   menuStatusFail: {
-    background: dangerColor,
+    background: theme.palette.danger,
     fontSize: '18px',
     animation: `${twinkling} 2s infinite cubic-bezier(1, 1, 1, 1)`,
     '&,&:focus,&:hover': {
-      background: dangerColor,
+      background: theme.palette.danger,
       fontSize: '18px',
       animation: `${twinkling} 2s infinite cubic-bezier(1, 1, 1, 1)`
     }
   }
-};
+});
 const root = {
   appBar: {
     height: '64px',
