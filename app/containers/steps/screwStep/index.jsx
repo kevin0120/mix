@@ -29,7 +29,6 @@ function ScrewStep({ image, points, activeIndex, result, imageReady }) {
       scale={1}
       onClick={() => result([{status:'success'}])}
       onReady={imageReady}
-      pointScale={0.5}
 
     />
     <ScrewImage
