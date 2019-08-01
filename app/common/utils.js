@@ -1,11 +1,12 @@
-import { cloneDeep } from 'lodash';
+// @flow
+
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import axiosRetry from 'axios-retry';
-import {Info, Error, Warn} from '../logger'
+import axiosRetry, { exponentialDelay } from 'axios-retry';
+import {isNil, cloneDeep} from 'lodash-es';
+import {Info, Error, Warn, Debug} from '../logger'
 
-
-const VINMAP = {
+const VINMap = {
   A: 1,
   B: 2,
   C: 3,
@@ -41,7 +42,8 @@ const VINMAP = {
   0: 0
 };
 
-export function sortObj(obj, orderKey) {
+// eslint-disable-next-line flowtype/no-weak-types
+export function sortObj(obj: any , orderKey: string): any {
   const orderedKey = Object.keys(obj).sort(
     (a, b) => obj[a][orderKey] - obj[b][orderKey]
   );
@@ -73,37 +75,33 @@ export function showNoty(type, text) {
   });
 }
 
-export function isCarID(data) {
-  if (isVin(data) || isKnr(data) || isLongpin(data)) {
-    return true;
-  }
-
-  return false;
+export function isCarID(data: string): boolean {
+  return !!(isVin(data) || isKnr(data) || isLongPin(data));
 }
 
-export function isVin(data) {
+export function isVin(data: string): boolean {
   if (data.length !== 17) return false;
-  const cd = getCheckDigit(data);
-  if (cd === 'x') {
+  const cd: 'X' | number = getCheckDigit(data);
+  if (cd === 'X') {
     return cd === data[8];
   }
-  return cd === VINMAP[data[8]];
+  return cd === VINMap[data[8]];
 }
 
-function isKnr(data) {
-  // if (data.length === 8 && checkNaturalnumber(data)) {
+function isKnr(data: string): boolean {
+  // if (data.length === 8 && checkNaturalNumber(data)) {
   //   return true;
   // }
 
-  return data.length === 8 && checkNaturalnumber(data);
+  return data.length === 8 && checkNaturalNumber(data);
 }
 
-function isLongpin(data) {
+function isLongPin(data: string): boolean {
   if (data.length === 14) {
     const year = data.substring(2, 6);
     const knr = data.substring(6);
 
-    if (checkNaturalnumber(year) && isKnr(knr)) {
+    if (checkNaturalNumber(year) && isKnr(knr)) {
       return true;
     }
   }
@@ -111,12 +109,8 @@ function isLongpin(data) {
   return false;
 }
 
-function checkNaturalnumber(data) {
-  if (/^[0-9]+$/.test(data) && data > 0) {
-    return true;
-  }
-
-  return false;
+function checkNaturalNumber(data: string): boolean {
+  return /^[0-9]+$/.test(data) && data > 0;
 }
 
 // source: https://en.wikipedia.org/wiki/Vehicle_identification_number#Example_Code
@@ -125,29 +119,32 @@ function checkNaturalnumber(data) {
 //   return '0123456789.ABCDEFGH..JKLMN.P.R..STUVWXYZ'.indexOf(c) % 10;
 // }
 
-function getCheckDigit(vin) {
+function getCheckDigit(vin: string): 'X' | number {
   const weights = [8, 7, 6, 5, 4, 3, 2, 10, 0, 9, 8, 7, 6, 5, 4, 3, 2];
   let sum = 0;
-  for (let i = 0; i < 17; i += 1) sum += VINMAP[vin[i]] * weights[i];
+  for (let i = 0; i < 17; i += 1) sum += VINMap[vin[i]] * weights[i];
   let checkDigit = sum % 11;
   if (checkDigit === 10) checkDigit = 'X';
   return checkDigit;
 }
 
 export class HttpClient {
+  // eslint-disable-next-line flowtype/no-weak-types
+  instance: any = null;
+
   constructor() {
     this.instance = null;
   }
 
-  static getInstance() {
-    if (!this.instance) {
+  getInstance() {
+    if (isNil(this.instance)) {
       this.instance = axios.create({
         timeout: 3000,
         headers: { 'Content-Type': 'application/json' }
       });
       axiosRetry(this.instance, {
         retries: 2,
-        retryDelay: axiosRetry.exponentialDelay,
+        retryDelay: exponentialDelay,
         retryCondition: err => err.message.indexOf('200') === -1
       });
       return this.instance;
@@ -156,7 +153,7 @@ export class HttpClient {
   }
 }
 
-export const defaultClient = HttpClient.getInstance();
+export const defaultClient = new HttpClient().getInstance();
 
 export const guard = (fun, msg) => (...args) => {
   try {
@@ -166,9 +163,33 @@ export const guard = (fun, msg) => (...args) => {
   }
 };
 
-type CommonLogLvl = 'Warn' | 'Info' | 'Error';
+type CommonLogLvl = 'Warn' | 'Info' | 'Error' | 'Debug';
 
-export function CommonLog(lvl: CommonLogLvl, msg: string) {
+export class CommonLog {
+  static Info(msg: string) {
+    _logger('Info', msg)
+  }
+
+  static Warn(msg: string) {
+    _logger('Warn', msg)
+  }
+
+  static Debug(msg: string) {
+    _logger('Debug', msg)
+  }
+
+  static Error(msg: mixed) {
+    if (typeof msg === 'string'){
+      _logger('Error', msg)
+    }
+    if (msg instanceof Error){
+      _logger('Error', msg.message);
+    }
+  }
+}
+
+// eslint-disable-next-line no-underscore-dangle
+function _logger(lvl: CommonLogLvl, msg: string) {
   if (process.env.NODE_ENV !== 'production'){
     switch (lvl) {
       case 'Error':
@@ -179,6 +200,9 @@ export function CommonLog(lvl: CommonLogLvl, msg: string) {
         break;
       case 'Warn':
         console.warn(msg);
+        break;
+      case 'Debug':
+        console.debug(msg);
         break;
       default:
         break;
@@ -193,6 +217,9 @@ export function CommonLog(lvl: CommonLogLvl, msg: string) {
       break;
     case 'Warn':
       Warn(msg);
+      break;
+    case 'Debug':
+      Debug(msg);
       break;
     default:
       break;

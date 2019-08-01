@@ -3,20 +3,23 @@
 import { put, takeLatest } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import {SCANNER} from './action';
-import Scanner from './model';
+import ClsScanner from './model';
+import type { tCommonActionType, tDeviceNewData } from '../../common/type';
+import { CommonLog } from '../../common/utils';
 
-let scanner = new Scanner('Scanner');
+// eslint-disable-next-line prefer-const
+let scanner = new ClsScanner('clsScanner');
 
-function* scannerHandler(action): Saga<void> {
+function* scannerHandler(action: tCommonActionType & tDeviceNewData): Saga<void> {
   try {
     const { data } = action;
     if (scanner.validate(data)){
-      yield put(scanner.dispatch())
+      yield put(scanner.doDispatch())
     }else {
       // do nothing
     }
   } catch (e) {
-    console.error(e);
+    CommonLog.Error(e)
   }
 }
 

@@ -1,15 +1,15 @@
 // @flow
 
 import Device from '../../common/type'
-import { Info } from '../../logger';
+import { CommonLog } from '../../common/utils';
 
-class Scanner extends Device {
+class ClsScanner extends Device {
   validate(data: string): boolean {
     const ret: boolean =  super.validate(data);
-    Info(`Scanner validate return: ${ret}`);
+    const msg = `${this.source} validate return: ${ret}`;
+    CommonLog.Info(msg);
     return ret
   }
-
 }
 
-export default Scanner;
+export default ClsScanner;

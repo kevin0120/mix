@@ -1,11 +1,12 @@
+import type { tCommonActionType, tDeviceNewData } from '../../common/type';
 
 export const RFID = {
-  INIT: 'RFID_INIT',
-  TOGGLE_STATUS: 'RFID_TOGGLE_STATUS'
+  READ_NEW_DATA: 'RFID_NEW_DATA'
 };
 
-export function toggleRFID() {
+export function RFIDNewData(data: string): tCommonActionType & tDeviceNewData {
   return {
-    type: RFID.TOGGLE_STATUS
+    type: RFID.READ_NEW_DATA,
+    data
   };
 }
