@@ -14,6 +14,7 @@ import { logoutRequest } from '../../modules/user/action';
 import type { Dispatch } from '../../modules/indexReducer';
 import type { tRouteComponent, tRouteObj } from '../model';
 import Notifier from '../../components/Notifier';
+import Dialog from '../../components/Dialog';
 
 type Props = {
   users: Array<tUser>,
@@ -43,6 +44,7 @@ function AppLayout(
     <React.Fragment>
       <Notify/>
       <Notifier/>
+      <Dialog/>
       <div style={{ height: 'calc(100% - 64px)', display: 'flex' }}>
         <LayoutDrawer
           contents={users.map((u) => ({

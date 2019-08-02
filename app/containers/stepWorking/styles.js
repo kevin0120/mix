@@ -1,6 +1,15 @@
-
 const layout = (theme) => ({
   root: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    backgroundImage: 'url("../resources/imgs/texture.png")',
+    backgroundRepeat: 'repeat',
+    backgroundColor: theme.palette.grey[100]
+
+  },
+  main: {
     width: '100%',
     height: '100%',
     display: 'flex',
@@ -74,16 +83,32 @@ const stepperContainer = theme => ({
   },
   stepIconDoing: {
     animation: '$doing-icon-rotation 1s infinite cubic-bezier(0.4, 0, 0.2, 1)',
-    color:theme.palette.primary.main
+    color: theme.palette.primary.main
   },
   '@keyframes doing-icon-rotation': {
     '0%': {
-      transform: 'rotate(0deg)',
+      transform: 'rotate(0deg)'
     },
     '100%': {
-      transform: 'rotate(-360deg)',
-    },
+      transform: 'rotate(-360deg)'
+    }
   },
+  stepLabelRoot: {
+    flex: 1,
+    display: 'flex'
+
+  },
+  stepLabelContainer: {
+    flex: 1,
+    display: 'flex'
+  },
+  stepLabel: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  }
 
 });
 
