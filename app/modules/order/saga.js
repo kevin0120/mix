@@ -93,7 +93,7 @@ function* doOrder() {
   try {
     while (true) {
       console.log('doing order');
-      const wOrder=yield select(state=>workingOrder(state.order));
+      const wOrder = yield select(state => workingOrder(state.order));
       const step = workingStep(wOrder);
       const idx = workingIndex(wOrder);
       const type = stepType(step);

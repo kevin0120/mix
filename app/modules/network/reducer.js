@@ -14,7 +14,7 @@ const reducers = {
   [NETWORK.SET_FAIL]: networkSetFail,
   [NETWORK.SCAN_OK]: networkScanOk,
   [NETWORK.CHECK_OK]: networkCheckOk,
-  [NETWORK.SIGNAL_OK]: networkSignalOk,
+  [NETWORK.SIGNAL_OK]: networkSignalOk
 };
 
 function networkSetOk(state, action) {
@@ -25,6 +25,7 @@ function networkSetOk(state, action) {
   };
 }
 
+// eslint-disable-next-line no-unused-vars
 function networkSet(state, action) {
   return {
     ...state,
@@ -32,6 +33,7 @@ function networkSet(state, action) {
   };
 }
 
+// eslint-disable-next-line no-unused-vars
 function networkSetFail(state, action) {
   return {
     ...state,

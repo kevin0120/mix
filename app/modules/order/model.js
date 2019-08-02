@@ -3,6 +3,7 @@
 import STEP_STATUS from '../step/model';
 
 export type tOrder = {
+  canRework: boolean, // 是否能够返工
   steps: tStepArray, // 工步
   status: tOrderStatus, // 工单状态
   plannedDateTime: string, // 计划时间
@@ -36,6 +37,7 @@ export type tStepArray = Array<tStep>;
 interface tStepPayload {
   [key: string]: any
 }
+
 /* eslint-enable flowtype/no-weak-types */
 
 
@@ -57,4 +59,10 @@ export type tStep = {
 
 export type tStepType = 'check' | 'collect' | 'instruct' | 'enable';
 
-export type tStepStatus = STEP_STATUS.DOING | STEP_STATUS.ENTERING | STEP_STATUS.FAIL | STEP_STATUS.FINISHED | STEP_STATUS.LEAVING | STEP_STATUS.READY;
+export type tStepStatus =
+  STEP_STATUS.DOING
+  | STEP_STATUS.ENTERING
+  | STEP_STATUS.FAIL
+  | STEP_STATUS.FINISHED
+  | STEP_STATUS.LEAVING
+  | STEP_STATUS.READY;

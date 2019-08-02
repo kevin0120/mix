@@ -13,8 +13,8 @@ import user from './user/saga';
 import { watchAiis } from './aiis/saga';
 import { watchSettingPreSave } from './setting/saga';
 import { watchRushEvent } from './rush/saga';
-import watchRFIDEvent  from './rfid/saga';
-import { watchNotification } from './notification/saga';
+import watchRFIDEvent from './rfid/saga';
+import watchNotification from './notification/saga';
 import watchOperationViewer from './operationViewer/saga';
 import logoFlow from './logo/saga';
 import watchNetwork from './network/saga';
@@ -24,26 +24,8 @@ import andon from './andon/saga';
 import order from './order/saga';
 import dialog from './dialog/saga';
 import { CommonLog } from '../common/utils';
-// import healthzCheckFlow from './healthzCheck';
 
-export function watch(workers, channel): Saga<void> {
-  return function* watcher() {
-    try {
-      while (true) {
-        const action = yield take(channel || Object.keys(workers));
-        if (workers[action.type].length > 1) {
-          const effect = workers[action.type][0];
-          const worker = workers[action.type][1];
-          yield effect(worker, action);
-        } else {
-          yield fork(workers[action.type], action);
-        }
-      }
-    } catch (e) {
-      console.error('saga watcher error:', e, workers, channel);
-    }
-  };
-}
+// import healthzCheckFlow from './healthzCheck';
 
 export default function* rootSaga(): Saga<void> {
   try {
@@ -69,7 +51,7 @@ export default function* rootSaga(): Saga<void> {
       // watchSettingPreSave(),
       sysInitFlow(),
       watchOperationViewer(),
-      logoFlow(),
+      // logoFlow(),
       watchNetwork(),
       watchBattery(),
       watchPower(),
@@ -78,6 +60,6 @@ export default function* rootSaga(): Saga<void> {
       dialog()
     ]);
   } catch (e) {
-    CommonLog.Error(e)
+    CommonLog.lError(e);
   }
 }

@@ -3,7 +3,7 @@
 import { put, call, fork } from 'redux-saga/effects';
 import { channel } from 'redux-saga';
 import { loginRequest, logoutRequest } from '../user/action';
-import {CARD_AUTH} from './action';
+import { CARD_AUTH } from './action';
 
 export function* cardAuthFlow() {
   try {

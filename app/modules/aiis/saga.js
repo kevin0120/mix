@@ -38,7 +38,7 @@ function* initAiis() {
     const state = yield select();
     const aiisUrl = state.setting.system.connections.aiis;
     // const hmiSN = state.setting.page.odooConnection.hmiSn.value;
-    const hmiSN=state.setting.system.connections.workcenterCode;
+    const hmiSN = state.setting.system.connections.workcenterCode;
     if (task) {
       yield cancel(task);
     }
@@ -110,12 +110,12 @@ function* aiisWSListener(hmiSN) {
           break;
         case AIIS_WS_CHANNEL.CLOSE:
           yield put(setHealthzCheck('andon', false));
-          yield put(setNewNotification('info', `andon连接状态更新: ${false}`));
+          yield put(setNewNotification('Info', `andon连接状态更新: ${false}`));
           break;
         case AIIS_WS_CHANNEL.ERROR:
           yield put(setHealthzCheck('andon', false));
           yield put(
-            setNewNotification('info', `masterPC连接状态更新: ${false}`)
+            setNewNotification('Info', `masterPC连接状态更新: ${false}`)
           );
           break;
         case AIIS_WS_CHANNEL.PING:
@@ -133,7 +133,7 @@ function* aiisWSListener(hmiSN) {
     }
   } catch (e) {
     console.error(e);
-  }finally {
+  } finally {
     console.log('aiisWSListener finished');
   }
 }
@@ -148,14 +148,14 @@ function wsOnOpen(hmiSN) {
 }
 
 function* wsOnMessage(dataRaw) {
-  try{
+  try {
     const dataArray = dataRaw.split(';');
 
     const json = dataArray.slice(-1);
     const data = JSON.parse(json);
 
     yield put(andonNewData(data));
-  }catch (e) {
+  } catch (e) {
     console.error(e);
   }
 }
@@ -167,7 +167,7 @@ function* stopAiisWebsocket() {
       ws.ws.readyState === OWebSocket.CONNECTING
     ) {
       yield put(setHealthzCheck('andon', false));
-      yield put(setNewNotification('info', `andon连接状态更新: ${false}`));
+      yield put(setNewNotification('Info', `andon连接状态更新: ${false}`));
       ws.close();
     }
     ws = null;

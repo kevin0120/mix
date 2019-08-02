@@ -1,9 +1,9 @@
 import { POWER } from './action';
-import { watch } from '../indexSaga';
+import { watchWorkers } from '../util';
 
 const { ipcRenderer } = require('electron');
 
-export default watch({
+export default watchWorkers({
   [POWER.SHUTDOWN]: shutdown
 });
 

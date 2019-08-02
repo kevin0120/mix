@@ -13,7 +13,7 @@ export default function* root() {
 }
 
 const dialogActions = {
-  *[DIALOG.OK](config) {
+  * [DIALOG.OK](config) {
     try {
       if (config?.okAction) {
         yield put(config.okAction);
@@ -22,7 +22,7 @@ const dialogActions = {
       console.error(e);
     }
   },
-  *[DIALOG.CANCEL](config) {
+  * [DIALOG.CANCEL](config) {
     try {
       if (config?.cancelAction) {
         yield put(config.cancelAction);
@@ -31,7 +31,7 @@ const dialogActions = {
       console.error(e);
     }
   },
-  *[DIALOG.CLOSE](config) {
+  * [DIALOG.CLOSE](config) {
     try {
       if (config?.closeAction) {
         yield put(config.closeAction);

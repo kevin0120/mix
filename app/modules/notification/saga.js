@@ -1,30 +1,41 @@
 // @flow
 
-import { takeEvery } from 'redux-saga/effects';
+import type { Saga } from 'redux-saga';
+import { takeEvery, call } from 'redux-saga/effects';
 
 import { NOTIFY } from './action';
-import { Info, Warn, Error, Maintenance } from '../../logger';
+import { Info, Warn, lError, Maintenance } from '../../logger';
+import type { tNotifyVariant } from './action';
+import { CommonLog } from '../../common/utils';
 
-function* notificationAlways(action) {
-  const { variant, message, meta } = action;
-  switch (variant) {
-    case 'info':
-      Info(message,meta);
-      break;
-    case 'warning':
-      Warn(message,meta);
-      break;
-    case 'maintenance':
-      Maintenance(message,meta);
-      break;
-    case 'error':
-      Error(message,meta);
-      break;
-    default:
-      break;
-  }
+interface tNotifyFuncMap<t> {
+  [type: tNotifyVariant]: t
 }
 
-export function* watchNotification() {
-  yield takeEvery(NOTIFY.NEW_NOTIFICATION, notificationAlways);
+const notifyFuncMap: tNotifyFuncMap<(string | Error, string) => void> = {
+  'Info': Info,
+  'Warn': Warn,
+  'Maintenance': Maintenance,
+  'Error': lError
+};
+
+function* notificationAlways(action): Saga<void> {
+  try {
+    const { variant = 'Info', message, meta } = action;
+    const t = (variant: tNotifyVariant);
+    const method = notifyFuncMap?.[t];
+    if (!method) return;
+    yield call(method, message, meta);
+  } catch (e) {
+    CommonLog.lError(e);
+  }
+
+}
+
+export default function* watchNotification(): Saga<void> {
+  try {
+    yield takeEvery(NOTIFY.NEW_NOTIFICATION, notificationAlways);
+  } catch (e) {
+    CommonLog.lError(e);
+  }
 }

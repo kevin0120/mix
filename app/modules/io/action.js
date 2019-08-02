@@ -14,13 +14,13 @@ export function onchangeIO(data: tIOContact): tCommonActionType & tDeviceNewData
   return {
     type: IOACTION.DATA_ONCHANGE,
     data
-  }
+  };
 }
 
 export function readIO(): tCommonActionType {
   return {
-    type: IOACTION.READ_DATA,
-  }
+    type: IOACTION.READ_DATA
+  };
 }
 
 // export function resetIO(modbusConfig: any):  {

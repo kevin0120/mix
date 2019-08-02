@@ -3,7 +3,7 @@
 import configs from '../../shared/config';
 
 import { USER_CONFIGS } from './action';
-import {RFID} from '../rfid/action';
+import { RFID } from '../rfid/action';
 
 type actionType = {
   +type: string,
@@ -49,7 +49,7 @@ export default function setting(state: object = configs, action: actionType) {
           ...state.systemSettings,
           rfidEnabled: !state.systemSettings.rfidEnabled
         }
-      }
+      };
     }
     default:
       return state;

@@ -10,10 +10,10 @@ import {
   operationListApi,
   imageEditApi
 } from '../../api/operationViewer';
-import { watch } from '../indexSaga';
+import { watchWorkers } from '../util';
 import { setNewNotification } from '../notification/action';
 
-export default watch({
+export default watchWorkers({
   [OPERATION_VIEWER.LIST_FETCH_START]: fetchOperationList,
   [OPERATION_VIEWER.DETAIL_FETCH_START]: fetchOperationDetail,
   [OPERATION_VIEWER.EDIT_START]: editOperation
@@ -30,7 +30,7 @@ function* fetchOperationList() {
     });
   } catch (e) {
     console.error(e);
-    yield put(setNewNotification('error', '获取作业信息失败'));
+    yield put(setNewNotification('Error', '获取作业信息失败'));
     yield put({
       type: OPERATION_VIEWER.LIST_FETCH_OK,
       data: []
@@ -50,7 +50,7 @@ function* fetchOperationDetail(action) {
     });
   } catch (e) {
     console.error(e);
-    yield put(setNewNotification('error', '获取作业信息失败'));
+    yield put(setNewNotification('Error', '获取作业信息失败'));
     yield put({
       type: OPERATION_VIEWER.DETAIL_FETCH_OK,
       data: {}
@@ -77,15 +77,15 @@ function* editOperation(action) {
     const response = yield call(imageEditApi, odooUrl, operationID, points, img);
     if (response && response.status === 200) {
       yield put(fetchOperationDetailStart(operationID));
-      yield put(setNewNotification('info', '作业信息编辑成功'));
+      yield put(setNewNotification('Info', '作业信息编辑成功'));
 
     } else {
       yield put(editOperationEnd(false));
-      yield put(setNewNotification('error', '作业信息编辑失败'));
+      yield put(setNewNotification('Error', '作业信息编辑失败'));
     }
   } catch (e) {
     console.error(e);
     yield put(editOperationEnd(false));
-    yield put(setNewNotification('error', '作业信息编辑失败'));
+    yield put(setNewNotification('Error', '作业信息编辑失败'));
   }
 }

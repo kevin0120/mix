@@ -1,10 +1,10 @@
 // @flow
 
-import {isNil} from 'lodash-es';
-import Device from '../../common/type'
-import type {AnyAction} from '../../common/type'
+import { isNil } from 'lodash-es';
+import Device from '../../common/type';
+import type { AnyAction } from '../../common/type';
 
-import type {tIOData} from './type'
+import type { tIOData } from './type';
 import { CommonLog } from '../../common/utils';
 
 /* eslint-disable no-underscore-dangle */
@@ -12,22 +12,22 @@ import { CommonLog } from '../../common/utils';
 export default class ClsIOModule extends Device {
   _data: tIOData;
 
-  set dispatcher(dispatcher: (...args: any) => AnyAction){
+  set dispatcher(dispatcher: (...args: any) => AnyAction) {
     this._dispatcher = null; // 永远设置的是null
   }
 
   static doDispatch(): AnyAction {
     CommonLog.Info(`IO Module Please Use doIODispatch Method`);
-    return null
+    return null;
   }
 
   doIODispatch(idx: number, ioType: 'inputs' | 'outputs'): AnyAction {
-      const ele = this._data?.[ioType]?.[idx];
-      if (isNil(ele)){
-        CommonLog.Error(`${ioType}, IO: ${idx} Is Undefined!`);
-        return;
-      }
-      return ele.action();
+    const ele = this._data?.[ioType]?.[idx];
+    if (isNil(ele)) {
+      CommonLog.lError(`${ioType}, IO: ${idx} Is Undefined!`);
+      return;
+    }
+    return ele.action();
   }
 
 }

@@ -154,7 +154,6 @@ export default merge.smart(baseConfig, {
         test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
         use: {
           loader: 'url-loader',
-          exclude: [path.resolve(__dirname, '..', 'app')],
           options: {
             limit: 10000,
             mimetype: 'image/svg+xml'

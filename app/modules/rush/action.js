@@ -1,6 +1,6 @@
 // @flow
 
-import type {tCommonActionType} from "../../common/type"
+import type { tCommonActionType } from '../../common/type';
 
 export const RUSH = {
   INIT: 'RUSH_INIT',

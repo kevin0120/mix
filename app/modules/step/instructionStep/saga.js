@@ -12,8 +12,8 @@ export default {
   },
   * [STEP_STATUS.DOING](ORDER, orderActions) {
     try {
-        yield take(INSTRUCTION_STEP.SUBMIT);
-        yield put(orderActions.stepStatus(STEP_STATUS.FINISHED));
+      yield take(INSTRUCTION_STEP.SUBMIT);
+      yield put(orderActions.stepStatus(STEP_STATUS.FINISHED));
     } catch (e) {
       console.error(e);
     }

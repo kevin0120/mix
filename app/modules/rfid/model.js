@@ -1,6 +1,6 @@
 // @flow
 
-import Device from '../../common/type'
+import Device from '../../common/type';
 
 class ClsRFID extends Device {
   validate(data: string): boolean {

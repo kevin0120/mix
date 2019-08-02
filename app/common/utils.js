@@ -3,8 +3,8 @@
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import axiosRetry, { exponentialDelay } from 'axios-retry';
-import {isNil, cloneDeep} from 'lodash-es';
-import {Info, Error, Warn, Debug} from '../logger'
+import { isNil, cloneDeep } from 'lodash-es';
+import { Info, lError, Warn, Debug, Maintenance } from '../logger';
 import moment, { DurationInputArg1 } from 'moment';
 
 const VINMap = {
@@ -44,7 +44,7 @@ const VINMap = {
 };
 
 // eslint-disable-next-line flowtype/no-weak-types
-export function sortObj(obj: any , orderKey: string): any {
+export function sortObj(obj: any, orderKey: string): any {
   const orderedKey = Object.keys(obj).sort(
     (a, b) => obj[a][orderKey] - obj[b][orderKey]
   );
@@ -164,26 +164,30 @@ export const guard = (fun, msg) => (...args) => {
   }
 };
 
-type CommonLogLvl = 'Warn' | 'Info' | 'Error' | 'Debug';
+export type CommonLogLvl = 'Warn' | 'Info' | 'Error' | 'Debug' | 'Maintenance';
 
 export class CommonLog {
   static Info(msg: string) {
-    _logger('Info', msg)
+    _logger('Info', msg);
   }
 
   static Warn(msg: string) {
-    _logger('Warn', msg)
+    _logger('Warn', msg);
   }
 
   static Debug(msg: string) {
-    _logger('Debug', msg)
+    _logger('Debug', msg);
   }
 
-  static Error(msg: mixed) {
-    if (typeof msg === 'string'){
-      _logger('Error', msg)
+  static Maintenance(msg: string) {
+    _logger('Maintenance', msg);
+  }
+
+  static lError(msg: mixed) {
+    if (typeof msg === 'string') {
+      _logger('Error', msg);
     }
-    if (msg instanceof Error){
+    if (msg instanceof Error) {
       _logger('Error', msg.message);
     }
   }
@@ -210,8 +214,11 @@ function _logger(lvl: CommonLogLvl, msg: string) {
     }
   }
   switch (lvl) {
+    case 'Maintenance':
+      Maintenance(msg);
+      break;
     case 'Error':
-      Error(msg);
+      lError(msg);
       break;
     case 'Info':
       Info(msg);
@@ -226,6 +233,7 @@ function _logger(lvl: CommonLogLvl, msg: string) {
       break;
   }
 }
+
 export const timeCost = (times) =>
   ((times || []).length % 2 === 0 ? times || [] : [...times, new Date()])
     .reduce((total, currentTime, idx) =>

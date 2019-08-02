@@ -11,8 +11,8 @@ export const OPERATION = {
   },
   TRIGGER: {
     NEW_DATA: 'OPERATION_TRIGGER_NEW_DATA',
-    TRIGGER:'OPERATION_TRIGGER_TRIGGER',
-    BLOCK:'OPERATION_TRIGGER_BLOCK',
+    TRIGGER: 'OPERATION_TRIGGER_TRIGGER',
+    BLOCK: 'OPERATION_TRIGGER_BLOCK'
   },
   SOURCE: {
     SET: 'OPERATION_SOURCE_SET'
@@ -24,15 +24,15 @@ export const OPERATION = {
   JOB_MANUAL: {
     OK: 'OPERATION_JOB_MANUAL_OK'
   },
-  BYPASS:{
-    CONFIRM:'OPERATION_BYPASS_CONFIRM',
-    CANCEL:'OPERATION_BYPASS_CANCEL',
-    IO:'OPERATION_BYPASS_IO'
+  BYPASS: {
+    CONFIRM: 'OPERATION_BYPASS_CONFIRM',
+    CANCEL: 'OPERATION_BYPASS_CANCEL',
+    IO: 'OPERATION_BYPASS_IO'
   },
-  CONFLICT:{
-    DETECTED:'OPERATION_CONFLICT_DETECTED',
-    CONFIRM:'OPERATION_CONFLICT_CONFIRM',
-    CANCEL:'OPERATION_CONFLICT_CANCEL'
+  CONFLICT: {
+    DETECTED: 'OPERATION_CONFLICT_DETECTED',
+    CONFIRM: 'OPERATION_CONFLICT_CONFIRM',
+    CANCEL: 'OPERATION_CONFLICT_CANCEL'
   },
   STARTED: 'OPERATION_STARTED', // switch to doing
   FINISHED: 'OPERATION_FINISHED', // switch to ready
@@ -42,10 +42,10 @@ export const OPERATION = {
   TIMEOUT: 'OPERATION_TIMEOUT',
   VERIFIED: 'OPERATION_VERIFIED',
   RESET: 'OPERATION_RESET', // predoing to ready
-  SWITCH_STATE:'OPERATION_SWITCH_STATE'
+  SWITCH_STATE: 'OPERATION_SWITCH_STATE'
 };
 
-export function switch2Ready(showDiag=true) {
+export function switch2Ready(showDiag = true) {
   return {
     type: OPERATION.FINISHED,
     showDiag
@@ -87,47 +87,47 @@ export function operationTrigger(carID, carType, job, source) {
   };
 }
 
-export function operationBypassIO(){
-  return{
-    type:OPERATION.BYPASS.IO
-  }
+export function operationBypassIO() {
+  return {
+    type: OPERATION.BYPASS.IO
+  };
 }
 
-export function operationBypassConfirm(){
-  return{
-    type:OPERATION.BYPASS.CONFIRM
-  }
+export function operationBypassConfirm() {
+  return {
+    type: OPERATION.BYPASS.CONFIRM
+  };
 }
 
-export function operationBypassCancel(){
-  return{
-    type:OPERATION.BYPASS.CANCEL
-  }
+export function operationBypassCancel() {
+  return {
+    type: OPERATION.BYPASS.CANCEL
+  };
 }
 
-export function operationConflictDetected(data){
-  return{
-    type:OPERATION.CONFLICT.DETECTED,
+export function operationConflictDetected(data) {
+  return {
+    type: OPERATION.CONFLICT.DETECTED,
     data
-  }
+  };
 }
 
-export function operationConflictConfirm(data){
-  return{
-    type:OPERATION.CONFLICT.CONFIRM,
+export function operationConflictConfirm(data) {
+  return {
+    type: OPERATION.CONFLICT.CONFIRM,
     data
-  }
+  };
 }
 
-export function operationConflictCancel(){
-  return{
-    type:OPERATION.CONFLICT.CANCEL
-  }
+export function operationConflictCancel() {
+  return {
+    type: OPERATION.CONFLICT.CANCEL
+  };
 }
 
-export function operationTriggerBlock(block){
-  return{
-    type:OPERATION.TRIGGER.BLOCK,
+export function operationTriggerBlock(block) {
+  return {
+    type: OPERATION.TRIGGER.BLOCK,
     block
-  }
+  };
 }

@@ -5,7 +5,7 @@ import { call, select, put } from 'redux-saga/effects';
 import { TOOLS } from './action';
 
 import { toolEnable } from '../../api/operation';
-import { watch } from '../indexSaga';
+import { watchWorkers } from '../util';
 import { setNewNotification } from '../notification/action';
 
 type actionType = {
@@ -31,7 +31,7 @@ function* staticToolEnable(action: actionType) {
 
     const { results } = state.operations;
     const targetResult = results[0];
-    yield call(toolEnable, mUrl, targetResult.controller_sn, targetResult.gun_sn, action.enable ,action.reason);
+    yield call(toolEnable, mUrl, targetResult.controller_sn, targetResult.gun_sn, action.enable, action.reason);
   } catch (e) {
     console.error(`staticToolEnable error:`, e);
     const { data } = e.response || { data: '' };
@@ -40,7 +40,7 @@ function* staticToolEnable(action: actionType) {
       const { results } = state.operations;
       const targetResult = results[0];
 
-      yield put(setNewNotification('warning', `工具序列号不匹配：${targetResult.gun_sn}`));
+      yield put(setNewNotification('Warn', `工具序列号不匹配：${targetResult.gun_sn}`));
     }
   }
 
@@ -55,8 +55,7 @@ function* onToolStatusChange(action) {
         `拧紧枪状态更新（${toolSN}）： ${status}${reason ? `, ${reason}` : ''}`
       )
     );
-  }
- catch (e) {
+  } catch (e) {
     console.error('onToolStatusChange:', e);
   }
 }
@@ -66,7 +65,7 @@ const workers = {
   [TOOLS.STATUS_CHANGE]: onToolStatusChange
 };
 
-export const toolFunctions = watch(workers);
+export const toolFunctions = watchWorkers(workers);
 
 // export function* toolFunctions() {
 //   yield takeEvery(TOOLS.ENABLE, staticToolEnable);

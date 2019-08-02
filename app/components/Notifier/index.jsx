@@ -7,6 +7,7 @@ import actions from '../../modules/Notifier/action';
 import Button from '../CustomButtons/Button';
 
 class Notifier extends Component {
+  // eslint-disable-next-line react/sort-comp
   displayed = [];
 
   storeDisplayed = (id) => {
@@ -24,12 +25,15 @@ class Notifier extends Component {
     for (let i = 0; i < newSnacks.length; i += 1) {
       const newSnack = newSnacks[i];
       if (newSnack.dismissed) {
-        this.props.removeSnackbarAction(newSnack.key);
-        this.props.closeSnackbar(newSnack.key);
+        const {removeSnackbarAction, closeSnackbar} = this.props;
+        removeSnackbarAction(newSnack.key);
+        closeSnackbar(newSnack.key);
       }
 
-      if (notExists) continue;
-      notExists = notExists || !currentSnacks.filter(({ key }) => newSnack.key === key).length;
+      if (!notExists) {
+        // update notExists Flag
+        notExists = notExists || !currentSnacks.filter(({ key }) => newSnack.key === key).length;
+      }
     }
     return notExists;
   }

@@ -4,7 +4,7 @@ import OWebSocket from 'ws';
 import isNil from 'lodash/isNil';
 import { call, take, takeLatest, put, select, fork, cancel, delay } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
-import type {Saga, EventChannel} from 'redux-saga';
+import type { Saga, EventChannel } from 'redux-saga';
 import { onchangeIO } from '../io/action';
 import { RUSH } from './action';
 import { ScannerNewData } from '../scanner/action';
@@ -15,8 +15,8 @@ import { setNewNotification } from '../notification/action';
 import { toolStatusChange } from '../tools/action';
 // import { andonScanner } from '../andon/action';
 import { CommonLog } from '../../common/utils';
-import type { tWebSocketEvent, tRushWebSocketData, tBarcode} from './type';
-import type {tIOWSMsgType, tIOContact } from '../io/type';
+import type { tWebSocketEvent, tRushWebSocketData, tBarcode } from './type';
+import type { tIOWSMsgType, tIOContact } from '../io/type';
 
 let task = null;
 let ws = null;
@@ -29,11 +29,12 @@ export function* watchRushEvent(): Saga<void> {
   try {
     yield takeLatest(RUSH.INIT, initRush);
     yield delay(DebounceWaitTime);
-  }catch (e) {
-    CommonLog.Error(e);
+  } catch (e) {
+    CommonLog.lError(e);
   }
 
 }
+
 function* initRush() {
   try {
     const state = yield select();
@@ -56,23 +57,23 @@ function* initRush() {
       state.setting.page.odooConnection.hmiSn.value
     );
   } catch (e) {
-    CommonLog.Error(e);
+    CommonLog.lError(e);
   }
 }
 
 function* stopRush() {
   try {
-    if (isNil(ws)){
-      return
+    if (isNil(ws)) {
+      return;
     }
     if (
       ws.ws.readyState === OWebSocket.OPEN ||
       ws.ws.readyState === OWebSocket.CONNECTING
     ) {
       yield put(setHealthzCheck('masterpc', false));
-      yield put(setNewNotification('info', `masterPC连接状态更新: ${false}`));
+      yield put(setNewNotification('Info', `masterPC连接状态更新: ${false}`));
       yield put(setHealthzCheck('controller', false));
-      yield put(setNewNotification('info', `controller连接状态更新: ${false}`));
+      yield put(setNewNotification('Info', `controller连接状态更新: ${false}`));
       ws.close();
     }
     ws = null;
@@ -80,11 +81,11 @@ function* stopRush() {
       yield cancel(task);
     }
   } catch (e) {
-    CommonLog.Error(e);
+    CommonLog.lError(e);
   }
 }
 
-function createRushChannel(hmiSN: string): EventChannel<void>{
+function createRushChannel(hmiSN: string): EventChannel<void> {
   return eventChannel(emit => {
     ws.on('open', () => {
       emit({ type: 'healthz', payload: true });
@@ -124,7 +125,7 @@ function* handleRushData(type: tWebSocketEvent, data: tRushWebSocketData): Saga<
   try {
     switch (type) {
       case 'maintenance':
-        yield put(setNewNotification(type, `新维护请求: ${data.type},${data.data.name}`));
+        yield put(setNewNotification('Maintenance', `新维护请求: ${data.type},${data.data.name}`));
         break;
       case 'job':
         // CommonLog.Info(json);
@@ -168,7 +169,7 @@ function* handleRushData(type: tWebSocketEvent, data: tRushWebSocketData): Saga<
             break;
           }
           default:
-            CommonLog.Error("IO Message Type Is Not Defined")
+            CommonLog.lError('IO Message Type Is Not Defined');
         }
         yield put(onchangeIO(d));
         break;
@@ -212,8 +213,8 @@ function* handleRushData(type: tWebSocketEvent, data: tRushWebSocketData): Saga<
       default:
         break;
     }
-  }catch (e) {
-    CommonLog.Error(e);
+  } catch (e) {
+    CommonLog.lError(e);
   }
 }
 
@@ -258,6 +259,6 @@ export function* watchRushChannel(hmiSN: string): Saga<void> {
       }
     }
   } catch (e) {
-    CommonLog.Error(e);
+    CommonLog.lError(e);
   }
 }

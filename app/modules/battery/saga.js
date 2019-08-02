@@ -1,6 +1,6 @@
-import { call, put,} from 'redux-saga/effects';
+import { call, put } from 'redux-saga/effects';
 import { BATTERY, batteryCheckOK } from './action';
-import { watch } from '../indexSaga';
+import { watchWorkers } from '../util';
 
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
@@ -9,7 +9,7 @@ const workers = {
   [BATTERY.CHECK]: doCheckBattery
 };
 
-export default watch(workers);
+export default watchWorkers(workers);
 
 
 function* doCheckBattery() {

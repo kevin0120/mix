@@ -1,6 +1,6 @@
 import { put, take } from 'redux-saga/effects';
 import { INPUT_STEP } from './action';
-import STEP_STATUS from "../model";
+import STEP_STATUS from '../model';
 
 export default {
   * [STEP_STATUS.ENTERING](ORDER, orderActions) {
@@ -12,7 +12,7 @@ export default {
   },
   * [STEP_STATUS.DOING](ORDER, orderActions) {
     try {
-      while(true){
+      while (true) {
         const { payload } = yield take(INPUT_STEP.SUBMIT);
         if (payload) {
           if (payload === 'fail') {

@@ -26,5 +26,5 @@ export default class CustomReactTable extends React.Component {
 }
 
 CustomReactTable.propTypes = {
-  translate: PropTypes.shape({}).isRequired
+  translate: PropTypes.func.isRequired
 };

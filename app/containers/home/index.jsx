@@ -40,7 +40,7 @@ const mapStateToProps = (state, ownProps) => ({
 const mapDispatchToProps = {
   doPush: push,
   notification: setNewNotification,
-  logout:logoutRequest,
+  logout: logoutRequest,
   // OpenShutdown
   shutDown: shutDownAction
 };
@@ -93,7 +93,7 @@ class ConnectedWelcome extends React.Component {
                 if (!route.role || route.role.length === 0 || users.some((u) => lodash.includes(route.role, u.role))) {
                   doPush(route.url);
                 } else {
-                  notification('error', '没有访问权限');
+                  notification('Error', '没有访问权限');
                 }
               }}
               navigationClassName={classes.BottomNavigation}

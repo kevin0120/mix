@@ -6,7 +6,6 @@ import lodash from 'lodash';
 import Clock from 'react-live-clock';
 import { push } from 'connected-react-router';
 import { connect } from 'react-redux';
-import { setNewNotification } from '../../modules/notification/action';
 import { logoutRequest } from '../../modules/user/action';
 import HealthCheck from '../HealthCheck';
 import PageEntrance from '../pageEntrance';
@@ -94,7 +93,7 @@ function ConnectedNavBar(
         if (!route.role || route.role.length === 0 || users.some((u) => lodash.includes(route.role, u.role))) {
           doPush(route.url);
         } else {
-          notification('error', '没有访问权限');
+          notification('Error', '没有访问权限');
         }
       }}
       navigationClassName={pagesClasses.BottomNavigation}

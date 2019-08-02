@@ -1,6 +1,6 @@
 // @flow
 
-import {  takeLatest, put, select } from 'redux-saga/effects';
+import { takeLatest, put, select } from 'redux-saga/effects';
 
 import { CONNECTION } from '../connections/action';
 import { RUSH } from '../rush/action';
@@ -47,7 +47,7 @@ function* sysInit(action) {
 
     setLedStatusReady();
   } catch (e) {
-    yield put(setNewNotification('error', e.toString()));
+    yield put(setNewNotification('Error', e.toString()));
   }
 }
 
@@ -82,6 +82,6 @@ export default function* sysInitFlow() {
     yield takeLatest(SYSTEM_INIT, sysInit);
     // yield call(fetchConnectionFlow);
   } catch (e) {
-    yield put(setNewNotification('error', e.toString()));
+    yield put(setNewNotification('Error', e.toString()));
   }
 }

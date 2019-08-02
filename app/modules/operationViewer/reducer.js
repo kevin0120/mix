@@ -4,28 +4,28 @@ import { genReducers } from '../util';
 const initOperationViewer = {
   list: [],
   detail: {},
-  loading:false,
+  loading: false
 };
 
-const operationViewerReducers={
+const operationViewerReducers = {
   [OPERATION_VIEWER.DETAIL_FETCH_OK]: (state, action) => ({
     ...state,
     detail: action.data,
-    loading:false
+    loading: false
   }),
   [OPERATION_VIEWER.LIST_FETCH_OK]: (state, action) => ({
     list: action.data,
     detail: {},
-    loading:false
+    loading: false
   }),
   [OPERATION_VIEWER.EDIT_START]: (state) => ({
     ...state,
-    loading:true
+    loading: true
   }),
-  [OPERATION_VIEWER.EDIT_END]:(state)=>({
+  [OPERATION_VIEWER.EDIT_END]: (state) => ({
     ...state,
-    loading:false,
+    loading: false
   })
 };
 
-export default genReducers(operationViewerReducers,initOperationViewer);
+export default genReducers(operationViewerReducers, initOperationViewer);

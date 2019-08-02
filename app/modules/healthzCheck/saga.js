@@ -1,7 +1,7 @@
 // @flow
 
 import { call, take, select, all, put, fork, cancel, delay } from 'redux-saga/effects';
-import { HEALTHZ_CHECK,setHealthzCheck } from './action';
+import { HEALTHZ_CHECK, setHealthzCheck } from './action';
 import { masterPCHealthCheck, controllerHealthCheck } from '../../api/healthzCheck';
 import { setNewNotification } from '../notification/action';
 
@@ -24,7 +24,7 @@ function* healthzCheckTask(url, controllers) {
         if (!lodash.isEqual(healthzStatus.masterpc.isHealth, s)) {
           // 如果不相等 更新
           yield put(setHealthzCheck('masterpc', s));
-          yield put(setNewNotification('info', `masterPC连接状态更新: ${s}`));
+          yield put(setNewNotification('Info', `masterPC连接状态更新: ${s}`));
         }
         // 控制器healthz check
         const statusCode = cHealthzs.status;
@@ -60,12 +60,12 @@ function* healthzCheckTask(url, controllers) {
 }
 
 function* getConnectionInfo() {
-  try{
+  try {
     const state = yield select();
     const u = state.connections.masterpc;
     const c = state.connections.controllers.map(v => v.serial_no);
     return { u, c };
-  }catch (e) {
+  } catch (e) {
     console.error(e);
   }
 }
@@ -83,7 +83,7 @@ function* startHealthzCheck(url, controllers) {
       C = c;
     }
     yield call(healthzCheckTask, U, C);
-  }catch (e) {
+  } catch (e) {
     console.error(e);
   }
 }
@@ -100,7 +100,7 @@ export default function* healthzCheckFlow() {
       const { url, controllers } = yield take(HEALTHZ_CHECK.START);
       task = yield fork(startHealthzCheck, url, controllers);
     }
-  }catch (e) {
+  } catch (e) {
     console.error(e);
   }
 }

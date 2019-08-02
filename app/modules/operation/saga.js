@@ -15,7 +15,7 @@ import {
   OPERATION_STATUS
 } from './model';
 import { addNewStory, clearStories } from '../timeline/saga';
-import {STORY_TYPE} from '../timeline/model';
+import { STORY_TYPE } from '../timeline/model';
 import { toolEnable, toolDisable } from '../tools/action';
 import { setResultDiagShow } from '../resultDiag/action';
 import {
@@ -29,9 +29,9 @@ import {
   fetchOngoingOperationOK,
   cleanOngoingOperation
 } from '../ongoingOperation/action';
-import { Error, Info } from '../../logger';
+import { lError, Info } from '../../logger';
 import { setNewNotification } from '../notification/action';
-import { watch } from '../indexSaga';
+import { watchWorkers } from '../util';
 import configs from '../../shared/config';
 
 const lodash = require('lodash');
@@ -53,8 +53,8 @@ const operationWorkers = {
 
 export function* operationFlow() {
   try {
-    yield fork(watch(operationMainProgress));
-    yield fork(watch(operationWorkers));
+    yield fork(watchWorkers(operationMainProgress));
+    yield fork(watchWorkers(operationWorkers));
     yield takeLatest(OPERATION.TRIGGER.TRIGGER, triggerOperation);
   } catch (e) {
     console.error(e);
@@ -246,11 +246,11 @@ export function* getOperation(job) {
               return;
             }
           } else {
-            yield put(setNewNotification('error', `获取工单失败:${e.message}`,{
-              workMode:state.workMode.workMode,
-              opMode:state.setting.operationSettings.opMode,
-              carID:code,
-              response:resp
+            yield put(setNewNotification('Error', `获取工单失败:${e.message}`, {
+              workMode: state.workMode.workMode,
+              opMode: state.setting.operationSettings.opMode,
+              carID: code,
+              response: resp
             }));
             yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
             yield call(clearStories);
@@ -265,11 +265,11 @@ export function* getOperation(job) {
       yield call(startOperation, { data: resp.data });
     } else {
       // 定位作业失败
-      yield put(setNewNotification('error', '定位作业失败',{
-        workMode:state.workMode.workMode,
-        opMode:state.setting.operationSettings.opMode,
-        carID:state.operations.carID,
-        response:resp
+      yield put(setNewNotification('Error', '定位作业失败', {
+        workMode: state.workMode.workMode,
+        opMode: state.setting.operationSettings.opMode,
+        carID: state.operations.carID,
+        response: resp
       }));
       yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
       yield call(clearStories);
@@ -277,10 +277,10 @@ export function* getOperation(job) {
     }
   } catch (e) {
     const state = yield select();
-    yield put(setNewNotification('error', `获取作业失败:${e.message}`,{
-      workMode:state.workMode.workMode,
-      opMode:state.setting.operationSettings.opMode,
-      carID:state.operations.carID
+    yield put(setNewNotification('Error', `获取作业失败:${e.message}`, {
+      workMode: state.workMode.workMode,
+      opMode: state.setting.operationSettings.opMode,
+      carID: state.operations.carID
     }));
     yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
     yield call(clearStories);
@@ -409,10 +409,10 @@ export function* doingOperation(controllerMode) {
     } catch (e) {
       // 程序号设置失败
       yield put({ type: OPERATION.PROGRAMME.SET_FAIL });
-      yield put(setNewNotification('error', 'pset failed'),{
-        workMode:state.workMode.workMode,
-        opMode:state.setting.operationSettings.opMode,
-        carID:state.operations.carID
+      yield put(setNewNotification('Error', 'pset failed'), {
+        workMode: state.workMode.workMode,
+        opMode: state.setting.operationSettings.opMode,
+        carID: state.operations.carID
       });
       return false;
     }
@@ -581,7 +581,7 @@ function* conflictDetected(action) {
     const { data } = action;
     const { enableConflictOP = false } = state.setting.systemSettings;
     if (!enableConflictOP) {
-      yield put(setNewNotification('warning', `设定为不允许重复拧紧同一张工单 VIN: ${data.vin}`));
+      yield put(setNewNotification('Warn', `设定为不允许重复拧紧同一张工单 VIN: ${data.vin}`));
       // return; // 直接返回, 不关闭模式对话框
     }
   } catch (e) {

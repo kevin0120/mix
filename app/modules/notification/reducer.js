@@ -7,7 +7,7 @@ const defaultNotify = {
   variant: 'success', // 'error', 'warning', 'info'
   message: '',
   isShow: false,
-  meta:{}
+  meta: {}
 };
 
 type actionType = {
@@ -25,7 +25,7 @@ export default function notify(
       const { type, ...data } = action;
       return {
         ...data,
-        isShow: true,
+        isShow: true
       };
     }
     case NOTIFY.CLOSE: {

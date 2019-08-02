@@ -58,12 +58,12 @@ export function* watchIOEvent() {
     while (true) {
       const action: AnyAction = yield take([IOACTION.RESET, IOACTION.DATA_ONCHANGE]);
       switch (action.type) {
-        case IOACTION.DATA_ONCHANGE:{
+        case IOACTION.DATA_ONCHANGE: {
           const data = (action.data: tIOContact);
           yield call(handleIOFunction, data);
           break;
         }
-        case IOACTION.RESET:{
+        case IOACTION.RESET: {
           yield fork(resetIO, action.modbusConfig);
           break;
         }
@@ -72,7 +72,7 @@ export function* watchIOEvent() {
       }
     }
   } catch (e) {
-    CommonLog.Error(e);
+    CommonLog.lError(e);
   }
 }
 
@@ -100,7 +100,7 @@ export function* handleIOFunction(data: tIOContact) {
           )
         ) {
           // yield put(openShutdown('bypass'));
-          if(state.setting.operationSettings.byPass){
+          if (state.setting.operationSettings.byPass) {
             yield put(operationBypassIO());
 
           }
@@ -120,9 +120,6 @@ export function* handleIOFunction(data: tIOContact) {
     console.error(e);
   }
 }
-
-
-
 
 
 export function setModBusIO(modbusConfig) {

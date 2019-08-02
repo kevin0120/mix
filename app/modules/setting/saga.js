@@ -17,7 +17,7 @@ function* saveConfiguration(action) {
     const { setting } = state;
 
     yield put({ type: USER_CONFIGS.SAVE, section, newConfigs });
-    yield put(setNewNotification('success', '配置文件保存成功'));
+    yield put(setNewNotification('Info', '配置文件保存成功'));
 
     switch (section) {
       case 'connections': {
@@ -29,7 +29,7 @@ function* saveConfiguration(action) {
           yield put({ type: CONNECTION.MANUAL_MODIFICATION, data: newConfigs });
           yield put(systemInit(section));
         } catch (e) {
-          yield put(setNewNotification('error', '保存连接信息,重新初始化失败'));
+          yield put(setNewNotification('Error', '保存连接信息,重新初始化失败'));
         }
 
         break;
@@ -59,7 +59,7 @@ function* saveConfiguration(action) {
         break;
     }
   } catch (e) {
-    yield put(setNewNotification('error', '配置文件保存失败'));
+    yield put(setNewNotification('Error', '配置文件保存失败'));
   }
 }
 

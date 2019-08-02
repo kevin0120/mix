@@ -6,6 +6,6 @@ import screwStep from './screwStep/saga';
 export default {
   input: inputStep,
   scanner: scannerStep,
-  instruction:instructionStep,
-  screw:screwStep,
+  instruction: instructionStep,
+  screw: screwStep
 };

@@ -8,7 +8,7 @@ import {
   cancel,
   delay
 } from 'redux-saga/effects';
-import type {Saga} from 'redux-saga'
+import type { Saga } from 'redux-saga';
 import ClsRFID from './model';
 import { RFID } from './action';
 import { CommonLog } from '../../common/utils';
@@ -22,19 +22,19 @@ function* RFIDHandler(action: tCommonActionType & tDeviceNewData): Saga<void> {
   try {
     const { data } = action;
     if (Rfid.validate(data)) {
-      yield put(Rfid.doDispatch())
+      yield put(Rfid.doDispatch());
     }
   } catch (err) {
-    CommonLog.Error(err);
+    CommonLog.lError(err);
   }
 }
 
-function* watchRFIDEvent(): Saga<void>{
+function* watchRFIDEvent(): Saga<void> {
   try {
     yield takeLatest(RFID.READ_NEW_DATA, RFIDHandler);
     yield delay(DebounceWaitTime);
   } catch (err) {
-    CommonLog.Error(err);
+    CommonLog.lError(err);
   }
 }
 

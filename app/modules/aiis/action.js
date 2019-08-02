@@ -1,4 +1,3 @@
-
 export const AIIS = {
   INIT: 'AIIS_INIT'
 };

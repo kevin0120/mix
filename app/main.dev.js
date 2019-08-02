@@ -86,6 +86,9 @@ app.on('ready', async () => {
   const size = electron.screen.getPrimaryDisplay().workAreaSize;
 
   mainWindow = new BrowserWindow({
+    webPreferences: {
+      nodeIntegration: true
+    },
     show: false,
     width: size.width,
     height: size.height,

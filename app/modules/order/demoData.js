@@ -1,6 +1,6 @@
 // @flow
 import dataImg from '../../../resources/imgs/working-page-test-pic1.png';
-import { ORDER_STATUS }from './model';
+import { ORDER_STATUS } from './model';
 
 export const demoOrder = {
   name: 'fill info',
@@ -17,7 +17,7 @@ export const demoOrder = {
       skippable: false,
       undoable: true,
       payload: {
-        maxRetryTimes:3,
+        maxRetryTimes: 3,
         points: [
           {
             id: 1,
@@ -186,7 +186,7 @@ export const demoOrderPending = {
     {
       name: '姓名',
       info: 'this step does one checking',
-      type:'input',
+      type: 'input',
 
       skippable: true,
       revocable: true,
@@ -208,7 +208,7 @@ export const demoOrderDone = {
     {
       name: '姓名',
       info: 'this step does one checking',
-      type:'input',
+      type: 'input',
       skippable: true,
       revocable: true,
       data: {},

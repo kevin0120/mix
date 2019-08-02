@@ -13,6 +13,7 @@ import { loginSuccess, logoutSuccess, USER } from './action';
 
 import { setNewNotification } from '../notification/action';
 import type { tUser, tUserName } from './model';
+import { CommonLog } from '../../common/utils';
 
 const lodash = require('lodash');
 
@@ -68,7 +69,7 @@ function* authorize(name: tUserName, password: string) {
       yield put(push('/app'));
     }
   } catch (e) {
-    yield put(setNewNotification('error', e));
+    yield put(setNewNotification('Error', e));
   }
 }
 
@@ -117,8 +118,8 @@ function* loginLocal(name, password) {
     }
 
   } catch (e) {
-    console.error(e);
-    yield put(setNewNotification('local login error', e));
+    CommonLog.lError(e);
+    yield put(setNewNotification('Error', e));
   }
 }
 

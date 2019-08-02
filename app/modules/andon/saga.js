@@ -5,7 +5,7 @@ import { andonVehicleApi } from '../../api/andon';
 import { jobManual } from '../../api/operation';
 import { OPERATION } from '../operation/action';
 import { ANDON } from './action';
-import { watch } from '../indexSaga';
+import { watchWorkers } from '../util';
 import { setNewNotification } from '../notification/action';
 import { addNewStory } from '../timeline/saga';
 import { STORY_TYPE } from '../timeline/model';
@@ -15,7 +15,7 @@ const workers = {
   [ANDON.SCANNER]: [call, handleAndonScanner]
 };
 
-export default watch(workers);
+export default watchWorkers(workers);
 
 function* handleAndonData(action) {
   try {
@@ -88,7 +88,7 @@ function* handleAndonScanner(action) {
     if (resp) {
       const { overtime, successAction } = yield race({ overtime: delay(8000), successAction: take(ANDON.NEW_DATA) });
       if (overtime) {
-        yield put(setNewNotification('warning', '获取工单信息超时'));
+        yield put(setNewNotification('Warn', '获取工单信息超时'));
       }
       if (successAction) {
         yield call(handleAndonData, successAction);

@@ -1,6 +1,6 @@
-export const BATTERY={
-  CHECK:'BATTERY_CHECK',
-  CHECK_OK: 'BATTERY_CHECK_OK',
+export const BATTERY = {
+  CHECK: 'BATTERY_CHECK',
+  CHECK_OK: 'BATTERY_CHECK_OK'
 };
 
 export function batteryCheck() {

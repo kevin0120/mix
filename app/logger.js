@@ -1,3 +1,4 @@
+// @flow
 import { primaryColor, dangerColor, infoColor, warningColor, roseColor } from './common/theme/palette';
 
 const winston = require('winston');
@@ -90,9 +91,14 @@ export function Maintenance(msg,meta) {
   gLogger.maintenance(msg,{meta});
 }
 
-export function Error(msg,meta) {
+export function lError(msg: mixed, meta) {
   if (gLogger === null) return;
-  gLogger.error(msg,{meta});
+  if (typeof msg === 'string'){
+    gLogger.error(msg,{meta});
+  }
+  if (msg instanceof Error) {
+    gLogger.error(msg.message, {meta});
+  }
 }
 
 export function Query(options, f) {

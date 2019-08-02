@@ -1,20 +1,19 @@
 import { select, call, put } from 'redux-saga/effects';
-import fetchLogo from '../../api/logo';
-import { LOGO } from './action';
+import type { Saga } from 'redux-saga';
+import fetchLogo from './api';
+import { fetchLogoOK } from './action';
+import { CommonLog } from '../../common/utils';
 
-export default function* logoFlow() {
+export default function* logoFlow(): Saga<void> {
   try {
     const state = yield select();
     const { odooUrl } = state.setting.page.odooConnection;
     const resp = yield call(fetchLogo, odooUrl.value);
-    if (resp && resp.status === 200) {
+    if (resp?.status === 200) {
       const { logo } = resp.data;
-      yield put({
-        type: LOGO.FETCH_OK,
-        logo
-      });
+      yield put(fetchLogoOK(logo));
     }
   } catch (e) {
-    console.error(e);
+    CommonLog.lError(e);
   }
 }

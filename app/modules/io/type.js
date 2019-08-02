@@ -1,5 +1,5 @@
 // @flow
-import type {AnyAction} from '../../common/type'
+import type { AnyAction } from '../../common/type';
 
 export const sOff = 0;
 export const sOn = 1;
@@ -8,7 +8,7 @@ export const sBlinkOn = 11;
 
 export type tIOWSMsgType = 'WS_IO_STATUS' | 'WS_IO_CONTACT' | 'WS_IO_SET';
 
-export type tIOContact =  {
+export type tIOContact = {
   +sn: string,
   +type: 'input' | 'output',
   +contact: string  // 位串

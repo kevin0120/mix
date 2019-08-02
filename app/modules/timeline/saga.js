@@ -6,17 +6,16 @@ import InfoRounded from '@material-ui/icons/InfoRounded';
 import { put } from 'redux-saga/effects';
 
 import { TIMELINE_STORY } from './action';
-import {STORY_TYPE} from './model';
+import { STORY_TYPE } from './model';
 
 const dayjs = require('dayjs');
 
 
-
 export function* addNewStory(level, title, msg) {
-  try{
+  try {
     const story = createNewStory(level, title, msg);
     yield put({ type: TIMELINE_STORY.NEW, story });
-  }catch (e) {
+  } catch (e) {
     console.error(e);
   }
 }
@@ -24,7 +23,7 @@ export function* addNewStory(level, title, msg) {
 export function* clearStories() {
   try {
     yield put({ type: TIMELINE_STORY.CLEAR });
-  }catch (e) {
+  } catch (e) {
     console.error(e);
   }
 }

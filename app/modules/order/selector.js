@@ -8,7 +8,7 @@ export const viewingIndex = (orderState: tOrderState): tOrderStepIdx => orderSta
 export const viewingStep = (orderState: tOrderState): ?tStep =>
   orderSteps(viewingOrder(orderState))?.[viewingIndex(orderState)] || null;
 
-export const workingIndex = (order: ?tOrder): tOrderStepIdx => order?.workingIndex ||0;
+export const workingIndex = (order: ?tOrder): tOrderStepIdx => order?.workingIndex || 0;
 export const workingStep = (order: ?tOrder): ?tStep =>
   orderSteps(order)?.[workingIndex(order)] || null;
 

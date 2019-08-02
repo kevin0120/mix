@@ -1,13 +1,12 @@
-/* eslint-disable no-bitwise,no-plusplus */
+// @flow
 import { call, put, select } from 'redux-saga/effects';
-import { cloneDeep } from 'lodash';
-import { NETWORK } from './action';
+import {uniq, cloneDeep} from 'lodash-es';
+import { NETWORK, networkSetOK, networkSignalOK } from './action';
 import saveConfigs from '../setting/action';
-import { watch } from '../indexSaga';
+import { watchWorkers } from '../util';
 import { setNewNotification } from '../notification/action';
+import { CommonLog } from '../../common/utils';
 
-
-const lodash = require('lodash');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 
@@ -18,6 +17,7 @@ const netmask2CIDR = netmask =>
   netmask
     .split('.')
     .map(Number)
+    // eslint-disable-next-line no-bitwise
     .map(part => (part >>> 0).toString(2))
     .join('')
     .split('1').length - 1;
@@ -25,7 +25,7 @@ const netmask2CIDR = netmask =>
 const CDIR2netmask = (bitCount) => {
   const mask = [];
   let count = bitCount;
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 4; i+=1) {
     const n = Math.min(count, 8);
     mask.push(256 - 2 ** (8 - n));
     count -= n;
@@ -41,7 +41,7 @@ const workers = {
   [NETWORK.SET_FAIL]: networkFail
 };
 
-export default watch(workers);
+export default watchWorkers(workers);
 
 function* doCheckCurrentConnection() {
   try {
@@ -106,13 +106,9 @@ function* doCheckActiveSignal() {
         return;
       }
     }
-    yield put({
-      type: NETWORK.SIGNAL_OK,
-      ssid: '',
-      signal: 0
-    });
+    yield put(networkSignalOK('', 0));
   } catch (e) {
-    console.error(e);
+    CommonLog.lError(e);
   }
 }
 
@@ -125,7 +121,7 @@ function* doSet(action) {
     const { error, stdout, stderr } = yield call(execNmcli,
       `LANG=eng nmcli dev wifi connect '${data.ssid.value}' password '${
         data.password.value
-        }' name default`);
+      }' name default`);
     if (error) {
       console.log(`exec error: ${error}`);
       ret = -1;
@@ -152,10 +148,11 @@ function* doSet(action) {
     yield call(execNmcli, 'nmcli con down default');
     const cmd = `nmcli con mod default ipv4.method manual ipv4.address ${
       data.ipAddress.value
-      }/${mask} ipv4.gateway ${data.gateway.value}`;
+    }/${mask} ipv4.gateway ${data.gateway.value}`;
+    // eslint-disable-next-line no-unused-vars
     const { error: err, stdout: sOut, stderr: sErr } = yield call(execNmcli, cmd);
     if (err) {
-      console.log(`exec error: ${err}`);
+      CommonLog.lError(`exec error: ${err}`);
       ret = -1;
     }
     if (sErr) {
@@ -164,10 +161,7 @@ function* doSet(action) {
     }
 
     if (ret === 0) {
-      yield put({
-        type: NETWORK.SET_OK,
-        data
-      });
+      yield put(networkSetOK(data));
       yield call(execNmcli, 'nmcli con up default');
       yield put(saveConfigs(section, data));
     } else {
@@ -198,7 +192,7 @@ function* doScan() {
       }
       yield put({
         type: NETWORK.SCAN_OK,
-        data: lodash.uniq(ssidList)
+        data: uniq(ssidList)
       });
     }
     if (stderr) {
@@ -211,7 +205,7 @@ function* doScan() {
 
 function* networkFail(action) {
   try {
-    yield put(setNewNotification('error', action.message || '无线网络错误'));
+    yield put(setNewNotification('Error', action.message || '无线网络错误'));
   } catch (e) {
     console.error(e);
   }
