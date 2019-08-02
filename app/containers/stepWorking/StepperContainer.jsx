@@ -1,5 +1,5 @@
 // @flow
-import {  makeStyles, StepContent, Typography } from '@material-ui/core';
+import { makeStyles, StepContent, Typography } from '@material-ui/core';
 import { connect } from 'react-redux';
 
 import Stepper from '@material-ui/core/Stepper';
@@ -9,15 +9,20 @@ import StepLabel from '@material-ui/core/StepLabel';
 import React from 'react';
 import STEP_STATUS from '../../modules/step/model';
 import styles from './styles';
-import * as orderSelectors from '../../modules/order/selector';
+import * as oSel from '../../modules/order/selector';
 import { orderActions } from '../../modules/order/action';
 import type { Dispatch } from '../../modules/indexReducer';
 import type { tStepArray } from '../../modules/order/model';
+import { Loop } from '@material-ui/icons';
+import clsx from 'clsx';
 
 const mapState = (state, props) => ({
   ...props,
-  steps: orderSelectors.orderSteps(orderSelectors.viewingOrder(state.order)) || [],
-  viewingIndex: orderSelectors.viewingIndex(state.order) || 0
+  steps: oSel.orderSteps(oSel.viewingOrder(state.order)) || [],
+  workingIndex: oSel.workingIndex(oSel.workingOrder(state.order)),
+  viewingStep: oSel.viewingStep(state.order),
+  viewingIndex: oSel.viewingIndex(state.order) || 0,
+  isCurrent: oSel.viewingOrder(state.order) === oSel.workingOrder(state.order)
 });
 
 const mapDispatch = {
@@ -33,37 +38,48 @@ type StepperLayoutProps = {
 const StepperContainer = ({
                             steps,
                             viewingIndex,
-                            jumpTo
+                            jumpTo,
+                            workingIndex,
+                            isCurrent
                           }: StepperLayoutProps) => {
   const classes = makeStyles(styles.stepperContainer)();
+
+
   return (
-      <Stepper
-        nonLinear
-        activeStep={viewingIndex}
-        orientation="vertical"
-        className={classes.root}
-      >
-        {steps.map((s, id) => {
-          const stepProps = {};
-          const labelProps = {
-            error: s.status === STEP_STATUS.FAIL
-          };
-          return (
-            <Step key={s.name} {...stepProps}>
-              <StepButton
-                completed={s.status === STEP_STATUS.FINISHED}
-                onClick={() => jumpTo(id)}
-                className={classes.stepButton}
-              >
-                <StepLabel {...labelProps}>{s.name}</StepLabel>
-              </StepButton>
-              <StepContent>
-                <Typography>{s.info}</Typography>
-              </StepContent>
-            </Step>
-          );
-        })}
-      </Stepper>
+    <Stepper
+      nonLinear
+      activeStep={viewingIndex}
+      orientation="vertical"
+      className={classes.root}
+    >
+      {steps.map((s, idx) => {
+        const stepProps = {};
+        const labelProps = {
+          error: s.status === STEP_STATUS.FAIL
+        };
+        const stepButtonProps={};
+        if(isCurrent && workingIndex===idx){
+          stepButtonProps.icon=<Loop
+            className={clsx(classes.stepIcon,classes.stepIconDoing)}
+          />
+        }
+        return (
+          <Step key={s.name} {...stepProps}>
+            <StepButton
+              completed={s.status === STEP_STATUS.FINISHED}
+              onClick={() => jumpTo(idx)}
+              className={classes.stepButton}
+              {...stepButtonProps}
+            >
+              {s.name}
+            </StepButton>
+            <StepContent>
+              <Typography>{s.info}</Typography>
+            </StepContent>
+          </Step>
+        );
+      })}
+    </Stepper>
   );
 };
 

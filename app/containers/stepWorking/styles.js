@@ -1,3 +1,4 @@
+
 const layout = (theme) => ({
   root: {
     width: '100%',
@@ -58,9 +59,9 @@ const layout = (theme) => ({
   }
 });
 
-const stepperContainer = {
+const stepperContainer = theme => ({
   root: {
-    padding: 16,
+    padding: 16
   },
   stepButton: {
     display: 'flex',
@@ -70,8 +71,21 @@ const stepperContainer = {
     height: 50,
     padding: '0 0',
     margin: '10px 0'
-  }
-};
+  },
+  stepIconDoing: {
+    animation: '$doing-icon-rotation 1s infinite cubic-bezier(0.4, 0, 0.2, 1)',
+    color:theme.palette.primary.main
+  },
+  '@keyframes doing-icon-rotation': {
+    '0%': {
+      transform: 'rotate(0deg)',
+    },
+    '100%': {
+      transform: 'rotate(-360deg)',
+    },
+  },
+
+});
 
 const buttonsContainer = {
   root: {
@@ -82,9 +96,7 @@ const buttonsContainer = {
     padding: '0 10px',
     alignItems: 'center'
   },
-  menuIcon: {
-
-  },
+  menuIcon: {},
   menuButton: {},
   dialog: {},
   dialogContainer: {
@@ -101,7 +113,7 @@ const buttonsContainer = {
 
 const stepPageContainer = {
   root: {
-    flex: 1,
+    flex: 1
   },
 
   left: {
