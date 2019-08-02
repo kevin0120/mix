@@ -60,8 +60,6 @@ function* showResult(order) {
 
 function* showOverview(order) {
   try {
-    console.log(order);
-
     const WIPOrder = yield select(s => workingOrder(s.order));
     const vOrderSteps = yield select((state => orderSteps(viewingOrder(state.order))));
     const data = vOrderSteps.map((s: tStep, idx) => ([
@@ -114,7 +112,6 @@ export default function* root(): any {
 
 function* viewOrder({ order }) {
   try {
-    console.log('view',order);
     yield call(mapping.onOrderView, order);
   } catch (e) {
     console.error(e);

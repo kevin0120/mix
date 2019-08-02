@@ -17,7 +17,6 @@ const dialogActions = {
   * [DIALOG.BUTTON](config: tDialogConfig,{idx}) {
     try {
       if (config?.buttons?.[idx]?.action) {
-        console.log(config.buttons[idx].action);
         yield put(config.buttons[idx].action);
       }
     } catch (e) {

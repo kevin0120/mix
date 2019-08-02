@@ -34,13 +34,10 @@ export const orderActions = {
     type: ORDER.VIEW,
     order
   }),
-  workOn: (order: tOrder): orderTriggerType => {
-    console.log('work on',order);
-    return ({
-      type: ORDER.WORK_ON,
-      order
-    })
-  },
+  workOn: (order: tOrder): orderTriggerType => ({
+    type: ORDER.WORK_ON,
+    order
+  }),
   finishOrder: () => ({
     type: ORDER.FINISH
   }),
