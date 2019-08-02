@@ -53,7 +53,7 @@ const StepperContainer = ({
       // eslint-disable-next-line react/no-find-dom-node
       const node = ReactDOM.findDOMNode(viewingStepRef);
       if (node) {
-        node.scrollIntoView({ block: 'center',  behavior: 'smooth' });
+        node.scrollIntoView({ block: 'center' });
       }
     }
   }, [viewingStepRef]);

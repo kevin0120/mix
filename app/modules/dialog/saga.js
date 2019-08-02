@@ -17,6 +17,7 @@ const dialogActions = {
   * [DIALOG.BUTTON](config: tDialogConfig,{idx}) {
     try {
       if (config?.buttons?.[idx]?.action) {
+        console.log(config.buttons[idx].action);
         yield put(config.buttons[idx].action);
       }
     } catch (e) {
@@ -36,13 +37,11 @@ const dialogActions = {
 
 function* showDialog(action) {
   try {
-    while (true) {
-      const { config } = action;
+    const { config } = action;
       const dialogAction = yield take(Object.keys(dialogActions));
       if (dialogActions[dialogAction.type]) {
         yield call(dialogActions[dialogAction.type], config,dialogAction);
       }
-    }
   } catch (e) {
     console.error(e);
   }
