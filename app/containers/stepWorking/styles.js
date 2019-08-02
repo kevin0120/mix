@@ -60,12 +60,31 @@ const layout = (theme) => ({
     height: 60,
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
+    textAlign: 'center',
     padding: `0 ${theme.spacing(2)}px`,
     alignItems: 'center',
 
     backgroundColor: theme.palette.common.white
-  }
+  },
+  orderStatus:{
+    marginRight:theme.spacing(1),
+  },
+  statusTodo:{
+    color:theme.palette.gray.main,
+  },
+  statusWIP:{
+    color:theme.palette.primary.main,
+  },
+  statusDone:{
+    color:theme.palette.success.main,
+  },
+  statusCancel:{
+    color:theme.palette.danger.main,
+  },
+  statusPending:{
+    color:theme.palette.warning.main,
+  },
 });
 
 const stepperContainer = theme => ({

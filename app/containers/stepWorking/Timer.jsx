@@ -18,14 +18,16 @@ type Props = {
 };
 
 export default function Timer({ step }: Props) {
-  const times=orderSelectors.times(step);
+  const times = orderSelectors.times(step);
   const [duration, setDuration] = useState(timeCost(times));
   useEffect(() => {
-    setDuration(timeCost(times));
-    const interval = setInterval(() => {
+    if (times && (times.length > 0)) {
       setDuration(timeCost(times));
-    }, 1000);
-    return () => clearInterval(interval);
+      const interval = setInterval(() => {
+        setDuration(timeCost(times));
+      }, 1000);
+      return () => clearInterval(interval);
+    }
   }, [times]);
 
 

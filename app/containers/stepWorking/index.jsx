@@ -9,37 +9,56 @@ import styles from './styles';
 import StepperContainer from './StepperContainer';
 import StepPageContainer from './StepPageContainer';
 import type { tOrder } from '../../modules/order/model';
+import { I18n } from 'react-i18next';
+import { ORDER_STATUS } from '../../modules/order/model';
+import clsx from 'clsx';
 
 type Props = {
   viewingOrder: tOrder
 };
+
+const statusMap = (classes) => ({
+  [ORDER_STATUS.TODO]: classes.statusTodo,
+  [ORDER_STATUS.WIP]: classes.statusWIP,
+  [ORDER_STATUS.DONE]: classes.statusDone,
+  [ORDER_STATUS.CANCEL]: classes.statusCancel,
+  [ORDER_STATUS.PENDING]: classes.statusPending
+});
 
 function StepWorking({ viewingOrder }: Props) {
   const classes = makeStyles(styles.layout)();
   const [action, bindAction] = useState(null);
 
   return (
-    <div className={classes.root}>
-      <Paper square className={classes.orderInfoContainer}>
-        <Typography variant="h5">{viewingOrder?.name || ''}</Typography>
-      </Paper>
-    <div className={classes.main}>
-      <Paper
-        square
-        classes={{ root: classes.leftContainer }}
-      >
-        <ButtonsContainer action={action}/>
-        <StepPageContainer bindAction={bindAction}/>
-      </Paper>
-      <div className={classes.rightContainer}>
-        <Paper square className={classes.stepperContainer}>
-          <StepperContainer/>
-        </Paper>
-      </div>
+    <I18n ns="translations">
+      {t => (
+        <div className={classes.root}>
+          <Paper square className={classes.orderInfoContainer}>
+            <Typography variant="h5" className={clsx(statusMap(classes)[viewingOrder?.status],classes.orderStatus)}>
+              [{t(viewingOrder?.status) || ''}]
+            </Typography>
+            <Typography variant="h5">{viewingOrder?.name || ''}</Typography>
+          </Paper>
+          <div className={classes.main}>
+            <Paper
+              square
+              classes={{ root: classes.leftContainer }}
+            >
+              <ButtonsContainer action={action}/>
+              <StepPageContainer bindAction={bindAction}/>
+            </Paper>
+            <div className={classes.rightContainer}>
+              <Paper square className={classes.stepperContainer}>
+                <StepperContainer/>
+              </Paper>
+            </div>
 
 
-    </div>
-    </div>
+          </div>
+        </div>
+      )}
+
+    </I18n>
   );
 }
 
