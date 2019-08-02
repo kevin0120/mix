@@ -7,8 +7,8 @@ import withStyles from '@material-ui/core/styles/withStyles';
 
 // core components
 import { Scrollbars } from 'react-custom-scrollbars';
-import Badge from '../Badge/Badge';
 import Grow from '@material-ui/core/Grow';
+import Badge from '../Badge/Badge';
 
 import timelineStyle from '../../common/jss/components/timelineStyle';
 

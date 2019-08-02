@@ -6,6 +6,8 @@ import stepTypes from '../steps/stepTypes';
 import * as oSel from '../../modules/order/selector';
 import styles from './styles';
 import type { tStep } from '../../modules/order/model';
+import TimeLine from '../../components/WorkPageTimeline';
+import {CardTravel} from '@material-ui/icons';
 
 const mapState = (state, props) => ({
   ...props,
@@ -33,12 +35,12 @@ const StepPageContainer = ({ step, workingStep, bindAction, result }: Props) => 
           <Grid item className={classes.left}>
             <Paper square className={classes.image}>
               {(StepComponent && (
-                  <StepComponent
-                    step={step}
-                    isCurrent={step === workingStep}
-                    bindAction={bindAction}
-                  />
-                )) || null}
+                <StepComponent
+                  step={step}
+                  isCurrent={step === workingStep}
+                  bindAction={bindAction}
+                />
+              )) || null}
             </Paper>
           </Grid>
         </Grid>
@@ -53,7 +55,51 @@ const StepPageContainer = ({ step, workingStep, bindAction, result }: Props) => 
           </Grid>
           <Grid item className={classes.result}>
             <Paper square className={classes.Paper}>
+
               {JSON.stringify(result)}
+              <TimeLine
+                simple
+                stories={[
+                {
+                  // First story
+                  simple:true,
+                  inverted: true,
+                  badgeColor: "danger",
+                  badgeIcon: CardTravel,
+                  title: "Some Title",
+                  titleColor: "danger",
+                  body: (
+                    <p>
+                      Wifey made the best Father's Day meal ever. So thankful so happy so
+                      blessed. Thank you for making my family We just had fun with the
+                      “future” theme !!! It was a fun night all together ... The always rude
+                      Kanye Show at 2am Sold Out Famous viewing @ Figueroa and 12th in
+                      downtown.
+                    </p>
+                  ),
+                  footerTitle: "11 hours ago via Twitter"
+                },
+                {
+                  // First story
+                  simple:true,
+                  inverted: true,
+                  badgeColor: "danger",
+                  badgeIcon: CardTravel,
+                  title: "Some Title",
+                  titleColor: "danger",
+                  body: (
+                    <p>
+                      Wifey made the best Father's Day meal ever. So thankful so happy so
+                      blessed. Thank you for making my family We just had fun with the
+                      “future” theme !!! It was a fun night all together ... The always rude
+                      Kanye Show at 2am Sold Out Famous viewing @ Figueroa and 12th in
+                      downtown.
+                    </p>
+                  ),
+                  footerTitle: "11 hours ago via Twitter"
+                },
+              ]}
+              />
             </Paper>
           </Grid>
         </Grid>

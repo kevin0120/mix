@@ -35,7 +35,7 @@ function StepWorking({ viewingOrder }: Props) {
         <div className={classes.root}>
           <Paper square className={classes.orderInfoContainer}>
             <Typography variant="h5" className={clsx(statusMap(classes)[viewingOrder?.status],classes.orderStatus)}>
-              [{t(viewingOrder?.status) || ''}]
+              [{viewingOrder?t(viewingOrder.status) || '':'未选中工单'}]
             </Typography>
             <Typography variant="h5">{viewingOrder?.name || ''}</Typography>
           </Paper>
@@ -64,7 +64,7 @@ function StepWorking({ viewingOrder }: Props) {
 
 const mapState = (state, props) => ({
   ...props,
-  viewingOrder: orderSelectors.viewingOrder(state.order) || {}
+  viewingOrder: orderSelectors.viewingOrder(state.order) || null
 });
 
 const mapDispatch = {};
