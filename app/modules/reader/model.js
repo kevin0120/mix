@@ -2,11 +2,10 @@
 
 import Device from '../../common/type'
 import { CommonLog } from '../../common/utils';
-import { scannerStepAction } from '../step/scannerStep/action';
 
-export const defaultScannerDispatcher = (data) => scannerStepAction.getValue(data);
+// export const defaultReaderDispatcher = (data) => readerStepAction.getValue(data);
 
-class ClsScanner extends Device {
+class ClsReader extends Device {
 
   doValidate(data: string): boolean {
     const ret: boolean =  super.doValidate(data);
@@ -16,4 +15,4 @@ class ClsScanner extends Device {
   }
 }
 
-export default ClsScanner;
+export default ClsReader;
