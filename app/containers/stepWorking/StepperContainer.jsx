@@ -6,7 +6,7 @@ import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepButton from '@material-ui/core/StepButton';
 import StepLabel from '@material-ui/core/StepLabel';
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Loop } from '@material-ui/icons';
 import STEP_STATUS from '../../modules/step/model';
@@ -47,16 +47,17 @@ const StepperContainer = ({
                           }: StepperLayoutProps) => {
   const classes = makeStyles(styles.stepperContainer)();
 
-  const [viewingStepRef, setViewingStepRef] = useState(null);
+const viewingRef=useRef(null);
+
   useEffect(() => {
-    if (viewingStepRef) {
+    if (viewingRef?.current) {
       // eslint-disable-next-line react/no-find-dom-node
-      const node = ReactDOM.findDOMNode(viewingStepRef);
+      const node = ReactDOM.findDOMNode(viewingRef.current);
       if (node) {
-        node.scrollIntoView({ block: 'center' });
+        node.scrollIntoView({ block: 'center', behavior: 'smooth' });
       }
     }
-  }, [viewingStepRef]);
+  }, [viewingRef.current]);
 
   return (
     <Stepper
@@ -67,28 +68,31 @@ const StepperContainer = ({
     >
       {steps.map((s, idx) => {
         const fail = s.status === STEP_STATUS.FAIL;
-        const stepProps = {};
+
         const labelProps = {
           error: fail
         };
+
         const stepButtonProps = {};
+
         if (workingStep === s) {
           stepButtonProps.icon = <Loop className={classes.stepIconDoing}/>;
         }
+
+        if(s===viewingStep){
+          stepButtonProps.ref=viewingRef;
+        }else{
+          stepButtonProps.ref=null;
+        }
+
         return (
-          <Step key={s.name} {...stepProps} >
+          <Step key={s.name}>
             <StepButton
               completed={s.status === STEP_STATUS.FINISHED}
               onClick={() => jumpTo(idx)}
               className={classes.stepButton}
               {...stepButtonProps}
-              ref={
-                r => {
-                  if (s === viewingStep) {
-                    setViewingStepRef(r);
-                  }
-                }
-              }
+              ref={s===viewingStep? viewingRef:()=>{}}
             >
               <StepLabel {...labelProps} >
                 {s.name}
