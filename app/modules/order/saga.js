@@ -1,7 +1,8 @@
 // @flow
-import { take, call, race, select, put, all, takeLatest, takeEvery } from 'redux-saga/effects';
+import { take, call, race, select, put, all, takeLatest, takeEvery, debounce } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 import React from 'react';
+import type { Saga } from 'redux-saga';
 import { ORDER, orderActions } from './action';
 import steps from '../step/saga';
 import {
@@ -11,27 +12,35 @@ import {
   stepType,
   orderLength,
   orderSteps,
-  doable
+  doable,
+  viewingOrder
 } from './selector';
 import dialogActions from '../dialog/action';
 import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
-import { durationString, timeCost } from '../../common/utils';
+import { CommonLog, durationString, timeCost } from '../../common/utils';
+import type { tOrder, tStep, tStepArray } from './model';
 
 const mapping = {
-  onOrderFinish: showResult
+  onOrderFinish: showResult,
+  onOrderView: showOverview
 };
 
-function* showResult() {
+function* showResult(order) {
   try {
-    const workingOrderSteps = yield select((state => orderSteps(workingOrder(state.order))));
-    const data = workingOrderSteps.map(s => ([
+    const oSteps = orderSteps(order) || [];
+    const data = oSteps.map(s => ([
       s.name,
       durationString(timeCost(s.times))
     ]));
     yield put(
-      dialogActions.showDialog({
-        hasOk: true,
+      dialogActions.dialogShow({
+        buttons: [
+          {
+            label: 'Common.Yes',
+            color: 'info'
+          }
+        ],
         closeAction: push('/app'),
         title: i18n.t('Common.Result'),
         content: <Table
@@ -46,53 +55,119 @@ function* showResult() {
       })
     );
   } catch (e) {
-    console.error('returnHome error', e);
+    const err = (e: Error);
+    CommonLog.lError(`showResult error: ${err.message}`);
   }
 }
 
-export default function* root(): any {
+function* showOverview(order: tOrder) {
+  try {
+    const WIPOrder: tOrder = yield select(s => workingOrder(s.order));
+    const vOrderSteps: ?tStepArray = yield select((state => orderSteps(viewingOrder(state.order))));
+    const data = vOrderSteps.map((s: tStep, idx) => ([
+      idx + 1,
+      s.name,
+      s.type,
+      s.info
+    ]));
+    if (WIPOrder?.name === order.name){
+      // 进行中的工单不显示概览对话框
+      return
+    }
+    yield put(
+      dialogActions.dialogShow({
+        buttons: [
+          {
+            label: 'Common.Close',
+            color: 'warning'
+          },
+          (!WIPOrder) && doable(order) && {
+            label: 'Order.Start',
+            color: 'info',
+            action: orderActions.workOn(order)
+          }
+        ],
+        title: i18n.t('Order.Overview'),
+        content: <Table
+          tableHeaderColor="info"
+          tableHead={[
+            i18n.t('Common.Idx'),
+            i18n.t('Order.Step.name'),
+            i18n.t('Order.Step.type'),
+            i18n.t('Order.Step.desc')
+          ]}
+          tableData={data}
+          colorsColls={['info']}
+        />
+      }));
+  } catch (e) {
+    CommonLog.lError(`showOverview error: ${e.message}`);
+  }
+}
+
+// eslint-disable-next-line no-unused-vars
+function* DebounceViewStep(action) {
+
+  try {
+    const {type} = action;
+    switch (type) {
+      case ORDER.STEP.PREVIOUS:
+        yield put({type: ORDER.STEP.VIEW_PREVIOUS});
+        break;
+      case ORDER.STEP.NEXT:
+        yield put({type: ORDER.STEP.VIEW_NEXT});
+        break;
+      default:
+        break;
+    }
+  }catch (e) {
+    CommonLog.lError(e);
+  }
+}
+
+export default function* root(): Saga<void> {
   try {
     yield all([
       takeLatest(ORDER.WORK_ON, workOnOrder),
-      takeEvery(ORDER.VIEW, viewOrder)
+      takeEvery(ORDER.VIEW, viewOrder),
+      debounce(500, ORDER.STEP.PREVIOUS, DebounceViewStep),
+      debounce(500, ORDER.STEP.NEXT, DebounceViewStep),
     ]);
   } catch (e) {
-    console.error(e);
+    CommonLog.lError(e);
   }
 }
 
 function* viewOrder({ order }) {
   try {
-    const WIPOrder = yield select(s => workingOrder(s.order));
-    if ((!WIPOrder) && doable(order)) {
-      yield put(orderActions.workOn(order));
-    }
+    yield call(mapping.onOrderView, order);
   } catch (e) {
-    console.error(e);
+    CommonLog.lError(e);
   }
 }
 
 function* workOnOrder() {
   try {
+    const wOrder = yield select(s => workingOrder(s.order));
     const { finish } = yield race({
       exit: call(doOrder),
       finish: take(ORDER.FINISH),
       pending: take(ORDER.PENDING),
       cancel: take(ORDER.CANCEL)
     });
-    console.log('order finished');
+    CommonLog.Info('order finished');
     if (finish) {
-      yield call(mapping.onOrderFinish);
+      yield call(mapping.onOrderFinish, wOrder);
     }
   } catch (e) {
-    console.error(e);
+    CommonLog.lError(e);
   }
 }
 
 function* doOrder() {
   try {
     while (true) {
-      console.log('doing order');
+      CommonLog.Info('Doing Order...');
       const wOrder = yield select(state => workingOrder(state.order));
       const step = workingStep(wOrder);
       const idx = workingIndex(wOrder);
@@ -105,13 +180,13 @@ function* doOrder() {
       });
       yield put(orderActions.stepTime(idx, new Date()));
       if (next) {
-        const wOrder = yield select(state => workingOrder(state.order));
-        if (workingIndex(wOrder) >= orderLength(wOrder)) {
+        const newWOrder = yield select(state => workingOrder(state.order));
+        if (workingIndex(newWOrder) >= orderLength(newWOrder)) {
           yield put(orderActions.finishOrder());
         }
       }
     }
   } catch (e) {
-    console.error(e);
+    CommonLog.lError(e);
   }
 }

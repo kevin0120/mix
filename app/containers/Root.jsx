@@ -8,6 +8,7 @@ import SnackbarProvider from '../components/Notifier/SnackbarProvider';
 import type { Store } from '../modules/indexReducer';
 import Routes from './Routes';
 import theme from '../common/theme';
+import { systemInit } from '../modules/systemInit/action';
 
 type Props = {
   store: Store,
@@ -19,7 +20,7 @@ const Root = (props: Props) => {
   const { store, history } = props;
   const { pages } = store.getState().setting;
   // listenToNewCar(store.dispatch, store.getState);
-  // store.dispatch(systemInit()); // 初始化
+  store.dispatch(systemInit()); // 初始化
   return (
     <MuiThemeProvider theme={theme}>
       <Provider store={store}>

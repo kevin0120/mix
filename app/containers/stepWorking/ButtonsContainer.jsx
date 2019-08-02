@@ -98,7 +98,7 @@ const ButtonsContainer = ({
             <Button
               justIcon
               type="button"
-              color="warning"
+              color="github"
               onClick={() => setDialogOpen(true)}
             >
                 <Menu fontSize="inherit" className={classes.menuIcon}/>
@@ -173,7 +173,7 @@ const ButtonsContainer = ({
         disabled={viewingStep !== workingStep || !viewingStep?.skippable}
         type="button"
         onClick={() => doNextStep()}
-        color="primary"
+        color="tumblr"
       >
         {t(actionStepWorkingDef.SKIP)}
       </Button>
@@ -181,7 +181,7 @@ const ButtonsContainer = ({
         disabled={viewingStep !== workingStep || !viewingStep?.undoable}
         type="button"
         onClick={() => doPreviousStep()}
-        color="primary"
+        color="danger"
       >
         {t(actionStepWorkingDef.UNDO)}
       </Button>

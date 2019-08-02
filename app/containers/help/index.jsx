@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import AppBarBack from '../../components/AppBarBack';
 import Paper from '@material-ui/core/Paper';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -14,12 +13,12 @@ const fakeHelp = [
   {
     key: 'Version',
     displayTitle: '版本',
-    value: 'v1.0.0-rc6'
+    value: 'v2.0.0-alpha'
   },
   {
     key: 'ReleaseDate',
     displayTitle: '发布时间',
-    value: '2019-03-26'
+    value: '2019-08-26'
   },
   // {
   //   key: 'Contact',
@@ -29,7 +28,7 @@ const fakeHelp = [
   {
     key: 'Company',
     displayTitle: '公司',
-    value: '上海途泰工具技术有限公司'
+    value: '上海砺星信息技术有限公司'
   },
   // {
   //   key: 'ContactPerson',

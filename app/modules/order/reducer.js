@@ -4,7 +4,7 @@ import { genReducers } from '../util';
 import type { tOrder, tOrderState, tOrderStepIdx, tStep } from './model';
 import { ORDER_STATUS } from './model';
 import STEP_STATUS from '../step/model';
-import { demoOrder, demoOrderCancel, demoOrderDone, demoOrderPending, demoOrder2 } from './demoData';
+import { demoOrder, demoOrderLong, demoOrderCancel, demoOrderDone, demoOrderPending } from './demoData';
 import {
   getStep,
   orderLength,
@@ -16,12 +16,13 @@ import {
   workingStep
 } from './selector';
 
+import {isNil} from 'lodash-es';
+
 const initState = {
   workingOrder: null,
   viewingOrder: null,
-  workingIndex: 0,
   viewingIndex: 0,
-  list: [demoOrder, demoOrderCancel, demoOrderPending, demoOrderDone]
+  list: [demoOrder, demoOrderLong, demoOrderCancel, demoOrderPending, demoOrderDone]
 };
 
 function reduceStepData(reducer, state: tOrderState, action): tOrderState {
@@ -67,6 +68,10 @@ const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: a
     };
   },
   [ORDER.WORK_ON]: (state, action) => {
+    const wOrder = workingOrder(state);
+    if (wOrder) {
+      return state;
+    }
     const { order } = action;
     const startIndex = workingIndex(order);
     order.status = ORDER_STATUS.WIP;
@@ -82,7 +87,8 @@ const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: a
       wOrder.status = ORDER_STATUS.DONE;
     }
     return {
-      ...state
+      ...state,
+      workingOrder: null
     };
   },
   [ORDER.CANCEL]: (state) => {
@@ -94,24 +100,30 @@ const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: a
     if (wStep && wStep.times && wStep.times.length % 2 === 1) {
       wStep.times.push(new Date());
     }
+    const wOrder = workingOrder(state);
+    const newWOrder = wOrder === vOrder ? null : wOrder;
     return {
       ...state,
-      workingOrder: null
+      workingOrder: newWOrder
     };
   },
   [ORDER.PENDING]: (state, action) => {
     const { order } = action;
     order.status = ORDER_STATUS.PENDING;
     const wStep = workingStep(order);
-    if (wStep && wStep.times && wStep.times.length % 2 === 1) {
+    const length = wStep?.times?.length;
+    if ( !isNil(length) && length % 2 === 1) {
       wStep.times.push(new Date());
     }
+    const vOrder = viewingOrder(state);
+    const wOrder = workingOrder(state);
+    const newWOrder = wOrder === vOrder ? null : wOrder;
     return {
       ...state,
-      workingOrder: null
+      workingOrder: newWOrder
     };
   },
-  [ORDER.STEP.NEXT]: (state) => {
+  [ORDER.STEP.VIEW_NEXT]: (state) => {
     const newIndex = limitIndex(viewingOrder(state), viewingIndex(state) + 1);
     return {
       ...state,
@@ -119,7 +131,7 @@ const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: a
     };
   },
 
-  [ORDER.STEP.PREVIOUS]: (state) => {
+  [ORDER.STEP.VIEW_PREVIOUS]: (state) => {
     const newIndex = limitIndex(viewingOrder(state), viewingIndex(state) - 1);
     return {
       ...state,
@@ -138,11 +150,11 @@ const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: a
   [ORDER.STEP.STATUS]: setStepStatus,
   //
   [ORDER.STEP.DO_NEXT]: (state) => {
-    const wOrder = workingOrder(state);
+    const wOrder: ?tOrder = workingOrder(state);
     const newIndex = workingIndex(wOrder) + 1;
     const vIndex = workingStep(wOrder) === viewingStep(state) ? newIndex
       : viewingIndex(state);
-    if (wOrder) {
+    if (!isNil(wOrder)) {
       wOrder.workingIndex = newIndex;
     }
     return {

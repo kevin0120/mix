@@ -15,8 +15,9 @@ import { setNewNotification } from '../notification/action';
 import { toolStatusChange } from '../tools/action';
 // import { andonScanner } from '../andon/action';
 import { CommonLog } from '../../common/utils';
-import type { tWebSocketEvent, tRushWebSocketData, tBarcode } from './type';
-import type { tIOWSMsgType, tIOContact } from '../io/type';
+import type { tWebSocketEvent, tRushWebSocketData, tBarcode, tReader } from './type';
+import type {tIOWSMsgType, tIOContact } from '../io/type';
+import { ReaderNewData } from '../reader/action';
 
 let task = null;
 let ws = null;
@@ -181,6 +182,12 @@ function* handleRushData(type: tWebSocketEvent, data: tRushWebSocketData): Saga<
         const d = (data.data: tBarcode);
         CommonLog.Info(` Scanner receive data: ${d.barcode}`);
         yield put(ScannerNewData(d.barcode));
+        break;
+      }
+      case 'reader': {
+        const d = (data.data: tReader);
+        CommonLog.Info(` Reader receive data: ${d.uid}`);
+        yield put(ReaderNewData(d.uid));
         break;
       }
       case 'controller': {

@@ -3,10 +3,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { push } from 'connected-react-router';
-import Button from '../../components/CustomButtons/Button';
 import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
-import Notify from '../../components/Notify';
+import Button from '../../components/CustomButtons/Button';
 import NavBar from '../../components/NavBar';
 import LayoutDrawer from '../../components/LayoutDrawer';
 import type { tUser } from '../../modules/user/model';
@@ -14,6 +13,7 @@ import { logoutRequest } from '../../modules/user/action';
 import type { Dispatch } from '../../modules/indexReducer';
 import type { tRouteComponent, tRouteObj } from '../model';
 import Notifier from '../../components/Notifier';
+import Dialog from '../../components/Dialog';
 
 type Props = {
   users: Array<tUser>,
@@ -41,8 +41,8 @@ function AppLayout(
   const { DefaultContent, navBarContents } = self;
   return (
     <React.Fragment>
-      <Notify/>
       <Notifier/>
+      <Dialog/>
       <div style={{ height: 'calc(100% - 64px)', display: 'flex' }}>
         <LayoutDrawer
           contents={users.map((u) => ({

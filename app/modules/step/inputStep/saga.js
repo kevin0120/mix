@@ -32,6 +32,13 @@ export default {
     } catch (e) {
       console.error(e);
     }
+  },
+  * [STEP_STATUS.FAIL](ORDER, orderActions) {
+    try {
+      yield put(orderActions.doNextStep());
+    } catch (e) {
+      console.error(e);
+    }
   }
 };
 

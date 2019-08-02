@@ -37,7 +37,7 @@ class Pages extends React.Component {
                 <p className={classes.right}>
                   &copy; {1900 + new Date().getYear()}{' '}
                   <a href="https://www.liktek.com" className={anchor}>
-                    上海途泰信息科技技术有限公司
+                    上海砺星信息技术有限公司
                   </a>
                 </p>
               }

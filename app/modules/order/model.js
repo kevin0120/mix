@@ -21,7 +21,7 @@ export type tOrderState = {
   list: Array<tOrder>
 };
 
-export type tOrderStatus = $Keys<typeof ORDER_STATUS>;
+export type tOrderStatus = $Values<typeof ORDER_STATUS>;
 
 export const ORDER_STATUS = {
   TODO: 'OrderStatus.TODO',

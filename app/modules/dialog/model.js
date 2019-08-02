@@ -1,17 +1,22 @@
 // @flow
 
 import React from 'react';
+import PropTypes from 'prop-types';
+import type { Dispatch } from '../indexReducer';
 
-export type dialogConfig = {
-  hasOk: false,
-  hasCancel: true,
-  cancelAction: () => {},
-  okAction: () => {},
-  content: React.Component,
-  title: React.Component
+type tDialogButton = {
+  action: Dispatch,
+  color: string,
+  label: string
 };
 
-export type dialogState = {
-  open: false,
-  config: dialogConfig
+export type tDialogConfig = {
+  buttons: Array<tDialogButton>,
+  content: PropTypes.Element,
+  title: PropTypes.Element
+};
+
+export type tDialogState = {
+  open: boolean,
+  config: tDialogConfig
 };
