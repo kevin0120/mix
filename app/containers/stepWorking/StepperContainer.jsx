@@ -6,8 +6,8 @@ import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepButton from '@material-ui/core/StepButton';
 import StepLabel from '@material-ui/core/StepLabel';
-import React from 'react';
-import clsx from 'clsx';
+import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { Loop } from '@material-ui/icons';
 import STEP_STATUS from '../../modules/step/model';
 import styles from './styles';
@@ -32,9 +32,10 @@ const mapDispatch = {
 
 type StepperLayoutProps = {
   steps: tStepArray,
-  viewingIndex: {},
+  viewingIndex: number,
   jumpTo: Dispatch,
-  workingStep: tStep
+  workingStep: tStep,
+  viewingStep: tStep
 };
 
 const StepperContainer = ({
@@ -42,10 +43,20 @@ const StepperContainer = ({
                             viewingIndex,
                             jumpTo,
                             workingStep,
+                            viewingStep
                           }: StepperLayoutProps) => {
   const classes = makeStyles(styles.stepperContainer)();
 
-
+  const [viewingStepRef, setViewingStepRef] = useState(null);
+  useEffect(() => {
+    if (viewingStepRef) {
+      // eslint-disable-next-line react/no-find-dom-node
+      const node = ReactDOM.findDOMNode(viewingStepRef);
+      if (node) {
+        node.scrollIntoView({ block: 'center',  behavior: 'smooth' });
+      }
+    }
+  }, [viewingStepRef]);
 
   return (
     <Stepper
@@ -65,12 +76,19 @@ const StepperContainer = ({
           stepButtonProps.icon = <Loop className={classes.stepIconDoing}/>;
         }
         return (
-          <Step key={s.name} {...stepProps}>
+          <Step key={s.name} {...stepProps} >
             <StepButton
               completed={s.status === STEP_STATUS.FINISHED}
               onClick={() => jumpTo(idx)}
               className={classes.stepButton}
               {...stepButtonProps}
+              ref={
+                r => {
+                  if (s === viewingStep) {
+                    setViewingStepRef(r);
+                  }
+                }
+              }
             >
               <StepLabel {...labelProps} >
                 {s.name}
