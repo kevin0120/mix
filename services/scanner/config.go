@@ -38,10 +38,10 @@ func (c Config) Validate() error {
 		if runtime.GOOS == "windows" {
 			if !strings.HasPrefix(c.EntityLabel, "COM") {
 				return errors.New("Platform Windows EntityLabel Is COM Port")
-			} else {
-				if !strings.Contains(c.EntityLabel, ":") {
-					return errors.New("Platform Unix/Linux EntityLabel Is VID:PID Format")
-				}
+			}
+		} else {
+			if !strings.Contains(c.EntityLabel, ":") {
+				return errors.New("Platform Unix/Linux EntityLabel Is VID:PID Format")
 			}
 		}
 	}
