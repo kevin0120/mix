@@ -36,13 +36,11 @@ const dialogActions = {
 
 function* showDialog(action) {
   try {
-    while (true) {
-      const { config } = action;
+    const { config } = action;
       const dialogAction = yield take(Object.keys(dialogActions));
       if (dialogActions[dialogAction.type]) {
         yield call(dialogActions[dialogAction.type], config,dialogAction);
       }
-    }
   } catch (e) {
     console.error(e);
   }

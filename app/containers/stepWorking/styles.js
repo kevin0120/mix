@@ -3,6 +3,16 @@ const layout = (theme) => ({
     width: '100%',
     height: '100%',
     display: 'flex',
+    flexDirection: 'column',
+    backgroundImage: 'url("../resources/imgs/texture.png")',
+    backgroundRepeat: 'repeat',
+    backgroundColor: theme.palette.grey[100]
+
+  },
+  main: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
     flexDirection: 'row',
     backgroundImage: 'url("../resources/imgs/texture.png")',
     backgroundRepeat: 'repeat',
@@ -50,17 +60,36 @@ const layout = (theme) => ({
     height: 60,
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
+    textAlign: 'center',
     padding: `0 ${theme.spacing(2)}px`,
     alignItems: 'center',
 
     backgroundColor: theme.palette.common.white
-  }
+  },
+  orderStatus:{
+    marginRight:theme.spacing(1),
+  },
+  statusTodo:{
+    color:theme.palette.gray.main,
+  },
+  statusWIP:{
+    color:theme.palette.primary.main,
+  },
+  statusDone:{
+    color:theme.palette.success.main,
+  },
+  statusCancel:{
+    color:theme.palette.danger.main,
+  },
+  statusPending:{
+    color:theme.palette.warning.main,
+  },
 });
 
-const stepperContainer = {
+const stepperContainer = theme => ({
   root: {
-    padding: 16,
+    padding: 16
   },
   stepButton: {
     display: 'flex',
@@ -70,8 +99,37 @@ const stepperContainer = {
     height: 50,
     padding: '0 0',
     margin: '10px 0'
+  },
+  stepIconDoing: {
+    animation: '$doing-icon-rotation 1s infinite linear',
+    color: theme.palette.primary.main
+  },
+  '@keyframes doing-icon-rotation': {
+    '0%': {
+      transform: 'rotate(0deg)'
+    },
+    '100%': {
+      transform: 'rotate(-360deg)'
+    }
+  },
+  stepLabelRoot: {
+    flex: 1,
+    display: 'flex'
+
+  },
+  stepLabelContainer: {
+    flex: 1,
+    display: 'flex'
+  },
+  stepLabel: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between'
   }
-};
+
+});
 
 const buttonsContainer = {
   root: {
@@ -82,9 +140,7 @@ const buttonsContainer = {
     padding: '0 10px',
     alignItems: 'center'
   },
-  menuIcon: {
-
-  },
+  menuIcon: {},
   menuButton: {},
   dialog: {},
   dialogContainer: {
@@ -101,7 +157,7 @@ const buttonsContainer = {
 
 const stepPageContainer = {
   root: {
-    flex: 1,
+    flex: 1
   },
 
   left: {

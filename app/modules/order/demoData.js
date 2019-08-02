@@ -11,7 +11,7 @@ export const demoOrder = {
   steps: [
 
     {
-      name: 'screw',
+      name: '拧紧作业指导',
       info: 'this is an screw step',
       type: 'screw',
       skippable: false,
@@ -50,7 +50,7 @@ export const demoOrder = {
       }
     },
     {
-      name: 'skippable',
+      name: '扫码',
       info: 'this step is skippable',
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -61,7 +61,7 @@ export const demoOrder = {
       }
     },
     {
-      name: 'skippable',
+      name: '扫码',
       info: 'this step is skippable',
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -71,87 +71,263 @@ export const demoOrder = {
         label: 'name'
       }
     }
-    // {
-    //   name: 'undoable',
-    //   info: 'this step is undoable',
-    //   type: 'input',
-    //   undoable: true,
-    //   skippable: true,
-    //
-    //   payload: {
-    //     label: 'address'
-    //   }
-    // },
-    // {
-    //   name: 'instruction',
-    //   info: 'this is an instruction step',
-    //   type: 'instruction',
-    //   skippable: true,
-    //
-    //   payload: {
-    //     instruction: '根据这段文字进行作业'
-    //   }
-    // },
+  ]
+};
 
-    // {
-    //   name: '扫码',
-    //   info: 'this step collects a input',
-    //   type: 'scanner',
-    //   payload: {
-    //     label: 'address'
-    //   }
-    // }
-    // {
-    //   name: '联系方式',
-    //   info: 'this step collects 2 inputs',
-    //   type:'parallel_input',
-    //   steps: [
-    //     [{
-    //       name: '座机',
-    //       info: 'this step collects a input',
-    //       type: 'input', // check,collect,instruct,enable,...
-    //       payload: {
-    //         label: 'phone'
-    //       }
-    //     }, {
-    //       name: '手机',
-    //       info: 'this step collects another input',
-    //       type: 'input', // check,collect,instruct,enable,...
-    //       payload: {
-    //         label: 'mobile'
-    //       }
-    //     }],
-    //     {
-    //       name: '电子邮箱',
-    //       info: 'this step collects another input',
-    //       type: 'input', // check,collect,instruct,enable,...
-    //       payload: {
-    //         label: 'email'
-    //       }
-    //     }
-    //   ]
-    // },
-    // {
-    //   name: '评价',
-    //   info: 'this step collects 2 inputs',
-    //   steps: [
-    //     {
-    //       name: '打分',
-    //       info: 'this step collects a input',
-    //       type: 'input', // check,collect,instruct,enable,...
-    //       payload: {
-    //         label: 'score'
-    //       }
-    //     }, {
-    //       name: '评论',
-    //       info: 'this step collects another input',
-    //       type: 'input', // check,collect,instruct,enable,...
-    //       payload: {
-    //         label: 'comment'
-    //       }
-    //     }
-    //   ]
-    // }
+export const demoOrderLong = {
+  name: 'Long Demo Order',
+  info: 'this demo order is long!',
+  type: 'step',
+  status: ORDER_STATUS.TODO,
+  steps: [
+    {
+      name: '拧紧作业指导',
+      info: 'this is an screw step',
+      type: 'screw',
+      skippable: false,
+      undoable: true,
+      payload: {
+        maxRetryTimes:3,
+        points: [
+          {
+            id: 1,
+            x: 10,
+            y: 10,
+            status: 'waiting'
+          }, {
+            id: 2,
+            x: 20,
+            y: 20,
+            status: 'waiting'
+          }, {
+            id: 3,
+            x: 30,
+            y: 30,
+            status: 'waiting'
+          }, {
+            id: 4,
+            x: 40,
+            y: 40,
+            status: 'waiting'
+          }, {
+            id: 5,
+            x: 50,
+            y: 50,
+            status: 'waiting'
+          }
+        ],
+        image: dataImg
+      }
+    },
+    {
+      name: '扫码',
+      info: 'this step is skippable',
+      description: '扫描二维码或在输入框中输入',
+      type: 'scanner',
+      skippable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    },
+    {
+      name: '扫码',
+      info: 'this step is skippable',
+      description: '扫描二维码或在输入框中输入',
+      type: 'scanner',
+      skippable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    },
+    {
+      name: '扫码',
+      info: 'this step is skippable',
+      description: '扫描二维码或在输入框中输入',
+      type: 'scanner',
+      skippable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    },
+    {
+      name: '扫码',
+      info: 'this step is skippable',
+      description: '扫描二维码或在输入框中输入',
+      type: 'scanner',
+      skippable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    },
+    {
+      name: '扫码',
+      info: 'this step is skippable',
+      description: '扫描二维码或在输入框中输入',
+      type: 'scanner',
+      skippable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    },
+    {
+      name: '扫码',
+      info: 'this step is skippable',
+      description: '扫描二维码或在输入框中输入',
+      type: 'scanner',
+      skippable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    },
+    {
+      name: '扫码',
+      info: 'this step is skippable',
+      description: '扫描二维码或在输入框中输入',
+      type: 'scanner',
+      skippable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    },
+    {
+      name: '扫码',
+      info: 'this step is skippable',
+      description: '扫描二维码或在输入框中输入',
+      type: 'scanner',
+      skippable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    },
+    {
+      name: '扫码',
+      info: 'this step is skippable',
+      description: '扫描二维码或在输入框中输入',
+      type: 'scanner',
+      skippable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    },
+    {
+      name: '扫码',
+      info: 'this step is skippable',
+      description: '扫描二维码或在输入框中输入',
+      type: 'scanner',
+      skippable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    },
+    {
+      name: '扫码',
+      info: 'this step is skippable',
+      description: '扫描二维码或在输入框中输入',
+      type: 'scanner',
+      skippable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    },
+    {
+      name: '扫码',
+      info: 'this step is skippable',
+      description: '扫描二维码或在输入框中输入',
+      type: 'scanner',
+      skippable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    },
+    {
+      name: '扫码',
+      info: 'this step is skippable',
+      description: '扫描二维码或在输入框中输入',
+      type: 'scanner',
+      skippable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    },
+    {
+      name: '扫码',
+      info: 'this step is skippable',
+      description: '扫描二维码或在输入框中输入',
+      type: 'scanner',
+      skippable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    },
+    {
+      name: '扫码',
+      info: 'this step is skippable',
+      description: '扫描二维码或在输入框中输入',
+      type: 'scanner',
+      skippable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    },
+    {
+      name: '扫码',
+      info: 'this step is skippable',
+      description: '扫描二维码或在输入框中输入',
+      type: 'scanner',
+      skippable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    },
+    {
+      name: '扫码',
+      info: 'this step is skippable',
+      description: '扫描二维码或在输入框中输入',
+      type: 'scanner',
+      skippable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    },
+    {
+      name: '扫码',
+      info: 'this step is skippable',
+      description: '扫描二维码或在输入框中输入',
+      type: 'scanner',
+      skippable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    },
+    {
+      name: '扫码',
+      info: 'this step is skippable',
+      description: '扫描二维码或在输入框中输入',
+      type: 'scanner',
+      skippable: true,
+      data: {},
+      payload: {
+        label: 'name'
+      }
+    }
   ]
 };
 
