@@ -1,24 +1,21 @@
-import type { dialogConfig } from './model';
+import type { tDialogConfig } from './model';
 
 export const DIALOG = {
   SHOW: 'DIALOG_SHOW',
-  CANCEL: 'DIALOG_CANCEL',
-  OK: 'DIALOG_OK',
+  BUTTON: 'DIALOG_BUTTON',
   CLOSE: 'DIALOG_CLOSE'
 };
 
 export default {
-  showDialog: (config: dialogConfig) => ({
+  dialogShow: (config: tDialogConfig) => ({
     type: DIALOG.SHOW,
     config
   }),
-  cancelDialog: () => ({
-    type: DIALOG.CANCEL
+  dialogButton: (idx) => ({
+    type: DIALOG.BUTTON,
+    idx
   }),
-  okDialog: () => ({
-    type: DIALOG.OK
-  }),
-  closeDialog: () => ({
+  dialogClose: () => ({
     type: DIALOG.CLOSE
   })
 };

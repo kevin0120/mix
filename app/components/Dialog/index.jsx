@@ -11,7 +11,7 @@ import styles from './style';
 import dialogActions from '../../modules/dialog/action';
 import Button from '../CustomButtons/Button';
 import { Dispatch } from '../../modules/indexReducer';
-import type { dialogConfig } from '../../modules/dialog/model';
+import type { tDialogConfig } from '../../modules/dialog/model';
 
 const mapState = (state, props) => ({
   ...props,
@@ -20,9 +20,8 @@ const mapState = (state, props) => ({
 });
 
 const mapDispatch = {
-  cancel: dialogActions.cancelDialog,
-  ok: dialogActions.okDialog,
-  close: dialogActions.closeDialog
+  closeAction: dialogActions.dialogClose,
+  buttonAction: dialogActions.dialogButton
 };
 
 const Transition = React.forwardRef((props, ref) => (
@@ -30,65 +29,55 @@ const Transition = React.forwardRef((props, ref) => (
 ));
 
 type Props = {
-  config: dialogConfig,
+  config: tDialogConfig,
   open: boolean,
-  cancel: Dispatch,
-  ok: Dispatch,
-  close: Dispatch
+  buttonAction: Dispatch,
+  closeAction: Dispatch
 };
 
 function customDialog(props: Props) {
-  const { config, open, cancel, ok, close } = props;
+  const { config, open, buttonAction, closeAction } = props;
   const classes = makeStyles(styles)();
-  const { hasCancel, hasOk, title, content } = config;
+  const { buttons, title, content } = config;
 
-  const onCancel = () => {
-    if (hasCancel && cancel) {
-      cancel();
-    }
-    close();
+  const onButton = (idx) => {
+    buttonAction(idx);
+    closeAction();
   };
-  const onOk = () => {
-    if (hasOk && ok) {
-      ok();
-    }
-    close();
+  const onClose = () => {
+    closeAction();
   };
 
   return (
     <I18n>
       {t => (
-          <Dialog
-            classes={{
-              root: classes.modalRoot,
-              paper: `${classes.modal} ${classes.modalLarge}`
-            }}
-            TransitionComponent={Transition}
-            keepMounted
-            open={open}
-            onClose={onCancel}
-            aria-labelledby="form-dialog-title"
-            scroll="paper"
-          >
-            <DialogTitle id="form-dialog-title" className={classes.modalHeader}>
-              {title || ''}
-            </DialogTitle>
-            <DialogContent className={classes.modalBody}>
-              {content || ''}
-            </DialogContent>
-            <DialogActions>
-              {hasCancel ? (
-                <Button onClick={onCancel} color="info" autoFocus round>
-                  {t('Common.Close')}
-                </Button>
-              ) : null}
-              {hasOk ? (
-                <Button onClick={onOk} color="info" autoFocus round>
-                  {t('Common.Yes')}
-                </Button>
-              ) : null}
-            </DialogActions>
-          </Dialog>
+        <Dialog
+          classes={{
+            root: classes.modalRoot,
+            paper: `${classes.modal} ${classes.modalLarge}`
+          }}
+          TransitionComponent={Transition}
+          keepMounted
+          open={open}
+          onClose={onClose}
+          aria-labelledby="form-dialog-title"
+          scroll="paper"
+        >
+          <DialogTitle id="form-dialog-title" className={classes.modalHeader}>
+            {(typeof title === 'string' ? t(title) : title) || ''}
+          </DialogTitle>
+          <DialogContent className={classes.modalBody}>
+            {content || ''}
+          </DialogContent>
+          <DialogActions>
+            {
+              buttons?.map((b, idx) => b ?
+                <Button key={b.label} onClick={() => onButton(idx)} color={b.color || 'info'} round>
+                  {t(b.label || '')}
+                </Button> : null) || null
+            }
+          </DialogActions>
+        </Dialog>
       )}
     </I18n>
   );

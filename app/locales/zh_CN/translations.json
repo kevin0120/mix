@@ -83,6 +83,7 @@
   "Common": {
     "Yes": "是",
     "No": "否",
+    "Idx": "序号",
     "WorkSegment": "工段",
     "WorkCenter": "工位",
     "SocketTray": "套筒",
@@ -205,5 +206,15 @@
     "Page": "页",
     "of": "/",
     "rows": "行"
+  },
+  "Order": {
+    "Step": {
+      "name": "名称",
+      "type": "类型",
+      "desc": "描述"
+    },
+    "Start": "开始",
+    "info": "工单信息",
+    "Overview": "概览"
   }
 }

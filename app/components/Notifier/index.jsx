@@ -51,6 +51,7 @@ class Notifier extends Component {
         action: (k) => (
           <Button
             justIcon
+            regular
             onClick={() => {
               closeSnackbarAction(k);
             }}

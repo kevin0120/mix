@@ -3,8 +3,8 @@ import { ORDER } from './action';
 import { genReducers } from '../util';
 import type { tOrder, tOrderState, tOrderStepIdx, tStep } from './model';
 import { ORDER_STATUS } from './model';
-import STEP_STATUS  from '../step/model';
-import { demoOrder, demoOrderCancel, demoOrderDone, demoOrderPending, demoOrder2 } from './demoData';
+import STEP_STATUS from '../step/model';
+import { demoOrder, demoOrderCancel, demoOrderDone, demoOrderPending } from './demoData';
 import {
   getStep,
   orderLength,
@@ -19,7 +19,6 @@ import {
 const initState = {
   workingOrder: null,
   viewingOrder: null,
-  workingIndex: 0,
   viewingIndex: 0,
   list: [demoOrder, demoOrderCancel, demoOrderPending, demoOrderDone]
 };
@@ -67,6 +66,10 @@ const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: a
     };
   },
   [ORDER.WORK_ON]: (state, action) => {
+    const wOrder = workingOrder(state);
+    if (wOrder) {
+      return state;
+    }
     const { order } = action;
     const startIndex = workingIndex(order);
     order.status = ORDER_STATUS.WIP;
@@ -82,7 +85,8 @@ const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: a
       wOrder.status = ORDER_STATUS.DONE;
     }
     return {
-      ...state
+      ...state,
+      workingOrder: null
     };
   },
   [ORDER.CANCEL]: (state) => {
@@ -94,9 +98,11 @@ const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: a
     if (wStep && wStep.times && wStep.times.length % 2 === 1) {
       wStep.times.push(new Date());
     }
+    const wOrder = workingOrder(state);
+    const newWOrder = wOrder === vOrder ? null : wOrder;
     return {
       ...state,
-      workingOrder: null
+      workingOrder: newWOrder
     };
   },
   [ORDER.PENDING]: (state, action) => {
@@ -106,9 +112,12 @@ const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: a
     if (wStep && wStep.times && wStep.times.length % 2 === 1) {
       wStep.times.push(new Date());
     }
+    const vOrder = viewingOrder(state);
+    const wOrder = workingOrder(state);
+    const newWOrder = wOrder === vOrder ? null : wOrder;
     return {
       ...state,
-      workingOrder: null
+      workingOrder: newWOrder
     };
   },
   [ORDER.STEP.NEXT]: (state) => {
