@@ -101,7 +101,7 @@ const stepperContainer = theme => ({
     margin: '10px 0'
   },
   stepIconDoing: {
-    animation: '$doing-icon-rotation 1s infinite cubic-bezier(0.4, 0, 0.2, 1)',
+    animation: '$doing-icon-rotation 1s infinite linear',
     color: theme.palette.primary.main
   },
   '@keyframes doing-icon-rotation': {

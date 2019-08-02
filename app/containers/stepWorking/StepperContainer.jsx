@@ -95,12 +95,14 @@ const viewingRef=useRef(null);
               ref={s===viewingStep? viewingRef:()=>{}}
             >
               <StepLabel {...labelProps} >
+                <Typography variant="h6">
                 {s.name}
+                </Typography>
               </StepLabel>
             </StepButton>
             <StepContent>
               <Timer step={s}/>
-              <Typography>{s.info}</Typography>
+              <Typography variant="body1">{s.info}</Typography>
             </StepContent>
           </Step>
         );
