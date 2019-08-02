@@ -13,6 +13,8 @@ export type tBarcode =  {
   +barcode: string
 };
 
-
+export type tReader =  {
+  +uid: string
+};
 
 /* eslint-enable flowtype/no-weak-types */

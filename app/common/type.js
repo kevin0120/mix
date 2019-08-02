@@ -77,30 +77,30 @@ class Device implements IInputDevice{
     this._enable = !this._enable;
   }
 
-  Validate(data: string): boolean {
+  doValidate(data: string): boolean {
     if (lodash.isNil(data) || lodash.isEmpty(data)){
       const msg = `${this._source} Receive Empty Data: ${data}`;
       CommonLog.Debug(msg);
       return false
     }
     // 有效的数据
-    if (lodash.isNil(this._validator)) {
+    if (lodash.isNil(this.validator)) {
       // 没有验证器默认返回正确
       return true;
     }
-    return this._validator(data);
+    return this.validator(data);
   }
 
-  doDispatch(): AnyAction {
+  doDispatch(data: string): AnyAction {
     if (!this._enable) {
       const msg = `${this._source} Is Not Enable`;
       CommonLog.Info(msg);
     }
-    if (lodash.isNil(this._dispatcher)) {
+    if (lodash.isNil(this.dispatcher)) {
       const msg = `${this._source} Validator is Nil, Please set Validator First`;
       CommonLog.Warn(msg);
     }
-    return this.dispatcher()
+    return this.dispatcher(data);
   }
 
   set validator(validator: (string | number) => boolean){
@@ -111,6 +111,7 @@ class Device implements IInputDevice{
     return this._validator
   }
 
+  /* eslint-disable flowtype/no-weak-types */
   set dispatcher(dispatcher: (...args: any) => AnyAction){
     this._dispatcher = dispatcher;
   }
@@ -118,6 +119,7 @@ class Device implements IInputDevice{
   get dispatcher(): ?(...args: any) => AnyAction {
     return this._dispatcher
   }
+  /* eslint-enable flowtype/no-weak-types */
 
   RemoveValidator(): boolean {
     this._validator = null;
