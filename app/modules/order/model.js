@@ -2,8 +2,15 @@
 
 import STEP_STATUS from '../step/model';
 
+export type tStockMove = {
+  lot: string, // 批次号或者序列号
+  product: string // 所选的产品名称
+};
+
 export type tOrder = {
   canRework: boolean, // 是否能够返工
+  incomingProducts: Array<tStockMove>,
+  finishedProducts: Array<tStockMove>, //
   steps: tStepArray, // 工步
   status: tOrderStatus, // 工单状态
   plannedDateTime: string, // 计划时间

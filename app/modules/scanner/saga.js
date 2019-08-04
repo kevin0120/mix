@@ -7,9 +7,10 @@ import ClsScanner, {defaultScannerDispatcher} from './model';
 import type { tCommonActionType, tDeviceNewData } from '../../common/type';
 import { CommonLog } from '../../common/utils';
 
-// eslint-disable-next-line prefer-const
-let scanner = new ClsScanner('clsScanner');
+const scanner = new ClsScanner('clsScanner');
 scanner.dispatcher = defaultScannerDispatcher;
+// TODO: 是否增加到系统初始化中
+scanner.Enable(); // 必须使能才能够使用
 
 function* scannerHandler(action: tCommonActionType & tDeviceNewData): Saga<void> {
   try {

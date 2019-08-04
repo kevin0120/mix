@@ -1,8 +1,10 @@
 // @flow
+
+import {isNil} from 'lodash-es';
 import { ORDER } from './action';
 import { genReducers } from '../util';
-import type { tOrder, tOrderState, tOrderStepIdx, tStep } from './model';
 import { ORDER_STATUS } from './model';
+import type { tOrder, tOrderState, tOrderStepIdx, tStep } from './model';
 import STEP_STATUS from '../step/model';
 import { demoOrder, demoOrderLong, demoOrderCancel, demoOrderDone, demoOrderPending } from './demoData';
 import {
@@ -16,7 +18,6 @@ import {
   workingStep
 } from './selector';
 
-import {isNil} from 'lodash-es';
 
 const initState = {
   workingOrder: null,
@@ -72,7 +73,7 @@ const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: a
     if (wOrder) {
       return state;
     }
-    const { order } = action;
+    const { order }: tOrder = action;
     const startIndex = workingIndex(order);
     order.status = ORDER_STATUS.WIP;
     return {

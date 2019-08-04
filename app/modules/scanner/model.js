@@ -8,7 +8,7 @@ export const defaultScannerDispatcher = (data) => scannerStepAction.getValue(dat
 
 class ClsScanner extends Device {
 
-  doValidate(data: string): boolean {
+  doValidate(data: string | number ): boolean {
     const ret: boolean =  super.doValidate(data);
     const msg = `${this.source} validate return: ${ret}`;
     CommonLog.Info(msg);

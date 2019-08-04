@@ -28,6 +28,7 @@ import { Query, CreateDailyLogger } from '../../logger';
 
 import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
 import withKeyboard from '../../components/Keyboard';
+import { CommonLog } from '../../common/utils';
 
 const lodash = require('lodash');
 const dayjs = require('dayjs');
@@ -84,8 +85,8 @@ const requestData = () =>
     // You can retrieve your data however you want, in this case, we will just use some local data.
 
     const options = {
-      from: new Date() - 24 * 60 * 60 * 1000,
-      until: new Date(),
+      from: dayjs().subtract(1, 'day').toDate(),
+      until: dayjs().toDate(),
       limit: 600,
       start: 0,
       order: 'desc',
@@ -95,7 +96,7 @@ const requestData = () =>
     Query(options, (err, results) => {
       if (err) {
         /* TODO: handle me */
-        console.log(err.toString());
+        console.error(err);
       }
 
       resolve(results);
@@ -125,6 +126,7 @@ class Event extends React.Component {
     // Request the data however you want.  Here, we'll use our mocked service we created earlier
     requestData().then(res => {
       // Now just get the rows of data to your React Table (and update anything else like total pages or loading)
+      CommonLog.Debug(res);
       this.setState({
         loading: false,
         data: res.info.map((item, key) => ({
@@ -392,7 +394,7 @@ class Event extends React.Component {
 }
 
 Event.propTypes = {
-  classes: PropTypes.instanceOf(styles).isRequired,
+  classes: PropTypes.shape({}).isRequired,
 };
 
 export default withKeyboard(withStyles(styles)(Event));

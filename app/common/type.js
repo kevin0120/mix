@@ -1,9 +1,9 @@
 // @flow
 
-import {Action} from 'redux'
+import { Action } from 'redux';
 import { CommonLog } from './utils';
-
-const lodash = require('lodash');
+import { isURL } from 'validator/lib/isURL';
+import { isNil, isEmpty, isEqual, isString } from 'lodash-es';
 
 type tCommonActionType = {
   +type: string
@@ -15,76 +15,133 @@ export interface AnyAction extends Action {
 }
 
 type tDeviceNewData = {
-  +data: {[key: string]: any}
+  +data: { [key: string]: any }
 };
 /* eslint-enable flowtype/no-weak-types */
 
-interface IInputDevice {
-  validate(data: string | number): boolean
+// interface IInputDevice {
+//   doValidate(data: string | number): boolean
+// }
+//
+// interface IOutputDevice {
+//   doValidate(data: string | number): boolean
+// }
+
+interface IHealthChecker {
+  Healthz: boolean
 }
 
-interface IOutputDevice {
-  validate(data: string | number): boolean
-}
+class CommonExternalEntity implements IHealthChecker {
+  #name: string;
 
-// eslint-disable-next-line no-unused-vars
-const defaultValidatorFunc = (data: string): boolean => true;
+  #isHealthz: boolean = false;
 
-/* eslint-disable no-underscore-dangle */
+  #enable: boolean = false;
 
-class Device implements IInputDevice{
-  _source: string;
-
-  _isHealthz: boolean = false;
-
-  _enable: boolean = false;
-
-  _dispatcher: () => AnyAction;
-
-  _validator: (data: string | number) => ?boolean = defaultValidatorFunc;
-
-  constructor(source: string) {
-    this._source = source;
-    this._validator = null;
-    this._dispatcher = null;
-  }
-
-  get source(): string {
-    return this._source;
+  constructor(name: string) {
+    this.#name = name;
   }
 
   set Healthz(isHealthz: boolean) {
-    if (lodash.isEqual(this._isHealthz,isHealthz)){
-      return
+    if (isEqual(this.#isHealthz, isHealthz)) {
+      return;
     }
-    this._isHealthz = isHealthz;
+    this.#isHealthz = isHealthz;
     if (!isHealthz) {
       this.Disable();
     }
-    const msg = `${this._source} Healthz Status Change: ${isHealthz}`;
-    CommonLog.Info(msg)
+    const msg = `${this.#name} Healthz Status Change: ${isHealthz}`;
+    CommonLog.Info(msg);
+  }
+
+  get Healthz(): boolean {
+    return this.#isHealthz;
+  }
+
+  get Name(): string {
+    return this.#name;
+  }
+
+  get source(): string {
+    return this.#name;
   }
 
   Enable() {
-    this._enable = true;
+    this.#enable = true;
   }
 
-  Disable(){
-    this._enable = false;
+  Disable() {
+    this.#enable = false;
   }
 
   ToggleEnable() {
-    this._enable = !this._enable;
+    this.#enable = !this.#enable;
   }
 
-  doValidate(data: string): boolean {
-    if (lodash.isNil(data) || lodash.isEmpty(data)){
-      const msg = `${this._source} Receive Empty Data: ${data}`;
+}
+
+class ExternalSystem extends CommonExternalEntity {
+
+  #endpoint: ?string = null;
+
+  constructor(name: string, endpoint: string) {
+    super(name);
+    this.Endpoint = endpoint;
+  }
+
+  get Endpoint(): ?string {
+    return this.#endpoint;
+  }
+
+  set Endpoint(endpoint: string) {
+    if (!isURL(endpoint)) {
+      CommonLog.lError(`Endpoint: ${endpoint} Is Not Valid!`);
+    } else {
+      this.#endpoint = endpoint;
+    }
+  }
+
+  Connect(): boolean {
+    CommonLog.Warn('Please Override Connect Method!!!');
+    this.Healthz = false;
+    return false
+  }
+
+  Close(): boolean {
+    CommonLog.Warn('Please Override Close Method!!!');
+    this.Healthz = false;
+    return true;
+  }
+
+}
+
+// eslint-disable-next-line no-unused-vars
+const defaultValidatorFunc = (data: string | number): boolean => true;
+
+/* eslint-disable no-underscore-dangle */
+
+class Device extends CommonExternalEntity {
+  #enable: boolean = false;
+
+  #dispatcher: null | () => AnyAction = null;
+
+  #validator: null | (data: string | number) => ?boolean = defaultValidatorFunc;
+
+  doValidate(data: string | number): boolean {
+    let _isEmpty = false;
+    if (isNil(data)) {
+      _isEmpty = true;
+    }
+    if (isString(data) && isEmpty(data)) {
+      _isEmpty = true;
+    }
+    if (_isEmpty) {
+      const msg = `${this.source} Receive Empty Data: ${data}`;
       CommonLog.Debug(msg);
-      return false
+      return false;
     }
     // 有效的数据
-    if (lodash.isNil(this.validator)) {
+    if (isNil(this.validator)) {
       // 没有验证器默认返回正确
       return true;
     }
@@ -92,47 +149,50 @@ class Device implements IInputDevice{
   }
 
   doDispatch(data: string): AnyAction {
-    if (!this._enable) {
-      const msg = `${this._source} Is Not Enable`;
+    if (!this.#enable) {
+      const msg = `${this.source} Is Not Enable`;
       CommonLog.Info(msg);
+      return
     }
-    if (lodash.isNil(this.dispatcher)) {
-      const msg = `${this._source} Validator is Nil, Please set Validator First`;
+    if (isNil(this.dispatcher)) {
+      const msg = `${this.source} Validator is Nil, Please set Validator First`;
       CommonLog.Warn(msg);
+      return
     }
     return this.dispatcher(data);
   }
 
-  set validator(validator: (string | number) => boolean){
-    this._validator = validator;
+  set validator(validator: (string | number) => boolean) {
+    this.#validator = validator;
   }
 
   get validator(): ?(string | number) => boolean {
-    return this._validator
+    return this.#validator;
   }
 
   /* eslint-disable flowtype/no-weak-types */
-  set dispatcher(dispatcher: (...args: any) => AnyAction){
-    this._dispatcher = dispatcher;
+  set dispatcher(dispatcher: (...args: any) => AnyAction) {
+    this.#dispatcher = dispatcher;
   }
 
   get dispatcher(): ?(...args: any) => AnyAction {
-    return this._dispatcher
+    return this.#dispatcher;
   }
+
   /* eslint-enable flowtype/no-weak-types */
 
   RemoveValidator(): boolean {
-    this._validator = null;
-    return true
+    this.#validator = null;
+    return true;
   }
 
   RemoveDispatcher(): boolean {
-    this._dispatcher = null;
-    return true
+    this.#dispatcher = null;
+    return true;
   }
 }
 
 /* eslint-enable no-underscore-dangle */
 
-export type {tCommonActionType,tDeviceNewData};
+export type { tCommonActionType, tDeviceNewData };
 export default Device;
