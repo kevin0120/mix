@@ -66,6 +66,10 @@ class CommonExternalEntity implements IHealthChecker {
     return this.#name;
   }
 
+  get isEnable(): boolean {
+    return this.#enable;
+  }
+
   Enable() {
     CommonLog.Debug(`${this.source} Is Enable!`);
     this.#enable = true;
@@ -83,7 +87,6 @@ class CommonExternalEntity implements IHealthChecker {
 }
 
 class ExternalSystem extends CommonExternalEntity {
-
   #endpoint: ?string = null;
 
   constructor(name: string, endpoint: string) {
@@ -149,7 +152,7 @@ class Device extends CommonExternalEntity {
   }
 
   doDispatch(data: string): AnyAction {
-    if (!this.#enable) {
+    if (!this.isEnable()) {
       const msg = `${this.source} Is Not Enable`;
       CommonLog.Info(msg);
       return
