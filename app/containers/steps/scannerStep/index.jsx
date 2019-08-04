@@ -69,6 +69,7 @@ function ScannerStep(
       setEnable(false);
       scanner.Disable();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
