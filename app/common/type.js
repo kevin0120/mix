@@ -67,10 +67,12 @@ class CommonExternalEntity implements IHealthChecker {
   }
 
   Enable() {
+    CommonLog.Debug(`${this.source} Is Enable!`);
     this.#enable = true;
   }
 
   Disable() {
+    CommonLog.Debug(`${this.source} Is Disable!`);
     this.#enable = false;
   }
 
@@ -121,8 +123,6 @@ const defaultValidatorFunc = (data: string | number): boolean => true;
 /* eslint-disable no-underscore-dangle */
 
 class Device extends CommonExternalEntity {
-  #enable: boolean = false;
-
   #dispatcher: null | () => AnyAction = null;
 
   #validator: null | (data: string | number) => ?boolean = defaultValidatorFunc;
