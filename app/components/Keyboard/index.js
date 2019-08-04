@@ -11,11 +11,10 @@ import IconButton from '@material-ui/core/IconButton';
 import Clear from '@material-ui/icons/CancelOutlined';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import { I18n } from 'react-i18next';
+import {isEqual} from 'lodash-es';
 import customSelectStyle from '../../common/jss/customSelectStyle';
 import Button from '../CustomButtons/Button';
 import CustomInput from '../CustomInput/CustomInput';
-
-const lodash = require('lodash');
 
 const customStyles = theme => ({
   ...customSelectStyle(theme),
@@ -51,10 +50,10 @@ export default function withKeyboard(SubComponents) {
     };
 
     const onKeyPress = press => {
-      if (lodash.isEqual(press, '{enter}') && text.length !== 0) {
+      if (isEqual(press, '{enter}') && text.length !== 0) {
         handleSubmit();
       }
-      if (lodash.isEqual(press, '{shift}')) {
+      if (isEqual(press, '{shift}')) {
         setLayout(layout === 'default' ? 'shift' : 'default');
       }
     };

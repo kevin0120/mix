@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import TextField from '@material-ui/core/TextField';
 import makeStyles from '@material-ui/core/styles/makeStyles';
+import QRcode from 'qrcode.react';
 import Button from '../../../components/CustomButtons/Button';
 import styles from './styles';
 import { scannerStepAction } from '../../../modules/step/scannerStep/action';
@@ -12,7 +13,7 @@ import { StepContent } from '../types';
 import withKeyboard from '../../../components/Keyboard';
 import type { Dispatch } from '../../../modules/indexReducer';
 import { stepData, stepPayload, viewingStep } from '../../../modules/order/selector';
-import QRcode from 'qrcode.react';
+import {scanner} from '../../../modules/scanner/saga'
 
 const mapState = (state, props) => ({
   ...props,
@@ -58,6 +59,17 @@ function ScannerStep(
     },
     [bindAction, isCurrent, step, submit]
   );
+
+  const [enable, setEnable] = useState(false);
+  useEffect(() => {
+    if(!enable) {
+      setEnable(true);
+      scanner.Enable();
+    }else {
+      setEnable(false);
+      scanner.Disable();
+    }
+  }, []);
 
   return (
     <div className={classes.root}>
