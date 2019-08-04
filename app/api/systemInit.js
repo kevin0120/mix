@@ -9,7 +9,7 @@
 // @flow
 
 import { defaultClient } from '../common/utils';
-import { Error } from '../logger';
+import { lError } from '../logger';
 
 // eslint-disable-next-line import/prefer-default-export
 export const fetchConnectionInfo = fullUrl =>
@@ -17,7 +17,7 @@ export const fetchConnectionInfo = fullUrl =>
     .get(fullUrl)
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(), {
+      lError(e.toString(), {
         at: 'fetchConnectionInfo',
         response:
           e.response && e.response.data && JSON.stringify(e.response.data)

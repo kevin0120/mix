@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Error } from '../logger';
+import { lError } from '../logger';
 
 const defaultClient = axios.create({
   timeout: 3000,
@@ -19,7 +19,7 @@ export function andonVehicleApi(baseUrl, vin, workcenterCode) {
     })
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(), {
+      lError(e.toString(), {
         at: 'andonVehicleApi',
         response:
           e.response && e.response.data && JSON.stringify(e.response.data)

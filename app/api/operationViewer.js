@@ -1,5 +1,5 @@
 import { defaultClient } from '../common/utils';
-import { Error } from '../logger';
+import { lError } from '../logger';
 
 export function operationListApi(baseURL, hmiSn) {
   const fullUrl = `${baseURL}/mrp.routing.workcenter`;
@@ -12,7 +12,7 @@ export function operationListApi(baseURL, hmiSn) {
     })
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(), {
+      lError(e.toString(), {
         at: 'operationListApi',
         response:
           e.response && e.response.data && JSON.stringify(e.response.data)
@@ -28,7 +28,7 @@ export function operationDetailApi(baseURL, operationID) {
     .get(fullUrl)
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(), {
+      lError(e.toString(), {
         at: 'operationDetailApi',
         response:
           e.response && e.response.data && JSON.stringify(e.response.data)
@@ -48,7 +48,7 @@ export function imageEditApi(baseURL, operationID, points, img) {
     })
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(), {
+      lError(e.toString(), {
         at: 'imageEditApi',
         response:
           e.response && e.response.data && JSON.stringify(e.response.data)

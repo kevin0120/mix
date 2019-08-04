@@ -3,7 +3,7 @@
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import isURL from 'validator/lib/isURL';
-import { Error } from '../logger';
+import { lError } from '../logger';
 
 const defaultClient = axios.create({
   timeout: 3000,
@@ -37,7 +37,7 @@ export function fetchNextWorkOrder(baseURL, workcenterCode) {
     })
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(), {
+      lError(e.toString(), {
         at: 'fetchNextWorkOrder',
         response:
           e.response && e.response.data && JSON.stringify(e.response.data)
@@ -70,7 +70,7 @@ export function fetchRoutingWorkcenter(url, workCenterCode, carType, job) {
     .get(fullUrl, { params: paramObj })
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(), {
+      lError(e.toString(), {
         at: 'fetchRoutingWorkcenter',
         response:
           e.response && e.response.data && JSON.stringify(e.response.data)
@@ -98,7 +98,7 @@ export function fetchWorkorder(url, workcenterCode, code) {
     })
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(), {
+      lError(e.toString(), {
         at: 'fetchWorkorder',
         response:
           e.response && e.response.data && JSON.stringify(e.response.data)
@@ -119,7 +119,7 @@ export function toolEnable(url, controllerSN, toolSN, enable, reason) {
     })
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(), {
+      lError(e.toString(), {
         at: 'toolEnable',
         response:
           e.response && e.response.data && JSON.stringify(e.response.data)
@@ -139,7 +139,7 @@ export function controllerMode(url, mode, controllerSN) {
     .put(fullUrl, bodyData)
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(), {
+      lError(e.toString(), {
         at: 'controllerMode',
         response:
           e.response && e.response.data && JSON.stringify(e.response.data)
@@ -174,7 +174,7 @@ export function pset(
     })
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(), {
+      lError(e.toString(), {
         at: 'pset',
         response:
           e.response && e.response.data && JSON.stringify(e.response.data)
@@ -215,7 +215,7 @@ export function jobManual(
     })
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(), {
+      lError(e.toString(), {
         at: 'jobManual',
         response:
           e.response && e.response.data && JSON.stringify(e.response.data)
@@ -246,7 +246,7 @@ export function ak2Api(
     })
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(), {
+      lError(e.toString(), {
         at: 'ak2Api',
         response:
           e.response && e.response.data && JSON.stringify(e.response.data)

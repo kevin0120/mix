@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/styles';
 import styles from './style';
 import Point from './point';
 
-export default function ScrewImage({ style, image, points, focus, activeIndex, onClick, onReady, pointScale }) {
+export default function ScrewImage({ style, image, points, focus, activeIndex, onClick, pointScale }) {
   const classes = makeStyles(styles.image)();
 
   const [imageRef, setImageRef] = useState(null);
@@ -26,12 +26,6 @@ export default function ScrewImage({ style, image, points, focus, activeIndex, o
   const [focusStyle, setFocusStyle] = useState({
     transform: `translate(${0}%,${0}%) scale(${1},${1})`
   });
-
-  useEffect(() => {
-    if (activeIndex === -1) {
-      onReady();
-    }
-  }, [activeIndex, onReady]);
 
   useEffect(() => {
     if (focus && points?.[activeIndex]) {
