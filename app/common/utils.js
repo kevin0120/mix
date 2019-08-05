@@ -234,7 +234,7 @@ function _logger(lvl: CommonLogLvl, msg: string) {
   }
 }
 
-export const timeCost = (times) =>
+export const timeCost = (times: Array<Date>) =>
   ((times || []).length % 2 === 0 ? times || [] : [...times, new Date()])
     .reduce((total, currentTime, idx) =>
       idx % 2 === 0 ? total - currentTime : total - (0 - currentTime), 0);

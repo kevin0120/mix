@@ -2,29 +2,38 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { makeStyles, Paper, Grid, Typography } from '@material-ui/core';
+import { InfoOutlined } from '@material-ui/icons';
 import stepTypes from '../steps/stepTypes';
 import * as oSel from '../../modules/order/selector';
 import styles from './styles';
 import type { tStep } from '../../modules/order/model';
 import TimeLine from '../../components/WorkPageTimeline';
-import {CardTravel} from '@material-ui/icons';
 
-const mapState = (state, props) => ({
-  ...props,
-  step: oSel.viewingStep(state.order) || {},
-  workingStep: oSel.workingStep(oSel.workingOrder(state.order)) || {},
-  result: oSel.stepData(oSel.viewingStep(state.order))?.result
-});
+const mapState = (state, props) => {
+  const vStep = oSel.viewingStep(state.order);
+  return {
+    ...props,
+    step: vStep,
+    timeLine: oSel.stepData(vStep)?.timeLine || [],
+    workingStep: oSel.workingStep(oSel.workingOrder(state.order)) || {}
+  };
+};
+
 const mapDispatch = {};
 
 type Props = {
   step: tStep,
   workingStep: tStep,
-  bindAction: ()=>{},
-  result: Object
+  bindAction: Function,
+  timeLine: Array<any>
 };
 
-const StepPageContainer = ({ step, workingStep, bindAction, result }: Props) => {
+const StepPageContainer = ({
+  step,
+  workingStep,
+  bindAction,
+  timeLine
+}: Props) => {
   const classes = makeStyles(styles.stepPageContainer)();
   if (stepTypes?.[step?.type]?.component) {
     const StepComponent = stepTypes[step.type].component;
@@ -40,65 +49,37 @@ const StepPageContainer = ({ step, workingStep, bindAction, result }: Props) => 
                   isCurrent={step === workingStep}
                   bindAction={bindAction}
                 />
-              )) || null}
+              )) ||
+                null}
             </Paper>
           </Grid>
         </Grid>
-        <Grid item container spacing={1} className={classes.right} direction="column">
-
+        <Grid
+          item
+          container
+          spacing={1}
+          className={classes.right}
+          direction="column"
+        >
           <Grid item className={classes.description}>
             <Paper square className={classes.Paper}>
-              <Typography>
-                {step.description}
-              </Typography>
+              <Typography>{step.description}</Typography>
             </Paper>
           </Grid>
           <Grid item className={classes.result}>
             <Paper square className={classes.Paper}>
-
-              {JSON.stringify(result)}
               <TimeLine
                 simple
-                stories={[
-                {
-                  // First story
-                  simple:true,
+                stories={timeLine.map(t => ({
+                  simple: true,
                   inverted: true,
-                  badgeColor: "danger",
-                  badgeIcon: CardTravel,
-                  title: "Some Title",
-                  titleColor: "danger",
-                  body: (
-                    <p>
-                      Wifey made the best Father's Day meal ever. So thankful so happy so
-                      blessed. Thank you for making my family We just had fun with the
-                      “future” theme !!! It was a fun night all together ... The always rude
-                      Kanye Show at 2am Sold Out Famous viewing @ Figueroa and 12th in
-                      downtown.
-                    </p>
-                  ),
-                  footerTitle: "11 hours ago via Twitter"
-                },
-                {
-                  // First story
-                  simple:true,
-                  inverted: true,
-                  badgeColor: "danger",
-                  badgeIcon: CardTravel,
-                  title: "Some Title",
-                  titleColor: "danger",
-                  body: (
-                    <p>
-                      Wifey made the best Father's Day meal ever. So thankful so happy so
-                      blessed. Thank you for making my family We just had fun with the
-                      “future” theme !!! It was a fun night all together ... The always rude
-                      Kanye Show at 2am Sold Out Famous viewing @ Figueroa and 12th in
-                      downtown.
-                    </p>
-                  ),
-                  footerTitle: "11 hours ago via Twitter"
-                },
-              ]}
+                  badgeColor: t.color,
+                  titleColor: t.color,
+                  title: t.title,
+                  badgeIcon: t.icon || InfoOutlined,
+                  body: <Typography>{t.body}</Typography>,
+                  footerTitle: t.footerTitle
+                }))}
               />
             </Paper>
           </Grid>
@@ -109,4 +90,7 @@ const StepPageContainer = ({ step, workingStep, bindAction, result }: Props) => 
   return null;
 };
 
-export default connect(mapState, mapDispatch)(StepPageContainer);
+export default connect(
+  mapState,
+  mapDispatch
+)(StepPageContainer);

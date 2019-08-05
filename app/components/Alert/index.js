@@ -25,7 +25,9 @@ export default class Alert extends React.Component {
             style={{
               display: 'block',
               position: 'relative',
-              marginTop: 0,
+              margin:'auto',
+              top:'auto',
+              left:'auto',
               ...style
             }}
             {...restProps}

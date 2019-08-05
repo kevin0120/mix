@@ -18,8 +18,10 @@ function* readerHandler(action: tCommonActionType & tDeviceNewData): Saga<void> 
   try {
     const { data } = action;
     if (reader.doValidate(data)){
-      yield put(reader.doDispatch(data))
-    } else {
+      const respAction = reader.doDispatch(data);
+      if (respAction) {
+        yield put(respAction);
+      }    } else {
       // do nothing
     }
   } catch (e) {

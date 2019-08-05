@@ -13,6 +13,7 @@ import ClsRFID from './model';
 import { RFID } from './action';
 import { CommonLog } from '../../common/utils';
 import type { tCommonActionType, tDeviceNewData } from '../../common/type';
+import { scanner } from '../scanner/saga';
 // eslint-disable-next-line prefer-const
 let Rfid = new ClsRFID('RFID');
 
@@ -22,7 +23,10 @@ function* RFIDHandler(action: tCommonActionType & tDeviceNewData): Saga<void> {
   try {
     const { data } = action;
     if (Rfid.validate(data)) {
-      yield put(Rfid.doDispatch());
+      const respAction = Rfid.doDispatch(data);
+      if (respAction) {
+        yield put(respAction);
+      }
     }
   } catch (err) {
     CommonLog.lError(err);

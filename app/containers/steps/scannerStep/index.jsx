@@ -12,8 +12,12 @@ import { scannerStepAction } from '../../../modules/step/scannerStep/action';
 import { StepContent } from '../types';
 import withKeyboard from '../../../components/Keyboard';
 import type { Dispatch } from '../../../modules/indexReducer';
-import { stepData, stepPayload, viewingStep } from '../../../modules/order/selector';
-import {scanner} from '../../../modules/scanner/saga'
+import {
+  stepData,
+  stepPayload,
+  viewingStep
+} from '../../../modules/order/selector';
+import { scanner } from '../../../modules/scanner/saga';
 
 const mapState = (state, props) => ({
   ...props,
@@ -29,36 +33,28 @@ const mapDispatch = {
 type Props = {
   submit: Dispatch,
   getValue: Dispatch,
-  keyboardInput: ()=>{}
+  keyboardInput: Function
 };
 
-function ScannerStep(
-  {
-    step,
-    submit,
-    isCurrent,
-    bindAction,
-    keyboardInput,
-    label,
-    getValue,
-    result
-  }: Props | StepContent) {
+function ScannerStep({
+  step,
+  submit,
+  isCurrent,
+  bindAction,
+  keyboardInput,
+  label,
+  getValue,
+  result
+}: Props | StepContent) {
   const classes = makeStyles(styles)();
-  useEffect(
-    () => {
-      bindAction(
-        <Button
-          onClick={() => submit()}
-          disabled={!isCurrent}
-          color="primary"
-        >
-          submit
-        </Button>
-      );
-      return () => bindAction(null);
-    },
-    [bindAction, isCurrent, step, submit]
-  );
+  useEffect(() => {
+    bindAction(
+      <Button onClick={() => submit()} disabled={!isCurrent} color="primary">
+        submit
+      </Button>
+    );
+    return () => bindAction(null);
+  }, [bindAction, isCurrent, step, submit]);
 
   useEffect(() => {
     scanner.Enable();
@@ -68,21 +64,27 @@ function ScannerStep(
 
   return (
     <div className={classes.root}>
-      <QRcode value="This Is Demo QR Code" size={400}/>
+      <QRcode value="This Is Demo QR Code" size={400} />
       <TextField
         label={label}
         disabled={!isCurrent}
         margin="normal"
         value={result?.[label] || ''}
         onClick={() => {
-          isCurrent && keyboardInput({
-            onSubmit: text => {
-              getValue(text);
-            },
-            text: result?.[label] || '',
-            title: label,
-            label
-          });
+          if (isCurrent) {
+            keyboardInput({
+              onSubmit: text => {
+                getValue({
+                  data: text,
+                  time: new Date(),
+                  name: 'input'
+                });
+              },
+              text: result?.[label] || '',
+              title: label,
+              label
+            });
+          }
         }}
       />
     </div>

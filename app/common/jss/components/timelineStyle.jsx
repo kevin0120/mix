@@ -46,9 +46,9 @@ const timelineStyle = theme => ({
       left: '5% !important'
     },
     color: '#FFFFFF',
-    width: '50px',
-    height: '50px',
-    lineHeight: '51px',
+    width: '40px',
+    height: '40px',
+    lineHeight: '41px',
     fontSize: '1.4em',
     textAlign: 'center',
     position: 'absolute',
@@ -91,7 +91,7 @@ const timelineStyle = theme => ({
   },
   badgeIcon: {
     width: '24px',
-    height: '51px'
+    height: '40px'
   },
   timelinePanel: {
     [theme.breakpoints.down('sm')]: {

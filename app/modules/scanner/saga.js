@@ -2,8 +2,8 @@
 
 import { put, takeLatest } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
-import {SCANNER} from './action';
-import ClsScanner, {defaultScannerDispatcher} from './model';
+import { SCANNER } from './action';
+import ClsScanner, { defaultScannerDispatcher } from './model';
 import type { tCommonActionType, tDeviceNewData } from '../../common/type';
 import { CommonLog } from '../../common/utils';
 // eslint-disable-next-line import/named
@@ -20,8 +20,11 @@ scanner.dispatcher = defaultScannerDispatcher;
 function* scannerHandler(action: tCommonActionType & tDeviceNewData): Saga<void> {
   try {
     const { data } = action;
-    if (scanner.doValidate(data)){
-      yield put(scanner.doDispatch(data))
+    if (scanner.doValidate(data)) {
+      const respAction = scanner.doDispatch(data);
+      if (respAction) {
+        yield put(respAction);
+      }
     } else {
       // do nothing
     }
