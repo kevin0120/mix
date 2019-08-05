@@ -78,10 +78,10 @@ export default {
       yield put(orderActions.stepData((data) => {
         const points = JSON.parse(JSON.stringify(payload?.points || []));
         return {
-          ...data,
           points,
           maxRetryTimes: payload.maxRetryTimes,
-          activeIndex: -1
+          activeIndex: 0,
+          ...data
         };
       }));
       yield put(orderActions.stepStatus(STEP_STATUS.DOING));
@@ -91,11 +91,6 @@ export default {
   },
   * [STEP_STATUS.DOING](ORDER, orderActions) {
     try {
-      yield take(SCREW_STEP.IMAGE_READY);
-      yield put(orderActions.stepData((data) => ({
-        ...data,
-        activeIndex: 0
-      })));
       while (true) {
         const { result } = yield take(SCREW_STEP.RESULT);
         console.log('result taken');
