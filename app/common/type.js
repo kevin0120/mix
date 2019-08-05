@@ -75,11 +75,17 @@ class CommonExternalEntity implements IHealthChecker {
     return this.#name;
   }
 
+  get isEnable(): boolean {
+    return this.#enable;
+  }
+
   Enable() {
+    CommonLog.Debug(`${this.source} Is Enable!`);
     this.#enable = true;
   }
 
   Disable() {
+    CommonLog.Debug(`${this.source} Is Disable!`);
     this.#enable = false;
   }
 
@@ -90,7 +96,6 @@ class CommonExternalEntity implements IHealthChecker {
 }
 
 class ExternalSystem extends CommonExternalEntity {
-
   #endpoint: ?string = null;
 
   constructor(name: string, endpoint: string) {
@@ -130,13 +135,12 @@ const defaultValidatorFunc = (data: string | number): boolean => true;
 /* eslint-disable no-underscore-dangle */
 
 class Device extends CommonExternalEntity {
-  #enable: boolean = false;
 
   #dispatcher: null | (?tInput) => AnyAction = null;
 
   #validator: null | (data: tInputData) => boolean = defaultValidatorFunc;
 
-  doValidate(data: string | number): boolean {
+  doValidate(data: tInputData): boolean {
     let _isEmpty = false;
     if (isNil(data)) {
       _isEmpty = true;
@@ -157,8 +161,8 @@ class Device extends CommonExternalEntity {
     return this.validator(data);
   }
 
-  doDispatch(data: string | number): ?AnyAction {
-    if (!this.#enable) {
+  doDispatch(data: tInputData): ?AnyAction {
+    if (!this.isEnable) {
       const msg = `${this.source} Is Not Enable`;
       CommonLog.Info(msg);
       return;
