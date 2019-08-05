@@ -2,7 +2,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { makeStyles, Paper, Grid, Typography } from '@material-ui/core';
-import { CardTravel } from '@material-ui/icons';
+import { InfoOutlined } from '@material-ui/icons';
 import stepTypes from '../steps/stepTypes';
 import * as oSel from '../../modules/order/selector';
 import styles from './styles';
@@ -76,8 +76,8 @@ const StepPageContainer = ({
                   badgeColor: t.color,
                   titleColor: t.color,
                   title: t.title,
-                  badgeIcon: CardTravel,
-                  body: t.body,
+                  badgeIcon: t.icon || InfoOutlined,
+                  body: <Typography>{t.body}</Typography>,
                   footerTitle: t.footerTitle
                 }))}
               />
