@@ -3,7 +3,9 @@
 import { take, fork, all, select } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 
-import watchScannerEvent from './scanner/saga';
+import watchScannerEvent, { scanner } from './scanner/saga';
+import watchReader, { reader } from './reader/saga';
+import watchController from './controller/saga';
 import { cardAuthFlow } from './cardAuth/saga';
 import sysInitFlow from './systemInit/saga';
 import { operationFlow, watchResults } from './operation/saga';
@@ -25,8 +27,6 @@ import order from './order/saga';
 import dialog from './dialog/saga';
 import { CommonLog } from '../common/utils';
 
-// import healthzCheckFlow from './healthzCheck';
-
 export default function* rootSaga(): Saga<void> {
   try {
     const state = yield select();
@@ -36,6 +36,8 @@ export default function* rootSaga(): Saga<void> {
       // cardAuthFlow(),
       // 硬件设备
       watchScannerEvent(),
+      watchReader(),
+      watchController(),
       watchIOEvent(), // 监听IO数据
       watchRFIDEvent(),
 

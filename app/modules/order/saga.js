@@ -31,6 +31,7 @@ import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
 import { CommonLog, durationString, timeCost } from '../../common/utils';
 import type { tOrder, tStep, tStepArray } from './model';
+import type { tCommonActionType } from '../../common/type';
 
 const mapping = {
   onOrderFinish: showResult,
@@ -121,9 +122,9 @@ function* showOverview(order: tOrder) {
   }
 }
 
-function* DebounceViewStep(d, action) {
+function* DebounceViewStep(d, action: tCommonActionType) {
   try {
-    const { type } = action;
+    const { type }: string = action;
     switch (type) {
       case ORDER.STEP.PREVIOUS:
         yield put({ type: ORDER.STEP.VIEW_PREVIOUS });
@@ -169,7 +170,7 @@ function* workOnOrder() {
       pending: take(ORDER.PENDING),
       cancel: take(ORDER.CANCEL)
     });
-    CommonLog.Info('order finished');
+    CommonLog.Info('Order Finished');
     if (finish) {
       yield call(mapping.onOrderFinish, wOrder);
     }

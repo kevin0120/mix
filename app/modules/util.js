@@ -1,4 +1,4 @@
-//@ flow
+// @flow
 import type { Saga } from 'redux-saga';
 import { fork, take } from 'redux-saga/effects';
 

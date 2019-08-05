@@ -1,6 +1,6 @@
 // @flow
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import TextField from '@material-ui/core/TextField';
 import makeStyles from '@material-ui/core/styles/makeStyles';
@@ -60,15 +60,9 @@ function ScannerStep(
     [bindAction, isCurrent, step, submit]
   );
 
-  const [enable, setEnable] = useState(false);
   useEffect(() => {
-    if(!enable) {
-      setEnable(true);
-      scanner.Enable();
-    }else {
-      setEnable(false);
-      scanner.Disable();
-    }
+    scanner.Enable();
+    return () => scanner.Disable();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

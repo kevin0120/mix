@@ -15,14 +15,12 @@ import {
 // actions
 import { OPERATION_STATUS } from '../operation/model';
 import { IOACTION } from './action';
-import { setNewNotification } from '../notification/action';
 import { operationBypassIO } from '../operation/action';
-import { isNil } from 'lodash-es';
 
 // reducers
 import ClsIOModule from './model';
 import type { AnyAction } from '../../common/type';
-import type { tIOContact } from '../rush/type';
+import type { tIOContact } from './type';
 import { CommonLog } from '../../common/utils';
 
 // config

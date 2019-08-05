@@ -6,8 +6,13 @@ import {SCANNER} from './action';
 import ClsScanner, {defaultScannerDispatcher} from './model';
 import type { tCommonActionType, tDeviceNewData } from '../../common/type';
 import { CommonLog } from '../../common/utils';
+// eslint-disable-next-line import/named
+import { gDevices } from '../global';
 
-export const scanner = new ClsScanner('Scanner');
+const symScanner = 'Scanner';
+
+export const scanner = new ClsScanner(symScanner);
+gDevices[symScanner] = [scanner];
 scanner.dispatcher = defaultScannerDispatcher;
 // TODO: 是否增加到系统初始化中
 // scanner.Enable(); // 必须使能才能够使用

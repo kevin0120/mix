@@ -15,7 +15,7 @@ export interface AnyAction extends Action {
 }
 
 type tDeviceNewData = {
-  +data: { [key: string]: any }
+  +data: string | number
 };
 /* eslint-enable flowtype/no-weak-types */
 
