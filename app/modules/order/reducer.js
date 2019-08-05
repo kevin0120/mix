@@ -1,12 +1,17 @@
 // @flow
 
-import {isNil} from 'lodash-es';
 import { ORDER } from './action';
 import { genReducers } from '../util';
 import { ORDER_STATUS } from './model';
 import type { tOrder, tOrderState, tOrderStepIdx, tStep } from './model';
 import STEP_STATUS from '../step/model';
-import { demoOrder, demoOrderLong, demoOrderCancel, demoOrderDone, demoOrderPending } from './demoData';
+import {
+  demoOrder,
+  demoOrderLong,
+  demoOrderCancel,
+  demoOrderDone,
+  demoOrderPending
+} from './demoData';
 import {
   getStep,
   orderLength,
@@ -18,12 +23,17 @@ import {
   workingStep
 } from './selector';
 
-
 const initState = {
   workingOrder: null,
   viewingOrder: null,
   viewingIndex: 0,
-  list: [demoOrder, demoOrderLong, demoOrderCancel, demoOrderPending, demoOrderDone]
+  list: [
+    demoOrder,
+    demoOrderLong,
+    demoOrderCancel,
+    demoOrderPending,
+    demoOrderDone
+  ]
 };
 
 function reduceStepData(reducer, state: tOrderState, action): tOrderState {
@@ -56,8 +66,9 @@ function limitIndex(order: ?tOrder, index: tOrderStepIdx): tOrderStepIdx {
   return index;
 }
 
-
-const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: any })=>tOrderState } = {
+const orderReducer: {
+  [key: string]: (tOrderState, { type: string, [key: any]: any }) => tOrderState
+} = {
   [ORDER.VIEW]: (state, action) => {
     const { order } = action;
     const firstIndex = 0;
@@ -73,7 +84,7 @@ const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: a
     if (wOrder) {
       return state;
     }
-    const { order }: tOrder = action;
+    const { order }: { order: tOrder } = action;
     const startIndex = workingIndex(order);
     order.status = ORDER_STATUS.WIP;
     return {
@@ -82,7 +93,7 @@ const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: a
       viewingIndex: startIndex
     };
   },
-  [ORDER.FINISH]: (state) => {
+  [ORDER.FINISH]: state => {
     const wOrder = workingOrder(state);
     if (wOrder) {
       wOrder.status = ORDER_STATUS.DONE;
@@ -92,7 +103,7 @@ const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: a
       workingOrder: null
     };
   },
-  [ORDER.CANCEL]: (state) => {
+  [ORDER.CANCEL]: state => {
     const vOrder = viewingOrder(state);
     if (vOrder) {
       vOrder.status = ORDER_STATUS.CANCEL;
@@ -112,8 +123,7 @@ const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: a
     const { order } = action;
     order.status = ORDER_STATUS.PENDING;
     const wStep = workingStep(order);
-    const length = wStep?.times?.length;
-    if ( !isNil(length) && length % 2 === 1) {
+    if (wStep && wStep.times && wStep.times.length % 2 === 1) {
       wStep.times.push(new Date());
     }
     const vOrder = viewingOrder(state);
@@ -124,7 +134,7 @@ const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: a
       workingOrder: newWOrder
     };
   },
-  [ORDER.STEP.VIEW_NEXT]: (state) => {
+  [ORDER.STEP.VIEW_NEXT]: state => {
     const newIndex = limitIndex(viewingOrder(state), viewingIndex(state) + 1);
     return {
       ...state,
@@ -132,7 +142,7 @@ const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: a
     };
   },
 
-  [ORDER.STEP.VIEW_PREVIOUS]: (state) => {
+  [ORDER.STEP.VIEW_PREVIOUS]: state => {
     const newIndex = limitIndex(viewingOrder(state), viewingIndex(state) - 1);
     return {
       ...state,
@@ -150,12 +160,14 @@ const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: a
   // 修改step的状态
   [ORDER.STEP.STATUS]: setStepStatus,
   //
-  [ORDER.STEP.DO_NEXT]: (state) => {
+  [ORDER.STEP.DO_NEXT]: state => {
     const wOrder: ?tOrder = workingOrder(state);
     const newIndex = workingIndex(wOrder) + 1;
-    const vIndex = workingStep(wOrder) === viewingStep(state) ? newIndex
-      : viewingIndex(state);
-    if (!isNil(wOrder)) {
+    const vIndex =
+      workingStep(wOrder) === viewingStep(state)
+        ? newIndex
+        : viewingIndex(state);
+    if (wOrder) {
       wOrder.workingIndex = newIndex;
     }
     return {
@@ -163,7 +175,7 @@ const orderReducer: { [key: string]: (tOrderState, { type: string, [key: any]: a
       viewingIndex: vIndex
     };
   },
-  [ORDER.STEP.DO_PREVIOUS]: (state) => {
+  [ORDER.STEP.DO_PREVIOUS]: state => {
     const wOrder = workingOrder(state);
     const newIndex = limitIndex(wOrder, workingIndex(wOrder) - 1);
     if (wOrder) {

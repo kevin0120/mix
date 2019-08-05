@@ -1,5 +1,16 @@
 // @flow
-import { take, call, race, select, put, all, takeLatest, takeEvery, debounce } from 'redux-saga/effects';
+import {
+  take,
+  call,
+  race,
+  select,
+  put,
+  all,
+  takeLatest,
+  takeEvery,
+  takeLeading,
+  delay
+} from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 import React from 'react';
 import type { Saga } from 'redux-saga';
@@ -29,10 +40,7 @@ const mapping = {
 function* showResult(order) {
   try {
     const oSteps = orderSteps(order) || [];
-    const data = oSteps.map(s => ([
-      s.name,
-      durationString(timeCost(s.times))
-    ]));
+    const data = oSteps.map(s => [s.name, durationString(timeCost(s.times))]);
     yield put(
       dialogActions.dialogShow({
         buttons: [
@@ -43,15 +51,14 @@ function* showResult(order) {
         ],
         closeAction: push('/app'),
         title: i18n.t('Common.Result'),
-        content: <Table
-          tableHeaderColor="info"
-          tableHead={[
-            '工步名称',
-            '耗时'
-          ]}
-          tableData={data}
-          colorsColls={['info']}
-        />
+        content: (
+          <Table
+            tableHeaderColor="info"
+            tableHead={['工步名称', '耗时']}
+            tableData={data}
+            colorsColls={['info']}
+          />
+        )
       })
     );
   } catch (e) {
@@ -63,16 +70,21 @@ function* showResult(order) {
 function* showOverview(order: tOrder) {
   try {
     const WIPOrder: tOrder = yield select(s => workingOrder(s.order));
-    const vOrderSteps: ?tStepArray = yield select((state => orderSteps(viewingOrder(state.order))));
-    const data = vOrderSteps.map((s: tStep, idx) => ([
-      idx + 1,
-      s.name,
-      s.type,
-      s.info
-    ]));
-    if (WIPOrder?.name === order.name){
+    const vOrderSteps: ?tStepArray = yield select(state =>
+      orderSteps(viewingOrder(state.order))
+    );
+    const data =
+      (vOrderSteps &&
+        vOrderSteps.map((s: tStep, idx) => [
+          idx + 1,
+          s.name,
+          s.type,
+          s.info
+        ])) ||
+      [];
+    if (WIPOrder === order) {
       // 进行中的工单不显示概览对话框
-      return
+      return;
     }
     yield put(
       dialogActions.dialogShow({
@@ -81,46 +93,49 @@ function* showOverview(order: tOrder) {
             label: 'Common.Close',
             color: 'warning'
           },
-          (!WIPOrder) && doable(order) && {
-            label: 'Order.Start',
-            color: 'info',
-            action: orderActions.workOn(order)
-          }
+          !WIPOrder &&
+            doable(order) && {
+              label: 'Order.Start',
+              color: 'info',
+              action: orderActions.workOn(order)
+            }
         ],
         title: i18n.t('Order.Overview'),
-        content: <Table
-          tableHeaderColor="info"
-          tableHead={[
-            i18n.t('Common.Idx'),
-            i18n.t('Order.Step.name'),
-            i18n.t('Order.Step.type'),
-            i18n.t('Order.Step.desc')
-          ]}
-          tableData={data}
-          colorsColls={['info']}
-        />
-      }));
+        content: (
+          <Table
+            tableHeaderColor="info"
+            tableHead={[
+              i18n.t('Common.Idx'),
+              i18n.t('Order.Step.name'),
+              i18n.t('Order.Step.type'),
+              i18n.t('Order.Step.desc')
+            ]}
+            tableData={data}
+            colorsColls={['info']}
+          />
+        )
+      })
+    );
   } catch (e) {
     CommonLog.lError(`showOverview error: ${e.message}`);
   }
 }
 
-// eslint-disable-next-line no-unused-vars
-function* DebounceViewStep(action) {
-
+function* DebounceViewStep(d, action) {
   try {
-    const {type} = action;
+    const { type } = action;
     switch (type) {
       case ORDER.STEP.PREVIOUS:
-        yield put({type: ORDER.STEP.VIEW_PREVIOUS});
+        yield put({ type: ORDER.STEP.VIEW_PREVIOUS });
         break;
       case ORDER.STEP.NEXT:
-        yield put({type: ORDER.STEP.VIEW_NEXT});
+        yield put({ type: ORDER.STEP.VIEW_NEXT });
         break;
       default:
         break;
     }
-  }catch (e) {
+    yield delay(d);
+  } catch (e) {
     CommonLog.lError(e);
   }
 }
@@ -130,8 +145,7 @@ export default function* root(): Saga<void> {
     yield all([
       takeLatest(ORDER.WORK_ON, workOnOrder),
       takeEvery(ORDER.VIEW, viewOrder),
-      debounce(500, ORDER.STEP.PREVIOUS, DebounceViewStep),
-      debounce(500, ORDER.STEP.NEXT, DebounceViewStep),
+      takeLeading([ORDER.STEP.PREVIOUS, ORDER.STEP.NEXT], DebounceViewStep, 300)
     ]);
   } catch (e) {
     CommonLog.lError(e);
