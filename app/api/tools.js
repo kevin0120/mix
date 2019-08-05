@@ -9,7 +9,7 @@
 // @flow
 
 import { defaultClient } from '../common/utils';
-import { Error } from '../logger';
+import { lError } from '../logger';
 
 // eslint-disable-next-line import/prefer-default-export
 export const apiToolEnable = (fullUrl, data) =>
@@ -17,7 +17,7 @@ export const apiToolEnable = (fullUrl, data) =>
     .put(fullUrl, data)
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(), {
+      lError(e.toString(), {
         at: 'apiToolEnable',
         response:
           e.response && e.response.data && JSON.stringify(e.response.data)

@@ -9,7 +9,7 @@
 // @flow
 
 import isURL from 'validator/lib/isURL';
-import { Error } from '../logger';
+import { lError } from '../logger';
 
 const axios = require('axios');
 
@@ -28,7 +28,7 @@ export function masterPCHealthCheck(conn) {
     .get(fullUrl)
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(), {
+      lError(e.toString(), {
         at: 'masterPCHealthCheck',
         response:
           e.response && e.response.data && JSON.stringify(e.response.data)
@@ -51,7 +51,7 @@ export function controllerHealthCheck(conn, controllers) {
     })
     .then(response => response)
     .catch(e => {
-      Error(e.toString(), {
+      lError(e.toString(), {
         at: 'controllerHealthCheck',
         response:
           e.response && e.response.data && JSON.stringify(e.response.data)

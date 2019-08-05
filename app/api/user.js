@@ -1,5 +1,5 @@
 import { defaultClient } from '../common/utils';
-import { Error } from '../logger';
+import { lError } from '../logger';
 
 // 获取用户信息
 // eslint-disable-next-line import/prefer-default-export
@@ -10,7 +10,7 @@ export function getUserInfo(url, uuid) {
     .get(fullUrl)
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(), {
+      lError(e.toString(), {
         at: 'getUserInfo',
         response:
           e.response && e.response.data && JSON.stringify(e.response.data)
