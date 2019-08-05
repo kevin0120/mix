@@ -2,7 +2,7 @@
 // // // SweetAlert view styles
 // #############################
 
-import buttonStyle from '../../jss/components/buttonStyle.jsx';
+import buttonStyle from "../components/buttonStyle";
 
 const sweetAlertStyle = theme=> ({
   cardTitle: {
