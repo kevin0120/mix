@@ -1,23 +1,32 @@
 // @flow
 
 import { Action } from 'redux';
-import { CommonLog } from './utils';
 import { isURL } from 'validator/lib/isURL';
 import { isNil, isEmpty, isEqual, isString } from 'lodash-es';
+import { CommonLog } from './utils';
 
 type tCommonActionType = {
   +type: string
 };
 
-/* eslint-disable flowtype/no-weak-types */
+export type tInputData = string | number;
+
+export type tInput = {
+  data: tInputData,
+  source: string,
+  time: Date
+};
+
 export interface AnyAction extends Action {
+  // eslint-disable-next-line flowtype/no-weak-types
   [extraProps: string]: any
 }
 
+
 type tDeviceNewData = {
-  +data: { [key: string]: any }
+  // eslint-disable-next-line flowtype/no-weak-types
+  +data: tInputData
 };
-/* eslint-enable flowtype/no-weak-types */
 
 // interface IInputDevice {
 //   doValidate(data: string | number): boolean
@@ -50,7 +59,7 @@ class CommonExternalEntity implements IHealthChecker {
     if (!isHealthz) {
       this.Disable();
     }
-    const msg = `${this.#name} Healthz Status Change: ${isHealthz}`;
+    const msg = `${this.#name} Healthz Status Change: ${isHealthz.toString()}`;
     CommonLog.Info(msg);
   }
 
@@ -104,7 +113,7 @@ class ExternalSystem extends CommonExternalEntity {
   Connect(): boolean {
     CommonLog.Warn('Please Override Connect Method!!!');
     this.Healthz = false;
-    return false
+    return false;
   }
 
   Close(): boolean {
@@ -123,9 +132,9 @@ const defaultValidatorFunc = (data: string | number): boolean => true;
 class Device extends CommonExternalEntity {
   #enable: boolean = false;
 
-  #dispatcher: null | () => AnyAction = null;
+  #dispatcher: null | (?tInput) => AnyAction = null;
 
-  #validator: null | (data: string | number) => ?boolean = defaultValidatorFunc;
+  #validator: null | (data: tInputData) => boolean = defaultValidatorFunc;
 
   doValidate(data: string | number): boolean {
     let _isEmpty = false;
@@ -141,25 +150,29 @@ class Device extends CommonExternalEntity {
       return false;
     }
     // 有效的数据
-    if (isNil(this.validator)) {
+    if (!this.validator) {
       // 没有验证器默认返回正确
       return true;
     }
     return this.validator(data);
   }
 
-  doDispatch(data: string): AnyAction {
+  doDispatch(data: string | number): ?AnyAction {
     if (!this.#enable) {
       const msg = `${this.source} Is Not Enable`;
       CommonLog.Info(msg);
-      return
+      return;
     }
-    if (isNil(this.dispatcher)) {
+    if (!this.dispatcher) {
       const msg = `${this.source} Validator is Nil, Please set Validator First`;
       CommonLog.Warn(msg);
-      return
+      return;
     }
-    return this.dispatcher(data);
+    return this.dispatcher({
+      data,
+      source: this.Name,
+      time: new Date()
+    });
   }
 
   set validator(validator: (string | number) => boolean) {
@@ -170,16 +183,15 @@ class Device extends CommonExternalEntity {
     return this.#validator;
   }
 
-  /* eslint-disable flowtype/no-weak-types */
-  set dispatcher(dispatcher: (...args: any) => AnyAction) {
+  // eslint-disable-next-line flowtype/no-weak-types
+  set dispatcher(dispatcher: (?tInput) => AnyAction) {
     this.#dispatcher = dispatcher;
   }
 
-  get dispatcher(): ?(...args: any) => AnyAction {
+  // eslint-disable-next-line flowtype/no-weak-types
+  get dispatcher(): ?(?tInput) => AnyAction {
     return this.#dispatcher;
   }
-
-  /* eslint-enable flowtype/no-weak-types */
 
   RemoveValidator(): boolean {
     this.#validator = null;

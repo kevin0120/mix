@@ -4,7 +4,7 @@ import Device from '../../common/type';
 
 class ClsRFID extends Device {
   validate(data: string): boolean {
-    return super.Validate(data);
+    return super.doValidate(data);
   }
 }
 
