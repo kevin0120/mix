@@ -78,10 +78,6 @@ func (h *Handlers) Handle(result interface{}, curve interface{}) {
 
 	consumes := []Consume{}
 	json.Unmarshal([]byte(dbWorkorder.Consumes), &consumes)
-	if len(consumes) == 0 {
-		h.controllerService.diag.Error("consumes not found", err)
-		return
-	}
 
 	targetConsume := consumes[0]
 	maxGroupSeq := 0
@@ -137,6 +133,11 @@ func (h *Handlers) Handle(result interface{}, curve interface{}) {
 func (h *Handlers) handleCurve(curve *minio.ControllerCurve) {
 	// 保存对象存储
 	h.controllerService.Minio.Save(curve)
+}
+
+func (h *Handlers) HandleCurve(curve *minio.ControllerCurve) {
+	// 保存对象存储
+	h.handleCurve(curve)
 }
 
 // 异步保存

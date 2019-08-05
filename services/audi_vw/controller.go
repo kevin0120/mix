@@ -468,7 +468,7 @@ func (c *Controller) audiVW2OPToolInfo(ti toolInfoCNT) openprotocol.ToolInfo {
 		c.Srv.diag.Error("audiVW2OPToolInfo", errors.New(fmt.Sprintf(" tool serial number:%s", t.SerialNO)))
 	}
 
-	info.SerialNo = t.SerialNO
+	info.ToolSN = t.SerialNO
 	info.CountSinLastService = int(ti.MSL_MSG.CSR)
 	info.TotalTighteningCount = int(ti.MSL_MSG.CLT)
 

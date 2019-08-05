@@ -5,7 +5,7 @@ import "github.com/masami10/rush/services/aiis"
 const (
 	AUDIPROTOCOL         = "Audi/VW"
 	OPENPROTOCOL         = "OpenProtocol"
-	DEFAULT_TOOL_CHANNEL = 9999
+	DEFAULT_TOOL_CHANNEL = 1
 	AUTO_MODE            = "auto"
 )
 
@@ -22,6 +22,7 @@ const (
 	ERR_NOT_FOUND           = "not found"
 	ERR_PSET_ERROR          = "pset error"
 	ERR_KNOWN               = "error known"
+	ERR_NOT_SUPPORTED       = "not supported"
 )
 
 const (

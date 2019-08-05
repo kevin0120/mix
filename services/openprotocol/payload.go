@@ -344,16 +344,16 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 
 		return h.Serialize() + data + end
 
-	case MID_0008_DATA_SUB:
-		h.MID = MID_0008_DATA_SUB
-		h.LEN = LEN_HEADER + len(data)
-		h.Revision = rev
-		h.NoAck = ""
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + data + end
+	//case MID_0008_DATA_SUB:
+	//	h.MID = MID_0008_DATA_SUB
+	//	h.LEN = LEN_HEADER + len(data)
+	//	h.Revision = rev
+	//	h.NoAck = ""
+	//	h.Station = ""
+	//	h.Spindle = ""
+	//	h.Spare = ""
+	//
+	//	return h.Serialize() + data + end
 
 	case MID_0012_PSET_DETAIL_REQUEST:
 		h.MID = MID_0012_PSET_DETAIL_REQUEST
@@ -1107,7 +1107,8 @@ func (ai *AlarmInfo) Deserialize(msg string) error {
 }
 
 type ToolInfo struct {
-	SerialNo             string `json:"serial_no"`
+	ToolSN               string `json:"serial_no"`
+	ControllerSN         string `json:"controller_sn"`
 	TotalTighteningCount int    `json:"times"`
 	CountSinLastService  int    `json:"sin_last_service"`
 }
@@ -1117,17 +1118,18 @@ func (ti *ToolInfo) Deserialize(msg string) error {
 	var err error = nil
 
 	if len(msg) < 20 {
-		return errors.New("alarm info msg len is not enough")
+		return errors.New("tool info msg len is not enough")
 	}
 
-	ti.SerialNo = strings.TrimSpace(msg[2:16]) //去除空格获取序列号
+	ti.ToolSN = strings.TrimSpace(msg[2:16]) //去除空格获取序列号
 
 	ti.TotalTighteningCount, err = strconv.Atoi(msg[18:28])
+
+	ti.ControllerSN = strings.TrimSpace(msg[51:61])
 
 	ti.CountSinLastService, err = strconv.Atoi(msg[92:102])
 
 	return err
-
 }
 
 type JobInfo struct {
