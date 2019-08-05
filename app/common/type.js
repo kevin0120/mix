@@ -152,7 +152,7 @@ class Device extends CommonExternalEntity {
   }
 
   doDispatch(data: string): AnyAction {
-    if (!this.isEnable()) {
+    if (!this.isEnable) {
       const msg = `${this.source} Is Not Enable`;
       CommonLog.Info(msg);
       return
