@@ -7,6 +7,7 @@ import { TOOLS } from './action';
 import { toolEnable } from '../../api/operation';
 import { watchWorkers } from '../util';
 import { setNewNotification } from '../notification/action';
+import ClsScrewTool, { defaultScrewToolDispatcher } from './model';
 
 type actionType = {
   +type: string,
@@ -17,6 +18,9 @@ type controllerType = {
   +connection: string,
   +serial_no: string
 };
+
+export const staticScrewTool = new ClsScrewTool('G1', "0001");
+staticScrewTool.dispatcher = defaultScrewToolDispatcher;
 
 function* staticToolEnable(action: actionType) {
   try {
@@ -60,9 +64,19 @@ function* onToolStatusChange(action) {
   }
 }
 
+function* onToolResult(action) {
+  try {
+    const { results } = action;
+    staticScrewTool.doDispatch(results);
+  } catch (e) {
+    console.error('onToolResult:', e);
+  }
+}
+
 const workers = {
   [TOOLS.ENABLE]: staticToolEnable,
-  [TOOLS.STATUS_CHANGE]: onToolStatusChange
+  [TOOLS.STATUS_CHANGE]: onToolStatusChange,
+  [TOOLS.NEW_RESULTS]: onToolResult
 };
 
 export const toolFunctions = watchWorkers(workers);

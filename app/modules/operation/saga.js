@@ -8,7 +8,7 @@ import {
   fetchNextWorkOrder,
   ak2Api
 } from '../../api/operation';
-import { RUSH } from '../rush/action';
+
 import {
   OPERATION_RESULT,
   OPERATION_SOURCE,
@@ -16,7 +16,7 @@ import {
 } from './model';
 import { addNewStory, clearStories } from '../timeline/saga';
 import { STORY_TYPE } from '../timeline/model';
-import { toolEnable, toolDisable } from '../tools/action';
+import { toolEnable, toolDisable, TOOLS } from '../tools/action';
 import { setResultDiagShow } from '../resultDiag/action';
 import {
   switch2Ready,

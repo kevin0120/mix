@@ -1,6 +1,6 @@
 // @flow
 
-import type { tCommonActionType } from '../../common/type';
+// import type { tCommonActionType } from '../../common/type';
 
 export const RUSH = {
   INIT: 'RUSH_INIT',
@@ -11,9 +11,9 @@ export const RUSH = {
 
 
 // eslint-disable-next-line flowtype/no-weak-types
-export function NewResults(results: Array<any>): tCommonActionType {
-  return {
-    type: RUSH.NEW_RESULTS,
-    data: results
-  };
-}
+// export function NewResults(results: Array<any>): tCommonActionType {
+//   return {
+//     type: RUSH.NEW_RESULTS,
+//     data: results
+//   };
+// }
