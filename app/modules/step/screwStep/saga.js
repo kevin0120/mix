@@ -8,6 +8,7 @@ import type { tResultAction } from './action';
 import type { tPoint, tScrewStepData, tScrewStepPayload } from './model';
 import controllerModeTasks from './controllerModeTasks';
 import handleResult from './handleResult';
+import { CommonLog } from '../../../common/utils';
 
 
 export default {
@@ -35,7 +36,7 @@ export default {
       //
       yield put(orderActions.stepStatus(STEP_STATUS.DOING));
     } catch (e) {
-      console.error(e);
+      CommonLog.lError(e);
     }
   },
   * [STEP_STATUS.DOING](ORDER, orderActions) {
@@ -43,6 +44,7 @@ export default {
       while (true) {
         const data = yield select(s => stepData(workingStep(workingOrder(s.order))));
 
+        console.log(data.controllerMode);
         // call controllerModeTasks(pset/job)
         yield call(controllerModeTasks[data.controllerMode], orderActions);
 
@@ -54,21 +56,21 @@ export default {
         yield call(handleResult, ORDER, orderActions, results, data);
       }
     } catch (e) {
-      console.error(e);
+      CommonLog.lError(e);
     }
   },
   * [STEP_STATUS.FINISHED](ORDER, orderActions) {
     try {
       yield put(orderActions.doNextStep());
     } catch (e) {
-      console.error(e);
+      CommonLog.lError(e);
     }
   },
   * [STEP_STATUS.FAIL](ORDER, orderActions) {
     try {
       yield put(orderActions.doNextStep());
     } catch (e) {
-      console.error(e);
+      CommonLog.lError(e);
     }
   }
 

@@ -20,8 +20,7 @@ export type tResultStatus = $Keys<typeof RESULT_STATUS>;
 
 export type tPoint = {
   id: number,
-  controller_sn: string,
-  gun_sn: string,
+  toolSN: string,
   pset: number,
   maxRetryTimes: number, // max_redo_times
 
@@ -63,6 +62,8 @@ export const controllerModes = {
 export type tControllerMode = $Keys<typeof controllerModes>;
 
 export type tScrewStepPayload = {
+  model: string,
+  points: Array<tPoint>,
   job_id: string,
   work_sheet: string,
   lnr: string,

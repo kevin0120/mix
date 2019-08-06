@@ -3,6 +3,7 @@ import type { tPoint, tPointStatus, tResult, tResultStatus, tScrewStepData } fro
 import { POINT_STATUS, RESULT_STATUS } from './model';
 import STEP_STATUS from '../model';
 import { stepData, workingOrder, workingStep } from '../../order/selector';
+import { CommonLog } from '../../../common/utils';
 
 function formPointStatusFromResultStatus(point: tPoint, rStatus: tResultStatus, groupSequence: number): tPointStatus {
   let pStatus = POINT_STATUS.WAITING;
@@ -66,7 +67,7 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
         retryTimes: (d.retryTimes || 0) + 1
       })));
     } catch (e) {
-      console.error(e);
+      CommonLog.lError(e);
     }
   },
   * fail() {
@@ -78,7 +79,7 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
       })));
       yield put(orderActions.stepStatus(STEP_STATUS.FAIL));
     } catch (e) {
-      console.error(e);
+      CommonLog.lError(e);
     }
   },
   * finish() {
@@ -90,7 +91,7 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
       })));
       yield put(orderActions.stepStatus(STEP_STATUS.FINISHED));
     } catch (e) {
-      console.error(e);
+      CommonLog.lError(e);
     }
   },
   * next() {
@@ -105,14 +106,14 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
         points: mergePointsAndResults(d.points, results, d.activeIndex)
       })));
     } catch (e) {
-      console.error(e);
+      CommonLog.lError(e);
     }
   },
   * LSN() {
     try {
       // do nothing
     } catch (e) {
-      console.error(e);
+      CommonLog.lError(e);
     }
   }
 });
@@ -130,6 +131,6 @@ export default function* handleResult(ORDER, orderActions, results, data) {
       yield call(firstMatchResultStatus);
     }
   } catch (e) {
-    console.error(e);
+    CommonLog.lError(e);
   }
 }

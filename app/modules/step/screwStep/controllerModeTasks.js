@@ -1,16 +1,19 @@
 // @flow
 import { put, select, call } from 'redux-saga/effects';
+import type { Saga } from 'redux-saga';
 import { controllerModes } from './model';
 import { jobManual, pset } from '../../../api/operation';
 import { setNewNotification } from '../../notification/action';
 import { OPERATION } from '../../operation/action';
 import { toolEnable } from '../../tools/action';
 import { stepData, workingStep, workingOrder } from '../../order/selector';
-import type { tResult } from './model';
+import type { tPoint, tResult, tScrewStepData } from './model';
+import { CommonLog } from '../../../common/utils';
 
 export default {
-  * [controllerModes.pset](orderActions): Saga<void> {
+  * [controllerModes.pset](): Saga<void> {
     try {
+      console.log('in pset progress');
       const rush = yield select(s => s.connections);
       const sData = yield select(stepData(workingStep(workingOrder(s.order))));
       const {
@@ -34,25 +37,27 @@ export default {
       );
     } catch (e) {
       // 程序号设置失败
-      yield put(setNewNotification('Error', 'pset failed'), {
+      yield put(setNewNotification('Error', 'pset failed', {
         // meta message
-      });
+      }));
       return false;
     }
     return true;
   },
-  * [controllerModes.job](orderActions): Saga<void> {
+  * [controllerModes.job](): Saga<void> {
     try {
-      const sData = yield select(s => stepData(workingStep(workingOrder(s.order))));
-      const { hmiSn } = yield select(s => s.setting.page.odooConnection);
-      const { operationID, carType, carID, jobID, source, result } = sData;
+      const sData: tScrewStepData = yield select(s => stepData(workingStep(workingOrder(s.order))));
+      const rushUrl = yield select(s => s.setting.system.connections.rush);
 
-      const toolSN = result.reduce((r: tResult, value) => {
-        if (r.toolSN && value.toolSN !== r.toolSN) {
-          console.error('结果中的toolSN不匹配');
+      const { hmiSn } = yield select(s => s.setting.page.odooConnection);
+      const { operationID, carType, carID, jobID, source, points } = sData;
+
+      const toolSN = points.reduce((tSN: string, p: tPoint): string => {
+        if (tSN && p.toolSN !== tSN) {
+          CommonLog.lError('结果中的toolSN不匹配');
         }
-        return value.toolSN || r.toolSN;
-      }, {});
+        return p.toolSN || tSN || '';
+      }, '');
 
       const userID = 1;
       const skip = false;
@@ -84,14 +89,16 @@ export default {
           });
           // 启动用具
           yield put(toolEnable('开始作业'));
-          yield put({ type: OPERATION.STARTED });
+          // yield put({ type: OPERATION.STARTED });
+        } else {
+          CommonLog.lError('程序号设置失败');
         }
       } catch (e) {
         // 程序号设置失败
-        console.error(e);
+        CommonLog.lError(e);
       }
     } catch (e) {
-      console.error(e);
+      CommonLog.lError(e);
     }
   }
 };
