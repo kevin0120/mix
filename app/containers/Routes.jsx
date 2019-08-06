@@ -1,7 +1,7 @@
 // @flow
+
 import React from 'react';
 import { Route } from 'react-router';
-import PropTypes from 'prop-types';
 import pages, { getContentByUrl } from './pages';
 import type {tRouteObj, tRouteComponent} from './model';
 

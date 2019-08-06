@@ -124,8 +124,7 @@ function* showOverview(order: tOrder) {
 
 function* DebounceViewStep(d, action: tCommonActionType) {
   try {
-    const { type }: string = action;
-    switch (type) {
+    switch (action.type) {
       case ORDER.STEP.PREVIOUS:
         yield put({ type: ORDER.STEP.VIEW_PREVIOUS });
         break;

@@ -166,72 +166,55 @@ export const guard = (fun, msg) => (...args) => {
 
 export type CommonLogLvl = 'Warn' | 'Info' | 'Error' | 'Debug' | 'Maintenance';
 
-export class CommonLog {
-  static Info(msg: string) {
-    _logger('Info', msg);
-  }
+// eslint-disable-next-line flowtype/no-weak-types
+type tCommonLogMeta = Object;
+export const CommonLog = {
+  Info(msg: string, meta: ?tCommonLogMeta) {
+    _logger('Info', msg, meta);
+  },
 
-  static Warn(msg: string) {
-    _logger('Warn', msg);
-  }
+  Warn(msg: string, meta: ?tCommonLogMeta) {
+    _logger('Warn', msg, meta);
+  },
 
-  static Debug(msg: string) {
-    _logger('Debug', msg);
-  }
+  Debug(msg: string, meta: ?tCommonLogMeta) {
+    _logger('Debug', msg, meta);
+  },
 
-  static Maintenance(msg: string) {
-    _logger('Maintenance', msg);
-  }
+  Maintenance(msg: string, meta: ?tCommonLogMeta) {
+    _logger('Maintenance', msg, meta);
+  },
 
-  static lError(msg: mixed) {
+  lError(msg: mixed, meta: ?tCommonLogMeta) {
     if (typeof msg === 'string') {
-      _logger('Error', msg);
+      _logger('Error', msg, meta);
     }
     if (msg instanceof Error) {
-      _logger('Error', msg.message);
+      _logger('Error', msg.message, meta);
     }
   }
-}
+};
 
 // eslint-disable-next-line no-underscore-dangle
-function _logger(lvl: CommonLogLvl, msg: string) {
+function _logger(lvl: CommonLogLvl, msg: string, meta: ?tCommonLogMeta) {
   if (process.env.NODE_ENV !== 'production') {
-    switch (lvl) {
-      case 'Error':
-        console.error(msg);
-        break;
-      case 'Info':
-        console.info(msg);
-        break;
-      case 'Warn':
-        console.warn(msg);
-        break;
-      case 'Debug':
-        console.debug(msg);
-        break;
-      default:
-        break;
-    }
+    const fn = {
+      Error: console.error,
+      Info: console.info,
+      Warn: console.warn,
+      Debug: console.debug,
+      Maintenance: console.log
+    };
+    fn[lvl](msg, meta||'');
   }
-  switch (lvl) {
-    case 'Maintenance':
-      Maintenance(msg);
-      break;
-    case 'Error':
-      lError(msg);
-      break;
-    case 'Info':
-      Info(msg);
-      break;
-    case 'Warn':
-      Warn(msg);
-      break;
-    case 'Debug':
-      Debug(msg);
-      break;
-    default:
-      break;
-  }
+  const fnAlways = {
+    Error: lError,
+    Info,
+    Warn,
+    Debug,
+    Maintenance
+  };
+  fnAlways[lvl](msg, meta);
 }
 
 export const timeCost = (times: Array<Date>) =>
