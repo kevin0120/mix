@@ -4,10 +4,15 @@ import { isNil } from 'lodash-es';
 import Device from '../../common/type'
 import { gDevices } from '../global';
 import ClsController from '../controller/model';
+import type { tInputData } from '../../common/type';
+import screwStepAction from '../step/screwStep/action';
+import { CommonLog } from '../../common/utils';
 
 const symTool = 'ToolScrew';
 
 // export const defaultReaderDispatcher = (data) => readerStepAction.getValue(data);
+
+export const defaultScrewToolDispatcher = (data: tInputData) => screwStepAction.result(data);
 
 class ClsScrewTool extends Device {
 
@@ -24,6 +29,13 @@ class ClsScrewTool extends Device {
     } else {
       cl.push(this);
     }
+  }
+
+  doValidate(data: string | number): boolean {
+    const ret: boolean = super.doValidate(data);
+    const msg = `${this.source} validate return: ${ret.toString()}`;
+    CommonLog.Info(msg);
+    return ret;
   }
 
   set BelongTo(controller: ClsController) {

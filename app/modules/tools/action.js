@@ -32,7 +32,7 @@ export function toolStatusChange(toolSN, status, reason) {
   };
 }
 
-export function toolNewResults(results: Array<any>) {
+export function toolNewResults(results) {
   return {
     type: TOOLS.NEW_RESULTS,
     results,

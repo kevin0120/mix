@@ -447,7 +447,7 @@ export function* continueOperation() {
 export function* watchResults() {
   try {
     while (true) {
-      const { data } = yield take(TOOLS.NEW_RESULTS);
+      const { data } = yield take(RUSH.NEW_RESULTS);
       yield call(handleResults, data);
     }
   } catch (e) {
