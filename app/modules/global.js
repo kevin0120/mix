@@ -8,6 +8,8 @@ interface tArrayDevices<t>{
 
 export const symController = 'Controller';
 export const symScanner = 'Scanner';
+export const symTool = 'ToolScrew';
+export const symReader = 'Reader';
 
 
 /* eslint-disable flowtype/no-weak-types */
@@ -20,6 +22,6 @@ export function AppendNewDevices(symbol: string, clsObj: any) {
   }
 }
 
-const gDevices: tArrayDevices<any> = {};
-const gExternalSystems: tArrayDevices<any> = {};
+let gDevices: tArrayDevices<any>;
+// const gExternalSystems: tArrayDevices<any> = {};
 /* eslint-enable flowtype/no-weak-types */
