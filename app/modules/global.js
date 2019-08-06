@@ -14,9 +14,9 @@ export const symReader = 'Reader';
 
 /* eslint-disable flowtype/no-weak-types */
 export function AppendNewDevices(symbol: string, clsObj: any) {
-  const cl = gDevices?.[symController];
+  const cl = gDevices?.[symbol];
   if (isNil(cl)){
-    gDevices[symController] = [clsObj];
+    gDevices[symbol] = [clsObj];
   }else {
     cl.push(clsObj);
   }

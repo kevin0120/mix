@@ -10,7 +10,8 @@ export const NOTIFY = {
 
 export type tNotifyVariant = CommonLogLvl;
 
-export const setNewNotification = (variant: tNotifyVariant, message: string, meta) => ({
+// eslint-disable-next-line flowtype/no-weak-types
+export const setNewNotification = (variant: tNotifyVariant, message: string, meta: Object) => ({
   type: NOTIFY.NEW_NOTIFICATION,
   variant,
   message,

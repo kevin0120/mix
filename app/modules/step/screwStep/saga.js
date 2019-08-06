@@ -30,13 +30,9 @@ export default {
           controllerMode: payload.controllerMode
         };
       }));
-
-      // enable tools
-
-      //
       yield put(orderActions.stepStatus(STEP_STATUS.DOING));
     } catch (e) {
-      CommonLog.lError(e);
+      CommonLog.lError(e, { at: 'screwStep ENTERING' });
     }
   },
   * [STEP_STATUS.DOING](ORDER, orderActions) {
@@ -44,33 +40,36 @@ export default {
       while (true) {
         const data = yield select(s => stepData(workingStep(workingOrder(s.order))));
 
-        console.log(data.controllerMode);
         // call controllerModeTasks(pset/job)
-        yield call(controllerModeTasks[data.controllerMode], orderActions);
+        const success = yield call(controllerModeTasks[data.controllerMode], orderActions);
+        if (success) {
+          // take result
+          const { results }: tResultAction = yield take(SCREW_STEP.RESULT);
+          console.log('result taken');
 
-        // take result
-        const { results }: tResultAction = yield take(SCREW_STEP.RESULT);
-        console.log('result taken');
-
-        // handle result
-        yield call(handleResult, ORDER, orderActions, results, data);
+          // handle result
+          yield call(handleResult, ORDER, orderActions, results, data);
+        }else{
+          // TODO: on set job/pset fail
+          yield put(orderActions.stepStatus(STEP_STATUS.FAIL));
+        }
       }
     } catch (e) {
-      CommonLog.lError(e);
+      CommonLog.lError(e, { at: 'screwStep DOING' });
     }
   },
   * [STEP_STATUS.FINISHED](ORDER, orderActions) {
     try {
       yield put(orderActions.doNextStep());
     } catch (e) {
-      CommonLog.lError(e);
+      CommonLog.lError(e, { at: 'screwStep FINISHED' });
     }
   },
   * [STEP_STATUS.FAIL](ORDER, orderActions) {
     try {
       yield put(orderActions.doNextStep());
     } catch (e) {
-      CommonLog.lError(e);
+      CommonLog.lError(e, { at: 'screwStep FAIL' });
     }
   }
 

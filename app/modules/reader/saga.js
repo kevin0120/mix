@@ -11,7 +11,7 @@ import { symReader, AppendNewDevices } from "../global";
 
 export const reader = new ClsReader(symReader);
 AppendNewDevices(symReader, reader);
-
+// TODO: 收到读卡器uid后，分发给user模块进行用户认证
 // reader.dispatcher = defaultReaderDispatcher;
 
 function* readerHandler(action: tCommonActionType & tDeviceNewData): Saga<void> {
