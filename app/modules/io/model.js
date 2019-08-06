@@ -4,7 +4,7 @@ import { isNil } from 'lodash-es';
 import Device from '../../common/type';
 import type { AnyAction } from '../../common/type';
 
-import type { tIOData } from './type';
+import type { iIODataField, tIOData } from './type';
 import { CommonLog } from '../../common/utils';
 
 /* eslint-disable no-underscore-dangle */
@@ -32,6 +32,16 @@ export default class ClsIOModule extends Device {
     }
   }
 
+  _storeDateField(data: string | number): void {
+    return;
+  }
+
+  doValidate(data: string | number): boolean {
+    ret = super.doValidate(data);
+
+    return ret;
+  }
+
   setIOAction(idx: number, ioType: 'inputs' | 'outputs', action: (...args: any) => AnyAction): boolean {
     if (!this._checkValidateIdx(idx, ioType)) {
       return false;
@@ -49,16 +59,17 @@ export default class ClsIOModule extends Device {
     return null;
   }
 
-  doIODispatch(idx: number, ioType: 'inputs' | 'outputs'): ?AnyAction {
+  doIODispatch(idx: number, ioType: 'inputs' | 'outputs', ...actionParams: any): ?AnyAction {
     if (!this._checkValidateIdx(idx, ioType)) {
       return null;
     }
-    const ele = this.#_data?.[ioType]?.[idx];
+    const ele: iIODataField = this.#_data?.[ioType]?.[idx];
     if (isNil(ele)) {
       CommonLog.lError(`${ioType}, IO: ${idx} Is Undefined!`);
       return null;
     }
-    return ele.action();
+    const triggerMode = ele.tIOTriggerMode;
+    return ele.action(...actionParams);
   }
 
 }
