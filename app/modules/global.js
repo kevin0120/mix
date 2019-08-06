@@ -14,14 +14,14 @@ export const symReader = 'Reader';
 
 /* eslint-disable flowtype/no-weak-types */
 export function AppendNewDevices(symbol: string, clsObj: any) {
-  const cl = gDevices?.[symController];
+  const cl = gDevices?.[symbol];
   if (isNil(cl)){
-    gDevices[symController] = [clsObj];
+    gDevices[symbol] = [clsObj];
   }else {
     cl.push(clsObj);
   }
 }
 
-let gDevices: tArrayDevices<any>;
+let gDevices: tArrayDevices<any> = {};
 // const gExternalSystems: tArrayDevices<any> = {};
 /* eslint-enable flowtype/no-weak-types */
