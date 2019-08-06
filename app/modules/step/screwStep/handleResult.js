@@ -1,0 +1,135 @@
+import { put, select, call } from 'redux-saga/effects';
+import type { tPoint, tPointStatus, tResult, tResultStatus, tScrewStepData } from './model';
+import { POINT_STATUS, RESULT_STATUS } from './model';
+import STEP_STATUS from '../model';
+import { stepData, workingOrder, workingStep } from '../../order/selector';
+
+function formPointStatusFromResultStatus(point: tPoint, rStatus: tResultStatus, groupSequence: number): tPointStatus {
+  let pStatus = POINT_STATUS.WAITING;
+
+  if (rStatus === RESULT_STATUS.NOK) {
+    pStatus = POINT_STATUS.ERROR;
+  } else if (rStatus === RESULT_STATUS.OK) {
+    pStatus = POINT_STATUS.SUCCESS;
+  }
+
+  const isActive = groupSequence === point.group_sequence;
+  if (isActive) {
+    switch (pStatus) {
+      case POINT_STATUS.ERROR: {
+        pStatus = POINT_STATUS.ERROR_ACTIVE;
+        break;
+      }
+      case POINT_STATUS.WAITING:
+        pStatus = POINT_STATUS.WAITING_ACTIVE;
+        break;
+      default:
+        break;
+    }
+  }
+
+  return pStatus;
+}
+
+const mergePointsAndResults = (points: Array<tPoint>, results: Array<tResult>, activeIndex: number): Array<tPoint> => {
+  const newPoints = [...points];
+  newPoints.splice(activeIndex, results.length,
+    ...newPoints.slice(activeIndex, activeIndex + results.length).map((p, idx) => {
+      const r: tResult = results[idx];
+      return ({
+        ...p,
+        ti: r.ti,
+        mi: r.mi,
+        wi: r.wi,
+        status: formPointStatusFromResultStatus(p, r.status, r.group_sequence), // result
+        batch: r.batch
+      });
+    }));
+  return newPoints;
+};
+
+const resultStatus = (results: Array<tResult>, data: tScrewStepData) => {
+  const LSN = results.some((r: tResult): boolean => r.status === RESULT_STATUS.LSN) && 'LSN';
+  const retry = results.some((r: tResult): boolean => r.status === RESULT_STATUS.NOK) && 'retry';
+  const fail = retry && data.retryTimes >= data.points[data.activeIndex].maxRetryTimes && 'fail';
+  const finish = (!retry && (data.activeIndex + results.length >= data.points.length)) && 'finish';
+  const next = !retry && !finish && 'next';
+  return [LSN, fail, retry, finish, next];
+};
+
+const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
+  * retry() {
+    try {
+      yield put(orderActions.stepData((d: tScrewStepData): tScrewStepData => ({
+        ...d,
+        points: mergePointsAndResults(d.points, results, d.activeIndex),
+        retryTimes: (d.retryTimes || 0) + 1
+      })));
+    } catch (e) {
+      console.error(e);
+    }
+  },
+  * fail() {
+    try {
+      yield put(orderActions.stepData((d: tScrewStepData): tScrewStepData => ({
+        ...d,
+        activeIndex: -1,
+        points: mergePointsAndResults(d.points, results, d.activeIndex)
+      })));
+      yield put(orderActions.stepStatus(STEP_STATUS.FAIL));
+    } catch (e) {
+      console.error(e);
+    }
+  },
+  * finish() {
+    try {
+      yield put(orderActions.stepData((d: tScrewStepData): tScrewStepData => ({
+        ...d,
+        activeIndex: -1,
+        points: mergePointsAndResults(d.points, results, d.activeIndex)
+      })));
+      yield put(orderActions.stepStatus(STEP_STATUS.FINISHED));
+    } catch (e) {
+      console.error(e);
+    }
+  },
+  * next() {
+    try {
+      const sData = yield select(s => stepData(workingStep(workingOrder(s.order))));
+      // call pset
+
+      // update step data
+      yield put(orderActions.stepData((d: tScrewStepData): tScrewStepData => ({
+        ...d,
+        activeIndex: d.activeIndex + results.length,
+        points: mergePointsAndResults(d.points, results, d.activeIndex)
+      })));
+    } catch (e) {
+      console.error(e);
+    }
+  },
+  * LSN() {
+    try {
+      // do nothing
+    } catch (e) {
+      console.error(e);
+    }
+  }
+});
+
+export default function* handleResult(ORDER, orderActions, results, data) {
+  try {
+    const firstMatchResultStatus =
+      resultStatusTasks(
+        ORDER,
+        orderActions,
+        results
+      )[resultStatus(results, data).find(v => !!v)];
+    // 执行
+    if (firstMatchResultStatus) {
+      yield call(firstMatchResultStatus);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
