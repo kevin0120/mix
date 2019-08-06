@@ -1,7 +1,8 @@
 // @flow
 
-import type { tCommonActionType, tDeviceNewData } from '../../common/type';
+import type { tCommonActionType } from '../../common/type';
 import type { tIOContact } from './type';
+import {isNil} from 'lodash-es';
 
 export const IOACTION = {
   DATA_ONCHANGE: 'IO_DATA_ON_CHANGE',
@@ -10,10 +11,13 @@ export const IOACTION = {
   RESET: 'IO_RESET'
 };
 
-export function onchangeIO(data: tIOContact): tCommonActionType & tDeviceNewData {
+export function onchangeIO(data: ?tIOContact): void | tCommonActionType & {data: tIOContact} {
+  if (isNil(data)){
+    return;
+  }
   return {
     type: IOACTION.DATA_ONCHANGE,
-    data
+    data,
   };
 }
 
