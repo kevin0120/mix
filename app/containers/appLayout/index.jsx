@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import { push } from 'connected-react-router';
 import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
+import {I18n} from 'react-i18next';
 import Button from '../../components/CustomButtons/Button';
 import NavBar from '../../components/NavBar';
 import LayoutDrawer from '../../components/LayoutDrawer';
@@ -40,6 +41,8 @@ function AppLayout(
   }: Props) {
   const { DefaultContent, navBarContents } = self;
   return (
+    <I18n ns="translations">
+      {t => (
     <React.Fragment>
       <Notifier/>
       <Dialog/>
@@ -63,7 +66,7 @@ function AppLayout(
                 onClick={() => logout(u.uuid)}
               >
                 <Typography variant="body1">
-                  Logout
+                  {t('Common.Logout')}
                 </Typography>
               </Button>
             </div>)
@@ -78,6 +81,8 @@ function AppLayout(
         childRoutes={childRoutes}
       />
     </React.Fragment>
+      )}
+    </I18n>
   );
 }
 
