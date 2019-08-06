@@ -1,16 +1,17 @@
 // @flow
 
 import { isNil } from 'lodash-es';
-import Device from '../../common/type';
+import Device from "../../common/type";
+import type { tInputData } from "../../common/type";
 import type { AnyAction } from '../../common/type';
 
-import type { iIODataField, tIOData } from './type';
+import type { iIODataField, tIOContact, tIOData, tIOTriggerMode } from "./type";
 import { CommonLog } from '../../common/utils';
 
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable flowtype/no-weak-types */
 export default class ClsIOModule extends Device {
-  #_data: tIOData;
+  #_data: tIOData = {'inputs': {}, "outputs": {}};
   #_maxInputs: number = 0;
   #_maxOutputs: number = 0;
 
@@ -32,12 +33,33 @@ export default class ClsIOModule extends Device {
     }
   }
 
-  _storeDateField(data: string | number): void {
-    return;
+  static bitString2Boolean(bit: string): boolean {
+    switch (bit) {
+      case '1':
+        return true;
+      case '0':
+        return false;
+      default:
+        return false;
+    }
+
   }
 
-  doValidate(data: string | number): boolean {
-    ret = super.doValidate(data);
+  _storeDateField(data: tIOContact): void {
+    const d = data.contact;
+    if (typeof d !== 'string'){
+      CommonLog.lError(`IO Data Must Be String!!!!`);
+      return;
+    }
+    const ioType = data.type + 's';
+    [...d].forEach((val, idx) => {
+      this.#_data[ioType][idx].data = ClsIOModule.bitString2Boolean(val);
+    })
+  }
+
+  doHandleIOData(data: tIOContact){
+    const ret = this.doValidate(data.contact);
+    this._storeDateField(data);
 
     return ret;
   }
@@ -50,11 +72,15 @@ export default class ClsIOModule extends Device {
     return true;
   }
 
-  set dispatcher(dispatcher: (...args: any) => AnyAction) {
+  set dispatcher(dispatcher: null | (...args: any) => AnyAction) {
     super.dispatcher = null; // 永远设置的是null
   }
 
-  static doDispatch(): AnyAction {
+  get dispatcher() {
+    return null;
+  }
+
+  static doDispatch(data: tInputData): ?AnyAction {
     CommonLog.Info(`IO Module Please Use doIODispatch Method`);
     return null;
   }
@@ -68,7 +94,8 @@ export default class ClsIOModule extends Device {
       CommonLog.lError(`${ioType}, IO: ${idx} Is Undefined!`);
       return null;
     }
-    const triggerMode = ele.tIOTriggerMode;
+    // TODO: 触发模式引入不同的业务逻辑效果
+    const triggerMode = ele.triggerMode;
     return ele.action(...actionParams);
   }
 

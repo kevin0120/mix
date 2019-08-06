@@ -24,7 +24,7 @@ export interface AnyAction extends Action {
 
 
 type tDeviceNewData = {
-  +data: tInputData
+  data: tInputData
 };
 
 // interface IInputDevice {
@@ -187,7 +187,7 @@ class Device extends CommonExternalEntity {
   }
 
   // eslint-disable-next-line flowtype/no-weak-types
-  set dispatcher(dispatcher: (?tInput) => AnyAction) {
+  set dispatcher(dispatcher: null | (?tInput) => AnyAction) {
     this.#dispatcher = dispatcher;
   }
 

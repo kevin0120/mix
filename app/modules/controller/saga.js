@@ -9,7 +9,6 @@ import { CommonLog } from '../../common/utils';
 
 // eslint-disable-next-line prefer-const
 const controller = new ClsController('controller', 'Dummy Serial Number');
-const controller2 = new ClsController('controller', 'Dummy Serial Number2');
 
 // reader.dispatcher = defaultReaderDispatcher;
 
@@ -22,7 +21,7 @@ function* controllerHandler(action: tCommonActionType & tDeviceNewData): Saga<vo
       // do nothing
     }
   } catch (e) {
-    CommonLog.Error(e)
+    CommonLog.lError(e)
   }
 }
 
