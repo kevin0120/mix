@@ -6,6 +6,7 @@ import type { tInputData, AnyAction } from "../../common/type";
 
 import type { iIODataField, tIOContact, tIOData, tIOTriggerMode } from "./type";
 import { CommonLog } from '../../common/utils';
+import { AppendNewDevices, symIO } from '../global';
 
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable flowtype/no-weak-types */
@@ -18,6 +19,8 @@ export default class ClsIOModule extends Device {
     super(name);
     this.#_maxInputs = inputs;
     this.#_maxOutputs = outputs;
+
+    AppendNewDevices(symIO, this);
   }
 
   _checkValidateIdx(idx: number, ioType: 'inputs' | 'outputs'): boolean {

@@ -10,6 +10,7 @@ export const symController = 'Controller';
 export const symScanner = 'Scanner';
 export const symTool = 'ToolScrew';
 export const symReader = 'Reader';
+export const symIO = 'IO';
 
 
 /* eslint-disable flowtype/no-weak-types */
