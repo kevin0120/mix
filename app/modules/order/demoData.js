@@ -11,12 +11,52 @@ export const demoOrder = {
   steps: [
 
     {
-      name: '拧紧作业指导',
+      name: '拧紧作业指导 pset',
       info: 'this is an screw step',
       type: 'screw',
       skippable: false,
       undoable: true,
       payload: {
+        controllerMode:'pset',
+        maxRetryTimes: 3,
+        points: [
+          {
+            id: 1,
+            x: 10,
+            y: 10,
+            status: 'waiting'
+          }, {
+            id: 2,
+            x: 20,
+            y: 20,
+            status: 'waiting'
+          }, {
+            id: 3,
+            x: 30,
+            y: 30,
+            status: 'waiting'
+          }, {
+            id: 4,
+            x: 40,
+            y: 40,
+            status: 'waiting'
+          }, {
+            id: 5,
+            x: 50,
+            y: 50,
+            status: 'waiting'
+          }
+        ],
+        image: dataImg
+      }
+    },{
+      name: '拧紧作业指导 job',
+      info: 'this is an screw step',
+      type: 'screw',
+      skippable: false,
+      undoable: true,
+      payload: {
+        controllerMode:'job',
         maxRetryTimes: 3,
         points: [
           {

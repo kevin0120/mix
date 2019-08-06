@@ -1,128 +1,76 @@
+// @flow
 import { put, select, take, call } from 'redux-saga/effects';
+import { cloneDeep } from 'lodash-es';
 import STEP_STATUS from '../model';
 import { stepPayload, workingStep, stepData, workingOrder } from '../../order/selector';
 import { SCREW_STEP } from './action';
+import type { tResultAction } from './action';
+import type { tPoint, tScrewStepData, tScrewStepPayload } from './model';
+import controllerModeTasks from './controllerModeTasks';
+import handleResult from './handleResult';
+import { CommonLog } from '../../../common/utils';
 
-
-const mergePointsAndResults = (points, result, activeIndex) => {
-  const newPoints = [...points];
-  newPoints.splice(activeIndex, result.length,
-    ...newPoints.slice(activeIndex, activeIndex + result.length).map((p, idx) => ({
-      ...p,
-      ...result[idx]
-    })));
-  return newPoints;
-};
-
-const resultStatus = (result, data) => {
-  const retry = result.some(r => r.status === 'error') && 'retry';
-  const fail = retry && data.retryTimes >= data.maxRetryTimes && 'fail';
-  const finish = !retry && (data.activeIndex + result.length >= data.points.length) && 'finish';
-  const next = !retry && !finish && 'next';
-  return [fail, retry, finish, next];
-};
-
-const resultStatusTasks = (ORDER, orderActions, result) => ({
-  * retry() {
-    try {
-      yield put(orderActions.stepData((d) => ({
-        ...d,
-        points: mergePointsAndResults(d.points, result, d.activeIndex),
-        retryTimes: (d.retryTimes || 0) + 1
-      })));
-    } catch (e) {
-      console.error(e);
-    }
-  },
-  * fail() {
-    try {
-      yield put(orderActions.stepData((d) => ({
-        ...d,
-        activeIndex: -1,
-        points: mergePointsAndResults(d.points, result, d.activeIndex)
-      })));
-      yield put(orderActions.stepStatus(STEP_STATUS.FAIL));
-    } catch (e) {
-      console.error(e);
-    }
-  },
-  * finish() {
-    try {
-      yield put(orderActions.stepData((d) => ({
-        ...d,
-        activeIndex: -1,
-        points: mergePointsAndResults(d.points, result, d.activeIndex)
-      })));
-      yield put(orderActions.stepStatus(STEP_STATUS.FINISHED));
-    } catch (e) {
-      console.error(e);
-    }
-  },
-  * next() {
-    try {
-      yield put(orderActions.stepData((d) => ({
-        ...d,
-        activeIndex: d.activeIndex + result.length,
-        points: mergePointsAndResults(d.points, result, d.activeIndex)
-      })));
-    } catch (e) {
-      console.error(e);
-    }
-  }
-});
 
 export default {
   * [STEP_STATUS.ENTERING](ORDER, orderActions) {
     try {
-      const payload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
-      yield put(orderActions.stepData((data) => {
-        const points = JSON.parse(JSON.stringify(payload?.points || []));
+      // init data
+      const payload: tScrewStepPayload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
+      yield put(orderActions.stepData((data: tScrewStepData): tScrewStepData => {
+        const points: Array<tPoint> = cloneDeep(payload?.points || []).sort((a, b) => a.group_sequence - b.group_sequence);
         return {
-          points,
-          maxRetryTimes: payload.maxRetryTimes,
-          activeIndex: 0,
-          ...data
+          points, // results data.results
+          activeIndex: 0, // <-activeResultIndex
+          ...data,
+          jobID: payload.job_id,
+          carType: payload.model,
+          workSheet: payload.work_sheet,
+          lnr: payload.lnr,
+          workorderID: payload.workorder_id,
+          controllerMode: payload.controllerMode
         };
       }));
+
+      // enable tools
+
+      //
       yield put(orderActions.stepStatus(STEP_STATUS.DOING));
     } catch (e) {
-      console.error(e);
+      CommonLog.lError(e);
     }
   },
   * [STEP_STATUS.DOING](ORDER, orderActions) {
     try {
       while (true) {
-        const { result } = yield take(SCREW_STEP.RESULT);
-        console.log('result taken');
         const data = yield select(s => stepData(workingStep(workingOrder(s.order))));
 
-        const firstMatchResultStatus =
-          resultStatusTasks(
-            ORDER,
-            orderActions,
-            result
-          )[resultStatus(result, data).find(v => !!v)];
+        console.log(data.controllerMode);
+        // call controllerModeTasks(pset/job)
+        yield call(controllerModeTasks[data.controllerMode], orderActions);
 
-        if (firstMatchResultStatus) {
-          yield call(firstMatchResultStatus);
-        }
+        // take result
+        const { results }: tResultAction = yield take(SCREW_STEP.RESULT);
+        console.log('result taken');
+
+        // handle result
+        yield call(handleResult, ORDER, orderActions, results, data);
       }
     } catch (e) {
-      console.error(e);
+      CommonLog.lError(e);
     }
   },
   * [STEP_STATUS.FINISHED](ORDER, orderActions) {
     try {
       yield put(orderActions.doNextStep());
     } catch (e) {
-      console.error(e);
+      CommonLog.lError(e);
     }
   },
   * [STEP_STATUS.FAIL](ORDER, orderActions) {
     try {
       yield put(orderActions.doNextStep());
     } catch (e) {
-      console.error(e);
+      CommonLog.lError(e);
     }
   }
 
