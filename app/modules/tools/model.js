@@ -1,14 +1,11 @@
 // @flow
 
-import { isNil } from 'lodash-es';
 import Device from '../../common/type'
-import { gDevices } from '../global';
+import { symTool, AppendNewDevices } from '../global';
 import ClsController from '../controller/model';
 import type { tInputData } from '../../common/type';
 import screwStepAction from '../step/screwStep/action';
 import { CommonLog } from '../../common/utils';
-
-const symTool = 'ToolScrew';
 
 // export const defaultReaderDispatcher = (data) => readerStepAction.getValue(data);
 
@@ -23,12 +20,7 @@ class ClsScrewTool extends Device {
   constructor(name: string, serialNumber: string){
     super(name);
     this.SerialNumber = serialNumber;
-    const cl = gDevices?.[symTool];
-    if (isNil(cl)){
-      gDevices[symTool] = [this];
-    } else {
-      cl.push(this);
-    }
+    AppendNewDevices(symTool, this);
   }
 
   doValidate(data: string | number): boolean {

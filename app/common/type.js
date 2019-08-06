@@ -24,7 +24,7 @@ export interface AnyAction extends Action {
 
 
 type tDeviceNewData = {
-  data: tInputData
+  +data: tInputData
 };
 
 // interface IInputDevice {

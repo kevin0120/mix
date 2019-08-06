@@ -7,9 +7,9 @@ import { CommonLog } from '../../common/utils';
 
 class ClsReader extends Device {
 
-  doValidate(data: string): boolean {
+  doValidate(data: string | number): boolean {
     const ret: boolean =  super.doValidate(data);
-    const msg = `${this.source} validate return: ${ret}`;
+    const msg = `${this.source} validate return: ${ret.toString()}`;
     CommonLog.Info(msg);
     return ret
   }

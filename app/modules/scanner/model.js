@@ -1,11 +1,11 @@
 // @flow
 
 import Device from '../../common/type';
-import type { tInputData } from '../../common/type';
+import type { tInput } from '../../common/type';
 import { CommonLog } from '../../common/utils';
 import { scannerStepAction } from '../step/scannerStep/action';
 
-export const defaultScannerDispatcher = (data: tInputData) => scannerStepAction.getValue(data);
+export const defaultScannerDispatcher = (data: ?tInput) => scannerStepAction.getValue(data);
 
 class ClsScanner extends Device {
 
