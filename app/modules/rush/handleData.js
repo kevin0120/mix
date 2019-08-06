@@ -1,0 +1,116 @@
+import { put, fork } from 'redux-saga/effects';
+import type { tBarcode, tReader, tRushWebSocketData, tWebSocketEvent } from './type';
+import { WEBSOCKET_EVENTS as wse } from './type';
+import { setNewNotification } from '../notification/action';
+import { CommonLog } from '../../common/utils';
+import type { tIOContact, tIOWSMsgType } from '../io/type';
+import { onchangeIO } from '../io/action';
+import { toolNewResults, toolStatusChange } from '../tools/action';
+import { ScannerNewData } from '../scanner/action';
+import { ReaderNewData } from '../reader/action';
+
+
+export default function* (payload) {
+  try {
+    const dataArray = payload.split(';');
+    const event: tWebSocketEvent = dataArray[0].split(':').slice(-1)[0];
+
+    const json: tRushWebSocketData = JSON.parse(dataArray.slice(-1));
+    if (rushDataHandlers[event]) {
+      yield fork(rushDataHandlers[event], json); // 异步处理rush数据
+    }
+  } catch (e) {
+    CommonLog.lError(e, { at: 'rush handleData' });
+  }
+}
+
+const rushDataHandlers = {
+  * [wse.maintenance](data: tRushWebSocketData) {
+    try {
+      yield put(setNewNotification('Maintenance', `新维护请求: ${data.type},${data.data.name}`));
+
+    } catch (e) {
+      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.maintenance' });
+    }
+  },
+
+  * [wse.job]() {
+
+  },
+
+  * [wse.odoo]() {
+
+  },
+
+  * [wse.io](data: tRushWebSocketData) {
+    try {
+      let d;
+      const msgType = (data.type: tIOWSMsgType);
+      switch (msgType) {
+        case 'WS_IO_CONTACT': {
+          d = (data.data: tIOContact);
+          break;
+        }
+        default:
+          CommonLog.lError('IO Message Type Is Not Defined', { msgType });
+      }
+      yield put(onchangeIO(d));
+    } catch (e) {
+      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.io' });
+    }
+  },
+
+  * [wse.result](data: tRushWebSocketData) {
+    try {
+      CommonLog.Info(` tool new results: ${data.data}`);
+      yield put(toolNewResults(data.data));
+    } catch (e) {
+      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.result' });
+    }
+  },
+
+  * [wse.scanner](data: tRushWebSocketData) {
+    try {
+      const d = (data.data: tBarcode);
+      CommonLog.Info(` Scanner receive data: ${d.barcode}`);
+      yield put(ScannerNewData(d.barcode));
+    } catch (e) {
+      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.scanner' });
+    }
+  },
+
+  * [wse.reader](data: tRushWebSocketData) {
+    try {
+      const d = (data.data: tReader);
+      CommonLog.Info(` Reader receive data: ${d.uid}`);
+      yield put(ReaderNewData(d.uid));
+    } catch (e) {
+      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.reader' });
+    }
+  },
+
+  * [wse.controller](data: tRushWebSocketData) {
+    try {
+    } catch (e) {
+      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.controller' });
+    }
+  },
+
+  * [wse.tool](data: tRushWebSocketData) {
+    try {
+      yield put(toolStatusChange(data.tool_sn, data.status, data.reason));
+    } catch (e) {
+      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.tool' });
+    }
+  },
+
+  * [wse.tightening_device](data: tRushWebSocketData) {
+    try {
+      // 初始化所有拧紧设备
+
+    } catch (e) {
+      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.tightening_device' });
+    }
+  }
+
+};

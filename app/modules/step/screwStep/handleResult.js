@@ -8,13 +8,13 @@ import { CommonLog } from '../../../common/utils';
 function formPointStatusFromResultStatus(point: tPoint, rStatus: tResultStatus, groupSequence: number): tPointStatus {
   let pStatus = POINT_STATUS.WAITING;
 
-  if (rStatus === RESULT_STATUS.NOK) {
+  if (rStatus === RESULT_STATUS.nok) {
     pStatus = POINT_STATUS.ERROR;
-  } else if (rStatus === RESULT_STATUS.OK) {
+  } else if (rStatus === RESULT_STATUS.ok) {
     pStatus = POINT_STATUS.SUCCESS;
   }
 
-  const isActive = groupSequence === point.group_sequence;
+  const isActive = groupSequence && groupSequence === point.group_sequence;
   if (isActive) {
     switch (pStatus) {
       case POINT_STATUS.ERROR: {
@@ -34,27 +34,36 @@ function formPointStatusFromResultStatus(point: tPoint, rStatus: tResultStatus, 
 
 const mergePointsAndResults = (points: Array<tPoint>, results: Array<tResult>, activeIndex: number): Array<tPoint> => {
   const newPoints = [...points];
-  newPoints.splice(activeIndex, results.length,
-    ...newPoints.slice(activeIndex, activeIndex + results.length).map((p, idx) => {
+  console.log(activeIndex);
+  newPoints.splice(activeIndex, newPoints.length - activeIndex,
+    ...newPoints.slice(activeIndex).map((p, idx) => {
       const r: tResult = results[idx];
+      if (r) {
+        return ({
+          ...p,
+          ti: r.ti,
+          mi: r.mi,
+          wi: r.wi,
+          batch: r.batch,
+          status: formPointStatusFromResultStatus(p, r.result, points[activeIndex + results.length]?.group_sequence)
+        });
+      }
       return ({
         ...p,
-        ti: r.ti,
-        mi: r.mi,
-        wi: r.wi,
-        status: formPointStatusFromResultStatus(p, r.status, r.group_sequence), // result
-        batch: r.batch
+        status: formPointStatusFromResultStatus(p, null, points[activeIndex + results.length]?.group_sequence)
       });
     }));
   return newPoints;
 };
 
 const resultStatus = (results: Array<tResult>, data: tScrewStepData) => {
-  const LSN = results.some((r: tResult): boolean => r.status === RESULT_STATUS.LSN) && 'LSN';
-  const retry = results.some((r: tResult): boolean => r.status === RESULT_STATUS.NOK) && 'retry';
+  console.log(results.length, data.activeIndex);
+  const LSN = results.some((r: tResult): boolean => r.result === RESULT_STATUS.lsn) && 'LSN';
+  const retry = results.some((r: tResult): boolean => r.result === RESULT_STATUS.nok) && 'retry';
   const fail = retry && data.retryTimes >= data.points[data.activeIndex].maxRetryTimes && 'fail';
   const finish = (!retry && (data.activeIndex + results.length >= data.points.length)) && 'finish';
   const next = !retry && !finish && 'next';
+  console.log([LSN, fail, retry, finish, next]);
   return [LSN, fail, retry, finish, next];
 };
 

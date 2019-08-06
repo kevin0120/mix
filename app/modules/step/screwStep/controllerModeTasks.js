@@ -7,6 +7,8 @@ import { setNewNotification } from '../../notification/action';
 import { stepData, workingStep, workingOrder } from '../../order/selector';
 import type { tPoint, tScrewStepData } from './model';
 import { CommonLog } from '../../../common/utils';
+import rushActions from '../../rush/action';
+
 
 export default {
   * [controllerModes.pset](): Saga<void> {
@@ -21,18 +23,21 @@ export default {
         workorderID
       } = sData;
       const userID = 1;
-      yield call(
-        pset,
-        rush,
-        results[activeResultIndex].controller_sn,
-        results[activeResultIndex].gun_sn,
-        0,
-        failCount + 1,
-        userID,
-        results[activeResultIndex].pset,
-        workorderID,
-        results[activeResultIndex].group_sequence
-      );
+      yield put(rushActions.sendJson({
+
+      }))
+      // yield call(
+      //   pset,
+      //   rush,
+      //   results[activeResultIndex].controller_sn,
+      //   results[activeResultIndex].gun_sn,
+      //   0,
+      //   failCount + 1,
+      //   userID,
+      //   results[activeResultIndex].pset,
+      //   workorderID,
+      //   results[activeResultIndex].group_sequence
+      // );
     } catch (e) {
       // 程序号设置失败
       yield put(setNewNotification('Error', 'pset failed', {
@@ -60,7 +65,9 @@ export default {
       const userID = 1;
 
       // TODO: set job here
-
+      // yield put(rushActions.sendJson({
+      //
+      // }))
       // if (resp.status === 200) {
       //   // 程序号设置成功
       //

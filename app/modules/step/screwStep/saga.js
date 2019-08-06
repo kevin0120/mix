@@ -37,22 +37,21 @@ export default {
   },
   * [STEP_STATUS.DOING](ORDER, orderActions) {
     try {
+      const initData = yield select(s => stepData(workingStep(workingOrder(s.order))));
+      yield call(handleResult, ORDER, orderActions, [], initData);
       while (true) {
         const data = yield select(s => stepData(workingStep(workingOrder(s.order))));
 
-        // call controllerModeTasks(pset/job)
-        const success = yield call(controllerModeTasks[data.controllerMode], orderActions);
-        if (success) {
-          // take result
-          const { results }: tResultAction = yield take(SCREW_STEP.RESULT);
-          console.log('result taken');
+        // const success = yield call(controllerModeTasks[data.controllerMode], orderActions);
+        // if (success) {
+        const { results: { data: results } } = yield take(SCREW_STEP.RESULT);
+        console.log('result taken', results);
 
-          // handle result
-          yield call(handleResult, ORDER, orderActions, results, data);
-        }else{
-          // TODO: on set job/pset fail
-          yield put(orderActions.stepStatus(STEP_STATUS.FAIL));
-        }
+        yield call(handleResult, ORDER, orderActions, results, data);
+        // }else{
+        //   // TODO: on set job/pset fail
+        //   yield put(orderActions.stepStatus(STEP_STATUS.FAIL));
+        // }
       }
     } catch (e) {
       CommonLog.lError(e, { at: 'screwStep DOING' });

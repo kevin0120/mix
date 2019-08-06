@@ -2,15 +2,16 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core';
 import clsx from 'clsx';
 import styles from './style';
+import { POINT_STATUS } from '../../modules/step/screwStep/model';
 
 
 const pointRadius = 30;
 
 const isStatus = {
-  waiting: status => !status || status === 'waiting' || status === 'waitingActive',
-  success: status => status === 'success',
-  error: status => status === 'error' || status === 'failActive',
-  active: status => status === 'waitingActive' || status === 'failActive'
+  waiting: status => !status || status === POINT_STATUS.WAITING || status === POINT_STATUS.WAITING_ACTIVE,
+  success: status => status === POINT_STATUS.SUCCESS,
+  error: status => status === POINT_STATUS.ERROR || status === POINT_STATUS.ERROR_ACTIVE,
+  active: status => status === POINT_STATUS.WAITING_ACTIVE || status === POINT_STATUS.ERROR_ACTIVE
 };
 
 

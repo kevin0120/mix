@@ -1,28 +1,19 @@
 // @flow
 
 import OWebSocket from 'ws';
-import { call, take, takeLatest, put, select, fork, cancel, delay } from 'redux-saga/effects';
+import { call, take, takeLatest, put, select, fork, cancel, delay, takeEvery } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
 import type { Saga, EventChannel } from 'redux-saga';
-import { onchangeIO } from '../io/action';
 import { RUSH } from './action';
-import { ScannerNewData } from '../scanner/action';
-// import { getIBypass, getIModeSelect, handleIOFunction } from '../io/saga';
 import { setHealthzCheck } from '../healthzCheck/action';
 import { setNewNotification } from '../notification/action';
-// import { switch2Ready, operationTrigger } from '../operation/action';
-import { toolStatusChange, toolNewResults } from '../tools/action';
-// import { andonScanner } from '../andon/action';
 import { CommonLog } from '../../common/utils';
-import type { tWebSocketEvent, tRushWebSocketData, tBarcode, tReader } from './type';
-import type { tIOWSMsgType, tIOContact } from '../io/type';
-import { ReaderNewData } from '../reader/action';
-import { WEBSOCKET_EVENTS } from './type';
+import handleData from './handleData';
+import handleHealthz from './handleHealthz';
 
-let task = null;
+const tasks = [];
 let ws = null;
 const WebSocket = require('@oznu/ws-connect');
-
 
 const DebounceWaitTime = 2000;
 
@@ -52,10 +43,15 @@ function* initRush() {
 
     ws = new WebSocket(wsURL, { reconnectInterval: 3000 });
 
-    task = yield fork(
+    const listenerTask = yield fork(
       watchRushChannel,
       state.setting.page.odooConnection.hmiSn.value
     );
+    tasks.push(listenerTask);
+
+    const sendTask = yield fork(watchRushSend);
+    tasks.push(sendTask);
+
   } catch (e) {
     CommonLog.lError(e, { at: 'initRush' });
   }
@@ -71,248 +67,79 @@ function* stopRush() {
       ws.ws.readyState === OWebSocket.CONNECTING
     ) {
       yield put(setHealthzCheck('masterpc', false));
-      yield put(setNewNotification('Info', `masterPC连接状态更新: ${false}`));
+      yield put(setNewNotification('Info', `masterPC连接状态更新: false`));
       yield put(setHealthzCheck('controller', false));
-      yield put(setNewNotification('Info', `controller连接状态更新: ${false}`));
+      yield put(setNewNotification('Info', `controller连接状态更新: false`));
       ws.close();
     }
     ws = null;
-    if (task) {
-      yield cancel(task);
+    while (tasks.length > 0) {
+      yield cancel(tasks.pop());
     }
   } catch (e) {
     CommonLog.lError(e, { at: 'stopRush' });
   }
 }
 
+function* watchRushSend() {
+  try {
+    yield takeEvery(RUSH.SEND_JSON, rushSend);
+  } catch (e) {
+    CommonLog.lError(e, { at: 'watchRushSend' });
+  }
+}
+
+function rushSend({ data }) {
+  if (ws) {
+    ws.sendJson(data, err => {
+      if (err && ws) {
+        ws.close();
+      }
+    });
+  }
+}
+
+
 function createRushChannel(hmiSN: string): EventChannel<void> {
   return eventChannel(emit => {
-    ws.on('open', () => {
-      emit({ type: 'healthz', payload: true });
-      // reg msg
-      ws.sendJson({ hmi_sn: hmiSN }, err => {
-        if (err) {
-          ws.close();
+    if (ws) {
+      ws.on('open', () => {
+        emit({ type: 'healthz', payload: true });
+        // reg msg
+        if(ws){
+          ws.sendJson({ hmi_sn: hmiSN }, err => {
+            if (err && ws) {
+              ws.close();
+            }
+          });
         }
       });
-    });
 
-    ws.on('close', () => {
-      emit({ type: 'healthz', payload: false });
-    });
+      ws.on('close', () => {
+        emit({ type: 'healthz', payload: false });
+      });
 
-    ws.on('error', () => {
-      emit({ type: 'healthz', payload: false });
-      // console.log('websocket error. reconnect after 1s');
-    });
-    ws.on('ping', () => {
-      CommonLog.Debug('receive ping msg');
-    });
-    ws.on('pong', () => {
-      CommonLog.Debug('receive pong msg');
-    });
+      ws.on('error', () => {
+        emit({ type: 'healthz', payload: false });
+        // console.log('websocket error. reconnect after 1s');
+      });
+      ws.on('ping', () => {
+        CommonLog.Debug('receive ping msg');
+      });
+      ws.on('pong', () => {
+        CommonLog.Debug('receive pong msg');
+      });
 
-    ws.on('message', data => {
-      emit({ type: 'data', payload: data });
-    });
-
+      ws.on('message', data => {
+        emit({ type: 'data', payload: data });
+      });
+    } else {
+      CommonLog.lError('ws doesn\'t exist', { at: 'createRushChannel' });
+    }
     return () => {
     };
   });
 }
-
-const rushDataHandlers = {
-  * [WEBSOCKET_EVENTS.maintenance](data: tRushWebSocketData) {
-    try {
-      yield put(setNewNotification('Maintenance', `新维护请求: ${data.type},${data.data.name}`));
-
-    } catch (e) {
-      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.maintenance' });
-    }
-  },
-  * [WEBSOCKET_EVENTS.job]() {
-
-  },
-  * [WEBSOCKET_EVENTS.odoo]() {
-
-  },
-  * [WEBSOCKET_EVENTS.io](data: tRushWebSocketData) {
-    try {
-      let d;
-      const msgType = (data.type: tIOWSMsgType);
-      switch (msgType) {
-        case 'WS_IO_CONTACT': {
-          d = (data.data: tIOContact);
-          break;
-        }
-        default:
-          CommonLog.lError('IO Message Type Is Not Defined', { msgType });
-      }
-      yield put(onchangeIO(d));
-    } catch (e) {
-      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.io' });
-    }
-  },
-  * [WEBSOCKET_EVENTS.result](data: tRushWebSocketData) {
-    try {
-      CommonLog.Info(` tool new results: ${data.data}`);
-      yield put(toolNewResults(data.data));
-    } catch (e) {
-      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.result' });
-    }
-  },
-  * [WEBSOCKET_EVENTS.scanner](data: tRushWebSocketData) {
-    try {
-      const d = (data.data: tBarcode);
-      CommonLog.Info(` Scanner receive data: ${d.barcode}`);
-      yield put(ScannerNewData(d.barcode));
-    } catch (e) {
-      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.scanner' });
-    }
-  },
-  * [WEBSOCKET_EVENTS.reader](data: tRushWebSocketData) {
-    try {
-      const d = (data.data: tReader);
-      CommonLog.Info(` Reader receive data: ${d.uid}`);
-      yield put(ReaderNewData(d.uid));
-    } catch (e) {
-      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.reader' });
-    }
-  },
-  * [WEBSOCKET_EVENTS.controller](data: tRushWebSocketData) {
-    try {
-    } catch (e) {
-      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.controller' });
-    }
-  },
-  * [WEBSOCKET_EVENTS.tool](data: tRushWebSocketData) {
-    try {
-      yield put(toolStatusChange(data.tool_sn, data.status, data.reason));
-    } catch (e) {
-      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.tool' });
-    }
-  },
-  * [WEBSOCKET_EVENTS.tightening_device](data: tRushWebSocketData) {
-    try {
-      // 初始化所有拧紧设备
-
-    } catch (e) {
-      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.tightening_device' });
-    }
-  }
-
-};
-
-// function* handleRushData(type: tWebSocketEvent, data: tRushWebSocketData): Saga<void> {
-//   try {
-//     switch (type) {
-//       case 'maintenance':
-//         yield put(setNewNotification('Maintenance', `新维护请求: ${data.type},${data.data.name}`));
-//         break;
-//       case 'job':
-//         // CommonLog.Info(json);
-//         // if (state.workMode.workMode === 'manual' && json.job_id > 0) {
-//         //   if (state.setting.operationSettings.manualFreestyle) {
-//         //     yield put(switch2Ready(false));
-//         //     // state=yield select();
-//         //   }
-//         //   const { carID } = state.operations;
-//         //
-//         //   yield put(operationTrigger(
-//         //     carID,
-//         //     '',
-//         //     json.job_id,
-//         //     OPERATION_SOURCE.MANUAL
-//         //   ));
-//         // }
-//         break;
-//       case 'odoo': {
-//         // const odooHealthzStatus = json.status === 'online';
-//         // const healthzStatus = state.healthCheckResults; // 获取整个healthz
-//         // if (
-//         //   !lodash.isEqual(healthzStatus.odoo.isHealth, odooHealthzStatus)
-//         // ) {
-//         //   yield put(setHealthzCheck('odoo', odooHealthzStatus));
-//         //   yield put(
-//         //     setNewNotification(
-//         //       'info',
-//         //       `后台连接状态更新: ${odooHealthzStatus}`
-//         //     )
-//         //   );
-//         // }
-//         break;
-//       }
-//       case 'io': {
-//         let d;
-//         const msgType = (data.type: tIOWSMsgType);
-//         switch (msgType) {
-//           case 'WS_IO_CONTACT': {
-//             d = (data.data: tIOContact);
-//             break;
-//           }
-//           default:
-//             CommonLog.lError('IO Message Type Is Not Defined', { msgType });
-//         }
-//         yield put(onchangeIO(d));
-//         break;
-//       }
-//       case 'result':
-//         CommonLog.Info(` tool new results: ${data.data}`);
-//         yield put(toolNewResults(data.data));
-//         break;
-//       case 'scanner': {
-//         const d = (data.data: tBarcode);
-//         CommonLog.Info(` Scanner receive data: ${d.barcode}`);
-//         yield put(ScannerNewData(d.barcode));
-//         break;
-//       }
-//       case 'reader': {
-//         const d = (data.data: tReader);
-//         CommonLog.Info(` Reader receive data: ${d.uid}`);
-//         yield put(ReaderNewData(d.uid));
-//         break;
-//       }
-//
-//       case 'controller': {
-//         // const healthzStatus = state.healthCheckResults; // 获取整个healthz
-//         // const controllerHealthzStatus = data.status === 'online';
-//         // if (
-//         //   !lodash.isEqual(
-//         //     healthzStatus.controller.isHealth,
-//         //     controllerHealthzStatus
-//         //   )
-//         // ) {
-//         //   // 如果不相等 更新
-//         //   yield put(
-//         //     setHealthzCheck('controller', controllerHealthzStatus)
-//         //   );
-//         //   yield put(
-//         //     setNewNotification(
-//         //       'info',
-//         //       `controller连接状态更新: ${controllerHealthzStatus}`
-//         //     )
-//         //   );
-//         // }
-//         break;
-//       }
-//
-//       case 'tool': {
-//         yield put(toolStatusChange(data.tool_sn, data.status, data.reason));
-//         break;
-//       }
-//
-//       case 'tightening_device': {
-//         // 初始化所有拧紧设备
-//         break;
-//       }
-//
-//       default:
-//         break;
-//     }
-//   } catch (e) {
-//     CommonLog.lError(e, { at: 'handleRushData' });
-//   }
-// }
 
 export function* watchRushChannel(hmiSN: string): Saga<void> {
   try {
@@ -322,38 +149,11 @@ export function* watchRushChannel(hmiSN: string): Saga<void> {
       // let state = yield select();
 
       const { type, payload } = data;
-
-      switch (type) {
-        case 'healthz': {
-          // const healthzStatus = state.healthCheckResults; // 获取整个healthz
-          // if (!lodash.isEqual(healthzStatus.masterpc.isHealth, payload)) {
-          //   // 如果不相等 更新
-          //   yield put(setHealthzCheck('masterpc', payload));
-          //   yield put(
-          //     setNewNotification('info', `masterPC连接状态更新: ${payload}`)
-          //   );
-          // }
-          // if (!payload) {
-          //   yield put(setHealthzCheck('controller', false));
-          //   yield put(
-          //     setNewNotification('info', `controller连接状态更新: ${false}`)
-          //   );
-          // }
-          break;
-        }
-        case 'data': {
-          const dataArray = payload.split(';');
-          const event: tWebSocketEvent = dataArray[0].split(':').slice(-1)[0];
-
-          const json: tRushWebSocketData = JSON.parse(dataArray.slice(-1));
-          if (rushDataHandlers[event]) {
-            yield fork(rushDataHandlers[event], json); // 异步处理rush数据
-          }
-          break;
-        }
-        default:
-          break;
-      }
+      const handlers = {
+        healthz: handleHealthz,
+        data: handleData
+      };
+      yield call(handlers[type], payload);
     }
   } catch (e) {
     CommonLog.lError(e, { at: 'watchRushChannel' });

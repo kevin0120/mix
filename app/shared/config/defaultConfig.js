@@ -257,7 +257,7 @@ const defaultConfigs = {
 
     },
     connections: {
-      rush: 'http://127.0.0.1:8082',
+      rush: 'http://192.168.4.219:8082',
       rfid: 'tcp://127.0.0.1:2112',
       aiis: 'http://127.0.0.1:9092'
     }

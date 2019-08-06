@@ -9,7 +9,6 @@ export const demoOrder = {
   type: 'step',
   status: ORDER_STATUS.TODO,
   steps: [
-
     {
       name: '拧紧作业指导 pset',
       info: 'this is an screw step',
@@ -18,33 +17,38 @@ export const demoOrder = {
       undoable: true,
       payload: {
         controllerMode:'pset',
-        maxRetryTimes: 3,
         points: [
           {
-            id: 1,
+            sequence: 1,
+            group_sequence:1,
             x: 10,
             y: 10,
-            status: 'waiting'
+            maxRetryTimes: 3,
           }, {
-            id: 2,
+            sequence: 2,
+            group_sequence:2,
             x: 20,
             y: 20,
-            status: 'waiting'
+            maxRetryTimes: 3,
           }, {
-            id: 3,
+            sequence: 3,
+            group_sequence:3,
+
             x: 30,
             y: 30,
-            status: 'waiting'
+            maxRetryTimes: 3,
           }, {
-            id: 4,
+            sequence: 4,
+            group_sequence:3,
             x: 40,
             y: 40,
-            status: 'waiting'
+            maxRetryTimes: 3,
           }, {
-            id: 5,
+            sequence: 5,
+            group_sequence:4,
             x: 50,
             y: 50,
-            status: 'waiting'
+            maxRetryTimes: 3,
           }
         ],
         image: dataImg
@@ -60,30 +64,35 @@ export const demoOrder = {
         maxRetryTimes: 3,
         points: [
           {
-            id: 1,
+            sequence: 1,
+            group_sequence:1,
             x: 10,
             y: 10,
-            status: 'waiting'
+            maxRetryTimes: 3,
           }, {
-            id: 2,
+            sequence: 2,
+            group_sequence:2,
             x: 20,
             y: 20,
-            status: 'waiting'
+            maxRetryTimes: 3,
           }, {
-            id: 3,
+            sequence: 3,
+            group_sequence:3,
             x: 30,
             y: 30,
-            status: 'waiting'
+            maxRetryTimes: 3,
           }, {
-            id: 4,
+            sequence: 4,
+            group_sequence:4,
             x: 40,
             y: 40,
-            status: 'waiting'
+            maxRetryTimes: 3,
           }, {
-            id: 5,
+            sequence: 5,
+            group_sequence:5,
             x: 50,
             y: 50,
-            status: 'waiting'
+            maxRetryTimes: 3,
           }
         ],
         image: dataImg

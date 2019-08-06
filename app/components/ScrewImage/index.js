@@ -76,7 +76,7 @@ export default function ScrewImage({ style, image, points, focus, activeIndex, o
           x={p.x}
           y={p.y}
           status={p.status}
-          label={p.id}
+          label={p.group_sequence}
           scale={pointScale}
         />) || null}
       </div>

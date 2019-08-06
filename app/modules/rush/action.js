@@ -11,6 +11,7 @@ export const RUSH = {
 };
 
 export default {
+  // eslint-disable-next-line flowtype/no-weak-types
   sendJson: (data: Object) => ({
     type: RUSH.SEND_JSON,
     data
