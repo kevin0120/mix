@@ -8,7 +8,7 @@ import { toolEnable } from '../../api/operation';
 import { watchWorkers } from '../util';
 import { setNewNotification } from '../notification/action';
 import ClsScrewTool, { defaultScrewToolDispatcher } from './model';
-
+import screwStepAction from '../step/screwStep/action';
 type actionType = {
   +type: string,
   +enable: boolean
@@ -67,7 +67,11 @@ function* onToolStatusChange(action) {
 function* onToolResult(action) {
   try {
     const { results } = action;
-    staticScrewTool.doDispatch(results);
+    const respAction = staticScrewTool.doDispatch(results);
+    if (respAction) {
+      yield put(respAction);
+    }
+
   } catch (e) {
     console.error('onToolResult:', e);
   }
