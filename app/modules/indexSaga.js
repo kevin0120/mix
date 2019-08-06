@@ -43,8 +43,8 @@ export default function* rootSaga(): Saga<void> {
 
       watchNotification(),
       watchAiis(),
-      operationFlow(),
-      watchResults(), // 监听结果
+      // operationFlow(),
+      // watchResults(), // 监听结果
       watchRushEvent(),
       toolFunctions(),
       user(),// auth

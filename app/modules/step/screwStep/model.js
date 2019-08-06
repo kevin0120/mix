@@ -51,7 +51,8 @@ export type tResult = {
 export type tScrewStepData = {
   points: Array<tPoint>,
   retryTimes: number,
-  activeIndex: number
+  activeIndex: number,
+  jobID: number
 };
 
 export const controllerModes = {
@@ -64,7 +65,7 @@ export type tControllerMode = $Keys<typeof controllerModes>;
 export type tScrewStepPayload = {
   model: string,
   points: Array<tPoint>,
-  job_id: string,
+  job_id: number,
   work_sheet: string,
   lnr: string,
   workorder_id: string,
