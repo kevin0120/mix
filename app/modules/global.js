@@ -22,6 +22,6 @@ export function AppendNewDevices(symbol: string, clsObj: any) {
   }
 }
 
-let gDevices: tArrayDevices<any>;
+const gDevices: tArrayDevices<any> = {};
 // const gExternalSystems: tArrayDevices<any> = {};
 /* eslint-enable flowtype/no-weak-types */
