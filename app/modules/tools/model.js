@@ -3,6 +3,7 @@
 import { isNil } from 'lodash-es';
 import Device from '../../common/type'
 import { gDevices } from '../global';
+import ClsController from '../controller/model';
 
 const symTool = 'ToolScrew';
 
@@ -12,7 +13,7 @@ class ClsScrewTool extends Device {
 
   #serialNumber: ?string = null;
 
-  #belongTo: ?string = null;
+  #belongTo: ?ClsController = null;
 
   constructor(name: string, serialNumber: string){
     super(name);
@@ -20,9 +21,17 @@ class ClsScrewTool extends Device {
     const cl = gDevices?.[symTool];
     if (isNil(cl)){
       gDevices[symTool] = [this];
-    }else {
+    } else {
       cl.push(this);
     }
+  }
+
+  set BelongTo(controller: ClsController) {
+    this.#belongTo = controller
+  }
+
+  get BelongTo() {
+    return this.#belongTo
   }
 
   set SerialNumber(sn: string) {

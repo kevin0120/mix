@@ -3,7 +3,8 @@
 export const TOOLS = {
   ENABLE: 'TOOLS.ENABLE',
   DISABLE: 'TOOLS.DISABLE',
-  STATUS_CHANGE: 'TOOLS.STATUS.CHANGE'
+  STATUS_CHANGE: 'TOOLS.STATUS.CHANGE',
+  NEW_RESULTS: 'TOOLS_NEW_RESULTS'
 };
 
 export function toolEnable(reason) {
@@ -28,5 +29,12 @@ export function toolStatusChange(toolSN, status, reason) {
     toolSN,
     status,
     reason
+  };
+}
+
+export function toolNewResults(results: Array<any>) {
+  return {
+    type: TOOLS.NEW_RESULTS,
+    results,
   };
 }

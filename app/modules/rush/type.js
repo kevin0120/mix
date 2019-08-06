@@ -11,7 +11,8 @@ export type tWebSocketEvent =
   | 'odoo'
   | 'maintenance'
   | 'tool'
-  | 'reader';
+  | 'reader'
+  | 'tightening_device';
 
 /* eslint-disable flowtype/no-weak-types */
 export type tRushWebSocketData = {
