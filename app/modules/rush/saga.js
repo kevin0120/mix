@@ -12,7 +12,7 @@ import { ScannerNewData } from '../scanner/action';
 import { setHealthzCheck } from '../healthzCheck/action';
 import { setNewNotification } from '../notification/action';
 // import { switch2Ready, operationTrigger } from '../operation/action';
-import { toolStatusChange } from '../tools/action';
+import { toolStatusChange, toolNewResults } from '../tools/action';
 // import { andonScanner } from '../andon/action';
 import { CommonLog } from '../../common/utils';
 import type { tWebSocketEvent, tRushWebSocketData, tBarcode, tReader } from './type';
@@ -176,7 +176,8 @@ function* handleRushData(type: tWebSocketEvent, data: tRushWebSocketData): Saga<
         break;
       }
       case 'result':
-        // yield put(NewResults(json));
+        CommonLog.Info(` tool new results: ${data.data}`);
+        yield put(toolNewResults(data.data));
         break;
       case 'scanner': {
         const d = (data.data: tBarcode);
@@ -190,6 +191,7 @@ function* handleRushData(type: tWebSocketEvent, data: tRushWebSocketData): Saga<
         yield put(ReaderNewData(d.uid));
         break;
       }
+
       case 'controller': {
         // const healthzStatus = state.healthCheckResults; // 获取整个healthz
         // const controllerHealthzStatus = data.status === 'online';
@@ -217,6 +219,12 @@ function* handleRushData(type: tWebSocketEvent, data: tRushWebSocketData): Saga<
         yield put(toolStatusChange(data.tool_sn, data.status, data.reason));
         break;
       }
+
+      case 'tightening_device': {
+        // 初始化所有拧紧设备
+        break;
+      }
+
       default:
         break;
     }
