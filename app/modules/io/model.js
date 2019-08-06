@@ -2,11 +2,11 @@
 
 import { isNil } from 'lodash-es';
 import Device from "../../common/type";
-import type { tInputData } from "../../common/type";
-import type { AnyAction } from '../../common/type';
+import type { tInputData, AnyAction } from "../../common/type";
 
 import type { iIODataField, tIOContact, tIOData, tIOTriggerMode } from "./type";
 import { CommonLog } from '../../common/utils';
+import { AppendNewDevices, symIO } from '../global';
 
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable flowtype/no-weak-types */
@@ -20,6 +20,7 @@ export default class ClsIOModule extends Device {
     this.#_maxInputs = inputs;
     this.#_maxOutputs = outputs;
 
+    AppendNewDevices(symIO, this);
   }
 
   _checkValidateIdx(idx: number, ioType: 'inputs' | 'outputs'): boolean {
@@ -46,21 +47,61 @@ export default class ClsIOModule extends Device {
   }
 
   _storeDateField(data: tIOContact): void {
-    const d = data.contact;
-    if (typeof d !== 'string'){
+    const {type: dType, contact} = data;
+    if (typeof contact !== 'string'){
       CommonLog.lError(`IO Data Must Be String!!!!`);
       return;
     }
-    const ioType = data.type + 's';
-    [...d].forEach((val, idx) => {
+    const ioType = dType + 's';
+    [...contact].forEach((val, idx) => {
       this.#_data[ioType][idx].data = ClsIOModule.bitString2Boolean(val);
     })
   }
 
-  doHandleIOData(data: tIOContact){
-    const ret = this.doValidate(data.contact);
-    this._storeDateField(data);
+  static _getTriggerMode(old: boolean, last: boolean, mode: tIOTriggerMode): ?tIOTriggerMode {
+    let ret = mode;
+    if(old === last){
+      return null;
+    }
+    return ret;
+  }
 
+  _doHandleIODataPart1(data: tIOContact,...actionParams: any): boolean {
+    let ret = false;
+    const {type: dType, contact} = data;
+    const ioType = ((dType + 's': any): 'inputs' | 'outputs');
+    const eles = this.#_data?.[ioType];
+    if (isNil(eles)){
+      return ret;
+    }
+    [...contact].map((val, idx) => {
+      if(isNil(val)){
+        return
+      }
+      if (!this._checkValidateIdx(idx, ioType)) {
+        return null;
+      }
+      const e: iIODataField = this.#_data[ioType]?.[idx];
+      if(isNil(e)){
+        // TODO: 未定义以默认方式进行
+      }else {
+        const old = e.data;
+        const last = ClsIOModule.bitString2Boolean(val);
+        const mode = ClsIOModule._getTriggerMode(old, last, e.triggerMode);
+        if(!isNil(mode)){
+          this._doIODispatch(e, ...actionParams);
+        }
+      }
+    });
+
+    return ret;
+
+  }
+
+  doHandleIOData(data: tIOContact, ...actionParams: any){
+    const ret = this.doValidate(data.contact);
+    this._doHandleIODataPart1(data, ...actionParams);
+    this._storeDateField(data);
     return ret;
   }
 
@@ -81,21 +122,11 @@ export default class ClsIOModule extends Device {
   }
 
   static doDispatch(data: tInputData): ?AnyAction {
-    CommonLog.Info(`IO Module Please Use doIODispatch Method`);
+    CommonLog.Info(`IO Module Please Use doHandleIOData Method`);
     return null;
   }
 
-  doIODispatch(idx: number, ioType: 'inputs' | 'outputs', ...actionParams: any): ?AnyAction {
-    if (!this._checkValidateIdx(idx, ioType)) {
-      return null;
-    }
-    const ele: iIODataField = this.#_data?.[ioType]?.[idx];
-    if (isNil(ele)) {
-      CommonLog.lError(`${ioType}, IO: ${idx} Is Undefined!`);
-      return null;
-    }
-    // TODO: 触发模式引入不同的业务逻辑效果
-    const triggerMode = ele.triggerMode;
+  _doIODispatch(ele: iIODataField, ...actionParams: any): ?AnyAction {
     return ele.action(...actionParams);
   }
 

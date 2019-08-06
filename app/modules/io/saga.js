@@ -1,5 +1,4 @@
 // redux-saga
-import { eventChannel, channel } from 'redux-saga';
 import {
   take,
   put,
@@ -21,11 +20,12 @@ import { operationBypassIO } from '../operation/action';
 import ClsIOModule from './model';
 import type { AnyAction } from '../../common/type';
 import type { tIOContact } from './type';
+import {DefaultMaxInputs, DefaultMaxOutputs } from './type';
 import { CommonLog } from '../../common/utils';
 
 // config
 
-const IO = new ClsIOModule('IO Module');
+const IO = new ClsIOModule('IO Module',DefaultMaxInputs,DefaultMaxOutputs);
 
 
 const io = {

@@ -29,6 +29,10 @@ const IO_FUNCTION = {
   }
 };
 
+export const DefaultMaxInputs = 8;
+export const DefaultMaxOutputs = 8;
+
+
 // 上升沿，下降沿，双向(toggle)
 export type tIOTriggerMode = 'Rising' | 'Falling' | 'Bidirectional';
 
