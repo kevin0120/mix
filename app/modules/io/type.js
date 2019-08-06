@@ -29,10 +29,14 @@ const IO_FUNCTION = {
   }
 };
 
+// 上升沿，下降沿，双向(toggle)
+type tIOTriggerMode = 'Rising' | 'Falling' | 'Bidirectional';
+
 /* eslint-disable flowtype/no-weak-types */
 export type  iIODataField = {
-  +data: boolean,
-  +action: (...args: any) => AnyAction
+  data: boolean,
+  triggerMode: tIOTriggerMode,
+  action: (mode: tIOTriggerMode, ...args: any) => AnyAction
 };
 /* eslint-enable flowtype/no-weak-types */
 
