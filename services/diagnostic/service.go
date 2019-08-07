@@ -132,6 +132,12 @@ func (s *Service) NewReaderHandler() *ReaderHandler {
 	}
 }
 
+func (s *Service) NewTighteningDeviceHandler() *TighteningDeviceHandler {
+	return &TighteningDeviceHandler{
+		l: s.Logger.With(String("service", "tightening_device")),
+	}
+}
+
 func BootstrapMainHandler() *CmdHandler {
 	s := NewService(NewConfig(), nil, os.Stderr)
 	// Should never error

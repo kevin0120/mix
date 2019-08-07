@@ -1348,3 +1348,15 @@ func (m *Methods) testProtocol(ctx iris.Context) {
 		m.service.ControllerService.Controllers["0001"].(*openprotocol.Controller).Parse(tp.Payload)
 	}
 }
+
+func (m *Methods) wsTest(ctx iris.Context) {
+	ws := WSTest{}
+	err := ctx.ReadJSON(&ws)
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		return
+	}
+
+	str, _ := json.Marshal(ws.Data)
+	m.service.ControllerService.WS.WSSend(ws.Event, string(str))
+}

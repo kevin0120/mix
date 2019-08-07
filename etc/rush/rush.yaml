@@ -127,6 +127,23 @@ reader:
   enable: true
 
 # 协议类型: Audi/VW, OpenProtocol
+# 支持型号: MODEL_DESOUTTER_CVI3, MODEL_DESOUTTER_DELTA_WRENCH
+tightening_device:
+  enable: true
+  devices:
+    - model: MODEL_DESOUTTER_CVI3
+      protocol: OpenProtocol
+      endpoint: tcp://127.0.0.1:4545
+
+    - model: MODEL_DESOUTTER_CVI3
+      protocol: Audi/VW
+      endpoint: tcp://127.0.0.1:4700
+
+    - model: MODEL_DESOUTTER_DELTA_WRENCH
+      protocol: OpenProtocol
+      endpoint: tcp://127.0.0.1:4545
+
+# 协议类型: Audi/VW, OpenProtocol
 controller_service:
   workers: 1
   controllers:

@@ -11,17 +11,18 @@ import (
 )
 
 const (
-	WS_EVENT_CONTROLLER  = "controller"
-	WS_EVENT_RESULT      = "result"
-	WS_EVENT_REG         = "regist"
-	WS_EVENT_SELECTOR    = "selector"
-	WS_EVENT_JOB         = "job"
-	WS_EVENT_SCANNER     = "scanner"
-	WS_EVENT_IO          = "io"
-	WS_EVENT_ODOO        = "odoo"
-	WS_EVENT_MAINTENANCE = "maintenance"
-	WS_EVETN_TOOL        = "tool"
-	WS_EVENT_READER      = "reader"
+	WS_EVENT_CONTROLLER        = "controller"
+	WS_EVENT_RESULT            = "result"
+	WS_EVENT_REG               = "regist"
+	WS_EVENT_SELECTOR          = "selector"
+	WS_EVENT_JOB               = "job"
+	WS_EVENT_SCANNER           = "scanner"
+	WS_EVENT_IO                = "io"
+	WS_EVENT_ODOO              = "odoo"
+	WS_EVENT_MAINTENANCE       = "maintenance"
+	WS_EVETN_TOOL              = "tool"
+	WS_EVENT_READER            = "reader"
+	WS_EVENT_TIGHTENING_DEVICE = "tightening_device"
 )
 
 type Diagnostic interface {
@@ -243,4 +244,11 @@ func (s *Service) WSSendReader(payload string) {
 		return
 	}
 	s.clientManager.NotifyALL(WS_EVENT_READER, payload)
+}
+
+func (s *Service) WSSendTightening(payload string) {
+	if s == nil || s.clientManager == nil {
+		return
+	}
+	s.clientManager.NotifyALL(WS_EVENT_TIGHTENING_DEVICE, payload)
 }

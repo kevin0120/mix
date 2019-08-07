@@ -190,3 +190,8 @@ type RoutingOperationDelete struct {
 	OperationID int64  `json:"id"`
 	ProductType string `json:"product_type"`
 }
+
+type WSTest struct {
+	Event string      `json:"event"`
+	Data  interface{} `json:"data"`
+}

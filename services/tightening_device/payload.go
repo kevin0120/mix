@@ -1,0 +1,32 @@
+package tightening_device
+
+// type
+const (
+	TIGHTENING_DEVICE_TYPE_CONTROLLER = "controller"
+	TIGHTENING_DEVICE_TYPE_TOOL       = "tool"
+)
+
+const (
+	WS_TIGHTENING_DEVICE = "WS_TIGHTENING_DEVICE"
+
+	WS_TOOL_JOB         = "WS_TOOL_JOB"
+	WS_TOOL_PSET        = "WS_TOOL_PSET"
+	WS_TOOL_RESULT      = "WS_TOOL_RESULT"
+	WS_TOOL_ENABLE      = "WS_TOOL_ENABLE"
+	WS_TOOL_PSET_LIST   = "WS_TOOL_PSET_LIST"
+	WS_TOOL_PSET_DETAIL = "WS_TOOL_PSET_DETAIL"
+	WS_TOOL_JOB_LIST    = "WS_TOOL_JOB_LIST"
+	WS_TOOL_JOB_DETAIL  = "WS_TOOL_JOB_DETAIL"
+)
+
+const (
+	TIGHTENING_DEVICE_ONLINE  = "online"
+	TIGHTENING_DEVICE_OFFLINE = "offline"
+)
+
+type Device struct {
+	SN     string `json:"sn"`
+	Type   string `json:"type"`
+	Parent string `json:"parent"`
+	Status string `json:"status"`
+}

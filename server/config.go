@@ -8,6 +8,7 @@ import (
 	"github.com/masami10/rush/services/io"
 	"github.com/masami10/rush/services/reader"
 	"github.com/masami10/rush/services/scanner"
+	"github.com/masami10/rush/services/tightening_device"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -57,6 +58,8 @@ type Config struct {
 
 	Reader reader.Config `yaml:"reader"`
 
+	TighteningDevice tightening_device.Config `yaml:"tightening_device"`
+
 	Commander command.Commander `yaml:"-"`
 }
 
@@ -80,6 +83,7 @@ func NewConfig() *Config {
 	c.Scanner = scanner.NewConfig()
 	c.IO = io.NewConfig()
 	c.Reader = reader.NewConfig()
+	c.TighteningDevice = tightening_device.NewConfig()
 
 	c.Contollers = controller.NewConfig()
 
@@ -152,6 +156,10 @@ func (c *Config) Validate() error {
 
 	if err := c.Reader.Validate(); err != nil {
 		return errors.Wrap(err, "reader")
+	}
+
+	if err := c.TighteningDevice.Validate(); err != nil {
+		return errors.Wrap(err, "tightening_device")
 	}
 
 	return nil

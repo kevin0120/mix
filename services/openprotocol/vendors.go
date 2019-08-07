@@ -1,13 +1,10 @@
 package openprotocol
 
-const (
-	MODEL_DESOUTTER_CVI3         = "MODEL_DESOUTTER_CVI3"
-	MODEL_DESOUTTER_DELTA_WRENCH = "MODEL_DESOUTTER_DELTA_WRENCH"
-)
+import "github.com/masami10/rush/services/tightening_device"
 
 // model[mid][rev]
 var VendorModels = map[string]map[string]string{
-	MODEL_DESOUTTER_CVI3: {
+	tightening_device.MODEL_DESOUTTER_CVI3: {
 		MID_0001_START:                   "003",
 		MID_0018_PSET:                    "001",
 		MID_0014_PSET_SUBSCRIBE:          "001",
@@ -36,7 +33,7 @@ var VendorModels = map[string]map[string]string{
 		MID_7408_LAST_CURVE_SUBSCRIBE: "001",
 	},
 
-	MODEL_DESOUTTER_DELTA_WRENCH: {
+	tightening_device.MODEL_DESOUTTER_DELTA_WRENCH: {
 		MID_0001_START:                 "003",
 		MID_0018_PSET:                  "001",
 		MID_0014_PSET_SUBSCRIBE:        "001",

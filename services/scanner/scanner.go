@@ -175,7 +175,7 @@ func (s *Scanner) manage() {
 func (s *Scanner) connect() error {
 	d, err := s.open()
 	if err == nil {
-		// device online
+		// tightening_device online
 		s.device = d
 		s.status.Store(SCANNER_STATUS_ONLINE)
 		s.notify.OnStatus(s.Channel(), SCANNER_STATUS_ONLINE)
@@ -188,7 +188,7 @@ func (s *Scanner) recv() error {
 	//defer ctx.Close()
 	d, err := s.open()
 	if err == nil {
-		// device online
+		// tightening_device online
 		s.device = d
 		s.status.Store(SCANNER_STATUS_ONLINE)
 		s.notify.OnStatus(s.Channel(), SCANNER_STATUS_ONLINE)
@@ -232,14 +232,14 @@ func (s *Scanner) _recv() {
 		n, err := di.Read(buf)
 		if err != nil {
 			s.diag.Error("Read Fail", err)
-			// device offline
+			// tightening_device offline
 			s.status.Store(SCANNER_STATUS_OFFLINE)
 			s.notify.OnStatus(s.Channel(), SCANNER_STATUS_OFFLINE)
 			return
 		}
 
 		if s.devInfo == nil {
-			s.diag.Error("Recv Fail, Plz init device info first",
+			s.diag.Error("Recv Fail, Plz init tightening_device info first",
 				errors.Errorf("Scanner: %s ", s.Channel()))
 			continue
 		}

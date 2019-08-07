@@ -17,6 +17,7 @@ import (
 	"github.com/masami10/rush/services/reader"
 	"github.com/masami10/rush/services/scanner"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
@@ -60,6 +61,8 @@ type Server struct {
 	ScannerService *scanner.Service
 	IOService      *io.Service
 	ReaderService  *reader.Service
+
+	TighteningDeviceService *tightening_device.Service
 
 	config *Config
 	// List of services in startup order
@@ -118,6 +121,8 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	if err := s.appendControllersService(); err != nil {
 		return nil, errors.Wrap(err, "Controllers service")
 	}
+
+	s.appendTighteningDeviceService()
 
 	s.appendAudiVWService() //此服务必须在控制器服务后进行append
 
@@ -234,6 +239,23 @@ func (s *Server) appendControllersService() error {
 	srv.Minio = s.MinioService
 	s.ControllerService = srv
 	s.AppendService("controller", srv)
+
+	return nil
+}
+
+func (s *Server) appendTighteningDeviceService() error {
+	c := s.config.TighteningDevice
+	d := s.DiagService.NewTighteningDeviceHandler()
+	srv, err := tightening_device.NewService(c, d, s.AudiVWService, s.OpenprotocolService)
+
+	if err != nil {
+		return errors.Wrap(err, "append tightening_device service fail")
+	}
+
+	srv.WS = s.WSNotifyService
+
+	s.TighteningDeviceService = srv
+	s.AppendService("tightening_device", srv)
 
 	return nil
 }

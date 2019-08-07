@@ -25,6 +25,7 @@ type WSResult struct {
 	WI       float64 `json:"wi"`
 	TI       float64 `json:"ti"`
 	Batch    string  `json:"batch"`
+	ToolSN   string  `json:"tool_sn"`
 }
 
 type WSSelector struct {
