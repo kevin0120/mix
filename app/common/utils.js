@@ -156,14 +156,6 @@ export class HttpClient {
 
 export const defaultClient = new HttpClient().getInstance();
 
-export const guard = (fun, msg) => (...args) => {
-  try {
-    return fun(...args);
-  } catch (e) {
-    throw new Error(msg, fun, ...args, e);
-  }
-};
-
 export type CommonLogLvl = 'Warn' | 'Info' | 'Error' | 'Debug' | 'Maintenance';
 
 // eslint-disable-next-line flowtype/no-weak-types

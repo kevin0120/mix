@@ -10,12 +10,18 @@ import { setNewNotification } from '../notification/action';
 import { CommonLog } from '../../common/utils';
 import handleData from './handleData';
 import handleHealthz from './handleHealthz';
+import { WEBSOCKET_EVENTS } from './type';
 
 const tasks = [];
 let ws = null;
+
 const WebSocket = require('@oznu/ws-connect');
 
 const DebounceWaitTime = 2000;
+
+export function getWSClient() {
+  return ws;
+}
 
 export function* watchRushEvent(): Saga<void> {
   try {
@@ -49,8 +55,6 @@ function* initRush() {
     );
     tasks.push(listenerTask);
 
-    const sendTask = yield fork(watchRushSend);
-    tasks.push(sendTask);
 
   } catch (e) {
     CommonLog.lError(e, { at: 'initRush' });
@@ -81,32 +85,13 @@ function* stopRush() {
   }
 }
 
-function* watchRushSend() {
-  try {
-    yield takeEvery(RUSH.SEND_JSON, rushSend);
-  } catch (e) {
-    CommonLog.lError(e, { at: 'watchRushSend' });
-  }
-}
-
-function rushSend({ data }) {
-  if (ws) {
-    ws.sendJson(data, err => {
-      if (err && ws) {
-        ws.close();
-      }
-    });
-  }
-}
-
-
 function createRushChannel(hmiSN: string): EventChannel<void> {
   return eventChannel(emit => {
     if (ws) {
       ws.on('open', () => {
         emit({ type: 'healthz', payload: true });
         // reg msg
-        if(ws){
+        if (ws) {
           ws.sendJson({ hmi_sn: hmiSN }, err => {
             if (err && ws) {
               ws.close();
@@ -131,6 +116,10 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
       });
 
       ws.on('message', data => {
+        if (data.type === WEBSOCKET_EVENTS.reply) {
+          emit({ type: 'reply', payload: data });
+          return;
+        }
         emit({ type: 'data', payload: data });
       });
     } else {
@@ -141,20 +130,23 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
   });
 }
 
+const rushChannelHandlers = {
+  healthz: handleHealthz,
+  data: handleData
+};
+
+function* rushChannelTask(data) {
+  try {
+    yield call(rushChannelHandlers[data.type], data.payload);
+  } catch (e) {
+    CommonLog.lError(e, { at: 'rushChannelTask' });
+  }
+}
+
 export function* watchRushChannel(hmiSN: string): Saga<void> {
   try {
     const chan = yield call(createRushChannel, hmiSN);
-    while (true) {
-      const data = yield take(chan);
-      // let state = yield select();
-
-      const { type, payload } = data;
-      const handlers = {
-        healthz: handleHealthz,
-        data: handleData
-      };
-      yield call(handlers[type], payload);
-    }
+    yield takeEvery(chan, rushChannelTask);
   } catch (e) {
     CommonLog.lError(e, { at: 'watchRushChannel' });
   }

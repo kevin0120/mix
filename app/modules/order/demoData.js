@@ -17,83 +17,102 @@ export const demoOrder = {
       skippable: false,
       undoable: true,
       payload: {
-        controllerMode:'pset',
+        controllerMode: 'pset',
         points: [
           {
             sequence: 1,
-            group_sequence:1,
+            group_sequence: 1,
             x: 10,
             y: 10,
             maxRetryTimes: 3,
+            pset: 1,
+            toolSN: 'demo'
           }, {
             sequence: 2,
-            group_sequence:2,
+            group_sequence: 2,
             x: 20,
             y: 20,
             maxRetryTimes: 3,
+            pset: 1,
+            toolSN: 'demo'
+
           }, {
             sequence: 3,
-            group_sequence:3,
+            group_sequence: 3,
 
             x: 30,
             y: 30,
             maxRetryTimes: 3,
+            pset: 1,
+            toolSN: 'demo'
+
           }, {
             sequence: 4,
-            group_sequence:3,
+            group_sequence: 3,
             x: 40,
             y: 40,
             maxRetryTimes: 3,
+            pset: 1,
+            toolSN: 'demo'
+
           }, {
             sequence: 5,
-            group_sequence:4,
+            group_sequence: 4,
             x: 50,
             y: 50,
             maxRetryTimes: 3,
+            pset: 1,
+            toolSN: 'demo'
+
           }
         ],
         image: dataImg
       }
-    },{
+    }, {
       name: '拧紧作业指导 job',
       info: 'this is an screw step',
       type: 'screw',
       skippable: false,
       undoable: true,
       payload: {
-        controllerMode:'job',
-        maxRetryTimes: 3,
+        controllerMode: 'job',
+        jobID: 1,
         points: [
           {
+            toolSN: 'demo2',
             sequence: 1,
-            group_sequence:1,
+            group_sequence: 1,
             x: 10,
             y: 10,
-            maxRetryTimes: 3,
+            maxRetryTimes: 3
           }, {
+            toolSN: 'demo2',
             sequence: 2,
-            group_sequence:2,
+            group_sequence: 2,
             x: 20,
             y: 20,
-            maxRetryTimes: 3,
+            maxRetryTimes: 3
           }, {
+            toolSN: 'demo2',
             sequence: 3,
-            group_sequence:3,
+            group_sequence: 3,
             x: 30,
             y: 30,
-            maxRetryTimes: 3,
+            maxRetryTimes: 3
           }, {
+            toolSN: 'demo2',
             sequence: 4,
-            group_sequence:4,
+            group_sequence: 4,
             x: 40,
             y: 40,
-            maxRetryTimes: 3,
+            maxRetryTimes: 3
           }, {
+            toolSN: 'demo2',
             sequence: 5,
-            group_sequence:5,
+            group_sequence: 5,
             x: 50,
             y: 50,
-            maxRetryTimes: 3,
+            maxRetryTimes: 3
           }
         ],
         image: dataImg2
@@ -137,7 +156,7 @@ export const demoOrderLong = {
       skippable: false,
       undoable: true,
       payload: {
-        maxRetryTimes:3,
+        maxRetryTimes: 3,
         points: [
           {
             id: 1,

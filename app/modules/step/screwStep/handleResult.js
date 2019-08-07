@@ -34,7 +34,6 @@ function formPointStatusFromResultStatus(point: tPoint, rStatus: tResultStatus, 
 
 const mergePointsAndResults = (points: Array<tPoint>, results: Array<tResult>, activeIndex: number, activeGroupSequence): Array<tPoint> => {
   const newPoints = [...points];
-  console.log(activeIndex);
   newPoints.splice(activeIndex, newPoints.length - activeIndex,
     ...newPoints.slice(activeIndex).map((p, idx) => {
       const r: tResult = results[idx];
@@ -57,13 +56,12 @@ const mergePointsAndResults = (points: Array<tPoint>, results: Array<tResult>, a
 };
 
 const resultStatus = (results: Array<tResult>, data: tScrewStepData) => {
-  console.log(results.length, data.activeIndex);
   const LSN = results.some((r: tResult): boolean => r.result === RESULT_STATUS.lsn) && 'LSN';
   const retry = results.some((r: tResult): boolean => r.result === RESULT_STATUS.nok) && 'retry';
   const fail = retry && data.retryTimes >= data.points[data.activeIndex].maxRetryTimes && 'fail';
   const finish = (!retry && (data.activeIndex + results.length >= data.points.length)) && 'finish';
   const next = !retry && !finish && 'next';
-  console.log([LSN, fail, retry, finish, next]);
+  CommonLog.Info([LSN, fail, retry, finish, next]);
   return [LSN, fail, retry, finish, next];
 };
 
@@ -111,7 +109,7 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
       // update step data
       yield put(orderActions.stepData((d: tScrewStepData): tScrewStepData => ({
         ...d,
-        activeIndex: d.activeIndex + results.length,
+        activeIndex: d.activeIndex===-1?0:d.activeIndex + results.length,
         points: mergePointsAndResults(
           d.points,
           results,

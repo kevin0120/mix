@@ -8,6 +8,7 @@ import { onchangeIO } from '../io/action';
 import { toolNewResults, toolStatusChange } from '../tools/action';
 import { ScannerNewData } from '../scanner/action';
 import { ReaderNewData } from '../reader/action';
+import rushActions from './action';
 
 
 export default function* (payload) {
@@ -30,7 +31,7 @@ const rushDataHandlers = {
       yield put(setNewNotification('Maintenance', `新维护请求: ${data.type},${data.data.name}`));
 
     } catch (e) {
-      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.maintenance' });
+      CommonLog.lError(e, { at: 'rush event maintenance' });
     }
   },
 
@@ -56,7 +57,7 @@ const rushDataHandlers = {
       }
       yield put(onchangeIO(d));
     } catch (e) {
-      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.io' });
+      CommonLog.lError(e, { at: 'rush event io' });
     }
   },
 
@@ -65,7 +66,7 @@ const rushDataHandlers = {
       CommonLog.Info(` tool new results: ${data.data}`);
       yield put(toolNewResults(data.data));
     } catch (e) {
-      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.result' });
+      CommonLog.lError(e, { at: 'rush event result' });
     }
   },
 
@@ -75,7 +76,7 @@ const rushDataHandlers = {
       CommonLog.Info(` Scanner receive data: ${d.barcode}`);
       yield put(ScannerNewData(d.barcode));
     } catch (e) {
-      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.scanner' });
+      CommonLog.lError(e, { at: 'rush event scanner' });
     }
   },
 
@@ -85,14 +86,14 @@ const rushDataHandlers = {
       CommonLog.Info(` Reader receive data: ${d.uid}`);
       yield put(ReaderNewData(d.uid));
     } catch (e) {
-      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.reader' });
+      CommonLog.lError(e, { at: 'rush event reader' });
     }
   },
 
   * [wse.controller](data: tRushWebSocketData) {
     try {
     } catch (e) {
-      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.controller' });
+      CommonLog.lError(e, { at: 'rush event controller' });
     }
   },
 
@@ -100,7 +101,7 @@ const rushDataHandlers = {
     try {
       yield put(toolStatusChange(data.tool_sn, data.status, data.reason));
     } catch (e) {
-      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.tool' });
+      CommonLog.lError(e, { at: 'rush event tool' });
     }
   },
 
@@ -109,8 +110,14 @@ const rushDataHandlers = {
       // 初始化所有拧紧设备
 
     } catch (e) {
-      CommonLog.lError(e, { at: 'WEBSOCKET_EVENTS.tightening_device' });
+      CommonLog.lError(e, { at: 'rush event tightening_device' });
+    }
+  },
+  * [wse.reply](data: tRushWebSocketData) {
+    try {
+      yield put(rushActions.reply(data));
+    } catch (e) {
+      CommonLog.lError(e, { at: 'rush event reply' });
     }
   }
-
 };

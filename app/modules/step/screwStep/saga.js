@@ -20,14 +20,11 @@ export default {
         const points: Array<tPoint> = cloneDeep(payload?.points || []).sort((a, b) => a.group_sequence - b.group_sequence);
         return {
           points, // results data.results
-          activeIndex: 0, // <-activeResultIndex
+          activeIndex: -1, // <-activeResultIndex
           ...data,
-          jobID: payload.job_id,
-          carType: payload.model,
-          workSheet: payload.work_sheet,
-          lnr: payload.lnr,
-          workorderID: payload.workorder_id,
-          controllerMode: payload.controllerMode
+          jobID: payload.jobID,
+          controllerMode: payload.controllerMode,
+          retryTimes:0,
         };
       }));
       yield put(orderActions.stepStatus(STEP_STATUS.DOING));
@@ -42,16 +39,16 @@ export default {
       while (true) {
         const data = yield select(s => stepData(workingStep(workingOrder(s.order))));
 
-        // const success = yield call(controllerModeTasks[data.controllerMode], orderActions);
-        // if (success) {
+        const success = yield call(controllerModeTasks[data.controllerMode], orderActions);
+        if (success) {
         const { results: { data: results } } = yield take(SCREW_STEP.RESULT);
         console.log('result taken', results);
 
         yield call(handleResult, ORDER, orderActions, results, data);
-        // }else{
-        //   // TODO: on set job/pset fail
-        //   yield put(orderActions.stepStatus(STEP_STATUS.FAIL));
-        // }
+        }else{
+          // TODO: on set job/pset fail
+          yield put(orderActions.stepStatus(STEP_STATUS.FAIL));
+        }
       }
     } catch (e) {
       CommonLog.lError(e, { at: 'screwStep DOING' });

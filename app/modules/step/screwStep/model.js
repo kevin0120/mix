@@ -65,9 +65,7 @@ export type tControllerMode = $Keys<typeof controllerModes>;
 export type tScrewStepPayload = {
   model: string,
   points: Array<tPoint>,
-  job_id: number,
-  work_sheet: string,
+  jobID: number,
   lnr: string,
-  workorder_id: string,
   controllerMode: tControllerMode
 };

@@ -7,18 +7,16 @@ export const RUSH = {
   STARTED: 'RUSH_STARTED',
   STOPPED: 'RUSH_STOPPED',
   NEW_RESULTS: 'RUSH_NEW_RESULTS',
-  SEND_JSON: 'RUSH_SEND_JSON'
+  REPLY: 'RUSH_REPLY'
 };
 
 export default {
   // eslint-disable-next-line flowtype/no-weak-types
-  sendJson: (data: Object) => ({
-    type: RUSH.SEND_JSON,
-    data
+  reply: (payload: { type: string, sn: number, data: Object }) => ({
+    type: RUSH.REPLY,
+    payload
   })
-
 };
-
 
 // eslint-disable-next-line flowtype/no-weak-types
 // export function NewResults(results: Array<any>): tCommonActionType {
