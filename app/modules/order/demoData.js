@@ -1,5 +1,6 @@
 // @flow
 import dataImg from '../../../resources/imgs/working-page-test-pic1.png';
+import dataImg2 from '../../../resources/imgs/working-page-test-pic2.png';
 import { ORDER_STATUS } from './model';
 
 export const demoOrder = {
@@ -95,7 +96,7 @@ export const demoOrder = {
             maxRetryTimes: 3,
           }
         ],
-        image: dataImg
+        image: dataImg2
       }
     },
     {

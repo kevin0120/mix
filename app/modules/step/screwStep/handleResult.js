@@ -5,7 +5,7 @@ import STEP_STATUS from '../model';
 import { stepData, workingOrder, workingStep } from '../../order/selector';
 import { CommonLog } from '../../../common/utils';
 
-function formPointStatusFromResultStatus(point: tPoint, rStatus: tResultStatus, groupSequence: number): tPointStatus {
+function formPointStatusFromResultStatus(point: tPoint, rStatus: tResultStatus, activeGroupSequence: number): tPointStatus {
   let pStatus = POINT_STATUS.WAITING;
 
   if (rStatus === RESULT_STATUS.nok) {
@@ -14,7 +14,7 @@ function formPointStatusFromResultStatus(point: tPoint, rStatus: tResultStatus, 
     pStatus = POINT_STATUS.SUCCESS;
   }
 
-  const isActive = groupSequence && groupSequence === point.group_sequence;
+  const isActive = activeGroupSequence && activeGroupSequence === point.group_sequence;
   if (isActive) {
     switch (pStatus) {
       case POINT_STATUS.ERROR: {
@@ -32,7 +32,7 @@ function formPointStatusFromResultStatus(point: tPoint, rStatus: tResultStatus, 
   return pStatus;
 }
 
-const mergePointsAndResults = (points: Array<tPoint>, results: Array<tResult>, activeIndex: number): Array<tPoint> => {
+const mergePointsAndResults = (points: Array<tPoint>, results: Array<tResult>, activeIndex: number, activeGroupSequence): Array<tPoint> => {
   const newPoints = [...points];
   console.log(activeIndex);
   newPoints.splice(activeIndex, newPoints.length - activeIndex,
@@ -45,12 +45,12 @@ const mergePointsAndResults = (points: Array<tPoint>, results: Array<tResult>, a
           mi: r.mi,
           wi: r.wi,
           batch: r.batch,
-          status: formPointStatusFromResultStatus(p, r.result, points[activeIndex + results.length]?.group_sequence)
+          status: formPointStatusFromResultStatus(p, r.result, activeGroupSequence)
         });
       }
       return ({
         ...p,
-        status: formPointStatusFromResultStatus(p, null, points[activeIndex + results.length]?.group_sequence)
+        status: formPointStatusFromResultStatus(p, null,activeGroupSequence)
       });
     }));
   return newPoints;
@@ -72,7 +72,7 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
     try {
       yield put(orderActions.stepData((d: tScrewStepData): tScrewStepData => ({
         ...d,
-        points: mergePointsAndResults(d.points, results, d.activeIndex),
+        points: mergePointsAndResults(d.points, results, d.activeIndex, d.points[d.activeIndex]?.group_sequence),
         retryTimes: (d.retryTimes || 0) + 1
       })));
     } catch (e) {
@@ -84,7 +84,7 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
       yield put(orderActions.stepData((d: tScrewStepData): tScrewStepData => ({
         ...d,
         activeIndex: -1,
-        points: mergePointsAndResults(d.points, results, d.activeIndex)
+        points: mergePointsAndResults(d.points, results, d.activeIndex, d.points[d.activeIndex]?.group_sequence)
       })));
       yield put(orderActions.stepStatus(STEP_STATUS.FAIL));
     } catch (e) {
@@ -96,7 +96,7 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
       yield put(orderActions.stepData((d: tScrewStepData): tScrewStepData => ({
         ...d,
         activeIndex: -1,
-        points: mergePointsAndResults(d.points, results, d.activeIndex)
+        points: mergePointsAndResults(d.points, results, d.activeIndex, d.points[d.activeIndex]?.group_sequence)
       })));
       yield put(orderActions.stepStatus(STEP_STATUS.FINISHED));
     } catch (e) {
@@ -112,7 +112,14 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
       yield put(orderActions.stepData((d: tScrewStepData): tScrewStepData => ({
         ...d,
         activeIndex: d.activeIndex + results.length,
-        points: mergePointsAndResults(d.points, results, d.activeIndex)
+        points: mergePointsAndResults(
+          d.points,
+          results,
+          d.activeIndex,
+          d.activeIndex === -1 ?
+            d.points[0].group_sequence :
+            d.points[d.activeIndex + results.length]?.group_sequence
+        )
       })));
     } catch (e) {
       CommonLog.lError(e);
