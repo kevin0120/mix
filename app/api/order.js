@@ -2,7 +2,7 @@ import { call, delay, race } from 'redux-saga/effects';
 import { CommonLog } from '../common/utils';
 import rushSendMessage from '../modules/rush/sendMessage';
 
-const timeout = 3000;
+const timeout = 10000;
 
 export function* psetApi(tool_sn = '', step_id, user_id, pset, sequence, count) {
   try {
@@ -66,6 +66,7 @@ export function* jobApi(tool_sn, step_id, user_id, job) {
 
 export function* toolEnableApi(tool_sn, enable) {
   try {
+    console.log('toolEnableApi');
     const { resp, timeout: tOut } = yield race({
       resp: call(rushSendMessage, {
         type: 'WS_TOOL_ENABLE',

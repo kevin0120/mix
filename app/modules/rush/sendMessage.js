@@ -19,11 +19,11 @@ function* listener(sn) {
 }
 
 function getSN() {
-  let sn = Math.floor(((+new Date()) % 100000000 + Math.random()) * 1000);
+  let sn;
   const isSame = k => k === sn;
-  while (Object.keys(messageSNs).findIndex(isSame) >= 0) {
+  do {
     sn = Math.floor(((+new Date()) % 100000000 + Math.random()) * 1000);
-  }
+  } while (Object.keys(messageSNs).findIndex(isSame) >= 0);
   return sn;
 }
 
@@ -37,7 +37,7 @@ export default function* rushSendMessage(data: Object): Saga<void> {
       const listenReplyTask = yield fork(listener, sn);
       ws.sendJson({
         sn,
-        payload: data
+        ...data
       }, err => {
         messageSNs[sn] = true;
         if (err && ws) {

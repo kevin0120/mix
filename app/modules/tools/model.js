@@ -52,7 +52,16 @@ class ClsScrewTool extends Device {
   * Enable(): Saga<void> {
     try {
       if (!this.isEnable) {
-        yield call(toolEnableApi, this.SerialNumber, true);
+        console.log(JSON.stringify(toolEnableApi));
+        const { result, msg } = yield call(toolEnableApi, this.SerialNumber, true);
+        if (result !== 0) {
+          CommonLog.lError(`tool enable failed:${msg}`, {
+            at: 'ClsScrewTool.Enable',
+            tool_sn: this.SerialNumber,
+            enable: true
+          });
+          return false;
+        }
         yield call(super.Enable);
       }
     } catch (e) {
@@ -65,23 +74,39 @@ class ClsScrewTool extends Device {
   * Disable(): Saga<void> {
     try {
       if (this.isEnable) {
-        yield call(toolEnableApi, this.SerialNumber, false);
+        const { result, msg } = yield call(toolEnableApi, this.SerialNumber, false);
+        if (result !== 0) {
+          CommonLog.lError(`tool enable failed:${msg}`, {
+            at: 'ClsScrewTool.Disable',
+            tool_sn: this.SerialNumber,
+            enable: false
+          });
+          return false;
+        }
         yield call(super.Disable);
       }
     } catch (e) {
       CommonLog.lError(e, {
-        at: 'ClsScrewTool.Enable'
+        at: 'ClsScrewTool.Disable'
       });
     }
   }
 
   * ToggleEnable(): Saga<void> {
     try {
-      yield call(toolEnableApi, this.SerialNumber, !this.isEnable);
+      const { result, msg } = yield call(toolEnableApi, this.SerialNumber, !this.isEnable);
+      if (result !== 0) {
+        CommonLog.lError(`tool enable failed:${msg}`, {
+          at: 'ClsScrewTool.ToggleEnable',
+          tool_sn: this.SerialNumber,
+          enable: !this.isEnable
+        });
+        return false;
+      }
       yield call(super.ToggleEnable);
     } catch (e) {
       CommonLog.lError(e, {
-        at: 'ClsScrewTool.Enable'
+        at: 'ClsScrewTool.ToggleEnable'
       });
     }
   }

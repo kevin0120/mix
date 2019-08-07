@@ -9,6 +9,7 @@ import controllerModeTasks from './controllerModeTasks';
 import handleResult from './handleResult';
 import { CommonLog } from '../../../common/utils';
 import { staticScrewTool } from '../../tools/saga';
+// import { toolEnableApi } from '../../../api/order';
 
 
 export default {
@@ -18,6 +19,8 @@ export default {
     try {
       // init data
       const payload: tScrewStepPayload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
+      // const { result, msg } = yield call(toolEnableApi, staticScrewTool.SerialNumber, false);
+      // console.log(result, msg);
       yield put(orderActions.stepData((data: tScrewStepData): tScrewStepData => {
         const points: Array<tPoint> = cloneDeep(payload?.points || []).sort((a, b) => a.group_sequence - b.group_sequence);
         return {
@@ -40,28 +43,23 @@ export default {
     try {
       const initData = yield select(s => stepData(workingStep(workingOrder(s.order))));
       yield call(handleResult, ORDER, orderActions, [], initData);
-
-      const success = yield call(controllerModeTasks[initData.controllerMode], orderActions);
-
-      if (success) {
-        yield call([staticScrewTool, staticScrewTool.Enable]);
-        while (true) {
-          const data = yield select(s => stepData(workingStep(workingOrder(s.order))));
-          if (data.controllerMode === 'pset') {
-            const succ = yield call(controllerModeTasks[data.controllerMode], orderActions);
-            if (!succ) {
-              // TODO: on set pset fail
-              yield put(orderActions.stepStatus(STEP_STATUS.FAIL));
-            }
+      let isFirst = true;
+      while (true) {
+        const data = yield select(s => stepData(workingStep(workingOrder(s.order))));
+        if (data.controllerMode === 'pset' || (data.controllerMode === 'job' && isFirst)) {
+          const succ = yield call(controllerModeTasks[data.controllerMode], orderActions);
+          if (!succ) {
+            // TODO: on set pset fail
+            yield put(orderActions.stepStatus(STEP_STATUS.FAIL));
           }
-          const { results: { data: results } } = yield take(SCREW_STEP.RESULT);
-          yield call(handleResult, ORDER, orderActions, results, data);
+          if (isFirst) {
+            yield call([staticScrewTool, staticScrewTool.Enable]);
+          }
+          isFirst = false;
         }
-      } else {
-        // TODO: on set job/pset fail
-        yield put(orderActions.stepStatus(STEP_STATUS.FAIL));
+        const { results: { data: results } } = yield take(SCREW_STEP.RESULT);
+        yield call(handleResult, ORDER, orderActions, results, data);
       }
-
     } catch (e) {
       CommonLog.lError(e, { at: 'screwStep DOING' });
     } finally {

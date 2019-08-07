@@ -116,6 +116,7 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
       });
 
       ws.on('message', data => {
+        console.log(data);
         if (data.type === WEBSOCKET_EVENTS.reply) {
           emit({ type: 'reply', payload: data });
           return;
