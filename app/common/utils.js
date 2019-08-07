@@ -170,51 +170,57 @@ export type CommonLogLvl = 'Warn' | 'Info' | 'Error' | 'Debug' | 'Maintenance';
 type tCommonLogMeta = Object;
 export const CommonLog = {
   Info(msg: string, meta: ?tCommonLogMeta) {
-    _logger('Info', msg, meta);
+    _logger('Info', ...arguments);
   },
 
   Warn(msg: string, meta: ?tCommonLogMeta) {
-    _logger('Warn', msg, meta);
+    _logger('Warn', ...arguments);
   },
 
   Debug(msg: string, meta: ?tCommonLogMeta) {
-    _logger('Debug', msg, meta);
+    _logger('Debug', ...arguments);
   },
 
   Maintenance(msg: string, meta: ?tCommonLogMeta) {
-    _logger('Maintenance', msg, meta);
+    _logger('Maintenance', ...arguments);
   },
 
   lError(msg: mixed, meta: ?tCommonLogMeta) {
-    if (typeof msg === 'string') {
-      _logger('Error', msg, meta);
-    }
-    if (msg instanceof Error) {
-      _logger('Error', msg.message, meta);
-    }
+    _logger('Error', ...arguments);
   }
 };
 
+const fn = {
+  Error: console.error,
+  Info: console.info,
+  Warn: console.warn,
+  Debug: console.debug,
+  Maintenance: console.log
+};
+
+const fnAlways = {
+  Error: (rest) => {
+    if (typeof rest[0] === 'string') {
+      lError(...rest);
+    }
+    if (rest[0] instanceof Error) {
+      lError(rest[0].message, rest[1]);
+    }
+  },
+  Info,
+  Warn,
+  Debug,
+  Maintenance
+};
+
 // eslint-disable-next-line no-underscore-dangle
-function _logger(lvl: CommonLogLvl, msg: string, meta: ?tCommonLogMeta) {
+function _logger(lvl: CommonLogLvl, ...rest) {
   if (process.env.NODE_ENV !== 'production') {
-    const fn = {
-      Error: console.error,
-      Info: console.info,
-      Warn: console.warn,
-      Debug: console.debug,
-      Maintenance: console.log
-    };
-    fn[lvl](msg, meta||'');
+    // eslint-disable-next-line no-unused-expressions
+    fn[lvl] && fn[lvl](...rest);
   }
-  const fnAlways = {
-    Error: lError,
-    Info,
-    Warn,
-    Debug,
-    Maintenance
-  };
-  fnAlways[lvl](msg, meta);
+  // eslint-disable-next-line no-unused-expressions
+  fnAlways[lvl] && fnAlways[lvl](...rest);
 }
 
 export const timeCost = (times: Array<Date>) =>
