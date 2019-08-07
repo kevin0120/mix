@@ -1,4 +1,4 @@
-import { take, put, select } from 'redux-saga/effects';
+import { take, put, select, call } from 'redux-saga/effects';
 import { SCANNER_STEP } from './action';
 import {
   workingStep,
@@ -7,17 +7,19 @@ import {
   workingOrder
 } from '../../order/selector';
 import STEP_STATUS from '../model';
+import { scanner } from '../../scanner/saga';
 
 export default {
-  *[STEP_STATUS.ENTERING](ORDER, orderActions) {
+  * [STEP_STATUS.ENTERING](ORDER, orderActions) {
     try {
       yield put(orderActions.stepStatus(STEP_STATUS.DOING));
     } catch (e) {
       console.error(e);
     }
   },
-  *[STEP_STATUS.DOING](ORDER, orderActions) {
+  * [STEP_STATUS.DOING](ORDER, orderActions) {
     try {
+      yield call([scanner, scanner.Enable]);
       while (true) {
         const action = yield take([
           SCANNER_STEP.GET_VALUE,
@@ -60,9 +62,11 @@ export default {
       }
     } catch (e) {
       console.error(e);
+    } finally {
+      yield call([scanner, scanner.Disable]);
     }
   },
-  *[STEP_STATUS.FINISHED](ORDER, orderActions) {
+  * [STEP_STATUS.FINISHED](ORDER, orderActions) {
     try {
       yield put(orderActions.doNextStep());
     } catch (e) {

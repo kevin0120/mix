@@ -4,14 +4,16 @@ import { cloneDeep } from 'lodash-es';
 import STEP_STATUS from '../model';
 import { stepPayload, workingStep, stepData, workingOrder } from '../../order/selector';
 import { SCREW_STEP } from './action';
-import type { tResultAction } from './action';
 import type { tPoint, tScrewStepData, tScrewStepPayload } from './model';
 import controllerModeTasks from './controllerModeTasks';
 import handleResult from './handleResult';
 import { CommonLog } from '../../../common/utils';
+import { staticScrewTool } from '../../tools/saga';
 
 
 export default {
+
+
   * [STEP_STATUS.ENTERING](ORDER, orderActions) {
     try {
       // init data
@@ -24,7 +26,7 @@ export default {
           ...data,
           jobID: payload.jobID,
           controllerMode: payload.controllerMode,
-          retryTimes:0,
+          retryTimes: 0
         };
       }));
       yield put(orderActions.stepStatus(STEP_STATUS.DOING));
@@ -32,28 +34,42 @@ export default {
       CommonLog.lError(e, { at: 'screwStep ENTERING' });
     }
   },
+
+
   * [STEP_STATUS.DOING](ORDER, orderActions) {
     try {
       const initData = yield select(s => stepData(workingStep(workingOrder(s.order))));
       yield call(handleResult, ORDER, orderActions, [], initData);
-      while (true) {
-        const data = yield select(s => stepData(workingStep(workingOrder(s.order))));
 
-        const success = yield call(controllerModeTasks[data.controllerMode], orderActions);
-        if (success) {
-        const { results: { data: results } } = yield take(SCREW_STEP.RESULT);
-        console.log('result taken', results);
+      const success = yield call(controllerModeTasks[initData.controllerMode], orderActions);
 
-        yield call(handleResult, ORDER, orderActions, results, data);
-        }else{
-          // TODO: on set job/pset fail
-          yield put(orderActions.stepStatus(STEP_STATUS.FAIL));
+      if (success) {
+        yield call([staticScrewTool, staticScrewTool.Enable]);
+        while (true) {
+          const data = yield select(s => stepData(workingStep(workingOrder(s.order))));
+          if (data.controllerMode === 'pset') {
+            const succ = yield call(controllerModeTasks[data.controllerMode], orderActions);
+            if (!succ) {
+              // TODO: on set pset fail
+              yield put(orderActions.stepStatus(STEP_STATUS.FAIL));
+            }
+          }
+          const { results: { data: results } } = yield take(SCREW_STEP.RESULT);
+          yield call(handleResult, ORDER, orderActions, results, data);
         }
+      } else {
+        // TODO: on set job/pset fail
+        yield put(orderActions.stepStatus(STEP_STATUS.FAIL));
       }
+
     } catch (e) {
       CommonLog.lError(e, { at: 'screwStep DOING' });
+    } finally {
+      yield call([staticScrewTool, staticScrewTool.Disable]);
     }
   },
+
+
   * [STEP_STATUS.FINISHED](ORDER, orderActions) {
     try {
       yield put(orderActions.doNextStep());
@@ -61,6 +77,8 @@ export default {
       CommonLog.lError(e, { at: 'screwStep FINISHED' });
     }
   },
+
+
   * [STEP_STATUS.FAIL](ORDER, orderActions) {
     try {
       yield put(orderActions.doNextStep());

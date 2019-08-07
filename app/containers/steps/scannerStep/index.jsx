@@ -17,7 +17,7 @@ import {
   stepPayload,
   viewingStep
 } from '../../../modules/order/selector';
-import { scanner } from '../../../modules/scanner/saga';
+// import { scanner } from '../../../modules/scanner/saga';
 
 const mapState = (state, props) => ({
   ...props,
@@ -56,11 +56,11 @@ function ScannerStep({
     return () => bindAction(null);
   }, [bindAction, isCurrent, step, submit]);
 
-  useEffect(() => {
-    scanner.Enable();
-    return () => scanner.Disable();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // useEffect(() => {
+  //   scanner.Enable();
+  //   return () => scanner.Disable();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   return (
     <div className={classes.root}>

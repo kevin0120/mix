@@ -8,7 +8,7 @@ import { toolEnable } from '../../api/operation';
 import { watchWorkers } from '../util';
 import { setNewNotification } from '../notification/action';
 import ClsScrewTool, { defaultScrewToolDispatcher } from './model';
-import screwStepAction from '../step/screwStep/action';
+
 type actionType = {
   +type: string,
   +enable: boolean
@@ -19,7 +19,7 @@ type controllerType = {
   +serial_no: string
 };
 
-export const staticScrewTool = new ClsScrewTool('G1', "0001");
+export const staticScrewTool = new ClsScrewTool('G1', '0001');
 staticScrewTool.dispatcher = defaultScrewToolDispatcher;
 
 function* staticToolEnable(action: actionType) {

@@ -3,6 +3,7 @@
 import { Action } from 'redux';
 import { isURL } from 'validator/lib/isURL';
 import { isNil, isEmpty, isEqual, isString } from 'lodash-es';
+import type { Saga } from 'redux-saga';
 import { CommonLog } from './utils';
 
 type tCommonActionType = {
@@ -78,17 +79,20 @@ class CommonExternalEntity implements IHealthChecker {
     return this.#enable;
   }
 
-  Enable() {
-    CommonLog.Debug(`${this.source} Is Enable!`);
+  // eslint-disable-next-line require-yield
+  * Enable(): Saga<void> {
+    CommonLog.Debug(`${this.source} Is Enabled!`);
     this.#enable = true;
   }
 
-  Disable() {
-    CommonLog.Debug(`${this.source} Is Disable!`);
+  // eslint-disable-next-line require-yield
+  * Disable(): Saga<void> {
+    CommonLog.Debug(`${this.source} Is Disabled!`);
     this.#enable = false;
   }
 
-  ToggleEnable() {
+  // eslint-disable-next-line require-yield
+  * ToggleEnable(): Saga<void> {
     this.#enable = !this.#enable;
   }
 

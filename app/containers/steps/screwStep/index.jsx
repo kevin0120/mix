@@ -1,15 +1,13 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core';
+import Paper from '@material-ui/core/Paper';
 import styles from './style';
 import { viewingStep, stepPayload, stepData, stepStatus } from '../../../modules/order/selector';
 import ScrewImage from '../../../components/ScrewImage';
 import screwStepAction from '../../../modules/step/screwStep/action';
-// import Card from '@material-ui/core/Card';
-import Paper from '@material-ui/core/Paper';
 import STEP_STATUS from '../../../modules/step/model';
-import Button from '../../../components/CustomButtons/Button';
-import { staticScrewTool } from '../../../modules/tools/saga';
+// import { staticScrewTool } from '../../../modules/tools/saga';
 
 const mapState = (state, props) => ({
   ...props,
@@ -27,11 +25,11 @@ const mapDispatch = {
 function ScrewStep({ status,image, points, activeIndex, result }) {
   const classes = makeStyles(styles)();
 
-  useEffect(() => {
-    staticScrewTool.Enable();
-    return () => staticScrewTool.Disable();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // useEffect(() => {
+  //   staticScrewTool.Enable();
+  //   return () => staticScrewTool.Disable();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   return <div className={classes.layout}>
     <ScrewImage
