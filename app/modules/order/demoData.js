@@ -11,6 +11,15 @@ export const demoOrder = {
   status: ORDER_STATUS.TODO,
   steps: [
     {
+      name: '获取物料',
+      info: 'fetch the following material',
+      description: '获取下列物料',
+      type: 'material',
+      skippable: true,
+      data: {},
+      payload: {}
+    },
+    {
       name: '拧紧作业指导 pset',
       info: 'this is an screw step',
       type: 'screw',
@@ -129,15 +138,7 @@ export const demoOrder = {
         label: 'name'
       }
     },
-    {
-      name: '获取物料',
-      info: 'fetch the following material',
-      description: '获取下列物料',
-      type: 'material',
-      skippable: true,
-      data: {},
-      payload: {}
-    },
+
     {
       name: '扫码',
       info: 'this step is skippable',

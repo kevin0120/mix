@@ -11,10 +11,10 @@ export const IOACTION = {
   RESET: 'IO_RESET'
 };
 
-export function onchangeIO(data: ?tIOContact): void | tCommonActionType & {data: tIOContact} {
-  if (isNil(data)){
-    return;
-  }
+export function onchangeIO(data: ?tIOContact): void | tCommonActionType & {data: ?tIOContact} {
+  // if (isNil(data)){
+  //   return;
+  // }
   return {
     type: IOACTION.DATA_ONCHANGE,
     data,

@@ -21,7 +21,7 @@ import { bindActionCreators } from 'redux';
 import Button from '../../components/CustomButtons/Button';
 
 import saveConfigs from '../../modules/setting/action';
-import { IO_FUNCTION } from '../../modules/io/model';
+import IO_FUNCTION from '../../modules/io/type';
 
 import { testIO } from '../../modules/io/saga';
 import { resetIO } from '../../modules/io/action';

@@ -9,7 +9,7 @@ import watchController from './controller/saga';
 import { cardAuthFlow } from './cardAuth/saga';
 import sysInitFlow from './systemInit/saga';
 import { operationFlow, watchResults } from './operation/saga';
-import { watchIOEvent } from './io/saga';
+import watchIOEvent from './io/saga';
 import { toolFunctions } from './tools/saga';
 import user from './user/saga';
 import { watchAiis } from './aiis/saga';
@@ -43,8 +43,6 @@ export default function* rootSaga(): Saga<void> {
 
       watchNotification(),
       watchAiis(),
-      // operationFlow(),
-      // watchResults(), // 监听结果
       watchRushEvent(),
       toolFunctions(),
       user(),// auth

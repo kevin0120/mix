@@ -3,7 +3,7 @@ import type { tBarcode, tReader, tRushWebSocketData, tWebSocketEvent } from './t
 import { WEBSOCKET_EVENTS as wse } from './type';
 import { setNewNotification } from '../notification/action';
 import { CommonLog } from '../../common/utils';
-import type { tIOContact, tIOWSMsgType } from '../io/type';
+import type { tIOContact, tIODirection, tIOWSMsgType } from '../io/type';
 import { onchangeIO } from '../io/action';
 import { toolNewResults, toolStatusChange } from '../tools/action';
 import { ScannerNewData } from '../scanner/action';
@@ -45,17 +45,22 @@ const rushDataHandlers = {
 
   * [wse.io](data: tRushWebSocketData) {
     try {
-      let d;
       const msgType = (data.type: tIOWSMsgType);
+      console.log('rush io', data);
       switch (msgType) {
-        case 'WS_IO_CONTACT': {
-          d = (data.data: tIOContact);
+        case 'WS_IO_CONTACT':
+          yield put(onchangeIO({
+            sn: data.data.sn,
+            direction: data.data.type,
+            contact: data.data.contact
+          }));
           break;
-        }
+        case 'WS_IO_STATUS':
+
+          break;
         default:
           CommonLog.lError('IO Message Type Is Not Defined', { msgType });
       }
-      yield put(onchangeIO(d));
     } catch (e) {
       CommonLog.lError(e, { at: 'rush event io' });
     }

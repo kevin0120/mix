@@ -8,9 +8,17 @@ export const sBlinkOn = 11;
 
 export type tIOWSMsgType = 'WS_IO_STATUS' | 'WS_IO_CONTACT' | 'WS_IO_SET';
 
+
+export const ioDirection = {
+  input: 'input',
+  output: 'output'
+};
+
+export type tIODirection = $Keys<typeof ioDirection>;
+
 export type tIOContact = {
   +sn: string,
-  +type: 'input' | 'output',
+  +direction: tIODirection,
   +contact: string  // 位串
 };
 
@@ -34,15 +42,23 @@ export const DefaultMaxOutputs = 8;
 
 
 // 上升沿，下降沿，双向(toggle)
-export type tIOTriggerMode = 'Rising' | 'Falling' | 'Bidirectional';
 
-/* eslint-disable flowtype/no-weak-types */
+export const ioTriggerMode={
+  rising:'rising',
+  falling:'falling',
+  // high:'high',
+  // low:'low',
+  change:'change',
+};
+// export type tIOTriggerMode = 'Rising' | 'Falling' | 'Bidirectional';
+export type tIOTriggerMode = $Keys<typeof ioTriggerMode>;
+
 export type  iIODataField = {
   data: boolean,
   triggerMode: tIOTriggerMode,
+  // eslint-disable-next-line flowtype/no-weak-types
   action: (mode: tIOTriggerMode, ...args: any) => AnyAction
 };
-/* eslint-enable flowtype/no-weak-types */
 
 // IO数据字段，key代表的是哪一位， value代表开或者关和相关的action
 export interface iIODataFieldObj {
@@ -50,8 +66,25 @@ export interface iIODataFieldObj {
 }
 
 export type tIOData = {
-  inputs: iIODataFieldObj | {},
-  outputs: iIODataFieldObj | {}
+  input: string,
+  output: string
+};
+
+export type tIOListener = {
+  port: tIOPort,
+  triggerMode: tIOTriggerMode,
+  
+  dispatcher: (...args: any) => AnyAction
+};
+
+export type tIOPort = {
+  direction: tIODirection,
+  idx: number
+};
+
+export type tIOChange = {
+  port: tIOPort,
+  triggerMode: tIOTriggerMode
 };
 
 export default IO_FUNCTION;

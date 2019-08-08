@@ -10,7 +10,8 @@ type tCommonActionType = {
   +type: string
 };
 
-export type tInputData = string | number;
+// eslint-disable-next-line flowtype/no-weak-types
+export type tInputData = any;
 
 export type tInput = {
   data: tInputData,
@@ -164,7 +165,7 @@ class Device extends CommonExternalEntity {
     return this.validator(data);
   }
 
-  doDispatch(data: tInputData): ?AnyAction {
+  doDispatch(data: tInputData): ?AnyAction | Array<AnyAction> {
     if (!this.isEnable) {
       const msg = `${this.source} Is Not Enable`;
       CommonLog.Info(msg);

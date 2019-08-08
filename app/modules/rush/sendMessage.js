@@ -41,10 +41,9 @@ export default function* rushSendMessage(data: Object): Saga<void> {
       };
       console.log(msg);
       ws.sendJson(msg, (err )=> {
-        CommonLog.lError(err );
-        console.log(messageSNs,sn);
         messageSNs[sn] = true;
         if (err && ws) {
+          CommonLog.lError(err );
           delete messageSNs[sn];
         }
       });
@@ -53,7 +52,7 @@ export default function* rushSendMessage(data: Object): Saga<void> {
   } catch (e) {
     CommonLog.lError(e);
   }finally{
-    console.log('rushSendMessage finished');
+    // console.log('rushSendMessage finished');
   }
 }
 

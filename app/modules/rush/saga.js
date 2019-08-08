@@ -31,7 +31,6 @@ export function* watchRushEvent(): Saga<void> {
 
 function* initRush() {
   try {
-    console.log('initRush');
     const state = yield select();
 
     const { connections } = state.setting.system;
@@ -55,8 +54,6 @@ function* initRush() {
   } catch (e) {
     CommonLog.lError(e, { at: 'initRush' });
   } finally {
-    console.log('initRush finished');
-
     if (!(ws && task)) {
       if (ws) {
         ws.close();
@@ -79,7 +76,6 @@ function* stopRush() {
     if (!ws) {
       return;
     }
-    console.log(OWebSocket.OPEN, OWebSocket.CONNECTING, ws);
     if (
       ws.ws.readyState === OWebSocket.OPEN ||
       ws.ws.readyState === OWebSocket.CONNECTING
@@ -138,7 +134,6 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
       });
 
       ws.on('message', data => {
-        console.log(data);
         if (data.type === WEBSOCKET_EVENTS.reply) {
           emit({ type: 'reply', payload: data });
           return;
@@ -146,7 +141,7 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
         emit({ type: 'data', payload: data });
       });
       ws.on('websocket-status', (...args) => {
-        console.log(...args)
+
       })
     } else {
       CommonLog.lError('ws doesn\'t exist', { at: 'createRushChannel' });
