@@ -836,15 +836,15 @@ func (rd *ResultData) Deserialize(str string) error {
 	rd.ID3 = strings.TrimSpace(str[428:453])
 	rd.ID4 = strings.TrimSpace(str[455:480])
 
-	rd.NumberOfStages, err = strconv.Atoi(str[508:510])
-	if err != nil {
-		return err
-	}
-
-	rd.NumberOfStageResults, err = strconv.Atoi(str[512:514])
-	if err != nil {
-		return err
-	}
+	//rd.NumberOfStages, err = strconv.Atoi(str[508:510])
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//rd.NumberOfStageResults, err = strconv.Atoi(str[512:514])
+	//if err != nil {
+	//	return err
+	//}
 
 	//rd.StageResult = str[516:527]
 

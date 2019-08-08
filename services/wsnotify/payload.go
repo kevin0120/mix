@@ -60,6 +60,7 @@ type WSToolStatus struct {
 }
 
 type WSMsg struct {
+	SN   uint64      `json:"sn"`
 	Type string      `json:"type"`
 	Data interface{} `json:"data"`
 }

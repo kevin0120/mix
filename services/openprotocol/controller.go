@@ -7,6 +7,7 @@ import (
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/socket_writer"
 	"net"
@@ -56,8 +57,10 @@ type Controller struct {
 	diag              Diagnostic
 	MID_7410_CURVE    handlerPkg_curve
 	result_CURVE      *minio.ControllerCurve
-	TightingID        string
 	toolStatus        atomic.Value
+	model             string
+	tighteningDevice  *tightening_device.Service
+	tightening_device.TighteningDevice
 }
 
 func NewController(c Config, d Diagnostic) Controller {
@@ -72,7 +75,7 @@ func NewController(c Config, d Diagnostic) Controller {
 		Response:          ResponseQueue{},
 		handlerBuf:        make(chan handlerPkg, 1024),
 		protocol:          controller.OPENPROTOCOL,
-		result_CURVE:      &minio.ControllerCurve{},
+		result_CURVE:      nil,
 	}
 
 	cont.StatusValue.Store(controller.STATUS_OFFLINE)
@@ -98,13 +101,13 @@ func (c *Controller) UpdateToolStatus(status string) {
 		c.toolStatus.Store(status)
 
 		// 推送工具状态
-		ts := wsnotify.WSToolStatus{
-			ToolSN: c.cfg.Tools[0].SerialNO,
-			Status: status,
-		}
-
-		str, _ := json.Marshal(ts)
-		c.Srv.WS.WSSend(wsnotify.WS_EVETN_TOOL, string(str))
+		//ts := wsnotify.WSToolStatus{
+		//	ToolSN: c.cfg.Tools[0].SerialNO,
+		//	Status: status,
+		//}
+		//
+		//str, _ := json.Marshal(ts)
+		//c.Srv.WS.WSSend(wsnotify.WS_EVETN_TOOL, string(str))
 	}
 }
 
@@ -164,6 +167,10 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) error {
 	switch pkg.Header.MID {
 	case MID_7410_LAST_CURVE:
 		//结果曲线
+		if c.result_CURVE == nil {
+			c.result_CURVE = &minio.ControllerCurve{}
+		}
+
 		Torque_Coefficient, _ := strconv.ParseFloat(strings.TrimSpace(pkg.Body[27:41]), 64)
 		Angle_Coefficient, _ := strconv.ParseFloat(strings.TrimSpace(pkg.Body[43:57]), 64)
 		if pkg.Body[69:71] == "01" {
@@ -198,9 +205,7 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) error {
 
 		result_data := ResultData{}
 		result_data.Deserialize(pkg.Body)
-		c.TightingID = result_data.ControllerName + result_data.ToolSerialNumber + result_data.TightingID
-		c.result_CURVE.CurveContent.Result = c.TightingID
-		c.Srv.Parent.Handlers.HandleCurve(c.result_CURVE)
+
 		return c.handleResult(&result_data, nil)
 
 	case MID_0065_OLD_DATA:
@@ -389,20 +394,26 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) error {
 		// 收到工具信息
 		var ti ToolInfo
 		err := ti.Deserialize(pkg.Body)
-		if err != nil {
-			c.diag.Error("tool info deserialize fail", err)
+
+		if c.Status() == controller.STATUS_OFFLINE {
+			c.Response.update(MID_0040_TOOL_INFO_REQUEST, ti)
 		} else {
-			// 将数据通过api传给odoo
-			if ti.ToolSN == "" {
-				return errors.New("Tool Serial Number is empty string")
-			}
+			if err != nil {
+				c.diag.Error("tool info deserialize fail", err)
+			} else {
 
-			if ti.TotalTighteningCount == 0 || ti.CountSinLastService == 0 {
-				//不需要尝试创建维修/标定单据
-				return nil
-			}
+				// 将数据通过api传给odoo
+				if ti.ToolSN == "" {
+					return errors.New("Tool Serial Number is empty string")
+				}
 
-			go c.Srv.TryCreateMaintenance(ti) // 协程处理
+				if ti.TotalTighteningCount == 0 || ti.CountSinLastService == 0 {
+					//不需要尝试创建维修/标定单据
+					return nil
+				}
+
+				go c.Srv.TryCreateMaintenance(ti) // 协程处理
+			}
 		}
 
 	}
@@ -425,7 +436,9 @@ func (c *Controller) handleResult(result_data *ResultData, carve *minio.Controll
 		return nil
 	}
 
-	c.Srv.DB.UpdateTightning(c.dbController.Id, result_data.TightingID)
+	if c.dbController != nil {
+		c.Srv.DB.UpdateTightning(c.dbController.Id, result_data.TightingID)
+	}
 
 	controllerResult := controller.ControllerResult{}
 	controllerResult.NeedPushHmi = false
@@ -492,7 +505,12 @@ func (c *Controller) handleResult(result_data *ResultData, carve *minio.Controll
 	controllerResult.GunSN = result_data.ToolSerialNumber
 	controllerResult.Seq, controllerResult.Count = c.calBatch(controllerResult.Workorder_ID)
 
-	c.Srv.Parent.Handlers.Handle(&controllerResult, nil)
+	if c.result_CURVE != nil {
+		c.result_CURVE.CurveContent.Result = controllerResult.Result
+		c.result_CURVE.CurveFile = result_data.ControllerName + result_data.ToolSerialNumber + result_data.TightingID
+	}
+
+	c.Srv.Parent.Handlers.Handle(&controllerResult, c.result_CURVE)
 
 	return nil
 
@@ -514,7 +532,7 @@ func (c *Controller) calBatch(workorderID int64) (int, int) {
 
 func (c *Controller) Start() {
 
-	c.w = socket_writer.NewSocketWriter(fmt.Sprintf("tcp://%s:%d", c.cfg.RemoteIP, c.cfg.Port), c)
+	c.w = socket_writer.NewSocketWriter(c.cfg.RemoteIP, c)
 
 	go c.handlerProcess()
 
@@ -545,9 +563,11 @@ func (c *Controller) Connect() error {
 		time.Sleep(time.Duration(c.req_timeout))
 	}
 
+	c.tighteningDevice.AddDevice("0", c)
 	c.updateStatus(controller.STATUS_ONLINE)
 
 	c.startComm()
+	c.ToolInfoReq()
 
 	//c.JobOff("1")
 	c.PSetSubscribe()
@@ -592,6 +612,40 @@ func (c *Controller) getTighteningCount() {
 			return //退出manage协程
 		}
 	}
+}
+
+func (c *Controller) ToolInfoReq() {
+	rev := GetVendorMid(c.Model(), MID_0040_TOOL_INFO_REQUEST)
+	if rev == "" {
+		return
+	}
+
+	//defer c.Response.remove(MID_0040_TOOL_INFO_REQUEST)
+	//c.Response.Add(MID_0040_TOOL_INFO_REQUEST, nil)
+
+	req := GeneratePackage(MID_0040_TOOL_INFO_REQUEST, rev, "", DEFAULT_MSG_END)
+	c.Write([]byte(req))
+
+	//var reply interface{} = nil
+	//
+	//for i := 0; i < MAX_REPLY_COUNT; i++ {
+	//	reply = c.Response.get(MID_0040_TOOL_INFO_REQUEST)
+	//	if reply != nil {
+	//		break
+	//	}
+	//
+	//	time.Sleep(REPLY_TIMEOUT)
+	//}
+	//
+	//if reply != nil {
+	//	ti := reply.(ToolInfo)
+	//
+	//	c.tighteningDevice.AddDevice(ti.ControllerSN, c)
+	//	c.tighteningDevice.AddDevice(ti.ToolSN, c)
+	//	c.updateStatus(controller.STATUS_ONLINE)
+	//} else {
+	//	c.updateStatus(controller.STATUS_OFFLINE)
+	//}
 }
 
 func (c *Controller) GetPSetList() ([]int, error) {
@@ -836,9 +890,9 @@ func (c *Controller) startComm() error {
 		return errors.New(controller.ERR_NOT_SUPPORTED)
 	}
 
-	if c.Status() == controller.STATUS_OFFLINE {
-		return errors.New("status offline")
-	}
+	//if c.Status() == controller.STATUS_OFFLINE {
+	//	return errors.New("status offline")
+	//}
 
 	start := GeneratePackage(MID_0001_START, rev, "", DEFAULT_MSG_END)
 
@@ -1431,7 +1485,7 @@ func (c *Controller) PSet(pset int, channel int, ex_info string, count int) (uin
 	}
 
 	// 次数控制
-	c.PSetBatchSet(pset, count)
+	//c.PSetBatchSet(pset, count)
 
 	// 结果id-拧接次数-用户id
 	c.IdentifierSet(ex_info)
@@ -1573,5 +1627,32 @@ func (c *Controller) JobAbort() error {
 }
 
 func (c *Controller) Model() string {
-	return ""
+	return c.model
+}
+
+func (c *Controller) SetModel(model string) {
+	c.model = model
+}
+
+func (c *Controller) SetJob(r *tightening_device.JobSet) tightening_device.Reply {
+	return tightening_device.Reply{}
+}
+
+func (c *Controller) SetPSet(r *tightening_device.PSetSet) tightening_device.Reply {
+	rt := tightening_device.Reply{
+		Result: 0,
+		Msg:    "",
+	}
+
+	err := c.pset(r.PSet)
+	if err != nil {
+		rt.Result = -1
+		rt.Msg = err.Error()
+	}
+
+	return rt
+}
+
+func (c *Controller) Enable(r *tightening_device.ToolEnable) tightening_device.Reply {
+	return tightening_device.Reply{}
 }

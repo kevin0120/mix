@@ -1,5 +1,7 @@
 package tightening_device
 
+import "github.com/masami10/rush/services/controller"
+
 type DeviceConfig struct {
 	Model    string `yaml:"model"`
 	Protocol string `yaml:"protocol"`
@@ -7,15 +9,15 @@ type DeviceConfig struct {
 }
 
 type Config struct {
-	Enable  bool           `yaml:"enable"`
-	Devices []DeviceConfig `yaml:"devices"`
+	Enable  bool                      `yaml:"enable"`
+	Devices []controller.DeviceConfig `yaml:"devices"`
 }
 
 func NewConfig() Config {
 
 	return Config{
 		Enable:  true,
-		Devices: []DeviceConfig{},
+		Devices: []controller.DeviceConfig{},
 	}
 }
 

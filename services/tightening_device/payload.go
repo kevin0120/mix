@@ -30,3 +30,29 @@ type Device struct {
 	Parent string `json:"parent"`
 	Status string `json:"status"`
 }
+
+type Reply struct {
+	Result int    `json:"result"`
+	Msg    string `json:"msg"`
+}
+
+type JobSet struct {
+	ToolSN string `json:"tool_sn"`
+	StepID int    `json:"step_id"`
+	Job    int    `json:"job"`
+	UserID uint   `json:"user_id"`
+}
+
+type PSetSet struct {
+	ToolSN   string `json:"tool_sn"`
+	StepID   int    `json:"step_id"`
+	UserID   uint   `json:"user_id"`
+	PSet     int    `json:"pset"`
+	Sequence uint   `json:"sequence"`
+	Count    int    `json:"count"`
+}
+
+type ToolEnable struct {
+	ToolSN string `json:"tool_sn"`
+	Enable bool   `json:"enable"`
+}

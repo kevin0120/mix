@@ -1350,13 +1350,16 @@ func (m *Methods) testProtocol(ctx iris.Context) {
 }
 
 func (m *Methods) wsTest(ctx iris.Context) {
-	ws := WSTest{}
+	ws := wsnotify.WSMsg{}
 	err := ctx.ReadJSON(&ws)
 	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
 		return
 	}
 
-	str, _ := json.Marshal(ws.Data)
-	m.service.ControllerService.WS.WSSend(ws.Event, string(str))
+	//str, _ := json.Marshal(ws.Data)
+	//m.service.ControllerService.WS.WSSend(ws.Event, string(str))
+
+	payload, _ := json.Marshal(ws)
+	m.service.ControllerService.WS.WSNotify("", string(payload))
 }

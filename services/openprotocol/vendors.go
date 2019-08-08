@@ -45,7 +45,7 @@ var VendorModels = map[string]map[string]string{
 		MID_0043_TOOL_ENABLE:           "001",
 		MID_0019_PSET_BATCH_SET:        "001",
 		MID_0070_ALARM_SUBSCRIBE:       "001",
-		MID_0040_TOOL_INFO_REQUEST:     "004",
+		MID_0040_TOOL_INFO_REQUEST:     "005",
 
 		MID_7408_LAST_CURVE_SUBSCRIBE: "001",
 	},

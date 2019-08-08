@@ -15,6 +15,12 @@ type ControllerConfig struct {
 	Tools    []ToolConfig `yaml:"tools"`
 }
 
+type DeviceConfig struct {
+	Model    string `yaml:"model"`
+	Protocol string `yaml:"protocol"`
+	Endpoint string `yaml:"endpoint"`
+}
+
 type ToolConfig struct {
 	SerialNO    string `yaml:"gun_serial"`
 	ToolChannel int    `yaml:"channel"`

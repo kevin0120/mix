@@ -2,6 +2,8 @@ package tightening_device
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/kataras/iris/core/errors"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/wsnotify"
 	"sync"
@@ -19,6 +21,10 @@ type Diagnostic interface {
 }
 
 type TighteningDevice interface {
+	SetModel(model string)
+	SetJob(r *JobSet) Reply
+	SetPSet(r *PSetSet) Reply
+	Enable(r *ToolEnable) Reply
 }
 
 type Service struct {
@@ -32,6 +38,7 @@ type Service struct {
 }
 
 func NewService(c Config, d Diagnostic, pAudi controller.Protocol, pOpenprotocol controller.Protocol) (*Service, error) {
+
 	srv := &Service{
 		diag:           d,
 		mtxDevices:     sync.Mutex{},
@@ -39,6 +46,18 @@ func NewService(c Config, d Diagnostic, pAudi controller.Protocol, pOpenprotocol
 	}
 
 	srv.configValue.Store(c)
+
+	for _, device := range c.Devices {
+		switch device.Protocol {
+		//case controller.AUDIPROTOCOL:
+
+		case controller.OPENPROTOCOL:
+			pOpenprotocol.AddDevice(device, srv)
+
+		default:
+
+		}
+	}
 
 	return srv, nil
 }
@@ -63,6 +82,7 @@ func (s *Service) config() Config {
 }
 
 func (s *Service) OnWSMsg(data []byte) {
+	fmt.Println(string(data))
 	msg := wsnotify.WSMsg{}
 	err := json.Unmarshal(data, &msg)
 	if err != nil {
@@ -95,8 +115,80 @@ func (s *Service) OnWSMsg(data []byte) {
 
 		s.WS.WSSendTightening(string(devices))
 
+	case WS_TOOL_ENABLE:
+		reply, _ := json.Marshal(wsnotify.WSMsg{
+			Type: WS_TOOL_ENABLE,
+			SN:   msg.SN,
+			Data: Reply{
+				Result: 0,
+				Msg:    "",
+			},
+		})
+
+		s.WS.WSSendReply(string(reply))
+
+	case WS_TOOL_JOB:
+		reply, _ := json.Marshal(wsnotify.WSMsg{
+			Type: WS_TOOL_JOB,
+			SN:   msg.SN,
+			Data: Reply{
+				Result: 0,
+				Msg:    "",
+			},
+		})
+
+		s.WS.WSSendReply(string(reply))
+
+	case WS_TOOL_PSET:
+		//device, _ := s.GetDevice("0")
+		//req := PSetSet{}
+		//strData, _ := json.Marshal(msg.Data)
+		//json.Unmarshal([]byte(strData), &req)
+		//
+		//rt := device.SetPSet(&req)
+		//reply, _ := json.Marshal(wsnotify.WSMsg{
+		//	Type: WS_TOOL_PSET,
+		//	SN: msg.SN,
+		//	Data: rt,
+		//})
+
+		reply, _ := json.Marshal(wsnotify.WSMsg{
+			Type: WS_TOOL_PSET,
+			SN:   msg.SN,
+			Data: Reply{
+				Result: 0,
+				Msg:    "",
+			},
+		})
+
+		s.WS.WSSendReply(string(reply))
+
 	default:
 		// 类型错误
 		return
 	}
+}
+
+func (s *Service) AddDevice(sn string, td TighteningDevice) {
+	defer s.mtxDevices.Unlock()
+	s.mtxDevices.Lock()
+
+	_, exist := s.runningDevices[sn]
+	if exist {
+		return
+	}
+
+	s.runningDevices[sn] = td
+}
+
+func (s *Service) GetDevice(sn string) (TighteningDevice, error) {
+	defer s.mtxDevices.Unlock()
+	s.mtxDevices.Lock()
+
+	td, exist := s.runningDevices[sn]
+	if !exist {
+		return td, errors.New("device not found")
+	}
+
+	return td, nil
 }

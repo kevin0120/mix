@@ -23,6 +23,7 @@ const (
 	WS_EVETN_TOOL              = "tool"
 	WS_EVENT_READER            = "reader"
 	WS_EVENT_TIGHTENING_DEVICE = "tightening_device"
+	WS_EVENT_REPLY             = "reply"
 )
 
 type Diagnostic interface {
@@ -202,6 +203,10 @@ func (s *Service) WSSend(evt string, payload string) {
 	s.clientManager.NotifyALL(evt, payload)
 }
 
+func (s *Service) WSNotify(evt string, payload string) {
+	go s.notify([]byte(payload))
+}
+
 // ws群发控制器状态
 func (s *Service) WSSendControllerStatus(payload string) {
 	s.clientManager.NotifyALL(WS_EVENT_CONTROLLER, payload)
@@ -251,4 +256,11 @@ func (s *Service) WSSendTightening(payload string) {
 		return
 	}
 	s.clientManager.NotifyALL(WS_EVENT_TIGHTENING_DEVICE, payload)
+}
+
+func (s *Service) WSSendReply(payload string) {
+	if s == nil || s.clientManager == nil {
+		return
+	}
+	s.clientManager.NotifyALL(WS_EVENT_REPLY, payload)
 }

@@ -135,10 +135,10 @@ func (h *Handlers) handleCurve(curve *minio.ControllerCurve) {
 	h.controllerService.Minio.Save(curve)
 }
 
-func (h *Handlers) HandleCurve(curve *minio.ControllerCurve) {
-	// 保存对象存储
-	h.handleCurve(curve)
-}
+//func (h *Handlers) HandleCurve(curve *minio.ControllerCurve) {
+//	// 保存对象存储
+//	h.handleCurve(curve)
+//}
 
 // 异步保存
 func (h *Handlers) saveProcess() {

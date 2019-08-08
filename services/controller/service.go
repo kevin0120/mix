@@ -33,6 +33,7 @@ type Protocol interface {
 	Parse(msg string) ([]byte, error)
 	Write(sn string, buf []byte) error
 	AddNewController(cfg ControllerConfig) Controller
+	AddDevice(cfg DeviceConfig, ts interface{}) Controller
 }
 
 type HandlerPackage struct {
