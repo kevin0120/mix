@@ -59,7 +59,7 @@ class ClsScrewTool extends Device {
           });
           return false;
         }
-        yield call(super.Enable);
+        yield call([this, super.Enable]);
       }
     } catch (e) {
       CommonLog.lError(e, {
@@ -80,7 +80,7 @@ class ClsScrewTool extends Device {
           });
           return false;
         }
-        yield call(super.Disable);
+        yield call([this, super.Disable]);
       }
     } catch (e) {
       CommonLog.lError(e, {
@@ -100,7 +100,7 @@ class ClsScrewTool extends Device {
         });
         return false;
       }
-      yield call(super.ToggleEnable);
+      yield call([this, super.ToggleEnable]);
     } catch (e) {
       CommonLog.lError(e, {
         at: 'ClsScrewTool.ToggleEnable'

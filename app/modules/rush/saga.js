@@ -103,7 +103,13 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
         emit({ type: 'healthz', payload: true });
         // reg msg
         if (ws) {
-          ws.sendJson({ hmi_sn: hmiSN }, err => {
+          ws.sendJson({
+            type:'WS_REG',
+            sn:0,
+            data:{
+              hmi_sn: hmiSN
+            }
+          }, err => {
             if (err && ws) {
               CommonLog.lError(err);
               ws.close();
@@ -124,7 +130,7 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
         emit({ type: 'healthz', payload: false });
         // console.log('websocket error. reconnect after 1s');
       });
-      ws.on('ping', (...args) => {
+      ws.on('ping', () => {
         CommonLog.Debug('receive ping msg');
       });
       ws.on('pong', () => {

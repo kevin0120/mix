@@ -2,6 +2,7 @@ import InputStep from './InputStep';
 import ScannerStep from './scannerStep';
 import InstructionStep from './instructionStep';
 import ScrewStep from './screwStep';
+import MaterialStep from './materialStep';
 
 export default {
   input: {
@@ -15,10 +16,9 @@ export default {
   },
   screw:{
     component:ScrewStep,
-    genProps:props=>({
-      points:props.payload.points,
-      image:props.payload.image
-    })
+  },
+  material:{
+    component:MaterialStep,
   }
 };
 

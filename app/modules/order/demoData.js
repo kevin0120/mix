@@ -130,6 +130,15 @@ export const demoOrder = {
       }
     },
     {
+      name: '获取物料',
+      info: 'fetch the following material',
+      description: '获取下列物料',
+      type: 'material',
+      skippable: true,
+      data: {},
+      payload: {}
+    },
+    {
       name: '扫码',
       info: 'this step is skippable',
       description: '扫描二维码或在输入框中输入',
