@@ -1,7 +1,7 @@
 // @flow
 
 import OWebSocket from 'ws';
-import { call, take, takeLatest, put, select, fork, cancel, delay, takeEvery } from 'redux-saga/effects';
+import { call, put, select, fork, cancel, takeEvery } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
 import type { Saga, EventChannel } from 'redux-saga';
 import { RUSH } from './action';
@@ -12,12 +12,10 @@ import handleData from './handleData';
 import handleHealthz from './handleHealthz';
 import { WEBSOCKET_EVENTS } from './type';
 
-const tasks = [];
+let task = null;
 let ws = null;
-
 const WebSocket = require('@oznu/ws-connect');
 
-const DebounceWaitTime = 2000;
 
 export function getWSClient() {
   return ws;
@@ -25,8 +23,7 @@ export function getWSClient() {
 
 export function* watchRushEvent(): Saga<void> {
   try {
-    yield takeLatest(RUSH.INIT, initRush);
-    yield delay(DebounceWaitTime);
+    yield takeEvery(RUSH.INIT, initRush);
   } catch (e) {
     CommonLog.lError(e, { at: 'watchRushEvent' });
   }
@@ -34,6 +31,7 @@ export function* watchRushEvent(): Saga<void> {
 
 function* initRush() {
   try {
+    console.log('initRush');
     const state = yield select();
 
     const { connections } = state.setting.system;
@@ -49,23 +47,39 @@ function* initRush() {
 
     ws = new WebSocket(wsURL, { reconnectInterval: 3000 });
 
-    const listenerTask = yield fork(
+    task = yield fork(
       watchRushChannel,
       state.setting.page.odooConnection.hmiSn.value
     );
-    tasks.push(listenerTask);
-
 
   } catch (e) {
     CommonLog.lError(e, { at: 'initRush' });
+  } finally {
+    console.log('initRush finished');
+
+    if (!(ws && task)) {
+      if (ws) {
+        ws.close();
+        ws = null;
+      }
+      if (task) {
+        yield cancel(task);
+        task = null;
+      }
+    }
   }
 }
 
 function* stopRush() {
   try {
+    if (task) {
+      yield cancel(task);
+      task = null;
+    }
     if (!ws) {
       return;
     }
+    console.log(OWebSocket.OPEN, OWebSocket.CONNECTING, ws);
     if (
       ws.ws.readyState === OWebSocket.OPEN ||
       ws.ws.readyState === OWebSocket.CONNECTING
@@ -77,9 +91,6 @@ function* stopRush() {
       ws.close();
     }
     ws = null;
-    while (tasks.length > 0) {
-      yield cancel(tasks.pop());
-    }
   } catch (e) {
     CommonLog.lError(e, { at: 'stopRush' });
   }
@@ -94,21 +105,26 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
         if (ws) {
           ws.sendJson({ hmi_sn: hmiSN }, err => {
             if (err && ws) {
+              CommonLog.lError(err);
               ws.close();
             }
           });
         }
       });
 
-      ws.on('close', () => {
+      ws.on('close', (...args) => {
+        console.warn('close', ...args, ws);
+
         emit({ type: 'healthz', payload: false });
       });
 
-      ws.on('error', () => {
+      ws.on('error', (...args) => {
+        console.warn('error', ...args);
+
         emit({ type: 'healthz', payload: false });
         // console.log('websocket error. reconnect after 1s');
       });
-      ws.on('ping', () => {
+      ws.on('ping', (...args) => {
         CommonLog.Debug('receive ping msg');
       });
       ws.on('pong', () => {
@@ -123,6 +139,9 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
         }
         emit({ type: 'data', payload: data });
       });
+      ws.on('websocket-status', (...args) => {
+        console.log(...args)
+      })
     } else {
       CommonLog.lError('ws doesn\'t exist', { at: 'createRushChannel' });
     }

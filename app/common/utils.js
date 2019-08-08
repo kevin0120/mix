@@ -186,17 +186,19 @@ const fn = {
   Error: console.error,
   Info: console.info,
   Warn: console.warn,
-  Debug: console.debug,
+  Debug: console.log,
   Maintenance: console.log
 };
 
 const fnAlways = {
   Error: (rest) => {
-    if (typeof rest[0] === 'string') {
-      lError(...rest);
-    }
-    if (rest[0] instanceof Error) {
-      lError(rest[0].message, rest[1]);
+    if(rest){
+      if (typeof rest[0] === 'string') {
+        lError(...rest);
+      }
+      if (rest[0] instanceof Error) {
+        lError(rest[0].message, rest[1]);
+      }
     }
   },
   Info,

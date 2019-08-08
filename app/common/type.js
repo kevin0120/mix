@@ -81,14 +81,14 @@ class CommonExternalEntity implements IHealthChecker {
 
   // eslint-disable-next-line require-yield
   * Enable(): Saga<void> {
-    CommonLog.Debug(`${this.source} Is Enabled!`);
     this.#enable = true;
+    CommonLog.Debug(`${this.source} Is Enabled!`);
   }
 
   // eslint-disable-next-line require-yield
   * Disable(): Saga<void> {
-    CommonLog.Debug(`${this.source} Is Disabled!`);
     this.#enable = false;
+    CommonLog.Debug(`${this.source} Is Disabled!`);
   }
 
   // eslint-disable-next-line require-yield

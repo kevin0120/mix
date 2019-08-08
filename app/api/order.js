@@ -66,7 +66,6 @@ export function* jobApi(tool_sn, step_id, user_id, job) {
 
 export function* toolEnableApi(tool_sn, enable) {
   try {
-    console.log('toolEnableApi');
     const { resp, timeout: tOut } = yield race({
       resp: call(rushSendMessage, {
         type: 'WS_TOOL_ENABLE',

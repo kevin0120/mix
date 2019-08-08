@@ -2,6 +2,7 @@ import { CommonLog } from '../../common/utils';
 
 export default function*(payload){
   try{
+    console.log('healthz',payload);
     // const healthzStatus = state.healthCheckResults; // 获取整个healthz
     // if (!lodash.isEqual(healthzStatus.masterpc.isHealth, payload)) {
     //   // 如果不相等 更新

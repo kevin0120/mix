@@ -9,7 +9,6 @@ import controllerModeTasks from './controllerModeTasks';
 import handleResult from './handleResult';
 import { CommonLog } from '../../../common/utils';
 import { staticScrewTool } from '../../tools/saga';
-// import { toolEnableApi } from '../../../api/order';
 
 
 export default {
@@ -19,8 +18,6 @@ export default {
     try {
       // init data
       const payload: tScrewStepPayload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
-      // const { result, msg } = yield call(toolEnableApi, staticScrewTool.SerialNumber, false);
-      // console.log(result, msg);
       yield put(orderActions.stepData((data: tScrewStepData): tScrewStepData => {
         const points: Array<tPoint> = cloneDeep(payload?.points || []).sort((a, b) => a.group_sequence - b.group_sequence);
         return {

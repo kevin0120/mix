@@ -1,7 +1,7 @@
 // @flow
 
 import type { Saga } from 'redux-saga';
-import { call } from 'redux-saga';
+import { call } from 'redux-saga/effects';
 import Device from '../../common/type';
 import { symTool, AppendNewDevices } from '../global';
 import ClsController from '../controller/model';
@@ -9,8 +9,6 @@ import type { tInputData } from '../../common/type';
 import screwStepAction from '../step/screwStep/action';
 import { CommonLog } from '../../common/utils';
 import { toolEnableApi } from '../../api/order';
-
-// export const defaultReaderDispatcher = (data) => readerStepAction.getValue(data);
 
 export const defaultScrewToolDispatcher = (data: tInputData) => screwStepAction.result(data);
 
@@ -52,7 +50,6 @@ class ClsScrewTool extends Device {
   * Enable(): Saga<void> {
     try {
       if (!this.isEnable) {
-        console.log(JSON.stringify(toolEnableApi));
         const { result, msg } = yield call(toolEnableApi, this.SerialNumber, true);
         if (result !== 0) {
           CommonLog.lError(`tool enable failed:${msg}`, {
