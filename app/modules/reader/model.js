@@ -1,17 +1,21 @@
 // @flow
 
-import Device from '../../common/type'
+import Device from '../../common/type';
 import { CommonLog } from '../../common/utils';
 
 // export const defaultReaderDispatcher = (data) => readerStepAction.getValue(data);
 
+export type tReaderData = {
+  +uid: string
+};
+
 class ClsReader extends Device {
 
   doValidate(data: string | number): boolean {
-    const ret: boolean =  super.doValidate(data);
+    const ret: boolean = super.doValidate(data);
     const msg = `${this.source} validate return: ${ret.toString()}`;
     CommonLog.Info(msg);
-    return ret
+    return ret;
   }
 }
 

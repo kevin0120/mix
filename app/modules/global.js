@@ -1,10 +1,11 @@
 // @flow
 
-import { isNil } from "lodash-es";
+import { isNil } from 'lodash-es';
 
-interface tArrayDevices<t>{
-  [type: string]: Array<t>
-}
+type tArrayDevices= {
+  // eslint-disable-next-line flowtype/no-weak-types
+  [type: string]: Array<any>
+};
 
 export const symController = 'Controller';
 export const symScanner = 'Scanner';
@@ -16,13 +17,14 @@ export const symIO = 'IO';
 /* eslint-disable flowtype/no-weak-types */
 export function AppendNewDevices(symbol: string, clsObj: any) {
   const cl = gDevices?.[symbol];
-  if (isNil(cl)){
+  if (!(cl instanceof Array)) {
     gDevices[symbol] = [clsObj];
-  }else {
+  } else {
     cl.push(clsObj);
   }
+  console.log(gDevices);
 }
 
-const gDevices: tArrayDevices<any> = {};
+const gDevices: tArrayDevices = {};
 // const gExternalSystems: tArrayDevices<any> = {};
 /* eslint-enable flowtype/no-weak-types */

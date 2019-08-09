@@ -49,7 +49,7 @@ const mergePointsAndResults = (points: Array<tPoint>, results: Array<tResult>, a
       }
       return ({
         ...p,
-        status: formPointStatusFromResultStatus(p, null,activeGroupSequence)
+        status: formPointStatusFromResultStatus(p, null, activeGroupSequence)
       });
     }));
   return newPoints;
@@ -109,7 +109,7 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
       // update step data
       yield put(orderActions.stepData((d: tScrewStepData): tScrewStepData => ({
         ...d,
-        activeIndex: d.activeIndex===-1?0:d.activeIndex + results.length,
+        activeIndex: d.activeIndex === -1 ? 0 : d.activeIndex + results.length,
         points: mergePointsAndResults(
           d.points,
           results,
@@ -134,6 +134,7 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
 
 export default function* handleResult(ORDER, orderActions, results, data) {
   try {
+    console.log(results);
     const firstMatchResultStatus =
       resultStatusTasks(
         ORDER,

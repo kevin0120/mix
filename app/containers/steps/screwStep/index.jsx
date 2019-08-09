@@ -33,7 +33,7 @@ function ScrewStep({ status, image, points, activeIndex, result }: tStepProps) {
       activeIndex={activeIndex}
       focus={status === STEP_STATUS.DOING ? 2 : 0}
       scale={1}
-      onClick={() => result([{ status: 'success' }])}
+      onClick={() => result({ data:[{result: 'ok'}] })}
     />
     <Paper
       square

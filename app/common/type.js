@@ -1,6 +1,7 @@
 // @flow
 
-import { Action } from 'redux';
+import type { Action } from 'redux';
+import { put } from 'redux-saga';
 import { isURL } from 'validator/lib/isURL';
 import { isNil, isEmpty, isEqual, isString } from 'lodash-es';
 import type { Saga } from 'redux-saga';
@@ -150,6 +151,13 @@ class Device extends CommonExternalEntity {
 
   #validator: null | (data: tInputData) => boolean = defaultValidatorFunc;
 
+  // eslint-disable-next-line flowtype/no-weak-types
+  constructor(name: string) {
+    super(name);
+    // eslint-disable-next-line flowtype/no-weak-types
+    (this: any).doDispatch = this.doDispatch.bind(this);
+  }
+
   doValidate(data: tInputData): boolean {
     let _isEmpty = false;
     if (isNil(data)) {
@@ -171,22 +179,34 @@ class Device extends CommonExternalEntity {
     return this.validator(data);
   }
 
-  doDispatch(data: tInputData): ?AnyAction | Array<AnyAction> {
-    if (!this.isEnable) {
-      const msg = `${this.source} Is Not Enable`;
-      CommonLog.Info(msg);
-      return;
+  * doDispatch(data: tInputData): Saga<void> {
+    try {
+      if (!this.isEnable) {
+        const msg = `${this.source} Is Not Enabled`;
+        CommonLog.Info(msg);
+        return;
+      }
+      if(!this.doValidate(data)){
+        const msg = `data ${data} didn't pass validator at ${this.source}`;
+        CommonLog.Info(msg);
+        return ;
+      }
+      if (!this.dispatcher) {
+        const msg = `${this.source} Validator is Nil, Please set Validator First`;
+        CommonLog.Warn(msg);
+        return;
+      }
+      yield put(this.dispatcher({
+        data,
+        source: this.Name,
+        time: new Date()
+      }));
+    } catch (e) {
+      CommonLog.lError(e, {
+        at: 'doDispatch',
+        data
+      });
     }
-    if (!this.dispatcher) {
-      const msg = `${this.source} Validator is Nil, Please set Validator First`;
-      CommonLog.Warn(msg);
-      return;
-    }
-    return this.dispatcher({
-      data,
-      source: this.Name,
-      time: new Date()
-    });
   }
 
   set validator(validator: (string | number) => boolean) {
@@ -217,7 +237,6 @@ class Device extends CommonExternalEntity {
     return true;
   }
 }
-
 /* eslint-enable no-underscore-dangle */
 
 export type { tCommonActionType, tDeviceNewData };

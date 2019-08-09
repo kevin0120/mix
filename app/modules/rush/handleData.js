@@ -7,10 +7,10 @@ import { CommonLog } from '../../common/utils';
 import type { tIOContact, tIODirection, tIOWSMsgType } from '../io/type';
 import { onchangeIO } from '../io/action';
 import { toolNewResults, toolStatusChange } from '../tools/action';
-import { ScannerNewData } from '../scanner/action';
-import { ReaderNewData } from '../reader/action';
 import rushActions from './action';
-
+import readerNewData from '../reader/saga';
+import scannerNewData from '../scanner/saga';
+import ioNewData from '../io/saga';
 
 export default function* (payload) {
   try {
@@ -44,27 +44,6 @@ const rushDataHandlers = {
 
   },
 
-  * [wse.io](data: tRushWebSocketData) {
-    try {
-      const msgType = (data.type: tIOWSMsgType);
-      switch (msgType) {
-        case 'WS_IO_CONTACT':
-          yield put(onchangeIO({
-            sn: data.data.sn,
-            direction: data.data.type,
-            contact: data.data.contact
-          }));
-          break;
-        case 'WS_IO_STATUS':
-          console.log(data);
-          break;
-        default:
-          CommonLog.lError('IO Message Type Is Not Defined', { msgType });
-      }
-    } catch (e) {
-      CommonLog.lError(e, { at: 'rush event io' });
-    }
-  },
 
   * [wse.result](data: tRushWebSocketData) {
     try {
@@ -75,27 +54,8 @@ const rushDataHandlers = {
     }
   },
 
-  * [wse.scanner](data: tRushWebSocketData) {
-    try {
-      const d = (data.data: tBarcode);
-      CommonLog.Info(` Scanner receive data: ${d.barcode}`);
-      yield put(ScannerNewData(d.barcode));
-    } catch (e) {
-      CommonLog.lError(e, { at: 'rush event scanner' });
-    }
-  },
 
-  * [wse.reader](data: tRushWebSocketData) {
-    try {
-      const d = (data.data: tReader);
-      CommonLog.Info(` Reader receive data: ${d.uid}`);
-      yield put(ReaderNewData(d.uid));
-    } catch (e) {
-      CommonLog.lError(e, { at: 'rush event reader' });
-    }
-  },
-
-  * [wse.controller](data: tRushWebSocketData) {
+  [wse.controller](data: tRushWebSocketData) {
     try {
     } catch (e) {
       CommonLog.lError(e, { at: 'rush event controller' });
@@ -124,5 +84,10 @@ const rushDataHandlers = {
     } catch (e) {
       CommonLog.lError(e, { at: 'rush event reply' });
     }
-  }
+  },
+  [wse.io]: ioNewData,
+
+  [wse.scanner]: scannerNewData,
+
+  [wse.reader]: readerNewData
 };

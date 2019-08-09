@@ -8,8 +8,9 @@ import type { tPoint, tScrewStepData } from './model';
 import { CommonLog } from '../../../common/utils';
 import { jobApi, psetApi } from '../../../api/order';
 
-
 export default {
+
+
   * [controllerModes.pset](): Saga<void> {
     try {
       console.log('in pset progress');
@@ -42,6 +43,8 @@ export default {
     }
     return true;
   },
+
+
   * [controllerModes.job](): Saga<void> {
     try {
       const { jobID, points }: tScrewStepData = yield select(s => stepData(workingStep(workingOrder(s.order))));

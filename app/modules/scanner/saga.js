@@ -1,13 +1,15 @@
 // @flow
 
-import { put, takeLatest } from 'redux-saga/effects';
+import { call, takeLatest } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
-import { SCANNER } from './action';
+import { SCANNER, ScannerNewData } from './action';
 import ClsScanner, { defaultScannerDispatcher } from './model';
 import type { tCommonActionType, tDeviceNewData } from '../../common/type';
 import { CommonLog } from '../../common/utils';
 // eslint-disable-next-line import/named
 import { symScanner, AppendNewDevices } from '../global';
+import { WEBSOCKET_EVENTS as wse } from '../rush/type';
+import type { tBarcode, tRushWebSocketData } from '../rush/type';
 
 
 export const scanner = new ClsScanner(symScanner);
@@ -16,22 +18,34 @@ scanner.dispatcher = defaultScannerDispatcher;
 // TODO: 是否增加到系统初始化中
 // scanner.Enable(); // 必须使能才能够使用
 
-function* scannerHandler(action: tCommonActionType & tDeviceNewData): Saga<void> {
+// function* scannerHandler(action: tCommonActionType & tDeviceNewData): Saga<void> {
+//   try {
+//     const { data } = action;
+//     if (scanner.doValidate(data)) {
+//       const respAction = scanner.doDispatch(data);
+//       if (respAction) {
+//         yield put(respAction);
+//       }
+//     } else {
+//       // do nothing
+//     }
+//   } catch (e) {
+//     CommonLog.lError(e);
+//   }
+// }
+//
+// export default function* watchScanner(): Saga<void> {
+//   yield takeLatest(SCANNER.READ_NEW_DATA, scannerHandler);
+// }
+
+export default function* scannerNewData(data: tRushWebSocketData): Saga<void> {
   try {
-    const { data } = action;
-    if (scanner.doValidate(data)) {
-      const respAction = scanner.doDispatch(data);
-      if (respAction) {
-        yield put(respAction);
-      }
-    } else {
-      // do nothing
-    }
+    const d = (data.data: tBarcode);
+    CommonLog.Info(` Scanner receive data: ${d.barcode}`);
+    yield call(scanner.doDispatch, d.barcode);
   } catch (e) {
-    CommonLog.lError(e);
+    CommonLog.lError(e, { at: 'rush event scanner' });
   }
 }
 
-export default function* watchScanner(): Saga<void> {
-  yield takeLatest(SCANNER.READ_NEW_DATA, scannerHandler);
-}
+

@@ -12,15 +12,15 @@ class ClsController extends Device {
 
   constructor(name: string, serialNumber: string){
     super(name);
-    this.SerialNumber = serialNumber;
+    this.#serialNumber = serialNumber;
     AppendNewDevices(symController, this);
   }
 
-  set SerialNumber(sn: string) {
+  set serialNumber(sn: string) {
     this.#serialNumber = sn
   }
 
-  get SerialNumber() {
+  get serialNumber() {
     return this.#serialNumber;
   }
 }

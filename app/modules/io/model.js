@@ -1,7 +1,7 @@
 // @flow
 import { isNil, remove } from 'lodash-es';
 import type { Saga } from 'redux-saga';
-import { call, fork } from 'redux-saga/effects';
+import { call, fork, put } from 'redux-saga/effects';
 import Device from '../../common/type';
 import type { AnyAction } from '../../common/type';
 import type {
@@ -19,35 +19,36 @@ import { ioDirection, ioTriggerMode } from './type';
 import { ioSetApi, ioContactApi, ioStatusApi } from '../../api/io';
 
 export default class ClsIOModule extends Device {
-  _data: tIOData = { input: '', output: '' };
 
-  _ports: Array<tIOPort> = [];
+  #data: tIOData = { input: '', output: '' };
 
-  _maxInputs: number = 0;
+  #ports: Array<tIOPort> = [];
 
-  _maxOutputs: number = 0;
+  #maxInputs: number = 0;
 
-  _listeners: Array<tIOListener> = [];
+  #maxOutputs: number = 0;
 
-  _serialNumber: ?string = null;
+  #listeners: Array<tIOListener> = [];
+
+  #serialNumber: ?string = null;
 
   get serialNumber() {
-    return this._serialNumber;
+    return this.#serialNumber;
   }
 
   constructor(name: string, serialNumber: string, inputs: number, outputs: number) {
     super(name);
-    this._serialNumber = serialNumber;
-    this._maxInputs = inputs;
-    this._maxOutputs = outputs;
+    this.#serialNumber = serialNumber;
+    this.#maxInputs = inputs;
+    this.#maxOutputs = outputs;
     for (let i = 0; i < inputs; i += 1) {
-      this._ports.push({
+      this.#ports.push({
         direction: ioDirection.input,
         idx: i
       });
     }
     for (let i = 0; i < outputs; i += 1) {
-      this._ports.push({
+      this.#ports.push({
         direction: ioDirection.output,
         idx: i
       });
@@ -63,15 +64,15 @@ export default class ClsIOModule extends Device {
   }
 
   getPort(direction: tIODirection, idx: number): ?tIOPort {
-    return this._ports.find(p => p.direction === direction && p.idx === idx);
+    return this.#ports.find(p => p.direction === direction && p.idx === idx);
   }
 
   _checkValidateIdx(idx: number, ioType: tIODirection): boolean {
     switch (ioType) {
       case 'input':
-        return idx <= this._maxInputs;
+        return idx <= this.#maxInputs;
       case 'output':
-        return idx <= this._maxOutputs;
+        return idx <= this.#maxOutputs;
       default:
         return false;
     }
@@ -95,18 +96,18 @@ export default class ClsIOModule extends Device {
       CommonLog.lError(`IO Data Must Be String!!!!`);
       return;
     }
-    this._data[direction] = contact;
+    this.#data[direction] = contact;
   }
 
 
   _getIOChanges(newData: tIOContact): Array<tIOChange> {
     const changes: Array<tIOChange> = [];
     const { direction, contact } = newData;
-    const eles: string = this._data?.[direction];
+    const eles: string = this.#data?.[direction];
     if (!eles) {
       return changes;
     }
-    const startIdx = direction === ioDirection.input ? 0 : this._maxInputs;
+    const startIdx = direction === ioDirection.input ? 0 : this.#maxInputs;
 
     [...contact].forEach((newVal, idx) => {
       if (isNil(newVal)) {
@@ -123,17 +124,17 @@ export default class ClsIOModule extends Device {
 
       if (newBool !== oldBool) {
         changes.push({
-          port: this._ports[startIdx + idx],
+          port: this.#ports[startIdx + idx],
           triggerMode: ioTriggerMode.change
         });
         if (newBool) {
           changes.push({
-            port: this._ports[startIdx + idx],
+            port: this.#ports[startIdx + idx],
             triggerMode: ioTriggerMode.rising
           });
         } else {
           changes.push({
-            port: this._ports[startIdx + idx],
+            port: this.#ports[startIdx + idx],
             triggerMode: ioTriggerMode.falling
           });
         }
@@ -151,7 +152,7 @@ export default class ClsIOModule extends Device {
       return [];
     }
     const changes = this._getIOChanges(newData, ...actionParams);
-    const matchedListeners = this._listeners.filter((l) =>
+    const matchedListeners = this.#listeners.filter((l) =>
       changes.findIndex(c =>
         c.port === l.port && c.triggerMode === l.triggerMode
       ) >= 0
@@ -175,9 +176,23 @@ export default class ClsIOModule extends Device {
     return null;
   }
 
-  doDispatch(newData: tIOContact): Array<AnyAction> {
+  *doDispatch(newData: tIOContact): Saga<void>{
     // CommonLog.Info(`IO Module Please Use doHandleIOData Method`);
-    return this._doHandleIOData(newData);
+    try {
+      const actions=this._doHandleIOData(newData)
+      if (actions instanceof Array) {
+        // eslint-disable-next-line
+        for (const a of actions) {
+          yield put(a);
+        }
+      }
+
+    } catch (e) {
+      CommonLog.lError(e,{
+        at:'doDispatch',
+        data:newData
+      });
+    }
   }
 
   * setIO(port: tIOPort, value: boolean): Saga<void> {
@@ -242,12 +257,12 @@ export default class ClsIOModule extends Device {
       triggerMode,
       dispatcher
     };
-    this._listeners.push(listener);
+    this.#listeners.push(listener);
     return listener;
   }
 
   removeListener(listener: tIOListener) {
-    return remove(this._listeners, l => l === listener);
+    return remove(this.#listeners, l => l === listener);
   }
 
 

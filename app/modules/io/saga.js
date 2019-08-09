@@ -1,20 +1,12 @@
 // @flow
 // redux-saga
 import {
-  take,
-  put,
   call,
-  fork,
-  all,
-  select,
-  cancel,
-  cancelled,
-  delay
 } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 // actions
 import { OPERATION_STATUS } from '../operation/model';
-import { IO_ACTION } from './action';
+import { IO_ACTION, onchangeIO } from './action';
 import { operationBypassIO } from '../operation/action';
 
 // reducers
@@ -23,6 +15,8 @@ import type { AnyAction, tCommonActionType, tDeviceNewData } from '../../common/
 import IO_FUNCTION, { DefaultMaxInputs, DefaultMaxOutputs } from './type';
 import { CommonLog } from '../../common/utils';
 import { scanner } from '../scanner/saga';
+import type { tRushWebSocketData } from '../rush/type';
+import type { tIOWSMsgType } from './type';
 
 // config
 
@@ -51,47 +45,69 @@ const io = {
 
 export const defaultIO = new ClsIOModule('IO Module', "1", DefaultMaxInputs, DefaultMaxOutputs);
 
-
-function* ioInputHandler(action: tCommonActionType & tDeviceNewData): Saga<void> {
-  try {
-    const { data } = action;
-    if (defaultIO.doValidate(data)) {
-      const respActions = defaultIO.doDispatch(data);
-      if (respActions instanceof Array) {
-        // eslint-disable-next-line
-        for (const a of respActions) {
-          yield put(a);
-        }
-      }
-    } else {
-      // do nothing
-    }
-  } catch (e) {
-    CommonLog.lError(e);
-  }
-}
-
-export default function* watchIOEvent(): Saga<void> {
-  try {
-    while (true) {
-      const action: AnyAction = yield take([IO_ACTION.RESET, IO_ACTION.DATA_ONCHANGE]);
-      switch (action.type) {
-        case IO_ACTION.DATA_ONCHANGE: {
-          yield fork(ioInputHandler, action);
+export default function* ioNewData(data: tRushWebSocketData): Saga<void>{
+    try {
+      const msgType = data.type;
+      switch (msgType) {
+        case 'WS_IO_CONTACT':
+          yield call(defaultIO.doDispatch,{
+            sn: data.data.sn,
+            direction: data.data.type,
+            contact: data.data.contact
+          });
           break;
-        }
-        // case IO_ACTION.RESET: {
-        //   yield fork(resetIO, action.modbusConfig);
-        //   break;
-        // }
+        case 'WS_IO_STATUS':
+          console.log(data);
+          break;
         default:
-          break;
+          CommonLog.lError('IO Message Type Is Not Defined', { msgType });
       }
+    } catch (e) {
+      CommonLog.lError(e, { at: 'rush event io' });
     }
-  } catch (e) {
-    CommonLog.lError(e);
-  }
 }
+
+//
+// function* ioInputHandler(action: tCommonActionType & tDeviceNewData): Saga<void> {
+//   try {
+//     const { data } = action;
+//     if (defaultIO.doValidate(data)) {
+//       const respActions = defaultIO.doDispatch(data);
+//       if (respActions instanceof Array) {
+//         // eslint-disable-next-line
+//         for (const a of respActions) {
+//           yield put(a);
+//         }
+//       }
+//     } else {
+//       // do nothing
+//     }
+//   } catch (e) {
+//     CommonLog.lError(e);
+//   }
+// }
+
+// export default function* watchIOEvent(): Saga<void> {
+//   try {
+//     while (true) {
+//       const action: AnyAction = yield take([IO_ACTION.RESET, IO_ACTION.DATA_ONCHANGE]);
+//       switch (action.type) {
+//         case IO_ACTION.DATA_ONCHANGE: {
+//           yield fork(ioInputHandler, action);
+//           break;
+//         }
+//         // case IO_ACTION.RESET: {
+//         //   yield fork(resetIO, action.modbusConfig);
+//         //   break;
+//         // }
+//         default:
+//           break;
+//       }
+//     }
+//   } catch (e) {
+//     CommonLog.lError(e);
+//   }
+// }
 
 // export function* handleIOFunction(data: ?tIOContact): Saga<void> {
 //   try {

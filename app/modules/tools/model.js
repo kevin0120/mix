@@ -14,13 +14,13 @@ export const defaultScrewToolDispatcher = (data: tInputData): AnyAction => screw
 
 class ClsScrewTool extends Device {
 
-  #serialNumber: ?string = null;
+  _serialNumber: ?string = null;
 
   #belongTo: ?ClsController = null;
 
   constructor(name: string, serialNumber: string) {
     super(name);
-    this.SerialNumber = serialNumber;
+    this.serialNumber = serialNumber;
     AppendNewDevices(symTool, this);
     /* eslint-disable flowtype/no-weak-types */
     (this: any).Enable = this.Enable.bind(this);
@@ -45,22 +45,22 @@ class ClsScrewTool extends Device {
     return this.#belongTo;
   }
 
-  set SerialNumber(sn: string) {
-    this.#serialNumber = sn;
+  set serialNumber(sn: string) {
+    this._serialNumber = sn;
   }
 
-  get SerialNumber() {
-    return this.#serialNumber;
+  get serialNumber() {
+    return this._serialNumber;
   }
 
   * Enable(): Saga<void> {
     try {
       if (!this.isEnable) {
-        const { result, msg } = yield call(toolEnableApi, this.SerialNumber, true);
+        const { result, msg } = yield call(toolEnableApi, this.serialNumber, true);
         if (result !== 0) {
           CommonLog.lError(`tool enable failed:${msg}`, {
             at: 'ClsScrewTool.Enable',
-            tool_sn: this.SerialNumber,
+            tool_sn: this.serialNumber,
             enable: true
           });
           return false;
@@ -77,11 +77,11 @@ class ClsScrewTool extends Device {
   * Disable(): Saga<void> {
     try {
       if (this.isEnable) {
-        const { result, msg } = yield call(toolEnableApi, this.SerialNumber, false);
+        const { result, msg } = yield call(toolEnableApi, this.serialNumber, false);
         if (result !== 0) {
           CommonLog.lError(`tool enable failed:${msg}`, {
             at: 'ClsScrewTool.Disable',
-            tool_sn: this.SerialNumber,
+            tool_sn: this.serialNumber,
             enable: false
           });
           return false;
@@ -97,11 +97,11 @@ class ClsScrewTool extends Device {
 
   * ToggleEnable(): Saga<void> {
     try {
-      const { result, msg } = yield call(toolEnableApi, this.SerialNumber, !this.isEnable);
+      const { result, msg } = yield call(toolEnableApi, this.serialNumber, !this.isEnable);
       if (result !== 0) {
         CommonLog.lError(`tool enable failed:${msg}`, {
           at: 'ClsScrewTool.ToggleEnable',
-          tool_sn: this.SerialNumber,
+          tool_sn: this.serialNumber,
           enable: !this.isEnable
         });
         return false;

@@ -1,12 +1,12 @@
 // @flow
 
 import { takeLatest, put, select } from 'redux-saga/effects';
-
+import type { Saga } from 'redux-saga';
 import { CONNECTION } from '../connections/action';
 import { RUSH } from '../rush/action';
 import { RFID } from '../rfid/action';
 import { SYSTEM_INIT } from './action';
-import { setLedStatusReady, setModBusIO } from '../io/saga';
+// import { setLedStatusReady, setModBusIO } from '../io/saga';
 
 import { setNewNotification } from '../notification/action';
 import { initIO } from '../io/action';
@@ -77,7 +77,7 @@ function* sysInit(action) {
 //   }
 // }
 
-export default function* sysInitFlow() {
+export default function* sysInitFlow(): Saga<void> {
   try {
     yield takeLatest(SYSTEM_INIT, sysInit);
     // yield call(fetchConnectionFlow);
