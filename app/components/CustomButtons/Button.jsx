@@ -44,7 +44,7 @@ function RegularButton(props) {
     [className]: className
   });
   return (
-    <Button {...rest} className={btnClasses}>
+    <Button className={btnClasses} {...rest}>
       {children}
     </Button>
   );

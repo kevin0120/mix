@@ -19,10 +19,10 @@ export type tInput = {
   time: Date
 };
 
-export interface AnyAction extends Action {
+export type AnyAction = Action & {
   // eslint-disable-next-line flowtype/no-weak-types
   [extraProps: string]: any
-}
+};
 
 
 type tDeviceNewData = {
@@ -50,6 +50,12 @@ class CommonExternalEntity implements IHealthChecker {
 
   constructor(name: string) {
     this.#name = name;
+
+    /* eslint-disable flowtype/no-weak-types */
+    (this: any).Enable = this.Enable.bind(this);
+    (this: any).Disable = this.Disable.bind(this);
+    (this: any).ToggleEnable = this.ToggleEnable.bind(this);
+    /* eslint-enable flowtype/no-weak-types */
   }
 
   set Healthz(isHealthz: boolean) {

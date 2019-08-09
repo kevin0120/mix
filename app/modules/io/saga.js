@@ -14,7 +14,7 @@ import {
 import type { Saga } from 'redux-saga';
 // actions
 import { OPERATION_STATUS } from '../operation/model';
-import { IOACTION } from './action';
+import { IO_ACTION } from './action';
 import { operationBypassIO } from '../operation/action';
 
 // reducers
@@ -74,15 +74,13 @@ function* ioInputHandler(action: tCommonActionType & tDeviceNewData): Saga<void>
 export default function* watchIOEvent(): Saga<void> {
   try {
     while (true) {
-      const action: AnyAction = yield take([IOACTION.RESET, IOACTION.DATA_ONCHANGE]);
+      const action: AnyAction = yield take([IO_ACTION.RESET, IO_ACTION.DATA_ONCHANGE]);
       switch (action.type) {
-        case IOACTION.DATA_ONCHANGE: {
-          // const { data } = action;
-          // yield call(handleIOFunction, data);
+        case IO_ACTION.DATA_ONCHANGE: {
           yield fork(ioInputHandler, action);
           break;
         }
-        // case IOACTION.RESET: {
+        // case IO_ACTION.RESET: {
         //   yield fork(resetIO, action.modbusConfig);
         //   break;
         // }

@@ -18,6 +18,7 @@
   },
   "rules": {
     "arrow-parens": ["off"],
+    "no-underscore-dangle": ["off"],
     "compat/compat": "error",
     "consistent-return": "off",
     "comma-dangle": "off",

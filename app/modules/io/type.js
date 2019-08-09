@@ -74,6 +74,7 @@ export type tIOListener = {
   port: tIOPort,
   triggerMode: tIOTriggerMode,
   
+  // eslint-disable-next-line flowtype/no-weak-types
   dispatcher: (...args: any) => AnyAction
 };
 

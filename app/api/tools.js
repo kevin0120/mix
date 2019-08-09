@@ -1,26 +1,36 @@
-/*
- * Copyright (c) 2018. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
- * Morbi non lorem porttitor neque feugiat blandit. Ut vitae ipsum eget quam lacinia accumsan.
- * Etiam sed turpis ac ipsum condimentum fringilla. Maecenas magna.
- * Proin dapibus sapien vel ante. Aliquam erat volutpat. Pellentesque sagittis ligula eget metus.
- * Vestibulum commodo. Ut rhoncus gravida arcu.
- */
-
 // @flow
 
-import { defaultClient } from '../common/utils';
-import { lError } from '../logger';
+import { call, delay, race } from '@redux-saga/core/effects';
+import type { Saga } from 'redux-saga';
+import { CommonLog } from '../common/utils';
+import rushSendMessage from '../modules/rush/sendMessage';
 
-// eslint-disable-next-line import/prefer-default-export
-export const apiToolEnable = (fullUrl, data) =>
-  defaultClient
-    .put(fullUrl, data)
-    .then(resp => resp)
-    .catch(e => {
-      lError(e.toString(), {
-        at: 'apiToolEnable',
-        response:
-          e.response && e.response.data && JSON.stringify(e.response.data)
-      });
-      throw e.toString();
+
+const timeout = 3000;
+
+export function* toolEnableApi(toolSN: string, enable: boolean): Saga<void> {
+  try {
+    const { resp, timeout: tOut } = yield race({
+      resp: call(rushSendMessage, {
+        type: 'WS_TOOL_ENABLE',
+        data: {
+          tool_sn: toolSN,
+          enable
+        }
+      }),
+      timeout: delay(timeout)
     });
+    if (tOut) {
+      return {
+        result: -1,
+        msg: 'toolEnableApi timeout'
+      };
+    }
+    const { data } = resp;
+    return data;
+  } catch (e) {
+    CommonLog.lError(e, {
+      at: 'toolEnableApi', toolSN, enable
+    });
+  }
+}

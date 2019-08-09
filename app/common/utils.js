@@ -160,6 +160,9 @@ export type CommonLogLvl = 'Warn' | 'Info' | 'Error' | 'Debug' | 'Maintenance';
 
 // eslint-disable-next-line flowtype/no-weak-types
 type tCommonLogMeta = Object;
+
+/* eslint-disable prefer-rest-params */
+/* eslint-disable no-unused-vars */
 export const CommonLog = {
   Info(msg: string, meta: ?tCommonLogMeta) {
     _logger('Info', ...arguments);
@@ -181,6 +184,9 @@ export const CommonLog = {
     _logger('Error', ...arguments);
   }
 };
+/* eslint-enable prefer-rest-params */
+/* eslint-enable no-unused-vars */
+
 
 const fn = {
   Error: console.error,
@@ -192,7 +198,7 @@ const fn = {
 
 const fnAlways = {
   Error: (rest) => {
-    if(rest){
+    if (rest) {
       if (typeof rest[0] === 'string') {
         lError(...rest);
       }
@@ -223,7 +229,7 @@ export const timeCost = (times: Array<Date>) =>
       idx % 2 === 0 ? total - currentTime : total - (0 - currentTime), 0);
 
 
-export const formatTime = (t) => `${t}`.length <= 2 ? `00${t}`.slice(-2) : t;
+export const formatTime = (t: number) => `${t}`.length <= 2 ? `00${t}`.slice(-2) : t;
 
 export function durationString(duration: DurationInputArg1): string {
   const h = moment.duration(duration).hours();

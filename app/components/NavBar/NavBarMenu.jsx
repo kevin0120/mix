@@ -15,7 +15,6 @@ function NavBarMenu({ statusOK, title, contents }) {
 
   return (
     <React.Fragment>
-
         <Button
           variant="contained"
           onClick={e => setShowMenu(e.currentTarget)}

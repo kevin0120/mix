@@ -1,3 +1,4 @@
+/* eslint-disable no-empty-function */
 import { put, fork } from 'redux-saga/effects';
 import type { tBarcode, tReader, tRushWebSocketData, tWebSocketEvent } from './type';
 import { WEBSOCKET_EVENTS as wse } from './type';
@@ -46,7 +47,6 @@ const rushDataHandlers = {
   * [wse.io](data: tRushWebSocketData) {
     try {
       const msgType = (data.type: tIOWSMsgType);
-      console.log('rush io', data);
       switch (msgType) {
         case 'WS_IO_CONTACT':
           yield put(onchangeIO({
@@ -56,7 +56,7 @@ const rushDataHandlers = {
           }));
           break;
         case 'WS_IO_STATUS':
-
+          console.log(data);
           break;
         default:
           CommonLog.lError('IO Message Type Is Not Defined', { msgType });

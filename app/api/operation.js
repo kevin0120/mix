@@ -1,5 +1,3 @@
-// @flow
-
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import isURL from 'validator/lib/isURL';

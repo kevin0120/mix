@@ -1,10 +1,14 @@
+// @flow
 import { call, delay, race } from 'redux-saga/effects';
+import type { Saga } from 'redux-saga';
 import { CommonLog } from '../common/utils';
 import rushSendMessage from '../modules/rush/sendMessage';
 
 const timeout = 10000;
 
-export function* ioSetApi(sn,index,status) {
+type tIOSn = string;
+
+export function* ioSetApi(sn: tIOSn, index: number, status: string): Saga<void> {
   try {
     const { resp, timeout: tOut } = yield race({
       resp: call(rushSendMessage, {
@@ -18,21 +22,21 @@ export function* ioSetApi(sn,index,status) {
       timeout: delay(timeout)
     });
     if (tOut) {
-      return{
-        result:-1,
-        msg:'ioSetApi timeout'
+      return {
+        result: -1,
+        msg: 'ioSetApi timeout'
       };
     }
     const { data } = resp;
     return data;
   } catch (e) {
     CommonLog.lError(e, {
-      at: 'psetApi',
+      at: 'psetApi'
     });
   }
 }
 
-export function* ioContactApi(sn){
+export function* ioContactApi(sn: tIOSn): Saga<void> {
   try {
     const { resp, timeout: tOut } = yield race({
       resp: call(rushSendMessage, {
@@ -44,21 +48,21 @@ export function* ioContactApi(sn){
       timeout: delay(timeout)
     });
     if (tOut) {
-      return{
-        result:-1,
-        msg:'ioContact timeout'
+      return {
+        result: -1,
+        msg: 'ioContact timeout'
       };
     }
     const { data } = resp;
     return data;
   } catch (e) {
     CommonLog.lError(e, {
-      at: 'psetApi',
+      at: 'psetApi'
     });
   }
 }
 
-export function* ioStatusApi(sn){
+export function* ioStatusApi(sn: tIOSn): Saga<void> {
   try {
     const { resp, timeout: tOut } = yield race({
       resp: call(rushSendMessage, {
@@ -70,16 +74,16 @@ export function* ioStatusApi(sn){
       timeout: delay(timeout)
     });
     if (tOut) {
-      return{
-        result:-1,
-        msg:'ioStatus timeout'
+      return {
+        result: -1,
+        msg: 'ioStatus timeout'
       };
     }
     const { data } = resp;
     return data;
   } catch (e) {
     CommonLog.lError(e, {
-      at: 'psetApi',
+      at: 'psetApi'
     });
   }
 }

@@ -44,7 +44,7 @@ const clock = {
   timeContent: {}
 };
 
-const avatar ={
+const avatar = {
   menuBtnWrapAvatar: {
     display: 'flex',
     width: '70px',
@@ -71,24 +71,32 @@ const languageMenu = {
   }
 };
 
-const NavBarMenu = theme=>({
+const NavBarMenu = theme => ({
   ...popoverStyles,
   menuStatusOK: {
-    background: `successColor`,
+    background: theme.palette.success.main,
     fontSize: '18px',
     '&,&:focus,&:hover': {
-      background: `successColor`,
+      background: theme.palette.success.main,
       fontSize: '18px'
     }
   },
   menuStatusFail: {
-    background: theme.palette.danger,
+    background: theme.palette.danger.main,
     fontSize: '18px',
-    animation: `${twinkling} 2s infinite cubic-bezier(1, 1, 1, 1)`,
+    animation: `$twinkling 2s infinite cubic-bezier(1,1,1,1)`,
     '&,&:focus,&:hover': {
-      background: theme.palette.danger,
+      background: theme.palette.danger.main,
       fontSize: '18px',
-      animation: `${twinkling} 2s infinite cubic-bezier(1, 1, 1, 1)`
+    }
+
+  },
+  '@keyframes twinkling': {
+    '0%': {
+      opacity: 0.1
+    },
+    '100%': {
+      opacity: 1
     }
   }
 });

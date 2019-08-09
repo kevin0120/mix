@@ -11,7 +11,8 @@ const ports = [];
 export default {
   * [STEP_STATUS.ENTERING](ORDER, orderActions) {
     try {
-      yield call([defaultIO, defaultIO.ioContact]);
+      yield call(defaultIO.ioContact);
+      // yield call(defaultIO.getStatus);
       const sPayload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
       const { items } = sPayload;
       items.forEach((i) => {

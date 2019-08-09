@@ -5,12 +5,12 @@ import { call } from 'redux-saga/effects';
 import Device from '../../common/type';
 import { symTool, AppendNewDevices } from '../global';
 import ClsController from '../controller/model';
-import type { tInputData } from '../../common/type';
+import type { AnyAction, tInputData } from '../../common/type';
 import screwStepAction from '../step/screwStep/action';
 import { CommonLog } from '../../common/utils';
-import { toolEnableApi } from '../../api/order';
+import { toolEnableApi } from '../../api/tools';
 
-export const defaultScrewToolDispatcher = (data: tInputData) => screwStepAction.result(data);
+export const defaultScrewToolDispatcher = (data: tInputData): AnyAction => screwStepAction.result(data);
 
 class ClsScrewTool extends Device {
 
@@ -22,6 +22,12 @@ class ClsScrewTool extends Device {
     super(name);
     this.SerialNumber = serialNumber;
     AppendNewDevices(symTool, this);
+    /* eslint-disable flowtype/no-weak-types */
+    (this: any).Enable = this.Enable.bind(this);
+    (this: any).Disable = this.Disable.bind(this);
+    (this: any).ToggleEnable = this.ToggleEnable.bind(this);
+    /* eslint-enable flowtype/no-weak-types */
+
   }
 
   doValidate(data: string | number): boolean {

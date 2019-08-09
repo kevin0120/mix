@@ -19,7 +19,7 @@ export default {
   },
   * [STEP_STATUS.DOING](ORDER, orderActions) {
     try {
-      yield call([scanner, scanner.Enable]);
+      yield call(scanner.Enable);
       while (true) {
         const action = yield take([
           SCANNER_STEP.GET_VALUE,
@@ -63,7 +63,7 @@ export default {
     } catch (e) {
       console.error(e);
     } finally {
-      yield call([scanner, scanner.Disable]);
+      yield call( scanner.Disable);
     }
   },
   * [STEP_STATUS.FINISHED](ORDER, orderActions) {

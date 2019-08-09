@@ -50,7 +50,7 @@ export default {
             yield put(orderActions.stepStatus(STEP_STATUS.FAIL));
           }
           if (isFirst) {
-            yield call([staticScrewTool, staticScrewTool.Enable]);
+            yield call(staticScrewTool.Enable);
           }
           isFirst = false;
         }
@@ -60,7 +60,7 @@ export default {
     } catch (e) {
       CommonLog.lError(e, { at: 'screwStep DOING' });
     } finally {
-      yield call([staticScrewTool, staticScrewTool.Disable]);
+      yield call(staticScrewTool.Disable);
     }
   },
 

@@ -16,7 +16,7 @@ function materialStep(props: Props & tStepProps) {
   const { payload, description } = step;
   useEffect(() => {
     bindAction(
-      isCurrent ? <Button onClick={() => ready()}>
+      isCurrent ? <Button onClick={() => ready()} color="primary">
         ready
       </Button> : null
     );
@@ -24,7 +24,7 @@ function materialStep(props: Props & tStepProps) {
         <React.Fragment>
           <Typography variant="h5">{description}</Typography>
           {(payload?.items || []).map(i =>
-            <Typography  variant="body1">{i.name}</Typography>
+            <Typography key={i.name} variant="body1">{i.name}</Typography>
           )}
         </React.Fragment>
     );

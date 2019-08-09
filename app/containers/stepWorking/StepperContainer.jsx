@@ -104,7 +104,7 @@ const StepperContainer = ({
             <StepContent>
               <Timer step={s}/>
               {(Object.keys(s.info) || []).map(k => (
-                <div className={classes.infoRow}>
+                <div className={classes.infoRow} key={k}>
                   <Typography variant="body1">{k || ''}</Typography>
                   <Typography variant="body1">{s.info[k] || ''}</Typography>
                 </div>
