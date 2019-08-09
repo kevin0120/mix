@@ -30,7 +30,7 @@ const statusMap = classes => ({
 function StepWorking({ status, name }: Props) {
   const classes = makeStyles(styles.layout)();
   const [action, bindAction] = useState(null);
-
+  const [description, bindDescription] = useState(null);
   return (
     <I18n ns="translations">
       {t => (
@@ -49,12 +49,15 @@ function StepWorking({ status, name }: Props) {
           </Paper>
           <div className={classes.main}>
             <Paper square classes={{ root: classes.leftContainer }}>
-              <ButtonsContainer action={action} />
-              <StepPageContainer bindAction={bindAction} />
+              <ButtonsContainer action={action}/>
+              <StepPageContainer
+                bindAction={bindAction}
+                bindDescription={bindDescription}
+                description={description}/>
             </Paper>
             <div className={classes.rightContainer}>
               <Paper square className={classes.stepperContainer}>
-                <StepperContainer />
+                <StepperContainer/>
               </Paper>
             </div>
           </div>

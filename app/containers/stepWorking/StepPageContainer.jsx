@@ -3,6 +3,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { makeStyles, Paper, Grid, Typography } from '@material-ui/core';
 import { InfoOutlined } from '@material-ui/icons';
+import PropTypes from 'prop-types';
+import clsx from 'clsx';
 import stepTypes from '../steps/stepTypes';
 import * as oSel from '../../modules/order/selector';
 import styles from './styles';
@@ -24,16 +26,20 @@ const mapDispatch = {};
 type Props = {
   step: tStep,
   workingStep: tStep,
-  bindAction: Function,
-  timeLine: Array<any>
+  bindAction: (PropTypes.Element)=>mixed,
+  timeLine: Array<any>,
+  bindDescription: (PropTypes.Element)=>mixed,
+  description: PropTypes.Element
 };
 
 const StepPageContainer = ({
-  step,
-  workingStep,
-  bindAction,
-  timeLine
-}: Props) => {
+                             step,
+                             workingStep,
+                             bindAction,
+                             timeLine,
+                             description,
+                             bindDescription
+                           }: Props) => {
   const classes = makeStyles(styles.stepPageContainer)();
   if (stepTypes?.[step?.type]?.component) {
     const StepComponent = stepTypes[step.type].component;
@@ -48,9 +54,10 @@ const StepPageContainer = ({
                   step={step}
                   isCurrent={step === workingStep}
                   bindAction={bindAction}
+                  bindDescription={bindDescription}
                 />
               )) ||
-                null}
+              null}
             </Paper>
           </Grid>
         </Grid>
@@ -61,9 +68,11 @@ const StepPageContainer = ({
           className={classes.right}
           direction="column"
         >
-          <Grid item className={classes.description}>
-            <Paper square className={classes.Paper}>
-              <Typography>{step.description}</Typography>
+          <Grid item className={classes.descriptionContainer}>
+            <Paper square className={clsx(classes.Paper, classes.Description)}>
+              {
+                description || <Typography variant="h5">{step.description}</Typography>
+              }
             </Paper>
           </Grid>
           <Grid item className={classes.result}>

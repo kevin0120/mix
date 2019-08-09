@@ -80,7 +80,7 @@ function* showOverview(order: tOrder) {
           idx + 1,
           s.name,
           s.type,
-          s.info
+          s.description
         ])) ||
       [];
     if (WIPOrder === order) {

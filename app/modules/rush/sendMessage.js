@@ -39,7 +39,7 @@ export default function* rushSendMessage(data: Object): Saga<void> {
         sn,
         ...data
       };
-      console.log(msg);
+      // console.log(msg);
       ws.sendJson(msg, (err )=> {
         messageSNs[sn] = true;
         if (err && ws) {

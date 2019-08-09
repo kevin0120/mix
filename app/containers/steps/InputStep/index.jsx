@@ -4,8 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import Button from '../../../components/CustomButtons/Button';
 import { inputStepActions } from '../../../modules/step/inputStep/action';
-import { StepContent } from '../types';
 import { stepPayload, viewingStep } from '../../../modules/order/selector';
+import type { tStepProps } from '../types';
 
 const mapState = (state, props) => ({
   ...props,
@@ -28,7 +28,7 @@ function InputStep({
                      isCurrent,
                      submit,
                      bindAction
-                   }: Props | StepContent) {
+                   }: Props & tStepProps) {
   const [value, setValue] = useState('');
 
   useEffect(

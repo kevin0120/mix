@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { Typography } from '@material-ui/core';
 import Button from '../../../components/CustomButtons/Button';
 import { instructionStepActions } from '../../../modules/step/instructionStep/action';
-import { StepContent } from '../types';
+import { tStepProps } from '../types';
 import { stepPayload, viewingStep } from '../../../modules/order/selector';
 
 const mapState = (state, props) => ({
@@ -19,7 +19,7 @@ type Props = {
   submit: () => {}
 };
 
-function InstructionStep({ step, isCurrent, submit, bindAction, instruction }: Props | StepContent) {
+function InstructionStep({ step, isCurrent, submit, bindAction, instruction }: Props & tStepProps) {
 
   useEffect(() => {
     bindAction(

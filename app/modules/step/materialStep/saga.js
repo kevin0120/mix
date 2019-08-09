@@ -1,41 +1,50 @@
-import { put, take, call } from 'redux-saga/effects';
+import { put, take, call, select } from 'redux-saga/effects';
 import STEP_STATUS from '../model';
 import actions, { MATERIAL_STEP } from './action';
 import { defaultIO } from '../../io/saga';
 import { ioTriggerMode, ioDirection } from '../../io/type';
+import { stepPayload, workingOrder, workingStep } from '../../order/selector';
+import { CommonLog } from '../../../common/utils';
+
+const ports = [];
 
 export default {
   * [STEP_STATUS.ENTERING](ORDER, orderActions) {
     try {
       yield call([defaultIO, defaultIO.ioContact]);
+      const sPayload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
+      const { items } = sPayload;
+      items.forEach((i) => {
+        ports.push(defaultIO.getPort(ioDirection.output, i.index));
+      });
+      yield call(defaultIO.openIO, ports);
       yield put(orderActions.stepStatus(STEP_STATUS.DOING));
     } catch (e) {
-      console.error(e);
+      CommonLog.lError(e);
     }
   },
   * [STEP_STATUS.DOING](ORDER, orderActions) {
     try {
-      const port = defaultIO.getPort(ioDirection.input, 4);
+      const sPayload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
+      const inputPort = defaultIO.getPort(ioDirection.input, sPayload?.confirmIO);
       const ioListener = defaultIO.addListener(
-        port,
+        inputPort,
         ioTriggerMode.falling,
         actions.ioInput
       );
-      // while(true){
-        const input = yield take(MATERIAL_STEP.IO_INPUT);
-        console.log('get input!!',input);
-      // }
+      yield take(MATERIAL_STEP.READY);
       defaultIO.removeListener(ioListener);
       yield put(orderActions.stepStatus(STEP_STATUS.FINISHED));
     } catch (e) {
-      console.error(e);
+      CommonLog.lError(e);
     }
   },
   * [STEP_STATUS.FINISHED](ORDER, orderActions) {
     try {
+      yield call(defaultIO.closeIO, ports);
       yield put(orderActions.doNextStep());
     } catch (e) {
-      console.error(e);
+      CommonLog.lError(e);
     }
   }
 };

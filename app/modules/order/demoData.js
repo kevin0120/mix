@@ -12,16 +12,31 @@ export const demoOrder = {
   steps: [
     {
       name: '获取物料',
-      info: 'fetch the following material',
+      info: {
+        time:'00:02:00'
+      },
       description: '获取下列物料',
       type: 'material',
       skippable: true,
       data: {},
-      payload: {}
+      payload: {
+        items: [
+          {
+            name: 'test1',
+            index: 0
+          }, {
+            name: 'test2',
+            index: 2
+          }
+        ],
+        confirmIO:4
+      }
     },
     {
       name: '拧紧作业指导 pset',
-      info: 'this is an screw step',
+      info: {
+        time:'00:02:00'
+      },
       type: 'screw',
       skippable: false,
       undoable: true,
@@ -79,7 +94,9 @@ export const demoOrder = {
       }
     }, {
       name: '拧紧作业指导 job',
-      info: 'this is an screw step',
+      info: {
+        time:'00:02:00'
+      },
       type: 'screw',
       skippable: false,
       undoable: true,
@@ -129,7 +146,9 @@ export const demoOrder = {
     },
     {
       name: '扫码',
-      info: 'this step is skippable',
+      info: {
+        time:'00:02:00'
+      },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
@@ -138,10 +157,11 @@ export const demoOrder = {
         label: 'name'
       }
     },
-
     {
       name: '扫码',
-      info: 'this step is skippable',
+      info: {
+        time:'00:02:00'
+      },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
@@ -155,13 +175,15 @@ export const demoOrder = {
 
 export const demoOrderLong = {
   name: 'Long Demo Order',
-  info: 'this demo order is long!',
+  info:     'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
   type: 'step',
   status: ORDER_STATUS.TODO,
   steps: [
     {
       name: '拧紧作业指导',
-      info: 'this is an screw step',
+      info: {
+        time:'00:02:00'
+      },
       type: 'screw',
       skippable: false,
       undoable: true,
@@ -200,7 +222,9 @@ export const demoOrderLong = {
     },
     {
       name: '扫码',
-      info: 'this step is skippable',
+      info: {
+        time:'00:02:00'
+      },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
@@ -211,7 +235,9 @@ export const demoOrderLong = {
     },
     {
       name: '扫码',
-      info: 'this step is skippable',
+      info: {
+        time:'00:02:00'
+      },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
@@ -222,7 +248,9 @@ export const demoOrderLong = {
     },
     {
       name: '扫码',
-      info: 'this step is skippable',
+      info: {
+        time:'00:02:00'
+      },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
@@ -233,7 +261,9 @@ export const demoOrderLong = {
     },
     {
       name: '扫码',
-      info: 'this step is skippable',
+      info: {
+        time:'00:02:00'
+      },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
@@ -244,7 +274,9 @@ export const demoOrderLong = {
     },
     {
       name: '扫码',
-      info: 'this step is skippable',
+      info: {
+        time:'00:02:00'
+      },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
@@ -255,7 +287,9 @@ export const demoOrderLong = {
     },
     {
       name: '扫码',
-      info: 'this step is skippable',
+      info: {
+        time:'00:02:00'
+      },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
@@ -266,7 +300,9 @@ export const demoOrderLong = {
     },
     {
       name: '扫码',
-      info: 'this step is skippable',
+      info: {
+        time:'00:02:00'
+      },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
@@ -277,7 +313,9 @@ export const demoOrderLong = {
     },
     {
       name: '扫码',
-      info: 'this step is skippable',
+      info: {
+        time:'00:02:00'
+      },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
@@ -288,7 +326,9 @@ export const demoOrderLong = {
     },
     {
       name: '扫码',
-      info: 'this step is skippable',
+      info: {
+        time:'00:02:00'
+      },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
@@ -299,7 +339,9 @@ export const demoOrderLong = {
     },
     {
       name: '扫码',
-      info: 'this step is skippable',
+      info: {
+        time:'00:02:00'
+      },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
@@ -310,7 +352,9 @@ export const demoOrderLong = {
     },
     {
       name: '扫码',
-      info: 'this step is skippable',
+      info: {
+        time:'00:02:00'
+      },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
@@ -321,7 +365,9 @@ export const demoOrderLong = {
     },
     {
       name: '扫码',
-      info: 'this step is skippable',
+      info: {
+        time:'00:02:00'
+      },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
@@ -332,7 +378,9 @@ export const demoOrderLong = {
     },
     {
       name: '扫码',
-      info: 'this step is skippable',
+      info: {
+        time:'00:02:00'
+      },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
@@ -343,7 +391,9 @@ export const demoOrderLong = {
     },
     {
       name: '扫码',
-      info: 'this step is skippable',
+      info: {
+        time:'00:02:00'
+      },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
@@ -354,7 +404,9 @@ export const demoOrderLong = {
     },
     {
       name: '扫码',
-      info: 'this step is skippable',
+      info: {
+        time:'00:02:00'
+      },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
@@ -365,7 +417,9 @@ export const demoOrderLong = {
     },
     {
       name: '扫码',
-      info: 'this step is skippable',
+      info: {
+        time:'00:02:00'
+      },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
@@ -376,7 +430,9 @@ export const demoOrderLong = {
     },
     {
       name: '扫码',
-      info: 'this step is skippable',
+      info: {
+        time:'00:02:00'
+      },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
@@ -387,7 +443,9 @@ export const demoOrderLong = {
     },
     {
       name: '扫码',
-      info: 'this step is skippable',
+      info: {
+        time:'00:02:00'
+      },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
@@ -398,7 +456,9 @@ export const demoOrderLong = {
     },
     {
       name: '扫码',
-      info: 'this step is skippable',
+      info: {
+        time:'00:02:00'
+      },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
@@ -419,7 +479,9 @@ export const demoOrderCancel = {
   steps: [
     {
       name: '姓名',
-      info: 'this step does one checking',
+      info: {
+        time:'00:02:00'
+      },
       type: 'input',
       skippable: true,
       revocable: true,
@@ -440,7 +502,9 @@ export const demoOrderPending = {
   steps: [
     {
       name: '姓名',
-      info: 'this step does one checking',
+      info: {
+        time:'00:02:00'
+      },
       type: 'input',
 
       skippable: true,
@@ -455,14 +519,15 @@ export const demoOrderPending = {
 
 export const demoOrderDone = {
   name: 'fill info',
-  info:
-    'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
+  info:     'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
   type: 'step',
   status: ORDER_STATUS.DONE,
   steps: [
     {
       name: '姓名',
-      info: 'this step does one checking',
+      info: {
+        time:'00:02:00'
+      },
       type: 'input',
       skippable: true,
       revocable: true,
@@ -474,45 +539,3 @@ export const demoOrderDone = {
   ]
 };
 
-export const demoOrder2 = {
-  name: '扫码触发 拧紧作业',
-  type: 'screw',
-  steps: [
-    {
-      name: '扫码',
-      steps: [
-        [
-          {
-            name: 'carID',
-            type: 'scanner',
-            payload: {}
-          },
-          {
-            name: 'CarType',
-            type: 'scanner',
-            payload: {}
-          }
-        ]
-      ]
-    },
-    {
-      name: '获取作业',
-      type: 'getOperation',
-      payload: {
-        keys: ['carID', 'carType']
-      }
-    },
-    {
-      name: '进行作业',
-      type: 'doScrew',
-      payload: {}
-    },
-    {
-      name: '显示结果',
-      type: 'showResult',
-      payload: {
-        keys: []
-      }
-    }
-  ]
-};

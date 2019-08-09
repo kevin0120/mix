@@ -1,10 +1,9 @@
 // @flow
-
 import { isNil, remove } from 'lodash-es';
 import Device from '../../common/type';
 import type { AnyAction } from '../../common/type';
 import type { Saga } from 'redux-saga';
-import { call } from 'redux-saga/effects';
+import { call, fork } from 'redux-saga/effects';
 import type {
   tIOContact,
   tIOData,
@@ -80,19 +79,9 @@ export default class ClsIOModule extends Device {
       CommonLog.lError(`IO Data Must Be String!!!!`);
       return;
     }
-    // [...contact].forEach((val, idx) => {
-    //   this.#_data[direction][idx].data = ClsIOModule.bitString2Boolean(val);
-    // });
     this.#_data[direction] = contact;
   }
 
-  // static _getTriggerMode(old: boolean, last: boolean, mode: tIOTriggerMode): ?tIOTriggerMode {
-  //   let ret = mode;
-  //   if (old === last) {
-  //     return null;
-  //   }
-  //   return ret;
-  // }
   get serialNumber() {
     return this.#serialNumber;
   }
@@ -136,18 +125,6 @@ export default class ClsIOModule extends Device {
           });
         }
       }
-
-      // const e: iIODataField = this.#_data[direction]?.[idx];
-      // if (isNil(e)) {
-      //   // TODO: 未定义以默认方式进行
-      // } else {
-      //   const old = e.data;
-      //   const last = ClsIOModule.bitString2Boolean(val);
-      //   const mode = ClsIOModule._getTriggerMode(old, last, e.triggerMode);
-      //   if (!isNil(mode)) {
-      //     this._doIODispatch(e, ...actionParams);
-      //   }
-      // }
     });
 
     return changes;
@@ -174,14 +151,6 @@ export default class ClsIOModule extends Device {
     }));
   }
 
-  // setIOAction(idx: number, ioType: tIODirection, action: (...args: any) => AnyAction): boolean {
-  //   if (!this._checkValidateIdx(idx, ioType)) {
-  //     return false;
-  //   }
-  //   this.#_data[ioType][idx].action = action;
-  //   return true;
-  // }
-
   set dispatcher(dispatcher: null | (...args: any) => AnyAction) {
     super.dispatcher = null; // 永远设置的是null
   }
@@ -195,23 +164,38 @@ export default class ClsIOModule extends Device {
     return this._doHandleIOData(newData);
   }
 
-  // _doIODispatch(ele: iIODataField, ...actionParams: any): ?AnyAction {
-  //   return ele.action(...actionParams);
-  // }
-
-  * setIO(port: tIOPort, value: boolean): Saga<void> {
-    // TODO: handle set io
+  setIO=function*(port: tIOPort, value: boolean): Saga<void> {
     const status = value ? 1 : 0;
     yield call(ioSetApi, this.serialNumber, port.idx, status);
-  }
+  }.bind(this);
 
-  * getStatus(): Saga<void> {
+  openIO=function*(port: tIOPort | Array<tIOPort>): Saga<void> {
+    if (port instanceof Array) {
+      for (const p of port) {
+        yield fork(ioSetApi, this.serialNumber, p.idx, 1);
+      }
+    } else {
+      yield call(ioSetApi, this.serialNumber, port.idx, 1);
+    }
+  }.bind(this);
+
+  closeIO=function* (port: tIOPort | Array<tIOPort>): Saga<void> {
+    if (port instanceof Array) {
+      for (const p of port) {
+        yield fork(ioSetApi, this.serialNumber, p.idx, 0);
+      }
+    } else {
+      yield call(ioSetApi, this.serialNumber, port.idx, 0);
+    }
+  }.bind(this);
+
+  getStatus=function*(): Saga<void> {
     yield call(ioStatusApi, this.serialNumber);
-  }
+  }.bind(this);
 
-  * ioContact(): Saga<void> {
+  ioContact=function*(): Saga<void> {
     yield call(ioContactApi, this.serialNumber);
-  }
+  }.bind(this);
 
   addListener(port: tIOPort, triggerMode: tIOTriggerMode, dispatcher: (...args: any) => AnyAction) {
     const listener = {

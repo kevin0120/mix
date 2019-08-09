@@ -1,17 +1,10 @@
 // @flow
 import React, { useEffect, useState } from 'react';
-import { connect } from 'react-redux';
 import { Typography } from '@material-ui/core';
 import { durationString, timeCost } from '../../common/utils';
 import * as orderSelectors from '../../modules/order/selector';
 import type { tStep } from '../../modules/order/model';
 
-// const mapState = (state, props) => ({
-//   ...props,
-//   step: orderSelectors.workingStep(orderSelectors.workingOrder(state.order)) || {},
-// });
-//
-// const mapDispatch = {};
 
 type Props = {
   step: tStep
@@ -35,5 +28,3 @@ export default function Timer({ step }: Props) {
     {durationString(duration)}
   </Typography>;
 }
-
-// export default connect(mapState, mapDispatch)(Timer);

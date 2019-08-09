@@ -1,10 +1,10 @@
 export const MATERIAL_STEP = {
-  IO_INPUT: 'MATERIAL_STEP_IO_INPUT'
+  READY: 'MATERIAL_STEP_READY'
 };
 
 export default {
-  ioInput: (input) => ({
-    type: MATERIAL_STEP.IO_INPUT,
+  ready: (input) => ({
+    type: MATERIAL_STEP.READY,
     input
   })
 };

@@ -45,7 +45,7 @@ function ScannerStep({
   label,
   getValue,
   result
-}: Props | StepContent) {
+}: Props & StepContent) {
   const classes = makeStyles(styles)();
   useEffect(() => {
     bindAction(
@@ -55,12 +55,6 @@ function ScannerStep({
     );
     return () => bindAction(null);
   }, [bindAction, isCurrent, step, submit]);
-
-  // useEffect(() => {
-  //   scanner.Enable();
-  //   return () => scanner.Disable();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
 
   return (
     <div className={classes.root}>

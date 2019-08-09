@@ -50,7 +50,7 @@ interface tStepPayload {
 
 export type tStep = {
   +name: string,
-  info: string,
+  info: Object,
   status: tStepStatus,
   +type: tStepType, // check,collect,instruct,enable,...
   payload: tStepPayload, // 工步的数据

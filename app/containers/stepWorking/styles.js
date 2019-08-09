@@ -64,27 +64,26 @@ const layout = (theme) => ({
     textAlign: 'center',
     padding: `0 ${theme.spacing(2)}px`,
     alignItems: 'center',
-
     backgroundColor: theme.palette.common.white
   },
-  orderStatus:{
-    marginRight:theme.spacing(1),
+  orderStatus: {
+    marginRight: theme.spacing(1)
   },
-  statusTodo:{
-    color:theme.palette.gray.main,
+  statusTodo: {
+    color: theme.palette.gray.main
   },
-  statusWIP:{
-    color:theme.palette.primary.main,
+  statusWIP: {
+    color: theme.palette.primary.main
   },
-  statusDone:{
-    color:theme.palette.success.main,
+  statusDone: {
+    color: theme.palette.success.main
   },
-  statusCancel:{
-    color:theme.palette.danger.main,
+  statusCancel: {
+    color: theme.palette.danger.main
   },
-  statusPending:{
-    color:theme.palette.warning.main,
-  },
+  statusPending: {
+    color: theme.palette.warning.main
+  }
 });
 
 const stepperContainer = theme => ({
@@ -115,7 +114,6 @@ const stepperContainer = theme => ({
   stepLabelRoot: {
     flex: 1,
     display: 'flex'
-
   },
   stepLabelContainer: {
     flex: 1,
@@ -127,8 +125,13 @@ const stepperContainer = theme => ({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between'
-  }
-
+  },
+  infoRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
 });
 
 const buttonsContainer = {
@@ -174,13 +177,19 @@ const stepPageContainer = {
     flex: 1,
     overflow: 'hidden'
   },
-  description: {
+  descriptionContainer: {
     flex: 1
   },
   Paper: {
     width: '100%',
     height: '100%',
-    padding: 6
+    padding: 'auto 6px'
+  },
+  Description: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   result: {
     flex: 2

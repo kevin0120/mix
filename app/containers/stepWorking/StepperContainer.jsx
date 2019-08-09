@@ -47,17 +47,17 @@ const StepperContainer = ({
                           }: StepperLayoutProps) => {
   const classes = makeStyles(styles.stepperContainer)();
 
-const viewingRef=useRef(null);
-
+  const viewingRef = useRef(null);
+  const viewingNode = viewingRef?.current;
   useEffect(() => {
-    if (viewingRef?.current) {
+    if (viewingNode) {
       // eslint-disable-next-line react/no-find-dom-node
-      const node = ReactDOM.findDOMNode(viewingRef.current);
+      const node = ReactDOM.findDOMNode(viewingNode);
       if (node) {
         node.scrollIntoView({ block: 'center', behavior: 'smooth' });
       }
     }
-  }, [viewingRef.current]);
+  }, [viewingNode]);
 
   return (
     <Stepper
@@ -79,10 +79,10 @@ const viewingRef=useRef(null);
           stepButtonProps.icon = <Loop className={classes.stepIconDoing}/>;
         }
 
-        if(s===viewingStep){
-          stepButtonProps.ref=viewingRef;
-        }else{
-          stepButtonProps.ref=null;
+        if (s === viewingStep) {
+          stepButtonProps.ref = viewingRef;
+        } else {
+          stepButtonProps.ref = null;
         }
 
         return (
@@ -92,17 +92,23 @@ const viewingRef=useRef(null);
               onClick={() => jumpTo(idx)}
               className={classes.stepButton}
               {...stepButtonProps}
-              ref={s===viewingStep? viewingRef:()=>{}}
+              ref={s === viewingStep ? viewingRef : () => {
+              }}
             >
               <StepLabel {...labelProps} >
                 <Typography variant="h6">
-                {s.name}
+                  {s.name}
                 </Typography>
               </StepLabel>
             </StepButton>
             <StepContent>
               <Timer step={s}/>
-              <Typography variant="body1">{s.info}</Typography>
+              {(Object.keys(s.info) || []).map(k => (
+                <div className={classes.infoRow}>
+                  <Typography variant="body1">{k || ''}</Typography>
+                  <Typography variant="body1">{s.info[k] || ''}</Typography>
+                </div>
+              ))}
             </StepContent>
           </Step>
         );
