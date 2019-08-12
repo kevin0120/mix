@@ -18,7 +18,7 @@ import Button from '../../components/CustomButtons/Button';
 import saveConfigs from '../../modules/setting/action';
 import { systemInit } from '../../modules/systemInit/action';
 
-import { toggleRFID } from '../../modules/rfid/action';
+import { toggleRFID } from '../../modules/external/device/rfid/action';
 
 import { sortObj, defaultClient } from '../../common/utils';
 import Test from './Test';

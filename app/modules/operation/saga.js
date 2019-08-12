@@ -16,7 +16,7 @@ import {
 } from './model';
 import { addNewStory, clearStories } from '../timeline/saga';
 import { STORY_TYPE } from '../timeline/model';
-import { toolEnable, toolDisable, TOOLS } from '../tools/action';
+// import { toolEnable, toolDisable, TOOLS } from '../external/device/tools/action';
 import { setResultDiagShow } from '../resultDiag/action';
 import {
   switch2Ready,

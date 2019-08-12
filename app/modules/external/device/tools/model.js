@@ -2,13 +2,13 @@
 
 import type { Saga } from 'redux-saga';
 import { call } from 'redux-saga/effects';
-import Device from '../../common/type';
+import Device from '../Device';
 import { symTool, AppendNewDevices } from '../global';
 import ClsController from '../controller/model';
-import type { AnyAction, tInputData } from '../../common/type';
-import screwStepAction from '../step/screwStep/action';
-import { CommonLog } from '../../common/utils';
-import { toolEnableApi } from '../../api/tools';
+import type { AnyAction, tInputData } from '../type';
+import screwStepAction from '../../../step/screwStep/action';
+import { CommonLog } from '../../../../common/utils';
+import { toolEnableApi } from '../../../../api/tools';
 
 export const defaultScrewToolDispatcher = (data: tInputData): AnyAction => screwStepAction.result(data);
 

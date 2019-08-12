@@ -7,7 +7,7 @@ import {
   workingOrder
 } from '../../order/selector';
 import STEP_STATUS from '../model';
-import { scanner } from '../../scanner/saga';
+import { scanner } from '../../external/device/scanner/saga';
 
 export default {
   * [STEP_STATUS.ENTERING](ORDER, orderActions) {

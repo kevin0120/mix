@@ -8,11 +8,11 @@ import { Info, Warn, lError, Maintenance } from '../../logger';
 import type { tNotifyVariant } from './action';
 import { CommonLog } from '../../common/utils';
 
-interface tNotifyFuncMap<t> {
-  [type: tNotifyVariant]: t
-}
+type tNotifyFuncMap ={
+  [type: tNotifyVariant]: (string | Error, string) => void
+};
 
-const notifyFuncMap: tNotifyFuncMap<(string | Error, string) => void> = {
+const notifyFuncMap: tNotifyFuncMap = {
   'Info': Info,
   'Warn': Warn,
   'Maintenance': Maintenance,

@@ -3,19 +3,14 @@
 import { take, fork, all, select } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 
-import watchController from './controller/saga';
 import sysInitFlow from './systemInit/saga';
-// import { operationFlow, watchResults } from './operation/saga';
-import watchIOEvent from './io/saga';
-import { toolFunctions } from './tools/saga';
 import user from './user/saga';
 import { watchAiis } from './aiis/saga';
 // import { watchSettingPreSave } from './setting/saga';
 import { watchRushEvent } from './rush/saga';
-import watchRFIDEvent from './rfid/saga';
+import watchRFIDEvent from './external/device/rfid/saga';
 import watchNotification from './notification/saga';
 import watchOperationViewer from './operationViewer/saga';
-// import logoFlow from './logo/saga';
 import watchNetwork from './network/saga';
 import watchBattery from './battery/saga';
 import watchPower from './power/saga';
@@ -35,14 +30,13 @@ export default function* rootSaga(): Saga<void> {
       watchNotification(),
       watchAiis(),
       watchRushEvent(),
-      toolFunctions(),
+
       user(),// auth
       // healthz
       // healthzCheckFlow(),
       // watchSettingPreSave(),
       sysInitFlow(),
       watchOperationViewer(),
-      // logoFlow(),
       watchNetwork(),
       watchBattery(),
       watchPower(),

@@ -1,8 +1,8 @@
 import { put, take, call, select } from 'redux-saga/effects';
 import STEP_STATUS from '../model';
 import actions, { MATERIAL_STEP } from './action';
-import { defaultIO } from '../../io/saga';
-import { ioTriggerMode, ioDirection } from '../../io/type';
+import { defaultIO } from '../../external/device/io/saga';
+import { ioTriggerMode, ioDirection } from '../../external/device/io/type';
 import { stepPayload, workingOrder, workingStep } from '../../order/selector';
 import { CommonLog } from '../../../common/utils';
 

@@ -18,7 +18,7 @@ import operationViewer from './operationViewer/reducer';
 import logo from './logo/reducer';
 import network from './network/reducer';
 import battery from './battery/reducer';
-import tools from './tools/reducer';
+// import tools from './external/device/tools/reducer';
 import order from './order/reducer';
 import dialog from './dialog/reducer';
 import Notifier from './Notifier/reducer';
@@ -59,7 +59,7 @@ export default function createRootReducer(history: {}) {
       logo,
       network,
       battery,
-      tools,
+      // tools,
       order,
       dialog,
       Notifier

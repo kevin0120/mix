@@ -1,6 +1,6 @@
 // @flow
 
-import Device from '../../common/type'
+import Device from '../Device'
 import { symController, AppendNewDevices } from '../global';
 
 

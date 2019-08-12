@@ -1,5 +1,5 @@
 // @flow
-import type { AnyAction } from '../../common/type';
+import type { AnyAction } from '../type';
 
 export const sOff = 0;
 export const sOn = 1;

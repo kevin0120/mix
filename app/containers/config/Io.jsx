@@ -21,10 +21,9 @@ import { bindActionCreators } from 'redux';
 import Button from '../../components/CustomButtons/Button';
 
 import saveConfigs from '../../modules/setting/action';
-import IO_FUNCTION from '../../modules/io/type';
+import IO_FUNCTION from '../../modules/external/device/io/type';
 
-import { testIO } from '../../modules/io/saga';
-import { resetIO } from '../../modules/io/action';
+import { testIO } from '../../modules/external/device/io/saga';
 
 import styles from './styles';
 import withKeyboard from '../../components/Keyboard';

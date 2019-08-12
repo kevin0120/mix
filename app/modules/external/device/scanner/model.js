@@ -1,9 +1,9 @@
 // @flow
 
-import Device from '../../common/type';
-import type { tInput } from '../../common/type';
-import { CommonLog } from '../../common/utils';
-import { scannerStepAction } from '../step/scannerStep/action';
+import Device from '../Device';
+import type { tInput } from '../type';
+import { CommonLog } from '../../../../common/utils';
+import { scannerStepAction } from '../../../step/scannerStep/action';
 
 export const defaultScannerDispatcher = (data: ?tInput) => scannerStepAction.getValue(data);
 

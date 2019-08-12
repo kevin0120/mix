@@ -4,19 +4,11 @@ import {
   call,
 } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
-// actions
-import { OPERATION_STATUS } from '../operation/model';
-import { IO_ACTION, onchangeIO } from './action';
-import { operationBypassIO } from '../operation/action';
-
 // reducers
 import ClsIOModule from './model';
-import type { AnyAction, tCommonActionType, tDeviceNewData } from '../../common/type';
 import IO_FUNCTION, { DefaultMaxInputs, DefaultMaxOutputs } from './type';
-import { CommonLog } from '../../common/utils';
-import { scanner } from '../scanner/saga';
-import type { tRushWebSocketData } from '../rush/type';
-import type { tIOWSMsgType } from './type';
+import { CommonLog } from '../../../../common/utils';
+import type { tRushWebSocketData } from '../../../rush/type';
 
 // config
 

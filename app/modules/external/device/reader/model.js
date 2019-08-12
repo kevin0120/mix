@@ -1,7 +1,7 @@
 // @flow
 
-import Device from '../../common/type';
-import { CommonLog } from '../../common/utils';
+import Device from '../Device';
+import { CommonLog } from '../../../../common/utils';
 
 // export const defaultReaderDispatcher = (data) => readerStepAction.getValue(data);
 

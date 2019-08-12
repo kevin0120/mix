@@ -12,7 +12,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
 import Slide from '@material-ui/core/Slide';
 
-import { ScannerNewData } from '../../modules/scanner/action';
+import { ScannerNewData } from '../../modules/external/device/scanner/action';
 
 import customSelectStyle from '../../common/jss/customSelectStyle';
 

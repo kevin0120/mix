@@ -3,7 +3,7 @@
 import configs from '../../shared/config';
 
 import { USER_CONFIGS } from './action';
-import { RFID } from '../rfid/action';
+import { RFID } from '../external/device/rfid/action';
 
 type actionType = {
   +type: string,

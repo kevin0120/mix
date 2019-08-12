@@ -5,7 +5,7 @@ import {
   setLedError,
   setLedStatusReady,
   sOn
-} from '../io/saga';
+} from '../external/device/io/saga';
 
 import sortObj from '../../common/utils';
 import { genReducers } from '../util';

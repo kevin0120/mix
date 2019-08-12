@@ -7,8 +7,8 @@ import {
 import type { Saga } from 'redux-saga';
 import ClsRFID from './model';
 import { RFID } from './action';
-import { CommonLog } from '../../common/utils';
-import type { tCommonActionType, tDeviceNewData } from '../../common/type';
+import { CommonLog } from '../../../../common/utils';
+import type { tCommonActionType, tDeviceNewData } from '../type';
 
 // eslint-disable-next-line prefer-const
 let Rfid = new ClsRFID('RFID');

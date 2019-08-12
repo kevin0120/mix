@@ -1,16 +1,14 @@
 /* eslint-disable no-empty-function */
 import { put, fork } from 'redux-saga/effects';
-import type { tBarcode, tReader, tRushWebSocketData, tWebSocketEvent } from './type';
+import type { tRushWebSocketData, tWebSocketEvent } from './type';
 import { WEBSOCKET_EVENTS as wse } from './type';
 import { setNewNotification } from '../notification/action';
 import { CommonLog } from '../../common/utils';
-import type { tIOContact, tIODirection, tIOWSMsgType } from '../io/type';
-import { onchangeIO } from '../io/action';
-import { toolNewResults, toolStatusChange } from '../tools/action';
+import { toolNewResults, toolStatusChange } from '../external/device/tools/saga';
 import rushActions from './action';
-import readerNewData from '../reader/saga';
-import scannerNewData from '../scanner/saga';
-import ioNewData from '../io/saga';
+import readerNewData from '../external/device/reader/saga';
+import scannerNewData from '../external/device/scanner/saga';
+import ioNewData from '../external/device/io/saga';
 
 export default function* (payload) {
   try {
@@ -45,16 +43,6 @@ const rushDataHandlers = {
   },
 
 
-  * [wse.result](data: tRushWebSocketData) {
-    try {
-      CommonLog.Info(` tool new results: ${data.data}`);
-      yield put(toolNewResults(data.data));
-    } catch (e) {
-      CommonLog.lError(e, { at: 'rush event result' });
-    }
-  },
-
-
   [wse.controller](data: tRushWebSocketData) {
     try {
     } catch (e) {
@@ -62,13 +50,6 @@ const rushDataHandlers = {
     }
   },
 
-  * [wse.tool](data: tRushWebSocketData) {
-    try {
-      yield put(toolStatusChange(data.tool_sn, data.status, data.reason));
-    } catch (e) {
-      CommonLog.lError(e, { at: 'rush event tool' });
-    }
-  },
 
   * [wse.tightening_device](data: tRushWebSocketData) {
     try {
@@ -89,5 +70,10 @@ const rushDataHandlers = {
 
   [wse.scanner]: scannerNewData,
 
-  [wse.reader]: readerNewData
+  [wse.reader]: readerNewData,
+
+  [wse.result]: toolNewResults,
+
+  [wse.tool]: toolStatusChange
+
 };

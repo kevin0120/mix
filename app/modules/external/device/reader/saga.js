@@ -2,19 +2,16 @@
 
 import { call, takeLatest } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
-import { READER } from './action';
 import ClsReader from './model';
-import type { tCommonActionType, tDeviceNewData } from '../../common/type';
-import { CommonLog } from '../../common/utils';
+import { CommonLog } from '../../../../common/utils';
 import { symReader, AppendNewDevices } from '../global';
-import type { tRushWebSocketData } from '../rush/type';
+import type { tRushWebSocketData } from '../../../rush/type';
 import type { tReaderData } from './model';
 
 
 export const reader = new ClsReader(symReader);
 AppendNewDevices(symReader, reader);
 // TODO: 收到读卡器uid后，分发给user模块进行用户认证
-// reader.dispatcher = defaultReaderDispatcher;
 
 
 export default function* readerNewData(data: tRushWebSocketData): Saga<void> {

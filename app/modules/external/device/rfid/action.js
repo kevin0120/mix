@@ -1,4 +1,4 @@
-import type { tCommonActionType, tDeviceNewData } from '../../common/type';
+import type { tCommonActionType, tDeviceNewData } from '../type';
 
 export const RFID = {
   READ_NEW_DATA: 'RFID_NEW_DATA'

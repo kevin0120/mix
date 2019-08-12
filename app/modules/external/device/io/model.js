@@ -2,8 +2,8 @@
 import { isNil, remove } from 'lodash-es';
 import type { Saga } from 'redux-saga';
 import { call, fork, put } from 'redux-saga/effects';
-import Device from '../../common/type';
-import type { AnyAction } from '../../common/type';
+import Device from '../Device';
+import type { AnyAction } from '../type';
 import type {
   tIOContact,
   tIOData,
@@ -13,10 +13,10 @@ import type {
   tIOPort,
   tIOChange
 } from './type';
-import { CommonLog } from '../../common/utils';
+import { CommonLog } from '../../../../common/utils';
 import { AppendNewDevices, symIO } from '../global';
 import { ioDirection, ioTriggerMode } from './type';
-import { ioSetApi, ioContactApi, ioStatusApi } from '../../api/io';
+import { ioSetApi, ioContactApi, ioStatusApi } from '../../../../api/io';
 
 export default class ClsIOModule extends Device {
 

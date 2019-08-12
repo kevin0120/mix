@@ -22,7 +22,7 @@ import styles from './styles';
 import saveConfigs from '../../modules/setting/action';
 import withKeyboard from '../../components/Keyboard';
 import { systemInit } from '../../modules/systemInit/action';
-import { toggleRFID } from '../../modules/rfid/action';
+import { toggleRFID } from '../../modules/external/device/rfid/action';
 
 function handleTest(obj) {
   obj.test(obj.value);

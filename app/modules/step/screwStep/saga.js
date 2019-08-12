@@ -8,7 +8,7 @@ import type { tPoint, tScrewStepData, tScrewStepPayload } from './model';
 import controllerModeTasks from './controllerModeTasks';
 import handleResult from './handleResult';
 import { CommonLog } from '../../../common/utils';
-import { staticScrewTool } from '../../tools/saga';
+import { staticScrewTool } from '../../external/device/tools/saga';
 
 
 export default {
