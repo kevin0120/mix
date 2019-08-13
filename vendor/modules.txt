@@ -1,0 +1,200 @@
+# github.com/BurntSushi/toml v0.3.1
+github.com/BurntSushi/toml
+# github.com/Joker/jade v1.0.0
+github.com/Joker/jade
+# github.com/Shopify/goreferrer v0.0.0-20181106222321-ec9c9a553398
+github.com/Shopify/goreferrer
+# github.com/aymerick/raymond v2.0.2+incompatible
+github.com/aymerick/raymond
+github.com/aymerick/raymond/ast
+github.com/aymerick/raymond/parser
+github.com/aymerick/raymond/lexer
+# github.com/bep/debounce v1.2.0
+github.com/bep/debounce
+# github.com/davecgh/go-spew v1.1.1
+github.com/davecgh/go-spew/spew
+# github.com/ebfe/scard v0.0.0-20190212122703-c3d1b1916a95
+github.com/ebfe/scard
+# github.com/eknkc/amber v0.0.0-20171010120322-cdade1c07385
+github.com/eknkc/amber
+github.com/eknkc/amber/parser
+# github.com/fatih/structs v1.1.0
+github.com/fatih/structs
+# github.com/flosch/pongo2 v0.0.0-20190707114632-bbf5a6c351f4
+github.com/flosch/pongo2
+# github.com/go-ini/ini v1.46.0
+github.com/go-ini/ini
+# github.com/go-xorm/xorm v0.7.6
+github.com/go-xorm/xorm
+# github.com/goburrow/modbus v0.1.0
+github.com/goburrow/modbus
+# github.com/goburrow/serial v0.1.0
+github.com/goburrow/serial
+# github.com/golang/protobuf v1.3.2
+github.com/golang/protobuf/proto
+github.com/golang/protobuf/ptypes
+github.com/golang/protobuf/ptypes/any
+github.com/golang/protobuf/ptypes/duration
+github.com/golang/protobuf/ptypes/timestamp
+# github.com/google/gousb v0.0.0-20190812193832-18f4c1d8a750
+github.com/google/gousb
+# github.com/gorilla/schema v1.1.0
+github.com/gorilla/schema
+# github.com/gorilla/websocket v1.4.0
+github.com/gorilla/websocket
+# github.com/iris-contrib/blackfriday v2.0.0+incompatible
+github.com/iris-contrib/blackfriday
+# github.com/iris-contrib/formBinder v5.0.0+incompatible
+github.com/iris-contrib/formBinder
+# github.com/iris-contrib/go.uuid v2.0.0+incompatible
+github.com/iris-contrib/go.uuid
+# github.com/iris-contrib/middleware v0.0.0-20190720041902-5f3a20f489c4
+github.com/iris-contrib/middleware/cors
+# github.com/json-iterator/go v1.1.7
+github.com/json-iterator/go
+# github.com/juju/errors v0.0.0-20190806202954-0232dcc7464d
+github.com/juju/errors
+# github.com/kataras/golog v0.0.0-20190624001437-99c81de45f40
+github.com/kataras/golog
+# github.com/kataras/iris v11.1.1+incompatible
+github.com/kataras/iris/core/errors
+github.com/kataras/iris/websocket
+github.com/kataras/iris
+github.com/kataras/iris/context
+github.com/kataras/iris/cache
+github.com/kataras/iris/core/handlerconv
+github.com/kataras/iris/core/host
+github.com/kataras/iris/core/netutil
+github.com/kataras/iris/core/router
+github.com/kataras/iris/middleware/logger
+github.com/kataras/iris/middleware/recover
+github.com/kataras/iris/view
+github.com/kataras/iris/core/memstore
+github.com/kataras/iris/macro
+github.com/kataras/iris/cache/client
+github.com/kataras/iris/macro/handler
+github.com/kataras/iris/macro/interpreter/ast
+github.com/kataras/iris/macro/interpreter/lexer
+github.com/kataras/iris/macro/interpreter/parser
+github.com/kataras/iris/cache/cfg
+github.com/kataras/iris/cache/client/rule
+github.com/kataras/iris/cache/entry
+github.com/kataras/iris/cache/ruleset
+github.com/kataras/iris/cache/uri
+github.com/kataras/iris/macro/interpreter/token
+# github.com/kataras/pio v0.0.0-20190103105442-ea782b38602d
+github.com/kataras/pio
+github.com/kataras/pio/terminal
+# github.com/klauspost/compress v1.7.5
+github.com/klauspost/compress/gzip
+github.com/klauspost/compress/flate
+# github.com/klauspost/cpuid v1.2.1
+github.com/klauspost/cpuid
+# github.com/lestrrat-go/file-rotatelogs v2.2.0+incompatible
+github.com/lestrrat-go/file-rotatelogs
+github.com/lestrrat-go/file-rotatelogs/internal/option
+# github.com/lestrrat-go/strftime v0.0.0-20190725011945-5c849dd2c51d
+github.com/lestrrat-go/strftime
+# github.com/lib/pq v1.2.0
+github.com/lib/pq
+github.com/lib/pq/oid
+github.com/lib/pq/scram
+# github.com/microcosm-cc/bluemonday v1.0.2
+github.com/microcosm-cc/bluemonday
+# github.com/minio/minio-go v6.0.14+incompatible
+github.com/minio/minio-go
+github.com/minio/minio-go/pkg/credentials
+github.com/minio/minio-go/pkg/encrypt
+github.com/minio/minio-go/pkg/s3signer
+github.com/minio/minio-go/pkg/s3utils
+github.com/minio/minio-go/pkg/set
+# github.com/mitchellh/go-homedir v1.1.0
+github.com/mitchellh/go-homedir
+# github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421
+github.com/modern-go/concurrent
+# github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742
+github.com/modern-go/reflect2
+# github.com/pkg/errors v0.8.1
+github.com/pkg/errors
+# github.com/pmezard/go-difflib v1.0.0
+github.com/pmezard/go-difflib/difflib
+# github.com/ryanuber/columnize v2.1.0+incompatible
+github.com/ryanuber/columnize
+# github.com/satori/go.uuid v1.2.0
+github.com/satori/go.uuid
+# github.com/shurcooL/sanitized_anchor_name v1.0.0
+github.com/shurcooL/sanitized_anchor_name
+# github.com/stretchr/testify v1.3.0
+github.com/stretchr/testify/assert
+# github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07
+github.com/tarm/serial
+# github.com/valyala/bytebufferpool v1.0.0
+github.com/valyala/bytebufferpool
+# golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5
+golang.org/x/crypto/acme/autocert
+golang.org/x/crypto/argon2
+golang.org/x/crypto/acme
+golang.org/x/crypto/blake2b
+# golang.org/x/net v0.0.0-20190724013045-ca1201d0de80
+golang.org/x/net/context
+golang.org/x/net/trace
+golang.org/x/net/publicsuffix
+golang.org/x/net/http/httpguts
+golang.org/x/net/internal/timeseries
+golang.org/x/net/http2
+golang.org/x/net/http2/hpack
+golang.org/x/net/html
+golang.org/x/net/idna
+golang.org/x/net/html/atom
+# golang.org/x/sys v0.0.0-20190602015325-4c4f7f33c9ed
+golang.org/x/sys/unix
+golang.org/x/sys/cpu
+# golang.org/x/text v0.3.2
+golang.org/x/text/secure/bidirule
+golang.org/x/text/unicode/bidi
+golang.org/x/text/unicode/norm
+golang.org/x/text/transform
+# google.golang.org/genproto v0.0.0-20190404172233-64821d5d2107
+google.golang.org/genproto/googleapis/rpc/status
+# google.golang.org/grpc v1.22.1
+google.golang.org/grpc
+google.golang.org/grpc/balancer
+google.golang.org/grpc/balancer/roundrobin
+google.golang.org/grpc/codes
+google.golang.org/grpc/connectivity
+google.golang.org/grpc/credentials
+google.golang.org/grpc/encoding
+google.golang.org/grpc/encoding/proto
+google.golang.org/grpc/grpclog
+google.golang.org/grpc/internal
+google.golang.org/grpc/internal/backoff
+google.golang.org/grpc/internal/balancerload
+google.golang.org/grpc/internal/binarylog
+google.golang.org/grpc/internal/channelz
+google.golang.org/grpc/internal/envconfig
+google.golang.org/grpc/internal/grpcrand
+google.golang.org/grpc/internal/grpcsync
+google.golang.org/grpc/internal/transport
+google.golang.org/grpc/keepalive
+google.golang.org/grpc/metadata
+google.golang.org/grpc/naming
+google.golang.org/grpc/peer
+google.golang.org/grpc/resolver
+google.golang.org/grpc/resolver/dns
+google.golang.org/grpc/resolver/passthrough
+google.golang.org/grpc/serviceconfig
+google.golang.org/grpc/stats
+google.golang.org/grpc/status
+google.golang.org/grpc/tap
+google.golang.org/grpc/balancer/base
+google.golang.org/grpc/credentials/internal
+google.golang.org/grpc/binarylog/grpc_binarylog_v1
+google.golang.org/grpc/internal/syscall
+# gopkg.in/resty.v1 v1.12.0
+gopkg.in/resty.v1
+# gopkg.in/yaml.v2 v2.2.2
+gopkg.in/yaml.v2
+# xorm.io/builder v0.3.5
+xorm.io/builder
+# xorm.io/core v0.7.0
+xorm.io/core

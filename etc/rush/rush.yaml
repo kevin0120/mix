@@ -142,16 +142,17 @@ tightening_device:
 #      protocol: Audi/VW
 #      endpoint: tcp://127.0.0.1:4700
 
-    - model: MODEL_DESOUTTER_DELTA_WRENCH
-      protocol: OpenProtocol
-      endpoint: tcp://192.168.0.222:4545
-      sn: 0001
-      tools:
-        - sn: 1001
+#    - model: MODEL_DESOUTTER_DELTA_WRENCH
+#      protocol: OpenProtocol
+#      endpoint: tcp://192.168.0.222:4545
+#      sn: 0001
+#      tools:
+#        - sn: 1001
 
 
 # 协议类型: Audi/VW, OpenProtocol
 controller_service:
+  enable: false
   workers: 1
   controllers:
 #    - serial_no: 0001
@@ -169,37 +170,3 @@ controller_service:
 #        channel: 1
 #      - gun_serial: 18G53917 5.8.2
 #        channel: 2
-
-#  - serial_no: 27231800455_1
-#    protocol: OpenProtocol
-#    remote_ip: 192.168.5.212
-#    port: 4545
-#    tools:
-#      - gun_serial: 15C92257 5.7.1
-#        channel: 1
-#
-#  - serial_no: 27231800455_2
-#    protocol: OpenProtocol
-#    remote_ip: 192.168.5.212
-#    port: 4546
-#    tools:
-#      - gun_serial: 18G53917 5.8.2
-#        channel: 2
-
-#  - serial_no: 0002
-#    protocol: OpenProtocol
-#    remote_ip: 192.168.1.102
-#    port: 4545
-#    channel: 1
-
-#  - serial_no: 0001
-#    protocol: OpenProtocol
-#    remote_ip: 192.168.5.212
-#    port: 4545
-#    channel: 1
-
-#  - serial_no: 0001
-#    protocol: OpenProtocol
-#    remote_ip: 192.168.5.212
-#    port: 4545
-#    channel: 1
