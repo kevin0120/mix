@@ -1361,5 +1361,5 @@ func (m *Methods) wsTest(ctx iris.Context) {
 	//m.service.ControllerService.WS.WSSend(ws.Event, string(str))
 
 	payload, _ := json.Marshal(ws)
-	m.service.ControllerService.WS.WSNotify("", string(payload))
+	m.service.ControllerService.WS.WSTestRecv("", string(payload))
 }

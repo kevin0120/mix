@@ -1,42 +1,61 @@
 package storage
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type Workorders struct {
-	Id             int64  `xorm:"pk autoincr notnull 'id'"`
-	WorkorderID    int64  `xorm:"bigint 'x_workorder_id'"`
-	HMISN          string `xorm:"varchar(64) 'hmi_sn'"`
-	WorkcenterCode string `xorm:"varchar(64) 'workcenter_code'"`
-	Vin            string `xorm:"varchar(64) 'vin'"`
-	Knr            string `xorm:"varchar(64) 'knr'"`
-	LongPin        string `xorm:"varchar(64) 'long_pin'"`
+	Id             int64  `xorm:"pk autoincr notnull 'id'" json:"id"`
+	WorkorderID    int64  `xorm:"bigint 'x_workorder_id'" json:"-"`
+	HMISN          string `xorm:"varchar(64) 'hmi_sn'" json:"-"`
+	WorkcenterCode string `xorm:"varchar(64) 'workcenter_code'" json:"-"`
+	Vin            string `xorm:"varchar(64) 'vin'" json:"-"`
+	Knr            string `xorm:"varchar(64) 'knr'" json:"-"`
+	LongPin        string `xorm:"varchar(64) 'long_pin'" json:"-"`
 
-	MaxOpTime    int    `xorm:"int 'max_op_time'"`
-	MaxSeq       int    `xorm:"int 'max_seq'"`
-	Status       string `xorm:"varchar(32) 'status'"`
-	LastResultID int64  `xorm:"bigint 'last_result_id'"`
+	MaxOpTime    int    `xorm:"int 'max_op_time'" json:"-"`
+	MaxSeq       int    `xorm:"int 'max_seq'" json:"-"`
+	Status       string `xorm:"varchar(32) 'status'" json:"status"`
+	LastResultID int64  `xorm:"bigint 'last_result_id'" json:"-"`
 	//WorkSheet      string    `xorm:"text 'work_sheet'"`
-	ImageOPID      int64     `xorm:"bigint 'img_op_id'"`
-	VehicleTypeImg string    `xorm:"text 'vehicle_type_img'"`
-	UpdateTime     time.Time `xorm:"datetime 'update_time'"`
-	ProductID      int64     `xorm:"bigint 'product_id'"`
-	WorkcenterID   int64     `xorm:"bigint 'workcenter_id'"`
-	UserID         int64     `xorm:"bigint 'user_id'"`
+	ImageOPID      int64     `xorm:"bigint 'img_op_id'" json:"-"`
+	VehicleTypeImg string    `xorm:"text 'vehicle_type_img'" json:"product_type_img"`
+	UpdateTime     time.Time `xorm:"datetime 'update_time'" json:"-"`
+	ProductID      int64     `xorm:"bigint 'product_id'" json:"-"`
+	WorkcenterID   int64     `xorm:"bigint 'workcenter_id'" json:"-"`
+	UserID         int64     `xorm:"bigint 'user_id'" json:"-"`
 
-	JobID int    `xorm:"bigint 'job_id'"`
-	Mode  string `xorm:"varchar(64) 'mode'"`
+	JobID int    `xorm:"bigint 'job_id'" json:"-"`
+	Mode  string `xorm:"varchar(64) 'mode'" json:"-"`
 
-	Consumes string `xorm:"text 'consumes'"`
+	Consumes string `xorm:"text 'consumes'" json:"-"`
 
 	// mo相关信息
-	MO_EquipemntName  string `xorm:"varchar(64) 'equipment_name'"` // 设备名
-	MO_FactoryName    string `xorm:"varchar(64) 'factory_name'"`   // 工厂代码
-	MO_Year           int64  `xorm:"bigint 'year'"`
-	MO_Pin            int64  `xorm:"bigint 'pin'"`
-	MO_Pin_check_code int64  `xorm:"bigint 'pin_check_code'"`
-	MO_AssemblyLine   string `xorm:"varchar(64) 'assembly_line'"`
-	MO_Lnr            string `xorm:"varchar(64) 'lnr'"`
-	MO_Model          string `xorm:"varchar(64) 'model'"`
+	MO_EquipemntName  string `xorm:"varchar(64) 'equipment_name'" json:"-"` // 设备名
+	MO_FactoryName    string `xorm:"varchar(64) 'factory_name'" json:"-"`   // 工厂代码
+	MO_Year           int64  `xorm:"bigint 'year'" json:"-"`
+	MO_Pin            int64  `xorm:"bigint 'pin'" json:"-"`
+	MO_Pin_check_code int64  `xorm:"bigint 'pin_check_code'" json:"-"`
+	MO_AssemblyLine   string `xorm:"varchar(64) 'assembly_line'" json:"-"`
+	MO_Lnr            string `xorm:"varchar(64) 'lnr'" json:"-"`
+	MO_Model          string `xorm:"varchar(64) 'model'" json:"-"`
+
+	Name string `xorm:"varchar(64) 'name'" json:"name"`
+	Desc string `xorm:"varchar(64) 'desc'" json:"desc"`
+}
+
+type Steps struct {
+	Id             int64           `xorm:"pk autoincr notnull 'id'" json:"id"`
+	WorkorderID    int64           `xorm:"bigint 'workorder_id'" json:"-"`
+	Name           string          `xorm:"varchar(64) 'name'" json:"name"`
+	Desc           string          `xorm:"varchar(64) 'desc'" json:"desc"`
+	Type           string          `xorm:"varchar(64) 'type'" json:"type"`
+	Skippable      bool            `xorm:"varchar(64) 'skippable'" json:"skippable"`
+	Undoable       bool            `xorm:"varchar(64) 'undoable'" json:"undoable"`
+	Status         string          `xorm:"varchar(32) 'status'" json:"status"`
+	Payload        json.RawMessage `sql:"type:json" json:"-"`
+	MarshalPayload interface{}     `xorm:"-" json:"payload"`
 }
 
 type Results struct {
@@ -45,6 +64,7 @@ type Results struct {
 	GroupSeq           int       `xorm:"int 'group_sequence'"`
 	ResultId           int64     `xorm:"bigint 'x_result_id'"`
 	WorkorderID        int64     `xorm:"bigint 'x_workorder_id'"`
+	StepID             int64     `xorm:"bigint 'step_id'"`
 	UserID             int64     `xorm:"bigint 'user_id'"`
 	ControllerSN       string    `xorm:"varchar(64) 'controller_sn'"`
 	GunSN              string    `xorm:"varchar(64) 'gun_sn'"`

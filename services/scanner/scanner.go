@@ -110,6 +110,14 @@ func (s *Scanner) Status() string {
 	return s.status.Load().(string)
 }
 
+func (s *Scanner) DeviceType() string {
+	return "scanner"
+}
+
+func (s *Scanner) Children() []string {
+	return []string{}
+}
+
 func (s *Scanner) open() (USBDevice, error) {
 	di := s.devInfo
 	if di == nil {
@@ -260,4 +268,12 @@ func (s *Scanner) _recv() {
 			})
 		}
 	}
+}
+
+func (s *Scanner) Data() interface{} {
+	return nil
+}
+
+func (s *Scanner) Config() interface{} {
+	return nil
 }

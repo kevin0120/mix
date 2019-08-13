@@ -62,3 +62,32 @@ func (s *IOModule) Read() (string, string, error) {
 func (s *IOModule) Write(index uint16, status uint16) error {
 	return s.client.Write(index, status)
 }
+
+func (s *IOModule) DeviceType() string {
+	return "io"
+}
+
+func (s *IOModule) Children() []string {
+	return []string{}
+}
+
+func (s *IOModule) Data() interface{} {
+	inputs, outputs, err := s.Read()
+	if err != nil {
+		return nil
+	}
+
+	return IoData{
+		Inputs: inputs,
+		Outputs: outputs,
+	}
+}
+
+func (s *IOModule) Config() interface{} {
+	vendor := VENDOR_MODELS[s.cfg.Model]
+
+	return IoConfig{
+		InputNum: vendor.Cfg().InputNum,
+		OutputNum: vendor.Cfg().OutputNum,
+	}
+}

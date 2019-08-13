@@ -80,6 +80,10 @@ func (p *Service) AddDevice(cfg controller.DeviceConfig, ts interface{}) control
 	c.SetModel(cfg.Model)
 	c.tighteningDevice = ts.(*tightening_device.Service)
 
+	if cfg.SN != "" {
+		c.tighteningDevice.AddDevice(cfg.SN, &c)
+	}
+
 	p.devices = append(p.devices, c)
 
 	return nil

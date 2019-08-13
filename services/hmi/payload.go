@@ -4,6 +4,13 @@ import (
 	"github.com/masami10/rush/services/openprotocol"
 )
 
+const (
+	WS_ORDER_LIST        = "WS_ORDER_LIST"
+	WS_ORDER_DETAIL      = "WS_ORDER_DETAIL"
+	WS_ORDER_UPDATE      = "WS_ORDER_UPDATE"
+	WS_ORDER_STEP_UPDATE = "WS_ORDER_STEP_UPDATE"
+)
+
 type PSet struct {
 	Controller_SN string `json:"controller_sn"`
 	GunSN         string `json:"gun_sn"`
@@ -194,4 +201,9 @@ type RoutingOperationDelete struct {
 type WSTest struct {
 	Event string      `json:"event"`
 	Data  interface{} `json:"data"`
+}
+
+type WSOrderReq struct {
+	ID     int64  `json:"id"`
+	Status string `json:"status"`
 }

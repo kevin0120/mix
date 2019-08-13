@@ -2,8 +2,8 @@ package tightening_device
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/kataras/iris/core/errors"
+	"github.com/kataras/iris/websocket"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/wsnotify"
 	"sync"
@@ -81,8 +81,7 @@ func (s *Service) config() Config {
 	return s.configValue.Load().(Config)
 }
 
-func (s *Service) OnWSMsg(data []byte) {
-	fmt.Println(string(data))
+func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 	msg := wsnotify.WSMsg{}
 	err := json.Unmarshal(data, &msg)
 	if err != nil {
@@ -92,52 +91,30 @@ func (s *Service) OnWSMsg(data []byte) {
 
 	//msgData, _ := json.Marshal(msg.Data)
 	switch msg.Type {
-	case WS_TIGHTENING_DEVICE:
-		// 请求取得所有拧紧设备
-
-		devices, _ := json.Marshal(wsnotify.WSMsg{
-			Type: WS_TIGHTENING_DEVICE,
-			Data: []Device{
-				{
-					SN:     "0001",
-					Type:   TIGHTENING_DEVICE_TYPE_CONTROLLER,
-					Parent: "",
-					Status: TIGHTENING_DEVICE_ONLINE,
-				},
-				{
-					SN:     "1001",
-					Type:   TIGHTENING_DEVICE_TYPE_TOOL,
-					Parent: "0001",
-					Status: TIGHTENING_DEVICE_ONLINE,
-				},
-			},
-		})
-
-		s.WS.WSSendTightening(string(devices))
 
 	case WS_TOOL_ENABLE:
-		reply, _ := json.Marshal(wsnotify.WSMsg{
+		reply := wsnotify.WSMsg{
 			Type: WS_TOOL_ENABLE,
 			SN:   msg.SN,
-			Data: Reply{
+			Data: wsnotify.WSReply{
 				Result: 0,
 				Msg:    "",
 			},
-		})
+		}
 
-		s.WS.WSSendReply(string(reply))
+		s.WS.WSSendReply(&reply)
 
 	case WS_TOOL_JOB:
-		reply, _ := json.Marshal(wsnotify.WSMsg{
+		reply := wsnotify.WSMsg{
 			Type: WS_TOOL_JOB,
 			SN:   msg.SN,
 			Data: Reply{
 				Result: 0,
 				Msg:    "",
 			},
-		})
+		}
 
-		s.WS.WSSendReply(string(reply))
+		s.WS.WSSendReply(&reply)
 
 	case WS_TOOL_PSET:
 		//device, _ := s.GetDevice("0")
@@ -152,16 +129,16 @@ func (s *Service) OnWSMsg(data []byte) {
 		//	Data: rt,
 		//})
 
-		reply, _ := json.Marshal(wsnotify.WSMsg{
+		reply := wsnotify.WSMsg{
 			Type: WS_TOOL_PSET,
 			SN:   msg.SN,
 			Data: Reply{
 				Result: 0,
 				Msg:    "",
 			},
-		})
+		}
 
-		s.WS.WSSendReply(string(reply))
+		s.WS.WSSendReply(&reply)
 
 	default:
 		// 类型错误

@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"github.com/masami10/rush/command"
+	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/diagnostic"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/io"
@@ -60,6 +61,8 @@ type Config struct {
 
 	TighteningDevice tightening_device.Config `yaml:"tightening_device"`
 
+	Device device.Config `yaml:"device"`
+
 	Commander command.Commander `yaml:"-"`
 }
 
@@ -84,6 +87,7 @@ func NewConfig() *Config {
 	c.IO = io.NewConfig()
 	c.Reader = reader.NewConfig()
 	c.TighteningDevice = tightening_device.NewConfig()
+	c.Device = device.NewConfig()
 
 	c.Contollers = controller.NewConfig()
 
@@ -160,6 +164,10 @@ func (c *Config) Validate() error {
 
 	if err := c.TighteningDevice.Validate(); err != nil {
 		return errors.Wrap(err, "tightening_device")
+	}
+
+	if err := c.Device.Validate(); err != nil {
+		return errors.Wrap(err, "device")
 	}
 
 	return nil

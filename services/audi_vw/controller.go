@@ -485,3 +485,19 @@ func (c *Controller) Tools() map[string]string {
 
 	return rt
 }
+
+func (c *Controller) DeviceType() string {
+	return "controller"
+}
+
+func (c *Controller) Children() []string {
+	return []string{}
+}
+
+func (s *Controller) Data() interface{} {
+	return nil
+}
+
+func (s *Controller) Config() interface{} {
+	return nil
+}

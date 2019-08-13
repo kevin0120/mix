@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kataras/iris/core/errors"
+	"github.com/kataras/iris/websocket"
+	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/wsnotify"
 	"sync/atomic"
 )
@@ -14,10 +16,11 @@ type Diagnostic interface {
 }
 
 type Service struct {
-	configValue atomic.Value
-	ios         map[string]*IOModule
-	diag        Diagnostic
-	WS          *wsnotify.Service
+	configValue   atomic.Value
+	ios           map[string]*IOModule
+	diag          Diagnostic
+	WS            *wsnotify.Service
+	DeviceService *device.Service
 	IONotify
 	wsnotify.WSNotify
 }
@@ -48,6 +51,8 @@ func (s *Service) Open() error {
 		s.ios[v.SN] = &IOModule{
 			cfg: &v,
 		}
+
+		s.DeviceService.AddDevice(v.SN, s.ios[v.SN])
 
 		err := s.ios[v.SN].Start(s)
 		if err != nil {
@@ -121,7 +126,7 @@ func (s *Service) OnIOStatus(sn string, t string, status string) {
 	s.WS.WSSendIO(string(io))
 }
 
-func (s *Service) OnWSMsg(data []byte) {
+func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 	msg := wsnotify.WSMsg{}
 	err := json.Unmarshal(data, &msg)
 	if err != nil {
@@ -130,6 +135,18 @@ func (s *Service) OnWSMsg(data []byte) {
 	}
 
 	msgData, _ := json.Marshal(msg.Data)
+
+	replyResult := 0
+	replyMsg := ""
+	reply := wsnotify.WSMsg{
+		SN:   msg.SN,
+		Type: msg.Type,
+		Data: wsnotify.WSReply{
+			Result: replyResult,
+			Msg:    replyMsg,
+		},
+	}
+
 	switch msg.Type {
 	case WS_IO_SET:
 		// 控制输出
@@ -137,14 +154,32 @@ func (s *Service) OnWSMsg(data []byte) {
 		err := json.Unmarshal(msgData, &ioSet)
 		if err != nil {
 			s.diag.Error(string(msgData), err)
+			replyResult = -1
+			replyMsg = err.Error()
+			reply.Data = wsnotify.WSReply{
+				Result: replyResult,
+				Msg:    replyMsg,
+			}
+
+			s.WS.WSSendReply(&reply)
 			return
 		}
 
 		err = s.Write(ioSet.SN, ioSet.Index, ioSet.Status)
 		if err != nil {
 			s.diag.Error(err.Error(), err)
+			replyResult = -2
+			replyMsg = err.Error()
+			reply.Data = wsnotify.WSReply{
+				Result: replyResult,
+				Msg:    replyMsg,
+			}
+
+			s.WS.WSSendReply(&reply)
 			return
 		}
+
+		s.WS.WSSendReply(&reply)
 
 	case WS_IO_CONTACT:
 		// 获取io状态
@@ -152,14 +187,30 @@ func (s *Service) OnWSMsg(data []byte) {
 		err := json.Unmarshal(msgData, &ioContact)
 		if err != nil {
 			s.diag.Error(string(msgData), err)
+			replyResult = -1
+			replyMsg = err.Error()
+			reply.Data = wsnotify.WSReply{
+				Result: replyResult,
+				Msg:    replyMsg,
+			}
+			s.WS.WSSendReply(&reply)
 			return
 		}
 
 		inputs, outputs, err := s.Read(ioContact.SN)
 		if err != nil {
 			s.diag.Error(err.Error(), err)
+			replyResult = -2
+			replyMsg = err.Error()
+			reply.Data = wsnotify.WSReply{
+				Result: replyResult,
+				Msg:    replyMsg,
+			}
+			s.WS.WSSendReply(&reply)
 			return
 		}
+
+		s.WS.WSSendReply(&reply)
 
 		ioInputs, _ := json.Marshal(wsnotify.WSMsg{
 			Type: WS_IO_CONTACT,
@@ -189,17 +240,36 @@ func (s *Service) OnWSMsg(data []byte) {
 		err := json.Unmarshal(msgData, &ioStatus)
 		if err != nil {
 			s.diag.Error(string(msgData), err)
+			replyResult = -1
+			replyMsg = err.Error()
+			reply.Data = wsnotify.WSReply{
+				Result: replyResult,
+				Msg:    replyMsg,
+			}
+			s.WS.WSSendReply(&reply)
+
 			return
 		}
 
 		m, err := s.getIO(ioStatus.SN)
 		if err != nil {
 			s.diag.Error(err.Error(), err)
+			replyResult = -2
+			replyMsg = err.Error()
+			reply.Data = wsnotify.WSReply{
+				Result: replyResult,
+				Msg:    replyMsg,
+			}
+			s.WS.WSSendReply(&reply)
+
 			return
 		}
 
+		//s.WS.WSSendReply(&reply)
+
 		io, _ := json.Marshal(wsnotify.WSMsg{
 			Type: WS_IO_STATUS,
+			SN:   msg.SN,
 			Data: IoStatus{
 				SN:     ioStatus.SN,
 				Status: m.Status(),

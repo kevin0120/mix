@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"github.com/masami10/rush/services/aiis"
+	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
@@ -22,11 +23,11 @@ type Diagnostic interface {
 type Controller interface {
 	Start()
 	Close() error
-	Status() string
 	Protocol() string
 	Inputs() string
 	LoadController(controller *storage.Controllers)
 	Tools() map[string]string
+	device.Device
 }
 
 type Protocol interface {

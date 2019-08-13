@@ -24,13 +24,6 @@ const (
 	TIGHTENING_DEVICE_OFFLINE = "offline"
 )
 
-type Device struct {
-	SN     string `json:"sn"`
-	Type   string `json:"type"`
-	Parent string `json:"parent"`
-	Status string `json:"status"`
-}
-
 type Reply struct {
 	Result int    `json:"result"`
 	Msg    string `json:"msg"`

@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/go-xorm/xorm"
 	_ "github.com/lib/pq"
@@ -105,6 +106,15 @@ func (s *Service) Open() error {
 		if !exist {
 			if err := engine.Sync2(new(RoutingOperations)); err != nil {
 				return errors.Wrapf(err, "Create Table RoutingOperations fail")
+			}
+		}
+	}
+
+	exist, err = engine.IsTableExist("Steps")
+	if err == nil {
+		if !exist {
+			if err := engine.Sync2(new(Steps)); err != nil {
+				return errors.Wrapf(err, "Create Table Steps fail")
 			}
 		}
 	}
@@ -920,5 +930,74 @@ func (s *Service) DropTableManage() error {
 		diff := time.Since(start) // 执行的间隔时间
 
 		time.Sleep(time.Duration(c.VacuumPeriod) - diff)
+	}
+}
+
+func (s *Service) Workorders(status string) ([]Workorders, error) {
+	var rt []Workorders
+
+	q := s.eng.Alias("w")
+	if status != "" {
+		q = q.Where("w.status = ?", status)
+	}
+
+	err := q.Find(&rt)
+
+	if err != nil {
+		return nil, err
+	} else {
+		return rt, nil
+	}
+}
+
+func (s *Service) Steps(workorderID int64) ([]Steps, error) {
+	var rt []Steps
+
+	q := s.eng.Alias("s").Where("s.workorder_id = ?", workorderID)
+
+	err := q.Find(&rt)
+
+	if err != nil {
+		return nil, err
+	} else {
+		return rt, nil
+	}
+}
+
+func (s *Service) WorkorderStep(workorderID int64) (*WorkorderStep, error) {
+	workorder, err := s.GetWorkorder(workorderID, true)
+	if err != nil {
+		return nil, err
+	}
+
+	steps, err := s.Steps(workorderID)
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range steps {
+		err := json.Unmarshal(v.Payload, &steps[k].MarshalPayload)
+		if err != nil {
+			s.diag.Error(err.Error(), err)
+		}
+	}
+
+	return &WorkorderStep{
+		Workorders: workorder,
+		Steps:      steps,
+	}, nil
+}
+
+func (s *Service) UpdateStep(step *Steps) (*Steps, error) {
+
+	sql := "update `steps` set status = ? where id = ?"
+	_, err := s.eng.Exec(sql,
+		step.Status,
+		step.Id)
+
+	if err != nil {
+		return step, err
+	} else {
+		return step, nil
 	}
 }

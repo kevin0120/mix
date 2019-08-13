@@ -46,7 +46,7 @@ func (s *WSClientManager) NotifyALL(evt string, payload string) {
 	s.mutex.Lock()
 
 	for _, v := range s.conn {
-		v.Emit(evt, payload)
+		_ = v.Emit(evt, payload)
 	}
 }
 

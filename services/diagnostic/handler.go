@@ -504,3 +504,15 @@ func (h *TighteningDeviceHandler) Error(msg string, err error) {
 func (h *TighteningDeviceHandler) Debug(msg string) {
 	h.l.Debug(msg)
 }
+
+type DeviceHandler struct {
+	l Logger
+}
+
+func (h *DeviceHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+func (h *DeviceHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}

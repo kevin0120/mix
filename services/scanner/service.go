@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/gousb"
+	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
 	"github.com/tarm/serial"
@@ -37,7 +38,8 @@ type Service struct {
 	diag Diagnostic
 	Notify
 
-	WS *wsnotify.Service
+	WS            *wsnotify.Service
+	DeviceService *device.Service
 }
 
 func NewService(c Config, d Diagnostic) *Service {
@@ -105,7 +107,9 @@ func (s *Service) search() {
 			d, err := ctx.OpenDeviceWithVIDPID(ID(vid), ID(pid))
 			if err == nil && d != nil {
 				s.diag.Debug(fmt.Sprintf("Search Success: %s", label))
-				s.addScanner(NewScanner(label, s.diag, d))
+				newScanner := NewScanner(label, s.diag, d)
+				s.addScanner(newScanner)
+				s.DeviceService.AddDevice(fmt.Sprintf("%d-%d", vid, pid), newScanner)
 			} else if err != nil {
 				s.diag.Error("Search Fail", err)
 			} else {

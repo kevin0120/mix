@@ -22,3 +22,13 @@ type IoSet struct {
 	Index  uint16 `json:"index"`
 	Status uint16 `json:"status"`
 }
+
+type IoData struct {
+	Inputs string `json:"inputs"`
+	Outputs string `json:"outputs"`
+}
+
+type IoConfig struct {
+	InputNum uint16  `json:"input_num"`
+	OutputNum uint16  `json:"output_num"`
+}

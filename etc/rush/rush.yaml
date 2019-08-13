@@ -78,7 +78,7 @@ websocket:
   write_buf_size: 4096
 storage:
   db_url: 127.0.0.1:5433
-  db_name: rush
+  db_name: rush_hardware
   db_user: admin
   db_pwd: admin
   max_connection: 60
@@ -126,6 +126,9 @@ io:
 reader:
   enable: true
 
+device:
+  enable: true
+
 # 协议类型: Audi/VW, OpenProtocol
 # 支持型号: MODEL_DESOUTTER_CVI3, MODEL_DESOUTTER_DELTA_WRENCH
 tightening_device:
@@ -142,6 +145,10 @@ tightening_device:
     - model: MODEL_DESOUTTER_DELTA_WRENCH
       protocol: OpenProtocol
       endpoint: tcp://192.168.0.222:4545
+      sn: 0001
+      tools:
+        - sn: 1001
+
 
 # 协议类型: Audi/VW, OpenProtocol
 controller_service:

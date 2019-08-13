@@ -60,6 +60,7 @@ type Controller struct {
 	toolStatus        atomic.Value
 	model             string
 	tighteningDevice  *tightening_device.Service
+
 	tightening_device.TighteningDevice
 }
 
@@ -563,7 +564,6 @@ func (c *Controller) Connect() error {
 		time.Sleep(time.Duration(c.req_timeout))
 	}
 
-	c.tighteningDevice.AddDevice("0", c)
 	c.updateStatus(controller.STATUS_ONLINE)
 
 	c.startComm()
@@ -1655,4 +1655,25 @@ func (c *Controller) SetPSet(r *tightening_device.PSetSet) tightening_device.Rep
 
 func (c *Controller) Enable(r *tightening_device.ToolEnable) tightening_device.Reply {
 	return tightening_device.Reply{}
+}
+
+func (c *Controller) DeviceType() string {
+	return "controller"
+}
+
+func (c *Controller) Children() []string {
+	tools := []string{}
+	for k, _ := range c.Tools() {
+		tools = append(tools, k)
+	}
+
+	return tools
+}
+
+func (s *Controller) Data() interface{} {
+	return nil
+}
+
+func (s *Controller) Config() interface{} {
+	return nil
 }
