@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
-	"github.com/satori/go.uuid"
 )
 
 type ControllerConfig struct {
@@ -41,7 +40,7 @@ func init() {
 }
 
 func newControllerConf() ControllerConfig {
-	_sn, _ := uuid.NewV4()
+	_sn := utils.GenerateID()
 
 	gunConf := ToolConfig{
 		SerialNO:    "",
@@ -49,7 +48,7 @@ func newControllerConf() ControllerConfig {
 	}
 
 	return ControllerConfig{
-		SN:       _sn.String(),
+		SN:       _sn,
 		Protocol: AUDIPROTOCOL,
 		RemoteIP: "127.0.0.1",
 		Port:     4700,

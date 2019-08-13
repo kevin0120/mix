@@ -10,6 +10,7 @@ import (
 	"github.com/masami10/rush/services/reader"
 	"github.com/masami10/rush/services/scanner"
 	"github.com/masami10/rush/services/tightening_device"
+	"github.com/masami10/rush/utils"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -23,7 +24,6 @@ import (
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
-	"github.com/satori/go.uuid"
 )
 
 type Config struct {
@@ -67,10 +67,10 @@ type Config struct {
 }
 
 func NewConfig() *Config {
-	sn, _ := uuid.NewV4()
+	sn := utils.GenerateID()
 	c := &Config{
 		Hostname:  "localhost",
-		SN:        sn.String(),
+		SN:        sn,
 		Commander: command.ExecCommander,
 	}
 
