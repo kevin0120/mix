@@ -42,9 +42,9 @@ const gDevices: tArrayDevices = new Set([]);
 
 const lostChildren = {};
 
-function newDevice(dt: tDeviceType, name: string, sn: string, config: Object, childrenSN: Array<tDeviceSN>) {
+function newDevice(dt: tDeviceType, name: string, sn: string, config: Object, data, childrenSN: Array<tDeviceSN>) {
   try {
-    const device = new sym2Device[dt](name, sn, config);
+    const device = new sym2Device[dt](name, sn, config, data);
     AppendNewDevices(device);
 
     // if the new device is a lost child
@@ -71,7 +71,8 @@ function newDevice(dt: tDeviceType, name: string, sn: string, config: Object, ch
 }
 
 
-function getDevice(sn: tDeviceSN): Device {
+export function getDevice(sn: tDeviceSN): Device {
+
   return [...gDevices].filter((d: Device) => d.serialNumber === sn)?.[0];
 }
 
@@ -89,19 +90,17 @@ export function* updateDeviceStatus(): Saga<void> {
 
 export function* deviceStatus(data: tRushWebSocketData): Saga<void> {
   try {
-    console.log('deviceStatus',data);
     if (!(data?.data instanceof Array)) {
       return;
     }
     data.data.forEach((d) => {
-      const { sn, type, children, status, data } = d;
+      const { sn, type, children, status, data, config } = d;
       let dv = getDevice(sn);
-
       // try make a new device
       if (!dv) {
         dv = newDevice(type, `${type}${([...gDevices].filter(
           gd => gd instanceof sym2Device[type]
-        )?.length || 0) + 1}`, sn, data, children);
+        )?.length || 0) + 1}`, sn, config, data, children);
       }
 
       // if dv exists, set its Healthz status

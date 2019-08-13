@@ -36,6 +36,7 @@ const initState = {
   ]
 };
 
+
 function reduceStepData(reducer, state: tOrderState, action): tOrderState {
   const newState = { ...state };
   const newStep: ?tStep = workingStep(workingOrder(newState));
@@ -67,8 +68,36 @@ function limitIndex(order: ?tOrder, index: tOrderStepIdx): tOrderStepIdx {
 }
 
 const orderReducer: {
+  // eslint-disable-next-line flowtype/no-weak-types
   [key: string]: (tOrderState, { type: string, [key: any]: any }) => tOrderState
 } = {
+  [ORDER.LIST.SUCCESS]:(state,{list})=>{
+    let newList=state.list.filter(
+      (o)=>!!list.find(newO=>o.id===newO.id)
+    );
+    newList.forEach((o)=>{
+      Object.assign(o,list.find(newO=>o.id===newO.id))
+    });
+    newList=newList.concat(list.filter(newO=>
+      !newList.find(o=>o.id===newO.id)
+    ));
+    console.log(newList);
+    return {
+      ...state,
+      list:newList,
+    }
+  },
+  [ORDER.DETAIL.SUCCESS]:(state,{order})=>{
+    const newList =[...state.list];
+    const newOrder=newList.find(o=>o.id===order.id);
+    if(newOrder){
+      Object.assign(newOrder,order)
+    }
+    return {
+      ...state,
+      list:newList,
+    }
+  },
   [ORDER.VIEW]: (state, action) => {
     const { order } = action;
     const firstIndex = 0;
@@ -141,7 +170,6 @@ const orderReducer: {
       viewingIndex: newIndex
     };
   },
-
   [ORDER.STEP.VIEW_PREVIOUS]: state => {
     const newIndex = limitIndex(viewingOrder(state), viewingIndex(state) - 1);
     return {
@@ -149,7 +177,6 @@ const orderReducer: {
       viewingIndex: newIndex
     };
   },
-
   [ORDER.STEP.JUMP_TO]: (state, action) => {
     const { stepId } = action;
     return {

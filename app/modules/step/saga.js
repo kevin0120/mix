@@ -1,7 +1,9 @@
-import { cancel, fork, join, put, take } from 'redux-saga/effects';
+import { cancel, fork, join, put, take, select, call } from 'redux-saga/effects';
 import STEP_STATUS from './model';
 import stepTypes from './stepTypes';
 import { orderActions, ORDER } from '../order/action';
+import { orderStepUpdateApi } from '../../api/order';
+import { stepStatus, workingOrder, workingStep } from '../order/selector';
 
 let statusTask = null;
 
@@ -22,11 +24,14 @@ export default function* (stepType) {
       function* runStep() {
         try {
           while (true) {
+          debugger;
             const { status } = yield take(ORDER.STEP.STATUS);
             if (statusTask) {
               yield cancel(statusTask);
             }
             statusTask = yield fork(stepTypes?.[stepType]?.[status] || (() => invalidStepStatus(stepType, status)), ORDER, orderActions);
+            const id = yield select(s => workingStep(workingOrder(s.order)).id);
+            yield call(orderStepUpdateApi, id, status);
           }
         } catch (e) {
           console.error(e);

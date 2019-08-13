@@ -4,9 +4,20 @@ import type { tOrder, tOrderStepIdx, tStepStatus } from './model';
 export const ORDER = {
   WORK_ON: 'ORDER_WORK_ON',
   VIEW: 'ORDER_VIEW',
+  STATUS:'ORDER_STATUS',
   FINISH: 'ORDER_FINISH',
   CANCEL: 'ORDER_CANCEL',
   PENDING: 'ORDER_PENDING',
+  LIST: {
+    GET: 'ORDER_LIST_GET',
+    SUCCESS: 'ORDER_LIST_SUCCESS',
+    FAIL: 'ORDER_LIST_FAIL'
+  },
+  DETAIL: {
+    GET: 'ORDER_DETAIL_GET',
+    SUCCESS: 'ORDER_DETAIL_SUCCESS',
+    FAIL: 'ORDER_DETAIL_FAIL'
+  },
   STEP: {
     // 仅移动指针，不修改step状态
     NEXT: 'ORDER_STEP_NEXT',
@@ -32,6 +43,27 @@ export type orderTriggerType = {
 };
 
 export const orderActions = {
+  getList: () => ({
+    type: ORDER.LIST.GET
+  }),
+  getListSuccess: (list: Array<tOrder>) => ({
+    type: ORDER.LIST.SUCCESS,
+    list
+  }),
+  getListFail: () => ({
+    type: ORDER.LIST.FAIL
+  }),
+  getDetail: (order: tOrder) => ({
+    type: ORDER.DETAIL.GET,
+    order
+  }),
+  getDetailSuccess: (order: tOrder) => ({
+    type: ORDER.DETAIL.SUCCESS,
+    order
+  }),
+  getDetailFail: () => ({
+    type: ORDER.DETAIL.FAIL
+  }),
   view: (order: tOrder) => ({
     type: ORDER.VIEW,
     order

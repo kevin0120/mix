@@ -133,10 +133,6 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
       });
 
       ws.on('message', data => {
-        if (data.type === WEBSOCKET_EVENTS.reply) {
-          emit({ type: 'reply', payload: data });
-          return;
-        }
         emit({ type: 'data', payload: data });
       });
       ws.on('websocket-status', (...args) => {

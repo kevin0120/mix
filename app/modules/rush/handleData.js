@@ -10,13 +10,14 @@ import readerNewData from '../external/device/reader/saga';
 import scannerNewData from '../external/device/scanner/saga';
 import ioNewData from '../external/device/io/saga';
 import { deviceStatus } from '../external/device';
+import orderData from '../order/handleData';
 
 export default function* (payload) {
   try {
     const dataArray = payload.split(';');
     const event: tWebSocketEvent = dataArray[0].split(':').slice(-1)[0];
-
     const json: tRushWebSocketData = JSON.parse(dataArray.slice(-1));
+    yield put(rushActions.data(json));
     if (rushDataHandlers[event]) {
       yield fork(rushDataHandlers[event], json); // 异步处理rush数据
     }
@@ -62,7 +63,8 @@ const rushDataHandlers = {
   },
   * [wse.reply](data: tRushWebSocketData) {
     try {
-      yield put(rushActions.reply(data));
+      // console.log(data);
+      // yield put(rushActions.reply(data));
     } catch (e) {
       CommonLog.lError(e, { at: 'rush event reply' });
     }
@@ -77,5 +79,7 @@ const rushDataHandlers = {
 
   [wse.tool]: toolStatusChange,
 
-  [wse.device]: deviceStatus
+  [wse.device]: deviceStatus,
+
+  [wse.order]: orderData
 };

@@ -7,13 +7,13 @@ export const RUSH = {
   STARTED: 'RUSH_STARTED',
   STOPPED: 'RUSH_STOPPED',
   NEW_RESULTS: 'RUSH_NEW_RESULTS',
-  REPLY: 'RUSH_REPLY'
+  DATA: 'RUSH_DATA'
 };
 
 export default {
   // eslint-disable-next-line flowtype/no-weak-types
-  reply: (payload: { type: string, sn: number, data: Object }) => ({
-    type: RUSH.REPLY,
+  data: (payload: { type: string, sn: number, data: Object }) => ({
+    type: RUSH.DATA,
     payload
   })
 };

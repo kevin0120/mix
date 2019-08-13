@@ -6,14 +6,13 @@ import { setNewNotification } from '../../notification/action';
 import { stepData, workingStep, workingOrder, workingIndex } from '../../order/selector';
 import type { tPoint, tScrewStepData } from './model';
 import { CommonLog } from '../../../common/utils';
-import { jobApi, psetApi } from '../../../api/order';
+import { jobApi, psetApi } from '../../../api/tools';
 
 export default {
 
 
   * [controllerModes.pset](): Saga<void> {
     try {
-      console.log('in pset progress');
       const sData: tScrewStepData = yield select(s => stepData(workingStep(workingOrder(s.order))));
       const stepId = yield select(s => workingIndex(workingOrder(s.order)));
       const {

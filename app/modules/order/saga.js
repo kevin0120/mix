@@ -31,7 +31,8 @@ import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
 import { CommonLog, durationString, timeCost } from '../../common/utils';
 import type { tOrder, tStep, tStepArray } from './model';
-import type { tCommonActionType } from '../../common/type';
+import type { tCommonActionType } from '../external/device/type';
+import { orderDetailApi, orderListApi, orderUpdateApi } from '../../api/order';
 
 const mapping = {
   onOrderFinish: showResult,
@@ -95,11 +96,11 @@ function* showOverview(order: tOrder) {
             color: 'warning'
           },
           !WIPOrder &&
-            doable(order) && {
-              label: 'Order.Start',
-              color: 'info',
-              action: orderActions.workOn(order)
-            }
+          doable(order) && {
+            label: 'Order.Start',
+            color: 'info',
+            action: orderActions.workOn(order)
+          }
         ],
         title: i18n.t('Order.Overview'),
         content: (
@@ -143,12 +144,35 @@ function* DebounceViewStep(d, action: tCommonActionType) {
 export default function* root(): Saga<void> {
   try {
     yield all([
+      // TODO: shall we takeEvery?
+      takeEvery(ORDER.LIST.GET, getOrderList),
+      takeEvery(ORDER.DETAIL.GET, getOrderDetail),
       takeLatest(ORDER.WORK_ON, workOnOrder),
       takeEvery(ORDER.VIEW, viewOrder),
       takeLeading([ORDER.STEP.PREVIOUS, ORDER.STEP.NEXT], DebounceViewStep, 300)
     ]);
   } catch (e) {
     CommonLog.lError(e);
+  }
+}
+
+function* getOrderDetail({ order }) {
+  try {
+    yield call(orderDetailApi, order.id);
+  } catch (e) {
+    CommonLog.lError(e, {
+      at: 'getOrderDetail'
+    });
+  }
+}
+
+function* getOrderList() {
+  try {
+    yield call(orderListApi);
+  } catch (e) {
+    CommonLog.lError(e, {
+      at: 'getOrderList'
+    });
   }
 }
 
@@ -161,8 +185,8 @@ function* viewOrder({ order }) {
 }
 
 function* workOnOrder() {
+  const wOrder = yield select(s => workingOrder(s.order));
   try {
-    const wOrder = yield select(s => workingOrder(s.order));
     const { finish } = yield race({
       exit: call(doOrder),
       finish: take(ORDER.FINISH),
@@ -175,6 +199,9 @@ function* workOnOrder() {
     }
   } catch (e) {
     CommonLog.lError(e);
+  }finally{
+    const {id,status}=wOrder;
+    yield call(orderUpdateApi,id,status);
   }
 }
 

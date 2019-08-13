@@ -13,7 +13,7 @@ export const demoOrder = {
     {
       name: '获取物料',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       description: '获取下列物料',
       type: 'material',
@@ -29,13 +29,14 @@ export const demoOrder = {
             index: 2
           }
         ],
-        confirmIO:4
+        ioSN: '1',
+        confirmIO: 4
       }
     },
     {
       name: '拧紧作业指导 pset',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       type: 'screw',
       skippable: false,
@@ -95,7 +96,7 @@ export const demoOrder = {
     }, {
       name: '拧紧作业指导 job',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       type: 'screw',
       skippable: false,
@@ -147,7 +148,7 @@ export const demoOrder = {
     {
       name: '扫码',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -160,7 +161,7 @@ export const demoOrder = {
     {
       name: '扫码',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -175,14 +176,14 @@ export const demoOrder = {
 
 export const demoOrderLong = {
   name: 'Long Demo Order',
-  info:     'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
+  info: 'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
   type: 'step',
   status: ORDER_STATUS.TODO,
   steps: [
     {
       name: '拧紧作业指导',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       type: 'screw',
       skippable: false,
@@ -223,7 +224,7 @@ export const demoOrderLong = {
     {
       name: '扫码',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -236,7 +237,7 @@ export const demoOrderLong = {
     {
       name: '扫码',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -249,7 +250,7 @@ export const demoOrderLong = {
     {
       name: '扫码',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -262,7 +263,7 @@ export const demoOrderLong = {
     {
       name: '扫码',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -275,7 +276,7 @@ export const demoOrderLong = {
     {
       name: '扫码',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -288,7 +289,7 @@ export const demoOrderLong = {
     {
       name: '扫码',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -301,7 +302,7 @@ export const demoOrderLong = {
     {
       name: '扫码',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -314,7 +315,7 @@ export const demoOrderLong = {
     {
       name: '扫码',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -327,7 +328,7 @@ export const demoOrderLong = {
     {
       name: '扫码',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -340,7 +341,7 @@ export const demoOrderLong = {
     {
       name: '扫码',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -353,7 +354,7 @@ export const demoOrderLong = {
     {
       name: '扫码',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -366,7 +367,7 @@ export const demoOrderLong = {
     {
       name: '扫码',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -379,7 +380,7 @@ export const demoOrderLong = {
     {
       name: '扫码',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -392,7 +393,7 @@ export const demoOrderLong = {
     {
       name: '扫码',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -405,7 +406,7 @@ export const demoOrderLong = {
     {
       name: '扫码',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -418,7 +419,7 @@ export const demoOrderLong = {
     {
       name: '扫码',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -431,7 +432,7 @@ export const demoOrderLong = {
     {
       name: '扫码',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -444,7 +445,7 @@ export const demoOrderLong = {
     {
       name: '扫码',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -457,7 +458,7 @@ export const demoOrderLong = {
     {
       name: '扫码',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
@@ -480,7 +481,7 @@ export const demoOrderCancel = {
     {
       name: '姓名',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       type: 'input',
       skippable: true,
@@ -503,7 +504,7 @@ export const demoOrderPending = {
     {
       name: '姓名',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       type: 'input',
 
@@ -519,14 +520,14 @@ export const demoOrderPending = {
 
 export const demoOrderDone = {
   name: 'fill info',
-  info:     'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
+  info: 'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
   type: 'step',
   status: ORDER_STATUS.DONE,
   steps: [
     {
       name: '姓名',
       info: {
-        time:'00:02:00'
+        time: '00:02:00'
       },
       type: 'input',
       skippable: true,

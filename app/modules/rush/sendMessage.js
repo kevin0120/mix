@@ -9,7 +9,7 @@ const messageSNs = {};
 
 function* listener(sn) {
   try {
-    const { payload } = yield take((action) => action.type === RUSH.REPLY && action?.payload?.sn === sn);
+    const { payload } = yield take((action) => action.type === RUSH.DATA && action?.payload?.sn === sn);
     delete messageSNs[sn];
     return payload;
   } catch (e) {
@@ -39,8 +39,9 @@ export default function* rushSendMessage(data: Object): Saga<void> {
         sn,
         ...data
       };
-      console.log(msg);
-      // console.log(msg);
+      CommonLog.Info('call rush sendMessage',{
+        msg
+      });
       ws.sendJson(msg, (err) => {
         messageSNs[sn] = true;
         if (err && ws) {

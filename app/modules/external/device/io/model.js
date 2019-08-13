@@ -29,17 +29,11 @@ export default class ClsIOModule extends Device {
 
   #listeners: Array<tIOListener> = [];
 
-  #serialNumber: ?string = null;
-
-  get serialNumber() {
-    return this.#serialNumber;
-  }
-
-  constructor(name: string, serialNumber: string, config: { input: string, output: string }) {
+  constructor(name: string, serialNumber: string, config: { input_num: number, output_num: number }) {
     super(name, serialNumber);
-    const { input, output } = config;
-    this.#maxInputs = input.length;
-    this.#maxOutputs = output.length;
+    const { input_num, output_num } = config;
+    this.#maxInputs = input_num;
+    this.#maxOutputs = output_num;
     for (let i = 0; i < this.#maxInputs; i += 1) {
       this.#ports.push({
         direction: ioDirection.input,

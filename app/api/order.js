@@ -3,40 +3,55 @@ import { call } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import { CommonLog } from '../common/utils';
 import { rushSendApi } from './rush';
+import { ORDER_WS_TYPES } from '../modules/order/handleData';
 
-
-export function* psetApi(toolSN: string = '', stepID: number, userID: number,
-                         pset: number, sequence: number, count: number): Saga<void> {
+export function* orderListApi(): Saga<void> {
   try {
-    return yield call(rushSendApi, 'WS_TOOL_PSET', {
-      tool_sn: toolSN,
-      step_id: stepID,
-      user_id: userID,
-      pset,
-      sequence,
-      count
-    });
+    return yield call(rushSendApi, ORDER_WS_TYPES.LIST);
   } catch (e) {
     CommonLog.lError(e, {
-      at: 'psetApi', toolSN, stepID, userID, pset, sequence, count
+      at: 'jobApi'
     });
   }
 }
 
-export function* jobApi(toolSN: string = '', stepID: number, userID: number, job: number): Saga<void> {
+export function* orderDetailApi(id: number): Saga<void> {
   try {
-    return yield call(rushSendApi, 'WS_TOOL_JOB', {
-      tool_sn: toolSN,
-      step_id: stepID,
-      user_id: userID,
-      job
+    return yield call(rushSendApi, ORDER_WS_TYPES.DETAIL, {
+      id
     });
   } catch (e) {
     CommonLog.lError(e, {
-      at: 'jobApi', toolSN, stepID, userID, job
+      at: 'jobApi'
     });
   }
 }
 
+// 更新工单状态
+export function* orderUpdateApi(id: number, status: string): Saga<void> {
+  try {
+    return yield call(rushSendApi, ORDER_WS_TYPES.UPDATE, {
+      id,
+      status
+    });
+  } catch (e) {
+    CommonLog.lError(e, {
+      at: 'jobApi'
+    });
+  }
+}
+
+// 更新工步状态
+export function* orderStepUpdateApi(id: number, status: string): Saga<void> {
+  try {
+    return yield call(rushSendApi, ORDER_WS_TYPES.STEP_UPDATE, {
+      id, status
+    });
+  } catch (e) {
+    CommonLog.lError(e, {
+      at: 'jobApi'
+    });
+  }
+}
 
 

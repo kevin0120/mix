@@ -115,7 +115,7 @@ const defaultConfigs = {
       hmiSn: {
         displayOrder: 2,
         value:
-          '1560c527ac7f4f9f90e4900b50717929',
+          '1560c527ac7f4f9f90e4900b50717123',
         displayTitle:
           'Configuration.connections.HMI'
       }
@@ -257,7 +257,7 @@ const defaultConfigs = {
 
     },
     connections: {
-      rush: 'http://192.168.4.219:8082',//
+      rush: 'http://192.168.4.188:8082',//4.188//4.219
       rfid: 'tcp://127.0.0.1:2112',
       aiis: 'http://127.0.0.1:9092'
     }

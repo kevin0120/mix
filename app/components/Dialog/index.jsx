@@ -12,7 +12,7 @@ import { DialogActions } from '@material-ui/core';
 import styles from './style';
 import dialogActions from '../../modules/dialog/action';
 import Button from '../CustomButtons/Button';
-import { Dispatch } from '../../modules/indexReducer';
+import type { Dispatch } from '../../modules/indexReducer';
 import type { tDialogConfig } from '../../modules/dialog/model';
 
 const mapState = (state, props) => ({
@@ -73,7 +73,7 @@ function customDialog(props: Props) {
           </DialogContent>
           <DialogActions>
             {
-              buttons?.map((b, idx) => b ?
+              buttons && buttons.map((b, idx) => b ?
                 <Button key={b.label} onClick={() => onButton(idx)} color={b.color || 'info'} regular>
                   {t(b.label || '')}
                 </Button> : null) || null

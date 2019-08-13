@@ -58,7 +58,6 @@ function ConnectedNavBar(
     return (!Object.keys(healthCheckResults).some(r => !healthCheckResults[r]));
   }
 
-  console.log(healthCheckResults);
   const [healthOK, setHealthOK] = useState(false);
 
   useEffect(() => {

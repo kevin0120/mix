@@ -9,7 +9,8 @@ export function* rushSendApi(msgType, data, timeout = defaultTimeout): Saga<void
   try {
     const { resp, timeout: tOut } = yield race({
       resp: call(rushSendMessage, {
-        type: msgType
+        type: msgType,
+        data
       }),
       timeout: delay(timeout)
     });
