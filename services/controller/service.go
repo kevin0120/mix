@@ -113,6 +113,10 @@ func (s *Service) Write(serialNo string, buf []byte) error {
 }
 
 func (s *Service) Open() error {
+	if !s.config.Enable {
+		return nil
+	}
+
 	s.Handlers.Init(s.config.Workers)
 
 	for i := 0; i < s.config.Workers; i++ {

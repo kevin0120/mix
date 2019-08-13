@@ -24,11 +24,11 @@ type IoSet struct {
 }
 
 type IoData struct {
-	Inputs string `json:"inputs"`
+	Inputs  string `json:"inputs"`
 	Outputs string `json:"outputs"`
 }
 
 type IoConfig struct {
-	InputNum uint16  `json:"input_num"`
-	OutputNum uint16  `json:"output_num"`
+	InputNum  uint16 `json:"input_num"`
+	OutputNum uint16 `json:"output_num"`
 }

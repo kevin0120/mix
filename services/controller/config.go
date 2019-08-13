@@ -29,6 +29,7 @@ type ToolConfig struct {
 }
 
 type Config struct {
+	Enable  bool               `yaml:"enable"`
 	Workers int                `yaml:"workers"`
 	Configs []ControllerConfig `yaml:"controllers"`
 }
@@ -62,6 +63,7 @@ func NewConfig() Config {
 	configs = append(configs, newControllerConf())
 
 	return Config{
+		Enable:  false,
 		Workers: 4,
 		Configs: configs,
 	}

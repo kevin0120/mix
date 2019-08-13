@@ -78,7 +78,7 @@ func (s *IOModule) Data() interface{} {
 	}
 
 	return IoData{
-		Inputs: inputs,
+		Inputs:  inputs,
 		Outputs: outputs,
 	}
 }
@@ -87,7 +87,7 @@ func (s *IOModule) Config() interface{} {
 	vendor := VENDOR_MODELS[s.cfg.Model]
 
 	return IoConfig{
-		InputNum: vendor.Cfg().InputNum,
+		InputNum:  vendor.Cfg().InputNum,
 		OutputNum: vendor.Cfg().OutputNum,
 	}
 }

@@ -5,10 +5,10 @@ const (
 )
 
 type DeviceStatus struct {
-	SN     string `json:"sn"`
-	Type   string `json:"type"`
-	Status string `json:"status"`
-	Children []string `json:"children"`
-	Config interface{} `json:"config"`
-	Data interface{} `json:"data"`
+	SN       string      `json:"sn"`
+	Type     string      `json:"type"`
+	Status   string      `json:"status"`
+	Children []string    `json:"children"`
+	Config   interface{} `json:"config"`
+	Data     interface{} `json:"data"`
 }
