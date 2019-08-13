@@ -5,7 +5,7 @@ import { createMuiTheme, makeStyles, MuiThemeProvider } from '@material-ui/core/
 import Button from '../CustomButtons/Button';
 import styles from './styles';
 
-function NavBarMenu({ statusOK, title, contents }) {
+function NavBarMenu({ statusOK, title,children,onClick }) {
   const classes = makeStyles(styles.NavBarMenu)();
   const [showMenu, setShowMenu] = useState(null);
   const statusClassName = statusOK
@@ -15,33 +15,37 @@ function NavBarMenu({ statusOK, title, contents }) {
 
   return (
     <React.Fragment>
-        <Button
-          variant="contained"
-          onClick={e => setShowMenu(e.currentTarget)}
-          className={statusClassName}
-        >
-          {title}
-        </Button>
-        <Menu
-          id="menu-sysInfo"
-          anchorEl={showMenu}
-          anchorOrigin={{
-            vertical: 'top',
-            horizontal: 'left'
-          }}
-          transformOrigin={{
-            vertical: 'bottom',
-            horizontal: 'left'
-          }}
-          open={open}
-          onClose={() => setShowMenu(null)}
-          TransitionComponent={Fade}
-          classes={{
-            paper: classes.popover
-          }}
-        >
-          {contents}
-        </Menu>
+      <Button
+        variant="contained"
+        onClick={e => {
+          onClick(e);
+          setShowMenu(e.currentTarget);
+
+        }}
+        className={statusClassName}
+      >
+        {title}
+      </Button>
+      <Menu
+        id="menu-sysInfo"
+        anchorEl={showMenu}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'left'
+        }}
+        transformOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left'
+        }}
+        open={open}
+        onClose={() => setShowMenu(null)}
+        TransitionComponent={Fade}
+        classes={{
+          paper: classes.popover
+        }}
+      >
+        {children}
+      </Menu>
     </React.Fragment>
   );
 }

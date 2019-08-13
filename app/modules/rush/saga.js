@@ -9,17 +9,14 @@ import { setHealthzCheck } from '../healthzCheck/action';
 import { setNewNotification } from '../notification/action';
 import { CommonLog } from '../../common/utils';
 import handleData from './handleData';
-import handleHealthz from './handleHealthz';
+import rushHealthz from './rushHealthz';
 import { WEBSOCKET_EVENTS } from './type';
+import {getWSClient, setWSClient} from './client';
 
 let task = null;
-let ws = null;
 const WebSocket = require('@oznu/ws-connect');
 
 
-export function getWSClient() {
-  return ws;
-}
 
 export function* watchRushEvent(): Saga<void> {
   try {
@@ -44,7 +41,7 @@ function* initRush() {
 
     yield call(stopRush);
 
-    ws = new WebSocket(wsURL, { reconnectInterval: 3000 });
+    setWSClient(new WebSocket(wsURL, { reconnectInterval: 3000 }));
 
     task = yield fork(
       watchRushChannel,
@@ -54,10 +51,11 @@ function* initRush() {
   } catch (e) {
     CommonLog.lError(e, { at: 'initRush' });
   } finally {
+    const ws=getWSClient();
     if (!(ws && task)) {
       if (ws) {
         ws.close();
-        ws = null;
+        setWSClient(null);
       }
       if (task) {
         yield cancel(task);
@@ -73,20 +71,20 @@ function* stopRush() {
       yield cancel(task);
       task = null;
     }
-    if (!ws) {
+    if (!getWSClient()) {
       return;
     }
     if (
-      ws.ws.readyState === OWebSocket.OPEN ||
-      ws.ws.readyState === OWebSocket.CONNECTING
+      getWSClient().ws.readyState === OWebSocket.OPEN ||
+      getWSClient().ws.readyState === OWebSocket.CONNECTING
     ) {
       yield put(setHealthzCheck('masterpc', false));
       yield put(setNewNotification('Info', `masterPC连接状态更新: false`));
       yield put(setHealthzCheck('controller', false));
       yield put(setNewNotification('Info', `controller连接状态更新: false`));
-      ws.close();
+      getWSClient().close();
     }
-    ws = null;
+    setWSClient(null);
   } catch (e) {
     CommonLog.lError(e, { at: 'stopRush' });
   }
@@ -94,6 +92,7 @@ function* stopRush() {
 
 function createRushChannel(hmiSN: string): EventChannel<void> {
   return eventChannel(emit => {
+    const ws=getWSClient();
     if (ws) {
       ws.on('open', () => {
         emit({ type: 'healthz', payload: true });
@@ -152,7 +151,7 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
 }
 
 const rushChannelHandlers = {
-  healthz: handleHealthz,
+  healthz: rushHealthz,
   data: handleData
 };
 

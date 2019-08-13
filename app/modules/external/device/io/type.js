@@ -37,18 +37,18 @@ const IO_FUNCTION = {
   }
 };
 
-export const DefaultMaxInputs = 8;
-export const DefaultMaxOutputs = 8;
+export const DefaultInput = '00000000';
+export const DefaultOutput = '00000000';
 
 
 // 上升沿，下降沿，双向(toggle)
 
-export const ioTriggerMode={
-  rising:'rising',
-  falling:'falling',
+export const ioTriggerMode = {
+  rising: 'rising',
+  falling: 'falling',
   // high:'high',
   // low:'low',
-  change:'change',
+  change: 'change'
 };
 // export type tIOTriggerMode = 'Rising' | 'Falling' | 'Bidirectional';
 export type tIOTriggerMode = $Keys<typeof ioTriggerMode>;
@@ -73,7 +73,7 @@ export type tIOData = {
 export type tIOListener = {
   port: tIOPort,
   triggerMode: tIOTriggerMode,
-  
+
   // eslint-disable-next-line flowtype/no-weak-types
   dispatcher: (...args: any) => AnyAction
 };

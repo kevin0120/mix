@@ -13,7 +13,9 @@ export const WEBSOCKET_EVENTS = {
   tool: 'tool',
   reader: 'reader',
   tightening_device: 'tightening_device',
-  reply: 'reply'
+  reply: 'reply',
+  order: 'order',
+  device: 'device'
 };
 
 export type tWebSocketEvent = $Keys<typeof WEBSOCKET_EVENTS>;
@@ -21,14 +23,13 @@ export type tWebSocketEvent = $Keys<typeof WEBSOCKET_EVENTS>;
 /* eslint-disable flowtype/no-weak-types */
 export type tRushWebSocketData = {
   +type: string,
-  +data: { [key: string]: any }
+  +data: { [key: string]: any } | Array<any>
 };
 
 export type tBarcode = {
   +id: string,
   +barcode: string
 };
-
 
 
 /* eslint-enable flowtype/no-weak-types */

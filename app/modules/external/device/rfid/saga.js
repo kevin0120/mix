@@ -11,7 +11,7 @@ import { CommonLog } from '../../../../common/utils';
 import type { tCommonActionType, tDeviceNewData } from '../type';
 
 // eslint-disable-next-line prefer-const
-let Rfid = new ClsRFID('RFID');
+let Rfid = new ClsRFID('RFID','demo rfid sn');
 
 const DebounceWaitTime = 2000;
 

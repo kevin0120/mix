@@ -14,7 +14,6 @@ import type {
   tIOChange
 } from './type';
 import { CommonLog } from '../../../../common/utils';
-import { AppendNewDevices, symIO } from '../global';
 import { ioDirection, ioTriggerMode } from './type';
 import { ioSetApi, ioContactApi, ioStatusApi } from '../../../../api/io';
 
@@ -36,24 +35,23 @@ export default class ClsIOModule extends Device {
     return this.#serialNumber;
   }
 
-  constructor(name: string, serialNumber: string, inputs: number, outputs: number) {
-    super(name);
-    this.#serialNumber = serialNumber;
-    this.#maxInputs = inputs;
-    this.#maxOutputs = outputs;
-    for (let i = 0; i < inputs; i += 1) {
+  constructor(name: string, serialNumber: string, config: { input: string, output: string }) {
+    super(name, serialNumber);
+    const { input, output } = config;
+    this.#maxInputs = input.length;
+    this.#maxOutputs = output.length;
+    for (let i = 0; i < this.#maxInputs; i += 1) {
       this.#ports.push({
         direction: ioDirection.input,
         idx: i
       });
     }
-    for (let i = 0; i < outputs; i += 1) {
+    for (let i = 0; i < this.#maxOutputs; i += 1) {
       this.#ports.push({
         direction: ioDirection.output,
         idx: i
       });
     }
-    AppendNewDevices(symIO, this);
     /* eslint-disable flowtype/no-weak-types */
     (this: any).setIO = this.setIO.bind(this);
     (this: any).openIO = this.openIO.bind(this);
@@ -176,10 +174,10 @@ export default class ClsIOModule extends Device {
     return null;
   }
 
-  *doDispatch(newData: tIOContact): Saga<void>{
+  * doDispatch(newData: tIOContact): Saga<void> {
     // CommonLog.Info(`IO Module Please Use doHandleIOData Method`);
     try {
-      const actions=this._doHandleIOData(newData)
+      const actions = this._doHandleIOData(newData);
       if (actions instanceof Array) {
         // eslint-disable-next-line
         for (const a of actions) {
@@ -188,9 +186,9 @@ export default class ClsIOModule extends Device {
       }
 
     } catch (e) {
-      CommonLog.lError(e,{
-        at:'doDispatch',
-        data:newData
+      CommonLog.lError(e, {
+        at: 'doDispatch',
+        data: newData
       });
     }
   }

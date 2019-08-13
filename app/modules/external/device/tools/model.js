@@ -3,8 +3,7 @@
 import type { Saga } from 'redux-saga';
 import { call } from 'redux-saga/effects';
 import Device from '../Device';
-import { symTool, AppendNewDevices } from '../global';
-import ClsController from '../controller/model';
+// import ClsController from '../controller/model';
 import type { AnyAction, tInputData } from '../type';
 import screwStepAction from '../../../step/screwStep/action';
 import { CommonLog } from '../../../../common/utils';
@@ -12,22 +11,15 @@ import { toolEnableApi } from '../../../../api/tools';
 
 export const defaultScrewToolDispatcher = (data: tInputData): AnyAction => screwStepAction.result(data);
 
-class ClsScrewTool extends Device {
-
-  _serialNumber: ?string = null;
-
-  #belongTo: ?ClsController = null;
+export default class ClsScrewTool extends Device {
 
   constructor(name: string, serialNumber: string) {
-    super(name);
-    this.serialNumber = serialNumber;
-    AppendNewDevices(symTool, this);
+    super(name,serialNumber);
     /* eslint-disable flowtype/no-weak-types */
     (this: any).Enable = this.Enable.bind(this);
     (this: any).Disable = this.Disable.bind(this);
     (this: any).ToggleEnable = this.ToggleEnable.bind(this);
     /* eslint-enable flowtype/no-weak-types */
-
   }
 
   doValidate(data: string | number): boolean {
@@ -37,21 +29,7 @@ class ClsScrewTool extends Device {
     return ret;
   }
 
-  set BelongTo(controller: ClsController) {
-    this.#belongTo = controller;
-  }
 
-  get BelongTo() {
-    return this.#belongTo;
-  }
-
-  set serialNumber(sn: string) {
-    this._serialNumber = sn;
-  }
-
-  get serialNumber() {
-    return this._serialNumber;
-  }
 
   * Enable(): Saga<void> {
     try {
@@ -114,7 +92,3 @@ class ClsScrewTool extends Device {
     }
   }
 }
-
-export default ClsScrewTool;
-
-

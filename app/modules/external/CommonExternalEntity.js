@@ -1,3 +1,4 @@
+// @flow
 import { isEqual } from 'lodash-es';
 import type { Saga } from 'redux-saga';
 import { CommonLog } from '../../common/utils';
@@ -13,6 +14,10 @@ export default class CommonExternalEntity implements IHealthChecker {
 
   #enable: boolean = false;
 
+  #_children: Set<CommonExternalEntity> = new Set([]);
+
+  #_parent: ?CommonExternalEntity = null;
+
   constructor(name: string) {
     this.#name = name;
 
@@ -23,6 +28,39 @@ export default class CommonExternalEntity implements IHealthChecker {
     /* eslint-enable flowtype/no-weak-types */
   }
 
+  set parent(p: CommonExternalEntity) {
+    this.#_parent = p;
+  }
+
+  get parent(){
+    return this.#_parent;
+  }
+
+  appendChildren(children: Array<CommonExternalEntity> | CommonExternalEntity) {
+    if (children instanceof Array) {
+      children.forEach((c) => {
+        this.#_children.add(c);
+      });
+    } else {
+      this.#_children.add(children);
+    }
+  }
+
+  deleteChildren(children: Array<CommonExternalEntity>) {
+    if (children instanceof Array) {
+      children.forEach(c => {
+        this.#_children.delete(c);
+      });
+    }
+  };
+
+  getChildren(patten: (CommonExternalEntity)=>boolean) {
+    if (!patten) {
+      return [...this.#_children];
+    }
+    return [...this.#_children].filter(patten);
+  }
+
   set Healthz(isHealthz: boolean) {
     if (isEqual(this.#isHealthz, isHealthz)) {
       return;
@@ -30,6 +68,11 @@ export default class CommonExternalEntity implements IHealthChecker {
     this.#isHealthz = isHealthz;
     if (!isHealthz) {
       this.Disable();
+    }
+    if (this.#_children) {
+      this.#_children.forEach(c => {
+        c.Healthz = false;
+      });
     }
     const msg = `${this.#name} Healthz Status Change: ${isHealthz.toString()}`;
     CommonLog.Info(msg);

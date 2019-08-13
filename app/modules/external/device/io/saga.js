@@ -1,62 +1,66 @@
 // @flow
 // redux-saga
 import {
-  call,
+  call
 } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 // reducers
 import ClsIOModule from './model';
-import IO_FUNCTION, { DefaultMaxInputs, DefaultMaxOutputs } from './type';
+import { DefaultInput, DefaultOutput } from './type';
 import { CommonLog } from '../../../../common/utils';
-import type { tRushWebSocketData } from '../../../rush/type';
 
 // config
 
-const io = {
-  channel: null,
-  client: null,
-  recon: null,
-  currentKeyStatus: null,
-  modbusClient: null,
-  senderReceiver: null,
-  runningTask: null,
-  health: false,
-  i: {
-    resetKey: 0,
-    byPass: 1,
-    modeSelect: 2
-  },
-  o: {
-    white: 0,
-    yellow: 1,
-    green: 2,
-    red: 3,
-    beep: 4
-  }
+// const io = {
+//   channel: null,
+//   client: null,
+//   recon: null,
+//   currentKeyStatus: null,
+//   modbusClient: null,
+//   senderReceiver: null,
+//   runningTask: null,
+//   health: false,
+//   i: {
+//     resetKey: 0,
+//     byPass: 1,
+//     modeSelect: 2
+//   },
+//   o: {
+//     white: 0,
+//     yellow: 1,
+//     green: 2,
+//     red: 3,
+//     beep: 4
+//   }
+// };
+
+export const defaultIO = new ClsIOModule('IO Module', '1', { input: DefaultInput, output: DefaultOutput });
+
+type tIORushData = {
+  type: string,
+  data: Object
 };
 
-export const defaultIO = new ClsIOModule('IO Module', "1", DefaultMaxInputs, DefaultMaxOutputs);
-
-export default function* ioNewData(data: tRushWebSocketData): Saga<void>{
-    try {
-      const msgType = data.type;
-      switch (msgType) {
-        case 'WS_IO_CONTACT':
-          yield call(defaultIO.doDispatch,{
-            sn: data.data.sn,
-            direction: data.data.type,
-            contact: data.data.contact
-          });
-          break;
-        case 'WS_IO_STATUS':
-          console.log(data);
-          break;
-        default:
-          CommonLog.lError('IO Message Type Is Not Defined', { msgType });
-      }
-    } catch (e) {
-      CommonLog.lError(e, { at: 'rush event io' });
+export default function* ioNewData(data: tIORushData): Saga<void> {
+  try {
+    const msgType = data.type;
+    switch (msgType) {
+      case 'WS_IO_CONTACT':
+        yield call(defaultIO.doDispatch, {
+          sn: data.data.sn,
+          direction: data.data.type,
+          contact: data.data.contact
+        });
+        break;
+      case 'WS_IO_STATUS':
+        console.log(data);
+        break;
+      default:
+        CommonLog.lError('IO Message Type Is Not Defined', { msgType });
     }
+  } catch (e) {
+    CommonLog.lError(e, { at: 'rush event io' });
+  }
 }
 
 //

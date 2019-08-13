@@ -1,62 +1,55 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { I18n } from 'react-i18next';
-
 import { withStyles } from '@material-ui/core/styles';
-
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import MenuList from '@material-ui/core/MenuList';
-
-import * as Utils from '../../common/utils';
-
 import styles from './styles';
 
-const lodash = require('lodash');
 
-class ConnectedHealthCheck extends React.Component {
+class HealthCheck extends React.Component {
   render() {
-    const { classes, healthCheckResults } = this.props;
+    const { status, classes } = this.props;
 
-    const results = lodash.filter(healthCheckResults, 'enable');
 
     const styleOptions = { disableGutters: false };
 
-    return Utils.sortObj(results, 'displayOrder').map(
-      ({ key, value: item }) => {
-        const { isHealth, displayTitle } = item;
+    return Object.keys(status).sort((a, b) => a.localeCompare(b, 'zh-CN')).map(
+      (k) => {
+        const isHealth = status[k];
+        const displayTitle = k;
         const statusClassName = isHealth
           ? classes.infoSuccess
           : classes.infoError;
 
         return (
-          <I18n ns="translations" key={`health-check-${key}`}>
+          <I18n ns="translations" key={`health-check-${k}`}>
             {t => (
-              <MenuList>
-                <ListItem
-                  disableGutters={styleOptions.disableGutters}
-                  className={classes.infoItem}
-                >
-                  <ListItemText
-                    className={classes.infoText}
-                    primary={t(displayTitle)}
-                  />
-                  <div className={`${classes.infoStatus} ${statusClassName}`} />
-                </ListItem>
-              </MenuList>
+              <ListItem
+                disableGutters={styleOptions.disableGutters}
+                className={classes.infoItem}
+              >
+                <ListItemText
+                  className={classes.infoText}
+                  primary={t(displayTitle)}
+                />
+                <div className={`${classes.infoStatus} ${statusClassName}`}/>
+              </ListItem>
             )}
           </I18n>
         );
       }
     );
   }
+
 }
 
-ConnectedHealthCheck.propTypes = {
+HealthCheck.propTypes = {
   // styles
   classes: PropTypes.shape({}).isRequired,
-  healthCheckResults: PropTypes.shape({}).isRequired
+  status: PropTypes.shape({}).isRequired
   // functions
 };
 
-export default withStyles(styles)(ConnectedHealthCheck);
+export default withStyles(styles)(HealthCheck);

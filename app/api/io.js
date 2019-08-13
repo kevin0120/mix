@@ -1,89 +1,45 @@
 // @flow
-import { call, delay, race } from 'redux-saga/effects';
+import { call } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import { CommonLog } from '../common/utils';
-import rushSendMessage from '../modules/rush/sendMessage';
-
-const timeout = 10000;
+import { rushSendApi } from './rush';
 
 type tIOSn = string;
 
 export function* ioSetApi(sn: tIOSn, index: number, status: string): Saga<void> {
   try {
-    const { resp, timeout: tOut } = yield race({
-      resp: call(rushSendMessage, {
-        type: 'WS_IO_SET',
-        data: {
-          sn,
-          index,
-          status
-        }
-      }),
-      timeout: delay(timeout)
+    return yield call(rushSendApi, 'WS_IO_SET', {
+      sn,
+      index,
+      status
     });
-    if (tOut) {
-      return {
-        result: -1,
-        msg: 'ioSetApi timeout'
-      };
-    }
-    const { data } = resp;
-    return data;
   } catch (e) {
     CommonLog.lError(e, {
-      at: 'psetApi'
+      at: 'ioSetApi'
     });
   }
 }
 
 export function* ioContactApi(sn: tIOSn): Saga<void> {
   try {
-    const { resp, timeout: tOut } = yield race({
-      resp: call(rushSendMessage, {
-        type: 'WS_IO_CONTACT',
-        data: {
-          sn
-        }
-      }),
-      timeout: delay(timeout)
+    return yield call(rushSendApi, 'WS_IO_CONTACT', {
+      sn
     });
-    if (tOut) {
-      return {
-        result: -1,
-        msg: 'ioContact timeout'
-      };
-    }
-    const { data } = resp;
-    return data;
   } catch (e) {
     CommonLog.lError(e, {
-      at: 'psetApi'
+      at: 'ioContact'
     });
   }
 }
 
 export function* ioStatusApi(sn: tIOSn): Saga<void> {
   try {
-    const { resp, timeout: tOut } = yield race({
-      resp: call(rushSendMessage, {
-        type: 'WS_IO_STATUS',
-        data: {
-          sn
-        }
-      }),
-      timeout: delay(timeout)
+    return yield call(rushSendApi, 'WS_IO_STATUS', {
+      sn
     });
-    if (tOut) {
-      return {
-        result: -1,
-        msg: 'ioStatus timeout'
-      };
-    }
-    const { data } = resp;
-    return data;
   } catch (e) {
     CommonLog.lError(e, {
-      at: 'psetApi'
+      at: 'ioStatusApi'
     });
   }
 }

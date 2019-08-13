@@ -2,7 +2,7 @@
 import type { Saga } from 'redux-saga';
 import { take, fork, join } from 'redux-saga/effects';
 import { CommonLog } from '../../common/utils';
-import { getWSClient } from './saga';
+import { getWSClient } from './client';
 import { RUSH } from './action';
 
 const messageSNs = {};
@@ -35,15 +35,16 @@ export default function* rushSendMessage(data: Object): Saga<void> {
       const sn = getSN();
       // const sn = 1;
       const listenReplyTask = yield fork(listener, sn);
-      const msg={
+      const msg = {
         sn,
         ...data
       };
+      console.log(msg);
       // console.log(msg);
-      ws.sendJson(msg, (err )=> {
+      ws.sendJson(msg, (err) => {
         messageSNs[sn] = true;
         if (err && ws) {
-          CommonLog.lError(err );
+          CommonLog.lError(err);
           delete messageSNs[sn];
         }
       });
@@ -51,7 +52,7 @@ export default function* rushSendMessage(data: Object): Saga<void> {
     }
   } catch (e) {
     CommonLog.lError(e);
-  }finally{
+  } finally {
     // console.log('rushSendMessage finished');
   }
 }

@@ -41,7 +41,7 @@ function* healthzCheckTask(url, controllers) {
           yield put(setHealthzCheck('controller', controllerHealthzStatus));
           yield put(
             setNewNotification(
-              'info',
+              'Info',
               `控制器连接状态更新: ${controllerHealthzStatus}`
             )
           );

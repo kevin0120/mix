@@ -1,3 +1,4 @@
+// @flow
 import { isURL } from 'validator/lib/isURL';
 import { CommonLog } from '../../common/utils';
 import CommonExternalEntity from './CommonExternalEntity';

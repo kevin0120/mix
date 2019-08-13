@@ -9,6 +9,7 @@ import rushActions from './action';
 import readerNewData from '../external/device/reader/saga';
 import scannerNewData from '../external/device/scanner/saga';
 import ioNewData from '../external/device/io/saga';
+import { deviceStatus } from '../external/device';
 
 export default function* (payload) {
   try {
@@ -74,6 +75,7 @@ const rushDataHandlers = {
 
   [wse.result]: toolNewResults,
 
-  [wse.tool]: toolStatusChange
+  [wse.tool]: toolStatusChange,
 
+  [wse.device]: deviceStatus
 };

@@ -1,5 +1,5 @@
 // @flow
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { AppBar } from '@material-ui/core';
 import lodash from 'lodash';
@@ -12,10 +12,10 @@ import PageEntrance from '../pageEntrance';
 import styles from './styles';
 import Avatar from '../Avatar';
 import SysInfo from '../sysInfo';
-
+import healthzActions from '../../modules/healthz/action';
 import NavBarMenu from './NavBarMenu';
 import LanguageMenu from './LanguageMenu';
-import type { tRouteObj,tUrl } from '../../containers/model';
+import type { tRouteObj, tUrl } from '../../containers/model';
 import type { Dispatch } from '../../modules/indexReducer';
 import type { tUser } from '../../modules/user/model';
 import notifyActions from '../../modules/Notifier/action';
@@ -47,18 +47,28 @@ function ConnectedNavBar(
     self,
     logout,
     contents,
-    getContentByUrl
+    getContentByUrl,
+    updateHealthz
   }: Props) {
 
+  /**
+   * @return {boolean}
+   */
   function HealthCheckOk() {
-    const results = lodash.filter(healthCheckResults, 'enable');
-    return lodash.every(results, ['isHealth', true]);
+    return (!Object.keys(healthCheckResults).some(r => !healthCheckResults[r]));
   }
+
+  console.log(healthCheckResults);
+  const [healthOK, setHealthOK] = useState(false);
+
+  useEffect(() => {
+    setHealthOK(HealthCheckOk);
+  }, [healthCheckResults]);
 
   const renderSysInfoMenu = (key) =>
     <NavBarMenu
       key={key}
-      statusOK={HealthCheckOk()}
+      statusOK={healthOK}
       title="系统"
       contents={<SysInfo/>}
     />;
@@ -66,11 +76,12 @@ function ConnectedNavBar(
   const renderHealthCheckMenu = (key) =>
     <NavBarMenu
       key={key}
-      statusOK={HealthCheckOk()}
+      statusOK={healthOK}
       title="连接"
-      contents={<HealthCheck healthCheckResults={healthCheckResults}/>
-      }
-    />;
+      onClick={()=>updateHealthz()}
+    >
+      <HealthCheck status={healthCheckResults}/>
+    </NavBarMenu>;
 
   const renderLanguageMenu = (key) =>
     <LanguageMenu
@@ -144,7 +155,7 @@ const mapState = (state, ownProps) => ({
   users: state.users,
   orderStatus: state.operations.operationStatus,
   workMode: state.workMode.workMode,
-  healthCheckResults: state.healthCheckResults,
+  healthCheckResults: state.healthz.status||{},
   path: state.router.location.pathname,
   ...ownProps
 });
@@ -152,7 +163,8 @@ const mapState = (state, ownProps) => ({
 const mapDispatch = {
   doPush: push,
   notification: notifyActions.enqueueSnackbar,
-  logout: logoutRequest
+  logout: logoutRequest,
+  updateHealthz:healthzActions.update
 };
 
 export default connect(

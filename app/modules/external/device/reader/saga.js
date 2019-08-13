@@ -1,20 +1,23 @@
 // @flow
 
-import { call, takeLatest } from 'redux-saga/effects';
+import { call } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import ClsReader from './model';
 import { CommonLog } from '../../../../common/utils';
-import { symReader, AppendNewDevices } from '../global';
-import type { tRushWebSocketData } from '../../../rush/type';
+import { AppendNewDevices } from '../index';
 import type { tReaderData } from './model';
 
 
-export const reader = new ClsReader(symReader);
-AppendNewDevices(symReader, reader);
+export const reader = new ClsReader('reader', 'demo reader sn');
+AppendNewDevices(reader);
 // TODO: 收到读卡器uid后，分发给user模块进行用户认证
 
+type tReaderRushData = {
+  type: string,
+  data: tReaderData
+}
 
-export default function* readerNewData(data: tRushWebSocketData): Saga<void> {
+export default function* readerNewData(data: tReaderRushData): Saga<void> {
   try {
     const d = (data.data: tReaderData);
     CommonLog.Info(` Reader receive data: ${d.uid}`);

@@ -1,3 +1,4 @@
+// @flow
 import type { Action } from 'redux';
 
 // eslint-disable-next-line flowtype/no-weak-types

@@ -18,7 +18,7 @@ import andon from './andon/saga';
 import order from './order/saga';
 import dialog from './dialog/saga';
 import { CommonLog } from '../common/utils';
-
+import healthz from './healthz/saga';
 export default function* rootSaga(): Saga<void> {
   try {
     const state = yield select();
@@ -32,7 +32,6 @@ export default function* rootSaga(): Saga<void> {
       watchRushEvent(),
 
       user(),// auth
-      // healthz
       // healthzCheckFlow(),
       // watchSettingPreSave(),
       sysInitFlow(),
@@ -42,7 +41,8 @@ export default function* rootSaga(): Saga<void> {
       watchPower(),
       andonEnable ? andon() : null,
       order(),
-      dialog()
+      dialog(),
+      healthz()
     ]);
   } catch (e) {
     CommonLog.lError(e);

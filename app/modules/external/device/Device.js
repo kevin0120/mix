@@ -1,3 +1,4 @@
+// @flow
 import { isEmpty, isNil, isString } from 'lodash-es';
 import type { Saga } from 'redux-saga';
 import { put } from 'redux-saga/effects';
@@ -7,15 +8,21 @@ import CommonExternalEntity from '../CommonExternalEntity';
 
 const defaultValidatorFunc = (data: string | number): boolean => true;
 
-export default class Device extends CommonExternalEntity{
+export type tDeviceSN = string;
+
+
+export default class Device extends CommonExternalEntity {
 
   #dispatcher: null | (?tInput) => AnyAction = null;
 
   #validator: null | (data: tInputData) => boolean = defaultValidatorFunc;
 
+  #_serialNumber: ?tDeviceSN = null;
+
   // eslint-disable-next-line flowtype/no-weak-types
-  constructor(name: string) {
+  constructor(name: string, sn: tDeviceSN) {
     super(name);
+    this.#_serialNumber = sn;
     // eslint-disable-next-line flowtype/no-weak-types
     (this: any).doDispatch = this.doDispatch.bind(this);
   }
@@ -48,10 +55,10 @@ export default class Device extends CommonExternalEntity{
         CommonLog.Info(msg);
         return;
       }
-      if(!this.doValidate(data)){
+      if (!this.doValidate(data)) {
         const msg = `data ${data} didn't pass validator at ${this.source}`;
         CommonLog.Info(msg);
-        return ;
+        return;
       }
       if (!this.dispatcher) {
         const msg = `${this.source} Validator is Nil, Please set Validator First`;
@@ -97,5 +104,9 @@ export default class Device extends CommonExternalEntity{
   RemoveDispatcher(): boolean {
     this.#dispatcher = null;
     return true;
+  }
+
+  get serialNumber() {
+    return this.#_serialNumber;
   }
 }

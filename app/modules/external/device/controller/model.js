@@ -1,23 +1,18 @@
 // @flow
 
-import Device from '../Device'
-import { symController, AppendNewDevices } from '../global';
-
-
-// export const defaultReaderDispatcher = (data) => readerStepAction.getValue(data);
+import Device from '../Device';
 
 class ClsController extends Device {
 
   #serialNumber: ?string = null;
 
-  constructor(name: string, serialNumber: string){
-    super(name);
+  constructor(name: string, serialNumber: string) {
+    super(name, serialNumber);
     this.#serialNumber = serialNumber;
-    AppendNewDevices(symController, this);
   }
 
   set serialNumber(sn: string) {
-    this.#serialNumber = sn
+    this.#serialNumber = sn;
   }
 
   get serialNumber() {
