@@ -24,7 +24,6 @@ export default function* (stepType) {
       function* runStep() {
         try {
           while (true) {
-          debugger;
             const { status } = yield take(ORDER.STEP.STATUS);
             if (statusTask) {
               yield cancel(statusTask);
