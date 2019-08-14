@@ -8,6 +8,7 @@ export type tStockMove = {
 };
 
 export type tOrder = {
+  id: number,
   canRework: boolean, // 是否能够返工
   incomingProducts: Array<tStockMove>,
   finishedProducts: Array<tStockMove>, //

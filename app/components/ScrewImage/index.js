@@ -13,6 +13,7 @@ export default function ScrewImage({ style, image, points, focus, activeIndex, o
     width: 100,
     height: 100
   });
+  console.log(points);
 
   const handleResize = () => {
     if (containerRef?.offsetHeight && containerRef?.offsetWidth) {
@@ -55,7 +56,7 @@ export default function ScrewImage({ style, image, points, focus, activeIndex, o
     >
       <img
         ref={r => setImageRef(r)}
-        src={image}
+        src={image || ''}
         className={classes.image}
         alt="job"
         onLoad={() => handleResize && handleResize()}

@@ -3,7 +3,7 @@
 import { ORDER } from './action';
 import { genReducers } from '../util';
 import { ORDER_STATUS } from './model';
-import type { tOrder, tOrderState, tOrderStepIdx, tStep } from './model';
+import type { tOrder, tOrderState, tOrderStatus, tOrderStepIdx, tStep } from './model';
 import STEP_STATUS from '../step/model';
 import {
   demoOrder,
@@ -67,36 +67,68 @@ function limitIndex(order: ?tOrder, index: tOrderStepIdx): tOrderStepIdx {
   return index;
 }
 
+function clearWorkingOrderIfMatch(state, order) {
+  const wOrder = workingOrder(state);
+  if (wOrder === order) {
+    return {
+      ...state,
+      workingOrder: null
+    };
+  }
+  return state;
+}
+
+function orderStatus(state: tOrderState, order: tOrder, status: tOrderStatus) {
+  const newOrder = order;
+  if (newOrder) {
+    newOrder.status = status;
+  }
+  return {
+    ...state
+  };
+}
+
+function stepTime(step: ?tStep, isStart: boolean) {
+  const newStep = step;
+  if (!(newStep && newStep.times)) {
+    return;
+  }
+  const isStarted = newStep.times.length % 2 === 1;
+  if ((isStart && !isStarted) || (!isStart && isStarted)) {
+    newStep.times.push(new Date());
+  }
+}
+
+
 const orderReducer: {
   // eslint-disable-next-line flowtype/no-weak-types
   [key: string]: (tOrderState, { type: string, [key: any]: any }) => tOrderState
 } = {
-  [ORDER.LIST.SUCCESS]:(state,{list})=>{
-    let newList=state.list.filter(
-      (o)=>!!list.find(newO=>o.id===newO.id)
+  [ORDER.LIST.SUCCESS]: (state, { list }) => {
+    let newList = state.list.filter(
+      (o) => !!list.find(newO => o.id === newO.id)
     );
-    newList.forEach((o)=>{
-      Object.assign(o,list.find(newO=>o.id===newO.id))
+    newList.forEach((o) => {
+      Object.assign(o, list.find(newO => o.id === newO.id));
     });
-    newList=newList.concat(list.filter(newO=>
-      !newList.find(o=>o.id===newO.id)
+    newList = newList.concat(list.filter(newO =>
+      !newList.find(o => o.id === newO.id)
     ));
-    console.log(newList);
     return {
       ...state,
-      list:newList,
-    }
+      list: newList
+    };
   },
-  [ORDER.DETAIL.SUCCESS]:(state,{order})=>{
-    const newList =[...state.list];
-    const newOrder=newList.find(o=>o.id===order.id);
-    if(newOrder){
-      Object.assign(newOrder,order)
+  [ORDER.DETAIL.SUCCESS]: (state, { order }) => {
+    const newList = [...state.list];
+    const newOrder = newList.find(o => o.id === order.id);
+    if (newOrder) {
+      Object.assign(newOrder, order);
     }
     return {
       ...state,
-      list:newList,
-    }
+      list: newList
+    };
   },
   [ORDER.VIEW]: (state, action) => {
     const { order } = action;
@@ -108,60 +140,36 @@ const orderReducer: {
       startTime: new Date()
     };
   },
-  [ORDER.WORK_ON]: (state, action) => {
+  [ORDER.WORK_ON]: (state, {order}) => {
     const wOrder = workingOrder(state);
     if (wOrder) {
       return state;
     }
-    const { order }: { order: tOrder } = action;
     const startIndex = workingIndex(order);
-    order.status = ORDER_STATUS.WIP;
-    return {
+    const newState={
       ...state,
       workingOrder: order || null,
       viewingIndex: startIndex
     };
+    return orderStatus(newState,order,ORDER_STATUS.WIP);
   },
-  [ORDER.FINISH]: state => {
-    const wOrder = workingOrder(state);
-    if (wOrder) {
-      wOrder.status = ORDER_STATUS.DONE;
-    }
-    return {
-      ...state,
-      workingOrder: null
-    };
+  [ORDER.FINISH]: (state, { order }) => clearWorkingOrderIfMatch(
+    orderStatus(state, order, ORDER_STATUS.DONE),
+    order
+  ),
+  [ORDER.CANCEL]: (state, { order }) => {
+    stepTime(workingStep(order), false);
+    return clearWorkingOrderIfMatch(
+      orderStatus(state, order, ORDER_STATUS.CANCEL),
+      order
+    );
   },
-  [ORDER.CANCEL]: state => {
-    const vOrder = viewingOrder(state);
-    if (vOrder) {
-      vOrder.status = ORDER_STATUS.CANCEL;
-    }
-    const wStep = workingStep(viewingOrder(state));
-    if (wStep && wStep.times && wStep.times.length % 2 === 1) {
-      wStep.times.push(new Date());
-    }
-    const wOrder = workingOrder(state);
-    const newWOrder = wOrder === vOrder ? null : wOrder;
-    return {
-      ...state,
-      workingOrder: newWOrder
-    };
-  },
-  [ORDER.PENDING]: (state, action) => {
-    const { order } = action;
-    order.status = ORDER_STATUS.PENDING;
-    const wStep = workingStep(order);
-    if (wStep && wStep.times && wStep.times.length % 2 === 1) {
-      wStep.times.push(new Date());
-    }
-    const vOrder = viewingOrder(state);
-    const wOrder = workingOrder(state);
-    const newWOrder = wOrder === vOrder ? null : wOrder;
-    return {
-      ...state,
-      workingOrder: newWOrder
-    };
+  [ORDER.PENDING]: (state, {order}) => {
+    stepTime(workingStep(order), false);
+    return clearWorkingOrderIfMatch(
+      orderStatus(state, order, ORDER_STATUS.PENDING),
+      order
+    );
   },
   [ORDER.STEP.VIEW_NEXT]: state => {
     const newIndex = limitIndex(viewingOrder(state), viewingIndex(state) + 1);

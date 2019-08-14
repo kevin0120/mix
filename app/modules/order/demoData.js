@@ -1,5 +1,5 @@
 // @flow
-import dataImg from '../../../resources/imgs/working-page-test-pic1.png';
+import dataImg from '../../../resources/imgs/workingImg.png';
 import dataImg2 from '../../../resources/imgs/working-page-test-pic2.png';
 import { ORDER_STATUS } from './model';
 

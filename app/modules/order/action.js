@@ -1,10 +1,9 @@
 // @flow
-import type { tOrder, tOrderStepIdx, tStepStatus } from './model';
+import type { tOrder, tOrderStepIdx, tStep, tStepStatus } from './model';
 
 export const ORDER = {
   WORK_ON: 'ORDER_WORK_ON',
   VIEW: 'ORDER_VIEW',
-  STATUS:'ORDER_STATUS',
   FINISH: 'ORDER_FINISH',
   CANCEL: 'ORDER_CANCEL',
   PENDING: 'ORDER_PENDING',
@@ -68,20 +67,24 @@ export const orderActions = {
     type: ORDER.VIEW,
     order
   }),
+  // order status
   workOn: (order: tOrder): orderTriggerType => ({
     type: ORDER.WORK_ON,
     order
   }),
-  finishOrder: () => ({
-    type: ORDER.FINISH
+  finishOrder: (order: tOrder) => ({
+    type: ORDER.FINISH,
+    order
   }),
-  cancelOrder: () => ({
-    type: ORDER.CANCEL
+  cancelOrder: (order: tOrder) => ({
+    type: ORDER.CANCEL,
+    order
   }),
   pendingOrder: (order: tOrder) => ({
     type: ORDER.PENDING,
     order
   }),
+
   nextStep: () => ({
     type: ORDER.STEP.NEXT
   }),

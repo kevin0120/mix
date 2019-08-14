@@ -32,7 +32,8 @@ import Table from '../../components/Table/Table';
 import { CommonLog, durationString, timeCost } from '../../common/utils';
 import type { tOrder, tStep, tStepArray } from './model';
 import type { tCommonActionType } from '../external/device/type';
-import { orderDetailApi, orderListApi, orderUpdateApi } from '../../api/order';
+import { orderDetailApi, orderListApi, orderStepUpdateApi, orderUpdateApi } from '../../api/order';
+import { ORDER_STATUS } from './model';
 
 const mapping = {
   onOrderFinish: showResult,
@@ -147,12 +148,48 @@ export default function* root(): Saga<void> {
       // TODO: shall we takeEvery?
       takeEvery(ORDER.LIST.GET, getOrderList),
       takeEvery(ORDER.DETAIL.GET, getOrderDetail),
+      takeEvery(ORDER.STEP.STATUS, orderStepStatus),
+      takeEvery([ORDER.WORK_ON, ORDER.FINISH, ORDER.PENDING, ORDER.CANCEL], orderUpdate),
+
+      //////
       takeLatest(ORDER.WORK_ON, workOnOrder),
       takeEvery(ORDER.VIEW, viewOrder),
       takeLeading([ORDER.STEP.PREVIOUS, ORDER.STEP.NEXT], DebounceViewStep, 300)
     ]);
   } catch (e) {
     CommonLog.lError(e);
+  }
+}
+
+function* orderStepStatus({ status }) {
+  try {
+    const wStep = yield select(s => workingStep(workingOrder(s.order)));
+    yield call(orderStepUpdateApi, wStep.id, status);
+  } catch (e) {
+    CommonLog.lError(e, {
+      at: 'orderStepStatus'
+    });
+  }
+}
+
+const action2Status = {
+  [ORDER.WORK_ON]: ORDER_STATUS.WIP,
+  [ORDER.FINISH]: ORDER_STATUS.DONE,
+  [ORDER.PENDING]: ORDER_STATUS.PENDING,
+  [ORDER.CANCEL]: ORDER_STATUS.CANCEL
+};
+
+function* orderUpdate(action) {
+  try {
+    const { type, order } = action;
+    const status = action2Status[type];
+    if (status && order) {
+      yield call(orderUpdateApi, order.id, status);
+    }
+  } catch (e) {
+    CommonLog.lError(e, {
+      at: 'orderUpdate'
+    });
   }
 }
 
@@ -199,9 +236,9 @@ function* workOnOrder() {
     }
   } catch (e) {
     CommonLog.lError(e);
-  }finally{
-    const {id,status}=wOrder;
-    yield call(orderUpdateApi,id,status);
+  } finally {
+    const { id, status } = wOrder;
+    yield call(orderUpdateApi, id, status);
   }
 }
 
@@ -223,7 +260,7 @@ function* doOrder() {
       if (next) {
         const newWOrder = yield select(state => workingOrder(state.order));
         if (workingIndex(newWOrder) >= orderLength(newWOrder)) {
-          yield put(orderActions.finishOrder());
+          yield put(orderActions.finishOrder(wOrder));
         }
       }
     }

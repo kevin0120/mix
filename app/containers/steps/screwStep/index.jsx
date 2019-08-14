@@ -10,13 +10,17 @@ import STEP_STATUS from '../../../modules/step/model';
 import type { tStepProps } from '../types';
 // import { staticScrewTool } from '../../../modules/tools/saga';
 
-const mapState = (state, props) => ({
-  ...props,
-  points: stepData(viewingStep(state.order))?.points || [],
-  image: stepPayload(viewingStep(state.order))?.image || {},
-  activeIndex: stepData(viewingStep(state.order))?.activeIndex,
-  status: stepStatus(viewingStep(state.order))
-});
+const mapState = (state, props) => {
+  const vStep = viewingStep(state.order);
+  console.log(vStep);
+  return ({
+    ...props,
+    points: stepData(vStep)?.points || stepPayload(vStep).points || [],
+    image: stepPayload(vStep)?.image || '',
+    activeIndex: stepData(vStep)?.activeIndex,
+    status: stepStatus(vStep)
+  });
+};
 
 const mapDispatch = {
   result: screwStepAction.result,
@@ -33,7 +37,7 @@ function ScrewStep({ status, image, points, activeIndex, result }: tStepProps) {
       activeIndex={activeIndex}
       focus={status === STEP_STATUS.DOING ? 2 : 0}
       scale={1}
-      onClick={() => result({ data:[{result: 'ok'}] })}
+      onClick={() => result({ data: [{ result: 'ok' }] })}
     />
     <Paper
       square

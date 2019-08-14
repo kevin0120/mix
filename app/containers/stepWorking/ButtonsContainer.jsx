@@ -141,7 +141,7 @@ const ButtonsContainer = ({
                       color="danger"
                       className={classes.bigButton}
                       onClick={() => {
-                        cancelOrder(true);
+                        cancelOrder(viewingOrder);
                         setDialogOpen(false);
                       }}
                     >

@@ -17,26 +17,28 @@ function invalidStepStatus(stepType, status) {
   throw Error(`step type ${stepType}  has empty status ${status}`);
 }
 
+function* runStep(stepType) {
+  try {
+    while (true) {
+      const { status } = yield take(ORDER.STEP.STATUS);
+      if (statusTask) {
+        yield cancel(statusTask);
+      }
+      const id = yield select(s => workingStep(workingOrder(s.order)).id);
+      console.log(id,status);
+      yield call(orderStepUpdateApi, id, status);
+      statusTask = yield fork(stepTypes?.[stepType]?.[status] ||
+        (() => invalidStepStatus(stepType, status)), ORDER, orderActions);
+
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
 
 export default function* (stepType) {
   try {
-    const step = yield fork(
-      function* runStep() {
-        try {
-          while (true) {
-            const { status } = yield take(ORDER.STEP.STATUS);
-            if (statusTask) {
-              yield cancel(statusTask);
-            }
-            statusTask = yield fork(stepTypes?.[stepType]?.[status] || (() => invalidStepStatus(stepType, status)), ORDER, orderActions);
-            const id = yield select(s => workingStep(workingOrder(s.order)).id);
-            yield call(orderStepUpdateApi, id, status);
-          }
-        } catch (e) {
-          console.error(e);
-        }
-      }
-    );
+    const step = yield fork(runStep, stepType);
     yield put(orderActions.stepStatus(STEP_STATUS.ENTERING));
     yield join(step);
   } catch (e) {
