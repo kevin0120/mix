@@ -26,6 +26,8 @@ function* sysInit(action) {
     // 初始化rush
     yield put({ type: RUSH.INIT });
 
+
+
     // 初始化io
     // const modbusConfig = state.setting.page.modbus;
     // setModBusIO(modbusConfig);

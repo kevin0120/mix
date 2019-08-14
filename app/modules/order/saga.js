@@ -34,6 +34,29 @@ import type { tOrder, tStep, tStepArray } from './model';
 import type { tCommonActionType } from '../external/device/type';
 import { orderDetailApi, orderListApi, orderStepUpdateApi, orderUpdateApi } from '../../api/order';
 import { ORDER_STATUS } from './model';
+import { bindOnConnectAction } from '../rush/rushHealthz';
+
+
+export default function* root(): Saga<void> {
+  try {
+    yield all([
+      call(bindOnConnectAction, orderActions.getList),
+      // TODO: shall we takeEvery?
+      takeEvery(ORDER.LIST.GET, getOrderList),
+      takeEvery(ORDER.DETAIL.GET, getOrderDetail),
+      takeEvery(ORDER.STEP.STATUS, orderStepStatus),
+      takeEvery([ORDER.WORK_ON, ORDER.FINISH, ORDER.PENDING, ORDER.CANCEL], orderUpdate),
+
+      //////
+      takeLatest(ORDER.WORK_ON, workOnOrder),
+      takeEvery(ORDER.VIEW, viewOrder),
+      takeLeading([ORDER.STEP.PREVIOUS, ORDER.STEP.NEXT], DebounceViewStep, 300)
+    ]);
+  } catch (e) {
+    CommonLog.lError(e);
+  }
+}
+
 
 const mapping = {
   onOrderFinish: showResult,
@@ -142,24 +165,6 @@ function* DebounceViewStep(d, action: tCommonActionType) {
   }
 }
 
-export default function* root(): Saga<void> {
-  try {
-    yield all([
-      // TODO: shall we takeEvery?
-      takeEvery(ORDER.LIST.GET, getOrderList),
-      takeEvery(ORDER.DETAIL.GET, getOrderDetail),
-      takeEvery(ORDER.STEP.STATUS, orderStepStatus),
-      takeEvery([ORDER.WORK_ON, ORDER.FINISH, ORDER.PENDING, ORDER.CANCEL], orderUpdate),
-
-      //////
-      takeLatest(ORDER.WORK_ON, workOnOrder),
-      takeEvery(ORDER.VIEW, viewOrder),
-      takeLeading([ORDER.STEP.PREVIOUS, ORDER.STEP.NEXT], DebounceViewStep, 300)
-    ]);
-  } catch (e) {
-    CommonLog.lError(e);
-  }
-}
 
 function* orderStepStatus({ status }) {
   try {

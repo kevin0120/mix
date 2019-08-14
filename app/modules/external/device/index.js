@@ -70,7 +70,6 @@ function newDevice(dt: tDeviceType, name: string, sn: string, config: Object, da
   }
 }
 
-
 export function getDevice(sn: tDeviceSN): Device {
 
   return [...gDevices].filter((d: Device) => d.serialNumber === sn)?.[0];
@@ -96,7 +95,7 @@ export function* deviceStatus(data: tRushWebSocketData): Saga<void> {
     data.data.forEach((d) => {
       const { sn, type, children, status, data, config } = d;
       let dv = getDevice(sn);
-      // try make a new device
+      // try make a new device if dv doesn't exist
       if (!dv) {
         dv = newDevice(type, `${type}${([...gDevices].filter(
           gd => gd instanceof sym2Device[type]

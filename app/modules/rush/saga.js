@@ -10,7 +10,6 @@ import { setNewNotification } from '../notification/action';
 import { CommonLog } from '../../common/utils';
 import handleData from './handleData';
 import rushHealthz from './rushHealthz';
-import { WEBSOCKET_EVENTS } from './type';
 import {getWSClient, setWSClient} from './client';
 
 let task = null;

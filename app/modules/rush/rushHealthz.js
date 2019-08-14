@@ -1,8 +1,29 @@
+import { put } from 'redux-saga/effects';
 import { CommonLog } from '../../common/utils';
+
+const onConnectActions=[];
+
+export function* bindOnConnectAction(actionToBind){
+  try {
+    onConnectActions.push(actionToBind);
+    if(rushHealthz){
+      yield put(actionToBind())
+    }
+  } catch (e) {
+    CommonLog.lError(e);
+  }
+}
+
+let rushHealthz=false;
 
 export default function*(payload){
   try{
-    console.log('healthz',payload);
+    rushHealthz=payload;
+    if(payload){
+      for(const action of onConnectActions){
+        yield put(action());
+      }
+    }
     // const healthzStatus = state.healthCheckResults; // 获取整个healthz
     // if (!lodash.isEqual(healthzStatus.masterpc.isHealth, payload)) {
     //   // 如果不相等 更新
