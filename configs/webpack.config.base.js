@@ -7,13 +7,17 @@ import webpack from 'webpack';
 import { dependencies } from '../package.json';
 
 export default {
-  externals: [...Object.keys(dependencies || {}).filter(k=>k!=='lodash-es')],
+  externals: [...Object.keys(dependencies || {}).filter(k=>
+    !([
+      'lodash-es'
+    ].find(item=>item===k))
+  )],
 
   module: {
     rules: [
       {
         test: /\.jsx?$/,
-        exclude: /node_modules/,
+        exclude: /node_modules[^(react\-pdf)]/,
         use: {
           loader: 'babel-loader',
           options: {

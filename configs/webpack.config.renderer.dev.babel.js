@@ -54,7 +54,8 @@ export default merge.smart(baseConfig, {
 
   output: {
     publicPath: `http://localhost:${port}/dist/`,
-    filename: 'renderer.dev.js'
+    filename: 'renderer.dev.js',
+    globalObject: "this"
   },
 
   module: {
@@ -208,6 +209,14 @@ export default merge.smart(baseConfig, {
       {
         test: /\.(?:ico|gif|png|jpg|jpeg|webp)$/,
         use: 'url-loader'
+      },
+      // pdf
+      {
+        test: /\.pdf$/,
+        include:/resources/,
+        use: {
+          loader: 'file-loader',
+        }
       }
     ]
   },

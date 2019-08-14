@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
-import { Typography } from '@material-ui/core';
+import { Document, Page } from 'react-pdf/dist/entry.webpack';
+import makeStyles from '@material-ui/core/styles/makeStyles';
 import Button from '../../../components/CustomButtons/Button';
 import { instructionStepActions } from '../../../modules/step/instructionStep/action';
 import { tStepProps } from '../types';
 import { stepPayload, viewingStep } from '../../../modules/order/selector';
+import demoPDF from '../../../../resources/demoPDF.pdf';
+import styles from './styles';
 
 const mapState = (state, props) => ({
   ...props,
@@ -20,7 +23,7 @@ type Props = {
 };
 
 function InstructionStep({ step, isCurrent, submit, bindAction, instruction }: Props & tStepProps) {
-
+  const classes=makeStyles(styles)();
   useEffect(() => {
     bindAction(
       <Button
@@ -38,9 +41,24 @@ function InstructionStep({ step, isCurrent, submit, bindAction, instruction }: P
   }, [step, bindAction, isCurrent, submit]);
 
   return (
-    <Typography>
-      {instruction}
-    </Typography>
+    <div className={classes.container}>
+      <Document
+        className={classes.document}
+        file={demoPDF}
+        style={{
+          width: '100%',
+          height: '100%'
+        }}
+      >
+        <Page
+          className={classes.page}
+          scale={1}
+          pageIndex={0}
+          renderAnnotationLayer={false}
+        />
+      </Document>
+    </div>
+
   );
 }
 

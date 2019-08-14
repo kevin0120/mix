@@ -160,14 +160,16 @@ const buttonsContainer = {
 
 const stepPageContainer = {
   root: {
-    flex: 1
+    flex: 1,
+    overflow:'hidden'
   },
 
   left: {
     flex: 3,
-    height: '100%',
     display: 'flex',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    height:'100%',
+    overflow:'hidden'
   },
   right: {
     flex: 1,
@@ -175,7 +177,7 @@ const stepPageContainer = {
   },
   image: {
     flex: 1,
-    overflow: 'hidden'
+    overflow: 'hidden',
   },
   descriptionContainer: {
     flex: 1
