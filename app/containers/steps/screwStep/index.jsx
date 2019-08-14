@@ -8,11 +8,10 @@ import ScrewImage from '../../../components/ScrewImage';
 import screwStepAction from '../../../modules/step/screwStep/action';
 import STEP_STATUS from '../../../modules/step/model';
 import type { tStepProps } from '../types';
-// import { staticScrewTool } from '../../../modules/tools/saga';
 
 const mapState = (state, props) => {
   const vStep = viewingStep(state.order);
-  console.log(vStep);
+
   return ({
     ...props,
     points: stepData(vStep)?.points || stepPayload(vStep).points || [],

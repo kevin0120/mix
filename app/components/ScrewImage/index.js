@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import styles from './style';
 import Point from './point';
@@ -6,23 +6,23 @@ import Point from './point';
 export default function ScrewImage({ style, image, points, focus, activeIndex, onClick, pointScale }) {
   const classes = makeStyles(styles.image)();
 
-  const [imageRef, setImageRef] = useState(null);
-  const [containerRef, setContainerRef] = useState(null);
-
+  const imageRef = useRef(null);
+  const containerRef = useRef(null);
   const [size, setSize] = useState({
     width: 100,
     height: 100
   });
-  console.log(points);
 
-  const handleResize = () => {
-    if (containerRef?.offsetHeight && containerRef?.offsetWidth) {
+  const handleResize = useCallback(() => {
+    const img=imageRef.current;
+    const container=containerRef.current;
+    if (container?.offsetHeight && container?.offsetWidth) {
       setSize({
-        height: (imageRef.offsetHeight / containerRef.offsetHeight) * 100 || 100,
-        width: (imageRef.offsetWidth / containerRef.offsetWidth) * 100 || 100
+        height: (img.offsetHeight / container.offsetHeight) * 100 || 100,
+        width: (img.offsetWidth / container.offsetWidth) * 100 || 100
       });
     }
-  };
+  },[]);
 
   const [focusStyle, setFocusStyle] = useState({
     transform: `translate(${0}%,${0}%) scale(${1},${1})`
@@ -51,11 +51,12 @@ export default function ScrewImage({ style, image, points, focus, activeIndex, o
   return (
     <div
       className={classes.container}
-      ref={r => setContainerRef(r)}
+      ref={containerRef}
       style={style}
+      onClick={() => onClick && onClick()}
     >
       <img
-        ref={r => setImageRef(r)}
+        ref={imageRef}
         src={image || ''}
         className={classes.image}
         alt="job"
@@ -70,7 +71,6 @@ export default function ScrewImage({ style, image, points, focus, activeIndex, o
           ...focusStyle,
           transition: 'transform 1s'
         }}
-        onClick={() => onClick && onClick()}
       >
         {points?.map((p) => <Point
           key={`${p.x}${p.y}${p.status}`}
