@@ -14,7 +14,7 @@ const mapState = (state, props) => {
 
   return ({
     ...props,
-    points: stepData(vStep)?.points || stepPayload(vStep).points || [],
+    points: stepData(vStep)?.points || stepPayload(vStep)?.points || [],
     image: stepPayload(vStep)?.image || '',
     activeIndex: stepData(vStep)?.activeIndex,
     status: stepStatus(vStep)

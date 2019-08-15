@@ -16,6 +16,7 @@ import { orderActions } from '../../modules/order/action';
 import type { Dispatch } from '../../modules/indexReducer';
 import type { tStep, tStepArray } from '../../modules/order/model';
 import Timer from './Timer';
+import clsx from 'clsx';
 
 const mapState = (state, props) => ({
   ...props,
@@ -76,7 +77,9 @@ const StepperContainer = ({
         const stepButtonProps = {};
 
         if (workingStep === s) {
-          stepButtonProps.icon = <Loop className={classes.stepIconDoing}/>;
+          stepButtonProps.icon = <Loop className={clsx(classes.stepIconDoing,{
+            [classes.fail]:fail
+          })}/>;
         }
 
         if (s === viewingStep) {

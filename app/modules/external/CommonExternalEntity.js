@@ -16,8 +16,6 @@ export default class CommonExternalEntity implements IHealthChecker {
 
   #_children: Set<CommonExternalEntity> = new Set([]);
 
-  #_parent: ?CommonExternalEntity = null;
-
   constructor(name: string) {
     this.#name = name;
 
@@ -26,14 +24,6 @@ export default class CommonExternalEntity implements IHealthChecker {
     (this: any).Disable = this.Disable.bind(this);
     (this: any).ToggleEnable = this.ToggleEnable.bind(this);
     /* eslint-enable flowtype/no-weak-types */
-  }
-
-  set parent(p: CommonExternalEntity) {
-    this.#_parent = p;
-  }
-
-  get parent(){
-    return this.#_parent;
   }
 
   appendChildren(children: Array<CommonExternalEntity> | CommonExternalEntity) {

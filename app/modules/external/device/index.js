@@ -71,8 +71,11 @@ function newDevice(dt: tDeviceType, name: string, sn: string, config: Object, da
 }
 
 export function getDevice(sn: tDeviceSN): Device {
-
   return [...gDevices].filter((d: Device) => d.serialNumber === sn)?.[0];
+}
+
+export function getDevicesByType(dType:tDeviceType): Array<Device> {
+  return [...gDevices].filter((d: Device) => d instanceof sym2Device[dType]);
 }
 
 export function AppendNewDevices(deviceObj: Device) {

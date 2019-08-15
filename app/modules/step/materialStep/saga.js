@@ -8,23 +8,26 @@ import { getDevice } from '../../external/device';
 
 const ports = [];
 
+const ioSN = (payload) => payload?.device?.IO?.sn;
+const items = (payload) => payload?.items;
+const confirmIdx=(payload)=>payload?.device?.IO?.confirmIdx;
+
 export default {
   * [STEP_STATUS.ENTERING](ORDER, orderActions) {
     try {
       const sPayload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
-      const { items, ioSN } = sPayload;
-      const io = getDevice(ioSN);
-      if(io?.ioContact){
+      const io = getDevice(ioSN(sPayload));
+      if(io?.ioContact) {
         yield call(io.ioContact);
-      }else{
-        CommonLog.lError('io not ready',{
-          at:'materialStep entering',
+      } else {
+        CommonLog.lError('io not ready', {
+          at: 'materialStep entering',
           io
         });
         yield put(orderActions.stepStatus(STEP_STATUS.FAIL));
         return;
       }
-      items.forEach((i) => {
+      items(sPayload).forEach((i) => {
         ports.push(io.getPort(ioDirection.output, i.index));
       });
       yield call(io.openIO, ports);
@@ -36,11 +39,10 @@ export default {
   * [STEP_STATUS.DOING](ORDER, orderActions) {
     try {
       const sPayload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
-      const { ioSN } = sPayload;
-      const io = getDevice(ioSN);
-      const inputPort = io.getPort(ioDirection.input, sPayload?.confirmIO);
+      const io = getDevice(ioSN(sPayload));
+      const confirmPort = io.getPort(ioDirection.input, confirmIdx(sPayload));
       const ioListener = io.addListener(
-        inputPort,
+        confirmPort,
         ioTriggerMode.falling,
         actions.ioInput
       );
@@ -54,8 +56,7 @@ export default {
   * [STEP_STATUS.FINISHED](ORDER, orderActions) {
     try {
       const sPayload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
-      const { ioSN } = sPayload;
-      const io = getDevice(ioSN);
+      const io = getDevice(ioSN(sPayload));
       yield call(io.closeIO, ports);
       yield put(orderActions.doNextStep());
     } catch (e) {
@@ -65,9 +66,8 @@ export default {
   * [STEP_STATUS.FAIL](ORDER, orderActions) {
     try {
       const sPayload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
-      const { ioSN } = sPayload;
-      const io = getDevice(ioSN);
-      if(io?.closeIO){
+      const io = getDevice(ioSN(sPayload));
+      if (io?.closeIO) {
         yield call(io.closeIO, ports);
       }
       // yield put(orderActions.doNextStep());

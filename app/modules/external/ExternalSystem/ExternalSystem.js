@@ -1,7 +1,7 @@
 // @flow
 import { isURL } from 'validator/lib/isURL';
-import { CommonLog } from '../../common/utils';
-import CommonExternalEntity from './CommonExternalEntity';
+import { CommonLog } from '../../../common/utils';
+import CommonExternalEntity from '../CommonExternalEntity';
 
 export default class ExternalSystem extends CommonExternalEntity {
   #endpoint: ?string = null;

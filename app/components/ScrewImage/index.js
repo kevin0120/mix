@@ -14,15 +14,15 @@ export default function ScrewImage({ style, image, points, focus, activeIndex, o
   });
 
   const handleResize = useCallback(() => {
-    const img=imageRef.current;
-    const container=containerRef.current;
+    const img = imageRef.current;
+    const container = containerRef.current;
     if (container?.offsetHeight && container?.offsetWidth) {
       setSize({
         height: (img.offsetHeight / container.offsetHeight) * 100 || 100,
         width: (img.offsetWidth / container.offsetWidth) * 100 || 100
       });
     }
-  },[]);
+  }, []);
 
   const [focusStyle, setFocusStyle] = useState({
     transform: `translate(${0}%,${0}%) scale(${1},${1})`

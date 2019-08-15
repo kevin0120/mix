@@ -34,13 +34,13 @@ import type { tOrder, tStep, tStepArray } from './model';
 import type { tCommonActionType } from '../external/device/type';
 import { orderDetailApi, orderListApi, orderStepUpdateApi, orderUpdateApi } from '../../api/order';
 import { ORDER_STATUS } from './model';
-import { bindOnConnectAction } from '../rush/rushHealthz';
+import { bindRushAction } from '../rush/rushHealthz';
 
 
 export default function* root(): Saga<void> {
   try {
     yield all([
-      call(bindOnConnectAction, orderActions.getList),
+      call(bindRushAction.onConnect, orderActions.getList),
       // TODO: shall we takeEvery?
       takeEvery(ORDER.LIST.GET, getOrderList),
       takeEvery(ORDER.DETAIL.GET, getOrderDetail),

@@ -34,6 +34,15 @@ function formPointStatusFromResultStatus(point: tPoint, rStatus: tResultStatus, 
 
 const mergePointsAndResults = (points: Array<tPoint>, results: Array<tResult>, activeIndex: number, activeGroupSequence): Array<tPoint> => {
   const newPoints = [...points];
+  if(activeIndex===-1){
+    return [
+      ...newPoints.map((p) => {
+        return ({
+          ...p,
+          status: formPointStatusFromResultStatus(p, null, activeGroupSequence)
+        });
+      })];
+  }
   newPoints.splice(activeIndex, newPoints.length - activeIndex,
     ...newPoints.slice(activeIndex).map((p, idx) => {
       const r: tResult = results[idx];
@@ -104,8 +113,6 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
   * next() {
     try {
       const sData = yield select(s => stepData(workingStep(workingOrder(s.order))));
-      // call pset
-
       // update step data
       yield put(orderActions.stepData((d: tScrewStepData): tScrewStepData => ({
         ...d,

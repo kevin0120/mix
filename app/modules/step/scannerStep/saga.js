@@ -1,5 +1,5 @@
 import { take, put, select, call } from 'redux-saga/effects';
-import { SCANNER_STEP } from './action';
+import { SCANNER_STEP,scannerStepAction } from './action';
 import {
   workingStep,
   stepData,
@@ -7,19 +7,25 @@ import {
   workingOrder
 } from '../../order/selector';
 import STEP_STATUS from '../model';
-import { scanner } from '../../external/device/scanner/saga';
+import { getDevicesByType,deviceType } from '../../external/device';
+
+let scanners=[];
 
 export default {
   * [STEP_STATUS.ENTERING](ORDER, orderActions) {
     try {
       yield put(orderActions.stepStatus(STEP_STATUS.DOING));
+      scanners=getDevicesByType(deviceType.scanner);
+      for(const scanner of scanners){
+        yield call(scanner.Enable);
+        scanner.dispatcher=scannerStepAction.getValue;
+      }
     } catch (e) {
       console.error(e);
     }
   },
   * [STEP_STATUS.DOING](ORDER, orderActions) {
     try {
-      yield call(scanner.Enable);
       while (true) {
         const action = yield take([
           SCANNER_STEP.GET_VALUE,
@@ -35,7 +41,7 @@ export default {
           case SCANNER_STEP.GET_VALUE:
             yield put(
               orderActions.stepData(d => ({
-                ...d,
+                ...d||{},
                 result: {
                   [label]: action?.input?.data
                 },
@@ -46,7 +52,7 @@ export default {
                     footerTitle: action?.input?.time.toLocaleString(),
                     body: action?.input?.data
                   },
-                  ...(d.timeLine || [])
+                  ...(d?.timeLine || [])
                 ]
               }))
             );
@@ -63,7 +69,10 @@ export default {
     } catch (e) {
       console.error(e);
     } finally {
-      yield call( scanner.Disable);
+      for(const scanner of scanners){
+        yield call(scanner.Disable);
+        scanner.dispatcher=scannerStepAction.getValue;
+      }
     }
   },
   * [STEP_STATUS.FINISHED](ORDER, orderActions) {

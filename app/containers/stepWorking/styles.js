@@ -103,6 +103,9 @@ const stepperContainer = theme => ({
     animation: '$doing-icon-rotation 1s infinite linear',
     color: theme.palette.primary.main
   },
+  fail: {
+    color: theme.palette.error.main
+  },
   '@keyframes doing-icon-rotation': {
     '0%': {
       transform: 'rotate(0deg)'

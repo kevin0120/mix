@@ -4,6 +4,7 @@ import stepTypes from './stepTypes';
 import { orderActions, ORDER } from '../order/action';
 import { orderStepUpdateApi } from '../../api/order';
 import { stepStatus, workingOrder, workingStep } from '../order/selector';
+import {CommonLog} from '../../common/utils';
 
 let statusTask = null;
 
@@ -25,14 +26,15 @@ function* runStep(stepType) {
         yield cancel(statusTask);
       }
       const id = yield select(s => workingStep(workingOrder(s.order)).id);
-      console.log(id,status);
       yield call(orderStepUpdateApi, id, status);
       statusTask = yield fork(stepTypes?.[stepType]?.[status] ||
         (() => invalidStepStatus(stepType, status)), ORDER, orderActions);
 
     }
   } catch (e) {
-    console.error(e);
+    CommonLog.lError(e,{
+      at:'runStep'
+    });
   }
 }
 
@@ -42,7 +44,8 @@ export default function* (stepType) {
     yield put(orderActions.stepStatus(STEP_STATUS.ENTERING));
     yield join(step);
   } catch (e) {
-    console.error(e);
-  }
+    CommonLog.lError(e,{
+      at:'step root'
+    });  }
 }
 
