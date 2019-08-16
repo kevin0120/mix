@@ -3,7 +3,7 @@
 import { ORDER } from './action';
 import { genReducers } from '../util';
 import type { tOrder, tOrderState, tOrderStepIdx } from './model';
-import { demoOrder, demoOrderCancel, demoOrderDone, demoOrderLong, demoOrderPending } from './demoData';
+// import { demoOrder, demoOrderCancel, demoOrderDone, demoOrderLong, demoOrderPending } from './demoData';
 import {
   orderLength,
   viewingIndex,

@@ -8,8 +8,8 @@ import { CommonLog } from '../../../../common/utils';
 import type { tDeviceSN } from '../Device';
 import type { tResult } from '../../../step/screwStep/model';
 
-export const staticScrewTool = new ClsScrewTool('G1', '0001');
-staticScrewTool.dispatcher = defaultScrewToolDispatcher;
+// export const staticScrewTool = new ClsScrewTool('G1', '0001');
+// staticScrewTool.dispatcher = defaultScrewToolDispatcher;
 
 type tToolStatusData = {
   type: string,
@@ -18,7 +18,7 @@ type tToolStatusData = {
     status: boolean,
     reason: string
   }
-}
+};
 
 type tToolResultData = {
   type: string,
@@ -26,7 +26,7 @@ type tToolResultData = {
     tool_sn: tDeviceSN,
     results: Array<tResult>
   }
-}
+};
 
 export function* toolStatusChange(data: tToolStatusData): Saga<void> {
   try {
