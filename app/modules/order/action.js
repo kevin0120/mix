@@ -1,5 +1,5 @@
 // @flow
-import type { tOrder, tOrderStepIdx, tStep, tStepStatus } from './model';
+import type { tOrder, tOrderStepIdx, tStepStatus } from './model';
 import Step from '../step/Step';
 import { ORDER_STATUS } from './model';
 
@@ -7,10 +7,8 @@ export const ORDER = {
   WORK_ON: 'ORDER_WORK_ON',
   VIEW: 'ORDER_VIEW',
   FINISH: 'ORDER_FINISH',
-  CANCEL: 'ORDER_CANCEL',
-  PENDING: 'ORDER_PENDING',
   // update the store
-  UPDATE_STATE:'ORDER_UPDATE_STATE',
+  UPDATE_STATE: 'ORDER_UPDATE_STATE',
   LIST: {
     GET: 'ORDER_LIST_GET',
     SUCCESS: 'ORDER_LIST_SUCCESS',
@@ -33,10 +31,7 @@ export const ORDER = {
     // 步进、步退
     DO_NEXT: 'ORDER_STEP_DO_NEXT',
     DO_PREVIOUS: 'ORDER_STEP_DO_PREVIOUS',
-    // 修改store
-    DATA: 'ORDER_STEP_DATA',
-    // 记录开始时间
-    TIME: 'ORDER_STEP_TIME'
+    FINISH: 'ORDER_STEP_FINISH'
   }
 };
 
@@ -82,13 +77,13 @@ export const orderActions = {
   }),
   cancelOrder: (order: tOrder) => ({
     type: ORDER.STEP.STATUS,
-    step:order,
-    status:ORDER_STATUS.CANCEL
+    step: order,
+    status: ORDER_STATUS.CANCEL
   }),
   pendingOrder: (order: tOrder) => ({
     type: ORDER.STEP.STATUS,
-    step:order,
-    status:ORDER_STATUS.PENDING
+    step: order,
+    status: ORDER_STATUS.PENDING
   }),
   nextStep: () => ({
     type: ORDER.STEP.NEXT
@@ -111,7 +106,11 @@ export const orderActions = {
   doPreviousStep: () => ({
     type: ORDER.STEP.DO_PREVIOUS
   }),
-  updateState:()=>({
-    type:ORDER.UPDATE_STATE,
+  updateState: () => ({
+    type: ORDER.UPDATE_STATE
+  }),
+  finishStep: (step) => ({
+    type: ORDER.STEP.FINISH,
+    step
   })
 };

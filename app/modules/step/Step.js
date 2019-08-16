@@ -1,4 +1,4 @@
-import { call, cancel, fork, join, put, takeEvery } from 'redux-saga/effects';
+import { call, cancel, fork, join, put, race, take, takeEvery } from 'redux-saga/effects';
 import { CommonLog } from '../../common/utils';
 import { orderStepUpdateApi } from '../../api/order';
 import { ORDER, orderActions } from '../order/action';
@@ -31,6 +31,8 @@ export default class Step {
 
   _desc = '';
 
+  _info = null;
+
   _type = '';
 
   _skippable = false;
@@ -58,7 +60,6 @@ export default class Step {
   constructor(stepObj, stepTypes) {
     this._id = stepObj.id;
     this.update(stepObj, stepTypes);
-
     this.run = this.run.bind(this);
     this.timerStart = this.timerStart.bind(this);
     this.timerStop = this.timerStop.bind(this);
@@ -67,18 +68,20 @@ export default class Step {
   update(stepObj, stepTypes) {
     this._name = stepObj.name || 'unnamed step';
     this._desc = stepObj.desc || '';
+    this._info = stepObj.info;
     this._type = stepObj.type || '';
     this._skippable = stepObj.skippable || false;
     this._undoable = stepObj.undoable || false;
     this._status = stepObj.status || this._status;
-    this._steps = stepObj.steps?stepObj.steps.map(sD =>{
-      const existStep=this._steps.find(s=>s._id===sD.id);
-      if(existStep){
-        existStep.update(sD,stepTypes);
+    this._steps = stepObj.steps ? stepObj.steps.map(sD => {
+      const existStep = this._steps.find(s => s._id === sD.id);
+      if (existStep) {
+        existStep.update(sD, stepTypes);
         return existStep;
       }
       return new stepTypes[sD.type](sD);
-    }):this._steps;
+    }) : this._steps;
+
     this._payload = stepObj.payload || this._payload;
   }
 
@@ -211,6 +214,34 @@ export default class Step {
     } catch (e) {
       CommonLog.lError(e, {
         at: 'step root'
+      });
+    }
+  }
+
+  * runSubStep(step, callbacks) {
+    try {
+      step.timerStart();
+      const { exit, next, previous } = yield race({
+        exit: call(step.run, STEP_STATUS.ENTERING),
+        next: take((action) =>
+          (action.type === ORDER.STEP.FINISH && action.step === step) || action.type === ORDER.STEP.DO_NEXT
+        ),
+        previous: take(ORDER.STEP.DO_PREVIOUS)
+      });
+      step.timerStop();
+      if (exit && callbacks?.onExit) {
+        yield call(callbacks.onExit);
+      }
+      if (next && callbacks?.onNext) {
+        yield call(callbacks.onNext);
+      }
+      if (previous && callbacks?.onPrevious) {
+        yield call(callbacks.onPrevious);
+      }
+    } catch (e) {
+      CommonLog.lError(e, {
+        at: 'runSub ',
+        id: `${this._id},${step.id}`
       });
     }
   }

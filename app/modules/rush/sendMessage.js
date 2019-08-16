@@ -50,6 +50,8 @@ export default function* rushSendMessage(data: Object): Saga<void> {
         }
       });
       return yield join(listenReplyTask);
+    }else{
+      CommonLog.Info('cannot send message to rush now, rush is not connected')
     }
   } catch (e) {
     CommonLog.lError(e);

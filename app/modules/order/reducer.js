@@ -150,6 +150,18 @@ const orderReducer: {
       viewingIndex: vIndex
     };
   },
+  [ORDER.STEP.FINISH]: state => {
+    const wOrder: ?tOrder = workingOrder(state);
+    const newIndex = workingIndex(wOrder) + 1;
+    const vIndex =
+      workingStep(wOrder) === viewingStep(state)
+        ? newIndex
+        : viewingIndex(state);
+    return {
+      ...state,
+      viewingIndex: vIndex
+    };
+  },
   [ORDER.STEP.DO_PREVIOUS]: state => {
     const wOrder = workingOrder(state);
     const newIndex = limitIndex(wOrder, workingIndex(wOrder) - 1);

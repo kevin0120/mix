@@ -24,7 +24,7 @@ export default class InstructionStep extends Step {
     },
     * [STEP_STATUS.FINISHED](ORDER, orderActions) {
       try {
-        yield put(orderActions.doNextStep());
+        yield put(orderActions.finishStep(this));
       } catch (e) {
         console.error(e);
       }

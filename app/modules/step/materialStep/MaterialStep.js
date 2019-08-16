@@ -61,7 +61,7 @@ export default class MaterialStep extends Step {
         const sPayload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
         const io = getDevice(ioSN(sPayload));
         yield call(io.closeIO, this._ports);
-        yield put(orderActions.doNextStep());
+        yield put(orderActions.finishStep(this));
       } catch (e) {
         CommonLog.lError(e);
       }
@@ -73,7 +73,6 @@ export default class MaterialStep extends Step {
         if (io?.closeIO) {
           yield call(io.closeIO, this._ports);
         }
-        // yield put(orderActions.doNextStep());
       } catch (e) {
         CommonLog.lError(e);
       }

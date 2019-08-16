@@ -32,7 +32,6 @@ export default function* rootSaga(): Saga<void> {
       watchRushEvent(),
 
       user(),// auth
-      // healthzCheckFlow(),
       // watchSettingPreSave(),
       sysInitFlow(),
       watchOperationViewer(),

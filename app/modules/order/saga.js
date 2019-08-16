@@ -4,7 +4,6 @@ import {
   select,
   put,
   all,
-  takeLatest,
   takeEvery,
   takeLeading,
   delay
@@ -13,7 +12,6 @@ import React from 'react';
 import type { Saga } from 'redux-saga';
 import { ORDER, orderActions } from './action';
 import {
-  workingStep,
   workingOrder,
   orderSteps,
   doable,
@@ -22,10 +20,10 @@ import {
 import dialogActions from '../dialog/action';
 import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
-import { CommonLog, durationString, timeCost } from '../../common/utils';
+import { CommonLog } from '../../common/utils';
 import type { tOrder, tStep, tStepArray } from './model';
-import type { tCommonActionType } from '../external/device/type';
-import { orderDetailApi, orderListApi, orderStepUpdateApi } from '../../api/order';
+import type { tCommonActionType } from '../../common/type';
+import { orderDetailApi, orderListApi } from '../../api/order';
 import { ORDER_STATUS } from './model';
 import { bindRushAction } from '../rush/rushHealthz';
 
@@ -34,10 +32,9 @@ export default function* root(): Saga<void> {
   try {
     yield all([
       call(bindRushAction.onConnect, orderActions.getList),
-      // TODO: shall we takeEvery?
+      // TODO: should we use takeEvery?
       takeEvery(ORDER.LIST.GET, getOrderList),
       takeEvery(ORDER.DETAIL.GET, getOrderDetail),
-      //////
       takeEvery(ORDER.WORK_ON, workOnOrder),
       takeEvery(ORDER.VIEW, viewOrder),
       takeLeading([ORDER.STEP.PREVIOUS, ORDER.STEP.NEXT], DebounceViewStep, 300)

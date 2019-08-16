@@ -20,6 +20,4 @@ export type tDeviceNewData = {
   +data: tInputData
 };
 
-export type tCommonActionType = {
-  +type: string
-};
+

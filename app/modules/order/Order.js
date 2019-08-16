@@ -1,15 +1,14 @@
 import React from 'react';
+import { push } from 'connected-react-router';
 import Step from '../step/Step';
 import { ORDER_STATUS } from './model';
 import { CommonLog, durationString } from '../../common/utils';
-import { call, put, race, take } from 'redux-saga/effects';
-import { ORDER, orderActions } from './action';
+import { call, put } from 'redux-saga/effects';
+import { orderActions } from './action';
 import { orderUpdateApi } from '../../api/order';
 import dialogActions from '../dialog/action';
-import { push } from 'connected-react-router';
 import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
-import STEP_STATUS from '../step/model';
 
 export default class Order extends Step {
   _apis = {
@@ -18,13 +17,11 @@ export default class Order extends Step {
 
   _workingIndex = 0;
 
+  _workingID = null;
+
   _steps = [];
 
   _status = ORDER_STATUS.TODO;
-
-  constructor() {
-    super(...arguments);
-  }
 
   get workingStep() {
     return this._steps[this._workingIndex];
@@ -34,39 +31,46 @@ export default class Order extends Step {
     return this._workingIndex;
   }
 
+  * onNext() {
+    try {
+      console.log(this._workingIndex,this._steps.length);
+      if (this._workingIndex + 1 >= this._steps.length) {
+        yield put(orderActions.finishOrder(this));
+      }
+      this._workingIndex += 1;
+    } catch (e) {
+      CommonLog.lError(e);
+    }
+  }
+
+  * onPrevious() {
+    if (this._workingIndex - 1 < 0) {
+      // yield put(orderActions.finishOrder(this));
+    } else {
+      this._workingIndex -= 1;
+    }
+  }
 
   _statusTasks = {
     * [ORDER_STATUS.TODO]() {
 
     },
     * [ORDER_STATUS.WIP]() {
-      while (true) {
-        CommonLog.Info('Doing Order...');
-        const step = this.workingStep;
-        if (step) {
-          step.timerStart();
-          const { next, previous } = yield race({
-            exit: call(step.run, STEP_STATUS.ENTERING),
-            next: take(ORDER.STEP.DO_NEXT),
-            previous: take(ORDER.STEP.DO_PREVIOUS)
-          });
-          step.timerStop();
-          if (next) {
-            if (this._workingIndex + 1 >= this._steps.length) {
-              yield put(orderActions.finishOrder(this));
-            }
-            this._workingIndex += 1;
+      try {
+        while (true) {
+          CommonLog.Info('Doing Order...');
+          const step = this.workingStep;
+          if (step) {
+            yield call(this.runSubStep, step, {
+              onNext: this.onNext.bind(this),
+              onPrevious: this.onPrevious.bind(this)
+            });
+          } else {
+            yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
           }
-          if (previous) {
-            if (this._workingIndex - 1 < 0) {
-              yield put(orderActions.finishOrder(this));
-            }else{
-              this._workingIndex -= 1;
-            }
-          }
-        } else {
-          yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
         }
+      } catch (e) {
+        CommonLog.lError(e, { at: ORDER_STATUS.WIP });
       }
     },
     * [ORDER_STATUS.DONE]() {

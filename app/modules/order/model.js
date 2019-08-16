@@ -37,7 +37,7 @@ export const ORDER_STATUS = {
   WIP: 'OrderStatus.WIP',
   DONE: 'OrderStatus.DONE',
   CANCEL: 'OrderStatus.CANCEL',
-  PENDING: 'OrderStatus.PENDING'
+  PENDING: 'OrderStatus.PENDING',
 };
 
 export type tStepArray = Array<tStep>;

@@ -1,6 +1,6 @@
 // @flow
 import { ORDER_STATUS } from './model';
-import type { tOrder, tOrderState, tOrderStepIdx, tStep, tStepStatus, tStepType } from './model';
+import type { tOrder, tOrderState, tOrderStepIdx, tStep, tStepStatus } from './model';
 import Step from '../step/Step';
 import Order from './Order';
 
@@ -33,11 +33,9 @@ export const exceptOrders = (orderList: Array<Order>): Array<tOrder> =>
 
 
 export const stepStatus = (step: ?tStep): ?tStepStatus => step?.status;
-export const stepType = (step: ?tStep): ?tStepType => step?.type;
 export const stepData = (step: ?tStep): ?Object => step?.data;
 export const stepPayload = (step: ?tStep): ?Object => step?.payload;
 export const times = (step: ?Step): ?Array<Date> => step?.times;
-export const timeCost = (step: ?Step): ?Array<Date> => step && step.timeCost();
 
 
 export const isPending = (order: ?Order): boolean => order?.status === ORDER_STATUS.PENDING || false;

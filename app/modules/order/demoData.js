@@ -4,8 +4,8 @@ import dataImg2 from '../../../resources/imgs/working-page-test-pic2.png';
 import { ORDER_STATUS } from './model';
 
 export const demoOrder = {
-  id:'demoOrder',
-  name: 'fill info',
+  id:'demoOrder1',
+  name: 'demo Order 1',
   info:
     'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
   type: 'step',
@@ -167,6 +167,7 @@ export const demoOrder = {
       }
     },
     {
+      id:'s5',
       name: '扫码',
       info: {
         time: '00:02:00'
@@ -183,6 +184,8 @@ export const demoOrder = {
 };
 
 export const demoOrderLong = {
+  id:'demoOrderLong',
+
   name: 'Long Demo Order',
   info: 'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
   type: 'step',
@@ -480,6 +483,7 @@ export const demoOrderLong = {
 };
 
 export const demoOrderCancel = {
+  id:'demoOrderCancel',
   name: 'fill info',
   info:
     'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
@@ -503,6 +507,7 @@ export const demoOrderCancel = {
 };
 
 export const demoOrderPending = {
+  id:'demoOrderPending',
   name: 'fill info',
   info:
     'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
@@ -527,6 +532,7 @@ export const demoOrderPending = {
 };
 
 export const demoOrderDone = {
+  id:'demoOrderDone',
   name: 'fill info',
   info: 'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
   type: 'step',

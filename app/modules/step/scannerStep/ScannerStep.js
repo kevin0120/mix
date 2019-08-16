@@ -13,7 +13,7 @@ export default class ScannerStep extends Step {
     * [STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {
         yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
-        scanners = getDevicesByType(deviceType.scanner);
+        this._scanners = getDevicesByType(deviceType.scanner);
         for (const scanner of this._scanners) {
           yield call(scanner.Enable);
           scanner.dispatcher = scannerStepAction.getValue;
@@ -54,6 +54,9 @@ export default class ScannerStep extends Step {
               }));
               break;
             case SCANNER_STEP.SUBMIT:
+              // if(this._steps.length>0){
+              //   yield call(this.runSubStep,this._steps[0])
+              // }
               if (Object.hasOwnProperty.call(result || {}, label)) {
                 yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED));
               }
@@ -73,7 +76,7 @@ export default class ScannerStep extends Step {
     },
     * [STEP_STATUS.FINISHED](ORDER, orderActions) {
       try {
-        yield put(orderActions.doNextStep());
+        yield put(orderActions.finishStep(this));
       } catch (e) {
         console.error(e);
       }

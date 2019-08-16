@@ -3,6 +3,7 @@ import ScannerStep from './scannerStep';
 import InstructionStep from './instructionStep';
 import ScrewStep from './screwStep';
 import MaterialStep from './materialStep';
+import CheckStep from './CheckStep';
 
 export default {
   input: {
@@ -19,6 +20,9 @@ export default {
   },
   material:{
     component:MaterialStep,
+  },
+  check:{
+    component:CheckStep,
   }
 };
 
