@@ -1,6 +1,7 @@
 // @flow
 
 import STEP_STATUS from '../step/model';
+import Order from './Order';
 
 export type tStockMove = {
   lot: string, // 批次号或者序列号
@@ -23,10 +24,10 @@ export type tOrder = {
 export type tOrderStepIdx = number;
 
 export type tOrderState = {
-  viewingOrder: tOrder | null,
-  workingOrder: tOrder | null,
+  viewingOrder: Order | null,
+  workingOrder: Order | null,
   viewingIndex: tOrderStepIdx,
-  list: Array<tOrder>
+  list: Array<Order>
 };
 
 export type tOrderStatus = $Values<typeof ORDER_STATUS>;

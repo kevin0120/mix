@@ -34,7 +34,7 @@ function formPointStatusFromResultStatus(point: tPoint, rStatus: tResultStatus, 
 
 const mergePointsAndResults = (points: Array<tPoint>, results: Array<tResult>, activeIndex: number, activeGroupSequence): Array<tPoint> => {
   const newPoints = [...points];
-  if(activeIndex===-1){
+  if (activeIndex === -1) {
     return [
       ...newPoints.map((p) => {
         return ({
@@ -77,44 +77,43 @@ const resultStatus = (results: Array<tResult>, data: tScrewStepData) => {
 const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
   * retry() {
     try {
-      yield put(orderActions.stepData((d: tScrewStepData): tScrewStepData => ({
+      this.updateData((d: tScrewStepData): tScrewStepData => ({
         ...d,
         points: mergePointsAndResults(d.points, results, d.activeIndex, d.points[d.activeIndex]?.group_sequence),
         retryTimes: (d.retryTimes || 0) + 1
-      })));
+      }));
     } catch (e) {
       CommonLog.lError(e);
     }
   },
   * fail() {
     try {
-      yield put(orderActions.stepData((d: tScrewStepData): tScrewStepData => ({
+      this.updateData((d: tScrewStepData): tScrewStepData => ({
         ...d,
         activeIndex: -1,
         points: mergePointsAndResults(d.points, results, d.activeIndex, d.points[d.activeIndex]?.group_sequence)
-      })));
-      yield put(orderActions.stepStatus(STEP_STATUS.FAIL));
+      }));
+      yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL));
     } catch (e) {
       CommonLog.lError(e);
     }
   },
   * finish() {
     try {
-      yield put(orderActions.stepData((d: tScrewStepData): tScrewStepData => ({
+      this.updateData((d: tScrewStepData): tScrewStepData => ({
         ...d,
         activeIndex: -1,
         points: mergePointsAndResults(d.points, results, d.activeIndex, d.points[d.activeIndex]?.group_sequence)
-      })));
-      yield put(orderActions.stepStatus(STEP_STATUS.FINISHED));
+      }));
+      yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED));
     } catch (e) {
       CommonLog.lError(e);
     }
   },
   * next() {
     try {
-      const sData = yield select(s => stepData(workingStep(workingOrder(s.order))));
       // update step data
-      yield put(orderActions.stepData((d: tScrewStepData): tScrewStepData => ({
+      this.updateData((d: tScrewStepData): tScrewStepData => ({
         ...d,
         activeIndex: d.activeIndex === -1 ? 0 : d.activeIndex + results.length,
         points: mergePointsAndResults(
@@ -125,7 +124,7 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
             d.points[0].group_sequence :
             d.points[d.activeIndex + results.length]?.group_sequence
         )
-      })));
+      }));
     } catch (e) {
       CommonLog.lError(e);
     }
@@ -141,7 +140,6 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
 
 export default function* handleResult(ORDER, orderActions, results, data) {
   try {
-    console.log(results);
     const firstMatchResultStatus =
       resultStatusTasks(
         ORDER,
@@ -150,7 +148,7 @@ export default function* handleResult(ORDER, orderActions, results, data) {
       )[resultStatus(results, data).find(v => !!v)];
     // 执行
     if (firstMatchResultStatus) {
-      yield call(firstMatchResultStatus);
+      yield call([this, firstMatchResultStatus]);
     }
   } catch (e) {
     CommonLog.lError(e);

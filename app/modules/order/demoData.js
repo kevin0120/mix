@@ -4,6 +4,7 @@ import dataImg2 from '../../../resources/imgs/working-page-test-pic2.png';
 import { ORDER_STATUS } from './model';
 
 export const demoOrder = {
+  id:'demoOrder',
   name: 'fill info',
   info:
     'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
@@ -11,6 +12,8 @@ export const demoOrder = {
   status: ORDER_STATUS.TODO,
   steps: [
     {
+      id:'s1',
+
       name: '获取物料',
       info: {
         time: '00:02:00'
@@ -34,6 +37,8 @@ export const demoOrder = {
       }
     },
     {
+      id:'s2',
+
       name: '拧紧作业指导 pset',
       info: {
         time: '00:02:00'
@@ -93,7 +98,9 @@ export const demoOrder = {
         ],
         image: dataImg
       }
-    }, {
+    },
+    {
+      id:'s3',
       name: '拧紧作业指导 job',
       info: {
         time: '00:02:00'
@@ -146,6 +153,7 @@ export const demoOrder = {
       }
     },
     {
+      id:'s4',
       name: '扫码',
       info: {
         time: '00:02:00'

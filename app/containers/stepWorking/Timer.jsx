@@ -1,27 +1,23 @@
 // @flow
 import React, { useEffect, useState } from 'react';
 import { Typography } from '@material-ui/core';
-import { durationString, timeCost } from '../../common/utils';
-import * as orderSelectors from '../../modules/order/selector';
-import type { tStep } from '../../modules/order/model';
-
+import { durationString } from '../../common/utils';
+import Step from '../../modules/step/Step';
 
 type Props = {
-  step: tStep
+  step: Step
 };
 
 export default function Timer({ step }: Props) {
-  const times = orderSelectors.times(step);
-  const [duration, setDuration] = useState(timeCost(times));
+  const [duration, setDuration] = useState(step.timeCost());
   useEffect(() => {
-    if (times && (times.length > 0)) {
-      setDuration(timeCost(times));
+    if (step.timeCost) {
       const interval = setInterval(() => {
-        setDuration(timeCost(times));
+        setDuration(step.timeCost());
       }, 1000);
       return () => clearInterval(interval);
     }
-  }, [times]);
+  }, [step]);
 
 
   return <Typography variant="h6">

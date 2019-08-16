@@ -13,8 +13,8 @@ export default {
 
   * [controllerModes.pset](): Saga<void> {
     try {
-      const sData: tScrewStepData = yield select(s => stepData(workingStep(workingOrder(s.order))));
-      const stepId = yield select(s => workingIndex(workingOrder(s.order)));
+      const sData: tScrewStepData = this._data;
+      const stepId = this._id;
       const {
         activeIndex,
         points,
@@ -46,8 +46,8 @@ export default {
 
   * [controllerModes.job](): Saga<void> {
     try {
-      const { jobID, points }: tScrewStepData = yield select(s => stepData(workingStep(workingOrder(s.order))));
-      const stepId = yield select(s => workingIndex(workingOrder(s.order)));
+      const { jobID, points }: tScrewStepData = this._data;
+      const stepId = this._id;
       const toolSN = points.reduce((tSN: string, p: tPoint): string => {
         if (tSN && p.toolSN !== tSN) {
           CommonLog.lError('结果中的toolSN不匹配');

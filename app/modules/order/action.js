@@ -1,5 +1,7 @@
 // @flow
 import type { tOrder, tOrderStepIdx, tStep, tStepStatus } from './model';
+import Step from '../step/Step';
+import { ORDER_STATUS } from './model';
 
 export const ORDER = {
   WORK_ON: 'ORDER_WORK_ON',
@@ -7,6 +9,8 @@ export const ORDER = {
   FINISH: 'ORDER_FINISH',
   CANCEL: 'ORDER_CANCEL',
   PENDING: 'ORDER_PENDING',
+  // update the store
+  UPDATE_STATE:'ORDER_UPDATE_STATE',
   LIST: {
     GET: 'ORDER_LIST_GET',
     SUCCESS: 'ORDER_LIST_SUCCESS',
@@ -77,14 +81,15 @@ export const orderActions = {
     order
   }),
   cancelOrder: (order: tOrder) => ({
-    type: ORDER.CANCEL,
-    order
+    type: ORDER.STEP.STATUS,
+    step:order,
+    status:ORDER_STATUS.CANCEL
   }),
   pendingOrder: (order: tOrder) => ({
-    type: ORDER.PENDING,
-    order
+    type: ORDER.STEP.STATUS,
+    step:order,
+    status:ORDER_STATUS.PENDING
   }),
-
   nextStep: () => ({
     type: ORDER.STEP.NEXT
   }),
@@ -95,8 +100,9 @@ export const orderActions = {
     type: ORDER.STEP.JUMP_TO,
     stepId
   }),
-  stepStatus: (status: tStepStatus) => ({
+  stepStatus: (step: Step, status: tStepStatus) => ({
     type: ORDER.STEP.STATUS,
+    step,
     status
   }),
   doNextStep: () => ({
@@ -105,13 +111,7 @@ export const orderActions = {
   doPreviousStep: () => ({
     type: ORDER.STEP.DO_PREVIOUS
   }),
-  stepData: (reducer: ({})=>{}) => ({
-    type: ORDER.STEP.DATA,
-    reducer
-  }),
-  stepTime: (idx: tOrderStepIdx, time: Date) => ({
-    type: ORDER.STEP.TIME,
-    idx,
-    time
+  updateState:()=>({
+    type:ORDER.UPDATE_STATE,
   })
 };

@@ -18,21 +18,23 @@ import type { tStep, tStepArray } from '../../modules/order/model';
 import Timer from './Timer';
 import clsx from 'clsx';
 
-const mapState = (state, props) => ({
-  ...props,
-  steps: oSel.orderSteps(oSel.viewingOrder(state.order)) || [],
-  workingStep: oSel.workingStep(oSel.workingOrder(state.order)),
-  viewingStep: oSel.viewingStep(state.order),
-  viewingIndex: oSel.viewingIndex(state.order) || 0,
-  isCurrent: oSel.viewingOrder(state.order) === oSel.workingOrder(state.order)
-});
+const mapState = (state, props) => {
+  return ({
+    ...props,
+    steps: oSel.orderSteps(oSel.viewingOrder(state.order)) || [],
+    workingStep: oSel.workingStep(oSel.workingOrder(state.order)),
+    viewingStep: oSel.viewingStep(state.order),
+    viewingIndex: oSel.viewingIndex(state.order) || 0,
+    isCurrent: oSel.viewingOrder(state.order) === oSel.workingOrder(state.order)
+  });
+};
 
 const mapDispatch = {
   jumpTo: orderActions.jumpToStep
 };
 
 type StepperLayoutProps = {
-  steps: tStepArray,
+  steps: Array<Step>,
   viewingIndex: number,
   jumpTo: Dispatch,
   workingStep: tStep,

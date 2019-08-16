@@ -2,18 +2,9 @@
 
 import { ORDER } from './action';
 import { genReducers } from '../util';
-import { ORDER_STATUS } from './model';
-import type { tOrder, tOrderState, tOrderStatus, tOrderStepIdx, tStep } from './model';
-import STEP_STATUS from '../step/model';
+import type { tOrder, tOrderState, tOrderStepIdx } from './model';
+import { demoOrder, demoOrderCancel, demoOrderDone, demoOrderLong, demoOrderPending } from './demoData';
 import {
-  demoOrder,
-  demoOrderLong,
-  demoOrderCancel,
-  demoOrderDone,
-  demoOrderPending
-} from './demoData';
-import {
-  getStep,
   orderLength,
   viewingIndex,
   viewingOrder,
@@ -22,6 +13,8 @@ import {
   workingOrder,
   workingStep
 } from './selector';
+import stepTypes from '../step/stepTypes';
+import Order from './Order';
 
 const initState = {
   workingOrder: null,
@@ -33,29 +26,9 @@ const initState = {
     demoOrderCancel,
     demoOrderPending,
     demoOrderDone
-  ]
+  ].map(o => new Order(o,stepTypes))
 };
 
-
-function reduceStepData(reducer, state: tOrderState, action): tOrderState {
-  const newState = { ...state };
-  const newStep: ?tStep = workingStep(workingOrder(newState));
-  if (newStep) {
-    newStep.data = reducer(newStep?.data, action);
-  }
-  return newState;
-}
-
-function setStepStatus(state: tOrderState, action): tOrderState {
-  const newState = {
-    ...state
-  };
-  const newStep = workingStep(workingOrder(newState));
-  if (newStep) {
-    newStep.status = action.status;
-  }
-  return newState;
-}
 
 function limitIndex(order: ?tOrder, index: tOrderStepIdx): tOrderStepIdx {
   if (index < 0) {
@@ -78,42 +51,30 @@ function clearWorkingOrderIfMatch(state, order) {
   return state;
 }
 
-function orderStatus(state: tOrderState, order: tOrder, status: tOrderStatus) {
-  const newOrder = order;
-  if (newOrder) {
-    newOrder.status = status;
-  }
-  return {
-    ...state
-  };
-}
-
-function stepTime(step: ?tStep, isStart: boolean) {
-  const newStep = step;
-  if (!(newStep && newStep.times)) {
-    return;
-  }
-  const isStarted = newStep.times.length % 2 === 1;
-  if ((isStart && !isStarted) || (!isStart && isStarted)) {
-    newStep.times.push(new Date());
-  }
-}
-
-
 const orderReducer: {
   // eslint-disable-next-line flowtype/no-weak-types
   [key: string]: (tOrderState, { type: string, [key: any]: any }) => tOrderState
 } = {
   [ORDER.LIST.SUCCESS]: (state, { list }) => {
+    // get exist orders
     let newList = state.list.filter(
       (o) => !!list.find(newO => o.id === newO.id)
     );
+    // update order data
     newList.forEach((o) => {
-      Object.assign(o, list.find(newO => o.id === newO.id));
+      const orderData = list.find(newO => o.id === newO.id);
+      o.update(orderData, stepTypes);
     });
-    newList = newList.concat(list.filter(newO =>
-      !newList.find(o => o.id === newO.id)
-    ));
+
+    // make new orders
+    newList = newList.concat(
+      list.filter(newO =>
+        !newList.find(o => o.id === newO.id)
+      ).map(
+        oD => new Order(oD, stepTypes)
+      )
+    );
+
     return {
       ...state,
       list: newList
@@ -123,54 +84,38 @@ const orderReducer: {
     const newList = [...state.list];
     const newOrder = newList.find(o => o.id === order.id);
     if (newOrder) {
-      Object.assign(newOrder, order);
+      newOrder.update(order, stepTypes);
     }
     return {
       ...state,
       list: newList
     };
   },
+  [ORDER.UPDATE_STATE]: (state, action) => ({
+    ...state
+  }),
   [ORDER.VIEW]: (state, action) => {
     const { order } = action;
     const firstIndex = 0;
     return {
       ...state,
       viewingOrder: order || null,
-      viewingIndex: firstIndex,
-      startTime: new Date()
+      viewingIndex: firstIndex
     };
   },
-  [ORDER.WORK_ON]: (state, {order}) => {
+  [ORDER.WORK_ON]: (state, { order }) => {
     const wOrder = workingOrder(state);
     if (wOrder) {
       return state;
     }
     const startIndex = workingIndex(order);
-    const newState={
+    return {
       ...state,
       workingOrder: order || null,
       viewingIndex: startIndex
     };
-    return orderStatus(newState,order,ORDER_STATUS.WIP);
   },
-  [ORDER.FINISH]: (state, { order }) => clearWorkingOrderIfMatch(
-    orderStatus(state, order, ORDER_STATUS.DONE),
-    order
-  ),
-  [ORDER.CANCEL]: (state, { order }) => {
-    stepTime(workingStep(order), false);
-    return clearWorkingOrderIfMatch(
-      orderStatus(state, order, ORDER_STATUS.CANCEL),
-      order
-    );
-  },
-  [ORDER.PENDING]: (state, {order}) => {
-    stepTime(workingStep(order), false);
-    return clearWorkingOrderIfMatch(
-      orderStatus(state, order, ORDER_STATUS.PENDING),
-      order
-    );
-  },
+  [ORDER.FINISH]: (state, { order }) => clearWorkingOrderIfMatch(state, order),
   [ORDER.STEP.VIEW_NEXT]: state => {
     const newIndex = limitIndex(viewingOrder(state), viewingIndex(state) + 1);
     return {
@@ -187,14 +132,12 @@ const orderReducer: {
   },
   [ORDER.STEP.JUMP_TO]: (state, action) => {
     const { stepId } = action;
+    console.log('jump to', stepId);
     return {
       ...state,
       viewingIndex: stepId
     };
   },
-  // 修改step的状态
-  [ORDER.STEP.STATUS]: setStepStatus,
-  //
   [ORDER.STEP.DO_NEXT]: state => {
     const wOrder: ?tOrder = workingOrder(state);
     const newIndex = workingIndex(wOrder) + 1;
@@ -202,9 +145,6 @@ const orderReducer: {
       workingStep(wOrder) === viewingStep(state)
         ? newIndex
         : viewingIndex(state);
-    if (wOrder) {
-      wOrder.workingIndex = newIndex;
-    }
     return {
       ...state,
       viewingIndex: vIndex
@@ -213,34 +153,13 @@ const orderReducer: {
   [ORDER.STEP.DO_PREVIOUS]: state => {
     const wOrder = workingOrder(state);
     const newIndex = limitIndex(wOrder, workingIndex(wOrder) - 1);
-    if (wOrder) {
-      wOrder.workingIndex = newIndex;
-    }
-    const revokedState = {
+    return {
       ...state,
       viewingIndex:
         workingStep(wOrder) === viewingStep(state)
           ? newIndex
           : viewingIndex(state)
     };
-    return setStepStatus(revokedState, STEP_STATUS.READY);
-  },
-  [ORDER.STEP.DATA]: (state, action) => {
-    const { reducer } = action;
-    return reduceStepData(reducer, state, action);
-  },
-  [ORDER.STEP.TIME]: (state, action) => {
-    const { idx, time } = action;
-    const newState = { ...state };
-    const newStep = getStep(workingOrder(newState), idx);
-    if (newStep) {
-      if (newStep.times) {
-        newStep.times.push(time);
-      } else {
-        newStep.times = [time];
-      }
-    }
-    return newState;
   }
 };
 

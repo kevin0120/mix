@@ -1,8 +1,6 @@
 // @flow
 import {
-  take,
   call,
-  race,
   select,
   put,
   all,
@@ -11,17 +9,12 @@ import {
   takeLeading,
   delay
 } from 'redux-saga/effects';
-import { push } from 'connected-react-router';
 import React from 'react';
 import type { Saga } from 'redux-saga';
 import { ORDER, orderActions } from './action';
-import steps from '../step/saga';
 import {
   workingStep,
   workingOrder,
-  workingIndex,
-  stepType,
-  orderLength,
   orderSteps,
   doable,
   viewingOrder
@@ -32,7 +25,7 @@ import Table from '../../components/Table/Table';
 import { CommonLog, durationString, timeCost } from '../../common/utils';
 import type { tOrder, tStep, tStepArray } from './model';
 import type { tCommonActionType } from '../external/device/type';
-import { orderDetailApi, orderListApi, orderStepUpdateApi, orderUpdateApi } from '../../api/order';
+import { orderDetailApi, orderListApi, orderStepUpdateApi } from '../../api/order';
 import { ORDER_STATUS } from './model';
 import { bindRushAction } from '../rush/rushHealthz';
 
@@ -44,11 +37,8 @@ export default function* root(): Saga<void> {
       // TODO: shall we takeEvery?
       takeEvery(ORDER.LIST.GET, getOrderList),
       takeEvery(ORDER.DETAIL.GET, getOrderDetail),
-      takeEvery(ORDER.STEP.STATUS, orderStepStatus),
-      takeEvery([ORDER.WORK_ON, ORDER.FINISH, ORDER.PENDING, ORDER.CANCEL], orderUpdate),
-
       //////
-      takeLatest(ORDER.WORK_ON, workOnOrder),
+      takeEvery(ORDER.WORK_ON, workOnOrder),
       takeEvery(ORDER.VIEW, viewOrder),
       takeLeading([ORDER.STEP.PREVIOUS, ORDER.STEP.NEXT], DebounceViewStep, 300)
     ]);
@@ -57,41 +47,18 @@ export default function* root(): Saga<void> {
   }
 }
 
-
-const mapping = {
-  onOrderFinish: showResult,
-  onOrderView: showOverview
-};
-
-function* showResult(order) {
+function*workOnOrder({order}){
   try {
-    const oSteps = orderSteps(order) || [];
-    const data = oSteps.map(s => [s.name, durationString(timeCost(s.times))]);
-    yield put(
-      dialogActions.dialogShow({
-        buttons: [
-          {
-            label: 'Common.Yes',
-            color: 'info'
-          }
-        ],
-        closeAction: push('/app'),
-        title: i18n.t('Common.Result'),
-        content: (
-          <Table
-            tableHeaderColor="info"
-            tableHead={['工步名称', '耗时']}
-            tableData={data}
-            colorsColls={['info']}
-          />
-        )
-      })
-    );
+    yield call(order.run,ORDER_STATUS.WIP);
   } catch (e) {
-    const err = (e: Error);
-    CommonLog.lError(`showResult error: ${err.message}`);
+    CommonLog.lError(e);
   }
 }
+
+
+const mapping = {
+  onOrderView: showOverview
+};
 
 function* showOverview(order: tOrder) {
   try {
@@ -166,38 +133,6 @@ function* DebounceViewStep(d, action: tCommonActionType) {
 }
 
 
-function* orderStepStatus({ status }) {
-  try {
-    const wStep = yield select(s => workingStep(workingOrder(s.order)));
-    yield call(orderStepUpdateApi, wStep.id, status);
-  } catch (e) {
-    CommonLog.lError(e, {
-      at: 'orderStepStatus'
-    });
-  }
-}
-
-const action2Status = {
-  [ORDER.WORK_ON]: ORDER_STATUS.WIP,
-  [ORDER.FINISH]: ORDER_STATUS.DONE,
-  [ORDER.PENDING]: ORDER_STATUS.PENDING,
-  [ORDER.CANCEL]: ORDER_STATUS.CANCEL
-};
-
-function* orderUpdate(action) {
-  try {
-    const { type, order } = action;
-    const status = action2Status[type];
-    if (status && order) {
-      yield call(orderUpdateApi, order.id, status);
-    }
-  } catch (e) {
-    CommonLog.lError(e, {
-      at: 'orderUpdate'
-    });
-  }
-}
-
 function* getOrderDetail({ order }) {
   try {
     yield call(orderDetailApi, order.id);
@@ -226,50 +161,6 @@ function* viewOrder({ order }) {
   }
 }
 
-function* workOnOrder() {
-  const wOrder = yield select(s => workingOrder(s.order));
-  try {
-    const { finish } = yield race({
-      exit: call(doOrder),
-      finish: take(ORDER.FINISH),
-      pending: take(ORDER.PENDING),
-      cancel: take(ORDER.CANCEL)
-    });
-    CommonLog.Info('Order Finished');
-    if (finish) {
-      yield call(mapping.onOrderFinish, wOrder);
-    }
-  } catch (e) {
-    CommonLog.lError(e);
-  } finally {
-    const { id, status } = wOrder;
-    yield call(orderUpdateApi, id, status);
-  }
-}
 
-function* doOrder() {
-  try {
-    while (true) {
-      CommonLog.Info('Doing Order...');
-      const wOrder = yield select(state => workingOrder(state.order));
-      const step = workingStep(wOrder);
-      const idx = workingIndex(wOrder);
-      const type = stepType(step);
-      yield put(orderActions.stepTime(idx, new Date()));
-      const { next } = yield race({
-        exit: call(steps, type),
-        next: take(ORDER.STEP.DO_NEXT),
-        previous: take(ORDER.STEP.DO_PREVIOUS)
-      });
-      yield put(orderActions.stepTime(idx, new Date()));
-      if (next) {
-        const newWOrder = yield select(state => workingOrder(state.order));
-        if (workingIndex(newWOrder) >= orderLength(newWOrder)) {
-          yield put(orderActions.finishOrder(wOrder));
-        }
-      }
-    }
-  } catch (e) {
-    CommonLog.lError(e);
-  }
-}
+
+

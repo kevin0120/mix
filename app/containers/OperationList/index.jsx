@@ -54,7 +54,6 @@ function HomeOperationList(props: Props) {
     getList();
   }, [getList]);
 
-
   const renderOrders = (t, orders, size, title) => (
     <React.Fragment>
       <Grid item xs={12} className={classes.listTitle}>
