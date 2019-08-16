@@ -164,7 +164,9 @@ const buttonsContainer = {
 const stepPageContainer = {
   root: {
     flex: 1,
-    overflow:'hidden'
+    overflow:'hidden',
+    width: '100%',
+    height: '100%',
   },
 
   left: {

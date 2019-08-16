@@ -2,7 +2,6 @@ import Step from '../Step';
 import STEP_STATUS from '../model';
 import type { tPoint, tScrewStepData, tScrewStepPayload } from './model';
 import { call, put, select, take } from 'redux-saga/effects';
-import { stepData, stepPayload, workingOrder, workingStep } from '../../order/selector';
 import { cloneDeep } from 'lodash-es';
 import { CommonLog } from '../../../common/utils';
 import handleResult from './handleResult';

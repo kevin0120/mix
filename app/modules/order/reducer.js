@@ -21,11 +21,11 @@ const initState = {
   viewingOrder: null,
   viewingIndex: 0,
   list: [
-    demoOrder,
-    demoOrderLong,
-    demoOrderCancel,
-    demoOrderPending,
-    demoOrderDone
+    // demoOrder,
+    // demoOrderLong,
+    // demoOrderCancel,
+    // demoOrderPending,
+    // demoOrderDone
   ].map(o => new Order(o,stepTypes))
 };
 

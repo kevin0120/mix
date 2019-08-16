@@ -1,8 +1,7 @@
-import { put, select, call } from 'redux-saga/effects';
+import { put, call } from 'redux-saga/effects';
 import type { tPoint, tPointStatus, tResult, tResultStatus, tScrewStepData } from './model';
 import { POINT_STATUS, RESULT_STATUS } from './model';
 import STEP_STATUS from '../model';
-import { stepData, workingOrder, workingStep } from '../../order/selector';
 import { CommonLog } from '../../../common/utils';
 
 function formPointStatusFromResultStatus(point: tPoint, rStatus: tResultStatus, activeGroupSequence: number): tPointStatus {
@@ -140,6 +139,18 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
 
 export default function* handleResult(ORDER, orderActions, results, data) {
   try {
+    this.updateData((d: tScrewStepData): tScrewStepData => ({
+      ...d,
+      timeLine: [
+        ...results.map(r => ({
+          title: r.batch,
+          color: r.result === 'ok' ? 'info' : 'danger',
+          footerTitle: r.tool_sn,
+          body: `${r.result}: wi=${r.wi},mi=${r.mi},ti=${r.ti}`
+        })),
+        ...(d.timeLine || [])
+      ]
+    }));
     const firstMatchResultStatus =
       resultStatusTasks(
         ORDER,
