@@ -11,7 +11,7 @@ import { jobApi, psetApi } from '../../../api/tools';
 export default {
 
 
-  * [controllerModes.pset](): Saga<void> {
+  * [controllerModes.pset](point): Saga<void> {
     try {
       const sData: tScrewStepData = this._data;
       const stepId = this._id;
@@ -23,7 +23,8 @@ export default {
       // TODO: pass correct userID
       const userID = 1;
 
-      const { toolSN, pset, sequence } = points[activeIndex];
+      // const { toolSN, pset, sequence } = points[activeIndex];
+      const { toolSN, pset, sequence } = point;
 
       const data = yield call(psetApi, toolSN || '', stepId, userID, pset, sequence, retryTimes);
       if (data && data.result !== 0) {

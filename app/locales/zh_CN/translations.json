@@ -1,17 +1,25 @@
 {
   "Title": "欢迎",
   "OrderStatus": {
-    "TODO": "待办",
-    "WIP": "进行中",
-    "CANCEL": "已取消",
-    "PENDING": "阻塞",
-    "DONE": "已完成",
-    "EXCP": "异常"
+    "todo": "待办",
+    "wip": "进行中",
+    "cancel": "已取消",
+    "pending": "阻塞",
+    "done": "已完成",
+    "excp": "异常"
   },
   "StepWorking": {
     "SKIP": "跳过",
     "UNDO": "取消上次动作",
     "SUBMIT": "提交(验证)"
+  },
+  "StepType": {
+    "input": "输入",
+    "scanner": "扫码",
+    "instruction": "指导",
+    "screw": "拧紧",
+    "material": "取料",
+    "check": "检测"
   },
   "Language": {
     "en": "英文",

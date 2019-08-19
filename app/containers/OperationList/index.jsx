@@ -79,7 +79,7 @@ function HomeOperationList(props: Props) {
                   {order.info}
                 </Typography>
                 <Typography variant="body2" color="textSecondary" align="left" className={classes.orderStatusText}>
-                  {t(order.status || ORDER_STATUS.TODO)}
+                  {t(`OrderStatus.${order.status || ORDER_STATUS.TODO}`)}
                 </Typography>
               </CardContent>
             </CardActionArea>
@@ -95,15 +95,15 @@ function HomeOperationList(props: Props) {
         <Grid container className={clsx(classes.container, classes.bgEven)} justify="center" spacing={4}>
           <Grid item container xs={6} spacing={1} alignItems="flex-start" alignContent="flex-start"
                 justify="flex-start" direction="row" className={classes.bgOdd}>
-            {renderOrders(t, [...doingOrders(retOrderList), ...todoOrders(retOrderList)], 6, t('OrderStatus.WIP'))}
+            {renderOrders(t, [...doingOrders(retOrderList), ...todoOrders(retOrderList)], 6, t(`OrderStatus.wip`))}
           </Grid>
           <Grid item container xs={3} spacing={1} alignItems="flex-start" alignContent="flex-start"
                 justify="flex-start" direction="row" className={classes.bgEven}>
-            {renderOrders(t, doneOrders(retOrderList), 12, t('OrderStatus.DONE'))}
+            {renderOrders(t, doneOrders(retOrderList), 12, t('OrderStatus.done'))}
           </Grid>
           <Grid item container xs={3} spacing={1} alignItems="flex-start" alignContent="flex-start"
                 justify="flex-start" direction="row" className={classes.bgOdd}>
-            {renderOrders(t, exceptOrders(retOrderList), 12, t('OrderStatus.EXCP'))}
+            {renderOrders(t, exceptOrders(retOrderList), 12, t('OrderStatus.excp'))}
           </Grid>
         </Grid>
       </div>)}

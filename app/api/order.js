@@ -27,8 +27,9 @@ export function* orderDetailApi(id: number): Saga<void> {
   }
 }
 
+
 // 更新工单状态
-export function* orderUpdateApi(id: number, status: string): Saga<void> {
+export function* orderUpdateApi(id: number, orderStatus: string): Saga<void> {
   try {
     return yield call(rushSendApi, ORDER_WS_TYPES.UPDATE, {
       id,

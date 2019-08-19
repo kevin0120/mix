@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/styles';
 import styles from './style';
 import Point from './point';
 
-export default function ScrewImage({ style, image, points, focus, activeIndex, onClick, pointScale }) {
+export default function ScrewImage({ style, image, points, focus, activeIndex, onClick, pointScale, onPointClick }) {
   const classes = makeStyles(styles.image)();
 
   const imageRef = useRef(null);
@@ -79,6 +79,11 @@ export default function ScrewImage({ style, image, points, focus, activeIndex, o
           status={p.status}
           label={p.group_sequence}
           scale={pointScale}
+          onClick={(e)=>{
+            e.preventDefault();
+            e.stopPropagation();
+            onPointClick && onPointClick(p);
+          }}
         />) || null}
       </div>
     </div>);

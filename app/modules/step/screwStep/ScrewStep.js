@@ -1,15 +1,37 @@
 import Step from '../Step';
 import STEP_STATUS from '../model';
 import type { tPoint, tScrewStepData, tScrewStepPayload } from './model';
-import { call, put, select, take } from 'redux-saga/effects';
+import { call, put, take } from 'redux-saga/effects';
 import { cloneDeep } from 'lodash-es';
 import { CommonLog } from '../../../common/utils';
 import handleResult from './handleResult';
 import controllerModeTasks from './controllerModeTasks';
-// import { staticScrewTool } from '../../external/device/tools/saga';
 import { SCREW_STEP } from './action';
 import { getDevice } from '../../external/device';
 
+
+function* doPoint(point, isFirst, orderActions) {
+  try {
+    const data = this._data;
+    if (data.controllerMode === 'pset' || (data.controllerMode === 'job' && isFirst)) {
+      const success = yield call([this, controllerModeTasks[data.controllerMode]], point);
+      if (!success) {
+        yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL));
+      }
+      if (isFirst) {
+        for (const t of this._tools) {
+          yield call(t.Enable);
+        }
+      }
+    }
+    return yield take([SCREW_STEP.RESULT, SCREW_STEP.REDO_POINT]);
+  } catch (e) {
+    CommonLog.lError(e, {
+      at: 'doPoint',
+      point
+    });
+  }
+}
 
 export default class ScrewStep extends Step {
   _tools = [];
@@ -47,7 +69,7 @@ export default class ScrewStep extends Step {
           yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL));
         }
 
-        yield call(this.updateData,(data: tScrewStepData): tScrewStepData => {
+        yield call(this.updateData, (data: tScrewStepData): tScrewStepData => {
           return {
             points, // results data.results
             activeIndex: -1, // <-activeResultIndex
@@ -70,23 +92,28 @@ export default class ScrewStep extends Step {
       try {
         yield call([this, handleResult], ORDER, orderActions, [], this._data);
         let isFirst = true;
+        const sData: tScrewStepData = this._data;
+        const {
+          activeIndex,
+          points
+        } = sData;
+        let activePoint = points[activeIndex];
         while (true) {
           const data = this._data;
-          if (data.controllerMode === 'pset' || (data.controllerMode === 'job' && isFirst)) {
-            const succ = yield call([this, controllerModeTasks[data.controllerMode]], orderActions);
-            if (!succ) {
-              // TODO: on set pset fail
-              yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL));
-            }
-            if (isFirst) {
-              for (const t of this._tools) {
-                yield call(t.Enable);
-              }
-            }
-            isFirst = false;
+          const nextAction=yield call(doPoint, activePoint);
+          switch (nextAction.type) {
+            case SCREW_STEP.RESULT:
+              const { results: { data: results } } = nextAction;
+              yield call([this, handleResult], ORDER, orderActions, results, data);
+              activePoint = points[activeIndex];
+              break;
+            case SCREW_STEP.REDO_POINT:
+              const { point } = nextAction;
+              activePoint = point;
+              break;
+            default:
+              break;
           }
-          const { results: { data: results } } = yield take(SCREW_STEP.RESULT);
-          yield call([this, handleResult], ORDER, orderActions, results, data);
         }
       } catch (e) {
         CommonLog.lError(e, { at: 'screwStep DOING' });

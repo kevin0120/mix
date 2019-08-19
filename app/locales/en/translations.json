@@ -1,12 +1,20 @@
 {
   "Title": "Welcome",
   "OrderStatus": {
-    "TODO": "TODO",
-    "WIP": "WIP",
-    "CANCEL": "CANCEL",
-    "PENDING": "PENDING",
-    "DONE": "DONE",
-    "EXCP": "EXCEPT"
+    "todo": "TODO",
+    "wip": "WIP",
+    "cancel": "CANCEL",
+    "pending": "PENDING",
+    "done": "DONE",
+    "excp": "EXCEPT"
+  },
+  "StepType": {
+    "input": "input",
+    "scanner": "scanner",
+    "instruction": "instruction",
+    "screw": "screw",
+    "material": "material",
+    "check": "check"
   },
   "StepWorking": {
     "SKIP": "SKIP",

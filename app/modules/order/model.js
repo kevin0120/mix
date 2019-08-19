@@ -33,11 +33,11 @@ export type tOrderState = {
 export type tOrderStatus = $Values<typeof ORDER_STATUS>;
 
 export const ORDER_STATUS = {
-  TODO: 'OrderStatus.TODO',
-  WIP: 'OrderStatus.WIP',
-  DONE: 'OrderStatus.DONE',
-  CANCEL: 'OrderStatus.CANCEL',
-  PENDING: 'OrderStatus.PENDING'
+  TODO: 'todo',
+  WIP: 'wip',
+  DONE: 'done',
+  CANCEL: 'cancel',
+  PENDING: 'pending'
 };
 
 export type tStepArray = Array<tStep>;

@@ -23,10 +23,11 @@ const mapState = (state, props) => {
 
 const mapDispatch = {
   result: screwStepAction.result,
-  imageReady: screwStepAction.imageReady
+  imageReady: screwStepAction.imageReady,
+  redoPoint:screwStepAction.redoPoint,
 };
 
-function ScrewStep({ status, image, points, activeIndex, result }: tStepProps) {
+function ScrewStep({ status, image, points, activeIndex, result,redoPoint }: tStepProps) {
   const classes = makeStyles(styles)();
 
   return <div className={classes.layout}>
@@ -37,6 +38,11 @@ function ScrewStep({ status, image, points, activeIndex, result }: tStepProps) {
       focus={status === STEP_STATUS.DOING ? 2 : 0}
       scale={1}
       onClick={() => result({ data: [{ result: 'ok' }] })}
+      onPointClick={(point)=>{
+        console.log('on point click',point);
+
+        redoPoint(point);
+      }}
     />
     <Paper
       square

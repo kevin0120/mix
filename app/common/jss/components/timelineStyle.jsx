@@ -177,6 +177,8 @@ const timelineStyle = theme => ({
   timelineBody: {
     fontSize: '14px',
     lineHeight: '21px',
+    wordWrap: 'break-word',
+    overflow:'hidden',
     '& p': {
       fontSize: '21px',
       marginBottom: '5px'

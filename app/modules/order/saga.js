@@ -68,7 +68,7 @@ function* showOverview(order: tOrder) {
         vOrderSteps.map((s: tStep, idx) => [
           idx + 1,
           s.name,
-          s.type,
+          i18n.t(`StepType.${s.type}`),
           s.description
         ])) ||
       [];
