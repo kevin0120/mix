@@ -47,7 +47,7 @@ export default class ScrewStep extends Step {
           yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL));
         }
 
-        this.updateData((data: tScrewStepData): tScrewStepData => {
+        yield call(this.updateData,(data: tScrewStepData): tScrewStepData => {
           return {
             points, // results data.results
             activeIndex: -1, // <-activeResultIndex

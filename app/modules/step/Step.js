@@ -63,6 +63,7 @@ export default class Step {
     this.run = this.run.bind(this);
     this.timerStart = this.timerStart.bind(this);
     this.timerStop = this.timerStop.bind(this);
+    this.updateData = this.updateData.bind(this);
   }
 
   update(stepObj, stepTypes) {
@@ -163,8 +164,15 @@ export default class Step {
     }
   }
 
-  updateData(dataReducer) {
-    this._data = dataReducer(this._data);
+  *updateData(dataReducer) {
+    try{
+      this._data = dataReducer(this._data);
+      yield put(orderActions.updateState());
+    }catch (e) {
+      CommonLog.lError(e,{
+        at:'step.UpdateData'
+      })
+    }
   }
 
   * _updateStatus({ status }) {

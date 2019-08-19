@@ -43,7 +43,6 @@ const StepPageContainer = ({
   const classes = makeStyles(styles.stepPageContainer)();
   if (stepTypes?.[step?.type]?.component) {
     const StepComponent = stepTypes[step.type].component;
-    console.log(timeLine);
     return (
       <Grid container spacing={1} className={classes.root}>
         <Grid item container className={classes.left} spacing={1}>

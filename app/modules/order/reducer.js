@@ -132,7 +132,6 @@ const orderReducer: {
   },
   [ORDER.STEP.JUMP_TO]: (state, action) => {
     const { stepId } = action;
-    console.log('jump to', stepId);
     return {
       ...state,
       viewingIndex: stepId

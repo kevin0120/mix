@@ -37,7 +37,7 @@ export default class ScannerStep extends Step {
           );
           switch (action.type) {
             case SCANNER_STEP.GET_VALUE:
-              this.updateData(d => ({
+              yield call(this.updateData,d => ({
                 ...d || {},
                 result: {
                   [label]: action?.input?.data

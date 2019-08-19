@@ -76,7 +76,7 @@ const resultStatus = (results: Array<tResult>, data: tScrewStepData) => {
 const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
   * retry() {
     try {
-      this.updateData((d: tScrewStepData): tScrewStepData => ({
+      yield call(this.updateData,(d: tScrewStepData): tScrewStepData => ({
         ...d,
         points: mergePointsAndResults(d.points, results, d.activeIndex, d.points[d.activeIndex]?.group_sequence),
         retryTimes: (d.retryTimes || 0) + 1
@@ -87,7 +87,7 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
   },
   * fail() {
     try {
-      this.updateData((d: tScrewStepData): tScrewStepData => ({
+      yield call(this.updateData,(d: tScrewStepData): tScrewStepData => ({
         ...d,
         activeIndex: -1,
         points: mergePointsAndResults(d.points, results, d.activeIndex, d.points[d.activeIndex]?.group_sequence)
@@ -99,7 +99,7 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
   },
   * finish() {
     try {
-      this.updateData((d: tScrewStepData): tScrewStepData => ({
+      yield call(this.updateData,(d: tScrewStepData): tScrewStepData => ({
         ...d,
         activeIndex: -1,
         points: mergePointsAndResults(d.points, results, d.activeIndex, d.points[d.activeIndex]?.group_sequence)
@@ -112,7 +112,7 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
   * next() {
     try {
       // update step data
-      this.updateData((d: tScrewStepData): tScrewStepData => ({
+      yield call(this.updateData,(d: tScrewStepData): tScrewStepData => ({
         ...d,
         activeIndex: d.activeIndex === -1 ? 0 : d.activeIndex + results.length,
         points: mergePointsAndResults(
@@ -139,7 +139,7 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
 
 export default function* handleResult(ORDER, orderActions, results, data) {
   try {
-    this.updateData((d: tScrewStepData): tScrewStepData => ({
+    yield call(this.updateData,(d: tScrewStepData): tScrewStepData => ({
       ...d,
       timeLine: [
         ...results.map(r => ({
