@@ -7,9 +7,9 @@ import { CommonLog } from '../../../common/utils';
 import { ioDirection, ioTriggerMode } from '../../external/device/io/type';
 import actions, { MATERIAL_STEP } from './action';
 
-const ioSN = (payload) => payload?.device?.IO?.sn;
+const ioSN = (payload) => payload?.ioSN;
 const items = (payload) => payload?.items;
-const confirmIdx=(payload)=>payload?.device?.IO?.confirmIdx;
+const confirmIdx=(payload)=>payload?.confirmIO;
 
 
 export default class MaterialStep extends Step {
@@ -18,7 +18,9 @@ export default class MaterialStep extends Step {
     * [STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {
         const sPayload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
+        console.log(ioSN(sPayload));
         const io = getDevice(ioSN(sPayload));
+        console.log(io);
         if(io?.ioContact) {
           yield call(io.ioContact);
         } else {

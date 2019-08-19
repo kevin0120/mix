@@ -100,9 +100,7 @@ export function* deviceStatus(data: tRushWebSocketData): Saga<void> {
       let dv = getDevice(sn);
       // try make a new device if dv doesn't exist
       if (!dv) {
-        dv = newDevice(type, `${type}${([...gDevices].filter(
-          gd => gd instanceof sym2Device[type]
-        )?.length || 0) + 1}`, sn, config, data, children);
+        dv = newDevice(type, `${type}-${sn}`, sn, config, data, children);
       }
 
       // if dv exists, set its Healthz status

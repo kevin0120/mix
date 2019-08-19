@@ -43,7 +43,7 @@ function StepWorking({ status, name }: Props) {
                 classes.orderStatus
               )}
             >
-              [{status ? t(status) || '' : '未选中工单'}]
+              [{status ? t(`OrderStatus.${status}`) : '未选中工单'}]
             </Typography>
             <Typography variant="h5">{name || ''}</Typography>
           </Paper>

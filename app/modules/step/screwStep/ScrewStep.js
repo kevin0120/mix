@@ -100,7 +100,7 @@ export default class ScrewStep extends Step {
         let activePoint = points[activeIndex];
         while (true) {
           const data = this._data;
-          const nextAction=yield call(doPoint, activePoint);
+          const nextAction = yield call([this,doPoint], activePoint, isFirst, orderActions);
           switch (nextAction.type) {
             case SCREW_STEP.RESULT:
               const { results: { data: results } } = nextAction;
@@ -113,6 +113,9 @@ export default class ScrewStep extends Step {
               break;
             default:
               break;
+          }
+          if(isFirst){
+            isFirst = false;
           }
         }
       } catch (e) {

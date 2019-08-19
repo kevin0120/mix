@@ -59,7 +59,7 @@ export default class Order extends Step {
           CommonLog.Info('Doing Order...');
           const step = this.workingStep;
           if (step) {
-            yield call(this.runSubStep, step, {
+            yield call([this,this.runSubStep], step, {
               onNext: this.onNext.bind(this),
               onPrevious: this.onPrevious.bind(this)
             });

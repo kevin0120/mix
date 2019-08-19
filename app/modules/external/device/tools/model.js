@@ -13,12 +13,14 @@ export const defaultScrewToolDispatcher = (data: tInputData): AnyAction => screw
 
 export default class ClsScrewTool extends Device {
 
+
   constructor(name: string, serialNumber: string) {
     super(name,serialNumber);
     /* eslint-disable flowtype/no-weak-types */
     (this: any).Enable = this.Enable.bind(this);
     (this: any).Disable = this.Disable.bind(this);
     (this: any).ToggleEnable = this.ToggleEnable.bind(this);
+    this.dispatcher=defaultScrewToolDispatcher;
     /* eslint-enable flowtype/no-weak-types */
   }
 

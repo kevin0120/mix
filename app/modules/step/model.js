@@ -1,10 +1,10 @@
 const STEP_STATUS = {
-  READY: 'STEP_STATUS_READY',
-  ENTERING: 'STEP_STATUS_ENTERING',
-  DOING: 'STEP_STATUS_DOING',
-  LEAVING: 'STEP_STATUS_LEAVING',
-  FAIL: 'STEP_STATUS_FAIL',
-  FINISHED: 'STEP_STATUS_FINISHED'
+  READY: 'ready',
+  ENTERING: 'entering',
+  DOING: 'doing',
+  LEAVING: 'leaving',
+  FAIL: 'fail',
+  FINISHED: 'finished'
 };
 
 export default STEP_STATUS;

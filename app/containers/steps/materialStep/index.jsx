@@ -36,7 +36,7 @@ function materialStep(props: Props & tStepProps) {
 
 
   return <div>
-    {payload.items.map(i => i.name)}
+    {payload.items.map(i => <img key={i.name} src={i.img||''} alt={i.name}/>)}
   </div>;
 }
 

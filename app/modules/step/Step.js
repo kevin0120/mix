@@ -2,17 +2,7 @@ import { call, cancel, fork, join, put, race, take, takeEvery } from 'redux-saga
 import { CommonLog } from '../../common/utils';
 import { orderStepUpdateApi } from '../../api/order';
 import { ORDER, orderActions } from '../order/action';
-
-
-const STEP_STATUS = {
-  READY: 'STEP_STATUS_READY',
-  ENTERING: 'STEP_STATUS_ENTERING',
-  DOING: 'STEP_STATUS_DOING',
-  LEAVING: 'STEP_STATUS_LEAVING',
-  FAIL: 'STEP_STATUS_FAIL',
-  FINISHED: 'STEP_STATUS_FINISHED'
-};
-
+import STEP_STATUS from './model';
 
 function invalidStepStatus(stepType, status) {
   if (!stepType) {

@@ -16,7 +16,6 @@ export default {
       const sData: tScrewStepData = this._data;
       const stepId = this._id;
       const {
-        activeIndex,
         points,
         retryTimes
       } = sData;
@@ -25,8 +24,8 @@ export default {
 
       // const { toolSN, pset, sequence } = points[activeIndex];
       const { toolSN, pset, sequence } = point;
-
-      const data = yield call(psetApi, toolSN || '', stepId, userID, pset, sequence, retryTimes);
+      const total=points.length||0;
+      const data = yield call(psetApi, toolSN || '', stepId, userID, pset, sequence, retryTimes,total);
       if (data && data.result !== 0) {
         CommonLog.lError(`pset失败${data.msg}`, {
           at: 'pset',

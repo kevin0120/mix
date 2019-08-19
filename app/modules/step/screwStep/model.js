@@ -9,9 +9,9 @@ export const POINT_STATUS = {
 };
 
 export const RESULT_STATUS = {
-  ok: 'ok',
-  nok: 'nok',
-  lsn: 'lsn'
+  ok: 'OK',
+  nok: 'NOK',
+  lsn: 'LSN'
 };
 
 export type tPointStatus = $Keys<typeof POINT_STATUS>;

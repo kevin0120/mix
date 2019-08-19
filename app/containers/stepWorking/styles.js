@@ -57,6 +57,7 @@ const layout = (theme) => ({
     flex: 1
   },
   orderInfoContainer: {
+    margin: `3px`,
     height: 60,
     display: 'flex',
     flexDirection: 'row',
@@ -134,7 +135,7 @@ const stepperContainer = theme => ({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center'
-  },
+  }
 });
 
 const buttonsContainer = {
@@ -143,7 +144,7 @@ const buttonsContainer = {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: '0 10px',
+    padding: '0 3px',
     alignItems: 'center'
   },
   menuIcon: {},
@@ -164,17 +165,22 @@ const buttonsContainer = {
 const stepPageContainer = {
   root: {
     flex: 1,
-    overflow:'hidden',
+    overflow: 'hidden',
     width: '100%',
     height: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent:'center',
+    alignSelf:'center',
+    backgroundColor:'#fefefe'
   },
 
   left: {
     flex: 3,
     display: 'flex',
     flexDirection: 'column',
-    height:'100%',
-    overflow:'hidden'
+    height: '100%',
+    overflow: 'hidden'
   },
   right: {
     flex: 1,
@@ -182,7 +188,7 @@ const stepPageContainer = {
   },
   image: {
     flex: 1,
-    overflow: 'hidden',
+    overflow: 'hidden'
   },
   descriptionContainer: {
     flex: 1
@@ -196,7 +202,7 @@ const stepPageContainer = {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   result: {
     flex: 2
