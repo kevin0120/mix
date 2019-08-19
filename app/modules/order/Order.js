@@ -19,8 +19,6 @@ export default class Order extends Step {
 
   _workingID = null;
 
-  _steps = [];
-
   _status = ORDER_STATUS.TODO;
 
   get workingStep() {
@@ -57,6 +55,7 @@ export default class Order extends Step {
     },
     * [ORDER_STATUS.WIP]() {
       try {
+        console.log(this);
         while (true) {
           CommonLog.Info('Doing Order...');
           const step = this.workingStep;
