@@ -82,6 +82,9 @@ function* showOverview(order: tOrder) {
           {
             label: 'Common.Close',
             color: 'warning'
+          },{
+            label: '查看模型',
+            color: 'info'
           },
           !WIPOrder &&
           doable(order) && {

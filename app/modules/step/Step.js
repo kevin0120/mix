@@ -247,3 +247,5 @@ export default class Step {
   }
 
 }
+
+export type tClsStep = typeof Step;

@@ -33,7 +33,7 @@ export default class Order extends Step {
 
   * onNext() {
     try {
-      console.log(this._workingIndex,this._steps.length);
+      // console.log(this._workingIndex, this._steps.length);
       if (this._workingIndex + 1 >= this._steps.length) {
         yield put(orderActions.finishOrder(this));
       }
@@ -106,12 +106,26 @@ export default class Order extends Step {
       }
     },
     * [ORDER_STATUS.PENDING]() {
-      this.workingStep.timerStop();
-      yield put(orderActions.finishOrder());
+      try {
+        this.workingStep.timerStop();
+        yield put(orderActions.finishOrder());
+      } catch (e) {
+        CommonLog.lError(e, {
+          at: 'ORDER_STATUS.PENDING'
+        });
+      }
     },
     * [ORDER_STATUS.CANCEL]() {
-      this.workingStep.timerStop();
-      yield put(orderActions.finishOrder());
+      try {
+        this.workingStep.timerStop();
+        yield put(orderActions.finishOrder());
+      } catch (e) {
+        CommonLog.lError(e, {
+          at: 'ORDER_STATUS.CANCEL'
+        });
+      }
     }
   };
 }
+
+export type tClsOrder = typeof Order;

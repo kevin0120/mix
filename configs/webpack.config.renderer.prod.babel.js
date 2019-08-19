@@ -165,10 +165,10 @@ export default merge.smart(baseConfig, {
         exclude: /node_modules/,
         use: [
           {
-            loader: "babel-loader"
+            loader: 'babel-loader'
           },
           {
-            loader: "react-svg-loader",
+            loader: 'react-svg-loader',
             options: {
               jsx: true // true outputs JSX tags
             }
@@ -179,6 +179,14 @@ export default merge.smart(baseConfig, {
       {
         test: /\.(?:ico|gif|png|jpg|jpeg|webp)$/,
         use: 'url-loader'
+      },
+      // pdf files
+      {
+        test: /\.pdf$/,
+        include: /resources/,
+        use: {
+          loader: 'file-loader'
+        }
       }
     ]
   },
@@ -187,20 +195,20 @@ export default merge.smart(baseConfig, {
     minimizer: process.env.E2E_BUILD
       ? []
       : [
-          new UglifyJSPlugin({
-            parallel: true,
-            sourceMap: true,
-            cache: true
-          }),
-          new OptimizeCSSAssetsPlugin({
-            cssProcessorOptions: {
-              map: {
-                inline: false,
-                annotation: true
-              }
+        new UglifyJSPlugin({
+          parallel: true,
+          sourceMap: true,
+          cache: true
+        }),
+        new OptimizeCSSAssetsPlugin({
+          cssProcessorOptions: {
+            map: {
+              inline: false,
+              annotation: true
             }
-          })
-        ]
+          }
+        })
+      ]
   },
 
   plugins: [

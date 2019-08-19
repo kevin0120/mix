@@ -1,6 +1,6 @@
 // @flow
 import type { tOrder, tOrderStepIdx, tStepStatus } from './model';
-import Step from '../step/Step';
+import type { tClsStep } from '../step/Step';
 import { ORDER_STATUS } from './model';
 
 export const ORDER = {
@@ -95,7 +95,7 @@ export const orderActions = {
     type: ORDER.STEP.JUMP_TO,
     stepId
   }),
-  stepStatus: (step: Step, status: tStepStatus) => ({
+  stepStatus: (step: tClsStep, status: tStepStatus) => ({
     type: ORDER.STEP.STATUS,
     step,
     status
