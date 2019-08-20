@@ -4,12 +4,9 @@ import { call } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import ClsReader from './model';
 import { CommonLog } from '../../../../common/utils';
-import { AppendNewDevices } from '../index';
 import type { tReaderData } from './model';
 
 
-// export const reader = new ClsReader('reader', 'demo reader sn');
-// AppendNewDevices(reader);
 // TODO: 收到读卡器uid后，分发给user模块进行用户认证
 
 type tReaderRushData = {

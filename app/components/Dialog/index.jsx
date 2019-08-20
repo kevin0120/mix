@@ -44,7 +44,6 @@ function customDialog(props: Props) {
 
   const onButton = (idx) => {
     buttonAction(idx);
-    closeAction();
   };
   const onClose = () => {
     closeAction();

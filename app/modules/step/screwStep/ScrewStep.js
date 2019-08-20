@@ -6,9 +6,10 @@ import { cloneDeep } from 'lodash-es';
 import { CommonLog } from '../../../common/utils';
 import handleResult from './handleResult';
 import controllerModeTasks from './controllerModeTasks';
-import { SCREW_STEP } from './action';
+import screwStepActions, { SCREW_STEP } from './action';
 import { getDevice } from '../../external/device';
-
+import dialogActions from '../../dialog/action';
+import i18n from '../../../i18n';
 
 function* doPoint(point, isFirst, orderActions) {
   try {
@@ -100,12 +101,13 @@ export default class ScrewStep extends Step {
         let activePoint = points[activeIndex];
         while (true) {
           const data = this._data;
-          const nextAction = yield call([this,doPoint], activePoint, isFirst, orderActions);
+          const nextAction = yield call([this, doPoint], activePoint, isFirst, orderActions);
           switch (nextAction.type) {
             case SCREW_STEP.RESULT:
               const { results: { data: results } } = nextAction;
               yield call([this, handleResult], ORDER, orderActions, results, data);
-              activePoint = points[activeIndex];
+              const {activeIndex:nextIndex,points:nextPoints}=this._data;
+              activePoint = nextPoints[nextIndex];
               break;
             case SCREW_STEP.REDO_POINT:
               const { point } = nextAction;
@@ -114,7 +116,7 @@ export default class ScrewStep extends Step {
             default:
               break;
           }
-          if(isFirst){
+          if (isFirst) {
             isFirst = false;
           }
         }
@@ -139,6 +141,26 @@ export default class ScrewStep extends Step {
 
     * [STEP_STATUS.FAIL](ORDER, orderActions) {
       try {
+        yield put(
+          dialogActions.dialogShow({
+            buttons: [
+              {
+                label: 'Common.Close',
+                color: 'danger'
+              },
+              {
+                label: 'Order.Next',
+                color: 'warning',
+                action: screwStepActions.confirmFail()
+              }
+            ],
+            title: '',
+            content: (
+              '拧紧工步失败'
+            )
+          })
+        );
+        yield take(SCREW_STEP.CONFIRM_FAIL);
         yield put(orderActions.doNextStep());
       } catch (e) {
         CommonLog.lError(e, { at: 'screwStep FAIL' });

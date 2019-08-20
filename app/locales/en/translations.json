@@ -213,5 +213,16 @@
     "Page": "Page",
     "of": "of",
     "rows": "rows"
+  },
+  "Order": {
+    "Step": {
+      "name": "name",
+      "type": "type",
+      "desc": "description"
+    },
+    "Start": "Start",
+    "info": "info",
+    "Overview": "Overview",
+    "Next": "Next"
   }
 }

@@ -44,9 +44,9 @@ export default function* root(): Saga<void> {
   }
 }
 
-function*workOnOrder({order}){
+function* workOnOrder({ order }) {
   try {
-    yield call(order.run,ORDER_STATUS.WIP);
+    yield call(order.run, ORDER_STATUS.WIP);
   } catch (e) {
     CommonLog.lError(e);
   }
@@ -82,10 +82,11 @@ function* showOverview(order: tOrder) {
           {
             label: 'Common.Close',
             color: 'warning'
-          },{
-            label: '查看模型',
-            color: 'info'
           },
+          // {
+          //   label: '查看模型',
+          //   color: 'info'
+          // },
           !WIPOrder &&
           doable(order) && {
             label: 'Order.Start',

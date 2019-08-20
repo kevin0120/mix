@@ -1,9 +1,17 @@
 import { put } from 'redux-saga/effects';
 import { CommonLog } from '../../common/utils';
+import NotifierActions from '../Notifier/action';
 
-const onConnectActions = [];
-const onDisconnectActions = [];
-const onChangeActions = [];
+const onConnectActions = [
+  ()=>NotifierActions.enqueueSnackbar('Info', 'rush 已连接'),
+];
+const onDisconnectActions = [
+  ()=>NotifierActions.enqueueSnackbar('Error', 'rush 已断开'),
+
+];
+const onChangeActions = [
+
+];
 
 export const bindRushAction = {
   onConnect: bindOnConnectAction,
@@ -56,10 +64,12 @@ export default function* (payload) {
       for (const action of onConnectActions) {
         yield put(action(payload));
       }
+      CommonLog.lError('rush 已连接');
     } else {
       for (const action of onDisconnectActions) {
         yield put(action(payload));
       }
+      CommonLog.lError('rush 已断开');
     }
     rushHealthz = payload;
 

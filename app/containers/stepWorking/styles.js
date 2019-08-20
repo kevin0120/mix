@@ -4,7 +4,7 @@ const layout = (theme) => ({
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
-    backgroundImage: 'url("../resources/imgs/texture.png")',
+    // backgroundImage: 'url("../resources/imgs/texture.png")',
     backgroundRepeat: 'repeat',
     backgroundColor: theme.palette.grey[100]
 
@@ -14,7 +14,7 @@ const layout = (theme) => ({
     height: '100%',
     display: 'flex',
     flexDirection: 'row',
-    backgroundImage: 'url("../resources/imgs/texture.png")',
+    // backgroundImage: 'url("../resources/imgs/texture.png")',
     backgroundRepeat: 'repeat',
     backgroundColor: theme.palette.grey[100]
 
@@ -172,7 +172,6 @@ const stepPageContainer = {
     flexDirection: 'row',
     justifyContent:'center',
     alignSelf:'center',
-    backgroundColor:'#fefefe'
   },
 
   left: {

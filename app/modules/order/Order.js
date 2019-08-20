@@ -9,6 +9,7 @@ import { orderUpdateApi } from '../../api/order';
 import dialogActions from '../dialog/action';
 import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
+import { workingIndex } from './selector';
 
 export default class Order extends Step {
   _apis = {
@@ -55,6 +56,7 @@ export default class Order extends Step {
     },
     * [ORDER_STATUS.WIP]() {
       try {
+        this._workingIndex = this._workingIndex >= this._steps.length ? 0 : this._workingIndex;
         while (true) {
           CommonLog.Info('Doing Order...');
           const step = this.workingStep;
@@ -68,7 +70,7 @@ export default class Order extends Step {
           }
         }
       } catch (e) {
-        CommonLog.lError(e, { at: ORDER_STATUS.WIP });
+        CommonLog.lError(e, { at: 'ORDER_STATUS.WIP' });
       }
     },
     * [ORDER_STATUS.DONE]() {

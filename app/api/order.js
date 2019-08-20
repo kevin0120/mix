@@ -33,7 +33,7 @@ export function* orderUpdateApi(id: number, orderStatus: string): Saga<void> {
   try {
     return yield call(rushSendApi, ORDER_WS_TYPES.UPDATE, {
       id,
-      status
+      status: orderStatus
     });
   } catch (e) {
     CommonLog.lError(e, {

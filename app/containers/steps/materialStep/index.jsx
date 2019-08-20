@@ -35,8 +35,25 @@ function materialStep(props: Props & tStepProps) {
   }, [bindAction, bindDescription, description, isCurrent, payload, ready]);
 
 
-  return <div>
-    {payload.items.map(i => <img key={i.name} src={i.img||''} alt={i.name}/>)}
+  return <div
+    style={{
+      display:'flex',
+      justifyContents:'center',
+      alignItems:'center',
+      width:'100%',
+      height:'100%',
+    }}>
+    {payload.items.map(i => <img
+      style={{
+        maxWidth:'100%',
+        maxHeight:'100%',
+        margin:'auto',
+        justifySelf:'center',
+        alignSelf:'center',
+resize:'both'
+      }}
+      key={i.name} src={i.image||''} alt={i.name}
+    />)}
   </div>;
 }
 

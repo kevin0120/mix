@@ -18,9 +18,9 @@ export default class MaterialStep extends Step {
     * [STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {
         const sPayload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
-        console.log(ioSN(sPayload));
+        // console.log(ioSN(sPayload));
         const io = getDevice(ioSN(sPayload));
-        console.log(io);
+        // console.log(io);
         if(io?.ioContact) {
           yield call(io.ioContact);
         } else {
@@ -35,7 +35,7 @@ export default class MaterialStep extends Step {
           this._ports.push(io.getPort(ioDirection.output, i.index));
         });
         yield call(io.openIO, this._ports);
-        console.log(this);
+        // console.log(this);
         yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
       } catch (e) {
         CommonLog.lError(e);
@@ -56,6 +56,12 @@ export default class MaterialStep extends Step {
         yield put(orderActions.stepStatus(this,STEP_STATUS.FINISHED));
       } catch (e) {
         CommonLog.lError(e);
+      }finally {
+        const sPayload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
+        const io = getDevice(ioSN(sPayload));
+        if (io?.closeIO) {
+          yield call(io.closeIO, this._ports);
+        }
       }
     },
     * [STEP_STATUS.FINISHED](ORDER, orderActions) {

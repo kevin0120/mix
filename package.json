@@ -22,6 +22,7 @@
     "package-mac": "npm run build && build --mac",
     "package-linux": "yarn build && electron-builder build --linux",
     "package-win": "yarn build && electron-builder build --win --x64",
+    "package-debug-win": "cross-env DEBUG_PROD=true yarn package-win",
     "postinstall": "yarn flow-typed && yarn build-dll && electron-builder install-app-deps package.json && opencollective-postinstall",
     "postlint-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{*{js,jsx,json},babelrc,eslintrc,prettierrc,stylelintrc}'",
     "postlint-styles-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{css,scss}'",

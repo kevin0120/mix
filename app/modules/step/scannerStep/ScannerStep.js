@@ -4,6 +4,7 @@ import { call, put, select, take } from 'redux-saga/effects';
 import { stepData, stepPayload, workingOrder, workingStep } from '../../order/selector';
 import { SCANNER_STEP, scannerStepAction } from './action';
 import { deviceType, getDevicesByType } from '../../external/device';
+import { CommonLog } from '../../../common/utils';
 
 
 export default class ScannerStep extends Step {
@@ -12,14 +13,14 @@ export default class ScannerStep extends Step {
   _statusTasks = {
     * [STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {
-        yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
         this._scanners = getDevicesByType(deviceType.scanner);
         for (const scanner of this._scanners) {
           yield call(scanner.Enable);
           scanner.dispatcher = scannerStepAction.getValue;
         }
+        yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
       } catch (e) {
-        console.error(e);
+        CommonLog.lError(e);
       }
     },
     * [STEP_STATUS.DOING](ORDER, orderActions) {
@@ -37,7 +38,7 @@ export default class ScannerStep extends Step {
           );
           switch (action.type) {
             case SCANNER_STEP.GET_VALUE:
-              yield call(this.updateData,d => ({
+              yield call(this.updateData, d => ({
                 ...d || {},
                 result: {
                   [label]: action?.input?.data
@@ -66,11 +67,11 @@ export default class ScannerStep extends Step {
           }
         }
       } catch (e) {
-        console.error(e);
+        CommonLog.lError(e);
       } finally {
         for (const scanner of this._scanners) {
           yield call(scanner.Disable);
-          scanner.dispatcher = scannerStepAction.getValue;
+          scanner.dispatcher = null;
         }
       }
     },
@@ -78,7 +79,7 @@ export default class ScannerStep extends Step {
       try {
         yield put(orderActions.finishStep(this));
       } catch (e) {
-        console.error(e);
+        CommonLog.lError(e);
       }
     }
   };

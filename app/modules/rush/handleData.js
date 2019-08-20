@@ -14,9 +14,14 @@ import orderData from '../order/handleData';
 
 export default function* (payload) {
   try {
-    const dataArray = payload.split(';');
+    const d=/(^[^"]*);(.*)/.exec(payload);
+    const dataArray = d[1].split(';');
     const event: tWebSocketEvent = dataArray[0].split(':').slice(-1)[0];
-    const json: tRushWebSocketData = JSON.parse(dataArray.slice(-1));
+    const json: tRushWebSocketData = JSON.parse(d[2]);
+    CommonLog.Info('rush message',{
+      event,
+      data:d[2]
+    });
     yield put(rushActions.data(json));
     if (rushDataHandlers[event]) {
       yield fork(rushDataHandlers[event], json); // 异步处理rush数据

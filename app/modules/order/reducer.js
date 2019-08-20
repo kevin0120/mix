@@ -26,7 +26,7 @@ const initState = {
     // demoOrderCancel,
     // demoOrderPending,
     // demoOrderDone
-  ].map(o => new Order(o,stepTypes))
+  ].map(o => new Order(o, stepTypes))
 };
 
 
@@ -108,7 +108,7 @@ const orderReducer: {
     if (wOrder) {
       return state;
     }
-    const startIndex = workingIndex(order);
+    const startIndex = workingIndex(order) >= order.steps.length ? 0 : workingIndex(order);
     return {
       ...state,
       workingOrder: order || null,

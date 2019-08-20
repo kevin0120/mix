@@ -197,7 +197,7 @@ const fn = {
 };
 
 const fnAlways = {
-  Error: (rest) => {
+  Error: (...rest) => {
     if (rest) {
       if (typeof rest[0] === 'string') {
         lError(...rest);
@@ -215,7 +215,7 @@ const fnAlways = {
 
 // eslint-disable-next-line no-underscore-dangle
 function _logger(lvl: CommonLogLvl, ...rest) {
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== 'production' || process.env.DEBUG_PROD === 'true') {
     // eslint-disable-next-line no-unused-expressions
     fn[lvl] && fn[lvl](...rest);
   }

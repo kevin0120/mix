@@ -45,20 +45,20 @@ const lostChildren = {};
 function newDevice(dt: tDeviceType, name: string, sn: string, config: Object, data, childrenSN: Array<tDeviceSN>) {
   try {
     const device = new sym2Device[dt](name, sn, config, data);
-    AppendNewDevices(device);
+    appendNewDevices(device);
 
     // if the new device is a lost child
     if (lostChildren[sn]) {
       const d = lostChildren[sn];
-      d.appendChildren(device);
-      device.patent = device;
+      device.appendChildren(d);
+      delete lostChildren[sn];
     }
 
+    // search for the children of the device
     childrenSN.forEach((cSN) => {
       const child = getDevice(cSN);
       if (child) {
         device.appendChildren(child);
-        child.parent = device;
       } else {
         lostChildren[cSN] = device;
       }
@@ -74,11 +74,11 @@ export function getDevice(sn: tDeviceSN): Device {
   return [...gDevices].filter((d: Device) => d.serialNumber === sn)?.[0];
 }
 
-export function getDevicesByType(dType:tDeviceType): Array<Device> {
+export function getDevicesByType(dType: tDeviceType): Array<Device> {
   return [...gDevices].filter((d: Device) => d instanceof sym2Device[dType]);
 }
 
-export function AppendNewDevices(deviceObj: Device) {
+export function appendNewDevices(deviceObj: Device) {
   gDevices.add(deviceObj);
 }
 
@@ -109,7 +109,6 @@ export function* deviceStatus(data: tRushWebSocketData): Saga<void> {
       }
     });
     const status = {};
-
     gDevices.forEach((d: Device) => {
       status[d.Name] = d.Healthz;
     });

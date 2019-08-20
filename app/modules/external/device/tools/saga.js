@@ -46,6 +46,9 @@ export function* toolStatusChange(data: tToolStatusData): Saga<void> {
 export function* toolNewResults(data: tToolResultData): Saga<void> {
   try {
     const results = data.data;
+    CommonLog.Info('rush result',{
+      result:JSON.stringify(results)
+    });
     for(const r of results){
       const tool=getDevice(r.tool_sn);
       const respAction = yield call(tool.doDispatch,[r]);
@@ -55,6 +58,6 @@ export function* toolNewResults(data: tToolResultData): Saga<void> {
     }
 
   } catch (e) {
-    console.error('onToolResult:', e);
+    CommonLog.lError('onToolResult:', e);
   }
 }
