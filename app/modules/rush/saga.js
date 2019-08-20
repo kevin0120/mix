@@ -40,7 +40,13 @@ function* initRush() {
 
     yield call(stopRush);
 
-    setWSClient(new WebSocket(wsURL, { reconnectInterval: 3000 }));
+    setWSClient(new WebSocket(wsURL,
+      { reconnectInterval: 3000,
+        options:
+          {
+            maxPayload: 200 * 1024 * 1024
+          }
+      }));
 
     task = yield fork(
       watchRushChannel,
