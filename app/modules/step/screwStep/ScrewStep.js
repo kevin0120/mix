@@ -9,7 +9,6 @@ import controllerModeTasks from './controllerModeTasks';
 import screwStepActions, { SCREW_STEP } from './action';
 import { getDevice } from '../../external/device';
 import dialogActions from '../../dialog/action';
-import i18n from '../../../i18n';
 
 function* doPoint(point, isFirst, orderActions) {
   try {
@@ -17,12 +16,7 @@ function* doPoint(point, isFirst, orderActions) {
     if (data.controllerMode === 'pset' || (data.controllerMode === 'job' && isFirst)) {
       const success = yield call([this, controllerModeTasks[data.controllerMode]], point);
       if (!success) {
-        yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL,`${data.controllerMode} failed`));
-      }
-      if (isFirst) {
-        for (const t of this._tools) {
-          yield call(t.Enable);
-        }
+        yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, `${data.controllerMode} failed`));
       }
     }
     return yield take([SCREW_STEP.RESULT, SCREW_STEP.REDO_POINT]);
@@ -36,6 +30,11 @@ function* doPoint(point, isFirst, orderActions) {
 
 export default class ScrewStep extends Step {
   _tools = [];
+
+  _onLeave=()=>{
+    this._tools=[];
+    console.log('tools cleared');
+  };
 
   _statusTasks = {
     * [STEP_STATUS.ENTERING](ORDER, orderActions) {
@@ -59,7 +58,7 @@ export default class ScrewStep extends Step {
           lostTool.forEach(t => {
             CommonLog.lError(`tool not found: ${t}`);
           });
-          yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL,`tool not found: ${lostTool.map(t=>`${t}`)}`));
+          yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, `tool not found: ${lostTool.map(t => `${t}`)}`));
         }
 
         const unhealthyTools = this._tools.filter(t => !t.Healthz);
@@ -67,7 +66,7 @@ export default class ScrewStep extends Step {
           unhealthyTools.forEach(t => {
             CommonLog.lError(`tool not found: ${t.serialNumber}`);
           });
-          yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL,`tool not connected: ${unhealthyTools.map(t=>`${t.serialNumber}`)}`));
+          yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, `tool not connected: ${unhealthyTools.map(t => `${t.serialNumber}`)}`));
         }
 
         yield call(this.updateData, (data: tScrewStepData): tScrewStepData => {
@@ -91,6 +90,9 @@ export default class ScrewStep extends Step {
 
     * [STEP_STATUS.DOING](ORDER, orderActions) {
       try {
+        for (const t of this._tools) {
+          yield call(t.Enable);
+        }
         yield call([this, handleResult], ORDER, orderActions, [], this._data);
         let isFirst = true;
         const sData: tScrewStepData = this._data;
@@ -106,7 +108,7 @@ export default class ScrewStep extends Step {
             case SCREW_STEP.RESULT:
               const { results: { data: results } } = nextAction;
               yield call([this, handleResult], ORDER, orderActions, results, data);
-              const {activeIndex:nextIndex,points:nextPoints}=this._data;
+              const { activeIndex: nextIndex, points: nextPoints } = this._data;
               activePoint = nextPoints[nextIndex];
               break;
             case SCREW_STEP.REDO_POINT:
@@ -122,7 +124,7 @@ export default class ScrewStep extends Step {
         }
       } catch (e) {
         CommonLog.lError(e, { at: 'screwStep DOING' });
-        yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL,e))
+        yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, e));
       } finally {
         for (const t of this._tools) {
           yield call(t.Disable);
@@ -134,13 +136,14 @@ export default class ScrewStep extends Step {
     * [STEP_STATUS.FINISHED](ORDER, orderActions) {
       try {
         yield put(orderActions.doNextStep());
+        this._tools = [];
       } catch (e) {
         CommonLog.lError(e, { at: 'screwStep FINISHED' });
       }
     },
 
 
-    * [STEP_STATUS.FAIL](ORDER, orderActions,msg) {
+    * [STEP_STATUS.FAIL](ORDER, orderActions, msg) {
       try {
         yield put(
           dialogActions.dialogShow({
@@ -158,11 +161,12 @@ export default class ScrewStep extends Step {
             title: '',
             content: (
               `拧紧工步失败${
-              JSON.stringify(msg)||''}`
+                JSON.stringify(msg) || ''}`
             )
           })
         );
         yield take(SCREW_STEP.CONFIRM_FAIL);
+        this._tools = [];
         yield put(orderActions.doNextStep());
       } catch (e) {
         CommonLog.lError(e, { at: 'screwStep FAIL' });

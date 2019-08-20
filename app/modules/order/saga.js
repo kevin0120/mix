@@ -76,6 +76,8 @@ function* showOverview(order: tOrder) {
       // 进行中的工单不显示概览对话框
       return;
     }
+    yield call(getOrderDetail,{order});
+
     yield put(
       dialogActions.dialogShow({
         buttons: [

@@ -10,6 +10,11 @@ import { CommonLog } from '../../../common/utils';
 export default class ScannerStep extends Step {
   _scanners = [];
 
+  _onLeave=()=>{
+    this._scanners=[];
+    console.log('scanners cleared');
+  };
+
   _statusTasks = {
     * [STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {
@@ -78,6 +83,7 @@ export default class ScannerStep extends Step {
     * [STEP_STATUS.FINISHED](ORDER, orderActions) {
       try {
         yield put(orderActions.finishStep(this));
+        this._scanners=[];
       } catch (e) {
         CommonLog.lError(e);
       }

@@ -47,6 +47,8 @@ export default class Step {
 
   _steps = [];
 
+  _onLeave = null;
+
   constructor(stepObj, stepTypes) {
     this._id = stepObj.id;
     this.update(stepObj, stepTypes);
@@ -201,7 +203,8 @@ export default class Step {
           at: 'runStep'
         });
       } finally {
-        console.log('running task finished');
+        console.log(`step run finished(${this._id}-${this._name})`);
+
       }
     }
 
@@ -213,6 +216,12 @@ export default class Step {
       CommonLog.lError(e, {
         at: 'step root'
       });
+    } finally {
+      console.log('leaving step',this._onLeave, this);
+      if (this._onLeave) {
+        console.log('calling _onLeave');
+        yield call([this, this._onLeave]);
+      }
     }
   }
 
@@ -241,6 +250,8 @@ export default class Step {
         at: 'runSub ',
         id: `${this._id},${step.id}`
       });
+    } finally {
+      CommonLog.Info(`run substep finished (${this._id}-${this._name})`);
     }
   }
 

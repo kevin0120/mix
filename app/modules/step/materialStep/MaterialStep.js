@@ -14,13 +14,17 @@ const confirmIdx=(payload)=>payload?.confirmIO;
 
 export default class MaterialStep extends Step {
   _ports=[];
+
+  _onLeave=()=>{
+    this._ports=[];
+    console.log('ports cleared');
+  };
+
   _statusTasks = {
     * [STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {
         const sPayload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
-        // console.log(ioSN(sPayload));
         const io = getDevice(ioSN(sPayload));
-        // console.log(io);
         if(io?.ioContact) {
           yield call(io.ioContact);
         } else {

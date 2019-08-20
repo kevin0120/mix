@@ -71,6 +71,8 @@ export default class Order extends Step {
         }
       } catch (e) {
         CommonLog.lError(e, { at: 'ORDER_STATUS.WIP' });
+      }finally{
+        CommonLog.Info('order doing finished');
       }
     },
     * [ORDER_STATUS.DONE]() {
@@ -103,6 +105,8 @@ export default class Order extends Step {
       } catch (e) {
         const err = (e: Error);
         CommonLog.lError(`showResult error: ${err.message}`);
+      }finally{
+        CommonLog.Info('order done');
       }
     },
     * [ORDER_STATUS.PENDING]() {

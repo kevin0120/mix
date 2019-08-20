@@ -37,7 +37,7 @@ function HomeOperationList(props: Props) {
   const retOrderList = sortBy(orderList, (o: tOrder) => new Date(o.plannedDateTime) || Date.now());
 
   const onCardClick = (order) => {
-    getDetail(order);
+    // getDetail(order);
     view(order);
     doPush('/app/working');
   };

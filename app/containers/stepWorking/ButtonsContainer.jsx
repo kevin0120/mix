@@ -14,6 +14,11 @@ import type { Dispatch } from '../../modules/indexReducer';
 import * as oSel from '../../modules/order/selector';
 import { orderActions } from '../../modules/order/action';
 import type { tOrder, tStep, tStepArray } from '../../modules/order/model';
+import dialogActions from '../../modules/dialog/action';
+import { doable } from '../../modules/order/selector';
+import i18n from '../../i18n';
+import Table from '../../components/Table/Table';
+import modelViewerActions from '../../modules/modelViewer/action';
 
 const mapState = (state, props) => {
   const vOrder = oSel.viewingOrder(state.order);
@@ -38,7 +43,9 @@ const mapDispatch = {
   doPreviousStep: orderActions.doPreviousStep,
   cancelOrder: orderActions.cancelOrder,
   pendingOrder: orderActions.pendingOrder,
-  workOn: orderActions.workOn
+  workOn: orderActions.workOn,
+  viewModelDialog: dialogActions.dialogShow,
+  viewModel: modelViewerActions.open
 };
 
 type ButtonsContainerProps = {
@@ -78,7 +85,9 @@ const ButtonsContainer = ({
                             isPending,
                             pendingable,
                             cancelable,
-                            workOn
+                            workOn,
+                            viewModel,
+                            viewModelDialog
                           }: ButtonsContainerProps) => {
 
   const classes = makeStyles(styles.buttonsContainer)();
@@ -88,107 +97,145 @@ const ButtonsContainer = ({
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
+  const modelsData = (viewingOrder?.payload?.models &&
+    viewingOrder.payload.models.map((m) => [
+      m.name,
+      m.desc,
+      <Button
+        color="primary"
+        type="button"
+        onClick={() => viewModel(m.url)}
+      >查看</Button>
+    ])) || [];
+  const modelsTableDialog = {
+    buttons: [
+      {
+        label: 'Common.Close',
+        color: 'warning'
+      }
+    ],
+    title: i18n.t('Order.Overview'),
+    content: (
+      <Table
+        tableHeaderColor="info"
+        tableHead={[
+          '名称',
+          '描述',
+          '操作',
+        ]}
+        tableData={modelsData}
+        colorsColls={['info']}
+      />
+    )
+  };
 
   return <I18n ns="translations">
     {t => (<div className={classes.root}>
-    <div>
-      {
-        isPending || pendingable || cancelable ?
-          <React.Fragment>
-            <Button
-              justIcon
-              type="button"
-              color="github"
-              onClick={() => setDialogOpen(true)}
-            >
+      <div>
+        {
+          isPending || pendingable || cancelable ?
+            <React.Fragment>
+              <Button
+                justIcon
+                type="button"
+                color="github"
+                onClick={() => setDialogOpen(true)}
+              >
                 <Menu fontSize="inherit" className={classes.menuIcon}/>
-            </Button>
-            <Dialog
-              open={dialogOpen}
-              onClose={() => setDialogOpen(false)}
-            >
-              <div style={{ backgroundColor: 'white' }}>
-                <DialogContent className={classes.dialogContainer}>
-                  {isPending ?
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        workOn(viewingOrder);
-                        setDialogOpen(false);
-                      }}
-                      variant="contained"
-                      color="primary"
-                      className={classes.bigButton}
-                    >
+              </Button>
+              <Dialog
+                open={dialogOpen}
+                onClose={() => setDialogOpen(false)}
+              >
+                <div style={{ backgroundColor: 'white' }}>
+                  <DialogContent className={classes.dialogContainer}>
+                    {isPending ?
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          workOn(viewingOrder);
+                          setDialogOpen(false);
+                        }}
+                        variant="contained"
+                        color="primary"
+                        className={classes.bigButton}
+                      >
                         continue
-                    </Button> :
-                    (pendingable && <Button
-                      type="button"
-                      onClick={() => {
-                        pendingOrder(viewingOrder);
-                        setDialogOpen(false);
-                      }}
-                      variant="contained"
-                      color="warning"
-                      className={classes.bigButton}
-                    >
+                      </Button> :
+                      (pendingable && <Button
+                        type="button"
+                        onClick={() => {
+                          pendingOrder(viewingOrder);
+                          setDialogOpen(false);
+                        }}
+                        variant="contained"
+                        color="warning"
+                        className={classes.bigButton}
+                      >
                         pending
-                    </Button>) || null
-                  }
-                  {
-                    cancelable ? <Button
-                      type="button"
-                      color="danger"
-                      className={classes.bigButton}
-                      onClick={() => {
-                        cancelOrder(viewingOrder);
-                        setDialogOpen(false);
-                      }}
-                    >
+                      </Button>) || null
+                    }
+                    {
+                      cancelable ? <Button
+                        type="button"
+                        color="danger"
+                        className={classes.bigButton}
+                        onClick={() => {
+                          cancelOrder(viewingOrder);
+                          setDialogOpen(false);
+                        }}
+                      >
                         cancel
-                    </Button> : null
-                  }
-                </DialogContent>
-              </div>
-            </Dialog>
-          </React.Fragment> : null
-      }
-      <Button
-        color="primary"
-        disabled={noPrevious}
-        type="button"
-        onClick={() => previous()}
-      >
-        {'<<'}
-      </Button>
-      <Button
-        disabled={noNext}
-        type="button"
-        onClick={() => next()}
-        color="primary"
-      >
-        {'>>'}
-      </Button>
-      <Button
-        disabled={viewingStep !== workingStep || !viewingStep?.skippable}
-        type="button"
-        onClick={() => doNextStep()}
-        color="tumblr"
-      >
-        {t(actionStepWorkingDef.SKIP)}
-      </Button>
-      <Button
-        disabled={viewingStep !== workingStep || !viewingStep?.undoable}
-        type="button"
-        onClick={() => doPreviousStep()}
-        color="danger"
-      >
-        {t(actionStepWorkingDef.UNDO)}
-      </Button>
-    </div>
-    <div>{action}</div>
-  </div>)}
-  </I18n>
+                      </Button> : null
+                    }
+                  </DialogContent>
+                </div>
+              </Dialog>
+            </React.Fragment> : null
+        }
+        <Button
+          color="primary"
+          type="button"
+          onClick={() => viewModelDialog(modelsTableDialog)}
+        >
+          {'查看模型'}
+        </Button>
+        <Button
+          color="primary"
+          disabled={noPrevious}
+          type="button"
+          onClick={() => previous()}
+        >
+          {'<<'}
+        </Button>
+        <Button
+          disabled={noNext}
+          type="button"
+          onClick={() => next()}
+          color="primary"
+        >
+          {'>>'}
+        </Button>
+        <Button
+          disabled={viewingStep !== workingStep || !viewingStep?.skippable}
+          type="button"
+          onClick={() => doNextStep()}
+          color="tumblr"
+        >
+          {t(actionStepWorkingDef.SKIP)}
+        </Button>
+        <Button
+          disabled={viewingStep !== workingStep || !viewingStep?.undoable}
+          type="button"
+          onClick={() => doPreviousStep()}
+          color="danger"
+        >
+          {t(actionStepWorkingDef.UNDO)}
+        </Button>
+      </div>
+      <div>{action}</div>
+    </div>)}
+  </I18n>;
 };
 
 export default connect(mapState, mapDispatch)(ButtonsContainer);

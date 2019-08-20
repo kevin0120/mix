@@ -3,7 +3,8 @@ export const MODEL_VIEWER={
 };
 
 export default {
-  open:()=>({
-    type:MODEL_VIEWER.OPEN
+  open:(url)=>({
+    type:MODEL_VIEWER.OPEN,
+    url
   })
 }

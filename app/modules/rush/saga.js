@@ -40,7 +40,9 @@ function* initRush() {
 
     yield call(stopRush);
 
-    setWSClient(new WebSocket(wsURL, { reconnectInterval: 3000 }));
+    setWSClient(new WebSocket(wsURL, {
+      reconnectInterval: 3000
+    }));
 
     task = yield fork(
       watchRushChannel,
@@ -132,6 +134,7 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
       });
 
       ws.on('message', data => {
+        // CommonLog.Info('rush raw message',data);
         emit({ type: 'data', payload: data });
       });
       ws.on('websocket-status', (...args) => {

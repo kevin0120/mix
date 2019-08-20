@@ -1,6 +1,6 @@
 // @flow
 
-import { put,call } from 'redux-saga/effects';
+import { put, call } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import { setNewNotification } from '../../../notification/action';
 // import ClsScrewTool, { defaultScrewToolDispatcher } from './model';
@@ -46,12 +46,19 @@ export function* toolStatusChange(data: tToolStatusData): Saga<void> {
 export function* toolNewResults(data: tToolResultData): Saga<void> {
   try {
     const results = data.data;
-    CommonLog.Info('rush result',{
-      result:JSON.stringify(results)
+    CommonLog.Info('rush result', {
+      result: JSON.stringify(results)
     });
-    for(const r of results){
-      const tool=getDevice(r.tool_sn);
-      const respAction = yield call(tool.doDispatch,[r]);
+    for (const r of results) {
+      let respAction = null;
+      const tool = getDevice(r.tool_sn);
+      if (tool) {
+        respAction = yield call(tool.doDispatch, [r]);
+      } else {
+        CommonLog.lError('invalid tool', {
+          sn: r.tool_sn
+        });
+      }
       if (respAction) {
         yield put(respAction);
       }

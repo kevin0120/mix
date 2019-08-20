@@ -7,8 +7,15 @@ const { exec } = require('child_process');
 export default function* root() {
   try {
     while (true) {
-      yield take(MODEL_VIEWER.OPEN);
-      // yield exec('');
+      const {url}=yield take(MODEL_VIEWER.OPEN);
+      if(url){
+        yield exec(`firefox ${url}`);
+      }else {
+        CommonLog.lError('model viewing url not valid', {
+          at: 'model viewer root',
+          url
+        });
+      }
     }
   } catch (e) {
     CommonLog.lError(e, {
