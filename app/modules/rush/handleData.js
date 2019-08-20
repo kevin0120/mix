@@ -18,7 +18,7 @@ export default function* (payload) {
     const dataArray = d[1].split(';');
     const event: tWebSocketEvent = dataArray[0].split(':').slice(-1)[0];
     const json: tRushWebSocketData = JSON.parse(d[2]);
-    CommonLog.Info('rush message',{
+    CommonLog.Info(`rush message (${event})(${json.type})`,{
       event,
       data:d[2]
     });

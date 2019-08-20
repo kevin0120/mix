@@ -62,7 +62,7 @@ function ConnectedNavBar(
 
   useEffect(() => {
     setHealthOK(HealthCheckOk);
-  }, [healthCheckResults]);
+  }, [HealthCheckOk, healthCheckResults]);
 
   const renderSysInfoMenu = (key) =>
     <NavBarMenu

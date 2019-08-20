@@ -209,11 +209,15 @@ class Event extends React.Component {
               </ListItem>
               {
                 keys.map((key) => (
-
                   <React.Fragment>
                     <Divider component="li"/>
                     <ListItem>
-                      <ListItemText primary={`${t(key)}: ${selectObj.meta[key]}`}/>
+                      <ListItemText
+                        style={{
+                          margin:'auto',
+                          width:'auto'
+                        }}
+                        primary={`${t(key)}: ${selectObj.meta[key]}`}/>
                     </ListItem>
                   </React.Fragment>
                 ))

@@ -112,7 +112,7 @@ export function* deviceStatus(data: tRushWebSocketData): Saga<void> {
     gDevices.forEach((d: Device) => {
       status[d.Name] = d.Healthz;
     });
-
+    console.log(status);
     yield put(healthzActions.data(status));
   } catch (e) {
     CommonLog.lError(e);

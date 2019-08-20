@@ -154,18 +154,18 @@ export default class Step {
     }
   }
 
-  *updateData(dataReducer) {
-    try{
+  * updateData(dataReducer) {
+    try {
       this._data = dataReducer(this._data);
       yield put(orderActions.updateState());
-    }catch (e) {
-      CommonLog.lError(e,{
-        at:'step.UpdateData'
-      })
+    } catch (e) {
+      CommonLog.lError(e, {
+        at: 'step.UpdateData'
+      });
     }
   }
 
-  * _updateStatus({ status }) {
+  * _updateStatus({ status, msg }) {
     if (status in this._statusTasks) {
       try {
         if (this._runningStatusTask) {
@@ -174,7 +174,7 @@ export default class Step {
         const taskToRun = this._statusTasks[status]?.bind(this) ||
           (() => invalidStepStatus(this._type, status));
 
-        this._runningStatusTask = yield fork(taskToRun, ORDER, orderActions);
+        this._runningStatusTask = yield fork(taskToRun, ORDER, orderActions, msg);
 
         this._status = status;
         yield call(this._apis.updateStatus, this.id, status);

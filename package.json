@@ -21,6 +21,7 @@
     "package-ci": "yarn postinstall && yarn build && electron-builder --publish always",
     "package-mac": "npm run build && build --mac",
     "package-linux": "yarn build && electron-builder build --linux",
+    "package-debug-linux": "cross-env DEBUG_PROD=true yarn package-linux",
     "package-win": "yarn build && electron-builder build --win --x64",
     "package-debug-win": "cross-env DEBUG_PROD=true yarn package-win",
     "postinstall": "yarn flow-typed && yarn build-dll && electron-builder install-app-deps package.json && opencollective-postinstall",

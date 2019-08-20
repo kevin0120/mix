@@ -32,7 +32,7 @@ class HealthCheck extends React.Component {
               >
                 <ListItemText
                   className={classes.infoText}
-                  primary={t(displayTitle)}
+                  primary={displayTitle}
                 />
                 <div className={`${classes.infoStatus} ${statusClassName}`}/>
               </ListItem>

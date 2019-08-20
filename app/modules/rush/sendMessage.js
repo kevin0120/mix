@@ -39,7 +39,9 @@ export default function* rushSendMessage(data: Object): Saga<void> {
         sn,
         ...data
       };
-      CommonLog.Info('call rush sendMessage', {
+      CommonLog.Info(`rush send (${msg.type})`, {
+        sn: msg.sn,
+        ...(msg.data || {}),
         msg: JSON.stringify(msg)
       });
       ws.sendJson(msg, (err) => {

@@ -59,11 +59,18 @@ export default class CommonExternalEntity implements IHealthChecker {
     if (!isHealthz) {
       this.Disable();
     }
-    if (this.#_children) {
+    if (this.#_children.length > 0 && !isHealthz) {
       this.#_children.forEach(c => {
         c.Healthz = false;
       });
     }
+
+    if (this.#_children.length > 0 && isHealthz) {
+      this.#_children.forEach(c => {
+
+      });
+    }
+
     const msg = `${this.#name} Healthz Status Change: ${isHealthz.toString()}`;
     CommonLog.Info(msg);
   }

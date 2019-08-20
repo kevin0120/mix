@@ -190,9 +190,9 @@ export const CommonLog = {
 
 const fn = {
   Error: console.error,
-  Info: console.info,
+  Info: console.log,
   Warn: console.warn,
-  Debug: console.log,
+  Debug: console.trace,
   Maintenance: console.log
 };
 

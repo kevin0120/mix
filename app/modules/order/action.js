@@ -95,10 +95,11 @@ export const orderActions = {
     type: ORDER.STEP.JUMP_TO,
     stepId
   }),
-  stepStatus: (step: tClsStep, status: tStepStatus) => ({
+  stepStatus: (step: tClsStep, status: tStepStatus,msg) => ({
     type: ORDER.STEP.STATUS,
     step,
-    status
+    status,
+    msg
   }),
   doNextStep: () => ({
     type: ORDER.STEP.DO_NEXT

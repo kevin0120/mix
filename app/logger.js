@@ -66,38 +66,38 @@ export function CreateDailyLogger() {
       info: primaryColor,
       debug: infoColor,
       maintenance: infoColor,
-      query: roseColor,
+      query: roseColor
     });
   }
 }
 
-export function Info(msg,meta) {
+export function Info(msg, meta) {
   if (gLogger === null) return;
-  gLogger.info(msg,{meta});
+  gLogger.info(msg, { meta });
 }
 
-export function Warn(msg,meta) {
+export function Warn(msg, meta) {
   if (gLogger === null) return;
-  gLogger.warn(msg,{meta});
+  gLogger.warn(msg, { meta });
 }
 
-export function Debug(msg,meta) {
+export function Debug(msg, meta) {
   if (gLogger === null) return;
-  gLogger.debug(msg,{meta});
+  gLogger.debug(msg, { meta });
 }
 
-export function Maintenance(msg,meta) {
+export function Maintenance(msg, meta) {
   if (gLogger === null) return;
-  gLogger.maintenance(msg,{meta});
+  gLogger.maintenance(msg, { meta });
 }
 
 export function lError(msg: mixed, meta) {
   if (gLogger === null) return;
-  if (typeof msg === 'string'){
-    gLogger.error(msg,{meta});
+  if (typeof msg === 'string') {
+    gLogger.error(msg, { meta });
   }
   if (msg instanceof Error) {
-    gLogger.error(msg.message, {meta});
+    gLogger.error(msg.message, { meta });
   }
 }
 
