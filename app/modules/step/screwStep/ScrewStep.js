@@ -65,9 +65,9 @@ export default class ScrewStep extends Step {
         const unhealthyTools = this._tools.filter(t => !t.Healthz);
         if (unhealthyTools.length > 0) {
           unhealthyTools.forEach(t => {
-            CommonLog.lError(`tool not found: ${t.sn}`);
+            CommonLog.lError(`tool not found: ${t.serialNumber}`);
           });
-          yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL,`tool not connected: ${unhealthyTools.map(t=>`${t.sn}`)}`));
+          yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL,`tool not connected: ${unhealthyTools.map(t=>`${t.serialNumber}`)}`));
         }
 
         yield call(this.updateData, (data: tScrewStepData): tScrewStepData => {
