@@ -114,6 +114,7 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
       // update step data
       yield call(this.updateData, (d: tScrewStepData): tScrewStepData => ({
         ...d,
+        retryTimes: 0,
         activeIndex: d.activeIndex === -1 ? 0 : d.activeIndex + results.length,
         points: mergePointsAndResults(
           d.points,

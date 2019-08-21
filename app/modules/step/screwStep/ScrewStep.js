@@ -151,6 +151,10 @@ export default class ScrewStep extends Step {
 
     * [STEP_STATUS.FAIL](ORDER, orderActions, msg) {
       try {
+        for (const t of this._tools) {
+          yield call(t.Disable);
+        }
+        this._tools=[];
         yield put(
           dialogActions.dialogShow({
             buttons: [
