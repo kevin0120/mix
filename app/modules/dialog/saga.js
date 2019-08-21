@@ -32,7 +32,6 @@ const dialogActions = {
 };
 function* handleClose(config){
   try {
-    console.log(config);
     if (config?.closeAction) {
       yield put(config.closeAction);
     }

@@ -26,7 +26,6 @@ export default {
 
       // const { toolSN, pset, sequence } = points[activeIndex];
       const { toolSN, pset, sequence } = point;
-      console.log(point);
       const total = points.length || 0;
       const workorderID=yield select(s=>workingOrder(s.order).id);
       const data = yield call(psetApi, toolSN || '', stepId, userID, pset, sequence, retryTimes, total, workorderID);

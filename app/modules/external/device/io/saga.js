@@ -55,7 +55,7 @@ export default function* ioNewData(data: tIORushData): Saga<void> {
         break;
       }
       case 'WS_IO_STATUS':
-        console.log(data);
+        CommonLog.Info('WS_IO_STATUS',data);
         break;
       default:
         CommonLog.lError('IO Message Type Is Not Defined', { msgType });

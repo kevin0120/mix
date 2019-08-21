@@ -53,7 +53,6 @@ export default class ClsIOModule extends Device {
     (this: any).getStatus = this.getStatus.bind(this);
     (this: any).ioContact = this.ioContact.bind(this);
     /* eslint-enable flowtype/no-weak-types */
-    console.log(this,config);
   }
 
   getPort(direction: tIODirection, idx: number): ?tIOPort {

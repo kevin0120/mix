@@ -8,7 +8,6 @@ export default function* root() {
   try {
     while (true) {
       const {url}=yield take(MODEL_VIEWER.OPEN);
-      console.log(url);
       if(url){
         yield call(exec,`firefox ${url}`);
       }else {
