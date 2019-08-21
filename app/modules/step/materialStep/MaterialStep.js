@@ -1,6 +1,6 @@
 import Step from '../Step';
 import STEP_STATUS from '../model';
-import { call, put, select, take } from '@redux-saga/core/effects';
+import { call, put, select, take } from 'redux-saga/effects';
 import { stepPayload, workingOrder, workingStep } from '../../order/selector';
 import { getDevice } from '../../external/device';
 import { CommonLog } from '../../../common/utils';
@@ -9,30 +9,43 @@ import actions, { MATERIAL_STEP } from './action';
 
 const ioSN = (payload) => payload?.ioSN;
 const items = (payload) => payload?.items;
-const confirmIdx=(payload)=>payload?.confirmIO;
+const confirmIdx = (payload) => payload?.confirmIO;
 
 
 export default class MaterialStep extends Step {
-  _ports=[];
+  _ports = [];
 
-  _onLeave=()=>{
-    this._ports=[];
-    console.log('ports cleared');
-  };
+  constructor(...args) {
+    super(...args);
+    function* onLeave() {
+      try {
+        const sPayload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
+        const io = getDevice(ioSN(sPayload));
+        if (io?.closeIO) {
+          yield call(io.closeIO, this._ports);
+        }
+        this._ports = [];
+        console.log('ports cleared');
+      } catch (e) {
+        CommonLog(e);
+      }
+    }
+    this._onLeave = onLeave.bind(this);
+  }
 
   _statusTasks = {
     * [STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {
         const sPayload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
         const io = getDevice(ioSN(sPayload));
-        if(io?.ioContact) {
+        if (io?.ioContact) {
           yield call(io.ioContact);
         } else {
           CommonLog.lError('io not ready', {
             at: 'materialStep entering',
             io
           });
-          yield put(orderActions.stepStatus(this,STEP_STATUS.FAIL));
+          yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL));
           return;
         }
         items(sPayload).forEach((i) => {
@@ -57,22 +70,15 @@ export default class MaterialStep extends Step {
         );
         yield take(MATERIAL_STEP.READY);
         io.removeListener(ioListener);
-        yield put(orderActions.stepStatus(this,STEP_STATUS.FINISHED));
+        yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED));
       } catch (e) {
         CommonLog.lError(e);
-      }finally {
-        const sPayload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
-        const io = getDevice(ioSN(sPayload));
-        if (io?.closeIO) {
-          yield call(io.closeIO, this._ports);
-        }
+      } finally {
+
       }
     },
     * [STEP_STATUS.FINISHED](ORDER, orderActions) {
       try {
-        const sPayload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
-        const io = getDevice(ioSN(sPayload));
-        yield call(io.closeIO, this._ports);
         yield put(orderActions.finishStep(this));
       } catch (e) {
         CommonLog.lError(e);
@@ -80,14 +86,10 @@ export default class MaterialStep extends Step {
     },
     * [STEP_STATUS.FAIL](ORDER, orderActions) {
       try {
-        const sPayload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
-        const io = getDevice(ioSN(sPayload));
-        if (io?.closeIO) {
-          yield call(io.closeIO, this._ports);
-        }
+        yield put(orderActions.finishStep(this));
       } catch (e) {
         CommonLog.lError(e);
       }
     }
-  }
+  };
 }

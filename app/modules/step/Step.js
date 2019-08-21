@@ -204,7 +204,6 @@ export default class Step {
         });
       } finally {
         console.log(`step run finished(${this._id}-${this._name})`);
-
       }
     }
 
@@ -217,9 +216,7 @@ export default class Step {
         at: 'step root'
       });
     } finally {
-      console.log('leaving step',this._onLeave, this);
       if (this._onLeave) {
-        console.log('calling _onLeave');
         yield call([this, this._onLeave]);
       }
     }

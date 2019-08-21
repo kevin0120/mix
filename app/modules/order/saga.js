@@ -6,7 +6,8 @@ import {
   all,
   takeEvery,
   takeLeading,
-  delay
+  delay,
+  take
 } from 'redux-saga/effects';
 import React from 'react';
 import type { Saga } from 'redux-saga';
@@ -26,7 +27,7 @@ import type { tCommonActionType } from '../../common/type';
 import { orderDetailApi, orderListApi } from '../../api/order';
 import { ORDER_STATUS } from './model';
 import { bindRushAction } from '../rush/rushHealthz';
-
+import loadingActions from '../loading/action';
 
 export default function* root(): Saga<void> {
   try {
@@ -52,14 +53,60 @@ function* workOnOrder({ order }) {
   }
 }
 
+function* DebounceViewStep(d, action: tCommonActionType) {
+  try {
+    switch (action.type) {
+      case ORDER.STEP.PREVIOUS:
+        yield put({ type: ORDER.STEP.VIEW_PREVIOUS });
+        break;
+      case ORDER.STEP.NEXT:
+        yield put({ type: ORDER.STEP.VIEW_NEXT });
+        break;
+      default:
+        break;
+    }
+    yield delay(d);
+  } catch (e) {
+    CommonLog.lError(e);
+  }
+}
 
-const mapping = {
-  onOrderView: showOverview
-};
 
-function* showOverview(order: tOrder) {
+function* getOrderDetail({ order }) {
+  try {
+    return yield call(orderDetailApi, order.id);
+  } catch (e) {
+    CommonLog.lError(e, {
+      at: 'getOrderDetail'
+    });
+  }
+}
+
+function* getOrderList() {
+  try {
+    yield call(orderListApi);
+  } catch (e) {
+    CommonLog.lError(e, {
+      at: 'getOrderList'
+    });
+  }
+}
+
+function* viewOrder({ order }) {
   try {
     const WIPOrder: tOrder = yield select(s => workingOrder(s.order));
+
+
+    if (WIPOrder === order) {
+      // 进行中的工单不显示概览对话框
+      return;
+    }
+    yield put(loadingActions.start());
+    yield all([
+      call(getOrderDetail,{order}),
+      take(ORDER.DETAIL.SUCCESS)
+    ]);
+    yield put(loadingActions.stop());
     const vOrderSteps: ?tStepArray = yield select(state =>
       orderSteps(viewingOrder(state.order))
     );
@@ -72,12 +119,6 @@ function* showOverview(order: tOrder) {
           s.description
         ])) ||
       [];
-    if (WIPOrder === order) {
-      // 进行中的工单不显示概览对话框
-      return;
-    }
-    yield call(getOrderDetail,{order});
-
     yield put(
       dialogActions.dialogShow({
         buttons: [
@@ -85,10 +126,6 @@ function* showOverview(order: tOrder) {
             label: 'Common.Close',
             color: 'warning'
           },
-          // {
-          //   label: '查看模型',
-          //   color: 'info'
-          // },
           !WIPOrder &&
           doable(order) && {
             label: 'Order.Start',
@@ -114,53 +151,6 @@ function* showOverview(order: tOrder) {
     );
   } catch (e) {
     CommonLog.lError(`showOverview error: ${e.message}`);
-  }
-}
-
-function* DebounceViewStep(d, action: tCommonActionType) {
-  try {
-    switch (action.type) {
-      case ORDER.STEP.PREVIOUS:
-        yield put({ type: ORDER.STEP.VIEW_PREVIOUS });
-        break;
-      case ORDER.STEP.NEXT:
-        yield put({ type: ORDER.STEP.VIEW_NEXT });
-        break;
-      default:
-        break;
-    }
-    yield delay(d);
-  } catch (e) {
-    CommonLog.lError(e);
-  }
-}
-
-
-function* getOrderDetail({ order }) {
-  try {
-    yield call(orderDetailApi, order.id);
-  } catch (e) {
-    CommonLog.lError(e, {
-      at: 'getOrderDetail'
-    });
-  }
-}
-
-function* getOrderList() {
-  try {
-    yield call(orderListApi);
-  } catch (e) {
-    CommonLog.lError(e, {
-      at: 'getOrderList'
-    });
-  }
-}
-
-function* viewOrder({ order }) {
-  try {
-    yield call(mapping.onOrderView, order);
-  } catch (e) {
-    CommonLog.lError(e);
   }
 }
 

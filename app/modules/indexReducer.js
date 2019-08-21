@@ -22,6 +22,7 @@ import healthz from './healthz/reducer';
 import order from './order/reducer';
 import dialog from './dialog/reducer';
 import Notifier from './Notifier/reducer';
+import loading from './loading/reducer';
 
 export type StateType = {
   +notify: Object,
@@ -63,7 +64,8 @@ export default function createRootReducer(history: {}) {
       order,
       dialog,
       Notifier,
-      healthz
+      healthz,
+      loading
     })
   );
 }

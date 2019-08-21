@@ -79,8 +79,6 @@ export default class ScrewStep extends Step {
             retryTimes: 0
           };
         });
-
-
         yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
       } catch (e) {
         CommonLog.lError(e, { at: 'screwStep ENTERING' });
@@ -136,7 +134,6 @@ export default class ScrewStep extends Step {
     * [STEP_STATUS.FINISHED](ORDER, orderActions) {
       try {
         yield put(orderActions.doNextStep());
-        this._tools = [];
       } catch (e) {
         CommonLog.lError(e, { at: 'screwStep FINISHED' });
       }
@@ -158,15 +155,14 @@ export default class ScrewStep extends Step {
                 action: screwStepActions.confirmFail()
               }
             ],
-            title: '',
+            title: '拧紧工步失败',
             content: (
-              `拧紧工步失败${
+              `${
                 JSON.stringify(msg) || ''}`
             )
           })
         );
         yield take(SCREW_STEP.CONFIRM_FAIL);
-        this._tools = [];
         yield put(orderActions.doNextStep());
       } catch (e) {
         CommonLog.lError(e, { at: 'screwStep FAIL' });

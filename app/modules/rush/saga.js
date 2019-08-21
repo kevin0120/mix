@@ -132,10 +132,10 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
         // console.log('websocket error. reconnect after 1s');
       });
       ws.on('ping', () => {
-        CommonLog.Info('receive ping msg');
+        // CommonLog.Info('receive ping msg');
       });
       ws.on('pong', () => {
-        CommonLog.Info('receive pong msg');
+        // CommonLog.Info('receive pong msg');
       });
       ws.on('message', data => {
         emit({ type: 'data', payload: data });
