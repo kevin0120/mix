@@ -144,7 +144,7 @@ export default function* handleResult(ORDER, orderActions, results, data) {
       timeLine: [
         ...results.map(r => ({
           title: r.batch,
-          color: r.result === 'NOK' ? (r.result === 'NOK' ? 'success' : 'info') : 'danger',
+          color: r.result === 'NOK' ? 'danger' : (r.result === 'OK' ? 'success' : 'info'),
           footerTitle: r.tool_sn,
           body: `${r.result}: wi=${r.wi},mi=${r.mi},ti=${r.ti}`
         })),
