@@ -126,7 +126,7 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
       });
 
       ws.on('error', (...args) => {
-        CommonLog.lError('error', ...args);
+        CommonLog.Info('error', ...args);
 
         emit({ type: 'healthz', payload: false });
         // console.log('websocket error. reconnect after 1s');
@@ -142,9 +142,9 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
       });
       ws.on('websocket-status', (msg) => {
         CommonLog.Info(msg);
-        // if(/Disconnected/.test(msg)){
-        //   emit({ type: 'healthz', payload: false });
-        // }
+        if(/Disconnected/.test(msg)){
+          emit({ type: 'healthz', payload: false });
+        }
       })
     } else {
       emit({ type: 'healthz', payload: false });

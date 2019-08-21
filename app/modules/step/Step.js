@@ -190,24 +190,23 @@ export default class Step {
 
 
   * run(initStatus) {
-    const updateStatus = this._updateStatus.bind(this);
-
-    function* runStep() {
-      try {
-        yield takeEvery((action) =>
-          action.type === ORDER.STEP.STATUS && action.step === this,
-          updateStatus
-        );
-      } catch (e) {
-        CommonLog.lError(e, {
-          at: 'runStep'
-        });
-      } finally {
-        console.log(`step run finished(${this._id}-${this._name})`);
-      }
-    }
-
     try {
+      const updateStatus = this._updateStatus.bind(this);
+
+      function* runStep() {
+        try {
+          while (true) {
+            const action = yield take((a) => a.type === ORDER.STEP.STATUS && a.step === this);
+            yield fork(updateStatus, action);
+          }
+        } catch (e) {
+          CommonLog.lError(e, {
+            at: 'runStep'
+          });
+        }
+      }
+
+
       const step = yield fork([this, runStep]);
       yield put(orderActions.stepStatus(this, initStatus));
       yield join(step);
@@ -219,6 +218,7 @@ export default class Step {
       if (this._onLeave) {
         yield call([this, this._onLeave]);
       }
+      this._runningStatusTask = null;
     }
   }
 

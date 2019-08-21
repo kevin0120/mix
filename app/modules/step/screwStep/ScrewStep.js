@@ -49,6 +49,7 @@ export default class ScrewStep extends Step {
       }
     }
   }
+
   _statusTasks = {
     * [STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {

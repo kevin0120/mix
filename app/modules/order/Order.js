@@ -9,7 +9,6 @@ import { orderUpdateApi } from '../../api/order';
 import dialogActions from '../dialog/action';
 import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
-import { workingIndex } from './selector';
 
 export default class Order extends Step {
   _apis = {
@@ -32,11 +31,10 @@ export default class Order extends Step {
 
   * onNext() {
     try {
-      // console.log(this._workingIndex, this._steps.length);
-      if (this._workingIndex + 1 >= this._steps.length) {
-        yield put(orderActions.finishOrder(this));
-      }
       this._workingIndex += 1;
+      if (this._workingIndex >= this._steps.length) {
+        yield put(orderActions.stepStatus(this,ORDER_STATUS.DONE));
+      }
     } catch (e) {
       CommonLog.lError(e);
     }
@@ -58,7 +56,7 @@ export default class Order extends Step {
       try {
         this._workingIndex = this._workingIndex >= this._steps.length ? 0 : this._workingIndex;
         while (true) {
-          CommonLog.Info('Doing Order...');
+          CommonLog.Info('Doing Order...',this._workingIndex);
           const step = this.workingStep;
           if (step) {
             yield call([this,this.runSubStep], step, {
@@ -101,7 +99,7 @@ export default class Order extends Step {
             )
           })
         );
-        yield put(orderActions.finishOrder());
+        yield put(orderActions.finishOrder(this));
       } catch (e) {
         const err = (e: Error);
         CommonLog.lError(`showResult error: ${err.message}`);
@@ -112,7 +110,7 @@ export default class Order extends Step {
     * [ORDER_STATUS.PENDING]() {
       try {
         this.workingStep.timerStop();
-        yield put(orderActions.finishOrder());
+        yield put(orderActions.finishOrder(this));
       } catch (e) {
         CommonLog.lError(e, {
           at: 'ORDER_STATUS.PENDING'
@@ -122,7 +120,7 @@ export default class Order extends Step {
     * [ORDER_STATUS.CANCEL]() {
       try {
         this.workingStep.timerStop();
-        yield put(orderActions.finishOrder());
+        yield put(orderActions.finishOrder(this));
       } catch (e) {
         CommonLog.lError(e, {
           at: 'ORDER_STATUS.CANCEL'

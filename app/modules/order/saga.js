@@ -48,7 +48,11 @@ export default function* root(): Saga<void> {
 
 function* workOnOrder({ order }) {
   try {
-    yield call(order.run, ORDER_STATUS.WIP);
+    yield race([
+        call(order.run, ORDER_STATUS.WIP),
+        take(a=>a.type===ORDER.FINISH && a.order===order)
+      ]
+    );
   } catch (e) {
     CommonLog.lError(e);
   }
