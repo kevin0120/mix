@@ -19,6 +19,8 @@ import order from './order/saga';
 import dialog from './dialog/saga';
 import { CommonLog } from '../common/utils';
 import healthz from './healthz/saga';
+import modelViewer from './modelViewer/saga';
+
 export default function* rootSaga(): Saga<void> {
   try {
     const state = yield select();
@@ -35,13 +37,14 @@ export default function* rootSaga(): Saga<void> {
       // watchSettingPreSave(),
       sysInitFlow(),
       watchOperationViewer(),
-      watchNetwork(),
-      watchBattery(),
+      // watchNetwork(),
+      // watchBattery(),
       watchPower(),
       andonEnable ? andon() : null,
       order(),
       dialog(),
-      healthz()
+      healthz(),
+      modelViewer()
     ]);
   } catch (e) {
     CommonLog.lError(e);

@@ -31,7 +31,7 @@ function getSN() {
 export default function* rushSendMessage(data: Object): Saga<void> {
   try {
     const ws = getWSClient();
-    if (ws) {
+    if (ws && !ws.closed) {
       const sn = getSN();
       // const sn = 1;
       const listenReplyTask = yield fork(listener, sn);

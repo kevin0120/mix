@@ -1,4 +1,4 @@
-import { take } from 'redux-saga/effects';
+import { take,call } from 'redux-saga/effects';
 import { MODEL_VIEWER } from './action';
 import { CommonLog } from '../../common/utils';
 
@@ -8,8 +8,9 @@ export default function* root() {
   try {
     while (true) {
       const {url}=yield take(MODEL_VIEWER.OPEN);
+      console.log(url);
       if(url){
-        yield exec(`firefox ${url}`);
+        yield call(exec,`firefox ${url}`);
       }else {
         CommonLog.lError('model viewing url not valid', {
           at: 'model viewer root',

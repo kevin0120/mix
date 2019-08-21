@@ -64,7 +64,7 @@ export default function* (payload) {
       for (const action of onConnectActions) {
         yield put(action(payload));
       }
-      CommonLog.lError('rush 已连接');
+      CommonLog.Info('rush 已连接');
     } else {
       for (const action of onDisconnectActions) {
         yield put(action(payload));

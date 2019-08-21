@@ -37,7 +37,7 @@ export default class Device extends CommonExternalEntity {
     }
     if (_isEmpty) {
       const msg = `${this.source} Receive Empty Data: ${data}`;
-      CommonLog.Debug(msg);
+      CommonLog.Info(msg);
       return false;
     }
     // 有效的数据

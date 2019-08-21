@@ -41,7 +41,8 @@ function* initRush() {
     yield call(stopRush);
 
     setWSClient(new WebSocket(wsURL,
-      { reconnectInterval: 3000,
+      {
+        reconnectInterval: 3000,
         options:
           {
             maxPayload: 200 * 1024 * 1024
@@ -56,17 +57,17 @@ function* initRush() {
   } catch (e) {
     CommonLog.lError(e, { at: 'initRush' });
   } finally {
-    const ws=getWSClient();
-    if (!(ws && task)) {
-      if (ws) {
-        ws.close();
-        setWSClient(null);
-      }
-      if (task) {
-        yield cancel(task);
-        task = null;
-      }
-    }
+    // const ws=getWSClient();
+    // if (!(ws && task)) {
+    //   if (ws) {
+    //     ws.close();
+    //     setWSClient(null);
+    //   }
+    //   if (task) {
+    //     yield cancel(task);
+    //     task = null;
+    //   }
+    // }
   }
 }
 
@@ -112,20 +113,20 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
           }, err => {
             if (err && ws) {
               CommonLog.lError(err);
-              ws.close();
+              // ws.close();
             }
           });
         }
       });
 
       ws.on('close', (...args) => {
-        console.warn('close', ...args, ws);
+        console.log('close', ...args, ws);
 
         emit({ type: 'healthz', payload: false });
       });
 
       ws.on('error', (...args) => {
-        console.warn('error', ...args);
+        console.log('error', ...args);
 
         emit({ type: 'healthz', payload: false });
         // console.log('websocket error. reconnect after 1s');
@@ -136,14 +137,17 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
       ws.on('pong', () => {
         CommonLog.Info('receive pong msg');
       });
-
       ws.on('message', data => {
         emit({ type: 'data', payload: data });
       });
-      ws.on('websocket-status', (...args) => {
-
+      ws.on('websocket-status', (msg) => {
+        console.log(msg);
+        // if(/Disconnected/.test(msg)){
+        //   emit({ type: 'healthz', payload: false });
+        // }
       })
     } else {
+      emit({ type: 'healthz', payload: false });
       CommonLog.lError('ws doesn\'t exist', { at: 'createRushChannel' });
     }
     return () => {
