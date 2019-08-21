@@ -7,7 +7,8 @@ import {
   takeEvery,
   takeLeading,
   delay,
-  take
+  take,
+  race
 } from 'redux-saga/effects';
 import React from 'react';
 import type { Saga } from 'redux-saga';
@@ -74,7 +75,10 @@ function* DebounceViewStep(d, action: tCommonActionType) {
 
 function* getOrderDetail({ order }) {
   try {
-    return yield call(orderDetailApi, order.id);
+    const resp=yield call(orderDetailApi, order.id);
+    if(resp.result!==0){
+      yield put(orderActions.getDetailFail());
+    }
   } catch (e) {
     CommonLog.lError(e, {
       at: 'getOrderDetail'
@@ -103,8 +107,11 @@ function* viewOrder({ order }) {
     }
     yield put(loadingActions.start());
     yield all([
-      call(getOrderDetail,{order}),
-      take(ORDER.DETAIL.SUCCESS)
+      call(getOrderDetail, { order }),
+      race([
+        take(ORDER.DETAIL.SUCCESS),
+        take(ORDER.DETAIL.FAIL)
+      ])
     ]);
     yield put(loadingActions.stop());
     const vOrderSteps: ?tStepArray = yield select(state =>

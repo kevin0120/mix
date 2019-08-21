@@ -3,7 +3,7 @@ import { call, delay, race } from 'redux-saga/effects';
 import rushSendMessage from '../modules/rush/sendMessage';
 import { CommonLog } from '../common/utils';
 
-const defaultTimeout = 10000;
+const defaultTimeout = 5000;
 
 export function* rushSendApi(msgType, data, timeout = defaultTimeout): Saga<void> {
   try {
