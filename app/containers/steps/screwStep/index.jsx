@@ -39,9 +39,9 @@ function ScrewStep({ status, image, points, activeIndex, result, redoPoint }: tS
       scale={1}
       // onClick={() => result({ data: [{ result: 'ok' }] })}
       onPointClick={(point) => {
-        console.log('on point click', point);
+        // console.log('on point click', point);
 
-        redoPoint(point);
+        // redoPoint(point);
       }}
     />
     <Paper

@@ -66,7 +66,7 @@ const mergePointsAndResults = (points: Array<tPoint>, results: Array<tResult>, a
 const resultStatus = (results: Array<tResult>, data: tScrewStepData) => {
   const LSN = results.some((r: tResult): boolean => r.result === RESULT_STATUS.lsn) && 'LSN';
   const retry = results.some((r: tResult): boolean => r.result === RESULT_STATUS.nok) && 'retry';
-  const fail = retry && data.retryTimes >= data.points[data.activeIndex].maxRetryTimes && 'fail';
+  const fail = retry && (data.retryTimes >= data.points[data.activeIndex].maxRetryTimes) && 'fail';
   const finish = (!retry && (data.activeIndex + results.length >= data.points.length)) && 'finish';
   const next = !retry && !finish && 'next';
   CommonLog.Info([LSN, fail, retry, finish, next]);

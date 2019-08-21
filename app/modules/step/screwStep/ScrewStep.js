@@ -31,11 +31,24 @@ function* doPoint(point, isFirst, orderActions) {
 export default class ScrewStep extends Step {
   _tools = [];
 
-  _onLeave=()=>{
-    this._tools=[];
-    console.log('tools cleared');
-  };
-
+  constructor(...args){
+    super(...args);
+    this._onLeave=function*(){
+      try {
+        for (const t of this._tools) {
+          yield call(t.Disable);
+        }
+        this._tools=[];
+        CommonLog.Info('tools cleared',{
+          at:`screwStep(${this._name},${this._id})._onLeave`
+        });
+      }catch (e) {
+        CommonLog.lError(e,{
+          at:`screwStep(${this._name},${this._id})._onLeave`,
+        });
+      }
+    }
+  }
   _statusTasks = {
     * [STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {
@@ -72,7 +85,7 @@ export default class ScrewStep extends Step {
         yield call(this.updateData, (data: tScrewStepData): tScrewStepData => {
           return {
             points, // results data.results
-            activeIndex: -1, // <-activeResultIndex
+            activeIndex: 0,
             ...data,
             jobID: payload.jobID,
             controllerMode: payload.controllerMode,
@@ -123,10 +136,6 @@ export default class ScrewStep extends Step {
       } catch (e) {
         CommonLog.lError(e, { at: 'screwStep DOING' });
         yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, e));
-      } finally {
-        for (const t of this._tools) {
-          yield call(t.Disable);
-        }
       }
     },
 
@@ -155,7 +164,7 @@ export default class ScrewStep extends Step {
                 action: screwStepActions.confirmFail()
               }
             ],
-            title: '拧紧工步失败',
+            title: `${this._name}工步失败`,
             content: (
               `${
                 JSON.stringify(msg) || ''}`
