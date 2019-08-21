@@ -101,7 +101,6 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
     const ws=getWSClient();
     if (ws) {
       ws.on('open', () => {
-        emit({ type: 'healthz', payload: true });
         // reg msg
         if (ws) {
           ws.sendJson({
@@ -117,6 +116,7 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
             }
           });
         }
+        emit({ type: 'healthz', payload: true });
       });
 
       ws.on('close', (...args) => {
@@ -126,7 +126,7 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
       });
 
       ws.on('error', (...args) => {
-        console.log('error', ...args);
+        CommonLog.lError('error', ...args);
 
         emit({ type: 'healthz', payload: false });
         // console.log('websocket error. reconnect after 1s');
@@ -141,7 +141,7 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
         emit({ type: 'data', payload: data });
       });
       ws.on('websocket-status', (msg) => {
-        console.log(msg);
+        CommonLog.Info(msg);
         // if(/Disconnected/.test(msg)){
         //   emit({ type: 'healthz', payload: false });
         // }

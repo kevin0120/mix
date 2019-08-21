@@ -53,10 +53,15 @@ export default class ClsIOModule extends Device {
     (this: any).getStatus = this.getStatus.bind(this);
     (this: any).ioContact = this.ioContact.bind(this);
     /* eslint-enable flowtype/no-weak-types */
+    console.log(this,config);
   }
 
   getPort(direction: tIODirection, idx: number): ?tIOPort {
     return this.#ports.find(p => p.direction === direction && p.idx === idx);
+  }
+
+  hasPort(port: tIOPort): ?boolean {
+    return this.#ports.findIndex(p => p === port) >= 0;
   }
 
   _checkValidateIdx(idx: number, ioType: tIODirection): boolean {

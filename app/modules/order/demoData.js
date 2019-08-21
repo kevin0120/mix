@@ -4,9 +4,12 @@ import dataImg2 from '../../../resources/imgs/working-page-test-pic2.png';
 import screwImg from '../../../resources/imgs/screw.jpg';
 import { ORDER_STATUS } from './model';
 
+
+
+
 // console.log(screwImg);
 export const demoOrder = {
-  id:'demoOrder1',
+  id: 'demoOrder1',
   name: 'demo Order 1',
   info:
     'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
@@ -14,7 +17,7 @@ export const demoOrder = {
   status: ORDER_STATUS.TODO,
   steps: [
     {
-      id:'s1',
+      id: 's1',
 
       name: '获取物料',
       info: {
@@ -27,19 +30,26 @@ export const demoOrder = {
       payload: {
         items: [
           {
-            name: 'test1',
-            index: 0
-          }, {
-            name: 'test2',
-            index: 2
-          }
+            name: 'test material 1',
+            image: '',
+            in: {
+              sn: "1",
+              index: 0
+            },
+            out: {
+              sn: "2",
+              index: 0
+            }
+          },
         ],
-        ioSN: '1',
-        confirmIO: 4
+        confirm: {
+          sn: "1",
+          index: 0
+        }
       }
     },
     {
-      id:'s2',
+      id: 's2',
 
       name: '拧紧作业指导 pset',
       info: {
@@ -102,7 +112,7 @@ export const demoOrder = {
       }
     },
     {
-      id:'s3',
+      id: 's3',
       name: '拧紧作业指导 job',
       info: {
         time: '00:02:00'
@@ -155,7 +165,7 @@ export const demoOrder = {
       }
     },
     {
-      id:'s4',
+      id: 's4',
       name: '扫码',
       info: {
         time: '00:02:00'
@@ -169,7 +179,7 @@ export const demoOrder = {
       }
     },
     {
-      id:'s5',
+      id: 's5',
       name: '扫码',
       info: {
         time: '00:02:00'
@@ -186,7 +196,7 @@ export const demoOrder = {
 };
 
 export const demoOrderLong = {
-  id:'demoOrderLong',
+  id: 'demoOrderLong',
 
   name: 'Long Demo Order',
   info: 'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
@@ -485,7 +495,7 @@ export const demoOrderLong = {
 };
 
 export const demoOrderCancel = {
-  id:'demoOrderCancel',
+  id: 'demoOrderCancel',
   name: 'fill info',
   info:
     'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
@@ -509,7 +519,7 @@ export const demoOrderCancel = {
 };
 
 export const demoOrderPending = {
-  id:'demoOrderPending',
+  id: 'demoOrderPending',
   name: 'fill info',
   info:
     'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
@@ -534,7 +544,7 @@ export const demoOrderPending = {
 };
 
 export const demoOrderDone = {
-  id:'demoOrderDone',
+  id: 'demoOrderDone',
   name: 'fill info',
   info: 'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
   type: 'step',

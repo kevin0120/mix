@@ -49,7 +49,7 @@ export default class Step {
 
   _onLeave = null;
 
-  constructor(stepObj, stepTypes) {
+  constructor(stepObj, stepTypes, parentID) {
     this._id = stepObj.id;
     this.update(stepObj, stepTypes);
     this.run = this.run.bind(this);

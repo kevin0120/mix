@@ -8,6 +8,7 @@ import type { Saga } from 'redux-saga';
 import ClsIOModule from './model';
 import { DefaultInput, DefaultOutput } from './type';
 import { CommonLog } from '../../../../common/utils';
+import { getDevice } from '../index';
 
 // config
 
@@ -34,7 +35,6 @@ import { CommonLog } from '../../../../common/utils';
 //   }
 // };
 
-export const defaultIO = new ClsIOModule('IO Module', '1', { input: DefaultInput, output: DefaultOutput });
 
 type tIORushData = {
   type: string,
@@ -45,13 +45,15 @@ export default function* ioNewData(data: tIORushData): Saga<void> {
   try {
     const msgType = data.type;
     switch (msgType) {
-      case 'WS_IO_CONTACT':
-        yield call(defaultIO.doDispatch, {
+      case 'WS_IO_CONTACT': {
+        const io = getDevice(data.data.sn);
+        yield call(io.doDispatch, {
           sn: data.data.sn,
           direction: data.data.type,
           contact: data.data.contact
         });
         break;
+      }
       case 'WS_IO_STATUS':
         console.log(data);
         break;

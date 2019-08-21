@@ -8,6 +8,7 @@ import type { tPoint, tScrewStepData } from './model';
 import { CommonLog } from '../../../common/utils';
 import { jobApi, psetApi } from '../../../api/tools';
 import Notifier from '../../Notifier/action';
+import { workingOrder } from '../../order/selector';
 
 export default {
 
@@ -27,7 +28,8 @@ export default {
       const { toolSN, pset, sequence } = point;
       console.log(point);
       const total = points.length || 0;
-      const data = yield call(psetApi, toolSN || '', stepId, userID, pset, sequence, retryTimes, total);
+      const workorderID=yield select(s=>workingOrder(s.order).id);
+      const data = yield call(psetApi, toolSN || '', stepId, userID, pset, sequence, retryTimes, total, workorderID);
       if (data && data.result !== 0) {
         Notifier.enqueueSnackbar('Error', `pset失败:${data.msg}`);
         CommonLog.lError(`pset失败${data.msg || ''}`, {

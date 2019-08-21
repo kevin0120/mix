@@ -22,7 +22,6 @@ export default (state = initState, action) => {
       return {
         ...state,
         notifications: state.notifications.map(notification => {
-          console.log('reducer key', action.key, notification.key);
           return (
             (action.dismissAll || notification.key === action.key)
               ? { ...notification, dismissed: true }
