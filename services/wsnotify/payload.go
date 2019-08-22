@@ -20,8 +20,8 @@ type WSMsgPackage struct {
 }
 
 type WSResult struct {
-	Result_id int64 `json:"result_id"`
-	//Seq       int     `json:"sequence"`
+	//Result_id int64 `json:"result_id"`
+	Seq      int     `json:"sequence"`
 	GroupSeq int     `json:"group_sequence"`
 	Count    int     `json:"count"`
 	Result   string  `json:"result"`

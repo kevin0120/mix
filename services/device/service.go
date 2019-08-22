@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"github.com/kataras/iris/websocket"
 	"github.com/masami10/rush/services/wsnotify"
+	"github.com/masami10/rush/utils"
 	"sync"
 	"sync/atomic"
 )
 
 type Device interface {
 	Status() string
-	DeviceType() string
+	DeviceType(string) string
 	Children() []string
 	Config() interface{}
 	Data() interface{}
@@ -81,11 +82,15 @@ func (s *Service) fetchAllDevices() []DeviceStatus {
 
 	devices := []DeviceStatus{}
 	for k, v := range s.runningDevices {
+		children := v.Children()
+		if utils.StringArrayContains(children, k) {
+			children = []string{}
+		}
 		devices = append(devices, DeviceStatus{
 			SN:       k,
-			Type:     v.DeviceType(),
+			Type:     v.DeviceType(k),
 			Status:   v.Status(),
-			Children: v.Children(),
+			Children: children,
 			Config:   v.Config(),
 			Data:     v.Data(),
 		})

@@ -77,6 +77,8 @@ type AIISResult struct {
 	WorkcenterCode string `json:"workcenter_code"`
 	Stage          string `json:"stage"`
 	WorkorderID    int64  `json:"workorder_id"`
+
+	Payload string `json:"payload"`
 }
 
 type CURObject struct {
@@ -84,14 +86,14 @@ type CURObject struct {
 	OP   int    `json:"op"`
 }
 
-type WSMsg struct {
-	Type string      `json:"type"`
-	Data interface{} `json:"data"`
-}
-
-type WSRegist struct {
-	Rush_SN string `json:"rush_sn"`
-}
+//type WSMsg struct {
+//	Type string      `json:"type"`
+//	Data interface{} `json:"data"`
+//}
+//
+//type WSRegist struct {
+//	Rush_SN string `json:"rush_sn"`
+//}
 
 type WSOpResult struct {
 	ResultID int64      `json:"result_id"`
@@ -123,4 +125,18 @@ type ResultPatch struct {
 
 type ODOOStatus struct {
 	Status string `json:"status"`
+}
+
+type Step struct {
+	Name    string      `json:"name"`
+	Desc    string      `json:"desc"`
+	Type    string      `json:"type"`
+	Payload interface{} `json:"payload"`
+}
+
+type Workorder struct {
+	Name    string      `json:"name"`
+	Desc    string      `json:"desc"`
+	Steps   []Step      `json:"steps"`
+	Payload interface{} `json:"payload"`
 }

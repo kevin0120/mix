@@ -2,7 +2,6 @@ package hmi
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/kataras/iris/websocket"
 	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/controller"
@@ -260,6 +259,14 @@ func (s *Service) Open() error {
 	}
 	s.Httpd.Handler[0].AddRoute(r)
 
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "GET",
+		Pattern:     "/storage",
+		HandlerFunc: s.methods.getStorage,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
 	s.ODOO.WS.AddNotify(s)
 
 	return nil
@@ -369,7 +376,7 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 		}
 
 		body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, w))
-		fmt.Println(string(body))
+		//fmt.Println(string(body))
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_ORDER, string(body))
 
 	case WS_ORDER_UPDATE:

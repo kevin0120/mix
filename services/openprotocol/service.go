@@ -32,7 +32,7 @@ type Service struct {
 
 	Parent *controller.Service
 
-	devices []Controller
+	devices []*Controller
 }
 
 func NewService(c Config, d Diagnostic, parent *controller.Service) *Service {
@@ -41,7 +41,7 @@ func NewService(c Config, d Diagnostic, parent *controller.Service) *Service {
 		name:    controller.OPENPROTOCOL,
 		diag:    d,
 		Parent:  parent,
-		devices: []Controller{},
+		devices: []*Controller{},
 	}
 
 	s.configValue.Store(c)
@@ -76,15 +76,23 @@ func (p *Service) AddDevice(cfg controller.DeviceConfig, ts interface{}) control
 	c.Srv = p //服务注入
 	c.cfg = controller.ControllerConfig{
 		RemoteIP: cfg.Endpoint,
+		SN:       cfg.SN,
+		Tools:    cfg.Tools,
 	}
 	c.SetModel(cfg.Model)
 	c.tighteningDevice = ts.(*tightening_device.Service)
 
 	if cfg.SN != "" {
 		c.tighteningDevice.AddDevice(cfg.SN, &c)
+		p.Parent.Device.AddDevice(cfg.SN, &c)
 	}
 
-	p.devices = append(p.devices, c)
+	for _, v := range cfg.Tools {
+		c.tighteningDevice.AddDevice(v.SerialNO, &c)
+		p.Parent.Device.AddDevice(v.SerialNO, &c)
+	}
+
+	p.devices = append(p.devices, &c)
 
 	return nil
 }

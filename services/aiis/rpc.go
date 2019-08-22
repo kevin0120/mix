@@ -11,6 +11,7 @@ import (
 const (
 	TYPE_RESULT      = "result_patch"
 	TYPE_ODOO_STATUS = "odoo_status"
+	TYPE_WORKORDER   = "workorder"
 
 	RPC_PING = "ping"
 	RPC_PONG = "pong"

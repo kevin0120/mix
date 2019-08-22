@@ -38,8 +38,8 @@ type Protocol interface {
 }
 
 type HandlerPackage struct {
-	result interface{}
-	curve  interface{}
+	result *ControllerResult
+	curve  *minio.ControllerCurve
 }
 
 type Service struct {
@@ -48,10 +48,11 @@ type Service struct {
 	protocols   map[string]Protocol //进行服务注入, serial_no : Protocol
 	Controllers map[string]Controller
 
-	DB    *storage.Service
-	WS    *wsnotify.Service
-	Aiis  *aiis.Service
-	Minio *minio.Service
+	DB     *storage.Service
+	WS     *wsnotify.Service
+	Aiis   *aiis.Service
+	Minio  *minio.Service
+	Device *device.Service
 
 	Handlers Handlers
 	wg       sync.WaitGroup
@@ -130,7 +131,7 @@ func (s *Service) Open() error {
 	return nil
 }
 
-func (s *Service) Handle(result interface{}, curve interface{}) {
+func (s *Service) Handle(result *ControllerResult, curve *minio.ControllerCurve) {
 	pkg := HandlerPackage{
 		result: result,
 		curve:  curve,
@@ -143,7 +144,7 @@ func (s *Service) HandleProcess() {
 	for {
 		select {
 		case data := <-s.handle_buffer:
-			s.Handlers.Handle(data.result, data.curve)
+			s.Handlers.Handle(*data.result, *data.curve)
 		case <-s.closing:
 			s.wg.Done()
 			return

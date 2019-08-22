@@ -9,6 +9,10 @@ import (
 )
 
 const (
+	OP_TERMINAL = 0x00
+)
+
+const (
 	JOB_ACTION_ABORT = "abort"
 	MAX_IDS_NUM      = 4
 )
@@ -188,6 +192,10 @@ func (h *OpenProtocolHeader) Serialize() string {
 }
 
 func (h *OpenProtocolHeader) Deserialize(str string) {
+	if len(str) != LEN_HEADER {
+		return
+	}
+
 	n, _ := strconv.ParseInt(str[0:4], 10, 32)
 	h.LEN = int(n) - LEN_HEADER
 	h.MID = str[4:8]
@@ -205,7 +213,7 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 		h.MID = MID_9999_ALIVE
 		h.LEN = LEN_HEADER
 		h.Revision = rev
-		h.NoAck = ""
+		h.NoAck = "1"
 		h.Station = ""
 		h.Spindle = ""
 		h.Spare = ""

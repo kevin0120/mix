@@ -486,7 +486,7 @@ func (c *Controller) Tools() map[string]string {
 	return rt
 }
 
-func (c *Controller) DeviceType() string {
+func (c *Controller) DeviceType(sn string) string {
 	return "controller"
 }
 

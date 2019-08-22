@@ -22,6 +22,15 @@ func (s *WSClientManager) AddClient(sn string, c websocket.Connection) {
 	s.conn[sn] = c
 }
 
+func (s *WSClientManager) RemoveClientBySN(sn string) {
+	defer s.mutex.Unlock()
+	s.mutex.Lock()
+
+	if sn != "" {
+		delete(s.conn, sn)
+	}
+}
+
 func (s *WSClientManager) RemoveClient(cid string) {
 	defer s.mutex.Unlock()
 

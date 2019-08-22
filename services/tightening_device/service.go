@@ -5,6 +5,7 @@ import (
 	"github.com/kataras/iris/core/errors"
 	"github.com/kataras/iris/websocket"
 	"github.com/masami10/rush/services/controller"
+	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"sync"
 	"sync/atomic"
@@ -34,6 +35,8 @@ type Service struct {
 	mtxDevices     sync.Mutex
 
 	WS *wsnotify.Service
+	DB *storage.Service
+
 	wsnotify.WSNotify
 }
 
@@ -93,16 +96,21 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 	switch msg.Type {
 
 	case WS_TOOL_ENABLE:
-		reply := wsnotify.WSMsg{
+
+		req := ToolEnable{}
+		strData, _ := json.Marshal(msg.Data)
+
+		_ = json.Unmarshal([]byte(strData), &req)
+
+		device, _ := s.GetDevice(req.ToolSN)
+		rt := device.Enable(&req)
+		reply, _ := json.Marshal(wsnotify.WSMsg{
 			Type: WS_TOOL_ENABLE,
 			SN:   msg.SN,
-			Data: wsnotify.WSReply{
-				Result: 0,
-				Msg:    "",
-			},
-		}
+			Data: rt,
+		})
 
-		s.WS.WSSendReply(&reply)
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, string(reply))
 
 	case WS_TOOL_JOB:
 		reply := wsnotify.WSMsg{
@@ -117,28 +125,25 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 		s.WS.WSSendReply(&reply)
 
 	case WS_TOOL_PSET:
-		//device, _ := s.GetDevice("0")
-		//req := PSetSet{}
-		//strData, _ := json.Marshal(msg.Data)
-		//json.Unmarshal([]byte(strData), &req)
-		//
-		//rt := device.SetPSet(&req)
-		//reply, _ := json.Marshal(wsnotify.WSMsg{
-		//	Type: WS_TOOL_PSET,
-		//	SN: msg.SN,
-		//	Data: rt,
-		//})
+		req := PSetSet{}
+		strData, _ := json.Marshal(msg.Data)
 
-		reply := wsnotify.WSMsg{
+		_ = json.Unmarshal([]byte(strData), &req)
+
+		_ = s.DB.UpdateGun(&storage.Guns{
+			Serial: req.ToolSN,
+			Trace:  string(strData),
+		})
+
+		device, _ := s.GetDevice(req.ToolSN)
+		rt := device.SetPSet(&req)
+		reply, _ := json.Marshal(wsnotify.WSMsg{
 			Type: WS_TOOL_PSET,
 			SN:   msg.SN,
-			Data: Reply{
-				Result: 0,
-				Msg:    "",
-			},
-		}
+			Data: rt,
+		})
 
-		s.WS.WSSendReply(&reply)
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, string(reply))
 
 	default:
 		// 类型错误

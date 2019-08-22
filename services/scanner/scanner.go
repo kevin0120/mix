@@ -110,7 +110,7 @@ func (s *Scanner) Status() string {
 	return s.status.Load().(string)
 }
 
-func (s *Scanner) DeviceType() string {
+func (s *Scanner) DeviceType(sn string) string {
 	return "scanner"
 }
 
