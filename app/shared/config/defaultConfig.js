@@ -33,22 +33,22 @@ const defaultConfigs = {
       'userName': {
         password: 'password',
         role: 'admin',
-        uuid: 'demoUUID',
-        uid: 'uid',
+        uid: 'demoUID',
+        uuid: 'uuid',
         avatar: ''
       },
       'ming': {
         password: '123',
         role: 'admin',
-        uuid: 'XiaoMing',
-        uid: 'uid',
+        uid: 'XiaoMing',
+        uuid: '87d1c74e9000',
         avatar: ''
       },
       'hong': {
         password: '123',
         role: 'admin',
-        uuid: 'XiaoHong',
-        uid: 'uid',
+        uid: 'XiaoHong',
+        uuid: '677e0f4f9000',
         avatar: ''
       },
     },
@@ -107,7 +107,7 @@ const defaultConfigs = {
       odooUrl: {
         displayOrder: 1,
         value:
-          'http://127.0.0.1:8069/api/v1',
+          'http://192.168.127.118:8069/api/v1',
         displayTitle:
           'Configuration.connections.Odoo'
       }
@@ -257,7 +257,7 @@ const defaultConfigs = {
 
     },
     connections: {
-      rush: 'http://192.168.127.108:8082',//4.188//4.219//192.168.4.188//10.1.1.65//192.168.4.247//0.2
+      rush: 'http://192.168.127.108:8082',// 4.188//4.219//192.168.4.188//10.1.1.65//192.168.4.247//0.2
       // rush: 'http://0da41704.ngrok.io:8082',//4.188//4.219//192.168.4.188//10.1.1.65//192.168.4.247//0.2
       rfid: 'tcp://127.0.0.1:2112',
       aiis: 'http://127.0.0.1:9092'

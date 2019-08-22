@@ -141,7 +141,7 @@ export class HttpClient {
     if (isNil(this.instance)) {
       this.instance = axios.create({
         timeout: 3000,
-        headers: { 'Content-Type': 'application/json' }
+        // headers: { 'Content-Type': 'application/json' }
       });
       axiosRetry(this.instance, {
         retries: 2,

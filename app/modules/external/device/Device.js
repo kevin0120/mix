@@ -13,7 +13,7 @@ export type tDeviceSN = string;
 
 export default class Device extends CommonExternalEntity {
 
-  #dispatcher: null | (?tInput) => AnyAction = null;
+  _dispatcher: null | (?tInput) => AnyAction = null;
 
   #validator: null | (data: tInputData) => boolean = defaultValidatorFunc;
 
@@ -88,12 +88,12 @@ export default class Device extends CommonExternalEntity {
 
   // eslint-disable-next-line flowtype/no-weak-types
   set dispatcher(dispatcher: null | (?tInput) => AnyAction) {
-    this.#dispatcher = dispatcher;
+    this._dispatcher = dispatcher;
   }
 
   // eslint-disable-next-line flowtype/no-weak-types
   get dispatcher(): ?(?tInput) => AnyAction {
-    return this.#dispatcher;
+    return this._dispatcher;
   }
 
   RemoveValidator(): boolean {
@@ -102,7 +102,7 @@ export default class Device extends CommonExternalEntity {
   }
 
   RemoveDispatcher(): boolean {
-    this.#dispatcher = null;
+    this._dispatcher = null;
     return true;
   }
 

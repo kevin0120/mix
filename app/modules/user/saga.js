@@ -12,7 +12,7 @@ import { loginSuccess, logoutSuccess, USER } from './action';
 
 
 import { setNewNotification } from '../notification/action';
-import type { tUser, tUserName } from './model';
+import type { tUser } from './model';
 import { CommonLog } from '../../common/utils';
 
 const lodash = require('lodash');
@@ -35,38 +35,65 @@ type tAuthLogout = {
   +uuid: string | null
 };
 
-function* authorize({ name, password }) {
+function* authorize(action) {
   try {
-    const state = yield select();
-    const { setting, users, systemSettings } = state;
-    const { authEnable } = systemSettings;
-    if (authEnable && name === '') {
-      // 强制需要认证
+    const { name, password, uuid } = action;
+    if(uuid){
+      const state = yield select();
+      const { setting } = state;
+      const response = yield call(
+        getUserInfo,
+        setting.page.odooConnection.odooUrl.value,
+        uuid
+      );
+      const statusCode = response.status;
+      if (statusCode === 200) {
+        const { id, name: n, uuid, image_small: avatar }: tAuthRespData = response.data;
+        const userInfo: tUser = {
+          uid: id,
+          name:n,
+          uuid,
+          avatar,
+          role: 'admin'
+        };
+        yield put(loginSuccess(userInfo));
+        yield put(push('/app'));
+      }
       return;
     }
-    const u = name !== '' ? name : setting.base.userInfo.uuid;
-    const isExisted =
-      lodash.some(users, { uuid: u }) || lodash.some(users, { name: u }); // 检测是否已经登录
-    if (isExisted) return;
 
-    const response = yield call(
-      getUserInfo,
-      setting.page.odooConnection.odooUrl.value,
-      u,
-      password
-    );
-    const statusCode = response.status;
-    if (statusCode === 200) {
-      const { id, name: n, uuid, image_small: avatar }: tAuthRespData = response.data;
-      const userInfo: tUser = {
-        uid: id,
-        n,
-        uuid,
-        avatar,
-        role: 'admin'
-      };
-      yield put(loginSuccess(userInfo));
-      yield put(push('/app'));
+    if(name && password){
+      const state = yield select();
+      const { setting, users, systemSettings } = state;
+      const { authEnable } = systemSettings;
+      if (authEnable && name === '') {
+        // 强制需要认证
+        return;
+      }
+      const u = name !== '' ? name : setting.base.userInfo.uuid;
+      const isExisted =
+        lodash.some(users, { uuid: u }) || lodash.some(users, { name: u }); // 检测是否已经登录
+      if (isExisted) return;
+
+      const response = yield call(
+        getUserInfo,
+        setting.page.odooConnection.odooUrl.value,
+        u,
+        password
+      );
+      const statusCode = response.status;
+      if (statusCode === 200) {
+        const { id, name: n, uuid, image_small: avatar }: tAuthRespData = response.data;
+        const userInfo: tUser = {
+          uid: id,
+          n,
+          uuid,
+          avatar,
+          role: 'admin'
+        };
+        yield put(loginSuccess(userInfo));
+        yield put(push('/app'));
+      }
     }
   } catch (e) {
     yield put(setNewNotification('Error', e));
