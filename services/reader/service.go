@@ -162,6 +162,13 @@ func (s *Service) search() {
 
 				for {
 					var cmd = []byte{0xff, 0xca, 0x00, 0x00, 0x00} // SELECT uid
+
+					_, err := card.Status()
+					if err != nil {
+						_ = card.Disconnect(scard.ResetCard)
+						break
+					}
+
 					rsp, err := card.Transmit(cmd)
 					if err != nil {
 						// card lost
@@ -175,6 +182,8 @@ func (s *Service) search() {
 
 					// ws notify
 					s.notifyUID(uid)
+
+					_ = card.Disconnect(scard.ResetCard)
 
 					time.Sleep(SEARCH_ITV)
 				}

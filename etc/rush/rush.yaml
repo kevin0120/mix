@@ -1,7 +1,7 @@
 hostname: localhost
 data_dir: /home/gubin/.rush
 serial_no: 1qaz2wsx
-doc_path: C:\mygo\src\github.com\masami10\rush\etc\rush\api.json
+doc_path: ./etc/rush/api.json
 logging:
 #  file: ./logs/%Y%m%d.log
   file: STDOUT
@@ -144,12 +144,12 @@ tightening_device:
 #      tools:
 #        - sn: 12B62230
 
-    - model: MODEL_DESOUTTER_CVI3
-      protocol: OpenProtocol
-      endpoint: tcp://192.168.127.109:4545
-      sn: 0002
-      tools:
-        - sn: 1234
+#    - model: MODEL_DESOUTTER_CVI3
+#      protocol: OpenProtocol
+#      endpoint: tcp://192.168.127.109:4545
+#      sn: 0002
+#      tools:
+#        - sn: 1234
 #
 #    - model: MODEL_DESOUTTER_CVI3
 #      protocol: Audi/VW
