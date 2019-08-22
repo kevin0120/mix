@@ -24,6 +24,14 @@ export function loginRequest(name: tUserName, password: string = '', method: str
   };
 }
 
+export function loginRequestUuid(uuid, method = 'local'){
+  return{
+    type: USER.LOGIN.REQUEST,
+    uuid,
+    method
+  }
+}
+
 export function loginSuccess(data: tUser): tCommonActionType & tUser {
   return {
     type: USER.LOGIN.SUCCESS,

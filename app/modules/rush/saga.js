@@ -27,33 +27,36 @@ export function* watchRushEvent(): Saga<void> {
 
 function* initRush() {
   try {
-    const state = yield select();
+    do{
+      setWSClient(null);
+      task = null;
+      const state = yield select();
 
-    const { connections } = state.setting.system;
+      const { connections } = state.setting.system;
 
-    if (connections.rush === '') {
-      return;
-    }
+      if (connections.rush === '') {
+        return;
+      }
 
-    const conn = connections.rush.split('://')[1];
-    const wsURL = `ws://${conn}/rush/v1/ws`;
+      const conn = connections.rush.split('://')[1];
+      const wsURL = `ws://${conn}/rush/v1/ws`;
 
-    yield call(stopRush);
+      yield call(stopRush);
 
-    setWSClient(new WebSocket(wsURL,
-      {
-        reconnectInterval: 3000,
-        options:
-          {
-            maxPayload: 200 * 1024 * 1024
-          }
-      }));
+      setWSClient(new WebSocket(wsURL,
+        {
+          reconnectInterval: 3000,
+          options:
+            {
+              maxPayload: 200 * 1024 * 1024
+            }
+        }));
 
-    task = yield fork(
-      watchRushChannel,
-      state.setting.page.odooConnection.hmiSn.value
-    );
-
+      task = yield fork(
+        watchRushChannel,
+        state.setting.page.odooConnection.hmiSn.value
+      );
+    }while(!(getWSClient() && task))
   } catch (e) {
     CommonLog.lError(e, { at: 'initRush' });
   } finally {

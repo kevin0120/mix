@@ -126,7 +126,7 @@ class Event extends React.Component {
     // Request the data however you want.  Here, we'll use our mocked service we created earlier
     requestData().then(res => {
       // Now just get the rows of data to your React Table (and update anything else like total pages or loading)
-      CommonLog.Debug(res);
+      CommonLog.Info(res);
       this.setState({
         loading: false,
         data: res.info.map((item, key) => ({

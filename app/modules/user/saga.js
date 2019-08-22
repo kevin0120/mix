@@ -35,7 +35,7 @@ type tAuthLogout = {
   +uuid: string | null
 };
 
-function* authorize(name: tUserName, password: string) {
+function* authorize({ name, password }) {
   try {
     const state = yield select();
     const { setting, users, systemSettings } = state;
@@ -99,23 +99,50 @@ const loginMethodMap = {
   online: authorize
 };
 
-function* loginLocal(name, password) {
+function* loginLocal(action) {
   try {
-    const state = yield select();
-    const { localUsers } = state.setting.authorization;
-    const success = !!localUsers[name] && localUsers[name].password === password;
-    if (success) {
-      const userInfo: tUser = {
-        uid: localUsers[name].uid,
-        name,
-        uuid: localUsers[name].uuid,
-        avatar: localUsers[name].avatar,
-        role: localUsers[name].role
-      };
-      yield put(loginSuccess(userInfo));
-      yield put(push('/app'));
-
+    const { name, password, uuid } = action;
+    if (name && password) {
+      const state = yield select();
+      const { localUsers } = state.setting.authorization;
+      const success = !!localUsers[name] && localUsers[name].password === password;
+      if (success) {
+        const userInfo: tUser = {
+          uid: localUsers[name].uid,
+          name,
+          uuid: localUsers[name].uuid,
+          avatar: localUsers[name].avatar,
+          role: localUsers[name].role
+        };
+        yield put(loginSuccess(userInfo));
+        yield put(push('/app'));
+      }
+      return;
     }
+    if (uuid) {
+      const state = yield select();
+      const { localUsers } = state.setting.authorization;
+      let user = null;
+      let n = null;
+      Object.keys(localUsers).forEach((k) => {
+        if (localUsers[k].uuid === uuid) {
+          user = localUsers[k];
+          n = k;
+        }
+      });
+      if (user) {
+        const userInfo: tUser = {
+          uid: user.uid,
+          name: n,
+          uuid: user.uuid,
+          avatar: user.avatar,
+          role: user.role
+        };
+        yield put(loginSuccess(userInfo));
+        yield put(push('/app'));
+      }
+    }
+
 
   } catch (e) {
     CommonLog.lError(e);
@@ -126,8 +153,8 @@ function* loginLocal(name, password) {
 export function* loginFlow(): Saga<void> {
   try {
     while (true) {
-      const { name, password, method }: tAuthInfo = yield take(USER.LOGIN.REQUEST);
-      yield fork(loginMethodMap[method], name, password);
+      const action: tAuthInfo = yield take(USER.LOGIN.REQUEST);
+      yield fork(loginMethodMap[action.method], action);
     }
   } catch (e) {
     console.error(e);

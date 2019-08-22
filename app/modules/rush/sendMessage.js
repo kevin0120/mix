@@ -39,17 +39,18 @@ export default function* rushSendMessage(data: Object): Saga<void> {
         sn,
         ...data
       };
-      CommonLog.Info(`rush send (${msg.type})`, {
-        sn: msg.sn,
-        ...(msg.data || {}),
-        msg: JSON.stringify(msg)
-      });
+
       ws.sendJson(msg, (err) => {
         messageSNs[sn] = true;
         if (err && ws) {
           CommonLog.lError(err);
           delete messageSNs[sn];
         }
+      });
+      CommonLog.Info(`rush send (${msg.type})`, {
+        sn: msg.sn,
+        ...(msg.data || {}),
+        msg: JSON.stringify(msg)
       });
       return yield join(listenReplyTask);
     }

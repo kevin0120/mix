@@ -110,11 +110,12 @@ app.on('ready', async () => {
       url.format({
         pathname: path.join(__dirname, 'app.html'),
         protocol: 'file:',
-        hash: '/',
+        hash: '/app',
         slashes: false
       })
     );
   }
+  let init = true;
 
   // @TODO: Use 'ready-to-show' event
   //        https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
@@ -131,6 +132,10 @@ app.on('ready', async () => {
       mainWindow.show();
       mainWindow.focus();
     }
+    if (init) {
+      mainWindow.webContents.reload();
+      init = false;
+    }
   });
 
   mainWindow.on('closed', () => {
@@ -143,4 +148,7 @@ app.on('ready', async () => {
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();
+
+
 });
+
