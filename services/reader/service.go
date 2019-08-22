@@ -48,24 +48,11 @@ func (s *Service) Open() error {
 		return nil
 	}
 
-	go s.initReader()
-	return nil
-}
-
-func (s *Service) initReader() {
-	for {
-		var err error
-		s.ctx, err = scard.EstablishContext()
-		if err != nil {
-			s.diag.Error("init reader failed", err)
-			continue
-			time.Sleep(1 * time.Second)
-		}
-		break
-	}
-
 	go s.search()
 
+	s.DeviceService.AddDevice("reader", s)
+
+	return nil
 }
 
 func (s *Service) Close() error {
@@ -175,13 +162,6 @@ func (s *Service) search() {
 
 				for {
 					var cmd = []byte{0xff, 0xca, 0x00, 0x00, 0x00} // SELECT uid
-
-					_, err := card.Status()
-					if err != nil {
-						_ = card.Disconnect(scard.ResetCard)
-						break
-					}
-
 					rsp, err := card.Transmit(cmd)
 					if err != nil {
 						// card lost
@@ -195,8 +175,6 @@ func (s *Service) search() {
 
 					// ws notify
 					s.notifyUID(uid)
-
-					_ = card.Disconnect(scard.ResetCard)
 
 					time.Sleep(SEARCH_ITV)
 				}
