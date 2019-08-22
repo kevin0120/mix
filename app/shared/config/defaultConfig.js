@@ -115,7 +115,7 @@ const defaultConfigs = {
       hmiSn: {
         displayOrder: 2,
         value:
-          '1560c527ac7f4f9f90e4900b50717123',
+          '1560c527ac7f4f9f90e4900b50717456',
         displayTitle:
           'Configuration.connections.HMI'
       }

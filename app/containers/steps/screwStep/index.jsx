@@ -27,16 +27,17 @@ const mapDispatch = {
   redoPoint: screwStepAction.redoPoint
 };
 
-function ScrewStep({ status, image, points, activeIndex, result, redoPoint }: tStepProps) {
+function ScrewStep({ isCurrent, status, image, points, activeIndex, result, redoPoint }: tStepProps) {
   const classes = makeStyles(styles)();
 
   return <div className={classes.layout}>
     <ScrewImage
       image={image}
       points={points}
-      activeIndex={activeIndex}
+      activeIndex={isCurrent ? activeIndex : -1}
       focus={status === STEP_STATUS.DOING ? 2 : 0}
       scale={1}
+      twinkle={isCurrent}
       // onClick={() => result({ data: [{ result: 'ok' }] })}
       onPointClick={(point) => {
         // console.log('on point click', point);
@@ -52,7 +53,8 @@ function ScrewStep({ status, image, points, activeIndex, result, redoPoint }: tS
         style={{ width: '200px', height: '200px' }}
         image={image}
         points={points}
-        activeIndex={activeIndex}
+        twinkle={isCurrent}
+        activeIndex={isCurrent ? activeIndex : -1}
         focus={0}
         pointScale={0.5}
       />
