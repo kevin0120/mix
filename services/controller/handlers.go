@@ -7,8 +7,6 @@ import (
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
-	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
@@ -29,10 +27,10 @@ type SavePackage struct {
 	controllerResult *ControllerResult
 	dbWorkorder      *storage.Workorders
 	dbResult         *storage.Results
-	consume          *Consume
-	count            int
-	batch            string
-	curveFile        string
+	//consume          *Consume
+	count     int
+	batch     string
+	curveFile string
 }
 
 type Handlers struct {
@@ -59,8 +57,7 @@ func (h *Handlers) Release() {
 	h.wg.Wait()
 }
 
-func (h *Handlers) Handle(result interface{}, curve interface{}) {
-	controllerResult := result.(*ControllerResult)
+func (h *Handlers) Handle(result ControllerResult, curve minio.ControllerCurve) {
 
 	// 取得工具信息
 	//gun, err := h.controllerService.DB.GetGun(controllerResult.GunSN)
@@ -70,54 +67,56 @@ func (h *Handlers) Handle(result interface{}, curve interface{}) {
 	//}
 
 	// 取得工单
-	dbWorkorder, err := h.controllerService.DB.GetWorkorder(controllerResult.Workorder_ID, true)
-	if err != nil {
-		h.controllerService.diag.Error("get workorder failed", err)
-		return
-	}
+	//dbWorkorder, err := h.controllerService.DB.GetWorkorder(controllerResult.Workorder_ID, true)
+	//if err != nil {
+	//	h.controllerService.diag.Error("get workorder failed", err)
+	//	return
+	//}
 
-	consumes := []Consume{}
-	json.Unmarshal([]byte(dbWorkorder.Consumes), &consumes)
+	// 取得工步
+	//dbStep, err := h.controllerService.DB.GetStep(controllerResult.StepID)
+	//if err != nil {
+	//	h.controllerService.diag.Error("get step failed", err)
+	//	return
+	//}
 
-	targetConsume := consumes[0]
-	maxGroupSeq := 0
-	for _, v := range consumes {
-		if v.GroupSeq == controllerResult.Seq {
-			targetConsume = v
-		}
-
-		if v.GroupSeq >= maxGroupSeq {
-			maxGroupSeq = v.GroupSeq
-		}
-	}
+	//consumes := []Consume{}
+	//json.Unmarshal([]byte(dbWorkorder.Consumes), &consumes)
+	//
+	//targetConsume := consumes[0]
+	//maxGroupSeq := 0
+	//for _, v := range consumes {
+	//	if v.GroupSeq == controllerResult.Seq {
+	//		targetConsume = v
+	//	}
+	//
+	//	if v.GroupSeq >= maxGroupSeq {
+	//		maxGroupSeq = v.GroupSeq
+	//	}
+	//}
 
 	// 处理曲线
-	curveFileName := ""
-	if curve != nil {
-		controllerCurve := curve.(*minio.ControllerCurve)
-		curveFileName = fmt.Sprintf("%s_%s_%d_%d_%d.json",
-			dbWorkorder.MO_Model, targetConsume.NutNo, dbWorkorder.WorkorderID, controllerResult.Seq, controllerResult.Count)
-
-		controllerResult.CurFile = aiis.CURObject{
-			File: curveFileName,
-			OP:   controllerResult.Count,
-		}
-
-		controllerCurve.CurveFile = curveFileName
-		//controllerCurve.ResultID = dbResult.Id
-		controllerCurve.Count = controllerResult.Count
-		controllerCurve.UpdateTime = controllerResult.Dat
-
-		h.handleCurve(controllerCurve)
+	curveFile := ""
+	result.CurFile = aiis.CURObject{
+		File: curve.CurveFile,
+		OP:   curve.Count,
 	}
 
+	curveFile = curve.CurveFile
+
+	//controllerCurve.ResultID = dbResult.Id
+	curve.Count = result.Count
+	curve.UpdateTime = result.Dat
+
+	h.handleCurve(&curve)
+
 	pkg := SavePackage{
-		controllerResult: controllerResult,
-		dbWorkorder:      &dbWorkorder,
-		consume:          &targetConsume,
-		count:            controllerResult.Count,
-		batch:            fmt.Sprintf("%d/%d", targetConsume.GroupSeq, maxGroupSeq),
-		curveFile:        curveFileName,
+		controllerResult: &result,
+		//dbWorkorder:      &dbWorkorder,
+		//consume:          &targetConsume,
+		count: result.Count,
+		//batch:            fmt.Sprintf("%d/%d", targetConsume.GroupSeq, maxGroupSeq),
+		curveFile: curveFile,
 	}
 
 	dbResult := h.doSaveResult(&pkg)
@@ -165,14 +164,23 @@ func (h *Handlers) saveResult(data *SavePackage) {
 			MI:       data.controllerResult.ResultValue.Mi,
 			WI:       data.controllerResult.ResultValue.Wi,
 			TI:       data.controllerResult.ResultValue.Ti,
-			GroupSeq: data.consume.GroupSeq,
-			Batch:    data.batch,
+			GroupSeq: data.controllerResult.GroupSeq,
+			Seq:      data.controllerResult.Seq,
+			Batch:    data.controllerResult.Batch,
+			ToolSN:   data.controllerResult.GunSN,
 		}
 
 		wsResults := []wsnotify.WSResult{}
 		wsResults = append(wsResults, wsResult)
-		ws_str, _ := json.Marshal(wsResults)
-		h.controllerService.WS.WSSendResult(data.dbWorkorder.HMISN, string(ws_str))
+
+		msg := wsnotify.WSMsg{
+			Type: WS_TIGHTENING_RESULT,
+			Data: wsResults,
+		}
+
+		str, _ := json.Marshal(msg)
+		h.controllerService.WS.WSSend(wsnotify.WS_EVENT_RESULT, string(str))
+
 	}
 
 }
@@ -209,38 +217,39 @@ func (h *Handlers) doSaveResult(data *SavePackage) storage.Results {
 	dbResult.ResultValue = string(s_value)
 	dbResult.PSetDefine = string(s_pset)
 	dbResult.TighteningID = data.controllerResult.TighteningID
-	dbResult.Batch = data.batch
+	dbResult.Batch = data.controllerResult.Batch
 	dbResult.GunSN = data.controllerResult.GunSN
 	dbResult.ExInfo = data.curveFile
 
-	dbResult.PSet, _ = strconv.Atoi(data.consume.PSet)
-	dbResult.ToleranceMax = data.consume.ToleranceMax
-	dbResult.ToleranceMin = data.consume.ToleranceMin
-	dbResult.ToleranceMaxDegree = data.consume.ToleranceMaxDegree
-	dbResult.ToleranceMinDegree = data.consume.ToleranceMinDegree
-	dbResult.NutNo = data.consume.NutNo
+	dbResult.PSet = data.controllerResult.PSet
+	dbResult.ToleranceMax = data.controllerResult.PSetDefine.Mp
+	dbResult.ToleranceMin = data.controllerResult.PSetDefine.Mm
+	dbResult.ToleranceMaxDegree = data.controllerResult.PSetDefine.Wp
+	dbResult.ToleranceMinDegree = data.controllerResult.PSetDefine.Wm
+	//dbResult.NutNo = data.consume.NutNo
 
 	dbResult.HasUpload = false
 	dbResult.Count = data.count
 	dbResult.UserID = 1
 
-	dbResult.OffsetX = data.consume.X
-	dbResult.OffsetY = data.consume.Y
+	//dbResult.OffsetX = data.consume.X
+	//dbResult.OffsetY = data.consume.Y
 
-	dbResult.GroupSeq = data.consume.GroupSeq
-	dbResult.Seq = data.consume.Seq
-	dbResult.MaxRedoTimes = data.consume.Max_redo_times
-	dbResult.WorkorderID = data.dbWorkorder.Id
+	//dbResult.GroupSeq = data.consume.GroupSeq
+	//dbResult.Seq = data.consume.Seq
+	//dbResult.MaxRedoTimes = data.consume.Max_redo_times
+	dbResult.WorkorderID = data.controllerResult.Workorder_ID
+	//dbResult.StepID = data.
 
-	if data.count >= int(data.consume.Max_redo_times) || dbResult.Result == storage.RESULT_OK {
+	if data.count >= int(data.controllerResult.MaxRedoTime) || dbResult.Result == storage.RESULT_OK {
 		dbResult.Stage = storage.RESULT_STAGE_FINAL
 
-		kvs := strings.Split(dbResult.Batch, "/")
-		if kvs[0] == kvs[1] {
-			h.controllerService.diag.Debug("工单已完成")
-			data.dbWorkorder.Status = "done"
-			h.controllerService.DB.UpdateWorkorder(data.dbWorkorder)
-		}
+		//kvs := strings.Split(dbResult.Batch, "/")
+		//if kvs[0] == kvs[1] {
+		//	h.controllerService.diag.Debug("工单已完成")
+		//	data.dbWorkorder.Status = "done"
+		//	h.controllerService.DB.UpdateWorkorder(data.dbWorkorder)
+		//}
 	} else {
 
 		dbResult.Stage = storage.RESULT_STAGE_INIT

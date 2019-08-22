@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"encoding/json"
 	"time"
 )
 
@@ -43,19 +42,22 @@ type Workorders struct {
 
 	Name string `xorm:"varchar(64) 'name'" json:"name"`
 	Desc string `xorm:"varchar(64) 'desc'" json:"desc"`
+
+	Payload        string      `xorm:"text" json:"-"`
+	MarshalPayload interface{} `xorm:"-" json:"payload"`
 }
 
 type Steps struct {
-	Id             int64           `xorm:"pk autoincr notnull 'id'" json:"id"`
-	WorkorderID    int64           `xorm:"bigint 'workorder_id'" json:"-"`
-	Name           string          `xorm:"varchar(64) 'name'" json:"name"`
-	Desc           string          `xorm:"varchar(64) 'desc'" json:"desc"`
-	Type           string          `xorm:"varchar(64) 'type'" json:"type"`
-	Skippable      bool            `xorm:"varchar(64) 'skippable'" json:"skippable"`
-	Undoable       bool            `xorm:"varchar(64) 'undoable'" json:"undoable"`
-	Status         string          `xorm:"varchar(32) 'status'" json:"status"`
-	Payload        json.RawMessage `sql:"type:json" json:"-"`
-	MarshalPayload interface{}     `xorm:"-" json:"payload"`
+	Id             int64       `xorm:"pk autoincr notnull 'id'" json:"id"`
+	WorkorderID    int64       `xorm:"bigint 'workorder_id'" json:"-"`
+	Name           string      `xorm:"varchar(64) 'name'" json:"name"`
+	Desc           string      `xorm:"varchar(64) 'desc'" json:"desc"`
+	Type           string      `xorm:"varchar(64) 'type'" json:"type"`
+	Skippable      bool        `xorm:"varchar(64) 'skippable'" json:"skippable"`
+	Undoable       bool        `xorm:"varchar(64) 'undoable'" json:"undoable"`
+	Status         string      `xorm:"varchar(32) 'status'" json:"status"`
+	Payload        string      `xorm:"text" json:"-"`
+	MarshalPayload interface{} `xorm:"-" json:"payload"`
 }
 
 type Results struct {
@@ -121,6 +123,8 @@ type Guns struct {
 	WorkorderID int64  `xorm:"bigint 'workorder_id'"`
 	Seq         int    `xorm:"bigint 'sequence'"`
 	Count       int    `xorm:"int 'count'"`
+	Mode        string `xorm:"varchar(128) 'mode'"`
+	Trace       string `xorm:"text 'trace'"`
 }
 
 type RoutingOperations struct {

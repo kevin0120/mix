@@ -85,6 +85,20 @@ type JobPoint struct {
 	ToleranceMaxDegree float64 `json:"tolerance_max_degree"`
 }
 
+type Point struct {
+	Seq          int     `json:"sequence"`
+	PSet         int     `json:"pset"`
+	X            float64 `json:"x"`
+	Y            float64 `json:"y"`
+	MaxRedoTimes int     `json:"maxRetryTimes"`
+	GroupSeq     int     `json:"group_sequence"`
+	ToolSN       string  `json:"toolSN"`
+}
+
+type ScrewPayload struct {
+	Points []Point
+}
+
 type ControllerMode struct {
 	Controller_SN string `json:"controller_sn"`
 	Mode          string `json:"mode"`

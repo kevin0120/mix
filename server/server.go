@@ -120,16 +120,17 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.appendOdooService()
 
+	s.appendDeviceService()
+
 	if err := s.appendControllersService(); err != nil {
 		return nil, errors.Wrap(err, "Controllers service")
 	}
 
-	s.appendDeviceService()
-	s.appendTighteningDeviceService()
-
 	s.appendAudiVWService() //此服务必须在控制器服务后进行append
 
 	s.appendOpenProtocolService()
+
+	s.appendTighteningDeviceService()
 
 	s.appendHMIService()
 
@@ -240,6 +241,7 @@ func (s *Server) appendControllersService() error {
 	srv.WS = s.WSNotifyService
 	srv.Aiis = s.AiisService
 	srv.Minio = s.MinioService
+	srv.Device = s.DeviceService
 	s.ControllerService = srv
 	s.AppendService("controller", srv)
 
@@ -272,6 +274,7 @@ func (s *Server) appendTighteningDeviceService() error {
 	}
 
 	srv.WS = s.WSNotifyService
+	srv.DB = s.StorageServie
 
 	s.TighteningDeviceService = srv
 	s.AppendService("tightening_device", srv)
@@ -384,6 +387,7 @@ func (s *Server) AppendReaderService() error {
 
 	srv := reader.NewService(c, d)
 	srv.WS = s.WSNotifyService
+	srv.DeviceService = s.DeviceService
 
 	s.ReaderService = srv
 	s.AppendService("reader", srv)

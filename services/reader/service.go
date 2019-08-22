@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ebfe/scard"
+	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/wsnotify"
 	"sync/atomic"
 	"time"
@@ -21,9 +22,10 @@ type Diagnostic interface {
 type Service struct {
 	configValue atomic.Value
 
-	diag Diagnostic
-	ctx  *scard.Context
-	WS   *wsnotify.Service
+	diag          Diagnostic
+	ctx           *scard.Context
+	WS            *wsnotify.Service
+	DeviceService *device.Service
 }
 
 func NewService(c Config, d Diagnostic) *Service {
@@ -59,11 +61,11 @@ func (s *Service) initReader() {
 			continue
 			time.Sleep(1 * time.Second)
 		}
-
 		break
 	}
 
 	go s.search()
+
 }
 
 func (s *Service) Close() error {
@@ -98,6 +100,26 @@ func (s *Service) waitUntilCardPresent(ctx *scard.Context, readers []string) (in
 	}
 }
 
+func (s *Service) DeviceType(sn string) string {
+	return "reader"
+}
+
+func (s *Service) Children() []string {
+	return []string{}
+}
+
+func (s *Service) Status() string {
+	return "online"
+}
+
+func (s *Service) Config() interface{} {
+	return nil
+}
+
+func (s *Service) Data() interface{} {
+	return nil
+}
+
 func (s *Service) notifyUID(uid string) {
 	barcode, _ := json.Marshal(wsnotify.WSMsg{
 		Type: WS_READER_UID,
@@ -110,6 +132,17 @@ func (s *Service) notifyUID(uid string) {
 }
 
 func (s *Service) search() {
+	var err error
+
+	for {
+		s.ctx, err = scard.EstablishContext()
+		if err == nil {
+			break
+		} else {
+			time.Sleep(SEARCH_ITV)
+		}
+	}
+
 	for {
 		// List available readers
 		ctx, err := scard.EstablishContext()

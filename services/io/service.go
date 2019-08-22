@@ -49,7 +49,7 @@ func (s *Service) Open() error {
 	cfgs := s.config().IOS
 	for _, v := range cfgs {
 		s.ios[v.SN] = &IOModule{
-			cfg: &v,
+			cfg: v,
 		}
 
 		s.DeviceService.AddDevice(v.SN, s.ios[v.SN])

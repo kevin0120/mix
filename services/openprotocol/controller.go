@@ -1,6 +1,7 @@
 package openprotocol
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/kataras/iris/core/errors"
@@ -10,6 +11,7 @@ import (
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/socket_writer"
+	"github.com/masami10/rush/utils"
 	"net"
 	"strconv"
 	"strings"
@@ -57,11 +59,15 @@ type Controller struct {
 	diag              Diagnostic
 	MID_7410_CURVE    handlerPkg_curve
 	result_CURVE      *minio.ControllerCurve
+	result            *controller.ControllerResult
+	mtxResult         sync.Mutex
 	toolStatus        atomic.Value
 	model             string
 	tighteningDevice  *tightening_device.Service
 
 	tightening_device.TighteningDevice
+
+	receiveBuf chan []byte
 }
 
 func NewController(c Config, d Diagnostic) Controller {
@@ -77,6 +83,8 @@ func NewController(c Config, d Diagnostic) Controller {
 		handlerBuf:        make(chan handlerPkg, 1024),
 		protocol:          controller.OPENPROTOCOL,
 		result_CURVE:      nil,
+		mtxResult:         sync.Mutex{},
+		receiveBuf:        make(chan []byte, 65535),
 	}
 
 	cont.StatusValue.Store(controller.STATUS_OFFLINE)
@@ -163,7 +171,7 @@ func (c *Controller) Data_decoding(original []byte, Torque_Coefficient float64, 
 }
 
 func (c *Controller) HandleMsg(pkg *handlerPkg) error {
-	c.Srv.diag.Debug(fmt.Sprintf("%s%s\n", pkg.Header.Serialize(), pkg.Body))
+	c.Srv.diag.Debug(fmt.Sprintf("%s: %s%s\n", c.cfg.SN, pkg.Header.Serialize(), pkg.Body))
 
 	switch pkg.Header.MID {
 	case MID_7410_LAST_CURVE:
@@ -183,15 +191,20 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) error {
 			//fmt.Println(Torque, Angle)
 			//fmt.Println(c.MID_7410_CURVE.Body[71:])
 
-			c.result_CURVE.CurveContent = minio.ControllerCurveFile{}
-			c.result_CURVE.CurveContent.CUR_M = Torque
-			c.result_CURVE.CurveContent.CUR_W = Angle
+			curve := minio.ControllerCurve{
+				//CUR_T: []float64{},
+			}
+			curve.CurveContent.CUR_M = Torque
+			curve.CurveContent.CUR_W = Angle
 
 			//c.result_CURVE.CurveContent.Result=c.TightingID
 			//c.Srv.Parent.Handlers.HandleCurve(c.result_CURVE)
 
 			c.MID_7410_CURVE.Header = nil
 			c.MID_7410_CURVE.Body = nil
+
+			c.updateResult(nil, &curve)
+			c.handleResultandClear()
 
 		} else {
 			c.MID_7410_CURVE.Body = append(c.MID_7410_CURVE.Body, []byte(pkg.Body[71:len(pkg.Body)])...)
@@ -442,8 +455,26 @@ func (c *Controller) handleResult(result_data *ResultData, carve *minio.Controll
 	}
 
 	controllerResult := controller.ControllerResult{}
-	controllerResult.NeedPushHmi = false
+	controllerResult.NeedPushHmi = true
+
+	if c.Model() == tightening_device.MODEL_DESOUTTER_DELTA_WRENCH {
+		controllerResult.GunSN = c.cfg.SN
+	} else {
+		controllerResult.GunSN = result_data.ToolSerialNumber
+	}
+
+	gun, err := c.Srv.DB.GetGun(controllerResult.GunSN)
+	if err != nil {
+		c.Srv.diag.Error("get gun failed", err)
+		return err
+	}
+
+	psetTrace := tightening_device.PSetSet{}
+	_ = json.Unmarshal([]byte(gun.Trace), &psetTrace)
+
 	controllerResult.TighteningID = result_data.TightingID
+	controllerResult.Count = psetTrace.Count
+	controllerResult.Batch = fmt.Sprintf("%d/%d", psetTrace.Sequence, psetTrace.Total)
 
 	dat_kvs := strings.Split(result_data.TimeStamp, ":")
 	controllerResult.Dat = fmt.Sprintf("%s %s:%s:%s", dat_kvs[0], dat_kvs[1], dat_kvs[2], dat_kvs[3])
@@ -490,31 +521,58 @@ func (c *Controller) handleResult(result_data *ResultData, carve *minio.Controll
 
 	controllerResult.ExceptionReason = result_data.TighteningErrorStatus
 
-	targetID := result_data.VIN
-	switch c.Srv.config().DataIndex {
-	case 1:
-		targetID = result_data.ID2
-	case 2:
-		targetID = result_data.ID3
-	case 3:
-		targetID = result_data.ID4
-	}
+	//targetID := result_data.VIN
+	//switch c.Srv.config().DataIndex {
+	//case 1:
+	//	targetID = result_data.ID2
+	//case 2:
+	//	targetID = result_data.ID3
+	//case 3:
+	//	targetID = result_data.ID4
+	//}
 
-	controllerResult.Workorder_ID, _ = strconv.ParseInt(targetID, 10, 64)
+	controllerResult.Workorder_ID = psetTrace.WorkorderID
 	controllerResult.NeedPushAiis = true
 
-	controllerResult.GunSN = result_data.ToolSerialNumber
-	controllerResult.Seq, controllerResult.Count = c.calBatch(controllerResult.Workorder_ID)
+	//controllerResult.Seq, controllerResult.Count = c.calBatch(controllerResult.Workorder_ID)
 
-	if c.result_CURVE != nil {
-		c.result_CURVE.CurveContent.Result = controllerResult.Result
-		c.result_CURVE.CurveFile = result_data.ControllerName + result_data.ToolSerialNumber + result_data.TightingID
-	}
+	//c.result = &controllerResult
 
-	c.Srv.Parent.Handlers.Handle(&controllerResult, c.result_CURVE)
+	//c.Srv.Parent.Handlers.Handle(&controllerResult, c.result_CURVE)
+	c.updateResult(&controllerResult, nil)
+	c.handleResultandClear()
 
 	return nil
+}
 
+func (c *Controller) updateResult(result *controller.ControllerResult, curve *minio.ControllerCurve) {
+	defer c.mtxResult.Unlock()
+	c.mtxResult.Lock()
+
+	if result != nil {
+		c.result = result
+	}
+
+	if curve != nil {
+		c.result_CURVE = curve
+	}
+}
+
+func (c *Controller) handleResultandClear() {
+	defer c.mtxResult.Unlock()
+	c.mtxResult.Lock()
+
+	if c.result != nil && c.result_CURVE != nil {
+
+		if c.result_CURVE != nil {
+			c.result_CURVE.CurveContent.Result = c.result.Result
+			c.result_CURVE.CurveFile = fmt.Sprintf("%s-%s.json", c.cfg.SN, c.result.TighteningID)
+		}
+
+		c.Srv.Parent.Handlers.Handle(*c.result, *c.result_CURVE)
+		c.result = nil
+		c.result_CURVE = nil
+	}
 }
 
 // seq, count
@@ -532,6 +590,18 @@ func (c *Controller) calBatch(workorderID int64) (int, int) {
 }
 
 func (c *Controller) Start() {
+
+	_ = c.Srv.DB.UpdateGun(&storage.Guns{
+		Serial: c.cfg.SN,
+		Mode:   "pset",
+	})
+
+	for _, v := range c.cfg.Tools {
+		_ = c.Srv.DB.UpdateGun(&storage.Guns{
+			Serial: v.SerialNO,
+			Mode:   "pset",
+		})
+	}
 
 	c.w = socket_writer.NewSocketWriter(c.cfg.RemoteIP, c)
 
@@ -929,7 +999,7 @@ func (c *Controller) updateStatus(status string) {
 		msg, _ := json.Marshal(s)
 		c.Srv.WS.WSSendControllerStatus(string(msg))
 
-		c.Srv.diag.Debug(fmt.Sprintf("CVI3:%s %s\n", c.cfg.SN, status))
+		c.Srv.diag.Debug(fmt.Sprintf("%s:%s %s\n", c.Model(), c.cfg.SN, status))
 
 	}
 }
@@ -937,94 +1007,17 @@ func (c *Controller) updateStatus(status string) {
 func (c *Controller) Read(conn net.Conn) {
 	defer conn.Close()
 
-	lenHeader := LEN_HEADER
-	rest := 0
-	body := ""
-	header_rest := 0
-
-	var header_buffer string
-	var header OpenProtocolHeader
-
 	buffer := make([]byte, c.Srv.config().ReadBufferSize)
 
 	for {
 		n, err := conn.Read(buffer)
 		if err != nil {
+			c.Srv.diag.Error("read failed", err)
 			break
 		}
 
 		c.updateKeepAliveCount(0)
-
-		msg := string(buffer[0:n])
-
-		off := 0 //循环前偏移为0
-		for off < n {
-			if rest == 0 {
-				len_msg := n - off
-				if len_msg < lenHeader-header_rest {
-					//长度不够
-					if header_rest == 0 {
-						header_rest = lenHeader - len_msg
-					} else {
-						header_rest -= len_msg
-					}
-					header_buffer += msg[off : off+len_msg]
-					break
-				} else {
-					//完整
-					if header_rest == 0 {
-						header_buffer = msg[off : off+lenHeader]
-						off += lenHeader
-					} else {
-						//fmt.Printf("off:%d rest:%d msg:%s\n", off, off+header_rest, msg)
-						if off < (off + header_rest) {
-							header_buffer += msg[off : off+header_rest]
-							off += header_rest
-							header_rest = 0
-						}
-					}
-				}
-				//fmt.Printf("header rest:%d, offset:%d, n %d, header : %s\n", header_rest, off, n, header_buffer)
-				header.Deserialize(header_buffer)
-				header_buffer = ""
-				if n-off > header.LEN {
-					//粘包
-					body = msg[off : off+header.LEN]
-
-					//c.Parse(body)
-					pkg := handlerPkg{
-						Header: header,
-						Body:   body,
-					}
-					c.handlerBuf <- pkg
-					off += header.LEN + 1
-					rest = 0 //同样解析头
-
-				} else {
-					body = msg[off:n]
-					rest = header.LEN - (n - off)
-					break
-				}
-			} else {
-				if n-off > rest {
-					//粘包
-					body += string(buffer[off : off+rest]) //已经是完整的包
-					//p.Parse(body)
-					pkg := handlerPkg{
-						Header: header,
-						Body:   body,
-					}
-					c.handlerBuf <- pkg
-					off += rest + 1
-					rest = 0 //进入解析头
-				} else {
-					body += string(buffer[off:n])
-					rest -= n - off
-					break
-				}
-			}
-		}
-
+		c.receiveBuf <- buffer[0:n]
 	}
 }
 
@@ -1055,7 +1048,42 @@ func (c *Controller) Close() error {
 	return c.w.Close()
 }
 
+func (c *Controller) handlePackageOPPayload(src []byte, data []byte) error {
+	msg := append(src, data...)
+
+	c.diag.Debug(fmt.Sprintf("%s op target buf: %s", c.cfg.SN, string(msg)))
+
+	lenMsg := len(msg)
+
+	// 如果头的长度不够
+	if lenMsg < LEN_HEADER {
+		return errors.New("Head Is Error")
+	}
+
+	header := OpenProtocolHeader{}
+	header.Deserialize(string(msg[0:LEN_HEADER]))
+
+	// 如果body的长度匹配
+	if header.LEN == lenMsg-LEN_HEADER {
+		pkg := handlerPkg{
+			Header: header,
+			Body:   string(msg[LEN_HEADER : LEN_HEADER+header.LEN]),
+		}
+
+		c.handlerBuf <- pkg
+	} else {
+		return errors.New("body len err")
+	}
+
+	return nil
+}
+
 func (c *Controller) manage() {
+
+	lenBuf := 65535
+	handleBuf := make([]byte, lenBuf)
+	writeOffset := 0
+
 	nextWriteThreshold := time.Now()
 	for {
 		select {
@@ -1088,6 +1116,40 @@ func (c *Controller) manage() {
 		case stopDone := <-c.closing:
 			close(stopDone)
 			return //退出manage协程
+
+		case buf := <-c.receiveBuf:
+			// 处理接收缓冲
+			var readOffset = 0
+
+			for {
+				if readOffset >= len(buf) {
+					break
+				}
+				index := bytes.IndexByte(buf[readOffset:], OP_TERMINAL)
+				if index == -1 {
+					// 没有结束字符,放入缓冲等待后续处理
+					c.diag.Debug("Index Is Empty")
+					restBuf := buf[readOffset:]
+					if writeOffset+len(restBuf) > lenBuf {
+						c.diag.Error("full", errors.New("full"))
+						break
+					}
+
+					copy(handleBuf[writeOffset:writeOffset+len(restBuf)], restBuf)
+					writeOffset += len(restBuf)
+					break
+				} else {
+					// 找到结束字符，结合缓冲进行处理
+					err := c.handlePackageOPPayload(handleBuf[0:writeOffset], buf[readOffset:readOffset+index])
+					if err != nil {
+						//数据需要丢弃
+						c.diag.Error("msg", err)
+					}
+
+					writeOffset = 0
+					readOffset += index + 1
+				}
+			}
 		}
 	}
 }
@@ -1299,10 +1361,32 @@ func (c *Controller) PSetBatchSet(pset int, batch int) error {
 		return errors.New("status offline")
 	}
 
+	c.Response.Add(MID_0019_PSET_BATCH_SET, nil)
+	defer c.Response.remove(MID_0019_PSET_BATCH_SET)
+
 	s := fmt.Sprintf("%03d%02d", pset, batch)
 	ide := GeneratePackage(MID_0019_PSET_BATCH_SET, rev, s, DEFAULT_MSG_END)
 
 	c.Write([]byte(ide))
+
+	var reply interface{} = nil
+	for i := 0; i < MAX_REPLY_COUNT; i++ {
+		reply = c.Response.get(MID_0019_PSET_BATCH_SET)
+		if reply != nil {
+			break
+		}
+
+		time.Sleep(REPLY_TIMEOUT)
+	}
+
+	if reply == nil {
+		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	}
+
+	s_reply := reply.(string)
+	if s_reply != request_errors["00"] {
+		return errors.New(s_reply)
+	}
 
 	return nil
 }
@@ -1644,6 +1728,8 @@ func (c *Controller) SetPSet(r *tightening_device.PSetSet) tightening_device.Rep
 		Msg:    "",
 	}
 
+	_ = c.PSetBatchSet(r.PSet, 1)
+
 	err := c.pset(r.PSet)
 	if err != nil {
 		rt.Result = -1
@@ -1654,17 +1740,37 @@ func (c *Controller) SetPSet(r *tightening_device.PSetSet) tightening_device.Rep
 }
 
 func (c *Controller) Enable(r *tightening_device.ToolEnable) tightening_device.Reply {
-	return tightening_device.Reply{}
+	rt := tightening_device.Reply{
+		Result: 0,
+		Msg:    "",
+	}
+
+	err := c.ToolControl(r.Enable)
+	if err != nil {
+		rt.Result = -1
+		rt.Msg = err.Error()
+	}
+
+	return rt
 }
 
-func (c *Controller) DeviceType() string {
-	return "controller"
+func (c *Controller) DeviceType(sn string) string {
+	if c.Model() == tightening_device.MODEL_DESOUTTER_DELTA_WRENCH {
+		return "tool"
+	}
+
+	if utils.StringArrayContains(c.Children(), sn) {
+		return "tool"
+	} else {
+		return "controller"
+	}
 }
 
 func (c *Controller) Children() []string {
+
 	tools := []string{}
-	for k, _ := range c.Tools() {
-		tools = append(tools, k)
+	for _, v := range c.cfg.Tools {
+		tools = append(tools, v.SerialNO)
 	}
 
 	return tools

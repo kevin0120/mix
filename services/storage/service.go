@@ -455,6 +455,21 @@ func (s *Service) ListWorkorders(hmi_sn string, workcenterCode string, status st
 	return workorders, err
 }
 
+func (s *Service) GetStep(id int64) (Steps, error) {
+	var step Steps
+	rt, err := s.eng.Alias("s").Where(fmt.Sprintf("s.id = ?", id), id).Get(&step)
+
+	if err != nil {
+		return step, err
+	} else {
+		if !rt {
+			return step, errors.New("step does not exist")
+		} else {
+			return step, nil
+		}
+	}
+}
+
 func (s *Service) GetWorkorder(id int64, raw bool) (Workorders, error) {
 
 	var workorder Workorders
@@ -953,7 +968,7 @@ func (s *Service) Workorders(status string) ([]Workorders, error) {
 func (s *Service) Steps(workorderID int64) ([]Steps, error) {
 	var rt []Steps
 
-	q := s.eng.Alias("s").Where("s.workorder_id = ?", workorderID)
+	q := s.eng.Alias("s").Where("s.workorder_id = ?", workorderID).Asc("s.id")
 
 	err := q.Find(&rt)
 
@@ -970,13 +985,19 @@ func (s *Service) WorkorderStep(workorderID int64) (*WorkorderStep, error) {
 		return nil, err
 	}
 
+	var p interface{}
+	err = json.Unmarshal([]byte(workorder.Payload), &p)
+	if err == nil {
+		workorder.MarshalPayload = p
+	}
+
 	steps, err := s.Steps(workorderID)
 	if err != nil {
 		return nil, err
 	}
 
 	for k, v := range steps {
-		err := json.Unmarshal(v.Payload, &steps[k].MarshalPayload)
+		err := json.Unmarshal([]byte(v.Payload), &steps[k].MarshalPayload)
 		if err != nil {
 			s.diag.Error(err.Error(), err)
 		}

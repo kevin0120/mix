@@ -29,7 +29,7 @@ type IO interface {
 }
 
 type IOModule struct {
-	cfg    *ConfigIO
+	cfg    ConfigIO
 	client IO
 }
 
@@ -39,7 +39,7 @@ func (s *IOModule) Start(srv *Service) error {
 	switch vendor.Type() {
 	case IO_MODBUSTCP:
 		s.client = &ModbusTcp{
-			cfg:    *s.cfg,
+			cfg:    s.cfg,
 			notify: srv,
 			vendor: vendor,
 		}
@@ -63,7 +63,7 @@ func (s *IOModule) Write(index uint16, status uint16) error {
 	return s.client.Write(index, status)
 }
 
-func (s *IOModule) DeviceType() string {
+func (s *IOModule) DeviceType(sn string) string {
 	return "io"
 }
 

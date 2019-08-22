@@ -37,12 +37,14 @@ type JobSet struct {
 }
 
 type PSetSet struct {
-	ToolSN   string `json:"tool_sn"`
-	StepID   int    `json:"step_id"`
-	UserID   uint   `json:"user_id"`
-	PSet     int    `json:"pset"`
-	Sequence uint   `json:"sequence"`
-	Count    int    `json:"count"`
+	ToolSN      string `json:"tool_sn"`
+	StepID      int64  `json:"step_id"`
+	WorkorderID int64  `json:"workorder_id"`
+	UserID      int64  `json:"user_id"`
+	PSet        int    `json:"pset"`
+	Sequence    uint   `json:"sequence"`
+	Count       int    `json:"count"`
+	Total       int    `json:"total"`
 }
 
 type ToolEnable struct {

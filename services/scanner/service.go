@@ -109,7 +109,7 @@ func (s *Service) search() {
 				s.diag.Debug(fmt.Sprintf("Search Success: %s", label))
 				newScanner := NewScanner(label, s.diag, d)
 				s.addScanner(newScanner)
-				s.DeviceService.AddDevice(fmt.Sprintf("%d-%d", vid, pid), newScanner)
+				s.DeviceService.AddDevice(fmt.Sprintf("%d:%d", vid, pid), newScanner)
 			} else if err != nil {
 				s.diag.Error("Search Fail", err)
 			} else {
@@ -121,7 +121,9 @@ func (s *Service) search() {
 			d, err := serial.OpenPort(c)
 			if err == nil {
 				s.diag.Debug(fmt.Sprintf("Search Success: %s", label))
-				s.addScanner(NewScanner(label, s.diag, d))
+				newScanner := NewScanner(label, s.diag, d)
+				s.addScanner(newScanner)
+				s.DeviceService.AddDevice(fmt.Sprintf("%s", label), newScanner)
 			} else {
 				s.diag.Error("Search Fail", err)
 			}
