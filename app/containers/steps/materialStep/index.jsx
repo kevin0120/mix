@@ -17,12 +17,12 @@ function materialStep(props: Props & tStepProps) {
   useEffect(() => {
     bindAction(
       isCurrent ? <Button onClick={() => ready()} color="primary">
-        ready
+        完成
       </Button> : null
     );
     bindDescription(
         <React.Fragment>
-          <Typography variant="h5">{description}</Typography>
+          <Typography variant="h5" style={{paddingBottom:'10px'}}>{description}</Typography>
           {(payload?.items || []).map(i =>
             <Typography key={i.name} variant="body1">{i.name}</Typography>
           )}

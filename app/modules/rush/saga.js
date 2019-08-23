@@ -145,9 +145,9 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
       });
       ws.on('websocket-status', (msg) => {
         CommonLog.Info(msg);
-        if(/Disconnected/.test(msg)){
-          emit({ type: 'healthz', payload: false });
-        }
+        // if(/Disconnected/.test(msg)){
+        //   emit({ type: 'healthz', payload: false });
+        // }
       })
     } else {
       emit({ type: 'healthz', payload: false });

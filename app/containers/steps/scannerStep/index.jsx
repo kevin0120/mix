@@ -50,7 +50,7 @@ function ScannerStep({
   useEffect(() => {
     bindAction(
       <Button onClick={() => submit()} disabled={!isCurrent} color="primary">
-        submit
+        完成
       </Button>
     );
     return () => bindAction(null);

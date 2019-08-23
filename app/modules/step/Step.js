@@ -90,6 +90,10 @@ export default class Step {
     return this._desc;
   }
 
+  get description() {
+    return this._desc;
+  }
+
   get type() {
     return this._type;
   }

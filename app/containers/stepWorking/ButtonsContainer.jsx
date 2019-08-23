@@ -172,7 +172,7 @@ const ButtonsContainer = ({
                         color="warning"
                         className={classes.bigButton}
                       >
-                        pending
+                        阻塞
                       </Button>) || null
                     }
                     {
@@ -185,7 +185,7 @@ const ButtonsContainer = ({
                           setDialogOpen(false);
                         }}
                       >
-                        cancel
+                        取消订单
                       </Button> : null
                     }
                   </DialogContent>

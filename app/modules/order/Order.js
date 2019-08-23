@@ -9,6 +9,18 @@ import { orderUpdateApi } from '../../api/order';
 import dialogActions from '../dialog/action';
 import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
+import STEP_STATUS from '../step/model';
+
+const stepStatus = (status) => {
+  switch (status) {
+    case STEP_STATUS.FINISHED:
+      return '完成';
+    case STEP_STATUS.FAIL:
+      return '失败';
+    default:
+      return '未完成';
+  }
+};
 
 export default class Order extends Step {
   _apis = {
@@ -33,7 +45,7 @@ export default class Order extends Step {
     try {
       this._workingIndex += 1;
       if (this._workingIndex >= this._steps.length) {
-        yield put(orderActions.stepStatus(this,ORDER_STATUS.DONE));
+        yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
       }
     } catch (e) {
       CommonLog.lError(e);
@@ -56,10 +68,10 @@ export default class Order extends Step {
       try {
         this._workingIndex = this._workingIndex >= this._steps.length ? 0 : this._workingIndex;
         while (true) {
-          CommonLog.Info('Doing Order...',this._workingIndex);
+          CommonLog.Info('Doing Order...', this._workingIndex);
           const step = this.workingStep;
           if (step) {
-            yield call([this,this.runSubStep], step, {
+            yield call([this, this.runSubStep], step, {
               onNext: this.onNext.bind(this),
               onPrevious: this.onPrevious.bind(this)
             });
@@ -69,7 +81,7 @@ export default class Order extends Step {
         }
       } catch (e) {
         CommonLog.lError(e, { at: 'ORDER_STATUS.WIP' });
-      }finally{
+      } finally {
         CommonLog.Info('order doing finished');
       }
     },
@@ -78,7 +90,7 @@ export default class Order extends Step {
         if (this.workingStep) {
           this.workingStep.timerStop();
         }
-        const data = this._steps.map(s => [s.name, durationString(s.timeCost())]);
+        const data = this._steps.map(s => [s.name, durationString(s.timeCost()),stepStatus(s.status) ]);
         yield put(
           dialogActions.dialogShow({
             buttons: [
@@ -92,7 +104,7 @@ export default class Order extends Step {
             content: (
               <Table
                 tableHeaderColor="info"
-                tableHead={['工步名称', '耗时']}
+                tableHead={['工步名称', '耗时', '结果']}
                 tableData={data}
                 colorsColls={['info']}
               />
@@ -103,7 +115,7 @@ export default class Order extends Step {
       } catch (e) {
         const err = (e: Error);
         CommonLog.lError(`showResult error: ${err.message}`);
-      }finally{
+      } finally {
         CommonLog.Info('order done');
       }
     },

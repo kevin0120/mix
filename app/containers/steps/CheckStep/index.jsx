@@ -52,7 +52,7 @@ function CheckStep({
           }}
           disabled={!isCurrent}
         >
-          submit
+          完成
         </Button>
       );
       return () => bindAction(null);
