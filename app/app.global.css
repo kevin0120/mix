@@ -14,7 +14,7 @@ body {
   font-family: Noto Sans SC, serif;
   /*font-weight: bold;*/
   overflow: hidden !important;
-  user-select: none ;
+  user-select: none;
 }
 
 /* h2 { */
@@ -58,6 +58,11 @@ a:hover {
 
 #root {
   height: 100%;
+  overflow: hidden;
+}
+
+div{
+  overflow: hidden;
 }
 
 ::-webkit-scrollbar {

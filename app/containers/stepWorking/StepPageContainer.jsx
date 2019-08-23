@@ -45,8 +45,8 @@ const StepPageContainer = ({
     const StepComponent = stepTypes[step.type].component;
     return (
       <Grid container spacing={1} className={classes.root}>
-        <Grid item container className={classes.left} spacing={1}>
-          <Grid item className={classes.left}>
+        <Grid item container className={classes.leftContainer} spacing={1}>
+          <Grid item className={classes.leftContent}>
             <Paper square className={classes.image}>
               {(StepComponent && (
                 <StepComponent

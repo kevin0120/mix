@@ -6,7 +6,7 @@ import Button from '../../../components/CustomButtons/Button';
 import { instructionStepActions } from '../../../modules/step/instructionStep/action';
 import { tStepProps } from '../types';
 import { stepPayload, viewingStep } from '../../../modules/order/selector';
-import demoPDF from '../../../../resources/demoPDF.pdf';
+import demoPDF from '../../../../resources/pdf/D0000177225.pdf';
 import styles from './styles';
 
 const mapState = (state, props) => ({
@@ -45,10 +45,6 @@ function InstructionStep({ step, isCurrent, submit, bindAction, instruction }: P
       <Document
         className={classes.document}
         file={demoPDF}
-        style={{
-          width: '100%',
-          height: '100%'
-        }}
       >
         <Page
           className={classes.page}

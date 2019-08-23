@@ -43,6 +43,7 @@ const layout = (theme) => ({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+
     backgroundColor: theme.palette.common.white
   },
   stepperContainer: {
@@ -56,16 +57,27 @@ const layout = (theme) => ({
   contentContainer: {
     flex: 1
   },
-  orderInfoContainer: {
+  topBarContainer: {
     margin: `3px`,
     height: 60,
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'flex-start',
+    justifyContent: 'space-between',
     textAlign: 'center',
     padding: `0 ${theme.spacing(2)}px`,
     alignItems: 'center',
     backgroundColor: theme.palette.common.white
+  },
+  orderInfoContainer: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    textAlign: 'center',
+    alignItems: 'center'
+  },
+  logo: {
+    maxHeight: '100%'
   },
   orderStatus: {
     marginRight: theme.spacing(1)
@@ -165,29 +177,32 @@ const buttonsContainer = {
 const stepPageContainer = {
   root: {
     flex: 1,
-    overflow: 'hidden',
     width: '100%',
     height: '100%',
     display: 'flex',
     flexDirection: 'row',
-    justifyContent:'center',
-    alignSelf:'center',
+    justifyContent: 'center',
+    alignSelf: 'center'
   },
 
-  left: {
+  leftContainer: {
     flex: 3,
     display: 'flex',
     flexDirection: 'column',
-    height: '100%',
-    overflow: 'hidden'
+    height: '100%'
+  },
+  leftContent: {
+    width: '100%',
+    height: '100%'
   },
   right: {
     flex: 1,
     height: '100%'
   },
   image: {
-    flex: 1,
-    overflow: 'hidden'
+    width: '100%',
+    height: '100%',
+    flex: 1
   },
   descriptionContainer: {
     flex: 1

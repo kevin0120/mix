@@ -12,6 +12,7 @@ import StepperContainer from './StepperContainer';
 import StepPageContainer from './StepPageContainer';
 import type { tOrderStatus } from '../../modules/order/model';
 import { ORDER_STATUS } from '../../modules/order/model';
+import logo from '../../../resources/imgs/logo.jpg';
 
 type Props = {
   status: ?tOrderStatus,
@@ -35,17 +36,20 @@ function StepWorking({ status, name }: Props) {
     <I18n ns="translations">
       {t => (
         <div className={classes.root}>
-          <Paper square className={classes.orderInfoContainer}>
-            <Typography
-              variant="h5"
-              className={clsx(
-                statusMap(classes)[status || 'empty'],
-                classes.orderStatus
-              )}
-            >
-              [{status ? t(`OrderStatus.${status}`) : '未选中工单'}]
-            </Typography>
-            <Typography variant="h5">{name || ''}</Typography>
+          <Paper square className={classes.topBarContainer}>
+            <div className={classes.orderInfoContainer}>
+              <Typography
+                variant="h5"
+                className={clsx(
+                  statusMap(classes)[status || 'empty'],
+                  classes.orderStatus
+                )}
+              >
+                [{status ? t(`OrderStatus.${status}`) : '未选中工单'}]
+              </Typography>
+              <Typography variant="h5">{name || ''}</Typography>
+            </div>
+            <img src={logo} className={classes.logo}/>
           </Paper>
           <div className={classes.main}>
             <Paper square classes={{ root: classes.leftContainer }}>
