@@ -1,5 +1,6 @@
 const layout = (theme) => ({
   root: {
+    overflow:'hidden',
     width: '100%',
     height: '100%',
     display: 'flex',
@@ -10,6 +11,7 @@ const layout = (theme) => ({
 
   },
   main: {
+    overflow:'hidden',
     width: '100%',
     height: '100%',
     display: 'flex',
@@ -29,6 +31,7 @@ const layout = (theme) => ({
 
   },
   leftContainer: {
+    overflow:'hidden',
     flex: 7,
     margin: 3,
     display: 'flex',
@@ -189,11 +192,13 @@ const stepPageContainer = {
     flex: 3,
     display: 'flex',
     flexDirection: 'column',
-    height: '100%'
+    height: '100%',
+    overflow:'hidden',
   },
   leftContent: {
     width: '100%',
-    height: '100%'
+    height: '100%',
+    overflow:'hidden',
   },
   right: {
     flex: 1,

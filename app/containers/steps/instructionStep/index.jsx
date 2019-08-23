@@ -6,9 +6,10 @@ import Button from '../../../components/CustomButtons/Button';
 import { instructionStepActions } from '../../../modules/step/instructionStep/action';
 import { tStepProps } from '../types';
 import { stepPayload, viewingStep } from '../../../modules/order/selector';
-import demoPDF from '../../../../resources/pdf/D0000177225.pdf';
+import demoPDF from '../../../../resources/pdf/D0000177249.pdf';
 import styles from './styles';
 
+console.log(demoPDF);
 const mapState = (state, props) => ({
   ...props,
   instruction: stepPayload(viewingStep(state.order))?.instruction || null
