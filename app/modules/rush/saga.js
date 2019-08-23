@@ -10,12 +10,13 @@ import { setNewNotification } from '../notification/action';
 import { CommonLog } from '../../common/utils';
 import handleData from './handleData';
 import rushHealthz from './rushHealthz';
-import {getWSClient, setWSClient} from './client';
+// import { getWSClient, setWSClient, init as wsInit } from '../../shared/webSocket';
 
 let task = null;
-const WebSocket = require('@oznu/ws-connect');
 
+// const WebSocket = require('@oznu/ws-connect');
 
+const {getWSClient, setWSClient, init: wsInit} = require('electron').remote.require('./shared/webSocket');
 
 export function* watchRushEvent(): Saga<void> {
   try {
@@ -27,50 +28,31 @@ export function* watchRushEvent(): Saga<void> {
 
 function* initRush() {
   try {
-    do{
-      setWSClient(null);
+    do {
       task = null;
       const state = yield select();
+      console.log(getWSClient());
+      // yield call(stopRush);
+      const hmiSN = state.setting.page.odooConnection.hmiSn.value;
 
-      const { connections } = state.setting.system;
 
-      if (connections.rush === '') {
-        return;
+      if (!getWSClient()) {
+        const { connections } = state.setting.system;
+        if (connections.rush === '') {
+          return;
+        }
+        const conn = connections.rush.split('://')[1];
+        const wsURL = `ws://${conn}/rush/v1/ws`;
+        wsInit(wsURL);
       }
-
-      const conn = connections.rush.split('://')[1];
-      const wsURL = `ws://${conn}/rush/v1/ws`;
-
-      yield call(stopRush);
-
-      setWSClient(new WebSocket(wsURL,
-        {
-          reconnectInterval: 3000,
-          options:
-            {
-              maxPayload: 200 * 1024 * 1024
-            }
-        }));
 
       task = yield fork(
         watchRushChannel,
-        state.setting.page.odooConnection.hmiSn.value
+        hmiSN
       );
-    }while(!(getWSClient() && task))
+    } while (!(getWSClient() && task));
   } catch (e) {
     CommonLog.lError(e, { at: 'initRush' });
-  } finally {
-    // const ws=getWSClient();
-    // if (!(ws && task)) {
-    //   if (ws) {
-    //     ws.close();
-    //     setWSClient(null);
-    //   }
-    //   if (task) {
-    //     yield cancel(task);
-    //     task = null;
-    //   }
-    // }
   }
 }
 
@@ -101,24 +83,24 @@ function* stopRush() {
 
 function createRushChannel(hmiSN: string): EventChannel<void> {
   return eventChannel(emit => {
-    const ws=getWSClient();
+    const ws = getWSClient();
     if (ws) {
       ws.on('open', () => {
         // reg msg
-        if (ws) {
-          ws.sendJson({
-            type:'WS_REG',
-            sn:0,
-            data:{
-              hmi_sn: hmiSN
-            }
-          }, err => {
-            if (err && ws) {
-              CommonLog.lError(err);
-              // ws.close();
-            }
-          });
-        }
+        // if (ws) {
+        //   ws.sendJson({
+        //     type: 'WS_REG',
+        //     sn: 0,
+        //     data: {
+        //       hmi_sn: hmiSN
+        //     }
+        //   }, err => {
+        //     if (err && ws) {
+        //       CommonLog.lError(err);
+        //       // ws.close();
+        //     }
+        //   });
+        // }
         emit({ type: 'healthz', payload: true });
       });
 
@@ -148,7 +130,7 @@ function createRushChannel(hmiSN: string): EventChannel<void> {
         // if(/Disconnected/.test(msg)){
         //   emit({ type: 'healthz', payload: false });
         // }
-      })
+      });
     } else {
       emit({ type: 'healthz', payload: false });
       CommonLog.lError('ws doesn\'t exist', { at: 'createRushChannel' });

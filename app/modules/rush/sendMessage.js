@@ -2,8 +2,10 @@
 import type { Saga } from 'redux-saga';
 import { take, fork, join } from 'redux-saga/effects';
 import { CommonLog } from '../../common/utils';
-import { getWSClient } from './client';
 import { RUSH } from './action';
+import OWebSocket from 'ws';
+
+const { getWSClient } = require('electron').remote.require('./shared/webSocket');
 
 const messageSNs = {};
 
@@ -31,7 +33,8 @@ function getSN() {
 export default function* rushSendMessage(data: Object): Saga<void> {
   try {
     const ws = getWSClient();
-    if (ws && !ws.closed) {
+    while(!ws || ws.closed || getWSClient().ws.readyState !== OWebSocket.OPEN);
+    if (ws && !ws.closed && getWSClient().ws.readyState === OWebSocket.OPEN) {
       const sn = getSN();
       // const sn = 1;
       const listenReplyTask = yield fork(listener, sn);
