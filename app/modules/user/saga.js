@@ -57,7 +57,10 @@ function* authorize(action) {
           role: 'admin'
         };
         yield put(loginSuccess(userInfo));
-        yield put(push('/app'));
+        const newState=yield select();
+        if(!(/\/app/.test(newState.router.location.pathname))){
+          yield put(push('/app'));
+        }
       }
       return;
     }
@@ -92,7 +95,10 @@ function* authorize(action) {
           role: 'admin'
         };
         yield put(loginSuccess(userInfo));
-        yield put(push('/app'));
+        const newState=yield select();
+        if(!(/\/app/.test(newState.router.location.pathname))){
+          yield put(push('/app'));
+        }
       }
     }
   } catch (e) {

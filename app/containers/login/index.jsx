@@ -148,7 +148,7 @@ class LoginPage extends React.Component {
                       className={`${classes.cardHeader} ${classes.textCenter}`}
                       color="info"
                     >
-                      <h4 className={classes.cardTitle}>Log in</h4>
+                      <h4 className={classes.cardTitle}>登  录</h4>
                     </CardHeader>
                     <CardBody>
                       <CustomInput

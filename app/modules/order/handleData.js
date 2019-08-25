@@ -39,20 +39,6 @@ const dataHandlers = {
     } catch (e) {
       CommonLog.lError(e, { at: 'ORDER_WS_TYPES.DETAIL' });
     }
-  },
-  * [ORDER_WS_TYPES.UPDATE](data) {
-    try {
-
-    } catch (e) {
-      CommonLog.lError(e, { at: 'ORDER_WS_TYPES.UPDATE' });
-    }
-  },
-  * [ORDER_WS_TYPES.STEP_UPDATE](data) {
-    try {
-
-    } catch (e) {
-      CommonLog.lError(e, { at: 'ORDER_WS_TYPES.STEP_UPDATE' });
-    }
   }
 };
 

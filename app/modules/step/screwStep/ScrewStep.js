@@ -36,7 +36,9 @@ export default class ScrewStep extends Step {
     this._onLeave=function*(){
       try {
         for (const t of this._tools) {
-          yield call(t.Disable);
+          if(t.isEnable){
+            yield call(t.Disable);
+          }
         }
         this._tools=[];
         CommonLog.Info('tools cleared',{
@@ -102,9 +104,9 @@ export default class ScrewStep extends Step {
 
     * [STEP_STATUS.DOING](ORDER, orderActions) {
       try {
-        for (const t of this._tools) {
-          yield call(t.Enable);
-        }
+        // for (const t of this._tools) {
+        //   yield call(t.Enable);
+        // }
         yield call([this, handleResult], ORDER, orderActions, [], this._data);
         let isFirst = true;
         const sData: tScrewStepData = this._data;
@@ -115,16 +117,19 @@ export default class ScrewStep extends Step {
         let activePoint = points[activeIndex];
         while (true) {
           const data = this._data;
+          yield call(getDevice(activePoint.toolSN).Enable);
           const nextAction = yield call([this, doPoint], activePoint, isFirst, orderActions);
           switch (nextAction.type) {
             case SCREW_STEP.RESULT:
               const { results: { data: results } } = nextAction;
               yield call([this, handleResult], ORDER, orderActions, results, data);
               const { activeIndex: nextIndex, points: nextPoints } = this._data;
+              yield call(getDevice(activePoint.toolSN).Disable);
               activePoint = nextPoints[nextIndex];
               break;
             case SCREW_STEP.REDO_POINT:
               const { point } = nextAction;
+              yield call(getDevice(activePoint.toolSN).Disable);
               activePoint = point;
               break;
             default:

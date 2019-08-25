@@ -4,6 +4,7 @@ import InstructionStep from './instructionStep/InstructionStep';
 import ScrewStep from './screwStep/ScrewStep';
 import MaterialStep from './materialStep/MaterialStep';
 import CheckStep from './checkStep/CheckStep';
+import videoStep from './videoStep/videoStep';
 
 export default {
   input: InputStep,
@@ -11,5 +12,6 @@ export default {
   instruction: InstructionStep,
   screw: ScrewStep,
   material: MaterialStep,
-  check: CheckStep
+  check: CheckStep,
+  video: videoStep
 };

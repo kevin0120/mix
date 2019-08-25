@@ -6,13 +6,13 @@ import Button from '../../../components/CustomButtons/Button';
 import { instructionStepActions } from '../../../modules/step/instructionStep/action';
 import { tStepProps } from '../types';
 import { stepPayload, viewingStep } from '../../../modules/order/selector';
-import demoPDF from '../../../../resources/pdf/D0000177249.pdf';
 import styles from './styles';
+import pdf from '../../../../resources/D0000177249.pdf';
 
-console.log(demoPDF);
 const mapState = (state, props) => ({
   ...props,
-  instruction: stepPayload(viewingStep(state.order))?.instruction || null
+  url: stepPayload(viewingStep(state.order))?.url || '',
+  page: stepPayload(viewingStep(state.order))?.page || 0
 });
 
 const mapDispatch = {
@@ -23,8 +23,8 @@ type Props = {
   submit: () => {}
 };
 
-function InstructionStep({ step, isCurrent, submit, bindAction, instruction }: Props & tStepProps) {
-  const classes=makeStyles(styles)();
+function InstructionStep({ step, isCurrent, submit, bindAction, url, page }: Props & tStepProps) {
+  const classes = makeStyles(styles)();
   useEffect(() => {
     bindAction(
       <Button
@@ -35,22 +35,24 @@ function InstructionStep({ step, isCurrent, submit, bindAction, instruction }: P
         }}
         disabled={!isCurrent}
       >
-        submit
+        完成
       </Button>
     );
     return () => bindAction(null);
   }, [step, bindAction, isCurrent, submit]);
+  const [pdfPage,setPage]=useState(0);
 
   return (
     <div className={classes.container}>
       <Document
         className={classes.document}
-        file={demoPDF}
+        file={pdf}
+        onLoadSuccess={()=>setPage(page)}
       >
         <Page
           className={classes.page}
           scale={1}
-          pageIndex={0}
+          pageIndex={pdfPage}
           renderAnnotationLayer={false}
         />
       </Document>

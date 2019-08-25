@@ -114,7 +114,7 @@ class PagesHeader extends React.Component {
   // }
 
   render() {
-    const { classes, color, login, ssid, signal, batteryPercentage } = this.props;
+    const { classes, color, login, ssid, signal, batteryPercentage,appName } = this.props;
     const { open } = this.state;
     const appBarClasses = cx({
       [` ${classes[color]}`]: color
@@ -138,21 +138,21 @@ class PagesHeader extends React.Component {
               <Hidden smDown implementation="css">
                 <div className={classes.flex}>
                   <Button className={classes.title} color="transparent">
-                    Control Panel
+                    {appName}
                   </Button>
                 </div>
               </Hidden>
               <Button simple onClick={() => login()} className={classes.navLink}>
                 <Dashboard fontSize="inherit"/>
-                Welcome
+                欢  迎
               </Button>
             </div>
-            <Button className={classes.indicator} color="transparent" onClick={this.handleStatusCheck}>
-              {signalLevel(signal)}
-              <span style={{ marginRight: '7px' }}>{`${ssid || '无连接'}`}</span>
-              {batteryLevel(batteryPercentage)}
-              <span>{batteryPercentage >= 0 ? `${batteryPercentage}%` : '电池检测中'}</span>
-            </Button>
+            {/*<Button className={classes.indicator} color="transparent" onClick={this.handleStatusCheck}>*/}
+            {/*  {signalLevel(signal)}*/}
+            {/*  <span style={{ marginRight: '7px' }}>{`${ssid || '无连接'}`}</span>*/}
+            {/*  {batteryLevel(batteryPercentage)}*/}
+            {/*  <span>{batteryPercentage >= 0 ? `${batteryPercentage}%` : '电池检测中'}</span>*/}
+            {/*</Button>*/}
           </div>
           {/* <Hidden mdUp> */}
           {/* <Button */}
@@ -197,7 +197,8 @@ PagesHeader.propTypes = {
 const mapStateToProps = (state) => ({
   ssid: state.network.ssid,
   signal: state.network.signal,
-  batteryPercentage: state.battery.percentage
+  batteryPercentage: state.battery.percentage,
+  appName: state.setting.appName
 });
 
 const mapDispatchToProps = {

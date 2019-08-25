@@ -4,6 +4,7 @@ import InstructionStep from './instructionStep';
 import ScrewStep from './screwStep';
 import MaterialStep from './materialStep';
 import CheckStep from './CheckStep';
+import VideoStep from './VideoStep';
 
 export default {
   input: {
@@ -23,6 +24,9 @@ export default {
   },
   check:{
     component:CheckStep,
+  },
+  video:{
+    component:VideoStep,
   }
 };
 
