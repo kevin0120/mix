@@ -2,6 +2,7 @@ package openprotocol
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"github.com/kataras/iris/core/errors"
@@ -140,32 +141,57 @@ func (c *Controller) handlerProcess() {
 	}
 }
 
-func (c *Controller) Data_decoding(original []byte, Torque_Coefficient float64, Angle_Coefficient float64) (Torque []float64, Angle []float64) {
-	var last_is_ff bool // 上一个字节是0xff
-	var data []byte
-	for i, _ := range original {
-		if original[i] == 0xff && !last_is_ff {
-			last_is_ff = true
+func DataDecoding(original []byte, torqueCoefficient float64, angleCoefficient float64, d Diagnostic) (Torque []float64, Angle []float64) {
+	lenO := len(original)
+	data := make([]byte , lenO,lenO) // 最大只会这些数据
+	writeOffset := 0
+	step := 1
+	for i :=0; i < lenO; i += step {
+		step = 1 // 初始化step
+		if original[i] != 0xff {
+			data[writeOffset] = original[i]
+			writeOffset += 1
 			continue
 		}
-		if last_is_ff {
-			if original[i] == 0xff {
-				data = append(data, 0xff)
-			} else if original[i] == 0xfe {
-				data = append(data, 0x00)
-			}
-			last_is_ff = false
-		} else {
-			data = append(data, original[i]-1)
+		//检测到0xff
+		if i + 1 == lenO {
+			//下一个字节大于整体长度, 最后一个字节了
+			data[writeOffset] = original[i]
+			writeOffset += 1
+			break
+		}
+		switch original[i + 1] {
+		case 0xff:
+			data[writeOffset] = 0xff
+			writeOffset += 1
+			step = 2 //跳过这个字节
+		case 0xfe:
+			data[writeOffset] = 0x00
+			writeOffset += 1
+			step = 2 //跳过这个字节
+		default:
+			// do nothing
 		}
 	}
-	for i := 0; i < len(data)/6; i++ {
-		_ = data[i*6+1]
-		_ = data[i*6+5]
-		a := uint16(data[i*6]) | uint16(data[i*6+1])<<8
-		b := uint32(data[i*6+2]) | uint32(data[i*6+3])<<8 | uint32(data[i*6+4])<<16 | uint32(data[i*6+5])<<24
-		Torque = append(Torque, float64(a)*Torque_Coefficient)
-		Angle = append(Angle, float64(b)*Angle_Coefficient)
+	if writeOffset % 6 != 0 {
+		e := errors.New("Desoutter Protocol Curve Raw Data Convert Fail")
+		d.Error("DataDecoding Fail", e)
+		return
+	}
+	// 所有位减1
+	for i := 0; i < writeOffset; i++ {
+		if data[i] == 0x00 {
+			data[i] = 0xff
+		}else {
+			data[i] = data[i] - 1
+		}
+	}
+
+	for i := 0; i < writeOffset; i += 6 {
+		a := binary.LittleEndian.Uint16(data[i: i+2])
+		b := binary.LittleEndian.Uint32(data[i+ 2: i + 6])
+		Torque = append(Torque, float64(a)*torqueCoefficient)
+		Angle = append(Angle, float64(b)*angleCoefficient)
 	}
 	return
 }
@@ -180,20 +206,19 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) error {
 			c.result_CURVE = &minio.ControllerCurve{}
 		}
 
-		Torque_Coefficient, _ := strconv.ParseFloat(strings.TrimSpace(pkg.Body[27:41]), 64)
-		Angle_Coefficient, _ := strconv.ParseFloat(strings.TrimSpace(pkg.Body[43:57]), 64)
+		torqueCoefficient, _ := strconv.ParseFloat(strings.TrimSpace(pkg.Body[27:41]), 64)
+		angleCoefficient, _ := strconv.ParseFloat(strings.TrimSpace(pkg.Body[43:57]), 64)
 		if pkg.Body[69:71] == "01" {
 			c.MID_7410_CURVE.Header = &pkg.Header
-			c.MID_7410_CURVE.Body = []byte(pkg.Body)
+			c.MID_7410_CURVE.Body = []byte{}
 		}
+		c.MID_7410_CURVE.Body = append(c.MID_7410_CURVE.Body, []byte(pkg.Body[71:len(pkg.Body)])...)
 		if pkg.Body[69:71] == pkg.Body[65:67] {
-			Torque, Angle := c.Data_decoding(c.MID_7410_CURVE.Body[71:], Torque_Coefficient, Angle_Coefficient)
-			//fmt.Println(Torque, Angle)
-			//fmt.Println(c.MID_7410_CURVE.Body[71:])
+			Torque, Angle := DataDecoding(c.MID_7410_CURVE.Body, torqueCoefficient, angleCoefficient, c.diag)
+			c.diag.Debug(fmt.Sprintf("Torque: %+v",Torque))
+			c.diag.Debug(fmt.Sprintf("Angle: %+v",Angle))
 
-			curve := minio.ControllerCurve{
-				//CUR_T: []float64{},
-			}
+			var curve minio.ControllerCurve
 			curve.CurveContent.CUR_M = Torque
 			curve.CurveContent.CUR_W = Angle
 
@@ -205,9 +230,6 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) error {
 
 			c.updateResult(nil, &curve)
 			c.handleResultandClear()
-
-		} else {
-			c.MID_7410_CURVE.Body = append(c.MID_7410_CURVE.Body, []byte(pkg.Body[71:len(pkg.Body)])...)
 		}
 		/*
 			fmt.Println([]byte(pkg.Body[71:]))
