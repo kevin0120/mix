@@ -1,6 +1,7 @@
 package wsnotify
 
 import (
+	"github.com/kataras/iris/core/errors"
 	"github.com/kataras/iris/websocket"
 	"sync"
 
@@ -11,17 +12,21 @@ import (
 )
 
 const (
-	WS_EVENT_CONTROLLER  = "controller"
-	WS_EVENT_RESULT      = "result"
-	WS_EVENT_REG         = "register"
-	WS_EVENT_SELECTOR    = "selector"
-	WS_EVENT_JOB         = "job"
-	WS_EVENT_SCANNER     = "scanner"
-	WS_EVENT_IO          = "io"
-	WS_EVENT_ODOO        = "odoo"
-	WS_EVENT_MAINTENANCE = "maintenance"
-	WS_EVETN_TOOL        = "tool"
-	WS_EVENT_READER      = "reader"
+	WS_EVENT_CONTROLLER        = "controller"
+	WS_EVENT_RESULT            = "result"
+	WS_EVENT_REG               = "regist"
+	WS_EVENT_SELECTOR          = "selector"
+	WS_EVENT_JOB               = "job"
+	WS_EVENT_SCANNER           = "scanner"
+	WS_EVENT_IO                = "io"
+	WS_EVENT_ODOO              = "odoo"
+	WS_EVENT_MAINTENANCE       = "maintenance"
+	WS_EVETN_TOOL              = "tool"
+	WS_EVENT_READER            = "reader"
+	WS_EVENT_TIGHTENING_DEVICE = "tightening_device"
+	WS_EVENT_REPLY             = "reply"
+	WS_EVENT_DEVICE            = "device"
+	WS_EVENT_ORDER             = "order"
 )
 
 type Diagnostic interface {
@@ -32,10 +37,15 @@ type Diagnostic interface {
 	Closed()
 }
 
+type NotifyPackage struct {
+	C    websocket.Connection
+	Data []byte
+}
+
 type OnNewClient func(c websocket.Connection)
 
 type WSNotify interface {
-	OnWSMsg(data []byte)
+	OnWSMsg(c websocket.Connection, data []byte)
 }
 
 type Service struct {
@@ -47,12 +57,12 @@ type Service struct {
 	Httpd *httpd.Service
 
 	clientManager *WSClientManager
-	msgBuffer     chan string
 
 	OnNewClient OnNewClient
 
 	notifies    []WSNotify
 	mtxNotifies sync.Mutex
+	notifyBuf   chan NotifyPackage
 }
 
 func (s *Service) Config() Config {
@@ -62,44 +72,49 @@ func (s *Service) Config() Config {
 func (s *Service) onConnect(c websocket.Connection) {
 
 	c.OnMessage(func(data []byte) {
-		go s.notify(data)
 
 		s.diag.OnMessage(string(data))
-		reg := WSRegist{}
-		err := json.Unmarshal(data, &reg)
+		msg := WSMsg{}
+		err := json.Unmarshal(data, &msg)
 		if err != nil {
-			Msg := map[string]string{"msg": "regist msg error"}
-			msg, err := json.Marshal(Msg)
-			if err != nil {
-				c.Emit(WS_EVENT_REG, msg)
-			}
-
-			c.Disconnect()
 			return
 		}
 
-		_, exist := s.clientManager.GetClient(reg.HMI_SN)
-		if exist {
-			Msg := fmt.Sprintf("client with sn:%s already exists", reg.HMI_SN)
-			msgs := map[string]string{"msg": Msg}
-			regStrs, err := json.Marshal(msgs)
+		if msg.Type == WS_REG {
+			reg := WSRegist{}
+			strData, _ := json.Marshal(msg.Data)
+			err := json.Unmarshal([]byte(strData), &reg)
 			if err != nil {
-				c.Emit(WS_EVENT_REG, regStrs)
+				_ = c.Disconnect()
+				s.clientManager.RemoveClientBySN(reg.HMI_SN)
+
+				_ = c.Emit(WS_EVENT_REPLY, GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 			}
 
-			c.Disconnect()
+			_, exist := s.clientManager.GetClient(reg.HMI_SN)
+			if exist {
+				Msg := fmt.Sprintf("client with sn:%s already exists", reg.HMI_SN)
+				_ = c.Disconnect()
+				s.clientManager.RemoveClientBySN(reg.HMI_SN)
+
+				_ = c.Emit(WS_EVENT_REPLY, GenerateReply(msg.SN, msg.Type, -2, Msg))
+
+			} else {
+				// 将客户端加入列表
+				s.clientManager.AddClient(reg.HMI_SN, c)
+
+				if s.OnNewClient != nil {
+					s.OnNewClient(c)
+				}
+
+				// 注册成功
+				_ = c.Emit(WS_EVENT_REPLY, GenerateReply(msg.SN, msg.Type, 0, ""))
+			}
 		} else {
-			// 将客户端加入列表
-			s.clientManager.AddClient(reg.HMI_SN, c)
-			Msg := map[string]string{"msg": "OK"}
-			msg, err := json.Marshal(Msg)
-			if err != nil {
-				c.Emit(WS_EVENT_REG, msg)
-			}
-
-			if s.OnNewClient != nil {
-				s.OnNewClient(c)
-			}
+			s.postNotify(NotifyPackage{
+				C:    c,
+				Data: data,
+			})
 		}
 	})
 
@@ -110,7 +125,8 @@ func (s *Service) onConnect(c websocket.Connection) {
 
 	c.OnError(func(err error) {
 		s.diag.Error("Connection get error", err)
-		c.Disconnect()
+		s.clientManager.RemoveClient(c.ID())
+		//c.Disconnect()
 	})
 
 }
@@ -122,10 +138,11 @@ func NewService(c Config, d Diagnostic) *Service {
 		ws: websocket.New(websocket.Config{
 			WriteBufferSize: c.WriteBufferSize,
 			ReadBufferSize:  c.ReadBufferSize,
+			MaxMessageSize:  int64(c.WriteBufferSize),
 			ReadTimeout:     websocket.DefaultWebsocketPongTimeout, //此作为readtimeout, 默认 如果有ping没有发送也成为read time out
 		}),
 		clientManager: &WSClientManager{},
-		msgBuffer:     make(chan string, 1024),
+		notifyBuf:     make(chan NotifyPackage, 65535),
 		notifies:      []WSNotify{},
 		mtxNotifies:   sync.Mutex{},
 	}
@@ -136,6 +153,19 @@ func NewService(c Config, d Diagnostic) *Service {
 
 	return s
 
+}
+
+func (s *Service) postNotify(n NotifyPackage) {
+	s.notifyBuf <- n
+}
+
+func (s *Service) startNotify() {
+	for {
+		select {
+		case pkg := <-s.notifyBuf:
+			s.notify(pkg.C, pkg.Data)
+		}
+	}
 }
 
 func (s *Service) Open() error {
@@ -154,8 +184,9 @@ func (s *Service) Open() error {
 	}
 	s.Httpd.Handler[0].AddRoute(r)
 
-	return nil
+	go s.startNotify()
 
+	return nil
 }
 
 func (s *Service) Close() error {
@@ -168,10 +199,6 @@ func (s *Service) Close() error {
 	return nil
 }
 
-func (s *Service) sendProcess() {
-
-}
-
 func (s *Service) AddNotify(n WSNotify) {
 	defer s.mtxNotifies.Unlock()
 	s.mtxNotifies.Lock()
@@ -179,12 +206,9 @@ func (s *Service) AddNotify(n WSNotify) {
 	s.notifies = append(s.notifies, n)
 }
 
-func (s *Service) notify(data []byte) {
-	defer s.mtxNotifies.Unlock()
-	s.mtxNotifies.Lock()
-
+func (s *Service) notify(c websocket.Connection, data []byte) {
 	for _, v := range s.notifies {
-		v.OnWSMsg(data)
+		v.OnWSMsg(c, data)
 	}
 }
 
@@ -243,4 +267,61 @@ func (s *Service) WSSendReader(payload string) {
 		return
 	}
 	s.clientManager.NotifyALL(WS_EVENT_READER, payload)
+}
+
+func (s *Service) WSSendTightening(payload string) {
+	if s == nil || s.clientManager == nil {
+		return
+	}
+	s.clientManager.NotifyALL(WS_EVENT_TIGHTENING_DEVICE, payload)
+}
+
+func (s *Service) WSSendReply(reply *WSMsg) {
+	if s == nil || s.clientManager == nil {
+		return
+	}
+
+	body, _ := json.Marshal(reply)
+	s.clientManager.NotifyALL(WS_EVENT_REPLY, string(body))
+}
+
+func (s *Service) WSSendOrder(payload []byte) {
+	if s == nil || s.clientManager == nil {
+		return
+	}
+
+	s.clientManager.NotifyALL(WS_EVENT_ORDER, string(payload))
+}
+
+func (s *Service) WSTestRecv(evt string, payload string) {
+	go s.notify(nil, []byte(payload))
+}
+
+func GenerateReply(sn uint64, wsType string, result int, msg string) *WSMsg {
+	return &WSMsg{
+		SN:   sn,
+		Type: wsType,
+		Data: WSReply{
+			Result: result,
+			Msg:    msg,
+		},
+	}
+}
+
+func GenerateResult(sn uint64, wsType string, data interface{}) *WSMsg {
+	return &WSMsg{
+		SN:   sn,
+		Type: wsType,
+		Data: data,
+	}
+}
+
+func WSClientSend(c websocket.Connection, event string, payload interface{}) error {
+	if c == nil {
+		return errors.New("conn is nil")
+	}
+
+	//str, _ := json.Marshal(payload)
+	//fmt.Println(string(str))
+	return c.Emit(event, payload)
 }

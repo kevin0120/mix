@@ -89,6 +89,19 @@ func (s *ModbusTcp) read() {
 	}
 }
 
+func (s *ModbusTcp) formatIO(results []byte, num uint16) string {
+	rt := ""
+	resultLen := int(num / 8)
+	for i := 0; i < resultLen; i++ {
+		strIO := strconv.FormatUint(uint64(results[i]), 2)
+		format := fmt.Sprintf("%%0%ds", num)
+		strIO = fmt.Sprintf(format, strIO)
+		rt += utils.ReverseString(strIO)
+	}
+
+	return rt
+}
+
 func (s *ModbusTcp) Read() (string, string, error) {
 	client := s.client
 	var err error
@@ -112,27 +125,19 @@ func (s *ModbusTcp) Read() (string, string, error) {
 		return inputs, outputs, err
 	}
 
-	inputs = strconv.FormatUint(uint64(result[0]), 2)
+	inputs = s.formatIO(result, s.vendor.Cfg().InputNum)
 
 	// output status
 	switch s.vendor.Cfg().OutputReadType {
 	case READ_TYPE_COILS:
-		result, err = client.ReadCoils(0, 8)
+		result, err = client.ReadCoils(s.vendor.Cfg().OutputAddress, s.vendor.Cfg().OutputNum)
 	}
 
 	if err != nil {
 		return inputs, outputs, err
 	}
 
-	outputs = strconv.FormatUint(uint64(result[0]), 2)
-
-	inputFormat := fmt.Sprintf("%%0%ds", s.vendor.Cfg().InputNum)
-	inputs = fmt.Sprintf(inputFormat, inputs)
-	inputs = utils.ReverseString(inputs)
-
-	outputFormat := fmt.Sprintf("%%0%ds", s.vendor.Cfg().OutputNum)
-	outputs = fmt.Sprintf(outputFormat, outputs)
-	outputs = utils.ReverseString(outputs)
+	outputs = s.formatIO(result, s.vendor.Cfg().OutputNum)
 
 	if s.inputs.Load().(string) != inputs {
 		s.inputs.Store(inputs)

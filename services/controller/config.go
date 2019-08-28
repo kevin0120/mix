@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
-	"github.com/satori/go.uuid"
 )
 
 type ControllerConfig struct {
@@ -15,12 +14,21 @@ type ControllerConfig struct {
 	Tools    []ToolConfig `yaml:"tools"`
 }
 
+type DeviceConfig struct {
+	Model    string       `yaml:"model"`
+	Protocol string       `yaml:"protocol"`
+	Endpoint string       `yaml:"endpoint"`
+	SN       string       `yaml:"sn"`
+	Tools    []ToolConfig `yaml:"tools"`
+}
+
 type ToolConfig struct {
-	SerialNO    string `yaml:"gun_serial"`
+	SerialNO    string `yaml:"sn"`
 	ToolChannel int    `yaml:"channel"`
 }
 
 type Config struct {
+	Enable  bool               `yaml:"enable"`
 	Workers int                `yaml:"workers"`
 	Configs []ControllerConfig `yaml:"controllers"`
 }
@@ -32,7 +40,7 @@ func init() {
 }
 
 func newControllerConf() ControllerConfig {
-	_sn, _ := uuid.NewV4()
+	_sn := utils.GenerateID()
 
 	gunConf := ToolConfig{
 		SerialNO:    "",
@@ -40,7 +48,7 @@ func newControllerConf() ControllerConfig {
 	}
 
 	return ControllerConfig{
-		SN:       _sn.String(),
+		SN:       _sn,
 		Protocol: AUDIPROTOCOL,
 		RemoteIP: "127.0.0.1",
 		Port:     4700,
@@ -54,6 +62,7 @@ func NewConfig() Config {
 	configs = append(configs, newControllerConf())
 
 	return Config{
+		Enable:  false,
 		Workers: 4,
 		Configs: configs,
 	}

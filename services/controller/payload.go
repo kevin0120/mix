@@ -5,8 +5,10 @@ import "github.com/masami10/rush/services/aiis"
 const (
 	AUDIPROTOCOL         = "Audi/VW"
 	OPENPROTOCOL         = "OpenProtocol"
-	DEFAULT_TOOL_CHANNEL = 9999
+	DEFAULT_TOOL_CHANNEL = 1
 	AUTO_MODE            = "auto"
+
+	WS_TIGHTENING_RESULT = "WS_TIGHTENING_RESULT"
 )
 
 const (
@@ -22,6 +24,7 @@ const (
 	ERR_NOT_FOUND           = "not found"
 	ERR_PSET_ERROR          = "pset error"
 	ERR_KNOWN               = "error known"
+	ERR_NOT_SUPPORTED       = "not supported"
 )
 
 const (
@@ -67,12 +70,14 @@ type ControllerResult struct {
 	Dat           string     `json:"dat"`
 	PSet          int        `json:"pset"`
 	Batch         string     `json:"batch"`
-	Seq           int        `json:"group_sequence"`
+	Seq           int        `json:"sequence"`
+	GroupSeq      int        `json:"group_sequence"`
 	Count         int        `json:"count"`
 	PSetDefine    PSetDefine `json:"pset_define"`
 	GunSN         string     `json:"gun_sn"`
 
 	ResultValue  ResultValue `json:"result_value"`
+	MaxRedoTime  int
 	TighteningID string
 
 	NeedPushAiis bool
@@ -80,7 +85,8 @@ type ControllerResult struct {
 
 	ExceptionReason string
 
-	Raw string
+	Raw    string
+	StepID int64
 }
 
 type PSetDefine struct {

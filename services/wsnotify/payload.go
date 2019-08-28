@@ -1,5 +1,9 @@
 package wsnotify
 
+const (
+	WS_REG = "WS_REG"
+)
+
 type WSRegist struct {
 	HMI_SN string `json:"hmi_sn"`
 }
@@ -16,8 +20,8 @@ type WSMsgPackage struct {
 }
 
 type WSResult struct {
-	Result_id int64 `json:"result_id"`
-	//Seq       int     `json:"sequence"`
+	//Result_id int64 `json:"result_id"`
+	Seq      int     `json:"sequence"`
 	GroupSeq int     `json:"group_sequence"`
 	Count    int     `json:"count"`
 	Result   string  `json:"result"`
@@ -25,6 +29,7 @@ type WSResult struct {
 	WI       float64 `json:"wi"`
 	TI       float64 `json:"ti"`
 	Batch    string  `json:"batch"`
+	ToolSN   string  `json:"tool_sn"`
 }
 
 type WSSelector struct {
@@ -59,6 +64,12 @@ type WSToolStatus struct {
 }
 
 type WSMsg struct {
+	SN   uint64      `json:"sn"`
 	Type string      `json:"type"`
 	Data interface{} `json:"data"`
+}
+
+type WSReply struct {
+	Result int    `json:"result"`
+	Msg    string `json:"msg"`
 }

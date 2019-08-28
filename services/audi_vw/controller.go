@@ -468,7 +468,7 @@ func (c *Controller) audiVW2OPToolInfo(ti toolInfoCNT) openprotocol.ToolInfo {
 		c.Srv.diag.Error("audiVW2OPToolInfo", errors.New(fmt.Sprintf(" tool serial number:%s", t.SerialNO)))
 	}
 
-	info.SerialNo = t.SerialNO
+	info.ToolSN = t.SerialNO
 	info.CountSinLastService = int(ti.MSL_MSG.CSR)
 	info.TotalTighteningCount = int(ti.MSL_MSG.CLT)
 
@@ -484,4 +484,20 @@ func (c *Controller) Tools() map[string]string {
 	rt := map[string]string{}
 
 	return rt
+}
+
+func (c *Controller) DeviceType(sn string) string {
+	return "controller"
+}
+
+func (c *Controller) Children() []string {
+	return []string{}
+}
+
+func (s *Controller) Data() interface{} {
+	return nil
+}
+
+func (s *Controller) Config() interface{} {
+	return nil
 }

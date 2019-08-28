@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func NewSrv(label string) *Service{
+func NewSrv(label string) *Service {
 	c := NewConfig()
 	diag := &TestDiag{}
 	c.EntityLabel = label
@@ -19,7 +19,7 @@ func TestNewService(t *testing.T) {
 }
 
 func TestService_search(t *testing.T) {
-	s := NewSrv("COM5")
+	s := NewSrv("3118:2305")
 	assert.NotNil(t, s)
 	s.search()
 }

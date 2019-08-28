@@ -963,7 +963,7 @@ func (m *Methods) getHmiResults(ctx iris.Context) {
 
 	ws_result := wsnotify.WSResult{}
 	ws_result.Count = n_count
-	ws_result.Result_id = int64(n_result_id)
+	//ws_result.Result_id = int64(n_result_id)
 	ws_result.Result = db_result.Result
 
 	result_value := controller.ResultValue{}
@@ -1347,4 +1347,33 @@ func (m *Methods) testProtocol(ctx iris.Context) {
 	case "op":
 		m.service.ControllerService.Controllers["0001"].(*openprotocol.Controller).Parse(tp.Payload)
 	}
+}
+
+func (m *Methods) wsTest(ctx iris.Context) {
+	ws := wsnotify.WSMsg{}
+	err := ctx.ReadJSON(&ws)
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		return
+	}
+
+	//str, _ := json.Marshal(ws.Data)
+	//m.service.ControllerService.WS.WSSend(ws.Event, string(str))
+
+	payload, _ := json.Marshal(ws)
+	m.service.ControllerService.WS.WSTestRecv("", string(payload))
+}
+
+func (m *Methods) getStorage(ctx iris.Context) {
+	curve := ctx.URLParam("curve")
+	file := ctx.URLParam("file")
+
+	url, err := m.service.ControllerService.Minio.GetLink(curve, file)
+	if err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		_, _ = ctx.WriteString(err.Error())
+		return
+	}
+
+	ctx.Redirect(url)
 }

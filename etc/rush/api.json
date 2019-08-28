@@ -956,6 +956,38 @@
           }
         }
       }
+    },
+    "/ws-test": {
+      "put": {
+        "tags": [
+          "Test"
+        ],
+        "summary": "ws-test",
+        "description": "ws-test",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/input_test"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功"
+          },
+          "400": {
+            "description": "失败"
+          }
+        }
+      }
     }
   },
   "definitions": {

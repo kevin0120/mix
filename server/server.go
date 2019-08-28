@@ -7,6 +7,7 @@ import (
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/controller"
+	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/diagnostic"
 	"github.com/masami10/rush/services/hmi"
 	"github.com/masami10/rush/services/httpd"
@@ -17,6 +18,7 @@ import (
 	"github.com/masami10/rush/services/reader"
 	"github.com/masami10/rush/services/scanner"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
@@ -60,6 +62,9 @@ type Server struct {
 	ScannerService *scanner.Service
 	IOService      *io.Service
 	ReaderService  *reader.Service
+
+	TighteningDeviceService *tightening_device.Service
+	DeviceService           *device.Service
 
 	config *Config
 	// List of services in startup order
@@ -115,6 +120,8 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.appendOdooService()
 
+	s.appendDeviceService()
+
 	if err := s.appendControllersService(); err != nil {
 		return nil, errors.Wrap(err, "Controllers service")
 	}
@@ -122,6 +129,8 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	s.appendAudiVWService() //此服务必须在控制器服务后进行append
 
 	s.appendOpenProtocolService()
+
+	s.appendTighteningDeviceService()
 
 	s.appendHMIService()
 
@@ -232,8 +241,43 @@ func (s *Server) appendControllersService() error {
 	srv.WS = s.WSNotifyService
 	srv.Aiis = s.AiisService
 	srv.Minio = s.MinioService
+	srv.Device = s.DeviceService
 	s.ControllerService = srv
 	s.AppendService("controller", srv)
+
+	return nil
+}
+
+func (s *Server) appendDeviceService() error {
+	c := s.config.Device
+	d := s.DiagService.NewDeviceHandler()
+	srv, err := device.NewService(c, d)
+
+	if err != nil {
+		return errors.Wrap(err, "append device service fail")
+	}
+	srv.WS = s.WSNotifyService
+
+	s.DeviceService = srv
+	s.AppendService("device", srv)
+
+	return nil
+}
+
+func (s *Server) appendTighteningDeviceService() error {
+	c := s.config.TighteningDevice
+	d := s.DiagService.NewTighteningDeviceHandler()
+	srv, err := tightening_device.NewService(c, d, s.AudiVWService, s.OpenprotocolService)
+
+	if err != nil {
+		return errors.Wrap(err, "append tightening_device service fail")
+	}
+
+	srv.WS = s.WSNotifyService
+	srv.DB = s.StorageServie
+
+	s.TighteningDeviceService = srv
+	s.AppendService("tightening_device", srv)
 
 	return nil
 }
@@ -315,6 +359,7 @@ func (s *Server) AppendScannerService() error {
 
 	srv := scanner.NewService(c, d)
 	srv.WS = s.WSNotifyService
+	srv.DeviceService = s.DeviceService
 
 	s.ScannerService = srv
 	s.AppendService("scanner", srv)
@@ -328,6 +373,7 @@ func (s *Server) AppendIOService() error {
 
 	srv := io.NewService(c, d)
 	srv.WS = s.WSNotifyService
+	srv.DeviceService = s.DeviceService
 
 	s.IOService = srv
 	s.AppendService("io", srv)
@@ -341,6 +387,7 @@ func (s *Server) AppendReaderService() error {
 
 	srv := reader.NewService(c, d)
 	srv.WS = s.WSNotifyService
+	srv.DeviceService = s.DeviceService
 
 	s.ReaderService = srv
 	s.AppendService("reader", srv)

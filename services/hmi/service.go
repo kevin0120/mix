@@ -30,6 +30,7 @@ type Service struct {
 	OpenProtocol      *openprotocol.Service
 	ControllerService *controller.Service
 	SN                string
+	wsnotify.WSNotify
 }
 
 func NewService(d Diagnostic) *Service {
@@ -250,6 +251,24 @@ func (s *Service) Open() error {
 	//}
 	//s.Httpd.Handler[0].AddRoute(r)
 
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "PUT",
+		Pattern:     "/ws-test",
+		HandlerFunc: s.methods.wsTest,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+	r = httpd.Route{
+		RouteType:   httpd.ROUTE_TYPE_HTTP,
+		Method:      "GET",
+		Pattern:     "/storage",
+		HandlerFunc: s.methods.getStorage,
+	}
+	s.Httpd.Handler[0].AddRoute(r)
+
+	s.ODOO.WS.AddNotify(s)
+
 	return nil
 
 }
@@ -317,4 +336,90 @@ func (s *Service) OnNewHmiClient(c websocket.Connection) {
 
 	str, _ := json.Marshal(odooStatus)
 	c.Emit(wsnotify.WS_EVENT_ODOO, string(str))
+}
+
+func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
+	msg := wsnotify.WSMsg{}
+	err := json.Unmarshal(data, &msg)
+	if err != nil {
+		s.diag.Error(string(data), err)
+		return
+	}
+
+	sData, _ := json.Marshal(msg.Data)
+	switch msg.Type {
+	case WS_ORDER_LIST:
+		// 请求获取工单列表
+		workorders, err := s.DB.Workorders("")
+		if err != nil {
+			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+			return
+		}
+
+		body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, workorders))
+
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_ORDER, string(body))
+
+	case WS_ORDER_DETAIL:
+		// 请求获取工单详情
+		orderReq := WSOrderReq{}
+		err := json.Unmarshal(sData, &orderReq)
+		if err != nil {
+			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+			return
+		}
+
+		w, err := s.DB.WorkorderStep(orderReq.ID)
+		if err != nil {
+			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+			return
+		}
+
+		body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, w))
+		//fmt.Println(string(body))
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_ORDER, string(body))
+
+	case WS_ORDER_UPDATE:
+		// 更新工单状态
+		orderReq := WSOrderReq{}
+		err := json.Unmarshal(sData, &orderReq)
+		if err != nil {
+			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+			return
+		}
+
+		_, err = s.DB.UpdateWorkorder(&storage.Workorders{
+			Id:     orderReq.ID,
+			Status: orderReq.Status,
+		})
+
+		if err != nil {
+			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+			return
+		}
+
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+
+	case WS_ORDER_STEP_UPDATE:
+		// 更新工步状态
+
+		orderReq := WSOrderReq{}
+		err := json.Unmarshal(sData, &orderReq)
+		if err != nil {
+			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+			return
+		}
+
+		_, err = s.DB.UpdateStep(&storage.Steps{
+			Id:     orderReq.ID,
+			Status: orderReq.Status,
+		})
+
+		if err != nil {
+			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+			return
+		}
+
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+	}
 }

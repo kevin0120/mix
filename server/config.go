@@ -3,11 +3,14 @@ package server
 import (
 	"fmt"
 	"github.com/masami10/rush/command"
+	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/diagnostic"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/io"
 	"github.com/masami10/rush/services/reader"
 	"github.com/masami10/rush/services/scanner"
+	"github.com/masami10/rush/services/tightening_device"
+	"github.com/masami10/rush/utils"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -21,7 +24,6 @@ import (
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
-	"github.com/satori/go.uuid"
 )
 
 type Config struct {
@@ -57,14 +59,18 @@ type Config struct {
 
 	Reader reader.Config `yaml:"reader"`
 
+	TighteningDevice tightening_device.Config `yaml:"tightening_device"`
+
+	Device device.Config `yaml:"device"`
+
 	Commander command.Commander `yaml:"-"`
 }
 
 func NewConfig() *Config {
-	sn, _ := uuid.NewV4()
+	sn := utils.GenerateID()
 	c := &Config{
 		Hostname:  "localhost",
-		SN:        sn.String(),
+		SN:        sn,
 		Commander: command.ExecCommander,
 	}
 
@@ -80,6 +86,8 @@ func NewConfig() *Config {
 	c.Scanner = scanner.NewConfig()
 	c.IO = io.NewConfig()
 	c.Reader = reader.NewConfig()
+	c.TighteningDevice = tightening_device.NewConfig()
+	c.Device = device.NewConfig()
 
 	c.Contollers = controller.NewConfig()
 
@@ -152,6 +160,14 @@ func (c *Config) Validate() error {
 
 	if err := c.Reader.Validate(); err != nil {
 		return errors.Wrap(err, "reader")
+	}
+
+	if err := c.TighteningDevice.Validate(); err != nil {
+		return errors.Wrap(err, "tightening_device")
+	}
+
+	if err := c.Device.Validate(); err != nil {
+		return errors.Wrap(err, "device")
 	}
 
 	return nil

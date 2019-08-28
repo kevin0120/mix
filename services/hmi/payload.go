@@ -4,6 +4,13 @@ import (
 	"github.com/masami10/rush/services/openprotocol"
 )
 
+const (
+	WS_ORDER_LIST        = "WS_ORDER_LIST"
+	WS_ORDER_DETAIL      = "WS_ORDER_DETAIL"
+	WS_ORDER_UPDATE      = "WS_ORDER_UPDATE"
+	WS_ORDER_STEP_UPDATE = "WS_ORDER_STEP_UPDATE"
+)
+
 type PSet struct {
 	Controller_SN string `json:"controller_sn"`
 	GunSN         string `json:"gun_sn"`
@@ -76,6 +83,20 @@ type JobPoint struct {
 	ToleranceMax       float64 `json:"tolerance_max"`
 	ToleranceMinDegree float64 `json:"tolerance_min_degree"`
 	ToleranceMaxDegree float64 `json:"tolerance_max_degree"`
+}
+
+type Point struct {
+	Seq          int     `json:"sequence"`
+	PSet         int     `json:"pset"`
+	X            float64 `json:"x"`
+	Y            float64 `json:"y"`
+	MaxRedoTimes int     `json:"maxRetryTimes"`
+	GroupSeq     int     `json:"group_sequence"`
+	ToolSN       string  `json:"toolSN"`
+}
+
+type ScrewPayload struct {
+	Points []Point
 }
 
 type ControllerMode struct {
@@ -189,4 +210,14 @@ type NewWorkorder struct {
 type RoutingOperationDelete struct {
 	OperationID int64  `json:"id"`
 	ProductType string `json:"product_type"`
+}
+
+type WSTest struct {
+	Event string      `json:"event"`
+	Data  interface{} `json:"data"`
+}
+
+type WSOrderReq struct {
+	ID     int64  `json:"id"`
+	Status string `json:"status"`
 }

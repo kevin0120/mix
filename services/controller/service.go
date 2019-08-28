@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"github.com/masami10/rush/services/aiis"
+	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
@@ -22,22 +23,23 @@ type Diagnostic interface {
 type Controller interface {
 	Start()
 	Close() error
-	Status() string
 	Protocol() string
 	Inputs() string
 	LoadController(controller *storage.Controllers)
 	Tools() map[string]string
+	device.Device
 }
 
 type Protocol interface {
 	Parse(msg string) ([]byte, error)
 	Write(sn string, buf []byte) error
 	AddNewController(cfg ControllerConfig) Controller
+	AddDevice(cfg DeviceConfig, ts interface{}) Controller
 }
 
 type HandlerPackage struct {
-	result interface{}
-	curve  interface{}
+	result *ControllerResult
+	curve  *minio.ControllerCurve
 }
 
 type Service struct {
@@ -46,10 +48,11 @@ type Service struct {
 	protocols   map[string]Protocol //进行服务注入, serial_no : Protocol
 	Controllers map[string]Controller
 
-	DB    *storage.Service
-	WS    *wsnotify.Service
-	Aiis  *aiis.Service
-	Minio *minio.Service
+	DB     *storage.Service
+	WS     *wsnotify.Service
+	Aiis   *aiis.Service
+	Minio  *minio.Service
+	Device *device.Service
 
 	Handlers Handlers
 	wg       sync.WaitGroup
@@ -111,6 +114,10 @@ func (s *Service) Write(serialNo string, buf []byte) error {
 }
 
 func (s *Service) Open() error {
+	if !s.config.Enable {
+		return nil
+	}
+
 	s.Handlers.Init(s.config.Workers)
 
 	for i := 0; i < s.config.Workers; i++ {
@@ -124,7 +131,7 @@ func (s *Service) Open() error {
 	return nil
 }
 
-func (s *Service) Handle(result interface{}, curve interface{}) {
+func (s *Service) Handle(result *ControllerResult, curve *minio.ControllerCurve) {
 	pkg := HandlerPackage{
 		result: result,
 		curve:  curve,
@@ -137,7 +144,7 @@ func (s *Service) HandleProcess() {
 	for {
 		select {
 		case data := <-s.handle_buffer:
-			s.Handlers.Handle(data.result, data.curve)
+			s.Handlers.Handle(*data.result, *data.curve)
 		case <-s.closing:
 			s.wg.Done()
 			return

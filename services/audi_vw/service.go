@@ -95,6 +95,10 @@ func (p *Service) AddNewController(cfg controller.ControllerConfig) controller.C
 	return &c
 }
 
+func (p *Service) AddDevice(cfg controller.DeviceConfig, ts interface{}) controller.Controller {
+	return nil
+}
+
 func (p *Service) Write(sn string, buf []byte) error {
 	if _, ok := p.Parent.Controllers[sn]; !ok {
 		return fmt.Errorf("can not found controller :%s", sn)

@@ -217,6 +217,10 @@ func (s *Service) OnRPCRecv(payload string) {
 
 }
 
+//func (s *Service) PutResult(msg *WSMsg) error {
+//
+//}
+
 func (s *Service) PutResult(result_id int64, body interface{}) error {
 
 	//var err error
@@ -304,7 +308,6 @@ func (s *Service) putResult(body interface{}, url string, method string) error {
 
 func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error) {
 	aiisResult := AIISResult{}
-
 	resultValue := ResultValue{}
 	json.Unmarshal([]byte(result.ResultValue), &resultValue)
 
@@ -312,8 +315,8 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	json.Unmarshal([]byte(result.PSetDefine), &psetDefine)
 
 	dbWorkorder, err := s.DB.GetWorkorder(result.WorkorderID, true)
-	if err != nil {
-		return aiisResult, err
+	if err == nil {
+		aiisResult.Payload = dbWorkorder.Payload
 	}
 
 	if result.ExInfo != "" {
@@ -321,7 +324,7 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	}
 
 	aiisResult.ID = result.Id
-	aiisResult.WorkorderID = dbWorkorder.WorkorderID
+	//aiisResult.WorkorderID = dbWorkorder.WorkorderID
 	aiisResult.Control_date = result.UpdateTime.Format(time.RFC3339)
 	aiisResult.Measure_degree = resultValue.Wi
 	aiisResult.Measure_result = strings.ToLower(result.Result)
@@ -340,44 +343,44 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	aiisResult.UserID = result.UserID
 	aiisResult.Seq = result.Seq
 
-	aiisResult.MO_AssemblyLine = dbWorkorder.MO_AssemblyLine
-	aiisResult.MO_EquipemntName = dbWorkorder.MO_EquipemntName
-	aiisResult.MO_FactoryName = dbWorkorder.MO_FactoryName
-	aiisResult.MO_Pin = dbWorkorder.MO_Pin
-	aiisResult.MO_Pin_check_code = dbWorkorder.MO_Pin_check_code
-	aiisResult.MO_Year = dbWorkorder.MO_Year
-	aiisResult.MO_Lnr = dbWorkorder.MO_Lnr
-	aiisResult.MO_NutNo = result.NutNo
-	aiisResult.MO_Model = dbWorkorder.MO_Model
+	//aiisResult.MO_AssemblyLine = dbWorkorder.MO_AssemblyLine
+	//aiisResult.MO_EquipemntName = dbWorkorder.MO_EquipemntName
+	//aiisResult.MO_FactoryName = dbWorkorder.MO_FactoryName
+	//aiisResult.MO_Pin = dbWorkorder.MO_Pin
+	//aiisResult.MO_Pin_check_code = dbWorkorder.MO_Pin_check_code
+	//aiisResult.MO_Year = dbWorkorder.MO_Year
+	//aiisResult.MO_Lnr = dbWorkorder.MO_Lnr
+	//aiisResult.MO_NutNo = result.NutNo
+	//aiisResult.MO_Model = dbWorkorder.MO_Model
 	aiisResult.Batch = result.Batch
-	aiisResult.Vin = dbWorkorder.Vin
-
-	aiisResult.Mode = dbWorkorder.Mode
+	//aiisResult.Vin = dbWorkorder.Vin
+	//
+	//aiisResult.Mode = dbWorkorder.Mode
 	aiisResult.TighteningId, _ = strconv.ParseInt(result.TighteningID, 10, 64)
 	aiisResult.Lacking = "normal"
 
-	gun, err := s.DB.GetGun(result.GunSN)
-	if err != nil {
-		gid, err := s.SyncGun(result.GunSN)
-		if err == nil {
-			gun.GunID = gid
-			gun.Serial = result.GunSN
-			s.DB.Store(gun)
-		} else {
-			gun.GunID = 0
-		}
-	}
+	//gun, err := s.DB.GetGun(result.GunSN)
+	//if err != nil {
+	//	gid, err := s.SyncGun(result.GunSN)
+	//	if err == nil {
+	//		gun.GunID = gid
+	//		gun.Serial = result.GunSN
+	//		s.DB.Store(gun)
+	//	} else {
+	//		gun.GunID = 0
+	//	}
+	//}
 
-	aiisResult.GunID = gun.GunID
-	aiisResult.WorkcenterID = dbWorkorder.WorkcenterID
-	aiisResult.ProductID = dbWorkorder.ProductID
+	//aiisResult.GunID = gun.GunID
+	//aiisResult.WorkcenterID = dbWorkorder.WorkcenterID
+	//aiisResult.ProductID = dbWorkorder.ProductID
 	aiisResult.NutID = result.ConsuProductID
 
-	aiisResult.WorkcenterCode = dbWorkorder.WorkcenterCode
+	//aiisResult.WorkcenterCode = dbWorkorder.WorkcenterCode
 	aiisResult.ToolSN = result.GunSN
 	aiisResult.ControllerSN = result.ControllerSN
 
-	aiisResult.Job = fmt.Sprintf("%d", dbWorkorder.JobID)
+	//aiisResult.Job = fmt.Sprintf("%d", dbWorkorder.JobID)
 	aiisResult.Stage = result.Stage
 
 	if result.Result == storage.RESULT_OK {

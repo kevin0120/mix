@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ebfe/scard"
+	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/wsnotify"
 	"sync/atomic"
 	"time"
@@ -21,9 +22,10 @@ type Diagnostic interface {
 type Service struct {
 	configValue atomic.Value
 
-	diag Diagnostic
-	ctx  *scard.Context
-	WS   *wsnotify.Service
+	diag          Diagnostic
+	ctx           *scard.Context
+	WS            *wsnotify.Service
+	DeviceService *device.Service
 }
 
 func NewService(c Config, d Diagnostic) *Service {
@@ -46,13 +48,9 @@ func (s *Service) Open() error {
 		return nil
 	}
 
-	var err error
-	s.ctx, err = scard.EstablishContext()
-	if err != nil {
-		return err
-	}
-
 	go s.search()
+
+	s.DeviceService.AddDevice("reader", s)
 
 	return nil
 }
@@ -89,6 +87,26 @@ func (s *Service) waitUntilCardPresent(ctx *scard.Context, readers []string) (in
 	}
 }
 
+func (s *Service) DeviceType(sn string) string {
+	return "reader"
+}
+
+func (s *Service) Children() []string {
+	return []string{}
+}
+
+func (s *Service) Status() string {
+	return "online"
+}
+
+func (s *Service) Config() interface{} {
+	return nil
+}
+
+func (s *Service) Data() interface{} {
+	return nil
+}
+
 func (s *Service) notifyUID(uid string) {
 	barcode, _ := json.Marshal(wsnotify.WSMsg{
 		Type: WS_READER_UID,
@@ -101,6 +119,17 @@ func (s *Service) notifyUID(uid string) {
 }
 
 func (s *Service) search() {
+	var err error
+
+	for {
+		s.ctx, err = scard.EstablishContext()
+		if err == nil {
+			break
+		} else {
+			time.Sleep(SEARCH_ITV)
+		}
+	}
+
 	for {
 		// List available readers
 		ctx, err := scard.EstablishContext()
@@ -133,6 +162,13 @@ func (s *Service) search() {
 
 				for {
 					var cmd = []byte{0xff, 0xca, 0x00, 0x00, 0x00} // SELECT uid
+
+					_, err := card.Status()
+					if err != nil {
+						_ = card.Disconnect(scard.ResetCard)
+						break
+					}
+
 					rsp, err := card.Transmit(cmd)
 					if err != nil {
 						// card lost
@@ -146,6 +182,8 @@ func (s *Service) search() {
 
 					// ws notify
 					s.notifyUID(uid)
+
+					_ = card.Disconnect(scard.ResetCard)
 
 					time.Sleep(SEARCH_ITV)
 				}

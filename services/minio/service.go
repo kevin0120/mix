@@ -136,6 +136,15 @@ func (s *Service) Upload(obj string, data string) error {
 	return nil
 }
 
+func (s *Service) GetLink(curve string, obj string) (string, error) {
+	url, err := s.minio.PresignedGetObject(curve, obj, time.Hour*74, nil)
+	if err != nil {
+		return "", err
+	}
+
+	return url.String(), nil
+}
+
 func (s *Service) TaskReupload() {
 	for {
 

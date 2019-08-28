@@ -1,7 +1,8 @@
 package io
 
 const (
-	MODEL_MOXA_E1212 = "MOXA_E1212"
+	MODEL_MOXA_E1212 = "MOXA_E1212" // 8进8出
+	MODEL_MOXA_E1242 = "MOXA_E1242" // 4进4出
 )
 
 const (
@@ -35,6 +36,7 @@ type Vendor interface {
 
 var VENDOR_MODELS = map[string]Vendor{
 	MODEL_MOXA_E1212: &MOXA{model: MODEL_MOXA_E1212},
+	MODEL_MOXA_E1242: &MOXA{model: MODEL_MOXA_E1242},
 }
 
 type MOXA struct {
@@ -44,6 +46,9 @@ type MOXA struct {
 func (s *MOXA) Type() string {
 	switch s.model {
 	case MODEL_MOXA_E1212:
+		return IO_MODBUSTCP
+
+	case MODEL_MOXA_E1242:
 		return IO_MODBUSTCP
 	}
 
@@ -59,6 +64,17 @@ func (s *MOXA) Cfg() VendorCfg {
 			InputAddress:   0,
 			InputReadType:  READ_TYPE_DISCRETES,
 			OutputNum:      8,
+			OutputAddress:  0,
+			OutputReadType: READ_TYPE_COILS,
+			WriteType:      WRITE_TYPE_SINGLE_COIL,
+		}
+
+	case MODEL_MOXA_E1242:
+		return VendorCfg{
+			InputNum:       4,
+			InputAddress:   0,
+			InputReadType:  READ_TYPE_DISCRETES,
+			OutputNum:      4,
 			OutputAddress:  0,
 			OutputReadType: READ_TYPE_COILS,
 			WriteType:      WRITE_TYPE_SINGLE_COIL,

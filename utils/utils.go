@@ -37,7 +37,7 @@ func AppendByteSlice(s []byte, t []byte) []byte {
 }
 
 func GenerateID() string {
-	u4, _ := uuid.NewV4()
+	u4 := uuid.NewV4()
 	return base64.RawURLEncoding.EncodeToString(u4.Bytes())
 }
 
@@ -56,4 +56,14 @@ func ReverseString(raw string) string {
 		rt = string(v) + rt
 	}
 	return rt
+}
+
+func StringArrayContains(s []string, e string) bool {
+	for _, v := range s {
+		if v == e {
+			return true
+		}
+	}
+
+	return false
 }

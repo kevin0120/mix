@@ -22,6 +22,15 @@ func (s *WSClientManager) AddClient(sn string, c websocket.Connection) {
 	s.conn[sn] = c
 }
 
+func (s *WSClientManager) RemoveClientBySN(sn string) {
+	defer s.mutex.Unlock()
+	s.mutex.Lock()
+
+	if sn != "" {
+		delete(s.conn, sn)
+	}
+}
+
 func (s *WSClientManager) RemoveClient(cid string) {
 	defer s.mutex.Unlock()
 
@@ -46,7 +55,7 @@ func (s *WSClientManager) NotifyALL(evt string, payload string) {
 	s.mutex.Lock()
 
 	for _, v := range s.conn {
-		v.Emit(evt, payload)
+		_ = v.Emit(evt, payload)
 	}
 }
 

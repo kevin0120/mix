@@ -7,6 +7,7 @@ import (
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
 	"sync/atomic"
@@ -30,14 +31,17 @@ type Service struct {
 	Odoo  *odoo.Service
 
 	Parent *controller.Service
+
+	devices []*Controller
 }
 
 func NewService(c Config, d Diagnostic, parent *controller.Service) *Service {
 
 	s := &Service{
-		name:   controller.OPENPROTOCOL,
-		diag:   d,
-		Parent: parent,
+		name:    controller.OPENPROTOCOL,
+		diag:    d,
+		Parent:  parent,
+		devices: []*Controller{},
 	}
 
 	s.configValue.Store(c)
@@ -66,11 +70,42 @@ func (p *Service) AddNewController(cfg controller.ControllerConfig) controller.C
 	return &c
 }
 
+func (p *Service) AddDevice(cfg controller.DeviceConfig, ts interface{}) controller.Controller {
+	config := p.config()
+	c := NewController(config, p.diag)
+	c.Srv = p //服务注入
+	c.cfg = controller.ControllerConfig{
+		RemoteIP: cfg.Endpoint,
+		SN:       cfg.SN,
+		Tools:    cfg.Tools,
+	}
+	c.SetModel(cfg.Model)
+	c.tighteningDevice = ts.(*tightening_device.Service)
+
+	if cfg.SN != "" {
+		c.tighteningDevice.AddDevice(cfg.SN, &c)
+		p.Parent.Device.AddDevice(cfg.SN, &c)
+	}
+
+	for _, v := range cfg.Tools {
+		c.tighteningDevice.AddDevice(v.SerialNO, &c)
+		p.Parent.Device.AddDevice(v.SerialNO, &c)
+	}
+
+	p.devices = append(p.devices, &c)
+
+	return nil
+}
+
 func (p *Service) Open() error {
-	for _, w := range p.Parent.Controllers {
-		if w.Protocol() == controller.OPENPROTOCOL {
-			go w.Start() //异步启动控制器
-		}
+	//for _, w := range p.Parent.Controllers {
+	//	if w.Protocol() == controller.OPENPROTOCOL {
+	//		go w.Start() //异步启动控制器
+	//	}
+	//}
+
+	for _, v := range p.devices {
+		go v.Start()
 	}
 
 	return nil

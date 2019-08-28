@@ -158,11 +158,11 @@ func (v *commonHoneywellScanner) Close() error {
 		err = d.Close()
 	} else {
 		d := v.dev.(*gousb.Device)
-		if v.cfg != nil {
-			err = v.cfg.Close()
-		}
 		if v.Interface != nil {
 			v.Interface.Close()
+		}
+		if v.cfg != nil {
+			err = v.cfg.Close()
 		}
 		if err := d.Close(); err != nil {
 			return err
@@ -198,7 +198,7 @@ type commonDataLogicScanner struct {
 }
 
 type commonUSBSerialScanner struct {
-	dev        USBDevice
+	dev USBDevice
 }
 
 func (v *commonDataLogicScanner) NewReader(dev USBDevice) error {
@@ -246,11 +246,11 @@ func (v *commonDataLogicScanner) Close() error {
 		return d.Close()
 	} else {
 		d := v.dev.(*gousb.Device)
-		if v.cfg != nil {
-			err = v.cfg.Close()
-		}
 		if v.Interface != nil {
 			v.Interface.Close()
+		}
+		if v.cfg != nil {
+			err = v.cfg.Close()
 		}
 		if err := d.Close(); err != nil {
 			return err
@@ -267,7 +267,6 @@ func (v *commonDataLogicScanner) Parse(buf []byte) (string, error) {
 //func (v *commonDataLogicScanner) Debounce() (time.Duration, time.Duration) {
 //	return 300 * time.Millisecond, 300 * time.Millisecond
 //}
-
 
 func (v *commonUSBSerialScanner) NewReader(d USBDevice) error {
 	v.dev = d

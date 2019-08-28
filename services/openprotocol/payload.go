@@ -9,6 +9,10 @@ import (
 )
 
 const (
+	OP_TERMINAL = 0x00
+)
+
+const (
 	JOB_ACTION_ABORT = "abort"
 	MAX_IDS_NUM      = 4
 )
@@ -141,8 +145,8 @@ var request_errors = map[string]string{
 	"44": "Multiple identifiers work order subscription does not exist",
 	"50": "Status external monitored inputs subscription already exists",
 	"51": "Status external monitored inputs subscription does not exist",
-	"52": "IO device not connected",
-	"53": "Faulty IO device ID",
+	"52": "IO tightening_device not connected",
+	"53": "Faulty IO tightening_device ID",
 	"54": "Tool Tag ID unknown",
 	"55": "Tool Tag ID subscription already exists",
 	"56": "Tool Tag ID subscription does not exist",
@@ -188,6 +192,10 @@ func (h *OpenProtocolHeader) Serialize() string {
 }
 
 func (h *OpenProtocolHeader) Deserialize(str string) {
+	if len(str) != LEN_HEADER {
+		return
+	}
+
 	n, _ := strconv.ParseInt(str[0:4], 10, 32)
 	h.LEN = int(n) - LEN_HEADER
 	h.MID = str[4:8]
@@ -205,7 +213,7 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 		h.MID = MID_9999_ALIVE
 		h.LEN = LEN_HEADER
 		h.Revision = rev
-		h.NoAck = ""
+		h.NoAck = "1"
 		h.Station = ""
 		h.Spindle = ""
 		h.Spare = ""
@@ -344,16 +352,16 @@ func GeneratePackage(mid string, rev string, data string, end string) string {
 
 		return h.Serialize() + data + end
 
-	case MID_0008_DATA_SUB:
-		h.MID = MID_0008_DATA_SUB
-		h.LEN = LEN_HEADER + len(data)
-		h.Revision = rev
-		h.NoAck = ""
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + data + end
+	//case MID_0008_DATA_SUB:
+	//	h.MID = MID_0008_DATA_SUB
+	//	h.LEN = LEN_HEADER + len(data)
+	//	h.Revision = rev
+	//	h.NoAck = ""
+	//	h.Station = ""
+	//	h.Spindle = ""
+	//	h.Spare = ""
+	//
+	//	return h.Serialize() + data + end
 
 	case MID_0012_PSET_DETAIL_REQUEST:
 		h.MID = MID_0012_PSET_DETAIL_REQUEST
@@ -836,15 +844,15 @@ func (rd *ResultData) Deserialize(str string) error {
 	rd.ID3 = strings.TrimSpace(str[428:453])
 	rd.ID4 = strings.TrimSpace(str[455:480])
 
-	rd.NumberOfStages, err = strconv.Atoi(str[508:510])
-	if err != nil {
-		return err
-	}
-
-	rd.NumberOfStageResults, err = strconv.Atoi(str[512:514])
-	if err != nil {
-		return err
-	}
+	//rd.NumberOfStages, err = strconv.Atoi(str[508:510])
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//rd.NumberOfStageResults, err = strconv.Atoi(str[512:514])
+	//if err != nil {
+	//	return err
+	//}
 
 	//rd.StageResult = str[516:527]
 
@@ -1107,7 +1115,8 @@ func (ai *AlarmInfo) Deserialize(msg string) error {
 }
 
 type ToolInfo struct {
-	SerialNo             string `json:"serial_no"`
+	ToolSN               string `json:"serial_no"`
+	ControllerSN         string `json:"controller_sn"`
 	TotalTighteningCount int    `json:"times"`
 	CountSinLastService  int    `json:"sin_last_service"`
 }
@@ -1117,17 +1126,18 @@ func (ti *ToolInfo) Deserialize(msg string) error {
 	var err error = nil
 
 	if len(msg) < 20 {
-		return errors.New("alarm info msg len is not enough")
+		return errors.New("tool info msg len is not enough")
 	}
 
-	ti.SerialNo = strings.TrimSpace(msg[2:16]) //去除空格获取序列号
+	ti.ToolSN = strings.TrimSpace(msg[2:16]) //去除空格获取序列号
 
 	ti.TotalTighteningCount, err = strconv.Atoi(msg[18:28])
+
+	ti.ControllerSN = strings.TrimSpace(msg[51:61])
 
 	ti.CountSinLastService, err = strconv.Atoi(msg[92:102])
 
 	return err
-
 }
 
 type JobInfo struct {
