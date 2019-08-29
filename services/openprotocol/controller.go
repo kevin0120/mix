@@ -170,6 +170,8 @@ func DataDecoding(original []byte, torqueCoefficient float64, angleCoefficient f
 			writeOffset += 1
 			step = 2 //跳过这个字节
 		default:
+			e := errors.New("Desoutter Protocol Curve Raw Data 0xff不能单独出现")
+			d.Error("DataDecoding", e)
 			// do nothing
 		}
 	}
@@ -837,8 +839,8 @@ func (c *Controller) GetJobList() ([]int, error) {
 	defer c.Response.remove(MID_0030_JOB_LIST_REQUEST)
 	c.Response.Add(MID_0030_JOB_LIST_REQUEST, nil)
 
-	psets_request := GeneratePackage(MID_0030_JOB_LIST_REQUEST, rev, "", DEFAULT_MSG_END)
-	c.Write([]byte(psets_request))
+	psetsRequest := GeneratePackage(MID_0030_JOB_LIST_REQUEST, rev, "", DEFAULT_MSG_END)
+	c.Write([]byte(psetsRequest))
 
 	var reply interface{} = nil
 
@@ -855,20 +857,20 @@ func (c *Controller) GetJobList() ([]int, error) {
 		return jobs, errors.New(controller.ERR_CONTROLER_TIMEOUT)
 	}
 
-	job_list := reply.(JobList)
+	jobList := reply.(JobList)
 
-	return job_list.jobs, nil
+	return jobList.jobs, nil
 }
 
 func (c *Controller) GetJobDetail(job int) (JobDetail, error) {
-	var obj_job_detail JobDetail
+	var objJobDetail JobDetail
 	rev := GetVendorMid(c.Model(), MID_0032_JOB_DETAIL_REQUEST)
 	if rev == "" {
-		return obj_job_detail, errors.New(controller.ERR_NOT_SUPPORTED)
+		return objJobDetail, errors.New(controller.ERR_NOT_SUPPORTED)
 	}
 
 	if c.Status() == controller.STATUS_OFFLINE {
-		return obj_job_detail, errors.New(controller.STATUS_OFFLINE)
+		return objJobDetail, errors.New(controller.STATUS_OFFLINE)
 	}
 
 	defer c.Response.remove(MID_0032_JOB_DETAIL_REQUEST)
@@ -888,18 +890,18 @@ func (c *Controller) GetJobDetail(job int) (JobDetail, error) {
 	}
 
 	if reply == nil {
-		return obj_job_detail, errors.New(controller.ERR_CONTROLER_TIMEOUT)
+		return objJobDetail, errors.New(controller.ERR_CONTROLER_TIMEOUT)
 	}
 
 	switch v := reply.(type) {
 	case string:
-		return obj_job_detail, errors.New(v)
+		return objJobDetail, errors.New(v)
 
 	case JobDetail:
 		return reply.(JobDetail), nil
 
 	default:
-		return obj_job_detail, errors.New(controller.ERR_KNOWN)
+		return objJobDetail, errors.New(controller.ERR_KNOWN)
 	}
 
 }
@@ -915,27 +917,27 @@ func (c *Controller) SolveOldResults() {
 		return
 	}
 
-	var last_result interface{} = nil
+	var lastResult interface{} = nil
 	for i := 0; i < MAX_REPLY_COUNT; i++ {
-		last_result = c.Response.get(MID_0065_OLD_DATA)
-		if last_result != nil {
+		lastResult = c.Response.get(MID_0065_OLD_DATA)
+		if lastResult != nil {
 			break
 		}
 
 		time.Sleep(REPLY_TIMEOUT)
 	}
 
-	if last_result == nil {
+	if lastResult == nil {
 		return
 	}
 
-	obj_last_result := last_result.(ResultData)
+	objLastResult := lastResult.(ResultData)
 
-	if obj_last_result.TightingID != c.dbController.LastID {
-		start_id, _ := strconv.ParseInt(c.dbController.LastID, 10, 64)
-		end_id, _ := strconv.ParseInt(obj_last_result.TightingID, 10, 64)
+	if objLastResult.TightingID != c.dbController.LastID {
+		startId, _ := strconv.ParseInt(c.dbController.LastID, 10, 64)
+		endId, _ := strconv.ParseInt(objLastResult.TightingID, 10, 64)
 
-		for i := start_id + 1; i <= end_id; i++ {
+		for i := startId + 1; i <= endId; i++ {
 			c.getOldResult(i)
 		}
 
@@ -972,8 +974,8 @@ func (c *Controller) sendKeepalive() {
 		return
 	}
 
-	keep_alive := GeneratePackage(MID_9999_ALIVE, DEFAULT_REV, "", DEFAULT_MSG_END)
-	c.Write([]byte(keep_alive))
+	keepAlive := GeneratePackage(MID_9999_ALIVE, DEFAULT_REV, "", DEFAULT_MSG_END)
+	c.Write([]byte(keepAlive))
 }
 
 func (c *Controller) startComm() error {
