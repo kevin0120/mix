@@ -853,7 +853,7 @@ func (m *Methods) getWorkorder(ctx iris.Context) {
 		}
 	}
 
-	//results, err := m.service.DB.FindResultsByWorkorder(workorder.Id)
+	//results, err := m.service.StorageService.FindResultsByWorkorder(workorder.Id)
 
 	resp := Workorder{}
 	resp.HMI_sn = workorder.HMISN

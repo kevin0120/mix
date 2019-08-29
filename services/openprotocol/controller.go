@@ -143,10 +143,10 @@ func (c *Controller) handlerProcess() {
 
 func DataDecoding(original []byte, torqueCoefficient float64, angleCoefficient float64, d Diagnostic) (Torque []float64, Angle []float64) {
 	lenO := len(original)
-	data := make([]byte , lenO,lenO) // 最大只会这些数据
+	data := make([]byte, lenO, lenO) // 最大只会这些数据
 	writeOffset := 0
 	step := 1
-	for i :=0; i < lenO; i += step {
+	for i := 0; i < lenO; i += step {
 		step = 1 // 初始化step
 		if original[i] != 0xff {
 			data[writeOffset] = original[i]
@@ -154,13 +154,13 @@ func DataDecoding(original []byte, torqueCoefficient float64, angleCoefficient f
 			continue
 		}
 		//检测到0xff
-		if i + 1 == lenO {
+		if i+1 == lenO {
 			//下一个字节大于整体长度, 最后一个字节了
 			data[writeOffset] = original[i]
 			writeOffset += 1
 			break
 		}
-		switch original[i + 1] {
+		switch original[i+1] {
 		case 0xff:
 			data[writeOffset] = 0xff
 			writeOffset += 1
@@ -175,7 +175,7 @@ func DataDecoding(original []byte, torqueCoefficient float64, angleCoefficient f
 			// do nothing
 		}
 	}
-	if writeOffset % 6 != 0 {
+	if writeOffset%6 != 0 {
 		e := errors.New("Desoutter Protocol Curve Raw Data Convert Fail")
 		d.Error("DataDecoding Fail", e)
 		return
@@ -184,14 +184,14 @@ func DataDecoding(original []byte, torqueCoefficient float64, angleCoefficient f
 	for i := 0; i < writeOffset; i++ {
 		if data[i] == 0x00 {
 			data[i] = 0xff
-		}else {
+		} else {
 			data[i] = data[i] - 1
 		}
 	}
 
 	for i := 0; i < writeOffset; i += 6 {
-		a := binary.LittleEndian.Uint16(data[i: i+2])
-		b := binary.LittleEndian.Uint32(data[i+ 2: i + 6])
+		a := binary.LittleEndian.Uint16(data[i : i+2])
+		b := binary.LittleEndian.Uint32(data[i+2 : i+6])
 		Torque = append(Torque, float64(a)*torqueCoefficient)
 		Angle = append(Angle, float64(b)*angleCoefficient)
 	}
@@ -217,8 +217,8 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) error {
 		c.MID_7410_CURVE.Body = append(c.MID_7410_CURVE.Body, []byte(pkg.Body[71:len(pkg.Body)])...)
 		if pkg.Body[69:71] == pkg.Body[65:67] {
 			Torque, Angle := DataDecoding(c.MID_7410_CURVE.Body, torqueCoefficient, angleCoefficient, c.diag)
-			c.diag.Debug(fmt.Sprintf("Torque: %+v",Torque))
-			c.diag.Debug(fmt.Sprintf("Angle: %+v",Angle))
+			c.diag.Debug(fmt.Sprintf("Torque: %+v", Torque))
+			c.diag.Debug(fmt.Sprintf("Angle: %+v", Angle))
 
 			var curve minio.ControllerCurve
 			curve.CurveContent.CUR_M = Torque
@@ -481,7 +481,7 @@ func (c *Controller) handleResult(result_data *ResultData, carve *minio.Controll
 	controllerResult := controller.ControllerResult{}
 	controllerResult.NeedPushHmi = true
 
-	if c.Model() == tightening_device.MODEL_DESOUTTER_DELTA_WRENCH {
+	if c.Model() == tightening_device.ModelDesoutterDeltaWrench {
 		controllerResult.GunSN = c.cfg.SN
 	} else {
 		controllerResult.GunSN = result_data.ToolSerialNumber
@@ -1779,7 +1779,7 @@ func (c *Controller) Enable(r *tightening_device.ToolEnable) tightening_device.R
 }
 
 func (c *Controller) DeviceType(sn string) string {
-	if c.Model() == tightening_device.MODEL_DESOUTTER_DELTA_WRENCH {
+	if c.Model() == tightening_device.ModelDesoutterDeltaWrench {
 		return "tool"
 	}
 

@@ -2,6 +2,7 @@ package tightening_device
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/kataras/iris/core/errors"
 	"github.com/kataras/iris/websocket"
 	"github.com/masami10/rush/services/controller"
@@ -12,8 +13,8 @@ import (
 )
 
 const (
-	MODEL_DESOUTTER_CVI3         = "MODEL_DESOUTTER_CVI3"
-	MODEL_DESOUTTER_DELTA_WRENCH = "MODEL_DESOUTTER_DELTA_WRENCH"
+	ModelDesoutterCvi3        = "ModelDesoutterCvi3"
+	ModelDesoutterDeltaWrench = "ModelDesoutterDeltaWrench"
 )
 
 type Diagnostic interface {
@@ -34,8 +35,8 @@ type Service struct {
 	runningDevices map[string]TighteningDevice
 	mtxDevices     sync.Mutex
 
-	WS *wsnotify.Service
-	DB *storage.Service
+	WS             *wsnotify.Service
+	StorageService *storage.Service
 
 	wsnotify.WSNotify
 }
@@ -85,32 +86,31 @@ func (s *Service) config() Config {
 }
 
 func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
-	msg := wsnotify.WSMsg{}
+	var msg wsnotify.WSMsg
+	s.diag.Debug(fmt.Sprintf("OnWSMsg Recv New Message: %# 20X", data))
 	err := json.Unmarshal(data, &msg)
 	if err != nil {
-		s.diag.Error(string(data), err)
+		s.diag.Error(fmt.Sprintf("OnWSMsg Fail With Message: %# 20X", data), err)
 		return
 	}
-
-	//msgData, _ := json.Marshal(msg.Data)
 	switch msg.Type {
-
 	case WS_TOOL_ENABLE:
-
 		req := ToolEnable{}
 		strData, _ := json.Marshal(msg.Data)
-
 		_ = json.Unmarshal([]byte(strData), &req)
-
 		device, _ := s.GetDevice(req.ToolSN)
 		rt := device.Enable(&req)
-		reply, _ := json.Marshal(wsnotify.WSMsg{
+		msg := wsnotify.WSMsg{
 			Type: WS_TOOL_ENABLE,
 			SN:   msg.SN,
 			Data: rt,
-		})
+		}
+		reply, _ := json.Marshal(msg)
 
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, string(reply))
+		err := wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, string(reply))
+		if err != nil {
+			s.diag.Error(fmt.Sprintf("WS_TOOL_ENABLE Send WS_EVENT_REPLY WebSocket Message: %#v Fail", msg), err)
+		}
 
 	case WS_TOOL_JOB:
 		reply := wsnotify.WSMsg{
@@ -125,14 +125,19 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 		s.WS.WSSendReply(&reply)
 
 	case WS_TOOL_PSET:
-		req := PSetSet{}
-		strData, _ := json.Marshal(msg.Data)
+		ds := s.StorageService
+		if ds == nil {
+			s.diag.Error("WS_TOOL_PSET Fail ", errors.New("Please Inject Storage Service First"))
+			return
+		}
+		var req PSetSet
+		bData, _ := json.Marshal(msg.Data)
 
-		_ = json.Unmarshal([]byte(strData), &req)
+		_ = json.Unmarshal(bData, &req)
 
-		_ = s.DB.UpdateGun(&storage.Guns{
+		_ = ds.UpdateGun(&storage.Guns{
 			Serial: req.ToolSN,
-			Trace:  string(strData),
+			Trace:  string(bData),
 		})
 
 		device, _ := s.GetDevice(req.ToolSN)
@@ -169,7 +174,7 @@ func (s *Service) GetDevice(sn string) (TighteningDevice, error) {
 
 	td, exist := s.runningDevices[sn]
 	if !exist {
-		return td, errors.New("device not found")
+		return nil, errors.New(fmt.Sprintf("Device Serial Number: %s Not Fount", sn))
 	}
 
 	return td, nil

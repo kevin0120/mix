@@ -60,21 +60,21 @@ func (h *Handlers) Release() {
 func (h *Handlers) Handle(result ControllerResult, curve minio.ControllerCurve) {
 
 	// 取得工具信息
-	//gun, err := h.controllerService.DB.GetGun(controllerResult.GunSN)
+	//gun, err := h.controllerService.StorageService.GetGun(controllerResult.GunSN)
 	//if err != nil {
 	//	h.controllerService.diag.Error("get gun failed", err)
 	//	return
 	//}
 
 	// 取得工单
-	//dbWorkorder, err := h.controllerService.DB.GetWorkorder(controllerResult.Workorder_ID, true)
+	//dbWorkorder, err := h.controllerService.StorageService.GetWorkorder(controllerResult.Workorder_ID, true)
 	//if err != nil {
 	//	h.controllerService.diag.Error("get workorder failed", err)
 	//	return
 	//}
 
 	// 取得工步
-	//dbStep, err := h.controllerService.DB.GetStep(controllerResult.StepID)
+	//dbStep, err := h.controllerService.StorageService.GetStep(controllerResult.StepID)
 	//if err != nil {
 	//	h.controllerService.diag.Error("get step failed", err)
 	//	return
@@ -248,7 +248,7 @@ func (h *Handlers) doSaveResult(data *SavePackage) storage.Results {
 		//if kvs[0] == kvs[1] {
 		//	h.controllerService.diag.Debug("工单已完成")
 		//	data.dbWorkorder.Status = "done"
-		//	h.controllerService.DB.UpdateWorkorder(data.dbWorkorder)
+		//	h.controllerService.StorageService.UpdateWorkorder(data.dbWorkorder)
 		//}
 	} else {
 

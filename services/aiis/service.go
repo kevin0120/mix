@@ -359,13 +359,13 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	aiisResult.TighteningId, _ = strconv.ParseInt(result.TighteningID, 10, 64)
 	aiisResult.Lacking = "normal"
 
-	//gun, err := s.DB.GetGun(result.GunSN)
+	//gun, err := s.StorageService.GetGun(result.GunSN)
 	//if err != nil {
 	//	gid, err := s.SyncGun(result.GunSN)
 	//	if err == nil {
 	//		gun.GunID = gid
 	//		gun.Serial = result.GunSN
-	//		s.DB.Store(gun)
+	//		s.StorageService.Store(gun)
 	//	} else {
 	//		gun.GunID = 0
 	//	}
