@@ -35,28 +35,10 @@ const rushDataHandlers = {
   * [wse.maintenance](data: tRushWebSocketData) {
     try {
       yield put(setNewNotification('Maintenance', `新维护请求: ${data.type},${data.data.name}`));
-
     } catch (e) {
       CommonLog.lError(e, { at: 'rush event maintenance' });
     }
   },
-
-  * [wse.job]() {
-
-  },
-
-  * [wse.odoo]() {
-
-  },
-
-
-  [wse.controller](data: tRushWebSocketData) {
-    try {
-    } catch (e) {
-      CommonLog.lError(e, { at: 'rush event controller' });
-    }
-  },
-
 
   * [wse.tightening_device](data: tRushWebSocketData) {
     try {
@@ -64,14 +46,6 @@ const rushDataHandlers = {
 
     } catch (e) {
       CommonLog.lError(e, { at: 'rush event tightening_device' });
-    }
-  },
-  * [wse.reply](data: tRushWebSocketData) {
-    try {
-      // console.log(data);
-      // yield put(rushActions.reply(data));
-    } catch (e) {
-      CommonLog.lError(e, { at: 'rush event reply' });
     }
   },
   [wse.io]: ioNewData,

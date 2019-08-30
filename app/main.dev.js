@@ -16,8 +16,8 @@ import log from 'electron-log';
 import url from 'url';
 import path from 'path';
 import MenuBuilder from './menu';
-
 import configs from './shared/config';
+import * as ws from './main/webSocket';
 
 export default class AppUpdater {
   constructor() {
@@ -116,7 +116,12 @@ app.on('ready', async () => {
       })
     );
   }
-  let init = true;
+  if (mainWindow){
+    const conn = configs.system.connections.rush.split('://')[1];
+    const wsURL = `ws://${conn}/rush/v1/ws`;
+    const hmiSN = configs.page.odooConnection.hmiSn.value;
+    ws.init(wsURL, hmiSN, mainWindow);
+  }
 
   // @TODO: Use 'ready-to-show' event
   //        https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
@@ -124,6 +129,7 @@ app.on('ready', async () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
+
     if (process.env.NODE_ENV === 'production' && process.env.DEBUG_PROD !== 'true') {
       mainWindow.setKiosk(true); // 只有生产环境才全屏
     }
@@ -132,10 +138,6 @@ app.on('ready', async () => {
     } else {
       mainWindow.show();
       mainWindow.focus();
-    }
-    if (init) {
-      mainWindow.webContents.reload();
-      init = false;
     }
   });
 
