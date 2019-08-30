@@ -1,5 +1,7 @@
 package device
 
+const ()
+
 const (
 	WS_DEVICE_STATUS = "WS_DEVICE_STATUS"
 )

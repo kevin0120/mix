@@ -10,8 +10,13 @@ import (
 )
 
 type Device interface {
+
+	// 设备状态
 	Status() string
+
+	// 设备类型
 	DeviceType(string) string
+
 	Children() []string
 	Config() interface{}
 	Data() interface{}

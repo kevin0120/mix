@@ -19,10 +19,10 @@ const (
 	WS_TOOL_JOB_DETAIL  = "WS_TOOL_JOB_DETAIL"
 )
 
-const (
-	TIGHTENING_DEVICE_ONLINE  = "online"
-	TIGHTENING_DEVICE_OFFLINE = "offline"
-)
+type ControllerOutput struct {
+	No     int    `json:"no"`
+	Status string `json:"status"`
+}
 
 type Reply struct {
 	Result int    `json:"result"`
@@ -50,4 +50,10 @@ type PSetSet struct {
 type ToolEnable struct {
 	ToolSN string `json:"tool_sn"`
 	Enable bool   `json:"enable"`
+}
+
+type TighteningResult struct {
+}
+
+type TighteningCurve struct {
 }

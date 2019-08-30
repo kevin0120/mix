@@ -7,7 +7,6 @@ import (
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/storage"
-	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
 	"sync/atomic"
@@ -80,15 +79,15 @@ func (p *Service) AddDevice(cfg controller.DeviceConfig, ts interface{}) control
 		Tools:    cfg.Tools,
 	}
 	c.SetModel(cfg.Model)
-	c.tighteningDevice = ts.(*tightening_device.Service)
+	//c.tighteningDevice = ts.(*tightening_device.Service)
 
 	if cfg.SN != "" {
-		c.tighteningDevice.AddDevice(cfg.SN, &c)
+		//c.tighteningDevice.AddDevice(cfg.SN, &c)
 		p.Parent.Device.AddDevice(cfg.SN, &c)
 	}
 
 	for _, v := range cfg.Tools {
-		c.tighteningDevice.AddDevice(v.SerialNO, &c)
+		//c.tighteningDevice.AddDevice(v.SerialNO, &c)
 		p.Parent.Device.AddDevice(v.SerialNO, &c)
 	}
 

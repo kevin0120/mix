@@ -6,6 +6,7 @@ import (
 	"github.com/kataras/iris/core/errors"
 	"github.com/kataras/iris/websocket"
 	"github.com/masami10/rush/services/controller"
+	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"sync"
@@ -23,16 +24,45 @@ type Diagnostic interface {
 }
 
 type TighteningDevice interface {
-	SetModel(model string)
-	SetJob(r *JobSet) Reply
-	SetPSet(r *PSetSet) Reply
-	Enable(r *ToolEnable) Reply
+	device.Device
+
+	Read()
+	Write()
+}
+
+type TighteningController interface {
+	TighteningDevice
+
+	// 启动
+	Start() error
+
+	// 停止
+	Stop() error
+
+	// 拧紧工具列表
+	Tools() map[string]TighteningTool
+
+	// 控制输出
+	SetOutput(outputs []ControllerOutput) error
+}
+
+type TighteningTool interface {
+	TighteningDevice
+
+	// 工具使能控制
+	ToolControl(enable bool) error
+
+	// 设置pset
+	SetPSet(pset int) error
+
+	// 设置job
+	SetJob(job int) error
 }
 
 type Service struct {
 	diag           Diagnostic
 	configValue    atomic.Value
-	runningDevices map[string]TighteningDevice
+	runningDevices map[string]TighteningController
 	mtxDevices     sync.Mutex
 
 	WS             *wsnotify.Service
@@ -46,17 +76,18 @@ func NewService(c Config, d Diagnostic, pAudi controller.Protocol, pOpenprotocol
 	srv := &Service{
 		diag:           d,
 		mtxDevices:     sync.Mutex{},
-		runningDevices: map[string]TighteningDevice{},
+		runningDevices: map[string]TighteningController{},
 	}
 
 	srv.configValue.Store(c)
 
+	// 根据配置加载所有拧紧设备
 	for _, device := range c.Devices {
 		switch device.Protocol {
 		//case controller.AUDIPROTOCOL:
 
 		case controller.OPENPROTOCOL:
-			pOpenprotocol.AddDevice(device, srv)
+			//pOpenprotocol.AddDevice(device, srv)
 
 		default:
 
@@ -72,6 +103,8 @@ func (s *Service) Open() error {
 	}
 
 	s.WS.AddNotify(s)
+
+	// 启动所有拧紧设备
 
 	return nil
 }
@@ -99,7 +132,7 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 		strData, _ := json.Marshal(msg.Data)
 		_ = json.Unmarshal([]byte(strData), &req)
 		device, _ := s.GetDevice(req.ToolSN)
-		rt := device.Enable(&req)
+		rt := device.Tools()[""].ToolControl(req.Enable)
 		msg := wsnotify.WSMsg{
 			Type: WS_TOOL_ENABLE,
 			SN:   msg.SN,
@@ -141,7 +174,7 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 		})
 
 		device, _ := s.GetDevice(req.ToolSN)
-		rt := device.SetPSet(&req)
+		rt := device.Tools()[""].SetPSet(req.PSet)
 		reply, _ := json.Marshal(wsnotify.WSMsg{
 			Type: WS_TOOL_PSET,
 			SN:   msg.SN,
@@ -156,7 +189,7 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 	}
 }
 
-func (s *Service) AddDevice(sn string, td TighteningDevice) {
+func (s *Service) AddDevice(sn string, td TighteningController) {
 	defer s.mtxDevices.Unlock()
 	s.mtxDevices.Lock()
 
@@ -168,7 +201,7 @@ func (s *Service) AddDevice(sn string, td TighteningDevice) {
 	s.runningDevices[sn] = td
 }
 
-func (s *Service) GetDevice(sn string) (TighteningDevice, error) {
+func (s *Service) GetDevice(sn string) (TighteningController, error) {
 	defer s.mtxDevices.Unlock()
 	s.mtxDevices.Lock()
 

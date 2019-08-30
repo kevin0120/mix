@@ -64,11 +64,10 @@ type Controller struct {
 	mtxResult         sync.Mutex
 	toolStatus        atomic.Value
 	model             string
-	tighteningDevice  *tightening_device.Service
-
-	tightening_device.TighteningDevice
-
+	//tighteningDevice  *tightening_device.Service
 	receiveBuf chan []byte
+
+	tightening_device.TighteningController
 }
 
 func NewController(c Config, d Diagnostic) Controller {
