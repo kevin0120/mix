@@ -1,14 +1,20 @@
 import { HEALTHZ } from './action';
 
 const initState = {
-  status: {}
+  status: {
+    rush: false
+  }
 };
 
 const reducers = {
   [HEALTHZ.DATA]: (state, action) => {
     const { status } = action;
     return {
-      status
+      status:{
+        ...state.status,
+        ...status
+      },
+
     };
   }
 };

@@ -1,17 +1,16 @@
 import { put } from 'redux-saga/effects';
 import { CommonLog } from '../../common/utils';
 import NotifierActions from '../Notifier/action';
+import healthzActions from '../healthz/action';
 
 const onConnectActions = [
-  ()=>NotifierActions.enqueueSnackbar('Info', 'rush 已连接'),
+  () => NotifierActions.enqueueSnackbar('Info', 'rush 已连接')
 ];
 const onDisconnectActions = [
-  ()=>NotifierActions.enqueueSnackbar('Error', 'rush 已断开'),
+  () => NotifierActions.enqueueSnackbar('Error', 'rush 已断开')
 
 ];
-const onChangeActions = [
-
-];
+const onChangeActions = [];
 
 export const bindRushAction = {
   onConnect: bindOnConnectAction,
@@ -55,6 +54,7 @@ function* bindOnChangeAction(actionToBind) {
 
 export default function* (payload) {
   try {
+    yield put(healthzActions.data({ rush: payload }));
     if (rushHealthz !== payload) {
       // eslint-disable-next-line no-restricted-syntax
       for (const action of onChangeActions) {
