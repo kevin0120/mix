@@ -29,6 +29,7 @@ import { orderDetailApi, orderListApi } from '../../api/order';
 import { ORDER_STATUS } from './model';
 import { bindRushAction } from '../rush/rushHealthz';
 import loadingActions from '../loading/action';
+import NotifierActions from '../Notifier/action';
 
 export default function* root(): Saga<void> {
   try {
@@ -39,8 +40,17 @@ export default function* root(): Saga<void> {
       takeEvery(ORDER.DETAIL.GET, getOrderDetail),
       takeEvery(ORDER.WORK_ON, workOnOrder),
       takeEvery(ORDER.VIEW, viewOrder),
+      takeEvery(ORDER.NEW, newOrder),
       takeLeading([ORDER.STEP.PREVIOUS, ORDER.STEP.NEXT], DebounceViewStep, 300)
     ]);
+  } catch (e) {
+    CommonLog.lError(e);
+  }
+}
+
+function* newOrder() {
+  try {
+    yield put(NotifierActions.enqueueSnackbar('Info', '收到新工单'));
   } catch (e) {
     CommonLog.lError(e);
   }
@@ -50,7 +60,7 @@ function* workOnOrder({ order }) {
   try {
     yield race([
         call(order.run, ORDER_STATUS.WIP),
-        take(a=>a.type===ORDER.FINISH && a.order===order)
+        take(a => a.type === ORDER.FINISH && a.order === order)
       ]
     );
   } catch (e) {
@@ -79,8 +89,8 @@ function* DebounceViewStep(d, action: tCommonActionType) {
 
 function* getOrderDetail({ order }) {
   try {
-    const resp=yield call(orderDetailApi, order.id);
-    if(resp.result!==0){
+    const resp = yield call(orderDetailApi, order.id);
+    if (resp.result !== 0) {
       yield put(orderActions.getDetailFail());
     }
   } catch (e) {

@@ -75,9 +75,12 @@ function HomeOperationList(props: Props) {
                 <Typography variant="body1" align="left" className={classes.orderNameText}>
                   {order.name}
                 </Typography>
-                <Typography variant="body2" color="textSecondary" align="left" className={classes.orderInfoText}>
-                  {order.info}
-                </Typography>
+                {
+                  order.desc&&order.desc.split('\t\t').map(d=>
+                    <Typography variant="body2" color="textSecondary" align="left" className={classes.orderInfoText}>
+                    {d}
+                  </Typography>)
+                }
                 <Typography variant="body2" color="textSecondary" align="left" className={classes.orderStatusText}>
                   {t(`OrderStatus.${order.status || ORDER_STATUS.TODO}`)}
                 </Typography>

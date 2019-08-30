@@ -160,7 +160,7 @@ const ButtonsContainer = ({
                         color="primary"
                         className={classes.bigButton}
                       >
-                        continue
+                        继续
                       </Button> :
                       (pendingable && <Button
                         type="button"

@@ -11,6 +11,7 @@ import { ORDER_STATUS } from './model';
 export const demoOrder = {
   id: 'demoOrder1',
   name: 'demo Order 1',
+  desc:'a:b\t\tb:c\t\tc:d',
   info:
     'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
   type: 'step',
@@ -176,6 +177,22 @@ export const demoOrder = {
       data: {},
       payload: {
         label: 'name'
+      }
+    },
+    {
+      id: 's6',
+      name: '指导',
+      info: {
+        time: '00:02:00'
+      },
+      description: 'pdf',
+      type: 'instruction',
+      skippable: true,
+      data: {},
+      payload: {
+        url:'\\\\192.168.74.31\\share\\D0000177249.pdf',
+        page:0
+        // label: 'name'
       }
     },
     {

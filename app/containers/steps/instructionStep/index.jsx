@@ -7,7 +7,7 @@ import { instructionStepActions } from '../../../modules/step/instructionStep/ac
 import { tStepProps } from '../types';
 import { stepPayload, viewingStep } from '../../../modules/order/selector';
 import styles from './styles';
-import pdf from '../../../../resources/D0000177249.pdf';
+import { defaultClient } from '../../../common/utils';
 
 const mapState = (state, props) => ({
   ...props,
@@ -40,18 +40,28 @@ function InstructionStep({ step, isCurrent, submit, bindAction, url, page }: Pro
     );
     return () => bindAction(null);
   }, [step, bindAction, isCurrent, submit]);
-  const [pdfPage,setPage]=useState(0);
+  const [pdfPage, setPage] = useState(0);
+  const [pdfUrl,setPdfUrl]=useState('');
+
+  useEffect(() => {
+    const response = defaultClient
+      .get(url)
+      .then(resp => {
+        setPdfUrl(resp.request._redirectable._currentUrl);
+      });
+  }, [url]);
 
   return (
     <div className={classes.container}>
       <Document
         className={classes.document}
-        file={pdf}
-        onLoadSuccess={()=>setPage(page)}
+        file={pdfUrl}
+        // file={pdf}
+        onLoadSuccess={() => setPage(page)}
       >
         <Page
           className={classes.page}
-          scale={1}
+          scale={1.3}
           pageIndex={pdfPage}
           renderAnnotationLayer={false}
         />

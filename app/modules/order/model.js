@@ -17,7 +17,7 @@ export type tOrder = {
   status: tOrderStatus, // 工单状态
   plannedDateTime: string, // 计划时间
   name: string, // 工单号
-  info: string, // 工单信息
+  desc: string, // 工单信息
   workingIndex: ?number // 正在执行的工步索引
 };
 

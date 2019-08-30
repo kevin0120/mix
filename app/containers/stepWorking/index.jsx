@@ -28,7 +28,7 @@ const statusMap = classes => ({
   [ORDER_STATUS.PENDING]: classes.statusPending
 });
 
-function StepWorking({ status, name }: Props) {
+function StepWorking({ status, name, desc }: Props) {
   const classes = makeStyles(styles.layout)();
   const [action, bindAction] = useState(null);
   const [description, bindDescription] = useState(null);
@@ -47,7 +47,18 @@ function StepWorking({ status, name }: Props) {
               >
                 [{status ? t(`OrderStatus.${status}`) : '未选中工单'}]
               </Typography>
-              <Typography variant="h5">{name || ''}</Typography>
+              {/*<Typography variant="h5">{name || ''}</Typography>*/}
+              {/*<Typography variant="h5">{desc || ''}</Typography>*/}
+              {
+                desc && desc.split('\t\t').map(d =>
+                  <React.Fragment>
+                  <Typography variant="h5">
+                    {d||''}
+                  </Typography>
+                <span style={{width:'40px'}}/>
+                  </React.Fragment>
+                )
+              }
             </div>
             <img src={logo} className={classes.logo}/>
           </Paper>
@@ -76,7 +87,8 @@ const mapState = (state, props) => {
   return {
     ...props,
     status: vOrder?.status,
-    name: vOrder?.name
+    name: vOrder?.name,
+    desc: vOrder?.desc
   };
 };
 

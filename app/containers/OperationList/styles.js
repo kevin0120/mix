@@ -1,4 +1,4 @@
-const cardHeight='120px';
+const cardHeight='130px';
 
 export default (theme) => ({
   root: {
@@ -27,9 +27,11 @@ export default (theme) => ({
     justifyContent:'flex-start',
   },
   bgOdd: {
+    overflow:'auto',
     backgroundColor: '#747474'
   },
   bgEven: {
+    overflow:'auto',
     backgroundColor: '#7c7c7c'
   },
   image: {
@@ -63,7 +65,7 @@ export default (theme) => ({
     display:'block',
   },
   orderStatusText:{
-
+    marginTop:'5px'
   },
   statusTodo:{
     backgroundColor:theme.palette.gray.main,

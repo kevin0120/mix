@@ -9,6 +9,7 @@ export const ORDER = {
   FINISH: 'ORDER_FINISH',
   // update the store
   UPDATE_STATE: 'ORDER_UPDATE_STATE',
+  NEW:'ORDER_NEW',
   LIST: {
     GET: 'ORDER_LIST_GET',
     SUCCESS: 'ORDER_LIST_SUCCESS',
@@ -43,6 +44,10 @@ export type orderTriggerType = {
 export const orderActions = {
   getList: () => ({
     type: ORDER.LIST.GET
+  }),
+  newOrder: (list) => ({
+    type: ORDER.NEW,
+    list
   }),
   getListSuccess: (list: Array<tOrder>) => ({
     type: ORDER.LIST.SUCCESS,

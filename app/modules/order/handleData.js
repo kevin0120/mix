@@ -9,7 +9,8 @@ export const ORDER_WS_TYPES = {
   LIST: 'WS_ORDER_LIST',
   DETAIL: 'WS_ORDER_DETAIL',
   UPDATE: 'WS_ORDER_UPDATE',
-  STEP_UPDATE: 'WS_ORDER_STEP_UPDATE'
+  STEP_UPDATE: 'WS_ORDER_STEP_UPDATE',
+  NEW: 'WS_NEW_ORDER'
 };
 
 
@@ -18,7 +19,7 @@ const dataHandlers = {
     try {
       const list = data.map(d => ({
         id: d.id,
-        info: d.desc,
+        desc: d.desc,
         name: d.name,
         image: '',
         status: d.status
@@ -39,7 +40,15 @@ const dataHandlers = {
     } catch (e) {
       CommonLog.lError(e, { at: 'ORDER_WS_TYPES.DETAIL' });
     }
+  },
+  * [ORDER_WS_TYPES.NEW](data) {
+    try {
+      yield put(orderActions.newOrder(data));
+    } catch (e) {
+      CommonLog.lError(e);
+    }
   }
+
 };
 
 export default function* orderData(rushData) {

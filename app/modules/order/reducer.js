@@ -56,14 +56,44 @@ const orderReducer: {
   [key: string]: (tOrderState, { type: string, [key: any]: any }) => tOrderState
 } = {
   [ORDER.LIST.SUCCESS]: (state, { list }) => {
-    // get exist orders
+    // get exist orders, orders not in the new list will be removed!!
     let newList = state.list.filter(
       (o) => !!list.find(newO => o.id === newO.id)
     );
+
     // update order data
     newList.forEach((o) => {
       const orderData = list.find(newO => o.id === newO.id);
       o.update(orderData, stepTypes);
+    });
+
+    // make new orders
+    newList = newList.concat(
+      list.filter(newO =>
+        !newList.find(o => o.id === newO.id)
+      ).map(
+        oD => new Order(oD, stepTypes)
+      )
+    );
+    console.log(newList);
+
+    // const newList = list.map(oD => new Order(oD, stepTypes));
+
+    return {
+      ...state,
+      list: newList
+    };
+  },
+  [ORDER.NEW]: (state, { list }) => {
+    // get exist orders
+    let newList = state.list;
+
+    // update order data
+    newList.forEach((o) => {
+      const orderData = list.find(newO => o.id === newO.id);
+      if(orderData){
+        o.update(orderData, stepTypes);
+      }
     });
 
     // make new orders
