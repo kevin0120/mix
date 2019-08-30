@@ -9,14 +9,13 @@ import DialogContent from '@material-ui/core/DialogContent';
 import { I18n } from 'react-i18next';
 import Button from '../../components/CustomButtons/Button';
 import styles from './styles';
-import actionStepWorkingDef from './type';
+import { translation as trans, stepWorkingNS } from './local';
 import type { Dispatch } from '../../modules/indexReducer';
 import * as oSel from '../../modules/order/selector';
 import { orderActions } from '../../modules/order/action';
 import type { tOrder, tStep, tStepArray } from '../../modules/order/model';
 import dialogActions from '../../modules/dialog/action';
-import { doable } from '../../modules/order/selector';
-import i18n from '../../i18n';
+import { tNS, withI18n } from '../../i18n';
 import Table from '../../components/Table/Table';
 import modelViewerActions from '../../modules/modelViewer/action';
 
@@ -101,11 +100,13 @@ const ButtonsContainer = ({
     viewingOrder.payload.models.map((m) => [
       m.name,
       m.desc,
-      <Button
-        color="primary"
-        type="button"
-        onClick={() => viewModel(m.url)}
-      >查看</Button>
+      withI18n(t => (
+        <Button
+          color="primary"
+          type="button"
+          onClick={() => viewModel(m.url)}
+        >{t(trans.view)}</Button>
+      ), stepWorkingNS)
     ])) || [];
   const modelsTableDialog = {
     buttons: [
@@ -114,23 +115,25 @@ const ButtonsContainer = ({
         color: 'warning'
       }
     ],
-    title: i18n.t('Order.Overview'),
+    title: tNS(trans.viewModel, stepWorkingNS),
     content: (
-      <Table
-        tableHeaderColor="info"
-        tableHead={[
-          '名称',
-          '描述',
-          '操作',
-        ]}
-        tableData={modelsData}
-        colorsColls={['info']}
-      />
+      withI18n(t => (
+        <Table
+          tableHeaderColor="info"
+          tableHead={[
+            t(trans.name),
+            t(trans.desc),
+            t(trans.action)
+          ]}
+          tableData={modelsData}
+          colorsColls={['info']}
+        />
+      ), stepWorkingNS)
     )
   };
 
-  return <I18n ns="translations">
-    {t => (<div className={classes.root}>
+  return withI18n(t => (
+    <div className={classes.root}>
       <div>
         {
           isPending || pendingable || cancelable ?
@@ -160,7 +163,7 @@ const ButtonsContainer = ({
                         color="primary"
                         className={classes.bigButton}
                       >
-                        继续
+                        {t(trans.continueDoing)}
                       </Button> :
                       (pendingable && <Button
                         type="button"
@@ -172,7 +175,7 @@ const ButtonsContainer = ({
                         color="warning"
                         className={classes.bigButton}
                       >
-                        阻塞
+                        {t(trans.pending)}
                       </Button>) || null
                     }
                     {
@@ -185,7 +188,7 @@ const ButtonsContainer = ({
                           setDialogOpen(false);
                         }}
                       >
-                        取消订单
+                        {t(trans.cancel)}
                       </Button> : null
                     }
                   </DialogContent>
@@ -198,7 +201,7 @@ const ButtonsContainer = ({
           type="button"
           onClick={() => viewModelDialog(modelsTableDialog)}
         >
-          {'查看模型'}
+          {t(trans.viewModel)}
         </Button>
         <Button
           color="primary"
@@ -222,7 +225,7 @@ const ButtonsContainer = ({
           onClick={() => doNextStep()}
           color="tumblr"
         >
-          {t(actionStepWorkingDef.SKIP)}
+          {t(trans.skip)}
         </Button>
         <Button
           disabled={viewingStep !== workingStep || !viewingStep?.undoable}
@@ -230,12 +233,11 @@ const ButtonsContainer = ({
           onClick={() => doPreviousStep()}
           color="danger"
         >
-          {t(actionStepWorkingDef.UNDO)}
+          {t(trans.undo)}
         </Button>
       </div>
       <div>{action}</div>
-    </div>)}
-  </I18n>;
+    </div>), stepWorkingNS);
 };
 
 export default connect(mapState, mapDispatch)(ButtonsContainer);

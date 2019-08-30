@@ -17,11 +17,6 @@
     "video": "video",
     "check": "check"
   },
-  "StepWorking": {
-    "SKIP": "SKIP",
-    "UNDO": "UNDO",
-    "SUBMIT": "VALIDATE"
-  },
   "Language": {
     "en": "EN",
     "zh_CN": "zh_CN"

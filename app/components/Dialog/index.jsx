@@ -50,7 +50,7 @@ function customDialog(props: Props) {
   };
 
   return (
-    <I18n>
+    <I18n ns="translations">
       {t => (
         <Dialog
           classes={{

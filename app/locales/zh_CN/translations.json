@@ -8,11 +8,6 @@
     "done": "已完成",
     "excp": "异常"
   },
-  "StepWorking": {
-    "SKIP": "跳过",
-    "UNDO": "取消上次动作",
-    "SUBMIT": "提交(验证)"
-  },
   "StepType": {
     "input": "输入",
     "scanner": "扫码",

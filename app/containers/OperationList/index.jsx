@@ -19,12 +19,12 @@ import styles from './styles';
 import settingImg from '../../../resources/imgs/setting.png';
 import type { Dispatch } from '../../modules/indexReducer';
 import type { tOrder } from '../../modules/order/model';
+import { withI18n } from '../../i18n';
 
 
 type Props = {
   classes: {},
   orderList: Array<tOrder>,
-  getDetail: Dispatch,
   view: Dispatch,
   doPush: Dispatch,
   getList: Dispatch
@@ -32,12 +32,11 @@ type Props = {
 
 function HomeOperationList(props: Props) {
   const classes = makeStyles(styles)();
-  const { view, getDetail, doPush, orderList, getList } = props;
+  const { view, doPush, orderList, getList } = props;
 
   const retOrderList = sortBy(orderList, (o: tOrder) => new Date(o.plannedDateTime) || Date.now());
 
   const onCardClick = (order) => {
-    // getDetail(order);
     view(order);
     doPush('/app/working');
   };
@@ -76,10 +75,10 @@ function HomeOperationList(props: Props) {
                   {order.name}
                 </Typography>
                 {
-                  order.desc&&order.desc.split('\t\t').map(d=>
+                  order.desc && order.desc.split('\t\t').map(d =>
                     <Typography variant="body2" color="textSecondary" align="left" className={classes.orderInfoText}>
-                    {d}
-                  </Typography>)
+                      {d}
+                    </Typography>)
                 }
                 <Typography variant="body2" color="textSecondary" align="left" className={classes.orderStatusText}>
                   {t(`OrderStatus.${order.status || ORDER_STATUS.TODO}`)}
@@ -92,25 +91,24 @@ function HomeOperationList(props: Props) {
     </React.Fragment>
   );
 
-  return <I18n ns="translations">
-    {t => (
-      <div className={classes.root}>
-        <Grid container className={clsx(classes.container, classes.bgEven)} justify="center" spacing={4}>
-          <Grid item container xs={6} spacing={1} alignItems="flex-start" alignContent="flex-start"
-                justify="flex-start" direction="row" className={classes.bgOdd}>
-            {renderOrders(t, [...doingOrders(retOrderList), ...todoOrders(retOrderList)], 6, t(`OrderStatus.wip`))}
-          </Grid>
-          <Grid item container xs={3} spacing={1} alignItems="flex-start" alignContent="flex-start"
-                justify="flex-start" direction="row" className={classes.bgEven}>
-            {renderOrders(t, doneOrders(retOrderList), 12, t('OrderStatus.done'))}
-          </Grid>
-          <Grid item container xs={3} spacing={1} alignItems="flex-start" alignContent="flex-start"
-                justify="flex-start" direction="row" className={classes.bgOdd}>
-            {renderOrders(t, exceptOrders(retOrderList), 12, t('OrderStatus.excp'))}
-          </Grid>
+  return withI18n(t => (
+    <div className={classes.root}>
+      <Grid container className={clsx(classes.container, classes.bgEven)} justify="center" spacing={4}>
+        <Grid item container xs={6} spacing={1} alignItems="flex-start" alignContent="flex-start"
+              justify="flex-start" direction="row" className={classes.bgOdd}>
+          {renderOrders(t, [...doingOrders(retOrderList), ...todoOrders(retOrderList)], 6, t(`OrderStatus.wip`))}
         </Grid>
-      </div>)}
-  </I18n>;
+        <Grid item container xs={3} spacing={1} alignItems="flex-start" alignContent="flex-start"
+              justify="flex-start" direction="row" className={classes.bgEven}>
+          {renderOrders(t, doneOrders(retOrderList), 12, t('OrderStatus.done'))}
+        </Grid>
+        <Grid item container xs={3} spacing={1} alignItems="flex-start" alignContent="flex-start"
+              justify="flex-start" direction="row" className={classes.bgOdd}>
+          {renderOrders(t, exceptOrders(retOrderList), 12, t('OrderStatus.excp'))}
+        </Grid>
+      </Grid>
+    </div>
+  ), 'translations');
 
 }
 
@@ -120,7 +118,6 @@ const mapState = (state, props) => ({
 });
 
 const mapDispatch = {
-  getDetail: orderActions.getDetail,
   view: orderActions.view,
   doPush: push,
   getList: orderActions.getList
