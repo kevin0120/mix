@@ -1,14 +1,12 @@
 // @flow
-import { call } from 'redux-saga/effects';
-import type { Saga } from 'redux-saga';
 import { CommonLog } from '../common/utils';
 import { rushSendApi } from './rush';
 
 type tIOSn = string;
 
-export function* ioSetApi(sn: tIOSn, index: number, status: string): Saga<void> {
+export function ioSetApi(sn: tIOSn, index: number, status: string) {
   try {
-    return yield call(rushSendApi, 'WS_IO_SET', {
+    return rushSendApi('WS_IO_SET', {
       sn,
       index,
       status
@@ -20,9 +18,9 @@ export function* ioSetApi(sn: tIOSn, index: number, status: string): Saga<void> 
   }
 }
 
-export function* ioContactApi(sn: tIOSn): Saga<void> {
+export function ioContactApi(sn: tIOSn) {
   try {
-    return yield call(rushSendApi, 'WS_IO_CONTACT', {
+    return rushSendApi('WS_IO_CONTACT', {
       sn
     });
   } catch (e) {
@@ -32,9 +30,9 @@ export function* ioContactApi(sn: tIOSn): Saga<void> {
   }
 }
 
-export function* ioStatusApi(sn: tIOSn): Saga<void> {
+export function ioStatusApi(sn: tIOSn) {
   try {
-    return yield call(rushSendApi, 'WS_IO_STATUS', {
+    return rushSendApi('WS_IO_STATUS', {
       sn
     });
   } catch (e) {

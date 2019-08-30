@@ -32,6 +32,7 @@ function* initRush() {
       task = yield fork(watchRushChannel);
       ipcRenderer.send('rush');
     }
+    console.log(getWSClient());
   } catch (e) {
     CommonLog.lError(e, { at: 'initRush' });
   } finally {

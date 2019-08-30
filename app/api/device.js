@@ -1,14 +1,12 @@
-import type { Saga } from 'redux-saga';
-import { call } from 'redux-saga/effects';
 import { CommonLog } from '../common/utils';
-import {rushSendApi} from './rush';
+import { rushSendApi } from './rush';
 
-export function* deviceStatusApi(): Saga<void> {
+export function deviceStatusApi() {
   try {
-    return yield call(rushSendApi, 'WS_DEVICE_STATUS')
+    return rushSendApi('WS_DEVICE_STATUS');
   } catch (e) {
     CommonLog.lError(e, {
-      at: 'deviceStatusApi',
+      at: 'deviceStatusApi'
     });
   }
 }

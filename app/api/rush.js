@@ -1,30 +1,39 @@
-import type { Saga } from 'redux-saga';
-import { call, delay, race } from 'redux-saga/effects';
-import rushSendMessage from '../modules/rush/sendMessage';
-import { CommonLog } from '../common/utils';
+const { ipcRenderer } = require('electron');
+
+const messageSNs = {};
+
+function getSN() {
+  let sn;
+  const isSame = k => k === sn;
+  do {
+    sn = Math.floor(((+new Date()) % 100000000 + Math.random()) * 1000);
+  } while (Object.keys(messageSNs).findIndex(isSame) >= 0);
+  return sn;
+}
 
 const defaultTimeout = 10000;
 
-export function* rushSendApi(msgType, data, timeout = defaultTimeout): Saga<void> {
-  try {
-    const { resp, timeout: tOut } = yield race({
-      resp: call(rushSendMessage, {
+export function rushSendApi(msgType, data, timeout = defaultTimeout) {
+  const sn = getSN();
+  messageSNs[sn] = true;
+  return new Promise((resolve) => {
+    ipcRenderer.send('rush-send', {
+      data: {
         type: msgType,
         data
-      }),
-      timeout: delay(timeout)
+      }, timeout, sn
     });
-    if (tOut) {
-      return {
-        result: -1,
-        msg: `rushSendApi timeout ${msgType}`
-      };
-    }
-    const { data: ret } = resp;
-    return ret;
-  } catch (e) {
-    CommonLog.lError(e, {
-      at: 'rushSendApi', type: msgType, data
-    });
-  }
+    const reply = (event, args, replySN) => {
+      if (replySN === sn) {
+        delete messageSNs[sn];
+        console.log('rush-reply', args);
+        ipcRenderer.removeListener('rush-reply', reply);
+        resolve(args);
+      }
+    };
+    ipcRenderer.on('rush-reply', reply);
+  }).then(resp => resp);
 }
+
+
+
