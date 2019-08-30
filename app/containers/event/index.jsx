@@ -97,6 +97,7 @@ const requestData = () =>
       if (err) {
         /* TODO: handle me */
         console.error(err);
+        reject(err);
       }
 
       resolve(results);

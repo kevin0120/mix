@@ -1,11 +1,11 @@
 // @flow
 import type { Saga } from 'redux-saga';
 import { take, fork, join } from 'redux-saga/effects';
+import OWebSocket from 'ws';
 import { CommonLog } from '../../common/utils';
 import { RUSH } from './action';
-import OWebSocket from 'ws';
 
-const { getWSClient } = require('electron').remote.require('./shared/webSocket');
+const { getWSClient } = require('electron').remote.require('./main/webSocket');
 
 const messageSNs = {};
 
@@ -33,7 +33,6 @@ function getSN() {
 export default function* rushSendMessage(data: Object): Saga<void> {
   try {
     const ws = getWSClient();
-    while(!ws || ws.closed || getWSClient().ws.readyState !== OWebSocket.OPEN);
     if (ws && !ws.closed && getWSClient().ws.readyState === OWebSocket.OPEN) {
       const sn = getSN();
       // const sn = 1;
@@ -57,12 +56,15 @@ export default function* rushSendMessage(data: Object): Saga<void> {
       });
       return yield join(listenReplyTask);
     }
-    CommonLog.Warn('cannot send message to rush now, rush is not connected');
-
+    CommonLog.lError('cannot send message to rush now, rush is not connected');
+    return {
+      result: -404,
+      msg: `cannot send message to rush now, rush is not connected`
+    }
   } catch (e) {
     CommonLog.lError(e);
   } finally {
-    // console.log('rushSendMessage finished');
+    console.log('rushSendMessage finished');
   }
 }
 

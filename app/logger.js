@@ -103,7 +103,7 @@ export function lError(msg: mixed, meta) {
 
 export function Query(options, f) {
   if (gLogger === null) {
-    return;
+    throw new Error('logger does not exist');
   }
   return gLogger.query(options, f);
 }
