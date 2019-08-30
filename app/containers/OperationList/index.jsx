@@ -33,7 +33,7 @@ type Props = {
 function HomeOperationList(props: Props) {
   const classes = makeStyles(styles)();
   const { view, doPush, orderList, getList } = props;
-
+  console.log(orderList);
   const retOrderList = sortBy(orderList, (o: tOrder) => new Date(o.plannedDateTime) || Date.now());
 
   const onCardClick = (order) => {
@@ -76,7 +76,8 @@ function HomeOperationList(props: Props) {
                 </Typography>
                 {
                   order.desc && order.desc.split('\t\t').map(d =>
-                    <Typography variant="body2" color="textSecondary" align="left" className={classes.orderInfoText}>
+                    <Typography key={d} variant="body2" color="textSecondary" align="left"
+                                className={classes.orderInfoText}>
                       {d}
                     </Typography>)
                 }

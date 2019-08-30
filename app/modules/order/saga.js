@@ -30,6 +30,7 @@ import { ORDER_STATUS } from './model';
 import { bindRushAction } from '../rush/rushHealthz';
 import loadingActions from '../loading/action';
 import NotifierActions from '../Notifier/action';
+import Order from './Order';
 
 export default function* root(): Saga<void> {
   try {
@@ -41,10 +42,22 @@ export default function* root(): Saga<void> {
       takeEvery(ORDER.WORK_ON, workOnOrder),
       takeEvery(ORDER.VIEW, viewOrder),
       takeEvery(ORDER.NEW, newOrder),
+      takeEvery(ORDER.STEP.STATUS, updateStatus),
       takeLeading([ORDER.STEP.PREVIOUS, ORDER.STEP.NEXT], DebounceViewStep, 300)
     ]);
   } catch (e) {
     CommonLog.lError(e);
+  }
+}
+
+function* updateStatus(action) {
+  try {
+    const { step } = action;
+    yield call([step, step.updateStatus], action);
+  } catch (e) {
+    CommonLog.lError(e, {
+      at: 'order.saga.updateStatus'
+    });
   }
 }
 

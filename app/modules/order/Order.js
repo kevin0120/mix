@@ -31,7 +31,11 @@ export default class Order extends Step {
 
   _workingID = null;
 
-  _status = ORDER_STATUS.TODO;
+
+  constructor(dataObj) {
+    super(...arguments);
+    this._status = dataObj.status || ORDER_STATUS.TODO;
+  }
 
   get workingStep() {
     return this._steps[this._workingIndex];
@@ -90,7 +94,7 @@ export default class Order extends Step {
         if (this.workingStep) {
           this.workingStep.timerStop();
         }
-        const data = this._steps.map(s => [s.name, durationString(s.timeCost()),stepStatus(s.status) ]);
+        const data = this._steps.map(s => [s.name, durationString(s.timeCost()), stepStatus(s.status)]);
         yield put(
           dialogActions.dialogShow({
             buttons: [

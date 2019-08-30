@@ -171,17 +171,9 @@ export default class Step {
     }
   }
 
-  * _updateStatus({ status, msg }) {
+  * updateStatus({ status, msg }) {
     if (status in this._statusTasks) {
       try {
-        if (this._runningStatusTask) {
-          yield cancel(this._runningStatusTask);
-        }
-        const taskToRun = this._statusTasks[status]?.bind(this) ||
-          (() => invalidStepStatus(this._type, status));
-
-        this._runningStatusTask = yield fork(taskToRun, ORDER, orderActions, msg);
-
         this._status = status;
         yield call(this._apis.updateStatus, this.id, status);
       } catch (e) {
@@ -192,25 +184,40 @@ export default class Step {
     }
   }
 
+  *_runStatusTask({ status, msg }){
+    if (status in this._statusTasks) {
+      try {
+        if (this._runningStatusTask) {
+          yield cancel(this._runningStatusTask);
+        }
+        const taskToRun = this._statusTasks[status]?.bind(this) ||
+          (() => invalidStepStatus(this._type, status));
+
+        this._runningStatusTask = yield fork(taskToRun, ORDER, orderActions, msg);
+
+      } catch (e) {
+        CommonLog.lError(e);
+      }
+    }
+  }
+
 
   * run(initStatus) {
-    try {
-      const updateStatus = this._updateStatus.bind(this);
-
-      function* runStep() {
-        try {
-          while (true) {
-            const action = yield take((a) => a.type === ORDER.STEP.STATUS && a.step === this);
-            yield fork(updateStatus, action);
-          }
-        } catch (e) {
-          CommonLog.lError(e, {
-            at: 'runStep'
-          });
+    const runStatusTask = this._runStatusTask.bind(this);
+    function* runStep() {
+      try {
+        while (true) {
+          const action = yield take((a) => a.type === ORDER.STEP.STATUS && a.step === this);
+          yield fork(runStatusTask, action);
         }
+      } catch (e) {
+        CommonLog.lError(e, {
+          at: 'runStep'
+        });
       }
+    }
 
-
+    try {
       const step = yield fork([this, runStep]);
       yield put(orderActions.stepStatus(this, initStatus));
       yield join(step);
