@@ -3,7 +3,7 @@ package openprotocol
 import "github.com/masami10/rush/services/tightening_device"
 
 type TighteningTool struct {
-	tightening_device.TighteningTool
+	tightening_device.ITighteningTool
 }
 
 // 工具使能控制
@@ -14,3 +14,9 @@ func (s *TighteningTool) SetPSet(pset int) error { return nil }
 
 // 设置Job
 func (s *TighteningTool) SetJob(job int) error { return nil }
+
+// 模式选择: job/pset
+func (s *TighteningTool) ModeSelect(mode string) error { return nil }
+
+// 取消job
+func (s *TighteningTool) AbortJob() error { return nil }

@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"github.com/kataras/iris/core/errors"
 	"github.com/masami10/rush/services/controller"
+	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/socket_writer"
-	"github.com/masami10/rush/utils"
 	"net"
 	"strconv"
 	"strings"
@@ -39,7 +39,7 @@ type handlerPkg_curve struct {
 }
 type Controller struct {
 	w                 *socket_writer.SocketWriter
-	cfg               controller.ControllerConfig
+	cfg               *tightening_device.TighteningDeviceConfig
 	StatusValue       atomic.Value
 	keepAliveCount    int32
 	keep_period       time.Duration
@@ -67,24 +67,26 @@ type Controller struct {
 	//tighteningDevice  *tightening_device.Service
 	receiveBuf chan []byte
 
-	tightening_device.TighteningController
+	tightening_device.ITighteningController
 }
 
-func NewController(c Config, d Diagnostic) Controller {
+// TODO: 如果工具序列号没有配置，则通过探测加入设备列表。
+func NewController(protocolConfig *Config, deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic) Controller {
 
 	cont := Controller{
 		diag:              d,
 		buffer:            make(chan []byte, 1024),
 		closing:           make(chan chan struct{}),
-		keep_period:       time.Duration(c.KeepAlivePeriod),
-		req_timeout:       time.Duration(c.ReqTimeout),
-		getToolInfoPeriod: time.Duration(c.GetToolInfoPeriod),
+		keep_period:       time.Duration(protocolConfig.KeepAlivePeriod),
+		req_timeout:       time.Duration(protocolConfig.ReqTimeout),
+		getToolInfoPeriod: time.Duration(protocolConfig.GetToolInfoPeriod),
 		Response:          ResponseQueue{},
 		handlerBuf:        make(chan handlerPkg, 1024),
 		protocol:          controller.OPENPROTOCOL,
 		result_CURVE:      nil,
 		mtxResult:         sync.Mutex{},
 		receiveBuf:        make(chan []byte, 65535),
+		cfg:               deviceConfig,
 	}
 
 	cont.StatusValue.Store(controller.STATUS_OFFLINE)
@@ -93,15 +95,15 @@ func NewController(c Config, d Diagnostic) Controller {
 	return cont
 }
 
-func (c *Controller) Tools() map[string]string {
-	rt := map[string]string{}
+func (c *Controller) Tools() map[string]tightening_device.ITighteningTool {
+	//rt := map[string]string{}
 
-	toolStatus := c.toolStatus.Load().(string)
-	for _, v := range c.cfg.Tools {
-		rt[v.SerialNO] = toolStatus
-	}
+	//toolStatus := c.toolStatus.Load().(string)
+	//for _, v := range c.cfg.Tools {
+	//	rt[v.SerialNO] = toolStatus
+	//}
 
-	return rt
+	return nil
 }
 
 func (c *Controller) UpdateToolStatus(status string) {
@@ -197,6 +199,7 @@ func DataDecoding(original []byte, torqueCoefficient float64, angleCoefficient f
 	return
 }
 
+// TODO: case封装成函数
 func (c *Controller) HandleMsg(pkg *handlerPkg) error {
 	c.Srv.diag.Debug(fmt.Sprintf("%s: %s%s\n", c.cfg.SN, pkg.Header.Serialize(), pkg.Body))
 
@@ -612,7 +615,7 @@ func (c *Controller) calBatch(workorderID int64) (int, int) {
 	}
 }
 
-func (c *Controller) Start() {
+func (c *Controller) Start() error {
 
 	_ = c.Srv.DB.UpdateGun(&storage.Guns{
 		Serial: c.cfg.SN,
@@ -621,16 +624,18 @@ func (c *Controller) Start() {
 
 	for _, v := range c.cfg.Tools {
 		_ = c.Srv.DB.UpdateGun(&storage.Guns{
-			Serial: v.SerialNO,
+			Serial: v.SN,
 			Mode:   "pset",
 		})
 	}
 
-	c.w = socket_writer.NewSocketWriter(c.cfg.RemoteIP, c)
+	c.w = socket_writer.NewSocketWriter(c.cfg.Endpoint, c)
 
 	go c.handlerProcess()
 
 	c.Connect()
+
+	return nil
 }
 
 func (c *Controller) Protocol() string {
@@ -690,8 +695,8 @@ func (c *Controller) getTighteningCount() {
 	for {
 		select {
 		case <-time.After(c.getToolInfoPeriod):
-			rev := GetVendorMid(c.Model(), MID_0040_TOOL_INFO_REQUEST)
-			if rev == "" {
+			rev, err := GetVendorMid(c.Model(), MID_0040_TOOL_INFO_REQUEST)
+			if err == nil {
 				continue
 			}
 
@@ -707,10 +712,10 @@ func (c *Controller) getTighteningCount() {
 	}
 }
 
-func (c *Controller) ToolInfoReq() {
-	rev := GetVendorMid(c.Model(), MID_0040_TOOL_INFO_REQUEST)
-	if rev == "" {
-		return
+func (c *Controller) ToolInfoReq() error {
+	rev, err := GetVendorMid(c.Model(), MID_0040_TOOL_INFO_REQUEST)
+	if err != nil {
+		return err
 	}
 
 	//defer c.Response.remove(MID_0040_TOOL_INFO_REQUEST)
@@ -739,14 +744,16 @@ func (c *Controller) ToolInfoReq() {
 	//} else {
 	//	c.updateStatus(controller.STATUS_OFFLINE)
 	//}
+
+	return nil
 }
 
 func (c *Controller) GetPSetList() ([]int, error) {
 	var psets []int
 
-	rev := GetVendorMid(c.Model(), MID_0010_PSET_LIST_REQUEST)
-	if rev == "" {
-		return psets, errors.New("not supported")
+	rev, err := GetVendorMid(c.Model(), MID_0010_PSET_LIST_REQUEST)
+	if err != nil {
+		return psets, err
 	}
 
 	if c.Status() == controller.STATUS_OFFLINE {
@@ -782,9 +789,9 @@ func (c *Controller) GetPSetList() ([]int, error) {
 func (c *Controller) GetPSetDetail(pset int) (PSetDetail, error) {
 	var obj_pset_detail PSetDetail
 
-	rev := GetVendorMid(c.Model(), MID_0012_PSET_DETAIL_REQUEST)
-	if rev == "" {
-		return obj_pset_detail, errors.New("not supported")
+	rev, err := GetVendorMid(c.Model(), MID_0012_PSET_DETAIL_REQUEST)
+	if err != nil {
+		return obj_pset_detail, err
 	}
 
 	if c.Status() == controller.STATUS_OFFLINE {
@@ -826,9 +833,9 @@ func (c *Controller) GetPSetDetail(pset int) (PSetDetail, error) {
 
 func (c *Controller) GetJobList() ([]int, error) {
 	var jobs []int
-	rev := GetVendorMid(c.Model(), MID_0030_JOB_LIST_REQUEST)
-	if rev == "" {
-		return jobs, errors.New("not supported")
+	rev, err := GetVendorMid(c.Model(), MID_0030_JOB_LIST_REQUEST)
+	if err != nil {
+		return jobs, err
 	}
 
 	if c.Status() == controller.STATUS_OFFLINE {
@@ -863,9 +870,9 @@ func (c *Controller) GetJobList() ([]int, error) {
 
 func (c *Controller) GetJobDetail(job int) (JobDetail, error) {
 	var objJobDetail JobDetail
-	rev := GetVendorMid(c.Model(), MID_0032_JOB_DETAIL_REQUEST)
-	if rev == "" {
-		return objJobDetail, errors.New(controller.ERR_NOT_SUPPORTED)
+	rev, err := GetVendorMid(c.Model(), MID_0032_JOB_DETAIL_REQUEST)
+	if err != nil {
+		return objJobDetail, err
 	}
 
 	if c.Status() == controller.STATUS_OFFLINE {
@@ -978,9 +985,9 @@ func (c *Controller) sendKeepalive() {
 }
 
 func (c *Controller) startComm() error {
-	rev := GetVendorMid(c.Model(), MID_0001_START)
-	if rev == "" {
-		return errors.New(controller.ERR_NOT_SUPPORTED)
+	rev, err := GetVendorMid(c.Model(), MID_0001_START)
+	if err != nil {
+		return err
 	}
 
 	//if c.Status() == controller.STATUS_OFFLINE {
@@ -1178,9 +1185,9 @@ func (c *Controller) manage() {
 }
 
 func (c *Controller) getOldResult(last_id int64) error {
-	rev := GetVendorMid(c.Model(), MID_0064_OLD_SUBSCRIBE)
-	if rev == "" {
-		return errors.New(controller.ERR_NOT_SUPPORTED)
+	rev, err := GetVendorMid(c.Model(), MID_0064_OLD_SUBSCRIBE)
+	if err != nil {
+		return err
 	}
 
 	if c.Status() == controller.STATUS_OFFLINE {
@@ -1195,9 +1202,9 @@ func (c *Controller) getOldResult(last_id int64) error {
 }
 
 func (c *Controller) pset(pset int) error {
-	rev := GetVendorMid(c.Model(), MID_0018_PSET)
-	if rev == "" {
-		return errors.New(controller.ERR_NOT_SUPPORTED)
+	rev, err := GetVendorMid(c.Model(), MID_0018_PSET)
+	if err != nil {
+		return err
 	}
 
 	if c.Status() == controller.STATUS_OFFLINE {
@@ -1243,9 +1250,9 @@ func (c *Controller) ToolControl(enable bool) error {
 		s_cmd = MID_0043_TOOL_ENABLE
 	}
 
-	rev := GetVendorMid(c.Model(), s_cmd)
-	if rev == "" {
-		return errors.New(controller.ERR_NOT_SUPPORTED)
+	rev, err := GetVendorMid(c.Model(), s_cmd)
+	if err != nil {
+		return err
 	}
 
 	c.Response.Add(s_cmd, nil)
@@ -1279,9 +1286,9 @@ func (c *Controller) ToolControl(enable bool) error {
 
 // 0: set 1: reset
 func (c *Controller) JobOff(off string) error {
-	rev := GetVendorMid(c.Model(), MID_0130_JOB_OFF)
-	if rev == "" {
-		return errors.New(controller.ERR_NOT_SUPPORTED)
+	rev, err := GetVendorMid(c.Model(), MID_0130_JOB_OFF)
+	if err != nil {
+		return err
 	}
 
 	if c.Status() == controller.STATUS_OFFLINE {
@@ -1319,9 +1326,9 @@ func (c *Controller) JobOff(off string) error {
 }
 
 func (c *Controller) jobSelect(job int) error {
-	rev := GetVendorMid(c.Model(), MID_0038_JOB_SELECT)
-	if rev == "" {
-		return errors.New(controller.ERR_NOT_SUPPORTED)
+	rev, err := GetVendorMid(c.Model(), MID_0038_JOB_SELECT)
+	if err != nil {
+		return err
 	}
 
 	if c.Status() == controller.STATUS_OFFLINE {
@@ -1358,9 +1365,9 @@ func (c *Controller) jobSelect(job int) error {
 }
 
 func (c *Controller) IdentifierSet(str string) error {
-	rev := GetVendorMid(c.Model(), MID_0150_IDENTIFIER_SET)
-	if rev == "" {
-		return errors.New(controller.ERR_NOT_SUPPORTED)
+	rev, err := GetVendorMid(c.Model(), MID_0150_IDENTIFIER_SET)
+	if err != nil {
+		return err
 	}
 
 	if c.Status() == controller.STATUS_OFFLINE {
@@ -1375,9 +1382,9 @@ func (c *Controller) IdentifierSet(str string) error {
 }
 
 func (c *Controller) PSetBatchSet(pset int, batch int) error {
-	rev := GetVendorMid(c.Model(), MID_0019_PSET_BATCH_SET)
-	if rev == "" {
-		return errors.New(controller.ERR_NOT_SUPPORTED)
+	rev, err := GetVendorMid(c.Model(), MID_0019_PSET_BATCH_SET)
+	if err != nil {
+		return err
 	}
 
 	if c.Status() == controller.STATUS_OFFLINE {
@@ -1415,9 +1422,9 @@ func (c *Controller) PSetBatchSet(pset int, batch int) error {
 }
 
 func (c *Controller) PSetBatchReset(pset int) error {
-	rev := GetVendorMid(c.Model(), MID_0020_PSET_BATCH_RESET)
-	if rev == "" {
-		return errors.New(controller.ERR_NOT_SUPPORTED)
+	rev, err := GetVendorMid(c.Model(), MID_0020_PSET_BATCH_RESET)
+	if err != nil {
+		return err
 	}
 
 	if c.Status() == controller.STATUS_OFFLINE {
@@ -1433,9 +1440,9 @@ func (c *Controller) PSetBatchReset(pset int) error {
 }
 
 func (c *Controller) PSetSubscribe() error {
-	rev := GetVendorMid(c.Model(), MID_0014_PSET_SUBSCRIBE)
-	if rev == "" {
-		return errors.New(controller.ERR_NOT_SUPPORTED)
+	rev, err := GetVendorMid(c.Model(), MID_0014_PSET_SUBSCRIBE)
+	if err != nil {
+		return err
 	}
 
 	if c.Status() == controller.STATUS_OFFLINE {
@@ -1450,9 +1457,9 @@ func (c *Controller) PSetSubscribe() error {
 }
 
 func (c *Controller) SelectorSubscribe() error {
-	rev := GetVendorMid(c.Model(), MID_0250_SELECTOR_SUBSCRIBE)
-	if rev == "" {
-		return errors.New(controller.ERR_NOT_SUPPORTED)
+	rev, err := GetVendorMid(c.Model(), MID_0250_SELECTOR_SUBSCRIBE)
+	if err != nil {
+		return err
 	}
 
 	if c.Status() == controller.STATUS_OFFLINE {
@@ -1467,9 +1474,9 @@ func (c *Controller) SelectorSubscribe() error {
 }
 
 func (c *Controller) JobInfoSubscribe() error {
-	rev := GetVendorMid(c.Model(), MID_0034_JOB_INFO_SUBSCRIBE)
-	if rev == "" {
-		return errors.New(controller.ERR_NOT_SUPPORTED)
+	rev, err := GetVendorMid(c.Model(), MID_0034_JOB_INFO_SUBSCRIBE)
+	if err != nil {
+		return err
 	}
 
 	if c.Status() == controller.STATUS_OFFLINE {
@@ -1484,9 +1491,9 @@ func (c *Controller) JobInfoSubscribe() error {
 }
 
 func (c *Controller) IOInputSubscribe() error {
-	rev := GetVendorMid(c.Model(), MID_0210_INPUT_SUBSCRIBE)
-	if rev == "" {
-		return errors.New(controller.ERR_NOT_SUPPORTED)
+	rev, err := GetVendorMid(c.Model(), MID_0210_INPUT_SUBSCRIBE)
+	if err != nil {
+		return err
 	}
 
 	if c.Status() == controller.STATUS_OFFLINE {
@@ -1501,9 +1508,9 @@ func (c *Controller) IOInputSubscribe() error {
 }
 
 func (c *Controller) MultiSpindleResultSubscribe() error {
-	rev := GetVendorMid(c.Model(), MID_0100_MULTI_SPINDLE_SUBSCRIBE)
-	if rev == "" {
-		return errors.New(controller.ERR_NOT_SUPPORTED)
+	rev, err := GetVendorMid(c.Model(), MID_0100_MULTI_SPINDLE_SUBSCRIBE)
+	if err != nil {
+		return err
 	}
 
 	if c.Status() == controller.STATUS_OFFLINE {
@@ -1518,9 +1525,9 @@ func (c *Controller) MultiSpindleResultSubscribe() error {
 }
 
 func (c *Controller) VinSubscribe() error {
-	rev := GetVendorMid(c.Model(), MID_0051_VIN_SUBSCRIBE)
-	if rev == "" {
-		return errors.New(controller.ERR_NOT_SUPPORTED)
+	rev, err := GetVendorMid(c.Model(), MID_0051_VIN_SUBSCRIBE)
+	if err != nil {
+		return err
 	}
 
 	if c.Status() == controller.STATUS_OFFLINE {
@@ -1535,9 +1542,9 @@ func (c *Controller) VinSubscribe() error {
 }
 
 func (c *Controller) ResultSubcribe() error {
-	rev := GetVendorMid(c.Model(), MID_0060_LAST_RESULT_SUBSCRIBE)
-	if rev == "" {
-		return errors.New(controller.ERR_NOT_SUPPORTED)
+	rev, err := GetVendorMid(c.Model(), MID_0060_LAST_RESULT_SUBSCRIBE)
+	if err != nil {
+		return err
 	}
 
 	if c.Status() == controller.STATUS_OFFLINE {
@@ -1552,9 +1559,9 @@ func (c *Controller) ResultSubcribe() error {
 }
 
 func (c *Controller) AlarmSubcribe() error {
-	rev := GetVendorMid(c.Model(), MID_0070_ALARM_SUBSCRIBE)
-	if rev == "" {
-		return errors.New(controller.ERR_NOT_SUPPORTED)
+	rev, err := GetVendorMid(c.Model(), MID_0070_ALARM_SUBSCRIBE)
+	if err != nil {
+		return err
 	}
 
 	if c.Status() == controller.STATUS_OFFLINE {
@@ -1569,9 +1576,9 @@ func (c *Controller) AlarmSubcribe() error {
 }
 
 func (c *Controller) CurveSubscribe() error {
-	rev := GetVendorMid(c.Model(), MID_7408_LAST_CURVE_SUBSCRIBE)
-	if rev == "" {
-		return errors.New(controller.ERR_NOT_SUPPORTED)
+	rev, err := GetVendorMid(c.Model(), MID_7408_LAST_CURVE_SUBSCRIBE)
+	if err != nil {
+		return err
 	}
 
 	if c.Status() == controller.STATUS_OFFLINE {
@@ -1617,9 +1624,9 @@ func (c *Controller) findIOByNo(no int, ios *[]IOStatus) (IOStatus, error) {
 }
 
 func (c *Controller) IOSet(ios *[]IOStatus) error {
-	rev := GetVendorMid(c.Model(), MID_0200_CONTROLLER_RELAYS)
-	if rev == "" {
-		return errors.New(controller.ERR_NOT_SUPPORTED)
+	rev, err := GetVendorMid(c.Model(), MID_0200_CONTROLLER_RELAYS)
+	if err != nil {
+		return err
 	}
 
 	if c.Status() == controller.STATUS_OFFLINE {
@@ -1695,9 +1702,9 @@ func (c *Controller) JobSet(id_info string, job int) error {
 }
 
 func (c *Controller) JobAbort() error {
-	rev := GetVendorMid(c.Model(), MID_0127_JOB_ABORT)
-	if rev == "" {
-		return errors.New(controller.ERR_NOT_SUPPORTED)
+	rev, err := GetVendorMid(c.Model(), MID_0127_JOB_ABORT)
+	if err != nil {
+		return err
 	}
 
 	if c.Mode.Load().(string) != MODE_JOB {
@@ -1778,25 +1785,12 @@ func (c *Controller) Enable(r *tightening_device.ToolEnable) tightening_device.R
 }
 
 func (c *Controller) DeviceType(sn string) string {
-	if c.Model() == tightening_device.ModelDesoutterDeltaWrench {
-		return "tool"
-	}
-
-	if utils.StringArrayContains(c.Children(), sn) {
-		return "tool"
-	} else {
-		return "controller"
-	}
+	return tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER
 }
 
-func (c *Controller) Children() []string {
+func (c *Controller) Children() map[string]device.IDevice {
 
-	tools := []string{}
-	for _, v := range c.cfg.Tools {
-		tools = append(tools, v.SerialNO)
-	}
-
-	return tools
+	return map[string]device.IDevice{}
 }
 
 func (s *Controller) Data() interface{} {

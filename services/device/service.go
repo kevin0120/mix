@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"github.com/kataras/iris/websocket"
 	"github.com/masami10/rush/services/wsnotify"
-	"github.com/masami10/rush/utils"
+	"reflect"
 	"sync"
 	"sync/atomic"
 )
 
-type Device interface {
+type IDevice interface {
 
 	// 设备状态
 	Status() string
@@ -17,8 +17,13 @@ type Device interface {
 	// 设备类型
 	DeviceType(string) string
 
-	Children() []string
+	// 子设备
+	Children() map[string]IDevice
+
+	// 设备配置
 	Config() interface{}
+
+	// 设备运行数据
 	Data() interface{}
 }
 
@@ -30,7 +35,7 @@ type Diagnostic interface {
 type Service struct {
 	diag           Diagnostic
 	configValue    atomic.Value
-	runningDevices map[string]Device
+	runningDevices map[string]IDevice
 	mtxDevices     sync.Mutex
 
 	WS *wsnotify.Service
@@ -41,7 +46,7 @@ func NewService(c Config, d Diagnostic) (*Service, error) {
 
 	srv := &Service{
 		diag:           d,
-		runningDevices: map[string]Device{},
+		runningDevices: map[string]IDevice{},
 		mtxDevices:     sync.Mutex{},
 	}
 
@@ -69,7 +74,7 @@ func (s *Service) config() Config {
 	return s.configValue.Load().(Config)
 }
 
-func (s *Service) AddDevice(sn string, d Device) {
+func (s *Service) AddDevice(sn string, d IDevice) {
 	defer s.mtxDevices.Unlock()
 	s.mtxDevices.Lock()
 
@@ -87,15 +92,12 @@ func (s *Service) fetchAllDevices() []DeviceStatus {
 
 	devices := []DeviceStatus{}
 	for k, v := range s.runningDevices {
-		children := v.Children()
-		if utils.StringArrayContains(children, k) {
-			children = []string{}
-		}
+
 		devices = append(devices, DeviceStatus{
 			SN:       k,
 			Type:     v.DeviceType(k),
 			Status:   v.Status(),
-			Children: children,
+			Children: reflect.ValueOf(v.Children()).MapKeys(),
 			Config:   v.Config(),
 			Data:     v.Data(),
 		})

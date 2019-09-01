@@ -10,7 +10,7 @@ type DeviceStatus struct {
 	SN       string      `json:"sn"`
 	Type     string      `json:"type"`
 	Status   string      `json:"status"`
-	Children []string    `json:"children"`
+	Children interface{} `json:"children"`
 	Config   interface{} `json:"config"`
 	Data     interface{} `json:"data"`
 }

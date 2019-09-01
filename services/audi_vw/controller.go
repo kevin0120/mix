@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/masami10/rush/services/controller"
+	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/openprotocol"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
@@ -144,7 +145,7 @@ func (c *Controller) Protocol() string {
 	return c.protocol
 }
 
-func (c *Controller) Start() {
+func (c *Controller) Start() error {
 
 	c.Srv.DB.ResetTightning(c.cfg.SN)
 
@@ -157,6 +158,7 @@ func (c *Controller) Start() {
 
 	// 订阅数据
 	//c.subscribe()
+	return nil
 }
 
 func (c *Controller) manage() {
@@ -490,8 +492,8 @@ func (c *Controller) DeviceType(sn string) string {
 	return "controller"
 }
 
-func (c *Controller) Children() []string {
-	return []string{}
+func (c *Controller) Children() map[string]device.IDevice {
+	return map[string]device.IDevice{}
 }
 
 func (s *Controller) Data() interface{} {

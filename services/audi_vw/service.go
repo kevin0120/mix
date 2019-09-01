@@ -2,6 +2,7 @@ package audi_vw
 
 import (
 	"fmt"
+	"github.com/masami10/rush/services/tightening_device"
 	"net"
 	"strings"
 	"sync"
@@ -56,6 +57,7 @@ type Service struct {
 	closing       chan struct{}
 	handle_buffer chan string
 	Parent        *controller.Service
+	tightening_device.ITighteningProtocol
 }
 
 func (s *Service) Err() <-chan error {
@@ -86,16 +88,24 @@ func (s *Service) config() Config {
 	return s.configValue.Load().(Config)
 }
 
-func (p *Service) AddNewController(cfg controller.ControllerConfig) controller.Controller {
-	config := p.config()
+func (s *Service) Name() string {
+	return "Audi/VW"
+}
+
+func (s *Service) CreateController(cfg *tightening_device.TighteningDeviceConfig) (tightening_device.ITighteningController, error) {
+	return nil, nil
+}
+
+func (s *Service) AddNewController(cfg controller.ControllerConfig) controller.Controller {
+	config := s.config()
 	c := NewController(config)
-	c.Srv = p //服务注入
+	c.Srv = s //服务注入
 	c.cfg = cfg
 
 	return &c
 }
 
-func (p *Service) AddDevice(cfg controller.DeviceConfig, ts interface{}) controller.Controller {
+func (s *Service) AddDevice(cfg controller.DeviceConfig, ts interface{}) controller.Controller {
 	return nil
 }
 

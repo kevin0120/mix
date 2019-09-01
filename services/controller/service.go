@@ -21,13 +21,13 @@ type Diagnostic interface {
 }
 
 type Controller interface {
-	Start()
+	Start() error
 	Close() error
 	Protocol() string
 	Inputs() string
 	LoadController(controller *storage.Controllers)
-	Tools() map[string]string
-	device.Device
+	//Tools() map[string]string
+	device.IDevice
 }
 
 type Protocol interface {

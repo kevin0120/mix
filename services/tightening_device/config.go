@@ -1,28 +1,40 @@
 package tightening_device
 
-type DeviceConfig struct {
-	Model    string       `yaml:"model"`
-	Protocol string       `yaml:"protocol"`
-	Endpoint string       `yaml:"endpoint"`
-	SN       string       `yaml:"sn"`
-	Tools    []ToolConfig `yaml:"tools"`
+type TighteningDeviceConfig struct {
+	// 控制器型号
+	Model string `yaml:"model"`
+
+	// 控制器协议类型
+	Protocol string `yaml:"protocol"`
+
+	// 连接地址
+	Endpoint string `yaml:"endpoint"`
+
+	// 控制器序列号
+	SN string `yaml:"sn"`
+
+	// 工具列表
+	Tools []ToolConfig `yaml:"tools"`
 }
 
 type ToolConfig struct {
-	SN      string `yaml:"sn"`
-	Channel int    `yaml:"channel"`
+	// 工具序列号
+	SN string `yaml:"sn"`
+
+	// 工具通道号
+	Channel int `yaml:"channel"`
 }
 
 type Config struct {
-	Enable  bool           `yaml:"enable"`
-	Devices []DeviceConfig `yaml:"devices"`
+	Enable  bool                     `yaml:"enable"`
+	Devices []TighteningDeviceConfig `yaml:"devices"`
 }
 
 func NewConfig() Config {
 
 	return Config{
 		Enable:  true,
-		Devices: []DeviceConfig{},
+		Devices: []TighteningDeviceConfig{},
 	}
 }
 

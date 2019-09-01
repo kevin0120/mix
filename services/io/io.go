@@ -3,6 +3,7 @@ package io
 import (
 	"fmt"
 	"github.com/kataras/iris/core/errors"
+	"github.com/masami10/rush/services/device"
 )
 
 const (
@@ -67,8 +68,8 @@ func (s *IOModule) DeviceType(sn string) string {
 	return "io"
 }
 
-func (s *IOModule) Children() []string {
-	return []string{}
+func (s *IOModule) Children() map[string]device.IDevice {
+	return map[string]device.IDevice{}
 }
 
 func (s *IOModule) Data() interface{} {

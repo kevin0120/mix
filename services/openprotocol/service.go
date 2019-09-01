@@ -7,6 +7,7 @@ import (
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
 	"sync/atomic"
@@ -32,6 +33,7 @@ type Service struct {
 	Parent *controller.Service
 
 	devices []*Controller
+	tightening_device.ITighteningProtocol
 }
 
 func NewService(c Config, d Diagnostic, parent *controller.Service) *Service {
@@ -52,78 +54,53 @@ func (s *Service) config() Config {
 	return s.configValue.Load().(Config)
 }
 
-func (p *Service) Parse(msg string) ([]byte, error) {
+func (s *Service) Name() string {
+	return "OpenProtocol"
+}
+
+func (s *Service) Parse(msg string) ([]byte, error) {
 	return nil, nil
 }
 
-func (p *Service) Write(sn string, buf []byte) error {
+func (s *Service) Write(sn string, buf []byte) error {
 	return nil
 }
 
-func (p *Service) AddNewController(cfg controller.ControllerConfig) controller.Controller {
-	config := p.config()
-	c := NewController(config, p.diag)
-	c.Srv = p //服务注入
-	c.cfg = cfg
-
-	return &c
-}
-
-func (p *Service) AddDevice(cfg controller.DeviceConfig, ts interface{}) controller.Controller {
-	config := p.config()
-	c := NewController(config, p.diag)
-	c.Srv = p //服务注入
-	c.cfg = controller.ControllerConfig{
-		RemoteIP: cfg.Endpoint,
-		SN:       cfg.SN,
-		Tools:    cfg.Tools,
-	}
-	c.SetModel(cfg.Model)
-	//c.tighteningDevice = ts.(*tightening_device.Service)
-
-	if cfg.SN != "" {
-		//c.tighteningDevice.AddDevice(cfg.SN, &c)
-		p.Parent.Device.AddDevice(cfg.SN, &c)
-	}
-
-	for _, v := range cfg.Tools {
-		//c.tighteningDevice.AddDevice(v.SerialNO, &c)
-		p.Parent.Device.AddDevice(v.SerialNO, &c)
-	}
-
-	p.devices = append(p.devices, &c)
-
-	return nil
-}
-
-func (p *Service) Open() error {
-	//for _, w := range p.Parent.Controllers {
-	//	if w.Protocol() == controller.OPENPROTOCOL {
-	//		go w.Start() //异步启动控制器
-	//	}
-	//}
-
-	for _, v := range p.devices {
-		go v.Start()
+func (s *Service) Support(cfg *tightening_device.TighteningDeviceConfig) error {
+	_, err := GetModel(cfg.Model)
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (p *Service) Close() error {
-	for _, w := range p.Parent.Controllers {
-		err := w.Close()
-		if err != nil {
-			return errors.Wrapf(err, "Close Protocol %s Writer fail", p.name)
-		}
+func (s *Service) CreateController(cfg *tightening_device.TighteningDeviceConfig) (tightening_device.ITighteningController, error) {
+	// 检测型号是否支持
+	err := s.Support(cfg)
+	if err != nil {
+		return nil, err
 	}
+
+	protocolConfig := s.config()
+	c := NewController(&protocolConfig, cfg, s.diag)
+
+	return &c, nil
+}
+
+func (s *Service) Open() error {
 
 	return nil
 }
 
-func (p *Service) ToolControl(sn string, tool_sn string, enable bool) error {
+func (s *Service) Close() error {
+
+	return nil
+}
+
+func (s *Service) ToolControl(sn string, tool_sn string, enable bool) error {
 	// 判断控制器是否存在
-	v, exist := p.Parent.Controllers[sn]
+	v, exist := s.Parent.Controllers[sn]
 	if !exist {
 		// SN对应控制器不存在
 		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
@@ -131,12 +108,10 @@ func (p *Service) ToolControl(sn string, tool_sn string, enable bool) error {
 
 	c := v.(*Controller)
 
-	var t controller.ToolConfig
-
 	var toolExist = false
 
-	for _, t = range c.cfg.Tools {
-		if t.SerialNO == tool_sn {
+	for _, t := range c.cfg.Tools {
+		if t.SN == tool_sn {
 			toolExist = true
 			break
 		}
@@ -156,9 +131,9 @@ func (p *Service) ToolControl(sn string, tool_sn string, enable bool) error {
 	return nil
 }
 
-func (p *Service) PSet(sn string, tool_sn string, pset int, result_id int64, count int, user_id int64) error {
+func (s *Service) PSet(sn string, tool_sn string, pset int, result_id int64, count int, user_id int64) error {
 	// 判断控制器是否存在
-	v, exist := p.Parent.Controllers[sn]
+	v, exist := s.Parent.Controllers[sn]
 	if !exist {
 		// SN对应控制器不存在
 		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
@@ -166,12 +141,11 @@ func (p *Service) PSet(sn string, tool_sn string, pset int, result_id int64, cou
 
 	c := v.(*Controller)
 
-	var t controller.ToolConfig
-
 	var toolExist = false
-
-	for _, t = range c.cfg.Tools {
-		if t.SerialNO == tool_sn {
+	var toolChannel int
+	for _, t := range c.cfg.Tools {
+		if t.SN == tool_sn {
+			toolChannel = t.Channel
 			toolExist = true
 			break
 		}
@@ -184,7 +158,7 @@ func (p *Service) PSet(sn string, tool_sn string, pset int, result_id int64, cou
 	ex_info := fmt.Sprintf("%s-%d-%d-%d", controller.AUTO_MODE, result_id, count, user_id)
 
 	// 设定pset并判断控制器响应
-	_, err := c.PSet(pset, t.ToolChannel, ex_info, 1)
+	_, err := c.PSet(pset, toolChannel, ex_info, 1)
 	if err != nil {
 		// 控制器请求失败
 		return err
@@ -193,9 +167,9 @@ func (p *Service) PSet(sn string, tool_sn string, pset int, result_id int64, cou
 	return nil
 }
 
-func (p *Service) PSetManual(sn string, tool_sn string, pset int, user_id int64, ex_info string, count int) error {
+func (s *Service) PSetManual(sn string, tool_sn string, pset int, user_id int64, ex_info string, count int) error {
 	// 判断控制器是否存在
-	v, exist := p.Parent.Controllers[sn]
+	v, exist := s.Parent.Controllers[sn]
 	if !exist {
 		// SN对应控制器不存在
 		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
@@ -203,12 +177,11 @@ func (p *Service) PSetManual(sn string, tool_sn string, pset int, user_id int64,
 
 	c := v.(*Controller)
 
-	var t controller.ToolConfig
-
 	var toolExist = false
-
-	for _, t = range c.cfg.Tools {
-		if t.SerialNO == tool_sn {
+	var toolChannel int
+	for _, t := range c.cfg.Tools {
+		if t.SN == tool_sn {
+			toolChannel = t.Channel
 			toolExist = true
 			break
 		}
@@ -219,7 +192,7 @@ func (p *Service) PSetManual(sn string, tool_sn string, pset int, user_id int64,
 	}
 
 	// 设定pset并判断控制器响应
-	_, err := c.PSet(pset, t.ToolChannel, ex_info, count)
+	_, err := c.PSet(pset, toolChannel, ex_info, count)
 	if err != nil {
 		// 控制器请求失败
 		return err
@@ -228,8 +201,8 @@ func (p *Service) PSetManual(sn string, tool_sn string, pset int, user_id int64,
 	return nil
 }
 
-func (p *Service) JobSet(sn string, job int, workorder_id int64, user_id int64) error {
-	v, exist := p.Parent.Controllers[sn]
+func (s *Service) JobSet(sn string, job int, workorder_id int64, user_id int64) error {
+	v, exist := s.Parent.Controllers[sn]
 	if !exist {
 		// SN对应控制器不存在
 		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
@@ -249,8 +222,8 @@ func (p *Service) JobSet(sn string, job int, workorder_id int64, user_id int64) 
 	return nil
 }
 
-func (p *Service) IDSet(sn string, str string) error {
-	v, exist := p.Parent.Controllers[sn]
+func (s *Service) IDSet(sn string, str string) error {
+	v, exist := s.Parent.Controllers[sn]
 	if !exist {
 		// SN对应控制器不存在
 		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
@@ -267,8 +240,8 @@ func (p *Service) IDSet(sn string, str string) error {
 	return nil
 }
 
-func (p *Service) JobSetManual(sn string, tool_sn string, job int, user_id int64, ex_info string, skip bool) error {
-	v, exist := p.Parent.Controllers[sn]
+func (s *Service) JobSetManual(sn string, tool_sn string, job int, user_id int64, ex_info string, skip bool) error {
+	v, exist := s.Parent.Controllers[sn]
 	if !exist {
 		// SN对应控制器不存在
 		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
@@ -276,12 +249,10 @@ func (p *Service) JobSetManual(sn string, tool_sn string, job int, user_id int64
 
 	c := v.(*Controller)
 
-	var t controller.ToolConfig
-
 	var toolExist = false
 
-	for _, t = range c.cfg.Tools {
-		if t.SerialNO == tool_sn {
+	for _, t := range c.cfg.Tools {
+		if t.SN == tool_sn {
 			toolExist = true
 			break
 		}
@@ -294,8 +265,8 @@ func (p *Service) JobSetManual(sn string, tool_sn string, job int, user_id int64
 	return c.JobSet(ex_info, job)
 }
 
-func (p *Service) JobOFF(sn string, off bool) error {
-	v, exist := p.Parent.Controllers[sn]
+func (s *Service) JobOFF(sn string, off bool) error {
+	v, exist := s.Parent.Controllers[sn]
 	if !exist {
 		// SN对应控制器不存在
 		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
@@ -317,8 +288,8 @@ func (p *Service) JobOFF(sn string, off bool) error {
 	return nil
 }
 
-func (p *Service) JobControl(sn string, action string) error {
-	v, exist := p.Parent.Controllers[sn]
+func (s *Service) JobControl(sn string, action string) error {
+	v, exist := s.Parent.Controllers[sn]
 	if !exist {
 		// SN对应控制器不存在
 		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
@@ -339,8 +310,8 @@ func (p *Service) JobControl(sn string, action string) error {
 	return nil
 }
 
-func (p *Service) GetPSetList(sn string) ([]int, error) {
-	v, exist := p.Parent.Controllers[sn]
+func (s *Service) GetPSetList(sn string) ([]int, error) {
+	v, exist := s.Parent.Controllers[sn]
 	if !exist {
 		// SN对应控制器不存在
 		return []int{}, errors.New(controller.ERR_CONTROLER_NOT_FOUND)
@@ -356,8 +327,8 @@ func (p *Service) GetPSetList(sn string) ([]int, error) {
 	return psetLists, nil
 }
 
-func (p *Service) GetPSetDetail(sn string, pset int) (PSetDetail, error) {
-	v, exist := p.Parent.Controllers[sn]
+func (s *Service) GetPSetDetail(sn string, pset int) (PSetDetail, error) {
+	v, exist := s.Parent.Controllers[sn]
 	if !exist {
 		// SN对应控制器不存在
 		return PSetDetail{}, errors.New(controller.ERR_CONTROLER_NOT_FOUND)
@@ -373,8 +344,8 @@ func (p *Service) GetPSetDetail(sn string, pset int) (PSetDetail, error) {
 	return psetDetail, nil
 }
 
-func (p *Service) GetJobList(sn string) ([]int, error) {
-	v, exist := p.Parent.Controllers[sn]
+func (s *Service) GetJobList(sn string) ([]int, error) {
+	v, exist := s.Parent.Controllers[sn]
 	if !exist {
 		// SN对应控制器不存在
 		return []int{}, errors.New(controller.ERR_CONTROLER_NOT_FOUND)
@@ -390,8 +361,8 @@ func (p *Service) GetJobList(sn string) ([]int, error) {
 	return jobLists, nil
 }
 
-func (p *Service) GetJobDetail(sn string, job int) (JobDetail, error) {
-	v, exist := p.Parent.Controllers[sn]
+func (s *Service) GetJobDetail(sn string, job int) (JobDetail, error) {
+	v, exist := s.Parent.Controllers[sn]
 	if !exist {
 		// SN对应控制器不存在
 		return JobDetail{}, errors.New(controller.ERR_CONTROLER_NOT_FOUND)
@@ -407,8 +378,8 @@ func (p *Service) GetJobDetail(sn string, job int) (JobDetail, error) {
 	return jobDetail, nil
 }
 
-func (p *Service) IOSet(sn string, ios *[]IOStatus) error {
-	v, exist := p.Parent.Controllers[sn]
+func (s *Service) IOSet(sn string, ios *[]IOStatus) error {
+	v, exist := s.Parent.Controllers[sn]
 	if !exist {
 		// SN对应控制器不存在
 		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
@@ -419,10 +390,10 @@ func (p *Service) IOSet(sn string, ios *[]IOStatus) error {
 	return c.IOSet(ios)
 }
 
-func (p *Service) GenerateIDInfo(info string) string {
+func (s *Service) GenerateIDInfo(info string) string {
 	ids := ""
 	for i := 0; i < 4; i++ {
-		if i == p.config().DataIndex {
+		if i == s.config().DataIndex {
 			ids += fmt.Sprintf("%-25s", info)
 		} else {
 			ids += fmt.Sprintf("%25s", "")
@@ -432,6 +403,6 @@ func (p *Service) GenerateIDInfo(info string) string {
 	return ids
 }
 
-func (p *Service) TryCreateMaintenance(info ToolInfo) error {
-	return p.Odoo.TryCreateMaintenance(info)
+func (s *Service) TryCreateMaintenance(info ToolInfo) error {
+	return s.Odoo.TryCreateMaintenance(info)
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/kataras/iris/core/errors"
 	"github.com/kataras/iris/websocket"
-	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
@@ -23,15 +22,12 @@ type Diagnostic interface {
 	Debug(msg string)
 }
 
-type TighteningDevice interface {
-	device.Device
-
-	Read()
-	Write()
+type ITighteningDevice interface {
+	device.IDevice
 }
 
-type TighteningController interface {
-	TighteningDevice
+type ITighteningController interface {
+	ITighteningDevice
 
 	// 启动
 	Start() error
@@ -39,15 +35,15 @@ type TighteningController interface {
 	// 停止
 	Stop() error
 
-	// 拧紧工具列表
-	Tools() map[string]TighteningTool
+	// 定位工具
+	GetTool(toolSN string) (ITighteningTool, error)
 
 	// 控制输出
 	SetOutput(outputs []ControllerOutput) error
 }
 
-type TighteningTool interface {
-	TighteningDevice
+type ITighteningTool interface {
+	ITighteningDevice
 
 	// 工具使能控制
 	ToolControl(enable bool) error
@@ -57,13 +53,26 @@ type TighteningTool interface {
 
 	// 设置job
 	SetJob(job int) error
+
+	// 模式选择: job/pset
+	ModeSelect(mode string) error
+
+	// 取消job
+	AbortJob() error
+
+	// TODO:
+	// pset列表
+	// pset详情
+	// job列表
+	// job详情
 }
 
 type Service struct {
-	diag           Diagnostic
-	configValue    atomic.Value
-	runningDevices map[string]TighteningController
-	mtxDevices     sync.Mutex
+	diag               Diagnostic
+	configValue        atomic.Value
+	runningControllers map[string]ITighteningController
+	mtxDevices         sync.Mutex
+	protocols          map[string]ITighteningProtocol
 
 	WS             *wsnotify.Service
 	StorageService *storage.Service
@@ -71,27 +80,33 @@ type Service struct {
 	wsnotify.WSNotify
 }
 
-func NewService(c Config, d Diagnostic, pAudi controller.Protocol, pOpenprotocol controller.Protocol) (*Service, error) {
+func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol) (*Service, error) {
 
 	srv := &Service{
-		diag:           d,
-		mtxDevices:     sync.Mutex{},
-		runningDevices: map[string]TighteningController{},
+		diag:               d,
+		mtxDevices:         sync.Mutex{},
+		runningControllers: map[string]ITighteningController{},
+		protocols:          map[string]ITighteningProtocol{},
 	}
 
 	srv.configValue.Store(c)
 
-	// 根据配置加载所有拧紧设备
-	for _, device := range c.Devices {
-		switch device.Protocol {
-		//case controller.AUDIPROTOCOL:
+	// 载入支持的协议
+	for _, protocol := range protocols {
+		srv.protocols[protocol.Name()] = protocol
+	}
 
-		case controller.OPENPROTOCOL:
-			//pOpenprotocol.AddDevice(device, srv)
+	// 根据配置加载所有拧紧控制器
+	for _, deviceConfig := range c.Devices {
 
-		default:
-
+		c, err := srv.protocols[deviceConfig.Protocol].CreateController(&deviceConfig)
+		if err != nil {
+			srv.diag.Error("Create Controller Failed", err)
+			continue
 		}
+
+		// TODO: 如果控制器序列号没有配置，则通过探测加入设备列表。
+		srv.addController(deviceConfig.SN, c)
 	}
 
 	return srv, nil
@@ -104,12 +119,16 @@ func (s *Service) Open() error {
 
 	s.WS.AddNotify(s)
 
-	// 启动所有拧紧设备
+	// 启动所有拧紧控制器
+	s.startupControllers()
 
 	return nil
 }
 
 func (s *Service) Close() error {
+
+	// 关闭所有控制器
+	s.shutdownControllers()
 
 	return nil
 }
@@ -118,6 +137,7 @@ func (s *Service) config() Config {
 	return s.configValue.Load().(Config)
 }
 
+// TODO: case封装成函数
 func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 	var msg wsnotify.WSMsg
 	s.diag.Debug(fmt.Sprintf("OnWSMsg Recv New Message: %# 20X", data))
@@ -131,16 +151,20 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 		req := ToolEnable{}
 		strData, _ := json.Marshal(msg.Data)
 		_ = json.Unmarshal([]byte(strData), &req)
-		device, _ := s.GetDevice(req.ToolSN)
-		rt := device.Tools()[""].ToolControl(req.Enable)
+		tool, err := s.getTool(req.ControllerSN, req.ToolSN)
+		if err != nil {
+			return
+		}
+
+		err = tool.ToolControl(req.Enable)
 		msg := wsnotify.WSMsg{
 			Type: WS_TOOL_ENABLE,
 			SN:   msg.SN,
-			Data: rt,
+			Data: err,
 		}
 		reply, _ := json.Marshal(msg)
 
-		err := wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, string(reply))
+		err = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, string(reply))
 		if err != nil {
 			s.diag.Error(fmt.Sprintf("WS_TOOL_ENABLE Send WS_EVENT_REPLY WebSocket Message: %#v Fail", msg), err)
 		}
@@ -173,8 +197,12 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 			Trace:  string(bData),
 		})
 
-		device, _ := s.GetDevice(req.ToolSN)
-		rt := device.Tools()[""].SetPSet(req.PSet)
+		tool, err := s.getTool(req.ControllerSN, req.ToolSN)
+		if err != nil {
+			return
+		}
+
+		rt := tool.SetPSet(req.PSet)
 		reply, _ := json.Marshal(wsnotify.WSMsg{
 			Type: WS_TOOL_PSET,
 			SN:   msg.SN,
@@ -189,26 +217,64 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 	}
 }
 
-func (s *Service) AddDevice(sn string, td TighteningController) {
-	defer s.mtxDevices.Unlock()
+func (s *Service) addController(controllerSN string, controller ITighteningController) {
 	s.mtxDevices.Lock()
+	defer s.mtxDevices.Unlock()
 
-	_, exist := s.runningDevices[sn]
+	_, exist := s.runningControllers[controllerSN]
 	if exist {
 		return
 	}
 
-	s.runningDevices[sn] = td
+	s.runningControllers[controllerSN] = controller
 }
 
-func (s *Service) GetDevice(sn string) (TighteningController, error) {
-	defer s.mtxDevices.Unlock()
+func (s *Service) getController(controllerSN string) (ITighteningController, error) {
 	s.mtxDevices.Lock()
+	defer s.mtxDevices.Unlock()
 
-	td, exist := s.runningDevices[sn]
+	td, exist := s.runningControllers[controllerSN]
 	if !exist {
-		return nil, errors.New(fmt.Sprintf("Device Serial Number: %s Not Fount", sn))
+		return nil, errors.New(fmt.Sprintf("Controller %s Not Fount", controllerSN))
 	}
 
 	return td, nil
+}
+
+func (s *Service) getTool(controllerSN string, toolSN string) (ITighteningTool, error) {
+	controller, err := s.getController(controllerSN)
+	if err != nil {
+		return nil, err
+	}
+
+	tool, err := controller.GetTool(toolSN)
+	if err != nil {
+		return nil, err
+	}
+
+	return tool, nil
+}
+
+func (s *Service) startupControllers() {
+	s.mtxDevices.Lock()
+	defer s.mtxDevices.Unlock()
+
+	for _, c := range s.runningControllers {
+		err := c.Start()
+		if err != nil {
+			s.diag.Error("Startup Controller Failed", err)
+		}
+	}
+}
+
+func (s *Service) shutdownControllers() {
+	s.mtxDevices.Lock()
+	defer s.mtxDevices.Unlock()
+
+	for _, c := range s.runningControllers {
+		err := c.Stop()
+		if err != nil {
+			s.diag.Error("Shutdown Controller Failed", err)
+		}
+	}
 }

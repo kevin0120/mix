@@ -1,6 +1,10 @@
 package openprotocol
 
-import "github.com/masami10/rush/services/tightening_device"
+import (
+	"fmt"
+	"github.com/kataras/iris/core/errors"
+	"github.com/masami10/rush/services/tightening_device"
+)
 
 // model[mid][rev]
 var VendorModels = map[string]map[string]string{
@@ -51,16 +55,25 @@ var VendorModels = map[string]map[string]string{
 	},
 }
 
-func GetVendorMid(model string, mid string) string {
-	m, has := VendorModels[model]
-	if !has {
-		return ""
+func GetModel(model string) (map[string]string, error) {
+	m, exist := VendorModels[model]
+	if !exist {
+		return nil, errors.New(fmt.Sprintf("Model %s Not Supported", model))
 	}
 
-	rev, has := m[mid]
-	if !has {
-		return ""
+	return m, nil
+}
+
+func GetVendorMid(model string, mid string) (string, error) {
+	m, err := GetModel(model)
+	if err != nil {
+		return "", err
 	}
 
-	return rev
+	rev, exist := m[mid]
+	if !exist {
+		return "", errors.New(fmt.Sprintf("MID %s Not Supported", mid))
+	}
+
+	return rev, nil
 }

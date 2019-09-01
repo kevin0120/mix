@@ -91,8 +91,8 @@ func (s *Service) DeviceType(sn string) string {
 	return "reader"
 }
 
-func (s *Service) Children() []string {
-	return []string{}
+func (s *Service) Children() map[string]device.IDevice {
+	return map[string]device.IDevice{}
 }
 
 func (s *Service) Status() string {

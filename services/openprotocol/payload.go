@@ -206,6 +206,7 @@ func (h *OpenProtocolHeader) Deserialize(str string) {
 	h.Spare = str[15:19]
 }
 
+// TODO: case合并
 func GeneratePackage(mid string, rev string, data string, end string) string {
 	h := OpenProtocolHeader{}
 	switch mid {
