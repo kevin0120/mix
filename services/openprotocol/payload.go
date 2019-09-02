@@ -13,8 +13,9 @@ const (
 )
 
 const (
-	JOB_ACTION_ABORT = "abort"
-	MAX_IDS_NUM      = 4
+	JOB_INFO_NOT_COMPLETED = 0
+	JOB_ACTION_ABORT       = "abort"
+	MAX_IDS_NUM            = 4
 )
 
 const (
@@ -832,15 +833,16 @@ func (ti *ToolInfo) Deserialize(msg string) error {
 }
 
 type JobInfo struct {
-	JobID           int
-	JobStatus       int
-	JobBatchMode    int
-	JobBatchSize    int
-	JobBatchCounter int
-	Timestamp       string
-	JobCurrentStep  int
-	JobTotalStep    int
-	JobStepType     int
+	JobID               int
+	JobStatus           int
+	JobBatchMode        int
+	JobBatchSize        int
+	JobBatchCounter     int
+	Timestamp           string
+	JobCurrentStep      int
+	JobTotalStep        int
+	JobStepType         int
+	JobTighteningStatus int
 }
 
 func (ji *JobInfo) Deserialize(msg string) error {
@@ -885,6 +887,11 @@ func (ji *JobInfo) Deserialize(msg string) error {
 	}
 
 	ji.JobStepType, err = strconv.Atoi(msg[57:59])
+	if err != nil {
+		return err
+	}
+
+	ji.JobTighteningStatus, err = strconv.Atoi(msg[61:63])
 	if err != nil {
 		return err
 	}

@@ -12,7 +12,7 @@ var VendorModels = map[string]map[string]string{
 		MID_0001_START:                   "003",
 		MID_0018_PSET:                    "001",
 		MID_0014_PSET_SUBSCRIBE:          "001",
-		MID_0034_JOB_INFO_SUBSCRIBE:      "003",
+		MID_0034_JOB_INFO_SUBSCRIBE:      "004",
 		MID_0250_SELECTOR_SUBSCRIBE:      "001",
 		MID_0060_LAST_RESULT_SUBSCRIBE:   "998",
 		MID_0150_IDENTIFIER_SET:          "001",

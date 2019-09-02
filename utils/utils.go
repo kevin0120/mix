@@ -58,7 +58,7 @@ func ReverseString(raw string) string {
 	return rt
 }
 
-func StringArrayContains(s []string, e string) bool {
+func ArrayContains(s []int, e int) bool {
 	for _, v := range s {
 		if v == e {
 			return true

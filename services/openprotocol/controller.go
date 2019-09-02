@@ -13,6 +13,7 @@ import (
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/socket_writer"
+	"github.com/masami10/rush/utils"
 	"net"
 	"strconv"
 	"strings"
@@ -140,7 +141,7 @@ func (c *TighteningController) handlerProcess() {
 		case pkg := <-c.handlerBuf:
 			err := c.HandleMsg(&pkg)
 			if err != nil {
-				c.diag.Error("OP protocol HandleMsg fail", err)
+				c.diag.Error("Open Protocol HandleMsg fail", err)
 			}
 		}
 	}
@@ -203,270 +204,20 @@ func DataDecoding(original []byte, torqueCoefficient float64, angleCoefficient f
 	return
 }
 
-// TODO: case封装成函数
 func (c *TighteningController) HandleMsg(pkg *handlerPkg) error {
 	c.Srv.diag.Debug(fmt.Sprintf("%s: %s%s\n", c.cfg.SN, pkg.Header.Serialize(), pkg.Body))
 
-	switch pkg.Header.MID {
-	case MID_7410_LAST_CURVE:
-		//结果曲线
-		if c.result_CURVE == nil {
-			c.result_CURVE = &minio.ControllerCurve{}
-		}
-
-		torqueCoefficient, _ := strconv.ParseFloat(strings.TrimSpace(pkg.Body[27:41]), 64)
-		angleCoefficient, _ := strconv.ParseFloat(strings.TrimSpace(pkg.Body[43:57]), 64)
-		if pkg.Body[69:71] == "01" {
-			c.MID_7410_CURVE.Header = &pkg.Header
-			c.MID_7410_CURVE.Body = []byte{}
-		}
-		c.MID_7410_CURVE.Body = append(c.MID_7410_CURVE.Body, []byte(pkg.Body[71:len(pkg.Body)])...)
-		if pkg.Body[69:71] == pkg.Body[65:67] {
-			Torque, Angle := DataDecoding(c.MID_7410_CURVE.Body, torqueCoefficient, angleCoefficient, c.diag)
-			c.diag.Debug(fmt.Sprintf("Torque: %+v", Torque))
-			c.diag.Debug(fmt.Sprintf("Angle: %+v", Angle))
-
-			var curve minio.ControllerCurve
-			curve.CurveContent.CUR_M = Torque
-			curve.CurveContent.CUR_W = Angle
-
-			//c.result_CURVE.CurveContent.Result=c.TightingID
-			//c.Srv.Parent.Handlers.HandleCurve(c.result_CURVE)
-
-			c.MID_7410_CURVE.Header = nil
-			c.MID_7410_CURVE.Body = nil
-
-			c.updateResult(nil, &curve)
-			c.handleResultandClear()
-		}
-		/*
-			fmt.Println([]byte(pkg.Body[71:]))
-			fmt.Println(pkg.Header)
-			fmt.Println(pkg.Body[65:67], "***********", pkg.Body[69:71])
-		*/
-	case MID_0061_LAST_RESULT:
-		// 结果数据
-
-		result_data := ResultData{}
-		result_data.Deserialize(pkg.Body)
-
-		return c.handleResult(&result_data, nil)
-
-	case MID_0065_OLD_DATA:
-		// 历史结果数据
-
-		result_data := ResultData{}
-		result_data.DeserializeOld(pkg.Body)
-
-		flag := c.Response.get(MID_0064_OLD_SUBSCRIBE)
-
-		if flag != nil {
-			defer c.Response.remove(MID_0064_OLD_SUBSCRIBE)
-			c.Response.Add(MID_0065_OLD_DATA, result_data)
-		} else {
-			// 处理历史数据
-			pset_detail, err := c.GetPSetDetail(result_data.PSetID)
-			if err == nil {
-				result_data.TorqueMin = pset_detail.TorqueMin
-				result_data.TorqueMax = pset_detail.TorqueMax
-				result_data.TorqueFinalTarget = pset_detail.TorqueTarget
-				result_data.AngleMax = pset_detail.AngleMax
-				result_data.AngleMin = pset_detail.AngleMin
-				result_data.FinalAngleTarget = pset_detail.AngleTarget
-			}
-
-			return c.handleResult(&result_data, nil)
-		}
-
-	case MID_0013_PSET_DETAIL_REPLY:
-		// pset详细数据
-		pset_detail := PSetDetail{}
-		pset_detail.Deserialize(pkg.Body)
-
-		c.Response.update(MID_0012_PSET_DETAIL_REQUEST, pset_detail)
-
-	case MID_0011_PSET_LIST_REPLY:
-		// pset列表
-		pset_list := PSetList{}
-		pset_list.Deserialize(pkg.Body)
-
-		c.Response.update(MID_0010_PSET_LIST_REQUEST, pset_list)
-
-		//case MID_7410_LAST_CURVE:
-		// 处理波形
-
-	case MID_0031_JOB_LIST_REPLY:
-		job_list := JobList{}
-		job_list.Deserialize(pkg.Body)
-
-		c.Response.update(MID_0030_JOB_LIST_REQUEST, job_list)
-
-	case MID_0033_JOB_DETAIL_REPLY:
-		// job详细数据
-		job_detail := JobDetail{}
-		job_detail.Deserialize(pkg.Body)
-
-		c.Response.update(MID_0032_JOB_DETAIL_REQUEST, job_detail)
-
-	case MID_0004_CMD_ERR:
-		// 请求错误
-
-		err_code := pkg.Body[4:6]
-		c.Response.update(pkg.Body[0:4], request_errors[err_code])
-
-	case MID_0005_CMD_OK:
-		// 请求正确
-
-		c.Response.update(pkg.Body, request_errors["00"])
-
-	case MID_0035_JOB_INFO:
-		job_info := JobInfo{}
-		job_info.Deserialize(pkg.Body)
-
-		if job_info.JobCurrentStep == 0 {
-			// 推送job选择信息
-
-			job_select := wsnotify.WSJobSelect{
-				JobID: job_info.JobID,
-			}
-
-			ws_str, _ := json.Marshal(job_select)
-			c.Srv.WS.WSSendJob(string(ws_str))
-		}
-
-	case MID_0211_INPUT_MONITOR:
-		inputs := IOMonitor{}
-		inputs.Deserialize(pkg.Body)
-
-		inputs.ControllerSN = c.cfg.SN
-
-		c.inputs = inputs.Inputs
-
-		str, _ := json.Marshal(inputs)
-		go c.Srv.WS.WSSendIOInput(string(str))
-
-	case MID_0101_MULTI_SPINDLE_RESULT:
-		ms := MultiSpindleResult{}
-		ms.Deserialize(pkg.Body)
-
-		wsResults := make([]wsnotify.WSResult, len(ms.Spindles), len(ms.Spindles))
-		//wsResult := wsnotify.WSResult{}
-		for idx, v := range ms.Spindles {
-			wsResults[idx].Result = v.Result
-			wsResults[idx].MI = v.Torque
-			wsResults[idx].WI = v.Angle
-			//wsResults = append(wsResults, wsResult)
-		}
-
-		wsStrs, err := json.Marshal(wsResults)
-		if err == nil {
-			c.Srv.WS.WSSend(wsnotify.WS_EVENT_RESULT, string(wsStrs))
-		}
-
+	handler, err := GetMidHandler(pkg.Header.MID)
+	if err != nil {
 		return err
-
-	case MID_0052_VIN:
-		// 收到条码
-		ids := DeserializeIDS(pkg.Body)
-
-		bc := ""
-		for _, v := range c.Srv.config().VinIndex {
-			if v < 0 || v > (MAX_IDS_NUM-1) {
-				continue
-			}
-
-			bc += ids[v]
-		}
-
-		barcode := wsnotify.WSScanner{
-			Barcode: bc,
-		}
-
-		str, _ := json.Marshal(barcode)
-
-		c.Srv.WS.WSSend(wsnotify.WS_EVENT_SCANNER, string(str))
-	case MID_0071_ALARM:
-		// 收到报警信息
-		var ai AlarmInfo
-		err := ai.Deserialize(pkg.Body)
-		if err != nil {
-			c.diag.Error("alarm info deserialize fail", err)
-			return err
-		} else {
-			// 参见 项目管理,长安项目中文件:http://116.62.21.97/web#id=325&view_type=form&model=ir.attachment&active_id=3&menu_id=90
-			// 第11页,错误代码:Tool calibration required:E305
-			//if ai.ErrorCode == "E305" {
-			//	// do nothing,当前未确认是否为这个错误代码
-			//}
-
-			switch ai.ErrorCode {
-			case EVT_CONTROLLER_TOOL_CONNECT:
-				c.UpdateToolStatus(controller.EVT_TOOL_CONNECTED)
-
-			case EVT_CONTROLLER_TOOL_DISCONNECT:
-				c.UpdateToolStatus(controller.EVT_TOOL_DISCONNECTED)
-			}
-		}
-		return nil
-
-	case MID_0076_ALARM_STATUS:
-		var as AlarmStatus
-		err := as.Deserialize(pkg.Body)
-		if err != nil {
-			c.diag.Error("alarm status deserialize fail", err)
-		} else {
-			switch as.ErrorCode {
-			case EVT_CONTROLLER_NO_ERR:
-				c.UpdateToolStatus(controller.EVT_TOOL_CONNECTED)
-
-			case EVT_CONTROLLER_TOOL_DISCONNECT:
-				c.UpdateToolStatus(controller.EVT_TOOL_DISCONNECTED)
-			}
-		}
-
-	case MID_0041_TOOL_INFO_REPLY:
-		// 收到工具信息
-		var ti ToolInfo
-		err := ti.Deserialize(pkg.Body)
-
-		if c.Status() == controller.STATUS_OFFLINE {
-			c.Response.update(MID_0040_TOOL_INFO_REQUEST, ti)
-		} else {
-			if err != nil {
-				c.diag.Error("tool info deserialize fail", err)
-			} else {
-
-				// 将数据通过api传给odoo
-				if ti.ToolSN == "" {
-					return errors.New("Tool Serial Number is empty string")
-				}
-
-				if ti.TotalTighteningCount == 0 || ti.CountSinLastService == 0 {
-					//不需要尝试创建维修/标定单据
-					return nil
-				}
-
-				go c.Srv.TryCreateMaintenance(ti) // 协程处理
-			}
-		}
-
-	}
-	return nil
-}
-
-func ArrayContains(s []int, e int) bool {
-	for _, v := range s {
-		if v == e {
-			return true
-		}
 	}
 
-	return false
+	return handler(c, pkg)
 }
 
-func (c *TighteningController) handleResult(result_data *ResultData, carve *minio.ControllerCurve) error {
+func (c *TighteningController) handleResult(result_data *ResultData, curve *minio.ControllerCurve) error {
 
-	if ArrayContains(c.Srv.config().SkipJobs, result_data.JobID) {
+	if utils.ArrayContains(c.Srv.config().SkipJobs, result_data.JobID) {
 		return nil
 	}
 
