@@ -314,54 +314,54 @@ func (m *Methods) getPSetList(ctx iris.Context) {
 
 func (m *Methods) getPSetDetail(ctx iris.Context) {
 
-	controller_sn := ctx.URLParam("controller_sn")
-	pset := ctx.URLParam("pset")
+	//controller_sn := ctx.URLParam("controller_sn")
+	//pset := ctx.URLParam("pset")
+	//
+	//if controller_sn == "" {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("controller_sn is required")
+	//	return
+	//}
+	//
+	//if pset == "" {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("pset is required")
+	//	return
+	//}
+	//
+	//v_pset, err := strconv.Atoi(pset)
+	//if err != nil {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("pset format error")
+	//	return
+	//}
+	//
+	//c, exist := m.service.ControllerService.Controllers[controller_sn]
+	//if !exist {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("controller not found")
+	//	return
+	//}
 
-	if controller_sn == "" {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("controller_sn is required")
-		return
-	}
-
-	if pset == "" {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("pset is required")
-		return
-	}
-
-	v_pset, err := strconv.Atoi(pset)
-	if err != nil {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("pset format error")
-		return
-	}
-
-	c, exist := m.service.ControllerService.Controllers[controller_sn]
-	if !exist {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("controller not found")
-		return
-	}
-
-	var pset_detail openprotocol.PSetDetail
-	switch c.Protocol() {
-	case controller.OPENPROTOCOL:
-		pset_detail, err = m.service.OpenProtocol.GetPSetDetail(controller_sn, v_pset)
-		if err != nil {
-			ctx.StatusCode(iris.StatusBadRequest)
-			ctx.WriteString(err.Error())
-			return
-		}
-
-	default:
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("not supported")
-		return
-	}
-
-	body, _ := json.Marshal(pset_detail)
-	ctx.Header("content-type", "application/json")
-	ctx.Write(body)
+	//var pset_detail openprotocol.PSetDetail
+	//switch c.Protocol() {
+	//case controller.OPENPROTOCOL:
+	//	pset_detail, err = m.service.OpenProtocol.GetPSetDetail(controller_sn, v_pset)
+	//	if err != nil {
+	//		ctx.StatusCode(iris.StatusBadRequest)
+	//		ctx.WriteString(err.Error())
+	//		return
+	//	}
+	//
+	//default:
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("not supported")
+	//	return
+	//}
+	//
+	//body, _ := json.Marshal(pset_detail)
+	//ctx.Header("content-type", "application/json")
+	//ctx.Write(body)
 }
 
 func (m *Methods) getJobList(ctx iris.Context) {
@@ -405,105 +405,105 @@ func (m *Methods) getJobList(ctx iris.Context) {
 
 func (m *Methods) getJobDetail(ctx iris.Context) {
 
-	controller_sn := ctx.URLParam("controller_sn")
-	job := ctx.URLParam("job")
-
-	if controller_sn == "" {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("controller_sn is required")
-		return
-	}
-
-	if job == "" {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("job is required")
-		return
-	}
-
-	v_job, err := strconv.Atoi(job)
-	if err != nil {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("pset format error")
-		return
-	}
-
-	c, exist := m.service.ControllerService.Controllers[controller_sn]
-	if !exist {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("controller not found")
-		return
-	}
-
-	var job_detail openprotocol.JobDetail
-	switch c.Protocol() {
-	case controller.OPENPROTOCOL:
-		job_detail, err = m.service.OpenProtocol.GetJobDetail(controller_sn, v_job)
-		if err != nil {
-			ctx.StatusCode(iris.StatusBadRequest)
-			ctx.WriteString(err.Error())
-			return
-		}
-
-	default:
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("not supported")
-		return
-	}
-
-	body, _ := json.Marshal(job_detail)
-	ctx.Header("content-type", "application/json")
-	ctx.Write(body)
+	//controller_sn := ctx.URLParam("controller_sn")
+	//job := ctx.URLParam("job")
+	//
+	//if controller_sn == "" {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("controller_sn is required")
+	//	return
+	//}
+	//
+	//if job == "" {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("job is required")
+	//	return
+	//}
+	//
+	//v_job, err := strconv.Atoi(job)
+	//if err != nil {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("pset format error")
+	//	return
+	//}
+	//
+	//c, exist := m.service.ControllerService.Controllers[controller_sn]
+	//if !exist {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("controller not found")
+	//	return
+	//}
+	//
+	//var job_detail openprotocol.JobDetail
+	//switch c.Protocol() {
+	//case controller.OPENPROTOCOL:
+	//	job_detail, err = m.service.OpenProtocol.GetJobDetail(controller_sn, v_job)
+	//	if err != nil {
+	//		ctx.StatusCode(iris.StatusBadRequest)
+	//		ctx.WriteString(err.Error())
+	//		return
+	//	}
+	//
+	//default:
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("not supported")
+	//	return
+	//}
+	//
+	//body, _ := json.Marshal(job_detail)
+	//ctx.Header("content-type", "application/json")
+	//ctx.Write(body)
 }
 
 func (m *Methods) enableJobMode(ctx iris.Context) {
-	var mode ControllerMode
-	err := ctx.ReadJSON(&mode)
-
-	if err != nil {
-		// 传输结构错误
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString(err.Error())
-		return
-	}
-
-	if mode.Controller_SN == "" {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("controller_sn is required")
-		return
-	}
-
-	if mode.Mode == "" {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("mode is required")
-		return
-	}
-
-	c, exist := m.service.ControllerService.Controllers[mode.Controller_SN]
-	if !exist {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("controller not found")
-		return
-	}
-
-	switch c.Protocol() {
-	case controller.OPENPROTOCOL:
-		flag := true
-		if mode.Mode == openprotocol.MODE_PSET {
-			flag = false
-		}
-		err = m.service.OpenProtocol.JobOFF(mode.Controller_SN, flag)
-
-	default:
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("not supported")
-		return
-	}
-
-	if err != nil {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString(err.Error())
-		return
-	}
+	//var mode ControllerMode
+	//err := ctx.ReadJSON(&mode)
+	//
+	//if err != nil {
+	//	// 传输结构错误
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString(err.Error())
+	//	return
+	//}
+	//
+	//if mode.Controller_SN == "" {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("controller_sn is required")
+	//	return
+	//}
+	//
+	//if mode.Mode == "" {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("mode is required")
+	//	return
+	//}
+	//
+	//c, exist := m.service.ControllerService.Controllers[mode.Controller_SN]
+	//if !exist {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("controller not found")
+	//	return
+	//}
+	//
+	//switch c.Protocol() {
+	//case controller.OPENPROTOCOL:
+	//	flag := true
+	//	if mode.Mode == openprotocol.MODE_PSET {
+	//		flag = false
+	//	}
+	//	err = m.service.OpenProtocol.JobOFF(mode.Controller_SN, flag)
+	//
+	//default:
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString("not supported")
+	//	return
+	//}
+	//
+	//if err != nil {
+	//	ctx.StatusCode(iris.StatusBadRequest)
+	//	ctx.WriteString(err.Error())
+	//	return
+	//}
 }
 
 func (m *Methods) putJobs(ctx iris.Context) {

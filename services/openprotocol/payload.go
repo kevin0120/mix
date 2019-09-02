@@ -3,6 +3,7 @@ package openprotocol
 import (
 	"fmt"
 	"github.com/juju/errors"
+	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/utils/biu"
 	"strconv"
 	"strings"
@@ -97,10 +98,7 @@ const (
 	ROTATION_CCW = "CCW"
 )
 
-const (
-	MODE_PSET = "pset"
-	MODE_JOB  = "job"
-)
+const ()
 
 const (
 	MID_0038_REV_1 = "001"
@@ -551,25 +549,13 @@ func (rd *ResultData) Deserialize(str string) error {
 	return nil
 }
 
-type PSetDetail struct {
-	PSetID            int     `json:"pset"`
-	PSetName          string  `json:"pset_name"`
-	RotationDirection string  `json:"rotation_direction"`
-	BatchSize         int     `json:"batch_size"`
-	TorqueMin         float64 `json:"torque_min"`
-	TorqueMax         float64 `json:"torque_max"`
-	TorqueTarget      float64 `json:"torque_target"`
-	AngleMin          float64 `json:"angle_min"`
-	AngleMax          float64 `json:"angle_max"`
-	AngleTarget       float64 `json:"angle_target"`
-}
-
-func (p *PSetDetail) Deserialize(str string) error {
+func DeserializePSetDetail(str string) (*tightening_device.PSetDetail, error) {
+	var p tightening_device.PSetDetail
 	var err error = nil
 
 	p.PSetID, err = strconv.Atoi(str[2:5])
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	p.PSetName = strings.TrimSpace(str[7:32])
@@ -585,46 +571,46 @@ func (p *PSetDetail) Deserialize(str string) error {
 
 	p.BatchSize, err = strconv.Atoi(str[37:39])
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	p.TorqueMin, err = strconv.ParseFloat(str[41:47], 64)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	p.TorqueMin = p.TorqueMin / 100
 
 	p.TorqueMax, err = strconv.ParseFloat(str[49:55], 64)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	p.TorqueMax = p.TorqueMax / 100
 
 	p.TorqueTarget, err = strconv.ParseFloat(str[57:63], 64)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	p.TorqueTarget = p.TorqueTarget / 100
 
 	p.AngleMin, err = strconv.ParseFloat(str[65:70], 64)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	p.AngleMax, err = strconv.ParseFloat(str[72:77], 64)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	p.AngleTarget, err = strconv.ParseFloat(str[79:84], 64)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &p, nil
 }
 
 type PSetList struct {
@@ -667,34 +653,13 @@ func (p *JobList) Deserialize(str string) error {
 	return nil
 }
 
-type JobStep struct {
-	StepName  string `json:"step_name"`
-	ChannelID int    `json:"channel_id"`
-	PSetID    int    `json:"pset_id"`
-	BatchSize int    `json:"batch_size"`
-	Socket    int    `json:"socket"`
-}
-
-type JobDetail struct {
-	JobID         int    `json:"job"`
-	JobName       string `json:"job_name"`
-	OrderStrategy string `json:"order_strategy"`
-	//MaxTimeforFirstTightening int
-	//MaxTimetoCompleteJob int
-	CountType         string    `json:"count_type"`
-	LockAtJobDone     bool      `json:"lock_at_job_done"`
-	UseLineControl    bool      `json:"use_line_control"`
-	RepeatJob         bool      `json:"repeat_job"`
-	LooseningStrategy string    `json:"loosening_strategy"`
-	Steps             []JobStep `json:"steps"`
-}
-
-func (p *JobDetail) Deserialize(str string) error {
+func DeserializeJobDetail(str string) (*tightening_device.JobDetail, error) {
 	var err error = nil
+	var p tightening_device.JobDetail
 
 	p.JobID, err = strconv.Atoi(str[2:6])
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	p.JobName = strings.TrimSpace(str[8:33])
@@ -710,16 +675,6 @@ func (p *JobDetail) Deserialize(str string) error {
 	case "2":
 		p.OrderStrategy = "free and forced"
 	}
-
-	//p.MaxTimeforFirstTightening, err = strconv.Atoi(str[38:42])
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//p.MaxTimetoCompleteJob, err = strconv.Atoi(str[44:49])
-	//if err != nil {
-	//	return err
-	//}
 
 	count_type := str[51:52]
 	switch count_type {
@@ -750,7 +705,7 @@ func (p *JobDetail) Deserialize(str string) error {
 
 	loosening, err := strconv.Atoi(str[63:65])
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	switch loosening {
@@ -766,7 +721,7 @@ func (p *JobDetail) Deserialize(str string) error {
 
 	step_str := str[75 : len(str)-1]
 	steps := strings.Split(step_str, ";")
-	job_step := JobStep{}
+	job_step := tightening_device.JobStep{}
 	for _, v := range steps {
 		values := strings.Split(v, ":")
 
@@ -779,7 +734,7 @@ func (p *JobDetail) Deserialize(str string) error {
 		p.Steps = append(p.Steps, job_step)
 	}
 
-	return nil
+	return &p, nil
 }
 
 type AlarmInfo struct {

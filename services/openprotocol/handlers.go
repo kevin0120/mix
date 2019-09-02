@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/wsnotify"
@@ -98,15 +97,16 @@ func handleMID_0065_OLD_DATA(c *TighteningController, pkg *handlerPkg) error {
 		c.Response.Add(MID_0065_OLD_DATA, result_data)
 	} else {
 		// 处理历史数据
-		pset_detail, err := c.GetPSetDetail(result_data.PSetID)
-		if err == nil {
-			result_data.TorqueMin = pset_detail.TorqueMin
-			result_data.TorqueMax = pset_detail.TorqueMax
-			result_data.TorqueFinalTarget = pset_detail.TorqueTarget
-			result_data.AngleMax = pset_detail.AngleMax
-			result_data.AngleMin = pset_detail.AngleMin
-			result_data.FinalAngleTarget = pset_detail.AngleTarget
-		}
+		// TODO: 通过工具获取psetdetail
+		//pset_detail, err := c.GetPSetDetail(result_data.PSetID)
+		//if err == nil {
+		//	result_data.TorqueMin = pset_detail.TorqueMin
+		//	result_data.TorqueMax = pset_detail.TorqueMax
+		//	result_data.TorqueFinalTarget = pset_detail.TorqueTarget
+		//	result_data.AngleMax = pset_detail.AngleMax
+		//	result_data.AngleMin = pset_detail.AngleMin
+		//	result_data.FinalAngleTarget = pset_detail.AngleTarget
+		//}
 
 		return c.handleResult(&result_data, nil)
 	}
@@ -116,8 +116,7 @@ func handleMID_0065_OLD_DATA(c *TighteningController, pkg *handlerPkg) error {
 
 // pset详情
 func handleMID_0013_PSET_DETAIL_REPLY(c *TighteningController, pkg *handlerPkg) error {
-	pset_detail := PSetDetail{}
-	err := pset_detail.Deserialize(pkg.Body)
+	pset_detail, err := DeserializePSetDetail(pkg.Body)
 	if err != nil {
 		return err
 	}
@@ -155,13 +154,12 @@ func handleMID_0031_JOB_LIST_REPLY(c *TighteningController, pkg *handlerPkg) err
 
 // job详情
 func handleMID_0033_JOB_DETAIL_REPLY(c *TighteningController, pkg *handlerPkg) error {
-	job_detail := JobDetail{}
-	err := job_detail.Deserialize(pkg.Body)
+	jobDetaill, err := DeserializeJobDetail(pkg.Body)
 	if err != nil {
 		return err
 	}
 
-	c.Response.update(MID_0032_JOB_DETAIL_REQUEST, job_detail)
+	c.Response.update(MID_0032_JOB_DETAIL_REQUEST, jobDetaill)
 
 	return nil
 }
@@ -290,10 +288,10 @@ func handleMID_0071_ALARM(c *TighteningController, pkg *handlerPkg) error {
 
 	switch ai.ErrorCode {
 	case EVT_CONTROLLER_TOOL_CONNECT:
-		c.UpdateToolStatus(controller.EVT_TOOL_CONNECTED)
+		//c.UpdateToolStatus(controller.EVT_TOOL_CONNECTED)
 
 	case EVT_CONTROLLER_TOOL_DISCONNECT:
-		c.UpdateToolStatus(controller.EVT_TOOL_DISCONNECTED)
+		//c.UpdateToolStatus(controller.EVT_TOOL_DISCONNECTED)
 	}
 
 	return nil
@@ -309,10 +307,10 @@ func handleMID_0076_ALARM_STATUS(c *TighteningController, pkg *handlerPkg) error
 
 	switch as.ErrorCode {
 	case EVT_CONTROLLER_NO_ERR:
-		c.UpdateToolStatus(controller.EVT_TOOL_CONNECTED)
+		//c.UpdateToolStatus(controller.EVT_TOOL_CONNECTED)
 
 	case EVT_CONTROLLER_TOOL_DISCONNECT:
-		c.UpdateToolStatus(controller.EVT_TOOL_DISCONNECTED)
+		//c.UpdateToolStatus(controller.EVT_TOOL_DISCONNECTED)
 	}
 
 	return nil

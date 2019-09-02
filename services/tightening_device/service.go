@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/kataras/iris/core/errors"
 	"github.com/kataras/iris/websocket"
-	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"sync"
@@ -20,51 +19,6 @@ const (
 type Diagnostic interface {
 	Error(msg string, err error)
 	Debug(msg string)
-}
-
-type ITighteningDevice interface {
-	device.IDevice
-}
-
-type ITighteningController interface {
-	ITighteningDevice
-
-	// 启动
-	Start() error
-
-	// 停止
-	Stop() error
-
-	// 定位工具
-	GetTool(toolSN string) (ITighteningTool, error)
-
-	// 控制输出
-	SetOutput(outputs []ControllerOutput) error
-}
-
-type ITighteningTool interface {
-	ITighteningDevice
-
-	// 工具使能控制
-	ToolControl(enable bool) error
-
-	// 设置pset
-	SetPSet(pset int) error
-
-	// 设置job
-	SetJob(job int) error
-
-	// 模式选择: job/pset
-	ModeSelect(mode string) error
-
-	// 取消job
-	AbortJob() error
-
-	// TODO:
-	// pset列表
-	// pset详情
-	// job列表
-	// job详情
 }
 
 type Service struct {

@@ -34,14 +34,15 @@ type handlerPkg struct {
 	Header OpenProtocolHeader
 	Body   string
 }
+
 type handlerPkg_curve struct {
 	Header *OpenProtocolHeader
 	Body   []byte
 }
+
 type TighteningController struct {
 	w                 *socket_writer.SocketWriter
 	cfg               *tightening_device.TighteningDeviceConfig
-	StatusValue       atomic.Value
 	keepAliveCount    int32
 	keep_period       time.Duration
 	req_timeout       time.Duration
@@ -54,18 +55,15 @@ type TighteningController struct {
 	handlerBuf        chan handlerPkg
 	keepaliveDeadLine atomic.Value
 	protocol          string
-	Mode              atomic.Value
 	inputs            string
 	diag              Diagnostic
 	MID_7410_CURVE    handlerPkg_curve
 	result_CURVE      *minio.ControllerCurve
 	result            *controller.ControllerResult
 	mtxResult         sync.Mutex
-	toolStatus        atomic.Value
 	model             string
 	receiveBuf        chan []byte
 
-	tightening_device.ITighteningController
 	device.BaseDevice
 }
 
@@ -89,9 +87,6 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 		BaseDevice:        device.CreateBaseDevice(),
 	}
 
-	c.StatusValue.Store(controller.STATUS_OFFLINE)
-	c.toolStatus.Store(controller.EVT_TOOL_DISCONNECTED)
-
 	for _, v := range deviceConfig.Tools {
 		tool := NewTool(&c, v, d)
 		c.AddChildren(v.SN, &tool)
@@ -111,21 +106,21 @@ func (c *TighteningController) Tools() map[string]tightening_device.ITighteningT
 	return nil
 }
 
-func (c *TighteningController) UpdateToolStatus(status string) {
-	s := c.toolStatus.Load().(string)
-	if s != status {
-		c.toolStatus.Store(status)
-
-		// 推送工具状态
-		//ts := wsnotify.WSToolStatus{
-		//	ToolSN: c.cfg.Tools[0].SerialNO,
-		//	Status: status,
-		//}
-		//
-		//str, _ := json.Marshal(ts)
-		//c.Srv.WS.WSSend(wsnotify.WS_EVETN_TOOL, string(str))
-	}
-}
+//func (c *TighteningController) UpdateToolStatus(status string) {
+//	s := c.toolStatus.Load().(string)
+//	if s != status {
+//		c.toolStatus.Store(status)
+//
+//		// 推送工具状态
+//		//ts := wsnotify.WSToolStatus{
+//		//	ToolSN: c.cfg.Tools[0].SerialNO,
+//		//	Status: status,
+//		//}
+//		//
+//		//str, _ := json.Marshal(ts)
+//		//c.Srv.WS.WSSend(wsnotify.WS_EVETN_TOOL, string(str))
+//	}
+//}
 
 func (c *TighteningController) LoadController(controller *storage.Controllers) {
 	c.dbController = controller
@@ -405,13 +400,11 @@ func (c *TighteningController) Protocol() string {
 }
 
 func (c *TighteningController) Connect() error {
-	c.StatusValue.Store(controller.STATUS_OFFLINE)
+	c.UpdateStatus(device.STATUS_OFFLINE)
 	c.Response = ResponseQueue{
 		Results: map[string]interface{}{},
 		mtx:     sync.Mutex{},
 	}
-
-	c.Mode.Store(MODE_JOB)
 
 	for {
 		err := c.w.Connect(DAIL_TIMEOUT)
@@ -424,7 +417,7 @@ func (c *TighteningController) Connect() error {
 		time.Sleep(time.Duration(c.req_timeout))
 	}
 
-	c.updateStatus(controller.STATUS_ONLINE)
+	c.handleStatus(controller.STATUS_ONLINE)
 
 	c.startComm()
 	c.ToolInfoReq()
@@ -502,176 +495,12 @@ func (c *TighteningController) ToolInfoReq() error {
 	//
 	//	c.tighteningDevice.AddDevice(ti.ControllerSN, c)
 	//	c.tighteningDevice.AddDevice(ti.ToolSN, c)
-	//	c.updateStatus(controller.STATUS_ONLINE)
+	//	c.handleStatus(controller.STATUS_ONLINE)
 	//} else {
-	//	c.updateStatus(controller.STATUS_OFFLINE)
+	//	c.handleStatus(controller.STATUS_OFFLINE)
 	//}
 
 	return nil
-}
-
-func (c *TighteningController) GetPSetList() ([]int, error) {
-	var psets []int
-
-	rev, err := GetVendorMid(c.Model(), MID_0010_PSET_LIST_REQUEST)
-	if err != nil {
-		return psets, err
-	}
-
-	if c.Status() == controller.STATUS_OFFLINE {
-		return psets, errors.New(controller.STATUS_OFFLINE)
-	}
-
-	defer c.Response.remove(MID_0010_PSET_LIST_REQUEST)
-	c.Response.Add(MID_0010_PSET_LIST_REQUEST, nil)
-
-	psets_request := GeneratePackage(MID_0010_PSET_LIST_REQUEST, rev, "", "", "", "")
-	c.Write([]byte(psets_request))
-
-	var reply interface{} = nil
-
-	for i := 0; i < MAX_REPLY_COUNT; i++ {
-		reply = c.Response.get(MID_0010_PSET_LIST_REQUEST)
-		if reply != nil {
-			break
-		}
-
-		time.Sleep(REPLY_TIMEOUT)
-	}
-
-	if reply == nil {
-		return psets, errors.New(controller.ERR_CONTROLER_TIMEOUT)
-	}
-
-	pset_list := reply.(PSetList)
-
-	return pset_list.psets, nil
-}
-
-func (c *TighteningController) GetPSetDetail(pset int) (PSetDetail, error) {
-	var obj_pset_detail PSetDetail
-
-	rev, err := GetVendorMid(c.Model(), MID_0012_PSET_DETAIL_REQUEST)
-	if err != nil {
-		return obj_pset_detail, err
-	}
-
-	if c.Status() == controller.STATUS_OFFLINE {
-		return obj_pset_detail, errors.New(controller.STATUS_OFFLINE)
-	}
-
-	defer c.Response.remove(MID_0012_PSET_DETAIL_REQUEST)
-	c.Response.Add(MID_0012_PSET_DETAIL_REQUEST, nil)
-
-	pset_detail := GeneratePackage(MID_0012_PSET_DETAIL_REQUEST, rev, "", "", "", fmt.Sprintf("%03d", pset))
-	c.Write([]byte(pset_detail))
-
-	var reply interface{} = nil
-	for i := 0; i < MAX_REPLY_COUNT; i++ {
-		reply = c.Response.get(MID_0012_PSET_DETAIL_REQUEST)
-		if reply != nil {
-			break
-		}
-
-		time.Sleep(REPLY_TIMEOUT)
-	}
-
-	if reply == nil {
-		return obj_pset_detail, errors.New(controller.ERR_CONTROLER_TIMEOUT)
-	}
-
-	switch v := reply.(type) {
-	case string:
-		return obj_pset_detail, errors.New(v)
-
-	case PSetDetail:
-		return reply.(PSetDetail), nil
-
-	default:
-		return obj_pset_detail, errors.New(controller.ERR_KNOWN)
-	}
-
-}
-
-func (c *TighteningController) GetJobList() ([]int, error) {
-	var jobs []int
-	rev, err := GetVendorMid(c.Model(), MID_0030_JOB_LIST_REQUEST)
-	if err != nil {
-		return jobs, err
-	}
-
-	if c.Status() == controller.STATUS_OFFLINE {
-		return jobs, errors.New(controller.STATUS_OFFLINE)
-	}
-
-	defer c.Response.remove(MID_0030_JOB_LIST_REQUEST)
-	c.Response.Add(MID_0030_JOB_LIST_REQUEST, nil)
-
-	psetsRequest := GeneratePackage(MID_0030_JOB_LIST_REQUEST, rev, "", "", "", "")
-	c.Write([]byte(psetsRequest))
-
-	var reply interface{} = nil
-
-	for i := 0; i < MAX_REPLY_COUNT; i++ {
-		reply = c.Response.get(MID_0030_JOB_LIST_REQUEST)
-		if reply != nil {
-			break
-		}
-
-		time.Sleep(REPLY_TIMEOUT)
-	}
-
-	if reply == nil {
-		return jobs, errors.New(controller.ERR_CONTROLER_TIMEOUT)
-	}
-
-	jobList := reply.(JobList)
-
-	return jobList.jobs, nil
-}
-
-func (c *TighteningController) GetJobDetail(job int) (JobDetail, error) {
-	var objJobDetail JobDetail
-	rev, err := GetVendorMid(c.Model(), MID_0032_JOB_DETAIL_REQUEST)
-	if err != nil {
-		return objJobDetail, err
-	}
-
-	if c.Status() == controller.STATUS_OFFLINE {
-		return objJobDetail, errors.New(controller.STATUS_OFFLINE)
-	}
-
-	defer c.Response.remove(MID_0032_JOB_DETAIL_REQUEST)
-	c.Response.Add(MID_0032_JOB_DETAIL_REQUEST, nil)
-
-	job_detail := GeneratePackage(MID_0032_JOB_DETAIL_REQUEST, rev, "", "", "", fmt.Sprintf("%04d", job))
-	c.Write([]byte(job_detail))
-
-	var reply interface{} = nil
-	for i := 0; i < MAX_REPLY_COUNT; i++ {
-		reply = c.Response.get(MID_0032_JOB_DETAIL_REQUEST)
-		if reply != nil {
-			break
-		}
-
-		time.Sleep(REPLY_TIMEOUT)
-	}
-
-	if reply == nil {
-		return objJobDetail, errors.New(controller.ERR_CONTROLER_TIMEOUT)
-	}
-
-	switch v := reply.(type) {
-	case string:
-		return objJobDetail, errors.New(v)
-
-	case JobDetail:
-		return reply.(JobDetail), nil
-
-	default:
-		return objJobDetail, errors.New(controller.ERR_KNOWN)
-	}
-
 }
 
 func (c *TighteningController) SolveOldResults() {
@@ -732,11 +561,6 @@ func (c *TighteningController) KeepAliveDeadLine() time.Time {
 	return c.keepaliveDeadLine.Load().(time.Time)
 }
 
-func (c *TighteningController) Status() string {
-
-	return c.StatusValue.Load().(string)
-}
-
 func (c *TighteningController) sendKeepalive() {
 	if c.Status() == controller.STATUS_OFFLINE {
 		return
@@ -752,13 +576,7 @@ func (c *TighteningController) startComm() error {
 		return err
 	}
 
-	//if c.Status() == controller.STATUS_OFFLINE {
-	//	return errors.New("status offline")
-	//}
-
 	start := GeneratePackage(MID_0001_START, rev, "", "", "", "")
-
-	//c.Response.Add(MID_0001_START, "")
 
 	c.Write([]byte(start))
 
@@ -769,13 +587,13 @@ func (c *TighteningController) Write(buf []byte) {
 	c.buffer <- buf
 }
 
-func (c *TighteningController) updateStatus(status string) {
+func (c *TighteningController) handleStatus(status string) {
 
 	if status != c.Status() {
 
-		c.StatusValue.Store(status)
+		c.UpdateStatus(status)
 
-		if status == controller.STATUS_OFFLINE {
+		if status == device.STATUS_OFFLINE {
 			c.Close()
 
 			// 断线重连
@@ -884,7 +702,7 @@ func (c *TighteningController) manage() {
 				continue
 			}
 			if c.KeepAliveCount() >= MAX_KEEP_ALIVE_CHECK {
-				go c.updateStatus(controller.STATUS_OFFLINE)
+				go c.handleStatus(controller.STATUS_OFFLINE)
 				c.updateKeepAliveCount(0)
 				continue
 			}
@@ -959,249 +777,6 @@ func (c *TighteningController) getOldResult(last_id int64) error {
 	s_last_result := GeneratePackage(MID_0064_OLD_SUBSCRIBE, rev, "", "", "", fmt.Sprintf("%010d", last_id))
 
 	c.Write([]byte(s_last_result))
-
-	return nil
-}
-
-// TODO   待删除
-func (c *TighteningController) pset(pset int) error {
-	rev, err := GetVendorMid(c.Model(), MID_0018_PSET)
-	if err != nil {
-		return err
-	}
-
-	if c.Status() == controller.STATUS_OFFLINE {
-		return errors.New("status offline")
-	}
-
-	c.Response.Add(MID_0018_PSET, nil)
-	defer c.Response.remove(MID_0018_PSET)
-
-	s_pset := GeneratePackage(MID_0018_PSET, rev, "", "", "", fmt.Sprintf("%03d", pset))
-
-	c.Write([]byte(s_pset))
-
-	var reply interface{} = nil
-	for i := 0; i < MAX_REPLY_COUNT; i++ {
-		reply = c.Response.get(MID_0018_PSET)
-		if reply != nil {
-			break
-		}
-
-		time.Sleep(REPLY_TIMEOUT)
-	}
-
-	if reply == nil {
-		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
-	}
-
-	s_reply := reply.(string)
-	if s_reply != request_errors["00"] {
-		return errors.New(s_reply)
-	}
-
-	return nil
-}
-
-// TODO   待删除
-func (c *TighteningController) ToolControl(enable bool) error {
-	if c.Status() == controller.STATUS_OFFLINE {
-		return errors.New("status offline")
-	}
-
-	s_cmd := MID_0042_TOOL_DISABLE
-	if enable {
-		s_cmd = MID_0043_TOOL_ENABLE
-	}
-
-	rev, err := GetVendorMid(c.Model(), s_cmd)
-	if err != nil {
-		return err
-	}
-
-	c.Response.Add(s_cmd, nil)
-	defer c.Response.remove(s_cmd)
-
-	sSend := GeneratePackage(s_cmd, rev, "", "", "", "")
-
-	c.Write([]byte(sSend))
-
-	var reply interface{} = nil
-	for i := 0; i < MAX_REPLY_COUNT; i++ {
-		reply = c.Response.get(s_cmd)
-		if reply != nil {
-			break
-		}
-
-		time.Sleep(REPLY_TIMEOUT)
-	}
-
-	if reply == nil {
-		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
-	}
-
-	sReply := reply.(string)
-	if sReply != request_errors["00"] {
-		return errors.New(sReply)
-	}
-
-	return nil
-}
-
-
-// TODO   待删除
-// 0: set 1: reset
-func (c *TighteningController) JobOff(off string) error {
-	rev, err := GetVendorMid(c.Model(), MID_0130_JOB_OFF)
-	if err != nil {
-		return err
-	}
-
-	if c.Status() == controller.STATUS_OFFLINE {
-		return errors.New("status offline")
-	}
-
-	c.Response.Add(MID_0130_JOB_OFF, nil)
-	defer c.Response.remove(MID_0130_JOB_OFF)
-
-	s_off := GeneratePackage(MID_0130_JOB_OFF, rev, "", "", "", off)
-
-	c.Write([]byte(s_off))
-
-	var reply interface{} = nil
-	for i := 0; i < MAX_REPLY_COUNT; i++ {
-		reply = c.Response.get(MID_0130_JOB_OFF)
-		if reply != nil {
-			break
-		}
-
-		time.Sleep(REPLY_TIMEOUT)
-	}
-
-	if reply == nil {
-		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
-	}
-
-	if off == "0" {
-		c.Mode.Store(MODE_PSET)
-	} else {
-		c.Mode.Store(MODE_JOB)
-	}
-
-	return nil
-}
-
-// TODO   待删除
-func (c *TighteningController) jobSelect(job int) error {
-	rev, err := GetVendorMid(c.Model(), MID_0038_JOB_SELECT)
-	if err != nil {
-		return err
-	}
-
-	if c.Status() == controller.STATUS_OFFLINE {
-		return errors.New("status offline")
-	}
-
-	c.Response.Add(MID_0038_JOB_SELECT, nil)
-	defer c.Response.remove(MID_0038_JOB_SELECT)
-
-	s_job := GeneratePackage(MID_0038_JOB_SELECT, rev, "", "", "", fmt.Sprintf("%04d", job))
-
-	c.Write([]byte(s_job))
-
-	var reply interface{} = nil
-	for i := 0; i < MAX_REPLY_COUNT; i++ {
-		reply = c.Response.get(MID_0038_JOB_SELECT)
-		if reply != nil {
-			break
-		}
-
-		time.Sleep(REPLY_TIMEOUT)
-	}
-
-	if reply == nil {
-		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
-	}
-
-	s_reply := reply.(string)
-	if s_reply != request_errors["00"] {
-		return errors.New(s_reply)
-	}
-
-	return nil
-}
-
-func (c *TighteningController) IdentifierSet(str string) error {
-	rev, err := GetVendorMid(c.Model(), MID_0150_IDENTIFIER_SET)
-	if err != nil {
-		return err
-	}
-
-	if c.Status() == controller.STATUS_OFFLINE {
-		return errors.New("status offline")
-	}
-
-	ide := GeneratePackage(MID_0150_IDENTIFIER_SET, rev, "", "", "", str)
-
-	c.Write([]byte(ide))
-
-	return nil
-}
-
-func (c *TighteningController) PSetBatchSet(pset int, batch int) error {
-	rev, err := GetVendorMid(c.Model(), MID_0019_PSET_BATCH_SET)
-	if err != nil {
-		return err
-	}
-
-	if c.Status() == controller.STATUS_OFFLINE {
-		return errors.New("status offline")
-	}
-
-	c.Response.Add(MID_0019_PSET_BATCH_SET, nil)
-	defer c.Response.remove(MID_0019_PSET_BATCH_SET)
-
-	s := fmt.Sprintf("%03d%02d", pset, batch)
-	ide := GeneratePackage(MID_0019_PSET_BATCH_SET, rev, "", "", "", s)
-
-	c.Write([]byte(ide))
-
-	var reply interface{} = nil
-	for i := 0; i < MAX_REPLY_COUNT; i++ {
-		reply = c.Response.get(MID_0019_PSET_BATCH_SET)
-		if reply != nil {
-			break
-		}
-
-		time.Sleep(REPLY_TIMEOUT)
-	}
-
-	if reply == nil {
-		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
-	}
-
-	s_reply := reply.(string)
-	if s_reply != request_errors["00"] {
-		return errors.New(s_reply)
-	}
-
-	return nil
-}
-
-func (c *TighteningController) PSetBatchReset(pset int) error {
-	rev, err := GetVendorMid(c.Model(), MID_0020_PSET_BATCH_RESET)
-	if err != nil {
-		return err
-	}
-
-	if c.Status() == controller.STATUS_OFFLINE {
-		return errors.New("status offline")
-	}
-
-	s := fmt.Sprintf("%03d", pset)
-	ide := GeneratePackage(MID_0020_PSET_BATCH_RESET, rev, "", "", "", s)
-
-	c.Write([]byte(ide))
 
 	return nil
 }
@@ -1359,27 +934,6 @@ func (c *TighteningController) CurveSubscribe() error {
 	return nil
 }
 
-func (c *TighteningController) PSet(pset int, channel int, ex_info string, count int) (uint32, error) {
-
-	if c.Mode.Load().(string) != MODE_PSET {
-		return 0, errors.New("current mode is not pset")
-	}
-
-	// 次数控制
-	//c.PSetBatchSet(pset, count)
-
-	// 结果id-拧接次数-用户id
-	c.IdentifierSet(ex_info)
-
-	// 设定pset
-	err := c.pset(pset)
-	if err != nil {
-		return 0, err
-	}
-
-	return 0, nil
-}
-
 func (c *TighteningController) findIOByNo(no int, ios *[]IOStatus) (IOStatus, error) {
 	for _, v := range *ios {
 		if no == v.No {
@@ -1452,61 +1006,6 @@ func (c *TighteningController) IOSet(ios *[]IOStatus) error {
 	return nil
 }
 
-func (c *TighteningController) JobSet(id_info string, job int) error {
-
-	if c.Mode.Load().(string) != MODE_JOB {
-		return errors.New("current mode is not job")
-	}
-
-	_ = c.IdentifierSet(id_info)
-
-	err := c.jobSelect(job)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-// TODO   待删除
-func (c *TighteningController) JobAbort() error {
-	rev, err := GetVendorMid(c.Model(), MID_0127_JOB_ABORT)
-	if err != nil {
-		return err
-	}
-
-	if c.Mode.Load().(string) != MODE_JOB {
-		return errors.New("current mode is not job")
-	}
-
-	c.Response.Add(MID_0127_JOB_ABORT, nil)
-	defer c.Response.remove(MID_0127_JOB_ABORT)
-
-	s_job := GeneratePackage(MID_0127_JOB_ABORT, rev, "", "", "", "")
-
-	c.Write([]byte(s_job))
-
-	var reply interface{} = nil
-	for i := 0; i < MAX_REPLY_COUNT; i++ {
-		reply = c.Response.get(MID_0127_JOB_ABORT)
-		if reply != nil {
-			break
-		}
-
-		time.Sleep(REPLY_TIMEOUT)
-	}
-
-	if reply == nil {
-		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
-	}
-
-	sReply := reply.(string)
-	if sReply != request_errors["00"] {
-		return errors.New(sReply)
-	}
-
-	return nil
-}
-
 func (c *TighteningController) Model() string {
 	return c.model
 }
@@ -1515,55 +1014,6 @@ func (c *TighteningController) SetModel(model string) {
 	c.model = model
 }
 
-func (c *TighteningController) SetJob(r *tightening_device.JobSet) tightening_device.Reply {
-	return tightening_device.Reply{}
-}
-
-func (c *TighteningController) SetPSet(r *tightening_device.PSetSet) tightening_device.Reply {
-	rt := tightening_device.Reply{
-		Result: 0,
-		Msg:    "",
-	}
-
-	_ = c.PSetBatchSet(r.PSet, 1)
-
-	err := c.pset(r.PSet)
-	if err != nil {
-		rt.Result = -1
-		rt.Msg = err.Error()
-	}
-
-	return rt
-}
-
-func (c *TighteningController) Enable(r *tightening_device.ToolEnable) tightening_device.Reply {
-	rt := tightening_device.Reply{
-		Result: 0,
-		Msg:    "",
-	}
-
-	err := c.ToolControl(r.Enable)
-	if err != nil {
-		rt.Result = -1
-		rt.Msg = err.Error()
-	}
-
-	return rt
-}
-
 func (c *TighteningController) DeviceType() string {
 	return tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER
-}
-
-func (c *TighteningController) Children() map[string]device.IDevice {
-
-	return map[string]device.IDevice{}
-}
-
-func (s *TighteningController) Data() interface{} {
-	return nil
-}
-
-func (s *TighteningController) Config() interface{} {
-	return nil
 }
