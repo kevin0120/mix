@@ -12,7 +12,7 @@ import { eventChannel } from 'redux-saga';
 import { AIIS } from './action';
 import { setHealthzCheck } from '../healthzCheck/action';
 import { andonNewData } from '../andon/action';
-import { setNewNotification } from '../notification/action';
+import notifierActions  from '../Notifier/action';
 
 let task = null;
 
@@ -110,12 +110,12 @@ function* aiisWSListener(hmiSN) {
           break;
         case AIIS_WS_CHANNEL.CLOSE:
           yield put(setHealthzCheck('andon', false));
-          yield put(setNewNotification('Info', `andon连接状态更新: ${false}`));
+          yield put(notifierActions.enqueueSnackbar('Info', `andon连接状态更新: ${false}`));
           break;
         case AIIS_WS_CHANNEL.ERROR:
           yield put(setHealthzCheck('andon', false));
           yield put(
-            setNewNotification('Info', `masterPC连接状态更新: ${false}`)
+            notifierActions.enqueueSnackbar('Info', `masterPC连接状态更新: ${false}`)
           );
           break;
         case AIIS_WS_CHANNEL.PING:
@@ -167,7 +167,7 @@ function* stopAiisWebsocket() {
       ws.ws.readyState === OWebSocket.CONNECTING
     ) {
       yield put(setHealthzCheck('andon', false));
-      yield put(setNewNotification('Info', `andon连接状态更新: ${false}`));
+      yield put(notifierActions.enqueueSnackbar('Info', `andon连接状态更新: ${false}`));
       ws.close();
     }
     ws = null;

@@ -6,7 +6,7 @@ import { jobManual } from '../../api/operation';
 import { OPERATION } from '../operation/action';
 import { ANDON } from './action';
 import { watchWorkers } from '../util';
-import { setNewNotification } from '../notification/action';
+import notifierActions from '../Notifier/action';
 import { addNewStory } from '../timeline/saga';
 import { STORY_TYPE } from '../timeline/model';
 
@@ -88,7 +88,7 @@ function* handleAndonScanner(action) {
     if (resp) {
       const { overtime, successAction } = yield race({ overtime: delay(8000), successAction: take(ANDON.NEW_DATA) });
       if (overtime) {
-        yield put(setNewNotification('Warn', '获取工单信息超时'));
+        yield put(notifierActions.enqueueSnackbar('Warn', '获取工单信息超时'));
       }
       if (successAction) {
         yield call(handleAndonData, successAction);

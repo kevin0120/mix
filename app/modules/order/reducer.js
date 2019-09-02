@@ -75,10 +75,7 @@ const orderReducer: {
         oD => new Order(oD, stepTypes)
       )
     );
-    console.log(newList);
-
     // const newList = list.map(oD => new Order(oD, stepTypes));
-
     return {
       ...state,
       list: newList

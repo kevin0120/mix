@@ -2,7 +2,7 @@
 
 import { put, call } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
-import { setNewNotification } from '../../../notification/action';
+import notifierActions from '../../../Notifier/action';
 // import ClsScrewTool, { defaultScrewToolDispatcher } from './model';
 import { CommonLog } from '../../../../common/utils';
 import type { tDeviceSN } from '../Device';
@@ -33,7 +33,7 @@ export function* toolStatusChange(data: tToolStatusData): Saga<void> {
   try {
     const { tool_sn: toolSN, status, reason } = data.data;
     yield put(
-      setNewNotification(
+      notifierActions.enqueueSnackbar(
         'Info',
         `拧紧枪状态更新（${toolSN}）： ${status.toString()}${reason ? `, ${reason}` : ''}`
       )

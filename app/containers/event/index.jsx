@@ -13,7 +13,6 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 
 import Divider from '@material-ui/core/Divider';
-import { I18n } from 'react-i18next';
 import Alert from '../../components/Alert';
 
 // core components
@@ -28,7 +27,7 @@ import { Query, CreateDailyLogger } from '../../logger';
 
 import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
 import withKeyboard from '../../components/Keyboard';
-import { CommonLog } from '../../common/utils';
+import { withI18n } from '../../i18n';
 
 const lodash = require('lodash');
 const dayjs = require('dayjs');
@@ -46,7 +45,7 @@ const styles = theme => ({
     flexDirection: 'column'
   },
   page: {
-    flex:1,
+    flex: 1
   },
   cardIconTitle: {
     ...theme.title.card,
@@ -127,7 +126,6 @@ class Event extends React.Component {
     // Request the data however you want.  Here, we'll use our mocked service we created earlier
     requestData().then(res => {
       // Now just get the rows of data to your React Table (and update anything else like total pages or loading)
-      CommonLog.Info(res);
       this.setState({
         loading: false,
         data: res.info.map((item, key) => ({
@@ -188,218 +186,175 @@ class Event extends React.Component {
         break;
     }
     const keys = Object.keys(selectObj.meta || {});
-    return (
-      <I18n ns="translations">
-        {t => (
-          <div>
-            <List>
-              <ListItem>
-                <ListItemText primary={`${t('Event.Time')}:   ${selectObj.timestamp}`}/>
-              </ListItem>
-              <li>
-                <Divider/>
-              </li>
-              <ListItem>
-                <ListItemText
-                  primary={`${t('Event.Level')}: ${t(levelText)}`}
-                />
-              </ListItem>
-              <Divider component="li"/>
-              <ListItem>
-                <ListItemText primary={`${t('Event.Message')}: ${selectObj.message}`}/>
-              </ListItem>
-              {
-                keys.map((key) => (
-                  <React.Fragment>
-                    <Divider component="li"/>
-                    <ListItem>
-                      <ListItemText
-                        style={{
-                          margin:'auto',
-                          width:'auto'
-                        }}
-                        primary={`${t(key)}: ${selectObj.meta[key]}`}/>
-                    </ListItem>
-                  </React.Fragment>
-                ))
-              }
-            </List>
-          </div>
-        )}
-      </I18n>
-    );
+    const meta = keys.map((key) => [key, selectObj.meta[key]]);
+    const contents = [
+      ['Event.Time', selectObj.timestamp],
+      ['Event.Level', (t) => t(levelText)],
+      ['Event.Message', selectObj.message],
+      ...meta
+    ];
+    return withI18n(t =>
+        <div>
+          <List component='ul'>
+            {
+              contents.map((c, idx) => (
+                <React.Fragment key={c[0]}>
+                  {idx > 0 ? <Divider component="li"/> : null}
+                  <ListItem component="li">
+                    <ListItemText
+                      style={{
+                        margin: 'auto',
+                        width: 'auto',
+                        overflowWrap: 'break-word'
+                      }}
+                      primary={`${t(c[0])}:`}
+                      secondary={`${c[1] instanceof Function ? c[1](t) : c[1]}`}/>
+                  </ListItem>
+                </React.Fragment>
+              ))
+            }
+          </List>
+        </div>
+      , 'translations');
   };
 
   render() {
-    const { classes, keyboardInput } = this.props;
-    const { data, isShow, selectObj, loading, messageFilter } = this.state;
+    const { classes } = this.props;
+    const { data, isShow, selectObj, loading } = this.state;
 
-    return (
-      <I18n ns="translations">
-        {t => (
-          <React.Fragment>
-            <div className={classes.root}>
-              <div className={classes.page}>
-                <Card>
-                  <CardHeader color="info" icon>
-                    <CardIcon color="info">
-                      <Assignment/>
-                    </CardIcon>
-                    <Typography variant="h6" className={classes.cardIconTitle}>{t('main.event')}</Typography>
-                  </CardHeader>
-                  <CardBody>
-                    <CustomReactTable
-                      translate={t}
-                      showPageJump={false}
-                      loading={loading}
-                      data={data}
-                      getTrProps={(state, rowInfo) => {
-                        if (rowInfo) {
-                          let className = classes.infoTr;
-                          switch (rowInfo.row.level) {
-                            case 'warn':
-                              className = classes.warnTr;
-                              break;
-                            case 'maintenance':
-                              className = classes.maintenanceTr;
-                              break;
-                            case 'error':
-                              className = classes.errorTr;
-                              break;
-                            default:
-                              break;
-                          }
-                          return {
-                            className
-                          };
+    return withI18n(t =>
+        <React.Fragment>
+          <div className={classes.root}>
+            <div className={classes.page}>
+              <Card>
+                <CardHeader color="info" icon>
+                  <CardIcon color="info">
+                    <Assignment/>
+                  </CardIcon>
+                  <Typography variant="h6" className={classes.cardIconTitle}>{t('main.event')}</Typography>
+                </CardHeader>
+                <CardBody>
+                  <CustomReactTable
+                    translate={t}
+                    showPageJump={false}
+                    loading={loading}
+                    data={data}
+                    getTrProps={(state, rowInfo) => {
+                      if (rowInfo) {
+                        let className = classes.infoTr;
+                        switch (rowInfo.row.level) {
+                          case 'warn':
+                            className = classes.warnTr;
+                            break;
+                          case 'maintenance':
+                            className = classes.maintenanceTr;
+                            break;
+                          case 'error':
+                            className = classes.errorTr;
+                            break;
+                          default:
+                            break;
                         }
-                        return {};
-                      }}
-                      filterable
-                      columns={[
-                        {
-                          Header: t('Event.Time'),
-                          accessor: 'timestamp',
-                          filterable: false,
-                          filterMethod: (filter, row) =>
-                            lodash.includes(
-                              lodash.toUpper(row[filter.id]),
-                              lodash.toUpper(filter.value)
-                            )
-                        },
-                        {
-                          Header: t('Event.Level'),
-                          accessor: 'level',
-                          filterMethod: (filter, row) => {
-                            if (filter.value === 'all') {
-                              return true;
-                            }
-                            if (filter.value === 'info') {
-                              return row[filter.id] === 'info';
-                            }
-                            if (filter.value === 'warn') {
-                              return row[filter.id] === 'warn';
-                            }
-                            if (filter.value === 'maintenance') {
-                              return row[filter.id] === 'maintenance';
-                            }
-                            if (filter.value === 'error') {
-                              return row[filter.id] === 'error';
-                            }
-                            return true;
-                          },
-                          Filter: ({ filter, onChange }) => (
-                            <select
-                              onChange={event => onChange(event.target.value)}
-                              style={{ width: '100%' }}
-                              value={filter ? filter.value : 'all'}
-                            >
-                              <option value="all">{t('Event.All')}</option>
-                              <option value="info">{t('Event.Info')}</option>
-                              <option value="maintenance">{t('Event.Maintenance')}</option>
-                              <option value="warn">{t('Event.Warn')}</option>
-                              <option value="error">{t('Event.Error')}</option>
-                            </select>
+                        return {
+                          className
+                        };
+                      }
+                      return {};
+                    }}
+                    filterable
+                    columns={[
+                      {
+                        Header: t('Event.Time'),
+                        accessor: 'timestamp',
+                        filterable: true,
+                        filterMethod: (filter, row) =>
+                          lodash.includes(
+                            lodash.toUpper(row[filter.id]),
+                            lodash.toUpper(filter.value)
                           )
+                      },
+                      {
+                        Header: t('Event.Level'),
+                        accessor: 'level',
+                        filterMethod: (filter, row) => {
+                          if (filter.value === 'all') {
+                            return true;
+                          }
+                          if (filter.value === 'info') {
+                            return row[filter.id] === 'info';
+                          }
+                          if (filter.value === 'warn') {
+                            return row[filter.id] === 'warn';
+                          }
+                          if (filter.value === 'maintenance') {
+                            return row[filter.id] === 'maintenance';
+                          }
+                          if (filter.value === 'error') {
+                            return row[filter.id] === 'error';
+                          }
+                          return true;
                         },
-                        {
-                          Header: t('Event.Message'),
-                          accessor: 'message',
-                          sortable: false,
-                          filterable: false
-                          // filterMethod: (filter, row) => lodash.includes(
-                          //     lodash.toUpper(row[filter.id]),
-                          //     lodash.toUpper(messageFilter || '')
-                          //   ),
-                          // Filter: ({ onChange }) => (
-                          //   <Input
-                          //     onClick={() => {
-                          //       keyboardInput({
-                          //         onSubmit: text => {
-                          //           this.setState(
-                          //             { messageFilter: text },
-                          //             () => {
-                          //               onChange(messageFilter);
-                          //             }
-                          //           );
-                          //         },
-                          //         text: messageFilter,
-                          //         title: 'Message',
-                          //         label: 'Message'
-                          //       });
-                          //     }}
-                          //     classes={{
-                          //       root: classes.InputRoot,
-                          //       input: classes.InputInput
-                          //     }}
-                          //     // style={{ width: "100%" ,height:'36px'}}
-                          //     value={messageFilter || ''}
-                          //   />
-                          // )
-                        },
-                        {
-                          Header: t('Event.Actions'),
-                          accessor: 'actions',
-                          sortable: false,
-                          filterable: false
-                        }
-                      ]}
-                      defaultPageSize={10}
-                      showPaginationTop
-                      showPaginationBottom={false}
-                      className="-striped -highlight"
-                    />
-                  </CardBody>
-                </Card>
-              </div>
+                        Filter: ({ filter, onChange }) => (
+                          <select
+                            onChange={event => onChange(event.target.value)}
+                            style={{ width: '100%' }}
+                            value={filter ? filter.value : 'all'}
+                          >
+                            <option value="all">{t('Event.All')}</option>
+                            <option value="info">{t('Event.Info')}</option>
+                            <option value="maintenance">{t('Event.Maintenance')}</option>
+                            <option value="warn">{t('Event.Warn')}</option>
+                            <option value="error">{t('Event.Error')}</option>
+                          </select>
+                        )
+                      },
+                      {
+                        Header: t('Event.Message'),
+                        accessor: 'message',
+                        sortable: false,
+                        filterable: false
+                      },
+                      {
+                        Header: t('Event.Actions'),
+                        accessor: 'actions',
+                        sortable: false,
+                        filterable: false
+                      }
+                    ]}
+                    defaultPageSize={10}
+                    showPaginationTop
+                    showPaginationBottom={false}
+                    className="-striped -highlight"
+                  />
+                </CardBody>
+              </Card>
             </div>
-            <Alert
-              warning
-              show={isShow}
-              title={t('Event.Detail')}
-              onConfirm={this.handleClose}
-              onCancel={this.handleClose}
-              confirmBtnCssClass={`${classes.button} ${
-                classes.successWarn
-                }`}
-              cancelBtnCssClass={`${classes.button} ${
-                classes.danger
-                }`}
-              confirmBtnText={t('Common.Yes')}
-              cancelBtnText={t('Common.No')}
-              showCancel
-            >
-              {this.renderMsg(selectObj)}
-            </Alert>
-          </React.Fragment>
-        )}
-      </I18n>
-    );
+          </div>
+          <Alert
+            warning
+            show={isShow}
+            title={t('Event.Detail')}
+            onConfirm={this.handleClose}
+            onCancel={this.handleClose}
+            confirmBtnCssClass={`${classes.button} ${
+              classes.successWarn
+            }`}
+            cancelBtnCssClass={`${classes.button} ${
+              classes.danger
+            }`}
+            confirmBtnText={t('Common.Yes')}
+            cancelBtnText={t('Common.No')}
+            showCancel
+          >
+            {this.renderMsg(selectObj)}
+          </Alert>
+        </React.Fragment>
+      , 'translations');
   }
 }
 
 Event.propTypes = {
-  classes: PropTypes.shape({}).isRequired,
+  classes: PropTypes.shape({}).isRequired
 };
 
 export default withKeyboard(withStyles(styles)(Event));

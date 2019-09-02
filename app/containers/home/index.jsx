@@ -24,7 +24,7 @@ import Button from '../../components/CustomButtons/Button';
 import ShutdownDiag from '../../components/ShutDownDiag';
 import styles from './styles';
 import { shutDownAction } from '../../modules/power/action';
-import { setNewNotification } from '../../modules/notification/action';
+import notifierActions from '../../modules/Notifier/action';
 import { logoutRequest } from '../../modules/user/action';
 import PageEntrance from '../../components/pageEntrance';
 
@@ -39,7 +39,7 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = {
   doPush: push,
-  notification: setNewNotification,
+  notification: notifierActions.enqueueSnackbar,
   logout: logoutRequest,
   // OpenShutdown
   shutDown: shutDownAction

@@ -30,7 +30,7 @@ import {
   cleanOngoingOperation
 } from '../ongoingOperation/action';
 import { lError, Info } from '../../logger';
-import { setNewNotification } from '../notification/action';
+import notifierActions from '../Notifier/action';
 import { watchWorkers } from '../util';
 import configs from '../../shared/config';
 
@@ -246,7 +246,7 @@ export function* getOperation(job) {
               return;
             }
           } else {
-            yield put(setNewNotification('Error', `获取工单失败:${e.message}`, {
+            yield put(notifierActions.enqueueSnackbar('Error', `获取工单失败:${e.message}`, {
               workMode: state.workMode.workMode,
               opMode: state.setting.operationSettings.opMode,
               carID: code,
@@ -265,7 +265,7 @@ export function* getOperation(job) {
       yield call(startOperation, { data: resp.data });
     } else {
       // 定位作业失败
-      yield put(setNewNotification('Error', '定位作业失败', {
+      yield put(notifierActions.enqueueSnackbar('Error', '定位作业失败', {
         workMode: state.workMode.workMode,
         opMode: state.setting.operationSettings.opMode,
         carID: state.operations.carID,
@@ -277,7 +277,7 @@ export function* getOperation(job) {
     }
   } catch (e) {
     const state = yield select();
-    yield put(setNewNotification('Error', `获取作业失败:${e.message}`, {
+    yield put(notifierActions.enqueueSnackbar('Error', `获取作业失败:${e.message}`, {
       workMode: state.workMode.workMode,
       opMode: state.setting.operationSettings.opMode,
       carID: state.operations.carID
@@ -409,7 +409,7 @@ export function* doingOperation(controllerMode) {
     } catch (e) {
       // 程序号设置失败
       yield put({ type: OPERATION.PROGRAMME.SET_FAIL });
-      yield put(setNewNotification('Error', 'pset failed'), {
+      yield put(notifierActions.enqueueSnackbar('Error', 'pset failed'), {
         workMode: state.workMode.workMode,
         opMode: state.setting.operationSettings.opMode,
         carID: state.operations.carID
@@ -581,7 +581,7 @@ function* conflictDetected(action) {
     const { data } = action;
     const { enableConflictOP = false } = state.setting.systemSettings;
     if (!enableConflictOP) {
-      yield put(setNewNotification('Warn', `设定为不允许重复拧紧同一张工单 VIN: ${data.vin}`));
+      yield put(notifierActions.enqueueSnackbar('Warn', `设定为不允许重复拧紧同一张工单 VIN: ${data.vin}`));
       // return; // 直接返回, 不关闭模式对话框
     }
   } catch (e) {

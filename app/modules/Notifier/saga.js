@@ -3,12 +3,12 @@
 import type { Saga } from 'redux-saga';
 import { takeEvery, call } from 'redux-saga/effects';
 
-import { NOTIFY } from './action';
+import { NOTIFIER } from './action';
 import { Info, Warn, lError, Maintenance } from '../../logger';
 import type { tNotifyVariant } from './action';
 import { CommonLog } from '../../common/utils';
 
-type tNotifyFuncMap ={
+type tNotifyFuncMap = {
   [type: tNotifyVariant]: (string | Error, string) => void
 };
 
@@ -29,12 +29,11 @@ function* notificationAlways(action): Saga<void> {
   } catch (e) {
     CommonLog.lError(e);
   }
-
 }
 
 export default function* watchNotification(): Saga<void> {
   try {
-    yield takeEvery(NOTIFY.NEW_NOTIFICATION, notificationAlways);
+    yield takeEvery(NOTIFIER.ENQUEUE_SNACKBAR, notificationAlways);
   } catch (e) {
     CommonLog.lError(e);
   }

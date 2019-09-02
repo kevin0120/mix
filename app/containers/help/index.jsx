@@ -76,7 +76,6 @@ class Help extends React.PureComponent {
 
     return (
       <div className={classes.root}>
-        {/*<AppBarBack />*/}
         <main className={classes.content}>
           <div className={classes.toolbar} />
           <div className={classes.wrap}>

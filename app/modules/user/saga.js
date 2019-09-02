@@ -11,7 +11,7 @@ import { getUserInfo } from '../../api/user';
 import { loginSuccess, logoutSuccess, USER } from './action';
 
 
-import { setNewNotification } from '../notification/action';
+import notifierActions from '../Notifier/action';
 import type { tUser } from './model';
 import { CommonLog } from '../../common/utils';
 
@@ -102,7 +102,7 @@ function* authorize(action) {
       }
     }
   } catch (e) {
-    yield put(setNewNotification('Error', e));
+    yield put(notifierActions.enqueueSnackbar('Error', e));
   }
 }
 
@@ -179,7 +179,7 @@ function* loginLocal(action) {
 
   } catch (e) {
     CommonLog.lError(e);
-    yield put(setNewNotification('Error', e));
+    yield put(notifierActions.enqueueSnackbar('Error', e));
   }
 }
 

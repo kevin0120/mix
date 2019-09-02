@@ -3,7 +3,7 @@
 import { call, take, select, all, put, fork, cancel, delay } from 'redux-saga/effects';
 import { HEALTHZ_CHECK, setHealthzCheck } from './action';
 import { masterPCHealthCheck, controllerHealthCheck } from '../../api/healthzCheck';
-import { setNewNotification } from '../notification/action';
+import notifierActions from '../Notifier/action';
 
 const lodash = require('lodash');
 
@@ -24,7 +24,7 @@ function* healthzCheckTask(url, controllers) {
         if (!lodash.isEqual(healthzStatus.masterpc.isHealth, s)) {
           // 如果不相等 更新
           yield put(setHealthzCheck('masterpc', s));
-          yield put(setNewNotification('Info', `masterPC连接状态更新: ${s}`));
+          yield put(notifierActions.enqueueSnackbar('Info', `masterPC连接状态更新: ${s}`));
         }
         // 控制器healthz check
         const statusCode = cHealthzs.status;
@@ -40,7 +40,7 @@ function* healthzCheckTask(url, controllers) {
         ) {
           yield put(setHealthzCheck('controller', controllerHealthzStatus));
           yield put(
-            setNewNotification(
+            notifierActions.enqueueSnackbar(
               'Info',
               `控制器连接状态更新: ${controllerHealthzStatus}`
             )
@@ -48,7 +48,7 @@ function* healthzCheckTask(url, controllers) {
         }
       } catch (e) {
         console.error(e);
-        // yield put(setNewNotification('error', e.toString()));
+        // yield put(notifierActions.enqueueSnackbar('error', e.toString()));
       }
 
       yield delay(3000); // 延时 3s

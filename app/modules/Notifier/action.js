@@ -1,43 +1,19 @@
 import type { CommonLogLvl } from '../../common/utils';
 
+export type tNotifyVariant = CommonLogLvl;
+
+
 export const NOTIFIER = {
   ENQUEUE_SNACKBAR: 'NOTIFIER_ENQUEUE_SNACKBAR',
   CLOSE_SNACKBAR: 'NOTIFIER_CLOSE_SNACKBAR',
   REMOVE_SNACKBAR: 'NOTIFIER_REMOVE_SNACKBAR'
 };
 
-type tnotiStackVariant = 'default' | 'success' | 'error' | 'info';
-
-function convertLogLvl2notiStackVariant(lvl: CommonLogLvl): tnotiStackVariant {
-  switch (lvl) {
-    case 'Info':
-      return 'info';
-    case 'Debug':
-      return 'error';
-    case 'Error':
-      return 'error';
-    case 'Warn':
-      return 'info';
-    case 'Maintenance':
-      return 'info';
-    default:
-      return 'default';
-  }
-}
-
-const enqueueSnackbar = (variant: CommonLogLvl, msg: string) => ({
+const enqueueSnackbar = (variant: CommonLogLvl, message: string, meta: Object) => ({
   type: NOTIFIER.ENQUEUE_SNACKBAR,
-  notification: {
-    message: msg,
-    options: {
-      key: `${new Date().getTime() + Math.random()}`,
-      variant: convertLogLvl2notiStackVariant(variant),
-      anchorOrigin: {
-        vertical: 'top',
-        horizontal: 'left'
-      }
-    }
-  }
+  meta,
+  variant,
+  message
 });
 
 const closeSnackbar = key => ({

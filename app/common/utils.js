@@ -4,8 +4,8 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import axiosRetry, { exponentialDelay } from 'axios-retry';
 import { isNil, cloneDeep } from 'lodash-es';
-import { Info, lError, Warn, Debug, Maintenance } from '../logger';
 import moment, { DurationInputArg1 } from 'moment';
+import { Info, lError, Warn, Debug, Maintenance } from '../logger';
 
 const VINMap = {
   A: 1,

@@ -5,7 +5,6 @@ import { connectRouter } from 'connected-react-router';
 
 import type { Dispatch as ReduxDispatch, Store as ReduxStore } from 'redux';
 import setting from './setting/reducer';
-import notify from './notification/reducer';
 import Configuration from './connections/reducer';
 import users from './user/reducer';
 import workMode from './workmode/reducer';
@@ -47,7 +46,6 @@ export default function createRootReducer(history: {}) {
     combineReducers({
       router: routerReducer,
       setting,
-      notify,
       ...Configuration,
       users,
       workMode,

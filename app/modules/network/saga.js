@@ -4,7 +4,7 @@ import {uniq, cloneDeep} from 'lodash-es';
 import { NETWORK, networkSetOK, networkSignalOK } from './action';
 import saveConfigs from '../setting/action';
 import { watchWorkers } from '../util';
-import { setNewNotification } from '../notification/action';
+import notifierActions from '../Notifier/action';
 import { CommonLog } from '../../common/utils';
 
 const util = require('util');
@@ -205,7 +205,7 @@ function* doScan() {
 
 function* networkFail(action) {
   try {
-    yield put(setNewNotification('Error', action.message || '无线网络错误'));
+    yield put(notifierActions.enqueueSnackbar('Error', action.message || '无线网络错误'));
   } catch (e) {
     console.error(e);
   }

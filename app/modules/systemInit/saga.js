@@ -8,7 +8,7 @@ import { RFID } from '../external/device/rfid/action';
 import { SYSTEM_INIT } from './action';
 // import { setLedStatusReady, setModBusIO } from '../io/saga';
 
-import { setNewNotification } from '../notification/action';
+import notifierActions from '../Notifier/action';
 import { initAiis } from '../aiis/action';
 
 // const lodash = require('lodash');
@@ -48,7 +48,7 @@ function* sysInit(action) {
 
     // setLedStatusReady();
   } catch (e) {
-    yield put(setNewNotification('Error', e.toString()));
+    yield put(notifierActions.enqueueSnackbar('Error', e.toString()));
   }
 }
 
@@ -74,7 +74,7 @@ function* sysInit(action) {
 //     }
 //
 //   } catch (e) {
-//     yield put(setNewNotification('error', e.toString()));
+//     yield put(notifierActions.enqueueSnackbar('error', e.toString()));
 //   }
 // }
 
@@ -83,6 +83,6 @@ export default function* sysInitFlow(): Saga<void> {
     yield takeLatest(SYSTEM_INIT, sysInit);
     // yield call(fetchConnectionFlow);
   } catch (e) {
-    yield put(setNewNotification('Error', e.toString()));
+    yield put(notifierActions.enqueueSnackbar('Error', e.toString()));
   }
 }

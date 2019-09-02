@@ -9,7 +9,6 @@ import { watchAiis } from './aiis/saga';
 // import { watchSettingPreSave } from './setting/saga';
 import { watchRushEvent } from './rush/saga';
 import watchRFIDEvent from './external/device/rfid/saga';
-import watchNotification from './notification/saga';
 import watchOperationViewer from './operationViewer/saga';
 import watchNetwork from './network/saga';
 import watchBattery from './battery/saga';
@@ -20,6 +19,7 @@ import dialog from './dialog/saga';
 import { CommonLog } from '../common/utils';
 import healthz from './healthz/saga';
 import modelViewer from './modelViewer/saga';
+import notifier from './Notifier/saga';
 
 export default function* rootSaga(): Saga<void> {
   try {
@@ -28,8 +28,6 @@ export default function* rootSaga(): Saga<void> {
     yield all([
       // 硬件设备
       watchRFIDEvent(),
-
-      watchNotification(),
       watchAiis(),
       watchRushEvent(),
 
@@ -44,7 +42,8 @@ export default function* rootSaga(): Saga<void> {
       order(),
       dialog(),
       healthz(),
-      modelViewer()
+      modelViewer(),
+      notifier()
     ]);
   } catch (e) {
     CommonLog.lError(e);

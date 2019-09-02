@@ -1,6 +1,4 @@
 // @flow
-
-import OWebSocket from 'ws';
 import { call, fork, cancel, takeEvery } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
 import type { Saga, EventChannel } from 'redux-saga';
@@ -32,7 +30,6 @@ function* initRush() {
       task = yield fork(watchRushChannel);
       ipcRenderer.send('rush');
     }
-    console.log(getWSClient());
   } catch (e) {
     CommonLog.lError(e, { at: 'initRush' });
   } finally {
@@ -48,7 +45,7 @@ const listeners = {
     emit({ type: 'healthz', payload: false });
   },
   'rush-error': emit => (ev, arg) => {
-    CommonLog.Info('error', arg);
+    CommonLog.lError('error', arg);
     emit({ type: 'healthz', payload: false });
   },
   'rush-message': emit => (ev, data) => {
