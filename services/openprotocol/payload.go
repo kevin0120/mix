@@ -37,7 +37,6 @@ type IOStatus struct {
 const (
 	LEN_HEADER         = 20
 	DEFAULT_REV        = "000"
-	DEFAULT_MSG_END    = string(0x00)
 	LEN_SINGLE_SPINDLE = 18
 
 	MID_0001_START                   = "0001"
@@ -133,7 +132,7 @@ var request_errors = map[string]string{
 	"23": "Job batch decrement failed",
 	"24": "Not possible to create Pset",
 	"25": "Programming control not granted",
-	"30": "Controller is not a sync Master/station controller",
+	"30": "TighteningController is not a sync Master/station controller",
 	"31": "Multi-spindle status subscription already exists",
 	"32": "Multi-spindle status subscription does not exist",
 	"33": "Multi-spindle result subscription already exists",
@@ -173,7 +172,7 @@ var request_errors = map[string]string{
 	"95": "Reject request, PowerMACS is in manual mode",
 	"96": "Client already connected",
 	"97": "MID revision unsupported",
-	"98": "Controller internal request timeout",
+	"98": "TighteningController internal request timeout",
 	"99": "Unknown MID",
 }
 
@@ -206,327 +205,18 @@ func (h *OpenProtocolHeader) Deserialize(str string) {
 	h.Spare = str[15:19]
 }
 
-// TODO: case合并
-func GeneratePackage(mid string, rev string, data string, end string) string {
-	h := OpenProtocolHeader{}
-	switch mid {
-	case MID_9999_ALIVE:
-		h.MID = MID_9999_ALIVE
-		h.LEN = LEN_HEADER
-		h.Revision = rev
-		h.NoAck = "1"
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + end
-
-	case MID_0001_START:
-		h.MID = MID_0001_START
-		h.LEN = LEN_HEADER
-		h.Revision = rev
-		h.NoAck = ""
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + end
-
-	case MID_0018_PSET:
-		h.MID = MID_0018_PSET
-		h.LEN = LEN_HEADER + len(data)
-		h.Revision = rev
-		h.NoAck = ""
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + data + end
-
-	case MID_0014_PSET_SUBSCRIBE:
-		h.MID = MID_0014_PSET_SUBSCRIBE
-		h.LEN = LEN_HEADER
-		h.Revision = rev
-		h.NoAck = "1"
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + end
-
-	case MID_0034_JOB_INFO_SUBSCRIBE:
-		h.MID = MID_0034_JOB_INFO_SUBSCRIBE
-		h.LEN = LEN_HEADER
-		h.Revision = rev
-		h.NoAck = "1"
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + end
-
-	case MID_0250_SELECTOR_SUBSCRIBE:
-		h.MID = MID_0250_SELECTOR_SUBSCRIBE
-		h.LEN = LEN_HEADER
-		h.Revision = rev
-		h.NoAck = "1"
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + end
-
-	case MID_0060_LAST_RESULT_SUBSCRIBE:
-		h.MID = MID_0060_LAST_RESULT_SUBSCRIBE
-		h.LEN = LEN_HEADER
-		h.Revision = rev
-		h.NoAck = "1"
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + end
-
-	case MID_7408_LAST_CURVE_SUBSCRIBE:
-		h.MID = MID_7408_LAST_CURVE_SUBSCRIBE
-		h.LEN = LEN_HEADER
-		h.Revision = rev
-		h.NoAck = "1"
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + end
-
-	case MID_0151_IDENTIFIER_SUBSCRIBE:
-		h.MID = MID_0151_IDENTIFIER_SUBSCRIBE
-		h.LEN = LEN_HEADER
-		h.Revision = rev
-		h.NoAck = "1"
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + end
-
-	case MID_0150_IDENTIFIER_SET:
-		h.MID = MID_0150_IDENTIFIER_SET
-		h.LEN = LEN_HEADER + 100
-		h.Revision = rev
-		h.NoAck = ""
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + data + end
-
-	case MID_0038_JOB_SELECT:
-		h.MID = MID_0038_JOB_SELECT
-		h.LEN = LEN_HEADER + len(data)
-		h.Revision = rev
-		h.NoAck = ""
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + data + end
-
-	case MID_0064_OLD_SUBSCRIBE:
-		h.MID = MID_0064_OLD_SUBSCRIBE
-		h.LEN = LEN_HEADER + len(data)
-		h.Revision = rev
-		h.NoAck = ""
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + data + end
-
-	case MID_0130_JOB_OFF:
-		h.MID = MID_0130_JOB_OFF
-		h.LEN = LEN_HEADER + len(data)
-		h.Revision = rev
-		h.NoAck = ""
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + data + end
-
-	//case MID_0008_DATA_SUB:
-	//	h.MID = MID_0008_DATA_SUB
-	//	h.LEN = LEN_HEADER + len(data)
-	//	h.Revision = rev
-	//	h.NoAck = ""
-	//	h.Station = ""
-	//	h.Spindle = ""
-	//	h.Spare = ""
-	//
-	//	return h.Serialize() + data + end
-
-	case MID_0012_PSET_DETAIL_REQUEST:
-		h.MID = MID_0012_PSET_DETAIL_REQUEST
-		h.LEN = LEN_HEADER + len(data)
-		h.Revision = rev
-		h.NoAck = ""
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + data + end
-
-	case MID_0010_PSET_LIST_REQUEST:
-		h.MID = MID_0010_PSET_LIST_REQUEST
-		h.LEN = LEN_HEADER
-		h.Revision = rev
-		h.NoAck = ""
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + end
-
-	case MID_0032_JOB_DETAIL_REQUEST:
-		h.MID = MID_0032_JOB_DETAIL_REQUEST
-		h.LEN = LEN_HEADER + len(data)
-		h.Revision = rev
-		h.NoAck = ""
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + data + end
-
-	case MID_0030_JOB_LIST_REQUEST:
-		h.MID = MID_0030_JOB_LIST_REQUEST
-		h.LEN = LEN_HEADER
-		h.Revision = rev
-		h.NoAck = ""
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + end
-
-	case MID_0042_TOOL_DISABLE:
-		h.MID = MID_0042_TOOL_DISABLE
-		h.LEN = LEN_HEADER
-		h.Revision = rev
-		h.NoAck = ""
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + end
-
-	case MID_0043_TOOL_ENABLE:
-		h.MID = MID_0043_TOOL_ENABLE
-		h.LEN = LEN_HEADER
-		h.Revision = rev
-		h.NoAck = ""
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + end
-
-	case MID_0200_CONTROLLER_RELAYS:
-		h.MID = MID_0200_CONTROLLER_RELAYS
-		h.LEN = LEN_HEADER + len(data)
-		h.Revision = rev
-		h.NoAck = ""
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + data + end
-
-	case MID_0019_PSET_BATCH_SET:
-		h.MID = MID_0019_PSET_BATCH_SET
-		h.LEN = LEN_HEADER + len(data)
-		h.Revision = rev
-		h.NoAck = ""
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + data + end
-
-	case MID_0020_PSET_BATCH_RESET:
-		h.MID = MID_0020_PSET_BATCH_RESET
-		h.LEN = LEN_HEADER + len(data)
-		h.Revision = rev
-		h.NoAck = ""
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + data + end
-
-	case MID_0210_INPUT_SUBSCRIBE:
-		h.MID = MID_0210_INPUT_SUBSCRIBE
-		h.LEN = LEN_HEADER
-		h.Revision = rev
-		h.NoAck = "1"
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + end
-
-	case MID_0127_JOB_ABORT:
-		h.MID = MID_0127_JOB_ABORT
-		h.LEN = LEN_HEADER
-		h.Revision = rev
-		h.NoAck = ""
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + end
-
-	case MID_0100_MULTI_SPINDLE_SUBSCRIBE:
-		h.MID = MID_0100_MULTI_SPINDLE_SUBSCRIBE
-		h.LEN = LEN_HEADER
-		h.Revision = rev
-		h.NoAck = "1"
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + end
-
-	case MID_0051_VIN_SUBSCRIBE:
-		h.MID = MID_0051_VIN_SUBSCRIBE
-		h.LEN = LEN_HEADER
-		h.Revision = rev
-		h.NoAck = "1"
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-
-		return h.Serialize() + end
-	case MID_0070_ALARM_SUBSCRIBE:
-		h.MID = MID_0070_ALARM_SUBSCRIBE
-		h.LEN = LEN_HEADER
-		h.Revision = rev
-		h.NoAck = "1" //不需要ack
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-		return h.Serialize() + end
-	case MID_0040_TOOL_INFO_REQUEST:
-		h.MID = MID_0040_TOOL_INFO_REQUEST
-		h.LEN = LEN_HEADER
-		h.Revision = rev
-		h.NoAck = ""
-		h.Station = ""
-		h.Spindle = ""
-		h.Spare = ""
-		return h.Serialize() + end
+func GeneratePackage(mid string, rev string, noack string, station string, spindle string, data string) string {
+	h := OpenProtocolHeader{
+		MID:      mid,
+		LEN:      LEN_HEADER + len(data),
+		Revision: rev,
+		NoAck:    noack,
+		Station:  station,
+		Spindle:  spindle,
+		Spare:    "",
 	}
 
-	return ""
+	return fmt.Sprintf("%s%s%s", h.Serialize(), data, string(OP_TERMINAL))
 }
 
 type IOMonitor struct {

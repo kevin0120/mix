@@ -3,6 +3,7 @@ package scanner
 import (
 	"github.com/bep/debounce"
 	"github.com/google/gousb"
+	"github.com/masami10/rush/services/device"
 	"github.com/pkg/errors"
 	"runtime"
 	"strconv"
@@ -110,12 +111,12 @@ func (s *Scanner) Status() string {
 	return s.status.Load().(string)
 }
 
-func (s *Scanner) DeviceType(sn string) string {
+func (s *Scanner) DeviceType() string {
 	return "scanner"
 }
 
-func (s *Scanner) Children() []string {
-	return []string{}
+func (s *Scanner) Children() map[string]device.IDevice {
+	return map[string]device.IDevice{}
 }
 
 func (s *Scanner) open() (USBDevice, error) {
@@ -125,17 +126,17 @@ func (s *Scanner) open() (USBDevice, error) {
 	}
 	label := s.Channel()
 	if label == "" {
-		return nil, errors.New("Device Info Label is Empty\n")
+		return nil, errors.New("BaseDevice Info Label is Empty\n")
 	}
 	if runtime.GOOS != "windows" {
 		// 通过 gousb 创建vid, pid
 		vid, pid := s.getVIDPID()
 		if vid == 0 || pid == 0 {
-			return nil, errors.New("Device Info is Empty\n")
+			return nil, errors.New("BaseDevice Info is Empty\n")
 		}
 		d := s.device.(*gousb.Device)
 		if d == nil {
-			return nil, errors.New("Device is Empty\n")
+			return nil, errors.New("BaseDevice is Empty\n")
 		}
 		err := d.SetAutoDetach(true)
 		if err != nil {

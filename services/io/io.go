@@ -64,7 +64,7 @@ func (s *IOModule) Write(index uint16, status uint16) error {
 	return s.client.Write(index, status)
 }
 
-func (s *IOModule) DeviceType(sn string) string {
+func (s *IOModule) DeviceType() string {
 	return "io"
 }
 

@@ -1,6 +1,9 @@
 package device
 
-const ()
+const (
+	STATUS_ONLINE  = "online"
+	STATUS_OFFLINE = "offline"
+)
 
 const (
 	WS_DEVICE_STATUS = "WS_DEVICE_STATUS"

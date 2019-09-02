@@ -223,7 +223,7 @@ func (c *Controller) sendKeepalive() {
 }
 
 //// 心跳检测
-//func (c *Controller) keep_alive_check() {
+//func (c *TighteningController) keep_alive_check() {
 //
 //	for i := 0; i < MAX_KEEP_ALIVE_CHECK; i++ {
 //		if c.recv_flag == true {
@@ -258,7 +258,7 @@ func (c *Controller) Write(buf []byte, seq uint32) {
 }
 
 // 异步发送
-//func (c *Controller) manage() {
+//func (c *TighteningController) manage() {
 //
 //	for {
 //		v := <-c.buffer
@@ -488,7 +488,7 @@ func (c *Controller) Tools() map[string]string {
 	return rt
 }
 
-func (c *Controller) DeviceType(sn string) string {
+func (c *Controller) DeviceType() string {
 	return "controller"
 }
 

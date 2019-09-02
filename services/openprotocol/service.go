@@ -32,7 +32,7 @@ type Service struct {
 
 	Parent *controller.Service
 
-	devices []*Controller
+	devices []*TighteningController
 	tightening_device.ITighteningProtocol
 }
 
@@ -42,7 +42,7 @@ func NewService(c Config, d Diagnostic, parent *controller.Service) *Service {
 		name:    controller.OPENPROTOCOL,
 		diag:    d,
 		Parent:  parent,
-		devices: []*Controller{},
+		devices: []*TighteningController{},
 	}
 
 	s.configValue.Store(c)
@@ -66,20 +66,19 @@ func (s *Service) Write(sn string, buf []byte) error {
 	return nil
 }
 
-func (s *Service) Support(cfg *tightening_device.TighteningDeviceConfig) error {
+func (s *Service) IsSupport(cfg *tightening_device.TighteningDeviceConfig) bool {
 	_, err := GetModel(cfg.Model)
 	if err != nil {
-		return err
+		return false
 	}
 
-	return nil
+	return true
 }
 
 func (s *Service) CreateController(cfg *tightening_device.TighteningDeviceConfig) (tightening_device.ITighteningController, error) {
 	// 检测型号是否支持
-	err := s.Support(cfg)
-	if err != nil {
-		return nil, err
+	if !s.IsSupport(cfg) {
+		return nil, errors.New("Not Supported")
 	}
 
 	protocolConfig := s.config()
@@ -106,7 +105,7 @@ func (s *Service) ToolControl(sn string, tool_sn string, enable bool) error {
 		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
 	}
 
-	c := v.(*Controller)
+	c := v.(*TighteningController)
 
 	var toolExist = false
 
@@ -139,7 +138,7 @@ func (s *Service) PSet(sn string, tool_sn string, pset int, result_id int64, cou
 		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
 	}
 
-	c := v.(*Controller)
+	c := v.(*TighteningController)
 
 	var toolExist = false
 	var toolChannel int
@@ -175,7 +174,7 @@ func (s *Service) PSetManual(sn string, tool_sn string, pset int, user_id int64,
 		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
 	}
 
-	c := v.(*Controller)
+	c := v.(*TighteningController)
 
 	var toolExist = false
 	var toolChannel int
@@ -208,7 +207,7 @@ func (s *Service) JobSet(sn string, job int, workorder_id int64, user_id int64) 
 		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
 	}
 
-	c := v.(*Controller)
+	c := v.(*TighteningController)
 
 	//workorder_id-user_id
 	id_info := fmt.Sprintf("%s-%d-%d", controller.AUTO_MODE, workorder_id, user_id)
@@ -229,7 +228,7 @@ func (s *Service) IDSet(sn string, str string) error {
 		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
 	}
 
-	c := v.(*Controller)
+	c := v.(*TighteningController)
 
 	err := c.IdentifierSet(str)
 	if err != nil {
@@ -247,7 +246,7 @@ func (s *Service) JobSetManual(sn string, tool_sn string, job int, user_id int64
 		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
 	}
 
-	c := v.(*Controller)
+	c := v.(*TighteningController)
 
 	var toolExist = false
 
@@ -272,7 +271,7 @@ func (s *Service) JobOFF(sn string, off bool) error {
 		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
 	}
 
-	c := v.(*Controller)
+	c := v.(*TighteningController)
 
 	s_off := "0"
 	if off {
@@ -295,7 +294,7 @@ func (s *Service) JobControl(sn string, action string) error {
 		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
 	}
 
-	c := v.(*Controller)
+	c := v.(*TighteningController)
 
 	var err error
 	if action == JOB_ACTION_ABORT {
@@ -317,7 +316,7 @@ func (s *Service) GetPSetList(sn string) ([]int, error) {
 		return []int{}, errors.New(controller.ERR_CONTROLER_NOT_FOUND)
 	}
 
-	c := v.(*Controller)
+	c := v.(*TighteningController)
 
 	psetLists, err := c.GetPSetList()
 	if err != nil {
@@ -334,7 +333,7 @@ func (s *Service) GetPSetDetail(sn string, pset int) (PSetDetail, error) {
 		return PSetDetail{}, errors.New(controller.ERR_CONTROLER_NOT_FOUND)
 	}
 
-	c := v.(*Controller)
+	c := v.(*TighteningController)
 
 	psetDetail, err := c.GetPSetDetail(pset)
 	if err != nil {
@@ -351,7 +350,7 @@ func (s *Service) GetJobList(sn string) ([]int, error) {
 		return []int{}, errors.New(controller.ERR_CONTROLER_NOT_FOUND)
 	}
 
-	c := v.(*Controller)
+	c := v.(*TighteningController)
 
 	jobLists, err := c.GetJobList()
 	if err != nil {
@@ -368,7 +367,7 @@ func (s *Service) GetJobDetail(sn string, job int) (JobDetail, error) {
 		return JobDetail{}, errors.New(controller.ERR_CONTROLER_NOT_FOUND)
 	}
 
-	c := v.(*Controller)
+	c := v.(*TighteningController)
 
 	jobDetail, err := c.GetJobDetail(job)
 	if err != nil {
@@ -385,7 +384,7 @@ func (s *Service) IOSet(sn string, ios *[]IOStatus) error {
 		return errors.New(controller.ERR_CONTROLER_NOT_FOUND)
 	}
 
-	c := v.(*Controller)
+	c := v.(*TighteningController)
 
 	return c.IOSet(ios)
 }

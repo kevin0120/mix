@@ -87,7 +87,7 @@ func (s *Service) waitUntilCardPresent(ctx *scard.Context, readers []string) (in
 	}
 }
 
-func (s *Service) DeviceType(sn string) string {
+func (s *Service) DeviceType() string {
 	return "reader"
 }
 

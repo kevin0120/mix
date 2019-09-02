@@ -33,8 +33,8 @@ type Controller interface {
 type Protocol interface {
 	Parse(msg string) ([]byte, error)
 	Write(sn string, buf []byte) error
-	AddNewController(cfg ControllerConfig) Controller
-	AddDevice(cfg DeviceConfig, ts interface{}) Controller
+	//AddNewController(cfg ControllerConfig) Controller
+	//AddDevice(cfg DeviceConfig, ts interface{}) Controller
 }
 
 type HandlerPackage struct {
@@ -77,22 +77,22 @@ func NewService(cs Config, d Diagnostic, pAudi Protocol, pOpenprotocol Protocol)
 
 	s.Handlers.controllerService = s
 
-	for _, c := range cs.Configs {
-		switch c.Protocol {
-		case AUDIPROTOCOL:
-			newController := pAudi.AddNewController(c)
-			s.Controllers[c.SN] = newController
-			s.protocols[c.SN] = pAudi
-
-		case OPENPROTOCOL:
-			newController := pOpenprotocol.AddNewController(c)
-			s.Controllers[c.SN] = newController
-			s.protocols[c.SN] = pOpenprotocol
-
-		default:
-
-		}
-	}
+	//for _, c := range cs.Configs {
+	//	switch c.Protocol {
+	//	case AUDIPROTOCOL:
+	//		newController := pAudi.AddNewController(c)
+	//		s.Controllers[c.SN] = newController
+	//		s.protocols[c.SN] = pAudi
+	//
+	//	case OPENPROTOCOL:
+	//		newController := pOpenprotocol.AddNewController(c)
+	//		s.Controllers[c.SN] = newController
+	//		s.protocols[c.SN] = pOpenprotocol
+	//
+	//	default:
+	//
+	//	}
+	//}
 
 	return s, nil
 }

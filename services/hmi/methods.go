@@ -1345,7 +1345,7 @@ func (m *Methods) testProtocol(ctx iris.Context) {
 		m.service.AudiVw.Parse(tp.Payload)
 
 	case "op":
-		m.service.ControllerService.Controllers["0001"].(*openprotocol.Controller).Parse(tp.Payload)
+		m.service.ControllerService.Controllers["0001"].(*openprotocol.TighteningController).Parse(tp.Payload)
 	}
 }
 

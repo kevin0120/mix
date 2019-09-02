@@ -37,7 +37,7 @@ type handlerPkg_curve struct {
 	Header *OpenProtocolHeader
 	Body   []byte
 }
-type Controller struct {
+type TighteningController struct {
 	w                 *socket_writer.SocketWriter
 	cfg               *tightening_device.TighteningDeviceConfig
 	StatusValue       atomic.Value
@@ -54,8 +54,6 @@ type Controller struct {
 	keepaliveDeadLine atomic.Value
 	protocol          string
 	Mode              atomic.Value
-	TriggerStart      time.Time
-	TriggerStop       time.Time
 	inputs            string
 	diag              Diagnostic
 	MID_7410_CURVE    handlerPkg_curve
@@ -64,16 +62,16 @@ type Controller struct {
 	mtxResult         sync.Mutex
 	toolStatus        atomic.Value
 	model             string
-	//tighteningDevice  *tightening_device.Service
-	receiveBuf chan []byte
+	receiveBuf        chan []byte
 
 	tightening_device.ITighteningController
+	device.BaseDevice
 }
 
 // TODO: 如果工具序列号没有配置，则通过探测加入设备列表。
-func NewController(protocolConfig *Config, deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic) Controller {
+func NewController(protocolConfig *Config, deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic) TighteningController {
 
-	cont := Controller{
+	c := TighteningController{
 		diag:              d,
 		buffer:            make(chan []byte, 1024),
 		closing:           make(chan chan struct{}),
@@ -87,15 +85,21 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 		mtxResult:         sync.Mutex{},
 		receiveBuf:        make(chan []byte, 65535),
 		cfg:               deviceConfig,
+		BaseDevice:        device.CreateBaseDevice(),
 	}
 
-	cont.StatusValue.Store(controller.STATUS_OFFLINE)
-	cont.toolStatus.Store(controller.EVT_TOOL_DISCONNECTED)
+	c.StatusValue.Store(controller.STATUS_OFFLINE)
+	c.toolStatus.Store(controller.EVT_TOOL_DISCONNECTED)
 
-	return cont
+	for _, v := range deviceConfig.Tools {
+		tool := NewTool(&c, v, d)
+		c.AddChildren(v.SN, &tool)
+	}
+
+	return c
 }
 
-func (c *Controller) Tools() map[string]tightening_device.ITighteningTool {
+func (c *TighteningController) Tools() map[string]tightening_device.ITighteningTool {
 	//rt := map[string]string{}
 
 	//toolStatus := c.toolStatus.Load().(string)
@@ -106,7 +110,7 @@ func (c *Controller) Tools() map[string]tightening_device.ITighteningTool {
 	return nil
 }
 
-func (c *Controller) UpdateToolStatus(status string) {
+func (c *TighteningController) UpdateToolStatus(status string) {
 	s := c.toolStatus.Load().(string)
 	if s != status {
 		c.toolStatus.Store(status)
@@ -122,15 +126,15 @@ func (c *Controller) UpdateToolStatus(status string) {
 	}
 }
 
-func (c *Controller) LoadController(controller *storage.Controllers) {
+func (c *TighteningController) LoadController(controller *storage.Controllers) {
 	c.dbController = controller
 }
 
-func (c *Controller) Inputs() string {
+func (c *TighteningController) Inputs() string {
 	return c.inputs
 }
 
-func (c *Controller) handlerProcess() {
+func (c *TighteningController) handlerProcess() {
 	for {
 		select {
 		case pkg := <-c.handlerBuf:
@@ -200,7 +204,7 @@ func DataDecoding(original []byte, torqueCoefficient float64, angleCoefficient f
 }
 
 // TODO: case封装成函数
-func (c *Controller) HandleMsg(pkg *handlerPkg) error {
+func (c *TighteningController) HandleMsg(pkg *handlerPkg) error {
 	c.Srv.diag.Debug(fmt.Sprintf("%s: %s%s\n", c.cfg.SN, pkg.Header.Serialize(), pkg.Body))
 
 	switch pkg.Header.MID {
@@ -341,16 +345,6 @@ func (c *Controller) HandleMsg(pkg *handlerPkg) error {
 		str, _ := json.Marshal(inputs)
 		go c.Srv.WS.WSSendIOInput(string(str))
 
-		if inputs.Inputs[c.Srv.config().IOTrigger-1] == '1' {
-			// 开始trigger计时
-			c.TriggerStart = time.Now()
-			go c.Srv.DB.UpdateResultTriggerTime("trigger_start", c.TriggerStart, c.cfg.SN)
-		} else if inputs.Inputs[c.Srv.config().IOTrigger-1] == '0' {
-			// 释放trigger
-			c.TriggerStop = time.Now()
-			go c.Srv.DB.UpdateResultTriggerTime("trigger_stop", c.TriggerStop, c.cfg.SN)
-		}
-
 	case MID_0101_MULTI_SPINDLE_RESULT:
 		ms := MultiSpindleResult{}
 		ms.Deserialize(pkg.Body)
@@ -470,7 +464,7 @@ func ArrayContains(s []int, e int) bool {
 	return false
 }
 
-func (c *Controller) handleResult(result_data *ResultData, carve *minio.ControllerCurve) error {
+func (c *TighteningController) handleResult(result_data *ResultData, carve *minio.ControllerCurve) error {
 
 	if ArrayContains(c.Srv.config().SkipJobs, result_data.JobID) {
 		return nil
@@ -571,7 +565,7 @@ func (c *Controller) handleResult(result_data *ResultData, carve *minio.Controll
 	return nil
 }
 
-func (c *Controller) updateResult(result *controller.ControllerResult, curve *minio.ControllerCurve) {
+func (c *TighteningController) updateResult(result *controller.ControllerResult, curve *minio.ControllerCurve) {
 	defer c.mtxResult.Unlock()
 	c.mtxResult.Lock()
 
@@ -584,7 +578,7 @@ func (c *Controller) updateResult(result *controller.ControllerResult, curve *mi
 	}
 }
 
-func (c *Controller) handleResultandClear() {
+func (c *TighteningController) handleResultandClear() {
 	defer c.mtxResult.Unlock()
 	c.mtxResult.Lock()
 
@@ -602,7 +596,7 @@ func (c *Controller) handleResultandClear() {
 }
 
 // seq, count
-func (c *Controller) calBatch(workorderID int64) (int, int) {
+func (c *TighteningController) calBatch(workorderID int64) (int, int) {
 	result, err := c.Srv.DB.FindTargetResultForJobManual(workorderID)
 	if err != nil {
 		return 1, 1
@@ -615,7 +609,7 @@ func (c *Controller) calBatch(workorderID int64) (int, int) {
 	}
 }
 
-func (c *Controller) Start() error {
+func (c *TighteningController) Start() error {
 
 	_ = c.Srv.DB.UpdateGun(&storage.Guns{
 		Serial: c.cfg.SN,
@@ -638,11 +632,28 @@ func (c *Controller) Start() error {
 	return nil
 }
 
-func (c *Controller) Protocol() string {
+func (c *TighteningController) Stop() error {
+	return nil
+}
+
+func (c *TighteningController) GetTool(toolSN string) (tightening_device.ITighteningTool, error) {
+	tool, exist := c.Children()[toolSN]
+	if !exist {
+		return nil, errors.New("Not Found")
+	}
+
+	return tool.(tightening_device.ITighteningTool), nil
+}
+
+func (c *TighteningController) SetOutput(outputs []tightening_device.ControllerOutput) error {
+	return nil
+}
+
+func (c *TighteningController) Protocol() string {
 	return c.protocol
 }
 
-func (c *Controller) Connect() error {
+func (c *TighteningController) Connect() error {
 	c.StatusValue.Store(controller.STATUS_OFFLINE)
 	c.Response = ResponseQueue{
 		Results: map[string]interface{}{},
@@ -691,7 +702,7 @@ func (c *Controller) Connect() error {
 	return nil
 }
 
-func (c *Controller) getTighteningCount() {
+func (c *TighteningController) getTighteningCount() {
 	for {
 		select {
 		case <-time.After(c.getToolInfoPeriod):
@@ -703,7 +714,7 @@ func (c *Controller) getTighteningCount() {
 			if c.Status() == controller.STATUS_OFFLINE {
 				continue
 			}
-			req := GeneratePackage(MID_0040_TOOL_INFO_REQUEST, rev, "", DEFAULT_MSG_END)
+			req := GeneratePackage(MID_0040_TOOL_INFO_REQUEST, rev, "", "", "", "")
 			c.Write([]byte(req))
 		case stopDone := <-c.closing:
 			close(stopDone)
@@ -712,7 +723,7 @@ func (c *Controller) getTighteningCount() {
 	}
 }
 
-func (c *Controller) ToolInfoReq() error {
+func (c *TighteningController) ToolInfoReq() error {
 	rev, err := GetVendorMid(c.Model(), MID_0040_TOOL_INFO_REQUEST)
 	if err != nil {
 		return err
@@ -721,7 +732,7 @@ func (c *Controller) ToolInfoReq() error {
 	//defer c.Response.remove(MID_0040_TOOL_INFO_REQUEST)
 	//c.Response.Add(MID_0040_TOOL_INFO_REQUEST, nil)
 
-	req := GeneratePackage(MID_0040_TOOL_INFO_REQUEST, rev, "", DEFAULT_MSG_END)
+	req := GeneratePackage(MID_0040_TOOL_INFO_REQUEST, rev, "", "", "", "")
 	c.Write([]byte(req))
 
 	//var reply interface{} = nil
@@ -748,7 +759,7 @@ func (c *Controller) ToolInfoReq() error {
 	return nil
 }
 
-func (c *Controller) GetPSetList() ([]int, error) {
+func (c *TighteningController) GetPSetList() ([]int, error) {
 	var psets []int
 
 	rev, err := GetVendorMid(c.Model(), MID_0010_PSET_LIST_REQUEST)
@@ -763,7 +774,7 @@ func (c *Controller) GetPSetList() ([]int, error) {
 	defer c.Response.remove(MID_0010_PSET_LIST_REQUEST)
 	c.Response.Add(MID_0010_PSET_LIST_REQUEST, nil)
 
-	psets_request := GeneratePackage(MID_0010_PSET_LIST_REQUEST, rev, "", DEFAULT_MSG_END)
+	psets_request := GeneratePackage(MID_0010_PSET_LIST_REQUEST, rev, "", "", "", "")
 	c.Write([]byte(psets_request))
 
 	var reply interface{} = nil
@@ -786,7 +797,7 @@ func (c *Controller) GetPSetList() ([]int, error) {
 	return pset_list.psets, nil
 }
 
-func (c *Controller) GetPSetDetail(pset int) (PSetDetail, error) {
+func (c *TighteningController) GetPSetDetail(pset int) (PSetDetail, error) {
 	var obj_pset_detail PSetDetail
 
 	rev, err := GetVendorMid(c.Model(), MID_0012_PSET_DETAIL_REQUEST)
@@ -801,7 +812,7 @@ func (c *Controller) GetPSetDetail(pset int) (PSetDetail, error) {
 	defer c.Response.remove(MID_0012_PSET_DETAIL_REQUEST)
 	c.Response.Add(MID_0012_PSET_DETAIL_REQUEST, nil)
 
-	pset_detail := GeneratePackage(MID_0012_PSET_DETAIL_REQUEST, rev, fmt.Sprintf("%03d", pset), DEFAULT_MSG_END)
+	pset_detail := GeneratePackage(MID_0012_PSET_DETAIL_REQUEST, rev, "", "", "", fmt.Sprintf("%03d", pset))
 	c.Write([]byte(pset_detail))
 
 	var reply interface{} = nil
@@ -831,7 +842,7 @@ func (c *Controller) GetPSetDetail(pset int) (PSetDetail, error) {
 
 }
 
-func (c *Controller) GetJobList() ([]int, error) {
+func (c *TighteningController) GetJobList() ([]int, error) {
 	var jobs []int
 	rev, err := GetVendorMid(c.Model(), MID_0030_JOB_LIST_REQUEST)
 	if err != nil {
@@ -845,7 +856,7 @@ func (c *Controller) GetJobList() ([]int, error) {
 	defer c.Response.remove(MID_0030_JOB_LIST_REQUEST)
 	c.Response.Add(MID_0030_JOB_LIST_REQUEST, nil)
 
-	psetsRequest := GeneratePackage(MID_0030_JOB_LIST_REQUEST, rev, "", DEFAULT_MSG_END)
+	psetsRequest := GeneratePackage(MID_0030_JOB_LIST_REQUEST, rev, "", "", "", "")
 	c.Write([]byte(psetsRequest))
 
 	var reply interface{} = nil
@@ -868,7 +879,7 @@ func (c *Controller) GetJobList() ([]int, error) {
 	return jobList.jobs, nil
 }
 
-func (c *Controller) GetJobDetail(job int) (JobDetail, error) {
+func (c *TighteningController) GetJobDetail(job int) (JobDetail, error) {
 	var objJobDetail JobDetail
 	rev, err := GetVendorMid(c.Model(), MID_0032_JOB_DETAIL_REQUEST)
 	if err != nil {
@@ -882,7 +893,7 @@ func (c *Controller) GetJobDetail(job int) (JobDetail, error) {
 	defer c.Response.remove(MID_0032_JOB_DETAIL_REQUEST)
 	c.Response.Add(MID_0032_JOB_DETAIL_REQUEST, nil)
 
-	job_detail := GeneratePackage(MID_0032_JOB_DETAIL_REQUEST, rev, fmt.Sprintf("%04d", job), DEFAULT_MSG_END)
+	job_detail := GeneratePackage(MID_0032_JOB_DETAIL_REQUEST, rev, "", "", "", fmt.Sprintf("%04d", job))
 	c.Write([]byte(job_detail))
 
 	var reply interface{} = nil
@@ -912,7 +923,7 @@ func (c *Controller) GetJobDetail(job int) (JobDetail, error) {
 
 }
 
-func (c *Controller) SolveOldResults() {
+func (c *TighteningController) SolveOldResults() {
 
 	if c.dbController == nil || c.dbController.LastID == "0" {
 		return
@@ -950,41 +961,41 @@ func (c *Controller) SolveOldResults() {
 	}
 }
 
-func (c *Controller) KeepAliveCount() int32 {
+func (c *TighteningController) KeepAliveCount() int32 {
 	return atomic.LoadInt32(&c.keepAliveCount)
 }
 
-func (c *Controller) updateKeepAliveCount(i int32) {
+func (c *TighteningController) updateKeepAliveCount(i int32) {
 	atomic.SwapInt32(&c.keepAliveCount, i)
 }
 
-func (c *Controller) addKeepAliveCount() {
+func (c *TighteningController) addKeepAliveCount() {
 	atomic.AddInt32(&c.keepAliveCount, 1)
 }
 
-func (c *Controller) updateKeepAliveDeadLine() {
+func (c *TighteningController) updateKeepAliveDeadLine() {
 	c.keepaliveDeadLine.Store(time.Now().Add(c.keep_period))
 }
 
-func (c *Controller) KeepAliveDeadLine() time.Time {
+func (c *TighteningController) KeepAliveDeadLine() time.Time {
 	return c.keepaliveDeadLine.Load().(time.Time)
 }
 
-func (c *Controller) Status() string {
+func (c *TighteningController) Status() string {
 
 	return c.StatusValue.Load().(string)
 }
 
-func (c *Controller) sendKeepalive() {
+func (c *TighteningController) sendKeepalive() {
 	if c.Status() == controller.STATUS_OFFLINE {
 		return
 	}
 
-	keepAlive := GeneratePackage(MID_9999_ALIVE, DEFAULT_REV, "", DEFAULT_MSG_END)
+	keepAlive := GeneratePackage(MID_9999_ALIVE, DEFAULT_REV, "1", "", "", "")
 	c.Write([]byte(keepAlive))
 }
 
-func (c *Controller) startComm() error {
+func (c *TighteningController) startComm() error {
 	rev, err := GetVendorMid(c.Model(), MID_0001_START)
 	if err != nil {
 		return err
@@ -994,7 +1005,7 @@ func (c *Controller) startComm() error {
 	//	return errors.New("status offline")
 	//}
 
-	start := GeneratePackage(MID_0001_START, rev, "", DEFAULT_MSG_END)
+	start := GeneratePackage(MID_0001_START, rev, "", "", "", "")
 
 	//c.Response.Add(MID_0001_START, "")
 
@@ -1003,11 +1014,11 @@ func (c *Controller) startComm() error {
 	return nil
 }
 
-func (c *Controller) Write(buf []byte) {
+func (c *TighteningController) Write(buf []byte) {
 	c.buffer <- buf
 }
 
-func (c *Controller) updateStatus(status string) {
+func (c *TighteningController) updateStatus(status string) {
 
 	if status != c.Status() {
 
@@ -1034,7 +1045,7 @@ func (c *Controller) updateStatus(status string) {
 	}
 }
 
-func (c *Controller) Read(conn net.Conn) {
+func (c *TighteningController) Read(conn net.Conn) {
 	defer conn.Close()
 
 	buffer := make([]byte, c.Srv.config().ReadBufferSize)
@@ -1051,7 +1062,7 @@ func (c *Controller) Read(conn net.Conn) {
 	}
 }
 
-func (c *Controller) Parse(msg string) {
+func (c *TighteningController) Parse(msg string) {
 	header := msg[0:LEN_HEADER]
 	headerObj := OpenProtocolHeader{}
 	headerObj.Deserialize(header)
@@ -1065,7 +1076,7 @@ func (c *Controller) Parse(msg string) {
 	c.handlerBuf <- pkg
 }
 
-func (c *Controller) Close() error {
+func (c *TighteningController) Close() error {
 
 	for i := 0; i < 2; i++ {
 		//两个协程需要关闭
@@ -1078,7 +1089,7 @@ func (c *Controller) Close() error {
 	return c.w.Close()
 }
 
-func (c *Controller) handlePackageOPPayload(src []byte, data []byte) error {
+func (c *TighteningController) handlePackageOPPayload(src []byte, data []byte) error {
 	msg := append(src, data...)
 
 	c.diag.Debug(fmt.Sprintf("%s op target buf: %s", c.cfg.SN, string(msg)))
@@ -1108,7 +1119,7 @@ func (c *Controller) handlePackageOPPayload(src []byte, data []byte) error {
 	return nil
 }
 
-func (c *Controller) manage() {
+func (c *TighteningController) manage() {
 
 	lenBuf := 65535
 	handleBuf := make([]byte, lenBuf)
@@ -1184,7 +1195,7 @@ func (c *Controller) manage() {
 	}
 }
 
-func (c *Controller) getOldResult(last_id int64) error {
+func (c *TighteningController) getOldResult(last_id int64) error {
 	rev, err := GetVendorMid(c.Model(), MID_0064_OLD_SUBSCRIBE)
 	if err != nil {
 		return err
@@ -1194,14 +1205,14 @@ func (c *Controller) getOldResult(last_id int64) error {
 		return errors.New("status offline")
 	}
 
-	s_last_result := GeneratePackage(MID_0064_OLD_SUBSCRIBE, rev, fmt.Sprintf("%010d", last_id), DEFAULT_MSG_END)
+	s_last_result := GeneratePackage(MID_0064_OLD_SUBSCRIBE, rev, "", "", "", fmt.Sprintf("%010d", last_id))
 
 	c.Write([]byte(s_last_result))
 
 	return nil
 }
 
-func (c *Controller) pset(pset int) error {
+func (c *TighteningController) pset(pset int) error {
 	rev, err := GetVendorMid(c.Model(), MID_0018_PSET)
 	if err != nil {
 		return err
@@ -1214,7 +1225,7 @@ func (c *Controller) pset(pset int) error {
 	c.Response.Add(MID_0018_PSET, nil)
 	defer c.Response.remove(MID_0018_PSET)
 
-	s_pset := GeneratePackage(MID_0018_PSET, rev, fmt.Sprintf("%03d", pset), DEFAULT_MSG_END)
+	s_pset := GeneratePackage(MID_0018_PSET, rev, "", "", "", fmt.Sprintf("%03d", pset))
 
 	c.Write([]byte(s_pset))
 
@@ -1240,7 +1251,7 @@ func (c *Controller) pset(pset int) error {
 	return nil
 }
 
-func (c *Controller) ToolControl(enable bool) error {
+func (c *TighteningController) ToolControl(enable bool) error {
 	if c.Status() == controller.STATUS_OFFLINE {
 		return errors.New("status offline")
 	}
@@ -1258,7 +1269,7 @@ func (c *Controller) ToolControl(enable bool) error {
 	c.Response.Add(s_cmd, nil)
 	defer c.Response.remove(s_cmd)
 
-	sSend := GeneratePackage(s_cmd, rev, "", DEFAULT_MSG_END)
+	sSend := GeneratePackage(s_cmd, rev, "", "", "", "")
 
 	c.Write([]byte(sSend))
 
@@ -1285,7 +1296,7 @@ func (c *Controller) ToolControl(enable bool) error {
 }
 
 // 0: set 1: reset
-func (c *Controller) JobOff(off string) error {
+func (c *TighteningController) JobOff(off string) error {
 	rev, err := GetVendorMid(c.Model(), MID_0130_JOB_OFF)
 	if err != nil {
 		return err
@@ -1298,7 +1309,7 @@ func (c *Controller) JobOff(off string) error {
 	c.Response.Add(MID_0130_JOB_OFF, nil)
 	defer c.Response.remove(MID_0130_JOB_OFF)
 
-	s_off := GeneratePackage(MID_0130_JOB_OFF, rev, off, DEFAULT_MSG_END)
+	s_off := GeneratePackage(MID_0130_JOB_OFF, rev, "", "", "", off)
 
 	c.Write([]byte(s_off))
 
@@ -1325,7 +1336,7 @@ func (c *Controller) JobOff(off string) error {
 	return nil
 }
 
-func (c *Controller) jobSelect(job int) error {
+func (c *TighteningController) jobSelect(job int) error {
 	rev, err := GetVendorMid(c.Model(), MID_0038_JOB_SELECT)
 	if err != nil {
 		return err
@@ -1338,7 +1349,7 @@ func (c *Controller) jobSelect(job int) error {
 	c.Response.Add(MID_0038_JOB_SELECT, nil)
 	defer c.Response.remove(MID_0038_JOB_SELECT)
 
-	s_job := GeneratePackage(MID_0038_JOB_SELECT, rev, fmt.Sprintf("%04d", job), DEFAULT_MSG_END)
+	s_job := GeneratePackage(MID_0038_JOB_SELECT, rev, "", "", "", fmt.Sprintf("%04d", job))
 
 	c.Write([]byte(s_job))
 
@@ -1364,7 +1375,7 @@ func (c *Controller) jobSelect(job int) error {
 	return nil
 }
 
-func (c *Controller) IdentifierSet(str string) error {
+func (c *TighteningController) IdentifierSet(str string) error {
 	rev, err := GetVendorMid(c.Model(), MID_0150_IDENTIFIER_SET)
 	if err != nil {
 		return err
@@ -1374,14 +1385,14 @@ func (c *Controller) IdentifierSet(str string) error {
 		return errors.New("status offline")
 	}
 
-	ide := GeneratePackage(MID_0150_IDENTIFIER_SET, rev, str, DEFAULT_MSG_END)
+	ide := GeneratePackage(MID_0150_IDENTIFIER_SET, rev, "", "", "", str)
 
 	c.Write([]byte(ide))
 
 	return nil
 }
 
-func (c *Controller) PSetBatchSet(pset int, batch int) error {
+func (c *TighteningController) PSetBatchSet(pset int, batch int) error {
 	rev, err := GetVendorMid(c.Model(), MID_0019_PSET_BATCH_SET)
 	if err != nil {
 		return err
@@ -1395,7 +1406,7 @@ func (c *Controller) PSetBatchSet(pset int, batch int) error {
 	defer c.Response.remove(MID_0019_PSET_BATCH_SET)
 
 	s := fmt.Sprintf("%03d%02d", pset, batch)
-	ide := GeneratePackage(MID_0019_PSET_BATCH_SET, rev, s, DEFAULT_MSG_END)
+	ide := GeneratePackage(MID_0019_PSET_BATCH_SET, rev, "", "", "", s)
 
 	c.Write([]byte(ide))
 
@@ -1421,7 +1432,7 @@ func (c *Controller) PSetBatchSet(pset int, batch int) error {
 	return nil
 }
 
-func (c *Controller) PSetBatchReset(pset int) error {
+func (c *TighteningController) PSetBatchReset(pset int) error {
 	rev, err := GetVendorMid(c.Model(), MID_0020_PSET_BATCH_RESET)
 	if err != nil {
 		return err
@@ -1432,14 +1443,14 @@ func (c *Controller) PSetBatchReset(pset int) error {
 	}
 
 	s := fmt.Sprintf("%03d", pset)
-	ide := GeneratePackage(MID_0020_PSET_BATCH_RESET, rev, s, DEFAULT_MSG_END)
+	ide := GeneratePackage(MID_0020_PSET_BATCH_RESET, rev, "", "", "", s)
 
 	c.Write([]byte(ide))
 
 	return nil
 }
 
-func (c *Controller) PSetSubscribe() error {
+func (c *TighteningController) PSetSubscribe() error {
 	rev, err := GetVendorMid(c.Model(), MID_0014_PSET_SUBSCRIBE)
 	if err != nil {
 		return err
@@ -1449,14 +1460,14 @@ func (c *Controller) PSetSubscribe() error {
 		return errors.New("status offline")
 	}
 
-	pset := GeneratePackage(MID_0014_PSET_SUBSCRIBE, rev, "", DEFAULT_MSG_END)
+	pset := GeneratePackage(MID_0014_PSET_SUBSCRIBE, rev, "1", "", "", "")
 
 	c.Write([]byte(pset))
 
 	return nil
 }
 
-func (c *Controller) SelectorSubscribe() error {
+func (c *TighteningController) SelectorSubscribe() error {
 	rev, err := GetVendorMid(c.Model(), MID_0250_SELECTOR_SUBSCRIBE)
 	if err != nil {
 		return err
@@ -1466,14 +1477,14 @@ func (c *Controller) SelectorSubscribe() error {
 		return errors.New("status offline")
 	}
 
-	pset := GeneratePackage(MID_0250_SELECTOR_SUBSCRIBE, rev, "", DEFAULT_MSG_END)
+	pset := GeneratePackage(MID_0250_SELECTOR_SUBSCRIBE, rev, "1", "", "", "")
 
 	c.Write([]byte(pset))
 
 	return nil
 }
 
-func (c *Controller) JobInfoSubscribe() error {
+func (c *TighteningController) JobInfoSubscribe() error {
 	rev, err := GetVendorMid(c.Model(), MID_0034_JOB_INFO_SUBSCRIBE)
 	if err != nil {
 		return err
@@ -1483,14 +1494,14 @@ func (c *Controller) JobInfoSubscribe() error {
 		return errors.New("status offline")
 	}
 
-	pset := GeneratePackage(MID_0034_JOB_INFO_SUBSCRIBE, rev, "", DEFAULT_MSG_END)
+	pset := GeneratePackage(MID_0034_JOB_INFO_SUBSCRIBE, rev, "1", "", "", "")
 
 	c.Write([]byte(pset))
 
 	return nil
 }
 
-func (c *Controller) IOInputSubscribe() error {
+func (c *TighteningController) IOInputSubscribe() error {
 	rev, err := GetVendorMid(c.Model(), MID_0210_INPUT_SUBSCRIBE)
 	if err != nil {
 		return err
@@ -1500,14 +1511,14 @@ func (c *Controller) IOInputSubscribe() error {
 		return errors.New("status offline")
 	}
 
-	input := GeneratePackage(MID_0210_INPUT_SUBSCRIBE, rev, "", DEFAULT_MSG_END)
+	input := GeneratePackage(MID_0210_INPUT_SUBSCRIBE, rev, "1", "", "", "")
 
 	c.Write([]byte(input))
 
 	return nil
 }
 
-func (c *Controller) MultiSpindleResultSubscribe() error {
+func (c *TighteningController) MultiSpindleResultSubscribe() error {
 	rev, err := GetVendorMid(c.Model(), MID_0100_MULTI_SPINDLE_SUBSCRIBE)
 	if err != nil {
 		return err
@@ -1517,14 +1528,14 @@ func (c *Controller) MultiSpindleResultSubscribe() error {
 		return errors.New("status offline")
 	}
 
-	input := GeneratePackage(MID_0100_MULTI_SPINDLE_SUBSCRIBE, rev, "", DEFAULT_MSG_END)
+	input := GeneratePackage(MID_0100_MULTI_SPINDLE_SUBSCRIBE, rev, "1", "", "", "")
 
 	c.Write([]byte(input))
 
 	return nil
 }
 
-func (c *Controller) VinSubscribe() error {
+func (c *TighteningController) VinSubscribe() error {
 	rev, err := GetVendorMid(c.Model(), MID_0051_VIN_SUBSCRIBE)
 	if err != nil {
 		return err
@@ -1534,14 +1545,14 @@ func (c *Controller) VinSubscribe() error {
 		return errors.New("status offline")
 	}
 
-	input := GeneratePackage(MID_0051_VIN_SUBSCRIBE, rev, "", DEFAULT_MSG_END)
+	input := GeneratePackage(MID_0051_VIN_SUBSCRIBE, rev, "1", "", "", "")
 
 	c.Write([]byte(input))
 
 	return nil
 }
 
-func (c *Controller) ResultSubcribe() error {
+func (c *TighteningController) ResultSubcribe() error {
 	rev, err := GetVendorMid(c.Model(), MID_0060_LAST_RESULT_SUBSCRIBE)
 	if err != nil {
 		return err
@@ -1551,14 +1562,14 @@ func (c *Controller) ResultSubcribe() error {
 		return errors.New("status offline")
 	}
 
-	pset := GeneratePackage(MID_0060_LAST_RESULT_SUBSCRIBE, rev, "", DEFAULT_MSG_END)
+	pset := GeneratePackage(MID_0060_LAST_RESULT_SUBSCRIBE, rev, "1", "", "", "")
 
 	c.Write([]byte(pset))
 
 	return nil
 }
 
-func (c *Controller) AlarmSubcribe() error {
+func (c *TighteningController) AlarmSubcribe() error {
 	rev, err := GetVendorMid(c.Model(), MID_0070_ALARM_SUBSCRIBE)
 	if err != nil {
 		return err
@@ -1568,14 +1579,14 @@ func (c *Controller) AlarmSubcribe() error {
 		return errors.New("status offline")
 	}
 
-	payload := GeneratePackage(MID_0070_ALARM_SUBSCRIBE, rev, "", DEFAULT_MSG_END)
+	payload := GeneratePackage(MID_0070_ALARM_SUBSCRIBE, rev, "1", "", "", "")
 
 	c.Write([]byte(payload))
 
 	return nil
 }
 
-func (c *Controller) CurveSubscribe() error {
+func (c *TighteningController) CurveSubscribe() error {
 	rev, err := GetVendorMid(c.Model(), MID_7408_LAST_CURVE_SUBSCRIBE)
 	if err != nil {
 		return err
@@ -1585,14 +1596,14 @@ func (c *Controller) CurveSubscribe() error {
 		return errors.New("status offline")
 	}
 
-	pset := GeneratePackage(MID_7408_LAST_CURVE_SUBSCRIBE, rev, "", DEFAULT_MSG_END)
+	pset := GeneratePackage(MID_7408_LAST_CURVE_SUBSCRIBE, rev, "1", "", "", "")
 
 	c.Write([]byte(pset))
 
 	return nil
 }
 
-func (c *Controller) PSet(pset int, channel int, ex_info string, count int) (uint32, error) {
+func (c *TighteningController) PSet(pset int, channel int, ex_info string, count int) (uint32, error) {
 
 	if c.Mode.Load().(string) != MODE_PSET {
 		return 0, errors.New("current mode is not pset")
@@ -1613,7 +1624,7 @@ func (c *Controller) PSet(pset int, channel int, ex_info string, count int) (uin
 	return 0, nil
 }
 
-func (c *Controller) findIOByNo(no int, ios *[]IOStatus) (IOStatus, error) {
+func (c *TighteningController) findIOByNo(no int, ios *[]IOStatus) (IOStatus, error) {
 	for _, v := range *ios {
 		if no == v.No {
 			return v, nil
@@ -1623,7 +1634,7 @@ func (c *Controller) findIOByNo(no int, ios *[]IOStatus) (IOStatus, error) {
 	return IOStatus{}, errors.New("not found")
 }
 
-func (c *Controller) IOSet(ios *[]IOStatus) error {
+func (c *TighteningController) IOSet(ios *[]IOStatus) error {
 	rev, err := GetVendorMid(c.Model(), MID_0200_CONTROLLER_RELAYS)
 	if err != nil {
 		return err
@@ -1659,7 +1670,7 @@ func (c *Controller) IOSet(ios *[]IOStatus) error {
 	c.Response.Add(MID_0200_CONTROLLER_RELAYS, nil)
 	defer c.Response.remove(MID_0200_CONTROLLER_RELAYS)
 
-	s_io := GeneratePackage(MID_0200_CONTROLLER_RELAYS, rev, str_io, DEFAULT_MSG_END)
+	s_io := GeneratePackage(MID_0200_CONTROLLER_RELAYS, rev, "", "", "", str_io)
 
 	c.Write([]byte(s_io))
 
@@ -1685,7 +1696,7 @@ func (c *Controller) IOSet(ios *[]IOStatus) error {
 	return nil
 }
 
-func (c *Controller) JobSet(id_info string, job int) error {
+func (c *TighteningController) JobSet(id_info string, job int) error {
 
 	if c.Mode.Load().(string) != MODE_JOB {
 		return errors.New("current mode is not job")
@@ -1701,7 +1712,7 @@ func (c *Controller) JobSet(id_info string, job int) error {
 	return nil
 }
 
-func (c *Controller) JobAbort() error {
+func (c *TighteningController) JobAbort() error {
 	rev, err := GetVendorMid(c.Model(), MID_0127_JOB_ABORT)
 	if err != nil {
 		return err
@@ -1714,7 +1725,7 @@ func (c *Controller) JobAbort() error {
 	c.Response.Add(MID_0127_JOB_ABORT, nil)
 	defer c.Response.remove(MID_0127_JOB_ABORT)
 
-	s_job := GeneratePackage(MID_0127_JOB_ABORT, rev, "", DEFAULT_MSG_END)
+	s_job := GeneratePackage(MID_0127_JOB_ABORT, rev, "", "", "", "")
 
 	c.Write([]byte(s_job))
 
@@ -1740,19 +1751,19 @@ func (c *Controller) JobAbort() error {
 	return nil
 }
 
-func (c *Controller) Model() string {
+func (c *TighteningController) Model() string {
 	return c.model
 }
 
-func (c *Controller) SetModel(model string) {
+func (c *TighteningController) SetModel(model string) {
 	c.model = model
 }
 
-func (c *Controller) SetJob(r *tightening_device.JobSet) tightening_device.Reply {
+func (c *TighteningController) SetJob(r *tightening_device.JobSet) tightening_device.Reply {
 	return tightening_device.Reply{}
 }
 
-func (c *Controller) SetPSet(r *tightening_device.PSetSet) tightening_device.Reply {
+func (c *TighteningController) SetPSet(r *tightening_device.PSetSet) tightening_device.Reply {
 	rt := tightening_device.Reply{
 		Result: 0,
 		Msg:    "",
@@ -1769,7 +1780,7 @@ func (c *Controller) SetPSet(r *tightening_device.PSetSet) tightening_device.Rep
 	return rt
 }
 
-func (c *Controller) Enable(r *tightening_device.ToolEnable) tightening_device.Reply {
+func (c *TighteningController) Enable(r *tightening_device.ToolEnable) tightening_device.Reply {
 	rt := tightening_device.Reply{
 		Result: 0,
 		Msg:    "",
@@ -1784,19 +1795,19 @@ func (c *Controller) Enable(r *tightening_device.ToolEnable) tightening_device.R
 	return rt
 }
 
-func (c *Controller) DeviceType(sn string) string {
+func (c *TighteningController) DeviceType() string {
 	return tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER
 }
 
-func (c *Controller) Children() map[string]device.IDevice {
+func (c *TighteningController) Children() map[string]device.IDevice {
 
 	return map[string]device.IDevice{}
 }
 
-func (s *Controller) Data() interface{} {
+func (s *TighteningController) Data() interface{} {
 	return nil
 }
 
-func (s *Controller) Config() interface{} {
+func (s *TighteningController) Config() interface{} {
 	return nil
 }

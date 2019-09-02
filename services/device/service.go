@@ -15,7 +15,7 @@ type IDevice interface {
 	Status() string
 
 	// 设备类型
-	DeviceType(string) string
+	DeviceType() string
 
 	// 子设备
 	Children() map[string]IDevice
@@ -95,7 +95,7 @@ func (s *Service) fetchAllDevices() []DeviceStatus {
 
 		devices = append(devices, DeviceStatus{
 			SN:       k,
-			Type:     v.DeviceType(k),
+			Type:     v.DeviceType(),
 			Status:   v.Status(),
 			Children: reflect.ValueOf(v.Children()).MapKeys(),
 			Config:   v.Config(),

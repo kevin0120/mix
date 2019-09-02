@@ -133,7 +133,7 @@ device:
   enable: true
 
 # 协议类型: Audi/VW, OpenProtocol
-# 支持型号: MODEL_DESOUTTER_CVI3, MODEL_DESOUTTER_DELTA_WRENCH
+# 支持型号: ModelDesoutterCvi3, ModelDesoutterDeltaWrench
 tightening_device:
   enable: true
   devices:

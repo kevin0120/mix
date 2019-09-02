@@ -9,5 +9,5 @@ type ITighteningProtocol interface {
 	CreateController(cfg *TighteningDeviceConfig) (ITighteningController, error)
 
 	// 判断协议是否支持
-	Support(cfg *TighteningDeviceConfig) error
+	IsSupport(cfg *TighteningDeviceConfig) bool
 }

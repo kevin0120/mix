@@ -234,7 +234,7 @@ func (s *Server) appendControllersService() error {
 	srv, err := controller.NewService(c, d, s.AudiVWService, s.OpenprotocolService)
 
 	if err != nil {
-		return errors.Wrap(err, "append Controller service fail")
+		return errors.Wrap(err, "append TighteningController service fail")
 	}
 
 	srv.DB = s.StorageServie
@@ -267,7 +267,7 @@ func (s *Server) appendDeviceService() error {
 func (s *Server) appendTighteningDeviceService() error {
 	c := s.config.TighteningDevice
 	d := s.DiagService.NewTighteningDeviceHandler()
-	srv, err := tightening_device.NewService(c, d, []tightening_device.TighteningProtocol{s.OpenprotocolService, s.AudiVWService})
+	srv, err := tightening_device.NewService(c, d, []tightening_device.ITighteningProtocol{s.OpenprotocolService, s.AudiVWService})
 
 	if err != nil {
 		return errors.Wrap(err, "append tightening_device service fail")
