@@ -25,7 +25,10 @@ const dir = path.join(homeDir, 'logs');
 
 let gLogger = null;
 
-const cpFormate = info => `${info.timestamp} ${info.level}: ${info.message}`;
+const cpFormate = config => {
+  const { level, message, meta, timestamp } = config;
+  return `[${timestamp()}]  (${level})  (${message}) :  ${JSON.stringify(meta)}\n`;
+};
 
 export function CreateDailyLogger() {
   const isExist = fs.existsSync(dir);
@@ -44,18 +47,20 @@ export function CreateDailyLogger() {
           maxFiles: 10,
           maxsize: 65535,
           zippedArchive: true,
-          formatter: cpFormate
+          timestamp: true
+        }),
+        new winston.transports.File({
+          name: 'alarm-file',
+          filename: path.join(homeDir, 'logs/pretty.log'),
+          tailable: true,
+          json: false,
+          maxFiles: 10,
+          maxsize: 65535,
+          timestamp: () => Date(),
+          formatter: cpFormate,
+          zippedArchive: true,
+          prettyPrint: true
         })
-        // new transports.File({
-        //   name: "alarm-file",
-        //   filename: './logs/alarm.log',
-        //   level: 'error',
-        //   tailable: true,
-        //   maxFiles: 10,
-        //   maxsize: 65535,
-        //   formatter: cpFormate,
-        //   zippedArchive: true
-        // }),
       ],
       exitOnError: false,
       levels: { error: 0, warn: 1, maintenance: 2, info: 3, debug: 4 }

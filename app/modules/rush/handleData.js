@@ -41,26 +41,11 @@ const rushDataHandlers = {
       CommonLog.lError(e, { at: 'rush event maintenance' });
     }
   },
-
-  * [wse.tightening_device](data: tRushWebSocketData) {
-    try {
-      // 初始化所有拧紧设备
-
-    } catch (e) {
-      CommonLog.lError(e, { at: 'rush event tightening_device' });
-    }
-  },
   [wse.io]: ioNewData,
-
   [wse.scanner]: scannerNewData,
-
   [wse.reader]: readerNewData,
-
   [wse.result]: toolNewResults,
-
   [wse.tool]: toolStatusChange,
-
   [wse.device]: deviceStatus,
-
   [wse.order]: orderData
 };

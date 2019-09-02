@@ -51,7 +51,7 @@ function StepWorking({ status, name, desc }: Props) {
           {/*<Typography variant="h5">{desc || ''}</Typography>*/}
           {
             desc && desc.split('\t\t').map(d =>
-              <React.Fragment>
+              <React.Fragment key={d}>
                 <Typography variant="h5">
                   {d || ''}
                 </Typography>
