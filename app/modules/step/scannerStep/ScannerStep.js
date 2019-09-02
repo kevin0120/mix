@@ -1,6 +1,6 @@
+import { call, put, select, take } from 'redux-saga/effects';
 import Step from '../Step';
 import STEP_STATUS from '../model';
-import { call, put, select, take } from 'redux-saga/effects';
 import { stepData, stepPayload, workingOrder, workingStep } from '../../order/selector';
 import { SCANNER_STEP, scannerStepAction } from './action';
 import { deviceType, getDevicesByType } from '../../external/device';

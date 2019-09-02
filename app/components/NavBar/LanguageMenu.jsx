@@ -9,9 +9,9 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Flag from 'react-flags';
 import ListItemText from '@material-ui/core/ListItemText';
 import Divider from '@material-ui/core/Divider';
+import { I18n } from 'react-i18next';
 import i18n from '../../i18n';
 import styles from './styles';
-import { I18n } from 'react-i18next';
 
 type Props = {
   disabled: boolean

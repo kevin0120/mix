@@ -36,17 +36,17 @@ function CustomTable({ ...props }) {
             <TableRow className={classes.tableRow}>
               {tableHead.map((prop, key) => {
                 const tableCellClasses =
-                  classes.tableHeadCell +
-                  ' ' +
-                  classes.tableCell +
-                  ' ' +
+                  `${classes.tableHeadCell 
+                  } ${ 
+                  classes.tableCell 
+                  } ${ 
                   cx({
                     [customHeadCellClasses[
                       customHeadClassesForCells.indexOf(key)
                     ]]: customHeadClassesForCells.indexOf(key) !== -1,
                     [classes.tableShoppingHead]: tableShopping,
                     [classes.tableHeadFontSize]: !tableShopping
-                  });
+                  })}`;
                 return (
                   <TableCell className={tableCellClasses} key={key}>
                     {prop}
@@ -58,8 +58,8 @@ function CustomTable({ ...props }) {
         ) : null}
         <TableBody>
           {tableData.map((prop, key) => {
-            var rowColor = '';
-            var rowColored = false;
+            let rowColor = '';
+            let rowColored = false;
             if (prop.color !== undefined) {
               rowColor = prop.color;
               rowColored = true;
@@ -67,7 +67,7 @@ function CustomTable({ ...props }) {
             }
             const tableRowClasses = cx({
               [classes.tableRowHover]: hover,
-              [classes[rowColor + 'Row']]: rowColored,
+              [classes[`${rowColor  }Row`]]: rowColored,
               [classes.tableStripedRow]: striped && key % 2 === 0
             });
             if (prop.total) {
@@ -78,13 +78,13 @@ function CustomTable({ ...props }) {
                     colSpan={prop.colspan}
                   />
                   <TableCell
-                    className={classes.tableCell + ' ' + classes.tableCellTotal}
+                    className={`${classes.tableCell  } ${  classes.tableCellTotal}`}
                   >
                     Total
                   </TableCell>
                   <TableCell
                     className={
-                      classes.tableCell + ' ' + classes.tableCellAmount
+                      `${classes.tableCell  } ${  classes.tableCellAmount}`
                     }
                   >
                     {prop.amount}
@@ -106,7 +106,7 @@ function CustomTable({ ...props }) {
                     colSpan={prop.colspan}
                   />
                   <TableCell
-                    className={classes.tableCell + ' ' + classes.right}
+                    className={`${classes.tableCell  } ${  classes.right}`}
                     colSpan={prop.col.colspan}
                   >
                     {prop.col.text}
@@ -118,18 +118,18 @@ function CustomTable({ ...props }) {
               <TableRow
                 key={key}
                 hover={hover}
-                className={classes.tableRow + ' ' + tableRowClasses}
+                className={`${classes.tableRow  } ${  tableRowClasses}`}
               >
                 {prop.map((prop, key) => {
                   const tableCellClasses =
-                    classes.tableCell +
-                    ' ' +
+                    `${classes.tableCell 
+                    } ${ 
                     cx({
                       [classes[colorsColls[coloredColls.indexOf(key)]]]:
                         coloredColls.indexOf(key) !== -1,
                       [customCellClasses[customClassesForCells.indexOf(key)]]:
                         customClassesForCells.indexOf(key) !== -1
-                    });
+                    })}`;
                   return (
                     <TableCell className={tableCellClasses} key={key}>
                       {prop}

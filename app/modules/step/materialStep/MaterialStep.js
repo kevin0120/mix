@@ -1,6 +1,6 @@
+import { call, put, select, take, all, race } from 'redux-saga/effects';
 import Step from '../Step';
 import STEP_STATUS from '../model';
-import { call, put, select, take, all, race } from 'redux-saga/effects';
 import { stepPayload, workingOrder, workingStep } from '../../order/selector';
 import { getDevice } from '../../external/device';
 import { CommonLog } from '../../../common/utils';
@@ -11,8 +11,11 @@ const items = (payload) => payload?.items;
 
 export default class MaterialStep extends Step {
   _ports = new Set([]);
+
   _io = new Set([]);
+
   _items = new Set([]);
+
   _confirm = null;
 
   constructor(...args) {

@@ -1,9 +1,9 @@
 import React from 'react';
 import { push } from 'connected-react-router';
+import { call, put } from 'redux-saga/effects';
 import Step from '../step/Step';
 import { ORDER_STATUS } from './model';
 import { CommonLog, durationString } from '../../common/utils';
-import { call, put } from 'redux-saga/effects';
 import { orderActions } from './action';
 import { orderUpdateApi } from '../../api/order';
 import dialogActions from '../dialog/action';

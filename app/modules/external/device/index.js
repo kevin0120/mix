@@ -1,4 +1,6 @@
 // @flow
+import type { Saga } from 'redux-saga';
+import { call, put } from 'redux-saga/effects';
 import { CommonLog } from '../../../common/utils';
 import type { tRushWebSocketData } from '../../rush/type';
 import Device from './Device';
@@ -8,8 +10,6 @@ import ClsScrewTool from './tools/model';
 import ClsReader from './reader/model';
 import ClsIOModule from './io/model';
 import type { tDeviceSN } from './Device';
-import type { Saga } from 'redux-saga';
-import { call, put } from 'redux-saga/effects';
 import { deviceStatusApi } from '../../../api/device';
 import healthzActions from '../../healthz/action';
 

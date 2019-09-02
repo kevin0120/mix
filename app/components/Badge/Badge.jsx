@@ -9,7 +9,7 @@ import badgeStyle from '../../common/jss/components/badgeStyle.jsx';
 function Badge({ ...props }) {
   const { classes, color, children } = props;
   return (
-    <span className={classes.badge + ' ' + classes[color]}>{children}</span>
+    <span className={`${classes.badge  } ${  classes[color]}`}>{children}</span>
   );
 }
 

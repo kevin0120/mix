@@ -15,13 +15,13 @@ import ViewList from '@material-ui/icons/ViewList';
 
 // core components
 import HeaderLinks from './HeaderLinks';
-import Button from '../../components/CustomButtons/Button.jsx';
+import Button from "../CustomButtons/Button.jsx";
 
 import headerStyle from '../../common/jss/components/headerStyle.jsx';
 
 function Header({ ...props }) {
   function makeBrand() {
-    var name;
+    let name;
     props.routes.map((prop, key) => {
       if (prop.collapse) {
         prop.views.map((prop, key) => {
@@ -40,14 +40,14 @@ function Header({ ...props }) {
   }
   const { classes, color, rtlActive } = props;
   const appBarClasses = cx({
-    [' ' + classes[color]]: color
+    [` ${  classes[color]}`]: color
   });
   const sidebarMinimize =
-    classes.sidebarMinimize +
-    ' ' +
+    `${classes.sidebarMinimize 
+    } ${ 
     cx({
       [classes.sidebarMinimizeRTL]: rtlActive
-    });
+    })}`;
   return (
     <AppBar className={classes.appBar + appBarClasses}>
       <Toolbar className={classes.container}>

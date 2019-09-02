@@ -100,12 +100,12 @@ const customSelectStyle = theme => ({
     }
   },
   selectMenuItemSelected: {
-    backgroundColor: theme.palette.primary.main + '!important',
+    backgroundColor: `${theme.palette.primary.main  }!important`,
     color: '#FFFFFF'
   },
   selectMenuItemSelectedMultiple: {
     '&:hover': {
-      backgroundColor: theme.palette.primary.main + '!important',
+      backgroundColor: `${theme.palette.primary.main  }!important`,
       color: '#FFFFFF',
       ...theme.boxShadow.primary,
       '&:after': {

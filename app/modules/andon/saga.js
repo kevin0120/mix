@@ -1,9 +1,9 @@
 import { select, put, call, race, delay, take } from 'redux-saga/effects';
 import { OPERATION_SOURCE, OPERATION_STATUS } from '../operation/model';
-import { operationTrigger } from '../operation/action';
+import { operationTrigger , OPERATION } from '../operation/action';
 import { andonVehicleApi } from '../../api/andon';
 import { jobManual } from '../../api/operation';
-import { OPERATION } from '../operation/action';
+
 import { ANDON } from './action';
 import { watchWorkers } from '../util';
 import notifierActions from '../Notifier/action';

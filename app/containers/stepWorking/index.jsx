@@ -47,8 +47,8 @@ function StepWorking({ status, name, desc }: Props) {
           >
             [{status ? t(`OrderStatus.${status}`, { ns: 'translations' }) : t('notSelected')}]
           </Typography>
-          {/*<Typography variant="h5">{name || ''}</Typography>*/}
-          {/*<Typography variant="h5">{desc || ''}</Typography>*/}
+          {/* <Typography variant="h5">{name || ''}</Typography> */}
+          {/* <Typography variant="h5">{desc || ''}</Typography> */}
           {
             desc && desc.split('\t\t').map(d =>
               <React.Fragment key={d}>
@@ -60,7 +60,7 @@ function StepWorking({ status, name, desc }: Props) {
             )
           }
         </div>
-        <img src={logo} className={classes.logo}/>
+        <img alt="logo" src={logo} className={classes.logo}/>
       </Paper>
       <div className={classes.main}>
         <Paper square classes={{ root: classes.leftContainer }}>

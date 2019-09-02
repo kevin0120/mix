@@ -3,8 +3,8 @@ import { GridLoader } from 'react-spinners';
 import { connect } from 'react-redux';
 import Dialog from '@material-ui/core/Dialog';
 import { makeStyles } from '@material-ui/styles';
-import styles from './style';
 import Fade from '@material-ui/core/Fade';
+import styles from './style';
 
 function Loading({ loading }) {
   const classes=makeStyles(styles)();

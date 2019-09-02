@@ -29,8 +29,8 @@ function CustomInput({ ...props }) {
   } = props;
 
   const labelClasses = classNames({
-    [' ' + classes.labelRootError]: error,
-    [' ' + classes.labelRootSuccess]: success && !error
+    [` ${  classes.labelRootError}`]: error,
+    [` ${  classes.labelRootSuccess}`]: success && !error
   });
   const underlineClasses = classNames({
     [classes.underlineError]: error,
@@ -46,7 +46,7 @@ function CustomInput({ ...props }) {
     [classes.whiteInput]: white,
     [classes.largeInput]: large
   });
-  var formControlClasses;
+  let formControlClasses;
   if (formControlProps !== undefined) {
     formControlClasses = classNames(
       formControlProps.className,
@@ -55,17 +55,17 @@ function CustomInput({ ...props }) {
   } else {
     formControlClasses = classes.formControl;
   }
-  var feedbackClasses = classes.feedback;
+  let feedbackClasses = classes.feedback;
   if (inputProps !== undefined) {
     if (inputProps.endAdornment !== undefined) {
-      feedbackClasses = feedbackClasses + ' ' + classes.feedbackRight;
+      feedbackClasses = `${feedbackClasses  } ${  classes.feedbackRight}`;
     }
   }
   return (
     <FormControl {...formControlProps} className={formControlClasses}>
       {labelText !== undefined ? (
         <InputLabel
-          className={classes.labelRoot + ' ' + labelClasses}
+          className={`${classes.labelRoot  } ${  labelClasses}`}
           htmlFor={id}
           {...labelProps}
         >
@@ -84,9 +84,9 @@ function CustomInput({ ...props }) {
         inputRef={inputRef}
       />
       {error ? (
-        <Clear className={feedbackClasses + ' ' + classes.labelRootError} />
+        <Clear className={`${feedbackClasses  } ${  classes.labelRootError}`} />
       ) : success ? (
-        <Check className={feedbackClasses + ' ' + classes.labelRootSuccess} />
+        <Check className={`${feedbackClasses  } ${  classes.labelRootSuccess}`} />
       ) : null}
     </FormControl>
   );

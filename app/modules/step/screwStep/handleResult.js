@@ -35,12 +35,10 @@ const mergePointsAndResults = (points: Array<tPoint>, results: Array<tResult>, a
   const newPoints = [...points];
   if (activeIndex === -1) {
     return [
-      ...newPoints.map((p) => {
-        return ({
+      ...newPoints.map((p) => ({
           ...p,
           status: formPointStatusFromResultStatus(p, null, activeGroupSequence)
-        });
-      })];
+        }))];
   }
   newPoints.splice(activeIndex, newPoints.length - activeIndex,
     ...newPoints.slice(activeIndex).map((p, idx) => {

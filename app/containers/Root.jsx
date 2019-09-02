@@ -19,7 +19,6 @@ type Props = {
 const Root = (props: Props) => {
   const { store, history } = props;
   const { pages } = store.getState().setting;
-  // listenToNewCar(store.dispatch, store.getState);
   store.dispatch(systemInit()); // 初始化
   return (
     <MuiThemeProvider theme={theme}>

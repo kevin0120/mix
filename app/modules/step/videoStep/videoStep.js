@@ -1,6 +1,6 @@
+import { put, take } from 'redux-saga/effects';
 import Step from '../Step';
 import STEP_STATUS from '../model';
-import { put, take } from 'redux-saga/effects';
 import { VIDEO_STEP } from './action';
 
 

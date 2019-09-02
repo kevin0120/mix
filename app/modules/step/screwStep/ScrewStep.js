@@ -1,8 +1,8 @@
+import { cloneDeep } from 'lodash-es';
+import { call, put, take, all } from 'redux-saga/effects';
 import Step from '../Step';
 import STEP_STATUS from '../model';
 import type { tPoint, tScrewStepData, tScrewStepPayload } from './model';
-import { call, put, take } from 'redux-saga/effects';
-import { cloneDeep } from 'lodash-es';
 import { CommonLog } from '../../../common/utils';
 import handleResult from './handleResult';
 import controllerModeTasks from './controllerModeTasks';
@@ -31,25 +31,22 @@ function* doPoint(point, isFirst, orderActions) {
 export default class ScrewStep extends Step {
   _tools = [];
 
-  constructor(...args){
+  constructor(...args) {
     super(...args);
-    this._onLeave=function*(){
+    const self = this;
+    this._onLeave = function* onLeave() {
       try {
-        for (const t of this._tools) {
-          if(t.isEnable){
-            yield call(t.Disable);
-          }
-        }
-        this._tools=[];
-        CommonLog.Info('tools cleared',{
-          at:`screwStep(${this._name},${this._id})._onLeave`
+        yield all(self._tools.map(t => t.isEnable ? call(t.Disable) : null).filter(s => !!s));
+        self._tools = [];
+        CommonLog.Info('tools cleared', {
+          at: `screwStep(${this._name},${this._id})._onLeave`
         });
-      }catch (e) {
-        CommonLog.lError(e,{
-          at:`screwStep(${this._name},${this._id})._onLeave`,
+      } catch (e) {
+        CommonLog.lError(e, {
+          at: `screwStep(${this._name},${this._id})._onLeave`
         });
       }
-    }
+    };
   }
 
   _statusTasks = {
@@ -85,16 +82,14 @@ export default class ScrewStep extends Step {
           yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, `tool not connected: ${unhealthyTools.map(t => `${t.serialNumber}`)}`));
         }
 
-        yield call(this.updateData, (data: tScrewStepData): tScrewStepData => {
-          return {
-            points, // results data.results
-            activeIndex: 0,
-            ...data,
-            jobID: payload.jobID,
-            controllerMode: payload.controllerMode,
-            retryTimes: 0
-          };
-        });
+        yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({
+          points, // results data.results
+          activeIndex: 0,
+          ...data,
+          jobID: payload.jobID,
+          controllerMode: payload.controllerMode,
+          retryTimes: 0
+        }));
         yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
       } catch (e) {
         CommonLog.lError(e, { at: 'screwStep ENTERING' });
@@ -120,18 +115,20 @@ export default class ScrewStep extends Step {
           yield call(getDevice(activePoint.toolSN).Enable);
           const nextAction = yield call([this, doPoint], activePoint, isFirst, orderActions);
           switch (nextAction.type) {
-            case SCREW_STEP.RESULT:
+            case SCREW_STEP.RESULT: {
               const { results: { data: results } } = nextAction;
               yield call([this, handleResult], ORDER, orderActions, results, data);
               const { activeIndex: nextIndex, points: nextPoints } = this._data;
               yield call(getDevice(activePoint.toolSN).Disable);
               activePoint = nextPoints[nextIndex];
               break;
-            case SCREW_STEP.REDO_POINT:
+            }
+            case SCREW_STEP.REDO_POINT: {
               const { point } = nextAction;
               yield call(getDevice(activePoint.toolSN).Disable);
               activePoint = point;
               break;
+            }
             default:
               break;
           }
@@ -157,10 +154,8 @@ export default class ScrewStep extends Step {
 
     * [STEP_STATUS.FAIL](ORDER, orderActions, msg) {
       try {
-        for (const t of this._tools) {
-          yield call(t.Disable);
-        }
-        this._tools=[];
+        yield all(this._tools.map(t => call(t.Disable)));
+        this._tools = [];
         yield put(
           dialogActions.dialogShow({
             buttons: [

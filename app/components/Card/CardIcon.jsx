@@ -14,7 +14,7 @@ function CardIcon({ ...props }) {
   const { classes, className, children, color, ...rest } = props;
   const cardIconClasses = classNames({
     [classes.cardIcon]: true,
-    [classes[color + 'CardHeader']]: color,
+    [classes[`${color}CardHeader`]]: color,
     [className]: className !== undefined
   });
   return (

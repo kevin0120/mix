@@ -34,10 +34,10 @@ import BatteryUnknown from '@material-ui/icons/BatteryUnknown';
 import Menu from '@material-ui/icons/Menu';
 
 // core components
+import connect from 'react-redux/es/connect/connect';
 import Button from '../CustomButtons/Button';
 
 import pagesHeaderStyle from '../../common/jss/components/pagesHeaderStyle';
-import connect from 'react-redux/es/connect/connect';
 import { networkCheck, networkSignal } from '../../modules/network/action';
 import { batteryCheck } from '../../modules/battery/action';
 
@@ -45,36 +45,34 @@ const signalLevel = (signal) => {
   const size = 'small';
   if (signal > 80)
     return <Signal4 fontSize={size}/>;
-  else if (signal > 60)
+  if (signal > 60)
     return <Signal3 fontSize={size}/>;
-  else if (signal > 40)
+  if (signal > 40)
     return <Signal2 fontSize={size}/>;
-  else if (signal > 20)
+  if (signal > 20)
     return <Signal1 fontSize={size}/>;
-  else
-    return <Signal0 fontSize={size}/>;
+  return <Signal0 fontSize={size}/>;
 };
 
 const batteryLevel = (percentage) => {
   const size = 'small';
   if (percentage > 99)
     return <BatteryFull fontSize={size}/>;
-  else if (percentage >= 90)
+  if (percentage >= 90)
     return <Battery90 fontSize={size}/>;
-  else if (percentage >= 80)
+  if (percentage >= 80)
     return <Battery80 fontSize={size}/>;
-  else if (percentage >= 60)
+  if (percentage >= 60)
     return <Battery60 fontSize={size}/>;
-  else if (percentage >= 50)
+  if (percentage >= 50)
     return <Battery50 fontSize={size}/>;
-  else if (percentage >= 30)
+  if (percentage >= 30)
     return <Battery30 fontSize={size}/>;
-  else if (percentage >= 20)
+  if (percentage >= 20)
     return <Battery20 fontSize={size}/>;
-  else if (percentage >= 0)
+  if (percentage >= 0)
     return <BatteryAlert fontSize={size}/>;
-  else
-    return <BatteryUnknown fontSize={size}/>;
+  return <BatteryUnknown fontSize={size}/>;
 };
 
 class PagesHeader extends React.Component {
@@ -147,12 +145,12 @@ class PagesHeader extends React.Component {
                 欢  迎
               </Button>
             </div>
-            {/*<Button className={classes.indicator} color="transparent" onClick={this.handleStatusCheck}>*/}
-            {/*  {signalLevel(signal)}*/}
-            {/*  <span style={{ marginRight: '7px' }}>{`${ssid || '无连接'}`}</span>*/}
-            {/*  {batteryLevel(batteryPercentage)}*/}
-            {/*  <span>{batteryPercentage >= 0 ? `${batteryPercentage}%` : '电池检测中'}</span>*/}
-            {/*</Button>*/}
+            {/* <Button className={classes.indicator} color="transparent" onClick={this.handleStatusCheck}> */}
+            {/*  {signalLevel(signal)} */}
+            {/*  <span style={{ marginRight: '7px' }}>{`${ssid || '无连接'}`}</span> */}
+            {/*  {batteryLevel(batteryPercentage)} */}
+            {/*  <span>{batteryPercentage >= 0 ? `${batteryPercentage}%` : '电池检测中'}</span> */}
+            {/* </Button> */}
           </div>
           {/* <Hidden mdUp> */}
           {/* <Button */}

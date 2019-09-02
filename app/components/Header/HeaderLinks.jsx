@@ -20,8 +20,8 @@ import Dashboard from '@material-ui/icons/Dashboard';
 import Search from '@material-ui/icons/Search';
 
 // core components
-import CustomInput from '../../components/CustomInput/CustomInput.jsx';
-import Button from '../../components/CustomButtons/Button.jsx';
+import CustomInput from "../CustomInput/CustomInput.jsx";
+import Button from "../CustomButtons/Button.jsx";
 
 import headerLinksStyle from '../../common/jss/components/headerLinksStyle';
 
@@ -29,23 +29,26 @@ class HeaderLinks extends React.Component {
   state = {
     open: false
   };
+
   handleClick = () => {
     this.setState({ open: !this.state.open });
   };
+
   handleClose = () => {
     this.setState({ open: false });
   };
+
   render() {
     const { classes, rtlActive } = this.props;
     const { open } = this.state;
     const searchButton =
-      classes.top +
-      ' ' +
-      classes.searchButton +
-      ' ' +
+      `${classes.top 
+      } ${ 
+      classes.searchButton 
+      } ${ 
       classNames({
         [classes.searchRTL]: rtlActive
-      });
+      })}`;
     const dropdownItem = classNames(
       classes.dropdownItem,
       classes.primaryHover,
@@ -62,7 +65,7 @@ class HeaderLinks extends React.Component {
         <CustomInput
           rtlActive={rtlActive}
           formControlProps={{
-            className: classes.top + ' ' + classes.search
+            className: `${classes.top  } ${  classes.search}`
           }}
           inputProps={{
             placeholder: rtlActive ? 'بحث' : 'Search',
@@ -80,7 +83,7 @@ class HeaderLinks extends React.Component {
           className={searchButton}
         >
           <Search
-            className={classes.headerLinksSvg + ' ' + classes.searchIcon}
+            className={`${classes.headerLinksSvg  } ${  classes.searchIcon}`}
           />
         </Button>
         <Button
@@ -95,11 +98,11 @@ class HeaderLinks extends React.Component {
         >
           <Dashboard
             className={
-              classes.headerLinksSvg +
-              ' ' +
-              (rtlActive
-                ? classes.links + ' ' + classes.linksRTL
-                : classes.links)
+              `${classes.headerLinksSvg 
+              } ${ 
+              rtlActive
+                ? `${classes.links  } ${  classes.linksRTL}`
+                : classes.links}`
             }
           />
           <Hidden mdUp implementation="css">
@@ -126,11 +129,11 @@ class HeaderLinks extends React.Component {
           >
             <Notifications
               className={
-                classes.headerLinksSvg +
-                ' ' +
-                (rtlActive
-                  ? classes.links + ' ' + classes.linksRTL
-                  : classes.links)
+                `${classes.headerLinksSvg 
+                } ${ 
+                rtlActive
+                  ? `${classes.links  } ${  classes.linksRTL}`
+                  : classes.links}`
               }
             />
             <span className={classes.notifications}>5</span>
@@ -215,11 +218,11 @@ class HeaderLinks extends React.Component {
         >
           <Person
             className={
-              classes.headerLinksSvg +
-              ' ' +
-              (rtlActive
-                ? classes.links + ' ' + classes.linksRTL
-                : classes.links)
+              `${classes.headerLinksSvg 
+              } ${ 
+              rtlActive
+                ? `${classes.links  } ${  classes.linksRTL}`
+                : classes.links}`
             }
           />
           <Hidden mdUp implementation="css">
