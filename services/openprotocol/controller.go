@@ -963,6 +963,7 @@ func (c *TighteningController) getOldResult(last_id int64) error {
 	return nil
 }
 
+// TODO   待删除
 func (c *TighteningController) pset(pset int) error {
 	rev, err := GetVendorMid(c.Model(), MID_0018_PSET)
 	if err != nil {
@@ -1002,6 +1003,7 @@ func (c *TighteningController) pset(pset int) error {
 	return nil
 }
 
+// TODO   待删除
 func (c *TighteningController) ToolControl(enable bool) error {
 	if c.Status() == controller.STATUS_OFFLINE {
 		return errors.New("status offline")
@@ -1046,6 +1048,8 @@ func (c *TighteningController) ToolControl(enable bool) error {
 	return nil
 }
 
+
+// TODO   待删除
 // 0: set 1: reset
 func (c *TighteningController) JobOff(off string) error {
 	rev, err := GetVendorMid(c.Model(), MID_0130_JOB_OFF)
@@ -1087,6 +1091,7 @@ func (c *TighteningController) JobOff(off string) error {
 	return nil
 }
 
+// TODO   待删除
 func (c *TighteningController) jobSelect(job int) error {
 	rev, err := GetVendorMid(c.Model(), MID_0038_JOB_SELECT)
 	if err != nil {
@@ -1462,7 +1467,7 @@ func (c *TighteningController) JobSet(id_info string, job int) error {
 
 	return nil
 }
-
+// TODO   待删除
 func (c *TighteningController) JobAbort() error {
 	rev, err := GetVendorMid(c.Model(), MID_0127_JOB_ABORT)
 	if err != nil {
