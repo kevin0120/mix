@@ -2,6 +2,7 @@ package openprotocol
 
 import (
 	"errors"
+	"fmt"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/tightening_device"
@@ -74,16 +75,158 @@ func (s *TighteningTool) ToolControl(enable bool) error {
 }
 
 // 设置PSet
-func (s *TighteningTool) SetPSet(pset int) error { return nil }
+func (s *TighteningTool) SetPSet(pset int) error {
+	rev, err := GetVendorMid(s.parent.Model(), MID_0018_PSET)
+	if err != nil {
+		return err
+	}
+
+	if s.parent.Status() == controller.STATUS_OFFLINE {
+		return errors.New("status offline")
+	}
+
+	s.parent.Response.Add(MID_0018_PSET, nil)
+	defer s.parent.Response.remove(MID_0018_PSET)
+
+	s_pset := GeneratePackage(MID_0018_PSET, rev, "", "", "", fmt.Sprintf("%03d", pset))
+
+	s.parent.Write([]byte(s_pset))
+
+	var reply interface{} = nil
+	for i := 0; i < MAX_REPLY_COUNT; i++ {
+		reply = s.parent.Response.get(MID_0018_PSET)
+		if reply != nil {
+			break
+		}
+
+		time.Sleep(REPLY_TIMEOUT)
+	}
+
+	if reply == nil {
+		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	}
+
+	s_reply := reply.(string)
+	if s_reply != request_errors["00"] {
+		return errors.New(s_reply)
+	}
+
+	return nil
+}
 
 // 设置Job
-func (s *TighteningTool) SetJob(job int) error { return nil }
+func (s *TighteningTool) SetJob(job int) error {
+	rev, err := GetVendorMid(s.parent.Model(), MID_0038_JOB_SELECT)
+	if err != nil {
+		return err
+	}
 
-// 模式选择: job/pset
-func (s *TighteningTool) ModeSelect(mode string) error { return nil }
+	if s.parent.Status() == controller.STATUS_OFFLINE {
+		return errors.New("status offline")
+	}
+
+	s.parent.Response.Add(MID_0038_JOB_SELECT, nil)
+	defer s.parent.Response.remove(MID_0038_JOB_SELECT)
+
+	s_job := GeneratePackage(MID_0038_JOB_SELECT, rev, "", "", "", fmt.Sprintf("%04d", job))
+
+	s.parent.Write([]byte(s_job))
+
+	var reply interface{} = nil
+	for i := 0; i < MAX_REPLY_COUNT; i++ {
+		reply = s.parent.Response.get(MID_0038_JOB_SELECT)
+		if reply != nil {
+			break
+		}
+
+		time.Sleep(REPLY_TIMEOUT)
+	}
+
+	if reply == nil {
+		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	}
+
+	s_reply := reply.(string)
+	if s_reply != request_errors["00"] {
+		return errors.New(s_reply)
+	}
+	return nil
+}
+
+// 模式选择: job/pset  0: pset 1: job
+func (s *TighteningTool) ModeSelect(mode string) error {
+	rev, err := GetVendorMid(s.parent.Model(), MID_0130_JOB_OFF)
+	if err != nil {
+		return err
+	}
+
+	if s.parent.Status() == controller.STATUS_OFFLINE {
+		return errors.New("status offline")
+	}
+
+	s.parent.Response.Add(MID_0130_JOB_OFF, nil)
+	defer s.parent.Response.remove(MID_0130_JOB_OFF)
+
+	s_off := GeneratePackage(MID_0130_JOB_OFF, rev, "", "", "", mode)
+
+	s.parent.Write([]byte(s_off))
+
+	var reply interface{} = nil
+	for i := 0; i < MAX_REPLY_COUNT; i++ {
+		reply = s.parent.Response.get(MID_0130_JOB_OFF)
+		if reply != nil {
+			break
+		}
+
+		time.Sleep(REPLY_TIMEOUT)
+	}
+
+	if reply == nil {
+		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	}
+
+	return nil
+}
 
 // 取消job
-func (s *TighteningTool) AbortJob() error { return nil }
+func (s *TighteningTool) AbortJob() error {
+	rev, err := GetVendorMid(s.parent.Model(), MID_0127_JOB_ABORT)
+	if err != nil {
+		return err
+	}
+
+	if s.parent.Mode.Load().(string) != MODE_JOB {
+		return errors.New("current mode is not job")
+	}
+
+	s.parent.Response.Add(MID_0127_JOB_ABORT, nil)
+	defer s.parent.Response.remove(MID_0127_JOB_ABORT)
+
+	s_job := GeneratePackage(MID_0127_JOB_ABORT, rev, "", "", "", "")
+
+	s.parent.Write([]byte(s_job))
+
+	var reply interface{} = nil
+	for i := 0; i < MAX_REPLY_COUNT; i++ {
+		reply = s.parent.Response.get(MID_0127_JOB_ABORT)
+		if reply != nil {
+			break
+		}
+
+		time.Sleep(REPLY_TIMEOUT)
+	}
+
+	if reply == nil {
+		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	}
+
+	sReply := reply.(string)
+	if sReply != request_errors["00"] {
+		return errors.New(sReply)
+	}
+
+	return nil
+}
 
 func (s *TighteningTool) Status() string {
 	if s.parent.Status() == device.STATUS_OFFLINE {
