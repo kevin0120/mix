@@ -9,9 +9,10 @@ func CreateBaseDevice() BaseDevice {
 	c := BaseDevice{
 		mtxChildren: sync.Mutex{},
 		children:    map[string]IDevice{},
+		status:      atomic.Value{},
 	}
 
-	c.status.Store(STATUS_OFFLINE)
+	c.UpdateStatus(STATUS_OFFLINE)
 	return c
 }
 
@@ -22,6 +23,7 @@ type BaseDevice struct {
 }
 
 func (s *BaseDevice) UpdateStatus(status string) {
+	//fmt.Println(status)
 	s.status.Store(status)
 }
 

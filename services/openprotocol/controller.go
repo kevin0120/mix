@@ -2,7 +2,6 @@ package openprotocol
 
 import (
 	"bytes"
-	"context"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
@@ -32,6 +31,8 @@ const (
 	MAX_REPLY_TIME = time.Duration(2000 * time.Millisecond)
 )
 
+type ControllerSubscribe func() error
+
 type handlerPkg struct {
 	Header OpenProtocolHeader
 	Body   string
@@ -43,34 +44,35 @@ type handlerPkg_curve struct {
 }
 
 type TighteningController struct {
-	w                 *socket_writer.SocketWriter
-	cfg               *tightening_device.TighteningDeviceConfig
-	keepAliveCount    int32
-	keep_period       time.Duration
-	req_timeout       time.Duration
-	getToolInfoPeriod time.Duration
-	Response          ResponseQueue
-	Srv               *Service
-	dbController      *storage.Controllers
-	buffer            chan []byte
-	closing           chan chan struct{}
-	handlerBuf        chan handlerPkg
-	keepaliveDeadLine atomic.Value
-	protocol          string
-	inputs            string
-	diag              Diagnostic
-	MID_7410_CURVE    handlerPkg_curve
-	result_CURVE      *minio.ControllerCurve
-	result            *controller.ControllerResult
-	mtxResult         sync.Mutex
-	model             string
-	receiveBuf        chan []byte
+	w                    *socket_writer.SocketWriter
+	cfg                  *tightening_device.TighteningDeviceConfig
+	keepAliveCount       int32
+	keep_period          time.Duration
+	req_timeout          time.Duration
+	getToolInfoPeriod    time.Duration
+	Response             ResponseQueue
+	Srv                  *Service
+	dbController         *storage.Controllers
+	buffer               chan []byte
+	closing              chan chan struct{}
+	handlerBuf           chan handlerPkg
+	keepaliveDeadLine    atomic.Value
+	protocol             string
+	inputs               string
+	diag                 Diagnostic
+	MID_7410_CURVE       handlerPkg_curve
+	result_CURVE         *minio.ControllerCurve
+	result               *controller.ControllerResult
+	mtxResult            sync.Mutex
+	model                string
+	receiveBuf           chan []byte
+	controllerSubscribes []ControllerSubscribe
 
 	device.BaseDevice
 }
 
 // TODO: 如果工具序列号没有配置，则通过探测加入设备列表。
-func NewController(protocolConfig *Config, deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic) TighteningController {
+func NewController(protocolConfig *Config, deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic) *TighteningController {
 
 	c := TighteningController{
 		diag:              d,
@@ -89,12 +91,24 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 		BaseDevice:        device.CreateBaseDevice(),
 	}
 
-	for _, v := range deviceConfig.Tools {
-		tool := NewTool(&c, v, d)
-		c.AddChildren(v.SN, &tool)
+	c.controllerSubscribes = []ControllerSubscribe{
+		//c.PSetSubscribe,
+		c.ResultSubcribe,
+		c.CurveSubscribe,
+		c.SelectorSubscribe,
+		c.JobInfoSubscribe,
+		c.IOInputSubscribe,
+		c.MultiSpindleResultSubscribe,
+		c.VinSubscribe,
+		c.AlarmSubcribe,
 	}
 
-	return c
+	for _, v := range deviceConfig.Tools {
+		tool := NewTool(&c, v, d)
+		c.AddChildren(v.SN, tool)
+	}
+
+	return &c
 }
 
 //func (c *TighteningController) UpdateToolStatus(status string) {
@@ -131,6 +145,40 @@ func (c *TighteningController) handlerProcess() {
 			}
 		}
 	}
+}
+
+func (c *TighteningController) Subscribe() {
+	for _, subscribe := range c.controllerSubscribes {
+		err := subscribe()
+		if err != nil {
+			c.diag.Debug(fmt.Sprintf("OpenProtocol Subscribe Failed: %s", err.Error()))
+		}
+	}
+}
+
+func (c *TighteningController) ProcessRequest(mid string, noack string, station string, spindle string, data string) (interface{}, error) {
+	rev, err := GetVendorMid(c.Model(), mid)
+	if err != nil {
+		return nil, err
+	}
+
+	if c.Status() == device.STATUS_OFFLINE {
+		return nil, errors.New(device.STATUS_OFFLINE)
+	}
+
+	wg := sync.WaitGroup{}
+	c.Response.Add(mid, &wg)
+	defer c.Response.remove(mid)
+
+	pkg := GeneratePackage(mid, rev, noack, station, spindle, data)
+
+	c.Write([]byte(pkg))
+
+	if utils.WaitGroupTimeout(&wg, MAX_REPLY_TIME) != nil {
+		return nil, errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	}
+
+	return c.Response.get(mid), nil
 }
 
 func DataDecoding(original []byte, torqueCoefficient float64, angleCoefficient float64, d Diagnostic) (Torque []float64, Angle []float64) {
@@ -191,7 +239,7 @@ func DataDecoding(original []byte, torqueCoefficient float64, angleCoefficient f
 }
 
 func (c *TighteningController) HandleMsg(pkg *handlerPkg) error {
-	c.Srv.diag.Debug(fmt.Sprintf("%s: %s%s\n", c.cfg.SN, pkg.Header.Serialize(), pkg.Body))
+	c.Srv.diag.Debug(fmt.Sprintf("OpenProtocol Recv %s: %s%s\n", c.cfg.SN, pkg.Header.Serialize(), pkg.Body))
 
 	handler, err := GetMidHandler(pkg.Header.MID)
 	if err != nil {
@@ -364,7 +412,7 @@ func (c *TighteningController) Start() error {
 
 	go c.handlerProcess()
 
-	c.Connect()
+	go c.Connect()
 
 	return nil
 }
@@ -410,14 +458,12 @@ func (c *TighteningController) Connect() error {
 
 	c.handleStatus(controller.STATUS_ONLINE)
 
-	c.startComm()
+	//c.Subscribe()
 
 	// 启动发送
 	go c.manage()
 
-	//go c.SolveOldResults()
-	//
-	//go c.getTighteningCount()
+	c.startComm()
 
 	return nil
 }
@@ -455,16 +501,16 @@ func (c *TighteningController) ToolInfoReq() error {
 	req := GeneratePackage(MID_0040_TOOL_INFO_REQUEST, rev, "", "", "", "")
 	c.Write([]byte(req))
 
-	var reply interface{} = nil
+	//var reply interface{} = nil
 
-	for i := 0; i < MAX_REPLY_COUNT; i++ {
-		reply = c.Response.get(MID_0040_TOOL_INFO_REQUEST)
-		if reply != nil {
-			break
-		}
-
-		time.Sleep(REPLY_TIMEOUT)
-	}
+	//for i := 0; i < MAX_REPLY_COUNT; i++ {
+	//	reply = c.Response.get(MID_0040_TOOL_INFO_REQUEST)
+	//	if reply != nil {
+	//		break
+	//	}
+	//
+	//	time.Sleep(REPLY_TIMEOUT)
+	//}
 	//
 	//if reply != nil {
 	//	ti := reply.(ToolInfo)
@@ -491,9 +537,9 @@ func (c *TighteningController) SolveOldResults() {
 	}
 
 	var reply interface{} = nil
-	ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
+	//ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
 	//当在队列中找到非空数据则返回，否则直到timeout返回nil
-	reply = c.Response.Get(MID_0065_OLD_DATA, ctx)
+	reply = c.Response.get(MID_0065_OLD_DATA)
 
 	if reply == nil {
 		return
@@ -542,20 +588,20 @@ func (c *TighteningController) sendKeepalive() {
 }
 
 func (c *TighteningController) startComm() error {
-	rev, err := GetVendorMid(c.Model(), MID_0001_START)
+	reply, err := c.ProcessRequest(MID_0001_START, "", "", "", "")
 	if err != nil {
 		return err
 	}
 
-	start := GeneratePackage(MID_0001_START, rev, "", "", "", "")
-
-	c.Write([]byte(start))
+	if reply.(string) != request_errors["00"] {
+		return errors.New(reply.(string))
+	}
 
 	return nil
 }
 
 func (c *TighteningController) Write(buf []byte) {
-	c.diag.Debug(fmt.Sprintf("op write %s: %d %s\n", c.cfg.SN, len(buf), string(buf)))
+	c.diag.Debug(fmt.Sprintf("OpenProtocol Send %s: %s", c.cfg.SN, string(buf)))
 	c.buffer <- buf
 }
 
@@ -563,6 +609,7 @@ func (c *TighteningController) handleStatus(status string) {
 
 	if status != c.Status() {
 
+		fmt.Println(status)
 		c.UpdateStatus(status)
 
 		if status == device.STATUS_OFFLINE {
@@ -674,7 +721,7 @@ func (c *TighteningController) manage() {
 				continue
 			}
 			if c.KeepAliveCount() >= MAX_KEEP_ALIVE_CHECK {
-				go c.handleStatus(controller.STATUS_OFFLINE)
+				c.handleStatus(controller.STATUS_OFFLINE)
 				c.updateKeepAliveCount(0)
 				continue
 			}
@@ -754,154 +801,123 @@ func (c *TighteningController) getOldResult(last_id int64) error {
 }
 
 func (c *TighteningController) PSetSubscribe() error {
-	rev, err := GetVendorMid(c.Model(), MID_0014_PSET_SUBSCRIBE)
+
+	reply, err := c.ProcessRequest(MID_0014_PSET_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
 
-	if c.Status() == controller.STATUS_OFFLINE {
-		return errors.New("status offline")
+	if reply.(string) != request_errors["00"] {
+		return errors.New(reply.(string))
 	}
-
-	pset := GeneratePackage(MID_0014_PSET_SUBSCRIBE, rev, "1", "", "", "")
-
-	c.Write([]byte(pset))
 
 	return nil
 }
 
 func (c *TighteningController) SelectorSubscribe() error {
-	rev, err := GetVendorMid(c.Model(), MID_0250_SELECTOR_SUBSCRIBE)
+	reply, err := c.ProcessRequest(MID_0250_SELECTOR_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
 
-	if c.Status() == controller.STATUS_OFFLINE {
-		return errors.New("status offline")
+	if reply.(string) != request_errors["00"] {
+		return errors.New(reply.(string))
 	}
-
-	pset := GeneratePackage(MID_0250_SELECTOR_SUBSCRIBE, rev, "1", "", "", "")
-
-	c.Write([]byte(pset))
 
 	return nil
 }
 
 func (c *TighteningController) JobInfoSubscribe() error {
-	rev, err := GetVendorMid(c.Model(), MID_0034_JOB_INFO_SUBSCRIBE)
+
+	reply, err := c.ProcessRequest(MID_0034_JOB_INFO_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
 
-	if c.Status() == controller.STATUS_OFFLINE {
-		return errors.New("status offline")
+	if reply.(string) != request_errors["00"] {
+		return errors.New(reply.(string))
 	}
-
-	pset := GeneratePackage(MID_0034_JOB_INFO_SUBSCRIBE, rev, "1", "", "", "")
-
-	c.Write([]byte(pset))
 
 	return nil
 }
 
 func (c *TighteningController) IOInputSubscribe() error {
-	rev, err := GetVendorMid(c.Model(), MID_0210_INPUT_SUBSCRIBE)
+	reply, err := c.ProcessRequest(MID_0210_INPUT_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
 
-	if c.Status() == controller.STATUS_OFFLINE {
-		return errors.New("status offline")
+	if reply.(string) != request_errors["00"] {
+		return errors.New(reply.(string))
 	}
-
-	input := GeneratePackage(MID_0210_INPUT_SUBSCRIBE, rev, "1", "", "", "")
-
-	c.Write([]byte(input))
 
 	return nil
 }
 
 func (c *TighteningController) MultiSpindleResultSubscribe() error {
-	rev, err := GetVendorMid(c.Model(), MID_0100_MULTI_SPINDLE_SUBSCRIBE)
+
+	reply, err := c.ProcessRequest(MID_0100_MULTI_SPINDLE_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
 
-	if c.Status() == controller.STATUS_OFFLINE {
-		return errors.New("status offline")
+	if reply.(string) != request_errors["00"] {
+		return errors.New(reply.(string))
 	}
-
-	input := GeneratePackage(MID_0100_MULTI_SPINDLE_SUBSCRIBE, rev, "1", "", "", "")
-
-	c.Write([]byte(input))
 
 	return nil
 }
 
 func (c *TighteningController) VinSubscribe() error {
-	rev, err := GetVendorMid(c.Model(), MID_0051_VIN_SUBSCRIBE)
+	reply, err := c.ProcessRequest(MID_0051_VIN_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
 
-	if c.Status() == controller.STATUS_OFFLINE {
-		return errors.New("status offline")
+	if reply.(string) != request_errors["00"] {
+		return errors.New(reply.(string))
 	}
-
-	input := GeneratePackage(MID_0051_VIN_SUBSCRIBE, rev, "1", "", "", "")
-
-	c.Write([]byte(input))
 
 	return nil
 }
 
 func (c *TighteningController) ResultSubcribe() error {
-	rev, err := GetVendorMid(c.Model(), MID_0060_LAST_RESULT_SUBSCRIBE)
+
+	reply, err := c.ProcessRequest(MID_0060_LAST_RESULT_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
 
-	if c.Status() == controller.STATUS_OFFLINE {
-		return errors.New("status offline")
+	if reply.(string) != request_errors["00"] {
+		return errors.New(reply.(string))
 	}
-
-	pset := GeneratePackage(MID_0060_LAST_RESULT_SUBSCRIBE, rev, "1", "", "", "")
-
-	c.Write([]byte(pset))
 
 	return nil
 }
 
 func (c *TighteningController) AlarmSubcribe() error {
-	rev, err := GetVendorMid(c.Model(), MID_0070_ALARM_SUBSCRIBE)
+
+	reply, err := c.ProcessRequest(MID_0070_ALARM_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
 
-	if c.Status() == controller.STATUS_OFFLINE {
-		return errors.New("status offline")
+	if reply.(string) != request_errors["00"] {
+		return errors.New(reply.(string))
 	}
-
-	payload := GeneratePackage(MID_0070_ALARM_SUBSCRIBE, rev, "1", "", "", "")
-
-	c.Write([]byte(payload))
 
 	return nil
 }
 
 func (c *TighteningController) CurveSubscribe() error {
-	rev, err := GetVendorMid(c.Model(), MID_7408_LAST_CURVE_SUBSCRIBE)
+	reply, err := c.ProcessRequest(MID_7408_LAST_CURVE_SUBSCRIBE, "1", "", "", "")
 	if err != nil {
 		return err
 	}
 
-	if c.Status() == controller.STATUS_OFFLINE {
-		return errors.New("status offline")
+	if reply.(string) != request_errors["00"] {
+		return errors.New(reply.(string))
 	}
-
-	pset := GeneratePackage(MID_7408_LAST_CURVE_SUBSCRIBE, rev, "1", "", "", "")
-
-	c.Write([]byte(pset))
 
 	return nil
 }
@@ -917,58 +933,58 @@ func (c *TighteningController) findIOByNo(no int, ios *[]IOStatus) (IOStatus, er
 }
 
 func (c *TighteningController) IOSet(ios *[]IOStatus) error {
-	rev, err := GetVendorMid(c.Model(), MID_0200_CONTROLLER_RELAYS)
-	if err != nil {
-		return err
-	}
-
-	if c.Status() == controller.STATUS_OFFLINE {
-		return errors.New("status offline")
-	}
-
-	if len(*ios) == 0 {
-		return errors.New("io status list is required")
-	}
-
-	str_io := ""
-	for i := 0; i < 10; i++ {
-		io, err := c.findIOByNo(i, ios)
-		if err != nil {
-			str_io += "3"
-		} else {
-			switch io.Status {
-			case IO_STATUS_OFF:
-				str_io += "0"
-
-			case IO_STATUS_ON:
-				str_io += "1"
-
-			case IO_STATUS_FLASHING:
-				str_io += "2"
-			}
-		}
-	}
-
-	c.Response.Add(MID_0200_CONTROLLER_RELAYS, nil)
-	defer c.Response.remove(MID_0200_CONTROLLER_RELAYS)
-
-	s_io := GeneratePackage(MID_0200_CONTROLLER_RELAYS, rev, "", "", "", str_io)
-
-	c.Write([]byte(s_io))
-
-	var reply interface{} = nil
-	ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
-	//当在队列中找到非空数据则返回，否则直到timeout返回nil
-	reply = c.Response.Get(MID_0200_CONTROLLER_RELAYS, ctx)
-
-	if reply == nil {
-		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
-	}
-
-	s_reply := reply.(string)
-	if s_reply != request_errors["00"] {
-		return errors.New(s_reply)
-	}
+	//rev, err := GetVendorMid(c.Model(), MID_0200_CONTROLLER_RELAYS)
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//if c.Status() == controller.STATUS_OFFLINE {
+	//	return errors.New("status offline")
+	//}
+	//
+	//if len(*ios) == 0 {
+	//	return errors.New("io status list is required")
+	//}
+	//
+	//str_io := ""
+	//for i := 0; i < 10; i++ {
+	//	io, err := c.findIOByNo(i, ios)
+	//	if err != nil {
+	//		str_io += "3"
+	//	} else {
+	//		switch io.Status {
+	//		case IO_STATUS_OFF:
+	//			str_io += "0"
+	//
+	//		case IO_STATUS_ON:
+	//			str_io += "1"
+	//
+	//		case IO_STATUS_FLASHING:
+	//			str_io += "2"
+	//		}
+	//	}
+	//}
+	//
+	//c.Response.Add(MID_0200_CONTROLLER_RELAYS, nil)
+	//defer c.Response.remove(MID_0200_CONTROLLER_RELAYS)
+	//
+	//s_io := GeneratePackage(MID_0200_CONTROLLER_RELAYS, rev, "", "", "", str_io)
+	//
+	//c.Write([]byte(s_io))
+	//
+	//var reply interface{} = nil
+	//ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
+	////当在队列中找到非空数据则返回，否则直到timeout返回nil
+	//reply = c.Response.Get(MID_0200_CONTROLLER_RELAYS, ctx)
+	//
+	//if reply == nil {
+	//	return errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	//}
+	//
+	//s_reply := reply.(string)
+	//if s_reply != request_errors["00"] {
+	//	return errors.New(s_reply)
+	//}
 
 	return nil
 }

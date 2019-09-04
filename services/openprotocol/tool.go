@@ -1,7 +1,6 @@
 package openprotocol
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"github.com/masami10/rush/services/controller"
@@ -10,19 +9,20 @@ import (
 )
 
 const (
-	JOB_MODE  = "1"
-	PSET_MODE = "0"
+	OPENPROTOCOL_MODE_JOB  = "1"
+	OPENPROTOCOL_MODE_PSET = "0"
 )
 
-func NewTool(c tightening_device.ITighteningController, cfg tightening_device.ToolConfig, d Diagnostic) TighteningTool {
+func NewTool(c *TighteningController, cfg tightening_device.ToolConfig, d Diagnostic) *TighteningTool {
 	tool := TighteningTool{
 		diag:       d,
 		cfg:        cfg,
-		parent:     c.(*TighteningController),
+		parent:     c,
 		BaseDevice: device.CreateBaseDevice(),
 	}
 
-	return tool
+	tool.UpdateStatus(device.STATUS_ONLINE)
+	return &tool
 }
 
 type TighteningTool struct {
@@ -45,30 +45,13 @@ func (s *TighteningTool) ToolControl(enable bool) error {
 		cmd = MID_0043_TOOL_ENABLE
 	}
 
-	rev, err := GetVendorMid(s.parent.Model(), cmd)
+	reply, err := s.parent.ProcessRequest(cmd, "", "", "", "")
 	if err != nil {
 		return err
 	}
 
-	s.parent.Response.Add(cmd, nil)
-	defer s.parent.Response.remove(cmd)
-
-	sSend := GeneratePackage(cmd, rev, "", "", "", "")
-
-	s.parent.Write([]byte(sSend))
-
-	var reply interface{} = nil
-	ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
-	//当在队列中找到非空数据则返回，否则直到timeout返回nil
-	reply = s.parent.Response.Get(cmd, ctx)
-
-	if reply == nil {
-		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
-	}
-
-	sReply := reply.(string)
-	if sReply != request_errors["00"] {
-		return errors.New(sReply)
+	if reply.(string) != request_errors["00"] {
+		return errors.New(reply.(string))
 	}
 
 	return nil
@@ -76,33 +59,17 @@ func (s *TighteningTool) ToolControl(enable bool) error {
 
 // 设置PSet
 func (s *TighteningTool) SetPSet(pset int) error {
-	rev, err := GetVendorMid(s.parent.Model(), MID_0018_PSET)
-	if err != nil {
-		return err
-	}
-
 	if s.Status() == device.STATUS_OFFLINE {
 		return errors.New(device.STATUS_OFFLINE)
 	}
 
-	s.parent.Response.Add(MID_0018_PSET, nil)
-	defer s.parent.Response.remove(MID_0018_PSET)
-
-	s_pset := GeneratePackage(MID_0018_PSET, rev, "", "", "", fmt.Sprintf("%03d", pset))
-
-	s.parent.Write([]byte(s_pset))
-
-	var reply interface{} = nil
-	ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
-	//当在队列中找到非空数据则返回，否则直到timeout返回nil
-	reply = s.parent.Response.Get(MID_0018_PSET, ctx)
-	if reply == nil {
-		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	reply, err := s.parent.ProcessRequest(MID_0018_PSET, "", "", "", "")
+	if err != nil {
+		return err
 	}
 
-	s_reply := reply.(string)
-	if s_reply != request_errors["00"] {
-		return errors.New(s_reply)
+	if reply.(string) != request_errors["00"] {
+		return errors.New(reply.(string))
 	}
 
 	return nil
@@ -110,72 +77,40 @@ func (s *TighteningTool) SetPSet(pset int) error {
 
 // 设置Job
 func (s *TighteningTool) SetJob(job int) error {
-	rev, err := GetVendorMid(s.parent.Model(), MID_0038_JOB_SELECT)
-	if err != nil {
-		return err
-	}
-
 	if s.Status() == device.STATUS_OFFLINE {
 		return errors.New(device.STATUS_OFFLINE)
 	}
 
-	s.parent.Response.Add(MID_0038_JOB_SELECT, nil)
-	defer s.parent.Response.remove(MID_0038_JOB_SELECT)
-
-	s_job := GeneratePackage(MID_0038_JOB_SELECT, rev, "", "", "", fmt.Sprintf("%04d", job))
-
-	s.parent.Write([]byte(s_job))
-
-	var reply interface{} = nil
-	ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
-	//当在队列中找到非空数据则返回，否则阻塞直到timeout返回nil
-	reply = s.parent.Response.Get(MID_0038_JOB_SELECT, ctx)
-
-	if reply == nil {
-		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	reply, err := s.parent.ProcessRequest(MID_0038_JOB_SELECT, "", "", "", "")
+	if err != nil {
+		return err
 	}
 
-	s_reply := reply.(string)
-	if s_reply != request_errors["00"] {
-		return errors.New(s_reply)
+	if reply.(string) != request_errors["00"] {
+		return errors.New(reply.(string))
 	}
+
 	return nil
 }
 
 // 模式选择: job/pset  0: pset 1: job
 func (s *TighteningTool) ModeSelect(mode string) error {
-	rev, err := GetVendorMid(s.parent.Model(), MID_0130_JOB_OFF)
-	if err != nil {
-		return err
-	}
-
 	if s.Status() == device.STATUS_OFFLINE {
 		return errors.New(device.STATUS_OFFLINE)
 	}
 
-	if mode != tightening_device.MODE_JOB && mode != tightening_device.MODE_PSET {
-		return errors.New("Mode Error")
-	}
-
-	s.parent.Response.Add(MID_0130_JOB_OFF, nil)
-	defer s.parent.Response.remove(MID_0130_JOB_OFF)
-
-	flag := PSET_MODE
+	flag := OPENPROTOCOL_MODE_PSET
 	if mode == tightening_device.MODE_JOB {
-		flag = JOB_MODE
+		flag = OPENPROTOCOL_MODE_JOB
 	}
 
-	s_off := GeneratePackage(MID_0130_JOB_OFF, rev, "", "", "", flag)
+	reply, err := s.parent.ProcessRequest(MID_0130_JOB_OFF, "", "", "", flag)
+	if err != nil {
+		return err
+	}
 
-	s.parent.Write([]byte(s_off))
-
-	var reply interface{} = nil
-	ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
-	//当在队列中找到非空数据则返回，否则直到timeout返回nil
-	reply = s.parent.Response.Get(MID_0130_JOB_OFF, ctx)
-
-	if reply == nil {
-		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	if reply.(string) != request_errors["00"] {
+		return errors.New(reply.(string))
 	}
 
 	return nil
@@ -183,37 +118,17 @@ func (s *TighteningTool) ModeSelect(mode string) error {
 
 // 取消job
 func (s *TighteningTool) AbortJob() error {
-	rev, err := GetVendorMid(s.parent.Model(), MID_0127_JOB_ABORT)
-	if err != nil {
-		return err
-	}
-
 	if s.Status() == device.STATUS_OFFLINE {
 		return errors.New(device.STATUS_OFFLINE)
 	}
 
-	if s.Mode != tightening_device.MODE_JOB {
-		return errors.New("current mode is not job")
+	reply, err := s.parent.ProcessRequest(MID_0127_JOB_ABORT, "", "", "", "")
+	if err != nil {
+		return err
 	}
 
-	s.parent.Response.Add(MID_0127_JOB_ABORT, nil)
-	defer s.parent.Response.remove(MID_0127_JOB_ABORT)
-
-	s_job := GeneratePackage(MID_0127_JOB_ABORT, rev, "", "", "", "")
-
-	s.parent.Write([]byte(s_job))
-
-	var reply interface{} = nil
-	ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
-	//当在队列中找到非空数据则返回，否则直到timeout返回nil
-	reply = s.parent.Response.Get(MID_0127_JOB_ABORT, ctx)
-	if reply == nil {
-		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
-	}
-
-	sReply := reply.(string)
-	if sReply != request_errors["00"] {
-		return errors.New(sReply)
+	if reply.(string) != request_errors["00"] {
+		return errors.New(reply.(string))
 	}
 
 	return nil
@@ -221,35 +136,18 @@ func (s *TighteningTool) AbortJob() error {
 
 // 设置pset次数
 func (s *TighteningTool) SetPSetBatch(pset int, batch int) error {
-	rev, err := GetVendorMid(s.parent.Model(), MID_0019_PSET_BATCH_SET)
-	if err != nil {
-		return err
-	}
-
 	if s.Status() == device.STATUS_OFFLINE {
 		return errors.New(device.STATUS_OFFLINE)
 	}
 
-	s.parent.Response.Add(MID_0019_PSET_BATCH_SET, nil)
-	defer s.parent.Response.remove(MID_0019_PSET_BATCH_SET)
-
 	data := fmt.Sprintf("%03d%02d", pset, batch)
-	ide := GeneratePackage(MID_0019_PSET_BATCH_SET, rev, "", "", "", data)
-
-	s.parent.Write([]byte(ide))
-
-	var reply interface{} = nil
-	ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
-	//当在队列中找到非空数据则返回，否则直到timeout返回nil
-	reply = s.parent.Response.Get(MID_0019_PSET_BATCH_SET, ctx)
-
-	if reply == nil {
-		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
+	reply, err := s.parent.ProcessRequest(MID_0019_PSET_BATCH_SET, "", "", "", data)
+	if err != nil {
+		return err
 	}
 
-	s_reply := reply.(string)
-	if s_reply != request_errors["00"] {
-		return errors.New(s_reply)
+	if reply.(string) != request_errors["00"] {
+		return errors.New(reply.(string))
 	}
 
 	return nil
@@ -257,147 +155,78 @@ func (s *TighteningTool) SetPSetBatch(pset int, batch int) error {
 
 // pset列表
 func (s *TighteningTool) GetPSetList() ([]int, error) {
-	var psets []int
+	if s.Status() == device.STATUS_OFFLINE {
+		return nil, errors.New(device.STATUS_OFFLINE)
+	}
 
-	rev, err := GetVendorMid(s.parent.Model(), MID_0010_PSET_LIST_REQUEST)
+	reply, err := s.parent.ProcessRequest(MID_0010_PSET_LIST_REQUEST, "", "", "", "")
 	if err != nil {
-		return psets, err
+		return nil, err
 	}
 
-	if s.parent.Status() == controller.STATUS_OFFLINE {
-		return psets, errors.New(controller.STATUS_OFFLINE)
-	}
-
-	defer s.parent.Response.remove(MID_0010_PSET_LIST_REQUEST)
-	s.parent.Response.Add(MID_0010_PSET_LIST_REQUEST, nil)
-
-	psets_request := GeneratePackage(MID_0010_PSET_LIST_REQUEST, rev, "", "", "", "")
-	s.parent.Write([]byte(psets_request))
-
-	var reply interface{} = nil
-
-	ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
-	//当在队列中找到非空数据则返回，否则直到timeout返回nil
-	reply = s.parent.Response.Get(MID_0010_PSET_LIST_REQUEST, ctx)
-	if reply == nil {
-		return psets, errors.New(controller.ERR_CONTROLER_TIMEOUT)
-	}
-
-	pset_list := reply.(PSetList)
-
-	return pset_list.psets, nil
+	return reply.(PSetList).psets, nil
 }
 
 // pset详情
-func (s *TighteningTool) GetPSetDetail(pset int) (tightening_device.PSetDetail, error) {
-	var obj_pset_detail tightening_device.PSetDetail
+func (s *TighteningTool) GetPSetDetail(pset int) (*tightening_device.PSetDetail, error) {
+	if s.Status() == device.STATUS_OFFLINE {
+		return nil, errors.New(device.STATUS_OFFLINE)
+	}
 
-	rev, err := GetVendorMid(s.parent.Model(), MID_0012_PSET_DETAIL_REQUEST)
+	data := fmt.Sprintf("%03d", pset)
+	reply, err := s.parent.ProcessRequest(MID_0012_PSET_DETAIL_REQUEST, "", "", "", data)
 	if err != nil {
-		return obj_pset_detail, err
-	}
-
-	if s.parent.Status() == controller.STATUS_OFFLINE {
-		return obj_pset_detail, errors.New(controller.STATUS_OFFLINE)
-	}
-
-	defer s.parent.Response.remove(MID_0012_PSET_DETAIL_REQUEST)
-	s.parent.Response.Add(MID_0012_PSET_DETAIL_REQUEST, nil)
-
-	pset_detail := GeneratePackage(MID_0012_PSET_DETAIL_REQUEST, rev, "", "", "", fmt.Sprintf("%03d", pset))
-	s.parent.Write([]byte(pset_detail))
-
-	var reply interface{} = nil
-	ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
-	//当在队列中找到非空数据则返回，否则直到timeout返回nil
-	reply = s.parent.Response.Get(MID_0012_PSET_DETAIL_REQUEST, ctx)
-
-	if reply == nil {
-		return obj_pset_detail, errors.New(controller.ERR_CONTROLER_TIMEOUT)
+		return nil, err
 	}
 
 	switch v := reply.(type) {
 	case string:
-		return obj_pset_detail, errors.New(v)
+		return nil, errors.New(v)
 
 	case tightening_device.PSetDetail:
-		return reply.(tightening_device.PSetDetail), nil
-
-	default:
-		return obj_pset_detail, errors.New(controller.ERR_KNOWN)
+		rt := reply.(tightening_device.PSetDetail)
+		return &rt, nil
 	}
+
+	return nil, errors.New(controller.ERR_KNOWN)
 }
 
 // job列表
 func (s *TighteningTool) GetJobList() ([]int, error) {
-	var jobs []int
-	rev, err := GetVendorMid(s.parent.Model(), MID_0030_JOB_LIST_REQUEST)
+	if s.Status() == device.STATUS_OFFLINE {
+		return nil, errors.New(device.STATUS_OFFLINE)
+	}
+
+	reply, err := s.parent.ProcessRequest(MID_0030_JOB_LIST_REQUEST, "", "", "", "")
 	if err != nil {
-		return jobs, err
+		return nil, err
 	}
 
-	if s.parent.Status() == controller.STATUS_OFFLINE {
-		return jobs, errors.New(controller.STATUS_OFFLINE)
-	}
-
-	defer s.parent.Response.remove(MID_0030_JOB_LIST_REQUEST)
-	s.parent.Response.Add(MID_0030_JOB_LIST_REQUEST, nil)
-
-	psetsRequest := GeneratePackage(MID_0030_JOB_LIST_REQUEST, rev, "", "", "", "")
-	s.parent.Write([]byte(psetsRequest))
-
-	var reply interface{} = nil
-
-	ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
-	//当在队列中找到非空数据则返回，否则直到timeout返回nil
-	reply = s.parent.Response.Get(MID_0030_JOB_LIST_REQUEST, ctx)
-
-	if reply == nil {
-		return jobs, errors.New(controller.ERR_CONTROLER_TIMEOUT)
-	}
-
-	jobList := reply.(JobList)
-
-	return jobList.jobs, nil
+	return reply.(JobList).jobs, nil
 }
 
 // job详情
-func (s *TighteningTool) GetJobDetail(job int) (tightening_device.JobDetail, error) {
-	var objJobDetail tightening_device.JobDetail
-	rev, err := GetVendorMid(s.parent.Model(), MID_0032_JOB_DETAIL_REQUEST)
+func (s *TighteningTool) GetJobDetail(job int) (*tightening_device.JobDetail, error) {
+	if s.Status() == device.STATUS_OFFLINE {
+		return nil, errors.New(device.STATUS_OFFLINE)
+	}
+
+	data := fmt.Sprintf("%04d", job)
+	reply, err := s.parent.ProcessRequest(MID_0032_JOB_DETAIL_REQUEST, "", "", "", data)
 	if err != nil {
-		return objJobDetail, err
-	}
-
-	if s.parent.Status() == controller.STATUS_OFFLINE {
-		return objJobDetail, errors.New(controller.STATUS_OFFLINE)
-	}
-
-	defer s.parent.Response.remove(MID_0032_JOB_DETAIL_REQUEST)
-	s.parent.Response.Add(MID_0032_JOB_DETAIL_REQUEST, nil)
-
-	job_detail := GeneratePackage(MID_0032_JOB_DETAIL_REQUEST, rev, "", "", "", fmt.Sprintf("%04d", job))
-	s.parent.Write([]byte(job_detail))
-
-	var reply interface{} = nil
-	ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
-	//当在队列中找到非空数据则返回，否则直到timeout返回nil
-	reply = s.parent.Response.Get(MID_0032_JOB_DETAIL_REQUEST, ctx)
-
-	if reply == nil {
-		return objJobDetail, errors.New(controller.ERR_CONTROLER_TIMEOUT)
+		return nil, err
 	}
 
 	switch v := reply.(type) {
 	case string:
-		return objJobDetail, errors.New(v)
+		return nil, errors.New(v)
 
 	case tightening_device.JobDetail:
-		return reply.(tightening_device.JobDetail), nil
-
-	default:
-		return objJobDetail, errors.New(controller.ERR_KNOWN)
+		rt := reply.(tightening_device.JobDetail)
+		return &rt, nil
 	}
+
+	return nil, errors.New(controller.ERR_KNOWN)
 }
 
 //func (s *TighteningTool) IdentifierSet(str string) error {

@@ -9,6 +9,7 @@ import (
 	"github.com/masami10/rush/services/wsnotify"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 func GetMidHandler(mid string) (MidHandler, error) {
@@ -48,16 +49,19 @@ func handleMID_9999_ALIVE(c *TighteningController, pkg *handlerPkg) error {
 }
 
 func handleMID_0002_START_ACK(c *TighteningController, pkg *handlerPkg) error {
-	c.ToolInfoReq()
-	c.PSetSubscribe()
-	c.ResultSubcribe()
-	c.CurveSubscribe()
-	c.SelectorSubscribe()
-	c.JobInfoSubscribe()
-	c.IOInputSubscribe()
-	c.MultiSpindleResultSubscribe()
-	c.VinSubscribe()
-	c.AlarmSubcribe()
+	wg := c.Response.get(MID_0001_START)
+	if wg == nil {
+		return errors.New("WaitGroup Is Nil")
+	}
+
+	defer wg.(*sync.WaitGroup).Done()
+
+	c.Response.update(MID_0001_START, request_errors["00"])
+
+	// TODO
+	go c.Subscribe()
+	//go c.SolveOldResults()
+	//go c.getTighteningCount()
 
 	return nil
 }
@@ -187,14 +191,30 @@ func handleMID_0033_JOB_DETAIL_REPLY(c *TighteningController, pkg *handlerPkg) e
 
 // 请求错误
 func handleMID_0004_CMD_ERR(c *TighteningController, pkg *handlerPkg) error {
-	err_code := pkg.Body[4:6]
-	c.Response.update(pkg.Body[0:4], request_errors[err_code])
+	mid := pkg.Body[0:4]
+	errCode := pkg.Body[4:6]
+
+	wg := c.Response.get(mid)
+	if wg == nil {
+		return errors.New("WaitGroup Is Nil")
+	}
+
+	defer wg.(*sync.WaitGroup).Done()
+
+	c.Response.update(mid, request_errors[errCode])
 
 	return nil
 }
 
 // 请求成功
 func handleMID_0005_CMD_OK(c *TighteningController, pkg *handlerPkg) error {
+	wg := c.Response.get(pkg.Body)
+	if wg == nil {
+		return errors.New("WaitGroup Is Nil")
+	}
+
+	defer wg.(*sync.WaitGroup).Done()
+
 	c.Response.update(pkg.Body, request_errors["00"])
 
 	return nil

@@ -139,13 +139,13 @@ tightening_device:
   devices:
     - model: ModelDesoutterCvi3
       protocol: OpenProtocol
-      endpoint: tcp://192.168.3.23:4545
+      endpoint: tcp://192.168.3.23:4546
       sn: 0001
       tools:
         - sn: 12B62230
           channel: 1
-        - sn: 12B62230
-          channel: 51
+#        - sn: 12B62230
+#          channel: 51
 
 #    - model: MODEL_DESOUTTER_CVI3
 #      protocol: OpenProtocol

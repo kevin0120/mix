@@ -124,3 +124,12 @@ func Test_DataEncoding(t *testing.T) {
 	assert.NotNil(t, torques)
 	assert.NotNil(t, angels)
 }
+
+func Test_MultiSpindle(t *testing.T) {
+	raw := "010102                         030104002050002060000070080110000901300010012000110000012099991300000142019-05-09:02:48:56152019-09-04:08:43:43162560917018010111012033100020"
+
+	ms := MultiSpindleResult{}
+	ms.Deserialize(raw)
+
+	fmt.Println(ms)
+}
