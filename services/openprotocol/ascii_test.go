@@ -7,12 +7,12 @@ import (
 )
 
 const (
-	TEST_STRINGS = "123" + "3.14" + "7410" + "15.3" + "-897" + "99" + "1" + "0" + "sn001"+"666"
+	TEST_STRINGS = "123" + "3.14" + "7410" + "15.3" + "-897" + "99" + "1" + "0" + "sn001" + "666"
 )
 
 type Header struct {
 	TOOL string `start:"1" end:"5"`
-	Sn   int	`start:"6" end:"8"`
+	Sn   int    `start:"6" end:"8"`
 }
 
 type OpenProtocol struct {
@@ -27,8 +27,8 @@ type OpenProtocol struct {
 	TO  Header  `start:"24" end:"31"`
 }
 
-func Test_Ascii(t *testing.T){
-//var he =Header{}
+func Test_Ascii(t *testing.T) {
+	//var he =Header{}
 	var testop = OpenProtocol{}
 	err := ascii.Unmarshal(TEST_STRINGS, &testop)
 	if err != nil {
