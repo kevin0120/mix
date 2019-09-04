@@ -82,6 +82,7 @@ func (s *Service) CreateController(cfg *tightening_device.TighteningDeviceConfig
 
 	protocolConfig := s.config()
 	c := NewController(&protocolConfig, cfg, s.diag)
+	c.Srv = s
 
 	return &c, nil
 }

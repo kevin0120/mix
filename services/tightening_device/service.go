@@ -146,7 +146,7 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 
 		_ = json.Unmarshal(bData, &req)
 
-		_ = ds.UpdateGun(&storage.Guns{
+		_ = ds.UpdateTool(&storage.Guns{
 			Serial: req.ToolSN,
 			Trace:  string(bData),
 		})

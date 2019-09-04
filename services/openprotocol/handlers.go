@@ -21,6 +21,8 @@ func GetMidHandler(mid string) (MidHandler, error) {
 }
 
 var MidHandlers = map[string]MidHandler{
+	MID_9999_ALIVE:                handleMID_9999_ALIVE,
+	MID_0002_START_ACK:            handleMID_0002_START_ACK,
 	MID_0005_CMD_OK:               handleMID_0005_CMD_OK,
 	MID_0004_CMD_ERR:              handleMID_0004_CMD_ERR,
 	MID_7410_LAST_CURVE:           handleMID_7410_LAST_CURVE,
@@ -40,6 +42,25 @@ var MidHandlers = map[string]MidHandler{
 }
 
 type MidHandler func(controller *TighteningController, pkg *handlerPkg) error
+
+func handleMID_9999_ALIVE(c *TighteningController, pkg *handlerPkg) error {
+	return nil
+}
+
+func handleMID_0002_START_ACK(c *TighteningController, pkg *handlerPkg) error {
+	c.ToolInfoReq()
+	c.PSetSubscribe()
+	c.ResultSubcribe()
+	c.CurveSubscribe()
+	c.SelectorSubscribe()
+	c.JobInfoSubscribe()
+	c.IOInputSubscribe()
+	c.MultiSpindleResultSubscribe()
+	c.VinSubscribe()
+	c.AlarmSubcribe()
+
+	return nil
+}
 
 // 处理曲线
 func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {

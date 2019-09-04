@@ -215,7 +215,7 @@ func GeneratePackage(mid string, rev string, noack string, station string, spind
 		Spare:    "",
 	}
 
-	return fmt.Sprintf("%s%s%s", h.Serialize(), data, string(OP_TERMINAL))
+	return h.Serialize() + data + string(OP_TERMINAL)
 }
 
 type IOMonitor struct {

@@ -95,17 +95,6 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 	return c
 }
 
-func (c *TighteningController) Tools() map[string]tightening_device.ITighteningTool {
-	//rt := map[string]string{}
-
-	//toolStatus := c.toolStatus.Load().(string)
-	//for _, v := range c.cfg.Tools {
-	//	rt[v.SerialNO] = toolStatus
-	//}
-
-	return nil
-}
-
 //func (c *TighteningController) UpdateToolStatus(status string) {
 //	s := c.toolStatus.Load().(string)
 //	if s != status {
@@ -357,13 +346,13 @@ func (c *TighteningController) calBatch(workorderID int64) (int, int) {
 
 func (c *TighteningController) Start() error {
 
-	_ = c.Srv.DB.UpdateGun(&storage.Guns{
+	_ = c.Srv.DB.UpdateTool(&storage.Guns{
 		Serial: c.cfg.SN,
 		Mode:   "pset",
 	})
 
 	for _, v := range c.cfg.Tools {
-		_ = c.Srv.DB.UpdateGun(&storage.Guns{
+		_ = c.Srv.DB.UpdateTool(&storage.Guns{
 			Serial: v.SN,
 			Mode:   "pset",
 		})
@@ -420,28 +409,13 @@ func (c *TighteningController) Connect() error {
 	c.handleStatus(controller.STATUS_ONLINE)
 
 	c.startComm()
-	c.ToolInfoReq()
-
-	//c.JobOff("1")
-	c.PSetSubscribe()
-
-	c.ResultSubcribe()
-	c.CurveSubscribe()
-	c.SelectorSubscribe()
-
-	c.JobInfoSubscribe()
-	c.IOInputSubscribe()
-	//c.MultiSpindleResultSubscribe()
-	c.VinSubscribe()
-
-	c.AlarmSubcribe()
 
 	// 启动发送
 	go c.manage()
 
-	go c.SolveOldResults()
-
-	go c.getTighteningCount()
+	//go c.SolveOldResults()
+	//
+	//go c.getTighteningCount()
 
 	return nil
 }
@@ -473,22 +447,22 @@ func (c *TighteningController) ToolInfoReq() error {
 		return err
 	}
 
-	//defer c.Response.remove(MID_0040_TOOL_INFO_REQUEST)
-	//c.Response.Add(MID_0040_TOOL_INFO_REQUEST, nil)
+	defer c.Response.remove(MID_0040_TOOL_INFO_REQUEST)
+	c.Response.Add(MID_0040_TOOL_INFO_REQUEST, nil)
 
 	req := GeneratePackage(MID_0040_TOOL_INFO_REQUEST, rev, "", "", "", "")
 	c.Write([]byte(req))
 
-	//var reply interface{} = nil
-	//
-	//for i := 0; i < MAX_REPLY_COUNT; i++ {
-	//	reply = c.Response.get(MID_0040_TOOL_INFO_REQUEST)
-	//	if reply != nil {
-	//		break
-	//	}
-	//
-	//	time.Sleep(REPLY_TIMEOUT)
-	//}
+	var reply interface{} = nil
+
+	for i := 0; i < MAX_REPLY_COUNT; i++ {
+		reply = c.Response.get(MID_0040_TOOL_INFO_REQUEST)
+		if reply != nil {
+			break
+		}
+
+		time.Sleep(REPLY_TIMEOUT)
+	}
 	//
 	//if reply != nil {
 	//	ti := reply.(ToolInfo)
@@ -584,6 +558,7 @@ func (c *TighteningController) startComm() error {
 }
 
 func (c *TighteningController) Write(buf []byte) {
+	c.diag.Debug(fmt.Sprintf("op write %s: %d %s\n", c.cfg.SN, len(buf), string(buf)))
 	c.buffer <- buf
 }
 
@@ -661,7 +636,7 @@ func (c *TighteningController) Close() error {
 func (c *TighteningController) handlePackageOPPayload(src []byte, data []byte) error {
 	msg := append(src, data...)
 
-	c.diag.Debug(fmt.Sprintf("%s op target buf: %s", c.cfg.SN, string(msg)))
+	//c.diag.Debug(fmt.Sprintf("%s op target buf: %s", c.cfg.SN, string(msg)))
 
 	lenMsg := len(msg)
 
@@ -738,7 +713,7 @@ func (c *TighteningController) manage() {
 				index := bytes.IndexByte(buf[readOffset:], OP_TERMINAL)
 				if index == -1 {
 					// 没有结束字符,放入缓冲等待后续处理
-					c.diag.Debug("Index Is Empty")
+					//c.diag.Debug("Index Is Empty")
 					restBuf := buf[readOffset:]
 					if writeOffset+len(restBuf) > lenBuf {
 						c.diag.Error("full", errors.New("full"))
@@ -1007,11 +982,7 @@ func (c *TighteningController) IOSet(ios *[]IOStatus) error {
 }
 
 func (c *TighteningController) Model() string {
-	return c.model
-}
-
-func (c *TighteningController) SetModel(model string) {
-	c.model = model
+	return c.cfg.Model
 }
 
 func (c *TighteningController) DeviceType() string {
