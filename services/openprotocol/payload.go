@@ -215,7 +215,7 @@ func GeneratePackage(mid string, rev string, noack string, station string, spind
 		Spare:    "",
 	}
 
-	return fmt.Sprintf("%s%s%s", h.Serialize(), data, string(OP_TERMINAL))
+	return h.Serialize() + data + string(OP_TERMINAL)
 }
 
 type IOMonitor struct {
@@ -940,5 +940,5 @@ type CurveBody struct{
 	MeasurePoints int `start:"60"  end:"63"`
 	Num string `start:"66"  end:"67"` //曲线总共分几段
 	Id string   `start:"70"  end:"71"`//当前为第几段
-	Data string   `start:"71"  end:"..."`
+	Data string   `start:"72"  end:"..."`
 }

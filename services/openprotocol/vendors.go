@@ -9,7 +9,7 @@ import (
 // model[mid][rev]
 var VendorModels = map[string]map[string]string{
 	tightening_device.ModelDesoutterCvi3: {
-		MID_0001_START:                   "003",
+		MID_0001_START:                   "004",
 		MID_0018_PSET:                    "001",
 		MID_0014_PSET_SUBSCRIBE:          "001",
 		MID_0034_JOB_INFO_SUBSCRIBE:      "004",
@@ -32,7 +32,7 @@ var VendorModels = map[string]map[string]string{
 		MID_0100_MULTI_SPINDLE_SUBSCRIBE: "001",
 		MID_0051_VIN_SUBSCRIBE:           "002",
 		MID_0070_ALARM_SUBSCRIBE:         "001",
-		MID_0040_TOOL_INFO_REQUEST:       "004",
+		MID_0040_TOOL_INFO_REQUEST:       "002",
 
 		MID_7408_LAST_CURVE_SUBSCRIBE: "001",
 	},

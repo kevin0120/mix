@@ -94,13 +94,35 @@ func (s *Service) config() Config {
 // TODO: case封装成函数
 func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 	var msg wsnotify.WSMsg
-	s.diag.Debug(fmt.Sprintf("OnWSMsg Recv New Message: %# 20X", data))
+	//s.diag.Debug(fmt.Sprintf("OnWSMsg Recv New Message: %# 20X", data))
 	err := json.Unmarshal(data, &msg)
 	if err != nil {
-		s.diag.Error(fmt.Sprintf("OnWSMsg Fail With Message: %# 20X", data), err)
+		//s.diag.Error(fmt.Sprintf("OnWSMsg Fail With Message: %# 20X", data), err)
 		return
 	}
 	switch msg.Type {
+	case WS_TOOL_MODE_SELECT:
+		req := ToolModeSelect{}
+		strData, _ := json.Marshal(msg.Data)
+		_ = json.Unmarshal([]byte(strData), &req)
+		tool, err := s.getTool(req.ControllerSN, req.ToolSN)
+		if err != nil {
+			return
+		}
+
+		err = tool.ModeSelect(req.Mode)
+		msg := wsnotify.WSMsg{
+			Type: msg.Type,
+			SN:   msg.SN,
+			Data: err,
+		}
+		reply, _ := json.Marshal(msg)
+
+		err = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, string(reply))
+		if err != nil {
+			s.diag.Error(fmt.Sprintf("WS_TOOL_ENABLE Send WS_EVENT_REPLY WebSocket Message: %#v Fail", msg), err)
+		}
+
 	case WS_TOOL_ENABLE:
 		req := ToolEnable{}
 		strData, _ := json.Marshal(msg.Data)
@@ -146,7 +168,7 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 
 		_ = json.Unmarshal(bData, &req)
 
-		_ = ds.UpdateGun(&storage.Guns{
+		_ = ds.UpdateTool(&storage.Guns{
 			Serial: req.ToolSN,
 			Trace:  string(bData),
 		})

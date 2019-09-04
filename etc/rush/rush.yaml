@@ -77,10 +77,10 @@ websocket:
   read_buf_size: 10000000
   write_buf_size: 10000000
 storage:
-  db_url: 192.168.127.108:5432
+  db_url: 127.0.0.1:5432
   db_name: rush_hardware
-  db_user: admin
-  db_pwd: admin
+  db_user: odoo
+  db_pwd: odoo
   max_connection: 60
   vacuum_period: 2160h
   data_keep: 2160h
@@ -137,12 +137,15 @@ device:
 tightening_device:
   enable: true
   devices:
-#    - model: MODEL_DESOUTTER_CVI3
-#      protocol: OpenProtocol
-#      endpoint: tcp://192.168.127.101:4545
-#      sn: 0002
-#      tools:
+    - model: ModelDesoutterCvi3
+      protocol: OpenProtocol
+      endpoint: tcp://192.168.3.23:4546
+      sn: 0001
+      tools:
+        - sn: 12B62230
+          channel: 1
 #        - sn: 12B62230
+#          channel: 51
 
 #    - model: MODEL_DESOUTTER_CVI3
 #      protocol: OpenProtocol

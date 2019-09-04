@@ -15,6 +15,7 @@ const (
 	WS_TOOL_PSET        = "WS_TOOL_PSET"
 	WS_TOOL_RESULT      = "WS_TOOL_RESULT"
 	WS_TOOL_ENABLE      = "WS_TOOL_ENABLE"
+	WS_TOOL_MODE_SELECT = "WS_TOOL_MODE_SELECT"
 	WS_TOOL_PSET_LIST   = "WS_TOOL_PSET_LIST"
 	WS_TOOL_PSET_DETAIL = "WS_TOOL_PSET_DETAIL"
 	WS_TOOL_JOB_LIST    = "WS_TOOL_JOB_LIST"
@@ -62,6 +63,12 @@ type ToolEnable struct {
 	ControllerSN string `json:"controller_sn"`
 	ToolSN       string `json:"tool_sn"`
 	Enable       bool   `json:"enable"`
+}
+
+type ToolModeSelect struct {
+	ControllerSN string `json:"controller_sn"`
+	ToolSN       string `json:"tool_sn"`
+	Mode         string `json:"mode"`
 }
 
 type PSetDetail struct {

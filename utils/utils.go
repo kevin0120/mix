@@ -2,9 +2,11 @@ package utils
 
 import (
 	"encoding/base64"
+	"github.com/kataras/iris/core/errors"
 	"github.com/satori/go.uuid"
 	"os"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -66,4 +68,24 @@ func ArrayContains(s []int, e int) bool {
 	}
 
 	return false
+}
+
+func WaitGroupTimeout(wg *sync.WaitGroup, timeout time.Duration) error {
+	if wg == nil {
+		return errors.New("Wait Group Is Nil")
+	}
+
+	wg.Add(1)
+	c := make(chan struct{})
+	go func() {
+		defer close(c)
+		wg.Wait()
+	}()
+
+	select {
+	case <-c:
+		return nil // completed normally
+	case <-time.After(timeout):
+		return errors.New("Timeout") // timed out
+	}
 }

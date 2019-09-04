@@ -149,7 +149,7 @@ func (m *Methods) putPSets(ctx iris.Context) {
 		return
 	}
 
-	m.service.DB.UpdateGun(&storage.Guns{
+	m.service.DB.UpdateTool(&storage.Guns{
 		Serial:      pset.GunSN,
 		WorkorderID: workorder.Id,
 		Seq:         pset.GroupSeq,

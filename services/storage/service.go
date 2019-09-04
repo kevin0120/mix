@@ -247,7 +247,7 @@ func (s *Service) GetGun(serial string) (Guns, error) {
 	}
 }
 
-func (s *Service) UpdateGun(gun *Guns) error {
+func (s *Service) UpdateTool(gun *Guns) error {
 	g, err := s.GetGun(gun.Serial)
 	if err == nil {
 		// update
