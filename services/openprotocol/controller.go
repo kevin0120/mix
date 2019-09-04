@@ -59,9 +59,9 @@ type TighteningController struct {
 	protocol          string
 	inputs            string
 	diag              Diagnostic
-	MID_7410_CURVE    handlerPkg_curve
-	result_CURVE      *minio.ControllerCurve
-	result            *controller.ControllerResult
+	temp_result_CURVE map[int]*minio.ControllerCurve
+	result_CURVE      map[int][]*minio.ControllerCurve
+	result            map[int][]*controller.ControllerResult
 	mtxResult         sync.Mutex
 	model             string
 	receiveBuf        chan []byte
@@ -307,39 +307,48 @@ func (c *TighteningController) handleResult(result_data *ResultData, curve *mini
 	//c.result = &controllerResult
 
 	//c.Srv.Parent.Handlers.Handle(&controllerResult, c.result_CURVE)
-	c.updateResult(&controllerResult, nil)
-	c.handleResultandClear()
+	c.updateResult(&controllerResult, nil,result_data.ChannelID)
+	c.handleResultandClear(result_data.ChannelID)
 
 	return nil
 }
 
-func (c *TighteningController) updateResult(result *controller.ControllerResult, curve *minio.ControllerCurve) {
+func (c *TighteningController) updateResult(result *controller.ControllerResult, curve *minio.ControllerCurve,toolNum int) {
 	defer c.mtxResult.Unlock()
 	c.mtxResult.Lock()
 
+	if _, ok := c.result[toolNum]; !ok {
+		c.result[toolNum]= nil
+	}
+	if _, ok := c.result_CURVE[toolNum]; !ok {
+		c.result_CURVE[toolNum]= nil
+	}
+
+
 	if result != nil {
-		c.result = result
+		c.result[toolNum] = append(c.result[toolNum], result)
 	}
 
 	if curve != nil {
-		c.result_CURVE = curve
+		c.result_CURVE[toolNum] = append(c.result_CURVE[toolNum], curve)
 	}
 }
 
-func (c *TighteningController) handleResultandClear() {
+func (c *TighteningController) handleResultandClear(toolNum int) {
 	defer c.mtxResult.Unlock()
 	c.mtxResult.Lock()
 
-	if c.result != nil && c.result_CURVE != nil {
+	if c.result[toolNum] != nil && c.result_CURVE[toolNum] != nil {
 
-		if c.result_CURVE != nil {
-			c.result_CURVE.CurveContent.Result = c.result.Result
-			c.result_CURVE.CurveFile = fmt.Sprintf("%s-%s.json", c.cfg.SN, c.result.TighteningID)
+		if c.result_CURVE[toolNum] != nil {
+			c.result_CURVE[toolNum][0].CurveContent.Result = c.result[toolNum][0].Result
+			c.result_CURVE[toolNum][0].CurveFile = fmt.Sprintf("%s-%s.json", c.cfg.SN, c.result[toolNum][0].TighteningID)
 		}
 
-		c.Srv.Parent.Handlers.Handle(*c.result, *c.result_CURVE)
-		c.result = nil
-		c.result_CURVE = nil
+		c.Srv.Parent.Handlers.Handle(*c.result[toolNum][0], *c.result_CURVE[toolNum][0])
+
+		c.result[toolNum] = c.result[toolNum][1:]
+		c.result_CURVE[toolNum] = c.result_CURVE[toolNum][1:]
 	}
 }
 

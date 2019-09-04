@@ -21,7 +21,8 @@ func unmarshal(str string, rType reflect.Type, rValue reflect.Value) error {
 	numField := rValue.NumField()
 
 	//变量结构体的所有字段
-
+	start:=0
+	end:=0
 	for i := 0; i < numField; i++ {
 		//fmt.Printf("Field %d: 类型为：%v\n", i, rValue.Field(i).Kind())
 		//获取到struct标签, 注意需要通过reflect.Type来获取tag标签的值
@@ -30,8 +31,12 @@ func unmarshal(str string, rType reflect.Type, rValue reflect.Value) error {
 		//如果该字段是tag标签就显示，否则就不显示
 		//start, _ := strconv.ParseInt(tagVal_start[0:], 10, 32)
 		//end, _ := strconv.ParseInt(tagVal_end[0:], 10, 32)
-		start, _ := strconv.Atoi(tagVal_start[0:])
-		end, _ := strconv.Atoi(tagVal_end[0:])
+		start, _ = strconv.Atoi(tagVal_start[0:])
+		if tagVal_end=="..."{
+			end=len(str)
+		}else {
+			end, _ = strconv.Atoi(tagVal_end[0:])
+		}
 		if end > len(str) {
 			return errors.New("message is unenough")
 		}
@@ -90,7 +95,7 @@ func unmarshal(str string, rType reflect.Type, rValue reflect.Value) error {
 			//chidld:=reflect.ValueOf(rValue.Field(i))
 			unmarshal(str[start-1:end], rType.Field(i).Type, rValue.Field(i))
 		default:
-			return errors.New("expect struct")
+			return errors.New("unexpect type")
 		}
 	}
 
