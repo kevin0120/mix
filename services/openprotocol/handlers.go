@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/masami10/rush/services/ascii"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/wsnotify"
@@ -68,31 +69,43 @@ func handleMID_0002_START_ACK(c *TighteningController, pkg *handlerPkg) error {
 
 // 处理曲线
 func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
-	if c.result_CURVE == nil {
-		c.result_CURVE = &minio.ControllerCurve{}
+//讲收到的曲线先做反序列化处理
+	var curve = CurveBody{}
+	err := ascii.Unmarshal(pkg.Body, &curve)
+	if err != nil {
+		c.diag.Error("ascii.Unmarshal", err)
+	}
+	if curve.ToolNumber ==0 {
+		e := errors.New("收到的结果曲线数据不合法，未指定工具号")
+		c.diag.Error("handleMID_7410_LAST_CURVE", e)
+		return  e
 	}
 
-	torqueCoefficient, _ := strconv.ParseFloat(strings.TrimSpace(pkg.Body[27:41]), 64)
-	angleCoefficient, _ := strconv.ParseFloat(strings.TrimSpace(pkg.Body[43:57]), 64)
-	if pkg.Body[69:71] == "01" {
-		c.MID_7410_CURVE.Header = &pkg.Header
-		c.MID_7410_CURVE.Body = []byte{}
+	//_, ok := c.temp_result_CURVE[curve.ToolNumber]
+	//结果曲线 判断本toolNumber是否收到过数据
+	if _, ok := c.temp_result_CURVE[curve.ToolNumber]; !ok {
+		c.temp_result_CURVE[curve.ToolNumber]=&minio.ControllerCurve{}
 	}
-	c.MID_7410_CURVE.Body = append(c.MID_7410_CURVE.Body, []byte(pkg.Body[71:len(pkg.Body)])...)
-	if pkg.Body[69:71] == pkg.Body[65:67] {
-		Torque, Angle := DataDecoding(c.MID_7410_CURVE.Body, torqueCoefficient, angleCoefficient, c.diag)
+	//收到的数据进行解析并将结果加到临时的切片中，等待整条曲线接收完毕。
+	torqueCoefficient, _ := strconv.ParseFloat(strings.TrimSpace(curve.TorqueString), 64)
+	angleCoefficient, _ := strconv.ParseFloat(strings.TrimSpace(curve.AngleString), 64)
+	Torque, Angle := DataDecoding([]byte(curve.Data), torqueCoefficient, angleCoefficient,c.diag)
 
-		var curve minio.ControllerCurve
-		curve.CurveContent.CUR_M = Torque
-		curve.CurveContent.CUR_W = Angle
+	c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_M = append(c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_M, Torque...)
+	c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_W = append(c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_W, Angle...)
+	//当本次数据为本次拧紧曲线的最后一次数据时
+	if curve.Num == curve.Id {
+		//若取到的点的数量大于协议解析出来该曲线的点数，多出的部分删掉，否则有多少发多少.
+		if curve.MeasurePoints<len(c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_M) {
+			c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_M =c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_M[0:curve.MeasurePoints]
+			c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_W =c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_W[0:curve.MeasurePoints]
+		}
+		c.updateResult(nil, c.temp_result_CURVE[curve.ToolNumber],curve.ToolNumber)
+		c.handleResultandClear(curve.ToolNumber)
 
-		c.MID_7410_CURVE.Header = nil
-		c.MID_7410_CURVE.Body = nil
-
-		c.updateResult(nil, &curve)
-		c.handleResultandClear()
+		//本次曲线全部解析完毕后,降临时存储的数据清空
+		delete(c.temp_result_CURVE, curve.ToolNumber)
 	}
-
 	return nil
 }
 
