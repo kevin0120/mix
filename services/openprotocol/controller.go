@@ -2,6 +2,7 @@ package openprotocol
 
 import (
 	"bytes"
+	"context"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
@@ -26,8 +27,9 @@ const (
 	DAIL_TIMEOUT         = time.Duration(5 * time.Second)
 	MAX_KEEP_ALIVE_CHECK = 3
 
-	REPLY_TIMEOUT   = time.Duration(100 * time.Millisecond)
-	MAX_REPLY_COUNT = 20
+	REPLY_TIMEOUT = time.Duration(100 * time.Millisecond)
+	//MAX_REPLY_COUNT = 20
+	MAX_REPLY_TIME = time.Duration(2000 * time.Millisecond)
 )
 
 type handlerPkg struct {
@@ -488,21 +490,16 @@ func (c *TighteningController) SolveOldResults() {
 		return
 	}
 
-	var lastResult interface{} = nil
-	for i := 0; i < MAX_REPLY_COUNT; i++ {
-		lastResult = c.Response.get(MID_0065_OLD_DATA)
-		if lastResult != nil {
-			break
-		}
+	var reply interface{} = nil
+	ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
+	//当在队列中找到非空数据则返回，否则直到timeout返回nil
+	reply = c.Response.Get(MID_0065_OLD_DATA, ctx)
 
-		time.Sleep(REPLY_TIMEOUT)
-	}
-
-	if lastResult == nil {
+	if reply == nil {
 		return
 	}
 
-	objLastResult := lastResult.(ResultData)
+	objLastResult := reply.(ResultData)
 
 	if objLastResult.TightingID != c.dbController.LastID {
 		startId, _ := strconv.ParseInt(c.dbController.LastID, 10, 64)
@@ -960,14 +957,9 @@ func (c *TighteningController) IOSet(ios *[]IOStatus) error {
 	c.Write([]byte(s_io))
 
 	var reply interface{} = nil
-	for i := 0; i < MAX_REPLY_COUNT; i++ {
-		reply = c.Response.get(MID_0200_CONTROLLER_RELAYS)
-		if reply != nil {
-			break
-		}
-
-		time.Sleep(REPLY_TIMEOUT)
-	}
+	ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
+	//当在队列中找到非空数据则返回，否则直到timeout返回nil
+	reply = c.Response.Get(MID_0200_CONTROLLER_RELAYS, ctx)
 
 	if reply == nil {
 		return errors.New(controller.ERR_CONTROLER_TIMEOUT)
