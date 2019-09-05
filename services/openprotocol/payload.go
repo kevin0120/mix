@@ -336,6 +336,11 @@ type ResultData struct {
 	StageResult          string
 }
 
+// TODO
+func (rd *ResultData) ToTighteningResult() *tightening_device.TighteningResult {
+	return &tightening_device.TighteningResult{}
+}
+
 func (rd *ResultData) DeserializeOld(str string) error {
 	var err error = nil
 

@@ -2,6 +2,7 @@ package openprotocol
 
 import (
 	"bytes"
+	"context"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
@@ -16,7 +17,6 @@ import (
 	"github.com/masami10/rush/utils"
 	"net"
 	"strconv"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -68,6 +68,8 @@ type TighteningController struct {
 	receiveBuf           chan []byte
 	controllerSubscribes []ControllerSubscribe
 
+	dispatches map[string]*utils.Dispatch
+
 	device.BaseDevice
 }
 
@@ -91,18 +93,23 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 		result:            map[int][]*controller.ControllerResult{},
 		result_CURVE:      map[int][]*minio.ControllerCurve{},
 		temp_result_CURVE: map[int]*minio.ControllerCurve{},
+
+		dispatches: map[string]*utils.Dispatch{
+			tightening_device.DISPATCH_RESULT: utils.CreateDispatch(utils.DEFAULT_BUF_LEN),
+			tightening_device.DISPATCH_CURVE:  utils.CreateDispatch(utils.DEFAULT_BUF_LEN),
+		},
 	}
 
 	c.controllerSubscribes = []ControllerSubscribe{
 		//c.PSetSubscribe,
 		c.ResultSubcribe,
-		c.CurveSubscribe,
 		c.SelectorSubscribe,
 		c.JobInfoSubscribe,
 		c.IOInputSubscribe,
 		c.MultiSpindleResultSubscribe,
 		c.VinSubscribe,
 		c.AlarmSubcribe,
+		c.CurveSubscribe,
 	}
 
 	for _, v := range deviceConfig.Tools {
@@ -128,6 +135,16 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 //		//c.Srv.WS.WSSend(wsnotify.WS_EVETN_TOOL, string(str))
 //	}
 //}
+
+func (c *TighteningController) findToolSNByChannel(channel int) (string, error) {
+	for _, v := range c.cfg.Tools {
+		if v.Channel == channel {
+			return v.SN, nil
+		}
+	}
+
+	return "", errors.New("Tool Not Found")
+}
 
 func (c *TighteningController) LoadController(controller *storage.Controllers) {
 	c.dbController = controller
@@ -168,19 +185,20 @@ func (c *TighteningController) ProcessRequest(mid string, noack string, station 
 		return nil, errors.New(device.STATUS_OFFLINE)
 	}
 
-	wg := sync.WaitGroup{}
-	c.Response.Add(mid, &wg)
+	ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
+	c.Response.Add(mid, ctx)
 	defer c.Response.remove(mid)
 
 	pkg := GeneratePackage(mid, rev, noack, station, spindle, data)
 
 	c.Write([]byte(pkg))
+	reply := c.Response.Get(mid, ctx)
 
-	if utils.WaitGroupTimeout(&wg, MAX_REPLY_TIME) != nil {
+	if reply == nil {
 		return nil, errors.New(controller.ERR_CONTROLER_TIMEOUT)
 	}
 
-	return c.Response.get(mid), nil
+	return reply, nil
 }
 
 func DataDecoding(original []byte, torqueCoefficient float64, angleCoefficient float64, d Diagnostic) (Torque []float64, Angle []float64) {
@@ -253,80 +271,80 @@ func (c *TighteningController) HandleMsg(pkg *handlerPkg) error {
 
 func (c *TighteningController) handleResult(result_data *ResultData, curve *minio.ControllerCurve) error {
 
-	if utils.ArrayContains(c.Srv.config().SkipJobs, result_data.JobID) {
-		return nil
-	}
-
-	if c.dbController != nil {
-		c.Srv.DB.UpdateTightning(c.dbController.Id, result_data.TightingID)
-	}
-
-	controllerResult := controller.ControllerResult{}
-	controllerResult.NeedPushHmi = true
-
-	if c.Model() == tightening_device.ModelDesoutterDeltaWrench {
-		controllerResult.GunSN = c.cfg.SN
-	} else {
-		controllerResult.GunSN = result_data.ToolSerialNumber
-	}
-
-	gun, err := c.Srv.DB.GetGun(controllerResult.GunSN)
-	if err != nil {
-		c.Srv.diag.Error("get gun failed", err)
-		return err
-	}
-
-	psetTrace := tightening_device.PSetSet{}
-	_ = json.Unmarshal([]byte(gun.Trace), &psetTrace)
-
-	controllerResult.TighteningID = result_data.TightingID
-	controllerResult.Count = psetTrace.Count
-	controllerResult.Batch = fmt.Sprintf("%d/%d", psetTrace.Sequence, psetTrace.Total)
-
-	dat_kvs := strings.Split(result_data.TimeStamp, ":")
-	controllerResult.Dat = fmt.Sprintf("%s %s:%s:%s", dat_kvs[0], dat_kvs[1], dat_kvs[2], dat_kvs[3])
-
-	controllerResult.PSet = result_data.PSetID
-	controllerResult.Controller_SN = c.cfg.SN
-	if result_data.TighteningStatus == "0" {
-		controllerResult.Result = storage.RESULT_NOK
-	} else {
-		controllerResult.Result = storage.RESULT_OK
-	}
-
-	controllerResult.ResultValue.Mi = result_data.Torque / 100
-	controllerResult.ResultValue.Wi = result_data.Angle
-	//controllerResult.ResultValue.Ti = result_data.
-
-	switch result_data.Strategy {
-	case "01":
-		controllerResult.PSetDefine.Strategy = controller.STRATEGY_AW
-
-	case "02":
-		controllerResult.PSetDefine.Strategy = controller.STRATEGY_AW
-
-	case "03":
-		controllerResult.PSetDefine.Strategy = controller.STRATEGY_ADW
-
-	case "04":
-		controllerResult.PSetDefine.Strategy = controller.STRATEGY_AD
-	}
-
-	if result_data.ResultType == "02" {
-		controllerResult.Result = storage.RESULT_LSN
-		controllerResult.NeedPushHmi = true
-		controllerResult.PSetDefine.Strategy = controller.STRATEGY_LN
-	}
-
-	controllerResult.PSetDefine.Mp = result_data.TorqueMax / 100
-	controllerResult.PSetDefine.Mm = result_data.TorqueMin / 100
-	controllerResult.PSetDefine.Ma = result_data.TorqueFinalTarget / 100
-
-	controllerResult.PSetDefine.Wp = result_data.AngleMax
-	controllerResult.PSetDefine.Wm = result_data.AngleMin
-	controllerResult.PSetDefine.Wa = result_data.FinalAngleTarget
-
-	controllerResult.ExceptionReason = result_data.TighteningErrorStatus
+	//if utils.ArrayContains(c.Srv.config().SkipJobs, result_data.JobID) {
+	//	return nil
+	//}
+	//
+	//if c.dbController != nil {
+	//	c.Srv.DB.UpdateTightning(c.dbController.Id, result_data.TightingID)
+	//}
+	//
+	//controllerResult := controller.ControllerResult{}
+	//controllerResult.NeedPushHmi = true
+	//
+	//if c.Model() == tightening_device.ModelDesoutterDeltaWrench {
+	//	controllerResult.GunSN = c.cfg.SN
+	//} else {
+	//	controllerResult.GunSN = result_data.ToolSerialNumber
+	//}
+	//
+	//gun, err := c.Srv.DB.GetGun(controllerResult.GunSN)
+	//if err != nil {
+	//	c.Srv.diag.Error("get gun failed", err)
+	//	return err
+	//}
+	//
+	//psetTrace := tightening_device.PSetSet{}
+	//_ = json.Unmarshal([]byte(gun.Trace), &psetTrace)
+	//
+	//controllerResult.TighteningID = result_data.TightingID
+	//controllerResult.Count = psetTrace.Count
+	//controllerResult.Batch = fmt.Sprintf("%d/%d", psetTrace.Sequence, psetTrace.Total)
+	//
+	//dat_kvs := strings.Split(result_data.TimeStamp, ":")
+	//controllerResult.Dat = fmt.Sprintf("%s %s:%s:%s", dat_kvs[0], dat_kvs[1], dat_kvs[2], dat_kvs[3])
+	//
+	//controllerResult.PSet = result_data.PSetID
+	//controllerResult.Controller_SN = c.cfg.SN
+	//if result_data.TighteningStatus == "0" {
+	//	controllerResult.Result = storage.RESULT_NOK
+	//} else {
+	//	controllerResult.Result = storage.RESULT_OK
+	//}
+	//
+	//controllerResult.ResultValue.Mi = result_data.Torque / 100
+	//controllerResult.ResultValue.Wi = result_data.Angle
+	////controllerResult.ResultValue.Ti = result_data.
+	//
+	//switch result_data.Strategy {
+	//case "01":
+	//	controllerResult.PSetDefine.Strategy = controller.STRATEGY_AW
+	//
+	//case "02":
+	//	controllerResult.PSetDefine.Strategy = controller.STRATEGY_AW
+	//
+	//case "03":
+	//	controllerResult.PSetDefine.Strategy = controller.STRATEGY_ADW
+	//
+	//case "04":
+	//	controllerResult.PSetDefine.Strategy = controller.STRATEGY_AD
+	//}
+	//
+	//if result_data.ResultType == "02" {
+	//	controllerResult.Result = storage.RESULT_LSN
+	//	controllerResult.NeedPushHmi = true
+	//	controllerResult.PSetDefine.Strategy = controller.STRATEGY_LN
+	//}
+	//
+	//controllerResult.PSetDefine.Mp = result_data.TorqueMax / 100
+	//controllerResult.PSetDefine.Mm = result_data.TorqueMin / 100
+	//controllerResult.PSetDefine.Ma = result_data.TorqueFinalTarget / 100
+	//
+	//controllerResult.PSetDefine.Wp = result_data.AngleMax
+	//controllerResult.PSetDefine.Wm = result_data.AngleMin
+	//controllerResult.PSetDefine.Wa = result_data.FinalAngleTarget
+	//
+	//controllerResult.ExceptionReason = result_data.TighteningErrorStatus
 
 	//targetID := result_data.VIN
 	//switch c.Srv.config().DataIndex {
@@ -338,16 +356,28 @@ func (c *TighteningController) handleResult(result_data *ResultData, curve *mini
 	//	targetID = result_data.ID4
 	//}
 
-	controllerResult.Workorder_ID = psetTrace.WorkorderID
-	controllerResult.NeedPushAiis = true
+	//controllerResult.Workorder_ID = psetTrace.WorkorderID
+	//controllerResult.NeedPushAiis = true
 
 	//controllerResult.Seq, controllerResult.Count = c.calBatch(controllerResult.Workorder_ID)
 
 	//c.result = &controllerResult
 
 	//c.Srv.Parent.Handlers.Handle(&controllerResult, c.result_CURVE)
-	c.updateResult(&controllerResult, nil, result_data.ChannelID)
-	c.handleResultandClear(result_data.ChannelID)
+
+	//c.updateResult(&controllerResult, nil, result_data.ChannelID)
+	//	c.handleResultandClear(result_data.ChannelID)
+
+	tighteningResult := result_data.ToTighteningResult()
+	toolSN, err := c.findToolSNByChannel(result_data.ChannelID)
+	if err != nil {
+		return err
+	}
+
+	tighteningResult.ToolSN = toolSN
+
+	// 分发结果
+	c.dispatches[tightening_device.DISPATCH_RESULT].Dispatch(tighteningResult)
 
 	return nil
 }
@@ -404,18 +434,20 @@ func (c *TighteningController) calBatch(workorderID int64) (int, int) {
 	}
 }
 
+func (c *TighteningController) RegistDispatch(dispatchType string, dispatcher utils.DispatchHandler) {
+	c.dispatches[dispatchType].Regist(dispatcher)
+}
+
 func (c *TighteningController) Start() error {
-
-	_ = c.Srv.DB.UpdateTool(&storage.Guns{
-		Serial: c.cfg.SN,
-		Mode:   "pset",
-	})
-
 	for _, v := range c.cfg.Tools {
 		_ = c.Srv.DB.UpdateTool(&storage.Guns{
 			Serial: v.SN,
 			Mode:   "pset",
 		})
+	}
+
+	for _, dispatch := range c.dispatches {
+		dispatch.Start()
 	}
 
 	c.w = socket_writer.NewSocketWriter(c.cfg.Endpoint, c)
@@ -428,6 +460,10 @@ func (c *TighteningController) Start() error {
 }
 
 func (c *TighteningController) Stop() error {
+	for _, dispatch := range c.dispatches {
+		dispatch.Release()
+	}
+
 	return nil
 }
 
@@ -619,7 +655,6 @@ func (c *TighteningController) handleStatus(status string) {
 
 	if status != c.Status() {
 
-		fmt.Println(status)
 		c.UpdateStatus(status)
 
 		if status == device.STATUS_OFFLINE {

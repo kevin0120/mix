@@ -1,6 +1,7 @@
 package openprotocol
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,7 +11,6 @@ import (
 	"github.com/masami10/rush/services/wsnotify"
 	"strconv"
 	"strings"
-	"sync"
 )
 
 func GetMidHandler(mid string) (MidHandler, error) {
@@ -50,13 +50,12 @@ func handleMID_9999_ALIVE(c *TighteningController, pkg *handlerPkg) error {
 }
 
 func handleMID_0002_START_ACK(c *TighteningController, pkg *handlerPkg) error {
-	wg := c.Response.get(MID_0001_START)
-	if wg == nil {
-		return errors.New("WaitGroup Is Nil")
+	ctx := c.Response.get(MID_0001_START)
+	if ctx == nil {
+		return errors.New("Context Is Nil")
 	}
 
-	defer wg.(*sync.WaitGroup).Done()
-
+	defer ctx.(context.Context).Done()
 	c.Response.update(MID_0001_START, request_errors["00"])
 
 	// TODO
@@ -100,11 +99,11 @@ func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
 			c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_M = c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_M[0:curve.MeasurePoints]
 			c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_W = c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_W[0:curve.MeasurePoints]
 		}
-		c.updateResult(nil, c.temp_result_CURVE[curve.ToolNumber], curve.ToolNumber)
-		c.handleResultandClear(curve.ToolNumber)
+		//c.updateResult(nil, c.temp_result_CURVE[curve.ToolNumber], curve.ToolNumber)
+		//c.handleResultandClear(curve.ToolNumber)
 
 		//本次曲线全部解析完毕后,降临时存储的数据清空
-		delete(c.temp_result_CURVE, curve.ToolNumber)
+		//delete(c.temp_result_CURVE, curve.ToolNumber)
 	}
 	return nil
 }
@@ -207,12 +206,12 @@ func handleMID_0004_CMD_ERR(c *TighteningController, pkg *handlerPkg) error {
 	mid := pkg.Body[0:4]
 	errCode := pkg.Body[4:6]
 
-	wg := c.Response.get(mid)
-	if wg == nil {
-		return errors.New("WaitGroup Is Nil")
+	ctx := c.Response.get(mid)
+	if ctx == nil {
+		return errors.New("Context Is Nil")
 	}
 
-	defer wg.(*sync.WaitGroup).Done()
+	defer ctx.(context.Context).Done()
 
 	c.Response.update(mid, request_errors[errCode])
 
@@ -221,12 +220,12 @@ func handleMID_0004_CMD_ERR(c *TighteningController, pkg *handlerPkg) error {
 
 // 请求成功
 func handleMID_0005_CMD_OK(c *TighteningController, pkg *handlerPkg) error {
-	wg := c.Response.get(pkg.Body)
-	if wg == nil {
-		return errors.New("WaitGroup Is Nil")
+	ctx := c.Response.get(pkg.Body)
+	if ctx == nil {
+		return errors.New("Context Is Nil")
 	}
 
-	defer wg.(*sync.WaitGroup).Done()
+	defer ctx.(context.Context).Done()
 
 	c.Response.update(pkg.Body, request_errors["00"])
 

@@ -1,5 +1,12 @@
 package tightening_device
 
+import "time"
+
+const (
+	DISPATCH_RESULT = "DISPATCH_RESULT"
+	DISPATCH_CURVE  = "DISPATCH_CURVE"
+)
+
 // type
 const (
 	TIGHTENING_DEVICE_TYPE_CONTROLLER = "controller"
@@ -28,47 +35,83 @@ type ControllerOutput struct {
 }
 
 type TighteningResult struct {
+	// 控制器序列号
+	ControllerSN string `json:"controller_sn"`
+
+	// 工具序列号
+	ToolSN string `json:"tool_sn"`
+
+	// 收到时间
+	UpdateTime time.Time `json:"update_time"`
+
+	// job号
+	Job int `json:"job"`
+
+	// pset号
+	PSet int `json:"pset"`
+
+	// 批次信息
+	Batch string `json:"batch"`
+
+	// 当前拧紧次数
+	Count int `json:"count"`
+
+	// 拧紧ID
+	TighteningID string `json:"tightening_id"`
+
+	// 实际结果
+	MeasureResult string `json:"measure_result"`
+
+	// 实际扭矩
+	MeasureTorque float64 `json:"measure_torque"`
+
+	// 实际角度
+	MeasureAngle float64 `json:"measure_angle"`
+
+	// 实际耗时
+	MeasureTime float64 `json:"measure_time"`
+
+	// 拧紧策略
+	Strategy string `json:"strategy"`
+
+	// 最大扭矩
+	TorqueMax float64 `json:"torque_max"`
+
+	// 最小扭矩
+	TorqueMin float64 `json:"torque_min-"`
+
+	// 扭矩阈值
+	TorqueThreshold float64 `json:"torque_threshold"`
+
+	// 目标扭矩
+	TorqueTarget float64 `json:"torque_target"`
+
+	// 最大角度
+	AngleMax float64 `json:"angle_max"`
+
+	// 最小角度
+	AngleMin float64 `json:"angle_min"`
+
+	// 目标角度
+	AngleTarget float64 `json:"angle_target"`
 }
 
 type TighteningCurve struct {
-}
+	// 工具序列号
+	ToolSN string `json:"tool_sn"`
 
-// api接口
-type Reply struct {
-	Result int    `json:"result"`
-	Msg    string `json:"msg"`
-}
+	// 拧紧ID
+	TighteningID string `json:"tightening_id"`
 
-type JobSet struct {
-	ControllerSN string `json:"controller_sn"`
-	ToolSN       string `json:"tool_sn"`
-	StepID       int    `json:"step_id"`
-	Job          int    `json:"job"`
-	UserID       uint   `json:"user_id"`
-}
+	// 收到时间
+	UpdateTime time.Time `json:"update_time"`
 
-type PSetSet struct {
-	ControllerSN string `json:"controller_sn"`
-	ToolSN       string `json:"tool_sn"`
-	StepID       int64  `json:"step_id"`
-	WorkorderID  int64  `json:"workorder_id"`
-	UserID       int64  `json:"user_id"`
-	PSet         int    `json:"pset"`
-	Sequence     uint   `json:"sequence"`
-	Count        int    `json:"count"`
-	Total        int    `json:"total"`
-}
+	// 实际拧紧结果(ok/nok)
+	Result string `json:"result"`
 
-type ToolEnable struct {
-	ControllerSN string `json:"controller_sn"`
-	ToolSN       string `json:"tool_sn"`
-	Enable       bool   `json:"enable"`
-}
-
-type ToolModeSelect struct {
-	ControllerSN string `json:"controller_sn"`
-	ToolSN       string `json:"tool_sn"`
-	Mode         string `json:"mode"`
+	CUR_M []float64 `json:"cur_m"`
+	CUR_W []float64 `json:"cur_w"`
+	CUR_T []float64 `json:"cur_t"`
 }
 
 type PSetDetail struct {

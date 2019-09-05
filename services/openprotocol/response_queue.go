@@ -1,7 +1,10 @@
 package openprotocol
 
 import (
+	"context"
+	"reflect"
 	"sync"
+	"time"
 )
 
 type ResponseQueue struct {
@@ -43,4 +46,28 @@ func (q *ResponseQueue) get(mid string) interface{} {
 	} else {
 		return nil
 	}
+}
+
+func (q *ResponseQueue) Get(mid string, ctx context.Context) interface{} {
+	ch := make(chan interface{})
+
+	go func() {
+		for {
+			in := q.get(mid)
+			if in != nil && reflect.TypeOf(in) != reflect.TypeOf(ctx) {
+				ch <- in
+				break
+			}
+
+			time.Sleep(REPLY_TIMEOUT)
+		}
+	}()
+
+	select {
+	case resp := <-ch:
+		return resp
+	case <-ctx.Done():
+		return nil
+	}
+
 }
