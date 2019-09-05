@@ -60,9 +60,9 @@ type TighteningController struct {
 	protocol             string
 	inputs               string
 	diag                 Diagnostic
-	temp_result_CURVE map[int]*minio.ControllerCurve
-	result_CURVE      map[int][]*minio.ControllerCurve
-	result            map[int][]*controller.ControllerResult
+	temp_result_CURVE    map[int]*minio.ControllerCurve
+	result_CURVE         map[int][]*minio.ControllerCurve
+	result               map[int][]*controller.ControllerResult
 	mtxResult            sync.Mutex
 	model                string
 	receiveBuf           chan []byte
@@ -88,7 +88,7 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 		receiveBuf:        make(chan []byte, 65535),
 		cfg:               deviceConfig,
 		BaseDevice:        device.CreateBaseDevice(),
-		result :           map[int][]*controller.ControllerResult{},
+		result:            map[int][]*controller.ControllerResult{},
 		result_CURVE:      map[int][]*minio.ControllerCurve{},
 		temp_result_CURVE: map[int]*minio.ControllerCurve{},
 	}
@@ -346,24 +346,22 @@ func (c *TighteningController) handleResult(result_data *ResultData, curve *mini
 	//c.result = &controllerResult
 
 	//c.Srv.Parent.Handlers.Handle(&controllerResult, c.result_CURVE)
-	c.updateResult(&controllerResult, nil,result_data.ChannelID)
+	c.updateResult(&controllerResult, nil, result_data.ChannelID)
 	c.handleResultandClear(result_data.ChannelID)
 
 	return nil
 }
 
-func (c *TighteningController) updateResult(result *controller.ControllerResult, curve *minio.ControllerCurve,toolNum int) {
+func (c *TighteningController) updateResult(result *controller.ControllerResult, curve *minio.ControllerCurve, toolNum int) {
 	defer c.mtxResult.Unlock()
 	c.mtxResult.Lock()
 
-
 	if _, ok := c.result[toolNum]; !ok {
-		c.result[toolNum]= nil
+		c.result[toolNum] = nil
 	}
 	if _, ok := c.result_CURVE[toolNum]; !ok {
-		c.result_CURVE[toolNum]= nil
+		c.result_CURVE[toolNum] = nil
 	}
-
 
 	if result != nil {
 		c.result[toolNum] = append(c.result[toolNum], result)

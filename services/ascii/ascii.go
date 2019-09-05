@@ -20,7 +20,7 @@ func unmarshal(str string, rType reflect.Type, rValue reflect.Value) error {
 	numField := rValue.NumField()
 
 	//变量结构体的所有字段
-	var start =1
+	var start = 1
 	var end int
 	for i := 0; i < numField; i++ {
 		//fmt.Printf("Field %d: 类型为：%v\n", i, rValue.Field(i).Kind())
@@ -30,13 +30,13 @@ func unmarshal(str string, rType reflect.Type, rValue reflect.Value) error {
 		//如果该字段是tag标签就显示，否则就不显示
 		//start, _ := strconv.ParseInt(tagValStart[0:], 10, 32)
 		//end, _ := strconv.ParseInt(tagValEnd[0:], 10, 32)
-		if tagValStart !=""{
+		if tagValStart != "" {
 			start, _ = strconv.Atoi(tagValStart[0:])
 		}
 
-		if tagValEnd =="..."|| tagValEnd ==""{
-			end=len(str)
-		}else {
+		if tagValEnd == "..." || tagValEnd == "" {
+			end = len(str)
+		} else {
 			end, _ = strconv.Atoi(tagValEnd[0:])
 		}
 
@@ -44,7 +44,7 @@ func unmarshal(str string, rType reflect.Type, rValue reflect.Value) error {
 			return errors.New("message is not enough")
 		}
 
-		if start > end || start==0 || end==0 {
+		if start > end || start == 0 || end == 0 {
 			return errors.New("the tag is wrong")
 		}
 		//fmt.Printf("Field %d: tag为start：%v--end：%v\n", i, start, end)
@@ -103,6 +103,9 @@ func unmarshal(str string, rType reflect.Type, rValue reflect.Value) error {
 			unmarshal(str[start-1:end], rType.Field(i).Type, rValue.Field(i))
 		default:
 			return errors.New("unexpect type")
+		}
+		if i == numField-1 && end != len(str) {
+			return errors.New("strings input is much longer than struct defined")
 		}
 	}
 
