@@ -1,8 +1,8 @@
 package openprotocol
 
 import (
-	"fmt"
 	"github.com/masami10/rush/services/ascii"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -24,16 +24,32 @@ type OpenProtocol struct {
 	Faa uint    `start:"20" end:"21"`
 	B   bool    `start:"22" end:"22"`
 	C   bool    `start:"23" end:"23"`
-	TO  Header  `start:"24" end:"25"`
+	TO  Header  `start:"24" end:"..."`
 }
 
 func Test_Ascii(t *testing.T) {
 	//var he =Header{}
-	var testop = OpenProtocol{}
+	var assertdata = OpenProtocol{
+		L:   123,
+		LEN: 3.14,
+		MID: "7410",
+		MD:  15.3,
+		M:   -897,
+		Faa: 99,
+		B:   true,
+		C:   false,
+		TO: Header{
+			TOOL: "sn001",
+			Sn:   666,
+		},
+	}
+	var testop OpenProtocol
 	err := ascii.Unmarshal(TEST_STRINGS, &testop)
-	fmt.Printf("%+v\n", testop)
-
-	if err != nil {
-		fmt.Println(err)
+	assert.Nil(t, err)
+	//fmt.Printf("%+v\n", testop)
+	if assert.NotNil(t, testop) {
+		// now we know that object isn't nil, we are safe to make
+		// further assertions without causing any errors
+		assert.Equal(t, assertdata, testop)
 	}
 }
