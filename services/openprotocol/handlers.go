@@ -1,6 +1,7 @@
 package openprotocol
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,7 +11,6 @@ import (
 	"github.com/masami10/rush/services/wsnotify"
 	"strconv"
 	"strings"
-	"sync"
 )
 
 func GetMidHandler(mid string) (MidHandler, error) {
@@ -50,13 +50,12 @@ func handleMID_9999_ALIVE(c *TighteningController, pkg *handlerPkg) error {
 }
 
 func handleMID_0002_START_ACK(c *TighteningController, pkg *handlerPkg) error {
-	wg := c.Response.get(MID_0001_START)
-	if wg == nil {
-		return errors.New("WaitGroup Is Nil")
+	ctx := c.Response.get(MID_0001_START)
+	if ctx == nil {
+		return errors.New("Context Is Nil")
 	}
 
-	defer wg.(*sync.WaitGroup).Done()
-
+	defer ctx.(context.Context).Done()
 	c.Response.update(MID_0001_START, request_errors["00"])
 
 	// TODO
@@ -69,38 +68,38 @@ func handleMID_0002_START_ACK(c *TighteningController, pkg *handlerPkg) error {
 
 // 处理曲线
 func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
-//讲收到的曲线先做反序列化处理
+	//讲收到的曲线先做反序列化处理
 	var curve = CurveBody{}
 	err := ascii.Unmarshal(pkg.Body, &curve)
 	if err != nil {
 		c.diag.Error("ascii.Unmarshal", err)
 	}
-	if curve.ToolNumber ==0 {
+	if curve.ToolNumber == 0 {
 		e := errors.New("收到的结果曲线数据不合法，未指定工具号")
 		c.diag.Error("handleMID_7410_LAST_CURVE", e)
-		return  e
+		return e
 	}
 
 	//_, ok := c.temp_result_CURVE[curve.ToolNumber]
 	//结果曲线 判断本toolNumber是否收到过数据
 	if _, ok := c.temp_result_CURVE[curve.ToolNumber]; !ok {
-		c.temp_result_CURVE[curve.ToolNumber]=&minio.ControllerCurve{}
+		c.temp_result_CURVE[curve.ToolNumber] = &minio.ControllerCurve{}
 	}
 	//收到的数据进行解析并将结果加到临时的切片中，等待整条曲线接收完毕。
 	torqueCoefficient, _ := strconv.ParseFloat(strings.TrimSpace(curve.TorqueString), 64)
 	angleCoefficient, _ := strconv.ParseFloat(strings.TrimSpace(curve.AngleString), 64)
-	Torque, Angle := DataDecoding([]byte(curve.Data), torqueCoefficient, angleCoefficient,c.diag)
+	Torque, Angle := DataDecoding([]byte(curve.Data), torqueCoefficient, angleCoefficient, c.diag)
 
 	c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_M = append(c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_M, Torque...)
 	c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_W = append(c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_W, Angle...)
 	//当本次数据为本次拧紧曲线的最后一次数据时
 	if curve.Num == curve.Id {
 		//若取到的点的数量大于协议解析出来该曲线的点数，多出的部分删掉，否则有多少发多少.
-		if curve.MeasurePoints<len(c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_M) {
-			c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_M =c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_M[0:curve.MeasurePoints]
-			c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_W =c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_W[0:curve.MeasurePoints]
+		if curve.MeasurePoints < len(c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_M) {
+			c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_M = c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_M[0:curve.MeasurePoints]
+			c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_W = c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_W[0:curve.MeasurePoints]
 		}
-		c.updateResult(nil, c.temp_result_CURVE[curve.ToolNumber],curve.ToolNumber)
+		c.updateResult(nil, c.temp_result_CURVE[curve.ToolNumber], curve.ToolNumber)
 		c.handleResultandClear(curve.ToolNumber)
 
 		//本次曲线全部解析完毕后,降临时存储的数据清空
@@ -207,12 +206,12 @@ func handleMID_0004_CMD_ERR(c *TighteningController, pkg *handlerPkg) error {
 	mid := pkg.Body[0:4]
 	errCode := pkg.Body[4:6]
 
-	wg := c.Response.get(mid)
-	if wg == nil {
-		return errors.New("WaitGroup Is Nil")
+	ctx := c.Response.get(mid)
+	if ctx == nil {
+		return errors.New("Context Is Nil")
 	}
 
-	defer wg.(*sync.WaitGroup).Done()
+	defer ctx.(context.Context).Done()
 
 	c.Response.update(mid, request_errors[errCode])
 
@@ -221,12 +220,12 @@ func handleMID_0004_CMD_ERR(c *TighteningController, pkg *handlerPkg) error {
 
 // 请求成功
 func handleMID_0005_CMD_OK(c *TighteningController, pkg *handlerPkg) error {
-	wg := c.Response.get(pkg.Body)
-	if wg == nil {
-		return errors.New("WaitGroup Is Nil")
+	ctx := c.Response.get(pkg.Body)
+	if ctx == nil {
+		return errors.New("Context Is Nil")
 	}
 
-	defer wg.(*sync.WaitGroup).Done()
+	defer ctx.(context.Context).Done()
 
 	c.Response.update(pkg.Body, request_errors["00"])
 

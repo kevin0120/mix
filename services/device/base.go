@@ -23,7 +23,6 @@ type BaseDevice struct {
 }
 
 func (s *BaseDevice) UpdateStatus(status string) {
-	//fmt.Println(status)
 	s.status.Store(status)
 }
 

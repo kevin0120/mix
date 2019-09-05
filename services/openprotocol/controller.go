@@ -2,6 +2,7 @@ package openprotocol
 
 import (
 	"bytes"
+	"context"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
@@ -60,13 +61,15 @@ type TighteningController struct {
 	protocol             string
 	inputs               string
 	diag                 Diagnostic
-	temp_result_CURVE map[int]*minio.ControllerCurve
-	result_CURVE      map[int][]*minio.ControllerCurve
-	result            map[int][]*controller.ControllerResult
+	temp_result_CURVE    map[int]*minio.ControllerCurve
+	result_CURVE         map[int][]*minio.ControllerCurve
+	result               map[int][]*controller.ControllerResult
 	mtxResult            sync.Mutex
 	model                string
 	receiveBuf           chan []byte
 	controllerSubscribes []ControllerSubscribe
+
+	dispatches map[string]*utils.Dispatch
 
 	device.BaseDevice
 }
@@ -88,21 +91,26 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 		receiveBuf:        make(chan []byte, 65535),
 		cfg:               deviceConfig,
 		BaseDevice:        device.CreateBaseDevice(),
-		result :           map[int][]*controller.ControllerResult{},
+		result:            map[int][]*controller.ControllerResult{},
 		result_CURVE:      map[int][]*minio.ControllerCurve{},
 		temp_result_CURVE: map[int]*minio.ControllerCurve{},
+
+		dispatches: map[string]*utils.Dispatch{
+			tightening_device.DISPATCH_RESULT: utils.CreateDispatch(utils.DEFAULT_BUF_LEN),
+			tightening_device.DISPATCH_CURVE:  utils.CreateDispatch(utils.DEFAULT_BUF_LEN),
+		},
 	}
 
 	c.controllerSubscribes = []ControllerSubscribe{
 		//c.PSetSubscribe,
 		c.ResultSubcribe,
-		c.CurveSubscribe,
 		c.SelectorSubscribe,
 		c.JobInfoSubscribe,
 		c.IOInputSubscribe,
 		c.MultiSpindleResultSubscribe,
 		c.VinSubscribe,
 		c.AlarmSubcribe,
+		c.CurveSubscribe,
 	}
 
 	for _, v := range deviceConfig.Tools {
@@ -168,19 +176,20 @@ func (c *TighteningController) ProcessRequest(mid string, noack string, station 
 		return nil, errors.New(device.STATUS_OFFLINE)
 	}
 
-	wg := sync.WaitGroup{}
-	c.Response.Add(mid, &wg)
+	ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
+	c.Response.Add(mid, ctx)
 	defer c.Response.remove(mid)
 
 	pkg := GeneratePackage(mid, rev, noack, station, spindle, data)
 
 	c.Write([]byte(pkg))
+	reply := c.Response.Get(mid, ctx)
 
-	if utils.WaitGroupTimeout(&wg, MAX_REPLY_TIME) != nil {
+	if reply == nil {
 		return nil, errors.New(controller.ERR_CONTROLER_TIMEOUT)
 	}
 
-	return c.Response.get(mid), nil
+	return reply, nil
 }
 
 func DataDecoding(original []byte, torqueCoefficient float64, angleCoefficient float64, d Diagnostic) (Torque []float64, Angle []float64) {
@@ -346,24 +355,25 @@ func (c *TighteningController) handleResult(result_data *ResultData, curve *mini
 	//c.result = &controllerResult
 
 	//c.Srv.Parent.Handlers.Handle(&controllerResult, c.result_CURVE)
-	c.updateResult(&controllerResult, nil,result_data.ChannelID)
-	c.handleResultandClear(result_data.ChannelID)
+
+	//c.updateResult(&controllerResult, nil, result_data.ChannelID)
+	//	c.handleResultandClear(result_data.ChannelID)
+
+	c.dispatches[tightening_device.DISPATCH_RESULT].Dispatch(&controllerResult)
 
 	return nil
 }
 
-func (c *TighteningController) updateResult(result *controller.ControllerResult, curve *minio.ControllerCurve,toolNum int) {
+func (c *TighteningController) updateResult(result *controller.ControllerResult, curve *minio.ControllerCurve, toolNum int) {
 	defer c.mtxResult.Unlock()
 	c.mtxResult.Lock()
 
-
 	if _, ok := c.result[toolNum]; !ok {
-		c.result[toolNum]= nil
+		c.result[toolNum] = nil
 	}
 	if _, ok := c.result_CURVE[toolNum]; !ok {
-		c.result_CURVE[toolNum]= nil
+		c.result_CURVE[toolNum] = nil
 	}
-
 
 	if result != nil {
 		c.result[toolNum] = append(c.result[toolNum], result)
@@ -406,18 +416,20 @@ func (c *TighteningController) calBatch(workorderID int64) (int, int) {
 	}
 }
 
+func (c *TighteningController) RegistDispatch(dispatchType string, dispatcher utils.DispatchHandler) {
+	c.dispatches[dispatchType].Regist(dispatcher)
+}
+
 func (c *TighteningController) Start() error {
-
-	_ = c.Srv.DB.UpdateTool(&storage.Guns{
-		Serial: c.cfg.SN,
-		Mode:   "pset",
-	})
-
 	for _, v := range c.cfg.Tools {
 		_ = c.Srv.DB.UpdateTool(&storage.Guns{
 			Serial: v.SN,
 			Mode:   "pset",
 		})
+	}
+
+	for _, dispatch := range c.dispatches {
+		dispatch.Start()
 	}
 
 	c.w = socket_writer.NewSocketWriter(c.cfg.Endpoint, c)
@@ -430,6 +442,10 @@ func (c *TighteningController) Start() error {
 }
 
 func (c *TighteningController) Stop() error {
+	for _, dispatch := range c.dispatches {
+		dispatch.Release()
+	}
+
 	return nil
 }
 
@@ -621,7 +637,6 @@ func (c *TighteningController) handleStatus(status string) {
 
 	if status != c.Status() {
 
-		fmt.Println(status)
 		c.UpdateStatus(status)
 
 		if status == device.STATUS_OFFLINE {

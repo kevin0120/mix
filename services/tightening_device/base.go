@@ -1,9 +1,14 @@
 package tightening_device
 
-import "github.com/masami10/rush/services/device"
+import (
+	"github.com/masami10/rush/services/device"
+	"github.com/masami10/rush/utils"
+)
 
 type ITighteningDevice interface {
 	device.IDevice
+
+	RegistDispatch(dispatchType string, dispatch utils.DispatchHandler)
 }
 
 type ITighteningController interface {
@@ -47,11 +52,11 @@ type ITighteningTool interface {
 	GetPSetList() ([]int, error)
 
 	// pset详情
-	GetPSetDetail(pset int) (PSetDetail, error)
+	GetPSetDetail(pset int) (*PSetDetail, error)
 
 	// job列表
 	GetJobList() ([]int, error)
 
 	// job详情
-	GetJobDetail(job int) (JobDetail, error)
+	GetJobDetail(job int) (*JobDetail, error)
 }

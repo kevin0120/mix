@@ -12,7 +12,7 @@ const (
 
 type Header struct {
 	TOOL string `start:"1"  end:"5"`
-	Sn   int	`start:"6"  end:"8"`
+	Sn   int    `start:"6"  end:"8"`
 }
 
 type OpenProtocol struct {

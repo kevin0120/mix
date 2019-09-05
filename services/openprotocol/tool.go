@@ -6,6 +6,7 @@ import (
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/tightening_device"
+	"github.com/masami10/rush/utils"
 )
 
 const (
@@ -63,7 +64,8 @@ func (s *TighteningTool) SetPSet(pset int) error {
 		return errors.New(device.STATUS_OFFLINE)
 	}
 
-	reply, err := s.parent.ProcessRequest(MID_0018_PSET, "", "", "", "")
+	data := fmt.Sprintf("%03d", pset)
+	reply, err := s.parent.ProcessRequest(MID_0018_PSET, "", "", "", data)
 	if err != nil {
 		return err
 	}
@@ -81,7 +83,8 @@ func (s *TighteningTool) SetJob(job int) error {
 		return errors.New(device.STATUS_OFFLINE)
 	}
 
-	reply, err := s.parent.ProcessRequest(MID_0038_JOB_SELECT, "", "", "", "")
+	data := fmt.Sprintf("%04d", job)
+	reply, err := s.parent.ProcessRequest(MID_0038_JOB_SELECT, "", "", "", data)
 	if err != nil {
 		return err
 	}
@@ -275,3 +278,5 @@ func (s *TighteningTool) Status() string {
 func (s *TighteningTool) DeviceType() string {
 	return tightening_device.TIGHTENING_DEVICE_TYPE_TOOL
 }
+
+func (c *TighteningTool) RegistDispatch(dispatchType string, dispatcher utils.DispatchHandler) {}

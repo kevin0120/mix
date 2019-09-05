@@ -933,12 +933,12 @@ func (ai *AlarmStatus) Deserialize(msg string) error {
 	return nil
 }
 
-type CurveBody struct{
-	ToolNumber int `start:"3"  end:"4"`
-	TorqueString string `start:"28"  end:"41"`
-	AngleString string `start:"44"  end:"57"`
-	MeasurePoints int `start:"60"  end:"63"`
-	Num string `start:"66"  end:"67"` //曲线总共分几段
-	Id string   `start:"70"  end:"71"`//当前为第几段
-	Data string   `start:"72"  end:"..."`
+type CurveBody struct {
+	ToolNumber    int    `start:"3"  end:"4"`
+	TorqueString  string `start:"28"  end:"41"`
+	AngleString   string `start:"44"  end:"57"`
+	MeasurePoints int    `start:"60"  end:"63"`
+	Num           string `start:"66"  end:"67"` //曲线总共分几段
+	Id            string `start:"70"  end:"71"` //当前为第几段
+	Data          string `start:"72"  end:"..."`
 }
