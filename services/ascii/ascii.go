@@ -21,24 +21,32 @@ func unmarshal(str string, rType reflect.Type, rValue reflect.Value) error {
 	numField := rValue.NumField()
 
 	//变量结构体的所有字段
-	start:=0
-	end:=0
+	var start =1
+	var end int
 	for i := 0; i < numField; i++ {
 		//fmt.Printf("Field %d: 类型为：%v\n", i, rValue.Field(i).Kind())
 		//获取到struct标签, 注意需要通过reflect.Type来获取tag标签的值
-		tagVal_start := rType.Field(i).Tag.Get("start")
-		tagVal_end := rType.Field(i).Tag.Get("end")
+		tagValStart := rType.Field(i).Tag.Get("start")
+		tagValEnd := rType.Field(i).Tag.Get("end")
 		//如果该字段是tag标签就显示，否则就不显示
-		//start, _ := strconv.ParseInt(tagVal_start[0:], 10, 32)
-		//end, _ := strconv.ParseInt(tagVal_end[0:], 10, 32)
-		start, _ = strconv.Atoi(tagVal_start[0:])
-		if tagVal_end=="..."{
+		//start, _ := strconv.ParseInt(tagValStart[0:], 10, 32)
+		//end, _ := strconv.ParseInt(tagValEnd[0:], 10, 32)
+		if tagValStart !=""{
+			start, _ = strconv.Atoi(tagValStart[0:])
+		}
+
+		if tagValEnd =="..."|| tagValEnd ==""{
 			end=len(str)
 		}else {
-			end, _ = strconv.Atoi(tagVal_end[0:])
+			end, _ = strconv.Atoi(tagValEnd[0:])
 		}
+
 		if end > len(str) {
-			return errors.New("message is unenough")
+			return errors.New("message is not enough")
+		}
+
+		if start > end || start==0 || end==0 {
+			return errors.New("the tag is wrong")
 		}
 		//fmt.Printf("Field %d: tag为start：%v--end：%v\n", i, start, end)
 

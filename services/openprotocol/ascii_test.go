@@ -24,7 +24,7 @@ type OpenProtocol struct {
 	Faa uint    `start:"20" end:"21"`
 	B   bool    `start:"22" end:"22"`
 	C   bool    `start:"23" end:"23"`
-	TO  Header  `start:"24" end:"..."`
+	TO  Header  `start:"24" end:"yy"`
 }
 
 func Test_Ascii(t *testing.T){
