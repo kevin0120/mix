@@ -341,45 +341,45 @@ type ResultData struct {
 func (rd *ResultData) ToTighteningResult() *tightening_device.TighteningResult {
 	return &tightening_device.TighteningResult{
 		// 控制器序列号
-		ControllerSN :rd.ControllerName,
+		ControllerSN: rd.ControllerName,
 		// 工具序列号
-		ToolSN :rd.ToolSerialNumber,
+		ToolSN: rd.ToolSerialNumber,
 		// 收到时间
-		UpdateTime :time.Now(),
+		UpdateTime: time.Now(),
 		// job号
-		Job :rd.JobID,
+		Job: rd.JobID,
 		// pset号
-		PSet : rd.PSetID,
+		PSet: rd.PSetID,
 		// 批次信息
-		Batch : rd.BatchStatus,
+		Batch: rd.BatchStatus,
 		// 当前拧紧次数
-		Count :rd.NumberOfStages,
+		Count: rd.NumberOfStages,
 		// 拧紧ID
 		TighteningID: rd.TightingID,
 		// 实际结果
-		MeasureResult :rd.StageResult,
+		MeasureResult: rd.StageResult,
 		// 实际扭矩
-		MeasureTorque :rd.Torque,
+		MeasureTorque: rd.Torque,
 		// 实际角度
-		MeasureAngle :rd.Angle,
+		MeasureAngle: rd.Angle,
 		// 实际耗时
-		MeasureTime :0,
+		MeasureTime: 0,
 		// 拧紧策略
-		Strategy :rd.Strategy,
+		Strategy: rd.Strategy,
 		// 最大扭矩
-		TorqueMax :rd.TorqueMax,
+		TorqueMax: rd.TorqueMax,
 		// 最小扭矩
-		TorqueMin :rd.TorqueMin,
+		TorqueMin: rd.TorqueMin,
 		// 扭矩阈值
-		TorqueThreshold :rd.TorqueMax,
+		TorqueThreshold: rd.TorqueMax,
 		// 目标扭矩
-		TorqueTarget :rd.TorqueFinalTarget,
+		TorqueTarget: rd.TorqueFinalTarget,
 		// 最大角度
-		AngleMax :rd.AngleMax,
+		AngleMax: rd.AngleMax,
 		// 最小角度
-		AngleMin :rd.AngleMin,
+		AngleMin: rd.AngleMin,
 		// 目标角度
-		AngleTarget :rd.FinalAngleTarget,
+		AngleTarget: rd.FinalAngleTarget,
 	}
 }
 

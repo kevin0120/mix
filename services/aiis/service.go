@@ -247,11 +247,11 @@ func (s *Service) PutResult(result_id int64, body interface{}) error {
 
 	result := WSOpResult{
 		ResultID: result_id,
-		Result:   body.(AIISResult),
+		Result:   body,
 		Port:     s.rush_port,
 	}
 
-	err := s.AddToQueue(result.Result.ID)
+	err := s.AddToQueue(result.ResultID)
 	if err != nil {
 		return nil
 	}
@@ -359,12 +359,12 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	aiisResult.TighteningId, _ = strconv.ParseInt(result.TighteningID, 10, 64)
 	aiisResult.Lacking = "normal"
 
-	//gun, err := s.StorageService.GetGun(result.GunSN)
+	//gun, err := s.StorageService.GetGun(result.ToolSN)
 	//if err != nil {
-	//	gid, err := s.SyncGun(result.GunSN)
+	//	gid, err := s.SyncGun(result.ToolSN)
 	//	if err == nil {
 	//		gun.GunID = gid
-	//		gun.Serial = result.GunSN
+	//		gun.Serial = result.ToolSN
 	//		s.StorageService.Store(gun)
 	//	} else {
 	//		gun.GunID = 0
@@ -377,7 +377,7 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	aiisResult.NutID = result.ConsuProductID
 
 	//aiisResult.WorkcenterCode = dbWorkorder.WorkcenterCode
-	aiisResult.ToolSN = result.GunSN
+	aiisResult.ToolSN = result.ToolSN
 	aiisResult.ControllerSN = result.ControllerSN
 
 	//aiisResult.Job = fmt.Sprintf("%d", dbWorkorder.JobID)

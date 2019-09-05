@@ -387,7 +387,7 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 			//
 			//	r := storage.Results{}
 			//	r.ControllerSN = consu.ControllerSN
-			//	r.GunSN = consu.GunSN
+			//	r.ToolSN = consu.ToolSN
 			//	r.PSet, _ = strconv.Atoi(consu.PSet)
 			//	r.ToleranceMax = consu.ToleranceMax
 			//	r.ToleranceMin = consu.ToleranceMin

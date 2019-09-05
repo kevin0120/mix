@@ -96,9 +96,9 @@ type CURObject struct {
 //}
 
 type WSOpResult struct {
-	ResultID int64      `json:"result_id"`
-	Result   AIISResult `json:"result"`
-	Port     string     `json:"port"`
+	ResultID int64       `json:"result_id"`
+	Result   interface{} `json:"result"`
+	Port     string      `json:"port"`
 }
 
 type PSetDefine struct {

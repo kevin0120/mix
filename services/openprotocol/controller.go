@@ -49,25 +49,25 @@ type handlerPkg_curve struct {
 }
 
 type TighteningController struct {
-	w                    *socket_writer.SocketWriter
-	cfg                  *tightening_device.TighteningDeviceConfig
-	keepAliveCount       int32
-	keep_period          time.Duration
-	req_timeout          time.Duration
-	getToolInfoPeriod    time.Duration
-	Response             ResponseQueue
-	Srv                  *Service
-	dbController         *storage.Controllers
-	buffer               chan []byte
-	closing              chan chan struct{}
-	handlerBuf           chan handlerPkg
-	keepaliveDeadLine    atomic.Value
-	protocol             string
-	inputs               string
-	diag                 Diagnostic
-	temp_result_CURVE    map[int]*minio.ControllerCurve
-	result_CURVE         map[int][]*minio.ControllerCurve
-	result               map[int][]*controller.ControllerResult
+	w                 *socket_writer.SocketWriter
+	cfg               *tightening_device.TighteningDeviceConfig
+	keepAliveCount    int32
+	keep_period       time.Duration
+	req_timeout       time.Duration
+	getToolInfoPeriod time.Duration
+	Response          ResponseQueue
+	Srv               *Service
+	dbController      *storage.Controllers
+	buffer            chan []byte
+	closing           chan chan struct{}
+	handlerBuf        chan handlerPkg
+	keepaliveDeadLine atomic.Value
+	protocol          string
+	inputs            string
+	diag              Diagnostic
+	temp_result_CURVE map[int]*tightening_device.TighteningCurve
+	//result_CURVE         map[int][]*minio.ControllerCurve
+	//result               map[int][]*controller.ControllerResult
 	mtxResult            sync.Mutex
 	model                string
 	receiveBuf           chan []byte
@@ -95,9 +95,9 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 		receiveBuf:        make(chan []byte, 65535),
 		cfg:               deviceConfig,
 		BaseDevice:        device.CreateBaseDevice(),
-		result:            map[int][]*controller.ControllerResult{},
-		result_CURVE:      map[int][]*minio.ControllerCurve{},
-		temp_result_CURVE: map[int]*minio.ControllerCurve{},
+		//result:            map[int][]*controller.ControllerResult{},
+		//result_CURVE:      map[int][]*minio.ControllerCurve{},
+		temp_result_CURVE: map[int]*tightening_device.TighteningCurve{},
 
 		dispatches: map[string]*ToolDispatch{},
 	}
@@ -292,12 +292,12 @@ func (c *TighteningController) handleResult(result_data *ResultData, curve *mini
 	//controllerResult.NeedPushHmi = true
 	//
 	//if c.Model() == tightening_device.ModelDesoutterDeltaWrench {
-	//	controllerResult.GunSN = c.cfg.SN
+	//	controllerResult.ToolSN = c.cfg.SN
 	//} else {
-	//	controllerResult.GunSN = result_data.ToolSerialNumber
+	//	controllerResult.ToolSN = result_data.ToolSerialNumber
 	//}
 	//
-	//gun, err := c.Srv.DB.GetGun(controllerResult.GunSN)
+	//gun, err := c.Srv.DB.GetGun(controllerResult.ToolSN)
 	//if err != nil {
 	//	c.Srv.diag.Error("get gun failed", err)
 	//	return err
@@ -391,43 +391,43 @@ func (c *TighteningController) handleResult(result_data *ResultData, curve *mini
 	return nil
 }
 
-func (c *TighteningController) updateResult(result *controller.ControllerResult, curve *minio.ControllerCurve, toolNum int) {
-	defer c.mtxResult.Unlock()
-	c.mtxResult.Lock()
-
-	if _, ok := c.result[toolNum]; !ok {
-		c.result[toolNum] = nil
-	}
-	if _, ok := c.result_CURVE[toolNum]; !ok {
-		c.result_CURVE[toolNum] = nil
-	}
-
-	if result != nil {
-		c.result[toolNum] = append(c.result[toolNum], result)
-	}
-
-	if curve != nil {
-		c.result_CURVE[toolNum] = append(c.result_CURVE[toolNum], curve)
-	}
-}
-
-func (c *TighteningController) handleResultandClear(toolNum int) {
-	defer c.mtxResult.Unlock()
-	c.mtxResult.Lock()
-
-	if len(c.result[toolNum]) != 0 && len(c.result_CURVE[toolNum]) != 0 {
-
-		if c.result_CURVE[toolNum] != nil {
-			c.result_CURVE[toolNum][0].CurveContent.Result = c.result[toolNum][0].Result
-			c.result_CURVE[toolNum][0].CurveFile = fmt.Sprintf("%s-%s.json", c.cfg.SN, c.result[toolNum][0].TighteningID)
-		}
-
-		c.Srv.Parent.Handlers.Handle(*c.result[toolNum][0], *c.result_CURVE[toolNum][0])
-
-		c.result[toolNum] = c.result[toolNum][1:]
-		c.result_CURVE[toolNum] = c.result_CURVE[toolNum][1:]
-	}
-}
+//func (c *TighteningController) updateResult(result *controller.ControllerResult, curve *minio.ControllerCurve, toolNum int) {
+//	defer c.mtxResult.Unlock()
+//	c.mtxResult.Lock()
+//
+//	if _, ok := c.result[toolNum]; !ok {
+//		c.result[toolNum] = nil
+//	}
+//	if _, ok := c.result_CURVE[toolNum]; !ok {
+//		c.result_CURVE[toolNum] = nil
+//	}
+//
+//	if result != nil {
+//		c.result[toolNum] = append(c.result[toolNum], result)
+//	}
+//
+//	if curve != nil {
+//		c.result_CURVE[toolNum] = append(c.result_CURVE[toolNum], curve)
+//	}
+//}
+//
+//func (c *TighteningController) handleResultandClear(toolNum int) {
+//	defer c.mtxResult.Unlock()
+//	c.mtxResult.Lock()
+//
+//	if len(c.result[toolNum]) != 0 && len(c.result_CURVE[toolNum]) != 0 {
+//
+//		if c.result_CURVE[toolNum] != nil {
+//			c.result_CURVE[toolNum][0].CurveContent.Result = c.result[toolNum][0].Result
+//			c.result_CURVE[toolNum][0].CurveFile = fmt.Sprintf("%s-%s.json", c.cfg.SN, c.result[toolNum][0].TighteningID)
+//		}
+//
+//		c.Srv.Parent.Handlers.Handle(*c.result[toolNum][0], *c.result_CURVE[toolNum][0])
+//
+//		c.result[toolNum] = c.result[toolNum][1:]
+//		c.result_CURVE[toolNum] = c.result_CURVE[toolNum][1:]
+//	}
+//}
 
 // seq, count
 func (c *TighteningController) calBatch(workorderID int64) (int, int) {

@@ -1270,7 +1270,7 @@ func (m *Methods) getLocalResults(ctx iris.Context) {
 			HmiSN:        m.filterValue(filters, "hmi_sn", string(v.HMISN)),
 			Vin:          m.filterValue(filters, "vin", string(v.Vin)),
 			ControllerSN: m.filterValue(filters, "controller_sn", string(v.ControllerSN)),
-			GunSN:        m.filterValue(filters, "gun_sn", string(v.GunSN)),
+			GunSN:        m.filterValue(filters, "gun_sn", string(v.ToolSN)),
 			Result:       m.filterValue(filters, "result", string(v.Result)),
 			Torque:       m.filterValue(filters, "torque", float64(sr.Mi)),
 			Angle:        m.filterValue(filters, "angle", float64(sr.Wi)),

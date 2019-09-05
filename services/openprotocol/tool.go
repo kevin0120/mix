@@ -285,12 +285,25 @@ func (c *TighteningTool) OnResult(result interface{}) {
 		return
 	}
 
-	//tighteningResult := result.(*tightening_device.TighteningResult)
+	tighteningResult := result.(*tightening_device.TighteningResult)
+	dbResult := tighteningResult.ToDBResult()
 
-	// 尝试获取最近一条没有对应结果的曲线并更新， 如果成功则上传曲线
+	// 尝试获取最近一条没有对应结果的曲线并更新
+	err := c.parent.Srv.DB.UpdateIncompleteCurve(dbResult.ToolSN, dbResult.TighteningID)
+	if err == nil {
+		// 如果成功则上传曲线
+		// TODO
+	}
 
 	// 缓存结果
+	err = c.parent.Srv.DB.Store(dbResult)
+	if err != nil {
 
+	}
+
+	// TODO
+	// 上传结果
+	//c.parent.Srv.Aiis.PutResult()
 }
 
 // 处理曲线
@@ -300,9 +313,10 @@ func (c *TighteningTool) OnCurve(curve interface{}) {
 		return
 	}
 
+	// TODO
 	//tighteningCurve := curve.(*tightening_device.TighteningCurve)
 
-	// 尝试获取最近一条没有对应曲线的结果并更新， 如果成功则在追加曲线， 同时在缓存曲线后上传曲线
+	// 尝试获取最近一条没有对应曲线的结果并更新， 如果成功则上传曲线， 否则只缓存
 
 	// 缓存曲线
 

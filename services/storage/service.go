@@ -576,7 +576,7 @@ func (s *Service) UpdateResult(result *Results) (int64, error) {
 		result.ResultValue,
 		result.Count,
 		result.Batch,
-		result.GunSN,
+		result.ToolSN,
 		result.Spent,
 		result.TighteningID,
 		result.Id)
@@ -1021,4 +1021,53 @@ func (s *Service) UpdateStep(step *Steps) (*Steps, error) {
 	} else {
 		return step, nil
 	}
+}
+
+func (s *Service) GetLastIncompleteCurve(toolSN string) (*Curves, error) {
+	curve := Curves{}
+	e := s.eng.Alias("c").Where("c.tightening_id = ?", "").And("c.tool_sn = ?", toolSN).OrderBy("c.update_time").Desc("c.update_time").Find(&curve)
+
+	if e != nil {
+		return &curve, e
+	} else {
+		return &curve, nil
+	}
+}
+
+func (s *Service) UpdateIncompleteCurve(toolSN string, tigheningID string) error {
+
+	session := s.eng.NewSession()
+	defer session.Close()
+
+	// 执行事务
+	err := session.Begin()
+	if err != nil {
+		return err
+	}
+
+	// 获取最近不完整的曲线
+	curve := Curves{}
+	err = s.eng.Alias("c").Where("c.tightening_id = ?", "").And("c.tool_sn = ?", toolSN).OrderBy("c.update_time").Desc("c.update_time").Find(&curve)
+
+	if err != nil {
+		return err
+	}
+
+	// 更新曲线
+	curve.TighteningID = tigheningID
+	sql := "update `curves` set tightening_id = ? where id = ?"
+	_, err = session.Exec(sql,
+		curve.TighteningID,
+		curve.Id)
+
+	if err != nil {
+		return err
+	}
+
+	err = session.Commit()
+	if err != nil {
+		return errors.Wrapf(err, "commit fail")
+	}
+
+	return nil
 }

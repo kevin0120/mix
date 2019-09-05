@@ -60,7 +60,7 @@ func (h *Handlers) Release() {
 func (h *Handlers) Handle(result ControllerResult, curve minio.ControllerCurve) {
 
 	// 取得工具信息
-	//gun, err := h.controllerService.StorageService.GetGun(controllerResult.GunSN)
+	//gun, err := h.controllerService.StorageService.GetGun(controllerResult.ToolSN)
 	//if err != nil {
 	//	h.controllerService.diag.Error("get gun failed", err)
 	//	return
@@ -218,7 +218,7 @@ func (h *Handlers) doSaveResult(data *SavePackage) storage.Results {
 	dbResult.PSetDefine = string(s_pset)
 	dbResult.TighteningID = data.controllerResult.TighteningID
 	dbResult.Batch = data.controllerResult.Batch
-	dbResult.GunSN = data.controllerResult.GunSN
+	dbResult.ToolSN = data.controllerResult.GunSN
 	dbResult.ExInfo = data.curveFile
 
 	dbResult.PSet = data.controllerResult.PSet

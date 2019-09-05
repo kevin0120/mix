@@ -1,6 +1,11 @@
 package tightening_device
 
-import "time"
+import (
+	"encoding/json"
+	"fmt"
+	"github.com/masami10/rush/services/storage"
+	"time"
+)
 
 const (
 	DISPATCH_RESULT = "DISPATCH_RESULT"
@@ -96,6 +101,16 @@ type TighteningResult struct {
 	AngleTarget float64 `json:"angle_target"`
 }
 
+func (r *TighteningResult) ToDBResult() *storage.Results {
+	return &storage.Results{
+		HasUpload:    false,
+		Result:       r.MeasureResult,
+		ToolSN:       r.ToolSN,
+		ControllerSN: r.ControllerSN,
+		TighteningID: r.TighteningID,
+	}
+}
+
 type TighteningCurve struct {
 	// 工具序列号
 	ToolSN string `json:"tool_sn"`
@@ -106,6 +121,21 @@ type TighteningCurve struct {
 	// 收到时间
 	UpdateTime time.Time `json:"update_time"`
 
+	TighteningCurveContent
+}
+
+func (c *TighteningCurve) ToDBCurve() *storage.Curves {
+	curveContent, _ := json.Marshal(c.TighteningCurveContent)
+
+	return &storage.Curves{
+		HasUpload:  false,
+		UpdateTime: c.UpdateTime,
+		CurveData:  string(curveContent),
+		CurveFile:  fmt.Sprintf("%s_%s.json", c.ToolSN, c.TighteningID),
+	}
+}
+
+type TighteningCurveContent struct {
 	// 实际拧紧结果(ok/nok)
 	Result string `json:"result"`
 
