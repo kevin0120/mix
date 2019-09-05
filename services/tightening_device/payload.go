@@ -1,5 +1,7 @@
 package tightening_device
 
+import "time"
+
 const (
 	DISPATCH_RESULT = "DISPATCH_RESULT"
 	DISPATCH_CURVE  = "DISPATCH_CURVE"
@@ -33,32 +35,83 @@ type ControllerOutput struct {
 }
 
 type TighteningResult struct {
+	// 控制器序列号
 	ControllerSN string `json:"controller_sn"`
-	ToolSN       string `json:"tool_sn"`
-	Dat          string `json:"dat"`
-	Result       string `json:"result"`
-	Job          int    `json:"job"`
-	PSet         int    `json:"pset"`
-	Batch        string `json:"batch"`
-	Count        int    `json:"count"`
 
-	Strategy string  `json:"strategy"`
-	Mp       float64 `json:"M+"`
-	Mm       float64 `json:"M-"`
-	Ms       float64 `json:"MS"`
-	Ma       float64 `json:"MA"`
-	Wp       float64 `json:"W+"`
-	Wm       float64 `json:"W-"`
-	Wa       float64 `json:"WS"`
+	// 工具序列号
+	ToolSN string `json:"tool_sn"`
 
-	Mi float64 `json:"MI"`
-	Wi float64 `json:"WI"`
-	Ti float64 `json:"TI"`
+	// 收到时间
+	UpdateTime time.Time `json:"update_time"`
 
-	TighteningID string
+	// job号
+	Job int `json:"job"`
+
+	// pset号
+	PSet int `json:"pset"`
+
+	// 批次信息
+	Batch string `json:"batch"`
+
+	// 当前拧紧次数
+	Count int `json:"count"`
+
+	// 拧紧ID
+	TighteningID string `json:"tightening_id"`
+
+	// 实际结果
+	MeasureResult string `json:"measure_result"`
+
+	// 实际扭矩
+	MeasureTorque float64 `json:"measure_torque"`
+
+	// 实际角度
+	MeasureAngle float64 `json:"measure_angle"`
+
+	// 实际耗时
+	MeasureTime float64 `json:"measure_time"`
+
+	// 拧紧策略
+	Strategy string `json:"strategy"`
+
+	// 最大扭矩
+	TorqueMax float64 `json:"torque_max"`
+
+	// 最小扭矩
+	TorqueMin float64 `json:"torque_min-"`
+
+	// 扭矩阈值
+	TorqueThreshold float64 `json:"torque_threshold"`
+
+	// 目标扭矩
+	TorqueTarget float64 `json:"torque_target"`
+
+	// 最大角度
+	AngleMax float64 `json:"angle_max"`
+
+	// 最小角度
+	AngleMin float64 `json:"angle_min"`
+
+	// 目标角度
+	AngleTarget float64 `json:"angle_target"`
 }
 
 type TighteningCurve struct {
+	// 工具序列号
+	ToolSN string `json:"tool_sn"`
+
+	// 拧紧ID
+	TighteningID string `json:"tightening_id"`
+
+	// 收到时间
+	UpdateTime time.Time `json:"update_time"`
+
+	// 实际拧紧结果(ok/nok)
+	Result string `json:"result"`
+
+	CUR_M []float64 `json:"cur_m"`
+	CUR_W []float64 `json:"cur_w"`
+	CUR_T []float64 `json:"cur_t"`
 }
 
 type PSetDetail struct {

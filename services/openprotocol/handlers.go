@@ -99,11 +99,11 @@ func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
 			c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_M = c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_M[0:curve.MeasurePoints]
 			c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_W = c.temp_result_CURVE[curve.ToolNumber].CurveContent.CUR_W[0:curve.MeasurePoints]
 		}
-		c.updateResult(nil, c.temp_result_CURVE[curve.ToolNumber], curve.ToolNumber)
-		c.handleResultandClear(curve.ToolNumber)
+		//c.updateResult(nil, c.temp_result_CURVE[curve.ToolNumber], curve.ToolNumber)
+		//c.handleResultandClear(curve.ToolNumber)
 
 		//本次曲线全部解析完毕后,降临时存储的数据清空
-		delete(c.temp_result_CURVE, curve.ToolNumber)
+		//delete(c.temp_result_CURVE, curve.ToolNumber)
 	}
 	return nil
 }
