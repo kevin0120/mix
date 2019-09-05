@@ -6,7 +6,6 @@ import (
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/tightening_device"
-	"github.com/masami10/rush/utils"
 )
 
 const (
@@ -279,4 +278,33 @@ func (s *TighteningTool) DeviceType() string {
 	return tightening_device.TIGHTENING_DEVICE_TYPE_TOOL
 }
 
-func (c *TighteningTool) RegistDispatch(dispatchType string, dispatcher utils.DispatchHandler) {}
+// 处理结果
+func (c *TighteningTool) OnResult(result interface{}) {
+	if result == nil {
+		c.diag.Error(fmt.Sprintf("Tool SN: %s", c.cfg.SN), errors.New("Result Is Nil"))
+		return
+	}
+
+	//tighteningResult := result.(*tightening_device.TighteningResult)
+
+	// 尝试获取最近一条没有对应结果的曲线并更新， 如果成功则上传曲线
+
+	// 缓存结果
+
+}
+
+// 处理曲线
+func (c *TighteningTool) OnCurve(curve interface{}) {
+	if curve == nil {
+		c.diag.Error(fmt.Sprintf("Tool SN: %s", c.cfg.SN), errors.New("Curve Is Nil"))
+		return
+	}
+
+	//tighteningCurve := curve.(*tightening_device.TighteningCurve)
+
+	// 尝试获取最近一条没有对应曲线的结果并更新， 如果成功则在追加曲线， 同时在缓存曲线后上传曲线
+
+	// 缓存曲线
+
+	// 上传曲线
+}

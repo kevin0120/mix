@@ -31,6 +31,11 @@ const (
 	MAX_REPLY_TIME = time.Duration(2000 * time.Millisecond)
 )
 
+type ToolDispatch struct {
+	resultDispatch *utils.Dispatch
+	curveDispatch  *utils.Dispatch
+}
+
 type ControllerSubscribe func() error
 
 type handlerPkg struct {
@@ -68,7 +73,7 @@ type TighteningController struct {
 	receiveBuf           chan []byte
 	controllerSubscribes []ControllerSubscribe
 
-	dispatches map[string]*utils.Dispatch
+	dispatches map[string]*ToolDispatch
 
 	device.BaseDevice
 }
@@ -94,10 +99,7 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 		result_CURVE:      map[int][]*minio.ControllerCurve{},
 		temp_result_CURVE: map[int]*minio.ControllerCurve{},
 
-		dispatches: map[string]*utils.Dispatch{
-			tightening_device.DISPATCH_RESULT: utils.CreateDispatch(utils.DEFAULT_BUF_LEN),
-			tightening_device.DISPATCH_CURVE:  utils.CreateDispatch(utils.DEFAULT_BUF_LEN),
-		},
+		dispatches: map[string]*ToolDispatch{},
 	}
 
 	c.controllerSubscribes = []ControllerSubscribe{
@@ -114,6 +116,13 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 
 	for _, v := range deviceConfig.Tools {
 		tool := NewTool(&c, v, d)
+		c.dispatches[v.SN] = &ToolDispatch{
+			resultDispatch: utils.CreateDispatch(utils.DEFAULT_BUF_LEN),
+			curveDispatch:  utils.CreateDispatch(utils.DEFAULT_BUF_LEN),
+		}
+		c.dispatches[v.SN].resultDispatch.Regist(tool.OnResult)
+		c.dispatches[v.SN].curveDispatch.Regist(tool.OnCurve)
+
 		c.AddChildren(v.SN, tool)
 	}
 
@@ -376,8 +385,8 @@ func (c *TighteningController) handleResult(result_data *ResultData, curve *mini
 
 	tighteningResult.ToolSN = toolSN
 
-	// 分发结果
-	c.dispatches[tightening_device.DISPATCH_RESULT].Dispatch(tighteningResult)
+	// 分发结果到工具进行处理
+	c.dispatches[toolSN].resultDispatch.Dispatch(tighteningResult)
 
 	return nil
 }
@@ -434,10 +443,6 @@ func (c *TighteningController) calBatch(workorderID int64) (int, int) {
 	}
 }
 
-func (c *TighteningController) RegistDispatch(dispatchType string, dispatcher utils.DispatchHandler) {
-	c.dispatches[dispatchType].Regist(dispatcher)
-}
-
 func (c *TighteningController) Start() error {
 	for _, v := range c.cfg.Tools {
 		_ = c.Srv.DB.UpdateTool(&storage.Guns{
@@ -447,7 +452,8 @@ func (c *TighteningController) Start() error {
 	}
 
 	for _, dispatch := range c.dispatches {
-		dispatch.Start()
+		dispatch.resultDispatch.Start()
+		dispatch.curveDispatch.Start()
 	}
 
 	c.w = socket_writer.NewSocketWriter(c.cfg.Endpoint, c)
@@ -461,7 +467,8 @@ func (c *TighteningController) Start() error {
 
 func (c *TighteningController) Stop() error {
 	for _, dispatch := range c.dispatches {
-		dispatch.Release()
+		dispatch.resultDispatch.Release()
+		dispatch.curveDispatch.Release()
 	}
 
 	return nil

@@ -60,8 +60,6 @@ func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol) (*Servi
 			srv.diag.Error("Create Controller Failed", err)
 			continue
 		}
-		c.RegistDispatch(DISPATCH_RESULT, srv.OnResult)
-		c.RegistDispatch(DISPATCH_CURVE, srv.OnCurve)
 
 		// TODO: 如果控制器序列号没有配置，则通过探测加入设备列表。
 		srv.addController(deviceConfig.SN, c)
@@ -93,16 +91,6 @@ func (s *Service) Close() error {
 
 func (s *Service) config() Config {
 	return s.configValue.Load().(Config)
-}
-
-// 收到结果
-func (s *Service) OnResult(result interface{}) {
-	fmt.Println(result)
-}
-
-// 收到曲线
-func (s *Service) OnCurve(curve interface{}) {
-
 }
 
 // TODO: case封装成函数

@@ -61,36 +61,98 @@ type Steps struct {
 }
 
 type Results struct {
-	Id                 int64     `xorm:"pk autoincr notnull 'id'"`
-	Seq                int       `xorm:"int 'seq'"`
-	GroupSeq           int       `xorm:"int 'group_sequence'"`
-	ResultId           int64     `xorm:"bigint 'x_result_id'"`
-	WorkorderID        int64     `xorm:"bigint 'x_workorder_id'"`
-	StepID             int64     `xorm:"bigint 'step_id'"`
-	UserID             int64     `xorm:"bigint 'user_id'"`
-	ControllerSN       string    `xorm:"varchar(64) 'controller_sn'"`
-	GunSN              string    `xorm:"varchar(64) 'gun_sn'"`
-	Result             string    `xorm:"varchar(32) 'result'"`
-	HasUpload          bool      `xorm:"bool 'has_upload'"`
-	Stage              string    `xorm:"varchar(32) 'stage'"`
-	UpdateTime         time.Time `xorm:"datetime 'update_time'"`
-	PSetDefine         string    `xorm:"text 'pset_define'"`
-	ResultValue        string    `xorm:"text 'result_value'"`
-	Count              int       `xorm:"int 'count'"`
-	PSet               int       `xorm:"int 'pset'"`
-	NutNo              string    `xorm:"varchar(64) 'nut_no'"`
-	ConsuProductID     int64     `xorm:"bigint 'consu_product_id'"`
-	ToleranceMinDegree float64   `xorm:"Double 'tolerance_min_degree'"`
-	ToleranceMaxDegree float64   `xorm:"Double 'tolerance_max_degree'"`
-	ToleranceMax       float64   `xorm:"Double 'tolerance_max'"`
-	ToleranceMin       float64   `xorm:"Double 'tolerance_min'"`
-	OffsetX            float64   `xorm:"Double 'offset_x'"`
-	OffsetY            float64   `xorm:"Double 'offset_y'"`
-	MaxRedoTimes       int       `xorm:"int 'max_redo_times'"`
-	Batch              string    `xorm:"varchar(32) 'batch'"`
-	ExInfo             string    `xorm:"text 'exinfo'"`
-	Spent              int64     `xorm:"bigint 'spent'"`
-	TighteningID       string    `xorm:"varchar(128) 'tightening_id'"`
+	Id        int64 `xorm:"pk autoincr notnull 'id'"`
+	HasUpload bool  `xorm:"bool 'has_upload'"`
+	//Seq                int       `xorm:"int 'seq'"`
+	//GroupSeq           int       `xorm:"int 'group_sequence'"`
+	//ResultId           int64     `xorm:"bigint 'x_result_id'"`
+	//WorkorderID        int64     `xorm:"bigint 'x_workorder_id'"`
+	//StepID             int64     `xorm:"bigint 'step_id'"`
+	//UserID             int64     `xorm:"bigint 'user_id'"`
+	//ControllerSN       string    `xorm:"varchar(64) 'controller_sn'"`
+	//GunSN              string    `xorm:"varchar(64) 'gun_sn'"`
+	//Result             string    `xorm:"varchar(32) 'result'"`
+	//Stage              string    `xorm:"varchar(32) 'stage'"`
+	//UpdateTime         time.Time `xorm:"datetime 'update_time'"`
+	//PSetDefine         string    `xorm:"text 'pset_define'"`
+	//ResultValue        string    `xorm:"text 'result_value'"`
+	//Count              int       `xorm:"int 'count'"`
+	//PSet               int       `xorm:"int 'pset'"`
+	//NutNo              string    `xorm:"varchar(64) 'nut_no'"`
+	//ConsuProductID     int64     `xorm:"bigint 'consu_product_id'"`
+	//ToleranceMinDegree float64   `xorm:"Double 'tolerance_min_degree'"`
+	//ToleranceMaxDegree float64   `xorm:"Double 'tolerance_max_degree'"`
+	//ToleranceMax       float64   `xorm:"Double 'tolerance_max'"`
+	//ToleranceMin       float64   `xorm:"Double 'tolerance_min'"`
+	//OffsetX            float64   `xorm:"Double 'offset_x'"`
+	//OffsetY            float64   `xorm:"Double 'offset_y'"`
+	//MaxRedoTimes       int       `xorm:"int 'max_redo_times'"`
+	//Batch              string    `xorm:"varchar(32) 'batch'"`
+	//ExInfo             string    `xorm:"text 'exinfo'"`
+	//Spent              int64     `xorm:"bigint 'spent'"`
+	//TighteningID       string    `xorm:"varchar(128) 'tightening_id'"`
+
+	// 控制器序列号
+	ControllerSN string `json:"controller_sn"`
+
+	// 工具序列号
+	ToolSN string `json:"tool_sn"`
+
+	// 收到时间
+	UpdateTime time.Time `json:"update_time"`
+
+	// job号
+	Job int `json:"job"`
+
+	// pset号
+	PSet int `json:"pset"`
+
+	// 批次信息
+	Batch string `json:"batch"`
+
+	// 当前拧紧次数
+	Count int `json:"count"`
+
+	// 拧紧ID
+	TighteningID string `json:"tightening_id"`
+
+	// 实际结果
+	MeasureResult string `json:"measure_result"`
+
+	// 实际扭矩
+	MeasureTorque float64 `json:"measure_torque"`
+
+	// 实际角度
+	MeasureAngle float64 `json:"measure_angle"`
+
+	// 实际耗时
+	MeasureTime float64 `json:"measure_time"`
+
+	// 拧紧策略
+	Strategy string `json:"strategy"`
+
+	// 最大扭矩
+	TorqueMax float64 `json:"torque_max"`
+
+	// 最小扭矩
+	TorqueMin float64 `json:"torque_min-"`
+
+	// 扭矩阈值
+	TorqueThreshold float64 `json:"torque_threshold"`
+
+	// 目标扭矩
+	TorqueTarget float64 `json:"torque_target"`
+
+	// 最大角度
+	AngleMax float64 `json:"angle_max"`
+
+	// 最小角度
+	AngleMin float64 `json:"angle_min"`
+
+	// 目标角度
+	AngleTarget float64 `json:"angle_target"`
+
+	// payload字段
 }
 
 type ResultsWorkorders struct {
