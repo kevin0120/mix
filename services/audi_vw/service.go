@@ -114,7 +114,7 @@ func (p *Service) Write(sn string, buf []byte) error {
 		return fmt.Errorf("can not found controller :%s", sn)
 	}
 	v := p.Parent.Controllers[sn]
-	c := v.(*Controller)
+	c := v.(*TighteningController)
 
 	s := c.Sequence()
 	c.Write(buf, s)
@@ -409,7 +409,7 @@ func (p *Service) PSet(controller_sn string, tool_sn string, pset int, workorder
 		return errors.New(ERR_CVI3_NOT_FOUND)
 	}
 
-	c := v.(*Controller)
+	c := v.(*TighteningController)
 
 	var t controller.ToolConfig
 
@@ -451,7 +451,7 @@ func (p *Service) ToolControl(sn string, tool_sn string, enable bool) error {
 		return errors.New(ERR_CVI3_NOT_FOUND)
 	}
 
-	c := v.(*Controller)
+	c := v.(*TighteningController)
 
 	var t controller.ToolConfig
 

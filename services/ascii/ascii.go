@@ -1,11 +1,10 @@
 package ascii
 
-
 import (
-"fmt"
-"github.com/kataras/iris/core/errors"
-"reflect"
-"strconv"
+	"fmt"
+	"github.com/kataras/iris/core/errors"
+	"reflect"
+	"strconv"
 )
 
 func unmarshal(str string, rType reflect.Type, rValue reflect.Value) error {

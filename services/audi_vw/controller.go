@@ -24,7 +24,7 @@ const (
 	MAX_REPLY_TIMEOUT_COUNT        = 10
 )
 
-type Controller struct {
+type TighteningController struct {
 	w           *socket_writer.SocketWriter
 	Srv         *Service
 	StatusValue atomic.Value
@@ -45,23 +45,23 @@ type Controller struct {
 	protocol          string
 }
 
-func (c *Controller) Inputs() string {
+func (c *TighteningController) Inputs() string {
 	return ""
 }
 
-func (c *Controller) KeepAliveCount() int32 {
+func (c *TighteningController) KeepAliveCount() int32 {
 	return atomic.LoadInt32(&c.keepAliveCount)
 }
 
-func (c *Controller) updateKeepAliveCount(i int32) {
+func (c *TighteningController) updateKeepAliveCount(i int32) {
 	atomic.SwapInt32(&c.keepAliveCount, i)
 }
 
-func (c *Controller) addKeepAliveCount() {
+func (c *TighteningController) addKeepAliveCount() {
 	atomic.AddInt32(&c.keepAliveCount, 1)
 }
 
-func (c *Controller) Sequence() uint32 {
+func (c *TighteningController) Sequence() uint32 {
 
 	c.mux_seq.Lock()
 	defer c.mux_seq.Unlock()
@@ -77,7 +77,7 @@ func (c *Controller) Sequence() uint32 {
 	return seq
 }
 
-func (c *Controller) setSequence(i uint32) {
+func (c *TighteningController) setSequence(i uint32) {
 	c.mux_seq.Lock()
 	defer c.mux_seq.Unlock()
 	if i >= MAXSEQUENCE {
@@ -88,14 +88,14 @@ func (c *Controller) setSequence(i uint32) {
 
 }
 
-func (c *Controller) Status() string {
+func (c *TighteningController) Status() string {
 
 	return c.StatusValue.Load().(string)
 }
 
-func (c *Controller) LoadController(controller *storage.Controllers) {}
+func (c *TighteningController) LoadController(controller *storage.Controllers) {}
 
-func (c *Controller) updateStatus(status string) {
+func (c *TighteningController) updateStatus(status string) {
 
 	if status != c.Status() {
 
@@ -122,9 +122,9 @@ func (c *Controller) updateStatus(status string) {
 	}
 }
 
-func NewController(c Config) Controller {
+func NewController(c Config) TighteningController {
 
-	cont := Controller{
+	cont := TighteningController{
 		buffer:          make(chan []byte, 1024),
 		response:        make(chan string),
 		closing:         make(chan chan struct{}),
@@ -141,11 +141,11 @@ func NewController(c Config) Controller {
 	return cont
 }
 
-func (c *Controller) Protocol() string {
+func (c *TighteningController) Protocol() string {
 	return c.protocol
 }
 
-func (c *Controller) Start() error {
+func (c *TighteningController) Start() error {
 
 	c.Srv.DB.ResetTightning(c.cfg.SN)
 
@@ -161,7 +161,7 @@ func (c *Controller) Start() error {
 	return nil
 }
 
-func (c *Controller) manage() {
+func (c *TighteningController) manage() {
 	nextWriteThreshold := time.Now()
 	for {
 		select {
@@ -204,14 +204,14 @@ func (c *Controller) manage() {
 	}
 }
 
-func (c *Controller) getToolInfo() {
+func (c *TighteningController) getToolInfo() {
 	seq := c.Sequence()
 	totalCount := fmt.Sprintf(Xml_get_total_count, c.Srv.config().Version)
 	p, seq := GeneratePacket(seq, Header_type_request_with_reply, totalCount)
 	c.Write([]byte(p), seq)
 }
 
-func (c *Controller) sendKeepalive() {
+func (c *TighteningController) sendKeepalive() {
 	if c.Status() == controller.STATUS_OFFLINE {
 		return
 	}
@@ -244,7 +244,7 @@ func (c *Controller) sendKeepalive() {
 //}
 
 // 订阅数据
-func (c *Controller) subscribe() {
+func (c *TighteningController) subscribe() {
 
 	seq := c.Sequence()
 	subscribe := fmt.Sprintf(Xml_subscribe, c.Srv.config().Version)
@@ -253,7 +253,7 @@ func (c *Controller) subscribe() {
 	c.Write([]byte(subscribePacket), seq)
 }
 
-func (c *Controller) Write(buf []byte, seq uint32) {
+func (c *TighteningController) Write(buf []byte, seq uint32) {
 	c.buffer <- buf
 }
 
@@ -272,7 +272,7 @@ func (c *Controller) Write(buf []byte, seq uint32) {
 //	}
 //}
 
-func (c *Controller) Connect() error {
+func (c *TighteningController) Connect() error {
 	c.StatusValue.Store(controller.STATUS_OFFLINE)
 	c.setSequence(MINSEQUENCE)
 
@@ -304,15 +304,15 @@ func (c *Controller) Connect() error {
 	return nil
 }
 
-func (c *Controller) updateKeepAliveDeadLine() {
+func (c *TighteningController) updateKeepAliveDeadLine() {
 	c.keepaliveDeadLine.Store(time.Now().Add(c.keep_period))
 }
 
-func (c *Controller) KeepAliveDeadLine() time.Time {
+func (c *TighteningController) KeepAliveDeadLine() time.Time {
 	return c.keepaliveDeadLine.Load().(time.Time)
 }
 
-func (c *Controller) Close() error {
+func (c *TighteningController) Close() error {
 
 	closed := make(chan struct{})
 	c.closing <- closed
@@ -322,7 +322,7 @@ func (c *Controller) Close() error {
 }
 
 // 客户端读取
-func (c *Controller) Read(conn net.Conn) {
+func (c *TighteningController) Read(conn net.Conn) {
 	defer conn.Close()
 
 	buffer := make([]byte, c.Srv.config().ReadBufferSize)
@@ -356,7 +356,7 @@ func (c *Controller) Read(conn net.Conn) {
 }
 
 // 拧紧抢使能
-func (c *Controller) ToolControl(enable bool, channel int) error {
+func (c *TighteningController) ToolControl(enable bool, channel int) error {
 	tool_channel := ""
 	if channel != controller.DEFAULT_TOOL_CHANNEL {
 		tool_channel = fmt.Sprintf("<KNR>%d</KNR>", channel)
@@ -405,7 +405,7 @@ func (c *Controller) ToolControl(enable bool, channel int) error {
 }
 
 // PSet程序设定
-func (c *Controller) PSet(pset int, workorder_id int64, reseult_id int64, count int, user_id int64, channel int) (uint32, error) {
+func (c *TighteningController) PSet(pset int, workorder_id int64, reseult_id int64, count int, user_id int64, channel int) (uint32, error) {
 
 	//sdate, stime := utils.GetDateTime()
 
@@ -452,7 +452,7 @@ func (c *Controller) PSet(pset int, workorder_id int64, reseult_id int64, count 
 	return seq, nil
 }
 
-func (c *Controller) audiVW2OPToolInfo(ti toolInfoCNT) openprotocol.ToolInfo {
+func (c *TighteningController) audiVW2OPToolInfo(ti toolInfoCNT) openprotocol.ToolInfo {
 	var info openprotocol.ToolInfo
 
 	var t controller.ToolConfig
@@ -477,29 +477,29 @@ func (c *Controller) audiVW2OPToolInfo(ti toolInfoCNT) openprotocol.ToolInfo {
 	return info
 }
 
-func (c *Controller) TryCreateMaintenance(ti toolInfoCNT) error {
+func (c *TighteningController) TryCreateMaintenance(ti toolInfoCNT) error {
 	info := c.audiVW2OPToolInfo(ti)
 	return c.Srv.Odoo.TryCreateMaintenance(info)
 }
 
-func (c *Controller) Tools() map[string]string {
+func (c *TighteningController) Tools() map[string]string {
 	rt := map[string]string{}
 
 	return rt
 }
 
-func (c *Controller) DeviceType() string {
+func (c *TighteningController) DeviceType() string {
 	return "controller"
 }
 
-func (c *Controller) Children() map[string]device.IDevice {
+func (c *TighteningController) Children() map[string]device.IDevice {
 	return map[string]device.IDevice{}
 }
 
-func (s *Controller) Data() interface{} {
+func (s *TighteningController) Data() interface{} {
 	return nil
 }
 
-func (s *Controller) Config() interface{} {
+func (s *TighteningController) Config() interface{} {
 	return nil
 }

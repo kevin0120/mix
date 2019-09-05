@@ -143,7 +143,7 @@ func (c *TighteningController) handlerProcess() {
 		case pkg := <-c.handlerBuf:
 			err := c.HandleMsg(&pkg)
 			if err != nil {
-				c.diag.Error("Open Protocol HandleMsg fail", err)
+				c.diag.Error("Open Protocol HandleMsg Fail", err)
 			}
 		}
 	}
