@@ -388,7 +388,7 @@ func (c *TighteningController) handleResultandClear(toolNum int) {
 	defer c.mtxResult.Unlock()
 	c.mtxResult.Lock()
 
-	if c.result[toolNum] != nil && c.result_CURVE[toolNum] != nil {
+	if len(c.result[toolNum]) != 0 && len(c.result_CURVE[toolNum]) != 0 {
 
 		if c.result_CURVE[toolNum] != nil {
 			c.result_CURVE[toolNum][0].CurveContent.Result = c.result[toolNum][0].Result
