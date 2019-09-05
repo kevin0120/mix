@@ -7,6 +7,7 @@ import (
 	"github.com/masami10/rush/utils/biu"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
@@ -338,7 +339,48 @@ type ResultData struct {
 
 // TODO
 func (rd *ResultData) ToTighteningResult() *tightening_device.TighteningResult {
-	return &tightening_device.TighteningResult{}
+	return &tightening_device.TighteningResult{
+		// 控制器序列号
+		ControllerSN :rd.ControllerName,
+		// 工具序列号
+		ToolSN :rd.ToolSerialNumber,
+		// 收到时间
+		UpdateTime :time.Now(),
+		// job号
+		Job :rd.JobID,
+		// pset号
+		PSet : rd.PSetID,
+		// 批次信息
+		Batch : rd.BatchStatus,
+		// 当前拧紧次数
+		Count :rd.NumberOfStages,
+		// 拧紧ID
+		TighteningID: rd.TightingID,
+		// 实际结果
+		MeasureResult :rd.StageResult,
+		// 实际扭矩
+		MeasureTorque :rd.Torque,
+		// 实际角度
+		MeasureAngle :rd.Angle,
+		// 实际耗时
+		MeasureTime :0,
+		// 拧紧策略
+		Strategy :rd.Strategy,
+		// 最大扭矩
+		TorqueMax :rd.TorqueMax,
+		// 最小扭矩
+		TorqueMin :rd.TorqueMin,
+		// 扭矩阈值
+		TorqueThreshold :rd.TorqueMax,
+		// 目标扭矩
+		TorqueTarget :rd.TorqueFinalTarget,
+		// 最大角度
+		AngleMax :rd.AngleMax,
+		// 最小角度
+		AngleMin :rd.AngleMin,
+		// 目标角度
+		AngleTarget :rd.FinalAngleTarget,
+	}
 }
 
 func (rd *ResultData) DeserializeOld(str string) error {
