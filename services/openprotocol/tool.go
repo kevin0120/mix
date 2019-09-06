@@ -289,16 +289,10 @@ func (c *TighteningTool) OnResult(result interface{}) {
 	tighteningResult := result.(*tightening_device.TighteningResult)
 	dbResult := tighteningResult.ToDBResult()
 
-	// 尝试获取最近一条没有对应结果的曲线并更新
-	err := c.parent.Srv.DB.UpdateIncompleteCurve(dbResult.ToolSN, dbResult.TighteningID)
-	if err == nil {
-		c.diag.Debug("No Curve Need Update")
-	}
-
-	// 缓存结果
-	err = c.parent.Srv.DB.Store(dbResult)
+	// 尝试获取最近一条没有对应结果的曲线并更新, 同时缓存结果
+	err := c.parent.Srv.DB.UpdateIncompleteCurveAndSaveResult(dbResult)
 	if err != nil {
-		c.diag.Debug("Save Result Failed")
+		c.diag.Error("Handle Result With Curve Failed", err)
 	}
 
 	// 分发结果
@@ -312,12 +306,14 @@ func (c *TighteningTool) OnCurve(curve interface{}) {
 		return
 	}
 
-	// TODO
-	//tighteningCurve := curve.(*tightening_device.TighteningCurve)
+	tighteningCurve := curve.(*tightening_device.TighteningCurve)
+	dbCurves := tighteningCurve.ToDBCurve()
 
-	// 尝试获取最近一条没有对应曲线的结果并更新， 如果成功则上传曲线， 否则只缓存
-
-	// 缓存曲线
+	// 尝试获取最近一条没有对应曲线的结果并更新, 同时缓存曲线
+	err := c.parent.Srv.DB.UpdateIncompleteResultAndSaveCurve(dbCurves)
+	if err != nil {
+		c.diag.Error("Handle Curve With Result Failed", err)
+	}
 }
 
 func (c *TighteningTool) GetDispatch(name string) *utils.Dispatch {

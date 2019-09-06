@@ -315,7 +315,7 @@ func (s *Service) ListCurvesByResult(result_id int64) ([]Curves, error) {
 func (s *Service) ListUnuploadCurves() ([]Curves, error) {
 	var curves []Curves
 
-	e := s.eng.Alias("c").Where("c.has_upload = ?", false).Find(&curves)
+	e := s.eng.Alias("c").Where("c.has_upload = ?", false).And("c.tightening_id != ?", "").Find(&curves)
 	if e != nil {
 		return curves, e
 	} else {
@@ -1034,7 +1034,7 @@ func (s *Service) GetLastIncompleteCurve(toolSN string) (*Curves, error) {
 	}
 }
 
-func (s *Service) UpdateIncompleteCurve(toolSN string, tigheningID string) error {
+func (s *Service) UpdateIncompleteCurveAndSaveResult(result *Results) error {
 
 	session := s.eng.NewSession()
 	defer session.Close()
@@ -1047,7 +1047,7 @@ func (s *Service) UpdateIncompleteCurve(toolSN string, tigheningID string) error
 
 	// 获取最近不完整的曲线
 	curve := Curves{}
-	exist, err := s.eng.Alias("c").Where("c.tightening_id = ?", "").And("c.tool_sn = ?", toolSN).OrderBy("c.update_time").Desc("c.update_time").Get(&curve)
+	exist, err := s.eng.Alias("c").Where("c.tightening_id = ?", "").And("c.tool_sn = ?", result.ToolSN).OrderBy("c.update_time").Desc("c.update_time").Get(&curve)
 
 	if err != nil {
 		return err
@@ -1055,7 +1055,7 @@ func (s *Service) UpdateIncompleteCurve(toolSN string, tigheningID string) error
 
 	if exist {
 		// 更新曲线
-		curve.TighteningID = tigheningID
+		curve.TighteningID = result.TighteningID
 		sql := "update `curves` set tightening_id = ? where id = ?"
 		_, err = session.Exec(sql,
 			curve.TighteningID,
@@ -1064,7 +1064,71 @@ func (s *Service) UpdateIncompleteCurve(toolSN string, tigheningID string) error
 		if err != nil {
 			return err
 		}
+
+		result.CurveFile = fmt.Sprintf("%s_%s.json", result.ToolSN, result.TighteningID)
 	}
+
+	// 保存结果
+	session.Insert(result)
+
+	err = session.Commit()
+	if err != nil {
+		return errors.Wrapf(err, "commit fail")
+	}
+
+	return nil
+}
+
+//func (s *Service) LastTigheningID(toolSN string) (string, error) {
+//
+//	result := Results{}
+//	rt, err := s.eng.Alias("c").Where("c.curve_file = ?", "").And("c.tool_sn = ?", toolSN).OrderBy("c.update_time").Desc("c.update_time").Get(&result)
+//
+//	if err != nil {
+//		return result.TighteningID, err
+//	} else {
+//		return result.TighteningID, nil
+//	}
+//
+//	return "", nil
+//}
+
+func (s *Service) UpdateIncompleteResultAndSaveCurve(curve *Curves) error {
+	session := s.eng.NewSession()
+	defer session.Close()
+
+	// 执行事务
+	err := session.Begin()
+	if err != nil {
+		return err
+	}
+
+	// 获取最近不完整的结果
+	result := Results{}
+	exist, err := s.eng.Alias("r").Where("r.curve_file = ?", "").And("r.gun_sn = ?", curve.ToolSN).OrderBy("r.update_time").Desc("r.update_time").Get(&result)
+
+	if err != nil {
+		return err
+	}
+
+	if exist {
+		// 更新结果
+		result.CurveFile = fmt.Sprintf("%s_%s.json", result.ToolSN, result.TighteningID)
+		sql := "update `results` set curve_file = ? where id = ?"
+		_, err = session.Exec(sql,
+			result.CurveFile,
+			result.Id)
+
+		if err != nil {
+			return err
+		}
+
+		curve.CurveFile = result.CurveFile
+		curve.TighteningID = result.TighteningID
+	}
+
+	// 保存曲线
+	session.Insert(curve)
 
 	err = session.Commit()
 	if err != nil {

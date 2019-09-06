@@ -430,4 +430,5 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 
 func (s *Service) OnTighteningResult(data interface{}) {
 	// TODO:结果推送HMI
+	s.diag.Debug("结果推送HMI")
 }

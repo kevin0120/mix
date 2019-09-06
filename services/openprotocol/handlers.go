@@ -9,6 +9,7 @@ import (
 	"github.com/masami10/rush/services/wsnotify"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func GetMidHandler(mid string) (MidHandler, error) {
@@ -101,6 +102,7 @@ func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
 
 		defer delete(c.temp_result_CURVE, curve.ToolNumber)
 		c.temp_result_CURVE[curve.ToolNumber].ToolSN = toolSN
+		c.temp_result_CURVE[curve.ToolNumber].UpdateTime = time.Now()
 		c.toolDispatches[toolSN].curveDispatch.Dispatch(c.temp_result_CURVE[curve.ToolNumber])
 	}
 	return nil
