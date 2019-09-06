@@ -1047,21 +1047,23 @@ func (s *Service) UpdateIncompleteCurve(toolSN string, tigheningID string) error
 
 	// 获取最近不完整的曲线
 	curve := Curves{}
-	err = s.eng.Alias("c").Where("c.tightening_id = ?", "").And("c.tool_sn = ?", toolSN).OrderBy("c.update_time").Desc("c.update_time").Find(&curve)
+	exist, err := s.eng.Alias("c").Where("c.tightening_id = ?", "").And("c.tool_sn = ?", toolSN).OrderBy("c.update_time").Desc("c.update_time").Get(&curve)
 
 	if err != nil {
 		return err
 	}
 
-	// 更新曲线
-	curve.TighteningID = tigheningID
-	sql := "update `curves` set tightening_id = ? where id = ?"
-	_, err = session.Exec(sql,
-		curve.TighteningID,
-		curve.Id)
+	if exist {
+		// 更新曲线
+		curve.TighteningID = tigheningID
+		sql := "update `curves` set tightening_id = ? where id = ?"
+		_, err = session.Exec(sql,
+			curve.TighteningID,
+			curve.Id)
 
-	if err != nil {
-		return err
+		if err != nil {
+			return err
+		}
 	}
 
 	err = session.Commit()

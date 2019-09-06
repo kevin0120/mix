@@ -6,6 +6,7 @@ import (
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/tightening_device"
+	"github.com/masami10/rush/utils"
 )
 
 const (
@@ -291,14 +292,13 @@ func (c *TighteningTool) OnResult(result interface{}) {
 	// 尝试获取最近一条没有对应结果的曲线并更新
 	err := c.parent.Srv.DB.UpdateIncompleteCurve(dbResult.ToolSN, dbResult.TighteningID)
 	if err == nil {
-		// 如果成功则上传曲线
-		// TODO
+		c.diag.Debug("No Curve Need Update")
 	}
 
 	// 缓存结果
 	err = c.parent.Srv.DB.Store(dbResult)
 	if err != nil {
-
+		c.diag.Debug("Save Result Failed")
 	}
 
 	// 分发结果
@@ -318,4 +318,8 @@ func (c *TighteningTool) OnCurve(curve interface{}) {
 	// 尝试获取最近一条没有对应曲线的结果并更新， 如果成功则上传曲线， 否则只缓存
 
 	// 缓存曲线
+}
+
+func (c *TighteningTool) GetDispatch(name string) *utils.Dispatch {
+	return nil
 }

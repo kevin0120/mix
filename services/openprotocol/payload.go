@@ -340,8 +340,6 @@ type ResultData struct {
 // TODO
 func (rd *ResultData) ToTighteningResult() *tightening_device.TighteningResult {
 	return &tightening_device.TighteningResult{
-		// 控制器序列号
-		ControllerSN: rd.ControllerName,
 		// 工具序列号
 		ToolSN: rd.ToolSerialNumber,
 		// 收到时间

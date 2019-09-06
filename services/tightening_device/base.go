@@ -2,10 +2,13 @@ package tightening_device
 
 import (
 	"github.com/masami10/rush/services/device"
+	"github.com/masami10/rush/utils"
 )
 
 type ITighteningDevice interface {
 	device.IDevice
+
+	GetDispatch(string) *utils.Dispatch
 }
 
 type ITighteningController interface {

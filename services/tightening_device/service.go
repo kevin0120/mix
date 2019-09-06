@@ -34,6 +34,8 @@ type Service struct {
 
 	wsnotify.WSNotify
 	utils.DispatchHandler
+
+	dispatches map[string]*utils.Dispatch
 }
 
 func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol) (*Service, error) {
@@ -43,6 +45,9 @@ func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol) (*Servi
 		mtxDevices:         sync.Mutex{},
 		runningControllers: map[string]ITighteningController{},
 		protocols:          map[string]ITighteningProtocol{},
+		dispatches: map[string]*utils.Dispatch{
+			DISPATCH_RESULT: utils.CreateDispatch(utils.DEFAULT_BUF_LEN),
+		},
 	}
 
 	srv.configValue.Store(c)
@@ -61,6 +66,8 @@ func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol) (*Servi
 			continue
 		}
 
+		c.GetDispatch(DISPATCH_RESULT).Regist(srv.OnResult)
+
 		// TODO: 如果控制器序列号没有配置，则通过探测加入设备列表。
 		srv.addController(deviceConfig.SN, c)
 	}
@@ -75,6 +82,10 @@ func (s *Service) Open() error {
 
 	s.WS.AddNotify(s)
 
+	for _, v := range s.dispatches {
+		v.Start()
+	}
+
 	// 启动所有拧紧控制器
 	s.startupControllers()
 
@@ -82,6 +93,10 @@ func (s *Service) Open() error {
 }
 
 func (s *Service) Close() error {
+
+	for _, v := range s.dispatches {
+		v.Release()
+	}
 
 	// 关闭所有控制器
 	s.shutdownControllers()
@@ -193,6 +208,15 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 		// 类型错误
 		return
 	}
+}
+
+// 收到结果
+func (s *Service) OnResult(data interface{}) {
+	s.GetDispatch(DISPATCH_RESULT).Dispatch(data)
+}
+
+func (s *Service) GetDispatch(name string) *utils.Dispatch {
+	return s.dispatches[name]
 }
 
 func (s *Service) addController(controllerSN string, controller ITighteningController) {

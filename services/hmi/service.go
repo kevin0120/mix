@@ -9,6 +9,7 @@ import (
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/openprotocol"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
 )
 
@@ -31,6 +32,7 @@ type Service struct {
 	ControllerService *controller.Service
 	SN                string
 	wsnotify.WSNotify
+	TighteningService *tightening_device.Service
 }
 
 func NewService(d Diagnostic) *Service {
@@ -48,6 +50,7 @@ func NewService(d Diagnostic) *Service {
 func (s *Service) Open() error {
 
 	s.ControllerService.WS.OnNewClient = s.OnNewHmiClient
+	s.TighteningService.GetDispatch(tightening_device.DISPATCH_RESULT).Regist(s.OnTighteningResult)
 
 	var r httpd.Route
 
@@ -423,4 +426,8 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
 	}
+}
+
+func (s *Service) OnTighteningResult(data interface{}) {
+	// TODO:结果推送HMI
 }

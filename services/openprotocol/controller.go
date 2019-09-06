@@ -123,6 +123,8 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 		c.AddChildren(v.SN, tool)
 	}
 
+	c.externalResultDispatch = utils.CreateDispatch(utils.DEFAULT_BUF_LEN)
+
 	return &c
 }
 
@@ -364,6 +366,7 @@ func (c *TighteningController) handleResult(result_data *ResultData, curve *mini
 	//	c.handleResultandClear(result_data.ChannelID)
 
 	tighteningResult := result_data.ToTighteningResult()
+	tighteningResult.ControllerSN = c.cfg.SN
 	toolSN, err := c.findToolSNByChannel(result_data.ChannelID)
 	if err != nil {
 		return err
@@ -403,6 +406,8 @@ func (c *TighteningController) Start() error {
 		dispatch.resultDispatch.Start()
 		dispatch.curveDispatch.Start()
 	}
+
+	c.externalResultDispatch.Start()
 
 	c.w = socket_writer.NewSocketWriter(c.cfg.Endpoint, c)
 
@@ -998,4 +1003,8 @@ func (c *TighteningController) Model() string {
 
 func (c *TighteningController) DeviceType() string {
 	return tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER
+}
+
+func (c *TighteningController) GetDispatch(name string) *utils.Dispatch {
+	return c.externalResultDispatch
 }
