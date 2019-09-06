@@ -49,36 +49,33 @@ type handlerPkg_curve struct {
 }
 
 type TighteningController struct {
-	w                 *socket_writer.SocketWriter
-	cfg               *tightening_device.TighteningDeviceConfig
-	keepAliveCount    int32
-	keep_period       time.Duration
-	req_timeout       time.Duration
-	getToolInfoPeriod time.Duration
-	//Response          ResponseQueue
-	Srv               *Service
-	dbController      *storage.Controllers
-	buffer            chan []byte
-	closing           chan chan struct{}
-	handlerBuf        chan handlerPkg
-	keepaliveDeadLine atomic.Value
-	protocol          string
-	inputs            string
-	diag              Diagnostic
-	temp_result_CURVE map[int]*tightening_device.TighteningCurve
-	//result_CURVE         map[int][]*minio.ControllerCurve
-	//result               map[int][]*controller.ControllerResult
+	w                    *socket_writer.SocketWriter
+	cfg                  *tightening_device.TighteningDeviceConfig
+	keepAliveCount       int32
+	keep_period          time.Duration
+	req_timeout          time.Duration
+	getToolInfoPeriod    time.Duration
+	Response             ResponseQueue
+	Srv                  *Service
+	dbController         *storage.Controllers
+	buffer               chan []byte
+	closing              chan chan struct{}
+	handlerBuf           chan handlerPkg
+	keepaliveDeadLine    atomic.Value
+	protocol             string
+	inputs               string
+	diag                 Diagnostic
+	temp_result_CURVE    map[int]*tightening_device.TighteningCurve
 	mtxResult            sync.Mutex
 	model                string
 	receiveBuf           chan []byte
 	controllerSubscribes []ControllerSubscribe
 
-	dispatches map[string]*ToolDispatch
+	toolDispatches         map[string]*ToolDispatch
+	externalResultDispatch *utils.Dispatch
 
-	responseChannel chan interface{}
-
-	// 无效的请求次数
-	invalidRequests int32
+	requestChannel chan uint32
+	sequence       *utils.Sequence
 
 	device.BaseDevice
 }
@@ -99,7 +96,7 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 		BaseDevice:        device.CreateBaseDevice(),
 		temp_result_CURVE: map[int]*tightening_device.TighteningCurve{},
 
-		dispatches: map[string]*ToolDispatch{},
+		toolDispatches: map[string]*ToolDispatch{},
 	}
 
 	c.controllerSubscribes = []ControllerSubscribe{
@@ -116,12 +113,12 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 
 	for _, v := range deviceConfig.Tools {
 		tool := NewTool(&c, v, d)
-		c.dispatches[v.SN] = &ToolDispatch{
+		c.toolDispatches[v.SN] = &ToolDispatch{
 			resultDispatch: utils.CreateDispatch(utils.DEFAULT_BUF_LEN),
 			curveDispatch:  utils.CreateDispatch(utils.DEFAULT_BUF_LEN),
 		}
-		c.dispatches[v.SN].resultDispatch.Regist(tool.OnResult)
-		c.dispatches[v.SN].curveDispatch.Regist(tool.OnCurve)
+		c.toolDispatches[v.SN].resultDispatch.Regist(tool.OnResult)
+		c.toolDispatches[v.SN].curveDispatch.Regist(tool.OnCurve)
 
 		c.AddChildren(v.SN, tool)
 	}
@@ -172,27 +169,6 @@ func (c *TighteningController) Subscribe() {
 	}
 }
 
-func (c *TighteningController) getResponse(ctx context.Context) interface{} {
-
-	for {
-		select {
-		case resp := <-c.responseChannel:
-			if atomic.LoadInt32(&c.invalidRequests) == 0 {
-				// 当前为有效响应
-				return resp
-			}
-
-			// 当前为无效响应， 不处理， 同时invalidRequests-1。 继续接收
-			atomic.AddInt32(&c.invalidRequests, -1)
-
-		case <-ctx.Done():
-			// 本次请求响应超时， 则标记为无效请求， invalidRequests+1
-			atomic.AddInt32(&c.invalidRequests, 1)
-			return nil
-		}
-	}
-}
-
 func (c *TighteningController) ProcessRequest(mid string, noack string, station string, spindle string, data string) (interface{}, error) {
 	rev, err := GetVendorMid(c.Model(), mid)
 	if err != nil {
@@ -205,9 +181,13 @@ func (c *TighteningController) ProcessRequest(mid string, noack string, station 
 
 	pkg := GeneratePackage(mid, rev, noack, station, spindle, data)
 
+	seq := c.sequence.GetSequence()
+	c.requestChannel <- seq
+	c.Response.Add(seq, nil)
+
 	c.Write([]byte(pkg))
 	ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
-	reply := c.getResponse(ctx)
+	reply := c.Response.Get(seq, ctx)
 
 	if reply == nil {
 		return nil, errors.New(controller.ERR_CONTROLER_TIMEOUT)
@@ -392,48 +372,10 @@ func (c *TighteningController) handleResult(result_data *ResultData, curve *mini
 	tighteningResult.ToolSN = toolSN
 
 	// 分发结果到工具进行处理
-	c.dispatches[toolSN].resultDispatch.Dispatch(tighteningResult)
+	c.toolDispatches[toolSN].resultDispatch.Dispatch(tighteningResult)
 
 	return nil
 }
-
-//func (c *TighteningController) updateResult(result *controller.ControllerResult, curve *minio.ControllerCurve, toolNum int) {
-//	defer c.mtxResult.Unlock()
-//	c.mtxResult.Lock()
-//
-//	if _, ok := c.result[toolNum]; !ok {
-//		c.result[toolNum] = nil
-//	}
-//	if _, ok := c.result_CURVE[toolNum]; !ok {
-//		c.result_CURVE[toolNum] = nil
-//	}
-//
-//	if result != nil {
-//		c.result[toolNum] = append(c.result[toolNum], result)
-//	}
-//
-//	if curve != nil {
-//		c.result_CURVE[toolNum] = append(c.result_CURVE[toolNum], curve)
-//	}
-//}
-//
-//func (c *TighteningController) handleResultandClear(toolNum int) {
-//	defer c.mtxResult.Unlock()
-//	c.mtxResult.Lock()
-//
-//	if len(c.result[toolNum]) != 0 && len(c.result_CURVE[toolNum]) != 0 {
-//
-//		if c.result_CURVE[toolNum] != nil {
-//			c.result_CURVE[toolNum][0].CurveContent.Result = c.result[toolNum][0].Result
-//			c.result_CURVE[toolNum][0].CurveFile = fmt.Sprintf("%s-%s.json", c.cfg.SN, c.result[toolNum][0].TighteningID)
-//		}
-//
-//		c.Srv.Parent.Handlers.Handle(*c.result[toolNum][0], *c.result_CURVE[toolNum][0])
-//
-//		c.result[toolNum] = c.result[toolNum][1:]
-//		c.result_CURVE[toolNum] = c.result_CURVE[toolNum][1:]
-//	}
-//}
 
 // seq, count
 func (c *TighteningController) calBatch(workorderID int64) (int, int) {
@@ -457,12 +399,15 @@ func (c *TighteningController) Start() error {
 		})
 	}
 
-	for _, dispatch := range c.dispatches {
+	for _, dispatch := range c.toolDispatches {
 		dispatch.resultDispatch.Start()
 		dispatch.curveDispatch.Start()
 	}
 
 	c.w = socket_writer.NewSocketWriter(c.cfg.Endpoint, c)
+
+	// 启动处理
+	go c.manage()
 
 	go c.Connect()
 
@@ -470,7 +415,7 @@ func (c *TighteningController) Start() error {
 }
 
 func (c *TighteningController) Stop() error {
-	for _, dispatch := range c.dispatches {
+	for _, dispatch := range c.toolDispatches {
 		dispatch.resultDispatch.Release()
 		dispatch.curveDispatch.Release()
 	}
@@ -499,8 +444,12 @@ func (c *TighteningController) Connect() error {
 	c.UpdateStatus(device.STATUS_OFFLINE)
 	c.handlerBuf = make(chan handlerPkg, 1024)
 	c.receiveBuf = make(chan []byte, 65535)
-	c.responseChannel = make(chan interface{}, 1024)
-	c.invalidRequests = 0
+	c.requestChannel = make(chan uint32, 1024)
+	c.sequence = utils.CreateSequence()
+	c.Response = ResponseQueue{
+		Results: map[interface{}]interface{}{},
+		mtx:     sync.Mutex{},
+	}
 
 	for {
 		err := c.w.Connect(DAIL_TIMEOUT)
@@ -513,10 +462,7 @@ func (c *TighteningController) Connect() error {
 		time.Sleep(time.Duration(c.req_timeout))
 	}
 
-	c.handleStatus(controller.STATUS_ONLINE)
-
-	// 启动处理
-	go c.manage()
+	c.handleStatus(device.STATUS_ONLINE)
 
 	c.startComm()
 
@@ -532,14 +478,14 @@ func (c *TighteningController) getTighteningCount() {
 				continue
 			}
 
-			if c.Status() == controller.STATUS_OFFLINE {
+			if c.Status() == device.STATUS_OFFLINE {
 				continue
 			}
 			req := GeneratePackage(MID_0040_TOOL_INFO_REQUEST, rev, "", "", "", "")
 			c.Write([]byte(req))
 		case stopDone := <-c.closing:
 			close(stopDone)
-			return //退出manage协程
+			return
 		}
 	}
 }
@@ -631,7 +577,7 @@ func (c *TighteningController) KeepAliveDeadLine() time.Time {
 }
 
 func (c *TighteningController) sendKeepalive() {
-	if c.Status() == controller.STATUS_OFFLINE {
+	if c.Status() == device.STATUS_OFFLINE {
 		return
 	}
 
@@ -665,7 +611,6 @@ func (c *TighteningController) handleStatus(status string) {
 		c.UpdateStatus(status)
 
 		if status == device.STATUS_OFFLINE {
-			c.Close()
 
 			// 断线重连
 			go c.Connect()
@@ -692,6 +637,7 @@ func (c *TighteningController) Read(conn net.Conn) {
 		n, err := conn.Read(buffer)
 		if err != nil {
 			c.Srv.diag.Error("read failed", err)
+			c.handleStatus(device.STATUS_OFFLINE)
 			break
 		}
 
@@ -767,11 +713,11 @@ func (c *TighteningController) manage() {
 	for {
 		select {
 		case <-time.After(c.keep_period):
-			if c.Status() == controller.STATUS_OFFLINE {
+			if c.Status() == device.STATUS_OFFLINE {
 				continue
 			}
 			if c.KeepAliveCount() >= MAX_KEEP_ALIVE_CHECK {
-				c.handleStatus(controller.STATUS_OFFLINE)
+				c.handleStatus(device.STATUS_OFFLINE)
 				c.updateKeepAliveCount(0)
 				continue
 			}
@@ -787,7 +733,7 @@ func (c *TighteningController) manage() {
 			}
 			err := c.w.Write([]byte(v))
 			if err != nil {
-				c.Srv.diag.Error("Write data fail", err)
+				c.Srv.diag.Error("Write Data Fail", err)
 			} else {
 				c.updateKeepAliveDeadLine()
 			}
@@ -846,7 +792,7 @@ func (c *TighteningController) getOldResult(last_id int64) error {
 		return err
 	}
 
-	if c.Status() == controller.STATUS_OFFLINE {
+	if c.Status() == device.STATUS_OFFLINE {
 		return errors.New("status offline")
 	}
 

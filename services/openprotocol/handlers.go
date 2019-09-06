@@ -48,14 +48,8 @@ func handleMID_9999_ALIVE(c *TighteningController, pkg *handlerPkg) error {
 }
 
 func handleMID_0002_START_ACK(c *TighteningController, pkg *handlerPkg) error {
-	//ctx := c.Response.get(MID_0001_START)
-	//if ctx == nil {
-	//	return errors.New("Context Is Nil")
-	//}
-
-	//defer ctx.(context.Context).Done()
-	//c.Response.update(MID_0001_START, request_errors["00"])
-	c.responseChannel <- request_errors["00"]
+	seq := <-c.requestChannel
+	c.Response.update(seq, request_errors["00"])
 
 	// TODO
 	go c.Subscribe()
@@ -98,8 +92,6 @@ func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
 			c.temp_result_CURVE[curve.ToolNumber].CUR_M = c.temp_result_CURVE[curve.ToolNumber].CUR_M[0:curve.MeasurePoints]
 			c.temp_result_CURVE[curve.ToolNumber].CUR_W = c.temp_result_CURVE[curve.ToolNumber].CUR_W[0:curve.MeasurePoints]
 		}
-		//c.updateResult(nil, c.temp_result_CURVE[curve.ToolNumber], curve.ToolNumber)
-		//c.handleResultandClear(curve.ToolNumber)
 
 		//本次曲线全部解析完毕后,降临时存储的数据清空
 		toolSN, err := c.findToolSNByChannel(curve.ToolNumber)
@@ -109,7 +101,7 @@ func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
 
 		defer delete(c.temp_result_CURVE, curve.ToolNumber)
 		c.temp_result_CURVE[curve.ToolNumber].ToolSN = toolSN
-		c.dispatches[toolSN].curveDispatch.Dispatch(c.temp_result_CURVE[curve.ToolNumber])
+		c.toolDispatches[toolSN].curveDispatch.Dispatch(c.temp_result_CURVE[curve.ToolNumber])
 	}
 	return nil
 }
@@ -161,12 +153,11 @@ func handleMID_0065_OLD_DATA(c *TighteningController, pkg *handlerPkg) error {
 func handleMID_0013_PSET_DETAIL_REPLY(c *TighteningController, pkg *handlerPkg) error {
 	pset_detail, err := DeserializePSetDetail(pkg.Body)
 	if err != nil {
-		c.responseChannel <- nil
 		return err
 	}
 
-	c.responseChannel <- pset_detail
-	//c.Response.update(MID_0012_PSET_DETAIL_REQUEST, pset_detail)
+	seq := <-c.requestChannel
+	c.Response.update(seq, pset_detail)
 
 	return nil
 }
@@ -176,12 +167,11 @@ func handleMID_0011_PSET_LIST_REPLY(c *TighteningController, pkg *handlerPkg) er
 	pset_list := PSetList{}
 	err := pset_list.Deserialize(pkg.Body)
 	if err != nil {
-		c.responseChannel <- nil
 		return err
 	}
 
-	//c.Response.update(MID_0010_PSET_LIST_REQUEST, pset_list)
-	c.responseChannel <- pset_list
+	seq := <-c.requestChannel
+	c.Response.update(seq, pset_list)
 
 	return nil
 }
@@ -191,12 +181,11 @@ func handleMID_0031_JOB_LIST_REPLY(c *TighteningController, pkg *handlerPkg) err
 	job_list := JobList{}
 	err := job_list.Deserialize(pkg.Body)
 	if err != nil {
-		c.responseChannel <- nil
 		return err
 	}
 
-	//c.Response.update(MID_0030_JOB_LIST_REQUEST, job_list)
-	c.responseChannel <- job_list
+	seq := <-c.requestChannel
+	c.Response.update(seq, job_list)
 
 	return nil
 }
@@ -205,46 +194,30 @@ func handleMID_0031_JOB_LIST_REPLY(c *TighteningController, pkg *handlerPkg) err
 func handleMID_0033_JOB_DETAIL_REPLY(c *TighteningController, pkg *handlerPkg) error {
 	jobDetaill, err := DeserializeJobDetail(pkg.Body)
 	if err != nil {
-		c.responseChannel <- nil
 		return err
 	}
 
-	//c.Response.update(MID_0032_JOB_DETAIL_REQUEST, jobDetaill)
-	c.responseChannel <- jobDetaill
+	seq := <-c.requestChannel
+	c.Response.update(seq, jobDetaill)
 
 	return nil
 }
 
 // 请求错误
 func handleMID_0004_CMD_ERR(c *TighteningController, pkg *handlerPkg) error {
-	//mid := pkg.Body[0:4]
 	errCode := pkg.Body[4:6]
 
-	c.responseChannel <- request_errors[errCode]
-	//ctx := c.Response.get(mid)
-	//if ctx == nil {
-	//	return errors.New("Context Is Nil")
-	//}
-	//
-	//defer ctx.(context.Context).Done()
-	//
-	//c.Response.update(mid, request_errors[errCode])
+	seq := <-c.requestChannel
+	c.Response.update(seq, errCode)
 
 	return nil
 }
 
 // 请求成功
 func handleMID_0005_CMD_OK(c *TighteningController, pkg *handlerPkg) error {
-	//ctx := c.Response.get(pkg.Body)
-	//if ctx == nil {
-	//	return errors.New("Context Is Nil")
-	//}
-	//
-	//defer ctx.(context.Context).Done()
+	seq := <-c.requestChannel
+	c.Response.update(seq, request_errors["00"])
 
-	//c.Response.update(pkg.Body, request_errors["00"])
-
-	c.responseChannel <- request_errors["00"]
 	return nil
 }
 

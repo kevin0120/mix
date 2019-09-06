@@ -301,9 +301,8 @@ func (c *TighteningTool) OnResult(result interface{}) {
 
 	}
 
-	// TODO
-	// 上传结果
-	//c.parent.Srv.Aiis.PutResult()
+	// 分发结果
+	c.parent.externalResultDispatch.Dispatch(tighteningResult)
 }
 
 // 处理曲线
@@ -319,6 +318,4 @@ func (c *TighteningTool) OnCurve(curve interface{}) {
 	// 尝试获取最近一条没有对应曲线的结果并更新， 如果成功则上传曲线， 否则只缓存
 
 	// 缓存曲线
-
-	// 上传曲线
 }

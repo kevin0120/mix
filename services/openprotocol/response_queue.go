@@ -2,45 +2,44 @@ package openprotocol
 
 import (
 	"context"
-	"reflect"
 	"sync"
 	"time"
 )
 
 type ResponseQueue struct {
-	Results map[string]interface{}
+	Results map[interface{}]interface{}
 	mtx     sync.Mutex
 }
 
-func (q *ResponseQueue) Add(mid string, msg interface{}) {
+func (q *ResponseQueue) Add(key interface{}, msg interface{}) {
 	defer q.mtx.Unlock()
 
 	q.mtx.Lock()
-	q.Results[mid] = msg
+	q.Results[key] = msg
 }
 
-func (q *ResponseQueue) update(mid string, msg interface{}) {
+func (q *ResponseQueue) update(key interface{}, msg interface{}) {
 	defer q.mtx.Unlock()
 
 	q.mtx.Lock()
-	_, e := q.Results[mid]
+	_, e := q.Results[key]
 	if e {
-		q.Results[mid] = msg
+		q.Results[key] = msg
 	}
 }
 
-func (q *ResponseQueue) remove(mid string) {
+func (q *ResponseQueue) remove(key interface{}) {
 	defer q.mtx.Unlock()
 
 	q.mtx.Lock()
-	delete(q.Results, mid)
+	delete(q.Results, key)
 }
 
-func (q *ResponseQueue) get(mid string) interface{} {
+func (q *ResponseQueue) get(key interface{}) interface{} {
 	defer q.mtx.Unlock()
 
 	q.mtx.Lock()
-	m, e := q.Results[mid]
+	m, e := q.Results[key]
 	if e {
 		return m
 	} else {
@@ -48,13 +47,13 @@ func (q *ResponseQueue) get(mid string) interface{} {
 	}
 }
 
-func (q *ResponseQueue) Get(mid string, ctx context.Context) interface{} {
+func (q *ResponseQueue) Get(key interface{}, ctx context.Context) interface{} {
 	ch := make(chan interface{})
 
 	go func() {
 		for {
-			in := q.get(mid)
-			if in != nil && reflect.TypeOf(in) != reflect.TypeOf(ctx) {
+			in := q.get(key)
+			if in != nil {
 				ch <- in
 				break
 			}
