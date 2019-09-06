@@ -1,12 +1,10 @@
 package openprotocol
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/masami10/rush/services/ascii"
-	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
 	"strconv"
@@ -50,13 +48,14 @@ func handleMID_9999_ALIVE(c *TighteningController, pkg *handlerPkg) error {
 }
 
 func handleMID_0002_START_ACK(c *TighteningController, pkg *handlerPkg) error {
-	ctx := c.Response.get(MID_0001_START)
-	if ctx == nil {
-		return errors.New("Context Is Nil")
-	}
+	//ctx := c.Response.get(MID_0001_START)
+	//if ctx == nil {
+	//	return errors.New("Context Is Nil")
+	//}
 
-	defer ctx.(context.Context).Done()
-	c.Response.update(MID_0001_START, request_errors["00"])
+	//defer ctx.(context.Context).Done()
+	//c.Response.update(MID_0001_START, request_errors["00"])
+	c.responseChannel <- request_errors["00"]
 
 	// TODO
 	go c.Subscribe()
@@ -134,26 +133,26 @@ func handleMID_0065_OLD_DATA(c *TighteningController, pkg *handlerPkg) error {
 		return err
 	}
 
-	flag := c.Response.get(MID_0064_OLD_SUBSCRIBE)
+	//flag := c.Response.get(MID_0064_OLD_SUBSCRIBE)
 
-	if flag != nil {
-		defer c.Response.remove(MID_0064_OLD_SUBSCRIBE)
-		c.Response.Add(MID_0065_OLD_DATA, result_data)
-	} else {
-		// 处理历史数据
-		// TODO: 通过工具获取psetdetail
-		//pset_detail, err := c.GetPSetDetail(result_data.PSetID)
-		//if err == nil {
-		//	result_data.TorqueMin = pset_detail.TorqueMin
-		//	result_data.TorqueMax = pset_detail.TorqueMax
-		//	result_data.TorqueFinalTarget = pset_detail.TorqueTarget
-		//	result_data.AngleMax = pset_detail.AngleMax
-		//	result_data.AngleMin = pset_detail.AngleMin
-		//	result_data.FinalAngleTarget = pset_detail.AngleTarget
-		//}
-
-		return c.handleResult(&result_data, nil)
-	}
+	//if flag != nil {
+	//	defer c.Response.remove(MID_0064_OLD_SUBSCRIBE)
+	//	c.Response.Add(MID_0065_OLD_DATA, result_data)
+	//} else {
+	//	// 处理历史数据
+	//	// TODO: 通过工具获取psetdetail
+	//	//pset_detail, err := c.GetPSetDetail(result_data.PSetID)
+	//	//if err == nil {
+	//	//	result_data.TorqueMin = pset_detail.TorqueMin
+	//	//	result_data.TorqueMax = pset_detail.TorqueMax
+	//	//	result_data.TorqueFinalTarget = pset_detail.TorqueTarget
+	//	//	result_data.AngleMax = pset_detail.AngleMax
+	//	//	result_data.AngleMin = pset_detail.AngleMin
+	//	//	result_data.FinalAngleTarget = pset_detail.AngleTarget
+	//	//}
+	//
+	//	return c.handleResult(&result_data, nil)
+	//}
 
 	return nil
 }
@@ -162,10 +161,12 @@ func handleMID_0065_OLD_DATA(c *TighteningController, pkg *handlerPkg) error {
 func handleMID_0013_PSET_DETAIL_REPLY(c *TighteningController, pkg *handlerPkg) error {
 	pset_detail, err := DeserializePSetDetail(pkg.Body)
 	if err != nil {
+		c.responseChannel <- nil
 		return err
 	}
 
-	c.Response.update(MID_0012_PSET_DETAIL_REQUEST, pset_detail)
+	c.responseChannel <- pset_detail
+	//c.Response.update(MID_0012_PSET_DETAIL_REQUEST, pset_detail)
 
 	return nil
 }
@@ -175,10 +176,12 @@ func handleMID_0011_PSET_LIST_REPLY(c *TighteningController, pkg *handlerPkg) er
 	pset_list := PSetList{}
 	err := pset_list.Deserialize(pkg.Body)
 	if err != nil {
+		c.responseChannel <- nil
 		return err
 	}
 
-	c.Response.update(MID_0010_PSET_LIST_REQUEST, pset_list)
+	//c.Response.update(MID_0010_PSET_LIST_REQUEST, pset_list)
+	c.responseChannel <- pset_list
 
 	return nil
 }
@@ -188,10 +191,12 @@ func handleMID_0031_JOB_LIST_REPLY(c *TighteningController, pkg *handlerPkg) err
 	job_list := JobList{}
 	err := job_list.Deserialize(pkg.Body)
 	if err != nil {
+		c.responseChannel <- nil
 		return err
 	}
 
-	c.Response.update(MID_0030_JOB_LIST_REQUEST, job_list)
+	//c.Response.update(MID_0030_JOB_LIST_REQUEST, job_list)
+	c.responseChannel <- job_list
 
 	return nil
 }
@@ -200,42 +205,46 @@ func handleMID_0031_JOB_LIST_REPLY(c *TighteningController, pkg *handlerPkg) err
 func handleMID_0033_JOB_DETAIL_REPLY(c *TighteningController, pkg *handlerPkg) error {
 	jobDetaill, err := DeserializeJobDetail(pkg.Body)
 	if err != nil {
+		c.responseChannel <- nil
 		return err
 	}
 
-	c.Response.update(MID_0032_JOB_DETAIL_REQUEST, jobDetaill)
+	//c.Response.update(MID_0032_JOB_DETAIL_REQUEST, jobDetaill)
+	c.responseChannel <- jobDetaill
 
 	return nil
 }
 
 // 请求错误
 func handleMID_0004_CMD_ERR(c *TighteningController, pkg *handlerPkg) error {
-	mid := pkg.Body[0:4]
+	//mid := pkg.Body[0:4]
 	errCode := pkg.Body[4:6]
 
-	ctx := c.Response.get(mid)
-	if ctx == nil {
-		return errors.New("Context Is Nil")
-	}
-
-	defer ctx.(context.Context).Done()
-
-	c.Response.update(mid, request_errors[errCode])
+	c.responseChannel <- request_errors[errCode]
+	//ctx := c.Response.get(mid)
+	//if ctx == nil {
+	//	return errors.New("Context Is Nil")
+	//}
+	//
+	//defer ctx.(context.Context).Done()
+	//
+	//c.Response.update(mid, request_errors[errCode])
 
 	return nil
 }
 
 // 请求成功
 func handleMID_0005_CMD_OK(c *TighteningController, pkg *handlerPkg) error {
-	ctx := c.Response.get(pkg.Body)
-	if ctx == nil {
-		return errors.New("Context Is Nil")
-	}
+	//ctx := c.Response.get(pkg.Body)
+	//if ctx == nil {
+	//	return errors.New("Context Is Nil")
+	//}
+	//
+	//defer ctx.(context.Context).Done()
 
-	defer ctx.(context.Context).Done()
+	//c.Response.update(pkg.Body, request_errors["00"])
 
-	c.Response.update(pkg.Body, request_errors["00"])
-
+	c.responseChannel <- request_errors["00"]
 	return nil
 }
 
@@ -385,21 +394,17 @@ func handleMID_0041_TOOL_INFO_REPLY(c *TighteningController, pkg *handlerPkg) er
 		return err
 	}
 
-	if c.Status() == device.STATUS_OFFLINE {
-		c.Response.update(MID_0040_TOOL_INFO_REQUEST, ti)
-	} else {
-		// 将数据通过api传给odoo
-		if ti.ToolSN == "" {
-			return errors.New("Tool Serial Number Is Empty String")
-		}
-
-		if ti.TotalTighteningCount == 0 || ti.CountSinLastService == 0 {
-			//不需要尝试创建维修/标定单据
-			return nil
-		}
-
-		go c.Srv.TryCreateMaintenance(ti) // 协程处理
+	// 将数据通过api传给odoo
+	if ti.ToolSN == "" {
+		return errors.New("Tool Serial Number Is Empty String")
 	}
+
+	if ti.TotalTighteningCount == 0 || ti.CountSinLastService == 0 {
+		//不需要尝试创建维修/标定单据
+		return nil
+	}
+
+	go c.Srv.TryCreateMaintenance(ti) // 协程处理
 
 	return nil
 }

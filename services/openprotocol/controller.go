@@ -55,7 +55,7 @@ type TighteningController struct {
 	keep_period       time.Duration
 	req_timeout       time.Duration
 	getToolInfoPeriod time.Duration
-	Response          ResponseQueue
+	//Response          ResponseQueue
 	Srv               *Service
 	dbController      *storage.Controllers
 	buffer            chan []byte
@@ -75,6 +75,11 @@ type TighteningController struct {
 
 	dispatches map[string]*ToolDispatch
 
+	responseChannel chan interface{}
+
+	// 无效的请求次数
+	invalidRequests int32
+
 	device.BaseDevice
 }
 
@@ -88,15 +93,10 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 		keep_period:       time.Duration(protocolConfig.KeepAlivePeriod),
 		req_timeout:       time.Duration(protocolConfig.ReqTimeout),
 		getToolInfoPeriod: time.Duration(protocolConfig.GetToolInfoPeriod),
-		Response:          ResponseQueue{},
-		handlerBuf:        make(chan handlerPkg, 1024),
 		protocol:          controller.OPENPROTOCOL,
 		mtxResult:         sync.Mutex{},
-		receiveBuf:        make(chan []byte, 65535),
 		cfg:               deviceConfig,
 		BaseDevice:        device.CreateBaseDevice(),
-		//result:            map[int][]*controller.ControllerResult{},
-		//result_CURVE:      map[int][]*minio.ControllerCurve{},
 		temp_result_CURVE: map[int]*tightening_device.TighteningCurve{},
 
 		dispatches: map[string]*ToolDispatch{},
@@ -163,23 +163,32 @@ func (c *TighteningController) Inputs() string {
 	return c.inputs
 }
 
-func (c *TighteningController) handlerProcess() {
-	for {
-		select {
-		case pkg := <-c.handlerBuf:
-			err := c.HandleMsg(&pkg)
-			if err != nil {
-				c.diag.Error("Open Protocol HandleMsg Fail", err)
-			}
-		}
-	}
-}
-
 func (c *TighteningController) Subscribe() {
 	for _, subscribe := range c.controllerSubscribes {
 		err := subscribe()
 		if err != nil {
 			c.diag.Debug(fmt.Sprintf("OpenProtocol Subscribe Failed: %s", err.Error()))
+		}
+	}
+}
+
+func (c *TighteningController) getResponse(ctx context.Context) interface{} {
+
+	for {
+		select {
+		case resp := <-c.responseChannel:
+			if atomic.LoadInt32(&c.invalidRequests) == 0 {
+				// 当前为有效响应
+				return resp
+			}
+
+			// 当前为无效响应， 不处理， 同时invalidRequests-1。 继续接收
+			atomic.AddInt32(&c.invalidRequests, -1)
+
+		case <-ctx.Done():
+			// 本次请求响应超时， 则标记为无效请求， invalidRequests+1
+			atomic.AddInt32(&c.invalidRequests, 1)
+			return nil
 		}
 	}
 }
@@ -194,14 +203,11 @@ func (c *TighteningController) ProcessRequest(mid string, noack string, station 
 		return nil, errors.New(device.STATUS_OFFLINE)
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
-	c.Response.Add(mid, ctx)
-	defer c.Response.remove(mid)
-
 	pkg := GeneratePackage(mid, rev, noack, station, spindle, data)
 
 	c.Write([]byte(pkg))
-	reply := c.Response.Get(mid, ctx)
+	ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
+	reply := c.getResponse(ctx)
 
 	if reply == nil {
 		return nil, errors.New(controller.ERR_CONTROLER_TIMEOUT)
@@ -458,8 +464,6 @@ func (c *TighteningController) Start() error {
 
 	c.w = socket_writer.NewSocketWriter(c.cfg.Endpoint, c)
 
-	go c.handlerProcess()
-
 	go c.Connect()
 
 	return nil
@@ -493,10 +497,10 @@ func (c *TighteningController) Protocol() string {
 
 func (c *TighteningController) Connect() error {
 	c.UpdateStatus(device.STATUS_OFFLINE)
-	c.Response = ResponseQueue{
-		Results: map[string]interface{}{},
-		mtx:     sync.Mutex{},
-	}
+	c.handlerBuf = make(chan handlerPkg, 1024)
+	c.receiveBuf = make(chan []byte, 65535)
+	c.responseChannel = make(chan interface{}, 1024)
+	c.invalidRequests = 0
 
 	for {
 		err := c.w.Connect(DAIL_TIMEOUT)
@@ -511,9 +515,7 @@ func (c *TighteningController) Connect() error {
 
 	c.handleStatus(controller.STATUS_ONLINE)
 
-	//c.Subscribe()
-
-	// 启动发送
+	// 启动处理
 	go c.manage()
 
 	c.startComm()
@@ -548,9 +550,6 @@ func (c *TighteningController) ToolInfoReq() error {
 		return err
 	}
 
-	defer c.Response.remove(MID_0040_TOOL_INFO_REQUEST)
-	c.Response.Add(MID_0040_TOOL_INFO_REQUEST, nil)
-
 	req := GeneratePackage(MID_0040_TOOL_INFO_REQUEST, rev, "", "", "", "")
 	c.Write([]byte(req))
 
@@ -584,7 +583,7 @@ func (c *TighteningController) SolveOldResults() {
 		return
 	}
 
-	c.Response.Add(MID_0064_OLD_SUBSCRIBE, MID_0064_OLD_SUBSCRIBE)
+	//c.Response.Add(MID_0064_OLD_SUBSCRIBE, MID_0064_OLD_SUBSCRIBE)
 	if c.getOldResult(0) != nil {
 		return
 	}
@@ -592,7 +591,7 @@ func (c *TighteningController) SolveOldResults() {
 	var reply interface{} = nil
 	//ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
 	//当在队列中找到非空数据则返回，否则直到timeout返回nil
-	reply = c.Response.get(MID_0065_OLD_DATA)
+	//reply = c.Response.get(MID_0065_OLD_DATA)
 
 	if reply == nil {
 		return
@@ -661,6 +660,7 @@ func (c *TighteningController) Write(buf []byte) {
 func (c *TighteningController) handleStatus(status string) {
 
 	if status != c.Status() {
+		c.diag.Debug(fmt.Sprintf("%s:%s %s\n", c.Model(), c.cfg.SN, status))
 
 		c.UpdateStatus(status)
 
@@ -679,8 +679,6 @@ func (c *TighteningController) handleStatus(status string) {
 
 		msg, _ := json.Marshal(s)
 		c.Srv.WS.WSSendControllerStatus(string(msg))
-
-		c.Srv.diag.Debug(fmt.Sprintf("%s:%s %s\n", c.Model(), c.cfg.SN, status))
 
 	}
 }
@@ -795,6 +793,7 @@ func (c *TighteningController) manage() {
 			}
 			nextWriteThreshold = time.Now().Add(c.req_timeout)
 		case stopDone := <-c.closing:
+			c.diag.Debug("manage exit")
 			close(stopDone)
 			return //退出manage协程
 
@@ -830,6 +829,12 @@ func (c *TighteningController) manage() {
 					writeOffset = 0
 					readOffset += index + 1
 				}
+			}
+
+		case pkg := <-c.handlerBuf:
+			err := c.HandleMsg(&pkg)
+			if err != nil {
+				c.diag.Error("Open Protocol HandleMsg Fail", err)
 			}
 		}
 	}
