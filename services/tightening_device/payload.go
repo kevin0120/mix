@@ -2,7 +2,6 @@ package tightening_device
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/masami10/rush/services/storage"
 	"time"
 )
@@ -131,7 +130,7 @@ func (c *TighteningCurve) ToDBCurve() *storage.Curves {
 		HasUpload:  false,
 		UpdateTime: c.UpdateTime,
 		CurveData:  string(curveContent),
-		CurveFile:  fmt.Sprintf("%s_%s.json", c.ToolSN, c.TighteningID),
+		//CurveFile:  fmt.Sprintf("%s_%s.json", c.ToolSN, c.TighteningID),
 	}
 }
 

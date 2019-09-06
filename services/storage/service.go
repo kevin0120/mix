@@ -315,7 +315,7 @@ func (s *Service) ListCurvesByResult(result_id int64) ([]Curves, error) {
 func (s *Service) ListUnuploadCurves() ([]Curves, error) {
 	var curves []Curves
 
-	e := s.eng.Alias("c").Where("c.has_upload = ?", false).Find(&curves)
+	e := s.eng.Alias("c").Where("c.has_upload = ?", false).And("c.tightening_id != ?", "").Find(&curves)
 	if e != nil {
 		return curves, e
 	} else {
@@ -1052,7 +1052,6 @@ func (s *Service) UpdateIncompleteCurve(toolSN string, tigheningID string) error
 	if err != nil {
 		return err
 	}
-
 	// 更新曲线
 	curve.TighteningID = tigheningID
 	sql := "update `curves` set tightening_id = ? where id = ?"
@@ -1070,4 +1069,18 @@ func (s *Service) UpdateIncompleteCurve(toolSN string, tigheningID string) error
 	}
 
 	return nil
+}
+
+func (s *Service) LastTigheningID(toolSN string) (string, error) {
+
+	result := Results{}
+	e := s.eng.Alias("c").Where("c.curve_file = ?", "").And("c.tool_sn = ?", toolSN).OrderBy("c.update_time").Desc("c.update_time").Find(&result)
+
+	if e != nil {
+		return result.TighteningID, e
+	} else {
+		return result.TighteningID, nil
+	}
+
+	return "", nil
 }

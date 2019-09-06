@@ -302,7 +302,7 @@ func (c *TighteningTool) OnResult(result interface{}) {
 	}
 
 	// 分发结果
-	c.parent.externalResultDispatch.Dispatch(tighteningResult)
+	//c.parent.externalResultDispatch.Dispatch(tighteningResult)
 }
 
 // 处理曲线
@@ -313,9 +313,21 @@ func (c *TighteningTool) OnCurve(curve interface{}) {
 	}
 
 	// TODO
-	//tighteningCurve := curve.(*tightening_device.TighteningCurve)
+	tighteningCurve := curve.(*tightening_device.TighteningCurve)
 
-	// 尝试获取最近一条没有对应曲线的结果并更新， 如果成功则上传曲线， 否则只缓存
+	// 尝试获取最近一条没有对应曲线的结果并更新， 否则只缓存
+	dbCurves := tighteningCurve.ToDBCurve()
 
+	// 尝试获取最近一条没有对应曲线的结果取回tightening id
+	dbCurves.TighteningID, _ = c.parent.Srv.DB.LastTigheningID(dbCurves.ToolSN)
+	if dbCurves.TighteningID != "" {
+
+		dbCurves.CurveFile = fmt.Sprintf("%s_%s.json", tighteningCurve.ToolSN, dbCurves.TighteningID)
+	}
 	// 缓存曲线
+	err := c.parent.Srv.DB.Store(dbCurves)
+	if err != nil {
+
+	}
+
 }

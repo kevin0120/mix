@@ -5,6 +5,7 @@ import (
 	"github.com/kataras/iris/core/errors"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 func unmarshal(str string, rType reflect.Type, rValue reflect.Value) error {
@@ -69,7 +70,7 @@ func unmarshal(str string, rType reflect.Type, rValue reflect.Value) error {
 		case reflect.Uint32:
 			fallthrough
 		case reflect.Uint64:
-			n, _ := strconv.ParseUint(str[start-1:end], 10, 64)
+			n, _ := strconv.ParseUint(strings.TrimSpace(str[start-1:end]), 10, 64)
 			rValue.Field(i).SetUint(n)
 		case reflect.Int:
 			fallthrough
@@ -80,13 +81,13 @@ func unmarshal(str string, rType reflect.Type, rValue reflect.Value) error {
 		case reflect.Int32:
 			fallthrough
 		case reflect.Int64:
-			n, _ := strconv.ParseInt(str[start-1:end], 10, 64)
+			n, _ := strconv.ParseInt(strings.TrimSpace(str[start-1:end]), 10, 64)
 			rValue.Field(i).SetInt(n)
 			//rValue.Field(i).Set(reflect.ValueOf(n))
 		case reflect.Float32:
 			fallthrough
 		case reflect.Float64:
-			n, _ := strconv.ParseFloat(str[start-1:end], 64)
+			n, _ := strconv.ParseFloat(strings.TrimSpace(str[start-1:end]), 64)
 			rValue.Field(i).SetFloat(n)
 		case reflect.Slice:
 			rValue.Field(i).SetBytes([]byte(str[start-1 : end]))
