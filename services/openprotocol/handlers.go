@@ -74,24 +74,24 @@ func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
 		return e
 	}
 
-	//_, ok := c.temp_result_CURVE[curve.ToolNumber]
+	//_, ok := c.tempResultCurve[curve.ToolNumber]
 	//结果曲线 判断本toolNumber是否收到过数据
-	if _, ok := c.temp_result_CURVE[curve.ToolNumber]; !ok {
-		c.temp_result_CURVE[curve.ToolNumber] = &tightening_device.TighteningCurve{}
+	if _, ok := c.tempResultCurve[curve.ToolNumber]; !ok {
+		c.tempResultCurve[curve.ToolNumber] = &tightening_device.TighteningCurve{}
 	}
 	//收到的数据进行解析并将结果加到临时的切片中，等待整条曲线接收完毕。
 	torqueCoefficient, _ := strconv.ParseFloat(strings.TrimSpace(curve.TorqueString), 64)
 	angleCoefficient, _ := strconv.ParseFloat(strings.TrimSpace(curve.AngleString), 64)
 	Torque, Angle := DataDecoding([]byte(curve.Data), torqueCoefficient, angleCoefficient, c.diag)
 
-	c.temp_result_CURVE[curve.ToolNumber].CUR_M = append(c.temp_result_CURVE[curve.ToolNumber].CUR_M, Torque...)
-	c.temp_result_CURVE[curve.ToolNumber].CUR_W = append(c.temp_result_CURVE[curve.ToolNumber].CUR_W, Angle...)
+	c.tempResultCurve[curve.ToolNumber].CUR_M = append(c.tempResultCurve[curve.ToolNumber].CUR_M, Torque...)
+	c.tempResultCurve[curve.ToolNumber].CUR_W = append(c.tempResultCurve[curve.ToolNumber].CUR_W, Angle...)
 	//当本次数据为本次拧紧曲线的最后一次数据时
 	if curve.Num == curve.Id {
 		//若取到的点的数量大于协议解析出来该曲线的点数，多出的部分删掉，否则有多少发多少.
-		if curve.MeasurePoints < len(c.temp_result_CURVE[curve.ToolNumber].CUR_M) {
-			c.temp_result_CURVE[curve.ToolNumber].CUR_M = c.temp_result_CURVE[curve.ToolNumber].CUR_M[0:curve.MeasurePoints]
-			c.temp_result_CURVE[curve.ToolNumber].CUR_W = c.temp_result_CURVE[curve.ToolNumber].CUR_W[0:curve.MeasurePoints]
+		if curve.MeasurePoints < len(c.tempResultCurve[curve.ToolNumber].CUR_M) {
+			c.tempResultCurve[curve.ToolNumber].CUR_M = c.tempResultCurve[curve.ToolNumber].CUR_M[0:curve.MeasurePoints]
+			c.tempResultCurve[curve.ToolNumber].CUR_W = c.tempResultCurve[curve.ToolNumber].CUR_W[0:curve.MeasurePoints]
 		}
 
 		//本次曲线全部解析完毕后,降临时存储的数据清空
@@ -100,10 +100,10 @@ func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
 			return err
 		}
 
-		defer delete(c.temp_result_CURVE, curve.ToolNumber)
-		c.temp_result_CURVE[curve.ToolNumber].ToolSN = toolSN
-		c.temp_result_CURVE[curve.ToolNumber].UpdateTime = time.Now()
-		c.toolDispatches[toolSN].curveDispatch.Dispatch(c.temp_result_CURVE[curve.ToolNumber])
+		defer delete(c.tempResultCurve, curve.ToolNumber)
+		c.tempResultCurve[curve.ToolNumber].ToolSN = toolSN
+		c.tempResultCurve[curve.ToolNumber].UpdateTime = time.Now()
+		c.toolDispatches[toolSN].curveDispatch.Dispatch(c.tempResultCurve[curve.ToolNumber])
 	}
 	return nil
 }

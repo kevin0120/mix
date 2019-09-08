@@ -35,7 +35,7 @@ type Service struct {
 	wsnotify.WSNotify
 	utils.DispatchHandler
 
-	dispatches map[string]*utils.Dispatch
+	dispatchers map[string]*utils.Dispatch
 }
 
 func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol) (*Service, error) {
@@ -45,7 +45,7 @@ func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol) (*Servi
 		mtxDevices:         sync.Mutex{},
 		runningControllers: map[string]ITighteningController{},
 		protocols:          map[string]ITighteningProtocol{},
-		dispatches: map[string]*utils.Dispatch{
+		dispatchers: map[string]*utils.Dispatch{
 			DISPATCH_RESULT: utils.CreateDispatch(utils.DEFAULT_BUF_LEN),
 		},
 	}
@@ -82,7 +82,7 @@ func (s *Service) Open() error {
 
 	s.WS.AddNotify(s)
 
-	for _, v := range s.dispatches {
+	for _, v := range s.dispatchers {
 		v.Start()
 	}
 
@@ -94,7 +94,7 @@ func (s *Service) Open() error {
 
 func (s *Service) Close() error {
 
-	for _, v := range s.dispatches {
+	for _, v := range s.dispatchers {
 		v.Release()
 	}
 
@@ -212,11 +212,11 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 
 // 收到结果
 func (s *Service) OnResult(data interface{}) {
-	s.GetDispatch(DISPATCH_RESULT).Dispatch(data)
+	s.GetDispatcher(DISPATCH_RESULT).Dispatch(data)
 }
 
-func (s *Service) GetDispatch(name string) *utils.Dispatch {
-	return s.dispatches[name]
+func (s *Service) GetDispatcher(name string) *utils.Dispatch {
+	return s.dispatchers[name]
 }
 
 func (s *Service) addController(controllerSN string, controller ITighteningController) {

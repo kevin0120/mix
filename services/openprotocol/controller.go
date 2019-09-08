@@ -52,8 +52,8 @@ type TighteningController struct {
 	w                    *socket_writer.SocketWriter
 	cfg                  *tightening_device.TighteningDeviceConfig
 	keepAliveCount       int32
-	keep_period          time.Duration
-	req_timeout          time.Duration
+	keepPeriod           time.Duration
+	reqTimeout           time.Duration
 	getToolInfoPeriod    time.Duration
 	Response             ResponseQueue
 	Srv                  *Service
@@ -65,7 +65,7 @@ type TighteningController struct {
 	protocol             string
 	inputs               string
 	diag                 Diagnostic
-	temp_result_CURVE    map[int]*tightening_device.TighteningCurve
+	tempResultCurve      map[int]*tightening_device.TighteningCurve
 	mtxResult            sync.Mutex
 	model                string
 	receiveBuf           chan []byte
@@ -87,14 +87,14 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 		diag:              d,
 		buffer:            make(chan []byte, 1024),
 		closing:           make(chan chan struct{}),
-		keep_period:       time.Duration(protocolConfig.KeepAlivePeriod),
-		req_timeout:       time.Duration(protocolConfig.ReqTimeout),
+		keepPeriod:        time.Duration(protocolConfig.KeepAlivePeriod),
+		reqTimeout:        time.Duration(protocolConfig.ReqTimeout),
 		getToolInfoPeriod: time.Duration(protocolConfig.GetToolInfoPeriod),
 		protocol:          controller.OPENPROTOCOL,
 		mtxResult:         sync.Mutex{},
 		cfg:               deviceConfig,
 		BaseDevice:        device.CreateBaseDevice(),
-		temp_result_CURVE: map[int]*tightening_device.TighteningCurve{},
+		tempResultCurve:   map[int]*tightening_device.TighteningCurve{},
 
 		toolDispatches: map[string]*ToolDispatch{},
 	}
@@ -464,7 +464,7 @@ func (c *TighteningController) Connect() error {
 			break
 		}
 
-		time.Sleep(time.Duration(c.req_timeout))
+		time.Sleep(time.Duration(c.reqTimeout))
 	}
 
 	c.handleStatus(device.STATUS_ONLINE)
@@ -574,7 +574,7 @@ func (c *TighteningController) addKeepAliveCount() {
 }
 
 func (c *TighteningController) updateKeepAliveDeadLine() {
-	c.keepaliveDeadLine.Store(time.Now().Add(c.keep_period))
+	c.keepaliveDeadLine.Store(time.Now().Add(c.keepPeriod))
 }
 
 func (c *TighteningController) KeepAliveDeadLine() time.Time {
@@ -611,7 +611,7 @@ func (c *TighteningController) Write(buf []byte) {
 func (c *TighteningController) handleStatus(status string) {
 
 	if status != c.Status() {
-		c.diag.Debug(fmt.Sprintf("%s:%s %s\n", c.Model(), c.cfg.SN, status))
+		c.diag.Debug(fmt.Sprintf("OpenProtocol handleStatus %s:%s %s\n", c.Model(), c.cfg.SN, status))
 
 		c.UpdateStatus(status)
 
@@ -717,7 +717,7 @@ func (c *TighteningController) manage() {
 	nextWriteThreshold := time.Now()
 	for {
 		select {
-		case <-time.After(c.keep_period):
+		case <-time.After(c.keepPeriod):
 			if c.Status() == device.STATUS_OFFLINE {
 				continue
 			}
@@ -742,7 +742,7 @@ func (c *TighteningController) manage() {
 			} else {
 				c.updateKeepAliveDeadLine()
 			}
-			nextWriteThreshold = time.Now().Add(c.req_timeout)
+			nextWriteThreshold = time.Now().Add(c.reqTimeout)
 		case stopDone := <-c.closing:
 			c.diag.Debug("manage exit")
 			close(stopDone)

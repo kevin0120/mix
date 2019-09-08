@@ -1034,6 +1034,36 @@ func (s *Service) GetLastIncompleteCurve(toolSN string) (*Curves, error) {
 	}
 }
 
+func (s *Service) getLasIncompleteCurveForTool(session *xorm.Session, toolSN string) (*Curves, error) {
+
+	curve := Curves{}
+	exist, err := session.Alias("c").Where("c.tightening_id = ?", "").And("c.tool_sn = ?", toolSN).OrderBy("c.update_time").Desc("c.update_time").Get(&curve)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !exist {
+		return nil, errors.New("Curve Not Found")
+	}
+
+	return &curve, nil
+}
+
+func (s *Service) updateIncompleteCurve(session *xorm.Session, curve *Curves) error {
+
+	sql := "update `curves` set tightening_id = ? where id = ?"
+	_, err := session.Exec(sql,
+		curve.TighteningID,
+		curve.Id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *Service) UpdateIncompleteCurveAndSaveResult(result *Results) error {
 
 	session := s.eng.NewSession()
@@ -1046,21 +1076,12 @@ func (s *Service) UpdateIncompleteCurveAndSaveResult(result *Results) error {
 	}
 
 	// 获取最近不完整的曲线
-	curve := Curves{}
-	exist, err := s.eng.Alias("c").Where("c.tightening_id = ?", "").And("c.tool_sn = ?", result.ToolSN).OrderBy("c.update_time").Desc("c.update_time").Get(&curve)
+	curve, err := s.getLasIncompleteCurveForTool(session, result.ToolSN)
 
-	if err != nil {
-		return err
-	}
-
-	if exist {
+	if err == nil {
 		// 更新曲线
 		curve.TighteningID = result.TighteningID
-		sql := "update `curves` set tightening_id = ? where id = ?"
-		_, err = session.Exec(sql,
-			curve.TighteningID,
-			curve.Id)
-
+		err = s.updateIncompleteCurve(session, curve)
 		if err != nil {
 			return err
 		}
@@ -1069,29 +1090,48 @@ func (s *Service) UpdateIncompleteCurveAndSaveResult(result *Results) error {
 	}
 
 	// 保存结果
-	session.Insert(result)
+	_, err = session.Insert(result)
+	if err != nil {
+		return err
+	}
 
 	err = session.Commit()
 	if err != nil {
-		return errors.Wrapf(err, "commit fail")
+		return errors.Wrapf(err, "Commit Failed")
 	}
 
 	return nil
 }
 
-//func (s *Service) LastTigheningID(toolSN string) (string, error) {
-//
-//	result := Results{}
-//	rt, err := s.eng.Alias("c").Where("c.curve_file = ?", "").And("c.tool_sn = ?", toolSN).OrderBy("c.update_time").Desc("c.update_time").Get(&result)
-//
-//	if err != nil {
-//		return result.TighteningID, err
-//	} else {
-//		return result.TighteningID, nil
-//	}
-//
-//	return "", nil
-//}
+func (s *Service) getLasIncompleteResultForTool(session *xorm.Session, toolSN string) (*Results, error) {
+
+	result := Results{}
+	exist, err := session.Alias("r").Where("r.curve_file = ?", "").And("r.gun_sn = ?", toolSN).OrderBy("r.update_time").Desc("r.update_time").Get(&result)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !exist {
+		return nil, errors.New("Result Not Found")
+	}
+
+	return &result, nil
+}
+
+func (s *Service) updateIncompleteResult(session *xorm.Session, result *Results) error {
+
+	sql := "update `results` set curve_file = ? where id = ?"
+	_, err := session.Exec(sql,
+		result.CurveFile,
+		result.Id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func (s *Service) UpdateIncompleteResultAndSaveCurve(curve *Curves) error {
 	session := s.eng.NewSession()
@@ -1104,21 +1144,12 @@ func (s *Service) UpdateIncompleteResultAndSaveCurve(curve *Curves) error {
 	}
 
 	// 获取最近不完整的结果
-	result := Results{}
-	exist, err := s.eng.Alias("r").Where("r.curve_file = ?", "").And("r.gun_sn = ?", curve.ToolSN).OrderBy("r.update_time").Desc("r.update_time").Get(&result)
+	result, err := s.getLasIncompleteResultForTool(session, curve.ToolSN)
 
-	if err != nil {
-		return err
-	}
-
-	if exist {
+	if err == nil {
 		// 更新结果
 		result.CurveFile = fmt.Sprintf("%s_%s.json", result.ToolSN, result.TighteningID)
-		sql := "update `results` set curve_file = ? where id = ?"
-		_, err = session.Exec(sql,
-			result.CurveFile,
-			result.Id)
-
+		err = s.updateIncompleteResult(session, result)
 		if err != nil {
 			return err
 		}
@@ -1128,11 +1159,14 @@ func (s *Service) UpdateIncompleteResultAndSaveCurve(curve *Curves) error {
 	}
 
 	// 保存曲线
-	session.Insert(curve)
+	_, err = session.Insert(curve)
+	if err != nil {
+		return err
+	}
 
 	err = session.Commit()
 	if err != nil {
-		return errors.Wrapf(err, "commit fail")
+		return errors.Wrapf(err, "Commit Fail")
 	}
 
 	return nil

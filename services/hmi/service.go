@@ -50,7 +50,7 @@ func NewService(d Diagnostic) *Service {
 func (s *Service) Open() error {
 
 	s.ControllerService.WS.OnNewClient = s.OnNewHmiClient
-	s.TighteningService.GetDispatch(tightening_device.DISPATCH_RESULT).Regist(s.OnTighteningResult)
+	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_RESULT).Regist(s.OnTighteningResult)
 
 	var r httpd.Route
 
