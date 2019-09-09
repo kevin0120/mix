@@ -445,6 +445,15 @@ func (c *TighteningController) Protocol() string {
 	return c.protocol
 }
 
+func (c *TighteningController) clearToolsResultAndCurve() {
+	for _, tool := range c.cfg.Tools {
+		err := c.Srv.DB.ClearToolResultAndCurve(tool.SN)
+		if err != nil {
+			c.diag.Error(fmt.Sprintf("Clear Tool: %s Result And Curve Failed", tool.SN), err)
+		}
+	}
+}
+
 func (c *TighteningController) Connect() error {
 	c.UpdateStatus(device.STATUS_OFFLINE)
 	c.handlerBuf = make(chan handlerPkg, 1024)
@@ -455,7 +464,7 @@ func (c *TighteningController) Connect() error {
 		Results: map[interface{}]interface{}{},
 		mtx:     sync.Mutex{},
 	}
-
+	
 	for {
 		err := c.w.Connect(DAIL_TIMEOUT)
 		if err != nil {
@@ -466,6 +475,9 @@ func (c *TighteningController) Connect() error {
 
 		time.Sleep(time.Duration(c.reqTimeout))
 	}
+
+	// 处理不完整的结果和曲线
+	c.clearToolsResultAndCurve()
 
 	c.handleStatus(device.STATUS_ONLINE)
 
