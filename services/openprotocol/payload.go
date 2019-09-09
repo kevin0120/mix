@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/juju/errors"
 	"github.com/masami10/rush/services/tightening_device"
-	"github.com/masami10/rush/utils/biu"
 	"strconv"
 	"strings"
 	"time"
@@ -269,79 +268,123 @@ var result_errors = []string{
 type ResultData struct {
 
 	//rev2
-	CellID                        int
-	ChannelID                     int
-	ControllerName                string
-	VIN                           string
-	JobID                         int
-	PSetID                        int
-	Strategy                      string
-	StrategyOption                []byte
-	BatchSize                     int
-	BatchCount                    int
-	TighteningStatus              string
-	BatchStatus                   string
-	TorqueStatus                  string
-	AngleStatus                   string
-	RundownAngleStatus            string
-	CurrentMonitoringStatus       string
-	SelftapStatus                 string
-	PrevailTorqueMonitoringStatus string
-	PrevailTorqueCompensateStatus string
-	TighteningErrorStatus         string
-	TorqueMin                     float64
-	TorqueMax                     float64
-	TorqueFinalTarget             float64
-	Torque                        float64
-	AngleMin                      float64
-	AngleMax                      float64
-	FinalAngleTarget              float64
-	Angle                         float64
-	RundownAngleMin               float64
-	RundownAngleMax               float64
-	RundownAngle                  float64
-	CurrentMonitoringMin          float64
-	CurrentMonitoringMax          float64
-	CurrentMonitoring             float64
-	SelftapMin                    float64
-	SelftapMax                    float64
-	SelftapTorque                 float64
-	PrevailTorqueMonitoringMin    float64
-	PrevailTorqueMonitoringMax    float64
-	PrevailTorque                 float64
-	TightingID                    string
-	JobSequenceNumber             int32
-	SyncTighteningID              int32
-	ToolSerialNumber              string
-	TimeStamp                     string
-	TimeStampPSetLastChange       string
+	CellID         int    `start:"3"  end:"6"`
+	ChannelID      int    `start:"9"  end:"10"`
+	ControllerName string `start:"13"  end:"37"`
+	VIN            string `start:"40"  end:"64"`
+	JobID          int    `start:"67"  end:"70"`
+	PSetID         int    `start:"73"  end:"75"`
+	Strategy       string `start:"78"  end:"79"`
+	//StrategyOption                []byte	`start:"3"  end:"6"`
+	BatchSize                     int     `start:"89"  end:"92"`
+	BatchCount                    int     `start:"95"  end:"98"`
+	TighteningStatus              string  `start:"101"  end:"101"`
+	BatchStatus                   string  `start:"104"  end:"104"`
+	TorqueStatus                  string  `start:"107"  end:"107"`
+	AngleStatus                   string  `start:"110"  end:"110"`
+	RundownAngleStatus            string  `start:"113"  end:"113"`
+	CurrentMonitoringStatus       string  `start:"116"  end:"116"`
+	SelftapStatus                 string  `start:"119"  end:"119"`
+	PrevailTorqueMonitoringStatus string  `start:"122"  end:"122"`
+	PrevailTorqueCompensateStatus string  `start:"125"  end:"125"`
+	TighteningErrorStatus         string  `start:"128"  end:"137"`
+	TorqueMin                     float64 `start:"140"  end:"145"`
+	TorqueMax                     float64 `start:"148"  end:"153"`
+	TorqueFinalTarget             float64 `start:"156"  end:"161"`
+	Torque                        float64 `start:"164"  end:"169"`
+	AngleMin                      float64 `start:"172"  end:"176"`
+	AngleMax                      float64 `start:"179"  end:"183"`
+	FinalAngleTarget              float64 `start:"186"  end:"190"`
+	Angle                         float64 `start:"193"  end:"197"`
+	//RundownAngleMin               float64	`start:"3"  end:"6"`
+	//RundownAngleMax               float64	`start:"3"  end:"6"`
+	//RundownAngle                  float64	`start:"130"  end:"134"`
+	//CurrentMonitoringMin          float64	`start:"3"  end:"6"`
+	//CurrentMonitoringMax          float64	`start:"3"  end:"6"`
+	//CurrentMonitoring             float64	`start:"137"  end:"139"`
+	//SelftapMin                    float64	`start:"3"  end:"6"`
+	//SelftapMax                    float64	`start:"3"  end:"6"`
+	//SelftapTorque                 float64	`start:"142"  end:"147"`
+	//PrevailTorqueMonitoringMin    float64	`start:"3"  end:"6"`
+	//PrevailTorqueMonitoringMax    float64	`start:"3"  end:"6"`
+	//PrevailTorque                 float64	`start:"150"  end:"155"`
+	TightingID string `start:"284"  end:"293"`
+	//JobSequenceNumber             int32		`start:"3"  end:"6"`
+	//SyncTighteningID              int32		`start:"3"  end:"6"`
+	ToolSerialNumber string `start:"310"  end:"323"`
+	TimeStamp        string `start:"326"  end:"344"`
+	//TimeStampPSetLastChange       string	`start:"3"  end:"6"`
 
 	//rev3
-	PSetName   string
-	TorqueUnit string
-	ResultType string
+	//PSetName   string	`start:"3"  end:"6"`
+	TorqueUnit string `start:"395"  end:"395"`
+	ResultType string `start:"398"  end:"399"`
 
 	//rev4
-	ID2 string
-	ID3 string
-	ID4 string
+	ID2 string `start:"402"  end:"426"`
+	ID3 string `start:"429"  end:"453"`
+	ID4 string `start:"456"  end:"480"`
 
 	//rev5
-	CustomerErrorCode string
+	//CustomerErrorCode string	`start:"3"  end:"6"`
 
 	//rev6
 
 	//rev998
-	NumberOfStages       int
-	NumberOfStageResults int
-	StageResult          string
+	NumberOfStages int `start:"3"  end:"6"`
+	//NumberOfStageResults int	`start:"3"  end:"6"`
+	StageResult string `start:"3"  end:"..."`
+}
+
+type ResultDataOld struct {
+
+	//rev2
+	VIN                           string  `start:"15"  end:"39"`
+	JobID                         int     `start:"42"  end:"45"`
+	PSetID                        int     `start:"48"  end:"50"`
+	Strategy                      string  `start:"53"  end:"54"`
+	BatchSize                     int     `start:"64"  end:"67"`
+	BatchCount                    int     `start:"70"  end:"73"`
+	TighteningStatus              string  `start:"76"  end:"76"`
+	BatchStatus                   string  `start:"79"  end:"79"`
+	TorqueStatus                  string  `start:"82"  end:"82"`
+	AngleStatus                   string  `start:"85"  end:"85"`
+	RundownAngleStatus            string  `start:"88"  end:"88"`
+	CurrentMonitoringStatus       string  `start:"91"  end:"91"`
+	SelftapStatus                 string  `start:"94"  end:"94"`
+	PrevailTorqueMonitoringStatus string  `start:"97"  end:"97"`
+	PrevailTorqueCompensateStatus string  `start:"100"  end:"100"`
+	Torque                        float64 `start:"115"  end:"120"`
+	Angle                         float64 `start:"123"  end:"127"`
+	RundownAngle                  float64 `start:"130"  end:"134"`
+	CurrentMonitoring             float64 `start:"137"  end:"139"`
+	SelftapTorque                 float64 `start:"142"  end:"147"`
+	PrevailTorque                 float64 `start:"150"  end:"155"`
+	TightingID                    string  `start:"3"  end:"12"`
+	ToolSerialNumber              string  `start:"172"  end:"285"`
+	TimeStamp                     string  `start:"188"  end:"206"`
+	//rev3
+	TorqueUnit string `start:"209"  end:"209"`
+	ResultType string `start:"212"  end:"213"`
+
+	//rev4
+	ID2 string `start:"216"  end:"240"`
+	ID3 string `start:"243"  end:"267"`
+	ID4 string `start:"270"  end:"294"`
+
+	//rev5
+
+	//rev6
+
+	//rev998
+	StageResult string `start:"3"  end:"..."`
 }
 
 // TODO
 func (rd *ResultData) ToTighteningResult() *tightening_device.TighteningResult {
 	return &tightening_device.TighteningResult{
 		// 工具序列号
-		ToolSN: rd.ToolSerialNumber,
+		ToolSN: strings.TrimSpace(rd.ToolSerialNumber),
 		// 收到时间
 		UpdateTime: time.Now(),
 		// job号
@@ -355,7 +398,7 @@ func (rd *ResultData) ToTighteningResult() *tightening_device.TighteningResult {
 		// 拧紧ID
 		TighteningID: rd.TightingID,
 		// 实际结果
-		MeasureResult: rd.StageResult,
+		MeasureResult: "",
 		// 实际扭矩
 		MeasureTorque: rd.Torque,
 		// 实际角度
@@ -379,219 +422,6 @@ func (rd *ResultData) ToTighteningResult() *tightening_device.TighteningResult {
 		// 目标角度
 		AngleTarget: rd.FinalAngleTarget,
 	}
-}
-
-func (rd *ResultData) DeserializeOld(str string) error {
-	var err error = nil
-
-	rd.TightingID = str[2:12]
-	rd.VIN = strings.TrimSpace(str[14:39])
-	rd.JobID, err = strconv.Atoi(str[41:45])
-	if err != nil {
-		return err
-	}
-
-	rd.PSetID, err = strconv.Atoi(str[47:50])
-	if err != nil {
-		return err
-	}
-
-	rd.Strategy = str[52:54]
-	rd.BatchSize, err = strconv.Atoi(str[63:67])
-	if err != nil {
-		return err
-	}
-
-	rd.BatchCount, err = strconv.Atoi(str[69:73])
-	if err != nil {
-		return err
-	}
-
-	rd.TighteningStatus = str[75:76]
-	rd.BatchStatus = str[78:79]
-	rd.TorqueStatus = str[81:82]
-	rd.AngleStatus = str[84:85]
-	rd.RundownAngleStatus = str[87:88]
-	rd.CurrentMonitoringStatus = str[90:91]
-	rd.SelftapStatus = str[93:94]
-	rd.PrevailTorqueMonitoringStatus = str[96:97]
-	rd.PrevailTorqueCompensateStatus = str[99:100]
-
-	rd.Torque, err = strconv.ParseFloat(str[114:120], 64)
-	if err != nil {
-		return err
-	}
-
-	rd.Angle, err = strconv.ParseFloat(str[122:127], 64)
-	if err != nil {
-		return err
-	}
-
-	rd.RundownAngle, err = strconv.ParseFloat(str[129:134], 64)
-	if err != nil {
-		return err
-	}
-
-	rd.CurrentMonitoring, err = strconv.ParseFloat(str[136:139], 64)
-	if err != nil {
-		return err
-	}
-
-	rd.SelftapTorque, err = strconv.ParseFloat(str[141:147], 64)
-	if err != nil {
-		return err
-	}
-
-	rd.PrevailTorque, err = strconv.ParseFloat(str[149:155], 64)
-	if err != nil {
-		return err
-	}
-
-	rd.TimeStamp = str[187:206]
-	rd.ToolSerialNumber = strings.TrimSpace(str[171:285])
-	rd.TorqueUnit = str[208:209]
-	rd.ResultType = str[211:213]
-	rd.ID2 = strings.TrimSpace(str[215:240])
-	rd.ID3 = strings.TrimSpace(str[242:267])
-	rd.ID4 = strings.TrimSpace(str[269:294])
-
-	return nil
-}
-
-func (rd *ResultData) Deserialize(str string) error {
-
-	var err error = nil
-	rd.CellID, err = strconv.Atoi(str[2:6])
-	if err != nil {
-		return err
-	}
-
-	rd.ChannelID, err = strconv.Atoi(str[8:10])
-	if err != nil {
-		return err
-	}
-
-	rd.ControllerName = str[12:37]
-	rd.VIN = strings.TrimSpace(str[39:64])
-
-	rd.JobID, err = strconv.Atoi(str[66:70])
-	if err != nil {
-		return err
-	}
-
-	rd.PSetID, err = strconv.Atoi(str[72:75])
-	if err != nil {
-		return err
-	}
-
-	rd.Strategy = str[77:79]
-
-	rd.BatchSize, err = strconv.Atoi(str[88:92])
-	if err != nil {
-		return err
-	}
-
-	rd.BatchCount, err = strconv.Atoi(str[94:98])
-	if err != nil {
-		return err
-	}
-
-	rd.TighteningStatus = str[100:101]
-	rd.BatchStatus = str[103:104]
-	rd.TorqueStatus = str[106:107]
-	rd.AngleStatus = str[109:110]
-	rd.RundownAngleStatus = str[112:113]
-	rd.CurrentMonitoringStatus = str[115:116]
-	rd.SelftapStatus = str[118:119]
-	rd.PrevailTorqueMonitoringStatus = str[121:122]
-	rd.PrevailTorqueCompensateStatus = str[124:125]
-
-	error_status := str[127:137]
-	error_value, err := strconv.ParseInt(error_status, 10, 32)
-	if err != nil {
-		return err
-	}
-
-	b_error := biu.ToBinaryString(error_value)
-	b_error = strings.Trim(b_error, "[] ")
-	b_error = strings.Replace(b_error, " ", "", -1)
-	l := len(b_error)
-	errs := []string{}
-	for i := 0; i < l; i++ {
-		v := b_error[l-1-i]
-
-		if v == '1' {
-			errs = append(errs, result_errors[i])
-		}
-	}
-
-	rd.TighteningErrorStatus = strings.Join(errs, ",")
-
-	rd.TorqueMin, err = strconv.ParseFloat(str[139:145], 64)
-	if err != nil {
-		return err
-	}
-
-	rd.TorqueMax, err = strconv.ParseFloat(str[147:153], 64)
-	if err != nil {
-		return err
-	}
-
-	rd.TorqueFinalTarget, err = strconv.ParseFloat(str[155:161], 64)
-	if err != nil {
-		return err
-	}
-
-	rd.Torque, err = strconv.ParseFloat(str[163:169], 64)
-	if err != nil {
-		return err
-	}
-
-	rd.AngleMin, err = strconv.ParseFloat(str[171:176], 64)
-	if err != nil {
-		return err
-	}
-
-	rd.AngleMax, err = strconv.ParseFloat(str[178:183], 64)
-	if err != nil {
-		return err
-	}
-
-	rd.FinalAngleTarget, err = strconv.ParseFloat(str[185:190], 64)
-	if err != nil {
-		return err
-	}
-
-	rd.Angle, err = strconv.ParseFloat(str[192:197], 64)
-	if err != nil {
-		return err
-	}
-
-	rd.TightingID = str[283:293]
-
-	rd.TimeStamp = str[325:344]
-
-	rd.ToolSerialNumber = strings.TrimSpace(str[309:323])
-
-	rd.TorqueUnit = str[394:395]
-	rd.ResultType = str[397:399]
-	rd.ID2 = strings.TrimSpace(str[401:426])
-	rd.ID3 = strings.TrimSpace(str[428:453])
-	rd.ID4 = strings.TrimSpace(str[455:480])
-
-	//rd.NumberOfStages, err = strconv.Atoi(str[508:510])
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//rd.NumberOfStageResults, err = strconv.Atoi(str[512:514])
-	//if err != nil {
-	//	return err
-	//}
-
-	//rd.StageResult = str[516:527]
-
-	return nil
 }
 
 func DeserializePSetDetail(str string) (*tightening_device.PSetDetail, error) {
@@ -783,27 +613,9 @@ func DeserializeJobDetail(str string) (*tightening_device.JobDetail, error) {
 }
 
 type AlarmInfo struct {
-	ErrorCode      string
-	isControllerOK bool
-	isToolOK       bool
-}
-
-func (ai *AlarmInfo) Deserialize(msg string) error {
-
-	var err error = nil
-
-	if len(msg) < 20 {
-		return errors.New("alarm info msg len is not enough")
-	}
-
-	ai.ErrorCode = msg[2:6] //4位为错误码
-
-	ai.isControllerOK, err = strconv.ParseBool(msg[8:9])
-
-	ai.isToolOK, err = strconv.ParseBool(msg[11:12])
-
-	return err
-
+	ErrorCode      string `start:"3"  end:"6"`
+	isControllerOK bool   `start:"9"  end:"9"`
+	isToolOK       bool   `start:"12"  end:"12"`
 }
 
 type ToolInfo struct {
@@ -833,70 +645,16 @@ func (ti *ToolInfo) Deserialize(msg string) error {
 }
 
 type JobInfo struct {
-	JobID               int
-	JobStatus           int
-	JobBatchMode        int
-	JobBatchSize        int
-	JobBatchCounter     int
-	Timestamp           string
-	JobCurrentStep      int
-	JobTotalStep        int
-	JobStepType         int
-	JobTighteningStatus int
-}
-
-func (ji *JobInfo) Deserialize(msg string) error {
-
-	var err error
-
-	ji.JobID, err = strconv.Atoi(msg[2:6])
-	if err != nil {
-		return err
-	}
-
-	ji.JobStatus, err = strconv.Atoi(msg[8:9])
-	if err != nil {
-		return err
-	}
-
-	ji.JobBatchMode, err = strconv.Atoi(msg[11:12])
-	if err != nil {
-		return err
-	}
-
-	ji.JobBatchSize, err = strconv.Atoi(msg[14:17])
-	if err != nil {
-		return err
-	}
-
-	ji.JobBatchCounter, err = strconv.Atoi(msg[20:24])
-	if err != nil {
-		return err
-	}
-
-	ji.Timestamp = msg[26:45]
-
-	ji.JobCurrentStep, err = strconv.Atoi(msg[47:50])
-	if err != nil {
-		return err
-	}
-
-	ji.JobTotalStep, err = strconv.Atoi(msg[52:55])
-	if err != nil {
-		return err
-	}
-
-	ji.JobStepType, err = strconv.Atoi(msg[57:59])
-	if err != nil {
-		return err
-	}
-
-	ji.JobTighteningStatus, err = strconv.Atoi(msg[61:63])
-	if err != nil {
-		return err
-	}
-
-	return nil
+	JobID               int    `start:"3"  end:"6"`
+	JobStatus           int    `start:"9"  end:"9"`
+	JobBatchMode        int    `start:"12"  end:"12"`
+	JobBatchSize        int    `start:"15"  end:"17"`
+	JobBatchCounter     int    `start:"21"  end:"24"`
+	Timestamp           string `start:"27"  end:"45"`
+	JobCurrentStep      int    `start:"48"  end:"50"`
+	JobTotalStep        int    `start:"53"  end:"55"`
+	JobStepType         int    `start:"58"  end:"59"`
+	JobTighteningStatus int    `start:"62"  end:"63"`
 }
 
 func DeserializeIDS(str string) []string {
@@ -968,14 +726,10 @@ func (msr *MultiSpindleResult) Deserialize(str string) {
 }
 
 type AlarmStatus struct {
-	Status string
-	AlarmInfo
-}
-
-func (ai *AlarmStatus) Deserialize(msg string) error {
-	ai.Status = msg[2:3]    //1位状态码
-	ai.ErrorCode = msg[5:9] //4为错误码
-	return nil
+	Status         string `start:"3"  end:"3"`
+	ErrorCode      string `start:"6"  end:"9"`
+	IsControllerOK bool   `start:"12"  end:"12"`
+	IsToolOK       bool   `start:"15"  end:"15"`
 }
 
 type CurveBody struct {

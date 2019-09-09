@@ -106,7 +106,8 @@ func unmarshal(str string, rType reflect.Type, rValue reflect.Value) error {
 			return errors.New("unexpect type")
 		}
 		if i == numField-1 && end != len(str) {
-			return errors.New("strings input is much longer than struct defined")
+			return nil
+			//return errors.New("strings input is much longer than struct defined")
 		}
 	}
 

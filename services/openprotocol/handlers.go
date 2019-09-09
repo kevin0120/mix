@@ -111,7 +111,7 @@ func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
 // 处理结果
 func handleMID_0061_LAST_RESULT(c *TighteningController, pkg *handlerPkg) error {
 	result_data := ResultData{}
-	err := result_data.Deserialize(pkg.Body)
+	err := ascii.Unmarshal(pkg.Body, &result_data)
 	if err != nil {
 		return err
 	}
@@ -121,8 +121,8 @@ func handleMID_0061_LAST_RESULT(c *TighteningController, pkg *handlerPkg) error 
 
 // 处理历史结果
 func handleMID_0065_OLD_DATA(c *TighteningController, pkg *handlerPkg) error {
-	result_data := ResultData{}
-	err := result_data.DeserializeOld(pkg.Body)
+	result_data := ResultDataOld{}
+	err := ascii.Unmarshal(pkg.Body, &result_data)
 	if err != nil {
 		return err
 	}
@@ -226,7 +226,7 @@ func handleMID_0005_CMD_OK(c *TighteningController, pkg *handlerPkg) error {
 // job推送信息
 func handleMID_0035_JOB_INFO(c *TighteningController, pkg *handlerPkg) error {
 	job_info := JobInfo{}
-	err := job_info.Deserialize(pkg.Body)
+	err := ascii.Unmarshal(pkg.Body, &job_info)
 	if err != nil {
 		return err
 	}
@@ -319,7 +319,7 @@ func handleMID_0052_VIN(c *TighteningController, pkg *handlerPkg) error {
 // 报警信息
 func handleMID_0071_ALARM(c *TighteningController, pkg *handlerPkg) error {
 	var ai AlarmInfo
-	err := ai.Deserialize(pkg.Body)
+	err := ascii.Unmarshal(pkg.Body, &ai)
 	if err != nil {
 		return err
 	}
@@ -343,8 +343,8 @@ func handleMID_0071_ALARM(c *TighteningController, pkg *handlerPkg) error {
 
 // 报警状态
 func handleMID_0076_ALARM_STATUS(c *TighteningController, pkg *handlerPkg) error {
-	var as AlarmStatus
-	err := as.Deserialize(pkg.Body)
+	var as = AlarmStatus{}
+	err := ascii.Unmarshal(pkg.Body, &as)
 	if err != nil {
 		return err
 	}

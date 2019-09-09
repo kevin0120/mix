@@ -1081,12 +1081,13 @@ func (s *Service) UpdateIncompleteCurveAndSaveResult(result *Results) error {
 	if err == nil {
 		// 更新曲线
 		curve.TighteningID = result.TighteningID
+		curve.CurveFile = fmt.Sprintf("%s_%s.json", result.ToolSN, result.TighteningID)
 		err = s.updateIncompleteCurve(session, curve)
 		if err != nil {
 			return err
 		}
 
-		result.CurveFile = fmt.Sprintf("%s_%s.json", result.ToolSN, result.TighteningID)
+		result.CurveFile = curve.CurveFile
 	}
 
 	// 保存结果
