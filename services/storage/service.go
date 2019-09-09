@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-xorm/xorm"
 	_ "github.com/lib/pq"
+	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"sync/atomic"
 	"time"
@@ -1052,9 +1053,10 @@ func (s *Service) getLasIncompleteCurveForTool(session *xorm.Session, toolSN str
 
 func (s *Service) updateIncompleteCurve(session *xorm.Session, curve *Curves) error {
 
-	sql := "update `curves` set tightening_id = ? where id = ?"
+	sql := "update `curves` set tightening_id = ?, curve_file = ? where id = ?"
 	_, err := session.Exec(sql,
 		curve.TighteningID,
+		curve.CurveFile,
 		curve.Id)
 
 	if err != nil {
@@ -1162,6 +1164,77 @@ func (s *Service) UpdateIncompleteResultAndSaveCurve(curve *Curves) error {
 	_, err = session.Insert(curve)
 	if err != nil {
 		return err
+	}
+
+	err = session.Commit()
+	if err != nil {
+		return errors.Wrapf(err, "Commit Fail")
+	}
+
+	return nil
+}
+
+func (s *Service) getIncompleteResults(session *xorm.Session, toolSN string) ([]Results, error) {
+	results := []Results{}
+
+	err := session.Alias("r").Where("r.curve_file = ?", "").And("r.gun_sn = ?", toolSN).OrderBy("r.update_time").Desc("r.update_time").Find(&results)
+	if err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}
+
+func (s *Service) getIncompleteCurves(session *xorm.Session, toolSN string) ([]Curves, error) {
+	curves := []Curves{}
+
+	err := session.Alias("c").Where("c.tightening_id = ?", "").And("c.tool_sn = ?", toolSN).OrderBy("c.update_time").Desc("c.update_time").Find(&curves)
+	if err != nil {
+		return nil, err
+	}
+
+	return curves, nil
+}
+
+func (s *Service) ClearToolResultAndCurve(toolSN string) error {
+	session := s.eng.NewSession()
+	defer session.Close()
+
+	// 执行事务
+	err := session.Begin()
+	if err != nil {
+		return err
+	}
+
+	// 获取所有不完整的结果
+	results, err := s.getIncompleteResults(session, toolSN)
+	if err != nil {
+		return err
+	}
+
+	// 处理不完整的结果
+	for _, r := range results {
+		r.CurveFile = fmt.Sprintf("%s_%s.json", r.ToolSN, r.TighteningID)
+		err := s.updateIncompleteResult(session, &r)
+		if err != nil {
+			return err
+		}
+	}
+
+	// 获取所有不完整的曲线
+	curves, err := s.getIncompleteCurves(session, toolSN)
+	if err != nil {
+		return err
+	}
+
+	// 处理不完整的曲线
+	for _, c := range curves {
+		c.TighteningID = utils.GenerateID()
+		c.CurveFile = fmt.Sprintf("invalid_%s_%s.json", c.ToolSN, c.TighteningID)
+		err := s.updateIncompleteCurve(session, &c)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = session.Commit()
