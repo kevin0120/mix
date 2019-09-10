@@ -27,8 +27,9 @@ const (
 	MAX_KEEP_ALIVE_CHECK = 3
 
 	REPLY_TIMEOUT = time.Duration(100 * time.Millisecond)
-	//MAX_REPLY_COUNT = 20
 	MAX_REPLY_TIME = time.Duration(2000 * time.Millisecond)
+
+	DEFAULT_TCP_KEEPALIVE = time.Duration(5 * time.Second)
 )
 
 type ToolDispatch struct {

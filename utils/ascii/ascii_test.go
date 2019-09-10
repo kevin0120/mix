@@ -1,7 +1,6 @@
-package openprotocol
+package ascii
 
 import (
-	"github.com/masami10/rush/services/ascii"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -44,7 +43,7 @@ func Test_Ascii(t *testing.T) {
 		},
 	}
 	var testop OpenProtocol
-	err := ascii.Unmarshal(TEST_STRINGS, &testop)
+	err := Unmarshal(TEST_STRINGS, &testop)
 	assert.Nil(t, err)
 	//fmt.Printf("%+v\n", testop)
 	if assert.NotNil(t, testop) {

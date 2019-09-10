@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/masami10/rush/services/ascii"
+	"github.com/masami10/rush/utils/ascii"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
 	"strconv"

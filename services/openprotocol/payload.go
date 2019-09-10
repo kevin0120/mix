@@ -614,8 +614,8 @@ func DeserializeJobDetail(str string) (*tightening_device.JobDetail, error) {
 
 type AlarmInfo struct {
 	ErrorCode      string `start:"3"  end:"6"`
-	isControllerOK bool   `start:"9"  end:"9"`
-	isToolOK       bool   `start:"12"  end:"12"`
+	IsControllerOK bool   `start:"9"  end:"9"`
+	IsToolOK       bool   `start:"12"  end:"12"`
 }
 
 type ToolInfo struct {
