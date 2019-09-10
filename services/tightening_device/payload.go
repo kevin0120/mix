@@ -7,8 +7,26 @@ import (
 )
 
 const (
-	DISPATCH_RESULT = "DISPATCH_RESULT"
-	DISPATCH_CURVE  = "DISPATCH_CURVE"
+	DISPATCH_RESULT            = "DISPATCH_RESULT"
+	DISPATCH_CURVE             = "DISPATCH_CURVE"
+	DISPATCH_IO                = "DISPATCH_IO"
+	DISPATCH_CONTROLLER_STATUS = "DISPATCH_CONTROLLER_STATUS"
+	DISPATCH_TOOL_STATUS       = "DISPATCH_TOOL_STATUS"
+)
+
+const (
+	RESULT_OK  = "OK"
+	RESULT_NOK = "NOK"
+	RESULT_LSN = "LSN"
+	RESULT_AK2 = "AK2"
+)
+
+const (
+	STRATEGY_AD  = "AD"
+	STRATEGY_AW  = "AW"
+	STRATEGY_ADW = "ADW"
+	STRATEGY_LN  = "LN"
+	STRATEGY_AK2 = "AK2"
 )
 
 // type
@@ -175,4 +193,19 @@ type JobStep struct {
 	PSetID    int    `json:"pset_id"`
 	BatchSize int    `json:"batch_size"`
 	Socket    int    `json:"socket"`
+}
+
+type TighteningControllerStatus struct {
+	ControllerSN string `json:"controller_sn"`
+	Status       string `json:"status"`
+}
+
+type TighteningToolStatus struct {
+	ToolSN string `json:"tool_sn"`
+	Status string `json:"status"`
+}
+
+type TighteningControllerInput struct {
+	ControllerSN string `json:"controller_sn"`
+	Inputs       string `json:"inputs"`
 }

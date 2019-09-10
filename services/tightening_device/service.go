@@ -35,7 +35,7 @@ type Service struct {
 	wsnotify.WSNotify
 	utils.DispatchHandler
 
-	dispatchers map[string]*utils.Dispatch
+	dispatchers map[string]*utils.Dispatcher
 }
 
 func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol) (*Service, error) {
@@ -45,8 +45,8 @@ func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol) (*Servi
 		mtxDevices:         sync.Mutex{},
 		runningControllers: map[string]ITighteningController{},
 		protocols:          map[string]ITighteningProtocol{},
-		dispatchers: map[string]*utils.Dispatch{
-			DISPATCH_RESULT: utils.CreateDispatch(utils.DEFAULT_BUF_LEN),
+		dispatchers: map[string]*utils.Dispatcher{
+			DISPATCH_RESULT: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		},
 	}
 
@@ -215,7 +215,7 @@ func (s *Service) OnResult(data interface{}) {
 	s.GetDispatcher(DISPATCH_RESULT).Dispatch(data)
 }
 
-func (s *Service) GetDispatcher(name string) *utils.Dispatch {
+func (s *Service) GetDispatcher(name string) *utils.Dispatcher {
 	return s.dispatchers[name]
 }
 

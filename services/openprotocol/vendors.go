@@ -9,6 +9,7 @@ import (
 // model[mid][rev]
 var VendorModels = map[string]map[string]string{
 	tightening_device.ModelDesoutterCvi3: {
+		// *MID							  *每个MID对应的REV版本
 		MID_0001_START:                   "004",
 		MID_0018_PSET:                    "001",
 		MID_0014_PSET_SUBSCRIBE:          "001",
@@ -38,6 +39,7 @@ var VendorModels = map[string]map[string]string{
 	},
 
 	tightening_device.ModelDesoutterDeltaWrench: {
+		// *MID							*每个MID对应的REV版本
 		MID_0001_START:                 "003",
 		MID_0018_PSET:                  "001",
 		MID_0014_PSET_SUBSCRIBE:        "001",

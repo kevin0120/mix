@@ -264,8 +264,8 @@ func handleMID_0211_INPUT_MONITOR(c *TighteningController, pkg *handlerPkg) erro
 
 	c.inputs = inputs.Inputs
 
-	str, _ := json.Marshal(inputs)
-	c.Srv.WS.WSSendIOInput(string(str))
+	// 分发控制器输入状态
+	c.GetDispatch(tightening_device.DISPATCH_IO).Dispatch(inputs.ToTighteningControllerInput())
 
 	return nil
 }

@@ -230,6 +230,13 @@ func (iom *IOMonitor) Deserialize(str string) error {
 	return nil
 }
 
+func (iom *IOMonitor) ToTighteningControllerInput() *tightening_device.TighteningControllerInput {
+	return &tightening_device.TighteningControllerInput{
+		ControllerSN: iom.ControllerSN,
+		Inputs:       iom.Inputs,
+	}
+}
+
 var result_errors = []string{
 	"Rundown angle max shut off",
 	"Rundown angle min shut off",
@@ -382,43 +389,81 @@ type ResultDataOld struct {
 
 // TODO
 func (rd *ResultData) ToTighteningResult() *tightening_device.TighteningResult {
+	measureResult := tightening_device.RESULT_OK
+	if rd.TighteningStatus == "0" {
+		measureResult = tightening_device.RESULT_NOK
+	}
+
+	strategy := ""
+
+	switch rd.Strategy {
+	case "01":
+		strategy = tightening_device.STRATEGY_AW
+
+	case "02":
+		strategy = tightening_device.STRATEGY_AW
+
+	case "03":
+		strategy = tightening_device.STRATEGY_ADW
+
+	case "04":
+		strategy = tightening_device.STRATEGY_AD
+	}
+
+	if rd.ResultType == "02" {
+		measureResult = tightening_device.RESULT_LSN
+		strategy = tightening_device.STRATEGY_LN
+	}
+
 	return &tightening_device.TighteningResult{
 		// 工具序列号
 		ToolSN: strings.TrimSpace(rd.ToolSerialNumber),
+
 		// 收到时间
 		UpdateTime: time.Now(),
+
 		// job号
 		Job: rd.JobID,
+
 		// pset号
 		PSet: rd.PSetID,
-		// 批次信息
-		Batch: rd.BatchStatus,
-		// 当前拧紧次数
-		Count: rd.NumberOfStages,
+
 		// 拧紧ID
 		TighteningID: rd.TightingID,
+
 		// 实际结果
-		MeasureResult: "",
+		MeasureResult: measureResult,
+
 		// 实际扭矩
-		MeasureTorque: rd.Torque,
+		MeasureTorque: rd.Torque / 100,
+
 		// 实际角度
 		MeasureAngle: rd.Angle,
+
 		// 实际耗时
 		MeasureTime: 0,
+
 		// 拧紧策略
-		Strategy: rd.Strategy,
+		Strategy: strategy,
+
 		// 最大扭矩
-		TorqueMax: rd.TorqueMax,
+		TorqueMax: rd.TorqueMax / 100,
+
 		// 最小扭矩
-		TorqueMin: rd.TorqueMin,
+		TorqueMin: rd.TorqueMin / 100,
+
 		// 扭矩阈值
-		TorqueThreshold: rd.TorqueMax,
+		TorqueThreshold: rd.TorqueMax / 100,
+
 		// 目标扭矩
-		TorqueTarget: rd.TorqueFinalTarget,
+		TorqueTarget: rd.TorqueFinalTarget / 100,
+
 		// 最大角度
 		AngleMax: rd.AngleMax,
+
 		// 最小角度
 		AngleMin: rd.AngleMin,
+
 		// 目标角度
 		AngleTarget: rd.FinalAngleTarget,
 	}

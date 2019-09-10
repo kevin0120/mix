@@ -296,7 +296,7 @@ func (c *TighteningTool) OnResult(result interface{}) {
 	}
 
 	// 分发结果
-	c.parent.externalResultDispatch.Dispatch(tighteningResult)
+	c.parent.GetDispatch(tightening_device.DISPATCH_RESULT).Dispatch(tighteningResult)
 }
 
 // 处理曲线
@@ -316,6 +316,6 @@ func (c *TighteningTool) OnCurve(curve interface{}) {
 	}
 }
 
-func (c *TighteningTool) GetDispatch(name string) *utils.Dispatch {
+func (c *TighteningTool) GetDispatch(name string) *utils.Dispatcher {
 	return nil
 }

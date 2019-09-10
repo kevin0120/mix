@@ -8,7 +8,7 @@ import (
 type ITighteningDevice interface {
 	device.IDevice
 
-	GetDispatch(string) *utils.Dispatch
+	GetDispatch(string) *utils.Dispatcher
 }
 
 type ITighteningController interface {
