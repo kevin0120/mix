@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/binary"
-	"encoding/json"
 	"fmt"
 	"github.com/kataras/iris/core/errors"
 	"github.com/masami10/rush/services/controller"
@@ -12,7 +11,6 @@ import (
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
-	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/socket_writer"
 	"github.com/masami10/rush/utils"
 	"net"
@@ -32,8 +30,8 @@ const (
 )
 
 type ToolDispatch struct {
-	resultDispatch *utils.Dispatch
-	curveDispatch  *utils.Dispatch
+	resultDispatch *utils.Dispatcher
+	curveDispatch  *utils.Dispatcher
 }
 
 type ControllerSubscribe func() error
@@ -71,8 +69,8 @@ type TighteningController struct {
 	receiveBuf           chan []byte
 	controllerSubscribes []ControllerSubscribe
 
-	toolDispatches         map[string]*ToolDispatch
-	externalResultDispatch *utils.Dispatch
+	toolDispatches           map[string]*ToolDispatch
+	externalResultDispatches map[string]*utils.Dispatcher
 
 	requestChannel chan uint32
 	sequence       *utils.Sequence
@@ -114,8 +112,8 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 	for _, v := range deviceConfig.Tools {
 		tool := NewTool(&c, v, d)
 		c.toolDispatches[v.SN] = &ToolDispatch{
-			resultDispatch: utils.CreateDispatch(utils.DEFAULT_BUF_LEN),
-			curveDispatch:  utils.CreateDispatch(utils.DEFAULT_BUF_LEN),
+			resultDispatch: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+			curveDispatch:  utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		}
 		c.toolDispatches[v.SN].resultDispatch.Regist(tool.OnResult)
 		c.toolDispatches[v.SN].curveDispatch.Regist(tool.OnCurve)
@@ -123,7 +121,12 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 		c.AddChildren(v.SN, tool)
 	}
 
-	c.externalResultDispatch = utils.CreateDispatch(utils.DEFAULT_BUF_LEN)
+	c.externalResultDispatches = map[string]*utils.Dispatcher{
+		tightening_device.DISPATCH_RESULT:            utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		tightening_device.DISPATCH_IO:                utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		tightening_device.DISPATCH_CONTROLLER_STATUS: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		tightening_device.DISPATCH_TOOL_STATUS:       utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+	}
 
 	return &c
 }
@@ -407,7 +410,9 @@ func (c *TighteningController) Start() error {
 		dispatch.curveDispatch.Start()
 	}
 
-	c.externalResultDispatch.Start()
+	for _, dispatch := range c.externalResultDispatches {
+		dispatch.Start()
+	}
 
 	c.w = socket_writer.NewSocketWriter(c.cfg.Endpoint, c)
 
@@ -464,7 +469,7 @@ func (c *TighteningController) Connect() error {
 		Results: map[interface{}]interface{}{},
 		mtx:     sync.Mutex{},
 	}
-	
+
 	for {
 		err := c.w.Connect(DAIL_TIMEOUT)
 		if err != nil {
@@ -633,14 +638,11 @@ func (c *TighteningController) handleStatus(status string) {
 			go c.Connect()
 		}
 
-		// 将最新状态推送给hmi
-		s := wsnotify.WSStatus{
-			SN:     c.cfg.SN,
-			Status: string(status),
-		}
-
-		msg, _ := json.Marshal(s)
-		c.Srv.WS.WSSendControllerStatus(string(msg))
+		// 分发控制器状态
+		c.GetDispatch(tightening_device.DISPATCH_CONTROLLER_STATUS).Dispatch(&tightening_device.TighteningControllerStatus{
+			ControllerSN: c.cfg.SN,
+			Status:       status,
+		})
 
 	}
 }
@@ -1017,6 +1019,6 @@ func (c *TighteningController) DeviceType() string {
 	return tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER
 }
 
-func (c *TighteningController) GetDispatch(name string) *utils.Dispatch {
-	return c.externalResultDispatch
+func (c *TighteningController) GetDispatch(name string) *utils.Dispatcher {
+	return c.externalResultDispatches[name]
 }

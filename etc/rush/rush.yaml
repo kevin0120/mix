@@ -79,8 +79,8 @@ websocket:
 storage:
   db_url: 127.0.0.1:5433
   db_name: rush_hardware
-  db_user: odoo
-  db_pwd: odoo
+  db_user: admin
+  db_pwd: admin
   max_connection: 60
   vacuum_period: 2160h
   data_keep: 2160h
@@ -139,7 +139,7 @@ tightening_device:
   devices:
     - model: ModelDesoutterCvi3
       protocol: OpenProtocol
-      endpoint: tcp://192.168.3.23:4546
+      endpoint: tcp://192.168.3.23:4545
       sn: 0001
       with_curve: true
       tools:
