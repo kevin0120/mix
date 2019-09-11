@@ -20,12 +20,6 @@ const (
 )
 
 const (
-	IO_STATUS_ON       = "on"
-	IO_STATUS_OFF      = "off"
-	IO_STATUS_FLASHING = "flashing"
-)
-
-const (
 	EVT_CONTROLLER_NO_ERR          = "E000"
 	EVT_CONTROLLER_TOOL_DISCONNECT = "I003"
 	EVT_CONTROLLER_TOOL_CONNECT    = "I002"
@@ -343,50 +337,6 @@ type ResultData struct {
 	StageResult string `start:"3"  end:"..."`
 }
 
-type ResultDataOld struct {
-
-	//rev2
-	VIN                           string  `start:"15"  end:"39"`
-	JobID                         int     `start:"42"  end:"45"`
-	PSetID                        int     `start:"48"  end:"50"`
-	Strategy                      string  `start:"53"  end:"54"`
-	BatchSize                     int     `start:"64"  end:"67"`
-	BatchCount                    int     `start:"70"  end:"73"`
-	TighteningStatus              string  `start:"76"  end:"76"`
-	BatchStatus                   string  `start:"79"  end:"79"`
-	TorqueStatus                  string  `start:"82"  end:"82"`
-	AngleStatus                   string  `start:"85"  end:"85"`
-	RundownAngleStatus            string  `start:"88"  end:"88"`
-	CurrentMonitoringStatus       string  `start:"91"  end:"91"`
-	SelftapStatus                 string  `start:"94"  end:"94"`
-	PrevailTorqueMonitoringStatus string  `start:"97"  end:"97"`
-	PrevailTorqueCompensateStatus string  `start:"100"  end:"100"`
-	Torque                        float64 `start:"115"  end:"120"`
-	Angle                         float64 `start:"123"  end:"127"`
-	RundownAngle                  float64 `start:"130"  end:"134"`
-	CurrentMonitoring             float64 `start:"137"  end:"139"`
-	SelftapTorque                 float64 `start:"142"  end:"147"`
-	PrevailTorque                 float64 `start:"150"  end:"155"`
-	TightingID                    string  `start:"3"  end:"12"`
-	ToolSerialNumber              string  `start:"172"  end:"285"`
-	TimeStamp                     string  `start:"188"  end:"206"`
-	//rev3
-	TorqueUnit string `start:"209"  end:"209"`
-	ResultType string `start:"212"  end:"213"`
-
-	//rev4
-	ID2 string `start:"216"  end:"240"`
-	ID3 string `start:"243"  end:"267"`
-	ID4 string `start:"270"  end:"294"`
-
-	//rev5
-
-	//rev6
-
-	//rev998
-	StageResult string `start:"3"  end:"..."`
-}
-
 // TODO
 func (rd *ResultData) ToTighteningResult() *tightening_device.TighteningResult {
 	measureResult := tightening_device.RESULT_OK
@@ -418,6 +368,9 @@ func (rd *ResultData) ToTighteningResult() *tightening_device.TighteningResult {
 	return &tightening_device.TighteningResult{
 		// 工具序列号
 		ToolSN: strings.TrimSpace(rd.ToolSerialNumber),
+
+		// 工具通道号
+		ChannelID: rd.ChannelID,
 
 		// 收到时间
 		UpdateTime: time.Now(),
@@ -466,6 +419,115 @@ func (rd *ResultData) ToTighteningResult() *tightening_device.TighteningResult {
 
 		// 目标角度
 		AngleTarget: rd.FinalAngleTarget,
+	}
+}
+
+type ResultDataOld struct {
+
+	//rev2
+	VIN                           string  `start:"15"  end:"39"`
+	JobID                         int     `start:"42"  end:"45"`
+	PSetID                        int     `start:"48"  end:"50"`
+	Strategy                      string  `start:"53"  end:"54"`
+	BatchSize                     int     `start:"64"  end:"67"`
+	BatchCount                    int     `start:"70"  end:"73"`
+	TighteningStatus              string  `start:"76"  end:"76"`
+	BatchStatus                   string  `start:"79"  end:"79"`
+	TorqueStatus                  string  `start:"82"  end:"82"`
+	AngleStatus                   string  `start:"85"  end:"85"`
+	RundownAngleStatus            string  `start:"88"  end:"88"`
+	CurrentMonitoringStatus       string  `start:"91"  end:"91"`
+	SelftapStatus                 string  `start:"94"  end:"94"`
+	PrevailTorqueMonitoringStatus string  `start:"97"  end:"97"`
+	PrevailTorqueCompensateStatus string  `start:"100"  end:"100"`
+	Torque                        float64 `start:"115"  end:"120"`
+	Angle                         float64 `start:"123"  end:"127"`
+	RundownAngle                  float64 `start:"130"  end:"134"`
+	CurrentMonitoring             float64 `start:"137"  end:"139"`
+	SelftapTorque                 float64 `start:"142"  end:"147"`
+	PrevailTorque                 float64 `start:"150"  end:"155"`
+	TightingID                    string  `start:"3"  end:"12"`
+	ToolSerialNumber              string  `start:"172"  end:"285"`
+	TimeStamp                     string  `start:"188"  end:"206"`
+
+	//rev3
+	TorqueUnit string `start:"209"  end:"209"`
+	ResultType string `start:"212"  end:"213"`
+
+	//rev4
+	ID2 string `start:"216"  end:"240"`
+	ID3 string `start:"243"  end:"267"`
+	ID4 string `start:"270"  end:"294"`
+
+	//rev5
+
+	//rev6
+
+	//rev998
+	StageResult string `start:"3"  end:"..."`
+}
+
+func (ord *ResultDataOld) ToTighteningResult() *tightening_device.TighteningResult {
+	measureResult := tightening_device.RESULT_OK
+	if ord.TighteningStatus == "0" {
+		measureResult = tightening_device.RESULT_NOK
+	}
+
+	strategy := ""
+
+	switch ord.Strategy {
+	case "01":
+		strategy = tightening_device.STRATEGY_AW
+
+	case "02":
+		strategy = tightening_device.STRATEGY_AW
+
+	case "03":
+		strategy = tightening_device.STRATEGY_ADW
+
+	case "04":
+		strategy = tightening_device.STRATEGY_AD
+	}
+
+	if ord.ResultType == "02" {
+		measureResult = tightening_device.RESULT_LSN
+		strategy = tightening_device.STRATEGY_LN
+	}
+
+	return &tightening_device.TighteningResult{
+
+		// 工具序列号
+		ToolSN: strings.TrimSpace(ord.ToolSerialNumber),
+
+		// 工具通道号
+		//ChannelID: ord.ChannelID,
+
+		// 收到时间
+		UpdateTime: time.Now(),
+
+		// job号
+		Job: ord.JobID,
+
+		// pset号
+		PSet: ord.PSetID,
+
+		// 拧紧ID
+		TighteningID: ord.TightingID,
+
+		// 实际结果
+		MeasureResult: measureResult,
+
+		// 实际扭矩
+		MeasureTorque: ord.Torque / 100,
+
+		// 实际角度
+		MeasureAngle: ord.Angle,
+
+		// 实际耗时
+		MeasureTime: 0,
+
+		// 拧紧策略
+		Strategy: strategy,
 	}
 }
 

@@ -94,7 +94,7 @@ audi/vw:
   version: 21
 
 openprotocol:
-  keep_alive_period: 10s
+  keep_alive_period: 3s
   read_buf: 65535
   req_time_out: 300ms
   skip_jobs:
@@ -167,7 +167,7 @@ tightening_device:
 
 # 协议类型: Audi/VW, OpenProtocol
 controller_service:
-  enable: true
+  enable: false
   workers: 1
   controllers:
 #    - serial_no: 0001
