@@ -2,7 +2,7 @@ package ascii
 
 import (
 	"fmt"
-	"github.com/kataras/iris/core/errors"
+	"github.com/pkg/errors"
 	"reflect"
 	"strconv"
 	"strings"
