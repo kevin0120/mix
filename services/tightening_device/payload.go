@@ -7,6 +7,10 @@ import (
 )
 
 const (
+	TIGHTENING_ERR_NOT_SUPPORTED = "Not Supported"
+)
+
+const (
 	DISPATCH_RESULT            = "DISPATCH_RESULT"
 	DISPATCH_CURVE             = "DISPATCH_CURVE"
 	DISPATCH_IO                = "DISPATCH_IO"

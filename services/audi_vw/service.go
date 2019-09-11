@@ -175,7 +175,7 @@ func (p *Service) Read(c net.Conn) {
 	header_rest := 0
 
 	var header_buffer string
-	var header CVI3Header
+	var header AUDIVWHeader
 	buffer := make([]byte, p.config().ReadBufferSize*2)
 	for {
 		n, err := c.Read(buffer)
@@ -264,10 +264,10 @@ func (p *Service) Read(c net.Conn) {
 
 }
 
-func (p *Service) CVIResponse(header *CVI3Header, c net.Conn) {
+func (p *Service) CVIResponse(header *AUDIVWHeader, c net.Conn) {
 	if header.TYP == Header_type_request_with_reply || header.TYP == Header_type_keep_alive {
 		// 执行应答
-		var reply CVI3Header
+		var reply AUDIVWHeader
 		reply.Init()
 		reply.TYP = Header_type_reply
 		reply.MID = header.MID
