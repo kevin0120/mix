@@ -90,7 +90,7 @@ func (cvi3_server *CVI3Server) Read(c net.Conn) {
 		}
 		//fmt.Printf("%s\n", msg)
 
-		header := audi_vw.CVI3Header{}
+		header := audi_vw.AUDIVWHeader{}
 		header.Deserialize(msg[0:audi_vw.HEADER_LEN])
 
 		go cvi3_server.Parse(msg)

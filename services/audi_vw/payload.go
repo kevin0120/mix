@@ -181,7 +181,7 @@ type CVI3Result struct {
 	PRC_SST PRC_SST  `xml:"PRC_SST"`
 }
 
-type CVI3Header struct {
+type AUDIVWHeader struct {
 	HDR string
 	MID uint32
 	SIZ int
@@ -191,13 +191,13 @@ type CVI3Header struct {
 	RSD string
 }
 
-func (header *CVI3Header) Init() {
+func (header *AUDIVWHeader) Init() {
 	header.HDR = header_fixed
 	header.REV = header_rev
 	header.RSD = header_rsd
 }
 
-func (header *CVI3Header) Check() bool {
+func (header *AUDIVWHeader) Check() bool {
 	if header.COD == Header_code_ok {
 		return true
 	} else {
@@ -205,7 +205,7 @@ func (header *CVI3Header) Check() bool {
 	}
 }
 
-func (header *CVI3Header) Serialize() string {
+func (header *AUDIVWHeader) Serialize() string {
 	return fmt.Sprintf("%s%04d%08d%04d%04d%s%s",
 		header.HDR,
 		header.MID,
@@ -216,14 +216,14 @@ func (header *CVI3Header) Serialize() string {
 		header.RSD)
 }
 
-func (header *CVI3Header) Deserialize(headerStr string) error {
+func (header *AUDIVWHeader) Deserialize(headerStr string) error {
 	header.Init()
 
 	var n uint64
 	var err error = nil
 
 	if len(headerStr) < 24 {
-		return errors.New(fmt.Sprintf("headerStr is not long enough: %d", len(headerStr)))
+		return errors.New(fmt.Sprintf("Header Len Error: %d", len(headerStr)))
 	}
 
 	n, err = strconv.ParseUint(headerStr[4:8], 10, 32)
@@ -250,7 +250,7 @@ func (header *CVI3Header) Deserialize(headerStr string) error {
 }
 
 func GeneratePacket(seq uint32, typ uint, xmlpacket string) (string, uint32) {
-	header := CVI3Header{}
+	header := AUDIVWHeader{}
 	header.Init()
 	header.MID = seq
 	header.SIZ = len(xmlpacket)

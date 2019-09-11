@@ -8,6 +8,7 @@ import (
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/openprotocol"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/socket_writer"
 	"net"
@@ -343,7 +344,7 @@ func (c *TighteningController) Read(conn net.Conn) {
 
 		// 处理应答
 		headerStr := msg[0:HEADER_LEN]
-		header := CVI3Header{}
+		header := AUDIVWHeader{}
 		header.Deserialize(headerStr)
 
 		c.Response.update(header.MID, headerStr)
@@ -393,7 +394,7 @@ func (c *TighteningController) ToolControl(enable bool, channel int) error {
 	}
 
 	//fmt.Printf("reply_header:%s\n", header_str)
-	header := CVI3Header{}
+	header := AUDIVWHeader{}
 	header.Deserialize(header_str)
 
 	if !header.Check() {
@@ -441,7 +442,7 @@ func (c *TighteningController) PSet(pset int, workorder_id int64, reseult_id int
 	}
 
 	//fmt.Printf("reply_header:%s\n", header_str)
-	header := CVI3Header{}
+	header := AUDIVWHeader{}
 	header.Deserialize(header_str)
 
 	if !header.Check() {
@@ -489,7 +490,7 @@ func (c *TighteningController) Tools() map[string]string {
 }
 
 func (c *TighteningController) DeviceType() string {
-	return "controller"
+	return tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER
 }
 
 func (c *TighteningController) Children() map[string]device.IDevice {
