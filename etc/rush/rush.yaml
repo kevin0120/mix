@@ -167,7 +167,7 @@ tightening_device:
 
 # 协议类型: Audi/VW, OpenProtocol
 controller_service:
-  enable: true
+  enable: false
   workers: 1
   controllers:
 #    - serial_no: 0001

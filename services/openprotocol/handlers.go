@@ -52,7 +52,6 @@ func handleMID_0002_START_ACK(c *TighteningController, pkg *handlerPkg) error {
 	seq := <-c.requestChannel
 	c.Response.update(seq, request_errors["00"])
 
-	// TODO
 	go c.Subscribe()
 	//go c.SolveOldResults()
 	//go c.getTighteningCount()
@@ -110,13 +109,13 @@ func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
 
 // 处理结果
 func handleMID_0061_LAST_RESULT(c *TighteningController, pkg *handlerPkg) error {
-	result_data := ResultData{}
-	err := ascii.Unmarshal(pkg.Body, &result_data)
+	resultData := ResultData{}
+	err := ascii.Unmarshal(pkg.Body, &resultData)
 	if err != nil {
 		return err
 	}
 
-	return c.handleResult(&result_data, nil)
+	return c.handleResult(resultData.ToTighteningResult())
 }
 
 // 处理历史结果
@@ -126,6 +125,9 @@ func handleMID_0065_OLD_DATA(c *TighteningController, pkg *handlerPkg) error {
 	if err != nil {
 		return err
 	}
+
+	seq := <-c.requestChannel
+	c.Response.update(seq, result_data.ToTighteningResult())
 
 	//flag := c.Response.get(MID_0064_OLD_SUBSCRIBE)
 

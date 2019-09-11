@@ -8,7 +8,6 @@ import (
 	"github.com/kataras/iris/core/errors"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/device"
-	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/socket_writer"
@@ -269,7 +268,7 @@ func (c *TighteningController) HandleMsg(pkg *handlerPkg) error {
 	return handler(c, pkg)
 }
 
-func (c *TighteningController) handleResult(result_data *ResultData, curve *minio.ControllerCurve) error {
+func (c *TighteningController) handleResult(result *tightening_device.TighteningResult) error {
 
 	//if utils.ArrayContains(c.Srv.config().SkipJobs, result_data.JobID) {
 	//	return nil
@@ -368,17 +367,17 @@ func (c *TighteningController) handleResult(result_data *ResultData, curve *mini
 	//c.updateResult(&controllerResult, nil, result_data.ChannelID)
 	//	c.handleResultandClear(result_data.ChannelID)
 
-	tighteningResult := result_data.ToTighteningResult()
-	tighteningResult.ControllerSN = c.cfg.SN
-	toolSN, err := c.findToolSNByChannel(result_data.ChannelID)
+	//tighteningResult := result_data.ToTighteningResult()
+	result.ControllerSN = c.cfg.SN
+	toolSN, err := c.findToolSNByChannel(result.ChannelID)
 	if err != nil {
 		return err
 	}
 
-	tighteningResult.ToolSN = toolSN
+	result.ToolSN = toolSN
 
 	// 分发结果到工具进行处理
-	c.toolDispatches[toolSN].resultDispatch.Dispatch(tighteningResult)
+	c.toolDispatches[toolSN].resultDispatch.Dispatch(result)
 
 	return nil
 }
@@ -443,6 +442,38 @@ func (c *TighteningController) GetTool(toolSN string) (tightening_device.ITighte
 }
 
 func (c *TighteningController) SetOutput(outputs []tightening_device.ControllerOutput) error {
+	if len(outputs) == 0 {
+		return errors.New("Output List Is Required")
+	}
+
+	strIo := ""
+	for i := 0; i < 10; i++ {
+		io, err := c.findIOByNo(i, outputs)
+		if err != nil {
+			strIo += "3"
+		} else {
+			switch io.Status {
+			case tightening_device.IO_STATUS_OFF:
+				strIo += "0"
+
+			case tightening_device.IO_STATUS_ON:
+				strIo += "1"
+
+			case tightening_device.IO_STATUS_FLASHING:
+				strIo += "2"
+			}
+		}
+	}
+
+	reply, err := c.ProcessRequest(MID_0200_CONTROLLER_RELAYS, "", "", "", strIo)
+	if err != nil {
+		return err
+	}
+
+	if reply.(string) != request_errors["00"] {
+		return errors.New(reply.(string))
+	}
+
 	return nil
 }
 
@@ -473,7 +504,7 @@ func (c *TighteningController) Connect() error {
 	for {
 		err := c.w.Connect(DAIL_TIMEOUT)
 		if err != nil {
-			c.Srv.diag.Error("connect err", err)
+			c.Srv.diag.Error("Connect Err", err)
 		} else {
 			break
 		}
@@ -551,30 +582,23 @@ func (c *TighteningController) SolveOldResults() {
 		return
 	}
 
-	//c.Response.Add(MID_0064_OLD_SUBSCRIBE, MID_0064_OLD_SUBSCRIBE)
-	if c.getOldResult(0) != nil {
+	lastResult, err := c.getOldResult(0)
+	if err != nil {
 		return
 	}
 
-	var reply interface{} = nil
-	//ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
-	//当在队列中找到非空数据则返回，否则直到timeout返回nil
-	//reply = c.Response.get(MID_0065_OLD_DATA)
-
-	if reply == nil {
-		return
-	}
-
-	objLastResult := reply.(ResultData)
-
-	if objLastResult.TightingID != c.dbController.LastID {
+	if lastResult.TighteningID != c.dbController.LastID {
 		startId, _ := strconv.ParseInt(c.dbController.LastID, 10, 64)
-		endId, _ := strconv.ParseInt(objLastResult.TightingID, 10, 64)
+		endId, _ := strconv.ParseInt(lastResult.TighteningID, 10, 64)
 
 		for i := startId + 1; i <= endId; i++ {
-			c.getOldResult(i)
+			result, err := c.getOldResult(i)
+			if err != nil {
+				c.diag.Error(fmt.Sprintf("Get Old Result Failed: %d", i), err)
+			} else {
+				c.handleResult(result)
+			}
 		}
-
 	}
 }
 
@@ -805,21 +829,13 @@ func (c *TighteningController) manage() {
 	}
 }
 
-func (c *TighteningController) getOldResult(last_id int64) error {
-	rev, err := GetVendorMid(c.Model(), MID_0064_OLD_SUBSCRIBE)
+func (c *TighteningController) getOldResult(last_id int64) (*tightening_device.TighteningResult, error) {
+	reply, err := c.ProcessRequest(MID_0064_OLD_SUBSCRIBE, "", "", "", fmt.Sprintf("%010d", last_id))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if c.Status() == device.STATUS_OFFLINE {
-		return errors.New("status offline")
-	}
-
-	s_last_result := GeneratePackage(MID_0064_OLD_SUBSCRIBE, rev, "", "", "", fmt.Sprintf("%010d", last_id))
-
-	c.Write([]byte(s_last_result))
-
-	return nil
+	return reply.(*tightening_device.TighteningResult), nil
 }
 
 func (c *TighteningController) PSetSubscribe() error {
@@ -944,71 +960,14 @@ func (c *TighteningController) CurveSubscribe() error {
 	return nil
 }
 
-func (c *TighteningController) findIOByNo(no int, ios *[]IOStatus) (IOStatus, error) {
-	for _, v := range *ios {
-		if no == v.No {
+func (c *TighteningController) findIOByNo(no int, outputs []tightening_device.ControllerOutput) (tightening_device.ControllerOutput, error) {
+	for _, v := range outputs {
+		if no == v.OutputNo {
 			return v, nil
 		}
 	}
 
-	return IOStatus{}, errors.New("not found")
-}
-
-func (c *TighteningController) IOSet(ios *[]IOStatus) error {
-	//rev, err := GetVendorMid(c.Model(), MID_0200_CONTROLLER_RELAYS)
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//if c.Status() == controller.STATUS_OFFLINE {
-	//	return errors.New("status offline")
-	//}
-	//
-	//if len(*ios) == 0 {
-	//	return errors.New("io status list is required")
-	//}
-	//
-	//str_io := ""
-	//for i := 0; i < 10; i++ {
-	//	io, err := c.findIOByNo(i, ios)
-	//	if err != nil {
-	//		str_io += "3"
-	//	} else {
-	//		switch io.Status {
-	//		case IO_STATUS_OFF:
-	//			str_io += "0"
-	//
-	//		case IO_STATUS_ON:
-	//			str_io += "1"
-	//
-	//		case IO_STATUS_FLASHING:
-	//			str_io += "2"
-	//		}
-	//	}
-	//}
-	//
-	//c.Response.Add(MID_0200_CONTROLLER_RELAYS, nil)
-	//defer c.Response.remove(MID_0200_CONTROLLER_RELAYS)
-	//
-	//s_io := GeneratePackage(MID_0200_CONTROLLER_RELAYS, rev, "", "", "", str_io)
-	//
-	//c.Write([]byte(s_io))
-	//
-	//var reply interface{} = nil
-	//ctx, _ := context.WithTimeout(context.Background(), MAX_REPLY_TIME)
-	////当在队列中找到非空数据则返回，否则直到timeout返回nil
-	//reply = c.Response.Get(MID_0200_CONTROLLER_RELAYS, ctx)
-	//
-	//if reply == nil {
-	//	return errors.New(controller.ERR_CONTROLER_TIMEOUT)
-	//}
-	//
-	//s_reply := reply.(string)
-	//if s_reply != request_errors["00"] {
-	//	return errors.New(s_reply)
-	//}
-
-	return nil
+	return tightening_device.ControllerOutput{}, errors.New("Not Found")
 }
 
 func (c *TighteningController) Model() string {

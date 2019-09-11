@@ -29,6 +29,12 @@ const (
 	STRATEGY_AK2 = "AK2"
 )
 
+const (
+	IO_STATUS_ON       = "on"
+	IO_STATUS_OFF      = "off"
+	IO_STATUS_FLASHING = "flashing"
+)
+
 // type
 const (
 	TIGHTENING_DEVICE_TYPE_CONTROLLER = "controller"
@@ -57,11 +63,15 @@ type ControllerOutput struct {
 }
 
 type TighteningResult struct {
+
 	// 控制器序列号
 	ControllerSN string `json:"controller_sn"`
 
 	// 工具序列号
 	ToolSN string `json:"tool_sn"`
+
+	// 工具通道号
+	ChannelID int
 
 	// 收到时间
 	UpdateTime time.Time `json:"update_time"`
