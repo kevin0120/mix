@@ -77,7 +77,7 @@ websocket:
   read_buf_size: 10000000
   write_buf_size: 10000000
 storage:
-  db_url: 127.0.0.1:5433
+  db_url: 127.0.0.1:5432
   db_name: rush_hardware
   db_user: admin
   db_pwd: admin
@@ -94,7 +94,7 @@ audi/vw:
   version: 21
 
 openprotocol:
-  keep_alive_period: 10s
+  keep_alive_period: 3s
   read_buf: 65535
   req_time_out: 300ms
   skip_jobs:

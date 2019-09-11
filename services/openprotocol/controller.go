@@ -667,7 +667,6 @@ func (c *TighteningController) handleStatus(status string) {
 			ControllerSN: c.cfg.SN,
 			Status:       status,
 		})
-
 	}
 }
 
@@ -677,6 +676,7 @@ func (c *TighteningController) Read(conn net.Conn) {
 	buffer := make([]byte, c.Srv.config().ReadBufferSize)
 
 	for {
+		conn.SetReadDeadline(time.Now().Add(c.keepPeriod * MAX_KEEP_ALIVE_CHECK).Add(1 * time.Second))
 		n, err := conn.Read(buffer)
 		if err != nil {
 			c.Srv.diag.Error("read failed", err)
@@ -759,11 +759,7 @@ func (c *TighteningController) manage() {
 			if c.Status() == device.STATUS_OFFLINE {
 				continue
 			}
-			if c.KeepAliveCount() >= MAX_KEEP_ALIVE_CHECK {
-				c.handleStatus(device.STATUS_OFFLINE)
-				c.updateKeepAliveCount(0)
-				continue
-			}
+
 			if c.KeepAliveDeadLine().Before(time.Now()) {
 				//到达了deadline
 				c.sendKeepalive()
@@ -846,7 +842,7 @@ func (c *TighteningController) PSetSubscribe() error {
 	}
 
 	if reply.(string) != request_errors["00"] {
-		return errors.New(reply.(string))
+		return errors.New(fmt.Sprintf("MID: %s err: %s", MID_0060_LAST_RESULT_SUBSCRIBE, reply.(string)))
 	}
 
 	return nil
@@ -859,7 +855,7 @@ func (c *TighteningController) SelectorSubscribe() error {
 	}
 
 	if reply.(string) != request_errors["00"] {
-		return errors.New(reply.(string))
+		return errors.New(fmt.Sprintf("MID: %s err: %s", MID_0250_SELECTOR_SUBSCRIBE, reply.(string)))
 	}
 
 	return nil
@@ -873,7 +869,7 @@ func (c *TighteningController) JobInfoSubscribe() error {
 	}
 
 	if reply.(string) != request_errors["00"] {
-		return errors.New(reply.(string))
+		return errors.New(fmt.Sprintf("MID: %s err: %s", MID_0034_JOB_INFO_SUBSCRIBE, reply.(string)))
 	}
 
 	return nil
@@ -886,7 +882,7 @@ func (c *TighteningController) IOInputSubscribe() error {
 	}
 
 	if reply.(string) != request_errors["00"] {
-		return errors.New(reply.(string))
+		return errors.New(fmt.Sprintf("MID: %s err: %s", MID_0210_INPUT_SUBSCRIBE, reply.(string)))
 	}
 
 	return nil
@@ -900,7 +896,7 @@ func (c *TighteningController) MultiSpindleResultSubscribe() error {
 	}
 
 	if reply.(string) != request_errors["00"] {
-		return errors.New(reply.(string))
+		return errors.New(fmt.Sprintf("MID: %s err: %s", MID_0100_MULTI_SPINDLE_SUBSCRIBE, reply.(string)))
 	}
 
 	return nil
@@ -913,7 +909,7 @@ func (c *TighteningController) VinSubscribe() error {
 	}
 
 	if reply.(string) != request_errors["00"] {
-		return errors.New(reply.(string))
+		return errors.New(fmt.Sprintf("MID: %s err: %s", MID_0051_VIN_SUBSCRIBE, reply.(string)))
 	}
 
 	return nil
@@ -927,7 +923,7 @@ func (c *TighteningController) ResultSubcribe() error {
 	}
 
 	if reply.(string) != request_errors["00"] {
-		return errors.New(reply.(string))
+		return errors.New(fmt.Sprintf("MID: %s err: %s", MID_0060_LAST_RESULT_SUBSCRIBE, reply.(string)))
 	}
 
 	return nil
@@ -941,7 +937,7 @@ func (c *TighteningController) AlarmSubcribe() error {
 	}
 
 	if reply.(string) != request_errors["00"] {
-		return errors.New(reply.(string))
+		return errors.New(fmt.Sprintf("MID: %s err: %s", MID_0070_ALARM_SUBSCRIBE, reply.(string)))
 	}
 
 	return nil
@@ -954,7 +950,7 @@ func (c *TighteningController) CurveSubscribe() error {
 	}
 
 	if reply.(string) != request_errors["00"] {
-		return errors.New(reply.(string))
+		return errors.New(fmt.Sprintf("MID: %s err: %s", MID_7408_LAST_CURVE_SUBSCRIBE, reply.(string)))
 	}
 
 	return nil

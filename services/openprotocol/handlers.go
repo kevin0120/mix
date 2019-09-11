@@ -212,7 +212,7 @@ func handleMID_0004_CMD_ERR(c *TighteningController, pkg *handlerPkg) error {
 	errCode := pkg.Body[4:6]
 
 	seq := <-c.requestChannel
-	c.Response.update(seq, errCode)
+	c.Response.update(seq, request_errors[errCode])
 
 	return nil
 }
