@@ -19,6 +19,8 @@ import MenuBuilder from './menu';
 import configs from './shared/config';
 import * as ws from './main/webSocket';
 
+global.getWSClient=ws.getWSClient;
+
 export default class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';

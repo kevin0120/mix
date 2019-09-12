@@ -9,8 +9,11 @@ import rushHealthz from './rushHealthz';
 
 let task = null;
 
-const { getWSClient } = require('electron').remote.require('./main/webSocket');
+// const { getWSClient } = require('electron').remote.require('./main/webSocket');
 const { ipcRenderer } = require('electron');
+const {getGlobal} = require('electron').remote;
+
+const getWSClient = getGlobal('getWSClient');
 
 export function* watchRushEvent(): Saga<void> {
   try {

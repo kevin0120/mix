@@ -1,4 +1,4 @@
-import { put } from 'redux-saga/effects';
+import { put, all } from 'redux-saga/effects';
 import { CommonLog } from '../../common/utils';
 import NotifierActions from '../Notifier/action';
 import healthzActions from '../healthz/action';
@@ -56,24 +56,12 @@ export default function* (payload) {
   try {
     yield put(healthzActions.data({ rush: payload }));
     if (rushHealthz !== payload) {
-      // eslint-disable-next-line no-restricted-syntax
-      for (const action of onChangeActions) {
-        yield put(action(payload));
-      }
+      yield all(onChangeActions.map(action => put(action(payload))));
     }
-    if (payload) {
-      for (const action of onConnectActions) {
-        yield put(action(payload));
-      }
-      // CommonLog.Info('rush 已连接');
-    } else {
-      for (const action of onDisconnectActions) {
-        yield put(action(payload));
-      }
-      // CommonLog.lError('rush 已断开');
-    }
+    yield all((payload ? onConnectActions : onDisconnectActions).map(
+      action => put(action(payload))
+    ));
     rushHealthz = payload;
-
   } catch (e) {
     CommonLog.lError(e, { at: 'rush handleHealthz' });
   }
