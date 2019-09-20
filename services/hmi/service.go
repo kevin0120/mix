@@ -51,6 +51,9 @@ func (s *Service) Open() error {
 
 	s.ControllerService.WS.OnNewClient = s.OnNewHmiClient
 	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_RESULT).Regist(s.OnTighteningResult)
+	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_IO).Regist(s.OnTighteningIOStatus)
+	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_CONTROLLER_STATUS).Regist(s.OnTighteningControllerStatus)
+	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_TOOL_STATUS).Regist(s.OnTighteningToolStatus)
 
 	var r httpd.Route
 
@@ -428,7 +431,22 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 	}
 }
 
+// 收到控制器结果
 func (s *Service) OnTighteningResult(data interface{}) {
-	// TODO:结果推送HMI
 	s.diag.Debug("结果推送HMI")
+}
+
+// 控制器状态变化
+func (s *Service) OnTighteningControllerStatus(data interface{}) {
+
+}
+
+// 工具状态变化
+func (s *Service) OnTighteningToolStatus(data interface{}) {
+
+}
+
+// 控制器IO变化
+func (s *Service) OnTighteningIOStatus(data interface{}) {
+
 }

@@ -232,22 +232,22 @@ func (s *TighteningTool) GetJobDetail(job int) (*tightening_device.JobDetail, er
 	return nil, errors.New(controller.ERR_KNOWN)
 }
 
-//func (s *TighteningTool) IdentifierSet(str string) error {
-//	rev, err := GetVendorMid(c.Model(), MID_0150_IDENTIFIER_SET)
-//	if err != nil {
-//		return err
-//	}
-//
-//	if c.Status() == controller.STATUS_OFFLINE {
-//		return errors.New("status offline")
-//	}
-//
-//	ide := GeneratePackage(MID_0150_IDENTIFIER_SET, rev, "", "", "", str)
-//
-//	c.Write([]byte(ide))
-//
-//	return nil
-//}
+func (s *TighteningTool) IdentifierSet(str string) error {
+	if s.Status() == device.STATUS_OFFLINE {
+		return errors.New(device.STATUS_OFFLINE)
+	}
+
+	reply, err := s.parent.ProcessRequest(MID_0150_IDENTIFIER_SET, "", "", "", str)
+	if err != nil {
+		return err
+	}
+
+	if reply.(string) != request_errors["00"] {
+		return errors.New(reply.(string))
+	}
+
+	return nil
+}
 
 //func (s *TighteningTool) PSetBatchReset(pset int) error {
 //	rev, err := GetVendorMid(c.Model(), MID_0020_PSET_BATCH_RESET)

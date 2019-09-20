@@ -69,8 +69,8 @@ type TighteningController struct {
 	receiveBuf           chan []byte
 	controllerSubscribes []ControllerSubscribe
 
-	toolDispatches           map[string]*ToolDispatch
-	externalResultDispatches map[string]*utils.Dispatcher
+	toolDispatches     map[string]*ToolDispatch
+	externalDispatches map[string]*utils.Dispatcher
 
 	requestChannel chan uint32
 	sequence       *utils.Sequence
@@ -121,7 +121,7 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 		c.AddChildren(v.SN, tool)
 	}
 
-	c.externalResultDispatches = map[string]*utils.Dispatcher{
+	c.externalDispatches = map[string]*utils.Dispatcher{
 		tightening_device.DISPATCH_RESULT:            utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		tightening_device.DISPATCH_IO:                utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		tightening_device.DISPATCH_CONTROLLER_STATUS: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
@@ -410,7 +410,7 @@ func (c *TighteningController) Start() error {
 		dispatch.curveDispatch.Start()
 	}
 
-	for _, dispatch := range c.externalResultDispatches {
+	for _, dispatch := range c.externalDispatches {
 		dispatch.Start()
 	}
 
@@ -976,5 +976,5 @@ func (c *TighteningController) DeviceType() string {
 }
 
 func (c *TighteningController) GetDispatch(name string) *utils.Dispatcher {
-	return c.externalResultDispatches[name]
+	return c.externalDispatches[name]
 }

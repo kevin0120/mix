@@ -46,7 +46,10 @@ func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol) (*Servi
 		runningControllers: map[string]ITighteningController{},
 		protocols:          map[string]ITighteningProtocol{},
 		dispatchers: map[string]*utils.Dispatcher{
-			DISPATCH_RESULT: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+			DISPATCH_RESULT:            utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+			DISPATCH_CONTROLLER_STATUS: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+			DISPATCH_IO:                utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+			DISPATCH_TOOL_STATUS:       utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		},
 	}
 
@@ -67,6 +70,9 @@ func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol) (*Servi
 		}
 
 		c.GetDispatch(DISPATCH_RESULT).Regist(srv.OnResult)
+		c.GetDispatch(DISPATCH_TOOL_STATUS).Regist(srv.OnToolStatus)
+		c.GetDispatch(DISPATCH_CONTROLLER_STATUS).Regist(srv.OnControllerStatus)
+		c.GetDispatch(DISPATCH_IO).Regist(srv.OnIOInputs)
 
 		// TODO: 如果控制器序列号没有配置，则通过探测加入设备列表。
 		srv.addController(deviceConfig.SN, c)
@@ -213,6 +219,21 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 // 收到结果
 func (s *Service) OnResult(data interface{}) {
 	s.GetDispatcher(DISPATCH_RESULT).Dispatch(data)
+}
+
+// 控制器IO变化
+func (s *Service) OnIOInputs(data interface{}) {
+	s.GetDispatcher(DISPATCH_IO).Dispatch(data)
+}
+
+// 控制器状态变化
+func (s *Service) OnControllerStatus(data interface{}) {
+	s.GetDispatcher(DISPATCH_CONTROLLER_STATUS).Dispatch(data)
+}
+
+// 工具状态变化
+func (s *Service) OnToolStatus(data interface{}) {
+	s.GetDispatcher(DISPATCH_TOOL_STATUS).Dispatch(data)
 }
 
 func (s *Service) GetDispatcher(name string) *utils.Dispatcher {
