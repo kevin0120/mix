@@ -69,10 +69,10 @@ func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol) (*Servi
 			continue
 		}
 
-		c.GetDispatch(DISPATCH_RESULT).Regist(srv.OnResult)
-		c.GetDispatch(DISPATCH_TOOL_STATUS).Regist(srv.OnToolStatus)
-		c.GetDispatch(DISPATCH_CONTROLLER_STATUS).Regist(srv.OnControllerStatus)
-		c.GetDispatch(DISPATCH_IO).Regist(srv.OnIOInputs)
+		c.GetDispatch(DISPATCH_RESULT).Register(srv.OnResult)
+		c.GetDispatch(DISPATCH_TOOL_STATUS).Register(srv.OnToolStatus)
+		c.GetDispatch(DISPATCH_CONTROLLER_STATUS).Register(srv.OnControllerStatus)
+		c.GetDispatch(DISPATCH_IO).Register(srv.OnIOInputs)
 
 		// TODO: 如果控制器序列号没有配置，则通过探测加入设备列表。
 		srv.addController(deviceConfig.SN, c)

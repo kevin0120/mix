@@ -115,8 +115,8 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 			resultDispatch: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 			curveDispatch:  utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		}
-		c.toolDispatches[v.SN].resultDispatch.Regist(tool.OnResult)
-		c.toolDispatches[v.SN].curveDispatch.Regist(tool.OnCurve)
+		c.toolDispatches[v.SN].resultDispatch.Register(tool.OnResult)
+		c.toolDispatches[v.SN].curveDispatch.Register(tool.OnCurve)
 
 		c.AddChildren(v.SN, tool)
 	}
