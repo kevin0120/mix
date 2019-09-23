@@ -109,6 +109,7 @@ openprotocol:
     - 1
 
   tool_info_period: 10h
+  default_mode: job
 
 scanner:
   enable: false

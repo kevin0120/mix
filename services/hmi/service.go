@@ -30,7 +30,8 @@ type Service struct {
 	AudiVw            *audi_vw.Service
 	OpenProtocol      *openprotocol.Service
 	ControllerService *controller.Service
-	SN                string
+
+	SN string
 	wsnotify.WSNotify
 	TighteningService *tightening_device.Service
 }
@@ -49,7 +50,7 @@ func NewService(d Diagnostic) *Service {
 
 func (s *Service) Open() error {
 
-	s.ControllerService.WS.OnNewClient = s.OnNewHmiClient
+	//s.ControllerService.WS.OnNewClient = s.OnNewHmiClient
 	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_RESULT).Register(s.OnTighteningResult)
 	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_IO).Register(s.OnTighteningIOStatus)
 	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_CONTROLLER_STATUS).Register(s.OnTighteningControllerStatus)
@@ -213,7 +214,7 @@ func (s *Service) Open() error {
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
 		Method:      "PUT",
 		Pattern:     "/job-control",
-		HandlerFunc: s.methods.putJobControll,
+		HandlerFunc: s.methods.putJobAbort,
 	}
 	s.Httpd.Handler[0].AddRoute(r)
 
@@ -303,46 +304,46 @@ func (s *Service) resetResult(id int64) error {
 }
 
 func (s *Service) OnNewHmiClient(c websocket.Connection) {
-	controllers := s.ControllerService.GetControllers()
+	//controllers := s.ControllerService.GetControllers()
+	//
+	//for k, v := range *controllers {
+	//	s := wsnotify.WSStatus{
+	//		SN:     k,
+	//		Status: string(v.Status()),
+	//	}
+	//
+	//	msg, _ := json.Marshal(s)
+	//
+	//	c.Emit(wsnotify.WS_EVENT_CONTROLLER, string(msg))
+	//
+	//	inputs := openprotocol.IOMonitor{
+	//		ControllerSN: k,
+	//		Inputs:       v.Inputs(),
+	//	}
+	//
+	//	msg, _ = json.Marshal(inputs)
+	//	c.Emit(wsnotify.WS_EVENT_IO, string(msg))
 
-	for k, v := range *controllers {
-		s := wsnotify.WSStatus{
-			SN:     k,
-			Status: string(v.Status()),
-		}
+	// 推送工具状态
+	// TODO:工具状态
+	//tools := v.Tools()
+	//for sn, status := range tools {
+	//	ts := wsnotify.WSToolStatus{
+	//		ToolSN: sn,
+	//		Status: status,
+	//	}
+	//	msg, _ = json.Marshal(ts)
+	//
+	//	c.Emit(wsnotify.WS_EVETN_TOOL, string(msg))
+	//}
+	//}
 
-		msg, _ := json.Marshal(s)
-
-		c.Emit(wsnotify.WS_EVENT_CONTROLLER, string(msg))
-
-		inputs := openprotocol.IOMonitor{
-			ControllerSN: k,
-			Inputs:       v.Inputs(),
-		}
-
-		msg, _ = json.Marshal(inputs)
-		c.Emit(wsnotify.WS_EVENT_IO, string(msg))
-
-		// 推送工具状态
-		// TODO:工具状态
-		//tools := v.Tools()
-		//for sn, status := range tools {
-		//	ts := wsnotify.WSToolStatus{
-		//		ToolSN: sn,
-		//		Status: status,
-		//	}
-		//	msg, _ = json.Marshal(ts)
-		//
-		//	c.Emit(wsnotify.WS_EVETN_TOOL, string(msg))
-		//}
-	}
-
-	odooStatus := wsnotify.WSOdooStatus{
-		Status: s.ODOO.Status(),
-	}
-
-	str, _ := json.Marshal(odooStatus)
-	c.Emit(wsnotify.WS_EVENT_ODOO, string(str))
+	//odooStatus := wsnotify.WSOdooStatus{
+	//	Status: s.ODOO.Status(),
+	//}
+	//
+	//str, _ := json.Marshal(odooStatus)
+	//c.Emit(wsnotify.WS_EVENT_ODOO, string(str))
 }
 
 func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {

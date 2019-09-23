@@ -1,6 +1,7 @@
 package openprotocol
 
 import (
+	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/toml"
 	"time"
 )
@@ -14,6 +15,7 @@ type Config struct {
 	DataIndex         int           `yaml:"data_index"`
 	VinIndex          []int         `yaml:"vin_index"`
 	GetToolInfoPeriod toml.Duration `yaml:"tool_info_period"`
+	DefaultMode       string        `yaml:"default_mode"`
 }
 
 func NewConfig() Config {
@@ -27,6 +29,7 @@ func NewConfig() Config {
 		DataIndex:         1,
 		VinIndex:          []int{0, 1},
 		GetToolInfoPeriod: toml.Duration(time.Hour * 12), // 半天
+		DefaultMode:       tightening_device.MODE_JOB,
 	}
 }
 

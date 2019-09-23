@@ -42,15 +42,16 @@ type IOSet struct {
 
 type ToolEnable struct {
 	Controller_SN string `json:"controller_sn"`
-	GunSN         string `json:"gun_sn"`
+	ToolSN        string `json:"tool_sn"`
 	Enable        bool   `json:"enable"`
 	Reason        string `json:"reason"`
 }
 
 type Job struct {
 	Controller_SN string `json:"controller_sn"`
+	ToolSN        string `json:"tool_sn"`
 	Job           int    `json:"job_id"`
-	WorkorderiD   int64  `json:"workorder_id"`
+	WorkorderID   int64  `json:"workorder_id"`
 	UserID        int64  `json:"user_id"`
 }
 

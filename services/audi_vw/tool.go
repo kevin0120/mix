@@ -79,6 +79,11 @@ func (s *TighteningTool) GetJobDetail(job int) (*tightening_device.JobDetail, er
 	return nil, errors.New(tightening_device.TIGHTENING_ERR_NOT_SUPPORTED)
 }
 
+// ID设置
+func (s *TighteningTool) TraceSet(str string) error {
+	return nil
+}
+
 func (s *TighteningTool) Status() string {
 	if s.parent.Status() == device.STATUS_OFFLINE {
 		return device.STATUS_OFFLINE

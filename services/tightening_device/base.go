@@ -59,4 +59,7 @@ type ITighteningTool interface {
 
 	// job详情
 	GetJobDetail(job int) (*JobDetail, error)
+
+	// 追溯信息设置
+	TraceSet(str string) error
 }

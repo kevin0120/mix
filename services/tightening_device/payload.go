@@ -92,6 +92,9 @@ type TighteningResult struct {
 	// 当前拧紧次数
 	Count int `json:"count"`
 
+	// 当前点位次序
+	Seq int `json:"seq"`
+
 	// 拧紧ID
 	TighteningID string `json:"tightening_id"`
 
@@ -130,6 +133,9 @@ type TighteningResult struct {
 
 	// 目标角度
 	AngleTarget float64 `json:"angle_target"`
+
+	// 工单ID
+	WorkorderID int64 `json:"workorder_id"`
 }
 
 func (r *TighteningResult) ToDBResult() *storage.Results {

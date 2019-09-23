@@ -110,7 +110,8 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 	}
 
 	for _, v := range deviceConfig.Tools {
-		tool := NewTool(&c, v, d)
+		tool := CreateTool(&c, v, d)
+		tool.SetMode(protocolConfig.DefaultMode)
 		c.toolDispatches[v.SN] = &ToolDispatch{
 			resultDispatch: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 			curveDispatch:  utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),

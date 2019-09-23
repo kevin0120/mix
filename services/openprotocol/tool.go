@@ -7,6 +7,7 @@ import (
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/utils"
+	"sync/atomic"
 )
 
 const (
@@ -14,11 +15,11 @@ const (
 	OPENPROTOCOL_MODE_PSET = "0"
 )
 
-func NewTool(c *TighteningController, cfg tightening_device.ToolConfig, d Diagnostic) *TighteningTool {
+func CreateTool(c *TighteningController, cfg tightening_device.ToolConfig, d Diagnostic) *TighteningTool {
 	tool := TighteningTool{
 		diag:       d,
 		cfg:        cfg,
-		parent:     c,
+		controller: c,
 		BaseDevice: device.CreateBaseDevice(),
 	}
 
@@ -27,12 +28,20 @@ func NewTool(c *TighteningController, cfg tightening_device.ToolConfig, d Diagno
 }
 
 type TighteningTool struct {
-	diag   Diagnostic
-	cfg    tightening_device.ToolConfig
-	Mode   string
-	parent *TighteningController
+	diag       Diagnostic
+	cfg        tightening_device.ToolConfig
+	Mode       atomic.Value
+	controller *TighteningController
 
 	device.BaseDevice
+}
+
+func (s *TighteningTool) SetMode(mode string) {
+	s.Mode.Store(mode)
+}
+
+func (s *TighteningTool) GetMode() string {
+	return s.Mode.Load().(string)
 }
 
 // 工具使能控制
@@ -46,7 +55,7 @@ func (s *TighteningTool) ToolControl(enable bool) error {
 		cmd = MID_0043_TOOL_ENABLE
 	}
 
-	reply, err := s.parent.ProcessRequest(cmd, "", "", "", "")
+	reply, err := s.controller.ProcessRequest(cmd, "", "", "", "")
 	if err != nil {
 		return err
 	}
@@ -65,7 +74,7 @@ func (s *TighteningTool) SetPSet(pset int) error {
 	}
 
 	data := fmt.Sprintf("%03d", pset)
-	reply, err := s.parent.ProcessRequest(MID_0018_PSET, "", "", "", data)
+	reply, err := s.controller.ProcessRequest(MID_0018_PSET, "", "", "", data)
 	if err != nil {
 		return err
 	}
@@ -84,7 +93,7 @@ func (s *TighteningTool) SetJob(job int) error {
 	}
 
 	data := fmt.Sprintf("%04d", job)
-	reply, err := s.parent.ProcessRequest(MID_0038_JOB_SELECT, "", "", "", data)
+	reply, err := s.controller.ProcessRequest(MID_0038_JOB_SELECT, "", "", "", data)
 	if err != nil {
 		return err
 	}
@@ -96,7 +105,7 @@ func (s *TighteningTool) SetJob(job int) error {
 	return nil
 }
 
-// 模式选择: job/pset  0: pset 1: job
+// 模式选择: job/pset
 func (s *TighteningTool) ModeSelect(mode string) error {
 	if s.Status() == device.STATUS_OFFLINE {
 		return errors.New(device.STATUS_OFFLINE)
@@ -107,7 +116,7 @@ func (s *TighteningTool) ModeSelect(mode string) error {
 		flag = OPENPROTOCOL_MODE_JOB
 	}
 
-	reply, err := s.parent.ProcessRequest(MID_0130_JOB_OFF, "", "", "", flag)
+	reply, err := s.controller.ProcessRequest(MID_0130_JOB_OFF, "", "", "", flag)
 	if err != nil {
 		return err
 	}
@@ -115,6 +124,8 @@ func (s *TighteningTool) ModeSelect(mode string) error {
 	if reply.(string) != request_errors["00"] {
 		return errors.New(reply.(string))
 	}
+
+	s.SetMode(mode)
 
 	return nil
 }
@@ -125,7 +136,7 @@ func (s *TighteningTool) AbortJob() error {
 		return errors.New(device.STATUS_OFFLINE)
 	}
 
-	reply, err := s.parent.ProcessRequest(MID_0127_JOB_ABORT, "", "", "", "")
+	reply, err := s.controller.ProcessRequest(MID_0127_JOB_ABORT, "", "", "", "")
 	if err != nil {
 		return err
 	}
@@ -144,7 +155,7 @@ func (s *TighteningTool) SetPSetBatch(pset int, batch int) error {
 	}
 
 	data := fmt.Sprintf("%03d%02d", pset, batch)
-	reply, err := s.parent.ProcessRequest(MID_0019_PSET_BATCH_SET, "", "", "", data)
+	reply, err := s.controller.ProcessRequest(MID_0019_PSET_BATCH_SET, "", "", "", data)
 	if err != nil {
 		return err
 	}
@@ -162,7 +173,7 @@ func (s *TighteningTool) GetPSetList() ([]int, error) {
 		return nil, errors.New(device.STATUS_OFFLINE)
 	}
 
-	reply, err := s.parent.ProcessRequest(MID_0010_PSET_LIST_REQUEST, "", "", "", "")
+	reply, err := s.controller.ProcessRequest(MID_0010_PSET_LIST_REQUEST, "", "", "", "")
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +188,7 @@ func (s *TighteningTool) GetPSetDetail(pset int) (*tightening_device.PSetDetail,
 	}
 
 	data := fmt.Sprintf("%03d", pset)
-	reply, err := s.parent.ProcessRequest(MID_0012_PSET_DETAIL_REQUEST, "", "", "", data)
+	reply, err := s.controller.ProcessRequest(MID_0012_PSET_DETAIL_REQUEST, "", "", "", data)
 	if err != nil {
 		return nil, err
 	}
@@ -200,7 +211,7 @@ func (s *TighteningTool) GetJobList() ([]int, error) {
 		return nil, errors.New(device.STATUS_OFFLINE)
 	}
 
-	reply, err := s.parent.ProcessRequest(MID_0030_JOB_LIST_REQUEST, "", "", "", "")
+	reply, err := s.controller.ProcessRequest(MID_0030_JOB_LIST_REQUEST, "", "", "", "")
 	if err != nil {
 		return nil, err
 	}
@@ -215,7 +226,7 @@ func (s *TighteningTool) GetJobDetail(job int) (*tightening_device.JobDetail, er
 	}
 
 	data := fmt.Sprintf("%04d", job)
-	reply, err := s.parent.ProcessRequest(MID_0032_JOB_DETAIL_REQUEST, "", "", "", data)
+	reply, err := s.controller.ProcessRequest(MID_0032_JOB_DETAIL_REQUEST, "", "", "", data)
 	if err != nil {
 		return nil, err
 	}
@@ -232,12 +243,13 @@ func (s *TighteningTool) GetJobDetail(job int) (*tightening_device.JobDetail, er
 	return nil, errors.New(controller.ERR_KNOWN)
 }
 
-func (s *TighteningTool) IdentifierSet(str string) error {
+func (s *TighteningTool) TraceSet(str string) error {
 	if s.Status() == device.STATUS_OFFLINE {
 		return errors.New(device.STATUS_OFFLINE)
 	}
 
-	reply, err := s.parent.ProcessRequest(MID_0150_IDENTIFIER_SET, "", "", "", str)
+	id := s.controller.Srv.generateIDInfo(str)
+	reply, err := s.controller.ProcessRequest(MID_0150_IDENTIFIER_SET, "", "", "", id)
 	if err != nil {
 		return err
 	}
@@ -268,7 +280,7 @@ func (s *TighteningTool) IdentifierSet(str string) error {
 //}
 
 func (s *TighteningTool) Status() string {
-	if s.parent.Status() == device.STATUS_OFFLINE {
+	if s.controller.Status() == device.STATUS_OFFLINE {
 		return device.STATUS_OFFLINE
 	}
 
@@ -280,29 +292,33 @@ func (s *TighteningTool) DeviceType() string {
 }
 
 // 处理结果
-func (c *TighteningTool) OnResult(result interface{}) {
+func (s *TighteningTool) OnResult(result interface{}) {
 	if result == nil {
-		c.diag.Error(fmt.Sprintf("Tool SN: %s", c.cfg.SN), errors.New("Result Is Nil"))
+		s.diag.Error(fmt.Sprintf("Tool SN: %s", s.cfg.SN), errors.New("Result Is Nil"))
 		return
 	}
 
 	tighteningResult := result.(*tightening_device.TighteningResult)
+	if s.Mode.Load().(string) == tightening_device.MODE_JOB {
+		tighteningResult.Seq, tighteningResult.Count = s.controller.calBatch(tighteningResult.WorkorderID)
+	}
+
 	dbResult := tighteningResult.ToDBResult()
 
 	// 尝试获取最近一条没有对应结果的曲线并更新, 同时缓存结果
-	err := c.parent.Srv.DB.UpdateIncompleteCurveAndSaveResult(dbResult)
+	err := s.controller.Srv.DB.UpdateIncompleteCurveAndSaveResult(dbResult)
 	if err != nil {
-		c.diag.Error("Handle Result With Curve Failed", err)
+		s.diag.Error("Handle Result With Curve Failed", err)
 	}
 
 	// 分发结果
-	c.parent.GetDispatch(tightening_device.DISPATCH_RESULT).Dispatch(tighteningResult)
+	s.controller.GetDispatch(tightening_device.DISPATCH_RESULT).Dispatch(tighteningResult)
 }
 
 // 处理曲线
-func (c *TighteningTool) OnCurve(curve interface{}) {
+func (s *TighteningTool) OnCurve(curve interface{}) {
 	if curve == nil {
-		c.diag.Error(fmt.Sprintf("Tool SN: %s", c.cfg.SN), errors.New("Curve Is Nil"))
+		s.diag.Error(fmt.Sprintf("Tool SN: %s", s.cfg.SN), errors.New("Curve Is Nil"))
 		return
 	}
 
@@ -310,12 +326,12 @@ func (c *TighteningTool) OnCurve(curve interface{}) {
 	dbCurves := tighteningCurve.ToDBCurve()
 
 	// 尝试获取最近一条没有对应曲线的结果并更新, 同时缓存曲线
-	err := c.parent.Srv.DB.UpdateIncompleteResultAndSaveCurve(dbCurves)
+	err := s.controller.Srv.DB.UpdateIncompleteResultAndSaveCurve(dbCurves)
 	if err != nil {
-		c.diag.Error("Handle Curve With Result Failed", err)
+		s.diag.Error("Handle Curve With Result Failed", err)
 	}
 }
 
-func (c *TighteningTool) GetDispatch(name string) *utils.Dispatcher {
+func (s *TighteningTool) GetDispatch(name string) *utils.Dispatcher {
 	return nil
 }

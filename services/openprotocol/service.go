@@ -1,6 +1,7 @@
 package openprotocol
 
 import (
+	"fmt"
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/minio"
@@ -396,18 +397,17 @@ func (s *Service) IOSet(sn string, ios *[]IOStatus) error {
 	return nil
 }
 
-func (s *Service) GenerateIDInfo(info string) string {
-	//	ids := ""
-	//	for i := 0; i < 4; i++ {
-	//		if i == s.config().DataIndex {
-	//			ids += fmt.Sprintf("%-25s", info)
-	//		} else {
-	//			ids += fmt.Sprintf("%25s", "")
-	//		}
-	//	}
-	//
-	//	return ids
-	return ""
+func (s *Service) generateIDInfo(info string) string {
+	ids := ""
+	for i := 0; i < MAX_IDS_NUM; i++ {
+		if i == s.config().DataIndex {
+			ids += fmt.Sprintf("%-25s", info)
+		} else {
+			ids += fmt.Sprintf("%25s", "")
+		}
+	}
+
+	return ids
 }
 
 func (s *Service) TryCreateMaintenance(info ToolInfo) error {

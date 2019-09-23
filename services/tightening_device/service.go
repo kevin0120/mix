@@ -36,6 +36,7 @@ type Service struct {
 	utils.DispatchHandler
 
 	dispatchers map[string]*utils.Dispatcher
+	Api         *Api
 }
 
 func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol) (*Service, error) {
@@ -54,6 +55,9 @@ func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol) (*Servi
 	}
 
 	srv.configValue.Store(c)
+	srv.Api = &Api{
+		service: srv,
+	}
 
 	// 载入支持的协议
 	for _, protocol := range protocols {
@@ -117,68 +121,52 @@ func (s *Service) config() Config {
 // TODO: case封装成函数
 func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 	var msg wsnotify.WSMsg
-	//s.diag.Debug(fmt.Sprintf("OnWSMsg Recv New Message: %# 20X", data))
 	err := json.Unmarshal(data, &msg)
 	if err != nil {
-		//s.diag.Error(fmt.Sprintf("OnWSMsg Fail With Message: %# 20X", data), err)
+		s.diag.Error(fmt.Sprintf("OnWSMsg Fail With Message: %# 20X", data), err)
 		return
 	}
+
+	if msg.Data == nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, "Msg Data Should Not Be nil"))
+		return
+	}
+
+	byteData, _ := json.Marshal(msg.Data)
+
 	switch msg.Type {
 	case WS_TOOL_MODE_SELECT:
 		req := ToolModeSelect{}
-		strData, _ := json.Marshal(msg.Data)
-		_ = json.Unmarshal([]byte(strData), &req)
-		tool, err := s.getTool(req.ControllerSN, req.ToolSN)
+		_ = json.Unmarshal(byteData, &req)
+		err := s.Api.ToolModeSelect(&req)
 		if err != nil {
+			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 			return
 		}
 
-		err = tool.ModeSelect(req.Mode)
-		msg := wsnotify.WSMsg{
-			Type: msg.Type,
-			SN:   msg.SN,
-			Data: err,
-		}
-		reply, _ := json.Marshal(msg)
-
-		err = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, string(reply))
-		if err != nil {
-			s.diag.Error(fmt.Sprintf("WS_TOOL_ENABLE Send WS_EVENT_REPLY WebSocket Message: %#v Fail", msg), err)
-		}
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
 
 	case WS_TOOL_ENABLE:
-		req := ToolEnable{}
-		strData, _ := json.Marshal(msg.Data)
-		_ = json.Unmarshal([]byte(strData), &req)
-		tool, err := s.getTool(req.ControllerSN, req.ToolSN)
+		req := ToolControl{}
+		_ = json.Unmarshal(byteData, &req)
+		err := s.Api.ToolControl(&req)
 		if err != nil {
+			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 			return
 		}
 
-		err = tool.ToolControl(req.Enable)
-		msg := wsnotify.WSMsg{
-			Type: WS_TOOL_ENABLE,
-			SN:   msg.SN,
-			Data: err,
-		}
-		reply, _ := json.Marshal(msg)
-
-		err = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, string(reply))
-		if err != nil {
-			s.diag.Error(fmt.Sprintf("WS_TOOL_ENABLE Send WS_EVENT_REPLY WebSocket Message: %#v Fail", msg), err)
-		}
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
 
 	case WS_TOOL_JOB:
-		reply := wsnotify.WSMsg{
-			Type: WS_TOOL_JOB,
-			SN:   msg.SN,
-			Data: Reply{
-				Result: 0,
-				Msg:    "",
-			},
+		req := JobSet{}
+		_ = json.Unmarshal(byteData, &req)
+		err := s.Api.ToolJobSet(&req)
+		if err != nil {
+			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+			return
 		}
 
-		s.WS.WSSendReply(&reply)
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
 
 	case WS_TOOL_PSET:
 		ds := s.StorageService
@@ -186,29 +174,21 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 			s.diag.Error("WS_TOOL_PSET Fail ", errors.New("Please Inject Storage Service First"))
 			return
 		}
-		var req PSetSet
-		bData, _ := json.Marshal(msg.Data)
-
-		_ = json.Unmarshal(bData, &req)
+		req := PSetSet{}
+		_ = json.Unmarshal(byteData, &req)
 
 		_ = ds.UpdateTool(&storage.Guns{
 			Serial: req.ToolSN,
-			Trace:  string(bData),
+			Trace:  string(byteData),
 		})
 
-		tool, err := s.getTool(req.ControllerSN, req.ToolSN)
+		err := s.Api.ToolPSetSet(&req)
 		if err != nil {
+			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 			return
 		}
 
-		rt := tool.SetPSet(req.PSet)
-		reply, _ := json.Marshal(wsnotify.WSMsg{
-			Type: WS_TOOL_PSET,
-			SN:   msg.SN,
-			Data: rt,
-		})
-
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, string(reply))
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
 
 	default:
 		// 类型错误
