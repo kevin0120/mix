@@ -4,7 +4,6 @@
 from odoo import fields,models,api,_
 from odoo.exceptions import ValidationError
 import odoo.addons.decimal_precision as dp
-from sa_base.models import base_model
 import json
 
 class OperationResult(models.HyperModel):
