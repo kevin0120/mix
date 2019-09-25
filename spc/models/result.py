@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
-from odoo import fields,models,api,_
+from odoo import fields,models,api,_, SUPERUSER_ID
 from odoo.exceptions import ValidationError
 import odoo.addons.decimal_precision as dp
 from datetime import datetime, timedelta, date
@@ -600,7 +600,8 @@ $$
             return self.do_pass()
 
 
-
     @api.multi
     def unlink(self):
-        raise ValidationError(u'不允许删除结果数据')
+        if self.env.uid != SUPERUSER_ID:
+            raise ValidationError(u'不允许删除结果数据')
+        return super(OperationResult, self).unlink()
