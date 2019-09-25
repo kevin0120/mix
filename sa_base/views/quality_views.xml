@@ -3,7 +3,7 @@
     <data>
         <record id="sa_quality_point_view_tree_inherit" model="ir.ui.view">
             <field name="name">sa_quality_point_view_tree_inherit</field>
-            <field name="model">quality.point</field>
+            <field name="model">sa.quality.point</field>
             <field name="inherit_id" ref="quality.quality_point_view_tree"/>
             <field name="arch" type="xml">
                 <xpath expr="//tree" position="attributes">
@@ -23,7 +23,7 @@
 
         <record id="sa_quality_point_view_form_inherit_mrp" model="ir.ui.view">
             <field name="name">sa_quality_point_view_form_inherit_mrp</field>
-            <field name="model">quality.point</field>
+            <field name="model">sa.quality.point</field>
             <field name="inherit_id" ref="quality.quality_point_view_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//form" position="attributes">
@@ -65,7 +65,7 @@
 
         <record id="sa_quality_check_view_form_small_inherit" model="ir.ui.view">
             <field name="name">sa_quality_check_view_form_small_inherit</field>
-            <field name="model">quality.check</field>
+            <field name="model">sa.quality.check</field>
             <field name="inherit_id" ref="quality.quality_check_view_form_small"/>
             <field name="arch" type="xml">
                 <xpath expr="//div[@class='o_row'][last()]" position="replace">
@@ -83,7 +83,7 @@
 
         <record id="sa_quality_point_view_search_inherit" model="ir.ui.view">
             <field name="name">sa_quality_point_view_search_inherit</field>
-            <field name="model">quality.point</field>
+            <field name="model">sa.quality.point</field>
             <field name="inherit_id" ref="quality.quality_point_view_search"/>
             <field name="arch" type="xml">
                 <xpath expr="//search[1]" position="replace">
@@ -98,7 +98,7 @@
 
         <record id="sa_quality_check_view_search_inherit" model="ir.ui.view">
             <field name="name">sa_quality_check_view_search_inherit</field>
-            <field name="model">quality.check</field>
+            <field name="model">sa.quality.check</field>
             <field name="inherit_id" ref="quality.quality_check_view_search"/>
             <field name="arch" type="xml">
                 <xpath expr="//search[1]" position="inside">

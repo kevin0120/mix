@@ -41,7 +41,7 @@ You can config odoo, make it look like your own platform.
 10. Standalone setting panel, easy to setup.
 11. Provide 236 country flags.
 12. Multi-language Support.
-13. Change Powered by Odoo in login screen.(Please change '../views/app_odoo_customize_view.xml' #15)
+13. Change Powered by SATURN in login screen.(Please change '../views/app_odoo_customize_view.xml' #15)
 14. Quick delete test data in Apps: Sales/POS/Purchase/MRP/Inventory/Accounting/Message/Workflow etc.
 15. Reset All the Sequence to beginning of 1: SO/PO/MO/Invoice...
 16. Fix odoo reload module translation bug while enable english language

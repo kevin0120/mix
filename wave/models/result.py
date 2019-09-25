@@ -4,7 +4,6 @@
 from odoo import fields,models,api,_
 from odoo.exceptions import ValidationError
 import odoo.addons.decimal_precision as dp
-from sa_base.models import base_model
 import json
 
 class OperationResult(models.HyperModel):
@@ -103,7 +102,7 @@ class OperationResultLine(models.TransientModel):
         all_updates = []
         for vals in all_vals:
             # if 'name' not in vals or vals['name'] == _('New'):
-            #     vals['name'] = self.env['ir.sequence'].next_by_code('quality.check') or _('New')
+            #     vals['name'] = self.env['ir.sequence'].next_by_code('sa.quality.check') or _('New')
             # data of parent records to create or update, by model
             tocreate = {
                 parent_model: {'id': vals.pop(parent_field, None)}

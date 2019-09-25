@@ -208,7 +208,7 @@
 
         <record id="sa_spc_quality_point_form_view" model="ir.ui.view">
             <field name="name">sa_spc_quality_point_form_view</field>
-            <field name="model">quality.point</field>
+            <field name="model">sa.quality.point</field>
             <field name="inherit_id" ref="quality.quality_point_view_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//button[@name='action_see_quality_checks']" position="replace">

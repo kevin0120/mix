@@ -76,7 +76,7 @@ class MrpRoutingWorkcenter(models.Model):
         _points = []
         for point in operation_id.operation_point_ids:
             # bom_line = self.env['mrp.bom.line'].search([('operation_id', '=', operation_id.id), ('operation_point_id', '=', point.id)])
-            # qcp = self.env['quality.point'].search([('operation_id', '=', operation_id.id), ('bom_line_id', '=', bom_line.id)])
+            # qcp = self.env['sa.quality.point'].search([('operation_id', '=', operation_id.id), ('bom_line_id', '=', bom_line.id)])
             _points.append({
                 'sequence': point.sequence,
                 'group_sequence': point.group_sequence,

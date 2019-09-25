@@ -34,7 +34,7 @@ class OperationResult(models.HyperModel):
 
     assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line', readonly=True)
 
-    qcp_id = fields.Many2one('quality.point', 'Quality Control Point')
+    qcp_id = fields.Many2one('sa.quality.point', 'Quality Control Point')
 
     operation_point_id = fields.Many2one('operation.point', string='Tightening Operation Point')
 
@@ -68,7 +68,7 @@ class OperationResult(models.HyperModel):
     cur_objects = fields.Char(string='Waveform Files')
 
     name = fields.Char('Name', default=lambda self: _('New'))
-    point_id = fields.Many2one('quality.point', 'Quality Control Point')
+    point_id = fields.Many2one('sa.quality.point', 'Quality Control Point')
     quality_state = fields.Selection([
         ('none', 'To do'),
         ('exception', 'Exception'),
@@ -188,7 +188,7 @@ BEGIN
            into r_vin_code, qcp_id, consu_bom_id, r_production_id, r_workcenter_id, r_gun_id, r_product_id, r_program_id, r_consu_product_id, r_assembly_id,r_bom_line_id,r_operation_point_id
     from public.mrp_workorder wo,
          public.mrp_wo_consu co,
-         public.quality_point qp,
+         public.sa_quality_point qp,
          public.mrp_production mp,
          public.product_product pp,
          public.maintenance_equipment me,
@@ -230,7 +230,7 @@ BEGIN
           where me.serial_no = gun_sn) as gg,
          public.product_product pp2,
          public.mrp_routing_workcenter op,
-         public.quality_point qp2,
+         public.sa_quality_point qp2,
          public.controller_job job2
     where pp2.screw_type_code = nut_no
       and pp2.id = cou_pid
@@ -331,7 +331,7 @@ $$
     @api.model
     def create(self, vals):
         if 'name' not in vals or vals['name'] == _('New'):
-            vals['name'] = self.env['ir.sequence'].next_by_code('quality.check') or _('New')
+            vals['name'] = self.env['ir.sequence'].next_by_code('sa.quality.check') or _('New')
         return super(OperationResult, self).create(vals)
 
     @api.model
@@ -343,7 +343,7 @@ $$
         all_updates = []
         for vals in all_vals:
             if 'name' not in vals or vals['name'] == _('New'):
-                vals['name'] = self.env['ir.sequence'].next_by_code('quality.check') or _('New')
+                vals['name'] = self.env['ir.sequence'].next_by_code('sa.quality.check') or _('New')
             # data of parent records to create or update, by model
             tocreate = {
                 parent_model: {'id': vals.pop(parent_field, None)}

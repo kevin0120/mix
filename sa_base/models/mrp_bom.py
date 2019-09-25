@@ -235,7 +235,7 @@ class MrpBomLine(models.Model):
             'times': line.product_qty,
             'test_type': 'measure',
         }
-        self.env['quality.point'].sudo().create(vals)
+        self.env['sa.quality.point'].sudo().create(vals)
         return line
 
     @api.multi
@@ -243,7 +243,7 @@ class MrpBomLine(models.Model):
         res = super(MrpBomLine, self).write(vals)
         if 'product_qty' in vals:
             for line in self:
-                rec = self.env['quality.point'].search([('bom_line_id', '=', line.id)])
+                rec = self.env['sa.quality.point'].search([('bom_line_id', '=', line.id)])
                 rec.sudo().write({'times': line.product_qty})
         return res
 
@@ -267,6 +267,7 @@ class MrpBomLine(models.Model):
 
     @api.multi
     def unlink(self):
+        quality_points = self.env['sa.quality.point']
         for line in self:
             master = line.workcenter_id.masterpc_id if line.workcenter_id else None
             if not master:
@@ -278,9 +279,8 @@ class MrpBomLine(models.Model):
             ret = self._push_del_routing_workcenter(line=line, url=url)
             if not ret:
                 self.env.user.notify_warning(u"未删除物料清单行")
-        quality_points = self.env['quality.point']
         for line in self:
-            rec = self.env['quality.point'].search([('bom_line_id', '=', line.id)])
+            rec = self.env['sa.quality.point'].search([('bom_line_id', '=', line.id)])
             quality_points += rec
         quality_points.sudo().unlink()
         ret = super(MrpBomLine, self).unlink()

@@ -907,7 +907,7 @@ msgid "Only one code per Work Segment is allowed"
 msgstr "Only one code per Work Segment is allowed"
 
 #. module: sa_base
-#: sql_constraint:quality.point:0
+#: sql_constraint:sa.quality.point:0
 msgid "Only one quailty point per product bom line is allowed"
 msgstr "Only one quailty point per product bom line is allowed"
 

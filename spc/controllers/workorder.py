@@ -42,7 +42,7 @@ class ApiMrpWorkorder(http.Controller):
             if order.consu_bom_line_ids:
                 for consu in order.consu_bom_line_ids:
                     # 定位消耗品的qcp
-                    _qcps = env['quality.point'].search([('bom_line_id', '=', consu.bom_line_id.id),
+                    _qcps = env['sa.quality.point'].search([('bom_line_id', '=', consu.bom_line_id.id),
                                                          ('operation_id', '=', order.operation_id.id)],
                                                         limit=1)
 
@@ -155,7 +155,7 @@ class ApiMrpWorkorder(http.Controller):
             if order.consu_bom_line_ids:
                 for consu in order.consu_bom_line_ids:
                     # 定位消耗品的qcp
-                    _qcps = env['quality.point'].search([('bom_line_id', '=', consu.bom_line_id.id),
+                    _qcps = env['sa.quality.point'].search([('bom_line_id', '=', consu.bom_line_id.id),
                                                          ('operation_id', '=', order.operation_id.id)],
                                                         limit=1)
 
