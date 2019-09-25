@@ -26,7 +26,7 @@ class OperationResult(models.HyperModel):
 
     sequence = fields.Integer('sequence', default=1)
 
-    workorder_id = fields.Many2one('mrp.workorder', 'Operation')
+    workorder_id = fields.Many2one('mrp.workorder', 'Work Order')
     workcenter_id = fields.Many2one('mrp.workcenter',  readonly=True)
     production_id = fields.Many2one('mrp.production', 'Production Order')
 
@@ -65,7 +65,7 @@ class OperationResult(models.HyperModel):
 
     pset_w_target = fields.Float(string='Set Target Angel(grad)', digits=dp.get_precision('Operation Result'))
 
-    cur_objects = fields.Char(string='Waveform Files')
+    cur_objects = fields.Char(string='Curve Files')
 
     name = fields.Char('Name', default=lambda self: _('New'))
     point_id = fields.Many2one('sa.quality.point', 'Quality Control Point')
