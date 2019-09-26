@@ -3,9 +3,6 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
-import pyecharts
-from pyecharts import Bar , Pie
-
 
 class ProductTemplate(models.Model):
     _inherit = 'product.template'

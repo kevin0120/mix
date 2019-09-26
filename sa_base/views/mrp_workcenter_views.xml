@@ -24,6 +24,9 @@
             <field eval="1" name="priority"/>
             <field name="arch" type="xml">
                 <form string="Work Center">
+                    <header>
+                        <button string="Sync Operation" type="object" name="button_sync_operations" class="oe_highlight" />
+                    </header>
                     <sheet>
                         <div class="oe_button_box" name="button_box">
                             <button class="oe_stat_button" name="toggle_active" type="object" icon="fa-archive" groups="base.group_system">
@@ -52,12 +55,12 @@
                                     <group string="Equipments" name="equipment">
                                         <field name="controller_ids_domain" invisible="1" />
                                         <field name="gun_ids_domain" invisible="1" />
-                                        <field name="masterpc_id" string="MasterPC" attrs="{'required': [('type','=','normal')]}" domain="[('category_name','=','MasterPC')]"/>
-                                        <field name="controller_ids" widget="many2many_tags" string="Controller" domain="controller_ids_domain" attrs="{'invisible': [('masterpc_id','=',False)]}"/>
-                                        <field name="gun_ids" widget="many2many_tags" string="Screw Gun" domain="gun_ids_domain" attrs="{'invisible': [('controller_ids','=',False)],'required': [('type','=','normal')]}"/>
-                                        <field name="hmi_id" string="HMI" domain="[('category_name','=','HMI')]" attrs="{'required': [('type','=','normal')]}"/>
-                                        <field name="io_id" string="Remote IO" domain="[('category_name','=','IO')]"/>
-                                        <field name="rfid_id" string="RFID" domain="[('category_name','=','RFID')]"/>
+                                        <field name="masterpc_id" attrs="{'required': [('type','=','normal')]}" />
+                                        <field name="controller_ids" widget="many2many_tags" domain="controller_ids_domain" attrs="{'invisible': [('masterpc_id','=',False)]}"/>
+                                        <field name="gun_ids" widget="many2many_tags" domain="gun_ids_domain" attrs="{'invisible': [('controller_ids','=',False)],'required': [('type','=','normal')]}"/>
+                                        <field name="hmi_id"  attrs="{'required': [('type','=','normal')]}"/>
+                                        <field name="io_id" />
+                                        <field name="rfid_id" />
                                     </group>
                                 </group>
                                 <separator string="Description"/>
@@ -85,6 +88,22 @@
                     <field name="active" invisible="1"/>
                 </tree>
             </field>
+        </record>
+
+        <record id="operation_sync_action" model="ir.actions.server">
+            <field name="name">Sync Operation</field>
+            <field name="model_id" ref="mrp.model_mrp_workcenter"/>
+            <field name="state">code</field>
+            <field name="code">records.button_sync_operations()</field>
+        </record>
+
+        <record id="run_operation_sync_action" model="ir.values">
+            <field name="model_id" ref="mrp.model_mrp_workcenter"/>
+            <field name="name">Sync Operation</field>
+            <field name="key2">client_action_multi</field>
+            <field name="key">action</field>
+            <field name="model">mrp.workcenter</field>
+            <field name="value" eval="'ir.actions.server,' + str(ref('operation_sync_action'))" />
         </record>
 
         <record id="sa_view_mrp_workcenter_search_inherit" model="ir.ui.view">

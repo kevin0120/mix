@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "changan_exhanced",
+    'name': "local_sense",
 
     'summary': """
         Short (1 phrase/line) summary of the module's purpose, used as
@@ -20,16 +20,12 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['sa_base', 'spc', 'sa_maintenance'],
+    'depends': ['sa_base'],
 
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
-        'views/mrp_routing_view.xml',
-        'views/operation_result_views.xml',
-        'views/hide_menu.xml',
-        'views/mrp_bom_views.xml',
-        'views/mrp_workcenter_views.xml',
         'views/maintenance_views.xml',
     ],
+
 }

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
-from odoo import fields,models,api,_
+from odoo import fields,models,api,_, SUPERUSER_ID
 from odoo.exceptions import ValidationError
 import odoo.addons.decimal_precision as dp
 from datetime import datetime, timedelta, date
@@ -26,7 +26,7 @@ class OperationResult(models.HyperModel):
 
     sequence = fields.Integer('sequence', default=1)
 
-    workorder_id = fields.Many2one('mrp.workorder', 'Operation')
+    workorder_id = fields.Many2one('mrp.workorder', 'Work Order')
     workcenter_id = fields.Many2one('mrp.workcenter',  readonly=True)
     production_id = fields.Many2one('mrp.production', 'Production Order')
 
@@ -65,7 +65,7 @@ class OperationResult(models.HyperModel):
 
     pset_w_target = fields.Float(string='Set Target Angel(grad)', digits=dp.get_precision('Operation Result'))
 
-    cur_objects = fields.Char(string='Waveform Files')
+    cur_objects = fields.Char(string='Curve Files')
 
     name = fields.Char('Name', default=lambda self: _('New'))
     point_id = fields.Many2one('sa.quality.point', 'Quality Control Point')
@@ -178,7 +178,7 @@ BEGIN
            co.id,
            mp.id,
            wo.workcenter_id,
-           co.gun_id,
+           me.id,
            mp.product_id,
            co.program_id,
            co.product_id,
@@ -188,9 +188,10 @@ BEGIN
            into r_vin_code, qcp_id, consu_bom_id, r_production_id, r_workcenter_id, r_gun_id, r_product_id, r_program_id, r_consu_product_id, r_assembly_id,r_bom_line_id,r_operation_point_id
     from public.mrp_workorder wo,
          public.mrp_wo_consu co,
-         public.quality_point qp,
+         public.sa_quality_point qp,
          public.mrp_production mp,
          public.product_product pp,
+         public.maintenance_equipment me,
          public.mrp_bom_line mbl
     where wo.id = order_id
       and co.workorder_id = order_id
@@ -198,6 +199,7 @@ BEGIN
       and co.bom_line_id = qp.bom_line_id
       and wo.production_id = mp.id
       and mbl.id = co.bom_line_id
+      and me.serial_no = gun_sn
       and co.product_id = pp.id;
   else
     r_vin_code = vin_code;
@@ -228,7 +230,7 @@ BEGIN
           where me.serial_no = gun_sn) as gg,
          public.product_product pp2,
          public.mrp_routing_workcenter op,
-         public.quality_point qp2,
+         public.sa_quality_point qp2,
          public.controller_job job2
     where pp2.screw_type_code = nut_no
       and pp2.id = cou_pid
@@ -598,7 +600,8 @@ $$
             return self.do_pass()
 
 
-
     @api.multi
     def unlink(self):
-        raise ValidationError(u'不允许删除结果数据')
+        if self.env.uid != SUPERUSER_ID:
+            raise ValidationError(u'不允许删除结果数据')
+        return super(OperationResult, self).unlink()

@@ -105,7 +105,6 @@ class Wave(models.TransientModel):
         # line.print_echarts_options()
         pyecharts.configure(force_js_embed=True)
         ret = line.render_embed()
-        print(ret)
         return ret
 
     @api.multi

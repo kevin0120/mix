@@ -85,6 +85,9 @@ class OperationView(http.Controller):
             for k in points_map:
                 points_map[k].toggle_active()
 
+            # 下发作业
+            operation.button_send_mrp_routing_workcenter()
+
             body = json.dumps({'msg': "Edit point success"})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=200, headers=headers)
@@ -116,7 +119,8 @@ class OperationView(http.Controller):
                         'operation_id': operation_id,
                         'sequence': val['sequence'],
                         'x_offset': val['x_offset'],
-                        'y_offset': val['y_offset']
+                        'y_offset': val['y_offset'],
+                        'product_id': env.ref('sa_base.product_product_screw_default').id  # 获取默认螺栓
                     })
                     env['operation.point'].create(val)
                 else:
@@ -127,8 +131,11 @@ class OperationView(http.Controller):
                     if points_map.has_key(point_id.id):
                         del points_map[point_id.id]
 
-            for k in points_map:
-                points_map[k].toggle_active()
+            need_delete_points = env['operation.point']
+            for p in points_map.values():
+                need_delete_points += p
+
+            need_delete_points.unlink()
 
             body = json.dumps({'msg': "Edit point success"})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
@@ -217,6 +224,9 @@ class OperationView(http.Controller):
                 limit = DEFAULT_LIMIT
             operations = env['mrp.routing.workcenter'].search(domain, limit=limit)
             vals = []
+
+
+
             for operation in operations:
                 # _points = []
                 # for point in operation.operation_point_ids:
@@ -225,12 +235,15 @@ class OperationView(http.Controller):
                 #         'x_offset': point.x_offset,
                 #         'y_offset': point.y_offset
                 #     })
-                vals.append({
-                    'id': operation.id,
-                    'name': u"[{0}]{1}@{2}/{3}".format(operation.name, operation.group_id.code, operation.workcenter_id.name, operation.routing_id.name),
-                    # "img": u'data:{0};base64,{1}'.format('image/png', operation.worksheet_img) if operation.worksheet_img else "",
-                    # "points": _points
-                })
+
+                boms = env['mrp.bom'].search([('operation_ids', 'in', operation.id)])
+                if boms:
+                    for bom in boms:
+                        vals.append({
+                            'id': operation.id,
+                            'name': u"{0}@{1}".format(bom.product_id.vehicle_type_code, operation.name),
+                        })
+
             body = json.dumps(vals)
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=200, headers=headers)

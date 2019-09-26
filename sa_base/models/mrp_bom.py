@@ -2,7 +2,18 @@
 
 from odoo import models, fields, api,_
 from odoo.exceptions import ValidationError, UserError
+
+import requests as Requests
+
+from requests import ConnectionError, RequestException, exceptions
+
 import json
+
+
+MASTER_DEL_WROKORDERS_API = '/rush/v1/mrp.routing.workcenter.delete'
+
+MASTER_WROKORDERS_API = '/rush/v1/mrp.routing.workcenter'
+
 
 
 class MrpBom(models.Model):
@@ -10,6 +21,35 @@ class MrpBom(models.Model):
 
     operation_ids = fields.Many2many('mrp.routing.workcenter', 'bom_operation_rel', 'bom_id', 'operation_id',
                                      string="Operations", copy=False)
+
+    has_operations = fields.Boolean(compute='_compute_has_operations')
+
+    @api.multi
+    @api.depends('operation_ids')
+    def _compute_has_operations(self):
+        for bom_id in self:
+            bom_id.has_operations = True if len(bom_id.operation_ids) else False
+    #
+    # @api.multi
+    # def button_add_operation(self):
+    #     self.ensure_one()
+    #     compose_form = self.env.ref('sa_base.mrp_bom_operation_wizard_from', False)
+    #     ctx = dict(
+    #         self.env.context,
+    #         default_routing_id=self.routing_id.id if self.routing_id else False
+    #         )
+    #
+    #     return {
+    #         'name': _('MRP Operation Setting'),
+    #         'type': 'ir.actions.act_window',
+    #         'view_type': 'form',
+    #         'view_mode': 'form',
+    #         'res_model': 'mrp.routing.wc.form',
+    #         'views': [(compose_form.id, 'form')],
+    #         'view_id': compose_form.id,
+    #         'target': 'new',
+    #         'context': ctx,
+    #     }
 
     @api.multi
     def button_resequence(self):
@@ -73,6 +113,11 @@ class MrpBom(models.Model):
 
     @api.model
     def create(self, vals):
+        auto_operation_inherit = self.env['ir.values'].get_default('sa.config.settings', 'auto_operation_inherit')
+        if auto_operation_inherit and 'routing_id' in vals:
+            routing_id = self.env['mrp.routing'].browse(vals['routing_id'])
+            operation_ids = routing_id.operation_ids
+            vals.update({'operation_ids': [(6, None, operation_ids.ids)]})
         ret = super(MrpBom, self).create(vals)
         if 'operation_ids' in vals:
             ret._onchange_operations()
@@ -84,6 +129,27 @@ class MrpBom(models.Model):
         if 'operation_ids' in vals:
             self._onchange_operations()
         return ret
+
+    @api.multi
+    def unlink(self):
+        raise ValidationError(u'不允许删除物料清单')
+
+    @api.one
+    def button_send_mrp_routing_workcenter(self):
+        if not self.operation_ids:
+            return True
+        for operation in self.operation_ids:
+            master = operation.workcenter_id.masterpc_id if operation.workcenter_id else None
+            if not master:
+                continue
+            connections = master.connection_ids.filtered(
+                lambda r: r.protocol == 'http') if master.connection_ids else None
+            if not connections:
+                continue
+            url = ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_WROKORDERS_API) for connect in connections][0]
+
+            operation._push_mrp_routing_workcenter(url)
+        return True
 
 
 class MrpBomLine(models.Model):
@@ -109,9 +175,9 @@ class MrpBomLine(models.Model):
 
     workcenter_id = fields.Many2one('mrp.workcenter', related="operation_id.workcenter_id", string='Work Center')
 
-    masterpc_id = fields.Many2one('maintenance.equipment',  string='MasterPC', related="operation_id.workcenter_id.masterpc_id")
+    masterpc_id = fields.Many2one('maintenance.equipment', string='Work Center Controller(MasterPC)', related="operation_id.workcenter_id.masterpc_id")
 
-    controller_id = fields.Many2one('maintenance.equipment', string='Controller', copy=False)
+    controller_id = fields.Many2one('maintenance.equipment', string='Screw Controller', copy=False)
 
     gun_id = fields.Many2one('maintenance.equipment', string='Screw Gun', copy=False)
 
@@ -181,10 +247,38 @@ class MrpBomLine(models.Model):
                 rec.sudo().write({'times': line.product_qty})
         return res
 
+    @api.multi
+    def _push_del_routing_workcenter(self, line, url):
+        val = [{
+            'product_type': line.bom_id.product_id.vehicle_type_code,
+            "id": line.operation_id.id,
+        }]
+        try:
+            ret = Requests.put(url, data=json.dumps(val), headers={'Content-Type': 'application/json'}, timeout=1)
+            if ret.status_code == 204:
+                self.env.user.notify_info(u'删除工艺成功')
+                return True
+        except ConnectionError as e:
+            self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
+            return False
+        except RequestException as e:
+            self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
+            return False
 
     @api.multi
     def unlink(self):
         quality_points = self.env['sa.quality.point']
+        for line in self:
+            master = line.workcenter_id.masterpc_id if line.workcenter_id else None
+            if not master:
+                raise UserError(u"未找到工位上的工位控制器")
+            connections = master.connection_ids.filtered(lambda r: r.protocol == 'http') if master.connection_ids else None
+            if not connections:
+                raise UserError(u"未找到工位上的工位控制器的连接信息")
+            url = ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_DEL_WROKORDERS_API) for connect in connections][0]
+            ret = self._push_del_routing_workcenter(line=line, url=url)
+            if not ret:
+                self.env.user.notify_warning(u"未删除物料清单行")
         for line in self:
             rec = self.env['sa.quality.point'].search([('bom_line_id', '=', line.id)])
             quality_points += rec

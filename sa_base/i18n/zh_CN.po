@@ -201,9 +201,24 @@ msgid "Assembly Line Name"
 msgstr "装配线名称"
 
 #. module: sa_base
+#: model:ir.model,name:sa_base.model_maintenance_equipment_category
+msgid "Asset Category"
+msgstr "资产类别"
+
+#. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_product_normal_form_view
 msgid "Auto Create QCP"
 msgstr "自动创建质量控制点"
+
+#. module: sa_base
+#: model:ir.model.fields,field_description:sa_base.field_sa_config_settings_auto_operation_inherit
+msgid "Auto Operation Inherit"
+msgstr "Auto Operation Inherit"
+
+#. module: sa_base
+#: model:ir.model.fields,field_description:sa_base.field_sa_config_settings_auto_operation_point_inherit
+msgid "Auto Operation Point Inherit"
+msgstr "Auto Operation Point Inherit"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_product_normal_form_view
@@ -384,12 +399,9 @@ msgid "Consume Tracking"
 msgstr "消耗追踪"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_mrp_bom_line_controller_id
-#: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_controller_ids
-#: model:ir.ui.view,arch_db:sa_base.sa_mrp_workcenter_form_view
 #: model:maintenance.equipment.category,name:sa_base.equipment_screw_controller
 msgid "Controller"
-msgstr "控制器"
+msgstr "Controller"
 
 #. module: sa_base
 #: model:ir.actions.act_window,name:sa_base.sa_job_form_action
@@ -511,6 +523,7 @@ msgstr "显示名称"
 
 #. module: sa_base
 #: model:ir.actions.server,name:sa_base.operation_download_action
+#: model:ir.ui.view,arch_db:sa_base.sa_mrp_bom_form_view
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_routing_workcenter_form_view
 msgid "Download Operation"
 msgstr "下发作业"
@@ -620,11 +633,9 @@ msgid "Gun ids domain"
 msgstr "Gun ids domain"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_hmi_id
-#: model:ir.ui.view,arch_db:sa_base.sa_mrp_workcenter_form_view
 #: model:maintenance.equipment.category,name:sa_base.equipment_hmi
 msgid "HMI"
-msgstr "人机交互"
+msgstr "HMI"
 
 #. module: sa_base
 #: selection:maintenance.equipment.connection,protocol:0
@@ -632,9 +643,19 @@ msgid "HTTP"
 msgstr "HTTP"
 
 #. module: sa_base
+#: model:ir.model.fields,field_description:sa_base.field_mrp_bom_has_operations
+msgid "Has operations"
+msgstr "Has operations"
+
+#. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_healthz_url
 msgid "Healthz Check URL"
 msgstr "心跳检查URL"
+
+#. module: sa_base
+#: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_hmi_id
+msgid "Human Machine Interface(HMI)"
+msgstr "Human Machine Interface(HMI)"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_controller_job_id
@@ -781,17 +802,9 @@ msgid "Manufacutre Routing Group"
 msgstr "工艺路线组"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_mrp_bom_line_masterpc_id
-#: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_masterpc_id
-#: model:ir.ui.view,arch_db:sa_base.sa_mrp_workcenter_form_view
 #: model:maintenance.equipment.category,name:sa_base.equipment_MasterPC
 msgid "MasterPC"
-msgstr "工位控制器(MasterPC)"
-
-#. module: sa_base
-#: model:ir.ui.view,arch_db:sa_base.sa_maintenance_equipment_view_search_inherit
-msgid "Masterpc"
-msgstr "工位控制器(MasterPC)"
+msgstr "MasterPC"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_workcenter_max_op_time
@@ -1138,10 +1151,13 @@ msgid "Quantity"
 msgstr "数量"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_rfid_id
-#: model:ir.ui.view,arch_db:sa_base.sa_mrp_workcenter_form_view
 #: model:maintenance.equipment.category,name:sa_base.equipment_RFID
 msgid "RFID"
+msgstr "RFID"
+
+#. module: sa_base
+#: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_rfid_id
+msgid "Radio Frequency Identification(RFID)"
 msgstr "无线射频识别(RFID)"
 
 #. module: sa_base
@@ -1158,7 +1174,6 @@ msgstr "参照"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_io_id
-#: model:ir.ui.view,arch_db:sa_base.sa_mrp_workcenter_form_view
 msgid "Remote IO"
 msgstr "远程IO"
 
@@ -1267,11 +1282,17 @@ msgid "Screw"
 msgstr "螺栓"
 
 #. module: sa_base
+#: model:ir.model.fields,field_description:sa_base.field_mrp_bom_line_controller_id
+#: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_controller_ids
+#: model:ir.ui.view,arch_db:sa_base.sa_maintenance_equipment_view_search_inherit
+msgid "Screw Controller"
+msgstr "拧紧控制器"
+
+#. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_bom_line_gun_id
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_gun_id
 #: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_gun_ids
 #: model:ir.ui.view,arch_db:sa_base.sa_maintenance_equipment_view_search_inherit
-#: model:ir.ui.view,arch_db:sa_base.sa_mrp_workcenter_form_view
 msgid "Screw Gun"
 msgstr "拧紧枪"
 
@@ -1353,6 +1374,13 @@ msgid "Strategy"
 msgstr "策略"
 
 #. module: sa_base
+#: model:ir.actions.server,name:sa_base.operation_sync_action
+#: model:ir.ui.view,arch_db:sa_base.sa_mrp_workcenter_form_view
+msgid "Sync Operation"
+msgstr "同步工位工艺信息"
+
+
+#. module: sa_base
 #: selection:maintenance.equipment.connection,protocol:0
 msgid "TCP"
 msgstr "TCP"
@@ -1363,7 +1391,7 @@ msgid "Test"
 msgstr "测试"
 
 #. module: sa_base
-#: code:addons/sa_base/models/mrp_bom.py:49
+#: code:addons/sa_base/models/mrp_bom.py:89
 #, python-format
 msgid "The product Template had a related routing config \"%s\" been actived!"
 msgstr "The product Template had a related routing config \"%s\" been actived!"
@@ -1378,13 +1406,13 @@ msgstr "产品表单中的信息可以简化销售流程:\n"
 "价格，询价单中的注释，会计信息，补货方式等等"
 
 #. module: sa_base
-#: code:addons/sa_base/models/mrp_bom.py:38
+#: code:addons/sa_base/models/mrp_bom.py:78
 #, python-format
 msgid "The product had a related routing config \"%s\" been actived!"
 msgstr "The product had a related routing config \"%s\" been actived!"
 
 #. module: sa_base
-#: code:addons/sa_base/models/mrp_bom.py:29
+#: code:addons/sa_base/models/mrp_bom.py:69
 #, python-format
 msgid "The product template \"%s\" is invalid on product with name \"%s\""
 msgstr "The product template \"%s\" is invalid on product with name \"%s\""
@@ -1501,6 +1529,13 @@ msgid "Work Center"
 msgstr "工作中心"
 
 #. module: sa_base
+#: model:ir.model.fields,field_description:sa_base.field_mrp_bom_line_masterpc_id
+#: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_masterpc_id
+#: model:ir.ui.view,arch_db:sa_base.sa_maintenance_equipment_view_search_inherit
+msgid "Work Center Controller(MasterPC)"
+msgstr "工位控制器(MasterPC)"
+
+#. module: sa_base
 #: model:ir.actions.report.xml,name:sa_base.report_workcenter_labels
 msgid "Work Center Labels"
 msgstr "工作中心标签"
@@ -1601,6 +1636,16 @@ msgid "[%s] %s"
 msgstr "[%s] %s"
 
 #. module: sa_base
+#: selection:sa.config.settings,auto_operation_inherit:0
+msgid "auto operation inherit"
+msgstr "自动作业继承"
+
+#. module: sa_base
+#: selection:sa.config.settings,auto_operation_point_inherit:0
+msgid "auto operation point inherit"
+msgstr "自动作业点继承"
+
+#. module: sa_base
 #: code:addons/sa_base/models/maintenance.py:58
 #, python-format
 msgid "is NOT valid IP Address!"
@@ -1646,6 +1691,16 @@ msgstr "类型"
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_sequence
 msgid "sequence"
 msgstr "序列"
+
+#. module: sa_base
+#: selection:sa.config.settings,auto_operation_inherit:0
+msgid "un auto operation inherit(default)"
+msgstr "un auto operation inherit(default)"
+
+#. module: sa_base
+#: selection:sa.config.settings,auto_operation_point_inherit:0
+msgid "un auto operation point inherit(default)"
+msgstr "un auto operation point inherit(default)"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_workcenter_worksheet_img

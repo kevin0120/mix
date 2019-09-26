@@ -20,7 +20,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['mrp_maintenance', 'maintenance', 'mrp', 'web_domain_field', 'quality_mrp', 'web_image_editor', 'mail'],
+    'depends': ['mrp_maintenance', 'maintenance', 'mrp', 'web_domain_field', 'quality_mrp', 'web_image_editor', 'web_widget_many2many_tags_multi_selection'],
 
     "external_dependencies": {
         "python": ['validators'],
@@ -29,10 +29,13 @@
     # always loaded
     'data': [
         'security/quality.xml',  # 权限
+        'security/ir.model.access.csv',
         'data/maintenance_data.xml',
         'data/point_data.xml',
+        'data/product_data.xml',
         'data/mail_template.xml',
         # 'data/test_data.xml',   # 测试数据
+        # 'wizards/mrp_bom_wizard_views.xml',
         'views/res_user_views.xml',
         'views/menu_hide_views.xml',
         'views/sa_views_menus.xml',

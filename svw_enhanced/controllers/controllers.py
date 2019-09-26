@@ -20,7 +20,7 @@ DEFAULT_ORDER_BY = 'production_date DESC'
 URGE_REQ_URL = '/aiis/v1/fis.urgs'
 
 
-def urget_request_mo(urls, longpin):
+def urgent_request_mo(urls, longpin):
     ret = False
     if not longpin:
         return ret
@@ -172,7 +172,7 @@ class SvwExhanced(ApiMrpWorkorder):
                 return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
                                 status=405)
             aiis_urls = _aiis_urls.split(',')
-            ret = urget_request_mo(aiis_urls, kw['code'] if 'code' in kw else None)
+            ret = urgent_request_mo(aiis_urls, kw['code'] if 'code' in kw else None)
             if ret:
                 ### 创建成功
                 workorder_ids = env['mrp.workorder'].search(domain, limit=limit, order=order_by)  # 重新尝试获取工单
