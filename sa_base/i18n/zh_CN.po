@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 10.0+e-20171123\n"
+"Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-12 02:38+0000\n"
-"PO-Revision-Date: 2019-02-12 02:38+0000\n"
+"POT-Creation-Date: 2019-09-26 08:49+0000\n"
+"PO-Revision-Date: 2019-09-26 08:49+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,16 +16,16 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: sa_base
-#: code:addons/sa_base/models/point.py:112
-#, python-format
-msgid "#%s operation point has been delete"
-msgstr "#%s operation point has been delete"
-
-#. module: sa_base
 #: code:addons/sa_base/models/point.py:136
 #, python-format
+msgid "#%s operation point has been delete"
+msgstr "#%s拧紧点已经被删除"
+
+#. module: sa_base
+#: code:addons/sa_base/models/point.py:161
+#, python-format
 msgid "#%s operation point has been modified"
-msgstr "#%s operation point has been modified"
+msgstr "#%s拧紧点已经更改"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_quality_check_view_form_small_inherit
@@ -191,7 +191,7 @@ msgstr "组装生产线"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_production_assembly_line_id
-#: model:ir.model.fields,field_description:sa_base.field_quality_check_assembly_line_id
+#: model:ir.model.fields,field_description:sa_base.field_sa_quality_check_assembly_line_id
 msgid "Assembly Line ID"
 msgstr "装配线ID"
 
@@ -249,7 +249,7 @@ msgstr "BoM行"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_bom_line_id
-#: model:ir.model.fields,field_description:sa_base.field_quality_point_bom_line_id
+#: model:ir.model.fields,field_description:sa_base.field_sa_quality_point_bom_line_id
 msgid "Bom line id"
 msgstr "BOM行ID"
 
@@ -264,9 +264,9 @@ msgid "Category"
 msgstr "类别"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_category_name_4077
+#: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_category_name_4083
 msgid "Category name"
-msgstr "类别名称"
+msgstr "设备类型"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_child_ids
@@ -336,7 +336,7 @@ msgstr "连接名称"
 
 #. module: sa_base
 #: code:addons/sa_base/models/maintenance.py:48
-#: code:addons/sa_base/models/maintenance.py:139
+#: code:addons/sa_base/models/maintenance.py:141
 #, python-format
 msgid "Connection Test Failed! Here is what we got instead:\n"
 " %s"
@@ -345,14 +345,14 @@ msgstr "连接测试失败! 原因:\n"
 
 #. module: sa_base
 #: code:addons/sa_base/models/maintenance.py:46
-#: code:addons/sa_base/models/maintenance.py:137
+#: code:addons/sa_base/models/maintenance.py:139
 #, python-format
 msgid "Connection Test Failed! Here is what we got instead: %d!"
 msgstr "连接测试失败! 原因: %d!"
 
 #. module: sa_base
 #: code:addons/sa_base/models/maintenance.py:44
-#: code:addons/sa_base/models/maintenance.py:135
+#: code:addons/sa_base/models/maintenance.py:137
 #, python-format
 msgid "Connection Test Succeeded! Everything seems properly set up!"
 msgstr "连接测试成功! 一切正常!"
@@ -445,12 +445,12 @@ msgstr "创建时间"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_product_product_active_bom_id
 msgid "Current Actived BOM"
-msgstr "当前激活的BOM"
+msgstr "当前激活的物料清单"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_quality_point_tolerance_max_degree
+#: model:ir.model.fields,field_description:sa_base.field_sa_quality_point_tolerance_max_degree
 msgid "Degree Max Tolerance"
-msgstr "最大角度上限"
+msgstr "最大角度"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_quality_check_view_form_small_inherit
@@ -458,9 +458,9 @@ msgid "Degree Measure"
 msgstr "角度测量值"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_quality_point_tolerance_min_degree
+#: model:ir.model.fields,field_description:sa_base.field_sa_quality_point_tolerance_min_degree
 msgid "Degree Min Tolerance"
-msgstr "最小角度上限"
+msgstr "Degree Min Tolerance"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_quality_point_view_form_inherit_mrp
@@ -548,7 +548,7 @@ msgid "Equipments"
 msgstr "设备"
 
 #. module: sa_base
-#: code:addons/sa_base/models/maintenance.py:166
+#: code:addons/sa_base/models/maintenance.py:168
 #, python-format
 msgid "Error ! You cannot create recursive Equipments."
 msgstr "错误! 你不能创建递归的设备."
@@ -595,14 +595,14 @@ msgid "Group By..."
 msgstr "分组..."
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_operation_point_group_sequence_3927
+#: model:ir.model.fields,field_description:sa_base.field_operation_point_group_sequence_3932
 msgid "Group Sequence for Multi Spindle"
-msgstr "次序组(多轴)"
+msgstr "Group Sequence for Multi Spindle"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_operation_point_group_id_3925
+#: model:ir.model.fields,field_description:sa_base.field_operation_point_group_id_3930
 msgid "Group id"
-msgstr "多轴组"
+msgstr "Group id"
 
 #. module: sa_base
 #: model:maintenance.equipment.category,name:sa_base.equipment_Gun
@@ -669,6 +669,11 @@ msgid "If the active field is set to False, it will allow you to hide the bills 
 msgstr "如果去掉“启用”的勾，可以不用删除就隐藏物料清单"
 
 #. module: sa_base
+#: model:ir.model.fields,field_description:sa_base.field_operation_point_is_key
+msgid "Is Key Point"
+msgstr "拧紧关键点"
+
+#. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_bom_line_op_job_id
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_workcenter_op_job_id
 #: model:ir.model.fields,help:sa_base.field_controller_job_code
@@ -692,6 +697,17 @@ msgstr "程序号名称(job)"
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_production_view_search_inherit
 msgid "KNR"
 msgstr "KNR"
+
+#. module: sa_base
+#: model:ir.model.fields,field_description:sa_base.field_operation_point_group_key_num
+msgid "Key Point Count"
+msgstr "关键点数"
+
+#. module: sa_base
+#: code:addons/sa_base/models/point.py:53
+#, python-format
+msgid "Key Point Number Can Not Less Than Operation Point Key Total"
+msgstr "拧紧组关键点数不能小于相关拧紧关键点的数量"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_controller_job___last_update
@@ -757,7 +773,7 @@ msgstr "松脱"
 #: model:ir.model,name:sa_base.model_mrp_production
 #: model:ir.ui.view,arch_db:sa_base.view_sa_config
 msgid "Manufacturing Order"
-msgstr "生产订单"
+msgstr "制造订单"
 
 #. module: sa_base
 #: model:ir.model,name:sa_base.model_mrp_routing_group
@@ -783,9 +799,9 @@ msgid "Max Operation time(second)"
 msgstr "最大作业时间(秒)"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_quality_check_measure_degree
+#: model:ir.model.fields,field_description:sa_base.field_sa_quality_check_measure_degree
 msgid "Measure Degree"
-msgstr "测量角度"
+msgstr "实际角度"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_image_medium
@@ -847,13 +863,13 @@ msgid "Odoo uses these BoMs to automatically propose manufacturing\n"
 msgstr "根据补货规则Odoo用BOM自动的生产生产订单"
 
 #. module: sa_base
-#: code:addons/sa_base/models/mrp_routing.py:222
+#: code:addons/sa_base/models/mrp_routing.py:224
 #, python-format
 msgid "Only SuperUser can delete Job ID"
 msgstr "Only SuperUser can delete Job ID"
 
 #. module: sa_base
-#: code:addons/sa_base/models/mrp_routing.py:255
+#: code:addons/sa_base/models/mrp_routing.py:257
 #, python-format
 msgid "Only SuperUser can delete program"
 msgstr "Only SuperUser can delete program"
@@ -899,7 +915,7 @@ msgid "Only one quailty point per product bom line is allowed"
 msgstr "Only one quailty point per product bom line is allowed"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_quality_point_operation_id
+#: model:ir.model.fields,field_description:sa_base.field_sa_quality_point_operation_id
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_routing_form_view
 msgid "Operation"
 msgstr "作业"
@@ -944,7 +960,7 @@ msgid "Operation id"
 msgstr "作业 id"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_quality_point_operation_id_domain
+#: model:ir.model.fields,field_description:sa_base.field_sa_quality_point_operation_id_domain
 msgid "Operation id domain"
 msgstr "Operation id domain"
 
@@ -1084,13 +1100,18 @@ msgid "Program id"
 msgstr "程序号(pset)"
 
 #. module: sa_base
+#: model:ir.model.fields,field_description:sa_base.field_operation_point_group_proposal_key_num
+msgid "Proposal key num"
+msgstr "Proposal key num"
+
+#. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_connection_protocol
 #: model:ir.ui.view,arch_db:sa_base.sa_equipment_connection_form_view
 msgid "Protocol"
 msgstr "通讯协议"
 
 #. module: sa_base
-#: model:ir.model,name:sa_base.model_quality_check
+#: model:ir.model,name:sa_base.model_sa_quality_check
 #: model:ir.ui.view,arch_db:sa_base.sa_product_normal_form_view
 msgid "Quality Check"
 msgstr "质量检查"
@@ -1101,7 +1122,7 @@ msgid "Quality Check Work Center"
 msgstr "质量检查工位"
 
 #. module: sa_base
-#: model:ir.model,name:sa_base.model_quality_point
+#: model:ir.model,name:sa_base.model_sa_quality_point
 #: model:ir.ui.view,arch_db:sa_base.sa_quality_point_view_search_inherit
 msgid "Quality Point"
 msgstr "质量点"
@@ -1142,9 +1163,9 @@ msgid "Remote IO"
 msgstr "远程IO"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_quality_point_times
+#: model:ir.model.fields,field_description:sa_base.field_sa_quality_point_times
 msgid "Repeat times"
-msgstr "重试次数"
+msgstr "Repeat times"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_sa_config_settings_generate_result_sequence
@@ -1573,8 +1594,8 @@ msgid "You must define a product for everything you sell, whether it's\n"
 msgstr "所有你要卖的东西都要定义为产品，不管是实体，消耗品或者你能提供给客户的服务"
 
 #. module: sa_base
-#: code:addons/sa_base/models/point.py:43
-#: code:addons/sa_base/models/point.py:93
+#: code:addons/sa_base/models/point.py:66
+#: code:addons/sa_base/models/point.py:117
 #, python-format
 msgid "[%s] %s"
 msgstr "[%s] %s"
@@ -1640,4 +1661,3 @@ msgstr "x方向拧紧点偏移(%)"
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_y_offset
 msgid "y axis offset from top(%)"
 msgstr "y方向拧紧点偏移(%)"
-

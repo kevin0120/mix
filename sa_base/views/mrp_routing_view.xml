@@ -83,6 +83,7 @@
                                         <field name="x_offset"/>
                                         <field name="y_offset"/>
                                         <field name="active" invisible="1"/>
+                                        <field name="is_key"/>
                                         <field name="group_id" domain="[('operation_id', 'in', context.get('search_operation_ids', []))]" options="{'no_create_edit': True,'no_open': True}"/>
                                         <field name="group_sequence" groups="base.group_no_one"/>
                                     </tree>
@@ -104,6 +105,7 @@
                                     <tree string="Operation Points Group(multi-spindle)" editable="bottom" delete="true">
                                         <field name="sequence" widget="handle"/>
                                         <field name="name" />
+                                        <field name="key_num" />
                                         <!--<field name="name" domain="[('operation_id', 'in', context.get('search_operation_ids', []))]" options="{'no_create_edit': True,'no_open': True}" widget="many2many_tags"/>-->
                                     </tree>
                                     <form string="Operation Points Group(multi-spindle)">

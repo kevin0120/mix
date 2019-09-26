@@ -17,8 +17,12 @@ class OperationPointsGroup(models.Model):
 
     sequence = fields.Integer('sequence', default=1)
 
-    name = fields.Char('Operation Point Group')
+    proposal_key_num = fields.Integer(default=0, copy=False)
 
+    name = fields.Char('Operation Point Group')
+    key_num = fields.Integer(string='Key Point Count', copy=False, compute="_compute_key_point_count",
+                             inverse='_inverse_key_point_count',
+                             store=True)
     # operation_point_ids_domain = fields.Char(
     #     compute="_compute_operation_point_ids_domain",
     #     readonly=True,
@@ -28,13 +32,32 @@ class OperationPointsGroup(models.Model):
     operation_id = fields.Many2one('mrp.routing.workcenter', ondelete='cascade', index=True)
 
     operation_point_ids = fields.One2many('operation.point', 'group_id',
-                                           string='Points', copy=False)
+                                          string='Points', copy=False)
 
-    # @api.constrains(operation_point_ids)
+    # @api.constrains('operation_point_ids')
     # def _constraint_operation_point_ids(self):
     #     point_ids = self.operation_point_ids.ids
     #     if len(point_ids) != len(set(point_ids)):
     #         raise ValidationError(u'作业点设定中存在重复项')
+
+    @api.multi
+    def _inverse_key_point_count(self):
+        for record in self:
+            record.proposal_key_num = record.key_num
+
+    @api.constrains('key_num')
+    def _constraint_key_num(self):
+        for record in self:
+            lk = len(record.operation_point_ids.filtered(lambda r: r.is_key))
+            if record.key_num < lk:
+                raise ValidationError(_('Key Point Number Can Not Less Than Operation Point Key Total'))
+
+    @api.multi
+    @api.depends('operation_point_ids.is_key', 'proposal_key_num')
+    def _compute_key_point_count(self):
+        for record in self:
+            lk = len(record.operation_point_ids.filtered(lambda r: r.is_key))
+            record.key_num = max(record.proposal_key_num, lk)
 
     @api.multi
     def name_get(self):
@@ -51,6 +74,7 @@ class OperationPoints(models.Model):
 
     _order = "group_sequence, sequence"
 
+    is_key = fields.Boolean(string='Is Key Point', default=False, )
     active = fields.Boolean(
         'Active', default=True,
         help="If the active field is set to False, it will allow you to hide the bills of material without removing it.")
@@ -71,7 +95,7 @@ class OperationPoints(models.Model):
 
     y_offset = fields.Float('y axis offset from top(%)', default=0.0, digits=dp.get_precision('POINT_OFFSET'))
 
-    program_id = fields.Many2one('controller.program',  string='程序号', ondelete='cascade')
+    program_id = fields.Many2one('controller.program', string='程序号', ondelete='cascade')
 
     operation_id = fields.Many2one('mrp.routing.workcenter', ondelete='cascade', index=True)
 
@@ -131,11 +155,12 @@ class OperationPoints(models.Model):
                     'program_id': point.program_id,
                     'product_id': point.product_id
                 }
-                ret = super(OperationPoints, point).write(vals)  #修改数据
+                ret = super(OperationPoints, point).write(vals)  # 修改数据
 
                 dummy, tracking_value_ids = point._message_track(tracked_fields, old_values)
                 msg = _("#%s operation point has been modified") % (point.id)
-                point.operation_id.message_post(body=msg, message_type='comment',tracking_value_ids=tracking_value_ids, subject=msg)
+                point.operation_id.message_post(body=msg, message_type='comment', tracking_value_ids=tracking_value_ids,
+                                                subject=msg)
             else:
                 ret = super(OperationPoints, point).write(vals)  # 修改数据
         return ret
