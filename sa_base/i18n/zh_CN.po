@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-26 08:49+0000\n"
-"PO-Revision-Date: 2019-09-26 08:49+0000\n"
+"POT-Creation-Date: 2019-09-27 04:12+0000\n"
+"PO-Revision-Date: 2019-09-27 04:12+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -22,7 +22,7 @@ msgid "#%s operation point has been delete"
 msgstr "#%s拧紧点已经被删除"
 
 #. module: sa_base
-#: code:addons/sa_base/models/point.py:161
+#: code:addons/sa_base/models/point.py:180
 #, python-format
 msgid "#%s operation point has been modified"
 msgstr "#%s拧紧点已经更改"
@@ -133,14 +133,14 @@ msgid "<strong>WorkCenter</strong>"
 msgstr "<strong>工作中心</strong>"
 
 #. module: sa_base
-#: code:addons/sa_base/models/product.py:30
+#: code:addons/sa_base/models/product.py:27
 #: sql_constraint:product.product:0
 #, python-format
 msgid "A Screw Code can only be assigned to one SCREW !"
 msgstr "同样的螺栓编号只能分配给一种螺栓！"
 
 #. module: sa_base
-#: code:addons/sa_base/models/product.py:31
+#: code:addons/sa_base/models/product.py:28
 #: sql_constraint:product.product:0
 #, python-format
 msgid "A Vehicle Code can only be assigned to one Vehicle !"
@@ -279,9 +279,9 @@ msgid "Category"
 msgstr "类别"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_category_name_4083
+#: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_category_name_4085
 msgid "Category name"
-msgstr "设备类型"
+msgstr "Category name"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_child_ids
@@ -351,7 +351,7 @@ msgstr "连接名称"
 
 #. module: sa_base
 #: code:addons/sa_base/models/maintenance.py:48
-#: code:addons/sa_base/models/maintenance.py:141
+#: code:addons/sa_base/models/maintenance.py:152
 #, python-format
 msgid "Connection Test Failed! Here is what we got instead:\n"
 " %s"
@@ -360,14 +360,14 @@ msgstr "连接测试失败! 原因:\n"
 
 #. module: sa_base
 #: code:addons/sa_base/models/maintenance.py:46
-#: code:addons/sa_base/models/maintenance.py:139
+#: code:addons/sa_base/models/maintenance.py:150
 #, python-format
 msgid "Connection Test Failed! Here is what we got instead: %d!"
 msgstr "连接测试失败! 原因: %d!"
 
 #. module: sa_base
 #: code:addons/sa_base/models/maintenance.py:44
-#: code:addons/sa_base/models/maintenance.py:137
+#: code:addons/sa_base/models/maintenance.py:148
 #, python-format
 msgid "Connection Test Succeeded! Everything seems properly set up!"
 msgstr "连接测试成功! 一切正常!"
@@ -414,6 +414,7 @@ msgstr "控制器装配过程"
 #. module: sa_base
 #: model:ir.actions.act_window,name:sa_base.sa_program_form_action
 #: model:ir.model,name:sa_base.model_controller_program
+#: model:ir.ui.menu,name:sa_base.sa_menu_program_action
 #: model:ir.ui.view,arch_db:sa_base.sa_program_form_view
 msgid "Controller Program"
 msgstr "控制器程序"
@@ -561,7 +562,7 @@ msgid "Equipments"
 msgstr "设备"
 
 #. module: sa_base
-#: code:addons/sa_base/models/maintenance.py:168
+#: code:addons/sa_base/models/maintenance.py:179
 #, python-format
 msgid "Error ! You cannot create recursive Equipments."
 msgstr "错误! 你不能创建递归的设备."
@@ -608,14 +609,14 @@ msgid "Group By..."
 msgstr "分组..."
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_operation_point_group_sequence_3932
+#: model:ir.model.fields,field_description:sa_base.field_operation_point_group_sequence_3933
 msgid "Group Sequence for Multi Spindle"
-msgstr "Group Sequence for Multi Spindle"
+msgstr "拧紧组"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_operation_point_group_id_3930
+#: model:ir.model.fields,field_description:sa_base.field_operation_point_group_id_3931
 msgid "Group id"
-msgstr "Group id"
+msgstr "拧紧点组"
 
 #. module: sa_base
 #: model:maintenance.equipment.category,name:sa_base.equipment_Gun
@@ -655,7 +656,7 @@ msgstr "心跳检查URL"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_workcenter_hmi_id
 msgid "Human Machine Interface(HMI)"
-msgstr "Human Machine Interface(HMI)"
+msgstr "人机交互(HMI)"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_controller_job_id
@@ -876,13 +877,13 @@ msgid "Odoo uses these BoMs to automatically propose manufacturing\n"
 msgstr "根据补货规则Odoo用BOM自动的生产生产订单"
 
 #. module: sa_base
-#: code:addons/sa_base/models/mrp_routing.py:224
+#: code:addons/sa_base/models/mrp_routing.py:229
 #, python-format
 msgid "Only SuperUser can delete Job ID"
 msgstr "Only SuperUser can delete Job ID"
 
 #. module: sa_base
-#: code:addons/sa_base/models/mrp_routing.py:257
+#: code:addons/sa_base/models/mrp_routing.py:262
 #, python-format
 msgid "Only SuperUser can delete program"
 msgstr "Only SuperUser can delete program"
@@ -970,7 +971,7 @@ msgstr "拧紧作业点组(多轴)"
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_group_operation_id
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_operation_id
 msgid "Operation id"
-msgstr "作业 id"
+msgstr "生产作业"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_sa_quality_point_operation_id_domain
@@ -1071,7 +1072,7 @@ msgid "Product Template"
 msgstr "产品模板"
 
 #. module: sa_base
-#: code:addons/sa_base/models/product.py:40
+#: code:addons/sa_base/models/product.py:37
 #, python-format
 msgid "Product can not be copy by User!"
 msgstr "产品不能被用户复制!"
@@ -1180,7 +1181,7 @@ msgstr "远程IO"
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_sa_quality_point_times
 msgid "Repeat times"
-msgstr "Repeat times"
+msgstr "可重试次数"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_sa_config_settings_generate_result_sequence
@@ -1235,13 +1236,14 @@ msgstr "工艺路线组名称必须是唯一的!"
 
 #. module: sa_base
 #: model:ir.actions.act_window,name:sa_base.sa_mrp_routing_group_action
+#: model:ir.ui.menu,name:sa_base.menu_mrp_routing_group_action
 msgid "Routing Groups"
 msgstr "工艺路线组"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_workcenter_routing_tracking_count
 msgid "Routing Modification"
-msgstr "Routing Modification"
+msgstr "工艺更改记录"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_routing_form_view
@@ -1379,7 +1381,6 @@ msgstr "策略"
 msgid "Sync Operation"
 msgstr "同步工位工艺信息"
 
-
 #. module: sa_base
 #: selection:maintenance.equipment.connection,protocol:0
 msgid "TCP"
@@ -1435,17 +1436,17 @@ msgstr "扭矩公差"
 #. module: sa_base
 #: selection:controller.program,strategy:0
 msgid "Torque tightening"
-msgstr "Torque tightening"
+msgstr "扭矩拧紧策略"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_quality_point_view_tree_inherit
 msgid "Torque(Max)"
-msgstr "Torque(Max)"
+msgstr "最大扭矩"
 
 #. module: sa_base
 #: model:ir.ui.view,arch_db:sa_base.sa_quality_point_view_tree_inherit
 msgid "Torque(Min)"
-msgstr "Torque(Min)"
+msgstr "最小扭矩"
 
 #. module: sa_base
 #: selection:controller.program,strategy:0
@@ -1486,7 +1487,7 @@ msgstr "VIN"
 
 #. module: sa_base
 #: selection:product.template,sa_type:0
-msgid "Vehcile"
+msgid "Vehicle"
 msgstr "车型"
 
 #. module: sa_base
@@ -1716,3 +1717,4 @@ msgstr "x方向拧紧点偏移(%)"
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_y_offset
 msgid "y axis offset from top(%)"
 msgstr "y方向拧紧点偏移(%)"
+

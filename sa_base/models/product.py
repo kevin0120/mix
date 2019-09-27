@@ -7,7 +7,7 @@ from odoo.exceptions import UserError
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
-    sa_type = fields.Selection([('screw', 'Screw'), ('vehicle', 'Vehcile')], default='vehicle', string='产品类型')
+    sa_type = fields.Selection([('screw', 'Screw'), ('vehicle', 'Vehicle')], default='vehicle', string='产品类型')
 
 
 class ProductProduct(models.Model):
