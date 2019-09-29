@@ -28,7 +28,7 @@ const fakeHelp = [
   {
     key: 'Company',
     displayTitle: '公司',
-    value: '上海途泰工具贸易有限公司'
+    value: '上海砺星信息科技有限公司'
   },
   // {
   //   key: 'ContactPerson',

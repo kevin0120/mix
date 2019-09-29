@@ -2,7 +2,7 @@
 
 const defaultConfigs = {
   version: 'v0.1',
-  appName:'转向架装配系统',
+  appName:'智能装配系统-终端',
   devices: {
     io: {
       enable: true,
