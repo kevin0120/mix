@@ -1,3 +1,5 @@
+import { CommonLog } from '../common/utils';
+
 const { ipcRenderer } = require('electron');
 
 const messageSNs = {};
@@ -11,27 +13,28 @@ function getSN() {
   return sn;
 }
 
-const defaultTimeout = 10000;
+const defaultTimeout = 10000; // 默认timeout 10s
+
+ipcRenderer.on('rush-reply', (event, args, replySN)=>{
+  if(messageSNs[replySN]){
+    CommonLog.Info('rush-reply', args);
+    messageSNs[replySN](args);
+    delete messageSNs[replySN];
+  }
+});
 
 export function rushSendApi(msgType, data, timeout = defaultTimeout) {
   const sn = getSN();
-  messageSNs[sn] = true;
   return new Promise((resolve) => {
+    messageSNs[sn] = (args)=>{
+      resolve(args);
+    };
     ipcRenderer.send('rush-send', {
       data: {
         type: msgType,
         data
       }, timeout, sn
     });
-    const reply = (event, args, replySN) => {
-      if (replySN === sn) {
-        delete messageSNs[sn];
-        console.log('rush-reply', args);
-        ipcRenderer.removeListener('rush-reply', reply);
-        resolve(args);
-      }
-    };
-    ipcRenderer.on('rush-reply', reply);
   }).then(resp => resp);
 }
 

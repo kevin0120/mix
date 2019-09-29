@@ -18,6 +18,31 @@ export type tPointStatus = $Keys<typeof POINT_STATUS>;
 
 export type tResultStatus = $Keys<typeof RESULT_STATUS>;
 
+// NOTE: 拧紧点key定义,如果此点为key，此点必须拧紧结束同时此组的结果到达拧紧关键点个数才能进入下个拧紧组
+
+class tClsOperationPoint {
+
+  _point: tPoint;
+
+
+  _results: Array<tResult>;
+
+  construct(p: tPoint) {
+    this._point = p;
+    this._results = [];
+  }
+
+  is_final_fail(): boolean {
+    const rs_count = this._results.length;
+    if(rs_count >= this._point.maxRetryTimes && this._results[rs_count - 1] === RESULT_STATUS.nok) {
+      return true;
+    }
+    return false;
+  }
+
+}
+
+
 export type tPoint = {
   id: number,
   toolSN: string,
@@ -29,7 +54,8 @@ export type tPoint = {
 
   sequence: number,
   group_sequence: number,
-
+  key_num: number, // key_num,定义了关键点个数
+  is_key: boolean, // 定义了此点是否为关键点
   ti: number,
   mi: number,
   wi: number,
