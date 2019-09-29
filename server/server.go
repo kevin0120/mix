@@ -336,6 +336,7 @@ func (s *Server) appendHMIService() error {
 	srv.ControllerService = s.ControllerService
 	srv.OpenProtocol = s.OpenprotocolService
 	srv.TighteningService = s.TighteningDeviceService
+	srv.WS = s.WSNotifyService
 
 	s.AppendService("hmi", srv)
 

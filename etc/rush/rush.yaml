@@ -109,7 +109,7 @@ openprotocol:
     - 1
 
   tool_info_period: 10h
-  default_mode: job
+  default_mode: pset
 
 scanner:
   enable: false
@@ -141,10 +141,10 @@ tightening_device:
     - model: ModelDesoutterCvi3
       protocol: OpenProtocol
       endpoint: tcp://192.168.3.23:4545
-      sn: 0001
+      sn: c1
       tools:
-        - sn: 12B62230
-          channel: 1
+        - sn: t1
+          channel: 51
 #        - sn: 12B62230
 #          channel: 51
 

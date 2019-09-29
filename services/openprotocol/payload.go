@@ -337,7 +337,6 @@ type ResultData struct {
 	StageResult string `start:"3"  end:"..."`
 }
 
-// TODO
 func (rd *ResultData) ToTighteningResult() *tightening_device.TighteningResult {
 	measureResult := tightening_device.RESULT_OK
 	if rd.TighteningStatus == "0" {

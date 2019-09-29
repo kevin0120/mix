@@ -42,7 +42,7 @@ type IOSet struct {
 
 type ToolEnable struct {
 	Controller_SN string `json:"controller_sn"`
-	ToolSN        string `json:"tool_sn"`
+	ToolSN        string `json:"gun_sn"`
 	Enable        bool   `json:"enable"`
 	Reason        string `json:"reason"`
 }

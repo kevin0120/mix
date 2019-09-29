@@ -2,6 +2,7 @@ package hmi
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/kataras/iris/websocket"
 	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/controller"
@@ -31,8 +32,8 @@ type Service struct {
 	OpenProtocol      *openprotocol.Service
 	ControllerService *controller.Service
 
-	SN string
-	wsnotify.WSNotify
+	SN                string
+	WS                *wsnotify.Service
 	TighteningService *tightening_device.Service
 }
 
@@ -50,11 +51,12 @@ func NewService(d Diagnostic) *Service {
 
 func (s *Service) Open() error {
 
-	//s.ControllerService.WS.OnNewClient = s.OnNewHmiClient
+	s.ControllerService.WS.OnNewClient = s.OnNewHmiClient
 	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_RESULT).Register(s.OnTighteningResult)
-	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_IO).Register(s.OnTighteningIOStatus)
+	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_IO).Register(s.OnTighteningControllerIO)
 	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_CONTROLLER_STATUS).Register(s.OnTighteningControllerStatus)
 	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_TOOL_STATUS).Register(s.OnTighteningToolStatus)
+	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_CONTROLLER_ID).Register(s.OnTighteningControllereID)
 
 	var r httpd.Route
 
@@ -261,7 +263,7 @@ func (s *Service) Open() error {
 	r = httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
 		Method:      "PUT",
-		Pattern:     "/ws-test",
+		Pattern:     "/WS-test",
 		HandlerFunc: s.methods.wsTest,
 	}
 	s.Httpd.Handler[0].AddRoute(r)
@@ -303,7 +305,18 @@ func (s *Service) resetResult(id int64) error {
 	return nil
 }
 
-func (s *Service) OnNewHmiClient(c websocket.Connection) {
+func (s *Service) OnNewHmiClient(conn websocket.Connection) {
+	controllers := s.TighteningService.GetControllers()
+	for sn, c := range controllers {
+		controllerStatus := wsnotify.WSStatus{
+			SN:     sn,
+			Status: c.Status(),
+		}
+
+		msg, _ := json.Marshal(controllerStatus)
+		conn.Emit(wsnotify.WS_EVENT_CONTROLLER, string(msg))
+	}
+
 	//controllers := s.ControllerService.GetControllers()
 	//
 	//for k, v := range *controllers {
@@ -314,7 +327,7 @@ func (s *Service) OnNewHmiClient(c websocket.Connection) {
 	//
 	//	msg, _ := json.Marshal(s)
 	//
-	//	c.Emit(wsnotify.WS_EVENT_CONTROLLER, string(msg))
+	//	conn.Emit(wsnotify.WS_EVENT_CONTROLLER, string(msg))
 	//
 	//	inputs := openprotocol.IOMonitor{
 	//		ControllerSN: k,
@@ -322,7 +335,7 @@ func (s *Service) OnNewHmiClient(c websocket.Connection) {
 	//	}
 	//
 	//	msg, _ = json.Marshal(inputs)
-	//	c.Emit(wsnotify.WS_EVENT_IO, string(msg))
+	//	conn.Emit(wsnotify.WS_EVENT_IO, string(msg))
 
 	// 推送工具状态
 	// TODO:工具状态
@@ -334,16 +347,16 @@ func (s *Service) OnNewHmiClient(c websocket.Connection) {
 	//	}
 	//	msg, _ = json.Marshal(ts)
 	//
-	//	c.Emit(wsnotify.WS_EVETN_TOOL, string(msg))
+	//	conn.Emit(wsnotify.WS_EVETN_TOOL, string(msg))
 	//}
 	//}
 
-	//odooStatus := wsnotify.WSOdooStatus{
-	//	Status: s.ODOO.Status(),
-	//}
-	//
-	//str, _ := json.Marshal(odooStatus)
-	//c.Emit(wsnotify.WS_EVENT_ODOO, string(str))
+	odooStatus := wsnotify.WSOdooStatus{
+		Status: s.ODOO.Status(),
+	}
+
+	str, _ := json.Marshal(odooStatus)
+	conn.Emit(wsnotify.WS_EVENT_ODOO, string(str))
 }
 
 func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
@@ -434,12 +447,36 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 
 // 收到控制器结果
 func (s *Service) OnTighteningResult(data interface{}) {
-	s.diag.Debug("结果推送HMI")
+	if data == nil {
+		return
+	}
+
+	tighteningResult := data.(*tightening_device.TighteningResult)
+	result := []wsnotify.WSResult{
+		{
+			Result: tighteningResult.MeasureResult,
+			MI:     tighteningResult.MeasureTorque,
+			WI:     tighteningResult.MeasureAngle,
+			TI:     tighteningResult.MeasureTime,
+		},
+	}
+
+	payload, _ := json.Marshal(result)
+
+	s.WS.WSSend(wsnotify.WS_EVENT_RESULT, string(payload))
+	s.diag.Debug(fmt.Sprintf("拧紧结果推送HMI: %s", string(payload)))
 }
 
 // 控制器状态变化
 func (s *Service) OnTighteningControllerStatus(data interface{}) {
+	if data == nil {
+		return
+	}
 
+	controllerStatus := data.(*tightening_device.TighteningControllerStatus)
+	payload, _ := json.Marshal(controllerStatus)
+	s.WS.WSSend(wsnotify.WS_EVENT_CONTROLLER, string(payload))
+	s.diag.Debug(fmt.Sprintf("控制器状态推送HMI: %s", string(payload)))
 }
 
 // 工具状态变化
@@ -448,6 +485,21 @@ func (s *Service) OnTighteningToolStatus(data interface{}) {
 }
 
 // 控制器IO变化
-func (s *Service) OnTighteningIOStatus(data interface{}) {
+func (s *Service) OnTighteningControllerIO(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	inputStatus := data.(*tightening_device.TighteningControllerInput)
+	payload, _ := json.Marshal(inputStatus)
+	s.WS.WSSend(wsnotify.WS_EVENT_IO, string(payload))
+	s.diag.Debug(fmt.Sprintf("控制器IO推送HMI: %s", string(payload)))
+}
+
+// 收到控制器条码
+func (s *Service) OnTighteningControllereID(data interface{}) {
+	if data == nil {
+		return
+	}
 
 }

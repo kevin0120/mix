@@ -38,6 +38,11 @@ type TighteningTool struct {
 
 func (s *TighteningTool) SetMode(mode string) {
 	s.Mode.Store(mode)
+
+	//s.controller.Srv.DB.UpdateTool(&storage.Guns{
+	//	Serial: s.cfg.SN,
+	//	Mode:   mode,
+	//})
 }
 
 func (s *TighteningTool) GetMode() string {
@@ -299,14 +304,38 @@ func (s *TighteningTool) OnResult(result interface{}) {
 	}
 
 	tighteningResult := result.(*tightening_device.TighteningResult)
-	if s.Mode.Load().(string) == tightening_device.MODE_JOB {
-		tighteningResult.Seq, tighteningResult.Count = s.controller.calBatch(tighteningResult.WorkorderID)
+	dbTool, err := s.controller.Srv.DB.GetGun(s.cfg.SN)
+	if err == nil {
+		if s.Mode.Load().(string) == tightening_device.MODE_JOB {
+			tighteningResult.Seq, tighteningResult.Count = s.controller.calBatch(dbTool.WorkorderID)
+		} else {
+			tighteningResult.Seq = dbTool.Seq
+			tighteningResult.Count = dbTool.Count
+		}
+
+		tighteningResult.WorkorderID = dbTool.WorkorderID
+		tighteningResult.UserID = dbTool.UserID
+		tighteningResult.Batch = fmt.Sprintf("%d/%d", tighteningResult.Seq, dbTool.Total)
+
+		dbWorkorder, err := s.controller.Srv.DB.GetWorkorder(dbTool.WorkorderID, true)
+		if err != nil {
+			s.diag.Error("Get Workorder Failed", err)
+			return
+		}
+
+		consume, err := s.controller.Srv.Odoo.GetConsumeBySeq(&dbWorkorder, tighteningResult.Seq)
+		if err != nil {
+			s.diag.Error("Get Consume Failed", err)
+			return
+		}
+
+		tighteningResult.NutNo = consume.NutNo
 	}
 
 	dbResult := tighteningResult.ToDBResult()
 
 	// 尝试获取最近一条没有对应结果的曲线并更新, 同时缓存结果
-	err := s.controller.Srv.DB.UpdateIncompleteCurveAndSaveResult(dbResult)
+	err = s.controller.Srv.DB.UpdateIncompleteCurveAndSaveResult(dbResult)
 	if err != nil {
 		s.diag.Error("Handle Result With Curve Failed", err)
 	}

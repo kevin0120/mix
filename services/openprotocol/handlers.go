@@ -116,18 +116,6 @@ func handleMID_0061_LAST_RESULT(c *TighteningController, pkg *handlerPkg) error 
 	}
 
 	tighteningResult := resultData.ToTighteningResult()
-
-	targetID := resultData.VIN
-	switch c.Srv.config().DataIndex {
-	case 1:
-		targetID = resultData.ID2
-	case 2:
-		targetID = resultData.ID3
-	case 3:
-		targetID = resultData.ID4
-	}
-
-	tighteningResult.WorkorderID, _ = strconv.ParseInt(targetID, 10, 64)
 	return c.handleResult(tighteningResult)
 }
 

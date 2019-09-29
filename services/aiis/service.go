@@ -319,12 +319,9 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 		aiisResult.Payload = dbWorkorder.Payload
 	}
 
-	if result.ExInfo != "" {
-		aiisResult.CURObjects = append(aiisResult.CURObjects, CURObject{OP: result.Count, File: result.ExInfo})
-	}
-
+	aiisResult.CURObjects = append(aiisResult.CURObjects, CURObject{OP: result.Count, File: fmt.Sprintf("%s_%s.json", result.ToolSN, result.TighteningID)})
 	aiisResult.ID = result.Id
-	//aiisResult.WorkorderID = dbWorkorder.WorkorderID
+	aiisResult.WorkorderID = dbWorkorder.WorkorderID
 	aiisResult.Control_date = result.UpdateTime.Format(time.RFC3339)
 	aiisResult.Measure_degree = resultValue.Wi
 	aiisResult.Measure_result = strings.ToLower(result.Result)
@@ -343,19 +340,18 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	aiisResult.UserID = result.UserID
 	aiisResult.Seq = result.Seq
 
-	//aiisResult.MO_AssemblyLine = dbWorkorder.MO_AssemblyLine
-	//aiisResult.MO_EquipemntName = dbWorkorder.MO_EquipemntName
-	//aiisResult.MO_FactoryName = dbWorkorder.MO_FactoryName
-	//aiisResult.MO_Pin = dbWorkorder.MO_Pin
-	//aiisResult.MO_Pin_check_code = dbWorkorder.MO_Pin_check_code
-	//aiisResult.MO_Year = dbWorkorder.MO_Year
-	//aiisResult.MO_Lnr = dbWorkorder.MO_Lnr
-	//aiisResult.MO_NutNo = result.NutNo
-	//aiisResult.MO_Model = dbWorkorder.MO_Model
+	aiisResult.MO_AssemblyLine = dbWorkorder.MO_AssemblyLine
+	aiisResult.MO_EquipemntName = dbWorkorder.MO_EquipemntName
+	aiisResult.MO_FactoryName = dbWorkorder.MO_FactoryName
+	aiisResult.MO_Pin = dbWorkorder.MO_Pin
+	aiisResult.MO_Pin_check_code = dbWorkorder.MO_Pin_check_code
+	aiisResult.MO_Year = dbWorkorder.MO_Year
+	aiisResult.MO_Lnr = dbWorkorder.MO_Lnr
+	aiisResult.MO_NutNo = result.NutNo
+	aiisResult.MO_Model = dbWorkorder.MO_Model
 	aiisResult.Batch = result.Batch
-	//aiisResult.Vin = dbWorkorder.Vin
-	//
-	//aiisResult.Mode = dbWorkorder.Mode
+	aiisResult.Vin = dbWorkorder.Vin
+	aiisResult.Mode = dbWorkorder.Mode
 	aiisResult.TighteningId, _ = strconv.ParseInt(result.TighteningID, 10, 64)
 	aiisResult.Lacking = "normal"
 

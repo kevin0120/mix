@@ -16,6 +16,7 @@ const (
 	DISPATCH_IO                = "DISPATCH_IO"
 	DISPATCH_CONTROLLER_STATUS = "DISPATCH_CONTROLLER_STATUS"
 	DISPATCH_TOOL_STATUS       = "DISPATCH_TOOL_STATUS"
+	DISPATCH_CONTROLLER_ID     = "DISPATCH_CONTROLLER_ID"
 )
 
 const (
@@ -60,6 +61,23 @@ const (
 	WS_TOOL_JOB_LIST    = "WS_TOOL_JOB_LIST"
 	WS_TOOL_JOB_DETAIL  = "WS_TOOL_JOB_DETAIL"
 )
+
+type PSetDefine struct {
+	Strategy string  `json:"strategy"`
+	Mp       float64 `json:"M+"`
+	Mm       float64 `json:"M-"`
+	Ms       float64 `json:"MS"`
+	Ma       float64 `json:"MA"`
+	Wp       float64 `json:"W+"`
+	Wm       float64 `json:"W-"`
+	Wa       float64 `json:"WS"`
+}
+
+type ResultValue struct {
+	Mi float64 `json:"MI"`
+	Wi float64 `json:"WI"`
+	Ti float64 `json:"TI"`
+}
 
 type ControllerOutput struct {
 	OutputNo int    `json:"no"`
@@ -136,15 +154,50 @@ type TighteningResult struct {
 
 	// 工单ID
 	WorkorderID int64 `json:"workorder_id"`
+
+	// 用户ID
+	UserID int64 `json:"user_id"`
+
+	// 螺栓编号
+	NutNo string `json:"nut_no"`
 }
 
 func (r *TighteningResult) ToDBResult() *storage.Results {
+	psetDefine := PSetDefine{
+		Strategy: r.Strategy,
+		Mp:       r.TorqueMax,
+		Mm:       r.TorqueMin,
+		Ms:       r.TorqueThreshold,
+		Ma:       r.TorqueTarget,
+		Wp:       r.AngleMax,
+		Wm:       r.AngleMin,
+		Wa:       r.AngleTarget,
+	}
+	strPsetDefine, _ := json.Marshal(psetDefine)
+
+	resultValue := ResultValue{
+		Mi: r.MeasureTorque,
+		Wi: r.MeasureAngle,
+		Ti: r.MeasureTime,
+	}
+	strResultValue, _ := json.Marshal(resultValue)
+
 	return &storage.Results{
 		HasUpload:    false,
+		Seq:          r.Seq,
+		WorkorderID:  r.WorkorderID,
 		Result:       r.MeasureResult,
 		ToolSN:       r.ToolSN,
 		ControllerSN: r.ControllerSN,
 		TighteningID: r.TighteningID,
+		UpdateTime:   r.UpdateTime,
+		PSetDefine:   string(strPsetDefine),
+		ResultValue:  string(strResultValue),
+		Count:        r.Count,
+		PSet:         r.PSet,
+		Batch:        r.Batch,
+		UserID:       r.UserID,
+		NutNo:        r.NutNo,
 	}
 }
 

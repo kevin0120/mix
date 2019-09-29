@@ -47,7 +47,7 @@ type handlerPkg_curve struct {
 }
 
 type TighteningController struct {
-	w                    *socket_writer.SocketWriter
+	sockClient           *socket_writer.SocketWriter
 	cfg                  *tightening_device.TighteningDeviceConfig
 	keepAliveCount       int32
 	keepPeriod           time.Duration
@@ -79,7 +79,7 @@ type TighteningController struct {
 }
 
 // TODO: 如果工具序列号没有配置，则通过探测加入设备列表。
-func NewController(protocolConfig *Config, deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic) *TighteningController {
+func NewController(protocolConfig *Config, deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic, service *Service) *TighteningController {
 
 	c := TighteningController{
 		diag:              d,
@@ -95,6 +95,7 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 		tempResultCurve:   map[int]*tightening_device.TighteningCurve{},
 
 		toolDispatches: map[string]*ToolDispatch{},
+		Srv:            service,
 	}
 
 	c.controllerSubscribes = []ControllerSubscribe{
@@ -103,7 +104,7 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 		c.SelectorSubscribe,
 		c.JobInfoSubscribe,
 		c.IOInputSubscribe,
-		c.MultiSpindleResultSubscribe,
+		//c.MultiSpindleResultSubscribe,
 		c.VinSubscribe,
 		c.AlarmSubcribe,
 		c.CurveSubscribe,
@@ -415,8 +416,6 @@ func (c *TighteningController) Start() error {
 		dispatch.Start()
 	}
 
-	c.w = socket_writer.NewSocketWriter(c.cfg.Endpoint, c)
-
 	// 启动处理
 	go c.manage()
 
@@ -503,8 +502,9 @@ func (c *TighteningController) Connect() error {
 		mtx:     sync.Mutex{},
 	}
 
+	c.sockClient = socket_writer.NewSocketWriter(c.cfg.Endpoint, c)
 	for {
-		err := c.w.Connect(DAIL_TIMEOUT)
+		err := c.sockClient.Connect(DAIL_TIMEOUT)
 		if err != nil {
 			c.Srv.diag.Error("Connect Err", err)
 		} else {
@@ -715,7 +715,7 @@ func (c *TighteningController) Close() error {
 		<-closed
 	}
 
-	return c.w.Close()
+	return c.sockClient.Close()
 }
 
 func (c *TighteningController) handlePackageOPPayload(src []byte, data []byte) error {
@@ -742,7 +742,7 @@ func (c *TighteningController) handlePackageOPPayload(src []byte, data []byte) e
 
 		c.handlerBuf <- pkg
 	} else {
-		return errors.New("body len err")
+		return errors.New(fmt.Sprintf("Body Len Err: %s", string(msg)))
 	}
 
 	return nil
@@ -772,7 +772,12 @@ func (c *TighteningController) manage() {
 			for nextWriteThreshold.After(time.Now()) {
 				time.Sleep(time.Microsecond * 100)
 			}
-			err := c.w.Write([]byte(v))
+
+			if c.sockClient == nil {
+				continue
+			}
+
+			err := c.sockClient.Write([]byte(v))
 			if err != nil {
 				c.Srv.diag.Error("Write Data Fail", err)
 			} else {

@@ -1,8 +1,8 @@
 package tightening_device
 
 import (
-	"fmt"
 	"github.com/kataras/iris/core/errors"
+	"github.com/masami10/rush/services/storage"
 )
 
 // api接口
@@ -15,9 +15,10 @@ type JobSet struct {
 	ControllerSN string `json:"controller_sn"`
 	ToolSN       string `json:"tool_sn"`
 	WorkorderID  int64  `json:"workorder_id"`
+	Total        int    `json:"total"`
 	StepID       int64  `json:"step_id"`
 	Job          int    `json:"job"`
-	UserID       uint   `json:"user_id"`
+	UserID       int64  `json:"user_id"`
 }
 
 func (s *JobSet) Validate() error {
@@ -30,6 +31,13 @@ func (s *JobSet) Validate() error {
 	}
 
 	return nil
+}
+
+type PSetBatchSet struct {
+	ControllerSN string `json:"controller_sn"`
+	ToolSN       string `json:"tool_sn"`
+	PSet         int    `json:"pset"`
+	Batch        int    `json:"batch"`
 }
 
 type PSetSet struct {
@@ -121,14 +129,31 @@ func (s *Api) ToolJobSet(req *JobSet) error {
 		return err
 	}
 
-	if req.WorkorderID > 0 {
-		err = tool.TraceSet(fmt.Sprintf("%d", req.WorkorderID))
-		if err != nil {
-			return err
-		}
+	if req.UserID == 0 {
+		req.UserID = 1
 	}
 
+	_ = s.service.StorageService.UpdateTool(&storage.Guns{
+		Serial:      req.ToolSN,
+		WorkorderID: req.WorkorderID,
+		Total:       req.Total,
+		UserID:      req.UserID,
+	})
+
 	return tool.SetJob(req.Job)
+}
+
+func (s *Api) ToolPSetBatchSet(req *PSetBatchSet) error {
+	if req == nil {
+		return errors.New("Req Is Nil")
+	}
+
+	tool, err := s.service.getTool(req.ControllerSN, req.ToolSN)
+	if err != nil {
+		return err
+	}
+
+	return tool.SetPSetBatch(req.PSet, req.Batch)
 }
 
 func (s *Api) ToolPSetSet(req *PSetSet) error {
@@ -146,12 +171,18 @@ func (s *Api) ToolPSetSet(req *PSetSet) error {
 		return err
 	}
 
-	if req.WorkorderID > 0 {
-		err = tool.TraceSet(fmt.Sprintf("%d", req.WorkorderID))
-		if err != nil {
-			return err
-		}
+	if req.UserID == 0 {
+		req.UserID = 1
 	}
+
+	_ = s.service.StorageService.UpdateTool(&storage.Guns{
+		Serial:      req.ToolSN,
+		WorkorderID: req.WorkorderID,
+		Seq:         int(req.Sequence),
+		Count:       req.Count,
+		UserID:      req.UserID,
+		Total:       req.Total,
+	})
 
 	return tool.SetPSet(req.PSet)
 }

@@ -51,6 +51,7 @@ func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol) (*Servi
 			DISPATCH_CONTROLLER_STATUS: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 			DISPATCH_IO:                utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 			DISPATCH_TOOL_STATUS:       utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+			DISPATCH_CONTROLLER_ID:     utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		},
 	}
 
@@ -177,11 +178,6 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 		req := PSetSet{}
 		_ = json.Unmarshal(byteData, &req)
 
-		_ = ds.UpdateTool(&storage.Guns{
-			Serial: req.ToolSN,
-			Trace:  string(byteData),
-		})
-
 		err := s.Api.ToolPSetSet(&req)
 		if err != nil {
 			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
@@ -218,6 +214,13 @@ func (s *Service) OnToolStatus(data interface{}) {
 
 func (s *Service) GetDispatcher(name string) *utils.Dispatcher {
 	return s.dispatchers[name]
+}
+
+func (s *Service) GetControllers() map[string]ITighteningController {
+	s.mtxDevices.Lock()
+	defer s.mtxDevices.Unlock()
+
+	return s.runningControllers
 }
 
 func (s *Service) addController(controllerSN string, controller ITighteningController) {

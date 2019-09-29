@@ -24,7 +24,7 @@ type Methods struct {
 }
 
 func (m *Methods) putToolControl(ctx iris.Context) {
-	req := tightening_device.ToolControl{}
+	req := ToolEnable{}
 	err := ctx.ReadJSON(&req)
 
 	if err != nil {
@@ -34,7 +34,12 @@ func (m *Methods) putToolControl(ctx iris.Context) {
 		return
 	}
 
-	err = m.service.TighteningService.Api.ToolControl(&req)
+	err = m.service.TighteningService.Api.ToolControl(&tightening_device.ToolControl{
+		ControllerSN: req.Controller_SN,
+		ToolSN:       req.ToolSN,
+		Enable:       req.Enable,
+	})
+
 	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString(err.Error())
@@ -78,11 +83,11 @@ func (m *Methods) putPSets(ctx iris.Context) {
 		return
 	}
 
-	//if pset.Count == 0 {
-	//	ctx.StatusCode(iris.StatusBadRequest)
-	//	ctx.WriteString("count is required")
-	//	return
-	//}
+	if pset.Count == 0 {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("count is required")
+		return
+	}
 
 	if pset.WorkorderID == 0 {
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -105,32 +110,32 @@ func (m *Methods) putPSets(ctx iris.Context) {
 		return
 	}
 
-	m.service.DB.UpdateTool(&storage.Guns{
-		Serial:      pset.GunSN,
-		WorkorderID: workorder.Id,
-		Seq:         pset.GroupSeq,
-		Count:       pset.Count,
+	var consumes []odoo.ODOOConsume
+	json.Unmarshal([]byte(workorder.Consumes), &consumes)
+
+	err = m.service.TighteningService.Api.ToolPSetBatchSet(&tightening_device.PSetBatchSet{
+		ControllerSN: pset.Controller_SN,
+		ToolSN:       pset.GunSN,
+		PSet:         pset.PSet,
+		Batch:        1,
 	})
 
-	// 通过控制器设定程序
-	c, exist := m.service.ControllerService.Controllers[pset.Controller_SN]
-	if !exist {
+	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("controller not found")
+		ctx.WriteString(err.Error())
 		return
 	}
 
-	switch c.Protocol() {
-	case controller.AUDIPROTOCOL:
-		err = m.service.AudiVw.PSet(pset.Controller_SN, pset.GunSN, pset.PSet, workorder.Id, int64(pset.GroupSeq), pset.Count, pset.UserID)
-	case controller.OPENPROTOCOL:
-		err = m.service.OpenProtocol.PSet(pset.Controller_SN, pset.GunSN, pset.PSet, workorder.Id, pset.Count, pset.UserID)
-
-	default:
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("not supported")
-		return
-	}
+	err = m.service.TighteningService.Api.ToolPSetSet(&tightening_device.PSetSet{
+		ControllerSN: pset.Controller_SN,
+		ToolSN:       pset.GunSN,
+		WorkorderID:  pset.WorkorderID,
+		UserID:       pset.UserID,
+		PSet:         pset.PSet,
+		Sequence:     uint(pset.GroupSeq),
+		Count:        pset.Count,
+		Total:        len(consumes),
+	})
 
 	if err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
@@ -412,54 +417,27 @@ func (m *Methods) getJobDetail(ctx iris.Context) {
 }
 
 func (m *Methods) enableJobMode(ctx iris.Context) {
-	//var mode ControllerMode
-	//err := ctx.ReadJSON(&mode)
-	//
-	//if err != nil {
-	//	// 传输结构错误
-	//	ctx.StatusCode(iris.StatusBadRequest)
-	//	ctx.WriteString(err.Error())
-	//	return
-	//}
-	//
-	//if mode.Controller_SN == "" {
-	//	ctx.StatusCode(iris.StatusBadRequest)
-	//	ctx.WriteString("controller_sn is required")
-	//	return
-	//}
-	//
-	//if mode.Mode == "" {
-	//	ctx.StatusCode(iris.StatusBadRequest)
-	//	ctx.WriteString("mode is required")
-	//	return
-	//}
-	//
-	//c, exist := m.service.ControllerService.Controllers[mode.Controller_SN]
-	//if !exist {
-	//	ctx.StatusCode(iris.StatusBadRequest)
-	//	ctx.WriteString("controller not found")
-	//	return
-	//}
-	//
-	//switch c.Protocol() {
-	//case controller.OPENPROTOCOL:
-	//	flag := true
-	//	if mode.Mode == openprotocol.MODE_PSET {
-	//		flag = false
-	//	}
-	//	err = m.service.OpenProtocol.JobOFF(mode.Controller_SN, flag)
-	//
-	//default:
-	//	ctx.StatusCode(iris.StatusBadRequest)
-	//	ctx.WriteString("not supported")
-	//	return
-	//}
-	//
-	//if err != nil {
-	//	ctx.StatusCode(iris.StatusBadRequest)
-	//	ctx.WriteString(err.Error())
-	//	return
-	//}
+	var req ControllerMode
+	err := ctx.ReadJSON(&req)
+
+	if err != nil {
+		// 传输结构错误
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+
+	if req.Controller_SN == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("controller_sn is required")
+		return
+	}
+
+	if req.Mode == "" {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString("req is required")
+		return
+	}
 }
 
 func (m *Methods) putJobs(ctx iris.Context) {
@@ -1221,8 +1199,8 @@ func (m *Methods) wsTest(ctx iris.Context) {
 		return
 	}
 
-	//str, _ := json.Marshal(ws.Data)
-	//m.service.ControllerService.WS.WSSend(ws.Event, string(str))
+	//str, _ := json.Marshal(WS.Data)
+	//m.service.ControllerService.WS.WSSend(WS.Event, string(str))
 
 	payload, _ := json.Marshal(ws)
 	m.service.ControllerService.WS.WSTestRecv("", string(payload))

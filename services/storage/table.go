@@ -127,8 +127,9 @@ type Guns struct {
 	WorkorderID int64  `xorm:"bigint 'workorder_id'"`
 	Seq         int    `xorm:"bigint 'sequence'"`
 	Count       int    `xorm:"int 'count'"`
+	Total       int    `xorm:"int 'total'"`
 	Mode        string `xorm:"varchar(128) 'mode'"`
-	Trace       string `xorm:"text 'trace'"`
+	UserID      int64  `xorm:"bigint 'user_id'"`
 }
 
 type RoutingOperations struct {

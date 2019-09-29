@@ -84,6 +84,7 @@ func (s *Dispatcher) manage() {
 
 		case <-s.closing:
 			s.setOpen(false)
+			log.Fatalf("Dispatcher Is Closed!!!")
 			return
 		}
 	}

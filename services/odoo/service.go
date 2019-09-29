@@ -499,3 +499,23 @@ func (s *Service) TryCreateMaintenance(body interface{}) error {
 	}
 	return err
 }
+
+func (s *Service) GetConsumeBySeq(workorder *storage.Workorders, seq int) (*ODOOConsume, error) {
+	if workorder == nil {
+		return nil, errors.New("Workorder Is Nil")
+	}
+
+	consumes := []ODOOConsume{}
+	json.Unmarshal([]byte(workorder.Consumes), &consumes)
+	if len(consumes) == 0 {
+		return nil, errors.New("Consumes Is Empty")
+	}
+
+	for k, v := range consumes {
+		if v.Seq == seq {
+			return &consumes[k], nil
+		}
+	}
+
+	return nil, errors.New("Consume Not Found")
+}
