@@ -27,6 +27,7 @@ from odoo.exceptions import ValidationError, AccessError
 
 _logger = logging.getLogger(__name__)
 
+
 class RefreshRule(models.Model):
     _name = 'muk_web_client_refresh.rule'
     _description = "Auto Refresh Rule"
@@ -34,28 +35,28 @@ class RefreshRule(models.Model):
     name = fields.Char(
         string="Name",
         required=True)
-    
+
     model = fields.Many2one(
         'ir.model',
         string="Model",
         required=True,
         help="Select model for which you want to refresh the corresponding views.")
-    
+
     refresh_create = fields.Boolean(
-        string="Refresh on Create", 
+        string="Refresh on Create",
         default=True)
-    
+
     refresh_write = fields.Boolean(
-        string="Refresh on Writes", 
+        string="Refresh on Writes",
         default=True)
-    
+
     refresh_unlink = fields.Boolean(
-        string="Refresh on Unlink", 
+        string="Refresh on Unlink",
         default=True)
 
     _sql_constraints = [
         ('model_uniq', 'unique(model)',
-        ("There is already a rule defined on this model."))
+         ("There is already a rule defined on this model."))
     ]
 
     def _register_hook(self):
@@ -75,7 +76,7 @@ class RefreshRule(models.Model):
             if rule.refresh_unlink and not hasattr(model, "rule_refresh_unlink"):
                 model._patch_method('unlink', rule._make_unlink())
                 setattr(type(model), "rule_refresh_unlink", True)
-           
+
     @api.multi
     def _revert_methods(self):
         for rule in self:
@@ -84,7 +85,7 @@ class RefreshRule(models.Model):
                 if getattr(rule, 'refresh_%s' % method) and hasattr(getattr(model, method), 'origin'):
                     model._revert_method(method)
                     delattr(type(model), 'refresh_ruled_%s' % method)
-            
+
     @api.model
     def create(self, vals):
         record = super(RefreshRule, self).create(vals)
@@ -104,7 +105,7 @@ class RefreshRule(models.Model):
         self._revert_methods()
         modules.registry.RegistryManager.signal_registry_change(self.env.cr.dbname)
         return super(RefreshRule, self).unlink()
-    
+
     @api.multi
     def _make_create(self):
         @api.model
@@ -113,6 +114,7 @@ class RefreshRule(models.Model):
             result = create_refresh.origin(self, vals, **kwargs)
             self.env['bus.bus'].sendone("%s_refresh" % self.env.cr.dbname, self._name)
             return result
+
         return create_refresh
 
     @api.multi
@@ -122,8 +124,9 @@ class RefreshRule(models.Model):
             result = write_refresh.origin(self, vals, **kwargs)
             self.env['bus.bus'].sendone("%s_refresh" % self.env.cr.dbname, self._name)
             return result
+
         return write_refresh
-    
+
     @api.multi
     def _make_unlink(self):
         @api.multi
@@ -131,4 +134,5 @@ class RefreshRule(models.Model):
             result = unlink_refresh.origin(self, **kwargs)
             self.env['bus.bus'].sendone("%s_refresh" % self.env.cr.dbname, self._name)
             return result
+
         return unlink_refresh

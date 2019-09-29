@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from odoo import http, fields,api, SUPERUSER_ID
+from odoo import http, fields, api, SUPERUSER_ID
 import json
-from odoo.http import request,Response
+from odoo.http import request, Response
+
 
 class Guns(http.Controller):
     @http.route('/api/v1/guns', type='http', methods=['GET', 'OPTIONS'], auth='none', cors='*', csrf=False)

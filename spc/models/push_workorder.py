@@ -42,8 +42,8 @@ class PushWorkorder(AbstractModel):
             for consu in order.consu_bom_line_ids:
                 # 定位消耗品的qcp
                 _qcps = self.env['sa.quality.point'].sudo().search([('bom_line_id', '=', consu.bom_line_id.id),
-                                                          ('operation_id', '=', order.operation_id.id)],
-                                                         limit=1)
+                                                                    ('operation_id', '=', order.operation_id.id)],
+                                                                   limit=1)
 
                 _consumes.append({
                     # "consu_product_id": consu.product_id,
@@ -53,7 +53,7 @@ class PushWorkorder(AbstractModel):
                     'offset_x': consu.bom_line_id.operation_point_id.x_offset,
                     'offset_y': consu.bom_line_id.operation_point_id.y_offset,
                     "pset": consu.bom_line_id.program_id.code if consu.bom_line_id.program_id.code else "0",
-                    "nut_no": consu.product_id.screw_type_code,
+                    "nut_no": consu.product_id.default_code,
                     "gun_sn": consu.bom_line_id.gun_id.serial_no if consu.bom_line_id.gun_id.serial_no else "",
                     "controller_sn": consu.bom_line_id.controller_id.serial_no if consu.bom_line_id.controller_id.serial_no else "",
                     'tolerance_min': _qcps.tolerance_min if _qcps else 0.0,
@@ -65,7 +65,8 @@ class PushWorkorder(AbstractModel):
 
             vals = {
                 'id': order.id,
-                'hmi': {'id': order.workcenter_id.hmi_id.id, 'uuid': order.workcenter_id.hmi_id.serial_no} if order.workcenter_id else None,
+                'hmi': {'id': order.workcenter_id.hmi_id.id,
+                        'uuid': order.workcenter_id.hmi_id.serial_no} if order.workcenter_id else None,
                 'workcenter': {'name': order.workcenter_id.name,
                                'code': order.workcenter_id.code} if order.workcenter_id else None,
                 'img_op_id': order.operation_id.id,
@@ -84,7 +85,7 @@ class PushWorkorder(AbstractModel):
                 'assembly_line': order.production_id.assembly_line_id.code,
                 'lnr': order.production_id.lnr,
                 'consumes': _consumes,
-                'model': order.production_id.product_id.vehicle_type_code,
+                'model': order.production_id.product_id.default_code,
                 'update_time': str_time_to_rfc3339(order.production_date),
                 'job': order.operation_id.op_job_id.code if order.operation_id.op_job_id else "0"
             }
@@ -100,7 +101,6 @@ class PushWorkorder(AbstractModel):
             return False
         return True
 
-
     @api.multi
     def workerorder_push(self):
         domain = [('sent', '=', False)]
@@ -114,8 +114,7 @@ class PushWorkorder(AbstractModel):
             connections = master.connection_ids.filtered(lambda r: r.protocol == 'http')
             if not connections:
                 continue
-            url = ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_WROKORDERS_API) for connect in connections][0]
+            url = \
+            ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_WROKORDERS_API) for connect in connections][0]
             ret = self._post_workorder_to_masterpc(url, need_send_orders)
         return True
-
-

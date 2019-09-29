@@ -39,13 +39,13 @@ from odoo.addons.muk_fields_lobject import fields as lobject_fields
 
 _logger = logging.getLogger(__name__)
 
+
 class LObjectIrAttachment(models.Model):
-    
     _inherit = 'ir.attachment'
 
     store_lobject = lobject_fields.LargeObject(
         string="Data")
-    
+
     @api.model
     def force_storage(self):
         """Override force_storage without calling super,
@@ -55,7 +55,7 @@ class LObjectIrAttachment(models.Model):
         for attach in self.search(['|', ['res_field', '=', False], ['res_field', '!=', False]]):
             attach.write({'datas': attach.datas})
         return True
-    
+
     @api.depends('store_fname', 'db_datas', 'store_lobject')
     def _compute_datas(self):
         bin_size = self._context.get('bin_size')
@@ -67,7 +67,7 @@ class LObjectIrAttachment(models.Model):
                     attach.datas = base64.b64encode(attach.store_lobject)
             else:
                 super(LObjectIrAttachment, attach)._compute_datas()
-        
+
     def _inverse_datas(self):
         location = self._storage()
         for attach in self:

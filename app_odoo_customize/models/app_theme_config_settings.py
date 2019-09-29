@@ -24,7 +24,8 @@ class AppThemeConfigSettings(models.TransientModel):
     app_show_enterprise = fields.Boolean('Show Enterprise Tag', help=u"Uncheck to hide the Enterprise tag")
     app_show_share = fields.Boolean('Show Share Dashboard', help=u"Uncheck to hide the Odoo Share Dashboard")
     app_show_poweredby = fields.Boolean('Show Powered by SATURN', help=u"Uncheck to hide the Powered by text")
-    app_stop_subscribe = fields.Boolean('Stop Odoo Subscribe(Performance Improve)', help=u"Check to stop Odoo Subscribe function")
+    app_stop_subscribe = fields.Boolean('Stop Odoo Subscribe(Performance Improve)',
+                                        help=u"Check to stop Odoo Subscribe function")
 
     app_documentation_url = fields.Char('Documentation Url')
     app_documentation_dev_url = fields.Char('Developer Documentation Url')
@@ -49,7 +50,8 @@ class AppThemeConfigSettings(models.TransientModel):
         app_show_lang = True if ir_config.sudo().get_param('app_show_lang') == "True" else False
         app_show_debug = True if ir_config.sudo().get_param('app_show_debug') == "True" else False
         app_show_documentation = True if ir_config.sudo().get_param('app_show_documentation') == "True" else False
-        app_show_documentation_dev = True if ir_config.sudo().get_param('app_show_documentation_dev') == "True" else False
+        app_show_documentation_dev = True if ir_config.sudo().get_param(
+            'app_show_documentation_dev') == "True" else False
         app_show_support = True if ir_config.sudo().get_param('app_show_support') == "True" else False
         app_show_account = True if ir_config.sudo().get_param('app_show_account') == "True" else False
         app_show_enterprise = True if ir_config.sudo().get_param('app_show_enterprise') == "True" else False
@@ -58,9 +60,9 @@ class AppThemeConfigSettings(models.TransientModel):
         app_stop_subscribe = True if ir_config.sudo().get_param('app_stop_subscribe') == "True" else False
 
         app_documentation_url = ir_config.sudo().get_param('app_documentation_url',
-                                                    default='http://www.sunpop.cn/documentation/user/10.0/en/index.html')
+                                                           default='http://www.sunpop.cn/documentation/user/10.0/en/index.html')
         app_documentation_dev_url = ir_config.sudo().get_param('app_documentation_dev_url',
-                                                        default='http://www.sunpop.cn/documentation/10.0/index.html')
+                                                               default='http://www.sunpop.cn/documentation/10.0/index.html')
         app_support_url = ir_config.sudo().get_param('app_support_url', default='http://www.sunpop.cn/trial/')
         app_account_title = ir_config.sudo().get_param('app_account_title', default='My Online Account')
         app_account_url = ir_config.sudo().get_param('app_account_url', default='http://www.sunpop.cn/my-account/')
@@ -76,7 +78,7 @@ class AppThemeConfigSettings(models.TransientModel):
             app_show_share=app_show_share,
             app_show_poweredby=app_show_poweredby,
             app_stop_subscribe=app_stop_subscribe,
-            
+
             app_documentation_url=app_documentation_url,
             app_documentation_dev_url=app_documentation_dev_url,
             app_support_url=app_support_url,
@@ -121,7 +123,7 @@ class AppThemeConfigSettings(models.TransientModel):
             ['sale.order', ],
         ]
         try:
-            for line in to_removes :
+            for line in to_removes:
                 obj_name = line[0]
                 obj = self.pool.get(obj_name)
                 if obj and obj._table_exist:
@@ -146,7 +148,7 @@ class AppThemeConfigSettings(models.TransientModel):
             ['product.template', ],
         ]
         try:
-            for line in to_removes :
+            for line in to_removes:
                 obj_name = line[0]
                 obj = self.pool.get(obj_name)
                 if obj and obj._table_exist:
@@ -171,7 +173,7 @@ class AppThemeConfigSettings(models.TransientModel):
             ['product.attribute', ],
         ]
         try:
-            for line in to_removes :
+            for line in to_removes:
                 obj_name = line[0]
                 obj = self.pool.get(obj_name)
                 if obj and obj._table_exist:
@@ -189,7 +191,7 @@ class AppThemeConfigSettings(models.TransientModel):
             ['pos.order', ],
         ]
         try:
-            for line in to_removes :
+            for line in to_removes:
                 obj_name = line[0]
                 obj = self.pool.get(obj_name)
                 if obj and obj._table_exist:
@@ -217,7 +219,7 @@ class AppThemeConfigSettings(models.TransientModel):
             ['purchase.requisition', ],
         ]
         try:
-            for line in to_removes :
+            for line in to_removes:
                 obj_name = line[0]
                 obj = self.pool.get(obj_name)
                 if obj and obj._table_exist:
@@ -248,7 +250,7 @@ class AppThemeConfigSettings(models.TransientModel):
             ['change.production.qty', ],
         ]
         try:
-            for line in to_removes :
+            for line in to_removes:
                 obj_name = line[0]
                 obj = self.pool.get(obj_name)
                 if obj and obj._table_exist:
@@ -274,7 +276,7 @@ class AppThemeConfigSettings(models.TransientModel):
             ['mrp.bom', ],
         ]
         try:
-            for line in to_removes :
+            for line in to_removes:
                 obj_name = line[0]
                 obj = self.pool.get(obj_name)
                 if obj and obj._table_exist:
@@ -307,7 +309,7 @@ class AppThemeConfigSettings(models.TransientModel):
             # 为优化，增加处理
             self._cr.execute("update stock_move set split_from=NULL;")
             self._cr.execute("update stock_move set origin_returned_move_id=NULL;")
-            for line in to_removes :
+            for line in to_removes:
                 obj_name = line[0]
                 obj = self.pool.get(obj_name)
                 if obj and obj._table_exist:
@@ -369,7 +371,7 @@ class AppThemeConfigSettings(models.TransientModel):
             ['account.move', ],
         ]
         try:
-            for line in to_removes :
+            for line in to_removes:
                 obj_name = line[0]
                 obj = self.pool.get(obj_name)
                 if obj and obj._table_exist:
@@ -425,7 +427,7 @@ class AppThemeConfigSettings(models.TransientModel):
             ['mail.followers', ],
         ]
         try:
-            for line in to_removes :
+            for line in to_removes:
                 obj_name = line[0]
                 obj = self.pool.get(obj_name)
                 if obj and obj._table_exist:
@@ -443,7 +445,7 @@ class AppThemeConfigSettings(models.TransientModel):
             ['wkf.instance', ],
         ]
         try:
-            for line in to_removes :
+            for line in to_removes:
                 obj_name = line[0]
                 obj = self.pool.get(obj_name)
                 if obj and obj._table_exist:

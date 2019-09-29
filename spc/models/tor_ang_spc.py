@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # from __future__ import unicode_literals
 from __future__ import division
-from scipy.stats import norm, dweibull, weibull_max, weibull_min, invweibull,exponweib
+from scipy.stats import norm, dweibull, weibull_max, weibull_min, invweibull, exponweib
 from odoo import models, fields, api
-from odoo.exceptions import UserError,ValidationError
+from odoo.exceptions import UserError, ValidationError
 from pyecharts import Overlap, Bar, Line, Grid
 import pyecharts
 from pandas import DataFrame
@@ -18,6 +18,7 @@ from ..utils import spc
 DEFAULT_LIMIT = 5000
 MIN_LIMIT = 1000
 
+
 class TorAngSPCReport(models.TransientModel):
     _name = "ta.spc.wizard"
     _description = "Result Statistics Process Control"
@@ -27,14 +28,17 @@ class TorAngSPCReport(models.TransientModel):
     vehicle_id = fields.Many2one('product.product', string='Vehicle Type', domain=[('sa_type', '=', 'vehicle')])
     vehicle_code = fields.Char(string='Vehicle Type Code(support Fuzzy search,case-insensitive)')
     screw_id = fields.Many2one('product.product', string='Screw Type', domain=[('sa_type', '=', 'screw')])
-    gun_id = fields.Many2one('maintenance.equipment',string='Tightening Gun', domain=lambda self: [('category_id.id', '=', self.env.ref('sa_base.equipment_Gun').id)])
+    gun_id = fields.Many2one('maintenance.equipment', string='Tightening Gun',
+                             domain=lambda self: [('category_id.id', '=', self.env.ref('sa_base.equipment_Gun').id)])
     assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line')
     limit = fields.Integer('Query Limit', default=DEFAULT_LIMIT)
     spc_target = fields.Selection([('torque', 'Torque'), ('angle', 'Angle')], string='统计对象', default='torque')
 
     normal_dist = fields.Text(string='Normal Distribution', store=False, compute='_compute_dist')
     weibull_dist = fields.Text(string='Weibull Distribution', store=False, compute='_compute_dist')
-    weibull_dist_method = fields.Selection([('double', 'Double Weibull'),('inverted', 'Inverted'), ('exponential', 'Exponential'),('min', 'Min Weibull'), ('max', 'Max Weibull')], string='韦伯分布统计方法', default='min')
+    weibull_dist_method = fields.Selection(
+        [('double', 'Double Weibull'), ('inverted', 'Inverted'), ('exponential', 'Exponential'), ('min', 'Min Weibull'),
+         ('max', 'Max Weibull')], string='韦伯分布统计方法', default='min')
     scatter = fields.Text(string='Scatter', store=False, compute='_compute_dist')
 
     step = fields.Selection([('day', 'Day'), ('month', 'Month'), ('week', 'Week')], default='day')
@@ -51,7 +55,8 @@ class TorAngSPCReport(models.TransientModel):
     @api.onchange('screw_id', 'spc_target')
     def _onchange_usl_lsl(self):
         self.ensure_one()
-        qcp_id = self.env['sa.quality.point'].sudo().search([('bom_line_id.product_id', '=', self.screw_id.id)], limit=1)
+        qcp_id = self.env['sa.quality.point'].sudo().search([('bom_line_id.product_id', '=', self.screw_id.id)],
+                                                            limit=1)
         if not qcp_id:
             return
         if self.spc_target == 'torque':
@@ -70,11 +75,12 @@ class TorAngSPCReport(models.TransientModel):
                 return
             mean = np.mean(data)
             std = np.std(data)
-            self.normal_dist, self.cmk, self.cpk = self._get_normal_dist(data=data, mean=mean, std=std, lsl=self.lsl, usl=self.usl)
+            self.normal_dist, self.cmk, self.cpk = self._get_normal_dist(data=data, mean=mean, std=std, lsl=self.lsl,
+                                                                         usl=self.usl)
             scale_parameter = self.env['ir.config_parameter'].sudo().get_param('weibull.scale', default=1.0)
             shape_parameter = self.env['ir.config_parameter'].sudo().get_param('weibull.shape', default=5.0)
             self.weibull_dist = self._get_weibull_dist(len(data), mean=mean, std=std,
-                                                        scale=scale_parameter, shape=shape_parameter)
+                                                       scale=scale_parameter, shape=shape_parameter)
 
             self.scatter = self._get_scatter(data)
 
@@ -139,20 +145,22 @@ class TorAngSPCReport(models.TransientModel):
         t = data.get_values()
 
         x_bar = x_line = np.around(np.arange(mean - std * 3.0, mean + std * 4.0, STEP), decimals=3)
-        y_line = np.around(norm_data.pdf(x_line),decimals=3)
+        y_line = np.around(norm_data.pdf(x_line), decimals=3)
         # x_bar = np.arange(mean - std * 3.0, mean + std * 4.0, STEP)
         _y_bar, bin_edges = np.histogram(t, range=(mean - std * 3.0, mean + std * 4.0), bins=len(x_bar))
         vfunc = np.vectorize(lambda x: x / length, otypes=[float])
         y_bar = np.around(vfunc(_y_bar), decimals=3)
 
         bar = Bar(title=u"Normal Distribution({0})".format(self.spc_target), title_pos="50%", width=960, height=1440)
-        bar.add(u'{0}'.format(self.spc_target), bin_edges[1:], y_bar, legend_orient="vertical", legend_top="45%", legend_pos='50%',
+        bar.add(u'{0}'.format(self.spc_target), bin_edges[1:], y_bar, legend_orient="vertical", legend_top="45%",
+                legend_pos='50%',
                 xaxis_name=u'{0}'.format(self.spc_target), yaxis_name_gap=100, label_pos='inside', is_label_show=True,
                 label_color=['#a6c84c', '#ffa022', '#46bee9'],
                 # bar_category_gap=0, ### 直方图
                 yaxis_name=u'概率(Probability)')
         line = Line(width=960, height=1440)
-        line.add(u'{0}'.format(self.spc_target).format(self.spc_target), x_line, y_line, xaxis_name=u'{0}'.format(self.spc_target),
+        line.add(u'{0}'.format(self.spc_target).format(self.spc_target), x_line, y_line,
+                 xaxis_name=u'{0}'.format(self.spc_target),
                  yaxis_name=u'概率(Probability)', mark_line_valuedim=['x', 'x'], mark_line=['min', 'max'],
                  line_color='rgba(0 ,255 ,127,0.5)', is_legend_show=False,
                  is_smooth=True, line_width=2, is_label_show=False,
@@ -168,7 +176,7 @@ class TorAngSPCReport(models.TransientModel):
         pyecharts.configure(force_js_embed=True)
         return overlap.render_embed(), CMK, CPK
 
-    def _get_scatter(self,  data):
+    def _get_scatter(self, data):
         qty = len(data)
         x_line = np.arange(1, qty + 1, 1)
         y_line = data
@@ -219,7 +227,8 @@ class TorAngSPCReport(models.TransientModel):
         if self.query_date_to:
             domain += [('control_date', '<=', self.query_date_to)]
         if self.vehicle_code:
-            product_id = self.env['product.product'].sudo().search([('vehicle_type_code', 'ilike', self.vehicle_code)], limit=1)
+            product_id = self.env['product.product'].sudo().search([('default_code', 'ilike', self.vehicle_code)],
+                                                                   limit=1)
             if product_id:
                 domain += [('product_id', '=', product_id.id)]
         if self.vehicle_id:
@@ -313,5 +322,7 @@ class TorAngSPCReport(models.TransientModel):
     @api.multi
     def button_today(self):
         timezone = pytz.timezone(self._context.get('tz'))
-        self.query_date_from = timezone.localize(datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)).astimezone(tz=pytz.utc)
-        self.query_date_to = timezone.localize(datetime.datetime.now().replace(hour=23, minute=59, second=59, microsecond=999999)).astimezone(tz=pytz.utc)
+        self.query_date_from = timezone.localize(
+            datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)).astimezone(tz=pytz.utc)
+        self.query_date_to = timezone.localize(
+            datetime.datetime.now().replace(hour=23, minute=59, second=59, microsecond=999999)).astimezone(tz=pytz.utc)

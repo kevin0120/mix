@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields,api, _
+from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 from reportlab.graphics.barcode import createBarcodeDrawing
 import qrcode
+
 
 class Report(models.Model):
     _inherit = "report"

@@ -34,13 +34,14 @@ from odoo.exceptions import AccessError
 
 _logger = logging.getLogger(__name__)
 
+
 class DocumentController(http.Controller):
 
     @http.route(['/dms/checkout/',
-        '/dms/checkout/<int:id>',
-        '/dms/checkout/<int:id>/<string:filename>',
-        '/dms/checkout/<int:id>-<string:unique>',
-        '/dms/checkout/<int:id>-<string:unique>/<string:filename>'], type='http', auth="user")
+                 '/dms/checkout/<int:id>',
+                 '/dms/checkout/<int:id>/<string:filename>',
+                 '/dms/checkout/<int:id>-<string:unique>',
+                 '/dms/checkout/<int:id>-<string:unique>/<string:filename>'], type='http', auth="user")
     def checkout(self, id=None, filename=None, unique=None, data=None, token=None):
         status, headers, content = request.registry['ir.http'].binary_content(
             model='muk_dms.file', id=id, field='content', unique=unique,

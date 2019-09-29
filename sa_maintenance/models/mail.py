@@ -2,6 +2,7 @@
 
 from odoo import models, fields, api, _
 
+
 class MailMail(models.Model):
     """ Model holding RFC2822 email messages to send. This model also provides
         facilities to queue and send new email messages.  """

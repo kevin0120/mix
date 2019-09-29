@@ -152,7 +152,7 @@ msgstr "同样的车型代码只能分配给一种车型！"
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_connection_active
 #: model:ir.model.fields,field_description:sa_base.field_mrp_assemblyline_active
 #: model:ir.model.fields,field_description:sa_base.field_mrp_bom_line_active
-#: model:ir.model.fields,field_description:sa_base.field_mrp_worksegament_active
+#: model:ir.model.fields,field_description:sa_base.field_mrp_worksection_active
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_active
 msgid "Active"
 msgstr "有效"
@@ -435,7 +435,7 @@ msgstr "控制器ids domain"
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_connection_create_uid
 #: model:ir.model.fields,field_description:sa_base.field_mrp_assemblyline_create_uid
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_group_create_uid
-#: model:ir.model.fields,field_description:sa_base.field_mrp_worksegament_create_uid
+#: model:ir.model.fields,field_description:sa_base.field_mrp_worksection_create_uid
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_create_uid
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_group_create_uid
 #: model:ir.model.fields,field_description:sa_base.field_sa_config_settings_create_uid
@@ -448,7 +448,7 @@ msgstr "创建人"
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_connection_create_date
 #: model:ir.model.fields,field_description:sa_base.field_mrp_assemblyline_create_date
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_group_create_date
-#: model:ir.model.fields,field_description:sa_base.field_mrp_worksegament_create_date
+#: model:ir.model.fields,field_description:sa_base.field_mrp_worksection_create_date
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_create_date
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_group_create_date
 #: model:ir.model.fields,field_description:sa_base.field_sa_config_settings_create_date
@@ -515,7 +515,7 @@ msgstr "LongPIN显示值"
 #: model:ir.model.fields,field_description:sa_base.field_mrp_assemblyline_display_name
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_group_display_name
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_display_name
-#: model:ir.model.fields,field_description:sa_base.field_mrp_worksegament_display_name
+#: model:ir.model.fields,field_description:sa_base.field_mrp_worksection_display_name
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_display_name
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_group_display_name
 #: model:ir.model.fields,field_description:sa_base.field_sa_config_settings_display_name
@@ -665,7 +665,7 @@ msgstr "人机交互(HMI)"
 #: model:ir.model.fields,field_description:sa_base.field_mrp_assemblyline_id
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_group_id
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_id
-#: model:ir.model.fields,field_description:sa_base.field_mrp_worksegament_id
+#: model:ir.model.fields,field_description:sa_base.field_mrp_worksection_id
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_group_id
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_id
 #: model:ir.model.fields,field_description:sa_base.field_sa_config_settings_id
@@ -685,7 +685,7 @@ msgstr "IP"
 #. module: sa_base
 #: model:ir.model.fields,help:sa_base.field_mrp_assemblyline_active
 #: model:ir.model.fields,help:sa_base.field_mrp_bom_line_active
-#: model:ir.model.fields,help:sa_base.field_mrp_worksegament_active
+#: model:ir.model.fields,help:sa_base.field_mrp_worksection_active
 #: model:ir.model.fields,help:sa_base.field_operation_point_active
 msgid "If the active field is set to False, it will allow you to hide the bills of material without removing it."
 msgstr "如果去掉“启用”的勾，可以不用删除就隐藏物料清单"
@@ -738,7 +738,7 @@ msgstr "拧紧组关键点数不能小于相关拧紧关键点的数量"
 #: model:ir.model.fields,field_description:sa_base.field_mrp_assemblyline___last_update
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_group___last_update
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu___last_update
-#: model:ir.model.fields,field_description:sa_base.field_mrp_worksegament___last_update
+#: model:ir.model.fields,field_description:sa_base.field_mrp_worksection___last_update
 #: model:ir.model.fields,field_description:sa_base.field_operation_point___last_update
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_group___last_update
 #: model:ir.model.fields,field_description:sa_base.field_sa_config_settings___last_update
@@ -751,7 +751,7 @@ msgstr "最后修改日"
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_connection_write_uid
 #: model:ir.model.fields,field_description:sa_base.field_mrp_assemblyline_write_uid
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_group_write_uid
-#: model:ir.model.fields,field_description:sa_base.field_mrp_worksegament_write_uid
+#: model:ir.model.fields,field_description:sa_base.field_mrp_worksection_write_uid
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_group_write_uid
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_write_uid
 #: model:ir.model.fields,field_description:sa_base.field_sa_config_settings_write_uid
@@ -764,7 +764,7 @@ msgstr "最后更新人"
 #: model:ir.model.fields,field_description:sa_base.field_maintenance_equipment_connection_write_date
 #: model:ir.model.fields,field_description:sa_base.field_mrp_assemblyline_write_date
 #: model:ir.model.fields,field_description:sa_base.field_mrp_routing_group_write_date
-#: model:ir.model.fields,field_description:sa_base.field_mrp_worksegament_write_date
+#: model:ir.model.fields,field_description:sa_base.field_mrp_worksection_write_date
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_group_write_date
 #: model:ir.model.fields,field_description:sa_base.field_operation_point_write_date
 #: model:ir.model.fields,field_description:sa_base.field_sa_config_settings_write_date
@@ -919,7 +919,7 @@ msgid "Only one code per Work Assembly Line is allowed"
 msgstr "Only one code per Work Assembly Line is allowed"
 
 #. module: sa_base
-#: sql_constraint:mrp.worksegament:0
+#: sql_constraint:mrp.worksection:0
 msgid "Only one code per Work Segment is allowed"
 msgstr "Only one code per Work Segment is allowed"
 
@@ -1142,7 +1142,7 @@ msgid "Quality Point"
 msgstr "质量点"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_product_product_qp_count
+#: model:ir.model.fields,field_description:sa_base.field_product_product_qcp_count
 msgid "Quality Point Count"
 msgstr "质量控制点计数"
 
@@ -1169,7 +1169,7 @@ msgstr "重新排序"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_assemblyline_code
-#: model:ir.model.fields,field_description:sa_base.field_mrp_worksegament_code
+#: model:ir.model.fields,field_description:sa_base.field_mrp_worksection_code
 msgid "Reference"
 msgstr "参照"
 
@@ -1319,8 +1319,8 @@ msgid "Search for mrp worksegment"
 msgstr "MRP工段的搜索"
 
 #. module: sa_base
-#: model:ir.model.fields,field_description:sa_base.field_mrp_worksegament_name
-msgid "Segament"
+#: model:ir.model.fields,field_description:sa_base.field_mrp_worksection_name
+msgid "Section"
 msgstr "工段"
 
 #. module: sa_base
@@ -1509,7 +1509,7 @@ msgstr "工作区域"
 
 #. module: sa_base
 #: model:ir.model,name:sa_base.model_mrp_assemblyline
-#: model:ir.model.fields,field_description:sa_base.field_mrp_worksegament_workassembly_id
+#: model:ir.model.fields,field_description:sa_base.field_mrp_worksection_workassembly_id
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_workassembly_form_view
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_workassembly_tree_view
 msgid "Work Assembly Line"
@@ -1558,8 +1558,8 @@ msgstr "工作中心使用情况"
 
 #. module: sa_base
 #: model:ir.actions.act_window,name:sa_base.sa_mrp_workcenter_action
-#: model:ir.model.fields,field_description:sa_base.field_mrp_worksegament_workcenter_count
-#: model:ir.model.fields,field_description:sa_base.field_mrp_worksegament_workcenter_ids
+#: model:ir.model.fields,field_description:sa_base.field_mrp_worksection_workcenter_count
+#: model:ir.model.fields,field_description:sa_base.field_mrp_worksection_workcenter_ids
 #: model:ir.ui.menu,name:sa_base.menu_mrp_workcenter_form_action
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_worksegment_form_view
 msgid "Work Centers"
@@ -1580,7 +1580,7 @@ msgid "Work Order"
 msgstr "工单"
 
 #. module: sa_base
-#: model:ir.model,name:sa_base.model_mrp_worksegament
+#: model:ir.model,name:sa_base.model_mrp_worksection
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_worksegment_form_view
 #: model:ir.ui.view,arch_db:sa_base.sa_mrp_worksegment_tree_view
 #: model:ir.ui.view,arch_db:sa_base.sa_view_mrp_workcenter_search_inherit

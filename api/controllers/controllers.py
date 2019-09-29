@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import http,SUPERUSER_ID,api
+from odoo import http, SUPERUSER_ID, api
 from odoo.http import request, Response
 
 from api_data import api_data

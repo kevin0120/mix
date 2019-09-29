@@ -27,25 +27,25 @@ from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
 
-class DocumentJob(models.Model):
 
+class DocumentJob(models.Model):
     _inherit = 'hr.job'
 
-    #----------------------------------------------------------
+    # ----------------------------------------------------------
     # Database
-    #----------------------------------------------------------
-    
+    # ----------------------------------------------------------
+
     groups = fields.Many2many(
         'muk_dms_access.groups',
         'muk_dms_groups_job_rel',
         'jid',
         'gid',
         string='Groups')
-    
-    #----------------------------------------------------------
+
+    # ----------------------------------------------------------
     # Create, Update, Delete
-    #----------------------------------------------------------
-    
+    # ----------------------------------------------------------
+
     @api.multi
     def write(self, vals):
         result = super(DocumentDepartment, self).write(vals)
@@ -54,7 +54,7 @@ class DocumentJob(models.Model):
                 for group in record.groups:
                     group.trigger_computation(['users'])
         return result
-    
+
     @api.multi
     def unlink(self):
         groups = record.env['muk_dms_access.groups']

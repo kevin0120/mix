@@ -19,7 +19,6 @@ class MailMessage(models.Model):
 
 
 class MailComposer(models.TransientModel):
-
     _inherit = 'mail.compose.message'
 
     @api.multi

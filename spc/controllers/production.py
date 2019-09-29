@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from odoo import http, fields,api, SUPERUSER_ID
+from odoo import http, fields, api, SUPERUSER_ID
 import json
-from odoo.http import request,Response
+from odoo.http import request, Response
 from dateutil import parser
 import time
 
@@ -11,12 +11,13 @@ NORMAL_RESULT_FIELDS_READ = ['vin', 'id', 'knr', 'product_id', 'assembly_line_id
 
 
 class SaConfiguration(http.Controller):
-    @http.route(['/api/v1/mrp.productions', '/api/v1/mrp.productions/<string:vin>'], type='http', methods=['GET', 'OPTIONS'], auth='none', cors='*', csrf=False)
+    @http.route(['/api/v1/mrp.productions', '/api/v1/mrp.productions/<string:vin>'], type='http',
+                methods=['GET', 'OPTIONS'], auth='none', cors='*', csrf=False)
     def _get_productions(self, vin=None, **kw):
         domain = []
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         if vin:
-            production_ids = env['mrp.production'].search([('vin', '=',vin)])
+            production_ids = env['mrp.production'].search([('vin', '=', vin)])
         else:
             if 'vins' in kw:
                 vins = kw['vins'].split(',')
@@ -42,7 +43,7 @@ class SaConfiguration(http.Controller):
         body = json.dumps(ret)
         return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=200)
 
-    @http.route('/api/v1/mrp.productions', type='json', methods=['POST','OPTIONS'], auth='none', cors='*', csrf=False)
+    @http.route('/api/v1/mrp.productions', type='json', methods=['POST', 'OPTIONS'], auth='none', cors='*', csrf=False)
     def assemble_mo_create(self):
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         vals = request.jsonrequest
@@ -53,14 +54,15 @@ class SaConfiguration(http.Controller):
             return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
                             status=405)
         mo_name = u'{0}--V001--{1}-{2}-{3}={4}'.format(
-            vals['equipment_name'],vals['factory_name'],vals['year'],vals['pin'],vals['pin_check_code'])
+            vals['equipment_name'], vals['factory_name'], vals['year'], vals['pin'], vals['pin_check_code'])
 
         count = env['mrp.production'].search_count(
             [('name', '=', mo_name)])
         if count > 0:
             # MO已存在
             body = json.dumps({"msg": "MO name " + mo_name + " already exists"})
-            return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=405)
+            return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
+                            status=405)
 
         count = env['mrp.production'].search_count(
             [('vin', '=', vin)])
@@ -77,11 +79,11 @@ class SaConfiguration(http.Controller):
                             status=405)
         vals.pop('model')
         records = env['product.product'].search(
-            [('vehicle_type_code', 'ilike', vechile_code)], limit=1)
+            [('default_code', 'ilike', vechile_code)], limit=1)
 
         if not records:
             # 找不到对应车型
-            body= json.dumps({"msg":"vechile model " + vechile_code + " not found"})
+            body = json.dumps({"msg": "vechile model " + vechile_code + " not found"})
             return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
                             status=400)
 
@@ -132,7 +134,6 @@ class SaConfiguration(http.Controller):
             body = json.dumps({"msg": "create MO failed"})
             return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
                             status=400)
-
 
         # 创建MO成功
         vals = {

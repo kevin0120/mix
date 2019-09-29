@@ -31,15 +31,15 @@ from odoo.tools import ustr, human_size
 
 _logger = logging.getLogger(__name__)
 
+
 class LargeObject(fields.Field):
-    
     type = 'lobject'
     column_type = ('oid', 'oid')
     _slots = {
-        'prefetch': False,              
-        'context_dependent': True,      
+        'prefetch': False,
+        'context_dependent': True,
     }
-    
+
     def convert_to_column(self, value, record, values=None):
         oid = record.with_context({'oid': True})[self.name]
         if oid:
@@ -77,7 +77,7 @@ class LargeObject(fields.Field):
             else:
                 return lobject.read()
         return False
-    
+
     def convert_to_export(self, value, record):
         if value:
             lobject = record.env.cr._cnx.lobject(value, 'rb')

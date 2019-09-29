@@ -32,8 +32,8 @@
         They are useful with data values too large to be
         manipulated conveniently as a whole.
     """,
-    "version": '10.0.1.0.1',   
-    "category": 'Extra Tools',   
+    "version": '10.0.1.0.1',
+    "category": 'Extra Tools',
     "license": "AGPL-3",
     "website": "http://www.mukit.at",
     "author": "MuK IT",
@@ -60,5 +60,5 @@
     "auto_install": True,
     "application": False,
     "installable": True,
-    
+
 }

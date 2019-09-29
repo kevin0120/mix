@@ -23,7 +23,8 @@ class MrpProduction(models.Model):
     @api.multi
     def _compute_alert_count(self):
         # TODO: Check if we include those in the work orders
-        alert_data = self.env['sa.quality.alert'].read_group([('production_id', 'in', self.ids)], ['production_id'], ['production_id'])
+        alert_data = self.env['sa.quality.alert'].read_group([('production_id', 'in', self.ids)], ['production_id'],
+                                                             ['production_id'])
         result = dict((data['production_id'][0], data['production_id_count']) for data in alert_data)
         for order in self:
             order.alert_count = result.get(order.id, 0)
@@ -56,7 +57,8 @@ class MrpProduction(models.Model):
         action_rec = self.env.ref('quality.quality_alert_action_check')
         if action_rec:
             action = action_rec.read([])[0]
-            action['views'] = [(view_id, mode) for (view_id, mode) in action['views'] if mode == 'form'] or action['views']
+            action['views'] = [(view_id, mode) for (view_id, mode) in action['views'] if mode == 'form'] or action[
+                'views']
             action['context'] = {
                 'default_product_tmpl_id': self.product_id.product_tmpl_id.id,
                 'default_product_id': self.product_id.id,
@@ -74,18 +76,19 @@ class MrpProduction(models.Model):
     @api.multi
     def _generate_moves(self):
         for production in self:
-            points = self.env['sa.quality.point'].search([('workcenter_id', '=', False), 
-                                                           ('picking_type_id', '=', production.picking_type_id.id),
-                                                           '|', ('product_id', '=', production.product_id.id), 
-                                                           '&', ('product_id', '=', False), ('product_tmpl_id', '=', production.product_id.product_tmpl_id.id)])
+            points = self.env['sa.quality.point'].search([('workcenter_id', '=', False),
+                                                          ('picking_type_id', '=', production.picking_type_id.id),
+                                                          '|', ('product_id', '=', production.product_id.id),
+                                                          '&', ('product_id', '=', False), ('product_tmpl_id', '=',
+                                                                                            production.product_id.product_tmpl_id.id)])
             for point in points:
                 if point.check_execute_now():
                     self.env['sa.quality.check'].create({'workorder_id': False,
-                                                      'production_id': production.id,
-                                                      'point_id': point.id,
-                                                      'team_id': point.team_id.id,
-                                                      'product_id': production.product_id.id,
-                                                     })
+                                                         'production_id': production.id,
+                                                         'point_id': point.id,
+                                                         'team_id': point.team_id.id,
+                                                         'product_id': production.product_id.id,
+                                                         })
         return super(MrpProduction, self)._generate_moves()
 
     @api.multi

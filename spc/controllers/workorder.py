@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from odoo import http, fields,api, SUPERUSER_ID
+from odoo import http, fields, api, SUPERUSER_ID
 import json
-from odoo.http import request,Response
+from odoo.http import request, Response
 from urlparse import urljoin
 import logging
 import validators
@@ -20,9 +20,11 @@ def str_time_to_rfc3339(s_time):
     sp = s_time.split(' ')
     return sp[0] + 'T' + sp[1] + 'Z'
 
+
 class ApiMrpWorkorder(http.Controller):
 
-    @http.route(['/api/v1/mrp.workorders/<int:order_id>', '/api/v1/mrp.workorders'], type='http', methods=['GET'], auth='none', cors='*', csrf=False)
+    @http.route(['/api/v1/mrp.workorders/<int:order_id>', '/api/v1/mrp.workorders'], type='http', methods=['GET'],
+                auth='none', cors='*', csrf=False)
     def _get_workorders(self, order_id=None, **kw):
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         workcenter_id = None
@@ -43,8 +45,8 @@ class ApiMrpWorkorder(http.Controller):
                 for consu in order.consu_bom_line_ids:
                     # 定位消耗品的qcp
                     _qcps = env['sa.quality.point'].search([('bom_line_id', '=', consu.bom_line_id.id),
-                                                         ('operation_id', '=', order.operation_id.id)],
-                                                        limit=1)
+                                                            ('operation_id', '=', order.operation_id.id)],
+                                                           limit=1)
 
                     _consumes.append({
                         "sequence": consu.bom_line_id.operation_point_id.sequence,
@@ -53,7 +55,7 @@ class ApiMrpWorkorder(http.Controller):
                         'offset_x': consu.bom_line_id.operation_point_id.x_offset,
                         'offset_y': consu.bom_line_id.operation_point_id.y_offset,
                         "pset": consu.bom_line_id.program_id.code,
-                        "nut_no": consu.product_id.screw_type_code,
+                        "nut_no": consu.product_id.default_code,
                         "gun_sn": consu.bom_line_id.gun_id.serial_no,
                         "controller_sn": consu.bom_line_id.controller_id.serial_no,
                         'tolerance_min': _qcps.tolerance_min if _qcps else 0.0,
@@ -89,9 +91,9 @@ class ApiMrpWorkorder(http.Controller):
                 'pin_check_code': order.production_id.pin_check_code,
                 'assembly_line': order.production_id.assembly_line_id.code,
                 'lnr': order.production_id.lnr,
-                # 'nut_no': order.consu_product_id.screw_type_code,
+                # 'nut_no': order.consu_product_id.default_code,
                 'consumes': _consumes,
-                'model': order.production_id.product_id.vehicle_type_code,
+                'model': order.production_id.product_id.default_code,
                 'update_time': str_time_to_rfc3339(order.production_date)
             }
             body = json.dumps(ret)
@@ -156,8 +158,8 @@ class ApiMrpWorkorder(http.Controller):
                 for consu in order.consu_bom_line_ids:
                     # 定位消耗品的qcp
                     _qcps = env['sa.quality.point'].search([('bom_line_id', '=', consu.bom_line_id.id),
-                                                         ('operation_id', '=', order.operation_id.id)],
-                                                        limit=1)
+                                                            ('operation_id', '=', order.operation_id.id)],
+                                                           limit=1)
 
                     _consumes.append({
                         "sequence": consu.bom_line_id.operation_point_id.sequence,
@@ -166,7 +168,7 @@ class ApiMrpWorkorder(http.Controller):
                         'offset_x': consu.bom_line_id.operation_point_id.x_offset,
                         'offset_y': consu.bom_line_id.operation_point_id.y_offset,
                         "pset": consu.bom_line_id.program_id.code,
-                        "nut_no": consu.product_id.screw_type_code,
+                        "nut_no": consu.product_id.default_code,
                         "gun_sn": consu.bom_line_id.gun_id.serial_no,
                         "controller_sn": consu.bom_line_id.controller_id.serial_no,
                         'tolerance_min': _qcps.tolerance_min if _qcps else 0.0,
@@ -202,9 +204,9 @@ class ApiMrpWorkorder(http.Controller):
                 'pin_check_code': order.production_id.pin_check_code,
                 'assembly_line': order.production_id.assembly_line_id.code,
                 'lnr': order.production_id.lnr,
-                # 'nut_no': order.consu_product_id.screw_type_code,
+                # 'nut_no': order.consu_product_id.default_code,
                 'consumes': _consumes,
-                'model': order.production_id.product_id.vehicle_type_code,
+                'model': order.production_id.product_id.default_code,
                 'update_time': str_time_to_rfc3339(order.production_date)
             })
         if len(_ret) == 0:
@@ -213,5 +215,3 @@ class ApiMrpWorkorder(http.Controller):
             return Response(body, status=404, headers=headers)
         body = json.dumps(_ret)
         return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=200)
-
-

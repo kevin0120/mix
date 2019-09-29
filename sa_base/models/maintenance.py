@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields,api, _
+from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 from odoo.osv import expression
 from validators import ip_address, ValidationFailure
@@ -28,9 +28,9 @@ class EquipmentConnection(models.Model):
     equipment_id = fields.Many2one('maintenance.equipment', string='Equipment')
 
     port = fields.Integer(string='port', default=0)
-    unitid = fields.Integer(string='Unit ID', help='Modbus need this ID for identification',default=0)
-    protocol = fields.Selection([('modbustcp','ModbusTCP'),('modbusrtu', 'ModbusRTU'),('http',"HTTP"),
-                                 ('rawtcp','TCP'),('rawudp','UDP')], string='Protocol')
+    unitid = fields.Integer(string='Unit ID', help='Modbus need this ID for identification', default=0)
+    protocol = fields.Selection([('modbustcp', 'ModbusTCP'), ('modbusrtu', 'ModbusRTU'), ('http', "HTTP"),
+                                 ('rawtcp', 'TCP'), ('rawudp', 'UDP')], string='Protocol')
 
     @api.multi
     def button_check_healthz(self):
@@ -82,6 +82,7 @@ class MaintenanceEquipmentCategory(models.Model):
     # code = fields.Char('code')
     name = fields.Char('Category Name', required=True)
 
+
 #     @api.multi
 #     def name_get(self):
 #         return [(cat.id, cat.name) for cat in self]
@@ -127,7 +128,8 @@ class MaintenanceEquipment(models.Model):
         for rec in self:
             rec.parent_id_domain = json.dumps([])
             if rec.category_id.id == self.env.ref('sa_base.equipment_Gun').id:
-                child_ids = self.env['maintenance.equipment'].sudo().search([('category_id', '=',self.env.ref('sa_base.equipment_screw_controller').id)])
+                child_ids = self.env['maintenance.equipment'].sudo().search(
+                    [('category_id', '=', self.env.ref('sa_base.equipment_screw_controller').id)])
                 rec.parent_id_domain = json.dumps([('id', 'in', child_ids.ids)])
             elif rec.category_id.id == self.env.ref('sa_base.equipment_screw_controller').id:
                 child_ids = self.env['maintenance.equipment'].sudo().search(
@@ -155,7 +157,8 @@ class MaintenanceEquipment(models.Model):
     def _compute_external_url(self):
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         for rec in self:
-            rec.external_url = urllib.quote(u'{0}/web#id={1}&view_type=form&model=maintenance.equipment'.format(base_url, rec.id))
+            rec.external_url = urllib.quote(
+                u'{0}/web#id={1}&view_type=form&model=maintenance.equipment'.format(base_url, rec.id))
 
     @api.multi
     def _compute_child_equipments_count(self):
@@ -205,7 +208,8 @@ class MaintenanceEquipment(models.Model):
             child = parents.pop()
             domain = ['|', ('name', operator, child), ('serial_no', operator, child)]
             if parents:
-                names_ids = super(MaintenanceEquipment, self).name_search(' / '.join(parents), args=args, operator='ilike', limit=limit)
+                names_ids = super(MaintenanceEquipment, self).name_search(' / '.join(parents), args=args,
+                                                                          operator='ilike', limit=limit)
                 equipment_ids = [name_id[0] for name_id in names_ids]
                 if operator in expression.NEGATIVE_TERM_OPERATORS:
                     equipments = self.search([('id', 'not in', equipment_ids)])
@@ -222,5 +226,3 @@ class MaintenanceEquipment(models.Model):
         else:
             equipments = self.search(args, limit=limit)
         return equipments.name_get()
-
-

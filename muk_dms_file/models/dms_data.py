@@ -35,9 +35,10 @@ from odoo.exceptions import ValidationError, AccessError, MissingError
 
 _logger = logging.getLogger(__name__)
 
-#----------------------------------------------------------
+
+# ----------------------------------------------------------
 # Static Functions
-#----------------------------------------------------------
+# ----------------------------------------------------------
 
 @contextmanager
 def opened_w_error(filename, mode="r"):
@@ -55,33 +56,34 @@ def opened_w_error(filename, mode="r"):
         finally:
             f.close()
 
+
 class SystemFileDataModel(models.Model):
     _name = 'muk_dms.data_system'
     _description = 'System File Data Model'
-    
+
     _inherit = 'muk_dms.data'
-    
-    #----------------------------------------------------------
+
+    # ----------------------------------------------------------
     # Database
-    #----------------------------------------------------------
-    
+    # ----------------------------------------------------------
+
     base_path = fields.Char(
         string="Base Path")
-    
+
     dms_path = fields.Char(
         string="Document Path")
-    
+
     checksum = fields.Char(
         string="Checksum",
         readonly=True)
-    
-    #----------------------------------------------------------
+
+    # ----------------------------------------------------------
     # Abstract Implementation
-    #----------------------------------------------------------
-    
+    # ----------------------------------------------------------
+
     def type(self):
         return "file"
-    
+
     def content(self):
         if self.env.context.get('bin_size'):
             file_path = self._build_path()
@@ -89,7 +91,7 @@ class SystemFileDataModel(models.Model):
         else:
             file_path = self._build_path()
             return self._read_file(file_path)
-    
+
     def update(self, values):
         if 'content' in values:
             file = base64.decodestring(values['content'])
@@ -111,12 +113,12 @@ class SystemFileDataModel(models.Model):
             self._move_file(old_file_path, new_file_path)
             self._remove_empty_directories(old_file_path)
             self.dms_path = values['dms_path']
-    
+
     def delete(self):
         file_path = self._build_path()
         self._delete_file(file_path)
         self._remove_empty_directories(file_path)
-    
+
     def update_checksum(self):
         for record in self:
             file_path = record._build_path()
@@ -127,11 +129,11 @@ class SystemFileDataModel(models.Model):
                 else:
                     file = file_handler.read()
                     record.checksum = record._compute_checksum(file)
-    
-    #----------------------------------------------------------
+
+    # ----------------------------------------------------------
     # File Helper
-    #----------------------------------------------------------
-    
+    # ----------------------------------------------------------
+
     def _build_path(self, base_path=None, dms_path=None):
         base_path = (base_path or self.base_path)
         dms_path = (dms_path or self.dms_path)
@@ -145,13 +147,13 @@ class SystemFileDataModel(models.Model):
                 if not (exc.errno == errno.EEXIST and os.path.isdir(path)):
                     _logger.error("Failed to create the necessary directories: " + str(exc))
                     raise AccessError(_("The System failed to create the necessary directories."))
-    
+
     def _compute_checksum(self, file):
         return hashlib.sha1(file).hexdigest()
-    
+
     def _check_file(self, file, checksum):
         return hashlib.sha1(file).hexdigest() == checksum
-    
+
     def _delete_file(self, file_path):
         try:
             os.remove(file_path)
@@ -159,7 +161,7 @@ class SystemFileDataModel(models.Model):
             if exc.errno != errno.ENOENT:
                 _logger.error("Failed to delete the file: " + str(exc))
                 raise AccessError(_("The System failed to delete the file."))
-            
+
     def _remove_empty_directories(self, file_path):
         try:
             os.removedirs(os.path.dirname(file_path))
@@ -167,7 +169,7 @@ class SystemFileDataModel(models.Model):
             if exc.errno != errno.ENOTEMPTY:
                 _logger.error("Failed to remove empty directories: " + str(exc))
                 raise AccessError(_("The System failed to delete a directory."))
-            
+
     def _move_file(self, old_file_path, new_file_path):
         try:
             shutil.move(old_file_path, new_file_path)
@@ -178,7 +180,7 @@ class SystemFileDataModel(models.Model):
             else:
                 _logger.error("Failed to move the file: " + str(exc))
                 raise AccessError(_("The System failed to rename the file."))
-    
+
     def _read_file(self, file_path):
         with opened_w_error(file_path, "rb") as (file_handler, exc):
             if exc:
@@ -192,10 +194,10 @@ class SystemFileDataModel(models.Model):
                 else:
                     _logger.error("Failed to read the file: The file has been altered outside of the system.")
                     raise ValidationError(_("The file is corrupted."))
-                
+
     def _read_size(self, file_path):
         return os.path.getsize(file_path)
-            
+
     def _write_file(self, file_path, file):
         with opened_w_error(file_path, "wb+") as (file_handler, exc):
             if exc:
@@ -203,5 +205,3 @@ class SystemFileDataModel(models.Model):
                 raise AccessError(_("The System failed to write the file."))
             else:
                 file_handler.write(file)
-            
-        

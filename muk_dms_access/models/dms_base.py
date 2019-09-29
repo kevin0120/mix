@@ -33,33 +33,35 @@ from odoo.exceptions import ValidationError, AccessError, UserError
 from odoo.addons.muk_dms.models import dms_base
 
 _logger = logging.getLogger(__name__)
-    
+
+
 class DMSAdvancedAccessModel(dms_base.DMSAbstractModel):
-    
     _inherit = 'muk_dms.access'
-    
-    #----------------------------------------------------------
+
+    # ----------------------------------------------------------
     # Database
-    #----------------------------------------------------------
-    
+    # ----------------------------------------------------------
+
     perm_access = fields.Boolean(
-        compute='_compute_perm_access', 
+        compute='_compute_perm_access',
         string="Access")
-    
+
     inherit_groups = fields.Boolean(
         string="Inherit Groups",
         default=True)
-    
-    #----------------------------------------------------------
+
+    # ----------------------------------------------------------
     # Function
-    #----------------------------------------------------------
-        
+    # ----------------------------------------------------------
+
     @api.model
     def _add_magic_fields(self):
         super(DMSAdvancedAccessModel, self)._add_magic_fields()
+
         def add(name, field):
             if name not in self._fields:
                 self._add_field(name, field)
+
         base, model = self._name.split(".")
         add('groups', fields.Many2many(
             _module=base,
@@ -75,8 +77,8 @@ class DMSAdvancedAccessModel(dms_base.DMSAbstractModel):
             relation='muk_groups_complete_%s_rel' % model,
             column1='aid',
             column2='gid',
-            string="Complete Groups", 
-            compute='_compute_groups', 
+            string="Complete Groups",
+            compute='_compute_groups',
             store=True,
             automatic=True))
 
@@ -85,7 +87,7 @@ class DMSAdvancedAccessModel(dms_base.DMSAbstractModel):
         if operation == 'access':
             return True
         return super(DMSAdvancedAccessModel, self).check_access_rights(operation, raise_exception)
-    
+
     @api.multi
     def check_access_rule(self, operation):
         if operation != 'access':
@@ -105,11 +107,11 @@ class DMSAdvancedAccessModel(dms_base.DMSAbstractModel):
             fetch = self.env.cr.fetchall()
             if not any(list(map(lambda x: x[0], fetch))):
                 raise AccessError(_("This operation is forbidden!"))
-    
+
     @api.model
     def _apply_ir_rules(self, query, mode='read'):
         super(DMSAdvancedAccessModel, self)._apply_ir_rules(query, mode)
-        
+
     def _after_read(self, result):
         result = super(DMSAdvancedAccessModel, self)._after_read(result)
         if self.env.user.id == SUPERUSER_ID or self.user_has_groups('muk_dms.group_dms_admin'):
@@ -133,7 +135,7 @@ class DMSAdvancedAccessModel(dms_base.DMSAbstractModel):
                     access_result.append(record)
             return access_result
         return []
-    
+
     def _after_search(self, result):
         result = super(DMSAdvancedAccessModel, self)._after_search(result)
         if self.env.user.id == SUPERUSER_ID or self.user_has_groups('muk_dms.group_dms_admin'):
@@ -150,7 +152,7 @@ class DMSAdvancedAccessModel(dms_base.DMSAbstractModel):
         fetch = self.env.cr.fetchall()
         if len(fetch) > 0:
             access_result = self.env[self._name]
-            access_ids = list(map(lambda x: x[0], fetch)) 
+            access_ids = list(map(lambda x: x[0], fetch))
             if isinstance(result, (int, long)):
                 if result in access_ids:
                     return result
@@ -160,7 +162,7 @@ class DMSAdvancedAccessModel(dms_base.DMSAbstractModel):
                         access_result += record
                 return access_result
         return self.env[self._name]
-    
+
     def _after_name_search(self, result):
         result = super(DMSAdvancedAccessModel, self)._after_name_search(result)
         if self.env.user.id == SUPERUSER_ID or self.user_has_groups('muk_dms.group_dms_admin'):
@@ -177,13 +179,13 @@ class DMSAdvancedAccessModel(dms_base.DMSAbstractModel):
         fetch = self.env.cr.fetchall()
         if len(fetch) > 0:
             access_result = []
-            access_ids = list(map(lambda x: x[0], fetch)) 
+            access_ids = list(map(lambda x: x[0], fetch))
             for tuple in result:
                 if tuple[0] in access_ids:
                     access_result.append(tuple)
             return access_result
         return []
-    
+
     @api.model
     def check_field_access_rights(self, operation, fields):
         fields = super(DMSAdvancedAccessModel, self).check_field_access_rights(operation, fields)
@@ -203,31 +205,32 @@ class DMSAdvancedAccessModel(dms_base.DMSAbstractModel):
             if len(fetch) == 0:
                 raise AccessError(_("This operation is forbidden!"))
         return fields
-        
-    #----------------------------------------------------------
+
+    # ----------------------------------------------------------
     # Read, View 
-    #----------------------------------------------------------
-        
+    # ----------------------------------------------------------
+
     @api.one
     def _compute_perm_access(self):
         try:
             self.perm_access = self.check_access('access')
         except AccessError:
-             self.perm_access = False
-    
+            self.perm_access = False
+
     def _compute_groups(self, write=True):
         if write:
             for record in self:
                 record.complete_groups = record.groups
         else:
             self.ensure_one()
-            return {'complete_groups': [(6, 0, self.groups.mapped('id'))]}      
-    
-    #----------------------------------------------------------
+            return {'complete_groups': [(6, 0, self.groups.mapped('id'))]}
+
+            # ----------------------------------------------------------
+
     # Create, Write, Delete
-    #----------------------------------------------------------
-    
-    @api.onchange('inherit_groups') 
+    # ----------------------------------------------------------
+
+    @api.onchange('inherit_groups')
     def _onchange_inherit_groups(self):
         if not self.inherit_groups:
             self.groups = self.complete_groups

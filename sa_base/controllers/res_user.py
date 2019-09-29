@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import http,SUPERUSER_ID,api
+from odoo import http, SUPERUSER_ID, api
 from odoo.http import request, Response
 
 import json
@@ -42,7 +42,8 @@ class UsersAPI(http.Controller):
         user_id = request.env['res.users'].sudo().search([('uuid', '=', uuid)], limit=1)
 
         if not user_id:
-            return Response(json.dumps({'msg': 'User not found'}), headers={'content-type': 'application/json'}, status=404)
+            return Response(json.dumps({'msg': 'User not found'}), headers={'content-type': 'application/json'},
+                            status=404)
 
         ret = user_id.sudo().read(fields=NORMAL_USER_FIELDS_READ)[0]
         if 'active' in ret:
@@ -52,7 +53,8 @@ class UsersAPI(http.Controller):
             ret.pop('active')
         if 'image_small' in ret:
             ret.update({
-                'image_small': u'data:{0};base64,{1}'.format('image/png', ret['image_small']) if ret['image_small'] else ""
+                'image_small': u'data:{0};base64,{1}'.format('image/png', ret['image_small']) if ret[
+                    'image_small'] else ""
             })
 
         return Response(json.dumps(ret), headers={'content-type': 'application/json'}, status=200)

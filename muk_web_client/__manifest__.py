@@ -55,5 +55,5 @@
     },
     "application": False,
     "installable": True,
-    
+
 }

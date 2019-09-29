@@ -5,7 +5,6 @@ from odoo.exceptions import ValidationError
 import math, json
 import logging
 
-
 _logger = logging.getLogger(__name__)
 
 
@@ -109,7 +108,6 @@ class MrpWOConsu(models.Model):
 
 
 class MrpWorkorder(models.Model):
-
     _inherit = 'mrp.workorder'
 
     # vin = fields.Char(string='VIN', related='production_id.vin', copy=False, store=True)
@@ -140,7 +138,7 @@ class MrpProduction(models.Model):
     _sql_constraints = [('vin_uniq', 'unique(vin)', 'Only one VIN per MO is allowed'),
                         ('pin_check_uniq', 'unique(pin,pin_check_code)', 'Only one KNR per MO is allowed')]
 
-    @api.depends('year', 'factory_name','pin','pin_check_code')
+    @api.depends('year', 'factory_name', 'pin', 'pin_check_code')
     def _compute_long_pin(self):
         for mo in self:
             mo.long_pin = u'{0}{1}{2}{3}'.format(mo.factory_name, mo.year, mo.pin, mo.pin_check_code)
@@ -153,7 +151,7 @@ class MrpProduction(models.Model):
             raise ValidationError(u'不是年份')
 
     @api.multi
-    def _generate_moves(self): ### 直接返回，不创建调拨单
+    def _generate_moves(self):  ### 直接返回，不创建调拨单
         return True
 
     @api.multi
@@ -175,7 +173,8 @@ class MrpProduction(models.Model):
         workorders = self.env['mrp.workorder']
         for bom, bom_data in exploded_boms:
             # If the routing of the parent BoM and phantom BoM are the same, don't recreate work orders, but use one master routing
-            if bom.routing_id.id and (not bom_data['parent_line'] or bom_data['parent_line'].bom_id.routing_id.id != bom.routing_id.id):
+            if bom.routing_id.id and (
+                    not bom_data['parent_line'] or bom_data['parent_line'].bom_id.routing_id.id != bom.routing_id.id):
                 workorders += self._workorders_create_by_prs(bom, bom_data)
         return workorders
 
@@ -199,7 +198,9 @@ class MrpProduction(models.Model):
 
         need_plan_prs = self.env['mrp.routing.workcenter']
         for pr in json.loads(self.production_routings):
-            need_plan_prs += self.env['mrp.routing.workcenter'].search([('routing_id','=',bom.routing_id.id),('group_id.code','=',pr['pr_group']), ('name','=',pr['pr_value'])])
+            need_plan_prs += self.env['mrp.routing.workcenter'].search(
+                [('routing_id', '=', bom.routing_id.id), ('group_id.code', '=', pr['pr_group']),
+                 ('name', '=', pr['pr_value'])])
 
         for operation in need_plan_prs:
             # create workorder
@@ -313,5 +314,3 @@ class MrpProduction(models.Model):
     @api.multi
     def unlink(self):
         raise ValidationError(u'不允许删除生产订单')
-
-

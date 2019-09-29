@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from odoo import http,fields,api, SUPERUSER_ID
+from odoo import http, fields, api, SUPERUSER_ID
 import json
-from odoo.http import request,Response
+from odoo.http import request, Response
 from dateutil import parser
 import requests as Requests
 from requests import ConnectionError, RequestException
@@ -12,7 +12,8 @@ AIIS_RESULT_API = '/aiis/v1/fis.results'
 
 DEFAULT_LIMIT = 80
 
-NORMAL_RESULT_FIELDS_READ = ['workorder_id', 'id', 'product_id', 'consu_product_id', 'op_time', 'measure_result', 'workcenter_id']
+NORMAL_RESULT_FIELDS_READ = ['workorder_id', 'id', 'product_id', 'consu_product_id', 'op_time', 'measure_result',
+                             'workcenter_id']
 
 from urlparse import urljoin
 
@@ -35,12 +36,12 @@ def _post_aiis_result_package(aiis_urls, results):
                 'pin_check_code': result.production_id.pin_check_code,
                 'assembly_line': result.production_id.assembly_line_id.code,
                 'lnr': result.production_id.lnr,
-                'nut_no': result.consu_product_id.screw_type_code,
+                'nut_no': result.consu_product_id.default_code,
                 'control_date': str_time_to_rfc3339(result.control_date),
                 'measure_result': result.measure_result.upper(),
                 'measure_torque': result.measure_torque,
                 'measure_degree': result.measure_degree,
-                'model': result.production_id.product_id.vehicle_type_code
+                'model': result.production_id.product_id.default_code
             }
             try:
                 u = urljoin(url, AIIS_RESULT_API)
@@ -60,7 +61,8 @@ def _post_aiis_result_package(aiis_urls, results):
 
 
 class SPC(http.Controller):
-    @http.route(['/api/v1/operation.results/<int:result_id>'], methods=['PUT','OPTIONS'], type='json', auth='none', cors='*', csrf=False)
+    @http.route(['/api/v1/operation.results/<int:result_id>'], methods=['PUT', 'OPTIONS'], type='json', auth='none',
+                cors='*', csrf=False)
     def _update_results(self, result_id):
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         operation_result_id = env['operation.result'].browse(result_id)
@@ -88,7 +90,8 @@ class SPC(http.Controller):
                 headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
                 response = Response(body, status=405, headers=headers)
                 return response
-            if operation_result_id.measure_result == 'ok' or (operation_result_id.measure_result == 'nok' and operation_result_id.op_time >= operation_result_id.point_id.times):
+            if operation_result_id.measure_result == 'ok' or (
+                    operation_result_id.measure_result == 'nok' and operation_result_id.op_time >= operation_result_id.point_id.times):
                 _aiis_urls = env['ir.config_parameter'].sudo().get_param('aiis.urls')
                 if _aiis_urls:
                     aiis_urls = _aiis_urls.split(',')
@@ -107,7 +110,8 @@ class SPC(http.Controller):
             response = Response(status=204, headers=headers)
             return response
 
-    @http.route(['/api/v1/operation.results'], methods=['PUT', 'OPTIONS'], type='json', auth='none', cors='*', csrf=False)
+    @http.route(['/api/v1/operation.results'], methods=['PUT', 'OPTIONS'], type='json', auth='none', cors='*',
+                csrf=False)
     def _batch_update_results(self):
         datas = request.jsonrequest
         map(lambda val: val.update({'lacking': 'normal'}), datas)  ### 有结果传送 所以 lacking变为normal
@@ -150,7 +154,8 @@ class SPC(http.Controller):
         response = Response(status=204, headers=headers)
         return response
 
-    @http.route(['/api/v1/operation.results', '/api/v1/operation.results/<int:result_id>'], type='http', auth='none', methods=['get'], cors='*', csrf=False)
+    @http.route(['/api/v1/operation.results', '/api/v1/operation.results/<int:result_id>'], type='http', auth='none',
+                methods=['get'], cors='*', csrf=False)
     def _get_result_lists(self, result_id=None, **kw):
         domain = []
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
@@ -159,10 +164,10 @@ class SPC(http.Controller):
         else:
             if 'date_from' in kw.keys():
                 _t = parser.parse(kw['date_from'])
-                domain += [('control_date', '>=', fields.Datetime.to_string((_t - _t.utcoffset())) )]
+                domain += [('control_date', '>=', fields.Datetime.to_string((_t - _t.utcoffset())))]
             if 'date_to' in kw.keys():
                 _t = parser.parse(kw['date_to'])
-                domain += [('control_date', '<=', fields.Datetime.to_string((_t - _t.utcoffset())) )]
+                domain += [('control_date', '<=', fields.Datetime.to_string((_t - _t.utcoffset())))]
             if 'limit' in kw.keys():
                 limit = int(kw['limit'])
             else:
@@ -173,19 +178,20 @@ class SPC(http.Controller):
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=404, headers=headers)
         vals = [{
-                'workorder_id': operation_result_id.workorder_id.id,
-                'id':  operation_result_id.id,
-                'product_id': operation_result_id.product_id.id,
-                'consu_product_id': operation_result_id.consu_product_id.id,
-                'op_time': operation_result_id.op_time,
-                'measure_result': operation_result_id.measure_result,
-                'workcenter_id': operation_result_id.workcenter_id.id
-            } for operation_result_id in quality_checks]
+            'workorder_id': operation_result_id.workorder_id.id,
+            'id': operation_result_id.id,
+            'product_id': operation_result_id.product_id.id,
+            'consu_product_id': operation_result_id.consu_product_id.id,
+            'op_time': operation_result_id.op_time,
+            'measure_result': operation_result_id.measure_result,
+            'workcenter_id': operation_result_id.workcenter_id.id
+        } for operation_result_id in quality_checks]
         ret = vals[0] if result_id else vals
         body = json.dumps(ret)
-        return Response(body, headers=[('Content-Type', 'application/json'),('Content-Length', len(body))], status=200)
+        return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))], status=200)
 
-    @http.route('/api/v1/operation.results/<int:result_id>/curves_add', type='json', methods=['PATCH', 'OPTIONS'], auth='none', cors='*', csrf=False)
+    @http.route('/api/v1/operation.results/<int:result_id>/curves_add', type='json', methods=['PATCH', 'OPTIONS'],
+                auth='none', cors='*', csrf=False)
     def _append_curves(self, result_id):
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         operation_result_id = env['operation.result'].browse(result_id)

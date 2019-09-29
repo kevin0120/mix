@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
-from odoo import fields,models,api,_, SUPERUSER_ID
+from odoo import fields, models, api, _, SUPERUSER_ID
 from odoo.exceptions import ValidationError
 import odoo.addons.decimal_precision as dp
 from datetime import datetime, timedelta, date
@@ -11,9 +11,8 @@ import babel.dates
 import pytz
 from odoo.osv import expression
 import logging
-from odoo.tools import float_round,frozendict, lazy_classproperty, lazy_property, ormcache, \
-                   Collector, LastOrderedSet, OrderedSet
-
+from odoo.tools import float_round, frozendict, lazy_classproperty, lazy_property, ormcache, \
+    Collector, LastOrderedSet, OrderedSet
 
 from collections import defaultdict, MutableMapping, OrderedDict
 from odoo.tools import frozendict
@@ -27,7 +26,7 @@ class OperationResult(models.HyperModel):
     sequence = fields.Integer('sequence', default=1)
 
     workorder_id = fields.Many2one('mrp.workorder', 'Work Order')
-    workcenter_id = fields.Many2one('mrp.workcenter',  readonly=True)
+    workcenter_id = fields.Many2one('mrp.workcenter', readonly=True)
     production_id = fields.Many2one('mrp.production', 'Production Order')
 
     vin = fields.Char('Vin')  # 如果无法通过工单查询,使用此字段
@@ -43,11 +42,11 @@ class OperationResult(models.HyperModel):
     gun_id = fields.Many2one('maintenance.equipment', string='Screw Gun', copy=False)
 
     pset_strategy = fields.Selection([('AD', 'Torque tightening'),
-                                         ('AW', 'Angle tightening'),
-                                         ('ADW', 'Torque/Angle tightening'),
-                                         ('LN', 'Loosening'),
-                                         ('AN', 'Number of Pulses tightening'),
-                                         ('AT', 'Time tightening')])
+                                      ('AW', 'Angle tightening'),
+                                      ('ADW', 'Torque/Angle tightening'),
+                                      ('LN', 'Loosening'),
+                                      ('AN', 'Number of Pulses tightening'),
+                                      ('AT', 'Time tightening')])
 
     pset_m_max = fields.Float(string='Set Max Torque(NM)', digits=dp.get_precision('Operation Result'))
 
@@ -92,11 +91,14 @@ class OperationResult(models.HyperModel):
 
     control_date = fields.Datetime('Control Date')
 
-    measure_torque = fields.Float('Measure Torque(NM)', default=0.0, digits=dp.get_precision('Operation Result'), group_operator="avg")
+    measure_torque = fields.Float('Measure Torque(NM)', default=0.0, digits=dp.get_precision('Operation Result'),
+                                  group_operator="avg")
 
-    measure_degree = fields.Float('Measure Degree(grad)', default=0.0, digits=dp.get_precision('Operation Result'), group_operator="avg")
+    measure_degree = fields.Float('Measure Degree(grad)', default=0.0, digits=dp.get_precision('Operation Result'),
+                                  group_operator="avg")
 
-    measure_t_don = fields.Float('Measure Time Done(ms)', default=0.0, digits=dp.get_precision('Operation Result'), group_operator="avg")
+    measure_t_don = fields.Float('Measure Time Done(ms)', default=0.0, digits=dp.get_precision('Operation Result'),
+                                 group_operator="avg")
 
     measure_result = fields.Selection([
         ('none', _('No measure')),
@@ -106,15 +108,15 @@ class OperationResult(models.HyperModel):
         ('nok', _('NOK'))], string="Measure Success", default='none')
 
     lacking = fields.Selection([(_('lack'), _('Data Lacking')),
-        (_('normal'), _('Normal'))], string='Lacking', default='lack')
+                                (_('normal'), _('Normal'))], string='Lacking', default='lack')
 
     op_time = fields.Integer(string=u'第几次拧紧作业', default=1)
 
     one_time_pass = fields.Selection([('pass', _('One Time Passed')),
-        ('fail', _('Failed'))], string='One Time Pass', default='fail')
+                                      ('fail', _('Failed'))], string='One Time Pass', default='fail')
 
     final_pass = fields.Selection([('pass', _('Final Passed')),
-        ('fail', _('Failed'))], string='Final Pass', default='fail')
+                                   ('fail', _('Failed'))], string='Final Pass', default='fail')
 
     sent = fields.Boolean('Have sent to aiis', default=False)
 
@@ -122,7 +124,8 @@ class OperationResult(models.HyperModel):
 
     tightening_id = fields.Integer('TighteningID')
 
-    _sql_constraints = [('tid_vin_gun_uniq', 'unique(gun_id, tightening_id, vin,time)', 'Per Screw Gun tighening ID VIN must different'),
+    _sql_constraints = [('tid_vin_gun_uniq', 'unique(gun_id, tightening_id, vin,time)',
+                         'Per Screw Gun tighening ID VIN must different'),
                         ('tid_wo_gun_uniq', 'unique(gun_id, tightening_id, workorder_id,time)',
                          'Per Screw Gun tighening ID  WO must different')]
 
@@ -195,7 +198,7 @@ BEGIN
          public.mrp_bom_line mbl
     where wo.id = order_id
       and co.workorder_id = order_id
-      and pp.screw_type_code = nut_no
+      and pp.default_code = nut_no
       and co.bom_line_id = qp.bom_line_id
       and wo.production_id = mp.id
       and mbl.id = co.bom_line_id
@@ -223,7 +226,7 @@ BEGIN
                public.mrp_bom_line mbl,
                public.mrp_bom bom
           where pp.id = bom.product_id
-            and pp.vehicle_type_code = vehicle_type
+            and pp.default_code = vehicle_type
             and bom.id = mbl.bom_id) as dd,
          (select me.id gun_id
           from public.maintenance_equipment me
@@ -232,7 +235,7 @@ BEGIN
          public.mrp_routing_workcenter op,
          public.sa_quality_point qp2,
          public.controller_job job2
-    where pp2.screw_type_code = nut_no
+    where pp2.default_code = nut_no
       and pp2.id = cou_pid
       and op.id = cou_opd
       and qp2.bom_line_id = cou_bom_id
@@ -416,7 +419,7 @@ $$
 
     @api.model
     def bulk_create(self, vals):
-        vals = [self._add_missing_default_values(val)for val in vals]
+        vals = [self._add_missing_default_values(val) for val in vals]
         self._bulk_create(vals)
 
     @api.multi
@@ -450,9 +453,12 @@ $$
                         # if single_lang or not (has_trans and field.translate is True):
                         #     # val is not a translation: update the table
                         #     val = field.convert_to_column(val, self)
-                        updates.append((name, field.column_format, '''timestamp '%s' ''' % val if field.column_type[0] == 'timestamp' else val))
+                        updates.append((name, field.column_format,
+                                        '''timestamp '%s' ''' % val if field.column_type[0] == 'timestamp' else val))
                         if name != 'id':
-                            splite_updates.append((name, field.column_format, '''timestamp '%s' ''' % val if field.column_type[0] == 'timestamp' else val))
+                            splite_updates.append((name, field.column_format,
+                                                   '''timestamp '%s' ''' % val if field.column_type[
+                                                                                      0] == 'timestamp' else val))
                         direct.append(name)
                     else:
                         upd_todo.append(name)
@@ -473,13 +479,14 @@ $$
         t = [tuple(u[2] for u in update if len(u) > 2) for update in all_updates]
         x = []
         for _t in t:
-            s = '(%s)' % (','.join("'%s'" % _s if (isinstance(_s, str) or isinstance(_s, unicode)) and _s.find('timestamp') < 0 else '%s' % str(_s) for _s in _t))
+            s = '(%s)' % (','.join("'%s'" % _s if (isinstance(_s, str) or isinstance(_s, unicode)) and _s.find(
+                'timestamp') < 0 else '%s' % str(_s) for _s in _t))
             x.append(s)
         query = """UPDATE "%s" AS o SET (%s) = (%s) FROM(VALUES %s) AS s (%s) WHERE o.id = s.id""" % (
             self._table,
             ', '.join('%s' % u[0] for u in update_wo_ids[0]),
             ','.join("s.%s" % u[0] for u in update_wo_ids[0]),
-            ','.join('%s'% _t for _t in x),
+            ','.join('%s' % _t for _t in x),
             ', '.join('%s' % u[0] for u in all_updates[0]),
         )
 
@@ -598,7 +605,6 @@ $$
             return self.do_fail()
         else:
             return self.do_pass()
-
 
     @api.multi
     def unlink(self):

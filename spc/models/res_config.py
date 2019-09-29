@@ -18,7 +18,7 @@ class AiisSettings(models.TransientModel):
 
     # minio_url
     def set_aiis_urls(self):
-        self.env['ir.config_parameter'].set_param("aiis.urls",self.aiis_urls,groups=['base.group_system'])
+        self.env['ir.config_parameter'].set_param("aiis.urls", self.aiis_urls, groups=['base.group_system'])
 
 
 class SaConfigSettings(models.TransientModel):
@@ -33,14 +33,15 @@ class SaConfigSettings(models.TransientModel):
         push_wo_number = int(self.env["ir.config_parameter"].get_param("sa.wo.push.num", default=80))
         push_result_number = int(self.env["ir.config_parameter"].get_param("sa.result.push.num", default=80))
 
-        return dict(push_wo_number=push_wo_number,push_result_number=push_result_number)
+        return dict(push_wo_number=push_wo_number, push_result_number=push_result_number)
 
     # push_wo_number
     def set_push_wo_number(self):
         self.env['ir.config_parameter'].set_param("sa.wo.push.num", self.push_wo_number, groups=['base.group_system'])
 
     def set_push_result_number(self):
-        self.env['ir.config_parameter'].set_param("sa.result.push.num", self.push_wo_number, groups=['base.group_system'])
+        self.env['ir.config_parameter'].set_param("sa.result.push.num", self.push_wo_number,
+                                                  groups=['base.group_system'])
 
 
 class SPCSetting(models.TransientModel):

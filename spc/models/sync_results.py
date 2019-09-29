@@ -19,7 +19,6 @@ from dateutil.relativedelta import relativedelta
 
 _logger = logging.getLogger(__name__)
 
-
 MASTER_RESULT_API = '/rush/v1/results'
 
 
@@ -90,5 +89,3 @@ class ResultSync(AbstractModel):
         urls = ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_RESULT_API) for connect in connections]
         ret = map(lambda url: self._get_masterpc_results(url), urls)
         return True
-
-

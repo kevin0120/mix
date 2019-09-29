@@ -3,10 +3,10 @@
 
 from .test_common import TestQualityCommon
 
+
 class TestQualityCheck(TestQualityCommon):
 
     def test_00_picking_quality_check(self):
-
         """Test quality check on incoming shipment."""
 
         # Create Quality Point for incoming shipment.

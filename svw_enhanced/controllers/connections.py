@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from odoo import http, fields,api, SUPERUSER_ID
+from odoo import http, fields, api, SUPERUSER_ID
 import json
-from odoo.http import request,Response
+from odoo.http import request, Response
 
 
 class HMIConnections(http.Controller):
-    @http.route('/api/v1/hmi.connections/<string:serial_no>', type='http', methods=['GET', 'OPTIONS'], auth='none', cors='*', csrf=False)
+    @http.route('/api/v1/hmi.connections/<string:serial_no>', type='http', methods=['GET', 'OPTIONS'], auth='none',
+                cors='*', csrf=False)
     def _get_connections(self, serial_no=None):
         hmi_id = None
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         if serial_no:
-            hmi = env['maintenance.equipment'].search([('serial_no', '=', serial_no)],limit=1)
+            hmi = env['maintenance.equipment'].search([('serial_no', '=', serial_no)], limit=1)
             if hmi:
                 hmi_id = hmi.ids[0]
             else:
@@ -23,7 +24,8 @@ class HMIConnections(http.Controller):
             body = json.dumps({'msg': "Workcenter not found, plz add hmi to One workcenter"})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=404, headers=headers)
-        if not all([workercenter_id.masterpc_id, workercenter_id.controller_ids, workercenter_id.io_id, workercenter_id.rfid_id]):
+        if not all([workercenter_id.masterpc_id, workercenter_id.controller_ids, workercenter_id.io_id,
+                    workercenter_id.rfid_id]):
             body = json.dumps({'msg': "Workcenter Cofiguration is not Complete"})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=404, headers=headers)
@@ -57,11 +59,14 @@ class HMIConnections(http.Controller):
                 'worksegment': workercenter_id.worksegment_id.name if workercenter_id.worksegment_id else None,
                 'qc_workcenter': workercenter_id.qc_workcenter_id.name if workercenter_id.qc_workcenter_id else None
             },
-            'masterpc': {'serial_no': workercenter_id.masterpc_id.serial_no, 'connection':masterpc_connection.name_get()[0][1] if masterpc_connection else False},
+            'masterpc': {'serial_no': workercenter_id.masterpc_id.serial_no,
+                         'connection': masterpc_connection.name_get()[0][1] if masterpc_connection else False},
             # 'controller': {'serial_no': workercenter_id.controller_id.serial_no, 'connection': False},
             "controllers": _controllers,
-            'io': {'serial_no': workercenter_id.io_id.serial_no, 'connection': io_connection.name_get()[0][1] if io_connection else False},
-            'rfid': {'serial_no': workercenter_id.rfid_id.serial_no, 'connection': rfid_connection.name_get()[0][1] if rfid_connection else False}
+            'io': {'serial_no': workercenter_id.io_id.serial_no,
+                   'connection': io_connection.name_get()[0][1] if io_connection else False},
+            'rfid': {'serial_no': workercenter_id.rfid_id.serial_no,
+                     'connection': rfid_connection.name_get()[0][1] if rfid_connection else False}
         }
         body = json.dumps(val)
         headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]

@@ -19,7 +19,7 @@ class LocalSense(http.Controller):
             return Response(body, status=404, headers=headers)
         controller_id = gun_id.parent_id
         if not controller_id:
-            body = json.dumps({'msg':  "can not found controller for this gun , gun sn:%s" % gun_id.serial_no})
+            body = json.dumps({'msg': "can not found controller for this gun , gun sn:%s" % gun_id.serial_no})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=404, headers=headers)
         workercenter_id = env['mrp.workcenter'].search([('gun_ids', 'in', gun_id.ids)], limit=1)
@@ -27,7 +27,7 @@ class LocalSense(http.Controller):
             body = json.dumps({'msg': "can not found gun in any work center, gun sn:%s" % gun_id.serial_no})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=404, headers=headers)
-        if not all([workercenter_id.masterpc_id, workercenter_id.controller_ids,workercenter_id.gun_ids]):
+        if not all([workercenter_id.masterpc_id, workercenter_id.controller_ids, workercenter_id.gun_ids]):
             body = json.dumps({'msg': "Workcenter Cofiguration is not Complete"})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=404, headers=headers)

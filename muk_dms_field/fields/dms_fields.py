@@ -26,7 +26,8 @@ from odoo import _
 from odoo import models, api, fields
 from odoo.tools import pg_varchar, ustr
 
-Default = object()    
+Default = object()
+
 
 def convert_to_file(value, records):
     if isinstance(value, models.BaseModel) and value._name == "muk_dms.file":
@@ -36,6 +37,7 @@ def convert_to_file(value, records):
         if 'id' in value:
             return records.env['muk_dms.file'].sudo().browse(value['id'])
     return None
+
 
 class Document(fields.Field):
     type = 'document'
@@ -68,7 +70,7 @@ class Document(fields.Field):
             ('reference_field', '=', self.name),
             ('reference_id', 'in', records.ids),
         ]
-        files = { 
+        files = {
             file.reference_id: {
                 'id': file.id,
                 'name': file.name,
@@ -76,14 +78,14 @@ class Document(fields.Field):
                 'directory': file.directory.name_get(),
                 'perm_write': file.perm_write,
                 'perm_unlink': file.perm_unlink,
-                'locked': file.locked.locked_by_ref and file.locked.locked_by_ref.name_get() or 
-                    not (len(file.locked) == 0 or file.locked.id == False),
+                'locked': file.locked.locked_by_ref and file.locked.locked_by_ref.name_get() or
+                          not (len(file.locked) == 0 or file.locked.id == False),
             }
             for file in records.env['muk_dms.file'].sudo().search(domain)
         }
         for record in records:
             record._cache[self.name] = files.get(record.id, None)
-        
+
     def write(self, records, value):
         if isinstance(value, models.BaseModel) and value._name == "muk_dms.file":
             if value.exists():
@@ -93,7 +95,7 @@ class Document(fields.Field):
                         'reference_field': self.name,
                         'reference_id': record.id
                     })
-        elif isinstance(value, dict):            
+        elif isinstance(value, dict):
             values = {}
             if 'directory' in value and isinstance(value['directory'], list):
                 if isinstance(value['directory'][0], list):
@@ -123,7 +125,3 @@ class Document(fields.Field):
                                 'reference_id': record.id
                             })
                             files.create(values)
-            
-      
-        
-        

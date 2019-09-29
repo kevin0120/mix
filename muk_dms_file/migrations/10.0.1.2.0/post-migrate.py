@@ -23,24 +23,24 @@ import base64
 
 from odoo import api, SUPERUSER_ID
 
+
 def migrate(cr, version):
     if not version:
         return
-    
+
     if version == "10.0.1.0.0":
         env = api.Environment(cr, SUPERUSER_ID, {})
-        
+
         datasystemlist = env["muk_dms.data_system"].search([])
         for datasystem in datasystemlist:
             datasystem.update_checksum()
-            
+
         files = env["muk_dms.file"].search([("reference", "like", "data_system")])
         for file in files:
-             file.trigger_computation(["extension","mimetype","index_content"])
-             file.size = len(base64.b64decode(file.with_context({}).content))
-             
+            file.trigger_computation(["extension", "mimetype", "index_content"])
+            file.size = len(base64.b64decode(file.with_context({}).content))
+
         settingslist = env["muk_dms.settings"].search([("save_type", "=", "file")])
         for settings in settingslist:
             for root_directory in settings.root_directories:
                 root_directory.trigger_computation(["path", "settings"])
-                

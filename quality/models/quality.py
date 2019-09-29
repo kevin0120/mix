@@ -113,7 +113,7 @@ class QualityPoint(models.Model):
             checks = self.env['sa.quality.check'].search([
                 ('point_id', '=', self.id),
                 ('create_date', '>=', date_previous.strftime(DEFAULT_SERVER_DATETIME_FORMAT))], limit=1)
-            return not(bool(checks))
+            return not (bool(checks))
         return False
 
 
@@ -133,14 +133,16 @@ class QualityAlertTeam(models.Model):
 
     @api.multi
     def _compute_check_count(self):
-        check_data = self.env['sa.quality.check'].read_group([('team_id', 'in', self.ids), ('quality_state', '=', 'none')], ['team_id'], ['team_id'])
+        check_data = self.env['sa.quality.check'].read_group(
+            [('team_id', 'in', self.ids), ('quality_state', '=', 'none')], ['team_id'], ['team_id'])
         check_result = dict((data['team_id'][0], data['team_id_count']) for data in check_data)
         for team in self:
             team.check_count = check_result.get(team.id, 0)
 
     @api.multi
     def _compute_alert_count(self):
-        alert_data = self.env['sa.quality.alert'].read_group([('team_id', 'in', self.ids), ('stage_id.done', '=', False)], ['team_id'], ['team_id'])
+        alert_data = self.env['sa.quality.alert'].read_group(
+            [('team_id', 'in', self.ids), ('stage_id.done', '=', False)], ['team_id'], ['team_id'])
         alert_result = dict((data['team_id'][0], data['team_id_count']) for data in alert_data)
         for team in self:
             team.alert_count = alert_result.get(team.id, 0)
@@ -207,7 +209,8 @@ class QualityCheck(models.Model):
     note = fields.Html(related='point_id.note', readonly=True)
     test_type = fields.Selection(related="point_id.test_type", readonly=True)
     norm_unit = fields.Char(related='point_id.norm_unit', readonly=True)
-    measure = fields.Float('Measure', default=0.0, digits=dp.get_precision('Quality Tests'), track_visibility='onchange')
+    measure = fields.Float('Measure', default=0.0, digits=dp.get_precision('Quality Tests'),
+                           track_visibility='onchange')
     measure_success = fields.Selection([
         ('none', 'No measure'),
         ('pass', 'Pass'),
@@ -324,8 +327,8 @@ class QualityAlert(models.Model):
     name = fields.Char('Name', default=lambda self: _('New'))
     description = fields.Text('Description')
     stage_id = fields.Many2one('sa.quality.alert.stage', 'Stage',
-        group_expand='_read_group_stage_ids',
-        default=lambda self: self.env['sa.quality.alert.stage'].search([], limit=1).id)
+                               group_expand='_read_group_stage_ids',
+                               default=lambda self: self.env['sa.quality.alert.stage'].search([], limit=1).id)
     company_id = fields.Many2one('res.company', 'Company', default=lambda self: self.env.user.company_id)
     reason_id = fields.Many2one('sa.quality.reason', 'Root Cause')
     tag_ids = fields.Many2many('sa.quality.tag', string="Tags")
@@ -361,7 +364,8 @@ class QualityAlert(models.Model):
 
     @api.onchange('product_tmpl_id')
     def onchange_product_tmpl_id(self):
-        self.product_id = self.product_tmpl_id.product_variant_ids.ids and self.product_tmpl_id.product_variant_ids.ids[0]
+        self.product_id = self.product_tmpl_id.product_variant_ids.ids and self.product_tmpl_id.product_variant_ids.ids[
+            0]
 
     @api.multi
     def action_see_check(self):

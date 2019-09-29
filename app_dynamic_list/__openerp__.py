@@ -1,4 +1,3 @@
-
 {
     'name': 'App Customize Columns of List (Tree) View Dynamic',
     'version': '10.0.1.6',
@@ -18,10 +17,10 @@ This module is ready for Community and Enterprise Edition.
 
     """,
     'images': ['static/description/sales_coms.jpg'
-    ],
+               ],
     'depends': ['web'],
     'data': [
-    'views/listview_button.xml',
+        'views/listview_button.xml',
     ],
     'demo': [],
     'test': [
@@ -31,4 +30,3 @@ This module is ready for Community and Enterprise Edition.
     'auto_install': False,
     'qweb': ['static/src/xml/listview_button_view.xml'],
 }
-

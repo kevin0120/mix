@@ -25,9 +25,9 @@
     'description': """ 
         ABX
     """,
-    'version': '10.0.1.0.0',   
-    'category': 'Document Management',   
-    'license': 'AGPL-3',    
+    'version': '10.0.1.0.0',
+    'category': 'Document Management',
+    'license': 'AGPL-3',
     'author': "MuK IT",
     'website': "http://www.mukit.at",
     'contributors': [

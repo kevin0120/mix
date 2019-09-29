@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api,_
+from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError, UserError
 
 import requests as Requests
@@ -9,11 +9,9 @@ from requests import ConnectionError, RequestException, exceptions
 
 import json
 
-
 MASTER_DEL_WROKORDERS_API = '/rush/v1/mrp.routing.workcenter.delete'
 
 MASTER_WROKORDERS_API = '/rush/v1/mrp.routing.workcenter'
-
 
 
 class MrpBom(models.Model):
@@ -29,6 +27,7 @@ class MrpBom(models.Model):
     def _compute_has_operations(self):
         for bom_id in self:
             bom_id.has_operations = True if len(bom_id.operation_ids) else False
+
     #
     # @api.multi
     # def button_add_operation(self):
@@ -60,22 +59,26 @@ class MrpBom(models.Model):
     @api.onchange('routing_id', 'product_id')
     def _onchange_routing_id(self):
         self.code = u'[{0}]{1}'.format(self.routing_id.name, self.product_id.name)
-        self.operation_ids = [(5,)] #刪除所有作業
-        self.bom_line_ids = [(5,)]  #删除所有BOM行
+        self.operation_ids = [(5,)]  # 刪除所有作業
+        self.bom_line_ids = [(5,)]  # 删除所有BOM行
 
     @api.constrains('product_id', 'product_tmpl_id')
     def _product_tmpl_product_constraint(self):
         if self.product_id.product_tmpl_id.id != self.product_tmpl_id.id:
-            raise ValidationError(_(u'The product template "%s" is invalid on product with name "%s"') % (self.product_tmpl_id.name, self.product_id.name))
+            raise ValidationError(_(u'The product template "%s" is invalid on product with name "%s"') % (
+            self.product_tmpl_id.name, self.product_id.name))
 
-    @api.constrains('product_id','routing_id','active')
+    @api.constrains('product_id', 'routing_id', 'active')
     def _constraint_active_product_routing(self):
         if not self.active:
             return
             ###只有激活状态才检查
-        count = self.env['mrp.bom'].search_count([('id','!=',self.id),('product_id','=',self.product_id.id),('routing_id','=',self.routing_id.id),('active','=',True)])
+        count = self.env['mrp.bom'].search_count(
+            [('id', '!=', self.id), ('product_id', '=', self.product_id.id), ('routing_id', '=', self.routing_id.id),
+             ('active', '=', True)])
         if count:
-            raise ValidationError(_(u'The product had a related routing config "%s" been actived!') % (self.product_id.name))
+            raise ValidationError(
+                _(u'The product had a related routing config "%s" been actived!') % (self.product_id.name))
 
     @api.constrains('product_tmpl_id', 'routing_id', 'active')
     def _constraint_active_product_tmpl_routing(self):
@@ -83,10 +86,12 @@ class MrpBom(models.Model):
             return
             ###只有激活状态才检查
         count = self.env['mrp.bom'].search_count(
-            [('id','!=',self.id),('product_tmpl_id', '=', self.product_tmpl_id.id), ('routing_id', '=', self.routing_id.id), ('active', '=', True)])
+            [('id', '!=', self.id), ('product_tmpl_id', '=', self.product_tmpl_id.id),
+             ('routing_id', '=', self.routing_id.id), ('active', '=', True)])
         if count:
             raise ValidationError(
-                _(u'The product Template had a related routing config "%s" been actived!') % (self.product_tmpl_id.name))
+                _(u'The product Template had a related routing config "%s" been actived!') % (
+                    self.product_tmpl_id.name))
 
     def _onchange_operations(self):
         self.ensure_one()
@@ -146,7 +151,8 @@ class MrpBom(models.Model):
                 lambda r: r.protocol == 'http') if master.connection_ids else None
             if not connections:
                 continue
-            url = ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_WROKORDERS_API) for connect in connections][0]
+            url = \
+            ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_WROKORDERS_API) for connect in connections][0]
 
             operation._push_mrp_routing_workcenter(url)
         return True
@@ -161,7 +167,7 @@ class MrpBomLine(models.Model):
 
     operation_point_id = fields.Many2one('operation.point', required=1, ondelete='cascade')
 
-    product_id = fields.Many2one('product.product',  related="operation_point_id.product_id", store=True)
+    product_id = fields.Many2one('product.product', related="operation_point_id.product_id", store=True)
 
     product_qty = fields.Float('Product Quantity', related="operation_point_id.product_qty", store=True)
 
@@ -175,7 +181,8 @@ class MrpBomLine(models.Model):
 
     workcenter_id = fields.Many2one('mrp.workcenter', related="operation_id.workcenter_id", string='Work Center')
 
-    masterpc_id = fields.Many2one('maintenance.equipment', string='Work Center Controller(MasterPC)', related="operation_id.workcenter_id.masterpc_id")
+    masterpc_id = fields.Many2one('maintenance.equipment', string='Work Center Controller(MasterPC)',
+                                  related="operation_id.workcenter_id.masterpc_id")
 
     controller_id = fields.Many2one('maintenance.equipment', string='Screw Controller', copy=False)
 
@@ -250,7 +257,7 @@ class MrpBomLine(models.Model):
     @api.multi
     def _push_del_routing_workcenter(self, line, url):
         val = [{
-            'product_type': line.bom_id.product_id.vehicle_type_code,
+            'product_type': line.bom_id.product_id.default_code,
             "id": line.operation_id.id,
         }]
         try:
@@ -272,10 +279,12 @@ class MrpBomLine(models.Model):
             master = line.workcenter_id.masterpc_id if line.workcenter_id else None
             if not master:
                 raise UserError(u"未找到工位上的工位控制器")
-            connections = master.connection_ids.filtered(lambda r: r.protocol == 'http') if master.connection_ids else None
+            connections = master.connection_ids.filtered(
+                lambda r: r.protocol == 'http') if master.connection_ids else None
             if not connections:
                 raise UserError(u"未找到工位上的工位控制器的连接信息")
-            url = ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_DEL_WROKORDERS_API) for connect in connections][0]
+            url = ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_DEL_WROKORDERS_API) for connect in
+                   connections][0]
             ret = self._push_del_routing_workcenter(line=line, url=url)
             if not ret:
                 self.env.user.notify_warning(u"未删除物料清单行")

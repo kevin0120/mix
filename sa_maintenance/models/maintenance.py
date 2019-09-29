@@ -13,7 +13,6 @@ import logging
 
 from datetime import date, datetime, timedelta
 
-
 from dateutil.relativedelta import relativedelta
 
 PUSH_MAINTENANCE_REQ_URL = '/rush/v1/maintenance'
@@ -180,7 +179,7 @@ class MaintenanceRequest(models.Model):
     close_date = fields.Datetime('Close Date', help="Date the maintenance was finished. ")
 
     request_date = fields.Datetime('Request Date', track_visibility='onchange', default=fields.Datetime.now,
-                               help="Date requested for the maintenance to happen")
+                                   help="Date requested for the maintenance to happen")
 
     @api.multi
     def write(self, vals):
@@ -204,7 +203,8 @@ class MaintenanceRequest(models.Model):
             master = ret._get_parent_masterpc()[0]
             if not master:
                 return
-            connections = master.connection_ids.filtered(lambda r: r.protocol == 'http') if master.connection_ids else None
+            connections = master.connection_ids.filtered(
+                lambda r: r.protocol == 'http') if master.connection_ids else None
             if not connections:
                 return
             url = ['http://{0}:{1}{2}'.format(connect.ip, connect.port, PUSH_MAINTENANCE_REQ_URL) for connect in
@@ -216,7 +216,8 @@ class MaintenanceRequest(models.Model):
             }
             try:
                 # logger.debug("try to push maintenance request to masterpc:{0}".format(url))
-                Requests.post(urljoin(url, PUSH_MAINTENANCE_REQ_URL), data=json.dumps(val), headers={'Content-Type': 'application/json'}, timeout=3)
+                Requests.post(urljoin(url, PUSH_MAINTENANCE_REQ_URL), data=json.dumps(val),
+                              headers={'Content-Type': 'application/json'}, timeout=3)
             except ConnectionError as e:
                 logger.debug(u'发送维护请求失败, 错误原因:{0}'.format(e.message))
             except RequestException as e:
@@ -284,9 +285,10 @@ class MaintenanceEquipment(models.Model):
     calibration_period = fields.Integer('Days between each calibration maintenance')
 
     next_calibration_action_date = fields.Date(compute='_compute_next_calibration_maintenance',
-                                   string='Date of the next calibration maintenance', store=True)
+                                               string='Date of the next calibration maintenance', store=True)
 
-    effective_date = fields.Date('Effective Date', default=fields.Date.context_today, required=True, help="Date at which the equipment became effective. This date will be used to compute the Mean Time Between Failure.")
+    effective_date = fields.Date('Effective Date', default=fields.Date.context_today, required=True,
+                                 help="Date at which the equipment became effective. This date will be used to compute the Mean Time Between Failure.")
 
     mttf = fields.Integer(compute='_compute_maintenance_request', string='MTTF',
                           help='Mean Time TO Failure, computed based on done corrective maintenances.')
@@ -298,7 +300,7 @@ class MaintenanceEquipment(models.Model):
             need_pre_calc = False
             if equipment.calibration_times > 0:
                 need_calib_calc = True
-            if equipment.times >0:
+            if equipment.times > 0:
                 need_pre_calc = True
             next_maintenance_todo = self.env['maintenance.request'].search([
                 ('equipment_id', '=', equipment.id),
@@ -312,7 +314,7 @@ class MaintenanceEquipment(models.Model):
                 ('action_times', '!=', False)], order="action_times desc", limit=1)
             if next_maintenance_todo and last_maintenance_done:
                 equipment.next_calibration_action_times = next_maintenance_todo.action_times + equipment.calibration_times
-                equipment.next_action_times = next_maintenance_todo.action_times + equipment.times   # 设置一个预先数值
+                equipment.next_action_times = next_maintenance_todo.action_times + equipment.times  # 设置一个预先数值
                 times_gap = next_maintenance_todo.action_times - last_maintenance_done.action_times
                 if times_gap > 0:
                     if need_calib_calc:
@@ -343,12 +345,12 @@ class MaintenanceEquipment(models.Model):
         for equipment in self.filtered(lambda x: x.calibration_period > 0):
             next_maintenance_todo = self.env['maintenance.request'].search([
                 ('equipment_id', '=', equipment.id),
-                ('maintenance_type', 'in', ['preventive','calibration']),
+                ('maintenance_type', 'in', ['preventive', 'calibration']),
                 ('stage_id.done', '!=', True),
                 ('close_date', '=', False)], order="request_date asc", limit=1)
             last_maintenance_done = self.env['maintenance.request'].search([
                 ('equipment_id', '=', equipment.id),
-                ('maintenance_type', 'in', ['preventive','calibration']),
+                ('maintenance_type', 'in', ['preventive', 'calibration']),
                 ('stage_id.done', '=', True),
                 ('close_date', '!=', False)], order="close_date desc", limit=1)
             if next_maintenance_todo and last_maintenance_done:
@@ -359,7 +361,7 @@ class MaintenanceEquipment(models.Model):
                 # We use 2 times the period to avoid creation too closed request from a manually one created
                 if date_gap > timedelta(0) and date_gap > timedelta(
                         days=equipment.calibration_period) * 2 and fields.Date.from_string(
-                        next_maintenance_todo.request_date) > fields.Date.from_string(date_now):
+                    next_maintenance_todo.request_date) > fields.Date.from_string(date_now):
                     # If the new date still in the past, we set it for today
                     if fields.Date.from_string(last_maintenance_done.close_date) + timedelta(
                             days=equipment.calibration_period) < fields.Date.from_string(date_now):
@@ -378,12 +380,14 @@ class MaintenanceEquipment(models.Model):
                     next_date = fields.Date.to_string(
                         fields.Date.from_string(date_now) + timedelta(days=equipment.calibration_period))
             elif last_maintenance_done:
-                next_date = fields.Date.from_string(last_maintenance_done.close_date) + timedelta(days=equipment.calibration_period)
+                next_date = fields.Date.from_string(last_maintenance_done.close_date) + timedelta(
+                    days=equipment.calibration_period)
                 # If when we add the period to the last maintenance done and we still in past, we plan it for today
                 if next_date < fields.Date.from_string(date_now):
                     next_date = date_now
             else:
-                next_date = fields.Date.to_string(fields.Date.from_string(date_now) + timedelta(days=equipment.calibration_period))
+                next_date = fields.Date.to_string(
+                    fields.Date.from_string(date_now) + timedelta(days=equipment.calibration_period))
 
             equipment.next_calibration_action_date = next_date
 
@@ -412,16 +416,21 @@ class MaintenanceEquipment(models.Model):
                 next_requests = self.env['maintenance.request'].search([('stage_id.done', '=', False),
                                                                         ('equipment_id', '=', equipment.id),
                                                                         ('maintenance_type', '=', 'preventive'),
-                                                                        ('request_date', '=', equipment.next_action_date)])
-                need_action = (fields.Date.from_string(equipment.next_action_date) - fields.Date.from_string(fields.Date.context_today(self))).days <= equipment.maintenance_lead_time
+                                                                        ('request_date', '=',
+                                                                         equipment.next_action_date)])
+                need_action = (fields.Date.from_string(equipment.next_action_date) - fields.Date.from_string(
+                    fields.Date.context_today(self))).days <= equipment.maintenance_lead_time
                 if not next_requests and need_action:
                     equipment._create_new_request(equipment.next_action_date)
                     return  # 创建了维护请求就无需创建标定请求
             if equipment.calibration_period:
                 next_requests = self.env['maintenance.request'].search([('stage_id.done', '=', False),
                                                                         ('equipment_id', '=', equipment.id),
-                                                                        ('maintenance_type', 'in', ['calibration', 'preventive']),
-                                                                        ('request_date', 'in', [equipment.next_calibration_action_date, equipment.next_action_date])])
+                                                                        ('maintenance_type', 'in',
+                                                                         ['calibration', 'preventive']),
+                                                                        ('request_date', 'in',
+                                                                         [equipment.next_calibration_action_date,
+                                                                          equipment.next_action_date])])
                 if not next_requests:
                     equipment._create_new_calibration_request(equipment.next_calibration_action_date)
 
@@ -437,23 +446,25 @@ class MaintenanceEquipment(models.Model):
     @api.multi
     def _compute_maintenance_request(self):
         for equipment in self:
-            maintenance_requests = equipment.maintenance_ids.filtered(lambda x: x.maintenance_type == 'corrective' and x.stage_id.done)
+            maintenance_requests = equipment.maintenance_ids.filtered(
+                lambda x: x.maintenance_type == 'corrective' and x.stage_id.done)
             mttr_days = 0
             for maintenance in maintenance_requests:
                 if maintenance.stage_id.done and maintenance.close_date:
-                    mttr_days += (fields.Date.from_string(maintenance.close_date) - fields.Date.from_string(maintenance.request_date)).days
+                    mttr_days += (fields.Date.from_string(maintenance.close_date) - fields.Date.from_string(
+                        maintenance.request_date)).days
             equipment.mttr = len(maintenance_requests) and (mttr_days / len(maintenance_requests)) or 0
 
             maintenance = maintenance_requests.sorted(lambda x: x.request_date)
             if len(maintenance) > 1:
-                equipment.mtbf = (fields.Date.from_string(maintenance[-1].request_date) - fields.Date.from_string(maintenance[0].request_date)).days / (len(maintenance) -1)
+                equipment.mtbf = (fields.Date.from_string(maintenance[-1].request_date) - fields.Date.from_string(
+                    maintenance[0].request_date)).days / (len(maintenance) - 1)
             else:
                 equipment.mtbf = 0
             equipment.latest_failure_date = maintenance and maintenance[-1].request_date or False
             if equipment.mtbf:
-                equipment.estimated_next_failure = fields.Datetime.from_string(equipment.latest_failure_date) + relativedelta(days=equipment.mtbf)
+                equipment.estimated_next_failure = fields.Datetime.from_string(
+                    equipment.latest_failure_date) + relativedelta(days=equipment.mtbf)
             else:
                 equipment.estimated_next_failure = False
             # equipment.mttf = equipment.mtbf - equipment.mttr
-
-

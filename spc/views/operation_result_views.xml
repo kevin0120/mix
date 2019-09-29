@@ -179,8 +179,8 @@
         <field name="arch" type="xml">
             <search>
                 <field name="name" string="KNR/VIN" filter_domain="['|','|', ('vin','ilike',self),('production_id.knr','ilike',self),('production_id.vin','ilike',self)]"/>
-                <field name="product_id" filter_domain="['|', ('product_id.name','ilike',self),('product_id.vehicle_type_code','ilike',self)]"/>
-                <field name="consu_product_id" filter_domain="['|', ('consu_product_id.name','ilike',self), ('consu_product_id.screw_type_code','ilike',self)]"/>
+                <field name="product_id" filter_domain="['|', ('product_id.name','ilike',self),('product_id.default_code','ilike',self)]"/>
+                <field name="consu_product_id" filter_domain="['|', ('consu_product_id.name','ilike',self), ('consu_product_id.default_code','ilike',self)]"/>
                 <field name="workorder_id" string="Operation"/>
                 <field name="workcenter_id" string="Work Center"/>
                 <field name="gun_id" string="Tightening Gun" widget="selection"/>

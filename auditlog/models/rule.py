@@ -20,6 +20,7 @@ class DictDiffer(object):
     (3) keys same in both but changed values
     (4) keys same in both and unchanged values
     """
+
     def __init__(self, current_dict, past_dict):
         self.current_dict, self.past_dict = current_dict, past_dict
         self.set_current = set(current_dict)
@@ -210,7 +211,7 @@ class AuditlogRule(models.Model):
             new_record = create_full.origin(self, vals, **kwargs)
             new_values = dict(
                 (d['id'], d) for d in new_record.sudo()
-                .with_context(prefetch_fields=False).read(list(self._fields)))
+                    .with_context(prefetch_fields=False).read(list(self._fields)))
             rule_model.sudo().create_logs(
                 self.env.uid, self._name, new_record.ids,
                 'create', None, new_values, {'log_type': log_type})
@@ -275,6 +276,7 @@ class AuditlogRule(models.Model):
                     self.env.uid, self._name, self.ids,
                     'read', read_values, None, {'log_type': log_type})
             return result
+
         return read
 
     @api.multi
@@ -289,11 +291,11 @@ class AuditlogRule(models.Model):
             rule_model = self.env['auditlog.rule']
             old_values = dict(
                 (d['id'], d) for d in self.sudo()
-                .with_context(prefetch_fields=False).read(list(self._fields)))
+                    .with_context(prefetch_fields=False).read(list(self._fields)))
             result = write_full.origin(self, vals, **kwargs)
             new_values = dict(
                 (d['id'], d) for d in self.sudo()
-                .with_context(prefetch_fields=False).read(list(self._fields)))
+                    .with_context(prefetch_fields=False).read(list(self._fields)))
             rule_model.sudo().create_logs(
                 self.env.uid, self._name, self.ids,
                 'write', old_values, new_values, {'log_type': log_type})
@@ -330,7 +332,7 @@ class AuditlogRule(models.Model):
             rule_model = self.env['auditlog.rule']
             old_values = dict(
                 (d['id'], d) for d in self.sudo()
-                .with_context(prefetch_fields=False).read(list(self._fields)))
+                    .with_context(prefetch_fields=False).read(list(self._fields)))
             rule_model.sudo().create_logs(
                 self.env.uid, self._name, self.ids, 'unlink', old_values, None,
                 {'log_type': log_type})

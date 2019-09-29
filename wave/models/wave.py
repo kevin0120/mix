@@ -44,7 +44,7 @@ class Wave(models.TransientModel):
     vehicle_id = fields.Many2one('product.product', string='Vehicle Type', domain=[('sa_type', '=', 'vehicle')])
     screw_id = fields.Many2one('product.product', string='Screw Type', domain=[('sa_type', '=', 'screw')])
     assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line')
-    segment_id = fields.Many2one('mrp.worksegament', string='Work Segment')
+    segment_id = fields.Many2one('mrp.worksection', string='Work Segment')
     knr_code = fields.Char(string='KNR')
     vin_code = fields.Char(string='VIN')
     limit = fields.Integer('Query Limit', default=5)

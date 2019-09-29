@@ -8,6 +8,7 @@ import requests as Requests
 
 from requests import ConnectionError, RequestException
 
+
 # MASTER_WROKORDERS_API = '/rush/v1/mrp.routing.workcenter'
 #
 
@@ -15,7 +16,8 @@ from requests import ConnectionError, RequestException
 class MrpRoutingWorkcenter(models.Model):
     _inherit = 'mrp.routing.workcenter'
 
-    gun_id = fields.Many2one('maintenance.equipment', string='Screw Gun', copy=False, domain=lambda self: [('category_id', '=', self.env.ref('sa_base.equipment_Gun').id)])
+    gun_id = fields.Many2one('maintenance.equipment', string='Screw Gun', copy=False,
+                             domain=lambda self: [('category_id', '=', self.env.ref('sa_base.equipment_Gun').id)])
 
     @api.onchange('workcenter_id')
     def _onchange_workcenter_id(self):
@@ -25,8 +27,9 @@ class MrpRoutingWorkcenter(models.Model):
 
     @api.multi
     def name_get(self):
-        return [(operation.id, u"[{0}]{1}@{2}/{3}".format(operation.name, operation.op_job_id.code, operation.workcenter_id.name, operation.routing_id.name)) for operation in self]  # 强制可视化时候名称显示的是code
-
+        return [(operation.id,
+                 u"[{0}]{1}@{2}/{3}".format(operation.name, operation.op_job_id.code, operation.workcenter_id.name,
+                                            operation.routing_id.name)) for operation in self]  # 强制可视化时候名称显示的是code
 
     @api.one
     def _push_mrp_routing_workcenter(self, url):
@@ -51,7 +54,7 @@ class MrpRoutingWorkcenter(models.Model):
                 # 'tolerance_min_degree': qcp.tolerance_min_degree,
                 # 'tolerance_max_degree': qcp.tolerance_max_degree,
                 'consu_product_id': point.product_id.id if point.product_id.id else 0,
-                'nut_no': point.product_id.screw_type_code if point.product_id else '',
+                'nut_no': point.product_id.default_code if point.product_id else '',
             })
 
         for bom_id in bom_ids:
@@ -66,7 +69,7 @@ class MrpRoutingWorkcenter(models.Model):
                 "img": u'data:{0};base64,{1}'.format('image/png',
                                                      operation_id.worksheet_img) if operation_id.worksheet_img else "",
                 "product_id": bom_id.product_id.id if bom_id else 0,
-                "product_type": bom_id.product_id.vehicle_type_code if bom_id else "",
+                "product_type": bom_id.product_id.default_code if bom_id else "",
                 "workcenter_code": operation_id.workcenter_id.code if operation_id.workcenter_id else "",
                 'vehicleTypeImg': u'data:{0};base64,{1}'.format('image/png',
                                                                 bom_id.product_id.image_small) if bom_id.product_id.image_small else "",

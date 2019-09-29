@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import werkzeug
 
-
-from odoo import http, fields,api, SUPERUSER_ID
+from odoo import http, fields, api, SUPERUSER_ID
 import json
 from odoo.http import request, Response
 
@@ -30,9 +29,11 @@ class SaMaintenance(http.Controller):
             if not Ticket:
                 return request.not_found()
 
-            return werkzeug.utils.redirect('/web?db=%s#id=%s&view_type=form&model=maintenance.request' % (db, ticket_id))
+            return werkzeug.utils.redirect(
+                '/web?db=%s#id=%s&view_type=form&model=maintenance.request' % (db, ticket_id))
 
-    @http.route(["/api/v1/maintenance/requests"], type='json', methods=['POST', 'OPTIONS'], auth='none', cors='*', csrf=False)
+    @http.route(["/api/v1/maintenance/requests"], type='json', methods=['POST', 'OPTIONS'], auth='none', cors='*',
+                csrf=False)
     def _create_maintenance_requests(self):
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         kw = request.jsonrequest
@@ -66,7 +67,8 @@ class SaMaintenance(http.Controller):
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=201, headers=headers)
 
-    @http.route(["/api/v1/maintenance/requests/try"], type='json', methods=['POST', 'OPTIONS'], auth='none', cors='*', csrf=False)
+    @http.route(["/api/v1/maintenance/requests/try"], type='json', methods=['POST', 'OPTIONS'], auth='none', cors='*',
+                csrf=False)
     def _try_create_maintenance_requests(self):
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         kw = request.jsonrequest
@@ -81,13 +83,13 @@ class SaMaintenance(http.Controller):
             return Response(body, status=404, headers=headers)
         total_times = kw['times']
         times_since_last_service = kw['sin_last_service']
-        if total_times > gun_id.next_action_times + gun_id.times_margin and gun_id.times >0:
+        if total_times > gun_id.next_action_times + gun_id.times_margin and gun_id.times > 0:
             mType = 'preventive'
-        elif times_since_last_service > gun_id.times and gun_id.times >0:
+        elif times_since_last_service > gun_id.times and gun_id.times > 0:
             mType = 'preventive'
         elif total_times > gun_id.next_calibration_action_times + gun_id.times_margin and gun_id.calibration_times > 0:
             mType = 'calibration'
-        elif times_since_last_service > gun_id.calibration_times and gun_id.calibration_times >0:
+        elif times_since_last_service > gun_id.calibration_times and gun_id.calibration_times > 0:
             mType = 'calibration'
         else:
             # body = json.dumps({'msg': "do not need create maintenance request!!!!"})
@@ -95,8 +97,8 @@ class SaMaintenance(http.Controller):
             return Response(status=204, headers=headers)
 
         m_r = env['maintenance.request'].search([('equipment_id', '=', gun_id.id),
-                                                      ('action_times', '=',total_times),
-                                                      ('maintenance_type','=',mType)])
+                                                 ('action_times', '=', total_times),
+                                                 ('maintenance_type', '=', mType)])
         if m_r:
             body = json.dumps({'msg': "maintenance request is existed !!!!"})
             headers = [('Content-Type', 'application/json')]
@@ -117,5 +119,3 @@ class SaMaintenance(http.Controller):
             body = json.dumps({'msg': "create maintenance request success!!!!"})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=201, headers=headers)
-
-
