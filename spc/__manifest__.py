@@ -27,11 +27,10 @@
         'data/result_data.xml',
         'security/spc_security.xml',
         'security/ir.model.access.csv',
+        'views/mrp_workorder_views.xml',
         'views/spc_menu_views.xml',
         'views/spc_wizard.xml',
         'views/operation_result_views.xml',
-        'views/mrp_production_views.xml',
-        'views/mrp_workorder_views.xml',
         'views/res_config_views.xml',
         'report/spc_report_main.xml',
         'report/report_result_views.xml'

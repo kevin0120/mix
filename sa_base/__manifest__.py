@@ -54,7 +54,6 @@
         'views/maintenance_views.xml',
         'views/quality_views.xml',
         'report/sa_mrp_report_main.xml',
-        'report/mrp_production_pin_template.xml',
         'report/workcenter_report_template.xml',
         'report/equipment_report_template.xml',
         'report/product_product_tempaltes.xml',

@@ -50,7 +50,7 @@ class SaConfiguration(http.Controller):
         # print(vals)
         vin = vals['vin'] if 'vin' in vals else None
         if not vin:
-            body = json.dumps({"msg": "VIN not exists in parameters"})
+            body = json.dumps({"msg": "Track Number(Serial Number/VIN) not exists in parameters"})
             return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
                             status=405)
         mo_name = u'{0}--V001--{1}-{2}-{3}={4}'.format(
@@ -83,7 +83,7 @@ class SaConfiguration(http.Controller):
 
         if not records:
             # 找不到对应车型
-            body = json.dumps({"msg": "vechile model " + vechile_code + " not found"})
+            body = json.dumps({"msg": "vehicle model " + vechile_code + " not found"})
             return Response(body, headers=[('Content-Type', 'application/json'), ('Content-Length', len(body))],
                             status=400)
 

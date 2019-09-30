@@ -37,10 +37,16 @@
             <field name="model">operation.result</field>
             <field name="inherit_id" ref="spc.operation_result_view_tree"/>
             <field name="arch" type="xml">
+                <field name="name" position="attributes">
+                    <attribute name="string">VIN</attribute>
+                </field>
                 <field name="production_id" position="replace">
                 </field>
                 <field name="program_id" position="replace">
                 </field>
+                <xpath expr="//filter[@name='group_by_finished_product']" position="attributes">
+                    <attribute name="string">Vehicle</attribute>
+                </xpath>
             </field>
         </record>
 
@@ -55,12 +61,12 @@
                 </xpath>
                 <xpath expr="//filter[@name='group_by_lacking']" position="replace">
                 </xpath>
-                <field name="name" position="replace">
-                    <field name="name" string="VIN/零件号" filter_domain="[('vin','ilike',self)]"/>
+                <field name="name" position="attributes">
+                    <attribute name="string">VIN/零件号</attribute>
                 </field>
                 <xpath expr="//group[last()]" position="inside">
                     <separator/>
-                    <filter string="VIN/零件号" context="{'group_by': 'vin'}"/>
+                    <filter string="VIN/零件号" context="{'group_by': 'track_no'}"/>
                 </xpath>
             </field>
         </record>

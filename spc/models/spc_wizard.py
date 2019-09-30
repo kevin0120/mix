@@ -19,14 +19,14 @@
 #     controller_ids = fields.Many2many('maintenance.equipment', string='Controllers', domain=[('category_name', '=', 'Controller')])
 #     segment_id = fields.Many2one('mrp.worksection', string='Work Segment')
 #     knr_code = fields.Char(string='KNR')
-#     vin_code = fields.Char(string='VIN')
+#     vin_code = fields.Char(string='Track Number(Serial Number/VIN)')
 #     limit = fields.Integer('Query Limit', default=80)
 #
 #     success_analyze = fields.Text(string='合格率分析', store=False)
 #     success_controller_analyze = fields.Text(string='合格率分析', store=False)
 #
 #     def _get_success_anaylize_data(self,data):
-#         pie = Pie(u"{0}".format(u'单车合格率'), u"KIN/VIN:{0}".format(self.knr_code or self.vin_code), title_pos='center',width=1920,height=1080)
+#         pie = Pie(u"{0}".format(u'单车合格率'), u"KIN/Track Number(Serial Number/VIN):{0}".format(self.knr_code or self.vin_code), title_pos='center',width=1920,height=1080)
 #         style = Style()
 #         pie_style = style.add(label_pos="center", is_label_show=True, label_text_color=None)
 #

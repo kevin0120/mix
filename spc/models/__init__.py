@@ -2,9 +2,9 @@
 
 from . import maintenance_equipment
 from . import result
-from . import mrp_workorder
 from . import quality
 from . import mrp_workcenter
+from . import mrp_workorder
 from . import mrp_production
 from . import sync_results
 from . import push_result

@@ -25,10 +25,10 @@ class TorAngSPCReport(models.TransientModel):
 
     query_date_from = fields.Datetime(string='Query Date From')
     query_date_to = fields.Datetime(string='Query Date to', default=fields.Datetime.now())
-    vehicle_id = fields.Many2one('product.product', string='Vehicle Type', domain=[('sa_type', '=', 'vehicle')])
-    vehicle_code = fields.Char(string='Vehicle Type Code(support Fuzzy search,case-insensitive)')
+    product_id = fields.Many2one('product.product', string='Finished Product SKU')
+    product_sku_code = fields.Char(string='Finished Product SKU Code(support Fuzzy Search, Case-Insensitive)')
     screw_id = fields.Many2one('product.product', string='Screw Type', domain=[('sa_type', '=', 'screw')])
-    gun_id = fields.Many2one('maintenance.equipment', string='Tightening Gun',
+    tool_id = fields.Many2one('maintenance.equipment', string='Tightening Tool(Gun/Wrench)',
                              domain=lambda self: [('category_id.id', '=', self.env.ref('sa_base.equipment_Gun').id)])
     assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line')
     limit = fields.Integer('Query Limit', default=DEFAULT_LIMIT)
@@ -226,17 +226,17 @@ class TorAngSPCReport(models.TransientModel):
             domain += [('control_date', '>=', self.query_date_from)]
         if self.query_date_to:
             domain += [('control_date', '<=', self.query_date_to)]
-        if self.vehicle_code:
-            product_id = self.env['product.product'].sudo().search([('default_code', 'ilike', self.vehicle_code)],
+        if self.product_sku_code:
+            product_id = self.env['product.product'].sudo().search([('default_code', 'ilike', self.product_sku_code)],
                                                                    limit=1)
             if product_id:
                 domain += [('product_id', '=', product_id.id)]
-        if self.vehicle_id:
-            domain += [('product_id', '=', self.vehicle_id.id)]
+        if self.product_id:
+            domain += [('product_id', '=', self.product_id.id)]
         if self.screw_id:
             domain += [('consu_product_id', '=', self.screw_id.id)]
-        if self.gun_id:
-            domain += [('gun_id', '=', self.gun_id.id)]
+        if self.tool_id:
+            domain += [('tool_id', '=', self.tool_id.id)]
         if self.assembly_line_id:
             domain += [('assembly_line_id', '=', self.assembly_line_id.id)]
         if self.spc_target == 'torque':

@@ -115,7 +115,7 @@
                     <field name="worksegment_id" string="Mrp Worksegment"/>
                     <filter string="Archived" domain="[('active','=',False)]"/>
                     <group expand="0" string="Group By...">
-                        <filter string="Work Segment" domain="[]" context="{'group_by':'worksegment_id'}"/>
+                        <filter string="Work Section" domain="[]" context="{'group_by':'worksegment_id'}"/>
                         <!--<filter string="Controller" name="group_by_controller" domain="[]" context="{'group_by':'controller_id'}"/>-->
                     </group>
                 </search>

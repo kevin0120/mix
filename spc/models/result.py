@@ -29,7 +29,7 @@ class OperationResult(models.HyperModel):
     workcenter_id = fields.Many2one('mrp.workcenter', readonly=True)
     production_id = fields.Many2one('mrp.production', 'Production Order')
 
-    vin = fields.Char('Vin')  # 如果无法通过工单查询,使用此字段
+    track_no = fields.Char('Finished Product Tracking Number')  # 如果无法通过工单查询,使用此字段
 
     assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line', readonly=True)
 
@@ -39,7 +39,7 @@ class OperationResult(models.HyperModel):
 
     bom_line_id = fields.Many2one('mrp.bom.line')
 
-    gun_id = fields.Many2one('maintenance.equipment', string='Screw Gun', copy=False)
+    tool_id = fields.Many2one('maintenance.equipment', string='Tightening Tool(Gun/Wrench)', copy=False)
 
     pset_strategy = fields.Selection([('AD', 'Torque tightening'),
                                       ('AW', 'Angle tightening'),
@@ -124,10 +124,10 @@ class OperationResult(models.HyperModel):
 
     tightening_id = fields.Integer('TighteningID')
 
-    _sql_constraints = [('tid_vin_gun_uniq', 'unique(gun_id, tightening_id, vin,time)',
-                         'Per Screw Gun tighening ID VIN must different'),
-                        ('tid_wo_gun_uniq', 'unique(gun_id, tightening_id, workorder_id,time)',
-                         'Per Screw Gun tighening ID  WO must different')]
+    _sql_constraints = [('tid_track_no_gun_uniq', 'unique(tool_id, tightening_id, track_no,time)',
+                         'Per Screw Gun tightening ID Tracking Number must different'),
+                        ('tid_wo_gun_uniq', 'unique(tool_id, tightening_id, workorder_id,time)',
+                         'Per Screw Gun tightening ID  Work Order  must different')]
 
     def init(self):
         self.env.cr.execute("""
@@ -249,10 +249,10 @@ BEGIN
                                        cur_objects, pset_m_target, pset_m_min, final_pass, measure_degree,
                                        measure_t_don,
                                        measure_torque, op_time, pset_w_min, pset_w_target, lacking, quality_state,
-                                       exception_reason, sent, batch, vin,
+                                       exception_reason, sent, batch, track_no,
                                        qcp_id, point_id, bom_line_id, operation_point_id, workorder_id,
                                        consu_product_id, consu_bom_line_id,
-                                       production_id, gun_id, program_id, product_id, assembly_line_id, workcenter_id,
+                                       production_id, tool_id, program_id, product_id, assembly_line_id, workcenter_id,
                                        tightening_id, job,
                                        time)
   VALUES (pset_m_threshold, pset_m_max, control_data, pset_w_max, user_id, r_one_time_pass, pset_strategy,

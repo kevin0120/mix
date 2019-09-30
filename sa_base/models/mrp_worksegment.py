@@ -23,13 +23,13 @@ class MrpWorkAssembly(models.Model):
 
     name = fields.Char('Assembly Line', copy=False)
     code = fields.Char('Reference', copy=False, required=True)
-    worksegment_count = fields.Integer('Work Segments', compute='_compute_worksegments_count')
+    worksegment_count = fields.Integer('Work Sections', compute='_compute_worksegments_count')
 
     active = fields.Boolean(
         'Active', default=True,
         help="If the active field is set to False, it will allow you to hide the bills of material without removing it.")
 
-    worksegment_ids = fields.One2many('mrp.worksection', 'workassembly_id', 'Work Segments', copy=False)
+    worksegment_ids = fields.One2many('mrp.worksection', 'workassembly_id', 'Work Sections', copy=False)
 
     _sql_constraints = [('code_uniq', 'unique(code)', 'Only one code per Work Assembly Line is allowed')]
 
@@ -65,7 +65,7 @@ class MrpWorkSegment(models.Model):
 
     workcenter_ids = fields.One2many('mrp.workcenter', 'worksegment_id', 'Work Centers', copy=False)
 
-    _sql_constraints = [('code_uniq', 'unique(code)', 'Only one code per Work Segment is allowed')]
+    _sql_constraints = [('code_uniq', 'unique(code)', 'Only one code per Work Section is allowed')]
 
     @api.multi
     @api.depends('workcenter_ids')
