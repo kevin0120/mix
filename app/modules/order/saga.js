@@ -30,7 +30,8 @@ import { ORDER_STATUS } from './model';
 import { bindRushAction } from '../rush/rushHealthz';
 import loadingActions from '../loading/action';
 import NotifierActions from '../Notifier/action';
-import Order from './Order';
+import type { updateStateActionType } from './action';
+import type { tClsStep } from '../step/Step';
 
 export default function* root(): Saga<void> {
   try {
@@ -50,10 +51,15 @@ export default function* root(): Saga<void> {
   }
 }
 
-function* updateStatus(action) {
+function* updateStatus(action: updateStateActionType) {
   try {
     const { step } = action;
-    yield call([step, step.updateStatus], action);
+    if(Reflect.has(step, 'updateStatus')){
+      const st = (step: tClsStep);
+      yield call([st, st.updateStatus], action);
+    }else {
+      throw new Error('');
+    }
   } catch (e) {
     CommonLog.lError(e, {
       at: 'order.saga.updateStatus'

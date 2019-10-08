@@ -1,6 +1,7 @@
 // @flow
 
 import React, { useState } from 'react';
+import type { Node} from 'react'
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Menu } from '@material-ui/icons';
@@ -10,14 +11,15 @@ import { I18n } from 'react-i18next';
 import Button from '../../components/CustomButtons/Button';
 import styles from './styles';
 import { translation as trans, stepWorkingNS } from './local';
-import type { Dispatch } from '../../modules/indexReducer';
 import * as oSel from '../../modules/order/selector';
 import { orderActions } from '../../modules/order/action';
-import type { tOrder, tStep, tStepArray } from '../../modules/order/model';
+import type { tStep, tStepArray } from '../../modules/order/model';
 import dialogActions from '../../modules/dialog/action';
 import { tNS, withI18n } from '../../i18n';
 import Table from '../../components/Table/Table';
 import modelViewerActions from '../../modules/modelViewer/action';
+import type { tClsOrder } from '../../modules/order/Order';
+import type { orderTriggerType, updateStateActionType } from '../../modules/order/action';
 
 const mapState = (state, props) => {
   const vOrder = oSel.viewingOrder(state.order);
@@ -48,27 +50,31 @@ const mapDispatch = {
 };
 
 type ButtonsContainerProps = {
-  viewingOrder: tOrder,
+  viewingOrder: tClsOrder,
   viewingIndex: number,
   viewingStep: tStep,
   workingStep: tStep,
   viewingIndex: number,
   steps: tStepArray,
-  next: Dispatch,
-  action: Dispatch,
-  previous: Dispatch,
-  doNextStep: Dispatch,
-  doPreviousStep: Dispatch,
-  cancelOrder: Dispatch,
-  pendingOrder: Dispatch,
+  /* eslint-disable flowtype/no-weak-types */
+  next: ()=> any,
+  action: Node,
+  previous: ()=> any,
+  doNextStep: ()=> any,
+  doPreviousStep: ()=> any,
+  cancelOrder: (order: tClsOrder)=> updateStateActionType,
+  pendingOrder: (order: tClsOrder)=> updateStateActionType,
   isPending: boolean,
   // isCancel: boolean,
   pendingable: boolean,
   cancelable: boolean,
-  workOn: Dispatch
+  workOn: (order: tClsOrder)=> orderTriggerType,
+  viewModel: any, // 查看的三维模型
+  viewModelDialog: any
+  /* eslint-enable flowtype/no-weak-types */
 };
 
-const ButtonsContainer = ({
+const ButtonsContainer: (ButtonsContainerProps) => Node = ({
                             viewingOrder,
                             viewingStep,
                             workingStep,
@@ -240,4 +246,4 @@ const ButtonsContainer = ({
     </div>), stepWorkingNS);
 };
 
-export default connect(mapState, mapDispatch)(ButtonsContainer);
+export default connect<ButtonsContainerProps,*, _,_,_,_>(mapState, mapDispatch)(ButtonsContainer);

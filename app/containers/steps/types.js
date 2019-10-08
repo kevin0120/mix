@@ -1,8 +1,10 @@
-import PropTypes from 'prop-types';
+// @flow
+
+import type { Node } from 'react';
 
 export type tStepProps = {
-  bindAction: (PropTypes.Element)=>mixed,
-  step: {},
+  bindAction: (Node)=>any,
+  step: Object,
   isCurrent: boolean,
-  bindDescription: (PropTypes.Element)=>mixed
+  bindDescription: (Node)=>any
 };

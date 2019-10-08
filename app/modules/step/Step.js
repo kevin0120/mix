@@ -45,7 +45,7 @@ export default class Step {
     updateStatus: orderStepUpdateApi
   };
 
-  _steps = [];
+  _steps: Array<tClsStep> = [];
 
   _onLeave = null;
 

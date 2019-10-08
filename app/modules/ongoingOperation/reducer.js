@@ -12,11 +12,13 @@ const defaultOngoingOperation = {
 
 type actionType = {
   +type: string,
-  +data: object
+  // eslint-disable-next-line flowtype/no-weak-types
+  +data: Object
 };
 
 export default function ongoingOperation(
-  state: object = defaultOngoingOperation,
+  // eslint-disable-next-line flowtype/no-weak-types
+  state: Object = defaultOngoingOperation,
   action: actionType
 ) {
   switch (action.type) {

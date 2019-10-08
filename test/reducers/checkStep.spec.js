@@ -1,8 +1,7 @@
 import counter from '../../app/reducers/counter';
 import {
-  INCREMENT_COUNTER,
-  DECREMENT_COUNTER
-} from '../../app/actions/counter';
+  CHECK_STEP,
+} from '../../app/modules/step/checkStep/action';
 
 describe('reducers', () => {
   describe('counter', () => {
@@ -10,12 +9,12 @@ describe('reducers', () => {
       expect(counter(undefined, {})).toMatchSnapshot();
     });
 
-    it('should handle INCREMENT_COUNTER', () => {
-      expect(counter(1, { type: INCREMENT_COUNTER })).toMatchSnapshot();
+    it('should handle CHECK_STEP.SUBMIT', () => {
+      expect(counter(1, { type: CHECK_STEP.SUBMIT })).toMatchSnapshot();
     });
 
-    it('should handle DECREMENT_COUNTER', () => {
-      expect(counter(1, { type: DECREMENT_COUNTER })).toMatchSnapshot();
+    it('should handle CHECK_STEP.CANCEL', () => {
+      expect(counter(1, { type: CHECK_STEP.CANCEL })).toMatchSnapshot();
     });
 
     it('should handle unknown action type', () => {

@@ -4,7 +4,8 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import axiosRetry, { exponentialDelay } from 'axios-retry';
 import { isNil, cloneDeep } from 'lodash-es';
-import moment, { DurationInputArg1 } from 'moment';
+import moment from 'moment';
+import type DurationInputArg1  from 'moment';
 import { Info, lError, Warn, Debug, Maintenance } from '../logger';
 
 const VINMap = {
@@ -63,7 +64,7 @@ export function normalSortObj(obj) {
 }
 
 // type: default、error、warning、success、info
-export function showNoty(type, text) {
+export function showNoty(type: string, text: string) {
   toast(text, {
     type,
     position: 'top-right',
@@ -111,7 +112,7 @@ function isLongPin(data: string): boolean {
 }
 
 function checkNaturalNumber(data: string): boolean {
-  return /^[0-9]+$/.test(data) && data > 0;
+  return /^[0-9]+$/.test(data) && data.length > 0;
 }
 
 // source: https://en.wikipedia.org/wiki/Vehicle_identification_number#Example_Code

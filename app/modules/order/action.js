@@ -1,7 +1,14 @@
 // @flow
 import type { tOrder, tOrderStepIdx, tStepStatus } from './model';
+import type { tClsOrder } from './Order';
 import type { tClsStep } from '../step/Step';
 import { ORDER_STATUS } from './model';
+
+export type updateStateActionType = {
+  type: string,
+  step: tClsOrder | tClsStep,
+  status: tStepStatus
+};
 
 export const ORDER = {
   WORK_ON: 'ORDER_WORK_ON',
@@ -45,7 +52,8 @@ export const orderActions = {
   getList: () => ({
     type: ORDER.LIST.GET
   }),
-  newOrder: (list) => ({
+  // eslint-disable-next-line flowtype/no-weak-types
+  newOrder: (list: Array<any>) => ({
     type: ORDER.NEW,
     list
   }),
@@ -72,20 +80,20 @@ export const orderActions = {
     order
   }),
   // order status
-  workOn: (order: tOrder): orderTriggerType => ({
+  workOn: (order: tClsOrder): orderTriggerType => ({
     type: ORDER.WORK_ON,
-    order
+    order,
   }),
-  finishOrder: (order: tOrder) => ({
+  finishOrder: (order: tClsOrder): orderTriggerType => ({
     type: ORDER.FINISH,
-    order
+    order,
   }),
-  cancelOrder: (order: tOrder) => ({
+  cancelOrder: (order: tClsOrder): updateStateActionType => ({
     type: ORDER.STEP.STATUS,
     step: order,
     status: ORDER_STATUS.CANCEL
   }),
-  pendingOrder: (order: tOrder) => ({
+  pendingOrder: (order: tClsOrder): updateStateActionType => ({
     type: ORDER.STEP.STATUS,
     step: order,
     status: ORDER_STATUS.PENDING
@@ -100,7 +108,7 @@ export const orderActions = {
     type: ORDER.STEP.JUMP_TO,
     stepId
   }),
-  stepStatus: (step: tClsStep, status: tStepStatus, msg) => ({
+  stepStatus: (step: tClsStep, status: tStepStatus, msg: string = "") => ({
     type: ORDER.STEP.STATUS,
     step,
     status,
@@ -115,7 +123,7 @@ export const orderActions = {
   updateState: () => ({
     type: ORDER.UPDATE_STATE
   }),
-  finishStep: (step) => ({
+  finishStep: (step: tClsStep) => ({
     type: ORDER.STEP.FINISH,
     step
   })

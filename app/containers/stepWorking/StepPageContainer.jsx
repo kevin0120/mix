@@ -1,18 +1,19 @@
 // @flow
 import React from 'react';
+import type { Node } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles, Paper, Grid, Typography } from '@material-ui/core';
 import { InfoOutlined } from '@material-ui/icons';
-import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import stepTypes from '../steps/stepTypes';
 import * as oSel from '../../modules/order/selector';
 import styles from './styles';
 import type { tStep } from '../../modules/order/model';
 import TimeLine from '../../components/WorkPageTimeline';
+import type { tClsStep } from '../../modules/step/Step';
 
 const mapState = (state, props) => {
-  const vStep = oSel.viewingStep(state.order);
+  const vStep: tClsStep = oSel.viewingStep(state.order);
   return {
     ...props,
     step: vStep,
@@ -26,19 +27,19 @@ const mapDispatch = {};
 type Props = {
   step: tStep,
   workingStep: tStep,
-  bindAction: (PropTypes.Element)=>mixed,
+  bindParentAction: (Node)=>any,
   timeLine: Array<any>,
-  bindDescription: (PropTypes.Element)=>mixed,
-  description: PropTypes.Element
+  bindParentDescription: (Node)=>any,
+  description: Node
 };
 
 const StepPageContainer = ({
                              step,
                              workingStep,
-                             bindAction,
+                             bindParentAction,
                              timeLine,
                              description,
-                             bindDescription
+                             bindParentDescription
                            }: Props) => {
   const classes = makeStyles(styles.stepPageContainer)();
   if (stepTypes?.[step?.type]?.component) {
@@ -52,8 +53,8 @@ const StepPageContainer = ({
                 <StepComponent
                   step={step}
                   isCurrent={step === workingStep}
-                  bindAction={bindAction}
-                  bindDescription={bindDescription}
+                  bindAction={bindParentAction}
+                  bindDescription={bindParentDescription}
                 />
               )) ||
               null}
@@ -98,7 +99,4 @@ const StepPageContainer = ({
   return null;
 };
 
-export default connect(
-  mapState,
-  mapDispatch
-)(StepPageContainer);
+export default connect<Props, *, _, _, _, _>(mapState, mapDispatch)(StepPageContainer);

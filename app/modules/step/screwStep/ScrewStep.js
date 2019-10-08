@@ -1,8 +1,8 @@
-import { cloneDeep } from 'lodash-es';
+import { cloneDeep, isNil, isEmpty } from 'lodash-es';
 import { call, put, take, all } from 'redux-saga/effects';
 import Step from '../Step';
 import STEP_STATUS from '../model';
-import type { tPoint, tScrewStepData, tScrewStepPayload } from './model';
+import type { tPoint, tScrewStepData, tScrewStepPayload, ClsOrderOperationPoints } from './model';
 import { CommonLog } from '../../../common/utils';
 import handleResult from './handleResult';
 import controllerModeTasks from './controllerModeTasks';
@@ -30,10 +30,22 @@ function* doPoint(point, isFirst, orderActions) {
 
 export default class ScrewStep extends Step {
   _tools = [];
+  
+  isValid: boolean = false;
+  
+  _orderOperationPoints: ClsOrderOperationPoints;
 
   constructor(...args) {
     super(...args);
     const self = this;
+    const payload: tScrewStepPayload = this._payload;
+    if(isNil(payload) || isEmpty(payload)) {
+      CommonLog.lError(`ScrewStepPayload Is Empty! Payload: ${String(payload)}`);
+      return;
+    }
+    
+    this._orderOperationPoints = new ClsOrderOperationPoints(payload);
+    
     this._onLeave = function* onLeave() {
       try {
         yield all(self._tools.map(t => t.isEnable ? call(t.Disable) : null).filter(s => !!s));
@@ -47,6 +59,7 @@ export default class ScrewStep extends Step {
         });
       }
     };
+    this.isValid = true; // 设置此工步是合法的
   }
 
   _statusTasks = {

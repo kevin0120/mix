@@ -1,5 +1,6 @@
 // @flow
 import React, { useState } from 'react';
+import type {Node} from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Typography, Paper } from '@material-ui/core';
@@ -13,12 +14,13 @@ import StepPageContainer from './StepPageContainer';
 import type { tOrderStatus } from '../../modules/order/model';
 import { ORDER_STATUS } from '../../modules/order/model';
 import logo from '../../../resources/imgs/logo.jpg';
-import { translation as trans, stepWorkingNS } from './local';
+import { stepWorkingNS } from './local';
 import { withI18n } from '../../i18n';
 
 type Props = {
   status: ?tOrderStatus,
-  name: ?string
+  name: ?string,
+  desc: ?string
 };
 
 const statusMap = classes => ({
@@ -30,10 +32,16 @@ const statusMap = classes => ({
   [ORDER_STATUS.PENDING]: classes.statusPending
 });
 
-function StepWorking({ status, name, desc }: Props) {
+function StepWorking({ status, desc }: Props): Node {
   const classes = makeStyles(styles.layout)();
   const [action, bindAction] = useState(null);
+  /* eslint-disable-next-line no-unused-expressions */
+  (action: Node);
   const [description, bindDescription] = useState(null);
+  /* eslint-disable no-unused-expressions */
+  (description: Node);
+  (bindDescription: (Node)=>any);
+  /* eslint-enable no-unused-expressions */
   return withI18n(t => (
     <div className={classes.root}>
       <Paper square className={classes.topBarContainer}>
@@ -66,8 +74,8 @@ function StepWorking({ status, name, desc }: Props) {
         <Paper square classes={{ root: classes.leftContainer }}>
           <ButtonsContainer action={action}/>
           <StepPageContainer
-            bindAction={bindAction}
-            bindDescription={bindDescription}
+            bindParentAction={bindAction}
+            bindParentDescription={bindDescription}
             description={description}/>
         </Paper>
         <div className={classes.rightContainer}>
@@ -92,7 +100,4 @@ const mapState = (state, props) => {
 
 const mapDispatch = {};
 
-export default connect(
-  mapState,
-  mapDispatch
-)(StepWorking);
+export default connect<Props,*,_,_,_,_>(mapState, mapDispatch)(StepWorking);

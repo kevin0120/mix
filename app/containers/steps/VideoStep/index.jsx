@@ -24,7 +24,6 @@ type Props = {
 };
 
 function InstructionStep({ step, isCurrent, submit, bindAction, video }: Props & tStepProps) {
-  console.log(video);
   const classes=makeStyles(styles)();
   useEffect(() => {
     bindAction(

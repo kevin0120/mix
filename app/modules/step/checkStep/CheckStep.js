@@ -10,7 +10,7 @@ export default class CheckStep extends Step {
       try {
         yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
       } catch (e) {
-        console.error(e);
+        CommonLog.lError(`CheckStep Entering Error: ${e}`);
       }
     },
     * [STEP_STATUS.DOING](ORDER, orderActions) {
@@ -27,7 +27,7 @@ export default class CheckStep extends Step {
 
         }
       } catch (e) {
-        CommonLog.lError(e);
+        CommonLog.lError(`CheckStep DOING Error: ${e}`);
       }
     },
     * [STEP_STATUS.FINISHED](ORDER, orderActions) {
@@ -41,7 +41,7 @@ export default class CheckStep extends Step {
       try {
         yield put(orderActions.finishStep(this));
       } catch (e) {
-        console.error(e);
+        CommonLog.lError(`CheckStep FAIL Error: ${e}`);
       }
     }
   };
