@@ -14,6 +14,10 @@ function invalidStepStatus(stepType, status) {
   throw Error(`step type ${stepType}  has empty status ${status}`);
 }
 
+export interface IWorkStep {
+  
+}
+
 export default class Step {
   _id = '';
 

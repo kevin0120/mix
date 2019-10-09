@@ -23,7 +23,7 @@ import dialogActions from '../dialog/action';
 import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
 import { CommonLog } from '../../common/utils';
-import type { tOrder, tStep, tStepArray } from './model';
+import type { tStep, tStepArray } from './model';
 import type { tCommonActionType } from '../../common/type';
 import { orderDetailApi, orderListApi } from '../../api/order';
 import { ORDER_STATUS } from './model';
@@ -32,6 +32,7 @@ import loadingActions from '../loading/action';
 import NotifierActions from '../Notifier/action';
 import type { updateStateActionType } from './action';
 import type { tClsStep } from '../step/Step';
+import type { tClsOrder } from './Order';
 
 export default function* root(): Saga<void> {
   try {
@@ -58,7 +59,7 @@ function* updateStatus(action: updateStateActionType) {
       const st = (step: tClsStep);
       yield call([st, st.updateStatus], action);
     }else {
-      throw new Error('');
+      throw new Error('updateStatus Error, The Step Without updateStatus Property');
     }
   } catch (e) {
     CommonLog.lError(e, {
@@ -107,8 +108,9 @@ function* DebounceViewStep(d, action: tCommonActionType) {
 
 
 function* getOrderDetail({ order }) {
+  const rOrder: tClsOrder = (order: tClsOrder);
   try {
-    const resp = yield call(orderDetailApi, order.id);
+    const resp = yield call(orderDetailApi, rOrder.id);
     if (resp.result !== 0) {
       yield put(orderActions.getDetailFail());
     }
@@ -130,8 +132,10 @@ function* getOrderList() {
 }
 
 function* viewOrder({ order }) {
+  // eslint-disable-next-line no-unused-expressions
+  (order: tClsOrder);
   try {
-    const WIPOrder: tOrder = yield select(s => workingOrder(s.order));
+    const WIPOrder: tClsOrder = yield select(s => workingOrder(s.order));
 
 
     if (WIPOrder === order) {
