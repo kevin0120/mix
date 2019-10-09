@@ -14,7 +14,7 @@ export default class CommonExternalEntity implements IHealthChecker {
 
   #enable: boolean = false;
 
-  #_children: Set<CommonExternalEntity> = new Set([]);
+  #_children: Set<CommonExternalEntity> = new Set();
 
   constructor(name: string) {
     this.#name = name;
@@ -59,13 +59,13 @@ export default class CommonExternalEntity implements IHealthChecker {
     if (!isHealthz) {
       this.Disable();
     }
-    if (this.#_children.length > 0 && !isHealthz) {
+    if (this.#_children.size > 0 && !isHealthz) {
       this.#_children.forEach(c => {
         c.Healthz = false;
       });
     }
 
-    if (this.#_children.length > 0 && isHealthz) {
+    if (this.#_children.size > 0 && isHealthz) {
       this.#_children.forEach(c => {
 
       });
