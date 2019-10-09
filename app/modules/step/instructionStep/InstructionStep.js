@@ -1,11 +1,9 @@
 import { put, take } from 'redux-saga/effects';
-import Step from '../Step';
 import STEP_STATUS from '../model';
 import { INSTRUCTION_STEP } from './action';
 
 
-
-export default class InstructionStep extends Step {
+const InstructionStepMixin = (ClsBaseStep) => class ClsInstructionStep extends ClsBaseStep {
   _statusTasks = {
     * [STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {
@@ -30,4 +28,5 @@ export default class InstructionStep extends Step {
       }
     }
   }
-}
+};
+export default InstructionStepMixin;

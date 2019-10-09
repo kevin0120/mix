@@ -1,15 +1,13 @@
 import { put, take } from 'redux-saga/effects';
-import Step from '../Step';
 import STEP_STATUS from '../model';
 import { INPUT_STEP } from './action';
 
 
-
-export default class InputStep extends Step {
+const InputStepMixin = (ClsBaseStep) => class ClsInputStep extends ClsBaseStep {
   _statusTasks = {
     * [STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {
-        yield put(orderActions.stepStatus(this,STEP_STATUS.DOING));
+        yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
       } catch (e) {
         console.error(e);
       }
@@ -20,9 +18,9 @@ export default class InputStep extends Step {
           const { payload } = yield take(INPUT_STEP.SUBMIT);
           if (payload) {
             if (payload === 'fail') {
-              yield put(orderActions.stepStatus(this,STEP_STATUS.FAIL));
+              yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL));
             } else {
-              yield put(orderActions.stepStatus(this,STEP_STATUS.FINISHED));
+              yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED));
             }
           }
         }
@@ -45,4 +43,5 @@ export default class InputStep extends Step {
       }
     }
   };
-}
+};
+export default InputStepMixin;

@@ -1,5 +1,4 @@
 import { call, put, select, take, all, race } from 'redux-saga/effects';
-import Step from '../Step';
 import STEP_STATUS from '../model';
 import { stepPayload, workingOrder, workingStep } from '../../order/selector';
 import { getDevice } from '../../external/device';
@@ -9,7 +8,7 @@ import actions, { MATERIAL_STEP } from './action';
 
 const items = (payload) => payload?.items;
 
-export default class MaterialStep extends Step {
+const MaterialStepMixin = (ClsBaseStep) => class ClsMaterialStep extends ClsBaseStep {
   _ports = new Set([]);
 
   _io = new Set([]);
@@ -149,4 +148,5 @@ export default class MaterialStep extends Step {
       }
     }
   };
-}
+};
+export default MaterialStepMixin;

@@ -1,10 +1,10 @@
 import { put, take, race } from 'redux-saga/effects';
-import Step from '../Step';
 import STEP_STATUS from '../model';
 import { CHECK_STEP } from './action';
-import {CommonLog} from '../../../common/utils';
+import { CommonLog } from '../../../common/utils';
 
-export default class CheckStep extends Step {
+
+const CheckStepMixin = (ClsBaseStep) => class ClsCheckStep extends ClsBaseStep {
   _statusTasks = {
     * [STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {
@@ -45,4 +45,5 @@ export default class CheckStep extends Step {
       }
     }
   };
-}
+};
+export default CheckStepMixin;

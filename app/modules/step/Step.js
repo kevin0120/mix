@@ -3,6 +3,7 @@ import { CommonLog } from '../../common/utils';
 import { orderStepUpdateApi } from '../../api/order';
 import { ORDER, orderActions } from '../order/action';
 import STEP_STATUS from './model';
+import stepTypes from './stepTypes';
 
 function invalidStepStatus(stepType, status) {
   if (!stepType) {
@@ -15,7 +16,7 @@ function invalidStepStatus(stepType, status) {
 }
 
 export interface IWorkStep {
-  
+
 }
 
 export default class Step {
@@ -53,7 +54,7 @@ export default class Step {
 
   _onLeave = null;
 
-  constructor(stepObj, stepTypes, parentID) {
+  constructor(stepObj, parentID) {
     this._id = stepObj.id;
     this.update(stepObj, stepTypes);
     this.run = this.run.bind(this);
@@ -62,7 +63,7 @@ export default class Step {
     this.updateData = this.updateData.bind(this);
   }
 
-  update(stepObj, stepTypes) {
+  update(stepObj) {
     this._name = stepObj.name || 'unnamed step';
     this._desc = stepObj.desc || '';
     this._info = stepObj.info;
@@ -76,7 +77,7 @@ export default class Step {
         existStep.update(sD, stepTypes);
         return existStep;
       }
-      return new stepTypes[sD.type](sD);
+      return new (stepTypes[sD.type](Step))(sD);
     }) : this._steps;
 
     this._payload = stepObj.payload || this._payload;
@@ -188,7 +189,7 @@ export default class Step {
     }
   }
 
-  *_runStatusTask({ status, msg }){
+  * _runStatusTask({ status, msg }) {
     if (status in this._statusTasks) {
       try {
         if (this._runningStatusTask) {
@@ -208,6 +209,7 @@ export default class Step {
 
   * run(initStatus) {
     const runStatusTask = this._runStatusTask.bind(this);
+
     function* runStep() {
       try {
         while (true) {

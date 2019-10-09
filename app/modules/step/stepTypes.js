@@ -1,17 +1,17 @@
-import InputStep from './inputStep/InputStep';
-import ScannerStep from './scannerStep/ScannerStep';
-import InstructionStep from './instructionStep/InstructionStep';
-import ScrewStep from './screwStep/ScrewStep';
-import MaterialStep from './materialStep/MaterialStep';
-import CheckStep from './checkStep/CheckStep';
-import videoStep from './videoStep/videoStep';
+import InputStepMixin from './inputStep/InputStep';
+import ScannerStepMixin from './scannerStep/ScannerStep';
+import InstructionStepMixin from './instructionStep/InstructionStep';
+import ScrewStepMixin from './screwStep/ScrewStep';
+import MaterialStepMixin from './materialStep/MaterialStep';
+import CheckStepMixin from './checkStep/CheckStep';
+import videoStepMixin from './videoStep/videoStep';
 
 export default {
-  input: InputStep,
-  scanner: ScannerStep,
-  instruction: InstructionStep,
-  screw: ScrewStep,
-  material: MaterialStep,
-  check: CheckStep,
-  video: videoStep
+  input: InputStepMixin,
+  scanner: ScannerStepMixin,
+  instruction: InstructionStepMixin,
+  screw: ScrewStepMixin,
+  material: MaterialStepMixin,
+  check: CheckStepMixin,
+  video: videoStepMixin
 };

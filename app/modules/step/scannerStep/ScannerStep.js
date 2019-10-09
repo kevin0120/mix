@@ -1,5 +1,4 @@
 import { call, put, select, take } from 'redux-saga/effects';
-import Step from '../Step';
 import STEP_STATUS from '../model';
 import { stepData, stepPayload, workingOrder, workingStep } from '../../order/selector';
 import { SCANNER_STEP, scannerStepAction } from './action';
@@ -7,11 +6,12 @@ import { deviceType, getDevicesByType } from '../../external/device';
 import { CommonLog } from '../../../common/utils';
 
 
-export default class ScannerStep extends Step {
+const ScannerStepMixin = (ClsBaseStep) => class ClsScannerStep extends ClsBaseStep {
+
   _scanners = [];
 
-  _onLeave=()=>{
-    this._scanners=[];
+  _onLeave = () => {
+    this._scanners = [];
     console.log('scanners cleared');
   };
 
@@ -83,10 +83,11 @@ export default class ScannerStep extends Step {
     * [STEP_STATUS.FINISHED](ORDER, orderActions) {
       try {
         yield put(orderActions.finishStep(this));
-        this._scanners=[];
+        this._scanners = [];
       } catch (e) {
         CommonLog.lError(e);
       }
     }
   };
-}
+};
+export default ScannerStepMixin;
