@@ -13,7 +13,6 @@ import {
   workingOrder,
   workingStep
 } from './selector';
-import stepTypes from '../step/stepTypes';
 import Order from './Order';
 
 const initState = {
@@ -26,7 +25,7 @@ const initState = {
     demoOrderCancel,
     demoOrderPending,
     demoOrderDone
-  ].map(o => new Order(o, stepTypes))
+  ].map(o => new Order(o))
 };
 
 
@@ -64,7 +63,7 @@ const orderReducer: {
     // update order data
     newList.forEach((o) => {
       const orderData = list.find(newO => o.id === newO.id);
-      o.update(orderData, stepTypes);
+      o.update(orderData);
     });
 
     // make new orders
@@ -72,10 +71,10 @@ const orderReducer: {
       list.filter(newO =>
         !newList.find(o => o.id === newO.id)
       ).map(
-        oD => new Order(oD, stepTypes)
+        oD => new Order(oD)
       )
     );
-    // const newList = list.map(oD => new Order(oD, stepTypes));
+    // const newList = list.map(oD => new Order(oD));
     return {
       ...state,
       list: newList
@@ -89,7 +88,7 @@ const orderReducer: {
     newList.forEach((o) => {
       const orderData = list.find(newO => o.id === newO.id);
       if(orderData){
-        o.update(orderData, stepTypes);
+        o.update(orderData);
       }
     });
 
@@ -98,7 +97,7 @@ const orderReducer: {
       list.filter(newO =>
         !newList.find(o => o.id === newO.id)
       ).map(
-        oD => new Order(oD, stepTypes)
+        oD => new Order(oD)
       )
     );
 
@@ -111,7 +110,7 @@ const orderReducer: {
     const newList = [...state.list];
     const newOrder = newList.find(o => o.id === order.id);
     if (newOrder) {
-      newOrder.update(order, stepTypes);
+      newOrder.update(order);
     }
     return {
       ...state,
