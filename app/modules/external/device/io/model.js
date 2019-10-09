@@ -18,7 +18,6 @@ import { ioDirection, ioTriggerMode } from './type';
 import { ioSetApi, ioContactApi, ioStatusApi } from '../../../../api/io';
 
 export default class ClsIOModule extends Device {
-
   #data: tIOData = { input: '', output: '' };
 
   #ports: Array<tIOPort> = [];
@@ -29,7 +28,11 @@ export default class ClsIOModule extends Device {
 
   #listeners: Array<tIOListener> = [];
 
-  constructor(name: string, serialNumber: string, config: { input_num: number, output_num: number }) {
+  constructor(
+    name: string,
+    serialNumber: string,
+    config: { input_num: number, output_num: number }
+  ) {
     super(name, serialNumber);
     const { input_num, output_num } = config;
     this.#maxInputs = input_num;
@@ -83,7 +86,6 @@ export default class ClsIOModule extends Device {
       default:
         return false;
     }
-
   }
 
   _storeDataField(newData: tIOContact): void {
@@ -94,7 +96,6 @@ export default class ClsIOModule extends Device {
     }
     this.#data[direction] = contact;
   }
-
 
   _getIOChanges(newData: tIOContact): Array<tIOChange> {
     const changes: Array<tIOChange> = [];
@@ -138,7 +139,6 @@ export default class ClsIOModule extends Device {
     });
 
     return changes;
-
   }
 
   // eslint-disable-next-line flowtype/no-weak-types
@@ -148,22 +148,25 @@ export default class ClsIOModule extends Device {
       return [];
     }
     const changes = this._getIOChanges(newData, ...actionParams);
-    const matchedListeners = this.#listeners.filter((l) =>
-      changes.findIndex(c =>
-        c.port === l.port && c.triggerMode === l.triggerMode
-      ) >= 0
+    const matchedListeners = this.#listeners.filter(
+      l =>
+        changes.findIndex(
+          c => c.port === l.port && c.triggerMode === l.triggerMode
+        ) >= 0
     );
 
     this._storeDataField(newData);
-    return matchedListeners.map(l => l.dispatcher({
-      data: newData,
-      source: this.Name,
-      time: new Date()
-    }));
+    return matchedListeners.map(l =>
+      l.dispatcher({
+        data: newData,
+        source: this.Name,
+        time: new Date()
+      })
+    );
   }
 
   // eslint-disable-next-line flowtype/no-weak-types
-  set dispatcher(dispatcher: null | (...args: any) => AnyAction) {
+  set dispatcher(dispatcher: null | ((...args: any) => AnyAction)) {
     super.dispatcher = null; // 永远设置的是null
   }
 
@@ -172,7 +175,7 @@ export default class ClsIOModule extends Device {
     return null;
   }
 
-  * doDispatch(newData: tIOContact): Saga<void> {
+  *doDispatch(newData: tIOContact): Saga<void> {
     // CommonLog.Info(`IO Module Please Use doHandleIOData Method`);
     try {
       const actions = this._doHandleIOData(newData);
@@ -182,7 +185,6 @@ export default class ClsIOModule extends Device {
           yield put(a);
         }
       }
-
     } catch (e) {
       CommonLog.lError(e, {
         at: 'doDispatch',
@@ -191,7 +193,7 @@ export default class ClsIOModule extends Device {
     }
   }
 
-  * setIO(port: tIOPort, value: boolean): Saga<void> {
+  *setIO(port: tIOPort, value: boolean): Saga<void> {
     try {
       const status = value ? 1 : 0;
       yield call(ioSetApi, this.serialNumber, port.idx, status);
@@ -200,7 +202,7 @@ export default class ClsIOModule extends Device {
     }
   }
 
-  * openIO(port: tIOPort | Array<tIOPort>): Saga<void> {
+  *openIO(port: tIOPort | Array<tIOPort>): Saga<void> {
     try {
       if (port instanceof Array) {
         // eslint-disable-next-line no-restricted-syntax
@@ -215,7 +217,7 @@ export default class ClsIOModule extends Device {
     }
   }
 
-  * closeIO(port: tIOPort | Array<tIOPort>): Saga<void> {
+  *closeIO(port: tIOPort | Array<tIOPort>): Saga<void> {
     try {
       if (port instanceof Array) {
         // eslint-disable-next-line no-restricted-syntax
@@ -230,7 +232,7 @@ export default class ClsIOModule extends Device {
     }
   }
 
-  * getStatus(): Saga<void> {
+  *getStatus(): Saga<void> {
     try {
       yield call(ioStatusApi, this.serialNumber);
     } catch (e) {
@@ -238,7 +240,7 @@ export default class ClsIOModule extends Device {
     }
   }
 
-  * ioContact(): Saga<void> {
+  *ioContact(): Saga<void> {
     try {
       yield call(ioContactApi, this.serialNumber);
     } catch (e) {
@@ -247,7 +249,11 @@ export default class ClsIOModule extends Device {
   }
 
   // eslint-disable-next-line flowtype/no-weak-types
-  addListener(port: tIOPort, triggerMode: tIOTriggerMode, dispatcher: (...args: any) => AnyAction) {
+  addListener(
+    port: tIOPort,
+    triggerMode: tIOTriggerMode,
+    dispatcher: (...args: any) => AnyAction
+  ) {
     const listener = {
       port,
       triggerMode,
@@ -260,8 +266,4 @@ export default class ClsIOModule extends Device {
   removeListener(listener: tIOListener) {
     return remove(this.#listeners, l => l === listener);
   }
-
-
 }
-
-

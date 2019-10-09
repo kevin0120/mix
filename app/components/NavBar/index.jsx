@@ -17,7 +17,7 @@ import NavBarMenu from './NavBarMenu';
 import LanguageMenu from './LanguageMenu';
 import type { tRouteObj, tUrl } from '../../containers/model';
 import type { Dispatch } from '../../modules/indexReducer';
-import type { tUser } from '../../modules/user/model';
+import type { tUser } from '../../modules/user/interface/model';
 import notifyActions from '../../modules/Notifier/action';
 
 type Props = {

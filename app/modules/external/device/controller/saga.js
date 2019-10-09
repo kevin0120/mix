@@ -9,9 +9,11 @@ import type { tRushWebSocketData } from '../../../rush/type';
 // eslint-disable-next-line prefer-const
 const controller = new ClsController('controller', 'Dummy Serial Number');
 
-export default function* controllerNewData(data: tRushWebSocketData): Saga<void> {
+export default function* controllerNewData(
+  data: tRushWebSocketData
+): Saga<void> {
   try {
-    yield call(controller.doDispatch,data);
+    yield call(controller.doDispatch, data);
   } catch (e) {
     CommonLog.lError(e, { at: 'rush event controller' });
   }

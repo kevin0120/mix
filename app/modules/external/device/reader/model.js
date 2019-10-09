@@ -10,13 +10,12 @@ export type tReaderData = {
 };
 
 class ClsReader extends Device {
-
-  _dispatcher = (input) => {
+  _dispatcher = input => {
     console.log(input);
-    return loginRequestUuid(input.data.data.uid,'online');
+    return loginRequestUuid(input.data.data.uid, 'online');
   };
 
-  constructor(...args){
+  constructor(...args) {
     super(...args);
     this.Enable();
   }

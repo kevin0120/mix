@@ -11,7 +11,7 @@ export default {
     type: DIALOG.SHOW,
     config
   }),
-  dialogButton: (idx) => ({
+  dialogButton: idx => ({
     type: DIALOG.BUTTON,
     idx
   }),

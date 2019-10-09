@@ -2,7 +2,7 @@ import { DIALOG } from './action';
 import type { tDialogState } from './model';
 
 const initState: tDialogState = {
-  open: false,
+  open: false
 };
 
 export default function(state: tDialogState = initState, action): tDialogState {

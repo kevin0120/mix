@@ -1,9 +1,5 @@
 // @flow
-import {
-  takeLatest,
-  put,
-  delay
-} from 'redux-saga/effects';
+import { takeLatest, put, delay } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import ClsRFID from './model';
 import { RFID } from './action';

@@ -9,18 +9,17 @@ import screwStepAction from '../../../step/screwStep/action';
 import { CommonLog } from '../../../../common/utils';
 import { toolEnableApi } from '../../../../api/tools';
 
-export const defaultScrewToolDispatcher = (data: tInputData): AnyAction => screwStepAction.result(data);
+export const defaultScrewToolDispatcher = (data: tInputData): AnyAction =>
+  screwStepAction.result(data);
 
 export default class ClsScrewTool extends Device {
-
-
   constructor(name: string, serialNumber: string) {
-    super(name,serialNumber);
+    super(name, serialNumber);
     /* eslint-disable flowtype/no-weak-types */
     (this: any).Enable = this.Enable.bind(this);
     (this: any).Disable = this.Disable.bind(this);
     (this: any).ToggleEnable = this.ToggleEnable.bind(this);
-    this.dispatcher=defaultScrewToolDispatcher;
+    this.dispatcher = defaultScrewToolDispatcher;
     /* eslint-enable flowtype/no-weak-types */
   }
 
@@ -31,12 +30,14 @@ export default class ClsScrewTool extends Device {
     return ret;
   }
 
-
-
-  * Enable(): Saga<void> {
+  *Enable(): Saga<void> {
     try {
       if (!this.isEnable) {
-        const { result, msg } = yield call(toolEnableApi, this.serialNumber, true);
+        const { result, msg } = yield call(
+          toolEnableApi,
+          this.serialNumber,
+          true
+        );
         if (result !== 0) {
           CommonLog.lError(`tool enable failed:${msg}`, {
             at: 'ClsScrewTool.Enable',
@@ -54,10 +55,14 @@ export default class ClsScrewTool extends Device {
     }
   }
 
-  * Disable(): Saga<void> {
+  *Disable(): Saga<void> {
     try {
       if (this.isEnable) {
-        const { result, msg } = yield call(toolEnableApi, this.serialNumber, false);
+        const { result, msg } = yield call(
+          toolEnableApi,
+          this.serialNumber,
+          false
+        );
         if (result !== 0) {
           CommonLog.lError(`tool enable failed:${msg}`, {
             at: 'ClsScrewTool.Disable',
@@ -75,9 +80,13 @@ export default class ClsScrewTool extends Device {
     }
   }
 
-  * ToggleEnable(): Saga<void> {
+  *ToggleEnable(): Saga<void> {
     try {
-      const { result, msg } = yield call(toolEnableApi, this.serialNumber, !this.isEnable);
+      const { result, msg } = yield call(
+        toolEnableApi,
+        this.serialNumber,
+        !this.isEnable
+      );
       if (result !== 0) {
         CommonLog.lError(`tool enable failed:${msg}`, {
           at: 'ClsScrewTool.ToggleEnable',

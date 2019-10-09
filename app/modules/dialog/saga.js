@@ -1,4 +1,4 @@
-import { take, call, put, fork,takeEvery } from 'redux-saga/effects';
+import { take, call, put, fork, takeEvery } from 'redux-saga/effects';
 import actions, { DIALOG } from './action';
 import type { tDialogConfig } from './model';
 import { CommonLog } from '../../common/utils';
@@ -7,11 +7,10 @@ export default function* root() {
   try {
     while (true) {
       const action = yield take(DIALOG.SHOW);
-      const {config}=action;
+      const { config } = action;
       yield fork(showDialog, action);
       yield take(DIALOG.CLOSE);
       yield fork(handleClose, config);
-
     }
   } catch (e) {
     CommonLog.lError(e);
@@ -19,7 +18,7 @@ export default function* root() {
 }
 
 const dialogActions = {
-  * [DIALOG.BUTTON](config: tDialogConfig, { idx }) {
+  *[DIALOG.BUTTON](config: tDialogConfig, { idx }) {
     try {
       yield put(actions.dialogClose());
       if (config?.buttons?.[idx]?.action) {
@@ -28,9 +27,9 @@ const dialogActions = {
     } catch (e) {
       CommonLog.lError(e);
     }
-  },
+  }
 };
-function* handleClose(config){
+function* handleClose(config) {
   try {
     if (config?.closeAction) {
       yield put(config.closeAction);
@@ -43,7 +42,7 @@ function* handleClose(config){
 function* showDialog(action) {
   try {
     const { config } = action;
-    const dialogAction=yield take(Object.keys(dialogActions));
+    const dialogAction = yield take(Object.keys(dialogActions));
     if (dialogActions[dialogAction.type]) {
       yield fork(dialogActions[dialogAction.type], config, dialogAction);
     }

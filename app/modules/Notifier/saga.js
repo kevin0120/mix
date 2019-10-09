@@ -13,10 +13,10 @@ type tNotifyFuncMap = {
 };
 
 const notifyFuncMap: tNotifyFuncMap = {
-  'Info': Info,
-  'Warn': Warn,
-  'Maintenance': Maintenance,
-  'Error': lError
+  Info: Info,
+  Warn: Warn,
+  Maintenance: Maintenance,
+  Error: lError
 };
 
 function* notificationAlways(action): Saga<void> {

@@ -35,7 +35,9 @@ export function* toolStatusChange(data: tToolStatusData): Saga<void> {
     yield put(
       notifierActions.enqueueSnackbar(
         'Info',
-        `拧紧枪状态更新（${toolSN}）： ${status.toString()}${reason ? `, ${reason}` : ''}`
+        `拧紧枪状态更新（${toolSN}）： ${status.toString()}${
+          reason ? `, ${reason}` : ''
+        }`
       )
     );
   } catch (e) {
@@ -63,7 +65,6 @@ export function* toolNewResults(data: tToolResultData): Saga<void> {
         yield put(respAction);
       }
     }
-
   } catch (e) {
     CommonLog.lError('onToolResult:', e);
   }

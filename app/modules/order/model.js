@@ -44,11 +44,10 @@ export type tStepArray = Array<tStep>;
 
 /* eslint-disable flowtype/no-weak-types */
 interface tStepPayload {
-  [key: string]: any
+  [key: string]: any;
 }
 
 /* eslint-enable flowtype/no-weak-types */
-
 
 export type tStep = {
   +name: string,
@@ -69,7 +68,7 @@ export type tStep = {
 export type tStepType = 'check' | 'collect' | 'instruct' | 'enable';
 
 export type tStepStatus =
-  STEP_STATUS.DOING
+  | STEP_STATUS.DOING
   | STEP_STATUS.ENTERING
   | STEP_STATUS.FAIL
   | STEP_STATUS.FINISHED

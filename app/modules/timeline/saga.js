@@ -10,7 +10,6 @@ import { STORY_TYPE } from './model';
 
 const dayjs = require('dayjs');
 
-
 export function* addNewStory(level, title, msg) {
   try {
     const story = createNewStory(level, title, msg);

@@ -11,7 +11,7 @@ let task = null;
 
 // const { getWSClient } = require('electron').remote.require('./main/webSocket');
 const { ipcRenderer } = require('electron');
-const {getGlobal} = require('electron').remote;
+const { getGlobal } = require('electron').remote;
 
 const getWSClient = getGlobal('getWSClient');
 
@@ -26,7 +26,7 @@ export function* watchRushEvent(): Saga<void> {
 function* initRush() {
   try {
     while (!(getWSClient() && task)) {
-      Object.keys(listeners).forEach(k=>ipcRenderer.removeAllListeners(k));
+      Object.keys(listeners).forEach(k => ipcRenderer.removeAllListeners(k));
       if (task) {
         yield cancel(task);
       }
@@ -61,11 +61,10 @@ const listeners = {
 
 function createRushChannel(): EventChannel<void> {
   return eventChannel(emit => {
-    Object.keys(listeners).forEach(k=>{
+    Object.keys(listeners).forEach(k => {
       ipcRenderer.on(k, listeners[k](emit));
     });
-    return () => {
-    };
+    return () => {};
   });
 }
 

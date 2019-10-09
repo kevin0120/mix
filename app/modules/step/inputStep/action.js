@@ -3,7 +3,7 @@ export const INPUT_STEP = {
 };
 
 export const inputStepActions = {
-  submit: (payload) => ({
+  submit: payload => ({
     type: INPUT_STEP.SUBMIT,
     payload
   })

@@ -28,7 +28,12 @@ function* saveConfiguration(action) {
           yield put({ type: CONNECTION.MANUAL_MODIFICATION, data: newConfigs });
           yield put(systemInit(section));
         } catch (e) {
-          yield put(notifierActions.enqueueSnackbar('Error', '保存连接信息,重新初始化失败'));
+          yield put(
+            notifierActions.enqueueSnackbar(
+              'Error',
+              '保存连接信息,重新初始化失败'
+            )
+          );
         }
 
         break;

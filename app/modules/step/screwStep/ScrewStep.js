@@ -2,7 +2,12 @@ import { cloneDeep, isNil, isEmpty } from 'lodash-es';
 import { call, put, take, all } from 'redux-saga/effects';
 import Step from '../Step';
 import STEP_STATUS from '../model';
-import type { tPoint, tScrewStepData, tScrewStepPayload, ClsOrderOperationPoints } from './model';
+import type {
+  tPoint,
+  tScrewStepData,
+  tScrewStepPayload,
+  ClsOrderOperationPoints
+} from './model';
 import { CommonLog } from '../../../common/utils';
 import handleResult from './handleResult';
 import controllerModeTasks from './controllerModeTasks';
@@ -13,10 +18,22 @@ import dialogActions from '../../dialog/action';
 function* doPoint(point, isFirst, orderActions) {
   try {
     const data = this._data;
-    if (data.controllerMode === 'pset' || (data.controllerMode === 'job' && isFirst)) {
-      const success = yield call([this, controllerModeTasks[data.controllerMode]], point);
+    if (
+      data.controllerMode === 'pset' ||
+      (data.controllerMode === 'job' && isFirst)
+    ) {
+      const success = yield call(
+        [this, controllerModeTasks[data.controllerMode]],
+        point
+      );
       if (!success) {
-        yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, `${data.controllerMode} failed`));
+        yield put(
+          orderActions.stepStatus(
+            this,
+            STEP_STATUS.FAIL,
+            `${data.controllerMode} failed`
+          )
+        );
       }
     }
     return yield take([SCREW_STEP.RESULT, SCREW_STEP.REDO_POINT]);
@@ -30,25 +47,31 @@ function* doPoint(point, isFirst, orderActions) {
 
 export default class ScrewStep extends Step {
   _tools = [];
-  
+
   isValid: boolean = false;
-  
+
   _orderOperationPoints: ClsOrderOperationPoints;
 
   constructor(...args) {
     super(...args);
     const self = this;
     const payload: tScrewStepPayload = this._payload;
-    if(isNil(payload) || isEmpty(payload)) {
-      CommonLog.lError(`ScrewStepPayload Is Empty! Payload: ${String(payload)}`);
+    if (isNil(payload) || isEmpty(payload)) {
+      CommonLog.lError(
+        `ScrewStepPayload Is Empty! Payload: ${String(payload)}`
+      );
       return;
     }
-    
+
     this._orderOperationPoints = new ClsOrderOperationPoints(payload);
-    
+
     this._onLeave = function* onLeave() {
       try {
-        yield all(self._tools.map(t => t.isEnable ? call(t.Disable) : null).filter(s => !!s));
+        yield all(
+          self._tools
+            .map(t => (t.isEnable ? call(t.Disable) : null))
+            .filter(s => !!s)
+        );
         self._tools = [];
         CommonLog.Info('tools cleared', {
           at: `screwStep(${this._name},${this._id})._onLeave`
@@ -63,12 +86,13 @@ export default class ScrewStep extends Step {
   }
 
   _statusTasks = {
-    * [STEP_STATUS.ENTERING](ORDER, orderActions) {
+    *[STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {
         // init data
         const payload: tScrewStepPayload = this._payload;
-        const points: Array<tPoint> = cloneDeep(payload?.points || [])
-          .sort((a, b) => a.group_sequence - b.group_sequence);
+        const points: Array<tPoint> = cloneDeep(payload?.points || []).sort(
+          (a, b) => a.group_sequence - b.group_sequence
+        );
         const toolSnSet = new Set(points.map(p => p.toolSN));
         const lostTool = [];
         toolSnSet.forEach(t => {
@@ -84,7 +108,13 @@ export default class ScrewStep extends Step {
           lostTool.forEach(t => {
             CommonLog.lError(`tool not found: ${t}`);
           });
-          yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, `tool not found: ${lostTool.map(t => `${t}`)}`));
+          yield put(
+            orderActions.stepStatus(
+              this,
+              STEP_STATUS.FAIL,
+              `tool not found: ${lostTool.map(t => `${t}`)}`
+            )
+          );
         }
 
         const unhealthyTools = this._tools.filter(t => !t.Healthz);
@@ -92,7 +122,15 @@ export default class ScrewStep extends Step {
           unhealthyTools.forEach(t => {
             CommonLog.lError(`tool not found: ${t.serialNumber}`);
           });
-          yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, `tool not connected: ${unhealthyTools.map(t => `${t.serialNumber}`)}`));
+          yield put(
+            orderActions.stepStatus(
+              this,
+              STEP_STATUS.FAIL,
+              `tool not connected: ${unhealthyTools.map(
+                t => `${t.serialNumber}`
+              )}`
+            )
+          );
         }
 
         yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({
@@ -109,8 +147,7 @@ export default class ScrewStep extends Step {
       }
     },
 
-
-    * [STEP_STATUS.DOING](ORDER, orderActions) {
+    *[STEP_STATUS.DOING](ORDER, orderActions) {
       try {
         // for (const t of this._tools) {
         //   yield call(t.Enable);
@@ -118,19 +155,29 @@ export default class ScrewStep extends Step {
         yield call([this, handleResult], ORDER, orderActions, [], this._data);
         let isFirst = true;
         const sData: tScrewStepData = this._data;
-        const {
-          activeIndex,
-          points
-        } = sData;
+        const { activeIndex, points } = sData;
         let activePoint = points[activeIndex];
         while (true) {
           const data = this._data;
           yield call(getDevice(activePoint.toolSN).Enable);
-          const nextAction = yield call([this, doPoint], activePoint, isFirst, orderActions);
+          const nextAction = yield call(
+            [this, doPoint],
+            activePoint,
+            isFirst,
+            orderActions
+          );
           switch (nextAction.type) {
             case SCREW_STEP.RESULT: {
-              const { results: { data: results } } = nextAction;
-              yield call([this, handleResult], ORDER, orderActions, results, data);
+              const {
+                results: { data: results }
+              } = nextAction;
+              yield call(
+                [this, handleResult],
+                ORDER,
+                orderActions,
+                results,
+                data
+              );
               const { activeIndex: nextIndex, points: nextPoints } = this._data;
               yield call(getDevice(activePoint.toolSN).Disable);
               activePoint = nextPoints[nextIndex];
@@ -155,8 +202,7 @@ export default class ScrewStep extends Step {
       }
     },
 
-
-    * [STEP_STATUS.FINISHED](ORDER, orderActions) {
+    *[STEP_STATUS.FINISHED](ORDER, orderActions) {
       try {
         yield put(orderActions.doNextStep());
       } catch (e) {
@@ -164,8 +210,7 @@ export default class ScrewStep extends Step {
       }
     },
 
-
-    * [STEP_STATUS.FAIL](ORDER, orderActions, msg) {
+    *[STEP_STATUS.FAIL](ORDER, orderActions, msg) {
       try {
         yield all(this._tools.map(t => call(t.Disable)));
         this._tools = [];
@@ -183,10 +228,7 @@ export default class ScrewStep extends Step {
               }
             ],
             title: `${this._name}工步失败`,
-            content: (
-              `${
-                JSON.stringify(msg) || ''}`
-            )
+            content: `${JSON.stringify(msg) || ''}`
           })
         );
         yield take(SCREW_STEP.CONFIRM_FAIL);

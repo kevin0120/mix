@@ -53,11 +53,11 @@ export default (state = initState, action) => {
     case NOTIFIER.CLOSE_SNACKBAR:
       return {
         ...state,
-        notifications: state.notifications.map(notification => (
-            (action.dismissAll || notification.key === action.key)
-              ? { ...notification, dismissed: true }
-              : { ...notification }
-          ))
+        notifications: state.notifications.map(notification =>
+          action.dismissAll || notification.key === action.key
+            ? { ...notification, dismissed: true }
+            : { ...notification }
+        )
       };
 
     case NOTIFIER.REMOVE_SNACKBAR:

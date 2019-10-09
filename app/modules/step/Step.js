@@ -1,4 +1,13 @@
-import { call, cancel, fork, join, put, race, take, takeEvery } from 'redux-saga/effects';
+import {
+  call,
+  cancel,
+  fork,
+  join,
+  put,
+  race,
+  take,
+  takeEvery
+} from 'redux-saga/effects';
 import { CommonLog } from '../../common/utils';
 import { orderStepUpdateApi } from '../../api/order';
 import { ORDER, orderActions } from '../order/action';
@@ -14,9 +23,7 @@ function invalidStepStatus(stepType, status) {
   throw Error(`step type ${stepType}  has empty status ${status}`);
 }
 
-export interface IWorkStep {
-  
-}
+export interface IWorkStep {}
 
 export default class Step {
   _id = '';
@@ -70,14 +77,16 @@ export default class Step {
     this._skippable = stepObj.skippable || false;
     this._undoable = stepObj.undoable || false;
     this._status = stepObj.status || this._status;
-    this._steps = stepObj.steps ? stepObj.steps.map(sD => {
-      const existStep = this._steps.find(s => s._id === sD.id);
-      if (existStep) {
-        existStep.update(sD, stepTypes);
-        return existStep;
-      }
-      return new stepTypes[sD.type](sD);
-    }) : this._steps;
+    this._steps = stepObj.steps
+      ? stepObj.steps.map(sD => {
+          const existStep = this._steps.find(s => s._id === sD.id);
+          if (existStep) {
+            existStep.update(sD, stepTypes);
+            return existStep;
+          }
+          return new stepTypes[sD.type](sD);
+        })
+      : this._steps;
 
     this._payload = stepObj.payload || this._payload;
   }
@@ -127,14 +136,17 @@ export default class Step {
   }
 
   timeCost() {
-    return ((this._times || []).length % 2 === 0 ? this._times || [] : [...this._times, new Date()])
-      .reduce((total, currentTime, idx) =>
-        idx % 2 === 0 ? total - currentTime : total - (0 - currentTime), 0);
+    return ((this._times || []).length % 2 === 0
+      ? this._times || []
+      : [...this._times, new Date()]
+    ).reduce(
+      (total, currentTime, idx) =>
+        idx % 2 === 0 ? total - currentTime : total - (0 - currentTime),
+      0
+    );
   }
 
-  timeLost() {
-
-  }
+  timeLost() {}
 
   timerStart() {
     try {
@@ -164,7 +176,7 @@ export default class Step {
     }
   }
 
-  * updateData(dataReducer) {
+  *updateData(dataReducer) {
     try {
       this._data = dataReducer(this._data);
       yield put(orderActions.updateState());
@@ -175,7 +187,7 @@ export default class Step {
     }
   }
 
-  * updateStatus({ status, msg }) {
+  *updateStatus({ status, msg }) {
     if (status in this._statusTasks) {
       try {
         this._status = status;
@@ -188,30 +200,36 @@ export default class Step {
     }
   }
 
-  *_runStatusTask({ status, msg }){
+  *_runStatusTask({ status, msg }) {
     if (status in this._statusTasks) {
       try {
         if (this._runningStatusTask) {
           yield cancel(this._runningStatusTask);
         }
-        const taskToRun = this._statusTasks[status]?.bind(this) ||
+        const taskToRun =
+          this._statusTasks[status]?.bind(this) ||
           (() => invalidStepStatus(this._type, status));
 
-        this._runningStatusTask = yield fork(taskToRun, ORDER, orderActions, msg);
-
+        this._runningStatusTask = yield fork(
+          taskToRun,
+          ORDER,
+          orderActions,
+          msg
+        );
       } catch (e) {
         CommonLog.lError(e);
       }
     }
   }
 
-
-  * run(initStatus) {
+  *run(initStatus) {
     const runStatusTask = this._runStatusTask.bind(this);
     function* runStep() {
       try {
         while (true) {
-          const action = yield take((a) => a.type === ORDER.STEP.STATUS && a.step === this);
+          const action = yield take(
+            a => a.type === ORDER.STEP.STATUS && a.step === this
+          );
           yield fork(runStatusTask, action);
         }
       } catch (e) {
@@ -237,13 +255,15 @@ export default class Step {
     }
   }
 
-  * runSubStep(step, callbacks) {
+  *runSubStep(step, callbacks) {
     try {
       step.timerStart();
       const { exit, next, previous } = yield race({
         exit: call(step.run, STEP_STATUS.ENTERING),
-        next: take((action) =>
-          (action.type === ORDER.STEP.FINISH && action.step === step) || action.type === ORDER.STEP.DO_NEXT
+        next: take(
+          action =>
+            (action.type === ORDER.STEP.FINISH && action.step === step) ||
+            action.type === ORDER.STEP.DO_NEXT
         ),
         previous: take(ORDER.STEP.DO_PREVIOUS)
       });
@@ -266,7 +286,6 @@ export default class Step {
       CommonLog.Info(`run substep finished (${this._id}-${this._name})`);
     }
   }
-
 }
 
 export type tClsStep = typeof Step;

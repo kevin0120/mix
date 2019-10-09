@@ -3,7 +3,6 @@
 import Device from '../Device';
 
 class ClsController extends Device {
-
   #serialNumber: ?string = null;
 
   constructor(name: string, serialNumber: string) {

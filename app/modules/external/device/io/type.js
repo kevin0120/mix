@@ -8,7 +8,6 @@ export const sBlinkOn = 11;
 
 export type tIOWSMsgType = 'WS_IO_STATUS' | 'WS_IO_CONTACT' | 'WS_IO_SET';
 
-
 export const ioDirection = {
   input: 'input',
   output: 'output'
@@ -19,7 +18,7 @@ export type tIODirection = $Keys<typeof ioDirection>;
 export type tIOContact = {
   +sn: string,
   +direction: tIODirection,
-  +contact: string  // 位串
+  +contact: string // 位串
 };
 
 const IO_FUNCTION = {
@@ -40,7 +39,6 @@ const IO_FUNCTION = {
 export const DefaultInput = '00000000';
 export const DefaultOutput = '00000000';
 
-
 // 上升沿，下降沿，双向(toggle)
 
 export const ioTriggerMode = {
@@ -53,7 +51,7 @@ export const ioTriggerMode = {
 // export type tIOTriggerMode = 'Rising' | 'Falling' | 'Bidirectional';
 export type tIOTriggerMode = $Keys<typeof ioTriggerMode>;
 
-export type  iIODataField = {
+export type iIODataField = {
   data: boolean,
   triggerMode: tIOTriggerMode,
   // eslint-disable-next-line flowtype/no-weak-types
@@ -62,7 +60,7 @@ export type  iIODataField = {
 
 // IO数据字段，key代表的是哪一位， value代表开或者关和相关的action
 export interface iIODataFieldObj {
-  [key: number]: iIODataField
+  [key: number]: iIODataField;
 }
 
 export type tIOData = {

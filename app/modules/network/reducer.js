@@ -64,4 +64,3 @@ function networkSignalOk(state, action) {
 }
 
 export default genReducers(reducers, initNetwork);
-

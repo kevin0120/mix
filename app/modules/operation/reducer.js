@@ -1,15 +1,13 @@
 import { OPERATION } from './action';
 import { OPERATION_STATUS } from './model';
-import {
-  setLedStatusDoing,
-  setLedError,
-  setLedStatusReady,
-  sOn
-} from '../external/device/io/saga';
+// import {
+//   setLedStatusDoing,
+//   setLedError,
+//   setLedStatusReady,
+//   sOn
+// } from '../external/device/io/saga';
 
-import sortObj from '../../common/utils';
 import { genReducers } from '../util';
-
 
 const defaultOperations = {
   workorderID: 0,
@@ -210,7 +208,7 @@ function setWorkorderID(state, action) {
 }
 
 function operationFetchFail(state) {
-  setLedStatusReady();
+  // setLedStatusReady();
 
   return {
     ...state,
@@ -225,7 +223,7 @@ function operationFetchFail(state) {
 }
 
 function operationStarted(state) {
-  setLedStatusDoing();
+  // setLedStatusDoing();
 
   return {
     ...state,
@@ -301,7 +299,7 @@ function operationFailed(state, action) {
       results
     };
   }
-  setLedError(sOn);
+  // setLedError(sOn);
 
   return {
     ...state,
@@ -314,7 +312,7 @@ function operationFailed(state, action) {
 function operationFinished(state, action) {
   const { data } = action;
 
-  setLedStatusReady();
+  // setLedStatusReady();
   const { carID } = state;
   const results = mergeResults(state, data);
 
@@ -338,7 +336,7 @@ function operationContinue(state) {
     // 等待车辆状态下 收到结果也无法在进入其他状态,直接返回
     return state;
   }
-  setLedStatusDoing();
+  // setLedStatusDoing();
 
   const { activeResultIndex, results } = state;
   let count = 1;

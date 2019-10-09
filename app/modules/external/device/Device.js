@@ -10,12 +10,10 @@ const defaultValidatorFunc = (data: string | number): boolean => true;
 
 export type tDeviceSN = string;
 
-
 export default class Device extends CommonExternalEntity {
+  _dispatcher: null | ((?tInput) => AnyAction) = null;
 
-  _dispatcher: null | (?tInput) => AnyAction = null;
-
-  #validator: null | (data: tInputData) => boolean = defaultValidatorFunc;
+  #validator: null | ((data: tInputData) => boolean) = defaultValidatorFunc;
 
   #_serialNumber: ?tDeviceSN = null;
 
@@ -48,7 +46,7 @@ export default class Device extends CommonExternalEntity {
     return this.validator(data);
   }
 
-  * doDispatch(data: tInputData): Saga<void> {
+  *doDispatch(data: tInputData): Saga<void> {
     try {
       if (!this.isEnable) {
         const msg = `${this.source} Is Not Enabled`;
@@ -65,11 +63,13 @@ export default class Device extends CommonExternalEntity {
         CommonLog.Warn(msg);
         return;
       }
-      yield put(this.dispatcher({
-        data,
-        source: this.Name,
-        time: new Date()
-      }));
+      yield put(
+        this.dispatcher({
+          data,
+          source: this.Name,
+          time: new Date()
+        })
+      );
     } catch (e) {
       CommonLog.lError(e, {
         at: 'doDispatch',
@@ -87,7 +87,7 @@ export default class Device extends CommonExternalEntity {
   }
 
   // eslint-disable-next-line flowtype/no-weak-types
-  set dispatcher(dispatcher: null | (?tInput) => AnyAction) {
+  set dispatcher(dispatcher: null | ((?tInput) => AnyAction)) {
     this._dispatcher = dispatcher;
   }
 

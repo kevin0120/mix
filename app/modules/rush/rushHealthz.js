@@ -8,7 +8,6 @@ const onConnectActions = [
 ];
 const onDisconnectActions = [
   () => NotifierActions.enqueueSnackbar('Error', 'rush 已断开')
-
 ];
 const onChangeActions = [];
 
@@ -18,7 +17,6 @@ export const bindRushAction = {
   onChange: bindOnChangeAction
 };
 let rushHealthz = false;
-
 
 function* bindOnConnectAction(actionToBind) {
   try {
@@ -51,16 +49,17 @@ function* bindOnChangeAction(actionToBind) {
   }
 }
 
-
-export default function* (payload) {
+export default function*(payload) {
   try {
     yield put(healthzActions.data({ rush: payload }));
     if (rushHealthz !== payload) {
       yield all(onChangeActions.map(action => put(action(payload))));
     }
-    yield all((payload ? onConnectActions : onDisconnectActions).map(
-      action => put(action(payload))
-    ));
+    yield all(
+      (payload ? onConnectActions : onDisconnectActions).map(action =>
+        put(action(payload))
+      )
+    );
     rushHealthz = payload;
   } catch (e) {
     CommonLog.lError(e, { at: 'rush handleHealthz' });

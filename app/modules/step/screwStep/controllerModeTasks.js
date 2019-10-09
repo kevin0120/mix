@@ -10,39 +10,50 @@ import { jobApi, psetApi } from '../../../api/tools';
 import { workingOrder } from '../../order/selector';
 
 export default {
-
-
-  * [controllerModes.pset](point): Saga<void> {
+  *[controllerModes.pset](point): Saga<void> {
     try {
       const sData: tScrewStepData = this._data;
       const stepId = this._id;
-      const {
-        points,
-        retryTimes
-      } = sData;
+      const { points, retryTimes } = sData;
       // TODO: pass correct userID
       const userID = 1;
 
       // const { toolSN, pset, sequence } = points[activeIndex];
       const { toolSN, pset, sequence } = point;
       const total = points.length || 0;
-      const workorderID=yield select(s=>workingOrder(s.order).id);
-      const data = yield call(psetApi, toolSN || '', stepId, userID, pset, sequence, retryTimes, total, workorderID);
+      const workorderID = yield select(s => workingOrder(s.order).id);
+      const data = yield call(
+        psetApi,
+        toolSN || '',
+        stepId,
+        userID,
+        pset,
+        sequence,
+        retryTimes,
+        total,
+        workorderID
+      );
       if (data && data.result !== 0) {
         notifierActions.enqueueSnackbar('Error', `pset失败:${data.msg}`);
         CommonLog.lError(`pset失败${data.msg || ''}`, {
           at: 'pset',
-          toolSN, stepId, userID, pset, sequence, retryTimes
+          toolSN,
+          stepId,
+          userID,
+          pset,
+          sequence,
+          retryTimes
         });
         return false;
       }
     } catch (e) {
       // 程序号设置失败
-      yield put(notifierActions.enqueueSnackbar('Error', 'pset failed', {
-        // meta message,
-        at: 'controllerModes.pset'
-
-      }));
+      yield put(
+        notifierActions.enqueueSnackbar('Error', 'pset failed', {
+          // meta message,
+          at: 'controllerModes.pset'
+        })
+      );
       CommonLog.lError(e, {
         at: 'controllerModes.pset'
       });
@@ -51,8 +62,7 @@ export default {
     return true;
   },
 
-
-  * [controllerModes.job](): Saga<void> {
+  *[controllerModes.job](): Saga<void> {
     try {
       const { jobID, points }: tScrewStepData = this._data;
       const stepId = this._id;
@@ -70,7 +80,10 @@ export default {
         notifierActions.enqueueSnackbar('Error', `程序号设置失败:${data.msg}`);
         CommonLog.lError(`程序号设置失败:${data.msg}`, {
           at: 'job',
-          toolSN, stepId, userID, jobID
+          toolSN,
+          stepId,
+          userID,
+          jobID
         });
         return false;
       }
@@ -81,4 +94,3 @@ export default {
     return true;
   }
 };
-

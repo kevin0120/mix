@@ -2,4 +2,4 @@
 
 import type { tCommonActionType } from '../../common/type';
 
-export type tActionLogo = tCommonActionType & {logo: string};
+export type tActionLogo = tCommonActionType & { logo: string };

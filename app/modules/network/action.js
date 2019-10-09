@@ -24,7 +24,7 @@ export function networkScan() {
 export function networkCheck(): tCommonActionType {
   return {
     type: NETWORK.CHECK
-  }
+  };
 }
 
 export function networkSet(data) {
@@ -34,12 +34,15 @@ export function networkSet(data) {
   };
 }
 
-export function networkSignalOK(ssid: string, signal: number): tCommonActionType & {ssid: string, signal: number} {
+export function networkSignalOK(
+  ssid: string,
+  signal: number
+): tCommonActionType & { ssid: string, signal: number } {
   return {
     type: NETWORK.SIGNAL_OK,
     ssid,
     signal
-  }
+  };
 }
 
 export function networkSetOK(data) {

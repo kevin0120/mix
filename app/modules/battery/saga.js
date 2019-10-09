@@ -11,11 +11,13 @@ const workers = {
 
 export default watchWorkers(workers);
 
-
 function* doCheckBattery() {
   try {
     // upower -i $(upower -e | grep BAT) | grep --color=never -E "percentage"
-    const { error, stdout, stderr } = yield call(execute, 'upower -i $(upower -e | grep BAT) | grep --color=never -E "percentage"');
+    const { error, stdout, stderr } = yield call(
+      execute,
+      'upower -i $(upower -e | grep BAT) | grep --color=never -E "percentage"'
+    );
     if (error) {
       console.log(error);
       return;
@@ -42,4 +44,3 @@ function execute(command) {
     .then(resp => resp)
     .catch(e => ({ error: e }));
 }
-

@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`User Auth Actions Local User Login Request action 1`] = `
+Object {
+  "method": "local",
+  "name": "test",
+  "password": "",
+  "type": "USER_LOGIN_REQUEST",
+}
+`;
+
+exports[`User Auth Actions Local User UUID Login Request action 1`] = `
+Object {
+  "method": "local",
+  "type": "USER_LOGIN_REQUEST",
+  "uuid": "05e1ddca-dfd2-4ae0-9f7c-451f0bf94f19",
+}
+`;
+
+exports[`User Auth Actions Online User Login Request action 1`] = `
+Object {
+  "method": "online",
+  "name": "test",
+  "password": "",
+  "type": "USER_LOGIN_REQUEST",
+}
+`;
