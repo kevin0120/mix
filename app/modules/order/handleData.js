@@ -1,20 +1,13 @@
 import { put, call } from 'redux-saga/effects';
 import { CommonLog } from '../../common/utils';
 import { orderActions } from './action';
-import { ORDER_STATUS } from './model';
+import { ORDER_WS_TYPES } from './model';
 
 const { getListSuccess } = orderActions;
 
-export const ORDER_WS_TYPES = {
-  LIST: 'WS_ORDER_LIST',
-  DETAIL: 'WS_ORDER_DETAIL',
-  UPDATE: 'WS_ORDER_UPDATE',
-  STEP_UPDATE: 'WS_ORDER_STEP_UPDATE',
-  NEW: 'WS_NEW_ORDER'
-};
 
 const dataHandlers = {
-  *[ORDER_WS_TYPES.LIST](data) {
+  * [ORDER_WS_TYPES.LIST](data) {
     try {
       const list = data.map(d => ({
         id: d.id,
@@ -28,7 +21,7 @@ const dataHandlers = {
       CommonLog.lError(e, { at: 'ORDER_WS_TYPES.LIST' });
     }
   },
-  *[ORDER_WS_TYPES.DETAIL](data) {
+  * [ORDER_WS_TYPES.DETAIL](data) {
     try {
       if (data.result === 0) {
         yield put(orderActions.getDetailSuccess(data));
@@ -39,7 +32,7 @@ const dataHandlers = {
       CommonLog.lError(e, { at: 'ORDER_WS_TYPES.DETAIL' });
     }
   },
-  *[ORDER_WS_TYPES.NEW](data) {
+  * [ORDER_WS_TYPES.NEW](data) {
     try {
       yield put(orderActions.newOrder(data));
     } catch (e) {

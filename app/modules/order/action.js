@@ -1,5 +1,5 @@
 // @flow
-import type { tOrder, tOrderStepIdx, tStepStatus } from './model';
+import type { tOrder, tOrderStepIdx, tStepStatus } from './interface/typeDef';
 import type { tClsOrder } from './Order';
 import type { tClsStep } from '../step/Step';
 import { ORDER_STATUS } from './model';
