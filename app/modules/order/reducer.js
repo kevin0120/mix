@@ -13,7 +13,8 @@ import {
   workingOrder,
   workingStep
 } from './selector';
-import Order from './Order';
+import OrderMixin from './Order';
+import Step from '../step/Step';
 
 const initState = {
   workingOrder: null,
@@ -25,7 +26,7 @@ const initState = {
     demoOrderCancel,
     demoOrderPending,
     demoOrderDone
-  ].map(o => new Order(o))
+  ].map(o => new (OrderMixin(Step))(o))
 };
 
 
@@ -71,7 +72,7 @@ const orderReducer: {
       list.filter(newO =>
         !newList.find(o => o.id === newO.id)
       ).map(
-        oD => new Order(oD)
+        oD => new (OrderMixin(Step))(oD)
       )
     );
     // const newList = list.map(oD => new Order(oD));
@@ -97,7 +98,7 @@ const orderReducer: {
       list.filter(newO =>
         !newList.find(o => o.id === newO.id)
       ).map(
-        oD => new Order(oD)
+        oD => new (OrderMixin(Step))(oD)
       )
     );
 

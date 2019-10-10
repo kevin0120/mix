@@ -1,7 +1,6 @@
 import React from 'react';
 import { push } from 'connected-react-router';
 import { call, put } from 'redux-saga/effects';
-import Step from '../step/Step';
 import { ORDER_STATUS } from './model';
 import { CommonLog, durationString } from '../../common/utils';
 import { orderActions } from './action';
@@ -22,7 +21,8 @@ const stepStatus = (status) => {
   }
 };
 
-export default class Order extends Step {
+const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep {
+
   _apis = {
     updateStatus: orderUpdateApi
   };
@@ -144,6 +144,8 @@ export default class Order extends Step {
       }
     }
   };
-}
+};
 
-export type tClsOrder = typeof Order;
+export default OrderMixin;
+
+export type tClsOrder = ClsOrder;

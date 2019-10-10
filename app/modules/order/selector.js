@@ -2,31 +2,31 @@
 import { ORDER_STATUS } from './model';
 import type { tOrder, tOrderState, tOrderStepIdx, tStep, tStepStatus } from './model';
 import Step from '../step/Step';
-import Order from './Order';
+import type { tClsOrder } from './Order';
 
-export const workingOrder = (orderState: tOrderState): ?Order => orderState?.workingOrder;
-export const viewingOrder = (orderState: tOrderState): ?Order => orderState?.viewingOrder;
+export const workingOrder = (orderState: tOrderState): ?tClsOrder => orderState?.workingOrder;
+export const viewingOrder = (orderState: tOrderState): ?tClsOrder => orderState?.viewingOrder;
 export const viewingIndex = (orderState: tOrderState): tOrderStepIdx => orderState?.viewingIndex;
 export const viewingStep = (orderState: tOrderState): ?Step =>
   orderSteps(viewingOrder(orderState))?.[viewingIndex(orderState)] || null;
 
-export const workingIndex = (order: ?Order): tOrderStepIdx => order?.workingIndex || 0;
-export const workingStep = (order: ?Order): ?tStep =>
+export const workingIndex = (order: ?tClsOrder): tOrderStepIdx => order?.workingIndex || 0;
+export const workingStep = (order: ?tClsOrder): ?tStep =>
   orderSteps(order)?.[workingIndex(order)] || null;
 
-export const orderSteps = (order: ?Order): ?Array<Step> => order?.steps || null;
-export const orderLength = (order: ?Order): number => orderSteps(order)?.length || 0;
+export const orderSteps = (order: ?tClsOrder): ?Array<Step> => order?.steps || null;
+export const orderLength = (order: ?tClsOrder): number => orderSteps(order)?.length || 0;
 
-export const todoOrders = (orderList: Array<Order>): Array<tOrder> =>
+export const todoOrders = (orderList: Array<tClsOrder>): Array<tOrder> =>
   orderList && orderList.filter((o) => o?.status === ORDER_STATUS.TODO || (o && !o?.status));
 
-export const doingOrders = (orderList: Array<Order>): Array<tOrder> =>
+export const doingOrders = (orderList: Array<tClsOrder>): Array<tOrder> =>
   orderList && orderList.filter((o) => o?.status === ORDER_STATUS.WIP);
 
-export const doneOrders = (orderList: Array<Order>): Array<tOrder> =>
+export const doneOrders = (orderList: Array<tClsOrder>): Array<tOrder> =>
   orderList && orderList.filter((o) => o?.status === ORDER_STATUS.DONE);
 
-export const exceptOrders = (orderList: Array<Order>): Array<tOrder> =>
+export const exceptOrders = (orderList: Array<tClsOrder>): Array<tOrder> =>
   orderList && orderList.filter((o) => (
   o?.status === ORDER_STATUS.PENDING || o?.status === ORDER_STATUS.CANCEL)
   );
@@ -38,15 +38,15 @@ export const stepPayload = (step: ?tStep): ?Object => step?.payload;
 export const times = (step: ?Step): ?Array<Date> => step?.times;
 
 
-export const isPending = (order: ?Order): boolean => order?.status === ORDER_STATUS.PENDING || false;
-export const isCancel = (order: ?Order): boolean => order?.status === ORDER_STATUS.CANCEL || false;
-export const doable = (order: ?Order): boolean =>
+export const isPending = (order: ?tClsOrder): boolean => order?.status === ORDER_STATUS.PENDING || false;
+export const isCancel = (order: ?tClsOrder): boolean => order?.status === ORDER_STATUS.CANCEL || false;
+export const doable = (order: ?tClsOrder): boolean =>
   (order?.status === ORDER_STATUS.WIP ||
     order?.status === ORDER_STATUS.TODO ||
     order?.status === ORDER_STATUS.DONE ||
     (order && !order.status)) || false;
 
-export const pendingable = (order: ?Order): boolean =>
+export const pendingable = (order: ?tClsOrder): boolean =>
   (order?.status && (
     order?.status !== ORDER_STATUS.PENDING &&
     order?.status !== ORDER_STATUS.CANCEL &&
