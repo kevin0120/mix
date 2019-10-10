@@ -1,11 +1,10 @@
 // @flow
 import React, { useState } from 'react';
-import type {Node} from 'react';
+import type { Node } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Typography, Paper } from '@material-ui/core';
 import clsx from 'clsx';
-import { I18n } from 'react-i18next';
 import ButtonsContainer from './ButtonsContainer';
 import * as orderSelectors from '../../modules/order/selector';
 import styles from './styles';
@@ -34,58 +33,59 @@ const statusMap = classes => ({
 
 function StepWorking({ status, desc }: Props): Node {
   const classes = makeStyles(styles.layout)();
-  const [action, bindAction] = useState(null);
-  /* eslint-disable-next-line no-unused-expressions */
-  (action: Node);
-  const [description, bindDescription] = useState(null);
-  /* eslint-disable no-unused-expressions */
-  (description: Node);
-  (bindDescription: (Node)=>any);
-  /* eslint-enable no-unused-expressions */
-  return withI18n(t => (
-    <div className={classes.root}>
-      <Paper square className={classes.topBarContainer}>
-        <div className={classes.orderInfoContainer}>
-          <Typography
-            variant="h5"
-            className={clsx(
-              statusMap(classes)[status || 'empty'],
-              classes.orderStatus
-            )}
-          >
-            [{status ? t(`OrderStatus.${status}`, { ns: 'translations' }) : t('notSelected')}]
-          </Typography>
-          {/* <Typography variant="h5">{name || ''}</Typography> */}
-          {/* <Typography variant="h5">{desc || ''}</Typography> */}
-          {
-            desc && desc.split('\t\t').map(d =>
-              <React.Fragment key={d}>
-                <Typography variant="h5">
-                  {d || ''}
-                </Typography>
-                <span style={{ width: '40px' }}/>
-              </React.Fragment>
-            )
-          }
-        </div>
-        <img alt="logo" src={logo} className={classes.logo}/>
-      </Paper>
-      <div className={classes.main}>
-        <Paper square classes={{ root: classes.leftContainer }}>
-          <ButtonsContainer action={action}/>
-          <StepPageContainer
-            bindParentAction={bindAction}
-            bindParentDescription={bindDescription}
-            description={description}/>
+
+  const [action, bindAction]: [Node, (Node) => any] = useState(null);
+  const [description, bindDescription]: [Node, (Node) => any] = useState(null);
+
+  return withI18n(
+    t => (
+      <div className={classes.root}>
+        <Paper square className={classes.topBarContainer}>
+          <div className={classes.orderInfoContainer}>
+            <Typography
+              variant="h5"
+              className={clsx(
+                statusMap(classes)[status || 'empty'],
+                classes.orderStatus
+              )}
+            >
+              [
+              {status
+                ? t(`OrderStatus.${status}`, { ns: 'translations' })
+                : t('notSelected')}
+              ]
+            </Typography>
+            {/* <Typography variant="h5">{name || ''}</Typography> */}
+            {/* <Typography variant="h5">{desc || ''}</Typography> */}
+            {desc &&
+              desc.split('\t\t').map(d => (
+                <React.Fragment key={d}>
+                  <Typography variant="h5">{d || ''}</Typography>
+                  <span style={{ width: '40px' }} />
+                </React.Fragment>
+              ))}
+          </div>
+          <img alt="logo" src={logo} className={classes.logo} />
         </Paper>
-        <div className={classes.rightContainer}>
-          <Paper square className={classes.stepperContainer}>
-            <StepperContainer/>
+        <div className={classes.main}>
+          <Paper square classes={{ root: classes.leftContainer }}>
+            <ButtonsContainer action={action} />
+            <StepPageContainer
+              bindParentAction={bindAction}
+              bindParentDescription={bindDescription}
+              description={description}
+            />
           </Paper>
+          <div className={classes.rightContainer}>
+            <Paper square className={classes.stepperContainer}>
+              <StepperContainer />
+            </Paper>
+          </div>
         </div>
       </div>
-    </div>
-  ), stepWorkingNS);
+    ),
+    stepWorkingNS
+  );
 }
 
 const mapState = (state, props) => {
@@ -100,4 +100,7 @@ const mapState = (state, props) => {
 
 const mapDispatch = {};
 
-export default connect<Props,*,_,_,_,_>(mapState, mapDispatch)(StepWorking);
+export default connect<Props, *, _, _, _, _>(
+  mapState,
+  mapDispatch
+)(StepWorking);

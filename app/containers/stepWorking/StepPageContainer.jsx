@@ -27,20 +27,21 @@ const mapDispatch = {};
 type Props = {
   step: tStep,
   workingStep: tStep,
-  bindParentAction: (Node)=>any,
+  bindParentAction: Node => any,
   timeLine: Array<any>,
-  bindParentDescription: (Node)=>any,
+  bindParentDescription: Node => any,
   description: Node
 };
 
+// 工步展示内容
 const StepPageContainer = ({
-                             step,
-                             workingStep,
-                             bindParentAction,
-                             timeLine,
-                             description,
-                             bindParentDescription
-                           }: Props) => {
+  step,
+  workingStep,
+  bindParentAction,
+  timeLine,
+  description,
+  bindParentDescription
+}: Props) => {
   const classes = makeStyles(styles.stepPageContainer)();
   if (stepTypes?.[step?.type]?.component) {
     const StepComponent = stepTypes[step.type].component;
@@ -57,7 +58,7 @@ const StepPageContainer = ({
                   bindDescription={bindParentDescription}
                 />
               )) ||
-              null}
+                null}
             </Paper>
           </Grid>
         </Grid>
@@ -70,9 +71,9 @@ const StepPageContainer = ({
         >
           <Grid item className={classes.descriptionContainer}>
             <Paper square className={clsx(classes.Paper, classes.Description)}>
-              {
-                description || <Typography variant="h5">{step.description}</Typography>
-              }
+              {description || (
+                <Typography variant="h5">{step.description}</Typography>
+              )}
             </Paper>
           </Grid>
           <Grid item className={classes.result}>
@@ -99,4 +100,7 @@ const StepPageContainer = ({
   return null;
 };
 
-export default connect<Props, *, _, _, _, _>(mapState, mapDispatch)(StepPageContainer);
+export default connect<Props, *, _, _, _, _>(
+  mapState,
+  mapDispatch
+)(StepPageContainer);

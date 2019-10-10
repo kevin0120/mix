@@ -1,7 +1,6 @@
 // @flow
 import { makeStyles, StepContent, Typography } from '@material-ui/core';
 import { connect } from 'react-redux';
-
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
 import StepButton from '@material-ui/core/StepButton';
@@ -9,25 +8,23 @@ import StepLabel from '@material-ui/core/StepLabel';
 import React, { useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Loop } from '@material-ui/icons';
+import clsx from 'clsx';
 import STEP_STATUS from '../../modules/step/constents';
 import styles from './styles';
 import * as oSel from '../../modules/order/selector';
 import { orderActions } from '../../modules/order/action';
 import type { Dispatch } from '../../modules/indexReducer';
-import type { tStep, tStepArray } from '../../modules/order/interface/typeDef';
+import type { tStep } from '../../modules/order/interface/typeDef';
 import Timer from './Timer';
-import clsx from 'clsx';
 
-const mapState = (state, props) => {
-  return ({
-    ...props,
-    steps: oSel.orderSteps(oSel.viewingOrder(state.order)) || [],
-    workingStep: oSel.workingStep(oSel.workingOrder(state.order)),
-    viewingStep: oSel.viewingStep(state.order),
-    viewingIndex: oSel.viewingIndex(state.order) || 0,
-    isCurrent: oSel.viewingOrder(state.order) === oSel.workingOrder(state.order)
-  });
-};
+const mapState = (state, props) => ({
+  ...props,
+  steps: oSel.orderSteps(oSel.viewingOrder(state.order)) || [],
+  workingStep: oSel.workingStep(oSel.workingOrder(state.order)),
+  viewingStep: oSel.viewingStep(state.order),
+  viewingIndex: oSel.viewingIndex(state.order) || 0,
+  isCurrent: oSel.viewingOrder(state.order) === oSel.workingOrder(state.order)
+});
 
 const mapDispatch = {
   jumpTo: orderActions.jumpToStep
@@ -41,13 +38,14 @@ type StepperLayoutProps = {
   viewingStep: tStep
 };
 
+// 步骤条
 const StepperContainer = ({
-                            steps,
-                            viewingIndex,
-                            jumpTo,
-                            workingStep,
-                            viewingStep
-                          }: StepperLayoutProps) => {
+  steps,
+  viewingIndex,
+  jumpTo,
+  workingStep,
+  viewingStep
+}: StepperLayoutProps) => {
   const classes = makeStyles(styles.stepperContainer)();
 
   const viewingRef = useRef(null);
@@ -79,9 +77,13 @@ const StepperContainer = ({
         const stepButtonProps = {};
 
         if (workingStep === s) {
-          stepButtonProps.icon = <Loop className={clsx(classes.stepIconDoing,{
-            [classes.fail]:fail
-          })}/>;
+          stepButtonProps.icon = (
+            <Loop
+              className={clsx(classes.stepIconDoing, {
+                [classes.fail]: fail
+              })}
+            />
+          );
         }
 
         if (s === viewingStep) {
@@ -97,21 +99,20 @@ const StepperContainer = ({
               onClick={() => jumpTo(idx)}
               className={classes.stepButton}
               {...stepButtonProps}
-              ref={s === viewingStep ? viewingRef : () => {
-              }}
+              ref={s === viewingStep ? viewingRef : () => {}}
             >
-              <StepLabel {...labelProps} >
-                <Typography variant="h6">
-                  {s.name}
-                </Typography>
+              <StepLabel {...labelProps}>
+                <Typography variant="h6">{s.name}</Typography>
               </StepLabel>
             </StepButton>
             <StepContent>
-              <Timer step={s}/>
-              {(Object.keys(s.payload.info||{}) || []).map(k => (
+              <Timer step={s} />
+              {(Object.keys(s.payload.info || {}) || []).map(k => (
                 <div className={classes.infoRow} key={k}>
                   <Typography variant="body1">{k || ''}</Typography>
-                  <Typography variant="body1">{s.payload.info[k] || ''}</Typography>
+                  <Typography variant="body1">
+                    {s.payload.info[k] || ''}
+                  </Typography>
                 </div>
               ))}
             </StepContent>
