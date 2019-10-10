@@ -1,4 +1,4 @@
-import type { tInput } from '../../../common/type';
+import type { tInput } from '../../external/device/type';
 
 export const SCANNER_STEP = {
   GET_VALUE: 'SCANNER_STEP_GET_VALUE',

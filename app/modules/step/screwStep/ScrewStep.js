@@ -10,7 +10,8 @@ import { ClsOrderOperationPoints } from './model';
 import { CommonLog } from '../../../common/utils';
 import handleResult from './handleResult';
 import controllerModeTasks from './controllerModeTasks';
-import screwStepActions, { SCREW_STEP } from './action';
+import screwStepActions from './action';
+import { SCREW_STEP } from './constents';
 import { getDevice } from '../../external/device';
 import dialogActions from '../../dialog/action';
 

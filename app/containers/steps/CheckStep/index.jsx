@@ -6,11 +6,11 @@ import type { tStepProps } from '../types';
 import Button from '../../../components/CustomButtons/Button';
 import Qualitative from './Qualitative';
 import Quantitative from './Quantitative';
-import {checkStepTypes} from '../../../modules/step/checkStep/model';
+import {checkStepTypes} from '../../../modules/step/checkStep/constents';
 
 const Contents = {
-[checkStepTypes.quantitative]: Quantitative,
-  [checkStepTypes.qualitative]: Qualitative
+[checkStepTypes.measurement]: Quantitative,
+  [checkStepTypes.passFail]: Qualitative
 };
 
 const mapState = (state, props) => ({

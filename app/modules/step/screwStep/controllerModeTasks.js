@@ -1,7 +1,7 @@
 // @flow
 import { put, select, call } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
-import { controllerModes } from './model';
+import { controllerModes } from './constents';
 import notifierActions from '../../Notifier/action';
 // import { stepData, workingStep, workingOrder, workingIndex } from '../../order/selector';
 import type { tPoint, tScrewStepData } from './model';
@@ -9,6 +9,7 @@ import { CommonLog } from '../../../common/utils';
 import { jobApi, psetApi } from '../../../api/tools';
 import { workingOrder } from '../../order/selector';
 
+// pset/job模式
 export default {
   *[controllerModes.pset](point): Saga<void> {
     try {

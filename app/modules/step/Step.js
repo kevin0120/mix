@@ -1,3 +1,4 @@
+// @flow
 import {
   call,
   cancel,
@@ -5,12 +6,12 @@ import {
   join,
   put,
   race,
-  take,
-  takeEvery
+  take
 } from 'redux-saga/effects';
 import { CommonLog } from '../../common/utils';
 import { orderStepUpdateApi } from '../../api/order';
-import { ORDER, orderActions } from '../order/action';
+import { orderActions } from '../order/action';
+import { ORDER } from '../order/constents';
 import STEP_STATUS from './constents';
 import stepTypes from './stepTypes';
 
@@ -24,7 +25,8 @@ function invalidStepStatus(stepType, status) {
   throw Error(`step type ${stepType}  has empty status ${status}`);
 }
 
-export interface IWorkStep {}
+export interface IWorkStep {
+}
 
 export default class Step {
   _id = '';
@@ -136,8 +138,8 @@ export default class Step {
 
   timeCost() {
     return ((this._times || []).length % 2 === 0
-      ? this._times || []
-      : [...this._times, new Date()]
+        ? this._times || []
+        : [...this._times, new Date()]
     ).reduce(
       (total, currentTime, idx) =>
         idx % 2 === 0 ? total - currentTime : total - (0 - currentTime),
@@ -145,7 +147,8 @@ export default class Step {
     );
   }
 
-  timeLost() {}
+  timeLost() {
+  }
 
   timerStart() {
     try {
@@ -175,7 +178,7 @@ export default class Step {
     }
   }
 
-  *updateData(dataReducer) {
+  * updateData(dataReducer) {
     try {
       this._data = dataReducer(this._data);
       yield put(orderActions.updateState());
@@ -186,7 +189,7 @@ export default class Step {
     }
   }
 
-  *updateStatus({ status, msg }) {
+  * updateStatus({ status, msg }) {
     if (status in this._statusTasks) {
       try {
         this._status = status;
@@ -199,7 +202,7 @@ export default class Step {
     }
   }
 
-  *_runStatusTask({ status, msg }) {
+  * _runStatusTask({ status, msg }) {
     if (status in this._statusTasks) {
       try {
         if (this._runningStatusTask) {
@@ -221,8 +224,9 @@ export default class Step {
     }
   }
 
-  *run(initStatus) {
+  * run(initStatus) {
     const runStatusTask = this._runStatusTask.bind(this);
+
     function* runStep() {
       try {
         while (true) {
@@ -254,7 +258,7 @@ export default class Step {
     }
   }
 
-  *runSubStep(step, callbacks) {
+  * runSubStep(step, callbacks) {
     try {
       step.timerStart();
       const { exit, next, previous } = yield race({

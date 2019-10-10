@@ -38,7 +38,9 @@ export const exceptOrders = (orderList: Array<tClsOrder>): Array<tOrder> =>
   );
 
 export const stepStatus = (step: ?tClsStep): ?tStepStatus => step?.status;
+// eslint-disable-next-line flowtype/no-weak-types
 export const stepData = (step: ?tClsStep): ?Object => step?.data;
+// eslint-disable-next-line flowtype/no-weak-types
 export const stepPayload = (step: ?tClsStep): ?Object => step?.payload;
 export const times = (step: ?tClsStep): ?Array<Date> => step?.times;
 

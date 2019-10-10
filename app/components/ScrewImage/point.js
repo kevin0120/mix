@@ -2,7 +2,7 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core';
 import clsx from 'clsx';
 import styles from './style';
-import { POINT_STATUS } from '../../modules/step/screwStep/model';
+import { POINT_STATUS } from '../../modules/step/screwStep/constents';
 
 
 const pointRadius = 30;

@@ -2,21 +2,8 @@
 
 import { find, isNil } from 'lodash-es';
 import { CommonLog } from '../../../common/utils';
+import { POINT_STATUS, RESULT_STATUS, controllerModes } from './constents';
 
-export const POINT_STATUS = {
-  WAITING: 'WAITING',
-  WAITING_ACTIVE: 'WAITING_ACTIVE',
-  SUCCESS: 'SUCCESS',
-  ERROR: 'ERROR',
-  ERROR_ACTIVE: 'ERROR_ACTIVE'
-};
-
-export const RESULT_STATUS = {
-  ok: 'OK',
-  nok: 'NOK',
-  lsn: 'LSN', // 松脱
-  ak2: 'AK2' // 强制放行
-};
 
 export type tPointStatus = $Keys<typeof POINT_STATUS>;
 
@@ -239,10 +226,6 @@ export type tScrewStepData = {
   jobID: number
 };
 
-export const controllerModes = {
-  job: 'job',
-  pset: 'pset'
-};
 
 export type tControllerMode = $Keys<typeof controllerModes>;
 

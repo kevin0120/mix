@@ -6,7 +6,7 @@ import type {
   tResultStatus,
   tScrewStepData
 } from './model';
-import { POINT_STATUS, RESULT_STATUS } from './model';
+import { POINT_STATUS, RESULT_STATUS } from './constents';
 import STEP_STATUS from '../constents';
 import { CommonLog } from '../../../common/utils';
 

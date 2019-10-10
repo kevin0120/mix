@@ -29,15 +29,15 @@ export type tOrderState = {
   list: Array<tClsOrder>
 };
 
-/* eslint-disable flowtype/no-weak-types */
 interface tStepPayload {
-  [key: string]: any;
+  // eslint-disable-next-line flowtype/no-weak-types
+  [key: string]: any
 }
 
-/* eslint-enable flowtype/no-weak-types */
 
 export type tStep = {
   +name: string,
+  // eslint-disable-next-line flowtype/no-weak-types
   info: Object,
   status: tStepStatus,
   +type: tStepType, // check,collect,instruct,enable,...

@@ -1,11 +1,6 @@
 // @flow
 import type { tResult } from './model';
-
-export const SCREW_STEP = {
-  RESULT: 'SCREW_STEP_RESULT',
-  REDO_POINT: 'SCREW_STEP_REDO_POINT',
-  CONFIRM_FAIL: 'SCREW_STEP_CONFIRM_FAIL'
-};
+import { SCREW_STEP } from './constents';
 
 export type tResultAction = { type: string, results: Array<tResult> };
 
