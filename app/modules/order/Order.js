@@ -29,6 +29,8 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep {
 
   _workingIndex = 0;
 
+  _stateToRun = ORDER_STATUS.WIP;
+
   _workingID = null;
 
   constructor(dataObj) {
@@ -44,7 +46,7 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep {
     return this._workingIndex;
   }
 
-  *onNext() {
+  * onNext() {
     try {
       this._workingIndex += 1;
       if (this._workingIndex >= this._steps.length) {
@@ -55,7 +57,7 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep {
     }
   }
 
-  *onPrevious() {
+  * onPrevious() {
     if (this._workingIndex - 1 < 0) {
       // yield put(orderActions.finishOrder(this));
     } else {
@@ -64,8 +66,9 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep {
   }
 
   _statusTasks = {
-    *[ORDER_STATUS.TODO]() {},
-    *[ORDER_STATUS.WIP]() {
+    * [ORDER_STATUS.TODO]() {
+    },
+    * [ORDER_STATUS.WIP]() {
       try {
         this._workingIndex =
           this._workingIndex >= this._steps.length ? 0 : this._workingIndex;
@@ -87,11 +90,8 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep {
         CommonLog.Info('order doing finished');
       }
     },
-    *[ORDER_STATUS.DONE]() {
+    * [ORDER_STATUS.DONE]() {
       try {
-        if (this.workingStep) {
-          this.workingStep.timerStop();
-        }
         const data = this._steps.map(s => [
           s.name,
           durationString(s.timeCost()),
@@ -125,9 +125,8 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep {
         CommonLog.Info('order done');
       }
     },
-    *[ORDER_STATUS.PENDING]() {
+    * [ORDER_STATUS.PENDING]() {
       try {
-        this.workingStep.timerStop();
         yield put(orderActions.finishOrder(this));
       } catch (e) {
         CommonLog.lError(e, {
@@ -135,9 +134,8 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep {
         });
       }
     },
-    *[ORDER_STATUS.CANCEL]() {
+    * [ORDER_STATUS.CANCEL]() {
       try {
-        this.workingStep.timerStop();
         yield put(orderActions.finishOrder(this));
       } catch (e) {
         CommonLog.lError(e, {
@@ -150,4 +148,4 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep {
 
 export default OrderMixin;
 
-export type tClsOrder=ClsOrder;
+export type tClsOrder = ClsOrder;

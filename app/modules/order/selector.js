@@ -42,7 +42,7 @@ export const stepStatus = (step: ?tClsStep): ?tStepStatus => step?.status;
 export const stepData = (step: ?tClsStep): ?Object => step?.data;
 // eslint-disable-next-line flowtype/no-weak-types
 export const stepPayload = (step: ?tClsStep): ?Object => step?.payload;
-export const times = (step: ?tClsStep): ?Array<Date> => step?.times;
+export const timeCost = (step: ?tClsStep): ?Array<Date> => step?.timeCost();
 
 
 export const isPending = (order: ?tClsOrder): boolean => order?.status === ORDER_STATUS.PENDING || false;

@@ -18,28 +18,26 @@ import dialogActions from '../dialog/action';
 import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
 import { CommonLog } from '../../common/utils';
-import type { tStep, tStepArray } from './interface/typeDef';
 import type { tCommonActionType } from '../../common/type';
 import { orderDetailApi, orderListApi } from '../../api/order';
-import { ORDER_STATUS, ORDER } from './constants';
+import { ORDER } from './constants';
 import { bindRushAction } from '../rush/rushHealthz';
 import loadingActions from '../loading/action';
 import NotifierActions from '../Notifier/action';
-import type { tActUpdateState } from './action';
 import type { tClsStep } from '../step/Step';
 import type { tClsOrder } from './Order';
 
 export default function* root(): Saga<void> {
   try {
     yield all([
-      call(bindRushAction.onConnect, orderActions.getList),
+      call(bindRushAction.onConnect, orderActions.getList),// 绑定rush连接时需要触发的action
       // TODO: should we use takeEvery?
       takeEvery(ORDER.LIST.GET, getOrderList),
       takeEvery(ORDER.DETAIL.GET, getOrderDetail),
       takeEvery(ORDER.WORK_ON, workOnOrder),
       takeEvery(ORDER.VIEW, viewOrder),
       takeEvery(ORDER.NEW, newOrder),
-      takeEvery(ORDER.STEP.STATUS, updateStatus),
+      // takeEvery(ORDER.STEP.STATUS, updateStatus),
       takeLeading([ORDER.STEP.PREVIOUS, ORDER.STEP.NEXT], DebounceViewStep, 300)
     ]);
   } catch (e) {
@@ -47,23 +45,22 @@ export default function* root(): Saga<void> {
   }
 }
 
-function* updateStatus(action: tActUpdateState) {
-  try {
-    const { step } = action;
-    if (Reflect.has(step, 'updateStatus')) {
-      const st = (step: tClsStep);
-      yield call([st, st.updateStatus], action);
-    } else {
-      throw new Error(
-        'updateStatus Error, The Step Without updateStatus Property'
-      );
-    }
-  } catch (e) {
-    CommonLog.lError(e, {
-      at: 'order.saga.updateStatus'
-    });
-  }
-}
+// function* updateStatus(action: tActUpdateState) {
+//   try {
+//     const { step }: { step: tClsStep } = action;
+//     if (Reflect.has(step, 'updateStatus')) {
+//       yield call([step, step.updateStatus], action);
+//     } else {
+//       throw new Error(
+//         'updateStatus Error, The Step Without updateStatus Property'
+//       );
+//     }
+//   } catch (e) {
+//     CommonLog.lError(e, {
+//       at: 'order.saga.updateStatus'
+//     });
+//   }
+// }
 
 function* newOrder() {
   try {
@@ -73,10 +70,10 @@ function* newOrder() {
   }
 }
 
-function* workOnOrder({ order }) {
+function* workOnOrder({ order }: { order: tClsOrder }) {
   try {
     yield race([
-      call(order.run, ORDER_STATUS.WIP),
+      call(order.run),
       take(a => a.type === ORDER.FINISH && a.order === order)
     ]);
   } catch (e) {
@@ -127,7 +124,6 @@ function* getOrderList() {
 }
 
 function* viewOrder({ order }: { order: tClsOrder }) {
-  // eslint-disable-next-line no-unused-expressions
   try {
     const WIPOrder: tClsOrder = yield select(s => workingOrder(s.order));
 
@@ -141,12 +137,12 @@ function* viewOrder({ order }: { order: tClsOrder }) {
       race([take(ORDER.DETAIL.SUCCESS), take(ORDER.DETAIL.FAIL)])
     ]);
     yield put(loadingActions.stop());
-    const vOrderSteps: ?tStepArray = yield select(state =>
+    const vOrderSteps: ?Array<tClsStep> = yield select(state =>
       orderSteps(viewingOrder(state.order))
     );
     const data =
       (vOrderSteps &&
-        vOrderSteps.map((s: tStep, idx) => [
+        vOrderSteps.map((s: tClsStep, idx) => [
           idx + 1,
           s.name,
           i18n.t(`StepType.${s.type}`),

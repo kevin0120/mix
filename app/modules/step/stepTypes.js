@@ -1,3 +1,4 @@
+// @flow
 import InputStepMixin from './inputStep/InputStep';
 import ScannerStepMixin from './scannerStep/ScannerStep';
 import InstructionStepMixin from './instructionStep/InstructionStep';

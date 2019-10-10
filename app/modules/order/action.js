@@ -20,7 +20,7 @@ export const orderActions = {
     type: ORDER.LIST.GET
   }),
   // eslint-disable-next-line flowtype/no-weak-types
-  newOrder: (list: Array<any>) => ({
+  newOrder: (list: Array<tOrder>) => ({
     type: ORDER.NEW,
     list
   }),

@@ -1,5 +1,6 @@
 // @flow
 
+// 工单状态
 export const ORDER_STATUS = {
   TODO: 'todo',
   WIP: 'wip',
@@ -7,7 +8,7 @@ export const ORDER_STATUS = {
   CANCEL: 'cancel',
   PENDING: 'pending'
 };
-
+// rush type
 export const ORDER_WS_TYPES = {
   LIST: 'WS_ORDER_LIST',
   DETAIL: 'WS_ORDER_DETAIL',

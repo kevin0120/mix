@@ -1,3 +1,4 @@
+// @flow
 const STEP_STATUS = {
   READY: 'ready',
   ENTERING: 'entering',

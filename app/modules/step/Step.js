@@ -8,12 +8,17 @@ import {
   race,
   take
 } from 'redux-saga/effects';
+import type { Saga } from 'redux-saga';
 import { CommonLog } from '../../common/utils';
 import { orderStepUpdateApi } from '../../api/order';
+// eslint-disable-next-line import/no-cycle
 import { orderActions } from '../order/action';
 import { ORDER } from '../order/constants';
 import STEP_STATUS from './constants';
+// eslint-disable-next-line import/no-cycle
 import stepTypes from './stepTypes';
+import type { tStepDataReducer, tAnyStepState, tRunSubStepCallbacks } from './interface/typeDef';
+import type { tStep } from '../order/interface/typeDef';
 
 function invalidStepStatus(stepType, status) {
   if (!stepType) {
@@ -45,6 +50,8 @@ export default class Step {
 
   _status = STEP_STATUS.READY;
 
+  _stateToRun = STEP_STATUS.ENTERING;
+
   _payload = {};
 
   _data = {};
@@ -63,9 +70,9 @@ export default class Step {
 
   _onLeave = null;
 
-  constructor(stepObj, parentID) {
+  constructor(stepObj: tStep) {
     this._id = stepObj.id;
-    this.update(stepObj, stepTypes);
+    this.update(stepObj);
     this.run = this.run.bind(this);
     this.timerStart = this.timerStart.bind(this);
     this.timerStop = this.timerStop.bind(this);
@@ -148,6 +155,7 @@ export default class Step {
   }
 
   timeLost() {
+    // TODO: calculate time lost
   }
 
   timerStart() {
@@ -178,7 +186,7 @@ export default class Step {
     }
   }
 
-  * updateData(dataReducer) {
+  * updateData(dataReducer: tStepDataReducer): Saga<void> {
     try {
       this._data = dataReducer(this._data);
       yield put(orderActions.updateState());
@@ -189,7 +197,7 @@ export default class Step {
     }
   }
 
-  * updateStatus({ status, msg }) {
+  * _updateStatus({ status, msg }) {
     if (status in this._statusTasks) {
       try {
         this._status = status;
@@ -209,7 +217,7 @@ export default class Step {
           yield cancel(this._runningStatusTask);
         }
         const taskToRun =
-          this._statusTasks[status]?.bind(this) ||
+          this._statusTasks[status] && this._statusTasks[status].bind(this) ||
           (() => invalidStepStatus(this._type, status));
 
         this._runningStatusTask = yield fork(
@@ -224,8 +232,10 @@ export default class Step {
     }
   }
 
-  * run(initStatus) {
+  * run(stateToRun: tAnyStepState = this._stateToRun): Saga<void> {
     const runStatusTask = this._runStatusTask.bind(this);
+    const updateStatus = this._updateStatus.bind(this);
+    this.timerStart();
 
     function* runStep() {
       try {
@@ -233,6 +243,7 @@ export default class Step {
           const action = yield take(
             a => a.type === ORDER.STEP.STATUS && a.step === this
           );
+          yield fork(updateStatus, action);
           yield fork(runStatusTask, action);
         }
       } catch (e) {
@@ -244,13 +255,14 @@ export default class Step {
 
     try {
       const step = yield fork([this, runStep]);
-      yield put(orderActions.stepStatus(this, initStatus));
+      yield put(orderActions.stepStatus(this, stateToRun));
       yield join(step);
     } catch (e) {
       CommonLog.lError(e, {
         at: 'step root'
       });
     } finally {
+      this.timerStop();
       if (this._onLeave) {
         yield call([this, this._onLeave]);
       }
@@ -258,11 +270,10 @@ export default class Step {
     }
   }
 
-  * runSubStep(step, callbacks) {
+  * runSubStep(step: tClsStep, callbacks: tRunSubStepCallbacks): Saga<void> {
     try {
-      step.timerStart();
       const { exit, next, previous } = yield race({
-        exit: call(step.run, STEP_STATUS.ENTERING),
+        exit: call(step.run),
         next: take(
           action =>
             (action.type === ORDER.STEP.FINISH && action.step === step) ||
@@ -270,14 +281,13 @@ export default class Step {
         ),
         previous: take(ORDER.STEP.DO_PREVIOUS)
       });
-      step.timerStop();
-      if (exit && callbacks?.onExit) {
+      if (exit && callbacks && callbacks.onExit) {
         yield call(callbacks.onExit);
       }
-      if (next && callbacks?.onNext) {
+      if (next && callbacks && callbacks.onNext) {
         yield call(callbacks.onNext);
       }
-      if (previous && callbacks?.onPrevious) {
+      if (previous && callbacks && callbacks.onPrevious) {
         yield call(callbacks.onPrevious);
       }
     } catch (e) {
