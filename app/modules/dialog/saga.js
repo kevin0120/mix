@@ -1,6 +1,6 @@
 import { take, call, put, fork, takeEvery } from 'redux-saga/effects';
 import actions  from './action';
-import { DIALOG } from './constents';
+import { DIALOG } from './constants';
 import type { tDialogConfig } from './interface/typeDef';
 import { CommonLog } from '../../common/utils';
 

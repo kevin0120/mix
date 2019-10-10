@@ -1,5 +1,5 @@
 import { put, take, race } from 'redux-saga/effects';
-import STEP_STATUS from '../constents';
+import STEP_STATUS from '../constants';
 import { CHECK_STEP } from './action';
 import { CommonLog } from '../../../common/utils';
 

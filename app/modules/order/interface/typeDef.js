@@ -1,5 +1,5 @@
-import STEP_STATUS from '../../step/constents';
-import { ORDER_STATUS } from '../constents';
+import STEP_STATUS from '../../step/constants';
+import { ORDER_STATUS } from '../constants';
 import type { tClsOrder } from '../Order';
 
 export type tStockMove = {

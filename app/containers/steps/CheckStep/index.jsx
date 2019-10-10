@@ -6,7 +6,7 @@ import type { tStepProps } from '../types';
 import Button from '../../../components/CustomButtons/Button';
 import Qualitative from './Qualitative';
 import Quantitative from './Quantitative';
-import { checkStepTypes } from '../../../modules/step/checkStep/constents';
+import { checkStepTypes } from '../../../modules/step/checkStep/constants';
 
 const Contents = {
   [checkStepTypes.measurement]: Quantitative,

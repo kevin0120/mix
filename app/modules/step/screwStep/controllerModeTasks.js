@@ -1,7 +1,7 @@
 // @flow
 import { put, select, call } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
-import { controllerModes } from './constents';
+import { controllerModes } from './constants';
 import notifierActions from '../../Notifier/action';
 // import { stepData, workingStep, workingOrder, workingIndex } from '../../order/selector';
 import type { tPoint, tScrewStepData } from './model';

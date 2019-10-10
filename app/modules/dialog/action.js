@@ -1,5 +1,5 @@
 import type { tDialogConfig } from './interface/typeDef';
-import {DIALOG} from './constents';
+import {DIALOG} from './constants';
 
 export default {
   dialogShow: (config: tDialogConfig) => ({

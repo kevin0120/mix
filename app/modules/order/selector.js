@@ -1,5 +1,5 @@
 // @flow
-import { ORDER_STATUS } from './constents';
+import { ORDER_STATUS } from './constants';
 import type {
   tOrder,
   tOrderState,

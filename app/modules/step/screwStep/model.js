@@ -2,7 +2,7 @@
 
 import { find, isNil } from 'lodash-es';
 import { CommonLog } from '../../../common/utils';
-import { POINT_STATUS, RESULT_STATUS, controllerModes } from './constents';
+import { POINT_STATUS, RESULT_STATUS, controllerModes } from './constants';
 
 
 export type tPointStatus = $Keys<typeof POINT_STATUS>;

@@ -1,14 +1,14 @@
 import React from 'react';
 import { push } from 'connected-react-router';
 import { call, put } from 'redux-saga/effects';
-import { ORDER_STATUS } from './constents';
+import { ORDER_STATUS } from './constants';
 import { CommonLog, durationString } from '../../common/utils';
 import { orderActions } from './action';
 import { orderUpdateApi } from '../../api/order';
 import dialogActions from '../dialog/action';
 import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
-import STEP_STATUS from '../step/constents';
+import STEP_STATUS from '../step/constants';
 
 const stepStatus = status => {
   switch (status) {

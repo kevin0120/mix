@@ -1,7 +1,7 @@
 import { put, call } from 'redux-saga/effects';
 import { CommonLog } from '../../common/utils';
 import { orderActions } from './action';
-import { ORDER_WS_TYPES } from './constents';
+import { ORDER_WS_TYPES } from './constants';
 
 const { getListSuccess } = orderActions;
 
@@ -13,7 +13,7 @@ const dataHandlers = {
         id: d.id,
         desc: d.desc,
         name: d.name,
-        image: '',
+        image: d.image || '',
         status: d.status
       }));
       yield put(getListSuccess(list));

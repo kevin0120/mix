@@ -1,6 +1,6 @@
 import { cloneDeep, isNil, isEmpty } from 'lodash-es';
 import { call, put, take, all } from 'redux-saga/effects';
-import STEP_STATUS from '../constents';
+import STEP_STATUS from '../constants';
 import type {
   tPoint,
   tScrewStepData,
@@ -11,7 +11,7 @@ import { CommonLog } from '../../../common/utils';
 import handleResult from './handleResult';
 import controllerModeTasks from './controllerModeTasks';
 import screwStepActions from './action';
-import { SCREW_STEP } from './constents';
+import { SCREW_STEP } from './constants';
 import { getDevice } from '../../external/device';
 import dialogActions from '../../dialog/action';
 

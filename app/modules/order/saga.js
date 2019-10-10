@@ -21,11 +21,11 @@ import { CommonLog } from '../../common/utils';
 import type { tStep, tStepArray } from './interface/typeDef';
 import type { tCommonActionType } from '../../common/type';
 import { orderDetailApi, orderListApi } from '../../api/order';
-import { ORDER_STATUS, ORDER } from './constents';
+import { ORDER_STATUS, ORDER } from './constants';
 import { bindRushAction } from '../rush/rushHealthz';
 import loadingActions from '../loading/action';
 import NotifierActions from '../Notifier/action';
-import type { updateStateActionType } from './action';
+import type { tActUpdateState } from './action';
 import type { tClsStep } from '../step/Step';
 import type { tClsOrder } from './Order';
 
@@ -47,7 +47,7 @@ export default function* root(): Saga<void> {
   }
 }
 
-function* updateStatus(action: updateStateActionType) {
+function* updateStatus(action: tActUpdateState) {
   try {
     const { step } = action;
     if (Reflect.has(step, 'updateStatus')) {
@@ -126,9 +126,8 @@ function* getOrderList() {
   }
 }
 
-function* viewOrder({ order }) {
+function* viewOrder({ order }: { order: tClsOrder }) {
   // eslint-disable-next-line no-unused-expressions
-  (order: tClsOrder);
   try {
     const WIPOrder: tClsOrder = yield select(s => workingOrder(s.order));
 

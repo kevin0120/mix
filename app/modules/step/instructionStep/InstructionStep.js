@@ -1,5 +1,5 @@
 import { put, take } from 'redux-saga/effects';
-import STEP_STATUS from '../constents';
+import STEP_STATUS from '../constants';
 import { INSTRUCTION_STEP } from './action';
 
 

@@ -1,5 +1,5 @@
 import { put, take } from 'redux-saga/effects';
-import STEP_STATUS from '../constents';
+import STEP_STATUS from '../constants';
 import { VIDEO_STEP } from './action';
 
 const videoStepMixin = (BaseStep) => class ClsVideoStep extends BaseStep {

@@ -13,7 +13,7 @@ import CardContent from '@material-ui/core/CardContent';
 import { I18n } from 'react-i18next';
 import { sortBy } from 'lodash-es';
 import { orderActions } from '../../modules/order/action';
-import { ORDER_STATUS } from '../../modules/order/constents';
+import { ORDER_STATUS } from '../../modules/order/constants';
 import { todoOrders, doneOrders, exceptOrders, doingOrders } from '../../modules/order/selector';
 import styles from './styles';
 import settingImg from '../../../resources/imgs/setting.png';

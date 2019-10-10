@@ -11,7 +11,7 @@ import styles from './styles';
 import StepperContainer from './StepperContainer';
 import StepPageContainer from './StepPageContainer';
 import type { tOrderStatus } from '../../modules/order/interface/typeDef';
-import { ORDER_STATUS } from '../../modules/order/constents';
+import { ORDER_STATUS } from '../../modules/order/constants';
 import logo from '../../../resources/imgs/logo.jpg';
 import { stepWorkingNS } from './local';
 import { withI18n } from '../../i18n';

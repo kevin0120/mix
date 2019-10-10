@@ -1,4 +1,4 @@
-import { DIALOG } from './constents';
+import { DIALOG } from './constants';
 import type { tDialogState } from './interface/typeDef';
 
 const initState: tDialogState = {

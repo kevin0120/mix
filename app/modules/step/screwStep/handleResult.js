@@ -6,8 +6,8 @@ import type {
   tResultStatus,
   tScrewStepData
 } from './model';
-import { POINT_STATUS, RESULT_STATUS } from './constents';
-import STEP_STATUS from '../constents';
+import { POINT_STATUS, RESULT_STATUS } from './constants';
+import STEP_STATUS from '../constants';
 import { CommonLog } from '../../../common/utils';
 
 function formPointStatusFromResultStatus(

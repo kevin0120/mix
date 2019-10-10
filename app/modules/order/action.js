@@ -2,17 +2,15 @@
 import type { tOrder, tOrderStepIdx, tStepStatus } from './interface/typeDef';
 import type { tClsOrder } from './Order';
 import type { tClsStep } from '../step/Step';
-import { ORDER_STATUS, ORDER } from './constents';
+import { ORDER_STATUS, ORDER } from './constants';
 
-export type updateStateActionType = {
+export type tActUpdateState = {
   type: string,
   step: tClsOrder | tClsStep,
   status: tStepStatus
 };
 
-
-
-export type orderTriggerType = {
+export type tActOrderTrigger = {
   type: string,
   order: tOrder
 };
@@ -49,20 +47,20 @@ export const orderActions = {
     order
   }),
   // order status
-  workOn: (order: tClsOrder): orderTriggerType => ({
+  workOn: (order: tClsOrder): tActOrderTrigger => ({
     type: ORDER.WORK_ON,
     order
   }),
-  finishOrder: (order: tClsOrder): orderTriggerType => ({
+  finishOrder: (order: tClsOrder): tActOrderTrigger => ({
     type: ORDER.FINISH,
     order
   }),
-  cancelOrder: (order: tClsOrder): updateStateActionType => ({
+  cancelOrder: (order: tClsOrder): tActUpdateState => ({
     type: ORDER.STEP.STATUS,
     step: order,
     status: ORDER_STATUS.CANCEL
   }),
-  pendingOrder: (order: tClsOrder): updateStateActionType => ({
+  pendingOrder: (order: tClsOrder): tActUpdateState => ({
     type: ORDER.STEP.STATUS,
     step: order,
     status: ORDER_STATUS.PENDING

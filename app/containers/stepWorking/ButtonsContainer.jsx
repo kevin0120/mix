@@ -12,15 +12,14 @@ import styles from './styles';
 import { translation as trans, stepWorkingNS } from './local';
 import * as oSel from '../../modules/order/selector';
 import { orderActions } from '../../modules/order/action';
-import type { tStepArray } from '../../modules/order/interface/typeDef';
 import dialogActions from '../../modules/dialog/action';
 import { tNS, withI18n } from '../../i18n';
 import Table from '../../components/Table/Table';
 import modelViewerActions from '../../modules/modelViewer/action';
 import type { tClsOrder } from '../../modules/order/Order';
 import type {
-  orderTriggerType,
-  updateStateActionType
+  tActOrderTrigger,
+  tActUpdateState
 } from '../../modules/order/action';
 import type { tClsStep } from '../../modules/step/Step';
 
@@ -58,20 +57,19 @@ type ButtonsContainerProps = {
   viewingIndex: number,
   viewingStep: tClsStep,
   workingStep: tClsStep,
-  viewingIndex: number,
-  steps: tStepArray,
+  steps: Array<tClsStep>,
   next: () => any,
   action: Node,
   previous: () => any,
   doNextStep: () => any,
   doPreviousStep: () => any,
-  cancelOrder: (order: tClsOrder) => updateStateActionType,
-  pendingOrder: (order: tClsOrder) => updateStateActionType,
+  cancelOrder: (order: tClsOrder) => tActUpdateState,
+  pendingOrder: (order: tClsOrder) => tActUpdateState,
   isPending: boolean,
   // isCancel: boolean,
   pendingable: boolean,
   cancelable: boolean,
-  workOn: (order: tClsOrder) => orderTriggerType,
+  workOn: (order: tClsOrder) => tActOrderTrigger,
   viewModel: any, // 查看的三维模型
   viewModelDialog: any
 };

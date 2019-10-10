@@ -1,7 +1,7 @@
 /* eslint-disable no-empty-function */
 import { put, fork } from 'redux-saga/effects';
 import type { tRushWebSocketData, tWebSocketEvent } from './type';
-import { WEBSOCKET_EVENTS as wse } from './type';
+import { WEBSOCKET_EVENTS as wse } from './constants';
 import notifierActions from '../Notifier/action';
 import { CommonLog } from '../../common/utils';
 import {

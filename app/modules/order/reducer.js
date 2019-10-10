@@ -1,6 +1,6 @@
 // @flow
 
-import { ORDER } from './constents';
+import { ORDER } from './constants';
 import { genReducers } from '../util';
 import type { tOrder, tOrderState, tOrderStepIdx } from './interface/typeDef';
 import { demoOrder, demoOrderCancel, demoOrderDone, demoOrderLong, demoOrderPending } from './demoData';

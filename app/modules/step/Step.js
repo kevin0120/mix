@@ -11,8 +11,8 @@ import {
 import { CommonLog } from '../../common/utils';
 import { orderStepUpdateApi } from '../../api/order';
 import { orderActions } from '../order/action';
-import { ORDER } from '../order/constents';
-import STEP_STATUS from './constents';
+import { ORDER } from '../order/constants';
+import STEP_STATUS from './constants';
 import stepTypes from './stepTypes';
 
 function invalidStepStatus(stepType, status) {
