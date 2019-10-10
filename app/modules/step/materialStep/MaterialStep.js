@@ -6,7 +6,7 @@ import { CommonLog } from '../../../common/utils';
 import { ioDirection, ioTriggerMode } from '../../external/device/io/type';
 import actions, { MATERIAL_STEP } from './action';
 
-const items = (payload) => payload?.items;
+const items = payload => payload?.items;
 
 const MaterialStepMixin = (ClsBaseStep) => class ClsMaterialStep extends ClsBaseStep {
   _ports = new Set([]);
@@ -28,7 +28,7 @@ const MaterialStepMixin = (ClsBaseStep) => class ClsMaterialStep extends ClsBase
         this._ports.clear();
         this._io.clear();
         this._items.clear();
-        this._confirm=null;
+        this._confirm = null;
       } catch (e) {
         CommonLog(e);
       }
@@ -38,9 +38,11 @@ const MaterialStepMixin = (ClsBaseStep) => class ClsMaterialStep extends ClsBase
   }
 
   _statusTasks = {
-    * [STEP_STATUS.ENTERING](ORDER, orderActions) {
+    *[STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {
-        const sPayload = yield select(s => stepPayload(workingStep(workingOrder(s.order))));
+        const sPayload = yield select(s =>
+          stepPayload(workingStep(workingOrder(s.order)))
+        );
         items(sPayload).forEach(i => {
           const item = {};
           if (i?.in?.sn) {
@@ -78,8 +80,8 @@ const MaterialStepMixin = (ClsBaseStep) => class ClsMaterialStep extends ClsBase
           }
         }
 
-        const confirmIO=getDevice(sPayload.confirm.sn);
-        if(confirmIO){
+        const confirmIO = getDevice(sPayload.confirm.sn);
+        if (confirmIO) {
           this._confirm = {
             io: confirmIO,
             port: confirmIO.getPort(ioDirection.input, sPayload.confirm.index)
@@ -91,7 +93,7 @@ const MaterialStepMixin = (ClsBaseStep) => class ClsMaterialStep extends ClsBase
         CommonLog.lError(e);
       }
     },
-    * [STEP_STATUS.DOING](ORDER, orderActions) {
+    *[STEP_STATUS.DOING](ORDER, orderActions) {
       try {
         const listeners = [];
         this._items.forEach(i => {
@@ -105,9 +107,9 @@ const MaterialStepMixin = (ClsBaseStep) => class ClsMaterialStep extends ClsBase
           });
         });
 
-        let readyListener=null;
+        let readyListener = null;
         // const confirmPort = io.getPort(ioDirection.input, confirmIdx(sPayload));
-        if(this._confirm && this._confirm.io && this._confirm.port){
+        if (this._confirm && this._confirm.io && this._confirm.port) {
           readyListener = this._confirm.io.addListener(
             this._confirm.port,
             ioTriggerMode.falling,
@@ -117,10 +119,14 @@ const MaterialStepMixin = (ClsBaseStep) => class ClsMaterialStep extends ClsBase
 
         yield race([
           take(MATERIAL_STEP.READY),
-          all([...this._items].map(i => take(a => a.type === MATERIAL_STEP.ITEM && a.item === i)))
+          all(
+            [...this._items].map(i =>
+              take(a => a.type === MATERIAL_STEP.ITEM && a.item === i)
+            )
+          )
         ]);
 
-        if(readyListener){
+        if (readyListener) {
           this._confirm.io.removeListener(readyListener);
         }
 
@@ -133,14 +139,14 @@ const MaterialStepMixin = (ClsBaseStep) => class ClsMaterialStep extends ClsBase
         CommonLog.lError(e);
       }
     },
-    * [STEP_STATUS.FINISHED](ORDER, orderActions) {
+    *[STEP_STATUS.FINISHED](ORDER, orderActions) {
       try {
         yield put(orderActions.finishStep(this));
       } catch (e) {
         CommonLog.lError(e);
       }
     },
-    * [STEP_STATUS.FAIL](ORDER, orderActions) {
+    *[STEP_STATUS.FAIL](ORDER, orderActions) {
       try {
         yield put(orderActions.finishStep(this));
       } catch (e) {

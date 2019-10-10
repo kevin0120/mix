@@ -4,14 +4,11 @@ import dataImg2 from '../../../resources/imgs/working-page-test-pic2.png';
 import screwImg from '../../../resources/imgs/screw.jpg';
 import { ORDER_STATUS } from './model';
 
-
-
-
 // console.log(screwImg);
 export const demoOrder = {
   id: 'demoOrder1',
   name: 'demo Order 1',
-  desc:'a:b\t\tb:c\t\tc:d',
+  desc: 'a:b\t\tb:c\t\tc:d',
   info:
     'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
   type: 'step',
@@ -34,17 +31,17 @@ export const demoOrder = {
             name: 'test material 1',
             image: '',
             in: {
-              sn: "1",
+              sn: '1',
               index: 0
             },
             out: {
-              sn: "2",
+              sn: '2',
               index: 0
             }
-          },
+          }
         ],
         confirm: {
-          sn: "1",
+          sn: '1',
           index: 0
         }
       }
@@ -70,7 +67,8 @@ export const demoOrder = {
             maxRetryTimes: 3,
             pset: 1,
             toolSN: 'demo'
-          }, {
+          },
+          {
             sequence: 2,
             group_sequence: 2,
             x: 20,
@@ -78,8 +76,8 @@ export const demoOrder = {
             maxRetryTimes: 3,
             pset: 1,
             toolSN: 'demo'
-
-          }, {
+          },
+          {
             sequence: 3,
             group_sequence: 3,
 
@@ -88,8 +86,8 @@ export const demoOrder = {
             maxRetryTimes: 3,
             pset: 1,
             toolSN: 'demo'
-
-          }, {
+          },
+          {
             sequence: 4,
             group_sequence: 3,
             x: 40,
@@ -97,8 +95,8 @@ export const demoOrder = {
             maxRetryTimes: 3,
             pset: 1,
             toolSN: 'demo'
-
-          }, {
+          },
+          {
             sequence: 5,
             group_sequence: 4,
             x: 50,
@@ -106,7 +104,6 @@ export const demoOrder = {
             maxRetryTimes: 3,
             pset: 1,
             toolSN: 'demo'
-
           }
         ],
         image: dataImg
@@ -132,28 +129,32 @@ export const demoOrder = {
             x: 10,
             y: 10,
             maxRetryTimes: 3
-          }, {
+          },
+          {
             toolSN: 'demo2',
             sequence: 2,
             group_sequence: 2,
             x: 20,
             y: 20,
             maxRetryTimes: 3
-          }, {
+          },
+          {
             toolSN: 'demo2',
             sequence: 3,
             group_sequence: 3,
             x: 30,
             y: 30,
             maxRetryTimes: 3
-          }, {
+          },
+          {
             toolSN: 'demo2',
             sequence: 4,
             group_sequence: 4,
             x: 40,
             y: 40,
             maxRetryTimes: 3
-          }, {
+          },
+          {
             toolSN: 'demo2',
             sequence: 5,
             group_sequence: 5,
@@ -190,8 +191,8 @@ export const demoOrder = {
       skippable: true,
       data: {},
       payload: {
-        url:'\\\\192.168.74.31\\share\\D0000177249.pdf',
-        page:0
+        url: '\\\\192.168.74.31\\share\\D0000177249.pdf',
+        page: 0
         // label: 'name'
       }
     },
@@ -216,7 +217,8 @@ export const demoOrderLong = {
   id: 'demoOrderLong',
 
   name: 'Long Demo Order',
-  info: 'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
+  info:
+    'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
   type: 'step',
   status: ORDER_STATUS.TODO,
   steps: [
@@ -236,22 +238,26 @@ export const demoOrderLong = {
             x: 10,
             y: 10,
             status: 'waiting'
-          }, {
+          },
+          {
             id: 2,
             x: 20,
             y: 20,
             status: 'waiting'
-          }, {
+          },
+          {
             id: 3,
             x: 30,
             y: 30,
             status: 'waiting'
-          }, {
+          },
+          {
             id: 4,
             x: 40,
             y: 40,
             status: 'waiting'
-          }, {
+          },
+          {
             id: 5,
             x: 50,
             y: 50,
@@ -563,7 +569,8 @@ export const demoOrderPending = {
 export const demoOrderDone = {
   id: 'demoOrderDone',
   name: 'fill info',
-  info: 'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
+  info:
+    'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
   type: 'step',
   status: ORDER_STATUS.DONE,
   steps: [
@@ -582,4 +589,3 @@ export const demoOrderDone = {
     }
   ]
 };
-

@@ -1,8 +1,6 @@
 // @flow
 // redux-saga
-import {
-  call
-} from 'redux-saga/effects';
+import { call } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 // reducers
 import ClsIOModule from './model';
@@ -35,7 +33,6 @@ import { getDevice } from '../index';
 //   }
 // };
 
-
 type tIORushData = {
   type: string,
   data: Object
@@ -55,7 +52,7 @@ export default function* ioNewData(data: tIORushData): Saga<void> {
         break;
       }
       case 'WS_IO_STATUS':
-        CommonLog.Info('WS_IO_STATUS',data);
+        CommonLog.Info('WS_IO_STATUS', data);
         break;
       default:
         CommonLog.lError('IO Message Type Is Not Defined', { msgType });
@@ -151,7 +148,6 @@ export default function* ioNewData(data: tIORushData): Saga<void> {
 //     console.error(e);
 //   }
 // }
-
 
 // export function setModBusIO(modbusConfig) {
 //   const modbusOutConfig = modbusConfig.out;

@@ -1,4 +1,4 @@
 export const checkStepTypes = {
-  qualitative: 'qualitative',
-  quantitative: 'qualitative'
+  measurement: 'measurement', // 定量
+  passFail: 'passFail' // 定性
 };

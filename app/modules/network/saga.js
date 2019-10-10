@@ -1,6 +1,6 @@
 // @flow
 import { call, put, select } from 'redux-saga/effects';
-import {uniq, cloneDeep} from 'lodash-es';
+import { uniq, cloneDeep } from 'lodash-es';
 import { NETWORK, networkSetOK, networkSignalOK } from './action';
 import saveConfigs from '../setting/action';
 import { watchWorkers } from '../util';
@@ -12,7 +12,6 @@ const exec = util.promisify(require('child_process').exec);
 
 const section = 'network';
 
-
 const netmask2CIDR = netmask =>
   netmask
     .split('.')
@@ -22,10 +21,10 @@ const netmask2CIDR = netmask =>
     .join('')
     .split('1').length - 1;
 
-const CDIR2netmask = (bitCount) => {
+const CDIR2netmask = bitCount => {
   const mask = [];
   let count = bitCount;
-  for (let i = 0; i < 4; i+=1) {
+  for (let i = 0; i < 4; i += 1) {
     const n = Math.min(count, 8);
     mask.push(256 - 2 ** (8 - n));
     count -= n;
@@ -45,7 +44,10 @@ export default watchWorkers(workers);
 
 function* doCheckCurrentConnection() {
   try {
-    const { error, stdout, stderr } = yield call(execNmcli, 'nmcli -t -s con show default');
+    const { error, stdout, stderr } = yield call(
+      execNmcli,
+      'nmcli -t -s con show default'
+    );
     if (error) {
       console.log(`exec error: ${error}`);
       return;
@@ -57,7 +59,8 @@ function* doCheckCurrentConnection() {
     if (stdout) {
       const result = stdout.toString();
       const ssid = /802-11-wireless.ssid:(.+)\n/.exec(result)[1] || '';
-      const password = /802-11-wireless-security.psk:(.+)\n/.exec(result)[1] || '';
+      const password =
+        /802-11-wireless-security.psk:(.+)\n/.exec(result)[1] || '';
       const addresses = /ipv4.addresses:(.+)\/(.+)\n/.exec(result) || '';
       const address = addresses[1] || '';
       const gateway = /ipv4.gateway:(.+)\n/.exec(result)[1] || '';
@@ -84,7 +87,10 @@ function* doCheckCurrentConnection() {
 
 function* doCheckActiveSignal() {
   try {
-    const { error, stdout, stderr } = yield call(execNmcli, 'LANG=eng nmcli -f active,ssid,signal -t -e no dev wifi');
+    const { error, stdout, stderr } = yield call(
+      execNmcli,
+      'LANG=eng nmcli -f active,ssid,signal -t -e no dev wifi'
+    );
     if (error) {
       console.log(`exec error: ${error}`);
       return;
@@ -118,10 +124,10 @@ function* doSet(action) {
     let ret = 0;
     const mask = netmask2CIDR(data.netmask.value);
     yield call(execNmcli, 'nmcli con delete default');
-    const { error, stdout, stderr } = yield call(execNmcli,
-      `LANG=eng nmcli dev wifi connect '${data.ssid.value}' password '${
-        data.password.value
-      }' name default`);
+    const { error, stdout, stderr } = yield call(
+      execNmcli,
+      `LANG=eng nmcli dev wifi connect '${data.ssid.value}' password '${data.password.value}' name default`
+    );
     if (error) {
       console.log(`exec error: ${error}`);
       ret = -1;
@@ -146,11 +152,12 @@ function* doSet(action) {
       return;
     }
     yield call(execNmcli, 'nmcli con down default');
-    const cmd = `nmcli con mod default ipv4.method manual ipv4.address ${
-      data.ipAddress.value
-    }/${mask} ipv4.gateway ${data.gateway.value}`;
+    const cmd = `nmcli con mod default ipv4.method manual ipv4.address ${data.ipAddress.value}/${mask} ipv4.gateway ${data.gateway.value}`;
     // eslint-disable-next-line no-unused-vars
-    const { error: err, stdout: sOut, stderr: sErr } = yield call(execNmcli, cmd);
+    const { error: err, stdout: sOut, stderr: sErr } = yield call(
+      execNmcli,
+      cmd
+    );
     if (err) {
       CommonLog.lError(`exec error: ${err}`);
       ret = -1;
@@ -179,7 +186,10 @@ function* doSet(action) {
 function* doScan() {
   try {
     const ssidList = [];
-    const { error, stdout, stderr } = yield call(execNmcli, 'nmcli -f ssid -t -e no dev wifi');
+    const { error, stdout, stderr } = yield call(
+      execNmcli,
+      'nmcli -f ssid -t -e no dev wifi'
+    );
     if (error) {
       console.log(`exec error: ${error}`);
       return;
@@ -205,7 +215,9 @@ function* doScan() {
 
 function* networkFail(action) {
   try {
-    yield put(notifierActions.enqueueSnackbar('Error', action.message || '无线网络错误'));
+    yield put(
+      notifierActions.enqueueSnackbar('Error', action.message || '无线网络错误')
+    );
   } catch (e) {
     console.error(e);
   }
@@ -216,6 +228,3 @@ function execNmcli(command) {
     .then(resp => resp)
     .catch(e => ({ error: e }));
 }
-
-
-

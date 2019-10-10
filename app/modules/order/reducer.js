@@ -29,7 +29,6 @@ const initState = {
   ].map(o => new (OrderMixin(Step))(o))
 };
 
-
 function limitIndex(order: ?tOrder, index: tOrderStepIdx): tOrderStepIdx {
   if (index < 0) {
     return 0;
@@ -57,25 +56,21 @@ const orderReducer: {
 } = {
   [ORDER.LIST.SUCCESS]: (state, { list }) => {
     // get exist orders, orders not in the new list will be removed!!
-    let newList = state.list.filter(
-      (o) => !!list.find(newO => o.id === newO.id)
-    );
+    let newList = state.list.filter(o => !!list.find(newO => o.id === newO.id));
 
     // update order data
-    newList.forEach((o) => {
+    newList.forEach(o => {
       const orderData = list.find(newO => o.id === newO.id);
       o.update(orderData);
     });
 
     // make new orders
     newList = newList.concat(
-      list.filter(newO =>
-        !newList.find(o => o.id === newO.id)
-      ).map(
-        oD => new (OrderMixin(Step))(oD)
-      )
+      list
+        .filter(newO => !newList.find(o => o.id === newO.id))
+        .map(oD => new (OrderMixin(Step))(oD))
     );
-    // const newList = list.map(oD => new Order(oD));
+    // const newList = list.map(oD => new Order(oD, stepTypes));
     return {
       ...state,
       list: newList
@@ -86,7 +81,7 @@ const orderReducer: {
     let newList = state.list;
 
     // update order data
-    newList.forEach((o) => {
+    newList.forEach(o => {
       const orderData = list.find(newO => o.id === newO.id);
       if(orderData){
         o.update(orderData);
@@ -95,11 +90,9 @@ const orderReducer: {
 
     // make new orders
     newList = newList.concat(
-      list.filter(newO =>
-        !newList.find(o => o.id === newO.id)
-      ).map(
-        oD => new (OrderMixin(Step))(oD)
-      )
+      list
+        .filter(newO => !newList.find(o => o.id === newO.id))
+        .map(oD => new (OrderMixin(Step))(oD))
     );
 
     return {
@@ -135,7 +128,8 @@ const orderReducer: {
     if (wOrder) {
       return state;
     }
-    const startIndex = workingIndex(order) >= order.steps.length ? 0 : workingIndex(order);
+    const startIndex =
+      workingIndex(order) >= order.steps.length ? 0 : workingIndex(order);
     return {
       ...state,
       workingOrder: order || null,

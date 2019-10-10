@@ -4,7 +4,7 @@ import type { Saga } from 'redux-saga';
 import { CommonLog } from '../../common/utils';
 
 interface IHealthChecker {
-  Healthz: boolean
+  Healthz: boolean;
 }
 
 export default class CommonExternalEntity implements IHealthChecker {
@@ -14,7 +14,7 @@ export default class CommonExternalEntity implements IHealthChecker {
 
   #enable: boolean = false;
 
-  #_children: Set<CommonExternalEntity> = new Set([]);
+  #_children: Set<CommonExternalEntity> = new Set();
 
   constructor(name: string) {
     this.#name = name;
@@ -28,7 +28,7 @@ export default class CommonExternalEntity implements IHealthChecker {
 
   appendChildren(children: Array<CommonExternalEntity> | CommonExternalEntity) {
     if (children instanceof Array) {
-      children.forEach((c) => {
+      children.forEach(c => {
         this.#_children.add(c);
       });
     } else {
@@ -42,9 +42,9 @@ export default class CommonExternalEntity implements IHealthChecker {
         this.#_children.delete(c);
       });
     }
-  };
+  }
 
-  getChildren(patten: (CommonExternalEntity)=>boolean) {
+  getChildren(patten: CommonExternalEntity => boolean) {
     if (!patten) {
       return [...this.#_children];
     }
@@ -59,16 +59,14 @@ export default class CommonExternalEntity implements IHealthChecker {
     if (!isHealthz) {
       this.Disable();
     }
-    if (this.#_children.length > 0 && !isHealthz) {
+    if (this.#_children.size > 0 && !isHealthz) {
       this.#_children.forEach(c => {
         c.Healthz = false;
       });
     }
 
-    if (this.#_children.length > 0 && isHealthz) {
-      this.#_children.forEach(c => {
-
-      });
+    if (this.#_children.size > 0 && isHealthz) {
+      this.#_children.forEach(c => {});
     }
 
     const msg = `${this.#name} Healthz Status Change: ${isHealthz.toString()}`;
@@ -102,8 +100,7 @@ export default class CommonExternalEntity implements IHealthChecker {
   }
 
   // eslint-disable-next-line require-yield
-  * ToggleEnable(): Saga<void> {
+  *ToggleEnable(): Saga<void> {
     this.#enable = !this.#enable;
   }
-
 }

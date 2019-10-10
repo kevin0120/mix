@@ -9,11 +9,7 @@ import {
   ak2Api
 } from '../../api/operation';
 
-import {
-  OPERATION_RESULT,
-  OPERATION_SOURCE,
-  OPERATION_STATUS
-} from './model';
+import { OPERATION_RESULT, OPERATION_SOURCE, OPERATION_STATUS } from './model';
 import { addNewStory, clearStories } from '../timeline/saga';
 import { STORY_TYPE } from '../timeline/model';
 // import { toolEnable, toolDisable, TOOLS } from '../external/device/tools/action';
@@ -77,7 +73,6 @@ function* operationFinished(action) {
 
     const state = yield select();
 
-
     if (state.setting.operationSettings.opMode === 'order') {
       yield call(getNextWorkOrderandShow);
     }
@@ -86,7 +81,6 @@ function* operationFinished(action) {
       // 工具禁用
 
       yield put(toolDisable('作业结束'));
-
     }
   } catch (e) {
     console.error(e);
@@ -110,7 +104,6 @@ function* getNextWorkOrderandShow() {
 // 触发作业
 function* triggerOperation(action) {
   try {
-
     const { carID, carType, job, source } = action;
     const rState = yield select();
 
@@ -165,8 +158,10 @@ function* triggerOperation(action) {
       return;
     }
 
-
-    const triggers = rState.workMode.workMode === 'manual' ? ['carID'] : rState.setting.operationSettings.flowTriggers; // 手动模式下，只需要车辆信息即可触发作业
+    const triggers =
+      rState.workMode.workMode === 'manual'
+        ? ['carID']
+        : rState.setting.operationSettings.flowTriggers; // 手动模式下，只需要车辆信息即可触发作业
 
     const operations = yield select(state => state.operations);
 
@@ -246,12 +241,18 @@ export function* getOperation(job) {
               return;
             }
           } else {
-            yield put(notifierActions.enqueueSnackbar('Error', `获取工单失败:${e.message}`, {
-              workMode: state.workMode.workMode,
-              opMode: state.setting.operationSettings.opMode,
-              carID: code,
-              response: resp
-            }));
+            yield put(
+              notifierActions.enqueueSnackbar(
+                'Error',
+                `获取工单失败:${e.message}`,
+                {
+                  workMode: state.workMode.workMode,
+                  opMode: state.setting.operationSettings.opMode,
+                  carID: code,
+                  response: resp
+                }
+              )
+            );
             yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
             yield call(clearStories);
           }
@@ -265,23 +266,27 @@ export function* getOperation(job) {
       yield call(startOperation, { data: resp.data });
     } else {
       // 定位作业失败
-      yield put(notifierActions.enqueueSnackbar('Error', '定位作业失败', {
-        workMode: state.workMode.workMode,
-        opMode: state.setting.operationSettings.opMode,
-        carID: state.operations.carID,
-        response: resp
-      }));
+      yield put(
+        notifierActions.enqueueSnackbar('Error', '定位作业失败', {
+          workMode: state.workMode.workMode,
+          opMode: state.setting.operationSettings.opMode,
+          carID: state.operations.carID,
+          response: resp
+        })
+      );
       yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
       yield call(clearStories);
       // yield put({ type: OPERATION.RESET });
     }
   } catch (e) {
     const state = yield select();
-    yield put(notifierActions.enqueueSnackbar('Error', `获取作业失败:${e.message}`, {
-      workMode: state.workMode.workMode,
-      opMode: state.setting.operationSettings.opMode,
-      carID: state.operations.carID
-    }));
+    yield put(
+      notifierActions.enqueueSnackbar('Error', `获取作业失败:${e.message}`, {
+        workMode: state.workMode.workMode,
+        opMode: state.setting.operationSettings.opMode,
+        carID: state.operations.carID
+      })
+    );
     yield put({ type: OPERATION.OPERATION.FETCH_FAIL });
     yield call(clearStories);
   }
@@ -309,24 +314,38 @@ export function* startOperation(action) {
       // job模式
 
       // const controllerSN = state.connections.controllers[0].serial_no;
-      const { operationID, carType, carID, jobID, source, results } = state.operations;
+      const {
+        operationID,
+        carType,
+        carID,
+        jobID,
+        source,
+        results
+      } = state.operations;
 
       const { hmiSn } = state.setting.page.odooConnection;
 
       // const toolSN = state.setting.systemSettings.defaultToolSN || "";
 
-      const { controller_sn, gun_sn } = lodash.reduce(results, (result, value) => {
-        if (result.controller_sn && value.controller_sn !== result.controller_sn) {
-          console.error('结果中的controller_sn不匹配');
-        }
-        if (result.gun_sn && value.gun_sn !== result.gun_sn) {
-          console.error('结果中的gun_sn不匹配');
-        }
-        return {
-          controller_sn: value.controller_sn || result.controller_sn,
-          gun_sn: value.gun_sn || result.gun_sn
-        };
-      }, {});
+      const { controller_sn, gun_sn } = lodash.reduce(
+        results,
+        (result, value) => {
+          if (
+            result.controller_sn &&
+            value.controller_sn !== result.controller_sn
+          ) {
+            console.error('结果中的controller_sn不匹配');
+          }
+          if (result.gun_sn && value.gun_sn !== result.gun_sn) {
+            console.error('结果中的gun_sn不匹配');
+          }
+          return {
+            controller_sn: value.controller_sn || result.controller_sn,
+            gun_sn: value.gun_sn || result.gun_sn
+          };
+        },
+        {}
+      );
 
       const userID = 1;
       const skip = false;
@@ -432,7 +451,6 @@ export function* continueOperation() {
     // }
 
     if (operations.activeResultIndex >= operations.results.length - 1) {
-
       yield put(switch2Ready());
     } else {
       yield put({ type: OPERATION.CONTINUE });
@@ -470,8 +488,8 @@ export function* handleResults(data) {
     const batch = `${(
       operations.activeResultIndex + 1
     ).toString()}/${operations.results[
-    operations.results.length - 1
-      ].group_sequence.toString()}`;
+      operations.results.length - 1
+    ].group_sequence.toString()}`;
 
     for (let i = 0; i < data.length; i += 1) {
       if (data[i].result === OPERATION_RESULT.NOK) {
@@ -581,7 +599,12 @@ function* conflictDetected(action) {
     const { data } = action;
     const { enableConflictOP = false } = state.setting.systemSettings;
     if (!enableConflictOP) {
-      yield put(notifierActions.enqueueSnackbar('Warn', `设定为不允许重复拧紧同一张工单 VIN: ${data.vin}`));
+      yield put(
+        notifierActions.enqueueSnackbar(
+          'Warn',
+          `设定为不允许重复拧紧同一张工单 VIN: ${data.vin}`
+        )
+      );
       // return; // 直接返回, 不关闭模式对话框
     }
   } catch (e) {

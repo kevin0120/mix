@@ -1,17 +1,9 @@
 import { put, call } from 'redux-saga/effects';
 import { CommonLog } from '../../common/utils';
 import { orderActions } from './action';
-import { ORDER_STATUS } from './model';
+import { ORDER_WS_TYPES } from './model';
 
 const { getListSuccess } = orderActions;
-
-export const ORDER_WS_TYPES = {
-  LIST: 'WS_ORDER_LIST',
-  DETAIL: 'WS_ORDER_DETAIL',
-  UPDATE: 'WS_ORDER_UPDATE',
-  STEP_UPDATE: 'WS_ORDER_STEP_UPDATE',
-  NEW: 'WS_NEW_ORDER'
-};
 
 
 const dataHandlers = {
@@ -36,7 +28,6 @@ const dataHandlers = {
       } else {
         yield put(orderActions.getDetailSuccess(data));
       }
-
     } catch (e) {
       CommonLog.lError(e, { at: 'ORDER_WS_TYPES.DETAIL' });
     }
@@ -48,7 +39,6 @@ const dataHandlers = {
       CommonLog.lError(e);
     }
   }
-
 };
 
 export default function* orderData(rushData) {

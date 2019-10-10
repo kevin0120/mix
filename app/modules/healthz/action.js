@@ -4,7 +4,7 @@ export const HEALTHZ = {
 };
 
 export default {
-  data: (status) => ({
+  data: status => ({
     type: HEALTHZ.DATA,
     status
   }),

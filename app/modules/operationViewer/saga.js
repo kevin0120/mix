@@ -74,11 +74,16 @@ function* editOperation(action) {
     const { operationID, points, img } = action;
     const state = yield select();
     const { value: odooUrl } = state.setting.page.odooConnection.odooUrl;
-    const response = yield call(imageEditApi, odooUrl, operationID, points, img);
+    const response = yield call(
+      imageEditApi,
+      odooUrl,
+      operationID,
+      points,
+      img
+    );
     if (response && response.status === 200) {
       yield put(fetchOperationDetailStart(operationID));
       yield put(notifierActions.enqueueSnackbar('Info', '作业信息编辑成功'));
-
     } else {
       yield put(editOperationEnd(false));
       yield put(notifierActions.enqueueSnackbar('Error', '作业信息编辑失败'));

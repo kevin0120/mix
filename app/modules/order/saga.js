@@ -13,12 +13,7 @@ import {
 import React from 'react';
 import type { Saga } from 'redux-saga';
 import { ORDER, orderActions } from './action';
-import {
-  workingOrder,
-  orderSteps,
-  doable,
-  viewingOrder
-} from './selector';
+import { workingOrder, orderSteps, doable, viewingOrder } from './selector';
 import dialogActions from '../dialog/action';
 import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
@@ -55,11 +50,13 @@ export default function* root(): Saga<void> {
 function* updateStatus(action: updateStateActionType) {
   try {
     const { step } = action;
-    if(Reflect.has(step, 'updateStatus')){
+    if (Reflect.has(step, 'updateStatus')) {
       const st = (step: tClsStep);
       yield call([st, st.updateStatus], action);
-    }else {
-      throw new Error('updateStatus Error, The Step Without updateStatus Property');
+    } else {
+      throw new Error(
+        'updateStatus Error, The Step Without updateStatus Property'
+      );
     }
   } catch (e) {
     CommonLog.lError(e, {
@@ -79,10 +76,9 @@ function* newOrder() {
 function* workOnOrder({ order }) {
   try {
     yield race([
-        call(order.run, ORDER_STATUS.WIP),
-        take(a => a.type === ORDER.FINISH && a.order === order)
-      ]
-    );
+      call(order.run, ORDER_STATUS.WIP),
+      take(a => a.type === ORDER.FINISH && a.order === order)
+    ]);
   } catch (e) {
     CommonLog.lError(e);
   }
@@ -105,7 +101,6 @@ function* DebounceViewStep(d, action: tCommonActionType) {
     CommonLog.lError(e);
   }
 }
-
 
 function* getOrderDetail({ order }) {
   const rOrder: tClsOrder = (order: tClsOrder);
@@ -137,7 +132,6 @@ function* viewOrder({ order }) {
   try {
     const WIPOrder: tClsOrder = yield select(s => workingOrder(s.order));
 
-
     if (WIPOrder === order) {
       // 进行中的工单不显示概览对话框
       return;
@@ -145,10 +139,7 @@ function* viewOrder({ order }) {
     yield put(loadingActions.start());
     yield all([
       call(getOrderDetail, { order }),
-      race([
-        take(ORDER.DETAIL.SUCCESS),
-        take(ORDER.DETAIL.FAIL)
-      ])
+      race([take(ORDER.DETAIL.SUCCESS), take(ORDER.DETAIL.FAIL)])
     ]);
     yield put(loadingActions.stop());
     const vOrderSteps: ?tStepArray = yield select(state =>
@@ -171,11 +162,11 @@ function* viewOrder({ order }) {
             color: 'warning'
           },
           !WIPOrder &&
-          doable(order) && {
-            label: 'Order.Start',
-            color: 'info',
-            action: orderActions.workOn(order)
-          }
+            doable(order) && {
+              label: 'Order.Start',
+              color: 'info',
+              action: orderActions.workOn(order)
+            }
         ],
         title: i18n.t('Order.Overview'),
         content: (
@@ -197,7 +188,3 @@ function* viewOrder({ order }) {
     CommonLog.lError(`showOverview error: ${e.message}`);
   }
 }
-
-
-
-

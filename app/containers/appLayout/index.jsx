@@ -9,7 +9,7 @@ import { I18n } from 'react-i18next';
 import Button from '../../components/CustomButtons/Button';
 import NavBar from '../../components/NavBar';
 import LayoutDrawer from '../../components/LayoutDrawer';
-import type { tUser } from '../../modules/user/model';
+import type { tUser } from '../../modules/user/interface/model';
 import { logoutRequest } from '../../modules/user/action';
 import type { Dispatch } from '../../modules/indexReducer';
 import type { tRouteComponent, tRouteObj } from '../model';

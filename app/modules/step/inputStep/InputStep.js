@@ -5,14 +5,14 @@ import { INPUT_STEP } from './action';
 
 const InputStepMixin = (ClsBaseStep) => class ClsInputStep extends ClsBaseStep {
   _statusTasks = {
-    * [STEP_STATUS.ENTERING](ORDER, orderActions) {
+    *[STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {
         yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
       } catch (e) {
         console.error(e);
       }
     },
-    * [STEP_STATUS.DOING](ORDER, orderActions) {
+    *[STEP_STATUS.DOING](ORDER, orderActions) {
       try {
         while (true) {
           const { payload } = yield take(INPUT_STEP.SUBMIT);
@@ -28,14 +28,14 @@ const InputStepMixin = (ClsBaseStep) => class ClsInputStep extends ClsBaseStep {
         console.error(e);
       }
     },
-    * [STEP_STATUS.FINISHED](ORDER, orderActions) {
+    *[STEP_STATUS.FINISHED](ORDER, orderActions) {
       try {
         yield put(orderActions.finishStep(this));
       } catch (e) {
         console.error(e);
       }
     },
-    * [STEP_STATUS.FAIL](ORDER, orderActions) {
+    *[STEP_STATUS.FAIL](ORDER, orderActions) {
       try {
         yield put(orderActions.finishStep(this));
       } catch (e) {

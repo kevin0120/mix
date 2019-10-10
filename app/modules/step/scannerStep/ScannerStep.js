@@ -1,6 +1,11 @@
 import { call, put, select, take } from 'redux-saga/effects';
 import STEP_STATUS from '../model';
-import { stepData, stepPayload, workingOrder, workingStep } from '../../order/selector';
+import {
+  stepData,
+  stepPayload,
+  workingOrder,
+  workingStep
+} from '../../order/selector';
 import { SCANNER_STEP, scannerStepAction } from './action';
 import { deviceType, getDevicesByType } from '../../external/device';
 import { CommonLog } from '../../../common/utils';
@@ -16,7 +21,7 @@ const ScannerStepMixin = (ClsBaseStep) => class ClsScannerStep extends ClsBaseSt
   };
 
   _statusTasks = {
-    * [STEP_STATUS.ENTERING](ORDER, orderActions) {
+    *[STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {
         this._scanners = getDevicesByType(deviceType.scanner);
         for (const scanner of this._scanners) {
@@ -28,7 +33,7 @@ const ScannerStepMixin = (ClsBaseStep) => class ClsScannerStep extends ClsBaseSt
         CommonLog.lError(e);
       }
     },
-    * [STEP_STATUS.DOING](ORDER, orderActions) {
+    *[STEP_STATUS.DOING](ORDER, orderActions) {
       try {
         while (true) {
           const action = yield take([
@@ -44,7 +49,7 @@ const ScannerStepMixin = (ClsBaseStep) => class ClsScannerStep extends ClsBaseSt
           switch (action.type) {
             case SCANNER_STEP.GET_VALUE:
               yield call(this.updateData, d => ({
-                ...d || {},
+                ...(d || {}),
                 result: {
                   [label]: action?.input?.data
                 },
@@ -80,7 +85,7 @@ const ScannerStepMixin = (ClsBaseStep) => class ClsScannerStep extends ClsBaseSt
         }
       }
     },
-    * [STEP_STATUS.FINISHED](ORDER, orderActions) {
+    *[STEP_STATUS.FINISHED](ORDER, orderActions) {
       try {
         yield put(orderActions.finishStep(this));
         this._scanners = [];

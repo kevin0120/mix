@@ -15,9 +15,6 @@ export type AnyAction = Action & {
   [extraProps: string]: any
 };
 
-
 export type tDeviceNewData = {
   +data: tInputData
 };
-
-

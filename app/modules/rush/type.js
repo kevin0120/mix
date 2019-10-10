@@ -31,5 +31,4 @@ export type tBarcode = {
   +barcode: string
 };
 
-
 /* eslint-enable flowtype/no-weak-types */

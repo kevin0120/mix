@@ -42,7 +42,14 @@ const gDevices: tArrayDevices = new Set([]);
 
 const lostChildren = {};
 
-function newDevice(dt: tDeviceType, name: string, sn: string, config: Object, data, childrenSN: Array<tDeviceSN>) {
+function newDevice(
+  dt: tDeviceType,
+  name: string,
+  sn: string,
+  config: Object,
+  data,
+  childrenSN: Array<tDeviceSN>
+) {
   try {
     const device = new sym2Device[dt](name, sn, config, data);
     appendNewDevices(device);
@@ -55,7 +62,7 @@ function newDevice(dt: tDeviceType, name: string, sn: string, config: Object, da
     }
 
     // search for the children of the device
-    childrenSN.forEach((cSN) => {
+    childrenSN.forEach(cSN => {
       const child = getDevice(cSN);
       if (child) {
         device.appendChildren(child);
@@ -95,7 +102,7 @@ export function* deviceStatus(data: tRushWebSocketData): Saga<void> {
     if (!(data?.data instanceof Array)) {
       return;
     }
-    data.data.forEach((d) => {
+    data.data.forEach(d => {
       const { sn, type, children, status, data, config } = d;
       let dv = getDevice(sn);
       // try make a new device if dv doesn't exist

@@ -22,7 +22,7 @@ export const editOperation = (operationID, points, img) => ({
   img
 });
 
-export const editOperationEnd = (success) => ({
+export const editOperationEnd = success => ({
   type: OPERATION_VIEWER.EDIT_END,
   success
 });

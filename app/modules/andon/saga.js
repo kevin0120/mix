@@ -1,6 +1,6 @@
 import { select, put, call, race, delay, take } from 'redux-saga/effects';
 import { OPERATION_SOURCE, OPERATION_STATUS } from '../operation/model';
-import { operationTrigger , OPERATION } from '../operation/action';
+import { operationTrigger, OPERATION } from '../operation/action';
 import { andonVehicleApi } from '../../api/andon';
 import { jobManual } from '../../api/operation';
 
@@ -24,12 +24,14 @@ function* handleAndonData(action) {
     if (state.operations.operationStatus !== OPERATION_STATUS.DOING) {
       if (data.cartype_code.length) {
         // 车辆拧紧作业
-        yield put(operationTrigger(
-          data.vin_code,
-          data.cartype_code,
-          null,
-          OPERATION_SOURCE.ANDON
-        ));
+        yield put(
+          operationTrigger(
+            data.vin_code,
+            data.cartype_code,
+            null,
+            OPERATION_SOURCE.ANDON
+          )
+        );
       } else {
         // 空车信息
 
@@ -86,7 +88,10 @@ function* handleAndonScanner(action) {
     const { aiis, workcenterCode } = state.setting.system.connections;
     const resp = yield call(andonVehicleApi, aiis, vin, workcenterCode);
     if (resp) {
-      const { overtime, successAction } = yield race({ overtime: delay(8000), successAction: take(ANDON.NEW_DATA) });
+      const { overtime, successAction } = yield race({
+        overtime: delay(8000),
+        successAction: take(ANDON.NEW_DATA)
+      });
       if (overtime) {
         yield put(notifierActions.enqueueSnackbar('Warn', '获取工单信息超时'));
       }

@@ -10,7 +10,7 @@ import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
 import STEP_STATUS from '../step/model';
 
-const stepStatus = (status) => {
+const stepStatus = status => {
   switch (status) {
     case STEP_STATUS.FINISHED:
       return '完成';
@@ -31,7 +31,6 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep {
 
   _workingID = null;
 
-
   constructor(dataObj) {
     super(...arguments);
     this._status = dataObj.status || ORDER_STATUS.TODO;
@@ -45,7 +44,7 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep {
     return this._workingIndex;
   }
 
-  * onNext() {
+  *onNext() {
     try {
       this._workingIndex += 1;
       if (this._workingIndex >= this._steps.length) {
@@ -56,7 +55,7 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep {
     }
   }
 
-  * onPrevious() {
+  *onPrevious() {
     if (this._workingIndex - 1 < 0) {
       // yield put(orderActions.finishOrder(this));
     } else {
@@ -65,12 +64,11 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep {
   }
 
   _statusTasks = {
-    * [ORDER_STATUS.TODO]() {
-
-    },
-    * [ORDER_STATUS.WIP]() {
+    *[ORDER_STATUS.TODO]() {},
+    *[ORDER_STATUS.WIP]() {
       try {
-        this._workingIndex = this._workingIndex >= this._steps.length ? 0 : this._workingIndex;
+        this._workingIndex =
+          this._workingIndex >= this._steps.length ? 0 : this._workingIndex;
         while (true) {
           CommonLog.Info('Doing Order...', this._workingIndex);
           const step = this.workingStep;
@@ -89,12 +87,16 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep {
         CommonLog.Info('order doing finished');
       }
     },
-    * [ORDER_STATUS.DONE]() {
+    *[ORDER_STATUS.DONE]() {
       try {
         if (this.workingStep) {
           this.workingStep.timerStop();
         }
-        const data = this._steps.map(s => [s.name, durationString(s.timeCost()), stepStatus(s.status)]);
+        const data = this._steps.map(s => [
+          s.name,
+          durationString(s.timeCost()),
+          stepStatus(s.status)
+        ]);
         yield put(
           dialogActions.dialogShow({
             buttons: [
@@ -123,7 +125,7 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep {
         CommonLog.Info('order done');
       }
     },
-    * [ORDER_STATUS.PENDING]() {
+    *[ORDER_STATUS.PENDING]() {
       try {
         this.workingStep.timerStop();
         yield put(orderActions.finishOrder(this));
@@ -133,7 +135,7 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep {
         });
       }
     },
-    * [ORDER_STATUS.CANCEL]() {
+    *[ORDER_STATUS.CANCEL]() {
       try {
         this.workingStep.timerStop();
         yield put(orderActions.finishOrder(this));

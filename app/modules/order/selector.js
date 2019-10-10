@@ -1,6 +1,12 @@
 // @flow
 import { ORDER_STATUS } from './model';
-import type { tOrder, tOrderState, tOrderStepIdx, tStep, tStepStatus } from './model';
+import type {
+  tOrder,
+  tOrderState,
+  tOrderStepIdx,
+  tStep,
+  tStepStatus
+} from './model';
 import Step from '../step/Step';
 import type { tClsOrder } from './Order';
 
@@ -31,7 +37,6 @@ export const exceptOrders = (orderList: Array<tClsOrder>): Array<tOrder> =>
   o?.status === ORDER_STATUS.PENDING || o?.status === ORDER_STATUS.CANCEL)
   );
 
-
 export const stepStatus = (step: ?tStep): ?tStepStatus => step?.status;
 export const stepData = (step: ?tStep): ?Object => step?.data;
 export const stepPayload = (step: ?tStep): ?Object => step?.payload;
@@ -52,8 +57,8 @@ export const pendingable = (order: ?tClsOrder): boolean =>
     order?.status !== ORDER_STATUS.CANCEL &&
     order?.status !== ORDER_STATUS.DONE)) || false;
 
-export const cancelable = (order: ?tOrder): boolean =>
-  (order?.status && (
-    order?.status !== ORDER_STATUS.CANCEL &&
-    order?.status !== ORDER_STATUS.DONE
-  )) || false;
+export const cancelable = (order: ?tClsOrder): boolean =>
+  (order?.status &&
+    (order?.status !== ORDER_STATUS.CANCEL &&
+      order?.status !== ORDER_STATUS.DONE)) ||
+  false;

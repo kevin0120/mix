@@ -2,14 +2,17 @@ import type { CommonLogLvl } from '../../common/utils';
 
 export type tNotifyVariant = CommonLogLvl;
 
-
 export const NOTIFIER = {
   ENQUEUE_SNACKBAR: 'NOTIFIER_ENQUEUE_SNACKBAR',
   CLOSE_SNACKBAR: 'NOTIFIER_CLOSE_SNACKBAR',
   REMOVE_SNACKBAR: 'NOTIFIER_REMOVE_SNACKBAR'
 };
 
-const enqueueSnackbar = (variant: CommonLogLvl, message: string, meta: Object) => ({
+const enqueueSnackbar = (
+  variant: CommonLogLvl,
+  message: string,
+  meta: Object
+) => ({
   type: NOTIFIER.ENQUEUE_SNACKBAR,
   meta,
   variant,

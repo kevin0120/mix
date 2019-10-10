@@ -1,6 +1,14 @@
 // @flow
 
-import { take, put, call, fork, select, takeEvery, all } from 'redux-saga/effects';
+import {
+  take,
+  put,
+  call,
+  fork,
+  select,
+  takeEvery,
+  all
+} from 'redux-saga/effects';
 
 import type { Saga } from 'redux-saga';
 
@@ -10,13 +18,11 @@ import { getUserInfo } from '../../api/user';
 
 import { loginSuccess, logoutSuccess, USER } from './action';
 
-
 import notifierActions from '../Notifier/action';
-import type { tUser } from './model';
+import type { tUser } from './interface/typeDef';
 import { CommonLog } from '../../common/utils';
 
 const lodash = require('lodash');
-
 
 type tAuthRespData = {
   +id: number,
@@ -38,7 +44,7 @@ type tAuthLogout = {
 function* authorize(action) {
   try {
     const { name, password, uuid } = action;
-    if(uuid){
+    if (uuid) {
       const state = yield select();
       const { setting } = state;
       const response = yield call(
@@ -48,24 +54,29 @@ function* authorize(action) {
       );
       const statusCode = response.status;
       if (statusCode === 200) {
-        const { id, name: n, uuid, image_small: avatar }: tAuthRespData = response.data;
+        const {
+          id,
+          name: n,
+          uuid,
+          image_small: avatar
+        }: tAuthRespData = response.data;
         const userInfo: tUser = {
           uid: id,
-          name:n,
+          name: n,
           uuid,
           avatar,
           role: 'admin'
         };
         yield put(loginSuccess(userInfo));
-        const newState=yield select();
-        if(!(/\/app/.test(newState.router.location.pathname))){
+        const newState = yield select();
+        if (!/\/app/.test(newState.router.location.pathname)) {
           yield put(push('/app'));
         }
       }
       return;
     }
 
-    if(name && password){
+    if (name && password) {
       const state = yield select();
       const { setting, users, systemSettings } = state;
       const { authEnable } = systemSettings;
@@ -86,7 +97,12 @@ function* authorize(action) {
       );
       const statusCode = response.status;
       if (statusCode === 200) {
-        const { id, name: n, uuid, image_small: avatar }: tAuthRespData = response.data;
+        const {
+          id,
+          name: n,
+          uuid,
+          image_small: avatar
+        }: tAuthRespData = response.data;
         const userInfo: tUser = {
           uid: id,
           n,
@@ -95,8 +111,8 @@ function* authorize(action) {
           role: 'admin'
         };
         yield put(loginSuccess(userInfo));
-        const newState=yield select();
-        if(!(/\/app/.test(newState.router.location.pathname))){
+        const newState = yield select();
+        if (!/\/app/.test(newState.router.location.pathname)) {
           yield put(push('/app'));
         }
       }
@@ -138,7 +154,8 @@ function* loginLocal(action) {
     if (name && password) {
       const state = yield select();
       const { localUsers } = state.setting.authorization;
-      const success = !!localUsers[name] && localUsers[name].password === password;
+      const success =
+        !!localUsers[name] && localUsers[name].password === password;
       if (success) {
         const userInfo: tUser = {
           uid: localUsers[name].uid,
@@ -157,7 +174,7 @@ function* loginLocal(action) {
       const { localUsers } = state.setting.authorization;
       let user = null;
       let n = null;
-      Object.keys(localUsers).forEach((k) => {
+      Object.keys(localUsers).forEach(k => {
         if (localUsers[k].uuid === uuid) {
           user = localUsers[k];
           n = k;
@@ -175,8 +192,6 @@ function* loginLocal(action) {
         yield put(push('/app'));
       }
     }
-
-
   } catch (e) {
     CommonLog.lError(e);
     yield put(notifierActions.enqueueSnackbar('Error', e));
@@ -200,10 +215,7 @@ export function* logoutFlow(): Saga<void> {
 
 export default function* userRoot(): Saga<void> {
   try {
-    yield all([
-      call(loginFlow),
-      call(logoutFlow)
-    ]);
+    yield all([call(loginFlow), call(logoutFlow)]);
   } catch (e) {
     console.error(e);
   }

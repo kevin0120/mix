@@ -34,5 +34,4 @@ export default class ExternalSystem extends CommonExternalEntity {
     this.Healthz = false;
     return true;
   }
-
 }

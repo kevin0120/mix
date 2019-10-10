@@ -1,8 +1,20 @@
 // @flow
 
-import { call, take, select, all, put, fork, cancel, delay } from 'redux-saga/effects';
+import {
+  call,
+  take,
+  select,
+  all,
+  put,
+  fork,
+  cancel,
+  delay
+} from 'redux-saga/effects';
 import { HEALTHZ_CHECK, setHealthzCheck } from './action';
-import { masterPCHealthCheck, controllerHealthCheck } from '../../api/healthzCheck';
+import {
+  masterPCHealthCheck,
+  controllerHealthCheck
+} from '../../api/healthzCheck';
 import notifierActions from '../Notifier/action';
 
 const lodash = require('lodash');
@@ -24,7 +36,12 @@ function* healthzCheckTask(url, controllers) {
         if (!lodash.isEqual(healthzStatus.masterpc.isHealth, s)) {
           // 如果不相等 更新
           yield put(setHealthzCheck('masterpc', s));
-          yield put(notifierActions.enqueueSnackbar('Info', `masterPC连接状态更新: ${s}`));
+          yield put(
+            notifierActions.enqueueSnackbar(
+              'Info',
+              `masterPC连接状态更新: ${s}`
+            )
+          );
         }
         // 控制器healthz check
         const statusCode = cHealthzs.status;
@@ -56,7 +73,6 @@ function* healthzCheckTask(url, controllers) {
   } catch (e) {
     console.error(e);
   }
-
 }
 
 function* getConnectionInfo() {

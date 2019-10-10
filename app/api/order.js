@@ -1,7 +1,7 @@
 // @flow
 import { CommonLog } from '../common/utils';
 import { rushSendApi } from './rush';
-import { ORDER_WS_TYPES } from '../modules/order/handleData';
+import { ORDER_WS_TYPES } from '../modules/order/model';
 
 export function orderListApi() {
   try {
