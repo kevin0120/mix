@@ -8,11 +8,11 @@ import { RFID } from '../external/device/rfid/action';
 type actionType = {
   +type: string,
   +section: string,
-  +newConfigs: object,
+  +newConfigs: Object,
   +uuid: string
 };
 
-export default function setting(state: object = configs, action: actionType) {
+export default function setting(state: Object = configs, action: actionType) {
   switch (action.type) {
     case USER_CONFIGS.SAVE: {
       const { section, newConfigs } = action;

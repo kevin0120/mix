@@ -1,12 +1,14 @@
 // @flow
 import type { tOrder, tOrderStepIdx, tStepStatus } from './interface/typeDef';
-import type { tClsOrder } from './Order';
-import type { tClsStep } from '../step/Step';
+// import type { tClsOrder } from './Order';
+import type { IOrder } from './interface/IOrder';
+// import type { tClsStep } from '../step/Step';
 import { ORDER_STATUS, ORDER } from './constants';
+import type { IWorkStep } from '../step/interface/IWorkStep';
 
 export type tActUpdateState = {
   type: string,
-  step: tClsOrder | tClsStep,
+  step: IOrder | IWorkStep,
   status: tStepStatus
 };
 
@@ -47,20 +49,20 @@ export const orderActions = {
     order
   }),
   // order status
-  workOn: (order: tClsOrder): tActOrderTrigger => ({
+  workOn: (order: IOrder): tActOrderTrigger => ({
     type: ORDER.WORK_ON,
     order
   }),
-  finishOrder: (order: tClsOrder): tActOrderTrigger => ({
+  finishOrder: (order: IOrder): tActOrderTrigger => ({
     type: ORDER.FINISH,
     order
   }),
-  cancelOrder: (order: tClsOrder): tActUpdateState => ({
+  cancelOrder: (order: IOrder): tActUpdateState => ({
     type: ORDER.STEP.STATUS,
     step: order,
     status: ORDER_STATUS.CANCEL
   }),
-  pendingOrder: (order: tClsOrder): tActUpdateState => ({
+  pendingOrder: (order: IOrder): tActUpdateState => ({
     type: ORDER.STEP.STATUS,
     step: order,
     status: ORDER_STATUS.PENDING
@@ -75,7 +77,7 @@ export const orderActions = {
     type: ORDER.STEP.JUMP_TO,
     stepId
   }),
-  stepStatus: (step: tClsStep, status: tStepStatus, msg: string = '') => ({
+  stepStatus: (step: IWorkStep, status: tStepStatus, msg: string = '') => ({
     type: ORDER.STEP.STATUS,
     step,
     status,
@@ -90,7 +92,7 @@ export const orderActions = {
   updateState: () => ({
     type: ORDER.UPDATE_STATE
   }),
-  finishStep: (step: tClsStep) => ({
+  finishStep: (step: IWorkStep) => ({
     type: ORDER.STEP.FINISH,
     step
   })

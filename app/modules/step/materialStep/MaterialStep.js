@@ -20,7 +20,13 @@ const MaterialStepMixin = (ClsBaseStep: IWorkStep) => class ClsMaterialStep exte
 
   _confirm = null;
 
-  constructor(...args) {
+  _onLeave: Function;
+
+  _payload: {
+    items: Array<any>
+  };
+
+  constructor(...args: any) {
     super(...args);
 
     function* onLeave() {
@@ -166,4 +172,5 @@ const MaterialStepMixin = (ClsBaseStep: IWorkStep) => class ClsMaterialStep exte
     }
   };
 };
+
 export default MaterialStepMixin;

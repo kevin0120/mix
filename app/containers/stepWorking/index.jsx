@@ -1,6 +1,6 @@
 // @flow
 import React, { useState } from 'react';
-import type { Node } from 'react';
+import type { Node, Element } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Typography, Paper } from '@material-ui/core';
@@ -46,8 +46,9 @@ const statusMap = classes => ({
 function StepWorking({ status, desc }: Props): Node {
   const classes = makeStyles(styles.layout)();
 
-  const [action, bindAction]: [Node, (Node) => any] = useState(null);
-  const [description, bindDescription]: [Node, (Node) => any] = useState(null);
+  type tNodeHook = [Node, ((Node => Node) | Node) => void]
+  const [action, bindAction]: tNodeHook = useState(null);
+  const [description, bindDescription]: tNodeHook = useState(null);
 
   return withI18n(
     t => (
@@ -70,18 +71,18 @@ function StepWorking({ status, desc }: Props): Node {
             {/* <Typography variant="h5">{name || ''}</Typography> */}
             {/* <Typography variant="h5">{desc || ''}</Typography> */}
             {desc &&
-              desc.split('\t\t').map(d => (
-                <React.Fragment key={d}>
-                  <Typography variant="h5">{d || ''}</Typography>
-                  <span style={{ width: '40px' }} />
-                </React.Fragment>
-              ))}
+            desc.split('\t\t').map(d => (
+              <React.Fragment key={d}>
+                <Typography variant="h5">{d || ''}</Typography>
+                <span style={{ width: '40px' }}/>
+              </React.Fragment>
+            ))}
           </div>
-          <img alt="logo" src={logo} className={classes.logo} />
+          <img alt="logo" src={logo} className={classes.logo}/>
         </Paper>
         <div className={classes.main}>
           <Paper square classes={{ root: classes.leftContainer }}>
-            <ButtonsContainer action={action} />
+            <ButtonsContainer action={action}/>
             <StepPageContainer
               bindParentAction={bindAction}
               bindParentDescription={bindDescription}
@@ -90,7 +91,7 @@ function StepWorking({ status, desc }: Props): Node {
           </Paper>
           <div className={classes.rightContainer}>
             <Paper square className={classes.stepperContainer}>
-              <StepperContainer />
+              <StepperContainer/>
             </Paper>
           </div>
         </div>

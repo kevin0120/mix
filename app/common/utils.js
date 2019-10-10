@@ -5,7 +5,7 @@ import axios from 'axios';
 import axiosRetry, { exponentialDelay } from 'axios-retry';
 import { isNil, cloneDeep } from 'lodash-es';
 import moment from 'moment';
-import type DurationInputArg1  from 'moment';
+import type DurationInputArg1 from 'moment';
 import { Info, lError, Warn, Debug, Maintenance } from '../logger';
 
 const VINMap = {
@@ -55,9 +55,9 @@ export function sortObj(obj: any, orderKey: string): any {
   }));
 }
 
-export function normalSortObj(obj) {
-  const orderedKey = Object.keys(obj);
-  return orderedKey.map(key => ({
+export function normalSortObj(obj: Object): Array<Object> {
+  const orderedKey: Array<any> = Object.keys(obj);
+  return orderedKey.map<Object>((key): Object => ({
     key,
     value: cloneDeep(obj[key])
   }));
@@ -141,7 +141,7 @@ export class HttpClient {
   getInstance() {
     if (isNil(this.instance)) {
       this.instance = axios.create({
-        timeout: 3000,
+        timeout: 3000
         // headers: { 'Content-Type': 'application/json' }
       });
       axiosRetry(this.instance, {

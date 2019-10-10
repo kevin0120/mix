@@ -11,15 +11,14 @@ import {
 import type { Saga } from 'redux-saga';
 import { CommonLog } from '../../common/utils';
 import { orderStepUpdateApi } from '../../api/order';
-// eslint-disable-next-line import/no-cycle
 import { orderActions } from '../order/action';
 import { ORDER } from '../order/constants';
 import STEP_STATUS from './constants';
-// eslint-disable-next-line import/no-cycle
 import stepTypes from './stepTypes';
 import type { tStepDataReducer, tAnyStepState, tRunSubStepCallbacks } from './interface/typeDef';
 import type { tStep } from '../order/interface/typeDef';
 import { IWorkStep } from './interface/IWorkStep';
+import type { tStepInfo } from './interface/typeDef';
 
 function invalidStepStatus(stepType, status) {
   if (!stepType) {
@@ -51,7 +50,10 @@ export default class Step implements IWorkStep {
 
   _stateToRun = STEP_STATUS.ENTERING;
 
-  _payload = {};
+  _payload: {
+    info: ?tStepInfo
+
+  } = {};
 
   _data = {};
 
@@ -61,15 +63,23 @@ export default class Step implements IWorkStep {
 
   _runningStatusTask = null;
 
-  _apis = {
-    updateStatus: orderStepUpdateApi
-  };
-
   _steps: Array<tClsStep> = [];
 
   _onLeave = null;
 
-  constructor(stepObj: tStep) {
+  _apis = {
+    updateStatus: orderStepUpdateApi
+  };
+
+  run: ()=>any;
+
+  timerStart: ()=>any;
+
+  timerStop: ()=>any;
+
+  updateData: ()=>any;
+
+  constructor(stepObj: tStep, ...rest: any) {
     this._id = stepObj.id;
     this.update(stepObj);
     this.run = this.run.bind(this);

@@ -12,7 +12,7 @@ import TimeLine from '../../components/WorkPageTimeline';
 import type { tClsStep } from '../../modules/step/Step';
 
 const mapState = (state, props) => {
-  const vStep: tClsStep = oSel.viewingStep(state.order);
+  const vStep: ?tClsStep = oSel.viewingStep(state.order);
   return {
     ...props,
     step: vStep,

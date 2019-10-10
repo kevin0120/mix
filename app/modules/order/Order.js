@@ -9,6 +9,7 @@ import dialogActions from '../dialog/action';
 import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
 import STEP_STATUS from '../step/constants';
+import {IOrder} from './interface/IOrder';
 
 const stepStatus = status => {
   switch (status) {
@@ -21,7 +22,7 @@ const stepStatus = status => {
   }
 };
 
-const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep {
+const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep implements IOrder{
 
   _apis = {
     updateStatus: orderUpdateApi

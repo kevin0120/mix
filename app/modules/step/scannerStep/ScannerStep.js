@@ -60,7 +60,7 @@ const ScannerStepMixin = (ClsBaseStep: IWorkStep) => class ClsScannerStep extend
                   {
                     title: action?.input?.name,
                     color: 'info',
-                    footerTitle: action?.input?.time.toLocaleString(),
+                    footerTitle: action && action.input && action.input.time.toLocaleString(),
                     body: action?.input?.data
                   },
                   ...(d?.timeLine || [])

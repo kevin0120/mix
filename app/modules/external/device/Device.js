@@ -18,7 +18,7 @@ export default class Device extends CommonExternalEntity {
   #_serialNumber: ?tDeviceSN = null;
 
   // eslint-disable-next-line flowtype/no-weak-types
-  constructor(name: string, sn: tDeviceSN) {
+  constructor(name: string, sn: tDeviceSN, ...rest: any) {
     super(name);
     this.#_serialNumber = sn;
     // eslint-disable-next-line flowtype/no-weak-types
@@ -46,7 +46,7 @@ export default class Device extends CommonExternalEntity {
     return this.validator(data);
   }
 
-  *doDispatch(data: tInputData): Saga<void> {
+  * doDispatch(data: tInputData): Saga<void> {
     try {
       if (!this.isEnable) {
         const msg = `${this.source} Is Not Enabled`;

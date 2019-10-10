@@ -6,6 +6,7 @@ import materialStepActions from '../../../modules/step/materialStep/action';
 import type { tStepProps } from '../types';
 import Button from '../../../components/CustomButtons/Button';
 import type { Dispatch } from '../../../modules/indexReducer';
+import type { IWorkStep } from '../../../modules/step/interface/IWorkStep';
 
 const mapState = (state, props) => ({
   ...props
@@ -16,12 +17,14 @@ const mapDispatch = {
 };
 
 type Props = {
-  ready: Dispatch
+  ready: Dispatch,
+  step: IWorkStep
 };
 
 function materialStep(props: Props & tStepProps) {
   const { step, bindAction, ready, isCurrent, bindDescription } = props;
   const { payload, description } = step;
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     bindAction(
       isCurrent ? <Button onClick={() => ready()} color="primary">
@@ -44,22 +47,27 @@ function materialStep(props: Props & tStepProps) {
 
 
   return <div
-    style={{
-      display: 'flex',
-      justifyContents: 'center',
-      alignItems: 'center',
-      width: '100%',
-      height: '100%'
-    }}>
+    style={
+      {
+        display: 'flex',
+        justifyContents: 'center',
+        alignItems: 'center',
+        width: '100%',
+        height: '100%'
+
+      }
+    }>
     {payload.items.map(i => <img
-      style={{
-        maxWidth: '100%',
-        maxHeight: '100%',
-        margin: 'auto',
-        justifySelf: 'center',
-        alignSelf: 'center',
-        resize: 'both'
-      }}
+      style={
+        {
+          maxWidth: '100%',
+          maxHeight: '100%',
+          margin: 'auto',
+          justifySelf: 'center',
+          alignSelf: 'center',
+          resize: 'both'
+        }
+      }
       key={i.name} src={i.image || ''} alt={i.name}
     />)}
   </div>;

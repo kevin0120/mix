@@ -1,10 +1,10 @@
 // @flow
 import { createStore, applyMiddleware } from 'redux';
-// import thunk from 'redux-thunk';
 import createSagaMiddleware from 'redux-saga';
 import { createHashHistory } from 'history';
 import { routerMiddleware } from 'connected-react-router';
-import createRootReducer, { StateType } from '../modules/indexReducer';
+import createRootReducer from '../modules/indexReducer';
+import type { StateType } from '../modules/indexReducer';
 
 const history = createHashHistory();
 const rootReducer = createRootReducer(history);

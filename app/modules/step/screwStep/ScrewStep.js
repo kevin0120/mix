@@ -12,7 +12,7 @@ import { CommonLog } from '../../../common/utils';
 import handleResult from './handleResult';
 import controllerModeTasks from './controllerModeTasks';
 import screwStepActions from './action';
-import { SCREW_STEP } from './constants';
+import { SCREW_STEP, controllerModes } from './constants';
 import { getDevice } from '../../external/device';
 import dialogActions from '../../dialog/action';
 import type { IWorkStep } from '../interface/IWorkStep';
@@ -21,8 +21,8 @@ function* doPoint(point, isFirst, orderActions) {
   try {
     const data = this._data;
     if (
-      data.controllerMode === 'pset' ||
-      (data.controllerMode === 'job' && isFirst)
+      data.controllerMode === controllerModes.pset ||
+      (data.controllerMode === controllerModes.job && isFirst)
     ) {
       const success = yield call(
         [this, controllerModeTasks[data.controllerMode]],
@@ -55,7 +55,7 @@ const ScrewStepMixin = (ClsBaseStep: IWorkStep) => class ClsScrewStep extends Cl
 
   _orderOperationPoints: ClsOrderOperationPoints;
 
-  constructor(...args) {
+  constructor(...args: Iterable<any>) {
     super(...args);
     const self = this;
     const payload: tScrewStepPayload = this._payload;

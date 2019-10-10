@@ -9,7 +9,7 @@ import Button from '../../../components/CustomButtons/Button';
 import styles from './styles';
 import { scannerStepAction } from '../../../modules/step/scannerStep/action';
 // import QRCode from './qrcode-scan.svg';
-import { tStepProps } from '../types';
+import type { tStepProps } from '../types';
 import withKeyboard from '../../../components/Keyboard';
 import type { Dispatch } from '../../../modules/indexReducer';
 import {
@@ -33,19 +33,21 @@ const mapDispatch = {
 type Props = {
   submit: Dispatch,
   getValue: Dispatch,
-  keyboardInput: Function
+  keyboardInput: Function,
+  label: string,
+  result: Object,
 };
 
 function ScannerStep({
-  step,
-  submit,
-  isCurrent,
-  bindAction,
-  keyboardInput,
-  label,
-  getValue,
-  result
-}: Props & tStepProps) {
+                       step,
+                       submit,
+                       isCurrent,
+                       bindAction,
+                       keyboardInput,
+                       label,
+                       getValue,
+                       result
+                     }: Props & tStepProps) {
   const classes = makeStyles(styles)();
   useEffect(() => {
     bindAction(
@@ -58,7 +60,7 @@ function ScannerStep({
 
   return (
     <div className={classes.root}>
-      <QRcode value="This Is Demo QR Code" size={400} />
+      <QRcode value="This Is Demo QR Code" size={400}/>
       <TextField
         label={label}
         disabled={!isCurrent}

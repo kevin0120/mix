@@ -1,6 +1,7 @@
 import STEP_STATUS from '../../step/constants';
 import { ORDER_STATUS } from '../constants';
-import type { tClsOrder } from '../Order';
+// import type { tClsOrder } from '../Order';
+import type { IOrder } from './interface/IOrder';
 
 export type tStockMove = {
   lot: string, // 批次号或者序列号
@@ -23,10 +24,10 @@ export type tOrder = {
 export type tOrderStepIdx = number;
 
 export type tOrderState = {
-  viewingOrder: tClsOrder | null,
-  workingOrder: tClsOrder | null,
+  viewingOrder: IOrder | null,
+  workingOrder: IOrder | null,
   viewingIndex: tOrderStepIdx,
-  list: Array<tClsOrder>
+  list: Array<IOrder>
 };
 
 interface tStepPayload {

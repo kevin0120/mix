@@ -40,12 +40,12 @@ type StepperLayoutProps = {
 
 // 步骤条
 const StepperContainer = ({
-  steps,
-  viewingIndex,
-  jumpTo,
-  workingStep,
-  viewingStep
-}: StepperLayoutProps) => {
+                            steps,
+                            viewingIndex,
+                            jumpTo,
+                            workingStep,
+                            viewingStep
+                          }: StepperLayoutProps) => {
   const classes = makeStyles(styles.stepperContainer)();
 
   const viewingRef = useRef(null);
@@ -53,9 +53,9 @@ const StepperContainer = ({
   useEffect(() => {
     if (viewingNode) {
       // eslint-disable-next-line react/no-find-dom-node
-      const node = ReactDOM.findDOMNode(viewingNode);
-      if (node) {
-        node.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      const node: null | Element | Text = ReactDOM.findDOMNode(viewingNode);
+      if (node && node.scrollIntoView && typeof node.scrollIntoView === 'function') {
+        ((node: any): Element).scrollIntoView({ block: 'center', behavior: 'smooth' });
       }
     }
   }, [viewingNode]);
@@ -99,19 +99,20 @@ const StepperContainer = ({
               onClick={() => jumpTo(idx)}
               className={classes.stepButton}
               {...stepButtonProps}
-              ref={s === viewingStep ? viewingRef : () => {}}
+              ref={s === viewingStep ? viewingRef : () => {
+              }}
             >
               <StepLabel {...labelProps}>
                 <Typography variant="h6">{s.name}</Typography>
               </StepLabel>
             </StepButton>
             <StepContent>
-              <Timer step={s} />
+              <Timer step={s}/>
               {(Object.keys(s.payload.info || {}) || []).map(k => (
                 <div className={classes.infoRow} key={k}>
                   <Typography variant="body1">{k || ''}</Typography>
                   <Typography variant="body1">
-                    {s.payload.info[k] || ''}
+                    {s.payload.info && s.payload.info[k] || ''}
                   </Typography>
                 </div>
               ))}

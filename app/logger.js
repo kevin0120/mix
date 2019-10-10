@@ -1,4 +1,5 @@
 // @flow
+import type { QueryOptions } from 'winston';
 import { primaryColor, dangerColor, infoColor, warningColor, roseColor } from './common/theme/palette';
 
 const winston = require('winston');
@@ -76,27 +77,27 @@ export function CreateDailyLogger() {
   }
 }
 
-export function Info(msg, meta) {
+export function Info(msg: string | Error, meta: ?Object) {
   if (gLogger === null) return;
   gLogger.info(msg, { meta });
 }
 
-export function Warn(msg, meta) {
+export function Warn(msg: string | Error, meta: ?Object) {
   if (gLogger === null) return;
   gLogger.warn(msg, { meta });
 }
 
-export function Debug(msg, meta) {
+export function Debug(msg: string | Error, meta: ?Object) {
   if (gLogger === null) return;
   gLogger.debug(msg, { meta });
 }
 
-export function Maintenance(msg, meta) {
+export function Maintenance(msg: string | Error, meta: ?Object) {
   if (gLogger === null) return;
   gLogger.maintenance(msg, { meta });
 }
 
-export function lError(msg: mixed, meta) {
+export function lError(msg: string | Error, meta: ?Object) {
   if (gLogger === null) return;
   if (typeof msg === 'string') {
     gLogger.error(msg, { meta });
@@ -106,7 +107,7 @@ export function lError(msg: mixed, meta) {
   }
 }
 
-export function Query(options, f) {
+export function Query(options: QueryOptions, f?: (err: Error, results: any) => void) {
   if (gLogger === null) {
     throw new Error('logger does not exist');
   }

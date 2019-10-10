@@ -14,7 +14,7 @@ type actionType = {
 };
 
 export default function workMode(
-  state: object = defaultWorkMode,
+  state: Object = defaultWorkMode,
   action: actionType
 ) {
   switch (action.type) {

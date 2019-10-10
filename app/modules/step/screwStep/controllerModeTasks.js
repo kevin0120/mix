@@ -22,7 +22,7 @@ export default {
       // const { toolSN, pset, sequence } = points[activeIndex];
       const { toolSN, pset, sequence } = point;
       const total = points.length || 0;
-      const workorderID = yield select(s => workingOrder(s.order).id);
+      const workorderID = yield select(s => workingOrder(s.order)?.id);
       const data = yield call(
         psetApi,
         toolSN || '',

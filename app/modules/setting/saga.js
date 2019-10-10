@@ -1,6 +1,7 @@
 // @flow
 
 import { select, takeEvery, put } from 'redux-saga/effects';
+import type { Saga } from 'redux-saga';
 import { USER_CONFIGS } from './action';
 import { CONNECTION } from '../connections/action';
 import notifierActions from '../Notifier/action';
@@ -67,6 +68,6 @@ function* saveConfiguration(action) {
   }
 }
 
-export default function* watchSettingPreSave() {
+export default function* watchSettingPreSave(): Saga<void> {
   yield takeEvery(USER_CONFIGS.PRE_SAVE, saveConfiguration);
 }

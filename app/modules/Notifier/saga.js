@@ -13,9 +13,9 @@ type tNotifyFuncMap = {
 };
 
 const notifyFuncMap: tNotifyFuncMap = {
-  Info: Info,
-  Warn: Warn,
-  Maintenance: Maintenance,
+  Info,
+  Warn,
+  Maintenance,
   Error: lError
 };
 

@@ -7,4 +7,8 @@ export type tRunSubStepCallbacks = {
   onNext?: Function,
   onPrevious?: Function
 
-}
+};
+
+export type tStepInfo = {
+  [key: string]: string | number
+};

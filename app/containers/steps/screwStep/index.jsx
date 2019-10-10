@@ -24,7 +24,6 @@ const mapState = (state, props) => {
 
 const mapDispatch = {
   result: screwStepAction.result,
-  imageReady: screwStepAction.imageReady,
   redoPoint: screwStepAction.redoPoint
 };
 

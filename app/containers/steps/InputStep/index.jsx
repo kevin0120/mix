@@ -19,8 +19,8 @@ const mapDispatch = {
 
 type Props = {
   label: string,
-  submit: () => {}
-};
+  submit: (?string | ?number) => any
+} ;
 
 function InputStep({
                      step,
