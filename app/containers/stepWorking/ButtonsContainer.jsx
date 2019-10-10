@@ -12,7 +12,7 @@ import styles from './styles';
 import { translation as trans, stepWorkingNS } from './local';
 import * as oSel from '../../modules/order/selector';
 import { orderActions } from '../../modules/order/action';
-import type { tStep, tStepArray } from '../../modules/order/interface/typeDef';
+import type { tStepArray } from '../../modules/order/interface/typeDef';
 import dialogActions from '../../modules/dialog/action';
 import { tNS, withI18n } from '../../i18n';
 import Table from '../../components/Table/Table';
@@ -22,6 +22,7 @@ import type {
   orderTriggerType,
   updateStateActionType
 } from '../../modules/order/action';
+import type { tClsStep } from '../../modules/step/Step';
 
 const mapState = (state, props) => {
   const vOrder = oSel.viewingOrder(state.order);
@@ -51,14 +52,14 @@ const mapDispatch = {
   viewModel: modelViewerActions.open
 };
 
+/* eslint-disable flowtype/no-weak-types */
 type ButtonsContainerProps = {
   viewingOrder: tClsOrder,
   viewingIndex: number,
-  viewingStep: tStep,
-  workingStep: tStep,
+  viewingStep: tClsStep,
+  workingStep: tClsStep,
   viewingIndex: number,
   steps: tStepArray,
-  /* eslint-disable flowtype/no-weak-types */
   next: () => any,
   action: Node,
   previous: () => any,
@@ -73,8 +74,9 @@ type ButtonsContainerProps = {
   workOn: (order: tClsOrder) => orderTriggerType,
   viewModel: any, // 查看的三维模型
   viewModelDialog: any
-  /* eslint-enable flowtype/no-weak-types */
 };
+/* eslint-enable flowtype/no-weak-types */
+
 
 const ButtonsContainer: ButtonsContainerProps => Node = ({
   viewingOrder,

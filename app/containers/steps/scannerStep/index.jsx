@@ -9,7 +9,7 @@ import Button from '../../../components/CustomButtons/Button';
 import styles from './styles';
 import { scannerStepAction } from '../../../modules/step/scannerStep/action';
 // import QRCode from './qrcode-scan.svg';
-import { StepContent } from '../types';
+import { tStepProps } from '../types';
 import withKeyboard from '../../../components/Keyboard';
 import type { Dispatch } from '../../../modules/indexReducer';
 import {
@@ -45,7 +45,7 @@ function ScannerStep({
   label,
   getValue,
   result
-}: Props & StepContent) {
+}: Props & tStepProps) {
   const classes = makeStyles(styles)();
   useEffect(() => {
     bindAction(

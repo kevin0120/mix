@@ -7,6 +7,14 @@ import type { tStepProps } from '../types';
 import Button from '../../../components/CustomButtons/Button';
 import type { Dispatch } from '../../../modules/indexReducer';
 
+const mapState = (state, props) => ({
+  ...props
+});
+
+const mapDispatch = {
+  ready: materialStepActions.ready
+};
+
 type Props = {
   ready: Dispatch
 };
@@ -56,13 +64,5 @@ function materialStep(props: Props & tStepProps) {
     />)}
   </div>;
 }
-
-const mapState = (state, props) => ({
-  ...props
-});
-
-const mapDispatch = {
-  ready: materialStepActions.ready
-};
 
 export default connect(mapState, mapDispatch)(materialStep);

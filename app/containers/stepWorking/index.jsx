@@ -16,6 +16,18 @@ import logo from '../../../resources/imgs/logo.jpg';
 import { stepWorkingNS } from './local';
 import { withI18n } from '../../i18n';
 
+const mapState = (state, props) => {
+  const vOrder = orderSelectors.viewingOrder(state.order);
+  return {
+    ...props,
+    status: vOrder?.status,
+    name: vOrder?.name,
+    desc: vOrder?.desc
+  };
+};
+
+const mapDispatch = {};
+
 type Props = {
   status: ?tOrderStatus,
   name: ?string,
@@ -87,18 +99,6 @@ function StepWorking({ status, desc }: Props): Node {
     stepWorkingNS
   );
 }
-
-const mapState = (state, props) => {
-  const vOrder = orderSelectors.viewingOrder(state.order);
-  return {
-    ...props,
-    status: vOrder?.status,
-    name: vOrder?.name,
-    desc: vOrder?.desc
-  };
-};
-
-const mapDispatch = {};
 
 export default connect<Props, *, _, _, _, _>(
   mapState,

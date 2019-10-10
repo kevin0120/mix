@@ -1,3 +1,4 @@
+// @flow
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core';
@@ -27,7 +28,11 @@ const mapDispatch = {
   redoPoint: screwStepAction.redoPoint
 };
 
-function ScrewStep({ isCurrent, status, image, points, activeIndex, result, redoPoint }: tStepProps) {
+type Props = {
+};
+
+
+function ScrewStep({ isCurrent, status, image, points, activeIndex, result, redoPoint }: Props & tStepProps) {
   const classes = makeStyles(styles)();
 
   return <div className={classes.layout}>

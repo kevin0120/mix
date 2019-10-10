@@ -20,7 +20,7 @@ const mapDispatch = {
 };
 
 type Props = {
-  submit: () => {}
+  submit: Function
 };
 
 function InstructionStep({ step, isCurrent, submit, bindAction, video }: Props & tStepProps) {

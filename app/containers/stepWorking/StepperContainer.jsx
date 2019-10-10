@@ -14,8 +14,8 @@ import styles from './styles';
 import * as oSel from '../../modules/order/selector';
 import { orderActions } from '../../modules/order/action';
 import type { Dispatch } from '../../modules/indexReducer';
-import type { tStep } from '../../modules/order/interface/typeDef';
 import Timer from './Timer';
+import type { tClsStep } from '../../modules/step/Step';
 
 const mapState = (state, props) => ({
   ...props,
@@ -31,11 +31,11 @@ const mapDispatch = {
 };
 
 type StepperLayoutProps = {
-  steps: Array<Step>,
+  steps: Array<tClsStep>,
   viewingIndex: number,
   jumpTo: Dispatch,
-  workingStep: tStep,
-  viewingStep: tStep
+  workingStep: tClsStep,
+  viewingStep: tClsStep
 };
 
 // 步骤条

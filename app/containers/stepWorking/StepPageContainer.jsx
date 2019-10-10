@@ -8,7 +8,6 @@ import clsx from 'clsx';
 import stepTypes from '../steps/stepTypes';
 import * as oSel from '../../modules/order/selector';
 import styles from './styles';
-import type { tStep } from '../../modules/order/interface/typeDef';
 import TimeLine from '../../components/WorkPageTimeline';
 import type { tClsStep } from '../../modules/step/Step';
 
@@ -25,8 +24,8 @@ const mapState = (state, props) => {
 const mapDispatch = {};
 
 type Props = {
-  step: tStep,
-  workingStep: tStep,
+  step: tClsStep,
+  workingStep: tClsStep,
   bindParentAction: Node => any,
   timeLine: Array<any>,
   bindParentDescription: Node => any,
