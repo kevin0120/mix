@@ -1,5 +1,5 @@
-import { DIALOG } from './action';
-import type { tDialogState } from './model';
+import { DIALOG } from './constents';
+import type { tDialogState } from './interface/typeDef';
 
 const initState: tDialogState = {
   open: false

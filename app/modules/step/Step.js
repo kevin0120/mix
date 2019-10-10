@@ -11,7 +11,7 @@ import {
 import { CommonLog } from '../../common/utils';
 import { orderStepUpdateApi } from '../../api/order';
 import { ORDER, orderActions } from '../order/action';
-import STEP_STATUS from './model';
+import STEP_STATUS from './constents';
 import stepTypes from './stepTypes';
 
 function invalidStepStatus(stepType, status) {
@@ -287,4 +287,4 @@ export default class Step {
   }
 }
 
-export type tClsStep = typeof Step;
+export type tClsStep = Step;

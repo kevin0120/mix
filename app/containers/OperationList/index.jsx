@@ -13,12 +13,12 @@ import CardContent from '@material-ui/core/CardContent';
 import { I18n } from 'react-i18next';
 import { sortBy } from 'lodash-es';
 import { orderActions } from '../../modules/order/action';
-import { ORDER_STATUS } from '../../modules/order/model';
+import { ORDER_STATUS } from '../../modules/order/constents';
 import { todoOrders, doneOrders, exceptOrders, doingOrders } from '../../modules/order/selector';
 import styles from './styles';
 import settingImg from '../../../resources/imgs/setting.png';
 import type { Dispatch } from '../../modules/indexReducer';
-import type { tOrder } from '../../modules/order/model';
+import type { tOrder } from '../../modules/order/interface/typeDef';
 import { withI18n } from '../../i18n';
 
 

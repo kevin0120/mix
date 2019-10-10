@@ -1,14 +1,14 @@
 import React from 'react';
 import { push } from 'connected-react-router';
 import { call, put } from 'redux-saga/effects';
-import { ORDER_STATUS } from './model';
+import { ORDER_STATUS } from './constents';
 import { CommonLog, durationString } from '../../common/utils';
 import { orderActions } from './action';
 import { orderUpdateApi } from '../../api/order';
 import dialogActions from '../dialog/action';
 import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
-import STEP_STATUS from '../step/model';
+import STEP_STATUS from '../step/constents';
 
 const stepStatus = status => {
   switch (status) {
@@ -150,4 +150,4 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep {
 
 export default OrderMixin;
 
-export type tClsOrder = ClsOrder;
+export type tClsOrder=ClsOrder;

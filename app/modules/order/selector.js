@@ -1,26 +1,26 @@
 // @flow
-import { ORDER_STATUS } from './model';
+import { ORDER_STATUS } from './constents';
 import type {
   tOrder,
   tOrderState,
   tOrderStepIdx,
   tStep,
   tStepStatus
-} from './model';
-import Step from '../step/Step';
+} from './interface/typeDef';
+import type {tClsStep} from '../step/Step';
 import type { tClsOrder } from './Order';
 
 export const workingOrder = (orderState: tOrderState): ?tClsOrder => orderState?.workingOrder;
 export const viewingOrder = (orderState: tOrderState): ?tClsOrder => orderState?.viewingOrder;
 export const viewingIndex = (orderState: tOrderState): tOrderStepIdx => orderState?.viewingIndex;
-export const viewingStep = (orderState: tOrderState): ?Step =>
+export const viewingStep = (orderState: tOrderState): ?tClsStep =>
   orderSteps(viewingOrder(orderState))?.[viewingIndex(orderState)] || null;
 
 export const workingIndex = (order: ?tClsOrder): tOrderStepIdx => order?.workingIndex || 0;
 export const workingStep = (order: ?tClsOrder): ?tStep =>
   orderSteps(order)?.[workingIndex(order)] || null;
 
-export const orderSteps = (order: ?tClsOrder): ?Array<Step> => order?.steps || null;
+export const orderSteps = (order: ?tClsOrder): ?Array<tClsStep> => order?.steps || null;
 export const orderLength = (order: ?tClsOrder): number => orderSteps(order)?.length || 0;
 
 export const todoOrders = (orderList: Array<tClsOrder>): Array<tOrder> =>
@@ -37,10 +37,10 @@ export const exceptOrders = (orderList: Array<tClsOrder>): Array<tOrder> =>
   o?.status === ORDER_STATUS.PENDING || o?.status === ORDER_STATUS.CANCEL)
   );
 
-export const stepStatus = (step: ?tStep): ?tStepStatus => step?.status;
-export const stepData = (step: ?tStep): ?Object => step?.data;
-export const stepPayload = (step: ?tStep): ?Object => step?.payload;
-export const times = (step: ?Step): ?Array<Date> => step?.times;
+export const stepStatus = (step: ?tClsStep): ?tStepStatus => step?.status;
+export const stepData = (step: ?tClsStep): ?Object => step?.data;
+export const stepPayload = (step: ?tClsStep): ?Object => step?.payload;
+export const times = (step: ?tClsStep): ?Array<Date> => step?.times;
 
 
 export const isPending = (order: ?tClsOrder): boolean => order?.status === ORDER_STATUS.PENDING || false;

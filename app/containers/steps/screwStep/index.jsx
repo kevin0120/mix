@@ -6,7 +6,7 @@ import styles from './style';
 import { viewingStep, stepPayload, stepData, stepStatus } from '../../../modules/order/selector';
 import ScrewImage from '../../../components/ScrewImage';
 import screwStepAction from '../../../modules/step/screwStep/action';
-import STEP_STATUS from '../../../modules/step/model';
+import STEP_STATUS from '../../../modules/step/constents';
 import type { tStepProps } from '../types';
 
 const mapState = (state, props) => {

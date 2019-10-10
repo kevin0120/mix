@@ -2,7 +2,7 @@
 import dataImg from '../../../resources/imgs/workingImg.png';
 import dataImg2 from '../../../resources/imgs/working-page-test-pic2.png';
 import screwImg from '../../../resources/imgs/screw.jpg';
-import { ORDER_STATUS } from './model';
+import { ORDER_STATUS } from './constents';
 
 // console.log(screwImg);
 export const demoOrder = {

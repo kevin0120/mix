@@ -13,7 +13,7 @@ import styles from './styles';
 import { translation as trans, stepWorkingNS } from './local';
 import * as oSel from '../../modules/order/selector';
 import { orderActions } from '../../modules/order/action';
-import type { tStep, tStepArray } from '../../modules/order/model';
+import type { tStep, tStepArray } from '../../modules/order/interface/typeDef';
 import dialogActions from '../../modules/dialog/action';
 import { tNS, withI18n } from '../../i18n';
 import Table from '../../components/Table/Table';

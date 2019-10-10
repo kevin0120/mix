@@ -9,12 +9,12 @@ import StepLabel from '@material-ui/core/StepLabel';
 import React, { useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Loop } from '@material-ui/icons';
-import STEP_STATUS from '../../modules/step/model';
+import STEP_STATUS from '../../modules/step/constents';
 import styles from './styles';
 import * as oSel from '../../modules/order/selector';
 import { orderActions } from '../../modules/order/action';
 import type { Dispatch } from '../../modules/indexReducer';
-import type { tStep, tStepArray } from '../../modules/order/model';
+import type { tStep, tStepArray } from '../../modules/order/interface/typeDef';
 import Timer from './Timer';
 import clsx from 'clsx';
 

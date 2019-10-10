@@ -8,7 +8,7 @@ import clsx from 'clsx';
 import stepTypes from '../steps/stepTypes';
 import * as oSel from '../../modules/order/selector';
 import styles from './styles';
-import type { tStep } from '../../modules/order/model';
+import type { tStep } from '../../modules/order/interface/typeDef';
 import TimeLine from '../../components/WorkPageTimeline';
 import type { tClsStep } from '../../modules/step/Step';
 

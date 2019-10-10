@@ -1,7 +1,6 @@
+import STEP_STATUS from '../../step/constents';
+import { ORDER_STATUS } from '../constents';
 import type { tClsOrder } from '../Order';
-import type { tOrderStatus, tStepArray } from '../model';
-import STEP_STATUS from '../../step/model';
-import { ORDER_STATUS } from '../model';
 
 export type tStockMove = {
   lot: string, // 批次号或者序列号

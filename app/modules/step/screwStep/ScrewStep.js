@@ -1,6 +1,6 @@
 import { cloneDeep, isNil, isEmpty } from 'lodash-es';
 import { call, put, take, all } from 'redux-saga/effects';
-import STEP_STATUS from '../model';
+import STEP_STATUS from '../constents';
 import type {
   tPoint,
   tScrewStepData,
