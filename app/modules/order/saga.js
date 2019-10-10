@@ -12,16 +12,16 @@ import {
 } from 'redux-saga/effects';
 import React from 'react';
 import type { Saga } from 'redux-saga';
-import { ORDER, orderActions } from './action';
+import { orderActions } from './action';
 import { workingOrder, orderSteps, doable, viewingOrder } from './selector';
 import dialogActions from '../dialog/action';
 import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
 import { CommonLog } from '../../common/utils';
-import type { tStep, tStepArray } from './model';
+import type { tStep, tStepArray } from './interface/typeDef';
 import type { tCommonActionType } from '../../common/type';
 import { orderDetailApi, orderListApi } from '../../api/order';
-import { ORDER_STATUS } from './model';
+import { ORDER_STATUS, ORDER } from './constents';
 import { bindRushAction } from '../rush/rushHealthz';
 import loadingActions from '../loading/action';
 import NotifierActions from '../Notifier/action';
@@ -162,11 +162,11 @@ function* viewOrder({ order }) {
             color: 'warning'
           },
           !WIPOrder &&
-            doable(order) && {
-              label: 'Order.Start',
-              color: 'info',
-              action: orderActions.workOn(order)
-            }
+          doable(order) && {
+            label: 'Order.Start',
+            color: 'info',
+            action: orderActions.workOn(order)
+          }
         ],
         title: i18n.t('Order.Overview'),
         content: (

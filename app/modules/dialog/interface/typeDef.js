@@ -1,8 +1,6 @@
 // @flow
-
-import React from 'react';
 import PropTypes from 'prop-types';
-import type { Dispatch } from '../indexReducer';
+import type { Dispatch } from '../../indexReducer';
 
 type tDialogButton = {
   action: Dispatch,

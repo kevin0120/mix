@@ -1,7 +1,7 @@
 import { put, call } from 'redux-saga/effects';
 import { CommonLog } from '../../common/utils';
 import { orderActions } from './action';
-import { ORDER_WS_TYPES } from './model';
+import { ORDER_WS_TYPES } from './constents';
 
 const { getListSuccess } = orderActions;
 

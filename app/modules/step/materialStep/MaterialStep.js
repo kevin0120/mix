@@ -1,5 +1,5 @@
 import { call, put, select, take, all, race } from 'redux-saga/effects';
-import STEP_STATUS from '../model';
+import STEP_STATUS from '../constents';
 import { stepPayload, workingOrder, workingStep } from '../../order/selector';
 import { getDevice } from '../../external/device';
 import { CommonLog } from '../../../common/utils';

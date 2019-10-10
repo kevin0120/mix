@@ -1,10 +1,5 @@
-import type { tDialogConfig } from './model';
-
-export const DIALOG = {
-  SHOW: 'DIALOG_SHOW',
-  BUTTON: 'DIALOG_BUTTON',
-  CLOSE: 'DIALOG_CLOSE'
-};
+import type { tDialogConfig } from './interface/typeDef';
+import {DIALOG} from './constents';
 
 export default {
   dialogShow: (config: tDialogConfig) => ({
