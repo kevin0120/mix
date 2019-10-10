@@ -1,3 +1,4 @@
+// @flow
 import { call, put, select, take, all, race } from 'redux-saga/effects';
 import STEP_STATUS from '../constants';
 import { stepPayload, workingOrder, workingStep } from '../../order/selector';
@@ -5,10 +6,12 @@ import { getDevice } from '../../external/device';
 import { CommonLog } from '../../../common/utils';
 import { ioDirection, ioTriggerMode } from '../../external/device/io/type';
 import actions, { MATERIAL_STEP } from './action';
+import type { IWorkStep } from '../interface/IWorkStep';
+import type ClsIOModule from '../../external/device/io/model';
 
 const items = payload => payload?.items;
 
-const MaterialStepMixin = (ClsBaseStep) => class ClsMaterialStep extends ClsBaseStep {
+const MaterialStepMixin = (ClsBaseStep: IWorkStep) => class ClsMaterialStep extends ClsBaseStep {
   _ports = new Set([]);
 
   _io = new Set([]);
@@ -22,15 +25,13 @@ const MaterialStepMixin = (ClsBaseStep) => class ClsMaterialStep extends ClsBase
 
     function* onLeave() {
       try {
-        for (const io of this._io) {
-          yield call(io.closeIO, [...this._ports].filter(p => io.hasPort(p)));
-        }
+        yield all([...this._io].map((io) => call(io.closeIO, [...this._ports].filter(p => io.hasPort(p)))));
         this._ports.clear();
         this._io.clear();
         this._items.clear();
         this._confirm = null;
       } catch (e) {
-        CommonLog(e);
+        CommonLog.lError(e);
       }
     }
 
@@ -38,27 +39,36 @@ const MaterialStepMixin = (ClsBaseStep) => class ClsMaterialStep extends ClsBase
   }
 
   _statusTasks = {
-    *[STEP_STATUS.ENTERING](ORDER, orderActions) {
+    * [STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {
         const sPayload = yield select(s =>
           stepPayload(workingStep(workingOrder(s.order)))
         );
         items(sPayload).forEach(i => {
           const item = {};
-          if (i?.in?.sn) {
-            const io = getDevice(i.in.sn);
-            this._io.add(io);
-            const port = io.getPort(ioDirection.input, i.in.index);
-            this._ports.add(port);
-            item.in = { io, port };
-          }
-          if (i?.out?.sn) {
-            const io = getDevice(i.out.sn);
-            this._io.add(io);
-            const port = io.getPort(ioDirection.output, i.out.index);
-            this._ports.add(port);
-            item.out = { io, port };
-          }
+          ['in', 'out'].forEach((dir) => {
+            if (i && i[dir] && i[dir].sn) {
+              const io: ClsIOModule = getDevice(i[dir].sn);
+              this._io.add(io);
+              const port = io.getPort(ioDirection.input, i[dir].index);
+              this._ports.add(port);
+              item[dir] = { io, port };
+            }
+          });
+          // if (i?.in?.sn) {
+          //   const io = getDevice(i.in.sn);
+          //   this._io.add(io);
+          //   const port = io.getPort(ioDirection.input, i.in.index);
+          //   this._ports.add(port);
+          //   item.in = { io, port };
+          // }
+          // if (i?.out?.sn) {
+          //   const io = getDevice(i.out.sn);
+          //   this._io.add(io);
+          //   const port = io.getPort(ioDirection.output, i.out.index);
+          //   this._ports.add(port);
+          //   item.out = { io, port };
+          // }
           this._items.add(item);
         });
         for (const io of this._io) {
@@ -74,11 +84,12 @@ const MaterialStepMixin = (ClsBaseStep) => class ClsMaterialStep extends ClsBase
           }
         }
 
-        for (const item of this._items) {
+        yield all(this._items.map((item) => {
           if (item?.out?.io?.openIO && item?.out?.port) {
-            yield call(item.out.io.openIO, item.out.port);
+            return call(item.out.io.openIO, item.out.port);
           }
-        }
+          return null;
+        }).filter(calls => !!calls));
 
         const confirmIO = getDevice(sPayload.confirm.sn);
         if (confirmIO) {
@@ -93,7 +104,7 @@ const MaterialStepMixin = (ClsBaseStep) => class ClsMaterialStep extends ClsBase
         CommonLog.lError(e);
       }
     },
-    *[STEP_STATUS.DOING](ORDER, orderActions) {
+    * [STEP_STATUS.DOING](ORDER, orderActions) {
       try {
         const listeners = [];
         this._items.forEach(i => {
@@ -139,14 +150,14 @@ const MaterialStepMixin = (ClsBaseStep) => class ClsMaterialStep extends ClsBase
         CommonLog.lError(e);
       }
     },
-    *[STEP_STATUS.FINISHED](ORDER, orderActions) {
+    * [STEP_STATUS.FINISHED](ORDER, orderActions) {
       try {
         yield put(orderActions.finishStep(this));
       } catch (e) {
         CommonLog.lError(e);
       }
     },
-    *[STEP_STATUS.FAIL](ORDER, orderActions) {
+    * [STEP_STATUS.FAIL](ORDER, orderActions) {
       try {
         yield put(orderActions.finishStep(this));
       } catch (e) {

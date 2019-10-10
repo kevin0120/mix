@@ -1,4 +1,5 @@
-import { call, put, select, take } from 'redux-saga/effects';
+// @flow
+import { call, put, select, take, all } from 'redux-saga/effects';
 import STEP_STATUS from '../constants';
 import {
   stepData,
@@ -9,9 +10,10 @@ import {
 import { SCANNER_STEP, scannerStepAction } from './action';
 import { deviceType, getDevicesByType } from '../../external/device';
 import { CommonLog } from '../../../common/utils';
+import type { IWorkStep } from '../interface/IWorkStep';
 
 
-const ScannerStepMixin = (ClsBaseStep) => class ClsScannerStep extends ClsBaseStep {
+const ScannerStepMixin = (ClsBaseStep: IWorkStep) => class ClsScannerStep extends ClsBaseStep {
 
   _scanners = [];
 
@@ -21,19 +23,20 @@ const ScannerStepMixin = (ClsBaseStep) => class ClsScannerStep extends ClsBaseSt
   };
 
   _statusTasks = {
-    *[STEP_STATUS.ENTERING](ORDER, orderActions) {
+    * [STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {
         this._scanners = getDevicesByType(deviceType.scanner);
-        for (const scanner of this._scanners) {
-          yield call(scanner.Enable);
-          scanner.dispatcher = scannerStepAction.getValue;
-        }
+        const scanners = this._scanners;
+        yield all(scanners.map((s) => {
+          s.dispatcher = scannerStepAction.getValue;
+          return call(s.Enable);
+        }));
         yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
       } catch (e) {
         CommonLog.lError(e);
       }
     },
-    *[STEP_STATUS.DOING](ORDER, orderActions) {
+    * [STEP_STATUS.DOING](ORDER, orderActions) {
       try {
         while (true) {
           const action = yield take([
@@ -79,13 +82,13 @@ const ScannerStepMixin = (ClsBaseStep) => class ClsScannerStep extends ClsBaseSt
       } catch (e) {
         CommonLog.lError(e);
       } finally {
-        for (const scanner of this._scanners) {
-          yield call(scanner.Disable);
-          scanner.dispatcher = null;
-        }
+        yield all(this._scanners.map((s) => {
+          s.dispatcher = null;
+          return call(s.Disable);
+        }));
       }
     },
-    *[STEP_STATUS.FINISHED](ORDER, orderActions) {
+    * [STEP_STATUS.FINISHED](ORDER, orderActions) {
       try {
         yield put(orderActions.finishStep(this));
         this._scanners = [];

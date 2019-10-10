@@ -1,10 +1,11 @@
+// @flow
 import { cloneDeep, isNil, isEmpty } from 'lodash-es';
 import { call, put, take, all } from 'redux-saga/effects';
 import STEP_STATUS from '../constants';
 import type {
   tPoint,
   tScrewStepData,
-  tScrewStepPayload,
+  tScrewStepPayload
 } from './model';
 import { ClsOrderOperationPoints } from './model';
 import { CommonLog } from '../../../common/utils';
@@ -14,6 +15,7 @@ import screwStepActions from './action';
 import { SCREW_STEP } from './constants';
 import { getDevice } from '../../external/device';
 import dialogActions from '../../dialog/action';
+import type { IWorkStep } from '../interface/IWorkStep';
 
 function* doPoint(point, isFirst, orderActions) {
   try {
@@ -45,7 +47,7 @@ function* doPoint(point, isFirst, orderActions) {
   }
 }
 
-const ScrewStepMixin = (BaseStep) => class ClsScrewStep extends BaseStep {
+const ScrewStepMixin = (ClsBaseStep: IWorkStep) => class ClsScrewStep extends ClsBaseStep {
 
   _tools = [];
 
@@ -87,7 +89,7 @@ const ScrewStepMixin = (BaseStep) => class ClsScrewStep extends BaseStep {
   }
 
   _statusTasks = {
-    *[STEP_STATUS.ENTERING](ORDER, orderActions) {
+    * [STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {
         // init data
         const payload: tScrewStepPayload = this._payload;
@@ -148,7 +150,7 @@ const ScrewStepMixin = (BaseStep) => class ClsScrewStep extends BaseStep {
       }
     },
 
-    *[STEP_STATUS.DOING](ORDER, orderActions) {
+    * [STEP_STATUS.DOING](ORDER, orderActions) {
       try {
         // for (const t of this._tools) {
         //   yield call(t.Enable);
@@ -203,7 +205,7 @@ const ScrewStepMixin = (BaseStep) => class ClsScrewStep extends BaseStep {
       }
     },
 
-    *[STEP_STATUS.FINISHED](ORDER, orderActions) {
+    * [STEP_STATUS.FINISHED](ORDER, orderActions) {
       try {
         yield put(orderActions.doNextStep());
       } catch (e) {
@@ -211,7 +213,7 @@ const ScrewStepMixin = (BaseStep) => class ClsScrewStep extends BaseStep {
       }
     },
 
-    *[STEP_STATUS.FAIL](ORDER, orderActions, msg) {
+    * [STEP_STATUS.FAIL](ORDER, orderActions, msg) {
       try {
         yield all(this._tools.map(t => call(t.Disable)));
         this._tools = [];

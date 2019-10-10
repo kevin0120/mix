@@ -19,6 +19,7 @@ import STEP_STATUS from './constants';
 import stepTypes from './stepTypes';
 import type { tStepDataReducer, tAnyStepState, tRunSubStepCallbacks } from './interface/typeDef';
 import type { tStep } from '../order/interface/typeDef';
+import { IWorkStep } from './interface/IWorkStep';
 
 function invalidStepStatus(stepType, status) {
   if (!stepType) {
@@ -30,10 +31,8 @@ function invalidStepStatus(stepType, status) {
   throw Error(`step type ${stepType}  has empty status ${status}`);
 }
 
-export interface IWorkStep {
-}
 
-export default class Step {
+export default class Step implements IWorkStep {
   _id = '';
 
   _name = '';
@@ -79,7 +78,7 @@ export default class Step {
     this.updateData = this.updateData.bind(this);
   }
 
-  update(stepObj) {
+  update(stepObj: tStep) {
     this._name = stepObj.name || 'unnamed step';
     this._desc = stepObj.desc || '';
     this._info = stepObj.info;
@@ -90,7 +89,7 @@ export default class Step {
     this._steps = stepObj.steps ? stepObj.steps.map(sD => {
       const existStep = this._steps.find(s => s._id === sD.id);
       if (existStep) {
-        existStep.update(sD, stepTypes);
+        existStep.update(sD);
         return existStep;
       }
       return new (stepTypes[sD.type](Step))(sD);
