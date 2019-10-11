@@ -85,7 +85,7 @@ class MrpRoutingWorkcenter(models.Model):
     def _push_mrp_routing_workcenter(self, url):
         self.ensure_one()
         operation_id = self
-        bom_ids = self.env['mrp.bom'].search([('operation_ids', 'in', operation_id.ids), ('active', '= ', True)])
+        bom_ids = self.env['mrp.bom'].search([('operation_ids', 'in', operation_id.ids), ('active', '=', True)])
         if not bom_ids:
             return
         _points = []

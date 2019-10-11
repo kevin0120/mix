@@ -59,6 +59,6 @@
         'views/sa_config_setting.xml'
     ],
     'demo': [
-        # 'demo/test_data.xml',   # 测试数据
+        # 'demo/test_demo.xml',   # 测试数据
     ],
 }
