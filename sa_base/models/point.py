@@ -7,7 +7,7 @@ from odoo.exceptions import UserError, ValidationError
 
 from odoo.addons import decimal_precision as dp
 
-import json
+import uuid
 
 
 class OperationPointsGroup(models.Model):
@@ -81,7 +81,7 @@ class OperationPoints(models.Model):
 
     sequence = fields.Integer('sequence', default=1)
 
-    name = fields.Char('Operation Point Name', default='Bolt Point')
+    name = fields.Char('Operation Point Name', default=lambda self: str(uuid.uuid4()))  # 如果未定义拧紧点编号，即自动生成uuid号作为唯一标示
 
     group_id = fields.Many2one('operation.point.group')
 
