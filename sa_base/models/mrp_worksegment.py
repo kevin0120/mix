@@ -105,11 +105,11 @@ class MrpWorkCenter(models.Model):
     rfid_id = fields.Many2one('maintenance.equipment', string='Radio Frequency Identification(RFID)', copy=False,
                               domain=lambda self: [('category_id', '=', self.env.ref('sa_base.equipment_RFID').id)])
 
-    controller_ids = fields.Many2many('maintenance.equipment', 'controller_center_rel', 'center_id', 'controller_id',
-                                      string='Screw Controller', copy=False)
+    controller_ids = fields.Many2many('maintenance.equipment', 'controller_center_rel', 'workcenter_id', 'controller_id',
+                                      string='Tightening Controllers', copy=False)
 
-    gun_ids = fields.Many2many('maintenance.equipment', 'gun_center_rel', 'center_id', 'gun_id',
-                               string='Screw Gun', copy=False)
+    gun_ids = fields.Many2many('maintenance.equipment', 'tool_workcenter_rel', 'workcenter_id', 'tool_id',
+                               string='Tightening Tools', copy=False)
 
     controller_ids_domain = fields.Char(
         compute="_compute_controller_ids_domain",
@@ -122,6 +122,10 @@ class MrpWorkCenter(models.Model):
         readonly=True,
         store=False,
     )
+
+    _sql_constraints = [('code_hmi', 'unique(hmi_id)', 'Only one HMI is allowed'),
+                        ('code_rfid', 'unique(rfid_id)', 'Only one RFID is allowed'),
+                        ('code_io', 'unique(io_id)', 'Only one Remote IO is allowed')]
 
     @api.constrains('controller_ids', 'gun_ids')
     def _constraint_equipments(self):
@@ -202,6 +206,3 @@ class MrpWorkCenter(models.Model):
             rec.gun_ids_domain = json.dumps([('id', 'in', child_ids.ids), ('category_id', '=', category_id)])
             rec.gun_ids = [(5,)]  # 去除所有的枪 重新设置
 
-    _sql_constraints = [('code_hmi', 'unique(hmi_id)', 'Only one HMI is allowed'),
-                        ('code_rfid', 'unique(rfid_id)', 'Only one RFID is allowed'),
-                        ('code_io', 'unique(io_id)', 'Only one Remote IO is allowed')]
