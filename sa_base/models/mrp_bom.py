@@ -88,7 +88,7 @@ class MrpBom(models.Model):
         count = self.env['mrp.bom'].search_count(
             [('id', '!=', self.id), ('product_tmpl_id', '=', self.product_tmpl_id.id),
              ('routing_id', '=', self.routing_id.id), ('active', '=', True)])
-        if count:f8ecede223363fdf2db5254d5d1aee7c1ef6be4e
+        if count:
             raise ValidationError(
                 _(u'The product Template had a related routing config "%s" been actived!') % (
                     self.product_tmpl_id.name))
@@ -174,7 +174,6 @@ class MrpBomLine(models.Model):
     operation_id = fields.Many2one('mrp.routing.workcenter', related="operation_point_id.operation_id", store=True)
 
     op_job_id = fields.Many2one('controller.job', string='Job', related="operation_id.op_job_id")
-f8ecede223363fdf2db5254d5d1aee7c1ef6be4e
     group_id = fields.Many2one('mrp.routing.group', related="operation_id.group_id", string='Routing Group')
 
     program_id = fields.Many2one('controller.program', related="operation_point_id.program_id", string='程序号')

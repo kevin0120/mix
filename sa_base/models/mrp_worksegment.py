@@ -99,21 +99,6 @@ class MrpWorkCenter(models.Model):
     masterpc_id = fields.Many2one('maintenance.equipment', string='Work Center Controller(MasterPC)', copy=False,
                                   domain=lambda self: [
                                       ('category_id', '=', self.env.ref('sa_base.equipment_MasterPC').id)])
- svw_enhanced/controllers/workorder.py
-自动合并 svw_enhanced/controllers/production.py
-删除 spc/views/mrp_production_views.xml
-自动合并 sa_base/views/mrp_workcenter_views.xml
-自动合并 sa_base/models/point.py
-自动合并 sa_base/models/mrp_worksegment.py
-冲突（内容）：合并冲突于 sa_base/models/mrp_worksegment.py
-自动合并 sa_base/models/mrp_routing.py
-自动合并 sa_base/models/mrp_bom.py
-冲突（内容）：合并冲突于 sa_base/models/mrp_bom.py
-自动合并 sa_base/models/__init__.py
-冲突（内容）：合并冲突于 sa_base/models/__init__.py
-自动合并 sa_base/demo/test_data.xml
-自动合并 sa_base/__manifest__.py
-冲突（内容）：合
     io_id = fields.Many2one('maintenance.equipment', string='Remote IO', copy=False,
                             domain=lambda self: [('category_id', '=', self.env.ref('sa_base.equipment_IO').id)])
 
