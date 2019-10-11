@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
-from odoo import fields,models,api,_
-from odoo.exceptions import ValidationError,UserError
+from odoo import fields, models, api, _
+from odoo.exceptions import ValidationError, UserError
 import odoo.addons.decimal_precision as dp
 from datetime import datetime, timedelta, date
 from dateutil.relativedelta import relativedelta
@@ -10,13 +10,11 @@ import babel.dates
 import pytz
 from odoo.osv import expression
 import logging
-from odoo.tools import float_round,frozendict, lazy_classproperty, lazy_property, ormcache, \
-                   Collector, LastOrderedSet, OrderedSet
-
+from odoo.tools import float_round, frozendict, lazy_classproperty, lazy_property, ormcache, \
+    Collector, LastOrderedSet, OrderedSet
 
 from collections import defaultdict, MutableMapping, OrderedDict
 from odoo.tools import frozendict
-
 
 
 class OperationResult(models.HyperModel):
@@ -106,7 +104,7 @@ class OperationResult(models.HyperModel):
                 w_clause_centron_part2 += 'and r1.gun_id = {0}'.format(r[2])
                 continue
             if r[0] == 'vin':
-                #过滤vin
+                # 过滤vin
                 if len(w_clause_centron_part1):
                     w_clause_centron_part1 += "and vin ilike \'%{0}%\'".format(r[2])
                 else:
@@ -396,7 +394,6 @@ class OperationResult(models.HyperModel):
         result = [self._read_group_format_result_centron(d, annotated_groupbys, groupby, domain) for d in data]
 
         return result
-
 
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=False):

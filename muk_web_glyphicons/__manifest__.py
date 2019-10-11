@@ -23,7 +23,7 @@
 {
     "name": "MuK Bootstrap Glyphicons",
     'summary': """Bootstrap Glyphicons Support""",
-    'description':"""
+    'description': """
         Odoo does not natively support the Glyphicons from Bootstrap although 
         it uses the framework. This module enables the Bootstrap Glyphicons.
         
@@ -59,5 +59,5 @@
     },
     "application": False,
     "installable": True,
-    
+
 }

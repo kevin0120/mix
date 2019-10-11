@@ -3,8 +3,9 @@
 
 from odoo import api, models, _
 
-
 rec = 0
+
+
 def autoIncrement():
     global rec
     pStart = 1
@@ -42,10 +43,12 @@ class MrpStockReport(models.TransientModel):
         elif context.get('active_id') and context.get('model') == 'stock.picking':
             context_ids = self.env['stock.picking'].browse(context['active_id']).move_lines.mapped('quant_ids')
         context.update({
-            'context_ids': context_ids or context.get('model') == 'stock.quant' and self.env[context.get('model')].browse(context.get('active_id')) or [],
+            'context_ids': context_ids or context.get('model') == 'stock.quant' and self.env[
+                context.get('model')].browse(context.get('active_id')) or [],
             'stream': stream
         })
-        res = self.with_context(context)._lines(line_id, model_id=model_id, model=model, level=level, parent_quant=parent_quant)
+        res = self.with_context(context)._lines(line_id, model_id=model_id, model=model, level=level,
+                                                parent_quant=parent_quant)
         return res
 
     @api.model
@@ -75,7 +78,7 @@ class MrpStockReport(models.TransientModel):
             'date': move.date,
             'parent_id': line_id,
             'model_id': move.id,
-            'model':'stock.move',
+            'model': 'stock.move',
             'product_id': move.product_id.display_name,
             'product_qty_uom': False,
             'location_source': move.location_id.name,
@@ -112,7 +115,7 @@ class MrpStockReport(models.TransientModel):
                 'date': quant.lot_id.name,
                 'model_id': quant.id,
                 'parent_id': line_id,
-                'model':'stock.quant',
+                'model': 'stock.quant',
                 'product_id': quant.product_id.display_name,
                 'product_qty_uom': str(quant.qty) + ' ' + quant.product_id.uom_id.name,
                 'location_source': False,
@@ -122,34 +125,42 @@ class MrpStockReport(models.TransientModel):
         return final_vals
 
     @api.model
-    def upstream_traceability(self, level, stream=False, line_id=False, model=False, model_id=False, parent_quant=False, final_vals=None):
+    def upstream_traceability(self, level, stream=False, line_id=False, model=False, model_id=False, parent_quant=False,
+                              final_vals=None):
         model_obj = self.env[model].browse(model_id)
         if model == 'stock.quant':
             for move in model_obj.history_ids.sorted(key=lambda r: r.date, reverse=True):
                 if move.production_id or move.unbuild_id:
-                    final_vals = self.make_dict_head(level, stream=stream, line_id=line_id, move=move, quant=model_obj, final_vals=final_vals)
+                    final_vals = self.make_dict_head(level, stream=stream, line_id=line_id, move=move, quant=model_obj,
+                                                     final_vals=final_vals)
                 else:
-                    final_vals = self.make_dict_move(level, stream=stream, line_id=line_id, move=move, final_vals=final_vals)
+                    final_vals = self.make_dict_move(level, stream=stream, line_id=line_id, move=move,
+                                                     final_vals=final_vals)
         else:
             if model_obj.production_id or model_obj.unbuild_id:
                 parent_quant = self.env['stock.quant'].browse(parent_quant)
                 for quant in parent_quant.consumed_quant_ids.filtered(lambda x: x.qty > 0):
-                    final_vals = self.make_dict_head(level, line_id=line_id, stream=stream, move=False, quant=quant, final_vals=final_vals)
+                    final_vals = self.make_dict_head(level, line_id=line_id, stream=stream, move=False, quant=quant,
+                                                     final_vals=final_vals)
 
     @api.model
-    def downstream_traceability(self, level, stream=False, line_id=False, model=False, model_id=False, parent_quant=False, final_vals=None):
+    def downstream_traceability(self, level, stream=False, line_id=False, model=False, model_id=False,
+                                parent_quant=False, final_vals=None):
         model_obj = self.env[model].browse(model_id)
         if model == 'stock.quant':
             for move in model_obj.history_ids.sorted(key=lambda r: r.date):
                 if move.raw_material_production_id or move.consume_unbuild_id:
-                    final_vals = self.make_dict_head(level, stream=stream, line_id=line_id, move=move, quant=model_obj, final_vals=final_vals)
+                    final_vals = self.make_dict_head(level, stream=stream, line_id=line_id, move=move, quant=model_obj,
+                                                     final_vals=final_vals)
                 else:
-                    final_vals = self.make_dict_move(level, stream=stream, line_id=line_id, move=move, final_vals=final_vals)
+                    final_vals = self.make_dict_move(level, stream=stream, line_id=line_id, move=move,
+                                                     final_vals=final_vals)
         else:
             if model_obj.raw_material_production_id or model_obj.consume_unbuild_id:
                 parent_quant = self.env['stock.quant'].browse(parent_quant)
                 for quant in parent_quant.produced_quant_ids.filtered(lambda x: x.qty > 0):
-                    final_vals = self.make_dict_head(level, stream=stream, line_id=line_id, move=False, quant=quant, final_vals=final_vals)
+                    final_vals = self.make_dict_head(level, stream=stream, line_id=line_id, move=False, quant=quant,
+                                                     final_vals=final_vals)
         return True
 
     @api.model
@@ -159,12 +170,15 @@ class MrpStockReport(models.TransientModel):
         final_vals = []
         if model:
             if context.get('stream') == "downstream" or context.get('stream') == 'downstream':
-                self.downstream_traceability(level, stream='downstream', line_id=line_id, model=model, model_id=model_id, parent_quant=parent_quant, final_vals=final_vals)
+                self.downstream_traceability(level, stream='downstream', line_id=line_id, model=model,
+                                             model_id=model_id, parent_quant=parent_quant, final_vals=final_vals)
             else:
-                self.upstream_traceability(level, stream='upstream', line_id=line_id, model=model, model_id=model_id, parent_quant=parent_quant, final_vals=final_vals)
+                self.upstream_traceability(level, stream='upstream', line_id=line_id, model=model, model_id=model_id,
+                                           parent_quant=parent_quant, final_vals=final_vals)
         else:
             for quant in context['context_ids']:
-                final_vals = self.make_dict_head(level, stream=context.get('stream', False), line_id=line_id, move=False, quant=quant, final_vals=final_vals)
+                final_vals = self.make_dict_head(level, stream=context.get('stream', False), line_id=line_id,
+                                                 move=False, quant=quant, final_vals=final_vals)
         for data in final_vals:
             lines.append({
                 'id': autoIncrement(),
@@ -196,14 +210,18 @@ class MrpStockReport(models.TransientModel):
             model = self.env[line['model_name']].browse(line['model_id'])
             if line.get('unfoldable'):
                 if line['model_name'] == 'stock.quant':
-                    final_vals = self.make_dict_head(line['level'], line_id=line['id'], move=False, quant=model, final_vals=final_vals)
+                    final_vals = self.make_dict_head(line['level'], line_id=line['id'], move=False, quant=model,
+                                                     final_vals=final_vals)
                 else:
-                    final_vals = self.make_dict_head(line['level'], line_id=line['id'], move=model, quant=False, final_vals=final_vals)
+                    final_vals = self.make_dict_head(line['level'], line_id=line['id'], move=model, quant=False,
+                                                     final_vals=final_vals)
             else:
                 if line['model_name'] == 'stock.move':
-                    final_vals = self.make_dict_move(line['level'], line_id=line['id'], move=model, final_vals=final_vals)
+                    final_vals = self.make_dict_move(line['level'], line_id=line['id'], move=model,
+                                                     final_vals=final_vals)
                 else:
-                    final_vals = self.make_dict_head(line['level'], line_id=line['id'], quant=model, final_vals=final_vals)
+                    final_vals = self.make_dict_head(line['level'], line_id=line['id'], quant=model,
+                                                     final_vals=final_vals)
         for data in final_vals:
             lines.append({
                 'id': autoIncrement(),
@@ -246,7 +264,10 @@ class MrpStockReport(models.TransientModel):
             values=dict(rcontext, subst=True, body=header),
         )
         landscape = True
-        return self.env['report']._run_wkhtmltopdf([header], [''], [(0, body)], landscape, self.env.user.company_id.paperformat_id, spec_paperformat_args={'data-report-margin-top': 10, 'data-report-header-spacing': 10})
+        return self.env['report']._run_wkhtmltopdf([header], [''], [(0, body)], landscape,
+                                                   self.env.user.company_id.paperformat_id,
+                                                   spec_paperformat_args={'data-report-margin-top': 10,
+                                                                          'data-report-header-spacing': 10})
 
     def _get_html(self):
         result = {}

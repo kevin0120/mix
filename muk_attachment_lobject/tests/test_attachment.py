@@ -34,19 +34,19 @@ from odoo.tests import common
 
 _logger = logging.getLogger(__name__)
 
+
 class AttachmentTestCase(common.TransactionCase):
-    
     at_install = False
     post_install = True
-    
+
     def setUp(self):
         super(AttachmentTestCase, self).setUp()
         self.attachment = self.env['ir.attachment'].sudo()
         self.param = self.env['ir.config_parameter'].sudo()
-        
+
     def tearDown(self):
         super(AttachmentTestCase, self).tearDown()
-    
+
     def test_attachment(self):
         self.param.set_param('ir_attachment.location', 'lobject')
         attach = self.attachment.create({

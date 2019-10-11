@@ -20,7 +20,8 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['mrp_maintenance', 'maintenance', 'mrp', 'web_domain_field', 'quality_mrp', 'web_image_editor', 'web_widget_many2many_tags_multi_selection'],
+    'depends': ['mrp_maintenance', 'maintenance', 'mrp', 'web_domain_field', 'quality_mrp', 'web_image_editor',
+                'web_widget_many2many_tags_multi_selection'],
 
     "external_dependencies": {
         "python": ['validators'],
@@ -52,7 +53,6 @@
         'views/maintenance_views.xml',
         'views/quality_views.xml',
         'report/sa_mrp_report_main.xml',
-        'report/mrp_production_pin_template.xml',
         'report/workcenter_report_template.xml',
         'report/equipment_report_template.xml',
         'report/product_product_tempaltes.xml',

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo import http, api, SUPERUSER_ID
 import json
-from odoo.http import request,Response
+from odoo.http import request, Response
 
 DEFAULT_LIMIT = 80
 

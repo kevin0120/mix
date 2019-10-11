@@ -16,30 +16,37 @@ class MaintenanceEquipment(models.Model):
     _inherit = "maintenance.equipment"
 
     expected_mtbf = fields.Integer(string='Expected MTBF', help='Expected Mean Time Between Failure')
-    mtbf = fields.Integer(compute='_compute_maintenance_request',string='MTBF', help='Mean Time Between Failure, computed based on done corrective maintenances.')
+    mtbf = fields.Integer(compute='_compute_maintenance_request', string='MTBF',
+                          help='Mean Time Between Failure, computed based on done corrective maintenances.')
     mttr = fields.Integer(compute='_compute_maintenance_request', string='MTTR', help='Mean Time To Repair')
-    estimated_next_failure = fields.Datetime(compute='_compute_maintenance_request', string='Estimated time before next failure (in days)', help='Computed as Latest Failure Date + MTBF')
+    estimated_next_failure = fields.Datetime(compute='_compute_maintenance_request',
+                                             string='Estimated time before next failure (in days)',
+                                             help='Computed as Latest Failure Date + MTBF')
     latest_failure_date = fields.Datetime(compute='_compute_maintenance_request', string='Latest Failure Date')
     workcenter_id = fields.Many2one('mrp.workcenter', string='Work Center')
 
     @api.multi
     def _compute_maintenance_request(self):
         for equipment in self:
-            maintenance_requests = equipment.maintenance_ids.filtered(lambda x: x.maintenance_type == 'corrective' and x.stage_id.done)
+            maintenance_requests = equipment.maintenance_ids.filtered(
+                lambda x: x.maintenance_type == 'corrective' and x.stage_id.done)
             mttr_days = 0
             for maintenance in maintenance_requests:
                 if maintenance.stage_id.done and maintenance.close_date:
-                    mttr_days += (fields.Date.from_string(maintenance.close_date) - fields.Date.from_string(maintenance.create_date)).days
+                    mttr_days += (fields.Date.from_string(maintenance.close_date) - fields.Date.from_string(
+                        maintenance.create_date)).days
             equipment.mttr = len(maintenance_requests) and (mttr_days / len(maintenance_requests)) or 0
 
             maintenance = maintenance_requests.sorted()
             if len(maintenance) > 1:
-                equipment.mtbf = ((fields.Date.from_string(maintenance[0].create_date) - fields.Date.from_string(maintenance[-1].create_date)).days) / (len(maintenance_requests) - 1) 
+                equipment.mtbf = ((fields.Date.from_string(maintenance[0].create_date) - fields.Date.from_string(
+                    maintenance[-1].create_date)).days) / (len(maintenance_requests) - 1)
             else:
                 equipment.mtbf = 0
             equipment.latest_failure_date = maintenance and maintenance[0].create_date or False
             if equipment.mtbf:
-                equipment.estimated_next_failure = fields.Datetime.from_string(self.latest_failure_date) + relativedelta(days=self.mtbf)
+                equipment.estimated_next_failure = fields.Datetime.from_string(
+                    self.latest_failure_date) + relativedelta(days=self.mtbf)
             else:
                 equipment.estimated_next_failure = False
 
@@ -85,7 +92,7 @@ class MrpProduction(models.Model):
             'view_mode': 'form',
             'res_model': 'maintenance.request',
             'type': 'ir.actions.act_window',
-            'context': {'default_production_id': self.id,},
+            'context': {'default_production_id': self.id, },
             'domain': [('production_id', '=', self.id)],
         }
 
@@ -98,7 +105,7 @@ class MrpProduction(models.Model):
             'view_mode': 'kanban,tree,form,pivot,graph,calendar',
             'res_model': 'maintenance.request',
             'type': 'ir.actions.act_window',
-            'context': {'default_production_id': self.id,},
+            'context': {'default_production_id': self.id, },
             'domain': [('production_id', '=', self.id)],
         }
         if self.maintenance_count == 1:
@@ -107,6 +114,7 @@ class MrpProduction(models.Model):
             action['res_id'] = production.id
         return action
 
+
 class MrpProductionWorkcenterLine(models.Model):
     _inherit = "mrp.workorder"
 
@@ -114,7 +122,8 @@ class MrpProductionWorkcenterLine(models.Model):
 
     @api.multi
     def _compute_maintenance_request(self):
-        request_data = self.env['maintenance.request'].read_group([('workorder_id', 'in', self.ids)], ['workorder_id'], ['workorder_id'])
+        request_data = self.env['maintenance.request'].read_group([('workorder_id', 'in', self.ids)], ['workorder_id'],
+                                                                  ['workorder_id'])
         result = dict((data['workorder_id'][0], data['workorder_id_count']) for data in request_data)
         for order in self:
             order.maintenance_request_count = result.get(order.id, 0)
@@ -128,7 +137,7 @@ class MrpProductionWorkcenterLine(models.Model):
             'view_mode': 'kanban,tree,form,pivot,graph,calendar',
             'res_model': 'maintenance.request',
             'type': 'ir.actions.act_window',
-            'context': {'default_workorder_id': self.id,},
+            'context': {'default_workorder_id': self.id, },
             'domain': [('workorder_id', '=', self.id)],
         }
         if self.maintenance_request_count == 1:

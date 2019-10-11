@@ -13,11 +13,9 @@ import validators
 from urlparse import urljoin
 from odoo.addons.spc.controllers.result import _post_aiis_result_package
 
-
 DEFAULT_RESULT_PUSH_LIMIT = 80
 
 DEFAULT_RESULT_PUSH_ORDER = 'control_date desc'
-
 
 _logger = logging.getLogger(__name__)
 
@@ -36,7 +34,7 @@ class PushResult(AbstractModel):
     #                 'pin_check_code': result.production_id.pin_check_code,
     #                 'assembly_line': result.production_id.assembly_line_id.code,
     #                 'lnr': result.production_id.lnr,
-    #                 'nut_no': result.consu_product_id.screw_type_code,
+    #                 'nut_no': result.consu_product_id.default_code,
     #                 'control_date': result.control_date,
     #                 'measure_result': result.measure_result.upper(),
     #                 'measure_torque': result.measure_torque,
@@ -60,7 +58,8 @@ class PushResult(AbstractModel):
     @api.multi
     def result_push(self):
         domain = [('measure_result', 'in', ['ok', 'nok'])]
-        limit = self.env['ir.config_parameter'].sudo().get_param('sa.result.push.num', default=DEFAULT_RESULT_PUSH_LIMIT)
+        limit = self.env['ir.config_parameter'].sudo().get_param('sa.result.push.num',
+                                                                 default=DEFAULT_RESULT_PUSH_LIMIT)
         results = self.env['operation.result'].sudo().search(domain, limit=limit, order=DEFAULT_RESULT_PUSH_ORDER)
         if not results:
             return True
@@ -70,5 +69,3 @@ class PushResult(AbstractModel):
         aiis_urls = _aiis_urls.split(',')
         ret = _post_aiis_result_package(aiis_urls, results)
         return True
-
-

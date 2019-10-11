@@ -17,6 +17,7 @@
 
 from openerp import api, fields, models, _
 
+
 class ResCompany(models.Model):
     _inherit = 'res.company'
 

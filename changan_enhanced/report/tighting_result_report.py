@@ -8,6 +8,7 @@ from itertools import groupby
 
 MAX_RESULT = 5000
 
+
 class ReportTightResultReport(models.AbstractModel):
     _inherit = 'report.spc.report_result_tighting'
 
@@ -39,9 +40,9 @@ class ReportTightResultReport(models.AbstractModel):
         query = '''select tb.vin, json_agg(json_build_array(tb.control_date, tb.job, tb.measure_result))
                 from (select ors.vin as vin, ors.control_date as control_date, ors.measure_result as measure_result, ors.job as job from operation_result ors where ors.control_date >= '%s' and ors.control_date <= '%s' order by ors.control_date) tb
                 group by tb.vin''' % (
-                    date_from,
-                    date_to
-                )
+            date_from,
+            date_to
+        )
 
         cr = self._cr
         cr.execute(query)

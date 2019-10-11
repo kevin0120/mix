@@ -36,4 +36,3 @@ class StockReportController(http.Controller):
                 'data': se
             }
             return request.make_response(html_escape(json.dumps(error)))
-

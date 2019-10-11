@@ -42,7 +42,8 @@ class QualityCheck(models.Model):
     _inherit = "sa.quality.check"
 
     workorder_id = fields.Many2one('mrp.workorder', 'Operation')
-    workcenter_id = fields.Many2one('mrp.workcenter', related='workorder_id.workcenter_id', store=True, readonly=True)  # TDE: necessary ?
+    workcenter_id = fields.Many2one('mrp.workcenter', related='workorder_id.workcenter_id', store=True,
+                                    readonly=True)  # TDE: necessary ?
     production_id = fields.Many2one('mrp.production', 'Production Order')
 
     @api.multi

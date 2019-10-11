@@ -30,8 +30,8 @@ from odoo.tools import ustr, human_size
 
 _logger = logging.getLogger(__name__)
 
-
 unlink = models.BaseModel.unlink
+
 
 def large_object_unlink(self):
     oids = []
@@ -43,5 +43,6 @@ def large_object_unlink(self):
     unlink(self)
     for oid in oids:
         lobject = self.env.cr._cnx.lobject(oid, 'rb').unlink()
-    
+
+
 models.BaseModel.unlink = large_object_unlink

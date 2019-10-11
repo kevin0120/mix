@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from odoo import http, fields,api, SUPERUSER_ID
+from odoo import http, fields, api, SUPERUSER_ID
 import json
-from odoo.http import request,Response
+from odoo.http import request, Response
 import re
 
 import werkzeug.utils
@@ -13,8 +13,8 @@ import os
 
 DEFAULT_LIMIT = 80
 
-class OperationView(http.Controller):
 
+class OperationView(http.Controller):
 
     def placeholder(self, image='placeholder.png'):
         addons_path = http.addons_manifest['web']['addons_path']
@@ -25,11 +25,12 @@ class OperationView(http.Controller):
         dictheaders['Content-Type'] = contenttype
         return dictheaders.items()
 
-    @http.route('/api/v1/mrp.routing.workcenter/<int:operation_id>/edit', type='json', methods=['PUT', 'OPTIONS'], auth='none', cors='*', csrf=False)
+    @http.route('/api/v1/mrp.routing.workcenter/<int:operation_id>/edit', type='json', methods=['PUT', 'OPTIONS'],
+                auth='none', cors='*', csrf=False)
     def _edit(self, operation_id=None):
         pattern = re.compile(r"^data:image/(.+);base64,(.+)", re.DOTALL)
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
-        operation = env['mrp.routing.workcenter'].search([('id', '=', operation_id)],limit=1)
+        operation = env['mrp.routing.workcenter'].search([('id', '=', operation_id)], limit=1)
         if not operation:
             body = json.dumps({'msg': "Operation %d not existed" % operation_id})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
@@ -62,7 +63,7 @@ class OperationView(http.Controller):
                 return Response(body, status=405, headers=headers)
 
             current_points = env['operation.point'].search([('operation_id', '=', operation_id)])
-            points_map = {i.id:i for i in current_points}
+            points_map = {i.id: i for i in current_points}
 
             for val in points:
                 point_id = env['operation.point'].search([('operation_id', '=', operation_id),
@@ -92,10 +93,11 @@ class OperationView(http.Controller):
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=200, headers=headers)
 
-    @http.route('/api/v1/mrp.routing.workcenter/<int:operation_id>/points_edit', type='json', methods=['PUT', 'OPTIONS'], auth='none', cors='*', csrf=False)
+    @http.route('/api/v1/mrp.routing.workcenter/<int:operation_id>/points_edit', type='json',
+                methods=['PUT', 'OPTIONS'], auth='none', cors='*', csrf=False)
     def _edit_points(self, operation_id=None):
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
-        operation = env['mrp.routing.workcenter'].search([('id', '=', operation_id)],limit=1)
+        operation = env['mrp.routing.workcenter'].search([('id', '=', operation_id)], limit=1)
         if not operation:
             body = json.dumps({'msg': "Operation %d not existed" % operation_id})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
@@ -108,7 +110,7 @@ class OperationView(http.Controller):
                 return Response(body, status=405, headers=headers)
 
             current_points = env['operation.point'].search([('operation_id', '=', operation_id)])
-            points_map = {i.id:i for i in current_points}
+            points_map = {i.id: i for i in current_points}
 
             for val in points:
                 point_id = env['operation.point'].search([('operation_id', '=', operation_id),
@@ -151,8 +153,9 @@ class OperationView(http.Controller):
         mimetype = None
         default_mimetype = 'application/octet-stream',
         status, headers, content = env['ir.http'].binary_content(model=model, id=id, field=field, filename=filename,
-            filename_field=filename_field, unique=unique,
-            download=download, mimetype=mimetype, default_mimetype=default_mimetype, env=env)
+                                                                 filename_field=filename_field, unique=unique,
+                                                                 download=download, mimetype=mimetype,
+                                                                 default_mimetype=default_mimetype, env=env)
         if status == 304:
             return werkzeug.wrappers.Response(status=304, headers=headers)
         elif status == 301:
@@ -168,7 +171,8 @@ class OperationView(http.Controller):
                 width = 500
             if height > 500:
                 height = 500
-            content = odoo.tools.image_resize_image(base64_source=content, size=(width or None, height or None), encoding='base64', filetype='PNG')
+            content = odoo.tools.image_resize_image(base64_source=content, size=(width or None, height or None),
+                                                    encoding='base64', filetype='PNG')
             # resize force png as filetype
             headers = self.force_contenttype(headers, contenttype='image/png')
 
@@ -183,9 +187,8 @@ class OperationView(http.Controller):
         response.status_code = status
         return response
 
-
-
-    @http.route(['/api/v1/mrp.routing.workcenter/<int:operation_id>', '/api/v1/mrp.routing.workcenter'], type='http', methods=['GET'], auth='none', cors='*', csrf=False)
+    @http.route(['/api/v1/mrp.routing.workcenter/<int:operation_id>', '/api/v1/mrp.routing.workcenter'], type='http',
+                methods=['GET'], auth='none', cors='*', csrf=False)
     def _get_operations(self, operation_id=None, **kw):
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         if operation_id:
@@ -205,8 +208,10 @@ class OperationView(http.Controller):
 
                 val = {
                     "id": operation_id,
-                    "name": u"[{0}]{1}@{2}/{3}".format(operation.name, operation.group_id.code, operation.workcenter_id.name, operation.routing_id.name),
-                    "img": u'data:{0};base64,{1}'.format('image/png', operation.worksheet_img) if operation.worksheet_img else "",
+                    "name": u"[{0}]{1}@{2}/{3}".format(operation.name, operation.group_id.code,
+                                                       operation.workcenter_id.name, operation.routing_id.name),
+                    "img": u'data:{0};base64,{1}'.format('image/png',
+                                                         operation.worksheet_img) if operation.worksheet_img else "",
                     # "worksheet": u'data:{0};base64,{1}'.format('application/pdf', operation.worksheet) if operation.worksheet else "",
                     "points": _points
                 }
@@ -225,8 +230,6 @@ class OperationView(http.Controller):
             operations = env['mrp.routing.workcenter'].search(domain, limit=limit)
             vals = []
 
-
-
             for operation in operations:
                 # _points = []
                 # for point in operation.operation_point_ids:
@@ -241,7 +244,7 @@ class OperationView(http.Controller):
                     for bom in boms:
                         vals.append({
                             'id': operation.id,
-                            'name': u"{0}@{1}".format(bom.product_id.vehicle_type_code, operation.name),
+                            'name': u"{0}@{1}".format(bom.product_id.default_code, operation.name),
                         })
 
             body = json.dumps(vals)

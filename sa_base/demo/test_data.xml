@@ -7,7 +7,7 @@
             <field name="code">01</field>
         </record>
 
-        <record id="work_segment_1" model="mrp.worksegament">
+        <record id="work_segment_1" model="mrp.worksection">
             <field name="name">测试工段1</field>
             <field name="code">测试工段1</field>
         </record>
@@ -209,28 +209,28 @@
             <field name="name">测试螺栓1</field>
             <field name="type">product</field>
             <field name="sa_type">screw</field>
-            <field name="screw_type_code">测试螺栓编号1</field>
+            <field name="default_code">测试螺栓编号1</field>
         </record>
 
         <record id="product_product_1" model="product.product">
             <field name="name">测试螺栓2</field>
             <field name="type">product</field>
             <field name="sa_type">screw</field>
-            <field name="screw_type_code">测试螺栓编号2</field>
+            <field name="default_code">测试螺栓编号2</field>
         </record>
 
         <record id="product_product_2" model="product.product">
             <field name="name">测试螺栓3</field>
             <field name="type">product</field>
             <field name="sa_type">screw</field>
-            <field name="screw_type_code">测试螺栓编号3</field>
+            <field name="default_code">测试螺栓编号3</field>
         </record>
 
         <record id="product_product_3" model="product.product">
             <field name="name">测试螺栓4</field>
             <field name="type">product</field>
             <field name="sa_type">screw</field>
-            <field name="screw_type_code">测试螺栓编号4</field>
+            <field name="default_code">测试螺栓编号4</field>
         </record>
 
         <record id="con_prog_0" model="controller.program">
@@ -399,7 +399,7 @@
             <field name="name">测试车辆2</field>
             <field name="type">product</field>
             <field name="sa_type">vehicle</field>
-            <field name="vehicle_type_code">BR24J3</field>
+            <field name="default_code">BR24J3</field>
             <field name="product_tmpl_id" ref="product_template_47"/>
         </record>
 

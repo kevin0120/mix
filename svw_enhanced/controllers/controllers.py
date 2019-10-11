@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from odoo import http, fields,api, SUPERUSER_ID
+from odoo import http, fields, api, SUPERUSER_ID
 import json
-from odoo.http import request,Response
+from odoo.http import request, Response
 from odoo.addons.spc.controllers.workorder import ApiMrpWorkorder, str_time_to_rfc3339
 import requests as Requests
 from requests import ConnectionError, RequestException
@@ -15,7 +15,6 @@ logger = logging.getLogger(__name__)
 DEFAULT_LIMIT = 80
 
 DEFAULT_ORDER_BY = 'production_date DESC'
-
 
 URGE_REQ_URL = '/aiis/v1/fis.urgs'
 
@@ -34,7 +33,7 @@ def urgent_request_mo(urls, longpin):
             }
             ret = Requests.post(u, data=json.dumps(data), headers={'Content-Type': 'application/json'}, timeout=2)
             if ret.status_code == 201:
-                logger.info(u"快速请求创建longpin:{0}生产订单成功",longpin)
+                logger.info(u"快速请求创建longpin:{0}生产订单成功", longpin)
                 ret = True
         except ConnectionError:
             logger.debug(u"快速请求创建longpin:{0} ConnectionError", longpin)
@@ -68,8 +67,8 @@ class SvwExhanced(ApiMrpWorkorder):
                 for consu in order.consu_bom_line_ids:
                     # 定位消耗品的qcp
                     _qcps = env['sa.quality.point'].search([('bom_line_id', '=', consu.bom_line_id.id),
-                                                         ('operation_id', '=', order.operation_id.id)],
-                                                        limit=1)
+                                                            ('operation_id', '=', order.operation_id.id)],
+                                                           limit=1)
 
                     _consumes.append({
                         "sequence": consu.bom_line_id.operation_point_id.sequence,
@@ -78,7 +77,7 @@ class SvwExhanced(ApiMrpWorkorder):
                         'offset_x': consu.bom_line_id.operation_point_id.x_offset,
                         'offset_y': consu.bom_line_id.operation_point_id.y_offset,
                         "pset": consu.bom_line_id.program_id.code,
-                        "nut_no": consu.product_id.screw_type_code,
+                        "nut_no": consu.product_id.default_code,
                         "gun_sn": consu.bom_line_id.gun_id.serial_no,
                         "controller_sn": consu.bom_line_id.controller_id.serial_no,
                         'tolerance_min': _qcps.tolerance_min if _qcps else 0.0,
@@ -114,9 +113,9 @@ class SvwExhanced(ApiMrpWorkorder):
                 'pin_check_code': order.production_id.pin_check_code,
                 'assembly_line': order.production_id.assembly_line_id.code,
                 'lnr': order.production_id.lnr,
-                # 'nut_no': order.consu_product_id.screw_type_code,
+                # 'nut_no': order.consu_product_id.default_code,
                 'consumes': _consumes,
-                'model': order.production_id.product_id.vehicle_type_code,
+                'model': order.production_id.product_id.default_code,
                 'update_time': str_time_to_rfc3339(order.production_date)
             }
             body = json.dumps(ret)
@@ -192,8 +191,8 @@ class SvwExhanced(ApiMrpWorkorder):
                 for consu in order.consu_bom_line_ids:
                     # 定位消耗品的qcp
                     _qcps = env['sa.quality.point'].search([('bom_line_id', '=', consu.bom_line_id.id),
-                                                         ('operation_id', '=', order.operation_id.id)],
-                                                        limit=1)
+                                                            ('operation_id', '=', order.operation_id.id)],
+                                                           limit=1)
 
                     _consumes.append({
                         "sequence": consu.bom_line_id.operation_point_id.sequence,
@@ -202,7 +201,7 @@ class SvwExhanced(ApiMrpWorkorder):
                         'offset_x': consu.bom_line_id.operation_point_id.x_offset,
                         'offset_y': consu.bom_line_id.operation_point_id.y_offset,
                         "pset": consu.bom_line_id.program_id.code,
-                        "nut_no": consu.product_id.screw_type_code,
+                        "nut_no": consu.product_id.default_code,
                         "gun_sn": consu.bom_line_id.gun_id.serial_no,
                         "controller_sn": consu.bom_line_id.controller_id.serial_no,
                         'tolerance_min': _qcps.tolerance_min if _qcps else 0.0,
@@ -238,9 +237,9 @@ class SvwExhanced(ApiMrpWorkorder):
                 'pin_check_code': order.production_id.pin_check_code,
                 'assembly_line': order.production_id.assembly_line_id.code,
                 'lnr': order.production_id.lnr,
-                # 'nut_no': order.consu_product_id.screw_type_code,
+                # 'nut_no': order.consu_product_id.default_code,
                 'consumes': _consumes,
-                'model': order.production_id.product_id.vehicle_type_code,
+                'model': order.production_id.product_id.default_code,
                 'update_time': str_time_to_rfc3339(order.production_date)
             })
         if len(_ret) == 0:

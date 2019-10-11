@@ -26,28 +26,28 @@ from odoo.exceptions import ValidationError, AccessError, UserError
 
 from odoo.addons.muk_dms.models import dms_base
 
+
 class AccessDirectory(dms_base.DMSModel):
-    
     _inherit = 'muk_dms.directory'
-    
-    #----------------------------------------------------------
+
+    # ----------------------------------------------------------
     # Functions
-    #----------------------------------------------------------
-    
+    # ----------------------------------------------------------
+
     def trigger_computation(self, fields, refresh=True, operation=None):
         super(AccessDirectory, self).trigger_computation(fields, refresh, operation)
         values = {}
         if "complete_groups" in fields:
             values.update(self.with_context(operation=operation)._compute_groups(write=False))
         if values:
-            self.write(values);   
+            self.write(values);
             if "complete_groups" in fields:
                 self.trigger_computation_down(fields, operation)
-    
-    #----------------------------------------------------------
+
+    # ----------------------------------------------------------
     # Read, View 
-    #----------------------------------------------------------
-    
+    # ----------------------------------------------------------
+
     def _compute_groups(self, write=True):
         def get_groups(record):
             groups = record.env['muk_dms_access.groups']
@@ -55,17 +55,18 @@ class AccessDirectory(dms_base.DMSModel):
                 groups |= record.parent_directory.complete_groups
             groups |= record.groups
             return groups
+
         if write:
             for record in self:
                 record.users = get_groups(record)
         else:
             self.ensure_one()
             return {'complete_groups': [(6, 0, get_groups(self).mapped('id'))]}
-        
-    #----------------------------------------------------------
+
+    # ----------------------------------------------------------
     # Create, Write 
-    #----------------------------------------------------------
-    
+    # ----------------------------------------------------------
+
     def _check_recomputation(self, values, operation=None):
         super(AccessDirectory, self)._check_recomputation(values, operation)
         fields = []
@@ -73,4 +74,3 @@ class AccessDirectory(dms_base.DMSModel):
             fields.extend(['complete_groups'])
         if fields:
             self.trigger_computation(fields, operation=operation)
-        

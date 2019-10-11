@@ -17,8 +17,8 @@
             <tbody>
                 <tr style="width: 1in;">
                     <td style="border: 2px solid black;text-align: center; vertical-align: middle;" class="col-xs-5">
-                        <img t-if="product.vehicle_type_code" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', product.vehicle_type_code, 600, 150)" style="width:100%;height:20%;"/>
-                        <span t-field="product.vehicle_type_code"/>
+                        <img t-if="product.default_code" t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', product.default_code, 600, 150)" style="width:100%;height:20%;"/>
+                        <span t-field="product.default_code"/>
                     </td>
                     <!--<td style="border: 2px solid black; text-align: center;" class="col-xs-7">-->
                         <!--<h4>-->

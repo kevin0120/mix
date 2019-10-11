@@ -2,7 +2,7 @@
 
 from odoo import models, fields, api, _, SUPERUSER_ID
 
-from odoo.exceptions import UserError,ValidationError
+from odoo.exceptions import UserError, ValidationError
 
 import requests as Requests
 
@@ -42,7 +42,8 @@ class MrpRoutingWorkcenter(models.Model):
                                                 string='Operation Points Group(multi-spindle)')
 
     group_id = fields.Many2one('mrp.routing.group', string='Routing Group')
-    max_redo_times = fields.Integer('Operation Max Redo Times', default=3, track_visibility="onchange")  # 此项重试业务逻辑在HMI中实现
+    max_redo_times = fields.Integer('Operation Max Redo Times', default=3,
+                                    track_visibility="onchange")  # 此项重试业务逻辑在HMI中实现
 
     worksheet_img = fields.Binary('worksheet_img')
 
@@ -84,7 +85,7 @@ class MrpRoutingWorkcenter(models.Model):
     def _push_mrp_routing_workcenter(self, url):
         self.ensure_one()
         operation_id = self
-        bom_ids = self.env['mrp.bom'].search([('operation_ids', 'in', operation_id.ids)])
+        bom_ids = self.env['mrp.bom'].search([('operation_ids', 'in', operation_id.ids), ('active', '= ', True)])
         if not bom_ids:
             return
         _points = []
@@ -104,7 +105,7 @@ class MrpRoutingWorkcenter(models.Model):
                 # 'tolerance_min_degree': qcp.tolerance_min_degree,
                 # 'tolerance_max_degree': qcp.tolerance_max_degree,
                 'consu_product_id': point.product_id.id if point.product_id.id else 0,
-                'nut_no': point.product_id.screw_type_code if point.product_id else '',
+                'nut_no': point.product_id.default_code if point.product_id else '',
             })
 
         for bom_id in bom_ids:
@@ -119,7 +120,7 @@ class MrpRoutingWorkcenter(models.Model):
                 "img": u'data:{0};base64,{1}'.format('image/png',
                                                      operation_id.worksheet_img) if operation_id.worksheet_img else "",
                 "product_id": bom_id.product_id.id if bom_id else 0,
-                "product_type": bom_id.product_id.vehicle_type_code if bom_id else "",
+                "product_type": bom_id.product_id.default_code if bom_id else "",
                 "workcenter_code": operation_id.workcenter_id.code if operation_id.workcenter_id else "",
                 'vehicleTypeImg': u'data:{0};base64,{1}'.format('image/png',
                                                                 bom_id.product_id.image_small) if bom_id.product_id.image_small else "",
@@ -143,14 +144,15 @@ class MrpRoutingWorkcenter(models.Model):
             master = operation.workcenter_id.masterpc_id if operation.workcenter_id else None
             if not master:
                 continue
-            connections = master.connection_ids.filtered(lambda r: r.protocol == 'http') if master.connection_ids else None
+            connections = master.connection_ids.filtered(
+                lambda r: r.protocol == 'http') if master.connection_ids else None
             if not connections:
                 continue
-            url = ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_WROKORDERS_API) for connect in connections][0]
+            url = \
+            ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_WROKORDERS_API) for connect in connections][0]
 
             operation._push_mrp_routing_workcenter(url)
         return True
-
 
     @api.multi
     def get_operation_points(self):
@@ -187,14 +189,15 @@ class MrpRoutingWorkcenter(models.Model):
         for idx, point in enumerate(self.operation_point_ids.sorted(key=lambda r: r.group_sequence)):
             point.write({'sequence': idx + 1})
 
-
     @api.multi
     def unlink(self):
         raise ValidationError(u'不允许删除作业')
 
     @api.multi
     def name_get(self):
-        return [(operation.id, u"[{0}]{1}@{2}/{3}".format(operation.name, operation.group_id.code, operation.workcenter_id.name, operation.routing_id.name)) for operation in self]  # 强制可视化时候名称显示的是code
+        return [(operation.id,
+                 u"[{0}]{1}@{2}/{3}".format(operation.name, operation.group_id.code, operation.workcenter_id.name,
+                                            operation.routing_id.name)) for operation in self]  # 强制可视化时候名称显示的是code
 
 
 class MrpPR(models.Model):

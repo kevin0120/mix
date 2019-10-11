@@ -3,10 +3,10 @@
 
 from .test_common import TestQualityMrpCommon
 
+
 class TestQualityCheck(TestQualityMrpCommon):
 
     def test_00_production_quality_check(self):
-
         """Test quality check on production order."""
 
         # Create Quality Point for product Laptop Customized with Manufacturing Picking Type.
@@ -32,7 +32,9 @@ class TestQualityCheck(TestQualityMrpCommon):
 
         # Perform check availability and produce product.
         self.mrp_production_qc_test1.action_assign()
-        produce_wiz = self.env['mrp.product.produce'].with_context(active_id=self.mrp_production_qc_test1.id).create({'product_qty': self.mrp_production_qc_test1.product_qty, 'lot_id': self.env.ref('mrp.lot_product_27_0').id})
+        produce_wiz = self.env['mrp.product.produce'].with_context(active_id=self.mrp_production_qc_test1.id).create(
+            {'product_qty': self.mrp_production_qc_test1.product_qty,
+             'lot_id': self.env.ref('mrp.lot_product_27_0').id})
         produce_wiz.consume_line_ids.write({'quantity_done': produce_wiz.product_qty})
         produce_wiz.do_produce()
 

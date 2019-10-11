@@ -21,7 +21,8 @@ class MrpProductionWorkcenterLine(models.Model):
 
     @api.multi
     def _compute_alert_count(self):
-        alert_data = self.env['sa.quality.alert'].read_group([('operation_id', 'in', self.ids)], ['operation_id'], ['operation_id'])
+        alert_data = self.env['sa.quality.alert'].read_group([('operation_id', 'in', self.ids)], ['operation_id'],
+                                                             ['operation_id'])
         result = dict((data['operation_id'][0], data['operation_id_count']) for data in alert_data)
         for order in self:
             order.alert_count = result.get(order.id, 0)
@@ -54,7 +55,8 @@ class MrpProductionWorkcenterLine(models.Model):
         action_rec = self.env.ref('quality.quality_alert_action_team')
         if action_rec:
             action = action_rec.read([])[0]
-            action['views'] = [(view_id, mode) for (view_id, mode) in action['views'] if mode == 'form'] or action['views']
+            action['views'] = [(view_id, mode) for (view_id, mode) in action['views'] if mode == 'form'] or action[
+                'views']
             action['context'] = {
                 'default_product_id': self.product_id.id,
                 'default_product_tmpl_id': self.product_id.product_tmpl_id.id,
@@ -67,17 +69,18 @@ class MrpProductionWorkcenterLine(models.Model):
     def _create_checks(self):
         for wo in self:
             production = wo.production_id
-            points = self.env['sa.quality.point'].search([('workcenter_id', '=', wo.workcenter_id.id), 
-                                                       ('picking_type_id', '=', production.picking_type_id.id),
-                                                       '|', ('product_id', '=', production.product_id.id), 
-                                                       '&', ('product_id', '=', False), ('product_tmpl_id', '=', production.product_id.product_tmpl_id.id)])
+            points = self.env['sa.quality.point'].search([('workcenter_id', '=', wo.workcenter_id.id),
+                                                          ('picking_type_id', '=', production.picking_type_id.id),
+                                                          '|', ('product_id', '=', production.product_id.id),
+                                                          '&', ('product_id', '=', False), ('product_tmpl_id', '=',
+                                                                                            production.product_id.product_tmpl_id.id)])
             for point in points:
                 if point.check_execute_now():
                     self.env['sa.quality.check'].create({'workorder_id': wo.id,
-                                                  'point_id': point.id,
-                                                  'team_id': point.team_id.id,
-                                                  'product_id': production.product_id.id,
-                                                 })
+                                                         'point_id': point.id,
+                                                         'team_id': point.team_id.id,
+                                                         'product_id': production.product_id.id,
+                                                         })
 
     @api.multi
     def record_production(self):
@@ -85,7 +88,7 @@ class MrpProductionWorkcenterLine(models.Model):
         if any([(x.quality_state == 'none') for x in self.check_ids]):
             raise UserError(_('You still need to do the quality checks!'))
         if self.check_ids:
-            #Check if you can attribute the lot to the checks
+            # Check if you can attribute the lot to the checks
             if (self.production_id.product_id.tracking != 'none') and self.final_lot_id:
                 checks_to_assign = self.check_ids.filtered(lambda x: not x.lot_id)
                 if checks_to_assign:

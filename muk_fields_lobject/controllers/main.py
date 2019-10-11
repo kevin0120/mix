@@ -25,7 +25,7 @@ import hashlib
 import mimetypes
 
 from werkzeug import utils
-from  werkzeug import wrappers
+from werkzeug import wrappers
 
 from odoo import _
 from odoo import tools
@@ -36,15 +36,16 @@ from odoo.exceptions import AccessError
 
 _logger = logging.getLogger(__name__)
 
+
 class LargeObjectController(http.Controller):
 
     @http.route(['/web/content',
-        '/web/lobject/<string:xmlid>',
-        '/web/lobject/<string:xmlid>/<string:filename>',
-        '/web/lobject/<int:id>',
-        '/web/lobject/<int:id>/<string:filename>',
-        '/web/lobject/<string:model>/<int:id>/<string:field>',
-        '/web/lobject/<string:model>/<int:id>/<string:field>/<string:filename>'], type='http', auth="public")
+                 '/web/lobject/<string:xmlid>',
+                 '/web/lobject/<string:xmlid>/<string:filename>',
+                 '/web/lobject/<int:id>',
+                 '/web/lobject/<int:id>/<string:filename>',
+                 '/web/lobject/<string:model>/<int:id>/<string:field>',
+                 '/web/lobject/<string:model>/<int:id>/<string:field>/<string:filename>'], type='http', auth="public")
     def content_common(self, xmlid=None, model='ir.attachment', id=None, field='datas', filename=None,
                        filename_field='datas_fname', mimetype=None, download=None, access_token=None):
         obj = None
@@ -76,4 +77,3 @@ class LargeObjectController(http.Controller):
         if download:
             headers.append(('Content-Disposition', http.content_disposition(filename)))
         return wrappers.Response(content, headers=headers, direct_passthrough=True, status=status)
-        

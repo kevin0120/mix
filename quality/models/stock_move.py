@@ -35,7 +35,8 @@ class StockMove(models.Model):
             quality_points = self.env['sa.quality.point'].sudo().search([
                 ('picking_type_id', '=', picking.picking_type_id.id),
                 '|', ('product_id', 'in', moves.mapped('product_id').ids),
-                '&', ('product_id', '=', False), ('product_tmpl_id', 'in', moves.mapped('product_id').mapped('product_tmpl_id').ids)])
+                '&', ('product_id', '=', False),
+                ('product_tmpl_id', 'in', moves.mapped('product_id').mapped('product_tmpl_id').ids)])
             for point in quality_points:
                 if point.check_execute_now():
                     if point.product_id:
@@ -51,7 +52,8 @@ class StockMove(models.Model):
                         })
                         quality_points_list.add(point_key)
                     else:
-                        products = picking.move_lines.filtered(lambda move: move.product_id.product_tmpl_id == point.product_tmpl_id).mapped('product_id')
+                        products = picking.move_lines.filtered(
+                            lambda move: move.product_id.product_tmpl_id == point.product_tmpl_id).mapped('product_id')
                         for product in products:
                             point_key = (picking.id, point.id, point.team_id.id, product.id)
                             if point_key in quality_points_list:

@@ -9,3 +9,5 @@ access_operation_point_group_user,sa_operation_point_group.user,model_operation_
 access_operation_point_group_manager,sa_operation_point_group.manager,model_operation_point_group,maintenance.group_equipment_manager,1,1,1,1
 access_operation_point_user,sa_operation_point.user,model_operation_point,base.group_user,1,0,0,0
 access_operation_point_manager,sa_operation_point.manager,model_operation_point,maintenance.group_equipment_manager,1,1,1,1
+access_mrp_worksection_user,sa_mrp_worksection.user,model_mrp_worksection,base.group_user,1,0,0,0
+access_operation_point_manager,sa_mrp_worksection.manager,model_mrp_worksection,maintenance.group_equipment_manager,1,1,1,1

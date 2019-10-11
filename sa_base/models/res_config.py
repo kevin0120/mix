@@ -11,7 +11,7 @@ class SAConfiguration(models.TransientModel):
     generate_result_sequence = fields.Selection([
         (0, "Set Sequence by Operation(default)"),
         (1, "Set Sequence by Per Vehicle")
-        ], string="Result Sequences")
+    ], string="Result Sequences")
 
     auto_operation_inherit = fields.Selection([
         (0, "un auto operation inherit(default)"),
@@ -42,4 +42,5 @@ class SAConfiguration(models.TransientModel):
         check = self.env.user.has_group('base.group_system')
         Values = check and self.env['ir.values'].sudo() or self.env['ir.values']
         for config in self:
-            Values.set_default('sa.config.settings', 'auto_operation_point_inherit', config.auto_operation_point_inherit)
+            Values.set_default('sa.config.settings', 'auto_operation_point_inherit',
+                               config.auto_operation_point_inherit)

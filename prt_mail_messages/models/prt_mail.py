@@ -36,7 +36,7 @@ class PRTMailMessage(models.Model):
                                        compute='_message_followers')
     ref_partner_count = fields.Integer(string="Followers", compute='_ref_partner_count')
 
-# -- Count ref Partners
+    # -- Count ref Partners
     @api.multi
     def _ref_partner_count(self):
         for rec in self:
@@ -46,19 +46,20 @@ class PRTMailMessage(models.Model):
     Sometimes user has access to record but does not have access to author or recipients.
     Below is a workaround for author, recipient and followers
     """
-# -- Get allowed author
+
+    # -- Get allowed author
     @api.depends('author_id')
     @api.multi
     def _get_author_allowed(self):
         for rec in self:
-                author_id = rec.author_id
-                try:
-                    author_id.check_access_rule('read')
-                    rec.author_allowed_id = author_id
-                except:
-                    continue
+            author_id = rec.author_id
+            try:
+                author_id.check_access_rule('read')
+                rec.author_allowed_id = author_id
+            except:
+                continue
 
-# -- Get allowed recipients
+    # -- Get allowed recipients
     @api.depends('partner_ids')
     @api.multi
     def _get_partners_allowed(self):
@@ -72,15 +73,16 @@ class PRTMailMessage(models.Model):
                     continue
             rec.partner_allowed_ids = recipients_allowed
 
-# -- Search allowed authors
+    # -- Search allowed authors
     @api.model
     def _search_author_allowed(self, operator, value):
         return [('author_id', operator, value)]
 
-# -- Get related record followers
+    # -- Get related record followers
     """
     Check if model has 'followers' field and user has access to followers
     """
+
     @api.depends('record_ref')
     @api.multi
     def _message_followers(self):
@@ -96,13 +98,12 @@ class PRTMailMessage(models.Model):
                             continue
                     rec.ref_partner_ids = followers_allowed
 
-
-# -- Dummy
+    # -- Dummy
     @api.multi
     def dummy(self):
         return
 
-# -- Get Subject for tree view
+    # -- Get Subject for tree view
     @api.depends('subject')
     @api.multi
     def _subject_display(self):
@@ -138,28 +139,28 @@ class PRTMailMessage(models.Model):
             # Set subject
             rec.subject_display = subject_display
 
-# -- Get Author for tree view
+    # -- Get Author for tree view
     @api.depends('author_allowed_id')
     @api.multi
     def _author_display(self):
         for rec in self:
             rec.author_display = rec.author_allowed_id.name if rec.author_allowed_id else rec.email_from
 
-# -- Count recipients
+    # -- Count recipients
     @api.depends('partner_allowed_ids')
     @api.multi
     def _partner_count(self):
         for rec in self:
             rec.partner_count = len(rec.partner_allowed_ids)
 
-# -- Count attachments
+    # -- Count attachments
     @api.depends('attachment_ids')
     @api.multi
     def _attachment_count(self):
         for rec in self:
             rec.attachment_count = len(rec.attachment_ids)
 
-# -- Count messages in same thread
+    # -- Count messages in same thread
     @api.depends('res_id')
     @api.multi
     def _thread_messages_count(self):
@@ -169,7 +170,7 @@ class PRTMailMessage(models.Model):
                                                            ('res_id', '=', rec.res_id),
                                                            ('message_type', '!=', 'notification')])
 
-# -- Ref models
+    # -- Ref models
     @api.model
     def _referenceable_models(self):
         # return [(x.model, x.name) for x in self.env['ir.model'].sudo().search([('model', '!=', 'mail.channel')])]
@@ -178,7 +179,7 @@ class PRTMailMessage(models.Model):
         """
         return [(x.model, x.name) for x in self.env['ir.model'].sudo().search([('transient', '=', False)])]
 
-# -- Compose reference
+    # -- Compose reference
     @api.depends('res_id')
     @api.multi
     def _record_ref(self):
@@ -189,8 +190,7 @@ class PRTMailMessage(models.Model):
                     if res:
                         rec.record_ref = res
 
-
-# -- Open messages of the same thread
+    # -- Open messages of the same thread
     @api.multi
     def thread_messages(self):
         self.ensure_one()
@@ -212,7 +212,7 @@ class PRTMailMessage(models.Model):
             'domain': [('message_type', '!=', 'notification'), ('model', '=', self.model), ('res_id', '=', self.res_id)]
         }
 
-# -- Override _search
+    # -- Override _search
     """
     mail.message overrides generic '_search' defined in 'model' to implement own logic for message access rights.
     However sometimes it does not work as expected.
@@ -220,11 +220,13 @@ class PRTMailMessage(models.Model):
     Following keys in context are used:
         - 'check_messages_access': if not set legacy 'search' is performed
     """
+
     @api.model
     def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
 
         if not self._context.get('check_messages_access', False):
-            return super(PRTMailMessage, self)._search(args=args, offset=offset, limit=limit, order=order, count=count, access_rights_uid=access_rights_uid)
+            return super(PRTMailMessage, self)._search(args=args, offset=offset, limit=limit, order=order, count=count,
+                                                       access_rights_uid=access_rights_uid)
 
         query = self._where_calc(args)
         self._apply_ir_rules(query, 'read')
@@ -256,7 +258,7 @@ class PRTMailMessage(models.Model):
 
         return _uniquify_list([x[0] for x in res])
 
-# -- Override read
+    # -- Override read
     """
     Avoid access rights check implemented in original mail.message
     Will check them later in "search"
@@ -264,6 +266,7 @@ class PRTMailMessage(models.Model):
         Following keys in context are used:
         - 'check_messages_access': if not set legacy 'search' is performed
     """
+
     @api.multi
     def read(self, fields=None, load='_classic_read'):
 
@@ -307,7 +310,7 @@ class PRTMailMessage(models.Model):
 
         return result
 
-# -- Override Search
+    # -- Override Search
     """
     Mail message access rights/rules checked must be done based on the access rights/rules of the message record.
     As a workaround we are using 'search' method to filter messages from unavailable records.
@@ -318,6 +321,7 @@ class PRTMailMessage(models.Model):
     - 'check_messages_access': if not set legacy 'search' is performed
     - 'force_record_reset': in case message refers to non-existing (e.g. removed) record model and res_id will be set NULL
     """
+
     @api.model
     def search(self, args, offset=0, limit=None, order=None, count=False):
 
@@ -362,7 +366,8 @@ class PRTMailMessage(models.Model):
 
         # Return Count
         if count:
-            return super(PRTMailMessage, self).search(args=modded_args, offset=offset, limit=limit, order=order, count=True)
+            return super(PRTMailMessage, self).search(args=modded_args, offset=offset, limit=limit, order=order,
+                                                      count=True)
 
         # Get records
         res_ids = self._search(args=modded_args, offset=offset, limit=limit, order=order, count=False)
@@ -480,7 +485,7 @@ class PRTMailMessage(models.Model):
 
         return res_allowed
 
-# -- Prepare context for reply or quote message
+    # -- Prepare context for reply or quote message
     @api.multi
     def reply_prep_context(self):
         self.ensure_one()
@@ -504,7 +509,7 @@ class PRTMailMessage(models.Model):
         }
         return ctx
 
-# -- Reply or quote message
+    # -- Reply or quote message
     @api.multi
     def reply(self):
         self.ensure_one()
@@ -518,8 +523,7 @@ class PRTMailMessage(models.Model):
             'context': self.reply_prep_context()
         }
 
-
-# -- Move message
+    # -- Move message
     @api.multi
     def move(self):
         self.ensure_one()
@@ -556,7 +560,7 @@ class PRTMailMove(models.TransientModel):
         default='0',
         help="Notify followers of destination record")
 
-# -- Ref models
+    # -- Ref models
     @api.model
     def _referenceable_models(self):
         return [(x.object, x.name) for x in self.env['res.request.link'].sudo().search([])]
@@ -572,7 +576,7 @@ class PRTPartner(models.Model):
     messages_from_count = fields.Integer(string="Messages From", compute='_messages_from_count')
     messages_to_count = fields.Integer(string="Messages To", compute='_messages_to_count')
 
-# -- Count messages from
+    # -- Count messages from
     @api.depends('message_ids')
     @api.multi
     def _messages_from_count(self):
@@ -582,7 +586,7 @@ class PRTPartner(models.Model):
                                                                                  ('message_type', '!=', 'notification'),
                                                                                  ('model', '!=', 'mail.channel')])
 
-# -- Count messages from
+    # -- Count messages from
     @api.depends('message_ids')
     @api.multi
     def _messages_to_count(self):
@@ -592,7 +596,7 @@ class PRTPartner(models.Model):
                                                                                ('message_type', '!=', 'notification'),
                                                                                ('model', '!=', 'mail.channel')])
 
-# -- Open related
+    # -- Open related
     @api.multi
     def partner_messages(self):
         self.ensure_one
@@ -627,7 +631,7 @@ class PRTPartner(models.Model):
             'domain': domain
         }
 
-# -- Send email from partner's form view
+    # -- Send email from partner's form view
     @api.multi
     def send_email(self):
         self.ensure_one()
@@ -662,12 +666,12 @@ class PRTMailComposer(models.TransientModel):
     forward_ref = fields.Reference(string="Attach to record", selection='_referenceable_models_fwd',
                                    readonly=False)
 
-# -- Ref models
+    # -- Ref models
     @api.model
     def _referenceable_models_fwd(self):
         return [(x.object, x.name) for x in self.env['res.request.link'].sudo().search([])]
 
-# -- Record ref change
+    # -- Record ref change
     @api.onchange('forward_ref')
     @api.multi
     def ref_change(self):
@@ -678,7 +682,7 @@ class PRTMailComposer(models.TransientModel):
                 'res_id': self.forward_ref.id
             })
 
-# -- Get record data
+    # -- Get record data
     @api.model
     def get_record_data(self, values):
         """
@@ -700,9 +704,12 @@ class PRTMailComposer(models.TransientModel):
                     result['model'] = parent.model
                 if not values.get('res_id'):
                     result['res_id'] = parent.res_id
-                partner_ids = values.get('partner_ids', list()) +\
-                              [(4, id) for id in parent.partner_ids.filtered(lambda rec: rec.email not in [self.env.user.email, self.env.user.company_id.email]).ids]
-                if self._context.get('is_private') and parent.author_id:  # check message is private then add author also in partner list.
+                partner_ids = values.get('partner_ids', list()) + \
+                              [(4, id) for id in parent.partner_ids.filtered(
+                                  lambda rec: rec.email not in [self.env.user.email,
+                                                                self.env.user.company_id.email]).ids]
+                if self._context.get(
+                        'is_private') and parent.author_id:  # check message is private then add author also in partner list.
                     partner_ids += [(4, parent.author_id.id)]
                 result['partner_ids'] = partner_ids
             elif values.get('model') and values.get('res_id'):
@@ -719,6 +726,7 @@ class PRTMailComposer(models.TransientModel):
         result['subject'] = subject
 
         return result
+
 
 # Legacy! keep those imports here to avoid dependency cycle errors
 from odoo.osv import expression

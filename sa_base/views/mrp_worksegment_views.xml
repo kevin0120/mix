@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <!-- Work Segments -->
+        <!-- Work Sections -->
         <record id="sa_mrp_worksegment_tree_view" model="ir.ui.view">
             <field name="name">sa_mrp_worksegment_tree_view</field>
-            <field name="model">mrp.worksegament</field>
+            <field name="model">mrp.worksection</field>
             <field name="arch" type="xml">
-                <tree string="Work Segment">
+                <tree string="Work Section">
                     <field name="code"/>
                     <field name="name"/>
                     <field name="active" invisible="1"/>
@@ -16,9 +16,9 @@
 
         <record id="sa_mrp_worksegment_form_view" model="ir.ui.view">
             <field name="name">sa_mrp_worksegment_form_view</field>
-            <field name="model">mrp.worksegament</field>
+            <field name="model">mrp.worksection</field>
             <field name="arch" type="xml">
-                <form string="Work Segment">
+                <form string="Work Section">
                     <sheet>
                         <field name="workcenter_count" invisible="1" />
                         <div class="oe_button_box" name="button_box">
@@ -33,7 +33,7 @@
                         </div>
                         <group>
                             <group>
-                                <field name="name" string="Work Segment Name" required="1"/>
+                                <field name="name" string="Work Section Name" required="1"/>
                             </group>
                             <group>
                                 <field name="code" required="1"/>
@@ -57,7 +57,7 @@
 
         <record id="sa_view_mrp_worksegment_search" model="ir.ui.view">
             <field name="name">sa_view_mrp_worksegment_search</field>
-            <field name="model">mrp.worksegament</field>
+            <field name="model">mrp.worksection</field>
             <field name="arch" type="xml">
                 <search string="Search for mrp worksegment">
                     <field name="workassembly_id" />
@@ -68,9 +68,9 @@
         </record>
 
         <record id="sa_mrp_worksegment_action" model="ir.actions.act_window">
-            <field name="name">Work Segments</field>
+            <field name="name">Work Sections</field>
             <field name="type">ir.actions.act_window</field>
-            <field name="res_model">mrp.worksegament</field>
+            <field name="res_model">mrp.worksection</field>
             <field name="view_mode">tree,form</field>
             <field name="search_view_id" ref="sa_view_mrp_worksegment_search"/>
             <field name="view_ids"
@@ -93,7 +93,7 @@
                             </button>
                             <button name="%(sa_mrp_worksegment_action)d" type="action" class="oe_stat_button" icon="fa-list"
                                        context="{'default_workassembly_id':active_id, 'search_default_workassembly_id': active_id}">
-                                <field string="Work Segments" name="worksegment_count" widget="statinfo"/>
+                                <field string="Work Sections" name="worksegment_count" widget="statinfo"/>
                             </button>
                         </div>
                         <group>
@@ -104,7 +104,7 @@
                                 <field name="code" required="1"/>
                             </group>
                         </group>
-                        <group string="Segments">
+                        <group string="Sections">
                             <field name="worksegment_ids" widget="one2many_list" colspan="4" nolabel="1" mode="tree" attrs="{'invisible': [('worksegment_count','=',0)]}" >
                                 <tree create="false" delete="false">
                                     <field name="name"/>

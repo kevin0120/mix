@@ -25,7 +25,7 @@
                         <table class="table table-condensed"  >
                             <thead>
                                 <tr>
-                                    <th><strong>VIN</strong></th>
+                                    <th><strong>Track Number(Serial Number/VIN)</strong></th>
                                 </tr>
                             </thead>
                             <tr t-foreach="docs" t-as="line">

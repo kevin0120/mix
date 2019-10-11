@@ -37,7 +37,7 @@
                     <group string="Setting Info">
                         <group string="Product">
                             <field name="product_id"/>
-                            <field name="vin"/>
+                            <field name="track_no"/>
                             <field name="consu_bom_line_id" groups="base.group_no_one" />
                             <field name="consu_product_id" />
                         </group>
@@ -46,7 +46,7 @@
                             <field name="production_id"/>
                             <field name="workcenter_id" />
                             <field name="assembly_line_id" />
-                            <field name="gun_id" />
+                            <field name="tool_id" />
                             <field name="operation_point_id" />
                         </group>
                         <group>
@@ -130,10 +130,10 @@
             <tree default_order="quality_state asc" decoration-muted="quality_state == 'none'" decoration-success="quality_state == 'pass'" decoration-danger="quality_state == 'fail'" decoration-warning="quality_state == 'exception'"  create="0" edit="0">
                 <field name="product_id"/>
                 <field name="production_id" />
-                <field name="vin"/>
+                <field name="track_no"/>
                 <field name="consu_product_id" />
                 <field name="workcenter_id" />
-                <field name="gun_id" />
+                <field name="tool_id" />
                 <field name="control_date" string="Checked Time"/>
                 <field name="measure_torque" avg="Avg. Torque" />
                 <field name="measure_degree" avg="Avg. Degree" />
@@ -168,7 +168,7 @@
                  <field name="control_date" type="col" interval="day"/>
                  <field name="product_id" type="row"/>
                  <field name="consu_product_id" type="row" />
-                 <field name="gun_id" />
+                 <field name="tool_id" />
              </pivot>
          </field>
     </record>
@@ -178,14 +178,14 @@
         <field name="model">operation.result</field>
         <field name="arch" type="xml">
             <search>
-                <field name="name" string="KNR/VIN" filter_domain="['|','|', ('vin','ilike',self),('production_id.knr','ilike',self),('production_id.vin','ilike',self)]"/>
-                <field name="product_id" filter_domain="['|', ('product_id.name','ilike',self),('product_id.vehicle_type_code','ilike',self)]"/>
-                <field name="consu_product_id" filter_domain="['|', ('consu_product_id.name','ilike',self), ('consu_product_id.screw_type_code','ilike',self)]"/>
+                <field name="name" string="Track Number" filter_domain="[('track_no','ilike',self)]"/>
+                <field name="product_id" filter_domain="['|', ('product_id.name','ilike',self),('product_id.default_code','ilike',self)]"/>
+                <field name="consu_product_id" filter_domain="['|', ('consu_product_id.name','ilike',self), ('consu_product_id.default_code','ilike',self)]"/>
                 <field name="workorder_id" string="Operation"/>
                 <field name="workcenter_id" string="Work Center"/>
-                <field name="gun_id" string="Tightening Gun" widget="selection"/>
+                <field name="tool_id" string="Tightening Tool" widget="selection"/>
                 <field name="qcp_id" string="Quality Check Point"/>
-                <field name="production_id" string="Production"/>
+                <field name="production_id" string="Manufacturing Production"/>
                 <field name="quality_state"/>
                 <separator/>
                 <filter string="In Progress" domain="[('quality_state', '=', 'none')]" name="progress"/>
@@ -194,13 +194,13 @@
                 <separator/>
                 <filter string="OK" domain="[('measure_result', '=', 'ok')]" name="ok"/>
                 <filter string="NOK" domain="[('measure_result', '=', 'nok')]" name="nok"/>
-                <filter string="松脱" domain="[('measure_result', '=', 'lsn')]" name="lsn"/>
-                <filter string="强制放行" domain="[('measure_result', '=', 'ak2')]" name="ak2"/>
+                <filter string="Loose" domain="[('measure_result', '=', 'lsn')]" name="lsn"/>
+                <filter string="Forced Release" domain="[('measure_result', '=', 'ak2')]" name="ak2"/>
                 <separator/>
                 <filter string="Data Lacking" domain="[('lacking', '=', 'lack')]" name="lacking"/>
                 <filter string="Date Using" domain="[('lacking', '=', 'normal')]" name="using"/>
                 <separator/>
-                <filter string="Not send" domain="[('sent', '=', False)]" name="sent"/>
+                <filter string="Not Send" domain="[('sent', '=', False)]" name="sent"/>
                 <separator/>
                 <filter name="today" string="Today" domain="[('control_date', '&gt;=', datetime.datetime.now().replace(hour=0, minute=0, second=0)),('control_date', '&lt;=', datetime.datetime.now().replace(hour=23, minute=59, second=59))]" />
                 <filter name="month" string="Current Month" domain="[('control_date','&gt;=', context_today().strftime('%Y-%m-1')),('control_date','&lt;', (context_today() + relativedelta(months=1)).strftime('%Y-%m-1') )]"/>
@@ -209,13 +209,13 @@
                 <group expand="1" string="Group By">
                     <filter string="Result" context="{'group_by': 'measure_result'}"/>
                     <filter string="Tightening Point" context="{'group_by': 'operation_point_id'}"/>
-                    <filter string="Vehicle" context="{'group_by': 'product_id'}"/>
-                    <filter string="Screw" context="{'group_by': 'consu_product_id'}"/>
-                    <filter string="WorkCenter" context="{'group_by': 'workcenter_id'}"/>
+                    <filter string="Finished Product" name="group_by_finished_product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Screw" name="group_by_screw" context="{'group_by': 'consu_product_id'}"/>
+                    <filter string="WorkCenter" name="group_by_workcenter" context="{'group_by': 'workcenter_id'}"/>
                     <filter string="One Time Pass" context="{'group_by': 'one_time_pass'}"/>
                     <filter string="Final Pass" context="{'group_by': 'final_pass'}"/>
                     <filter string="Data Lacking" context="{'group_by': 'lacking'}" name="group_by_lacking"/>
-                    <filter string="Screw Gun" context="{'group_by': 'gun_id'}" name="group_by_gun"/>
+                    <filter string="Tightening Tool(Gun/Wrench)" context="{'group_by': 'tool_id'}" name="group_by_tool"/>
                     <separator/>
                     <filter string="Tightening Date Day" context="{'group_by': 'control_date:day'}"/>
                     <filter string="Tightening Date Week" context="{'group_by': 'control_date:week'}"/>

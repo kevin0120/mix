@@ -23,10 +23,11 @@ import models
 
 from odoo import api, SUPERUSER_ID
 
+
 def _auto_default_group(cr, registry):
     env = api.Environment(cr, SUPERUSER_ID, {})
     access_groups = env['muk_dms_access.groups'].search([])
-    
+
     if not access_groups.check_existence():
         settings = env['muk_dms.settings'].search([])
         category = env['ir.module.category'].search([['name', '=', 'Documents']], limit=1)

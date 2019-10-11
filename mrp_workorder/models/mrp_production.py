@@ -26,8 +26,10 @@ class MrpProduction(models.Model):
         for order in self:
             date_planned_start_wo = date_planned_finished_wo = False
             if order.workorder_ids:
-                date_planned_start_wo = order.workorder_ids.sorted(key=lambda r: r.date_planned_start)[0].date_planned_start
-                date_planned_finished_wo = order.workorder_ids.sorted(key=lambda r: r.date_planned_finished)[-1].date_planned_finished
+                date_planned_start_wo = order.workorder_ids.sorted(key=lambda r: r.date_planned_start)[
+                    0].date_planned_start
+                date_planned_finished_wo = order.workorder_ids.sorted(key=lambda r: r.date_planned_finished)[
+                    -1].date_planned_finished
             order.date_planned_start_wo = date_planned_start_wo
             order.date_planned_finished_wo = date_planned_finished_wo
 
@@ -50,9 +52,12 @@ class MrpProduction(models.Model):
                 workcenter = workorder.workcenter_id
                 wos = WorkOrder.search([('workcenter_id', '=', workcenter.id), ('date_planned_finished', '<>', False),
                                         ('state', 'in', ('ready', 'pending', 'progress')),
-                                        ('date_planned_finished', '>=', start_date.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT))], order='date_planned_start')
+                                        ('date_planned_finished', '>=',
+                                         start_date.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT))],
+                                       order='date_planned_start')
                 from_date = start_date
-                intervals = workcenter.calendar_id.attendance_ids and workcenter.calendar_id.interval_get(from_date, workorder.duration_expected / 60.0)
+                intervals = workcenter.calendar_id.attendance_ids and workcenter.calendar_id.interval_get(from_date,
+                                                                                                          workorder.duration_expected / 60.0)
                 if intervals:
                     to_date = intervals[-1][1]
                     if not from_date_set:
@@ -62,22 +67,26 @@ class MrpProduction(models.Model):
                     to_date = from_date + relativedelta(minutes=workorder.duration_expected)
                 # Check interval
                 for wo in wos:
-                    if from_date < fields.Datetime.from_string(wo.date_planned_finished) and (to_date > fields.Datetime.from_string(wo.date_planned_start)):
+                    if from_date < fields.Datetime.from_string(wo.date_planned_finished) and (
+                            to_date > fields.Datetime.from_string(wo.date_planned_start)):
                         from_date = fields.Datetime.from_string(wo.date_planned_finished)
-                        intervals = workcenter.calendar_id.attendance_ids and workcenter.calendar_id.interval_get(from_date, workorder.duration_expected / 60.0)
+                        intervals = workcenter.calendar_id.attendance_ids and workcenter.calendar_id.interval_get(
+                            from_date, workorder.duration_expected / 60.0)
                         if intervals:
                             to_date = intervals[-1][1]
                         else:
                             to_date = from_date + relativedelta(minutes=workorder.duration_expected)
                 workorder.write({'date_planned_start': from_date, 'date_planned_finished': to_date})
 
-                if (workorder.operation_id.batch == 'no') or (workorder.operation_id.batch_size >= workorder.qty_production):
+                if (workorder.operation_id.batch == 'no') or (
+                        workorder.operation_id.batch_size >= workorder.qty_production):
                     start_date = to_date
                 else:
                     qty = min(workorder.operation_id.batch_size, workorder.qty_production)
                     cycle_number = math.ceil(qty / workorder.production_id.product_qty / workcenter.capacity)
                     duration = workcenter.time_start + cycle_number * workorder.operation_id.time_cycle * 100.0 / workcenter.time_efficiency
-                    intervals = workcenter.calendar_id.attendance_ids and workcenter.calendar_id.interval_get(from_date, duration / 60.0)
+                    intervals = workcenter.calendar_id.attendance_ids and workcenter.calendar_id.interval_get(from_date,
+                                                                                                              duration / 60.0)
                     if intervals:
                         start_date = intervals[-1][1]
                     else:

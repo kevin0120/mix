@@ -2,15 +2,6 @@
 <odoo>
     <data>
         <report
-            string="PIN Production Order"
-            id="action_report_vin_production_order"
-            model="mrp.production"
-            name="sa_base.report_mrporder_pin"
-            file="sa_base.report.mrp_production_pin_template"
-            report_type="qweb-pdf"
-        />
-
-        <report
             id="report_workcenter_labels"
             string="Work Center Labels"
             model="mrp.workcenter"

@@ -5,7 +5,7 @@
             <field name="name">缺省螺栓</field>
             <field name="type">product</field>
             <field name="sa_type">screw</field>
-            <field name="screw_type_code">dummynut</field>
+            <field name="default_code">dummynut</field>
         </record>
     </data>
 </odoo>

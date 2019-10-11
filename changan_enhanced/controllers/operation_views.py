@@ -2,13 +2,14 @@
 
 from odoo import http, api, SUPERUSER_ID
 import json
-from odoo.http import request,Response
+from odoo.http import request, Response
 
 DEFAULT_LIMIT = 80
 
 
 class OperationViews(http.Controller):
-    @http.route(['/api/v1/operation/<string:center_code>'], type='http', methods=['GET'], auth='none', cors='*', csrf=False)
+    @http.route(['/api/v1/operation/<string:center_code>'], type='http', methods=['GET'], auth='none', cors='*',
+                csrf=False)
     def _get_operation_by_center_code(self, center_code=None, **kw):
         bom_id = False
         job_id = False
@@ -20,7 +21,7 @@ class OperationViews(http.Controller):
         else:
             limit = 1
         if 'carType' in kw:
-            bom_id = env['mrp.bom'].search([('product_id.vehicle_type_code', '=', kw['carType'])], limit=1)
+            bom_id = env['mrp.bom'].search([('product_id.default_code', '=', kw['carType'])], limit=1)
         if 'Job' in kw:
             job_id = env['controller.job'].search(['|', ('code', '=', str(kw['Job'])), ('name', '=', str(kw['Job']))],
                                                   limit=1)
@@ -65,7 +66,8 @@ class OperationViews(http.Controller):
             "img": u'data:{0};base64,{1}'.format('image/png',
                                                  operation_id.worksheet_img) if operation_id.worksheet_img else "",
             "product_id": bom_id.product_id.id if bom_id.product_id else None,
-            'vehicleTypeImg': u'data:{0};base64,{1}'.format('image/png', bom_id.product_id.image_small) if bom_id and bom_id.product_id.image_small else None,
+            'vehicleTypeImg': u'data:{0};base64,{1}'.format('image/png',
+                                                            bom_id.product_id.image_small) if bom_id and bom_id.product_id.image_small else None,
             "points": _points
         }
         body = json.dumps(val)

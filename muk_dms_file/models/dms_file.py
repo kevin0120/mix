@@ -36,23 +36,24 @@ from odoo.addons.muk_dms.models import dms_base
 
 _logger = logging.getLogger(__name__)
 
+
 class SystemFile(dms_base.DMSModel):
-    
     _inherit = 'muk_dms.file'
-              
-    #----------------------------------------------------------
+
+    # ----------------------------------------------------------
     # Functions
-    #----------------------------------------------------------
-    
+    # ----------------------------------------------------------
+
     def notify_change(self, values, refresh=False, operation=None):
         super(SystemFile, self).notify_change(values, refresh, operation)
         if "base_path" in values:
-            self._check_reference_values({'base_path': values['base_path']})         
-             
-    #----------------------------------------------------------
+            self._check_reference_values({'base_path': values['base_path']})
+
+            # ----------------------------------------------------------
+
     # Reference
-    #----------------------------------------------------------
-    
+    # ----------------------------------------------------------
+
     def _create_reference(self, settings, path, filename, content):
         result = super(SystemFile, self)._create_reference(settings, path, filename, content)
         if result:

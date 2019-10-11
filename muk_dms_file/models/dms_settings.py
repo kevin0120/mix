@@ -30,24 +30,24 @@ from odoo.addons.muk_dms.models import dms_base
 
 _logger = logging.getLogger(__name__)
 
+
 class SystemSettings(dms_base.DMSModel):
-    
     _inherit = 'muk_dms.settings'
 
-    #----------------------------------------------------------
+    # ----------------------------------------------------------
     # Database
-    #----------------------------------------------------------
-    
+    # ----------------------------------------------------------
+
     save_type = fields.Selection(
         selection_add=[('file', "File System")])
-    
+
     base_path = fields.Char(
         string="Path")
-        
-    #----------------------------------------------------------
+
+    # ----------------------------------------------------------
     # Create, Update
-    #----------------------------------------------------------
-           
+    # ----------------------------------------------------------
+
     @api.constrains('base_path', 'save_type')
     def _check_base_path(self):
         if self.save_type == 'file':
@@ -57,7 +57,7 @@ class SystemSettings(dms_base.DMSModel):
                 raise ValidationError(_("The given path does not exists."))
             if not os.access(self.base_path, os.W_OK):
                 raise ValidationError(_("Odoo requires to have access rights for the given path."))
-            
+
     def _check_notification(self, values, operation):
         super(SystemSettings, self)._check_notification(values, operation)
         if 'base_path' in values:

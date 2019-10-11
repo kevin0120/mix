@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
-from odoo import fields,models,api,_
+from odoo import fields, models, api, _
 from odoo.exceptions import ValidationError
 import odoo.addons.decimal_precision as dp
 from datetime import datetime, timedelta, date
@@ -10,9 +10,8 @@ import babel.dates
 import pytz
 from odoo.osv import expression
 import logging
-from odoo.tools import float_round,frozendict, lazy_classproperty, lazy_property, ormcache, \
-                   Collector, LastOrderedSet, OrderedSet
-
+from odoo.tools import float_round, frozendict, lazy_classproperty, lazy_property, ormcache, \
+    Collector, LastOrderedSet, OrderedSet
 
 from collections import defaultdict, MutableMapping, OrderedDict
 from odoo.tools import frozendict
@@ -20,8 +19,6 @@ from odoo.tools import frozendict
 
 class OperationResult(models.HyperModel):
     _inherit = "operation.result"
-
-
 
     @api.model
     def _read_group_format_result_centron(self, data, annotated_groupbys, groupby, domain):
@@ -151,7 +148,8 @@ class OperationResult(models.HyperModel):
             where_clause2 = '''r1.measure_result in ('ok', 'nok')'''
         else:
             if where_clause.find('''"operation_result"."control_date"''') > 0:
-                where_clause = where_clause.replace('''"operation_result"."control_date"''', '''"mw"."date_planned_start"''')
+                where_clause = where_clause.replace('''"operation_result"."control_date"''',
+                                                    '''"mw"."date_planned_start"''')
 
                 where_clause_params.extend(where_clause_params[:])
             where_clause2 = where_clause + '''AND r1.measure_result in ('ok', 'nok')'''
@@ -290,7 +288,9 @@ class OperationResult(models.HyperModel):
                       group by control_date
                       order by control_date) d2
         ''' % {
-            'interval': annotated_groupbys[0]['groupby'].split(':')[-1] if annotated_groupbys[0]['field'] == 'control_date' else annotated_groupbys[1]['groupby'].split(':')[-1],
+            'interval': annotated_groupbys[0]['groupby'].split(':')[-1] if annotated_groupbys[0][
+                                                                               'field'] == 'control_date' else
+            annotated_groupbys[1]['groupby'].split(':')[-1],
         }
 
         if where_clause == '':
@@ -337,7 +337,6 @@ class OperationResult(models.HyperModel):
 
         return result
 
-
     def read_group_qualified(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         self.check_access_rights('read')
         query = self._where_calc(domain)
@@ -351,7 +350,7 @@ class OperationResult(models.HyperModel):
             if gb['field'] == 'final_pass':
                 gb['qualified_field'] = "\'final\'"
             if gb['field'] == 'one_time_pass':
-                one_time_pass_state=1
+                one_time_pass_state = 1
                 gb['qualified_field'] = "\'once\'"
             if gb['field'] == 'control_date':
                 gb['qualified_field'] = "d1.control_date"
@@ -421,11 +420,11 @@ class OperationResult(models.HyperModel):
                             group by control_date) d2
                     """ % {
 
-                    'interval': annotated_groupbys[0]['groupby'].split(':')[-1] if annotated_groupbys[0][
+            'interval': annotated_groupbys[0]['groupby'].split(':')[-1] if annotated_groupbys[0][
                                                                                'field'] == 'control_date' else
-                        annotated_groupbys[1]['groupby'].split(':')[-1],
-                    'interval2': '''and r1.one_time_pass='true' ''' if one_time_pass_state == 1 else '''and r1.final_pass='pass' ''',
-         }
+            annotated_groupbys[1]['groupby'].split(':')[-1],
+            'interval2': '''and r1.one_time_pass='true' ''' if one_time_pass_state == 1 else '''and r1.final_pass='pass' ''',
+        }
 
         if where_clause == '':
             where_clause = 'd1.control_date = d2.control_date'
@@ -485,7 +484,7 @@ class OperationResult(models.HyperModel):
             if gb['field'] == 'final_pass':
                 gb['qualified_field'] = "\'final\'"
             if gb['field'] == 'one_time_pass':
-                one_time_pass_state=1
+                one_time_pass_state = 1
                 gb['qualified_field'] = "\'once\'"
             if gb['field'] == 'consu_product_id':
                 gb['qualified_field'] = "d1.consu_product_id"
@@ -545,8 +544,8 @@ group by consu_product_id) d1,
 (select a.product_id as consu_product_id,count (*) as sequence from  mrp_wo_consu a left join mrp_workorder mw on a.workorder_id = mw.id
 group by consu_product_id)d2
                     """ % {
-                    'interval2': ''' r1.one_time_pass='true' ''' if one_time_pass_state == 1 else ''' r1.final_pass='pass' ''',
-         }
+            'interval2': ''' r1.one_time_pass='true' ''' if one_time_pass_state == 1 else ''' r1.final_pass='pass' ''',
+        }
 
         if where_clause == '':
             where_clause = 'd1.consu_product_id = d2.consu_product_id'
@@ -554,7 +553,8 @@ group by consu_product_id)d2
             if where_clause.find('''"operation_result"."control_date"''') > 0:
                 where_clause = where_clause.replace('''"operation_result"."control_date"''', '''"d1"."control_date"''')
             if where_clause.find('''"operation_result"."consu_product_id"''') > 0:
-                where_clause = where_clause.replace('''"operation_result"."consu_product_id"''', '''"d1"."consu_product_id"''')
+                where_clause = where_clause.replace('''"operation_result"."consu_product_id"''',
+                                                    '''"d1"."consu_product_id"''')
             where_clause += 'AND d1.consu_product_id = d2.consu_product_id'
 
         query = """
@@ -588,7 +588,7 @@ group by consu_product_id)d2
         """
         for d in fetched_data:
            n = {'consu_product_id': """
-        #(%(from)s,'test')
+        # (%(from)s,'test')
         """ % {'from': d['consu_product_id']}}
             d.update(n)
         """
@@ -609,20 +609,23 @@ group by consu_product_id)d2
             if 'gun_id' in groupby:
                 # res = super(OperationResult, self).read_group(domain, fields, groupby, offset=offset, limit=limit,
                 #                                               orderby=orderby, lazy=lazy)
-                res = self.read_group_lacking_by_gun(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+                res = self.read_group_lacking_by_gun(domain, fields, groupby, offset=offset, limit=limit,
+                                                     orderby=orderby, lazy=lazy)
             else:
-                res = self.read_group_lacking(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby, lazy=lazy)
+                res = self.read_group_lacking(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby,
+                                              lazy=lazy)
 
         elif ('one_time_pass' in groupby or 'final_pass' in groupby) and len(groupby) >= 2:
-             if 'consu_product_id' in groupby:
-                res = self.read_group_qualified_bynut(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby,
-                                                lazy=lazy)
-             else:
+            if 'consu_product_id' in groupby:
+                res = self.read_group_qualified_bynut(domain, fields, groupby, offset=offset, limit=limit,
+                                                      orderby=orderby,
+                                                      lazy=lazy)
+            else:
                 res = self.read_group_qualified(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby,
                                                 lazy=lazy)
         else:
             res = super(OperationResult, self).read_group(domain, fields, groupby, offset=offset, limit=limit,
-                                                      orderby=orderby, lazy=lazy)
+                                                          orderby=orderby, lazy=lazy)
         if 'measure_result' in fields:
             for line in res:
                 if '__count' not in line.keys():
@@ -650,6 +653,7 @@ group by consu_product_id)d2
                     inv_value = 0
                 line['__count'] = inv_value
 
-        res = sorted(res, key=lambda l: next(v for (line_key, v) in l.iteritems() if '__count' or '_count' in line_key), reverse=True)
+        res = sorted(res, key=lambda l: next(v for (line_key, v) in l.iteritems() if '__count' or '_count' in line_key),
+                     reverse=True)
 
         return res

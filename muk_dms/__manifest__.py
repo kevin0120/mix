@@ -25,8 +25,8 @@
     "description": """ 
         
     """,
-    "version": '10.0.1.2.0',   
-    "category": 'Document Management',   
+    "version": '10.0.1.2.0',
+    "category": 'Document Management',
     "license": "AGPL-3",
     "website": "http://www.mukit.at",
     "author": "MuK IT",
@@ -64,5 +64,5 @@
     },
     "application": True,
     "installable": True,
-    
+
 }

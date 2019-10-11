@@ -7,6 +7,7 @@ from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from itertools import groupby
 
+
 class TightResultReport(models.TransientModel):
     _name = 'tight.result.report'
     _description = u'拧紧结果报告'
