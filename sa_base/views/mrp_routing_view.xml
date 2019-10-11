@@ -51,9 +51,12 @@
                         <group>
                             <group name="description">
                                 <field name="name"/>
-                                <field name="routing_id" readonly="1"/>
-                                <field name="group_id"  options="{'no_edit': True, 'no_create': True}" />
-                                <field name="workcenter_id" options="{'no_edit': True, 'no_create': True}"/>
+                                <field name="sa_routing_ids" readonly="1" widget="many2many_tags" groups="base.group_no_one"/>
+
+                                <field name="workcenter_ids" readonly="1" widget="many2many_tags" groups="base.group_no_one"/>
+                                <!--<field name="group_id"  options="{'no_edit': True, 'no_create': True}" />-->
+                                <!--<field name="workcenter_id" options="{'no_edit': True, 'no_create': True}"/>-->
+                                <field name="workcenter_group" options="{'no_edit': True, 'no_create': True}"/>
                                 <field name="company_id" options="{'no_edit': True, 'no_create': True}" groups="base.group_multi_company"/>
                             </group>
                             <group name="parameters">
@@ -168,18 +171,21 @@
                                 <field name="location_id" groups="stock.group_adv_location"/>
                            </group>
                         </group>
+                        <group>
+                        <field name="sa_operation_ids" widget="many2many_tags" options="{'no_create': True, 'no_open':True}"/>
+                        </group>
                         <notebook>
-                            <page string="Work Center Operations">
-                                <field name="operation_ids" widget="one2many_list" mode="tree" context="{'default_routing_id':active_id}">
-                                    <tree string="Operation Items" edit="false" create="false" delete="false">
-                                        <field name="sequence" widget="handle"/>
-                                        <field name="name"/>
-                                        <field name="workcenter_id" />
-                                        <field name="group_id" />
-                                        <field name="op_job_id"/>
-                                    </tree>
-                                </field>
-                            </page>
+                            <!--<page string="Work Center Operations">-->
+                                <!--<field name="operation_ids" mode="tree">-->
+                                    <!--<tree string="Operation Items" edit="false" create="false" delete="false">-->
+                                        <!--<field name="sequence" widget="handle"/>-->
+                                        <!--<field name="name"/>-->
+                                        <!--<field name="workcenter_id" />-->
+                                        <!--<field name="group_id" />-->
+                                        <!--<field name="op_job_id"/>-->
+                                    <!--</tree>-->
+                                <!--</field>-->
+                            <!--</page>-->
                             <page string="Notes">
                                 <field name="note"/>
                             </page>
@@ -242,8 +248,15 @@
         </field>
     </record>
 
+
+
     <menuitem id="menu_mrp_routing_form_action"
             action="sa_mrp_routing_action"
             parent="menu_bom_form"
             sequence="20"/>
+
+    <menuitem id="menu_mrp_routing_workcenter_action"
+            action="sa_mrp_routing_workcenter_action"
+            parent="menu_bom_form"
+            sequence="30"/>
 </odoo>

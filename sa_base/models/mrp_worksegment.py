@@ -202,3 +202,4 @@ class MrpWorkCenter(models.Model):
     _sql_constraints = [('code_hmi', 'unique(hmi_id)', 'Only one HMI is allowed'),
                         ('code_rfid', 'unique(rfid_id)', 'Only one RFID is allowed'),
                         ('code_io', 'unique(io_id)', 'Only one Remote IO is allowed')]
+

@@ -18,9 +18,9 @@ MASTER_WROKORDERS_API = '/rush/v1/mrp.routing.workcenter'
 
 class MrpBom(models.Model):
     _inherit = 'mrp.bom'
+    operation_ids = fields.Many2many('mrp.routing.workcenter', related='routing_id.sa_operation_ids',
+                                     copy=False, readonly=True)
 
-    operation_ids = fields.Many2many('mrp.routing.workcenter', 'bom_operation_rel', 'bom_id', 'operation_id',
-                                     string="Operations", copy=False)
 
     has_operations = fields.Boolean(compute='_compute_has_operations')
 
@@ -119,15 +119,15 @@ class MrpBom(models.Model):
             operation_ids = routing_id.operation_ids
             vals.update({'operation_ids': [(6, None, operation_ids.ids)]})
         ret = super(MrpBom, self).create(vals)
-        if 'operation_ids' in vals:
-            ret._onchange_operations()
+        # if 'operation_ids' in vals:
+        ret._onchange_operations()
         return ret
 
     @api.multi
     def write(self, vals):
         ret = super(MrpBom, self).write(vals)
-        if 'operation_ids' in vals:
-            self._onchange_operations()
+        # if 'operation_ids' in vals:
+        self._onchange_operations()
         return ret
 
     @api.multi
@@ -267,21 +267,22 @@ class MrpBomLine(models.Model):
 
     @api.multi
     def unlink(self):
-        quality_points = self.env['sa.quality.point']
-        for line in self:
-            master = line.workcenter_id.masterpc_id if line.workcenter_id else None
-            if not master:
-                raise UserError(u"未找到工位上的工位控制器")
-            connections = master.connection_ids.filtered(lambda r: r.protocol == 'http') if master.connection_ids else None
-            if not connections:
-                raise UserError(u"未找到工位上的工位控制器的连接信息")
-            url = ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_DEL_WROKORDERS_API) for connect in connections][0]
-            ret = self._push_del_routing_workcenter(line=line, url=url)
-            if not ret:
-                self.env.user.notify_warning(u"未删除物料清单行")
-        for line in self:
-            rec = self.env['sa.quality.point'].search([('bom_line_id', '=', line.id)])
-            quality_points += rec
-        quality_points.sudo().unlink()
-        ret = super(MrpBomLine, self).unlink()
-        return ret
+        pass
+        # quality_points = self.env['sa.quality.point']
+        # for line in self:
+        #     master = line.workcenter_id.masterpc_id if line.workcenter_id else None
+        #     if not master:
+        #         raise UserError(u"未找到工位上的工位控制器")
+        #     connections = master.connection_ids.filtered(lambda r: r.protocol == 'http') if master.connection_ids else None
+        #     if not connections:
+        #         raise UserError(u"未找到工位上的工位控制器的连接信息")
+        #     url = ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_DEL_WROKORDERS_API) for connect in connections][0]
+        #     ret = self._push_del_routing_workcenter(line=line, url=url)
+        #     if not ret:
+        #         self.env.user.notify_warning(u"未删除物料清单行")
+        # for line in self:
+        #     rec = self.env['sa.quality.point'].search([('bom_line_id', '=', line.id)])
+        #     quality_points += rec
+        # quality_points.sudo().unlink()
+        # ret = super(MrpBomLine, self).unlink()
+        # return ret

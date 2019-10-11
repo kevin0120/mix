@@ -10,4 +10,5 @@ from . import mrp_bom
 from . import maintenance
 from . import quality
 from . import res_config
+from . import mrp_workcenter_group
 # from . import report

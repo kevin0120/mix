@@ -185,3 +185,4 @@ class OperationPoints(models.Model):
         return ret
 
         # return super(OperationPoints, self).write(vals)
+

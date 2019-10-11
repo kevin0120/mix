@@ -34,7 +34,6 @@
         'data/point_data.xml',
         'data/product_data.xml',
         'data/mail_template.xml',
-        # 'data/test_data.xml',   # 测试数据
         # 'wizards/mrp_bom_wizard_views.xml',
         'views/res_user_views.xml',
         'views/menu_hide_views.xml',
@@ -58,5 +57,8 @@
         'report/equipment_report_template.xml',
         'report/product_product_tempaltes.xml',
         'views/sa_config_setting.xml'
+    ],
+    'demo': [
+        # 'demo/test_data.xml',   # 测试数据
     ],
 }

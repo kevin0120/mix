@@ -15,12 +15,26 @@ MASTER_WROKORDERS_API = '/rush/v1/mrp.routing.workcenter'
 
 class MrpRoutingWorkcenter(models.Model):
     _inherit = 'mrp.routing.workcenter'
+    """重写routing_id的定义"""
+    routing_id = fields.Many2one(
+        'mrp.routing', 'Parent Routing',
+        index=True, ondelete='set null', required=False,
+        help="The routing contains all the Work Centers used and for how long. This will create work orders afterwards"
+        "which alters the execution of the manufacturing order. ")
 
-    workcenter_id = fields.Many2one('mrp.workcenter', copy=False)
+    sa_routing_ids = fields.Many2many('mrp.routing', 'routing_operation_rel', 'operation_id', 'routing_id',
+                                     string="Routes", copy=False)
+
+    workcenter_group = fields.Many2one('mrp.workcenter.group', copy=False)
+    workcenter_ids = fields.Many2many('mrp.workcenter', related='workcenter_group.sa_workcenter_ids',
+                                     copy=False, readonly=True)
+
+
+    workcenter_id = fields.Many2one('mrp.workcenter', copy=False, required=False)
 
     socket = fields.Char(string='Socket No')
-
-    op_job_id = fields.Many2one('controller.job', string='Job', track_visibility="onchange")
+    # op_job_id = fields.Many2one('controller.job', string='Job', track_visibility="onchange")
+    op_job_id = fields.Many2one('controller.job', string='Job')
 
     operation_point_ids = fields.One2many('operation.point', 'operation_id', string='Operation Points')
 
@@ -267,10 +281,12 @@ class MrpRouting(models.Model):
     """ Specifies routings of work centers """
     _inherit = 'mrp.routing'
 
+    '''重写operation_ids的定义'''
+    sa_operation_ids = fields.Many2many('mrp.routing.workcenter', 'routing_operation_rel', 'routing_id', 'operation_id',
+                                     string="Operations", copy=False)
     code = fields.Char('Reference', copy=False)
 
     operation_count = fields.Integer(string='Operations', compute='_compute_operation_count')
-
 
     @api.onchange('code')
     def _routing_code_change(self):
@@ -285,7 +301,7 @@ class MrpRouting(models.Model):
     @api.depends('operation_ids')
     def _compute_operation_count(self):
         for routing in self:
-            routing.operation_count = len(routing.operation_ids)
+            routing.operation_count = len(routing.sa_operation_ids)
 
     @api.multi
     def action_sa_view_operation(self):
@@ -294,12 +310,12 @@ class MrpRouting(models.Model):
         ids = self.ids
         # bom specific to this variant or global to template
         action['context'] = {
-            'default_routing_id': ids[0],
+            'default_sa_routing_ids': [(4, ids[0], None)]
             # 'default_workcenter_id': self.workcenter_id.id
         }
-        action['domain'] = [('routing_id', 'in', [self.ids])]
+        action['domain'] = [('sa_routing_ids', 'in', self.ids)]
         return action
 
     @api.multi
     def name_get(self):
-        return [(routing.id, routing.code) for routing in self]  # 强制可视化时候名称显示的是code
+        return [(routing.id, u'[{0}]{1}'.format(routing.code, routing.name)) for routing in self]  # 强制可视化时候名称显示的是code
