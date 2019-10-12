@@ -17,7 +17,7 @@ import { ORDER_STATUS } from '../../modules/order/constants';
 import { todoOrders, doneOrders, exceptOrders, doingOrders } from '../../modules/order/selector';
 import styles from './styles';
 import settingImg from '../../../resources/imgs/setting.png';
-import type { Dispatch } from '../../modules/indexReducer';
+import type { Dispatch } from '../../modules/typeDef';
 import type { tOrder } from '../../modules/order/interface/typeDef';
 import { withI18n } from '../../i18n';
 

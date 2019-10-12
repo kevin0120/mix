@@ -16,8 +16,8 @@ import healthzActions from '../../modules/healthz/action';
 import NavBarMenu from './NavBarMenu';
 import LanguageMenu from './LanguageMenu';
 import type { tRouteObj, tUrl } from '../../containers/model';
-import type { Dispatch } from '../../modules/indexReducer';
-import type { tUser } from '../../modules/user/interface/model';
+import type { Dispatch } from '../../modules/typeDef';
+import type { tUser } from '../../modules/user/interface/typeDef';
 import notifyActions from '../../modules/Notifier/action';
 
 type Props = {

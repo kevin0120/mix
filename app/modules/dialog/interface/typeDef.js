@@ -1,5 +1,5 @@
 // @flow
-import PropTypes from 'prop-types';
+import type { Node } from 'react';
 import type { Dispatch } from '../../typeDef';
 
 type tDialogButton = {
@@ -10,8 +10,8 @@ type tDialogButton = {
 
 export type tDialogConfig = {
   buttons: Array<tDialogButton>,
-  content: PropTypes.Element,
-  title: PropTypes.Element
+  content: Node,
+  title: Node
 };
 
 export type tDialogState = {

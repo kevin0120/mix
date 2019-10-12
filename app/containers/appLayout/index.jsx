@@ -11,7 +11,7 @@ import NavBar from '../../components/NavBar';
 import LayoutDrawer from '../../components/LayoutDrawer';
 import type { tUser } from '../../modules/user/interface/typeDef';
 import { logoutRequest } from '../../modules/user/action';
-import type { Dispatch } from '../../modules/indexReducer';
+import type { Dispatch } from '../../modules/typeDef';
 import type { tRouteComponent, tRouteObj } from '../model';
 import Notifier from '../../components/Notifier';
 import Dialog from '../../components/Dialog';

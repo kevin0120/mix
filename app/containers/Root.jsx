@@ -5,7 +5,7 @@ import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'connected-react-router';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import SnackbarProvider from '../components/Notifier/SnackbarProvider';
-import type { Store } from '../modules/indexReducer';
+import type { Store } from '../modules/typeDef';
 import Routes from './Routes';
 import theme from '../common/theme';
 import { systemInit } from '../modules/systemInit/action';

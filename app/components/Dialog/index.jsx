@@ -12,8 +12,8 @@ import { DialogActions } from '@material-ui/core';
 import styles from './style';
 import dialogActions from '../../modules/dialog/action';
 import Button from '../CustomButtons/Button';
-import type { Dispatch } from '../../modules/indexReducer';
-import type { tDialogConfig } from '../../modules/dialog/model';
+import type { Dispatch } from '../../modules/typeDef';
+import type { tDialogConfig } from '../../modules/dialog/interface/typeDef';
 
 const mapState = (state, props) => ({
   ...props,
