@@ -127,11 +127,17 @@ export class ClsOrderOperationPoints {
   _operationGroups: { [groupSeq: number]: ClsOperationPointGroup } = {};
 
   static validatePayload(payload: tScrewStepPayload): boolean {
+    CommonLog.Debug(`ClsOrderOperationPoints validatePayload Points: ${JSON.stringify(payload.points)}`);
     let ret: boolean = true;
     const { controllerMode, jobID } = payload;
     switch (controllerMode) {
       case 'job':
+        if (isNil(jobID)){
+          CommonLog.Info('ClsOrderOperationPoints validatePayload Controller Mode Is Job, But Job ID Is Undefined');
+          return false;
+        }
         if (jobID <= 0) {
+          CommonLog.Info('ClsOrderOperationPoints validatePayload Job Is Less Than Zero');
           return false;
         }
         break;
@@ -149,7 +155,7 @@ export class ClsOrderOperationPoints {
     const ret: boolean = ClsOrderOperationPoints.validatePayload(p);
     if (!ret) {
       // 验证失败
-      CommonLog.lError(`validatePayload Error! Payload: ${String(p)}`);
+      CommonLog.lError(`validatePayload Error! Payload! `);
       return;
     }
     const { points } = p;
