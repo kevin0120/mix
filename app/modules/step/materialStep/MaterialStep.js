@@ -1,5 +1,6 @@
 // @flow
 import { call, put, select, take, all, race } from 'redux-saga/effects';
+import type { Saga } from 'redux-saga';
 import STEP_STATUS from '../constants';
 import { stepPayload, workingOrder, workingStep } from '../../order/selector';
 import { getDevice } from '../../external/device';
@@ -21,22 +22,21 @@ const MaterialStepMixin = (ClsBaseStep: IWorkStep) => class ClsMaterialStep exte
 
   _confirm = null;
 
+  * _onLeave(): Saga<void> {
+    try {
+      yield all([...this._io].map((io) => call(io.closeIO, [...this._ports].filter(p => io.hasPort(p)))));
+      this._ports.clear();
+      this._io.clear();
+      this._items.clear();
+      this._confirm = null;
+    } catch (e) {
+      CommonLog.lError(e);
+    }
+  }
+
   constructor(...args: any) {
     super(...args);
-
-    function* onLeave() {
-      try {
-        yield all([...this._io].map((io) => call(io.closeIO, [...this._ports].filter(p => io.hasPort(p)))));
-        this._ports.clear();
-        this._io.clear();
-        this._items.clear();
-        this._confirm = null;
-      } catch (e) {
-        CommonLog.lError(e);
-      }
-    }
-
-    this._onLeave = onLeave.bind(this);
+    (this: any)._onLeave = this.onLeave.bind(this);
   }
 
   _statusTasks = {
@@ -92,7 +92,7 @@ const MaterialStepMixin = (ClsBaseStep: IWorkStep) => class ClsMaterialStep exte
           return null;
         }).filter(calls => !!calls));
 
-        const confirmIO = getDevice(sPayload.confirm.sn);
+        const confirmIO = (getDevice(sPayload.confirm.sn): ClsIOModule);
         if (confirmIO) {
           this._confirm = {
             io: confirmIO,

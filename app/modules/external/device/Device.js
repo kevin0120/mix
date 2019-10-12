@@ -5,20 +5,21 @@ import { put } from 'redux-saga/effects';
 import { CommonLog } from '../../../common/utils';
 import type { AnyAction, tInput, tInputData } from './type';
 import CommonExternalEntity from '../CommonExternalEntity';
+import type { IDevice } from './IDevice';
+import type { tDeviceSN } from './typeDef';
 
 const defaultValidatorFunc = (data: string | number): boolean => true;
 
-export type tDeviceSN = string;
 
-export default class Device extends CommonExternalEntity {
+export default class Device extends CommonExternalEntity implements IDevice {
   _dispatcher: null | ((?tInput) => AnyAction) = null;
 
   #validator: null | ((data: tInputData) => boolean) = defaultValidatorFunc;
 
   #_serialNumber: ?tDeviceSN = null;
 
-  // eslint-disable-next-line flowtype/no-weak-types
-  constructor(name: string, sn: tDeviceSN, ...rest: any) {
+  // eslint-disable-next-line flowtype/no-weak-types,no-unused-vars
+  constructor(name: string, sn: tDeviceSN, config: Object, data: any) {
     super(name);
     this.#_serialNumber = sn;
     // eslint-disable-next-line flowtype/no-weak-types

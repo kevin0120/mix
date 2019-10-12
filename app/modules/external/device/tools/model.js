@@ -13,7 +13,7 @@ export const defaultScrewToolDispatcher = (data: tInputData): AnyAction =>
   screwStepAction.result(data);
 
 export default class ClsScrewTool extends Device {
-  constructor(name: string, serialNumber: string) {
+  constructor(name: string, serialNumber: string, ...rest: Array<any>) {
     super(name, serialNumber);
     /* eslint-disable flowtype/no-weak-types */
     (this: any).Enable = this.Enable.bind(this);
@@ -44,7 +44,7 @@ export default class ClsScrewTool extends Device {
             tool_sn: this.serialNumber,
             enable: true
           });
-          return false;
+          return;
         }
         yield call([this, super.Enable]);
       }
@@ -69,7 +69,7 @@ export default class ClsScrewTool extends Device {
             tool_sn: this.serialNumber,
             enable: false
           });
-          return false;
+          return;
         }
         yield call([this, super.Disable]);
       }
@@ -93,7 +93,7 @@ export default class ClsScrewTool extends Device {
           tool_sn: this.serialNumber,
           enable: !this.isEnable
         });
-        return false;
+        return;
       }
       yield call([this, super.ToggleEnable]);
     } catch (e) {

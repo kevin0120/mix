@@ -1,9 +1,10 @@
 // @flow
-import type { Saga } from 'redux-saga';
+import type { Saga, TakeableChannel } from 'redux-saga';
 import { fork, take } from 'redux-saga/effects';
+import type { Reducer, Action } from 'redux';
 
-export function genReducers(reducers, initState = {}) {
-  return (state = initState, action) => {
+export function genReducers(reducers: { [key: string]: Reducer<any, Action<any>> }, initState: Object = {}) {
+  return (state: any = initState, action: Action<any>) => {
     if (reducers[action.type]) {
       return reducers[action.type](state, action);
     }
@@ -11,8 +12,8 @@ export function genReducers(reducers, initState = {}) {
   };
 }
 
-export function watchWorkers(workers, channel): Saga<void> {
-  return function* watcher() {
+export function watchWorkers(workers: { [key: string]: (any)=>Saga<any> | Array<(any)=>Saga<any>> }, channel: TakeableChannel<any>) {
+  return function* watcher(): Saga<void> {
     try {
       while (true) {
         const action = yield take(channel || Object.keys(workers));

@@ -59,7 +59,7 @@ const listeners = {
   }
 };
 
-function createRushChannel(): EventChannel<void> {
+function createRushChannel(): EventChannel<{ type: string, payload: any }> {
   return eventChannel(emit => {
     Object.keys(listeners).forEach(k => {
       ipcRenderer.on(k, listeners[k](emit));

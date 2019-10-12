@@ -5,7 +5,7 @@ import Device from '../Device';
 class ClsController extends Device {
   #serialNumber: ?string = null;
 
-  constructor(name: string, serialNumber: string) {
+  constructor(name: string, serialNumber: string, ...rest: Array<any>) {
     super(name, serialNumber);
     this.#serialNumber = serialNumber;
   }

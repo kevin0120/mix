@@ -4,7 +4,7 @@ import { rushSendApi } from './rush';
 
 type tIOSn = string;
 
-export function ioSetApi(sn: tIOSn, index: number, status: string) {
+export function ioSetApi(sn: tIOSn, index: number, status: 0 | 1) {
   try {
     return rushSendApi('WS_IO_SET', {
       sn,

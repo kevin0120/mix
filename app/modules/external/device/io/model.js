@@ -31,7 +31,8 @@ export default class ClsIOModule extends Device {
   constructor(
     name: string,
     serialNumber: string,
-    config: { input_num: number, output_num: number }
+    config: { input_num: number, output_num: number },
+    ...rest: Array<any>
   ) {
     super(name, serialNumber);
     const { input_num, output_num } = config;
@@ -175,7 +176,7 @@ export default class ClsIOModule extends Device {
     return null;
   }
 
-  *doDispatch(newData: tIOContact): Saga<void> {
+  * doDispatch(newData: tIOContact): Saga<void> {
     // CommonLog.Info(`IO Module Please Use doHandleIOData Method`);
     try {
       const actions = this._doHandleIOData(newData);
@@ -193,7 +194,7 @@ export default class ClsIOModule extends Device {
     }
   }
 
-  *setIO(port: tIOPort, value: boolean): Saga<void> {
+  * setIO(port: tIOPort, value: boolean): Saga<void> {
     try {
       const status = value ? 1 : 0;
       yield call(ioSetApi, this.serialNumber, port.idx, status);
@@ -202,7 +203,7 @@ export default class ClsIOModule extends Device {
     }
   }
 
-  *openIO(port: tIOPort | Array<tIOPort>): Saga<void> {
+  * openIO(port: tIOPort | Array<tIOPort>): Saga<void> {
     try {
       if (port instanceof Array) {
         // eslint-disable-next-line no-restricted-syntax
@@ -217,7 +218,7 @@ export default class ClsIOModule extends Device {
     }
   }
 
-  *closeIO(port: tIOPort | Array<tIOPort>): Saga<void> {
+  * closeIO(port: tIOPort | Array<tIOPort>): Saga<void> {
     try {
       if (port instanceof Array) {
         // eslint-disable-next-line no-restricted-syntax
@@ -232,7 +233,7 @@ export default class ClsIOModule extends Device {
     }
   }
 
-  *getStatus(): Saga<void> {
+  * getStatus(): Saga<void> {
     try {
       yield call(ioStatusApi, this.serialNumber);
     } catch (e) {
@@ -240,7 +241,7 @@ export default class ClsIOModule extends Device {
     }
   }
 
-  *ioContact(): Saga<void> {
+  * ioContact(): Saga<void> {
     try {
       yield call(ioContactApi, this.serialNumber);
     } catch (e) {
@@ -264,6 +265,6 @@ export default class ClsIOModule extends Device {
   }
 
   removeListener(listener: tIOListener) {
-    return remove(this.#listeners, l => l === listener);
+    return remove<tIOListener>(this.#listeners, (l: tIOListener) => l === listener);
   }
 }

@@ -16,11 +16,11 @@ const mapDispatch = {
   submit: inputStepActions.submit
 };
 
-
-type Props = {
+type Props = {|
+  ...tStepProps,
   label: string,
   submit: (?string | ?number) => any
-} ;
+|};
 
 function InputStep({
                      step,
@@ -28,7 +28,7 @@ function InputStep({
                      isCurrent,
                      submit,
                      bindAction
-                   }: Props & tStepProps) {
+                   }: Props) {
   const [value, setValue] = useState('');
 
   useEffect(
@@ -74,7 +74,7 @@ function InputStep({
 }
 
 
-export default connect(
+export default connect<Props, Props, _, _, _, _>(
   mapState,
   mapDispatch
 )(InputStep);

@@ -2,24 +2,27 @@
 
 import ReactTable from 'react-table';
 import React from 'react';
-import PropTypes from "prop-types";
+import PropTypes from 'prop-types';
 
-export default class CustomReactTable extends React.Component {
+type Props = {
+  translate: (string)=>string
+};
+export default class CustomReactTable extends React.Component<Props> {
 
   render() {
-    const {translate,...restProps}=this.props;
+    const { translate, ...restProps } = this.props;
     return (
-          <ReactTable
-            previousText={translate('Table.Previous')}
-            nextText={translate('Table.Next')}
-            loadingText={translate('Table.Loading')}
-            noDataText={translate('Table.NoRowsFound')}
-            pageText={translate('Table.Page')}
-            ofText={translate('Table.of')}
-            rowsText={translate('Table.rows')}
-            showPageJump={false}
-            {...restProps}
-          />
+      <ReactTable
+        previousText={translate('Table.Previous')}
+        nextText={translate('Table.Next')}
+        loadingText={translate('Table.Loading')}
+        noDataText={translate('Table.NoRowsFound')}
+        pageText={translate('Table.Page')}
+        ofText={translate('Table.of')}
+        rowsText={translate('Table.rows')}
+        showPageJump={false}
+        {...restProps}
+      />
 
     );
   }

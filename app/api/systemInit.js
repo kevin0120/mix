@@ -4,7 +4,7 @@ import { defaultClient } from '../common/utils';
 import { lError } from '../logger';
 
 // eslint-disable-next-line import/prefer-default-export
-export const fetchConnectionInfo = fullUrl =>
+export const fetchConnectionInfo = (fullUrl: string) =>
   defaultClient
     .get(fullUrl)
     .then(resp => resp)

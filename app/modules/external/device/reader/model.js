@@ -15,7 +15,7 @@ class ClsReader extends Device {
     return loginRequestUuid(input.data.data.uid, 'online');
   };
 
-  constructor(...args) {
+  constructor(...args: Array<any>) {
     super(...args);
     this.Enable();
   }

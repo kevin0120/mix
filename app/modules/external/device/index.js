@@ -9,7 +9,7 @@ import ClsScanner from './scanner/model';
 import ClsScrewTool from './tools/model';
 import ClsReader from './reader/model';
 import ClsIOModule from './io/model';
-import type { tDeviceSN } from './Device';
+import type { tDeviceSN } from './typeDef';
 import { deviceStatusApi } from '../../../api/device';
 import healthzActions from '../../healthz/action';
 
