@@ -2,7 +2,9 @@
 
 const developmentEnvironments = ['development', 'test'];
 
-const developmentPlugins = [require('react-hot-loader/babel')];
+const developmentPlugins = [
+  require('react-hot-loader/babel'),
+];
 
 const productionPlugins = [
   require('babel-plugin-dev-expression'),
@@ -19,6 +21,10 @@ module.exports = api => {
   const development = api.env(developmentEnvironments);
 
   return {
+    babelrcRoots: [
+      ".",
+      "app/modules/*",
+    ],
     presets: [
       [
         require('@babel/preset-env'),

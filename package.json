@@ -145,6 +145,7 @@
     "transform": {
       "^.+\\.jsx?$": "babel-jest"
     },
+    "transformIgnorePatterns": ["./node_modules/(?!(lodash-es))"],
     "setupFiles": [
       "./internals/scripts/CheckBuiltsExist.js"
     ]
@@ -179,6 +180,7 @@
     "babel-loader": "^8.0.6",
     "babel-plugin-dev-expression": "^0.2.2",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "chalk": "^2.4.1",
     "concurrently": "^3.6.1",
     "connected-react-router": "^4.4.1",
@@ -212,6 +214,7 @@
     "flow-bin": "^0.104.0",
     "flow-runtime": "^0.17.0",
     "flow-typed": "^2.6.1",
+    "faker": "^4.1.0",
     "husky": "^0.14.3",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^24.8.0",

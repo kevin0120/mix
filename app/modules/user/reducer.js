@@ -1,12 +1,10 @@
 // @flow
 
+import { remove } from 'lodash-es';
 import { USER } from './action';
 // import defaultAvatarImg from '../../../resources/imgs/image_placeholder.jpg';
 import type { tCommonActionType } from '../../common/type';
 import type { tUser } from './interface/typeDef';
-import { CommonLog } from '../../common/utils';
-
-const lodash = require('lodash');
 
 const defaultUsers = [];
 
@@ -25,11 +23,10 @@ export default function users(
     }
     case USER.LOGOUT.SUCCESS: {
       const { uuid } = action;
-      lodash.remove(state, i => i.uuid === uuid);
+      remove(state, i => i.uuid === uuid);
       return [...state];
     }
     default:
-      // CommonLog.lError(`This Action Type: ${action.type} Is Not Support!`);
       return state;
   }
 }
