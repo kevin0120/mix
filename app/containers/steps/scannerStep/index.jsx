@@ -11,7 +11,7 @@ import { scannerStepAction } from '../../../modules/step/scannerStep/action';
 // import QRCode from './qrcode-scan.svg';
 import type { tStepProps } from '../types';
 import withKeyboard from '../../../components/Keyboard';
-import type { Dispatch } from '../../../modules/indexReducer';
+import type { Dispatch } from '../../../modules/typeDef';
 import {
   stepData,
   stepPayload,

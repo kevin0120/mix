@@ -13,7 +13,7 @@ import STEP_STATUS from '../../modules/step/constants';
 import styles from './styles';
 import * as oSel from '../../modules/order/selector';
 import { orderActions } from '../../modules/order/action';
-import type { Dispatch } from '../../modules/indexReducer';
+import type { Dispatch } from '../../modules/typeDef';
 import Timer from './Timer';
 import type { tClsStep } from '../../modules/step/Step';
 

@@ -5,7 +5,7 @@ import { Typography } from '@material-ui/core';
 import materialStepActions from '../../../modules/step/materialStep/action';
 import type { tStepProps } from '../types';
 import Button from '../../../components/CustomButtons/Button';
-import type { Dispatch } from '../../../modules/indexReducer';
+import type { Dispatch } from '../../../modules/typeDef';
 import type { IWorkStep } from '../../../modules/step/interface/IWorkStep';
 
 const mapState = (state, props) => ({

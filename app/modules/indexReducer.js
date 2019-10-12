@@ -3,7 +3,6 @@
 import { combineReducers } from 'redux';
 import { connectRouter } from 'connected-react-router';
 
-import type { Dispatch as ReduxDispatch, Store as ReduxStore } from 'redux';
 import setting from './setting/reducer';
 import Configuration from './connections/reducer';
 import users from './user/reducer';
@@ -22,21 +21,6 @@ import order from './order/reducer';
 import dialog from './dialog/reducer';
 import Notifier from './Notifier/reducer';
 import loading from './loading/reducer';
-
-export type StateType = {
-  +notify: Object,
-  +setting: Object
-};
-
-export type Action = {
-  +type: string
-};
-
-export type GetState = () => StateType;
-
-export type Dispatch = ReduxDispatch<Action>;
-
-export type Store = ReduxStore<GetState, Action>;
 
 export default function createRootReducer(history: {}) {
   const routerReducer = connectRouter(history)(() => {});
