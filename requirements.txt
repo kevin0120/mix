@@ -1,6 +1,5 @@
 pyecharts==0.5.11
-echarts-themes-pypkg
-pyecharts_snapshot
+pyecharts-snapshot==0.1.10
 scipy
 validators
 minio

@@ -67,7 +67,6 @@ class OperationResult(models.HyperModel):
     cur_objects = fields.Char(string='Curve Files')
 
     name = fields.Char('Name', default=lambda self: _('New'))
-    point_id = fields.Many2one('sa.quality.point', 'Quality Control Point')
     quality_state = fields.Selection([
         ('none', 'To do'),
         ('exception', 'Exception'),
@@ -250,7 +249,7 @@ BEGIN
                                        measure_t_don,
                                        measure_torque, op_time, pset_w_min, pset_w_target, lacking, quality_state,
                                        exception_reason, sent, batch, track_no,
-                                       qcp_id, point_id, bom_line_id, operation_point_id, workorder_id,
+                                       qcp_id, bom_line_id, operation_point_id, workorder_id,
                                        consu_product_id, consu_bom_line_id,
                                        production_id, tool_id, program_id, product_id, assembly_line_id, workcenter_id,
                                        tightening_id, job,
@@ -262,7 +261,7 @@ BEGIN
           pset_w_min, pset_w_target, lacking,
           quality_state, exception_reason,
           sent, batch, r_vin_code,
-          qcp_id, qcp_id, r_bom_line_id, r_operation_point_id, order_id,
+          qcp_id, r_bom_line_id, r_operation_point_id, order_id,
           r_consu_product_id,
           consu_bom_id, r_production_id,
           r_gun_id, r_program_id, r_product_id, r_assembly_id,

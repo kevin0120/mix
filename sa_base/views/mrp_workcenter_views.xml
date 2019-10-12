@@ -227,7 +227,7 @@
                       (0, 0, {'view_mode': 'form', 'view_id': ref('sa_mrp_workcenter_group_form_view')})]"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
-                Click to add a work center .
+                Click to add a work center group.
               </p><p>
                 Work Centers allow you to create and manage manufacturing
                 units. They consist of workers and/or machines, which are
