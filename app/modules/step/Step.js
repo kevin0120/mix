@@ -71,14 +71,6 @@ export default class Step implements IWorkStep {
     updateStatus: orderStepUpdateApi
   };
 
-  run: ()=>any;
-
-  timerStart: ()=>any;
-
-  timerStop: ()=>any;
-
-  updateData: ()=>any;
-
   constructor(stepObj: tStep, ...rest: any) {
     this._id = stepObj.id;
     this.update(stepObj);

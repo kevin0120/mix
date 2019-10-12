@@ -8,10 +8,11 @@ import { ioDirection, ioTriggerMode } from '../../external/device/io/type';
 import actions, { MATERIAL_STEP } from './action';
 import type { IWorkStep } from '../interface/IWorkStep';
 import type ClsIOModule from '../../external/device/io/model';
+import type { IMaterialStep } from './interface/IMaterialStep';
 
 const items = payload => payload?.items;
 
-const MaterialStepMixin = (ClsBaseStep: IWorkStep) => class ClsMaterialStep extends ClsBaseStep {
+const MaterialStepMixin = (ClsBaseStep: IWorkStep) => class ClsMaterialStep extends ClsBaseStep implements IMaterialStep, IWorkStep {
   _ports = new Set([]);
 
   _io = new Set([]);
@@ -19,12 +20,6 @@ const MaterialStepMixin = (ClsBaseStep: IWorkStep) => class ClsMaterialStep exte
   _items = new Set([]);
 
   _confirm = null;
-
-  _onLeave: Function;
-
-  _payload: {
-    items: Array<any>
-  };
 
   constructor(...args: any) {
     super(...args);

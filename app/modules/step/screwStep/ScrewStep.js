@@ -47,7 +47,7 @@ function* doPoint(point, isFirst, orderActions) {
   }
 }
 
-const ScrewStepMixin = (ClsBaseStep: IWorkStep) => class ClsScrewStep extends ClsBaseStep {
+const ScrewStepMixin = (ClsBaseStep: IWorkStep) => class ClsScrewStep extends ClsBaseStep implements IWorkStep {
 
   _tools = [];
 
