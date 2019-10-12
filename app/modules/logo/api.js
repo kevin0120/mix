@@ -5,7 +5,7 @@ import { defaultClient } from '../../common/utils';
 
 export default function fetchLogo(baseURL: string) {
   if (!isURL(baseURL, { require_protocol: true })) {
-    throw new Error('fetchLogo baseURL is empty');
+    throw new Error('fetchLogo baseURL Is Empty');
   }
   const fullUrl = `${baseURL}/logo`;
 
