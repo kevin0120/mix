@@ -3,7 +3,7 @@
 import isURL from 'validator/lib/isURL';
 import { defaultClient } from '../../common/utils';
 
-export default function fetchLogo(baseURL) {
+export default function fetchLogo(baseURL: string) {
   if (!isURL(baseURL, { require_protocol: true })) {
     throw new Error('fetchLogo baseURL is empty');
   }
@@ -15,8 +15,7 @@ export default function fetchLogo(baseURL) {
     .catch(e => {
       Error(e.toString(), {
         at: 'fetchLogo',
-        response:
-          e.response && e.response.data && JSON.stringify(e.response.data)
+        response: e.response && e.response.data && JSON.stringify(e.response.data)
       });
       throw e;
     });

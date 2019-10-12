@@ -31,7 +31,7 @@ import CardBody from '../../components/Card/CardBody';
 import CardIcon from '../../components/Card/CardIcon';
 import CardHeader from '../../components/Card/CardHeader';
 
-import { defaultClient } from '../../common/utils';
+import { CommonLog, defaultClient } from '../../common/utils';
 import withKeyboard from '../../components/Keyboard';
 import CustomReactTable from '../../components/CustomReactTable';
 
@@ -152,7 +152,7 @@ class Result extends React.Component {
         }
       })
       .catch(error => {
-        console.log(`get error: ${error.toString()}`);
+        CommonLog.lError(error);
       });
   }
 
