@@ -417,6 +417,21 @@ func (s *Service) ResultExists(id int64) (bool, error) {
 	}
 }
 
+func (s *Service) GetResultByID(id int64) (*Results, error) {
+	result := Results{}
+	rt, err := s.eng.Alias("r").Where("r.id = ?", id).Limit(1).Get(&result)
+
+	if err != nil {
+		return nil, err
+	} else {
+		if !rt {
+			return nil, errors.New("result does not exist")
+		} else {
+			return &result, nil
+		}
+	}
+}
+
 func (s *Service) GetResult(resultId int64, count int) (Results, error) {
 	var err error
 

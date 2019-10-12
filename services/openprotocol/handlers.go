@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils/ascii"
@@ -308,13 +309,18 @@ func handleMID_0052_VIN(c *TighteningController, pkg *handlerPkg) error {
 		bc += ids[v]
 	}
 
-	barcode := wsnotify.WSScanner{
-		Barcode: bc,
-	}
+	c.GetDispatch(tightening_device.DISPATCH_CONTROLLER_ID).Dispatch(&tightening_device.TighteningBarcode{
+		ControllerSN: c.cfg.SN,
+		Barcode:      bc,
+	})
 
-	str, _ := json.Marshal(barcode)
-
-	c.Srv.WS.WSSend(wsnotify.WS_EVENT_SCANNER, string(str))
+	//barcode := wsnotify.WSScanner{
+	//	Barcode: bc,
+	//}
+	//
+	//str, _ := json.Marshal(barcode)
+	//
+	//c.Srv.WS.WSSend(wsnotify.WS_EVENT_SCANNER, string(str))
 
 	return nil
 }
@@ -335,10 +341,10 @@ func handleMID_0071_ALARM(c *TighteningController, pkg *handlerPkg) error {
 
 	switch ai.ErrorCode {
 	case EVT_CONTROLLER_TOOL_CONNECT:
-		//c.UpdateToolStatus(controller.EVT_TOOL_CONNECTED)
+		c.UpdateToolStatus(device.STATUS_ONLINE)
 
 	case EVT_CONTROLLER_TOOL_DISCONNECT:
-		//c.UpdateToolStatus(controller.EVT_TOOL_DISCONNECTED)
+		c.UpdateToolStatus(device.STATUS_OFFLINE)
 	}
 
 	return nil
@@ -354,10 +360,10 @@ func handleMID_0076_ALARM_STATUS(c *TighteningController, pkg *handlerPkg) error
 
 	switch as.ErrorCode {
 	case EVT_CONTROLLER_NO_ERR:
-		//c.UpdateToolStatus(controller.EVT_TOOL_CONNECTED)
+		c.UpdateToolStatus(device.STATUS_ONLINE)
 
 	case EVT_CONTROLLER_TOOL_DISCONNECT:
-		//c.UpdateToolStatus(controller.EVT_TOOL_DISCONNECTED)
+		c.UpdateToolStatus(device.STATUS_OFFLINE)
 	}
 
 	return nil

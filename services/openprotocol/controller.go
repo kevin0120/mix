@@ -75,6 +75,9 @@ type TighteningController struct {
 	requestChannel chan uint32
 	sequence       *utils.Sequence
 
+	handleRecvBuf []byte
+	writeOffset   int
+
 	device.BaseDevice
 }
 
@@ -128,26 +131,23 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 		tightening_device.DISPATCH_IO:                utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		tightening_device.DISPATCH_CONTROLLER_STATUS: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		tightening_device.DISPATCH_TOOL_STATUS:       utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		tightening_device.DISPATCH_CONTROLLER_ID:     utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 	}
 
 	return &c
 }
 
-//func (c *TighteningController) UpdateToolStatus(status string) {
-//	s := c.toolStatus.Load().(string)
-//	if s != status {
-//		c.toolStatus.Store(status)
-//
-//		// 推送工具状态
-//		//ts := wsnotify.WSToolStatus{
-//		//	ToolSN: c.cfg.Tools[0].SerialNO,
-//		//	Status: status,
-//		//}
-//		//
-//		//str, _ := json.Marshal(ts)
-//		//c.Srv.WS.WSSend(wsnotify.WS_EVETN_TOOL, string(str))
-//	}
-//}
+func (c *TighteningController) UpdateToolStatus(status string) {
+	for sn, v := range c.Children() {
+		tool := v.(*TighteningTool)
+		tool.UpdateStatus(status)
+
+		c.GetDispatch(tightening_device.DISPATCH_TOOL_STATUS).Dispatch(&tightening_device.TighteningToolStatus{
+			ToolSN: sn,
+			Status: status,
+		})
+	}
+}
 
 func (c *TighteningController) findToolSNByChannel(channel int) (string, error) {
 	for _, v := range c.cfg.Tools {
@@ -418,6 +418,7 @@ func (c *TighteningController) Start() error {
 
 	// 启动处理
 	go c.manage()
+	go c.handleRecv()
 
 	go c.Connect()
 
@@ -494,7 +495,7 @@ func (c *TighteningController) clearToolsResultAndCurve() {
 func (c *TighteningController) Connect() error {
 	c.UpdateStatus(device.STATUS_OFFLINE)
 	c.handlerBuf = make(chan handlerPkg, 1024)
-	c.receiveBuf = make(chan []byte, 65535)
+	c.writeOffset = 0
 	c.requestChannel = make(chan uint32, 1024)
 	c.sequence = utils.CreateSequence()
 	c.Response = ResponseQueue{
@@ -748,11 +749,50 @@ func (c *TighteningController) handlePackageOPPayload(src []byte, data []byte) e
 	return nil
 }
 
-func (c *TighteningController) manage() {
+func (c *TighteningController) handleRecv() {
+	c.handleRecvBuf = make([]byte, c.Srv.config().ReadBufferSize)
+	c.receiveBuf = make(chan []byte, 65535)
+	lenBuf := len(c.handleRecvBuf)
 
-	lenBuf := 65535
-	handleBuf := make([]byte, lenBuf)
-	writeOffset := 0
+	for {
+		select {
+		case buf := <-c.receiveBuf:
+			// 处理接收缓冲
+			var readOffset = 0
+
+			for {
+				if readOffset >= len(buf) {
+					break
+				}
+				index := bytes.IndexByte(buf[readOffset:], OP_TERMINAL)
+				if index == -1 {
+					// 没有结束字符,放入缓冲等待后续处理
+					restBuf := buf[readOffset:]
+					if c.writeOffset+len(restBuf) > lenBuf {
+						c.diag.Error("full", errors.New("full"))
+						break
+					}
+
+					copy(c.handleRecvBuf[c.writeOffset:c.writeOffset+len(restBuf)], restBuf)
+					c.writeOffset += len(restBuf)
+					break
+				} else {
+					// 找到结束字符，结合缓冲进行处理
+					err := c.handlePackageOPPayload(c.handleRecvBuf[0:c.writeOffset], buf[readOffset:readOffset+index])
+					if err != nil {
+						//数据需要丢弃
+						c.diag.Error("msg", err)
+					}
+
+					c.writeOffset = 0
+					readOffset += index + 1
+				}
+			}
+		}
+	}
+}
+
+func (c *TighteningController) manage() {
 
 	nextWriteThreshold := time.Now()
 	for {
@@ -784,44 +824,11 @@ func (c *TighteningController) manage() {
 				c.updateKeepAliveDeadLine()
 			}
 			nextWriteThreshold = time.Now().Add(c.reqTimeout)
+
 		case stopDone := <-c.closing:
 			c.diag.Debug("manage exit")
 			close(stopDone)
 			return //退出manage协程
-
-		case buf := <-c.receiveBuf:
-			// 处理接收缓冲
-			var readOffset = 0
-
-			for {
-				if readOffset >= len(buf) {
-					break
-				}
-				index := bytes.IndexByte(buf[readOffset:], OP_TERMINAL)
-				if index == -1 {
-					// 没有结束字符,放入缓冲等待后续处理
-					//c.diag.Debug("Index Is Empty")
-					restBuf := buf[readOffset:]
-					if writeOffset+len(restBuf) > lenBuf {
-						c.diag.Error("full", errors.New("full"))
-						break
-					}
-
-					copy(handleBuf[writeOffset:writeOffset+len(restBuf)], restBuf)
-					writeOffset += len(restBuf)
-					break
-				} else {
-					// 找到结束字符，结合缓冲进行处理
-					err := c.handlePackageOPPayload(handleBuf[0:writeOffset], buf[readOffset:readOffset+index])
-					if err != nil {
-						//数据需要丢弃
-						c.diag.Error("msg", err)
-					}
-
-					writeOffset = 0
-					readOffset += index + 1
-				}
-			}
 
 		case pkg := <-c.handlerBuf:
 			err := c.HandleMsg(&pkg)

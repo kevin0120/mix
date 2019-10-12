@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"gopkg.in/resty.v1"
@@ -59,6 +60,8 @@ type Service struct {
 
 	updateQueue map[int64]time.Time
 	mtx         sync.Mutex
+
+	TighteningService *tightening_device.Service
 }
 
 func NewService(c Config, d Diagnostic, rush_port string) *Service {
@@ -135,6 +138,8 @@ func (s *Service) Config() Config {
 }
 
 func (s *Service) Open() error {
+	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_RESULT).Register(s.OnTighteningResult)
+
 	c := s.Config()
 	client := resty.New()
 	client.SetRESTMode() // restful mode is default
@@ -372,11 +377,11 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	//aiisResult.ProductID = dbWorkorder.ProductID
 	aiisResult.NutID = result.ConsuProductID
 
-	//aiisResult.WorkcenterCode = dbWorkorder.WorkcenterCode
+	aiisResult.WorkcenterCode = dbWorkorder.WorkcenterCode
 	aiisResult.ToolSN = result.ToolSN
 	aiisResult.ControllerSN = result.ControllerSN
 
-	//aiisResult.Job = fmt.Sprintf("%d", dbWorkorder.JobID)
+	aiisResult.Job = fmt.Sprintf("%d", dbWorkorder.JobID)
 	aiisResult.Stage = result.Stage
 
 	if result.Result == storage.RESULT_OK {
@@ -417,11 +422,29 @@ func (s *Service) ResultUploadManager() error {
 			for _, v := range results {
 				aiisResult, err := s.ResultToAiisResult(&v)
 				if err == nil {
-					s.PutResult(v.ResultId, aiisResult)
+					s.PutResult(v.Id, aiisResult)
 				}
 			}
 		}
 
 		time.Sleep(time.Duration(s.Config().ResultUploadInteval))
+	}
+}
+
+// 收到控制器结果
+func (s *Service) OnTighteningResult(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	tighteningResult := data.(*tightening_device.TighteningResult)
+	dbResult, err := s.DB.GetResultByID(tighteningResult.ID)
+	if err != nil {
+		s.diag.Error("Get Result Failed", err)
+	}
+
+	aiisResult, err := s.ResultToAiisResult(dbResult)
+	if err == nil {
+		s.PutResult(dbResult.Id, aiisResult)
 	}
 }

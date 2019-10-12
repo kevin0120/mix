@@ -308,48 +308,21 @@ func (s *Service) resetResult(id int64) error {
 func (s *Service) OnNewHmiClient(conn websocket.Connection) {
 	controllers := s.TighteningService.GetControllers()
 	for sn, c := range controllers {
-		controllerStatus := wsnotify.WSStatus{
+		msg, _ := json.Marshal(wsnotify.WSStatus{
 			SN:     sn,
 			Status: c.Status(),
-		}
-
-		msg, _ := json.Marshal(controllerStatus)
+		})
 		conn.Emit(wsnotify.WS_EVENT_CONTROLLER, string(msg))
+
+		for toolSN, tool := range c.Children() {
+			msg, _ := json.Marshal(wsnotify.WSToolStatus{
+				ToolSN: toolSN,
+				Status: tool.Status(),
+			})
+
+			conn.Emit(wsnotify.WS_EVENT_TOOL, string(msg))
+		}
 	}
-
-	//controllers := s.ControllerService.GetControllers()
-	//
-	//for k, v := range *controllers {
-	//	s := wsnotify.WSStatus{
-	//		SN:     k,
-	//		Status: string(v.Status()),
-	//	}
-	//
-	//	msg, _ := json.Marshal(s)
-	//
-	//	conn.Emit(wsnotify.WS_EVENT_CONTROLLER, string(msg))
-	//
-	//	inputs := openprotocol.IOMonitor{
-	//		ControllerSN: k,
-	//		Inputs:       v.Inputs(),
-	//	}
-	//
-	//	msg, _ = json.Marshal(inputs)
-	//	conn.Emit(wsnotify.WS_EVENT_IO, string(msg))
-
-	// 推送工具状态
-	// TODO:工具状态
-	//tools := v.Tools()
-	//for sn, status := range tools {
-	//	ts := wsnotify.WSToolStatus{
-	//		ToolSN: sn,
-	//		Status: status,
-	//	}
-	//	msg, _ = json.Marshal(ts)
-	//
-	//	conn.Emit(wsnotify.WS_EVETN_TOOL, string(msg))
-	//}
-	//}
 
 	odooStatus := wsnotify.WSOdooStatus{
 		Status: s.ODOO.Status(),
@@ -481,7 +454,14 @@ func (s *Service) OnTighteningControllerStatus(data interface{}) {
 
 // 工具状态变化
 func (s *Service) OnTighteningToolStatus(data interface{}) {
+	if data == nil {
+		return
+	}
 
+	toolStatus := data.(*tightening_device.TighteningToolStatus)
+	payload, _ := json.Marshal(toolStatus)
+	s.WS.WSSend(wsnotify.WS_EVENT_TOOL, string(payload))
+	s.diag.Debug(fmt.Sprintf("工具状态推送HMI: %s", string(payload)))
 }
 
 // 控制器IO变化
@@ -502,4 +482,8 @@ func (s *Service) OnTighteningControllereID(data interface{}) {
 		return
 	}
 
+	controllerBarcode := data.(*tightening_device.TighteningBarcode)
+	payload, _ := json.Marshal(controllerBarcode)
+	s.WS.WSSend(wsnotify.WS_EVENT_SCANNER, string(payload))
+	s.diag.Debug(fmt.Sprintf("控制器条码推送HMI: %s", string(payload)))
 }

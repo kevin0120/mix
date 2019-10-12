@@ -160,6 +160,9 @@ type TighteningResult struct {
 
 	// 螺栓编号
 	NutNo string `json:"nut_no"`
+
+	// 结果id
+	ID int64 `json:"id"`
 }
 
 func (r *TighteningResult) ToDBResult() *storage.Results {
@@ -281,4 +284,9 @@ type TighteningToolStatus struct {
 type TighteningControllerInput struct {
 	ControllerSN string `json:"controller_sn"`
 	Inputs       string `json:"inputs"`
+}
+
+type TighteningBarcode struct {
+	ControllerSN string `json:"controller_sn"`
+	Barcode      string `json:"barcode"`
 }

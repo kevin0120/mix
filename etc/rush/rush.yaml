@@ -94,7 +94,7 @@ audi/vw:
   version: 21
 
 openprotocol:
-  keep_alive_period: 3s
+  keep_alive_period: 10s
   read_buf: 65535
   req_time_out: 300ms
   skip_jobs:

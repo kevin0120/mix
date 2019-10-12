@@ -21,7 +21,7 @@ const (
 	WS_EVENT_IO                = "io"
 	WS_EVENT_ODOO              = "odoo"
 	WS_EVENT_MAINTENANCE       = "maintenance"
-	WS_EVETN_TOOL              = "tool"
+	WS_EVENT_TOOL              = "tool"
 	WS_EVENT_READER            = "reader"
 	WS_EVENT_TIGHTENING_DEVICE = "tightening_device"
 	WS_EVENT_REPLY             = "reply"

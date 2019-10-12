@@ -23,7 +23,7 @@ func CreateTool(c *TighteningController, cfg tightening_device.ToolConfig, d Dia
 		BaseDevice: device.CreateBaseDevice(),
 	}
 
-	tool.UpdateStatus(device.STATUS_ONLINE)
+	tool.UpdateStatus(device.STATUS_OFFLINE)
 	return &tool
 }
 
@@ -51,7 +51,7 @@ func (s *TighteningTool) GetMode() string {
 
 // 工具使能控制
 func (s *TighteningTool) ToolControl(enable bool) error {
-	if s.Status() == device.STATUS_OFFLINE {
+	if s.controller.Status() == device.STATUS_OFFLINE {
 		return errors.New(device.STATUS_OFFLINE)
 	}
 
@@ -74,7 +74,7 @@ func (s *TighteningTool) ToolControl(enable bool) error {
 
 // 设置PSet
 func (s *TighteningTool) SetPSet(pset int) error {
-	if s.Status() == device.STATUS_OFFLINE {
+	if s.controller.Status() == device.STATUS_OFFLINE {
 		return errors.New(device.STATUS_OFFLINE)
 	}
 
@@ -93,7 +93,7 @@ func (s *TighteningTool) SetPSet(pset int) error {
 
 // 设置Job
 func (s *TighteningTool) SetJob(job int) error {
-	if s.Status() == device.STATUS_OFFLINE {
+	if s.controller.Status() == device.STATUS_OFFLINE {
 		return errors.New(device.STATUS_OFFLINE)
 	}
 
@@ -112,7 +112,7 @@ func (s *TighteningTool) SetJob(job int) error {
 
 // 模式选择: job/pset
 func (s *TighteningTool) ModeSelect(mode string) error {
-	if s.Status() == device.STATUS_OFFLINE {
+	if s.controller.Status() == device.STATUS_OFFLINE {
 		return errors.New(device.STATUS_OFFLINE)
 	}
 
@@ -137,7 +137,7 @@ func (s *TighteningTool) ModeSelect(mode string) error {
 
 // 取消job
 func (s *TighteningTool) AbortJob() error {
-	if s.Status() == device.STATUS_OFFLINE {
+	if s.controller.Status() == device.STATUS_OFFLINE {
 		return errors.New(device.STATUS_OFFLINE)
 	}
 
@@ -155,7 +155,7 @@ func (s *TighteningTool) AbortJob() error {
 
 // 设置pset次数
 func (s *TighteningTool) SetPSetBatch(pset int, batch int) error {
-	if s.Status() == device.STATUS_OFFLINE {
+	if s.controller.Status() == device.STATUS_OFFLINE {
 		return errors.New(device.STATUS_OFFLINE)
 	}
 
@@ -174,7 +174,7 @@ func (s *TighteningTool) SetPSetBatch(pset int, batch int) error {
 
 // pset列表
 func (s *TighteningTool) GetPSetList() ([]int, error) {
-	if s.Status() == device.STATUS_OFFLINE {
+	if s.controller.Status() == device.STATUS_OFFLINE {
 		return nil, errors.New(device.STATUS_OFFLINE)
 	}
 
@@ -188,7 +188,7 @@ func (s *TighteningTool) GetPSetList() ([]int, error) {
 
 // pset详情
 func (s *TighteningTool) GetPSetDetail(pset int) (*tightening_device.PSetDetail, error) {
-	if s.Status() == device.STATUS_OFFLINE {
+	if s.controller.Status() == device.STATUS_OFFLINE {
 		return nil, errors.New(device.STATUS_OFFLINE)
 	}
 
@@ -212,7 +212,7 @@ func (s *TighteningTool) GetPSetDetail(pset int) (*tightening_device.PSetDetail,
 
 // job列表
 func (s *TighteningTool) GetJobList() ([]int, error) {
-	if s.Status() == device.STATUS_OFFLINE {
+	if s.controller.Status() == device.STATUS_OFFLINE {
 		return nil, errors.New(device.STATUS_OFFLINE)
 	}
 
@@ -226,7 +226,7 @@ func (s *TighteningTool) GetJobList() ([]int, error) {
 
 // job详情
 func (s *TighteningTool) GetJobDetail(job int) (*tightening_device.JobDetail, error) {
-	if s.Status() == device.STATUS_OFFLINE {
+	if s.controller.Status() == device.STATUS_OFFLINE {
 		return nil, errors.New(device.STATUS_OFFLINE)
 	}
 
@@ -249,7 +249,7 @@ func (s *TighteningTool) GetJobDetail(job int) (*tightening_device.JobDetail, er
 }
 
 func (s *TighteningTool) TraceSet(str string) error {
-	if s.Status() == device.STATUS_OFFLINE {
+	if s.controller.Status() == device.STATUS_OFFLINE {
 		return errors.New(device.STATUS_OFFLINE)
 	}
 
@@ -341,6 +341,7 @@ func (s *TighteningTool) OnResult(result interface{}) {
 	}
 
 	// 分发结果
+	tighteningResult.ID = dbResult.Id
 	s.controller.GetDispatch(tightening_device.DISPATCH_RESULT).Dispatch(tighteningResult)
 }
 

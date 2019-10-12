@@ -116,10 +116,6 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.appendMinioService()
 
-	s.appendAiisService()
-
-	s.appendOdooService()
-
 	s.appendDeviceService()
 
 	if err := s.appendControllersService(); err != nil {
@@ -131,6 +127,10 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	s.appendOpenProtocolService()
 
 	s.appendTighteningDeviceService()
+
+	s.appendAiisService()
+
+	s.appendOdooService()
 
 	s.appendHMIService()
 
@@ -287,6 +287,7 @@ func (s *Server) appendAiisService() error {
 	d := s.DiagService.NewAiisHandler()
 	srv := aiis.NewService(c, d, s.config.HTTP.BindAddress)
 
+	srv.TighteningService = s.TighteningDeviceService
 	srv.SN = s.config.SN
 	srv.DB = s.StorageServie
 	s.AiisService = srv

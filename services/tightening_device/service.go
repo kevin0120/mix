@@ -78,6 +78,7 @@ func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol) (*Servi
 		c.GetDispatch(DISPATCH_TOOL_STATUS).Register(srv.OnToolStatus)
 		c.GetDispatch(DISPATCH_CONTROLLER_STATUS).Register(srv.OnControllerStatus)
 		c.GetDispatch(DISPATCH_IO).Register(srv.OnIOInputs)
+		c.GetDispatch(DISPATCH_CONTROLLER_ID).Register(srv.OnControllerBarcode)
 
 		// TODO: 如果控制器序列号没有配置，则通过探测加入设备列表。
 		srv.addController(deviceConfig.SN, c)
@@ -210,6 +211,11 @@ func (s *Service) OnControllerStatus(data interface{}) {
 // 工具状态变化
 func (s *Service) OnToolStatus(data interface{}) {
 	s.GetDispatcher(DISPATCH_TOOL_STATUS).Dispatch(data)
+}
+
+// 控制器条码
+func (s *Service) OnControllerBarcode(data interface{}) {
+	s.GetDispatcher(DISPATCH_CONTROLLER_ID).Dispatch(data)
 }
 
 func (s *Service) GetDispatcher(name string) *utils.Dispatcher {
