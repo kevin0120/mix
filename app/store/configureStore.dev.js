@@ -5,7 +5,7 @@ import { routerMiddleware, routerActions } from 'connected-react-router';
 import { createLogger } from 'redux-logger';
 import createRootReducer from '../modules/indexReducer';
 
-import type { StateType } from '../modules/indexReducer';
+import type { StateType } from '../modules/typeDef';
 
 const history = createHashHistory();
 

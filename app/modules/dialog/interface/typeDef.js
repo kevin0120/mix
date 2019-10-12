@@ -1,6 +1,6 @@
 // @flow
 import PropTypes from 'prop-types';
-import type { Dispatch } from '../../indexReducer';
+import type { Dispatch } from '../../typeDef';
 
 type tDialogButton = {
   action: Dispatch,

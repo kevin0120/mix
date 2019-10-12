@@ -1,7 +1,7 @@
 import STEP_STATUS from '../../step/constants';
 import { ORDER_STATUS } from '../constants';
 // import type { tClsOrder } from '../Order';
-import type { IOrder } from './interface/IOrder';
+import type { IOrder } from './IOrder';
 
 export type tStockMove = {
   lot: string, // 批次号或者序列号

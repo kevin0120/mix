@@ -74,10 +74,10 @@ export default class Step implements IWorkStep {
   constructor(stepObj: tStep, ...rest: any) {
     this._id = stepObj.id;
     this.update(stepObj);
-    this.run = this.run.bind(this);
-    this.timerStart = this.timerStart.bind(this);
-    this.timerStop = this.timerStop.bind(this);
-    this.updateData = this.updateData.bind(this);
+    (this: any).run = this.run.bind(this);
+    (this: any).timerStart = this.timerStart.bind(this);
+    (this: any).timerStop = this.timerStop.bind(this);
+    (this: any).updateData = this.updateData.bind(this);
   }
 
   update(stepObj: tStep) {
