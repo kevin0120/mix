@@ -79,13 +79,9 @@ class EquipmentConnection(models.Model):
 class MaintenanceEquipmentCategory(models.Model):
     _inherit = 'maintenance.equipment.category'
 
-    # code = fields.Char('code')
     name = fields.Char('Category Name', required=True)
 
-
-#     @api.multi
-#     def name_get(self):
-#         return [(cat.id, cat.name) for cat in self]
+    technical_name = fields.Char('Technical name', required=True)
 
 
 class MaintenanceEquipment(models.Model):
@@ -109,7 +105,7 @@ class MaintenanceEquipment(models.Model):
 
     connections_count = fields.Integer(compute='_compute_connections_count')
 
-    category_name = fields.Char(compute='_compute_category_name', default='', store=True)
+    category_name = fields.Char(related='category_id.name')
 
     connection_ids = fields.One2many('maintenance.equipment.connection', 'equipment_id', 'Connection Information')
 
@@ -170,11 +166,11 @@ class MaintenanceEquipment(models.Model):
         for equipment in self:
             equipment.connections_count = len(equipment.connection_ids)
 
-    @api.multi
-    @api.depends('category_id')
-    def _compute_category_name(self):
-        for equipment in self:
-            equipment.category_name = equipment.category_id.name or ''
+    # @api.multi
+    # @api.depends('category_id')
+    # def _compute_category_name(self):
+    #     for equipment in self:
+    #         equipment.category_name = equipment.category_id.name or ''
 
     @api.constrains('parent_id')
     def _check_category_recursion(self):
