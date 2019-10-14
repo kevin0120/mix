@@ -12,23 +12,36 @@ import LayoutDrawer from '../../components/LayoutDrawer';
 import type { tUser } from '../../modules/user/interface/typeDef';
 import { logoutRequest } from '../../modules/user/action';
 import type { Dispatch } from '../../modules/typeDef';
-import type { tRouteComponent, tRouteObj } from '../model';
+import type { tRouteComponent, tRouteObj } from '../typeDef';
 import Notifier from '../../components/Notifier';
 import Dialog from '../../components/Dialog';
 import Loading from '../../components/Loading';
 
-type Props = {
-  users: Array<tUser>,
-  path: string,
+type tOP = {|
   children: Array<tRouteComponent>,
   childRoutes: Array<tRouteObj>,
   self: tRouteObj & {
     DefaultContent: Node,
     navBarContents: Array<string>
   },
-  logout: Dispatch,
   getContentByUrl: (string)=>tRouteObj
-};
+|};
+type tSP = {|
+  ...tOP,
+  users: Array<tUser>,
+  path: string,
+|};
+type tDP = {|
+  logout: Dispatch,
+  doPush: Dispatch
+|};
+
+type Props = {|
+  ...tOP,
+  ...tSP,
+  ...tDP,
+
+|};
 
 function AppLayout(
   {
@@ -88,19 +101,18 @@ function AppLayout(
   );
 }
 
-const mapStateToProps = (state, ownProps) => ({
+const mapStateToProps = (state, ownProps: tOP): tSP => ({
+  ...ownProps,
   users: state.users,
-  healthCheckResults: state.healthCheckResults,
-  path: state.router.location.pathname,
-  ...ownProps
+  path: state.router.location.pathname
 });
 
-const mapDispatchToProps = {
+const mapDispatchToProps: tDP = {
   logout: logoutRequest,
   doPush: push
 };
 
-export default connect(
+export default connect<Props, tOP, tSP, tDP, _, _>(
   mapStateToProps,
   mapDispatchToProps
 )(AppLayout);

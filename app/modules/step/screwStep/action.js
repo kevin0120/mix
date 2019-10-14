@@ -1,5 +1,5 @@
 // @flow
-import type { tResult } from './model';
+import type { tPoint, tResult } from './model';
 import { SCREW_STEP } from './constants';
 
 export type tResultAction = { type: string, results: Array<tResult> };
@@ -9,7 +9,7 @@ export default {
     type: SCREW_STEP.RESULT,
     results
   }),
-  redoPoint: (point): tResultAction => ({
+  redoPoint: (point: tPoint) => ({
     type: SCREW_STEP.REDO_POINT,
     point
   }),

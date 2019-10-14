@@ -34,7 +34,7 @@ import settingImg from '../../resources/imgs/setting.png';
 import LockingImg from '../../resources/imgs/lock.jpeg';
 import CurveImg from '../../resources/imgs/curveImg.jpeg';
 import LoginImg from '../../resources/imgs/login.jpeg';
-import type { tRouteObj, tUrl } from './model';
+import type { tRouteObj, tUrl } from './typeDef';
 
 const shade = 500;
 

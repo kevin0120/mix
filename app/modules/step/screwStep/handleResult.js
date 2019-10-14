@@ -1,5 +1,6 @@
 // @flow
 import { put, call } from 'redux-saga/effects';
+import type { Saga } from 'redux-saga';
 import type {
   tPoint,
   tPointStatus,
@@ -10,10 +11,11 @@ import type {
 import { POINT_STATUS, RESULT_STATUS } from './constants';
 import STEP_STATUS from '../constants';
 import { CommonLog } from '../../../common/utils';
+import { orderActions } from '../../order/action';
 
 function formPointStatusFromResultStatus(
   point: tPoint,
-  rStatus: tResultStatus,
+  rStatus: ?tResultStatus,
   activeGroupSequence: number
 ): tPointStatus {
   let pStatus = POINT_STATUS.WAITING;
@@ -86,28 +88,18 @@ const mergePointsAndResults = (
   return newPoints;
 };
 
-const resultStatus = (results: Array<tResult>, data: tScrewStepData) => {
-  const LSN =
-    results.some((r: tResult): boolean => r.result === RESULT_STATUS.lsn) &&
-    'LSN';
-  const retry =
-    results.some((r: tResult): boolean => r.result === RESULT_STATUS.nok) &&
-    'retry';
-  const fail =
-    retry &&
-    data.retryTimes >= data.points[data.activeIndex].maxRetryTimes &&
-    'fail';
-  const finish =
-    !retry &&
-    data.activeIndex + results.length >= data.points.length &&
-    'finish';
+const resultStatus = (results: Array<tResult>, data: tScrewStepData): Array<boolean | string> => {
+  const LSN = results.some((r: tResult): boolean => r.result === RESULT_STATUS.lsn) && 'LSN';
+  const retry = results.some((r: tResult): boolean => r.result === RESULT_STATUS.nok) && 'retry';
+  const fail = retry && data.retryTimes >= data.points[data.activeIndex].maxRetryTimes && 'fail';
+  const finish = !retry && data.activeIndex + results.length >= data.points.length && 'finish';
   const next = !retry && !finish && 'next';
-  CommonLog.Info([LSN, fail, retry, finish, next]);
+  CommonLog.Info(String([LSN, fail, retry, finish, next]));
   return [LSN, fail, retry, finish, next];
 };
 
-const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
-  *retry() {
+const resultStatusTasks = (results: Array<tResult>) => ({
+  * retry() {
     try {
       yield call(this.updateData, (d: tScrewStepData): tScrewStepData => ({
         ...d,
@@ -123,7 +115,7 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
       CommonLog.lError(e);
     }
   },
-  *fail() {
+  * fail() {
     try {
       yield call(this.updateData, (d: tScrewStepData): tScrewStepData => ({
         ...d,
@@ -140,7 +132,7 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
       CommonLog.lError(e);
     }
   },
-  *finish() {
+  * finish() {
     try {
       yield call(this.updateData, (d: tScrewStepData): tScrewStepData => ({
         ...d,
@@ -157,7 +149,7 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
       CommonLog.lError(e);
     }
   },
-  *next() {
+  * next() {
     try {
       // update step data
       yield call(this.updateData, (d: tScrewStepData): tScrewStepData => ({
@@ -177,7 +169,7 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
       CommonLog.lError(e);
     }
   },
-  *LSN() {
+  * LSN() {
     try {
       // do nothing
     } catch (e) {
@@ -186,33 +178,32 @@ const resultStatusTasks = (ORDER, orderActions, results: Array<tResult>) => ({
   }
 });
 
-export default function* handleResult(ORDER, orderActions, results, data) {
+const resultStatusColor = {
+  NOK: 'danger',
+  OK: 'success',
+  default: 'info'
+};
+
+export default function* handleResult(results: Array<tResult>, data: tScrewStepData): Saga<void> {
   try {
     yield call(this.updateData, (d: tScrewStepData): tScrewStepData => ({
       ...d,
       timeLine: [
         ...results.map(r => ({
           title: r.batch,
-          color:
-            r.result === 'NOK'
-              ? 'danger'
-              : r.result === 'OK'
-              ? 'success'
-              : 'info',
-          footerTitle: r.tool_sn,
+          color: resultStatusColor[r.result] || resultStatusColor.default,
+          footerTitle: r.toolSN,
           body: `${r.result}: wi=${r.wi},mi=${r.mi},ti=${r.ti}`
         })),
         ...(d.timeLine || [])
       ]
     }));
-    const firstMatchResultStatus = resultStatusTasks(
-      ORDER,
-      orderActions,
-      results
-    )[resultStatus(results, data).find(v => !!v)];
+    // eslint-disable-next-line flowtype/no-weak-types
+    const firstMatchResultStatus = ((resultStatus(results, data).find(v => !!v): any): string);
+    const matchedStatusTask = resultStatusTasks(results)[firstMatchResultStatus];
     // 执行
     if (firstMatchResultStatus) {
-      yield call([this, firstMatchResultStatus]);
+      yield call([this, matchedStatusTask]);
     }
   } catch (e) {
     CommonLog.lError(e);

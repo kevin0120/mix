@@ -66,3 +66,5 @@ export type tStepStatus =
 export type tOrderStatus = $Values<typeof ORDER_STATUS>;
 
 export type tStepArray = Array<tStep>;
+
+export opaque type tOrderActionTypes= string;
