@@ -10,7 +10,6 @@ import {
 import OWebSocket from 'ws';
 import { eventChannel } from 'redux-saga';
 import { AIIS } from './action';
-import { setHealthzCheck } from '../healthzCheck/action';
 import { andonNewData } from '../andon/action';
 import notifierActions from '../Notifier/action';
 
@@ -104,11 +103,11 @@ function* aiisWSListener(hmiSN) {
       const chanAction = yield take(chan);
       switch (chanAction.type) {
         case AIIS_WS_CHANNEL.OPEN:
-          yield put(setHealthzCheck('andon', true));
+          // yield put(setHealthzCheck('andon', true));
           yield call(wsOnOpen, hmiSN);
           break;
         case AIIS_WS_CHANNEL.CLOSE:
-          yield put(setHealthzCheck('andon', false));
+          // yield put(setHealthzCheck('andon', false));
           yield put(
             notifierActions.enqueueSnackbar(
               'Info',
@@ -117,7 +116,7 @@ function* aiisWSListener(hmiSN) {
           );
           break;
         case AIIS_WS_CHANNEL.ERROR:
-          yield put(setHealthzCheck('andon', false));
+          // yield put(setHealthzCheck('andon', false));
           yield put(
             notifierActions.enqueueSnackbar(
               'Info',
@@ -173,7 +172,7 @@ function* stopAiisWebsocket() {
       ws.ws.readyState === OWebSocket.OPEN ||
       ws.ws.readyState === OWebSocket.CONNECTING
     ) {
-      yield put(setHealthzCheck('andon', false));
+      // yield put(setHealthzCheck('andon', false));
       yield put(
         notifierActions.enqueueSnackbar('Info', `andon连接状态更新: ${false}`)
       );

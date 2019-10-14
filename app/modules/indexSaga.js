@@ -44,8 +44,8 @@ export default function* rootSaga(): Saga<void> {
       healthz,
       modelViewer,
       notifier
-    ].filter((e: Saga<void>) => !!e).map((e: Saga<void>) => e && call(e));
-    yield all(m);
+    ].filter(e => !!e).map(e => call(e || (() => {
+    }))));
   } catch (e) {
     CommonLog.lError(e);
   }

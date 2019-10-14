@@ -10,7 +10,6 @@ import workMode from './workmode/reducer';
 import operations from './operation/reducer';
 import resultDiag from './resultDiag/reducer';
 import ongoingOperation from './ongoingOperation/reducer';
-import healthCheckResults from './healthzCheck/reducer';
 import timeline from './timeline/reducer';
 import operationViewer from './operationViewer/reducer';
 import logo from './logo/reducer';
@@ -32,7 +31,6 @@ export default function createRootReducer(history: {}) {
       users,
       workMode,
       operations,
-      healthCheckResults,
       resultDiag,
       ongoingOperation,
       timeline,

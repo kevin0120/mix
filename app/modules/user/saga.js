@@ -33,8 +33,8 @@ const DummyUserName = 'DummyUser';
 function* authenticate(action) {
   try {
     const { name, password, uuid } = action;
+    const state = yield select();
     if (uuid) {
-      const state = yield select();
       const { setting } = state;
       const response = yield call(
         getUserInfo,
@@ -45,13 +45,13 @@ function* authenticate(action) {
       if (statusCode === status.OK) {
         const {
           id,
-          name: n,
+          name: respName,
           uuid: respUUID,
           image_small: avatar
         }: tAuthRespData = response.data;
         const userInfo: tUser = {
           uid: id,
-          name: n,
+          name: respName,
           uuid: respUUID,
           avatar,
           role: 'admin'
@@ -62,12 +62,9 @@ function* authenticate(action) {
           yield put(push('/app'));
         }
       }
-      return;
-    }
-
-    if (name && password) {
-      const state = yield select();
-      const { setting, users, systemSettings } = state;
+    } else if (name && password) {
+      const { setting, users } = state;
+      const {systemSettings } = setting;
       const { authEnable } = systemSettings;
       if (authEnable && name === '') {
         // 强制需要认证
@@ -87,13 +84,13 @@ function* authenticate(action) {
       if (statusCode === 200) {
         const {
           id,
-          name: n,
+          name: respName,
           uuid: respUUID,
           image_small: avatar
         }: tAuthRespData = response.data;
         const userInfo: tUser = {
           uid: id,
-          n,
+          name: respName,
           uuid: respUUID,
           avatar,
           role: 'admin'
@@ -142,7 +139,7 @@ const loginMethodMap = {
 };
 
 interface ILocalUser {
-  [key: string]: tUser
+  [key: string]: tUser;
 }
 
 function* loginLocal(action) {
@@ -190,7 +187,7 @@ function* loginLocal(action) {
         };
       }
     }
-    if(!isNil(userInfo)){
+    if (!isNil(userInfo)) {
       yield put(loginSuccess(userInfo));
       yield put(push('/app'));
     }

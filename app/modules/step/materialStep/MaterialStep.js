@@ -34,11 +34,6 @@ const MaterialStepMixin = (ClsBaseStep: IWorkStep) => class ClsMaterialStep exte
     }
   }
 
-  constructor(...args: any) {
-    super(...args);
-    (this: any)._onLeave = this.onLeave.bind(this);
-  }
-
   _statusTasks = {
     * [STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {
