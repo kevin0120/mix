@@ -23,6 +23,7 @@ odoo.define('web_widget_echart', function (require) {
                         data: this.genData(val[v][xLabel], val[v][yLabel]),
                         type: 'line',
                         name: val[v]['name'],
+                        symbol: 'none',
                         markLine: {
                             data: [
                                 {type: 'min', name: '最小值'},
