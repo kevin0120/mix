@@ -1,7 +1,7 @@
 // @flow
 import { isNil, remove } from 'lodash-es';
 import type { Saga } from 'redux-saga';
-import { call, fork, put } from 'redux-saga/effects';
+import { call, fork, put, all } from 'redux-saga/effects';
 import Device from '../Device';
 import type { AnyAction } from '../type';
 import type {
@@ -197,7 +197,7 @@ export default class ClsIOModule extends Device {
   * setIO(port: tIOPort, value: boolean): Saga<void> {
     try {
       const status = value ? 1 : 0;
-      yield call(ioSetApi, this.serialNumber, port.idx, status);
+      yield call((ioSetApi: Function), this.serialNumber, port.idx, status);
     } catch (e) {
       CommonLog.lError(e, { at: 'setIO' });
     }
@@ -208,10 +208,10 @@ export default class ClsIOModule extends Device {
       if (port instanceof Array) {
         // eslint-disable-next-line no-restricted-syntax
         for (const p of port) {
-          yield fork(ioSetApi, this.serialNumber, p.idx, 1);
+          yield fork((ioSetApi: Function), this.serialNumber, p.idx, 1);
         }
       } else {
-        yield call(ioSetApi, this.serialNumber, port.idx, 1);
+        yield call((ioSetApi: Function), this.serialNumber, port.idx, 1);
       }
     } catch (e) {
       CommonLog.lError(e, { at: 'openIO' });
@@ -222,11 +222,12 @@ export default class ClsIOModule extends Device {
     try {
       if (port instanceof Array) {
         // eslint-disable-next-line no-restricted-syntax
-        for (const p of port) {
-          yield fork(ioSetApi, this.serialNumber, p.idx, 0);
-        }
+        // for (const p of port) {
+        //   yield fork(ioSetApi, this.serialNumber, p.idx, 0);
+        // }
+        yield all(port.map(p => fork((ioSetApi: Function), this.serialNumber, p.idx, 0)));
       } else {
-        yield call(ioSetApi, this.serialNumber, port.idx, 0);
+        yield call((ioSetApi: Function), this.serialNumber, port.idx, 0);
       }
     } catch (e) {
       CommonLog.lError(e, { at: 'closeIO' });
@@ -235,7 +236,7 @@ export default class ClsIOModule extends Device {
 
   * getStatus(): Saga<void> {
     try {
-      yield call(ioStatusApi, this.serialNumber);
+      yield call((ioStatusApi: Function), this.serialNumber);
     } catch (e) {
       CommonLog.lError(e, { at: 'getStatus' });
     }
@@ -243,7 +244,7 @@ export default class ClsIOModule extends Device {
 
   * ioContact(): Saga<void> {
     try {
-      yield call(ioContactApi, this.serialNumber);
+      yield call((ioContactApi: Function), this.serialNumber);
     } catch (e) {
       CommonLog.lError(e, { at: 'ioContact' });
     }
