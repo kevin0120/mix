@@ -25,7 +25,7 @@ export default function* rootSaga(): Saga<void> {
   try {
     const state = yield select();
     const { andonEnable } = state.setting.systemSettings;
-    yield all([
+    const m = [
       // 硬件设备
       watchRFIDEvent,
       watchAiis,
@@ -44,7 +44,8 @@ export default function* rootSaga(): Saga<void> {
       healthz,
       modelViewer,
       notifier
-    ].filter(e => !!e).map(e => e && call(e)));
+    ].filter((e: Saga<void>) => !!e).map((e: Saga<void>) => e && call(e));
+    yield all(m);
   } catch (e) {
     CommonLog.lError(e);
   }

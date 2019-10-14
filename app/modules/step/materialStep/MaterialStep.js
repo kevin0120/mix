@@ -30,7 +30,7 @@ const MaterialStepMixin = (ClsBaseStep: IWorkStep) => class ClsMaterialStep exte
       this._items.clear();
       this._confirm = null;
     } catch (e) {
-      CommonLog.lError(e);
+      CommonLog.lError(`MaterialStepMixin onLeave Error: ${e.toString()}`);
     }
   }
 

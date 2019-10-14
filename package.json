@@ -316,7 +316,8 @@
     "typeface-noto-sans-sc": "^0.0.71",
     "validator": "^10.9.0",
     "winston": "^2.4.4",
-    "ws": "^4.1.0"
+    "ws": "^4.1.0",
+    "http-status": "^1.4.0"
   },
   "devEngines": {
     "node": ">=7.x",

@@ -9,6 +9,13 @@ const path = require('path');
 const os = require('os');
 
 export const getAppDirectory = () => {
+  if (
+    process.env.NODE_ENV === 'development' ||
+    process.env.DEBUG_PROD === 'true' ||
+    process.env.NODE_ENV === 'test'
+  ) {
+    return path.join(os.homedir(), '.controlPanel_sa');
+  }
   switch (process.platform) {
     case 'darwin':
       return process.execPath.substring(0, process.execPath.indexOf('.app') + 4);
