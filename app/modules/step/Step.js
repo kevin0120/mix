@@ -15,10 +15,9 @@ import { orderActions } from '../order/action';
 import { ORDER } from '../order/constants';
 import STEP_STATUS from './constants';
 import stepTypes from './stepTypes';
-import type { tStepDataReducer, tAnyStepState, tRunSubStepCallbacks } from './interface/typeDef';
+import type { tStepDataReducer, tAnyStepState, tRunSubStepCallbacks, tStepInfo } from './interface/typeDef';
 import type { tStep } from '../order/interface/typeDef';
 import { IWorkStep } from './interface/IWorkStep';
-import type { tStepInfo } from './interface/typeDef';
 
 function invalidStepStatus(stepType, status) {
   if (!stepType) {
@@ -144,7 +143,7 @@ export default class Step implements IWorkStep {
     return this._data;
   }
 
-  timeCost() {
+  timeCost(): number {
     return ((this._times || []).length % 2 === 0
         ? this._times || []
         : [...this._times, new Date()]

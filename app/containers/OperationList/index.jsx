@@ -10,7 +10,6 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import CardContent from '@material-ui/core/CardContent';
-import { I18n } from 'react-i18next';
 import { sortBy } from 'lodash-es';
 import { orderActions } from '../../modules/order/action';
 import { ORDER_STATUS } from '../../modules/order/constants';
@@ -21,13 +20,34 @@ import type { Dispatch } from '../../modules/typeDef';
 import type { tOrder } from '../../modules/order/interface/typeDef';
 import { withI18n } from '../../i18n';
 
+type tOP = {||};
 
-type Props = {
-  classes: {},
-  orderList: Array<tOrder>,
+type tSP = {|
+  ...tOP,
+  orderList: Array<tOrder>
+|};
+
+type tDP = {|
   view: Dispatch,
   doPush: Dispatch,
   getList: Dispatch
+|};
+
+type Props = {
+  ...tOP,
+  ...tSP,
+  ...tDP
+};
+
+const mapState = (state, props: tOP): tSP => ({
+  ...props,
+  orderList: state.order.list
+});
+
+const mapDispatch = {
+  view: orderActions.view,
+  doPush: push,
+  getList: orderActions.getList
 };
 
 function HomeOperationList(props: Props) {
@@ -112,15 +132,7 @@ function HomeOperationList(props: Props) {
 
 }
 
-const mapState = (state, props) => ({
-  ...props,
-  orderList: state.order.list
-});
-
-const mapDispatch = {
-  view: orderActions.view,
-  doPush: push,
-  getList: orderActions.getList
-};
-
-export default connect(mapState, mapDispatch)(HomeOperationList);
+export default connect<Props, tOP, tSP, tDP, _, _>(
+  mapState,
+  mapDispatch
+)(HomeOperationList);

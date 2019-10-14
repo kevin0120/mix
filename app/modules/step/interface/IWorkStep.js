@@ -4,5 +4,6 @@ export interface IWorkStep {
   run: ()=>any,
   timerStart: ()=>any,
   timerStop: ()=>any,
-  updateData: ()=>any
+  updateData: ()=>any,
+  _payload: Object
 }

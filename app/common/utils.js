@@ -5,7 +5,6 @@ import axios from 'axios';
 import axiosRetry, { exponentialDelay } from 'axios-retry';
 import { isNil, cloneDeep } from 'lodash-es';
 import moment from 'moment';
-import type DurationInputArg1 from 'moment';
 import { Info, lError, Warn, Debug, Maintenance } from '../logger';
 
 const VINMap = {
@@ -232,7 +231,7 @@ export const timeCost = (times: Array<Date>) =>
 
 export const formatTime = (t: number) => `${t}`.length <= 2 ? `00${t}`.slice(-2) : t;
 
-export function durationString(duration: DurationInputArg1): string {
+export function durationString(duration: number): string {
   const h = moment.duration(duration).hours();
   const m = moment.duration(duration).minutes();
   const s = moment.duration(duration).seconds();

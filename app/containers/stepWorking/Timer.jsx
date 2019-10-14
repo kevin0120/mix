@@ -2,10 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { Typography } from '@material-ui/core';
 import { durationString } from '../../common/utils';
-import type { tClsStep } from '../../modules/step/Step';
+import type { IWorkStep } from '../../modules/step/interface/IWorkStep';
 
 type Props = {
-  step: tClsStep
+  step: IWorkStep
 };
 
 export default function Timer({ step }: Props) {

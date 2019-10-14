@@ -11,7 +11,7 @@ import { workingOrder } from '../../order/selector';
 
 // pset/job模式
 export default {
-  *[controllerModes.pset](point): Saga<void> {
+  *[controllerModes.pset](point): Saga<boolean> {
     try {
       const sData: tScrewStepData = this._data;
       const stepId = this._id;
@@ -63,7 +63,7 @@ export default {
     return true;
   },
 
-  *[controllerModes.job](): Saga<void> {
+  *[controllerModes.job](): Saga<boolean> {
     try {
       const { jobID, points }: tScrewStepData = this._data;
       const stepId = this._id;

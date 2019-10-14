@@ -1,6 +1,6 @@
 // @flow
 
-import { take, fork, all, select } from 'redux-saga/effects';
+import { take, call, all, select } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 
 import sysInitFlow from './systemInit/saga';
@@ -27,24 +27,24 @@ export default function* rootSaga(): Saga<void> {
     const { andonEnable } = state.setting.systemSettings;
     yield all([
       // 硬件设备
-      watchRFIDEvent(),
-      watchAiis(),
-      watchRushEvent(),
+      watchRFIDEvent,
+      watchAiis,
+      watchRushEvent,
 
-      user(), // auth
+      user, // auth
       // watchSettingPreSave(),
-      sysInitFlow(),
-      watchOperationViewer(),
+      sysInitFlow,
+      watchOperationViewer,
       // watchNetwork(),
       // watchBattery(),
-      watchPower(),
-      andonEnable ? andon() : null,
-      order(),
-      dialog(),
-      healthz(),
-      modelViewer(),
-      notifier()
-    ]);
+      watchPower,
+      andonEnable ? andon : null,
+      order,
+      dialog,
+      healthz,
+      modelViewer,
+      notifier
+    ].filter(e => !!e).map(e => e && call(e)));
   } catch (e) {
     CommonLog.lError(e);
   }

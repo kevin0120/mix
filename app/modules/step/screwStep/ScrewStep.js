@@ -115,7 +115,7 @@ const ScrewStepMixin = (ClsBaseStep: IWorkStep) => class ClsScrewStep extends Cl
             orderActions.stepStatus(
               this,
               STEP_STATUS.FAIL,
-              `tool not found: ${lostTool.map(t => `${t}`)}`
+              `tool not found: ${String(lostTool.map(t => `${t}`))}`
             )
           );
         }

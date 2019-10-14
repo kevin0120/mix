@@ -66,7 +66,8 @@ export default class CommonExternalEntity implements IHealthChecker {
     }
 
     if (this.#_children.size > 0 && isHealthz) {
-      this.#_children.forEach(c => {});
+      this.#_children.forEach(c => {
+      });
     }
 
     const msg = `${this.#name} Healthz Status Change: ${isHealthz.toString()}`;
@@ -89,18 +90,18 @@ export default class CommonExternalEntity implements IHealthChecker {
     return this.#enable;
   }
 
-  Enable(): Saga<void> {
+  Enable(): any {
     this.#enable = true;
     CommonLog.Info(`${this.source} Is Enabled!`);
   }
 
-  Disable() {
+  Disable(): any {
     this.#enable = false;
     CommonLog.Info(`${this.source} Is Disabled!`);
   }
 
   // eslint-disable-next-line require-yield
-  *ToggleEnable(): Saga<void> {
+  * ToggleEnable(): Saga<void> {
     this.#enable = !this.#enable;
   }
 }

@@ -1,5 +1,5 @@
 // @flow
-import React, { useEffect } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core';
 import Paper from '@material-ui/core/Paper';
@@ -9,8 +9,33 @@ import ScrewImage from '../../../components/ScrewImage';
 import screwStepAction from '../../../modules/step/screwStep/action';
 import STEP_STATUS from '../../../modules/step/constants';
 import type { tStepProps } from '../types';
+import type { tPoint } from '../../../modules/step/screwStep/model';
+import type { tStepStatus } from '../../../modules/order/interface/typeDef';
+import type { Dispatch } from '../../../modules/typeDef';
 
-const mapState = (state, props) => {
+type tOP = {|
+  ...tStepProps
+|};
+
+type tSP = {|
+  ...tOP,
+  points: Array<tPoint>,
+  image: string,
+  activeIndex: number,
+  status: tStepStatus
+|};
+
+type tDP = {|
+  redoPoint: Dispatch
+|};
+
+type Props = {|
+  ...tOP,
+  ...tSP,
+  ...tDP
+|};
+
+const mapState = (state, props: tOP): tSP => {
   const vStep = viewingStep(state.order);
 
   return ({
@@ -23,15 +48,12 @@ const mapState = (state, props) => {
 };
 
 const mapDispatch = {
-  result: screwStepAction.result,
+  // result: screwStepAction.result,
   redoPoint: screwStepAction.redoPoint
 };
 
-type Props = {
-};
 
-
-function ScrewStep({ isCurrent, status, image, points, activeIndex, result, redoPoint }: Props & tStepProps) {
+function ScrewStep({ isCurrent, status, image, points, activeIndex, redoPoint }: Props) {
   const classes = makeStyles(styles)();
 
   return <div className={classes.layout}>
@@ -42,7 +64,6 @@ function ScrewStep({ isCurrent, status, image, points, activeIndex, result, redo
       focus={status === STEP_STATUS.DOING ? 2 : 0}
       scale={1}
       twinkle={isCurrent}
-      // onClick={() => result({ data: [{ result: 'ok' }] })}
       onPointClick={(point) => {
         // console.log('on point click', point);
 
@@ -67,7 +88,7 @@ function ScrewStep({ isCurrent, status, image, points, activeIndex, result, redo
 }
 
 
-export default connect(
+export default connect<Props, tOP, tSP, tDP, _, _>(
   mapState,
   mapDispatch
 )(ScrewStep);

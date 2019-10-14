@@ -17,25 +17,37 @@ import type { Dispatch } from '../../modules/typeDef';
 import Timer from './Timer';
 import type { tClsStep } from '../../modules/step/Step';
 
-const mapState = (state, props) => ({
+type DProps = {|
+  jumpTo: Dispatch
+|};
+
+type ownProps = {||};
+
+type SProps = {|
+  ...ownProps,
+  steps: Array<tClsStep>,
+  viewingIndex: number,
+  workingStep: ?tClsStep,
+  viewingStep: ?tClsStep
+|};
+
+type Props = {|
+  ...ownProps,
+  ...SProps,
+  ...DProps
+|};
+
+const mapState = (state, props: ownProps): SProps => ({
   ...props,
   steps: oSel.orderSteps(oSel.viewingOrder(state.order)) || [],
   workingStep: oSel.workingStep(oSel.workingOrder(state.order)),
   viewingStep: oSel.viewingStep(state.order),
-  viewingIndex: oSel.viewingIndex(state.order) || 0,
-  isCurrent: oSel.viewingOrder(state.order) === oSel.workingOrder(state.order)
+  viewingIndex: oSel.viewingIndex(state.order) || 0
+  // isCurrent: oSel.viewingOrder(state.order) === oSel.workingOrder(state.order)
 });
 
-const mapDispatch = {
+const mapDispatch: DProps = {
   jumpTo: orderActions.jumpToStep
-};
-
-type StepperLayoutProps = {
-  steps: Array<tClsStep>,
-  viewingIndex: number,
-  jumpTo: Dispatch,
-  workingStep: tClsStep,
-  viewingStep: tClsStep
 };
 
 // 步骤条
@@ -45,7 +57,7 @@ const StepperContainer = ({
                             jumpTo,
                             workingStep,
                             viewingStep
-                          }: StepperLayoutProps) => {
+                          }: Props) => {
   const classes = makeStyles(styles.stepperContainer)();
 
   const viewingRef = useRef(null);
@@ -124,7 +136,7 @@ const StepperContainer = ({
   );
 };
 
-export default connect(
+export default connect<Props, ownProps, SProps, DProps, _, _>(
   mapState,
   mapDispatch
 )(StepperContainer);

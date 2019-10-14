@@ -4,7 +4,6 @@ import type {
   tOrder,
   tOrderState,
   tOrderStepIdx,
-  tStep,
   tStepStatus
 } from './interface/typeDef';
 import type { IWorkStep } from '../step/interface/IWorkStep';
@@ -17,7 +16,7 @@ export const viewingStep = (orderState: tOrderState): ?IWorkStep =>
   orderSteps(viewingOrder(orderState))?.[viewingIndex(orderState)] || null;
 
 export const workingIndex = (order: ?tClsOrder): tOrderStepIdx => order?.workingIndex || 0;
-export const workingStep = (order: ?tClsOrder): ?tStep =>
+export const workingStep = (order: ?tClsOrder): ?IWorkStep =>
   orderSteps(order)?.[workingIndex(order)] || null;
 
 export const orderSteps = (order: ?tClsOrder): ?Array<IWorkStep> => order?.steps || null;

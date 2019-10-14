@@ -5,7 +5,7 @@ import type { Saga } from 'redux-saga';
 import notifierActions from '../../../Notifier/action';
 // import ClsScrewTool, { defaultScrewToolDispatcher } from './model';
 import { CommonLog } from '../../../../common/utils';
-import type { tDeviceSN } from '../Device';
+import type { tDeviceSN } from '../typeDef';
 import type { tResult } from '../../../step/screwStep/model';
 import { getDevice } from '../index';
 
@@ -23,10 +23,10 @@ type tToolStatusData = {
 
 type tToolResultData = {
   type: string,
-  data: {
+  data: Array<{
     tool_sn: tDeviceSN,
     results: Array<tResult>
-  }
+  }>
 };
 
 export function* toolStatusChange(data: tToolStatusData): Saga<void> {

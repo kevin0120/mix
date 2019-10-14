@@ -10,7 +10,7 @@ export type tInput = {
   time: Date
 };
 
-export type AnyAction = Action & {
+export type AnyAction = Action<any> & {
   // eslint-disable-next-line flowtype/no-weak-types
   [extraProps: string]: any
 };

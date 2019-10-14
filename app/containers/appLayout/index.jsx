@@ -1,6 +1,6 @@
 // @flow
 import React from 'react';
-import PropTypes from 'prop-types';
+import type { Node } from 'react';
 import { connect } from 'react-redux';
 import { push } from 'connected-react-router';
 import Avatar from '@material-ui/core/Avatar';
@@ -23,7 +23,7 @@ type Props = {
   children: Array<tRouteComponent>,
   childRoutes: Array<tRouteObj>,
   self: tRouteObj & {
-    DefaultContent: PropTypes.element,
+    DefaultContent: Node,
     navBarContents: Array<string>
   },
   logout: Dispatch,

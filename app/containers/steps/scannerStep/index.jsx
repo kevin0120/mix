@@ -8,7 +8,6 @@ import QRcode from 'qrcode.react';
 import Button from '../../../components/CustomButtons/Button';
 import styles from './styles';
 import { scannerStepAction } from '../../../modules/step/scannerStep/action';
-// import QRCode from './qrcode-scan.svg';
 import type { tStepProps } from '../types';
 import withKeyboard from '../../../components/Keyboard';
 import type { Dispatch } from '../../../modules/typeDef';
@@ -17,9 +16,29 @@ import {
   stepPayload,
   viewingStep
 } from '../../../modules/order/selector';
-// import { scanner } from '../../../modules/scanner/saga';
 
-const mapState = (state, props) => ({
+type tDP = {|
+  submit: Dispatch,
+  getValue: Dispatch
+|};
+type tSP = {|
+  ...tOP,
+  result: Object,
+  label: string
+|};
+
+type tOP = {|
+  ...tStepProps,
+  keyboardInput: Function
+|};
+
+type Props = {
+  ...tOP,
+  ...tDP,
+  ...tSP
+};
+
+const mapState = (state, props: tOP): tSP => ({
   ...props,
   result: stepData(viewingStep(state.order))?.result || {},
   label: stepPayload(viewingStep(state.order))?.label || ''
@@ -28,14 +47,6 @@ const mapState = (state, props) => ({
 const mapDispatch = {
   submit: scannerStepAction.submit,
   getValue: scannerStepAction.getValue
-};
-
-type Props = {
-  submit: Dispatch,
-  getValue: Dispatch,
-  keyboardInput: Function,
-  label: string,
-  result: Object,
 };
 
 function ScannerStep({
@@ -47,7 +58,7 @@ function ScannerStep({
                        label,
                        getValue,
                        result
-                     }: Props & tStepProps) {
+                     }: Props) {
   const classes = makeStyles(styles)();
   useEffect(() => {
     bindAction(
@@ -87,7 +98,7 @@ function ScannerStep({
   );
 }
 
-export default connect(
+export default connect<Props, tOP, tSP, tDP, _, _>(
   mapState,
   mapDispatch
 )(withKeyboard(ScannerStep));

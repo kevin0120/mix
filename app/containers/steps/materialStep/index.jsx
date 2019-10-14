@@ -6,9 +6,9 @@ import materialStepActions from '../../../modules/step/materialStep/action';
 import type { tStepProps } from '../types';
 import Button from '../../../components/CustomButtons/Button';
 import type { Dispatch } from '../../../modules/typeDef';
-import type { IWorkStep } from '../../../modules/step/interface/IWorkStep';
+import type { IMaterialStep } from '../../../modules/step/materialStep/interface/IMaterialStep';
 
-const mapState = (state, props) => ({
+const mapState = (state, props: ownProps): Props => ({
   ...props
 });
 
@@ -16,12 +16,17 @@ const mapDispatch = {
   ready: materialStepActions.ready
 };
 
-type Props = {
-  ready: Dispatch,
-  step: IWorkStep
-};
+type Props = {|
+  ...ownProps
+|};
 
-function materialStep(props: Props & tStepProps) {
+type ownProps = {|
+  ...tStepProps,
+  ready: Dispatch,
+  step: IMaterialStep
+|};
+
+function materialStep(props: Props) {
   const { step, bindAction, ready, isCurrent, bindDescription } = props;
   const { payload, description } = step;
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -73,4 +78,7 @@ function materialStep(props: Props & tStepProps) {
   </div>;
 }
 
-export default connect(mapState, mapDispatch)(materialStep);
+export default connect<Props, ownProps, _, _, _, _>(
+  mapState,
+  mapDispatch
+)(materialStep);

@@ -15,7 +15,26 @@ import Button from '../CustomButtons/Button';
 import type { Dispatch } from '../../modules/typeDef';
 import type { tDialogConfig } from '../../modules/dialog/interface/typeDef';
 
-const mapState = (state, props) => ({
+type tOP = {||};
+
+type tSP = {|
+  ...tOP,
+  config: tDialogConfig,
+  open: boolean
+|};
+
+type tDP = {|
+  buttonAction: Dispatch,
+  closeAction: Dispatch
+|};
+
+type Props = {|
+  ...tOP,
+  ...tSP,
+  ...tDP
+|};
+
+const mapState = (state, props: tOP): tSP => ({
   ...props,
   config: state?.dialog?.config || {},
   open: state?.dialog?.open || false
@@ -30,12 +49,6 @@ const Transition = React.forwardRef((props, ref) => (
   <Slide direction="up" {...props} ref={ref}/>
 ));
 
-type Props = {
-  config: tDialogConfig,
-  open: boolean,
-  buttonAction: Dispatch,
-  closeAction: Dispatch
-};
 
 function customDialog(props: Props) {
   const { config, open, buttonAction, closeAction } = props;
@@ -84,7 +97,7 @@ function customDialog(props: Props) {
   );
 }
 
-export default connect(
+export default connect<Props, tOP, tSP, tDP, _, _>(
   mapState,
   mapDispatch
 )(customDialog);

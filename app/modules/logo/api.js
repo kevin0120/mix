@@ -1,7 +1,7 @@
 // @flow
 
 import isURL from 'validator/lib/isURL';
-import { defaultClient } from '../../common/utils';
+import { CommonLog, defaultClient } from '../../common/utils';
 
 export default function fetchLogo(baseURL: string) {
   if (!isURL(baseURL, { require_protocol: true })) {
@@ -13,7 +13,7 @@ export default function fetchLogo(baseURL: string) {
     .get(fullUrl)
     .then(resp => resp)
     .catch(e => {
-      Error(e.toString(), {
+      CommonLog.lError(e.toString(), {
         at: 'fetchLogo',
         response: e.response && e.response.data && JSON.stringify(e.response.data)
       });
