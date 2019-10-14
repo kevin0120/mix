@@ -16,6 +16,7 @@ import { SCREW_STEP, controllerModes } from './constants';
 import { getDevice } from '../../external/device';
 import dialogActions from '../../dialog/action';
 import type { IWorkStep } from '../interface/IWorkStep';
+import type { IScrewStep } from './IScrewStep';
 
 function* doPoint(point, isFirst, orderActions) {
   try {
@@ -47,7 +48,7 @@ function* doPoint(point, isFirst, orderActions) {
   }
 }
 
-const ScrewStepMixin = (ClsBaseStep: IWorkStep) => class ClsScrewStep extends ClsBaseStep implements IWorkStep {
+const ScrewStepMixin = (ClsBaseStep: IWorkStep) => class ClsScrewStep extends ClsBaseStep implements IWorkStep, IScrewStep {
 
   _tools = [];
 
@@ -55,10 +56,24 @@ const ScrewStepMixin = (ClsBaseStep: IWorkStep) => class ClsScrewStep extends Cl
 
   _orderOperationPoints: ClsOrderOperationPoints;
 
+  * _onLeave() {
+    try {
+      yield all(this._tools.map(t => (t.isEnable ? call(t.Disable) : call(() => {
+      }))));
+      this._tools = [];
+      CommonLog.Info('tools cleared', {
+        at: `screwStep(${(this: IScrewStep)._name},${(this: IScrewStep)._id})._onLeave`
+      });
+    } catch (e) {
+      CommonLog.lError(e, {
+        at: `screwStep(${(this: IScrewStep)._name},${(this: IScrewStep)._id})._onLeave`
+      });
+    }
+  };
+
   constructor(...args: Iterable<any>) {
     super(...args);
-    const self = this;
-    const payload: tScrewStepPayload = this._payload;
+    const payload: tScrewStepPayload = (this: IScrewStep)._payload;
     if (isNil(payload) || isEmpty(payload)) {
       CommonLog.lError(
         `ScrewStepPayload Is Empty! Payload: ${String(payload)}`
@@ -68,23 +83,6 @@ const ScrewStepMixin = (ClsBaseStep: IWorkStep) => class ClsScrewStep extends Cl
 
     this._orderOperationPoints = new ClsOrderOperationPoints(payload);
 
-    this._onLeave = function* onLeave() {
-      try {
-        yield all(
-          self._tools
-            .map(t => (t.isEnable ? call(t.Disable) : null))
-            .filter(s => !!s)
-        );
-        self._tools = [];
-        CommonLog.Info('tools cleared', {
-          at: `screwStep(${this._name},${this._id})._onLeave`
-        });
-      } catch (e) {
-        CommonLog.lError(e, {
-          at: `screwStep(${this._name},${this._id})._onLeave`
-        });
-      }
-    };
     this.isValid = true; // 设置此工步是合法的
   }
 
@@ -155,7 +153,7 @@ const ScrewStepMixin = (ClsBaseStep: IWorkStep) => class ClsScrewStep extends Cl
         // for (const t of this._tools) {
         //   yield call(t.Enable);
         // }
-        yield call([this, handleResult], ORDER, orderActions, [], this._data);
+        yield call([this, handleResult], [], this._data);
         let isFirst = true;
         const sData: tScrewStepData = this._data;
         const { activeIndex, points } = sData;
@@ -176,8 +174,6 @@ const ScrewStepMixin = (ClsBaseStep: IWorkStep) => class ClsScrewStep extends Cl
               } = nextAction;
               yield call(
                 [this, handleResult],
-                ORDER,
-                orderActions,
                 results,
                 data
               );

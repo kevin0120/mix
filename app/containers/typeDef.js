@@ -1,6 +1,6 @@
-import PropTypes from "prop-types";
+import type { Node } from 'react';
 
-export type tRouteComponent = PropTypes.element;
+export type tRouteComponent = Node;
 
 export type tRouteObj = {
   url: tUrl,

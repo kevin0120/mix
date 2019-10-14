@@ -34,7 +34,7 @@ export default class ClsScrewTool extends Device {
     try {
       if (!this.isEnable) {
         const { result, msg } = yield call(
-          toolEnableApi,
+          (toolEnableApi: Function),
           this.serialNumber,
           true
         );
@@ -59,7 +59,7 @@ export default class ClsScrewTool extends Device {
     try {
       if (this.isEnable) {
         const { result, msg } = yield call(
-          toolEnableApi,
+          (toolEnableApi: Function),
           this.serialNumber,
           false
         );
@@ -83,7 +83,7 @@ export default class ClsScrewTool extends Device {
   *ToggleEnable(): Saga<void> {
     try {
       const { result, msg } = yield call(
-        toolEnableApi,
+        (toolEnableApi: Function),
         this.serialNumber,
         !this.isEnable
       );

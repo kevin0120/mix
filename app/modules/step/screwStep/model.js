@@ -132,7 +132,7 @@ export class ClsOrderOperationPoints {
     const { controllerMode, jobID } = payload;
     switch (controllerMode) {
       case 'job':
-        if (isNil(jobID)){
+        if (isNil(jobID)) {
           CommonLog.Info('ClsOrderOperationPoints validatePayload Controller Mode Is Job, But Job ID Is Undefined');
           return false;
         }
@@ -229,7 +229,13 @@ export type tScrewStepData = {
   points: Array<tPoint>,
   retryTimes: number,
   activeIndex: number,
-  jobID: number
+  jobID: number,
+  timeLine: Array<{
+    title: string,
+    color: string,
+    footerTitle: string,
+    body: string
+  }>
 };
 
 

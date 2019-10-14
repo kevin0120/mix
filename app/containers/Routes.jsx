@@ -2,19 +2,20 @@
 
 import React from 'react';
 import { Route } from 'react-router';
+import type { Node } from 'react';
 import pages, { getContentByUrl } from './pages';
-import type {tRouteObj, tRouteComponent} from './model';
+import type { tRouteObj, tRouteComponent } from './typeDef';
 
 type Props = {
-  pagesConfig: {}
+  pagesConfig: { [key: string]: Object | Array<string> }
 };
 
 type tRouteList = [
   ?Array<?tRouteObj>,
   ?Array<?tRouteComponent>
-  ];
+];
 
-function renderRoute(R: ?tRouteObj, subRouteList: tRouteList) {
+function renderRoute(R: ?tRouteObj, subRouteList: tRouteList): ?Node {
   return R ?
     <Route
       key={R.url}
@@ -27,7 +28,7 @@ function renderRoute(R: ?tRouteObj, subRouteList: tRouteList) {
     /> : null;
 }
 
-function parseRouteTree(routesObj, parentUrl, filter) {
+function parseRouteTree(routesObj: tRouteObj, parentUrl: string, filter: Object): tRouteList {
   const routeUrls = Object.keys(routesObj).filter((key) => /^\//.test(key));
   const routeList = routeUrls.map(u => {
     const name = u.slice(1);
