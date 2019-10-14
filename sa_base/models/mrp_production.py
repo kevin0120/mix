@@ -109,7 +109,7 @@ class MrpWOConsu(models.Model):
 class MrpWorkorder(models.Model):
     _inherit = 'mrp.workorder'
 
-    # vin = fields.Char(string='VIN', related='production_id.vin', copy=False, store=True)
+    track_no = fields.Char('Finished Product Tracking Number', related='production_id.track_no')
 
     consu_bom_line_ids = fields.One2many('mrp.wo.consu', 'workorder_id', string='Consume Product')
 
@@ -120,5 +120,8 @@ class MrpWorkorder(models.Model):
 
 class MrpProduction(models.Model):
     _inherit = 'mrp.production'
+
+    track_no = fields.Char('Finished Product Tracking Number')
+
 
     assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line ID')
