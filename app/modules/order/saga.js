@@ -37,30 +37,12 @@ export default function* root(): Saga<void> {
       takeEvery(ORDER.WORK_ON, workOnOrder),
       takeEvery(ORDER.VIEW, viewOrder),
       takeEvery(ORDER.NEW, newOrder),
-      // takeEvery(ORDER.STEP.STATUS, updateStatus),
       takeLeading([ORDER.STEP.PREVIOUS, ORDER.STEP.NEXT], DebounceViewStep, 300)
     ]);
   } catch (e) {
     CommonLog.lError(e);
   }
 }
-
-// function* updateStatus(action: tActUpdateState) {
-//   try {
-//     const { step }: { step: tClsStep } = action;
-//     if (Reflect.has(step, 'updateStatus')) {
-//       yield call([step, step.updateStatus], action);
-//     } else {
-//       throw new Error(
-//         'updateStatus Error, The Step Without updateStatus Property'
-//       );
-//     }
-//   } catch (e) {
-//     CommonLog.lError(e, {
-//       at: 'order.saga.updateStatus'
-//     });
-//   }
-// }
 
 function* newOrder() {
   try {

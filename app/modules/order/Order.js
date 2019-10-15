@@ -8,8 +8,9 @@ import { orderUpdateApi } from '../../api/order';
 import dialogActions from '../dialog/action';
 import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
-import STEP_STATUS from '../step/constants';
-import {IOrder} from './interface/IOrder';
+import { STEP_STATUS } from '../step/constants';
+import { IOrder } from './interface/IOrder';
+import type { IWorkStep } from '../step/interface/IWorkStep';
 
 const stepStatus = status => {
   switch (status) {
@@ -22,7 +23,7 @@ const stepStatus = status => {
   }
 };
 
-const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep implements IOrder{
+const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep implements IOrder, IWorkStep {
 
   _apis = {
     updateStatus: orderUpdateApi
@@ -34,8 +35,9 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep implement
 
   _workingID = null;
 
-  constructor(dataObj) {
-    super(...arguments);
+  // eslint-disable-next-line flowtype/no-weak-types
+  constructor(dataObj, ...rest: Array<any>) {
+    super(dataObj, ...rest);
     this._status = dataObj.status || ORDER_STATUS.TODO;
   }
 

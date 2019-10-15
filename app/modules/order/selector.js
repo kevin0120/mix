@@ -4,9 +4,9 @@ import type {
   tOrder,
   tOrderState,
   tOrderStepIdx,
-  tStepStatus
 } from './interface/typeDef';
 import type { IWorkStep } from '../step/interface/IWorkStep';
+import type { tStepStatus } from '../step/interface/typeDef';
 import type { tClsOrder } from './Order';
 
 export const workingOrder = (orderState: tOrderState): ?tClsOrder => orderState?.workingOrder;

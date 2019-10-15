@@ -13,10 +13,9 @@ import { CommonLog } from '../../common/utils';
 import { orderStepUpdateApi } from '../../api/order';
 import { orderActions } from '../order/action';
 import { ORDER } from '../order/constants';
-import STEP_STATUS from './constants';
+import { STEP_STATUS } from './constants';
 import stepTypes from './stepTypes';
-import type { tStepDataReducer, tAnyStepState, tRunSubStepCallbacks, tStepInfo } from './interface/typeDef';
-import type { tStep } from '../order/interface/typeDef';
+import type { tStepDataReducer, tAnyStepStatus, tRunSubStepCallbacks,tStep } from './interface/typeDef';
 import { IWorkStep } from './interface/IWorkStep';
 
 function invalidStepStatus(stepType, status) {
@@ -49,10 +48,7 @@ export default class Step implements IWorkStep {
 
   _stateToRun = STEP_STATUS.ENTERING;
 
-  _payload: {
-    info: ?tStepInfo
-
-  } = {};
+  _payload = {};
 
   _data = {};
 
@@ -70,13 +66,16 @@ export default class Step implements IWorkStep {
     updateStatus: orderStepUpdateApi
   };
 
-  constructor(stepObj: tStep, ...rest: any) {
+  // eslint-disable-next-line flowtype/no-weak-types
+  constructor(stepObj: tStep, ...rest: Array<any>) {
     this._id = stepObj.id;
     this.update(stepObj);
+    /* eslint-disable flowtype/no-weak-types */
     (this: any).run = this.run.bind(this);
     (this: any).timerStart = this.timerStart.bind(this);
     (this: any).timerStop = this.timerStop.bind(this);
     (this: any).updateData = this.updateData.bind(this);
+    /* eslint-enable flowtype/no-weak-types */
   }
 
   update(stepObj: tStep) {
@@ -232,7 +231,7 @@ export default class Step implements IWorkStep {
     }
   }
 
-  * run(stateToRun: tAnyStepState = this._stateToRun): Saga<void> {
+  * run(stateToRun: tAnyStepStatus = this._stateToRun): Saga<void> {
     const runStatusTask = this._runStatusTask.bind(this);
     const updateStatus = this._updateStatus.bind(this);
     this.timerStart();

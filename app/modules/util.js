@@ -1,13 +1,14 @@
 // @flow
 import type { Saga, TakeableChannel, Effect } from 'redux-saga';
 import { fork, take } from 'redux-saga/effects';
-import type { Reducer, Action } from 'redux';
+import type { Action } from 'redux';
+import type { tReducer } from './typeDef';
 
-export function genReducers(
-  reducers: { [key: string]: Reducer<any, Action<any>> },
-  initState: Object = {}
+export function genReducers<TState, TActionTypes>(
+  reducers: { [key: TActionTypes]: tReducer<TState, Action<TActionTypes>> },
+  initState: TState
 ) {
-  return (state: any = initState, action: Action<any>) => {
+  return (state: TState = initState, action: Action<TActionTypes>) => {
     if (reducers[action.type]) {
       return reducers[action.type](state, action);
     }

@@ -7,10 +7,10 @@ import styles from './style';
 import { viewingStep, stepPayload, stepData, stepStatus } from '../../../modules/order/selector';
 import ScrewImage from '../../../components/ScrewImage';
 import screwStepAction from '../../../modules/step/screwStep/action';
-import STEP_STATUS from '../../../modules/step/constants';
+import { STEP_STATUS } from '../../../modules/step/constants';
 import type { tStepProps } from '../types';
-import type { tPoint } from '../../../modules/step/screwStep/model';
-import type { tStepStatus } from '../../../modules/order/interface/typeDef';
+import type { tPoint } from '../../../modules/step/screwStep/interface/typeDef';
+import type { tStepStatus } from '../../../modules/step/interface/typeDef';
 import type { Dispatch } from '../../../modules/typeDef';
 
 type tOP = {|
@@ -22,7 +22,7 @@ type tSP = {|
   points: Array<tPoint>,
   image: string,
   activeIndex: number,
-  status: tStepStatus
+  status: ?tStepStatus
 |};
 
 type tDP = {|
@@ -47,7 +47,7 @@ const mapState = (state, props: tOP): tSP => {
   });
 };
 
-const mapDispatch = {
+const mapDispatch: tDP = {
   // result: screwStepAction.result,
   redoPoint: screwStepAction.redoPoint
 };
@@ -72,10 +72,10 @@ function ScrewStep({ isCurrent, status, image, points, activeIndex, redoPoint }:
     />
     <Paper
       square
-      style={{ position: 'absolute', bottom: 10, right: 10, width: 'auto' }}
+      className={classes.thumbPaper}
     >
       <ScrewImage
-        style={{ width: '200px', height: '200px' }}
+        className={classes.thumbImage}
         image={image}
         points={points}
         twinkle={isCurrent}

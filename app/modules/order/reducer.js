@@ -1,8 +1,11 @@
 // @flow
 
+import type { Action, Reducer } from 'redux';
 import { ORDER } from './constants';
 import { genReducers } from '../util';
-import type { tOrder, tOrderState, tOrderStepIdx } from './interface/typeDef';
+
+import type { tAction, tReducer } from '../typeDef';
+import type { tOrder, tOrderState, tOrderStepIdx, tOrderActionTypes, tOrderListData } from './interface/typeDef';
 import { demoOrder, demoOrderCancel, demoOrderDone, demoOrderLong, demoOrderPending } from './demoData';
 import {
   orderLength,
@@ -15,8 +18,9 @@ import {
 } from './selector';
 import OrderMixin from './Order';
 import Step from '../step/Step';
+import type { IOrder } from './interface/IOrder';
 
-const initState = {
+const initState: tOrderState = {
   workingOrder: null,
   viewingOrder: null,
   viewingIndex: 0,
@@ -39,7 +43,7 @@ function limitIndex(order: ?tOrder, index: tOrderStepIdx): tOrderStepIdx {
   return index;
 }
 
-function clearWorkingOrderIfMatch(state, order) {
+function clearWorkingOrderIfMatch(state: tOrderState, order: IOrder) {
   const wOrder = workingOrder(state);
   if (wOrder === order) {
     return {
@@ -51,12 +55,11 @@ function clearWorkingOrderIfMatch(state, order) {
 }
 
 const orderReducer: {
-  // eslint-disable-next-line flowtype/no-weak-types
-  [key: string]: (tOrderState, { type: string, [key: any]: any }) => tOrderState
+  [key: tOrderActionTypes]: tReducer<tOrderState, Action<tOrderActionTypes>>
 } = {
-  [ORDER.LIST.SUCCESS]: (state, { list }) => {
+  [ORDER.LIST.SUCCESS](state, { list }: { list: Array<tOrderListData> }) {
     // get exist orders, orders not in the new list will be removed!!
-    let newList = state.list.filter(o => !!list.find(newO => o.id === newO.id));
+    let newList = state && state.list.filter(o => !!list.find(newO => o.id === newO.id));
 
     // update order data
     newList.forEach(o => {
@@ -76,14 +79,14 @@ const orderReducer: {
       list: newList
     };
   },
-  [ORDER.NEW]: (state, { list }) => {
+  [ORDER.NEW](state, { list }: { list: Array<tOrderListData> }) {
     // get exist orders
     let newList = state.list;
 
     // update order data
     newList.forEach(o => {
       const orderData = list.find(newO => o.id === newO.id);
-      if(orderData){
+      if (orderData) {
         o.update(orderData);
       }
     });
@@ -100,7 +103,7 @@ const orderReducer: {
       list: newList
     };
   },
-  [ORDER.DETAIL.SUCCESS]: (state, { order }) => {
+  [ORDER.DETAIL.SUCCESS](state, { order }: { order: IOrder }) {
     const newList = [...state.list];
     const newOrder = newList.find(o => o.id === order.id);
     if (newOrder) {
@@ -111,11 +114,10 @@ const orderReducer: {
       list: newList
     };
   },
-  [ORDER.UPDATE_STATE]: (state, action) => ({
-    ...state
-  }),
-  [ORDER.VIEW]: (state, action) => {
-    const { order } = action;
+  [ORDER.UPDATE_STATE](state) {
+    return { ...state };
+  },
+  [ORDER.VIEW](state, { order }: { order: IOrder }) {
     const firstIndex = 0;
     return {
       ...state,
@@ -123,42 +125,31 @@ const orderReducer: {
       viewingIndex: firstIndex
     };
   },
-  [ORDER.WORK_ON]: (state, { order }) => {
+  [ORDER.WORK_ON](state, { order }: { order: IOrder }) {
     const wOrder = workingOrder(state);
     if (wOrder) {
       return state;
     }
-    const startIndex =
-      workingIndex(order) >= order.steps.length ? 0 : workingIndex(order);
     return {
       ...state,
       workingOrder: order || null,
-      viewingIndex: startIndex
+      viewingIndex: workingIndex(order) >= order.steps.length ? 0 : workingIndex(order)
     };
   },
-  [ORDER.FINISH]: (state, { order }) => clearWorkingOrderIfMatch(state, order),
-  [ORDER.STEP.VIEW_NEXT]: state => {
-    const newIndex = limitIndex(viewingOrder(state), viewingIndex(state) + 1);
-    return {
-      ...state,
-      viewingIndex: newIndex
-    };
-  },
-  [ORDER.STEP.VIEW_PREVIOUS]: state => {
-    const newIndex = limitIndex(viewingOrder(state), viewingIndex(state) - 1);
-    return {
-      ...state,
-      viewingIndex: newIndex
-    };
-  },
-  [ORDER.STEP.JUMP_TO]: (state, action) => {
-    const { stepId } = action;
-    return {
-      ...state,
-      viewingIndex: stepId
-    };
-  },
-  [ORDER.STEP.DO_NEXT]: state => {
+  [ORDER.FINISH]: (state, { order }: { order: IOrder }) => clearWorkingOrderIfMatch(state, order),
+  [ORDER.STEP.VIEW_NEXT]: state => ({
+    ...state,
+    viewingIndex: limitIndex(viewingOrder(state), viewingIndex(state) + 1)
+  }),
+  [ORDER.STEP.VIEW_PREVIOUS]: state => ({
+    ...state,
+    viewingIndex: limitIndex(viewingOrder(state), viewingIndex(state) - 1)
+  }),
+  [ORDER.STEP.JUMP_TO]: (state, { stepId }) => ({
+    ...state,
+    viewingIndex: stepId
+  }),
+  [ORDER.STEP.DO_NEXT](state) {
     const wOrder: ?tOrder = workingOrder(state);
     const newIndex = workingIndex(wOrder) + 1;
     const vIndex =
@@ -170,7 +161,7 @@ const orderReducer: {
       viewingIndex: vIndex
     };
   },
-  [ORDER.STEP.FINISH]: state => {
+  [ORDER.STEP.FINISH](state) {
     const wOrder: ?tOrder = workingOrder(state);
     const newIndex = workingIndex(wOrder) + 1;
     const vIndex =
@@ -182,7 +173,7 @@ const orderReducer: {
       viewingIndex: vIndex
     };
   },
-  [ORDER.STEP.DO_PREVIOUS]: state => {
+  [ORDER.STEP.DO_PREVIOUS](state) {
     const wOrder = workingOrder(state);
     const newIndex = limitIndex(wOrder, workingIndex(wOrder) - 1);
     return {
@@ -195,4 +186,4 @@ const orderReducer: {
   }
 };
 
-export default genReducers(orderReducer, initState);
+export default genReducers<tOrderState, tOrderActionTypes>(orderReducer, initState);

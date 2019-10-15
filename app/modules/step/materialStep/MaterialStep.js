@@ -1,7 +1,7 @@
 // @flow
 import { call, put, select, take, all, race } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
-import STEP_STATUS from '../constants';
+import {STEP_STATUS} from '../constants';
 import { stepPayload, workingOrder, workingStep } from '../../order/selector';
 import { getDevice } from '../../external/device';
 import { CommonLog } from '../../../common/utils';

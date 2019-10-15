@@ -7,9 +7,9 @@ import type {
   tResult,
   tResultStatus,
   tScrewStepData
-} from './model';
+} from './interface/typeDef';
 import { POINT_STATUS, RESULT_STATUS } from './constants';
-import STEP_STATUS from '../constants';
+import {STEP_STATUS} from '../constants';
 import { CommonLog } from '../../../common/utils';
 import { orderActions } from '../../order/action';
 
@@ -181,23 +181,28 @@ const resultStatusTasks = (results: Array<tResult>) => ({
 const resultStatusColor = {
   NOK: 'danger',
   OK: 'success',
+  LSN: 'info',
+  AK2: 'info',
   default: 'info'
 };
 
+const reduceResult2TimeLine = (results: Array<tResult>) =>
+  (d: tScrewStepData): tScrewStepData => ({
+    ...d,
+    timeLine: [
+      ...results.map(r => ({
+        title: r.batch,
+        color: resultStatusColor[r.result] || resultStatusColor.default,
+        footerTitle: r.toolSN,
+        body: `${r.result}: wi=${r.wi},mi=${r.mi},ti=${r.ti}`
+      })),
+      ...(d.timeLine || [])
+    ]
+  });
+
 export default function* handleResult(results: Array<tResult>, data: tScrewStepData): Saga<void> {
   try {
-    yield call(this.updateData, (d: tScrewStepData): tScrewStepData => ({
-      ...d,
-      timeLine: [
-        ...results.map(r => ({
-          title: r.batch,
-          color: resultStatusColor[r.result] || resultStatusColor.default,
-          footerTitle: r.toolSN,
-          body: `${r.result}: wi=${r.wi},mi=${r.mi},ti=${r.ti}`
-        })),
-        ...(d.timeLine || [])
-      ]
-    }));
+    yield call(this.updateData, reduceResult2TimeLine(results));
     // eslint-disable-next-line flowtype/no-weak-types
     const firstMatchResultStatus = ((resultStatus(results, data).find(v => !!v): any): string);
     const matchedStatusTask = resultStatusTasks(results)[firstMatchResultStatus];

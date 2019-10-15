@@ -9,7 +9,7 @@ import React, { useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Loop } from '@material-ui/icons';
 import clsx from 'clsx';
-import STEP_STATUS from '../../modules/step/constants';
+import {STEP_STATUS} from '../../modules/step/constants';
 import styles from './styles';
 import * as oSel from '../../modules/order/selector';
 import { orderActions } from '../../modules/order/action';

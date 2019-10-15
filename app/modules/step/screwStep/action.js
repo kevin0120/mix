@@ -1,5 +1,5 @@
 // @flow
-import type { tPoint, tResult } from './model';
+import type { tPoint, tResult } from './interface/typeDef';
 import { SCREW_STEP } from './constants';
 
 export type tResultAction = { type: string, results: Array<tResult> };

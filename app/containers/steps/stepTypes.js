@@ -5,27 +5,28 @@ import ScrewStep from './screwStep';
 import MaterialStep from './materialStep';
 import CheckStep from './CheckStep';
 import VideoStep from './VideoStep';
+import {stepTypeKeys as s} from '../../modules/step/constants';
 
 export default {
-  input: {
+   [s.input]: {
     component: InputStep
   },
-  scanner:{
+  [s.scanner]:{
     component:ScannerStep
   },
-  instruction:{
+  [s.instruction]:{
     component:InstructionStep,
   },
-  screw:{
+  [s.screw]:{
     component:ScrewStep,
   },
-  material:{
+  [s.material]:{
     component:MaterialStep,
   },
-  check:{
+  [s.check]:{
     component:CheckStep,
   },
-  video:{
+  [s.video]:{
     component:VideoStep,
   }
 };

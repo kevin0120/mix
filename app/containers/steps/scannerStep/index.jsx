@@ -44,7 +44,7 @@ const mapState = (state, props: tOP): tSP => ({
   label: stepPayload(viewingStep(state.order))?.label || ''
 });
 
-const mapDispatch = {
+const mapDispatch: tDP = {
   submit: scannerStepAction.submit,
   getValue: scannerStepAction.getValue
 };

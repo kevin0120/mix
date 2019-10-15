@@ -1,13 +1,13 @@
 // @flow
 import { cloneDeep, isNil, isEmpty } from 'lodash-es';
 import { call, put, take, all } from 'redux-saga/effects';
-import STEP_STATUS from '../constants';
+import {STEP_STATUS} from '../constants';
 import type {
   tPoint,
   tScrewStepData,
   tScrewStepPayload
-} from './model';
-import { ClsOrderOperationPoints } from './model';
+} from './interface/typeDef';
+import { ClsOrderOperationPoints } from './classes/ClsOrderOperationPoints';
 import { CommonLog } from '../../../common/utils';
 import handleResult from './handleResult';
 import controllerModeTasks from './controllerModeTasks';
@@ -16,7 +16,7 @@ import { SCREW_STEP, controllerModes } from './constants';
 import { getDevice } from '../../external/device';
 import dialogActions from '../../dialog/action';
 import type { IWorkStep } from '../interface/IWorkStep';
-import type { IScrewStep } from './IScrewStep';
+import type { IScrewStep } from './interface/IScrewStep';
 
 function* doPoint(point, isFirst, orderActions) {
   try {
@@ -71,7 +71,8 @@ const ScrewStepMixin = (ClsBaseStep: IWorkStep) => class ClsScrewStep extends Cl
     }
   };
 
-  constructor(...args: Iterable<any>) {
+  // eslint-disable-next-line flowtype/no-weak-types
+  constructor(...args: Array<any>) {
     super(...args);
     const payload: tScrewStepPayload = (this: IScrewStep)._payload;
     if (isNil(payload) || isEmpty(payload)) {
@@ -153,7 +154,7 @@ const ScrewStepMixin = (ClsBaseStep: IWorkStep) => class ClsScrewStep extends Cl
         // for (const t of this._tools) {
         //   yield call(t.Enable);
         // }
-        yield call([this, handleResult], [], this._data);
+        yield call([this, handleResult], [], this._data); // call with the empty result to init the data
         let isFirst = true;
         const sData: tScrewStepData = this._data;
         const { activeIndex, points } = sData;
@@ -186,6 +187,7 @@ const ScrewStepMixin = (ClsBaseStep: IWorkStep) => class ClsScrewStep extends Cl
               const { point } = nextAction;
               yield call(getDevice(activePoint.toolSN).Disable);
               activePoint = point;
+              // TODO: handle redo point
               break;
             }
             default:

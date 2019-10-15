@@ -1,21 +1,22 @@
 // @flow
 
 // 工单状态
-export const ORDER_STATUS = {
+export const ORDER_STATUS = Object.freeze({
   TODO: 'todo',
   WIP: 'wip',
   DONE: 'done',
   CANCEL: 'cancel',
   PENDING: 'pending'
-};
+});
+
 // rush type
-export const ORDER_WS_TYPES = {
+export const ORDER_WS_TYPES = Object.freeze({
   LIST: 'WS_ORDER_LIST',
   DETAIL: 'WS_ORDER_DETAIL',
   UPDATE: 'WS_ORDER_UPDATE',
   STEP_UPDATE: 'WS_ORDER_STEP_UPDATE',
   NEW: 'WS_NEW_ORDER'
-};
+});
 
 // order action types
 export const ORDER = {

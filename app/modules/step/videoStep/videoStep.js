@@ -1,6 +1,6 @@
 // @flow
 import { put, take } from 'redux-saga/effects';
-import STEP_STATUS from '../constants';
+import {STEP_STATUS} from '../constants';
 import { VIDEO_STEP } from './action';
 import type { IWorkStep } from '../interface/IWorkStep';
 

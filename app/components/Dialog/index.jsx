@@ -40,7 +40,7 @@ const mapState = (state, props: tOP): tSP => ({
   open: state?.dialog?.open || false
 });
 
-const mapDispatch = {
+const mapDispatch: tDP = {
   closeAction: dialogActions.dialogClose,
   buttonAction: dialogActions.dialogButton
 };

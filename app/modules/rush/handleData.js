@@ -1,6 +1,6 @@
 /* eslint-disable no-empty-function */
 import { put, fork } from 'redux-saga/effects';
-import type { tRushWebSocketData, tWebSocketEvent } from './type';
+import type { tRushWebSocketData, tWebSocketEvent, IRushData, tRushData } from './type';
 import { WEBSOCKET_EVENTS as wse } from './constants';
 import notifierActions from '../Notifier/action';
 import { CommonLog } from '../../common/utils';
@@ -14,8 +14,9 @@ import scannerNewData from '../external/device/scanner/saga';
 import ioNewData from '../external/device/io/saga';
 import { deviceStatus } from '../external/device';
 import orderData from '../order/handleData';
+import { Saga } from 'redux-saga';
 
-export default function*(payload) {
+export default function* (payload) {
   try {
     const d = /(^[^"]*);(.*)/.exec(payload);
     const dataArray = d[1].split(';');
@@ -38,8 +39,10 @@ export default function*(payload) {
   }
 }
 
-const rushDataHandlers = {
-  *[wse.maintenance](data: tRushWebSocketData) {
+const rushDataHandlers: {
+  [tWebSocketEvent]: (tRushData<any,any>)=>void | Saga<void>
+} = {
+  * [wse.maintenance](data: tRushWebSocketData) {
     try {
       yield put(
         notifierActions.enqueueSnackbar(

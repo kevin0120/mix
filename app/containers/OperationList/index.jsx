@@ -44,7 +44,7 @@ const mapState = (state, props: tOP): tSP => ({
   orderList: state.order.list
 });
 
-const mapDispatch = {
+const mapDispatch: tDP = {
   view: orderActions.view,
   doPush: push,
   getList: orderActions.getList

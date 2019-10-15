@@ -1,4 +1,4 @@
-export const WEBSOCKET_EVENTS = {
+export const WEBSOCKET_EVENTS = Object.freeze({
   controller: 'controller',
   result: 'result',
   register: 'register',
@@ -14,4 +14,4 @@ export const WEBSOCKET_EVENTS = {
   reply: 'reply',
   order: 'order',
   device: 'device'
-};
+});

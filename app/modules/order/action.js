@@ -1,15 +1,14 @@
 // @flow
-import type { tOrder, tOrderStepIdx, tStepStatus } from './interface/typeDef';
-// import type { tClsOrder } from './Order';
+import type { tOrder, tOrderStepIdx, tOrderListData, tOrderStatus } from './interface/typeDef';
 import type { IOrder } from './interface/IOrder';
-// import type { tClsStep } from '../step/Step';
 import { ORDER_STATUS, ORDER } from './constants';
 import type { IWorkStep } from '../step/interface/IWorkStep';
+import type { tAnyStepStatus, tStepStatus } from '../step/interface/typeDef';
 
 export type tActUpdateState = {
   type: string,
   step: IOrder | IWorkStep,
-  status: tStepStatus
+  status: tOrderStatus
 };
 
 export type tActOrderTrigger = {
@@ -26,7 +25,7 @@ export const orderActions = {
     type: ORDER.NEW,
     list
   }),
-  getListSuccess: (list: Array<tOrder>) => ({
+  getListSuccess: (list: Array<tOrderListData>) => ({
     type: ORDER.LIST.SUCCESS,
     list
   }),
@@ -77,7 +76,7 @@ export const orderActions = {
     type: ORDER.STEP.JUMP_TO,
     stepId
   }),
-  stepStatus: (step: IWorkStep, status: tStepStatus, msg: string = '') => ({
+  stepStatus: (step: IWorkStep, status: tAnyStepStatus, msg: string = '') => ({
     type: ORDER.STEP.STATUS,
     step,
     status,

@@ -1,25 +1,32 @@
-import STEP_STATUS from '../../step/constants';
-import { ORDER_STATUS } from '../constants';
-// import type { tClsOrder } from '../Order';
+// @flow
+import { ORDER_STATUS, ORDER_WS_TYPES } from '../constants';
 import type { IOrder } from './IOrder';
+import type { tStep } from '../../step/interface/typeDef';
+import type { tRushData } from '../../rush/type';
 
 export type tStockMove = {
   lot: string, // 批次号或者序列号
   product: string // 所选的产品名称
 };
 
-export type tOrder = {
+export type tOrderListData = {|
   id: number,
+  desc: string, // 工单描述
+  name: string, // 工单名称（工单号）
+  image: string,
+  status: tOrderStatus
+|};
+
+export type tOrder = {|
+  ...tOrderListData,
   canRework: boolean, // 是否能够返工
   incomingProducts: Array<tStockMove>,
   finishedProducts: Array<tStockMove>, //
-  steps: tStepArray, // 工步
+  steps: Array<tStep>, // 工步
   status: tOrderStatus, // 工单状态
   plannedDateTime: string, // 计划时间
-  name: string, // 工单号
-  desc: string, // 工单信息
   workingIndex: ?number // 正在执行的工步索引
-};
+|};
 
 export type tOrderStepIdx = number;
 
@@ -30,41 +37,9 @@ export type tOrderState = {
   list: Array<IOrder>
 };
 
-interface tStepPayload {
-  // eslint-disable-next-line flowtype/no-weak-types
-  [key: string]: any
-}
-
-
-export type tStep = {
-  +name: string,
-  // eslint-disable-next-line flowtype/no-weak-types
-  info: Object,
-  status: tStepStatus,
-  +type: tStepType, // check,collect,instruct,enable,...
-  payload: tStepPayload, // 工步的数据
-  data: tStepPayload, // 工步执行过程中生成的数据
-  steps: tStepArray,
-  // startTime: Date,
-  // endTime: Date,
-  times: Array<Date>,
-  skippable: boolean, // 此工步是否可跳过
-  undoable: boolean, // 是否可重做
-  description: string
-};
-
-export type tStepType = 'check' | 'collect' | 'instruct' | 'enable';
-
-export type tStepStatus =
-  | STEP_STATUS.DOING
-  | STEP_STATUS.ENTERING
-  | STEP_STATUS.FAIL
-  | STEP_STATUS.FINISHED
-  | STEP_STATUS.LEAVING
-  | STEP_STATUS.READY;
+export type tOrderActionTypes = string;
 
 export type tOrderStatus = $Values<typeof ORDER_STATUS>;
+export type tOrderWSTypes = $Values<typeof ORDER_WS_TYPES>;
 
-export type tStepArray = Array<tStep>;
-
-export opaque type tOrderActionTypes= string;
+export type tOrderRushData = tRushData<tOrderWSTypes, any>;

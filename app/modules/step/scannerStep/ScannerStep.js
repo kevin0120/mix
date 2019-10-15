@@ -1,6 +1,6 @@
 // @flow
 import { call, put, select, take, all } from 'redux-saga/effects';
-import STEP_STATUS from '../constants';
+import {STEP_STATUS} from '../constants';
 import {
   stepData,
   stepPayload,
