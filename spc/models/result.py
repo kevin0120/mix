@@ -164,7 +164,7 @@ DECLARE
   r_bom_line_id        BIGINT  = null;
   r_operation_point_id BIGINT  = null;
   r_measure_result     varchar;
-  r_expect_order_id             bigint;
+  r_expect_order_id    BIGINT  = null;
 BEGIN
   case pset_strategy
     when 'LN'
@@ -178,7 +178,7 @@ BEGIN
 
   if order_id != 0
   then
-    select mp.vin,
+    select mp.track_no,
            qp.id,
            co.id,
            mp.id,
@@ -206,17 +206,16 @@ BEGIN
       and mbl.id = co.bom_line_id
       and me.serial_no = gun_sn
       and co.product_id = pp.id;
-     
-     select wo.id
-            into r_expect_order_id
-     from public.mrp_workorder wo,
-          public.mrp_production mp,
-          public.mrp_wo_consu co,
-     where wo.production_id = mp.id
+
+    select wo.id into r_expect_order_id
+    from public.mrp_workorder wo,
+         public.mrp_production mp,
+         public.mrp_wo_consu co
+    where wo.production_id = mp.id
       and co.workorder_id = wo.id
-      and mp.vin=r_vin_code 
-      and co.gunid=r_gun_id
-     limit 1 
+      and mp.track_no = r_vin_code
+      and co.gun_id = r_gun_id
+    limit 1;
   else
     r_vin_code = vin_code;
     order_id = null;
@@ -266,7 +265,7 @@ BEGIN
                                        qcp_id, bom_line_id, operation_point_id, workorder_id,
                                        consu_product_id, consu_bom_line_id,
                                        production_id, tool_id, program_id, product_id, assembly_line_id, workcenter_id,
-                                       tightening_id, job,expect_workorder_id,
+                                       tightening_id, job, expect_workorder_id,
                                        time)
   VALUES (pset_m_threshold, pset_m_max, control_data, pset_w_max, user_id, r_one_time_pass, pset_strategy,
           r_measure_result,
@@ -279,7 +278,7 @@ BEGIN
           r_consu_product_id,
           consu_bom_id, r_production_id,
           r_gun_id, r_program_id, r_product_id, r_assembly_id,
-          r_workcenter_id, r_tightening_id, r_job,r_expect_order_id
+          r_workcenter_id, r_tightening_id, r_job, r_expect_order_id,
           NOW());
 
   result_id = lastval();
