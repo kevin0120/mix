@@ -681,6 +681,8 @@
                                 <span>from </span> <field name="tolerance_min"/>
                                 <span>to </span> <field name="tolerance_max"/>
                             </div>
+                            <field name="test_type" invisible="1"/>
+                            <field string="Type" name="test_type_id" widget="selection"/>
                             <field name="team_id" widget="selection"/>
                             <field name="user_id"/>
                         </group>

@@ -70,6 +70,54 @@
             <field name="name">Others</field>
         </record>
 
+        <record id="test_type_register_consumed_materials" model="sa.quality.point.test_type">
+            <field name="name">Register Consumed Materials</field>
+            <field name="technical_name">register_consumed_materials</field>
+        </record>
+
+        <record id="test_type_register_byproducts" model="sa.quality.point.test_type">
+            <field name="name">Register By-products</field>
+            <field name="technical_name">register_byproducts</field>
+        </record>
+
+        <record id="test_type_print_label" model="sa.quality.point.test_type">
+            <field name="name">Print label</field>
+            <field name="technical_name">print_label</field>
+        </record>
+
+        <record id="test_type_passfail" model="sa.quality.point.test_type">
+            <field name="name">Pass - Fail</field>
+            <field name="technical_name">passfail</field>
+        </record>
+
+        <record id="test_type_measure" model="sa.quality.point.test_type">
+            <field name="name">Measure</field>
+            <field name="technical_name">measure</field>
+        </record>
+
+        <record id="test_type_text" model="sa.quality.point.test_type">
+            <field name="name">Text</field>
+            <field name="technical_name">text</field>
+        </record>
+        <record id="test_type_picture" model="sa.quality.point.test_type">
+            <field name="name">Take a Picture</field>
+            <field name="technical_name">picture</field>
+        </record>
+
+        <record id="test_type_video" model="sa.quality.point.test_type">
+            <field name="name">Show a Video</field>
+            <field name="technical_name">video</field>
+        </record>
+
+        <record id="test_type_tightening" model="sa.quality.point.test_type">
+            <field name="name">Tightening Work Step</field>
+            <field name="technical_name">tightening</field>
+        </record>
+
+        <record id="test_type_tightening_point" model="sa.quality.point.test_type">
+            <field name="name">Tightening Point</field>
+            <field name="technical_name">tightening_point</field>
+        </record>
 
     </data>
 </odoo>
