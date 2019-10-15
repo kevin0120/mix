@@ -25,7 +25,7 @@ export default function* rootSaga(): Saga<void> {
   try {
     const state = yield select();
     const { andonEnable } = state.setting.systemSettings;
-    yield all([
+    const m = [
       // 硬件设备
       watchRFIDEvent,
       watchAiis,

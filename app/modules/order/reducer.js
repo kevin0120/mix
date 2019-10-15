@@ -24,14 +24,17 @@ const initState: tOrderState = {
   workingOrder: null,
   viewingOrder: null,
   viewingIndex: 0,
-  list: [
-    demoOrder,
-    demoOrderLong,
-    demoOrderCancel,
-    demoOrderPending,
-    demoOrderDone
-  ].map(o => new (OrderMixin(Step))(o))
+  list: [],
+  // list: [
+  //   demoOrder,
+  //   demoOrderLong,
+  //   demoOrderCancel,
+  //   demoOrderPending,
+  //   demoOrderDone
+  // ].map(o => new (OrderMixin(Step))(o))
 };
+
+// if (process.env.)
 
 function limitIndex(order: ?tOrder, index: tOrderStepIdx): tOrderStepIdx {
   if (index < 0) {

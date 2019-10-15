@@ -16,7 +16,8 @@ settings.setPath(path.join(dir, 'setting.json'));
 
 if (
   process.env.NODE_ENV === 'development' ||
-  process.env.DEBUG_PROD === 'true'
+  process.env.DEBUG_PROD === 'true' ||
+  process.env.NODE_ENV === 'test'
 ) {
   settings.deleteAll();
 }

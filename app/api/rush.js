@@ -1,5 +1,7 @@
 import { CommonLog } from '../common/utils';
 
+import {isNil} from 'lodash-es';
+
 const { ipcRenderer } = require('electron');
 
 const messageSNs = {};
@@ -15,13 +17,16 @@ function getSN() {
 
 const defaultTimeout = 10000; // 默认timeout 10s
 
-ipcRenderer.on('rush-reply', (event, args, replySN)=>{
-  if(messageSNs[replySN]){
-    CommonLog.Info('rush-reply', args);
-    messageSNs[replySN](args);
-    delete messageSNs[replySN];
-  }
-});
+if(!isNil(ipcRenderer)){
+  ipcRenderer.on('rush-reply', (event, args, replySN)=>{
+    if(messageSNs[replySN]){
+      CommonLog.Info('rush-reply', args);
+      messageSNs[replySN](args);
+      delete messageSNs[replySN];
+    }
+  });
+}
+
 
 export function rushSendApi(msgType, data, timeout = defaultTimeout) {
   const sn = getSN();
