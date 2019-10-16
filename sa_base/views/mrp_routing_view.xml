@@ -63,9 +63,13 @@
                                 <!--<field name="op_job_id"/>-->
                                 <field name="max_redo_times" required="1"/>
                                 <field name="max_op_time" required="1"/>
-                                <field name="sa_step_ids" widget="many2many_tags" options="{'no_create': True, 'no_open':True}"/>
                             </group>
                         </group>
+                        <group>
+                            <group name="description">
+                              <field name="sa_step_ids" widget="many2many_tags" options="{'no_create': True, 'no_open':True}"/>
+                            </group>
+                         </group>
                         <notebook>
                             <page string="工艺路线图片">
                                 <field name="worksheet_img" widget="imageEditor" required="1"/>

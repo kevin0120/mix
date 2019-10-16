@@ -22,15 +22,18 @@ class MrpStepCategory(models.Model):
 class MrpStep(models.Model):
     _name = 'mrp.step'
 
+    # _inherits = {'sa.quality.point': 'qcp_id'}
+
     _inherit = ['mail.thread']
 
-    _order = "id"
+
+    _order = "id,sequence"
     note = fields.Text('Description')
     code = fields.Char('Reference', copy=False)
     step_name = fields.Char('Name Point Group')
     category_id = fields.Many2one('mrp.step.category', string='工步类型')
     category_name = fields.Char(compute='_compute_category_name', default='', store=True)
-    direction = fields.Text(compute='_compute_category_direction', default='', store=True)
+    direction = fields.Text(compute='_compute_category_direction', default='请按提示作业', store=True)
 
     worksheet = fields.Binary('worksheet')
     worksheet_img = fields.Binary('worksheet_img')
@@ -39,6 +42,7 @@ class MrpStep(models.Model):
     active = fields.Boolean(
         'Active', default=True,
         help="If the active field is set to False, it will allow you to hide the bills of material without removing it.")
+    child_step_count = fields.Integer(string='Operations', compute='_compute_child_step_count')
 
     sequence = fields.Integer('sequence', default=1)
 
@@ -67,7 +71,7 @@ class MrpStep(models.Model):
     up_step_id = fields.Many2one('mrp.step', ondelete='cascade')
     is_child = fields.Boolean(string='Is child', default=False, )
     operation_point_ids = fields.One2many('mrp.step', 'up_step_id', string='Operation Points')
-
+    material_ids = fields.One2many('mrp.step', 'up_step_id', string='Material Ids')
     operation_point_group_ids = fields.One2many('mrp.step.group', 'step_id',
                                                 string='Operation Points Group(multi-spindle)')
 
@@ -119,6 +123,21 @@ class MrpStep(models.Model):
         if bom_line_ids:
             bom_line_ids.toggle_active()
         return super(MrpStep, self).toggle_active()
+
+
+    @api.multi
+    def delete_child_step(self):
+        bom_line_ids = self.env['mrp.step'].search([('up_step_id', 'in', self.ids)])
+        if bom_line_ids:
+            bom_line_ids.unlink()
+        return
+
+    @api.depends('operation_point_ids')
+    def _compute_child_step_count(self):
+        for routing in self:
+            routing.child_step_count = len(routing.operation_point_ids)
+
+
 
     @api.model
     def create(self, vals):

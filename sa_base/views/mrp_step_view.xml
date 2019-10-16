@@ -13,6 +13,9 @@
                     </xpath>
                     <sheet>
                         <div class="oe_button_box" name="button_box">
+                            <button class="oe_stat_button" name="delete_child_step" type="object" icon="fa-list-alt">
+                                <field string="Delete Child Step" name="child_step_count" widget="statinfo" />
+                            </button>
                             <button class="oe_stat_button" name="toggle_active" type="object" icon="fa-archive" groups="base.group_system">
                                 <field name="active" widget="boolean_button"
                                     options='{"terminology": "archive"}'/>
@@ -30,7 +33,7 @@
                             </group>
                             <group>
                                 <field name="op_job_id" string="JOB" attrs="{'invisible': [('category_name', '!=', '拧紧作业指导JOB')]}"/>
-                                <field name="direction" string="Direction" attrs="{'invisible': [('category_name', '=', False)]}"/>
+                                <field name="direction" string="Direction" readonly="1"/>
                             </group>
                         </group>
                         <notebook>
@@ -40,9 +43,21 @@
                             <page string="工艺文件">
                                 <field name="worksheet" widget="pdf_viewer"/>
                             </page>
+                            <page string="物料清单" attrs="{'invisible': [('category_name', '!=', '获取物料')]}">
+                                <field name="material_ids" widget="one2many_list" colspan="4" nolabel="1" mode="tree" context="{'default_up_step_id':active_id, 'search_operation_ids': [active_id]}">
+                                    <tree string="Material Ids" editable="bottom" delete="true">
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="sequence" readonly="1"/>
+                                        <field name="id" readonly="1" groups="base.group_no_one"/>
+                                        <field name="name" string="Description" />
+                                        <field name="product_id" required="1"/>
+                                        <field name="product_qty"/>
+                                    </tree>
+                                 </field>
+                            </page>
                             <page string="Operation Points"  attrs="{'invisible': [('category_name', '!=', '拧紧作业指导JOB'),('category_name', '!=', '拧紧作业指导Pset')]}">
                                  <field name="operation_point_ids" widget="one2many_list" colspan="4" nolabel="1" mode="tree" context="{'default_up_step_id':active_id, 'search_operation_ids': [active_id]}">
-                                    <tree string="Operation Points" editable="bottom" delete="false">
+                                    <tree string="Operation Points" editable="bottom" delete="true">
                                         <field name="sequence" widget="handle"/>
                                         <field name="sequence" readonly="1"/>
                                         <field name="id" readonly="1" groups="base.group_no_one"/>
