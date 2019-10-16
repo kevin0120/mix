@@ -291,13 +291,6 @@ $$
             """)
 
     @api.multi
-    @api.depends('workorder_id', 'tool_id')
-    def _compute_theory_workorder_id(self):
-        for result in self:
-            result.theory_workorder_id = self.env['mrp.workorder'].filtered("active")[0] if workorder_id.bom_ids else False
-
-
-    @api.multi
     def sent_aiis(self):
         results = self.filtered(lambda r: r.measure_result in ['ok', 'nok'])
         if not results:

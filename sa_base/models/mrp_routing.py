@@ -29,12 +29,13 @@ class MrpRoutingWorkcenter(models.Model):
     workcenter_ids = fields.Many2many('mrp.workcenter', related='workcenter_group.sa_workcenter_ids',
                                      copy=False, readonly=True)
 
-
-    workcenter_id = fields.Many2one('mrp.workcenter', copy=False, required=False)
+    sa_step_ids = fields.Many2many('mrp.step', 'step_operation_rel', 'operation_id', 'step_id',
+                                     string="Steps", copy=False)
+    # workcenter_id = fields.Many2one('mrp.workcenter', copy=False, required=False)
 
     socket = fields.Char(string='Socket No')
-    # op_job_id = fields.Many2one('controller.job', string='Job', track_visibility="onchange")
-    op_job_id = fields.Many2one('controller.job', string='Job')
+    op_job_id = fields.Many2one('controller.job', string='Job', track_visibility="onchange")
+    # op_job_id = fields.Many2one('controller.job', string='Job')
 
     operation_point_ids = fields.One2many('operation.point', 'operation_id', string='Operation Points')
 
