@@ -46,7 +46,7 @@ const statusMap = classes => ({
 function StepWorking({ status, desc }: Props): Node {
   const classes = makeStyles(styles.layout)();
 
-  type tNodeHook = [Node, ((Node => Node) | Node) => void]
+  type tNodeHook = [Node, ((Node => Node) | Node) => void];
   const [action, bindAction]: tNodeHook = useState(null);
   const [description, bindDescription]: tNodeHook = useState(null);
 

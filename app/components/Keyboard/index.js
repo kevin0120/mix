@@ -1,3 +1,4 @@
+// @flow
 /* eslint-disable react/no-this-in-sfc */
 import React, { useEffect, useState } from 'react';
 import Dialog from '@material-ui/core/Dialog';
@@ -11,10 +12,13 @@ import IconButton from '@material-ui/core/IconButton';
 import Clear from '@material-ui/icons/CancelOutlined';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import { I18n } from 'react-i18next';
-import {isEqual} from 'lodash-es';
+import { isEqual } from 'lodash-es';
+import type { AbstractComponent } from 'react';
 import customSelectStyle from '../../common/jss/customSelectStyle';
 import Button from '../CustomButtons/Button';
 import CustomInput from '../CustomInput/CustomInput';
+import type { tKeyboard } from './typeDef';
+
 
 const customStyles = theme => ({
   ...customSelectStyle(theme),
@@ -25,9 +29,12 @@ const customStyles = theme => ({
   }
 });
 
-export default function withKeyboard(SubComponents) {
-  function KeyboardDialog(props) {
-    const [keyboard, setKeyboard] = useState(null);
+type Props = {};
+
+// eslint-disable-next-line flowtype/no-weak-types
+export default function withKeyboard(SubComponents: AbstractComponent<any, any>): AbstractComponent<any, any> {
+  function KeyboardDialog(props: Props) {
+    const [keyboard, setKeyboard]: [?tKeyboard, ((?tKeyboard => ?tKeyboard) | ?tKeyboard) => void] = useState(null);
     const [layout, setLayout] = useState('default');
     const [text, setText] = useState('');
     const [config, setConfig] = useState({
@@ -45,7 +52,9 @@ export default function withKeyboard(SubComponents) {
     }, [keyboard, text]);
 
     const handleSubmit = () => {
-      config.onSubmit(text);
+      if (config.onSubmit) {
+        config.onSubmit(text);
+      }
       setShow(false);
     };
 
@@ -67,7 +76,7 @@ export default function withKeyboard(SubComponents) {
     const onChangeInput = event => {
       const tx = event.target.value;
       setText(tx);
-      if (keyboard?.keyboard?.setInput) {
+      if (keyboard && keyboard.keyboard) {
         keyboard.keyboard.setInput(tx);
       } else {
         console.error('no keyboard');
@@ -81,7 +90,6 @@ export default function withKeyboard(SubComponents) {
       <I18n ns="translations">
         {t => (
           <React.Fragment>
-
             <SubComponents
               keyboardInput={c => bindKeyboardInput(c)}
               {...restProps}
@@ -124,7 +132,9 @@ export default function withKeyboard(SubComponents) {
                           aria-label="clear input"
                           onClick={() => {
                             setText('');
-                            keyboard.setInput('');
+                            if (keyboard) {
+                              keyboard.keyboard.setInput('');
+                            }
                           }}
                         >
                           <Clear/>
@@ -137,7 +147,7 @@ export default function withKeyboard(SubComponents) {
               <DialogActions
                 className={`${classes.modalFooter} ${
                   classes.modalFooterCenter
-                  }`}
+                }`}
               >
                 <Button
                   // className={classes.modalFooterCenter}

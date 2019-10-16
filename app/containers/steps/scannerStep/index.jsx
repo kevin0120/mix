@@ -16,6 +16,7 @@ import {
   stepPayload,
   viewingStep
 } from '../../../modules/order/selector';
+import type { tKeyboardBinder } from '../../../components/Keyboard/typeDef';
 
 type tDP = {|
   submit: Dispatch,
@@ -23,13 +24,13 @@ type tDP = {|
 |};
 type tSP = {|
   ...tOP,
-  result: Object,
+  result: {},
   label: string
 |};
 
 type tOP = {|
   ...tStepProps,
-  keyboardInput: Function
+  keyboardInput: tKeyboardBinder
 |};
 
 type Props = {

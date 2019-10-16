@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { AppBar } from '@material-ui/core';
-import lodash from 'lodash';
+import * as lodash from 'lodash-es';
 import Clock from 'react-live-clock';
 import { push } from 'connected-react-router';
 import { connect } from 'react-redux';
@@ -20,19 +20,49 @@ import type { Dispatch } from '../../modules/typeDef';
 import type { tUser } from '../../modules/user/interface/typeDef';
 import notifyActions from '../../modules/Notifier/action';
 
-type Props = {
-  classes: {},
+
+type OP = {|
   disabled: boolean,
   contents: Array<string>,
   childRoutes: Array<tRouteObj>,
-  healthCheckResults: {},
+  self: tRouteObj,
+  getContentByUrl: (tUrl)=>tRouteObj
+|};
+
+type SP = {|
+  ...OP,
   users: Array<tUser>,
+  workMode: string,
+  healthCheckResults: {},
+  path: string
+|};
+
+type DP = {|
   doPush: Dispatch,
   notification: Dispatch,
-  path: string,
-  self: tRouteObj,
   logout: Dispatch,
-  getContentByUrl: (tUrl)=>tRouteObj
+  updateHealthz: Dispatch
+|};
+
+type Props = {|
+  ...SP,
+  ...DP
+|};
+
+const mapState = (state, ownProps: OP): SP => ({
+  ...ownProps,
+  users: state.users,
+  // orderStatus: state.operations.operationStatus,
+  workMode: state.workMode.workMode,
+  healthCheckResults: state.healthz.status || {},
+  path: state.router.location.pathname
+});
+
+const mapDispatch: DP = {
+  doPush: push,
+  notification: notifyActions.enqueueSnackbar,
+  logout: logoutRequest,
+  updateHealthz: healthzActions.update
 };
 
 function ConnectedNavBar(
@@ -51,18 +81,13 @@ function ConnectedNavBar(
     updateHealthz
   }: Props) {
 
-  /**
-   * @return {boolean}
-   */
-  function HealthCheckOk() {
-    return (!Object.keys(healthCheckResults).some(r => !healthCheckResults[r]));
-  }
 
   const [healthOK, setHealthOK] = useState(false);
 
   useEffect(() => {
-    setHealthOK(HealthCheckOk);
-  }, [HealthCheckOk, healthCheckResults]);
+    const HealthCheckOk = (): boolean => (!Object.keys(healthCheckResults).some(r => !healthCheckResults[r]));
+    setHealthOK(HealthCheckOk());
+  }, [healthCheckResults]);
 
   const renderSysInfoMenu = (key) =>
     <NavBarMenu
@@ -77,7 +102,7 @@ function ConnectedNavBar(
       key={key}
       statusOK={healthOK}
       title="连接"
-      onClick={()=>updateHealthz()}
+      onClick={() => updateHealthz()}
     >
       <HealthCheck status={healthCheckResults}/>
     </NavBarMenu>;
@@ -149,24 +174,7 @@ function ConnectedNavBar(
   );
 }
 
-
-const mapState = (state, ownProps) => ({
-  users: state.users,
-  // orderStatus: state.operations.operationStatus,
-  workMode: state.workMode.workMode,
-  healthCheckResults: state.healthz.status||{},
-  path: state.router.location.pathname,
-  ...ownProps
-});
-
-const mapDispatch = {
-  doPush: push,
-  notification: notifyActions.enqueueSnackbar,
-  logout: logoutRequest,
-  updateHealthz:healthzActions.update
-};
-
-export default connect(
+export default connect<Props, OP, SP, DP, _, _>(
   mapState,
   mapDispatch
 )(ConnectedNavBar);

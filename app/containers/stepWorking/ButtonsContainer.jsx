@@ -21,7 +21,7 @@ import type {
   tActOrderTrigger,
   tActUpdateState
 } from '../../modules/order/action';
-import type { tClsStep } from '../../modules/step/Step';
+import type { IWorkStep } from '../../modules/step/interface/IWorkStep';
 
 const mapState = (state, props) => {
   const vOrder = oSel.viewingOrder(state.order);
@@ -55,9 +55,9 @@ const mapDispatch = {
 type ButtonsContainerProps = {
   viewingOrder: tClsOrder,
   viewingIndex: number,
-  viewingStep: tClsStep,
-  workingStep: tClsStep,
-  steps: Array<tClsStep>,
+  viewingStep: IWorkStep,
+  workingStep: IWorkStep,
+  steps: Array<IWorkStep>,
   next: () => any,
   action: Node,
   previous: () => any,

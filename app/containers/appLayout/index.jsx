@@ -29,7 +29,7 @@ type tOP = {|
 type tSP = {|
   ...tOP,
   users: Array<tUser>,
-  path: string,
+  path: string
 |};
 type tDP = {|
   logout: Dispatch,
@@ -39,7 +39,7 @@ type tDP = {|
 type Props = {|
   ...tOP,
   ...tSP,
-  ...tDP,
+  ...tDP
 
 |};
 
@@ -90,6 +90,8 @@ function AppLayout(
             {path === '/app' ? <DefaultContent childRoutes={childRoutes}/> : children}
           </div>
           <NavBar
+            // TODO: 判断disabled
+            disabled={false}
             getContentByUrl={getContentByUrl}
             contents={navBarContents}
             self={self}

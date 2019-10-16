@@ -9,7 +9,6 @@ import users from './user/reducer';
 import workMode from './workmode/reducer';
 import resultDiag from './resultDiag/reducer';
 import ongoingOperation from './ongoingOperation/reducer';
-import timeline from './timeline/reducer';
 import operationViewer from './operationViewer/reducer';
 import logo from './logo/reducer';
 import network from './network/reducer';
@@ -31,7 +30,6 @@ export default function createRootReducer(history: {}) {
       workMode,
       resultDiag,
       ongoingOperation,
-      timeline,
       operationViewer,
       logo,
       network,

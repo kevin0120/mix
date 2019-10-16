@@ -1,11 +1,11 @@
 // @flow
 
 import type { Node } from 'react';
-import type { tClsStep } from '../../modules/step/Step';
+import type { IWorkStep } from '../../modules/step/interface/IWorkStep';
 
 export type tStepProps = {|
-  bindAction: (Node)=>any,
-  step: tClsStep,
+  bindAction: ((Node => Node) | Node) => void,
+  step: IWorkStep,
   isCurrent: boolean,
-  bindDescription: (Node)=>any
+  bindDescription: ((Node => Node) | Node) => void
 |};

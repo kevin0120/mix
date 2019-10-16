@@ -1,17 +1,9 @@
-/*
- * Copyright (c) 2018. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
- * Morbi non lorem porttitor neque feugiat blandit. Ut vitae ipsum eget quam lacinia accumsan.
- * Etiam sed turpis ac ipsum condimentum fringilla. Maecenas magna.
- * Proin dapibus sapien vel ante. Aliquam erat volutpat. Pellentesque sagittis ligula eget metus.
- * Vestibulum commodo. Ut rhoncus gravida arcu.
- */
-
 // @flow
+import type { tTheme } from '../../common/type';
 
-
-const styles = theme => ({
+const styles = (theme: tTheme) => ({
   wrap: {
-    backgroundColor: '#f2f2f2',
+    backgroundColor: '#f2f2f2'
     // height: 'calc(100% - 64px)',
     // display: 'flex',
     // flex: 1,
@@ -33,8 +25,8 @@ const styles = theme => ({
   root: {
     flexWrap: 'wrap',
     minWidth: 300,
-    width:'100%',
-    height:'100%',
+    width: '100%',
+    height: '100%',
     backgroundColor: '#232c39',
     backgroundImage:
       'linear-gradient(45deg, rgba(150, 216, 255, 0.5) 10%, rgba(150, 160, 187, 0.7))'

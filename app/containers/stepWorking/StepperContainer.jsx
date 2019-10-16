@@ -15,7 +15,7 @@ import * as oSel from '../../modules/order/selector';
 import { orderActions } from '../../modules/order/action';
 import type { Dispatch } from '../../modules/typeDef';
 import Timer from './Timer';
-import type { tClsStep } from '../../modules/step/Step';
+import type { IWorkStep } from '../../modules/step/interface/IWorkStep';
 
 type DProps = {|
   jumpTo: Dispatch
@@ -25,10 +25,10 @@ type ownProps = {||};
 
 type SProps = {|
   ...ownProps,
-  steps: Array<tClsStep>,
+  steps: Array<IWorkStep>,
   viewingIndex: number,
-  workingStep: ?tClsStep,
-  viewingStep: ?tClsStep
+  workingStep: ?IWorkStep,
+  viewingStep: ?IWorkStep
 |};
 
 type Props = {|

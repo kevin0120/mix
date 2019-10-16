@@ -19,7 +19,7 @@ import notifier from './Notifier/saga';
 
 export default function* rootSaga(): Saga<void> {
   try {
-    const state = yield select();
+    // const state = yield select();
     yield all([
       // 硬件设备
       watchRFIDEvent,

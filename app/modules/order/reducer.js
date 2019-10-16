@@ -5,7 +5,7 @@ import { genReducers } from '../util';
 
 import type { tAction, tReducer } from '../typeDef';
 import type { tOrder, tOrderState, tOrderStepIdx, tOrderActionTypes, tOrderListData } from './interface/typeDef';
-// import { demoOrder, demoOrderCancel, demoOrderDone, demoOrderLong, demoOrderPending } from './demoData';
+import { demoOrder, demoOrderCancel, demoOrderDone, demoOrderLong, demoOrderPending } from './demoData';
 import {
   orderLength,
   viewingIndex,
@@ -24,15 +24,13 @@ const initState: tOrderState = {
   viewingOrder: null,
   viewingIndex: 0,
   list: [
-    // demoOrder,
-    // demoOrderLong,
-    // demoOrderCancel,
-    // demoOrderPending,
-    // demoOrderDone
+    demoOrder,
+    demoOrderLong,
+    demoOrderCancel,
+    demoOrderPending,
+    demoOrderDone
   ].map(o => new (OrderMixin(Step))(o))
 };
-
-// if (process.env.)
 
 function limitIndex(order: ?tOrder, index: tOrderStepIdx): tOrderStepIdx {
   if (index < 0) {

@@ -9,10 +9,10 @@ import stepTypes from '../steps/stepTypes';
 import * as oSel from '../../modules/order/selector';
 import styles from './styles';
 import TimeLine from '../../components/WorkPageTimeline';
-import type { tClsStep } from '../../modules/step/Step';
+import type { IWorkStep } from '../../modules/step/interface/IWorkStep';
 
 const mapState = (state, props) => {
-  const vStep: ?tClsStep = oSel.viewingStep(state.order);
+  const vStep: ?IWorkStep = oSel.viewingStep(state.order);
   return {
     ...props,
     step: vStep,
@@ -24,8 +24,8 @@ const mapState = (state, props) => {
 const mapDispatch = {};
 
 type Props = {
-  step: tClsStep,
-  workingStep: tClsStep,
+  step: IWorkStep,
+  workingStep: IWorkStep,
   bindParentAction: Node => any,
   timeLine: Array<any>,
   bindParentDescription: Node => any,

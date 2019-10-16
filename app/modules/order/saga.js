@@ -24,7 +24,7 @@ import { ORDER } from './constants';
 import { bindRushAction } from '../rush/rushHealthz';
 import loadingActions from '../loading/action';
 import NotifierActions from '../Notifier/action';
-import type { tClsStep } from '../step/Step';
+import type { IWorkStep } from '../step/interface/IWorkStep';
 import type { tClsOrder } from './Order';
 
 export default function* root(): Saga<void> {
@@ -119,12 +119,12 @@ function* viewOrder({ order }: { order: tClsOrder }) {
       race([take(ORDER.DETAIL.SUCCESS), take(ORDER.DETAIL.FAIL)])
     ]);
     yield put(loadingActions.stop());
-    const vOrderSteps: ?Array<tClsStep> = yield select(state =>
+    const vOrderSteps: ?Array<IWorkStep> = yield select(state =>
       orderSteps(viewingOrder(state.order))
     );
     const data =
       (vOrderSteps &&
-        vOrderSteps.map((s: tClsStep, idx) => [
+        vOrderSteps.map((s: IWorkStep, idx) => [
           idx + 1,
           s.name,
           i18n.t(`StepType.${s.type}`),

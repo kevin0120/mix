@@ -1,4 +1,5 @@
 import type { Dispatch as ReduxDispatch, Store as ReduxStore } from 'redux';
+import type { Saga } from 'redux-saga';
 
 export type StateType = {
   +notify: Object,
@@ -19,3 +20,5 @@ export type Dispatch = ReduxDispatch<tAction<string, any>>;
 
 // eslint-disable-next-line flowtype/no-weak-types
 export type Store = ReduxStore<GetState, tAction<string, any>>;
+
+export type tCallable<TR> = (any)=>TR | Saga<TR>;

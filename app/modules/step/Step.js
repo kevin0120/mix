@@ -15,7 +15,7 @@ import { orderActions } from '../order/action';
 import { ORDER } from '../order/constants';
 import { STEP_STATUS } from './constants';
 import stepTypes from './stepTypes';
-import type { tStepDataReducer, tAnyStepStatus, tRunSubStepCallbacks,tStep } from './interface/typeDef';
+import type { tStepDataReducer, tAnyStepStatus, tRunSubStepCallbacks, tStep } from './interface/typeDef';
 import { IWorkStep } from './interface/IWorkStep';
 
 function invalidStepStatus(stepType, status) {
@@ -58,7 +58,7 @@ export default class Step implements IWorkStep {
 
   _runningStatusTask = null;
 
-  _steps: Array<tClsStep> = [];
+  _steps: Array<IWorkStep> = [];
 
   _onLeave = null;
 
@@ -78,7 +78,7 @@ export default class Step implements IWorkStep {
     /* eslint-enable flowtype/no-weak-types */
   }
 
-  update(stepObj: tStep) {
+  update(stepObj: tStep): void {
     this._name = stepObj.name || 'unnamed step';
     this._desc = stepObj.desc || '';
     this._info = stepObj.info;
@@ -110,8 +110,8 @@ export default class Step implements IWorkStep {
     return this._desc;
   }
 
-  get description() {
-    return this._desc;
+  get info() {
+    return this._info;
   }
 
   get type() {
@@ -270,7 +270,7 @@ export default class Step implements IWorkStep {
     }
   }
 
-  * runSubStep(step: tClsStep, callbacks: tRunSubStepCallbacks): Saga<void> {
+  * runSubStep(step: IWorkStep, callbacks: tRunSubStepCallbacks): Saga<void> {
     try {
       const { exit, next, previous } = yield race({
         exit: call(step.run),
@@ -300,5 +300,3 @@ export default class Step implements IWorkStep {
     }
   }
 }
-
-export type tClsStep = Step;
