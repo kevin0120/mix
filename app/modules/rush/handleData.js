@@ -1,6 +1,7 @@
 /* eslint-disable no-empty-function */
-import { put, fork } from 'redux-saga/effects';
-import type { tRushWebSocketData, tWebSocketEvent, IRushData, tRushData } from './type';
+import { put, fork, call } from 'redux-saga/effects';
+import type { Saga } from 'redux-saga';
+import type { tRushWebSocketData, tWebSocketEvent, tRushData } from './type';
 import { WEBSOCKET_EVENTS as wse } from './constants';
 import notifierActions from '../Notifier/action';
 import { CommonLog } from '../../common/utils';
@@ -11,10 +12,9 @@ import {
 import rushActions from './action';
 import readerNewData from '../external/device/reader/saga';
 import scannerNewData from '../external/device/scanner/saga';
-import ioNewData from '../external/device/io/saga';
+import ioWSDataHandlers from '../external/device/io/handleWSData';
 import { deviceStatus } from '../external/device';
-import orderData from '../order/handleData';
-import { Saga } from 'redux-saga';
+import orderWSDataHandlers from '../order/handleData';
 
 export default function* (payload) {
   try {
@@ -39,10 +39,19 @@ export default function* (payload) {
   }
 }
 
+const handleData = (dataHandlers) => function* _handleData(rushData: tRushData<any, any>): Saga<void> {
+  try {
+    const { type, data } = rushData;
+    yield call(dataHandlers[type], data);
+  } catch (e) {
+    CommonLog.lError(e);
+  }
+};
+
 const rushDataHandlers: {
-  [tWebSocketEvent]: (tRushData<any,any>)=>void | Saga<void>
+  [tWebSocketEvent]: (tRushData<any, any>)=>void | Saga<void>
 } = {
-  * [wse.maintenance](data: tRushWebSocketData) {
+  * [wse.maintenance](data: tRushData<string, { name: string }>) {
     try {
       yield put(
         notifierActions.enqueueSnackbar(
@@ -54,11 +63,11 @@ const rushDataHandlers: {
       CommonLog.lError(e, { at: 'rush event maintenance' });
     }
   },
-  [wse.io]: ioNewData,
+  [wse.io]: handleData(ioWSDataHandlers),
   [wse.scanner]: scannerNewData,
   [wse.reader]: readerNewData,
   [wse.result]: toolNewResults,
   [wse.tool]: toolStatusChange,
   [wse.device]: deviceStatus,
-  [wse.order]: orderData
+  [wse.order]: handleData(orderWSDataHandlers)
 };

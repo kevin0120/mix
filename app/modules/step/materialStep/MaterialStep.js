@@ -5,10 +5,10 @@ import {STEP_STATUS} from '../constants';
 import { stepPayload, workingOrder, workingStep } from '../../order/selector';
 import { getDevice } from '../../external/device';
 import { CommonLog } from '../../../common/utils';
-import { ioDirection, ioTriggerMode } from '../../external/device/io/type';
+import { ioDirection, ioTriggerMode } from '../../external/device/io/constants';
 import actions, { MATERIAL_STEP } from './action';
 import type { IWorkStep } from '../interface/IWorkStep';
-import type ClsIOModule from '../../external/device/io/model';
+import type ClsIOModule from '../../external/device/io/ClsIOModule';
 import type { IMaterialStep } from './interface/IMaterialStep';
 
 const items = payload => payload?.items;

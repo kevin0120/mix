@@ -5,9 +5,9 @@ import { WEBSOCKET_EVENTS } from './constants';
 
 export type tWebSocketEvent = $Values<typeof WEBSOCKET_EVENTS>;
 
-/* eslint-disable flowtype/no-weak-types */
 export type tRushWebSocketData = {
   +type: string,
+  // eslint-disable-next-line flowtype/no-weak-types
   +data: { [key: string]: any } | Array<any>
 };
 
@@ -27,4 +27,3 @@ export type tRushData<TType, TData> = {|
   data: TData
 |};
 
-/* eslint-enable flowtype/no-weak-types */

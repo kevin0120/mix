@@ -60,6 +60,7 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep implement
     }
   }
 
+  // eslint-disable-next-line require-yield
   * onPrevious() {
     if (this._workingIndex - 1 < 0) {
       // yield put(orderActions.finishOrder(this));
@@ -69,6 +70,7 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep implement
   }
 
   _statusTasks = {
+    // eslint-disable-next-line no-empty-function
     * [ORDER_STATUS.TODO]() {
     },
     * [ORDER_STATUS.WIP]() {

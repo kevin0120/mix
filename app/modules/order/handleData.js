@@ -1,6 +1,5 @@
 // @flow
-import { put, call } from 'redux-saga/effects';
-import type { Saga } from 'redux-saga';
+import { put } from 'redux-saga/effects';
 import { CommonLog } from '../../common/utils';
 import { orderActions } from './action';
 import { ORDER_WS_TYPES } from './constants';
@@ -37,16 +36,9 @@ const dataHandlers: rushHandlerMap<tOrderWSTypes, $PropertyType<tOrderRushData, 
     try {
       yield put(orderActions.newOrder(data));
     } catch (e) {
-      CommonLog.lError(e);
+      CommonLog.lError(e,{ at: 'ORDER_WS_TYPES.NEW' });
     }
   }
 };
 
-export default function* orderData(rushData: tOrderRushData): Saga<void> {
-  try {
-    const { type, data } = rushData;
-    yield call(dataHandlers[type], data);
-  } catch (e) {
-    CommonLog.lError(e);
-  }
-}
+export default dataHandlers;

@@ -1,12 +1,11 @@
 // @flow
 
-import type { Action, Reducer } from 'redux';
 import { ORDER } from './constants';
 import { genReducers } from '../util';
 
 import type { tAction, tReducer } from '../typeDef';
 import type { tOrder, tOrderState, tOrderStepIdx, tOrderActionTypes, tOrderListData } from './interface/typeDef';
-import { demoOrder, demoOrderCancel, demoOrderDone, demoOrderLong, demoOrderPending } from './demoData';
+// import { demoOrder, demoOrderCancel, demoOrderDone, demoOrderLong, demoOrderPending } from './demoData';
 import {
   orderLength,
   viewingIndex,
@@ -24,14 +23,13 @@ const initState: tOrderState = {
   workingOrder: null,
   viewingOrder: null,
   viewingIndex: 0,
-  list: [],
-  // list: [
-  //   demoOrder,
-  //   demoOrderLong,
-  //   demoOrderCancel,
-  //   demoOrderPending,
-  //   demoOrderDone
-  // ].map(o => new (OrderMixin(Step))(o))
+  list: [
+    // demoOrder,
+    // demoOrderLong,
+    // demoOrderCancel,
+    // demoOrderPending,
+    // demoOrderDone
+  ].map(o => new (OrderMixin(Step))(o))
 };
 
 // if (process.env.)
@@ -58,7 +56,7 @@ function clearWorkingOrderIfMatch(state: tOrderState, order: IOrder) {
 }
 
 const orderReducer: {
-  [key: tOrderActionTypes]: tReducer<tOrderState, Action<tOrderActionTypes>>
+  [key: tOrderActionTypes]: tReducer<tOrderState, tAction<tOrderActionTypes, any>>
 } = {
   [ORDER.LIST.SUCCESS](state, { list }: { list: Array<tOrderListData> }) {
     // get exist orders, orders not in the new list will be removed!!

@@ -1,19 +1,11 @@
 // @flow
-import type { AnyAction } from '../type';
+import { IO_WS_TYPES, ioDirection, ioTriggerMode } from './constants';
+import type { tAction } from '../../../typeDef';
 
-export const sOff = 0;
-export const sOn = 1;
-export const sBlinkOff = 10;
-export const sBlinkOn = 11;
 
-export type tIOWSMsgType = 'WS_IO_STATUS' | 'WS_IO_CONTACT' | 'WS_IO_SET';
+export type tIOWSMsgType = $Values<typeof IO_WS_TYPES>;
 
-export const ioDirection = {
-  input: 'input',
-  output: 'output'
-};
-
-export type tIODirection = $Keys<typeof ioDirection>;
+export type tIODirection = $Values<typeof ioDirection>;
 
 export type tIOContact = {
   +sn: string,
@@ -21,46 +13,26 @@ export type tIOContact = {
   +contact: string // 位串
 };
 
-const IO_FUNCTION = {
-  IN: {
-    RESET: 'RESET',
-    BYPASS: 'BYPASS',
-    MODE_SELECT: 'MODE_SELECT'
-  },
-  OUT: {
-    LED_WHITE: 'LED_WHITE',
-    LED_YELLOW: 'LED_YELLOW',
-    LED_GREEN: 'LED_GREEN',
-    LED_RED: 'LED_RED',
-    BEEP: 'BEEP'
-  }
+export type tIOWSDataContact = {
+  +sn: string,
+  +type: tIODirection,
+  +contact: string // 位串
 };
 
-export const DefaultInput = '00000000';
-export const DefaultOutput = '00000000';
 
 // 上升沿，下降沿，双向(toggle)
-
-export const ioTriggerMode = {
-  rising: 'rising',
-  falling: 'falling',
-  // high:'high',
-  // low:'low',
-  change: 'change'
-};
-// export type tIOTriggerMode = 'Rising' | 'Falling' | 'Bidirectional';
-export type tIOTriggerMode = $Keys<typeof ioTriggerMode>;
+export type tIOTriggerMode = $Values<typeof ioTriggerMode>;
 
 export type iIODataField = {
   data: boolean,
   triggerMode: tIOTriggerMode,
   // eslint-disable-next-line flowtype/no-weak-types
-  action: (mode: tIOTriggerMode, ...args: any) => AnyAction
+  action: (mode: tIOTriggerMode, ...args: any) => tAction<any, any>
 };
 
 // IO数据字段，key代表的是哪一位， value代表开或者关和相关的action
 export interface iIODataFieldObj {
-  [key: number]: iIODataField;
+  [key: number]: iIODataField
 }
 
 export type tIOData = {
@@ -73,7 +45,7 @@ export type tIOListener = {
   triggerMode: tIOTriggerMode,
 
   // eslint-disable-next-line flowtype/no-weak-types
-  dispatcher: (...args: any) => AnyAction
+  dispatcher: (...args: any) => tAction<any, any>
 };
 
 export type tIOPort = {
@@ -86,4 +58,3 @@ export type tIOChange = {
   triggerMode: tIOTriggerMode
 };
 
-export default IO_FUNCTION;

@@ -1,10 +1,10 @@
 // @flow
 import { takeLatest, put, delay } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
-import ClsRFID from './model';
+import ClsRFID from './ClsRFID';
 import { RFID } from './action';
 import { CommonLog } from '../../../../common/utils';
-import type { tDeviceNewData } from '../type';
+import type { tDeviceNewData } from '../typeDef';
 import type { tCommonActionType } from '../../../../common/type';
 
 // eslint-disable-next-line prefer-const

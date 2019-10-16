@@ -4,20 +4,20 @@ import type { Saga } from 'redux-saga';
 import { CommonLog } from '../../common/utils';
 
 interface IHealthChecker {
-  Healthz: boolean;
+  Healthz: boolean
 }
 
 export default class CommonExternalEntity implements IHealthChecker {
-  #name: string;
+  _name: string;
 
-  #isHealthz: boolean = false;
+  _isHealthz: boolean = false;
 
-  #enable: boolean = false;
+  _enable: boolean = false;
 
-  #_children: Set<CommonExternalEntity> = new Set();
+  _children: Set<CommonExternalEntity> = new Set();
 
   constructor(name: string) {
-    this.#name = name;
+    this._name = name;
 
     /* eslint-disable flowtype/no-weak-types */
     (this: any).Enable = this.Enable.bind(this);
@@ -29,79 +29,79 @@ export default class CommonExternalEntity implements IHealthChecker {
   appendChildren(children: Array<CommonExternalEntity> | CommonExternalEntity) {
     if (children instanceof Array) {
       children.forEach(c => {
-        this.#_children.add(c);
+        this._children.add(c);
       });
     } else {
-      this.#_children.add(children);
+      this._children.add(children);
     }
   }
 
   deleteChildren(children: Array<CommonExternalEntity>) {
     if (children instanceof Array) {
       children.forEach(c => {
-        this.#_children.delete(c);
+        this._children.delete(c);
       });
     }
   }
 
   getChildren(patten: CommonExternalEntity => boolean) {
     if (!patten) {
-      return [...this.#_children];
+      return [...this._children];
     }
-    return [...this.#_children].filter(patten);
+    return [...this._children].filter(patten);
   }
 
   set Healthz(isHealthz: boolean) {
-    if (isEqual(this.#isHealthz, isHealthz)) {
+    if (isEqual(this._isHealthz, isHealthz)) {
       return;
     }
-    this.#isHealthz = isHealthz;
+    this._isHealthz = isHealthz;
     if (!isHealthz) {
       this.Disable();
     }
-    if (this.#_children.size > 0 && !isHealthz) {
-      this.#_children.forEach(c => {
+    if (this._children.size > 0 && !isHealthz) {
+      this._children.forEach(c => {
         c.Healthz = false;
       });
     }
 
-    if (this.#_children.size > 0 && isHealthz) {
-      this.#_children.forEach(c => {
+    if (this._children.size > 0 && isHealthz) {
+      this._children.forEach(c => {
       });
     }
 
-    const msg = `${this.#name} Healthz Status Change: ${isHealthz.toString()}`;
+    const msg = `${this._name} Healthz Status Change: ${isHealthz.toString()}`;
     CommonLog.Info(msg);
   }
 
   get Healthz(): boolean {
-    return this.#isHealthz;
+    return this._isHealthz;
   }
 
   get Name(): string {
-    return this.#name;
+    return this._name;
   }
 
   get source(): string {
-    return this.#name;
+    return this._name;
   }
 
   get isEnable(): boolean {
-    return this.#enable;
+    return this._enable;
   }
 
   Enable(): any {
-    this.#enable = true;
+    this._enable = true;
     CommonLog.Info(`${this.source} Is Enabled!`);
   }
 
   Disable(): any {
-    this.#enable = false;
+    this._enable = false;
     CommonLog.Info(`${this.source} Is Disabled!`);
   }
 
   // eslint-disable-next-line require-yield
   * ToggleEnable(): Saga<void> {
-    this.#enable = !this.#enable;
+    this._enable = !this._enable;
   }
 }

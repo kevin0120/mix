@@ -4,7 +4,7 @@ import { CommonLog } from '../../../common/utils';
 import CommonExternalEntity from '../CommonExternalEntity';
 
 export default class ExternalSystem extends CommonExternalEntity {
-  #endpoint: ?string = null;
+  _endpoint: ?string = null;
 
   constructor(name: string, endpoint: string) {
     super(name);
@@ -12,14 +12,14 @@ export default class ExternalSystem extends CommonExternalEntity {
   }
 
   get Endpoint(): ?string {
-    return this.#endpoint;
+    return this._endpoint;
   }
 
   set Endpoint(endpoint: string) {
     if (!isURL(endpoint)) {
       CommonLog.lError(`Endpoint: ${endpoint} Is Not Valid!`);
     } else {
-      this.#endpoint = endpoint;
+      this._endpoint = endpoint;
     }
   }
 

@@ -66,7 +66,7 @@ export default class Step implements IWorkStep {
     updateStatus: orderStepUpdateApi
   };
 
-  // eslint-disable-next-line flowtype/no-weak-types
+  // eslint-disable-next-line flowtype/no-weak-types,no-unused-vars
   constructor(stepObj: tStep, ...rest: Array<any>) {
     this._id = stepObj.id;
     this.update(stepObj);
@@ -153,6 +153,7 @@ export default class Step implements IWorkStep {
     );
   }
 
+  // eslint-disable-next-line class-methods-use-this
   timeLost() {
     // TODO: calculate time lost
   }
@@ -196,7 +197,7 @@ export default class Step implements IWorkStep {
     }
   }
 
-  * _updateStatus({ status, msg }) {
+  * _updateStatus({ status }) {
     if (status in this._statusTasks) {
       try {
         this._status = status;

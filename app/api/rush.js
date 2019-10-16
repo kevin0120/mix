@@ -1,6 +1,7 @@
+// @flow
+import { isNil } from 'lodash-es';
 import { CommonLog } from '../common/utils';
 
-import {isNil} from 'lodash-es';
 
 const { ipcRenderer } = require('electron');
 
@@ -17,9 +18,9 @@ function getSN() {
 
 const defaultTimeout = 10000; // 默认timeout 10s
 
-if(!isNil(ipcRenderer)){
-  ipcRenderer.on('rush-reply', (event, args, replySN)=>{
-    if(messageSNs[replySN]){
+if (!isNil(ipcRenderer)) {
+  ipcRenderer.on('rush-reply', (event, args, replySN) => {
+    if (messageSNs[replySN]) {
       CommonLog.Info('rush-reply', args);
       messageSNs[replySN](args);
       delete messageSNs[replySN];
@@ -28,10 +29,10 @@ if(!isNil(ipcRenderer)){
 }
 
 
-export function rushSendApi(msgType, data, timeout = defaultTimeout) {
+export function rushSendApi(msgType: string, data: any, timeout: number = defaultTimeout): Promise<any> {
   const sn = getSN();
   return new Promise((resolve) => {
-    messageSNs[sn] = (args)=>{
+    messageSNs[sn] = (args) => {
       resolve(args);
     };
     ipcRenderer.send('rush-send', {

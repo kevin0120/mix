@@ -38,10 +38,11 @@ export const ORDER = {
   },
   STEP: {
     // 仅移动指针，不修改step状态
-    NEXT: 'ORDER_STEP_NEXT',
-    PREVIOUS: 'ORDER_STEP_PREVIOUS',
+    NEXT: 'ORDER_STEP_NEXT', // 防抖前事件
+    PREVIOUS: 'ORDER_STEP_PREVIOUS', // 防抖前事件
     VIEW_PREVIOUS: 'ORDER_STEP_VIEW_PREVIOUS', // 防抖后事件
     VIEW_NEXT: 'ORDER_STEP_VIEW_NEXT', // 防抖后事件
+
     JUMP_TO: 'ORDER_STEP_JUMP_TO',
     // 修改step的状态
     STATUS: 'ORDER_STEP_STATUS',

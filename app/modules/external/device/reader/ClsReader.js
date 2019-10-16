@@ -3,11 +3,6 @@
 import Device from '../Device';
 import { CommonLog } from '../../../../common/utils';
 import { loginRequestUuid } from '../../../user/action';
-// export const defaultReaderDispatcher = (data) => readerStepAction.getValue(data);
-
-export type tReaderData = {
-  +uid: string
-};
 
 class ClsReader extends Device {
   _dispatcher = input => {

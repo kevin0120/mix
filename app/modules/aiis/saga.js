@@ -10,7 +10,7 @@ import {
 import OWebSocket from 'ws';
 import { eventChannel } from 'redux-saga';
 import { AIIS } from './action';
-import { andonNewData } from '../andon/action';
+// import { andonNewData } from '../andon/action';
 import notifierActions from '../Notifier/action';
 
 let task = null;
@@ -160,7 +160,7 @@ function* wsOnMessage(dataRaw) {
     const json = dataArray.slice(-1);
     const data = JSON.parse(json);
 
-    yield put(andonNewData(data));
+    // yield put(andonNewData(data));
   } catch (e) {
     console.error(e);
   }

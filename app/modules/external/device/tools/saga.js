@@ -3,14 +3,10 @@
 import { put, call } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import notifierActions from '../../../Notifier/action';
-// import ClsScrewTool, { defaultScrewToolDispatcher } from './model';
 import { CommonLog } from '../../../../common/utils';
 import type { tDeviceSN } from '../typeDef';
 import type { tResult } from '../../../step/screwStep/interface/typeDef';
 import { getDevice } from '../index';
-
-// export const staticScrewTool = new ClsScrewTool('G1', '0001');
-// staticScrewTool.dispatcher = defaultScrewToolDispatcher;
 
 type tToolStatusData = {
   type: string,

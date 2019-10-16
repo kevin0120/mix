@@ -1,9 +1,9 @@
+/* eslint-disable camelcase */
 // @flow
 import { isNil, remove } from 'lodash-es';
 import type { Saga } from 'redux-saga';
 import { call, fork, put, all } from 'redux-saga/effects';
 import Device from '../Device';
-import type { AnyAction } from '../type';
 import type {
   tIOContact,
   tIOData,
@@ -14,38 +14,40 @@ import type {
   tIOChange
 } from './type';
 import { CommonLog } from '../../../../common/utils';
-import { ioDirection, ioTriggerMode } from './type';
+import { ioDirection, ioTriggerMode } from './constants';
 import { ioSetApi, ioContactApi, ioStatusApi } from '../../../../api/io';
+import type { tAction } from '../../../typeDef';
 
 export default class ClsIOModule extends Device {
-  #data: tIOData = { input: '', output: '' };
+  _data: tIOData = { input: '', output: '' };
 
-  #ports: Array<tIOPort> = [];
+  _ports: Array<tIOPort> = [];
 
-  #maxInputs: number = 0;
+  _maxInputs: number = 0;
 
-  #maxOutputs: number = 0;
+  _maxOutputs: number = 0;
 
-  #listeners: Array<tIOListener> = [];
+  _listeners: Array<tIOListener> = [];
 
   constructor(
     name: string,
     serialNumber: string,
     config: { input_num: number, output_num: number },
+    // eslint-disable-next-line no-unused-vars,flowtype/no-weak-types
     ...rest: Array<any>
   ) {
     super(name, serialNumber);
     const { input_num, output_num } = config;
-    this.#maxInputs = input_num;
-    this.#maxOutputs = output_num;
-    for (let i = 0; i < this.#maxInputs; i += 1) {
-      this.#ports.push({
+    this._maxInputs = input_num;
+    this._maxOutputs = output_num;
+    for (let i = 0; i < this._maxInputs; i += 1) {
+      this._ports.push({
         direction: ioDirection.input,
         idx: i
       });
     }
-    for (let i = 0; i < this.#maxOutputs; i += 1) {
-      this.#ports.push({
+    for (let i = 0; i < this._maxOutputs; i += 1) {
+      this._ports.push({
         direction: ioDirection.output,
         idx: i
       });
@@ -60,19 +62,19 @@ export default class ClsIOModule extends Device {
   }
 
   getPort(direction: tIODirection, idx: number): ?tIOPort {
-    return this.#ports.find(p => p.direction === direction && p.idx === idx);
+    return this._ports.find(p => p.direction === direction && p.idx === idx);
   }
 
   hasPort(port: tIOPort): ?boolean {
-    return this.#ports.findIndex(p => p === port) >= 0;
+    return this._ports.findIndex(p => p === port) >= 0;
   }
 
   _checkValidateIdx(idx: number, ioType: tIODirection): boolean {
     switch (ioType) {
       case 'input':
-        return idx <= this.#maxInputs;
+        return idx <= this._maxInputs;
       case 'output':
-        return idx <= this.#maxOutputs;
+        return idx <= this._maxOutputs;
       default:
         return false;
     }
@@ -95,17 +97,17 @@ export default class ClsIOModule extends Device {
       CommonLog.lError(`IO Data Must Be String!!!!`);
       return;
     }
-    this.#data[direction] = contact;
+    this._data[direction] = contact;
   }
 
   _getIOChanges(newData: tIOContact): Array<tIOChange> {
     const changes: Array<tIOChange> = [];
     const { direction, contact } = newData;
-    const eles: string = this.#data?.[direction];
+    const eles: string = this._data?.[direction];
     if (!eles) {
       return changes;
     }
-    const startIdx = direction === ioDirection.input ? 0 : this.#maxInputs;
+    const startIdx = direction === ioDirection.input ? 0 : this._maxInputs;
 
     [...contact].forEach((newVal, idx) => {
       if (isNil(newVal)) {
@@ -122,17 +124,17 @@ export default class ClsIOModule extends Device {
 
       if (newBool !== oldBool) {
         changes.push({
-          port: this.#ports[startIdx + idx],
+          port: this._ports[startIdx + idx],
           triggerMode: ioTriggerMode.change
         });
         if (newBool) {
           changes.push({
-            port: this.#ports[startIdx + idx],
+            port: this._ports[startIdx + idx],
             triggerMode: ioTriggerMode.rising
           });
         } else {
           changes.push({
-            port: this.#ports[startIdx + idx],
+            port: this._ports[startIdx + idx],
             triggerMode: ioTriggerMode.falling
           });
         }
@@ -143,13 +145,13 @@ export default class ClsIOModule extends Device {
   }
 
   // eslint-disable-next-line flowtype/no-weak-types
-  _doHandleIOData(newData: tIOContact, ...actionParams: any): Array<AnyAction> {
+  _doHandleIOData(newData: tIOContact, ...actionParams: any): Array<tAction<any, any>> {
     const ret = this.doValidate(newData.contact);
     if (!ret) {
       return [];
     }
     const changes = this._getIOChanges(newData, ...actionParams);
-    const matchedListeners = this.#listeners.filter(
+    const matchedListeners = this._listeners.filter(
       l =>
         changes.findIndex(
           c => c.port === l.port && c.triggerMode === l.triggerMode
@@ -167,7 +169,7 @@ export default class ClsIOModule extends Device {
   }
 
   // eslint-disable-next-line flowtype/no-weak-types
-  set dispatcher(dispatcher: null | ((...args: any) => AnyAction)) {
+  set dispatcher(dispatcher: null | ((...args: any) => tAction<any, any>)) {
     super.dispatcher = null; // 永远设置的是null
   }
 
@@ -197,6 +199,7 @@ export default class ClsIOModule extends Device {
   * setIO(port: tIOPort, value: boolean): Saga<void> {
     try {
       const status = value ? 1 : 0;
+      // eslint-disable-next-line flowtype/no-weak-types
       yield call((ioSetApi: Function), this.serialNumber, port.idx, status);
     } catch (e) {
       CommonLog.lError(e, { at: 'setIO' });
@@ -208,9 +211,11 @@ export default class ClsIOModule extends Device {
       if (port instanceof Array) {
         // eslint-disable-next-line no-restricted-syntax
         for (const p of port) {
+          // eslint-disable-next-line flowtype/no-weak-types
           yield fork((ioSetApi: Function), this.serialNumber, p.idx, 1);
         }
       } else {
+        // eslint-disable-next-line flowtype/no-weak-types
         yield call((ioSetApi: Function), this.serialNumber, port.idx, 1);
       }
     } catch (e) {
@@ -221,12 +226,10 @@ export default class ClsIOModule extends Device {
   * closeIO(port: tIOPort | Array<tIOPort>): Saga<void> {
     try {
       if (port instanceof Array) {
-        // eslint-disable-next-line no-restricted-syntax
-        // for (const p of port) {
-        //   yield fork(ioSetApi, this.serialNumber, p.idx, 0);
-        // }
+        // eslint-disable-next-line flowtype/no-weak-types
         yield all(port.map(p => fork((ioSetApi: Function), this.serialNumber, p.idx, 0)));
       } else {
+        // eslint-disable-next-line flowtype/no-weak-types
         yield call((ioSetApi: Function), this.serialNumber, port.idx, 0);
       }
     } catch (e) {
@@ -236,6 +239,7 @@ export default class ClsIOModule extends Device {
 
   * getStatus(): Saga<void> {
     try {
+      // eslint-disable-next-line flowtype/no-weak-types
       yield call((ioStatusApi: Function), this.serialNumber);
     } catch (e) {
       CommonLog.lError(e, { at: 'getStatus' });
@@ -244,6 +248,7 @@ export default class ClsIOModule extends Device {
 
   * ioContact(): Saga<void> {
     try {
+      // eslint-disable-next-line flowtype/no-weak-types
       yield call((ioContactApi: Function), this.serialNumber);
     } catch (e) {
       CommonLog.lError(e, { at: 'ioContact' });
@@ -254,18 +259,19 @@ export default class ClsIOModule extends Device {
   addListener(
     port: tIOPort,
     triggerMode: tIOTriggerMode,
-    dispatcher: (...args: any) => AnyAction
+    // eslint-disable-next-line flowtype/no-weak-types
+    dispatcher: (...args: any) => tAction<any, any>
   ) {
     const listener = {
       port,
       triggerMode,
       dispatcher
     };
-    this.#listeners.push(listener);
+    this._listeners.push(listener);
     return listener;
   }
 
   removeListener(listener: tIOListener) {
-    return remove<tIOListener>(this.#listeners, (l: tIOListener) => l === listener);
+    return remove<tIOListener>(this._listeners, (l: tIOListener) => l === listener);
   }
 }

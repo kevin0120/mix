@@ -3,25 +3,25 @@ import { isEmpty, isNil, isString } from 'lodash-es';
 import type { Saga } from 'redux-saga';
 import { put } from 'redux-saga/effects';
 import { CommonLog } from '../../../common/utils';
-import type { AnyAction, tInput, tInputData } from './type';
+import type { tInput, tInputData, tDeviceSN } from './typeDef';
 import CommonExternalEntity from '../CommonExternalEntity';
 import type { IDevice } from './IDevice';
-import type { tDeviceSN } from './typeDef';
+import type { tAction } from '../../typeDef';
 
 const defaultValidatorFunc = (data: string | number): boolean => true;
 
 
 export default class Device extends CommonExternalEntity implements IDevice {
-  _dispatcher: null | ((?tInput) => AnyAction) = null;
+  _dispatcher: null | ((?tInput) => tAction<any, any>) = null;
 
-  #validator: null | ((data: tInputData) => boolean) = defaultValidatorFunc;
+  _validator: null | ((data: tInputData) => boolean) = defaultValidatorFunc;
 
-  #_serialNumber: ?tDeviceSN = null;
+  _serialNumber: ?tDeviceSN = null;
 
   // eslint-disable-next-line flowtype/no-weak-types,no-unused-vars
   constructor(name: string, sn: tDeviceSN, config: Object, data: any) {
     super(name);
-    this.#_serialNumber = sn;
+    this._serialNumber = sn;
     // eslint-disable-next-line flowtype/no-weak-types
     (this: any).doDispatch = this.doDispatch.bind(this);
   }
@@ -80,25 +80,25 @@ export default class Device extends CommonExternalEntity implements IDevice {
   }
 
   set validator(validator: (string | number) => boolean) {
-    this.#validator = validator;
+    this._validator = validator;
   }
 
   get validator(): ?(string | number) => boolean {
-    return this.#validator;
+    return this._validator;
   }
 
   // eslint-disable-next-line flowtype/no-weak-types
-  set dispatcher(dispatcher: null | ((?tInput) => AnyAction)) {
+  set dispatcher(dispatcher: null | ((?tInput) => tAction<any, any>)) {
     this._dispatcher = dispatcher;
   }
 
   // eslint-disable-next-line flowtype/no-weak-types
-  get dispatcher(): ?(?tInput) => AnyAction {
+  get dispatcher(): ?(?tInput) => tAction<any, any> {
     return this._dispatcher;
   }
 
   RemoveValidator(): boolean {
-    this.#validator = null;
+    this._validator = null;
     return true;
   }
 
@@ -108,6 +108,6 @@ export default class Device extends CommonExternalEntity implements IDevice {
   }
 
   get serialNumber() {
-    return this.#_serialNumber;
+    return this._serialNumber;
   }
 }

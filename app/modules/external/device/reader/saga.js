@@ -3,8 +3,8 @@
 import { call } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import { CommonLog } from '../../../../common/utils';
-import type { tReaderData } from './model';
 import { deviceType, getDevicesByType } from '../index';
+import type {tReaderData} from './typeDef';
 
 // TODO: 收到读卡器uid后，分发给user模块进行用户认证
 

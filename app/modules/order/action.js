@@ -3,7 +3,7 @@ import type { tOrder, tOrderStepIdx, tOrderListData, tOrderStatus } from './inte
 import type { IOrder } from './interface/IOrder';
 import { ORDER_STATUS, ORDER } from './constants';
 import type { IWorkStep } from '../step/interface/IWorkStep';
-import type { tAnyStepStatus, tStepStatus } from '../step/interface/typeDef';
+import type { tAnyStepStatus } from '../step/interface/typeDef';
 
 export type tActUpdateState = {
   type: string,

@@ -152,7 +152,7 @@ function ConnectedNavBar(
 
 const mapState = (state, ownProps) => ({
   users: state.users,
-  orderStatus: state.operations.operationStatus,
+  // orderStatus: state.operations.operationStatus,
   workMode: state.workMode.workMode,
   healthCheckResults: state.healthz.status||{},
   path: state.router.location.pathname,

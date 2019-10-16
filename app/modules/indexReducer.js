@@ -7,7 +7,6 @@ import setting from './setting/reducer';
 import Configuration from './connections/reducer';
 import users from './user/reducer';
 import workMode from './workmode/reducer';
-import operations from './operation/reducer';
 import resultDiag from './resultDiag/reducer';
 import ongoingOperation from './ongoingOperation/reducer';
 import timeline from './timeline/reducer';
@@ -30,7 +29,6 @@ export default function createRootReducer(history: {}) {
       ...Configuration,
       users,
       workMode,
-      operations,
       resultDiag,
       ongoingOperation,
       timeline,

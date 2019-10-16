@@ -17,16 +17,17 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
-import { bindActionCreators } from 'redux';
 import Button from '../../components/CustomButtons/Button';
 
 import saveConfigs from '../../modules/setting/action';
-import IO_FUNCTION from '../../modules/external/device/io/type';
+import IO_FUNCTION from '../../modules/external/device/io/constants';
 
-import { testIO } from '../../modules/external/device/io/saga';
+// import { testIO } from '../../modules/external/device/io/saga';
 
 import styles from './styles';
 import withKeyboard from '../../components/Keyboard';
+
+const testIO = () => {};
 
 const mapStateToProps = (state, ownProps) => ({
   storedConfigs: state.setting.page.modbus,
@@ -254,7 +255,7 @@ class ConnectedIo extends React.PureComponent {
   }
 
   render() {
-    const { classes,ioEnabled } = this.props;
+    const { classes, ioEnabled } = this.props;
     const { data, isDataValid } = this.state;
     const inItems = t => this.generatorItems(data.in, t);
     const outItems = t => this.generatorItems(data.out, t);
@@ -278,7 +279,7 @@ class ConnectedIo extends React.PureComponent {
               <List>{outItems(t)}</List>
               <Button
                 variant="contained"
-                disabled={!isDataValid|| !ioEnabled}
+                disabled={!isDataValid || !ioEnabled}
                 color="info"
                 onClick={this.handleSubmit}
                 className={classes.button}
