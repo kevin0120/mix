@@ -49,7 +49,7 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep implement
     return this._workingIndex;
   }
 
-  * onNext() {
+  * _onNext() {
     try {
       this._workingIndex += 1;
       if (this._workingIndex >= this._steps.length) {
@@ -61,7 +61,7 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep implement
   }
 
   // eslint-disable-next-line require-yield
-  * onPrevious() {
+  * _onPrevious() {
     if (this._workingIndex - 1 < 0) {
       // yield put(orderActions.finishOrder(this));
     } else {
@@ -82,8 +82,8 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep implement
           const step = this.workingStep;
           if (step) {
             yield call([this, this.runSubStep], step, {
-              onNext: this.onNext.bind(this),
-              onPrevious: this.onPrevious.bind(this)
+              onNext: this._onNext.bind(this),
+              onPrevious: this._onPrevious.bind(this)
             });
           } else {
             yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
@@ -152,5 +152,3 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep implement
 };
 
 export default OrderMixin;
-
-export type tClsOrder = ClsOrder;

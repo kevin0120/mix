@@ -1,13 +1,26 @@
+// @flow
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Button from '../../../components/CustomButtons/Button';
 import { videoStepActions } from '../../../modules/step/videoStep/action';
-import { tStepProps } from '../types';
+import type { tStepProps } from '../types';
 import { stepPayload, viewingStep } from '../../../modules/order/selector';
 import styles from './styles';
 
-const mapState = (state, props) => {
+type tOP = {|
+  ...tStepProps
+|};
+
+type tSP = {|
+  ...tOP,
+  video: string
+|};
+
+type tDP = {|
+  submit: ()=>void
+|};
+const mapState = (state, props: tOP): tSP => {
   console.log(stepPayload(viewingStep(state.order)));
   return ({
     ...props,
@@ -19,12 +32,13 @@ const mapDispatch = {
   submit: videoStepActions.submit
 };
 
-type Props = {
-  submit: Function
-};
+type Props = {|
+  ...tSP,
+  ...tDP
+|};
 
-function InstructionStep({ step, isCurrent, submit, bindAction, video }: Props & tStepProps) {
-  const classes=makeStyles(styles)();
+function InstructionStep({ step, isCurrent, submit, bindAction, video }: Props) {
+  const classes = makeStyles(styles)();
   useEffect(() => {
     bindAction(
       <Button
@@ -49,4 +63,4 @@ function InstructionStep({ step, isCurrent, submit, bindAction, video }: Props &
   );
 }
 
-export default connect(mapState, mapDispatch)(InstructionStep);
+export default connect<Props, tOP, tSP, tDP, _, _>(mapState, mapDispatch)(InstructionStep);

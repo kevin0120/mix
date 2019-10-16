@@ -16,7 +16,7 @@ import dialogActions from '../../modules/dialog/action';
 import { tNS, withI18n } from '../../i18n';
 import Table from '../../components/Table/Table';
 import modelViewerActions from '../../modules/modelViewer/action';
-import type { tClsOrder } from '../../modules/order/Order';
+import type { IOrder } from '../../modules/order/interface/IOrder';
 import type {
   tActOrderTrigger,
   tActUpdateState
@@ -53,7 +53,7 @@ const mapDispatch = {
 
 /* eslint-disable flowtype/no-weak-types */
 type ButtonsContainerProps = {
-  viewingOrder: tClsOrder,
+  viewingOrder: IOrder,
   viewingIndex: number,
   viewingStep: IWorkStep,
   workingStep: IWorkStep,
@@ -63,13 +63,13 @@ type ButtonsContainerProps = {
   previous: () => any,
   doNextStep: () => any,
   doPreviousStep: () => any,
-  cancelOrder: (order: tClsOrder) => tActUpdateState,
-  pendingOrder: (order: tClsOrder) => tActUpdateState,
+  cancelOrder: (order: IOrder) => tActUpdateState,
+  pendingOrder: (order: IOrder) => tActUpdateState,
   isPending: boolean,
   // isCancel: boolean,
   pendingable: boolean,
   cancelable: boolean,
-  workOn: (order: tClsOrder) => tActOrderTrigger,
+  workOn: (order: IOrder) => tActOrderTrigger,
   viewModel: any, // 查看的三维模型
   viewModelDialog: any
 };

@@ -25,7 +25,7 @@ import { bindRushAction } from '../rush/rushHealthz';
 import loadingActions from '../loading/action';
 import NotifierActions from '../Notifier/action';
 import type { IWorkStep } from '../step/interface/IWorkStep';
-import type { tClsOrder } from './Order';
+import type { IOrder } from './interface/IOrder';
 
 export default function* root(): Saga<void> {
   try {
@@ -52,7 +52,7 @@ function* newOrder() {
   }
 }
 
-function* workOnOrder({ order }: { order: tClsOrder }) {
+function* workOnOrder({ order }: { order: IOrder }) {
   try {
     yield race([
       call(order.run),
@@ -82,7 +82,7 @@ function* DebounceViewStep(d, action: tCommonActionType) {
 }
 
 function* getOrderDetail({ order }) {
-  const rOrder: tClsOrder = (order: tClsOrder);
+  const rOrder: IOrder = (order: IOrder);
   try {
     const resp = yield call(orderDetailApi, rOrder.id);
     if (resp.result !== 0) {
@@ -105,9 +105,9 @@ function* getOrderList() {
   }
 }
 
-function* viewOrder({ order }: { order: tClsOrder }) {
+function* viewOrder({ order }: { order: IOrder }) {
   try {
-    const WIPOrder: tClsOrder = yield select(s => workingOrder(s.order));
+    const WIPOrder: IOrder = yield select(s => workingOrder(s.order));
 
     if (WIPOrder === order) {
       // 进行中的工单不显示概览对话框

@@ -1,5 +1,6 @@
 import type { Saga } from 'redux-saga';
 import type { tAnyStepStatus, tRunSubStepCallbacks, tStepDataReducer, tStepPayload, tStep } from './typeDef';
+import type { tCallable } from '../../typeDef';
 
 export interface IWorkStep {
   // _id: string,

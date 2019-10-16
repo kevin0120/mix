@@ -19,7 +19,7 @@ export const ORDER_WS_TYPES = Object.freeze({
 });
 
 // order action types
-export const ORDER = {
+export const ORDER = Object.freeze({
   WORK_ON: 'ORDER_WORK_ON',
   VIEW: 'ORDER_VIEW',
   FINISH: 'ORDER_FINISH',
@@ -51,6 +51,6 @@ export const ORDER = {
     DO_PREVIOUS: 'ORDER_STEP_DO_PREVIOUS',
     FINISH: 'ORDER_STEP_FINISH'
   }
-};
+});
 
 

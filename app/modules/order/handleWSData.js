@@ -11,6 +11,8 @@ const { getListSuccess } = orderActions;
 
 // rush data handlers
 const dataHandlers: rushHandlerMap<tOrderWSTypes, $PropertyType<tOrderRushData, 'data'>> = {
+
+  // 工单列表
   * [ORDER_WS_TYPES.LIST](data: Array<tOrderListData>) {
     try {
       const list = data.map(d => ({
@@ -25,6 +27,7 @@ const dataHandlers: rushHandlerMap<tOrderWSTypes, $PropertyType<tOrderRushData, 
       CommonLog.lError(e, { at: 'ORDER_WS_TYPES.LIST' });
     }
   },
+  // 工单详情
   * [ORDER_WS_TYPES.DETAIL](data: tOrder) {
     try {
       yield put(orderActions.getDetailSuccess(data));
@@ -32,6 +35,7 @@ const dataHandlers: rushHandlerMap<tOrderWSTypes, $PropertyType<tOrderRushData, 
       CommonLog.lError(e, { at: 'ORDER_WS_TYPES.DETAIL' });
     }
   },
+  // 新工单
   * [ORDER_WS_TYPES.NEW](data: Array<tOrder>) {
     try {
       yield put(orderActions.newOrder(data));

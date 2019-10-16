@@ -1,9 +1,22 @@
+// @flow
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import styles from './style';
 import Point from './point';
+import type { tPoint } from '../../modules/step/screwStep/interface/typeDef';
 
-export default function ScrewImage({ twinkle, style, image, points, focus, activeIndex, onClick, pointScale, onPointClick }) {
+type Props = {
+  twinkle: boolean,
+  style?: string,
+  image: string,
+  points: Array<tPoint>,
+  focus: number,
+  activeIndex: number,
+  pointScale?: number,
+  onPointClick?: (tPoint)=>void
+};
+
+export default function ScrewImage({ twinkle, style = '', image, points, focus, activeIndex, pointScale = 1, onPointClick }: Props) {
   const classes = makeStyles(styles.image)();
 
   const imageRef = useRef(null);
@@ -16,7 +29,7 @@ export default function ScrewImage({ twinkle, style, image, points, focus, activ
   const handleResize = useCallback(() => {
     const img = imageRef.current;
     const container = containerRef.current;
-    if (container?.offsetHeight && container?.offsetWidth) {
+    if (container && img && container?.offsetHeight && container?.offsetWidth) {
       setSize({
         height: (img.offsetHeight / container.offsetHeight) * 100 || 100,
         width: (img.offsetWidth / container.offsetWidth) * 100 || 100
@@ -53,7 +66,6 @@ export default function ScrewImage({ twinkle, style, image, points, focus, activ
       className={classes.container}
       ref={containerRef}
       style={style}
-      onClick={() => onClick && onClick()}
     >
       <img
         ref={imageRef}
@@ -72,7 +84,7 @@ export default function ScrewImage({ twinkle, style, image, points, focus, activ
           transition: 'transform 1s'
         }}
       >
-        {points?.map((p) => <Point
+        {points && points.map((p) => <Point
           key={`${p.x}${p.y}${p.status}`}
           x={p.x}
           y={p.y}
@@ -80,10 +92,12 @@ export default function ScrewImage({ twinkle, style, image, points, focus, activ
           status={p.status}
           label={p.group_sequence}
           scale={pointScale}
-          onClick={(e)=>{
+          onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            onPointClick && onPointClick(p);
+            if (onPointClick) {
+              onPointClick(p);
+            }
           }}
         />) || null}
       </div>

@@ -1,3 +1,4 @@
+// @flow
 import InputStep from './InputStep';
 import ScannerStep from './scannerStep';
 import InstructionStep from './instructionStep';

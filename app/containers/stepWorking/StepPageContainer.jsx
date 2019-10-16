@@ -11,7 +11,33 @@ import styles from './styles';
 import TimeLine from '../../components/WorkPageTimeline';
 import type { IWorkStep } from '../../modules/step/interface/IWorkStep';
 
-const mapState = (state, props) => {
+type tOP = {|
+  bindParentAction: Node => void,
+  bindParentDescription: Node => void,
+  description: Node
+|};
+
+type tSP = {|
+  ...tOP,
+  step: IWorkStep,
+  timeLine: Array<{
+    color: string,
+    title: string,
+    icon: Node,
+    body: Node,
+    footerTitle: string
+  }>,
+  workingStep: IWorkStep
+|};
+
+type tDP = {||};
+
+type Props = {|
+  ...tSP,
+  ...tDP
+|};
+
+const mapState = (state, props: tOP): tSP => {
   const vStep: ?IWorkStep = oSel.viewingStep(state.order);
   return {
     ...props,
@@ -21,26 +47,17 @@ const mapState = (state, props) => {
   };
 };
 
-const mapDispatch = {};
-
-type Props = {
-  step: IWorkStep,
-  workingStep: IWorkStep,
-  bindParentAction: Node => any,
-  timeLine: Array<any>,
-  bindParentDescription: Node => any,
-  description: Node
-};
+const mapDispatch: tDP = Object.freeze({});
 
 // 工步展示内容
 const StepPageContainer = ({
-  step,
-  workingStep,
-  bindParentAction,
-  timeLine,
-  description,
-  bindParentDescription
-}: Props) => {
+                             step,
+                             workingStep,
+                             bindParentAction,
+                             timeLine,
+                             description,
+                             bindParentDescription
+                           }: Props) => {
   const classes = makeStyles(styles.stepPageContainer)();
   if (stepTypes?.[step?.type]?.component) {
     const StepComponent = stepTypes[step.type].component;
@@ -57,7 +74,7 @@ const StepPageContainer = ({
                   bindDescription={bindParentDescription}
                 />
               )) ||
-                null}
+              null}
             </Paper>
           </Grid>
         </Grid>
@@ -99,7 +116,7 @@ const StepPageContainer = ({
   return null;
 };
 
-export default connect<Props, *, _, _, _, _>(
+export default connect<Props, tOP, tSP, tDP, _, _>(
   mapState,
   mapDispatch
 )(StepPageContainer);

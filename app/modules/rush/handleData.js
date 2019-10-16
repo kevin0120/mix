@@ -14,7 +14,7 @@ import readerNewData from '../external/device/reader/saga';
 import scannerNewData from '../external/device/scanner/saga';
 import ioWSDataHandlers from '../external/device/io/handleWSData';
 import { deviceStatus } from '../external/device';
-import orderWSDataHandlers from '../order/handleData';
+import orderWSDataHandlers from '../order/handleWSData';
 
 export default function* (payload) {
   try {

@@ -1,6 +1,6 @@
 // @flow
 
-import { take, call, all, select } from 'redux-saga/effects';
+import { call, all } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 
 import sysInitFlow from './systemInit/saga';
