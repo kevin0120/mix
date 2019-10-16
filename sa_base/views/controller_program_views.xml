@@ -20,6 +20,7 @@
                             <group string="Setting">
                                 <field name="code"/>
                                 <field name="strategy"/>
+                                <field name="control_mode" />
                             </group>
                         </group>
                       </sheet>
@@ -32,6 +33,7 @@
             <field name="model">controller.program</field>
             <field name="arch" type="xml">
                 <tree string="Program">
+                    <field name="control_mode" />
                     <field name="name"/>
                     <field name="code"/>
                     <field name="strategy"/>

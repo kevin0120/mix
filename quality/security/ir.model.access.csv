@@ -18,4 +18,6 @@ access_quality_tag_manager,sa.quality.tag,quality.model_sa_quality_tag,quality.g
 access_quality_alert_stage_manager,sa.quality.alert.stage,quality.model_sa_quality_alert_stage,quality.group_quality_manager,1,1,1,1
 access_quality_point_manager,sa.quality.point.manager,quality.model_sa_quality_point,quality.group_quality_manager,1,1,1,1
 access_quality_check_stock_manager,sa.quality.check.manager,quality.model_sa_quality_check,quality.group_quality_manager,1,1,1,1
-access_quality_point_test_type_user,sa.quality.point.test_type,quality.model_sa_quality_point_test_type,quality.group_quality_user,1,0,0,0
+access_quality_point_test_type_user,sa.quality.point.test_type.user,quality.model_sa_quality_point_test_type,quality.group_quality_user,1,0,0,0
+access_quality_point_test_type_manager,sa.quality.point.test_type.manager,quality.model_sa_quality_point_test_type,quality.group_quality_manager,1,1,1,1
+

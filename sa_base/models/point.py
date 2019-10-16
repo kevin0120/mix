@@ -70,24 +70,40 @@ class OperationPointsGroup(models.Model):
 class OperationPoints(models.Model):
     _name = 'operation.point'
 
+    _inherits = {'sa.quality.point': 'qcp_id'}
+
     _inherit = ['mail.thread']
 
     _order = "group_sequence, sequence"
 
-    is_key = fields.Boolean(string='Is Key Point', default=False, )
+    @api.model
+    def _get_default_picking_type(self):
+        return self.env['stock.picking.type'].search([
+            ('code', '=', 'mrp_operation'),
+            (
+                'warehouse_id.company_id', 'in',
+                [self.env.context.get('company_id', self.env.user.company_id.id), False])],
+            limit=1).id
+
+    is_key = fields.Boolean(string='Is Key Point', default=False)
     active = fields.Boolean(
         'Active', default=True,
         help="If the active field is set to False, it will allow you to hide the bills of material without removing it.")
 
     sequence = fields.Integer('sequence', default=1)
 
-    name = fields.Char('Operation Point Name', default=lambda self: str(uuid.uuid4()))  # 如果未定义拧紧点编号，即自动生成uuid号作为唯一标示
+    name = fields.Char('Tightening Point Name', related='qcp_id.name', inherited=True, default=lambda self: str(uuid.uuid4()))  # 如果未定义拧紧点编号，即自动生成uuid号作为唯一标示
 
     group_id = fields.Many2one('operation.point.group')
 
     group_sequence = fields.Integer('Group Sequence for Multi Spindle')
 
-    product_id = fields.Many2one('product.product', 'Product')
+    product_id = fields.Many2one('product.product', 'Consume Product', related='qcp_id.product_id', inherited=True,
+                                 domain="[('sa_type', '=', 'screw')]")
+
+    product_tmpl_id = fields.Many2one('product.template', 'Consume Product(Tightening Screw)',
+                                      related='qcp_id.product_tmpl_id', inherited=True,
+                                      domain="[('type', 'in', ['product', 'consu']), ('sa_type', '=', 'screw')]")
 
     product_qty = fields.Float('Product Quantity', default=1.0, digits=dp.get_precision('Product Unit of Measure'))
 
@@ -95,11 +111,24 @@ class OperationPoints(models.Model):
 
     y_offset = fields.Float('y axis offset from top(%)', default=0.0, digits=dp.get_precision('POINT_OFFSET'))
 
-    program_id = fields.Many2one('controller.program', string='程序号', ondelete='cascade')
+    program_id = fields.Many2one('controller.program', string='程序号(Pset/Job)', ondelete='cascade')
 
-    operation_id = fields.Many2one('mrp.routing.workcenter', ondelete='cascade', index=True)
+    control_mode = fields.Selection(related='program_id.control_mode', readonly=1)
 
-    max_redo_times = fields.Integer('Operation Max Redo Times', default=3)  # 此项重试业务逻辑在HMI中实现
+    parent_qcp_id = fields.Many2one('sa.quality.point', ondelete='cascade', index=True)
+
+    qcp_id = fields.Many2one('sa.quality.point', required=True, string='Quality Control Point(Tightening Work Step)',
+                             ondelete='cascade', auto_join=True)
+
+    picking_type_id = fields.Many2one('stock.picking.type', related='qcp_id.test_type_id', inherited=True,
+                                      default=_get_default_picking_type)
+
+    operation_id = fields.Many2one('mrp.routing.workcenter', related='qcp_id.operation_id', inherited=True)
+
+    test_type_id = fields.Char(related='qcp_id.test_type_id', inherited=True)
+
+    max_redo_times = fields.Integer(string='Operation Max Redo Times', related='qcp_id.max_redo_times',
+                                    default=3)  # 此项重试业务逻辑在HMI中实现
 
     # @api.multi
     # def _track_subtype(self, init_values):
@@ -120,6 +149,10 @@ class OperationPoints(models.Model):
     @api.model
     def default_get(self, fields):
         res = super(OperationPoints, self).default_get(fields)
+        if 'picking_type_id' not in res:
+            res.update({
+                'picking_type_id': self._get_default_picking_type()
+            })
 
         operation_id = self.env.context.get('default_operation_id')
         if operation_id:
@@ -149,6 +182,15 @@ class OperationPoints(models.Model):
 
     @api.model
     def create(self, vals):
+        tightening_point_type_id = self.env.ref('quality.test_type_tightening_point').id
+        vals.update({
+            'test_type_id': tightening_point_type_id
+        })
+        if 'product_tmpl_id' not in vals and 'product_id' in vals:
+            product_tmpl_id = self.env['product.product'].sudo().browse(vals.get('product_id')).product_tmpl_id.id
+            vals.update({
+                'product_tmpl_id': product_tmpl_id
+            })
         ret = super(OperationPoints, self).create(vals)
         auto_operation_point_inherit = self.env['ir.values'].get_default('sa.config.settings',
                                                                          'auto_operation_point_inherit')
@@ -186,4 +228,3 @@ class OperationPoints(models.Model):
         return ret
 
         # return super(OperationPoints, self).write(vals)
-

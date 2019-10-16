@@ -27,6 +27,9 @@ class QualityPoint(models.Model):
     def __get_default_team_id(self):
         return self.env['sa.quality.alert.team'].search([], limit=1).id
 
+    def _get_type_default_domain(self):
+        return []
+
     def _get_default_test_type_id(self):
         domain = self._get_type_default_domain()
         return self.env['sa.quality.point.test_type'].search(domain, limit=1).id

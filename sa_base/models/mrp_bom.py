@@ -183,9 +183,9 @@ class MrpBomLine(models.Model):
     masterpc_id = fields.Many2one('maintenance.equipment', string='Work Center Controller(MasterPC)',
                                   related="operation_id.workcenter_id.masterpc_id")
 
-    controller_id = fields.Many2one('maintenance.equipment', string='Screw Controller', copy=False)
+    controller_id = fields.Many2one('maintenance.equipment', string='Tightening Controller', copy=False)
 
-    gun_id = fields.Many2one('maintenance.equipment', string='Screw Gun', copy=False)
+    gun_id = fields.Many2one('maintenance.equipment', string='Tightening Tool(Gun/Wrench)', copy=False)
 
     # _sql_constraints = [
     #     ('unique_operation_bom_id', 'unique(bom_id,operation_id)', 'Every Bom unique operation'),

@@ -7,7 +7,7 @@
             <field name="inherit_id" ref="quality.quality_point_view_tree"/>
             <field name="arch" type="xml">
                 <xpath expr="//tree" position="attributes">
-                    <attribute name="create">false</attribute>
+                    <attribute name="groups">base.group_no_one,base.group_erp_manager</attribute>
                 </xpath>
                 <field name="picking_type_id" position="replace">
                     <field name="operation_id" />
@@ -27,7 +27,7 @@
             <field name="inherit_id" ref="quality.quality_point_view_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//form" position="attributes">
-                    <attribute name="create">false</attribute>
+                    <attribute name="groups">base.group_no_one,base.group_erp_manager</attribute>
                 </xpath>
                 <xpath expr="//label[@for='tolerance_min']" position="attributes">
                     <attribute name="string">Torque Tolerance</attribute>
@@ -35,7 +35,7 @@
                 <field name="workcenter_id" position="after">
                     <field name="operation_id_domain" invisible="1"/>
                     <field name="operation_id" domain="operation_id_domain" attrs="{'invisible': [('workcenter_id', '=', False)],'required': [('workcenter_id', '!=', False)]}"/>
-                    <field name="times" attrs="{'invisible': [('workcenter_id', '=', False)],'required': [('workcenter_id', '!=', False)]}"/>
+                    <field name="max_redo_times" attrs="{'invisible': [('workcenter_id', '=', False)],'required': [('workcenter_id', '!=', False)]}"/>
                 </field>
                 <field name="product_id" position="attributes">
                     <attribute name="required">1</attribute>
@@ -60,6 +60,41 @@
                     <attribute name="domain">[('code', '=', 'mrp_operation')]</attribute>
                     <attribute name="options">{'no_create': True, 'no_open': True}</attribute>
                 </field>
+                <xpath expr="//notebook/page[1]" position="before">
+                    <page string="Tightening Points" name="qcp_tightening_point" attrs="{'invisible': [('test_type','!=','tightening')]}">
+                        <group name="qcp_tightening_point">
+                            <field name="operation_point_ids" nolabel="1" widget="one2many_list" context="{'default_parent_qcp_id': active_id }">
+                                <tree string="Tightening Operation Points" editable="bottom" delete="false">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="sequence" readonly="1"/>
+                                    <field name="id" readonly="1" groups="base.group_no_one"/>
+                                    <field name="name" string="Description" readonly="1"/>
+                                    <field name="product_id" required="1" options="{'no_create_edit': True,'no_open': True}"/>
+                                    <field name="product_qty"/>
+                                    <field name="program_id" options="{'no_create_edit': True,'no_open': True}"/>
+                                    <field name="max_redo_times" />
+                                    <field name="x_offset"/>
+                                    <field name="y_offset"/>
+                                    <field name="active" invisible="1"/>
+                                    <field name="is_key"/>
+                                    <field name="group_id" domain="[('operation_id', 'in', context.get('search_operation_ids', []))]" options="{'no_create_edit': True,'no_open': True}"/>
+                                    <field name="group_sequence" groups="base.group_no_one"/>
+                                </tree>
+                                <form string="Tightening Operation Points">
+                                    <group>
+                                        <field name="sequence" readonly="1"/>
+                                        <field name="product_id"/>
+                                        <field name="product_qty"/>
+                                        <field name="max_redo_times" />
+                                        <field name="program_id" />
+                                        <field name="x_offset"/>
+                                        <field name="y_offset"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </group>
+                    </page>
+                </xpath>
             </field>
         </record>
 

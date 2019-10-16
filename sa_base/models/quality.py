@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
-from odoo import fields, models, api
+from odoo import fields, models, api, _
 from odoo.exceptions import ValidationError
 import odoo.addons.decimal_precision as dp
 import json
+import uuid
 
 
 class QualityPoint(models.Model):
     _inherit = "sa.quality.point"
 
-    operation_id = fields.Many2one('mrp.routing.workcenter', 'Operation')
+    active = fields.Boolean(
+        'Active', default=True,
+        help="If the active field is set to False, it will allow you to hide Quality Check Point without removing it.")
 
     tolerance_min = fields.Float('Torque Min Tolerance', digits=dp.get_precision('Quality Tests'), default=0.0)
     tolerance_max = fields.Float('Torque Max Tolerance', digits=dp.get_precision('Quality Tests'), default=0.0)
@@ -16,9 +19,15 @@ class QualityPoint(models.Model):
     tolerance_min_degree = fields.Float('Degree Min Tolerance', digits=dp.get_precision('Quality Tests'), default=0.0)
     tolerance_max_degree = fields.Float('Degree Max Tolerance', digits=dp.get_precision('Quality Tests'), default=0.0)
 
-    times = fields.Integer('Repeat times', default=1)
-
     bom_line_id = fields.Many2one('mrp.bom.line', ondelete='cascade')
+
+    # parent_id = fields.Many2one('sa.quality.point', ondelete='cascade')
+
+    operation_id = fields.Many2one('mrp.routing.workcenter', index=True)
+
+    max_redo_times = fields.Integer('Operation Max Redo Times', default=3)  # 此项重试业务逻辑在HMI中实现
+
+    operation_point_ids = fields.One2many('operation.point', 'parent_qcp_id', string='Quality Points(Tightening Point)')
 
     operation_id_domain = fields.Char(
         compute="_compute_operation_id_domain",
@@ -28,6 +37,26 @@ class QualityPoint(models.Model):
 
     _sql_constraints = [
         ('product_bom_line_id_uniq', 'unique(bom_line_id)', 'Only one quality point per product bom line is allowed')]
+
+    @api.model
+    def default_get(self, fields):
+        res = super(QualityPoint, self).default_get(fields)
+
+        operation_id = self.env.context.get('default_operation_id')
+        if operation_id:
+            operation = self.env['mrp.routing.workcenter'].sudo().browse(operation_id)
+            if 'max_redo_times' in fields:
+                res.update({'max_redo_times': operation.max_redo_times})
+            if 'sequence' in fields and operation.operation_point_ids:
+                res.update({'sequence': max(operation.operation_point_ids.mapped('sequence')) + 1})
+        return res
+
+    @api.multi
+    def name_get(self):
+        res = []
+        for point in self:
+            res.append((point.id, _('[%s] %s') % (point.operation_id.name, point.name)))
+        return res
 
     @api.onchange('operation_id')
     def _onchange_opeartion_id(self):
@@ -50,6 +79,16 @@ class QualityPoint(models.Model):
             operation_ids = rec.product_id.bom_ids.mapped('routing_id.operation_ids').ids or []
             rec.operation_id_domain = json.dumps(
                 [('workcenter_id', '=', rec.workcenter_id.id), ('id', 'in', operation_ids)])
+
+    @api.model
+    def create(self, vals):
+        # tightening_point_type = self.env.ref('quality.test_type_tightening_point').id
+        # if 'test_type_id' in vals and vals.get('test_type_id') == tightening_point_type:
+        #     vals.update({
+        #         'name': uuid.uuid4()
+        #     })
+        ret = super(QualityPoint, self).create(vals)
+        return ret
 
 
 class QualityCheck(models.Model):

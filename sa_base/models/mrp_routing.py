@@ -262,6 +262,9 @@ class ControllerProgram(models.Model):
 
     active = fields.Boolean('Active', default=True)
 
+    control_mode = fields.Selection([('pset', 'Parameter Set'), ('job', 'Assembly Process')],
+                                    default='pset', string='Control Mode For Tightening')
+
     @api.onchange('code', 'strategy')
     def _onchange_code_style(self):
         for program in self:
