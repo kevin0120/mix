@@ -46,9 +46,9 @@
                            attrs="{'invisible': [('picking_type_code', '!=', 'mrp_operation')],'required': [('picking_type_code', '=', 'mrp_operation')]}"/>
                     <field name="max_redo_times" attrs="{'invisible': [('picking_type_code', '=', 'mrp_operation')],'required': [('picking_type_code', '=', 'mrp_operation')]}"/>
                 </field>
-                <field name="product_id" position="attributes">
-                    <attribute name="required">1</attribute>
-                </field>
+                <!--<field name="product_id" position="attributes">-->
+                    <!--<attribute name="required">1</attribute>-->
+                <!--</field>-->
                 <field name="tolerance_min" position="attributes">
                     <attribute name="string">Torque Tolerance</attribute>
                 </field>
@@ -72,6 +72,12 @@
                 <xpath expr="//notebook/page[1]" position="before">
                     <page string="工艺路线图片" name="tightening_pic" attrs="{'invisible': [('test_type','!=','tightening')],'required': [('test_type','=','tightening')]}">
                         <field name="worksheet_img" widget="imageEditor" />
+                    </page>
+                    <page string="Video" name="video" attrs="{'invisible': [('test_type','!=','video')]}">
+                        <label for="worksheet_video" string="Show Me A Video"/>
+                        <div>
+                            <field name="worksheet_video" string="Show Me A Video"/>
+                        </div>
                     </page>
                     <page string="Tightening Points" name="qcp_tightening_point" attrs="{'invisible': [('test_type','!=','tightening')]}">
                         <group name="qcp_tightening_point">

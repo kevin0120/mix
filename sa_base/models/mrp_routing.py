@@ -25,8 +25,8 @@ class MrpRoutingWorkcenter(models.Model):
     sa_routing_ids = fields.Many2many('mrp.routing', 'routing_operation_rel', 'operation_id', 'routing_id',
                                      string="Routes", copy=False)
 
-    workcenter_group = fields.Many2one('mrp.workcenter.group', copy=False, required=True)
-    workcenter_ids = fields.Many2many('mrp.workcenter', related='workcenter_group.sa_workcenter_ids',
+    workcenter_group_id = fields.Many2one('mrp.workcenter.group', copy=False, required=True)
+    workcenter_ids = fields.Many2many('mrp.workcenter', related='workcenter_group_id.sa_workcenter_ids',
                                      copy=False, readonly=True)
 
     sa_step_ids = fields.Many2many('sa.quality.point', 'work_step_operation_rel', 'operation_id', 'step_id',

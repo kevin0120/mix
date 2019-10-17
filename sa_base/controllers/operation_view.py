@@ -4,14 +4,17 @@ from odoo import http, fields, api, SUPERUSER_ID
 import json
 from odoo.http import request, Response
 import re
-
+import logging
 import werkzeug.utils
 import werkzeug.wrappers
 import odoo
 import base64
 import os
+import pprint
 
 DEFAULT_LIMIT = 80
+
+_logger = logging.getLogger(__name__)
 
 
 class OperationView(http.Controller):
@@ -25,12 +28,12 @@ class OperationView(http.Controller):
         dictheaders['Content-Type'] = contenttype
         return dictheaders.items()
 
-    @http.route('/api/v1/mrp.routing.workcenter/<int:operation_id>/edit', type='json', methods=['PUT', 'OPTIONS'],
+    @http.route('/api/v1/sa.quality.point/<int:operation_id>/edit', type='json', methods=['PUT', 'OPTIONS'],
                 auth='none', cors='*', csrf=False)
     def _edit(self, operation_id=None):
         pattern = re.compile(r"^data:image/(.+);base64,(.+)", re.DOTALL)
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
-        operation = env['mrp.routing.workcenter'].search([('id', '=', operation_id)], limit=1)
+        operation = env['sa.quality.point'].browse(operation_id)
         if not operation:
             body = json.dumps({'msg': "Operation %d not existed" % operation_id})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
@@ -62,19 +65,20 @@ class OperationView(http.Controller):
                 headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
                 return Response(body, status=405, headers=headers)
 
-            current_points = env['operation.point'].search([('operation_id', '=', operation_id)])
+            current_points = env['operation.point'].search([('parent_qcp_id', '=', operation_id)])
             points_map = {i.id: i for i in current_points}
 
             for val in points:
-                point_id = env['operation.point'].search([('operation_id', '=', operation_id),
+                point_id = env['operation.point'].search([('parent_qcp_id', '=', operation_id),
                                                           ('sequence', '=', val['sequence'])])
                 if not point_id:
                     # 新增
                     val.update({
-                        'operation_id': operation_id,
+                        'parent_qcp_id': operation_id,
                         'sequence': val['sequence'],
                         'x_offset': val['x_offset'],
-                        'y_offset': val['y_offset']
+                        'y_offset': val['y_offset'],
+                        'product_id': env.ref('sa_base.product_product_screw_default').id  # 获取默认螺栓
                     })
                     env['operation.point'].create(val)
                 else:
@@ -93,11 +97,11 @@ class OperationView(http.Controller):
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
             return Response(body, status=200, headers=headers)
 
-    @http.route('/api/v1/mrp.routing.workcenter/<int:operation_id>/points_edit', type='json',
+    @http.route('/api/v1/sa.quality.point/<int:operation_id>/points_edit', type='json',
                 methods=['PUT', 'OPTIONS'], auth='none', cors='*', csrf=False)
     def _edit_points(self, operation_id=None):
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
-        operation = env['mrp.routing.workcenter'].search([('id', '=', operation_id)], limit=1)
+        operation = env['sa.quality.point'].browse(operation_id)
         if not operation:
             body = json.dumps({'msg': "Operation %d not existed" % operation_id})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
@@ -109,35 +113,39 @@ class OperationView(http.Controller):
                 headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
                 return Response(body, status=405, headers=headers)
 
-            current_points = env['operation.point'].search([('operation_id', '=', operation_id)])
+            current_points = env['operation.point'].search([('parent_qcp_id', '=', operation_id)])
             points_map = {i.id: i for i in current_points}
 
             for val in points:
-                point_id = env['operation.point'].search([('operation_id', '=', operation_id),
+                point_id = env['operation.point'].search([('parent_qcp_id', '=', operation_id),
                                                           ('sequence', '=', val['sequence'])])
                 if not point_id:
                     # 新增
                     val.update({
-                        'operation_id': operation_id,
+                        'parent_qcp_id': operation_id,
                         'sequence': val['sequence'],
                         'x_offset': val['x_offset'],
                         'y_offset': val['y_offset'],
                         'product_id': env.ref('sa_base.product_product_screw_default').id  # 获取默认螺栓
                     })
-                    env['operation.point'].create(val)
+                    ret = env['operation.point'].create(val)
+                    if not ret:
+                        _logger.error("Create Operation Point Fail, Vals: {0}".format(pprint.pformat(val, indent=4)))
                 else:
                     # 更新
                     ret = point_id.write(val)
                     if not ret:
-                        print(u'更新点位失败')
-                    if points_map.has_key(point_id.id):
+                        _logger.error(u'Update Operation Point Fail, vals: {0}'.format(pprint.pformat(val, indent=4)))
+                    if point_id.id in points_map:
                         del points_map[point_id.id]
 
             need_delete_points = env['operation.point']
             for p in points_map.values():
                 need_delete_points += p
 
-            need_delete_points.unlink()
+            ret = need_delete_points.unlink()
+            if not ret and need_delete_points:
+                _logger.error("Delete Operation Point Fail, Points: {0}".format(pprint.pformat(need_delete_points, indent=4)))
 
             body = json.dumps({'msg': "Edit point success"})
             headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]

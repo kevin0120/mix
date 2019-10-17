@@ -29,7 +29,8 @@
 
     # always loaded
     'data': [
-        # 'security/quality.xml',  # 权限
+        'demo/test_demo.xml',   # 测试数据
+        'security/quality.xml',  # 权限
         'security/ir.model.access.csv',
         'data/maintenance_data.xml',
         'data/point_data.xml',

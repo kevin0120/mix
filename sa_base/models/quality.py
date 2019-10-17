@@ -24,7 +24,9 @@ class QualityPoint(models.Model):
 
     bom_line_id = fields.Many2one('mrp.bom.line', ondelete='cascade')
 
-    worksheet_img = fields.Binary(string='Tightening Work Step Image')
+    worksheet_img = fields.Binary(string='Tightening Work Step Image', attachment=True)
+
+    worksheet_video = fields.Binary(string='Work Step Video', attachment=True)
 
     sa_operation_ids = fields.Many2many('mrp.routing.workcenter', 'work_step_operation_rel', 'step_id', 'operation_id',
                                         string="Operation Groups", copy=False)
@@ -32,7 +34,6 @@ class QualityPoint(models.Model):
     max_redo_times = fields.Integer('Operation Max Redo Times', default=3)  # 此项重试业务逻辑在HMI中实现
 
     operation_point_ids = fields.One2many('operation.point', 'parent_qcp_id', string='Quality Points(Tightening Point)')
-
 
     operation_id_domain = fields.Char(
         compute="_compute_operation_id_domain",
@@ -43,10 +44,34 @@ class QualityPoint(models.Model):
     _sql_constraints = [
         ('product_bom_line_id_uniq', 'unique(bom_line_id)', 'Only one quality point per product bom line is allowed')]
 
+    @api.multi
+    def get_operation_points(self):
+        if not self:
+            return []
+        self.ensure_one()
+        vals = []
+        for point in self.operation_point_ids:
+            vals.append({
+                'sequence': point.sequence,
+                'x_offset': point.x_offset,
+                'y_offset': point.y_offset
+            })
+        return vals
+
+    def _get_type_default_domain(self):
+        domain = super(QualityPoint, self)._get_type_default_domain()
+        domain.append(('technical_name', '=', 'text'))
+        return domain
+
     @api.model
     def default_get(self, fields):
         res = super(QualityPoint, self).default_get(fields)
-
+        if 'picking_type_id' in fields and 'picking_type_id' not in res:
+            picking_type_id = self.env['stock.picking.type'].search([('code', '=', 'mrp_operation')], limit=1).id
+            res.update({'picking_type_id': picking_type_id})
+        if 'test_type_id' in fields and 'test_type_id' not in res:
+            test_type_id = self.env.ref('quality.test_type_text').id
+            res.update({'test_type_id': test_type_id})
         operation_id = self.env.context.get('default_operation_id')
         if operation_id:
             operation = self.env['mrp.routing.workcenter'].sudo().browse(operation_id)
@@ -87,12 +112,12 @@ class QualityPoint(models.Model):
 
     @api.model
     def create(self, vals):
-        # tightening_point_type = self.env.ref('quality.test_type_tightening_point').id
-        # if 'test_type_id' in vals and vals.get('test_type_id') == tightening_point_type:
-        #     vals.update({
-        #         'name': uuid.uuid4()
-        #     })
         ret = super(QualityPoint, self).create(vals)
+        return ret
+
+    @api.multi
+    def unlink(self):
+        ret = super(QualityPoint, self).unlink()
         return ret
 
 

@@ -96,9 +96,9 @@
             <field eval="1" name="priority"/>
             <field name="arch" type="xml">
                 <tree string="Work Center Group">
-                    <field name="sequence" widget="handle"/>
                     <field name="code"/>
                     <field name="name"/>
+                    <field name="sa_workcenter_ids" widget="many2many_tags" />
                 </tree>
             </field>
         </record>
@@ -109,9 +109,6 @@
             <field eval="1" name="priority"/>
             <field name="arch" type="xml">
                 <form string="Work Center Group">
-                    <!--<header>-->
-                        <!--<button string="Sync Operation" type="object" name="button_sync_operations" class="oe_highlight" />-->
-                    <!--</header>-->
                     <sheet>
                         <div class="oe_button_box" name="button_box">
                             <button class="oe_stat_button" name="toggle_active" type="object" icon="fa-archive" groups="base.group_system">
@@ -127,7 +124,7 @@
                                 <field name="code" string="Code"/>
                             </group>
                             <group>
-                                <field name="sa_workcenter_ids" widget="many2many_tags" options="{'no_create': True, 'no_open':True}"/>
+                                <field name="sa_workcenter_ids" required="1" widget="many2many_tags" options="{'no_create': True, 'no_open':True}"/>
                             </group>
                         </group>
                     </sheet>

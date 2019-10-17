@@ -289,12 +289,32 @@
             <field name="name">测试路线2</field>
         </record>
 
+
+        <record id="mrp_workcenter_group_0" model="mrp.workcenter.group">
+            <field name="name">#1工位组</field>
+            <field name="code">#1</field>
+            <field name="sa_workcenter_ids" eval="[(4, ref('sa_base.mrp_workcenter_0'))]"/>
+        </record>
+
+        <record id="mrp_workcenter_group_1" model="mrp.workcenter.group">
+            <field name="name">#2工位组</field>
+            <field name="code">#2</field>
+            <field name="sa_workcenter_ids" eval="[(4, ref('sa_base.mrp_workcenter_1'))]"/>
+        </record>
+
+        <record id="mrp_workcenter_group_2" model="mrp.workcenter.group">
+            <field name="name">#3工位组</field>
+            <field name="code">#3</field>
+            <field name="sa_workcenter_ids" eval="[(4, ref('sa_base.mrp_workcenter_2'))]"/>
+        </record>
+
+
         <record id="routing_operation_0" model="mrp.routing.workcenter">
             <field name="name">G0C</field>
             <field name="routing_id" ref="routing_0"/>
             <!--<field name="program_id" ref="con_prog_0" />-->
             <field name="group_id" ref="routing_group_0" />
-            <field name="workcenter_id" ref="mrp_workcenter_0" />
+            <field name="workcenter_group_id" ref="mrp_workcenter_group_0" />
             <field name="max_redo_times">3</field>
             <field name="max_op_time">30</field>
         </record>
@@ -304,7 +324,7 @@
             <field name="routing_id" ref="routing_0"/>
             <!--<field name="program_id" ref="con_prog_0" />-->
             <field name="group_id" ref="routing_group_0" />
-            <field name="workcenter_id" ref="mrp_workcenter_1" />
+            <field name="workcenter_group_id" ref="mrp_workcenter_group_1" />
             <field name="max_redo_times">3</field>
             <field name="max_op_time">30</field>
         </record>
@@ -314,7 +334,7 @@
             <field name="routing_id" ref="routing_0"/>
             <!--<field name="program_id" ref="con_prog_1" />-->
             <field name="group_id" ref="routing_group_1" />
-            <field name="workcenter_id" ref="mrp_workcenter_1" />
+            <field name="workcenter_group_id" ref="mrp_workcenter_group_2" />
             <field name="max_redo_times">3</field>
             <field name="max_op_time">30</field>
         </record>
@@ -324,7 +344,7 @@
             <field name="routing_id" ref="routing_0"/>
             <!--<field name="program_id" ref="con_prog_1" />-->
             <field name="group_id" ref="routing_group_2" />
-            <field name="workcenter_id" ref="mrp_workcenter_1" />
+            <field name="workcenter_group_id" ref="mrp_workcenter_group_1" />
             <field name="max_redo_times">3</field>
             <field name="max_op_time">30</field>
         </record>
@@ -334,7 +354,7 @@
             <field name="routing_id" ref="routing_0"/>
             <!--<field name="program_id" ref="con_prog_1" />-->
             <field name="group_id" ref="routing_group_3" />
-            <field name="workcenter_id" ref="mrp_workcenter_1" />
+            <field name="workcenter_group_id" ref="mrp_workcenter_group_2" />
             <field name="max_redo_times">3</field>
             <field name="max_op_time">30</field>
         </record>
@@ -344,7 +364,7 @@
             <field name="routing_id" ref="routing_0"/>
             <!--<field name="program_id" ref="con_prog_1" />-->
             <field name="group_id" ref="routing_group_4" />
-            <field name="workcenter_id" ref="mrp_workcenter_1" />
+            <field name="workcenter_group_id" ref="mrp_workcenter_group_1" />
             <field name="max_redo_times">3</field>
             <field name="max_op_time">30</field>
         </record>
@@ -354,7 +374,7 @@
             <field name="routing_id" ref="routing_0"/>
             <!--<field name="program_id" ref="con_prog_1" />-->
             <field name="group_id" ref="routing_group_5" />
-            <field name="workcenter_id" ref="mrp_workcenter_1" />
+            <field name="workcenter_group_id" ref="mrp_workcenter_group_0" />
             <field name="max_redo_times">3</field>
             <field name="max_op_time">30</field>
         </record>
@@ -364,7 +384,7 @@
             <field name="routing_id" ref="routing_0"/>
             <!--<field name="program_id" ref="con_prog_1" />-->
             <field name="group_id" ref="routing_group_6" />
-            <field name="workcenter_id" ref="mrp_workcenter_1" />
+            <field name="workcenter_group_id" ref="mrp_workcenter_group_1" />
             <field name="max_redo_times">3</field>
             <field name="max_op_time">30</field>
         </record>
@@ -374,7 +394,7 @@
             <field name="routing_id" ref="routing_0"/>
             <!--<field name="program_id" ref="con_prog_1" />-->
             <field name="group_id" ref="routing_group_7" />
-            <field name="workcenter_id" ref="mrp_workcenter_1" />
+            <field name="workcenter_group_id" ref="mrp_workcenter_group_1" />
             <field name="max_redo_times">3</field>
             <field name="max_op_time">30</field>
         </record>
@@ -384,7 +404,7 @@
             <field name="routing_id" ref="routing_0"/>
             <!--<field name="program_id" ref="con_prog_1" />-->
             <field name="group_id" ref="routing_group_8" />
-            <field name="workcenter_id" ref="mrp_workcenter_1" />
+            <field name="workcenter_group_id" ref="mrp_workcenter_group_2" />
             <field name="max_redo_times">3</field>
             <field name="max_op_time">30</field>
         </record>

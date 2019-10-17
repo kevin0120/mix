@@ -29,7 +29,7 @@ odoo.define('web_widget_darkroom.image_editor', function (require) {
             save_all_mask: function (event) {
                 var self = this;
                 var active_id = this.view.dataset.context.active_record_id;
-                var url = '/api/v1/mrp.routing.workcenter/';
+                var url = '/api/v1/sa.quality.point/';
                 var markPoints = JSON.stringify(self.markPoints);
                 $.ajax({
                     type: "PUT",

@@ -132,14 +132,6 @@ class OperationPoints(models.Model):
     max_redo_times = fields.Integer(string='Operation Max Redo Times', related='qcp_id.max_redo_times',
                                     default=3)  # 此项重试业务逻辑在HMI中实现
 
-    # @api.multi
-    # def _track_subtype(self, init_values):
-    #     self.ensure_one()
-    #     if 'max_redo_times' in init_values:
-    #         return 'sa_base.mt_op_point_max_redo_time'
-    #     elif 'program_id' in init_values:
-    #         return 'sa_base.mt_op_program_id'
-    #     return super(OperationPoints, self)._track_subtype(init_values)
 
     @api.multi
     def name_get(self):
@@ -173,6 +165,9 @@ class OperationPoints(models.Model):
         lines = self.env['mrp.bom.line'].search([('operation_point_id', 'in', self.ids)])
         if lines:
             lines.unlink()
+        qcp_ids = self.env['sa.quality.point'].search([('id', 'in', self.mapped('qcp_id').ids)])
+        if qcp_ids:
+            qcp_ids.unlink()
         return super(OperationPoints, self).unlink()
 
     @api.multi

@@ -59,7 +59,7 @@
                                 <field name="workcenter_ids" readonly="1" widget="many2many_tags" groups="base.group_no_one"/>
                                 <!--<field name="group_id"  options="{'no_edit': True, 'no_create': True}" />-->
                                 <!--<field name="workcenter_id" options="{'no_edit': True, 'no_create': True}"/>-->
-                                <field name="workcenter_group" options="{'no_edit': True, 'no_create': True}"/>
+                                <field name="workcenter_group_id" options="{'no_edit': True, 'no_create': True}"/>
                                 <field name="company_id" options="{'no_edit': True, 'no_create': True}" groups="base.group_multi_company"/>
                             </group>
                             <group name="parameters">
