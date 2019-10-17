@@ -8,7 +8,6 @@ import Configuration from './connections/reducer';
 import users from './user/reducer';
 import workMode from './workmode/reducer';
 import resultDiag from './resultDiag/reducer';
-import ongoingOperation from './ongoingOperation/reducer';
 import operationViewer from './operationViewer/reducer';
 import logo from './logo/reducer';
 import network from './network/reducer';
@@ -29,7 +28,6 @@ export default function createRootReducer(history: {}) {
       users,
       workMode,
       resultDiag,
-      ongoingOperation,
       operationViewer,
       logo,
       network,
