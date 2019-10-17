@@ -32,10 +32,14 @@
                 <xpath expr="//label[@for='tolerance_min']" position="attributes">
                     <attribute name="string">Torque Tolerance</attribute>
                 </xpath>
-                <field name="workcenter_id" position="after">
+                <field name="operation_id" position="replace"><!-->delete operation id<-->
+
+                </field>
+                <field name="picking_type_code" position="after">
                     <field name="operation_id_domain" invisible="1"/>
-                    <field name="operation_id" domain="operation_id_domain" attrs="{'invisible': [('workcenter_id', '=', False)],'required': [('workcenter_id', '!=', False)]}"/>
-                    <field name="max_redo_times" attrs="{'invisible': [('workcenter_id', '=', False)],'required': [('workcenter_id', '!=', False)]}"/>
+                    <field name="operation_id" domain="operation_id_domain" string="Work Order Operation"
+                           attrs="{'invisible': [('picking_type_code', '!=', 'mrp_operation')],'required': [('picking_type_code', '=', 'mrp_operation')]}"/>
+                    <field name="max_redo_times" attrs="{'invisible': [('picking_type_code', '=', 'mrp_operation')],'required': [('picking_type_code', '=', 'mrp_operation')]}"/>
                 </field>
                 <field name="product_id" position="attributes">
                     <attribute name="required">1</attribute>
@@ -61,6 +65,9 @@
                     <attribute name="options">{'no_create': True, 'no_open': True}</attribute>
                 </field>
                 <xpath expr="//notebook/page[1]" position="before">
+                    <page string="工艺路线图片" name="tightening_pic" attrs="{'invisible': [('test_type','!=','tightening')],'required': [('test_type','=','tightening')]}">
+                        <field name="worksheet_img" widget="imageEditor" />
+                    </page>
                     <page string="Tightening Points" name="qcp_tightening_point" attrs="{'invisible': [('test_type','!=','tightening')]}">
                         <group name="qcp_tightening_point">
                             <field name="operation_point_ids" nolabel="1" widget="one2many_list" context="{'default_parent_qcp_id': active_id }">

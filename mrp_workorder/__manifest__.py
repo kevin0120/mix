@@ -15,6 +15,7 @@
 * Cost Structure report (mrp_account)""",
     'data': [
         'data/stock_traceability_report_data.xml',
+        'views/quality_views.xml',
         'views/mrp_workorder_views.xml',
         'views/mrp_workcenter_views.xml',
         'views/mrp_workorder_template.xml',

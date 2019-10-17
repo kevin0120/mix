@@ -82,7 +82,7 @@ class ProductProduct(models.Model):
                 'picking_type_id':
                     self.env['stock.picking.type'].search_read(domain=[('code', '=', 'mrp_operation')], fields=['id'],
                                                                limit=1)[0]['id'],
-                'workcenter_id': line.operation_id.workcenter_id.id,
+                # 'workcenter_id': line.operation_id.workcenter_id.id,
                 'times': line.product_qty,
                 'test_type': 'measure',
             }

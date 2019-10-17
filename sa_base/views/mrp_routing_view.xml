@@ -44,6 +44,9 @@
                     </header>
                     <sheet>
                           <div class="oe_button_box" name="button_box" groups="base.group_user">
+                              <button class="oe_stat_button" type="object" name="action_sa_show_steps" icon="fa-list-ul">
+                                <field string="工步" name="sa_step_ids" widget="statinfo"/>
+                            </button>
                             <button class="oe_stat_button" type="object" name="action_sa_view_routing_tracking" icon="fa-table">
                                 <field string="工艺修改记录" name="routing_tracking_count" widget="statinfo"/>
                             </button>
@@ -67,13 +70,10 @@
                         </group>
                         <group>
                             <group name="description">
-                              <field name="sa_step_ids" widget="many2many_tags" options="{'no_create': True, 'no_open':True}"/>
+                              <field name="sa_step_ids" widget="many2many_tags" readonly="1"/>
                             </group>
                          </group>
                         <notebook>
-                            <page string="工艺路线图片">
-                                <field name="worksheet_img" widget="imageEditor" required="1"/>
-                            </page>
                             <page string="工艺文件">
                                 <field name="worksheet" widget="pdf_viewer"/>
                             </page>

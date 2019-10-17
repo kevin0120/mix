@@ -634,6 +634,7 @@
                 <field name="name"/>
                 <field name="title"/>
                 <field name="product_tmpl_id"/>
+                <field name="product_id"/>
                 <field name="picking_type_id"/>
             </tree>
         </field>
@@ -662,6 +663,7 @@
                             <field name="product_tmpl_id"/>
                             <field name="product_id" groups="product.group_product_variant"/>
                             <field name="picking_type_id" string="Operation"/>
+                            <field name="picking_type_code" invisible="1"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                         </group>
                         <group>

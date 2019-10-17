@@ -13,9 +13,6 @@ class MrpWOConsu(models.Model):
 class MrpWorkorder(models.Model):
     _inherit = 'mrp.workorder'
 
-    worksheet_img = fields.Binary(
-        'Worksheet', related='operation_id.worksheet_img', readonly=True)
-
     result_ids = fields.One2many('operation.result', 'workorder_id', string='Operation Results')
 
     sent = fields.Boolean('Have Sent To Work Center(MasterPC)', default=False)

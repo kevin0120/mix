@@ -120,12 +120,14 @@ class OperationPoints(models.Model):
     qcp_id = fields.Many2one('sa.quality.point', required=True, string='Quality Control Point(Tightening Work Step)',
                              ondelete='cascade', auto_join=True)
 
-    picking_type_id = fields.Many2one('stock.picking.type', related='qcp_id.test_type_id', inherited=True,
+    picking_type_id = fields.Many2one('stock.picking.type', related='qcp_id.picking_type_id', inherited=True,
                                       default=_get_default_picking_type)
 
-    operation_id = fields.Many2one('mrp.routing.workcenter', related='qcp_id.operation_id', inherited=True)
+    sa_operation_ids = fields.Many2many('mrp.routing.workcenter', related='qcp_id.sa_operation_ids', inherited=True)
 
-    test_type_id = fields.Char(related='qcp_id.test_type_id', inherited=True)
+    operation_id = fields.Many2one('mrp.routing.workcenter', string='Preferred Operation', related='qcp_id.operation_id', inherited=True)
+
+    test_type_id = fields.Many2one('sa.quality.point.test_type', related='qcp_id.test_type_id', inherited=True)
 
     max_redo_times = fields.Integer(string='Operation Max Redo Times', related='qcp_id.max_redo_times',
                                     default=3)  # 此项重试业务逻辑在HMI中实现

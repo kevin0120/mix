@@ -48,6 +48,8 @@ class QualityPoint(models.Model):
         'product.template', 'Product', required=True,
         domain="[('type', 'in', ['consu', 'product'])]")
     picking_type_id = fields.Many2one('stock.picking.type', "Picking Type", required=True)
+
+    picking_type_code = fields.Selection(related='picking_type_id.code', readonly=True)
     measure_frequency_type = fields.Selection([
         ('all', 'All Operations'),
         ('random', 'Randomly'),

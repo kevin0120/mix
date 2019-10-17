@@ -1,17 +1,19 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# * quality_mrp
+# 	* quality_mrp
 # 
 # Translators:
-# Jeffery CHEN <jeffery9@gmail.com>, 2016
-# liAnGjiA <liangjia@qq.com>, 2016
+# Martin Trigaux, 2019
+# guohuadeng <guohuadeng@hotmail.com>, 2019
+# inspur qiuguodong <qiuguodong@inspur.com>, 2019
+# 
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 10.0e\n"
+"Project-Id-Version: Odoo Server saas~12.5+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-07 09:57+0000\n"
-"PO-Revision-Date: 2016-09-07 09:57+0000\n"
-"Last-Translator: liAnGjiA <liangjia@qq.com>, 2016\n"
+"POT-Creation-Date: 2019-08-26 08:04+0000\n"
+"PO-Revision-Date: 2019-08-26 09:37+0000\n"
+"Last-Translator: inspur qiuguodong <qiuguodong@inspur.com>, 2019\n"
 "Language-Team: Chinese (China) (https://www.transifex.com/odoo/teams/41243/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -20,81 +22,46 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. module: quality_mrp
-#: model:ir.ui.view,arch_db:quality_mrp.mrp_production_view_form_inherit_quality
-#: model:ir.ui.view,arch_db:quality_mrp.mrp_workorder_view_form_inherit_quality
-msgid "<span class=\"o_stat_text\">Quality Alert</span>"
-msgstr "<span class=\"o_stat_text\">质量警报</span>"
+#: model_terms:ir.ui.view,arch_db:quality_mrp.mrp_production_view_form_inherit_quality
+msgid ""
+"<span class=\"o_stat_text text-success\" attrs=\"{'invisible': [('quality_check_fail', '=', True)]}\">Quality Checks</span>\n"
+"                    <span class=\"o_stat_text text-danger\" attrs=\"{'invisible': [('quality_check_fail', '!=', True)]}\">Quality Checks</span>"
+msgstr ""
+"<span class=\"o_stat_text text-success\" attrs=\"{'invisible': [('quality_check_fail', '=', True)]}\">质量检查</span>\n"
+"                    <span class=\"o_stat_text text-danger\" attrs=\"{'invisible': [('quality_check_fail', '!=', True)]}\">质量检查</span>"
 
 #. module: quality_mrp
-#: model:ir.model.fields,field_description:quality_mrp.field_mrp_production_alert_count
-#: model:ir.model.fields,field_description:quality_mrp.field_mrp_workorder_alert_count
-msgid "Alert count"
-msgstr "警报个数"
+#: model_terms:ir.ui.view,arch_db:quality_mrp.mrp_production_view_form_inherit_quality
+msgid "<span class=\"o_stat_text\">Quality Alerts</span>"
+msgstr ""
 
 #. module: quality_mrp
-#: model:ir.model.fields,field_description:quality_mrp.field_mrp_production_alert_ids
+#: model:ir.model.fields,field_description:quality_mrp.field_mrp_production__quality_alert_ids
 msgid "Alerts"
 msgstr "警报"
 
 #. module: quality_mrp
-#: model:ir.model.fields,field_description:quality_mrp.field_mrp_workorder_check_ids
-msgid "Check ids"
-msgstr "检查 id"
-
-#. module: quality_mrp
-#: model:ir.model.fields,field_description:quality_mrp.field_mrp_production_check_todo
-#: model:ir.model.fields,field_description:quality_mrp.field_mrp_workorder_check_todo
-msgid "Check todo"
-msgstr "代办检查"
-
-#. module: quality_mrp
-#: model:ir.model.fields,field_description:quality_mrp.field_mrp_production_check_ids
+#: model:ir.model.fields,field_description:quality_mrp.field_mrp_production__check_ids
 msgid "Checks"
-msgstr "检查"
-
-#. module: quality_mrp
-#: model:ir.ui.view,arch_db:quality_mrp.quality_alert_view_form_inherit_mrp
-msgid "Create Production Message"
-msgstr "创建生产消息"
-
-#. module: quality_mrp
-#: model:ir.ui.view,arch_db:quality_mrp.mrp_workorder_tablet_view_form_inherit_quality
-#: model:ir.ui.view,arch_db:quality_mrp.mrp_workorder_view_form_inherit_quality
-msgid "Done"
-msgstr "完成"
+msgstr "质量检查单"
 
 #. module: quality_mrp
 #: model:ir.model,name:quality_mrp.model_mrp_production
-msgid "Manufacturing Order"
-msgstr "制造订单"
-
-#. module: quality_mrp
-#: model:ir.model.fields,field_description:quality_mrp.field_quality_alert_operation_id
-#: model:ir.model.fields,field_description:quality_mrp.field_quality_check_workorder_id
-msgid "Operation"
-msgstr "作业"
-
-#. module: quality_mrp
-#: model:ir.model.fields,field_description:quality_mrp.field_quality_alert_production_id
-#: model:ir.model.fields,field_description:quality_mrp.field_quality_check_production_id
+#: model:ir.model.fields,field_description:quality_mrp.field_quality_alert__production_id
+#: model:ir.model.fields,field_description:quality_mrp.field_quality_check__production_id
 msgid "Production Order"
-msgstr "生产单"
+msgstr "生产订单"
 
 #. module: quality_mrp
 #: model:ir.model,name:quality_mrp.model_quality_alert
-#: model:ir.ui.view,arch_db:quality_mrp.mrp_production_view_form_inherit_quality
-#: model:ir.ui.view,arch_db:quality_mrp.mrp_workcenter_view_kanban_inherit_quality_mrp
-#: model:ir.ui.view,arch_db:quality_mrp.mrp_workorder_tablet_view_form_inherit_quality
-#: model:ir.ui.view,arch_db:quality_mrp.mrp_workorder_view_form_inherit_quality
+#: model_terms:ir.ui.view,arch_db:quality_mrp.mrp_production_view_form_inherit_quality
 msgid "Quality Alert"
 msgstr "质量警报"
 
 #. module: quality_mrp
-#: code:addons/quality_mrp/models/mrp_production.py:38
-#: code:addons/quality_mrp/models/mrp_workorder.py:36
-#, python-format
-msgid "Quality Alerts"
-msgstr "质量警报"
+#: model:ir.model.fields,field_description:quality_mrp.field_mrp_production__quality_alert_count
+msgid "Quality Alert Count"
+msgstr "质量警报次数"
 
 #. module: quality_mrp
 #: model:ir.model,name:quality_mrp.model_quality_check
@@ -102,49 +69,23 @@ msgid "Quality Check"
 msgstr "质量检查"
 
 #. module: quality_mrp
+#: model:ir.model.fields,field_description:quality_mrp.field_mrp_production__quality_check_fail
+msgid "Quality Check Fail"
+msgstr "未通过"
+
+#. module: quality_mrp
+#: model:ir.model.fields,field_description:quality_mrp.field_mrp_production__quality_check_todo
+msgid "Quality Check Todo"
+msgstr "待执行"
+
+#. module: quality_mrp
 #: model:ir.actions.act_window,name:quality_mrp.quality_check_action_mo
-#: model:ir.actions.act_window,name:quality_mrp.quality_check_action_wo
-#: model:ir.ui.view,arch_db:quality_mrp.mrp_production_view_form_inherit_quality
-#: model:ir.ui.view,arch_db:quality_mrp.mrp_workorder_tablet_view_form_inherit_quality
-#: model:ir.ui.view,arch_db:quality_mrp.mrp_workorder_view_form_inherit_quality
+#: model_terms:ir.ui.view,arch_db:quality_mrp.mrp_production_view_form_inherit_quality
 msgid "Quality Checks"
 msgstr "质量检查"
 
 #. module: quality_mrp
-#: model:ir.model,name:quality_mrp.model_quality_point
-msgid "Quality Point"
-msgstr "质量点"
-
-#. module: quality_mrp
-#: model:ir.model.fields,field_description:quality_mrp.field_quality_point_code
-msgid "Type of Operation"
-msgstr "作业类型"
-
-#. module: quality_mrp
-#: model:ir.model.fields,field_description:quality_mrp.field_quality_alert_workcenter_id
-#: model:ir.model.fields,field_description:quality_mrp.field_quality_check_workcenter_id
-msgid "Work Center"
-msgstr "工作中心"
-
-#. module: quality_mrp
-#: model:ir.model,name:quality_mrp.model_mrp_workorder
-msgid "Work Order"
-msgstr "工单"
-
-#. module: quality_mrp
-#: model:ir.model.fields,field_description:quality_mrp.field_quality_point_workcenter_id
-msgid "Workcenter"
-msgstr "工作中心"
-
-#. module: quality_mrp
-#: code:addons/quality_mrp/models/quality.py:25
-#, python-format
-msgid "Workorder Messages"
-msgstr "工单消息"
-
-#. module: quality_mrp
-#: code:addons/quality_mrp/models/mrp_production.py:91
-#: code:addons/quality_mrp/models/mrp_workorder.py:81
+#: code:addons/quality_mrp/models/mrp_production.py:0
 #, python-format
 msgid "You still need to do the quality checks!"
-msgstr "你还是需要做质量检查!"
+msgstr "请先进行质量检查！"

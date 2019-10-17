@@ -4,10 +4,10 @@
 {
     'name': 'MRP features for Quality Control',
     'version': '1.0',
-    'category': 'Manufacturing',
+    'category': 'Manufacturing/Quality',
     'sequence': 50,
     'summary': 'Quality Management with MRP',
-    'depends': ['quality', 'mrp_workorder'],
+    'depends': ['quality', 'mrp'],
     'description': """
     Adds workcenters to Quality Control
 """,
@@ -15,9 +15,8 @@
         'security/quality_mrp.xml',
         'views/quality_views.xml',
         'views/mrp_production_views.xml',
-        'views/mrp_workorder_views.xml',
-        'views/mrp_workcenter_views.xml',
     ],
-    "demo": ['data/quality_mrp_demo.xml'],
+    "demo": [],
     'auto_install': True,
+    'license': 'OEEL-1',
 }

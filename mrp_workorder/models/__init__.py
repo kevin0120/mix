@@ -3,3 +3,4 @@
 
 from . import mrp_production
 from . import stock_traceability
+from . import quality

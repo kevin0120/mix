@@ -29,24 +29,23 @@ class MrpRoutingWorkcenter(models.Model):
     workcenter_ids = fields.Many2many('mrp.workcenter', related='workcenter_group.sa_workcenter_ids',
                                      copy=False, readonly=True)
 
-    sa_step_ids = fields.Many2many('mrp.step', 'step_operation_rel', 'operation_id', 'step_id',
+    sa_step_ids = fields.Many2many('sa.quality.point', 'work_step_operation_rel', 'operation_id', 'step_id',
                                      string="Steps", copy=False)
+
     # workcenter_id = fields.Many2one('mrp.workcenter', copy=False, required=False)
 
-    socket = fields.Char(string='Socket No')
+    socket = fields.Char(string='Bolt Socket No')
     op_job_id = fields.Many2one('controller.job', string='Job', track_visibility="onchange")
     # op_job_id = fields.Many2one('controller.job', string='Job')
 
-    operation_point_ids = fields.One2many('operation.point', 'operation_id', string='Operation Points')
-
-    operation_point_group_ids = fields.One2many('operation.point.group', 'operation_id',
-                                                string='Operation Points Group(multi-spindle)')
+    # operation_point_ids = fields.One2many('operation.point', 'operation_id', string='Operation Points')
+    #
+    # operation_point_group_ids = fields.One2many('operation.point.group', 'operation_id',
+    #                                             string='Operation Points Group(multi-spindle)')
 
     group_id = fields.Many2one('mrp.routing.group', string='Routing Group')
     max_redo_times = fields.Integer('Operation Max Redo Times', default=3,
                                     track_visibility="onchange")  # 此项重试业务逻辑在HMI中实现
-
-    worksheet_img = fields.Binary('worksheet_img')
 
     sync_download_time = fields.Datetime(string=u'同步下发时间')
 
@@ -56,6 +55,20 @@ class MrpRoutingWorkcenter(models.Model):
 
     _sql_constraints = [('routing_group_wc_uniq', 'unique(routing_id,group_id, workcenter_id)',
                          'Per Routing only has one unique Routing group per Work Center!')]
+
+    @api.multi
+    def action_sa_show_steps(self):
+        self.ensure_one()
+        action = self.env.ref('quality.quality_point_action').read()[0]
+        ids = self.ids
+        picking_type_id = self.env['stock.picking.type'].search([('code', '=', 'mrp_operation')], limit=1).id
+        test_type_id = self.env.ref('quality.test_type_text').id
+        ctx = dict(self._context, default_picking_type_id=picking_type_id, default_company_id=self.company_id.id,
+                   default_sa_operation_ids=[(4, ids[0], None)], default_operation_id= self.id,
+                   default_test_type_id=test_type_id)
+        action.update({'context': ctx})
+        action['domain'] = [('sa_operation_ids', 'in', self.ids)]
+        return action
 
     @api.multi
     def action_sa_view_routing_tracking(self):

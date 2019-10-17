@@ -21,13 +21,18 @@ class QualityPoint(models.Model):
 
     bom_line_id = fields.Many2one('mrp.bom.line', ondelete='cascade')
 
-    # parent_id = fields.Many2one('sa.quality.point', ondelete='cascade')
+    worksheet_img = fields.Binary(string='Tightening Work Step Image')
 
-    operation_id = fields.Many2one('mrp.routing.workcenter', index=True)
+    sa_operation_ids = fields.Many2many('mrp.routing.workcenter', 'work_step_operation_rel', 'step_id', 'operation_id',
+                                        string="Operation Groups", copy=False)
+
+
+    # parent_id = fields.Many2one('sa.quality.point', ondelete='cascade')
 
     max_redo_times = fields.Integer('Operation Max Redo Times', default=3)  # 此项重试业务逻辑在HMI中实现
 
     operation_point_ids = fields.One2many('operation.point', 'parent_qcp_id', string='Quality Points(Tightening Point)')
+
 
     operation_id_domain = fields.Char(
         compute="_compute_operation_id_domain",
@@ -73,12 +78,12 @@ class QualityPoint(models.Model):
             self.product_tmpl_id.name, self.product_id.name))
 
     @api.multi
-    @api.depends('operation_id', 'product_id', 'workcenter_id')
+    @api.depends('operation_id', 'product_id')
     def _compute_operation_id_domain(self):
         for rec in self:
             operation_ids = rec.product_id.bom_ids.mapped('routing_id.operation_ids').ids or []
             rec.operation_id_domain = json.dumps(
-                [('workcenter_id', '=', rec.workcenter_id.id), ('id', 'in', operation_ids)])
+                [('id', 'in', operation_ids)])
 
     @api.model
     def create(self, vals):
