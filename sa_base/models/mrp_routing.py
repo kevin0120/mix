@@ -56,6 +56,13 @@ class MrpRoutingWorkcenter(models.Model):
     _sql_constraints = [('routing_group_wc_uniq', 'unique(routing_id,group_id, workcenter_id)',
                          'Per Routing only has one unique Routing group per Work Center!')]
 
+    step_count = fields.Integer(string='Steps', compute='_compute_step_count')
+
+    @api.depends('sa_step_ids')
+    def _compute_step_count(self):
+        for routing in self:
+            routing.step_count = len(routing.sa_step_ids)
+
     @api.multi
     def action_sa_show_steps(self):
         self.ensure_one()

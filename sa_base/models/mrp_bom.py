@@ -106,7 +106,7 @@ class MrpBom(models.Model):
 
         delta_operation = self.operation_ids - bom_line_operations
         for operation in delta_operation:
-            for operation_point in operation.operation_point_ids:
+            for operation_point in operation.sa_step_ids.mapped('operation_point_ids'):
                 if not operation_point.product_id:
                     raise UserError(u'未定义作业点{0}的螺栓,请定义'.format(operation_point.name))
                 val = {

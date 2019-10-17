@@ -45,7 +45,7 @@
                     <sheet>
                           <div class="oe_button_box" name="button_box" groups="base.group_user">
                               <button class="oe_stat_button" type="object" name="action_sa_show_steps" icon="fa-list-ul">
-                                <field string="工步" name="sa_step_ids" widget="statinfo"/>
+                                <field string="工步" name="step_count" widget="statinfo"/>
                             </button>
                             <button class="oe_stat_button" type="object" name="action_sa_view_routing_tracking" icon="fa-table">
                                 <field string="工艺修改记录" name="routing_tracking_count" widget="statinfo"/>
