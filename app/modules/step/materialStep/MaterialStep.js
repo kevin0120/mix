@@ -13,7 +13,7 @@ import type { IMaterialStep } from './interface/IMaterialStep';
 
 const items = payload => payload?.items;
 
-const MaterialStepMixin = (ClsBaseStep: IWorkStep) => class ClsMaterialStep extends ClsBaseStep implements IMaterialStep, IWorkStep {
+const MaterialStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsMaterialStep extends ClsBaseStep implements IMaterialStep {
   _ports = new Set([]);
 
   _io = new Set([]);
@@ -51,20 +51,6 @@ const MaterialStepMixin = (ClsBaseStep: IWorkStep) => class ClsMaterialStep exte
               item[dir] = { io, port };
             }
           });
-          // if (i?.in?.sn) {
-          //   const io = getDevice(i.in.sn);
-          //   this._io.add(io);
-          //   const port = io.getPort(ioDirection.input, i.in.index);
-          //   this._ports.add(port);
-          //   item.in = { io, port };
-          // }
-          // if (i?.out?.sn) {
-          //   const io = getDevice(i.out.sn);
-          //   this._io.add(io);
-          //   const port = io.getPort(ioDirection.output, i.out.index);
-          //   this._ports.add(port);
-          //   item.out = { io, port };
-          // }
           this._items.add(item);
         });
         for (const io of this._io) {

@@ -1,3 +1,4 @@
+// @flow
 import React from 'react';
 import { push } from 'connected-react-router';
 import { call, put } from 'redux-saga/effects';
@@ -11,6 +12,7 @@ import Table from '../../components/Table/Table';
 import { STEP_STATUS } from '../step/constants';
 import { IOrder } from './interface/IOrder';
 import type { IWorkStep } from '../step/interface/IWorkStep';
+import type { tOrder } from './interface/typeDef';
 
 const stepStatus = status => {
   switch (status) {
@@ -23,7 +25,7 @@ const stepStatus = status => {
   }
 };
 
-const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep implements IOrder, IWorkStep {
+const OrderMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsOrder extends ClsBaseStep implements IOrder {
 
   _apis = {
     updateStatus: orderUpdateApi
@@ -35,14 +37,16 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep implement
 
   _workingID = null;
 
+  _status = null;
+
   // eslint-disable-next-line flowtype/no-weak-types
-  constructor(dataObj, ...rest: Array<any>) {
+  constructor(dataObj: {[key: string]: any}, ...rest: Array<any>) {
     super(dataObj, ...rest);
     this._status = dataObj.status || ORDER_STATUS.TODO;
   }
 
   get workingStep() {
-    return this._steps[this._workingIndex];
+    return (this: IWorkStep)._steps[this._workingIndex];
   }
 
   get workingIndex() {
@@ -52,7 +56,7 @@ const OrderMixin = (ClsBaseStep) => class ClsOrder extends ClsBaseStep implement
   * _onNext() {
     try {
       this._workingIndex += 1;
-      if (this._workingIndex >= this._steps.length) {
+      if (this._workingIndex >= (this: IWorkStep)._steps.length) {
         yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
       }
     } catch (e) {

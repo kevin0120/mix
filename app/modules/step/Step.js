@@ -16,7 +16,8 @@ import { ORDER } from '../order/constants';
 import { STEP_STATUS } from './constants';
 import stepTypes from './stepTypes';
 import type { tStepDataReducer, tAnyStepStatus, tRunSubStepCallbacks, tStep } from './interface/typeDef';
-import { IWorkStep } from './interface/IWorkStep';
+import type { IWorkStep } from './interface/IWorkStep';
+import type { tOrder } from '../order/interface/typeDef';
 
 function invalidStepStatus(stepType, status) {
   if (!stepType) {
@@ -30,7 +31,7 @@ function invalidStepStatus(stepType, status) {
 
 
 export default class Step implements IWorkStep {
-  _id = '';
+  _id = -1;
 
   _name = '';
 
@@ -58,7 +59,7 @@ export default class Step implements IWorkStep {
 
   _runningStatusTask = null;
 
-  _steps: Array<IWorkStep> = [];
+  _steps = [];
 
   _onLeave = null;
 
@@ -67,7 +68,7 @@ export default class Step implements IWorkStep {
   };
 
   // eslint-disable-next-line flowtype/no-weak-types,no-unused-vars
-  constructor(stepObj: tStep, ...rest: Array<any>) {
+  constructor(stepObj: {[key: string]: any} | tOrder, ...rest: Array<any>) {
     this._id = stepObj.id;
     this.update(stepObj);
     /* eslint-disable flowtype/no-weak-types */
@@ -78,16 +79,16 @@ export default class Step implements IWorkStep {
     /* eslint-enable flowtype/no-weak-types */
   }
 
-  update(stepObj: tStep): void {
+  update(stepObj: {[key: string]: any}) {
     this._name = stepObj.name || 'unnamed step';
     this._desc = stepObj.desc || '';
-    this._info = stepObj.info;
+    this._info = stepObj.info || {};
     this._type = stepObj.type || '';
     this._skippable = stepObj.skippable || false;
     this._undoable = stepObj.undoable || false;
     this._status = stepObj.status || this._status;
-    this._steps = stepObj.steps ? stepObj.steps.map(sD => {
-      const existStep = this._steps.find(s => s._id === sD.id);
+    this._steps = stepObj.steps ? stepObj.steps.map<IWorkStep>(sD => {
+      const existStep = this._steps.find(s => s.id === sD.id);
       if (existStep) {
         existStep.update(sD);
         return existStep;
@@ -156,6 +157,7 @@ export default class Step implements IWorkStep {
   // eslint-disable-next-line class-methods-use-this
   timeLost() {
     // TODO: calculate time lost
+    return 0;
   }
 
   timerStart() {
@@ -273,7 +275,7 @@ export default class Step implements IWorkStep {
   * runSubStep(step: IWorkStep, callbacks: tRunSubStepCallbacks): Saga<void> {
     try {
       const { exit, next, previous } = yield race({
-        exit: call(step.run),
+        exit: call([step, step.run]),
         next: take(
           action =>
             (action.type === ORDER.STEP.FINISH && action.step === step) ||

@@ -5,7 +5,7 @@ import { INPUT_STEP } from './action';
 import type { IWorkStep } from '../interface/IWorkStep';
 
 
-const InputStepMixin = (ClsBaseStep: IWorkStep) => class ClsInputStep extends ClsBaseStep {
+const InputStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsInputStep extends ClsBaseStep {
   _statusTasks = {
     *[STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {

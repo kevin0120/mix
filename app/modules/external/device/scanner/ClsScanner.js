@@ -5,7 +5,7 @@ import type { tInput } from '../typeDef';
 import { CommonLog } from '../../../../common/utils';
 import { scannerStepAction } from '../../../step/scannerStep/action';
 
-export const defaultScannerDispatcher = (data: ?tInput) =>
+export const defaultScannerDispatcher = (data: tInput) =>
   scannerStepAction.getValue(data);
 
 class ClsScanner extends Device {

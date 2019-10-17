@@ -7,6 +7,7 @@ import type { tStepProps } from '../types';
 import Button from '../../../components/CustomButtons/Button';
 import type { Dispatch } from '../../../modules/typeDef';
 import type { IMaterialStep } from '../../../modules/step/materialStep/interface/IMaterialStep';
+import type { IWorkStep } from '../../../modules/step/interface/IWorkStep';
 
 const mapState = (state, props: ownProps): Props => ({
   ...props
@@ -23,12 +24,12 @@ type Props = {|
 type ownProps = {|
   ...tStepProps,
   ready: Dispatch,
-  step: IMaterialStep
+  step: { ...IWorkStep,...IMaterialStep }
 |};
 
 function materialStep(props: Props) {
   const { step, bindAction, ready, isCurrent, bindDescription } = props;
-  const { payload, description } = step;
+  const { payload, desc } = step;
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     bindAction(
@@ -38,7 +39,7 @@ function materialStep(props: Props) {
     );
     bindDescription(
       <React.Fragment>
-        <Typography variant="h5" style={{ paddingBottom: '10px' }}>{description}</Typography>
+        <Typography variant="h5" style={{ paddingBottom: '10px' }}>{desc}</Typography>
         {(payload?.items || []).map(i =>
           <Typography key={i.name} variant="body1">{i.name}</Typography>
         )}
@@ -48,7 +49,7 @@ function materialStep(props: Props) {
       bindAction(null);
       bindDescription(null);
     };
-  }, [bindAction, bindDescription, description, isCurrent, payload, ready]);
+  }, [bindAction, bindDescription, desc, isCurrent, payload, ready]);
 
 
   return <div
@@ -62,7 +63,7 @@ function materialStep(props: Props) {
 
       }
     }>
-    {payload.items.map(i => <img
+    {payload && payload.items.map(i => <img
       style={
         {
           maxWidth: '100%',

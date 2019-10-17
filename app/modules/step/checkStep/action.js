@@ -1,3 +1,4 @@
+// @flow
 export const CHECK_STEP = {
   SUBMIT: 'CHECK_STEP_SUBMIT',
   CANCEL: 'CHECK_STEP_CANCEL'

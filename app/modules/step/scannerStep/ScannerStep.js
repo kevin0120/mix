@@ -13,7 +13,7 @@ import { CommonLog } from '../../../common/utils';
 import type { IWorkStep } from '../interface/IWorkStep';
 
 
-const ScannerStepMixin = (ClsBaseStep: IWorkStep) => class ClsScannerStep extends ClsBaseStep {
+const ScannerStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsScannerStep extends ClsBaseStep {
 
   _scanners = [];
 
@@ -28,6 +28,7 @@ const ScannerStepMixin = (ClsBaseStep: IWorkStep) => class ClsScannerStep extend
         this._scanners = getDevicesByType(deviceType.scanner);
         const scanners = this._scanners;
         yield all(scanners.map((s) => {
+          // eslint-disable-next-line no-param-reassign
           s.dispatcher = scannerStepAction.getValue;
           return call(s.Enable);
         }));

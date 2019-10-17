@@ -10,7 +10,7 @@ import screwStepAction from '../../../modules/step/screwStep/action';
 import { STEP_STATUS } from '../../../modules/step/constants';
 import type { tStepProps } from '../types';
 import type { tPoint } from '../../../modules/step/screwStep/interface/typeDef';
-import type { tStepStatus } from '../../../modules/step/interface/typeDef';
+import type { tAnyStepStatus, tStepStatus } from '../../../modules/step/interface/typeDef';
 import type { Dispatch } from '../../../modules/typeDef';
 
 type tOP = {|
@@ -22,7 +22,7 @@ type tSP = {|
   points: Array<tPoint>,
   image: string,
   activeIndex: number,
-  status: ?tStepStatus
+  status: ?tAnyStepStatus
 |};
 
 type tDP = {|

@@ -4,7 +4,7 @@ import {STEP_STATUS} from '../constants';
 import { VIDEO_STEP } from './action';
 import type { IWorkStep } from '../interface/IWorkStep';
 
-const videoStepMixin = (ClsBaseStep: IWorkStep) => class ClsVideoStep extends ClsBaseStep {
+const videoStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsVideoStep extends ClsBaseStep {
   _statusTasks = {
     * [STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {

@@ -6,7 +6,7 @@ export type tStepInfo = {
   [key: string]: ?string | ?number
 };
 
-export type tStepPayload = ?{
+export type tStepPayload = {
   // eslint-disable-next-line flowtype/no-weak-types
   [key: string]: any
 };

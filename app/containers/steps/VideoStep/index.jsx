@@ -7,6 +7,7 @@ import { videoStepActions } from '../../../modules/step/videoStep/action';
 import type { tStepProps } from '../types';
 import { stepPayload, viewingStep } from '../../../modules/order/selector';
 import styles from './styles';
+import type { Dispatch } from '../../../modules/typeDef';
 
 type tOP = {|
   ...tStepProps
@@ -18,17 +19,17 @@ type tSP = {|
 |};
 
 type tDP = {|
-  submit: ()=>void
+  submit: Dispatch
 |};
 const mapState = (state, props: tOP): tSP => {
-  console.log(stepPayload(viewingStep(state.order)));
+  // console.log(stepPayload(viewingStep(state.order)));
   return ({
     ...props,
     video: stepPayload(viewingStep(state.order))?.url || ''
   });
 };
 
-const mapDispatch = {
+const mapDispatch: tDP = {
   submit: videoStepActions.submit
 };
 

@@ -1,7 +1,7 @@
 // @flow
 import { cloneDeep, isNil, isEmpty } from 'lodash-es';
 import { call, put, take, all } from 'redux-saga/effects';
-import {STEP_STATUS} from '../constants';
+import { STEP_STATUS } from '../constants';
 import type {
   tPoint,
   tScrewStepData,
@@ -48,7 +48,7 @@ function* doPoint(point, isFirst, orderActions) {
   }
 }
 
-const ScrewStepMixin = (ClsBaseStep: IWorkStep) => class ClsScrewStep extends ClsBaseStep implements IWorkStep, IScrewStep {
+const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsScrewStep extends ClsBaseStep implements IScrewStep {
 
   _tools = [];
 
@@ -62,11 +62,11 @@ const ScrewStepMixin = (ClsBaseStep: IWorkStep) => class ClsScrewStep extends Cl
       }))));
       this._tools = [];
       CommonLog.Info('tools cleared', {
-        at: `screwStep(${(this: IScrewStep)._name},${(this: IScrewStep)._id})._onLeave`
+        at: `screwStep(${(this: IWorkStep)._name},${(this: IWorkStep)._id})._onLeave`
       });
     } catch (e) {
       CommonLog.lError(e, {
-        at: `screwStep(${(this: IScrewStep)._name},${(this: IScrewStep)._id})._onLeave`
+        at: `screwStep(${(this: IWorkStep)._name},${(this: IWorkStep)._id})._onLeave`
       });
     }
   };
@@ -74,7 +74,7 @@ const ScrewStepMixin = (ClsBaseStep: IWorkStep) => class ClsScrewStep extends Cl
   // eslint-disable-next-line flowtype/no-weak-types
   constructor(...args: Array<any>) {
     super(...args);
-    const payload: tScrewStepPayload = (this: IScrewStep)._payload;
+    const payload: ?tScrewStepPayload = (this: IWorkStep)._payload;
     if (isNil(payload) || isEmpty(payload)) {
       CommonLog.lError(
         `ScrewStepPayload Is Empty! Payload: ${String(payload)}`

@@ -1,4 +1,4 @@
-
+// @flow
 
 export const POINT_STATUS = {
   WAITING: 'WAITING',

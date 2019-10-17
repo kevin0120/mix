@@ -16,9 +16,10 @@ import healthzActions from '../../modules/healthz/action';
 import NavBarMenu from './NavBarMenu';
 import LanguageMenu from './LanguageMenu';
 import type { tRouteObj, tUrl } from '../../containers/typeDef';
-import type { Dispatch } from '../../modules/typeDef';
+import type { Dispatch, tAction } from '../../modules/typeDef';
 import type { tUser } from '../../modules/user/interface/typeDef';
 import notifyActions from '../../modules/Notifier/action';
+import type { CommonLogLvl } from '../../common/utils';
 
 
 type OP = {|
@@ -39,7 +40,7 @@ type SP = {|
 
 type DP = {|
   doPush: Dispatch,
-  notification: Dispatch,
+  notification: (variant: CommonLogLvl, message: string, meta: Object)=>tAction<any, any>,
   logout: Dispatch,
   updateHealthz: Dispatch
 |};

@@ -6,7 +6,7 @@ import { CommonLog } from '../../../common/utils';
 import type { IWorkStep } from '../interface/IWorkStep';
 
 
-const CheckStepMixin = (ClsBaseStep: IWorkStep) => class ClsCheckStep extends ClsBaseStep {
+const CheckStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsCheckStep extends ClsBaseStep {
   _statusTasks = {
     *[STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {

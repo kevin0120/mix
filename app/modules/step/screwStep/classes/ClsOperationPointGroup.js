@@ -1,3 +1,4 @@
+// @flow
 import { find, isNil } from 'lodash-es';
 import { CommonLog } from '../../../../common/utils';
 import type { tPoint } from '../interface/typeDef';

@@ -12,7 +12,7 @@ const defaultValidatorFunc = (data: string | number): boolean => true;
 
 
 export default class Device extends CommonExternalEntity implements IDevice {
-  _dispatcher: null | ((?tInput) => tAction<any, any>) = null;
+  _dispatcher: null | ((tInput) => tAction<any, any>) = null;
 
   _validator: null | ((data: tInputData) => boolean) = defaultValidatorFunc;
 
@@ -88,12 +88,12 @@ export default class Device extends CommonExternalEntity implements IDevice {
   }
 
   // eslint-disable-next-line flowtype/no-weak-types
-  set dispatcher(dispatcher: null | ((?tInput) => tAction<any, any>)) {
+  set dispatcher(dispatcher: null | ((tInput) => tAction<any, any>)) {
     this._dispatcher = dispatcher;
   }
 
   // eslint-disable-next-line flowtype/no-weak-types
-  get dispatcher(): ?(?tInput) => tAction<any, any> {
+  get dispatcher(): ?(tInput) => tAction<any, any> {
     return this._dispatcher;
   }
 

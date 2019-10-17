@@ -18,7 +18,7 @@ type tOP = {|
 type tSP = {|
   ...tOP,
   type: string,
-  payload: tStepPayload
+  payload: ?tStepPayload
 |};
 
 type tDP = {|

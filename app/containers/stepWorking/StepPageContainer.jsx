@@ -19,7 +19,7 @@ type tOP = {|
 
 type tSP = {|
   ...tOP,
-  step: IWorkStep,
+  step: ?IWorkStep,
   timeLine: Array<{
     color: string,
     title: string,
@@ -27,7 +27,7 @@ type tSP = {|
     body: Node,
     footerTitle: string
   }>,
-  workingStep: IWorkStep
+  workingStep: IWorkStep | {}
 |};
 
 type tDP = {||};
@@ -59,7 +59,7 @@ const StepPageContainer = ({
                              bindParentDescription
                            }: Props) => {
   const classes = makeStyles(styles.stepPageContainer)();
-  if (stepTypes?.[step?.type]?.component) {
+  if (step && stepTypes && stepTypes[step.type]?.component) {
     const StepComponent = stepTypes[step.type].component;
     return (
       <Grid container spacing={1} className={classes.root}>
@@ -88,7 +88,7 @@ const StepPageContainer = ({
           <Grid item className={classes.descriptionContainer}>
             <Paper square className={clsx(classes.Paper, classes.Description)}>
               {description || (
-                <Typography variant="h5">{step.description}</Typography>
+                <Typography variant="h5">{step.desc}</Typography>
               )}
             </Paper>
           </Grid>

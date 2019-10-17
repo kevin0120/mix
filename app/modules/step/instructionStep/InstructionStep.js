@@ -5,7 +5,7 @@ import { INSTRUCTION_STEP } from './action';
 import type { IWorkStep } from '../interface/IWorkStep';
 
 
-const InstructionStepMixin = (ClsBaseStep: IWorkStep) => class ClsInstructionStep extends ClsBaseStep {
+const InstructionStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsInstructionStep extends ClsBaseStep {
   _statusTasks = {
     * [STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {

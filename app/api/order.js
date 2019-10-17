@@ -41,7 +41,7 @@ export function orderUpdateApi(id: number, orderStatus: string) {
 }
 
 // 更新工步状态
-export function orderStepUpdateApi(id: number, status: string) {
+export function orderStepUpdateApi(id: number, status: string): any {
   try {
     return rushSendApi(ORDER_WS_TYPES.STEP_UPDATE, {
       id, status

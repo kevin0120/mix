@@ -1,3 +1,4 @@
+// @flow
 import type { tInput } from '../../external/device/typeDef';
 
 export const SCANNER_STEP = {

@@ -128,7 +128,7 @@ function* viewOrder({ order }: { order: IOrder }) {
           idx + 1,
           s.name,
           i18n.t(`StepType.${s.type}`),
-          s.description
+          s.desc
         ])) ||
       [];
     yield put(

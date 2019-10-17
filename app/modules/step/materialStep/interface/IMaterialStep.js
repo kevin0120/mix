@@ -1,7 +1,11 @@
-export interface IMaterialStep{
-  _onLeave: Function,
+// @flow
 
-  _payload: {
-    items: Array<any>
-  }
+import type { IWorkStep } from '../../interface/IWorkStep';
+
+export type tMaterialStepPayload = {
+  items: Array<any>
+};
+
+export interface IMaterialStep extends IWorkStep{
+  _payload: ?tMaterialStepPayload
 }
