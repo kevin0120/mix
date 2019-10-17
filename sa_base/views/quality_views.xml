@@ -8,6 +8,8 @@
             <field name="arch" type="xml">
                 <xpath expr="//tree" position="attributes">
                     <attribute name="groups">base.group_no_one,base.group_erp_manager</attribute>
+                    <attribute name="create">false</attribute>
+                    <attribute name="delete">false</attribute>
                 </xpath>
                 <field name="picking_type_id" position="replace">
                     <field name="operation_id" />
@@ -28,6 +30,9 @@
             <field name="arch" type="xml">
                 <xpath expr="//form" position="attributes">
                     <attribute name="groups">base.group_no_one,base.group_erp_manager</attribute>
+                    <attribute name="create">false</attribute>
+                    <attribute name="delete">false</attribute>
+                    <attribute name="edit">true</attribute>
                 </xpath>
                 <xpath expr="//label[@for='tolerance_min']" position="attributes">
                     <attribute name="string">Torque Tolerance</attribute>

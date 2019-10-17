@@ -25,14 +25,14 @@ class MrpRoutingWorkcenter(models.Model):
     sa_routing_ids = fields.Many2many('mrp.routing', 'routing_operation_rel', 'operation_id', 'routing_id',
                                      string="Routes", copy=False)
 
-    workcenter_group = fields.Many2one('mrp.workcenter.group', copy=False)
+    workcenter_group = fields.Many2one('mrp.workcenter.group', copy=False, required=True)
     workcenter_ids = fields.Many2many('mrp.workcenter', related='workcenter_group.sa_workcenter_ids',
                                      copy=False, readonly=True)
 
     sa_step_ids = fields.Many2many('sa.quality.point', 'work_step_operation_rel', 'operation_id', 'step_id',
                                      string="Steps", copy=False)
 
-    # workcenter_id = fields.Many2one('mrp.workcenter', copy=False, required=False)
+    workcenter_id = fields.Many2one('mrp.workcenter', copy=False, required=False)
 
     socket = fields.Char(string='Bolt Socket No')
     op_job_id = fields.Many2one('controller.job', string='Job', track_visibility="onchange")
@@ -59,7 +59,7 @@ class MrpRoutingWorkcenter(models.Model):
     @api.multi
     def action_sa_show_steps(self):
         self.ensure_one()
-        action = self.env.ref('quality.quality_point_action').read()[0]
+        action = self.env.ref('sa_base.sa_mrp_step_action').read()[0]
         ids = self.ids
         picking_type_id = self.env['stock.picking.type'].search([('code', '=', 'mrp_operation')], limit=1).id
         test_type_id = self.env.ref('quality.test_type_text').id
@@ -68,6 +68,7 @@ class MrpRoutingWorkcenter(models.Model):
                    default_test_type_id=test_type_id)
         action.update({'context': ctx})
         action['domain'] = [('sa_operation_ids', 'in', self.ids)]
+        action['name'] = _("Work Steps")
         return action
 
     @api.multi

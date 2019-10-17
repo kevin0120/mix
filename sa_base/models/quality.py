@@ -9,6 +9,9 @@ import uuid
 class QualityPoint(models.Model):
     _inherit = "sa.quality.point"
 
+    product_tmpl_id = fields.Many2one('product.template', 'Product', required=False,
+                                      domain="[('type', 'in', ['consu', 'product'])，('sa_type', '=', 'vehicle')]")
+
     active = fields.Boolean(
         'Active', default=True,
         help="If the active field is set to False, it will allow you to hide Quality Check Point without removing it.")
@@ -25,9 +28,6 @@ class QualityPoint(models.Model):
 
     sa_operation_ids = fields.Many2many('mrp.routing.workcenter', 'work_step_operation_rel', 'step_id', 'operation_id',
                                         string="Operation Groups", copy=False)
-
-
-    # parent_id = fields.Many2one('sa.quality.point', ondelete='cascade')
 
     max_redo_times = fields.Integer('Operation Max Redo Times', default=3)  # 此项重试业务逻辑在HMI中实现
 
