@@ -19,7 +19,8 @@ class OperationPointsGroup(models.Model):
 
     proposal_key_num = fields.Integer(default=0, copy=False)
 
-    name = fields.Char('Operation Point Group')
+    name = fields.Char('Operation Point Group', required=True,
+                       default=lambda self: self.env['ir.sequence'].next_by_code('operation.point.group'))
     key_num = fields.Integer(string='Key Point Count', copy=False, compute="_compute_key_point_count",
                              inverse='_inverse_key_point_count',
                              store=True)
@@ -29,10 +30,13 @@ class OperationPointsGroup(models.Model):
     #     store=False,
     # )
 
-    operation_id = fields.Many2one('mrp.routing.workcenter', ondelete='cascade', index=True)
+    work_step_id = fields.Many2one('sa.quality.point', ondelete='cascade', index=True)
 
     operation_point_ids = fields.One2many('operation.point', 'group_id',
                                           string='Points', copy=False)
+
+    _sql_constraints = [
+        ('name_uniq', 'unique(name)', 'Operation Point Group Name MUST BE Unique!')]
 
     # @api.constrains('operation_point_ids')
     # def _constraint_operation_point_ids(self):
@@ -59,12 +63,12 @@ class OperationPointsGroup(models.Model):
             lk = len(record.operation_point_ids.filtered(lambda r: r.is_key))
             record.key_num = max(record.proposal_key_num, lk)
 
-    @api.multi
-    def name_get(self):
-        res = []
-        for point in self:
-            res.append((point.id, _('[%s] %s') % (point.operation_id.name, point.name)))
-        return res
+    # @api.multi
+    # def name_get(self):
+    #     res = []
+    #     for point in self:
+    #         res.append((point.id, _('[%s] %s') % (point.operation_id.name, point.name)))
+    #     return res
 
 
 class OperationPoints(models.Model):
@@ -111,7 +115,8 @@ class OperationPoints(models.Model):
 
     y_offset = fields.Float('y axis offset from top(%)', default=0.0, digits=dp.get_precision('POINT_OFFSET'))
 
-    program_id = fields.Many2one('controller.program', string='程序号(Pset/Job)', ondelete='cascade')
+    program_id = fields.Many2one('controller.program', related='qcp_id.program_id', string='程序号(Pset/Job)',
+                                 inherited=True)
 
     control_mode = fields.Selection(related='program_id.control_mode', readonly=1)
 

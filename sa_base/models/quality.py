@@ -24,14 +24,20 @@ class QualityPoint(models.Model):
 
     bom_line_id = fields.Many2one('mrp.bom.line', ondelete='cascade')
 
+    worksheet_video = fields.Binary(string='Work Step Video', attachment=True)
+
+    # 拧紧相关
     worksheet_img = fields.Binary(string='Tightening Work Step Image', attachment=True)
 
-    worksheet_video = fields.Binary(string='Work Step Video', attachment=True)
+    program_id = fields.Many2one('controller.program', string='程序号(Pset/Job)', ondelete='cascade')
 
     sa_operation_ids = fields.Many2many('mrp.routing.workcenter', 'work_step_operation_rel', 'step_id', 'operation_id',
                                         string="Operation Groups", copy=False)
 
     max_redo_times = fields.Integer('Operation Max Redo Times', default=3)  # 此项重试业务逻辑在HMI中实现
+
+    operation_point_group_ids = fields.One2many('operation.point.group', 'work_step_id',
+                                                string='Operation Points Group(multi-spindle)')
 
     operation_point_ids = fields.One2many('operation.point', 'parent_qcp_id', string='Quality Points(Tightening Point)')
 
@@ -100,7 +106,7 @@ class QualityPoint(models.Model):
     def _product_tmpl_product_constraint(self):
         if self.product_id.product_tmpl_id.id != self.product_tmpl_id.id:
             raise ValidationError('The product template "%s" is invalid on product with name "%s"' % (
-            self.product_tmpl_id.name, self.product_id.name))
+                self.product_tmpl_id.name, self.product_id.name))
 
     @api.multi
     @api.depends('operation_id', 'product_id')
