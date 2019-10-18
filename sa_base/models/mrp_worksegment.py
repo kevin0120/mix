@@ -98,11 +98,14 @@ class MrpWorkCenter(models.Model):
 
     @api.multi
     def write(self, vals):
-        super(MrpWorkCenter, self).write(vals)
+
         if 'equipment_ids' in vals:
             ret = self.env['mrp.workcenter.group.tool'].search(['|', ('tool_id', 'in', self.equipment_ids.ids), ('workcenter_id', '=', self.ids[0])])
             ret.sudo().unlink()
             self.ensure_one()
+
+        super(MrpWorkCenter, self).write(vals)
+        if 'equipment_ids' in vals:
             for group in self.sa_workcentergroup_ids.ids:
                 for tool in self.equipment_ids.ids:
                     val = {
