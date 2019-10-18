@@ -1,9 +1,11 @@
+// @flow
 import { defaultClient } from '../common/utils';
 import { lError } from '../logger';
+import type { tUuid } from '../modules/user/interface/typeDef';
 
 // 获取用户信息
 // eslint-disable-next-line import/prefer-default-export
-export function getUserInfo(url, uuid) {
+export function getUserInfo(url: string, uuid: tUuid) {
   const fullUrl = `${url}/res.users/${uuid}`;
 
   return defaultClient

@@ -37,13 +37,21 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsOrder extends Cls
 
   _workingID = null;
 
-  _status = null;
+  _status = ORDER_STATUS.TODO;
+
+  _plannedDateTime = null;
+
 
   // eslint-disable-next-line flowtype/no-weak-types
-  constructor(dataObj: {[key: string]: any}, ...rest: Array<any>) {
+  constructor(dataObj: { [key: string]: any }, ...rest: Array<any>) {
     super(dataObj, ...rest);
-    this._status = dataObj.status || ORDER_STATUS.TODO;
+    this._status = dataObj.status || this._status;
   }
+
+  get plannedDateTime() {
+    return this._plannedDateTime;
+  }
+
 
   get workingStep() {
     return (this: IWorkStep)._steps[this._workingIndex];

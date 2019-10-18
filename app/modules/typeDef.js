@@ -20,7 +20,7 @@ export type GetState = () => StateType;
 export type Dispatch = ReduxDispatch<tAction<string, any>>;
 
 // eslint-disable-next-line flowtype/no-weak-types
-export type Store = ReduxStore<GetState, tAction<string, any>>;
+export type Store = ReduxStore<StateType, tAction<string, any>>;
 
 // eslint-disable-next-line flowtype/no-weak-types
-export type tCallable<TR> = (...args: Array<any>)=>(TR | Saga<TR>);
+export type tCallable<TP,TR> = (...TP)=>(TR | Saga<TR>);

@@ -2,14 +2,9 @@
 
 import type { Saga } from 'redux-saga';
 import { WEBSOCKET_EVENTS } from './constants';
+import type { tAction } from '../typeDef';
 
-export type tWebSocketEvent = $Values<typeof WEBSOCKET_EVENTS>;
-
-export type tRushWebSocketData = {
-  +type: string,
-  // eslint-disable-next-line flowtype/no-weak-types
-  +data: { [key: string]: any } | Array<any>
-};
+export type tWebSocketEvent = string;// $Values<typeof WEBSOCKET_EVENTS>;
 
 export type tBarcode = {
   +id: string,
@@ -24,6 +19,8 @@ export type rushHandlerMap<TTypes, TData> = {
 
 export type tRushData<TType, TData> = {|
   type: TType,
-  data: TData
+  data: TData,
+  sn: number
 |};
 
+export type tRushConnectionCallback = (...Array<any>)=>tAction<any, any>;

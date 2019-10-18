@@ -1,3 +1,4 @@
+// @flow
 import { RESULT_DIAG } from './action';
 
 const defaultResultDiag = {
@@ -10,7 +11,7 @@ type actionType = {
 };
 
 export default function resultDiag(
-  state: object = defaultResultDiag,
+  state: Object = defaultResultDiag,
   action: actionType
 ) {
   switch (action.type) {

@@ -58,12 +58,12 @@ function* doCheckCurrentConnection() {
     }
     if (stdout) {
       const result = stdout.toString();
-      const ssid = /802-11-wireless.ssid:(.+)\n/.exec(result)[1] || '';
+      const ssid = (/802-11-wireless.ssid:(.+)\n/.exec(result) || ['', ''])[1];
       const password =
-        /802-11-wireless-security.psk:(.+)\n/.exec(result)[1] || '';
+        (/802-11-wireless-security.psk:(.+)\n/.exec(result) || ['', ''])[1];
       const addresses = /ipv4.addresses:(.+)\/(.+)\n/.exec(result) || '';
       const address = addresses[1] || '';
-      const gateway = /ipv4.gateway:(.+)\n/.exec(result)[1] || '';
+      const gateway = (/ipv4.gateway:(.+)\n/.exec(result) || ['', ''])[1];
       const CDIR = parseInt(addresses[2], 10) || 0;
       const mask = CDIR2netmask(CDIR);
       const data = yield select(state => state.network.config);

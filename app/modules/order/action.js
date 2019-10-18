@@ -13,7 +13,7 @@ export type tActUpdateState = {
 
 export type tActOrderTrigger = {
   type: string,
-  order: tOrder
+  order: IOrder
 };
 
 export const orderActions = {

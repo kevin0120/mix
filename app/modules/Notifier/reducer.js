@@ -1,30 +1,22 @@
+// @flow
 import { NOTIFIER } from './action';
-import type { CommonLogLvl } from '../../common/utils';
+import type { tNotification, tNotifyState } from './typeDef';
+import type { tAction } from '../typeDef';
 
-const initState = {
+const initState: tNotifyState = {
   notifications: []
 };
 
-type tNotiStackVariant = 'default' | 'success' | 'error' | 'info';
+const logLvl2NotiStackVariant = {
+  Info: 'info',
+  Debug: 'error',
+  Error: 'error',
+  Warn: 'info',
+  Maintenance: 'info',
+  default: 'info'
+};
 
-function convertLogLvl2NotiStackVariant(lvl: CommonLogLvl): tNotiStackVariant {
-  switch (lvl) {
-    case 'Info':
-      return 'info';
-    case 'Debug':
-      return 'error';
-    case 'Error':
-      return 'error';
-    case 'Warn':
-      return 'info';
-    case 'Maintenance':
-      return 'info';
-    default:
-      return 'default';
-  }
-}
-
-export default (state = initState, action) => {
+export default (state: tNotifyState = initState, action: tAction<any, any>) => {
   switch (action.type) {
     case NOTIFIER.ENQUEUE_SNACKBAR: {
       const { message, variant } = action;
@@ -32,7 +24,7 @@ export default (state = initState, action) => {
         message,
         options: {
           key: `${new Date().getTime() + Math.random()}`,
-          variant: convertLogLvl2NotiStackVariant(variant),
+          variant: logLvl2NotiStackVariant[variant],
           anchorOrigin: {
             vertical: 'top',
             horizontal: 'left'
@@ -53,7 +45,7 @@ export default (state = initState, action) => {
     case NOTIFIER.CLOSE_SNACKBAR:
       return {
         ...state,
-        notifications: state.notifications.map(notification =>
+        notifications: state.notifications.map<tNotification>(notification =>
           action.dismissAll || notification.key === action.key
             ? { ...notification, dismissed: true }
             : { ...notification }

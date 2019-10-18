@@ -15,6 +15,8 @@ export const NETWORK = {
   SIGNAL_OK: 'NETWORK_SIGNAL_OK'
 };
 
+type tNetworkConfig = { netmask: {}, ssid: {}, password: {} }
+
 export function networkScan() {
   return {
     type: NETWORK.SCAN
@@ -27,7 +29,7 @@ export function networkCheck(): tCommonActionType {
   };
 }
 
-export function networkSet(data) {
+export function networkSet(data: tNetworkConfig) {
   return {
     type: NETWORK.SET,
     data
@@ -45,7 +47,7 @@ export function networkSignalOK(
   };
 }
 
-export function networkSetOK(data) {
+export function networkSetOK(data: tNetworkConfig) {
   return {
     type: NETWORK.SET_OK,
     data

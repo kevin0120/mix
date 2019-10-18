@@ -103,7 +103,7 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const modelsData =
-    (viewingOrder?.payload?.models &&
+    (viewingOrder && viewingOrder.payload && viewingOrder.payload.models &&
       viewingOrder.payload.models.map(m => [
         m.name,
         m.desc,

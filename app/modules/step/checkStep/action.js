@@ -5,7 +5,7 @@ export const CHECK_STEP = {
 };
 
 export default {
-  submit: payload => ({
+  submit: (payload: any) => ({
     type: CHECK_STEP.SUBMIT,
     payload
   }),

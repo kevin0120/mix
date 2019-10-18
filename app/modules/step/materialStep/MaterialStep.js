@@ -8,8 +8,10 @@ import { CommonLog } from '../../../common/utils';
 import { ioDirection, ioTriggerMode } from '../../external/device/io/constants';
 import actions, { MATERIAL_STEP } from './action';
 import type { IWorkStep } from '../interface/IWorkStep';
-import type ClsIOModule from '../../external/device/io/ClsIOModule';
 import type { IMaterialStep } from './interface/IMaterialStep';
+import type { IIOModule } from '../../external/device/io/interface/IIOModule';
+import type { IDevice } from '../../external/device/IDevice';
+import ClsIOModule from '../../external/device/io/ClsIOModule';
 
 const items = payload => payload?.items;
 
@@ -44,11 +46,13 @@ const MaterialStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsMaterialSt
           const item = {};
           ['in', 'out'].forEach((dir) => {
             if (i && i[dir] && i[dir].sn) {
-              const io: ClsIOModule = getDevice(i[dir].sn);
-              this._io.add(io);
-              const port = io.getPort(ioDirection.input, i[dir].index);
-              this._ports.add(port);
-              item[dir] = { io, port };
+              const io: IDevice = getDevice(i[dir].sn);
+              if(io instanceof ClsIOModule){
+                this._io.add(io);
+                const port = io.getPort(ioDirection.input, i[dir].index);
+                this._ports.add(port);
+                item[dir] = { io, port };
+              }
             }
           });
           this._items.add(item);
@@ -73,8 +77,8 @@ const MaterialStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsMaterialSt
           return null;
         }).filter(calls => !!calls));
 
-        const confirmIO = (getDevice(sPayload.confirm.sn): ClsIOModule);
-        if (confirmIO) {
+        const confirmIO = getDevice(sPayload.confirm.sn);
+        if (confirmIO && confirmIO instanceof ClsIOModule) {
           this._confirm = {
             io: confirmIO,
             port: confirmIO.getPort(ioDirection.input, sPayload.confirm.index)

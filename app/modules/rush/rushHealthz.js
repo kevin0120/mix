@@ -1,12 +1,16 @@
+// @flow
 import { put, all } from 'redux-saga/effects';
+import type { Saga } from 'redux-saga';
 import { CommonLog } from '../../common/utils';
 import NotifierActions from '../Notifier/action';
 import healthzActions from '../healthz/action';
+import type { tAction } from '../typeDef';
+import type { tRushConnectionCallback } from './type';
 
-const onConnectActions = [
+const onConnectActions: Array<tRushConnectionCallback> = [
   () => NotifierActions.enqueueSnackbar('Info', 'rush 已连接')
 ];
-const onDisconnectActions = [
+const onDisconnectActions: Array<tRushConnectionCallback> = [
   () => NotifierActions.enqueueSnackbar('Error', 'rush 已断开')
 ];
 const onChangeActions = [];
@@ -18,7 +22,7 @@ export const bindRushAction = {
 };
 let rushHealthz = false;
 
-function* bindOnConnectAction(actionToBind) {
+function* bindOnConnectAction(actionToBind: tRushConnectionCallback): Saga<void> {
   try {
     onConnectActions.push(actionToBind);
     if (rushHealthz) {
@@ -29,7 +33,7 @@ function* bindOnConnectAction(actionToBind) {
   }
 }
 
-function* bindOnDisconnectAction(actionToBind) {
+function* bindOnDisconnectAction(actionToBind: tRushConnectionCallback): Saga<void> {
   try {
     onConnectActions.push(actionToBind);
     if (!rushHealthz) {
@@ -40,7 +44,7 @@ function* bindOnDisconnectAction(actionToBind) {
   }
 }
 
-function* bindOnChangeAction(actionToBind) {
+function* bindOnChangeAction(actionToBind: tRushConnectionCallback): Saga<void> {
   try {
     onConnectActions.push(actionToBind);
     yield put(actionToBind());
@@ -49,7 +53,7 @@ function* bindOnChangeAction(actionToBind) {
   }
 }
 
-export default function*(payload) {
+export default function* (payload: boolean): Saga<void> {
   try {
     yield put(healthzActions.data({ rush: payload }));
     if (rushHealthz !== payload) {

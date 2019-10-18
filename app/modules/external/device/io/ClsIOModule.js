@@ -17,8 +17,9 @@ import { CommonLog } from '../../../../common/utils';
 import { ioDirection, ioTriggerMode } from './constants';
 import { ioSetApi, ioContactApi, ioStatusApi } from '../../../../api/io';
 import type { tAction } from '../../../typeDef';
+import type { IIOModule } from './interface/IIOModule';
 
-export default class ClsIOModule extends Device {
+export default class ClsIOModule extends Device implements IIOModule {
   _data: tIOData = { input: '', output: '' };
 
   _ports: Array<tIOPort> = [];
@@ -261,7 +262,7 @@ export default class ClsIOModule extends Device {
     triggerMode: tIOTriggerMode,
     // eslint-disable-next-line flowtype/no-weak-types
     dispatcher: (...args: any) => tAction<any, any>
-  ) {
+  ): tIOListener {
     const listener = {
       port,
       triggerMode,
@@ -271,7 +272,7 @@ export default class ClsIOModule extends Device {
     return listener;
   }
 
-  removeListener(listener: tIOListener) {
+  removeListener(listener: tIOListener): Array<tIOListener> {
     return remove<tIOListener>(this._listeners, (l: tIOListener) => l === listener);
   }
 }

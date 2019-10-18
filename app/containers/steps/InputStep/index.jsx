@@ -19,7 +19,7 @@ const mapDispatch = {
 type Props = {|
   ...tStepProps,
   label: string,
-  submit: (?string | ?number) => void
+  submit: (string | number) => void
 |};
 
 function InputStep({

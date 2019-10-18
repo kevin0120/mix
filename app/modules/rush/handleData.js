@@ -1,7 +1,8 @@
+// @flow
 /* eslint-disable no-empty-function */
 import { put, fork, call } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
-import type { tRushWebSocketData, tWebSocketEvent, tRushData } from './type';
+import type { tWebSocketEvent, tRushData } from './type';
 import { WEBSOCKET_EVENTS as wse } from './constants';
 import notifierActions from '../Notifier/action';
 import { CommonLog } from '../../common/utils';
@@ -16,12 +17,18 @@ import ioWSDataHandlers from '../external/device/io/handleWSData';
 import { deviceStatus } from '../external/device';
 import orderWSDataHandlers from '../order/handleWSData';
 
-export default function* (payload) {
+export default function* (payload: string): Saga<void> {
   try {
+    if (!payload) {
+      return;
+    }
     const d = /(^[^"]*);(.*)/.exec(payload);
+    if (!d) {
+      return;
+    }
     const dataArray = d[1].split(';');
     const event: tWebSocketEvent = dataArray[0].split(':').slice(-1)[0];
-    const json: tRushWebSocketData = JSON.parse(d[2]);
+    const json: tRushData<string, any> = JSON.parse(d[2]);
     const { sn, type, data, ...otherInfo } = json;
     CommonLog.Info(`rush message (${event})(${json.type})`, {
       event,

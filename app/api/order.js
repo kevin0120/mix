@@ -27,7 +27,7 @@ export function orderDetailApi(id: number) {
 
 
 // 更新工单状态
-export function orderUpdateApi(id: number, orderStatus: string) {
+export function orderUpdateApi(id: number, orderStatus: string): ?Promise<any> {
   try {
     return rushSendApi(ORDER_WS_TYPES.UPDATE, {
       id,

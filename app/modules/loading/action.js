@@ -1,3 +1,4 @@
+// @flow
 export const LOADING = {
   START: 'LOADING_START',
   STOP: 'LOADING_STOP'

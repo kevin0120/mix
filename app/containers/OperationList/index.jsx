@@ -17,14 +17,14 @@ import { todoOrders, doneOrders, exceptOrders, doingOrders } from '../../modules
 import styles from './styles';
 import settingImg from '../../../resources/imgs/setting.png';
 import type { Dispatch } from '../../modules/typeDef';
-import type { tOrder } from '../../modules/order/interface/typeDef';
 import { withI18n } from '../../i18n';
+import type { IOrder } from '../../modules/order/interface/IOrder';
 
 type tOP = {||};
 
 type tSP = {|
   ...tOP,
-  orderList: Array<tOrder>
+  orderList: Array<IOrder>
 |};
 
 type tDP = {|
@@ -53,7 +53,7 @@ const mapDispatch: tDP = {
 function HomeOperationList(props: Props) {
   const classes = makeStyles(styles)();
   const { view, doPush, orderList, getList } = props;
-  const retOrderList = sortBy(orderList, (o: tOrder) => new Date(o.plannedDateTime) || Date.now());
+  const retOrderList = sortBy(orderList, (o: IOrder) => o.plannedDateTime && new Date(o.plannedDateTime) || Date.now());
 
   const onCardClick = (order) => {
     view(order);
@@ -80,7 +80,7 @@ function HomeOperationList(props: Props) {
         </Typography>
       </Grid>
       {/* eslint-disable-next-line react/no-array-index-key */}
-      {orders && orders.map((order: tOrder, idx: number) => order ? (<Grid item xs={size} key={`${order.name}${idx}`}>
+      {orders && orders.map((order: IOrder, idx: number) => order ? (<Grid item xs={size} key={`${order.name}${idx}`}>
           <Paper square className={classes.orderCardContainer}>
             <CardActionArea className={classes.orderCard} onClick={() => onCardClick(order)}>
               <div className={clsx(statusMap[order.status || ORDER_STATUS.TODO], classes.statusIndicator)}/>

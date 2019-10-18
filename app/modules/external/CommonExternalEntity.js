@@ -2,19 +2,16 @@
 import { isEqual } from 'lodash-es';
 import type { Saga } from 'redux-saga';
 import { CommonLog } from '../../common/utils';
+import type { ICommonExternalEntity } from './ICommonExternalEntity';
 
-interface IHealthChecker {
-  Healthz: boolean
-}
-
-export default class CommonExternalEntity implements IHealthChecker {
+export default class CommonExternalEntity implements ICommonExternalEntity {
   _name: string;
 
   _isHealthz: boolean = false;
 
   _enable: boolean = false;
 
-  _children: Set<CommonExternalEntity> = new Set();
+  _children: Set<ICommonExternalEntity> = new Set();
 
   constructor(name: string) {
     this._name = name;
@@ -26,7 +23,7 @@ export default class CommonExternalEntity implements IHealthChecker {
     /* eslint-enable flowtype/no-weak-types */
   }
 
-  appendChildren(children: Array<CommonExternalEntity> | CommonExternalEntity) {
+  appendChildren(children: Array<ICommonExternalEntity> | ICommonExternalEntity) {
     if (children instanceof Array) {
       children.forEach(c => {
         this._children.add(c);
@@ -36,7 +33,7 @@ export default class CommonExternalEntity implements IHealthChecker {
     }
   }
 
-  deleteChildren(children: Array<CommonExternalEntity>) {
+  deleteChildren(children: Array<ICommonExternalEntity>) {
     if (children instanceof Array) {
       children.forEach(c => {
         this._children.delete(c);
@@ -44,7 +41,7 @@ export default class CommonExternalEntity implements IHealthChecker {
     }
   }
 
-  getChildren(patten: CommonExternalEntity => boolean) {
+  getChildren(patten: ICommonExternalEntity => boolean): Array<ICommonExternalEntity> {
     if (!patten) {
       return [...this._children];
     }
@@ -90,12 +87,12 @@ export default class CommonExternalEntity implements IHealthChecker {
     return this._enable;
   }
 
-  Enable(): any {
+  Enable(): void | Saga<void> {
     this._enable = true;
     CommonLog.Info(`${this.source} Is Enabled!`);
   }
 
-  Disable(): any {
+  Disable(): void | Saga<void> {
     this._enable = false;
     CommonLog.Info(`${this.source} Is Disabled!`);
   }

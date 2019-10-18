@@ -8,11 +8,12 @@ import screwStepAction from '../../../step/screwStep/action';
 import { CommonLog } from '../../../../common/utils';
 import { toolEnableApi } from '../../../../api/tools';
 import type { tAction } from '../../../typeDef';
+import type {IScrewTool} from './interface/IScrewTool';
 
 export const defaultScrewToolDispatcher = (data: tInputData): tAction<any, any> =>
   screwStepAction.result(data);
 
-export default class ClsScrewTool extends Device {
+export default class ClsScrewTool extends Device implements IScrewTool {
   constructor(name: string, serialNumber: string, ...rest: Array<any>) {
     super(name, serialNumber);
     /* eslint-disable flowtype/no-weak-types */

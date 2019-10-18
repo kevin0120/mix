@@ -1,10 +1,12 @@
+// @flow
 import { take, call } from 'redux-saga/effects';
 import { MODEL_VIEWER } from './action';
 import { CommonLog } from '../../common/utils';
+import type { Saga } from 'redux-saga';
 
 const { exec } = require('child_process');
 
-export default function* root() {
+export default function* root(): Saga<void> {
   try {
     while (true) {
       const { url } = yield take(MODEL_VIEWER.OPEN);

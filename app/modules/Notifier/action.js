@@ -1,4 +1,6 @@
+// @flow
 import type { CommonLogLvl } from '../../common/utils';
+import type { tNotifyKey } from './typeDef';
 
 export type tNotifyVariant = CommonLogLvl;
 
@@ -19,16 +21,17 @@ const enqueueSnackbar = (
   message
 });
 
-const closeSnackbar = key => ({
+const closeSnackbar = (key: tNotifyKey) => ({
   type: NOTIFIER.CLOSE_SNACKBAR,
   dismissAll: !key, // dismiss all if no key has been defined
   key
 });
 
-const removeSnackbar = key => ({
+const removeSnackbar = (key: string) => ({
   type: NOTIFIER.REMOVE_SNACKBAR,
   key
 });
+
 export default {
   enqueueSnackbar,
   closeSnackbar,

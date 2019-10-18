@@ -4,7 +4,7 @@ export const INPUT_STEP = {
 };
 
 export const inputStepActions = {
-  submit: (payload: string) => ({
+  submit: (payload: string | number) => ({
     type: INPUT_STEP.SUBMIT,
     payload
   })

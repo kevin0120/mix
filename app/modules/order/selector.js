@@ -22,16 +22,16 @@ export const workingStep = (order: ?IOrder): ?IWorkStep =>
 export const orderSteps = (order: ?IOrder): ?Array<IWorkStep> => order?.steps || null;
 export const orderLength = (order: ?IOrder): number => orderSteps(order)?.length || 0;
 
-export const todoOrders = (orderList: Array<IOrder>): Array<tOrder> =>
+export const todoOrders = (orderList: Array<IOrder>): Array<IOrder> =>
   orderList && orderList.filter((o) => o?.status === ORDER_STATUS.TODO || (o && !o?.status));
 
-export const doingOrders = (orderList: Array<IOrder>): Array<tOrder> =>
+export const doingOrders = (orderList: Array<IOrder>): Array<IOrder> =>
   orderList && orderList.filter((o) => o?.status === ORDER_STATUS.WIP);
 
-export const doneOrders = (orderList: Array<IOrder>): Array<tOrder> =>
+export const doneOrders = (orderList: Array<IOrder>): Array<IOrder> =>
   orderList && orderList.filter((o) => o?.status === ORDER_STATUS.DONE);
 
-export const exceptOrders = (orderList: Array<IOrder>): Array<tOrder> =>
+export const exceptOrders = (orderList: Array<IOrder>): Array<IOrder> =>
   orderList && orderList.filter((o) => (
   o?.status === ORDER_STATUS.PENDING || o?.status === ORDER_STATUS.CANCEL)
   );

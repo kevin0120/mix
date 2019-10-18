@@ -1,9 +1,10 @@
+// @flow
 import LOGO from './action';
 import defaultWorkingImg from '../../../resources/imgs/defaultWorking.jpg';
 import type { tActionLogo } from './type';
 
 export default function logo(
-  state: object = defaultWorkingImg,
+  state: Object = defaultWorkingImg,
   action: tActionLogo
 ) {
   switch (action.type) {

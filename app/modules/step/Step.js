@@ -68,7 +68,7 @@ export default class Step implements IWorkStep {
   };
 
   // eslint-disable-next-line flowtype/no-weak-types,no-unused-vars
-  constructor(stepObj: {[key: string]: any} | tOrder, ...rest: Array<any>) {
+  constructor(stepObj: { [key: string]: any }, ...rest: Array<any>) {
     this._id = stepObj.id;
     this.update(stepObj);
     /* eslint-disable flowtype/no-weak-types */
@@ -79,24 +79,24 @@ export default class Step implements IWorkStep {
     /* eslint-enable flowtype/no-weak-types */
   }
 
-  update(stepObj: {[key: string]: any}) {
-    this._name = stepObj.name || 'unnamed step';
-    this._desc = stepObj.desc || '';
-    this._info = stepObj.info || {};
-    this._type = stepObj.type || '';
-    this._skippable = stepObj.skippable || false;
-    this._undoable = stepObj.undoable || false;
-    this._status = stepObj.status || this._status;
-    this._steps = stepObj.steps ? stepObj.steps.map<IWorkStep>(sD => {
+  update(stepObj: ?{ [key: string]: any }) {
+    this._name = stepObj?.name || 'unnamed step';
+    this._desc = stepObj?.desc || '';
+    this._info = stepObj?.info || {};
+    this._type = stepObj?.type || '';
+    this._skippable = stepObj?.skippable || false;
+    this._undoable = stepObj?.undoable || false;
+    this._status = stepObj?.status || this._status;
+    this._steps = stepObj?.steps ? (stepObj && stepObj.steps.map<IWorkStep>(sD => {
       const existStep = this._steps.find(s => s.id === sD.id);
       if (existStep) {
         existStep.update(sD);
         return existStep;
       }
       return new (stepTypes[sD.type](Step))(sD);
-    }) : this._steps;
+    })) || [] : this._steps;
 
-    this._payload = stepObj.payload || this._payload;
+    this._payload = stepObj?.payload || this._payload;
   }
 
   get id() {

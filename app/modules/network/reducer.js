@@ -1,3 +1,4 @@
+// @flow
 import { NETWORK } from './action';
 import configs from '../../shared/config';
 import { genReducers } from '../util';

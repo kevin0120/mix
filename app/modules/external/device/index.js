@@ -2,8 +2,7 @@
 import type { Saga } from 'redux-saga';
 import { call, put } from 'redux-saga/effects';
 import { CommonLog } from '../../../common/utils';
-import type { tRushWebSocketData } from '../../rush/type';
-import Device from './Device';
+import type Device from './Device';
 import ClsController from './controller/model';
 import ClsScanner from './scanner/ClsScanner';
 import ClsScrewTool from './tools/ClsScrewTool';
@@ -12,6 +11,9 @@ import ClsIOModule from './io/ClsIOModule';
 import type { tDeviceSN } from './typeDef';
 import { deviceStatusApi } from '../../../api/device';
 import healthzActions from '../../healthz/action';
+import type { tRushData } from '../../rush/type';
+import type { IDevice } from './IDevice';
+import type { ICommonExternalEntity } from '../ICommonExternalEntity';
 
 type tArrayDevices = Set<Device>;
 
@@ -65,7 +67,7 @@ function newDevice(
     childrenSN.forEach(cSN => {
       const child = getDevice(cSN);
       if (child) {
-        device.appendChildren(child);
+        device.appendChildren((child: ICommonExternalEntity));
       } else {
         lostChildren[cSN] = device;
       }
@@ -77,7 +79,7 @@ function newDevice(
   }
 }
 
-export function getDevice(sn: tDeviceSN): Device {
+export function getDevice(sn: tDeviceSN): IDevice {
   return [...gDevices].filter((d: Device) => d.serialNumber === sn)?.[0];
 }
 
@@ -97,17 +99,17 @@ export function* updateDeviceStatus(): Saga<void> {
   }
 }
 
-export function* deviceStatus(data: tRushWebSocketData): Saga<void> {
+export function* deviceStatus(data: tRushData<any, any>): Saga<void> {
   try {
     if (!(data?.data instanceof Array)) {
       return;
     }
     data.data.forEach(d => {
-      const { sn, type, children, status, data, config } = d;
+      const { sn, type, children, status, dData, config } = d;
       let dv = getDevice(sn);
       // try make a new device if dv doesn't exist
       if (!dv) {
-        dv = newDevice(type, `${type}-${sn}`, sn, config, data, children);
+        dv = newDevice(type, `${type}-${sn}`, sn, config, dData, children);
       }
 
       // if dv exists, set its Healthz status

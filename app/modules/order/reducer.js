@@ -32,7 +32,7 @@ const initState: tOrderState = {
   ].map(o => new (OrderMixin(Step))(o))
 };
 
-function limitIndex(order: ?tOrder, index: tOrderStepIdx): tOrderStepIdx {
+function limitIndex(order: ?IOrder, index: tOrderStepIdx): tOrderStepIdx {
   if (index < 0) {
     return 0;
   }
@@ -149,7 +149,7 @@ const orderReducer: {
     viewingIndex: stepId
   }),
   [ORDER.STEP.DO_NEXT](state) {
-    const wOrder: ?tOrder = workingOrder(state);
+    const wOrder: ?IOrder = workingOrder(state);
     const newIndex = workingIndex(wOrder) + 1;
     const vIndex =
       workingStep(wOrder) === viewingStep(state)
@@ -161,7 +161,7 @@ const orderReducer: {
     };
   },
   [ORDER.STEP.FINISH](state) {
-    const wOrder: ?tOrder = workingOrder(state);
+    const wOrder: ?IOrder = workingOrder(state);
     const newIndex = workingIndex(wOrder) + 1;
     const vIndex =
       workingStep(wOrder) === viewingStep(state)

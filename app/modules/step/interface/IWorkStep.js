@@ -2,7 +2,6 @@
 import type { Saga, Task } from 'redux-saga';
 import type { tAnyStepStatus, tRunSubStepCallbacks, tStepDataReducer, tStepPayload, tStep, tStepInfo } from './typeDef';
 import type { tCallable } from '../../typeDef';
-import type { tOrder } from '../../order/interface/typeDef';
 
 export interface IWorkStep {
   _id: number,
@@ -12,9 +11,9 @@ export interface IWorkStep {
   _type: string,
   _skippable: boolean,
   _undoable: boolean,
-  +_onLeave: ?tCallable<any>,
+  +_onLeave: ?tCallable<Array<any>, any>,
   _payload: ?tStepPayload,
-  _statusTasks: { [key: string]: tCallable<void> },
+  _statusTasks: { [key: string]: tCallable<Array<any>, void> },
   _runningStatusTask: ?Task<any>,
   _status: tAnyStepStatus,
   _stateToRun: tAnyStepStatus,
@@ -22,9 +21,9 @@ export interface IWorkStep {
   _times: Array<Date>,
   _steps: Array<IWorkStep>,
   _apis: {
-    updateStatus: tCallable<any>
+    updateStatus: tCallable<Array<any>, any>
   },
-  +constructor: ({[key: string]: any}, ...Array<any>)=>void,
+  +constructor: ({ [key: string]: any }, ...Array<any>)=>void,
   +update: (tStep)=>void,
   +id: number,
   +name: string,
@@ -38,9 +37,9 @@ export interface IWorkStep {
   +payload: ?tStepPayload,
   +data: any,
 
-  +run: tCallable<any>,
+  +run: tCallable<Array<any>, any>,
 
-  update( {[key:string]: any}): void,
+  update(?{ [key: string]: any }): void,
 
   timeLost(): number,
 
