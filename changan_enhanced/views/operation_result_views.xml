@@ -14,7 +14,7 @@
                 <field name="workcenter_id" position="attributes">
                     <attribute name="options">{"no_open": True, "no_create": True}</attribute>
                 </field>
-                <field name="gun_id" position="attributes">
+                <field name="tool_id" position="attributes">
                     <attribute name="options">{"no_open": True, "no_create": True}</attribute>
                 </field>
                 <field name="operation_point_id" position="attributes">

@@ -78,9 +78,6 @@
                                             <field name="product_qty"/>
                                             <field name="program_id" />
                                             <field name="workcenter_id" />
-                                            <field name="masterpc_id" />
-                                            <field name="controller_id"/>
-                                            <field name="gun_id" />
                                        </tree>
                                     </field>
                                 </group>

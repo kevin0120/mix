@@ -27,7 +27,6 @@ class QualityPoint(models.Model):
     tolerance_min_degree = fields.Float('Degree Min Tolerance', digits=dp.get_precision('Quality Tests'), default=0.0)
     tolerance_max_degree = fields.Float('Degree Max Tolerance', digits=dp.get_precision('Quality Tests'), default=0.0)
 
-
     worksheet_img = fields.Binary(string='Tightening Work Step Image', attachment=True)
 
     program_id = fields.Many2one('controller.program', string='程序号(Pset/Job)', ondelete='cascade')

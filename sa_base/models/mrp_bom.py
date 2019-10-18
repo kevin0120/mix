@@ -19,7 +19,6 @@ class MrpBom(models.Model):
     operation_ids = fields.Many2many('mrp.routing.workcenter', related='routing_id.sa_operation_ids',
                                      copy=False, readonly=True)
 
-
     has_operations = fields.Boolean(compute='_compute_has_operations')
 
     @api.multi
@@ -59,14 +58,13 @@ class MrpBom(models.Model):
     @api.onchange('routing_id', 'product_id')
     def _onchange_routing_id(self):
         self.code = u'[{0}]{1}'.format(self.routing_id.name, self.product_id.name)
-        self.operation_ids = [(5,)]  # 刪除所有作業
         self.bom_line_ids = [(5,)]  # 删除所有BOM行
 
     @api.constrains('product_id', 'product_tmpl_id')
     def _product_tmpl_product_constraint(self):
         if self.product_id.product_tmpl_id.id != self.product_tmpl_id.id:
             raise ValidationError(_(u'The product template "%s" is invalid on product with name "%s"') % (
-            self.product_tmpl_id.name, self.product_id.name))
+                self.product_tmpl_id.name, self.product_id.name))
 
     @api.constrains('product_id', 'routing_id', 'active')
     def _constraint_active_product_routing(self):
@@ -93,29 +91,6 @@ class MrpBom(models.Model):
                 _(u'The product Template had a related routing config "%s" been actived!') % (
                     self.product_tmpl_id.name))
 
-    def _onchange_operations(self):
-        self.ensure_one()
-        operation_ids = self.operation_ids
-        need_delete_bom_line = self.env['mrp.bom.line']
-        for bom_line in self.bom_line_ids:
-            if bom_line.operation_id.id not in operation_ids.ids:
-                need_delete_bom_line += bom_line
-        need_delete_bom_line.unlink()  # delete bom line ids
-
-        bom_line_operations = self.bom_line_ids.mapped('operation_id')
-
-        delta_operation = self.operation_ids - bom_line_operations
-        for operation in delta_operation:
-            for operation_point in operation.sa_step_ids.mapped('operation_point_ids'):
-                if not operation_point.product_id:
-                    raise UserError(u'未定义作业点{0}的螺栓,请定义'.format(operation_point.name))
-                val = {
-                    "operation_point_id": operation_point.id,
-                    "product_id": operation_point.product_id.id,
-                    "bom_id": self.id,
-                }
-                self.env['mrp.bom.line'].sudo().create(val)
-
     @api.model
     def create(self, vals):
         auto_operation_inherit = self.env['ir.values'].get_default('sa.config.settings', 'auto_operation_inherit')
@@ -124,15 +99,11 @@ class MrpBom(models.Model):
             operation_ids = routing_id.operation_ids
             vals.update({'operation_ids': [(6, None, operation_ids.ids)]})
         ret = super(MrpBom, self).create(vals)
-        # if 'operation_ids' in vals:
-        ret._onchange_operations()
         return ret
 
     @api.multi
     def write(self, vals):
         ret = super(MrpBom, self).write(vals)
-        # if 'operation_ids' in vals:
-        self._onchange_operations()
         return ret
 
     @api.multi
@@ -152,7 +123,8 @@ class MrpBom(models.Model):
             if not connections:
                 continue
             url = \
-            ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_WROKORDERS_API) for connect in connections][0]
+                ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_WROKORDERS_API) for connect in
+                 connections][0]
 
             operation._push_mrp_routing_workcenter(url)
         return True
@@ -161,90 +133,48 @@ class MrpBom(models.Model):
 class MrpBomLine(models.Model):
     _inherit = 'mrp.bom.line'
 
+    @api.depends('work_step_id')
+    def _compute_product_qty(self):
+        operation_point_sudo = self.env['operation.point'].sudo()
+        for line in self:
+            operation_point_id = operation_point_sudo.search([('qcp_id', '=', line.work_step_id.id)])
+            if not operation_point_id:
+                line.product_qty = 1.0
+            line.product_qty = operation_point_id.product_qty
+
     active = fields.Boolean(
         'Active', default=True,
         help="If the active field is set to False, it will allow you to hide the bills of material without removing it.")
 
-    operation_point_id = fields.Many2one('operation.point', ondelete='cascade')
+    work_step_id = fields.Many2one('sa.quality.point', ondelete='cascade', required=True)
 
-    op_job_id = fields.Many2one('controller.job', string='Job')
+    product_qty = fields.Float('Product Quantity', default=1.0, required=True, compute=_compute_product_qty, store=True)
+
     group_id = fields.Many2one('mrp.routing.group', related="operation_id.group_id", string='Routing Group')
 
-    program_id = fields.Many2one('controller.program', related="operation_point_id.program_id", string='程序号')
+    program_id = fields.Many2one('controller.program', related="work_step_id.program_id", readonly=True,
+                                 string='Tightening Program(Pset/Assembly Process)')
 
-    workcenter_id = fields.Many2one('mrp.workcenter', related="operation_id.workcenter_id", string='Work Center')
+    workcenter_ids = fields.Many2many('mrp.workcenter', related="operation_id.workcenter_ids", string='Work Centers',
+                                      readonly=True)
 
-    masterpc_id = fields.Many2one('maintenance.equipment', string='Work Center Controller(MasterPC)',
-                                  related="operation_id.workcenter_id.masterpc_id")
-
-    controller_id = fields.Many2one('maintenance.equipment', string='Tightening Controller', copy=False)
-
-    gun_id = fields.Many2one('maintenance.equipment', string='Tightening Tool(Gun/Wrench)', copy=False)
-
-    # _sql_constraints = [
-    #     ('unique_operation_bom_id', 'unique(bom_id,operation_id)', 'Every Bom unique operation'),
-    # ]
-
-    controller_id_domain = fields.Char(
-        compute="_compute_gun_id_domain",
-        readonly=True,
-        store=False,
-    )
-
-    gun_id_domain = fields.Char(
-        compute="_compute_gun_id_domain",
-        readonly=True,
-        store=False,
-    )
-
-    @api.onchange('operation_id')
-    def _onchange_operation(self):
-        self.ensure_one()
-        self.controller_id = False
-        self.gun_id = False
-
-    @api.onchange('operation_point_id')
-    def _onchange_operation_point_id(self):
-        self.ensure_one()
-        self.product_id = self.operation_point_id.product_id
-
-    @api.onchange('controller_id')
-    def _onchange_controller(self):
-        self.ensure_one()
-        self.gun_id = False
-
-    @api.multi
-    @api.depends('operation_id.workcenter_id')
-    def _compute_gun_id_domain(self):
-        for rec in self:
-            rec.gun_id_domain = json.dumps([('id', 'in', rec.workcenter_id.gun_ids.ids)])
-            rec.controller_id_domain = json.dumps([('id', 'in', rec.workcenter_id.controller_ids.ids)])
+    workcenter_id = fields.Many2one('mrp.workcenter', string='Prefer Work Center', copy=False,
+                                    related='operation_id.workcenter_id', required=False)
 
     @api.model
     def create(self, vals):
         line = super(MrpBomLine, self).create(vals)
-        vals = {
-            'product_id': line.bom_id.product_id.id,
-            'product_tmpl_id': line.bom_id.product_tmpl_id.id,
-            'operation_id': line.operation_id.id,
-            'bom_line_id': line.id,
-            'picking_type_id':
-                self.env['stock.picking.type'].search_read(domain=[('code', '=', 'mrp_operation')], fields=['id'],
-                                                           limit=1)[0]['id'],
-            'workcenter_id': line.operation_id.workcenter_id.id,
-            'times': line.product_qty,
-            'test_type': 'measure',
-        }
-        self.env['sa.quality.point'].sudo().create(vals)
         return line
 
     @api.multi
     def write(self, vals):
         res = super(MrpBomLine, self).write(vals)
-        if 'product_qty' in vals:
-            for line in self:
-                rec = self.env['sa.quality.point'].search([('bom_line_id', '=', line.id)])
-                rec.sudo().write({'times': line.product_qty})
+        if 'product_qty' not in vals:
+            return res
+        for line in self:
+            if not line.work_step_id:
+                continue
+            line.work_step_id.write({'product_qty': line.product_qty})
         return res
 
     @api.multi
@@ -264,26 +194,3 @@ class MrpBomLine(models.Model):
         except RequestException as e:
             self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
             return False
-
-    @api.multi
-    def unlink(self):
-        quality_points = self.env['sa.quality.point']
-        for line in self:
-            master = line.workcenter_id.masterpc_id if line.workcenter_id else None
-            if not master:
-                raise UserError(u"未找到工位上的工位控制器")
-            connections = master.connection_ids.filtered(
-                lambda r: r.protocol == 'http') if master.connection_ids else None
-            if not connections:
-                raise UserError(u"未找到工位上的工位控制器的连接信息")
-            url = ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_DEL_WROKORDERS_API) for connect in
-                   connections][0]
-            ret = self._push_del_routing_workcenter(line=line, url=url)
-            if not ret:
-                self.env.user.notify_warning(u"未删除物料清单行")
-        for line in self:
-            rec = self.env['sa.quality.point'].search([('bom_line_id', '=', line.id)])
-            quality_points += rec
-        quality_points.sudo().unlink()
-        ret = super(MrpBomLine, self).unlink()
-        return ret

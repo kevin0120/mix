@@ -5,18 +5,26 @@
             <field name="model">mrp.workcenter</field>
             <field name="inherit_id" ref="sa_base.sa_mrp_workcenter_form_view"/>
             <field name="arch" type="xml">
-                <xpath expr="//notebook/page/group/group[@name='equipment']/field[@name='controller_ids']" position="attributes">
-                    <attribute name="attrs">{'invisible': [('masterpc_id','=',False)], 'required': [('type','=','normal')]}</attribute>
-                </xpath>
-                <xpath expr="//notebook/page/group/group[@name='equipment']/field[@name='io_id']" position="attributes">
-                    <attribute name="attrs">{'required': [('type','=','normal')]}</attribute>
-                </xpath>
-                <xpath expr="//notebook/page/group/group[@name='equipment']/field[@name='rfid_id']" position="attributes">
-                    <attribute name="attrs">{'required': [('type','=','normal')]}</attribute>
+                <xpath expr="//notebook/page/group[1]" position="inside">
+                    <group string="Equipments" name="equipment">
+                        <field name="controller_ids_domain" invisible="1"/>
+                        <field name="tool_ids_domain" invisible="1"/>
+                        <field name="masterpc_id" attrs="{'required': [('type','=','operate')]}"/>
+                        <field name="controller_ids" widget="many2many_tags"
+                               domain="controller_ids_domain"
+                               attrs="{'invisible': [('masterpc_id','=',False)],'required': [('type','=','operate')]}"/>
+                        <field name="tool_ids" widget="many2many_tags" domain="tool_ids_domain"
+                               attrs="{'invisible': [('controller_ids','=',False)],'required': [('type','=','operate')]}"/>
+                        <field name="hmi_id" attrs="{'required': [('type','=','operate')]}"/>
+                        <field name="io_id"/>
+                        <field name="rfid_id"/>
+                    </group>
                 </xpath>
                 <field name="qc_workcenter_id" position="attributes">
                     <attribute name="string">QRK</attribute>
-                    <attribute name="attrs">{'invisible': [('type','=','rework')], 'required': [('type','=','normal')]}</attribute>
+                    <attribute name="attrs">{'invisible': [('type','=','rework')], 'required':
+                        [('type','=','operate')]}
+                    </attribute>
                 </field>
                 <field name="code" position="attributes">
                     <attribute name="required">1</attribute>

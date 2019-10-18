@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
           <xpath expr="//page/field[@name='bom_line_ids']/tree/field[@name='controller_id']" position="replace">
           </xpath>
-          <xpath expr="//page/field[@name='bom_line_ids']/tree/field[@name='gun_id']" position="replace">
+          <xpath expr="//page/field[@name='bom_line_ids']/tree/field[@name='tool_id']" position="replace">
           </xpath>
           <xpath expr="//page/field[@name='bom_line_ids']/tree/field[@name='product_id']" position="attributes">
               <attribute name="required">1</attribute>

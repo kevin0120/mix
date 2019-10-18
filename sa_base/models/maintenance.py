@@ -94,9 +94,9 @@ class MaintenanceEquipment(models.Model):
     parent_id = fields.Many2one('maintenance.equipment', 'Parent Equipment', index=True, ondelete='cascade')
     child_ids = fields.One2many('maintenance.equipment', 'parent_id', 'Child Equipments')
 
-    external_url = fields.Text('External URL', compute='_compute_external_url')
+    external_url = fields.Text('Equipment External URL', compute='_compute_external_url')
 
-    healthz_url = fields.Char('Healthz Check URL')
+    healthz_url = fields.Char('Equipment Health Check URL')
 
     parent_left = fields.Integer('Left Parent', index=1)
     parent_right = fields.Integer('Right Parent', index=1)
