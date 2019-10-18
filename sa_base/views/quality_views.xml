@@ -46,18 +46,20 @@
                            attrs="{'invisible': [('picking_type_code', '!=', 'mrp_operation')],'required': [('picking_type_code', '=', 'mrp_operation')]}"/>
                     <field name="max_redo_times" attrs="{'invisible': [('picking_type_code', '=', 'mrp_operation')],'required': [('picking_type_code', '=', 'mrp_operation')]}"/>
                 </field>
-                <!--<field name="product_id" position="attributes">-->
-                    <!--<attribute name="required">1</attribute>-->
-                <!--</field>-->
-                <field name="tolerance_min" position="attributes">
-                    <attribute name="string">Torque Tolerance</attribute>
-                </field>
+<!--                <field name="product_id" position="attributes">-->
+<!--                    <attribute name="required">1</attribute>-->
+<!--                </field>-->
+<!--                <field name="tolerance_min" position="attributes">-->
+<!--                    <attribute name="string">Torque Tolerance</attribute>-->
+<!--                </field>-->
                 <xpath expr="//div[@class='o_row'][last()]" position="after">
-                    <label for="tolerance_min_degree" string="Degree Tolerance" attrs="{'invisible': [('test_type', '!=', 'measure')]}"/>
-                    <div attrs="{'invisible': [('test_type', '!=', 'measure')]}" class="o_row">
-                        <span>from </span> <field name="tolerance_min_degree"/>
-                        <span>to </span> <field name="tolerance_max_degree"/>
-                    </div>
+<!--                    <label for="tolerance_min_degree" string="Degree Tolerance" attrs="{'invisible': [('test_type', '!=', 'tightening')]}"/>-->
+<!--                    <div attrs="{'invisible': [('test_type', '!=', 'tightening')]}" class="o_row">-->
+<!--                        <span>from </span> <field name="tolerance_min_degree"/>-->
+<!--                        <span>to </span> <field name="tolerance_max_degree"/>-->
+<!--                    </div>-->
+                    <field string="Assembly Process(JOB)" name="program_id" domain="[('control_mode', '=', 'job')]" options="{'no_create_edit': True,'no_open': True}"
+                           attrs="{'invisible': [('test_type','!=','tightening')],'required': [('test_type','=','tightening')]}" />
                 </xpath>
                 <field name="picking_type_id" position="attributes">
                     <attribute name="domain">[('code', '=', 'mrp_operation')]</attribute>
@@ -75,21 +77,27 @@
                     </page>
                     <page string="Tightening Points" name="qcp_tightening_point" attrs="{'invisible': [('test_type','!=','tightening')]}">
                         <group name="qcp_tightening_point">
-                            <field name="operation_point_ids" nolabel="1" widget="one2many_list" context="{'default_parent_qcp_id': active_id }">
+                            <field name="operation_point_ids" nolabel="1" widget="one2many_list" context="{'default_parent_qcp_id': active_id, 'search_parent_step_ids': [active_id] }">
                                 <tree string="Tightening Operation Points" editable="bottom" delete="false">
                                     <field name="sequence" widget="handle"/>
                                     <field name="sequence" readonly="1"/>
                                     <field name="id" readonly="1" groups="base.group_no_one"/>
                                     <field name="name" string="Description" readonly="1"/>
                                     <field name="product_id" required="1" options="{'no_create_edit': True,'no_open': True}"/>
-                                    <field name="product_qty"/>
-                                    <field name="program_id" options="{'no_create_edit': True,'no_open': True}"/>
+                                    <field name="product_qty" required="1"/>
+                                    <field name="program_id" string="Program Set(Pset)" domain="[('control_mode', '=', 'pset')]" options="{'no_create_edit': True,'no_open': True}"/>
                                     <field name="max_redo_times" />
-                                    <field name="x_offset"/>
-                                    <field name="y_offset"/>
+                                    <field name="norm" string="Normal Torque(N.M)" />
+                                    <field name="tolerance_min" string="Tolerance Torque(min)" />
+                                    <field name="tolerance_max" string="Tolerance Torque(max)" />
+                                    <field name="norm_degree" string="Normal Degree" />
+                                    <field name="tolerance_min_degree" />
+                                    <field name="tolerance_max_degree" />
+<!--                                    <field name="x_offset"/>-->
+<!--                                    <field name="y_offset"/>-->
                                     <field name="active" invisible="1"/>
                                     <field name="is_key"/>
-                                    <field name="group_id" domain="[('operation_id', 'in', context.get('search_operation_ids', []))]" options="{'no_create_edit': True,'no_open': True}"/>
+                                    <field name="group_id" domain="[('work_step_id', 'in', context.get('search_parent_step_ids', []))]" options="{'no_create_edit': True,'no_open': True}"/>
                                     <field name="group_sequence" groups="base.group_no_one"/>
                                 </tree>
                                 <form string="Tightening Operation Points">
@@ -105,6 +113,23 @@
                                 </form>
                             </field>
                         </group>
+                    </page>
+                    <page string="Operation Points Group(multi-spindle)" name="qcp_tightening_point_group" attrs="{'invisible': [('test_type','!=','tightening')]}">
+                        <field name="operation_point_group_ids" widget="one2many_list" colspan="4" nolabel="1"
+                               mode="tree"
+                               context="{'default_operation_id':active_id, 'search_operation_ids': [active_id]}">
+                            <tree string="Operation Points Group(multi-spindle)" editable="bottom" delete="true">
+                                <field name="sequence" widget="handle"/>
+                                <field name="name"/>
+                                <field name="key_num"/>
+                            </tree>
+                            <form string="Operation Points Group(multi-spindle)">
+                                <group>
+                                    <field name="sequence" readonly="1"/>
+                                    <field name="name"/>
+                                </group>
+                            </form>
+                        </field>
                     </page>
                 </xpath>
             </field>

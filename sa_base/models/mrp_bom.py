@@ -165,15 +165,9 @@ class MrpBomLine(models.Model):
         'Active', default=True,
         help="If the active field is set to False, it will allow you to hide the bills of material without removing it.")
 
-    operation_point_id = fields.Many2one('operation.point', required=1, ondelete='cascade')
+    operation_point_id = fields.Many2one('operation.point', ondelete='cascade')
 
-    product_id = fields.Many2one('product.product', related="operation_point_id.product_id", store=True)
-
-    product_qty = fields.Float('Product Quantity', related="operation_point_id.product_qty", store=True)
-
-    operation_id = fields.Many2one('mrp.routing.workcenter', related="operation_point_id.operation_id", store=True)
-
-    op_job_id = fields.Many2one('controller.job', string='Job', related="operation_id.op_job_id")
+    op_job_id = fields.Many2one('controller.job', string='Job')
     group_id = fields.Many2one('mrp.routing.group', related="operation_id.group_id", string='Routing Group')
 
     program_id = fields.Many2one('controller.program', related="operation_point_id.program_id", string='程序号')
@@ -209,10 +203,10 @@ class MrpBomLine(models.Model):
         self.controller_id = False
         self.gun_id = False
 
-    @api.onchange('masterpc_id')
-    def _onchange_masterpc(self):
+    @api.onchange('operation_point_id')
+    def _onchange_operation_point_id(self):
         self.ensure_one()
-        self.controller_id = False
+        self.product_id = self.operation_point_id.product_id
 
     @api.onchange('controller_id')
     def _onchange_controller(self):

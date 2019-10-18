@@ -21,7 +21,7 @@
 
     # any module necessary for this one to work correctly
     'depends': ['mrp_maintenance', 'maintenance', 'mrp', 'web_domain_field', 'quality_mrp', 'web_image_editor',
-                'web_widget_many2many_tags_multi_selection'],
+                'web_widget_many2many_tags_multi_selection', 'web_sheet_full_width'],
 
     "external_dependencies": {
         "python": ['validators'],
@@ -29,7 +29,6 @@
 
     # always loaded
     'data': [
-        'demo/test_demo.xml',   # 测试数据
         'security/quality.xml',  # 权限
         'security/ir.model.access.csv',
         'data/maintenance_data.xml',
@@ -59,7 +58,8 @@
         'report/workcenter_report_template.xml',
         'report/equipment_report_template.xml',
         'report/product_product_tempaltes.xml',
-        'views/sa_config_setting.xml'
+        'views/sa_config_setting.xml',
+        'demo/test_demo.xml',  # 测试数据
     ],
     'demo': [
         # 'demo/test_demo.xml',   # 测试数据
