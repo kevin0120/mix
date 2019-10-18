@@ -92,3 +92,23 @@ class MrpWorkCenter(models.Model):
 
     worksegment_id = fields.Many2one('mrp.worksection', copy=False)
 
+    sa_workcentergroup_ids = fields.Many2many('mrp.workcenter', 'mrp_workcenter_rel', 'workcenter_id', 'group_id',
+                                     string="Workcenters Group", copy=False)
+
+
+    @api.multi
+    def write(self, vals):
+        super(MrpWorkCenter, self).write(vals)
+        if 'equipment_ids' in vals:
+            ret = self.env['mrp.workcenter.group.tool'].search(['|', ('tool_id', 'in', self.equipment_ids.ids), ('workcenter_id', '=', self.ids[0])])
+            ret.sudo().unlink()
+            self.ensure_one()
+            for group in self.sa_workcentergroup_ids.ids:
+                for tool in self.equipment_ids.ids:
+                    val = {
+                        "workgroup_id": group,
+                        "workcenter_id": self.id,
+                        "tool_id": tool,
+                    }
+                    self.env['mrp.workcenter.group.tool'].sudo().create(val)
+        return True
