@@ -21,7 +21,7 @@
 
     # any module necessary for this one to work correctly
     'depends': ['mrp_maintenance', 'maintenance', 'mrp', 'web_domain_field', 'quality_mrp', 'web_image_editor',
-                'web_widget_many2many_tags_multi_selection'],
+                'web_widget_many2many_tags_multi_selection', 'web_sheet_full_width'],
 
     "external_dependencies": {
         "python": ['validators'],

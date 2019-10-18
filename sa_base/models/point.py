@@ -134,9 +134,16 @@ class OperationPoints(models.Model):
 
     test_type_id = fields.Many2one('sa.quality.point.test_type', related='qcp_id.test_type_id', inherited=True)
 
-    max_redo_times = fields.Integer(string='Operation Max Redo Times', related='qcp_id.max_redo_times',
-                                    default=3)  # 此项重试业务逻辑在HMI中实现
+    max_redo_times = fields.Integer(string='Operation Max Redo Times', default=3)  # 此项重试业务逻辑在HMI中实现
 
+    # 测量相关
+    norm = fields.Float('Norm', related='qcp_id.norm', digits=dp.get_precision('Quality Tests'), inherited=True)
+    tolerance_min = fields.Float('Min Tolerance', related='qcp_id.tolerance_min', digits=dp.get_precision('Quality Tests'), inherited=True)
+    tolerance_max = fields.Float('Max Tolerance', related='qcp_id.tolerance_max', digits=dp.get_precision('Quality Tests'), inherited=True)
+
+    norm_degree = fields.Float('Norm Degree', related='qcp_id.norm_degree', inherited=True, digits=dp.get_precision('Quality Tests'))  # TDE RENAME ?
+    tolerance_min_degree = fields.Float('Degree Min Tolerance', related='qcp_id.tolerance_min_degree', inherited=True, digits=dp.get_precision('Quality Tests'), default=0.0)
+    tolerance_max_degree = fields.Float('Degree Max Tolerance', related='qcp_id.tolerance_max_degree', inherited=True, digits=dp.get_precision('Quality Tests'), default=0.0)
 
     @api.multi
     def name_get(self):
