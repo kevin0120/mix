@@ -215,6 +215,21 @@
     </record>
 
     <!-- sa.quality.check -->
+
+    <record id="sa_quality_check_failure_message" model="ir.ui.view">
+        <field name="name">sa_quality_check_failure_message</field>
+        <field name="model">sa.quality.check</field>
+        <field name="priority">1000</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="failure_message"/>
+                <footer>
+                    <button special="cancel" string="OK" class="btn-primary"/>
+                </footer>
+            </form>
+        </field>
+   </record>
+
     <record id="quality_check_view_form" model="ir.ui.view">
         <field name="name">sa.quality.check.view.form</field>
         <field name="model">sa.quality.check</field>
@@ -248,7 +263,8 @@
                         <group>
                             <field name="product_id"/>
                             <field name="lot_id" groups="stock.group_production_lot"/>
-                            <field name="test_type" invisible="1"/>
+                            <field name="test_type_id" invisible="1"/>
+                            <field name="test_type" />
                             <field name="measure" attrs="{'invisible': [('test_type', '!=', 'measure')]}"/>
                             <field name="alert_ids" invisible="1"/>
                         </group>
@@ -259,6 +275,9 @@
                             <field name="team_id"/>
                             <field name="user_id" string="Control Person" invisible="1"/>
                         </group>
+                    </group>
+                    <group attrs="{'invisible': [('test_type', '!=', 'picture')]}">
+                        <field name="picture" widget="image"/>
                     </group>
                     <notebook>
                         <page string="Notes">

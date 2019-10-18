@@ -47,7 +47,7 @@ class QualityPoint(models.Model):
         'product.product', 'Product Variant',
         domain="[('product_tmpl_id', '=', product_tmpl_id)]")
     product_tmpl_id = fields.Many2one(
-        'product.template', 'Product', required=True,
+        'product.template', 'Product',
         domain="[('type', 'in', ['consu', 'product'])]")
     picking_type_id = fields.Many2one('stock.picking.type', "Picking Type", required=True)
 
@@ -220,22 +220,31 @@ class QualityCheck(models.Model):
         'product.product', 'Product',
         domain="[('type', 'in', ['consu', 'product'])]", required=True)
     picking_id = fields.Many2one('stock.picking', 'Operation')
-    lot_id = fields.Many2one('stock.production.lot', 'Lot', domain="[('product_id', '=', product_id)]")
+    lot_id = fields.Many2one('stock.production.lot', 'Lot',
+                             domain="[('product_id', '=', product_id)]")
     user_id = fields.Many2one('res.users', 'Responsible', track_visibility='onchange')
     team_id = fields.Many2one('sa.quality.alert.team', 'Team', required=True)
     company_id = fields.Many2one('res.company', 'Company', default=lambda self: self.env.user.company_id)
     alert_ids = fields.One2many('sa.quality.alert', 'check_id', string='Alerts')
     alert_count = fields.Integer('# Quality Alerts', compute="_compute_alert_count")
     note = fields.Html(related='point_id.note', readonly=True)
-    test_type = fields.Char(related="point_id.test_type", readonly=True)
-    norm_unit = fields.Char(related='point_id.norm_unit', readonly=True)
-    measure = fields.Float('Measure', default=0.0, digits=dp.get_precision('Quality Tests'),
-                           track_visibility='onchange')
+    test_type_id = fields.Many2one(
+        'sa.quality.point.test_type', 'Test Type',
+        required=True)
+    test_type = fields.Char(related='test_type_id.technical_name', store=True)
+    picture = fields.Binary('Picture', attachment=True)
+
+    failure_message = fields.Html(related='point_id.failure_message', readonly=True)
+    measure = fields.Float('Measure', default=0.0, digits='Quality Tests', tracking=True)
     measure_success = fields.Selection([
         ('none', 'No measure'),
         ('pass', 'Pass'),
         ('fail', 'Fail')], string="Measure Success", compute="_compute_measure_success",
         readonly=True, store=True)
+    tolerance_min = fields.Float('Min Tolerance', related='point_id.tolerance_min', readonly=True)
+    tolerance_max = fields.Float('Max Tolerance', related='point_id.tolerance_max', readonly=True)
+    warning_message = fields.Text(compute='_compute_warning_message')
+    norm_unit = fields.Char(related='point_id.norm_unit', readonly=True)
 
     @api.multi
     def _compute_alert_count(self):
@@ -244,16 +253,58 @@ class QualityCheck(models.Model):
         for check in self:
             check.alert_count = alert_result.get(check.id, 0)
 
-    @api.one
+    @api.depends('measure_success')
+    def _compute_warning_message(self):
+        for rec in self:
+            if rec.measure_success == 'fail':
+                rec.warning_message = _('You measured %.2f %s and it should be between %.2f and %.2f %s.') % (
+                    rec.measure, rec.norm_unit, rec.point_id.tolerance_min,
+                    rec.point_id.tolerance_max, rec.norm_unit
+                )
+            else:
+                rec.warning_message = ''
+
     @api.depends('measure')
     def _compute_measure_success(self):
-        if self.point_id.test_type == 'passfail':
-            self.measure_success = 'none'
-        else:
-            if self.measure < self.point_id.tolerance_min or self.measure > self.point_id.tolerance_max:
-                self.measure_success = 'fail'
+        for rec in self:
+            if rec.point_id.test_type == 'passfail':
+                rec.measure_success = 'none'
             else:
-                self.measure_success = 'pass'
+                if rec.measure < rec.point_id.tolerance_min or rec.measure > rec.point_id.tolerance_max:
+                    rec.measure_success = 'fail'
+                else:
+                    rec.measure_success = 'pass'
+
+    # Add picture dependency
+    @api.depends('picture')
+    def _compute_result(self):
+        super(QualityCheck, self)._compute_result()
+
+    def _get_check_result(self):
+        if self.test_type == 'picture' and self.picture:
+            return _('Picture Uploaded')
+        else:
+            return super(QualityCheck, self)._get_check_result()
+
+    def do_measure(self):
+        self.ensure_one()
+        if self.measure < self.point_id.tolerance_min or self.measure > self.point_id.tolerance_max:
+            return self.do_fail()
+        else:
+            return self.do_pass()
+
+    def correct_measure(self):
+        self.ensure_one()
+        return {
+            'name': _('Quality Checks'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'sa.quality.check',
+            'view_mode': 'form',
+            'view_id': self.env.ref('quality.quality_check_view_form_small').id,
+            'target': 'new',
+            'res_id': self.id,
+            'context': self.env.context,
+        }
 
     @api.onchange('point_id')
     def _onchange_point_id(self):
@@ -265,6 +316,8 @@ class QualityCheck(models.Model):
     def create(self, vals):
         if 'name' not in vals or vals['name'] == _('New'):
             vals['name'] = self.env['ir.sequence'].next_by_code('sa.quality.check') or _('New')
+        if 'point_id' in vals and not vals.get('test_type_id'):
+            vals['test_type_id'] = self.env['sa.quality.point'].browse(vals['point_id']).test_type_id.id
         return super(QualityCheck, self).create(vals)
 
     @api.multi
