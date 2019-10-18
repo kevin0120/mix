@@ -25,17 +25,18 @@ class OperationResult(models.HyperModel):
 
     sequence = fields.Integer('sequence', default=1)
 
-    workorder_id = fields.Many2one('mrp.workorder', 'Actual Work Order')
-    workcenter_id = fields.Many2one('mrp.workcenter', readonly=True)
+    workorder_id = fields.Many2one('mrp.workorder', 'Actual Work Order', index=True)
+    workcenter_id = fields.Many2one('mrp.workcenter', 'Actual Operation Work Center', readonly=True)
     production_id = fields.Many2one('mrp.production', 'Production Order')
 
-    expect_workorder_id = fields.Many2one('mrp.workorder', string='Expect Work Order')
+    expect_workorder_id = fields.Many2one('mrp.workorder', string='Expect Work Order')  # 期望的工单，计算获得
 
     track_no = fields.Char('Finished Product Tracking Number')  # 如果无法通过工单查询,使用此字段
 
     assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line', readonly=True)
 
-    qcp_id = fields.Many2one('sa.quality.point', 'Quality Control Point')
+    quality_check_id = fields.Many2one('sa.quality.check', 'Quality Check', index=True,
+                                       domain=lambda self: [('test_type_id.id', '=', self.env.ref('quality.test_type_tightening_point').id)])
 
     operation_point_id = fields.Many2one('operation.point', string='Tightening Operation Point')
 
@@ -84,9 +85,9 @@ class OperationResult(models.HyperModel):
 
     consu_bom_line_id = fields.Many2one('mrp.wo.consu', 'Consume BOM line')
 
-    program_id = fields.Many2one('controller.program')
+    program_id = fields.Many2one('controller.program')  # 实际拧紧时使用的Pset/Job
 
-    job = fields.Char(string='Job')
+    job = fields.Char(string='Job')  # 实际拧紧时使用的Pset/Job
 
     consu_product_id = fields.Many2one('product.product')
 

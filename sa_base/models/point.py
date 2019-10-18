@@ -12,6 +12,7 @@ import uuid
 
 class OperationPointsGroup(models.Model):
     _name = 'operation.point.group'
+    _description = 'Tightening Operation Point Group'
 
     _order = "sequence"
 
@@ -73,6 +74,7 @@ class OperationPointsGroup(models.Model):
 
 class OperationPoints(models.Model):
     _name = 'operation.point'
+    _description = 'Tightening Operation Point'
 
     _inherits = {'sa.quality.point': 'qcp_id'}
 

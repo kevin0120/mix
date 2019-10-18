@@ -61,12 +61,6 @@
                     <field string="Assembly Process(JOB)" name="program_id" domain="[('control_mode', '=', 'job')]" options="{'no_create_edit': True,'no_open': True}"
                            attrs="{'invisible': [('test_type','!=','tightening')],'required': [('test_type','=','tightening')]}" />
                 </xpath>
-                <field name="norm" position="replace">
-
-                </field>
-                <field name="norm_unit" position="replace">
-
-                </field>
                 <field name="picking_type_id" position="attributes">
                     <attribute name="domain">[('code', '=', 'mrp_operation')]</attribute>
                     <attribute name="options">{'no_create': True, 'no_open': True}</attribute>

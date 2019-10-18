@@ -1,0 +1,14 @@
+<odoo>
+    <data>
+        <record id="tangche_quality_point_view_form_inherit_mrp" model="ir.ui.view">
+            <field name="name">tangche_quality_point_view_form_inherit_mrp</field>
+            <field name="model">sa.quality.point</field>
+            <field name="inherit_id" ref="quality.quality_point_view_form"/>
+            <field name="arch" type="xml">
+                <field name="norm_unit" position="replace">
+
+                </field>
+            </field>
+        </record>
+    </data>
+</odoo>
