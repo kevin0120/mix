@@ -32,7 +32,10 @@ class MrpRoutingWorkcenter(models.Model):
     sa_step_ids = fields.Many2many('sa.quality.point', 'work_step_operation_rel', 'operation_id', 'step_id',
                                      string="Steps", copy=False)
 
-    workcenter_id = fields.Many2one('mrp.workcenter', copy=False, required=False)
+    prefer_workcenter_id_domain = fields.Char(compute='_compute_workcenter_group', readonly=True, store=False,)
+
+    workcenter_id = fields.Many2one('mrp.workcenter', string='Prefer Work Center', copy=False,
+                                    required=False)
 
     socket = fields.Char(string='Bolt Socket No')
     op_job_id = fields.Many2one('controller.job', string='Job', track_visibility="onchange")
@@ -58,10 +61,20 @@ class MrpRoutingWorkcenter(models.Model):
 
     step_count = fields.Integer(string='Steps', compute='_compute_step_count')
 
+    @api.multi
+    @api.depends('workcenter_group_id')
+    def _compute_workcenter_group(self):
+        for routing in self:
+            workcenter_ids = routing.workcenter_group_id and routing.workcenter_group_id.sa_workcenter_ids
+            if not workcenter_ids:
+                continue
+            routing.workcenter_id = workcenter_ids[0]  # 重新设置工位
+            routing.prefer_workcenter_id_domain = json.dumps([('id', 'in', workcenter_ids.ids)])
+
     @api.depends('sa_step_ids')
     def _compute_step_count(self):
         for routing in self:
-            routing.step_count = len(routing.sa_step_ids)
+            routing.step_count = len(routing.sa_step_ids.filtered(lambda r: r.test_type != 'tightening_point'))
 
     @api.multi
     def action_sa_show_steps(self):

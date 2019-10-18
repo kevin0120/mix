@@ -222,7 +222,7 @@ class QualityCheck(models.Model):
     picking_id = fields.Many2one('stock.picking', 'Operation')
     lot_id = fields.Many2one('stock.production.lot', 'Lot',
                              domain="[('product_id', '=', product_id)]")
-    user_id = fields.Many2one('res.users', 'Responsible', track_visibility='onchange')
+    user_id = fields.Many2one('res.users', 'Responsible', track_visibility='onchange')  # 质量工作人人有责，这个未来会在派工阶段完善
     team_id = fields.Many2one('sa.quality.alert.team', 'Team', required=True)
     company_id = fields.Many2one('res.company', 'Company', default=lambda self: self.env.user.company_id)
     alert_ids = fields.One2many('sa.quality.alert', 'check_id', string='Alerts')

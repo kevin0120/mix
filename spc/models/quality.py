@@ -25,3 +25,16 @@ class QualityPoint(models.Model):
             }
         })
         return action
+
+
+class QualityCheck(models.Model):
+    _inherit = "sa.quality.check"
+
+    @api.depends('result_ids')
+    def _get_operation_results(self):
+        for check in self:
+            check.result_count = len(check.result_ids)
+
+    result_ids = fields.One2many('operation.result', 'quality_check_id', string='Operation Results')
+
+    result_count = fields.Integer(string='Operation Result Count', compute=_get_operation_results)

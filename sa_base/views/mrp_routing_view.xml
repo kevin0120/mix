@@ -45,10 +45,10 @@
                     <sheet>
                           <div class="oe_button_box" name="button_box" groups="base.group_user">
                               <button class="oe_stat_button" type="object" name="action_sa_show_steps" icon="fa-list-ul">
-                                <field string="工步" name="step_count" widget="statinfo"/>
+                                <field string="Work Step" name="step_count" widget="statinfo"/>
                             </button>
                             <button class="oe_stat_button" type="object" name="action_sa_view_routing_tracking" icon="fa-table">
-                                <field string="工艺修改记录" name="routing_tracking_count" widget="statinfo"/>
+                                <field string="Audit Log" name="routing_tracking_count" widget="statinfo"/>
                             </button>
                           </div>
                         <group>
@@ -56,10 +56,11 @@
                                 <field name="name"/>
                                 <field name="sa_routing_ids" readonly="1" widget="many2many_tags" groups="base.group_no_one"/>
 
-                                <field name="workcenter_ids" readonly="1" widget="many2many_tags" groups="base.group_no_one"/>
                                 <!--<field name="group_id"  options="{'no_edit': True, 'no_create': True}" />-->
-                                <!--<field name="workcenter_id" options="{'no_edit': True, 'no_create': True}"/>-->
                                 <field name="workcenter_group_id" options="{'no_edit': True, 'no_create': True}"/>
+                                <field name="workcenter_ids" readonly="1" widget="many2many_tags" groups="base.group_no_one"/>
+                                <field name="prefer_workcenter_id_domain" invisible="1" />
+                                <field name="workcenter_id" options="{'no_edit': True, 'no_create': True}" domain="prefer_workcenter_id_domain"/>
                                 <field name="company_id" options="{'no_edit': True, 'no_create': True}" groups="base.group_multi_company"/>
                             </group>
                             <group name="parameters">
@@ -74,7 +75,7 @@
                             </group>
                          </group>
                         <notebook>
-                            <page string="工艺文件">
+                            <page string="Work Sheet(PDF)">
                                 <field name="worksheet" widget="pdf_viewer"/>
                             </page>
                             <!--<page string="Operation Points">-->
