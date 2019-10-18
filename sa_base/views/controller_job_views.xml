@@ -51,10 +51,10 @@
             <field name="view_mode">tree,form</field>
         </record>
 
-        <menuitem id="sa_menu_job_action"
-            action="sa_job_form_action"
-            parent="menu_bom_form"
-            sequence="30"/>
+        <!--<menuitem id="sa_menu_job_action"-->
+            <!--action="sa_job_form_action"-->
+            <!--parent="menu_bom_form"-->
+            <!--sequence="30"/>-->
     </data>
 </odoo>
 

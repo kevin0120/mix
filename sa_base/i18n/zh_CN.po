@@ -1087,17 +1087,17 @@ msgstr "产品"
 #: model:ir.ui.view,arch_db:sa_base.sa_program_form_view
 #: model:ir.ui.view,arch_db:sa_base.sa_program_tree_view
 msgid "Program"
-msgstr "程序号(pset)"
+msgstr "程序号(pset/job)"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_controller_program_code
 msgid "Program Code"
-msgstr "程序号代码(pset)"
+msgstr "程序号代码(pset/job)"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_controller_program_name
 msgid "Program Name"
-msgstr "程序号名称(pset)"
+msgstr "程序号名称(pset/job)"
 
 #. module: sa_base
 #: model:ir.model.fields,field_description:sa_base.field_mrp_wo_consu_program_id
