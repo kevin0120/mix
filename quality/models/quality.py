@@ -34,6 +34,8 @@ class QualityPoint(models.Model):
         domain = self._get_type_default_domain()
         return self.env['sa.quality.point.test_type'].search(domain, limit=1).id
 
+    failure_message = fields.Html('Failure Message')
+
     name = fields.Char(
         'Reference', copy=False, default=lambda self: _('New'),
         readonly=True, required=True)
