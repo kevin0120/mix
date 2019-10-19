@@ -5,8 +5,30 @@
         <field name="model">mrp.production</field>
         <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
         <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_assign']" position="before">
+                <button name="do_confirm" attrs="{'invisible': [('state', '!=', 'draft')]}" string="Dispatch Confirm"
+                        type="object" class="oe_highlight"/>
+            </xpath>
+            <xpath expr="//notebook/page[1]" position="replace">
+                <page string="Dispatch Work Orders">
+                    <field name="dispatch_workorder_ids" options="{'reload_on_button': True}"
+                           context="{'default_routing_id': routing_id}">
+                        <tree editable="bottom" delete="0" default_order="is_dispatched desc,sequence"
+                              decoration-muted="is_dispatched"
+                              decoration-success="is_dispatched and workorder_id"
+                              decoration-danger="not is_dispatched" create="0">
+                            <field name="is_dispatched" invisible="1"/>
+                            <field name="sequence" invisible="1"/>
+                            <field name="routing_id" />
+                            <field name="workorder_id" groups="base.group_no_one" readonly="1"/>
+                            <field name="operation_id" readonly="1" />
+                            <field name="workcenter_id" />
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
             <field name="product_id" position="before">
-                <field name="assembly_line_id" required="1" options="{'no_create_edit': True}" />
+                <field name="assembly_line_id" required="1" options="{'no_create_edit': True}"/>
             </field>
         </field>
     </record>

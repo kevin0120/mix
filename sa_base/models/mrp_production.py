@@ -19,9 +19,11 @@ class MrpWOConsu(models.Model):
 
     bom_line_id = fields.Many2one('mrp.bom.line')
 
+    qcp_id = fields.Many2one('sa.quality.point', related='check_id.point_id')
     check_id = fields.Many2one('sa.quality.check', required=True, string='Quality Check For Work Step')
 
-    product_id = fields.Many2one('product.product', string='Consume Product')
+    product_id = fields.Many2one('product.product', related='check_id.product_id', string='Consume Product')
+
     product_qty = fields.Float('Consume Product Qty')
 
     tool_id = fields.Many2one('maintenance.equipment', string='Screw Gun', copy=False)
@@ -119,10 +121,50 @@ class MrpWorkorder(models.Model):
         raise ValidationError(u'不允许删除工单')
 
 
+class DispatchingWorkOrder(models.Model):
+    _name = 'dispatch.mrp.workorder'
+    _order = "sequence"
+    _log_access = False
+
+    sequence = fields.Integer(string='Sequence', default=1)
+
+    is_dispatched = fields.Boolean('Is Dispatched', default=False)
+
+    production_id = fields.Many2one('mrp.production', string='Manufacture Order')
+
+    workorder_id = fields.Many2one('mrp.workorder')
+
+    user_id = fields.Many2one('res.users', string='Responsible Person')
+
+    routing_id = fields.Many2one('mrp.routing', 'Routing', related='production_id.routing_id', store=True,
+                                 readonly=True)
+
+    operation_id = fields.Many2one('mrp.routing.workcenter')
+
+    workcenter_id = fields.Many2one('mrp.workcenter', string='Operate In Work Center', required=True)
+
+
 class MrpProduction(models.Model):
     _inherit = 'mrp.production'
 
+    state = fields.Selection(selection_add=[('draft', 'Draft')], default='draft')
+
     track_no = fields.Char('Finished Product Tracking Number')
 
+    dispatch_workorder_ids = fields.One2many('dispatch.mrp.workorder', 'production_id', string='Dispatching Work Order')
 
     assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line ID')
+
+    @api.model
+    def create(self, vals):
+        ret = super(MrpProduction, self).create()
+        # todo: 根据物料清单创建相应的派工行，为了后续创建工单
+        return ret
+
+    @api.multi
+    def do_confirm(self):
+        can_confirm_productions = self.env['mrp.production']
+        for production in self:
+            # todo: 确认是否可以确认需求
+            can_confirm_productions |= production
+        can_confirm_productions.write({'state': 'confirm'})
