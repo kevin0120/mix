@@ -105,7 +105,7 @@ class MaintenanceEquipment(models.Model):
 
     connections_count = fields.Integer(compute='_compute_connections_count')
 
-    category_name = fields.Char(related='category_id.name')
+    category_name = fields.Char(related='category_id.technical_name')
 
     connection_ids = fields.One2many('maintenance.equipment.connection', 'equipment_id', 'Connection Information')
 
@@ -222,3 +222,24 @@ class MaintenanceEquipment(models.Model):
         else:
             equipments = self.search(args, limit=limit)
         return equipments.name_get()
+
+    @api.multi
+    def write(self, vals):
+        ret = super(MaintenanceEquipment, self).write(vals)
+        if 'workcenter_id' not in vals:
+            return ret
+        tool_category_ids = self.env.ref('sa_base.equipment_Gun') + self.env.ref('sa_base.equipment_Wrench')
+        for tool_id in self:
+            if tool_id.category_id.id not in tool_category_ids.ids:
+                continue
+            need_unlink_recs = self.env['mrp.workcenter.group.tool'].search(
+                [('tool_id', '=', tool_id.id)])
+            need_unlink_recs.sudo().unlink()
+            for wg in tool_id.workcenter_id.sa_workcentergroup_ids:
+                val = {
+                    "workgroup_id": wg.id,
+                    "workcenter_id": tool_id.workcenter_id.id,
+                    "tool_id": tool_id.id,
+                }
+                self.env['mrp.workcenter.group.tool'].sudo().create(val)
+        return ret

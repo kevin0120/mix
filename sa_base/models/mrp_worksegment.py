@@ -14,7 +14,6 @@ from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 
 
-
 class MrpWorkAssembly(models.Model):
     _name = 'mrp.assemblyline'
     _description = 'Work Assembly Line'
@@ -93,25 +92,29 @@ class MrpWorkCenter(models.Model):
     worksegment_id = fields.Many2one('mrp.worksection', copy=False)
 
     sa_workcentergroup_ids = fields.Many2many('mrp.workcenter', 'mrp_workcenter_rel', 'workcenter_id', 'group_id',
-                                     string="Workcenters Group", copy=False)
+                                              string="Workcenters Group", copy=False)
 
+    # @api.multi
+    # def _update_create_workcenter_group_tool_by_tool(self):
+    #     tool_category_ids = self.env.ref('sa_base.equipment_Gun') + self.env.ref('sa_base.equipment_Wrench')
+    #     for workcenter_id in self:
+    #         already_equipment_group_ids = self.env['mrp.workcenter.group.tool'].search(
+    #             [('workcenter_id', '=', workcenter_id.id)])
+    #         if not already_equipment_group_ids:
+    #             continue
+    #         already_equipment_ids = already_equipment_group_ids.mapped('tool_id')
+    #         tool_ids = workcenter_id.equipment_ids.filtered(
+    #             lambda r: r.category_id in tool_category_ids and r not in already_equipment_ids)
+    #         for tool in tool_ids:
+    #             for wg in workcenter_id.sa_workcentergroup_ids:
+    #                 val = {
+    #                     "workgroup_id": wg.id,
+    #                     "workcenter_id": tool.workcenter_id.id,
+    #                     "tool_id": tool.id,
+    #                 }
+    #                 self.env['mrp.workcenter.group.tool'].sudo().create(val)
 
     @api.multi
     def write(self, vals):
-
-        if 'equipment_ids' in vals:
-            ret = self.env['mrp.workcenter.group.tool'].search(['|', ('tool_id', 'in', self.equipment_ids.ids), ('workcenter_id', '=', self.ids[0])])
-            ret.sudo().unlink()
-            self.ensure_one()
-
-        super(MrpWorkCenter, self).write(vals)
-        if 'equipment_ids' in vals:
-            for group in self.sa_workcentergroup_ids.ids:
-                for tool in self.equipment_ids.ids:
-                    val = {
-                        "workgroup_id": group,
-                        "workcenter_id": self.id,
-                        "tool_id": tool,
-                    }
-                    self.env['mrp.workcenter.group.tool'].sudo().create(val)
-        return True
+        ret = super(MrpWorkCenter, self).write(vals)
+        return ret
