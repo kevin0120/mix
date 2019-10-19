@@ -5,7 +5,7 @@ import time
 
 
 class MrpWOConsu(models.Model):
-    _inherit = 'mrp.wo.consu'
+    _inherit = 'mrp.wo.consu.line'
 
     result_ids = fields.One2many('operation.result', 'consu_bom_line_id', string='Operation Results')
 

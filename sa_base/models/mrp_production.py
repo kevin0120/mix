@@ -8,10 +8,9 @@ _logger = logging.getLogger(__name__)
 
 
 class MrpWOConsu(models.Model):
-    _name = 'mrp.wo.consu'
-
+    _name = 'mrp.wo.consu.line'
+    _inherits = {'sa.quality.check': 'check_id'}
     _order = "sequence"
-
     _log_access = False
 
     sequence = fields.Integer(string='Sequence')
@@ -20,10 +19,12 @@ class MrpWOConsu(models.Model):
 
     bom_line_id = fields.Many2one('mrp.bom.line')
 
-    product_id = fields.Many2one('product.product', string='Consume Product')
-    qty = fields.Float('Consume Product Qty')
+    check_id = fields.Many2one('sa.quality.check', required=True, string='Quality Check For Work Step')
 
-    gun_id = fields.Many2one('maintenance.equipment', string='Screw Gun', copy=False)
+    product_id = fields.Many2one('product.product', string='Consume Product')
+    product_qty = fields.Float('Consume Product Qty')
+
+    tool_id = fields.Many2one('maintenance.equipment', string='Screw Gun', copy=False)
 
     program_id = fields.Many2one('controller.program')
 
@@ -111,7 +112,7 @@ class MrpWorkorder(models.Model):
 
     track_no = fields.Char('Finished Product Tracking Number', related='production_id.track_no')
 
-    consu_bom_line_ids = fields.One2many('mrp.wo.consu', 'workorder_id', string='Consume Product')
+    consu_bom_line_ids = fields.One2many('mrp.wo.consu.line', 'workorder_id', string='Consume Product')
 
     @api.multi
     def unlink(self):

@@ -83,7 +83,7 @@ class OperationResult(models.HyperModel):
     product_id = fields.Many2one('product.product', 'Vehicle',
                                  domain="[('sa_type', '=', 'vehicle')]")
 
-    consu_bom_line_id = fields.Many2one('mrp.wo.consu', 'Consume BOM line')
+    consu_bom_line_id = fields.Many2one('mrp.wo.consu.line', 'Consume BOM line')
 
     program_id = fields.Many2one('controller.program')  # 实际拧紧时使用的Pset/Job
 

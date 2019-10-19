@@ -72,7 +72,7 @@ class MrpProduction(models.Model):
                     BoMs
         """
         workorders = self.env['mrp.workorder']
-        consume_bom_lines = self.env['mrp.wo.consu']
+        consume_bom_lines = self.env['mrp.wo.consu.line']
 
         consume_bom_line_vals = []
         bom_qty = bom_data['qty']
@@ -140,7 +140,7 @@ class MrpProduction(models.Model):
 
     def _workorders_create(self, bom, bom_data):
         workorders = self.env['mrp.workorder']
-        consume_bom_lines = self.env['mrp.wo.consu']
+        consume_bom_lines = self.env['mrp.wo.consu.line']
         bom_qty = bom_data['qty']
 
         consume_bom_line_vals = []
