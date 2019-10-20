@@ -141,7 +141,9 @@ class DispatchingWorkOrder(models.Model):
 
     operation_id = fields.Many2one('mrp.routing.workcenter')
 
-    workcenter_id = fields.Many2one('mrp.workcenter', string='Operate In Work Center', required=True)
+    workcenter_ids = fields.Many2many('mrp.workcenter', related='operation_id.workcenter_ids',
+                                      copy=False, readonly=True)
+    workcenter_id = fields.Many2one('mrp.workcenter', string='Operate In Work Center', domain="[('id', 'in', workcenter_ids.ids)]")
 
     @api.onchange('workcenter_id')
     def _onchange_workcenter_id(self):
@@ -165,7 +167,7 @@ class MrpProduction(models.Model):
         ('progress', 'In Progress'),
         ('done', 'Done'),
         ('cancel', 'Cancelled')], string='State',
-        copy=False, default='draft')
+        copy=False, default='draft')  # 重新定义生产订单的阶段，将草稿阶段移至最前
 
     track_no = fields.Char('Finished Product Tracking Number')
 

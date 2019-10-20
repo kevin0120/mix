@@ -28,7 +28,10 @@
                               decoration-danger="not is_dispatched" create="0">
                             <field name="is_dispatched" invisible="1"/>
                             <field name="sequence" invisible="1"/>
-                            <field name="workcenter_id" attrs="{'readonly': [('is_dispatched', '=', True)]}"/>
+                            <field name="workcenter_ids" invisible="1" />
+                            <field name="workcenter_id"
+                                   attrs="{'readonly': ['|', ('is_dispatched', '=', True),('workcenter_ids', '=', False)],
+                                    'required': [('is_dispatched', '=', False),('workcenter_ids', '!=', False)]}"/>
                             <field name="user_id" domain="[('id', 'in', workcenter_id.user_ids.ids)]"
                                    attrs="{'readonly': [('is_dispatched', '=', True)]}"/>
                             <field name="routing_id" readonly="1"/>
