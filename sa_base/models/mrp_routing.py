@@ -68,7 +68,7 @@ class MrpRoutingWorkcenter(models.Model):
             workcenter_ids = routing.workcenter_group_id and routing.workcenter_group_id.sa_workcenter_ids
             if not workcenter_ids:
                 continue
-            routing.workcenter_id = workcenter_ids[0]  # 重新设置工位
+            routing.workcenter_id = workcenter_ids[0]  # 重新设置优先工位
             routing.prefer_workcenter_id_domain = json.dumps([('id', 'in', workcenter_ids.ids)])
 
     @api.depends('sa_step_ids')

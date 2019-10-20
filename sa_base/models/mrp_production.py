@@ -173,6 +173,7 @@ class MrpProduction(models.Model):
         for production in self:
             # todo: 确认是否可以确认需求
             can_confirm_productions |= production
+            production.dispatch_workorder_ids.write({'is_dispatched': True})
         can_confirm_productions.write({'state': 'confirm'})
 
     @api.multi
@@ -198,7 +199,7 @@ class MrpProduction(models.Model):
                 'routing_id': routing_id.id,
                 'production_id': self.id,
                 'workcenter_id': routing_id.workcenter_id and routing_id.workcenter_id.id,  # 设置优先选择工位，方便后续快速排产
-                'user_id': routing_id.workcenter_id.user_id and routing_id.workcenter_id.user_id.id
+                'user_id': routing_id.workcenter_id.user_ids and routing_id.workcenter_id.user_ids[0].id
             }
             self.env['dispatch.mrp.workorder'].sudo().create(val)  # 创建派工信息
 

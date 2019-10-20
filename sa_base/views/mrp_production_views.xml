@@ -14,15 +14,15 @@
                     <field name="dispatch_workorder_ids" options="{'reload_on_button': True}"
                            context="{'default_routing_id': routing_id}">
                         <tree editable="bottom" delete="0" default_order="is_dispatched desc,sequence"
-                              decoration-muted="is_dispatched"
-                              decoration-success="is_dispatched and workorder_id"
+                              decoration-success="is_dispatched"
                               decoration-danger="not is_dispatched" create="0">
                             <field name="is_dispatched" invisible="1"/>
                             <field name="sequence" invisible="1"/>
-                            <field name="routing_id" />
+                            <field name="user_id" attrs="{'readonly': [('is_dispatched', '=', True)]}" />
+                            <field name="routing_id" readonly="1"/>
                             <field name="workorder_id" groups="base.group_no_one" readonly="1"/>
                             <field name="operation_id" readonly="1" />
-                            <field name="workcenter_id" />
+                            <field name="workcenter_id" attrs="{'readonly': [('is_dispatched', '=', True)]}"/>
                         </tree>
                     </field>
                 </page>
