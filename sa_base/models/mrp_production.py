@@ -155,6 +155,11 @@ class MrpProduction(models.Model):
 
     assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line ID')
 
+    # 重写此方法，禁止生成库存移动
+    @api.multi
+    def _generate_moves(self):
+        return True
+
     @api.model
     def create(self, vals):
         ret = super(MrpProduction, self).create()
