@@ -10,10 +10,11 @@ class MrpProduction(models.Model):
 
     @api.multi
     def action_see_spc_control(self):
+        self.ensure_one()
         action = self.env.ref('spc.quality_check_action_spc').read()[0]
         action.update({
             'context': {
-                'search_default_name': self.knr if self.knr else self.vin
+                'search_default_name': self.track_no
             }
         })
         return action

@@ -46,7 +46,7 @@ class MrpWorkcenterGroup(models.Model):
     def _update_create_workcenter_group_tool(self):
         tool_category_ids = self.env.ref('sa_base.equipment_Gun') + self.env.ref('sa_base.equipment_Wrench')
         for wg in self:
-            already_workcenter_ids = self.env['mrp.workcenter.group.tool'].search([('workgroup_id', '=', wg.id)])
+            already_workcenter_ids = self.env['mrp.workcenter.group.tool'].search([('workgroup_id', '=', wg.id)]).mapped('workcenter_id')
             workcenter_ids = wg.sa_workcenter_ids.filtered(lambda wc: wc not in already_workcenter_ids)
             if not workcenter_ids:
                 continue

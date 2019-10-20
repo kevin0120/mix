@@ -2,7 +2,8 @@
 
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
-import math, json
+import math
+import json
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -11,21 +12,6 @@ _logger = logging.getLogger(__name__)
 class MrpProduction(models.Model):
     _inherit = 'mrp.production'
 
-    equipment_name = fields.Char(string='Equipment Name')
-    factory_name = fields.Char(string='Factory Name')
-    year = fields.Integer(string='Year')
-    production_routings = fields.Char(string='Production Routings')
-    pin = fields.Integer(string='PIN')
-    vin = fields.Char(string='VIN', copy=False)
-    pin_check_code = fields.Integer(string='PIN check Code')
-    lnr = fields.Char(string='Line Number')
-    knr = fields.Char(string='KNR', store=True, compute='_compute_long_pin', copy=False)
-    long_pin = fields.Char(string='LongPIN', store=True, compute='_compute_long_pin', copy=False)
-    display_long_pin = fields.Char(string='Display LongPIN', store=True, compute='_compute_long_pin')
-
-    _sql_constraints = [('vin_uniq', 'unique(vin)', 'Only one VIN per MO is allowed'),
-                        ('pin_check_uniq', 'unique(pin,pin_check_code)', 'Only one KNR per MO is allowed')]
-
     @api.depends('year', 'factory_name', 'pin', 'pin_check_code')
     def _compute_long_pin(self):
         for mo in self:
@@ -33,14 +19,36 @@ class MrpProduction(models.Model):
             mo.knr = u'{0}{1}'.format(mo.pin, mo.pin_check_code)
             mo.display_long_pin = u'{0}-{1}-{2}={3}'.format(mo.factory_name, mo.year, mo.pin, mo.pin_check_code)
 
+    equipment_name = fields.Char(string='Equipment Name')
+    factory_name = fields.Char(string='Factory Name')
+    year = fields.Integer(string='Year')
+    production_routings = fields.Char(string='Production Routings Via VW FIS System ')
+    pin = fields.Integer(string='PIN')
+    track_no = fields.Char(string='VIN', copy=False)
+    pin_check_code = fields.Integer(string='PIN check Code')
+    lnr = fields.Char(string='Line Number')
+    knr = fields.Char(string='KNR', store=True, compute=_compute_long_pin, copy=False)
+    long_pin = fields.Char(string='LongPIN', store=True, compute=_compute_long_pin, copy=False)
+    display_long_pin = fields.Char(string='Display LongPIN', store=True, compute='_compute_long_pin')
+
+    _sql_constraints = [('vin_uniq', 'unique(track_no)', 'Only one VIN per MO is allowed'),
+                        ('pin_check_uniq', 'unique(pin,pin_check_code)', 'Only one KNR per MO is allowed')]
+
+    @api.multi
+    def action_see_spc_control(self):
+        self.ensure_one()
+        action = self.env.ref('spc.quality_check_action_spc').read()[0]
+        action.update({
+            'context': {
+                'search_default_name': self.knr if self.knr else self.vin
+            }
+        })
+        return action
+
     @api.constrains('year')
     def _constraint_mo_year(self):
         if len(str(self.year)) != 4:
             raise ValidationError(u'不是年份')
-
-    @api.multi
-    def _generate_moves(self):  ### 直接返回，不创建调拨单
-        return True
 
     @api.multi
     def plan_by_prs(self):

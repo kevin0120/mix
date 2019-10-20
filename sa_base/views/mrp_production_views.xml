@@ -15,8 +15,11 @@
             <field name="date_planned_finished_wo" position="attributes">
                 <attribute name="attrs">{'readonly': [('dispatch_workorder_ids', '!=', [])]}</attribute>
             </field>
+            <field name="product_qty" position="attributes">
+                <attribute name="attrs">{'readonly': True}</attribute>
+            </field>
             <field name="product_uom_id" position="attributes">
-                <attribute name="attrs">{'readonly': False}</attribute>
+                <attribute name="attrs">{'readonly': True}</attribute>
                 <attribute name="groups">base.group_no_one</attribute>
             </field>
             <xpath expr="//notebook/page[1]" position="replace">
