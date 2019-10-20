@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from odoo import fields, models, api, _
-from odoo.exceptions import ValidationError
+from odoo import fields, models, api, _, SUPERUSER_ID
+from odoo.exceptions import ValidationError, UserError
 import odoo.addons.decimal_precision as dp
 import json
 import uuid
@@ -135,6 +135,11 @@ class QualityCheck(models.Model):
 
     assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line ID',
                                        related='production_id.assembly_line_id', readonly=True)
+
+    @api.multi
+    def unlink(self):
+        if self.env.uid != SUPERUSER_ID:
+            raise UserError(_('Quality Check Can Not Be Delete'))
 
     @api.one
     @api.depends('measure', 'measure_degree')

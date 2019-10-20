@@ -9,6 +9,16 @@
                 <button name="do_confirm" attrs="{'invisible': [('state', '!=', 'draft')]}" string="Dispatch Confirm"
                         type="object" class="oe_highlight"/>
             </xpath>
+            <field name="date_planned_start_wo" position="attributes">
+                <attribute name="attrs">{'readonly': [('dispatch_workorder_ids', '!=', [])]}</attribute>
+            </field>
+            <field name="date_planned_finished_wo" position="attributes">
+                <attribute name="attrs">{'readonly': [('dispatch_workorder_ids', '!=', [])]}</attribute>
+            </field>
+            <field name="product_uom_id" position="attributes">
+                <attribute name="attrs">{'readonly': False}</attribute>
+                <attribute name="groups">base.group_no_one</attribute>
+            </field>
             <xpath expr="//notebook/page[1]" position="replace">
                 <page string="Dispatch Work Orders">
                     <field name="dispatch_workorder_ids" options="{'reload_on_button': True}"
@@ -18,11 +28,12 @@
                               decoration-danger="not is_dispatched" create="0">
                             <field name="is_dispatched" invisible="1"/>
                             <field name="sequence" invisible="1"/>
-                            <field name="user_id" attrs="{'readonly': [('is_dispatched', '=', True)]}" />
+                            <field name="workcenter_id" attrs="{'readonly': [('is_dispatched', '=', True)]}"/>
+                            <field name="user_id" domain="[('id', 'in', workcenter_id.user_ids.ids)]"
+                                   attrs="{'readonly': [('is_dispatched', '=', True)]}"/>
                             <field name="routing_id" readonly="1"/>
                             <field name="workorder_id" groups="base.group_no_one" readonly="1"/>
-                            <field name="operation_id" readonly="1" />
-                            <field name="workcenter_id" attrs="{'readonly': [('is_dispatched', '=', True)]}"/>
+                            <field name="operation_id" readonly="1"/>
                         </tree>
                     </field>
                 </page>

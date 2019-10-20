@@ -20,7 +20,7 @@ class MrpWOConsu(models.Model):
     bom_line_id = fields.Many2one('mrp.bom.line')
 
     qcp_id = fields.Many2one('sa.quality.point', related='check_id.point_id')
-    check_id = fields.Many2one('sa.quality.check', required=True, string='Quality Check For Work Step')
+    check_id = fields.Many2one('sa.quality.check', ondelete='restrict', required=True, string='Quality Check For Work Step')
 
     product_id = fields.Many2one('product.product', related='check_id.product_id', string='Consume Product')
 
@@ -143,9 +143,20 @@ class DispatchingWorkOrder(models.Model):
 
     workcenter_id = fields.Many2one('mrp.workcenter', string='Operate In Work Center', required=True)
 
+    @api.onchange('workcenter_id')
+    def _onchange_workcenter_id(self):
+        if not self.workcenter_id:
+            self.user_id = False
+        self.user_id = self.workcenter_id.user_ids and self.workcenter_id.user_ids[0] # 第一个用户
+
 
 class MrpProduction(models.Model):
     _inherit = 'mrp.production'
+
+    product_uom_id = fields.Many2one(
+        'product.uom', 'Product Unit of Measure',
+        oldname='product_uom', readonly=True, required=False,
+        states={'draft': [('readonly', False)]})  # 重新定义产品单位字段
 
     state = fields.Selection(selection_add=[('draft', 'Draft')], default='draft')
 
@@ -162,7 +173,7 @@ class MrpProduction(models.Model):
 
     @api.model
     def create(self, vals):
-        ret = super(MrpProduction, self).create()
+        ret = super(MrpProduction, self).create(vals)
         if ret:
             ret._create_dispatch_workorder()
         return ret
@@ -192,7 +203,7 @@ class MrpProduction(models.Model):
             _logger.error("Production: {0} Can Not Create Dispatching Work Order. Cause It Is Not Define Routing".format(
                 self.name))
             return ret
-        for idx, operation_id in enumerate(routing_id.sa_routing_ids):
+        for idx, operation_id in enumerate(routing_id.sa_operation_ids):
             val = {
                 'sequence': idx,
                 'operation_id': operation_id.id,
