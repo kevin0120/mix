@@ -158,7 +158,14 @@ class MrpProduction(models.Model):
         oldname='product_uom', readonly=True, required=False,
         states={'draft': [('readonly', False)]})  # 重新定义产品单位字段
 
-    state = fields.Selection(selection_add=[('draft', 'Draft')], default='draft')
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('confirmed', 'Confirmed'),
+        ('planned', 'Planned'),
+        ('progress', 'In Progress'),
+        ('done', 'Done'),
+        ('cancel', 'Cancelled')], string='State',
+        copy=False, default='draft')
 
     track_no = fields.Char('Finished Product Tracking Number')
 
