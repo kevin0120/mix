@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from . import mrp_factory
 from . import point
 from . import res_users
 from . import mrp_worksegment
