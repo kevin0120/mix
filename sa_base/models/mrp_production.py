@@ -130,7 +130,7 @@ class DispatchingWorkOrder(models.Model):
 
     is_dispatched = fields.Boolean('Is Dispatched', default=False)
 
-    production_id = fields.Many2one('mrp.production', string='Manufacture Order')
+    production_id = fields.Many2one('mrp.production', string='Manufacture Order', index=True)
 
     workorder_id = fields.Many2one('mrp.workorder')
 
@@ -163,7 +163,8 @@ class MrpProduction(models.Model):
     @api.model
     def create(self, vals):
         ret = super(MrpProduction, self).create()
-        # todo: 根据物料清单创建相应的派工行，为了后续创建工单
+        if ret:
+            ret._create_dispatch_workorder()
         return ret
 
     @api.multi
@@ -173,3 +174,36 @@ class MrpProduction(models.Model):
             # todo: 确认是否可以确认需求
             can_confirm_productions |= production
         can_confirm_productions.write({'state': 'confirm'})
+
+    @api.multi
+    def button_dispatching(self):
+        for production in self:
+            if not production.routing_id:
+                _logger.error("Production: {0} Can Not Create Dispatching Info. Cause It Is Not Define Routing".format(production.name))
+                continue
+
+    @api.multi
+    def _create_dispatch_workorder(self):
+        ret = True
+        self.ensure_one()
+        routing_id = self.routing_id
+        if not routing_id:
+            _logger.error("Production: {0} Can Not Create Dispatching Work Order. Cause It Is Not Define Routing".format(
+                self.name))
+            return ret
+        for idx, operation_id in enumerate(routing_id.sa_routing_ids):
+            val = {
+                'sequence': idx,
+                'operation_id': operation_id.id,
+                'routing_id': routing_id.id,
+                'production_id': self.id,
+                'workcenter_id': routing_id.workcenter_id and routing_id.workcenter_id.id,  # 设置优先选择工位，方便后续快速排产
+                'user_id': routing_id.workcenter_id.user_id and routing_id.workcenter_id.user_id.id
+            }
+            self.env['dispatch.mrp.workorder'].sudo().create(val)  # 创建派工信息
+
+        return ret
+
+
+
+

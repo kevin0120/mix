@@ -87,6 +87,8 @@ class MrpWorkCenter(models.Model):
     type = fields.Selection([('operate', 'Operate'),
                              ('rework', 'Rework')], default='operate')
 
+    user_id = fields.Many2one('res.users', string='Responsible Person', default=lambda self: self.env.uid)
+
     qc_workcenter_id = fields.Many2one('mrp.workcenter', string='Quality Check Work Center')
 
     worksegment_id = fields.Many2one('mrp.worksection', copy=False)
