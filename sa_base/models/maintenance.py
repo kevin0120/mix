@@ -243,3 +243,22 @@ class MaintenanceEquipment(models.Model):
                 }
                 self.env['mrp.workcenter.group.tool'].sudo().create(val)
         return ret
+
+
+    @api.model
+    def create(self, vals):
+        ret = super(MaintenanceEquipment, self).create(vals)
+        if 'workcenter_id' not in vals:
+            return ret
+        tool_category_ids = self.env.ref('sa_base.equipment_Gun') + self.env.ref('sa_base.equipment_Wrench')
+        tool_id = ret
+        if tool_id.category_id.id not in tool_category_ids.ids:
+            return ret
+        for wg in tool_id.workcenter_id.sa_workcentergroup_ids:
+            val = {
+                "workgroup_id": wg.id,
+                "workcenter_id": tool_id.workcenter_id.id,
+                "tool_id": tool_id.id,
+            }
+            self.env['mrp.workcenter.group.tool'].sudo().create(val)
+        return ret

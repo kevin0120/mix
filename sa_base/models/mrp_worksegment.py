@@ -95,7 +95,7 @@ class MrpWorkCenter(models.Model):
 
     worksegment_id = fields.Many2one('mrp.worksection', copy=False)
 
-    sa_workcentergroup_ids = fields.Many2many('mrp.workcenter', 'mrp_workcenter_rel', 'workcenter_id', 'group_id',
+    sa_workcentergroup_ids = fields.Many2many('mrp.workcenter.group', 'mrp_workcenter_rel', 'workcenter_id', 'group_id',
                                               string="Workcenters Group", copy=False)
 
     # @api.multi

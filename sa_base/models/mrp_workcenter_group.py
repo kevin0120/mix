@@ -33,7 +33,9 @@ class MrpWorkcenterGroup(models.Model):
             return ret
         workgroup_id = ret
         tool_ids = workgroup_id.sa_workcenter_ids.mapped('equipment_ids')
-        for tool in tool_ids:
+        tool_category_ids = self.env.ref('sa_base.equipment_Gun') + self.env.ref('sa_base.equipment_Wrench')
+        tightening_tool_ids = tool_ids.filtered(lambda r: r.category_id in tool_category_ids)
+        for tool in tightening_tool_ids:
             val = {
                 "workgroup_id": workgroup_id.id,
                 "workcenter_id": tool.workcenter_id.id,
