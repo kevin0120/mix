@@ -3,6 +3,7 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 import logging
+import json
 
 _logger = logging.getLogger(__name__)
 
@@ -127,6 +128,15 @@ class DispatchingWorkOrder(models.Model):
     _order = "sequence"
     _log_access = False
 
+    @api.depends('workcenter_ids')
+    def _compute_operation_workcenter_domain(self):
+        for dispatch_wo in self:
+            if dispatch_wo.workcenter_id not in dispatch_wo.workcenter_ids:
+                dispatch_wo.workcenter_id = False
+            if not dispatch_wo.workcenter_ids:
+                dispatch_wo.operation_workcenter_domain = json.dumps([])
+            dispatch_wo.operation_workcenter_domain = json.dumps([('id', 'in', dispatch_wo.workcenter_ids.ids)])
+
     sequence = fields.Integer(string='Sequence', default=1)
 
     is_dispatched = fields.Boolean('Is Dispatched', default=False)
@@ -144,11 +154,18 @@ class DispatchingWorkOrder(models.Model):
 
     workcenter_ids = fields.Many2many('mrp.workcenter', related='operation_id.workcenter_ids',
                                       copy=False, readonly=True)
-    workcenter_id = fields.Many2one('mrp.workcenter', string='Operate In Work Center',
-                                    domain="[('id', 'in', workcenter_ids.ids)]")
+    workcenter_id = fields.Many2one('mrp.workcenter', string='Operate In Work Center')
+
+    operation_workcenter_domain = fields.Char(
+        compute=_compute_operation_workcenter_domain,
+        readonly=True,
+        default=json.dumps([]),
+        store=False,
+    )
 
     @api.onchange('workcenter_id')
     def _onchange_workcenter_id(self):
+        self.ensure_one()
         if not self.workcenter_id:
             self.user_id = False
         self.user_id = self.workcenter_id.user_ids and self.workcenter_id.user_ids[0]  # 第一个用户
