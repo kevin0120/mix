@@ -99,6 +99,7 @@
                                     <field name="is_key"/>
                                     <field name="group_id" domain="[('work_step_id', 'in', context.get('search_parent_step_ids', []))]" options="{'no_create_edit': True,'no_open': True}"/>
                                     <field name="group_sequence" groups="base.group_no_one"/>
+                                    <field name="tightening_tool_ids" widget="many2many_tags" options="{'no_create': True, 'no_open':True}"/>
                                 </tree>
                                 <form string="Tightening Operation Points">
                                     <group>
