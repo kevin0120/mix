@@ -29,7 +29,7 @@
 
             </xpath>
             <field name="product_id" position="after">
-                <field name="track_no" string="Finished Product Serial Number" required="1" />
+                <field name="track_no" string="Finished Product Serial Number" attrs="{'readonly': [('state', '!=', 'draft')]}" required="1"/>
             </field>
             <xpath expr="//button[@name='button_plan']" position="replace">
                 <button name="button_plan_by_dispatching" attrs="{'invisible': ['|', ('state', '!=', 'confirmed'), ('dispatch_workorder_ids', '=', False)]}" type="object" string="Create Workorders" class="oe_highlight"/>
