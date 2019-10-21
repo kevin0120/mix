@@ -4,7 +4,7 @@ from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 import logging
 import json
-
+import math
 _logger = logging.getLogger(__name__)
 
 
@@ -192,12 +192,43 @@ class MrpProduction(models.Model):
 
     dispatch_workorder_ids = fields.One2many('dispatch.mrp.workorder', 'production_id', string='Dispatching Work Order')
 
-    assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line ID')
+    assembly_line_id = fields.Many2one('mrp.assemblyline', string='Manufactory Assembly Line')
 
     # 重写此方法，禁止生成库存移动
     @api.multi
     def _generate_moves(self):
         return True
+
+    @api.one
+    def _create_workorder_by_dispatching(self):
+        workorders = self.env['mrp.workorder']
+        dispatch_wos = self.dispatch_workorder_ids.filtered('is_dispatched')
+        for dispatch in dispatch_wos:
+            operation = dispatch.operation_id
+            cycle_number = math.ceil(1.0 / operation.workcenter_id.capacity)  # TODO: float_round UP
+            duration_expected = (operation.workcenter_id.time_start +
+                                 operation.workcenter_id.time_stop +
+                                 cycle_number * operation.time_cycle * 100.0 / operation.workcenter_id.time_efficiency)
+            workorder = workorders.create({
+                'name': operation.name,
+                'production_id': self.id,
+                'workcenter_id': operation.workcenter_id.id,
+                'operation_id': operation.id,
+                'duration_expected': duration_expected,
+                'state': len(workorders) == 0 and 'ready' or 'pending',
+                'qty_producing': 1.0,
+                'capacity': operation.workcenter_id.capacity,
+            })
+            if workorders:
+                workorders[-1].next_work_order_id = workorder.id
+            workorders += workorder
+        return workorders
+
+    @api.constrains('product_qty')
+    def _constraint_mo_product_qty(self):
+        for mo in self:
+            if mo.product_qty != 1.0:
+                raise ValidationError(_('MO Finished Product Qty Must Be Equal 1'))
 
     @api.multi
     @api.depends('bom_id.routing_id', 'bom_id.routing_id.sa_operation_ids')
@@ -212,8 +243,16 @@ class MrpProduction(models.Model):
     def create(self, vals):
         ret = super(MrpProduction, self).create(vals)
         if ret:
-            ret._create_dispatch_workorder()
+            ret._create_dispatch_workorders()
         return ret
+
+    @api.multi
+    def button_plan_by_dispatching(self):
+        """ Create work orders. And probably do stuff, like things. """
+        orders_to_plan = self.filtered(lambda order: order.routing_id and order.state == 'confirmed')
+        for order in orders_to_plan:
+            order._create_workorder_by_dispatching()
+        return orders_to_plan.write({'state': 'planned'})
 
     @api.multi
     def do_confirm(self):
@@ -227,13 +266,13 @@ class MrpProduction(models.Model):
     @api.multi
     def button_dispatching(self):
         for production in self:
-            if not production.routing_id:
+            if not production.dispatch_workorder_ids:
                 _logger.error("Production: {0} Can Not Create Dispatching Info. Cause It Is Not Define Routing".format(
                     production.name))
                 continue
 
     @api.multi
-    def _create_dispatch_workorder(self):
+    def _create_dispatch_workorders(self):
         ret = True
         self.ensure_one()
         routing_id = self.routing_id

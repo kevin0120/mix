@@ -32,7 +32,7 @@ class MrpRoutingWorkcenter(models.Model):
     sa_step_ids = fields.Many2many('sa.quality.point', 'work_step_operation_rel', 'operation_id', 'step_id',
                                      string="Steps", copy=False)
 
-    # prefer_workcenter_id_domain = fields.Char(compute='_compute_workcenter_group', readonly=True, store=False,)
+    prefer_workcenter_id_domain = fields.Char(compute='_compute_workcenter_group', readonly=True, store=False,)
 
     workcenter_id = fields.Many2one('mrp.workcenter', string='Prefer Work Center', copy=False,
                                     required=False)
@@ -69,7 +69,7 @@ class MrpRoutingWorkcenter(models.Model):
             if not workcenter_ids:
                 continue
             routing.workcenter_id = workcenter_ids[0]  # 重新设置优先工位
-            # routing.prefer_workcenter_id_domain = json.dumps([('id', 'in', workcenter_ids.ids)])
+            routing.prefer_workcenter_id_domain = json.dumps([('id', 'in', workcenter_ids.ids)])
 
     @api.depends('sa_step_ids')
     def _compute_step_count(self):

@@ -63,9 +63,9 @@
                             <field name="workcenter_group_id" options="{'no_edit': True, 'no_create': True}"/>
                             <field name="workcenter_ids" readonly="1" widget="many2many_tags"
                                    groups="base.group_no_one"/>
-                            <!--<field name="prefer_workcenter_id_domain" invisible="1"/>-->
+                            <field name="prefer_workcenter_id_domain" invisible="1"/>
                             <field name="workcenter_id" options="{'no_edit': True, 'no_create': True}"
-                                   domain="[('id', 'in', workcenter_ids.ids)]"/>
+                                   domain="prefer_workcenter_id_domain"/>
                             <field name="company_id" options="{'no_edit': True, 'no_create': True}"
                                    groups="base.group_multi_company"/>
                         </group>
