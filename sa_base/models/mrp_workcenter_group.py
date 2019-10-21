@@ -69,7 +69,7 @@ class MrpWorkcenterGroup(models.Model):
             recs = self.env['mrp.workcenter.group.tool'].search([('workgroup_id', '=', wg.id),
                                                                 ('workcenter_id', 'not in', wg.sa_workcenter_ids.ids)])
             need_unlink_recs |= recs
-        need_unlink_recs.sudo.unlink()
+        need_unlink_recs.sudo().unlink()
 
     @api.multi
     def write(self, vals):

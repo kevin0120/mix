@@ -3,6 +3,7 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 import logging
+import json
 
 _logger = logging.getLogger(__name__)
 
@@ -20,7 +21,8 @@ class MrpWOConsu(models.Model):
     bom_line_id = fields.Many2one('mrp.bom.line')
 
     qcp_id = fields.Many2one('sa.quality.point', related='check_id.point_id')
-    check_id = fields.Many2one('sa.quality.check', ondelete='restrict', required=True, string='Quality Check For Work Step')
+    check_id = fields.Many2one('sa.quality.check', ondelete='restrict', required=True,
+                               string='Quality Check For Work Step')
 
     product_id = fields.Many2one('product.product', related='check_id.product_id', string='Consume Product')
 
@@ -126,6 +128,15 @@ class DispatchingWorkOrder(models.Model):
     _order = "sequence"
     _log_access = False
 
+    @api.depends('workcenter_ids')
+    def _compute_operation_workcenter_domain(self):
+        for dispatch_wo in self:
+            if dispatch_wo.workcenter_id not in dispatch_wo.workcenter_ids:
+                dispatch_wo.workcenter_id = False
+            if not dispatch_wo.workcenter_ids:
+                dispatch_wo.operation_workcenter_domain = json.dumps([])
+            dispatch_wo.operation_workcenter_domain = json.dumps([('id', 'in', dispatch_wo.workcenter_ids.ids)])
+
     sequence = fields.Integer(string='Sequence', default=1)
 
     is_dispatched = fields.Boolean('Is Dispatched', default=False)
@@ -143,13 +154,21 @@ class DispatchingWorkOrder(models.Model):
 
     workcenter_ids = fields.Many2many('mrp.workcenter', related='operation_id.workcenter_ids',
                                       copy=False, readonly=True)
-    workcenter_id = fields.Many2one('mrp.workcenter', string='Operate In Work Center', domain="[('id', 'in', workcenter_ids.ids)]")
+    workcenter_id = fields.Many2one('mrp.workcenter', string='Operate In Work Center')
+
+    operation_workcenter_domain = fields.Char(
+        compute=_compute_operation_workcenter_domain,
+        readonly=True,
+        default=json.dumps([]),
+        store=False,
+    )
 
     @api.onchange('workcenter_id')
     def _onchange_workcenter_id(self):
+        self.ensure_one()
         if not self.workcenter_id:
             self.user_id = False
-        self.user_id = self.workcenter_id.user_ids and self.workcenter_id.user_ids[0] # 第一个用户
+        self.user_id = self.workcenter_id.user_ids and self.workcenter_id.user_ids[0]  # 第一个用户
 
 
 class MrpProduction(models.Model):
@@ -180,6 +199,15 @@ class MrpProduction(models.Model):
     def _generate_moves(self):
         return True
 
+    @api.multi
+    @api.depends('bom_id.routing_id', 'bom_id.routing_id.sa_operation_ids')
+    def _compute_routing(self):
+        for production in self:
+            if production.bom_id.routing_id.sa_operation_ids:
+                production.routing_id = production.bom_id.routing_id.id
+            else:
+                production.routing_id = False
+
     @api.model
     def create(self, vals):
         ret = super(MrpProduction, self).create(vals)
@@ -200,7 +228,8 @@ class MrpProduction(models.Model):
     def button_dispatching(self):
         for production in self:
             if not production.routing_id:
-                _logger.error("Production: {0} Can Not Create Dispatching Info. Cause It Is Not Define Routing".format(production.name))
+                _logger.error("Production: {0} Can Not Create Dispatching Info. Cause It Is Not Define Routing".format(
+                    production.name))
                 continue
 
     @api.multi
@@ -209,8 +238,9 @@ class MrpProduction(models.Model):
         self.ensure_one()
         routing_id = self.routing_id
         if not routing_id:
-            _logger.error("Production: {0} Can Not Create Dispatching Work Order. Cause It Is Not Define Routing".format(
-                self.name))
+            _logger.error(
+                "Production: {0} Can Not Create Dispatching Work Order. Cause It Is Not Define Routing".format(
+                    self.name))
             return ret
         for idx, operation_id in enumerate(routing_id.sa_operation_ids):
             val = {
@@ -218,13 +248,9 @@ class MrpProduction(models.Model):
                 'operation_id': operation_id.id,
                 'routing_id': routing_id.id,
                 'production_id': self.id,
-                'workcenter_id': routing_id.workcenter_id and routing_id.workcenter_id.id,  # 设置优先选择工位，方便后续快速排产
-                'user_id': routing_id.workcenter_id.user_ids and routing_id.workcenter_id.user_ids[0].id
+                'workcenter_id': operation_id.workcenter_id and operation_id.workcenter_id.id,  # 设置优先选择工位，方便后续快速排产
+                'user_id': operation_id.workcenter_id.user_ids and operation_id.workcenter_id.user_ids[0].id
             }
             self.env['dispatch.mrp.workorder'].sudo().create(val)  # 创建派工信息
 
         return ret
-
-
-
-

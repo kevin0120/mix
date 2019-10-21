@@ -59,6 +59,7 @@
         'report/equipment_report_template.xml',
         'report/product_product_tempaltes.xml',
         'views/sa_config_setting.xml',
+        'views/mrp_view_menu.xml',
         'demo/test_demo.xml',  # 测试数据
     ],
     'demo': [
