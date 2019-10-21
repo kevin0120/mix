@@ -5,6 +5,7 @@ from odoo.exceptions import ValidationError
 import logging
 import json
 import math
+
 _logger = logging.getLogger(__name__)
 
 
@@ -188,7 +189,8 @@ class MrpProduction(models.Model):
         ('cancel', 'Cancelled')], string='State',
         copy=False, default='draft')  # 重新定义生产订单的阶段，将草稿阶段移至最前
 
-    track_no = fields.Char('Finished Product Tracking Number')
+    track_no = fields.Char('Finished Product Tracking Number',
+                           default=lambda self: self.env['ir.sequence'].next_by_code('stock.lot.serial') or '')
 
     dispatch_workorder_ids = fields.One2many('dispatch.mrp.workorder', 'production_id', string='Dispatching Work Order')
 
