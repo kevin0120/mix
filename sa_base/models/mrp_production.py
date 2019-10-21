@@ -205,19 +205,21 @@ class MrpProduction(models.Model):
         dispatch_wos = self.dispatch_workorder_ids.filtered('is_dispatched')
         for dispatch in dispatch_wos:
             operation = dispatch.operation_id
-            cycle_number = math.ceil(1.0 / operation.workcenter_id.capacity)  # TODO: float_round UP
-            duration_expected = (operation.workcenter_id.time_start +
-                                 operation.workcenter_id.time_stop +
-                                 cycle_number * operation.time_cycle * 100.0 / operation.workcenter_id.time_efficiency)
+            workcenter_id = dispatch.workcenter_id
+            capacity = workcenter_id.capacity or 1.0
+            cycle_number = math.ceil(1.0 / capacity)  # TODO: float_round UP
+            duration_expected = (workcenter_id.time_start +
+                                 workcenter_id.time_stop +
+                                 cycle_number * operation.time_cycle * 100.0 / workcenter_id.time_efficiency)
             workorder = workorders.create({
                 'name': operation.name,
                 'production_id': self.id,
-                'workcenter_id': operation.workcenter_id.id,
+                'workcenter_id': workcenter_id.id,
                 'operation_id': operation.id,
                 'duration_expected': duration_expected,
                 'state': len(workorders) == 0 and 'ready' or 'pending',
                 'qty_producing': 1.0,
-                'capacity': operation.workcenter_id.capacity,
+                'capacity': workcenter_id.capacity,
             })
             if workorders:
                 workorders[-1].next_work_order_id = workorder.id
@@ -261,7 +263,7 @@ class MrpProduction(models.Model):
             # todo: 确认是否可以确认需求
             can_confirm_productions |= production
             production.dispatch_workorder_ids.write({'is_dispatched': True})
-        can_confirm_productions.write({'state': 'confirm'})
+        can_confirm_productions.write({'state': 'confirmed'})
 
     @api.multi
     def button_dispatching(self):

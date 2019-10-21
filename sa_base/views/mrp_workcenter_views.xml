@@ -43,7 +43,7 @@
                             <group>
                                 <field name="code"/>
                                 <field name="type" required="1"/>
-                                <field name="user_ids" widget="many2many_tags" />
+                                <field name="user_ids" widget="many2many_tags"/>
                                 <field name="calendar_id" groups="base.group_system"/>
                                 <field name="company_id" groups="base.group_multi_company"
                                        options="{'no_create': True}"/>
@@ -52,12 +52,28 @@
                         <notebook>
                             <page string="General Information">
                                 <group>
-                                    <group string="Work Area" name="segment">
-                                        <field name="worksegment_id"
-                                               options="{'no_create_edit': True , 'no_open': True}"/>
-                                        <field name="qc_workcenter_id"
-                                               options="{'no_create_edit': True , 'no_open': True}"
-                                               domain="[('type','=','rework')]"/>
+                                    <group name="capacity">
+                                        <label for="time_efficiency"/>
+                                        <div class="o_row">
+                                            <field name="time_efficiency"/>
+                                            %
+                                        </div>
+                                        <field name="capacity"/>
+
+                                        <label for="oee_target"/>
+                                        <div class="o_row">
+                                            <field name="oee_target"/>
+                                            %
+                                        </div>
+                                    </group>
+                                    <group>
+                                        <group string="Work Area" name="segment">
+                                            <field name="worksegment_id"
+                                                   options="{'no_create_edit': True , 'no_open': True}"/>
+                                            <field name="qc_workcenter_id"
+                                                   options="{'no_create_edit': True , 'no_open': True}"
+                                                   domain="[('type','=','rework')]"/>
+                                        </group>
                                     </group>
                                 </group>
                                 <separator string="Description"/>

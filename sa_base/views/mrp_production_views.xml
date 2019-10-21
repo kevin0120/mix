@@ -26,7 +26,7 @@
                 <attribute name="attrs">{'required': True}</attribute>
             </field>
             <xpath expr="//button[@name='button_plan']" position="replace">
-                <button name="button_plan_by_dispatching" attrs="{'invisible': ['|', ('state', '!=', 'confirmed'), ('routing_id', '=', False)]}" type="object" string="Create Workorders" class="oe_highlight"/>
+                <button name="button_plan_by_dispatching" attrs="{'invisible': ['|', ('state', '!=', 'confirmed'), ('dispatch_workorder_ids', '=', False)]}" type="object" string="Create Workorders" class="oe_highlight"/>
             </xpath>
             <xpath expr="//notebook/page[1]" position="replace">
                 <page string="Dispatch Work Orders">
