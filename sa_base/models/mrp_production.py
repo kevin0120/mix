@@ -117,6 +117,10 @@ class MrpWOConsu(models.Model):
 class MrpWorkorder(models.Model):
     _inherit = 'mrp.workorder'
 
+    origin = fields.Char(
+        'Source', copy=False,
+        help="Reference of the document that generated this Work order request.")
+
     track_no = fields.Char('Finished Product Tracking Number', related='production_id.track_no', required=True,
                            store=True)
 
@@ -124,6 +128,8 @@ class MrpWorkorder(models.Model):
 
     @api.model
     def create(self, vals):
+        if 'origin' not in vals:
+            vals.update({'origin': vals.get('name', '')})
         ret = super(MrpWorkorder, self).create(vals)
         if 'track_no' not in vals and not ret.track_no:
             ret.write({'track_no': ret.production_id.track_no})
