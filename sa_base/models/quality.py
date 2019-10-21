@@ -119,6 +119,18 @@ class QualityPoint(models.Model):
     @api.model
     def create(self, vals):
         ret = super(QualityPoint, self).create(vals)
+        if 'parent_qcp_id' in vals and not ret.sa_operation_ids:
+            val = {
+                'sa_operation_ids': [(6, 0, ret.sa_operation_ids.ids)]
+            }
+            ret.write(val)
+        return ret
+
+    @api.multi
+    def write(self, vals):
+        ret = super(QualityPoint, self).write(vals)
+        if 'sa_operation_ids' in vals:
+            self.mapped('operation_point_ids').write({'sa_operation_ids': vals.get('sa_operation_ids')})
         return ret
 
     @api.multi

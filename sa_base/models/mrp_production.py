@@ -5,6 +5,7 @@ from odoo.exceptions import ValidationError
 import logging
 import json
 import math
+
 _logger = logging.getLogger(__name__)
 
 
@@ -20,15 +21,17 @@ class MrpWOConsu(models.Model):
 
     bom_line_id = fields.Many2one('mrp.bom.line')
 
-    qcp_id = fields.Many2one('sa.quality.point', related='check_id.point_id')
     check_id = fields.Many2one('sa.quality.check', ondelete='restrict', required=True,
                                string='Quality Check For Work Step')
 
-    product_id = fields.Many2one('product.product', related='check_id.product_id', string='Consume Product')
+    qcp_id = fields.Many2one('sa.quality.point', related='check_id.point_id', inherited=True)
 
-    product_qty = fields.Float('Consume Product Qty')
+    product_id = fields.Many2one('product.product', related='check_id.product_id', string='Consume Product',
+                                 inherited=True)
 
-    tool_id = fields.Many2one('maintenance.equipment', string='Screw Gun', copy=False)
+    product_qty = fields.Float('Consume Product Qty', inherited=True)
+
+    tool_id = fields.Many2one('maintenance.equipment', string='Tightening Tool(Gun/Wrench)', copy=False)
 
     program_id = fields.Many2one('controller.program')
 
@@ -114,9 +117,33 @@ class MrpWOConsu(models.Model):
 class MrpWorkorder(models.Model):
     _inherit = 'mrp.workorder'
 
-    track_no = fields.Char('Finished Product Tracking Number', related='production_id.track_no')
+    track_no = fields.Char('Finished Product Tracking Number', related='production_id.track_no', required=True,
+                           store=True)
 
     consu_bom_line_ids = fields.One2many('mrp.wo.consu.line', 'workorder_id', string='Consume Product')
+
+    @api.model
+    def create(self, vals):
+        ret = super(MrpWorkorder, self).create(vals)
+        if 'track_no' not in vals and not ret.track_no:
+            ret.write({'track_no': ret.production_id.track_no})
+        return ret
+
+    @api.multi
+    def _create_bulk_cosume_lines(self):
+        vals = []
+        for order in self:
+            for idx, step in enumerate(order.operation_id.sa_step_ids):
+                val = {
+                    'sequence': idx,
+                    'workorder_id': order.id,
+                    'qcp_id': step.id,
+                    'product_id': step.product_id.id,
+                    'product_qty': 1.0,
+                    # todo: 拧紧枪需要定义好模型后再增加
+                    # 'tool_id':
+                }
+                self.env['mrp.wo.consu.line'].create(val)
 
     @api.multi
     def unlink(self):
@@ -188,7 +215,8 @@ class MrpProduction(models.Model):
         ('cancel', 'Cancelled')], string='State',
         copy=False, default='draft')  # 重新定义生产订单的阶段，将草稿阶段移至最前
 
-    track_no = fields.Char('Finished Product Tracking Number')
+    track_no = fields.Char('Finished Product Tracking Number',
+                           default=lambda self: self.env['ir.sequence'].next_by_code('stock.lot.serial') or '')
 
     dispatch_workorder_ids = fields.One2many('dispatch.mrp.workorder', 'production_id', string='Dispatching Work Order')
 
@@ -219,6 +247,7 @@ class MrpProduction(models.Model):
                 'duration_expected': duration_expected,
                 'state': len(workorders) == 0 and 'ready' or 'pending',
                 'qty_producing': 1.0,
+                'track_no': self.track_no,
                 'capacity': workcenter_id.capacity,
             })
             if workorders:

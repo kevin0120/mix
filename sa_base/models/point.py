@@ -98,7 +98,8 @@ class OperationPoints(models.Model):
 
     sequence = fields.Integer('sequence', default=1)
 
-    name = fields.Char('Tightening Point Name', related='qcp_id.name', inherited=True, default=lambda self: str(uuid.uuid4()))  # 如果未定义拧紧点编号，即自动生成uuid号作为唯一标示
+    name = fields.Char('Tightening Point Name', related='qcp_id.name', inherited=True,
+                       default=lambda self: str(uuid.uuid4()))  # 如果未定义拧紧点编号，即自动生成uuid号作为唯一标示
 
     group_id = fields.Many2one('operation.point.group')
 
@@ -122,7 +123,8 @@ class OperationPoints(models.Model):
 
     control_mode = fields.Selection(related='program_id.control_mode', readonly=1)
 
-    parent_qcp_id = fields.Many2one('sa.quality.point', ondelete='cascade', index=True)
+    parent_qcp_id = fields.Many2one('sa.quality.point', ondelete='cascade', index=True,
+                                    string='Quality Control Point(Tightening Work Step)')
 
     qcp_id = fields.Many2one('sa.quality.point', required=True, string='Quality Control Point(Tightening Work Step)',
                              ondelete='cascade', auto_join=True)
@@ -132,7 +134,8 @@ class OperationPoints(models.Model):
 
     sa_operation_ids = fields.Many2many('mrp.routing.workcenter', related='qcp_id.sa_operation_ids', inherited=True)
 
-    operation_id = fields.Many2one('mrp.routing.workcenter', string='Preferred Operation', related='qcp_id.operation_id', inherited=True)
+    operation_id = fields.Many2one('mrp.routing.workcenter', string='Preferred Operation',
+                                   related='qcp_id.operation_id', inherited=True)
 
     test_type_id = fields.Many2one('sa.quality.point.test_type', related='qcp_id.test_type_id', inherited=True)
 
@@ -140,12 +143,17 @@ class OperationPoints(models.Model):
 
     # 测量相关
     norm = fields.Float('Norm', related='qcp_id.norm', digits=dp.get_precision('Quality Tests'), inherited=True)
-    tolerance_min = fields.Float('Min Tolerance', related='qcp_id.tolerance_min', digits=dp.get_precision('Quality Tests'), inherited=True)
-    tolerance_max = fields.Float('Max Tolerance', related='qcp_id.tolerance_max', digits=dp.get_precision('Quality Tests'), inherited=True)
+    tolerance_min = fields.Float('Min Tolerance', related='qcp_id.tolerance_min',
+                                 digits=dp.get_precision('Quality Tests'), inherited=True)
+    tolerance_max = fields.Float('Max Tolerance', related='qcp_id.tolerance_max',
+                                 digits=dp.get_precision('Quality Tests'), inherited=True)
 
-    norm_degree = fields.Float('Norm Degree', related='qcp_id.norm_degree', inherited=True, digits=dp.get_precision('Quality Tests'))  # TDE RENAME ?
-    tolerance_min_degree = fields.Float('Degree Min Tolerance', related='qcp_id.tolerance_min_degree', inherited=True, digits=dp.get_precision('Quality Tests'), default=0.0)
-    tolerance_max_degree = fields.Float('Degree Max Tolerance', related='qcp_id.tolerance_max_degree', inherited=True, digits=dp.get_precision('Quality Tests'), default=0.0)
+    norm_degree = fields.Float('Norm Degree', related='qcp_id.norm_degree', inherited=True,
+                               digits=dp.get_precision('Quality Tests'))  # TDE RENAME ?
+    tolerance_min_degree = fields.Float('Degree Min Tolerance', related='qcp_id.tolerance_min_degree', inherited=True,
+                                        digits=dp.get_precision('Quality Tests'), default=0.0)
+    tolerance_max_degree = fields.Float('Degree Max Tolerance', related='qcp_id.tolerance_max_degree', inherited=True,
+                                        digits=dp.get_precision('Quality Tests'), default=0.0)
 
     tightening_tool_ids = fields.Many2many('mrp.workcenter.group.tool', 'point_tool_rel', 'point_id', 'tool_id',
                                string='Tightening Tools(Tightening Gun)', copy=False)
@@ -172,6 +180,11 @@ class OperationPoints(models.Model):
                 res.update({'max_redo_times': operation.max_redo_times})
             if 'sequence' in fields and operation.operation_point_ids:
                 res.update({'sequence': max(operation.operation_point_ids.mapped('sequence')) + 1})
+        parent_qcp_id = self.env.context.get('default_parent_qcp_id')
+        if parent_qcp_id:
+            qcp_id = self.env['sa.quality.point'].sudo().browse(parent_qcp_id)
+            if 'sa_operation_ids' in fields:
+                res.update({'sa_operation_ids': [(6, 0, qcp_id.sa_operation_ids.ids)]})
         return res
 
     @api.multi
@@ -189,9 +202,9 @@ class OperationPoints(models.Model):
 
     @api.multi
     def toggle_active(self):
-        bom_line_ids = self.env['mrp.bom.line'].search([('operation_point_id', 'in', self.ids)])
-        if bom_line_ids:
-            bom_line_ids.toggle_active()
+        # bom_line_ids = self.env['mrp.bom.line'].search([('operation_point_id', 'in', self.ids)])
+        # if bom_line_ids:
+        #     bom_line_ids.toggle_active()
         return super(OperationPoints, self).toggle_active()
 
     @api.model
@@ -206,18 +219,6 @@ class OperationPoints(models.Model):
                 'product_tmpl_id': product_tmpl_id
             })
         ret = super(OperationPoints, self).create(vals)
-        auto_operation_point_inherit = self.env['ir.values'].get_default('sa.config.settings',
-                                                                         'auto_operation_point_inherit')
-        if auto_operation_point_inherit:
-            operation_id = ret.operation_id
-            bom_ids = self.env['mrp.bom'].search([('operation_ids', 'in', operation_id.ids)])
-            for bom in bom_ids:
-                val = {
-                    "operation_point_id": ret.id,
-                    "product_id": ret.product_id.id,
-                    "bom_id": bom.id,
-                }
-                self.env['mrp.bom.line'].sudo().create(val)
         return ret
 
     @api.multi
@@ -232,11 +233,11 @@ class OperationPoints(models.Model):
                     'product_id': point.product_id
                 }
                 ret = super(OperationPoints, point).write(vals)  # 修改数据
-
                 dummy, tracking_value_ids = point._message_track(tracked_fields, old_values)
                 msg = _("#%s operation point has been modified") % (point.id)
-                point.operation_id.message_post(body=msg, message_type='comment', tracking_value_ids=tracking_value_ids,
-                                                subject=msg)
+                point.parent_qcp_id.message_post(body=msg, message_type='comment',
+                                                 tracking_value_ids=tracking_value_ids,
+                                                 subject=msg)
             else:
                 ret = super(OperationPoints, point).write(vals)  # 修改数据
         return ret
