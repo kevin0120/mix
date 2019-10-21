@@ -22,6 +22,9 @@
                 <attribute name="attrs">{'readonly': True}</attribute>
                 <attribute name="groups">base.group_no_one</attribute>
             </field>
+            <field name="routing_id" position="attributes">
+                <attribute name="attrs">{'required': True}</attribute>
+            </field>
             <xpath expr="//notebook/page[1]" position="replace">
                 <page string="Dispatch Work Orders">
                     <field name="dispatch_workorder_ids" options="{'reload_on_button': True}"

@@ -37,7 +37,7 @@
                         </group>
                     </group>
                      <group>
-                        <field name="operation_ids" widget="many2many_tags" domain="[('routing_id', '=', routing_id)]" options="{'no_create': True, 'no_open':True}"/>
+                        <!--<field name="operation_ids" widget="many2many_tags" domain="[('routing_id', '=', routing_id)]" options="{'no_create': True, 'no_open':True}"/>-->
                     </group>
                     <notebook>
                         <page string="Components">
@@ -79,7 +79,6 @@
                     <field name="code"/>
                     <field name="product_id" groups="product.group_product_variant"/>
                     <field name="product_qty"/>
-                    <field name="routing_id" groups="mrp.group_mrp_routings"/>
                     <field name="routing_id" groups="mrp.group_mrp_routings"/>
                 </tree>
             </field>
