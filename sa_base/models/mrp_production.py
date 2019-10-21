@@ -236,7 +236,8 @@ class MrpProduction(models.Model):
     @api.one
     def _create_workorder_by_dispatching(self):
         workorders = self.env['mrp.workorder']
-        dispatch_wos = self.dispatch_workorder_ids.filtered('is_dispatched')
+        dispatch_wos = self.dispatch_workorder_ids.filtered('is_dispatched').sorted(
+            lambda wo: wo.workcenter_id.sequence)
         for dispatch in dispatch_wos:
             operation = dispatch.operation_id
             workcenter_id = dispatch.workcenter_id
