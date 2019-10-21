@@ -129,6 +129,22 @@
             </field>
         </record>
 
+        <record id="sa_mrp_workcenter_group_tool_tree_view" model="ir.ui.view">
+            <field name="name">sa_mrp_workcenter_group_tool_tree_view</field>
+            <field name="model">mrp.workcenter.group.tool</field>
+            <field eval="1" name="priority"/>
+            <field name="arch" type="xml">
+                <tree string="Work Center Group Tool">
+                    <field name="id"/>
+                    <field name="workgroup_id"/>
+                    <field name="workcenter_id"/>
+                    <field name="tool_id"/>
+                </tree>
+            </field>
+        </record>
+
+
+
         <record id="sa_mrp_workcenter_group_form_view" model="ir.ui.view">
             <field name="name">sa_mrp_workcenter_group_form_view</field>
             <field name="model">mrp.workcenter.group</field>

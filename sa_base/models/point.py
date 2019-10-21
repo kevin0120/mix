@@ -147,6 +147,9 @@ class OperationPoints(models.Model):
     tolerance_min_degree = fields.Float('Degree Min Tolerance', related='qcp_id.tolerance_min_degree', inherited=True, digits=dp.get_precision('Quality Tests'), default=0.0)
     tolerance_max_degree = fields.Float('Degree Max Tolerance', related='qcp_id.tolerance_max_degree', inherited=True, digits=dp.get_precision('Quality Tests'), default=0.0)
 
+    tightening_tool_ids = fields.Many2many('mrp.workcenter.group.tool', 'point_tool_rel', 'point_id', 'tool_id',
+                               string='Tightening Tools(Tightening Gun)', copy=False)
+
     @api.multi
     def name_get(self):
         res = []
