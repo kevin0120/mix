@@ -16,6 +16,7 @@ import { getDevice } from '../../external/device';
 import dialogActions from '../../dialog/action';
 import type { IWorkStep } from '../interface/IWorkStep';
 import type { IScrewStep } from './interface/IScrewStep';
+import {reduceResult2TimeLine} from './handleResult';
 
 function* doPoints(points, isFirst, orderActions) {
   try {
@@ -162,14 +163,13 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsScrewStep ext
             orderActions
           );
 
-          // TODO: timeLine
-
           switch (nextAction.type) {
             case SCREW_STEP.RESULT: {
-              console.log(nextAction);
               const {
                 results: { data: results }
               } = nextAction;
+              yield call(this.updateData, reduceResult2TimeLine(results));
+
               const { active, inactive } = this._pointsManager.newResult(results);
 
               inactive.forEach(p => activePoints.delete(p));

@@ -186,7 +186,7 @@ const resultStatusColor = {
   default: 'info'
 };
 
-const reduceResult2TimeLine = (results: Array<tResult>) =>
+export const reduceResult2TimeLine = (results: Array<tResult>) =>
   (d: tScrewStepData): tScrewStepData => ({
     ...d,
     timeLine: [

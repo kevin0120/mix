@@ -25,10 +25,14 @@ export class ClsOperationPoint {
   isFinalFail(): boolean {
     // 结果的长度已经达到最大重试次数，同时最后一条结果为fail
     const rsCount = this._results.length;
+    // return (
+    //   this._point.maxRetryTimes >= 0 &&
+    //   rsCount >= this._point.maxRetryTimes &&
+    //   this._results[rsCount - 1].result === RESULT_STATUS.nok
+    // );
     return (
       this._point.maxRetryTimes >= 0 &&
-      rsCount >= this._point.maxRetryTimes &&
-      this._results[rsCount - 1].result === RESULT_STATUS.nok
+      this._results.filter(r => r.result === RESULT_STATUS.nok).length >= this._point.maxRetryTimes
     );
   }
 

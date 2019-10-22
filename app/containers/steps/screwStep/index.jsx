@@ -69,7 +69,7 @@ function ScrewStep({ isCurrent, image, points, redoPoint, result }: Props) {
         result({
           data: [{
             ...point._point,
-            result: RESULT_STATUS.nok
+            result: RESULT_STATUS.ok
           }]
         });
         // redoPoint(point);
