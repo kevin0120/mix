@@ -154,8 +154,8 @@ class MrpWorkorder(models.Model):
                     'product_qty': 1.0,
                 }
                 consume_sudo.create(val)
-                for point in step.operation_point_ids:
-                    wgc_id = point.tightening_tool_ids.filtered(
+                for operation_point in step.operation_point_ids:
+                    wgc_id = operation_point.tightening_tool_ids.filtered(
                         lambda wgc: wgc.workcenter_id == order.workcenter_id)
                     if not wgc_id or not wgc_id.tool_id:
                         _logger.error("Can Not Found The Operation Point Tool Define")
@@ -163,9 +163,9 @@ class MrpWorkorder(models.Model):
                     val = {
                         'sequence': idx,
                         'workorder_id': order.id,
-                        'point_id': point.qcp_id.id,
-                        'operation_point_id': point.id,
-                        'product_id': point.product_id.id,
+                        'point_id': operation_point.qcp_id.id,
+                        'operation_point_id': operation_point.id,
+                        'product_id': operation_point.product_id.id,
                         'product_qty': 1.0,
                         # todo: 拧紧枪需要定义好模型后再增加
                         'tool_id': wgc_id.tool_id.id or False
