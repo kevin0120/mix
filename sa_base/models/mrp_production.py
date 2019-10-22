@@ -142,6 +142,7 @@ class MrpWorkorder(models.Model):
 
     @api.multi
     def _create_bulk_cosume_lines(self):
+        consume_sudo = self.env['mrp.wo.consu.line'].sudo()
         for order in self:
             step_ids = order.operation_id.sa_step_ids.filtered(lambda qcp: qcp.test_type != 'tightening_point')
             for idx, step in enumerate(step_ids):
@@ -152,7 +153,7 @@ class MrpWorkorder(models.Model):
                     'product_id': step.product_id.id,
                     'product_qty': 1.0,
                 }
-                self.env['mrp.wo.consu.line'].sudo().create(val)
+                consume_sudo.create(val)
                 for point in step.operation_point_ids:
                     wgc_id = point.tightening_tool_ids.filtered(
                         lambda wgc: wgc.workcenter_id == order.workcenter_id)
@@ -169,7 +170,7 @@ class MrpWorkorder(models.Model):
                         # todo: 拧紧枪需要定义好模型后再增加
                         'tool_id': wgc_id.tool_id.id or False
                     }
-                    self.env['mrp.wo.consu.line'].sudo().create(val)
+                    consume_sudo.create(val)
 
     @api.multi
     def unlink(self):
