@@ -24,10 +24,15 @@ class MrpWOConsu(models.Model):
     check_id = fields.Many2one('sa.quality.check', ondelete='restrict', required=True,
                                string='Quality Check For Work Step')
 
-    qcp_id = fields.Many2one('sa.quality.point', related='check_id.point_id', inherited=True)
+    point_id = fields.Many2one('sa.quality.point', related='check_id.point_id', inherited=True)
+
+    operation_point_id = fields.Many2one('operation.point', ondelete='set null')
 
     product_id = fields.Many2one('product.product', related='check_id.product_id', string='Consume Product',
                                  inherited=True)
+
+    test_type_id = fields.Many2one(
+        'sa.quality.point.test_type', 'Test Type', related='point_id.test_type_id', store=True)
 
     product_qty = fields.Float('Consume Product Qty', inherited=True)
 
@@ -117,13 +122,19 @@ class MrpWOConsu(models.Model):
 class MrpWorkorder(models.Model):
     _inherit = 'mrp.workorder'
 
+    origin = fields.Char(
+        'Source', copy=False,
+        help="Reference of the document that generated this Work order request.")
+
     track_no = fields.Char('Finished Product Tracking Number', related='production_id.track_no', required=True,
                            store=True)
 
-    consu_bom_line_ids = fields.One2many('mrp.wo.consu.line', 'workorder_id', string='Consume Product')
+    consu_work_order_line_ids = fields.One2many('mrp.wo.consu.line', 'workorder_id', string='Consume Product')
 
     @api.model
     def create(self, vals):
+        if 'origin' not in vals:
+            vals.update({'origin': vals.get('name', '')})
         ret = super(MrpWorkorder, self).create(vals)
         if 'track_no' not in vals and not ret.track_no:
             ret.write({'track_no': ret.production_id.track_no})
@@ -131,19 +142,35 @@ class MrpWorkorder(models.Model):
 
     @api.multi
     def _create_bulk_cosume_lines(self):
-        vals = []
+        consume_sudo = self.env['mrp.wo.consu.line'].sudo()
         for order in self:
-            for idx, step in enumerate(order.operation_id.sa_step_ids):
+            step_ids = order.operation_id.sa_step_ids.filtered(lambda qcp: qcp.test_type != 'tightening_point')
+            for idx, step in enumerate(step_ids):
                 val = {
                     'sequence': idx,
                     'workorder_id': order.id,
-                    'qcp_id': step.id,
+                    'point_id': step.id,
                     'product_id': step.product_id.id,
                     'product_qty': 1.0,
-                    # todo: 拧紧枪需要定义好模型后再增加
-                    # 'tool_id':
                 }
-                self.env['mrp.wo.consu.line'].create(val)
+                consume_sudo.create(val)
+                for point in step.operation_point_ids:
+                    wgc_id = point.tightening_tool_ids.filtered(
+                        lambda wgc: wgc.workcenter_id == order.workcenter_id)
+                    if not wgc_id or not wgc_id.tool_id:
+                        _logger.error("Can Not Found The Operation Point Tool Define")
+                        continue
+                    val = {
+                        'sequence': idx,
+                        'workorder_id': order.id,
+                        'point_id': point.qcp_id.id,
+                        'operation_point_id': point.id,
+                        'product_id': point.product_id.id,
+                        'product_qty': 1.0,
+                        # todo: 拧紧枪需要定义好模型后再增加
+                        'tool_id': wgc_id.tool_id.id or False
+                    }
+                    consume_sudo.create(val)
 
     @api.multi
     def unlink(self):
@@ -230,7 +257,8 @@ class MrpProduction(models.Model):
     @api.one
     def _create_workorder_by_dispatching(self):
         workorders = self.env['mrp.workorder']
-        dispatch_wos = self.dispatch_workorder_ids.filtered('is_dispatched')
+        dispatch_wos = self.dispatch_workorder_ids.filtered('is_dispatched').sorted(
+            lambda wo: wo.workcenter_id.sequence)
         for dispatch in dispatch_wos:
             operation = dispatch.operation_id
             workcenter_id = dispatch.workcenter_id
@@ -283,6 +311,7 @@ class MrpProduction(models.Model):
         orders_to_plan = self.filtered(lambda order: order.routing_id and order.state == 'confirmed')
         for order in orders_to_plan:
             order._create_workorder_by_dispatching()
+            order.workorder_ids._create_bulk_cosume_lines()
         return orders_to_plan.write({'state': 'planned'})
 
     @api.multi

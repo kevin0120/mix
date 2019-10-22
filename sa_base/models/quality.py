@@ -142,11 +142,10 @@ class QualityPoint(models.Model):
 class QualityCheck(models.Model):
     _inherit = "sa.quality.check"
 
+    bolt_number = fields.Char(string='Bolt Number', related='point_id.name', store=True)  # 质量控制点名称和螺栓编号在sa_base模块中绑定了
+
     measure_degree = fields.Float('Measure Degree', default=0.0, digits=dp.get_precision('Quality Tests'),
                                   track_visibility='onchange')
-
-    assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line ID',
-                                       related='production_id.assembly_line_id', readonly=True)
 
     @api.multi
     def unlink(self):

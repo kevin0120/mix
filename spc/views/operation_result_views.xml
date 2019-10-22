@@ -92,7 +92,7 @@
         <field name="model">operation.result</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_small_column" default_order="quality_state asc">
-                <field name="name"/>
+                <field name="track_no"/>
                 <field name="user_id"/>
                 <field name="time"/>
                 <field name="product_id"/>
@@ -102,7 +102,7 @@
                         <div t-attf-class="oe_kanban_card oe_kanban_global_click">
                             <div class="row">
                                 <div class="col-xs-6">
-                                    <strong><span><t t-esc="record.name.value"/></span></strong>
+                                    <strong><span><t t-esc="record.track_no.value"/></span></strong>
                                 </div>
                                 <div class="col-xs-6">
                                     <strong><span t-attf-class="pull-right text-right label #{['none'].indexOf(record.quality_state.raw_value) > -1 ? 'label-default' : ['fail'].indexOf(record.quality_state.raw_value) > -1 ? 'label-danger' :['exception'].indexOf(record.quality_state.raw_value) > -1 ? 'label-warning' : ['done'].indexOf(record.quality_state.raw_value) > -1 ? 'label-primary' : 'label-success'}"><t t-esc="record.quality_state.value"/></span></strong>
@@ -178,7 +178,7 @@
         <field name="model">operation.result</field>
         <field name="arch" type="xml">
             <search>
-                <field name="name" string="Track Number" filter_domain="[('track_no','ilike',self)]"/>
+                <field name="track_no" string="Track Number" filter_domain="[('track_no','ilike',self)]"/>
                 <field name="product_id" filter_domain="['|', ('product_id.name','ilike',self),('product_id.default_code','ilike',self)]"/>
                 <field name="consu_product_id" filter_domain="['|', ('consu_product_id.name','ilike',self), ('consu_product_id.default_code','ilike',self)]"/>
                 <field name="workorder_id" string="Operation"/>

@@ -87,6 +87,11 @@ class MrpWorkCenter(models.Model):
     type = fields.Selection([('operate', 'Operate'),
                              ('rework', 'Rework')], default='operate')
 
+    sequence = fields.Integer(
+        'Sequence', default=lambda self: int(self.env['ir.sequence'].next_by_code('mrp.workcenter.sequence')) or 1,
+        required=True,
+        help="Gives the sequence order when displaying a list of work centers.")
+
     user_ids = fields.Many2many('res.users', 'workcenter_users_rel', 'workcenter_id', 'user_id',
                                 string='Responsible Persons',
                                 default=lambda self: [(4, self.env.uid)])

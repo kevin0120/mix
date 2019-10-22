@@ -167,9 +167,6 @@ class TorAngSPCReport(models.TransientModel):
                  is_datazoom_show=False, datazoom_type='both', label_text_size=16,
                  tooltip_tragger='axis', is_fill=False)
 
-        # grid = Grid(width=1920, height=1440, )
-        # grid.add(bar, grid_bottom="60%", grid_left="60%")
-        # grid.add(line, grid_bottom="60%", grid_right="60%")
         overlap = Overlap(width=1080, height=1024, page_title=u"Normal Distribution({0})".format(self.spc_target))
         overlap.add(line)
         overlap.add(bar)

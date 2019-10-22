@@ -2,6 +2,7 @@
 
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
+from uuid import uuid4
 
 
 class ProductTemplate(models.Model):
@@ -23,6 +24,16 @@ class ProductProduct(models.Model):
     def _compute_product_quality_point_count(self):
         for product in self:
             product.qcp_count = self.env['sa.quality.point'].search_count([('product_id', '=', product.id)])
+
+    @api.model
+    def default_get(self, fields_list):
+        res = super(ProductProduct, self).default_get(fields_list)
+        sa_type = self._context.get('default_sa_type')
+        if sa_type == 'screw':
+            res.update({
+                'default_code': str(uuid4())
+            })
+        return res
 
     @api.multi
     def copy(self, default=None):
