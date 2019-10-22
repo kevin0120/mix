@@ -235,7 +235,7 @@ class QualityCheck(models.Model):
     picture = fields.Binary('Picture', attachment=True)
 
     failure_message = fields.Html(related='point_id.failure_message', readonly=True)
-    measure = fields.Float('Measure', default=0.0, digits='Quality Tests', tracking=True)
+    measure = fields.Float('Measure', default=0.0, digits=dp.get_precision('Quality Tests'), tracking=True)
     measure_success = fields.Selection([
         ('none', 'No measure'),
         ('pass', 'Pass'),

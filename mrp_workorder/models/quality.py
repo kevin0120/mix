@@ -2,13 +2,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
+from odoo.addons import decimal_precision as dp
 
 
 class TestType(models.Model):
     _inherit = "sa.quality.point.test_type"
 
     allow_registration = fields.Boolean(search='_get_domain_from_allow_registration',
-            store=False, default=False)
+                                        store=False, default=False)
 
     def _get_domain_from_allow_registration(self, operator, value):
         if value:
@@ -25,7 +26,8 @@ class MrpRouting(models.Model):
         picking_type_id = self.env['stock.picking.type'].search([('code', '=', 'mrp_operation')], limit=1).id
         test_type_id = self.env.ref('quality.test_type_text')
         action = self.env.ref('mrp_workorder.action_mrp_workorder_show_steps').read()[0]
-        ctx = dict(self._context, default_picking_type_id=picking_type_id, default_company_id=self.company_id.id, default_test_type_id=test_type_id.id)
+        ctx = dict(self._context, default_picking_type_id=picking_type_id, default_company_id=self.company_id.id,
+                   default_test_type_id=test_type_id.id)
         action.update({'context': ctx})
         return action
 
@@ -40,7 +42,8 @@ class QualityPoint(models.Model):
     test_type_id = fields.Many2one(
         'sa.quality.point.test_type',
         domain="[('allow_registration', '=', operation_id and code == 'mrp_operation')]")
-    test_report_type = fields.Selection([('pdf', 'PDF'), ('zpl', 'ZPL')], string="Report Type", default="pdf", required=True)
+    test_report_type = fields.Selection([('pdf', 'PDF'), ('zpl', 'ZPL')], string="Report Type", default="pdf",
+                                        required=True)
     worksheet = fields.Selection([
         ('noupdate', 'Do not update page'),
         ('scroll', 'Scroll to specific page')], string="Worksheet",
@@ -64,10 +67,14 @@ class QualityPoint(models.Model):
         if self.picking_type_id.code == 'mrp_operation':
             return {
                 'domain': {
-                    'operation_id': [('routing_id', 'in', routing_ids), '|', ('company_id', '=', self.company_id.id), ('company_id', '=', False)],
-                    'component_id': [('id', 'in', list(component_ids)), '|', ('company_id', '=', self.company_id.id), ('company_id', '=', False)],
-                    'product_tmpl_id': [('bom_ids', '!=', False), ('bom_ids.routing_id', '!=', False), '|', ('company_id', '=', self.company_id.id), ('company_id', '=', False)],
-                    'product_id': [('variant_bom_ids', '!=', False), ('variant_bom_ids.routing_id', '!=', False), '|', ('company_id', '=', self.company_id.id), ('company_id', '=', False)],
+                    'operation_id': [('routing_id', 'in', routing_ids), '|', ('company_id', '=', self.company_id.id),
+                                     ('company_id', '=', False)],
+                    'component_id': [('id', 'in', list(component_ids)), '|', ('company_id', '=', self.company_id.id),
+                                     ('company_id', '=', False)],
+                    'product_tmpl_id': [('bom_ids', '!=', False), ('bom_ids.routing_id', '!=', False), '|',
+                                        ('company_id', '=', self.company_id.id), ('company_id', '=', False)],
+                    'product_id': [('variant_bom_ids', '!=', False), ('variant_bom_ids.routing_id', '!=', False), '|',
+                                   ('company_id', '=', self.company_id.id), ('company_id', '=', False)],
                 }
             }
 
@@ -84,18 +91,19 @@ class QualityCheck(models.Model):
     _inherit = "sa.quality.check"
 
     workorder_id = fields.Many2one(
-        'mrp.workorder', 'Operation', check_company=True)
-    workcenter_id = fields.Many2one('mrp.workcenter', related='workorder_id.workcenter_id', store=True, readonly=True)  # TDE: necessary ?
+        'mrp.workorder', 'Operation')
+    workcenter_id = fields.Many2one('mrp.workcenter', related='workorder_id.workcenter_id', store=True,
+                                    readonly=True)  # TDE: necessary ?
     production_id = fields.Many2one(
-        'mrp.production', 'Production Order', check_company=True)
+        'mrp.production', 'Production Order')
 
     # For components registration
     parent_id = fields.Many2one(
-        'sa.quality.check', 'Parent Quality Check', check_company=True)
+        'sa.quality.check', 'Parent Quality Check')
     component_id = fields.Many2one(
-        'product.product', 'Component', check_company=True)
+        'product.product', 'Component')
 
-    qty_done = fields.Float('Done', default=1.0, digits='Product Unit of Measure')
+    qty_done = fields.Float('Done', default=1.0, digits=dp.get_precision('Product Unit of Measure'))
     finished_lot_id = fields.Many2one(
         'stock.production.lot', 'Finished Product Lot',
         domain="[('product_id', '=', product_id), ('company_id', '=', company_id)]")
@@ -120,7 +128,6 @@ class QualityCheck(models.Model):
             if point:
                 value['component_id'] = point.component_id.id
         return super(QualityCheck, self).create(value)
-
 
     def _compute_title(self):
         for check in self:

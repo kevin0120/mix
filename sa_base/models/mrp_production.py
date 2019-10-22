@@ -2,6 +2,9 @@
 
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
+from odoo.addons import decimal_precision as dp
+
+import pprint
 import logging
 import json
 import math
@@ -34,7 +37,8 @@ class MrpWOConsu(models.Model):
     test_type_id = fields.Many2one(
         'sa.quality.point.test_type', 'Test Type', related='point_id.test_type_id', store=True)
 
-    product_qty = fields.Float('Consume Product Qty', inherited=True)
+    product_qty = fields.Float('Consume Product Qty', default=1.0, digits=dp.get_precision('Product Unit of Measure'),
+                               inherited=True)
 
     tool_id = fields.Many2one('maintenance.equipment', string='Tightening Tool(Gun/Wrench)', copy=False)
 
@@ -54,11 +58,6 @@ class MrpWOConsu(models.Model):
                 for parent_model, parent_field in self._inherits.iteritems()
             }
 
-            # list of column assignments defined as tuples like:
-            #   (column_name, format_string, column_value)
-            #   (column_name, sql_formula)
-            # Those tuples will be used by the string formatting for the INSERT
-            # statement below.
             updates = [
                 ('id', "%s", "nextval('%s')" % self._sequence),
             ]
@@ -150,23 +149,28 @@ class MrpWorkorder(models.Model):
                     'sequence': idx,
                     'workorder_id': order.id,
                     'point_id': step.id,
+                    'production_id': order.production_id.id,
+                    'test_type_id': step.test_type_id.id,
                     'product_id': step.product_id.id,
-                    'product_qty': 1.0,
+                    'team_id': step.team_id.id
                 }
                 consume_sudo.create(val)
-                for point in step.operation_point_ids:
-                    wgc_id = point.tightening_tool_ids.filtered(
+                for operation_point in step.operation_point_ids:
+                    wgc_id = operation_point.tightening_tool_ids.filtered(
                         lambda wgc: wgc.workcenter_id == order.workcenter_id)
                     if not wgc_id or not wgc_id.tool_id:
-                        _logger.error("Can Not Found The Operation Point Tool Define")
+                        _logger.error(
+                            "Can Not Found The Operation Point Tool Define: {0}".format(pprint.pformat(wgc_id)))
                         continue
                     val = {
                         'sequence': idx,
                         'workorder_id': order.id,
-                        'point_id': point.qcp_id.id,
-                        'operation_point_id': point.id,
-                        'product_id': point.product_id.id,
-                        'product_qty': 1.0,
+                        'test_type_id': operation_point.test_type_id.id,
+                        'production_id': order.production_id.id,
+                        'point_id': operation_point.qcp_id.id,
+                        'operation_point_id': operation_point.id,
+                        'product_id': operation_point.product_id.id,
+                        'team_id': step.team_id.id,
                         # todo: 拧紧枪需要定义好模型后再增加
                         'tool_id': wgc_id.tool_id.id or False
                     }
