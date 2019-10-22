@@ -8,7 +8,7 @@ import json
 class LocalSense(http.Controller):
     @http.route('/api/v1/workcenters', type='http', methods=['GET', 'OPTIONS'], auth='none', cors='*', csrf=False)
     def _get_workcenter_info(self, **kw):
-        domain = [('category_name', '=', 'Gun')]
+        domain = [('category_name', 'in', ['tightening_gun', 'tightening_wrench'])]
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         if 'location_tag' in kw.keys():
             domain += [('location_tag', '=', kw['location_tag'])]

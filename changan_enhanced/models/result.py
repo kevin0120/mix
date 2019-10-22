@@ -88,7 +88,6 @@ class OperationResult(models.HyperModel):
 
     def read_group_qualified(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         self.check_access_rights('read')
-        # gun_filter = []
         w_clause_centron_part2 = ""
         w_clause_centron_part1 = ""
         d = list()
@@ -96,7 +95,6 @@ class OperationResult(models.HyperModel):
             if r[0] == 'measure_result':
                 continue
             if r[0] == 'gun_id':
-                # gun_filter = [r[2]] if isinstance(r[2], int) else r[2]
                 if len(w_clause_centron_part1):
                     w_clause_centron_part1 += 'and gun_id = {0}'.format(r[2])
                 else:

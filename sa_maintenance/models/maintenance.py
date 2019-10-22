@@ -199,7 +199,7 @@ class MaintenanceRequest(models.Model):
         ret = self.equipment_id
         if not ret:
             return
-        if ret.category_name == 'Gun':
+        if ret.category_name in ['tightening_gun', 'tightening_wrench']:
             master = ret._get_parent_masterpc()[0]
             if not master:
                 return

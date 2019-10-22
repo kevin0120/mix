@@ -16,7 +16,7 @@ from requests import ConnectionError, RequestException
 class MrpRoutingWorkcenter(models.Model):
     _inherit = 'mrp.routing.workcenter'
 
-    gun_id = fields.Many2one('maintenance.equipment', string='Screw Gun', copy=False,
+    tool_id = fields.Many2one('maintenance.equipment', string='Tightening Tool(Screw Gun)', copy=False,
                              domain=lambda self: [('category_id', '=', self.env.ref('sa_base.equipment_Gun').id)])
 
     @api.onchange('workcenter_id')
