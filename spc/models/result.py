@@ -23,6 +23,8 @@ _logger = logging.getLogger(__name__)
 class OperationResult(models.HyperModel):
     _name = "operation.result"
 
+    _rec_name = 'track_no'
+
     sequence = fields.Integer('sequence', default=1)
 
     workorder_id = fields.Many2one('mrp.workorder', 'Actual Work Order', index=True)
@@ -34,6 +36,8 @@ class OperationResult(models.HyperModel):
     track_no = fields.Char('Finished Product Tracking Number')  # 如果无法通过工单查询,使用此字段
 
     assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line', readonly=True)
+
+    qcp_id = fields.Many2one('sa.quality.point', 'Quality Control Point', related='quality_check_id.point_id')
 
     quality_check_id = fields.Many2one('sa.quality.check', 'Quality Check', index=True,
                                        domain=lambda self: [('test_type_id.id', '=', self.env.ref('quality.test_type_tightening_point').id)])
@@ -69,7 +73,6 @@ class OperationResult(models.HyperModel):
 
     cur_objects = fields.Char(string='Curve Files')
 
-    name = fields.Char('Name', default=lambda self: _('New'))
     quality_state = fields.Selection([
         ('none', 'To do'),
         ('exception', 'Exception'),
