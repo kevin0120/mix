@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="tangche_sa_mrp_routing_workcenter_form_view" model="ir.ui.view">
+            <field name="name">tangche_sa_mrp_routing_workcenter_form_view</field>
+            <field name="model">mrp.routing.workcenter</field>
+            <field name="inherit_id" ref="sa_base.sa_mrp_routing_workcenter_form_view"/>
+            <field name="arch" type="xml">
+                <field name="prefer_workcenter_id_domain" position="replace">
+
+                </field>
+                <field name="workcenter_id" position="attributes">
+                    <attribute name="domain">[]</attribute>
+                </field>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -4,13 +4,10 @@ from odoo import models, fields, api, _, SUPERUSER_ID
 
 from odoo.exceptions import UserError, ValidationError
 
-import requests as Requests
-
-from requests import ConnectionError, RequestException, exceptions
-
+import logging
 import json
 
-MASTER_WROKORDERS_API = '/rush/v1/mrp.routing.workcenter'
+_logger = logging.getLogger(__name__)
 
 
 class MrpRoutingWorkcenter(models.Model):
@@ -20,19 +17,19 @@ class MrpRoutingWorkcenter(models.Model):
         'mrp.routing', 'Parent Routing',
         index=True, ondelete='set null', required=False,
         help="The routing contains all the Work Centers used and for how long. This will create work orders afterwards"
-        "which alters the execution of the manufacturing order. ")
+             "which alters the execution of the manufacturing order. ")
 
     sa_routing_ids = fields.Many2many('mrp.routing', 'routing_operation_rel', 'operation_id', 'routing_id',
-                                     string="Routes", copy=False)
+                                      string="Routes", copy=False)
 
     workcenter_group_id = fields.Many2one('mrp.workcenter.group', copy=False, required=True)
     workcenter_ids = fields.Many2many('mrp.workcenter', related='workcenter_group_id.sa_workcenter_ids',
-                                     copy=False, readonly=True)
+                                      copy=False, readonly=True)
 
     sa_step_ids = fields.Many2many('sa.quality.point', 'work_step_operation_rel', 'operation_id', 'step_id',
-                                     string="Steps", copy=False)
+                                   string="Steps", copy=False)
 
-    prefer_workcenter_id_domain = fields.Char(compute='_compute_workcenter_group', readonly=True, store=False,)
+    prefer_workcenter_id_domain = fields.Char(compute='_compute_workcenter_group', readonly=True, store=False, )
 
     workcenter_id = fields.Many2one('mrp.workcenter', string='Prefer Work Center', copy=False,
                                     required=False)
@@ -84,7 +81,7 @@ class MrpRoutingWorkcenter(models.Model):
         picking_type_id = self.env['stock.picking.type'].search([('code', '=', 'mrp_operation')], limit=1).id
         test_type_id = self.env.ref('quality.test_type_text').id
         ctx = dict(self._context, default_picking_type_id=picking_type_id, default_company_id=self.company_id.id,
-                   default_sa_operation_ids=[(4, ids[0], None)], default_operation_id= self.id,
+                   default_sa_operation_ids=[(4, ids[0], None)], default_operation_id=self.id,
                    default_test_type_id=test_type_id)
         action.update({'context': ctx})
         action['domain'] = [('sa_operation_ids', 'in', self.ids)]
@@ -118,75 +115,10 @@ class MrpRoutingWorkcenter(models.Model):
 
     @api.one
     def _push_mrp_routing_workcenter(self, url):
-        self.ensure_one()
-        operation_id = self
-        bom_ids = self.env['mrp.bom'].search([('operation_ids', 'in', operation_id.ids), ('active', '=', True)])
-        if not bom_ids:
-            return
-        _points = []
-        for point in operation_id.operation_point_ids:
-            # bom_line = self.env['mrp.bom.line'].search([('operation_id', '=', operation_id.id), ('operation_point_id', '=', point.id)])
-            # qcp = self.env['sa.quality.point'].search([('operation_id', '=', operation_id.id), ('bom_line_id', '=', bom_line.id)])
-            _points.append({
-                'sequence': point.sequence,
-                'group_sequence': point.group_sequence,
-                'offset_x': point.x_offset,
-                'offset_y': point.y_offset,
-                'max_redo_times': point.max_redo_times,
-                'gun_sn': '',  # 默认模式下这里传送的枪的序列号是空字符串
-                'controller_sn': '',
-                # 'tolerance_min': qcp.tolerance_min,
-                # 'tolerance_max': qcp.tolerance_max,
-                # 'tolerance_min_degree': qcp.tolerance_min_degree,
-                # 'tolerance_max_degree': qcp.tolerance_max_degree,
-                'consu_product_id': point.product_id.id if point.product_id.id else 0,
-                'nut_no': point.product_id.default_code if point.product_id else '',
-            })
-
-        for bom_id in bom_ids:
-            val = {
-                "id": operation_id.id,
-                "workcenter_id": operation_id.workcenter_id.id,
-                "job": int(operation_id.op_job_id.code) if operation_id.op_job_id else 0,
-                "max_op_time": operation_id.max_op_time,
-                "name": u"[{0}]{1}@{2}/{3}".format(operation_id.name, operation_id.group_id.code,
-                                                   operation_id.workcenter_id.name,
-                                                   operation_id.routing_id.name),
-                "img": u'data:{0};base64,{1}'.format('image/png',
-                                                     operation_id.worksheet_img) if operation_id.worksheet_img else "",
-                "product_id": bom_id.product_id.id if bom_id else 0,
-                "product_type": bom_id.product_id.default_code if bom_id else "",
-                "workcenter_code": operation_id.workcenter_id.code if operation_id.workcenter_id else "",
-                'vehicleTypeImg': u'data:{0};base64,{1}'.format('image/png',
-                                                                bom_id.product_id.image_small) if bom_id.product_id.image_small else "",
-                "points": _points
-            }
-            try:
-                ret = Requests.put(url, data=json.dumps(val), headers={'Content-Type': 'application/json'}, timeout=1)
-                if ret.status_code == 200:
-                    # operation_id.write({'sync_download_time': fields.Datetime.now()})  ### 更新发送结果
-                    self.env.user.notify_info(u'下发工艺成功')
-            except ConnectionError as e:
-                self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
-            except RequestException as e:
-                self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
-
         return True
 
     @api.multi
     def button_send_mrp_routing_workcenter(self):
-        for operation in self:
-            master = operation.workcenter_id.masterpc_id if operation.workcenter_id else None
-            if not master:
-                continue
-            connections = master.connection_ids.filtered(
-                lambda r: r.protocol == 'http') if master.connection_ids else None
-            if not connections:
-                continue
-            url = \
-            ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_WROKORDERS_API) for connect in connections][0]
-
-            operation._push_mrp_routing_workcenter(url)
         return True
 
     @api.multi
@@ -324,7 +256,7 @@ class MrpRouting(models.Model):
 
     '''重写operation_ids的定义'''
     sa_operation_ids = fields.Many2many('mrp.routing.workcenter', 'routing_operation_rel', 'routing_id', 'operation_id',
-                                     string="Operations", copy=False)
+                                        string="Operations", copy=False)
     code = fields.Char('Reference', copy=False)
 
     operation_count = fields.Integer(string='Operations', compute='_compute_operation_count')
