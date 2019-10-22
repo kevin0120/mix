@@ -5,11 +5,11 @@ import json
 from odoo.http import request, Response
 
 
-class Guns(http.Controller):
-    @http.route('/api/v1/guns', type='http', methods=['GET', 'OPTIONS'], auth='none', cors='*', csrf=False)
+class tools(http.Controller):
+    @http.route('/api/v1/tools', type='http', methods=['GET', 'OPTIONS'], auth='none', cors='*', csrf=False)
     def _get_guns(self, **kw):
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
-        domain = [('category_name', '=', 'Gun')]
+        domain = [('category_name', 'in', ('tightening_gun', 'tightening_wrench'))]
         if 'serial' in kw.keys():
             domain += [('serial_no', '=', kw['serial'])]
 

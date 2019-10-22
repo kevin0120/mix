@@ -3,11 +3,10 @@
     'name': "changan_enhanced",
 
     'summary': """
-        Short (1 phrase/line) summary of the module's purpose, used as
-        subtitle on modules listing or apps.openerp.com""",
+        TS001 长安合肥二期""",
 
     'description': """
-        Long description of module's purpose
+        TS001 长安合肥二期
     """,
 
     'author': "My Company",
