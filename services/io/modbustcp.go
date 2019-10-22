@@ -40,7 +40,11 @@ func (s *ModbusTcp) Start() error {
 }
 
 func (s *ModbusTcp) Stop() error {
-	return s.handler.Close()
+	if s.handler != nil {
+		return s.handler.Close()
+	}
+
+	return nil
 }
 
 func (s *ModbusTcp) Status() string {

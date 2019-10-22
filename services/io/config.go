@@ -1,6 +1,7 @@
 package io
 
 import (
+	"github.com/kataras/iris/core/errors"
 	"github.com/masami10/rush/toml"
 	"time"
 )
@@ -32,6 +33,13 @@ func NewConfig() Config {
 }
 
 func (c Config) Validate() error {
+
+	for _, io := range c.IOS {
+		_, exist := VENDOR_MODELS[io.Model]
+		if !exist {
+			return errors.New("Vendor Not Found")
+		}
+	}
 
 	return nil
 }
