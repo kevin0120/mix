@@ -40,7 +40,8 @@ class OperationResult(models.HyperModel):
     qcp_id = fields.Many2one('sa.quality.point', 'Quality Control Point', related='quality_check_id.point_id')
 
     quality_check_id = fields.Many2one('sa.quality.check', 'Quality Check', index=True,
-                                       domain=lambda self: [('test_type_id.id', '=', self.env.ref('quality.test_type_tightening_point').id)])
+                                       domain=lambda self: [('test_type_id.id', '=',
+                                                             self.env.ref('quality.test_type_tightening_point').id)])
 
     operation_point_id = fields.Many2one('operation.point', string='Tightening Operation Point')
 
@@ -137,17 +138,17 @@ class OperationResult(models.HyperModel):
     def init(self):
         self.env.cr.execute("""
             CREATE OR REPLACE FUNCTION create_operation_result(pset_m_threshold numeric, pset_m_max numeric,
-                                                   control_data timestamp without time zone, pset_w_max numeric,
-                                                   user_id bigint, one_time_pass boolean,
+                                                   control_date timestamp without time zone, pset_w_max numeric,
+                                                   user_id bigint,
                                                    pset_strategy varchar, measure_result varchar,
                                                    pset_w_threshold numeric, cur_objects varchar,
                                                    pset_m_target numeric, pset_m_min numeric,
-                                                   final_pass varchar, measure_degree numeric,
+                                                   measure_degree numeric,
                                                    measure_t_done numeric, measure_torque numeric, op_time integer,
-                                                   pset_w_min numeric, pset_w_target numeric, lacking varchar,
+                                                   pset_w_min numeric, pset_w_target numeric,
                                                    quality_state varchar, exception_reason varchar, sent boolean,
                                                    batch varchar,
-                                                   order_id bigint, nut_no varchar, r_tightening_id integer,
+                                                   order_no varchar, nut_no varchar, r_tightening_id integer,
                                                    vin_code varchar, vehicle_type varchar, gun_sn varchar)
   returns BIGINT as
 $$
@@ -155,13 +156,13 @@ DECLARE
   result_id            bigint;
   r_vin_code           varchar;
   r_job                varchar;
-  r_one_time_pass      varchar = 'fail';
   qcp_id               BIGINT  = null;
   consu_bom_id         BIGINT  = null;
   r_consu_product_id   BIGINT  = null;
   r_production_id      BIGINT  = null;
   r_workcenter_id      BIGINT;
   r_gun_id             BIGINT;
+  r_order_id           BIGINT = null;
   r_product_id         BIGINT;
   r_program_id         BIGINT;
   r_assembly_id        BIGINT;
@@ -175,17 +176,14 @@ BEGIN
       then r_measure_result = 'lsn';
     ELSE r_measure_result = measure_result;
     end case;
-  if one_time_pass
-  then
-    r_one_time_pass = 'pass';
-  end if;
 
-  if order_id != 0
+  if order_no != ''
   then
     select mp.track_no,
            qp.id,
            co.id,
            mp.id,
+           wo.id,
            wo.workcenter_id,
            me.id,
            mp.product_id,
@@ -194,15 +192,15 @@ BEGIN
            mp.assembly_line_id,
            mbl.id,
            mbl.operation_point_id
-           into r_vin_code, qcp_id, consu_bom_id, r_production_id, r_workcenter_id, r_gun_id, r_product_id, r_program_id, r_consu_product_id, r_assembly_id,r_bom_line_id,r_operation_point_id
+           into r_vin_code, qcp_id, consu_bom_id, r_production_id, r_order_id, r_workcenter_id, r_gun_id, r_product_id, r_program_id, r_consu_product_id, r_assembly_id,r_bom_line_id,r_operation_point_id
     from public.mrp_workorder wo,
-         public.mrp_wo_consu co,
+         public.mrp_wo_consu_line co,
          public.sa_quality_point qp,
          public.mrp_production mp,
          public.product_product pp,
          public.maintenance_equipment me,
          public.mrp_bom_line mbl
-    where wo.id = order_id
+    where wo.name = order_no
       and co.workorder_id = order_id
       and pp.default_code = nut_no
       and co.bom_line_id = qp.bom_line_id
@@ -214,7 +212,7 @@ BEGIN
     select wo.id into r_expect_order_id
     from public.mrp_workorder wo,
          public.mrp_production mp,
-         public.mrp_wo_consu co
+         public.mrp_wo_consu_line co
     where wo.production_id = mp.id
       and co.workorder_id = wo.id
       and mp.track_no = r_vin_code
@@ -222,7 +220,6 @@ BEGIN
     limit 1;
   else
     r_vin_code = vin_code;
-    order_id = null;
     select dd.pid,
            dd.cou_pid,
            job2.code,
@@ -261,24 +258,24 @@ BEGIN
 
 
   INSERT INTO public.operation_result (pset_m_threshold, pset_m_max, control_date, pset_w_max, user_id,
-                                       one_time_pass, pset_strategy, measure_result, pset_w_threshold,
-                                       cur_objects, pset_m_target, pset_m_min, final_pass, measure_degree,
+                                       pset_strategy, measure_result, pset_w_threshold,
+                                       cur_objects, pset_m_target, pset_m_min, measure_degree,
                                        measure_t_don,
-                                       measure_torque, op_time, pset_w_min, pset_w_target, lacking, quality_state,
+                                       measure_torque, op_time, pset_w_min, pset_w_target, quality_state,
                                        exception_reason, sent, batch, track_no,
                                        qcp_id, bom_line_id, operation_point_id, workorder_id,
                                        consu_product_id, consu_bom_line_id,
                                        production_id, tool_id, program_id, product_id, assembly_line_id, workcenter_id,
                                        tightening_id, job, expect_workorder_id,
                                        time)
-  VALUES (pset_m_threshold, pset_m_max, control_data, pset_w_max, user_id, r_one_time_pass, pset_strategy,
+  VALUES (pset_m_threshold, pset_m_max, control_date, pset_w_max, user_id, pset_strategy,
           r_measure_result,
-          pset_w_threshold, cur_objects, pset_m_target, pset_m_min, final_pass, measure_degree,
+          pset_w_threshold, cur_objects, pset_m_target, pset_m_min, measure_degree,
           measure_t_done, measure_torque, op_time,
-          pset_w_min, pset_w_target, lacking,
+          pset_w_min, pset_w_target,
           quality_state, exception_reason,
           sent, batch, r_vin_code,
-          qcp_id, r_bom_line_id, r_operation_point_id, order_id,
+          qcp_id, r_bom_line_id, r_operation_point_id, r_order_id,
           r_consu_product_id,
           consu_bom_id, r_production_id,
           r_gun_id, r_program_id, r_product_id, r_assembly_id,
