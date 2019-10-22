@@ -8,6 +8,7 @@ import (
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/wsnotify"
 	"sync/atomic"
+	"time"
 )
 
 type Diagnostic interface {
@@ -49,7 +50,8 @@ func (s *Service) Open() error {
 	cfgs := s.config().IOS
 	for _, v := range cfgs {
 		s.ios[v.SN] = &IOModule{
-			cfg: v,
+			cfg:           v,
+			flashInterval: time.Duration(s.config().FlashInteval),
 		}
 
 		s.DeviceService.AddDevice(v.SN, s.ios[v.SN])
@@ -66,6 +68,9 @@ func (s *Service) Open() error {
 }
 
 func (s *Service) Close() error {
+	for _, dev := range s.ios {
+		dev.Stop()
+	}
 
 	return nil
 }

@@ -4,6 +4,10 @@ const (
 	WS_IO_STATUS  = "WS_IO_STATUS"
 	WS_IO_CONTACT = "WS_IO_CONTACT"
 	WS_IO_SET     = "WS_IO_SET"
+
+	OUTPUT_STATUS_OFF   = 0
+	OUTPUT_STATUS_ON    = 1
+	OUTPUT_STATUS_FLASH = 2
 )
 
 type IoStatus struct {

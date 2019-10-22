@@ -1,5 +1,10 @@
 package io
 
+import (
+	"github.com/masami10/rush/toml"
+	"time"
+)
+
 type ConfigIO struct {
 	SN      string `yaml:"sn"`
 	Model   string `yaml:"model"`
@@ -7,13 +12,15 @@ type ConfigIO struct {
 }
 
 type Config struct {
-	Enable bool       `yaml:"enable"`
-	IOS    []ConfigIO `yaml:"ios"`
+	Enable       bool          `yaml:"enable"`
+	FlashInteval toml.Duration `yaml:"flash_inteval"`
+	IOS          []ConfigIO    `yaml:"ios"`
 }
 
 func NewConfig() Config {
 	return Config{
-		Enable: true,
+		Enable:       true,
+		FlashInteval: toml.Duration(time.Second * 1),
 		IOS: []ConfigIO{
 			{
 				SN:      "1",

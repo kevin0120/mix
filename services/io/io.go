@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/kataras/iris/core/errors"
 	"github.com/masami10/rush/services/device"
+	"sync"
+	"time"
 )
 
 const (
@@ -32,9 +34,20 @@ type IO interface {
 type IOModule struct {
 	cfg    ConfigIO
 	client IO
+
+	flashInterval time.Duration
+	closing       chan struct{}
+	flashes       map[uint16]uint16
+	mtx           sync.Mutex
+
+	diag Diagnostic
 }
 
 func (s *IOModule) Start(srv *Service) error {
+
+	s.flashes = map[uint16]uint16{}
+	s.closing = make(chan struct{}, 1)
+	s.mtx = sync.Mutex{}
 
 	vendor := VENDOR_MODELS[s.cfg.Model]
 	switch vendor.Type() {
@@ -49,7 +62,15 @@ func (s *IOModule) Start(srv *Service) error {
 		return errors.New(fmt.Sprintf("invalid model type: %s", s.cfg.Model))
 	}
 
+	go s.flashProc()
+
 	return s.client.Start()
+}
+
+func (s *IOModule) Stop() error {
+	s.closing <- struct{}{}
+
+	return s.client.Stop()
 }
 
 func (s *IOModule) Status() string {
@@ -61,6 +82,16 @@ func (s *IOModule) Read() (string, string, error) {
 }
 
 func (s *IOModule) Write(index uint16, status uint16) error {
+	switch status {
+	case OUTPUT_STATUS_OFF:
+		// 从flash列表删除
+		s.removeFlash(index)
+	case OUTPUT_STATUS_FLASH:
+		// 加入flash列表
+		s.addFlash(index)
+		return nil
+	}
+
 	return s.client.Write(index, status)
 }
 
@@ -90,5 +121,51 @@ func (s *IOModule) Config() interface{} {
 	return IoConfig{
 		InputNum:  vendor.Cfg().InputNum,
 		OutputNum: vendor.Cfg().OutputNum,
+	}
+}
+
+func (s *IOModule) addFlash(output uint16) {
+	s.mtx.Lock()
+	defer s.mtx.Unlock()
+
+	s.flashes[output] = output
+}
+
+func (s *IOModule) removeFlash(output uint16) {
+	s.mtx.Lock()
+	defer s.mtx.Unlock()
+
+	delete(s.flashes, output)
+}
+
+func (s *IOModule) getFlashes() map[uint16]uint16 {
+	s.mtx.Lock()
+	defer s.mtx.Unlock()
+
+	return s.flashes
+}
+
+func (s *IOModule) flashProc() {
+
+	status := OUTPUT_STATUS_OFF
+	flag := -1
+	for {
+		select {
+		case <-time.After(s.flashInterval):
+			// 状态0<->1变换
+			flag *= -1
+			status += flag
+
+			flashes := s.getFlashes()
+			for _, v := range flashes {
+				err := s.Write(v, uint16(status))
+				if err != nil {
+					s.diag.Error("Write Failed", err)
+				}
+			}
+
+		case <-s.closing:
+			return
+		}
 	}
 }
