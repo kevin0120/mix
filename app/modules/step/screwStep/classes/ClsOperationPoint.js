@@ -22,12 +22,13 @@ export class ClsOperationPoint {
     this._results = [];
   }
 
-  _isFinalFail(): boolean {
+  isFinalFail(): boolean {
     // 结果的长度已经达到最大重试次数，同时最后一条结果为fail
     const rsCount = this._results.length;
     return (
+      this._point.maxRetryTimes >= 0 &&
       rsCount >= this._point.maxRetryTimes &&
-      this._results[rsCount - 1] === RESULT_STATUS.nok
+      this._results[rsCount - 1].result === RESULT_STATUS.nok
     );
   }
 
@@ -35,7 +36,7 @@ export class ClsOperationPoint {
     // 是否需要跳到下一个拧紧点
     const rsCount = this._results.length;
     const lastResult = this._results[rsCount - 1];
-    return lastResult === RESULT_STATUS.ak2 || this._isFinalFail();
+    return lastResult === RESULT_STATUS.ak2 || this.isFinalFail();
   }
 
   get sequence() {
@@ -80,6 +81,8 @@ export class ClsOperationPoint {
 
   newResult(result: tResult): ?ClsOperationPoint {
     this._results.push(result);
+    // TODO: store result data
+
     this._parseStatus(result);
     this._parseActive(result);
     if (!this._isActive) {
@@ -98,10 +101,11 @@ export class ClsOperationPoint {
   }
 
   _parseActive(result: tResult): void {
-    if (this._isFinalFail() || result.result === RESULT_STATUS.ok) {
+    if (this.isFinalFail() || result.result === RESULT_STATUS.ok) {
       this.setActive(false);
     }
   }
+
 
 }
 

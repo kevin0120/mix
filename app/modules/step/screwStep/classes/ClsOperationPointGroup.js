@@ -71,6 +71,10 @@ export class ClsOperationPointGroup {
     return this._points.every(p => p.status === POINT_STATUS.SUCCESS);
   }
 
+  isFailed(){
+    return this.points.some(p=>p.isFinalFail())
+  }
+
   newResult(result: tResult): Array<?ClsOperationPoint> {
     const inactivePoints = [];
     (() => {

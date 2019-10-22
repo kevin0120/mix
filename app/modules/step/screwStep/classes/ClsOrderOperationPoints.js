@@ -73,7 +73,6 @@ export class ClsOrderOperationPoints {
   newResult(results: Array<tResult>) {
     let newActivePoints = [];
     const newInactivePoints = [];
-    console.log(results);
     results.forEach((r) => {
       const { group_sequence: groupSeq } = r;
       const group = this._groups[groupSeq];
@@ -94,6 +93,7 @@ export class ClsOrderOperationPoints {
       nextGroup.setActive(true);
       newActivePoints = newActivePoints.concat(nextGroup.points);
     });
+
     return {
       active: newActivePoints,
       inactive: newInactivePoints
@@ -116,5 +116,15 @@ export class ClsOrderOperationPoints {
       points = points.concat(this._groups[g].points);
     });
     return points;
+  }
+
+  isPass(){
+    // eslint-disable-next-line radix
+    return Object.keys(this._groups).every(g=>this._groups[parseInt(g)].isAllPass());
+  }
+
+  isFailed(){
+    // eslint-disable-next-line radix
+    return Object.keys(this._groups).some(g=>this._groups[parseInt(g)].isFailed());
   }
 }

@@ -80,7 +80,7 @@ export default function ScrewImage({ twinkle, style = {}, image, points, focus, 
           width: `${size.width || 100}%`,
           height: `${size.height || 100}%`,
           position: 'absolute',
-          ...(focusStyle||{}),
+          ...(focusStyle || {}),
           transition: 'transform 1s'
         }}
       >
@@ -90,7 +90,7 @@ export default function ScrewImage({ twinkle, style = {}, image, points, focus, 
           y={p.y}
           twinkle={twinkle && p.isActive}
           status={p.status}
-          label={`${p.groupSequence}-${p.sequence}`}
+          label={`${p?.groupSequence || ''}-${p?.sequence || ''}`}
           scale={pointScale}
           onClick={(e) => {
             e.preventDefault();
