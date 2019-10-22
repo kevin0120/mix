@@ -134,8 +134,9 @@ class OperationResult(models.HyperModel):
     _sql_constraints = [('tid_track_no_gun_uniq', 'unique(tool_id, tightening_id, track_no,time)',
                          'Per Screw Gun tightening ID Tracking Number must different'),
                         ('tid_wo_gun_uniq', 'unique(tool_id, tightening_id, workorder_id,time)',
-                         'Per Screw Gun tightening ID  Work Order  must different')]
+                         'Per Screw Gun tightening ID  Work Order must different')]
 
+# FIXME: 无工单模式存储过程
     def init(self):
         self.env.cr.execute("""
             CREATE OR REPLACE FUNCTION create_operation_result(pset_m_threshold numeric, pset_m_max numeric,
@@ -154,24 +155,24 @@ class OperationResult(models.HyperModel):
   returns BIGINT as
 $$
 DECLARE
-  result_id            bigint;
-  r_vin_code           varchar;
+  result_id            BIGINT;
+  r_vin_code           varchar = vin_code;
   r_job                varchar;
-  r_qcp_id             BIGINT = null;
-  r_qc_id              BIGINT = null;
-  consu_bom_id         BIGINT = null;
-  r_consu_product_id   BIGINT = null;
-  r_production_id      BIGINT = null;
+  r_qcp_id             BIGINT  = null;
+  r_qc_id              BIGINT  = null;
+  consu_bom_id         BIGINT  = null;
+  r_consu_product_id   BIGINT  = null;
+  r_production_id      BIGINT  = null;
   r_workcenter_id      BIGINT;
   r_gun_id             BIGINT;
-  r_order_id           BIGINT = null;
+  r_order_id           BIGINT  = null;
   r_product_id         BIGINT;
   r_program_id         BIGINT;
   r_assembly_id        BIGINT;
-  r_bom_line_id        BIGINT = null;
-  r_operation_point_id BIGINT = null;
+  r_bom_line_id        BIGINT  = null;
+  r_operation_point_id BIGINT  = null;
   r_measure_result     varchar;
-  r_expect_order_id    BIGINT = null;
+  r_expect_order_id    BIGINT  = null;
 BEGIN
   case pset_strategy
     when 'LN'
@@ -181,8 +182,7 @@ BEGIN
 
   if order_no != ''
   then
-    select mp.track_no,
-           qc.id,
+    select qc.id,
            qc.point_id,
            co.id,
            mp.id,
@@ -195,7 +195,7 @@ BEGIN
            mp.assembly_line_id,
            mbl.id,
            co.operation_point_id
-           into r_vin_code, r_qc_id, r_qcp_id, consu_bom_id, r_production_id, r_order_id, r_workcenter_id, r_gun_id, r_product_id, r_program_id, r_consu_product_id, r_assembly_id,r_bom_line_id,r_operation_point_id
+           into r_qc_id, r_qcp_id, consu_bom_id, r_production_id, r_order_id, r_workcenter_id, r_gun_id, r_product_id, r_program_id, r_consu_product_id, r_assembly_id,r_bom_line_id,r_operation_point_id
     from public.mrp_workorder wo,
          public.mrp_wo_consu_line co,
          public.sa_quality_check qc,
@@ -220,7 +220,6 @@ BEGIN
       and co.tool_id = r_gun_id
     limit 1;
   else
-    r_vin_code = vin_code;
     select dd.pid,
            dd.cou_pid,
            job2.code,
