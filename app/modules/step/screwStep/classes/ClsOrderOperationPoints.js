@@ -1,12 +1,13 @@
 // @flow
 import { isNil } from 'lodash-es';
 import { CommonLog } from '../../../../common/utils';
-import type { tPoint, tScrewStepPayload } from '../interface/typeDef';
+import type { tPoint, tResult, tScrewStepPayload } from '../interface/typeDef';
 import { ClsOperationPointGroup } from './ClsOperationPointGroup';
+import { ClsOperationPoint } from './ClsOperationPoint';
 
 // eslint-disable-next-line import/prefer-default-export
 export class ClsOrderOperationPoints {
-  _operationGroups: { [groupSeq: number]: ClsOperationPointGroup } = {};
+  _groups: { [groupSeq: number]: ClsOperationPointGroup } = {};
 
   static validatePayload(payload: tScrewStepPayload): boolean {
     CommonLog.Debug(`ClsOrderOperationPoints validatePayload Points: ${JSON.stringify(payload.points)}`);
@@ -33,14 +34,15 @@ export class ClsOrderOperationPoints {
     return ret;
   }
 
-  constructor(p: tScrewStepPayload) {
-    const ret: boolean = ClsOrderOperationPoints.validatePayload(p);
-    if (!ret) {
-      // 验证失败
-      CommonLog.lError(`validatePayload Error! Payload! `);
-      return;
-    }
-    const { points } = p;
+  constructor(points: Array<tPoint>) {
+    // const ret: boolean = ClsOrderOperationPoints.validatePayload(p);
+    // if (!ret) {
+    //   // 验证失败
+    //   throw new Error(`validatePayload Error! Payload! `);
+    //   // CommonLog.lError(`validatePayload Error! Payload! `);
+    //   // return;
+    // }
+    // const { points } = p;
     points.forEach((point: tPoint) => {
       this._appendNewOperationPoint(point);
     });
@@ -50,21 +52,14 @@ export class ClsOrderOperationPoints {
     const groupSeq: number = p.group_sequence;
     const isExist = Object.hasOwnProperty.call(this.operationGroups, groupSeq);
     let pg: ClsOperationPointGroup | null = null;
-    switch (isExist) {
-      case true:
-        pg = this.operationGroups[groupSeq];
-        break;
-      case false:
-        CommonLog.Debug(
-          `Group Seq: ${groupSeq} Is Not Exist! We Will Create It`
-        );
-        pg = new ClsOperationPointGroup(groupSeq);
-        this._operationGroups[groupSeq] = pg;
-        break;
-      default:
-        CommonLog.lError(
-          'tOrderOperationPoints _appendNewOperationPoint Error!'
-        );
+    if (isExist) {
+      pg = this.operationGroups[groupSeq];
+    } else {
+      CommonLog.Debug(
+        `Group Seq: ${groupSeq} Does Not Exist! Creating...`
+      );
+      pg = new ClsOperationPointGroup(groupSeq);
+      this._groups[groupSeq] = pg;
     }
     if (pg) {
       pg.appendNewOperationPoint(p); // always success
@@ -72,6 +67,54 @@ export class ClsOrderOperationPoints {
   }
 
   get operationGroups(): { [groupSeq: number]: ClsOperationPointGroup } {
-    return this._operationGroups;
+    return this._groups;
+  }
+
+  newResult(results: Array<tResult>) {
+    let newActivePoints = [];
+    const newInactivePoints = [];
+    console.log(results);
+    results.forEach((r) => {
+      const { group_sequence: groupSeq } = r;
+      const group = this._groups[groupSeq];
+      if (!group) {
+        return;
+      }
+      const point = group.newResult(r);
+      newInactivePoints.push(point);
+      if (!group.isKeyPass()) {
+        return;
+      }
+      // eslint-disable-next-line radix
+      const gSeq = Math.min(...Object.keys(this._groups).map(s => parseInt(s)).filter(s => s > groupSeq));
+      const nextGroup = this._groups[gSeq];
+      if (!nextGroup) {
+        return;
+      }
+      nextGroup.setActive(true);
+      newActivePoints = newActivePoints.concat(nextGroup.points);
+    });
+    return {
+      active: newActivePoints,
+      inactive: newInactivePoints
+    };
+  }
+
+  start(): Array<ClsOperationPoint> {
+    // eslint-disable-next-line radix
+    const groupSeqs = Object.keys(this._groups).map(s => parseInt(s));
+    const firstGroupSeq = Math.min(...groupSeqs);
+    this._groups[firstGroupSeq].setActive(true);
+    return this._groups[firstGroupSeq].points;
+  }
+
+  get points() {
+    // eslint-disable-next-line radix
+    const groupSeqs = Object.keys(this._groups).map(s => parseInt(s));
+    let points = [];
+    groupSeqs.forEach(g => {
+      points = points.concat(this._groups[g].points);
+    });
+    return points;
   }
 }

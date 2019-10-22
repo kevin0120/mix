@@ -7,11 +7,11 @@ import styles from './style';
 import { viewingStep, stepPayload, stepData, stepStatus } from '../../../modules/order/selector';
 import ScrewImage from '../../../components/ScrewImage';
 import screwStepAction from '../../../modules/step/screwStep/action';
-import { STEP_STATUS } from '../../../modules/step/constants';
 import type { tStepProps } from '../types';
-import type { tPoint } from '../../../modules/step/screwStep/interface/typeDef';
-import type { tAnyStepStatus, tStepStatus } from '../../../modules/step/interface/typeDef';
+import type { tAnyStepStatus } from '../../../modules/step/interface/typeDef';
 import type { Dispatch } from '../../../modules/typeDef';
+import { ClsOperationPoint } from '../../../modules/step/screwStep/classes/ClsOperationPoint';
+import { RESULT_STATUS } from '../../../modules/step/screwStep/constants';
 
 type tOP = {|
   ...tStepProps
@@ -19,14 +19,15 @@ type tOP = {|
 
 type tSP = {|
   ...tOP,
-  points: Array<tPoint>,
+  points: Array<ClsOperationPoint>,
   image: string,
-  activeIndex: number,
+  // activeIndex: number,
   status: ?tAnyStepStatus
 |};
 
 type tDP = {|
-  redoPoint: Dispatch
+  redoPoint: Dispatch,
+  result: Dispatch
 |};
 
 type Props = {|
@@ -42,31 +43,35 @@ const mapState = (state, props: tOP): tSP => {
     ...props,
     points: stepData(vStep)?.points || stepPayload(vStep)?.points || [],
     image: stepPayload(vStep)?.image || '',
-    activeIndex: stepData(vStep)?.activeIndex,
+    // activeIndex: stepData(vStep)?.activeIndex,
     status: stepStatus(vStep)
   });
 };
 
 const mapDispatch: tDP = {
-  // result: screwStepAction.result,
+  result: screwStepAction.result,
   redoPoint: screwStepAction.redoPoint
 };
 
 
-function ScrewStep({ isCurrent, status, image, points, activeIndex, redoPoint }: Props) {
+function ScrewStep({ isCurrent, image, points, redoPoint, result }: Props) {
   const classes = makeStyles(styles)();
 
   return <div className={classes.layout}>
     <ScrewImage
       image={image}
       points={points}
-      activeIndex={isCurrent ? activeIndex : -1}
-      focus={status === STEP_STATUS.DOING ? 2 : 0}
+      // activeIndex={isCurrent ? activeIndex : -1}
+      focus={0}
       scale={1}
       twinkle={isCurrent}
       onPointClick={(point) => {
-        // console.log('on point click', point);
-
+        result({
+          data: [{
+            ...point._point,
+            result: RESULT_STATUS.ok
+          }]
+        });
         // redoPoint(point);
       }}
     />
@@ -75,11 +80,13 @@ function ScrewStep({ isCurrent, status, image, points, activeIndex, redoPoint }:
       className={classes.thumbPaper}
     >
       <ScrewImage
-        className={classes.thumbImage}
+        style={{
+          width: '200px',
+          height: '200px'
+        }}
         image={image}
         points={points}
         twinkle={isCurrent}
-        activeIndex={isCurrent ? activeIndex : -1}
         focus={0}
         pointScale={0.5}
       />

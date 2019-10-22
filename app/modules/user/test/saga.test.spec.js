@@ -1,13 +1,13 @@
 import { expectSaga } from 'redux-saga-test-plan';
 import * as matchers from 'redux-saga-test-plan/matchers';
 import { push } from 'connected-react-router';
+import status from 'http-status';
 import userAuth from '../saga';
 import { configureStore } from '../../../store/configureStore';
 import * as actions from '../action';
 import configs from '../../../shared/config';
 import { getUserInfo } from '../../../api/user';
 import type { tAuthRespData } from '../interface/typeDef';
-import status from 'http-status';
 
 const user: string = 'ming';
 const { password } = configs.authorization.localUsers[user];
@@ -44,7 +44,7 @@ describe('User Auth Saga Authorize Login Logout Workflow', () => {
       .put(actions.loginSuccess(LocalUserInfo))
       .put(push('/app'))
       .dispatch(actions.loginRequest(user, password))
-      .run(3000));
+      .run());
   it('Online(Remote) User Test Auth Login Workflow Success', () =>
     expectSaga(userAuth)
       .withState(state)

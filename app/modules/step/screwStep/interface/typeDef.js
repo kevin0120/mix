@@ -1,11 +1,11 @@
 // @flow
 
-import { POINT_STATUS, controllerModes } from '../constants';
+import { POINT_STATUS, controllerModes, RESULT_STATUS } from '../constants';
 
 
-export type tPointStatus = $Keys<typeof POINT_STATUS>;
+export type tPointStatus = $Values<typeof POINT_STATUS>;
 
-export type tResultStatus = 'OK' | 'NOK' | 'LSN' | 'AK2';
+export type tResultStatus = $Values<typeof RESULT_STATUS>;
 
 export type tPoint = {
   id: number,

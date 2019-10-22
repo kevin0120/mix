@@ -64,7 +64,7 @@ function* authenticate(action) {
       }
     } else if (name && password) {
       const { setting, users } = state;
-      const {systemSettings } = setting;
+      const { systemSettings } = setting;
       const { authEnable } = systemSettings;
       if (authEnable && name === '') {
         // 强制需要认证
@@ -139,7 +139,7 @@ const loginMethodMap = {
 };
 
 interface ILocalUser {
-  [key: string]: tUser;
+  [key: string]: tUser
 }
 
 function* loginLocal(action) {
@@ -162,13 +162,11 @@ function* loginLocal(action) {
           avatar: localUsers[name].avatar,
           role: localUsers[name].role
         };
-        yield put(loginSuccess(userInfo));
-        yield put(push('/app'));
+        // yield put(loginSuccess(userInfo));
+        // yield put(push('/app'));
       }
     } else if (uuid) {
-      const { localUsers } = state.setting.authorization;
-      // eslint-disable-next-line no-unused-expressions
-      (localUsers: ILocalUser);
+      const { localUsers }: { localUsers: ILocalUser } = state.setting.authorization;
       let user: ?tUser = null;
       let n: string = DummyUserName;
       Object.keys(localUsers).forEach((k: string) => {

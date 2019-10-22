@@ -1,14 +1,17 @@
 // @flow
 import { find, isNil } from 'lodash-es';
 import { CommonLog } from '../../../../common/utils';
-import type { tPoint } from '../interface/typeDef';
-import {ClsOperationPoint} from './ClsOperationPoint';
+import type { tPoint, tResult } from '../interface/typeDef';
+import { ClsOperationPoint } from './ClsOperationPoint';
+import { POINT_STATUS } from '../constants';
 
 // eslint-disable-next-line import/prefer-default-export
 export class ClsOperationPointGroup {
   _groupSeq: number = 0;
 
-  _operationPoints: Array<ClsOperationPoint> = [];
+  _points: Array<ClsOperationPoint> = [];
+
+  _active: boolean = false;
 
   constructor(s: number) {
     this._groupSeq = s;
@@ -16,11 +19,9 @@ export class ClsOperationPointGroup {
 
   validatePoint(p: tPoint): boolean {
     const { toolSN } = p;
-    const isExist = find(this._operationPoints, { toolSN });
-    if (isNil(isExist)) {
-      return true;
-    }
-    return false;
+    const pointWithSameToolSN = find(this._points, { toolSN });
+    return isNil(pointWithSameToolSN);
+
   }
 
   appendNewOperationPoint(p: tPoint): boolean {
@@ -30,11 +31,11 @@ export class ClsOperationPointGroup {
       );
       return false;
     }
-    this._operationPoints.push(new ClsOperationPoint(p));
-    this._operationPoints.sort(
-      (a: ClsOperationPoint, b: ClsOperationPoint) =>
-        a.point.sequence - b.point.sequence
-    ); // 排序操作
+    this._points.push(new ClsOperationPoint(p));
+    // this._points.sort(
+    //   (a: ClsOperationPoint, b: ClsOperationPoint) =>
+    //     a.point.sequence - b.point.sequence
+    // ); // 排序操作
     return true;
   }
 
@@ -43,15 +44,52 @@ export class ClsOperationPointGroup {
   }
 
   get operationPoints(): Array<ClsOperationPoint> {
-    return this._operationPoints;
+    return this._points;
   }
 
   set operationPoints(t: Array<ClsOperationPoint>) {
-    this._operationPoints = t;
+    this._points = t;
+  }
+
+  get points() {
+    return this._points;
   }
 
   isGroupPass(): boolean {
-    // todo: 是否需要跳到下一个一组拧紧组,
+    // todo: 是否需要跳到下一个一组拧紧组
+
     return true;
+  }
+
+  // 关键点全部完成
+  isKeyPass() {
+    return this._points.filter(p => p.isKey).every(p => p.status === POINT_STATUS.SUCCESS);
+  }
+
+  // 所有点完成
+  isAllPass() {
+    return this._points.every(p => p.status === POINT_STATUS.SUCCESS);
+  }
+
+  newResult(result: tResult): Array<?ClsOperationPoint> {
+    const inactivePoints = [];
+    (() => {
+      const { sequence } = result;
+      const point = this._points.find(p => p.sequence === sequence);
+      if (!point) {
+        return;
+      }
+      inactivePoints.push(point.newResult(result));
+      if (!this.isAllPass()) {
+        return;
+      }
+      this.setActive(false);
+    })();
+    return inactivePoints.filter(p => !isNil(p));
+  }
+
+  setActive(active: boolean) {
+    this._active = active;
+    this._points.forEach(p => p.setActive(active));
   }
 }

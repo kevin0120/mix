@@ -66,7 +66,8 @@ export const demoOrder = {
             y: 10,
             maxRetryTimes: 3,
             pset: 1,
-            toolSN: 'demo'
+            toolSN: '1',
+            is_key:true,
           },
           {
             sequence: 2,
@@ -75,7 +76,9 @@ export const demoOrder = {
             y: 20,
             maxRetryTimes: 3,
             pset: 1,
-            toolSN: 'demo'
+            toolSN: '1',
+            is_key:true,
+
           },
           {
             sequence: 3,
@@ -85,7 +88,9 @@ export const demoOrder = {
             y: 30,
             maxRetryTimes: 3,
             pset: 1,
-            toolSN: 'demo'
+            toolSN: '1',
+            is_key:true,
+
           },
           {
             sequence: 4,
@@ -94,7 +99,9 @@ export const demoOrder = {
             y: 40,
             maxRetryTimes: 3,
             pset: 1,
-            toolSN: 'demo'
+            toolSN: '2',
+            is_key:true,
+
           },
           {
             sequence: 5,
@@ -103,7 +110,9 @@ export const demoOrder = {
             y: 50,
             maxRetryTimes: 3,
             pset: 1,
-            toolSN: 'demo'
+            toolSN: '1',
+            is_key:true,
+
           }
         ],
         image: dataImg

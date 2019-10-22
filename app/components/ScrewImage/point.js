@@ -10,10 +10,9 @@ import type { tPointStatus } from '../../modules/step/screwStep/interface/typeDe
 const pointRadius = 30;
 
 const isStatus = {
-  waiting: status => !status || status === POINT_STATUS.WAITING || status === POINT_STATUS.WAITING_ACTIVE,
+  waiting: status => !status || status === POINT_STATUS.WAITING ,
   success: status => status === POINT_STATUS.SUCCESS,
-  error: status => status === POINT_STATUS.ERROR || status === POINT_STATUS.ERROR_ACTIVE,
-  active: (status, twinkle) => twinkle ? status === POINT_STATUS.WAITING_ACTIVE || status === POINT_STATUS.ERROR_ACTIVE : false
+  error: status => status === POINT_STATUS.ERROR ,
 };
 
 type Props = {
@@ -33,7 +32,7 @@ function Point({ twinkle, x, y, status, label, scale = 1, ...restProps }: Props)
         [classes.waiting]: isStatus.waiting(status),
         [classes.success]: isStatus.success(status),
         [classes.error]: isStatus.error(status),
-        [classes.active]: isStatus.active(status, twinkle || false)
+        [classes.active]: twinkle || false
       })}
     style={{
       position: 'absolute',

@@ -1,7 +1,7 @@
 // @flow
 import { call, put, select, take, all, race } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
-import {STEP_STATUS} from '../constants';
+import { STEP_STATUS } from '../constants';
 import { stepPayload, workingOrder, workingStep } from '../../order/selector';
 import { getDevice } from '../../external/device';
 import { CommonLog } from '../../../common/utils';
@@ -9,7 +9,6 @@ import { ioDirection, ioTriggerMode } from '../../external/device/io/constants';
 import actions, { MATERIAL_STEP } from './action';
 import type { IWorkStep } from '../interface/IWorkStep';
 import type { IMaterialStep } from './interface/IMaterialStep';
-import type { IIOModule } from '../../external/device/io/interface/IIOModule';
 import type { IDevice } from '../../external/device/IDevice';
 import ClsIOModule from '../../external/device/io/ClsIOModule';
 
@@ -43,34 +42,34 @@ const MaterialStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsMaterialSt
           stepPayload(workingStep(workingOrder(s.order)))
         );
         items(sPayload).forEach(i => {
-          const item = {};
+          let item = null;
           ['in', 'out'].forEach((dir) => {
-            if (i && i[dir] && i[dir].sn) {
-              const io: IDevice = getDevice(i[dir].sn);
-              if(io instanceof ClsIOModule){
-                this._io.add(io);
-                const port = io.getPort(ioDirection.input, i[dir].index);
-                this._ports.add(port);
-                item[dir] = { io, port };
-              }
+            if (!(i && i[dir] && i[dir].sn)) {
+              return;
             }
+            const io: IDevice = getDevice(i[dir].sn);
+            if (!(io instanceof ClsIOModule)) {
+              return;
+            }
+            this._io.add(io);
+            const port = io.getPort(ioDirection.input, i[dir].index);
+            this._ports.add(port);
+            item = { io, port };
           });
-          this._items.add(item);
-        });
-        for (const io of this._io) {
-          if (io?.ioContact) {
-            yield call(io.ioContact);
-          } else {
-            CommonLog.lError('io not ready', {
-              at: 'materialStep entering',
-              io
-            });
-            yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL));
+          if (!item) {
             return;
           }
-        }
+          this._items.add(item);
+        });
 
-        yield all(this._items.map((item) => {
+        yield all([...this._io].map(io => {
+          if(!io?.ioContact){
+            throw new Error(`io invalid ${io?.sn}`);
+          }
+          return call(io.ioContact);
+        }));
+
+        yield all([...this._items].map((item) => {
           if (item?.out?.io?.openIO && item?.out?.port) {
             return call(item.out.io.openIO, item.out.port);
           }
@@ -93,7 +92,7 @@ const MaterialStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsMaterialSt
     * [STEP_STATUS.DOING](ORDER, orderActions) {
       try {
         const listeners = [];
-        this._items.forEach(i => {
+        [...this._items].forEach(i => {
           listeners.push({
             listener: i.in.io.addListener(
               i.in.port,

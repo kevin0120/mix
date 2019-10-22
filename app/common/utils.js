@@ -192,7 +192,7 @@ const fn = {
   Error: console.error,
   Info: console.log,
   Warn: console.warn,
-  Debug: console.trace,
+  Debug: console.log,
   Maintenance: console.log
 };
 

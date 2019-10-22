@@ -6,5 +6,6 @@ import type { tCallable } from '../../typeDef';
 export interface IDevice extends ICommonExternalEntity {
   +constructor: (name: string, sn: tDeviceSN, config: Object, data: any)=>void,
   +doDispatch: tCallable<tInputData, void>,
-  _validator: null | ((data: tInputData) => boolean)
+  _validator: null | ((data: tInputData) => boolean),
+  +serialNumber: ?tDeviceSN
 }

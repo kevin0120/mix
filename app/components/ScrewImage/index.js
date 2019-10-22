@@ -3,20 +3,20 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import styles from './style';
 import Point from './point';
-import type { tPoint } from '../../modules/step/screwStep/interface/typeDef';
+import { ClsOperationPoint } from '../../modules/step/screwStep/classes/ClsOperationPoint';
 
 type Props = {
   twinkle: boolean,
-  style?: string,
+  style?: {},
   image: string,
-  points: Array<tPoint>,
+  points: Array<ClsOperationPoint>,
   focus: number,
-  activeIndex: number,
+  // activeIndex: number,
   pointScale?: number,
-  onPointClick?: (tPoint)=>void
+  onPointClick?: (ClsOperationPoint)=>void
 };
 
-export default function ScrewImage({ twinkle, style = '', image, points, focus, activeIndex, pointScale = 1, onPointClick }: Props) {
+export default function ScrewImage({ twinkle, style = {}, image, points, focus, pointScale = 1, onPointClick }: Props) {
   const classes = makeStyles(styles.image)();
 
   const imageRef = useRef(null);
@@ -42,18 +42,18 @@ export default function ScrewImage({ twinkle, style = '', image, points, focus, 
   });
 
   useEffect(() => {
-    if (focus && points?.[activeIndex]) {
-      const transformX = (50 - points?.[activeIndex]?.x || 0) * focus;
-      const transformY = (50 - points?.[activeIndex]?.y || 0) * focus;
-      setFocusStyle({
-        transform: `translate(${transformX || 0}%,${transformY || 0}%) scale(${focus},${focus})`
-      });
-    } else {
-      setFocusStyle({
-        transform: `translate(${0}%,${0}%) scale(${1},${1})`
-      });
-    }
-  }, [activeIndex, focus, points]);
+    // if (focus && points?.[activeIndex]) {
+    //   const transformX = (50 - points?.[activeIndex]?.x || 0) * focus;
+    //   const transformY = (50 - points?.[activeIndex]?.y || 0) * focus;
+    //   setFocusStyle({
+    //     transform: `translate(${transformX || 0}%,${transformY || 0}%) scale(${focus},${focus})`
+    //   });
+    // } else {
+    //   setFocusStyle({
+    //     transform: `translate(${0}%,${0}%) scale(${1},${1})`
+    //   });
+    // }
+  }, [focus, points]);
 
 
   useEffect(() => {
@@ -80,7 +80,7 @@ export default function ScrewImage({ twinkle, style = '', image, points, focus, 
           width: `${size.width || 100}%`,
           height: `${size.height || 100}%`,
           position: 'absolute',
-          ...focusStyle,
+          ...(focusStyle||{}),
           transition: 'transform 1s'
         }}
       >
@@ -88,9 +88,9 @@ export default function ScrewImage({ twinkle, style = '', image, points, focus, 
           key={`${p.x}${p.y}${p.status}`}
           x={p.x}
           y={p.y}
-          twinkle={twinkle}
+          twinkle={twinkle && p.isActive}
           status={p.status}
-          label={p.group_sequence}
+          label={`${p.groupSequence}-${p.sequence}`}
           scale={pointScale}
           onClick={(e) => {
             e.preventDefault();

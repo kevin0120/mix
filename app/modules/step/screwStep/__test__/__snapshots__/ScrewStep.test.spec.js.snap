@@ -1,0 +1,75 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Class ScrewStep should be initialized 1`] = `
+ClsScrewStep {
+  "_apis": Object {
+    "updateStatus": [Function],
+  },
+  "_data": Object {},
+  "_desc": "this is a screw step",
+  "_id": "0001",
+  "_info": Object {},
+  "_name": "name",
+  "_onLeave": null,
+  "_orderOperationPoints": undefined,
+  "_payload": Object {},
+  "_runningStatusTask": null,
+  "_skippable": false,
+  "_stateToRun": "entering",
+  "_status": "ready",
+  "_statusTasks": Object {
+    "doing": [Function],
+    "entering": [Function],
+    "fail": [Function],
+    "finished": [Function],
+  },
+  "_steps": Array [],
+  "_times": Array [],
+  "_tools": Array [],
+  "_type": "screw",
+  "_undoable": false,
+  "isValid": true,
+  "run": [Function],
+  "timerStart": [Function],
+  "timerStop": [Function],
+  "updateData": [Function],
+}
+`;
+
+exports[`Class ScrewStep should be initialized successfully 1`] = `
+ClsScrewStep {
+  "_apis": Object {
+    "updateStatus": [Function],
+  },
+  "_data": Object {},
+  "_desc": "this is a screw step",
+  "_id": "0001",
+  "_info": Object {},
+  "_name": "name",
+  "_onLeave": null,
+  "_orderOperationPoints": undefined,
+  "_payload": Object {},
+  "_runningStatusTask": null,
+  "_skippable": false,
+  "_stateToRun": "entering",
+  "_status": "ready",
+  "_statusTasks": Object {
+    "doing": [Function],
+    "entering": [Function],
+    "fail": [Function],
+    "finished": [Function],
+  },
+  "_steps": Array [],
+  "_times": Array [],
+  "_tools": Array [],
+  "_type": "screw",
+  "_undoable": false,
+  "isValid": true,
+  "run": [Function],
+  "timerStart": [Function],
+  "timerStop": [Function],
+  "updateData": [Function],
+}
+`;
+
+exports[`Class ScrewStep should be updated successfully 1`] = `undefined`;
