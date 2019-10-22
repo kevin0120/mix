@@ -26,6 +26,8 @@ class MrpWOConsu(models.Model):
 
     point_id = fields.Many2one('sa.quality.point', related='check_id.point_id', inherited=True)
 
+    operation_point_id = fields.Many2one('operation.point', ondelete='set null')
+
     product_id = fields.Many2one('product.product', related='check_id.product_id', string='Consume Product',
                                  inherited=True)
 
@@ -161,6 +163,7 @@ class MrpWorkorder(models.Model):
                         'sequence': idx,
                         'workorder_id': order.id,
                         'point_id': point.qcp_id.id,
+                        'operation_point_id': point.id,
                         'product_id': point.product_id.id,
                         'product_qty': 1.0,
                         # todo: 拧紧枪需要定义好模型后再增加

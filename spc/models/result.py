@@ -37,11 +37,12 @@ class OperationResult(models.HyperModel):
 
     assembly_line_id = fields.Many2one('mrp.assemblyline', string='Assembly Line', readonly=True)
 
-    qcp_id = fields.Many2one('sa.quality.point', 'Quality Control Point', related='quality_check_id.point_id')
-
     quality_check_id = fields.Many2one('sa.quality.check', 'Quality Check', index=True,
                                        domain=lambda self: [('test_type_id.id', '=',
                                                              self.env.ref('quality.test_type_tightening_point').id)])
+
+    qcp_id = fields.Many2one('sa.quality.point', 'Quality Control Point', related='quality_check_id.point_id',
+                             store=True)
 
     operation_point_id = fields.Many2one('operation.point', string='Tightening Operation Point')
 
@@ -156,20 +157,21 @@ DECLARE
   result_id            bigint;
   r_vin_code           varchar;
   r_job                varchar;
-  qcp_id               BIGINT  = null;
-  consu_bom_id         BIGINT  = null;
-  r_consu_product_id   BIGINT  = null;
-  r_production_id      BIGINT  = null;
+  r_qcp_id             BIGINT = null;
+  r_qc_id              BIGINT = null;
+  consu_bom_id         BIGINT = null;
+  r_consu_product_id   BIGINT = null;
+  r_production_id      BIGINT = null;
   r_workcenter_id      BIGINT;
   r_gun_id             BIGINT;
   r_order_id           BIGINT = null;
   r_product_id         BIGINT;
   r_program_id         BIGINT;
   r_assembly_id        BIGINT;
-  r_bom_line_id        BIGINT  = null;
-  r_operation_point_id BIGINT  = null;
+  r_bom_line_id        BIGINT = null;
+  r_operation_point_id BIGINT = null;
   r_measure_result     varchar;
-  r_expect_order_id    BIGINT  = null;
+  r_expect_order_id    BIGINT = null;
 BEGIN
   case pset_strategy
     when 'LN'
@@ -180,7 +182,8 @@ BEGIN
   if order_no != ''
   then
     select mp.track_no,
-           qp.id,
+           qc.id,
+           qc.point_id,
            co.id,
            mp.id,
            wo.id,
@@ -188,26 +191,24 @@ BEGIN
            me.id,
            mp.product_id,
            co.program_id,
-           co.product_id,
+           qc.product_id,
            mp.assembly_line_id,
            mbl.id,
-           mbl.operation_point_id
-           into r_vin_code, qcp_id, consu_bom_id, r_production_id, r_order_id, r_workcenter_id, r_gun_id, r_product_id, r_program_id, r_consu_product_id, r_assembly_id,r_bom_line_id,r_operation_point_id
+           co.operation_point_id
+           into r_vin_code, r_qc_id, r_qcp_id, consu_bom_id, r_production_id, r_order_id, r_workcenter_id, r_gun_id, r_product_id, r_program_id, r_consu_product_id, r_assembly_id,r_bom_line_id,r_operation_point_id
     from public.mrp_workorder wo,
          public.mrp_wo_consu_line co,
-         public.sa_quality_point qp,
+         public.sa_quality_check qc,
          public.mrp_production mp,
          public.product_product pp,
          public.maintenance_equipment me,
          public.mrp_bom_line mbl
     where wo.name = order_no
-      and co.workorder_id = order_id
-      and pp.default_code = nut_no
-      and co.bom_line_id = qp.bom_line_id
+      and qc.bolt_number = nut_no
+      and co.check_id = qc.id
       and wo.production_id = mp.id
       and mbl.id = co.bom_line_id
-      and me.serial_no = gun_sn
-      and co.product_id = pp.id;
+      and me.serial_no = gun_sn;
 
     select wo.id into r_expect_order_id
     from public.mrp_workorder wo,
@@ -216,7 +217,7 @@ BEGIN
     where wo.production_id = mp.id
       and co.workorder_id = wo.id
       and mp.track_no = r_vin_code
-      and co.gun_id = r_gun_id
+      and co.tool_id = r_gun_id
     limit 1;
   else
     r_vin_code = vin_code;
@@ -228,7 +229,7 @@ BEGIN
            qp2.id,
            dd.cou_bom_id,
            dd.operation_point_id
-           into r_product_id, r_consu_product_id,r_job, r_workcenter_id,r_gun_id,qcp_id,r_bom_line_id,r_operation_point_id
+           into r_product_id, r_consu_product_id,r_job, r_workcenter_id,r_gun_id,r_qcp_id,r_bom_line_id,r_operation_point_id
     from (select pp.id                  pid,
                  mbl.product_id         cou_pid,
                  mbl.operation_id       cou_opd,
@@ -263,7 +264,7 @@ BEGIN
                                        measure_t_don,
                                        measure_torque, op_time, pset_w_min, pset_w_target, quality_state,
                                        exception_reason, sent, batch, track_no,
-                                       qcp_id, bom_line_id, operation_point_id, workorder_id,
+                                       quality_check_id, qcp_id, bom_line_id, operation_point_id, workorder_id,
                                        consu_product_id, consu_bom_line_id,
                                        production_id, tool_id, program_id, product_id, assembly_line_id, workcenter_id,
                                        tightening_id, job, expect_workorder_id,
@@ -275,7 +276,7 @@ BEGIN
           pset_w_min, pset_w_target,
           quality_state, exception_reason,
           sent, batch, r_vin_code,
-          qcp_id, r_bom_line_id, r_operation_point_id, r_order_id,
+          r_qc_id, r_qcp_id, r_bom_line_id, r_operation_point_id, r_order_id,
           r_consu_product_id,
           consu_bom_id, r_production_id,
           r_gun_id, r_program_id, r_product_id, r_assembly_id,
