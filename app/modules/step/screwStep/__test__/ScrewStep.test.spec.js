@@ -1,10 +1,13 @@
 import { expectSaga } from 'redux-saga-test-plan';
+import * as matchers from 'redux-saga-test-plan/matchers';
 import ScrewStepMixin from '../ScrewStep';
 import Step from '../../Step';
-import STEP_STATUS from '../../constants';
+import { STEP_STATUS } from '../../constants';
 import { ORDER } from '../../../order/constants';
 import { orderActions } from '../../../order/action';
-import dataImg from '../../../../../resources/imgs/workingImg.png';
+import { demoOrder } from '../../../order/demoData';
+import screwStepActions from '../action';
+import { RESULT_STATUS } from '../constants';
 
 const demoStepData = {
   id: '0001',
@@ -14,77 +17,67 @@ const demoStepData = {
   type: 'screw'
 };
 
-const step = new (ScrewStepMixin(Step))(demoStepData);
-
 
 describe('Class ScrewStep', () => {
-  it('should be initialized successfully', () => {
-    expect(step).toMatchSnapshot();
-  });
+  // it('should be initialized successfully', () => {
+  //   expect(step).toMatchSnapshot();
+  // });
+  //
+  // it('should be updated successfully', () => {
+  //   expect(() => {
+  //     step.update(demoOrder.steps[1]);
+  //   }).not.toThrow();
+  // });
 
-  it('should be updated successfully', () => {
-    expect(() => {
-      step.update({
-        payload: {
-          controllerMode: 'pset',
-          points: [
-            {
-              sequence: 1,
-              group_sequence: 1,
-              x: 10,
-              y: 10,
-              maxRetryTimes: 3,
-              pset: 1,
-              toolSN: 'demo'
-            },
-            {
-              sequence: 2,
-              group_sequence: 2,
-              x: 20,
-              y: 20,
-              maxRetryTimes: 3,
-              pset: 1,
-              toolSN: 'demo'
-            },
-            {
-              sequence: 3,
-              group_sequence: 3,
+  it('Entering state', () => {
+    const step = new (ScrewStepMixin(Step))(demoOrder.steps[1]);
 
-              x: 30,
-              y: 30,
-              maxRetryTimes: 3,
-              pset: 1,
-              toolSN: 'demo'
-            },
-            {
-              sequence: 4,
-              group_sequence: 3,
-              x: 40,
-              y: 40,
-              maxRetryTimes: 3,
-              pset: 1,
-              toolSN: 'demo'
-            },
-            {
-              sequence: 5,
-              group_sequence: 4,
-              x: 50,
-              y: 50,
-              maxRetryTimes: 3,
-              pset: 1,
-              toolSN: 'demo'
-            }
-          ],
-          image: dataImg
-        }
-      });
-    }).not.toThrow();
-  });
-
-  it('Entering state ', () => {
-    expectSaga(step._statusTasks[STEP_STATUS.ENTERING].bind(step), ORDER, orderActions)
-
+    return expectSaga(step._statusTasks[STEP_STATUS.ENTERING].bind(step), ORDER, orderActions)
+      .provide([
+        // Use the `call.fn` matcher from Redux Saga Test Plan
+        [matchers.call.fn(step.updateData)]
+      ])
+      .put(orderActions.stepStatus(step, STEP_STATUS.DOING))
       .run();
+  });
+
+  it('Doing state: step finishes when all points are passed', async () => {
+    const step = new (ScrewStepMixin(Step))(demoOrder.steps[1]);
+    await expectSaga(step._statusTasks[STEP_STATUS.ENTERING].bind(step), ORDER, orderActions).run();
+    const demoPoints = demoOrder.steps[1].payload.points;
+    const doingState = expectSaga(step._statusTasks[STEP_STATUS.DOING].bind(step), ORDER, orderActions);
+
+    demoPoints.forEach((p, idx) => {
+      doingState.dispatch(screwStepActions.result({
+        data: [{
+          ...p,
+          result: RESULT_STATUS.ok
+        }]
+      }));
+    });
+
+    return doingState.put(orderActions.stepStatus(step, STEP_STATUS.FINISHED)).run();
+
+
+  });
+
+  it('Doing state: step fails when point fails', async () => {
+    const step = new (ScrewStepMixin(Step))(demoOrder.steps[1]);
+    await expectSaga(step._statusTasks[STEP_STATUS.ENTERING].bind(step), ORDER, orderActions).run();
+    const demoPoints = demoOrder.steps[1].payload.points;
+    const doingState = expectSaga(step._statusTasks[STEP_STATUS.DOING].bind(step), ORDER, orderActions);
+
+    [RESULT_STATUS.nok, RESULT_STATUS.nok, RESULT_STATUS.nok].forEach(r =>
+      doingState.delay(10).dispatch(screwStepActions.result({
+        data: [{
+          ...demoPoints[0],
+          result: r
+        }]
+      }))
+    );
+    return doingState.put(orderActions.stepStatus(step, STEP_STATUS.FAIL)).run();
+
+
   });
 
 

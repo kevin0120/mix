@@ -16,15 +16,11 @@ import { getDevice } from '../../external/device';
 import dialogActions from '../../dialog/action';
 import type { IWorkStep } from '../interface/IWorkStep';
 import type { IScrewStep } from './interface/IScrewStep';
-import {reduceResult2TimeLine} from './handleResult';
+import { reduceResult2TimeLine } from './handleResult';
 
 function* doPoints(points, isFirst, orderActions) {
   try {
     const data = this._data;
-
-    yield all(points.map(p => call(getDevice(p.toolSN)?.Enable || (() => {
-      CommonLog.lError(`tool ${p.toolSN}: no such tool or tool cannot be enabled.`);
-    }))));
 
     yield call([this, function* callControllerModeTask() {
       if (!(data.controllerMode === controllerModes.pset ||
@@ -118,15 +114,9 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsScrewStep ext
 
         this._tools = getTools(points);
 
-        // TODO: init step data
         yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({
           ...data,
           points: this._pointsManager.points
-          // activeIndex: 0,
-          // ...data,
-          // jobID: payload.jobID,
-          // controllerMode: payload.controllerMode,
-          // retryTimes: 0
         }));
         yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
       } catch (e) {
@@ -141,19 +131,23 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsScrewStep ext
         let isFirst = true;
         const activePoints = new Set(this._pointsManager.start());
 
+        yield all([...activePoints].map(p => call(getDevice(p.toolSN)?.Disable || (() => {
+          CommonLog.lError(`tool ${p.toolSN}: no such tool or tool cannot be enabled.`);
+        }))));
+        // TODO: fix doing state workflow to make points listeners parallel
+
         while (true) {
           yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({
             ...data,
             points: this._pointsManager.points // results data.results
           }));
 
-          if(this._pointsManager.isPass()){
+          if (this._pointsManager.isPass()) {
             yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED));
           }
 
-          if(this._pointsManager.isFailed()){
+          if (this._pointsManager.isFailed()) {
             yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL));
-
           }
 
           const nextAction = yield call(
@@ -176,7 +170,10 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsScrewStep ext
               active.forEach(p => activePoints.add(p));
 
               yield all(inactive.map(p => call(getDevice(p.toolSN)?.Disable || (() => {
-                CommonLog.lError(`tool ${p.toolSN}: no such tool or tool cannot be disabled.`)
+                CommonLog.lError(`tool ${p.toolSN}: no such tool or tool cannot be disabled.`);
+              }))));
+              yield all(active.map(p => call(getDevice(p.toolSN)?.Disable || (() => {
+                CommonLog.lError(`tool ${p.toolSN}: no such tool or tool cannot be enabled.`);
               }))));
               break;
             }
@@ -187,7 +184,6 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsScrewStep ext
             default:
               break;
           }
-
 
 
           if (isFirst) {

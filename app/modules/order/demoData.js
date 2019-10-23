@@ -88,7 +88,7 @@ export const demoOrder = {
             y: 30,
             maxRetryTimes: 3,
             pset: 1,
-            toolSN: '1',
+            toolSN: '2',
             is_key:false,
 
           },
@@ -99,7 +99,7 @@ export const demoOrder = {
             y: 40,
             maxRetryTimes: 3,
             pset: 1,
-            toolSN: '2',
+            toolSN: '1',
             is_key:true,
 
           },

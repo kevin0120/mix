@@ -72,7 +72,7 @@ export class ClsOrderOperationPoints {
 
   newResult(results: Array<tResult>) {
     let newActivePoints = [];
-    const newInactivePoints = [];
+    let newInactivePoints = [];
     results.forEach((r) => {
       const { group_sequence: groupSeq } = r;
       const group = this._groups[groupSeq];
@@ -80,7 +80,7 @@ export class ClsOrderOperationPoints {
         return;
       }
       const point = group.newResult(r);
-      newInactivePoints.push(point);
+      newInactivePoints=newInactivePoints.concat(point);
       if (!group.isKeyPass()) {
         return;
       }
