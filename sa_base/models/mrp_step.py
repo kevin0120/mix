@@ -10,7 +10,6 @@ from odoo.addons import decimal_precision as dp
 import uuid
 
 
-
 class MrpStepCategory(models.Model):
     _name = 'mrp.step.category'
 
@@ -19,13 +18,13 @@ class MrpStepCategory(models.Model):
     name = fields.Char('Mrp.Step.Category')
     direction = fields.Text('Direction')
 
+
 class MrpStep(models.Model):
     _name = 'mrp.step'
 
     # _inherits = {'sa.quality.point': 'qcp_id'}
 
     _inherit = ['mail.thread']
-
 
     _order = "id,sequence"
     note = fields.Text('Description')
@@ -47,8 +46,6 @@ class MrpStep(models.Model):
     sequence = fields.Integer('sequence', default=1)
 
     name = fields.Char('Operation Point Name', default=lambda self: str(uuid.uuid4()))  # 如果未定义拧紧点编号，即自动生成uuid号作为唯一标示
-
-
 
     group_sequence = fields.Integer('Group Sequence for Multi Spindle')
 
@@ -124,7 +121,6 @@ class MrpStep(models.Model):
             bom_line_ids.toggle_active()
         return super(MrpStep, self).toggle_active()
 
-
     @api.multi
     def delete_child_step(self):
         bom_line_ids = self.env['mrp.step'].search([('up_step_id', 'in', self.ids)])
@@ -136,8 +132,6 @@ class MrpStep(models.Model):
     def _compute_child_step_count(self):
         for routing in self:
             routing.child_step_count = len(routing.operation_point_ids)
-
-
 
     @api.model
     def create(self, vals):
@@ -172,7 +166,7 @@ class MrpStep(models.Model):
                 dummy, tracking_value_ids = point._message_track(tracked_fields, old_values)
                 msg = _("#%s operation point has been modified") % (point.id)
                 point.up_step_id.message_post(body=msg, message_type='comment', tracking_value_ids=tracking_value_ids,
-                                                subject=msg)
+                                              subject=msg)
             else:
                 ret = super(MrpStep, point).write(vals)  # 修改数据
         return ret
@@ -202,7 +196,7 @@ class StepPointsGroup(models.Model):
     step_id = fields.Many2one('mrp.step', ondelete='cascade', index=True)
 
     step_ids = fields.One2many('mrp.step', 'group_id',
-                                          string='Points', copy=False)
+                               string='Points', copy=False)
 
     # @api.constrains('operation_point_ids')
     # def _constraint_operation_point_ids(self):
