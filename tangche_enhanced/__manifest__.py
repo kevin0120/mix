@@ -27,6 +27,7 @@
         'views/product_views.xml',
         'views/quality_views.xml',
         'views/mrp_routing_views.xml',
+        'views/menu_hide_views.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
