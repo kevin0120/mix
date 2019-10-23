@@ -60,13 +60,13 @@
                                    groups="base.group_no_one"/>
 
                             <!--<field name="group_id"  options="{'no_edit': True, 'no_create': True}" />-->
-                            <field name="workcenter_group_id" options="{'no_edit': True, 'no_create': True}"/>
+                            <field name="workcenter_group_id" options="{'no_open': True, 'no_create_edit': True}"/>
                             <field name="workcenter_ids" readonly="1" widget="many2many_tags"
                                    groups="base.group_no_one"/>
                             <field name="prefer_workcenter_id_domain" invisible="1"/>
-                            <field name="workcenter_id" options="{'no_edit': True, 'no_create': True}"
+                            <field name="workcenter_id" options="{'no_open': True, 'no_create_edit': True}"
                                    domain="prefer_workcenter_id_domain"/>
-                            <field name="company_id" options="{'no_edit': True, 'no_create': True}"
+                            <field name="company_id" options="{'no_open': True, 'no_create_edit': True}"
                                    groups="base.group_multi_company"/>
                         </group>
                         <group name="parameters">

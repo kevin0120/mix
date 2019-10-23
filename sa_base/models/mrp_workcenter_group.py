@@ -11,7 +11,7 @@ class MrpWorkcenterGroup(models.Model):
     code = fields.Char('Reference', copy=False, required=True)
     name = fields.Char('Work Center Group')
     sa_workcenter_ids = fields.Many2many('mrp.workcenter', 'mrp_workcenter_rel', 'group_id', 'workcenter_id',
-                                         string="Workcenters", copy=False)
+                                         string="Work Centers", copy=False)
 
     active = fields.Boolean(
         'Active', default=True,

@@ -19,13 +19,17 @@ _logger = logging.getLogger(__name__)
 class MrpRoutingWorkcenter(models.Model):
     _inherit = 'mrp.routing.workcenter'
 
+    @api.depends('workcenter_id')
+    def _compute_workcenter_group(self):
+        for routing in self:
+            if routing.workcenter_id and routing.workcenter_id.sa_workcentergroup_ids:
+                routing.workcenter_group_id = routing.workcenter_id.sa_workcentergroup_ids[0]
+
     workcenter_id = fields.Many2one('mrp.workcenter', string='Prefer Work Center', copy=True,
                                     required=True)
 
-    @api.depends('workcenter_id')
-    def _onchange_workcenter_id(self):
-        if self.workcenter_id and self.workcenter_id.sa_workcentergroup_ids:
-            self.workcenter_group_id = self.workcenter_id.sa_workcentergroup_ids[0]
+    workcenter_group_id = fields.Many2one('mrp.workcenter.group', compute=_compute_workcenter_group, store=True,
+                                          readonly=True)
 
     @api.multi
     def _push_mrp_routing_workcenter(self, url):

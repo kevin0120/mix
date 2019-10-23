@@ -11,6 +11,14 @@
                 </field>
                 <field name="workcenter_id" position="attributes">
                     <attribute name="domain">[]</attribute>
+                    <attribute name="string">Work Center</attribute>
+                </field>
+                <field name="workcenter_ids" position="attributes">
+                    <attribute name="readonly">1</attribute>
+                </field>
+                <field name="workcenter_group_id" position="attributes">
+                    <attribute name="readonly">1</attribute>
+                    <attribute name="groups">base.group_no_one</attribute>
                 </field>
             </field>
         </record>
