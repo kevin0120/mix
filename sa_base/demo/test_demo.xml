@@ -667,7 +667,7 @@
 
         <record id="tinghtening_job1" model="controller.program">
             <field name="name">JOB001</field>
-            <field name="code">001</field>
+            <field name="code">2</field>
             <field name="strategy">AT</field>
             <field name="control_mode">job</field>
         </record>
