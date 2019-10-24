@@ -80,6 +80,7 @@
 
         <menuitem id="tangche_menu_view_consume"
                   name="Consumable Component"
+                  sequence="100"
                   action="tangche_enhanced.product_product_action_consum"
                   parent="sa_base.menu_product_form"/>
     </data>

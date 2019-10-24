@@ -3,6 +3,14 @@
 from odoo import models, fields, api
 
 
+class MrpWorkCenterLoc(models.Model):
+    _inherit = 'mrp.workcenter.loc'
+
+    io_output = fields.Integer('IO Output For Picking Indicate')
+
+    io_input = fields.Integer('IO Output For Picking Confirm')
+
+
 class MrpWorkCenter(models.Model):
     _inherit = 'mrp.workcenter'
 

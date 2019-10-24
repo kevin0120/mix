@@ -24,6 +24,7 @@
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
+        'views/mrp_workcenter.xml',
         'views/product_views.xml',
         'views/quality_views.xml',
         'views/mrp_routing_views.xml',

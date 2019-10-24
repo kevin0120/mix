@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="tangche_mrp_workcenter_form_view" model="ir.ui.view">
+            <field name="name">tangche_mrp_workcenter_form_view</field>
+            <field name="model">mrp.workcenter</field>
+            <field name="inherit_id" ref="sa_base.sa_mrp_workcenter_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree[@name='workcenter_loc']" position="inside">
+                    <field name="io_output" required="1"/>
+                    <field name="io_input" required="1"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
