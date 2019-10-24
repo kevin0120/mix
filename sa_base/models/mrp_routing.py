@@ -257,7 +257,7 @@ class MrpRouting(models.Model):
 
     '''重写operation_ids的定义'''
     sa_operation_ids = fields.Many2many('mrp.routing.workcenter', 'routing_operation_rel', 'routing_id', 'operation_id',
-                                        string="Operations", copy=False)
+                                        string="Operations", copy=True)
     code = fields.Char('Reference', copy=False)
 
     operation_count = fields.Integer(string='Operations', compute='_compute_operation_count')

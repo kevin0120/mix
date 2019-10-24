@@ -92,7 +92,14 @@
                                     </tree>
                                 </field>
                             </page>
-
+                            <page string="Places(Component)">
+                                <field name="sa_workcenter_loc_ids" widget="many2many" context="{'default_workcenter_id':active_id}">
+                                    <tree string="Component Places Within Work Center">
+                                        <field name="product_id"/>
+                                        <field name="workcenter_id" readonly="1"/>
+                                    </tree>
+                                </field>
+                            </page>
                         </notebook>
                     </sheet>
                 </form>

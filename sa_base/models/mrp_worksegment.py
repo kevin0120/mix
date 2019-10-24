@@ -81,6 +81,24 @@ class MrpWorkSegment(models.Model):
         return res
 
 
+class MrpWorkCenterLoc(models.Model):
+    _name = 'mrp.workcenter.loc'
+    _description = 'Work Center Location For Picking Component'
+
+    workcenter_id = fields.Many2one('mrp.workcenter', string='Mrp WorkCenter', required=True, copy=False)
+
+    product_id = fields.Many2one('product.product', string='Component', copy=False)
+
+    @api.multi
+    @api.depends('workcenter_id', 'product_id')
+    def name_get(self):
+        res = []
+        for line in self:
+            name = u"[{0}]@{1}".format(line.product_id.name, line.workcenter_id.name)
+            res.append((line.id, name))
+        return res
+
+
 class MrpWorkCenter(models.Model):
     _inherit = 'mrp.workcenter'
 
@@ -98,10 +116,13 @@ class MrpWorkCenter(models.Model):
 
     qc_workcenter_id = fields.Many2one('mrp.workcenter', string='Quality Check Work Center')
 
-    worksegment_id = fields.Many2one('mrp.worksection', copy=False)
+    worksegment_id = fields.Many2one('mrp.worksection', copy=True)
 
     sa_workcentergroup_ids = fields.Many2many('mrp.workcenter.group', 'mrp_workcenter_rel', 'workcenter_id', 'group_id',
                                               string="Workcenters Group", copy=False)
+
+    sa_workcenter_loc_ids = fields.One2many('mrp.workcenter.loc', 'workcenter_id',
+                                            string='Location For Place Component', copy=True)
 
     # @api.multi
     # def _update_create_workcenter_group_tool_by_tool(self):
