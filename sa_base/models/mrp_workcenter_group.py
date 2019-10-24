@@ -110,7 +110,7 @@ class MrpWorkcenterGroupTool(models.Model):
     def create(self, vals):
         context = self.env.context
         if context.get('force_uncreate_group_tool', False):
-            return
+            return self
         return super(MrpWorkcenterGroupTool, self).create(vals)
 
     @api.multi
