@@ -76,8 +76,6 @@ describe('Class ScrewStep', () => {
       }))
     );
     return doingState.put(orderActions.stepStatus(step, STEP_STATUS.FAIL)).run();
-
-
   });
 
 

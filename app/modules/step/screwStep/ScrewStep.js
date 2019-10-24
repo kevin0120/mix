@@ -1,6 +1,6 @@
 // @flow
 import { cloneDeep, isNil, isEmpty } from 'lodash-es';
-import { call, put, take, all } from 'redux-saga/effects';
+import { call, put, take, all, fork, takeEvery, actionChannel } from 'redux-saga/effects';
 import { STEP_STATUS } from '../constants';
 import type {
   tPoint,
@@ -35,8 +35,6 @@ function* doPoints(points, isFirst, orderActions) {
         }
       }
     }]);
-
-    return yield take([SCREW_STEP.RESULT, SCREW_STEP.REDO_POINT]);
   } catch (e) {
     CommonLog.lError(e, { at: 'doPoint', points });
     yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, e));
@@ -78,6 +76,8 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsScrewStep ext
   isValid: boolean = false;
 
   _orderOperationPoints: ClsOrderOperationPoints;
+
+  _activePoints = [];
 
   * _onLeave() {
     try {
@@ -129,13 +129,9 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsScrewStep ext
       try {
 
         let isFirst = true;
-        const activePoints = new Set(this._pointsManager.start());
+        this._activePoints = this._pointsManager.start();
 
-        yield all([...activePoints].map(p => call(getDevice(p.toolSN)?.Disable || (() => {
-          CommonLog.lError(`tool ${p.toolSN}: no such tool or tool cannot be enabled.`);
-        }))));
-        // TODO: fix doing state workflow to make points listeners parallel
-
+        const resultChannel = yield actionChannel([SCREW_STEP.RESULT, SCREW_STEP.REDO_POINT]);
         while (true) {
           yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({
             ...data,
@@ -150,30 +146,33 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsScrewStep ext
             yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL));
           }
 
-          const nextAction = yield call(
+          yield call(
             [this, doPoints],
-            [...activePoints],
+            [...this._activePoints],
             isFirst,
             orderActions
           );
 
-          switch (nextAction.type) {
+          yield all(this._activePoints.map(p => call(getDevice(p.toolSN)?.Enable || (() => {
+            CommonLog.lError(`tool ${p.toolSN}: no such tool or tool cannot be enabled.`);
+          }))));
+
+          const action = yield take(resultChannel);
+
+          switch (action.type) {
             case SCREW_STEP.RESULT: {
               const {
                 results: { data: results }
-              } = nextAction;
+              } = action;
+
               yield call(this.updateData, reduceResult2TimeLine(results));
 
               const { active, inactive } = this._pointsManager.newResult(results);
 
-              inactive.forEach(p => activePoints.delete(p));
-              active.forEach(p => activePoints.add(p));
+              this._activePoints = active;
 
               yield all(inactive.map(p => call(getDevice(p.toolSN)?.Disable || (() => {
                 CommonLog.lError(`tool ${p.toolSN}: no such tool or tool cannot be disabled.`);
-              }))));
-              yield all(active.map(p => call(getDevice(p.toolSN)?.Disable || (() => {
-                CommonLog.lError(`tool ${p.toolSN}: no such tool or tool cannot be enabled.`);
               }))));
               break;
             }
@@ -184,8 +183,6 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsScrewStep ext
             default:
               break;
           }
-
-
           if (isFirst) {
             isFirst = false;
           }
