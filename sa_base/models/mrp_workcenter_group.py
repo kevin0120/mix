@@ -102,6 +102,13 @@ class MrpWorkcenterGroupTool(models.Model):
     tool_id = fields.Many2one('maintenance.equipment', string='Tightening Tool(Tightening Gun/Wrench)', copy=False,
                               ondelete='cascade', required=True)
 
+    @api.model
+    def create(self, vals):
+        context = self.env.context
+        if context.get('force_uncreate_group_tool', False):
+            return
+        super(MrpWorkcenterGroupTool, self).create(vals)
+
     @api.multi
     def name_get(self):
         res = []

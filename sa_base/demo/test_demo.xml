@@ -234,7 +234,7 @@
             <field name="workcenter_id" ref="mrp_workcenter_1"/>
         </record>
 
-        <record id="gun_5" model="maintenance.equipment">
+        <record id="gun_5" model="maintenance.equipment" context="{'force_uncreate_group_tool': True}">
             <field name="name">测试拧枪5</field>
             <field name="serial_no">xx0055</field>
             <field name="parent_id" ref="controller_2"/>
@@ -242,7 +242,7 @@
             <field name="workcenter_id" ref="mrp_workcenter_1"/>
         </record>
 
-        <record id="gun_6" model="maintenance.equipment">
+        <record id="gun_6" model="maintenance.equipment" context="{'force_uncreate_group_tool': True}">
             <field name="name">测试拧枪6</field>
             <field name="serial_no">xx1166</field>
             <field name="parent_id" ref="controller_2"/>
@@ -258,7 +258,7 @@
             <field name="workcenter_id" ref="mrp_workcenter_1"/>
         </record>
 
-        <record id="gun_7" model="maintenance.equipment">
+        <record id="gun_7" model="maintenance.equipment" context="{'force_uncreate_group_tool': True}">
             <field name="name">测试拧枪7</field>
             <field name="serial_no">xx0777</field>
             <field name="parent_id" ref="controller_3"/>
