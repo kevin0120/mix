@@ -48,7 +48,8 @@ class MrpWorkcenterGroup(models.Model):
     def _update_create_workcenter_group_tool(self):
         tool_category_ids = self.env.ref('sa_base.equipment_Gun') + self.env.ref('sa_base.equipment_Wrench')
         for wg in self:
-            already_workcenter_ids = self.env['mrp.workcenter.group.tool'].search([('workgroup_id', '=', wg.id)]).mapped('workcenter_id')
+            already_workcenter_ids = self.env['mrp.workcenter.group.tool'].search(
+                [('workgroup_id', '=', wg.id)]).mapped('workcenter_id')
             workcenter_ids = wg.sa_workcenter_ids.filtered(lambda wc: wc not in already_workcenter_ids)
             if not workcenter_ids:
                 continue
@@ -67,7 +68,7 @@ class MrpWorkcenterGroup(models.Model):
         need_unlink_recs = self.env['mrp.workcenter.group.tool']
         for wg in self:
             recs = self.env['mrp.workcenter.group.tool'].search([('workgroup_id', '=', wg.id),
-                                                                ('workcenter_id', 'not in', wg.sa_workcenter_ids.ids)])
+                                                                 ('workcenter_id', 'not in', wg.sa_workcenter_ids.ids)])
             need_unlink_recs |= recs
         need_unlink_recs.sudo().unlink()
 
@@ -102,12 +103,15 @@ class MrpWorkcenterGroupTool(models.Model):
     tool_id = fields.Many2one('maintenance.equipment', string='Tightening Tool(Tightening Gun/Wrench)', copy=False,
                               ondelete='cascade', required=True)
 
+    _sql_constraints = [
+        ('each_uniq', 'unique(workgroup_id,workcenter_id,tool_id)', 'Every Record Is Unique')]
+
     @api.model
     def create(self, vals):
         context = self.env.context
         if context.get('force_uncreate_group_tool', False):
             return
-        super(MrpWorkcenterGroupTool, self).create(vals)
+        return super(MrpWorkcenterGroupTool, self).create(vals)
 
     @api.multi
     def name_get(self):

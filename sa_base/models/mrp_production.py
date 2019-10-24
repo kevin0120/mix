@@ -34,8 +34,12 @@ class MrpWOConsu(models.Model):
     product_id = fields.Many2one('product.product', related='check_id.product_id', string='Consume Product',
                                  inherited=True)
 
+    parent_consu_order_line_id = fields.Many2one('mrp.wo.consu.line', copy=False)
+
+    child_ids = fields.One2many('mrp.wo.consu.line', 'parent_consu_order_line_id', copy=False)
+
     test_type_id = fields.Many2one(
-        'sa.quality.point.test_type', 'Test Type', related='point_id.test_type_id', store=True)
+        'sa.quality.point.test_type', 'Test Type', related='check_id.test_type_id', inherited=True, store=True)
 
     product_qty = fields.Float('Consume Product Qty', default=1.0, digits=dp.get_precision('Product Unit of Measure'),
                                inherited=True)
@@ -154,7 +158,7 @@ class MrpWorkorder(models.Model):
                     'product_id': step.product_id.id,
                     'team_id': step.team_id.id
                 }
-                consume_sudo.create(val)
+                ret = consume_sudo.create(val)
                 for operation_point in step.operation_point_ids:
                     wgc_id = operation_point.tightening_tool_ids.filtered(
                         lambda wgc: wgc.workcenter_id == order.workcenter_id)
@@ -172,7 +176,9 @@ class MrpWorkorder(models.Model):
                         'product_id': operation_point.product_id.id,
                         'team_id': step.team_id.id,
                         # todo: 拧紧枪需要定义好模型后再增加
-                        'tool_id': wgc_id.tool_id.id or False
+                        'tool_id': wgc_id.tool_id.id or False,
+                        'program_id': step.program_id.id,
+                        'parent_consu_order_line_id': ret.id,
                     }
                     consume_sudo.create(val)
 
