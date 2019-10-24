@@ -61,9 +61,12 @@
         'report/product_product_tempaltes.xml',
         'views/sa_config_setting.xml',
         'views/mrp_view_menu.xml',
+        # 'demo/test_demo.xml',  # 测试数据
         'demo/test_demo.xml',  # 测试数据
+
+        'demo/group_tool_demo.xml',  # 测试数据
     ],
     'demo': [
-        # 'demo/test_demo.xml',   # 测试数据
+
     ],
 }

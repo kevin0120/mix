@@ -70,30 +70,6 @@
             <!--<field name="controller_ids" eval="[(4, ref('sa_base.controller_0'))]"/>-->
         </record>
 
-        <record id="wrench_1" model="maintenance.equipment">
-            <field name="name">拧紧扳手1</field>
-            <field name="serial_no">xx1233</field>
-            <field name="category_id" ref="equipment_Wrench"/>
-            <field name="workcenter_id" ref="mrp_workcenter_3"/>
-        </record>
-
-        <record id="wrench_2" model="maintenance.equipment">
-            <field name="name">拧紧扳手2</field>
-            <field name="serial_no">xx3245</field>
-            <field name="category_id" ref="equipment_Wrench"/>
-            <field name="workcenter_id" ref="mrp_workcenter_4"/>
-        </record>
-
-        <record id="wrench_3" model="maintenance.equipment">
-            <field name="name">拧紧扳手3</field>
-            <field name="serial_no">xx7788</field>
-            <field name="category_id" ref="equipment_Wrench"/>
-            <field name="workcenter_id" ref="mrp_workcenter_5"/>
-        </record>
-
-
-
-
 
         <record id="hmi_0" model="maintenance.equipment">
             <field name="name">测试HMI1</field>
@@ -234,21 +210,14 @@
             <field name="workcenter_id" ref="mrp_workcenter_1"/>
         </record>
 
-        <record id="gun_5" model="maintenance.equipment" context="{'force_uncreate_group_tool': True}">
-            <field name="name">测试拧枪5</field>
-            <field name="serial_no">xx0055</field>
-            <field name="parent_id" ref="controller_2"/>
-            <field name="category_id" ref="equipment_Gun"/>
-            <field name="workcenter_id" ref="mrp_workcenter_1"/>
-        </record>
+        <!--<record id="gun_5" model="maintenance.equipment" context="{'force_uncreate_group_tool': True}">-->
+            <!--<field name="name">测试拧枪5</field>-->
+            <!--<field name="serial_no">xx0055</field>-->
+            <!--<field name="parent_id" ref="controller_2"/>-->
+            <!--<field name="category_id" ref="equipment_Gun"/>-->
+            <!--<field name="workcenter_id" ref="mrp_workcenter_1"/>-->
+        <!--</record>-->
 
-        <record id="gun_6" model="maintenance.equipment" context="{'force_uncreate_group_tool': True}">
-            <field name="name">测试拧枪6</field>
-            <field name="serial_no">xx1166</field>
-            <field name="parent_id" ref="controller_2"/>
-            <field name="category_id" ref="equipment_Gun"/>
-            <field name="workcenter_id" ref="mrp_workcenter_1"/>
-        </record>
 
         <record id="controller_3" model="maintenance.equipment">
             <field name="name">测试控制器4</field>
@@ -258,13 +227,6 @@
             <field name="workcenter_id" ref="mrp_workcenter_1"/>
         </record>
 
-        <record id="gun_7" model="maintenance.equipment" context="{'force_uncreate_group_tool': True}">
-            <field name="name">测试拧枪7</field>
-            <field name="serial_no">xx0777</field>
-            <field name="parent_id" ref="controller_3"/>
-            <field name="category_id" ref="equipment_Gun"/>
-            <field name="workcenter_id" ref="mrp_workcenter_1"/>
-        </record>
 
         <record id="gun_8" model="maintenance.equipment">
             <field name="name">测试拧枪8</field>
@@ -665,228 +627,46 @@
             <!--<field name="operation_id" ref="routing_operation_8"/>-->
         <!--</record>-->
 
-        <record id="tinghtening_job1" model="controller.program">
-            <field name="name">JOB001</field>
-            <field name="code">2</field>
-            <field name="strategy">AT</field>
-            <field name="control_mode">job</field>
+        <record id="wrench_1" model="maintenance.equipment" context="{'force_uncreate_group_tool': True}">
+            <field name="name">拧紧扳手1</field>
+            <field name="serial_no">xx1233</field>
+            <field name="category_id" ref="equipment_Wrench"/>
+            <field name="workcenter_id" ref="mrp_workcenter_3"/>
         </record>
 
-
-        <record id="quality_point1" model="sa.quality.point">
-            <field name="sa_operation_ids" eval="[(6,0, [ref('sa_base.routing_operation_1'), ref('sa_base.routing_operation_2')])]"/>
-            <field name="operation_id" ref="routing_operation_1"/>
-            <field name="program_id" ref="tinghtening_job1"/>
-            <field name="test_type_id" ref="quality.test_type_tightening"/>
-            <field name="note">Quality Control For Customized Laptop's Parts By Manufacturing Department.</field>
-        </record>
-        <record id="tinghtening_point0" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point1"/>
-            <field name="product_id" ref="product_product_0"/>
-            <!--<field name="product_tmpl_id">2</field>-->
-        </record>
-        <record id="tinghtening_point1" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point1"/>
-            <field name="product_id" ref="product_product_1"/>
-            <!--<field name="product_tmpl_id">3</field>-->
-        </record>
-        <record id="tinghtening_point2" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point1"/>
-            <field name="product_id" ref="product_product_2"/>
-            <!--<field name="product_tmpl_id">4</field>-->
+        <record id="wrench_2" model="maintenance.equipment" context="{'force_uncreate_group_tool': True}">
+            <field name="name">拧紧扳手2</field>
+            <field name="serial_no">xx3245</field>
+            <field name="category_id" ref="equipment_Wrench"/>
+            <field name="workcenter_id" ref="mrp_workcenter_4"/>
         </record>
 
-
-
-        <record id="quality_point2" model="sa.quality.point">
-            <field name="sa_operation_ids" eval="[(6,0, [ref('sa_base.routing_operation_0'), ref('sa_base.routing_operation_1')])]"/>
-            <field name="operation_id" ref="routing_operation_1"/>
-            <field name="program_id" ref="tinghtening_job1"/>
-            <field name="test_type_id" ref="quality.test_type_tightening"/>
-            <field name="note">Quality Control For Customized Laptop's Parts By Manufacturing Department.</field>
-        </record>
-        <record id="tinghtening_point20" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point2"/>
-            <field name="product_id" ref="product_product_0"/>
-            <!--<field name="product_tmpl_id">2</field>-->
-        </record>
-        <record id="tinghtening_point21" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point2"/>
-            <field name="product_id" ref="product_product_1"/>
-            <!--<field name="product_tmpl_id">3</field>-->
-        </record>
-        <record id="tinghtening_point22" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point2"/>
-            <field name="product_id" ref="product_product_2"/>
-            <!--<field name="product_tmpl_id">4</field>-->
+        <record id="wrench_3" model="maintenance.equipment" context="{'force_uncreate_group_tool': True}">
+            <field name="name">拧紧扳手3</field>
+            <field name="serial_no">xx7788</field>
+            <field name="category_id" ref="equipment_Wrench"/>
+            <field name="workcenter_id" ref="mrp_workcenter_5"/>
         </record>
 
-
-        <record id="quality_point3" model="sa.quality.point">
-            <field name="sa_operation_ids" eval="[(6,0, [ref('sa_base.routing_operation_3')])]"/>
-            <field name="operation_id" ref="routing_operation_1"/>
-            <field name="program_id" ref="tinghtening_job1"/>
-            <field name="test_type_id" ref="quality.test_type_tightening"/>
-            <field name="note">Quality Control For Customized Laptop's Parts By Manufacturing Department.</field>
-        </record>
-        <record id="tinghtening_point30" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point2"/>
-            <field name="product_id" ref="product_product_0"/>
-            <!--<field name="product_tmpl_id">2</field>-->
-        </record>
-        <record id="tinghtening_point31" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point2"/>
-            <field name="product_id" ref="product_product_1"/>
-            <!--<field name="product_tmpl_id">3</field>-->
-        </record>
-        <record id="tinghtening_point32" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point2"/>
-            <field name="product_id" ref="product_product_2"/>
-            <!--<field name="product_tmpl_id">4</field>-->
+        <record id="wrench_4" model="maintenance.equipment" context="{'force_uncreate_group_tool': True}">
+            <field name="name">拧紧扳手4</field>
+            <field name="serial_no">xx4443</field>
+            <field name="category_id" ref="equipment_Wrench"/>
+            <field name="workcenter_id" ref="mrp_workcenter_0"/>
         </record>
 
-
-
-        <record id="quality_point4" model="sa.quality.point">
-            <field name="sa_operation_ids" eval="[(6,0, [ref('sa_base.routing_operation_4')])]"/>
-            <field name="operation_id" ref="routing_operation_1"/>
-            <field name="program_id" ref="tinghtening_job1"/>
-            <field name="test_type_id" ref="quality.test_type_tightening"/>
-            <field name="note">Quality Control For Customized Laptop's Parts By Manufacturing Department.</field>
-        </record>
-        <record id="tinghtening_point40" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point2"/>
-            <field name="product_id" ref="product_product_0"/>
-            <!--<field name="product_tmpl_id">2</field>-->
-        </record>
-        <record id="tinghtening_point41" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point2"/>
-            <field name="product_id" ref="product_product_1"/>
-            <!--<field name="product_tmpl_id">3</field>-->
-        </record>
-        <record id="tinghtening_point42" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point2"/>
-            <field name="product_id" ref="product_product_2"/>
-            <!--<field name="product_tmpl_id">4</field>-->
+        <record id="wrench_5" model="maintenance.equipment" context="{'force_uncreate_group_tool': True}">
+            <field name="name">拧紧扳手5</field>
+            <field name="serial_no">xx7535</field>
+            <field name="category_id" ref="equipment_Wrench"/>
+            <field name="workcenter_id" ref="mrp_workcenter_1"/>
         </record>
 
-        <record id="quality_point5" model="sa.quality.point">
-            <field name="sa_operation_ids" eval="[(6,0, [ref('sa_base.routing_operation_5')])]"/>
-            <field name="operation_id" ref="routing_operation_1"/>
-            <field name="program_id" ref="tinghtening_job1"/>
-            <field name="test_type_id" ref="quality.test_type_tightening"/>
-            <field name="note">Quality Control For Customized Laptop's Parts By Manufacturing Department.</field>
-        </record>
-        <record id="tinghtening_point50" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point5"/>
-            <field name="product_id" ref="product_product_0"/>
-            <!--<field name="product_tmpl_id">2</field>-->
-        </record>
-        <record id="tinghtening_point51" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point5"/>
-            <field name="product_id" ref="product_product_1"/>
-            <!--<field name="product_tmpl_id">3</field>-->
-        </record>
-        <record id="tinghtening_point52" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point5"/>
-            <field name="product_id" ref="product_product_2"/>
-            <!--<field name="product_tmpl_id">4</field>-->
-        </record>
-
-
-        <record id="quality_point6" model="sa.quality.point">
-            <field name="sa_operation_ids" eval="[(6,0, [ref('sa_base.routing_operation_6')])]"/>
-            <field name="operation_id" ref="routing_operation_1"/>
-            <field name="program_id" ref="tinghtening_job1"/>
-            <field name="test_type_id" ref="quality.test_type_tightening"/>
-            <field name="note">Quality Control For Customized Laptop's Parts By Manufacturing Department.</field>
-        </record>
-        <record id="tinghtening_point60" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point6"/>
-            <field name="product_id" ref="product_product_0"/>
-            <!--<field name="product_tmpl_id">2</field>-->
-        </record>
-        <record id="tinghtening_point61" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point6"/>
-            <field name="product_id" ref="product_product_1"/>
-            <!--<field name="product_tmpl_id">3</field>-->
-        </record>
-        <record id="tinghtening_point62" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point6"/>
-            <field name="product_id" ref="product_product_2"/>
-            <!--<field name="product_tmpl_id">4</field>-->
-        </record>
-
-
-        <record id="quality_point7" model="sa.quality.point">
-            <field name="sa_operation_ids" eval="[(6,0, [ref('sa_base.routing_operation_7')])]"/>
-            <field name="operation_id" ref="routing_operation_1"/>
-            <field name="program_id" ref="tinghtening_job1"/>
-            <field name="test_type_id" ref="quality.test_type_tightening"/>
-            <field name="note">Quality Control For Customized Laptop's Parts By Manufacturing Department.</field>
-        </record>
-        <record id="tinghtening_point70" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point7"/>
-            <field name="product_id" ref="product_product_0"/>
-            <!--<field name="product_tmpl_id">2</field>-->
-        </record>
-        <record id="tinghtening_point71" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point7"/>
-            <field name="product_id" ref="product_product_1"/>
-            <!--<field name="product_tmpl_id">3</field>-->
-        </record>
-        <record id="tinghtening_point72" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point7"/>
-            <field name="product_id" ref="product_product_2"/>
-            <!--<field name="product_tmpl_id">4</field>-->
-        </record>
-
-
-        <record id="quality_point8" model="sa.quality.point">
-            <field name="sa_operation_ids" eval="[(6,0, [ref('sa_base.routing_operation_8')])]"/>
-            <field name="operation_id" ref="routing_operation_1"/>
-            <field name="program_id" ref="tinghtening_job1"/>
-            <field name="test_type_id" ref="quality.test_type_tightening"/>
-            <field name="note">Quality Control For Customized Laptop's Parts By Manufacturing Department.</field>
-        </record>
-        <record id="tinghtening_point80" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point8"/>
-            <field name="product_id" ref="product_product_0"/>
-            <!--<field name="product_tmpl_id">2</field>-->
-        </record>
-        <record id="tinghtening_point81" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point8"/>
-            <field name="product_id" ref="product_product_1"/>
-            <!--<field name="product_tmpl_id">3</field>-->
-        </record>
-        <record id="tinghtening_point82" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point8"/>
-            <field name="product_id" ref="product_product_2"/>
-            <!--<field name="product_tmpl_id">4</field>-->
-        </record>
-
-
-        <record id="quality_point9" model="sa.quality.point">
-            <field name="sa_operation_ids" eval="[(6,0, [ref('sa_base.routing_operation_20')])]"/>
-            <field name="operation_id" ref="routing_operation_1"/>
-            <field name="program_id" ref="tinghtening_job1"/>
-            <field name="test_type_id" ref="quality.test_type_tightening"/>
-            <field name="note">Quality Control For Customized Laptop's Parts By Manufacturing Department.</field>
-        </record>
-        <record id="tinghtening_point90" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point9"/>
-            <field name="product_id" ref="product_product_0"/>
-            <!--<field name="product_tmpl_id">2</field>-->
-        </record>
-        <record id="tinghtening_point91" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point9"/>
-            <field name="product_id" ref="product_product_1"/>
-            <!--<field name="product_tmpl_id">3</field>-->
-        </record>
-        <record id="tinghtening_point92" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point9"/>
-            <field name="product_id" ref="product_product_2"/>
-            <!--<field name="product_tmpl_id">4</field>-->
+        <record id="wrench_6" model="maintenance.equipment" context="{'force_uncreate_group_tool': True}">
+            <field name="name">拧紧扳手6</field>
+            <field name="serial_no">xx6388</field>
+            <field name="category_id" ref="equipment_Wrench"/>
+            <field name="workcenter_id" ref="mrp_workcenter_2"/>
         </record>
 
 
