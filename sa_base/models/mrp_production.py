@@ -155,7 +155,7 @@ class MrpWorkorder(models.Model):
             step_ids = order.operation_id.sa_step_ids.filtered(lambda qcp: qcp.test_type != 'tightening_point')
             for idx, step in enumerate(step_ids):
                 val = {
-                    'sequence': idx,
+                    'sequence': idx + 1,
                     'workorder_id': order.id,
                     'point_id': step.id,
                     'production_id': order.production_id.id,
@@ -164,7 +164,7 @@ class MrpWorkorder(models.Model):
                     'team_id': step.team_id.id
                 }
                 ret = consume_sudo.create(val)
-                for operation_point in step.operation_point_ids:
+                for sub_idx, operation_point in enumerate(step.operation_point_ids):
                     wgc_id = operation_point.tightening_tool_ids.filtered(
                         lambda wgc: wgc.workcenter_id == order.workcenter_id)
                     if not wgc_id or not wgc_id.tool_id:
@@ -172,7 +172,7 @@ class MrpWorkorder(models.Model):
                             "Can Not Found The Operation Point Tool Define: {0}".format(pprint.pformat(wgc_id)))
                         continue
                     val = {
-                        'sequence': idx,
+                        'sequence': idx + 1 + sub_idx,
                         'workorder_id': order.id,
                         'test_type_id': operation_point.test_type_id.id,
                         'production_id': order.production_id.id,
