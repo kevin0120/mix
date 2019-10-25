@@ -167,6 +167,9 @@ class MrpWorkorder(models.Model):
                 for sub_idx, operation_point in enumerate(step.operation_point_ids):
                     wgc_id = operation_point.tightening_tool_ids.filtered(
                         lambda wgc: wgc.workcenter_id == order.workcenter_id)
+                    if len(wgc_id) > 1:
+                        _logger.error('There is more than one tightening tool under this workcenter!!!')
+                        wgc_id = wgc_id[0]
                     if not wgc_id or not wgc_id.tool_id:
                         _logger.error(
                             "Can Not Found The Operation Point Tool Define: {0}".format(pprint.pformat(wgc_id)))
