@@ -8,6 +8,9 @@
             <xpath expr="//button[@name='check_quality']" position="replace">
 
             </xpath>
+            <xpath expr="//button[@name='button_quality_alert']" position="replace">
+
+            </xpath>
             <xpath expr="//button[@name='action_assign']" position="before">
                 <button name="do_confirm" attrs="{'invisible': [('state', '!=', 'draft')]}" string="Dispatch Confirm"
                         type="object" class="oe_highlight"/>
@@ -28,15 +31,15 @@
             <field name="routing_id" position="attributes">
                 <attribute name="attrs">{'required': True}</attribute>
             </field>
-            <xpath expr="//button[@name='button_quality_alert']" position="replace">
 
-            </xpath>
-            <xpath expr="//button[@name='check_quality']" position="replace">
-
-            </xpath>
             <xpath expr="//button[@name='%(mrp.action_change_production_qty)d']" position="replace">
 
             </xpath>
+
+            <field name="product_id" position="attributes">
+                 <attribute name="options">{'no_create_edit': True,'no_open': True}</attribute>
+            </field>
+
             <field name="product_id" position="after">
                 <field name="track_no" string="Finished Product Serial Number" attrs="{'readonly': [('state', '!=', 'draft')]}" required="1"/>
             </field>
