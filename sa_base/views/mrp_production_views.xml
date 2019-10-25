@@ -25,6 +25,12 @@
             <field name="routing_id" position="attributes">
                 <attribute name="attrs">{'required': True}</attribute>
             </field>
+            <xpath expr="//button[@name='button_quality_alert']" position="replace">
+
+            </xpath>
+            <xpath expr="//button[@name='check_quality']" position="replace">
+
+            </xpath>
             <xpath expr="//button[@name='%(mrp.action_change_production_qty)d']" position="replace">
 
             </xpath>

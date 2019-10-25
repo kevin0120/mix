@@ -39,7 +39,7 @@ class MrpWOConsu(models.Model):
     child_ids = fields.One2many('mrp.wo.consu.line', 'parent_consu_order_line_id', copy=False)
 
     test_type_id = fields.Many2one(
-        'sa.quality.point.test_type', 'Test Type', related='check_id.test_type_id', inherited=True, store=True)
+        'sa.quality.point.test_type', 'Test Type', related='check_id.test_type_id', inherited=True)
 
     product_qty = fields.Float('Consume Product Qty', default=1.0, digits=dp.get_precision('Product Unit of Measure'),
                                inherited=True)
