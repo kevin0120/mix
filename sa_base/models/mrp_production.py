@@ -121,6 +121,11 @@ class MrpWOConsu(models.Model):
         ids_news = cr.fetchall()
         return [ids[0] for ids in ids_news]
 
+    @api.model
+    def create(self, vals):
+        ret = super(MrpWOConsu, self).create(vals)
+        return ret
+
 
 class MrpWorkorder(models.Model):
     _inherit = 'mrp.workorder'

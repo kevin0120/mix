@@ -5,6 +5,9 @@
         <field name="model">mrp.production</field>
         <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
         <field name="arch" type="xml">
+            <xpath expr="//button[@name='check_quality']" position="replace">
+
+            </xpath>
             <xpath expr="//button[@name='action_assign']" position="before">
                 <button name="do_confirm" attrs="{'invisible': [('state', '!=', 'draft')]}" string="Dispatch Confirm"
                         type="object" class="oe_highlight"/>

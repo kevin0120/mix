@@ -29,27 +29,54 @@ def str_time_to_rfc3339(s_time):
 class PushWorkorder(AbstractModel):
     _name = "workorder.push"
 
+    @staticmethod
+    def pack_step_payload(steps, type_tightening_point_id):
+        payloads = []
+        for step in steps.filtered(lambda t: t.test_type_id != type_tightening_point_id):
+            val = {
+                "sequence": step.sequence,
+                'max_redo_times': step.bom_line_id.operation_point_id.max_redo_times,
+                'offset_x': step.bom_line_id.operation_point_id.x_offset,
+                'offset_y': step.bom_line_id.operation_point_id.y_offset,
+                "pset": step.bom_line_id.program_id.code if step.bom_line_id.program_id.code else "0",
+                "nut_no": step.product_id.default_code,
+                "gun_sn": step.bom_line_id.gun_id.serial_no if step.bom_line_id.gun_id.serial_no else "",
+                "controller_sn": step.bom_line_id.controller_id.serial_no if step.bom_line_id.controller_id.serial_no else "",
+            }
+            for tightening_point_step in step.child_ids:
+                operation_point_id = tightening_point_step.operation_point_id
+                val = {
+                    'sequence': operation_point_id.sequence,
+                    'group_sequence': operation_point_id.group_sequence,
+                    'bolt_number': operation_point_id.product_id.default_code,
+                    'program_id': operation_point_id.program_id.code,
+                }
+            payloads.append(val)
+
+        return payloads
+
     def _post_workorder_to_masterpc(self, url, orders):
         r = list()
+        type_tightening_point_id = self.env.ref['quality.test_type_tightening_point'].id
         for order in orders:
-            _consumes = list()
-            for consu in order.consu_work_order_line_ids:
-
-                _consumes.append({
-                    "sequence": consu.bom_line_id.operation_point_id.sequence,
-                    "group_sequence": consu.bom_line_id.operation_point_id.group_sequence,
-                    'max_redo_times': consu.bom_line_id.operation_point_id.max_redo_times,
-                    'offset_x': consu.bom_line_id.operation_point_id.x_offset,
-                    'offset_y': consu.bom_line_id.operation_point_id.y_offset,
-                    "pset": consu.bom_line_id.program_id.code if consu.bom_line_id.program_id.code else "0",
-                    "nut_no": consu.product_id.default_code,
-                    "gun_sn": consu.bom_line_id.gun_id.serial_no if consu.bom_line_id.gun_id.serial_no else "",
-                    "controller_sn": consu.bom_line_id.controller_id.serial_no if consu.bom_line_id.controller_id.serial_no else "",
-                    # 'tolerance_min': _qcps.tolerance_min if _qcps else 0.0,
-                    # 'tolerance_max': _qcps.tolerance_max if _qcps else 0.0,
-                    # 'tolerance_min_degree': _qcps.tolerance_min_degree if _qcps else 0.0,
-                    # 'tolerance_max_degree': _qcps.tolerance_max_degree if _qcps else 0.0,
-                })
+            _steps = self.pack_step_payload(order.consu_work_order_line_ids, type_tightening_point_id)
+            # for step in order.consu_work_order_line_ids:
+            #
+            #     _steps.append({
+            #         "sequence": step.bom_line_id.operation_point_id.sequence,
+            #         "group_sequence": step.bom_line_id.operation_point_id.group_sequence,
+            #         'max_redo_times': step.bom_line_id.operation_point_id.max_redo_times,
+            #         'offset_x': step.bom_line_id.operation_point_id.x_offset,
+            #         'offset_y': step.bom_line_id.operation_point_id.y_offset,
+            #         "pset": step.bom_line_id.program_id.code if step.bom_line_id.program_id.code else "0",
+            #         "nut_no": step.product_id.default_code,
+            #         "gun_sn": step.bom_line_id.gun_id.serial_no if step.bom_line_id.gun_id.serial_no else "",
+            #         "controller_sn": step.bom_line_id.controller_id.serial_no if step.bom_line_id.controller_id.serial_no else "",
+            #         # 'tolerance_min': _qcps.tolerance_min if _qcps else 0.0,
+            #         # 'tolerance_max': _qcps.tolerance_max if _qcps else 0.0,
+            #         # 'tolerance_min_degree': _qcps.tolerance_min_degree if _qcps else 0.0,
+            #         # 'tolerance_max_degree': _qcps.tolerance_max_degree if _qcps else 0.0,
+            #     })
 
             vals = {
                 'order': {'name': order.name, 'origin': order.origin},
@@ -59,10 +86,9 @@ class PushWorkorder(AbstractModel):
                 'track_no': order.track_no,
                 'status': order.state,  # pending, ready, process, done, cancel
                 'assembly_line': order.production_id.assembly_line_id.code,
-                'consumes': _consumes,
+                'work_steps': _steps,
                 'finished_product': order.product_id.default_code,
                 'update_time': str_time_to_rfc3339(order.production_date),
-                'job': order.operation_id.op_job_id.code if order.operation_id.op_job_id else "0"
             }
             r.append(vals)
         try:
