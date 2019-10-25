@@ -20,12 +20,12 @@ export type tOrderListData = {|
 export type tOrder = {|
   ...tOrderListData,
   canRework: boolean, // 是否能够返工
-  incomingProducts: Array<tStockMove>,
-  finishedProducts: Array<tStockMove>, //
+  incomingProducts?: Array<tStockMove>,
+  finishedProducts?: Array<tStockMove>, //
   steps: Array<tStep>, // 工步
   status: tOrderStatus, // 工单状态
-  plannedDateTime: string, // 计划时间
-  workingIndex: ?number // 正在执行的工步索引
+  plannedDateTime?: string, // 计划时间
+  workingIndex?: number // 正在执行的工步索引
 |};
 
 export type tOrderStepIdx = number;

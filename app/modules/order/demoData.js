@@ -3,19 +3,19 @@ import dataImg from '../../../resources/imgs/workingImg.png';
 import dataImg2 from '../../../resources/imgs/working-page-test-pic2.png';
 // import screwImg from '../../../resources/imgs/screw.jpg';
 import { ORDER_STATUS } from './constants';
+import type { tOrder } from './interface/typeDef';
 
 // console.log(screwImg);
-export const demoOrder = {
-  id: 'demoOrder1',
+export const demoOrder: tOrder = {
+  id: 1,
   name: 'demo Order 1',
   desc: 'a:b\t\tb:c\t\tc:d',
-  info:
-    'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
-  type: 'step',
+  canRework:true,
+  image: '',
   status: ORDER_STATUS.TODO,
   steps: [
     {
-      id: 's1',
+      id: 1,
 
       name: '获取物料',
       info: {
@@ -24,7 +24,7 @@ export const demoOrder = {
       description: '获取下列物料',
       type: 'material',
       skippable: true,
-      data: {},
+      undoable: true,
       payload: {
         items: [
           {
@@ -47,7 +47,7 @@ export const demoOrder = {
       }
     },
     {
-      id: 's2',
+      id: 2,
 
       name: '拧紧作业指导 pset',
       info: {
@@ -119,7 +119,7 @@ export const demoOrder = {
       }
     },
     {
-      id: 's3',
+      id: 3,
       name: '拧紧作业指导 job',
       info: {
         time: '00:02:00'
@@ -176,7 +176,7 @@ export const demoOrder = {
       }
     },
     {
-      id: 's4',
+      id: 4,
       name: '扫码',
       info: {
         time: '00:02:00'
@@ -184,13 +184,13 @@ export const demoOrder = {
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
-      data: {},
+      undoable: true,
       payload: {
         label: 'name'
       }
     },
     {
-      id: 's6',
+      id: 6,
       name: '指导',
       info: {
         time: '00:02:00'
@@ -198,15 +198,14 @@ export const demoOrder = {
       description: 'pdf',
       type: 'instruction',
       skippable: true,
-      data: {},
+      undoable: true,
       payload: {
         url: '\\\\192.168.74.31\\share\\D0000177249.pdf',
         page: 0
-        // label: 'name'
       }
     },
     {
-      id: 's5',
+      id: 5,
       name: '扫码',
       info: {
         time: '00:02:00'
@@ -214,7 +213,7 @@ export const demoOrder = {
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
-      data: {},
+      undoable: true,
       payload: {
         label: 'name'
       }

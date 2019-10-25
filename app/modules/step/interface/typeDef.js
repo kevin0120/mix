@@ -12,19 +12,17 @@ export type tStepPayload = {
 };
 
 export type tStep = {
-  +id: number,
-  +name: string,
-  +desc: string,
+  id: number,
+  name: string,
+  desc?: string,
   info: tStepInfo,
-  status: tStepStatus,
-  +type: tStepType, //
+  status?: tStepStatus,
+  type: tStepType, //
   payload: tStepPayload, // 工步的数据
-  data: tStepPayload, // 工步执行过程中生成的数据
-  steps: Array<tStep>,
-  times: Array<Date>,
+  data?: tStepPayload, // 工步执行过程中生成的数据
+  steps?: Array<tStep>,
   skippable: boolean, // 此工步是否可跳过
-  undoable: boolean, // 是否可重做
-  description: string
+  undoable: boolean // 是否可重做
 };
 
 export type tStepDataReducer = Function;
