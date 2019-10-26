@@ -141,6 +141,8 @@ class MrpWorkorder(models.Model):
 
     @api.model
     def create(self, vals):
+        if 'name' not in vals:
+            vals.update({'name': self.env['ir.sequence'].next_by_code('mrp.workorder') or _('New')})
         if 'origin' not in vals:
             vals.update({'origin': vals.get('name', '')})
         ret = super(MrpWorkorder, self).create(vals)
@@ -215,6 +217,8 @@ class DispatchingWorkOrder(models.Model):
 
     production_id = fields.Many2one('mrp.production', string='Manufacture Order', index=True)
 
+    date_planned_start = fields.Datetime('Scheduled Date Start')
+
     workorder_id = fields.Many2one('mrp.workorder')
 
     user_id = fields.Many2one('res.users', string='Responsible Person')
@@ -286,12 +290,14 @@ class MrpProduction(models.Model):
                                  workcenter_id.time_stop +
                                  cycle_number * operation.time_cycle * 100.0 / workcenter_id.time_efficiency)
             workorder = workorders.create({
-                'name': operation.name,
+                'origin': self.origin,
+                'date_planned_start': dispatch.date_planned_start,
                 'production_id': self.id,
                 'workcenter_id': workcenter_id.id,
                 'operation_id': operation.id,
                 'duration_expected': duration_expected,
-                'state': len(workorders) == 0 and 'ready' or 'pending',
+                'state': len(
+                    workorders) == 0 and 'ready' or 'pending',
                 'qty_producing': 1.0,
                 'track_no': self.track_no,
                 'capacity': workcenter_id.capacity,
@@ -364,6 +370,7 @@ class MrpProduction(models.Model):
                 'sequence': idx,
                 'operation_id': operation_id.id,
                 'routing_id': routing_id.id,
+                'date_planned_start': self.date_planned_start,
                 'production_id': self.id,
                 'workcenter_id': operation_id.workcenter_id and operation_id.workcenter_id.id,  # 设置优先选择工位，方便后续快速排产
                 'user_id': operation_id.workcenter_id.user_ids and operation_id.workcenter_id.user_ids[0].id

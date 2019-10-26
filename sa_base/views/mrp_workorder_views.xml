@@ -8,6 +8,7 @@
             <field name="product_id" position="after">
                 <field name="track_no" readonly="1"/>
                 <field name="origin" readonly="1" />
+                <!--<field name="date_planned_start" readonly="1" />-->
             </field>
             <xpath expr="//page[last()]" position="after">
                 <page string="Consume Tracking" groups="mrp.group_mrp_manager">

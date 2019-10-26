@@ -19,5 +19,14 @@
             <field name="number_next">1</field>
             <field name="number_increment">1</field>
         </record>
+
+        <record id="sequence_mrp_work_order" model="ir.sequence">
+            <field name="name">Work order</field>
+            <field name="code">mrp.workorder</field>
+            <field name="prefix">WO/</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+        </record>
     </data>
 </odoo>
