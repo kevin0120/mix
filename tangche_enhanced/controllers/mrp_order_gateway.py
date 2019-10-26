@@ -2,9 +2,9 @@
 from odoo import api, SUPERUSER_ID
 from odoo.http import request, Response, Controller, route
 from odoo.exceptions import ValidationError
-from odoo.addons.common_sa_utils import sa_http_session
+from odoo.addons.common_sa_utils.http import sa_http_session
 
-from odoo.addons.spc import MASTER_WROKORDERS_API
+from odoo.addons.spc.models.push_workorder import MASTER_WROKORDERS_API
 import logging
 import pprint
 import json
