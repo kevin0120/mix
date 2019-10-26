@@ -80,7 +80,7 @@ export class ClsOrderOperationPoints {
         return;
       }
       const point = group.newResult(r);
-      newInactivePoints=newInactivePoints.concat(point);
+      newInactivePoints = newInactivePoints.concat(point);
       if (!group.isKeyPass()) {
         return;
       }
@@ -118,13 +118,17 @@ export class ClsOrderOperationPoints {
     return points;
   }
 
-  isPass(){
+  isPass() {
     // eslint-disable-next-line radix
-    return Object.keys(this._groups).every(g=>this._groups[parseInt(g)].isAllPass());
+    return Object.keys(this._groups).every(g => this._groups[parseInt(g)].isAllPass());
   }
 
-  isFailed(){
+  isFailed() {
     // eslint-disable-next-line radix
-    return Object.keys(this._groups).some(g=>this._groups[parseInt(g)].isFailed());
+    return Object.keys(this._groups).some(g => this._groups[parseInt(g)].isFailed());
+  }
+
+  hasPoint(point: ClsOperationPoint) {
+    return Object.keys(this._groups).some(k => this._groups[k].hasPoint(point));
   }
 }

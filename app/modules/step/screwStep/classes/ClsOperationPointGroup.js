@@ -71,8 +71,8 @@ export class ClsOperationPointGroup {
     return this._points.every(p => p.status === POINT_STATUS.SUCCESS);
   }
 
-  isFailed(){
-    return this.points.some(p=>p.isFinalFail())
+  isFailed() {
+    return this.points.some(p => p.isFinalFail());
   }
 
   newResult(result: tResult): Array<?ClsOperationPoint> {
@@ -95,5 +95,9 @@ export class ClsOperationPointGroup {
   setActive(active: boolean) {
     this._active = active;
     this._points.forEach(p => p.setActive(active));
+  }
+
+  hasPoint(point: ClsOperationPoint) {
+    return this._points.some(p => p === point);
   }
 }

@@ -21,7 +21,6 @@ type tSP = {|
   ...tOP,
   points: Array<ClsOperationPoint>,
   image: string,
-  // activeIndex: number,
   status: ?tAnyStepStatus
 |};
 
@@ -43,7 +42,6 @@ const mapState = (state, props: tOP): tSP => {
     ...props,
     points: stepData(vStep)?.points || stepPayload(vStep)?.points || [],
     image: stepPayload(vStep)?.image || '',
-    // activeIndex: stepData(vStep)?.activeIndex,
     status: stepStatus(vStep)
   });
 };
@@ -65,14 +63,14 @@ function ScrewStep({ isCurrent, image, points, redoPoint, result }: Props) {
       focus={0}
       scale={1}
       twinkle={isCurrent}
-      onPointClick={(point) => {
-        result({
-          data: [{
-            ...point._point,
-            result: RESULT_STATUS.ok
-          }]
-        });
-        // redoPoint(point);
+      onPointClick={(point: ClsOperationPoint) => {
+        // result({
+        //   data: [{
+        //     ...point._point,
+        //     result: RESULT_STATUS.ok
+        //   }]
+        // });
+        redoPoint(point);
       }}
     />
     <Paper

@@ -18,23 +18,21 @@ import type { IWorkStep } from '../interface/IWorkStep';
 import type { IScrewStep } from './interface/IScrewStep';
 import { reduceResult2TimeLine } from './handleResult';
 
-function* doPoints(points, isFirst, orderActions) {
+export function* doPoint(points, isFirst, orderActions) {
   try {
     const data = this._data;
 
-    yield call([this, function* callControllerModeTask() {
-      if (!(data.controllerMode === controllerModes.pset ||
-        (data.controllerMode === controllerModes.job && isFirst))) {
-        return;
+    if (!(data.controllerMode === controllerModes.pset ||
+      (data.controllerMode === controllerModes.job && isFirst))) {
+      return;
+    }
+    // eslint-disable-next-line no-restricted-syntax
+    for (const p of points) {
+      const success = yield call([this, controllerModeTasks[data.controllerMode]], p);
+      if (!success) {
+        throw new Error(`${data.controllerMode} failed`);
       }
-      // eslint-disable-next-line no-restricted-syntax
-      for (const p of points) {
-        const success = yield call([this, controllerModeTasks[data.controllerMode]], p);
-        if (!success) {
-          throw new Error(`${data.controllerMode} failed`);
-        }
-      }
-    }]);
+    }
   } catch (e) {
     CommonLog.lError(e, { at: 'doPoint', points });
     yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, e));
@@ -147,7 +145,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsScrewStep ext
           }
 
           yield call(
-            [this, doPoints],
+            [this, doPoint],
             [...this._activePoints],
             isFirst,
             orderActions
@@ -164,20 +162,20 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsScrewStep ext
               const {
                 results: { data: results }
               } = action;
-
               yield call(this.updateData, reduceResult2TimeLine(results));
-
               const { active, inactive } = this._pointsManager.newResult(results);
-
               this._activePoints = active;
-
               yield all(inactive.map(p => call(getDevice(p.toolSN)?.Disable || (() => {
                 CommonLog.lError(`tool ${p.toolSN}: no such tool or tool cannot be disabled.`);
               }))));
               break;
             }
             case SCREW_STEP.REDO_POINT: {
-              // TODO: handle redo point
+              const { point } = action;
+              if (!this._pointsManager.hasPoint(point)) {
+                break;
+              }
+              this._activePoints = [point.redo()];
               break;
             }
             default:

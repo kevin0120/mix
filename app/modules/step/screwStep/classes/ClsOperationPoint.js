@@ -110,6 +110,12 @@ export class ClsOperationPoint {
     }
   }
 
+  redo(){
+    this.setActive(true);
+    this._results=[];
+    return this;
+  }
+
 
 }
 
