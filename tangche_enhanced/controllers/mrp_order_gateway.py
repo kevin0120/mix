@@ -2,7 +2,7 @@
 from odoo import api, SUPERUSER_ID
 from odoo.http import request, Response, Controller, route
 from odoo.exceptions import ValidationError
-from odoo.addons.common_sa_utils.http import sa_http_session
+from odoo.addons.common_sa_utils.http import sa_http_session, sa_success_resp, sa_fail_response
 
 from odoo.addons.spc.models.push_workorder import MASTER_WROKORDERS_API
 import logging
@@ -48,7 +48,7 @@ def get_masterpc_order_url(env, vals):
 
 
 class TangcheMrpOrderGateway(Controller):
-    @route('/ts002/workorders', type='json', methods=['PUT', 'OPTIONS'], auth='none', cors='*', csrf=False)
+    @route('/ts002/workorders', type='json', methods=['POST', 'OPTIONS'], auth='none', cors='*', csrf=False)
     def tangcheOrderGateway(self, **kw):
         """
         唐车工单转换函数，将从MES接收的工单进行转换
@@ -65,18 +65,14 @@ class TangcheMrpOrderGateway(Controller):
 
             session = sa_http_session()
 
-            url = get_masterpc_order_url(env, vals)
-            resp = session.post(url, data=payload)
+            master_url = get_masterpc_order_url(env, vals)
+            resp = session.post(master_url, data=payload)
             if resp.status_code != 201:
                 msg = 'TS002 Post WorkOrder To MasterPC Fail'
-                _logger.error(msg)
-                body = json.dumps({'msg': msg})
-                headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
-                return Response(body, status=404, headers=headers)
+                return sa_fail_response(msg=msg)
 
-            body = json.dumps({'msg': "Tightening System Create Work Order Success"})
-            headers = [('Content-Type', 'application/json'), ('Content-Length', len(body))]
-            return Response(body, status=201, headers=headers)
+            msg = "Tightening System Create Work Order Success"
+            return sa_success_resp(status_code=201, msg=msg)
 
         except Exception as e:
             body = json.dumps({'msg': e.message})
