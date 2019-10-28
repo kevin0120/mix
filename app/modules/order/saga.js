@@ -8,7 +8,9 @@ import {
   takeLeading,
   delay,
   take,
-  race
+  race,
+  fork,
+  join
 } from 'redux-saga/effects';
 import React from 'react';
 import type { Saga } from 'redux-saga';
@@ -100,10 +102,16 @@ function* DebounceViewStep(d, action: tCommonActionType) {
 function* getOrderDetail({ order }) {
   const rOrder: IOrder = (order: IOrder);
   try {
+    yield put(loadingActions.start());
+    const detailResult = yield fork(function* detailResult() {
+      yield race([take(ORDER.DETAIL.SUCCESS), take(ORDER.DETAIL.FAIL)]);
+    });
     const resp = yield call(orderDetailApi, rOrder.id);
     if (resp.result !== 0) {
       yield put(orderActions.getDetailFail());
     }
+    yield join(detailResult);
+    yield put(loadingActions.stop());
   } catch (e) {
     CommonLog.lError(e, {
       at: 'getOrderDetail'
@@ -129,15 +137,12 @@ function* viewOrder({ order }: { order: IOrder }) {
       // 进行中的工单不显示概览对话框
       return;
     }
-    yield put(loadingActions.start());
-    yield all([
-      call(getOrderDetail, { order }),
-      race([take(ORDER.DETAIL.SUCCESS), take(ORDER.DETAIL.FAIL)])
-    ]);
-    yield put(loadingActions.stop());
+    yield call(getOrderDetail, { order });
+
     const vOrderSteps: ?Array<IWorkStep> = yield select(state =>
       orderSteps(viewingOrder(state.order))
     );
+
     const data =
       (vOrderSteps &&
         vOrderSteps.map((s: IWorkStep, idx) => [
@@ -147,6 +152,7 @@ function* viewOrder({ order }: { order: IOrder }) {
           s.desc
         ])) ||
       [];
+
     yield put(
       dialogActions.dialogShow({
         buttons: [
