@@ -16,7 +16,7 @@ export type tActOrderTrigger = {
   order: IOrder
 };
 
-export const orderActions = {
+export const orderActions = Object.freeze({
   getList: () => ({
     type: ORDER.LIST.GET
   }),
@@ -95,4 +95,6 @@ export const orderActions = {
     type: ORDER.STEP.FINISH,
     step
   })
-};
+});
+
+export type tOrderActions = $Values<typeof orderActions>;

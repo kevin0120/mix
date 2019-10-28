@@ -129,6 +129,7 @@ export class ClsOrderOperationPoints {
   }
 
   hasPoint(point: ClsOperationPoint) {
-    return Object.keys(this._groups).some(k => this._groups[k].hasPoint(point));
+    // eslint-disable-next-line radix
+    return Object.keys(this._groups).some(k => this._groups[parseInt(k)].hasPoint(point));
   }
 }

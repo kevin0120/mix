@@ -1,6 +1,7 @@
 // @flow
+import type { Saga } from 'redux-saga';
 import { cloneDeep, isNil, isEmpty } from 'lodash-es';
-import { call, put, take, all, fork, takeEvery, actionChannel } from 'redux-saga/effects';
+import { call, put, take, all, actionChannel } from 'redux-saga/effects';
 import { STEP_STATUS } from '../constants';
 import type {
   tPoint,
@@ -17,8 +18,10 @@ import dialogActions from '../../dialog/action';
 import type { IWorkStep } from '../interface/IWorkStep';
 import type { IScrewStep } from './interface/IScrewStep';
 import { reduceResult2TimeLine } from './handleResult';
+import type { ClsOperationPoint } from './classes/ClsOperationPoint';
 
-export function* doPoint(points, isFirst, orderActions) {
+
+export function* doPoint(points: Array<ClsOperationPoint>, isFirst: boolean, orderActions: Object): Saga<void> {
   try {
     const data = this._data;
 
