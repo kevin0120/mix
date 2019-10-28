@@ -1,6 +1,6 @@
 import { expectSaga } from 'redux-saga-test-plan';
 import * as matchers from 'redux-saga-test-plan/matchers';
-import ScrewStepMixin, {doPoint} from '../ScrewStep';
+import ScrewStepMixin, { doPoint } from '../ScrewStep';
 import Step from '../../Step';
 import { STEP_STATUS } from '../../constants';
 import { ORDER } from '../../../order/constants';
@@ -8,7 +8,6 @@ import { orderActions } from '../../../order/action';
 import { demoOrder } from '../../../order/demoData';
 import screwStepActions from '../action';
 import { controllerModes, RESULT_STATUS } from '../constants';
-import controllerModeTasks from '../controllerModeTasks';
 
 const demoStepData = {
   id: '0001',
@@ -81,20 +80,14 @@ describe('Class ScrewStep', () => {
     return doingState.put(orderActions.stepStatus(step, STEP_STATUS.FAIL)).run();
   });
 
-  it('Doing state: should do the passed point', async () => {
-    const { doingState, demoPoints, step } = await prepareDoingState();
-    const point = null;
-    doingState.provide({
-      call(effect, next) {
-        console.log(effect.fn, doPoint);
-        if (effect.fn === doPoint) {
-          console.log('do point');
-          // TODO
-        }
-        return next();
-      }
+  it('Doing state: should call doPoint with the point passed on redo', async () => {
+    const { doingState, step } = await prepareDoingState();
+    step._pointsManager.points.forEach((p) => {
+      doingState
+        .call([step, doPoint], [p], false, orderActions)
+        .dispatch(screwStepActions.redoPoint(p));
     });
-    return doingState.dispatch(screwStepActions.redoPoint(point)).run();
+    return doingState.run();
   });
 
 

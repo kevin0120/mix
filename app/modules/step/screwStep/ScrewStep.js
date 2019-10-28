@@ -147,12 +147,15 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsScrewStep ext
             yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL));
           }
 
-          yield call(
-            [this, doPoint],
-            [...this._activePoints],
-            isFirst,
-            orderActions
-          );
+          if (this._activePoints && this._activePoints.length > 0) {
+            yield call(
+              [this, doPoint],
+              [...this._activePoints],
+              isFirst,
+              orderActions
+            );
+          }
+
 
           yield all(this._activePoints.map(p => call(getDevice(p.toolSN)?.Enable || (() => {
             CommonLog.lError(`tool ${p.toolSN}: no such tool or tool cannot be enabled.`);
