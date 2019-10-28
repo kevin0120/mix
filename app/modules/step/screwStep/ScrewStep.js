@@ -42,7 +42,7 @@ export function* doPoint(points: Array<ClsOperationPoint>, isFirst: boolean, ord
   }
 }
 
-function getTools(points) {
+export function getTools(points: Array<tPoint>) {
   const toolSnSet = new Set(points.map(p => p.toolSN));
   const lostTool = [];
   const tools = [];
@@ -55,18 +55,18 @@ function getTools(points) {
     }
   });
 
-  // if (lostTool.length > 0) {
-  //   throw new Error(`tools not found: ${String(lostTool.map(t => `${t}`))}`);
-  // }
-  //
-  // const unhealthyTools = tools.filter(t => !t.Healthz);
-  // if (unhealthyTools.length > 0) {
-  //   throw new Error(`tool not connected: ${
-  //     JSON.stringify(unhealthyTools.map(
-  //       t => `${String(t.serialNumber)}`
-  //     ))
-  //   }`);
-  // }
+  if (lostTool.length > 0) {
+    throw new Error(`tools not found: ${String(lostTool.map(t => `${t}`))}`);
+  }
+
+  const unhealthyTools = tools.filter(t => !t.Healthz);
+  if (unhealthyTools.length > 0) {
+    throw new Error(`tool not connected: ${
+      JSON.stringify(unhealthyTools.map(
+        t => `${String(t.serialNumber)}`
+      ))
+    }`);
+  }
   return tools;
 }
 
@@ -113,7 +113,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsScrewStep ext
         this._pointsManager = new ClsOrderOperationPoints(payload.points);
         const points: Array<tPoint> = cloneDeep(payload?.points || []);
 
-        this._tools = getTools(points);
+        this._tools = yield call(getTools, points);
 
         yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({
           ...data,
