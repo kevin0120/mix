@@ -52,6 +52,12 @@ function* newOrder() {
   }
 }
 
+// TODO: 扫码触发工单
+
+// TODO: 工单持久化
+
+// TODO: 开工、报工接口
+
 function* workOnOrder({ order }: { order: IOrder }) {
   try {
     yield race([

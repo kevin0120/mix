@@ -6,9 +6,6 @@ import { CommonLog } from '../../../../common/utils';
 import { getDevice } from '../index';
 import type { tBarcode } from '../../../rush/type';
 
-// TODO: 是否增加到系统初始化中
-// scanner.Enable(); // 必须使能才能够使用
-
 type tScannerRushData = {
   type: string,
   data: tBarcode

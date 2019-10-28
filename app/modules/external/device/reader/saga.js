@@ -6,8 +6,6 @@ import { CommonLog } from '../../../../common/utils';
 import { deviceType, getDevicesByType } from '../index';
 import type {tReaderData} from './typeDef';
 
-// TODO: 收到读卡器uid后，分发给user模块进行用户认证
-
 type tReaderRushData = {
   type: string,
   data: tReaderData

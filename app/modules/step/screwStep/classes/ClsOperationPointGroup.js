@@ -55,12 +55,6 @@ export class ClsOperationPointGroup {
     return this._points;
   }
 
-  isGroupPass(): boolean {
-    // todo: 是否需要跳到下一个一组拧紧组
-
-    return true;
-  }
-
   // 关键点全部完成
   isKeyPass() {
     return this._points.filter(p => p.isKey).every(p => p.status === POINT_STATUS.SUCCESS);
