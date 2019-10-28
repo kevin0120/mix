@@ -24,6 +24,7 @@ export const ORDER = Object.freeze({
   WORK_ON: 'ORDER_WORK_ON',
   VIEW: 'ORDER_VIEW',
   FINISH: 'ORDER_FINISH',
+  DID_FINISH: 'ORDER_DID_FINISH',
   // update the store
   UPDATE_STATE: 'ORDER_UPDATE_STATE',
   NEW_LIST: 'ORDER_NEW_LIST',

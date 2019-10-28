@@ -73,6 +73,7 @@ export default class Step implements IWorkStep {
     /* eslint-enable flowtype/no-weak-types */
   }
 
+  // eslint-disable-next-line flowtype/no-weak-types
   update(stepObj: ?{ [key: string]: any }) {
     this._name = stepObj?.name || 'unnamed step';
     this._desc = stepObj?.desc || '';

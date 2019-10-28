@@ -51,12 +51,19 @@ export default function* root(): Saga<void> {
 function* tryWorkOnOrder({ order }: { order: IOrder }) {
   try {
     // TODO: judge can work on
-    const canWorkOnOrder = true;
+    let canWorkOnOrder = true;
+    const orderState = yield select(s => s.order);
+    if (workingOrder(orderState)) {
+      canWorkOnOrder = false;
+    }
+    if (!order) {
+      canWorkOnOrder = false;
+    }
     if (canWorkOnOrder) {
       yield put(orderActions.workOn(order));
     }
   } catch (e) {
-    CommonLog.lError(e);
+    CommonLog.lError(e, { at: 'tryWorkOnOrder' });
   }
 }
 
@@ -66,8 +73,9 @@ function* workOnOrder({ order }: { order: IOrder }) {
       call(order.run),
       take(a => a.type === ORDER.FINISH && a.order === order)
     ]);
+    yield put(orderActions.orderDidFinish());
   } catch (e) {
-    CommonLog.lError(e);
+    CommonLog.lError(e, { at: 'workOnOrder' });
   }
 }
 

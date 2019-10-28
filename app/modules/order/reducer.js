@@ -52,24 +52,14 @@ function limitIndex(order: ?IOrder, index: tOrderStepIdx): tOrderStepIdx {
   return index;
 }
 
-function clearWorkingOrderIfMatch(state: tOrderState, order: IOrder) {
-  const wOrder = workingOrder(state);
-  if (wOrder === order) {
-    return {
-      ...state,
-      workingOrder: null
-    };
-  }
-  return state;
-}
-
 const orderReducer: {
   [key: tOrderActionTypes]: tReducer<
     tOrderState,
+    // eslint-disable-next-line flowtype/no-weak-types
     tAction<tOrderActionTypes, any>
   >
 } = {
-  [ORDER.NEW_LIST]: (state, { list }) => ({
+  [ORDER.NEW_LIST]: (state, { list }: { list: Array<IOrder> }) => ({
     ...state,
     list
   }),
@@ -87,8 +77,10 @@ const orderReducer: {
     viewingIndex:
       workingIndex(order) >= order.steps.length ? 0 : workingIndex(order)
   }),
-  [ORDER.FINISH]: (state, { order }: { order: IOrder }) =>
-    clearWorkingOrderIfMatch(state, order),
+  [ORDER.DID_FINISH]: state => ({
+    ...state,
+    workingOrder: null
+  }),
   [ORDER.STEP.VIEW_NEXT]: state => ({
     ...state,
     viewingIndex: limitIndex(viewingOrder(state), viewingIndex(state) + 1)

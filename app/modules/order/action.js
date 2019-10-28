@@ -58,6 +58,9 @@ export const orderActions = Object.freeze({
     type: ORDER.FINISH,
     order
   }),
+  orderDidFinish: () => ({
+    type: ORDER.DID_FINISH
+  }),
   cancelOrder: (order: IOrder): tActUpdateState => ({
     type: ORDER.STEP.STATUS,
     step: order,
