@@ -20,16 +20,17 @@ export const ORDER_WS_TYPES = Object.freeze({
 
 // order action types
 export const ORDER = Object.freeze({
+  TRY_WORK_ON: 'ORDER_TRY_WORK_ON',
   WORK_ON: 'ORDER_WORK_ON',
   VIEW: 'ORDER_VIEW',
   FINISH: 'ORDER_FINISH',
   // update the store
   UPDATE_STATE: 'ORDER_UPDATE_STATE',
-  NEW: 'ORDER_NEW',
+  NEW_LIST: 'ORDER_NEW_LIST',
   LIST: {
     GET: 'ORDER_LIST_GET',
-    SUCCESS: 'ORDER_LIST_SUCCESS',
-    FAIL: 'ORDER_LIST_FAIL'
+    FAIL: 'ORDER_LIST_FAIL',
+    SUCCESS: 'ORDER_LIST_SUCCESS'
   },
   DETAIL: {
     GET: 'ORDER_DETAIL_GET',
@@ -47,10 +48,7 @@ export const ORDER = Object.freeze({
     // 修改step的状态
     STATUS: 'ORDER_STEP_STATUS',
     // 步进、步退
-    DO_NEXT: 'ORDER_STEP_DO_NEXT',
     DO_PREVIOUS: 'ORDER_STEP_DO_PREVIOUS',
     FINISH: 'ORDER_STEP_FINISH'
   }
 });
-
-

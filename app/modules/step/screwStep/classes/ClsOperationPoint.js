@@ -24,7 +24,7 @@ export class ClsOperationPoint {
 
   isFinalFail(): boolean {
     // 结果的长度已经达到最大重试次数，同时最后一条结果为fail
-    const rsCount = this._results.length;
+    // const rsCount = this._results.length;
     // return (
     //   this._point.maxRetryTimes >= 0 &&
     //   rsCount >= this._point.maxRetryTimes &&
@@ -32,7 +32,8 @@ export class ClsOperationPoint {
     // );
     return (
       this._point.maxRetryTimes >= 0 &&
-      this._results.filter(r => r.result === RESULT_STATUS.nok).length >= this._point.maxRetryTimes
+      this._results.filter(r => r.result === RESULT_STATUS.nok).length >=
+        this._point.maxRetryTimes
     );
   }
 
@@ -85,7 +86,6 @@ export class ClsOperationPoint {
 
   newResult(result: tResult): ?ClsOperationPoint {
     this._results.push(result);
-    // TODO: store result data
 
     this._parseStatus(result);
     this._parseActive(result);
@@ -110,15 +110,9 @@ export class ClsOperationPoint {
     }
   }
 
-  redo(){
+  redo() {
     this.setActive(true);
-    this._results=[];
+    this._results = [];
     return this;
   }
-
-
 }
-
-
-
-

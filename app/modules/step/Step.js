@@ -1,13 +1,5 @@
 // @flow
-import {
-  call,
-  cancel,
-  fork,
-  join,
-  put,
-  race,
-  take
-} from 'redux-saga/effects';
+import { call, cancel, fork, join, put, race, take } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import { CommonLog } from '../../common/utils';
 import { orderStepUpdateApi } from '../../api/order';
@@ -15,9 +7,12 @@ import { orderActions } from '../order/action';
 import { ORDER } from '../order/constants';
 import { STEP_STATUS } from './constants';
 import stepTypes from './stepTypes';
-import type { tStepDataReducer, tAnyStepStatus, tRunSubStepCallbacks, tStep } from './interface/typeDef';
+import type {
+  tStepDataReducer,
+  tAnyStepStatus,
+  tRunSubStepCallbacks
+} from './interface/typeDef';
 import type { IWorkStep } from './interface/IWorkStep';
-import type { tOrder } from '../order/interface/typeDef';
 
 function invalidStepStatus(stepType, status) {
   if (!stepType) {
@@ -28,7 +23,6 @@ function invalidStepStatus(stepType, status) {
   }
   throw Error(`step type ${stepType}  has empty status ${status}`);
 }
-
 
 export default class Step implements IWorkStep {
   _id = -1;
@@ -87,14 +81,18 @@ export default class Step implements IWorkStep {
     this._skippable = stepObj?.skippable || false;
     this._undoable = stepObj?.undoable || false;
     this._status = stepObj?.status || this._status;
-    this._steps = stepObj?.steps ? (stepObj && stepObj.steps.map<IWorkStep>(sD => {
-      const existStep = this._steps.find(s => s.id === sD.id);
-      if (existStep) {
-        existStep.update(sD);
-        return existStep;
-      }
-      return new (stepTypes[sD.type](Step))(sD);
-    })) || [] : this._steps;
+    this._steps = stepObj?.steps
+      ? (stepObj &&
+          stepObj.steps.map<IWorkStep>(sD => {
+            const existStep = this._steps.find(s => s.id === sD.id);
+            if (existStep) {
+              existStep.update(sD);
+              return existStep;
+            }
+            return new (stepTypes[sD.type](Step))(sD);
+          })) ||
+        []
+      : this._steps;
 
     this._payload = stepObj?.payload || this._payload;
   }
@@ -145,8 +143,8 @@ export default class Step implements IWorkStep {
 
   timeCost(): number {
     return ((this._times || []).length % 2 === 0
-        ? this._times || []
-        : [...this._times, new Date()]
+      ? this._times || []
+      : [...this._times, new Date()]
     ).reduce(
       (total, currentTime, idx) =>
         idx % 2 === 0 ? total - currentTime : total - (0 - currentTime),
@@ -188,7 +186,7 @@ export default class Step implements IWorkStep {
     }
   }
 
-  * updateData(dataReducer: tStepDataReducer): Saga<void> {
+  *updateData(dataReducer: tStepDataReducer): Saga<void> {
     try {
       this._data = dataReducer(this._data);
       yield put(orderActions.updateState());
@@ -199,7 +197,7 @@ export default class Step implements IWorkStep {
     }
   }
 
-  * _updateStatus({ status }) {
+  *_updateStatus({ status }) {
     if (status in this._statusTasks) {
       try {
         this._status = status;
@@ -212,14 +210,14 @@ export default class Step implements IWorkStep {
     }
   }
 
-  * _runStatusTask({ status, msg }) {
+  *_runStatusTask({ status, msg }) {
     if (status in this._statusTasks) {
       try {
         if (this._runningStatusTask) {
           yield cancel(this._runningStatusTask);
         }
         const taskToRun =
-          this._statusTasks[status] && this._statusTasks[status].bind(this) ||
+          (this._statusTasks[status] && this._statusTasks[status].bind(this)) ||
           (() => invalidStepStatus(this._type, status));
 
         this._runningStatusTask = yield fork(
@@ -234,7 +232,7 @@ export default class Step implements IWorkStep {
     }
   }
 
-  * run(stateToRun: tAnyStepStatus = this._stateToRun): Saga<void> {
+  *run(stateToRun: tAnyStepStatus = this._stateToRun): Saga<void> {
     const runStatusTask = this._runStatusTask.bind(this);
     const updateStatus = this._updateStatus.bind(this);
     this.timerStart();
@@ -272,14 +270,12 @@ export default class Step implements IWorkStep {
     }
   }
 
-  * runSubStep(step: IWorkStep, callbacks: tRunSubStepCallbacks): Saga<void> {
+  *runSubStep(step: IWorkStep, callbacks: tRunSubStepCallbacks): Saga<void> {
     try {
       const { exit, next, previous } = yield race({
         exit: call([step, step.run]),
         next: take(
-          action =>
-            (action.type === ORDER.STEP.FINISH && action.step === step) ||
-            action.type === ORDER.STEP.DO_NEXT
+          action => action.type === ORDER.STEP.FINISH && action.step === step
         ),
         previous: take(ORDER.STEP.DO_PREVIOUS)
       });

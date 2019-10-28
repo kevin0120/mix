@@ -41,12 +41,12 @@ const mapState = (state, props) => {
 
 const mapDispatch = {
   next: orderActions.nextStep,
-  doNextStep: orderActions.doNextStep,
+  finishStep: orderActions.finishStep,
   previous: orderActions.previousStep,
   doPreviousStep: orderActions.doPreviousStep,
   cancelOrder: orderActions.cancelOrder,
   pendingOrder: orderActions.pendingOrder,
-  workOn: orderActions.workOn,
+  tryWorkOn: orderActions.tryWorkOn,
   viewModelDialog: dialogActions.dialogShow,
   viewModel: modelViewerActions.open
 };
@@ -61,7 +61,7 @@ type ButtonsContainerProps = {
   next: () => any,
   action: Node,
   previous: () => any,
-  doNextStep: () => any,
+  finishStep: IWorkStep => any,
   doPreviousStep: () => any,
   cancelOrder: (order: IOrder) => tActUpdateState,
   pendingOrder: (order: IOrder) => tActUpdateState,
@@ -69,12 +69,11 @@ type ButtonsContainerProps = {
   // isCancel: boolean,
   pendingable: boolean,
   cancelable: boolean,
-  workOn: (order: IOrder) => tActOrderTrigger,
+  tryWorkOn: (order: IOrder) => tActOrderTrigger,
   viewModel: any, // 查看的三维模型
   viewModelDialog: any
 };
 /* eslint-enable flowtype/no-weak-types */
-
 
 const ButtonsContainer: ButtonsContainerProps => Node = ({
   viewingOrder,
@@ -85,14 +84,14 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
   viewingIndex,
   action,
   previous,
-  doNextStep,
+  finishStep,
   doPreviousStep,
   cancelOrder,
   pendingOrder,
   isPending,
   pendingable,
   cancelable,
-  workOn,
+  tryWorkOn,
   viewModel,
   viewModelDialog
 }: ButtonsContainerProps) => {
@@ -103,7 +102,9 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const modelsData =
-    (viewingOrder && viewingOrder.payload && viewingOrder.payload.models &&
+    (viewingOrder &&
+      viewingOrder.payload &&
+      viewingOrder.payload.models &&
       viewingOrder.payload.models.map(m => [
         m.name,
         m.desc,
@@ -163,7 +164,7 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
                       <Button
                         type="button"
                         onClick={() => {
-                          workOn(viewingOrder);
+                          tryWorkOn(viewingOrder);
                           setDialogOpen(false);
                         }}
                         variant="contained"
@@ -233,7 +234,7 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
           <Button
             disabled={viewingStep !== workingStep || !viewingStep?.skippable}
             type="button"
-            onClick={() => doNextStep()}
+            onClick={() => finishStep(viewingStep)}
             color="tumblr"
           >
             {t(trans.skip)}

@@ -1,20 +1,29 @@
 // @flow
-import { put } from 'redux-saga/effects';
+import { put, select } from 'redux-saga/effects';
 import { CommonLog } from '../../common/utils';
 import { orderActions } from './action';
 import { ORDER_WS_TYPES } from './constants';
-import type { tOrderWSTypes, tOrderRushData, tOrderListData, tOrder } from './interface/typeDef';
+import type {
+  tOrderWSTypes,
+  tOrderRushData,
+  tOrderListData,
+  tOrder
+} from './interface/typeDef';
 import type { rushHandlerMap } from '../rush/type';
-
-const { getListSuccess } = orderActions;
-
+import OrderMixin from './Order';
+import Step from '../step/Step';
+import NotifierActions from '../Notifier/action';
 
 // rush data handlers
-const dataHandlers: rushHandlerMap<tOrderWSTypes, $PropertyType<tOrderRushData, 'data'>> = {
-
+const dataHandlers: rushHandlerMap<
+  tOrderWSTypes,
+  $PropertyType<tOrderRushData, 'data'>
+> = {
   // 工单列表
-  * [ORDER_WS_TYPES.LIST](data: Array<tOrderListData>) {
+  *[ORDER_WS_TYPES.LIST](data: Array<tOrderListData>) {
     try {
+      yield put(orderActions.getListSuccess());
+
       const list = data.map(d => ({
         id: d.id,
         desc: d.desc,
@@ -22,25 +31,69 @@ const dataHandlers: rushHandlerMap<tOrderWSTypes, $PropertyType<tOrderRushData, 
         image: d.image || '',
         status: d.status
       }));
-      yield put(getListSuccess(list));
+      const orderState = yield select(s => s.order);
+      // get exist orders, orders not in the new list will be removed!!
+      let newList =
+        orderState &&
+        orderState.list.filter(o => !!list.find(newO => o.id === newO.id));
+      // update order data
+      newList.forEach(o => {
+        const orderData = list.find(newO => o.id === newO.id);
+        o.update(orderData);
+      });
+      // make new orders
+      newList = newList.concat(
+        list
+          .filter(newO => !newList.find(o => o.id === newO.id))
+          .map(oD => new (OrderMixin(Step))(oD))
+      );
+      yield put(orderActions.newList(newList));
     } catch (e) {
       CommonLog.lError(e, { at: 'ORDER_WS_TYPES.LIST' });
     }
   },
   // 工单详情
-  * [ORDER_WS_TYPES.DETAIL](data: tOrder) {
+  *[ORDER_WS_TYPES.DETAIL](data: tOrder) {
     try {
-      yield put(orderActions.getDetailSuccess(data));
+      yield put(orderActions.getDetailSuccess());
+      const orderState = yield select(s => s.order);
+      const newList = [...orderState.list];
+      const newOrder = newList.find(o => o.id === data.id);
+      if (newOrder) {
+        newOrder.update(data);
+      }
+      yield put(orderActions.newList(newList));
     } catch (e) {
       CommonLog.lError(e, { at: 'ORDER_WS_TYPES.DETAIL' });
     }
   },
   // 新工单
-  * [ORDER_WS_TYPES.NEW](data: Array<tOrder>) {
+  *[ORDER_WS_TYPES.NEW](data: Array<tOrder>) {
     try {
-      yield put(orderActions.newOrder(data));
+      yield put(NotifierActions.enqueueSnackbar('Info', '收到新工单'));
+
+      const orderState = yield select(s => s.order);
+      // get exist orders
+      let newList = orderState.list;
+
+      // update order data
+      newList.forEach(o => {
+        const orderData = data.find(newO => o.id === newO.id);
+        if (orderData) {
+          o.update(orderData);
+        }
+      });
+
+      // make new orders
+      newList = newList.concat(
+        data
+          .filter(newO => !newList.find(o => o.id === newO.id))
+          .map(oD => new (OrderMixin(Step))(oD))
+      );
+
+      yield put(orderActions.newList(newList));
     } catch (e) {
-      CommonLog.lError(e,{ at: 'ORDER_WS_TYPES.NEW' });
+      CommonLog.lError(e, { at: 'ORDER_WS_TYPES.NEW' });
     }
   }
 };

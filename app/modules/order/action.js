@@ -1,5 +1,5 @@
 // @flow
-import type { tOrder, tOrderStepIdx, tOrderListData, tOrderStatus } from './interface/typeDef';
+import type { tOrder, tOrderStepIdx, tOrderStatus } from './interface/typeDef';
 import type { IOrder } from './interface/IOrder';
 import { ORDER_STATUS, ORDER } from './constants';
 import type { IWorkStep } from '../step/interface/IWorkStep';
@@ -16,18 +16,17 @@ export type tActOrderTrigger = {
   order: IOrder
 };
 
+// eslint-disable-next-line import/prefer-default-export
 export const orderActions = Object.freeze({
+  newList: (list: Array<IOrder>) => ({
+    type: ORDER.NEW_LIST,
+    list
+  }),
   getList: () => ({
     type: ORDER.LIST.GET
   }),
-  // eslint-disable-next-line flowtype/no-weak-types
-  newOrder: (list: Array<tOrder>) => ({
-    type: ORDER.NEW,
-    list
-  }),
-  getListSuccess: (list: Array<tOrderListData>) => ({
-    type: ORDER.LIST.SUCCESS,
-    list
+  getListSuccess: () => ({
+    type: ORDER.LIST.SUCCESS
   }),
   getListFail: () => ({
     type: ORDER.LIST.FAIL
@@ -36,9 +35,8 @@ export const orderActions = Object.freeze({
     type: ORDER.DETAIL.GET,
     order
   }),
-  getDetailSuccess: (order: tOrder) => ({
-    type: ORDER.DETAIL.SUCCESS,
-    order
+  getDetailSuccess: () => ({
+    type: ORDER.DETAIL.SUCCESS
   }),
   getDetailFail: () => ({
     type: ORDER.DETAIL.FAIL
@@ -48,6 +46,10 @@ export const orderActions = Object.freeze({
     order
   }),
   // order status
+  tryWorkOn: (order: IOrder): tActOrderTrigger => ({
+    type: ORDER.TRY_WORK_ON,
+    order
+  }),
   workOn: (order: IOrder): tActOrderTrigger => ({
     type: ORDER.WORK_ON,
     order
@@ -82,19 +84,14 @@ export const orderActions = Object.freeze({
     status,
     msg
   }),
-  doNextStep: () => ({
-    type: ORDER.STEP.DO_NEXT
-  }),
   doPreviousStep: () => ({
     type: ORDER.STEP.DO_PREVIOUS
-  }),
-  updateState: () => ({
-    type: ORDER.UPDATE_STATE
   }),
   finishStep: (step: IWorkStep) => ({
     type: ORDER.STEP.FINISH,
     step
+  }),
+  updateState: () => ({
+    type: ORDER.UPDATE_STATE
   })
 });
-
-export type tOrderActions = $Values<typeof orderActions>;

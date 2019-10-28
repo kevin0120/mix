@@ -23,30 +23,20 @@ import { orderDetailApi, orderListApi } from '../../api/order';
 import { ORDER } from './constants';
 import { bindRushAction } from '../rush/rushHealthz';
 import loadingActions from '../loading/action';
-import NotifierActions from '../Notifier/action';
 import type { IWorkStep } from '../step/interface/IWorkStep';
 import type { IOrder } from './interface/IOrder';
 
 export default function* root(): Saga<void> {
   try {
     yield all([
-      call(bindRushAction.onConnect, orderActions.getList),// 绑定rush连接时需要触发的action
-      // TODO: should we use takeEvery?
+      call(bindRushAction.onConnect, orderActions.getList), // 绑定rush连接时需要触发的action
       takeEvery(ORDER.LIST.GET, getOrderList),
       takeEvery(ORDER.DETAIL.GET, getOrderDetail),
+      takeEvery(ORDER.TRY_WORK_ON, tryWorkOnOrder),
       takeEvery(ORDER.WORK_ON, workOnOrder),
       takeEvery(ORDER.VIEW, viewOrder),
-      takeEvery(ORDER.NEW, newOrder),
       takeLeading([ORDER.STEP.PREVIOUS, ORDER.STEP.NEXT], DebounceViewStep, 300)
     ]);
-  } catch (e) {
-    CommonLog.lError(e);
-  }
-}
-
-function* newOrder() {
-  try {
-    yield put(NotifierActions.enqueueSnackbar('Info', '收到新工单'));
   } catch (e) {
     CommonLog.lError(e);
   }
@@ -57,6 +47,18 @@ function* newOrder() {
 // TODO: 工单持久化
 
 // TODO: 开工、报工接口
+
+function* tryWorkOnOrder({ order }: { order: IOrder }) {
+  try {
+    // TODO: judge can work on
+    const canWorkOnOrder = true;
+    if (canWorkOnOrder) {
+      yield put(orderActions.workOn(order));
+    }
+  } catch (e) {
+    CommonLog.lError(e);
+  }
+}
 
 function* workOnOrder({ order }: { order: IOrder }) {
   try {
@@ -145,11 +147,11 @@ function* viewOrder({ order }: { order: IOrder }) {
             color: 'warning'
           },
           !WIPOrder &&
-          doable(order) && {
-            label: 'Order.Start',
-            color: 'info',
-            action: orderActions.workOn(order)
-          }
+            doable(order) && {
+              label: 'Order.Start',
+              color: 'info',
+              action: orderActions.tryWorkOn(order)
+            }
         ],
         title: i18n.t('Order.Overview'),
         content: (
