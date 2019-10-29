@@ -132,7 +132,7 @@ func (s *Service) manage() {
 		timeout := s.shutdownTimeout
 		ctx, cancel := stdContext.WithTimeout(stdContext.Background(), timeout)
 		defer cancel()
-		if err :=s.server.Shutdown(ctx); err != nil {
+		if err := s.server.Shutdown(ctx); err != nil {
 			s.diag.Error("httpd Server Shut Down Error", err)
 		}
 		close(stopDone)

@@ -95,7 +95,7 @@ func NewService(c Config, d Diagnostic) *Service {
 	return nil
 }
 
-func (s *Service)setGrpcHandler()  {
+func (s *Service) setGrpcHandler() {
 	s.rpc.OnAIISRPCRecv = s.OnRPCRecv
 	s.rpc.OnAIISRPCNewClient = s.OnRPCNewClient
 }
@@ -172,7 +172,7 @@ func (s *Service) Open() error {
 
 	if err := s.rpc.Start(c.GRPCPort); err != nil {
 		s.diag.Error("Rush Start GRPC Server Error", err)
-	}else {
+	} else {
 		s.diag.Info(fmt.Sprintf("Rush Start grpc Server Listen: 0.0.0.0:%d", c.GRPCPort))
 	}
 

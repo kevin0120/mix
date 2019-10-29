@@ -32,7 +32,7 @@ func NewAiisGrpcServer(d Diagnostic) *GRPCServer {
 	s := &GRPCServer{
 		server:  grpc.NewServer(opts...),
 		clients: make(map[string]RPCAiis_RPCNodeServer),
-		diag: d,
+		diag:    d,
 	}
 
 	return s
@@ -126,7 +126,6 @@ func (s *GRPCServer) RPCSend(stream RPCAiis_RPCNodeServer, payload string) error
 func (s *GRPCServer) RPCSendAll(payload string) error {
 	s.mtxClients.Lock()
 	defer s.mtxClients.Unlock()
-
 
 	for _, stream := range s.clients {
 		if err := s.RPCSend(stream, payload); err != nil {

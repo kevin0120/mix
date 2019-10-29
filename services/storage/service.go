@@ -17,7 +17,6 @@ type Diagnostic interface {
 	UpdateResultSuccess(id int64)
 }
 
-
 type Service struct {
 	diag        Diagnostic
 	configValue atomic.Value
