@@ -5,11 +5,10 @@ import { CommonLog } from '../../../../common/utils';
 import { loginRequestUuid } from '../../../user/action';
 
 class ClsReader extends Device {
-  _dispatcher = input => {
-    console.log(input);
-    return loginRequestUuid(input.data.data.uid, 'online');
-  };
 
+  _listeners=[input=>loginRequestUuid(input.data.data.uid, 'online')];
+
+  // eslint-disable-next-line flowtype/no-weak-types
   constructor(...args: Array<any>) {
     super(...args);
     this.Enable();

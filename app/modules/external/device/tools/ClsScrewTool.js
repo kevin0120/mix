@@ -3,15 +3,9 @@
 import type { Saga } from 'redux-saga';
 import { call } from 'redux-saga/effects';
 import Device from '../Device';
-import type { tInputData } from '../typeDef';
-import screwStepAction from '../../../step/screwStep/action';
 import { CommonLog } from '../../../../common/utils';
 import { toolEnableApi } from '../../../../api/tools';
-import type { tAction } from '../../../typeDef';
 import type {IScrewTool} from './interface/IScrewTool';
-
-export const defaultScrewToolDispatcher = (data: tInputData): tAction<any, any> =>
-  screwStepAction.result(data);
 
 export default class ClsScrewTool extends Device implements IScrewTool {
   constructor(name: string, serialNumber: string, ...rest: Array<any>) {
@@ -20,7 +14,6 @@ export default class ClsScrewTool extends Device implements IScrewTool {
     (this: any).Enable = this.Enable.bind(this);
     (this: any).Disable = this.Disable.bind(this);
     (this: any).ToggleEnable = this.ToggleEnable.bind(this);
-    this.dispatcher = defaultScrewToolDispatcher;
     /* eslint-enable flowtype/no-weak-types */
   }
 

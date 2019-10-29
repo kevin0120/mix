@@ -17,8 +17,16 @@ const ScannerStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsScannerStep
 
   _scanners = [];
 
+  _listeners=[];
+
   _onLeave = () => {
+    this._scanners.forEach(s=>{
+      this._listeners.forEach((l)=>{
+        s.removeListener(l);
+      });
+    });
     this._scanners = [];
+    this._listeners=[];
     console.log('scanners cleared');
   };
 
@@ -29,7 +37,10 @@ const ScannerStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsScannerStep
         const scanners = this._scanners;
         yield all(scanners.map((s) => {
           // eslint-disable-next-line no-param-reassign
-          s.dispatcher = scannerStepAction.getValue;
+          this._listeners.push(s.addListener(
+            ()=>true,
+            scannerStepAction.getValue
+          ));
           return call(s.Enable);
         }));
         yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
@@ -84,6 +95,7 @@ const ScannerStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsScannerStep
         CommonLog.lError(e);
       } finally {
         yield all(this._scanners.map((s) => {
+          // eslint-disable-next-line no-param-reassign
           s.dispatcher = null;
           return call(s.Disable);
         }));
@@ -92,7 +104,6 @@ const ScannerStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsScannerStep
     * [STEP_STATUS.FINISHED](ORDER, orderActions) {
       try {
         yield put(orderActions.finishStep(this));
-        this._scanners = [];
       } catch (e) {
         CommonLog.lError(e);
       }

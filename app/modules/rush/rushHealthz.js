@@ -4,7 +4,6 @@ import type { Saga } from 'redux-saga';
 import { CommonLog } from '../../common/utils';
 import NotifierActions from '../Notifier/action';
 import healthzActions from '../healthz/action';
-import type { tAction } from '../typeDef';
 import type { tRushConnectionCallback } from './type';
 
 const onConnectActions: Array<tRushConnectionCallback> = [
@@ -20,6 +19,7 @@ export const bindRushAction = {
   onDisconnect: bindOnDisconnectAction,
   onChange: bindOnChangeAction
 };
+
 let rushHealthz = false;
 
 function* bindOnConnectAction(actionToBind: tRushConnectionCallback): Saga<void> {
@@ -35,7 +35,7 @@ function* bindOnConnectAction(actionToBind: tRushConnectionCallback): Saga<void>
 
 function* bindOnDisconnectAction(actionToBind: tRushConnectionCallback): Saga<void> {
   try {
-    onConnectActions.push(actionToBind);
+    onDisconnectActions.push(actionToBind);
     if (!rushHealthz) {
       yield put(actionToBind());
     }
@@ -46,12 +46,14 @@ function* bindOnDisconnectAction(actionToBind: tRushConnectionCallback): Saga<vo
 
 function* bindOnChangeAction(actionToBind: tRushConnectionCallback): Saga<void> {
   try {
-    onConnectActions.push(actionToBind);
+    onChangeActions.push(actionToBind);
     yield put(actionToBind());
   } catch (e) {
     CommonLog.lError(e);
   }
 }
+
+// TODO make rush extends CommonExternalEntity
 
 export default function* (payload: boolean): Saga<void> {
   try {

@@ -47,18 +47,15 @@ export function* toolNewResults(data: tToolResultData): Saga<void> {
     CommonLog.Info('rush result', {
       result: JSON.stringify(results)
     });
+    // eslint-disable-next-line no-restricted-syntax
     for (const r of results) {
-      let respAction = null;
       const tool = getDevice(r.tool_sn);
       if (tool) {
-        respAction = yield call(tool.doDispatch, [r]);
+        yield call(tool.doDispatch, [r]);
       } else {
         CommonLog.lError('invalid tool', {
           sn: r.tool_sn
         });
-      }
-      if (respAction) {
-        yield put(respAction);
       }
     }
   } catch (e) {

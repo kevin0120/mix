@@ -63,7 +63,7 @@ const MaterialStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsMaterialSt
         });
 
         yield all([...this._io].map(io => {
-          if(!io?.ioContact){
+          if (!io?.ioContact) {
             throw new Error(`io invalid ${io?.sn}`);
           }
           return call(io.ioContact);
@@ -95,8 +95,7 @@ const MaterialStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsMaterialSt
         [...this._items].forEach(i => {
           listeners.push({
             listener: i.in.io.addListener(
-              i.in.port,
-              ioTriggerMode.falling,
+              (input) => i.in.port === input.port && ioTriggerMode.falling === input.triggerMode,
               () => actions.item(i)
             ),
             io: i.in.io
@@ -107,8 +106,7 @@ const MaterialStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsMaterialSt
         // const confirmPort = io.getPort(ioDirection.input, confirmIdx(sPayload));
         if (this._confirm && this._confirm.io && this._confirm.port) {
           readyListener = this._confirm.io.addListener(
-            this._confirm.port,
-            ioTriggerMode.falling,
+            (input) => this._confirm.port === input.port && ioTriggerMode.falling === input.triggerMode,
             actions.ready
           );
         }

@@ -1,6 +1,7 @@
 // @flow
 import { IO_WS_TYPES, ioDirection, ioTriggerMode } from './constants';
 import type { tAction } from '../../../typeDef';
+import type { tInput } from '../typeDef';
 
 
 export type tIOWSMsgType = $Values<typeof IO_WS_TYPES>;
@@ -40,13 +41,6 @@ export type tIOData = {
   output: string
 };
 
-export type tIOListener = {
-  port: tIOPort,
-  triggerMode: tIOTriggerMode,
-
-  // eslint-disable-next-line flowtype/no-weak-types
-  dispatcher: (...args: any) => tAction<any, any>
-};
 
 export type tIOPort = {
   direction: tIODirection,
