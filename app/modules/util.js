@@ -2,7 +2,15 @@
 import type { Saga, TakeableChannel, Effect } from 'redux-saga';
 import { fork, take } from 'redux-saga/effects';
 import type { Action } from 'redux';
-import type { tReducer } from './typeDef';
+import { remove } from 'lodash-es';
+import type {
+  tAction,
+  tListener,
+  tFnAction,
+  tPredicate,
+  tReducer,
+  tListenerObj
+} from './typeDef';
 
 export function genReducers<TState, TActionTypes>(
   reducers: { [key: TActionTypes]: tReducer<TState, Action<TActionTypes>> },
@@ -39,3 +47,46 @@ export function watchWorkers(
     }
   };
 }
+
+/* eslint-disable flowtype/no-weak-types */
+export function makeListener(
+  initListeners: Array<tListener<any>> = []
+): tListenerObj {
+  const listeners = initListeners;
+
+  function addListener(
+    predicate: tPredicate<any>,
+    action: tFnAction<any>
+  ): tListener<any> {
+    const listener = {
+      predicate,
+      action
+    };
+    listeners.push(listener);
+    return listener;
+  }
+
+  function removeListener(listener: tListener<any>): Array<tListener<any>> {
+    return remove(listeners, (l: tListener<any>) => l === listener);
+  }
+
+  function check(...args: Array<any>): Array<tAction<any, any>> {
+    const actions: tAction<any, any> = [];
+    listeners.forEach(l => {
+      if (l.predicate(...args)) {
+        actions.push(l.action(...args));
+      }
+    });
+
+    return actions;
+  }
+
+  return {
+    listeners,
+    add: addListener,
+    remove: removeListener,
+    check
+  };
+}
+
+/* eslint-enable flowtype/no-weak-types */

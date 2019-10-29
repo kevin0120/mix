@@ -3,13 +3,12 @@ import { call } from 'redux-saga/effects';
 import { CommonLog } from '../../../../common/utils';
 import type { tIOWSDataContact, tIOWSMsgType } from './type';
 import { IO_WS_TYPES } from './constants';
-import { getDevice } from '../index';
+import { getDevice } from '../../../deviceManager/devices';
 import type { rushHandlerMap } from '../../../rush/type';
-
 
 // eslint-disable-next-line flowtype/no-weak-types
 const handlers: rushHandlerMap<tIOWSMsgType, any> = {
-  * [IO_WS_TYPES.CONTACT](data: { data: tIOWSDataContact }) {
+  *[IO_WS_TYPES.CONTACT](data: { data: tIOWSDataContact }) {
     try {
       const io = getDevice(data.data.sn);
       yield call(io.doDispatch, {
@@ -23,7 +22,7 @@ const handlers: rushHandlerMap<tIOWSMsgType, any> = {
   },
   [IO_WS_TYPES.STATUS](data) {
     CommonLog.Info('WS_IO_STATUS', data);
-  },
+  }
 };
 
 export default handlers;

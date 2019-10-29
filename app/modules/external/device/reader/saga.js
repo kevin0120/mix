@@ -3,9 +3,9 @@
 import { call } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import { CommonLog } from '../../../../common/utils';
-import { getDevicesByType } from '../index';
+import { getDevicesByType } from '../../../deviceManager/devices';
 import type { tReaderData } from './typeDef';
-import { deviceType } from '../constants';
+import { deviceType } from '../../../deviceManager/constants';
 
 type tReaderRushData = {
   type: string,

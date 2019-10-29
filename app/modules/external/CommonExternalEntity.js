@@ -1,8 +1,11 @@
 // @flow
 import { isEqual } from 'lodash-es';
 import type { Saga } from 'redux-saga';
+import { all, put, call } from 'redux-saga/effects';
 import { CommonLog } from '../../common/utils';
 import type { ICommonExternalEntity } from './ICommonExternalEntity';
+import { makeListener } from '../util';
+import type { tAction, tListener } from '../typeDef';
 
 export default class CommonExternalEntity implements ICommonExternalEntity {
   _name: string;
@@ -12,6 +15,8 @@ export default class CommonExternalEntity implements ICommonExternalEntity {
   _enable: boolean = false;
 
   _children: Set<ICommonExternalEntity> = new Set();
+
+  _healthzListener = makeListener();
 
   constructor(name: string) {
     this._name = name;
@@ -23,7 +28,9 @@ export default class CommonExternalEntity implements ICommonExternalEntity {
     /* eslint-enable flowtype/no-weak-types */
   }
 
-  appendChildren(children: Array<ICommonExternalEntity> | ICommonExternalEntity) {
+  appendChildren(
+    children: Array<ICommonExternalEntity> | ICommonExternalEntity
+  ) {
     if (children instanceof Array) {
       children.forEach(c => {
         this._children.add(c);
@@ -41,34 +48,52 @@ export default class CommonExternalEntity implements ICommonExternalEntity {
     }
   }
 
-  getChildren(patten: ICommonExternalEntity => boolean): Array<ICommonExternalEntity> {
+  getChildren(
+    patten: ICommonExternalEntity => boolean
+  ): Array<ICommonExternalEntity> {
     if (!patten) {
       return [...this._children];
     }
     return [...this._children].filter(patten);
   }
 
-  set Healthz(isHealthz: boolean) {
-    if (isEqual(this._isHealthz, isHealthz)) {
-      return;
-    }
-    this._isHealthz = isHealthz;
-    if (!isHealthz) {
-      this.Disable();
-    }
-    if (this._children.size > 0 && !isHealthz) {
-      this._children.forEach(c => {
-        c.Healthz = false;
-      });
-    }
+  // eslint-disable-next-line flowtype/no-weak-types
+  bindOnHealthzAction(
+    predicate: boolean => boolean,
+    action: boolean => tAction<any, any>
+  ) {
+    return this._healthzListener.add(predicate, action);
+  }
 
-    if (this._children.size > 0 && isHealthz) {
-      this._children.forEach(c => {
-      });
-    }
+  removeOnHealthzAction(listener: tListener<boolean>) {
+    return this._healthzListener.remove(listener);
+  }
 
-    const msg = `${this._name} Healthz Status Change: ${isHealthz.toString()}`;
-    CommonLog.Info(msg);
+  *setHealthz(isHealthz: boolean): Saga<void> {
+    try {
+      if (isEqual(this._isHealthz, isHealthz)) {
+        return;
+      }
+      this._isHealthz = isHealthz;
+      const actions = this._healthzListener.check(isHealthz);
+
+      if (!isHealthz) {
+        this.Disable();
+      }
+
+      if (this._children.size > 0 && !isHealthz) {
+        yield all([...this._children].map(c => call(c.setHealthz, false)));
+      }
+
+      const msg = `${
+        this._name
+      } Healthz Status Change: ${isHealthz.toString()}`;
+      CommonLog.Info(msg);
+
+      yield all(actions.map(a => put(a)));
+    } catch (e) {
+      CommonLog.lError(e, { at: 'setHealthz', name: this._name });
+    }
   }
 
   get Healthz(): boolean {
@@ -98,7 +123,7 @@ export default class CommonExternalEntity implements ICommonExternalEntity {
   }
 
   // eslint-disable-next-line require-yield
-  * ToggleEnable(): Saga<void> {
+  *ToggleEnable(): Saga<void> {
     this._enable = !this._enable;
   }
 }

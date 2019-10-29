@@ -8,10 +8,10 @@ import {
   workingStep
 } from '../../order/selector';
 import { SCANNER_STEP, scannerStepAction } from './action';
-import { getDevicesByType } from '../../external/device';
+import { getDevicesByType } from '../../deviceManager/devices';
 import { CommonLog } from '../../../common/utils';
 import type { IWorkStep } from '../interface/IWorkStep';
-import { deviceType } from '../../external/device/constants';
+import { deviceType } from '../../deviceManager/constants';
 
 const ScannerStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
   class ClsScannerStep extends ClsBaseStep {

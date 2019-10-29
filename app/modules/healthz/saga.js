@@ -3,7 +3,7 @@ import { takeEvery, fork } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import { CommonLog } from '../../common/utils';
 import healthzActions, { HEALTHZ } from './action';
-import { updateDeviceStatus } from '../external/device';
+import { updateDeviceStatus } from '../deviceManager/saga';
 import { bindRushAction } from '../rush/rushHealthz';
 
 export default function* healthz(): Saga<void> {

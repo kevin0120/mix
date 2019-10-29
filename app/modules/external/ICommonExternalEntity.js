@@ -1,11 +1,16 @@
 // @flow
-import type { Saga } from "redux-saga";
+import type { Saga } from 'redux-saga';
 
 export interface ICommonExternalEntity {
-  Healthz: boolean,
-  +isEnable: boolean,
-  +Name: string,
-  +source: string,
-  Enable(): void | Saga<void>,
-  Disable(): void | Saga<void>
+  _name: string;
+  +Healthz: boolean;
+  +isEnable: boolean;
+  +Name: string;
+  +source: string;
+
+  Enable(): void | Saga<void>;
+
+  setHealthz(isHealthz: boolean): Saga<void>;
+
+  Disable(): void | Saga<void>;
 }

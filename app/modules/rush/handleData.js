@@ -14,10 +14,10 @@ import rushActions from './action';
 import readerNewData from '../external/device/reader/saga';
 import scannerNewData from '../external/device/scanner/saga';
 import ioWSDataHandlers from '../external/device/io/handleWSData';
-import { deviceStatus } from '../external/device';
+import { deviceStatus } from '../deviceManager/handlerWSData';
 import orderWSDataHandlers from '../order/handleWSData';
 
-export default function* (payload: string): Saga<void> {
+export default function*(payload: string): Saga<void> {
   try {
     if (!payload) {
       return;
@@ -46,19 +46,20 @@ export default function* (payload: string): Saga<void> {
   }
 }
 
-const handleData = (dataHandlers) => function* _handleData(rushData: tRushData<any, any>): Saga<void> {
-  try {
-    const { type, data } = rushData;
-    yield call(dataHandlers[type], data);
-  } catch (e) {
-    CommonLog.lError(e);
-  }
-};
+const handleData = dataHandlers =>
+  function* _handleData(rushData: tRushData<any, any>): Saga<void> {
+    try {
+      const { type, data } = rushData;
+      yield call(dataHandlers[type], data);
+    } catch (e) {
+      CommonLog.lError(e);
+    }
+  };
 
 const rushDataHandlers: {
-  [tWebSocketEvent]: (tRushData<any, any>)=>void | Saga<void>
+  [tWebSocketEvent]: (tRushData<any, any>) => void | Saga<void>
 } = {
-  * [wse.maintenance](data: tRushData<string, { name: string }>) {
+  *[wse.maintenance](data: tRushData<string, { name: string }>) {
     try {
       yield put(
         notifierActions.enqueueSnackbar(

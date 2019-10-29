@@ -1,23 +1,28 @@
 // @flow
-import { isEmpty, isNil, isString, remove } from 'lodash-es';
+import { isEmpty, isNil, isString } from 'lodash-es';
 import type { Saga } from 'redux-saga';
 import { put, all } from 'redux-saga/effects';
 import { CommonLog } from '../../../common/utils';
-import type { tInput, tInputData, tDeviceSN, tInputPredicate, tInputListener } from './typeDef';
+import type {
+  tInput,
+  tInputData,
+  tDeviceSN,
+  tInputPredicate,
+  tInputListener
+} from './typeDef';
 import CommonExternalEntity from '../CommonExternalEntity';
 import type { IDevice } from './IDevice';
-import type { tAction } from '../../typeDef';
+import type { tAction, tListenerObj } from '../../typeDef';
+import { makeListener } from '../../util';
 
-const defaultValidatorFunc = (data: string | number): boolean => true;
-
+const defaultValidatorFunc = (): boolean => true;
 
 export default class Device extends CommonExternalEntity implements IDevice {
-
   _validator: null | ((data: tInputData) => boolean) = defaultValidatorFunc;
 
   _serialNumber: ?tDeviceSN = null;
 
-  _listeners: Array<tInputListener> = [];
+  _inputListener: tListenerObj = makeListener();
 
   // eslint-disable-next-line flowtype/no-weak-types,no-unused-vars
   constructor(name: string, sn: tDeviceSN, config: Object, data: any) {
@@ -28,17 +33,15 @@ export default class Device extends CommonExternalEntity implements IDevice {
   }
 
   // eslint-disable-next-line flowtype/no-weak-types
-  addListener(predicate: tInputPredicate, action: (...args: any) => tAction<any, any>): tInputListener {
-    const listener = {
-      predicate,
-      action
-    };
-    this._listeners.push(listener);
-    return listener;
+  addListener(
+    predicate: tInputPredicate,
+    action: (...args: any) => tAction<any, any>
+  ): tInputListener {
+    return this._inputListener.add(predicate, action);
   }
 
   removeListener(listener: tInputListener): Array<tInputListener> {
-    return remove(this._listeners, (l: tInputListener) => l === listener);
+    return this._inputListener.remove(listener);
   }
 
   doValidate(data: tInputData): boolean {
@@ -62,7 +65,7 @@ export default class Device extends CommonExternalEntity implements IDevice {
     return this.validator(data);
   }
 
-  * doDispatch(data: tInputData): Saga<void> {
+  *doDispatch(data: tInputData): Saga<void> {
     try {
       if (!this.isEnable) {
         const msg = `${this.source} Is Not Enabled`;
@@ -74,7 +77,7 @@ export default class Device extends CommonExternalEntity implements IDevice {
         CommonLog.Info(msg);
         return;
       }
-      if (!this._listeners) {
+      if (!this._inputListener) {
         const msg = `${this.source} listener is Nil, Please set listener First`;
         CommonLog.Warn(msg);
         return;
@@ -85,12 +88,9 @@ export default class Device extends CommonExternalEntity implements IDevice {
         source: this.Name,
         time: new Date()
       };
-
-      const matchedListeners = this._listeners.filter(l => l.predicate(input));
-      const actions = matchedListeners.map(l => l.action(input));
+      const actions = this._inputListener.check(input);
 
       yield all(actions.map(a => put(a)));
-
     } catch (e) {
       CommonLog.lError(e, {
         at: 'doDispatch',

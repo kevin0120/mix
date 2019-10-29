@@ -9,9 +9,11 @@ import type { tRushConnectionCallback } from './type';
 const onConnectActions: Array<tRushConnectionCallback> = [
   () => NotifierActions.enqueueSnackbar('Info', 'rush 已连接')
 ];
+
 const onDisconnectActions: Array<tRushConnectionCallback> = [
   () => NotifierActions.enqueueSnackbar('Error', 'rush 已断开')
 ];
+
 const onChangeActions = [];
 
 export const bindRushAction = {
@@ -22,7 +24,9 @@ export const bindRushAction = {
 
 let rushHealthz = false;
 
-function* bindOnConnectAction(actionToBind: tRushConnectionCallback): Saga<void> {
+function* bindOnConnectAction(
+  actionToBind: tRushConnectionCallback
+): Saga<void> {
   try {
     onConnectActions.push(actionToBind);
     if (rushHealthz) {
@@ -33,7 +37,9 @@ function* bindOnConnectAction(actionToBind: tRushConnectionCallback): Saga<void>
   }
 }
 
-function* bindOnDisconnectAction(actionToBind: tRushConnectionCallback): Saga<void> {
+function* bindOnDisconnectAction(
+  actionToBind: tRushConnectionCallback
+): Saga<void> {
   try {
     onDisconnectActions.push(actionToBind);
     if (!rushHealthz) {
@@ -44,7 +50,9 @@ function* bindOnDisconnectAction(actionToBind: tRushConnectionCallback): Saga<vo
   }
 }
 
-function* bindOnChangeAction(actionToBind: tRushConnectionCallback): Saga<void> {
+function* bindOnChangeAction(
+  actionToBind: tRushConnectionCallback
+): Saga<void> {
   try {
     onChangeActions.push(actionToBind);
     yield put(actionToBind());
@@ -55,7 +63,7 @@ function* bindOnChangeAction(actionToBind: tRushConnectionCallback): Saga<void> 
 
 // TODO make rush extends CommonExternalEntity
 
-export default function* (payload: boolean): Saga<void> {
+export default function*(payload: boolean): Saga<void> {
   try {
     yield put(healthzActions.data({ rush: payload }));
     if (rushHealthz !== payload) {

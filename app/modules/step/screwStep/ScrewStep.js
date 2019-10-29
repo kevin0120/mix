@@ -13,7 +13,7 @@ import { CommonLog } from '../../../common/utils';
 import controllerModeTasks from './controllerModeTasks';
 import screwStepActions from './action';
 import { SCREW_STEP, controllerModes } from './constants';
-import { getDevice } from '../../external/device';
+import { getDevice } from '../../deviceManager/devices';
 import dialogActions from '../../dialog/action';
 import type { IWorkStep } from '../interface/IWorkStep';
 import type { IScrewStep } from './interface/IScrewStep';
@@ -93,19 +93,18 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
     _listeners = [];
 
-    * _onLeave() {
+    *_onLeave() {
       try {
         yield all(
-          this._tools.map(t => (t.isEnable ? call(t.Disable) : call(() => {
-          })))
+          this._tools.map(t => (t.isEnable ? call(t.Disable) : call(() => {})))
         );
         this._tools.forEach(t => {
-          this._listeners.forEach((l) => {
+          this._listeners.forEach(l => {
             t.removeListener(l);
           });
         });
         this._tools = [];
-        this._listeners=[];
+        this._listeners = [];
         CommonLog.Info('tools cleared', {
           at: `screwStep(${(this: IWorkStep)._name},${
             (this: IWorkStep)._id
@@ -127,7 +126,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
     }
 
     _statusTasks = {
-      * [STEP_STATUS.ENTERING](ORDER, orderActions) {
+      *[STEP_STATUS.ENTERING](ORDER, orderActions) {
         try {
           // init data
           const payload: tScrewStepPayload = this._payload;
@@ -143,11 +142,13 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
           const points: Array<tPoint> = cloneDeep(payload?.points || []);
 
           this._tools = yield call(getTools, points);
-          this._tools.forEach((t) => {
-            this._listeners.push(t.addListener(
-              () => true,
-              (input) => screwStepActions.result(input.result)
-            ));
+          this._tools.forEach(t => {
+            this._listeners.push(
+              t.addListener(
+                () => true,
+                input => screwStepActions.result(input.result)
+              )
+            );
           });
           yield call(
             this.updateData,
@@ -163,7 +164,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
         }
       },
 
-      * [STEP_STATUS.DOING](ORDER, orderActions) {
+      *[STEP_STATUS.DOING](ORDER, orderActions) {
         try {
           let isFirst = true;
           this._activePoints = this._pointsManager.start();
@@ -202,11 +203,11 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               this._activePoints.map(p =>
                 call(
                   getDevice(p.toolSN)?.Enable ||
-                  (() => {
-                    CommonLog.lError(
-                      `tool ${p.toolSN}: no such tool or tool cannot be enabled.`
-                    );
-                  })
+                    (() => {
+                      CommonLog.lError(
+                        `tool ${p.toolSN}: no such tool or tool cannot be enabled.`
+                      );
+                    })
                 )
               )
             );
@@ -227,11 +228,11 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                   inactive.map(p =>
                     call(
                       getDevice(p.toolSN)?.Disable ||
-                      (() => {
-                        CommonLog.lError(
-                          `tool ${p.toolSN}: no such tool or tool cannot be disabled.`
-                        );
-                      })
+                        (() => {
+                          CommonLog.lError(
+                            `tool ${p.toolSN}: no such tool or tool cannot be disabled.`
+                          );
+                        })
                     )
                   )
                 );
@@ -258,7 +259,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
         }
       },
 
-      * [STEP_STATUS.FINISHED](ORDER, orderActions) {
+      *[STEP_STATUS.FINISHED](ORDER, orderActions) {
         try {
           yield put(orderActions.finishStep(this));
         } catch (e) {
@@ -267,7 +268,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
         }
       },
 
-      * [STEP_STATUS.FAIL](ORDER, orderActions, msg) {
+      *[STEP_STATUS.FAIL](ORDER, orderActions, msg) {
         try {
           yield all(this._tools.map(t => call(t.Disable)));
           this._tools = [];

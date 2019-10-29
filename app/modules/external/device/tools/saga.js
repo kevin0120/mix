@@ -6,7 +6,7 @@ import notifierActions from '../../../Notifier/action';
 import { CommonLog } from '../../../../common/utils';
 import type { tDeviceSN } from '../typeDef';
 import type { tResult } from '../../../step/screwStep/interface/typeDef';
-import { getDevice } from '../index';
+import { getDevice } from '../../../deviceManager/devices';
 
 type tToolStatusData = {
   type: string,

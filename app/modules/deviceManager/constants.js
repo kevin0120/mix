@@ -1,3 +1,5 @@
+// @flow
+
 export const deviceType = Object.freeze({
   controller: 'controller',
   scanner: 'scanner',

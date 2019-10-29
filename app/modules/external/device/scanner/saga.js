@@ -3,7 +3,7 @@
 import { call } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import { CommonLog } from '../../../../common/utils';
-import { getDevice } from '../index';
+import { getDevice } from '../../../deviceManager/devices';
 import type { tBarcode } from '../../../rush/type';
 
 type tScannerRushData = {
