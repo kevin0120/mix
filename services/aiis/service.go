@@ -11,7 +11,6 @@ import (
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"gopkg.in/resty.v1"
-	"net/http"
 	"strconv"
 	"strings"
 	"sync"
@@ -218,37 +217,20 @@ func (s *Service) OnRPCRecv(payload string) {
 			s.OnOdooStatus(status.Status)
 		}
 		break
+
+	case TYPE_MES_STATUS:
+		// TODO: 收到mes状态
+
+	case TYPE_ORDER_START:
+		// TODO: 开工响应
+
+	case TYPE_ORDER_FINISH:
+		// TODO: 完工响应
 	}
 
 }
 
-//func (s *Service) PutResult(msg *WSMsg) error {
-//
-//}
-
 func (s *Service) PutResult(result_id int64, body interface{}) error {
-
-	//var err error
-	//for _, endpoint := range s.endpoints {
-	//	err = s.putResult(body, fmt.Sprintf(endpoint.url, result_id), endpoint.method)
-	//	if err == nil {
-	//		// 如果第一次就成功，推出循环
-	//		return nil
-	//	}
-	//}
-
-	//ws_msg := WSMsg{
-	//	Type: WS_RESULT,
-	//	Data: WSOpResult{
-	//		ResultID: result_id,
-	//		Result:   body.(AIISResult),
-	//		Port:     s.rush_port,
-	//	},
-	//}
-	//
-	//str, _ := json.Marshal(ws_msg)
-	//s.ws.WriteMessage(websocket.TextMessage, str)
-	//s.ws.SendText(string(str))
 
 	result := WSOpResult{
 		ResultID: result_id,
@@ -261,54 +243,31 @@ func (s *Service) PutResult(result_id int64, body interface{}) error {
 		return nil
 	}
 
-	str, _ := json.Marshal(result)
+	str, _ := json.Marshal(RPCPayload{
+		Type: TYPE_RESULT,
+		Data: result,
+	})
+
 	err = s.rpc.RPCSend(string(str))
 	if err != nil {
-		s.diag.Error("grpc err", err)
+		s.diag.Error("Grpc Err", err)
 	}
 
 	return err
 }
 
-func (s *Service) putResult(body interface{}, url string, method string) error {
-	r := s.httpClient.R().SetBody(body).SetHeader("rush_port", s.rush_port)
-	var resp *resty.Response
-	var err error
+func (s *Service) PutOrderRequest(reqType string, body interface{}) error {
+	msg, _ := json.Marshal(RPCPayload{
+		Type: reqType,
+		Data: body,
+	})
 
-	switch method {
-	case "PATCH":
-		resp, err = r.Patch(url)
-		if err != nil {
-			return fmt.Errorf("Result Put fail: %s ", err.Error())
-		} else {
-			if resp.StatusCode() != http.StatusNoContent {
-				return fmt.Errorf("Result Put fail: %d ", resp.StatusCode())
-			}
-		}
-	case "PUT":
-		resp, err = r.Put(url)
-		if err != nil {
-			return fmt.Errorf("Result Put fail: %s ", err.Error())
-		} else {
-			if resp.StatusCode() != http.StatusNoContent {
-				return fmt.Errorf("Result Put fail: %d ", resp.StatusCode())
-			}
-		}
-	case "POST":
-		resp, err = r.Post(url)
-		if err != nil {
-			return fmt.Errorf("Result Put fail: %s ", err.Error())
-		} else {
-			if resp.StatusCode() != http.StatusNoContent {
-				return fmt.Errorf("Result Put fail: %d ", resp.StatusCode())
-			}
-		}
-	default:
-		return errors.New("Result Put :the Method is wrong")
-
+	err := s.rpc.RPCSend(string(msg))
+	if err != nil {
+		s.diag.Error("Grpc Err", err)
 	}
-	s.diag.PutResultDone()
-	return nil
+
+	return err
 }
 
 func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error) {

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kataras/iris/websocket"
+	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/httpd"
@@ -31,6 +32,7 @@ type Service struct {
 	AudiVw            *audi_vw.Service
 	OpenProtocol      *openprotocol.Service
 	ControllerService *controller.Service
+	Aiis              *aiis.Service
 
 	SN                string
 	WS                *wsnotify.Service
@@ -411,6 +413,26 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 
 		if err != nil {
 			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+			return
+		}
+
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+
+	case WS_ORDER_START_REQUEST:
+		// TODO: 收到HMI的开工请求， 处理收到的请求信息， 通过GRPC上传AIIS
+		err := s.Aiis.PutOrderRequest(aiis.TYPE_ORDER_START, nil)
+		if err != nil {
+			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+			return
+		}
+
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+
+	case WS_ORDER_FINISH_REQUEST:
+		// TODO: 收到HMI的完工请求， 处理收到的请求信息， 通过GRPC上传AIIS
+		err := s.Aiis.PutOrderRequest(aiis.TYPE_ORDER_FINISH, nil)
+		if err != nil {
+			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 			return
 		}
 

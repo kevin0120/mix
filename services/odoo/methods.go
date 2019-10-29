@@ -17,12 +17,11 @@ type Methods struct {
 	service *Service
 }
 
+// TODO: 创建工单（工单模型/工步模型/结果模型）
 // 创建工单
 func (m *Methods) postWorkorders(ctx iris.Context) {
 	var workorders []ODOOWorkorder
 	err := ctx.ReadJSON(&workorders)
-
-	//m.service.diag.Debug("postWorkorders start")
 
 	if err != nil {
 		// 传输结构错误
@@ -32,23 +31,7 @@ func (m *Methods) postWorkorders(ctx iris.Context) {
 		return
 	}
 
-	//m.service.diag.Debug("postWorkorders finsh try to send to workordersChannel")
-
 	m.service.workordersChannel <- &workorders
-
-	//m.service.diag.Debug("postWorkorders finsh send to workordersChannel")
-
-	//_, err = m.service.CreateWorkorders(workorders)
-	//
-	//if err != nil {
-	//	ctx.StatusCode(iris.StatusBadRequest)
-	//	ctx.WriteString(err.Error())
-	//	return
-	//} else {
-	//	ctx.StatusCode(iris.StatusCreated)
-	//	return
-	//}
-
 	ctx.StatusCode(iris.StatusCreated)
 	return
 }

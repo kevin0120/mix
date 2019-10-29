@@ -9,9 +9,12 @@ import (
 )
 
 const (
-	TYPE_RESULT      = "result_patch"
-	TYPE_ODOO_STATUS = "odoo_status"
-	TYPE_WORKORDER   = "workorder"
+	TYPE_RESULT       = "result_patch"
+	TYPE_ODOO_STATUS  = "odoo_status"
+	TYPE_WORKORDER    = "workorder"
+	TYPE_MES_STATUS   = "mes_status"
+	TYPE_ORDER_START  = "order_start"
+	TYPE_ORDER_FINISH = "order_finish"
 
 	RPC_PING = "ping"
 	RPC_PONG = "pong"
