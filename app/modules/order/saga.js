@@ -29,13 +29,18 @@ import loadingActions from '../loading/action';
 import type { IWorkStep } from '../step/interface/IWorkStep';
 import type { IOrder } from './interface/IOrder';
 
+import { bindNewDeviceListener } from '../deviceManager/handlerWSData';
+import ClsScanner from '../external/device/scanner/ClsScanner';
+
 export default function* root(): Saga<void> {
   try {
     yield all([
       call(bindRushAction.onConnect, orderActions.getList), // 绑定rush连接时需要触发的action
+      call(bindNewScanner),
+      takeEvery(ORDER.ADD_SCANNER_TRIGGER_LISTENER, bindScannerTrigger),
       takeEvery(ORDER.LIST.GET, getOrderList),
       takeEvery(ORDER.DETAIL.GET, getOrderDetail),
-      fork(orderTrigger),
+      call(orderTrigger),
       takeEvery(ORDER.WORK_ON, workOnOrder),
       takeEvery(ORDER.VIEW, viewOrder),
       takeLeading([ORDER.STEP.PREVIOUS, ORDER.STEP.NEXT], DebounceViewStep, 300)
@@ -46,6 +51,31 @@ export default function* root(): Saga<void> {
 }
 
 // TODO: 扫码触发工单
+function* bindNewScanner() {
+  try {
+    yield call(
+      bindNewDeviceListener,
+      d => d instanceof ClsScanner,
+      s => orderActions.addScannerTriggerListener(s)
+    );
+  } catch (e) {
+    CommonLog.lError(e, { at: 'scannerTrigger' });
+  }
+}
+
+function bindScannerTrigger({ scanner }) {
+  try {
+    // TODO: filter scanner input
+    scanner.addListener(
+      () => true,
+      input => {
+        orderActions.tryWorkOn(input.data);
+      }
+    );
+  } catch (e) {
+    CommonLog.lError(e, { at: 'scannerTrigger' });
+  }
+}
 
 // TODO: 工单持久化
 
@@ -53,6 +83,7 @@ export default function* root(): Saga<void> {
 
 function* orderTrigger() {
   try {
+    // TODO: trigger by order VIN/trackCode
     const triggerChannel = yield actionChannel(ORDER.TRY_WORK_ON);
     while (true) {
       const action = yield take(triggerChannel);

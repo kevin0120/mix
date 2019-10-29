@@ -12,10 +12,21 @@ import type { tAction, tListener } from '../typeDef';
 
 const newDeviceListener = makeListener();
 
-export function bindNewDeviceListener(
+export function* bindNewDeviceListener(
   predicate: IDevice => boolean,
   action: IDevice => tAction<any, any>
-) {
+): Saga<tListener<IDevice>> {
+  const actions = [];
+  getAllDevices().forEach(d => {
+    if (predicate(d)) {
+      actions.push(action(d));
+    }
+  });
+  try {
+    yield all(actions.map(a => put(a)));
+  } catch (e) {
+    CommonLog.lError(e, { at: 'bindNewDeviceListener' });
+  }
   return newDeviceListener.add(predicate, action);
 }
 
@@ -46,8 +57,8 @@ export function* deviceStatus(data: tRushData<any, any>): Saga<void> {
 
       // if dv exists, set its Healthz status
       if (dv) {
-        // eslint-disable-next-line redux-saga/yield-effects
         setHealthzEffects.push(
+          // eslint-disable-next-line redux-saga/yield-effects
           call(dv.setHealthz, status2Healthz[status] || false)
         );
         return;

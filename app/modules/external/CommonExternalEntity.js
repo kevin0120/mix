@@ -58,11 +58,18 @@ export default class CommonExternalEntity implements ICommonExternalEntity {
   }
 
   // eslint-disable-next-line flowtype/no-weak-types
-  bindOnHealthzAction(
+  *bindOnHealthzAction(
     predicate: boolean => boolean,
     action: boolean => tAction<any, any>
-  ) {
-    return this._healthzListener.add(predicate, action);
+  ): Saga<?tListener<boolean>> {
+    try {
+      if (predicate(this._isHealthz)) {
+        yield put(action(this._isHealthz));
+      }
+      return this._healthzListener.add(predicate, action);
+    } catch (e) {
+      CommonLog.lError(e, { at: 'bindOnHealthzAction' });
+    }
   }
 
   removeOnHealthzAction(listener: tListener<boolean>) {
