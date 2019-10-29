@@ -8,29 +8,13 @@ import ClsScanner from './scanner/ClsScanner';
 import ClsScrewTool from './tools/ClsScrewTool';
 import ClsReader from './reader/ClsReader';
 import ClsIOModule from './io/ClsIOModule';
-import type { tDeviceSN } from './typeDef';
+import type { tDeviceSN, tArrayDevices, tDeviceType } from './typeDef';
 import { deviceStatusApi } from '../../../api/device';
 import healthzActions from '../../healthz/action';
 import type { tRushData } from '../../rush/type';
 import type { IDevice } from './IDevice';
 import type { ICommonExternalEntity } from '../ICommonExternalEntity';
-
-type tArrayDevices = Set<Device>;
-
-export const deviceType = {
-  controller: 'controller',
-  scanner: 'scanner',
-  tool: 'tool',
-  reader: 'reader',
-  io: 'io'
-};
-
-type tDeviceType = $Keys<typeof deviceType>;
-
-const status2Healthz = {
-  online: true,
-  offline: false
-};
+import { deviceType, status2Healthz } from './constants';
 
 const sym2Device = {
   [deviceType.controller]: ClsController,
@@ -48,7 +32,8 @@ function newDevice(
   dt: tDeviceType,
   name: string,
   sn: string,
-  config: Object,
+  // eslint-disable-next-line flowtype/no-weak-types
+  config: { [string]: any },
   data,
   childrenSN: Array<tDeviceSN>
 ) {
@@ -99,6 +84,7 @@ export function* updateDeviceStatus(): Saga<void> {
   }
 }
 
+// eslint-disable-next-line flowtype/no-weak-types
 export function* deviceStatus(data: tRushData<any, any>): Saga<void> {
   try {
     if (!(data?.data instanceof Array)) {
@@ -115,7 +101,9 @@ export function* deviceStatus(data: tRushData<any, any>): Saga<void> {
       // if dv exists, set its Healthz status
       if (dv) {
         dv.Healthz = status2Healthz[status] || false;
+        return;
       }
+      CommonLog.lError(`invalid device: ${sn}`, { at: 'deviceStatus' });
     });
     const status = {};
     gDevices.forEach((d: Device) => {
