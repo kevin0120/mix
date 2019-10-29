@@ -3,7 +3,6 @@ package httpd
 import (
 	stdContext "context"
 	"fmt"
-	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris"
 	"github.com/masami10/aiis/services/diagnostic"
 	"log"
@@ -133,7 +132,9 @@ func (s *Service) manage() {
 		timeout := s.shutdownTimeout
 		ctx, cancel := stdContext.WithTimeout(stdContext.Background(), timeout)
 		defer cancel()
-		s.server.Shutdown(ctx)
+		if err :=s.server.Shutdown(ctx); err != nil {
+			s.diag.Error("httpd Server Shut Down Error", err)
+		}
 		close(stopDone)
 		return
 	}
@@ -161,7 +162,7 @@ func (s *Service) Close() error {
 }
 
 func (s *Service) serve() {
-	err := s.server.Run(s.Addr(), iris.WithoutInterruptHandler)
+	err := s.server.Run(s.Addr(), iris.WithoutInterruptHandler, iris.WithoutPathCorrectionRedirection)
 	// The listener was closed so exit
 	// See https://github.com/golang/go/issues/4373
 	if !strings.Contains(err.Error(), "closed") {
@@ -217,11 +218,12 @@ func (s *Service) AddNewHandler(version string, c Config, d Diagnostic, disc *di
 		// Should be unreachable code
 		panic("cannot append handler twice")
 	}
-	crs := cors.New(cors.Options{
-		AllowedOrigins:   s.cors.AllowedOrigins,
-		AllowCredentials: s.cors.AllowCredentials,
-		AllowedMethods:   s.cors.AllowedMethods,
-	})
+	crs := func(ctx iris.Context) {
+		ctx.Header("Access-Control-Allow-Origin", "*")
+		ctx.Header("Access-Control-Allow-Credentials", "true")
+		ctx.Header("Access-Control-Allow-Headers", "*")
+		ctx.Next()
+	}
 	p := s.server.Party(version, crs).AllowMethods(iris.MethodOptions)
 	if p == nil {
 		return fmt.Errorf("fail to create the party%s", version)
