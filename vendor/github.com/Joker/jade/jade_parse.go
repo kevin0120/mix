@@ -2,6 +2,7 @@ package jade
 
 import (
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -55,7 +56,7 @@ func (t *Tree) hub(token item) (n Node) {
 		case itemTag, itemTagInline, itemTagVoid, itemTagVoidInline:
 			return t.parseTag(token)
 		case itemText, itemComment, itemHTMLTag:
-			return t.newText(token.pos, token.val, token.typ)
+			return t.newText(token.pos, []byte(token.val), token.typ)
 		case itemCode, itemCodeBuffered, itemCodeUnescaped, itemMixinBlock:
 			return t.newCode(token.pos, token.val, token.typ)
 		case itemIf, itemUnless:
@@ -72,7 +73,7 @@ func (t *Tree) hub(token item) (n Node) {
 			return t.parseInclude(token)
 		case itemDoctype:
 			return t.newDoctype(token.pos, token.val)
-		case itemFilter, itemFilterText:
+		case itemFilter:
 			return t.parseFilter(token)
 		case itemError:
 			t.errorf("Error lex: %s line: %d\n", token.val, token.line)
@@ -83,8 +84,55 @@ func (t *Tree) hub(token item) (n Node) {
 }
 
 func (t *Tree) parseFilter(tk item) Node {
-	// TODO add golang filters
-	return t.newList(tk.pos)
+	var subf, args, text string
+Loop:
+	for {
+		switch token := t.nextNonSpace(); token.typ {
+		case itemFilterSubf:
+			subf = token.val
+		case itemFilterArgs:
+			args = strings.Trim(token.val, " \t\r\n")
+		case itemFilterText:
+			text = strings.Trim(token.val, " \t\r\n")
+		default:
+			break Loop
+		}
+	}
+	t.backup()
+	switch tk.val {
+	case "go":
+		filterGo(subf, args, text)
+	case "markdown", "markdown-it":
+		// TODO: filterMarkdown(subf, args, text)
+	}
+	return t.newList(tk.pos) // for return nothing
+}
+
+func filterGo(subf, args, text string) {
+	switch subf {
+	case "func":
+		Go.Name = ""
+		switch args {
+		case "name":
+			Go.Name = text
+		case "arg", "args":
+			if Go.Args != "" {
+				Go.Args += ", " + strings.Trim(text, "()")
+			} else {
+				Go.Args = strings.Trim(text, "()")
+			}
+		default:
+			fn := strings.Split(text, "(")
+			if len(fn) == 2 {
+				Go.Name = strings.Trim(fn[0], " \t\n)")
+				Go.Args = strings.Trim(fn[1], " \t\n)")
+			} else {
+				log.Fatal(":go:func filter error in " + text)
+			}
+		}
+	case "import":
+		Go.Import = text
+	}
 }
 
 func (t *Tree) parseTag(tk item) Node {
@@ -99,17 +147,15 @@ Loop:
 			if tag.tagType == itemTagVoid || tag.tagType == itemTagVoidInline {
 				break Loop
 			}
-			t.tab++
 			tag.append(t.hub(token))
-			t.tab--
 		case token.depth == deep:
 			switch token.typ {
 			case itemClass:
-				tag.attr("class", `"`+token.val+`"`)
+				tag.attr("class", `"`+token.val+`"`, false)
 			case itemID:
-				tag.attr("id", `"`+token.val+`"`)
+				tag.attr("id", `"`+token.val+`"`, false)
 			case itemAttrStart:
-				t.parseAttributes(tag)
+				t.parseAttributes(tag, `"`)
 			case itemTagEnd:
 				tag.tagType = itemTagVoid
 				return tag
@@ -125,10 +171,10 @@ Loop:
 }
 
 type pAttr interface {
-	attr(string, string)
+	attr(string, string, bool)
 }
 
-func (t *Tree) parseAttributes(tag pAttr) {
+func (t *Tree) parseAttributes(tag pAttr, qw string) {
 	var (
 		aname string
 		equal bool
@@ -144,26 +190,23 @@ func (t *Tree) parseAttributes(tag pAttr) {
 			case aname == "":
 				aname = token.val
 			case aname != "" && !equal:
-				tag.attr(aname, `"`+aname+`"`)
+				tag.attr(aname, qw+aname+qw, unesc)
 				aname = token.val
 			case aname != "" && equal:
-				if unesc {
-					stack = append(stack, "ߐ"+token.val)
-					unesc = false
-				} else {
-					stack = append(stack, token.val)
-				}
+				stack = append(stack, token.val)
 			}
-		case itemAttrEqualUn:
-			unesc = true
-			fallthrough
-		case itemAttrEqual:
+		case itemAttrEqual, itemAttrEqualUn:
+			if token.typ == itemAttrEqual {
+				unesc = false
+			} else {
+				unesc = true
+			}
 			equal = true
 			switch len_stack := len(stack); {
 			case len_stack == 0 && aname != "":
 				// skip
 			case len_stack > 1 && aname != "":
-				tag.attr(aname, strings.Join(stack[:len(stack)-1], " "))
+				tag.attr(aname, strings.Join(stack[:len(stack)-1], " "), unesc)
 
 				aname = stack[len(stack)-1]
 				stack = stack[:0]
@@ -177,23 +220,23 @@ func (t *Tree) parseAttributes(tag pAttr) {
 			equal = false
 			switch len_stack := len(stack); {
 			case len_stack > 0 && aname != "":
-				tag.attr(aname, strings.Join(stack, " "))
+				tag.attr(aname, strings.Join(stack, " "), unesc)
 				aname = ""
 				stack = stack[:0]
 			case len_stack == 0 && aname != "":
-				tag.attr(aname, `"`+aname+`"`)
+				tag.attr(aname, qw+aname+qw, unesc)
 				aname = ""
 			}
 		case itemAttrEnd:
 			switch len_stack := len(stack); {
 			case len_stack > 0 && aname != "":
-				tag.attr(aname, strings.Join(stack, " "))
+				tag.attr(aname, strings.Join(stack, " "), unesc)
 			case len_stack > 0 && aname == "":
 				for _, a := range stack {
-					tag.attr(a, a)
+					tag.attr(a, a, unesc)
 				}
 			case len_stack == 0 && aname != "":
-				tag.attr(aname, `"`+aname+`"`)
+				tag.attr(aname, qw+aname+qw, unesc)
 			}
 			return
 		default:
@@ -211,9 +254,7 @@ Loop:
 	for {
 		switch token := t.nextNonSpace(); {
 		case token.depth > deep:
-			t.tab++
 			cond.append(t.hub(token))
-			t.tab--
 		case token.depth == deep:
 			switch token.typ {
 			case itemElse:
@@ -244,9 +285,7 @@ Loop:
 	for {
 		switch token := t.nextNonSpace(); {
 		case token.depth > deep:
-			t.tab++
 			cond.append(t.hub(token))
-			t.tab--
 		case token.depth == deep:
 			if token.typ == itemElse {
 				cond.condType = itemForIfNotContain
@@ -264,25 +303,23 @@ Loop:
 
 func (t *Tree) parseCase(tk item) Node {
 	var (
-		deep   = tk.depth
-		_case_ = t.newCond(tk.pos, tk.val, tk.typ)
+		deep  = tk.depth
+		iCase = t.newCond(tk.pos, tk.val, tk.typ)
 	)
 	for {
 		if token := t.nextNonSpace(); token.depth > deep {
 			switch token.typ {
 			case itemCaseWhen, itemCaseDefault:
-				_case_.append(t.newCode(token.pos, token.val, token.typ))
+				iCase.append(t.newCode(token.pos, token.val, token.typ))
 			default:
-				t.tab++
-				_case_.append(t.hub(token))
-				t.tab--
+				iCase.append(t.hub(token))
 			}
 		} else {
 			break
 		}
 	}
 	t.backup()
-	return _case_
+	return iCase
 }
 
 func (t *Tree) parseMixin(tk item) *MixinNode {
@@ -294,12 +331,10 @@ Loop:
 	for {
 		switch token := t.nextNonSpace(); {
 		case token.depth > deep:
-			t.tab++
 			mixin.append(t.hub(token))
-			t.tab--
 		case token.depth == deep:
 			if token.typ == itemAttrStart {
-				t.parseAttributes(mixin)
+				t.parseAttributes(mixin, "")
 			} else {
 				break Loop
 			}
@@ -324,12 +359,10 @@ Loop:
 	for {
 		switch token := t.nextNonSpace(); {
 		case token.depth > deep:
-			t.tab++
-			mixin.append(t.hub(token))
-			t.tab--
+			mixin.appendToBlock(t.hub(token))
 		case token.depth == deep:
 			if token.typ == itemAttrStart {
-				t.parseAttributes(mixin)
+				t.parseAttributes(mixin, "")
 			} else {
 				break Loop
 			}
@@ -407,18 +440,28 @@ func (t *Tree) parseInclude(tk item) *ListNode {
 }
 
 func (t *Tree) parseSubFile(path string) *ListNode {
+	// log.Println("subtemplate: " + path)
 	var incTree = New(path)
-	incTree.tab = t.tab
 	incTree.block = t.block
 	incTree.mixin = t.mixin
-	_, err := incTree.Parse(t.read(path))
-	if err != nil {
-		t.errorf(`%s`, err)
+	wd, _ := os.Getwd()
+
+	dir, file := filepath.Split(path)
+	if dir != "" && dir != "./" {
+		os.Chdir(dir)
 	}
+
+	_, err := incTree.Parse(t.read(file))
+	if err != nil {
+		d, _ := os.Getwd()
+		t.errorf(`in '%s' subtemplate '%s': parseSubFile() error: %s`, d, path, err)
+	}
+
+	os.Chdir(wd)
 	return incTree.Root
 }
 
-func (t *Tree) read(path string) string {
+func (t *Tree) read(path string) []byte {
 	var (
 		bb  []byte
 		ext string
@@ -430,7 +473,8 @@ func (t *Tree) read(path string) string {
 	case "":
 		if _, err = os.Stat(path + ".jade"); os.IsNotExist(err) {
 			if _, err = os.Stat(path + ".pug"); os.IsNotExist(err) {
-				t.errorf(`".jade" or ".pug" file required`)
+				wd, _ := os.Getwd()
+				t.errorf("in '%s' subtemplate '%s': file path error: '.jade' or '.pug' file required", wd, path)
 			} else {
 				ext = ".pug"
 			}
@@ -442,9 +486,9 @@ func (t *Tree) read(path string) string {
 		t.errorf(`file extension  %s  is not supported`, ext)
 	}
 	if err != nil {
-		dir, _ := os.Getwd()
-		t.errorf(`%s  work dir: %s `, err, dir)
+		wd, _ := os.Getwd()
+		t.errorf(`%s  work dir: %s `, err, wd)
 	}
 
-	return string(bb)
+	return bb
 }
