@@ -1,8 +1,8 @@
 // @flow
-import { put, select, take, join, fork } from 'redux-saga/effects';
+import { put, select } from 'redux-saga/effects';
 import { CommonLog } from '../../common/utils';
 import { orderActions } from './action';
-import { ORDER, ORDER_WS_TYPES } from './constants';
+import { ORDER_WS_TYPES } from './constants';
 import type {
   tOrderWSTypes,
   tOrderRushData,
@@ -45,13 +45,7 @@ const dataHandlers: rushHandlerMap<
           .filter(newO => !newList.find(o => o.id === newO.id))
           .map(oD => new (OrderMixin(Step))(oD))
       );
-      const updated = yield fork(function* updated() {
-        yield take(
-          action => action.type === ORDER.NEW_LIST && action.list === newList
-        );
-      });
       yield put(orderActions.newList(newList));
-      yield join(updated);
       yield put(orderActions.getListSuccess());
     } catch (e) {
       CommonLog.lError(e, { at: 'ORDER_WS_TYPES.LIST' });
@@ -66,13 +60,7 @@ const dataHandlers: rushHandlerMap<
       if (newOrder) {
         newOrder.update(data);
       }
-      const updated = yield fork(function* updated() {
-        yield take(
-          action => action.type === ORDER.NEW_LIST && action.list === newList
-        );
-      });
       yield put(orderActions.newList(newList));
-      yield join(updated);
       yield put(orderActions.getDetailSuccess());
     } catch (e) {
       CommonLog.lError(e, { at: 'ORDER_WS_TYPES.DETAIL' });
@@ -81,8 +69,6 @@ const dataHandlers: rushHandlerMap<
   // 新工单
   *[ORDER_WS_TYPES.NEW](data: Array<tOrder>) {
     try {
-      yield put(NotifierActions.enqueueSnackbar('Info', '收到新工单'));
-
       const orderState = yield select(s => s.order);
       // get exist orders
       let newList = orderState.list;
@@ -103,6 +89,7 @@ const dataHandlers: rushHandlerMap<
       );
 
       yield put(orderActions.newList(newList));
+      yield put(NotifierActions.enqueueSnackbar('Info', '收到新工单'));
     } catch (e) {
       CommonLog.lError(e, { at: 'ORDER_WS_TYPES.NEW' });
     }

@@ -10,7 +10,8 @@ import {
   take,
   race,
   fork,
-  join
+  join,
+  actionChannel
 } from 'redux-saga/effects';
 import React from 'react';
 import type { Saga } from 'redux-saga';
@@ -34,7 +35,7 @@ export default function* root(): Saga<void> {
       call(bindRushAction.onConnect, orderActions.getList), // 绑定rush连接时需要触发的action
       takeEvery(ORDER.LIST.GET, getOrderList),
       takeEvery(ORDER.DETAIL.GET, getOrderDetail),
-      takeEvery(ORDER.TRY_WORK_ON, tryWorkOnOrder),
+      fork(orderTrigger),
       takeEvery(ORDER.WORK_ON, workOnOrder),
       takeEvery(ORDER.VIEW, viewOrder),
       takeLeading([ORDER.STEP.PREVIOUS, ORDER.STEP.NEXT], DebounceViewStep, 300)
@@ -50,9 +51,20 @@ export default function* root(): Saga<void> {
 
 // TODO: 开工、报工接口
 
+function* orderTrigger() {
+  try {
+    const triggerChannel = yield actionChannel(ORDER.TRY_WORK_ON);
+    while (true) {
+      const action = yield take(triggerChannel);
+      yield call(tryWorkOnOrder, action);
+    }
+  } catch (e) {
+    CommonLog.lError(e, { at: 'orderTrigger' });
+  }
+}
+
 function* tryWorkOnOrder({ order }: { order: IOrder }) {
   try {
-    // TODO: judge can work on
     let canWorkOnOrder = true;
     const orderState = yield select(s => s.order);
     if (workingOrder(orderState)) {
