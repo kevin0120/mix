@@ -30,7 +30,7 @@ type CResult struct {
 	ID     int64
 	IP     string
 	Port   string
-	Stream *aiis.RPCAiis_RPCNodeServer
+	Stream aiis.RPCAiis_RPCNodeServer
 }
 
 type RushResult struct {
@@ -64,7 +64,7 @@ type Service struct {
 	Odoo    *odoo.Service
 	diag    Diagnostic
 
-	rpc aiis.GRPCServer
+	rpc *aiis.GRPCServer
 }
 
 func NewService(c Config, d Diagnostic) *Service {
@@ -83,11 +83,10 @@ func NewService(c Config, d Diagnostic) *Service {
 			}),
 			clientManager: wsnotify.WSClientManager{},
 			results:       make(chan *storage.ResultObject, c.BatchSaveRowsLimit),
-			rpc:           aiis.GRPCServer{},
+			rpc:           aiis.NewAiisGrpcServer(d),
 		}
 
-		s.rpc.RPCRecv = s.OnRPCRecv
-		s.rpc.RPCNewClient = s.OnRPCNewClinet
+		s.setGrpcHandler()
 		s.clientManager.Init()
 		s.configValue.Store(c)
 		return &s
@@ -96,11 +95,18 @@ func NewService(c Config, d Diagnostic) *Service {
 	return nil
 }
 
+func (s *Service)setGrpcHandler()  {
+	s.rpc.OnAIISRPCRecv = s.OnRPCRecv
+	s.rpc.OnAIISRPCNewClient = s.OnRPCNewClient
+}
+
 func (s *Service) Config() Config {
 	return s.configValue.Load().(Config)
 }
 
 func (s *Service) Open() error {
+
+	c := s.Config()
 
 	r := httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
@@ -164,7 +170,11 @@ func (s *Service) Open() error {
 
 	go s.TaskResultsBatchSave()
 
-	s.rpc.Start(s.Config().GRPCPort)
+	if err := s.rpc.Start(c.GRPCPort); err != nil {
+		s.diag.Error("Rush Start GRPC Server Error", err)
+	}else {
+		s.diag.Info(fmt.Sprintf("Rush Start grpc Server Listen: 0.0.0.0:%d", c.GRPCPort))
+	}
 
 	s.Opened = true
 
@@ -173,15 +183,15 @@ func (s *Service) Open() error {
 	return nil
 }
 
-func (s *Service) OnRPCNewClinet(stream *aiis.RPCAiis_RPCNodeServer) {
+func (s *Service) OnRPCNewClient(stream aiis.RPCAiis_RPCNodeServer) {
 
-	odoo_status := odoo.ODOOStatus{
+	status := odoo.ODOOStatus{
 		Status: s.Odoo.Status(),
 	}
 
 	payload := aiis.RPCPayload{
 		Type: aiis.TYPE_ODOO_STATUS,
-		Data: odoo_status,
+		Data: status,
 	}
 
 	str, _ := json.Marshal(payload)
@@ -189,7 +199,7 @@ func (s *Service) OnRPCNewClinet(stream *aiis.RPCAiis_RPCNodeServer) {
 	s.diag.Info("new rpc client")
 }
 
-func (s *Service) OnRPCRecv(stream *aiis.RPCAiis_RPCNodeServer, payload string) {
+func (s *Service) OnRPCRecv(stream aiis.RPCAiis_RPCNodeServer, payload string) {
 	s.diag.Debug(fmt.Sprintf("收到结果: %s\n", payload))
 
 	op_result := WSOpResult{}
@@ -505,7 +515,7 @@ func (s *Service) OperationToChanganResult(r *storage.OperationResult) changan.T
 	return result
 }
 
-func (s *Service) PatchResultFlag(stream *aiis.RPCAiis_RPCNodeServer, result_id int64, has_upload bool, ip string, port string) error {
+func (s *Service) PatchResultFlag(stream aiis.RPCAiis_RPCNodeServer, result_id int64, has_upload bool, ip string, port string) error {
 	//if s.httpClient == nil {
 	//	return errors.New("rush http client is nil")
 	//}

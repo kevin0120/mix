@@ -9,62 +9,95 @@ import (
 	"sync"
 )
 
-type OnRPCNewClient func(stream *RPCAiis_RPCNodeServer)
-type OnRPCRecv func(stream *RPCAiis_RPCNodeServer, payload string)
+type Diagnostic interface {
+	Info(msg string)
+	Error(msg string, err error)
+	Debug(msg string)
+}
+
+type OnRPCNewClient func(stream RPCAiis_RPCNodeServer)
+type OnRPCRecv func(stream RPCAiis_RPCNodeServer, payload string)
 
 type GRPCServer struct {
-	grpcServer   *grpc.Server
-	RPCRecv      OnRPCRecv
-	RPCNewClient OnRPCNewClient
-	clients      map[string]*RPCAiis_RPCNodeServer
-	mtx_clients  sync.Mutex
+	server             *grpc.Server
+	OnAIISRPCRecv      OnRPCRecv
+	OnAIISRPCNewClient OnRPCNewClient
+	clients            map[string]RPCAiis_RPCNodeServer
+	mtxClients         sync.Mutex
+	diag               Diagnostic
+}
+
+func NewAiisGrpcServer(d Diagnostic) *GRPCServer {
+	var opts []grpc.ServerOption
+	s := &GRPCServer{
+		server:  grpc.NewServer(opts...),
+		clients: make(map[string]RPCAiis_RPCNodeServer),
+		diag: d,
+	}
+
+	return s
 }
 
 func (s *GRPCServer) Start(port int) error {
-	var opts []grpc.ServerOption
-	s.grpcServer = grpc.NewServer(opts...)
-	RegisterRPCAiisServer(s.grpcServer, s)
-	s.clients = make(map[string]*RPCAiis_RPCNodeServer)
-	s.mtx_clients = sync.Mutex{}
+
+	RegisterRPCAiisServer(s.server, s)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", port))
 	if err != nil {
 		return err
 	}
 
-	go s.grpcServer.Serve(lis)
+	go s.server.Serve(lis)
 
 	return nil
 }
 
 func (s *GRPCServer) Stop() error {
-	s.grpcServer.GracefulStop()
+	s.server.GracefulStop()
 
 	return nil
 }
 
-func (s *GRPCServer) addClient(addr string, stream *RPCAiis_RPCNodeServer) {
-	defer s.mtx_clients.Unlock()
-	s.mtx_clients.Lock()
+func (s *GRPCServer) addClient(addr string, stream RPCAiis_RPCNodeServer) {
+	s.mtxClients.Lock()
+	defer s.mtxClients.Unlock()
 
 	s.clients[addr] = stream
 }
 
 func (s *GRPCServer) removeClient(addr string) {
-	defer s.mtx_clients.Unlock()
-	s.mtx_clients.Lock()
+	s.mtxClients.Lock()
+	defer s.mtxClients.Unlock()
 
 	delete(s.clients, addr)
 }
 
+func (s *GRPCServer) grpcHandleMsg(stream RPCAiis_RPCNodeServer, in *Payload) {
+	switch in.Payload {
+	case RPC_PING:
+		msg := &Payload{
+			Payload: RPC_PONG,
+		}
+		if err := stream.Send(msg); err != nil {
+			s.diag.Error("grpcHandleMsg Send PONG Message", err)
+		}
+	default:
+		if s.OnAIISRPCRecv == nil {
+			err := errors.New("OnAIISRPCRecv Is Not Defined!!!\n")
+			s.diag.Error("grpcHandleMsg", err)
+		}
+		s.OnAIISRPCRecv(stream, in.Payload)
+	}
+}
+
 func (s *GRPCServer) RPCNode(stream RPCAiis_RPCNodeServer) error {
 
-	if s.RPCNewClient != nil {
-		s.RPCNewClient(&stream)
+	if s.OnAIISRPCNewClient != nil {
+		s.OnAIISRPCNewClient(stream)
 	}
 
 	pr, _ := peer.FromContext(stream.Context())
-	s.addClient(pr.Addr.String(), &stream)
+	s.addClient(pr.Addr.String(), stream)
 
 	for {
 		in, err := stream.Recv()
@@ -72,35 +105,33 @@ func (s *GRPCServer) RPCNode(stream RPCAiis_RPCNodeServer) error {
 			s.removeClient(pr.Addr.String())
 			return err
 		}
-
-		if in.Payload == RPC_PING {
-			s.RPCSend(&stream, RPC_PONG)
-		} else {
-			if s.RPCRecv != nil {
-				s.RPCRecv(&stream, in.Payload)
-			}
-		}
+		s.grpcHandleMsg(stream, in)
 	}
 
-	return nil
 }
 
-func (s *GRPCServer) RPCSend(stream *RPCAiis_RPCNodeServer, payload string) error {
+func (s *GRPCServer) RPCSend(stream RPCAiis_RPCNodeServer, payload string) error {
 	if stream != nil {
-		return (*stream).Send(&Payload{
+		return stream.Send(&Payload{
 			Payload: payload,
 		})
 	}
+	ctx := stream.Context()
 
-	return errors.New("rpc disconnected")
+	pr, _ := peer.FromContext(ctx)
+
+	return errors.New(fmt.Sprintf("AIIS GRPC: %s Disconnected", pr.Addr.String()))
 }
 
 func (s *GRPCServer) RPCSendAll(payload string) error {
-	defer s.mtx_clients.Unlock()
-	s.mtx_clients.Lock()
+	s.mtxClients.Lock()
+	defer s.mtxClients.Unlock()
+
 
 	for _, stream := range s.clients {
-		s.RPCSend(stream, payload)
+		if err := s.RPCSend(stream, payload); err != nil {
+			s.diag.Error("RPCSendAll Error", err)
+		}
 	}
 
 	return nil

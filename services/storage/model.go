@@ -121,7 +121,7 @@ type ResultObject struct {
 	Send   bool
 	Port   string
 	IP     string
-	Stream *aiis.RPCAiis_RPCNodeServer
+	Stream aiis.RPCAiis_RPCNodeServer
 }
 
 type OperationResult struct {

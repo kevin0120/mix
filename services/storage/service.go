@@ -17,17 +17,19 @@ type Diagnostic interface {
 	UpdateResultSuccess(id int64)
 }
 
+
 type Service struct {
 	diag        Diagnostic
 	configValue atomic.Value
-	//eng         *xorm.Engine
-	eng *gorm.DB
+	open        bool
+	eng         *gorm.DB
 }
 
 func NewService(c Config, d Diagnostic) *Service {
 
 	s := &Service{
 		diag: d,
+		open: false,
 	}
 
 	s.configValue.Store(c)
@@ -39,63 +41,57 @@ func (s *Service) Config() Config {
 	return s.configValue.Load().(Config)
 }
 
-func (s *Service) Open() error {
-	//c := s.Config()
-	//info := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable",
-	//	c.User,
-	//	c.Password,
-	//	c.Url,
-	//	c.DBName)
-	//engine, err := xorm.NewEngine("postgres", info)
-	//
-	//if err != nil {
-	//	return errors.Wrapf(err, "Create postgres engine fail")
-	//}
-	//
-	//exist, err := engine.IsTableExist("operation_result")
-	//if err != nil {
-	//	return errors.Wrapf(err, "Check Table exist %s fail", "operation_result")
-	//}
-	//if !exist {
-	//	return errors.New("Check Table exist operation_result fail, Please start Odoo first")
-	//}
-	//
-	//engine.SetMaxOpenConns(c.MaxConnects) // always success
-	//
-	//s.eng = engine
+func (s *Service) openStorageEngine() error {
+	c := s.Config()
+	if c.Enable {
+		urls := strings.Split(c.Url, ":")
+		sConn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable connect_timeout=10",
+			urls[0],
+			urls[1],
+			c.User,
+			c.DBName,
+			c.Password)
 
-	urls := strings.Split(s.Config().Url, ":")
-	sConn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable connect_timeout=10",
-		urls[0],
-		urls[1],
-		s.Config().User,
-		s.Config().DBName,
-		s.Config().Password)
+		_db, err := gorm.Open("postgres", sConn)
+		if err != nil {
+			return err
+		}
 
-	_db, err := gorm.Open("postgres", sConn)
-	if err != nil {
-		return err
+		_db.AutoMigrate(&OperationResultModel{})
+
+		s.eng = _db
+		s.open = true
+
+		s.diag.OpenEngineSuccess(sConn)
 	}
-
-	_db.AutoMigrate(&OperationResultModel{})
-
-	s.eng = _db
-
-	s.diag.OpenEngineSuccess(sConn)
 
 	return nil
 }
 
+func (s *Service) Open() error {
+	return s.openStorageEngine()
+}
+
 func (s *Service) Close() error {
-	if s.eng == nil {
+	eng := s.eng
+	if eng == nil {
 		return nil
 	}
-	s.eng.Close()
+	if err := eng.Close(); err != nil {
+		s.diag.Error("Storage Service Close Engine Error", err)
+	}
 
 	return nil
 }
 
 func (s *Service) BatchSave(results []*ResultObject) error {
+	eng, err := s.ensureStorageEng()
+
+	if eng == nil || err != nil {
+		s.diag.Error("Cannot Update Results", err)
+		return err
+	}
+
 	for _, v := range results {
 		cur, _ := json.Marshal(v.OR["cur_objects"])
 
@@ -136,13 +132,19 @@ func (s *Service) BatchSave(results []*ResultObject) error {
 			reflect.ValueOf(v.OR["model"]).String(),
 			reflect.ValueOf(v.OR["tool_sn"]).String())
 
-		err := s.eng.Exec(sql)
-		if err.Error != nil {
-			if strings.HasSuffix(err.Error.Error(), "tid_vin_gun_uniq\"") || strings.HasSuffix(err.Error.Error(), "tid_wo_gun_uniq\"") {
-				continue
-			}
-			return err.Error
+		e := eng.Exec(sql)
+		if e == nil {
+			return errors.New("BatchSave Result Error")
 		}
+		for _, err := range e.GetErrors() {
+			if err != nil {
+				if strings.HasSuffix(err.Error(), "tid_vin_gun_uniq\"") || strings.HasSuffix(err.Error(), "tid_wo_gun_uniq\"") {
+					continue
+				}
+				return err
+			}
+		}
+
 	}
 
 	return nil
@@ -350,7 +352,27 @@ func (s *Service) BatchSave(results []*ResultObject) error {
 //	return nil
 //}
 
+func (s *Service) ensureStorageEng() (*gorm.DB, error) {
+	if s.eng != nil {
+		return s.eng, nil
+	}
+
+	if err := s.openStorageEngine(); err != nil {
+		s.diag.Error("openStorageEngine Error:", err)
+		return nil, err
+	}
+
+	return s.eng, nil
+}
+
 func (s *Service) UpdateResults(result *OperationResult, id int64, sent int) error {
+
+	eng, err := s.ensureStorageEng()
+
+	if eng == nil && err != nil {
+		s.diag.Error("Cannot Update Results", err)
+		return err
+	}
 
 	var r OperationResultModel
 	r.PsetMThreshold = result.PsetMThreshold
@@ -391,7 +413,7 @@ func (s *Service) UpdateResults(result *OperationResult, id int64, sent int) err
 		r.Vin = result.Vin
 		r.GunID = result.GunID
 
-		result := s.eng.Create(&r)
+		result := eng.Create(&r)
 
 		if result.Error != nil {
 			return errors.Wrapf(result.Error, "insert result record fail: %s", result.Error.Error())
@@ -402,7 +424,7 @@ func (s *Service) UpdateResults(result *OperationResult, id int64, sent int) err
 		// 更新
 
 		r.Id = id
-		result := s.eng.Save(&r)
+		result := eng.Save(&r)
 		fmt.Printf("%d\n", id)
 
 		if result.Error != nil {
