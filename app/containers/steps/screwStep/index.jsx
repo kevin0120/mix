@@ -70,7 +70,7 @@ function ScrewStep({ isCurrent, image, points, redoPoint, result }: Props) {
         //     result: RESULT_STATUS.ok
         //   }]
         // });
-        redoPoint(point);
+        // redoPoint(point);
       }}
     />
     <Paper
