@@ -19,7 +19,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['spc', 'common_sa_utils'],
+    'depends': ['api', 'spc', 'common_sa_utils'],
 
     # always loaded
     'data': [

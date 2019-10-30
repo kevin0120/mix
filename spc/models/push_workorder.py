@@ -57,7 +57,7 @@ class PushWorkorder(AbstractModel):
 
     def _post_workorder_to_masterpc(self, url, orders):
         r = list()
-        type_tightening_point_id = self.env.ref['quality.test_type_tightening_point'].id
+        type_tightening_point_id = self.env.ref('quality.test_type_tightening_point').id
         for order in orders:
             _steps = self.pack_step_payload(order.consu_work_order_line_ids, type_tightening_point_id)
             # for step in order.consu_work_order_line_ids:
