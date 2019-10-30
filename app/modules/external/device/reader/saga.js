@@ -4,13 +4,8 @@ import { call } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import { CommonLog } from '../../../../common/utils';
 import { getDevicesByType } from '../../../deviceManager/devices';
-import type { tReaderData } from './typeDef';
+import type { tReaderData, tReaderRushData } from './typeDef';
 import { deviceType } from '../../../deviceManager/constants';
-
-type tReaderRushData = {
-  type: string,
-  data: tReaderData
-};
 
 export default function* readerNewData(data: tReaderRushData): Saga<void> {
   try {

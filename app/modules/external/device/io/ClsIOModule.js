@@ -15,6 +15,7 @@ import { CommonLog } from '../../../../common/utils';
 import { ioDirection, ioTriggerMode } from './constants';
 import { ioSetApi, ioContactApi, ioStatusApi } from '../../../../api/io';
 import type { IIOModule } from './interface/IIOModule';
+import type { IDevice } from '../IDevice';
 
 export default class ClsIOModule extends Device implements IIOModule {
   _data: tIOData = { input: '', output: '' };
@@ -159,7 +160,7 @@ export default class ClsIOModule extends Device implements IIOModule {
 
       let actions = [];
       inputs.forEach(i => {
-        actions = [...actions, ...this._inputListener.check(i)];
+        actions = [...actions, ...(this: IDevice)._inputListener.check(i)];
       });
 
       yield all(actions.map(a => put(a)));

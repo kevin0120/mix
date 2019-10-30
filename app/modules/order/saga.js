@@ -35,12 +35,12 @@ import ClsScanner from '../external/device/scanner/ClsScanner';
 export default function* root(): Saga<void> {
   try {
     yield takeEvery(ORDER.NEW_SCANNER, onNewScanner);
-    yield  call(bindNewScanner);
+    yield call(bindNewScanner);
     yield all([
       call(bindRushAction.onConnect, orderActions.getList), // 绑定rush连接时需要触发的action
       takeEvery(ORDER.LIST.GET, getOrderList),
       takeEvery(ORDER.DETAIL.GET, getOrderDetail),
-      call(orderTrigger),
+      call(watchOrderTrigger),
       takeEvery(ORDER.WORK_ON, workOnOrder),
       takeEvery(ORDER.VIEW, viewOrder),
       takeLeading([ORDER.STEP.PREVIOUS, ORDER.STEP.NEXT], DebounceViewStep, 300)
@@ -50,7 +50,6 @@ export default function* root(): Saga<void> {
   }
 }
 
-// TODO: 扫码触发工单
 function* bindNewScanner() {
   try {
     yield call(
@@ -63,6 +62,7 @@ function* bindNewScanner() {
   }
 }
 
+// 扫码触发工单
 function onNewScanner({ scanner }) {
   try {
     // TODO: filter scanner input
@@ -79,7 +79,7 @@ function onNewScanner({ scanner }) {
 
 // TODO: 开工、报工接口
 
-function* orderTrigger() {
+function* watchOrderTrigger() {
   try {
     // TODO: trigger by order VIN/trackCode
     const triggerChannel = yield actionChannel(ORDER.TRY_WORK_ON);
@@ -202,11 +202,11 @@ function* viewOrder({ order }: { order: IOrder }) {
             color: 'warning'
           },
           !WIPOrder &&
-          doable(order) && {
-            label: 'Order.Start',
-            color: 'info',
-            action: orderActions.tryWorkOn(order)
-          }
+            doable(order) && {
+              label: 'Order.Start',
+              color: 'info',
+              action: orderActions.tryWorkOn(order)
+            }
         ],
         title: i18n.t('Order.Overview'),
         content: (

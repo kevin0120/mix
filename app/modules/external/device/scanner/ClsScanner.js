@@ -1,12 +1,7 @@
 // @flow
 
 import Device from '../Device';
-import type { tInput } from '../typeDef';
 import { CommonLog } from '../../../../common/utils';
-import { scannerStepAction } from '../../../step/scannerStep/action';
-
-export const defaultScannerDispatcher = (data: tInput) =>
-  scannerStepAction.getValue(data);
 
 class ClsScanner extends Device {
   doValidate(data: string | number): boolean {
