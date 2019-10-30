@@ -8,7 +8,7 @@ export function orderListApi() {
     return rushSendApi(ORDER_WS_TYPES.LIST);
   } catch (e) {
     CommonLog.lError(e, {
-      at: 'jobApi'
+      at: 'orderListApi'
     });
   }
 }
@@ -20,11 +20,10 @@ export function orderDetailApi(id: number) {
     });
   } catch (e) {
     CommonLog.lError(e, {
-      at: 'jobApi'
+      at: 'orderDetailApi'
     });
   }
 }
-
 
 // 更新工单状态
 export function orderUpdateApi(id: number, orderStatus: string): ?Promise<any> {
@@ -35,7 +34,7 @@ export function orderUpdateApi(id: number, orderStatus: string): ?Promise<any> {
     });
   } catch (e) {
     CommonLog.lError(e, {
-      at: 'jobApi'
+      at: 'orderUpdateApi'
     });
   }
 }
@@ -44,13 +43,32 @@ export function orderUpdateApi(id: number, orderStatus: string): ?Promise<any> {
 export function orderStepUpdateApi(id: number, status: string): any {
   try {
     return rushSendApi(ORDER_WS_TYPES.STEP_UPDATE, {
-      id, status
+      id,
+      status
     });
   } catch (e) {
     CommonLog.lError(e, {
-      at: 'jobApi'
+      at: 'orderStepUpdateApi'
     });
   }
 }
 
-
+// TODO
+export function orderReportStartApi() {
+  try {
+    return rushSendApi(ORDER_WS_TYPES.REPORT_START, {});
+  } catch (e) {
+    CommonLog.lError(e, {
+      at: 'orderReportStartApi'
+    });
+  }
+}
+export function orderReportFinishApi() {
+  try {
+    return rushSendApi(ORDER_WS_TYPES.REPORT_FINISH, {});
+  } catch (e) {
+    CommonLog.lError(e, {
+      at: 'orderReportFinishApi'
+    });
+  }
+}

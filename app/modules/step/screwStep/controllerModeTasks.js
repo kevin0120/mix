@@ -15,8 +15,8 @@ export default {
       const sData: tScrewStepData = this._data;
       const stepId = this._id;
       const { points, retryTimes } = sData;
-      // TODO: pass correct userID
-      const userID = 1;
+      const userIDs = yield select(s => s.users.map(u => u.uid));
+      // const userID = 1;
 
       // const { toolSN, pset, sequence } = points[activeIndex];
       const { toolSN, pset, sequence } = point;
@@ -26,7 +26,8 @@ export default {
         psetApi,
         toolSN || '',
         stepId,
-        userID,
+        // userID,
+        userIDs,
         pset,
         sequence,
         retryTimes,
@@ -39,7 +40,8 @@ export default {
           at: 'pset',
           toolSN,
           stepId,
-          userID,
+          // userID,
+          userIDs,
           pset,
           sequence,
           retryTimes

@@ -22,7 +22,11 @@ import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
 import { CommonLog } from '../../common/utils';
 import type { tCommonActionType } from '../../common/type';
-import { orderDetailApi, orderListApi } from '../../api/order';
+import {
+  orderDetailApi,
+  orderListApi,
+  orderReportFinishApi
+} from '../../api/order';
 import { ORDER } from './constants';
 import { bindRushAction } from '../rush/rushHealthz';
 import loadingActions from '../loading/action';
@@ -43,6 +47,7 @@ export default function* root(): Saga<void> {
       call(watchOrderTrigger),
       takeEvery(ORDER.WORK_ON, workOnOrder),
       takeEvery(ORDER.VIEW, viewOrder),
+      takeEvery(ORDER.REPORT_FINISH, reportFinish),
       takeLeading([ORDER.STEP.PREVIOUS, ORDER.STEP.NEXT], DebounceViewStep, 300)
     ]);
   } catch (e) {
@@ -68,7 +73,7 @@ function onNewScanner({ scanner }) {
     // TODO: filter scanner input
     scanner.addListener(
       () => true,
-      input => orderActions.tryWorkOn(input.data)
+      input => orderActions.tryWorkOnCode(input.data)
     );
   } catch (e) {
     CommonLog.lError(e, { at: 'onNewScanner' });
@@ -78,10 +83,16 @@ function onNewScanner({ scanner }) {
 // TODO: 工单持久化
 
 // TODO: 开工、报工接口
+function* reportFinish() {
+  try {
+    yield call(orderReportFinishApi);
+  } catch (e) {
+    CommonLog.lError(e, { at: 'reportFinish' });
+  }
+}
 
 function* watchOrderTrigger() {
   try {
-    // TODO: trigger by order VIN/trackCode
     const triggerChannel = yield actionChannel(ORDER.TRY_WORK_ON);
     while (true) {
       const action = yield take(triggerChannel);
@@ -92,18 +103,34 @@ function* watchOrderTrigger() {
   }
 }
 
-function* tryWorkOnOrder({ order }: { order: IOrder }) {
+function* tryWorkOnOrder({
+  order,
+  code
+}: {
+  order: IOrder,
+  code: string | number
+}) {
   try {
-    let canWorkOnOrder = true;
     const orderState = yield select(s => s.order);
+    let orderToDo = null;
+    if (order) {
+      orderToDo = order;
+    }
+    if (code) {
+      const { list: orderList } = orderState;
+      // TODO: trigger by order VIN/trackCode
+      orderToDo = orderList.find(o => o.id === code);
+    }
+    if (!orderToDo) {
+      return;
+    }
+
+    let canWorkOnOrder = true;
     if (workingOrder(orderState)) {
       canWorkOnOrder = false;
     }
-    if (!order) {
-      canWorkOnOrder = false;
-    }
     if (canWorkOnOrder) {
-      yield put(orderActions.workOn(order));
+      yield put(orderActions.workOn((orderToDo: IOrder)));
     }
   } catch (e) {
     CommonLog.lError(e, { at: 'tryWorkOnOrder' });

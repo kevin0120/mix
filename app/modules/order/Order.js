@@ -1,17 +1,18 @@
 // @flow
 import React from 'react';
 import { push } from 'connected-react-router';
-import { call, put } from 'redux-saga/effects';
-import { ORDER_STATUS } from './constants';
+import { call, put, select, take } from 'redux-saga/effects';
+import { ORDER, ORDER_STATUS } from './constants';
 import { CommonLog, durationString } from '../../common/utils';
 import { orderActions } from './action';
-import { orderUpdateApi } from '../../api/order';
+import { orderReportStartApi, orderUpdateApi } from '../../api/order';
 import dialogActions from '../dialog/action';
 import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
 import { STEP_STATUS } from '../step/constants';
 import { IOrder } from './interface/IOrder';
 import type { IWorkStep } from '../step/interface/IWorkStep';
+import loadingActions from '../loading/action';
 
 const stepStatus = status => {
   switch (status) {
@@ -32,7 +33,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
     _workingIndex = 0;
 
-    _stateToRun = ORDER_STATUS.WIP;
+    _stateToRun = ORDER_STATUS.TODO;
 
     _workingID = null;
 
@@ -80,7 +81,25 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
     _statusTasks = {
       // eslint-disable-next-line no-empty-function
-      *[ORDER_STATUS.TODO]() {},
+      *[ORDER_STATUS.TODO]() {
+        try {
+          const { reportStart } = yield select(s => s.setting.systemSettings);
+          if (reportStart) {
+            yield put(loadingActions.start());
+            yield call(orderReportStartApi);
+            yield take(ORDER.REPORT_START_OK);
+            yield put(loadingActions.stop());
+          }
+
+          yield put(orderActions.stepStatus(this, ORDER_STATUS.WIP));
+        } catch (e) {
+          CommonLog.lError(e, {
+            at: 'ORDER_STATUS.TODO',
+            id: this._id,
+            name: this._name
+          });
+        }
+      },
       *[ORDER_STATUS.WIP]() {
         try {
           this._workingIndex =
@@ -110,14 +129,21 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
             durationString(s.timeCost()),
             stepStatus(s.status)
           ]);
+          const { reportFinish } = yield select(s => s.setting.systemSettings);
+          let confirm = {
+            label: 'Common.OK',
+            color: 'info'
+          };
+          if (reportFinish) {
+            confirm = {
+              label: '完工',
+              color: 'info',
+              action: orderActions.reportFinish
+            };
+          }
           yield put(
             dialogActions.dialogShow({
-              buttons: [
-                {
-                  label: 'Common.Yes',
-                  color: 'info'
-                }
-              ],
+              buttons: [confirm],
               closeAction: push('/app'),
               title: i18n.t('Common.Result'),
               content: (

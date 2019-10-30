@@ -51,6 +51,10 @@ export const orderActions = Object.freeze({
     type: ORDER.TRY_WORK_ON,
     order
   }),
+  tryWorkOnCode: (code: string | number) => ({
+    type: ORDER.TRY_WORK_ON,
+    code
+  }),
   workOn: (order: IOrder): tActOrderTrigger => ({
     type: ORDER.WORK_ON,
     order
@@ -101,5 +105,8 @@ export const orderActions = Object.freeze({
   newScanner: (scanner: ClsScanner) => ({
     type: ORDER.NEW_SCANNER,
     scanner
+  }),
+  reportFinish: () => ({
+    type: ORDER.REPORT_FINISH
   })
 });
