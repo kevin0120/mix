@@ -1,8 +1,6 @@
 // @flow
 import { IO_WS_TYPES, ioDirection, ioTriggerMode } from './constants';
 import type { tAction } from '../../../typeDef';
-import type { tInput } from '../typeDef';
-
 
 export type tIOWSMsgType = $Values<typeof IO_WS_TYPES>;
 

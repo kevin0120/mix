@@ -7,6 +7,7 @@ import type {
   tUserLoginAction,
   tUuid
 } from './interface/typeDef';
+import ClsReader from '../external/device/reader/ClsReader';
 
 export const USER = {
   LOGIN: {
@@ -16,7 +17,8 @@ export const USER = {
   LOGOUT: {
     REQUEST: 'USER_LOGOUT_REQUEST',
     SUCCESS: 'USER_LOGOUT_SUCCESS'
-  }
+  },
+  NEW_READER:'USER_NEW_READER'
 };
 
 type tAuthMethod = 'online' | 'local';
@@ -60,5 +62,12 @@ export function logoutSuccess(data: tUser): tCommonActionType & tUser {
   return {
     type: USER.LOGOUT.SUCCESS,
     ...data
+  };
+}
+
+export function userNewReader(reader: ClsReader): tCommonActionType {
+  return {
+    type: USER.NEW_READER,
+    reader
   };
 }

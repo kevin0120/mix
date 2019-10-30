@@ -34,10 +34,10 @@ import ClsScanner from '../external/device/scanner/ClsScanner';
 
 export default function* root(): Saga<void> {
   try {
+    yield takeEvery(ORDER.NEW_SCANNER, onNewScanner);
+    yield  call(bindNewScanner);
     yield all([
       call(bindRushAction.onConnect, orderActions.getList), // 绑定rush连接时需要触发的action
-      call(bindNewScanner),
-      takeEvery(ORDER.ADD_SCANNER_TRIGGER_LISTENER, bindScannerTrigger),
       takeEvery(ORDER.LIST.GET, getOrderList),
       takeEvery(ORDER.DETAIL.GET, getOrderDetail),
       call(orderTrigger),
@@ -56,24 +56,22 @@ function* bindNewScanner() {
     yield call(
       bindNewDeviceListener,
       d => d instanceof ClsScanner,
-      s => orderActions.addScannerTriggerListener(s)
+      s => orderActions.newScanner(s)
     );
   } catch (e) {
-    CommonLog.lError(e, { at: 'scannerTrigger' });
+    CommonLog.lError(e, { at: 'bindNewScanner' });
   }
 }
 
-function bindScannerTrigger({ scanner }) {
+function onNewScanner({ scanner }) {
   try {
     // TODO: filter scanner input
     scanner.addListener(
       () => true,
-      input => {
-        orderActions.tryWorkOn(input.data);
-      }
+      input => orderActions.tryWorkOn(input.data)
     );
   } catch (e) {
-    CommonLog.lError(e, { at: 'scannerTrigger' });
+    CommonLog.lError(e, { at: 'onNewScanner' });
   }
 }
 
@@ -204,11 +202,11 @@ function* viewOrder({ order }: { order: IOrder }) {
             color: 'warning'
           },
           !WIPOrder &&
-            doable(order) && {
-              label: 'Order.Start',
-              color: 'info',
-              action: orderActions.tryWorkOn(order)
-            }
+          doable(order) && {
+            label: 'Order.Start',
+            color: 'info',
+            action: orderActions.tryWorkOn(order)
+          }
         ],
         title: i18n.t('Order.Overview'),
         content: (

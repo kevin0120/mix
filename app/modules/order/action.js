@@ -98,8 +98,8 @@ export const orderActions = Object.freeze({
   updateState: () => ({
     type: ORDER.UPDATE_STATE
   }),
-  addScannerTriggerListener: (scanner: ClsScanner) => ({
-    type: ORDER.ADD_SCANNER_TRIGGER_LISTENER,
+  newScanner: (scanner: ClsScanner) => ({
+    type: ORDER.NEW_SCANNER,
     scanner
   })
 });

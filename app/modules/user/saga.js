@@ -18,7 +18,7 @@ import { isNil, some, cloneDeep, find, isUndefined, remove } from 'lodash-es';
 import status from 'http-status';
 import { getUserInfo } from '../../api/user';
 
-import { loginSuccess, logoutSuccess, USER } from './action';
+import { loginRequestUuid, loginSuccess, logoutSuccess, USER, userNewReader } from './action';
 import notifierActions from '../Notifier/action';
 import type {
   tUser,
@@ -27,6 +27,8 @@ import type {
   tAuthLogout
 } from './interface/typeDef';
 import { CommonLog } from '../../common/utils';
+import { bindNewDeviceListener } from '../deviceManager/handlerWSData';
+import ClsReader from '../external/device/reader/ClsReader';
 
 const DummyUserName = 'DummyUser';
 
@@ -214,8 +216,34 @@ export function* logoutFlow(): Saga<void> {
   yield takeEvery(USER.LOGOUT.REQUEST, logout);
 }
 
+function* bindNewReader() {
+  try {
+    yield call(
+      bindNewDeviceListener,
+      d => d instanceof ClsReader,
+      r => userNewReader(r)
+    );
+  } catch (e) {
+    CommonLog.lError(e, { at: 'bindNewReader' });
+  }
+}
+
+function onNewReader({ reader }) {
+  try {
+    reader.addListener(
+      () => true,
+      i => loginRequestUuid(i.data.data.uid,'online')
+    );
+  } catch (e) {
+    CommonLog.lError(e, { at: 'onNewReader' });
+  }
+}
+
+
 export default function* userRoot(): Saga<void> {
   try {
+    yield takeEvery(USER.NEW_READER, onNewReader);
+    yield call(bindNewReader);
     yield all([call(loginFlow), call(logoutFlow)]);
   } catch (e) {
     CommonLog.lError(`userRoot User Authentication Error: ${e.toString()}`);
