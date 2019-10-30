@@ -1,22 +1,33 @@
+import { expectSaga } from 'redux-saga-test-plan';
 import ScrewStepMixin, { doPoint } from '../ScrewStep';
 import Step from '../../Step';
 import { demoOrder } from '../../../order/demoData';
-import { expectSaga } from 'redux-saga-test-plan';
 import { STEP_STATUS } from '../../constants';
 import { ORDER } from '../../../order/constants';
 import { orderActions } from '../../../order/action';
 import screwStepActions from '../action';
 import { RESULT_STATUS } from '../constants';
 import { mockGetTools } from './mocks/mocks';
+import { demoPoints } from './mocks/demoPoints';
 
-const prepareDoingState = async () => {
-  const step = new (ScrewStepMixin(Step))(demoOrder.steps[1]);
+const stepData = (points) => {
+  const demoStep = demoOrder.steps[1];
+
+  if (!points) {
+    return demoStep;
+  }
+  demoStep.payload.points = points;
+  return demoStep;
+};
+
+const prepareDoingState = async (p) => {
+  const step = new (ScrewStepMixin(Step))(stepData(p));
   await expectSaga(step._statusTasks[STEP_STATUS.ENTERING].bind(step), ORDER, orderActions).provide([
     mockGetTools
   ]).run();
-  const demoPoints = demoOrder.steps[1].payload.points;
+  const { points } = demoOrder.steps[1].payload;
   const doingState = expectSaga(step._statusTasks[STEP_STATUS.DOING].bind(step), ORDER, orderActions);
-  return { doingState, demoPoints, step };
+  return { doingState, points, step };
 };
 
 describe('DoingState', () => {
@@ -30,9 +41,9 @@ describe('DoingState', () => {
   });
 
   it('step finishes when all points are passed', async () => {
-    const { doingState, demoPoints, step } = await prepareDoingState();
+    const { doingState, points, step } = await prepareDoingState();
 
-    demoPoints.forEach((p, idx) => {
+    points.forEach((p, idx) => {
       doingState.dispatch(screwStepActions.result({
         data: [{
           ...p,
@@ -47,12 +58,12 @@ describe('DoingState', () => {
   });
 
   it('step fails when point fails', async () => {
-    const { doingState, demoPoints, step } = await prepareDoingState();
+    const { doingState, points, step } = await prepareDoingState();
 
     [RESULT_STATUS.nok, RESULT_STATUS.nok, RESULT_STATUS.nok].forEach(r =>
       doingState.dispatch(screwStepActions.result({
         data: [{
-          ...demoPoints[0],
+          ...points[0],
           result: r
         }]
       }))
@@ -68,5 +79,10 @@ describe('DoingState', () => {
         .dispatch(screwStepActions.redoPoint(p));
     });
     return doingState.run();
+  });
+
+  it.todo('should start next group when condition matches', async () => {
+    const { doingState, step } = await prepareDoingState(demoPoints);
+      // TODO
   });
 });

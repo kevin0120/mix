@@ -1,8 +1,8 @@
 // @flow
 import type {
   tResult,
-  tScrewStepData
 } from './interface/typeDef';
+import type {tTimeLineObj} from '../../../components/WorkPageTimeline/typeDef';
 
 const resultStatusColor = {
   NOK: 'danger',
@@ -12,16 +12,10 @@ const resultStatusColor = {
   default: 'info'
 };
 
-export const reduceResult2TimeLine = (results: Array<tResult>) =>
-  (d: tScrewStepData): tScrewStepData => ({
-    ...d,
-    timeLine: [
-      ...results.map(r => ({
+// eslint-disable-next-line import/prefer-default-export
+export const result2TimeLine = (results: Array<tResult>): Array<tTimeLineObj> => results.map(r => ({
         title: r.batch,
         color: resultStatusColor[r.result] || resultStatusColor.default,
         footerTitle: r.toolSN,
         body: `${r.result}: wi=${r.wi},mi=${r.mi},ti=${r.ti}`
-      })),
-      ...(d.timeLine || [])
-    ]
-  });
+      }));

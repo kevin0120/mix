@@ -9,8 +9,8 @@ import { orderActions } from '../../../order/action';
 import { mockGetTools } from './mocks/mocks';
 
 
-describe('Class ScrewStep', () => {
-  it('Entering state', () => {
+describe('Class ScrewStep Entering state', () => {
+  it('goes to doing', () => {
     const step = new (ScrewStepMixin(Step))(demoOrder.steps[1]);
 
     return expectSaga(step._statusTasks[STEP_STATUS.ENTERING].bind(step), ORDER, orderActions)
@@ -20,5 +20,9 @@ describe('Class ScrewStep', () => {
       ])
       .put(orderActions.stepStatus(step, STEP_STATUS.DOING))
       .run();
+  });
+
+  it.todo('restores result data', () => {
+    // TODO
   });
 });

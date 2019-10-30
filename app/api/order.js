@@ -63,9 +63,20 @@ export function orderReportStartApi() {
     });
   }
 }
+
 export function orderReportFinishApi() {
   try {
     return rushSendApi(ORDER_WS_TYPES.REPORT_FINISH, {});
+  } catch (e) {
+    CommonLog.lError(e, {
+      at: 'orderReportFinishApi'
+    });
+  }
+}
+
+export function stepDataApi(data){
+  try {
+    return rushSendApi(ORDER_WS_TYPES.STEP_DATA, {data});
   } catch (e) {
     CommonLog.lError(e, {
       at: 'orderReportFinishApi'

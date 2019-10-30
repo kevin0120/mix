@@ -135,6 +135,7 @@ export const demoOrder: tOrder = {
             toolSN: 'demo2',
             sequence: 1,
             group_sequence: 1,
+            minPassCount:0,
             x: 10,
             y: 10,
             maxRetryTimes: 3
@@ -143,6 +144,7 @@ export const demoOrder: tOrder = {
             toolSN: 'demo2',
             sequence: 2,
             group_sequence: 2,
+            minPassCount:0,
             x: 20,
             y: 20,
             maxRetryTimes: 3
@@ -151,6 +153,7 @@ export const demoOrder: tOrder = {
             toolSN: 'demo2',
             sequence: 3,
             group_sequence: 3,
+            minPassCount:0,
             x: 30,
             y: 30,
             maxRetryTimes: 3
@@ -159,6 +162,7 @@ export const demoOrder: tOrder = {
             toolSN: 'demo2',
             sequence: 4,
             group_sequence: 4,
+            minPassCount:0,
             x: 40,
             y: 40,
             maxRetryTimes: 3
@@ -167,6 +171,7 @@ export const demoOrder: tOrder = {
             toolSN: 'demo2',
             sequence: 5,
             group_sequence: 5,
+            minPassCount:0,
             x: 50,
             y: 50,
             maxRetryTimes: 3

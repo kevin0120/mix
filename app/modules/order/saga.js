@@ -27,7 +27,7 @@ import {
   orderListApi,
   orderReportFinishApi
 } from '../../api/order';
-import { ORDER } from './constants';
+import { ORDER, ORDER_STATUS } from './constants';
 import { bindRushAction } from '../rush/rushHealthz';
 import loadingActions from '../loading/action';
 import type { IWorkStep } from '../step/interface/IWorkStep';
@@ -104,9 +104,9 @@ function* watchOrderTrigger() {
 }
 
 function* tryWorkOnOrder({
-  order,
-  code
-}: {
+                           order,
+                           code
+                         }: {
   order: IOrder,
   code: string | number
 }) {
@@ -140,7 +140,7 @@ function* tryWorkOnOrder({
 function* workOnOrder({ order }: { order: IOrder }) {
   try {
     yield race([
-      call(order.run),
+      call(order.run, ORDER_STATUS.TODO),
       take(a => a.type === ORDER.FINISH && a.order === order)
     ]);
     yield put(orderActions.orderDidFinish());
@@ -229,11 +229,11 @@ function* viewOrder({ order }: { order: IOrder }) {
             color: 'warning'
           },
           !WIPOrder &&
-            doable(order) && {
-              label: 'Order.Start',
-              color: 'info',
-              action: orderActions.tryWorkOn(order)
-            }
+          doable(order) && {
+            label: 'Order.Start',
+            color: 'info',
+            action: orderActions.tryWorkOn(order)
+          }
         ],
         title: i18n.t('Order.Overview'),
         content: (

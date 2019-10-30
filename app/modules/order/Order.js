@@ -13,6 +13,7 @@ import { STEP_STATUS } from '../step/constants';
 import { IOrder } from './interface/IOrder';
 import type { IWorkStep } from '../step/interface/IWorkStep';
 import loadingActions from '../loading/action';
+import notifyActions from '../Notifier/action';
 
 const stepStatus = status => {
   switch (status) {
@@ -118,6 +119,8 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           }
         } catch (e) {
           CommonLog.lError(e, { at: 'ORDER_STATUS.WIP' });
+          yield put(notifyActions.enqueueSnackbar('Error',e.message));
+          yield put(orderActions.stepStatus(this, ORDER_STATUS.PENDING));
         } finally {
           CommonLog.Info('order doing finished');
         }
@@ -138,7 +141,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
             confirm = {
               label: '完工',
               color: 'info',
-              action: orderActions.reportFinish
+              action: orderActions.reportFinish()
             };
           }
           yield put(

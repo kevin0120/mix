@@ -58,7 +58,7 @@ export class ClsOrderOperationPoints {
       CommonLog.Debug(
         `Group Seq: ${groupSeq} Does Not Exist! Creating...`
       );
-      pg = new ClsOperationPointGroup(groupSeq);
+      pg = new ClsOperationPointGroup(groupSeq,p.minPassCount);
       this._groups[groupSeq] = pg;
     }
     if (pg) {

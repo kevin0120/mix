@@ -8,6 +8,13 @@ import type { IWorkStep } from '../interface/IWorkStep';
 
 const CheckStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsCheckStep extends ClsBaseStep {
   _statusTasks = {
+    *[STEP_STATUS.READY](ORDER, orderActions){
+      try {
+        yield put(orderActions.stepStatus(this, STEP_STATUS.ENTERING));
+      } catch (e) {
+        CommonLog.lError(e);
+      }
+    },
     *[STEP_STATUS.ENTERING](ORDER, orderActions) {
       try {
         yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));

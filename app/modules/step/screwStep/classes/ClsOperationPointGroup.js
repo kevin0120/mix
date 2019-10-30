@@ -13,8 +13,11 @@ export class ClsOperationPointGroup {
 
   _active: boolean = false;
 
-  constructor(s: number) {
+  _minPassCount: number = 0;
+
+  constructor(s: number, minPassCount: number) {
     this._groupSeq = s;
+    this._minPassCount = minPassCount;
   }
 
   validatePoint(p: tPoint): boolean {
@@ -57,7 +60,8 @@ export class ClsOperationPointGroup {
 
   // 关键点全部完成
   isKeyPass() {
-    return this._points.filter(p => p.isKey).every(p => p.status === POINT_STATUS.SUCCESS);
+    return this._points.filter(p => p.isKey).every(p => p.status === POINT_STATUS.SUCCESS)
+      && this._points.filter(p => p.status === POINT_STATUS.SUCCESS).length >= this._minPassCount;
   }
 
   // 所有点完成
@@ -70,6 +74,7 @@ export class ClsOperationPointGroup {
   }
 
   newResult(result: tResult): Array<?ClsOperationPoint> {
+    // TODO handle minPassCount
     const inactivePoints = [];
     (() => {
       const { sequence } = result;

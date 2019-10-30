@@ -12,7 +12,7 @@ export type tPoint = {
   toolSN: string,
   pset: number,
   maxRetryTimes: number, // max_redo_times
-
+  minPassCount: number, // group 最完成数量
   x: number,
   y: number,
 

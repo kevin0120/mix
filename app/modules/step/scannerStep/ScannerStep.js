@@ -31,6 +31,13 @@ const ScannerStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
     };
 
     _statusTasks = {
+      *[STEP_STATUS.READY](ORDER, orderActions){
+        try {
+          yield put(orderActions.stepStatus(this, STEP_STATUS.ENTERING));
+        } catch (e) {
+          CommonLog.lError(e);
+        }
+      },
       *[STEP_STATUS.ENTERING](ORDER, orderActions) {
         try {
           this._scanners = getDevicesByType(deviceType.scanner);
