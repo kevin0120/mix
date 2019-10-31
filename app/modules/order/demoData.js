@@ -288,7 +288,7 @@ export const demoOrderLong = {
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
-      data: {},
+      data: '',
       payload: {
         label: 'name'
       }
@@ -301,7 +301,7 @@ export const demoOrderLong = {
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
-      data: {},
+      data: '',
       payload: {
         label: 'name'
       }
@@ -314,7 +314,7 @@ export const demoOrderLong = {
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
-      data: {},
+      data: '',
       payload: {
         label: 'name'
       }
@@ -327,7 +327,7 @@ export const demoOrderLong = {
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
-      data: {},
+      data: '',
       payload: {
         label: 'name'
       }
@@ -340,7 +340,7 @@ export const demoOrderLong = {
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
-      data: {},
+      data: '',
       payload: {
         label: 'name'
       }
@@ -353,7 +353,7 @@ export const demoOrderLong = {
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
-      data: {},
+      data: '',
       payload: {
         label: 'name'
       }
@@ -366,7 +366,7 @@ export const demoOrderLong = {
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
-      data: {},
+      data: '',
       payload: {
         label: 'name'
       }
@@ -379,7 +379,7 @@ export const demoOrderLong = {
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
-      data: {},
+      data: '',
       payload: {
         label: 'name'
       }
@@ -392,7 +392,7 @@ export const demoOrderLong = {
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
-      data: {},
+      data: '',
       payload: {
         label: 'name'
       }
@@ -405,7 +405,7 @@ export const demoOrderLong = {
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
-      data: {},
+      data: '',
       payload: {
         label: 'name'
       }
@@ -418,7 +418,7 @@ export const demoOrderLong = {
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
-      data: {},
+      data: '',
       payload: {
         label: 'name'
       }
@@ -431,7 +431,7 @@ export const demoOrderLong = {
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
-      data: {},
+      data: '',
       payload: {
         label: 'name'
       }
@@ -444,7 +444,7 @@ export const demoOrderLong = {
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
-      data: {},
+      data: '',
       payload: {
         label: 'name'
       }
@@ -457,7 +457,7 @@ export const demoOrderLong = {
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
-      data: {},
+      data: '',
       payload: {
         label: 'name'
       }
@@ -470,7 +470,7 @@ export const demoOrderLong = {
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
-      data: {},
+      data: '',
       payload: {
         label: 'name'
       }
@@ -483,7 +483,7 @@ export const demoOrderLong = {
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
-      data: {},
+      data: '',
       payload: {
         label: 'name'
       }
@@ -496,7 +496,7 @@ export const demoOrderLong = {
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
-      data: {},
+      data: '',
       payload: {
         label: 'name'
       }
@@ -509,7 +509,7 @@ export const demoOrderLong = {
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
-      data: {},
+      data: '',
       payload: {
         label: 'name'
       }
@@ -522,7 +522,7 @@ export const demoOrderLong = {
       description: '扫描二维码或在输入框中输入',
       type: 'scanner',
       skippable: true,
-      data: {},
+      data: '',
       payload: {
         label: 'name'
       }
@@ -546,7 +546,7 @@ export const demoOrderCancel = {
       type: 'input',
       skippable: true,
       revocable: true,
-      data: {},
+      data: '',
       payload: {
         label: 'name'
       }
@@ -571,7 +571,7 @@ export const demoOrderPending = {
 
       skippable: true,
       revocable: true,
-      data: {},
+      data: '',
       payload: {
         label: 'name'
       }
@@ -595,7 +595,7 @@ export const demoOrderDone = {
       type: 'input',
       skippable: true,
       revocable: true,
-      data: {},
+      data: '',
       payload: {
         label: 'name'
       }

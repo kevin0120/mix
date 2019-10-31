@@ -81,7 +81,6 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
     }
 
     _statusTasks = {
-      // eslint-disable-next-line no-empty-function
       * [ORDER_STATUS.TODO]() {
         try {
           const { reportStart } = yield select(s => s.setting.systemSettings);

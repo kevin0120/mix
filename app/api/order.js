@@ -81,7 +81,7 @@ export function orderReportStartApi(
 }> {
   try {
     const dateStartString=Moment(dateStart).format();
-    return rushSendApi(ORDER_WS_TYPES.REPORT_START, {
+    return rushSendApi(ORDER_WS_TYPES.START_REQUEST, {
       code,
       track_code: trackCode,
       workcenter: workCenter,
@@ -104,7 +104,7 @@ export function orderReportFinishApi(
   operation: {}
 ) {
   try {
-    return rushSendApi(ORDER_WS_TYPES.REPORT_FINISH, {
+    return rushSendApi(ORDER_WS_TYPES.FINISH_REQUEST, {
       code,
       track_code: trackCode,
       workcenter: workCenter,

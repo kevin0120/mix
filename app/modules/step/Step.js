@@ -97,6 +97,7 @@ export default class Step implements IWorkStep {
     if (stepObj && stepObj.data) {
       this._data = (() => {
         try {
+          console.log(stepObj);
           return JSON.parse(stepObj.data) || {};
         } catch (e) {
           CommonLog.lError(e, {

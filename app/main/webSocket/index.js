@@ -13,36 +13,53 @@ const messageSNs = {};
 
 function parseData(payload) {
   const d = /(^[^"]*);(.*)/.exec(payload);
-  return JSON.parse(d[2]);
+  if (d && d[2]) {
+    return (()=>{
+      try{
+        return JSON.parse(d[2]);
+      }catch(e){
+        return {}
+      }
+    })();
+  }
+  return {};
 }
 
-const rushReply = (sn, event) => (json) => {
-  const data = parseData(json);
-  if (data.sn === sn && messageSNs[sn]) {
-    event.reply('rush-reply', data, sn);
-    ws.removeListener('message', messageSNs[sn]);
-    delete messageSNs[sn];
+const onWSMessage = (dataParser) => (resp) => {
+  let data = resp;
+  if (dataParser) {
+    data = dataParser(resp);
   }
+  if (messageSNs[data.sn]) {
+    messageSNs[data.sn](data);
+    delete messageSNs[data.sn];
+  }
+};
+
+const rushReply = (event) => (data) => {
+  event.reply('rush-reply', data, data.sn);
 };
 
 function startListenSend() {
   ipcMain.on('rush-send', (event, { data, timeout, sn }) => {
+    messageSNs[sn] = rushReply(event);
     if (ws && !ws.closed && getWSClient().ws.readyState === OWebSocket.OPEN) {
       const msg = {
         sn,
         ...data
       };
 
-      messageSNs[sn] = rushReply(sn, event);
-      ws.on('message', messageSNs[sn]);
       ws.sendJson(msg, (err) => {
         if (err && ws) {
           console.error(err);
           if (!messageSNs[sn]) {
             return;
           }
-          ws.removeListener('message', messageSNs[sn]);
-          delete messageSNs[sn];
+          onWSMessage()({
+            result: -2,
+            msg: `error when sending message`,
+            sn
+          });
         }
       });
 
@@ -51,25 +68,25 @@ function startListenSend() {
           return;
         }
         // eslint-disable-next-line no-param-reassign
-        event.reply('rush-reply', {
+        onWSMessage()({
           result: -1,
-          msg: `rush send timeout`
-        }, sn);
-        ws.removeListener('message', messageSNs[sn]);
-        delete messageSNs[sn];
+          msg: `rush send timeout`,
+          sn
+        });
       }, timeout);
 
-    } else {
-      // eslint-disable-next-line no-param-reassign
-      event.reply('rush-reply', {
+    }else{
+      onWSMessage()({
         result: -404,
-        msg: `cannot send message to rush now, rush is not connected`
-      }, sn);
+        msg: `cannot send message to rush now, rush is not connected`,
+        sn
+      });
     }
   });
 }
 
 export function init(url, hmiSN, window) {
+  const wsMessage = onWSMessage(parseData);
   ipcMain.once('rush', () => {
     ws = new WebSocket(url, {
       reconnectInterval: 3000,
@@ -91,10 +108,12 @@ export function init(url, hmiSN, window) {
             console.error(err);
           }
         });
+        ws.on('message', wsMessage);
         window.send('rush-open');
       });
 
       ws.on('close', (...args) => {
+        ws.removeListener('message', wsMessage);
         window.send('rush-close', ...args);
       });
       ws.on('error', (...args) => {

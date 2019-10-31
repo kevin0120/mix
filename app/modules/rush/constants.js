@@ -14,5 +14,6 @@ export const WEBSOCKET_EVENTS = Object.freeze({
   tightening_device: 'tightening_device',
   reply: 'reply',
   order: 'order',
-  device: 'device'
+  device: 'device',
+  mes: 'mes'
 });
