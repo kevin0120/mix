@@ -73,6 +73,7 @@ func NewService(c Config, d Diagnostic) *Service {
 			diag:     d,
 			workers:  c.Workers,
 			Opened:   false,
+			closing: make(chan struct{}),
 			chResult: make(chan CResult, c.Workers*4),
 			route:    c.Route,
 
@@ -416,6 +417,7 @@ func (s *Service) run() {
 			s.HandleResult(&r)
 
 		case <-s.closing:
+			s.diag.Debug("Rush Worker Stop")
 			s.wg.Done()
 			return
 		}

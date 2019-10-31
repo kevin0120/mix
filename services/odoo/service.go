@@ -1,7 +1,7 @@
 package odoo
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"sync/atomic"
 	"time"
 
@@ -11,13 +11,14 @@ import (
 )
 
 const (
-	HEALTHZ_ITV    = 3 // 秒
+	HEALTHZ_ITV    = 3 * time.Second // 秒
 	STATUS_ONLINE  = "online"
 	STATUS_OFFLINE = "offline"
 )
 
 type Diagnostic interface {
 	Error(msg string, err error)
+	Debug(msg string)
 }
 
 type OnStatus func(status string)
@@ -29,13 +30,16 @@ type Service struct {
 	httpClient  *resty.Client
 	status      string
 	OnStatus    OnStatus
+	closing     chan chan struct{}
+	Opened      bool
 }
 
 func NewService(c Config, d Diagnostic) *Service {
 	s := &Service{
-		diag:   d,
-		route:  c.URL + c.Route,
-		status: STATUS_OFFLINE,
+		diag:    d,
+		route:   c.URL + c.Route,
+		status:  STATUS_OFFLINE,
+		closing: make(chan chan struct{}),
 	}
 
 	s.configValue.Store(c)
@@ -61,12 +65,21 @@ func (s *Service) Open() error {
 
 	s.httpClient = client
 
-	go s.taskHealthz()
+	if c.Enable && ! s.Opened {
+		go s.taskHealthzCheck()
+		s.Opened = true
+	}
 
 	return nil
 }
 
 func (s *Service) Close() error {
+	if s.Opened {
+		closed := make(chan struct{})
+		s.closing <- closed
+		<-closed
+		s.Opened = false
+	}
 	return nil
 }
 
@@ -88,16 +101,20 @@ func (s *Service) CreateMO(body interface{}) error {
 	return nil
 }
 
-func (s *Service) Healthz() error {
+func (s *Service) doHealthz() error {
 	if s.httpClient == nil {
 		return errors.New("Odoo Http client is nil ")
 	}
 	r := s.httpClient.R().SetHeader("Content-Type", "text/html")
 
 	url := fmt.Sprintf("%s/api/v1/healthz", s.Config().URL)
-	_, err := r.Get(url)
+	resp, err := r.Get(url)
 	if err != nil {
-		return fmt.Errorf("check status failed", err)
+		return errors.Wrap(err, "check status failed")
+	}
+	if resp.StatusCode() != http.StatusNoContent {
+		err := errors.Errorf("Odoo HealCheck Fail With Resp Code: %d", resp.StatusCode())
+		return err
 	}
 
 	return nil
@@ -114,18 +131,24 @@ func (s *Service) UpdateStatus(status string) {
 	}
 }
 
-func (s *Service) taskHealthz() {
+func (s *Service) taskHealthzCheck() {
 	for {
-		err := s.Healthz()
-		if err != nil {
-			// 离线
-			s.UpdateStatus(STATUS_OFFLINE)
-		} else {
-			// 在线
-			s.UpdateStatus(STATUS_ONLINE)
+		select {
+		case <-time.After(HEALTHZ_ITV):
+			err := s.doHealthz()
+			if err != nil {
+				// 离线
+				s.diag.Error("taskHealthzCheck", err)
+				s.UpdateStatus(STATUS_OFFLINE)
+			} else {
+				// 在线
+				s.UpdateStatus(STATUS_ONLINE)
+			}
+		case c := <-s.closing:
+			close(c)
+			return
 		}
 
-		time.Sleep(HEALTHZ_ITV * time.Second)
 	}
 }
 

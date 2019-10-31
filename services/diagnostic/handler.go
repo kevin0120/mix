@@ -289,6 +289,10 @@ func (h *OdooHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
 
+func (h *OdooHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}
+
 // Storage Handler
 
 type StorageHandler struct {
