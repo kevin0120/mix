@@ -83,9 +83,9 @@ function onNewScanner({ scanner }) {
 // TODO: 工单持久化
 
 // TODO: 开工、报工接口
-function* reportFinish() {
+function* reportFinish({ code, trackCode, workCenterCode, productCode, operation }) {
   try {
-    yield call(orderReportFinishApi);
+    yield call(orderReportFinishApi, code, trackCode, workCenterCode, productCode, operation);
   } catch (e) {
     CommonLog.lError(e, { at: 'reportFinish' });
   }

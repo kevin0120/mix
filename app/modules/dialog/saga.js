@@ -1,4 +1,4 @@
-import { take, call, put, fork, takeEvery } from 'redux-saga/effects';
+import { take, put, fork } from 'redux-saga/effects';
 import actions  from './action';
 import { DIALOG } from './constants';
 import type { tDialogConfig } from './interface/typeDef';
@@ -33,6 +33,13 @@ const dialogActions = {
 function* handleClose(config) {
   try {
     if (config?.closeAction) {
+      if(config.closeAction instanceof Array){
+        // eslint-disable-next-line no-restricted-syntax
+        for(const action of config.closeAction){
+          yield put(action);
+        }
+        return ;
+      }
       yield put(config.closeAction);
     }
   } catch (e) {

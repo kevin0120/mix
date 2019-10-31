@@ -1,4 +1,5 @@
 // @flow
+import Moment from 'moment';
 import { CommonLog } from '../common/utils';
 import { rushSendApi } from './rush';
 import { ORDER_WS_TYPES } from '../modules/order/constants';
@@ -40,7 +41,7 @@ export function orderUpdateApi(id: number, orderStatus: string): ?Promise<any> {
 }
 
 // 更新工步状态
-export function orderStepUpdateApi(id: number, status: string): any {
+export function orderStepUpdateApi(id: number, status: string): ?Promise<any> {
   try {
     return rushSendApi(ORDER_WS_TYPES.STEP_UPDATE, {
       id,
@@ -54,9 +55,40 @@ export function orderStepUpdateApi(id: number, status: string): any {
 }
 
 // TODO
-export function orderReportStartApi() {
+export function orderReportStartApi(
+  code: string,
+  trackCode: string,
+  workCenter: string,
+  productCode: string,
+  dateStart: Date,
+  resources: {
+    user: [{
+      name: string,
+      code: string
+    }],
+    equipments: [
+      {
+        name: string,
+        code: string
+      }
+    ]
+
+  }
+): ?Promise<{
+  error_code: number,
+  msg: string,
+  extra: string
+}> {
   try {
-    return rushSendApi(ORDER_WS_TYPES.REPORT_START, {});
+    const dateStartString=Moment(dateStart).format();
+    return rushSendApi(ORDER_WS_TYPES.REPORT_START, {
+      code,
+      track_code: trackCode,
+      workcenter: workCenter,
+      product_code: productCode,
+      date_start: dateStartString,
+      resources
+    });
   } catch (e) {
     CommonLog.lError(e, {
       at: 'orderReportStartApi'
@@ -64,9 +96,21 @@ export function orderReportStartApi() {
   }
 }
 
-export function orderReportFinishApi() {
+export function orderReportFinishApi(
+  code: string,
+  trackCode: string,
+  workCenter: string,
+  productCode: string,
+  operation: {}
+) {
   try {
-    return rushSendApi(ORDER_WS_TYPES.REPORT_FINISH, {});
+    return rushSendApi(ORDER_WS_TYPES.REPORT_FINISH, {
+      code,
+      track_code: trackCode,
+      workcenter: workCenter,
+      product_code: productCode,
+      operation
+    });
   } catch (e) {
     CommonLog.lError(e, {
       at: 'orderReportFinishApi'
@@ -74,9 +118,9 @@ export function orderReportFinishApi() {
   }
 }
 
-export function stepDataApi(data){
+export function stepDataApi(data: Object): ?Promise<any> {
   try {
-    return rushSendApi(ORDER_WS_TYPES.STEP_DATA, {data});
+    return rushSendApi(ORDER_WS_TYPES.STEP_DATA, { data });
   } catch (e) {
     CommonLog.lError(e, {
       at: 'orderReportFinishApi'

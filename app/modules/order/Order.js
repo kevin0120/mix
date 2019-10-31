@@ -60,7 +60,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
       return this._workingIndex;
     }
 
-    *_onNext() {
+    * _onNext() {
       try {
         this._workingIndex += 1;
         if (this._workingIndex >= (this: IWorkStep)._steps.length) {
@@ -72,7 +72,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
     }
 
     // eslint-disable-next-line require-yield
-    *_onPrevious() {
+    * _onPrevious() {
       if (this._workingIndex - 1 < 0) {
         // yield put(orderActions.finishOrder(this));
       } else {
@@ -82,16 +82,23 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
     _statusTasks = {
       // eslint-disable-next-line no-empty-function
-      *[ORDER_STATUS.TODO]() {
+      * [ORDER_STATUS.TODO]() {
         try {
           const { reportStart } = yield select(s => s.setting.systemSettings);
           if (reportStart) {
             yield put(loadingActions.start());
-            yield call(orderReportStartApi);
-            yield take(ORDER.REPORT_START_OK);
+            const orderCode = this._id;
+            const trackCode = '';
+            const productCode = '';
+            const dateStart = new Date();
+            const workCenterCode = yield select(s => s.system.workcenter.code);
+            // eslint-disable-next-line flowtype/no-weak-types
+            const resp = yield call((orderReportStartApi: Function), orderCode, trackCode, workCenterCode, productCode, dateStart);
             yield put(loadingActions.stop());
+            if (resp.status !== 200) {
+              throw new Error(`报工失败(${resp.error_code}): ${resp.msg}; extra: ${resp.extra}`);
+            }
           }
-
           yield put(orderActions.stepStatus(this, ORDER_STATUS.WIP));
         } catch (e) {
           CommonLog.lError(e, {
@@ -99,9 +106,11 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
             id: this._id,
             name: this._name
           });
+          yield put(notifyActions.enqueueSnackbar('Error', e.message));
+          yield put(orderActions.stepStatus(this, ORDER_STATUS.PENDING));
         }
       },
-      *[ORDER_STATUS.WIP]() {
+      * [ORDER_STATUS.WIP]() {
         try {
           this._workingIndex =
             this._workingIndex >= this._steps.length ? 0 : this._workingIndex;
@@ -119,13 +128,13 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           }
         } catch (e) {
           CommonLog.lError(e, { at: 'ORDER_STATUS.WIP' });
-          yield put(notifyActions.enqueueSnackbar('Error',e.message));
+          yield put(notifyActions.enqueueSnackbar('Error', e.message));
           yield put(orderActions.stepStatus(this, ORDER_STATUS.PENDING));
         } finally {
           CommonLog.Info('order doing finished');
         }
       },
-      *[ORDER_STATUS.DONE]() {
+      * [ORDER_STATUS.DONE]() {
         try {
           const data = this._steps.map(s => [
             s.name,
@@ -137,17 +146,29 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
             label: 'Common.OK',
             color: 'info'
           };
+          let closeAction = push('/app');
           if (reportFinish) {
+            const code = this._id;
+            const trackCode = '';
+            const workCenterCode = yield select(s => s.system.workcenter.code);
+            const productCode = '';
+            const operation = {};
+            closeAction = orderActions.reportFinish(
+              code,
+              trackCode,
+              workCenterCode,
+              productCode,
+              operation
+            );
             confirm = {
               label: '完工',
-              color: 'info',
-              action: orderActions.reportFinish()
+              color: 'info'
             };
           }
           yield put(
             dialogActions.dialogShow({
               buttons: [confirm],
-              closeAction: push('/app'),
+              closeAction,
               title: i18n.t('Common.Result'),
               content: (
                 <Table
@@ -161,13 +182,12 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           );
           yield put(orderActions.finishOrder(this));
         } catch (e) {
-          const err = (e: Error);
-          CommonLog.lError(`showResult error: ${err.message}`);
+          CommonLog.lError(`showResult error: ${e.message}`);
         } finally {
           CommonLog.Info('order done');
         }
       },
-      *[ORDER_STATUS.PENDING]() {
+      * [ORDER_STATUS.PENDING]() {
         try {
           yield put(orderActions.finishOrder(this));
         } catch (e) {
@@ -176,7 +196,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           });
         }
       },
-      *[ORDER_STATUS.CANCEL]() {
+      * [ORDER_STATUS.CANCEL]() {
         try {
           yield put(orderActions.finishOrder(this));
         } catch (e) {
