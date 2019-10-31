@@ -50,6 +50,29 @@ class QualityPoint(models.Model):
     _sql_constraints = [
         ('product_bom_line_id_uniq', 'unique(bom_line_id)', 'Only one quality point per product bom line is allowed')]
 
+
+    @api.multi
+    def button_resequence(self):
+        self.ensure_one()
+        has_sort_point_list = self.env['operation.point']
+        group_idx = 0
+        need_add = False
+        for idx, point_group in enumerate(self.operation_point_group_ids):
+            point_group.write({'sequence': idx + 1})
+            for point in point_group.operation_point_ids:
+                need_add = True
+                point.write({'group_sequence': group_idx + 1})
+                has_sort_point_list += point
+            if need_add:
+                need_add = False
+                group_idx += 1
+        not_sort_list = self.operation_point_ids - has_sort_point_list
+        for idx, point in enumerate(not_sort_list.sorted(key=lambda r: r.sequence)):
+            point.write({'group_sequence': group_idx + idx + 1})
+        for idx, point in enumerate(self.operation_point_ids.sorted(key=lambda r: r.group_sequence)):
+            point.write({'sequence': idx + 1})
+
+
     @api.multi
     def get_operation_points(self):
         if not self:

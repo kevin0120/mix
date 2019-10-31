@@ -28,6 +28,11 @@
             <field name="model">sa.quality.point</field>
             <field name="inherit_id" ref="quality.quality_point_view_form"/>
             <field name="arch" type="xml">
+
+                <xpath expr="//div[@class='oe_button_head']" position="inside">
+                    <button string="ReSequence" type="object" name="button_resequence" class="oe_highlight"/>
+                </xpath>
+
                 <xpath expr="//form" position="attributes">
                     <attribute name="groups">base.group_no_one,base.group_erp_manager</attribute>
                     <attribute name="create">false</attribute>
