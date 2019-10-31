@@ -9,8 +9,10 @@ import uuid
 class QualityPoint(models.Model):
     _inherit = "sa.quality.point"
 
+    ref = fields.Char('Reference')
+
     product_tmpl_id = fields.Many2one('product.template', 'Product', required=False,
-                                      domain="[('type', 'in', ['consu', 'product'])，('sa_type', '=', 'vehicle')]")
+                                      domain="[('type', 'in', ['consu', 'product']), ('sa_type', '=', 'vehicle')]")
 
     active = fields.Boolean(
         'Active', default=True,

@@ -3,19 +3,23 @@ from odoo import api, SUPERUSER_ID
 from odoo.http import request, Response, Controller, route
 from odoo.exceptions import ValidationError
 from odoo.addons.common_sa_utils.http import sa_success_resp, sa_fail_response
-
+import os
 from odoo.addons.spc.models.push_workorder import MASTER_WROKORDERS_API
 import logging
 import pprint
-import traceback
 import itertools
 import requests
 from tenacity import retry, wait_exponential, retry_if_exception_type, stop_after_delay, RetryError
+import json
+
+MES_BASE_URL = os.environ.get('ENV_SA_TS002_MES_BASE_URL', 'http://127.0.0.1:1888')
 
 schema = "http"
 
 ORDER_REQUIRED_FIELDS = ['code', 'product_code', 'track_code', 'workcenter', 'worksheet', 'product', 'operation',
                          'steps']
+
+headers = {'Content-Type': 'application/json'}
 
 HAVE_SOME_REQUIRED_FIELDS = {
     'worksheet': ['url', 'name', 'revision'],
@@ -100,7 +104,7 @@ def convert_ts002_order(env, vals):
         return vals
     for ts in tightening_steps:
         tc = ts.get('code')
-        ws = env['sa.quality.point'].search(['|', ('code', '=', tc), ('name', '=', tc)])
+        ws = env['sa.quality.point'].search(['|', ('ref', '=', tc), ('name', '=', tc)])
         if not ws:
             _logger.error("Can Not Found Tightening Step By Code:{0}".format(tc))
             continue
@@ -168,10 +172,41 @@ def get_masterpc_order_url_and_package(env, vals):
 
 @retry(wait=wait_exponential(multiplier=1, min=1, max=3), stop=stop_after_delay(5), retry=retry_if_exception_type())
 def post_order_2_masterpc(master_url, data):
-    resp = requests.post(master_url, data=data)
+    resp = requests.post(master_url, data=json.dumps(data), headers=headers)
     if resp.status_code != 201:
         msg = 'TS002 Post WorkOrder To MasterPC Fail'
         return sa_fail_response(msg=msg)
+    msg = "Tightening System Create Work Order Success"
+    return sa_success_resp(status_code=201, msg=msg)
+
+
+@retry(wait=wait_exponential(multiplier=1, min=1, max=3), stop=stop_after_delay(5), retry=retry_if_exception_type())
+def query_order_from_mes(order_code, workcenter_code):
+    if not order_code:
+        raise ValidationError('query_order_from_mes Query WorkOrder Must Include Order Code')
+    url = '{0}/workorders'.format(MES_BASE_URL)
+    params = {'code': order_code}
+    if workcenter_code:
+        params.update({'workcenter': workcenter_code})
+    resp = requests.get(url, params=params)
+    if resp.status_code != 200:
+        msg = 'TS002 Query Work Order:{0} From MES Fail'.format(order_code)
+        return sa_fail_response(msg=msg, extra=resp.json())
+    return resp.json()
+
+
+def _convert_orders_info(env, values):
+    validate_ts002_order_req_vals(values)  # make sure field is all in request body
+    validate_ts002_req_val_by_entry(values)
+    payload = convert_ts002_order(env, values)
+    workcenter_id, master_url = get_masterpc_order_url_and_package(env, payload)
+    package_workcenter_location_data(workcenter_id, payload)
+    _logger.debug("TS002 Get Order: {0}".format(pprint.pformat(payload)))
+
+    resp = post_order_2_masterpc(master_url, payload)
+    if resp:
+        return resp
+
     msg = "Tightening System Create Work Order Success"
     return sa_success_resp(status_code=201, msg=msg)
 
@@ -187,22 +222,30 @@ class TangcheMrpOrderGateway(Controller):
         env = api.Environment(request.cr, SUPERUSER_ID, request.context)
         vals = request.jsonrequest
         try:
-            validate_ts002_order_req_vals(vals)  # make sure field is all in request body
-            validate_ts002_req_val_by_entry(vals)
-            payload = convert_ts002_order(env, vals)
-            workcenter_id, master_url = get_masterpc_order_url_and_package(env, payload)
-            package_workcenter_location_data(workcenter_id, payload)
-            _logger.debug("TS002 Get Order: {0}".format(pprint.pformat(payload)))
-
-            resp = post_order_2_masterpc(master_url, payload)
-            if resp:
-                return resp
-
-            msg = "Tightening System Create Work Order Success"
-            return sa_success_resp(status_code=201, msg=msg)
+            return _convert_orders_info(env, vals)
+        except RetryError as err:
+            msg = str(err)
+            return sa_fail_response(msg=msg)
         except Exception as e:
             msg = str(e)
             return sa_fail_response(msg=msg)
+
+    @route('/api/v1/ts002/workorders', type='json', methods=['GET', 'OPTIONS'], auth='none', cors='*', csrf=False)
+    def tangcheQueryOrderGateway(self, **kw):
+        try:
+            if 'code' not in kw:
+                raise ValidationError('Query WorkOrder Must Include Order Code')
+            resp = query_order_from_mes(kw.get('code'), kw.get('workcenter'))
+            if isinstance(resp, Response):
+                # must be bad resp
+                return resp
+            env = api.Environment(request.cr, SUPERUSER_ID, request.context)
+            vals = resp
+            return _convert_orders_info(env, vals)
+
         except RetryError as err:
             msg = str(err)
+            return sa_fail_response(msg=msg)
+        except Exception as e:
+            msg = str(e)
             return sa_fail_response(msg=msg)

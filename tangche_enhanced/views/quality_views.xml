@@ -5,9 +5,6 @@
             <field name="model">sa.quality.point</field>
             <field name="inherit_id" ref="quality.quality_point_view_form"/>
             <field name="arch" type="xml">
-                <field name="product_id" position="before">
-                    <field name="code" required="1" />
-                </field>
                 <field name="norm_unit" position="replace">
 
                 </field>
