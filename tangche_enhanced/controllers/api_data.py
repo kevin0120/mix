@@ -1614,7 +1614,7 @@ api_data = {
         "code": {
           "type": "string",
           "description": "工步代码",
-          "example": "1111"
+          "example": "T0001"
         },
         "tolerance_max": {
           "type": "number",
@@ -1667,9 +1667,9 @@ api_data = {
           "description": "如果失败弹出的信息"
         }
       },
-      "examples": [
+      "example": [
         {
-          "code": "1111",
+          "code": "T0001",
           "test_type": "text",
           "sequence": 1,
           "text": "测试文本工步",
@@ -1677,7 +1677,7 @@ api_data = {
           "failure_msg": "测试文本工步失败消息"
         },
         {
-          "code": "222",
+          "code": "T0002",
           "test_type": "tightening",
           "sequence": 2,
           "desc": "测试拧紧工步描述",

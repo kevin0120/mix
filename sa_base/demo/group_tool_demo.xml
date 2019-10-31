@@ -70,31 +70,47 @@
 
         </record>
 
+        <record id="quality_point100" model="sa.quality.point">
+            <field name="name">T0001</field>
+            <field name="sa_operation_ids" eval="[(6,0, [ref('sa_base.routing_operation_0'), ref('sa_base.routing_operation_1')])]"/>
+            <field name="operation_id" ref="routing_operation_1"/>
+            <field name="test_type_id" ref="quality.test_type_text"/>
+            <field name="note">Quality Control For Text.</field>
+            <field name="failure_message">Text Work Step Fail</field>
+        </record>
 
 
         <record id="quality_point2" model="sa.quality.point">
+            <field name="name">T0002</field>
             <field name="sa_operation_ids" eval="[(6,0, [ref('sa_base.routing_operation_0'), ref('sa_base.routing_operation_1')])]"/>
             <field name="operation_id" ref="routing_operation_1"/>
             <field name="program_id" ref="tinghtening_job1"/>
             <field name="test_type_id" ref="quality.test_type_tightening"/>
             <field name="note">Quality Control For Customized Laptop's Parts By Manufacturing Department.</field>
+            <field name="failure_message">Tightening Work Step Fail</field>
         </record>
         <record id="tinghtening_point20" model="operation.point">
+            <field name="sequence">1</field>
             <field name="parent_qcp_id" ref="quality_point2"/>
             <field name="product_id" ref="product_product_0"/>
+            <field name="program_id" ref="con_prog_0"/>
             <!--<field name="product_tmpl_id">2</field>-->
             <field name="tightening_tool_ids" eval="[(6,0, [ref('sa_base.group_tool_3'), ref('sa_base.group_tool_6'),ref('sa_base.group_tool_1'), ref('sa_base.group_tool_4')])]"/>
         </record>
         <record id="tinghtening_point21" model="operation.point">
+            <field name="sequence">2</field>
             <field name="parent_qcp_id" ref="quality_point2"/>
             <field name="product_id" ref="product_product_1"/>
+            <field name="program_id" ref="con_prog_0"/>
             <!--<field name="product_tmpl_id">3</field>-->
             <field name="tightening_tool_ids" eval="[(6,0, [ref('sa_base.group_tool_3'), ref('sa_base.group_tool_6'),ref('sa_base.group_tool_1'), ref('sa_base.group_tool_4')])]"/>
 
         </record>
         <record id="tinghtening_point22" model="operation.point">
+            <field name="sequence">3</field>
             <field name="parent_qcp_id" ref="quality_point2"/>
             <field name="product_id" ref="product_product_2"/>
+            <field name="program_id" ref="con_prog_0"/>
             <!--<field name="product_tmpl_id">4</field>-->
             <field name="tightening_tool_ids" eval="[(6,0, [ref('sa_base.group_tool_3'), ref('sa_base.group_tool_6'),ref('sa_base.group_tool_1'), ref('sa_base.group_tool_4')])]"/>
 
@@ -109,19 +125,19 @@
             <field name="note">Quality Control For Customized Laptop's Parts By Manufacturing Department.</field>
         </record>
         <record id="tinghtening_point30" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point2"/>
+            <field name="parent_qcp_id" ref="quality_point3"/>
             <field name="product_id" ref="product_product_0"/>
             <!--<field name="product_tmpl_id">2</field>-->
             <field name="tightening_tool_ids" eval="[(6,0, [ref('sa_base.group_tool_3'), ref('sa_base.group_tool_6')])]"/>
         </record>
         <record id="tinghtening_point31" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point2"/>
+            <field name="parent_qcp_id" ref="quality_point3"/>
             <field name="product_id" ref="product_product_1"/>
             <!--<field name="product_tmpl_id">3</field>-->
             <field name="tightening_tool_ids" eval="[(6,0, [ref('sa_base.group_tool_3'), ref('sa_base.group_tool_6')])]"/>
         </record>
         <record id="tinghtening_point32" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point2"/>
+            <field name="parent_qcp_id" ref="quality_point3"/>
             <field name="product_id" ref="product_product_2"/>
             <!--<field name="product_tmpl_id">4</field>-->
             <field name="tightening_tool_ids" eval="[(6,0, [ref('sa_base.group_tool_3'), ref('sa_base.group_tool_6')])]"/>
@@ -137,19 +153,19 @@
             <field name="note">Quality Control For Customized Laptop's Parts By Manufacturing Department.</field>
         </record>
         <record id="tinghtening_point40" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point2"/>
+            <field name="parent_qcp_id" ref="quality_point4"/>
             <field name="product_id" ref="product_product_0"/>
             <!--<field name="product_tmpl_id">2</field>-->
             <field name="tightening_tool_ids" eval="[(6,0, [ref('sa_base.group_tool_2'), ref('sa_base.group_tool_5')])]"/>
         </record>
         <record id="tinghtening_point41" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point2"/>
+            <field name="parent_qcp_id" ref="quality_point4"/>
             <field name="product_id" ref="product_product_1"/>
             <!--<field name="product_tmpl_id">3</field>-->
             <field name="tightening_tool_ids" eval="[(6,0, [ref('sa_base.group_tool_2'), ref('sa_base.group_tool_5')])]"/>
         </record>
         <record id="tinghtening_point42" model="operation.point">
-            <field name="parent_qcp_id" ref="quality_point2"/>
+            <field name="parent_qcp_id" ref="quality_point4"/>
             <field name="product_id" ref="product_product_2"/>
             <!--<field name="product_tmpl_id">4</field>-->
             <field name="tightening_tool_ids" eval="[(6,0, [ref('sa_base.group_tool_2'), ref('sa_base.group_tool_5')])]"/>

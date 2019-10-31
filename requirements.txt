@@ -8,3 +8,4 @@ scipy
 numpy
 boltons
 requests
+tenacity==5.1.5
