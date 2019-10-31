@@ -1613,7 +1613,7 @@ api_data = {
       "properties": {
         "code": {
           "type": "string",
-          "description": "环境检查项编码",
+          "description": "工步代码",
           "example": "1111"
         },
         "tolerance_max": {
@@ -1666,7 +1666,25 @@ api_data = {
           "type": "string",
           "description": "如果失败弹出的信息"
         }
-      }
+      },
+      "examples": [
+        {
+          "code": "1111",
+          "test_type": "text",
+          "sequence": 1,
+          "text": "测试文本工步",
+          "desc": "测试文本工步描述",
+          "failure_msg": "测试文本工步失败消息"
+        },
+        {
+          "code": "222",
+          "test_type": "tightening",
+          "sequence": 2,
+          "desc": "测试拧紧工步描述",
+          "failure_msg": "测试拧紧工步失败消息",
+          "tightening_total": 4
+        }
+      ]
     },
     "curve": {
       "type": "object",
