@@ -7,7 +7,6 @@ from odoo.addons.common_sa_utils.http import sa_http_session, sa_success_resp, s
 from odoo.addons.spc.models.push_workorder import MASTER_WROKORDERS_API
 import logging
 import pprint
-import json
 
 schema = "http"
 
@@ -61,8 +60,58 @@ def validate_ts002_req_val_by_entry(vals):
         _validate_ts002_req_val_by_entry(entry, val)
 
 
+def package_tightening_points(tightening_points):
+    ret = []
+    for tp in tightening_points:
+        pset = tp.program_id.code
+        if isinstance(tp.program_id.code, str):
+            pset = int(tp.program_id.code)
+        val = {
+            'tightening_tool': tp.tightening_tool_ids[0].serial_no,
+            'x': tp.x_offset,
+            'y': tp.y_offset,
+            'program_id': pset,
+            'sequence': tp.sequence,
+            'group_sequence': tp.group_sequence if tp.group_id else tp.sequence,
+            'is_key': tp.is_key,  # 是否为关键拧紧点
+            'max_redo_times': tp.max_redo_times,
+            'key_num': tp.group_id.key_num if tp.group_id else 1,
+        }
+        ret.append(val)
+    return ret
+
+
 def convert_ts002_order(env, vals):
-    ret = {}
+    ret = vals
+    mes_work_steps = vals.get('steps')
+    if not mes_work_steps:
+        raise ValidationError("Can Not Get Work Step From External System")
+    tightening_steps = [step.get('test_type') == 'tightening' for step in mes_work_steps]
+    if not tightening_steps:
+        return vals
+    for ts in tightening_steps:
+        tc = ts.get('code')
+        ws = env['quality.point'].search(['|', ('code', '=', tc), ('name', '=', tc)])
+        if not ws:
+            _logger.error("Can Not Found Tightening Step By Code:{0}".format(tc))
+            continue
+        rws = ws
+        if len(ws) != 1:
+            _logger.error("Tightening Step By Code:{0} Is Not Unique".format(tc))
+            rws = ws[0]
+        expect_tightening_total = ts.get('tightening_total', 0)
+        if not expect_tightening_total:
+            raise ValidationError('Can Not Found Tightening Total Within The Tightening Step: {0}'.format(tc))
+        if len(rws.operation_point_ids) != expect_tightening_total:
+            _logger.error(
+                "Tightening Count Is Not Equal Within Tightening System By Code:{0}. "
+                "Except:{1}, Real:{2}".format(tc, expect_tightening_total, len(rws.operation_point_ids)))
+
+        if not rws.worksheet_img:
+            raise ValidationError('Can Not Found Tightening Image Within The Tightening Step: {0}'.format(tc))
+        ts.update({'tightening_image': rws.worksheet_img})
+        val = package_tightening_points(rws.operation_point_ids)
+        ts.update({'tightening_points': val})  # 将拧紧点的包包裹进去
 
     return ret
 
