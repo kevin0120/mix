@@ -1,6 +1,7 @@
 package aiis
 
 import (
+	"github.com/masami10/rush/services/wsnotify"
 	"sync/atomic"
 	"time"
 
@@ -56,7 +57,7 @@ type Service struct {
 	SyncGun      SyncGun
 	SN           string
 	rpc          GRPCClient
-
+	WS                *wsnotify.Service
 	updateQueue map[int64]time.Time
 	mtx         sync.Mutex
 
@@ -219,15 +220,21 @@ func (s *Service) OnRPCRecv(payload string) {
 		break
 
 	case TYPE_MES_STATUS:
-		// TODO: 收到mes状态
+		// TODO: 收到mes状态, 通知HMI------doing
+		//s.WS.WSSend(wsnotify.WS_EVENT_MES,"MES在线")
+		s.WS.WSSend(wsnotify.WS_EVENT_MES,payload)
+		s.diag.Debug(fmt.Sprintf("收到mes状态并推送HMI: %s", payload))
 
-	case TYPE_ORDER_START:
-		// TODO: 开工响应
-
-	case TYPE_ORDER_FINISH:
-		// TODO: 完工响应
+	//case TYPE_ORDER_START:
+	//	// TODO: 开工响应------doing
+	//	//s.WS.WSSendMes(wsnotify.WS_EVENT_MES,"123","mes允许开工")
+	//	break
+	//
+	//case TYPE_ORDER_FINISH:
+	//	// TODO: 完工响应------doing
+	//	//s.WS.WSSendMes(wsnotify.WS_EVENT_MES,"123","mes确认完工")
+	//	break
 	}
-
 }
 
 func (s *Service) PutResult(result_id int64, body interface{}) error {
@@ -254,6 +261,33 @@ func (s *Service) PutResult(result_id int64, body interface{}) error {
 	}
 
 	return err
+}
+
+func (s *Service) PutMesOpenRequest(req interface{}) (interface{}, error) {
+	resp, err := s.httpClient.R().
+		SetBody(req).
+     // or SetError(Error{}).
+		Put(s.Config().MesOpenWorkUrl)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Body(), nil
+}
+
+
+func (s *Service) PutMesFinishRequest(req interface{}) (interface{}, error) {
+	resp, err := s.httpClient.R().
+		SetBody(req).
+		// or SetError(Error{}).
+		Put(s.Config().MesFinishWorkUrl)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.Body(), nil
 }
 
 func (s *Service) PutOrderRequest(reqType string, body interface{}) error {

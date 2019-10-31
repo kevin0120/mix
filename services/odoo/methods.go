@@ -31,6 +31,11 @@ func (m *Methods) postWorkorders(ctx iris.Context) {
 		return
 	}
 
+	workorderJson, _ := json.Marshal(workorders)
+	m.service.WS.WSSend(wsnotify.WS_EVENT_MES,string(workorderJson))
+	m.service.diag.Debug(fmt.Sprintf("收到工单并推送HMI: %s", string(workorderJson)))
+
+
 	m.service.workordersChannel <- &workorders
 	ctx.StatusCode(iris.StatusCreated)
 	return

@@ -419,23 +419,25 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
 
 	case WS_ORDER_START_REQUEST:
-		// TODO: 收到HMI的开工请求， 处理收到的请求信息， 通过GRPC上传AIIS
-		err := s.Aiis.PutOrderRequest(aiis.TYPE_ORDER_START, nil)
+		// TODO: 收到HMI的开工请求， 处理收到的请求信息， 通过GRPC上传AIIS----doing
+		resp, err := s.Aiis.PutMesOpenRequest(sData)
+
 		if err != nil {
 			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 			return
 		}
-
+		s.diag.Debug(fmt.Sprintf("Mes处理开工请求的结果推送HMI: %s", resp.(string)))
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
 
 	case WS_ORDER_FINISH_REQUEST:
-		// TODO: 收到HMI的完工请求， 处理收到的请求信息， 通过GRPC上传AIIS
-		err := s.Aiis.PutOrderRequest(aiis.TYPE_ORDER_FINISH, nil)
+		// TODO: 收到HMI的完工请求， 处理收到的请求信息， 通过GRPC上传AIIS-----doing
+
+		resp, err := s.Aiis.PutMesFinishRequest(sData)
 		if err != nil {
 			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 			return
 		}
-
+		s.diag.Debug(fmt.Sprintf("Mes处理完工请求的结果推送HMI: %s", resp.(string)))
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
 	}
 }

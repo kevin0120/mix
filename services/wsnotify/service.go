@@ -27,6 +27,7 @@ const (
 	WS_EVENT_REPLY             = "reply"
 	WS_EVENT_DEVICE            = "device"
 	WS_EVENT_ORDER             = "order"
+	WS_EVENT_MES               = "mes"
 )
 
 type Diagnostic interface {
@@ -220,6 +221,16 @@ func (s *Service) WSSendResult(sn string, payload string) {
 		c.Emit(WS_EVENT_RESULT, payload)
 	}
 }
+
+// ws推送MES指示到显示ping
+//func (s *Service) WSSendMes(event string,sn string, payload string) {
+//
+//	c, exist := s.clientManager.GetClient(sn)
+//	if exist {
+//		c.Emit(event, payload)
+//	}
+//}
+
 
 func (s *Service) WSSend(evt string, payload string) {
 	s.clientManager.NotifyALL(evt, payload)
