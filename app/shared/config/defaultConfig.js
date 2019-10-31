@@ -182,7 +182,7 @@ const defaultConfigs = {
       file: true
     },
     curveEnable: true,
-    reportStart: false, // 报开工
+    reportStart: true, // 报开工
     reportFinish: true // 报完工
   }
 };

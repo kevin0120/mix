@@ -91,7 +91,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
             const trackCode = '';
             const productCode = '';
             const dateStart = new Date();
-            const workCenterCode = yield select(s => s.system.workcenter.code);
+            const workCenterCode = yield select(s => s.setting.system.workcenter.code);
             // eslint-disable-next-line flowtype/no-weak-types
             const resp = yield call((orderReportStartApi: Function), orderCode, trackCode, workCenterCode, productCode, dateStart);
             yield put(loadingActions.stop());
@@ -150,16 +150,16 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           if (reportFinish) {
             const code = this._id;
             const trackCode = '';
-            const workCenterCode = yield select(s => s.system.workcenter.code);
+            const workCenterCode = yield select(s => s.setting.system.workcenter.code);
             const productCode = '';
             const operation = {};
-            closeAction = orderActions.reportFinish(
+            closeAction = [orderActions.reportFinish(
               code,
               trackCode,
               workCenterCode,
               productCode,
               operation
-            );
+            ), push('/app')];
             confirm = {
               label: '完工',
               color: 'info'
