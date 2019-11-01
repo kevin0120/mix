@@ -14,18 +14,18 @@ const messageSNs = {};
 function parseData(payload) {
   const d = /(^[^"]*);(.*)/.exec(payload);
   if (d && d[2]) {
-    return (()=>{
-      try{
+    return (() => {
+      try {
         return JSON.parse(d[2]);
-      }catch(e){
-        return {}
+      } catch (e) {
+        return {};
       }
     })();
   }
   return {};
 }
 
-const onWSMessage = (dataParser) => (resp) => {
+const onWSMessage = dataParser => resp => {
   let data = resp;
   if (dataParser) {
     data = dataParser(resp);
@@ -36,7 +36,7 @@ const onWSMessage = (dataParser) => (resp) => {
   }
 };
 
-const rushReply = (event) => (data) => {
+const rushReply = event => data => {
   event.reply('rush-reply', data, data.sn);
 };
 
@@ -49,7 +49,7 @@ function startListenSend() {
         ...data
       };
 
-      ws.sendJson(msg, (err) => {
+      ws.sendJson(msg, err => {
         if (err && ws) {
           console.error(err);
           if (!messageSNs[sn]) {
@@ -74,8 +74,7 @@ function startListenSend() {
           sn
         });
       }, timeout);
-
-    }else{
+    } else {
       onWSMessage()({
         result: -404,
         msg: `cannot send message to rush now, rush is not connected`,
@@ -87,27 +86,32 @@ function startListenSend() {
 
 export function init(url, hmiSN, window) {
   const wsMessage = onWSMessage(parseData);
-  ipcMain.once('rush', () => {
+  ipcMain.on('rush', () => {
+    if (ws) {
+      ws = null;
+    }
     ws = new WebSocket(url, {
       reconnectInterval: 3000,
-      options:
-        {
-          maxPayload: 200 * 1024 * 1024
-        }
+      options: {
+        maxPayload: 200 * 1024 * 1024
+      }
     });
     if (ws) {
       ws.on('open', () => {
-        ws.sendJson({
-          type: 'WS_REG',
-          sn: 0,
-          data: {
-            hmi_sn: hmiSN
+        ws.sendJson(
+          {
+            type: 'WS_REG',
+            sn: 0,
+            data: {
+              hmi_sn: hmiSN
+            }
+          },
+          err => {
+            if (err && ws) {
+              console.error(err);
+            }
           }
-        }, err => {
-          if (err && ws) {
-            console.error(err);
-          }
-        });
+        );
         ws.on('message', wsMessage);
         window.send('rush-open');
       });
