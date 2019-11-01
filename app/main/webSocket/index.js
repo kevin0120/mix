@@ -85,18 +85,15 @@ function startListenSend() {
 }
 
 export function init(url, hmiSN, window) {
-  const wsMessage = onWSMessage(parseData);
   ipcMain.on('rush', () => {
-    if (ws) {
-      ws = null;
-    }
-    ws = new WebSocket(url, {
-      reconnectInterval: 3000,
-      options: {
-        maxPayload: 200 * 1024 * 1024
-      }
-    });
-    if (ws) {
+    const wsMessage = onWSMessage(parseData);
+    if (!ws) {
+      ws = new WebSocket(url, {
+        reconnectInterval: 3000,
+        options: {
+          maxPayload: 200 * 1024 * 1024
+        }
+      });
       ws.on('open', () => {
         ws.sendJson(
           {
@@ -115,7 +112,6 @@ export function init(url, hmiSN, window) {
         ws.on('message', wsMessage);
         window.send('rush-open');
       });
-
       ws.on('close', (...args) => {
         ws.removeListener('message', wsMessage);
         window.send('rush-close', ...args);
@@ -135,6 +131,8 @@ export function init(url, hmiSN, window) {
       ws.on('websocket-status', (...args) => {
         window.send('rush-status', ...args);
       });
+    } else if (!ws.closed) {
+      window.send('rush-open');
     }
   });
   startListenSend();
