@@ -46,7 +46,7 @@ export function newDevice(
     }
 
     // search for the children of the device
-    childrenSN.forEach(cSN => {
+    (childrenSN || []).forEach(cSN => {
       const child = getDevice(cSN);
       if (child) {
         device.appendChildren((child: ICommonExternalEntity));

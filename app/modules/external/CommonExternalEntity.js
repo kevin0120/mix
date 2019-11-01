@@ -25,6 +25,7 @@ export default class CommonExternalEntity implements ICommonExternalEntity {
     (this: any).Enable = this.Enable.bind(this);
     (this: any).Disable = this.Disable.bind(this);
     (this: any).ToggleEnable = this.ToggleEnable.bind(this);
+    (this: any).setHealthz = this.setHealthz.bind(this);
     /* eslint-enable flowtype/no-weak-types */
   }
 
