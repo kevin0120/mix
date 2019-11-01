@@ -1,8 +1,8 @@
 // @flow
 import React from 'react';
 import { push } from 'connected-react-router';
-import { call, put, select, take } from 'redux-saga/effects';
-import { ORDER, ORDER_STATUS } from './constants';
+import { call, put, select } from 'redux-saga/effects';
+import { ORDER_STATUS } from './constants';
 import { CommonLog, durationString } from '../../common/utils';
 import { orderActions } from './action';
 import { orderReportStartApi, orderUpdateApi } from '../../api/order';
@@ -60,42 +60,35 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
       return this._workingIndex;
     }
 
-    * _onNext() {
-      try {
-        this._workingIndex += 1;
-        if (this._workingIndex >= (this: IWorkStep)._steps.length) {
-          yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
-        }
-      } catch (e) {
-        CommonLog.lError(e);
-      }
-    }
-
-    // eslint-disable-next-line require-yield
-    * _onPrevious() {
-      if (this._workingIndex - 1 < 0) {
-        // yield put(orderActions.finishOrder(this));
-      } else {
-        this._workingIndex -= 1;
-      }
-    }
-
     _statusTasks = {
-      * [ORDER_STATUS.TODO]() {
+      *[ORDER_STATUS.TODO]() {
         try {
           const { reportStart } = yield select(s => s.setting.systemSettings);
+          // TODO 开工自检
+
           if (reportStart) {
             yield put(loadingActions.start());
             const orderCode = this._id;
             const trackCode = '';
             const productCode = '';
             const dateStart = new Date();
-            const workCenterCode = yield select(s => s.setting.system.workcenter.code);
+            const workCenterCode = yield select(
+              s => s.setting.system.workcenter.code
+            );
             // eslint-disable-next-line flowtype/no-weak-types
-            const resp = yield call((orderReportStartApi: Function), orderCode, trackCode, workCenterCode, productCode, dateStart);
+            const resp = yield call(
+              (orderReportStartApi: Function),
+              orderCode,
+              trackCode,
+              workCenterCode,
+              productCode,
+              dateStart
+            );
             yield put(loadingActions.stop());
             if (resp.status !== 200) {
-              throw new Error(`报工失败(${resp.error_code}): ${resp.msg}; extra: ${resp.extra}`);
+              throw new Error(
+                `报工失败(${resp.error_code}): ${resp.msg}; extra: ${resp.extra}`
+              );
             }
           }
           yield put(orderActions.stepStatus(this, ORDER_STATUS.WIP));
@@ -109,18 +102,42 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           yield put(orderActions.stepStatus(this, ORDER_STATUS.PENDING));
         }
       },
-      * [ORDER_STATUS.WIP]() {
+      *[ORDER_STATUS.WIP]() {
         try {
           this._workingIndex =
             this._workingIndex >= this._steps.length ? 0 : this._workingIndex;
+          let status = null;
+
+          const _onPrevious = () => {
+            // if (this.workingStep.status === STEP_STATUS.DOING) {
+            //
+            // }
+            if (this._workingIndex - 1 < 0) {
+              // yield put(orderActions.finishOrder(this));
+            } else {
+              this._workingIndex -= 1;
+              console.log(this.workingStep);
+              status = STEP_STATUS.READY;
+            }
+          };
+
+          const _onNext = () => {
+            this._workingIndex += 1;
+          };
+
           while (true) {
             CommonLog.Info('Doing Order...', this._workingIndex);
             const step = this.workingStep;
             if (step) {
-              yield call([this, this.runSubStep], step, {
-                onNext: this._onNext.bind(this),
-                onPrevious: this._onPrevious.bind(this)
-              });
+              yield call(
+                [this, this.runSubStep],
+                step,
+                {
+                  onNext: _onNext,
+                  onPrevious: _onPrevious
+                },
+                status
+              );
             } else {
               yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
             }
@@ -133,7 +150,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           CommonLog.Info('order doing finished');
         }
       },
-      * [ORDER_STATUS.DONE]() {
+      *[ORDER_STATUS.DONE]() {
         try {
           const data = this._steps.map(s => [
             s.name,
@@ -149,16 +166,21 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           if (reportFinish) {
             const code = this._id;
             const trackCode = '';
-            const workCenterCode = yield select(s => s.setting.system.workcenter.code);
+            const workCenterCode = yield select(
+              s => s.setting.system.workcenter.code
+            );
             const productCode = '';
             const operation = {};
-            closeAction = [orderActions.reportFinish(
-              code,
-              trackCode,
-              workCenterCode,
-              productCode,
-              operation
-            ), push('/app')];
+            closeAction = [
+              orderActions.reportFinish(
+                code,
+                trackCode,
+                workCenterCode,
+                productCode,
+                operation
+              ),
+              push('/app')
+            ];
             confirm = {
               label: '完工',
               color: 'info'
@@ -186,7 +208,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           CommonLog.Info('order done');
         }
       },
-      * [ORDER_STATUS.PENDING]() {
+      *[ORDER_STATUS.PENDING]() {
         try {
           yield put(orderActions.finishOrder(this));
         } catch (e) {
@@ -195,7 +217,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           });
         }
       },
-      * [ORDER_STATUS.CANCEL]() {
+      *[ORDER_STATUS.CANCEL]() {
         try {
           yield put(orderActions.finishOrder(this));
         } catch (e) {

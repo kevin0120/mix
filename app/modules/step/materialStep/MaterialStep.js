@@ -11,6 +11,7 @@ import type { IWorkStep } from '../interface/IWorkStep';
 import type { IMaterialStep } from './interface/IMaterialStep';
 import type { IDevice } from '../../external/device/IDevice';
 import ClsIOModule from '../../external/device/io/ClsIOModule';
+import dialogActions from '../../dialog/action';
 
 const items = payload => payload?.items;
 
@@ -41,7 +42,7 @@ const MaterialStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
     }
 
     _statusTasks = {
-      *[STEP_STATUS.READY](ORDER, orderActions){
+      *[STEP_STATUS.READY](ORDER, orderActions) {
         try {
           yield put(orderActions.stepStatus(this, STEP_STATUS.ENTERING));
         } catch (e) {
@@ -53,15 +54,16 @@ const MaterialStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
           const sPayload = yield select(s =>
             stepPayload(workingStep(workingOrder(s.order)))
           );
+          console.log(items(sPayload));
           items(sPayload).forEach(i => {
             let item = null;
             ['in', 'out'].forEach(dir => {
               if (!(i && i[dir] && i[dir].sn)) {
-                return;
+                throw new Error(`io module ${i[dir].sn} not provided`);
               }
               const io: IDevice = getDevice(i[dir].sn);
               if (!(io instanceof ClsIOModule)) {
-                return;
+                throw new Error(`io module ${i[dir].sn} not found`);
               }
               this._io.add(io);
               const port = io.getPort(ioDirection.input, i[dir].index);
@@ -105,10 +107,12 @@ const MaterialStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
           yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
         } catch (e) {
           CommonLog.lError(e);
+          yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, e.message));
         }
       },
       *[STEP_STATUS.DOING](ORDER, orderActions) {
         try {
+          console.log('material step doing');
           const listeners = [];
           [...this._items].forEach(i => {
             listeners.push({
@@ -132,6 +136,7 @@ const MaterialStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               actions.ready
             );
           }
+          console.log(this._items);
 
           yield race([
             take(MATERIAL_STEP.READY),
@@ -162,9 +167,31 @@ const MaterialStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
           CommonLog.lError(e);
         }
       },
-      *[STEP_STATUS.FAIL](ORDER, orderActions) {
+      *[STEP_STATUS.FAIL](ORDER, orderActions, msg) {
         try {
-          yield put(orderActions.finishStep(this));
+          yield put(
+            dialogActions.dialogShow({
+              buttons: [
+                {
+                  label: 'Common.Close',
+                  color: 'danger'
+                },
+                {
+                  label: '重试',
+                  color: 'info',
+                  action: orderActions.doPreviousStep()
+                },
+                {
+                  label: 'Order.Next',
+                  color: 'warning',
+                  action: orderActions.finishStep(this)
+                }
+              ],
+              title: `工步失败：${this._name}`,
+              content: `${msg || ''}`
+            })
+          );
+          // yield put(orderActions.finishStep(this));
         } catch (e) {
           CommonLog.lError(e);
         }
