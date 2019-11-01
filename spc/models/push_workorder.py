@@ -55,32 +55,17 @@ class PushWorkorder(AbstractModel):
 
         return payloads
 
+    @api.model
     def _post_workorder_to_masterpc(self, url, orders):
         r = list()
         type_tightening_point_id = self.env.ref('quality.test_type_tightening_point').id
         for order in orders:
             _steps = self.pack_step_payload(order.consu_work_order_line_ids, type_tightening_point_id)
-            # for step in order.consu_work_order_line_ids:
-            #
-            #     _steps.append({
-            #         "sequence": step.bom_line_id.operation_point_id.sequence,
-            #         "group_sequence": step.bom_line_id.operation_point_id.group_sequence,
-            #         'max_redo_times': step.bom_line_id.operation_point_id.max_redo_times,
-            #         'offset_x': step.bom_line_id.operation_point_id.x_offset,
-            #         'offset_y': step.bom_line_id.operation_point_id.y_offset,
-            #         "pset": step.bom_line_id.program_id.code if step.bom_line_id.program_id.code else "0",
-            #         "nut_no": step.product_id.default_code,
-            #         "gun_sn": step.bom_line_id.gun_id.serial_no if step.bom_line_id.gun_id.serial_no else "",
-            #         "controller_sn": step.bom_line_id.controller_id.serial_no if step.bom_line_id.controller_id.serial_no else "",
-            #         # 'tolerance_min': _qcps.tolerance_min if _qcps else 0.0,
-            #         # 'tolerance_max': _qcps.tolerance_max if _qcps else 0.0,
-            #         # 'tolerance_min_degree': _qcps.tolerance_min_degree if _qcps else 0.0,
-            #         # 'tolerance_max_degree': _qcps.tolerance_max_degree if _qcps else 0.0,
-            #     })
 
             vals = {
                 'order': {'name': order.name, 'origin': order.origin},
-                'workcenter': {'name': order.workcenter_id.name, 'code': order.workcenter_id.code} if order.workcenter_id else None,
+                'workcenter': {'name': order.workcenter_id.name,
+                               'code': order.workcenter_id.code} if order.workcenter_id else None,
                 'img_op_code': order.operation_id.code,
                 'max_op_time': order.operation_id.max_op_time,
                 'track_no': order.track_no,
@@ -104,20 +89,4 @@ class PushWorkorder(AbstractModel):
 
     @api.multi
     def workerorder_push(self):
-        domain = [('sent', '=', False)]
-        limit = self.env['ir.config_parameter'].sudo().get_param('sa.wo.push.num', default=80)
-        orders = self.env['mrp.workorder'].sudo().search(domain, limit=int(limit), order=ORDER_PRODUCTION_ORDER_BY)
-        masterpcs = orders.mapped('workcenter_id.equipment_ids').filtered(
-            lambda equip: equip.category_name == 'MasterPC')
-        for master in masterpcs:
-            need_send_orders = orders.filtered(lambda r: r.workcenter_id.id == master.workcenter_id.id)
-            if not need_send_orders:
-                continue
-            connections = master.connection_ids.filtered(lambda r: r.protocol == 'http')
-            if not connections:
-                continue
-            url = \
-                ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_WROKORDERS_API) for connect in
-                 connections][0]
-            ret = self._post_workorder_to_masterpc(url, need_send_orders)
-        return True
+        pass

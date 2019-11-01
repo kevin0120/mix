@@ -58,7 +58,7 @@ class PushResult(AbstractModel):
     @api.multi
     def result_push(self):
         domain = [('measure_result', 'in', ['ok', 'nok'])]
-        limit = self.env['ir.config_parameter'].sudo().get_param('sa.result.push.num',
+        limit = self.env['ir.config_parameter'].sudo().get_param('sa.result.push.limit',
                                                                  default=DEFAULT_RESULT_PUSH_LIMIT)
         results = self.env['operation.result'].sudo().search(domain, limit=limit, order=DEFAULT_RESULT_PUSH_ORDER)
         if not results:
