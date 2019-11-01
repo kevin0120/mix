@@ -64,7 +64,9 @@ class MrpRoutingWorkcenter(models.Model):
                     'nut_no': point.name,  # 螺栓编号为拧紧点上的名称
                 })
             val = {
-                "id": operation_id.id,
+                # "id": operation_id.id,
+                'tightening_step_ref': tightening_step_id.ref,
+                'tightening_step_name': tightening_step_id.name,
                 "workcenter_id": operation_id.workcenter_id.id,
                 "job": int(operation_id.op_job_id.code) if operation_id.op_job_id else 0,
                 "max_op_time": operation_id.max_op_time,
