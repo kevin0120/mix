@@ -11,7 +11,7 @@ import json
 
 MASTER_DEL_WROKORDERS_API = '/rush/v1/mrp.routing.workcenter.delete'
 
-MASTER_WROKORDERS_API = '/rush/v1/mrp.routing.workcenter'
+MASTER_ROUTING_API = '/rush/v1/mrp.routing.workcenter'
 
 
 class MrpBom(models.Model):
@@ -123,7 +123,7 @@ class MrpBom(models.Model):
             if not connections:
                 continue
             url = \
-                ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_WROKORDERS_API) for connect in
+                ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_ROUTING_API) for connect in
                  connections][0]
 
             operation._push_mrp_routing_workcenter(url)

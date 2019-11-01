@@ -11,7 +11,7 @@ import logging
 import json
 import pprint
 
-from odoo.addons.spc.models.push_workorder import MASTER_WROKORDERS_API
+from odoo.addons.sa_base.models.mrp_bom import MASTER_ROUTING_API
 
 _logger = logging.getLogger(__name__)
 
@@ -106,7 +106,7 @@ class MrpRoutingWorkcenter(models.Model):
                         _logger.error("Can Not Found MasterPC Connect Info For Work Center:{0}".format(workcenter_id.name))
                         continue
                     connect = connects[0]
-                    url = 'http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_WROKORDERS_API)
+                    url = 'http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_ROUTING_API)
                     operation._push_mrp_routing_workcenter(url)
             self.env.user.notify_info(u'同步工艺成功')
             return True
