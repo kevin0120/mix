@@ -11,7 +11,8 @@ import requests as Requests
 from requests import ConnectionError, RequestException, exceptions
 
 from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError
+
+DELETE_ALL_MASTER_WROKORDERS_API = '/rush/v1/mrp.routing.workcenter/all'
 
 
 class MrpWorkAssembly(models.Model):
@@ -123,6 +124,39 @@ class MrpWorkCenter(models.Model):
 
     sa_workcenter_loc_ids = fields.One2many('mrp.workcenter.loc', 'workcenter_id',
                                             string='Location For Place Component', copy=True)
+
+    @api.one
+    def get_workcenter_masterpc_http_connect(self):
+        workcenter_id = self
+        master_pc = self.env['maintenance.equipment'].search(
+            [('workcenter_id', '=', workcenter_id.id), ('category_name', '=', 'MasterPC')], limit=1)
+        if not master_pc:
+            return None
+        connections = master_pc.connection_ids.filtered(
+            lambda r: r.protocol == 'http') if master_pc.connection_ids else None
+        if not connections:
+            raise None
+        connect = connections[0]
+        return connect
+
+    @api.multi
+    def button_sync_operations(self):
+        pass
+
+    @api.one
+    def _delete_workcenter_all_opertaions(self, url):
+        try:
+            ret = Requests.delete(url, headers={'Content-Type': 'application/json'}, timeout=1)
+            if ret.status_code == 200:
+                self.env.user.notify_info(u'删除工艺成功')
+                return True
+        except ConnectionError as e:
+            self.env.user.notify_warning(u'删除工艺失败, 错误原因:{0}'.format(str(e)))
+            return False
+        except RequestException as e:
+            self.env.user.notify_warning(u'删除工艺失败, 错误原因:{0}'.format(str(e)))
+            return False
+        return False
 
     # @api.multi
     # def _update_create_workcenter_group_tool_by_tool(self):

@@ -122,7 +122,7 @@ def convert_ts002_order(env, vals):
 
         if not rws.worksheet_img:
             raise ValidationError('Can Not Found Tightening Image Within The Tightening Step: {0}'.format(tc))
-        ts.update({'tightening_image': rws.worksheet_img})
+        ts.update({'tightening_image_by_step_code': tc})
         val = package_tightening_points(rws.operation_point_ids)
         ts.update({'tightening_points': val})  # 将拧紧点的包包裹进去
     return ret

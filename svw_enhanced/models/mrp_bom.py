@@ -5,9 +5,7 @@ from odoo.exceptions import ValidationError, UserError
 
 import json
 
-MASTER_DEL_WROKORDERS_API = '/rush/v1/mrp.routing.workcenter.delete'
-
-MASTER_WROKORDERS_API = '/rush/v1/mrp.routing.workcenter'
+from odoo.addons.sa_base.models.mrp_worksegment import DELETE_ALL_MASTER_WROKORDERS_API
 
 
 class MrpBomLine(models.Model):
@@ -59,7 +57,6 @@ class MrpBomLine(models.Model):
             rec.tool_id_domain = json.dumps([('id', 'in', rec.workcenter_id.gun_ids.ids)])
             rec.controller_id_domain = json.dumps([('id', 'in', rec.workcenter_id.controller_ids.ids)])
 
-
     @api.multi
     def unlink(self):
         for line in self:
@@ -70,7 +67,7 @@ class MrpBomLine(models.Model):
                 lambda r: r.protocol == 'http') if master.connection_ids else None
             if not connections:
                 raise UserError(u"未找到工位上的工位控制器的连接信息")
-            url = ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_DEL_WROKORDERS_API) for connect in
+            url = ['http://{0}:{1}{2}'.format(connect.ip, connect.port, DELETE_ALL_MASTER_WROKORDERS_API) for connect in
                    connections][0]
             ret = self._push_del_routing_workcenter(line=line, url=url)
             if not ret:

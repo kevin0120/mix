@@ -52,7 +52,6 @@ class QualityPoint(models.Model):
     _sql_constraints = [
         ('product_bom_line_id_uniq', 'unique(bom_line_id)', 'Only one quality point per product bom line is allowed')]
 
-
     @api.multi
     def button_resequence(self):
         self.ensure_one()
@@ -74,6 +73,10 @@ class QualityPoint(models.Model):
         for idx, point in enumerate(self.operation_point_ids.sorted(key=lambda r: r.group_sequence)):
             point.write({'sequence': idx + 1})
 
+    @api.onchange('program_id')
+    def onchange_program_id(self):
+        if self.program_id and self.operation_point_ids:
+            self.operation_point_ids.write({'program_id', False})  # 所有下级的拧紧点拧紧程序设置为False
 
     @api.multi
     def get_operation_points(self):

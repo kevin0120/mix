@@ -9,7 +9,7 @@ from requests import Request as Requests, ConnectionError, RequestException
 
 _logger = logging.getLogger(__name__)
 
-DELETE_ALL_MASTER_WROKORDERS_API = '/rush/v1/mrp.routing.workcenter/all'
+from odoo.addons.sa_base.models.mrp_worksegment import DELETE_ALL_MASTER_WROKORDERS_API
 
 
 class MrpWorkCenter(models.Model):
@@ -69,22 +69,6 @@ class MrpWorkCenter(models.Model):
             org_list.extend(new_list)
             if len(set(org_list)) != new + org:
                 raise ValidationError('拧紧枪设置重复')
-
-    @api.one
-    def _delete_workcenter_all_opertaions(self, url):
-        try:
-            ret = Requests.delete(url, headers={'Content-Type': 'application/json'}, timeout=1)
-            if ret.status_code == 200:
-                # operation_id.write({'sync_download_time': fields.Datetime.now()})  ### 更新发送结果
-                self.env.user.notify_info(u'删除工艺成功')
-                return True
-        except ConnectionError as e:
-            self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
-            return False
-        except RequestException as e:
-            self.env.user.notify_warning(u'下发工艺失败, 错误原因:{0}'.format(e.message))
-            return False
-        return False
 
     @api.multi
     def button_sync_operations(self):

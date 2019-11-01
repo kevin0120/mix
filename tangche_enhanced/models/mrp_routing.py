@@ -11,7 +11,7 @@ import logging
 import json
 import pprint
 
-MASTER_WROKORDERS_API = '/rush/v1/mrp.routing.workcenter'
+from odoo.addons.spc.models.push_workorder import MASTER_WROKORDERS_API
 
 _logger = logging.getLogger(__name__)
 
@@ -35,31 +35,34 @@ class MrpRoutingWorkcenter(models.Model):
     def _push_mrp_routing_workcenter(self, url):
         self.ensure_one()
         operation_id = self
-        bom_ids = self.env['mrp.bom'].search([('operation_ids', 'in', operation_id.ids), ('active', '=', True)])
-        if not bom_ids:
-            _logger.info('Cannot Found BOM 4 This Operation:{0}'.format(operation_id.name))
-            return
-        _points = []
+        bom_ids = self.env['mrp.bom'].search([('routing_id.sa_operation_ids', 'in', operation_id.ids)])
+        if len(bom_ids) != 1:
+            _logger.debug("_push_mrp_routing_workcenter, BOM:{0}".format(pprint.pformat(bom_ids.ids, indent=4)))
+            msg = "Can Not Found MRP BOM Within The Operation:{0}".format(operation_id.name)
+            _logger.error(msg)
+            raise ValidationError(msg)
+        bom_id = bom_ids[0]
         tightening_step_ids = operation_id.sa_step_ids.filtered(lambda step: step.test_type == 'tightening')
-        operation_point_ids = tightening_step_ids.mapped('operation_point_ids')
-        for point in operation_point_ids:
-            _points.append({
-                'sequence': point.sequence,
-                'group_sequence': point.group_sequence,
-                'offset_x': point.x_offset,
-                'offset_y': point.y_offset,
-                'max_redo_times': point.max_redo_times,
-                'tool_sn': '',  # 默认模式下这里传送的枪的序列号是空字符串
-                'controller_sn': '',
-                # 'tolerance_min': qcp.tolerance_min,
-                # 'tolerance_max': qcp.tolerance_max,
-                # 'tolerance_min_degree': qcp.tolerance_min_degree,
-                # 'tolerance_max_degree': qcp.tolerance_max_degree,
-                'consu_product_id': point.product_id.id if point.product_id.id else 0,
-                'nut_no': point.product_id.default_code if point.product_id else '',
-            })
-
-        for bom_id in bom_ids:
+        if not tightening_step_ids:
+            msg = "Can Not Found Tightening Step For Operation:{0}".format(operation_id.name)
+            _logger.error(msg)
+            raise ValidationError(msg)
+        for tightening_step_id in tightening_step_ids:
+            _points = []
+            operation_point_ids = tightening_step_id.operation_point_ids
+            for point in operation_point_ids:
+                _points.append({
+                    'sequence': point.sequence,
+                    'group_sequence': point.group_sequence,
+                    'offset_x': point.x_offset,
+                    'offset_y': point.y_offset,
+                    'max_redo_times': point.max_redo_times,
+                    'tool_sn': '',  # 默认模式下这里传送的枪的序列号是空字符串
+                    'controller_sn': '',
+                    'pset': point.program_id.code if point.program_id else False,
+                    'consu_product_id': point.product_id.id if point.product_id.id else 0,
+                    'nut_no': point.name,  # 螺栓编号为拧紧点上的名称
+                })
             val = {
                 "id": operation_id.id,
                 "workcenter_id": operation_id.workcenter_id.id,
@@ -69,7 +72,7 @@ class MrpRoutingWorkcenter(models.Model):
                                                    operation_id.workcenter_id.name,
                                                    operation_id.routing_id.name),
                 "img": u'data:{0};base64,{1}'.format('image/png',
-                                                     operation_id.worksheet_img) if operation_id.worksheet_img else "",
+                                                     tightening_step_id.worksheet_img) if tightening_step_id.worksheet_img else "",
                 "product_id": bom_id.product_id.id if bom_id else 0,
                 "product_type": bom_id.product_id.default_code if bom_id else "",
                 "workcenter_code": operation_id.workcenter_id.code if operation_id.workcenter_id else "",
@@ -91,23 +94,19 @@ class MrpRoutingWorkcenter(models.Model):
 
     @api.multi
     def button_send_mrp_routing_workcenter(self):
-        for operation in self:
-            if not operation.workcenter_ids:
-                continue
-            for workcenter_id in operation.workcenter_ids:
-                master = workcenter_id.equipment_ids.filtered(
-                    lambda equipment: equipment.category_name == 'MasterPC')
-                if not master:
-                    _logger.warning("Send Operation To Workcenter: {0}, But Cannot Found MasterPC".format(
-                        pprint.pformat(workcenter_id.name)))
+        try:
+            for operation in self:
+                if not operation.workcenter_ids:
                     continue
-                connections = master.connection_ids.filtered(
-                    lambda r: r.protocol == 'http') if master.connection_ids else None
-                if not connections:
-                    continue
-                url = \
-                    ['http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_WROKORDERS_API) for connect in
-                     connections][0]
-
-                operation._push_mrp_routing_workcenter(url)
-        return True
+                for workcenter_id in operation.workcenter_ids:
+                    connects = workcenter_id.get_workcenter_masterpc_http_connect()
+                    if not len(connects):
+                        _logger.error("Can Not Found MasterPC Connect Info For Work Center:{0}".format(workcenter_id.name))
+                        continue
+                    connect = connects[0]
+                    url = 'http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_WROKORDERS_API)
+                    operation._push_mrp_routing_workcenter(url)
+            self.env.user.notify_info(u'同步工艺成功')
+            return True
+        except Exception as e:
+            self.env.user.notify_warning(u'同步工艺失败:{0}'.format(str(e)))

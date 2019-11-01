@@ -12,5 +12,4 @@ from . import maintenance
 from . import quality
 from . import res_config
 from . import mrp_workcenter_group
-# from . import mrp_step
 # from . import report
