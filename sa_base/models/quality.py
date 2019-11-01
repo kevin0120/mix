@@ -11,6 +11,8 @@ class QualityPoint(models.Model):
 
     ref = fields.Char('Reference')
 
+    can_do_skip = fields.Boolean(string='Allow Do Skip', default=False, Help='Whether This Step Can Be Skipped')
+
     product_tmpl_id = fields.Many2one('product.template', 'Product', required=False,
                                       domain="[('type', 'in', ['consu', 'product']), ('sa_type', '=', 'vehicle')]")
 
