@@ -237,7 +237,7 @@ class TangcheMrpOrderGateway(Controller):
                 raise ValidationError('Query WorkOrder Must Include Order Code')
             resp = query_order_from_mes(kw.get('code'), kw.get('workcenter'))
             if isinstance(resp, Response):
-                # must be bad resp
+                # 返回值如果是response，代表异常，否则返回的是字典对象
                 return resp
             env = api.Environment(request.cr, SUPERUSER_ID, request.context)
             vals = resp
