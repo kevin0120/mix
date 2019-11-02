@@ -230,7 +230,7 @@ class TangcheMrpOrderGateway(Controller):
             msg = str(e)
             return sa_fail_response(msg=msg)
 
-    @route('/api/v1/ts002/workorders', type='json', methods=['GET', 'OPTIONS'], auth='none', cors='*', csrf=False)
+    @route('/api/v1/ts002/workorders', type='http', methods=['GET', 'OPTIONS'], auth='none', cors='*', csrf=False)
     def tangcheQueryOrderGateway(self, **kw):
         try:
             if 'code' not in kw:
