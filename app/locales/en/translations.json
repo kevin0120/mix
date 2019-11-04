@@ -13,6 +13,8 @@
     "scanner": "scanner",
     "instruction": "instruction",
     "screw": "screw",
+    "tightening": "tightening",
+    "text": "text",
     "material": "material",
     "video": "video",
     "check": "check"
