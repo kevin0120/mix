@@ -78,7 +78,7 @@ class MrpRoutingWorkcenter(models.Model):
                 "product_id": bom_id.product_id.id if bom_id else 0,
                 "product_type": bom_id.product_id.default_code if bom_id else "",
                 "workcenter_code": operation_id.workcenter_id.code if operation_id.workcenter_id else "",
-                'vehicleTypeImg': u'data:{0};base64,{1}'.format('image/png',
+                'product_type_image': u'data:{0};base64,{1}'.format('image/png',
                                                                 bom_id.product_id.image_small) if bom_id.product_id.image_small else "",
                 "points": _points
             }
