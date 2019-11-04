@@ -33,18 +33,25 @@ class MrpWorkCenter(models.Model):
         """
         只同步拧紧相关的工步信息到工位控制器，为了后续的方便使用
         """
-        operation_obj_sudo = self.env['mrp.routing.workcenter'].sudo()
-        for center in self:
-            connects = center.get_workcenter_masterpc_http_connect()
-            if not len(connects):
-                _logger.error("Can Not Found MasterPC Connect Info For Work Center:{0}".format(center.name))
-                continue
-            connect = connects[0]
-            delete_all_endpoint = 'http://{0}:{1}{2}'.format(connect.ip, connect.port, DELETE_ALL_MASTER_WROKORDERS_API)
-            center._delete_workcenter_all_opertaions(delete_all_endpoint)
-            operations = operation_obj_sudo.search([('workcenter_id', '=', center.id)])
-            for operation in operations:
-                operation.button_send_mrp_routing_workcenter()
+        self.ensure_one()
+        try:
+            operation_obj_sudo = self.env['mrp.routing.workcenter'].sudo()
+            for center in self:
+                connects = center.get_workcenter_masterpc_http_connect()
+                if not len(connects):
+                    _logger.error("Can Not Found MasterPC Connect Info For Work Center:{0}".format(center.name))
+                    continue
+                connect = connects[0]
+                delete_all_endpoint = 'http://{0}:{1}{2}'.format(connect.ip, connect.port, DELETE_ALL_MASTER_WROKORDERS_API)
+                center._delete_workcenter_all_opertaions(delete_all_endpoint)
+                operations = operation_obj_sudo.search([('workcenter_id', '=', center.id)])
+                for operation in operations:
+                    operation.button_send_mrp_routing_workcenter()
+            return True
+        except Exception as e:
+            _logger.error("button_sync_operations Error", e)
+            raise e
+
 
 
 @api.multi

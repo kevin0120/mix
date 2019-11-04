@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from dateutil import relativedelta
-import datetime
-import json
-import urllib
 
 import requests as Requests
 
 from requests import ConnectionError, RequestException, exceptions
 
 from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
 
 DELETE_ALL_MASTER_WROKORDERS_API = '/rush/v1/mrp.routing.workcenter/all'
 
@@ -152,10 +149,10 @@ class MrpWorkCenter(models.Model):
                 return True
         except ConnectionError as e:
             self.env.user.notify_warning(u'删除工艺失败, 错误原因:{0}'.format(str(e)))
-            return False
+            raise ValidationError(u'删除工艺失败, 错误原因:{0}'.format(str(e)))
         except RequestException as e:
             self.env.user.notify_warning(u'删除工艺失败, 错误原因:{0}'.format(str(e)))
-            return False
+            raise ValidationError(u'删除工艺失败, 错误原因:{0}'.format(str(e)))
         return False
 
     # @api.multi

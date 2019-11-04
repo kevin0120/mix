@@ -7,11 +7,11 @@ api_data = {
   "info": {
     "termsOfService": "http://centronsys.com",
     "version": "1.0.0",
+    "title": "智能装配应用服务器RESTful",
+    "description": "智能装配应用服务器RESTful",
     "contact": {
       "email": "gubin@centronsys.com"
-    },
-    "description": "智能装配应用服务器RESTful",
-    "title": "智能装配应用服务器RESTful"
+    }
   },
   "paths": {
     "/res.users": {
@@ -35,26 +35,26 @@ api_data = {
             "items": {
               "type": "string"
             },
-            "in": "query",
             "type": "array",
             "description": "UUID to filter by",
-            "name": "uuids"
+            "name": "uuids",
+            "in": "query"
           },
           {
             "description": "返回结果限定个数",
             "default": 80,
             "required": False,
-            "collectionFormat": "multi",
+            "name": "limit",
             "in": "query",
             "type": "integer",
-            "name": "limit"
+            "collectionFormat": "multi"
           }
-        ],
-        "tags": [
-          "Users"
         ],
         "produces": [
           "application/json"
+        ],
+        "tags": [
+          "Users"
         ],
         "summary": "查询用户清单",
         "consumes": [
@@ -63,11 +63,45 @@ api_data = {
         "description": ""
       }
     },
-    "/ts002/workorders": {
-      "post": {
+    "/ts002/mrp.workcenter/{workcenter_code}/OperationDownload": {
+      "put": {
         "tags": [
           "TS002"
         ],
+        "description": "唐车更新工位工艺",
+        "responses": {
+          "200": {
+            "description": "成功创建工单下发给工位控制器",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/ACKRESP"
+              }
+            }
+          },
+          "400": {
+            "description": "下发参数有误",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/ACKRESP"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "description": "工位号",
+            "required": True,
+            "in": "path",
+            "type": "string",
+            "name": "workcenter_code",
+            "default": "TA2-26L-01"
+          }
+        ]
+      }
+    },
+    "/ts002/workorders": {
+      "post": {
+        "description": "唐客下发工单",
         "responses": {
           "201": {
             "description": "成功创建工单下发给工位控制器",
@@ -88,25 +122,44 @@ api_data = {
         },
         "parameters": [
           {
+            "required": True,
+            "in": "body",
+            "name": "body",
             "schema": {
               "$ref": "#/definitions/ts002Order"
-            },
-            "required": True,
-            "name": "body",
-            "in": "body"
+            }
           }
         ],
-        "description": "唐客下发工单"
+        "tags": [
+          "TS002"
+        ]
       },
       "get": {
+        "description": "唐客查询工单",
+        "parameters": [
+          {
+            "description": "查询的工单号",
+            "default": "MO0001",
+            "required": True,
+            "in": "query",
+            "type": "string",
+            "name": "code"
+          },
+          {
+            "description": "工位号,非必填",
+            "type": "string",
+            "name": "workcenter",
+            "in": "query"
+          }
+        ],
+        "tags": [
+          "TS002"
+        ],
         "produces": [
           "application/json"
         ],
         "consumes": [
           "application/json"
-        ],
-        "tags": [
-          "TS002"
         ],
         "responses": {
           "200": {
@@ -125,24 +178,7 @@ api_data = {
               }
             }
           }
-        },
-        "parameters": [
-          {
-            "in": "query",
-            "name": "code",
-            "type": "string",
-            "description": "查询的工单号",
-            "required": True,
-            "default": "MO0001"
-          },
-          {
-            "in": "query",
-            "name": "workcenter",
-            "type": "string",
-            "description": "工位号,非必填"
-          }
-        ],
-        "description": "唐客查询工单"
+        }
       }
     },
     "/maintenance/requests/try": {
@@ -172,19 +208,19 @@ api_data = {
         },
         "parameters": [
           {
+            "required": True,
+            "in": "body",
+            "name": "body",
             "schema": {
               "$ref": "#/definitions/try_maintenance_request"
-            },
-            "required": True,
-            "name": "body",
-            "in": "body"
+            }
           }
-        ],
-        "tags": [
-          "Maintenance"
         ],
         "produces": [
           "application/json"
+        ],
+        "tags": [
+          "Maintenance"
         ],
         "summary": "根据发送拧紧次数创建维护请求",
         "consumes": [
@@ -218,18 +254,18 @@ api_data = {
             "name": "resultId"
           },
           {
-            "in": "body",
-            "name": "body",
             "schema": {
               "$ref": "#/definitions/curve"
-            }
+            },
+            "name": "body",
+            "in": "body"
           }
-        ],
-        "tags": [
-          "Result"
         ],
         "produces": [
           "application/json"
+        ],
+        "tags": [
+          "Result"
         ],
         "summary": "为一条结果添加波形",
         "consumes": [
@@ -264,11 +300,11 @@ api_data = {
             "name": "serial_no"
           }
         ],
-        "tags": [
-          "HMI"
-        ],
         "produces": [
           "application/json"
+        ],
+        "tags": [
+          "HMI"
         ],
         "summary": "查询HMI连接信息",
         "consumes": [
@@ -279,25 +315,6 @@ api_data = {
     },
     "/mrp.productions/{vin}": {
       "get": {
-        "description": "获取某一用户信息",
-        "parameters": [
-          {
-            "required": True,
-            "type": "string",
-            "description": "VIN",
-            "in": "path",
-            "name": "vin"
-          }
-        ],
-        "tags": [
-          "Manufacture"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "consumes": [
-          "application/json"
-        ],
         "responses": {
           "200": {
             "description": "生产订单",
@@ -311,40 +328,75 @@ api_data = {
           "405": {
             "description": "Invalid input"
           }
-        }
+        },
+        "parameters": [
+          {
+            "required": True,
+            "type": "string",
+            "description": "VIN",
+            "name": "vin",
+            "in": "path"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Manufacture"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "description": "获取某一用户信息"
       }
     },
     "/mrp.workorders": {
       "get": {
-        "description": "获取某一用户信息",
+        "responses": {
+          "200": {
+            "description": "获取工单",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/WorkOrder"
+              },
+              "type": "array"
+            }
+          },
+          "404": {
+            "description": "MasterPC not found"
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        },
         "parameters": [
           {
             "required": False,
             "type": "string",
             "description": "MasterPC UUID",
-            "in": "query",
-            "name": "masterpc"
+            "name": "masterpc",
+            "in": "query"
           },
           {
             "required": False,
             "type": "string",
             "description": "HMi序列号",
-            "in": "query",
-            "name": "hmi"
+            "name": "hmi",
+            "in": "query"
           },
           {
             "required": False,
             "type": "string",
             "description": "工位序列号",
-            "in": "query",
-            "name": "workcenter"
+            "name": "workcenter",
+            "in": "query"
           },
           {
             "required": False,
             "type": "string",
             "description": "Long PIN or VIN or KNR",
-            "in": "query",
-            "name": "code"
+            "name": "code",
+            "in": "query"
           },
           {
             "description": "返回结果的条数限制",
@@ -363,192 +415,16 @@ api_data = {
             "name": "order"
           }
         ],
-        "tags": [
-          "Manufacture"
-        ],
         "produces": [
           "application/json"
-        ],
-        "consumes": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "获取工单",
-            "schema": {
-              "items": {
-                "$ref": "#/definitions/WorkOrder"
-              },
-              "type": "array"
-            }
-          },
-          "404": {
-            "description": "MasterPC not found"
-          },
-          "405": {
-            "description": "Invalid input"
-          }
-        }
-      }
-    },
-    "/mrp.routing.workcenter/{operation_id}/edit": {
-      "put": {
-        "tags": [
-          "Operation"
-        ],
-        "description": "通过此api可以对某个作业的图片和点位进行编辑。参数中图片传入base64编码的字符串。 对于点位列表,如果传入的点位有sequence则会进行更新（如果对应sequence的点位不存在则会新增），如果不传sequence则会新增。对于那些不在点位列表中的作业点会进行删除操作（比如当前某作业有3个点，调用api时只传了前两个，那么第三个点会被删除。同理如果传了一个空的点位列表则会删除该作业的所有点）",
-        "parameters": [
-          {
-            "description": "需要修改的作业的ID",
-            "format": "int64",
-            "required": True,
-            "in": "path",
-            "type": "integer",
-            "name": "operation_id"
-          },
-          {
-            "in": "body",
-            "description": "图片点位信息",
-            "name": "body",
-            "schema": {
-              "$ref": "#/definitions/operation_edit"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功更新了作业图片点位"
-          },
-          "405": {
-            "description": "无效参数"
-          }
-        }
-      }
-    },
-    "/logo": {
-      "get": {
-        "responses": {
-          "200": {
-            "description": "图片信息",
-            "schema": {
-              "$ref": "#/definitions/Logo"
-            }
-          }
-        },
-        "tags": [
-          "LOGO"
-        ]
-      }
-    },
-    "/maintenance/requests": {
-      "post": {
-        "responses": {
-          "201": {
-            "description": "创建维护请求成功",
-            "schema": {
-              "$ref": "#/definitions/common_resp"
-            }
-          },
-          "404": {
-            "description": "枪序列号未找到",
-            "schema": {
-              "$ref": "#/definitions/common_resp"
-            }
-          },
-          "405": {
-            "description": "无效的输入,缺少参数",
-            "schema": {
-              "$ref": "#/definitions/common_resp"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "schema": {
-              "$ref": "#/definitions/maintenance_request"
-            },
-            "required": True,
-            "name": "body",
-            "in": "body"
-          }
-        ],
-        "tags": [
-          "Maintenance"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "summary": "创建维护请求",
-        "consumes": [
-          "application/json"
-        ],
-        "description": "创建维护请求"
-      }
-    },
-    "/mrp.workorders/{order_id}": {
-      "get": {
-        "description": "获取某一用户信息",
-        "parameters": [
-          {
-            "required": True,
-            "type": "string",
-            "description": "MasterPC UUID",
-            "in": "path",
-            "name": "order_id"
-          }
         ],
         "tags": [
           "Manufacture"
         ],
-        "produces": [
-          "application/json"
-        ],
         "consumes": [
           "application/json"
         ],
-        "responses": {
-          "200": {
-            "description": "获取工单",
-            "schema": {
-              "items": {
-                "$ref": "#/definitions/WorkOrder"
-              },
-              "type": "array"
-            }
-          },
-          "404": {
-            "description": "MasterPC not found"
-          },
-          "405": {
-            "description": "Invalid input"
-          }
-        }
-      }
-    },
-    "/mrp.routing.workcenter/{operation_id}": {
-      "get": {
-        "tags": [
-          "Operation"
-        ],
-        "description": "获取作业详情",
-        "parameters": [
-          {
-            "description": "需要获取的作业的ID",
-            "format": "int64",
-            "required": True,
-            "in": "path",
-            "type": "integer",
-            "name": "operation_id"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "schema": {
-              "$ref": "#/definitions/OperationDetail"
-            }
-          }
-        }
+        "description": "获取某一用户信息"
       }
     },
     "/operation.results": {
@@ -566,21 +442,21 @@ api_data = {
         },
         "parameters": [
           {
-            "in": "body",
-            "name": "body",
             "schema": {
               "items": {
                 "$ref": "#/definitions/Batchresult"
               },
               "type": "array"
-            }
+            },
+            "name": "body",
+            "in": "body"
           }
-        ],
-        "tags": [
-          "Result"
         ],
         "produces": [
           "application/json"
+        ],
+        "tags": [
+          "Result"
         ],
         "summary": "批量修改结果数据",
         "consumes": [
@@ -629,17 +505,177 @@ api_data = {
             "in": "query"
           }
         ],
-        "tags": [
-          "Result"
-        ],
         "produces": [
           "application/json"
+        ],
+        "tags": [
+          "Result"
         ],
         "summary": "获取结果数据",
         "consumes": [
           "application/json"
         ],
         "description": "获取拧紧结果数据"
+      }
+    },
+    "/logo": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "图片信息",
+            "schema": {
+              "$ref": "#/definitions/Logo"
+            }
+          }
+        },
+        "tags": [
+          "LOGO"
+        ]
+      }
+    },
+    "/maintenance/requests": {
+      "post": {
+        "responses": {
+          "201": {
+            "description": "创建维护请求成功",
+            "schema": {
+              "$ref": "#/definitions/common_resp"
+            }
+          },
+          "404": {
+            "description": "枪序列号未找到",
+            "schema": {
+              "$ref": "#/definitions/common_resp"
+            }
+          },
+          "405": {
+            "description": "无效的输入,缺少参数",
+            "schema": {
+              "$ref": "#/definitions/common_resp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "required": True,
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/maintenance_request"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Maintenance"
+        ],
+        "summary": "创建维护请求",
+        "consumes": [
+          "application/json"
+        ],
+        "description": "创建维护请求"
+      }
+    },
+    "/mrp.workorders/{order_id}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "获取工单",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/WorkOrder"
+              },
+              "type": "array"
+            }
+          },
+          "404": {
+            "description": "MasterPC not found"
+          },
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "parameters": [
+          {
+            "required": True,
+            "type": "string",
+            "description": "MasterPC UUID",
+            "name": "order_id",
+            "in": "path"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Manufacture"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "description": "获取某一用户信息"
+      }
+    },
+    "/mrp.routing.workcenter/{operation_id}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "成功",
+            "schema": {
+              "$ref": "#/definitions/OperationDetail"
+            }
+          }
+        },
+        "description": "获取作业详情",
+        "parameters": [
+          {
+            "description": "需要获取的作业的ID",
+            "format": "int64",
+            "required": True,
+            "in": "path",
+            "type": "integer",
+            "name": "operation_id"
+          }
+        ],
+        "tags": [
+          "Operation"
+        ]
+      }
+    },
+    "/mrp.routing.workcenter/{operation_id}/edit": {
+      "put": {
+        "responses": {
+          "200": {
+            "description": "成功更新了作业图片点位"
+          },
+          "405": {
+            "description": "无效参数"
+          }
+        },
+        "description": "通过此api可以对某个作业的图片和点位进行编辑。参数中图片传入base64编码的字符串。 对于点位列表,如果传入的点位有sequence则会进行更新（如果对应sequence的点位不存在则会新增），如果不传sequence则会新增。对于那些不在点位列表中的作业点会进行删除操作（比如当前某作业有3个点，调用api时只传了前两个，那么第三个点会被删除。同理如果传了一个空的点位列表则会删除该作业的所有点）",
+        "parameters": [
+          {
+            "description": "需要修改的作业的ID",
+            "format": "int64",
+            "required": True,
+            "in": "path",
+            "type": "integer",
+            "name": "operation_id"
+          },
+          {
+            "schema": {
+              "$ref": "#/definitions/operation_edit"
+            },
+            "description": "图片点位信息",
+            "name": "body",
+            "in": "body"
+          }
+        ],
+        "tags": [
+          "Operation"
+        ]
       }
     },
     "/res.users/batch_archived": {
@@ -660,24 +696,24 @@ api_data = {
         },
         "parameters": [
           {
+            "required": True,
+            "in": "body",
+            "description": "用户唯一标示(胸卡信息)",
+            "name": "body",
             "schema": {
               "items": {
                 "type": "string",
                 "example": "112233"
               },
               "type": "array"
-            },
-            "required": True,
-            "description": "用户唯一标示(胸卡信息)",
-            "name": "body",
-            "in": "body"
+            }
           }
-        ],
-        "tags": [
-          "Users"
         ],
         "produces": [
           "application/json"
+        ],
+        "tags": [
+          "Users"
         ],
         "summary": "批量归档用户",
         "consumes": [
@@ -706,18 +742,18 @@ api_data = {
             "name": "resultId"
           },
           {
-            "in": "body",
-            "name": "body",
             "schema": {
               "$ref": "#/definitions/result"
-            }
+            },
+            "name": "body",
+            "in": "body"
           }
-        ],
-        "tags": [
-          "Result"
         ],
         "produces": [
           "application/json"
+        ],
+        "tags": [
+          "Result"
         ],
         "summary": "更新一条结果数据",
         "consumes": [
@@ -749,11 +785,11 @@ api_data = {
             "name": "resultId"
           }
         ],
-        "tags": [
-          "Result"
-        ],
         "produces": [
           "application/json"
+        ],
+        "tags": [
+          "Result"
         ],
         "summary": "获取一条结果数据",
         "consumes": [
@@ -767,18 +803,18 @@ api_data = {
         "description": "当AIIS收到FIS下发的装配任务，会调用此API将任务同步下发给ODOO.",
         "parameters": [
           {
+            "in": "body",
+            "name": "body",
             "schema": {
               "$ref": "#/definitions/mission"
-            },
-            "name": "body",
-            "in": "body"
+            }
           }
-        ],
-        "tags": [
-          "AIIS"
         ],
         "produces": [
           "application/json"
+        ],
+        "tags": [
+          "AIIS"
         ],
         "summary": "下发装配任务",
         "consumes": [
@@ -815,11 +851,11 @@ api_data = {
             "in": "query"
           }
         ],
-        "tags": [
-          "Manufacture"
-        ],
         "produces": [
           "application/json"
+        ],
+        "tags": [
+          "Manufacture"
         ],
         "summary": "获取生产订单清单",
         "consumes": [
@@ -865,15 +901,15 @@ api_data = {
             "required": True,
             "type": "string",
             "description": "用户唯一标示(胸卡信息)",
-            "in": "path",
-            "name": "uuid"
+            "name": "uuid",
+            "in": "path"
           }
-        ],
-        "tags": [
-          "Users"
         ],
         "produces": [
           "application/json"
+        ],
+        "tags": [
+          "Users"
         ],
         "summary": "查询用户清单",
         "consumes": [
@@ -884,6 +920,10 @@ api_data = {
     },
     "/mrp.routing.workcenter": {
       "get": {
+        "description": "获取作业清单",
+        "tags": [
+          "Operation"
+        ],
         "responses": {
           "200": {
             "description": "成功更新了结果数据",
@@ -896,10 +936,6 @@ api_data = {
         },
         "produces": [
           "application/json"
-        ],
-        "description": "获取作业清单",
-        "tags": [
-          "Operation"
         ]
       }
     }
@@ -953,10 +989,10 @@ api_data = {
           "example": 4.34
         },
         "control_date": {
-          "format": "date-time",
+          "description": "拧紧时间",
           "type": "string",
           "example": "2018-05-19T16:39:57+08:00",
-          "description": "拧紧时间"
+          "format": "date-time"
         },
         "pset_w_max": {
           "type": "number",
@@ -990,11 +1026,6 @@ api_data = {
           "type": "number",
           "example": 1.44,
           "description": "设定角度阈值"
-        },
-        "pset_w_min": {
-          "type": "number",
-          "example": 1.34,
-          "description": "设定最小角度"
         },
         "cur_objects": {
           "items": {
@@ -1033,6 +1064,11 @@ api_data = {
           "description": "实际扭矩",
           "example": 3.224
         },
+        "id": {
+          "type": "integer",
+          "example": 11635,
+          "description": "修改了结果的id"
+        },
         "measure_result": {
           "enum": [
             "ok",
@@ -1047,10 +1083,10 @@ api_data = {
           "description": "当前操作",
           "example": 1
         },
-        "id": {
-          "type": "integer",
-          "example": 11635,
-          "description": "修改了结果的id"
+        "pset_w_min": {
+          "type": "number",
+          "example": 1.34,
+          "description": "设定最小角度"
         },
         "pset_w_target": {
           "type": "number",
@@ -1112,68 +1148,6 @@ api_data = {
         }
       }
     },
-    "ts002Operation": {
-      "required": [
-        "code",
-        "resources"
-      ],
-      "type": "object",
-      "description": "工艺作业",
-      "properties": {
-        "code": {
-          "type": "string",
-          "description": "工艺代码",
-          "example": "G0C"
-        },
-        "resources": {
-          "$ref": "#/definitions/ts002OperationResource"
-        },
-        "desc": {
-          "type": "string",
-          "description": "工艺相关描述",
-          "example": "测试工艺作业"
-        }
-      }
-    },
-    "ts002FinishedProduct": {
-      "required": [
-        "code",
-        "url"
-      ],
-      "type": "object",
-      "description": "产成品",
-      "properties": {
-        "url": {
-          "type": "string",
-          "description": "产成品三维模型路径"
-        },
-        "code": {
-          "type": "string",
-          "description": "产成品料号"
-        }
-      }
-    },
-    "OperationDetail": {
-      "type": "object",
-      "properties": {
-        "points": {
-          "items": {
-            "$ref": "#/definitions/point"
-          },
-          "type": "array"
-        },
-        "id": {
-          "type": "integer"
-        },
-        "img": {
-          "type": "string",
-          "description": "作业图片信息(base64)"
-        },
-        "name": {
-          "type": "string"
-        }
-      }
-    },
     "ts002OperationResource": {
       "required": [
         "users",
@@ -1197,6 +1171,64 @@ api_data = {
           },
           "type": "array",
           "description": "作业相关操作人员"
+        }
+      }
+    },
+    "ts002FinishedProduct": {
+      "required": [
+        "code",
+        "url"
+      ],
+      "type": "object",
+      "description": "产成品",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "产成品三维模型路径"
+        },
+        "code": {
+          "type": "string",
+          "description": "产成品料号"
+        }
+      }
+    },
+    "point_edit": {
+      "type": "object",
+      "properties": {
+        "y_offset": {
+          "type": "integer",
+          "description": "上偏移"
+        },
+        "x_offset": {
+          "type": "integer",
+          "description": "左偏移"
+        },
+        "sequence": {
+          "type": "integer",
+          "description": "id"
+        }
+      }
+    },
+    "ts002Operation": {
+      "required": [
+        "code",
+        "resources"
+      ],
+      "type": "object",
+      "description": "工艺作业",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "工艺代码",
+          "example": "G0C"
+        },
+        "resources": {
+          "$ref": "#/definitions/ts002OperationResource"
+        },
+        "desc": {
+          "type": "string",
+          "description": "工艺相关描述",
+          "example": "测试工艺作业"
         }
       }
     },
@@ -1240,10 +1272,10 @@ api_data = {
           "example": 5
         },
         "date_planned_start": {
-          "example": "2018-05-19T16:39:57+08:00",
+          "format": "date-time",
           "type": "string",
-          "description": "生产订单日期",
-          "format": "date-time"
+          "example": "2018-05-19T16:39:57+08:00",
+          "description": "生产订单日期"
         },
         "equipment_name": {
           "type": "string",
@@ -1358,58 +1390,154 @@ api_data = {
         }
       }
     },
-    "ts002Environment": {
-      "required": [
-        "code",
-        "text",
-        "sequence",
-        "test_type"
-      ],
+    "result": {
       "type": "object",
-      "description": "环境,此检查类型必须在正式作业的前面完成。",
       "properties": {
-        "text": {
-          "type": "string"
+        "pset_m_threshold": {
+          "type": "number",
+          "example": 1.44,
+          "description": "设定扭矩阈值"
         },
-        "test_type": {
-          "default": "text",
+        "pset_m_max": {
+          "type": "number",
+          "description": "设定最大扭矩",
+          "example": 4.34
+        },
+        "control_date": {
+          "description": "拧紧时间",
+          "type": "string",
+          "example": "2018-05-19T16:39:57+08:00",
+          "format": "date-time"
+        },
+        "pset_w_max": {
+          "type": "number",
+          "description": "设定最大角度",
+          "example": 4.34
+        },
+        "user_id": {
+          "type": "integer",
+          "example": 1,
+          "description": "当前操作用户"
+        },
+        "one_time_pass": {
+          "type": "string",
+          "example": "fail",
+          "description": "是否一次成功（pass/fail）"
+        },
+        "quality_state": {
           "enum": [
-            "text",
-            "passfail"
+            "exception",
+            "pass",
+            "fail"
           ],
           "type": "string",
-          "example": "text",
-          "description": "检查类型"
+          "description": "质量检测结果",
+          "example": "pass"
         },
-        "code": {
+        "pset_strategy": {
+          "enum": [
+            "AD",
+            "AW",
+            "ADW",
+            "LN",
+            "AN",
+            "AT"
+          ],
           "type": "string",
-          "description": "环境检查项编码",
-          "example": "1111"
+          "description": "拧紧枪策略",
+          "example": "AD"
         },
-        "desc": {
+        "pset_w_threshold": {
+          "type": "number",
+          "example": 1.44,
+          "description": "设定角度阈值"
+        },
+        "pset_w_min": {
+          "type": "number",
+          "example": 1.34,
+          "description": "设定最小角度"
+        },
+        "cur_objects": {
+          "items": {
+            "$ref": "#/definitions/curve"
+          },
+          "type": "array",
+          "description": "个次操作波形对象列表"
+        },
+        "pset_m_target": {
+          "type": "number",
+          "example": 1.44,
+          "description": "设定目标扭矩"
+        },
+        "pset_m_min": {
+          "type": "number",
+          "example": 1.34,
+          "description": "设定最小扭矩"
+        },
+        "final_pass": {
           "type": "string",
-          "description": "环境检查的描述"
+          "example": "pass",
+          "description": "是否最终成功（pass/fail）"
         },
-        "sequence": {
+        "measure_degree": {
+          "type": "number",
+          "description": "实际角度",
+          "example": 2.44
+        },
+        "measure_t_don": {
+          "type": "number",
+          "description": "拧紧过程花费时间",
+          "example": 3.22
+        },
+        "measure_torque": {
+          "type": "number",
+          "description": "实际扭矩",
+          "example": 3.224
+        },
+        "measure_result": {
+          "enum": [
+            "ok",
+            "nok"
+          ],
+          "type": "string",
+          "description": "测量结果",
+          "example": "ok"
+        },
+        "op_time": {
           "type": "integer",
+          "description": "当前操作",
           "example": 1
+        },
+        "exception_reason": {
+          "type": "string",
+          "example": "unknown",
+          "description": "异常原因"
+        },
+        "pset_w_target": {
+          "type": "number",
+          "example": 1.44,
+          "description": "设定目标角度"
         }
       }
     },
-    "point_edit": {
+    "OperationDetail": {
       "type": "object",
       "properties": {
-        "y_offset": {
-          "type": "integer",
-          "description": "上偏移"
+        "points": {
+          "items": {
+            "$ref": "#/definitions/point"
+          },
+          "type": "array"
         },
-        "x_offset": {
-          "type": "integer",
-          "description": "左偏移"
+        "id": {
+          "type": "integer"
         },
-        "sequence": {
-          "type": "integer",
-          "description": "id"
+        "img": {
+          "type": "string",
+          "description": "作业图片信息(base64)"
+        },
+        "name": {
+          "type": "string"
         }
       }
     },
@@ -1555,136 +1683,6 @@ api_data = {
         }
       }
     },
-    "result": {
-      "type": "object",
-      "properties": {
-        "pset_m_threshold": {
-          "type": "number",
-          "example": 1.44,
-          "description": "设定扭矩阈值"
-        },
-        "pset_m_max": {
-          "type": "number",
-          "description": "设定最大扭矩",
-          "example": 4.34
-        },
-        "control_date": {
-          "format": "date-time",
-          "type": "string",
-          "example": "2018-05-19T16:39:57+08:00",
-          "description": "拧紧时间"
-        },
-        "pset_w_max": {
-          "type": "number",
-          "description": "设定最大角度",
-          "example": 4.34
-        },
-        "user_id": {
-          "type": "integer",
-          "example": 1,
-          "description": "当前操作用户"
-        },
-        "one_time_pass": {
-          "type": "string",
-          "example": "fail",
-          "description": "是否一次成功（pass/fail）"
-        },
-        "quality_state": {
-          "enum": [
-            "exception",
-            "pass",
-            "fail"
-          ],
-          "type": "string",
-          "description": "质量检测结果",
-          "example": "pass"
-        },
-        "pset_strategy": {
-          "enum": [
-            "AD",
-            "AW",
-            "ADW",
-            "LN",
-            "AN",
-            "AT"
-          ],
-          "type": "string",
-          "description": "拧紧枪策略",
-          "example": "AD"
-        },
-        "pset_w_threshold": {
-          "type": "number",
-          "example": 1.44,
-          "description": "设定角度阈值"
-        },
-        "cur_objects": {
-          "items": {
-            "$ref": "#/definitions/curve"
-          },
-          "type": "array",
-          "description": "个次操作波形对象列表"
-        },
-        "pset_m_target": {
-          "type": "number",
-          "example": 1.44,
-          "description": "设定目标扭矩"
-        },
-        "pset_m_min": {
-          "type": "number",
-          "example": 1.34,
-          "description": "设定最小扭矩"
-        },
-        "final_pass": {
-          "type": "string",
-          "example": "pass",
-          "description": "是否最终成功（pass/fail）"
-        },
-        "exception_reason": {
-          "type": "string",
-          "example": "unknown",
-          "description": "异常原因"
-        },
-        "measure_degree": {
-          "type": "number",
-          "description": "实际角度",
-          "example": 2.44
-        },
-        "measure_t_don": {
-          "type": "number",
-          "description": "拧紧过程花费时间",
-          "example": 3.22
-        },
-        "measure_torque": {
-          "type": "number",
-          "description": "实际扭矩",
-          "example": 3.224
-        },
-        "measure_result": {
-          "enum": [
-            "ok",
-            "nok"
-          ],
-          "type": "string",
-          "description": "测量结果",
-          "example": "ok"
-        },
-        "op_time": {
-          "type": "integer",
-          "description": "当前操作",
-          "example": 1
-        },
-        "pset_w_min": {
-          "type": "number",
-          "example": 1.34,
-          "description": "设定最小角度"
-        },
-        "pset_w_target": {
-          "type": "number",
-          "example": 1.44,
-          "description": "设定目标角度"
-        }
-      }
-    },
     "ts002Order": {
       "required": [
         "code",
@@ -1726,16 +1724,16 @@ api_data = {
           "example": "M000001780589"
         },
         "date_planned_complete": {
-          "format": "date-time",
+          "description": "计划开工时间",
           "type": "string",
           "example": "2019-10-17T12:20:30+08:00",
-          "description": "计划开工时间"
+          "format": "date-time"
         },
         "date_planned_start": {
-          "format": "date-time",
+          "description": "计划开工时间",
           "type": "string",
           "example": "2019-10-16T11:20:30+08:00",
-          "description": "计划开工时间"
+          "format": "date-time"
         },
         "worksheet": {
           "$ref": "#/definitions/ts002Worksheet"
@@ -1760,32 +1758,6 @@ api_data = {
       }
     },
     "ts002WorkStep": {
-      "example": [
-        {
-          "code": "T0001",
-          "sequence": 1,
-          "text": "测试文本工步",
-          "test_type": "text",
-          "failure_msg": "测试文本工步失败消息",
-          "desc": "测试文本工步描述"
-        },
-        {
-          "code": "T0002",
-          "tightening_total": 4,
-          "sequence": 2,
-          "test_type": "tightening",
-          "failure_msg": "测试拧紧工步失败消息",
-          "desc": "测试拧紧工步描述"
-        }
-      ],
-      "required": [
-        "code",
-        "sequence",
-        "test_type",
-        "failure_msg"
-      ],
-      "type": "object",
-      "description": "环境",
       "properties": {
         "code": {
           "type": "string",
@@ -1842,7 +1814,33 @@ api_data = {
           "type": "string",
           "description": "如果失败弹出的信息"
         }
-      }
+      },
+      "required": [
+        "code",
+        "sequence",
+        "test_type",
+        "failure_msg"
+      ],
+      "type": "object",
+      "example": [
+        {
+          "code": "T0001",
+          "sequence": 1,
+          "text": "测试文本工步",
+          "test_type": "text",
+          "failure_msg": "测试文本工步失败消息",
+          "desc": "测试文本工步描述"
+        },
+        {
+          "code": "T0002",
+          "tightening_total": 4,
+          "sequence": 2,
+          "test_type": "tightening",
+          "failure_msg": "测试拧紧工步失败消息",
+          "desc": "测试拧紧工步描述"
+        }
+      ],
+      "description": "环境"
     },
     "curve": {
       "type": "object",
@@ -1857,22 +1855,41 @@ api_data = {
         }
       }
     },
-    "ts002Component": {
+    "ts002Environment": {
       "required": [
         "code",
-        "is_key"
+        "text",
+        "sequence",
+        "test_type"
       ],
       "type": "object",
-      "description": "作业所需部件信息",
+      "description": "环境,此检查类型必须在正式作业的前面完成。",
       "properties": {
-        "is_key": {
-          "type": "boolean",
-          "description": "是否为关键部件"
+        "text": {
+          "type": "string"
+        },
+        "test_type": {
+          "default": "text",
+          "enum": [
+            "text",
+            "passfail"
+          ],
+          "type": "string",
+          "example": "text",
+          "description": "检查类型"
         },
         "code": {
           "type": "string",
-          "description": "部件代码",
+          "description": "环境检查项编码",
           "example": "1111"
+        },
+        "sequence": {
+          "type": "integer",
+          "example": 1
+        },
+        "desc": {
+          "type": "string",
+          "description": "环境检查的描述"
         }
       }
     },
@@ -1979,6 +1996,25 @@ api_data = {
         }
       }
     },
+    "ts002Component": {
+      "required": [
+        "code",
+        "is_key"
+      ],
+      "type": "object",
+      "description": "作业所需部件信息",
+      "properties": {
+        "is_key": {
+          "type": "boolean",
+          "description": "是否为关键部件"
+        },
+        "code": {
+          "type": "string",
+          "description": "部件代码",
+          "example": "1111"
+        }
+      }
+    },
     "WorkOrder": {
       "type": "object",
       "properties": {
@@ -2000,12 +2036,6 @@ api_data = {
         "pin": {
           "type": "string",
           "example": 12345
-        },
-        "consumes": {
-          "items": {
-            "$ref": "#/definitions/Consume"
-          },
-          "type": "array"
         },
         "worksheet": {
           "type": "string",
@@ -2052,6 +2082,10 @@ api_data = {
           "type": "integer",
           "example": 2018
         },
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
         "factory_name": {
           "type": "string",
           "description": "订单工厂代号",
@@ -2065,9 +2099,11 @@ api_data = {
         "knr": {
           "type": "string"
         },
-        "id": {
-          "type": "integer",
-          "format": "int64"
+        "consumes": {
+          "items": {
+            "$ref": "#/definitions/Consume"
+          },
+          "type": "array"
         },
         "equipment_name": {
           "type": "string",

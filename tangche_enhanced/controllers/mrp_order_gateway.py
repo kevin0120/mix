@@ -249,3 +249,26 @@ class TangcheMrpOrderGateway(Controller):
         except Exception as e:
             msg = str(e)
             return sa_fail_response(msg=msg)
+
+    @route('/api/v1/ts002/mrp.workcenter/<string:ref>/OperationDownload', type='http', methods=['PUT', 'OPTIONS'],
+           auth='none', cors='*', csrf=False)
+    def tangcheWorkCenterOperationSync(self, ref, **kw):
+        try:
+            if not ref:
+                raise ValidationError('Work Center Code Must Be Include')
+            env = api.Environment(request.cr, SUPERUSER_ID, request.context)
+            work_center_sudo = env['mrp.workcenter'].sudo()
+            workcenter_id = work_center_sudo.search(['|', ('code', '=', ref), ('name', '=', ref)])
+            if not workcenter_id:
+                raise ValidationError('Can Not Found Work Center By Ref:{0}'.format(ref))
+            if len(workcenter_id) > 1:
+                raise ValidationError('Work Center By Ref:{0} Is Not Unique!'.format(ref))
+            workcenter_id.button_sync_operations()
+            msg = "Sync Operation Success"
+            return sa_success_resp(status_code=200, msg=msg)
+        except RetryError as err:
+            msg = str(err)
+            return sa_fail_response(msg=msg)
+        except Exception as e:
+            msg = getattr(e, 'message') or getattr(e, 'name')
+            return sa_fail_response(msg=msg)
