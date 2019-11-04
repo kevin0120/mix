@@ -46,12 +46,15 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
     _productCode = '';
 
+    _operation = '';
+
     // eslint-disable-next-line flowtype/no-weak-types
     constructor(dataObj: { [key: string]: any }, ...rest: Array<any>) {
       super(dataObj, ...rest);
       this._status = dataObj.status || this._status;
       this._trackCode = dataObj.track_code;
       this._productCode = dataObj.product_code;
+      this._operation = dataObj.operation;
     }
 
     get plannedDateTime() {
@@ -176,7 +179,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
               s => s.setting.system.workcenter.code
             );
             const productCode = '';
-            const operation = {};
+            const operation = this._operation;
             closeAction = [
               orderActions.reportFinish(
                 code,

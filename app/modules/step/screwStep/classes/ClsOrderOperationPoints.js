@@ -10,7 +10,7 @@ export class ClsOrderOperationPoints {
   _groups: { [groupSeq: number]: ClsOperationPointGroup } = {};
 
   static validatePayload(payload: tScrewStepPayload): boolean {
-    CommonLog.Debug(`ClsOrderOperationPoints validatePayload Points: ${JSON.stringify(payload.points)}`);
+    CommonLog.Debug(`ClsOrderOperationPoints validatePayload Points: ${JSON.stringify(payload.tightening_points)}`);
     let ret: boolean = true;
     const { controllerMode, jobID } = payload;
     switch (controllerMode) {

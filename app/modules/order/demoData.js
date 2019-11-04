@@ -7,7 +7,7 @@ import type { tOrder } from './interface/typeDef';
 
 // console.log(screwImg);
 export const demoOrder: tOrder = {
-  code: 1,
+  code: '1',
   name: 'demo Order 1',
   desc: 'a:b\t\tb:c\t\tc:d',
   canRework:true,
@@ -53,7 +53,7 @@ export const demoOrder: tOrder = {
       info: {
         time: '00:02:00'
       },
-      type: 'screw',
+      type: 'tightening',
       skippable: false,
       undoable: true,
       payload: {
@@ -124,7 +124,7 @@ export const demoOrder: tOrder = {
       info: {
         time: '00:02:00'
       },
-      type: 'screw',
+      type: 'tightening',
       skippable: false,
       undoable: true,
       payload: {

@@ -114,7 +114,7 @@ export const orderActions = Object.freeze({
     type: ORDER.NEW_SCANNER,
     scanner
   }),
-  reportFinish: (code, trackCode, workCenterCode, productCode, operation) => ({
+  reportFinish: (code: string, trackCode: string, workCenterCode: string , productCode: string, operation: {}) => ({
     type: ORDER.REPORT_FINISH,
     code,
     trackCode,

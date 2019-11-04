@@ -191,7 +191,7 @@ function* getOrderDetail({ order }) {
     const detailResult = yield fork(function* detailResult() {
       yield race([take(ORDER.DETAIL.SUCCESS), take(ORDER.DETAIL.FAIL)]);
     });
-    const resp = yield call(orderDetailApi, rOrder.code);
+    const resp = yield call(orderDetailApi, rOrder.id);
     if (resp.result !== 0) {
       yield put(orderActions.getDetailFail());
     }

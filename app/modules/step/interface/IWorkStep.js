@@ -4,6 +4,7 @@ import type { tAnyStepStatus, tRunSubStepCallbacks, tStepDataReducer, tStepPaylo
 import type { tCallable } from '../../typeDef';
 
 export interface IWorkStep {
+  _id: number,
   _code: string,
   _name: string,
   _desc: string,
@@ -25,6 +26,7 @@ export interface IWorkStep {
   },
   +constructor: ({ [key: string]: any }, ...Array<any>)=>void,
   +update: (tStep)=>void,
+  +id: number,
   +code: string,
   +name: string,
   +desc: string,

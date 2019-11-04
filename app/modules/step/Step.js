@@ -25,6 +25,8 @@ function invalidStepStatus(stepType, status) {
 }
 
 export default class Step implements IWorkStep {
+  _id: number = 0;
+
   _code = '';
 
   _name = '';
@@ -91,7 +93,7 @@ export default class Step implements IWorkStep {
           existStep.update(sD);
           return existStep;
         }
-        if(!stepTypes[sD.test_type] || typeof stepTypes[sD.test_type] !== 'function' ){
+        if (!stepTypes[sD.test_type] || typeof stepTypes[sD.test_type] !== 'function') {
           return new Step(sD);
         }
         return new (stepTypes[sD.test_type](Step))(sD);
@@ -121,6 +123,10 @@ export default class Step implements IWorkStep {
 
   get code() {
     return this._code;
+  }
+
+  get id() {
+    return this._id;
   }
 
   get name() {
