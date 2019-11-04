@@ -133,7 +133,7 @@ export function init(url, hmiSN, window) {
       ws.on('websocket-status', (...args) => {
         window.send('rush-status', ...args);
       });
-    } else if (!ws.closed) {
+    } else if (!ws.closed && ws.ws.readyState === OWebSocket.OPEN) {
       window.send('rush-open');
     }
   });

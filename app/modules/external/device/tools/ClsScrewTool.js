@@ -5,7 +5,7 @@ import { call } from 'redux-saga/effects';
 import Device from '../Device';
 import { CommonLog } from '../../../../common/utils';
 import { toolEnableApi } from '../../../../api/tools';
-import type {IScrewTool} from './interface/IScrewTool';
+import type { IScrewTool } from './interface/IScrewTool';
 
 export default class ClsScrewTool extends Device implements IScrewTool {
   constructor(name: string, serialNumber: string, ...rest: Array<any>) {
@@ -24,7 +24,7 @@ export default class ClsScrewTool extends Device implements IScrewTool {
     return ret;
   }
 
-  *Enable(): Saga<void> {
+  * Enable(): Saga<void> {
     try {
       if (!this.isEnable) {
         const { result, msg } = yield call(
@@ -33,12 +33,7 @@ export default class ClsScrewTool extends Device implements IScrewTool {
           true
         );
         if (result !== 0) {
-          CommonLog.lError(`tool enable failed:${msg}`, {
-            at: 'ClsScrewTool.Enable',
-            tool_sn: this.serialNumber,
-            enable: true
-          });
-          return;
+          throw new Error(`工具使能失败: ${msg}`);
         }
         yield call([this, super.Enable]);
       }
@@ -46,10 +41,11 @@ export default class ClsScrewTool extends Device implements IScrewTool {
       CommonLog.lError(e, {
         at: 'ClsScrewTool.Enable'
       });
+      throw e;
     }
   }
 
-  *Disable(): Saga<void> {
+  * Disable(): Saga<void> {
     try {
       if (this.isEnable) {
         const { result, msg } = yield call(
@@ -58,12 +54,7 @@ export default class ClsScrewTool extends Device implements IScrewTool {
           false
         );
         if (result !== 0) {
-          CommonLog.lError(`tool enable failed:${msg}`, {
-            at: 'ClsScrewTool.Disable',
-            tool_sn: this.serialNumber,
-            enable: false
-          });
-          return;
+          throw new Error(`工具禁用失败: ${msg}`);
         }
         yield call([this, super.Disable]);
       }
@@ -71,10 +62,11 @@ export default class ClsScrewTool extends Device implements IScrewTool {
       CommonLog.lError(e, {
         at: 'ClsScrewTool.Disable'
       });
+      throw e;
     }
   }
 
-  *ToggleEnable(): Saga<void> {
+  * ToggleEnable(): Saga<void> {
     try {
       const { result, msg } = yield call(
         (toolEnableApi: Function),
@@ -82,12 +74,7 @@ export default class ClsScrewTool extends Device implements IScrewTool {
         !this.isEnable
       );
       if (result !== 0) {
-        CommonLog.lError(`tool enable failed:${msg}`, {
-          at: 'ClsScrewTool.ToggleEnable',
-          tool_sn: this.serialNumber,
-          enable: !this.isEnable
-        });
-        return;
+        throw new Error(`切换工具使能失败: ${msg}`);
       }
       yield call([this, super.ToggleEnable]);
     } catch (e) {
