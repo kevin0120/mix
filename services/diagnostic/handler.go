@@ -469,6 +469,22 @@ func (h *ScannerHandler) Debug(msg string) {
 	h.l.Debug(msg)
 }
 
+type BrokerHandler struct {
+	l Logger
+}
+
+func (h *BrokerHandler) Info(msg string) {
+	h.l.Info(msg)
+}
+
+func (h *BrokerHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+func (h *BrokerHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}
+
 type IOHandler struct {
 	l Logger
 }

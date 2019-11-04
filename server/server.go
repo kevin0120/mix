@@ -6,6 +6,7 @@ import (
 	"github.com/masami10/rush/keyvalue"
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/audi_vw"
+	"github.com/masami10/rush/services/broker"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/diagnostic"
@@ -65,6 +66,8 @@ type Server struct {
 
 	TighteningDeviceService *tightening_device.Service
 	DeviceService           *device.Service
+
+	BrokerService *broker.Service
 
 	config *Config
 	// List of services in startup order
@@ -366,6 +369,20 @@ func (s *Server) AppendScannerService() error {
 
 	s.ScannerService = srv
 	s.AppendService("scanner", srv)
+
+	return nil
+}
+
+func (s *Server) AppendBrokerService() error {
+	c := s.config.Broker
+	d := s.DiagService.NewBrokerHandler()
+
+	srv := broker.NewService(c, d)
+
+	s.BrokerService = srv
+	if c.Enable {
+		s.AppendService("broker", srv)
+	}
 
 	return nil
 }

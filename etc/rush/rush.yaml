@@ -167,6 +167,13 @@ tightening_device:
 
 
 # 协议类型: Audi/VW, OpenProtocol
+broker:
+  enable: true
+  connect-urls:
+    - nats://192.168.4.203:4222
+    - nats://192.168.4.203:4223
+    - nats://192.168.4.203:4224
+  provider: nats
 controller_service:
   enable: false
   workers: 1

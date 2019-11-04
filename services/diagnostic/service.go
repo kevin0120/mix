@@ -120,6 +120,12 @@ func (s *Service) NewScannerHandler() *ScannerHandler {
 	}
 }
 
+func (s *Service) NewBrokerHandler() *BrokerHandler {
+	return &BrokerHandler{
+		l: s.Logger.With(String("service", "broker")),
+	}
+}
+
 func (s *Service) NewIOHandler() *IOHandler {
 	return &IOHandler{
 		l: s.Logger.With(String("service", "io")),
