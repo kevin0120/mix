@@ -18,7 +18,7 @@ export class ClsOperationPoint {
 
   constructor(p: tPoint) {
     this._point = p;
-    this._toolSN = p.toolSN;
+    this._toolSN = p.tightening_tool;
     this._results = [];
   }
 
@@ -31,9 +31,9 @@ export class ClsOperationPoint {
     //   this._results[rsCount - 1].result === RESULT_STATUS.nok
     // );
     return (
-      this._point.maxRetryTimes >= 0 &&
+      this._point.max_redo_times >= 0 &&
       this._results.filter(r => r.result === RESULT_STATUS.nok).length >=
-        this._point.maxRetryTimes
+        this._point.max_redo_times
     );
   }
 
@@ -68,7 +68,7 @@ export class ClsOperationPoint {
     return this._point.y;
   }
 
-  get groupSequence() {
+  get group_sequence() {
     return this._point.group_sequence;
   }
 

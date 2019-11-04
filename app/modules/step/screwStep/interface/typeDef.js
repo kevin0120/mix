@@ -9,10 +9,9 @@ export type tResultStatus = $Values<typeof RESULT_STATUS>;
 
 export type tPoint = {
   id: number,
-  toolSN: string,
-  pset: number,
-  maxRetryTimes: number, // max_redo_times
-  minPassCount: number, // group 最完成数量
+  tightening_tool: string,
+  pset: string,
+  max_redo_times: number, // max_redo_times
   x: number,
   y: number,
 

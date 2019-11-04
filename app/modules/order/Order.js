@@ -48,6 +48,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
     _operation = '';
 
+
     // eslint-disable-next-line flowtype/no-weak-types
     constructor(dataObj: { [key: string]: any }, ...rest: Array<any>) {
       super(dataObj, ...rest);

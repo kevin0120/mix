@@ -21,8 +21,8 @@ export class ClsOperationPointGroup {
   }
 
   validatePoint(p: tPoint): boolean {
-    const { toolSN } = p;
-    const pointWithSameToolSN = find(this._points, { toolSN });
+    const { tightening_tool } = p;
+    const pointWithSameToolSN = find(this._points, { tightening_tool });
     return isNil(pointWithSameToolSN);
 
   }
@@ -30,7 +30,7 @@ export class ClsOperationPointGroup {
   appendNewOperationPoint(p: tPoint): boolean {
     if (!this.validatePoint(p)) {
       CommonLog.lError(
-        `appendNewOperationPoint validatePoint Error: ${p.toolSN}`
+        `appendNewOperationPoint validatePoint Error: ${p.tightening_tool}`
       );
       return false;
     }

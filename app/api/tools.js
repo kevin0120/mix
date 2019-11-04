@@ -20,7 +20,7 @@ export function* toolEnableApi(toolSN: string, enable: boolean): Saga<void> {
 }
 
 export function* psetApi(toolSN: string = '', stepID: number, userID: number,
-                         pset: number, sequence: number, count: number,
+                         pset: string, sequence: number, count: number,
                          total: number, workorderID: string): Saga<void> {
   try {
     return yield call(rushSendApi, 'WS_TOOL_PSET', {

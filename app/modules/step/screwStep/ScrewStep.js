@@ -55,7 +55,7 @@ export function* doPoint(
 }
 
 export function getTools(points: Array<tPoint>) {
-  const toolSnSet = new Set(points.map(p => p.toolSN));
+  const toolSnSet = new Set(points.map(p => p.tightening_tool));
   const lostTool = [];
   const tools = [];
   toolSnSet.forEach(t => {

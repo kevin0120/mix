@@ -19,12 +19,12 @@ export default {
       // const userID = 1;
 
       // const { toolSN, pset, sequence } = points[activeIndex];
-      const { toolSN, pset, sequence } = point;
+      const { tightening_tool, pset, sequence } = point;
       const total = points.length || 0;
       const workorderID = yield select(s => workingOrder(s.order)?.code);
       const data = yield call(
         psetApi,
-        toolSN || '',
+        tightening_tool || '',
         stepId,
         // userID,
         userIDs,
@@ -38,7 +38,7 @@ export default {
         notifierActions.enqueueSnackbar('Error', `pset失败:${data.msg}`);
         CommonLog.lError(`pset失败${data.msg || ''}`, {
           at: 'pset',
-          toolSN,
+          tightening_tool,
           stepId,
           // userID,
           userIDs,
@@ -69,10 +69,10 @@ export default {
       const { jobID, points }: tScrewStepData = this._data;
       const stepId = this._id;
       const toolSN = points.reduce((tSN: string, p: tPoint): string => {
-        if (tSN && p.toolSN !== tSN) {
+        if (tSN && p.tightening_tool !== tSN) {
           CommonLog.lError('结果中的toolSN不匹配');
         }
-        return p.toolSN || tSN || '';
+        return p.tightening_tool || tSN || '';
       }, '');
 
       const userID = 1;
