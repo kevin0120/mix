@@ -48,6 +48,8 @@ require (
 	github.com/minio/minio-go v6.0.14+incompatible
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/moul/http2curl v1.0.0 // indirect
+	github.com/nats-io/nats-server/v2 v2.1.0 // indirect
+	github.com/nats-io/nats.go v1.9.1
 	github.com/pkg/errors v0.8.1
 	github.com/ryanuber/columnize v2.1.0+incompatible // indirect
 	github.com/satori/go.uuid v1.2.0
