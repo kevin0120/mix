@@ -74,6 +74,7 @@ const orderReducer: {
   [ORDER.WORK_ON]: (state, { order }: { order: IOrder }) => ({
     ...state,
     workingOrder: order || null,
+    viewingOrder: order || null,
     viewingIndex:
       workingIndex(order) >= order.steps.length ? 0 : workingIndex(order)
   }),

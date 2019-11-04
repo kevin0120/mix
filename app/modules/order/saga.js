@@ -15,6 +15,8 @@ import {
 } from 'redux-saga/effects';
 import React from 'react';
 import type { Saga } from 'redux-saga';
+import { isNil } from 'lodash-es';
+import { push } from 'connected-react-router';
 import { orderActions } from './action';
 import { workingOrder, orderSteps, doable, viewingOrder } from './selector';
 import dialogActions from '../dialog/action';
@@ -47,6 +49,7 @@ export default function* root(): Saga<void> {
       call(watchOrderTrigger),
       takeEvery(ORDER.WORK_ON, workOnOrder),
       takeEvery(ORDER.VIEW, viewOrder),
+      takeEvery(ORDER.TRY_VIEW, tryViewOrder),
       takeEvery(ORDER.REPORT_FINISH, reportFinish),
       takeLeading([ORDER.STEP.PREVIOUS, ORDER.STEP.NEXT], DebounceViewStep, 300)
     ]);
@@ -71,9 +74,10 @@ function* bindNewScanner() {
 function onNewScanner({ scanner }) {
   try {
     // TODO: filter scanner input
+    scanner.Enable();
     scanner.addListener(
       () => true,
-      input => orderActions.tryWorkOnCode(input.data)
+      input => orderActions.tryViewCode(input.data)
     );
   } catch (e) {
     CommonLog.lError(e, { at: 'onNewScanner' });
@@ -83,9 +87,22 @@ function onNewScanner({ scanner }) {
 // TODO: 工单持久化
 
 // TODO: 开工、报工接口
-function* reportFinish({ code, trackCode, workCenterCode, productCode, operation }) {
+function* reportFinish({
+  code,
+  trackCode,
+  workCenterCode,
+  productCode,
+  operation
+}) {
   try {
-    yield call(orderReportFinishApi, code, trackCode, workCenterCode, productCode, operation);
+    yield call(
+      orderReportFinishApi,
+      code,
+      trackCode,
+      workCenterCode,
+      productCode,
+      operation
+    );
   } catch (e) {
     CommonLog.lError(e, { at: 'reportFinish' });
   }
@@ -104,9 +121,9 @@ function* watchOrderTrigger() {
 }
 
 function* tryWorkOnOrder({
-                           order,
-                           code
-                         }: {
+  order,
+  code
+}: {
   order: IOrder,
   code: string | number
 }) {
@@ -197,15 +214,47 @@ function* getOrderList() {
   }
 }
 
+function* tryViewOrder({
+  order: orderRec,
+  code
+}: {
+  order: IOrder,
+  code: string | number
+}) {
+  try {
+    yield put(push('/app/working'));
+
+    const orderList = yield select(s => s.order.list);
+    let order = orderRec;
+
+    if (isNil(order) && !isNil(code)) {
+      order = orderList.find(o => o.id === code);
+    }
+
+    // TODO: check conditions
+
+    if (!order) {
+      return;
+    }
+
+    yield call(getOrderDetail, { order });
+
+    yield put(orderActions.view(order));
+  } catch (e) {
+    CommonLog.lError(e, { at: 'tryViewOrder', orderRec, code });
+  }
+}
+
 function* viewOrder({ order }: { order: IOrder }) {
   try {
+    yield put(push('/app/working'));
+
     const WIPOrder: IOrder = yield select(s => workingOrder(s.order));
 
     if (WIPOrder === order) {
       // 进行中的工单不显示概览对话框
       return;
     }
-    yield call(getOrderDetail, { order });
 
     const vOrderSteps: ?Array<IWorkStep> = yield select(state =>
       orderSteps(viewingOrder(state.order))
@@ -229,11 +278,11 @@ function* viewOrder({ order }: { order: IOrder }) {
             color: 'warning'
           },
           !WIPOrder &&
-          doable(order) && {
-            label: 'Order.Start',
-            color: 'info',
-            action: orderActions.tryWorkOn(order)
-          }
+            doable(order) && {
+              label: 'Order.Start',
+              color: 'info',
+              action: orderActions.tryWorkOn(order)
+            }
         ],
         title: i18n.t('Order.Overview'),
         content: (

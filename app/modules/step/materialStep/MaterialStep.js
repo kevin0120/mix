@@ -54,7 +54,6 @@ const MaterialStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
           const sPayload = yield select(s =>
             stepPayload(workingStep(workingOrder(s.order)))
           );
-          console.log(items(sPayload));
           items(sPayload).forEach(i => {
             let item = null;
             ['in', 'out'].forEach(dir => {
@@ -112,7 +111,6 @@ const MaterialStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
       },
       *[STEP_STATUS.DOING](ORDER, orderActions) {
         try {
-          console.log('material step doing');
           const listeners = [];
           [...this._items].forEach(i => {
             listeners.push({
@@ -136,7 +134,6 @@ const MaterialStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               actions.ready
             );
           }
-          console.log(this._items);
 
           yield race([
             take(MATERIAL_STEP.READY),
@@ -169,6 +166,7 @@ const MaterialStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
       },
       *[STEP_STATUS.FAIL](ORDER, orderActions, msg) {
         try {
+          // todo: fix empty msg on retry
           yield put(
             dialogActions.dialogShow({
               buttons: [

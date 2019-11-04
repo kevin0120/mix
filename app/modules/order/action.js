@@ -46,6 +46,14 @@ export const orderActions = Object.freeze({
     type: ORDER.VIEW,
     order
   }),
+  tryView: (order: tOrder) => ({
+    type: ORDER.TRY_VIEW,
+    order
+  }),
+  tryViewCode: (code: string | number) => ({
+    type: ORDER.TRY_VIEW,
+    code
+  }),
   // order status
   tryWorkOn: (order: IOrder): tActOrderTrigger => ({
     type: ORDER.TRY_WORK_ON,
@@ -106,13 +114,7 @@ export const orderActions = Object.freeze({
     type: ORDER.NEW_SCANNER,
     scanner
   }),
-  reportFinish: (
-    code,
-    trackCode,
-    workCenterCode,
-    productCode,
-    operation
-  ) => ({
+  reportFinish: (code, trackCode, workCenterCode, productCode, operation) => ({
     type: ORDER.REPORT_FINISH,
     code,
     trackCode,
