@@ -2,8 +2,9 @@
 
 import Device from '../Device';
 import { CommonLog } from '../../../../common/utils';
+import type {IReader} from './IReader';
 
-class ClsReader extends Device {
+class ClsReader extends Device implements IReader{
 
   // eslint-disable-next-line flowtype/no-weak-types
   constructor(...args: Array<any>) {

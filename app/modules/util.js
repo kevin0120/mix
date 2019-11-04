@@ -13,10 +13,10 @@ import type {
 } from './typeDef';
 
 export function genReducers<TState, TActionTypes>(
-  reducers: { [key: TActionTypes]: tReducer<TState, Action<TActionTypes>> },
+  reducers: { [key: TActionTypes]: tReducer<TState, tAction<TActionTypes, any>> },
   initState: TState
 ) {
-  return (state: TState = initState, action: Action<TActionTypes>) => {
+  return (state: TState = initState, action: tAction<TActionTypes, any>) => {
     if (reducers[action.type]) {
       return reducers[action.type](state, action);
     }

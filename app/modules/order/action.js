@@ -4,7 +4,7 @@ import type { IOrder } from './interface/IOrder';
 import { ORDER_STATUS, ORDER } from './constants';
 import type { IWorkStep } from '../step/interface/IWorkStep';
 import type { tAnyStepStatus } from '../step/interface/typeDef';
-import ClsScanner from '../external/device/scanner/ClsScanner';
+import type { IScanner } from '../external/device/scanner/IScanner';
 
 export type tActUpdateState = {
   type: string,
@@ -110,7 +110,7 @@ export const orderActions = Object.freeze({
   updateState: () => ({
     type: ORDER.UPDATE_STATE
   }),
-  newScanner: (scanner: ClsScanner) => ({
+  newScanner: (scanner: IScanner) => ({
     type: ORDER.NEW_SCANNER,
     scanner
   }),

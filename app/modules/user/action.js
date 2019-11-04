@@ -7,7 +7,7 @@ import type {
   tUserLoginAction,
   tUuid
 } from './interface/typeDef';
-import ClsReader from '../external/device/reader/ClsReader';
+import type { IReader } from '../external/device/reader/IReader';
 
 export const USER = {
   LOGIN: {
@@ -65,7 +65,7 @@ export function logoutSuccess(data: tUser): tCommonActionType & tUser {
   };
 }
 
-export function userNewReader(reader: ClsReader): tCommonActionType {
+export function userNewReader(reader: IReader): tCommonActionType {
   return {
     type: USER.NEW_READER,
     reader
