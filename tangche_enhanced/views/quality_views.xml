@@ -5,9 +5,21 @@
             <field name="model">sa.quality.point</field>
             <field name="inherit_id" ref="quality.quality_point_view_form"/>
             <field name="arch" type="xml">
+                <field name="sa_operation_ids" position="attributes">
+                    <attribute name="readonly">1</attribute>
+                </field>
                 <field name="norm_unit" position="replace">
 
                 </field>
+                <field name="program_id" position="replace">
+
+                </field>
+                <xpath expr="//page[@name='qcp_tightening_point']//field[@name='tightening_tool_ids']" position="replace">
+
+                </xpath>
+                <xpath expr="//page[@name='qcp_tightening_point']//field[@name='tool_id']" position="attributes">
+                    <attribute name="required">1</attribute>
+                </xpath>
             </field>
         </record>
     </data>

@@ -74,7 +74,8 @@ def package_tightening_points(tightening_points):
         pset = tp.program_id.code
         if isinstance(tp.program_id.code, str):
             pset = int(tp.program_id.code)
-        tool_id = tp.tightening_tool_ids[0].tool_id if tp.tightening_tool_ids else None
+        # tool_id = tp.tightening_tool_ids[0].tool_id if tp.tightening_tool_ids else None
+        tool_id = tp.tool_id if tp.tool_id else None # 使用Prefer Tool
         if not tool_id:
             _logger.error('Can Not Found Tool:{0}'.format(tp.name or tp.code))
         val = {

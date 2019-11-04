@@ -3,7 +3,6 @@ from odoo import fields, models, api, _, SUPERUSER_ID
 from odoo.exceptions import ValidationError, UserError
 import odoo.addons.decimal_precision as dp
 import json
-import uuid
 
 
 class QualityPoint(models.Model):
@@ -12,6 +11,7 @@ class QualityPoint(models.Model):
     ref = fields.Char('Reference')
 
     can_do_skip = fields.Boolean(string='Allow Do Skip', default=False, Help='Whether This Step Can Be Skipped')
+    can_do_redo = fields.Boolean(string='Allow Do Redo', default=True, Help='Whether This Step Can Be Redo')
 
     product_tmpl_id = fields.Many2one('product.template', 'Product', required=False,
                                       domain="[('type', 'in', ['consu', 'product']), ('sa_type', '=', 'vehicle')]")

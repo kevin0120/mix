@@ -156,7 +156,16 @@ class OperationPoints(models.Model):
                                         digits=dp.get_precision('Quality Tests'), default=0.0)
 
     tightening_tool_ids = fields.Many2many('mrp.workcenter.group.tool', 'point_tool_rel', 'point_id', 'tool_id',
-                               string='Tightening Tools(Tightening Gun)', copy=False)
+                                           string='Tightening Tools(Tightening Gun)', copy=False)
+
+    tool_id = fields.Many2one('maintenance.equipment', string='Prefer Tightening Tool(Gun/Wrench)',
+                              domain="[('category_name', 'in', ['tightening_wrench', 'tightening_gun'])]",
+                              copy=False)
+
+    @api.onchange('tightening_tool_ids')
+    def onchange_tightening_tool_ids(self):
+        if not self.tool_id and self.tightening_tool_ids:
+            self.tool_id = self.tightening_tool_ids[0].tool_id
 
     @api.multi
     def name_get(self):
