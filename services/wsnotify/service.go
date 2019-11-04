@@ -231,7 +231,6 @@ func (s *Service) WSSendResult(sn string, payload string) {
 //	}
 //}
 
-
 func (s *Service) WSSend(evt string, payload string) {
 	s.clientManager.NotifyALL(evt, payload)
 }
@@ -320,6 +319,14 @@ func GenerateReply(sn uint64, wsType string, result int, msg string) *WSMsg {
 }
 
 func GenerateResult(sn uint64, wsType string, data interface{}) *WSMsg {
+	return &WSMsg{
+		SN:   sn,
+		Type: wsType,
+		Data: data,
+	}
+}
+
+func GenerateMessage(sn uint64, wsType string, data interface{}) *WSMsg {
 	return &WSMsg{
 		SN:   sn,
 		Type: wsType,

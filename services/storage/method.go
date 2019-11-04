@@ -1,96 +1,24 @@
-package orm
+package storage
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-xorm/xorm"
 	"github.com/pkg/errors"
-	"time"
 )
 
 //參考文檔
 //https://github.com/go-xorm/xorm/blob/master/README_CN.md
 //http://gobook.io/read/github.com/go-xorm/manual-zh-CN/chapter-01/
-type Rush struct {
-	eng *xorm.Engine
-}
 
-type Workorder struct {
-	Id           int64  `xorm:"pk autoincr notnull 'id'" json:"-"`
-	Workorder    string `xorm:"text 'workorder'" json:"-"`
-	Code         string `xorm:"varchar(128) 'code'"  json:"code"`
-	Track_code   string `xorm:"varchar(128) 'track_code'" json:"track_code"`
-	Product_code string `xorm:"varchar(128) 'product_code'" json:"product_code"`
-
-	Created time.Time `xorm:"created" json:"-"`
-	Updated time.Time `xorm:"updated" json:"-"`
-}
-
-type Step struct {
-	Id          int64  `xorm:"pk autoincr notnull 'id'" json:"-"`
-	WorkorderID int64  `xorm:"bigint 'x_workorder_id'" json:"-"`
-	Step        string `xorm:"text 'step'" json:"-"`
-
-	Test_type string `xorm:"varchar(128) 'test_type'" json:"test_type"`
-
-	Code string `xorm:"varchar(128) 'code'" json:"code"`
-
-	Status1 string    `xorm:"varchar(128) 'status1'" json:"status1"`
-	Status2 string    `xorm:"varchar(128) 'status2'" json:"status2"`
-	Image   string    `xorm:"varchar(128) 'image'" json:"image"`
-	Created time.Time `xorm:"created" json:"-"`
-	Updated time.Time `xorm:"updated" json:"-"`
-}
-
-func NewRush() *Rush {
-	info := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable",
-		"odoo",
-		"odoo",
-		"localhost",
-		"new_database")
-	engine, err := xorm.NewEngine("postgres", info)
-
-	engine.DatabaseTZ = time.UTC
-	engine.TZLocation = time.UTC
-
-	if err != nil {
-		errors.Wrapf(err, "Create postgres engine fail")
-	}
-	//_ = engine.Sync2(new(User))
-	exist, err := engine.IsTableExist("Workorder")
-	if err == nil {
-		if !exist {
-			if err := engine.Sync2(new(Workorder)); err != nil {
-				errors.Wrapf(err, "Create Table Workorder fail")
-			}
-		}
-	}
-
-	exist, err = engine.IsTableExist("Step")
-	if err == nil {
-		if !exist {
-			if err := engine.Sync2(new(Step)); err != nil {
-				errors.Wrapf(err, "Create Table Step fail")
-			}
-		}
-	}
-
-	r := &Rush{
-		eng: engine,
-	}
-
-	return r
-}
-
-func (s *Rush) WorkorderIn(in []byte) error {
+func (s *Service) WorkorderIn(in []byte) (string, error) {
 
 	session := s.eng.NewSession()
 	defer session.Close()
 
-	var work Workorder
+	var work Workorders
 	err := json.Unmarshal(in, &work)
 
-	workorder1 := Workorder{
+	workorder1 := Workorders{
 		Workorder:    string(in),
 		Code:         work.Code,
 		Track_code:   work.Track_code,
@@ -106,7 +34,7 @@ func (s *Rush) WorkorderIn(in []byte) error {
 	//有的数据库超时断开ping可以重连。可以通过起一个定期Ping的Go程来保持连接鲜活。
 	if err != nil {
 		session.Rollback()
-		return errors.Wrapf(err, "store data fail")
+		return "", errors.Wrapf(err, "store data fail")
 	}
 
 	var hh map[string]interface{}
@@ -120,10 +48,10 @@ func (s *Rush) WorkorderIn(in []byte) error {
 
 	for i := 0; i < len(step); i++ {
 		a, _ := json.Marshal(step[i])
-		var msg Step
+		var msg Steps
 		err = json.Unmarshal(a, &msg)
 
-		step := Step{
+		step := Steps{
 			WorkorderID: workorder1.Id,
 			Step:        string(a),
 			Image:       msg.Image,
@@ -137,30 +65,30 @@ func (s *Rush) WorkorderIn(in []byte) error {
 		// INSERT INTO struct () values ()
 		if err != nil {
 			session.Rollback()
-			return errors.Wrapf(err, "store data fail")
+			return "", errors.Wrapf(err, "store data fail")
 		}
 
 	}
 
 	err = session.Commit()
 	if err != nil {
-		return errors.Wrapf(err, "commit fail")
+		return "", errors.Wrapf(err, "commit fail")
 	}
 
-	return nil
+	return workorder1.Code, nil
 
 }
 
-func (s *Rush) WorkorderOut(order string) (error, []byte) {
+func (s *Service) WorkorderOut(order string) (error, []byte) {
 
-	var workorder Workorder
+	var workorder Workorders
 	ss := s.eng.Alias("r").Where("r.code = ?", order)
 	_, e := ss.Get(&workorder)
 	if e != nil {
 		return e, nil
 	}
 
-	var step []Step
+	var step []Steps
 	ss = s.eng.Alias("r").Where("r.x_workorder_id = ?", workorder.Id)
 	e = ss.Find(&step)
 	if e != nil {

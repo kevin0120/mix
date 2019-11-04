@@ -45,19 +45,49 @@ type Workorders struct {
 
 	Payload        string      `xorm:"text" json:"-"`
 	MarshalPayload interface{} `xorm:"-" json:"payload"`
+
+	Workorder    string `xorm:"text 'workorder'" json:"-"`
+	Code         string `xorm:"pk unique varchar(128) 'code'"  json:"code"`
+	Track_code   string `xorm:"varchar(128) 'track_code'" json:"track_code"`
+	Product_code string `xorm:"varchar(128) 'product_code'" json:"product_code"`
+
+	Created time.Time `xorm:"created" json:"-"`
+	Updated time.Time `xorm:"updated" json:"-"`
 }
 
 type Steps struct {
-	Id             int64       `xorm:"pk autoincr notnull 'id'" json:"id"`
-	WorkorderID    int64       `xorm:"bigint 'workorder_id'" json:"-"`
-	Name           string      `xorm:"varchar(64) 'name'" json:"name"`
-	Desc           string      `xorm:"varchar(64) 'desc'" json:"desc"`
-	Type           string      `xorm:"varchar(64) 'type'" json:"type"`
-	Skippable      bool        `xorm:"varchar(64) 'skippable'" json:"skippable"`
-	Undoable       bool        `xorm:"varchar(64) 'undoable'" json:"undoable"`
-	Status         string      `xorm:"varchar(32) 'status'" json:"status"`
+	//Id             int64       `xorm:"pk autoincr notnull 'id'" json:"id"`
+	////WorkorderID    int64     `xorm:"bigint 'workorder_id'" json:"-"`
+	//Name           string      `xorm:"varchar(64) 'name'" json:"name"`
+	//Desc           string      `xorm:"varchar(64) 'desc'" json:"desc"`
+	//Type           string      `xorm:"varchar(64) 'type'" json:"type"`
+	//Skippable      bool        `xorm:"varchar(64) 'skippable'" json:"skippable"`
+	//Undoable       bool        `xorm:"varchar(64) 'undoable'" json:"undoable"`
+	//Status         string      `xorm:"varchar(32) 'status'"   json:"status"`
+	//Payload        string      `xorm:"text" json:"-"`
+	//MarshalPayload interface{} `xorm:"-" json:"payload"`
+
+	Id int64 `xorm:"pk autoincr notnull 'id'" json:"-"`
+	//WorkorderID    int64       `xorm:"bigint 'workorder_id'" json:"-"`
+	Name           string      `xorm:"varchar(64) 'name'" json:"-"`
+	Desc           string      `xorm:"varchar(64) 'desc'" json:"-"`
+	Type           string      `xorm:"varchar(64) 'type'" json:"-"`
+	Skippable      bool        `xorm:"varchar(64) 'skippable'" json:"-"`
+	Undoable       bool        `xorm:"varchar(64) 'undoable'" json:"-"`
+	Status         string      `xorm:"varchar(32) 'status'" json:"-"`
 	Payload        string      `xorm:"text" json:"-"`
-	MarshalPayload interface{} `xorm:"-" json:"payload"`
+	MarshalPayload interface{} `xorm:"-" json:"-"`
+
+	WorkorderID int64  `xorm:"bigint 'x_workorder_id'" json:"-"`
+	Step        string `xorm:"text 'step'" json:"-"`
+	Test_type   string `xorm:"varchar(128) 'test_type'" json:"test_type"`
+	Code        string `xorm:"varchar(128) 'code'" json:"code"`
+
+	Status1 string    `xorm:"varchar(128) 'status1'" json:"status1"`
+	Status2 string    `xorm:"varchar(128) 'status2'" json:"status2"`
+	Image   string    `xorm:"varchar(128) 'image'" json:"image"`
+	Created time.Time `xorm:"created" json:"-"`
+	Updated time.Time `xorm:"updated" json:"-"`
 }
 
 type Results struct {

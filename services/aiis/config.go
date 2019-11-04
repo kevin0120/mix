@@ -20,8 +20,8 @@ type Config struct {
 	GRPCServer          string            `yaml:"grpc_server"`
 	KeepAlive           toml.Duration     `yaml:"keep_alive"`
 	Recheck             bool              `yaml:"recheck"`
-	MesOpenWorkUrl		string			  `yaml:"mesopenworkurl"`
-	MesFinishWorkUrl	string			  `yaml:"mesfinishworkurl"`
+	MesOpenWorkUrl      string            `yaml:"mesopenworkurl"`
+	MesFinishWorkUrl    string            `yaml:"mesfinishworkurl"`
 }
 
 func NewConfig() Config {
@@ -40,7 +40,6 @@ func NewConfig() Config {
 		Recheck:             true,
 		MesOpenWorkUrl:      "http://127.0.0.1:8080/workorders/open",
 		MesFinishWorkUrl:    "http://127.0.0.1:8080/workorders/finished",
-
 	}
 
 	return c

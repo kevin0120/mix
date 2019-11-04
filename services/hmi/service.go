@@ -419,7 +419,7 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
 
 	case WS_ORDER_START_REQUEST:
-		// TODO: 收到HMI的开工请求， 处理收到的请求信息， 通过GRPC上传AIIS----doing
+		// TODO: 收到HMI的开工请求， 处理收到的请求信息， 直接作为http客户端访问mes提供的接口，并将结果反馈给hmi----doing
 		resp, err := s.Aiis.PutMesOpenRequest(sData)
 
 		if err != nil {
@@ -427,10 +427,12 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 			return
 		}
 		s.diag.Debug(fmt.Sprintf("Mes处理开工请求的结果推送HMI: %s", resp.(string)))
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+		//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, resp.(string)))
+		body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, resp))
+		s.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
 
 	case WS_ORDER_FINISH_REQUEST:
-		// TODO: 收到HMI的完工请求， 处理收到的请求信息， 通过GRPC上传AIIS-----doing
+		// TODO: 收到HMI的完工请求， 处理收到的请求信息， 直接作为http客户端访问mes提供的接口，并将结果反馈给hmi----doing
 
 		resp, err := s.Aiis.PutMesFinishRequest(sData)
 		if err != nil {
@@ -438,7 +440,10 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 			return
 		}
 		s.diag.Debug(fmt.Sprintf("Mes处理完工请求的结果推送HMI: %s", resp.(string)))
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+		//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+		body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, resp))
+		s.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
+
 	}
 }
 

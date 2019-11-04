@@ -57,9 +57,9 @@ type Service struct {
 	SyncGun      SyncGun
 	SN           string
 	rpc          GRPCClient
-	WS                *wsnotify.Service
-	updateQueue map[int64]time.Time
-	mtx         sync.Mutex
+	WS           *wsnotify.Service
+	updateQueue  map[int64]time.Time
+	mtx          sync.Mutex
 
 	TighteningService *tightening_device.Service
 }
@@ -220,20 +220,21 @@ func (s *Service) OnRPCRecv(payload string) {
 		break
 
 	case TYPE_MES_STATUS:
-		// TODO: 收到mes状态, 通知HMI------doing
+		// TODO: 收到mes状态更新, 通知HMI------doing
 		//s.WS.WSSend(wsnotify.WS_EVENT_MES,"MES在线")
-		s.WS.WSSend(wsnotify.WS_EVENT_MES,payload)
+		body, _ := json.Marshal(wsnotify.GenerateResult(0, "", payload))
+		s.WS.WSSend(wsnotify.WS_EVENT_MES, string(body))
 		s.diag.Debug(fmt.Sprintf("收到mes状态并推送HMI: %s", payload))
 
-	//case TYPE_ORDER_START:
-	//	// TODO: 开工响应------doing
-	//	//s.WS.WSSendMes(wsnotify.WS_EVENT_MES,"123","mes允许开工")
-	//	break
-	//
-	//case TYPE_ORDER_FINISH:
-	//	// TODO: 完工响应------doing
-	//	//s.WS.WSSendMes(wsnotify.WS_EVENT_MES,"123","mes确认完工")
-	//	break
+		//case TYPE_ORDER_START:
+		//	// TODO: 开工响应------doing
+		//	//s.WS.WSSendMes(wsnotify.WS_EVENT_MES,"123","mes允许开工")
+		//	break
+		//
+		//case TYPE_ORDER_FINISH:
+		//	// TODO: 完工响应------doing
+		//	//s.WS.WSSendMes(wsnotify.WS_EVENT_MES,"123","mes确认完工")
+		//	break
 	}
 }
 
@@ -266,7 +267,7 @@ func (s *Service) PutResult(result_id int64, body interface{}) error {
 func (s *Service) PutMesOpenRequest(req interface{}) (interface{}, error) {
 	resp, err := s.httpClient.R().
 		SetBody(req).
-     // or SetError(Error{}).
+		// or SetError(Error{}).
 		Put(s.Config().MesOpenWorkUrl)
 
 	if err != nil {
@@ -275,7 +276,6 @@ func (s *Service) PutMesOpenRequest(req interface{}) (interface{}, error) {
 
 	return resp.Body(), nil
 }
-
 
 func (s *Service) PutMesFinishRequest(req interface{}) (interface{}, error) {
 	resp, err := s.httpClient.R().

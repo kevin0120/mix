@@ -5,6 +5,10 @@ import (
 	"time"
 )
 
+const (
+	WS_ORDER_NEW_ORDER = "WS_NEW_ORDER"
+)
+
 type ODOOMOCreated struct {
 	ID           int    `json:"id"`
 	KNR          string `json:"knr"`
