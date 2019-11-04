@@ -1,6 +1,6 @@
 // @flow
 import React, { useState } from 'react';
-import type { Node, Element } from 'react';
+import type { Node } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Typography, Paper } from '@material-ui/core';

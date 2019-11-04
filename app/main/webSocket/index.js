@@ -12,6 +12,7 @@ export function getWSClient() {
 const messageSNs = {};
 
 function parseData(payload) {
+  console.log('ws received data: ', payload);
   const d = /(^[^"]*);(.*)/.exec(payload);
   if (d && d[2]) {
     return (() => {
@@ -37,13 +38,14 @@ const onWSMessage = dataParser => resp => {
 };
 
 const rushReply = event => data => {
+  console.log('ws reply data: ', data);
   event.reply('rush-reply', data, data.sn);
 };
 
 function startListenSend() {
   ipcMain.on('rush-send', (event, { data, timeout, sn }) => {
     messageSNs[sn] = rushReply(event);
-    if (ws && !ws.closed && getWSClient().ws.readyState === OWebSocket.OPEN) {
+    if (ws && !ws.closed && ws.ws.readyState === OWebSocket.OPEN) {
       const msg = {
         sn,
         ...data

@@ -56,7 +56,8 @@ export type tControllerMode = $Keys<typeof controllerModes>;
 
 export type tScrewStepPayload = {
   model: string, // 产品类型
-  points: Array<tPoint>, // 拧紧点
+  tightening_points: Array<tPoint>, // 拧紧点
+  image: string,
   jobID: number, // 拧紧ID, 只有当是job模式才会使用
   lnr: string,
   controllerMode: tControllerMode

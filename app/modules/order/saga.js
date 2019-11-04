@@ -136,7 +136,7 @@ function* tryWorkOnOrder({
     if (code) {
       const { list: orderList } = orderState;
       // TODO: trigger by order VIN/trackCode
-      orderToDo = orderList.find(o => o.id === code);
+      orderToDo = orderList.find(o => o.code === code);
     }
     if (!orderToDo) {
       return;
@@ -191,7 +191,7 @@ function* getOrderDetail({ order }) {
     const detailResult = yield fork(function* detailResult() {
       yield race([take(ORDER.DETAIL.SUCCESS), take(ORDER.DETAIL.FAIL)]);
     });
-    const resp = yield call(orderDetailApi, rOrder.id);
+    const resp = yield call(orderDetailApi, rOrder.code);
     if (resp.result !== 0) {
       yield put(orderActions.getDetailFail());
     }
@@ -228,7 +228,7 @@ function* tryViewOrder({
     let order = orderRec;
 
     if (isNil(order) && !isNil(code)) {
-      order = orderList.find(o => o.id === code);
+      order = orderList.find(o => o.code === code);
     }
 
     // TODO: check conditions

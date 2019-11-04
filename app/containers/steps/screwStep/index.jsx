@@ -11,7 +11,6 @@ import type { tStepProps } from '../types';
 import type { tAnyStepStatus } from '../../../modules/step/interface/typeDef';
 import type { Dispatch } from '../../../modules/typeDef';
 import { ClsOperationPoint } from '../../../modules/step/screwStep/classes/ClsOperationPoint';
-import { RESULT_STATUS } from '../../../modules/step/screwStep/constants';
 
 type tOP = {|
   ...tStepProps
@@ -40,7 +39,7 @@ const mapState = (state, props: tOP): tSP => {
 
   return ({
     ...props,
-    points: stepData(vStep)?.points || stepPayload(vStep)?.points || [],
+    points: stepData(vStep)?.tightening_points || stepPayload(vStep)?.tightening_points || [],
     image: stepPayload(vStep)?.image || '',
     status: stepStatus(vStep)
   });

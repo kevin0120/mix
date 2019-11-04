@@ -109,13 +109,13 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
         this._listeners = [];
         CommonLog.Info('tools cleared', {
           at: `screwStep(${(this: IWorkStep)._name},${
-            (this: IWorkStep)._id
+            (this: IWorkStep)._code
           })._onLeave`
         });
       } catch (e) {
         CommonLog.lError(e, {
           at: `screwStep(${(this: IWorkStep)._name},${
-            (this: IWorkStep)._id
+            (this: IWorkStep)._code
           })._onLeave`
         });
       }
@@ -141,15 +141,15 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
           const payload: tScrewStepPayload = this._payload;
           if (isNil(payload) || isEmpty(payload)) {
             throw new Error(
-              `ScrewStepPayload Is Empty! id: ${
+              `ScrewStepPayload Is Empty! code: ${
                 this._id
               }, Payload: ${JSON.stringify(payload)}`
             );
           }
 
-          this._pointsManager = new ClsOrderOperationPoints(payload.points);
+          this._pointsManager = new ClsOrderOperationPoints(payload.tightening_points);
 
-          this._tools = yield call(getTools, payload?.points || []);
+          this._tools = yield call(getTools, payload?.tightening_points || []);
           this._tools.forEach(t => {
             this._listeners.push(
               t.addListener(
@@ -165,7 +165,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
             this.updateData,
             (data: tScrewStepData): tScrewStepData => ({
               ...data,
-              points: this._pointsManager.points
+              tightening_points: this._pointsManager.points
             })
           );
           yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
@@ -189,7 +189,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               this.updateData,
               (data: tScrewStepData): tScrewStepData => ({
                 ...data,
-                points: this._pointsManager.points // results data.results
+                tightening_points: this._pointsManager.points // results data.results
               })
             );
 

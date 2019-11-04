@@ -42,7 +42,7 @@ export const orderActions = Object.freeze({
   getDetailFail: () => ({
     type: ORDER.DETAIL.FAIL
   }),
-  view: (order: tOrder) => ({
+  view: (order: IOrder) => ({
     type: ORDER.VIEW,
     order
   }),

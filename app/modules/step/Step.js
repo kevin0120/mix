@@ -25,7 +25,7 @@ function invalidStepStatus(stepType, status) {
 }
 
 export default class Step implements IWorkStep {
-  _id = -1;
+  _code = '';
 
   _name = '';
 
@@ -63,7 +63,7 @@ export default class Step implements IWorkStep {
 
   // eslint-disable-next-line flowtype/no-weak-types,no-unused-vars
   constructor(stepObj: { [key: string]: any }, ...rest: Array<any>) {
-    this._id = stepObj.id;
+    this._code = stepObj.code;
     this.update(stepObj);
     /* eslint-disable flowtype/no-weak-types */
     (this: any).run = this.run.bind(this);
@@ -75,46 +75,52 @@ export default class Step implements IWorkStep {
 
   // eslint-disable-next-line flowtype/no-weak-types
   update(stepObj: ?{ [key: string]: any }) {
-    this._name = stepObj?.name || 'unnamed step';
-    this._desc = stepObj?.desc || '';
-    this._info = stepObj?.info || {};
-    this._type = stepObj?.type || '';
-    this._skippable = stepObj?.skippable || false;
-    this._undoable = stepObj?.undoable || false;
-    this._status = stepObj?.status || this._status;
-    this._steps = stepObj?.steps
+    const { name, desc, sequence, info, skippable, undoable, status1, steps, text, test_type, ...payload } = stepObj || {};
+    this._name = name || text || desc || 'unnamed';
+    this._desc = desc || '';
+    this._info = info || {};
+    this._type = test_type || '';
+    this._skippable = skippable || false;
+    this._undoable = undoable || false;
+    this._status = status1 || this._status;
+    this._steps = steps
       ? (stepObj &&
-          stepObj.steps.map<IWorkStep>(sD => {
-            const existStep = this._steps.find(s => s.id === sD.id);
-            if (existStep) {
-              existStep.update(sD);
-              return existStep;
-            }
-            return new (stepTypes[sD.type](Step))(sD);
-          })) ||
-        []
+      stepObj.steps.map<IWorkStep>(sD => {
+        const existStep = this._steps.find(s => s.code === sD.code);
+        if (existStep) {
+          existStep.update(sD);
+          return existStep;
+        }
+        if(!stepTypes[sD.test_type] || typeof stepTypes[sD.test_type] !== 'function' ){
+          return new Step(sD);
+        }
+        return new (stepTypes[sD.test_type](Step))(sD);
+      })) ||
+      []
       : this._steps;
     if (stepObj && stepObj.data) {
       this._data = (() => {
         try {
-          console.log(stepObj);
           return JSON.parse(stepObj.data) || {};
         } catch (e) {
           CommonLog.lError(e, {
             at: 'step updating data',
             data: stepObj.data,
-            id: this._id,
+            code: this._code,
             name: this._name
           });
           return {};
         }
       })();
     }
-    this._payload = stepObj?.payload || this._payload;
+    this._payload = {
+      ...this._payload,
+      ...(payload || {})
+    };
   }
 
-  get id() {
-    return this._id;
+  get code() {
+    return this._code;
   }
 
   get name() {
@@ -159,8 +165,8 @@ export default class Step implements IWorkStep {
 
   timeCost(): number {
     return ((this._times || []).length % 2 === 0
-      ? this._times || []
-      : [...this._times, new Date()]
+        ? this._times || []
+        : [...this._times, new Date()]
     ).reduce(
       (total, currentTime, idx) =>
         idx % 2 === 0 ? total - currentTime : total - (0 - currentTime),
@@ -202,7 +208,7 @@ export default class Step implements IWorkStep {
     }
   }
 
-  *updateData(dataReducer: tStepDataReducer): Saga<void> {
+  * updateData(dataReducer: tStepDataReducer): Saga<void> {
     try {
       this._data = dataReducer(this._data);
       yield put(orderActions.updateState());
@@ -213,20 +219,20 @@ export default class Step implements IWorkStep {
     }
   }
 
-  *_updateStatus({ status }) {
+  * _updateStatus({ status }) {
     if (status in this._statusTasks) {
       try {
         this._status = status;
-        yield call(this._apis.updateStatus, this.id, status);
+        yield call(this._apis.updateStatus, this.code, status);
       } catch (e) {
         CommonLog.lError(e);
       }
     } else {
-      throw new Error(`step ${this._name}(${this._id})has no status ${status}`);
+      throw new Error(`step ${this._name}(${this._code})has no status ${status}`);
     }
   }
 
-  *_runStatusTask({ status, msg }) {
+  * _runStatusTask({ status, msg }) {
     try {
       if (this._runningStatusTask) {
         yield cancel(this._runningStatusTask);
@@ -241,7 +247,7 @@ export default class Step implements IWorkStep {
     }
   }
 
-  *run(status: tAnyStepStatus): Saga<void> {
+  * run(status: tAnyStepStatus): Saga<void> {
     let statusToRun = status;
     if (!statusToRun) {
       statusToRun = this._status;
@@ -284,10 +290,10 @@ export default class Step implements IWorkStep {
     }
   }
 
-  *runSubStep(
+  * runSubStep(
     step: IWorkStep,
     callbacks: tRunSubStepCallbacks,
-    status
+    status: tAnyStepStatus
   ): Saga<void> {
     try {
       const { exit, next, previous } = yield race({
@@ -309,11 +315,11 @@ export default class Step implements IWorkStep {
     } catch (e) {
       CommonLog.lError(e, {
         at: 'runSub ',
-        id: `${this._id},${step.id}`
+        code: `${this._code},${step.code}`
       });
       throw e;
     } finally {
-      CommonLog.Info(`run substep finished (${this._id}-${this._name})`);
+      CommonLog.Info(`run substep finished (${this._code}-${this._name})`);
     }
   }
 }

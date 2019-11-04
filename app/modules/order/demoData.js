@@ -7,7 +7,7 @@ import type { tOrder } from './interface/typeDef';
 
 // console.log(screwImg);
 export const demoOrder: tOrder = {
-  id: 1,
+  code: 1,
   name: 'demo Order 1',
   desc: 'a:b\t\tb:c\t\tc:d',
   canRework:true,
@@ -15,7 +15,7 @@ export const demoOrder: tOrder = {
   status: ORDER_STATUS.TODO,
   steps: [
     {
-      id: 1,
+      code: 1,
 
       name: '获取物料',
       info: {
@@ -47,7 +47,7 @@ export const demoOrder: tOrder = {
       }
     },
     {
-      id: 2,
+      code: 2,
 
       name: '拧紧作业指导 pset',
       info: {
@@ -119,7 +119,7 @@ export const demoOrder: tOrder = {
       }
     },
     {
-      id: 3,
+      code: 3,
       name: '拧紧作业指导 job',
       info: {
         time: '00:02:00'
@@ -181,7 +181,7 @@ export const demoOrder: tOrder = {
       }
     },
     {
-      id: 4,
+      code: 4,
       name: '扫码',
       info: {
         time: '00:02:00'
@@ -195,7 +195,7 @@ export const demoOrder: tOrder = {
       }
     },
     {
-      id: 6,
+      code: 6,
       name: '指导',
       info: {
         time: '00:02:00'
@@ -210,7 +210,7 @@ export const demoOrder: tOrder = {
       }
     },
     {
-      id: 5,
+      code: 5,
       name: '扫码',
       info: {
         time: '00:02:00'
@@ -227,7 +227,7 @@ export const demoOrder: tOrder = {
 };
 
 export const demoOrderLong = {
-  id: 'demoOrderLong',
+  code: 'demoOrderLong',
 
   name: 'Long Demo Order',
   info:
@@ -531,7 +531,7 @@ export const demoOrderLong = {
 };
 
 export const demoOrderCancel = {
-  id: 'demoOrderCancel',
+  code: 'demoOrderCancel',
   name: 'fill info',
   info:
     'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
@@ -555,7 +555,7 @@ export const demoOrderCancel = {
 };
 
 export const demoOrderPending = {
-  id: 'demoOrderPending',
+  code: 'demoOrderPending',
   name: 'fill info',
   info:
     'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',
@@ -580,7 +580,7 @@ export const demoOrderPending = {
 };
 
 export const demoOrderDone = {
-  id: 'demoOrderDone',
+  code: 'demoOrderDone',
   name: 'fill info',
   info:
     'this is a demo order this is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo orderthis is a demo order',

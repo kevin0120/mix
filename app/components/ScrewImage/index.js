@@ -85,7 +85,7 @@ export default function ScrewImage({ twinkle, style = {}, image, points, focus, 
         }}
       >
         {points && points.map((p) => <Point
-          key={`${p.x}${p.y}${p.status}`}
+          key={`${p.sequence}`}
           x={p.x}
           y={p.y}
           twinkle={twinkle && p.isActive}

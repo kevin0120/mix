@@ -27,6 +27,9 @@ type tToolResultData = {
 
 export function* toolStatusChange(data: tToolStatusData): Saga<void> {
   try {
+    if (!data.data) {
+      return;
+    }
     const { tool_sn: toolSN, status, reason } = data.data;
     yield put(
       notifierActions.enqueueSnackbar(

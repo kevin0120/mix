@@ -12,7 +12,7 @@ export type tStepPayload = {
 };
 
 export type tStep = {
-  id: number,
+  code: number,
   name: string,
   desc?: string,
   info: tStepInfo,

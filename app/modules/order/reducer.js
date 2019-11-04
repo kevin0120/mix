@@ -34,11 +34,11 @@ const initState: tOrderState = {
   viewingOrder: null,
   viewingIndex: 0,
   list: [
-    demoOrder,
-    demoOrderLong,
-    demoOrderCancel,
-    demoOrderPending,
-    demoOrderDone
+    // demoOrder,
+    // demoOrderLong,
+    // demoOrderCancel,
+    // demoOrderPending,
+    // demoOrderDone
   ].map(o => new (OrderMixin(Step))(o))
 };
 
@@ -56,8 +56,7 @@ const orderReducer: {
   [key: tOrderActionTypes]: tReducer<
     tOrderState,
     // eslint-disable-next-line flowtype/no-weak-types
-    tAction<tOrderActionTypes, any>
-  >
+    tAction<tOrderActionTypes, any>>
 } = {
   [ORDER.NEW_LIST]: (state, { list }: { list: Array<IOrder> }) => ({
     ...state,

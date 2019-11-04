@@ -13,7 +13,8 @@ export const stepTypeKeys=Object.freeze({
   input: 'input',
   scanner: 'scanner',
   instruction: 'instruction',
-  screw: 'screw',
+  text: 'text',
+  screw: 'tightening',
   material: 'material',
   check: 'check',
   video: 'video'

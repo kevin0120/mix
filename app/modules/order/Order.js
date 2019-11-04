@@ -42,10 +42,16 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
     _plannedDateTime = null;
 
+    _trackCode = '';
+
+    _productCode = '';
+
     // eslint-disable-next-line flowtype/no-weak-types
     constructor(dataObj: { [key: string]: any }, ...rest: Array<any>) {
       super(dataObj, ...rest);
       this._status = dataObj.status || this._status;
+      this._trackCode = dataObj.track_code;
+      this._productCode = dataObj.product_code;
     }
 
     get plannedDateTime() {
@@ -61,7 +67,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
     }
 
     _statusTasks = {
-      *[ORDER_STATUS.TODO]() {
+      * [ORDER_STATUS.TODO]() {
         try {
           const { reportStart } = yield select(s => s.setting.systemSettings);
           // TODO 开工自检
@@ -69,8 +75,8 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           if (reportStart) {
             yield put(loadingActions.start());
             const orderCode = this._id;
-            const trackCode = '';
-            const productCode = '';
+            const trackCode = this._trackCode;
+            const productCode = this._productCode;
             const dateStart = new Date();
             const workCenterCode = yield select(
               s => s.setting.system.workcenter.code
@@ -95,14 +101,14 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
         } catch (e) {
           CommonLog.lError(e, {
             at: 'ORDER_STATUS.TODO',
-            id: this._id,
+            code: this._code,
             name: this._name
           });
           yield put(notifyActions.enqueueSnackbar('Error', e.message));
           yield put(orderActions.stepStatus(this, ORDER_STATUS.PENDING));
         }
       },
-      *[ORDER_STATUS.WIP]() {
+      * [ORDER_STATUS.WIP]() {
         try {
           this._workingIndex =
             this._workingIndex >= this._steps.length ? 0 : this._workingIndex;
@@ -150,7 +156,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           CommonLog.Info('order doing finished');
         }
       },
-      *[ORDER_STATUS.DONE]() {
+      * [ORDER_STATUS.DONE]() {
         try {
           const data = this._steps.map(s => [
             s.name,
@@ -208,7 +214,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           CommonLog.Info('order done');
         }
       },
-      *[ORDER_STATUS.PENDING]() {
+      * [ORDER_STATUS.PENDING]() {
         try {
           yield put(orderActions.finishOrder(this));
         } catch (e) {
@@ -217,7 +223,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           });
         }
       },
-      *[ORDER_STATUS.CANCEL]() {
+      * [ORDER_STATUS.CANCEL]() {
         try {
           yield put(orderActions.finishOrder(this));
         } catch (e) {

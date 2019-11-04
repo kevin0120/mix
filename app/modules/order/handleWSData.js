@@ -15,34 +15,28 @@ import Step from '../step/Step';
 import NotifierActions from '../Notifier/action';
 
 // rush data handlers
-const dataHandlers: rushHandlerMap<
-  tOrderWSTypes,
-  $PropertyType<tOrderRushData, 'data'>
-> = {
+const dataHandlers: rushHandlerMap<tOrderWSTypes,
+  $PropertyType<tOrderRushData, 'data'>> = {
   // 工单列表
-  *[ORDER_WS_TYPES.LIST](data: Array<tOrderListData>) {
+  * [ORDER_WS_TYPES.LIST](data: Array<tOrderListData>) {
     try {
-      const list = data.map(d => ({
-        id: d.id,
-        desc: d.desc,
-        name: d.name,
-        image: d.image || '',
-        status: d.status
+      const list = (data || []).map(d => ({
+        ...d
       }));
       const orderState = yield select(s => s.order);
       // get exist orders, orders not in the new list will be removed!!
       let newList =
         orderState &&
-        orderState.list.filter(o => !!list.find(newO => o.id === newO.id));
+        orderState.list.filter(o => !!list.find(newO => o.code === newO.code));
       // update order data
       newList.forEach(o => {
-        const orderData = list.find(newO => o.id === newO.id);
+        const orderData = list.find(newO => o.code === newO.code);
         o.update(orderData);
       });
       // make new orders
       newList = newList.concat(
         list
-          .filter(newO => !newList.find(o => o.id === newO.id))
+          .filter(newO => !newList.find(o => o.code === newO.code))
           .map(oD => new (OrderMixin(Step))(oD))
       );
       yield put(orderActions.newList(newList));
@@ -52,11 +46,12 @@ const dataHandlers: rushHandlerMap<
     }
   },
   // 工单详情
-  *[ORDER_WS_TYPES.DETAIL](data: tOrder) {
+  * [ORDER_WS_TYPES.DETAIL](data: tOrder) {
     try {
+      console.log(data);
       const orderState = yield select(s => s.order);
       const newList = [...orderState.list];
-      const newOrder = newList.find(o => o.id === data.id);
+      const newOrder = newList.find(o => o.code === data.code);
       if (newOrder) {
         newOrder.update(data);
       }
@@ -67,7 +62,7 @@ const dataHandlers: rushHandlerMap<
     }
   },
   // 新工单
-  *[ORDER_WS_TYPES.NEW](data: Array<tOrder>) {
+  * [ORDER_WS_TYPES.NEW](data: Array<tOrder>) {
     try {
       const orderState = yield select(s => s.order);
       // get exist orders
@@ -75,7 +70,7 @@ const dataHandlers: rushHandlerMap<
 
       // update order data
       newList.forEach(o => {
-        const orderData = data.find(newO => o.id === newO.id);
+        const orderData = data.find(newO => o.code === newO.code);
         if (orderData) {
           o.update(orderData);
         }
@@ -84,7 +79,7 @@ const dataHandlers: rushHandlerMap<
       // make new orders
       newList = newList.concat(
         data
-          .filter(newO => !newList.find(o => o.id === newO.id))
+          .filter(newO => !newList.find(o => o.code === newO.code))
           .map(oD => new (OrderMixin(Step))(oD))
       );
 

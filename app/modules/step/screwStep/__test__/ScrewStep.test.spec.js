@@ -3,7 +3,7 @@ import ScrewStepMixin from '../ScrewStep';
 import Step from '../../Step';
 
 const demoStepListData = {
-  id: '0001',
+  code: '0001',
   name: 'name',
   desc: 'this is a screw step',
   info: {},

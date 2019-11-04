@@ -10,11 +10,12 @@ export type tStockMove = {
 };
 
 export type tOrderListData = {|
-  id: number,
+  code: number,
   desc: string, // 工单描述
   name: string, // 工单名称（工单号）
   image: string,
-  status: tOrderStatus
+  status: tOrderStatus,
+  code: string
 |};
 
 export type tOrder = {|
