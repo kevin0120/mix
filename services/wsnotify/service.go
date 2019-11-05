@@ -110,6 +110,7 @@ func (s *Service) onConnect(c websocket.Connection) {
 
 				// 注册成功
 				_ = c.Emit(WS_EVENT_REPLY, GenerateReply(msg.SN, msg.Type, 0, ""))
+
 			}
 		} else {
 			s.postNotify(NotifyPackage{

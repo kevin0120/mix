@@ -2,6 +2,7 @@ package wsnotify
 
 const (
 	WS_REG = "WS_REG"
+	WS_RUSH_DATA="WS_RUSH_DATA"
 )
 
 type WSRegist struct {
@@ -73,3 +74,5 @@ type WSReply struct {
 	Result int    `json:"result"`
 	Msg    string `json:"msg"`
 }
+
+

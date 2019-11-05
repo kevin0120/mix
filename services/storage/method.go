@@ -2,7 +2,7 @@ package storage
 
 import (
 	"encoding/json"
-	"fmt"
+	"github.com/go-xorm/xorm"
 	"github.com/pkg/errors"
 )
 
@@ -23,6 +23,7 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 		Code:         work.Code,
 		Track_code:   work.Track_code,
 		Product_code: work.Product_code,
+		Status:"ready",
 	}
 
 	//var hh map[string]interface{}
@@ -57,7 +58,7 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 			Image:       msg.Image,
 
 			Test_type: msg.Test_type,
-
+			Status:"ready",
 			Code: msg.Code,
 		}
 
@@ -79,10 +80,16 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 
 }
 
-func (s *Service) WorkorderOut(order string) (error, []byte) {
+func (s *Service) WorkorderOut(order string,workorderID int64) (error, []byte) {
 
 	var workorder Workorders
-	ss := s.eng.Alias("r").Where("r.code = ?", order)
+	var ss *xorm.Session
+	if order==""{
+		ss = s.eng.Alias("r").Where("r.id = ?", workorderID)
+	}else{
+		ss = s.eng.Alias("r").Where("r.code = ?", order)
+	}
+
 	_, e := ss.Get(&workorder)
 	if e != nil {
 		return e, nil
@@ -109,13 +116,20 @@ func (s *Service) WorkorderOut(order string) (error, []byte) {
 		for k, v := range mm {
 			hh[k] = v
 		}
-		findpicture()
-		hh["image"] = "http://127.0.0.1:8080/picture"
+		_,image1:=s.findsteppicture(step[i].ImageRef)
+		hh["image"] = image1
 		steps = append(steps, hh)
 	}
 
 	ww := stringtomap(workorder.Workorder)
+	mm := structomap(workorder)
 	ww["steps"] = steps
+	for k, v := range mm {
+		ww[k] = v
+	}
+
+	_,image2:=s.findorderpicture(workorder.Product_code)
+	ww["product_type_image"] = image2
 
 	rr, _ := json.Marshal(ww)
 
@@ -133,7 +147,25 @@ func stringtomap(in string) (m map[string]interface{}) {
 	return
 }
 
-func findpicture() {
-	fmt.Println("*****************正在根据工单提供的信息查找图片####################")
+func (s *Service) findsteppicture(ref string) (error, string){
 
+	var ro RoutingOperations
+	ss := s.eng.Alias("r").Where("r.tightening_step_ref = ?", ref).Limit(1)
+	_,e := ss.Get(&ro)
+	if e != nil {
+		return e, ro.Img
+	}
+	return nil, ""
+}
+
+
+func (s *Service) findorderpicture(ref string) (error, string){
+
+	var ro RoutingOperations
+	ss := s.eng.Alias("r").Where("r.product_type = ?", ref).Limit(1)
+	_,e := ss.Get(&ro)
+	if e != nil {
+		return e, ro.ProductTypeImage
+	}
+	return nil, ""
 }

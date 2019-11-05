@@ -964,15 +964,36 @@ func (s *Service) DropTableManage() error {
 	}
 }
 
-func (s *Service) Workorders(status string) ([]Workorders, error) {
-	var rt []Workorders
-
-	q := s.eng.Alias("w")
-	if status != "" {
-		q = q.Where("w.status = ?", status)
+func (s *Service) Workorders(par []byte) ([]Workorders, error) {
+	orderPar := WorkorderListPar{}
+	err := json.Unmarshal(par, &orderPar)
+	if err != nil {
+		return nil, err
 	}
 
-	err := q.Find(&rt)
+	q := s.eng.Alias("w")
+	if orderPar.Status != "" {
+		q = q.Where("w.status = ?", orderPar.Status)
+	}else {
+		q = q.Where("w.status != ?", orderPar.Status)
+	}
+
+	if orderPar.Time_from != "" {
+		q = q.And("w.date_planned_start >= ?", orderPar.Time_from)
+	}
+	if orderPar.Time_to != "" {
+		q = q.And("w.date_planned_complete <= ?", orderPar.Time_to)
+	}
+	q.Desc("id")
+	if orderPar.Page_size==0{
+		orderPar.Page_size=20
+	}
+	q.Limit(orderPar.Page_size,orderPar.Page_no*orderPar.Page_size+1)
+
+
+	var rt []Workorders
+
+	err = q.Find(&rt)
 
 	if err != nil {
 		return nil, err
@@ -1038,6 +1059,24 @@ func (s *Service) UpdateStep(step *Steps) (*Steps, error) {
 		return step, nil
 	}
 }
+
+
+func (s *Service) UpdateStepData(step *Steps) (*Steps, error) {
+
+	sql := "update `steps` set data = ? where id = ?"
+	_, err := s.eng.Exec(sql,
+		step.Data,
+		step.Id)
+
+	if err != nil {
+		return step, err
+	} else {
+		return step, nil
+	}
+}
+
+
+
 
 func (s *Service) GetLastIncompleteCurve(toolSN string) (*Curves, error) {
 	curve := Curves{}
