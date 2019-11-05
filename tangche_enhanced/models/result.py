@@ -11,7 +11,7 @@ class OperationResult(models.HyperModel):
 
     def init(self):
         self.env.cr.execute("""
-        CREATE OR REPLACE FUNCTION create_operation_result(pset_m_threshold numeric, pset_m_max numeric,
+            CREATE OR REPLACE FUNCTION create_operation_result(pset_m_threshold numeric, pset_m_max numeric,
                                                    control_data timestamp without time zone, pset_w_max numeric,
                                                    user_id bigint, one_time_pass boolean,
                                                    pset_strategy varchar, measure_result varchar,
@@ -91,9 +91,9 @@ BEGIN
     r_bom_line_id = null;
     select pp2.id,
            tp.cou_pid,
-           sa_program.code,
-           sa_program.id,
-           op.workcenter_id,
+           tp.cou_program_code,
+           tp.cou_program_id,
+           tp.cou_workcenter_id,
            tp.cou_qcp_id,
            tp.operation_point_id
            into r_product_id, r_consu_product_id,r_job, r_program_id, r_workcenter_id,r_qcp_id,r_operation_point_id
@@ -102,26 +102,25 @@ BEGIN
                  op.routing_id    cou_routing_id,
                  sqp.id           cou_qcp_id,
                  opp.id           operation_point_id,
-                 sqp.program_id   cou_program_id
+                 op.workcenter_id cou_workcenter_id,
+                 sa_program.id    cou_program_id,
+                 sa_program.code  cou_program_code
           from public.product_product pp,
                public.operation_point opp,
                public.sa_quality_point sqp,
                public.mrp_routing_workcenter op,
+               public.controller_program sa_program,
                public.mrp_routing routing
           where pp.id = sqp.product_id
-            and opp.qcp_id = sqp.id /* 找到质量控制点 */
-            and pp.default_code = nut_no
+            and opp.qcp_id = sqp.id /* 找到拧紧点 */
+            and sqp.name = nut_no /* 找到质量控制点 */
             and op.id = sqp.operation_id
-         ) as tp, /* 找到具体拧紧点 */
+            and sa_program.id = sqp.program_id
+         ) as tp, /* 找到拧紧点相关拧紧编号的清单 */
          public.product_product pp2,
-         public.mrp_routing_workcenter op,
-         public.mrp_routing routing,
-         public.mrp_bom bom,
-         public.controller_program sa_program
+         public.mrp_bom bom
     where pp2.default_code = vehicle_type
-      and bom.product_id = pp2.id /* 找到物料清单 */
-      and bom.routing_id = tp.cou_routing_id
-      and sa_program.id = tp.cou_program_id;
+      and bom.product_id = pp2.id; /* 找到物料清单 */
   end if;
   INSERT INTO public.operation_result (pset_m_threshold, pset_m_max, control_date, pset_w_max, user_id,
                                        one_time_pass, pset_strategy, measure_result, pset_w_threshold,

@@ -167,6 +167,15 @@ class OperationPoints(models.Model):
         if not self.tool_id and self.tightening_tool_ids:
             self.tool_id = self.tightening_tool_ids[0].tool_id
 
+    @api.constrains('tightening_tool_ids')
+    def _constraint_tightening_tool_ids(self):
+        for point in self:
+            if not point.tightening_tool_ids:
+                continue
+            workcenter_ids = set(point.tightening_tool_ids.mapped('workcenter_id').ids)
+            if len(workcenter_ids) != len(point.tightening_tool_ids):
+                raise ValidationError(u'不能对同一个拧紧点选择同一个工位上的拧紧工具')
+
     @api.multi
     def name_get(self):
         res = []
