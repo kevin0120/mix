@@ -8,7 +8,6 @@ import (
 	"github.com/masami10/rush/services/diagnostic"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/io"
-	"github.com/masami10/rush/services/nats"
 	"github.com/masami10/rush/services/reader"
 	"github.com/masami10/rush/services/scanner"
 	"github.com/masami10/rush/services/tightening_device"

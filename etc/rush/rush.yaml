@@ -34,7 +34,7 @@ minio:
   reupload_interval: 1s
 aiis:
   urls:
-  - http://127.0.0.1:9092
+  - http://192.168.4.32:9092
   headers:
     Content-Type: application/json
   result_push_url: /aiis/v1/operation.results/%d
@@ -44,7 +44,7 @@ aiis:
   max_retry: 3
   ws_result_route: /aiis/v1/ws/results
   result_upload_inteval: 2s
-  grpc_server: 127.0.0.1:9093
+  grpc_server: 192.168.4.32:9093
   keep_alive: 3s
   recheck: false
 odoo:
@@ -173,6 +173,10 @@ broker:
     - nats://192.168.4.203:4222
     - nats://192.168.4.203:4223
     - nats://192.168.4.203:4224
+  connect-options:
+    name: Dummy Server
+    token: Dummy Token
+
   provider: nats
 controller_service:
   enable: false

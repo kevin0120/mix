@@ -507,7 +507,7 @@ func (c *TighteningController) Connect() error {
 	for {
 		err := c.sockClient.Connect(DAIL_TIMEOUT)
 		if err != nil {
-			c.Srv.diag.Error("Connect Err", err)
+			c.Srv.diag.Error("connect Err", err)
 		} else {
 			break
 		}
