@@ -96,6 +96,7 @@ export default class Device extends CommonExternalEntity implements IDevice {
         at: 'doDispatch',
         data
       });
+      throw e;
     }
   }
 

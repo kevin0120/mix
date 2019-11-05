@@ -77,10 +77,11 @@ export default class Step implements IWorkStep {
 
   // eslint-disable-next-line flowtype/no-weak-types
   update(stepObj: ?{ [key: string]: any }) {
-    const { name, desc, sequence, info, skippable, undoable, status1, steps, text, test_type, ...payload } = stepObj || {};
+    const { name, desc, info, skippable, undoable, status1, steps, text, test_type, payload } = stepObj || {};
     this._name = name || text || desc || 'unnamed';
     this._desc = desc || '';
     this._info = info || {};
+    // eslint-disable-next-line camelcase
     this._type = test_type || '';
     this._skippable = skippable || false;
     this._undoable = undoable || false;
@@ -229,7 +230,7 @@ export default class Step implements IWorkStep {
     if (status in this._statusTasks) {
       try {
         this._status = status;
-        yield call(this._apis.updateStatus, this.code, status);
+        yield call(this._apis.updateStatus, this.id, status);
       } catch (e) {
         CommonLog.lError(e);
       }

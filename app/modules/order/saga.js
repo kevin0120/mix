@@ -9,8 +9,6 @@ import {
   delay,
   take,
   race,
-  fork,
-  join,
   actionChannel
 } from 'redux-saga/effects';
 import React from 'react';
@@ -25,7 +23,7 @@ import Table from '../../components/Table/Table';
 import { CommonLog } from '../../common/utils';
 import type { tCommonActionType } from '../../common/type';
 import {
-  orderDetailApi,
+  orderDetailApi, orderDetailByCodeApi,
   orderListApi,
   orderReportFinishApi
 } from '../../api/order';
@@ -88,19 +86,21 @@ function onNewScanner({ scanner }) {
 
 // TODO: 开工、报工接口
 function* reportFinish({
-  code,
-  trackCode,
-  workCenterCode,
-  productCode,
-  operation
-}) {
+                         code,
+                         trackCode,
+                         productCode,
+                         workCenterCode,
+                         dateComplete,
+                         operation
+                       }) {
   try {
     yield call(
       orderReportFinishApi,
       code,
       trackCode,
-      workCenterCode,
       productCode,
+      workCenterCode,
+      dateComplete,
       operation
     );
   } catch (e) {
@@ -121,9 +121,9 @@ function* watchOrderTrigger() {
 }
 
 function* tryWorkOnOrder({
-  order,
-  code
-}: {
+                           order,
+                           code
+                         }: {
   order: IOrder,
   code: string | number
 }) {
@@ -185,28 +185,25 @@ function* DebounceViewStep(d, action: tCommonActionType) {
 }
 
 function* getOrderDetail({ order }) {
-  const rOrder: IOrder = (order: IOrder);
   try {
     yield put(loadingActions.start());
-    const detailResult = yield fork(function* detailResult() {
-      yield race([take(ORDER.DETAIL.SUCCESS), take(ORDER.DETAIL.FAIL)]);
-    });
-    const resp = yield call(orderDetailApi, rOrder.id);
-    if (resp.result !== 0) {
-      yield put(orderActions.getDetailFail());
-    }
-    yield join(detailResult);
+    yield call(orderDetailApi, order.id);
     yield put(loadingActions.stop());
   } catch (e) {
+    yield put(loadingActions.stop());
     CommonLog.lError(e, {
-      at: 'getOrderDetail'
+      at: 'getOrderDetail',
+      code: order.code
     });
   }
 }
 
 function* getOrderList() {
   try {
-    yield call(orderListApi);
+
+    yield call(orderListApi, {
+      // TODO
+    });
   } catch (e) {
     CommonLog.lError(e, {
       at: 'getOrderList'
@@ -215,9 +212,9 @@ function* getOrderList() {
 }
 
 function* tryViewOrder({
-  order: orderRec,
-  code
-}: {
+                         order: orderRec,
+                         code
+                       }: {
   order: IOrder,
   code: string | number
 }) {
@@ -231,8 +228,14 @@ function* tryViewOrder({
       order = orderList.find(o => o.code === code);
     }
 
-    // TODO: check conditions
+    if (!order) {
+      // TODO: use remote workcenter code
+      const workcenterCode = yield select(s => s.systemInfo.workcenter);
+      const { data } = yield call(orderDetailByCodeApi, code, workcenterCode);
+      order = data;
+    }
 
+    // TODO: check no-trigger conditions
     if (!order) {
       return;
     }
@@ -278,11 +281,11 @@ function* viewOrder({ order }: { order: IOrder }) {
             color: 'warning'
           },
           !WIPOrder &&
-            doable(order) && {
-              label: 'Order.Start',
-              color: 'info',
-              action: orderActions.tryWorkOn(order)
-            }
+          doable(order) && {
+            label: 'Order.Start',
+            color: 'info',
+            action: orderActions.tryWorkOn(order)
+          }
         ],
         title: i18n.t('Order.Overview'),
         content: (

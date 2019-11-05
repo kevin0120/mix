@@ -1,11 +1,3 @@
-/*
- * Copyright (c) 2018. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
- * Morbi non lorem porttitor neque feugiat blandit. Ut vitae ipsum eget quam lacinia accumsan.
- * Etiam sed turpis ac ipsum condimentum fringilla. Maecenas magna.
- * Proin dapibus sapien vel ante. Aliquam erat volutpat. Pellentesque sagittis ligula eget metus.
- * Vestibulum commodo. Ut rhoncus gravida arcu.
- */
-
 import React from 'react';
 import { connect } from 'react-redux';
 import ReactTable from 'react-table';
@@ -42,7 +34,7 @@ import withKeyboard from '../../components/Keyboard';
 
 const lodash = require('lodash');
 
-const styles = theme=>({
+const styles = theme => ({
   ...sweetAlertStyle(theme),
   root: {
     flexGrow: 1,
@@ -76,7 +68,7 @@ const styles = theme=>({
 
 const mapStateToProps = (state, ownProps) => ({
   masterpcUrl: state.connections.masterpc,
-  workcenterCode: state.connections.workcenterCode,
+  workcenterCode: state.systemInfo.workcenter,
   ...ownProps
 });
 
@@ -156,7 +148,7 @@ class WorkOrder extends React.Component {
                     color="warning"
                     className="edit"
                   >
-                    <Dvr />
+                    <Dvr/>
                   </Button>{' '}
                 </div>
               )
@@ -194,25 +186,25 @@ class WorkOrder extends React.Component {
       <div>
         <List>
           <ListItem>
-            <ListItemText primary={`车序: ${selectObj.lnr}`} />
+            <ListItemText primary={`车序: ${selectObj.lnr}`}/>
           </ListItem>
-          <Divider inset component="li" />
+          <Divider inset component="li"/>
           <ListItem>
-            <ListItemText primary={`VIN:   ${selectObj.vin}`} />
+            <ListItemText primary={`VIN:   ${selectObj.vin}`}/>
           </ListItem>
-          <Divider inset component="li" />
+          <Divider inset component="li"/>
           <ListItem>
-            <ListItemText primary={`车型:   ${selectObj.model}`} />
+            <ListItemText primary={`车型:   ${selectObj.model}`}/>
           </ListItem>
           <li>
-            <Divider inset />
+            <Divider inset/>
           </li>
           <ListItem>
-            <ListItemText primary={`KNR: ${selectObj.knr}`} />
+            <ListItemText primary={`KNR: ${selectObj.knr}`}/>
           </ListItem>
-          <Divider inset component="li" />
+          <Divider inset component="li"/>
           <ListItem>
-            <ListItemText primary={`LongPIN:   ${selectObj.long_pin}`} />
+            <ListItemText primary={`LongPIN:   ${selectObj.long_pin}`}/>
           </ListItem>
         </List>
       </div>
@@ -225,25 +217,25 @@ class WorkOrder extends React.Component {
       <div>
         <List>
           <ListItem>
-            <ListItemText primary={`VIN:   ${info.vin}`} />
+            <ListItemText primary={`VIN:   ${info.vin}`}/>
           </ListItem>
-          <Divider inset component="li" />
+          <Divider inset component="li"/>
           <ListItem>
-            <ListItemText primary={`车型:   ${info.model}`} />
+            <ListItemText primary={`车型:   ${info.model}`}/>
           </ListItem>
           <li>
-            <Divider inset />
+            <Divider inset/>
           </li>
           <ListItem>
-            <ListItemText primary={`KNR: ${info.knr}`} />
+            <ListItemText primary={`KNR: ${info.knr}`}/>
           </ListItem>
-          <Divider inset component="li" />
+          <Divider inset component="li"/>
           <ListItem>
-            <ListItemText primary={`车序: ${info.lnr}`} />
+            <ListItemText primary={`车序: ${info.lnr}`}/>
           </ListItem>
-          <Divider inset component="li" />
+          <Divider inset component="li"/>
           <ListItem>
-            <ListItemText primary={`LongPIN:   ${info.long_pin}`} />
+            <ListItemText primary={`LongPIN:   ${info.long_pin}`}/>
           </ListItem>
         </List>
       </div>
@@ -313,7 +305,7 @@ class WorkOrder extends React.Component {
                 <Card>
                   <CardHeader color="info" icon>
                     <CardIcon color="info">
-                      <Assignment />
+                      <Assignment/>
                     </CardIcon>
                     <h4 className={classes.cardIconTitle}>
                       {t('main.orders')}
@@ -389,19 +381,21 @@ class WorkOrder extends React.Component {
                               lodash.toUpper(this.state.vehicleTypeFilter || '')
                             );
                           },
-                          Filter: ({ filter, onChange }) => (
-                            <Input
+                          Filter: ({ onChange }) => {
+                            const { vehicleTypeFilter } = this.state;
+                            const { keyboardInput } = this.props;
+                            return <Input
                               onClick={() => {
-                                this.props.keyboardInput({
+                                keyboardInput({
                                   onSubmit: text => {
                                     this.setState(
                                       { vehicleTypeFilter: text },
                                       () => {
-                                        onChange(this.state.vehicleTypeFilter);
+                                        onChange(vehicleTypeFilter);
                                       }
                                     );
                                   },
-                                  text: this.state.vehicleTypeFilter,
+                                  text: vehicleTypeFilter,
                                   title: '车型',
                                   label: '车型'
                                 });
@@ -411,9 +405,9 @@ class WorkOrder extends React.Component {
                                 input: classes.InputInput
                               }}
                               // style={{ width: "100%" ,height:'36px'}}
-                              value={this.state.vehicleTypeFilter || ''}
-                            />
-                          )
+                              value={vehicleTypeFilter || ''}
+                            />;
+                          }
                         },
                         {
                           Header: 'KNR',

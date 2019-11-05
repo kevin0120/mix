@@ -48,7 +48,6 @@ const dataHandlers: rushHandlerMap<tOrderWSTypes,
   // 工单详情
   * [ORDER_WS_TYPES.DETAIL](data: tOrder) {
     try {
-      console.log(data);
       const orderState = yield select(s => s.order);
       const newList = [...orderState.list];
       const newOrder = newList.find(o => o.code === data.code);
@@ -56,7 +55,7 @@ const dataHandlers: rushHandlerMap<tOrderWSTypes,
         newOrder.update(data);
       }
       yield put(orderActions.newList(newList));
-      yield put(orderActions.getDetailSuccess());
+      // yield put(orderActions.getDetailSuccess());
     } catch (e) {
       CommonLog.lError(e, { at: 'ORDER_WS_TYPES.DETAIL' });
     }

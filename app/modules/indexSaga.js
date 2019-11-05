@@ -16,6 +16,7 @@ import { CommonLog } from '../common/utils';
 import healthz from './healthz/saga';
 import modelViewer from './modelViewer/saga';
 import notifier from './Notifier/saga';
+import systemInfo from './systemInfo/saga';
 
 export default function* rootSaga(): Saga<void> {
   try {
@@ -37,7 +38,8 @@ export default function* rootSaga(): Saga<void> {
       dialog,
       healthz,
       modelViewer,
-      notifier
+      notifier,
+      systemInfo
     ].filter(e => !!e).map(e => call(e || (() => {
     }))));
   } catch (e) {

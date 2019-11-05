@@ -46,7 +46,13 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
     _productCode = '';
 
-    _operation = '';
+    _workcenter: string = '';
+
+    _datePlannedStart: string = '';
+
+    _datePlannedComplete: string = '';
+
+    _productTypeImage: string = '';
 
 
     // eslint-disable-next-line flowtype/no-weak-types
@@ -55,7 +61,10 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
       this._status = dataObj.status || this._status;
       this._trackCode = dataObj.track_code;
       this._productCode = dataObj.product_code;
-      this._operation = dataObj.operation;
+      this._workcenter = dataObj.workcenter;
+      this._datePlannedStart = dataObj.date_planned_start;
+      this._datePlannedComplete = dataObj.date_planned_start;
+      this._productTypeImage = dataObj.product_type_image;
     }
 
     get plannedDateTime() {
@@ -83,26 +92,24 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
             const productCode = this._productCode;
             const dateStart = new Date();
             const workCenterCode = yield select(
-              s => s.setting.system.workcenter.code
+              s => s.systemInfo.workcenter
             );
+            const { resources } = this._payload.operation || {};
             // eslint-disable-next-line flowtype/no-weak-types
-            const resp = yield call(
-              (orderReportStartApi: Function),
+            yield call(
+              orderReportStartApi,
               orderCode,
               trackCode,
               workCenterCode,
               productCode,
-              dateStart
+              dateStart,
+              resources
             );
             yield put(loadingActions.stop());
-            if (resp.status !== 200) {
-              throw new Error(
-                `报工失败(${resp.error_code}): ${resp.msg}; extra: ${resp.extra}`
-              );
-            }
           }
           yield put(orderActions.stepStatus(this, ORDER_STATUS.WIP));
         } catch (e) {
+          yield put(loadingActions.stop());
           CommonLog.lError(e, {
             at: 'ORDER_STATUS.TODO',
             code: this._code,
@@ -177,16 +184,18 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
             const code = this._id;
             const trackCode = '';
             const workCenterCode = yield select(
-              s => s.setting.system.workcenter.code
+              s => s.system.workcenter
             );
             const productCode = '';
-            const operation = this._operation;
+            const dateComplete=new Date();
+            const operation = this.payload.operation;
             closeAction = [
               orderActions.reportFinish(
                 code,
                 trackCode,
-                workCenterCode,
                 productCode,
+                workCenterCode,
+                dateComplete,
                 operation
               ),
               push('/app')
@@ -213,7 +222,10 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           );
           yield put(orderActions.finishOrder(this));
         } catch (e) {
-          CommonLog.lError(`showResult error: ${e.message}`);
+          CommonLog.lError(e, {
+            at: 'ORDER_STATUS.DONE'
+          });
+          // yield put(orderActions.stepStatus(this, ORDER_STATUS.PENDING));
         } finally {
           CommonLog.Info('order done');
         }

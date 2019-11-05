@@ -36,8 +36,8 @@ function* initAiis() {
   try {
     const state = yield select();
     const aiisUrl = state.setting.system.connections.aiis;
-    // const hmiSN = state.setting.page.odooConnection.hmiSn.value;
-    const hmiSN = state.setting.system.connections.workcenterCode;
+    const hmiSN = state.setting.page.odooConnection.hmiSn.value;
+    // const hmiSN = state.setting.system.connections.workcenterCode;
     if (task) {
       yield cancel(task);
     }

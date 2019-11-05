@@ -10,12 +10,17 @@ export type tStockMove = {
 };
 
 export type tOrderListData = {|
-  code: number,
-  desc: string, // 工单描述
-  name: string, // 工单名称（工单号）
-  image: string,
-  status: tOrderStatus,
-  code: string
+  id: number,
+  code: string,
+  track_code: string,
+  product_code: string,
+  workcenter: string,
+  date_planned_start: string,
+  date_planned_complete: string,
+  product_type_image: string, // 产成品图片
+  status: tOrderStatus
+  // desc: string, // 工单描述
+  // name: string, // 工单名称（工单号）
 |};
 
 export type tOrder = {|

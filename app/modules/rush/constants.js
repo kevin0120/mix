@@ -17,3 +17,7 @@ export const WEBSOCKET_EVENTS = Object.freeze({
   device: 'device',
   mes: 'mes'
 });
+
+export const WS_RUSH=Object.freeze({
+  RUSH_DATA:'WS_RUSH_DATA'
+});

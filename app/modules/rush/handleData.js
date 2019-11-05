@@ -3,7 +3,7 @@
 import { put, fork, call } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import type { tWebSocketEvent, tRushData } from './type';
-import { WEBSOCKET_EVENTS as wse } from './constants';
+import { WEBSOCKET_EVENTS as wse, WS_RUSH } from './constants';
 import notifierActions from '../Notifier/action';
 import { CommonLog } from '../../common/utils';
 import {
@@ -16,8 +16,22 @@ import scannerNewData from '../external/device/scanner/saga';
 import ioWSDataHandlers from '../external/device/io/handleWSData';
 import { deviceStatus } from '../deviceManager/handlerWSData';
 import orderWSDataHandlers from '../order/handleWSData';
+import systemInfoActions from '../systemInfo/action';
 
-export default function*(payload: string): Saga<void> {
+const registerHandlers = {
+  * [WS_RUSH.RUSH_DATA]({ workcenter }) {
+    try {
+      // const { workcenter } = data;
+      if (workcenter) {
+        yield put(systemInfoActions.setWorkcenter(workcenter));
+      }
+    } catch (e) {
+      CommonLog.lError(e);
+    }
+  }
+};
+
+export default function* (payload: string): Saga<void> {
   try {
     if (!payload) {
       return;
@@ -59,7 +73,7 @@ const handleData = dataHandlers =>
 const rushDataHandlers: {
   [tWebSocketEvent]: (tRushData<any, any>) => void | Saga<void>
 } = {
-  *[wse.maintenance](data: tRushData<string, { name: string }>) {
+  * [wse.maintenance](data: tRushData<string, { name: string }>) {
     try {
       yield put(
         notifierActions.enqueueSnackbar(
@@ -77,5 +91,6 @@ const rushDataHandlers: {
   [wse.result]: toolNewResults,
   [wse.tool]: toolStatusChange,
   [wse.device]: deviceStatus,
-  [wse.order]: handleData(orderWSDataHandlers)
+  [wse.order]: handleData(orderWSDataHandlers),
+  [wse.register]: handleData(registerHandlers)
 };

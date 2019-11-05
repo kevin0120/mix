@@ -17,6 +17,7 @@ import order from './order/reducer';
 import dialog from './dialog/reducer';
 import Notifier from './Notifier/reducer';
 import loading from './loading/reducer';
+import systemInfo from './systemInfo/reducer';
 
 export default function createRootReducer(history: {}) {
   const routerReducer = connectRouter(history)(() => {});
@@ -37,7 +38,8 @@ export default function createRootReducer(history: {}) {
       dialog,
       Notifier,
       healthz,
-      loading
+      loading,
+      systemInfo
     })
   );
 }

@@ -1,57 +1,40 @@
 // @flow
 import Moment from 'moment';
-import { CommonLog } from '../common/utils';
 import { rushSendApi } from './rush';
 import { ORDER_WS_TYPES } from '../modules/order/constants';
 
-export function orderListApi() {
-  try {
-    return rushSendApi(ORDER_WS_TYPES.LIST);
-  } catch (e) {
-    CommonLog.lError(e, {
-      at: 'orderListApi'
-    });
-  }
+export function orderListApi({ timeFrom, timeTo, status, pageSize, pageNo }: {
+  timeFrom?: string, timeTo?: string, status?: string, pageSize?: number, pageNo?: number
+}): Promise<{}> {
+  return rushSendApi(ORDER_WS_TYPES.LIST, {
+    time_from: timeFrom,
+    time_to: timeTo,
+    status,
+    page_size: pageSize,
+    page_no: pageNo
+  });
 }
 
-export function orderDetailApi(id: number) {
-  try {
-    return rushSendApi(ORDER_WS_TYPES.DETAIL, {
-      id
-    });
-  } catch (e) {
-    CommonLog.lError(e, {
-      at: 'orderDetailApi'
-    });
-  }
+export function orderDetailApi(id: number): Promise<any> {
+  return rushSendApi(ORDER_WS_TYPES.DETAIL, {
+    id
+  });
 }
 
 // 更新工单状态
-export function orderUpdateApi(id: number, orderStatus: string): ?Promise<any> {
-  try {
-    return rushSendApi(ORDER_WS_TYPES.UPDATE, {
-      id,
-      status: orderStatus
-    });
-  } catch (e) {
-    CommonLog.lError(e, {
-      at: 'orderUpdateApi'
-    });
-  }
+export function orderUpdateApi(id: number, orderStatus: string): Promise<any> {
+  return rushSendApi(ORDER_WS_TYPES.UPDATE, {
+    id,
+    status: orderStatus
+  });
 }
 
 // 更新工步状态
-export function orderStepUpdateApi(id: number, status: string): ?Promise<any> {
-  try {
-    return rushSendApi(ORDER_WS_TYPES.STEP_UPDATE, {
-      id,
-      status
-    });
-  } catch (e) {
-    CommonLog.lError(e, {
-      at: 'orderStepUpdateApi'
-    });
-  }
+export function orderStepUpdateApi(id: number, status: string): Promise<any> {
+  return rushSendApi(ORDER_WS_TYPES.STEP_UPDATE, {
+    id,
+    status
+  });
 }
 
 // TODO
@@ -62,68 +45,52 @@ export function orderReportStartApi(
   productCode: string,
   dateStart: Date,
   resources: {
-    user: [{
+    user: Array<{
       name: string,
       code: string
-    }],
-    equipments: [
-      {
-        name: string,
-        code: string
-      }
-    ]
+    }>,
+    equipments: Array<{
+      name: string,
+      code: string
+    }>
 
   }
-): ?Promise<{
-  error_code: number,
-  msg: string,
-  extra: string
-}> {
-  try {
-    const dateStartString=Moment(dateStart).format();
-    return rushSendApi(ORDER_WS_TYPES.START_REQUEST, {
-      code,
-      track_code: trackCode,
-      workcenter: workCenter,
-      product_code: productCode,
-      date_start: dateStartString,
-      resources
-    });
-  } catch (e) {
-    CommonLog.lError(e, {
-      at: 'orderReportStartApi'
-    });
-  }
+): Promise<any> {
+  const dateStartString = Moment(dateStart).format();
+  return rushSendApi(ORDER_WS_TYPES.START_REQUEST, {
+    code,
+    track_code: trackCode,
+    workcenter: workCenter,
+    product_code: productCode,
+    date_start: dateStartString,
+    resources
+  });
 }
 
 export function orderReportFinishApi(
   code: string,
   trackCode: string,
-  workCenter: string,
   productCode: string,
+  workCenter: string,
+  dateComplete: Date,
   operation: {}
 ) {
-  try {
-    return rushSendApi(ORDER_WS_TYPES.FINISH_REQUEST, {
-      code,
-      track_code: trackCode,
-      workcenter: workCenter,
-      product_code: productCode,
-      operation
-    });
-  } catch (e) {
-    CommonLog.lError(e, {
-      at: 'orderReportFinishApi'
-    });
-  }
+  const dateCompleteString = Moment(dateComplete).format();
+  return rushSendApi(ORDER_WS_TYPES.FINISH_REQUEST, {
+    code,
+    track_code: trackCode,
+    workcenter: workCenter,
+    product_code: productCode,
+    date_complete: dateCompleteString,
+    operation
+  });
 }
 
-export function stepDataApi(data: Object): ?Promise<any> {
-  try {
-    return rushSendApi(ORDER_WS_TYPES.STEP_DATA, { data });
-  } catch (e) {
-    CommonLog.lError(e, {
-      at: 'orderReportFinishApi'
-    });
-  }
+export function stepDataApi(id: number, data: Object): Promise<any> {
+  const json = JSON.stringify(data);
+  return rushSendApi(ORDER_WS_TYPES.STEP_DATA, { id, data: json });
+}
+
+export function orderDetailByCodeApi(code: string, workcenter?: string): Promise<any> {
+  return rushSendApi(ORDER_WS_TYPES.ORDER_DETAIL_BY_CODE, { code, workcenter });
 }

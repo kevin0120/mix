@@ -81,6 +81,7 @@ export default class ClsScrewTool extends Device implements IScrewTool {
       CommonLog.lError(e, {
         at: 'ClsScrewTool.ToggleEnable'
       });
+      throw e;
     }
   }
 }

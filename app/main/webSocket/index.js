@@ -5,6 +5,8 @@ const { ipcMain } = require('electron');
 
 let ws = null;
 
+let mainWindow = null;
+
 export function getWSClient() {
   return ws;
 }
@@ -31,18 +33,22 @@ const onWSMessage = dataParser => resp => {
   if (dataParser) {
     data = dataParser(resp);
   }
-  if (messageSNs[data.sn]) {
+  if (messageSNs[data.sn]) { // is reply
     messageSNs[data.sn](data);
     delete messageSNs[data.sn];
   }
+  if (mainWindow) {
+    mainWindow.send('rush-message', resp);
+  }
 };
 
-const rushReply = event => data => {
-  console.log('ws reply data: ', data);
-  event.reply('rush-reply', data, data.sn);
+const rushReply = event => resp => {
+  console.log('ws reply data: ', resp);
+  event.reply('rush-reply', resp, resp.sn);
 };
 
 function startListenSend() {
+  const replyWSError = onWSMessage();
   ipcMain.on('rush-send', (event, { data, timeout, sn }) => {
     messageSNs[sn] = rushReply(event);
     if (ws && !ws.closed && ws.ws.readyState === OWebSocket.OPEN) {
@@ -57,9 +63,11 @@ function startListenSend() {
           if (!messageSNs[sn]) {
             return;
           }
-          onWSMessage()({
-            result: -2,
-            msg: `error when sending message`,
+          replyWSError({
+            data:{
+              result: -2,
+              msg: `error when sending message`,
+            },
             sn
           });
         }
@@ -70,16 +78,20 @@ function startListenSend() {
           return;
         }
         // eslint-disable-next-line no-param-reassign
-        onWSMessage()({
-          result: -1,
-          msg: `rush send timeout`,
+        replyWSError({
+          data:{
+            result: -1,
+            msg: `rush send timeout`,
+          },
           sn
         });
       }, timeout);
     } else {
-      onWSMessage()({
-        result: -404,
-        msg: `cannot send message to rush now, rush is not connected`,
+      replyWSError({
+        data:{
+          result: -404,
+          msg: `cannot send message to rush now, rush is not connected`,
+        },
         sn
       });
     }
@@ -87,6 +99,7 @@ function startListenSend() {
 }
 
 export function init(url, hmiSN, window) {
+  mainWindow = window;
   ipcMain.on('rush', () => {
     const wsMessage = onWSMessage(parseData);
     if (!ws) {
@@ -126,9 +139,6 @@ export function init(url, hmiSN, window) {
       });
       ws.on('pong', (...args) => {
         window.send('rush-pong', ...args);
-      });
-      ws.on('message', (...args) => {
-        window.send('rush-message', ...args);
       });
       ws.on('websocket-status', (...args) => {
         window.send('rush-status', ...args);

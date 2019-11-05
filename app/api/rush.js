@@ -1,6 +1,7 @@
 // @flow
 import { isNil } from 'lodash-es';
 import { CommonLog } from '../common/utils';
+import type { tRushData } from '../modules/rush/type';
 
 
 const { ipcRenderer } = require('electron');
@@ -20,8 +21,8 @@ const defaultTimeout = 10000; // 默认timeout 10s
 
 if (!isNil(ipcRenderer)) {
   ipcRenderer.on('rush-reply', (event, args, replySN) => {
+    CommonLog.Info('rush-reply', args);
     if (messageSNs[replySN]) {
-      CommonLog.Info('rush-reply', args);
       messageSNs[replySN](args);
       delete messageSNs[replySN];
     }
@@ -29,11 +30,25 @@ if (!isNil(ipcRenderer)) {
 }
 
 
-export function rushSendApi(msgType: string, data: any, timeout: number = defaultTimeout): Promise<any> {
+// eslint-disable-next-line flowtype/no-weak-types
+export function rushSendApi(msgType: string, data: any, timeout: number = defaultTimeout): Promise<tRushData<any, any>> {
   const sn = getSN();
-  return new Promise((resolve) => {
-    messageSNs[sn] = (args) => {
-      resolve(args);
+  return new Promise((resolve, reject) => {
+    // eslint-disable-next-line flowtype/no-weak-types
+    messageSNs[sn] = (resp: tRushData<any, any>) => {
+      if (!resp) {
+        reject(new Error(`error (sn:${sn}):ws received an empty response`));
+        return;
+      }
+      if (!resp.data) {
+        reject(new Error(`error (sn:${sn}):reply has no data`));
+        return;
+      }
+      if (!isNil(resp.data.result) && resp.data.result < 0) {
+        reject(new Error(`error ${resp.data.result}(sn:${sn}):${resp.data.msg}`));
+        return;
+      }
+      resolve(resp);
     };
     ipcRenderer.send('rush-send', {
       data: {

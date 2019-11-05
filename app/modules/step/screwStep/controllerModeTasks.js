@@ -19,11 +19,13 @@ export default {
       // const userID = 1;
 
       // const { toolSN, pset, sequence } = points[activeIndex];
+      // eslint-disable-next-line camelcase
       const { tightening_tool, pset, sequence } = point;
       const total = points.length || 0;
       const workorderID = yield select(s => workingOrder(s.order)?.code);
-      const data = yield call(
+      yield call(
         psetApi,
+        // eslint-disable-next-line camelcase
         tightening_tool || '',
         stepId,
         // userID,
@@ -34,31 +36,14 @@ export default {
         total,
         workorderID
       );
-      if (data && data.result !== 0) {
-        notifierActions.enqueueSnackbar('Error', `pset失败:${data.msg}`);
-        CommonLog.lError(`pset失败${data.msg || ''}`, {
-          at: 'pset',
-          tightening_tool,
-          stepId,
-          // userID,
-          userIDs,
-          pset,
-          sequence,
-          retryTimes
-        });
-        return false;
-      }
     } catch (e) {
       // 程序号设置失败
       yield put(
-        notifierActions.enqueueSnackbar('Error', 'pset failed', {
+        notifierActions.enqueueSnackbar('Error', `pset失败，${e.message}`, {
           // meta message,
           at: 'controllerModes.pset'
         })
       );
-      CommonLog.lError(e, {
-        at: 'controllerModes.pset'
-      });
       return false;
     }
     return true;
@@ -77,20 +62,14 @@ export default {
 
       const userID = 1;
 
-      const data = yield call(jobApi, toolSN, stepId, userID, jobID);
-      if (data && data.result !== 0) {
-        notifierActions.enqueueSnackbar('Error', `程序号设置失败:${data.msg}`);
-        CommonLog.lError(`程序号设置失败:${data.msg}`, {
-          at: 'job',
-          toolSN,
-          stepId,
-          userID,
-          jobID
-        });
-        return false;
-      }
+      yield call(jobApi, toolSN, stepId, userID, jobID);
     } catch (e) {
-      CommonLog.lError(e);
+      yield put(
+        notifierActions.enqueueSnackbar('Error', `程序号设置失败，${e.message}`, {
+          // meta message,
+          at: 'controllerModes.job'
+        })
+      );
       return false;
     }
     return true;
