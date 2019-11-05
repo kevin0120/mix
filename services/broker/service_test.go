@@ -34,7 +34,7 @@ func TestNewService(t *testing.T) {
 }
 
 func testHandler(message *brokerMessage) {
-	fmt.Printf("Msg: %v", message)
+	fmt.Println(fmt.Sprintf("Msg: %v", message))
 }
 
 func TestService_Subscribe_Fail(t *testing.T) {

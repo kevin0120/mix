@@ -22,11 +22,11 @@ func NewService(c Config, d Diagnostic) *Service {
 	s := &Service{
 		diag: d,
 	}
+	s.configValue.Store(c)
 
 	p := s.newBroker(c.Provider)
 	s.Provider = p
 
-	s.configValue.Store(c)
 
 	return s
 }

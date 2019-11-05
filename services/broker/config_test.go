@@ -9,7 +9,7 @@ func newTestConfig() Config {
 	c := NewConfig()
 	c.Enable = true
 	c.Provider = "nats"
-	c.ConnectUrls = []string{"nats://192.168.4.203:4222,nats://192.168.4.203:4223"}
+	c.ConnectUrls = []string{"nats://192.168.4.203:4222","nats://192.168.4.203:4223"}
 	return c
 }
 
