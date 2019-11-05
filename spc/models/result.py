@@ -150,7 +150,7 @@ class OperationResult(models.HyperModel):
                                                    pset_w_min numeric, pset_w_target numeric,
                                                    quality_state varchar, exception_reason varchar, sent boolean,
                                                    batch varchar,
-                                                   order_no varchar, nut_no varchar, r_tightening_id integer,
+                                                   order_no varchar, nut_serial_no varchar, r_tightening_id integer,
                                                    vin_code varchar, vehicle_type varchar, gun_sn varchar)
   returns BIGINT as
 $$
@@ -204,7 +204,7 @@ BEGIN
          public.maintenance_equipment me,
          public.mrp_bom_line mbl
     where wo.name = order_no
-      and qc.bolt_number = nut_no
+      and qc.bolt_number = nut_serial_no
       and co.check_id = qc.id
       and wo.production_id = mp.id
       and mbl.id = co.bom_line_id
@@ -220,40 +220,41 @@ BEGIN
       and co.tool_id = r_gun_id
     limit 1;
   else
-    select dd.pid,
-           dd.cou_pid,
-           job2.code,
-           op.workcenter_id,
-           gg.gun_id,
-           qp2.id,
-           dd.cou_bom_id,
-           dd.operation_point_id
-           into r_product_id, r_consu_product_id,r_job, r_workcenter_id,r_gun_id,r_qcp_id,r_bom_line_id,r_operation_point_id
-    from (select pp.id                  pid,
-                 mbl.product_id         cou_pid,
-                 mbl.operation_id       cou_opd,
-                 mbl.gun_id             cou_gid,
-                 mbl.id                 cou_bom_id,
-                 mbl.operation_point_id operation_point_id
+    r_vin_code = vin_code;
+    r_order_id = null;
+    r_bom_line_id = null;
+    select pp2.id,
+           tp.cou_pid,
+           tp.cou_program_code,
+           tp.cou_program_id,
+           tp.cou_workcenter_id,
+           tp.cou_qcp_id,
+           tp.operation_point_id
+           into r_product_id, r_consu_product_id,r_job, r_program_id, r_workcenter_id,r_qcp_id,r_operation_point_id
+    from (select sqp.product_id   cou_pid,
+                 sqp.operation_id cou_opd,
+                 op.routing_id    cou_routing_id,
+                 sqp.id           cou_qcp_id,
+                 opp.id           operation_point_id,
+                 op.workcenter_id cou_workcenter_id,
+                 sa_program.id    cou_program_id,
+                 sa_program.code  cou_program_code
           from public.product_product pp,
-               public.mrp_bom_line mbl,
-               public.mrp_bom bom
-          where pp.id = bom.product_id
-            and pp.default_code = vehicle_type
-            and bom.id = mbl.bom_id) as dd,
-         (select me.id gun_id
-          from public.maintenance_equipment me
-          where me.serial_no = gun_sn) as gg,
+               public.operation_point opp,
+               public.sa_quality_point sqp,
+               public.mrp_routing_workcenter op,
+               public.controller_program sa_program,
+               public.mrp_routing routing
+          where pp.id = sqp.product_id
+            and opp.qcp_id = sqp.id /* 找到拧紧点 */
+            and sqp.name = nut_serial_no /* 找到质量控制点 */
+            and op.id = sqp.operation_id
+            and sa_program.id = sqp.program_id
+         ) as tp, /* 找到拧紧点相关拧紧编号的清单 */
          public.product_product pp2,
-         public.mrp_routing_workcenter op,
-         public.sa_quality_point qp2,
-         public.controller_job job2
-    where pp2.default_code = nut_no
-      and pp2.id = cou_pid
-      and op.id = cou_opd
-      and qp2.bom_line_id = cou_bom_id
-      and job2.id = op.op_job_id;
-
+         public.mrp_bom bom
+    where pp2.default_code = vehicle_type
+      and bom.product_id = pp2.id; /* 找到物料清单 */
   end if;
 
 

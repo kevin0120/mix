@@ -86,6 +86,7 @@ def package_tightening_points(tightening_points):
             'sequence': tp.sequence,
             'group_sequence': tp.group_sequence if tp.group_id else tp.sequence,
             'is_key': tp.is_key,  # 是否为关键拧紧点
+            'nut_no': tp.name,  # 螺栓编号
             'max_redo_times': tp.max_redo_times,
             'key_num': tp.group_id.key_num if tp.group_id else 1,
         }

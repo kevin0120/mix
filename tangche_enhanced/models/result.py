@@ -22,7 +22,7 @@ class OperationResult(models.HyperModel):
                                                    pset_w_min numeric, pset_w_target numeric, lacking varchar,
                                                    quality_state varchar, exception_reason varchar, sent boolean,
                                                    batch varchar,
-                                                   order_id bigint, nut_no varchar, r_tightening_id integer,
+                                                   order_id bigint, nut_serial_no varchar, r_tightening_id integer,
                                                    vin_code varchar, vehicle_type varchar, gun_sn varchar)
   returns BIGINT as
 $$
@@ -79,7 +79,7 @@ BEGIN
          public.mrp_bom_line mbl
     where wo.id = order_id
       and co.workorder_id = order_id
-      and pp.default_code = nut_no
+      and pp.default_code = nut_serial_no
       and co.bom_line_id = qp.bom_line_id
       and wo.production_id = mp.id
       and mbl.id = co.bom_line_id
@@ -113,7 +113,7 @@ BEGIN
                public.mrp_routing routing
           where pp.id = sqp.product_id
             and opp.qcp_id = sqp.id /* 找到拧紧点 */
-            and sqp.name = nut_no /* 找到质量控制点 */
+            and sqp.name = nut_serial_no /* 找到质量控制点 */
             and op.id = sqp.operation_id
             and sa_program.id = sqp.program_id
          ) as tp, /* 找到拧紧点相关拧紧编号的清单 */
