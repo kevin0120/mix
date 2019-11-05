@@ -180,7 +180,7 @@ func (s *Service) Open() error {
 }
 
 func (s *Service) Close() error {
-	return nil
+	return s.rpc.Stop()
 }
 
 func (s *Service) OnRPCStatus(status string) {
@@ -226,11 +226,11 @@ func (s *Service) OnRPCRecv(payload string) {
 //
 //}
 
-func (s *Service) PutResult(result_id int64, body interface{}) error {
+func (s *Service) PutResult(resultId int64, body interface{}) error {
 
 	//var err error
 	//for _, endpoint := range s.endpoints {
-	//	err = s.putResult(body, fmt.Sprintf(endpoint.url, result_id), endpoint.method)
+	//	err = s.putResult(body, fmt.Sprintf(endpoint.url, resultId), endpoint.method)
 	//	if err == nil {
 	//		// 如果第一次就成功，推出循环
 	//		return nil
@@ -240,7 +240,7 @@ func (s *Service) PutResult(result_id int64, body interface{}) error {
 	//ws_msg := WSMsg{
 	//	Type: WS_RESULT,
 	//	Data: WSOpResult{
-	//		ResultID: result_id,
+	//		ResultID: resultId,
 	//		Result:   body.(AIISResult),
 	//		Port:     s.rush_port,
 	//	},
@@ -251,7 +251,7 @@ func (s *Service) PutResult(result_id int64, body interface{}) error {
 	//s.ws.SendText(string(str))
 
 	result := WSOpResult{
-		ResultID: result_id,
+		ResultID: resultId,
 		Result:   body,
 		Port:     s.rush_port,
 	}

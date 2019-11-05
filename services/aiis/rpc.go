@@ -171,6 +171,8 @@ func (c *GRPCClient) RecvProcess() {
 			return
 		}
 
+		c.srv.diag.Debug(fmt.Sprintf("Recv Message From GRPC: %s", in.Payload))
+
 		if c.RPCRecv != nil {
 			c.RPCRecv(in.Payload)
 		}
