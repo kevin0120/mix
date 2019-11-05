@@ -8,6 +8,8 @@ export const WEBSOCKET_EVENTS = Object.freeze({
   scanner: 'scanner',
   io: 'io',
   odoo: 'odoo',
+  aiis: 'aiis',
+  exsys: 'exsys',
   maintenance: 'maintenance',
   tool: 'tool',
   reader: 'reader',
@@ -18,6 +20,6 @@ export const WEBSOCKET_EVENTS = Object.freeze({
   mes: 'mes'
 });
 
-export const WS_RUSH=Object.freeze({
-  RUSH_DATA:'WS_RUSH_DATA'
+export const WS_RUSH = Object.freeze({
+  RUSH_DATA: 'WS_RUSH_DATA'
 });

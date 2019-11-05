@@ -17,9 +17,10 @@ import ioWSDataHandlers from '../external/device/io/handleWSData';
 import { deviceStatus } from '../deviceManager/handlerWSData';
 import orderWSDataHandlers from '../order/handleWSData';
 import systemInfoActions from '../systemInfo/action';
+import healthzActions from '../healthz/action';
 
 const registerHandlers = {
-  * [WS_RUSH.RUSH_DATA]({ workcenter }) {
+  *[WS_RUSH.RUSH_DATA]({ workcenter }) {
     try {
       // const { workcenter } = data;
       if (workcenter) {
@@ -31,7 +32,7 @@ const registerHandlers = {
   }
 };
 
-export default function* (payload: string): Saga<void> {
+export default function*(payload: string): Saga<void> {
   try {
     if (!payload) {
       return;
@@ -73,7 +74,7 @@ const handleData = dataHandlers =>
 const rushDataHandlers: {
   [tWebSocketEvent]: (tRushData<any, any>) => void | Saga<void>
 } = {
-  * [wse.maintenance](data: tRushData<string, { name: string }>) {
+  *[wse.maintenance](data: tRushData<string, { name: string }>) {
     try {
       yield put(
         notifierActions.enqueueSnackbar(
@@ -92,5 +93,44 @@ const rushDataHandlers: {
   [wse.tool]: toolStatusChange,
   [wse.device]: deviceStatus,
   [wse.order]: handleData(orderWSDataHandlers),
-  [wse.register]: handleData(registerHandlers)
+  [wse.register]: handleData(registerHandlers),
+  *[wse.odoo]({ type, data }) {
+    try {
+      if (type === 'WS_ODOO_STATUS') {
+        const { name, status } = data;
+        yield call(updateExternalStatus, name, status);
+      }
+    } catch (e) {
+      CommonLog.lError(e);
+    }
+  },
+  *[wse.aiis]({ type, data }) {
+    try {
+      if (type === 'WS_AIIS_STATUS') {
+        const { name, status } = data;
+        yield call(updateExternalStatus, name, status);
+      }
+    } catch (e) {
+      CommonLog.lError(e);
+    }
+  },
+  *[wse.exsys]({ type, data }) {
+    try {
+      if (type === 'WS_EXSYS_STATUS') {
+        const { name, status } = data;
+        yield call(updateExternalStatus, name, status);
+      }
+    } catch (e) {
+      CommonLog.lError(e);
+    }
+  }
 };
+
+function* updateExternalStatus(name, status) {
+  try {
+    const statusBool = status === 'online';
+    yield put(healthzActions.data({ [name]: statusBool }));
+  } catch (e) {
+    CommonLog.lError(e, { at: 'updateExternalStatus' });
+  }
+}
