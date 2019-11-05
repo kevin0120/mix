@@ -23,7 +23,8 @@ import Table from '../../components/Table/Table';
 import { CommonLog } from '../../common/utils';
 import type { tCommonActionType } from '../../common/type';
 import {
-  orderDetailApi, orderDetailByCodeApi,
+  orderDetailApi,
+  orderDetailByCodeApi,
   orderListApi,
   orderReportFinishApi
 } from '../../api/order';
@@ -86,13 +87,13 @@ function onNewScanner({ scanner }) {
 
 // TODO: 开工、报工接口
 function* reportFinish({
-                         code,
-                         trackCode,
-                         productCode,
-                         workCenterCode,
-                         dateComplete,
-                         operation
-                       }) {
+  code,
+  trackCode,
+  productCode,
+  workCenterCode,
+  dateComplete,
+  operation
+}) {
   try {
     yield call(
       orderReportFinishApi,
@@ -121,9 +122,9 @@ function* watchOrderTrigger() {
 }
 
 function* tryWorkOnOrder({
-                           order,
-                           code
-                         }: {
+  order,
+  code
+}: {
   order: IOrder,
   code: string | number
 }) {
@@ -135,7 +136,6 @@ function* tryWorkOnOrder({
     }
     if (code) {
       const { list: orderList } = orderState;
-      // TODO: trigger by order VIN/trackCode
       orderToDo = orderList.find(o => o.code === code);
     }
     if (!orderToDo) {
@@ -200,7 +200,6 @@ function* getOrderDetail({ order }) {
 
 function* getOrderList() {
   try {
-
     yield call(orderListApi, {
       // TODO
     });
@@ -212,9 +211,9 @@ function* getOrderList() {
 }
 
 function* tryViewOrder({
-                         order: orderRec,
-                         code
-                       }: {
+  order: orderRec,
+  code
+}: {
   order: IOrder,
   code: string | number
 }) {
@@ -281,11 +280,11 @@ function* viewOrder({ order }: { order: IOrder }) {
             color: 'warning'
           },
           !WIPOrder &&
-          doable(order) && {
-            label: 'Order.Start',
-            color: 'info',
-            action: orderActions.tryWorkOn(order)
-          }
+            doable(order) && {
+              label: 'Order.Start',
+              color: 'info',
+              action: orderActions.tryWorkOn(order)
+            }
         ],
         title: i18n.t('Order.Overview'),
         content: (
