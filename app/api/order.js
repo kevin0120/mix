@@ -3,11 +3,21 @@ import Moment from 'moment';
 import { rushSendApi } from './rush';
 import { ORDER_WS_TYPES } from '../modules/order/constants';
 
-export function orderListApi({ timeFrom, timeTo, status, pageSize, pageNo }: {
-  timeFrom?: string, timeTo?: string, status?: string, pageSize?: number, pageNo?: number
+export function orderListApi({
+  timeFrom,
+  timeTo,
+  status,
+  pageSize,
+  pageNo
+}: {
+  timeFrom?: string,
+  timeTo?: string,
+  status?: string,
+  pageSize?: number,
+  pageNo?: number
 }): Promise<{}> {
   return rushSendApi(ORDER_WS_TYPES.LIST, {
-    time_from: timeFrom,
+    time_from: timeFrom, // UTC
     time_to: timeTo,
     status,
     page_size: pageSize,
@@ -53,7 +63,6 @@ export function orderReportStartApi(
       name: string,
       code: string
     }>
-
   }
 ): Promise<any> {
   const dateStartString = Moment(dateStart).format();
@@ -91,6 +100,9 @@ export function stepDataApi(id: number, data: Object): Promise<any> {
   return rushSendApi(ORDER_WS_TYPES.STEP_DATA, { id, data: json });
 }
 
-export function orderDetailByCodeApi(code: string, workcenter?: string): Promise<any> {
+export function orderDetailByCodeApi(
+  code: string,
+  workcenter?: string
+): Promise<any> {
   return rushSendApi(ORDER_WS_TYPES.ORDER_DETAIL_BY_CODE, { code, workcenter });
 }

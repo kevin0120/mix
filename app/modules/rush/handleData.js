@@ -6,10 +6,7 @@ import type { tWebSocketEvent, tRushData } from './type';
 import { WEBSOCKET_EVENTS as wse, WS_RUSH } from './constants';
 import notifierActions from '../Notifier/action';
 import { CommonLog } from '../../common/utils';
-import {
-  toolNewResults,
-  toolStatusChange
-} from '../device/tools/saga';
+import { toolNewResults, toolStatusChange } from '../device/tools/saga';
 import rushActions from './action';
 import readerNewData from '../device/reader/saga';
 import scannerNewData from '../device/scanner/saga';
@@ -123,6 +120,9 @@ const rushDataHandlers: {
     } catch (e) {
       CommonLog.lError(e);
     }
+  },
+  *[wse.controller]() {
+    // 控制器状态推送在设备列表中处理
   }
 };
 
