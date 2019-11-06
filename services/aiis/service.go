@@ -264,11 +264,11 @@ func (s *Service) PutResult(result_id int64, body interface{}) error {
 	return err
 }
 
-func (s *Service) PutMesOpenRequest(code string,req interface{}) (interface{}, error) {
+func (s *Service) PutMesOpenRequest(code string, req interface{}) (interface{}, error) {
 	resp, err := s.httpClient.R().
 		SetBody(req).
 		// or SetError(Error{}).
-		Put(fmt.Sprintf(s.Config().MesOpenWorkUrl,code))
+		Put(fmt.Sprintf(s.Config().MesOpenWorkUrl, code))
 
 	if err != nil {
 		return nil, err
@@ -277,11 +277,11 @@ func (s *Service) PutMesOpenRequest(code string,req interface{}) (interface{}, e
 	return resp.Body(), nil
 }
 
-func (s *Service) PutMesFinishRequest(code string,req interface{}) (interface{}, error) {
+func (s *Service) PutMesFinishRequest(code string, req interface{}) (interface{}, error) {
 	resp, err := s.httpClient.R().
 		SetBody(req).
 		// or SetError(Error{}).
-		Put(fmt.Sprintf(s.Config().MesFinishWorkUrl,code))
+		Put(fmt.Sprintf(s.Config().MesFinishWorkUrl, code))
 
 	if err != nil {
 		return nil, err

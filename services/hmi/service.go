@@ -335,7 +335,7 @@ func (s *Service) OnNewHmiClient(conn websocket.Connection) {
 
 	//主动推送工位号
 	msg := WSWorkcenter{
-		WorkCenter:s.WS.Config().Workcenter,
+		WorkCenter: s.WS.Config().Workcenter,
 	}
 	_ = conn.Emit(wsnotify.WS_EVENT_REG, wsnotify.GenerateMessage(0, wsnotify.WS_RUSH_DATA, msg))
 }
@@ -371,7 +371,7 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 			return
 		}
 
-		err,w:= s.DB.WorkorderOut("",orderReq.ID)
+		w, err := s.DB.WorkorderOut("", orderReq.ID)
 		if err != nil {
 			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
 			return
@@ -390,11 +390,11 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 			return
 		}
 
-		err,w:= s.DB.WorkorderOut(orderReq.Code,0)
+		w, err := s.DB.WorkorderOut(orderReq.Code, 0)
 		//todo 判定本地无工单
-		if w==nil && err==nil{
+		if w == nil && err == nil {
 			fmt.Println("如果RUSH收到HMI请求后找不到新工单,可通过调用ODOO api获取对应工单并推送HMI")
-			w,err=s.ODOO.GetWorkorder("","",orderReq.Workcenter,orderReq.Code)
+			w, err = s.ODOO.GetWorkorder("", "", orderReq.Workcenter, orderReq.Code)
 		}
 
 		if err != nil {
@@ -405,7 +405,6 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 		body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, w))
 		//fmt.Println(string(body))
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_ORDER, string(body))
-
 
 	case WS_ORDER_UPDATE:
 		// 更新工单状态
@@ -461,7 +460,7 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 		}
 
 		_, err = s.DB.UpdateStepData(&storage.Steps{
-			Id:     orderReq.ID,
+			Id:   orderReq.ID,
 			Data: orderReq.Data,
 		})
 
@@ -471,7 +470,6 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 		}
 
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
-
 
 	case WS_ORDER_START_REQUEST:
 		// TODO: 收到HMI的开工请求， 处理收到的请求信息， 直接作为http客户端访问mes提供的接口，并将结果反馈给hmi----doing
@@ -483,7 +481,7 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 			return
 		}
-		resp, err := s.Aiis.PutMesOpenRequest(orderReq.Code,sData)
+		resp, err := s.Aiis.PutMesOpenRequest(orderReq.Code, sData)
 
 		if err != nil {
 			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
@@ -503,7 +501,7 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 			return
 		}
-		resp, err := s.Aiis.PutMesFinishRequest(orderReq.Code,sData)
+		resp, err := s.Aiis.PutMesFinishRequest(orderReq.Code, sData)
 
 		if err != nil {
 			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
