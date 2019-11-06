@@ -52,6 +52,7 @@ func (s *Service) Open() error {
 		s.ios[v.SN] = &IOModule{
 			cfg:           v,
 			flashInterval: time.Duration(s.config().FlashInteval),
+			opened: false,
 		}
 
 		s.DeviceService.AddDevice(v.SN, s.ios[v.SN])

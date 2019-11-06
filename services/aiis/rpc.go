@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/keepalive"
+	"strings"
 	"sync/atomic"
 	"time"
 )
@@ -53,22 +54,22 @@ func (c *GRPCClient) Start() error {
 	c.closing = make(chan chan struct{})
 
 	go c.connect()
-	go c.manage()
 
 	return nil
 }
 
 func (c *GRPCClient) Stop() error {
 	if c.conn != nil {
+		closed := make(chan struct{})
+		c.closing <- closed
+		<-closed
 		c.conn.Close()
 	}
 	if c.stream != nil {
 		c.stream.CloseSend()
 	}
 
-	closed := make(chan struct{})
-	c.closing <- closed
-	<-closed
+	c.srv.diag.Debug("Stop GRPC Successful!")
 
 	return nil
 }
@@ -83,8 +84,7 @@ func (c *GRPCClient) setStatus(status string) {
 	c.status.Store(status)
 }
 
-func (c *GRPCClient) updateStatus() {
-
+func (c *GRPCClient) updateStatusPart2(done chan struct{}) {
 	prevStatus := c.Status()
 	conn := c.conn
 	if conn == nil {
@@ -112,21 +112,59 @@ func (c *GRPCClient) updateStatus() {
 			c.OnRPCStatus(status)
 		}
 	}
+	done <- struct{}{}
+}
+
+func (c *GRPCClient) updateStatus(cancel context.CancelFunc, done chan struct{}) {
+	go c.updateStatusPart2(done)
+	ticker := time.NewTicker(2 * time.Second)
+	defer func() {
+		ticker.Stop()
+	}()
+	select {
+	case <-ticker.C:
+		c.srv.diag.Debug("updateStatus Is Timeout!")
+		cancel()
+		return
+	case <-done:
+		return
+	}
+
 }
 
 func (c *GRPCClient) manage() {
 
-	ticker := time.NewTicker(500 * time.Millisecond)
+	ticker := time.NewTicker(2 * time.Second)
+	defer func() {
+		ticker.Stop()
+		c.srv.diag.Debug("Stop manage Ticker")
+	}()
+	done := make(chan struct{})
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	for {
 		select {
 		case <-ticker.C:
-			c.updateStatus()
+			go c.updateStatus(cancel, done)
 
 		case stopDone := <-c.closing:
-			ticker.Stop()
+			c.srv.diag.Debug("Stop GRPC Manage GO Route")
 			close(stopDone)
 			return //退出manage协程
+		case <-ctx.Done():
+			// 执行出现错误，timeout
+			c.srv.diag.Debug("Stop GRPC Manage GO Route")
+			return //退出manage协程
+		//case <- done:
+		//	c.srv.diag.Debug("Never Go Here")
 		}
+	}
+}
+
+func (c *GRPCClient) reConnect() {
+	if err := c.Stop(); err == nil {
+		c.srv.diag.Debug("Reconnect do Connect Behaviour")
+		c.connect()
 	}
 }
 
@@ -139,8 +177,9 @@ func (c *GRPCClient) connect() {
 		MaxDelay: 1 * time.Second,
 	}))
 	kp := keepalive.ClientParameters{
-		Time:    PING_ITV,
-		Timeout: KEEP_ALIVE_CHECK * PING_ITV,
+		Time:                1 * PING_ITV,
+		Timeout:             2 * PING_ITV,
+		PermitWithoutStream: true,
 	}
 	opts = append(opts, grpc.WithKeepaliveParams(kp))
 	for ; ; {
@@ -156,19 +195,30 @@ func (c *GRPCClient) connect() {
 	c.rpcClient = NewRPCAiisClient(c.conn)
 	c.stream, _ = c.rpcClient.RPCNode(context.Background())
 
+	go c.manage()
+
 	go c.RecvProcess()
 }
 
 func (c *GRPCClient) RecvProcess() {
 	for {
 		if c.stream == nil {
+			err := errors.New("GRPC RecvProcess Stream Is Not Defined")
+			c.srv.diag.Error("RecvProcess Error", err)
 			continue
 		}
 
 		in, err := c.stream.Recv()
 		if err != nil {
 			c.srv.diag.Error("GRPC RecvProcess Error", err)
-			return
+			if strings.HasSuffix(err.Error(), "transport is closing") {
+				go c.reConnect() //进行重连
+				return
+			} else if strings.HasSuffix(err.Error(), "the client connection is closing") {
+				return
+			} else {
+				continue
+			}
 		}
 
 		c.srv.diag.Debug(fmt.Sprintf("Recv Message From GRPC: %s", in.Payload))
