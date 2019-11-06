@@ -10,6 +10,11 @@ const (
 	WS_ORDER_UPDATE      = "WS_ORDER_UPDATE"
 	WS_ORDER_STEP_UPDATE = "WS_ORDER_STEP_UPDATE"
 
+	WS_ORDER_STEP_DATA_UPDATE = "WS_ORDER_STEP_DATA_UPDATE"
+	WS_ORDER_DETAIL_BY_CODE   = "WS_ORDER_DETAIL_BY_CODE"
+
+	WS_ORDER_NEW_ORDER = "WS_NEW_ORDER"
+
 	WS_AIIS_STATUS  = "WS_AIIS_STATUS"
 	WS_ODOO_STATUS  = "WS_ODOO_STATUS"
 	WS_EXSYS_STATUS = "WS_EXSYS_STATUS"
@@ -225,4 +230,18 @@ type WSTest struct {
 type WSOrderReq struct {
 	ID     int64  `json:"id"`
 	Status string `json:"status"`
+}
+
+type WSOrderReqData struct {
+	ID   int64  `json:"id"`
+	Data string `json:"data"`
+}
+
+type WSOrderReqCode struct {
+	Code       string `json:"code"`
+	Workcenter string `json:"workcenter"`
+}
+
+type WSWorkcenter struct {
+	WorkCenter string `json:"workcenter"`
 }

@@ -1,7 +1,8 @@
 package wsnotify
 
 const (
-	WS_REG = "WS_REG"
+	WS_REG       = "WS_REG"
+	WS_RUSH_DATA = "WS_RUSH_DATA"
 )
 
 type WSRegist struct {

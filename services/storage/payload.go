@@ -1,5 +1,7 @@
 package storage
 
+import "time"
+
 const (
 	RESULT_NONE = "NONE"
 	RESULT_OK   = "OK"
@@ -36,4 +38,24 @@ type RoutingOperationDelete struct {
 type WorkorderStep struct {
 	Workorders
 	Steps []Steps `json:"steps"`
+}
+
+type WorkorderList struct {
+	Id                    int64     `json:"id"`
+	Code                  string    `json:"code"`
+	Track_code            string    `json:"track_code"`
+	Product_code          string    `json:"product_code"`
+	WorkCenter            string    `json:"-"`
+	Date_planned_start    time.Time `json:"date_planned_start"`
+	Date_planned_complete time.Time `json:"date_planned_complete"`
+	Status                string    `json:"status"`
+	Product_type_image    string    `json:"product_type_image"`
+}
+
+type WorkorderListPar struct {
+	Time_from string `json:"time_from"`
+	Time_to   string `json:"time_to"`
+	Status    string `json:"status"`
+	Page_size int    `json:"page_size"`
+	Page_no   int    `json:"page_no"`
 }

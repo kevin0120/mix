@@ -120,13 +120,20 @@ func (s *Service) OnStatus(sn string, status string) {
 func (s *Service) OnIOStatus(sn string, t string, status string) {
 	s.diag.Debug(fmt.Sprintf("sn:%s type:%s status:%s", sn, t, status))
 
+	ioContact := IoContact{
+		Src: device.DEVICE_TYPE_IO,
+		SN:  sn,
+	}
+
+	if t == IO_TYPE_INPUT {
+		ioContact.Inputs = status
+	} else {
+		ioContact.Outputs = status
+	}
+
 	io, _ := json.Marshal(wsnotify.WSMsg{
 		Type: WS_IO_CONTACT,
-		Data: IoContact{
-			SN:      sn,
-			Type:    t,
-			CONTACT: status,
-		},
+		Data: ioContact,
 	})
 
 	s.WS.WSSendIO(string(io))
@@ -218,27 +225,17 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 
 		s.WS.WSSendReply(&reply)
 
-		ioInputs, _ := json.Marshal(wsnotify.WSMsg{
+		ioContacts, _ := json.Marshal(wsnotify.WSMsg{
 			Type: WS_IO_CONTACT,
 			Data: IoContact{
+				Src:     device.DEVICE_TYPE_IO,
 				SN:      ioContact.SN,
-				Type:    IO_TYPE_INPUT,
-				CONTACT: inputs,
+				Inputs:  inputs,
+				Outputs: outputs,
 			},
 		})
 
-		s.WS.WSSendIO(string(ioInputs))
-
-		ioOutputs, _ := json.Marshal(wsnotify.WSMsg{
-			Type: WS_IO_CONTACT,
-			Data: IoContact{
-				SN:      ioContact.SN,
-				Type:    IO_TYPE_OUTPUT,
-				CONTACT: outputs,
-			},
-		})
-
-		s.WS.WSSendIO(string(ioOutputs))
+		s.WS.WSSendIO(string(ioContacts))
 
 	case WS_IO_STATUS:
 		// 获取连接状态

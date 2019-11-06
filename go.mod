@@ -26,7 +26,7 @@ require (
 	github.com/imkira/go-interpol v1.1.0 // indirect
 	github.com/iris-contrib/blackfriday v2.0.0+incompatible // indirect
 	github.com/iris-contrib/formBinder v5.0.0+incompatible // indirect
-	github.com/iris-contrib/go.uuid v2.0.0+incompatible // indirect
+	github.com/iris-contrib/go.uuid v2.0.0+incompatible
 	github.com/iris-contrib/httpexpect v0.0.0-20180314041918-ebe99fcebbce // indirect
 	github.com/iris-contrib/middleware v0.0.0-20190720041902-5f3a20f489c4
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869 // indirect

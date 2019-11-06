@@ -968,11 +968,27 @@ func (s *Service) Workorders(status string) ([]Workorders, error) {
 	var rt []Workorders
 
 	q := s.eng.Alias("w")
-	if status != "" {
-		q = q.Where("w.status = ?", status)
+	if orderPar.Status != "" {
+		q = q.Where("w.status = ?", orderPar.Status)
+	} else {
+		q = q.Where("w.status != ?", orderPar.Status)
 	}
 
-	err := q.Find(&rt)
+	if orderPar.Time_from != "" {
+		q = q.And("w.date_planned_start >= ?", orderPar.Time_from)
+	}
+	if orderPar.Time_to != "" {
+		q = q.And("w.date_planned_complete <= ?", orderPar.Time_to)
+	}
+	q.Desc("id")
+	if orderPar.Page_size == 0 {
+		orderPar.Page_size = 20
+	}
+	q.Limit(orderPar.Page_size, orderPar.Page_no*orderPar.Page_size+1)
+
+	var rt []Workorders
+
+	err = q.Find(&rt)
 
 	if err != nil {
 		return nil, err
@@ -1030,6 +1046,20 @@ func (s *Service) UpdateStep(step *Steps) (*Steps, error) {
 	sql := "update `steps` set status = ? where id = ?"
 	_, err := s.eng.Exec(sql,
 		step.Status,
+		step.Id)
+
+	if err != nil {
+		return step, err
+	} else {
+		return step, nil
+	}
+}
+
+func (s *Service) UpdateStepData(step *Steps) (*Steps, error) {
+
+	sql := "update `steps` set data = ? where id = ?"
+	_, err := s.eng.Exec(sql,
+		step.Data,
 		step.Id)
 
 	if err != nil {

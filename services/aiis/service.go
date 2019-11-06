@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"github.com/masami10/rush/services/wsnotify"
 )
 
 type Diagnostic interface {
@@ -50,6 +51,9 @@ type Service struct {
 	rush_port   string
 	DB          *storage.Service
 	ws          utils.RecConn
+	WS          *wsnotify.Service
+	updateQueue map[int64]time.Time
+	mtx         sync.Mutex
 
 	OdooStatusDispatcher *utils.Dispatcher
 	AiisStatusDispatcher *utils.Dispatcher

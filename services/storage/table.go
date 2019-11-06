@@ -40,11 +40,21 @@ type Workorders struct {
 	MO_Lnr            string `xorm:"varchar(64) 'lnr'" json:"-"`
 	MO_Model          string `xorm:"varchar(64) 'model'" json:"-"`
 
-	Name string `xorm:"varchar(64) 'name'" json:"name"`
-	Desc string `xorm:"varchar(64) 'desc'" json:"desc"`
-
+	Name           string      `xorm:"varchar(64) 'name'" json:"-"`
+	Desc           string      `xorm:"varchar(64) 'desc'" json:"-"`
 	Payload        string      `xorm:"text" json:"-"`
-	MarshalPayload interface{} `xorm:"-" json:"payload"`
+	MarshalPayload interface{} `xorm:"-" json:"-"`
+
+	Workorder             string    `xorm:"text 'workorder'" json:"-"`
+	Code                  string    `xorm:"pk unique varchar(128) 'code'"  json:"code"`
+	Track_code            string    `xorm:"varchar(128) 'track_code'" json:"track_code"`
+	Product_code          string    `xorm:"varchar(128) 'product_code'" json:"product_code"`
+	Date_planned_start    time.Time `xorm:"datetime 'date_planned_start'" json:"date_planned_start"`
+	Date_planned_complete time.Time `xorm:"datetime 'date_planned_complete'" json:"date_planned_complete"`
+
+	Created            time.Time `xorm:"created" json:"-"`
+	Updated            time.Time `xorm:"updated" json:"-"`
+	Product_type_image string    `xorm:"text 'product_type_image'" json:"product_type_image"`
 }
 
 type Steps struct {
@@ -57,7 +67,17 @@ type Steps struct {
 	Undoable       bool        `xorm:"varchar(64) 'undoable'" json:"undoable"`
 	Status         string      `xorm:"varchar(32) 'status'" json:"status"`
 	Payload        string      `xorm:"text" json:"-"`
-	MarshalPayload interface{} `xorm:"-" json:"payload"`
+	MarshalPayload interface{} `xorm:"-" json:"-"`
+
+	Step        string `xorm:"text 'step'" json:"-"`
+	Test_type   string `xorm:"varchar(128) 'test_type'" json:"test_type"`
+	Code        string `xorm:"varchar(128) 'code'" json:"code"`
+
+	Data     string    `xorm:"varchar(128) 'data'" json:"data"`
+	Image    string    `xorm:"varchar(128) 'image'" json:"image"`
+	ImageRef string    `xorm:"text 'tightening_image_by_step_code'" json:"tightening_image_by_step_code"`
+	Created  time.Time `xorm:"created" json:"-"`
+	Updated  time.Time `xorm:"updated" json:"-"`
 }
 
 type Results struct {
@@ -133,14 +153,19 @@ type Guns struct {
 }
 
 type RoutingOperations struct {
-	OperationID    int64  `xorm:"bigint 'operation_id'"`
-	Job            int    `xorm:"bigint 'job'"`
-	MaxOpTime      int    `xorm:"int 'max_op_time'"`
-	Name           string `xorm:"varchar(256) 'name'"`
-	Img            string `xorm:"text 'img'"`
-	ProductId      int64  `xorm:"bigint 'product_id'"`
-	WorkcenterID   int64  `xorm:"bigint 'workcenter_id'"`
-	ProductType    string `xorm:"varchar(256) 'product_type'"`
+	OperationID int64  `xorm:"bigint 'operation_id'"`
+	Job         int    `xorm:"bigint 'job'"`
+	MaxOpTime   int    `xorm:"int 'max_op_time'"`
+	Name        string `xorm:"varchar(256) 'name'"
+`
+	Img                 string `xorm:"text 'img'"`
+	Tigntening_step_ref string `xorm:"varchar(256) 'tightening_step_ref'"`
+
+	ProductId    int64 `xorm:"bigint 'product_id'"`
+	WorkcenterID int64 `xorm:"bigint 'workcenter_id'"`
+	ProductType      string `xorm:"varchar(256) 'product_type'"`
+	ProductTypeImage string `xorm:"text 'product_type_image'"`
+
 	WorkcenterCode string `xorm:"varchar(256) 'workcenter_code'"`
 	VehicleTypeImg string `xorm:"text 'vehicle_type_img'"`
 	Points         string `xorm:"text 'points'"`
