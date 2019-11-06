@@ -586,11 +586,11 @@ func (s *Service) OnTighteningControllerIO(data interface{}) {
 		return
 	}
 
-	ioStatus := data.(*io.IoContact)
+	inputStatus := data.(*tightening_device.TighteningControllerInput)
 
 	msg := wsnotify.WSMsg{
 		Type: tightening_device.WS_TIGHTENING_CONTROLLER_IO,
-		Data: ioStatus,
+		Data: inputStatus,
 	}
 	payload, _ := json.Marshal(msg)
 	s.WS.WSSend(wsnotify.WS_EVENT_IO, string(payload))

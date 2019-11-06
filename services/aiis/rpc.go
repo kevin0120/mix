@@ -57,7 +57,7 @@ func (c *GRPCClient) Start() error {
 	c.RPCRecvDispatcher.Start()
 	c.RPCStatusDispatcher.Start()
 
-	go c.Connect()
+	go c.connect()
 	go c.manage()
 
 	return nil

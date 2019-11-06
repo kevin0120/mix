@@ -51,15 +51,22 @@ type Service struct {
 	rush_port   string
 	DB          *storage.Service
 	ws          utils.RecConn
-	WS          *wsnotify.Service
-	updateQueue map[int64]time.Time
-	mtx         sync.Mutex
+	//ws			websocket.Client
+	//LocalWSServer *wsnotify.Service
+	//Odoo 		*odoo.Service
+	//OnOdooStatus OnOdooStatus
+	WS           *wsnotify.Service
+	updateQueue  map[int64]time.Time
+	mtx          sync.Mutex
 
 	OdooStatusDispatcher *utils.Dispatcher
 	AiisStatusDispatcher *utils.Dispatcher
 	SyncGun              SyncGun
 	SN                   string
 	rpc                  GRPCClient
+
+	updateQueue map[int64]time.Time
+	mtx         sync.Mutex
 
 	TighteningService *tightening_device.Service
 }
