@@ -1,13 +1,9 @@
 package aiis
 
 import (
-	"fmt"
 	"github.com/kataras/iris/core/errors"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/connectivity"
-	"google.golang.org/grpc/keepalive"
-	"strings"
 	"sync/atomic"
 	"time"
 )
@@ -52,24 +48,20 @@ type GRPCClient struct {
 func (c *GRPCClient) Start() error {
 	c.status.Store(RPC_OFFLINE)
 	c.closing = make(chan chan struct{})
+	c.updateKeepAliveDeadLine()
 
-	go c.connect()
+	go c.Connect()
+	go c.manage()
 
 	return nil
 }
 
 func (c *GRPCClient) Stop() error {
-	if c.conn != nil {
-		closed := make(chan struct{})
-		c.closing <- closed
-		<-closed
-		c.conn.Close()
-	}
-	if c.stream != nil {
-		c.stream.CloseSend()
-	}
+	c.conn.Close()
+	c.stream.CloseSend()
 
-	c.srv.diag.Debug("Stop GRPC Successful!")
+	closed := make(chan struct{})
+	c.closing <- closed
 
 	return nil
 }
@@ -79,123 +71,112 @@ func (c *GRPCClient) Status() string {
 	return c.status.Load().(string)
 }
 
-func (c *GRPCClient) setStatus(status string) {
-
-	c.status.Store(status)
+func (c *GRPCClient) KeepAliveCount() int32 {
+	return atomic.LoadInt32(&c.keepAliveCount)
 }
 
-func (c *GRPCClient) updateStatusPart2(done chan struct{}) {
-	prevStatus := c.Status()
-	conn := c.conn
-	if conn == nil {
-		return
-	}
-	status := RPC_OFFLINE
-	ss := conn.GetState()
-	switch ss {
-	case connectivity.Connecting:
-		c.srv.diag.Debug("GRPC Connection Is Connecting")
-	case connectivity.Idle:
-	case connectivity.Ready:
-		c.srv.diag.Debug(fmt.Sprintf("GRPC Connection Is %s", ss))
-		status = RPC_ONLINE
-	case connectivity.Shutdown:
-	case connectivity.TransientFailure:
-	default:
-		c.srv.diag.Debug(fmt.Sprintf("GRPC Connection Is %s, Try To Connecting", ss))
-		status = RPC_OFFLINE
-	}
+func (c *GRPCClient) updateKeepAliveCount(i int32) {
+	atomic.SwapInt32(&c.keepAliveCount, i)
+}
 
-	if prevStatus != status {
-		c.setStatus(status)
+func (c *GRPCClient) addKeepAliveCount() {
+	atomic.AddInt32(&c.keepAliveCount, 1)
+}
+
+func (c *GRPCClient) updateKeepAliveDeadLine() {
+	c.keepaliveDeadLine.Store(time.Now().Add(time.Duration(c.srv.Config().KeepAlive)))
+}
+
+func (c *GRPCClient) KeepAliveDeadLine() time.Time {
+	return c.keepaliveDeadLine.Load().(time.Time)
+}
+
+func (c *GRPCClient) sendPing() {
+	c.RPCSend(RPC_PING)
+}
+
+func (c *GRPCClient) updateStatus(status string) {
+
+	if status != c.Status() {
+
+		c.status.Store(status)
+
+		if status == RPC_OFFLINE {
+			c.srv.diag.Debug("grpc disconnected")
+
+			c.conn.Close()
+			c.stream.CloseSend()
+
+			// 断线重连
+			go c.Connect()
+		}
+
 		if c.OnRPCStatus != nil {
 			c.OnRPCStatus(status)
 		}
-	}
-	done <- struct{}{}
-}
 
-func (c *GRPCClient) updateStatus(cancel context.CancelFunc, done chan struct{}) {
-	go c.updateStatusPart2(done)
-	ticker := time.NewTicker(2 * time.Second)
-	defer func() {
-		ticker.Stop()
-	}()
-	select {
-	case <-ticker.C:
-		c.srv.diag.Debug("updateStatus Is Timeout!")
-		cancel()
-		return
-	case <-done:
-		return
+		// 将最新状态推送给hmi
+		//s := wsnotify.WSStatus{
+		//	SN:     c.cfg.SN,
+		//	Status: string(status),
+		//}
+		//
+		//msg, _ := json.Marshal(s)
+		//c.Srv.WS.WSSendControllerStatus(string(msg))
 	}
-
 }
 
 func (c *GRPCClient) manage() {
-
-	ticker := time.NewTicker(2 * time.Second)
-	defer func() {
-		ticker.Stop()
-		c.srv.diag.Debug("Stop manage Ticker")
-	}()
-	done := make(chan struct{})
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	//nextWriteThreshold := time.Now()
 	for {
 		select {
-		case <-ticker.C:
-			go c.updateStatus(cancel, done)
+		case <-time.After(time.Duration(c.srv.Config().KeepAlive)):
+			if c.Status() == RPC_OFFLINE {
+				continue
+			}
+			if c.KeepAliveCount() >= KEEP_ALIVE_CHECK {
+				go c.updateStatus(RPC_OFFLINE)
+				c.updateKeepAliveCount(0)
+				continue
+			}
+			if c.KeepAliveDeadLine().Before(time.Now()) {
+				//到达了deadline
+				c.sendPing()
+				c.updateKeepAliveDeadLine() //更新keepalivedeadline
+				c.addKeepAliveCount()
+			}
 
 		case stopDone := <-c.closing:
-			c.srv.diag.Debug("Stop GRPC Manage GO Route")
 			close(stopDone)
 			return //退出manage协程
-		case <-ctx.Done():
-			// 执行出现错误，timeout
-			c.srv.diag.Debug("Stop GRPC Manage GO Route")
-			return //退出manage协程
-		//case <- done:
-		//	c.srv.diag.Debug("Never Go Here")
 		}
 	}
 }
 
-func (c *GRPCClient) reConnect() {
-	if err := c.Stop(); err == nil {
-		c.srv.diag.Debug("Reconnect do Connect Behaviour")
-		c.connect()
-	}
-}
-
-func (c *GRPCClient) connect() {
+func (c *GRPCClient) Connect() {
 	var err error = nil
-	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithInsecure())
-	opts = append(opts, grpc.WithBlock())
-	opts = append(opts, grpc.WithBackoffConfig(grpc.BackoffConfig{
-		MaxDelay: 1 * time.Second,
-	}))
-	kp := keepalive.ClientParameters{
-		Time:                1 * PING_ITV,
-		Timeout:             2 * PING_ITV,
-		PermitWithoutStream: true,
-	}
-	opts = append(opts, grpc.WithKeepaliveParams(kp))
-	for ; ; {
+
+	for {
+		c.srv.diag.Debug("grpc connecting ...\n")
+		var opts []grpc.DialOption
+		opts = append(opts, grpc.WithInsecure())
+		opts = append(opts, grpc.WithBlock())
+		opts = append(opts, grpc.WithBackoffConfig(grpc.BackoffConfig{
+			MaxDelay: 1 * time.Second,
+		}))
+
 		c.conn, err = grpc.Dial(c.srv.Config().GRPCServer, opts...)
-		if err != nil {
-			c.srv.diag.Error("GRPC connect Error", err)
-		} else {
+		if err == nil {
+			c.srv.diag.Debug("grpc connected\n")
+			c.updateStatus(RPC_ONLINE)
 			break
 		}
+
 		time.Sleep(1 * time.Second)
 	}
 
 	c.rpcClient = NewRPCAiisClient(c.conn)
 	c.stream, _ = c.rpcClient.RPCNode(context.Background())
-
-	go c.manage()
 
 	go c.RecvProcess()
 }
@@ -203,25 +184,16 @@ func (c *GRPCClient) connect() {
 func (c *GRPCClient) RecvProcess() {
 	for {
 		if c.stream == nil {
-			err := errors.New("GRPC RecvProcess Stream Is Not Defined")
-			c.srv.diag.Error("RecvProcess Error", err)
 			continue
 		}
 
 		in, err := c.stream.Recv()
 		if err != nil {
-			c.srv.diag.Error("GRPC RecvProcess Error", err)
-			if strings.HasSuffix(err.Error(), "transport is closing") {
-				go c.reConnect() //进行重连
-				return
-			} else if strings.HasSuffix(err.Error(), "the client connection is closing") {
-				return
-			} else {
-				continue
-			}
+			c.srv.diag.Debug("rpc RecvProcess Exit")
+			return
 		}
 
-		c.srv.diag.Debug(fmt.Sprintf("Recv Message From GRPC: %s", in.Payload))
+		c.updateKeepAliveCount(0)
 
 		if c.RPCRecv != nil {
 			c.RPCRecv(in.Payload)
