@@ -60,6 +60,12 @@ const (
 	WS_TOOL_PSET_DETAIL = "WS_TOOL_PSET_DETAIL"
 	WS_TOOL_JOB_LIST    = "WS_TOOL_JOB_LIST"
 	WS_TOOL_JOB_DETAIL  = "WS_TOOL_JOB_DETAIL"
+
+	WS_TIGHTENING_RESULT             = "WS_TIGHTENING_RESULT"
+	WS_TIGHTENING_CONTROLLER_STATUS  = "WS_TIGHTENING_CONTROLLER_STATUS"
+	WS_TIGHTENING_CONTROLLER_IO      = "WS_TIGHTENING_CONTROLLER_IO"
+	WS_TIGHTENING_CONTROLLER_BARCODE = "WS_TIGHTENING_CONTROLLER_BARCODE"
+	WS_TIGHTENING_TOOL_STATUS        = "WS_TIGHTENING_TOOL_STATUS"
 )
 
 type PSetDefine struct {
@@ -112,6 +118,9 @@ type TighteningResult struct {
 
 	// 当前点位次序
 	Seq int `json:"seq"`
+
+	// 当前点位次序
+	GroupSeq int `json:"group_seq"`
 
 	// 拧紧ID
 	TighteningID string `json:"tightening_id"`

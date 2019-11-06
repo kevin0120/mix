@@ -186,7 +186,7 @@ func (s *Service) Open() error {
 	}
 	handler.AddRoute(r)
 
-	s.Aiis.OnOdooStatus = s.OnStatus
+	s.Aiis.OdooStatusDispatcher.Register(s.OnStatus)
 	s.Aiis.SyncGun = s.GetGunID
 
 	for i := 0; i < s.Config().Workers; i++ {
@@ -438,7 +438,12 @@ func (s *Service) CreateWorkorders(workorders []ODOOWorkorder) ([]storage.Workor
 	return dbWorkorders, finalErr
 }
 
-func (s *Service) OnStatus(status string) {
+func (s *Service) OnStatus(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	status := data.(string)
 	s.UpdateStatus(status)
 }
 
