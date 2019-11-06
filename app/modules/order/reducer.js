@@ -53,14 +53,13 @@ function limitIndex(order: ?IOrder, index: tOrderStepIdx): tOrderStepIdx {
 }
 
 const orderReducer: {
-  [key: tOrderActionTypes]: tReducer<
-    tOrderState,
+  [key: tOrderActionTypes]: tReducer<tOrderState,
     // eslint-disable-next-line flowtype/no-weak-types
     tAction<tOrderActionTypes, any>>
 } = {
   [ORDER.NEW_LIST]: (state, { list }: { list: Array<IOrder> }) => ({
     ...state,
-    list
+    list: list.sort((a, b) => a.datePlannedStart - b.datePlannedStart)
   }),
   [ORDER.UPDATE_STATE]: state => ({
     ...state

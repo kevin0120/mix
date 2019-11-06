@@ -46,13 +46,33 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
     _productCode = '';
 
+    get productCode() {
+      return this._productCode;
+    }
+
     _workcenter: string = '';
 
-    _datePlannedStart: string = '';
+    get workcenter() {
+      return this._workcenter;
+    }
 
-    _datePlannedComplete: string = '';
+    _datePlannedStart: Date = new Date();
+
+    get datePlannedStart() {
+      return this._datePlannedStart;
+    }
+
+    _datePlannedComplete: Date = new Date();
+
+    get datePlannedComplete() {
+      return this._datePlannedComplete;
+    }
 
     _productTypeImage: string = '';
+
+    get productTypeImage() {
+      return this._productTypeImage;
+    }
 
 
     // eslint-disable-next-line flowtype/no-weak-types
@@ -62,8 +82,8 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
       this._trackCode = dataObj.track_code;
       this._productCode = dataObj.product_code;
       this._workcenter = dataObj.workcenter;
-      this._datePlannedStart = dataObj.date_planned_start;
-      this._datePlannedComplete = dataObj.date_planned_start;
+      this._datePlannedStart = new Date(dataObj.date_planned_start);
+      this._datePlannedComplete = new Date(dataObj.datePlannedComplete);
       this._productTypeImage = dataObj.product_type_image;
     }
 

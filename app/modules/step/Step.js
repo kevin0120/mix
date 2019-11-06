@@ -64,6 +64,7 @@ export default class Step implements IWorkStep {
   // eslint-disable-next-line flowtype/no-weak-types,no-unused-vars
   constructor(stepObj: { [key: string]: any }, ...rest: Array<any>) {
     this._code = stepObj.code;
+    this._id = stepObj.id;
     this.update(stepObj);
     /* eslint-disable flowtype/no-weak-types */
     (this: any).run = this.run.bind(this);

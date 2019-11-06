@@ -86,9 +86,9 @@ function HomeOperationList(props: Props) {
       </Grid>
       {/* eslint-disable-next-line react/no-array-index-key */}
       {(orders &&
-        orders.map((order: IOrder, idx: number) =>
+        orders.map((order: IOrder) =>
           order ? (
-            <Grid item xs={size} key={`${order.name}${idx}`}>
+            <Grid item xs={size} key={`${order.code}`}>
               <Paper square className={classes.orderCardContainer}>
                 <CardActionArea
                   className={classes.orderCard}
@@ -102,8 +102,10 @@ function HomeOperationList(props: Props) {
                   />
                   <CardMedia
                     className={classes.image}
-                    src={settingImg}
+                    src={order.productTypeImage || settingImg}
                     component="img"
+                    style={{ overflow: 'hidden' }}
+                    alt={order.productCode}
                   />
                   <CardContent className={classes.info}>
                     <Typography
@@ -111,20 +113,19 @@ function HomeOperationList(props: Props) {
                       align="left"
                       className={classes.orderNameText}
                     >
-                      {order.name}
+                      {order.code}
                     </Typography>
-                    {order.desc &&
-                      order.desc.split('\t\t').map(d => (
-                        <Typography
-                          key={d}
-                          variant="body2"
-                          color="textSecondary"
-                          align="left"
-                          className={classes.orderInfoText}
-                        >
-                          {d}
-                        </Typography>
-                      ))}
+                    {[order.datePlannedStart && order.datePlannedStart.toLocaleString(), order.workcenter, order.productCode].map(d => (
+                      <Typography
+                        key={d}
+                        variant="body2"
+                        color="textSecondary"
+                        align="left"
+                        className={classes.orderInfoText}
+                      >
+                        {d}
+                      </Typography>
+                    ))}
                     <Typography
                       variant="body2"
                       color="textSecondary"
@@ -139,7 +140,7 @@ function HomeOperationList(props: Props) {
             </Grid>
           ) : null
         )) ||
-        null}
+      null}
     </React.Fragment>
   );
 

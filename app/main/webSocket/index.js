@@ -56,7 +56,8 @@ function startListenSend() {
         sn,
         ...data
       };
-
+      console.log('sending:');
+      console.log(msg);
       ws.sendJson(msg, err => {
         if (err && ws) {
           console.error(err);
@@ -64,9 +65,9 @@ function startListenSend() {
             return;
           }
           replyWSError({
-            data:{
+            data: {
               result: -2,
-              msg: `error when sending message`,
+              msg: `error when sending message`
             },
             sn
           });
@@ -79,18 +80,18 @@ function startListenSend() {
         }
         // eslint-disable-next-line no-param-reassign
         replyWSError({
-          data:{
+          data: {
             result: -1,
-            msg: `rush send timeout`,
+            msg: `rush send timeout`
           },
           sn
         });
       }, timeout);
     } else {
       replyWSError({
-        data:{
+        data: {
           result: -404,
-          msg: `cannot send message to rush now, rush is not connected`,
+          msg: `cannot send message to rush now, rush is not connected`
         },
         sn
       });
