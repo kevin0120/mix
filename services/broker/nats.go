@@ -83,6 +83,29 @@ func setAddrs(addrs []string) []string {
 	return cAddrs
 }
 
+func (s *Nats) statusHandler(conn *nats.Conn) {
+	if cid, err := conn.GetClientID(); err == nil {
+		s.diag.Debug(fmt.Sprintf("%d is %d ", cid, conn.Status()))
+	} else {
+		s.diag.Error("statusHandler", err)
+	}
+}
+
+func (s *Nats) statusErrHandler(conn *nats.Conn, err error) {
+	if cid, err := conn.GetClientID(); err == nil {
+		s.diag.Error(fmt.Sprintf("%d is %d ", cid, conn.Status()), err)
+	} else {
+		s.diag.Error("statusErrHandler", err)
+	}
+}
+
+func (s *Nats) setDefaultHandlers() {
+	nc := s.conn
+	nc.SetReconnectHandler(s.statusHandler)
+	nc.SetDisconnectErrHandler(s.statusErrHandler)
+	nc.SetClosedHandler(s.statusHandler)
+}
+
 func (s *Nats) Connect(urls []string) error {
 	nc, err := nats.Connect(strings.Join(urls, ","), s.nopts...)
 	if err != nil {
@@ -90,6 +113,8 @@ func (s *Nats) Connect(urls []string) error {
 		return err
 	}
 	s.conn = nc
+	//最后设置默认句柄
+	s.setDefaultHandlers()
 	return nil
 }
 
