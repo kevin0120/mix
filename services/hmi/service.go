@@ -59,6 +59,8 @@ func (s *Service) Open() error {
 	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_CONTROLLER_STATUS).Register(s.OnTighteningControllerStatus)
 	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_TOOL_STATUS).Register(s.OnTighteningToolStatus)
 	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_CONTROLLER_ID).Register(s.OnTighteningControllereID)
+	s.ODOO.Aiis.OdooStatusDispatcher.Register(s.OnOdooStatus)
+	s.ODOO.Aiis.AiisStatusDispatcher.Register(s.OnAiisStatus)
 
 	var r httpd.Route
 
@@ -530,10 +532,18 @@ func (s *Service) OnTighteningResult(data interface{}) {
 			MI:     tighteningResult.MeasureTorque,
 			WI:     tighteningResult.MeasureAngle,
 			TI:     tighteningResult.MeasureTime,
+			Seq:    tighteningResult.Seq,
+			Batch:  tighteningResult.Batch,
+			ToolSN: tighteningResult.ToolSN,
 		},
 	}
 
-	payload, _ := json.Marshal(result)
+	msg := wsnotify.WSMsg{
+		Type: tightening_device.WS_TIGHTENING_RESULT,
+		Data: result,
+	}
+
+	payload, _ := json.Marshal(msg)
 
 	s.WS.WSSend(wsnotify.WS_EVENT_RESULT, string(payload))
 	s.diag.Debug(fmt.Sprintf("拧紧结果推送HMI: %s", string(payload)))
@@ -546,7 +556,12 @@ func (s *Service) OnTighteningControllerStatus(data interface{}) {
 	}
 
 	controllerStatus := data.(*tightening_device.TighteningControllerStatus)
-	payload, _ := json.Marshal(controllerStatus)
+
+	msg := wsnotify.WSMsg{
+		Type: tightening_device.WS_TIGHTENING_CONTROLLER_STATUS,
+		Data: controllerStatus,
+	}
+	payload, _ := json.Marshal(msg)
 	s.WS.WSSend(wsnotify.WS_EVENT_CONTROLLER, string(payload))
 	s.diag.Debug(fmt.Sprintf("控制器状态推送HMI: %s", string(payload)))
 }
@@ -558,7 +573,12 @@ func (s *Service) OnTighteningToolStatus(data interface{}) {
 	}
 
 	toolStatus := data.(*tightening_device.TighteningToolStatus)
-	payload, _ := json.Marshal(toolStatus)
+
+	msg := wsnotify.WSMsg{
+		Type: tightening_device.WS_TIGHTENING_TOOL_STATUS,
+		Data: toolStatus,
+	}
+	payload, _ := json.Marshal(msg)
 	s.WS.WSSend(wsnotify.WS_EVENT_TOOL, string(payload))
 	s.diag.Debug(fmt.Sprintf("工具状态推送HMI: %s", string(payload)))
 }
@@ -570,7 +590,12 @@ func (s *Service) OnTighteningControllerIO(data interface{}) {
 	}
 
 	inputStatus := data.(*tightening_device.TighteningControllerInput)
-	payload, _ := json.Marshal(inputStatus)
+
+	msg := wsnotify.WSMsg{
+		Type: tightening_device.WS_TIGHTENING_CONTROLLER_IO,
+		Data: inputStatus,
+	}
+	payload, _ := json.Marshal(msg)
 	s.WS.WSSend(wsnotify.WS_EVENT_IO, string(payload))
 	s.diag.Debug(fmt.Sprintf("控制器IO推送HMI: %s", string(payload)))
 }
@@ -582,7 +607,71 @@ func (s *Service) OnTighteningControllereID(data interface{}) {
 	}
 
 	controllerBarcode := data.(*tightening_device.TighteningBarcode)
-	payload, _ := json.Marshal(controllerBarcode)
+
+	msg := wsnotify.WSMsg{
+		Type: tightening_device.WS_TIGHTENING_CONTROLLER_BARCODE,
+		Data: controllerBarcode,
+	}
+
+	payload, _ := json.Marshal(msg)
 	s.WS.WSSend(wsnotify.WS_EVENT_SCANNER, string(payload))
 	s.diag.Debug(fmt.Sprintf("控制器条码推送HMI: %s", string(payload)))
+}
+
+// 收到Aiis连接状态变化
+func (s *Service) OnAiisStatus(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	status := data.(string)
+
+	// Aiis状态推送给HMI
+	payload, _ := json.Marshal(&wsnotify.WSMsg{
+		Type: WS_AIIS_STATUS,
+		Data: &aiis.SystemStatus{
+			Name:   "AIIS",
+			Status: status,
+		},
+	})
+
+	s.WS.WSSend(wsnotify.WS_EVENT_AIIS, string(payload))
+	s.diag.Debug(fmt.Sprintf("Aiis连接状态推送HMI: %s", string(payload)))
+}
+
+// 收到Odoo连接状态变化
+func (s *Service) OnOdooStatus(data interface{}) {
+	if data == nil {
+		return
+	}
+	status := data.(string)
+
+	// Odoo状态推送给HMI
+	payload, _ := json.Marshal(&wsnotify.WSMsg{
+		Type: WS_ODOO_STATUS,
+		Data: &aiis.SystemStatus{
+			Name:   "ODOO",
+			Status: status,
+		},
+	})
+
+	s.WS.WSSend(wsnotify.WS_EVENT_ODOO, string(payload))
+	s.diag.Debug(fmt.Sprintf("ODOO连接状态推送HMI: %s", string(payload)))
+}
+
+// 收到第三方系统状态变化
+func (s *Service) OnExSysStatus(data interface{}) {
+	if data == nil {
+		return
+	}
+	status := data.(*aiis.SystemStatus)
+
+	// 第三方系统状态推送给HMI
+	payload, _ := json.Marshal(&wsnotify.WSMsg{
+		Type: WS_EXSYS_STATUS,
+		Data: status,
+	})
+
+	s.WS.WSSend(wsnotify.WS_EVENT_EXSYS, string(payload))
+	s.diag.Debug(fmt.Sprintf("第三方系统连接状态推送HMI: %s", string(payload)))
 }
