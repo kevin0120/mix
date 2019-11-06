@@ -2,6 +2,7 @@ package aiis
 
 import (
 	"github.com/kataras/iris/core/errors"
+	"github.com/masami10/rush/utils"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"sync/atomic"
@@ -28,21 +29,24 @@ type RPCPayload struct {
 	Data interface{} `json:"data"`
 }
 
-type OnRPCRecv func(payload string)
-type OnRPCStatus func(status string)
+//
+//type OnRPCRecv func(payload string)
+//type OnRPCStatus func(status string)
 
 type GRPCClient struct {
-	srv               *Service
-	conn              *grpc.ClientConn
-	stream            RPCAiis_RPCNodeClient
-	opts              []grpc.DialOption
-	rpcClient         RPCAiisClient
-	RPCRecv           OnRPCRecv
-	OnRPCStatus       OnRPCStatus
-	status            atomic.Value
-	keepAliveCount    int32
-	keepaliveDeadLine atomic.Value
-	closing           chan chan struct{}
+	srv       *Service
+	conn      *grpc.ClientConn
+	stream    RPCAiis_RPCNodeClient
+	opts      []grpc.DialOption
+	rpcClient RPCAiisClient
+	//RPCRecv           OnRPCRecv
+	//OnRPCStatus       OnRPCStatus
+	RPCRecvDispatcher   *utils.Dispatcher
+	RPCStatusDispatcher *utils.Dispatcher
+	status              atomic.Value
+	keepAliveCount      int32
+	keepaliveDeadLine   atomic.Value
+	closing             chan chan struct{}
 }
 
 func (c *GRPCClient) Start() error {
@@ -50,7 +54,10 @@ func (c *GRPCClient) Start() error {
 	c.closing = make(chan chan struct{})
 	c.updateKeepAliveDeadLine()
 
-	go c.Connect()
+	c.RPCRecvDispatcher.Start()
+	c.RPCStatusDispatcher.Start()
+
+	go c.connect()
 	go c.manage()
 
 	return nil
@@ -63,6 +70,9 @@ func (c *GRPCClient) Stop() error {
 	if c.stream != nil {
 		c.stream.CloseSend()
 	}
+
+	c.RPCStatusDispatcher.Release()
+	c.RPCRecvDispatcher.Release()
 
 	closed := make(chan struct{})
 	c.closing <- closed
@@ -115,9 +125,7 @@ func (c *GRPCClient) updateStatus(status string) {
 			go c.Connect()
 		}
 
-		if c.OnRPCStatus != nil {
-			c.OnRPCStatus(status)
-		}
+		c.RPCStatusDispatcher.Dispatch(status)
 
 		// 将最新状态推送给hmi
 		//s := wsnotify.WSStatus{
@@ -198,10 +206,7 @@ func (c *GRPCClient) RecvProcess() {
 		}
 
 		c.updateKeepAliveCount(0)
-
-		if c.RPCRecv != nil {
-			c.RPCRecv(in.Payload)
-		}
+		c.RPCRecvDispatcher.Dispatch(in.Payload)
 	}
 }
 

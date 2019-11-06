@@ -53,31 +53,37 @@ type Service struct {
 	//ws			websocket.Client
 	//LocalWSServer *wsnotify.Service
 	//Odoo 		*odoo.Service
-	OnOdooStatus OnOdooStatus
-	SyncGun      SyncGun
-	SN           string
-	rpc          GRPCClient
+	//OnOdooStatus OnOdooStatus
+
+	OdooStatusDispatcher *utils.Dispatcher
+	AiisStatusDispatcher *utils.Dispatcher
+	SyncGun              SyncGun
+	SN                   string
+	rpc                  GRPCClient
 
 	updateQueue map[int64]time.Time
 	mtx         sync.Mutex
 
-	TighteningService interface {
-		GetDispatcher(string) *utils.Dispatcher
-	}
+	TighteningService *tightening_device.Service
 }
 
 func NewService(c Config, d Diagnostic, rush_port string) *Service {
 	e, _ := c.index()
 	s := &Service{
-		diag:        d,
-		endpoints:   e,
-		rush_port:   rush_port,
-		rpc:         GRPCClient{},
-		updateQueue: map[int64]time.Time{},
-		mtx:         sync.Mutex{},
+		diag:      d,
+		endpoints: e,
+		rush_port: rush_port,
+		rpc: GRPCClient{
+			RPCRecvDispatcher:   utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+			RPCStatusDispatcher: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		},
+		OdooStatusDispatcher: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		AiisStatusDispatcher: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		updateQueue:          map[int64]time.Time{},
+		mtx:                  sync.Mutex{},
 	}
-	s.rpc.RPCRecv = s.OnRPCRecv
-	s.rpc.OnRPCStatus = s.OnRPCStatus
+	s.rpc.RPCRecvDispatcher.Register(s.OnRPCRecv)
+	s.rpc.RPCStatusDispatcher.Register(s.OnRPCStatus)
 	s.rpc.srv = s
 	s.configValue.Store(c)
 	return s
@@ -183,6 +189,8 @@ func (s *Service) Open() error {
 	//
 	//s.ws.Dial(url.String(), nil)
 
+	s.OdooStatusDispatcher.Start()
+	s.AiisStatusDispatcher.Start()
 	go s.taskUpdateTimeoutCheck()
 	go s.ResultUploadManager()
 
@@ -192,19 +200,31 @@ func (s *Service) Open() error {
 }
 
 func (s *Service) Close() error {
+	s.OdooStatusDispatcher.Release()
+	s.AiisStatusDispatcher.Release()
 	return s.rpc.Stop()
 }
 
-func (s *Service) OnRPCStatus(status string) {
-	if status == RPC_OFFLINE {
-
-		if s.OnOdooStatus != nil {
-			s.OnOdooStatus(ODOO_STATUS_OFFLINE)
-		}
+func (s *Service) OnRPCStatus(data interface{}) {
+	if data == nil {
+		return
 	}
+
+	status := data.(string)
+	// 如果RPC连接断开， 认为ODOO连接也断开
+	if status == RPC_OFFLINE {
+		s.OdooStatusDispatcher.Dispatch(ODOO_STATUS_OFFLINE)
+	}
+
+	s.AiisStatusDispatcher.Dispatch(status)
 }
 
-func (s *Service) OnRPCRecv(payload string) {
+func (s *Service) OnRPCRecv(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	payload := data.(string)
 	rpcPayload := RPCPayload{}
 	json.Unmarshal([]byte(payload), &rpcPayload)
 	str_data, _ := json.Marshal(rpcPayload.Data)
@@ -226,9 +246,7 @@ func (s *Service) OnRPCRecv(payload string) {
 		status := ODOOStatus{}
 		json.Unmarshal(str_data, &status)
 
-		if s.OnOdooStatus != nil {
-			s.OnOdooStatus(status.Status)
-		}
+		s.OdooStatusDispatcher.Dispatch(status.Status)
 		break
 	}
 

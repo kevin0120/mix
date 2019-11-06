@@ -140,3 +140,8 @@ type Workorder struct {
 	Steps   []Step      `json:"steps"`
 	Payload interface{} `json:"payload"`
 }
+
+type SystemStatus struct {
+	Name   string `json:"name"`
+	Status string `json:"status"`
+}
