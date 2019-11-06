@@ -1,5 +1,7 @@
 package broker
 
+import "time"
+
 type DefaultBroker struct {
 }
 
@@ -29,4 +31,8 @@ func (s *DefaultBroker) UnSubscribe(subject string) error {
 
 func (s *DefaultBroker) Publish(subject string, data []byte) error {
 	return nil
+}
+
+func (s *DefaultBroker) DoRequest(subject string, data []byte, timeOut time.Duration) (resp []byte, err error) {
+	return
 }

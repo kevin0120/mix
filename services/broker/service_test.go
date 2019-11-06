@@ -33,8 +33,9 @@ func TestNewService(t *testing.T) {
 	assert.NotNil(t, s)
 }
 
-func testHandler(message *brokerMessage) {
+func testHandler(message *brokerMessage) ([]byte, error) {
 	fmt.Println(fmt.Sprintf("Msg: %v", message))
+	return nil, nil
 }
 
 func TestService_Subscribe_Fail(t *testing.T) {
@@ -49,4 +50,8 @@ func TestService_Subscribe_Success(t *testing.T) {
 	assert.Nil(t, err)
 	err = s.Subscribe("ttt", testHandler)
 	assert.Nil(t, err)
+}
+
+func TestService_Publish(t *testing.T) {
+
 }

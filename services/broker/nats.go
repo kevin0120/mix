@@ -12,18 +12,24 @@ import (
 
 type Nats struct {
 	sync.Mutex
-	addrs      []string
-	conn       *nats.Conn
-	diag       Diagnostic
-	opts       brokerOptions
-	nopts      []nats.Option
-	subscribes map[string]*nats.Subscription
+	addrs       []string
+	conn        *nats.Conn
+	diag        Diagnostic
+	opts        brokerOptions
+	nopts       []nats.Option
+	subscribes  map[string]*nats.Subscription
+	respSubject string
+	workGroups  map[string][]string
 }
 
-func NewNats(d Diagnostic, addrs []string, options map[string]string) *Nats {
+func NewNats(d Diagnostic, c Config) *Nats {
+	addrs := c.ConnectUrls
+	options := c.Options
 	s := &Nats{
-		diag:       d,
-		subscribes: map[string]*nats.Subscription{},
+		diag:        d,
+		subscribes:  map[string]*nats.Subscription{},
+		workGroups:  map[string][]string{},
+		respSubject: fmt.Sprintf("%s.responses", c.Name),
 	}
 
 	opts := generateConnectOptions(options)
@@ -36,7 +42,7 @@ func NewNats(d Diagnostic, addrs []string, options map[string]string) *Nats {
 
 }
 
-func generateConnectOptions(options map[string]string) (opts []nats.Option)  {
+func generateConnectOptions(options map[string]string) (opts []nats.Option) {
 	for key, value := range options {
 		switch key {
 		case "name":
@@ -45,7 +51,7 @@ func generateConnectOptions(options map[string]string) (opts []nats.Option)  {
 			opts = append(opts, nats.Token(value))
 		case "ping":
 			var dur toml.Duration
-			if err :=dur.UnmarshalText([]byte(value)); err == nil {
+			if err := dur.UnmarshalText([]byte(value)); err == nil {
 				opts = append(opts, nats.PingInterval(time.Duration(dur)))
 			}
 		}
@@ -110,11 +116,20 @@ func (s *Nats) Close() error {
 	return nil
 }
 
+func (s *Nats) isExist(subject string) bool {
+	s.Lock()
+	defer s.Unlock()
+	_, ok := s.subscribes[subject]
+	return ok
+}
+
 func (s *Nats) addSub(subject string, sub *nats.Subscription) {
 	s.Lock()
 	defer s.Unlock()
 	if _, ok := s.subscribes[subject]; !ok {
 		s.subscribes[subject] = sub
+	} else {
+		//已经存在
 	}
 }
 
@@ -128,21 +143,56 @@ func (s *Nats) removeSub(subject string) error {
 	return nil
 }
 
-func (s *Nats) Subscribe(subject string, handler SubscribeHandler) error {
-	if s.conn == nil {
+func (s *Nats) NewWorkGroup(name string, subject string, handler SubscribeHandler) error {
+
+	if err := s.subscribe(subject, name, handler); err != nil {
+		return err
+	}
+	if ss, ok := s.workGroups[name]; !ok {
+		s.workGroups[name] = []string{subject}
+	} else {
+		ss = append(ss, subject)
+	}
+
+	return nil
+}
+
+func (s *Nats) subscribe(subject string, group string, handler SubscribeHandler) error {
+	nc := s.conn
+	if nc == nil {
 		err := errors.New("Nats Is Not Connected!")
 		s.diag.Error("Subscribe Error", err)
 		return err
 	}
-	nc := s.conn
+	if s.isExist(subject) {
+		err := errors.Errorf("Subject: %s Is Been Subscribed, Please Unsubscribe First", subject)
+		s.diag.Error("Subscribe Error", err)
+		return err
+	}
+
 	fn := func(msg *nats.Msg) {
 		d := &brokerMessage{
 			Body:   msg.Data,
 			Header: map[string]string{"subject": msg.Subject, "Reply": msg.Reply},
 		}
-		handler(d)
+		if resp, err := handler(d); err != nil {
+			s.diag.Error("Subscribe Handler Error", err)
+		} else {
+			if len(resp) == 0 {
+				return
+			}
+			if err := nc.Publish(msg.Reply, resp); err != nil {
+				s.diag.Error("Subscribe Handler Publish Error", err)
+			}
+		}
 	}
-	ss, err := nc.Subscribe(subject, fn)
+	var ss *nats.Subscription
+	var err error
+	if group == "" {
+		ss, err = nc.QueueSubscribe(subject, group, fn)
+	} else {
+		ss, err = nc.Subscribe(subject, fn)
+	}
 	if err != nil {
 		return err
 	}
@@ -150,17 +200,45 @@ func (s *Nats) Subscribe(subject string, handler SubscribeHandler) error {
 	return nil
 }
 
-func (s *Nats) UnSubscribe(subject string) error {
-	return s.removeSub(subject)
-
+// 创建一个新的订阅，然后对其订阅发起返回
+func (s *Nats) Subscribe(subject string, handler SubscribeHandler) error {
+	return s.subscribe(subject, "", handler)
 }
 
-func (s *Nats) Publish(subject string, data[]byte) error {
-	if s.conn == nil {
+func (s *Nats) UnSubscribe(subject string) error {
+	return s.removeSub(subject)
+}
+
+func (s *Nats) Publish(subject string, data []byte) error {
+	nc := s.conn
+	if nc == nil {
 		err := errors.New("Nats Is Not Connected!")
 		s.diag.Error("Subscribe Error", err)
 		return err
 	}
-	nc := s.conn
+
 	return nc.Publish(subject, data)
+}
+
+func (s *Nats) DoRequest(subject string, data []byte, timeOut time.Duration) (resp []byte, err error) {
+	nc := s.conn
+	if nc == nil {
+		err = errors.New("Nats Is Not Connected!")
+		s.diag.Error("DoRequest Error", err)
+		return
+	}
+	if timeOut.Microseconds() == 0 {
+		timeOut = time.Second * 10
+	}
+
+	if r, rErr := nc.Request(subject, data, timeOut); rErr != nil {
+		s.diag.Error("Nats Request Error", err)
+		err = rErr
+		return
+	} else {
+		s.diag.Debug(fmt.Sprintf("Get Resp With Msg: %v", resp))
+		resp = r.Data
+	}
+
+	return
 }

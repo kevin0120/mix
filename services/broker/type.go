@@ -3,6 +3,7 @@ package broker
 import (
 	"context"
 	"crypto/tls"
+	"time"
 )
 
 type IBrokerProvider interface {
@@ -12,9 +13,10 @@ type IBrokerProvider interface {
 	Subscribe(subject string, handler SubscribeHandler) error
 	UnSubscribe(subject string) error
 	Publish(subject string, data []byte) error
+	DoRequest(subject string, data []byte, timeOut time.Duration) ([]byte, error)
 }
 
-type SubscribeHandler func(*brokerMessage)
+type SubscribeHandler func(*brokerMessage) ([]byte, error)
 
 type brokerOptions struct {
 	Addrs     []string

@@ -3,6 +3,7 @@ package broker
 import (
 	"github.com/pkg/errors"
 	"sync/atomic"
+	"time"
 )
 
 type Diagnostic interface {
@@ -26,7 +27,6 @@ func NewService(c Config, d Diagnostic) *Service {
 
 	p := s.newBroker(c.Provider)
 	s.Provider = p
-
 
 	return s
 }
@@ -54,7 +54,7 @@ func (s *Service) newBroker(provider string) (ret IBrokerProvider) {
 	c := s.Config()
 	switch provider {
 	case "nats":
-		ret = NewNats(s.diag, c.ConnectUrls, c.Options)
+		ret = NewNats(s.diag, c)
 	default:
 		ret = NewDefaultBroker()
 	}
@@ -77,4 +77,13 @@ func (s *Service) Publish(subject string, data []byte) error {
 	}
 
 	return p.Publish(subject, data)
+}
+
+func (s *Service) Request(subject string, data []byte, timeOut time.Duration) ([]byte, error) {
+	p := s.Provider
+	if p == nil {
+		return nil, errors.New("Can Not Create Broker Publish, Cause Provider Is Empty")
+	}
+
+	return p.DoRequest(subject, data, timeOut)
 }

@@ -57,8 +57,12 @@ func (c *GRPCClient) Start() error {
 }
 
 func (c *GRPCClient) Stop() error {
-	c.conn.Close()
-	c.stream.CloseSend()
+	if c.conn != nil {
+		c.conn.Close()
+	}
+	if c.stream != nil {
+		c.stream.CloseSend()
+	}
 
 	closed := make(chan struct{})
 	c.closing <- closed

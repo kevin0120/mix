@@ -1,6 +1,7 @@
 package broker
 
 import (
+	uuid "github.com/iris-contrib/go.uuid"
 	"github.com/pkg/errors"
 	"strings"
 )
@@ -12,14 +13,17 @@ type Config struct {
 	Enable      bool              `yaml:"enable"`
 	Provider    string            `yaml:"provider"`
 	Options     map[string]string `yaml:"connect-options"`
+	Name        string            `yaml:"name"`
 }
 
 func NewConfig() Config {
+	n, _ := uuid.NewV4()
 	c := Config{
 		Enable:      false,
 		ConnectUrls: []string{"nats://127.0.0.1:4222"},
 		Provider:    "nats",
 		Options:     DefaultOptions,
+		Name:        n.String(),
 	}
 
 	return c
@@ -27,6 +31,9 @@ func NewConfig() Config {
 
 func (c Config) Validate() error {
 	if c.Enable {
+		if c.Name == "" {
+			return errors.New("Broker Name Is Required! But Now Is Empty")
+		}
 		for _, connect := range c.ConnectUrls {
 			if !strings.HasPrefix(connect, "nats://") {
 				return errors.Errorf("Broker connect Url Is Invalid, error: %s", connect)
