@@ -119,6 +119,8 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.appendMinioService()
 
+	s.AppendBrokerService()
+
 	s.appendDeviceService()
 
 	if err := s.appendControllersService(); err != nil {
