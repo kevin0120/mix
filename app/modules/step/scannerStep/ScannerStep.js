@@ -27,7 +27,6 @@ const ScannerStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
       });
       this._scanners = [];
       this._listeners = [];
-      console.log('scanners cleared');
     };
 
     _statusTasks = {

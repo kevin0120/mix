@@ -96,7 +96,6 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
     * _onLeave() {
       try {
-        console.log('step leaving');
         yield all(
           this._tools.map(t => (t.isEnable ? call(t.Disable) : call(() => {
           })))
@@ -126,7 +125,6 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
     constructor(...args: Array<any>) {
       super(...args);
       this.isValid = true; // 设置此工步是合法的
-      this._onLeave=this._onLeave.bind(this);
     }
 
     _statusTasks = {
@@ -198,8 +196,6 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               })
             );
 
-            console.log(this._pointsManager);
-            console.log(this._pointsManager.isPass());
 
             if (this._pointsManager.isPass()) {
               yield call(stepDataApi, this._data);
@@ -243,7 +239,6 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                   timeLine: [...result2TimeLine(results), ...(data.timeLine || [])]
                 }));
                 const { active, inactive } = this._pointsManager.newResult(results);
-                console.log(active, inactive);
                 this._activePoints = active;
                 yield all(
                   inactive.map(p =>

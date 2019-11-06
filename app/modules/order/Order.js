@@ -133,7 +133,6 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
               // yield put(orderActions.finishOrder(this));
             } else {
               this._workingIndex -= 1;
-              console.log(this.workingStep);
               status = STEP_STATUS.READY;
             }
           };
@@ -187,8 +186,8 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
               s => s.systemInfo.workcenter
             );
             const productCode = '';
-            const dateComplete=new Date();
-            const operation = this.payload.operation;
+            const dateComplete = new Date();
+            const { operation } = this.payload;
             closeAction = [
               orderActions.reportFinish(
                 code,
