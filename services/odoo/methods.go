@@ -42,7 +42,7 @@ func (m *Methods) postWorkorders(ctx iris.Context) {
 	if err != nil {
 		return
 	}
-	_,rr:= m.service.DB.WorkorderOut(code,0)
+	_, rr := m.service.DB.WorkorderOut(code, 0)
 
 	var bd []interface{}
 	bd = append(bd, string(rr))

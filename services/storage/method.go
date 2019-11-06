@@ -23,7 +23,7 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 		Code:         work.Code,
 		Track_code:   work.Track_code,
 		Product_code: work.Product_code,
-		Status:"ready",
+		Status:       "ready",
 	}
 
 	//var hh map[string]interface{}
@@ -58,8 +58,8 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 			Image:       msg.Image,
 
 			Test_type: msg.Test_type,
-			Status:"ready",
-			Code: msg.Code,
+			Status:    "ready",
+			Code:      msg.Code,
 		}
 
 		_, err := s.eng.Insert(&step)
@@ -80,13 +80,13 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 
 }
 
-func (s *Service) WorkorderOut(order string,workorderID int64) (error, []byte) {
+func (s *Service) WorkorderOut(order string, workorderID int64) (error, []byte) {
 
 	var workorder Workorders
 	var ss *xorm.Session
-	if order==""{
+	if order == "" {
 		ss = s.eng.Alias("r").Where("r.id = ?", workorderID)
-	}else{
+	} else {
 		ss = s.eng.Alias("r").Where("r.code = ?", order)
 	}
 
@@ -116,7 +116,7 @@ func (s *Service) WorkorderOut(order string,workorderID int64) (error, []byte) {
 		for k, v := range mm {
 			hh[k] = v
 		}
-		_,image1:=s.findsteppicture(step[i].ImageRef)
+		_, image1 := s.findsteppicture(step[i].ImageRef)
 		hh["image"] = image1
 		steps = append(steps, hh)
 	}
@@ -128,7 +128,7 @@ func (s *Service) WorkorderOut(order string,workorderID int64) (error, []byte) {
 		ww[k] = v
 	}
 
-	_,image2:=s.findorderpicture(workorder.Product_code)
+	_, image2 := s.findorderpicture(workorder.Product_code)
 	ww["product_type_image"] = image2
 
 	rr, _ := json.Marshal(ww)
@@ -147,23 +147,22 @@ func stringtomap(in string) (m map[string]interface{}) {
 	return
 }
 
-func (s *Service) findsteppicture(ref string) (error, string){
+func (s *Service) findsteppicture(ref string) (error, string) {
 
 	var ro RoutingOperations
 	ss := s.eng.Alias("r").Where("r.tightening_step_ref = ?", ref).Limit(1)
-	_,e := ss.Get(&ro)
+	_, e := ss.Get(&ro)
 	if e != nil {
 		return e, ro.Img
 	}
 	return nil, ""
 }
 
-
-func (s *Service) findorderpicture(ref string) (error, string){
+func (s *Service) findorderpicture(ref string) (error, string) {
 
 	var ro RoutingOperations
 	ss := s.eng.Alias("r").Where("r.product_type = ?", ref).Limit(1)
-	_,e := ss.Get(&ro)
+	_, e := ss.Get(&ro)
 	if e != nil {
 		return e, ro.ProductTypeImage
 	}

@@ -974,7 +974,7 @@ func (s *Service) Workorders(par []byte) ([]Workorders, error) {
 	q := s.eng.Alias("w")
 	if orderPar.Status != "" {
 		q = q.Where("w.status = ?", orderPar.Status)
-	}else {
+	} else {
 		q = q.Where("w.status != ?", orderPar.Status)
 	}
 
@@ -985,11 +985,10 @@ func (s *Service) Workorders(par []byte) ([]Workorders, error) {
 		q = q.And("w.date_planned_complete <= ?", orderPar.Time_to)
 	}
 	q.Desc("id")
-	if orderPar.Page_size==0{
-		orderPar.Page_size=20
+	if orderPar.Page_size == 0 {
+		orderPar.Page_size = 20
 	}
-	q.Limit(orderPar.Page_size,orderPar.Page_no*orderPar.Page_size+1)
-
+	q.Limit(orderPar.Page_size, orderPar.Page_no*orderPar.Page_size+1)
 
 	var rt []Workorders
 
@@ -1060,7 +1059,6 @@ func (s *Service) UpdateStep(step *Steps) (*Steps, error) {
 	}
 }
 
-
 func (s *Service) UpdateStepData(step *Steps) (*Steps, error) {
 
 	sql := "update `steps` set data = ? where id = ?"
@@ -1074,9 +1072,6 @@ func (s *Service) UpdateStepData(step *Steps) (*Steps, error) {
 		return step, nil
 	}
 }
-
-
-
 
 func (s *Service) GetLastIncompleteCurve(toolSN string) (*Curves, error) {
 	curve := Curves{}

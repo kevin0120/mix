@@ -16,9 +16,10 @@ type IoStatus struct {
 }
 
 type IoContact struct {
+	Src     string `json:"src"`
 	SN      string `json:"sn"`
-	Type    string `json:"type"`
-	CONTACT string `json:"contact"`
+	Inputs  string `json:"inputs"`
+	Outputs string `json:"outputs"`
 }
 
 type IoSet struct {

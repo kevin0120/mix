@@ -3,6 +3,7 @@ package openprotocol
 import (
 	"fmt"
 	"github.com/juju/errors"
+	"github.com/masami10/rush/services/io"
 	"github.com/masami10/rush/services/tightening_device"
 	"strconv"
 	"strings"
@@ -224,10 +225,11 @@ func (iom *IOMonitor) Deserialize(str string) error {
 	return nil
 }
 
-func (iom *IOMonitor) ToTighteningControllerInput() *tightening_device.TighteningControllerInput {
-	return &tightening_device.TighteningControllerInput{
-		ControllerSN: iom.ControllerSN,
-		Inputs:       iom.Inputs,
+func (iom *IOMonitor) ToTighteningControllerInput() *io.IoContact {
+	return &io.IoContact{
+		Src:    tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER,
+		SN:     iom.ControllerSN,
+		Inputs: iom.Inputs,
 	}
 }
 
