@@ -58,21 +58,21 @@ type Service struct {
 	wg       sync.WaitGroup
 	closing  chan struct{}
 
-	handle_buffer chan *HandlerPackage
+	handlerPackages chan *HandlerPackage
 
 	diag Diagnostic
 }
 
 func NewService(cs Config, d Diagnostic, pAudi Protocol, pOpenprotocol Protocol) (*Service, error) {
 	s := &Service{
-		config:        cs,
-		diag:          d,
-		Controllers:   map[string]Controller{},
-		protocols:     map[string]Protocol{},
-		Handlers:      Handlers{},
-		handle_buffer: make(chan *HandlerPackage, 1024),
-		wg:            sync.WaitGroup{},
-		closing:       make(chan struct{}, 1),
+		config:          cs,
+		diag:            d,
+		Controllers:     map[string]Controller{},
+		protocols:       map[string]Protocol{},
+		Handlers:        Handlers{},
+		handlerPackages: make(chan *HandlerPackage, 1024),
+		wg:              sync.WaitGroup{},
+		closing:         make(chan struct{}, 1),
 	}
 
 	s.Handlers.controllerService = s
@@ -137,13 +137,13 @@ func (s *Service) Handle(result *ControllerResult, curve *minio.ControllerCurve)
 		curve:  curve,
 	}
 
-	s.handle_buffer <- &pkg
+	s.handlerPackages <- &pkg
 }
 
 func (s *Service) HandleProcess() {
 	for {
 		select {
-		case data := <-s.handle_buffer:
+		case data := <-s.handlerPackages:
 			s.Handlers.Handle(*data.result, *data.curve)
 		case <-s.closing:
 			s.wg.Done()

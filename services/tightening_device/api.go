@@ -93,7 +93,7 @@ func (s *ToolModeSelect) Validate() error {
 }
 
 type Api struct {
-	service *Service
+	*Service
 }
 
 func (s *Api) ToolControl(req *ToolControl) error {
@@ -106,7 +106,7 @@ func (s *Api) ToolControl(req *ToolControl) error {
 		return err
 	}
 
-	tool, err := s.service.getTool(req.ControllerSN, req.ToolSN)
+	tool, err := s.getTool(req.ControllerSN, req.ToolSN)
 	if err != nil {
 		return err
 	}
@@ -124,7 +124,7 @@ func (s *Api) ToolJobSet(req *JobSet) error {
 		return err
 	}
 
-	tool, err := s.service.getTool(req.ControllerSN, req.ToolSN)
+	tool, err := s.getTool(req.ControllerSN, req.ToolSN)
 	if err != nil {
 		return err
 	}
@@ -133,7 +133,7 @@ func (s *Api) ToolJobSet(req *JobSet) error {
 		req.UserID = 1
 	}
 
-	_ = s.service.StorageService.UpdateTool(&storage.Guns{
+	_ = s.StorageService.UpdateTool(&storage.Guns{
 		Serial:      req.ToolSN,
 		WorkorderID: req.WorkorderID,
 		Total:       req.Total,
@@ -148,7 +148,7 @@ func (s *Api) ToolPSetBatchSet(req *PSetBatchSet) error {
 		return errors.New("Req Is Nil")
 	}
 
-	tool, err := s.service.getTool(req.ControllerSN, req.ToolSN)
+	tool, err := s.getTool(req.ControllerSN, req.ToolSN)
 	if err != nil {
 		return err
 	}
@@ -166,7 +166,7 @@ func (s *Api) ToolPSetSet(req *PSetSet) error {
 		return err
 	}
 
-	tool, err := s.service.getTool(req.ControllerSN, req.ToolSN)
+	tool, err := s.getTool(req.ControllerSN, req.ToolSN)
 	if err != nil {
 		return err
 	}
@@ -175,7 +175,7 @@ func (s *Api) ToolPSetSet(req *PSetSet) error {
 		req.UserID = 1
 	}
 
-	_ = s.service.StorageService.UpdateTool(&storage.Guns{
+	_ = s.StorageService.UpdateTool(&storage.Guns{
 		Serial:      req.ToolSN,
 		WorkorderID: req.WorkorderID,
 		Seq:         int(req.Sequence),
@@ -197,7 +197,7 @@ func (s *Api) ToolModeSelect(req *ToolModeSelect) error {
 		return err
 	}
 
-	tool, err := s.service.getTool(req.ControllerSN, req.ToolSN)
+	tool, err := s.getTool(req.ControllerSN, req.ToolSN)
 	if err != nil {
 		return err
 	}

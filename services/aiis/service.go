@@ -61,7 +61,9 @@ type Service struct {
 	updateQueue map[int64]time.Time
 	mtx         sync.Mutex
 
-	TighteningService *tightening_device.Service
+	TighteningService interface {
+		GetDispatcher(string) *utils.Dispatcher
+	}
 }
 
 func NewService(c Config, d Diagnostic, rush_port string) *Service {
@@ -137,8 +139,18 @@ func (s *Service) Config() Config {
 	return s.configValue.Load().(Config)
 }
 
+type TighteningResultHandler = func(data *tightening_device.TighteningResult)
+
+func (s *Service) RegisterTighteningResultHandler(name string, handler TighteningResultHandler) {
+	fn := func(data interface{}) {
+		d := data.(*tightening_device.TighteningResult)
+		handler(d)
+	}
+	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_RESULT).Register(fn)
+}
+
 func (s *Service) Open() error {
-	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_RESULT).Register(s.OnTighteningResult)
+	s.RegisterTighteningResultHandler(tightening_device.DISPATCH_RESULT, s.OnTighteningResult)
 
 	c := s.Config()
 	client := resty.New()
@@ -432,12 +444,12 @@ func (s *Service) ResultUploadManager() error {
 }
 
 // 收到控制器结果
-func (s *Service) OnTighteningResult(data interface{}) {
+func (s *Service) OnTighteningResult(data *tightening_device.TighteningResult) {
 	if data == nil {
 		return
 	}
 
-	tighteningResult := data.(*tightening_device.TighteningResult)
+	tighteningResult := data
 	dbResult, err := s.DB.GetResultByID(tighteningResult.ID)
 	if err != nil {
 		s.diag.Error("Get Result Failed", err)
