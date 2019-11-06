@@ -5,6 +5,7 @@ import (
 	"github.com/masami10/rush/toml"
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
+	uuid "github.com/satori/go.uuid"
 	"strings"
 	"sync"
 	"time"
@@ -12,24 +13,26 @@ import (
 
 type Nats struct {
 	sync.Mutex
-	addrs       []string
-	conn        *nats.Conn
-	diag        Diagnostic
-	opts        brokerOptions
-	nopts       []nats.Option
-	subscribes  map[string]*nats.Subscription
-	respSubject string
-	workGroups  map[string][]string
+	addrs         []string
+	conn          *nats.Conn
+	diag          Diagnostic
+	opts          brokerOptions
+	nopts         []nats.Option
+	subscribes    map[string]*nats.Subscription
+	loadBalancers map[string][]string
+	respSubject   string
+	workGroups    map[string][]string
 }
 
 func NewNats(d Diagnostic, c Config) *Nats {
 	addrs := c.ConnectUrls
 	options := c.Options
 	s := &Nats{
-		diag:        d,
-		subscribes:  map[string]*nats.Subscription{},
-		workGroups:  map[string][]string{},
-		respSubject: fmt.Sprintf("%s.responses", c.Name),
+		diag:          d,
+		subscribes:    map[string]*nats.Subscription{},
+		loadBalancers: map[string][]string{},
+		workGroups:    map[string][]string{},
+		respSubject:   fmt.Sprintf("%s.responses", c.Name),
 	}
 
 	opts := generateConnectOptions(options)
@@ -110,7 +113,7 @@ func (s *Nats) unsubscribeAll() error {
 
 func (s *Nats) Close() error {
 	if s.conn != nil {
-		s.unsubscribeAll()
+		_ = s.unsubscribeAll()
 		s.conn.Close()
 	}
 	return nil
@@ -143,31 +146,50 @@ func (s *Nats) removeSub(subject string) error {
 	return nil
 }
 
-func (s *Nats) NewWorkGroup(name string, subject string, handler SubscribeHandler) error {
-
-	if err := s.subscribe(subject, name, handler); err != nil {
-		return err
-	}
-	if ss, ok := s.workGroups[name]; !ok {
-		s.workGroups[name] = []string{subject}
-	} else {
-		ss = append(ss, subject)
-	}
-
-	return nil
-}
-
-func (s *Nats) subscribe(subject string, group string, handler SubscribeHandler) error {
+func (s *Nats) AppendWorkGroup(subject string, group string, handler SubscribeHandler) error {
 	nc := s.conn
 	if nc == nil {
 		err := errors.New("Nats Is Not Connected!")
 		s.diag.Error("Subscribe Error", err)
 		return err
 	}
-	if s.isExist(subject) {
-		err := errors.Errorf("Subject: %s Is Been Subscribed, Please Unsubscribe First", subject)
-		s.diag.Error("Subscribe Error", err)
+	if group == "" {
+		err := errors.New("Group Name Is Required")
+		s.diag.Error("AppendWorkGroup Error", err)
 		return err
+	}
+	r := s.ensureWorkGroup(subject, group)
+
+	if id, err := s.subscribe(subject, group, handler); err != nil {
+		return err
+	} else {
+		r = append(r, id)
+
+	}
+
+	return nil
+}
+
+func (s *Nats) ensureWorkGroup(subject string, group string) []string {
+	name := fmt.Sprintf("%s@%s", subject, group)
+	if _, ok := s.loadBalancers[name]; !ok {
+		s.loadBalancers[name] = []string{}
+	}
+
+	return s.loadBalancers[name]
+}
+
+func (s *Nats) subscribe(subject, group string, handler SubscribeHandler) (registerName string, err error) {
+	nc := s.conn
+	if nc == nil {
+		err = errors.New("Nats Is Not Connected!")
+		s.diag.Error("Subscribe Error", err)
+		return
+	}
+	if s.isExist(subject) {
+		err = errors.Errorf("Subject: %s Is Been Subscribed, Please Unsubscribe First", subject)
+		s.diag.Error("Subscribe Error", err)
+		return
 	}
 
 	fn := func(msg *nats.Msg) {
@@ -186,23 +208,28 @@ func (s *Nats) subscribe(subject string, group string, handler SubscribeHandler)
 			}
 		}
 	}
+
 	var ss *nats.Subscription
-	var err error
+	registerName = subject
 	if group == "" {
-		ss, err = nc.QueueSubscribe(subject, group, fn)
-	} else {
 		ss, err = nc.Subscribe(subject, fn)
+
+	} else {
+		ss, err = nc.QueueSubscribe(subject, group, fn)
+		registerName = uuid.NewV4().String()
 	}
+
 	if err != nil {
-		return err
+		return
 	}
-	s.addSub(subject, ss)
-	return nil
+	s.addSub(registerName, ss)
+	return
 }
 
 // 创建一个新的订阅，然后对其订阅发起返回
 func (s *Nats) Subscribe(subject string, handler SubscribeHandler) error {
-	return s.subscribe(subject, "", handler)
+	_, err := s.subscribe(subject, "", handler)
+	return err
 }
 
 func (s *Nats) UnSubscribe(subject string) error {

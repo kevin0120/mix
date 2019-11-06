@@ -16,12 +16,14 @@ type Service struct {
 	diag        Diagnostic
 	configValue atomic.Value
 	Provider    IBrokerProvider
+	opened bool
 }
 
 func NewService(c Config, d Diagnostic) *Service {
 
 	s := &Service{
 		diag: d,
+		opened: false,
 	}
 	s.configValue.Store(c)
 
@@ -38,7 +40,12 @@ func (s *Service) Config() Config {
 func (s *Service) Open() error {
 	c := s.Config()
 	if c.Enable {
-		return s.Provider.Connect(c.ConnectUrls)
+		if err :=s.Provider.Connect(c.ConnectUrls); err != nil {
+			s.Provider = NewDefaultBroker()
+			return err
+		}else {
+			s.opened = true
+		}
 	}
 	return nil
 }
