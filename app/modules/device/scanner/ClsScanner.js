@@ -1,7 +1,7 @@
 // @flow
 
 import Device from '../Device';
-import { CommonLog } from '../../../../common/utils';
+import { CommonLog } from '../../../common/utils';
 import type {IScanner} from './IScanner';
 
 class ClsScanner extends Device implements IScanner{

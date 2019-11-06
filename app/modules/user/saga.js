@@ -28,7 +28,7 @@ import type {
 } from './interface/typeDef';
 import { CommonLog } from '../../common/utils';
 import { bindNewDeviceListener } from '../deviceManager/handlerWSData';
-import ClsReader from '../external/device/reader/ClsReader';
+import ClsReader from '../device/reader/ClsReader';
 
 const DummyUserName = 'DummyUser';
 

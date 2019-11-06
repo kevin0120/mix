@@ -1,10 +1,10 @@
 // @flow
 import { call } from 'redux-saga/effects';
-import { CommonLog } from '../../../../common/utils';
+import { CommonLog } from '../../../common/utils';
 import type { tIOWSDataContact, tIOWSMsgType } from './type';
 import { IO_WS_TYPES } from './constants';
-import { getDevice } from '../../../deviceManager/devices';
-import type { rushHandlerMap } from '../../../rush/type';
+import { getDevice } from '../../deviceManager/devices';
+import type { rushHandlerMap } from '../../rush/type';
 
 // eslint-disable-next-line flowtype/no-weak-types
 const handlers: rushHandlerMap<tIOWSMsgType, any> = {

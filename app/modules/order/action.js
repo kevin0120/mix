@@ -4,7 +4,7 @@ import type { IOrder } from './interface/IOrder';
 import { ORDER_STATUS, ORDER } from './constants';
 import type { IWorkStep } from '../step/interface/IWorkStep';
 import type { tAnyStepStatus } from '../step/interface/typeDef';
-import type { IScanner } from '../external/device/scanner/IScanner';
+import type { IScanner } from '../device/scanner/IScanner';
 
 export type tActUpdateState = {
   type: string,

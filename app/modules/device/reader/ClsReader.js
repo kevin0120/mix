@@ -1,7 +1,7 @@
 // @flow
 
 import Device from '../Device';
-import { CommonLog } from '../../../../common/utils';
+import { CommonLog } from '../../../common/utils';
 import type {IReader} from './IReader';
 
 class ClsReader extends Device implements IReader{

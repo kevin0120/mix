@@ -5,8 +5,8 @@ import type {
   tInputListener,
   tInputPredicate
 } from './typeDef';
-import type { ICommonExternalEntity } from '../ICommonExternalEntity';
-import type { tAction, tCallable, tListenerObj } from '../../typeDef';
+import type { ICommonExternalEntity } from '../external/ICommonExternalEntity';
+import type { tAction, tCallable, tListenerObj } from '../typeDef';
 
 export interface IDevice extends ICommonExternalEntity {
   // eslint-disable-next-line flowtype/no-weak-types

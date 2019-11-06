@@ -4,7 +4,7 @@ import { takeLatest, put, select } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import { CONNECTION } from '../connections/action';
 import { RUSH } from '../rush/action';
-import { RFID } from '../external/device/rfid/action';
+import { RFID } from '../device/rfid/action';
 import { SYSTEM_INIT } from './action';
 // import { setLedStatusReady, setModBusIO } from '../io/saga';
 

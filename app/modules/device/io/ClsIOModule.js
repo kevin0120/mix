@@ -11,9 +11,9 @@ import type {
   tIOPort,
   tIOChange
 } from './type';
-import { CommonLog } from '../../../../common/utils';
+import { CommonLog } from '../../../common/utils';
 import { ioDirection, ioTriggerMode } from './constants';
-import { ioSetApi, ioContactApi, ioStatusApi } from '../../../../api/io';
+import { ioSetApi, ioContactApi, ioStatusApi } from '../../../api/io';
 import type { IIOModule } from './interface/IIOModule';
 import type { IDevice } from '../IDevice';
 

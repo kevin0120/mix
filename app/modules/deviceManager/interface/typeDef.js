@@ -1,4 +1,4 @@
-import type Device from '../../external/device/Device';
+import type Device from '../../device/Device';
 import { deviceType } from '../constants';
 
 export type tArrayDevices = Set<Device>;

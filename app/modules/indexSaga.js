@@ -7,7 +7,7 @@ import sysInitFlow from './systemInit/saga';
 import user from './user/saga';
 import { watchAiis } from './aiis/saga';
 import { watchRushEvent } from './rush/saga';
-import watchRFIDEvent from './external/device/rfid/saga';
+import watchRFIDEvent from './device/rfid/saga';
 import watchOperationViewer from './operationViewer/saga';
 import watchPower from './power/saga';
 import order from './order/saga';

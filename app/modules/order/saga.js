@@ -9,6 +9,8 @@ import {
   delay,
   take,
   race,
+  fork,
+  join,
   actionChannel
 } from 'redux-saga/effects';
 import React from 'react';
@@ -35,7 +37,7 @@ import type { IWorkStep } from '../step/interface/IWorkStep';
 import type { IOrder } from './interface/IOrder';
 
 import { bindNewDeviceListener } from '../deviceManager/handlerWSData';
-import ClsScanner from '../external/device/scanner/ClsScanner';
+import ClsScanner from '../device/scanner/ClsScanner';
 
 export default function* root(): Saga<void> {
   try {
@@ -187,7 +189,14 @@ function* DebounceViewStep(d, action: tCommonActionType) {
 function* getOrderDetail({ order }) {
   try {
     yield put(loadingActions.start());
+    const detailResult = yield fork(function* detailResult() {
+      yield race([take(ORDER.DETAIL.SUCCESS), take(ORDER.DETAIL.FAIL)]);
+    });
     yield call(orderDetailApi, order.id);
+    // if (resp.result !== 0) {
+    //   yield put(orderActions.getDetailFail());
+    // }
+    yield join(detailResult);
     yield put(loadingActions.stop());
   } catch (e) {
     yield put(loadingActions.stop());

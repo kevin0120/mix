@@ -16,6 +16,6 @@ const resultStatusColor = {
 export const result2TimeLine = (results: Array<tResult>): Array<tTimeLineObj> => results.map(r => ({
         title: r.batch,
         color: resultStatusColor[r.result] || resultStatusColor.default,
-        footerTitle: r.toolSN,
+        footerTitle: r.tool_sn,
         body: `${r.result}: wi=${r.wi},mi=${r.mi},ti=${r.ti}`
       }));

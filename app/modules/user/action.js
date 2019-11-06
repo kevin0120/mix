@@ -7,7 +7,7 @@ import type {
   tUserLoginAction,
   tUuid
 } from './interface/typeDef';
-import type { IReader } from '../external/device/reader/IReader';
+import type { IReader } from '../device/reader/IReader';
 
 export const USER = {
   LOGIN: {

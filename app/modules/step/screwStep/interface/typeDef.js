@@ -27,7 +27,7 @@ export type tPoint = {
 };
 
 export type tResult = {
-  toolSN: string,
+  tool_sn: string,
   sequence: number,
   group_sequence: number,
   ti: number,

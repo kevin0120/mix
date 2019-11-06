@@ -94,10 +94,12 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
     _listeners = [];
 
-    *_onLeave() {
+    * _onLeave() {
       try {
+        console.log('step leaving');
         yield all(
-          this._tools.map(t => (t.isEnable ? call(t.Disable) : call(() => {})))
+          this._tools.map(t => (t.isEnable ? call(t.Disable) : call(() => {
+          })))
         );
         this._tools.forEach(t => {
           this._listeners.forEach(l => {
@@ -124,17 +126,18 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
     constructor(...args: Array<any>) {
       super(...args);
       this.isValid = true; // 设置此工步是合法的
+      this._onLeave=this._onLeave.bind(this);
     }
 
     _statusTasks = {
-      *[STEP_STATUS.READY](ORDER, orderActions) {
+      * [STEP_STATUS.READY](ORDER, orderActions) {
         try {
           yield put(orderActions.stepStatus(this, STEP_STATUS.ENTERING));
         } catch (e) {
           CommonLog.lError(e);
         }
       },
-      *[STEP_STATUS.ENTERING](ORDER, orderActions) {
+      * [STEP_STATUS.ENTERING](ORDER, orderActions) {
         try {
           // init data
           const payload: tScrewStepPayload = this._payload;
@@ -156,7 +159,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
             this._listeners.push(
               t.addListener(
                 () => true,
-                input => screwStepActions.result(input.result)
+                input => screwStepActions.result(input.data)
               )
             );
           });
@@ -177,7 +180,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
         }
       },
 
-      *[STEP_STATUS.DOING](ORDER, orderActions) {
+      * [STEP_STATUS.DOING](ORDER, orderActions) {
         try {
           let isFirst = true;
           this._activePoints = this._pointsManager.start();
@@ -194,6 +197,9 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 tightening_points: this._pointsManager.points // results data.results
               })
             );
+
+            console.log(this._pointsManager);
+            console.log(this._pointsManager.isPass());
 
             if (this._pointsManager.isPass()) {
               yield call(stepDataApi, this._data);
@@ -217,11 +223,11 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               this._activePoints.map(p =>
                 call(
                   getDevice(p.toolSN)?.Enable ||
-                    (() => {
-                      CommonLog.lError(
-                        `tool ${p.toolSN}: no such tool or tool cannot be enabled.`
-                      );
-                    })
+                  (() => {
+                    CommonLog.lError(
+                      `tool ${p.toolSN}: no such tool or tool cannot be enabled.`
+                    );
+                  })
                 )
               )
             );
@@ -230,27 +236,24 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
             switch (action.type) {
               case SCREW_STEP.RESULT: {
-                const {
-                  results: { data: results }
-                } = action;
+                const { results } = action;
                 yield call(this.updateData, data => ({
                   ...data,
-                  results: [...data.results, ...results],
-                  timeLine: [...result2TimeLine(results), ...data.timeLine]
+                  results: [...(data.results || []), ...results],
+                  timeLine: [...result2TimeLine(results), ...(data.timeLine || [])]
                 }));
-                const { active, inactive } = this._pointsManager.newResult(
-                  results
-                );
+                const { active, inactive } = this._pointsManager.newResult(results);
+                console.log(active, inactive);
                 this._activePoints = active;
                 yield all(
                   inactive.map(p =>
                     call(
                       getDevice(p.toolSN)?.Disable ||
-                        (() => {
-                          CommonLog.lError(
-                            `tool ${p.toolSN}: no such tool or tool cannot be disabled.`
-                          );
-                        })
+                      (() => {
+                        CommonLog.lError(
+                          `tool ${p.toolSN}: no such tool or tool cannot be disabled.`
+                        );
+                      })
                     )
                   )
                 );
@@ -277,7 +280,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
         }
       },
 
-      *[STEP_STATUS.FINISHED](ORDER, orderActions) {
+      * [STEP_STATUS.FINISHED](ORDER, orderActions) {
         try {
           yield put(orderActions.finishStep(this));
         } catch (e) {
@@ -286,7 +289,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
         }
       },
 
-      *[STEP_STATUS.FAIL](ORDER, orderActions, msg) {
+      * [STEP_STATUS.FAIL](ORDER, orderActions, msg) {
         try {
           yield all(this._tools.map(t => call(t.Disable)));
           this._tools = [];

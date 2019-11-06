@@ -2,10 +2,10 @@
 
 import { call } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
-import { CommonLog } from '../../../../common/utils';
-import { getDevicesByType } from '../../../deviceManager/devices';
+import { CommonLog } from '../../../common/utils';
+import { getDevicesByType } from '../../deviceManager/devices';
 import type { tReaderData, tReaderRushData } from './typeDef';
-import { deviceType } from '../../../deviceManager/constants';
+import { deviceType } from '../../deviceManager/constants';
 
 export default function* readerNewData(data: tReaderRushData): Saga<void> {
   try {

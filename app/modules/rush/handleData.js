@@ -9,11 +9,11 @@ import { CommonLog } from '../../common/utils';
 import {
   toolNewResults,
   toolStatusChange
-} from '../external/device/tools/saga';
+} from '../device/tools/saga';
 import rushActions from './action';
-import readerNewData from '../external/device/reader/saga';
-import scannerNewData from '../external/device/scanner/saga';
-import ioWSDataHandlers from '../external/device/io/handleWSData';
+import readerNewData from '../device/reader/saga';
+import scannerNewData from '../device/scanner/saga';
+import ioWSDataHandlers from '../device/io/handleWSData';
 import { deviceStatus } from '../deviceManager/handlerWSData';
 import orderWSDataHandlers from '../order/handleWSData';
 import systemInfoActions from '../systemInfo/action';

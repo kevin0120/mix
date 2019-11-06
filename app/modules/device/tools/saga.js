@@ -2,11 +2,11 @@
 
 import { put, call } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
-import notifierActions from '../../../Notifier/action';
-import { CommonLog } from '../../../../common/utils';
+import notifierActions from '../../Notifier/action';
+import { CommonLog } from '../../../common/utils';
 import type { tDeviceSN } from '../typeDef';
-import type { tResult } from '../../../step/screwStep/interface/typeDef';
-import { getDevice } from '../../../deviceManager/devices';
+import type { tResult } from '../../step/screwStep/interface/typeDef';
+import { getDevice } from '../../deviceManager/devices';
 
 type tToolStatusData = {
   type: string,
@@ -30,25 +30,26 @@ export function* toolStatusChange(data: tToolStatusData): Saga<void> {
     if (!data.data) {
       return;
     }
-    const { tool_sn: toolSN, status, reason } = data.data;
-    yield put(
-      notifierActions.enqueueSnackbar(
-        'Info',
-        `拧紧枪状态更新（${toolSN}）： ${status.toString()}${
-          reason ? `, ${reason}` : ''
-        }`
-      )
-    );
+    if (data.type === 'WS_TIGHTENING_TOOL_STATUS') {
+      const { tool_sn: toolSN, status, reason } = data.data;
+      yield put(
+        notifierActions.enqueueSnackbar(
+          'Info',
+          `拧紧枪状态更新（${toolSN}）： ${String(status)}${
+            reason ? `, ${reason}` : ''
+          }`
+        )
+      );
+    }
   } catch (e) {
     CommonLog.lError(e, { at: 'rush event tool' });
   }
 }
 
-export function* toolNewResults(data: tToolResultData): Saga<void> {
+export function* toolNewResults({ data: results }: tToolResultData): Saga<void> {
   try {
-    const results = data.data;
     CommonLog.Info('rush result', {
-      result: JSON.stringify(results)
+      results: JSON.stringify(results)
     });
     // eslint-disable-next-line no-restricted-syntax
     for (const r of results) {

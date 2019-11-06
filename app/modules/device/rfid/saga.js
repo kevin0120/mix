@@ -3,9 +3,9 @@ import { takeLatest, put, delay } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import ClsRFID from './ClsRFID';
 import { RFID } from './action';
-import { CommonLog } from '../../../../common/utils';
+import { CommonLog } from '../../../common/utils';
 import type { tDeviceNewData } from '../typeDef';
-import type { tCommonActionType } from '../../../../common/type';
+import type { tCommonActionType } from '../../../common/type';
 
 // eslint-disable-next-line prefer-const
 let Rfid = new ClsRFID('RFID', 'demo rfid sn');

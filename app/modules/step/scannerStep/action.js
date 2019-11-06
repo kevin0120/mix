@@ -1,5 +1,5 @@
 // @flow
-import type { tInput } from '../../external/device/typeDef';
+import type { tInput } from '../../device/typeDef';
 
 export const SCANNER_STEP = {
   GET_VALUE: 'SCANNER_STEP_GET_VALUE',

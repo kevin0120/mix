@@ -1,8 +1,8 @@
 // @flow
 
 import type { IWorkStep } from '../../interface/IWorkStep';
-import type { IIOModule } from '../../../external/device/io/interface/IIOModule';
-import type { tIOPort } from '../../../external/device/io/type';
+import type { IIOModule } from '../../../device/io/interface/IIOModule';
+import type { tIOPort } from '../../../device/io/type';
 
 export type tMaterialStepPayload = {
   items: Array<any>

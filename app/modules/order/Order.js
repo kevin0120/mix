@@ -184,7 +184,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
             const code = this._id;
             const trackCode = '';
             const workCenterCode = yield select(
-              s => s.system.workcenter
+              s => s.systemInfo.workcenter
             );
             const productCode = '';
             const dateComplete=new Date();

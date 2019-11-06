@@ -55,7 +55,7 @@ const dataHandlers: rushHandlerMap<tOrderWSTypes,
         newOrder.update(data);
       }
       yield put(orderActions.newList(newList));
-      // yield put(orderActions.getDetailSuccess());
+      yield put(orderActions.getDetailSuccess());
     } catch (e) {
       CommonLog.lError(e, { at: 'ORDER_WS_TYPES.DETAIL' });
     }

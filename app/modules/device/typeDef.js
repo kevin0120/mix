@@ -1,6 +1,6 @@
 // @flow
 
-import type { tAction } from '../../typeDef';
+import type { tAction } from '../typeDef';
 
 // eslint-disable-next-line flowtype/no-weak-types
 export type tInputData = any;

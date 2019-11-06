@@ -20,7 +20,7 @@ import Select from '@material-ui/core/Select';
 import Button from '../../components/CustomButtons/Button';
 
 import saveConfigs from '../../modules/setting/action';
-import IO_FUNCTION from '../../modules/external/device/io/constants';
+import IO_FUNCTION from '../../modules/device/io/constants';
 
 // import { testIO } from '../../modules/external/device/io/saga';
 

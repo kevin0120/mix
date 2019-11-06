@@ -6,7 +6,7 @@ import healthzActions from '../healthz/action';
 import type { tRushData } from '../rush/type';
 import { CommonLog } from '../../common/utils';
 import { status2Healthz } from './constants';
-import type { IDevice } from '../external/device/IDevice';
+import type { IDevice } from '../device/IDevice';
 import { makeListener } from '../util';
 import type { tAction, tListener } from '../typeDef';
 

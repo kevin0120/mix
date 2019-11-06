@@ -2,14 +2,14 @@
 
 import { CommonLog } from '../../common/utils';
 import type { tArrayDevices, tDeviceType } from './interface/typeDef';
-import type { tDeviceSN } from '../external/device/typeDef';
-import type { IDevice } from '../external/device/IDevice';
+import type { tDeviceSN } from '../device/typeDef';
+import type { IDevice } from '../device/IDevice';
 import type { ICommonExternalEntity } from '../external/ICommonExternalEntity';
-import ClsController from '../external/device/controller/model';
-import ClsScanner from '../external/device/scanner/ClsScanner';
-import ClsScrewTool from '../external/device/tools/ClsScrewTool';
-import ClsReader from '../external/device/reader/ClsReader';
-import ClsIOModule from '../external/device/io/ClsIOModule';
+import ClsController from '../device/controller/model';
+import ClsScanner from '../device/scanner/ClsScanner';
+import ClsScrewTool from '../device/tools/ClsScrewTool';
+import ClsReader from '../device/reader/ClsReader';
+import ClsIOModule from '../device/io/ClsIOModule';
 import { deviceType } from './constants';
 
 const sym2Device = Object.freeze({

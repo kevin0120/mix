@@ -96,10 +96,14 @@ export class ClsOperationPoint {
   }
 
   _parseStatus(result: tResult): void {
-    if (result.result === RESULT_STATUS.ok) {
+    if(!result.result || typeof result.result !=='string'){
+      return;
+    }
+
+    if (result.result.toUpperCase() === RESULT_STATUS.ok.toUpperCase()) {
       this._status = POINT_STATUS.SUCCESS;
     }
-    if (result.result === RESULT_STATUS.nok) {
+    if (result.result.toUpperCase() === RESULT_STATUS.nok.toUpperCase()) {
       this._status = POINT_STATUS.ERROR;
     }
   }

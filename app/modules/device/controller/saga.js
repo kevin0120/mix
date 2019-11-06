@@ -3,8 +3,8 @@
 import { call } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import ClsController from './model';
-import { CommonLog } from '../../../../common/utils';
-import type { tRushData } from '../../../rush/type';
+import { CommonLog } from '../../../common/utils';
+import type { tRushData } from '../../rush/type';
 
 // eslint-disable-next-line prefer-const
 const controller = new ClsController('controller', 'Dummy Serial Number');

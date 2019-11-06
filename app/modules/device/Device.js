@@ -2,7 +2,7 @@
 import { isEmpty, isNil, isString } from 'lodash-es';
 import type { Saga } from 'redux-saga';
 import { put, all } from 'redux-saga/effects';
-import { CommonLog } from '../../../common/utils';
+import { CommonLog } from '../../common/utils';
 import type {
   tInput,
   tInputData,
@@ -10,10 +10,10 @@ import type {
   tInputPredicate,
   tInputListener
 } from './typeDef';
-import CommonExternalEntity from '../CommonExternalEntity';
+import CommonExternalEntity from '../external/CommonExternalEntity';
 import type { IDevice } from './IDevice';
-import type { tAction, tListenerObj } from '../../typeDef';
-import { makeListener } from '../../util';
+import type { tAction, tListenerObj } from '../typeDef';
+import { makeListener } from '../util';
 
 const defaultValidatorFunc = (): boolean => true;
 

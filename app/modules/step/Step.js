@@ -57,8 +57,6 @@ export default class Step implements IWorkStep {
 
   _steps = [];
 
-  _onLeave = null;
-
   _apis = {
     updateStatus: orderStepUpdateApi
   };
@@ -289,6 +287,8 @@ export default class Step implements IWorkStep {
         at: 'step root'
       });
     } finally {
+      console.log('step run finished',this._onLeave);
+
       this.timerStop();
       if (this._onLeave) {
         yield call([this, this._onLeave]);
