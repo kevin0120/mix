@@ -17,7 +17,7 @@ function getSN() {
   return sn;
 }
 
-const defaultTimeout = 10000; // 默认timeout 10s
+const defaultTimeout = 20000; // 默认timeout 10s
 
 if (!isNil(ipcRenderer)) {
   ipcRenderer.on('rush-reply', (event, args, replySN) => {

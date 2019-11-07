@@ -35,7 +35,7 @@ import { bindRushAction } from '../rush/rushHealthz';
 import loadingActions from '../loading/action';
 import type { IWorkStep } from '../step/interface/IWorkStep';
 import type { IOrder } from './interface/IOrder';
-
+import notifierActions from '../Notifier/action';
 import { bindNewDeviceListener } from '../deviceManager/handlerWSData';
 import ClsScanner from '../device/scanner/ClsScanner';
 
@@ -89,13 +89,13 @@ function onNewScanner({ scanner }) {
 
 // TODO: 开工、报工接口
 function* reportFinish({
-  code,
-  trackCode,
-  productCode,
-  workCenterCode,
-  dateComplete,
-  operation
-}) {
+                         code,
+                         trackCode,
+                         productCode,
+                         workCenterCode,
+                         dateComplete,
+                         operation
+                       }) {
   try {
     yield call(
       orderReportFinishApi,
@@ -124,9 +124,9 @@ function* watchOrderTrigger() {
 }
 
 function* tryWorkOnOrder({
-  order,
-  code
-}: {
+                           order,
+                           code
+                         }: {
   order: IOrder,
   code: string | number
 }) {
@@ -220,14 +220,15 @@ function* getOrderList() {
 }
 
 function* tryViewOrder({
-  order: orderRec,
-  code
-}: {
+                         order: orderRec,
+                         code
+                       }: {
   order: IOrder,
   code: string | number
 }) {
   try {
-    yield put(push('/app/working'));
+    yield put(loadingActions.start());
+
 
     const orderList = yield select(s => s.order.list);
     let order = orderRec;
@@ -245,13 +246,17 @@ function* tryViewOrder({
 
     // TODO: check no-trigger conditions
     if (!order) {
+      yield put(loadingActions.stop());
+      yield put(notifierActions.enqueueSnackbar('Warn', `工单不存在: ${code}`));
       return;
     }
+    yield put(push('/app/working'));
 
     yield call(getOrderDetail, { order });
 
     yield put(orderActions.view(order));
   } catch (e) {
+    yield put(loadingActions.stop());
     CommonLog.lError(e, { at: 'tryViewOrder', orderRec, code });
   }
 }
@@ -289,11 +294,11 @@ function* viewOrder({ order }: { order: IOrder }) {
             color: 'warning'
           },
           !WIPOrder &&
-            doable(order) && {
-              label: 'Order.Start',
-              color: 'info',
-              action: orderActions.tryWorkOn(order)
-            }
+          doable(order) && {
+            label: 'Order.Start',
+            color: 'info',
+            action: orderActions.tryWorkOn(order)
+          }
         ],
         title: i18n.t('Order.Overview'),
         content: (

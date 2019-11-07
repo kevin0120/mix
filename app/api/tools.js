@@ -15,6 +15,7 @@ export function psetApi(toolSN: string = '', stepID: number, userIDs: Array<numb
                         total: number, workorderID: number): Promise<any> {
   return rushSendApi('WS_TOOL_PSET', {
     tool_sn: toolSN,
+    // TODO add controller sn
     step_id: stepID,
     user_id: userIDs[0],
     total,

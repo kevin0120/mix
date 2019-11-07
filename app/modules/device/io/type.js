@@ -14,7 +14,7 @@ export type tIOContact = {
 
 export type tIOWSDataContact = {
   +sn: string,
-  +type: tIODirection,
+  +type: tIODirection,// TODO
   +contact: string // 位串
 };
 
@@ -50,3 +50,6 @@ export type tIOChange = {
   triggerMode: tIOTriggerMode
 };
 
+type tIOConfig = {
+  input_num: number, output_num: number
+};
