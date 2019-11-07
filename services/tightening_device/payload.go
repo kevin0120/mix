@@ -280,22 +280,22 @@ type JobStep struct {
 	Socket    int    `json:"socket"`
 }
 
-type TighteningControllerStatus struct {
-	ControllerSN string `json:"controller_sn"`
-	Status       string `json:"status"`
-}
+//type TighteningControllerStatus struct {
+//	ControllerSN string `json:"controller_sn"`
+//	Status       string `json:"status"`
+//}
+//
+//type TighteningToolStatus struct {
+//	ToolSN string `json:"tool_sn"`
+//	Status string `json:"status"`
+//}
 
-type TighteningToolStatus struct {
-	ToolSN string `json:"tool_sn"`
-	Status string `json:"status"`
-}
-
-type TighteningControllerInput struct {
-	ControllerSN string `json:"controller_sn"`
-	Inputs       string `json:"inputs"`
-}
-
-type TighteningBarcode struct {
-	ControllerSN string `json:"controller_sn"`
-	Barcode      string `json:"barcode"`
-}
+//type TighteningControllerInput struct {
+//	ControllerSN string `json:"controller_sn"`
+//	Inputs       string `json:"inputs"`
+//}
+//
+//type TighteningBarcode struct {
+//	ControllerSN string `json:"controller_sn"`
+//	Barcode      string `json:"barcode"`
+//}

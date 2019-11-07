@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/kataras/iris/core/errors"
 	"github.com/kataras/iris/websocket"
+	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
@@ -31,6 +32,8 @@ type Service struct {
 
 	WS             *wsnotify.Service
 	StorageService *storage.Service
+
+	DeviceService *device.Service
 
 	wsnotify.WSNotify
 	utils.DispatchHandler
@@ -126,11 +129,6 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 	err := json.Unmarshal(data, &msg)
 	if err != nil {
 		s.diag.Error(fmt.Sprintf("OnWSMsg Fail With Message: %# 20X", data), err)
-		return
-	}
-
-	if msg.Data == nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, "Msg Data Should Not Be nil"))
 		return
 	}
 
@@ -271,11 +269,13 @@ func (s *Service) startupControllers() {
 	s.mtxDevices.Lock()
 	defer s.mtxDevices.Unlock()
 
-	for _, c := range s.runningControllers {
+	for sn, c := range s.runningControllers {
 		err := c.Start()
 		if err != nil {
 			s.diag.Error("Startup Controller Failed", err)
 		}
+
+		s.DeviceService.AddDevice(sn, c)
 	}
 }
 

@@ -101,6 +101,16 @@ func (s *Service) fetchAllDevices() []DeviceStatus {
 			Config:   v.Config(),
 			Data:     v.Data(),
 		})
+
+		for cSN, c := range v.Children() {
+			devices = append(devices, DeviceStatus{
+				SN:     cSN,
+				Type:   c.DeviceType(),
+				Status: c.Status(),
+				Config: c.Config(),
+				Data:   c.Data(),
+			})
+		}
 	}
 
 	return devices

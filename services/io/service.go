@@ -106,10 +106,13 @@ func (s *Service) OnStatus(sn string, status string) {
 	s.diag.Debug(fmt.Sprintf("sn:%s status:%s", sn, status))
 
 	io, _ := json.Marshal(wsnotify.WSMsg{
-		Type: WS_IO_STATUS,
-		Data: IoStatus{
-			SN:     sn,
-			Status: status,
+		Type: device.WS_DEVICE_STATUS,
+		Data: []device.DeviceStatus{
+			{
+				SN:     sn,
+				Type:   device.DEVICE_TYPE_IO,
+				Status: status,
+			},
 		},
 	})
 
@@ -267,14 +270,15 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 			return
 		}
 
-		//s.WS.WSSendReply(&reply)
-
 		io, _ := json.Marshal(wsnotify.WSMsg{
 			Type: WS_IO_STATUS,
 			SN:   msg.SN,
-			Data: IoStatus{
-				SN:     ioStatus.SN,
-				Status: m.Status(),
+			Data: []device.DeviceStatus{
+				{
+					SN:     ioStatus.SN,
+					Type:   device.DEVICE_TYPE_IO,
+					Status: m.Status(),
+				},
 			},
 		})
 
