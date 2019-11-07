@@ -175,7 +175,8 @@ func (s *Service) OnRecv(id string, str string) {
 	barcode, _ := json.Marshal(wsnotify.WSMsg{
 		Type: WS_SCANNER_READ,
 		Data: ScannerRead{
-			ID:      id,
+			Src:     device.DEVICE_TYPE_SCANNER,
+			SN:      id,
 			Barcode: str,
 		},
 	})
