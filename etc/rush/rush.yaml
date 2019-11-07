@@ -116,8 +116,8 @@ openprotocol:
   default_mode: pset
 
 scanner:
-  enable: false
-  entity_label: COM4
+  enable: true
+  entity_label: 3118:2305
 io:
   enable: true
   flash_inteval: 1s

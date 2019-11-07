@@ -59,3 +59,20 @@ type WorkorderListPar struct {
 	Page_size int    `json:"page_size"`
 	Page_no   int    `json:"page_no"`
 }
+
+type WorkorderPayload struct {
+	Product      interface{}   `json:"product"`
+	Worksheet    interface{}   `json:"worksheet"`
+	Environments []interface{} `json:"environments"`
+	Components   []interface{} `json:"components"`
+	Operation    interface{}   `json:"operation"`
+}
+
+type StepTextPayload struct {
+	Text string `json:"text"`
+}
+
+type StepTighteningPayload struct {
+	TighteningTotal int64         `json:"tightening_total"`
+	TighteningPoint []interface{} `json:"tightening_points"`
+}

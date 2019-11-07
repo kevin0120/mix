@@ -340,7 +340,7 @@ func (s *Server) appendHMIService() error {
 	srv.OpenProtocol = s.OpenprotocolService
 	srv.TighteningService = s.TighteningDeviceService
 	srv.WS = s.WSNotifyService
-
+	srv.Aiis = s.AiisService
 	s.AppendService("hmi", srv)
 
 	return nil
