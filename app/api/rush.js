@@ -21,7 +21,7 @@ const defaultTimeout = 10000; // 默认timeout 10s
 
 if (!isNil(ipcRenderer)) {
   ipcRenderer.on('rush-reply', (event, args, replySN) => {
-    CommonLog.Info('rush-reply', args);
+    // CommonLog.Info('rush-reply', args);
     if (messageSNs[replySN]) {
       messageSNs[replySN](args);
       delete messageSNs[replySN];
@@ -55,6 +55,11 @@ export function rushSendApi(msgType: string, data: any, timeout: number = defaul
         type: msgType,
         data
       }, timeout, sn
+    });
+    CommonLog.Info(`rush send (${msgType})`, {
+      type:msgType,
+      sn,
+      data: JSON.stringify(data)
     });
   }).then(resp => resp);
 }

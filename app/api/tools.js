@@ -10,13 +10,13 @@ export function toolEnableApi(toolSN: string, enable: boolean): Promise<any> {
   });
 }
 
-export function psetApi(toolSN: string = '', stepID: number, userID: number,
+export function psetApi(toolSN: string = '', stepID: number, userIDs: Array<number>,
                         pset: string, sequence: number, count: number,
-                        total: number, workorderID: string): Promise<any> {
+                        total: number, workorderID: number): Promise<any> {
   return rushSendApi('WS_TOOL_PSET', {
     tool_sn: toolSN,
     step_id: stepID,
-    user_id: userID,
+    user_id: userIDs[0],
     total,
     pset,
     sequence,

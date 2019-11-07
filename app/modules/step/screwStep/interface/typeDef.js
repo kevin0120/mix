@@ -8,22 +8,23 @@ export type tPointStatus = $Values<typeof POINT_STATUS>;
 export type tResultStatus = $Values<typeof RESULT_STATUS>;
 
 export type tPoint = {
-  id: number,
-  tightening_tool: string,
-  pset: string,
-  max_redo_times: number, // max_redo_times
+  // id: number,
+  is_key: boolean, // 定义了此点是否为关键点
+  pset?: string,
+  sequence: number,
   x: number,
   y: number,
-
-  sequence: number,
-  group_sequence: number,
   key_num: number, // key_num,定义了关键点个数
-  is_key: boolean, // 定义了此点是否为关键点
-  ti: number,
-  mi: number,
-  wi: number,
-  status: tPointStatus, // result
-  batch: string
+  tightening_tool: string,
+  max_redo_times: number, // max_redo_times
+  group_sequence: number,
+  nut_no: string // 螺栓编号
+
+  // ti: number,
+  // mi: number,
+  // wi: number,
+  // status: tPointStatus, // result
+  // batch: string
 };
 
 export type tResult = {

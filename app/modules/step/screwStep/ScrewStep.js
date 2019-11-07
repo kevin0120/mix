@@ -40,13 +40,10 @@ export function* doPoint(
     }
     // eslint-disable-next-line no-restricted-syntax
     for (const p of points) {
-      const success = yield call(
+      yield call(
         [this, controllerModeTasks[data.controllerMode]],
-        p
+        p.point
       );
-      if (!success) {
-        throw new Error(`${data.controllerMode} failed`);
-      }
     }
   } catch (e) {
     CommonLog.lError(e, { at: 'doPoint', points });
@@ -145,6 +142,28 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 this._id
               }, Payload: ${JSON.stringify(payload)}`
             );
+          }
+
+          const points = payload.tightening_points;
+
+          if(!isNil(payload.jobID)){
+            yield call(
+              this.updateData,
+              (data: tScrewStepData): tScrewStepData => ({
+                ...data,
+                controllerMode: controllerModes.job
+              })
+            );
+          }else if(points.every(p=>!isNil(p.pset))){
+            yield call(
+              this.updateData,
+              (data: tScrewStepData): tScrewStepData => ({
+                ...data,
+                controllerMode: controllerModes.pset
+              })
+            );
+          }else{
+            throw new Error('缺少Job号或Pset号');
           }
 
           this._pointsManager = new ClsOrderOperationPoints(
