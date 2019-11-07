@@ -311,30 +311,6 @@ func (s *Service) resetResult(id int64) error {
 }
 
 func (s *Service) OnNewHmiClient(conn websocket.Connection) {
-	controllers := s.TighteningService.GetControllers()
-	for sn, c := range controllers {
-		msg, _ := json.Marshal(wsnotify.WSStatus{
-			SN:     sn,
-			Status: c.Status(),
-		})
-		conn.Emit(wsnotify.WS_EVENT_CONTROLLER, string(msg))
-
-		for toolSN, tool := range c.Children() {
-			msg, _ := json.Marshal(wsnotify.WSToolStatus{
-				ToolSN: toolSN,
-				Status: tool.Status(),
-			})
-
-			conn.Emit(wsnotify.WS_EVENT_TOOL, string(msg))
-		}
-	}
-
-	odooStatus := wsnotify.WSOdooStatus{
-		Status: s.ODOO.Status(),
-	}
-
-	str, _ := json.Marshal(odooStatus)
-	conn.Emit(wsnotify.WS_EVENT_ODOO, string(str))
 
 	//主动推送工位号
 	msg := WSWorkcenter{
@@ -554,7 +530,7 @@ func (s *Service) OnTighteningControllerStatus(data interface{}) {
 		return
 	}
 
-	controllerStatus := data.(*device.DeviceStatus)
+	controllerStatus := data.(*[]device.DeviceStatus)
 
 	msg := wsnotify.WSMsg{
 		Type: device.WS_DEVICE_STATUS,
@@ -571,7 +547,7 @@ func (s *Service) OnTighteningToolStatus(data interface{}) {
 		return
 	}
 
-	toolStatus := data.(*device.DeviceStatus)
+	toolStatus := data.(*[]device.DeviceStatus)
 
 	msg := wsnotify.WSMsg{
 		Type: device.WS_DEVICE_STATUS,

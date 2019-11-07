@@ -280,6 +280,7 @@ func (s *Server) appendTighteningDeviceService() error {
 
 	srv.WS = s.WSNotifyService
 	srv.StorageService = s.StorageServie
+	srv.DeviceService = s.DeviceService
 
 	s.TighteningDeviceService = srv
 	s.AppendService("tightening_device", srv)

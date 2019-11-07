@@ -161,10 +161,13 @@ func (s *Service) OnStatus(id string, status string) {
 		s.removeScanner(id)
 	}
 	barcode, _ := json.Marshal(wsnotify.WSMsg{
-		Type: WS_SCANNER_STATUS,
-		Data: ScannerStatus{
-			ID:     id,
-			Status: status,
+		Type: device.WS_DEVICE_STATUS,
+		Data: []device.DeviceStatus{
+			{
+				SN:     id,
+				Type:   device.DEVICE_TYPE_SCANNER,
+				Status: status,
+			},
 		},
 	})
 	s.WS.WSSendScanner(string(barcode))
