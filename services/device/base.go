@@ -20,6 +20,7 @@ type BaseDevice struct {
 	status      atomic.Value
 	mtxChildren sync.Mutex
 	children    map[string]IDevice
+	Cfg         interface{}
 }
 
 func (s *BaseDevice) UpdateStatus(status string) {
@@ -46,7 +47,7 @@ func (s *BaseDevice) Children() map[string]IDevice {
 
 // 设备配置
 func (s *BaseDevice) Config() interface{} {
-	return nil
+	return s.Cfg
 }
 
 // 设备运行数据

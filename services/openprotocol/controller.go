@@ -101,6 +101,8 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 		Srv:            service,
 	}
 
+	c.BaseDevice.Cfg = VendorModels[c.cfg.Model][IO_CONFIG]
+
 	c.controllerSubscribes = []ControllerSubscribe{
 		//c.PSetSubscribe,
 		c.ResultSubcribe,
@@ -674,6 +676,7 @@ func (c *TighteningController) handleStatus(status string) {
 				Type:   tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER,
 				SN:     c.cfg.SN,
 				Status: status,
+				Config: c.Config(),
 			},
 		})
 	}

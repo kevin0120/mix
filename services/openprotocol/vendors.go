@@ -3,11 +3,16 @@ package openprotocol
 import (
 	"fmt"
 	"github.com/kataras/iris/core/errors"
+	"github.com/masami10/rush/services/io"
 	"github.com/masami10/rush/services/tightening_device"
 )
 
+const (
+	IO_CONFIG = "IO_CONFIG"
+)
+
 // model[mid][rev]
-var VendorModels = map[string]map[string]string{
+var VendorModels = map[string]map[string]interface{}{
 	tightening_device.ModelDesoutterCvi3: {
 		// *MID							  *每个MID对应的REV版本
 		MID_0001_START:                   "004",
@@ -36,6 +41,11 @@ var VendorModels = map[string]map[string]string{
 		MID_0040_TOOL_INFO_REQUEST:       "002",
 
 		MID_7408_LAST_CURVE_SUBSCRIBE: "001",
+
+		IO_CONFIG: io.IoConfig{
+			InputNum:  8,
+			OutputNum: 8,
+		},
 	},
 
 	tightening_device.ModelDesoutterDeltaWrench: {
@@ -54,10 +64,15 @@ var VendorModels = map[string]map[string]string{
 		MID_0040_TOOL_INFO_REQUEST:     "005",
 
 		MID_7408_LAST_CURVE_SUBSCRIBE: "001",
+
+		IO_CONFIG: io.IoConfig{
+			InputNum:  0,
+			OutputNum: 0,
+		},
 	},
 }
 
-func GetModel(model string) (map[string]string, error) {
+func GetModel(model string) (map[string]interface{}, error) {
 	m, exist := VendorModels[model]
 	if !exist {
 		return nil, errors.New(fmt.Sprintf("Model %s Not Supported", model))
@@ -77,5 +92,5 @@ func GetVendorMid(model string, mid string) (string, error) {
 		return "", errors.New(fmt.Sprintf("MID %s Not Supported", mid))
 	}
 
-	return rev, nil
+	return rev.(string), nil
 }
