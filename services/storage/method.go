@@ -16,14 +16,35 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 	defer session.Close()
 
 	var work Workorders
+	var workPayload WorkorderPayload
 	err := json.Unmarshal(in, &work)
+	if err != nil {
+		return "", err
+	}
+	err = json.Unmarshal(in, &workPayload)
+	if err != nil {
+		return "", err
+	}
+
+	wp, err := json.Marshal(workPayload)
+	//dt := time.Now()
+	//if data.controllerResult.Dat != "" {
+	//	loc, _ := time.LoadLocation("Local")
+	//	dt, _ = time.ParseInLocation("2006-01-02 15:04:05", data.controllerResult.Dat, loc)
+	//}
+	//
+	//dbResult.UpdateTime = dt.UTC()
+	//
 
 	workorder1 := Workorders{
-		Workorder:    string(in),
-		Code:         work.Code,
-		Track_code:   work.Track_code,
-		Product_code: work.Product_code,
-		Status:       "ready",
+		Workorder:             string(wp),
+		Code:                  work.Code,
+		Track_code:            work.Track_code,
+		Product_code:          work.Product_code,
+		Workcenter:            work.Workcenter,
+		Status:                "todo",
+		Date_planned_start:    work.Date_planned_start,
+		Date_planned_complete: work.Date_planned_start,
 	}
 	//
 	s.DeleteWorkAndStep(work.Code)
@@ -45,23 +66,39 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 
 	err = json.Unmarshal(in, &workorderMap)
 
-	cc, _ := json.Marshal(workorderMap["steps"])
+	steps, _ := json.Marshal(workorderMap["steps"])
 
-	err = json.Unmarshal(cc, &step)
+	err = json.Unmarshal(steps, &step)
 
 	for i := 0; i < len(step); i++ {
-		a, _ := json.Marshal(step[i])
+		stepString, _ := json.Marshal(step[i])
 		var msg Steps
-		err = json.Unmarshal(a, &msg)
+		var stepText StepTextPayload
+		var stepTightening StepTighteningPayload
+		var sp []byte
+		err = json.Unmarshal(stepString, &msg)
+
+		if msg.Testtype == "tightening" {
+			err = json.Unmarshal(stepString, &stepTightening)
+			sp, _ = json.Marshal(stepTightening)
+		} else {
+			err = json.Unmarshal(stepString, &stepText)
+			sp, _ = json.Marshal(stepText)
+		}
 
 		step := Steps{
-			WorkorderID: workorder1.Id,
-			Step:        string(a),
-			Image:       msg.Image,
-
-			Test_type: msg.Test_type,
-			Status:    "ready",
-			Code:      msg.Code,
+			WorkorderID:    workorder1.Id,
+			Step:           string(sp),
+			ImageRef:       msg.ImageRef,
+			Testtype:       msg.Testtype,
+			Status:         "ready",
+			Code:           msg.Code,
+			Sequence:       msg.Sequence,
+			FailureMessage: msg.FailureMessage,
+			Desc:           msg.Desc,
+			Skippable:      msg.Skippable,
+			Undoable:       msg.Undoable,
+			Data:           msg.Data,
 		}
 
 		_, err := s.eng.Insert(&step)
@@ -82,7 +119,7 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 
 }
 
-func (s *Service) WorkorderOut(order string, workorderID int64) ([]byte, error) {
+func (s *Service) WorkorderOut(order string, workorderID int64) (interface{}, error) {
 
 	var workorder Workorders
 	var ss *xorm.Session
@@ -92,8 +129,8 @@ func (s *Service) WorkorderOut(order string, workorderID int64) ([]byte, error) 
 		ss = s.eng.Alias("r").Where("r.code = ?", order)
 	}
 
-	_, e := ss.Get(&workorder)
-	if e != nil {
+	bool, e := ss.Get(&workorder)
+	if e != nil || !bool {
 		return nil, e
 	}
 
@@ -107,35 +144,31 @@ func (s *Service) WorkorderOut(order string, workorderID int64) ([]byte, error) 
 	var steps []map[string]interface{}
 	for i := 0; i < len(step); i++ {
 		stepMap := stringToMap(step[i].Step)
-		testType, _ := json.Marshal(stepMap["test_type"])
+		stepOut := strucToMap(step[i])
+		stepOut["payload"] = stepMap
 
-		if !(string(testType) == `"tightening"`) {
-			steps = append(steps, stepMap)
+		if step[i].Testtype != "tightening" {
+			delete(stepOut, "tightening_image_by_step_code")
+			steps = append(steps, stepOut)
 			continue
 		}
-
-		map1 := strucToMap(step[i])
-		for k, v := range map1 {
-			stepMap[k] = v
-		}
 		image1, _ := s.findStepPicture(step[i].ImageRef)
-		stepMap["image"] = image1
-		steps = append(steps, stepMap)
+		stepOut["image"] = image1
+		delete(stepOut, "tightening_image_by_step_code")
+		steps = append(steps, stepOut)
 	}
 
-	workOrderOut := stringToMap(workorder.Workorder)
-	map2 := strucToMap(workorder)
+	map2 := stringToMap(workorder.Workorder)
+	workOrderOut := strucToMap(workorder)
 	workOrderOut["steps"] = steps
-	for k, v := range map2 {
-		workOrderOut[k] = v
-	}
+	workOrderOut["payload"] = map2
 
 	image2, _ := s.findOrderPicture(workorder.Product_code)
 	workOrderOut["product_type_image"] = image2
+	//delete(workOrderOut,"product_code")
+	//rr, _ := json.Marshal(workOrderOut)
 
-	rr, _ := json.Marshal(workOrderOut)
-
-	return rr, nil
+	return workOrderOut, nil
 }
 
 func strucToMap(in interface{}) (m map[string]interface{}) {
@@ -155,9 +188,9 @@ func (s *Service) findStepPicture(ref string) (string, error) {
 	ss := s.eng.Alias("r").Where("r.tightening_step_ref = ?", ref).Limit(1)
 	_, e := ss.Get(&ro)
 	if e != nil {
-		return ro.Img, e
+		return "", e
 	}
-	return "", nil
+	return ro.Img, nil
 }
 
 func (s *Service) findOrderPicture(ref string) (string, error) {
@@ -165,7 +198,7 @@ func (s *Service) findOrderPicture(ref string) (string, error) {
 	ss := s.eng.Alias("r").Where("r.product_type = ?", ref).Limit(1)
 	_, e := ss.Get(&ro)
 	if e != nil {
-		return ro.ProductTypeImage, e
+		return "", e
 	}
-	return "", nil
+	return ro.ProductTypeImage, nil
 }

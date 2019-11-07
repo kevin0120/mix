@@ -207,6 +207,9 @@ func (s *Service) Close() error {
 	return nil
 }
 
+func (s *Service) HandleWorkorder(data []byte) {
+	s.workordersChannel <- data
+}
 func (s *Service) GetWorkorder(masterpcSn string, hmiSn string, workcenterCode, code string) ([]byte, error) {
 
 	var err error
@@ -461,9 +464,10 @@ func (s *Service) taskSaveWorkorders() {
 				break
 			}
 			orderOut, _ := s.DB.WorkorderOut(code, 0)
-
+			out, _ := json.Marshal(orderOut)
+			s.diag.Debug(fmt.Sprintf("收到工单處理後: %s", string(out)))
 			var orderHmi []interface{}
-			orderHmi = append(orderHmi, string(orderOut))
+			orderHmi = append(orderHmi, orderOut)
 			//fmt.Println(string(orderOut))
 			//fmt.Println(orderHmi)
 			body, _ := json.Marshal(wsnotify.GenerateMessage(0, WS_ORDER_NEW_ORDER, orderHmi))

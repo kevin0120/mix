@@ -37,7 +37,7 @@ func (m *Methods) postWorkorders(ctx iris.Context) {
 	//	return
 	//}
 
-	m.service.workordersChannel <- orderData
+	m.service.HandleWorkorder(orderData)
 	ctx.StatusCode(iris.StatusCreated)
 	return
 }

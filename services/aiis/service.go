@@ -50,9 +50,9 @@ type Service struct {
 	rush_port   string
 	DB          *storage.Service
 	ws          utils.RecConn
-	WS           *wsnotify.Service
-	updateQueue  map[int64]time.Time
-	mtx          sync.Mutex
+	WS          *wsnotify.Service
+	updateQueue map[int64]time.Time
+	mtx         sync.Mutex
 
 	OdooStatusDispatcher *utils.Dispatcher
 	AiisStatusDispatcher *utils.Dispatcher
@@ -281,10 +281,11 @@ func (s *Service) PutResult(result_id int64, body interface{}) error {
 }
 
 func (s *Service) PutMesOpenRequest(code string, req interface{}) (interface{}, error) {
+	urlString := s.Config().MesOpenWorkUrl
+	url := fmt.Sprintf(urlString, code)
 	resp, err := s.httpClient.R().
 		SetBody(req).
-		// or SetError(Error{}).
-		Put(fmt.Sprintf(s.Config().MesOpenWorkUrl, code))
+		Put(url)
 
 	if err != nil {
 		return nil, err
@@ -294,10 +295,11 @@ func (s *Service) PutMesOpenRequest(code string, req interface{}) (interface{}, 
 }
 
 func (s *Service) PutMesFinishRequest(code string, req interface{}) (interface{}, error) {
+	url := fmt.Sprintf(s.Config().MesFinishWorkUrl, code)
 	resp, err := s.httpClient.R().
 		SetBody(req).
 		// or SetError(Error{}).
-		Put(fmt.Sprintf(s.Config().MesFinishWorkUrl, code))
+		Put(url)
 
 	if err != nil {
 		return nil, err

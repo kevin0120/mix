@@ -359,9 +359,7 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 			return
 		}
-
 		body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, workorders))
-
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_ORDER, string(body))
 
 	case WS_ORDER_DETAIL:
@@ -378,7 +376,10 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
 			return
 		}
-
+		if w == nil {
+			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -3, fmt.Sprintf("找不到對應Id=%d的工單", orderReq.ID)))
+			return
+		}
 		body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, w))
 		//fmt.Println(string(body))
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_ORDER, string(body))
@@ -396,14 +397,16 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 		//todo 判定本地无工单
 		if w == nil && err == nil {
 			fmt.Println("如果RUSH收到HMI请求后找不到新工单,可通过调用ODOO api获取对应工单并推送HMI")
-			w, err = s.ODOO.GetWorkorder("", "", orderReq.Workcenter, orderReq.Code)
-		}
+			orderData, err := s.ODOO.GetWorkorder("", "", orderReq.Workcenter, orderReq.Code)
 
+			if err == nil {
+				s.ODOO.HandleWorkorder(orderData)
+			}
+		}
 		if err != nil {
 			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
 			return
 		}
-
 		body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, w))
 		//fmt.Println(string(body))
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_ORDER, string(body))
@@ -431,7 +434,6 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 
 	case WS_ORDER_STEP_UPDATE:
 		// 更新工步状态
-
 		orderReq := WSOrderReq{}
 		err := json.Unmarshal(sData, &orderReq)
 		if err != nil {
@@ -453,7 +455,6 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 
 	case WS_ORDER_STEP_DATA_UPDATE:
 		// 更新工步数据
-
 		orderReq := WSOrderReqData{}
 		err := json.Unmarshal(sData, &orderReq)
 		if err != nil {
@@ -513,7 +514,6 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 		//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
 		body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, resp))
 		s.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
-
 	}
 }
 
