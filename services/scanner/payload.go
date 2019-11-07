@@ -6,7 +6,8 @@ const (
 )
 
 type ScannerRead struct {
-	ID      string `json:"id"`
+	Src     string `json:"src"`
+	SN      string `json:"sn"`
 	Barcode string `json:"barcode"`
 }
 

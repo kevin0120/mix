@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/masami10/rush/services/device"
+	"github.com/masami10/rush/services/scanner"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils/ascii"
@@ -309,18 +310,11 @@ func handleMID_0052_VIN(c *TighteningController, pkg *handlerPkg) error {
 		bc += ids[v]
 	}
 
-	c.GetDispatch(tightening_device.DISPATCH_CONTROLLER_ID).Dispatch(&tightening_device.TighteningBarcode{
-		ControllerSN: c.cfg.SN,
-		Barcode:      bc,
+	c.GetDispatch(tightening_device.DISPATCH_CONTROLLER_ID).Dispatch(&scanner.ScannerRead{
+		Src:     tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER,
+		SN:      c.cfg.SN,
+		Barcode: bc,
 	})
-
-	//barcode := wsnotify.WSScanner{
-	//	Barcode: bc,
-	//}
-	//
-	//str, _ := json.Marshal(barcode)
-	//
-	//c.Srv.WS.WSSend(wsnotify.WS_EVENT_SCANNER, string(str))
 
 	return nil
 }
