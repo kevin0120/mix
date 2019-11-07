@@ -93,8 +93,6 @@ const (
 	ROTATION_CCW = "CCW"
 )
 
-const ()
-
 const (
 	MID_0038_REV_1 = "001"
 	MID_0038_REV_2 = "002"
