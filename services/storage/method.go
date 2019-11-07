@@ -25,6 +25,8 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 		Product_code: work.Product_code,
 		Status:       "ready",
 	}
+	//
+	s.DeleteWorkAndStep(work.Code)
 
 	//var hh map[string]interface{}
 	//
@@ -38,12 +40,12 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 		return "", errors.Wrapf(err, "store data fail")
 	}
 
-	var hh map[string]interface{}
+	var workorderMap map[string]interface{}
 	var step []map[string]interface{}
 
-	err = json.Unmarshal(in, &hh)
+	err = json.Unmarshal(in, &workorderMap)
 
-	cc, _ := json.Marshal(hh["steps"])
+	cc, _ := json.Marshal(workorderMap["steps"])
 
 	err = json.Unmarshal(cc, &step)
 
@@ -80,7 +82,7 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 
 }
 
-func (s *Service) WorkorderOut(order string, workorderID int64) (error, []byte) {
+func (s *Service) WorkorderOut(order string, workorderID int64) ([]byte, error) {
 
 	var workorder Workorders
 	var ss *xorm.Session
@@ -92,79 +94,78 @@ func (s *Service) WorkorderOut(order string, workorderID int64) (error, []byte) 
 
 	_, e := ss.Get(&workorder)
 	if e != nil {
-		return e, nil
+		return nil, e
 	}
 
 	var step []Steps
 	ss = s.eng.Alias("r").Where("r.x_workorder_id = ?", workorder.Id)
 	e = ss.Find(&step)
 	if e != nil {
-		return e, nil
+		return nil, e
 	}
 
 	var steps []map[string]interface{}
 	for i := 0; i < len(step); i++ {
-		hh := stringtomap(step[i].Step)
-		jj, _ := json.Marshal(hh["test_type"])
+		stepMap := stringToMap(step[i].Step)
+		testType, _ := json.Marshal(stepMap["test_type"])
 
-		if !(string(jj) == `"tightening"`) {
-			steps = append(steps, hh)
+		if !(string(testType) == `"tightening"`) {
+			steps = append(steps, stepMap)
 			continue
 		}
 
-		mm := structomap(step[i])
-		for k, v := range mm {
-			hh[k] = v
+		map1 := strucToMap(step[i])
+		for k, v := range map1 {
+			stepMap[k] = v
 		}
-		_, image1 := s.findsteppicture(step[i].ImageRef)
-		hh["image"] = image1
-		steps = append(steps, hh)
+		image1, _ := s.findStepPicture(step[i].ImageRef)
+		stepMap["image"] = image1
+		steps = append(steps, stepMap)
 	}
 
-	ww := stringtomap(workorder.Workorder)
-	mm := structomap(workorder)
-	ww["steps"] = steps
-	for k, v := range mm {
-		ww[k] = v
+	workOrderOut := stringToMap(workorder.Workorder)
+	map2 := strucToMap(workorder)
+	workOrderOut["steps"] = steps
+	for k, v := range map2 {
+		workOrderOut[k] = v
 	}
 
-	_, image2 := s.findorderpicture(workorder.Product_code)
-	ww["product_type_image"] = image2
+	image2, _ := s.findOrderPicture(workorder.Product_code)
+	workOrderOut["product_type_image"] = image2
 
-	rr, _ := json.Marshal(ww)
+	rr, _ := json.Marshal(workOrderOut)
 
-	return nil, rr
+	return rr, nil
 }
 
-func structomap(in interface{}) (m map[string]interface{}) {
+func strucToMap(in interface{}) (m map[string]interface{}) {
 	j, _ := json.Marshal(in)
 	json.Unmarshal(j, &m)
 	return
 }
 
-func stringtomap(in string) (m map[string]interface{}) {
+func stringToMap(in string) (m map[string]interface{}) {
 	json.Unmarshal([]byte(in), &m)
 	return
 }
 
-func (s *Service) findsteppicture(ref string) (error, string) {
+func (s *Service) findStepPicture(ref string) (string, error) {
 
 	var ro RoutingOperations
 	ss := s.eng.Alias("r").Where("r.tightening_step_ref = ?", ref).Limit(1)
 	_, e := ss.Get(&ro)
 	if e != nil {
-		return e, ro.Img
+		return ro.Img, e
 	}
-	return nil, ""
+	return "", nil
 }
 
-func (s *Service) findorderpicture(ref string) (error, string) {
-
+func (s *Service) findOrderPicture(ref string) (string, error) {
 	var ro RoutingOperations
 	ss := s.eng.Alias("r").Where("r.product_type = ?", ref).Limit(1)
 	_, e := ss.Get(&ro)
 	if e != nil {
-		return e, ro.ProductTypeImage
+		return ro.ProductTypeImage, e
 	}
-	return nil, ""
+	return "", nil
 }

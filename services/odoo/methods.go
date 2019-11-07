@@ -22,8 +22,8 @@ type Methods struct {
 // 创建工单
 func (m *Methods) postWorkorders(ctx iris.Context) {
 
-	r, _ := ioutil.ReadAll(ctx.Request().Body)
-	fmt.Println(string(r))
+	orderData, _ := ioutil.ReadAll(ctx.Request().Body)
+	m.service.diag.Debug(fmt.Sprintf("收到下發的工单: %s", string(orderData)))
 	//return
 	//
 	//var workorders []ODOOWorkorder
@@ -37,22 +37,7 @@ func (m *Methods) postWorkorders(ctx iris.Context) {
 	//	return
 	//}
 
-	code, err := m.service.DB.WorkorderIn(r)
-
-	if err != nil {
-		return
-	}
-	_, rr := m.service.DB.WorkorderOut(code, 0)
-
-	var bd []interface{}
-	bd = append(bd, string(rr))
-	fmt.Println(string(rr))
-	fmt.Println(bd)
-	body, _ := json.Marshal(wsnotify.GenerateMessage(0, WS_ORDER_NEW_ORDER, bd))
-
-	m.service.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
-	m.service.diag.Debug(fmt.Sprintf("收到工单并推送HMI: %s", string(body)))
-	//m.service.workordersChannel <- &workorders
+	m.service.workordersChannel <- orderData
 	ctx.StatusCode(iris.StatusCreated)
 	return
 }

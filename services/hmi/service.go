@@ -376,7 +376,7 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 			return
 		}
 
-		err, w := s.DB.WorkorderOut("", orderReq.ID)
+		w, err := s.DB.WorkorderOut("", orderReq.ID)
 		if err != nil {
 			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
 			return
@@ -395,7 +395,7 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 			return
 		}
 
-		err, w := s.DB.WorkorderOut(orderReq.Code, 0)
+		w, err := s.DB.WorkorderOut(orderReq.Code, 0)
 		//todo 判定本地无工单
 		if w == nil && err == nil {
 			fmt.Println("如果RUSH收到HMI请求后找不到新工单,可通过调用ODOO api获取对应工单并推送HMI")

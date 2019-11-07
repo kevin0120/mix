@@ -455,7 +455,21 @@ func (s *Service) taskSaveWorkorders() {
 	for {
 		select {
 		case payload := <-s.workordersChannel:
-			s.handleSaveWorkorders(payload)
+			//s.handleSaveWorkorders(payload)
+			code, err := s.DB.WorkorderIn(payload.([]byte))
+			if err != nil {
+				break
+			}
+			orderOut, _ := s.DB.WorkorderOut(code, 0)
+
+			var orderHmi []interface{}
+			orderHmi = append(orderHmi, string(orderOut))
+			//fmt.Println(string(orderOut))
+			//fmt.Println(orderHmi)
+			body, _ := json.Marshal(wsnotify.GenerateMessage(0, WS_ORDER_NEW_ORDER, orderHmi))
+
+			s.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
+			s.diag.Debug(fmt.Sprintf("收到工单并推送HMI: %s", string(body)))
 
 		case <-s.closing:
 			s.diag.Info("taskSaveWorkorders closed")

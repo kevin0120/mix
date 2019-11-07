@@ -1045,6 +1045,27 @@ func (s *Service) WorkorderStep(workorderID int64) (*WorkorderStep, error) {
 	}, nil
 }
 
+func (s *Service) DeleteWorkAndStep(code string) error {
+	var workorder Workorders
+	var ss *xorm.Session
+	ss = s.eng.Alias("r").Where("r.code = ?", code)
+
+	bool, e := ss.Get(&workorder)
+	if e != nil {
+		return e
+	}
+	if !bool {
+		return nil
+	}
+	sql1 := "delete from `workorders` where id = ?"
+	sql2 := "delete from `steps` where id = ?"
+
+	_, err := s.eng.Exec(sql1, workorder.Id)
+
+	_, err = s.eng.Exec(sql2, workorder.Id)
+	return err
+}
+
 func (s *Service) UpdateStep(step *Steps) (*Steps, error) {
 
 	sql := "update `steps` set status = ? where id = ?"

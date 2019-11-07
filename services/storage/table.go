@@ -54,7 +54,7 @@ type Workorders struct {
 
 	Created            time.Time `xorm:"created" json:"-"`
 	Updated            time.Time `xorm:"updated" json:"-"`
-	Product_type_image string    `xorm:"text 'product_type_image'" json:"product_type_image"`
+	Product_type_image string    `json:"product_type_image"`
 }
 
 type Steps struct {
@@ -84,12 +84,13 @@ type Steps struct {
 	Test_type   string `xorm:"varchar(128) 'test_type'" json:"test_type"`
 	Code        string `xorm:"varchar(128) 'code'" json:"code"`
 
-	Status   string    `xorm:"varchar(32) 'status'" json:"status"`
-	Data     string    `xorm:"varchar(128) 'data'" json:"data"`
-	Image    string    `xorm:"varchar(128) 'image'" json:"image"`
-	ImageRef string    `xorm:"text 'tightening_image_by_step_code'" json:"tightening_image_by_step_code"`
-	Created  time.Time `xorm:"created" json:"-"`
-	Updated  time.Time `xorm:"updated" json:"-"`
+	Status   string `xorm:"varchar(32) 'status'" json:"status"`
+	Data     string `xorm:"varchar(128) 'data'" json:"data"`
+	Image    string ` json:"image"`
+	ImageRef string `xorm:"varchar(128) 'tightening_image_by_step_code'" json:"tightening_image_by_step_code"`
+
+	Created time.Time `xorm:"created" json:"-"`
+	Updated time.Time `xorm:"updated" json:"-"`
 }
 
 type Results struct {
@@ -165,11 +166,10 @@ type Guns struct {
 }
 
 type RoutingOperations struct {
-	OperationID int64  `xorm:"bigint 'operation_id'"`
-	Job         int    `xorm:"bigint 'job'"`
-	MaxOpTime   int    `xorm:"int 'max_op_time'"`
-	Name        string `xorm:"varchar(256) 'name'"
-`
+	OperationID         int64  `xorm:"bigint 'operation_id'"`
+	Job                 int    `xorm:"bigint 'job'"`
+	MaxOpTime           int    `xorm:"int 'max_op_time'"`
+	Name                string `xorm:"varchar(256) 'name'"`
 	Img                 string `xorm:"text 'img'"`
 	Tigntening_step_ref string `xorm:"varchar(256) 'tightening_step_ref'"`
 
