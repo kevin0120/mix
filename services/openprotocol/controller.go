@@ -142,8 +142,9 @@ func (c *TighteningController) UpdateToolStatus(status string) {
 		tool := v.(*TighteningTool)
 		tool.UpdateStatus(status)
 
-		c.GetDispatch(tightening_device.DISPATCH_TOOL_STATUS).Dispatch(&tightening_device.TighteningToolStatus{
-			ToolSN: sn,
+		c.GetDispatch(tightening_device.DISPATCH_TOOL_STATUS).Dispatch(&device.DeviceStatus{
+			Type:   tightening_device.TIGHTENING_DEVICE_TYPE_TOOL,
+			SN:     sn,
 			Status: status,
 		})
 	}
@@ -666,9 +667,10 @@ func (c *TighteningController) handleStatus(status string) {
 		}
 
 		// 分发控制器状态
-		c.GetDispatch(tightening_device.DISPATCH_CONTROLLER_STATUS).Dispatch(&tightening_device.TighteningControllerStatus{
-			ControllerSN: c.cfg.SN,
-			Status:       status,
+		c.GetDispatch(tightening_device.DISPATCH_CONTROLLER_STATUS).Dispatch(&device.DeviceStatus{
+			Type:   tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER,
+			SN:     c.cfg.SN,
+			Status: status,
 		})
 	}
 }

@@ -7,10 +7,12 @@ import (
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/controller"
+	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/io"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/openprotocol"
+	"github.com/masami10/rush/services/scanner"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
@@ -554,14 +556,14 @@ func (s *Service) OnTighteningControllerStatus(data interface{}) {
 		return
 	}
 
-	controllerStatus := data.(*tightening_device.TighteningControllerStatus)
+	controllerStatus := data.(*device.DeviceStatus)
 
 	msg := wsnotify.WSMsg{
-		Type: tightening_device.WS_TIGHTENING_CONTROLLER_STATUS,
+		Type: device.WS_DEVICE_STATUS,
 		Data: controllerStatus,
 	}
 	payload, _ := json.Marshal(msg)
-	s.WS.WSSend(wsnotify.WS_EVENT_CONTROLLER, string(payload))
+	s.WS.WSSend(wsnotify.WS_EVENT_DEVICE, string(payload))
 	s.diag.Debug(fmt.Sprintf("控制器状态推送HMI: %s", string(payload)))
 }
 
@@ -571,14 +573,14 @@ func (s *Service) OnTighteningToolStatus(data interface{}) {
 		return
 	}
 
-	toolStatus := data.(*tightening_device.TighteningToolStatus)
+	toolStatus := data.(*device.DeviceStatus)
 
 	msg := wsnotify.WSMsg{
-		Type: tightening_device.WS_TIGHTENING_TOOL_STATUS,
+		Type: device.WS_DEVICE_STATUS,
 		Data: toolStatus,
 	}
 	payload, _ := json.Marshal(msg)
-	s.WS.WSSend(wsnotify.WS_EVENT_TOOL, string(payload))
+	s.WS.WSSend(wsnotify.WS_EVENT_DEVICE, string(payload))
 	s.diag.Debug(fmt.Sprintf("工具状态推送HMI: %s", string(payload)))
 }
 
@@ -591,7 +593,7 @@ func (s *Service) OnTighteningControllerIO(data interface{}) {
 	ioStatus := data.(*io.IoContact)
 
 	msg := wsnotify.WSMsg{
-		Type: tightening_device.WS_TIGHTENING_CONTROLLER_IO,
+		Type: io.WS_IO_CONTACT,
 		Data: ioStatus,
 	}
 	payload, _ := json.Marshal(msg)
@@ -605,10 +607,10 @@ func (s *Service) OnTighteningControllereID(data interface{}) {
 		return
 	}
 
-	controllerBarcode := data.(*tightening_device.TighteningBarcode)
+	controllerBarcode := data.(*scanner.ScannerRead)
 
 	msg := wsnotify.WSMsg{
-		Type: tightening_device.WS_TIGHTENING_CONTROLLER_BARCODE,
+		Type: scanner.WS_SCANNER_READ,
 		Data: controllerBarcode,
 	}
 
