@@ -226,6 +226,9 @@ func (m *Methods) deleteAllRoutingOpertions(ctx iris.Context) {
 
 func (m *Methods) putSyncRoutingOpertions(ctx iris.Context) {
 
+	//orderData, _ := ioutil.ReadAll(ctx.Request().Body)
+	//m.service.diag.Debug(fmt.Sprintf("收到下發的工单: %s", string(orderData)))
+
 	ro := RoutingOperation{}
 	e := ctx.ReadJSON(&ro)
 	if e != nil {
@@ -248,6 +251,8 @@ func (m *Methods) putSyncRoutingOpertions(ctx iris.Context) {
 	db_ro.MaxOpTime = ro.MaxOpTime
 	db_ro.Job = ro.Job
 	db_ro.WorkcenterID = ro.WorkcenterID
+	db_ro.Tigntening_step_ref = ro.Tigntening_step_ref
+	db_ro.ProductTypeImage = ro.ProductTypeImage
 
 	if err != nil {
 		// 新增

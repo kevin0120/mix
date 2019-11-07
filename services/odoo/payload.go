@@ -138,17 +138,19 @@ type ODOOGun struct {
 }
 
 type RoutingOperation struct {
-	OperationID    int64       `json:"id"`
-	Job            int         `json:"job"`
-	MaxOpTime      int         `json:"max_op_time"`
-	Name           string      `json:"name"`
-	Img            string      `json:"img"`
-	ProductId      int64       `json:"product_id"`
-	WorkcenterID   int64       `json:"workcenter_id"`
-	ProductType    string      `json:"product_type"`
-	WorkcenterCode string      `json:"workcenter_code"`
-	VehicleTypeImg string      `json:"vehicleTypeImg"`
-	Points         interface{} `json:"points"`
+	OperationID         int64       `json:"id"`
+	Job                 int         `json:"job"`
+	MaxOpTime           int         `json:"max_op_time"`
+	Name                string      `json:"name"`
+	Img                 string      `json:"img"`
+	ProductId           int64       `json:"product_id"`
+	WorkcenterID        int64       `json:"workcenter_id"`
+	ProductType         string      `json:"product_type"`
+	WorkcenterCode      string      `json:"workcenter_code"`
+	VehicleTypeImg      string      `json:"vehicleTypeImg"`
+	Points              interface{} `json:"points"`
+	Tigntening_step_ref string      `json:"tightening_step_ref"`
+	ProductTypeImage    string      `json:"product_type_image"`
 }
 
 type Maintenance struct {
