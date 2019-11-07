@@ -85,7 +85,7 @@ func setAddrs(addrs []string) []string {
 
 func (s *Nats) statusHandler(conn *nats.Conn) {
 	if cid, err := conn.GetClientID(); err == nil {
-		s.diag.Debug(fmt.Sprintf("%d is %d ", cid, conn.Status()))
+		s.diag.Debug(fmt.Sprintf("Client %d is %s ", cid, STATUS_BROKER[conn.Status()]))
 	} else {
 		s.diag.Error("statusHandler", err)
 	}
@@ -93,7 +93,7 @@ func (s *Nats) statusHandler(conn *nats.Conn) {
 
 func (s *Nats) statusErrHandler(conn *nats.Conn, err error) {
 	if cid, err := conn.GetClientID(); err == nil {
-		s.diag.Error(fmt.Sprintf("%d is %d ", cid, conn.Status()), err)
+		s.diag.Error(fmt.Sprintf("Client %d is %s ", cid, STATUS_BROKER[conn.Status()]), err)
 	} else {
 		s.diag.Error("statusErrHandler", err)
 	}
@@ -113,8 +113,10 @@ func (s *Nats) Connect(urls []string) error {
 		return err
 	}
 	s.conn = nc
+
 	//最后设置默认句柄
 	s.setDefaultHandlers()
+
 	return nil
 }
 
@@ -218,9 +220,9 @@ func (s *Nats) subscribe(subject, group string, handler SubscribeHandler) (regis
 	}
 
 	fn := func(msg *nats.Msg) {
-		d := &brokerMessage{
+		d := &BrokerMessage{
 			Body:   msg.Data,
-			Header: map[string]string{"subject": msg.Subject, "Reply": msg.Reply},
+			Header: map[string]string{HEADER_SUBJECT: msg.Subject, HEADER_REPLY: msg.Reply},
 		}
 		if resp, err := handler(d); err != nil {
 			s.diag.Error("Subscribe Handler Error", err)

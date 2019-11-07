@@ -33,7 +33,7 @@ func TestNewService(t *testing.T) {
 	assert.NotNil(t, s)
 }
 
-func testHandler(message *brokerMessage) ([]byte, error) {
+func testHandler(message *BrokerMessage) ([]byte, error) {
 	fmt.Println(fmt.Sprintf("Msg: %v", message))
 	return nil, nil
 }
