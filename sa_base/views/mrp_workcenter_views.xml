@@ -93,8 +93,8 @@
                                 </field>
                             </page>
                             <page name="workcenter_place" string="Places(Component)">
-                                <field name="sa_workcenter_loc_ids" widget="many2many" context="{'default_workcenter_id':active_id}">
-                                    <tree name="workcenter_loc" string="Component Places Within Work Center">
+                                <field name="sa_workcenter_loc_ids" widget="one2many_list" context="{'default_workcenter_id':active_id}">
+                                    <tree name="workcenter_loc" string="Component Places Within Work Center" editable="bottom" edit="1" create="1" delete="1">
                                         <field name="product_id"/>
                                         <field name="workcenter_id" readonly="1"/>
                                     </tree>

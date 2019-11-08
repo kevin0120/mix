@@ -228,7 +228,7 @@
                 </footer>
             </form>
         </field>
-   </record>
+    </record>
 
     <record id="quality_check_view_form" model="ir.ui.view">
         <field name="name">sa.quality.check.view.form</field>
@@ -264,7 +264,7 @@
                             <field name="product_id"/>
                             <field name="lot_id" groups="stock.group_production_lot"/>
                             <field name="test_type_id" invisible="1"/>
-                            <field name="test_type" />
+                            <field name="test_type"/>
                             <field name="measure" attrs="{'invisible': [('test_type', '!=', 'measure')]}"/>
                             <field name="alert_ids" invisible="1"/>
                         </group>
@@ -710,13 +710,13 @@
         <field name="name">sa.quality.point.view.form</field>
         <field name="model">sa.quality.point</field>
         <field name="arch" type="xml">
-            <header>
-                <div class="oe_button_head" name="button_head">
-
-                </div>
-                <!--<button string="ReSequence" type="object" name="button_resequence" class="oe_highlight"/>-->
-            </header>
             <form>
+                <header>
+                    <div class="oe_button_head" name="button_head">
+
+                    </div>
+                    <!--<button string="ReSequence" type="object" name="button_resequence" class="oe_highlight"/>-->
+                </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive"
@@ -787,7 +787,8 @@
                             <field name="note" placeholder="Describe the quality check to do..."/>
                         </page>
                         <page string="Notes" name="Notes">
-                            <field name="reason" string="Notes" placeholder="Describe why you need to perform this quality check..."/>
+                            <field name="reason" string="Notes"
+                                   placeholder="Describe why you need to perform this quality check..."/>
                         </page>
                     </notebook>
                 </sheet>

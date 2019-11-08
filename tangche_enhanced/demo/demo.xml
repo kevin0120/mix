@@ -13,10 +13,26 @@
             <field name="product_tmpl_id" ref="product_template_100"/>
         </record>
 
-        <!--<record id="object2" model="tangche_enhanced.tangche_enhanced"> -->
-        <!--<field name="name">Object 2</field> -->
-        <!--<field name="value">20</field> -->
-        <!--</record> -->
+        <record id="product_template_300" model="product.template">
+            <field name="name">测试耗材胶水</field>
+            <field name="type">consu</field>
+        </record>
+
+        <record id="product_product_300" model="product.product">
+            <field name="name">测试耗材胶水</field>
+            <field name="type">consu</field>
+            <field name="sa_type">consu</field>
+            <field name="default_code">C1780589</field>
+            <field name="product_tmpl_id" ref="product_template_300"/>
+        </record>
+
+        <record id="workcenter_location" model="mrp.workcenter.loc">
+            <field name="workcenter_id" ref="sa_base.mrp_workcenter_0"/>
+            <field name="equipment_id" ref="sa_base.io_0" />
+            <field name="io_input">1</field>
+            <field name="io_output">1</field>
+            <field name="product_id" ref="product_product_300"/>
+        </record>
         <!---->
         <!--<record id="object3" model="tangche_enhanced.tangche_enhanced"> -->
         <!--<field name="name">Object 3</field> -->

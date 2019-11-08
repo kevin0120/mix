@@ -153,6 +153,7 @@ def package_workcenter_location_data(workcenter_id, val):
     for loc in workcenter_locations:
         data = {
             'product_code': loc.product_id.default_code if loc.product_id else False,
+            'equipment_sn': loc.equipment_id.serial_no if loc.equipment_id else False,
             'io_output': loc.io_output,
             'io_input': loc.io_input
         }

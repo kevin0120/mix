@@ -14,7 +14,7 @@
                 <field name="picking_type_id" position="replace">
                     <field name="operation_id"/>
                     <field name="can_do_skip"/>
-                    <field name="can_do_redo" />
+                    <field name="can_do_redo"/>
                     <field name="bom_line_id" groups="base.group_no_one"/>
                     <field name="tolerance_min" string="Torque(Min)"/>
                     <field name="tolerance_max" string="Torque(Max)"/>
@@ -59,7 +59,7 @@
                     <field name="max_redo_times"
                            attrs="{'invisible': [('picking_type_code', '=', 'mrp_operation')],'required': [('picking_type_code', '=', 'mrp_operation')]}"/>
                     <field name="can_do_skip" required="1"/>
-                    <field name="can_do_redo" required="1" />
+                    <field name="can_do_redo" required="1"/>
                 </field>
                 <!--                <field name="product_id" position="attributes">-->
                 <!--                    <attribute name="required">1</attribute>-->

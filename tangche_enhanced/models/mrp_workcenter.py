@@ -6,12 +6,21 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+
 class MrpWorkCenterLoc(models.Model):
     _inherit = 'mrp.workcenter.loc'
+
+    equipment_id = fields.Many2one('maintenance.equipment', 'Remote IO Module For Control',
+                                   domain=[('category_name', '=', 'IO')])
 
     io_output = fields.Integer('IO Output For Picking Indicate')
 
     io_input = fields.Integer('IO Output For Picking Confirm')
+
+    _sql_constraints = [
+        ('equipment_input_uniq', 'unique (equipment_id, io_input)', 'The Equipment With Input Must be unique!'),
+        ('equipment_output_uniq', 'unique (equipment_id, io_output)', 'The Equipment With Output Must be unique!')
+    ]
 
 
 class MrpWorkCenter(models.Model):
@@ -42,7 +51,8 @@ class MrpWorkCenter(models.Model):
                     _logger.error("Can Not Found MasterPC Connect Info For Work Center:{0}".format(center.name))
                     continue
                 connect = connects[0]
-                delete_all_endpoint = 'http://{0}:{1}{2}'.format(connect.ip, connect.port, DELETE_ALL_MASTER_WROKORDERS_API)
+                delete_all_endpoint = 'http://{0}:{1}{2}'.format(connect.ip, connect.port,
+                                                                 DELETE_ALL_MASTER_WROKORDERS_API)
                 center._delete_workcenter_all_opertaions(delete_all_endpoint)
                 operations = operation_obj_sudo.search([('workcenter_id', '=', center.id)])
                 for operation in operations:
@@ -51,7 +61,6 @@ class MrpWorkCenter(models.Model):
         except Exception as e:
             _logger.error("button_sync_operations Error", e)
             raise e
-
 
 
 @api.multi

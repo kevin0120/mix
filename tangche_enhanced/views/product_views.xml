@@ -8,7 +8,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//filter[@name='vehicle']" position="replace">
                     <filter string="Carriage" name="carriage" domain="[('sa_type', '=', 'carriage')]"/>
-                    <filter string="Consume Component" name="consu" domain="[('sa_type', '=', 'consum')]"/>
+                    <filter string="Consume Component" name="consu" domain="[('sa_type', '=', 'consu')]"/>
                 </xpath>
             </field>
         </record>
