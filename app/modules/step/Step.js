@@ -37,6 +37,12 @@ export default class Step implements IWorkStep {
 
   _type = '';
 
+  _image = '';
+
+  get image() {
+    return this._image;
+  }
+
   _skippable = false;
 
   _undoable = false;
@@ -76,9 +82,10 @@ export default class Step implements IWorkStep {
 
   // eslint-disable-next-line flowtype/no-weak-types
   update(stepObj: ?{ [key: string]: any }) {
-    const { name, desc, info, skippable, undoable, status1, steps, text, test_type, payload } = stepObj || {};
+    const { name, desc, image, info, skippable, undoable, status1, steps, text, test_type, payload } = stepObj || {};
     this._name = name || text || desc || 'unnamed';
     this._desc = desc || '';
+    this._image = image || '';
     this._info = info || {};
     // eslint-disable-next-line camelcase
     this._type = test_type || '';

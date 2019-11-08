@@ -50,6 +50,6 @@ export type tIOChange = {
   triggerMode: tIOTriggerMode
 };
 
-type tIOConfig = {
+export type tIOConfig = {
   input_num: number, output_num: number
 };

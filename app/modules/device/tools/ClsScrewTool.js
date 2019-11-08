@@ -6,6 +6,7 @@ import Device from '../Device';
 import { CommonLog } from '../../../common/utils';
 import { toolEnableApi } from '../../../api/tools';
 import type { IScrewTool } from './interface/IScrewTool';
+import type { IDevice } from '../IDevice';
 
 export default class ClsScrewTool extends Device implements IScrewTool {
   constructor(name: string, serialNumber: string, ...rest: Array<any>) {
@@ -28,8 +29,10 @@ export default class ClsScrewTool extends Device implements IScrewTool {
     try {
       if (!this.isEnable) {
         yield call(
-          (toolEnableApi: Function),
-          this.serialNumber,
+          toolEnableApi,
+          this.serialNumber || '',
+          // eslint-disable-next-line flowtype/no-weak-types
+          ((this.parent: any): IDevice)?.serialNumber || '',
           true
         );
         yield call([this, super.Enable]);
@@ -49,6 +52,8 @@ export default class ClsScrewTool extends Device implements IScrewTool {
         yield call(
           toolEnableApi,
           this.serialNumber || '',
+          // eslint-disable-next-line flowtype/no-weak-types
+          ((this.parent: any): IDevice)?.serialNumber || '',
           false
         );
         yield call([this, super.Disable]);
@@ -66,6 +71,8 @@ export default class ClsScrewTool extends Device implements IScrewTool {
       yield call(
         toolEnableApi,
         this.serialNumber || '',
+        // eslint-disable-next-line flowtype/no-weak-types
+        ((this.parent: any): IDevice)?.serialNumber || '',
         !this.isEnable
       );
       yield call([this, super.ToggleEnable]);

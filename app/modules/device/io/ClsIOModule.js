@@ -34,6 +34,9 @@ export default class ClsIOModule extends Device implements IIOModule {
     ...rest: Array<any>
   ) {
     super(name, serialNumber);
+    if(!config){
+      throw new Error(`io缺少配置(${name}, ${serialNumber})`);
+    }
     const { input_num, output_num } = config;
     this._maxInputs = input_num;
     this._maxOutputs = output_num;

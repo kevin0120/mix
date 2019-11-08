@@ -1,6 +1,5 @@
 // @flow
 
-import { CommonLog } from '../../common/utils';
 import type { tArrayDevices, tDeviceType } from './interface/typeDef';
 import type { tDeviceSN } from '../device/typeDef';
 import type { IDevice } from '../device/IDevice';
@@ -34,31 +33,34 @@ export function newDevice(
   data: { [string]: any },
   childrenSN: Array<tDeviceSN>
 ) {
-  try {
-    const device = new sym2Device[dt](name, sn, config, data);
-    appendNewDevices(device);
+  const device = new sym2Device[dt](name, sn, config, data);
+  appendNewDevices(device);
 
-    // if the new device is a lost child
-    if (lostChildren[sn]) {
-      const d = lostChildren[sn];
-      device.appendChildren(d);
+  // if the new device is a lost child
+  if (lostChildren[sn]) {
+    const parent = getDevice(lostChildren[sn].parent);
+    if (parent) {
+      parent.appendChildren(device);
+      device.setParent(parent);
       delete lostChildren[sn];
     }
-
-    // search for the children of the device
-    (childrenSN || []).forEach(cSN => {
-      const child = getDevice(cSN);
-      if (child) {
-        device.appendChildren((child: ICommonExternalEntity));
-      } else {
-        lostChildren[cSN] = device;
-      }
-    });
-
-    return device;
-  } catch (e) {
-    CommonLog.lError(e);
   }
+
+  // search for the children of the device
+  (childrenSN || []).forEach(cSN => {
+    const child = getDevice(cSN);
+    if (child) {
+      device.appendChildren((child: ICommonExternalEntity));
+      child.setParent(device);
+    } else {
+      lostChildren[cSN] = {
+        device,
+        parent: sn
+      };
+    }
+  });
+
+  return device;
 }
 
 export function getAllDevices(): Array<IDevice> {

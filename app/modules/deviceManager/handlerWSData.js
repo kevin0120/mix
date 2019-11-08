@@ -9,6 +9,7 @@ import { status2Healthz } from './constants';
 import type { IDevice } from '../device/IDevice';
 import { makeListener } from '../util';
 import type { tAction, tListener } from '../typeDef';
+import notifierActions from '../Notifier/action';
 
 const newDeviceListener = makeListener();
 
@@ -43,28 +44,36 @@ export function* deviceStatus(data: tRushData<any, any>): Saga<void> {
 
     let newDeviceActions = [];
     const setHealthzEffects = [];
-    data.data.forEach(d => {
-      const { sn, type, children, status, dData, config } = d;
-      let dv = getDevice(sn);
-      // try make a new device if dv doesn't exist
-      if (!dv) {
-        dv = newDevice(type, `${type}-${sn}`, sn, config, dData, children);
-        newDeviceActions = [
-          ...newDeviceActions,
-          ...newDeviceListener.check(dv)
-        ];
-      }
-
-      // if dv exists, set its Healthz status
-      if (dv) {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const d of data.data) {
+      try {
+        const { sn, type, children, status, dData, config } = d;
+        let dv = getDevice(sn);
+        // try make a new device if dv doesn't exist
+        if (!dv) {
+          dv = newDevice(type, `${type}-${sn}`, sn, config, dData, children);
+          newDeviceActions = [
+            ...newDeviceActions,
+            ...newDeviceListener.check(dv)
+          ];
+        }
+        // if dv exists, set its Healthz status
+        if (!dv) {
+          throw new Error(`设备（${sn}）不可用`);
+        }
         setHealthzEffects.push(
           // eslint-disable-next-line redux-saga/yield-effects
           call(dv.setHealthz, status2Healthz[status] || false)
         );
-        return;
+      } catch (e) {
+        yield put(
+          notifierActions.enqueueSnackbar('Error', e.message, {
+            at: 'deviceStatus'
+          })
+        );
       }
-      CommonLog.lError(`invalid device: ${sn}`, { at: 'deviceStatus' });
-    });
+    }
+
     yield all(newDeviceActions.map(a => put(a)));
     yield all(setHealthzEffects);
 
@@ -75,5 +84,10 @@ export function* deviceStatus(data: tRushData<any, any>): Saga<void> {
     yield put(healthzActions.data(status));
   } catch (e) {
     CommonLog.lError(e);
+    yield put(
+      notifierActions.enqueueSnackbar('Error', e.message, {
+        at: 'deviceStatus'
+      })
+    );
   }
 }

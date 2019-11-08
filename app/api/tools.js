@@ -3,19 +3,20 @@
 import { rushSendApi } from './rush';
 
 
-export function toolEnableApi(toolSN: string, enable: boolean): Promise<any> {
+export function toolEnableApi(toolSN: string, ControllerSN: string = '', enable: boolean): Promise<any> {
   return rushSendApi('WS_TOOL_ENABLE', {
     tool_sn: toolSN,
+    controller_sn: ControllerSN,
     enable
   });
 }
 
-export function psetApi(toolSN: string = '', stepID: number, userIDs: Array<number>,
+export function psetApi(toolSN: string = '', ControllerSN: string = '', stepID: number, userIDs: Array<number>,
                         pset: string, sequence: number, count: number,
                         total: number, workorderID: number): Promise<any> {
   return rushSendApi('WS_TOOL_PSET', {
     tool_sn: toolSN,
-    // TODO add controller sn
+    controller_sn: ControllerSN,
     step_id: stepID,
     user_id: userIDs[0],
     total,
@@ -26,9 +27,10 @@ export function psetApi(toolSN: string = '', stepID: number, userIDs: Array<numb
   });
 }
 
-export function jobApi(toolSN: string = '', stepID: number, userID: number, job: number): Promise<any> {
+export function jobApi(toolSN: string = '', ControllerSN: string = '', stepID: number, userID: number, job: number): Promise<any> {
   return rushSendApi('WS_TOOL_JOB', {
     tool_sn: toolSN,
+    controller_sn: ControllerSN,
     step_id: stepID,
     user_id: userID,
     job

@@ -16,6 +16,16 @@ export default class CommonExternalEntity implements ICommonExternalEntity {
 
   _children: Set<ICommonExternalEntity> = new Set();
 
+  _parent: ICommonExternalEntity;
+
+  setParent(parent: ICommonExternalEntity): void {
+    this._parent = parent;
+  }
+
+  get parent() {
+    return this._parent;
+  }
+
   _healthzListener = makeListener();
 
   constructor(name: string) {
@@ -31,7 +41,7 @@ export default class CommonExternalEntity implements ICommonExternalEntity {
 
   appendChildren(
     children: Array<ICommonExternalEntity> | ICommonExternalEntity
-  ) {
+  ): void {
     if (children instanceof Array) {
       children.forEach(c => {
         this._children.add(c);
@@ -59,7 +69,7 @@ export default class CommonExternalEntity implements ICommonExternalEntity {
   }
 
   // eslint-disable-next-line flowtype/no-weak-types
-  *bindOnHealthzAction(
+  * bindOnHealthzAction(
     predicate: boolean => boolean,
     action: boolean => tAction<any, any>
   ): Saga<?tListener<boolean>> {
@@ -77,7 +87,7 @@ export default class CommonExternalEntity implements ICommonExternalEntity {
     return this._healthzListener.remove(listener);
   }
 
-  *setHealthz(isHealthz: boolean): Saga<void> {
+  * setHealthz(isHealthz: boolean): Saga<void> {
     try {
       if (isEqual(this._isHealthz, isHealthz)) {
         return;
@@ -131,7 +141,7 @@ export default class CommonExternalEntity implements ICommonExternalEntity {
   }
 
   // eslint-disable-next-line require-yield
-  *ToggleEnable(): Saga<void> {
+  * ToggleEnable(): Saga<void> {
     this._enable = !this._enable;
   }
 }
