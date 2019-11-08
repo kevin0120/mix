@@ -104,7 +104,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
     }
 
     _statusTasks = {
-      * [ORDER_STATUS.TODO]() {
+      *[ORDER_STATUS.TODO]() {
         try {
           const { reportStart } = yield select(s => s.setting.systemSettings);
           // TODO 开工自检
@@ -141,7 +141,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           yield put(orderActions.stepStatus(this, ORDER_STATUS.PENDING));
         }
       },
-      * [ORDER_STATUS.WIP]() {
+      *[ORDER_STATUS.WIP]() {
         try {
           this._workingIndex =
             this._workingIndex >= this._steps.length ? 0 : this._workingIndex;
@@ -188,7 +188,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           CommonLog.Info('order doing finished');
         }
       },
-      * [ORDER_STATUS.DONE]() {
+      *[ORDER_STATUS.DONE]() {
         try {
           const data = this._steps.map(s => [
             s.name,
@@ -197,7 +197,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           ]);
           const { reportFinish } = yield select(s => s.setting.systemSettings);
           let confirm = {
-            label: 'Common.OK',
+            label: 'Common.Yes',
             color: 'info'
           };
           let closeAction = push('/app');
@@ -249,7 +249,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           CommonLog.Info('order done');
         }
       },
-      * [ORDER_STATUS.PENDING]() {
+      *[ORDER_STATUS.PENDING]() {
         try {
           yield put(orderActions.finishOrder(this));
         } catch (e) {
@@ -258,7 +258,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           });
         }
       },
-      * [ORDER_STATUS.CANCEL]() {
+      *[ORDER_STATUS.CANCEL]() {
         try {
           yield put(orderActions.finishOrder(this));
         } catch (e) {

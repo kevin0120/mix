@@ -22,7 +22,7 @@ const mapState = (state, props) => {
     ...props,
     status: vOrder?.status,
     name: vOrder?.name,
-    desc: vOrder?.desc
+    code: vOrder?.code
   };
 };
 
@@ -31,7 +31,7 @@ const mapDispatch = {};
 type Props = {
   status: ?tOrderStatus,
   name: ?string,
-  desc: ?string
+  code: ?string
 };
 
 const statusMap = classes => ({
@@ -43,7 +43,7 @@ const statusMap = classes => ({
   [ORDER_STATUS.PENDING]: classes.statusPending
 });
 
-function StepWorking({ status, desc }: Props): Node {
+function StepWorking({ status, code }: Props): Node {
   const classes = makeStyles(styles.layout)();
 
   type tNodeHook = [Node, ((Node => Node) | Node) => void];
@@ -68,21 +68,13 @@ function StepWorking({ status, desc }: Props): Node {
                 : t('notSelected')}
               ]
             </Typography>
-            {/* <Typography variant="h5">{name || ''}</Typography> */}
-            {/* <Typography variant="h5">{desc || ''}</Typography> */}
-            {desc &&
-            desc.split('\t\t').map(d => (
-              <React.Fragment key={d}>
-                <Typography variant="h5">{d || ''}</Typography>
-                <span style={{ width: '40px' }}/>
-              </React.Fragment>
-            ))}
+            <Typography variant="h5">{code || ''}</Typography>
           </div>
-          <img alt="logo" src={logo} className={classes.logo}/>
+          <img alt="logo" src={logo} className={classes.logo} />
         </Paper>
         <div className={classes.main}>
           <Paper square classes={{ root: classes.leftContainer }}>
-            <ButtonsContainer action={action}/>
+            <ButtonsContainer action={action} />
             <StepPageContainer
               bindParentAction={bindAction}
               bindParentDescription={bindDescription}
@@ -91,7 +83,7 @@ function StepWorking({ status, desc }: Props): Node {
           </Paper>
           <div className={classes.rightContainer}>
             <Paper square className={classes.stepperContainer}>
-              <StepperContainer/>
+              <StepperContainer />
             </Paper>
           </div>
         </div>
