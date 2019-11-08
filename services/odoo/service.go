@@ -210,7 +210,7 @@ func (s *Service) Close() error {
 func (s *Service) HandleWorkorder(data []byte) {
 	s.workordersChannel <- data
 }
-func (s *Service) GetWorkorder(masterpcSn string, hmiSn string, workcenterCode, code string) ([]byte, error) {
+func (s *Service) GetWorkorder(masterpcSn string, hmiSn string, workcenterCode, code string, ch <-chan int) ([]byte, error) {
 
 	var err error
 	var body []byte
@@ -229,9 +229,11 @@ func (s *Service) GetWorkorder(masterpcSn string, hmiSn string, workcenterCode, 
 		if err == nil {
 			// 如果第一次就成功，推出循环
 			s.HandleWorkorder(body)
+			<-ch
 			return body, nil
 		}
 	}
+	<-ch
 	return nil, errors.Wrap(err, "Get workorder fail")
 }
 

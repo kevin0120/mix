@@ -27,17 +27,23 @@ type Diagnostic interface {
 	Closed()
 }
 
-type Service struct {
-	diag              Diagnostic
-	methods           Methods
-	DB                *storage.Service
-	Httpd             *httpd.Service
-	ODOO              *odoo.Service
-	AudiVw            *audi_vw.Service
-	OpenProtocol      *openprotocol.Service
-	ControllerService *controller.Service
-	Aiis              *aiis.Service
+const (
+	CH_LENGTH = 1024
+)
 
+type Service struct {
+	diag               Diagnostic
+	methods            Methods
+	DB                 *storage.Service
+	Httpd              *httpd.Service
+	ODOO               *odoo.Service
+	AudiVw             *audi_vw.Service
+	OpenProtocol       *openprotocol.Service
+	ControllerService  *controller.Service
+	Aiis               *aiis.Service
+	ChStart            chan int
+	ChFinish           chan int
+	ChWorkorder        chan int
 	SN                 string
 	WS                 *wsnotify.Service
 	TighteningService  *tightening_device.Service
@@ -47,8 +53,11 @@ type Service struct {
 func NewService(d Diagnostic) *Service {
 
 	s := &Service{
-		diag:    d,
-		methods: Methods{},
+		diag:        d,
+		methods:     Methods{},
+		ChStart:     make(chan int, CH_LENGTH),
+		ChFinish:    make(chan int, CH_LENGTH),
+		ChWorkorder: make(chan int, CH_LENGTH),
 	}
 
 	s.methods.service = s
@@ -66,6 +75,8 @@ func (s *Service) Open() error {
 	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_CONTROLLER_ID).Register(s.OnTighteningControllereID)
 	s.ODOO.Aiis.OdooStatusDispatcher.Register(s.OnOdooStatus)
 	s.ODOO.Aiis.AiisStatusDispatcher.Register(s.OnAiisStatus)
+
+	s.initRequestDispatchers()
 
 	var r httpd.Route
 
@@ -492,7 +503,8 @@ func (s *Service) OnWS_ORDER_START_REQUEST(data interface{}) {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 		return
 	}
-	go s.Aiis.PutMesOpenRequest(msg.SN, msg.Type, orderReq.Code, sData)
+	s.ChStart <- 1
+	go s.Aiis.PutMesOpenRequest(msg.SN, msg.Type, orderReq.Code, sData, s.ChStart)
 }
 
 // 完工请求
@@ -513,8 +525,8 @@ func (s *Service) OnWS_ORDER_FINISH_REQUEST(data interface{}) {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 		return
 	}
-
-	go s.Aiis.PutMesFinishRequest(msg.SN, msg.Type, orderReq.Code, sData)
+	s.ChFinish <- 1
+	go s.Aiis.PutMesFinishRequest(msg.SN, msg.Type, orderReq.Code, sData, s.ChFinish)
 
 }
 
@@ -570,7 +582,8 @@ func (s *Service) OnWS_ORDER_DETAIL_BY_CODE(data interface{}) {
 	w, err := s.DB.WorkorderOut(orderReq.Code, 0)
 	//todo 判定本地无工单
 	if w == nil && err == nil {
-		go s.ODOO.GetWorkorder("", "", orderReq.Workcenter, orderReq.Code)
+		s.ChWorkorder <- 1
+		go s.ODOO.GetWorkorder("", "", orderReq.Workcenter, orderReq.Code, s.ChWorkorder)
 	}
 	if err != nil {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
