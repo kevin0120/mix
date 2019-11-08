@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/kataras/iris/websocket"
 	"github.com/masami10/rush/services/wsnotify"
+	"github.com/masami10/rush/utils"
 	"reflect"
 	"sync"
 	"sync/atomic"
@@ -40,6 +41,8 @@ type Service struct {
 
 	WS *wsnotify.Service
 	wsnotify.WSNotify
+
+	requestDispatchers map[string]*utils.Dispatcher
 }
 
 func NewService(c Config, d Diagnostic) (*Service, error) {
@@ -61,17 +64,40 @@ func (s *Service) Open() error {
 	}
 
 	s.WS.AddNotify(s)
+	s.initRequestDispatchers()
 
 	return nil
 }
 
 func (s *Service) Close() error {
+	for _, v := range s.requestDispatchers {
+		v.Release()
+	}
 
 	return nil
 }
 
 func (s *Service) config() Config {
 	return s.configValue.Load().(Config)
+}
+
+func (s *Service) initRequestDispatchers() {
+	s.requestDispatchers = map[string]*utils.Dispatcher{
+		WS_DEVICE_STATUS: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+	}
+
+	s.requestDispatchers[WS_DEVICE_STATUS].Register(s.OnWS_DEVICE_STATUS)
+
+	for _, v := range s.requestDispatchers {
+		v.Start()
+	}
+}
+
+func (s *Service) dispatchRequest(req *wsnotify.WSRequest) {
+	d, exist := s.requestDispatchers[req.WSMsg.Type]
+	if exist {
+		d.Dispatch(req)
+	}
 }
 
 func (s *Service) AddDevice(sn string, d IDevice) {
@@ -116,6 +142,21 @@ func (s *Service) fetchAllDevices() []DeviceStatus {
 	return devices
 }
 
+func (s *Service) OnWS_DEVICE_STATUS(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	wsRequest := data.(*wsnotify.WSRequest)
+	c := wsRequest.C
+	msg := wsRequest.WSMsg
+
+	devices := s.fetchAllDevices()
+	body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, devices))
+
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_DEVICE, string(body))
+}
+
 func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 	msg := wsnotify.WSMsg{}
 	err := json.Unmarshal(data, &msg)
@@ -124,12 +165,8 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 		return
 	}
 
-	//sData, _ := json.Marshal(msg.Data)
-	switch msg.Type {
-	case WS_DEVICE_STATUS:
-		devices := s.fetchAllDevices()
-		body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, devices))
-
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_DEVICE, string(body))
-	}
+	s.dispatchRequest(&wsnotify.WSRequest{
+		C:     c,
+		WSMsg: &msg,
+	})
 }

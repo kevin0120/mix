@@ -40,6 +40,8 @@ type Service struct {
 
 	dispatchers map[string]*utils.Dispatcher
 	Api         *Api
+
+	requestDispatchers map[string]*utils.Dispatcher
 }
 
 func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol) (*Service, error) {
@@ -104,12 +106,18 @@ func (s *Service) Open() error {
 	// 启动所有拧紧控制器
 	s.startupControllers()
 
+	s.initRequestDispatchers()
+
 	return nil
 }
 
 func (s *Service) Close() error {
 
 	for _, v := range s.dispatchers {
+		v.Release()
+	}
+
+	for _, v := range s.requestDispatchers {
 		v.Release()
 	}
 
@@ -123,7 +131,121 @@ func (s *Service) config() Config {
 	return s.configValue.Load().(Config)
 }
 
-// TODO: case封装成函数
+func (s *Service) initRequestDispatchers() {
+	s.requestDispatchers = map[string]*utils.Dispatcher{
+		WS_TOOL_MODE_SELECT: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		WS_TOOL_ENABLE:      utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		WS_TOOL_JOB:         utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		WS_TOOL_PSET:        utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+	}
+
+	s.requestDispatchers[WS_TOOL_MODE_SELECT].Register(s.OnWS_TOOL_MODE_SELECT)
+	s.requestDispatchers[WS_TOOL_ENABLE].Register(s.OnWS_TOOL_ENABLE)
+	s.requestDispatchers[WS_TOOL_JOB].Register(s.OnWS_TOOL_JOB)
+	s.requestDispatchers[WS_TOOL_PSET].Register(s.OnWS_TOOL_PSET)
+
+	for _, v := range s.requestDispatchers {
+		v.Start()
+	}
+}
+
+func (s *Service) dispatchRequest(req *wsnotify.WSRequest) {
+	d, exist := s.requestDispatchers[req.WSMsg.Type]
+	if exist {
+		d.Dispatch(req)
+	}
+}
+
+func (s *Service) OnWS_TOOL_MODE_SELECT(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	wsRequest := data.(*wsnotify.WSRequest)
+	byteData, _ := json.Marshal(wsRequest.WSMsg.Data)
+	c := wsRequest.C
+	msg := wsRequest.WSMsg
+
+	req := ToolModeSelect{}
+	_ = json.Unmarshal(byteData, &req)
+	err := s.Api.ToolModeSelect(&req)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		return
+	}
+
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+}
+func (s *Service) OnWS_TOOL_ENABLE(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	wsRequest := data.(*wsnotify.WSRequest)
+	byteData, _ := json.Marshal(wsRequest.WSMsg.Data)
+	c := wsRequest.C
+	msg := wsRequest.WSMsg
+
+	req := ToolControl{}
+	_ = json.Unmarshal(byteData, &req)
+	err := s.Api.ToolControl(&req)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		return
+	}
+
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+}
+
+func (s *Service) OnWS_TOOL_JOB(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	wsRequest := data.(*wsnotify.WSRequest)
+	byteData, _ := json.Marshal(wsRequest.WSMsg.Data)
+	c := wsRequest.C
+	msg := wsRequest.WSMsg
+
+	req := JobSet{}
+	_ = json.Unmarshal(byteData, &req)
+	err := s.Api.ToolJobSet(&req)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		return
+	}
+
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+
+}
+
+func (s *Service) OnWS_TOOL_PSET(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	wsRequest := data.(*wsnotify.WSRequest)
+	byteData, _ := json.Marshal(wsRequest.WSMsg.Data)
+	c := wsRequest.C
+	msg := wsRequest.WSMsg
+
+	ds := s.StorageService
+	if ds == nil {
+		s.diag.Error("WS_TOOL_PSET Fail ", errors.New("Please Inject Storage Service First"))
+		return
+	}
+	req := PSetSet{}
+	_ = json.Unmarshal(byteData, &req)
+
+	err := s.Api.ToolPSetSet(&req)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		return
+	}
+
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+}
+
 func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 	var msg wsnotify.WSMsg
 	err := json.Unmarshal(data, &msg)
@@ -132,63 +254,10 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 		return
 	}
 
-	byteData, _ := json.Marshal(msg.Data)
-
-	switch msg.Type {
-	case WS_TOOL_MODE_SELECT:
-		req := ToolModeSelect{}
-		_ = json.Unmarshal(byteData, &req)
-		err := s.Api.ToolModeSelect(&req)
-		if err != nil {
-			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
-			return
-		}
-
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
-
-	case WS_TOOL_ENABLE:
-		req := ToolControl{}
-		_ = json.Unmarshal(byteData, &req)
-		err := s.Api.ToolControl(&req)
-		if err != nil {
-			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
-			return
-		}
-
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
-
-	case WS_TOOL_JOB:
-		req := JobSet{}
-		_ = json.Unmarshal(byteData, &req)
-		err := s.Api.ToolJobSet(&req)
-		if err != nil {
-			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
-			return
-		}
-
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
-
-	case WS_TOOL_PSET:
-		ds := s.StorageService
-		if ds == nil {
-			s.diag.Error("WS_TOOL_PSET Fail ", errors.New("Please Inject Storage Service First"))
-			return
-		}
-		req := PSetSet{}
-		_ = json.Unmarshal(byteData, &req)
-
-		err := s.Api.ToolPSetSet(&req)
-		if err != nil {
-			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
-			return
-		}
-
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
-
-	default:
-		// 类型错误
-		return
-	}
+	s.dispatchRequest(&wsnotify.WSRequest{
+		C:     c,
+		WSMsg: &msg,
+	})
 }
 
 // 收到结果

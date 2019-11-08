@@ -51,7 +51,7 @@ type Workorders struct {
 	Workcenter            string    `xorm:"varchar(128) 'workcenter'" json:"workcenter"`
 	Date_planned_start    time.Time `xorm:"datetime 'date_planned_start'" json:"date_planned_start"`
 	Date_planned_complete time.Time `xorm:"datetime 'date_planned_complete'" json:"date_planned_complete"`
-	Status                string    `xorm:"varchar(32) default 'ready' 'status' " json:"status"`
+	Status                string    `xorm:"varchar(32) default 'todo' 'status' " json:"status"`
 	Product_type_image    string    `json:"product_type_image"`
 
 	Created time.Time `xorm:"created" json:"-"`
@@ -87,12 +87,12 @@ type Steps struct {
 	Testtype       string `xorm:"varchar(128) 'test_type'" json:"test_type"`
 	FailureMessage string `xorm:"varchar(128) 'failure_msg'" json:"failure_msg"`
 	Desc           string `xorm:"varchar(64) 'desc'" json:"desc"`
-	Image          string ` json:"image"`
+	Image          string `xorm:"-" json:"image"`
 	ImageRef       string `xorm:"varchar(128) 'tightening_image_by_step_code'" json:"tightening_image_by_step_code"`
 	Skippable      bool   `xorm:"varchar(64) 'skippable'" json:"skippable"`
 	Undoable       bool   `xorm:"varchar(64) 'undoable'" json:"undoable"`
 	Data           string `xorm:"varchar(128) 'data'" json:"data"`
-	Status         string `xorm:"varchar(32) 'status'" json:"status"`
+	Status         string `xorm:"varchar(32) default 'ready' 'status'" json:"status"`
 
 	Created time.Time `xorm:"created" json:"-"`
 	Updated time.Time `xorm:"updated" json:"-"`
