@@ -16,6 +16,7 @@ import (
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
+	"github.com/masami10/rush/utils"
 )
 
 type Diagnostic interface {
@@ -37,9 +38,10 @@ type Service struct {
 	ControllerService *controller.Service
 	Aiis              *aiis.Service
 
-	SN                string
-	WS                *wsnotify.Service
-	TighteningService *tightening_device.Service
+	SN                 string
+	WS                 *wsnotify.Service
+	TighteningService  *tightening_device.Service
+	requestDispatchers map[string]*utils.Dispatcher
 }
 
 func NewService(d Diagnostic) *Service {
@@ -293,7 +295,44 @@ func (s *Service) Close() error {
 	s.diag.Close()
 	s.diag.Closed()
 
+	for _, v := range s.requestDispatchers {
+		v.Release()
+	}
+
 	return nil
+}
+
+func (s *Service) initRequestDispatchers() {
+	s.requestDispatchers = map[string]*utils.Dispatcher{
+		WS_ORDER_LIST:             utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		WS_ORDER_DETAIL:           utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		WS_ORDER_UPDATE:           utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		WS_ORDER_STEP_UPDATE:      utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		WS_ORDER_START_REQUEST:    utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		WS_ORDER_FINISH_REQUEST:   utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		WS_ORDER_STEP_DATA_UPDATE: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		WS_ORDER_DETAIL_BY_CODE:   utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+	}
+
+	s.requestDispatchers[WS_ORDER_LIST].Register(s.OnWS_ORDER_LIST)
+	s.requestDispatchers[WS_ORDER_DETAIL].Register(s.OnWS_ORDER_DETAIL)
+	s.requestDispatchers[WS_ORDER_UPDATE].Register(s.OnWS_ORDER_UPDATE)
+	s.requestDispatchers[WS_ORDER_STEP_UPDATE].Register(s.OnWS_ORDER_STEP_UPDATE)
+	s.requestDispatchers[WS_ORDER_START_REQUEST].Register(s.OnWS_ORDER_START_REQUEST)
+	s.requestDispatchers[WS_ORDER_FINISH_REQUEST].Register(s.OnWS_ORDER_FINISH_REQUEST)
+	s.requestDispatchers[WS_ORDER_STEP_DATA_UPDATE].Register(s.OnWS_ORDER_STEP_DATA_UPDATE)
+	s.requestDispatchers[WS_ORDER_DETAIL_BY_CODE].Register(s.OnWS_ORDER_DETAIL_BY_CODE)
+
+	for _, v := range s.requestDispatchers {
+		v.Start()
+	}
+}
+
+func (s *Service) dispatchRequest(req *wsnotify.WSRequest) {
+	d, exist := s.requestDispatchers[req.WSMsg.Type]
+	if exist {
+		d.Dispatch(req)
+	}
 }
 
 func (s *Service) resetResult(id int64) error {
@@ -321,6 +360,248 @@ func (s *Service) OnNewHmiClient(conn websocket.Connection) {
 	_ = conn.Emit(wsnotify.WS_EVENT_REG, wsnotify.GenerateMessage(0, wsnotify.WS_RUSH_DATA, msg))
 }
 
+// 请求获取工单列表
+func (s *Service) OnWS_ORDER_LIST(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	wsRequest := data.(*wsnotify.WSRequest)
+	sData, _ := json.Marshal(wsRequest.WSMsg.Data)
+	c := wsRequest.C
+	msg := wsRequest.WSMsg
+
+	workorders, err := s.DB.Workorders(sData)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		return
+	}
+	body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, workorders))
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_ORDER, string(body))
+}
+
+// 请求获取工单详情
+func (s *Service) OnWS_ORDER_DETAIL(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	wsRequest := data.(*wsnotify.WSRequest)
+	sData, _ := json.Marshal(wsRequest.WSMsg.Data)
+	c := wsRequest.C
+	msg := wsRequest.WSMsg
+
+	orderReq := WSOrderReq{}
+	err := json.Unmarshal(sData, &orderReq)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		return
+	}
+
+	w, err := s.DB.WorkorderOut("", orderReq.ID)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+		return
+	}
+	if w == nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -3, fmt.Sprintf("找不到對應Id=%d的工單", orderReq.ID)))
+		return
+	}
+	body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, w))
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_ORDER, string(body))
+}
+
+// 更新工单状态
+func (s *Service) OnWS_ORDER_UPDATE(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	wsRequest := data.(*wsnotify.WSRequest)
+	sData, _ := json.Marshal(wsRequest.WSMsg.Data)
+	c := wsRequest.C
+	msg := wsRequest.WSMsg
+
+	orderReq := WSOrderReq{}
+	err := json.Unmarshal(sData, &orderReq)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		return
+	}
+
+	_, err = s.DB.UpdateWorkorder(&storage.Workorders{
+		Id:     orderReq.ID,
+		Status: orderReq.Status,
+	})
+
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+		return
+	}
+
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+}
+
+// 更新工步状态
+func (s *Service) OnWS_ORDER_STEP_UPDATE(data interface{}) {
+
+	if data == nil {
+		return
+	}
+
+	wsRequest := data.(*wsnotify.WSRequest)
+	sData, _ := json.Marshal(wsRequest.WSMsg.Data)
+	c := wsRequest.C
+	msg := wsRequest.WSMsg
+
+	orderReq := WSOrderReq{}
+	err := json.Unmarshal(sData, &orderReq)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		return
+	}
+
+	_, err = s.DB.UpdateStep(&storage.Steps{
+		Id:     orderReq.ID,
+		Status: orderReq.Status,
+	})
+
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+		return
+	}
+
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+}
+
+// 开工请求
+func (s *Service) OnWS_ORDER_START_REQUEST(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	wsRequest := data.(*wsnotify.WSRequest)
+	sData, _ := json.Marshal(wsRequest.WSMsg.Data)
+	c := wsRequest.C
+	msg := wsRequest.WSMsg
+
+	orderReq := WSOrderReqCode{}
+	err := json.Unmarshal(sData, &orderReq)
+
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		return
+	}
+	resp, err := s.Aiis.PutMesOpenRequest(orderReq.Code, sData)
+
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+		return
+	}
+	s.diag.Debug(fmt.Sprintf("Mes处理开工请求的结果推送HMI: %s", resp.(string)))
+	//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, resp.(string)))
+	body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, resp))
+	s.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
+}
+
+// 完工请求
+func (s *Service) OnWS_ORDER_FINISH_REQUEST(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	wsRequest := data.(*wsnotify.WSRequest)
+	sData, _ := json.Marshal(wsRequest.WSMsg.Data)
+	c := wsRequest.C
+	msg := wsRequest.WSMsg
+
+	orderReq := WSOrderReqCode{}
+	err := json.Unmarshal(sData, &orderReq)
+
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		return
+	}
+	resp, err := s.Aiis.PutMesFinishRequest(orderReq.Code, sData)
+
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+		return
+	}
+	s.diag.Debug(fmt.Sprintf("Mes处理完工请求的结果推送HMI: %s", resp.(string)))
+	//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+	body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, resp))
+	s.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
+
+}
+
+// 更新工步数据
+func (s *Service) OnWS_ORDER_STEP_DATA_UPDATE(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	wsRequest := data.(*wsnotify.WSRequest)
+	sData, _ := json.Marshal(wsRequest.WSMsg.Data)
+	c := wsRequest.C
+	msg := wsRequest.WSMsg
+
+	orderReq := WSOrderReqData{}
+	err := json.Unmarshal(sData, &orderReq)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		return
+	}
+
+	_, err = s.DB.UpdateStepData(&storage.Steps{
+		Id:   orderReq.ID,
+		Data: orderReq.Data,
+	})
+
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+		return
+	}
+
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+}
+
+// 根据CODE获取工单
+func (s *Service) OnWS_ORDER_DETAIL_BY_CODE(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	wsRequest := data.(*wsnotify.WSRequest)
+	sData, _ := json.Marshal(wsRequest.WSMsg.Data)
+	c := wsRequest.C
+	msg := wsRequest.WSMsg
+
+	orderReq := WSOrderReqCode{}
+	err := json.Unmarshal(sData, &orderReq)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		return
+	}
+
+	w, err := s.DB.WorkorderOut(orderReq.Code, 0)
+	//todo 判定本地无工单
+	if w == nil && err == nil {
+		fmt.Println("如果RUSH收到HMI请求后找不到新工单,可通过调用ODOO api获取对应工单并推送HMI")
+		orderData, err := s.ODOO.GetWorkorder("", "", orderReq.Workcenter, orderReq.Code)
+
+		if err == nil {
+			s.ODOO.HandleWorkorder(orderData)
+		}
+	}
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+		return
+	}
+	body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, w))
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_ORDER, string(body))
+}
+
 func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 	msg := wsnotify.WSMsg{}
 	err := json.Unmarshal(data, &msg)
@@ -329,171 +610,10 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 		return
 	}
 
-	sData, _ := json.Marshal(msg.Data)
-	switch msg.Type {
-	case WS_ORDER_LIST:
-		// 请求获取工单列表
-		workorders, err := s.DB.Workorders(sData)
-		if err != nil {
-			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
-			return
-		}
-		body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, workorders))
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_ORDER, string(body))
-
-	case WS_ORDER_DETAIL:
-		// 请求获取工单详情
-		orderReq := WSOrderReq{}
-		err := json.Unmarshal(sData, &orderReq)
-		if err != nil {
-			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
-			return
-		}
-
-		w, err := s.DB.WorkorderOut("", orderReq.ID)
-		if err != nil {
-			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
-			return
-		}
-		if w == nil {
-			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -3, fmt.Sprintf("找不到對應Id=%d的工單", orderReq.ID)))
-			return
-		}
-		body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, w))
-		//fmt.Println(string(body))
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_ORDER, string(body))
-
-	case WS_ORDER_DETAIL_BY_CODE:
-		// 根据CODE获取工单
-		orderReq := WSOrderReqCode{}
-		err := json.Unmarshal(sData, &orderReq)
-		if err != nil {
-			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
-			return
-		}
-
-		w, err := s.DB.WorkorderOut(orderReq.Code, 0)
-		//todo 判定本地无工单
-		if w == nil && err == nil {
-			fmt.Println("如果RUSH收到HMI请求后找不到新工单,可通过调用ODOO api获取对应工单并推送HMI")
-			orderData, err := s.ODOO.GetWorkorder("", "", orderReq.Workcenter, orderReq.Code)
-
-			if err == nil {
-				s.ODOO.HandleWorkorder(orderData)
-			}
-		}
-		if err != nil {
-			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
-			return
-		}
-		body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, w))
-		//fmt.Println(string(body))
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_ORDER, string(body))
-
-	case WS_ORDER_UPDATE:
-		// 更新工单状态
-		orderReq := WSOrderReq{}
-		err := json.Unmarshal(sData, &orderReq)
-		if err != nil {
-			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
-			return
-		}
-
-		_, err = s.DB.UpdateWorkorder(&storage.Workorders{
-			Id:     orderReq.ID,
-			Status: orderReq.Status,
-		})
-
-		if err != nil {
-			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
-			return
-		}
-
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
-
-	case WS_ORDER_STEP_UPDATE:
-		// 更新工步状态
-		orderReq := WSOrderReq{}
-		err := json.Unmarshal(sData, &orderReq)
-		if err != nil {
-			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
-			return
-		}
-
-		_, err = s.DB.UpdateStep(&storage.Steps{
-			Id:     orderReq.ID,
-			Status: orderReq.Status,
-		})
-
-		if err != nil {
-			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
-			return
-		}
-
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
-
-	case WS_ORDER_STEP_DATA_UPDATE:
-		// 更新工步数据
-		orderReq := WSOrderReqData{}
-		err := json.Unmarshal(sData, &orderReq)
-		if err != nil {
-			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
-			return
-		}
-
-		_, err = s.DB.UpdateStepData(&storage.Steps{
-			Id:   orderReq.ID,
-			Data: orderReq.Data,
-		})
-
-		if err != nil {
-			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
-			return
-		}
-
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
-
-	case WS_ORDER_START_REQUEST:
-		// TODO: 收到HMI的开工请求， 处理收到的请求信息， 直接作为http客户端访问mes提供的接口，并将结果反馈给hmi----doing
-
-		orderReq := WSOrderReqCode{}
-		err := json.Unmarshal(sData, &orderReq)
-
-		if err != nil {
-			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
-			return
-		}
-		resp, err := s.Aiis.PutMesOpenRequest(orderReq.Code, sData)
-
-		if err != nil {
-			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
-			return
-		}
-		s.diag.Debug(fmt.Sprintf("Mes处理开工请求的结果推送HMI: %s", resp.(string)))
-		//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, resp.(string)))
-		body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, resp))
-		s.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
-
-	case WS_ORDER_FINISH_REQUEST:
-		// TODO: 收到HMI的完工请求， 处理收到的请求信息， 直接作为http客户端访问mes提供的接口，并将结果反馈给hmi----doing
-		orderReq := WSOrderReqCode{}
-		err := json.Unmarshal(sData, &orderReq)
-
-		if err != nil {
-			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
-			return
-		}
-		resp, err := s.Aiis.PutMesFinishRequest(orderReq.Code, sData)
-
-		if err != nil {
-			_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
-			return
-		}
-		s.diag.Debug(fmt.Sprintf("Mes处理完工请求的结果推送HMI: %s", resp.(string)))
-		//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
-		body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, resp))
-		s.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
-	}
+	s.dispatchRequest(&wsnotify.WSRequest{
+		C:     c,
+		WSMsg: &msg,
+	})
 }
 
 // 收到控制器结果

@@ -1,5 +1,7 @@
 package wsnotify
 
+import "github.com/kataras/iris/websocket"
+
 const (
 	WS_REG       = "WS_REG"
 	WS_RUSH_DATA = "WS_RUSH_DATA"
@@ -68,6 +70,11 @@ type WSMsg struct {
 	SN   uint64      `json:"sn"`
 	Type string      `json:"type"`
 	Data interface{} `json:"data"`
+}
+
+type WSRequest struct {
+	C     websocket.Connection
+	WSMsg *WSMsg
 }
 
 type WSReply struct {
