@@ -66,6 +66,7 @@ type WorkorderPayload struct {
 	Environments []interface{} `json:"environments"`
 	Components   []interface{} `json:"components"`
 	Operation    interface{}   `json:"operation"`
+	Workcenter   interface{}   `json:"workcenter"`
 }
 
 type StepTextPayload struct {

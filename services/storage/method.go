@@ -14,7 +14,7 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 
 	session := s.eng.NewSession()
 	defer session.Close()
-
+	session.Begin()
 	var work Workorders
 	var workPayload WorkorderPayload
 	err := json.Unmarshal(in, &work)
@@ -37,22 +37,22 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 	//
 
 	workorder1 := Workorders{
-		Workorder:             string(wp),
-		Code:                  work.Code,
-		Track_code:            work.Track_code,
-		Product_code:          work.Product_code,
-		Workcenter:            work.Workcenter,
+		Workorder:    string(wp),
+		Code:         work.Code,
+		Track_code:   work.Track_code,
+		Product_code: work.Product_code,
+		//Workcenter:            work.Workcenter,
 		Status:                "todo",
 		Date_planned_start:    work.Date_planned_start,
 		Date_planned_complete: work.Date_planned_start,
 	}
 	//
-	s.DeleteWorkAndStep(work.Code)
+	s.DeleteWorkAndStep(session,work.Code)
 
 	//var hh map[string]interface{}
 	//
 	//err = json.Unmarshal(wor, &hh)
-	_, err = s.eng.Insert(&workorder1)
+	_, err = session.Insert(&workorder1)
 	// INSERT INTO struct () values ()
 	//engine.Ping()
 	//有的数据库超时断开ping可以重连。可以通过起一个定期Ping的Go程来保持连接鲜活。
@@ -101,7 +101,7 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 			Data:           msg.Data,
 		}
 
-		_, err := s.eng.Insert(&step)
+		_, err := session.Insert(&step)
 		// INSERT INTO struct () values ()
 		if err != nil {
 			session.Rollback()

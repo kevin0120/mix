@@ -44,11 +44,11 @@ type Workorders struct {
 	Payload        string      `xorm:"text" json:"-"`
 	MarshalPayload interface{} `xorm:"-" json:"-"`
 
-	Workorder             string    `xorm:"text 'workorder'" json:"-"`
-	Code                  string    `xorm:"pk unique varchar(128) 'code'"  json:"code"`
-	Track_code            string    `xorm:"varchar(128) 'track_code'" json:"track_code"`
-	Product_code          string    `xorm:"varchar(128) 'product_code'" json:"product_code"`
-	Workcenter            string    `xorm:"varchar(128) 'workcenter'" json:"workcenter"`
+	Workorder    string `xorm:"text 'workorder'" json:"-"`
+	Code         string `xorm:"pk unique varchar(128) 'code'"  json:"code"`
+	Track_code   string `xorm:"varchar(128) 'track_code'" json:"track_code"`
+	Product_code string `xorm:"varchar(128) 'product_code'" json:"product_code"`
+	//Workcenter            string    `xorm:"varchar(128) 'workcenter'" json:"workcenter"`
 	Date_planned_start    time.Time `xorm:"datetime 'date_planned_start'" json:"date_planned_start"`
 	Date_planned_complete time.Time `xorm:"datetime 'date_planned_complete'" json:"date_planned_complete"`
 	Status                string    `xorm:"varchar(32) default 'todo' 'status' " json:"status"`
