@@ -67,6 +67,8 @@ func (s *Service) Open() error {
 	s.ODOO.Aiis.OdooStatusDispatcher.Register(s.OnOdooStatus)
 	s.ODOO.Aiis.AiisStatusDispatcher.Register(s.OnAiisStatus)
 
+	s.initRequestDispatchers()
+
 	var r httpd.Route
 
 	r = httpd.Route{
