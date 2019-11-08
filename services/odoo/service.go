@@ -228,6 +228,7 @@ func (s *Service) GetWorkorder(masterpcSn string, hmiSn string, workcenterCode, 
 		body, err = s.getWorkorder(url, endpoint.method)
 		if err == nil {
 			// 如果第一次就成功，推出循环
+			s.HandleWorkorder(body)
 			return body, nil
 		}
 	}

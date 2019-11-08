@@ -280,7 +280,7 @@ func (s *Service) PutResult(result_id int64, body interface{}) error {
 	return err
 }
 
-func (s *Service) PutMesOpenRequest(code string, req interface{}) (interface{}, error) {
+func (s *Service) PutMesOpenRequest(sn uint64, wsType string, code string, req interface{}) (interface{}, error) {
 	urlString := s.Config().MesOpenWorkUrl
 	url := fmt.Sprintf(urlString, code)
 	resp, err := s.httpClient.R().
@@ -288,13 +288,17 @@ func (s *Service) PutMesOpenRequest(code string, req interface{}) (interface{}, 
 		Put(url)
 
 	if err != nil {
+		body, _ := json.Marshal(wsnotify.GenerateReply(sn, wsType, -2, err.Error()))
+		s.WS.WSSend(wsnotify.WS_EVENT_REPLY, string(body))
 		return nil, err
 	}
-
+	//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, resp.(string)))
+	body, _ := json.Marshal(wsnotify.GenerateResult(sn, wsType, resp))
+	s.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
 	return resp.Body(), nil
 }
 
-func (s *Service) PutMesFinishRequest(code string, req interface{}) (interface{}, error) {
+func (s *Service) PutMesFinishRequest(sn uint64, wsType string, code string, req interface{}) (interface{}, error) {
 	url := fmt.Sprintf(s.Config().MesFinishWorkUrl, code)
 	resp, err := s.httpClient.R().
 		SetBody(req).
@@ -302,8 +306,13 @@ func (s *Service) PutMesFinishRequest(code string, req interface{}) (interface{}
 		Put(url)
 
 	if err != nil {
+		body, _ := json.Marshal(wsnotify.GenerateReply(sn, wsType, -2, err.Error()))
+		s.WS.WSSend(wsnotify.WS_EVENT_REPLY, string(body))
 		return nil, err
 	}
+	//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+	body, _ := json.Marshal(wsnotify.GenerateResult(sn, wsType, resp))
+	s.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
 
 	return resp.Body(), nil
 }
