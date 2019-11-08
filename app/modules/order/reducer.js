@@ -10,13 +10,6 @@ import type {
   tOrderActionTypes
 } from './interface/typeDef';
 import {
-  demoOrder,
-  demoOrderCancel,
-  demoOrderDone,
-  demoOrderLong,
-  demoOrderPending
-} from './demoData';
-import {
   orderLength,
   viewingIndex,
   viewingOrder,
@@ -25,21 +18,13 @@ import {
   workingOrder,
   workingStep
 } from './selector';
-import OrderMixin from './Order';
-import Step from '../step/Step';
 import type { IOrder } from './interface/IOrder';
 
 const initState: tOrderState = {
   workingOrder: null,
   viewingOrder: null,
   viewingIndex: 0,
-  list: [
-    // demoOrder,
-    // demoOrderLong,
-    // demoOrderCancel,
-    // demoOrderPending,
-    // demoOrderDone
-  ].map(o => new (OrderMixin(Step))(o))
+  list: []
 };
 
 function limitIndex(order: ?IOrder, index: tOrderStepIdx): tOrderStepIdx {
@@ -53,9 +38,11 @@ function limitIndex(order: ?IOrder, index: tOrderStepIdx): tOrderStepIdx {
 }
 
 const orderReducer: {
-  [key: tOrderActionTypes]: tReducer<tOrderState,
+  [key: tOrderActionTypes]: tReducer<
+    tOrderState,
     // eslint-disable-next-line flowtype/no-weak-types
-    tAction<tOrderActionTypes, any>>
+    tAction<tOrderActionTypes, any>
+  >
 } = {
   [ORDER.NEW_LIST]: (state, { list }: { list: Array<IOrder> }) => ({
     ...state,

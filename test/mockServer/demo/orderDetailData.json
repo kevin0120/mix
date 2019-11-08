@@ -3,7 +3,6 @@
   "code": "MO0002",
   "track_code": "",
   "product_code": "",
-  "workcenter": "",
   "date_planned_start": "",
   "date_planned_complete": "",
   "status": "",
@@ -40,6 +39,17 @@
         "users": ["112233"]
       },
       "desc": "测试工艺作业"
+    },
+    "workcenter": {
+      "code": "TA2-26L-01",
+      "locations": [
+        {
+          "equipment_sn": "1234567",
+          "io_input": 1,
+          "io_output": 1,
+          "product_code": "C1780589"
+        }
+      ]
     }
   },
   "steps": [
