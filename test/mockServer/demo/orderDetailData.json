@@ -1,0 +1,90 @@
+{
+  "id": 1,
+  "code": "MO0002",
+  "track_code": "",
+  "product_code": "",
+  "workcenter": "",
+  "date_planned_start": "",
+  "date_planned_complete": "",
+  "status": "",
+  "product_type_image": "",
+  "payload": {
+    "product": {
+      "url": "string",
+      "code": "string"
+    },
+    "worksheet": {
+      "url": "http://baidu.com",
+      "name": "工艺指导书1",
+      "revision": "v1"
+    },
+    "environments": [
+      {
+        "text": "string",
+        "test_type": "text",
+        "code": "1111",
+        "sequence": 1,
+        "desc": "string"
+      }
+    ],
+    "components": [
+      {
+        "is_key": true,
+        "code": "1111"
+      }
+    ],
+    "operation": {
+      "code": "G0C",
+      "resources": {
+        "equipments": ["xx0011"],
+        "users": ["112233"]
+      },
+      "desc": "测试工艺作业"
+    }
+  },
+  "steps": [
+    {
+      "code": "T0001",
+      "sequence": 1,
+      "test_type": "text",
+      "failure_msg": "测试文本工步失败消息",
+      "desc": "测试文本工步描述",
+      "image": "",
+      "skippable": true,
+      "undoable": true,
+      "data": "",
+      "status": "",
+      "payload": {
+        "text": "测试文本工步"
+      }
+    },
+    {
+      "code": "T0002",
+      "sequence": 2,
+      "test_type": "tightening",
+      "failure_msg": "测试拧紧工步失败消息",
+      "desc": "测试拧紧工步描述",
+      "image": "",
+      "skippable": true,
+      "undoable": true,
+      "data": "",
+      "status": "",
+      "payload": {
+        "tightening_points": [
+          {
+            "is_key": true,
+            "pset": "1",
+            "sequence": 1,
+            "y": 0,
+            "x": 0,
+            "key_num": 1,
+            "tightening_tool": "xx1233",
+            "max_redo_times": 3,
+            "group_sequence": 1,
+            "nut_no": ""
+          }
+        ]
+      }
+    }
+  ]
+}

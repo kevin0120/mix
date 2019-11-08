@@ -1,0 +1,89 @@
+{
+  "code": "MO0002",
+  "components": [
+    {
+      "code": "1111",
+      "is_key": true
+    }
+  ],
+  "date_planned_complete": "2019-10-17T12:20:30+08:00",
+  "date_planned_start": "2019-10-16T11:20:30+08:00",
+  "environments": [
+    {
+      "code": "1111",
+      "desc": "string",
+      "sequence": 1,
+      "test_type": "text",
+      "text": "string"
+    }
+  ],
+  "operation": {
+    "code": "G0C",
+    "desc": "测试工艺作业",
+    "resources": {
+      "equipments": ["xx0011"],
+      "users": ["112233"]
+    }
+  },
+  "product": {
+    "code": "string",
+    "url": "string"
+  },
+  "product_code": "M000001780589",
+  "steps": [
+    {
+      "code": "T0002",
+      "desc": "测试拧紧工步描述",
+      "failure_msg": "测试拧紧工步失败消息",
+      "image": "http://127.0.0.1:8080/picture",
+      "sequence": 2,
+      "status1": "",
+      "status2": "",
+      "test_type": "tightening",
+      "tightening_image_by_step_code": "T0002",
+      "tightening_points": [
+        {
+          "group_sequence": 1,
+          "is_key": false,
+          "key_num": 1,
+          "max_redo_times": 3,
+          "pset": "1",
+          "sequence": 1,
+          "tightening_tool": "xx1233",
+          "x": 20,
+          "y": 20
+        },
+        {
+          "group_sequence": 2,
+          "is_key": false,
+          "key_num": 1,
+          "max_redo_times": 3,
+          "pset": "1",
+          "sequence": 2,
+          "tightening_tool": "xx1233",
+          "x": 50,
+          "y": 50
+        },
+        {
+          "group_sequence": 3,
+          "is_key": false,
+          "key_num": 1,
+          "max_redo_times": 3,
+          "pset": "1",
+          "sequence": 3,
+          "tightening_tool": "xx1233",
+          "x": 80,
+          "y": 80
+        }
+      ],
+      "tightening_total": 3
+    }
+  ],
+  "track_code": "XM205Z03",
+  "workcenter": "TA2-26L-01",
+  "worksheet": {
+    "name": "工艺指导书1",
+    "revision": "v1",
+    "url": "http://baidu.com"
+  }
+}
