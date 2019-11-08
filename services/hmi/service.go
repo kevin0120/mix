@@ -492,16 +492,7 @@ func (s *Service) OnWS_ORDER_START_REQUEST(data interface{}) {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 		return
 	}
-	resp, err := s.Aiis.PutMesOpenRequest(orderReq.Code, sData)
-
-	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
-		return
-	}
-	s.diag.Debug(fmt.Sprintf("Mes处理开工请求的结果推送HMI: %s", resp.(string)))
-	//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, resp.(string)))
-	body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, resp))
-	s.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
+	go s.Aiis.PutMesOpenRequest(msg.SN, msg.Type, orderReq.Code, sData)
 }
 
 // 完工请求
@@ -522,16 +513,8 @@ func (s *Service) OnWS_ORDER_FINISH_REQUEST(data interface{}) {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 		return
 	}
-	resp, err := s.Aiis.PutMesFinishRequest(orderReq.Code, sData)
 
-	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
-		return
-	}
-	s.diag.Debug(fmt.Sprintf("Mes处理完工请求的结果推送HMI: %s", resp.(string)))
-	//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
-	body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, resp))
-	s.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
+	go s.Aiis.PutMesFinishRequest(msg.SN, msg.Type, orderReq.Code, sData)
 
 }
 
@@ -587,18 +570,20 @@ func (s *Service) OnWS_ORDER_DETAIL_BY_CODE(data interface{}) {
 	w, err := s.DB.WorkorderOut(orderReq.Code, 0)
 	//todo 判定本地无工单
 	if w == nil && err == nil {
-		fmt.Println("如果RUSH收到HMI请求后找不到新工单,可通过调用ODOO api获取对应工单并推送HMI")
-		orderData, err := s.ODOO.GetWorkorder("", "", orderReq.Workcenter, orderReq.Code)
-
-		if err == nil {
-			s.ODOO.HandleWorkorder(orderData)
-		}
+		go s.ODOO.GetWorkorder("", "", orderReq.Workcenter, orderReq.Code)
 	}
 	if err != nil {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
 		return
 	}
+
+	if w == nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -3, "本地没有工单,正在向后台查询..."))
+		return
+	}
+
 	body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, w))
+	//fmt.Println(string(body))
 	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_ORDER, string(body))
 }
 

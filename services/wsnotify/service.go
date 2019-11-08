@@ -1,13 +1,12 @@
 package wsnotify
 
 import (
-	"github.com/kataras/iris/core/errors"
-	"github.com/kataras/iris/websocket"
-	"sync"
-
 	"encoding/json"
 	"fmt"
+	"github.com/kataras/iris/core/errors"
+	"github.com/kataras/iris/websocket"
 	"github.com/masami10/rush/services/httpd"
+	"sync"
 	"sync/atomic"
 )
 
@@ -75,8 +74,6 @@ func (s *Service) Config() Config {
 func (s *Service) onConnect(c websocket.Connection) {
 
 	c.OnMessage(func(data []byte) {
-
-		s.diag.OnMessage(string(data))
 		msg := WSMsg{}
 		err := json.Unmarshal(data, &msg)
 		if err != nil {
