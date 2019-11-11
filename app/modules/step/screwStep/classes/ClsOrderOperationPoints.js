@@ -10,17 +10,25 @@ export class ClsOrderOperationPoints {
   _groups: { [groupSeq: number]: ClsOperationPointGroup } = {};
 
   static validatePayload(payload: tScrewStepPayload): boolean {
-    CommonLog.Debug(`ClsOrderOperationPoints validatePayload Points: ${JSON.stringify(payload.tightening_points)}`);
+    CommonLog.Debug(
+      `ClsOrderOperationPoints validatePayload Points: ${JSON.stringify(
+        payload.tightening_points
+      )}`
+    );
     let ret: boolean = true;
     const { controllerMode, jobID } = payload;
     switch (controllerMode) {
       case 'job':
         if (isNil(jobID)) {
-          CommonLog.Info('ClsOrderOperationPoints validatePayload Controller Mode Is Job, But Job ID Is Undefined');
+          CommonLog.Info(
+            'ClsOrderOperationPoints validatePayload Controller Mode Is Job, But Job ID Is Undefined'
+          );
           return false;
         }
         if (jobID <= 0) {
-          CommonLog.Info('ClsOrderOperationPoints validatePayload Job Is Less Than Zero');
+          CommonLog.Info(
+            'ClsOrderOperationPoints validatePayload Job Is Less Than Zero'
+          );
           return false;
         }
         break;
@@ -55,9 +63,7 @@ export class ClsOrderOperationPoints {
     if (isExist) {
       pg = this.operationGroups[groupSeq];
     } else {
-      CommonLog.Debug(
-        `Group Seq: ${groupSeq} Does Not Exist! Creating...`
-      );
+      CommonLog.Debug(`Group Seq: ${groupSeq} Does Not Exist! Creating...`);
       pg = new ClsOperationPointGroup(groupSeq, p.key_num);
       this._groups[groupSeq] = pg;
     }
@@ -73,7 +79,7 @@ export class ClsOrderOperationPoints {
   newResult(results: Array<tResult>) {
     let newActivePoints = [];
     let newInactivePoints = [];
-    results.forEach((r) => {
+    results.forEach(r => {
       const { sequence: seq } = r;
       const group = this.getGroupByPointSequence(seq);
       if (!group) {
@@ -86,7 +92,11 @@ export class ClsOrderOperationPoints {
         return;
       }
       // eslint-disable-next-line radix
-      const gSeq = Math.min(...Object.keys(this._groups).map(s => parseInt(s)).filter(s => s > groupSeq));
+      const gSeq = Math.min(
+        ...Object.keys(this._groups)
+          .map(s => parseInt(s))
+          .filter(s => s > groupSeq)
+      );
       const nextGroup = this._groups[gSeq];
       if (!nextGroup) {
         return;
@@ -120,24 +130,31 @@ export class ClsOrderOperationPoints {
   }
 
   getGroupByPointSequence(seq: number): ?ClsOperationPointGroup {
-    const groups: Array<ClsOperationPointGroup> = Object.values(this.operationGroups);
-    return groups.find(g => {
-      return g.points.some(p => p.sequence === seq);
-    });
+    // eslint-disable-next-line flowtype/no-weak-types
+    const groups: Array<ClsOperationPointGroup> = (Object.values(
+      this.operationGroups
+    ): any);
+    return groups.find(g => g.points.some(p => p.sequence === seq));
   }
 
   isPass() {
     // eslint-disable-next-line radix
-    return Object.keys(this._groups).every(g => this._groups[parseInt(g)].isAllPass());
+    return Object.keys(this._groups).every(g =>
+      this._groups[parseInt(g)].isAllPass()
+    );
   }
 
   isFailed() {
     // eslint-disable-next-line radix
-    return Object.keys(this._groups).some(g => this._groups[parseInt(g)].isFailed());
+    return Object.keys(this._groups).some(g =>
+      this._groups[parseInt(g)].isFailed()
+    );
   }
 
   hasPoint(point: ClsOperationPoint) {
     // eslint-disable-next-line radix
-    return Object.keys(this._groups).some(k => this._groups[parseInt(k)].hasPoint(point));
+    return Object.keys(this._groups).some(k =>
+      this._groups[parseInt(k)].hasPoint(point)
+    );
   }
 }

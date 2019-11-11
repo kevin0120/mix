@@ -13,11 +13,14 @@ export type tIOContact = {
 };
 
 export type tIOWSDataContact = {
-  +sn: string,
-  +type: tIODirection,// TODO
-  +contact: string // 位串
+  // +sn: string,
+  // +type: tIODirection,// TODO
+  // +contact: string // 位串
+  src: string, // 设备类型
+  sn: string, // 序列号
+  inputs?: string,
+  outputs?: string
 };
-
 
 // 上升沿，下降沿，双向(toggle)
 export type tIOTriggerMode = $Values<typeof ioTriggerMode>;
@@ -31,14 +34,13 @@ export type iIODataField = {
 
 // IO数据字段，key代表的是哪一位， value代表开或者关和相关的action
 export interface iIODataFieldObj {
-  [key: number]: iIODataField
+  [key: number]: iIODataField;
 }
 
 export type tIOData = {
   input: string,
   output: string
 };
-
 
 export type tIOPort = {
   direction: tIODirection,
@@ -51,5 +53,6 @@ export type tIOChange = {
 };
 
 export type tIOConfig = {
-  input_num: number, output_num: number
+  input_num: number,
+  output_num: number
 };

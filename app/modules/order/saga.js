@@ -87,15 +87,14 @@ function onNewScanner({ scanner }) {
 
 // TODO: 工单持久化
 
-// TODO: 开工、报工接口
 function* reportFinish({
-                         code,
-                         trackCode,
-                         productCode,
-                         workCenterCode,
-                         dateComplete,
-                         operation
-                       }) {
+  code,
+  trackCode,
+  productCode,
+  workCenterCode,
+  dateComplete,
+  operation
+}) {
   try {
     yield call(
       orderReportFinishApi,
@@ -124,9 +123,9 @@ function* watchOrderTrigger() {
 }
 
 function* tryWorkOnOrder({
-                           order,
-                           code
-                         }: {
+  order,
+  code
+}: {
   order: IOrder,
   code: string | number
 }) {
@@ -210,7 +209,7 @@ function* getOrderDetail({ order }) {
 function* getOrderList() {
   try {
     yield call(orderListApi, {
-      // TODO
+      // TODO: order query args
     });
   } catch (e) {
     CommonLog.lError(e, {
@@ -220,15 +219,14 @@ function* getOrderList() {
 }
 
 function* tryViewOrder({
-                         order: orderRec,
-                         code
-                       }: {
+  order: orderRec,
+  code
+}: {
   order: IOrder,
   code: string | number
 }) {
   try {
     yield put(loadingActions.start());
-
 
     const orderList = yield select(s => s.order.list);
     let order = orderRec;
@@ -238,7 +236,6 @@ function* tryViewOrder({
     }
 
     if (!order) {
-      // TODO: use remote workcenter code
       const workcenterCode = yield select(s => s.systemInfo.workcenter);
       const { data } = yield call(orderDetailByCodeApi, code, workcenterCode);
       order = data;
@@ -294,11 +291,11 @@ function* viewOrder({ order }: { order: IOrder }) {
             color: 'warning'
           },
           !WIPOrder &&
-          doable(order) && {
-            label: 'Order.Start',
-            color: 'info',
-            action: orderActions.tryWorkOn(order)
-          }
+            doable(order) && {
+              label: 'Order.Start',
+              color: 'info',
+              action: orderActions.tryWorkOn(order)
+            }
         ],
         title: i18n.t('Order.Overview'),
         content: (

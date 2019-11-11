@@ -26,12 +26,12 @@ export const IO_WS_TYPES = Object.freeze({
   SET: 'WS_IO_SET'
 });
 
-export const ioTriggerMode = {
+export const ioTriggerMode = Object.freeze({
   rising: 'rising',
   falling: 'falling',
   // high:'high',
   // low:'low',
   change: 'change'
-};
+});
 
 export default IO_FUNCTION;
