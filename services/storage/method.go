@@ -12,7 +12,7 @@ import (
 
 func (s *Service) WorkorderIn(in []byte) (string, error) {
 
-	session := s.eng.NewSession()
+	session := s.eng.NewSession().ForUpdate()
 	defer session.Close()
 	session.Begin()
 	var work Workorders
@@ -26,6 +26,12 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 		return "", err
 	}
 
+	//删除已有公布工单,条件:收到的工单号比原有工单号大
+	roll, _ := s.DeleteWorkAndStep(session, work.Code, work.Unique_Num)
+	if roll {
+		session.Rollback()
+		return "", errors.Wrapf(err, "本地已有更新版本号对应的工单")
+	}
 	wp, err := json.Marshal(workPayload)
 	//dt := time.Now()
 	//if data.controllerResult.Dat != "" {
@@ -45,9 +51,8 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 		Status:                "todo",
 		Date_planned_start:    work.Date_planned_start,
 		Date_planned_complete: work.Date_planned_start,
+		Unique_Num:            work.Unique_Num,
 	}
-	//
-	s.DeleteWorkAndStep(session,work.Code)
 
 	//var hh map[string]interface{}
 	//

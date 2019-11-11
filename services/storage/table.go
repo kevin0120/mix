@@ -54,6 +54,8 @@ type Workorders struct {
 	Status                string    `xorm:"varchar(32) default 'todo' 'status' " json:"status"`
 	Product_type_image    string    `json:"product_type_image"`
 
+	Unique_Num int64 `xorm:"bigint 'unique_num'" json:"unique_num"`
+
 	Created time.Time `xorm:"created" json:"-"`
 	Updated time.Time `xorm:"updated" json:"-"`
 }

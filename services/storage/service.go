@@ -1050,15 +1050,18 @@ func (s *Service) WorkorderStep(workorderID int64) (*WorkorderStep, error) {
 	}, nil
 }
 
-func (s *Service) DeleteWorkAndStep(ss *xorm.Session,code string) error {
+func (s *Service) DeleteWorkAndStep(ss *xorm.Session, code string, uniqueNum int64) (bool, error) {
 	var workorder Workorders
 
 	bool, e := ss.Alias("r").Where("r.code = ?", code).Get(&workorder)
 	if e != nil {
-		return e
+		return false, e
 	}
 	if !bool {
-		return nil
+		return false, nil
+	}
+	if workorder.Unique_Num > uniqueNum {
+		return true, nil
 	}
 	sql1 := "delete from `workorders` where id = ?"
 	sql2 := "delete from `steps` where x_workorder_id = ?"
@@ -1066,7 +1069,7 @@ func (s *Service) DeleteWorkAndStep(ss *xorm.Session,code string) error {
 	_, err := ss.Exec(sql1, workorder.Id)
 
 	_, err = ss.Exec(sql2, workorder.Id)
-	return err
+	return false, err
 }
 
 func (s *Service) UpdateStep(step *Steps) (*Steps, error) {
