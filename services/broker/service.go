@@ -1,6 +1,7 @@
 package broker
 
 import (
+	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"sync/atomic"
 	"time"
@@ -13,17 +14,21 @@ type Diagnostic interface {
 }
 
 type Service struct {
-	diag        Diagnostic
-	configValue atomic.Value
-	Provider    IBrokerProvider
-	opened      bool
+	diag                  Diagnostic
+	configValue           atomic.Value
+	Provider              IBrokerProvider
+	opened                bool
+	BrokerStatusDisptcher *utils.Dispatcher
+	closing               chan struct{}
 }
 
 func NewService(c Config, d Diagnostic) *Service {
 
 	s := &Service{
-		diag:   d,
-		opened: false,
+		diag:                  d,
+		opened:                false,
+		BrokerStatusDisptcher: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		closing:               make(chan struct{}, 1),
 	}
 	s.configValue.Store(c)
 
@@ -40,21 +45,38 @@ func (s *Service) Config() Config {
 func (s *Service) Open() error {
 	c := s.Config()
 	if c.Enable {
-		if err := s.Provider.Connect(c.ConnectUrls); err != nil {
-			s.Provider = NewDefaultBroker()
-			return err
-		} else {
-			s.opened = true
-		}
+		s.BrokerStatusDisptcher.Start()
+		go s.connectProc()
 	}
 	return nil
 }
 
 func (s *Service) Close() error {
+	s.closing <- struct{}{}
+	s.BrokerStatusDisptcher.Release()
 	if s.Provider != nil {
 		return s.Provider.Close()
 	}
 	return nil
+}
+
+func (s *Service) connectProc() {
+	for {
+		select {
+		case <-time.After(1 * time.Second):
+			if err := s.Provider.Connect(s.Config().ConnectUrls); err != nil {
+				continue
+			} else {
+				s.opened = true
+				s.diag.Debug("Broker Service Started")
+				s.BrokerStatusDisptcher.Dispatch(s.opened)
+				return
+			}
+
+		case <-s.closing:
+			return
+		}
+	}
 }
 
 func (s *Service) newBroker(provider string) (ret IBrokerProvider) {
