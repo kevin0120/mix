@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
+	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"gopkg.in/resty.v1"
@@ -15,7 +16,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"github.com/masami10/rush/services/wsnotify"
 )
 
 type Diagnostic interface {
@@ -55,18 +55,15 @@ type Service struct {
 	//LocalWSServer *wsnotify.Service
 	//Odoo 		*odoo.Service
 	//OnOdooStatus OnOdooStatus
-	WS           *wsnotify.Service
-	updateQueue  map[int64]time.Time
-	mtx          sync.Mutex
+	WS          *wsnotify.Service
+	updateQueue map[int64]time.Time
+	mtx         sync.Mutex
 
 	OdooStatusDispatcher *utils.Dispatcher
 	AiisStatusDispatcher *utils.Dispatcher
 	SyncGun              SyncGun
 	SN                   string
 	rpc                  GRPCClient
-
-	updateQueue map[int64]time.Time
-	mtx         sync.Mutex
 
 	TighteningService *tightening_device.Service
 }

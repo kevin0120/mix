@@ -471,20 +471,21 @@ func (s *Service) ListWorkorders(hmi_sn string, workcenterCode string, status st
 	return workorders, err
 }
 
-func (s *Service) GetStep(id int64) (Steps, error) {
-	var step Steps
-	rt, err := s.eng.Alias("s").Where(fmt.Sprintf("s.id = ?", id), id).Get(&step)
-
-	if err != nil {
-		return step, err
-	} else {
-		if !rt {
-			return step, errors.New("step does not exist")
-		} else {
-			return step, nil
-		}
-	}
-}
+//
+//func (s *Service) GetStep(id int64) (Steps, error) {
+//	var step Steps
+//	rt, err := s.eng.Alias("s").Where(fmt.Sprintf("s.id = ?", id), id).Get(&step)
+//
+//	if err != nil {
+//		return step, err
+//	} else {
+//		if !rt {
+//			return step, errors.New("step does not exist")
+//		} else {
+//			return step, nil
+//		}
+//	}
+//}
 
 func (s *Service) GetWorkorder(id int64, raw bool) (Workorders, error) {
 
@@ -888,17 +889,17 @@ func (s *Service) IsMultiResult(workorderID int64, batch string) bool {
 	}
 }
 
-func (s *Service) UpdateResultTriggerTime(trigger_type string, trigger_time time.Time, controller_sn string) error {
-
-	sql := fmt.Sprintf("update `controllers` set %s = ? where controller_sn = ?", trigger_type, trigger_time)
-	_, err := s.eng.Exec(sql, controller_sn)
-
-	if err != nil {
-		return err
-	} else {
-		return nil
-	}
-}
+//func (s *Service) UpdateResultTriggerTime(trigger_type string, trigger_time time.Time, controller_sn string) error {
+//
+//	sql := fmt.Sprintf("update `controllers` set %s = ? where controller_sn = ?", trigger_type, trigger_time)
+//	_, err := s.eng.Exec(sql, controller_sn)
+//
+//	if err != nil {
+//		return err
+//	} else {
+//		return nil
+//	}
+//}
 
 func (s *Service) GetController(sn string) (interface{}, error) {
 
@@ -964,8 +965,12 @@ func (s *Service) DropTableManage() error {
 	}
 }
 
-func (s *Service) Workorders(status string) ([]Workorders, error) {
-	var rt []Workorders
+func (s *Service) Workorders(par []byte) ([]Workorders, error) {
+	orderPar := WorkorderListPar{}
+	err := json.Unmarshal(par, &orderPar)
+	if err != nil {
+		return nil, err
+	}
 
 	q := s.eng.Alias("w")
 	if orderPar.Status != "" {
@@ -984,11 +989,15 @@ func (s *Service) Workorders(status string) ([]Workorders, error) {
 	if orderPar.Page_size == 0 {
 		orderPar.Page_size = 20
 	}
-	q.Limit(orderPar.Page_size, orderPar.Page_no*orderPar.Page_size+1)
+	q.Limit(orderPar.Page_size, orderPar.Page_no*orderPar.Page_size)
 
 	var rt []Workorders
 
 	err = q.Find(&rt)
+
+	for i := 0; i < len(rt); i++ {
+		rt[i].Product_type_image, err = s.findOrderPicture(rt[i].Product_code)
+	}
 
 	if err != nil {
 		return nil, err
@@ -1039,6 +1048,25 @@ func (s *Service) WorkorderStep(workorderID int64) (*WorkorderStep, error) {
 		Workorders: workorder,
 		Steps:      steps,
 	}, nil
+}
+
+func (s *Service) DeleteWorkAndStep(ss *xorm.Session, code string) error {
+	var workorder Workorders
+
+	bool, e := ss.Alias("r").Where("r.code = ?", code).Get(&workorder)
+	if e != nil {
+		return e
+	}
+	if !bool {
+		return nil
+	}
+	sql1 := "delete from `workorders` where id = ?"
+	sql2 := "delete from `steps` where x_workorder_id = ?"
+
+	_, err := ss.Exec(sql1, workorder.Id)
+
+	_, err = ss.Exec(sql2, workorder.Id)
+	return err
 }
 
 func (s *Service) UpdateStep(step *Steps) (*Steps, error) {

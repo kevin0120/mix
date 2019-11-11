@@ -207,7 +207,10 @@ func (s *Service) Close() error {
 	return nil
 }
 
-func (s *Service) GetWorkorder(masterpcSn string, hmiSn string, workcenterCode, code string) ([]byte, error) {
+func (s *Service) HandleWorkorder(data []byte) {
+	s.workordersChannel <- data
+}
+func (s *Service) GetWorkorder(masterpcSn string, hmiSn string, workcenterCode, code string, ch <-chan int) ([]byte, error) {
 
 	var err error
 	var body []byte
@@ -225,9 +228,12 @@ func (s *Service) GetWorkorder(masterpcSn string, hmiSn string, workcenterCode, 
 		body, err = s.getWorkorder(url, endpoint.method)
 		if err == nil {
 			// 如果第一次就成功，推出循环
+			s.HandleWorkorder(body)
+			<-ch
 			return body, nil
 		}
 	}
+	<-ch
 	return nil, errors.Wrap(err, "Get workorder fail")
 }
 
@@ -455,7 +461,22 @@ func (s *Service) taskSaveWorkorders() {
 	for {
 		select {
 		case payload := <-s.workordersChannel:
-			s.handleSaveWorkorders(payload)
+			//s.handleSaveWorkorders(payload)
+			code, err := s.DB.WorkorderIn(payload.([]byte))
+			if err != nil {
+				break
+			}
+			orderOut, _ := s.DB.WorkorderOut(code, 0)
+			out, _ := json.Marshal(orderOut)
+			s.diag.Debug(fmt.Sprintf("收到工单處理後: %s", string(out)))
+			var orderHmi []interface{}
+			orderHmi = append(orderHmi, orderOut)
+			//fmt.Println(string(orderOut))
+			//fmt.Println(orderHmi)
+			body, _ := json.Marshal(wsnotify.GenerateMessage(0, WS_ORDER_NEW_ORDER, orderHmi))
+
+			s.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
+			s.diag.Debug(fmt.Sprintf("收到工单并推送HMI: %s", string(body)))
 
 		case <-s.closing:
 			s.diag.Info("taskSaveWorkorders closed")

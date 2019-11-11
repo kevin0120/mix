@@ -14,22 +14,45 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 
 	session := s.eng.NewSession()
 	defer session.Close()
-
+	session.Begin()
 	var work Workorders
+	var workPayload WorkorderPayload
 	err := json.Unmarshal(in, &work)
+	if err != nil {
+		return "", err
+	}
+	err = json.Unmarshal(in, &workPayload)
+	if err != nil {
+		return "", err
+	}
+
+	wp, err := json.Marshal(workPayload)
+	//dt := time.Now()
+	//if data.controllerResult.Dat != "" {
+	//	loc, _ := time.LoadLocation("Local")
+	//	dt, _ = time.ParseInLocation("2006-01-02 15:04:05", data.controllerResult.Dat, loc)
+	//}
+	//
+	//dbResult.UpdateTime = dt.UTC()
+	//
 
 	workorder1 := Workorders{
-		Workorder:    string(in),
+		Workorder:    string(wp),
 		Code:         work.Code,
 		Track_code:   work.Track_code,
 		Product_code: work.Product_code,
-		Status:       "ready",
+		//Workcenter:            work.Workcenter,
+		Status:                "todo",
+		Date_planned_start:    work.Date_planned_start,
+		Date_planned_complete: work.Date_planned_start,
 	}
+	//
+	s.DeleteWorkAndStep(session, work.Code)
 
 	//var hh map[string]interface{}
 	//
 	//err = json.Unmarshal(wor, &hh)
-	_, err = s.eng.Insert(&workorder1)
+	_, err = session.Insert(&workorder1)
 	// INSERT INTO struct () values ()
 	//engine.Ping()
 	//有的数据库超时断开ping可以重连。可以通过起一个定期Ping的Go程来保持连接鲜活。
@@ -38,31 +61,47 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 		return "", errors.Wrapf(err, "store data fail")
 	}
 
-	var hh map[string]interface{}
+	var workorderMap map[string]interface{}
 	var step []map[string]interface{}
 
-	err = json.Unmarshal(in, &hh)
+	err = json.Unmarshal(in, &workorderMap)
 
-	cc, _ := json.Marshal(hh["steps"])
+	steps, _ := json.Marshal(workorderMap["steps"])
 
-	err = json.Unmarshal(cc, &step)
+	err = json.Unmarshal(steps, &step)
 
 	for i := 0; i < len(step); i++ {
-		a, _ := json.Marshal(step[i])
+		stepString, _ := json.Marshal(step[i])
 		var msg Steps
-		err = json.Unmarshal(a, &msg)
+		var stepText StepTextPayload
+		var stepTightening StepTighteningPayload
+		var sp []byte
+		err = json.Unmarshal(stepString, &msg)
 
-		step := Steps{
-			WorkorderID: workorder1.Id,
-			Step:        string(a),
-			Image:       msg.Image,
-
-			Test_type: msg.Test_type,
-			Status:    "ready",
-			Code:      msg.Code,
+		if msg.Testtype == "tightening" {
+			err = json.Unmarshal(stepString, &stepTightening)
+			sp, _ = json.Marshal(stepTightening)
+		} else {
+			err = json.Unmarshal(stepString, &stepText)
+			sp, _ = json.Marshal(stepText)
 		}
 
-		_, err := s.eng.Insert(&step)
+		step := Steps{
+			WorkorderID:    workorder1.Id,
+			Step:           string(sp),
+			ImageRef:       msg.ImageRef,
+			Testtype:       msg.Testtype,
+			Status:         "ready",
+			Code:           msg.Code,
+			Sequence:       msg.Sequence,
+			FailureMessage: msg.FailureMessage,
+			Desc:           msg.Desc,
+			Skippable:      msg.Skippable,
+			Undoable:       msg.Undoable,
+			Data:           msg.Data,
+		}
+
+		_, err := session.Insert(&step)
 		// INSERT INTO struct () values ()
 		if err != nil {
 			session.Rollback()
@@ -80,7 +119,7 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 
 }
 
-func (s *Service) WorkorderOut(order string, workorderID int64) (error, []byte) {
+func (s *Service) WorkorderOut(order string, workorderID int64) (interface{}, error) {
 
 	var workorder Workorders
 	var ss *xorm.Session
@@ -90,81 +129,76 @@ func (s *Service) WorkorderOut(order string, workorderID int64) (error, []byte) 
 		ss = s.eng.Alias("r").Where("r.code = ?", order)
 	}
 
-	_, e := ss.Get(&workorder)
-	if e != nil {
-		return e, nil
+	bool, e := ss.Get(&workorder)
+	if e != nil || !bool {
+		return nil, e
 	}
 
 	var step []Steps
 	ss = s.eng.Alias("r").Where("r.x_workorder_id = ?", workorder.Id)
 	e = ss.Find(&step)
 	if e != nil {
-		return e, nil
+		return nil, e
 	}
 
 	var steps []map[string]interface{}
 	for i := 0; i < len(step); i++ {
-		hh := stringtomap(step[i].Step)
-		jj, _ := json.Marshal(hh["test_type"])
+		stepMap := stringToMap(step[i].Step)
+		stepOut := strucToMap(step[i])
+		stepOut["payload"] = stepMap
 
-		if !(string(jj) == `"tightening"`) {
-			steps = append(steps, hh)
+		if step[i].Testtype != "tightening" {
+			delete(stepOut, "tightening_image_by_step_code")
+			steps = append(steps, stepOut)
 			continue
 		}
-
-		mm := structomap(step[i])
-		for k, v := range mm {
-			hh[k] = v
-		}
-		_, image1 := s.findsteppicture(step[i].ImageRef)
-		hh["image"] = image1
-		steps = append(steps, hh)
+		image1, _ := s.findStepPicture(step[i].ImageRef)
+		stepOut["image"] = image1
+		delete(stepOut, "tightening_image_by_step_code")
+		steps = append(steps, stepOut)
 	}
 
-	ww := stringtomap(workorder.Workorder)
-	mm := structomap(workorder)
-	ww["steps"] = steps
-	for k, v := range mm {
-		ww[k] = v
-	}
+	map2 := stringToMap(workorder.Workorder)
+	workOrderOut := strucToMap(workorder)
+	workOrderOut["steps"] = steps
+	workOrderOut["payload"] = map2
 
-	_, image2 := s.findorderpicture(workorder.Product_code)
-	ww["product_type_image"] = image2
+	image2, _ := s.findOrderPicture(workorder.Product_code)
+	workOrderOut["product_type_image"] = image2
+	//delete(workOrderOut,"product_code")
+	//rr, _ := json.Marshal(workOrderOut)
 
-	rr, _ := json.Marshal(ww)
-
-	return nil, rr
+	return workOrderOut, nil
 }
 
-func structomap(in interface{}) (m map[string]interface{}) {
+func strucToMap(in interface{}) (m map[string]interface{}) {
 	j, _ := json.Marshal(in)
 	json.Unmarshal(j, &m)
 	return
 }
 
-func stringtomap(in string) (m map[string]interface{}) {
+func stringToMap(in string) (m map[string]interface{}) {
 	json.Unmarshal([]byte(in), &m)
 	return
 }
 
-func (s *Service) findsteppicture(ref string) (error, string) {
+func (s *Service) findStepPicture(ref string) (string, error) {
 
 	var ro RoutingOperations
 	ss := s.eng.Alias("r").Where("r.tightening_step_ref = ?", ref).Limit(1)
 	_, e := ss.Get(&ro)
 	if e != nil {
-		return e, ro.Img
+		return "", e
 	}
-	return nil, ""
+	return ro.Img, nil
 }
 
-func (s *Service) findorderpicture(ref string) (error, string) {
-
+func (s *Service) findOrderPicture(ref string) (string, error) {
 	var ro RoutingOperations
 	ss := s.eng.Alias("r").Where("r.product_type = ?", ref).Limit(1)
 	_, e := ss.Get(&ro)
 	if e != nil {
-		return e, ro.ProductTypeImage
+		return "", e
 	}
-	return nil, ""
+	return ro.ProductTypeImage, nil
 }

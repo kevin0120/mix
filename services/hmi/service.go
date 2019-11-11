@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kataras/iris/websocket"
+	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/device"
@@ -16,6 +17,10 @@ import (
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
+)
+
+const (
+	CH_LENGTH = 1024
 )
 
 type Diagnostic interface {
@@ -40,13 +45,16 @@ type Service struct {
 	WS                 *wsnotify.Service
 	TighteningService  *tightening_device.Service
 	requestDispatchers map[string]*utils.Dispatcher
+
+	ChWorkorder chan int
 }
 
 func NewService(d Diagnostic) *Service {
 
 	s := &Service{
-		diag:    d,
-		methods: Methods{},
+		diag:        d,
+		methods:     Methods{},
+		ChWorkorder: make(chan int, CH_LENGTH),
 	}
 
 	s.methods.service = s
@@ -308,8 +316,6 @@ func (s *Service) initRequestDispatchers() {
 		WS_ORDER_DETAIL:           utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		WS_ORDER_UPDATE:           utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		WS_ORDER_STEP_UPDATE:      utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		WS_ORDER_START_REQUEST:    utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		WS_ORDER_FINISH_REQUEST:   utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		WS_ORDER_STEP_DATA_UPDATE: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		WS_ORDER_DETAIL_BY_CODE:   utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 	}
@@ -318,8 +324,6 @@ func (s *Service) initRequestDispatchers() {
 	s.requestDispatchers[WS_ORDER_DETAIL].Register(s.OnWS_ORDER_DETAIL)
 	s.requestDispatchers[WS_ORDER_UPDATE].Register(s.OnWS_ORDER_UPDATE)
 	s.requestDispatchers[WS_ORDER_STEP_UPDATE].Register(s.OnWS_ORDER_STEP_UPDATE)
-	s.requestDispatchers[WS_ORDER_START_REQUEST].Register(s.OnWS_ORDER_START_REQUEST)
-	s.requestDispatchers[WS_ORDER_FINISH_REQUEST].Register(s.OnWS_ORDER_FINISH_REQUEST)
 	s.requestDispatchers[WS_ORDER_STEP_DATA_UPDATE].Register(s.OnWS_ORDER_STEP_DATA_UPDATE)
 	s.requestDispatchers[WS_ORDER_DETAIL_BY_CODE].Register(s.OnWS_ORDER_DETAIL_BY_CODE)
 
@@ -474,67 +478,6 @@ func (s *Service) OnWS_ORDER_STEP_UPDATE(data interface{}) {
 	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
 }
 
-// 开工请求
-func (s *Service) OnWS_ORDER_START_REQUEST(data interface{}) {
-	if data == nil {
-		return
-	}
-
-	wsRequest := data.(*wsnotify.WSRequest)
-	sData, _ := json.Marshal(wsRequest.WSMsg.Data)
-	c := wsRequest.C
-	msg := wsRequest.WSMsg
-
-	orderReq := WSOrderReqCode{}
-	err := json.Unmarshal(sData, &orderReq)
-
-	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
-		return
-	}
-	resp, err := s.Aiis.PutMesOpenRequest(orderReq.Code, sData)
-
-	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
-		return
-	}
-	s.diag.Debug(fmt.Sprintf("Mes处理开工请求的结果推送HMI: %s", resp.(string)))
-	//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, resp.(string)))
-	body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, resp))
-	s.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
-}
-
-// 完工请求
-func (s *Service) OnWS_ORDER_FINISH_REQUEST(data interface{}) {
-	if data == nil {
-		return
-	}
-
-	wsRequest := data.(*wsnotify.WSRequest)
-	sData, _ := json.Marshal(wsRequest.WSMsg.Data)
-	c := wsRequest.C
-	msg := wsRequest.WSMsg
-
-	orderReq := WSOrderReqCode{}
-	err := json.Unmarshal(sData, &orderReq)
-
-	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
-		return
-	}
-	resp, err := s.Aiis.PutMesFinishRequest(orderReq.Code, sData)
-
-	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
-		return
-	}
-	s.diag.Debug(fmt.Sprintf("Mes处理完工请求的结果推送HMI: %s", resp.(string)))
-	//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
-	body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, resp))
-	s.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
-
-}
-
 // 更新工步数据
 func (s *Service) OnWS_ORDER_STEP_DATA_UPDATE(data interface{}) {
 	if data == nil {
@@ -587,19 +530,21 @@ func (s *Service) OnWS_ORDER_DETAIL_BY_CODE(data interface{}) {
 	w, err := s.DB.WorkorderOut(orderReq.Code, 0)
 	//todo 判定本地无工单
 	if w == nil && err == nil {
-		fmt.Println("如果RUSH收到HMI请求后找不到新工单,可通过调用ODOO api获取对应工单并推送HMI")
-		orderData, err := s.ODOO.GetWorkorder("", "", orderReq.Workcenter, orderReq.Code)
-
-		if err == nil {
-			s.ODOO.HandleWorkorder(orderData)
-		}
-
+		s.ChWorkorder <- 1
+		go s.ODOO.GetWorkorder("", "", orderReq.Workcenter, orderReq.Code, s.ChWorkorder)
 	}
 	if err != nil {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
 		return
 	}
+
+	if w == nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -3, "本地没有工单,正在向后台查询..."))
+		return
+	}
+
 	body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, w))
+	//fmt.Println(string(body))
 	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_ORDER, string(body))
 }
 
@@ -687,7 +632,7 @@ func (s *Service) OnTighteningControllerIO(data interface{}) {
 		return
 	}
 
-	inputStatus := data.(*tightening_device.TighteningControllerInput)
+	inputStatus := data.(*io.IoContact)
 
 	msg := wsnotify.WSMsg{
 		Type: io.WS_IO_CONTACT,

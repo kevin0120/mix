@@ -8,6 +8,7 @@ import (
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
+	"io/ioutil"
 	"strconv"
 	"strings"
 	"time"
@@ -17,54 +18,26 @@ type Methods struct {
 	service *Service
 }
 
+// TODO: 创建工单（工单模型/工步模型/结果模型）
 // 创建工单
 func (m *Methods) postWorkorders(ctx iris.Context) {
-	var workorders []ODOOWorkorder
-	err := ctx.ReadJSON(&workorders)
 
-	//m.service.diag.Debug("postWorkorders start")
-
-	if err != nil {
-		// 传输结构错误
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString(err.Error())
-
-		return
-	}
-
-	//m.service.diag.Debug("postWorkorders finsh try to send to workordersChannel")
-
-	m.service.workordersChannel <- &workorders
-
-	//m.service.diag.Debug("postWorkorders finsh send to workordersChannel")
-
-	//_, err = m.service.CreateWorkorders(workorders)
+	orderData, _ := ioutil.ReadAll(ctx.Request().Body)
+	m.service.diag.Debug(fmt.Sprintf("收到下發的工单: %s", string(orderData)))
+	//return
+	//
+	//var workorders []ODOOWorkorder
+	//err := ctx.ReadJSON(&workorders)
 	//
 	//if err != nil {
+	//	// 传输结构错误
 	//	ctx.StatusCode(iris.StatusBadRequest)
 	//	ctx.WriteString(err.Error())
-	//	return
-	//} else {
-	//	ctx.StatusCode(iris.StatusCreated)
+	//
 	//	return
 	//}
 
-	code, err := m.service.DB.WorkorderIn(r)
-
-	if err != nil {
-		return
-	}
-	_, rr := m.service.DB.WorkorderOut(code, 0)
-
-	var bd []interface{}
-	bd = append(bd, string(rr))
-	fmt.Println(string(rr))
-	fmt.Println(bd)
-	body, _ := json.Marshal(wsnotify.GenerateMessage(0, WS_ORDER_NEW_ORDER, bd))
-
-	m.service.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
-	m.service.diag.Debug(fmt.Sprintf("收到工单并推送HMI: %s", string(body)))
-	//m.service.workordersChannel <- &workorders
+	m.service.HandleWorkorder(orderData)
 	ctx.StatusCode(iris.StatusCreated)
 	return
 }
@@ -253,6 +226,9 @@ func (m *Methods) deleteAllRoutingOpertions(ctx iris.Context) {
 
 func (m *Methods) putSyncRoutingOpertions(ctx iris.Context) {
 
+	//orderData, _ := ioutil.ReadAll(ctx.Request().Body)
+	//m.service.diag.Debug(fmt.Sprintf("收到下發的工单: %s", string(orderData)))
+
 	ro := RoutingOperation{}
 	e := ctx.ReadJSON(&ro)
 	if e != nil {
@@ -275,6 +251,8 @@ func (m *Methods) putSyncRoutingOpertions(ctx iris.Context) {
 	db_ro.MaxOpTime = ro.MaxOpTime
 	db_ro.Job = ro.Job
 	db_ro.WorkcenterID = ro.WorkcenterID
+	db_ro.Tigntening_step_ref = ro.Tigntening_step_ref
+	db_ro.ProductTypeImage = ro.ProductTypeImage
 
 	if err != nil {
 		// 新增

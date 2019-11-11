@@ -47,11 +47,6 @@ aiis:
   grpc_server: 127.0.0.1:9093
   keep_alive: 3s
   recheck: false
-<<<<<<< HEAD
-=======
-  mesopenworkurl: http://127.0.0.1:8080/workorders/%s/start
-  mesfinishworkurl: http://127.0.0.1:8080/workorders/%s/finish
->>>>>>> 5f450b83... 1. 推送控制器状态时，加入IO配置
 odoo:
   urls:
   - http://127.0.0.1:8069
@@ -61,12 +56,7 @@ odoo:
   workers: 8
   endpoints:
   - name: getWorkorder
-<<<<<<< HEAD
     path: /api/v1/mrp.workorders?code=%s&limit=1&order=production_date
-=======
-#    path: /api/v1/mrp.workorders?code=%s&limit=1&order=production_date
-    path: /ts002/workorders?code=%s&limit=1&order=production_date
->>>>>>> 5f450b83... 1. 推送控制器状态时，加入IO配置
     headers:
     method: GET
   - name: getGun
@@ -86,16 +76,11 @@ websocket:
   route: /rush/v1/ws
   read_buf_size: 10000000
   write_buf_size: 10000000
-<<<<<<< HEAD
-storage:
-  db_url: 127.0.0.1:5432
-  db_name: rush_hardware
-=======
   workcenter: TA-01L
+
 storage:
   db_url: 127.0.0.1:5432
   db_name: rush_dev
->>>>>>> 5f450b83... 1. 推送控制器状态时，加入IO配置
   db_user: admin
   db_pwd: admin
   max_connection: 60
@@ -132,11 +117,7 @@ scanner:
   enable: false
   entity_label: COM4
 io:
-<<<<<<< HEAD
-  enable: false
-=======
   enable: true
->>>>>>> 5f450b83... 1. 推送控制器状态时，加入IO配置
   flash_inteval: 1s
   ios:
     - sn: 1
@@ -158,11 +139,7 @@ device:
 # 协议类型: Audi/VW, OpenProtocol
 # 支持型号: ModelDesoutterCvi3, ModelDesoutterDeltaWrench
 tightening_device:
-<<<<<<< HEAD
-  enable: false
-=======
   enable: true
->>>>>>> 5f450b83... 1. 推送控制器状态时，加入IO配置
   devices:
     - model: ModelDesoutterCvi3
       protocol: OpenProtocol
@@ -192,7 +169,6 @@ tightening_device:
 
 
 # 协议类型: Audi/VW, OpenProtocol
-<<<<<<< HEAD
 broker:
   enable: true
   connect-urls:
@@ -202,10 +178,7 @@ broker:
   connect-options:
     name: Dummy Server
     token: Dummy Token
-
   provider: nats
-=======
->>>>>>> 5f450b83... 1. 推送控制器状态时，加入IO配置
 controller_service:
   enable: false
   workers: 1
