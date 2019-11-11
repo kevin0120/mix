@@ -5,6 +5,7 @@ const { readerHandlers } = require('./dataHandlers/reader');
 const { resultHandlers } = require('./dataHandlers/result');
 const { registerHandlers } = require('./dataHandlers/register');
 const { toolHandlers } = require('./dataHandlers/tool');
+const { ioHandlers } = require('./dataHandlers/io');
 
 module.exports = {
   ...orderHandlers,
@@ -13,5 +14,6 @@ module.exports = {
   ...deviceHandlers,
   ...resultHandlers,
   ...registerHandlers,
-  ...toolHandlers
+  ...toolHandlers,
+  ...ioHandlers
 };

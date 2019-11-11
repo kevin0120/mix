@@ -1,5 +1,5 @@
 const { events } = require('../constants');
-const { demoDevices } = require('../demo/demoDevice');
+const demoDevices = require('../demo/demoDevice');
 
 const deviceType = Object.freeze({
   controller: 'controller',
@@ -19,7 +19,7 @@ const deviceHandlers = {
       {
         type: deviceTypes.STATUS,
         sn: data.sn,
-        data: demoDevices
+        data: Object.values(demoDevices)
       },
       events.device
     );
