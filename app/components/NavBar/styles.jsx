@@ -119,8 +119,16 @@ const root = {
   }
 };
 
+const switchWorkCenterButton = {
+  bigButton: {
+    width: '10vw',
+    height: '6vh'
+  }
+};
+
 export default {
   root,
+  switchWorkCenterButton,
   pages,
   clock,
   avatar,

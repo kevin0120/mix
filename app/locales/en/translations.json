@@ -87,8 +87,8 @@
     "Save": "Save"
   },
   "Common": {
-    "Yes": "Yes",
-    "No": "No",
+    "Yes": "Confirm",
+    "No": "Cancel",
     "WorkSegment": "Work Segment",
     "WorkCenter": "Work Center",
     "SocketTray": "Socket Tray",

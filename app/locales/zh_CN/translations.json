@@ -87,8 +87,8 @@
     "Save": "保存"
   },
   "Common": {
-    "Yes": "是",
-    "No": "否",
+    "Yes": "确认",
+    "No": "取消",
     "Idx": "序号",
     "WorkSegment": "工段",
     "WorkCenter": "工位",

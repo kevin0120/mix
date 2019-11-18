@@ -41,7 +41,7 @@ const shade = 500;
 const pages = {
   '/app': {
     component: Layout,
-    navBarContents: ['clock', 'pages', 'healthCheck', 'language'], // 'sysInfo','avatar','clock', 'pages', 'language',
+    navBarContents: ['clock', 'switchWorkCenterButton', 'pages', 'healthCheck', 'language'], // 'sysInfo','avatar','clock', 'pages', 'language',
     DefaultContent: OperationList,
     title: 'main.home',
     icon: icons.Home,
