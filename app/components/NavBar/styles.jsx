@@ -1,6 +1,7 @@
 import { keyframes } from '@emotion/core';
 import imagesStyles from '../../common/jss/imagesStyles';
 import popoverStyles from '../../common/jss/popoverStyles';
+import sweetAlertStyle from '../../common/jss/views/sweetAlertStyle';
 
 const twinkling = keyframes`
   0% {
@@ -119,12 +120,13 @@ const root = {
   }
 };
 
-const switchWorkCenterButton = {
+const switchWorkCenterButton = (theme)=>({
+  ...sweetAlertStyle(theme),
   bigButton: {
     width: '10vw',
     height: '6vh'
   }
-};
+});
 
 export default {
   root,

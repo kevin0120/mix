@@ -70,6 +70,17 @@ const mapDispatch: DP = {
   updateHealthz: healthzActions.update
 };
 
+const workCenterModeBtnColor = (workCenterMode): string => {
+  switch (workCenterMode) {
+    case trans.reworkWorkCenterMode:
+      return 'danger';
+    case trans.normWorkCenterMode:
+      return 'primary';
+    default:
+      return 'primary';
+  }
+};
+
 function ConnectedNavBar(
   {
     healthCheckResults,
@@ -97,23 +108,7 @@ function ConnectedNavBar(
   const [showSwitchWorkCenterModeDiag, setShowSwitchWorkCenterModeDiag] = useState(false);
   
   const [workCenterMode, setWorkCenterMode] = useState(trans.normWorkCenterMode); // 将其翻译直接作为工作模式
-  
-  const [showButtonColor, setShowButtonColor] = useState('primary');
-  useEffect(() => {
-    const btnColor = (): string => {
-      switch (workCenterMode) {
-        case trans.reworkWorkCenterMode:
-          return 'danger';
-        case trans.normWorkCenterMode:
-          return 'primary';
-        default:
-          return 'primary';
-      }
-    };
-    setShowButtonColor(btnColor());
-  }, [workCenterMode]);
-  
-  
+
   const renderSysInfoMenu = (key) =>
     <NavBarMenu
       key={key}
@@ -194,12 +189,13 @@ function ConnectedNavBar(
               setShowSwitchWorkCenterModeDiag(!showSwitchWorkCenterModeDiag);
             }}
             variant="contained"
-            color={showButtonColor}
+            color={workCenterModeBtnColor(workCenterMode)}
             className={switchWorkCenterModeClasses.bigButton}
           >
             {t(workCenterMode)}
           </Button>
           <Alert
+            warning
             show={showSwitchWorkCenterModeDiag}
             title={t(trans.switchWorkCenterModeTitle)}
             onConfirm={() => {
@@ -226,9 +222,10 @@ function ConnectedNavBar(
               }`}
             confirmBtnText={t(trans.confirm)}
             cancelBtnText={t(trans.cancel)}
-            content={t(trans.switchWorkCenterModeContent)}
             showCancel
-          />
+          >
+            {t(trans.switchWorkCenterModeContent)}
+          </Alert>
         </div>
       ),
       navBarNs);
