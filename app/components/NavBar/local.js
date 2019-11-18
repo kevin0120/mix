@@ -6,7 +6,7 @@ export const translation = {
   normWorkCenterMode: 'normWorkCenterMode',
   reworkWorkCenterMode: 'reworkWorkCenterMode',
   switchWorkCenterModeTitle: 'switchWorkCenterModeTitle',
-switchWorkCenterModeContent: 'switchWorkCenterModeContent',
+  switchWorkCenterModeContent: 'switchWorkCenterModeContent',
   confirm: 'confirm',
   cancel: 'cancel'
 };

@@ -19,11 +19,13 @@ import type { tRouteObj, tUrl } from '../../containers/typeDef';
 import type { Dispatch, tAction } from '../../modules/typeDef';
 import type { tUser } from '../../modules/user/interface/typeDef';
 import notifyActions from '../../modules/Notifier/action';
+import workCenterModeActions from '../../modules/workCenterMode/action';
 import type { CommonLogLvl } from '../../common/utils';
 import Button from '../CustomButtons/Button';
 import { translation as trans, navBarNs } from './local';
 import Alert from '../Alert';
 import { withI18n } from '../../i18n';
+import { CommonLog } from '../../common/utils';
 
 
 type OP = {|
@@ -38,6 +40,7 @@ type SP = {|
   ...OP,
   users: Array<tUser>,
   workMode: string,
+  workCenterMode: string,
   healthCheckResults: {},
   path: string
 |};
@@ -46,6 +49,7 @@ type DP = {|
   doPush: Dispatch,
   notification: (variant: CommonLogLvl, message: string, meta: Object)=>tAction<any, any>,
   logout: Dispatch,
+  switchWorkCenterMode: Dispatch,
   updateHealthz: Dispatch
 |};
 
@@ -59,6 +63,7 @@ const mapState = (state, ownProps: OP): SP => ({
   users: state.users,
   // orderStatus: state.operations.operationStatus,
   workMode: state.workMode.workMode,
+  workCenterMode: state.workCenterMode,
   healthCheckResults: state.healthz.status || {},
   path: state.router.location.pathname
 });
@@ -66,6 +71,7 @@ const mapState = (state, ownProps: OP): SP => ({
 const mapDispatch: DP = {
   doPush: push,
   notification: notifyActions.enqueueSnackbar,
+  switchWorkCenterMode: workCenterModeActions.aSwitchWorkCenterMode,
   logout: logoutRequest,
   updateHealthz: healthzActions.update
 };
@@ -78,12 +84,14 @@ function ConnectedNavBar(
     doPush,
     notification,
     path,
+    workCenterMode,
     childRoutes,
     self,
     logout,
     contents,
     getContentByUrl,
-    updateHealthz
+    updateHealthz,
+    switchWorkCenterMode
   }: Props) {
   
   
@@ -96,7 +104,7 @@ function ConnectedNavBar(
   
   const [showSwitchWorkCenterModeDiag, setShowSwitchWorkCenterModeDiag] = useState(false);
   
-  const [workCenterMode, setWorkCenterMode] = useState(trans.normWorkCenterMode); // 将其翻译直接作为工作模式
+  // const [workCenterMode, setWorkCenterMode] = useState(trans.normWorkCenterMode); // 将其翻译直接作为工作模式
   
   const [showButtonColor, setShowButtonColor] = useState('primary');
   useEffect(() => {
@@ -205,12 +213,13 @@ function ConnectedNavBar(
             onConfirm={() => {
               switch (workCenterMode) {
                 case trans.reworkWorkCenterMode:
-                  setWorkCenterMode(trans.normWorkCenterMode);
+                  switchWorkCenterMode(trans.normWorkCenterMode);
                   break;
                 case trans.normWorkCenterMode:
-                  setWorkCenterMode(trans.reworkWorkCenterMode);
+                  switchWorkCenterMode(trans.reworkWorkCenterMode);
                   break;
                 default:
+                  CommonLog.lError(`{workCenterMode} Is Not Support`);
                   break;
               }
               setShowSwitchWorkCenterModeDiag(false);

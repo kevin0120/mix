@@ -1,10 +1,10 @@
 // flow
 
+import { isArray } from 'lodash-es';
 import { CONNECTION } from './action';
 
 import configs from '../../shared/config';
 
-const lodash = require('lodash');
 
 const defaultConnInfo = configs.system.connections;
 
@@ -27,7 +27,7 @@ export default function connections(
         io: io.connection ? io.connection : '',
         workcenterCode: info.workcenter_code ? info.workcenter_code : '',
         rework_workcenter: info.qc_workcenter ? info.qc_workcenter : '',
-        controllers: lodash.isArray(controllers) ? controllers : []
+        controllers: isArray(controllers) ? controllers : []
       };
     }
     case CONNECTION.MANUAL_MODIFICATION: {
