@@ -159,6 +159,7 @@ def package_workcenter_location_data(workcenter_id, val):
         }
         ret.append(data)
     entry.update({'locations': ret})
+    val['workcenter'] = entry
 
 
 def get_masterpc_order_url_and_package(env, vals):

@@ -33,7 +33,7 @@
 
                 <xpath expr="//div[@class='oe_button_head']" position="inside">
                     <button string="ReSequence" type="object" name="button_resequence" class="oe_highlight"
-                            attrs="{'invisible': [('test_type', '=', 'tightening')]}"/>
+                            attrs="{'invisible': [('test_type', '!=', 'tightening')]}"/>
                 </xpath>
 
                 <xpath expr="//form" position="attributes">
