@@ -20,6 +20,7 @@ import type { IScrewStep } from './interface/IScrewStep';
 import { result2TimeLine } from './timeLine';
 import type { ClsOperationPoint } from './classes/ClsOperationPoint';
 import { stepDataApi } from '../../../api/order';
+import type { IWorkable } from '../../workable/IWorkable';
 
 export function* doPoint(
   points: Array<ClsOperationPoint>,
@@ -105,14 +106,12 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
         this._tools = [];
         this._listeners = [];
         CommonLog.Info('tools cleared', {
-          at: `screwStep(${(this: IWorkStep)._name},${
-            (this: IWorkStep)._code
-          })._onLeave`
+          at: `screwStep(${String((this: IWorkable)._code)})._onLeave`
         });
       } catch (e) {
         CommonLog.lError(e, {
-          at: `screwStep(${(this: IWorkStep)._name},${
-            (this: IWorkStep)._code
+          at: `screwStep(${
+            String((this: IWorkable)._code)
           })._onLeave`
         });
       }

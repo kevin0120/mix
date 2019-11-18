@@ -21,7 +21,7 @@ export default class CustomReactTable extends React.Component<Props> {
         ofText={translate('Table.of')}
         rowsText={translate('Table.rows')}
         showPageJump={false}
-        {...restProps}
+        {...(restProps: any)}
       />
 
     );

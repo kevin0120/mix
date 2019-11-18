@@ -6,6 +6,7 @@ import ClsIOModule from '../io/ClsIOModule';
 import type { tIOContact, tIOConfig } from '../io/type';
 import { CommonLog } from '../../../common/utils';
 import type { IController } from './IController';
+import type { IDevice } from '../IDevice';
 
 class ClsController extends Device implements IController {
   _io = null;
@@ -18,11 +19,11 @@ class ClsController extends Device implements IController {
     ...rest: Array<any>
   ) {
     super(name, serialNumber);
-    this._serialNumber = serialNumber;
+    (this: IDevice)._serialNumber = serialNumber;
     this._io = new ClsIOModule(name, serialNumber, config);
   }
 
-  *doDispatch(data: tIOContact): Saga<void> {
+  * doDispatch(data: tIOContact): Saga<void> {
     try {
       if (!this._io) {
         return;

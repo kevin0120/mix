@@ -11,7 +11,7 @@ import type {
 } from './interface/typeDef';
 import type { rushHandlerMap } from '../rush/type';
 import OrderMixin from './Order';
-import Step from '../step/Step';
+import Workable from '../workable/Workable';
 import NotifierActions from '../Notifier/action';
 
 // rush data handlers
@@ -37,7 +37,7 @@ const dataHandlers: rushHandlerMap<tOrderWSTypes,
       newList = newList.concat(
         list
           .filter(newO => !newList.find(o => o.code === newO.code))
-          .map(oD => new (OrderMixin(Step))(oD))
+          .map(oD => new (OrderMixin(Workable))(oD))
       );
       yield put(orderActions.newList(newList));
       yield put(orderActions.getListSuccess());
@@ -79,7 +79,7 @@ const dataHandlers: rushHandlerMap<tOrderWSTypes,
       newList = newList.concat(
         data
           .filter(newO => !newList.find(o => o.code === newO.code))
-          .map(oD => new (OrderMixin(Step))(oD))
+          .map(oD => new (OrderMixin(Workable))(oD))
       );
 
       yield put(orderActions.newList(newList));

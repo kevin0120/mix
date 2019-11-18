@@ -7,7 +7,6 @@ import type { tStepProps } from '../types';
 import Button from '../../../components/CustomButtons/Button';
 import type { Dispatch } from '../../../modules/typeDef';
 import type { IMaterialStep } from '../../../modules/step/materialStep/interface/IMaterialStep';
-import type { IWorkStep } from '../../../modules/step/interface/IWorkStep';
 
 const mapState = (state, props: ownProps): Props => ({
   ...props
@@ -24,7 +23,7 @@ type Props = {|
 type ownProps = {|
   ...tStepProps,
   ready: Dispatch,
-  step: { ...IWorkStep,...IMaterialStep }
+  step: IMaterialStep
 |};
 
 function materialStep(props: Props) {

@@ -3,8 +3,9 @@ import type { tOrder, tOrderStepIdx, tOrderStatus } from './interface/typeDef';
 import type { IOrder } from './interface/IOrder';
 import { ORDER_STATUS, ORDER } from './constants';
 import type { IWorkStep } from '../step/interface/IWorkStep';
-import type { tAnyStepStatus } from '../step/interface/typeDef';
+import type { tAnyStatus } from '../step/interface/typeDef';
 import type { IScanner } from '../device/scanner/IScanner';
+import type { IWorkable } from '../workable/IWorkable';
 
 export type tActUpdateState = {
   type: string,
@@ -94,7 +95,7 @@ export const orderActions = Object.freeze({
     type: ORDER.STEP.JUMP_TO,
     stepId
   }),
-  stepStatus: (step: IWorkStep, status: tAnyStepStatus, msg: string = '') => ({
+  stepStatus: (step: IWorkable, status: tAnyStatus, msg: string = '') => ({
     type: ORDER.STEP.STATUS,
     step,
     status,

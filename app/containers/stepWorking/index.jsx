@@ -21,7 +21,6 @@ const mapState = (state, props) => {
   return {
     ...props,
     status: vOrder?.status,
-    name: vOrder?.name,
     code: vOrder?.code
   };
 };
