@@ -6,7 +6,7 @@ from odoo import api, release, SUPERUSER_ID, fields
 from odoo.exceptions import UserError
 from odoo.addons.tangche_enhanced.controllers.mrp_order_gateway import package_tightening_points, post_order_2_masterpc
 from odoo.models import AbstractModel
-from tenacity import 
+from tenacity import RetryError
 import logging
 
 logger = logging.getLogger(__name__)
@@ -82,9 +82,10 @@ class PushWorkorder(AbstractModel):
             if ret.status_code == 201:
                 orders.write({'sent': True})
                 return True
-        except ConnectionError:
-            _logger.debug(u'masterpc:{0} 链接失败'.format(url))
-            return False
+        except RetryError:
+            msg = u'推送工单 masterpc:{0} 链接失败'.format(url)
+            _logger.debug(msg)
+            raise UserError(msg)
         return True
 
     @api.multi
