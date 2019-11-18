@@ -32,7 +32,7 @@ class PushWorkorder(AbstractModel):
     @staticmethod
     def pack_step_payload(steps, type_tightening_point_id):
         payloads = []
-        for step in steps.filtered(lambda t: t.test_type_id != type_tightening_point_id):
+        for step in steps.filtered(lambda t: t.test_type_id.id != type_tightening_point_id):
             val = {
                 "sequence": step.sequence,
                 'max_redo_times': step.bom_line_id.operation_point_id.max_redo_times,

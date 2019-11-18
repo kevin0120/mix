@@ -215,7 +215,7 @@ def _convert_orders_info(env, values):
     package_workcenter_location_data(workcenter_id, payload)
     _logger.debug("TS002 Get Order: {0}".format(pprint.pformat(payload)))
 
-    resp = post_order_2_masterpc(master_url, payload)
+    resp = post_order_2_masterpc(master_url, [payload])
     if resp:
         return resp
 

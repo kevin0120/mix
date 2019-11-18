@@ -25,6 +25,8 @@
     'data': [
         # 'security/ir.model.access.csv',
         'views/mrp_workcenter.xml',
+        'views/mrp_production_views.xml',
+        'views/mrp_workorder_views.xml',
         'views/product_views.xml',
         'views/quality_views.xml',
         'views/mrp_routing_views.xml',

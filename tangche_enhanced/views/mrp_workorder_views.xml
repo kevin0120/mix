@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sa_mrp_workorder_view_form_inherit_mrp" model="ir.ui.view">
+        <field name="name">tangche_mrp_workorder_view_form_inherit_mrp</field>
+        <field name="model">mrp.workorder</field>
+        <field name="inherit_id" ref="mrp.mrp_production_workcenter_form_view_inherit"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[last()]" position="after">
+                <button name="button_push_workorder" type="object" string="Download WorkOrder"
+                        attrs="{'invisible': [('state', 'in', ('confirmed', 'cancel'))]}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

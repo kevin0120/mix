@@ -6,4 +6,5 @@ from . import mrp_routing
 from . import program
 from . import quality
 from . import result
-
+from . import push_workorder
+from . import mrp_production
