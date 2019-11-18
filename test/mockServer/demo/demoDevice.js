@@ -10,12 +10,24 @@ const demoTool2 = {
   name: 'tool1',
   status: 'online'
 };
+
 const demoController = {
   sn: 'c1',
   type: 'controller',
   name: 'controller1',
   status: 'online',
   children: ['2', 'xx1233'],
+  config: {
+    input_num: 8,
+    output_num: 8
+  }
+};
+
+const demoIO = {
+  sn: 'io1',
+  type: 'io',
+  name: 'io1',
+  status: 'online',
   config: {
     input_num: 8,
     output_num: 8
@@ -35,5 +47,10 @@ const demoReader = {
 };
 
 module.exports = {
-  demoDevices: [demoTool, demoTool2, demoScanner, demoReader, demoController]
+  demoTool,
+  demoTool2,
+  demoScanner,
+  demoReader,
+  demoController,
+  demoIO
 };

@@ -47,7 +47,7 @@ export function orderStepUpdateApi(id: number, status: string): Promise<any> {
   });
 }
 
-// TODO
+// 开工
 export function orderReportStartApi(
   code: string,
   trackCode: string,
@@ -76,6 +76,7 @@ export function orderReportStartApi(
   });
 }
 
+// 完工
 export function orderReportFinishApi(
   code: string,
   trackCode: string,

@@ -15,18 +15,17 @@ export interface IDevice extends ICommonExternalEntity {
     sn: tDeviceSN,
     config: Object,
     data: any
-  ) => void,
-  +doDispatch: tCallable<tInputData, void>,
-  _validator: null | ((data: tInputData) => boolean),
-  _inputListener: tListenerObj,
-  +serialNumber: ?tDeviceSN,
-
+  ) => void;
+  +doDispatch: tCallable<tInputData, void>;
+  _validator: null | ((data: tInputData) => boolean);
+  _inputListener: tListenerObj;
+  +serialNumber: ?tDeviceSN;
+  _serialNumber: ?tDeviceSN;
   addListener(
     predicate: tInputPredicate,
     // eslint-disable-next-line flowtype/no-weak-types
     action: (...args: any) => tAction<any, any>
-  ): tInputListener,
+  ): tInputListener;
 
-
-  removeListener(listener: tInputListener): Array<tInputListener>
+  removeListener(listener: tInputListener): Array<tInputListener>;
 }

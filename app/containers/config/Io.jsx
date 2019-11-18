@@ -27,7 +27,8 @@ import IO_FUNCTION from '../../modules/device/io/constants';
 import styles from './styles';
 import withKeyboard from '../../components/Keyboard';
 
-const testIO = () => {};
+const testIO = () => {
+};
 
 const mapStateToProps = (state, ownProps) => ({
   storedConfigs: state.setting.page.modbus,
@@ -75,7 +76,7 @@ class ConnectedIo extends React.PureComponent {
       data: props.storedConfigs,
       btnGroupStatus: {},
       section: 'modbus',
-      ioTestRsp: Array(props.storedConfigs.in.length).fill(0)
+      ioTestRsp: Array(props?.storedConfigs?.in?.length).fill(0)
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -145,7 +146,7 @@ class ConnectedIo extends React.PureComponent {
     return true;
   }
 
-  generatorItems(data, t) {
+  generatorItems(data=[], t) {
     const { classes, ioEnabled } = this.props;
     const { btnGroupStatus, ioTestRsp } = this.state;
     return data.map((item, idx) => {
@@ -257,8 +258,8 @@ class ConnectedIo extends React.PureComponent {
   render() {
     const { classes, ioEnabled } = this.props;
     const { data, isDataValid } = this.state;
-    const inItems = t => this.generatorItems(data.in, t);
-    const outItems = t => this.generatorItems(data.out, t);
+    const inItems = t => this.generatorItems(data?.in, t);
+    const outItems = t => this.generatorItems(data?.out, t);
 
     return (
       <I18n ns="translations">
