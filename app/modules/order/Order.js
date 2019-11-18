@@ -11,9 +11,11 @@ import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
 import { STEP_STATUS } from '../step/constants';
 import { IOrder } from './interface/IOrder';
-import type { IWorkStep } from '../step/interface/IWorkStep';
 import loadingActions from '../loading/action';
 import notifyActions from '../Notifier/action';
+import type { tOrder } from './interface/typeDef';
+import type { IWorkable } from '../workable/IWorkable';
+import type { IWorkStep } from '../step/interface/IWorkStep';
 
 const stepStatus = status => {
   switch (status) {
@@ -26,21 +28,14 @@ const stepStatus = status => {
   }
 };
 
-const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
+const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
   class ClsOrder extends ClsBaseStep implements IOrder {
-    _apis = {
-      updateStatus: orderUpdateApi
-    };
 
     _workingIndex = 0;
 
     _stateToRun = ORDER_STATUS.TODO;
 
-    _workingID = null;
-
     _status = ORDER_STATUS.TODO;
-
-    _plannedDateTime = null;
 
     _trackCode = '';
 
@@ -56,7 +51,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
       return this._workcenter;
     }
 
-    _datePlannedStart: Date = new Date();
+    _datePlannedStart = new Date();
 
     get datePlannedStart() {
       return this._datePlannedStart;
@@ -75,36 +70,43 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
     }
 
     // eslint-disable-next-line flowtype/no-weak-types
-    constructor(dataObj: { [key: string]: any }, ...rest: Array<any>) {
-      super(dataObj, ...rest);
+    constructor(dataObj: $Shape<tOrder>): void {
+      // eslint-disable-next-line prefer-rest-params
+      super(dataObj);
+      this.update.call(this, dataObj);
+    }
+
+    update(dataObj: $Shape<tOrder>) {
+      super.update.call(this,dataObj);
       this._status = dataObj.status || this._status;
       this._trackCode = dataObj.track_code;
       this._productCode = dataObj.product_code;
       this._workcenter = dataObj.workcenter;
       this._datePlannedStart = new Date(dataObj.date_planned_start);
-      this._datePlannedComplete = new Date(dataObj.datePlannedComplete);
+      this._datePlannedComplete = new Date(dataObj.date_planned_complete);
       this._productTypeImage = dataObj.product_type_image;
-    }
-
-    update(data) {
-      console.log('updating order with data:', data);
-      return super.update(data);
-    }
-
-    get plannedDateTime() {
-      return this._plannedDateTime;
+      (this: IWorkable)._desc = dataObj?.payload?.operation?.desc;
     }
 
     get workingStep() {
-      return (this: IWorkStep)._steps[this._workingIndex];
+      return (((this: IWorkable)._steps[this._workingIndex]: any): IWorkStep);
     }
 
     get workingIndex() {
       return this._workingIndex;
     }
 
+    * _updateStatus({ status }) {
+      super._updateStatus({ status });
+      try {
+        yield call(orderUpdateApi, this.id, status);
+      } catch (e) {
+        CommonLog.lError(e);
+      }
+    }
+
     _statusTasks = {
-      *[ORDER_STATUS.TODO]() {
+      * [ORDER_STATUS.TODO]() {
         try {
           const { reportStart } = yield select(s => s.setting.systemSettings);
           // TODO 开工自检
@@ -141,7 +143,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           yield put(orderActions.stepStatus(this, ORDER_STATUS.PENDING));
         }
       },
-      *[ORDER_STATUS.WIP]() {
+      * [ORDER_STATUS.WIP]() {
         try {
           this._workingIndex =
             this._workingIndex >= this._steps.length ? 0 : this._workingIndex;
@@ -179,6 +181,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
             } else {
               yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
             }
+            status = null;
           }
         } catch (e) {
           CommonLog.lError(e, { at: 'ORDER_STATUS.WIP' });
@@ -188,10 +191,10 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           CommonLog.Info('order doing finished');
         }
       },
-      *[ORDER_STATUS.DONE]() {
+      * [ORDER_STATUS.DONE]() {
         try {
           const data = this._steps.map(s => [
-            s.name,
+            s.code,
             durationString(s.timeCost()),
             stepStatus(s.status)
           ]);
@@ -249,7 +252,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           CommonLog.Info('order done');
         }
       },
-      *[ORDER_STATUS.PENDING]() {
+      * [ORDER_STATUS.PENDING]() {
         try {
           yield put(orderActions.finishOrder(this));
         } catch (e) {
@@ -258,7 +261,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkStep>) =>
           });
         }
       },
-      *[ORDER_STATUS.CANCEL]() {
+      * [ORDER_STATUS.CANCEL]() {
         try {
           yield put(orderActions.finishOrder(this));
         } catch (e) {

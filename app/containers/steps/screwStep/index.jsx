@@ -8,7 +8,7 @@ import { viewingStep, stepPayload, stepData, stepStatus } from '../../../modules
 import ScrewImage from '../../../components/ScrewImage';
 import screwStepAction from '../../../modules/step/screwStep/action';
 import type { tStepProps } from '../types';
-import type { tAnyStepStatus } from '../../../modules/step/interface/typeDef';
+import type { tAnyStatus } from '../../../modules/step/interface/typeDef';
 import type { Dispatch } from '../../../modules/typeDef';
 import { ClsOperationPoint } from '../../../modules/step/screwStep/classes/ClsOperationPoint';
 
@@ -20,7 +20,7 @@ type tSP = {|
   ...tOP,
   points: Array<ClsOperationPoint>,
   image: string,
-  status: ?tAnyStepStatus
+  status: ?tAnyStatus
 |};
 
 type tDP = {|

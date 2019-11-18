@@ -105,7 +105,7 @@ const StepperContainer = ({
         }
 
         return (
-          <Step key={s.name}>
+          <Step key={s.code}>
             <StepButton
               completed={s.status === STEP_STATUS.FINISHED}
               onClick={() => jumpTo(idx)}
@@ -115,7 +115,7 @@ const StepperContainer = ({
               }}
             >
               <StepLabel {...labelProps}>
-                <Typography variant="h6">{s.name}</Typography>
+                <Typography variant="h6">{s.code}</Typography>
               </StepLabel>
             </StepButton>
             <StepContent>

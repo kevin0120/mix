@@ -7,7 +7,8 @@ const styles = {
     '& .lead':{
       maxHeight:'40vh',
       overflow:'auto'
-    }
+    },
+    color: '#212121'
   }
 };
 

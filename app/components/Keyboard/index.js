@@ -92,7 +92,7 @@ export default function withKeyboard(SubComponents: AbstractComponent<any, any>)
           <React.Fragment>
             <SubComponents
               keyboardInput={c => bindKeyboardInput(c)}
-              {...restProps}
+              {...(restProps: any)}
             />
             {show ? <Dialog
               classes={{

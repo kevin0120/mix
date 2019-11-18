@@ -58,7 +58,7 @@ function HomeOperationList(props: Props) {
   const retOrderList = sortBy(
     orderList,
     (o: IOrder) =>
-      (o.plannedDateTime && new Date(o.plannedDateTime)) || Date.now()
+      (o.datePlannedStart && new Date(o.datePlannedStart)) || Date.now()
   );
 
   const onCardClick = order => {

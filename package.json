@@ -212,7 +212,7 @@
     "eslint-plugin-testcafe": "^0.2.1",
     "fbjs-scripts": "^0.8.3",
     "file-loader": "^1.1.11",
-    "flow-bin": "^0.104.0",
+    "flow-bin": "^0.112.0",
     "flow-runtime": "^0.17.0",
     "flow-typed": "^2.6.1",
     "faker": "^4.1.0",

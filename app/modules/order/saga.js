@@ -85,8 +85,6 @@ function onNewScanner({ scanner }) {
   }
 }
 
-// TODO: 工单持久化
-
 function* reportFinish({
   code,
   trackCode,
@@ -277,7 +275,7 @@ function* viewOrder({ order }: { order: IOrder }) {
       (vOrderSteps &&
         vOrderSteps.map((s: IWorkStep, idx) => [
           idx + 1,
-          s.name,
+          s.code,
           i18n.t(`StepType.${s.type}`),
           s.desc
         ])) ||

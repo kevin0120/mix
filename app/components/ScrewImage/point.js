@@ -39,7 +39,7 @@ function Point({ twinkle, x, y, status, label, scale = 1, ...restProps }: Props)
       left: `calc(${x}% - ${pointRadius}px)`,
       top: `calc(${y}% - ${pointRadius}px)`
     }}
-    {...restProps}
+    {...(restProps: any)}
   >
     {label}
   </div>;
