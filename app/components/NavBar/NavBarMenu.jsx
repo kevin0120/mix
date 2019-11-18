@@ -4,6 +4,7 @@ import Fade from '@material-ui/core/Fade';
 import { createMuiTheme, makeStyles, MuiThemeProvider } from '@material-ui/core/styles';
 import Button from '../CustomButtons/Button';
 import styles from './styles';
+import PropTypes from "prop-types";
 
 function NavBarMenu({ statusOK, title,children,onClick }) {
   const classes = makeStyles(styles.NavBarMenu)();
@@ -49,5 +50,19 @@ function NavBarMenu({ statusOK, title,children,onClick }) {
     </React.Fragment>
   );
 }
+
+NavBarMenu.propTypes = {
+  title: PropTypes.string,
+  statusOK: PropTypes.bool,
+  children: PropTypes.element,
+  onClick: PropTypes.func,
+};
+
+NavBarMenu.defaultProps = {
+  title: '',
+  statusOK: false,
+  children: null,
+  onClick: () => {}
+};
 
 export default NavBarMenu;

@@ -18,7 +18,7 @@ export const translation = {
 
 
 const trans = [
-    makeLocalBundle(lng.zh_CN, 'stepWorking', {
+  makeLocalBundle(lng.zh_CN, 'stepWorking', {
       skip: '跳过',
       undo: '取消上次动作',
       submit: '提交',

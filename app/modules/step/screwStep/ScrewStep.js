@@ -139,13 +139,13 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
             throw new Error(
               `ScrewStepPayload Is Empty! code: ${
                 this._id
-              }, Payload: ${JSON.stringify(payload)}`
+                }, Payload: ${JSON.stringify(payload)}`
             );
           }
 
           const points = payload.tightening_points;
 
-          if(!isNil(payload.jobID)){
+          if (!isNil(payload.jobID)) {
             yield call(
               this.updateData,
               (data: tScrewStepData): tScrewStepData => ({
@@ -153,7 +153,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 controllerMode: controllerModes.job
               })
             );
-          }else if(points.every(p=>!isNil(p.pset))){
+          } else if (points.every(p => !isNil(p.pset))) {
             yield call(
               this.updateData,
               (data: tScrewStepData): tScrewStepData => ({
@@ -161,7 +161,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 controllerMode: controllerModes.pset
               })
             );
-          }else{
+          } else {
             throw new Error('缺少Job号或Pset号');
           }
 
@@ -195,7 +195,6 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
           yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, e));
         }
       },
-
       * [STEP_STATUS.DOING](ORDER, orderActions) {
         try {
           let isFirst = true;

@@ -42,12 +42,18 @@ class ShutdownDiag extends React.Component {
 }
 
 ShutdownDiag.propTypes = {
+  title: PropTypes.string,
+  content: PropTypes.string,
+  showCancel: PropTypes.bool,
   show: PropTypes.bool.isRequired,
   onConfirm: PropTypes.func,
   onCancel: PropTypes.func
 
 };
 ShutdownDiag.defaultProps = {
+  title: '',
+  content: '',
+  showCancel: false,
   onConfirm: () => {
   },
   onCancel: () => {
