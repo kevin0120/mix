@@ -31,6 +31,9 @@ class MrpWorkorder(models.Model):
             url = 'http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_WROKORDERS_API)
             push_workorder = self.env['workorder.push']
             ret = push_workorder._post_workorder_to_masterpc(url, need_send_orders)
+            if ret:
+                msg = u'推送工单 masterpc:{0} 成功!'.format(url)
+                self.env.user.notify_info(msg)
         return True
 
 
