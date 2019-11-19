@@ -115,7 +115,12 @@ function HomeOperationList(props: Props) {
                     >
                       {order.code}
                     </Typography>
-                    {[order.datePlannedStart && order.datePlannedStart.toLocaleString(), order.workcenter, order.productCode].map(d => (
+                    {[
+                      order.productCode,
+                      order.workcenter,
+                      order.datePlannedStart &&
+                        order.datePlannedStart.toLocaleString()
+                    ].map(d => (
                       <Typography
                         key={d}
                         variant="body2"
@@ -140,7 +145,7 @@ function HomeOperationList(props: Props) {
             </Grid>
           ) : null
         )) ||
-      null}
+        null}
     </React.Fragment>
   );
 

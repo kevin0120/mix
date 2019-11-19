@@ -8,7 +8,8 @@ import stepTypes from '../step/stepTypes';
 import type {
   tStep,
   tAnyStatus,
-  tRunSubStepCallbacks, tStepType
+  tRunSubStepCallbacks,
+  tStepType
 } from '../step/interface/typeDef';
 import type { IWorkable } from './IWorkable';
 import type { tWorkableData } from './typeDef';
@@ -66,9 +67,10 @@ export default class Workable implements IWorkable {
   _times = [];
 
   // eslint-disable-next-line flowtype/no-weak-types,no-unused-vars
-  constructor(workableData: tWorkableData, ...rest: Array<any>) {
-    this._code = workableData.code || this._code;
-    this._id = workableData.id || this._id;
+  constructor(workableData: ?tWorkableData) {
+    const { code, id } = workableData || {};
+    this._code = code || this._code;
+    this._id = id || this._id;
     this.update(workableData);
     /* eslint-disable flowtype/no-weak-types */
     (this: any).run = this.run.bind(this);
@@ -79,23 +81,30 @@ export default class Workable implements IWorkable {
   }
 
   // eslint-disable-next-line flowtype/no-weak-types
-  update(workableData: $Shape<tWorkableData>) {
+  update(workableData: ?$Shape<tWorkableData>) {
     console.log(this, workableData);
     const { steps, status, payload, data } = workableData || {};
     this._status = status || this._status;
     this._steps = steps
-      ? (((steps: any): Array<tStep>).map<IWorkable>((sD: tStep) => {
-      const existStep = this._steps.find(s => s.code === sD.code);
-      if (existStep) {
-        existStep.update(((sD: any): tWorkableData));
-        return existStep;
-      }
-      const stepType: ?tStepType = (sD: tStep).test_type;
-      if (!stepType || !stepTypes[stepType] || typeof stepTypes[stepType] !== 'function') {
-        return new Workable(((sD: any): tWorkableData));
-      }
-      return new (stepTypes[stepType](Workable))(((sD: any): tWorkableData));
-    })) || [] : this._steps;
+      ? ((steps: any): Array<tStep>).map<IWorkable>((sD: tStep) => {
+          const existStep = this._steps.find(s => s.code === sD.code);
+          if (existStep) {
+            existStep.update(((sD: any): tWorkableData));
+            return existStep;
+          }
+          const stepType: ?tStepType = (sD: tStep).test_type;
+          if (
+            !stepType ||
+            !stepTypes[stepType] ||
+            typeof stepTypes[stepType] !== 'function'
+          ) {
+            return new Workable(((sD: any): tWorkableData));
+          }
+          return new (stepTypes[stepType](Workable))(
+            ((sD: any): tWorkableData)
+          );
+        }) || []
+      : this._steps;
     if (data) {
       this._data = (() => {
         try {
@@ -118,8 +127,8 @@ export default class Workable implements IWorkable {
 
   timeCost(): number {
     return ((this._times || []).length % 2 === 0
-        ? this._times || []
-        : [...this._times, new Date()]
+      ? this._times || []
+      : [...this._times, new Date()]
     ).reduce(
       (total, currentTime, idx) =>
         idx % 2 === 0 ? total - currentTime : total - (0 - currentTime),
@@ -161,7 +170,7 @@ export default class Workable implements IWorkable {
     }
   }
 
-  * updateData(dataReducer: Function): Saga<void> {
+  *updateData(dataReducer: Function): Saga<void> {
     try {
       this._data = dataReducer(this._data);
       yield put(orderActions.updateState());
@@ -172,16 +181,24 @@ export default class Workable implements IWorkable {
     }
   }
 
-  _updateStatus({ status }) {
+  *updateStatus({ status }: { status: tAnyStatus }): Saga<void> {
     const validStatus = Object.keys(this._statusTasks || {});
     if (validStatus.includes(status)) {
       this._status = status;
+      try {
+        yield put(orderActions.updateState());
+      } catch (e) {
+        CommonLog.lError(e);
+        throw e;
+      }
     } else {
-      throw new Error(`workable (${String(this._code)}) has no status ${status}`);
+      throw new Error(
+        `workable (${String(this._code)}) has no status ${status}`
+      );
     }
   }
 
-  * _runStatusTask({ status, msg }) {
+  *_runStatusTask({ status, msg }) {
     try {
       if (this._runningStatusTask) {
         yield cancel(this._runningStatusTask);
@@ -197,13 +214,13 @@ export default class Workable implements IWorkable {
     }
   }
 
-  * run(status: tAnyStatus): Saga<void> {
+  *run(status: tAnyStatus): Saga<void> {
     let statusToRun = status;
     if (!statusToRun) {
       statusToRun = this._status;
     }
     const runStatusTask = this._runStatusTask.bind(this);
-    const updateStatus = this._updateStatus.bind(this);
+    // const updateStatus = this.updateStatus.bind(this);
     this.timerStart();
 
     function* runStep() {
@@ -212,7 +229,7 @@ export default class Workable implements IWorkable {
           const action = yield take(
             a => a.type === ORDER.STEP.STATUS && a.step === this
           );
-          yield fork(updateStatus, action);
+          // yield fork(updateStatus, action);
           yield fork(runStatusTask, action);
         }
       } catch (e) {
@@ -240,7 +257,7 @@ export default class Workable implements IWorkable {
     }
   }
 
-  * runSubStep(
+  *runSubStep(
     step: IWorkable,
     callbacks: tRunSubStepCallbacks,
     status: tAnyStatus

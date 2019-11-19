@@ -1,4 +1,5 @@
 // @flow
+import type { Saga } from 'redux-saga';
 import React from 'react';
 import { push } from 'connected-react-router';
 import { call, put, select } from 'redux-saga/effects';
@@ -13,7 +14,7 @@ import { STEP_STATUS } from '../step/constants';
 import { IOrder } from './interface/IOrder';
 import loadingActions from '../loading/action';
 import notifyActions from '../Notifier/action';
-import type { tOrder } from './interface/typeDef';
+import type { tOrder, tOrderStatus } from './interface/typeDef';
 import type { IWorkable } from '../workable/IWorkable';
 import type { IWorkStep } from '../step/interface/IWorkStep';
 
@@ -30,14 +31,23 @@ const stepStatus = status => {
 
 const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
   class ClsOrder extends ClsBaseStep implements IOrder {
-
     _workingIndex = 0;
 
-    _stateToRun = ORDER_STATUS.TODO;
+    get workingIndex() {
+      return this._workingIndex;
+    }
 
     _status = ORDER_STATUS.TODO;
 
+    get status() {
+      return this._status;
+    }
+
     _trackCode = '';
+
+    get trackCode() {
+      return this._trackCode;
+    }
 
     _productCode = '';
 
@@ -51,13 +61,13 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       return this._workcenter;
     }
 
-    _datePlannedStart = new Date();
+    _datePlannedStart = null;
 
     get datePlannedStart() {
       return this._datePlannedStart;
     }
 
-    _datePlannedComplete: Date = new Date();
+    _datePlannedComplete = null;
 
     get datePlannedComplete() {
       return this._datePlannedComplete;
@@ -70,34 +80,45 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
     }
 
     // eslint-disable-next-line flowtype/no-weak-types
-    constructor(dataObj: $Shape<tOrder>): void {
+    constructor(dataObj: ?$Shape<tOrder>): void {
       // eslint-disable-next-line prefer-rest-params
       super(dataObj);
       this.update.call(this, dataObj);
     }
 
-    update(dataObj: $Shape<tOrder>) {
-      super.update.call(this,dataObj);
-      this._status = dataObj.status || this._status;
-      this._trackCode = dataObj.track_code;
-      this._productCode = dataObj.product_code;
-      this._workcenter = dataObj.workcenter;
-      this._datePlannedStart = new Date(dataObj.date_planned_start);
-      this._datePlannedComplete = new Date(dataObj.date_planned_complete);
-      this._productTypeImage = dataObj.product_type_image;
-      (this: IWorkable)._desc = dataObj?.payload?.operation?.desc;
+    update(dataObj: ?$Shape<tOrder>) {
+      super.update.call(this, dataObj);
+      const {
+        status,
+        track_code: trackCode,
+        product_code: productCode,
+        workcenter,
+        date_planned_start: datePlannedStart,
+        date_planned_complete: datePlannedComplete,
+        product_type_image: productTypeImage,
+        payload
+      } = dataObj || {};
+
+      this._status = status || ORDER_STATUS.TODO;
+      this._trackCode = trackCode || '';
+      this._productCode = productCode || '';
+      this._workcenter = workcenter || '';
+      this._datePlannedStart = datePlannedStart
+        ? new Date(datePlannedStart)
+        : null;
+      this._datePlannedComplete = datePlannedComplete
+        ? new Date(datePlannedComplete)
+        : null;
+      this._productTypeImage = productTypeImage || '';
+      (this: IWorkable)._desc = payload?.operation?.desc || '';
     }
 
     get workingStep() {
       return (((this: IWorkable)._steps[this._workingIndex]: any): IWorkStep);
     }
 
-    get workingIndex() {
-      return this._workingIndex;
-    }
-
-    * _updateStatus({ status }) {
-      super._updateStatus({ status });
+    *updateStatus({ status }: { status: tOrderStatus }): Saga<void> {
+      super.updateStatus({ status });
       try {
         yield call(orderUpdateApi, this.id, status);
       } catch (e) {
@@ -106,7 +127,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
     }
 
     _statusTasks = {
-      * [ORDER_STATUS.TODO]() {
+      *[ORDER_STATUS.TODO]() {
         try {
           const { reportStart } = yield select(s => s.setting.systemSettings);
           // TODO 开工自检
@@ -143,19 +164,14 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           yield put(orderActions.stepStatus(this, ORDER_STATUS.PENDING));
         }
       },
-      * [ORDER_STATUS.WIP]() {
+      *[ORDER_STATUS.WIP]() {
         try {
           this._workingIndex =
             this._workingIndex >= this._steps.length ? 0 : this._workingIndex;
           let status = null;
 
           const _onPrevious = () => {
-            // if (this.workingStep.status === STEP_STATUS.DOING) {
-            //
-            // }
-            if (this._workingIndex - 1 < 0) {
-              // yield put(orderActions.finishOrder(this));
-            } else {
+            if (this._workingIndex - 1 >= 0) {
               this._workingIndex -= 1;
               status = STEP_STATUS.READY;
             }
@@ -166,7 +182,9 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           };
 
           while (true) {
-            CommonLog.Info('Doing Order...', this._workingIndex);
+            CommonLog.Info(
+              `Doing Order (${this.code}),at ${this.workingIndex} step (${this.workingStep?.code}) `
+            );
             const step = this.workingStep;
             if (step) {
               yield call(
@@ -191,7 +209,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           CommonLog.Info('order doing finished');
         }
       },
-      * [ORDER_STATUS.DONE]() {
+      *[ORDER_STATUS.DONE]() {
         try {
           const data = this._steps.map(s => [
             s.code,
@@ -252,7 +270,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           CommonLog.Info('order done');
         }
       },
-      * [ORDER_STATUS.PENDING]() {
+      *[ORDER_STATUS.PENDING]() {
         try {
           yield put(orderActions.finishOrder(this));
         } catch (e) {
@@ -261,7 +279,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           });
         }
       },
-      * [ORDER_STATUS.CANCEL]() {
+      *[ORDER_STATUS.CANCEL]() {
         try {
           yield put(orderActions.finishOrder(this));
         } catch (e) {
