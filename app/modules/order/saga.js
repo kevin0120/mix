@@ -202,7 +202,7 @@ function* DebounceViewStep(d, action: tCommonActionType) {
     CommonLog.lError(e);
   }
 }
-
+// TODO: auto set wip order working
 function* getOrderDetail({ order }) {
   try {
     yield put(loadingActions.start());
