@@ -23,7 +23,7 @@ const StepMixin = (ClsWorkable: Class<IWorkable>) => class Step extends ClsWorka
   get type() {
     const validTypes = Object.values(stepTypeKeys);
     if (!this._type || !validTypes.includes(this._type)) {
-      throw new Error(`Step(${this.code}) has invalid type${this._type}`);
+      throw new Error(`Step(${this.code}) has invalid type ${this._type}`);
     }
     return this._type;
   }

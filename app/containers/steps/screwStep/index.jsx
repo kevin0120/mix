@@ -9,8 +9,12 @@ import ScrewImage from '../../../components/ScrewImage';
 import screwStepAction from '../../../modules/step/screwStep/action';
 import type { tStepProps } from '../types';
 import type { tAnyStatus } from '../../../modules/step/interface/typeDef';
-import type { Dispatch } from '../../../modules/typeDef';
+import type { Dispatch, tAction } from '../../../modules/typeDef';
 import { ClsOperationPoint } from '../../../modules/step/screwStep/classes/ClsOperationPoint';
+import { translation as trans } from '../../../components/NavBar/local';
+import notifierActions from '../../../modules/Notifier/action';
+import type { CommonLogLvl } from '../../../common/utils';
+
 
 type tOP = {|
   ...tStepProps
@@ -20,12 +24,14 @@ type tSP = {|
   ...tOP,
   points: Array<ClsOperationPoint>,
   image: string,
+  workCenterMode: string,
   status: ?tAnyStatus
 |};
 
 type tDP = {|
   redoPoint: Dispatch,
-  result: Dispatch
+  result: Dispatch,
+  notify: (variant: CommonLogLvl, message: string, meta: Object)=>tAction<any, any>
 |};
 
 type Props = {|
@@ -40,17 +46,19 @@ const mapState = (state, props: tOP): tSP => {
     ...props,
     points: stepData(vStep)?.tightening_points || stepPayload(vStep)?.tightening_points || [],
     image: vStep?.image || '',
+    workCenterMode: state.workCenterMode,
     status: stepStatus(vStep)
   };
 };
 
 const mapDispatch: tDP = {
   result: screwStepAction.result,
-  redoPoint: screwStepAction.redoPoint
+  redoPoint: screwStepAction.redoPoint,
+  notify: notifierActions.enqueueSnackbar
 };
 
 
-function ScrewStep({ isCurrent, image, points, redoPoint, result }: Props) {
+function ScrewStep({ isCurrent, image, points, workCenterMode, notify, redoPoint, result }: Props) {
   const classes = makeStyles(styles)();
   return <div className={classes.layout}>
     <ScrewImage
@@ -60,6 +68,8 @@ function ScrewStep({ isCurrent, image, points, redoPoint, result }: Props) {
       focus={0}
       scale={1}
       twinkle={isCurrent}
+      enableReWork={workCenterMode === trans.reworkWorkCenterMode}
+      notifyInfo={notify}
       onPointClick={(point: ClsOperationPoint) => {
         // result({
         //   data: [{

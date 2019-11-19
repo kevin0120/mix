@@ -2,6 +2,7 @@
 import React from 'react';
 import { push } from 'connected-react-router';
 import { call, put, select } from 'redux-saga/effects';
+import { some, filter } from 'lodash-es';
 import { ORDER_STATUS } from './constants';
 import { CommonLog, durationString } from '../../common/utils';
 import { orderActions } from './action';
@@ -43,6 +44,15 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
 
     get productCode() {
       return this._productCode;
+    }
+    
+    get failSteps(): Array<IWorkStep> {
+      const ret  = filter(this.steps, (step: IWorkStep) => step.status === STEP_STATUS.FAIL);
+      return ((ret: any): Array<IWorkStep>)
+    }
+  
+    hasFailWorkStep(): boolean {
+      return some(this.steps, (step: IWorkable) => step.status === STEP_STATUS.FAIL);
     }
 
     _workcenter: string = '';

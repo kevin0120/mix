@@ -37,6 +37,10 @@ import type { IWorkStep } from '../step/interface/IWorkStep';
 import type { IOrder } from './interface/IOrder';
 import notifierActions from '../Notifier/action';
 import { bindNewDeviceListener } from '../deviceManager/handlerWSData';
+import {sGetWorkCenterMode} from '../workCenterMode/selector';
+import { translation as trans } from '../../components/NavBar/local';
+import type {tWorkCenterMode} from  '../workCenterMode/interface/typeDef'
+
 import ClsScanner from '../device/scanner/ClsScanner';
 
 export default function* root(): Saga<void> {
@@ -129,6 +133,12 @@ function* tryWorkOnOrder({
 }) {
   try {
     const orderState = yield select(s => s.order);
+    const workCenterMode: tWorkCenterMode = yield select(s => sGetWorkCenterMode(s));
+    if (workCenterMode === trans.reworkWorkCenterMode && !order.hasFailWorkStep()) {
+      // 在返工模式下，但此工单并没有失败的工步
+      yield put(notifierActions.enqueueSnackbar('Error', '当前工单没有可返工的工步'));
+      return;
+    }
     let orderToDo = null;
     if (order) {
       orderToDo = order;

@@ -19,6 +19,8 @@ export interface IOrder extends IWorkable {
   _status: tOrderStatus,
   _trackCode: string,
   _productCode: string,
+  +failSteps: Array<IWorkStep>,
   +workingStep: IWorkStep,
+  +hasFailWorkStep: () => boolean,
   constructor(tOrder, ...Array<any>): void
 }

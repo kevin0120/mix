@@ -7,6 +7,10 @@ import { isNil, cloneDeep } from 'lodash-es';
 import moment from 'moment';
 import { Info, lError, Warn, Debug, Maintenance } from '../logger';
 
+interface IVINMap {
+  [key: number ]: number
+}
+
 const VINMap = {
   A: 1,
   B: 2,
