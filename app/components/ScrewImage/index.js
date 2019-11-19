@@ -3,7 +3,10 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import styles from './style';
 import Point from './point';
+import type { tAction } from '../../modules/typeDef';
+
 import { ClsOperationPoint } from '../../modules/step/screwStep/classes/ClsOperationPoint';
+import type { CommonLogLvl } from '../../common/utils';
 
 type Props = {
   twinkle: boolean,
@@ -11,12 +14,14 @@ type Props = {
   image: string,
   points: Array<ClsOperationPoint>,
   focus: number,
+  enableReWork: boolean,
+  notifyInfo: (variant: CommonLogLvl, message: string, meta: Object)=>tAction<any, any>,
   // activeIndex: number,
   pointScale?: number,
   onPointClick?: (ClsOperationPoint)=>void
 };
 
-export default function ScrewImage({ twinkle, style = {}, image, points, focus, pointScale = 1, onPointClick }: Props) {
+export default function ScrewImage({ twinkle, style = {}, image, points, focus, pointScale = 1, notifyInfo, enableReWork, onPointClick }: Props) {
   const classes = makeStyles(styles.image)();
 
   const imageRef = useRef(null);
@@ -95,6 +100,10 @@ export default function ScrewImage({ twinkle, style = {}, image, points, focus, 
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
+            if(!enableReWork) {
+              notifyInfo('Warn', '当前工作模式无法进行返工作业，请先切换至返工模式!')
+              return
+            }
             if (onPointClick) {
               onPointClick(p);
             }
