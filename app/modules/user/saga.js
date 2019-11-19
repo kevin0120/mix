@@ -18,7 +18,13 @@ import { isNil, some, cloneDeep, find, isUndefined, remove } from 'lodash-es';
 import status from 'http-status';
 import { getUserInfo } from '../../api/user';
 
-import { loginRequestUuid, loginSuccess, logoutSuccess, USER, userNewReader } from './action';
+import {
+  loginRequestUuid,
+  loginSuccess,
+  logoutSuccess,
+  USER,
+  userNewReader
+} from './action';
 import notifierActions from '../Notifier/action';
 import type {
   tUser,
@@ -141,7 +147,7 @@ const loginMethodMap = {
 };
 
 interface ILocalUser {
-  [key: string]: tUser
+  [key: string]: tUser;
 }
 
 function* loginLocal(action) {
@@ -168,7 +174,9 @@ function* loginLocal(action) {
         // yield put(push('/app'));
       }
     } else if (uuid) {
-      const { localUsers }: { localUsers: ILocalUser } = state.setting.authorization;
+      const {
+        localUsers
+      }: { localUsers: ILocalUser } = state.setting.authorization;
       let user: ?tUser = null;
       let n: string = DummyUserName;
       Object.keys(localUsers).forEach((k: string) => {
@@ -177,7 +185,7 @@ function* loginLocal(action) {
           n = k;
         }
       });
-      if (!isNil(user)) {
+      if (user) {
         userInfo = {
           uid: user.uid,
           name: n,
@@ -232,13 +240,12 @@ function onNewReader({ reader }) {
   try {
     reader.addListener(
       () => true,
-      i => loginRequestUuid(i.data.data.uid,'online')
+      i => loginRequestUuid(i.data.data.uid, 'online')
     );
   } catch (e) {
     CommonLog.lError(e, { at: 'onNewReader' });
   }
 }
-
 
 export default function* userRoot(): Saga<void> {
   try {

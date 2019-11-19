@@ -45,7 +45,11 @@ const orderReducer: {
 } = {
   [ORDER.NEW_LIST]: (state, { list }: { list: Array<IOrder> }) => ({
     ...state,
-    list: list.sort((a, b) => a.datePlannedStart - b.datePlannedStart)
+    list: list.sort((a, b) => {
+      const prev = a.datePlannedStart || 0;
+      const latter = b.datePlannedStart || 0;
+      return prev - latter;
+    })
   }),
   [ORDER.UPDATE_STATE]: state => ({
     ...state

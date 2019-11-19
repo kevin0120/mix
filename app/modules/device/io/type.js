@@ -13,9 +13,6 @@ export type tIOContact = {
 };
 
 export type tIOWSDataContact = {
-  // +sn: string,
-  // +type: tIODirection,// TODO
-  // +contact: string // 位串
   src: string, // 设备类型
   sn: string, // 序列号
   inputs?: string,

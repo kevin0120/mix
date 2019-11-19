@@ -42,6 +42,8 @@ import { translation as trans } from '../../components/NavBar/local';
 import type {tWorkCenterMode} from  '../workCenterMode/interface/typeDef'
 
 import ClsScanner from '../device/scanner/ClsScanner';
+import type { tAnyStatus } from '../step/interface/typeDef';
+import type { IWorkable } from '../workable/IWorkable';
 
 export default function* root(): Saga<void> {
   try {
@@ -56,8 +58,26 @@ export default function* root(): Saga<void> {
       takeEvery(ORDER.VIEW, viewOrder),
       takeEvery(ORDER.TRY_VIEW, tryViewOrder),
       takeEvery(ORDER.REPORT_FINISH, reportFinish),
+      takeEvery(ORDER.STEP.STATUS, setStepStatus),
       takeLeading([ORDER.STEP.PREVIOUS, ORDER.STEP.NEXT], DebounceViewStep, 300)
     ]);
+  } catch (e) {
+    CommonLog.lError(e);
+  }
+}
+
+function* setStepStatus({
+  step,
+  status
+}: {
+  step: IWorkable,
+  status: tAnyStatus
+}) {
+  if (!step || !status) {
+    return;
+  }
+  try {
+    yield call([step, step.updateStatus], { status });
   } catch (e) {
     CommonLog.lError(e);
   }
