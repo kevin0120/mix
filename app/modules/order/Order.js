@@ -118,8 +118,8 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
     }
 
     *updateStatus({ status }: { status: tOrderStatus }): Saga<void> {
-      super.updateStatus({ status });
       try {
+        yield call([this, super.updateStatus], { status });
         yield call(orderUpdateApi, this.id, status);
       } catch (e) {
         CommonLog.lError(e);

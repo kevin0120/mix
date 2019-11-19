@@ -98,8 +98,8 @@ const StepMixin = (ClsWorkable: Class<IWorkable>) =>
     }
 
     *updateStatus({ status }: { status: tStepStatus }): Saga<void> {
-      super.updateStatus({ status });
       try {
+        yield call([this, super.updateStatus], { status });
         yield call(orderStepUpdateApi, this.id, status);
       } catch (e) {
         CommonLog.lError(e);
