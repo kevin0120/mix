@@ -5,6 +5,10 @@ const toolTypes = {
   PSET: 'WS_TOOL_PSET'
 };
 
+function getRandomArbitrary(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
 const toolHandlers = {
   [toolTypes.ENABLE]: (data, reply) => {
     reply(
@@ -21,6 +25,8 @@ const toolHandlers = {
   [toolTypes.PSET]: (data, reply) => {
     // eslint-disable-next-line camelcase
     const { sequence, total, tool_sn } = data.data;
+    const r = getRandomArbitrary(0, 2);
+    const dResult = r % 2 > 1 ? 'ok' : 'nok';
     reply(
       {
         sn: data.sn,
@@ -42,7 +48,7 @@ const toolHandlers = {
               ti: 1,
               mi: 1,
               wi: 1,
-              result: 'ok', // result
+              result: dResult, // result
               batch: `${sequence}/${total}`
             }
           ]
