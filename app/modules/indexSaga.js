@@ -16,6 +16,7 @@ import { CommonLog } from '../common/utils';
 import healthz from './healthz/saga';
 import modelViewer from './modelViewer/saga';
 import notifier from './Notifier/saga';
+import workCenterMode from './workCenterMode/saga'
 import systemInfo from './systemInfo/saga';
 
 export default function* rootSaga(): Saga<void> {
@@ -34,6 +35,7 @@ export default function* rootSaga(): Saga<void> {
       // watchNetwork,
       // watchBattery,
       watchPower,
+      workCenterMode, //切换工位工作模式
       order,
       dialog,
       healthz,

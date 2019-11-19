@@ -19,7 +19,7 @@ const trans = [
     confirm: '确认切换工作模式',
     cancel: '取消',
     switchWorkCenterModeTitle: '切换工位工作模式',
-    switchWorkCenterModeContent: '确认是否切换工作模式？'
+    switchWorkCenterModeContent: '确认是否切换工作模式？当前模式为:'
   }),
   makeLocalBundle(lng.en, 'navBar', {
     normWorkCenterMode: 'Normal Mode',
@@ -27,7 +27,7 @@ const trans = [
     confirm: 'Confirm',
     cancel: 'Cancel',
     switchWorkCenterModeTitle: 'Switch WorkCenter Work Mode',
-    switchWorkCenterModeContent: 'Make Sure. Do You Want To Switch WorkCenter Mode'
+    switchWorkCenterModeContent: 'Make Sure. Do You Want To Switch WorkCenter Mode? Current Work Center Mode:'
   })
 ];
 
