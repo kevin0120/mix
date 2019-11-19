@@ -36,12 +36,12 @@ type Props = {|
 
 const mapState = (state, props: tOP): tSP => {
   const vStep = viewingStep(state.order);
-  return ({
+  return {
     ...props,
     points: stepData(vStep)?.tightening_points || stepPayload(vStep)?.tightening_points || [],
     image: vStep?.image || '',
     status: stepStatus(vStep)
-  });
+  };
 };
 
 const mapDispatch: tDP = {
@@ -52,8 +52,6 @@ const mapDispatch: tDP = {
 
 function ScrewStep({ isCurrent, image, points, redoPoint, result }: Props) {
   const classes = makeStyles(styles)();
-  console.log(image);
-
   return <div className={classes.layout}>
     <ScrewImage
       image={image}

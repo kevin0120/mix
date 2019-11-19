@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import Menu from '@material-ui/core/Menu';
 import Fade from '@material-ui/core/Fade';
-import { createMuiTheme, makeStyles, MuiThemeProvider } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
+import PropTypes from "prop-types";
 import Button from '../CustomButtons/Button';
 import styles from './styles';
-import PropTypes from "prop-types";
 
 function NavBarMenu({ statusOK, title,children,onClick }) {
   const classes = makeStyles(styles.NavBarMenu)();

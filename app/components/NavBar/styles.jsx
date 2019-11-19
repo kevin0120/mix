@@ -124,7 +124,10 @@ const switchWorkCenterButton = (theme)=>({
   ...sweetAlertStyle(theme),
   bigButton: {
     width: '10vw',
-    height: '6vh'
+    height: '50px'
+  },
+  buttonTxt: {
+    fontSize: '15px',
   }
 });
 

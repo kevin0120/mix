@@ -41,8 +41,7 @@ const orderReducer: {
   [key: tOrderActionTypes]: tReducer<
     tOrderState,
     // eslint-disable-next-line flowtype/no-weak-types
-    tAction<tOrderActionTypes, any>
-  >
+    tAction<tOrderActionTypes, any>>
 } = {
   [ORDER.NEW_LIST]: (state, { list }: { list: Array<IOrder> }) => ({
     ...state,

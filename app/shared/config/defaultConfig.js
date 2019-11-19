@@ -144,6 +144,8 @@ const defaultConfigs = {
 
     // 作业前检测(order mode only)
     preCheck: false, // 开工检查
+    
+    maxReworkCnt: 1, // 默认的最大返工点计数
 
     // 强制放行配置
     byPass: {

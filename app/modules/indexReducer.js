@@ -18,6 +18,7 @@ import dialog from './dialog/reducer';
 import Notifier from './Notifier/reducer';
 import loading from './loading/reducer';
 import systemInfo from './systemInfo/reducer';
+import workCenterMode from './workCenterMode/reducer';
 
 export default function createRootReducer(history: {}) {
   const routerReducer = connectRouter(history)(() => {});
@@ -28,6 +29,7 @@ export default function createRootReducer(history: {}) {
       ...Configuration,
       users,
       workMode,
+      workCenterMode,
       resultDiag,
       operationViewer,
       logo,
