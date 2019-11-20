@@ -193,21 +193,18 @@ BEGIN
            co.program_id,
            qc.product_id,
            mp.assembly_line_id,
-           mbl.id,
            co.operation_point_id
-           into r_qc_id, r_qcp_id, consu_bom_id, r_production_id, r_order_id, r_workcenter_id, r_gun_id, r_product_id, r_program_id, r_consu_product_id, r_assembly_id,r_bom_line_id,r_operation_point_id
+           into r_qc_id, r_qcp_id, consu_bom_id, r_production_id, r_order_id, r_workcenter_id, r_gun_id, r_product_id, r_program_id, r_consu_product_id, r_assembly_id,r_operation_point_id
     from public.mrp_workorder wo,
          public.mrp_wo_consu_line co,
          public.sa_quality_check qc,
          public.mrp_production mp,
          public.product_product pp,
-         public.maintenance_equipment me,
-         public.mrp_bom_line mbl
+         public.maintenance_equipment me
     where wo.name = order_no
       and qc.bolt_number = nut_serial_no
       and co.check_id = qc.id
       and wo.production_id = mp.id
-      and mbl.id = co.bom_line_id
       and me.serial_no = gun_sn;
 
     select wo.id into r_expect_order_id

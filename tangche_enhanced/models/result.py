@@ -71,7 +71,7 @@ BEGIN
            mbl.operation_point_id
            into r_vin_code, r_qcp_id, consu_bom_id, r_production_id, r_workcenter_id, r_product_id, r_program_id, r_consu_product_id, r_assembly_id,r_bom_line_id,r_operation_point_id
     from public.mrp_workorder wo,
-         public.mrp_wo_consu co,
+         public.mrp_wo_consu_line co,
          public.sa_quality_point qp,
          public.mrp_production mp,
          public.product_product pp,
