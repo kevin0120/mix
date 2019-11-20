@@ -77,8 +77,8 @@ export class ClsOrderOperationPoints {
   }
 
   newResult(results: Array<tResult>) {
-    let newActivePoints = [];
-    let newInactivePoints = [];
+    let newActivePoints: Array<?ClsOperationPoint> = [];
+    let newInactivePoints: Array<?ClsOperationPoint> = [];
     results.forEach(r => {
       const { sequence: seq } = r;
       const group = this.getGroupByPointSequence(seq);

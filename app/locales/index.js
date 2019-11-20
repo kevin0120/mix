@@ -3,6 +3,7 @@ import stepWorking from '../containers/stepWorking/local';
 import navBar from '../components/NavBar/local';
 
 
+
 const trans = [
   ...stepWorking,
   ...navBar

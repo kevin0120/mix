@@ -15,6 +15,9 @@ export default {
     point
   }),
   confirmFail: () => ({
-    type: SCREW_STEP.CONFIRM_FAIL
-  })
+    type: SCREW_STEP.CONFIRM_FAIL,
+  }),
+  confirmFailSpecPoint: () => ({
+    type: SCREW_STEP.CONFIRM_FAIL_SPEC_POINT
+  }),
 };

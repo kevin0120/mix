@@ -80,13 +80,13 @@ function customDialog(props: Props) {
           <DialogTitle id="form-dialog-title" className={classes.modalHeader}>
             {(typeof title === 'string' ? t(title) : title) || ''}
           </DialogTitle>
-          <DialogContent className={classes.modalBody}>
+          <DialogContent className={`${classes.modalBody} ${classes.diagContent}`}>
             {content || ''}
           </DialogContent>
           <DialogActions>
             {
               buttons && buttons.map((b, idx) => b ?
-                <Button key={b.label} onClick={() => onButton(idx)} color={b.color || 'info'} regular>
+                <Button key={b.label} onClick={() => onButton(idx)} color={b.color || 'info'} regular size='lg' className={classes.diagButton} fullWidth>
                   {t(b.label || '')}
                 </Button> : null) || null
             }

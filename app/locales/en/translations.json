@@ -212,6 +212,10 @@
     "of": "of",
     "rows": "rows"
   },
+  "Screw": {
+    "Next": "Next Tightening Point",
+    "Prev": "Prev Tightening Point"
+  },
   "Order": {
     "Step": {
       "name": "name",
