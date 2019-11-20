@@ -197,7 +197,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
       },
       * [STEP_STATUS.DOING](ORDER, orderActions) {
         try {
-          let isFirst = true;
+          let isFirst = true; // job只设置一次，记录状态
           this._activePoints = this._pointsManager.start();
 
           const resultChannel = yield actionChannel([
@@ -216,11 +216,11 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
             if (this._pointsManager.isPass()) {
               yield call(stepDataApi, this._data);
-              yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED));
+              yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
             }
 
             if (this._pointsManager.isFailed()) {
-              yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL));
+              yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL));  // 失败退出
             }
 
             if (this._activePoints && this._activePoints.length > 0) {
@@ -271,14 +271,14 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 );
                 break;
               }
-              case SCREW_STEP.REDO_POINT: {
-                const { point } = action;
-                if (!this._pointsManager.hasPoint(point)) {
-                  break;
-                }
-                this._activePoints = [point.redo()];
-                break;
-              }
+              // case SCREW_STEP.REDO_POINT: {
+              //   const { point } = action;
+              //   if (!this._pointsManager.hasPoint(point)) {
+              //     break;
+              //   }
+              //   this._activePoints = [point.redo()];
+              //   break;
+              // }
               default:
                 break;
             }

@@ -1,4 +1,7 @@
-export default {
+import narBarStyles from '../../../components/NavBar/styles'
+
+const screwImageStyles = (theme) => ({
+  ...narBarStyles.switchWorkCenterButton(theme),
   layout: {
     width: '100%',
     height: '100%',
@@ -15,4 +18,6 @@ export default {
     width: '200px',
     height: '200px'
   }
-};
+});
+
+export default screwImageStyles;

@@ -48,12 +48,16 @@ export class ClsOperationPoint {
     return this._point.sequence;
   }
 
-  get status() {
+  get status(): tPointStatus {
     return this._status;
   }
 
   get isActive(): boolean {
     return this._isActive;
+  }
+  
+  get canRedo(): boolean {
+    return !this.isActive && this.status === POINT_STATUS.ERROR;
   }
 
   get toolSN(): string {

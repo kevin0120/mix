@@ -1,0 +1,7 @@
+// @flow
+
+// action types
+export const REWORK_PATTERN = {
+  SPEC_SCREW: 'REWORK_PATTERN_SPEC_SCREW',
+  SCREW_STEP: 'REWORK_PATTERN_SCREW_STEP'
+};

@@ -26,7 +26,7 @@ const orderHandlers = {
           {
             id: 1,
             code: 'MO0002',
-            track_code: 'track_code for order list',
+            track_code: '1x0001',
             product_code: 'demo_product_code',
             workcenter: 'workcenter',
             date_planned_start: '2019-10-16T03:20:30Z',
@@ -37,12 +37,32 @@ const orderHandlers = {
           {
             id: 2,
             code: 'MO0003',
-            track_code: 'track_code for order list',
+            track_code: '1x0002',
             product_code: 'product_code',
             workcenter: 'workcenter',
             date_planned_start: '2019-10-16T03:25:30Z',
             date_planned_complete: 'date_planned_complete',
             status: 'todo'
+          },
+          {
+            id: 3,
+            code: 'MO0004',
+            track_code: '1x0004',
+            product_code: 'product_code',
+            workcenter: 'workcenter',
+            date_planned_start: '2019-10-16T03:25:30Z',
+            date_planned_complete: 'date_planned_complete',
+            status: 'pending',
+          },
+          {
+            id: 4,
+            code: 'MO0005',
+            track_code: '1x0005',
+            product_code: 'product_code',
+            workcenter: 'workcenter',
+            date_planned_start: '2019-10-16T03:25:30Z',
+            date_planned_complete: 'date_planned_complete',
+            status: 'done',
           }
         ]
       },

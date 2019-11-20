@@ -24,5 +24,6 @@ export const controllerModes = Object.freeze({
 export const SCREW_STEP = Object.freeze({
   RESULT: 'SCREW_STEP_RESULT',
   REDO_POINT: 'SCREW_STEP_REDO_POINT',
+  REDO_POINT_PRE: 'SCREW_STEP_REDO_POINT',
   CONFIRM_FAIL: 'SCREW_STEP_CONFIRM_FAIL'
 });

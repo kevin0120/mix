@@ -11,7 +11,7 @@ const logLvl2NotiStackVariant = {
   Info: 'info',
   Debug: 'error',
   Error: 'error',
-  Warn: 'info',
+  Warn: 'warning',
   Maintenance: 'info',
   default: 'info'
 };

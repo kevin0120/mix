@@ -9,7 +9,7 @@ import Button from '../CustomButtons/Button';
 class Notifier extends Component {
   // eslint-disable-next-line react/sort-comp
   displayed = [];
-
+  
   storeDisplayed = (id) => {
     this.displayed = [...this.displayed, id];
   };
@@ -42,6 +42,7 @@ class Notifier extends Component {
     const {
       notifications = [],
       enqueueSnackbar,
+      closeSnackbar,
       removeSnackbarAction,
       closeSnackbarAction,
     } = this.props;
@@ -57,6 +58,7 @@ class Notifier extends Component {
             justIcon
             regular
             onClick={() => {
+              closeSnackbar(k);
               closeSnackbarAction(k);
             }}
             simple
