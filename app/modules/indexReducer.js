@@ -19,6 +19,7 @@ import Notifier from './Notifier/reducer';
 import loading from './loading/reducer';
 import systemInfo from './systemInfo/reducer';
 import workCenterMode from './workCenterMode/reducer';
+import io from './io/reducer';
 
 export default function createRootReducer(history: {}) {
   const routerReducer = connectRouter(history)(() => {});
@@ -41,7 +42,8 @@ export default function createRootReducer(history: {}) {
       Notifier,
       healthz,
       loading,
-      systemInfo
+      systemInfo,
+      io
     })
   );
 }
