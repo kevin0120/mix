@@ -22,7 +22,7 @@ jobs:
     - name: Build
       run: |
         # build for windows
-        $env:Path+=";$pwd\tools\pkg-config\exe"
+        $env:Path="$pwd\tools\pkg-config\exe;$env:Path"
         $env:PKG_CONFIG_PATH="$pwd\libs\libusb\1.0.22"
         which pkg-config
         ls env:
