@@ -49,6 +49,5 @@ jobs:
         # Gives the release a custom name
         name: ${GITHUB_REF/refs\/tags\//}
         # Creates a draft release
-        draft: # optional, default is false
-        - ./build/rush-${GITHUB_REF/refs\/tags\//}.exe
+        draft: ./build/rush-${GITHUB_REF/refs\/tags\//}.exe
         files: # optional, default is empty
