@@ -27,6 +27,8 @@ jobs:
     - name: Build
       run: |
         # build for windows
+        where pkg-config
+        ls env:
         go build -o ./build/rush-${GITHUB_REF/refs\/tags\//}.exe ./cmd/rushd/main.go
 
     - name: Draft release
