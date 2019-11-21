@@ -88,7 +88,7 @@ export class ClsOrderOperationPoints {
       const groupSeq = group.groupSequence;
       const point = group.newResult(r);
       newInactivePoints = newInactivePoints.concat(point);
-      if (!group.isKeyPass()) {
+      if (!group.isKeyPass) {
         return;
       }
       const gSeq = Math.min(
@@ -135,15 +135,15 @@ export class ClsOrderOperationPoints {
     return groups.find(g => g.points.some(p => p.sequence === seq));
   }
 
-  isPass() {
+  get isPass() {
     return Object.keys(this._groups).every(g =>
-      this._groups[parseInt(g, 10)].isAllPass()
+      this._groups[parseInt(g, 10)].isAllPass
     );
   }
 
-  isFailed() {
+  get isFailed() {
     return Object.keys(this._groups).some(g =>
-      this._groups[parseInt(g, 10)].isFailed()
+      this._groups[parseInt(g, 10)].isFailed
     );
   }
 

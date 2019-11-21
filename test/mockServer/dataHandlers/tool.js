@@ -55,7 +55,7 @@ const toolHandlers = {
         },
         events.result
       );
-    }, 1000);
+    }, sequence * 1000);
   }
 };
 
