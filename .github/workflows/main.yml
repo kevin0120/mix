@@ -21,8 +21,8 @@ jobs:
 
     - name: PreBuild
       run: |
-        set PATH=%PATH%;%CD%\tools\pkg-config\exe
-        set PKG_CONFIG_PATH=%CD%\libs\libusb\1.0.22
+        $env:Path+=";$pwd\tools\pkg-config\exe"
+        $env:PKG_CONFIG_PATH="$pwd\libs\libusb\1.0.22"
 
     - name: Build
       run: |
