@@ -19,6 +19,10 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v1
 
+    - name: PreBuild
+      run: |
+        set PKG_CONFIG_PATH=%CD%\libs\libusb\1.0.22
+
     - name: Build
       run: |
         # build for windows
