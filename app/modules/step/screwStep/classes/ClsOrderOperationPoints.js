@@ -91,10 +91,9 @@ export class ClsOrderOperationPoints {
       if (!group.isKeyPass()) {
         return;
       }
-      // eslint-disable-next-line radix
       const gSeq = Math.min(
         ...Object.keys(this._groups)
-          .map(s => parseInt(s))
+          .map(s => parseInt(s, 10))
           .filter(s => s > groupSeq)
       );
       const nextGroup = this._groups[gSeq];
@@ -112,8 +111,7 @@ export class ClsOrderOperationPoints {
   }
 
   start(): Array<ClsOperationPoint> {
-    // eslint-disable-next-line radix
-    const groupSeqs = Object.keys(this._groups).map(s => parseInt(s));
+    const groupSeqs = Object.keys(this._groups).map(s => parseInt(s, 10));
     const firstGroupSeq = Math.min(...groupSeqs);
     this._groups[firstGroupSeq].setActive(true);
     return this._groups[firstGroupSeq].points;
@@ -138,23 +136,20 @@ export class ClsOrderOperationPoints {
   }
 
   isPass() {
-    // eslint-disable-next-line radix
     return Object.keys(this._groups).every(g =>
-      this._groups[parseInt(g)].isAllPass()
+      this._groups[parseInt(g, 10)].isAllPass()
     );
   }
 
   isFailed() {
-    // eslint-disable-next-line radix
     return Object.keys(this._groups).some(g =>
-      this._groups[parseInt(g)].isFailed()
+      this._groups[parseInt(g, 10)].isFailed()
     );
   }
 
   hasPoint(point: ClsOperationPoint) {
-    // eslint-disable-next-line radix
     return Object.keys(this._groups).some(k =>
-      this._groups[parseInt(k)].hasPoint(point)
+      this._groups[parseInt(k, 10)].hasPoint(point)
     );
   }
 }
