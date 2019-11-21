@@ -19,15 +19,12 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v1
 
-    - name: PreBuild
-      run: |
-        $env:Path+=";$pwd\tools\pkg-config\exe"
-        $env:PKG_CONFIG_PATH="$pwd\libs\libusb\1.0.22"
-
     - name: Build
       run: |
         # build for windows
-        where pkg-config
+        $env:Path+=";$pwd\tools\pkg-config\exe"
+        $env:PKG_CONFIG_PATH="$pwd\libs\libusb\1.0.22"
+        which pkg-config
         ls env:
         go build -o ./build/rush-${GITHUB_REF/refs\/tags\//}.exe ./cmd/rushd/main.go
 
