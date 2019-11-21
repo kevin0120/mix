@@ -28,8 +28,17 @@ class MrpRoutingWorkcenter(models.Model):
     workcenter_id = fields.Many2one('mrp.workcenter', string='Prefer Work Center', copy=True,
                                     required=True)
 
-    workcenter_group_id = fields.Many2one('mrp.workcenter.group', compute=_compute_workcenter_group, store=True,
-                                          readonly=True)
+    workcenter_group_id = fields.Many2one('mrp.workcenter.group', compute=_compute_workcenter_group, store=True)
+
+    @api.model
+    def create(self, vals):
+        if 'workcenter_id' in vals:
+            workcenter_id = self.env['mrp.workcenter'].sudo().browse(vals.get('workcenter_id'))
+            if workcenter_id and workcenter_id.sa_workcentergroup_ids:
+                vals.update({
+                    'workcenter_group_id': workcenter_id.sa_workcentergroup_ids[0].id
+                })
+        return super(MrpRoutingWorkcenter, self).create(vals)
 
     @api.multi
     def _push_mrp_routing_workcenter(self, url):
@@ -79,7 +88,7 @@ class MrpRoutingWorkcenter(models.Model):
                 "product_type": bom_id.product_id.default_code if bom_id else "",
                 "workcenter_code": operation_id.workcenter_id.code if operation_id.workcenter_id else "",
                 'product_type_image': u'data:{0};base64,{1}'.format('image/png',
-                                                                bom_id.product_id.image_small) if bom_id.product_id.image_small else "",
+                                                                    bom_id.product_id.image_small) if bom_id.product_id.image_small else "",
                 "points": _points
             }
             try:
@@ -103,7 +112,8 @@ class MrpRoutingWorkcenter(models.Model):
                 for workcenter_id in operation.workcenter_ids:
                     connects = workcenter_id.get_workcenter_masterpc_http_connect()
                     if not len(connects):
-                        _logger.error("Can Not Found MasterPC Connect Info For Work Center:{0}".format(workcenter_id.name))
+                        _logger.error(
+                            "Can Not Found MasterPC Connect Info For Work Center:{0}".format(workcenter_id.name))
                         continue
                     connect = connects[0]
                     url = 'http://{0}:{1}{2}'.format(connect.ip, connect.port, MASTER_ROUTING_API)
