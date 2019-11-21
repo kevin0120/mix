@@ -26,6 +26,8 @@ jobs:
         $env:PKG_CONFIG_PATH="$pwd\libs\libusb\1.0.22"
         which pkg-config
         ls env:
+        pkg-config --cflags  -- libusb-1.0
+
         go build -o ./build/rush-${GITHUB_REF/refs\/tags\//}.exe ./cmd/rushd/main.go
 
     - name: Draft release
