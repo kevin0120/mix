@@ -1,14 +1,15 @@
 name: Go
 on:
   push:
-    tags: 
+    tags:
     - 'customize-*'
 
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: windows
     steps:
+
     - name: Set up Go 1.13
       uses: actions/setup-go@v1
       with:
@@ -18,26 +19,10 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v1
 
-#     - name: Get dependencies
-#       run: |
-#         go get -v -t -d ./...
-#         if [ -f Gopkg.toml ]; then
-#             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-#             dep ensure
-#         fi
-
     - name: Build
       run: |
-        # build for docker
-        CGO_ENABLED=0 go build -o ./build/rushd ./cmd/rushd/main.go
-
         # build for windows
-        GOOS=windows GOARCH=amd64 go build -o ./build/rush-${GITHUB_REF/refs\/tags\//}.exe ./cmd/rushd/main.go
-
-    - name: Build and deploy docker image
-      run: |
-        docker login docker.pkg.github.com -u masami10 -p f6a12ade4d6724c9a180c0de7c0310d3ec5416c2
-        ./build_docker.sh ${GITHUB_REF/refs\/tags\//}
+        go build -o ./build/rush-${GITHUB_REF/refs\/tags\//}.exe ./cmd/rushd/main.go
 
     - name: Draft release
       uses: softprops/action-gh-release@v1
