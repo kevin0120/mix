@@ -6,6 +6,7 @@ import (
 
 	"encoding/json"
 	"fmt"
+	"github.com/masami10/rush/services/broker"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
@@ -66,6 +67,10 @@ type Service struct {
 	rpc                  GRPCClient
 
 	TighteningService *tightening_device.Service
+	Broker            *broker.Service
+
+	toolCollector chan string
+	closing       chan struct{}
 }
 
 func NewService(c Config, d Diagnostic, rush_port string) *Service {
@@ -82,6 +87,8 @@ func NewService(c Config, d Diagnostic, rush_port string) *Service {
 		AiisStatusDispatcher: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		updateQueue:          map[int64]time.Time{},
 		mtx:                  sync.Mutex{},
+		toolCollector:        make(chan string, 16),
+		closing:              make(chan struct{}, 1),
 	}
 	s.rpc.RPCRecvDispatcher.Register(s.OnRPCRecv)
 	s.rpc.RPCStatusDispatcher.Register(s.OnRPCStatus)
@@ -158,6 +165,8 @@ func (s *Service) RegisterTighteningResultHandler(name string, handler Tightenin
 
 func (s *Service) Open() error {
 	s.RegisterTighteningResultHandler(tightening_device.DISPATCH_RESULT, s.OnTighteningResult)
+	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_NEW_TOOL).Register(s.onNewTool)
+	s.Broker.BrokerStatusDisptcher.Register(s.onBrokerStatus)
 
 	c := s.Config()
 	client := resty.New()
@@ -203,6 +212,7 @@ func (s *Service) Open() error {
 func (s *Service) Close() error {
 	s.OdooStatusDispatcher.Release()
 	s.AiisStatusDispatcher.Release()
+	s.closing <- struct{}{}
 	return s.rpc.Stop()
 }
 
@@ -231,17 +241,17 @@ func (s *Service) OnRPCRecv(data interface{}) {
 	str_data, _ := json.Marshal(rpcPayload.Data)
 
 	switch rpcPayload.Type {
-	case TYPE_RESULT:
-		rp := ResultPatch{}
-		json.Unmarshal(str_data, &rp)
-		err := s.DB.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
-		if err == nil {
-			s.RemoveFromQueue(rp.ID)
-			s.diag.Debug(fmt.Sprintf("结果上传成功 ID:%d", rp.ID))
-		} else {
-			s.diag.Error(fmt.Sprintf("结果上传失败 ID:%d", rp.ID), err)
-		}
-		break
+	//case TYPE_RESULT:
+	//	rp := ResultPatch{}
+	//	json.Unmarshal(str_data, &rp)
+	//	err := s.DB.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
+	//	if err == nil {
+	//		s.RemoveFromQueue(rp.ID)
+	//		s.diag.Debug(fmt.Sprintf("结果上传成功 ID:%d", rp.ID))
+	//	} else {
+	//		s.diag.Error(fmt.Sprintf("结果上传失败 ID:%d", rp.ID), err)
+	//	}
+	//	break
 
 	case TYPE_ODOO_STATUS:
 		status := ODOOStatus{}
@@ -257,7 +267,7 @@ func (s *Service) OnRPCRecv(data interface{}) {
 //
 //}
 
-func (s *Service) PutResult(resultId int64, body interface{}) error {
+func (s *Service) PutResult(resultId int64, body *AIISResult) error {
 
 	//var err error
 	//for _, endpoint := range s.endpoints {
@@ -293,12 +303,13 @@ func (s *Service) PutResult(resultId int64, body interface{}) error {
 	}
 
 	str, _ := json.Marshal(result)
-	err = s.rpc.RPCSend(string(str))
-	if err != nil {
-		s.diag.Error("grpc err", err)
-	}
-
-	return err
+	return s.Broker.Publish(fmt.Sprintf(SUBJECT_RESULTS, body.ToolSN), str)
+	//err = s.rpc.RPCSend(string(str))
+	//if err != nil {
+	//	s.diag.Error("grpc err", err)
+	//}
+	//
+	//return err
 }
 
 func (s *Service) putResult(body interface{}, url string, method string) error {
@@ -453,7 +464,7 @@ func (s *Service) ResultUploadManager() error {
 			for _, v := range results {
 				aiisResult, err := s.ResultToAiisResult(&v)
 				if err == nil {
-					s.PutResult(v.Id, aiisResult)
+					s.PutResult(v.Id, &aiisResult)
 				}
 			}
 		}
@@ -476,6 +487,62 @@ func (s *Service) OnTighteningResult(data *tightening_device.TighteningResult) {
 
 	aiisResult, err := s.ResultToAiisResult(dbResult)
 	if err == nil {
-		s.PutResult(dbResult.Id, aiisResult)
+		s.PutResult(dbResult.Id, &aiisResult)
 	}
+}
+
+func (s *Service) collectTools() {
+	for {
+		select {
+		case toolSN := <-s.toolCollector:
+			s.Broker.Subscribe(fmt.Sprintf(SUBJECT_RESULTS_RESP, toolSN), s.onResultResp)
+
+		case <-s.closing:
+			return
+		}
+	}
+}
+
+func (s *Service) onBrokerStatus(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	brokerStatus := data.(bool)
+	if !brokerStatus {
+		return
+	}
+
+	go s.collectTools()
+}
+
+// 检测到新工具
+func (s *Service) onNewTool(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	toolSN := data.(string)
+	s.toolCollector <- toolSN
+}
+
+func (s *Service) onResultResp(message *broker.BrokerMessage) ([]byte, error) {
+	if message == nil {
+		return nil, nil
+	}
+
+	rpcPayload := RPCPayload{}
+	json.Unmarshal(message.Body, &rpcPayload)
+	str_data, _ := json.Marshal(rpcPayload.Data)
+	rp := ResultPatch{}
+	json.Unmarshal(str_data, &rp)
+	err := s.DB.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
+	if err == nil {
+		s.RemoveFromQueue(rp.ID)
+		s.diag.Debug(fmt.Sprintf("结果上传成功 ID:%d", rp.ID))
+	} else {
+		s.diag.Error(fmt.Sprintf("结果上传失败 ID:%d", rp.ID), err)
+	}
+
+	return nil, nil
 }

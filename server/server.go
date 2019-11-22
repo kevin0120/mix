@@ -296,6 +296,8 @@ func (s *Server) appendAiisService() error {
 	srv.TighteningService = s.TighteningDeviceService
 	srv.SN = s.config.SN
 	srv.DB = s.StorageServie
+	srv.Broker = s.BrokerService
+
 	s.AiisService = srv
 	s.AppendService("aiis", srv)
 

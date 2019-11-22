@@ -6,6 +6,11 @@ const (
 )
 
 const (
+	SUBJECT_RESULTS      = "saturn.results.%s"
+	SUBJECT_RESULTS_RESP = "saturn.results.%s.response"
+)
+
+const (
 	ODOO_RESULT_PASS = "pass"
 	ODOO_RESULT_FAIL = "fail"
 

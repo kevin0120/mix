@@ -51,6 +51,7 @@ func (s *Service) initGblDispatcher() {
 		DISPATCH_IO:                utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		DISPATCH_TOOL_STATUS:       utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		DISPATCH_CONTROLLER_ID:     utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		DISPATCH_NEW_TOOL:          utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 	}
 }
 
@@ -117,6 +118,13 @@ func (s *Service) Open() error {
 	s.startupControllers()
 
 	s.initRequestDispatchers()
+
+	controllers := s.GetControllers()
+	for _, c := range controllers {
+		for toolSN, _ := range c.Children() {
+			s.GetDispatcher(DISPATCH_NEW_TOOL).Dispatch(toolSN)
+		}
+	}
 
 	return nil
 }
