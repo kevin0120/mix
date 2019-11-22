@@ -1,22 +1,31 @@
 // @flow
-import { takeEvery, select, call, all } from 'redux-saga/effects';
+import { takeEvery, select, call, all, put } from 'redux-saga/effects';
 import { IO } from './constants';
-import ClsIOModule from '../device/io/ClsIOModule';
+import { newDevice } from '../deviceManager/devices';
 import { CommonLog } from '../../common/utils';
 import { ioDirection, ioTriggerMode } from '../device/io/constants';
+import { deviceType } from '../deviceManager/constants';
+import ioActions from './action';
 
-const defaultIOModule = new ClsIOModule(
-  'defaultIO',
-  'defaultIO',
-  { input_num: 8, output_num: 8 }
-);
+let defaultIOModule = null;
 
 const listeners = {};
 
 export default function* root() {
-  yield takeEvery(IO.SET, setIOOutput);
-  yield takeEvery(IO.ADD_LISTENER, bindIOListeners);
-  yield takeEvery(IO.SET_PORT, setPort);
+  try {
+    defaultIOModule = newDevice(
+      deviceType.io,
+      'defaultIO',
+      'defaultIO',
+      { input_num: 8, output_num: 8 }
+    );
+    yield put(ioActions.setModule(defaultIOModule));
+    yield takeEvery(IO.SET, setIOOutput);
+    yield takeEvery(IO.ADD_LISTENER, bindIOListeners);
+    yield takeEvery(IO.SET_PORT, setPort);
+  } catch (e) {
+    CommonLog.lError(e);
+  }
 }
 
 function* setPort(action) {
@@ -38,7 +47,7 @@ function* bindIOListeners(action) {
     }
     const { inputType, action: act } = action;
     const { ioPorts } = yield select(s => s.io);
-    const port = defaultIOModule.getPort(ioDirection.output, ioPorts.in[inputType]);
+    const port = defaultIOModule.getPort(ioDirection.output, ioPorts[ioDirection.input][inputType]);
     if (listeners[inputType]) {
       defaultIOModule.removeListener(listeners[inputType]);
     }
@@ -57,7 +66,7 @@ function* setIOOutput(action) {
     }
     const { group, status } = action;
     const { ioPorts } = yield select(s => s.io);
-    const ports = group.map(o => defaultIOModule.getPort(ioDirection.output, ioPorts.out[o]));
+    const ports = group.map(o => defaultIOModule.getPort(ioDirection.output, ioPorts[ioDirection.input][o]));
     yield all(ports.map(p => call(defaultIOModule.setIO(p, status))));
   } catch (e) {
     CommonLog.lError(e);

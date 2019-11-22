@@ -1,10 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-
-import { withStyles } from '@material-ui/core/styles';
 import { get, cloneDeep } from 'lodash';
-
 import Paper from '@material-ui/core/Paper';
 import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
@@ -20,12 +17,13 @@ import Select from '@material-ui/core/Select';
 import Button from '../../components/CustomButtons/Button';
 
 import saveConfigs from '../../modules/setting/action';
-import IO_FUNCTION from '../../modules/device/io/constants';
-
+import { ioDirection } from '../../modules/device/io/constants';
+import { ioOutputs, ioInputs } from '../../modules/io/constants';
 // import { testIO } from '../../modules/external/device/io/saga';
 
 import styles from './styles';
 import withKeyboard from '../../components/Keyboard';
+import { makeStyles } from '@material-ui/styles';
 
 const testIO = () => {
 };
@@ -33,7 +31,8 @@ const testIO = () => {
 const mapStateToProps = (state, ownProps) => ({
   storedConfigs: state.setting.page.modbus,
   ioEnabled: state.setting.systemSettings.modbusEnable,
-  ...ownProps
+  ...ownProps,
+  ioModule: state.io.ioModule
 });
 
 function mapDispatchToProps(dispatch) {
@@ -44,9 +43,22 @@ function mapDispatchToProps(dispatch) {
 }
 
 /* eslint-disable react/prefer-stateless-function */
-class ConnectedIo extends React.PureComponent {
+function ConnectedIo(props) {
+  const { ioEnabled, ioModule } = props;
+  const classes = makeStyles(styles.content)();
+
+
+  const [data, setData] = useState(props.storedConfigs);
+  const [isDataValid, setIsDataValid] = useState(true);
+  const [section, setSection] = useState('modbus');
+  const [btnGroupStatus, setBtnGroupStatus] = useState({});
+  const [ioTestRsp, setIoTestRsps] = useState(Array(props?.storedConfigs?.in?.length).fill(0));
+
+  if (!ioModule) {
+    return null;
+  }
   // 获取 btns 的状态集
-  static getBtnStatus(data) {
+  function getBtnStatus(data) {
     const checkEveryBtns = items =>
       items.reduce(
         (pre, item) => ({
@@ -69,48 +81,27 @@ class ConnectedIo extends React.PureComponent {
     return status;
   }
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      isDataValid: true,
-      data: props.storedConfigs,
-      btnGroupStatus: {},
-      section: 'modbus',
-      ioTestRsp: Array(props?.storedConfigs?.in?.length).fill(0)
-    };
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleTest = this.handleTest.bind(this);
-
-    this.IO_FUNCTION = IO_FUNCTION;
-  }
-
-  handleChange(e, idx, io, key) {
-    const { data } = this.state;
+  function handlePortChange(e, idx, io, key) {
     const tempData = cloneDeep(data[io]);
     tempData[idx][key] = get(e, 'target.value', '').trim();
-    this.setState({
-      data: {
-        ...data,
-        [io]: tempData
-      },
-      isDataValid: this.validateData({
-        ...data,
-        [io]: tempData
-      })
+    setData({
+      ...data,
+      [io]: tempData
     });
+    setIsDataValid(validateData({
+      ...data,
+      [io]: tempData
+    }));
   }
 
-  handleSubmit() {
-    const { saveConfigs, resetIO } = this.props;
-    const { data, section } = this.state;
+  function handleSubmit() {
+    const { saveConfigs, resetIO } = props;
     resetIO(data);
     saveConfigs(section, data);
   }
 
-  handleTest(obj) {
-    const { ioTestRsp } = this.state;
+  function handleTest(obj) {
     switch (obj.io) {
       case 'in': {
         testIO(obj.io, obj.bit)
@@ -141,166 +132,162 @@ class ConnectedIo extends React.PureComponent {
     }
   }
 
-  validateData(data = this.state.data) {
+  function validateData(d = data) {
     // return Object.keys(data).every(io => data[io].every(item => item.label && item.function));
     return true;
   }
 
-  generatorItems(data=[], t) {
-    const { classes, ioEnabled } = this.props;
-    const { btnGroupStatus, ioTestRsp } = this.state;
+  function renderTestResult(status) {
+    const cls = {
+      0: {
+        color: classes.info,
+        text: 'OFF',
+        textColor: classes.infoText
+      },
+      1: {
+        color: classes.success,
+        text: 'ON',
+        textColor: classes.successText
+      },
+      Fail: {
+        color: classes.fail,
+        text: 'Fail',
+        textColor: classes.failText
+      }
+    };
+    if (!(status in Object.keys(cls))) {
+      return null;
+    }
+    const { color = classes.info, text = '', textColor = classes.infoText } = cls[status];
+    return <div className={classes.statusWrap}>
+      <span className={`${classes.statusCircle} ${color}`}/>
+      <span className={textColor}>{text}</span>
+    </div>;
+  }
+
+  function generatorItems(ports = [], direction, t) {
+    if (!ports) {
+      return null;
+    }
+    const data = ports.filter(p => p.direction === direction);
+
     return data.map((item, idx) => {
-      const options = get(
-        this.IO_FUNCTION,
-        String.prototype.toUpperCase.call(item.io),
-        this.IO_FUNCTION.IN
-      );
-      const selectItems = Object.keys(options).map(v => (
-        <MenuItem key={v} value={v}>
-          {v}
-        </MenuItem>
-      ));
-
-      const generatorStatus = () => {
-        if (item.io === 'out') return null;
-
-        if (ioTestRsp[item.bit] === 0) {
-          return (
-            <div className={classes.statusWrap}>
-              <span className={`${classes.statusCircle} ${classes.info}`}/>
-              <span className={classes.infoText}>OFF</span>
-            </div>
-          );
-        }
-        if (ioTestRsp[item.bit] === 1) {
-          return (
-            <div className={classes.statusWrap}>
-              <span className={`${classes.statusCircle} ${classes.success}`}/>
-              <span className={classes.successText}>ON</span>
-            </div>
-          );
-        }
-        if (ioTestRsp[item.bit] === 'fail') {
-          return (
-            <div className={classes.statusWrap}>
-              <span className={`${classes.statusCircle} ${classes.fail}`}/>
-              <span className={classes.failText}>Fail</span>
-            </div>
-          );
-        }
-        return null;
+      let options = [];
+      if (direction === ioDirection.output) {
+        options = Object.keys(ioOutputs);
+      } else if (direction === ioDirection.input) {
+        options = Object.keys(ioInputs);
+      }
+      const renderTest = () => {
+        if (direction === ioDirection.output) return null;
+        return renderTestResult(ioTestRsp[item.bit]);
       };
       return (
-        <div key={`${item.io}_${item.bit}`}>
+        <React.Fragment key={`${item.io}_${item.bit}`}>
           <ListItem className={classes.inputItem}>
             <InputLabel className={classes.ioInputLabel} htmlFor="name-simple">
-              {item.bit}
+              {item.idx}
             </InputLabel>
             <Input
               id="name-simple"
               placeholder={t('Common.isRequired')}
               className={classes.ioInput}
               value={item.label}
-              onClick={() => {
-                this.props.keyboardInput({
-                  onSubmit: text => {
-                    const tempData = cloneDeep(this.state.data[item.io]);
-                    tempData[idx]['label'] = text;
-                    this.setState({
-                      ...this.state,
-                      data: {
-                        ...this.state.data,
-                        [item.io]: tempData
-                      },
-                      isDataValid: this.validateData({
-                        ...this.state.data,
-                        [item.io]: tempData
-                      })
-                    });
-                  },
-                  text: item.label,
-                  title: item.bit,
-                  label: item.bit
-                });
-              }}
+              // onClick={() => {
+              //   this.props.keyboardInput({
+              //     onSubmit: text => {
+              //       const tempData = cloneDeep(this.state.data[item.io]);
+              //       tempData[idx]['label'] = text;
+              //       this.setState({
+              //         ...this.state,
+              //         data: {
+              //           ...this.state.data,
+              //           [item.io]: tempData
+              //         },
+              //         isDataValid: this.validateData({
+              //           ...this.state.data,
+              //           [item.io]: tempData
+              //         })
+              //       });
+              //     },
+              //     text: item.label,
+              //     title: item.bit,
+              //     label: item.bit
+              //   });
+              // }}
               // onChange={e => this.handleChange(e, idx, item.io, 'label')}
             />
             <Select
               value={item.function}
-              onChange={e => this.handleChange(e, idx, item.io, 'function')}
+              onChange={e => handlePortChange(e, idx, item, 'function')}
               displayEmpty
               name="function"
               className={classes.ioFunctionSelect}
             >
-              <MenuItem key="dummy" value=""/>
-              {selectItems}
+              {['', ...options].map(v => (
+                <MenuItem key={v} value={v}>{v}</MenuItem>
+              ))}
             </Select>
-            <span>{String.prototype.toUpperCase.call(item.io)}</span>
             <Button
               color="warning"
               size="lg"
-              onClick={() => this.handleTest(item)}
+              onClick={() => handleTest(item)}
               className={classes.testButton}
-              disabled={(!get(btnGroupStatus, `${item.io}.${item.bit}`, [])) || !ioEnabled}
+              // disabled={(!get(btnGroupStatus, `${item.io}.${item.bit}`, [])) || !ioEnabled}
             >
               {t('Common.Test')}
             </Button>
-            {generatorStatus()}
+            {renderTest()}
           </ListItem>
-          <li>
+          {idx !== data.length - 1 ?
             <Divider/>
-          </li>
-        </div>
+            : null}
+        </React.Fragment>
       );
     });
   }
 
-  render() {
-    const { classes, ioEnabled } = this.props;
-    const { data, isDataValid } = this.state;
-    const inItems = t => this.generatorItems(data?.in, t);
-    const outItems = t => this.generatorItems(data?.out, t);
+  const { ports } = ioModule;
+  const inItems = t => generatorItems(ports, ioDirection.input, t);
+  const outItems = t => generatorItems(ports, ioDirection.output, t);
 
-    return (
-      <I18n ns="translations">
-        {t => (
-          <section className={classes.section}>
-            <h3 className={classes.sectionTitle}>
-              {t('Configuration.IO.INname')}
-            </h3>
-            <Paper className={classes.paperWrap} elevation={1}>
-              <List>{inItems(t)}</List>
-            </Paper>
-            <h3
-              className={`${classes.sectionTitle} ${classes.sectionTitleInner}`}
-            >
-              {t('Configuration.IO.OUTname')}
-            </h3>
-            <Paper className={classes.paperWrap} elevation={1}>
-              <List>{outItems(t)}</List>
-              <Button
-                variant="contained"
-                disabled={!isDataValid || !ioEnabled}
-                color="info"
-                onClick={this.handleSubmit}
-                className={classes.button}
-              >
-                <SaveIcon className={classes.leftIcon}/>
-                {t('Common.Submit')}
-              </Button>
-            </Paper>
-          </section>
-        )}
-      </I18n>
-    );
-  }
+  return (
+    <I18n ns="translations">
+      {t => (
+        <section className={classes.section}>
+          <h3 className={classes.sectionTitle}>
+            {t('Configuration.IO.INname')}
+          </h3>
+          <Paper className={classes.paperWrap} elevation={1}>
+            <List>{inItems(t)}</List>
+          </Paper>
+          <h3
+            className={`${classes.sectionTitle} ${classes.sectionTitleInner}`}
+          >
+            {t('Configuration.IO.OUTname')}
+          </h3>
+          <Paper className={classes.paperWrap} elevation={1}>
+            <List>{outItems(t)}</List>
+          </Paper>
+          <Button
+            variant="contained"
+            disabled={!isDataValid || !ioEnabled}
+            color="info"
+            onClick={handleSubmit}
+            className={classes.button}
+          >
+            <SaveIcon className={classes.leftIcon}/>
+            {t('Common.Submit')}
+          </Button>
+        </section>
+      )}
+    </I18n>
+  );
 }
 
 ConnectedIo.propTypes = {
   classes: PropTypes.shape({}).isRequired,
   storedConfigs: PropTypes.shape({}).isRequired,
-  // in: PropTypes.array,
-  // out: PropTypes.array,
   saveConfigs: PropTypes.func.isRequired,
   resetIO: PropTypes.func.isRequired
 };
@@ -310,4 +297,4 @@ const Io = connect(
   mapDispatchToProps
 )(ConnectedIo);
 
-export default withKeyboard(withStyles(styles.content)(Io));
+export default withKeyboard(Io);

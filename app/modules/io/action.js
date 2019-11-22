@@ -1,6 +1,10 @@
 import { IO } from './constants';
 
 export default {
+  setModule: (io) => ({
+    type: IO.SET_MODULE,
+    io
+  }),
   set: (group, status) => ({
     type: IO.SET,
     group,
@@ -14,5 +18,9 @@ export default {
     type: IO.SET_PORT,
     output,
     portIdx
+  }),
+  test:()=>({
+    type: IO.TEST,
+
   })
 };
