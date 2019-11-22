@@ -11,6 +11,7 @@ import (
 	"github.com/masami10/aiis/services/httpd"
 	"github.com/masami10/aiis/services/storage"
 
+	"github.com/masami10/aiis/services/broker"
 	"github.com/masami10/aiis/services/changan"
 	"github.com/masami10/aiis/services/fis"
 	"github.com/masami10/aiis/services/masterplc"
@@ -48,6 +49,8 @@ type Config struct {
 
 	Minio minio.Config `yaml:"minio"`
 
+	Broker broker.Config `yaml:"broker"`
+
 	Commander command.Commander `yaml:"-"`
 }
 
@@ -68,6 +71,7 @@ func NewConfig() *Config {
 	c.Changan = changan.NewConfig()
 	c.MasterPLC = masterplc.NewConfig()
 	c.Minio = minio.NewConfig()
+	c.Broker = broker.NewConfig()
 
 	return c
 }
@@ -133,6 +137,10 @@ func (c *Config) Validate() error {
 
 	if err := c.Minio.Validate(); err != nil {
 		return errors.Wrap(err, "minio")
+	}
+
+	if err := c.Broker.Validate(); err != nil {
+		return errors.Wrap(err, "broker")
 	}
 
 	return nil

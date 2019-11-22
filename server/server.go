@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/masami10/aiis/command"
 	"github.com/masami10/aiis/keyvalue"
+	"github.com/masami10/aiis/services/broker"
 	"github.com/masami10/aiis/services/changan"
 	"github.com/masami10/aiis/services/diagnostic"
 	"github.com/masami10/aiis/services/fis"
@@ -53,6 +54,8 @@ type Server struct {
 	MasterplcService *masterplc.Service
 	MinioService     *minio.Service
 
+	BrokerService *broker.Service
+
 	config *Config
 	// List of services in startup order
 	Services []Service
@@ -95,6 +98,8 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	}
 
 	s.appendStorageService()
+
+	s.AppendBrokerService()
 
 	s.appendOdooService()
 
@@ -260,6 +265,20 @@ func (s *Server) appendOdooService() {
 	s.OdooService = srv
 	s.AppendService("odoo", srv)
 
+}
+
+func (s *Server) AppendBrokerService() error {
+	c := s.config.Broker
+	d := s.DiagService.NewBrokerHandler()
+
+	srv := broker.NewService(c, d)
+
+	s.BrokerService = srv
+	if c.Enable {
+		s.AppendService("broker", srv)
+	}
+
+	return nil
 }
 
 func (s *Server) Open() error {

@@ -65,7 +65,7 @@ func (s *Service) Open() error {
 
 	s.httpClient = client
 
-	if c.Enable && ! s.Opened {
+	if c.Enable && !s.Opened {
 		go s.taskHealthzCheck()
 		s.Opened = true
 	}

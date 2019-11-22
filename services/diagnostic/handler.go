@@ -401,3 +401,19 @@ type MinioHandler struct {
 func (h *MinioHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }
+
+type BrokerHandler struct {
+	l Logger
+}
+
+func (h *BrokerHandler) Info(msg string) {
+	h.l.Info(msg)
+}
+
+func (h *BrokerHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+func (h *BrokerHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}

@@ -73,7 +73,7 @@ func NewService(c Config, d Diagnostic) *Service {
 			diag:     d,
 			workers:  c.Workers,
 			Opened:   false,
-			closing: make(chan struct{}),
+			closing:  make(chan struct{}),
 			chResult: make(chan CResult, c.Workers*4),
 			route:    c.Route,
 

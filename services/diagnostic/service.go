@@ -114,6 +114,12 @@ func (s *Service) NewMinioHandler() *MinioHandler {
 	}
 }
 
+func (s *Service) NewBrokerHandler() *BrokerHandler {
+	return &BrokerHandler{
+		l: s.Logger.With(String("service", "broker")),
+	}
+}
+
 func BootstrapMainHandler() *CmdHandler {
 	s := NewService(NewConfig(), nil, os.Stderr)
 	// Should never error

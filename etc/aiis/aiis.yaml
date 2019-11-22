@@ -123,3 +123,14 @@ rush:
   batch_save_rows_limit: 100
   batch_save_time_limit: 2s
   grpc_port: 9093
+
+broker:
+  enable: true
+  connect-urls:
+    - nats://192.168.4.203:4222
+    - nats://192.168.4.203:4223
+    - nats://192.168.4.203:4224
+  connect-options:
+    name: Dummy Server
+    token: Dummy Token
+  provider: nats
