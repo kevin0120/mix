@@ -128,6 +128,7 @@ func (s *Server) appendRushService() {
 	srv.Fis = s.FisService
 	srv.Changan = s.ChanganService
 	srv.Odoo = s.OdooService
+	srv.Broker = s.BrokerService
 
 	s.RushService = srv
 

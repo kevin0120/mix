@@ -9,6 +9,11 @@ const (
 	WS_RESULT = "result"
 )
 
+const (
+	SUBJECT_RESULTS      = "saturn.results.*"
+	SUBJECT_RESULTS_RESP = "saturn.results.%s.response"
+)
+
 //type AIISResult struct {
 //	Pset_m_threshold float64 `json:"pset_m_threshold"`
 //	Pset_m_max       float64 `json:"pset_m_max"`

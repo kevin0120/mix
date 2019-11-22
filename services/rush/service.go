@@ -2,10 +2,12 @@ package rush
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/websocket"
 	"github.com/masami10/aiis/services/aiis"
+	"github.com/masami10/aiis/services/broker"
 	"github.com/masami10/aiis/services/changan"
 	"github.com/masami10/aiis/services/fis"
 	"github.com/masami10/aiis/services/httpd"
@@ -13,6 +15,7 @@ import (
 	"github.com/masami10/aiis/services/storage"
 	"github.com/masami10/aiis/services/wsnotify"
 	"gopkg.in/resty.v1"
+	"net/http"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -64,7 +67,8 @@ type Service struct {
 	Odoo    *odoo.Service
 	diag    Diagnostic
 
-	rpc *aiis.GRPCServer
+	//rpc *aiis.GRPCServer
+	Broker *broker.Service
 }
 
 func NewService(c Config, d Diagnostic) *Service {
@@ -84,10 +88,10 @@ func NewService(c Config, d Diagnostic) *Service {
 			}),
 			clientManager: wsnotify.WSClientManager{},
 			results:       make(chan *storage.ResultObject, c.BatchSaveRowsLimit),
-			rpc:           aiis.NewAiisGrpcServer(d),
+			//rpc:           aiis.NewAiisGrpcServer(d),
 		}
 
-		s.setGrpcHandler()
+		//s.setGrpcHandler()
 		s.clientManager.Init()
 		s.configValue.Store(c)
 		return &s
@@ -96,10 +100,10 @@ func NewService(c Config, d Diagnostic) *Service {
 	return nil
 }
 
-func (s *Service) setGrpcHandler() {
-	s.rpc.OnAIISRPCRecv = s.OnRPCRecv
-	s.rpc.OnAIISRPCNewClient = s.OnRPCNewClient
-}
+//func (s *Service) setGrpcHandler() {
+//	s.rpc.OnAIISRPCRecv = s.OnRPCRecv
+//	s.rpc.OnAIISRPCNewClient = s.OnRPCNewClient
+//}
 
 func (s *Service) Config() Config {
 	return s.configValue.Load().(Config)
@@ -107,7 +111,7 @@ func (s *Service) Config() Config {
 
 func (s *Service) Open() error {
 
-	c := s.Config()
+	//c := s.Config()
 
 	r := httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
@@ -171,11 +175,13 @@ func (s *Service) Open() error {
 
 	go s.TaskResultsBatchSave()
 
-	if err := s.rpc.Start(c.GRPCPort); err != nil {
-		s.diag.Error("Rush Start GRPC Server Error", err)
-	} else {
-		s.diag.Info(fmt.Sprintf("Rush Start grpc Server Listen: 0.0.0.0:%d", c.GRPCPort))
-	}
+	s.Broker.BrokerStatusDisptcher.Register(s.onBrokerStatus)
+
+	//if err := s.rpc.Start(c.GRPCPort); err != nil {
+	//	s.diag.Error("Rush Start GRPC Server Error", err)
+	//} else {
+	//	s.diag.Info(fmt.Sprintf("Rush Start grpc Server Listen: 0.0.0.0:%d", c.GRPCPort))
+	//}
 
 	s.Opened = true
 
@@ -184,40 +190,40 @@ func (s *Service) Open() error {
 	return nil
 }
 
-func (s *Service) OnRPCNewClient(stream aiis.RPCAiis_RPCNodeServer) {
+//func (s *Service) OnRPCNewClient(stream aiis.RPCAiis_RPCNodeServer) {
+//
+//	status := odoo.ODOOStatus{
+//		Status: s.Odoo.Status(),
+//	}
+//
+//	payload := aiis.RPCPayload{
+//		Type: aiis.TYPE_ODOO_STATUS,
+//		Data: status,
+//	}
+//
+//	str, _ := json.Marshal(payload)
+//	s.rpc.RPCSend(stream, string(str))
+//	s.diag.Info("new rpc client")
+//}
 
-	status := odoo.ODOOStatus{
-		Status: s.Odoo.Status(),
-	}
-
-	payload := aiis.RPCPayload{
-		Type: aiis.TYPE_ODOO_STATUS,
-		Data: status,
-	}
-
-	str, _ := json.Marshal(payload)
-	s.rpc.RPCSend(stream, string(str))
-	s.diag.Info("new rpc client")
-}
-
-func (s *Service) OnRPCRecv(stream aiis.RPCAiis_RPCNodeServer, payload string) {
-	s.diag.Debug(fmt.Sprintf("收到结果: %s\n", payload))
-
-	op_result := WSOpResult{}
-	err := json.Unmarshal([]byte(payload), &op_result)
-	if err != nil {
-		s.diag.Error("op result error", err)
-		return
-	}
-
-	cr := CResult{
-		Result: &op_result.Result,
-		ID:     op_result.ResultID,
-		Stream: stream,
-	}
-
-	s.AddResultTask(cr)
-}
+//func (s *Service) OnRPCRecv(stream aiis.RPCAiis_RPCNodeServer, payload string) {
+//	s.diag.Debug(fmt.Sprintf("收到结果: %s\n", payload))
+//
+//	op_result := WSOpResult{}
+//	err := json.Unmarshal([]byte(payload), &op_result)
+//	if err != nil {
+//		s.diag.Error("op result error", err)
+//		return
+//	}
+//
+//	cr := CResult{
+//		Result: &op_result.Result,
+//		ID:     op_result.ResultID,
+//		Stream: stream,
+//	}
+//
+//	s.AddResultTask(cr)
+//}
 
 func (s *Service) onConnect(c websocket.Connection) {
 
@@ -436,7 +442,7 @@ func (s *Service) Close() error {
 
 	s.wg.Wait()
 
-	s.rpc.Stop()
+	//s.rpc.Stop()
 
 	return nil
 }
@@ -517,28 +523,28 @@ func (s *Service) OperationToChanganResult(r *storage.OperationResult) changan.T
 	return result
 }
 
-func (s *Service) PatchResultFlag(stream aiis.RPCAiis_RPCNodeServer, result_id int64, has_upload bool, ip string, port string) error {
-	//if s.httpClient == nil {
-	//	return errors.New("rush http client is nil")
-	//}
-	//
-	//rush_result := RushResult{}
-	//rush_result.HasUpload = has_upload
-	//r := s.httpClient.R().SetBody(rush_result)
-	//
-	//s_port := port
-	//if s_port == "" {
-	//	s_port = "80"
-	//}
-	//url := fmt.Sprintf("http://%s:%s%s/%d", ip, s_port, s.route, result_id)
-	//resp, err := r.Patch(url)
-	//if err != nil {
-	//	return fmt.Errorf("patch result flag failed: %s\n", err)
-	//} else {
-	//	if resp.StatusCode() != http.StatusOK {
-	//		return fmt.Errorf("patch result flag failed: %s\n", resp.Status())
-	//	}
-	//}
+func (s *Service) PatchResultFlag(stream aiis.RPCAiis_RPCNodeServer, result_id int64, has_upload bool, ip string, port string, toolSN string) error {
+	if s.httpClient == nil {
+		return errors.New("rush http client is nil")
+	}
+
+	rush_result := RushResult{}
+	rush_result.HasUpload = has_upload
+	r := s.httpClient.R().SetBody(rush_result)
+
+	s_port := port
+	if s_port == "" {
+		s_port = "80"
+	}
+	url := fmt.Sprintf("http://%s:%s%s/%d", ip, s_port, s.route, result_id)
+	resp, err := r.Patch(url)
+	if err != nil {
+		return fmt.Errorf("patch result flag failed: %s\n", err)
+	} else {
+		if resp.StatusCode() != http.StatusOK {
+			return fmt.Errorf("patch result flag failed: %s\n", resp.Status())
+		}
+	}
 
 	rushResult := RushResult{
 		ID:        result_id,
@@ -550,13 +556,13 @@ func (s *Service) PatchResultFlag(stream aiis.RPCAiis_RPCNodeServer, result_id i
 		Data: rushResult,
 	}
 
-	str, err := json.Marshal(payload)
+	body, err := json.Marshal(payload)
 	if err != nil {
 		s.diag.Error("PatchResultFlag Marshal fail", err)
 		return err
 	}
-	return s.rpc.RPCSend(stream, string(str))
 
+	return s.Broker.Publish(fmt.Sprintf(SUBJECT_RESULTS_RESP, toolSN), body)
 }
 
 func (s *Service) HandleResult(cr *CResult) {
@@ -630,7 +636,7 @@ func (s *Service) TaskResultsBatchSave() {
 					for _, v := range rs {
 						resultID := int64(v.OR["id"].(float64))
 						if resultID > 0 {
-							go s.PatchResultFlag(v.Stream, int64(v.OR["id"].(float64)), true, v.IP, v.Port)
+							go s.PatchResultFlag(v.Stream, int64(v.OR["id"].(float64)), true, v.IP, v.Port, v.OR["tool_sn"].(string))
 						}
 					}
 				}
@@ -647,7 +653,7 @@ func (s *Service) TaskResultsBatchSave() {
 					for _, v := range rs {
 						resultID := int64(v.OR["id"].(float64))
 						if resultID > 0 {
-							go s.PatchResultFlag(v.Stream, int64(v.OR["id"].(float64)), true, v.IP, v.Port)
+							go s.PatchResultFlag(v.Stream, int64(v.OR["id"].(float64)), true, v.IP, v.Port, v.OR["tool_sn"].(string))
 						}
 					}
 				}
@@ -658,21 +664,57 @@ func (s *Service) TaskResultsBatchSave() {
 }
 
 func (s *Service) OnOdooStatus(status string) {
-	odooStatus := odoo.ODOOStatus{
-		Status: status,
+	//odooStatus := odoo.ODOOStatus{
+	//	Status: status,
+	//}
+	//
+	//payload := aiis.RPCPayload{
+	//	Type: aiis.TYPE_ODOO_STATUS,
+	//	Data: odooStatus,
+	//}
+
+	//str, err := json.Marshal(payload)
+	//if err != nil {
+	//	s.diag.Error("OnOdooStatus Marshal fail", err)
+	//}
+	//err = s.rpc.RPCSendAll(string(str))
+	//if err != nil {
+	//	s.diag.Error("OnOdooStatus RPCSendAll fail", err)
+	//}
+}
+
+func (s *Service) onBrokerStatus(data interface{}) {
+	if data == nil {
+		return
 	}
 
-	payload := aiis.RPCPayload{
-		Type: aiis.TYPE_ODOO_STATUS,
-		Data: odooStatus,
+	status := data.(bool)
+	if !status {
+		return
 	}
 
-	str, err := json.Marshal(payload)
-	if err != nil {
-		s.diag.Error("OnOdooStatus Marshal fail", err)
+	s.Broker.Subscribe(SUBJECT_RESULTS, s.onToolsResults)
+}
+
+func (s *Service) onToolsResults(message *broker.BrokerMessage) ([]byte, error) {
+	if message == nil {
+		return nil, nil
 	}
-	err = s.rpc.RPCSendAll(string(str))
+
+	s.diag.Debug(fmt.Sprintf("收到结果: %s\n", string(message.Body)))
+
+	op_result := WSOpResult{}
+	err := json.Unmarshal(message.Body, &op_result)
 	if err != nil {
-		s.diag.Error("OnOdooStatus RPCSendAll fail", err)
+		s.diag.Error("op result error", err)
+		return nil, nil
 	}
+
+	cr := CResult{
+		Result: &op_result.Result,
+		ID:     op_result.ResultID,
+	}
+
+	s.AddResultTask(cr)
+	return nil, nil
 }
