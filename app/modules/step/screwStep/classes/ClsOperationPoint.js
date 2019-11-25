@@ -2,7 +2,7 @@
 
 // NOTE: 拧紧点key定义,如果此点为key，此点必须拧紧结束同时此组的结果到达拧紧关键点个数才能进入下个拧紧组
 import { POINT_STATUS, RESULT_STATUS } from '../constants';
-import type { tPoint, tPointStatus, tResult } from '../interface/typeDef';
+import type { tPoint, tPointStatus, tResult, tResultStatus } from '../interface/typeDef';
 
 // eslint-disable-next-line import/prefer-default-export
 export class ClsOperationPoint {
