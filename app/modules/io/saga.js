@@ -1,6 +1,6 @@
 // @flow
 import type { Saga } from 'redux-saga';
-import { takeEvery, select, call, all, put } from 'redux-saga/effects';
+import { takeEvery, select, call, all, put, delay } from 'redux-saga/effects';
 import { IO } from './constants';
 import { newDevice } from '../deviceManager/devices';
 import { CommonLog } from '../../common/utils';
@@ -40,9 +40,8 @@ function* setPortsConfig(action) {
       return;
     }
     const { ioPorts } = action;
-    console.log(ioPorts);
-    const {[ioDirection.input]:inputs} = ioPorts;
-    const {[ioDirection.output]:outputs} = ioPorts;
+    const { [ioDirection.input]: inputs } = ioPorts;
+    const { [ioDirection.output]: outputs } = ioPorts;
 
     eSetting.set('devices.io.inputs', inputs);
     eSetting.set('devices.io.inputs', outputs);
@@ -54,11 +53,16 @@ function* setPortsConfig(action) {
 
 function* testPort(action) {
   try {
-    if (!action) {
+    if (!action || !defaultIOModule) {
       return;
     }
-    const { port } = action;
-
+    const {
+      port: { direction, idx }
+    } = action;
+    const port = defaultIOModule.getPort(direction, idx);
+    yield call(defaultIOModule.openIO, port);
+    yield delay(3000);
+    yield call(defaultIOModule.closeIO, port);
   } catch (e) {
     CommonLog.lError(e);
   }
@@ -71,13 +75,18 @@ function* bindIOListeners(action) {
     }
     const { inputType, action: act } = action;
     const { ioPorts } = yield select(s => s.io);
-    const port = defaultIOModule.getPort(ioDirection.output, ioPorts[ioDirection.input][inputType]);
+    const port = defaultIOModule.getPort(
+      ioDirection.output,
+      ioPorts[ioDirection.input][inputType]
+    );
     if (listeners[inputType]) {
       defaultIOModule.removeListener(listeners[inputType]);
     }
-    listeners[inputType] = defaultIOModule.addListener(input =>
-      port === input.port &&
-      ioTriggerMode.falling === input.triggerMode, act);
+    listeners[inputType] = defaultIOModule.addListener(
+      input =>
+        port === input.port && ioTriggerMode.falling === input.triggerMode,
+      act
+    );
   } catch (e) {
     CommonLog.lError(e);
   }
@@ -91,11 +100,18 @@ function* setIOOutput(action) {
     const { group, status } = action;
     const { ioPorts } = yield select(s => s.io);
     console.log(group);
-    const ports = group.map(o => defaultIOModule && defaultIOModule.getPort(ioDirection.output, ioPorts[ioDirection.input][o]));
-    yield all(ports.map(p => call(defaultIOModule && defaultIOModule.setIO(p, status))));
+    const ports = group.map(
+      o =>
+        defaultIOModule &&
+        defaultIOModule.getPort(
+          ioDirection.output,
+          ioPorts[ioDirection.input][o]
+        )
+    );
+    yield all(
+      ports.map(p => call(defaultIOModule && defaultIOModule.setIO(p, status)))
+    );
   } catch (e) {
     CommonLog.lError(e);
   }
 }
-
-

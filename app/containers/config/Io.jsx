@@ -30,16 +30,20 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = {
-  setIO: ioActions.set,
   testIO: ioActions.test,
   setPortsConfig: ioActions.setPortsConfig
 };
 
-
 function ConnectedIo(props): ?Node {
-  const { ioEnabled, ioModule, testIO, setIO, testStatus, ioPorts, setPortsConfig } = props;
+  const {
+    ioEnabled,
+    ioModule,
+    testIO,
+    testStatus,
+    ioPorts,
+    setPortsConfig
+  } = props;
   const classes = makeStyles(styles.content)();
-
 
   const [config, setConfig] = useState(ioPorts);
   const [isConfigValid, setIsConfigValid] = useState(true);
@@ -60,16 +64,15 @@ function ConnectedIo(props): ?Node {
 
   const { ports } = ioModule;
 
-  function handlePortLabelChange() {
-
-  }
+  function handlePortLabelChange() {}
 
   function handlePortFunctionChange(e, port) {
-
     const { idx, direction } = port;
     const tempConfig = cloneDeep(config);
     const newFunction = get(e, 'target.value', '').trim();
-    const prevFunction = Object.keys(config[direction]).find(k => config[direction][k] === idx);
+    const prevFunction = Object.keys(config[direction]).find(
+      k => config[direction][k] === idx
+    );
     if (prevFunction) {
       delete tempConfig[direction][prevFunction];
     }
@@ -105,11 +108,17 @@ function ConnectedIo(props): ?Node {
     if (!(status in Object.keys(cls))) {
       return null;
     }
-    const { color = classes.info, text = '', textColor = classes.infoText } = cls[status];
-    return <div className={classes.statusWrap}>
-      <span className={`${classes.statusCircle} ${color}`}/>
-      <span className={textColor}>{text}</span>
-    </div>;
+    const {
+      color = classes.info,
+      text = '',
+      textColor = classes.infoText
+    } = cls[status];
+    return (
+      <div className={classes.statusWrap}>
+        <span className={`${classes.statusCircle} ${color}`} />
+        <span className={textColor}>{text}</span>
+      </div>
+    );
   }
 
   function generatorItems(direction) {
@@ -118,7 +127,8 @@ function ConnectedIo(props): ?Node {
     }
     const filteredPorts = ports.filter(p => p.direction === direction);
 
-    const portHasFunction = (p) => Object.values(config[p.direction]).some(v => v === p.idx);
+    const portHasFunction = p =>
+      Object.values(config[p.direction]).some(v => v === p.idx);
     let options = [];
     if (direction === ioDirection.output) {
       options = Object.values(ioOutputs);
@@ -127,11 +137,29 @@ function ConnectedIo(props): ?Node {
     }
 
     return filteredPorts.map((port, idx) => {
-      const currentFunction = Object.keys(config[direction]).find(k => port.idx === config[direction][k]) || '';
+      const currentFunction =
+        Object.keys(config[direction]).find(
+          k => port.idx === config[direction][k]
+        ) || '';
 
       const renderTest = () => {
-        if (direction === ioDirection.output) return null;
-        return renderTestResult(testStatus[port.idx]);
+        if (direction === ioDirection.input) {
+          return null;
+        }
+        return withI18n(t => (
+          <React.Fragment>
+            {renderTestResult(testStatus[port.idx])}
+            <Button
+              color="warning"
+              size="lg"
+              onClick={() => testIO(port)}
+              className={classes.testButton}
+              disabled={!portHasFunction(port) || !ioEnabled}
+            >
+              {t('Common.Test')}
+            </Button>
+          </React.Fragment>
+        ));
       };
       return withI18n(t => (
         <List key={`${port.idx}_${port.direction}`}>
@@ -171,23 +199,15 @@ function ConnectedIo(props): ?Node {
               className={classes.ioFunctionSelect}
             >
               {['', ...options].map(v => (
-                <MenuItem key={v} value={v}>{v}</MenuItem>
+                <MenuItem key={v} value={v}>
+                  {v}
+                </MenuItem>
               ))}
             </Select>
-            <Button
-              color="warning"
-              size="lg"
-              onClick={() => testIO(port)}
-              className={classes.testButton}
-              disabled={!ioEnabled} // !portHasFunction(port) &&
-            >
-              {t('Common.Test')}
-            </Button>
+
             {renderTest()}
           </ListItem>
-          {idx !== config.length - 1 ?
-            <Divider/>
-            : null}
+          {idx !== config.length - 1 ? <Divider /> : null}
         </List>
       ));
     });
@@ -198,15 +218,11 @@ function ConnectedIo(props): ?Node {
 
   return withI18n(t => (
     <section className={classes.section}>
-      <h3 className={classes.sectionTitle}>
-        {t('Configuration.IO.INname')}
-      </h3>
+      <h3 className={classes.sectionTitle}>{t('Configuration.IO.INname')}</h3>
       <Paper className={classes.paperWrap} elevation={1}>
         {inItems}
       </Paper>
-      <h3
-        className={`${classes.sectionTitle} ${classes.sectionTitleInner}`}
-      >
+      <h3 className={`${classes.sectionTitle} ${classes.sectionTitleInner}`}>
         {t('Configuration.IO.OUTname')}
       </h3>
       <Paper className={classes.paperWrap} elevation={1}>
@@ -219,14 +235,16 @@ function ConnectedIo(props): ?Node {
         className={classes.button}
         onClick={handleSubmit}
       >
-        <SaveIcon className={classes.leftIcon}/>
+        <SaveIcon className={classes.leftIcon} />
         {t('Common.Submit')}
       </Button>
     </section>
   ));
 }
 
-export default withKeyboard(connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ConnectedIo));
+export default withKeyboard(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )(ConnectedIo)
+);
