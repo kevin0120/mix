@@ -117,7 +117,7 @@ openprotocol:
 
 scanner:
   enable: true
-  entity_label: 3118:2305
+#  entity_label: 3118:2305
 io:
   enable: true
   flash_inteval: 1s
