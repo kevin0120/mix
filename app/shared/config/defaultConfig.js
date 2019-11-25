@@ -1,11 +1,25 @@
 // @flow
+import { ioOutputs, ioInputs } from '../../modules/io/constants';
+
 
 const defaultConfigs = {
   version: 'v0.1',
   appName: '智能装配系统-终端',
   devices: {
     io: {
-      enable: true
+      enable: true,
+      config: { input_num: 8, output_num: 8 },
+      inputs: {
+        [ioInputs.resetKey]: 0,
+        [ioInputs.byPass]: 1,
+        [ioInputs.modeSelect]: 2
+      },
+      outputs: {
+        [ioOutputs.red]: 0,
+        [ioOutputs.green]: 1,
+        [ioOutputs.white]: 2,
+        [ioOutputs.yellow]: 3
+      }
     }
   },
   pages: {
@@ -144,7 +158,7 @@ const defaultConfigs = {
 
     // 作业前检测(order mode only)
     preCheck: false, // 开工检查
-    
+
     maxReworkCnt: 1, // 默认的最大返工点计数
 
     // 强制放行配置

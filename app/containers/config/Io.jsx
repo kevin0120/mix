@@ -1,150 +1,97 @@
-import React, { useState } from 'react';
+// @flow
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
 import { get, cloneDeep } from 'lodash';
 import Paper from '@material-ui/core/Paper';
 import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import { I18n } from 'react-i18next';
-
 import SaveIcon from '@material-ui/icons/Save';
-
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
+import { makeStyles } from '@material-ui/styles';
+import type { Node } from 'react';
 import Button from '../../components/CustomButtons/Button';
-
-import saveConfigs from '../../modules/setting/action';
 import { ioDirection } from '../../modules/device/io/constants';
 import { ioOutputs, ioInputs } from '../../modules/io/constants';
-// import { testIO } from '../../modules/external/device/io/saga';
-
+import ioActions from '../../modules/io/action';
 import styles from './styles';
 import withKeyboard from '../../components/Keyboard';
-import { makeStyles } from '@material-ui/styles';
-
-const testIO = () => {
-};
+import { withI18n } from '../../i18n';
 
 const mapStateToProps = (state, ownProps) => ({
-  storedConfigs: state.setting.page.modbus,
-  ioEnabled: state.setting.systemSettings.modbusEnable,
   ...ownProps,
-  ioModule: state.io.ioModule
+  ioEnabled: state.io.enabled,
+  ioModule: state.io.ioModule,
+  testStatus: state.io.testStatus,
+  ioPorts: state.io.ioPorts
 });
 
-function mapDispatchToProps(dispatch) {
-  return {
-    saveConfigs: (...args) => dispatch(saveConfigs(...args)),
-    resetIO: (...args) => dispatch(resetIO(...args))
-  };
-}
+const mapDispatchToProps = {
+  setIO: ioActions.set,
+  testIO: ioActions.test,
+  setPortsConfig: ioActions.setPortsConfig
+};
 
-/* eslint-disable react/prefer-stateless-function */
-function ConnectedIo(props) {
-  const { ioEnabled, ioModule } = props;
+
+function ConnectedIo(props): ?Node {
+  const { ioEnabled, ioModule, testIO, setIO, testStatus, ioPorts, setPortsConfig } = props;
   const classes = makeStyles(styles.content)();
 
 
-  const [data, setData] = useState(props.storedConfigs);
-  const [isDataValid, setIsDataValid] = useState(true);
-  const [section, setSection] = useState('modbus');
-  const [btnGroupStatus, setBtnGroupStatus] = useState({});
-  const [ioTestRsp, setIoTestRsps] = useState(Array(props?.storedConfigs?.in?.length).fill(0));
+  const [config, setConfig] = useState(ioPorts);
+  const [isConfigValid, setIsConfigValid] = useState(true);
+
+  useEffect(() => {
+    // eslint-disable-next-line no-unused-vars
+    function validateConfig(d = config) {
+      // return Object.keys(d).every(io => d[io].every(item => item.label && item.function));
+      return true;
+    }
+
+    setIsConfigValid(validateConfig(config));
+  }, [config]);
 
   if (!ioModule) {
     return null;
   }
-  // 获取 btns 的状态集
-  function getBtnStatus(data) {
-    const checkEveryBtns = items =>
-      items.reduce(
-        (pre, item) => ({
-          ...pre,
-          [item.bit]: !(
-            get(item, 'label', '').length === 0 ||
-            get(item, 'function', '').length === 0
-          )
-        }),
-        {}
-      );
 
-    const status = Object.keys(data).reduce(
-      (pre, io) => ({
-        ...pre,
-        [io]: checkEveryBtns(data[io])
-      }),
-      {}
-    );
-    return status;
+  const { ports } = ioModule;
+
+  function handlePortLabelChange() {
+
   }
 
+  function handlePortFunctionChange(e, port) {
 
-  function handlePortChange(e, idx, io, key) {
-    const tempData = cloneDeep(data[io]);
-    tempData[idx][key] = get(e, 'target.value', '').trim();
-    setData({
-      ...data,
-      [io]: tempData
-    });
-    setIsDataValid(validateData({
-      ...data,
-      [io]: tempData
-    }));
+    const { idx, direction } = port;
+    const tempConfig = cloneDeep(config);
+    const newFunction = get(e, 'target.value', '').trim();
+    const prevFunction = Object.keys(config[direction]).find(k => config[direction][k] === idx);
+    if (prevFunction) {
+      delete tempConfig[direction][prevFunction];
+    }
+    if (newFunction) {
+      tempConfig[direction][newFunction] = idx;
+    }
+    setConfig(tempConfig);
   }
 
   function handleSubmit() {
-    const { saveConfigs, resetIO } = props;
-    resetIO(data);
-    saveConfigs(section, data);
-  }
-
-  function handleTest(obj) {
-    switch (obj.io) {
-      case 'in': {
-        testIO(obj.io, obj.bit)
-          .then(resp => {
-            const d = resp.response.body.valuesAsArray[0];
-            const [...retIO] = ioTestRsp;
-            retIO[obj.bit] = d;
-            this.setState({
-              ioTestRsp: retIO
-            });
-            return true;
-          })
-          .catch(() => {
-            const [...retIO] = ioTestRsp;
-            retIO[obj.bit] = 'fail';
-            this.setState({
-              ioTestRsp: retIO
-            });
-            return true;
-          });
-        break;
-      }
-      case 'out': {
-        return testIO(obj.io, obj.bit);
-      }
-      default:
-        break;
-    }
-  }
-
-  function validateData(d = data) {
-    // return Object.keys(data).every(io => data[io].every(item => item.label && item.function));
-    return true;
+    setPortsConfig(config);
+    // setIO(config);
   }
 
   function renderTestResult(status) {
     const cls = {
-      0: {
+      '0': {
         color: classes.info,
         text: 'OFF',
         textColor: classes.infoText
       },
-      1: {
+      '1': {
         color: classes.success,
         text: 'ON',
         textColor: classes.successText
@@ -165,61 +112,60 @@ function ConnectedIo(props) {
     </div>;
   }
 
-  function generatorItems(ports = [], direction, t) {
+  function generatorItems(direction) {
     if (!ports) {
       return null;
     }
-    const data = ports.filter(p => p.direction === direction);
+    const filteredPorts = ports.filter(p => p.direction === direction);
 
-    return data.map((item, idx) => {
-      let options = [];
-      if (direction === ioDirection.output) {
-        options = Object.keys(ioOutputs);
-      } else if (direction === ioDirection.input) {
-        options = Object.keys(ioInputs);
-      }
+    const portHasFunction = (p) => Object.values(config[p.direction]).some(v => v === p.idx);
+    let options = [];
+    if (direction === ioDirection.output) {
+      options = Object.values(ioOutputs);
+    } else if (direction === ioDirection.input) {
+      options = Object.values(ioInputs);
+    }
+
+    return filteredPorts.map((port, idx) => {
+      const currentFunction = Object.keys(config[direction]).find(k => port.idx === config[direction][k]) || '';
+
       const renderTest = () => {
         if (direction === ioDirection.output) return null;
-        return renderTestResult(ioTestRsp[item.bit]);
+        return renderTestResult(testStatus[port.idx]);
       };
-      return (
-        <React.Fragment key={`${item.io}_${item.bit}`}>
+      return withI18n(t => (
+        <List key={`${port.idx}_${port.direction}`}>
           <ListItem className={classes.inputItem}>
             <InputLabel className={classes.ioInputLabel} htmlFor="name-simple">
-              {item.idx}
+              {port.idx}
             </InputLabel>
             <Input
               id="name-simple"
               placeholder={t('Common.isRequired')}
               className={classes.ioInput}
-              value={item.label}
-              // onClick={() => {
-              //   this.props.keyboardInput({
-              //     onSubmit: text => {
-              //       const tempData = cloneDeep(this.state.data[item.io]);
-              //       tempData[idx]['label'] = text;
-              //       this.setState({
-              //         ...this.state,
-              //         data: {
-              //           ...this.state.data,
-              //           [item.io]: tempData
-              //         },
-              //         isDataValid: this.validateData({
-              //           ...this.state.data,
-              //           [item.io]: tempData
-              //         })
-              //       });
-              //     },
-              //     text: item.label,
-              //     title: item.bit,
-              //     label: item.bit
-              //   });
-              // }}
-              // onChange={e => this.handleChange(e, idx, item.io, 'label')}
+              value={port.idx}
+              onClick={() => {
+                // props.keyboardInput({
+                //   onSubmit: text => {
+                //     const tempConfig = cloneDeep(config[port.idx]);
+                //     tempConfig[port.idx].label = text;
+                //     setConfig({
+                //       ...config,
+                //       [port.idx]: tempConfig
+                //     });
+                //   },
+                //   text: port.idx,
+                //   title: port.idx,
+                //   label: port.idx
+                // });
+              }}
+              onChange={e => handlePortLabelChange(e, port)}
             />
             <Select
-              value={item.function}
-              onChange={e => handlePortChange(e, idx, item, 'function')}
+              value={currentFunction}
+              onChange={e => {
+                handlePortFunctionChange(e, port);
+              }}
               displayEmpty
               name="function"
               className={classes.ioFunctionSelect}
@@ -231,70 +177,56 @@ function ConnectedIo(props) {
             <Button
               color="warning"
               size="lg"
-              onClick={() => handleTest(item)}
+              onClick={() => testIO(port)}
               className={classes.testButton}
-              // disabled={(!get(btnGroupStatus, `${item.io}.${item.bit}`, [])) || !ioEnabled}
+              disabled={!ioEnabled} // !portHasFunction(port) &&
             >
               {t('Common.Test')}
             </Button>
             {renderTest()}
           </ListItem>
-          {idx !== data.length - 1 ?
+          {idx !== config.length - 1 ?
             <Divider/>
             : null}
-        </React.Fragment>
-      );
+        </List>
+      ));
     });
   }
 
-  const { ports } = ioModule;
-  const inItems = t => generatorItems(ports, ioDirection.input, t);
-  const outItems = t => generatorItems(ports, ioDirection.output, t);
+  const inItems = generatorItems(ioDirection.input);
+  const outItems = generatorItems(ioDirection.output);
 
-  return (
-    <I18n ns="translations">
-      {t => (
-        <section className={classes.section}>
-          <h3 className={classes.sectionTitle}>
-            {t('Configuration.IO.INname')}
-          </h3>
-          <Paper className={classes.paperWrap} elevation={1}>
-            <List>{inItems(t)}</List>
-          </Paper>
-          <h3
-            className={`${classes.sectionTitle} ${classes.sectionTitleInner}`}
-          >
-            {t('Configuration.IO.OUTname')}
-          </h3>
-          <Paper className={classes.paperWrap} elevation={1}>
-            <List>{outItems(t)}</List>
-          </Paper>
-          <Button
-            variant="contained"
-            disabled={!isDataValid || !ioEnabled}
-            color="info"
-            onClick={handleSubmit}
-            className={classes.button}
-          >
-            <SaveIcon className={classes.leftIcon}/>
-            {t('Common.Submit')}
-          </Button>
-        </section>
-      )}
-    </I18n>
-  );
+  return withI18n(t => (
+    <section className={classes.section}>
+      <h3 className={classes.sectionTitle}>
+        {t('Configuration.IO.INname')}
+      </h3>
+      <Paper className={classes.paperWrap} elevation={1}>
+        {inItems}
+      </Paper>
+      <h3
+        className={`${classes.sectionTitle} ${classes.sectionTitleInner}`}
+      >
+        {t('Configuration.IO.OUTname')}
+      </h3>
+      <Paper className={classes.paperWrap} elevation={1}>
+        {outItems}
+      </Paper>
+      <Button
+        variant="contained"
+        disabled={!isConfigValid || !ioEnabled}
+        color="info"
+        className={classes.button}
+        onClick={handleSubmit}
+      >
+        <SaveIcon className={classes.leftIcon}/>
+        {t('Common.Submit')}
+      </Button>
+    </section>
+  ));
 }
 
-ConnectedIo.propTypes = {
-  classes: PropTypes.shape({}).isRequired,
-  storedConfigs: PropTypes.shape({}).isRequired,
-  saveConfigs: PropTypes.func.isRequired,
-  resetIO: PropTypes.func.isRequired
-};
-
-const Io = connect(
+export default withKeyboard(connect(
   mapStateToProps,
   mapDispatchToProps
-)(ConnectedIo);
-
-export default withKeyboard(Io);
+)(ConnectedIo));

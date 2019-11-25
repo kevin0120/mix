@@ -14,13 +14,16 @@ export default {
     type: IO.ADD_LISTENER,
     inputType, action
   }),
-  setPort: (output, portIdx) => ({
-    type: IO.SET_PORT,
-    output,
-    portIdx
+  setPortsConfig: (ioPorts) => ({
+    type: IO.SET_PORT_CONFIG,
+    ioPorts
   }),
-  test:()=>({
+  portsConfigChange: (ioPorts) => ({
+    type: IO.PORT_CONFIG_CHANGE,
+    ioPorts
+  }),
+  test: (port) => ({
     type: IO.TEST,
-
+    port
   })
 };

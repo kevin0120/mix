@@ -1,37 +1,35 @@
-import { IO, ioOutputs, ioInputs, ioOutputGroups } from './constants';
+import { IO, ioOutputGroups } from './constants';
 import { genReducers } from '../util';
 import { ioDirection } from '../device/io/constants';
 
+const eSetting = require('electron-settings');
+
+const ioConfig = eSetting.get('devices.io');
+
 const reducers = {
-  [IO.SET_PORT]: (state, { output, portIdx }) => ({
-    ...state,
-    [output]: portIdx
-  }),
+  // [IO.SET_PORT_CONFIG]: (state, { output, portIdx }) => ({
+  //   ...state,
+  //   [output]: portIdx
+  // }),
   [IO.SET_MODULE]: (state, { io }) => ({
     ...state,
     ioModule: io
-  })
+  }),
+  [IO.PORT_CONFIG_CHANGE]: (state, { ioPorts }) => ({
+    ...state,
+    ioPorts
+  }),
 };
 
-
-const { red, green, white, yellow } = ioOutputs;
-const { resetKey, byPass, modeSelect } = ioInputs;
 const initState = {
+  enabled: ioConfig.enable,
   ioPorts: {
-    [ioDirection.output]: {
-      [red]: 0,
-      [green]: 1,
-      [white]: 2,
-      [yellow]: 3
-    },
-    [ioDirection.input]: {
-      [resetKey]: 0,
-      [byPass]: 1,
-      [modeSelect]: 2
-    }
+    [ioDirection.output]: ioConfig.outputs || {},
+    [ioDirection.input]: ioConfig.inputs || {}
   },
   ioOutputGroups,
-  ioModule: null
+  ioModule: null,
+  testStatus: []
 };
 
 export default genReducers(reducers, initState);
