@@ -148,7 +148,7 @@ tightening_device:
       endpoint: tcp://192.168.3.23:4545
       sn: c1
       tools:
-        - sn: t1
+        - sn: xx0011
           channel: 51
 #        - sn: 12B62230
 #          channel: 51
