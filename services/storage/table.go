@@ -88,7 +88,7 @@ type Steps struct {
 	Sequence       int64  `xorm:"bigint 'sequence'" json:"sequence"`
 	Testtype       string `xorm:"varchar(128) 'test_type'" json:"test_type"`
 	FailureMessage string `xorm:"varchar(128) 'failure_msg'" json:"failure_msg"`
-	Desc           string `xorm:"varchar(64) 'desc'" json:"desc"`
+	Desc           string `xorm:"varchar(128) 'desc'" json:"desc"`
 	Image          string `xorm:"-" json:"image"`
 	ImageRef       string `xorm:"varchar(128) 'tightening_image_by_step_code'" json:"tightening_image_by_step_code"`
 	Skippable      bool   `xorm:"varchar(64) 'skippable'" json:"skippable"`

@@ -50,7 +50,7 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 		//Workcenter:            work.Workcenter,
 		Status:                "todo",
 		Date_planned_start:    work.Date_planned_start,
-		Date_planned_complete: work.Date_planned_start,
+		Date_planned_complete: work.Date_planned_complete,
 		Unique_Num:            work.Unique_Num,
 	}
 
