@@ -31,11 +31,20 @@ class PushWorkorder(AbstractModel):
     @staticmethod
     def pack_step_payload(steps, type_tightening_id):
         payloads = []
-        for step in steps.filtered(lambda t: t.test_type_id.id == type_tightening_id):
-            ts = {}
+        for idx, step in enumerate(steps.filtered(lambda t: t.test_type_id.id == type_tightening_id)):
+            ts = {
+                "code": step.name or step.ref,
+                "desc": step.note or '',
+                "failure_msg": step.failure_message or '',
+                "sequence": idx + 1,
+                "skippable": step.can_do_skip,
+                "undoable": step.can_do_redo,
+                "test_type": "tightening",
+            }
             ts.update({'tightening_image_by_step_code': step.name or step.ref})
             val = package_tightening_points(step.operation_point_ids)
             ts.update({'tightening_points': val})  # 将拧紧点的包包裹进去
+            ts.update({'tightening_total': len(step.operation_point_ids)})  # 将拧紧点的包包裹进去
             payloads.append(ts)
 
         return payloads
@@ -72,8 +81,8 @@ class PushWorkorder(AbstractModel):
                     },
                     'components': [],
                     'environments': [],
-                    'steps': _steps,
                 },
+                'steps': _steps,
             }
             r.append(vals)
         try:
