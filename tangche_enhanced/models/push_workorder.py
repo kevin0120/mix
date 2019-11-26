@@ -29,9 +29,10 @@ class PushWorkorder(AbstractModel):
     _inherit = "workorder.push"
 
     @staticmethod
-    def pack_step_payload(steps, type_tightening_id):
+    def pack_step_payload(consum_lines, type_tightening_id):
         payloads = []
-        for idx, step in enumerate(steps.filtered(lambda t: t.test_type_id.id == type_tightening_id)):
+        for idx, line in enumerate(consum_lines.filtered(lambda t: t.test_type_id.id == type_tightening_id)):
+            step = line.point_id
             ts = {
                 "code": step.name or step.ref,
                 "desc": step.note or '',
@@ -42,7 +43,7 @@ class PushWorkorder(AbstractModel):
                 "test_type": "tightening",
             }
             ts.update({'tightening_image_by_step_code': step.name or step.ref})
-            val = package_tightening_points(step.operation_point_ids)
+            val = package_tightening_points(line.child_ids)
             ts.update({'tightening_points': val})  # 将拧紧点的包包裹进去
             ts.update({'tightening_total': len(step.operation_point_ids)})  # 将拧紧点的包包裹进去
             payloads.append(ts)
@@ -54,7 +55,7 @@ class PushWorkorder(AbstractModel):
         r = list()
         type_tightening_id = self.env.ref('quality.test_type_tightening').id
         for order in orders:
-            _steps = self.pack_step_payload(order.consu_work_order_line_ids.mapped('point_id'), type_tightening_id)
+            _steps = self.pack_step_payload(order.consu_work_order_line_ids, type_tightening_id)
 
             vals = {
                 'code': order.name,
