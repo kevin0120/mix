@@ -47,7 +47,7 @@ function Point({ twinkle, x, y, status, label, scale, reworkModiBGColor, onClick
     onClick={(e) => {
       if (onClick) {
         if (onClick(e) && reworkModiBGColor){
-          setColor({ backgroundColor: 'blue' });
+          setColor(classes.rework);
         }
       }
     }}

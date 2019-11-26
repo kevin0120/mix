@@ -58,6 +58,9 @@ export default {
     },
     error: {
       background: `${theme.palette.danger.main}`
+    },
+    rework: {
+      background: `${theme.palette.secondary.main}`
     }
   })
 };
