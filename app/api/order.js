@@ -100,6 +100,10 @@ export function stepDataApi(id: number, data: Object): Promise<any> {
   const json = JSON.stringify(data);
   return rushSendApi(ORDER_WS_TYPES.STEP_DATA, { id, data: json });
 }
+export function orderDataApi(id: number, data: Object): Promise<any> {
+  const json = JSON.stringify(data);
+  return rushSendApi(ORDER_WS_TYPES.ORDER_DATA, { id, data: json });
+}
 
 export function orderDetailByCodeApi(
   code: string,

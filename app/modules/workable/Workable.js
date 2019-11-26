@@ -24,10 +24,10 @@ export default class Workable implements IWorkable {
   _code = '';
 
   get code() {
-    if (this._code) {
-      return this._code;
-    }
-    throw new Error(`workable(${String(this._code)}) has invalid code`);
+    // if (this._code) {
+    return this._code;
+    // }
+    // throw new Error(`workable(${String(this._code)}) has invalid code`);
   }
 
   _status = '';

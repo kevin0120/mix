@@ -55,14 +55,20 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
     get productCode() {
       return this._productCode;
     }
-    
+
     get failSteps(): Array<IWorkStep> {
-      const ret  = filter(this.steps, (step: IWorkStep) => step.status === STEP_STATUS.FAIL);
-      return ((ret: any): Array<IWorkStep>)
+      const ret = filter(
+        this.steps,
+        (step: IWorkStep) => step.status === STEP_STATUS.FAIL
+      );
+      return ((ret: any): Array<IWorkStep>);
     }
-  
+
     hasFailWorkStep(): boolean {
-      return some(this.steps, (step: IWorkable) => step.status === STEP_STATUS.FAIL);
+      return some(
+        this.steps,
+        (step: IWorkable) => step.status === STEP_STATUS.FAIL
+      );
     }
 
     _workcenter: string = '';
@@ -183,8 +189,8 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           const _onPrevious = () => {
             if (this._workingIndex - 1 >= 0) {
               this._workingIndex -= 1;
-              status = STEP_STATUS.READY;
             }
+            status = STEP_STATUS.READY;
           };
 
           const _onNext = () => {
@@ -197,6 +203,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
             );
             const step = this.workingStep;
             if (step) {
+              console.log(status);
               yield call(
                 [this, this.runSubStep],
                 step,
@@ -221,6 +228,12 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       },
       *[ORDER_STATUS.DONE]() {
         try {
+          if (this._workingIndex > this._steps.length - 1) {
+            this._workingIndex = this._steps.length - 1;
+          }
+          if (this._workingIndex < 0) {
+            this._workingIndex = 0;
+          }
           const data = this._steps.map(s => [
             s.code,
             durationString(s.timeCost()),

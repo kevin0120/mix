@@ -128,8 +128,8 @@ const defaultConfigs = {
     },
     connections: {
       // rush: 'http://192.168.4.32:8082',
-      // rush: 'http://192.168.4.221:8082',
-      rush: 'http://127.0.0.1:8082',
+      rush: 'http://192.168.4.18:8082',
+      // rush: 'http://127.0.0.1:8082',
       // rush: 'http://0da41704.ngrok.io:8082',//4.188//4.219//192.168.4.188//10.1.1.65//192.168.4.247//0.2
       rfid: 'tcp://127.0.0.1:2112',
       aiis: 'http://127.0.0.1:9092'
@@ -144,7 +144,7 @@ const defaultConfigs = {
 
     // 作业前检测(order mode only)
     preCheck: false, // 开工检查
-    
+
     maxReworkCnt: 1, // 默认的最大返工点计数
 
     // 强制放行配置
