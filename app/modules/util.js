@@ -53,7 +53,7 @@ export function makeListener(
   initListeners: Array<tListener<any>> = []
 ): tListenerObj {
   const listeners = initListeners;
-
+  
   function addListener(
     predicate: tPredicate<any>,
     action: tFnAction<any>
@@ -65,11 +65,15 @@ export function makeListener(
     listeners.push(listener);
     return listener;
   }
-
+  
   function removeListener(listener: tListener<any>): Array<tListener<any>> {
+    const idx = listeners.findIndex(l => l === listener);
+    if (idx < 0) {
+      return initListeners;
+    }
     return remove(listeners, (l: tListener<any>) => l === listener);
   }
-
+  
   function check(...args: Array<any>): Array<tAction<any, any>> {
     const actions: tAction<any, any> = [];
     listeners.forEach(l => {
@@ -77,10 +81,10 @@ export function makeListener(
         actions.push(l.action(...args));
       }
     });
-
+    
     return actions;
   }
-
+  
   return {
     listeners,
     add: addListener,

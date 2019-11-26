@@ -32,7 +32,6 @@ export default {
       lineHeight: `${circleRadius * 2}px`,
       fontSize: `${(circleRadius - 10) * 2}px`,
       overflow: 'hidden',
-      background: '#dbdbdb',
       transform:`scale(${scale},${scale})`
     },
     active: {
@@ -52,13 +51,13 @@ export default {
       }
     },
     waiting: {
-      background: `${theme.palette.warning.main} !important`
+      background: `${theme.palette.warning.main}`
     },
     success: {
-      background: `${theme.palette.success.main} !important`
+      background: `${theme.palette.success.main}`
     },
     error: {
-      background: `${theme.palette.danger.main} !important`
+      background: `${theme.palette.danger.main}`
     }
   })
 };

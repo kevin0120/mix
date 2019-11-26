@@ -6,7 +6,8 @@ export const ORDER_STATUS = Object.freeze({
   WIP: 'wip',
   DONE: 'done',
   CANCEL: 'cancel',
-  PENDING: 'pending'
+  PENDING: 'pending',
+  FAIL: 'fail'
 });
 
 // rush type
@@ -19,7 +20,7 @@ export const ORDER_WS_TYPES = Object.freeze({
   START_REQUEST: 'WS_ORDER_START_REQUEST',
   FINISH_REQUEST: 'WS_ORDER_FINISH_REQUEST',
   STEP_DATA: 'WS_ORDER_STEP_DATA_UPDATE',
-  ORDER_DETAIL_BY_CODE: 'WS_ORDER_DETAIL_BY_CODE',
+  ORDER_DETAIL_BY_CODE: 'WS_ORDER_DETAIL_BY_CODE'
 });
 
 // order action types
@@ -51,7 +52,7 @@ export const ORDER = Object.freeze({
     PREVIOUS: 'ORDER_STEP_PREVIOUS', // 防抖前事件
     VIEW_PREVIOUS: 'ORDER_STEP_VIEW_PREVIOUS', // 防抖后事件
     VIEW_NEXT: 'ORDER_STEP_VIEW_NEXT', // 防抖后事件
-
+    
     JUMP_TO: 'ORDER_STEP_JUMP_TO',
     // 修改step的状态
     STATUS: 'ORDER_STEP_STATUS',

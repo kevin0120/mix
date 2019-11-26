@@ -99,7 +99,10 @@ const layout = (theme) => ({
   },
   statusPending: {
     color: theme.palette.warning.main
-  }
+  },
+  statusFail: {
+    color: theme.palette.rose.main
+  },
 });
 
 const stepperContainer = theme => ({

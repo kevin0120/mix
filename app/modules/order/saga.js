@@ -185,6 +185,12 @@ function* tryWorkOnOrder({
 
 function* workOnOrder({ order }: { order: IOrder }) {
   try {
+    const workCenterMode: tWorkCenterMode = yield select(s => sGetWorkCenterMode(s));
+    if (workCenterMode === trans.reworkWorkCenterMode && !order.hasFailWorkStep()) {
+      // 在返工模式下，但此工单并没有失败的工步
+      yield put(notifierActions.enqueueSnackbar('Error', '当前工单没有可返工的工步'));
+      return;
+    }
     yield race([
       call(order.run, ORDER_STATUS.TODO),
       take(a => a.type === ORDER.FINISH && a.order === order)

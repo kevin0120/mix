@@ -18,7 +18,7 @@ type Props = {
   notifyInfo?: ?(variant: CommonLogLvl, message: string, meta: Object)=>tAction<any, any>,
   // activeIndex: number,
   pointScale?: number,
-  onPointClick?: ?(ClsOperationPoint)=>void
+  onPointClick?: ?(ClsOperationPoint)=>boolean
 };
 
 export default function ScrewImage({ twinkle, style = {}, image, points, focus, pointScale = 1, notifyInfo, enableReWork, onPointClick }: Props) {
@@ -97,16 +97,18 @@ export default function ScrewImage({ twinkle, style = {}, image, points, focus, 
           status={p.status}
           label={`${p?.sequence || ''}`}
           scale={pointScale}
+          reworkModiBGColor
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             if (!enableReWork && notifyInfo) {
               notifyInfo('Warn', '当前工作模式无法进行返工作业，请先切换至返工模式!');
-              return;
+              return false;
             }
             if (onPointClick) {
-              onPointClick(p);
+              return onPointClick(p);
             }
+            return false;
           }}
         />) || null}
       </div>

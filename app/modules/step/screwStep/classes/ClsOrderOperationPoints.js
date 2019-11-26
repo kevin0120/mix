@@ -86,8 +86,8 @@ export class ClsOrderOperationPoints {
         return;
       }
       const groupSeq = group.groupSequence;
-      const point = group.newResult(r);
-      newInactivePoints = newInactivePoints.concat(point);
+      const inactivePoints = group.newResult(r);
+      newInactivePoints = newInactivePoints.concat(inactivePoints);
       if (!group.isKeyPass) {
         return;
       }
