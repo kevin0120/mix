@@ -21,7 +21,7 @@
                     <field name="healthz_url" />
                 </field>
                 <field name="serial_no" position="attributes">
-                    <attribute name="required">{'required': [(1, '=', 1)]}</attribute>
+                    <attribute name="required">1</attribute>
                 </field>
                 <xpath expr="//div[@name='button_box']" position="inside">
                     <button name="button_check_healthz"
