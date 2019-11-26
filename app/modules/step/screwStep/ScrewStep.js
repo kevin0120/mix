@@ -30,7 +30,7 @@ export function* doPoint(
 ): Saga<void> {
   try {
     const data = this._data;
-    
+
     if (
       !(
         data.controllerMode === controllerModes.pset ||
@@ -61,11 +61,11 @@ export function getTools(points: Array<tPoint>) {
       lostTool.push(t);
     }
   });
-  
+
   if (lostTool.length > 0) {
     throw new Error(`tools not found: ${String(lostTool.map(t => `${t}`))}`);
   }
-  
+
   const unhealthyTools = tools.filter(t => !t.Healthz);
   if (unhealthyTools.length > 0) {
     throw new Error(
@@ -80,15 +80,15 @@ export function getTools(points: Array<tPoint>) {
 const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
   class ClsScrewStep extends ClsBaseStep implements IScrewStep {
     _tools = [];
-    
+
     isValid: boolean = false;
-    
+
     _orderOperationPoints: ClsOrderOperationPoints;
-    
+
     _pointsToActive = [];
-    
+
     _listeners = [];
-    
+
     * _onLeave() {
       try {
         yield all(
@@ -111,13 +111,13 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
         });
       }
     }
-    
+
     // eslint-disable-next-line flowtype/no-weak-types
     constructor(...args: Array<any>) {
       super(...args);
       this.isValid = true; // 设置此工步是合法的
     }
-    
+
     _statusTasks = {
       * [STEP_STATUS.READY](ORDER, orderActions) {
         try {
@@ -137,9 +137,9 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 }, Payload: ${JSON.stringify(payload)}`
             );
           }
-          
+
           const points = payload.tightening_points;
-          
+
           if (!isNil(payload.jobID)) {
             yield call(
               this.updateData,
@@ -159,11 +159,11 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
           } else {
             throw new Error('缺少Job号或Pset号');
           }
-          
+
           this._pointsManager = new ClsOrderOperationPoints(
             payload.tightening_points
           );
-          
+
           // eslint-disable-next-line camelcase
           this._tools = yield call(getTools, payload?.tightening_points || []);
           this._tools.forEach(t => {
@@ -194,7 +194,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
         try {
           let isFirst = true; // job只设置一次，记录状态
           this._pointsToActive = this._pointsManager.start();
-          
+
           const resultChannel = yield actionChannel([
             SCREW_STEP.RESULT,
             SCREW_STEP.REDO_POINT
@@ -207,7 +207,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 tightening_points: this._pointsManager.points // results data.results
               })
             );
-            
+
             if (
               this._pointsManager.isFailed &&
               this._pointsManager.points.filter(p => p.isActive).length === 0
@@ -217,7 +217,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               yield call(stepDataApi, this._data);
               yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
             }
-            
+
             if (this._pointsToActive && this._pointsToActive.length > 0) {
               yield call(
                 [this, doPoint],
@@ -226,7 +226,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 orderActions
               );
             }
-            
+
             yield all(
               this._pointsToActive.map(p =>
                 call(
@@ -239,9 +239,9 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 )
               )
             );
-            
+
             const action = yield take(resultChannel);
-            
+
             switch (action.type) {
               case SCREW_STEP.RESULT: {
                 const { results } = action;
@@ -272,7 +272,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                           label: 'Order.Next',
                           color: 'danger',
                           action: screwStepActions.confirmFailSpecPoint()
-                          
+
                         },
                         {
                           label: 'Screw.Next',
@@ -293,7 +293,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                     yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL)); // 失败退出
                   }
                 }
-                
+
                 yield all(
                   inactive.map(p =>
                     call(
@@ -328,7 +328,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
           yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, e));
         }
       },
-      
+
       * [STEP_STATUS.FINISHED](ORDER, orderActions) {
         try {
           yield put(orderActions.finishStep(this));
@@ -337,11 +337,10 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
           yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, e));
         }
       },
-      
+
       * [STEP_STATUS.FAIL](ORDER, orderActions, msg) {
         try {
           yield all(this._tools.map(t => call(t.Disable)));
-          this._tools = [];
           yield put(
             dialogActions.dialogShow({
               buttons: [
