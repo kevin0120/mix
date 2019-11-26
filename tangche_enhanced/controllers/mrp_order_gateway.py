@@ -70,12 +70,18 @@ def validate_ts002_req_val_by_entry(vals):
 
 def package_tightening_points(tightening_points):
     ret = []
-    for tp in tightening_points:
+    for ltp in tightening_points:
+        if ltp._name == 'mrp.wo.consu.line':
+            tp = request.env['operation.point'].sudo().search([('qcp_id', '=', ltp.point_id.id)], limit=1)
+        else:
+            tp = ltp
         pset = tp.program_id.code
         if isinstance(tp.program_id.code, str):
             pset = int(tp.program_id.code)
-        # tool_id = tp.tightening_tool_ids[0].tool_id if tp.tightening_tool_ids else None
-        tool_id = tp.tool_id if tp.tool_id else None  # 使用Prefer Tool
+        if ltp._name == 'mrp.wo.consu.line':
+            tool_id = ltp.tool_id if ltp.tool_id else None
+        else:
+            tool_id = tp.tool_id if tp.tool_id else None
         if not tool_id:
             _logger.error('Can Not Found Tool:{0}'.format(tp.name or tp.code))
         val = {
@@ -84,7 +90,7 @@ def package_tightening_points(tightening_points):
             'y': tp.y_offset,
             'pset': pset,
             'sequence': tp.sequence,
-            'group_sequence': tp.group_sequence if tp.group_id else tp.sequence,
+            'group_sequence': tp.group_sequence,
             'is_key': tp.is_key,  # 是否为关键拧紧点
             'nut_no': tp.name,  # 螺栓编号
             'max_redo_times': tp.max_redo_times,

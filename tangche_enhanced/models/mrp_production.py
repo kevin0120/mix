@@ -17,6 +17,38 @@ _logger = logging.getLogger(__name__)
 class MrpWorkorder(models.Model):
     _inherit = 'mrp.workorder'
 
+    @api.multi
+    def _create_bulk_cosume_lines(self):
+        consume_sudo = self.env['mrp.wo.consu.line'].sudo()
+        for order in self:
+            step_ids = order.operation_id.sa_step_ids.filtered(lambda qcp: qcp.test_type != 'tightening_point')
+            for idx, step in enumerate(step_ids):
+                val = {
+                    'sequence': idx + 1,
+                    'workorder_id': order.id,
+                    'point_id': step.id,
+                    'production_id': order.production_id.id,
+                    'test_type_id': step.test_type_id.id,
+                    'product_id': step.product_id.id,
+                    'team_id': step.team_id.id
+                }
+                ret = consume_sudo.create(val)
+                for sub_idx, operation_point in enumerate(step.operation_point_ids):
+                    val = {
+                        'sequence': idx + 1 + sub_idx,
+                        'workorder_id': order.id,
+                        'test_type_id': operation_point.test_type_id.id,
+                        'production_id': order.production_id.id,
+                        'point_id': operation_point.qcp_id.id,
+                        'operation_point_id': operation_point.id,
+                        'product_id': operation_point.product_id.id,
+                        'team_id': step.team_id.id,
+                        'tool_id': operation_point.tool_id.id if operation_point.tool_id else False,
+                        'program_id': step.program_id.id,
+                        'parent_consu_order_line_id': ret.id,
+                    }
+                    consume_sudo.create(val)
+
     @api.one
     def button_push_workorder(self):
         order = self
