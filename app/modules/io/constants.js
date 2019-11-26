@@ -30,6 +30,7 @@ export const ioOutputGroups = {
 
 export const IO = {
   ADD_LISTENER: 'IO_ADD_LISTENER',
+  REMOVE_LISTENER: 'IO_REMOVE_LISTENER',
   SET: 'IO_SET',
   TEST: 'IO_TEST',
   SET_PORT_CONFIG: 'IO_SET_PORT_CONFIG',

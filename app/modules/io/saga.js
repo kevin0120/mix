@@ -27,6 +27,7 @@ export default function* root(): Saga<void> {
     yield put(ioActions.setModule(defaultIOModule));
     yield takeEvery(IO.SET, setIOOutput);
     yield takeEvery(IO.ADD_LISTENER, bindIOListeners);
+    yield takeEvery(IO.REMOVE_LISTENER, removeIOListener);
     yield takeEvery(IO.SET_PORT_CONFIG, setPortsConfig);
     yield takeEvery(IO.TEST, testPort);
   } catch (e) {
@@ -43,9 +44,25 @@ function* setPortsConfig(action) {
     const { [ioDirection.input]: inputs } = ioPorts;
     const { [ioDirection.output]: outputs } = ioPorts;
 
+    const { ioPorts: prevIoPorts } = yield select();
     eSetting.set('devices.io.inputs', inputs);
     eSetting.set('devices.io.inputs', outputs);
     yield put(ioActions.portsConfigChange(ioPorts));
+
+    const { inputs: prevInputs, outputs: prevOutputs } = prevIoPorts;
+    const effects = [];
+    Object.keys(prevInputs).forEach((k) => {
+      if (prevInputs[k] !== inputs[k]) {
+        if (prevInputs[k]) {
+          effects.push(put(ioActions.removeListener(k)));
+        }
+        if (inputs[k]) {
+          effects.push(put(ioActions.addListener(k, inputs[k])));
+        }
+      }
+    });
+
+
   } catch (e) {
     CommonLog.lError(e);
   }
@@ -68,6 +85,21 @@ function* testPort(action) {
   }
 }
 
+function removeIOListener(action) {
+  try {
+    if (!action || !defaultIOModule) {
+      return;
+    }
+    const { inputType } = action;
+    if (listeners[inputType]) {
+      defaultIOModule.removeListener(listeners[inputType]);
+      delete listeners[inputType];
+    }
+  } catch (e) {
+    CommonLog.lError(e);
+  }
+}
+
 function* bindIOListeners(action) {
   try {
     if (!action || !defaultIOModule) {
@@ -81,6 +113,7 @@ function* bindIOListeners(action) {
     );
     if (listeners[inputType]) {
       defaultIOModule.removeListener(listeners[inputType]);
+      delete listeners[inputType];
     }
     listeners[inputType] = defaultIOModule.addListener(
       input =>
