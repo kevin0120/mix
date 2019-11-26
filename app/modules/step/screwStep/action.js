@@ -20,4 +20,7 @@ export default {
   confirmFailSpecPoint: () => ({
     type: SCREW_STEP.CONFIRM_FAIL_SPEC_POINT
   }),
+  byPassSpecPoint: () => ({
+    type: SCREW_STEP.BYPASS_SPEC_POINT
+  }),
 };

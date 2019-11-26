@@ -59,23 +59,23 @@ export class ClsOperationPointGroup {
   }
 
   // 关键点全部完成
-  isKeyPass() {
+  get isKeyPass() {
     return (
       this._points
         .filter(p => p.isKey)
-        .every(p => p.status === POINT_STATUS.SUCCESS) &&
-      this._points.filter(p => p.status === POINT_STATUS.SUCCESS).length >=
+        .every(p => p.isPass) &&
+      this._points.filter(p => p.isPass).length >=
         this._keyNum
     );
   }
 
   // 所有点完成
-  isAllPass() {
-    return this._points.every(p => p.status === POINT_STATUS.SUCCESS);
+  get isAllPass() {
+    return this.points.every(p => p.isPass);
   }
 
-  isFailed() {
-    return this.points.some(p => p.isFinalFail());
+  get isFailed() {
+    return this.points.some(p => p.isFinalFail);
   }
 
   newResult(result: tResult): Array<?ClsOperationPoint> {
@@ -87,7 +87,7 @@ export class ClsOperationPointGroup {
         return;
       }
       inactivePoints.push(point.newResult(result));
-      if (!this.isAllPass()) {
+      if (!this.isAllPass) {
         return;
       }
       this.setActive(false);

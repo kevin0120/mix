@@ -1,7 +1,7 @@
 // @flow
 import type { Saga } from 'redux-saga';
 import { isNil, isEmpty } from 'lodash-es';
-import { call, put, take, all, actionChannel } from 'redux-saga/effects';
+import { call, put, take, all, actionChannel, race } from 'redux-saga/effects';
 import { STEP_STATUS } from '../constants';
 import type {
   tPoint,
@@ -85,14 +85,15 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
     _orderOperationPoints: ClsOrderOperationPoints;
 
-    _activePoints = [];
+    _pointsToActive = [];
 
     _listeners = [];
 
-    *_onLeave() {
+    * _onLeave() {
       try {
         yield all(
-          this._tools.map(t => (t.isEnable ? call(t.Disable) : call(() => {})))
+          this._tools.map(t => (t.isEnable ? call(t.Disable) : call(() => {
+          })))
         );
         this._tools.forEach(t => {
           this._listeners.forEach(l => {
@@ -118,14 +119,14 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
     }
 
     _statusTasks = {
-      *[STEP_STATUS.READY](ORDER, orderActions) {
+      * [STEP_STATUS.READY](ORDER, orderActions) {
         try {
           yield put(orderActions.stepStatus(this, STEP_STATUS.ENTERING));
         } catch (e) {
           CommonLog.lError(e);
         }
       },
-      *[STEP_STATUS.ENTERING](ORDER, orderActions) {
+      * [STEP_STATUS.ENTERING](ORDER, orderActions) {
         try {
           // init data
           const payload: tScrewStepPayload = this._payload;
@@ -133,7 +134,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
             throw new Error(
               `ScrewStepPayload Is Empty! code: ${
                 this._id
-              }, Payload: ${JSON.stringify(payload)}`
+                }, Payload: ${JSON.stringify(payload)}`
             );
           }
 
@@ -189,10 +190,10 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
           yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, e));
         }
       },
-      *[STEP_STATUS.DOING](ORDER, orderActions) {
+      * [STEP_STATUS.DOING](ORDER, orderActions) {
         try {
           let isFirst = true; // job只设置一次，记录状态
-          this._activePoints = this._pointsManager.start();
+          this._pointsToActive = this._pointsManager.start();
 
           const resultChannel = yield actionChannel([
             SCREW_STEP.RESULT,
@@ -207,36 +208,34 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               })
             );
 
-            if (this._pointsManager.isPass()) {
+            if (
+              this._pointsManager.isFailed &&
+              this._pointsManager.points.filter(p => p.isActive).length === 0
+            ) {
+              yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL)); // 失败退出
+            } else if (this._pointsManager.isPass) {
               yield call(stepDataApi, this._data);
               yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
             }
 
-            if (
-              this._pointsManager.isFailed() &&
-              this._activePoints.length === 0
-            ) {
-              yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL)); // 失败退出
-            }
-
-            if (this._activePoints && this._activePoints.length > 0) {
+            if (this._pointsToActive && this._pointsToActive.length > 0) {
               yield call(
                 [this, doPoint],
-                [...this._activePoints],
+                [...this._pointsToActive],
                 isFirst,
                 orderActions
               );
             }
 
             yield all(
-              this._activePoints.map(p =>
+              this._pointsToActive.map(p =>
                 call(
                   getDevice(p.toolSN)?.Enable ||
-                    (() => {
-                      CommonLog.lError(
-                        `tool ${p.toolSN}: no such tool or tool cannot be enabled.`
-                      );
-                    })
+                  (() => {
+                    CommonLog.lError(
+                      `tool ${p.toolSN}: no such tool or tool cannot be enabled.`
+                    );
+                  })
                 )
               )
             );
@@ -257,9 +256,9 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 const { active, inactive } = this._pointsManager.newResult(
                   results
                 );
-                this._activePoints = active;
+                this._pointsToActive = active;
                 const finalFailPoints = inactive.filter(
-                  (p: ClsOperationPoint) => p.isFinalFail()
+                  (p: ClsOperationPoint) => p.isFinalFail
                 );
                 const n: string = finalFailPoints
                   .map((p: ClsOperationPoint) => p.point.nut_no)
@@ -270,13 +269,15 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                     dialogActions.dialogShow({
                       buttons: [
                         {
-                          label: 'Common.Close',
-                          color: 'danger'
+                          label: 'Order.Next',
+                          color: 'danger',
+                          action: screwStepActions.confirmFailSpecPoint()
+
                         },
                         {
                           label: 'Screw.Next',
                           color: 'warning',
-                          action: screwStepActions.confirmFailSpecPoint()
+                          action: screwStepActions.byPassSpecPoint()
                         }
                       ],
                       // eslint-disable-next-line camelcase
@@ -284,18 +285,24 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                       content: `${this.failureMsg}`
                     })
                   );
-                  yield take(SCREW_STEP.CONFIRM_FAIL_SPEC_POINT);
+                  const { bypass, fail } = yield race({
+                    bypass: take(SCREW_STEP.BYPASS_SPEC_POINT),
+                    fail: take(SCREW_STEP.CONFIRM_FAIL_SPEC_POINT)
+                  });
+                  if (fail) {
+                    yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL)); // 失败退出
+                  }
                 }
 
                 yield all(
                   inactive.map(p =>
                     call(
                       getDevice(p.toolSN)?.Disable ||
-                        (() => {
-                          CommonLog.lError(
-                            `tool ${p.toolSN}: no such tool or tool cannot be disabled.`
-                          );
-                        })
+                      (() => {
+                        CommonLog.lError(
+                          `tool ${p.toolSN}: no such tool or tool cannot be disabled.`
+                        );
+                      })
                     )
                   )
                 );
@@ -306,7 +313,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               //   if (!this._pointsManager.hasPoint(point)) {
               //     break;
               //   }
-              //   this._activePoints = [point.redo()];
+              //   this._pointsToActive = [point.redo()];
               //   break;
               // }
               default:
@@ -322,7 +329,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
         }
       },
 
-      *[STEP_STATUS.FINISHED](ORDER, orderActions) {
+      * [STEP_STATUS.FINISHED](ORDER, orderActions) {
         try {
           yield put(orderActions.finishStep(this));
         } catch (e) {
@@ -331,10 +338,9 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
         }
       },
 
-      *[STEP_STATUS.FAIL](ORDER, orderActions, msg) {
+      * [STEP_STATUS.FAIL](ORDER, orderActions, msg) {
         try {
           yield all(this._tools.map(t => call(t.Disable)));
-          this._tools = [];
           yield put(
             dialogActions.dialogShow({
               buttons: [

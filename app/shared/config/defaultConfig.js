@@ -185,6 +185,7 @@ const defaultConfigs = {
     url: 'http://192.168.1.10:8080/CVINetWeb'
   },
   systemSettings: {
+    restrictMode: true, // 严格模式，关键点必须为pass
     enableDebugInfo: false,
     showSwitchMode: false, // 切换pset or job 模式
     authEnable: true, // 认证
