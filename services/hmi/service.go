@@ -323,6 +323,7 @@ func (s *Service) initRequestDispatchers() {
 		WS_ORDER_FINISH_REQUEST:   utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		WS_ORDER_STEP_DATA_UPDATE: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		WS_ORDER_DETAIL_BY_CODE:   utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		WS_WORKORDER_DATA_UPDATE:  utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 	}
 
 	s.requestDispatchers[WS_ORDER_LIST].Register(s.OnWS_ORDER_LIST)
@@ -333,7 +334,7 @@ func (s *Service) initRequestDispatchers() {
 	s.requestDispatchers[WS_ORDER_FINISH_REQUEST].Register(s.OnWS_ORDER_FINISH_REQUEST)
 	s.requestDispatchers[WS_ORDER_STEP_DATA_UPDATE].Register(s.OnWS_ORDER_STEP_DATA_UPDATE)
 	s.requestDispatchers[WS_ORDER_DETAIL_BY_CODE].Register(s.OnWS_ORDER_DETAIL_BY_CODE)
-
+	s.requestDispatchers[WS_WORKORDER_DATA_UPDATE].Register(s.OnWS_WORKORDER_DATA_UPDATE)
 	for _, v := range s.requestDispatchers {
 		v.Start()
 	}
@@ -549,6 +550,37 @@ func (s *Service) OnWS_ORDER_STEP_DATA_UPDATE(data interface{}) {
 	}
 
 	_, err = s.DB.UpdateStepData(&storage.Steps{
+		Id:   orderReq.ID,
+		Data: orderReq.Data,
+	})
+
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+		return
+	}
+
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+}
+
+// 更新工单数据
+func (s *Service) OnWS_WORKORDER_DATA_UPDATE(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	wsRequest := data.(*wsnotify.WSRequest)
+	sData, _ := json.Marshal(wsRequest.WSMsg.Data)
+	c := wsRequest.C
+	msg := wsRequest.WSMsg
+
+	orderReq := WSOrderReqData{}
+	err := json.Unmarshal(sData, &orderReq)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		return
+	}
+
+	_, err = s.DB.UpdateOrderData(&storage.Workorders{
 		Id:   orderReq.ID,
 		Data: orderReq.Data,
 	})

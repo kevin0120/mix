@@ -54,10 +54,10 @@ type Workorders struct {
 	Status                string    `xorm:"varchar(32) default 'todo' 'status' " json:"status"`
 	Product_type_image    string    `json:"product_type_image"`
 
-	Unique_Num int64 `xorm:"bigint 'unique_num'" json:"unique_num"`
-
-	Created time.Time `xorm:"created" json:"-"`
-	Updated time.Time `xorm:"updated" json:"-"`
+	Unique_Num int64     `xorm:"bigint 'unique_num'" json:"unique_num"`
+	Data       string    `xorm:"text 'data'" json:"data"`
+	Created    time.Time `xorm:"created" json:"-"`
+	Updated    time.Time `xorm:"updated" json:"-"`
 }
 
 type Steps struct {
@@ -93,7 +93,7 @@ type Steps struct {
 	ImageRef       string `xorm:"varchar(128) 'tightening_image_by_step_code'" json:"tightening_image_by_step_code"`
 	Skippable      bool   `xorm:"varchar(64) 'skippable'" json:"skippable"`
 	Undoable       bool   `xorm:"varchar(64) 'undoable'" json:"undoable"`
-	Data           string `xorm:"varchar(128) 'data'" json:"data"`
+	Data           string `xorm:"text 'data'" json:"data"`
 	Status         string `xorm:"varchar(32) default 'ready' 'status'" json:"status"`
 
 	Created time.Time `xorm:"created" json:"-"`
@@ -170,6 +170,7 @@ type Guns struct {
 	Total       int    `xorm:"int 'total'"`
 	Mode        string `xorm:"varchar(128) 'mode'"`
 	UserID      int64  `xorm:"bigint 'user_id'"`
+	StepID      int64  `xorm:"bigint 'step_id'"`
 }
 
 type RoutingOperations struct {

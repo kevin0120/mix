@@ -509,6 +509,23 @@ func (s *Service) GetWorkorder(id int64, raw bool) (Workorders, error) {
 	}
 }
 
+func (s *Service) GetStep(id int64) (Steps, error) {
+
+	var step Steps
+
+	rt, err := s.eng.Alias("w").Where("w.id = ?", id).Get(&step)
+
+	if err != nil {
+		return step, err
+	} else {
+		if !rt {
+			return step, errors.New("Step does not exist")
+		} else {
+			return step, nil
+		}
+	}
+}
+
 func (s *Service) FindWorkorder(hmi_sn string, workcenter_code string, code string) (Workorders, error) {
 
 	var workorder Workorders
@@ -1097,6 +1114,20 @@ func (s *Service) UpdateStepData(step *Steps) (*Steps, error) {
 		return step, err
 	} else {
 		return step, nil
+	}
+}
+
+func (s *Service) UpdateOrderData(order *Workorders) (*Workorders, error) {
+
+	sql := "update `workorders` set data = ? where id = ?"
+	_, err := s.eng.Exec(sql,
+		order.Data,
+		order.Id)
+
+	if err != nil {
+		return order, err
+	} else {
+		return order, nil
 	}
 }
 

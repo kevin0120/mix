@@ -182,6 +182,7 @@ func (s *Api) ToolPSetSet(req *PSetSet) error {
 		Count:       req.Count,
 		UserID:      req.UserID,
 		Total:       req.Total,
+		StepID:      req.StepID,
 	})
 
 	return tool.SetPSet(req.PSet)

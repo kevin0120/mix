@@ -317,13 +317,13 @@ func (s *TighteningTool) OnResult(result interface{}) {
 		tighteningResult.UserID = dbTool.UserID
 		tighteningResult.Batch = fmt.Sprintf("%d/%d", tighteningResult.Seq, dbTool.Total)
 
-		dbWorkorder, err := s.controller.Srv.DB.GetWorkorder(dbTool.WorkorderID, true)
+		dbStep, err := s.controller.Srv.DB.GetStep(dbTool.StepID)
 		if err != nil {
-			s.diag.Error("Get Workorder Failed", err)
+			s.diag.Error("Get Step Failed", err)
 			return
 		}
 
-		consume, err := s.controller.Srv.Odoo.GetConsumeBySeq(&dbWorkorder, tighteningResult.Seq)
+		consume, err := s.controller.Srv.Odoo.GetConsumeBySeqInStep(&dbStep, tighteningResult.Seq)
 		if err != nil {
 			s.diag.Error("Get Consume Failed", err)
 			return
