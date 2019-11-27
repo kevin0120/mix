@@ -134,7 +134,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
             throw new Error(
               `ScrewStepPayload Is Empty! code: ${
                 this._id
-                }, Payload: ${JSON.stringify(payload)}`
+              }, Payload: ${JSON.stringify(payload)}`
             );
           }
 
@@ -193,6 +193,9 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
       * [STEP_STATUS.DOING](ORDER, orderActions) {
         try {
           let isFirst = true; // job只设置一次，记录状态
+          if (!this._pointsManager) {
+            throw new Error('拧紧点异常');
+          }
           this._pointsToActive = this._pointsManager.start();
 
           const resultChannel = yield actionChannel([
@@ -207,14 +210,13 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 tightening_points: this._pointsManager.points // results data.results
               })
             );
-
             if (
               this._pointsManager.isFailed &&
               this._pointsManager.points.filter(p => p.isActive).length === 0
             ) {
               yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL)); // 失败退出
             } else if (this._pointsManager.isPass) {
-              yield call(stepDataApi, this._data);
+              yield call(stepDataApi, this.id, this._data);
               yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
             }
 
@@ -241,7 +243,6 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
             );
 
             const action = yield take(resultChannel);
-
             switch (action.type) {
               case SCREW_STEP.RESULT: {
                 const { results } = action;

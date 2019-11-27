@@ -38,6 +38,7 @@ export default {
       if (isNil(workorderID)) {
         throw new Error('工单ID为空');
       }
+      console.log(pset, typeof pset);
       yield call(
         psetApi,
         toolSN || '',

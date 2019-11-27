@@ -18,6 +18,7 @@ import notifyActions from '../Notifier/action';
 import type { tOrder, tOrderStatus } from './interface/typeDef';
 import type { IWorkable } from '../workable/IWorkable';
 import type { IWorkStep } from '../step/interface/IWorkStep';
+import {orderDataApi} from '../../api/order';
 
 const stepStatus = status => {
   switch (status) {
@@ -42,6 +43,12 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
 
     get status() {
       return this._status;
+    }
+
+    _data = {};
+
+    get data() {
+      return this._data;
     }
 
     _trackCode = '';
@@ -133,7 +140,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       return (((this: IWorkable)._steps[this._workingIndex]: any): IWorkStep);
     }
 
-    *updateStatus({ status }: { status: tOrderStatus }): Saga<void> {
+    * updateStatus({ status }: { status: tOrderStatus }): Saga<void> {
       try {
         yield call([this, super.updateStatus], { status });
         yield call(orderUpdateApi, this.id, status);
@@ -143,7 +150,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
     }
 
     _statusTasks = {
-      *[ORDER_STATUS.TODO]() {
+      * [ORDER_STATUS.TODO]() {
         try {
           const { reportStart } = yield select(s => s.setting.systemSettings);
           // TODO 开工自检
@@ -180,17 +187,18 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           yield put(orderActions.stepStatus(this, ORDER_STATUS.PENDING));
         }
       },
-      *[ORDER_STATUS.WIP]() {
+      * [ORDER_STATUS.WIP]() {
         try {
           this._workingIndex =
             this._workingIndex >= this._steps.length ? 0 : this._workingIndex;
           let status = null;
 
           const _onPrevious = () => {
+            console.log('on previous');
             if (this._workingIndex - 1 >= 0) {
               this._workingIndex -= 1;
             }
-            status = STEP_STATUS.READY;
+            return STEP_STATUS.READY;
           };
 
           const _onNext = () => {
@@ -204,7 +212,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
             const step = this.workingStep;
             if (step) {
               console.log(status);
-              yield call(
+              const nextStatus = yield call(
                 [this, this.runSubStep],
                 step,
                 {
@@ -213,10 +221,11 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
                 },
                 status
               );
+              status = nextStatus || null;
+
             } else {
               yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
             }
-            status = null;
           }
         } catch (e) {
           CommonLog.lError(e, { at: 'ORDER_STATUS.WIP' });
@@ -226,7 +235,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           CommonLog.Info('order doing finished');
         }
       },
-      *[ORDER_STATUS.DONE]() {
+      * [ORDER_STATUS.DONE]() {
         try {
           if (this._workingIndex > this._steps.length - 1) {
             this._workingIndex = this._steps.length - 1;
@@ -293,7 +302,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           CommonLog.Info('order done');
         }
       },
-      *[ORDER_STATUS.PENDING]() {
+      * [ORDER_STATUS.PENDING]() {
         try {
           yield put(orderActions.finishOrder(this));
         } catch (e) {
@@ -302,7 +311,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           });
         }
       },
-      *[ORDER_STATUS.CANCEL]() {
+      * [ORDER_STATUS.CANCEL]() {
         try {
           yield put(orderActions.finishOrder(this));
         } catch (e) {
