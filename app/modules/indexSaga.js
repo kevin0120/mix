@@ -19,6 +19,7 @@ import notifier from './Notifier/saga';
 import workCenterMode from './workCenterMode/saga'
 import systemInfo from './systemInfo/saga';
 import io from './io/saga';
+import reworkPatternRoot from './reworkPattern/saga';
 
 export default function* rootSaga(): Saga<void> {
   try {
@@ -36,7 +37,8 @@ export default function* rootSaga(): Saga<void> {
       // watchNetwork,
       // watchBattery,
       watchPower,
-      workCenterMode, //切换工位工作模式
+      workCenterMode, // 切换工位工作模式
+      reworkPatternRoot, // 返工模式
       order,
       dialog,
       healthz,

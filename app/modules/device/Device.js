@@ -41,7 +41,8 @@ export default class Device extends CommonExternalEntity implements IDevice {
   }
 
   removeListener(listener: tInputListener): Array<tInputListener> {
-    return this._inputListener.remove(listener);
+    this._inputListener.remove(listener);
+    console.log(this._inputListener.listeners);
   }
 
   doValidate(data: tInputData): boolean {
@@ -65,7 +66,7 @@ export default class Device extends CommonExternalEntity implements IDevice {
     return this.validator(data);
   }
 
-  *doDispatch(data: tInputData): Saga<void> {
+  * doDispatch(data: tInputData): Saga<void> {
     try {
       if (!this.isEnable) {
         const msg = `${this.source} Is Not Enabled`;

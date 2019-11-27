@@ -22,6 +22,14 @@ export class ClsOperationPoint {
     this._results = [];
   }
 
+  toString(): string {
+    return JSON.stringify(
+      {
+        Bolt: this.point.nut_no,
+        Sequence: this.point.sequence
+      });
+  }
+
   get isFinalFail(): boolean {
     // 结果的长度已经达到最大重试次数，同时最后一条结果为fail
     // const rsCount = this._results.length;
@@ -41,7 +49,7 @@ export class ClsOperationPoint {
     // 是否需要跳到下一个拧紧点
     const rsCount = this._results.length;
     const lastResult: tResult = this._results[rsCount - 1];
-    if(!lastResult){
+    if (!lastResult) {
       return false;
     }
     return (
@@ -97,7 +105,7 @@ export class ClsOperationPoint {
   }
 
   newResult(result: tResult): ?ClsOperationPoint {
-    const r={
+    const r = {
       ...result,
       result: result.result.toUpperCase()
     };
@@ -128,6 +136,14 @@ export class ClsOperationPoint {
     if (this.isPass) {
       this.setActive(false);
     }
+  }
+
+  get data() {
+    return {
+      ...this.point,
+      status: this._status,
+      isActive: this._isActive
+    };
   }
 
   redo() {

@@ -3,8 +3,8 @@ import { makeLocalBundle, lng } from '../../../i18n';
 export const screwStepNS = 'screwStepNS';
 
 export const translation = {
-  redoSpecScrewPointTitle: 'switchWorkCenterModeTitle',
-  redoSpecScrewPointContent: 'switchWorkCenterModeContent',
+  redoSpecScrewPointTitle: 'redoSpecScrewPointTitle',
+  redoSpecScrewPointContent: 'redoSpecScrewPointContent',
   confirm: 'confirm',
   cancel: 'cancel'
 };
@@ -12,16 +12,16 @@ export const translation = {
 
 const trans = [
   makeLocalBundle(lng.zh_CN, 'screwStepNS', {
-    confirm: '确认切换工作模式',
-    cancel: '取消',
-    redoSpecScrewPointTitle: '切换工位工作模式',
-    redoSpecScrewPointContent: '确认是否切换工作模式？当前模式为:'
+    confirm: '确认返工拧紧点',
+    cancel: '取消返工此拧紧点',
+    redoSpecScrewPointTitle: '返工当前拧紧点',
+    redoSpecScrewPointContent: '返工当前拧紧点:'
   }),
   makeLocalBundle(lng.en, 'screwStepNS', {
-    confirm: 'Confirm',
+    confirm: 'Confirm Rework',
     cancel: 'Cancel',
-    redoSpecScrewPointTitle: 'Switch WorkCenter Work Mode',
-    redoSpecScrewPointContent: 'Make Sure. Do You Want To Switch WorkCenter Mode? Current Work Center Mode:'
+    redoSpecScrewPointTitle: 'Rework Current Tightening Point',
+    redoSpecScrewPointContent: 'Make Sure. Do You Want To Rework This Tightening Joint? Current Joint:'
   })
 ];
 

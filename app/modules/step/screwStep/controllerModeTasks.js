@@ -26,7 +26,6 @@ export default {
         throw new Error(`未找到工具(${toolSN})`);
       }
       const ControllerSN = ((tool.parent: any): IDevice)?.serialNumber;
-      console.log(ControllerSN);
       if (!ControllerSN) {
         throw new Error(`工具(${toolSN})缺少控制器`);
       }
@@ -38,6 +37,7 @@ export default {
       if (isNil(workorderID)) {
         throw new Error('工单ID为空');
       }
+      console.log(pset, typeof pset);
       yield call(
         psetApi,
         toolSN || '',
@@ -61,7 +61,7 @@ export default {
       throw new Error(msg);
     }
   },
-
+  
   * [controllerModes.job](): Saga<void> {
     try {
       const { jobID, points }: tScrewStepData = this._data;
@@ -72,7 +72,7 @@ export default {
         }
         return p.tightening_tool || tSN || '';
       }, '');
-
+      
       const userID = 1;
       const tool = getDevice(toolSN);
       if (!tool) {
@@ -85,7 +85,7 @@ export default {
       yield call(jobApi, toolSN, ControllerSN, stepId, userID, jobID);
     } catch (e) {
       const msg = `程序号设置失败，${e.message}`;
-
+      
       yield put(
         notifierActions.enqueueSnackbar('Error', msg, {
           at: 'controllerModes.job'

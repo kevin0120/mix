@@ -24,10 +24,10 @@ export default class Workable implements IWorkable {
   _code = '';
 
   get code() {
-    if (this._code) {
-      return this._code;
-    }
-    throw new Error(`workable(${String(this._code)}) has invalid code`);
+    // if (this._code) {
+    return this._code;
+    // }
+    // throw new Error(`workable(${String(this._code)}) has invalid code`);
   }
 
   _status = '';
@@ -82,7 +82,7 @@ export default class Workable implements IWorkable {
 
   // eslint-disable-next-line flowtype/no-weak-types
   update(workableData: ?$Shape<tWorkableData>) {
-    console.log(this, workableData);
+    // console.log(this, workableData);
     const { steps, status, payload, data } = workableData || {};
     this._status = status || this._status;
     this._steps = steps
@@ -271,13 +271,13 @@ export default class Workable implements IWorkable {
         previous: take(ORDER.STEP.DO_PREVIOUS)
       });
       if (exit && callbacks && callbacks.onExit) {
-        yield call(callbacks.onExit);
+        return yield call(callbacks.onExit);
       }
       if (next && callbacks && callbacks.onNext) {
-        yield call(callbacks.onNext);
+        return yield call(callbacks.onNext);
       }
       if (previous && callbacks && callbacks.onPrevious) {
-        yield call(callbacks.onPrevious);
+        return yield call(callbacks.onPrevious);
       }
     } catch (e) {
       CommonLog.lError(e, {

@@ -225,6 +225,7 @@
     "Start": "Start",
     "info": "info",
     "Overview": "Overview",
-    "Next": "Next"
+    "Next": "Next",
+    "Retry": "Retry"
   }
 }

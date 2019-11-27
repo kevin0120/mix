@@ -66,6 +66,7 @@ function customDialog(props: Props) {
     <I18n ns="translations">
       {t => (
         <Dialog
+          disableBackdropClick
           classes={{
             root: classes.modalRoot,
             paper: `${classes.modal} ${classes.modalLarge}`

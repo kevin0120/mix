@@ -6,7 +6,8 @@ export const ORDER_STATUS = Object.freeze({
   WIP: 'wip',
   DONE: 'done',
   CANCEL: 'cancel',
-  PENDING: 'pending'
+  PENDING: 'pending',
+  FAIL: 'fail'
 });
 
 // rush type
@@ -19,7 +20,8 @@ export const ORDER_WS_TYPES = Object.freeze({
   START_REQUEST: 'WS_ORDER_START_REQUEST',
   FINISH_REQUEST: 'WS_ORDER_FINISH_REQUEST',
   STEP_DATA: 'WS_ORDER_STEP_DATA_UPDATE',
-  ORDER_DETAIL_BY_CODE: 'WS_ORDER_DETAIL_BY_CODE',
+  ORDER_DATA: 'WS_WORKORDER_DATA_UPDATE',
+  ORDER_DETAIL_BY_CODE: 'WS_ORDER_DETAIL_BY_CODE'
 });
 
 // order action types

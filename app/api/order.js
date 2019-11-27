@@ -4,12 +4,12 @@ import { rushSendApi } from './rush';
 import { ORDER_WS_TYPES } from '../modules/order/constants';
 
 export function orderListApi({
-  timeFrom,
-  timeTo,
-  status,
-  pageSize,
-  pageNo
-}: {
+                               timeFrom,
+                               timeTo,
+                               status,
+                               pageSize,
+                               pageNo
+                             }: {
   timeFrom?: string,
   timeTo?: string,
   status?: string,
@@ -97,8 +97,21 @@ export function orderReportFinishApi(
 }
 
 export function stepDataApi(id: number, data: Object): Promise<any> {
+  let idNum = id;
+  if (typeof id === 'string') {
+    idNum = parseInt(id, 10);
+  }
   const json = JSON.stringify(data);
-  return rushSendApi(ORDER_WS_TYPES.STEP_DATA, { id, data: json });
+  return rushSendApi(ORDER_WS_TYPES.STEP_DATA, { id: idNum, data: json });
+}
+
+export function orderDataApi(id: number, data: Object): Promise<any> {
+  let idNum = id;
+  if (typeof id === 'string') {
+    idNum = parseInt(id, 10);
+  }
+  const json = JSON.stringify(data);
+  return rushSendApi(ORDER_WS_TYPES.ORDER_DATA, { id: idNum, data: json });
 }
 
 export function orderDetailByCodeApi(

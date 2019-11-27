@@ -39,7 +39,8 @@ const statusMap = classes => ({
   [ORDER_STATUS.WIP]: classes.statusWIP,
   [ORDER_STATUS.DONE]: classes.statusDone,
   [ORDER_STATUS.CANCEL]: classes.statusCancel,
-  [ORDER_STATUS.PENDING]: classes.statusPending
+  [ORDER_STATUS.PENDING]: classes.statusPending,
+  [ORDER_STATUS.FAIL]: classes.statusFail
 });
 
 function StepWorking({ status, code }: Props): Node {

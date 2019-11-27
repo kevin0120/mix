@@ -16,7 +16,8 @@ import notifierActions from '../../../modules/Notifier/action';
 import type { CommonLogLvl } from '../../../common/utils';
 import Alert from '../../../components/Alert';
 import { withI18n } from '../../../i18n';
-import { translation as trans, screwStepNS } from './local';
+import { translation as Navtrans } from '../../../components/NavBar/local';
+import {screwStepNS, translation as trans} from './local'
 
 
 type tOP = {|
@@ -62,13 +63,15 @@ const mapDispatch: tDP = {
 
 
 
-function ScrewStep({ isCurrent, image, points, workCenterMode, notify, redoPointSpecPoint, result }: Props) {
+function ScrewStep({ step, isCurrent, image, points, workCenterMode, notify, redoPointSpecPoint, result }: Props) {
   
   const screwImgClasses = makeStyles(styles)();
   
   const [showRedoScrewPointDiag, setShowRedoScrewPointDiag] = useState(false);
   
   const [redoScrewPoint, setRedoScrewPoint] = useState(null);
+  
+  const enableReWork = workCenterMode === Navtrans.reworkWorkCenterMode;
   
   return withI18n(
     t => (<div className={screwImgClasses.layout}>
@@ -79,15 +82,16 @@ function ScrewStep({ isCurrent, image, points, workCenterMode, notify, redoPoint
         focus={0}
         scale={1}
         twinkle={isCurrent}
-        enableReWork={workCenterMode === trans.reworkWorkCenterMode}
+        enableReWork={enableReWork}
         notifyInfo={notify}
         onPointClick={(point: ClsOperationPoint) => {
           if (!point.canRedo) {
             notify('Error', '此拧紧点不具备返工条件!');
-            return;
+            return false;
           }
           setShowRedoScrewPointDiag(true);
           setRedoScrewPoint(point);
+          return true
         }}
       />
       <Alert
@@ -95,7 +99,7 @@ function ScrewStep({ isCurrent, image, points, workCenterMode, notify, redoPoint
         show={showRedoScrewPointDiag}
         title={t(trans.redoSpecScrewPointTitle)}
         onConfirm={() => {
-          redoPointSpecPoint(redoScrewPoint);
+          redoPointSpecPoint(step, redoScrewPoint);
           setShowRedoScrewPointDiag(false);
         }}
         onCancel={() => {
@@ -111,7 +115,7 @@ function ScrewStep({ isCurrent, image, points, workCenterMode, notify, redoPoint
         cancelBtnText={t(trans.cancel)}
         showCancel
       >
-        {`${t(trans.redoSpecScrewPointContent)} ${t(workCenterMode)}`}
+        {`${t(trans.redoSpecScrewPointContent)} ${redoScrewPoint?.toString() || ""}`}
       </Alert>
       <Paper
         square
