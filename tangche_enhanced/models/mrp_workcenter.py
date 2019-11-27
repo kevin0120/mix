@@ -51,6 +51,9 @@ class MrpWorkCenter(models.Model):
                     _logger.error("Can Not Found MasterPC Connect Info For Work Center:{0}".format(center.name))
                     continue
                 connect = connects[0]
+                if not connect:
+                    _logger.error("Sync Operation Fail. Can Not Found Connect Info For WorkCenter: {0}".format(center.name))
+                    continue
                 delete_all_endpoint = 'http://{0}:{1}{2}'.format(connect.ip, connect.port,
                                                                  DELETE_ALL_MASTER_WROKORDERS_API)
                 center._delete_workcenter_all_opertaions(delete_all_endpoint)
