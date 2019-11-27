@@ -177,6 +177,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               )
             );
           });
+          console.warn('step data', this._data);
           if (this._data && this._data.results) {
             this._pointsManager.newResult(this._data.results);
           }
@@ -184,7 +185,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
             this.updateData,
             (data: tScrewStepData): tScrewStepData => ({
               ...data,
-              tightening_points: this._pointsManager.points
+              tightening_points: this._pointsManager.points.map(p => p.data)
             })
           );
           yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
@@ -210,7 +211,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               this.updateData,
               (data: tScrewStepData): tScrewStepData => ({
                 ...data,
-                tightening_points: this._pointsManager.points // results data.results
+                tightening_points: this._pointsManager.points.map(p => p.data) // results data.results
               })
             );
             if (
@@ -220,6 +221,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL)); // 失败退出
             } else if (this._pointsManager.isPass) {
               yield call(stepDataApi, this.id, this._data);
+              console.warn('setting data', this._data);
               yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
             }
 
@@ -350,7 +352,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                   action: screwStepActions.confirmFail()
                 },
                 {
-                  label: 'Common.Retry',
+                  label: 'Order.Retry',
                   color: 'info',
                   action: orderActions.stepStatus(this, STEP_STATUS.READY)
                 },

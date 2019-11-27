@@ -93,7 +93,6 @@ const StepMixin = (ClsWorkable: Class<IWorkable>) =>
       this._undoable = undoable;
       this._failureMsg = failureMsg;
       (this: IWorkable)._status = status || STEP_STATUS.READY;
-      (this: IWorkable)._data = data;
       (this: IWorkable)._desc = desc;
     }
 
