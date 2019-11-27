@@ -97,9 +97,11 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
         );
         this._tools.forEach(t => {
           this._listeners.forEach(l => {
-            t.removeListener(l);
+            const r = t.removeListener(l);
+            CommonLog.Warn(r);
           });
         });
+        
         this._tools = [];
         this._listeners = [];
         CommonLog.Info('tools cleared', {
@@ -116,6 +118,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
     constructor(...args: Array<any>) {
       super(...args);
       this.isValid = true; // 设置此工步是合法的
+      this._onLeave = this._onLeave.bind(this);
     }
 
     _statusTasks = {
@@ -157,7 +160,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               })
             );
           } else {
-            throw new Error('缺少Job号或Pset号');
+            throw new Error('缺少JOB号或Pset号');
           }
 
           this._pointsManager = new ClsOrderOperationPoints(
@@ -347,12 +350,13 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               buttons: [
                 {
                   label: 'Common.Close',
-                  color: 'danger'
+                  color: 'danger',
+                  action: screwStepActions.confirmFail(),
                 },
                 {
                   label: 'Order.Next',
                   color: 'warning',
-                  action: screwStepActions.confirmFail()
+                  action: screwStepActions.confirmFail(),
                 }
               ],
               title: `工步失败：${this._code}`,

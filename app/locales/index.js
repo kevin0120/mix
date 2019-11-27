@@ -1,10 +1,12 @@
 import i18n from '../i18n';
 import stepWorking from '../containers/stepWorking/local';
 import navBar from '../components/NavBar/local';
+import screwStep from '../containers/steps/screwStep/local';
 
 
 
 const trans = [
+  ...screwStep,
   ...stepWorking,
   ...navBar
 ];

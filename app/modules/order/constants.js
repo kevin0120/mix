@@ -6,7 +6,8 @@ export const ORDER_STATUS = Object.freeze({
   WIP: 'wip',
   DONE: 'done',
   CANCEL: 'cancel',
-  PENDING: 'pending'
+  PENDING: 'pending',
+  FAIL: 'fail'
 });
 
 // rush type

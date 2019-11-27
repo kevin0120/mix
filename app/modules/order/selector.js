@@ -32,8 +32,9 @@ export const todoOrders = (orderList: Array<IOrder>): Array<IOrder> =>
 export const doingOrders = (orderList: Array<IOrder>): Array<IOrder> =>
   orderList && orderList.filter(o => o?.status === ORDER_STATUS.WIP);
 
+// fixme: 将fail的工单也在Done列显示
 export const doneOrders = (orderList: Array<IOrder>): Array<IOrder> =>
-  orderList && orderList.filter(o => o?.status === ORDER_STATUS.DONE);
+  orderList && orderList.filter(o => o?.status === ORDER_STATUS.DONE || o?.status === ORDER_STATUS.FAIL);
 
 export const exceptOrders = (orderList: Array<IOrder>): Array<IOrder> =>
   orderList &&
@@ -41,12 +42,19 @@ export const exceptOrders = (orderList: Array<IOrder>): Array<IOrder> =>
     o => o?.status === ORDER_STATUS.PENDING || o?.status === ORDER_STATUS.CANCEL
   );
 
+export const failOrders = (orderList: Array<IOrder>): Array<IOrder> =>
+  orderList && orderList.filter(o => o?.status === ORDER_STATUS.FAIL);
+
 export const stepStatus = (step: ?IWorkStep): ?tAnyStatus => step?.status;
 // eslint-disable-next-line flowtype/no-weak-types
 export const stepData = (step: ?IWorkStep): ?Object => step?.data;
 // eslint-disable-next-line flowtype/no-weak-types
 export const stepPayload = (step: ?IWorkStep): ?Object => step?.payload;
 export const timeCost = (step: ?IWorkStep): ?number => step && step.timeCost();
+
+
+export const isFail = (order: ?IOrder): boolean =>
+  order?.status === ORDER_STATUS.FAIL || false;
 
 export const isPending = (order: ?IOrder): boolean =>
   order?.status === ORDER_STATUS.PENDING || false;

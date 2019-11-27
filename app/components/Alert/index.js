@@ -32,7 +32,7 @@ export default function (props) {
         }}
       >
         <SweetAlert
-          show={show}
+          show={show || false}
           customClass={classes.root}
           style={{
             display: 'block',
@@ -42,7 +42,7 @@ export default function (props) {
             left: 'auto',
             maxHeight: '100%',
             overflow: 'auto',
-            ...style
+            ...(style|| {})
           }}
           {...restProps}
         >
