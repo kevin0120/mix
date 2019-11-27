@@ -831,11 +831,11 @@ func (s *Service) UpdateRoutingOperations(ro *RoutingOperations) error {
 	}
 }
 
-func (s *Service) GetRoutingOperations(op_id int64, model string) (RoutingOperations, error) {
+func (s *Service) GetRoutingOperations(name string, model string) (RoutingOperations, error) {
 
 	var ro RoutingOperations
 
-	rt, err := s.eng.Alias("r").Where("r.operation_id = ?", op_id).And("r.product_type = ?", model).Get(&ro)
+	rt, err := s.eng.Alias("r").Where("r.name = ?", name).And("r.product_type = ?", model).Get(&ro)
 
 	if err != nil {
 		return ro, err

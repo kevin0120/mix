@@ -378,7 +378,8 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	aiisResult.MO_NutNo = result.NutNo
 	aiisResult.MO_Model = dbWorkorder.MO_Model
 	aiisResult.Batch = result.Batch
-	aiisResult.Vin = dbWorkorder.Vin
+	aiisResult.Vin = dbWorkorder.Track_code
+	aiisResult.WorkorderName = dbWorkorder.Code
 	aiisResult.Mode = dbWorkorder.Mode
 	aiisResult.TighteningId, _ = strconv.ParseInt(result.TighteningID, 10, 64)
 	aiisResult.Lacking = "normal"

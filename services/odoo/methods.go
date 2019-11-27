@@ -220,7 +220,6 @@ func (m *Methods) deleteAllRoutingOpertions(ctx iris.Context) {
 		ctx.WriteString(err.Error())
 		return
 	}
-
 	ctx.StatusCode(iris.StatusOK)
 }
 
@@ -239,7 +238,7 @@ func (m *Methods) putSyncRoutingOpertions(ctx iris.Context) {
 
 	points, _ := json.Marshal(ro.Points)
 
-	db_ro, err := m.service.DB.GetRoutingOperations(ro.OperationID, ro.ProductType)
+	db_ro, err := m.service.DB.GetRoutingOperations(ro.Name, ro.ProductType)
 
 	db_ro.Points = string(points)
 	db_ro.VehicleTypeImg = ro.VehicleTypeImg
