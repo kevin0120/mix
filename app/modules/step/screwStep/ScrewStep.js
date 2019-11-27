@@ -101,7 +101,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
             CommonLog.Warn(r);
           });
         });
-        
+
         this._tools = [];
         this._listeners = [];
         CommonLog.Info('tools cleared', {
@@ -261,6 +261,15 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                   results
                 );
                 this._pointsToActive = active;
+                // disable tools before bypass point
+                yield all(inactive.map(p => call(
+                  getDevice(p.toolSN)?.Disable || (() => {
+                    CommonLog.lError(
+                      `tool ${p.toolSN}: no such tool or tool cannot be disabled.`
+                    );
+                  })
+                )));
+
                 const finalFailPoints = inactive.filter(
                   (p: ClsOperationPoint) => p.isFinalFail
                 );
@@ -297,19 +306,6 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                     yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL)); // 失败退出
                   }
                 }
-
-                yield all(
-                  inactive.map(p =>
-                    call(
-                      getDevice(p.toolSN)?.Disable ||
-                      (() => {
-                        CommonLog.lError(
-                          `tool ${p.toolSN}: no such tool or tool cannot be disabled.`
-                        );
-                      })
-                    )
-                  )
-                );
                 break;
               }
               // case SCREW_STEP.REDO_POINT: {
@@ -351,12 +347,17 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 {
                   label: 'Common.Close',
                   color: 'danger',
-                  action: screwStepActions.confirmFail(),
+                  action: screwStepActions.confirmFail()
+                },
+                {
+                  label: 'Common.Retry',
+                  color: 'info',
+                  action: orderActions.stepStatus(this, STEP_STATUS.READY)
                 },
                 {
                   label: 'Order.Next',
                   color: 'warning',
-                  action: screwStepActions.confirmFail(),
+                  action: screwStepActions.confirmFail()
                 }
               ],
               title: `工步失败：${this._code}`,
