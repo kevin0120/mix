@@ -7,6 +7,7 @@ const defaultConfigs = {
   appName: '智能装配系统-终端',
   devices: {
     io: {
+      sn:'io1',
       enable: true,
       config: { input_num: 8, output_num: 8 },
       inputs: {

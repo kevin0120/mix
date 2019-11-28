@@ -18,7 +18,7 @@ const reducers = {
   [IO.PORT_CONFIG_CHANGE]: (state, { ioPorts }) => ({
     ...state,
     ioPorts
-  }),
+  })
 };
 
 const initState = {
@@ -29,7 +29,8 @@ const initState = {
   },
   ioOutputGroups,
   ioModule: null,
-  testStatus: []
+  testStatus: [],
+  ioOutStatus: [...new Array(ioConfig.config.output_num)].map(o => 0)
 };
 
 export default genReducers(reducers, initState);

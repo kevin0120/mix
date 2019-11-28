@@ -14,6 +14,8 @@ let defaultIOModule = null;
 
 const listeners = {};
 
+const ioFunctions = {};
+
 export default function* root(): Saga<void> {
   try {
     defaultIOModule = newDevice(
@@ -53,16 +55,27 @@ function* setPortsConfig(action) {
     const effects = [];
     Object.keys(prevInputs).forEach((k) => {
       if (prevInputs[k] !== inputs[k]) {
-        if (prevInputs[k]) {
-          effects.push(put(ioActions.removeListener(k)));
-        }
-        if (inputs[k]) {
-          effects.push(put(ioActions.addListener(k, inputs[k])));
-        }
+        effects.push(put(ioActions.removeListener(k)));
+      }
+    });
+    Object.keys(inputs).forEach((k) => {
+      if (prevInputs[k] !== inputs[k]) {
+        effects.push(put(ioActions.addListener(k, ioFunctions[k])));
+      }
+    });
+    const { ioOutStatus } = yield select(s => s.io);
+    Object.keys(prevOutputs).forEach((k) => {
+      if (prevOutputs[k] !== outputs[k]) {
+        effects.push(put(ioActions.set(prevOutputs[k], ioOutStatus[prevOutputs[k]])));
+      }
+    });
+    Object.keys(outputs).forEach((k) => {
+      if (prevOutputs[k] !== outputs[k]) {
+        effects.push(put(ioActions.set(outputs[k], ioOutStatus[outputs[k]])));
       }
     });
 
-
+    yield all(effects);
   } catch (e) {
     CommonLog.lError(e);
   }
@@ -144,6 +157,7 @@ function* setIOOutput(action) {
     yield all(
       ports.map(p => call(defaultIOModule && defaultIOModule.setIO(p, status)))
     );
+
   } catch (e) {
     CommonLog.lError(e);
   }
