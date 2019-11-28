@@ -12,3 +12,8 @@ class QualityPoint(models.Model):
         for step in self:
             if len(step.sa_operation_ids) > 1:
                 raise ValidationError(u'唐山客车 每个工步最多定义一个作业')
+
+
+    @api.onchange('ref')
+    def onchange_ref(self):
+        self.name = self.ref
