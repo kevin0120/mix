@@ -33,11 +33,17 @@ const stepStatus = status => {
 function* redoOrder(step, point, orderActions) {
   try {
     console.warn('redo order', step, point);
-
+    let redoStep = step;
+    if (!redoStep) {
+      redoStep = this.steps.find(s => s.status === STEP_STATUS.FAIL);
+    }
+    if (!redoStep) {
+      yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
+    }
     while (true) {
       yield call(
         [this, this.runSubStep],
-        step,
+        redoStep,
         {
           onNext: () => {
             console.warn('next');

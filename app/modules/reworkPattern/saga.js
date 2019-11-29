@@ -19,6 +19,7 @@ import { translation as trans } from './local';
 import notifierActions from '../Notifier/action';
 import actions from './action';
 import { workModes } from '../workCenterMode/constants';
+import { workingOrder } from '../order/selector';
 
 function* tryRework(action: tAction = {}): Saga<void> {
   try {
@@ -28,6 +29,11 @@ function* tryRework(action: tAction = {}): Saga<void> {
     const { workCenterMode } = yield select();
     if (workCenterMode !== workModes.reworkWorkCenterMode) {
       yield put(notifierActions.enqueueSnackbar('Warn', '当前工作模式无法进行返工作业，请先切换至返工模式!'));
+      canRework = false;
+    }
+    const wOrder = yield select(s => workingOrder(s.order));
+    if (wOrder) {
+      yield put(notifierActions.enqueueSnackbar('Error', '当前工位有正在执行的工单,不能切换工单模式'));
       canRework = false;
     }
     if (!order) {
@@ -69,12 +75,6 @@ function* tryRework(action: tAction = {}): Saga<void> {
     } else {
       yield put(actions.cancelRework());
     }
-    // if (!isNil(extra)) {
-    //   const { point, step } = extra;
-    //
-    // } else {
-    //   yield put(notifierActions.enqueueSnackbar('Error', '当前工位有正在执行的工单,不能切换工单模式'));
-    // }
   } catch (e) {
     CommonLog.lError(`tryRework Error: ${e.toString()}`);
     yield put(actions.cancelRework());

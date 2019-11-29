@@ -286,7 +286,7 @@ export default class Workable implements IWorkable {
     } catch (e) {
       CommonLog.lError(e, {
         at: 'runSub ',
-        code: `${String(this._code)},${step.code}`
+        code: `${String(this?._code)},${step?.code}`
       });
       throw e;
     } finally {
