@@ -63,7 +63,7 @@ function* getResult(pointsToActive, resultChannel, isFirst, orderActions) {
 
     // 先设置pset再enable
     yield all(
-      this._pointsToActive.map(p =>
+      pointsToActive.map(p =>
         call(
           getDevice(p.toolSN)?.Enable ||
           (() => {
@@ -315,6 +315,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 tightening_points: this._pointsManager.points.map(p => p.data)
               })
             );
+            console.warn(this._pointsToActive);
 
             const results = yield call(
               [this, getResult],
@@ -324,9 +325,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               orderActions
             );
 
-            const { active, inactive } = this._pointsManager.newResult(
-              results
-            );
+            const { inactive } = this._pointsManager.newResult(results);
             // disable tools before bypass point
             yield all(inactive.map(p => call(
               getDevice(p.toolSN)?.Disable || (() => {
@@ -346,7 +345,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
               }
             } else {
-              this._pointsToActive = active;
+              this._pointsToActive = this._pointsManager.start();
               if (
                 this._pointsManager.isFailed &&
                 this._pointsManager.points.filter(p => p.isActive).length === 0

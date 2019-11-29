@@ -30,7 +30,7 @@ const stepStatus = status => {
   }
 };
 
-function* redoOrder(step, point) {
+function* redoOrder(step, point, orderActions) {
   try {
     console.warn('redo order', step, point);
 
@@ -53,6 +53,7 @@ function* redoOrder(step, point) {
           }
         }
       );
+      yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
     }
   } catch (e) {
     CommonLog.lError(e);
@@ -225,15 +226,18 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           this._workingIndex =
             this._workingIndex >= this._steps.length ? 0 : this._workingIndex;
           const { step } = config;
-          const stepIndex = this.steps.findIndex(s => s.code === step.code);
-          if (stepIndex >= 0) {
-            this._workingIndex = stepIndex;
+          if (step) {
+            const stepIndex = this.steps.findIndex(s => s.code === step.code);
+            if (stepIndex >= 0) {
+              this._workingIndex = stepIndex;
+            }
           }
+
           const mode = yield select(s => s.workCenterMode);
           if (mode === workModes.reworkWorkCenterMode) {
             const reworkConfig = config?.reworkConfig || {};
             const { point } = reworkConfig;
-            yield call([this, redoOrder], step, point);
+            yield call([this, redoOrder], step, point, orderActions);
             return;
           }
 

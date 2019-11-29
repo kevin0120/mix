@@ -35,9 +35,9 @@ class Pages extends React.Component {
               white
               content={
                 <p className={classes.right}>
-                  &copy; {1900 + new Date().getYear()}{' '}
+                  {/*&copy; {1900 + new Date().getYear()}{' '}*/}
                   <a href="https://www.liktek.com" className={anchor}>
-                    上海砺星信息科技有限公司
+                    {/*上海砺星信息科技有限公司*/}
                   </a>
                 </p>
               }

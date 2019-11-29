@@ -32,7 +32,7 @@ function Point({ twinkle, x, y, status, label, scale, reworkModiBGColor, onClick
 
   return <div
     className={clsx(
-      classes.root, {
+      classes.root, {}, {
         [classes.waiting]: isStatus.waiting(status),
         [classes.success]: isStatus.success(status),
         [classes.error]: isStatus.error(status),
@@ -46,7 +46,7 @@ function Point({ twinkle, x, y, status, label, scale, reworkModiBGColor, onClick
     }}
     onClick={(e) => {
       if (onClick) {
-        onClick(e)
+        onClick(e);
       }
     }}
     {...(restProps: any)}

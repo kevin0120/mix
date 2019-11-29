@@ -67,6 +67,7 @@ const orderReducer: {
         vIdx = stepIndex;
       }
     }
+    vIdx = limitIndex(viewingOrder(state), vIdx);
     return {
       ...state,
       workingOrder: order || null,

@@ -2,7 +2,8 @@
 
 const defaultConfigs = {
   version: 'v0.1',
-  appName: '智能装配系统-终端',
+  // appName: '智能装配系统-终端',
+  appName: '长安汽车智能装配系统-终端',
   devices: {
     io: {
       enable: true

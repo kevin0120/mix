@@ -88,33 +88,72 @@ export class ClsOrderOperationPoints {
       const groupSeq = group.groupSequence;
       const inactivePoints = group.newResult(r);
       newInactivePoints = newInactivePoints.concat(inactivePoints);
-      if (!group.isKeyPass) {
-        return;
-      }
-      const gSeq = Math.min(
-        ...Object.keys(this._groups)
-          .map(s => parseInt(s, 10))
-          .filter(s => s > groupSeq)
-      );
-      const nextGroup = this._groups[gSeq];
-      if (!nextGroup) {
-        return;
-      }
-      nextGroup.setActive(true);
-      newActivePoints = newActivePoints.concat(nextGroup.points);
+      // if (!group.isKeyPass) {
+      //   return;
+      // }
+      // const gSeq = Math.min(
+      //   ...Object.keys(this._groups)
+      //     .map(s => parseInt(s, 10))
+      //     .filter(s => s > groupSeq)
+      // );
+      // const nextGroup = this._groups[gSeq];
+      // if (!nextGroup) {
+      //   return;
+      // }
+      // nextGroup.setActive(true);
+      // newActivePoints = newActivePoints.concat(nextGroup.points);
     });
 
     return {
-      active: newActivePoints,
+      // active: newActivePoints,
       inactive: newInactivePoints
     };
   }
 
   start(): Array<ClsOperationPoint> {
-    const groupSeqs = Object.keys(this._groups).map(s => parseInt(s, 10));
-    const firstGroupSeq = Math.min(...groupSeqs);
-    this._groups[firstGroupSeq].setActive(true);
-    return this._groups[firstGroupSeq].points;
+    // 开始可被最先开始的的组，并返回所有被开始的点
+    return this.nextActiveGroups().reduce((activatedPoints, g) => {
+      const points = g.start();
+      console.warn('points', points);
+      return activatedPoints.concat(points);
+    }, []);
+  }
+
+  stop() {
+    Object.values(this._groups).forEach(g => {
+      g.setActive(false);
+    });
+  }
+
+  nextActiveGroups(seq) {
+    // 下一步可工作的组，即之前所有组都完成的组
+    const groups = [];
+    const sortedSeqs = Object.keys(this._groups).map(s => parseInt(s, 10))
+      .sort((s1, s2) => s1 - s2);
+    // eslint-disable-next-line no-restricted-syntax
+    for (const s of sortedSeqs) {
+      if (seq && s <= seq) {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+      const group = this._groups[s];
+      if (!group.isAllPass) {
+        groups.push(this._groups[s]);
+      }
+      if (!group.isKeyPass) {
+        break;
+      }
+    }
+    console.warn('groups', groups);
+    return groups;
+  }
+
+
+  nextGroupSequence(groupSequence) {
+    const sequencesAfter = Object.keys(this._groups)
+      .map(s => parseInt(s, 10))
+      .filter(s => s > groupSequence);
+    return Math.min(...sequencesAfter);
   }
 
   get points() {
@@ -128,7 +167,7 @@ export class ClsOrderOperationPoints {
   }
 
   get currentActivePoints(): Array<ClsOperationPoint> {
-    return this.points.filter((p: ClsOperationPoint) => p.isActive) || []
+    return this.points.filter((p: ClsOperationPoint) => p.isActive) || [];
   }
 
   getGroupByPointSequence(seq: number): ?ClsOperationPointGroup {

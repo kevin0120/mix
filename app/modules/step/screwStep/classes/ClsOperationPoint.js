@@ -22,6 +22,14 @@ export class ClsOperationPoint {
     this._results = [];
   }
 
+  start() {
+    if (!this._isActive) {
+      this.setActive(true);
+      return this;
+    }
+    return null;
+  }
+
   toString(): string {
     return JSON.stringify(
       {

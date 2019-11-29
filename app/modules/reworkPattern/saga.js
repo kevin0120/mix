@@ -57,7 +57,11 @@ function* tryRework(action: tAction = {}): Saga<void> {
       yield put(dialogActions.dialogShow({
         buttons: [btnCancel, btnConfirm],
         title: tNS(trans.redoSpecScrewPointTitle, reworkNS),
-        content: `${tNS(trans.redoSpecScrewPointContent, reworkNS)} ${point?.sequence || ''}`
+        content: `${tNS(trans.redoSpecScrewPointContent, reworkNS)} ${JSON.stringify(
+          {
+            Bolt: point.nut_no,
+            Sequence: point.sequence
+          })}`
       }));
     } else {
       yield put(actions.cancelRework());
@@ -74,23 +78,24 @@ function* tryRework(action: tAction = {}): Saga<void> {
   }
 }
 
-function* doRework(action = {}) {
+function* doRework(action = {}): Saga<void> {
   try {
     const { order, step, point } = action;
     console.log(order, step, point);
-    CommonLog.Debug(`Now Try To Rework Tightening Point: ${point.toString()}`);
+    CommonLog.Debug(`Now Try To Rework Tightening Point: ${JSON.stringify(
+      {
+        Bolt: point.nut_no,
+        Sequence: point.sequence
+      })}`);
     yield put(orderActions.workOn(order, {
       step,
       reworkConfig: {
         point
       }
     })); // 将工单切换到工作状态。
-    // yield call([step, doPoint], [point], false, orderActions);
   } catch (e) {
     CommonLog.lError(e);
   }
-
-
 }
 
 

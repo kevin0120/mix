@@ -48,14 +48,14 @@ const toolHandlers = {
               ti: 1,
               mi: 1,
               wi: 1,
-              result: dResult, // result
+              result: 'ok', // result
               batch: `${sequence}/${total}`
             }
           ]
         },
         events.result
       );
-    }, 1000);
+    }, 3000);
   }
 };
 

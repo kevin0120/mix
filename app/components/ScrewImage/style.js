@@ -60,7 +60,7 @@ export default {
       background: `${theme.palette.danger.main}`
     },
     selected: {
-      background: '#03a9f4 !important'
+      backgroundColor: '#03a9f4 !important'
     }
   })
 };
