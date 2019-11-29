@@ -64,9 +64,10 @@ export const orderActions = Object.freeze({
     type: ORDER.TRY_WORK_ON,
     code
   }),
-  workOn: (order: IOrder): tActOrderTrigger => ({
+  workOn: (order: IOrder, config): tActOrderTrigger => ({
     type: ORDER.WORK_ON,
-    order
+    order,
+    config
   }),
   finishOrder: (order: IOrder): tActOrderTrigger => ({
     type: ORDER.FINISH,
@@ -95,11 +96,11 @@ export const orderActions = Object.freeze({
     type: ORDER.STEP.JUMP_TO,
     stepId
   }),
-  stepStatus: (step: IWorkable, status: tAnyStatus, msg: string = '') => ({
+  stepStatus: (step: IWorkable, status: tAnyStatus, config) => ({
     type: ORDER.STEP.STATUS,
     step,
     status,
-    msg
+    config
   }),
   doPreviousStep: () => ({
     type: ORDER.STEP.DO_PREVIOUS

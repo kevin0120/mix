@@ -10,7 +10,7 @@ export default {
       position: 'relative',
       padding: 'auto',
       objectFit: 'contain',
-      backgroundColor:'inherit'
+      backgroundColor: 'inherit'
     },
     image: {
       maxHeight: '100%',
@@ -18,11 +18,11 @@ export default {
       textAlign: 'center',
       objectFit: 'contain',
       resize: 'both',
-      margin:0
+      margin: 0
       // flex: 1
-    },
+    }
   },
-  point: (circleRadius,scale)=>theme=>({
+  point: (circleRadius, scale) => theme => ({
     root: {
       display: 'block',
       width: `${circleRadius * 2}px`,
@@ -32,7 +32,7 @@ export default {
       lineHeight: `${circleRadius * 2}px`,
       fontSize: `${(circleRadius - 10) * 2}px`,
       overflow: 'hidden',
-      transform:`scale(${scale},${scale})`
+      transform: `scale(${scale},${scale})`
     },
     active: {
       animation: '$activeRipple 1s infinite cubic-bezier(1, 1, 1, 1)'
@@ -59,8 +59,8 @@ export default {
     error: {
       background: `${theme.palette.danger.main}`
     },
-    rework: {
-      background: `${theme.palette.secondary.main}`
+    selected: {
+      background: '#03a9f4 !important'
     }
   })
 };

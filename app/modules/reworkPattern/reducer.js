@@ -1,12 +1,12 @@
-import { WORKCENTER_MODE } from './constants';
-import type { tWorkCenterMode, tAction } from './interface/typeDef';
-import { translation as trans } from '../../components/NavBar/local';
+import { REWORK_PATTERN } from './constants';
+import type {  tAction } from './interface/typeDef';
+
+const initState = {
+  selectPoints: []
+};
 
 
-const initState: tWorkCenterMode = trans.normWorkCenterMode;
-
-
-export default function(state: tWorkCenterMode = initState, action: tAction): tWorkCenterMode {
+export default function(state = initState, action: tAction) {
   if (reducers[(action?.type)]) {
     return reducers[(action?.type)](state, action);
   }
@@ -14,7 +14,17 @@ export default function(state: tWorkCenterMode = initState, action: tAction): tW
 }
 
 const reducers = {
-  [WORKCENTER_MODE.SWITCH_VALID]: (state: tWorkCenterMode, action: tAction) => (
-    action.mode
-  )
+  [REWORK_PATTERN.SPEC_SCREW]: (state, action: tAction) => {
+    if (!action.point) {
+      return state;
+    }
+    return {
+      ...state,
+      selectPoints: [action.point]
+    };
+  },
+  [REWORK_PATTERN.CANCEL_REWORK]:(state: tWorkCenterMode, action: tAction)=>({
+    ...state,
+    selectPoints: []
+  })
 };

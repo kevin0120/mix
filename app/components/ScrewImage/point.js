@@ -26,29 +26,27 @@ type Props = {
   scale?: number
 };
 
-function Point({ twinkle, x, y, status, label, scale, reworkModiBGColor, onClick, ...restProps }: Props) {
+
+function Point({ twinkle, x, y, status, label, scale, reworkModiBGColor, onClick, selected, ...restProps }: Props) {
   const classes = makeStyles(styles.point(pointRadius, scale))();
-  
-  const [color, setColor] = useState({});
+
   return <div
     className={clsx(
       classes.root, {
         [classes.waiting]: isStatus.waiting(status),
         [classes.success]: isStatus.success(status),
         [classes.error]: isStatus.error(status),
-        [classes.active]: twinkle || false
+        [classes.active]: twinkle || false,
+        [classes.selected]: selected
       })}
     style={{
-      ...color,
       position: 'absolute',
       left: `calc(${x}% - ${pointRadius}px)`,
       top: `calc(${y}% - ${pointRadius}px)`
     }}
     onClick={(e) => {
       if (onClick) {
-        if (onClick(e) && reworkModiBGColor){
-          setColor(classes.rework);
-        }
+        onClick(e)
       }
     }}
     {...(restProps: any)}

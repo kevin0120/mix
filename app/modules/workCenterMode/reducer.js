@@ -1,9 +1,8 @@
-import { WORKCENTER_MODE } from './constants';
+import { WORKCENTER_MODE, workModes } from './constants';
 import type { tWorkCenterMode, tAction } from './interface/typeDef';
-import { translation as trans } from '../../components/NavBar/local';
 
 
-const initState: tWorkCenterMode = trans.normWorkCenterMode;
+const initState: tWorkCenterMode = workModes.normWorkCenterMode;
 
 
 export default function(state: tWorkCenterMode = initState, action: tAction): tWorkCenterMode {

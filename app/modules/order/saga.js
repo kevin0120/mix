@@ -37,13 +37,14 @@ import type { IWorkStep } from '../step/interface/IWorkStep';
 import type { IOrder } from './interface/IOrder';
 import notifierActions from '../Notifier/action';
 import { bindNewDeviceListener } from '../deviceManager/handlerWSData';
-import {sGetWorkCenterMode} from '../workCenterMode/selector';
+import { sGetWorkCenterMode } from '../workCenterMode/selector';
 import { translation as trans } from '../../components/NavBar/local';
-import type {tWorkCenterMode} from  '../workCenterMode/interface/typeDef'
+import type { tWorkCenterMode } from '../workCenterMode/interface/typeDef';
 
 import ClsScanner from '../device/scanner/ClsScanner';
 import type { tAnyStatus } from '../step/interface/typeDef';
 import type { IWorkable } from '../workable/IWorkable';
+import reworkActions from '../reworkPattern/action';
 
 export default function* root(): Saga<void> {
   try {
@@ -67,9 +68,9 @@ export default function* root(): Saga<void> {
 }
 
 function* setStepStatus({
-  step,
-  status
-}: {
+                          step,
+                          status
+                        }: {
   step: IWorkable,
   status: tAnyStatus
 }) {
@@ -110,13 +111,13 @@ function onNewScanner({ scanner }) {
 }
 
 function* reportFinish({
-  code,
-  trackCode,
-  productCode,
-  workCenterCode,
-  dateComplete,
-  operation
-}) {
+                         code,
+                         trackCode,
+                         productCode,
+                         workCenterCode,
+                         dateComplete,
+                         operation
+                       }) {
   try {
     yield call(
       orderReportFinishApi,
@@ -145,24 +146,25 @@ function* watchOrderTrigger() {
 }
 
 function* tryWorkOnOrder({
-  order,
-  code
-}: {
+                           order,
+                           code
+                         }: {
   order: IOrder,
   code: string | number
 }) {
   try {
-    const orderState = yield select(s => s.order);
-    const workCenterMode: tWorkCenterMode = yield select(s => sGetWorkCenterMode(s));
-    if (workCenterMode === trans.reworkWorkCenterMode && !order.hasFailWorkStep()) {
-      // 在返工模式下，但此工单并没有失败的工步
-      yield put(notifierActions.enqueueSnackbar('Error', '当前工单没有可返工的工步'));
-      return;
-    }
+
     let orderToDo = null;
     if (order) {
       orderToDo = order;
     }
+    const workCenterMode: tWorkCenterMode = yield select(s => sGetWorkCenterMode(s));
+    if (workCenterMode === trans.reworkWorkCenterMode) {
+      // go to rework when in rework mode
+      yield put(reworkActions.tryRework(orderToDo));
+      return;
+    }
+    const orderState = yield select(s => s.order);
     if (code) {
       const { list: orderList } = orderState;
       orderToDo = orderList.find(o => o.code === code);
@@ -170,7 +172,6 @@ function* tryWorkOnOrder({
     if (!orderToDo) {
       return;
     }
-
     let canWorkOnOrder = true;
     if (workingOrder(orderState)) {
       canWorkOnOrder = false;
@@ -183,16 +184,11 @@ function* tryWorkOnOrder({
   }
 }
 
-function* workOnOrder({ order }: { order: IOrder }) {
+function* workOnOrder({ order, config }: { order: IOrder }) {
   try {
-    const workCenterMode: tWorkCenterMode = yield select(s => sGetWorkCenterMode(s));
-    if (workCenterMode === trans.reworkWorkCenterMode && !order.hasFailWorkStep()) {
-      // 在返工模式下，但此工单并没有失败的工步
-      yield put(notifierActions.enqueueSnackbar('Error', '当前工单没有可返工的工步'));
-      return;
-    }
+
     yield race([
-      call(order.run, ORDER_STATUS.TODO),
+      call(order.run, ORDER_STATUS.TODO, config),
       take(a => a.type === ORDER.FINISH && a.order === order)
     ]);
     yield put(orderActions.orderDidFinish());
@@ -218,6 +214,7 @@ function* DebounceViewStep(d, action: tCommonActionType) {
     CommonLog.lError(e);
   }
 }
+
 // TODO: auto set wip order working
 function* getOrderDetail({ order }) {
   try {
@@ -253,9 +250,9 @@ function* getOrderList() {
 }
 
 function* tryViewOrder({
-  order: orderRec,
-  code
-}: {
+                         order: orderRec,
+                         code
+                       }: {
   order: IOrder,
   code: string | number
 }) {
@@ -325,11 +322,11 @@ function* viewOrder({ order }: { order: IOrder }) {
             color: 'warning'
           },
           !WIPOrder &&
-            doable(order) && {
-              label: 'Order.Start',
-              color: 'info',
-              action: orderActions.tryWorkOn(order)
-            }
+          doable(order) && {
+            label: 'Order.Start',
+            color: 'info',
+            action: orderActions.tryWorkOn(order)
+          }
         ],
         title: i18n.t('Order.Overview'),
         content: (

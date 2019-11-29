@@ -126,7 +126,7 @@ export class ClsOrderOperationPoints {
     });
     return points;
   }
-  
+
   get currentActivePoints(): Array<ClsOperationPoint> {
     return this.points.filter((p: ClsOperationPoint) => p.isActive) || []
   }

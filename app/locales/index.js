@@ -1,12 +1,12 @@
 import i18n from '../i18n';
 import stepWorking from '../containers/stepWorking/local';
 import navBar from '../components/NavBar/local';
-import screwStep from '../containers/steps/screwStep/local';
+import rework from '../modules/reworkPattern/local';
 
 
 
 const trans = [
-  ...screwStep,
+  ...rework,
   ...stepWorking,
   ...navBar
 ];

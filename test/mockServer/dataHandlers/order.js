@@ -1,6 +1,7 @@
 const { events } = require('../constants');
 const { demoOrder, demoOrderJson } = require('../demo/demoOrder');
 const orderDetailData = require('../demo/orderDetailData.json');
+const failOrder = require('../demo/failOrder.json');
 
 const orderTypes = Object.freeze({
   LIST: 'WS_ORDER_LIST',
@@ -92,7 +93,7 @@ const orderHandlers = {
       {
         sn: data.sn,
         type: orderTypes.DETAIL,
-        data: orderDetailData
+        data: failOrder
       },
       events.order
     );

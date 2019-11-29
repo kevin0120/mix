@@ -87,23 +87,23 @@ export default class Workable implements IWorkable {
     this._status = status || this._status;
     this._steps = steps
       ? ((steps: any): Array<tStep>).map<IWorkable>((sD: tStep) => {
-          const existStep = this._steps.find(s => s.code === sD.code);
-          if (existStep) {
-            existStep.update(((sD: any): tWorkableData));
-            return existStep;
-          }
-          const stepType: ?tStepType = (sD: tStep).test_type;
-          if (
-            !stepType ||
-            !stepTypes[stepType] ||
-            typeof stepTypes[stepType] !== 'function'
-          ) {
-            return new Workable(((sD: any): tWorkableData));
-          }
-          return new (stepTypes[stepType](Workable))(
-            ((sD: any): tWorkableData)
-          );
-        }) || []
+      const existStep = this._steps.find(s => s.code === sD.code);
+      if (existStep) {
+        existStep.update(((sD: any): tWorkableData));
+        return existStep;
+      }
+      const stepType: ?tStepType = (sD: tStep).test_type;
+      if (
+        !stepType ||
+        !stepTypes[stepType] ||
+        typeof stepTypes[stepType] !== 'function'
+      ) {
+        return new Workable(((sD: any): tWorkableData));
+      }
+      return new (stepTypes[stepType](Workable))(
+        ((sD: any): tWorkableData)
+      );
+    }) || []
       : this._steps;
     if (data) {
       this._data = (() => {
@@ -127,8 +127,8 @@ export default class Workable implements IWorkable {
 
   timeCost(): number {
     return ((this._times || []).length % 2 === 0
-      ? this._times || []
-      : [...this._times, new Date()]
+        ? this._times || []
+        : [...this._times, new Date()]
     ).reduce(
       (total, currentTime, idx) =>
         idx % 2 === 0 ? total - currentTime : total - (0 - currentTime),
@@ -170,7 +170,7 @@ export default class Workable implements IWorkable {
     }
   }
 
-  *updateData(dataReducer: Function): Saga<void> {
+  * updateData(dataReducer: Function): Saga<void> {
     try {
       this._data = dataReducer(this._data);
       yield put(orderActions.updateState());
@@ -181,7 +181,7 @@ export default class Workable implements IWorkable {
     }
   }
 
-  *updateStatus({ status }: { status: tAnyStatus }): Saga<void> {
+  * updateStatus({ status }: { status: tAnyStatus }): Saga<void> {
     const validStatus = Object.keys(this._statusTasks || {});
     if (validStatus.includes(status)) {
       this._status = status;
@@ -198,7 +198,7 @@ export default class Workable implements IWorkable {
     }
   }
 
-  *_runStatusTask({ status, msg }) {
+  * _runStatusTask({ status, config }) {
     try {
       if (this._runningStatusTask) {
         yield cancel(this._runningStatusTask);
@@ -208,13 +208,13 @@ export default class Workable implements IWorkable {
         throw new Error(`trying to run invalid status ${status}`);
       }
       const taskToRun = this._statusTasks[status].bind(this);
-      this._runningStatusTask = yield fork(taskToRun, ORDER, orderActions, msg);
+      this._runningStatusTask = yield fork(taskToRun, ORDER, orderActions, config);
     } catch (e) {
       CommonLog.lError(e);
     }
   }
 
-  *run(status: tAnyStatus): Saga<void> {
+  * run(status: tAnyStatus, config): Saga<void> {
     let statusToRun = status;
     if (!statusToRun) {
       statusToRun = this._status;
@@ -230,7 +230,10 @@ export default class Workable implements IWorkable {
             a => a.type === ORDER.STEP.STATUS && a.step === this
           );
           // yield fork(updateStatus, action);
-          yield fork(runStatusTask, action);
+          yield fork(runStatusTask, {
+            status: action.status,
+            config
+          });
         }
       } catch (e) {
         CommonLog.lError(e, {
@@ -257,14 +260,15 @@ export default class Workable implements IWorkable {
     }
   }
 
-  *runSubStep(
+  * runSubStep(
     step: IWorkable,
     callbacks: tRunSubStepCallbacks,
-    status: tAnyStatus
+    status: tAnyStatus,
+    config
   ): Saga<void> {
     try {
       const { exit, next, previous } = yield race({
-        exit: call([step, step.run], status),
+        exit: call([step, step.run], status, config),
         next: take(
           action => action.type === ORDER.STEP.FINISH && action.step === step
         ),
