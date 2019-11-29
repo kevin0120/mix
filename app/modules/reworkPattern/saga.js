@@ -93,6 +93,7 @@ function* doRework(action = {}): Saga<void> {
         point
       }
     })); // 将工单切换到工作状态。
+    yield put(actions.cancelRework());
   } catch (e) {
     CommonLog.lError(e);
   }

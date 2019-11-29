@@ -292,10 +292,14 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
           let redoPointClsObj = null;
           if (workCenterMode === workModes.reworkWorkCenterMode) {
             const { point } = reworkConfig;
-            redoPointClsObj = this.points.find(p => p.sequence === point.sequence);
+            if (point) {
+              redoPointClsObj = this.points.find(p => p.sequence === point.sequence);
+            } else {
+              redoPointClsObj = this.points.find(p => p.canRedo);
+            }
             console.warn('rework step with point', redoPointClsObj);
             if (redoPointClsObj) {
-              this._pointsToActive = [redoPointClsObj];
+              this._pointsToActive = [redoPointClsObj.start()];
             }
           } else {
             if (!this._pointsManager) {
@@ -340,8 +344,8 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
             yield call([this, byPassPoint], finalFailPoints, orderActions);
 
             if (workCenterMode === workModes.reworkWorkCenterMode) {
-
               if (redoPointClsObj && redoPointClsObj.isSuccess) {
+                const canRedoPoints = this.points(p => p.);
                 yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
               }
             } else {

@@ -33,7 +33,6 @@ const orderHandlers = {
             workcenter: 'workcenter',
             date_planned_start: '2019-10-16T03:20:30Z',
             date_planned_complete: 'date_planned_complete',
-            product_type_image: 'this is an image',
             status: 'fail'
           },
           {

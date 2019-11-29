@@ -155,6 +155,7 @@ export class ClsOrderOperationPoints {
       .filter(s => s > groupSequence);
     return Math.min(...sequencesAfter);
   }
+  
 
   get points() {
     // eslint-disable-next-line radix
