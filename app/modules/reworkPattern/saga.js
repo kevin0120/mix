@@ -54,14 +54,17 @@ function* tryRework(action: tAction = {}): Saga<void> {
         color: 'warning',
         action: actions.cancelRework()
       };
+      const title = point ? tNS(trans.redoSpecScrewPointTitle, reworkNS) :
+        tNS(trans.redoSpecScrewPointTitleNoPoint, reworkNS);
+      const content = point ? `${tNS(trans.redoSpecScrewPointContent, reworkNS)} ${JSON.stringify(
+        {
+          Bolt: point?.nut_no,
+          Sequence: point?.sequence
+        })}` : `${tNS(trans.redoSpecScrewPointContentNoPoint, reworkNS)}`;
       yield put(dialogActions.dialogShow({
         buttons: [btnCancel, btnConfirm],
-        title: tNS(trans.redoSpecScrewPointTitle, reworkNS),
-        content: `${tNS(trans.redoSpecScrewPointContent, reworkNS)} ${JSON.stringify(
-          {
-            Bolt: point.nut_no,
-            Sequence: point.sequence
-          })}`
+        title,
+        content
       }));
     } else {
       yield put(actions.cancelRework());
@@ -73,7 +76,7 @@ function* tryRework(action: tAction = {}): Saga<void> {
     //   yield put(notifierActions.enqueueSnackbar('Error', '当前工位有正在执行的工单,不能切换工单模式'));
     // }
   } catch (e) {
-    CommonLog.lError(`onSwitchWorkCenterMode Error: ${e.toString()}`);
+    CommonLog.lError(`tryRework Error: ${e.toString()}`);
     yield put(actions.cancelRework());
   }
 }
@@ -82,11 +85,11 @@ function* doRework(action = {}): Saga<void> {
   try {
     const { order, step, point } = action;
     console.log(order, step, point);
-    CommonLog.Debug(`Now Try To Rework Tightening Point: ${JSON.stringify(
+    CommonLog.Debug(`Now Try To Rework Tightening Point: ${point ? JSON.stringify(
       {
         Bolt: point.nut_no,
         Sequence: point.sequence
-      })}`);
+      }) : 'no point'}`);
     yield put(orderActions.workOn(order, {
       step,
       reworkConfig: {

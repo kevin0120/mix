@@ -18,7 +18,9 @@ export const redoPointConstants = {
   confirm: 'confirm',
   cancel: 'cancel',
   redoSpecScrewPointTitle: 'redoSpecScrewPointTitle',
-  redoSpecScrewPointContent: 'redoSpecScrewPointContent'
+  redoSpecScrewPointTitleNoPoint: 'redoSpecScrewPointTitleNoPoint',
+  redoSpecScrewPointContent: 'redoSpecScrewPointContent',
+  redoSpecScrewPointContentNoPoint: 'redoSpecScrewPointContentNoPoint'
 };
 
 export const reworkNS = 'reworkPattern';

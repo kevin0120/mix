@@ -345,7 +345,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
             if (workCenterMode === workModes.reworkWorkCenterMode) {
               if (redoPointClsObj && redoPointClsObj.isSuccess) {
-                const canRedoPoints = this.points(p => p.);
+                const canRedoPoints = this.points.find(p => p.canRedo);
                 yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
               }
             } else {
