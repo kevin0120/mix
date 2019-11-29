@@ -94,7 +94,9 @@ const orderReducer: {
   [ORDER.STEP.FINISH](state, { step }) {
     const wOrder: ?IOrder = workingOrder(state);
     const newIndex = workingIndex(wOrder) + 1;
-    const vIndex = step === viewingStep(state) ? newIndex : viewingIndex(state);
+    const vIndex = limitIndex(viewingOrder(state),
+      step === viewingStep(state) ? newIndex : viewingIndex(state)
+    );
     return {
       ...state,
       viewingIndex: vIndex
