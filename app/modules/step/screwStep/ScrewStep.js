@@ -345,21 +345,23 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 );
               })
             )));
-            const finalFailPoints = inactive.filter(
-              (p: ClsOperationPoint) => p.isFinalFail
-            );
-            yield call([this, byPassPoint], finalFailPoints, orderActions);
 
             if (workCenterMode === workModes.reworkWorkCenterMode) {
-              if (redoPointClsObj && redoPointClsObj.isSuccess) {
-                const canRedoPoint = this.points.find(p => p.canRedo);
-                if (!canRedoPoint) {
-                  yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
-                } else {
-                  yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL)); // 失败退出
-                }
+              const canRedoPoint = this.points.find(p => p.canRedo);
+              const success = redoPointClsObj
+                && redoPointClsObj.isSuccess
+                && !canRedoPoint;
+              if (success) {
+                yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
+              } else {
+                yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL)); // 失败退出
               }
             } else {
+              const finalFailPoints = inactive.filter(
+                (p: ClsOperationPoint) => p.isFinalFail
+              );
+              yield call([this, byPassPoint], finalFailPoints, orderActions);
+
               this._pointsToActive = this._pointsManager.start();
               if (
                 this._pointsManager.isFailed &&

@@ -281,6 +281,10 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
 
             } else {
               yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
+              if (this._steps.some(s => s.status === STEP_STATUS.FAIL)) {
+                yield put(orderActions.stepStatus(this, ORDER_STATUS.FAIL));
+
+              }
             }
           }
         } catch (e) {
@@ -360,6 +364,16 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           // yield put(orderActions.stepStatus(this, ORDER_STATUS.PENDING));
         } finally {
           CommonLog.Info('order done');
+        }
+      },
+      * [ORDER_STATUS.FAIL](ORDER, orderActions) {
+        try {
+
+          yield put(orderActions.finishOrder(this));
+        } catch (e) {
+          CommonLog.lError(e, {
+            at: 'ORDER_STATUS.PENDING'
+          });
         }
       },
       * [ORDER_STATUS.PENDING](ORDER, orderActions) {

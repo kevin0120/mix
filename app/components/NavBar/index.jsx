@@ -104,20 +104,20 @@ function ConnectedNavBar(
     updateHealthz,
     switchWorkCenterMode
   }: Props) {
-  
-  
+
+
   const [healthOK, setHealthOK] = useState(false);
-  
+
   useEffect(() => {
     const HealthCheckOk = (): boolean => (!Object.keys(healthCheckResults).some(r => !healthCheckResults[r]));
     setHealthOK(HealthCheckOk());
   }, [healthCheckResults]);
-  
+
   const [showSwitchWorkCenterModeDiag, setShowSwitchWorkCenterModeDiag] = useState(false);
-  
+
   // const [workCenterMode, setWorkCenterMode] = useState(trans.normWorkCenterMode); // 将其翻译直接作为工作模式
-  
-  
+
+
   const renderSysInfoMenu = (key) =>
     <NavBarMenu
       key={key}
@@ -125,7 +125,7 @@ function ConnectedNavBar(
       title="系统"
       contents={<SysInfo/>}
     />;
-  
+
   const renderHealthCheckMenu = (key) =>
     <NavBarMenu
       key={key}
@@ -135,14 +135,14 @@ function ConnectedNavBar(
     >
       <HealthCheck status={healthCheckResults}/>
     </NavBarMenu>;
-  
+
   const renderLanguageMenu = (key) =>
     <LanguageMenu
       key={key}
       disabled={disabled}
     />;
-  
-  
+
+
   const pagesClasses = makeStyles(styles.pages)();
   const renderPageEntrance = (key) =>
     <PageEntrance
@@ -163,8 +163,8 @@ function ConnectedNavBar(
       navigationClassName={pagesClasses.BottomNavigation}
       ActionClassName={pagesClasses.BottomNavigationIcon}
     />;
-  
-  
+
+
   const clockClasses = makeStyles(styles.clock)();
   const renderClock = (key) =>
     <div key={key} className={clockClasses.menuClock}>
@@ -175,8 +175,8 @@ function ConnectedNavBar(
         timezone="Asia/Shanghai"
       />
     </div>;
-  
-  
+
+
   const avatarClasses = makeStyles(styles.avatar)();
   const renderAvatar = (key) => <Avatar
     key={key}
@@ -184,15 +184,14 @@ function ConnectedNavBar(
     users={users}
     onClickAvatar={logout}
   />;
-  
+
   const switchWorkCenterModeClasses = makeStyles(styles.switchWorkCenterButton)();
-  
+
   const renderWorkCenterModeToggleButton = (key) =>
     withI18n(
       t => (
-        <div>
+        <React.Fragment>
           <Button
-            key={key}
             type="button"
             onClick={() => {
               setShowSwitchWorkCenterModeDiag(!showSwitchWorkCenterModeDiag);
@@ -226,21 +225,21 @@ function ConnectedNavBar(
             }}
             confirmBtnCssClass={`${switchWorkCenterModeClasses.button} ${
               switchWorkCenterModeClasses.success
-              } ${switchWorkCenterModeClasses.buttonTxt}`}
+            } ${switchWorkCenterModeClasses.buttonTxt}`}
             cancelBtnCssClass={`${switchWorkCenterModeClasses.button} ${
               switchWorkCenterModeClasses.danger
-              } ${switchWorkCenterModeClasses.buttonTxt}`}
+            } ${switchWorkCenterModeClasses.buttonTxt}`}
             confirmBtnText={t(trans.confirm)}
             cancelBtnText={t(trans.cancel)}
             showCancel
           >
             {`${t(trans.switchWorkCenterModeContent)} ${t(workCenterMode)}`}
           </Alert>
-        </div>
+        </React.Fragment>
       ),
-      navBarNs);
-  
-  
+      navBarNs, { key });
+
+
   const renderContentsMapping = {
     sysInfo: renderSysInfoMenu,
     healthCheck: renderHealthCheckMenu,
@@ -250,7 +249,7 @@ function ConnectedNavBar(
     avatar: renderAvatar,
     switchWorkCenterButton: renderWorkCenterModeToggleButton
   };
-  
+
   const classes = makeStyles(styles.root)();
   return (
     <AppBar className={classes.appBar}>

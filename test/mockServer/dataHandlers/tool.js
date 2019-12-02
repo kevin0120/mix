@@ -48,7 +48,7 @@ const toolHandlers = {
               ti: 1,
               mi: 1,
               wi: 1,
-              result: 'ok', // result
+              result: dResult, // result
               batch: `${sequence}/${total}`
             }
           ]
