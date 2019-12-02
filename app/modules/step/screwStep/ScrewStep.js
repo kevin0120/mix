@@ -175,6 +175,13 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
     * _onLeave() {
       try {
+        yield call(
+          this.updateData,
+          (data: tScrewStepData): tScrewStepData => ({
+            ...data,
+            tightening_points: this._pointsManager.points.map(p => p.data)
+          })
+        );
         yield call(stepDataApi, this.id, this._data);
         yield all(
           this._tools.map(t => (t.isEnable ? call(t.Disable) : call(() => {
@@ -345,12 +352,12 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
             if (workCenterMode === workModes.reworkWorkCenterMode) {
               if (redoPointClsObj && redoPointClsObj.isSuccess) {
-                const canRedoPoint = this.points.find(p => p.canRedo);
-                if (!canRedoPoint) {
-                  yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
-                } else {
-                  this._pointsToActive = [canRedoPoint.start()];
-                }
+                // const canRedoPoint = this.points.find(p => p.canRedo);
+                // if (!canRedoPoint) {
+                yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
+                // } else {
+                //   this._pointsToActive = [canRedoPoint.start()];
+                // }
               }
             } else {
               this._pointsToActive = this._pointsManager.start();
