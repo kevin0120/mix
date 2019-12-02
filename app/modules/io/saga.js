@@ -18,14 +18,7 @@ const ioFunctions = {};
 
 export default function* root(): Saga<void> {
   try {
-    defaultIOModule = newDevice(
-      deviceType.io,
-      'defaultIO',
-      'defaultIO',
-      { input_num: 8, output_num: 8 },
-      {},
-      []
-    );
+    yield call(initIO);
     yield put(ioActions.setModule(defaultIOModule));
     yield takeEvery(IO.SET, setIOOutput);
     yield takeEvery(IO.ADD_LISTENER, bindIOListeners);
@@ -34,6 +27,22 @@ export default function* root(): Saga<void> {
     yield takeEvery(IO.TEST, testPort);
   } catch (e) {
     CommonLog.lError(e);
+  }
+}
+
+function* initIO() {
+  try {
+    defaultIOModule = newDevice(
+      deviceType.io,
+      'defaultIO',
+      'defaultIO',
+      { input_num: 8, output_num: 8 },
+      {},
+      []
+    );
+    // TODO set init io status
+  } catch (e) {
+    console.error(e);
   }
 }
 
@@ -46,34 +55,43 @@ function* setPortsConfig(action) {
     const { [ioDirection.input]: inputs } = ioPorts;
     const { [ioDirection.output]: outputs } = ioPorts;
 
-    const { ioPorts: prevIoPorts } = yield select();
+    const { ioPorts: prevIoPorts } = yield select(s => s.io);
     eSetting.set('devices.io.inputs', inputs);
     eSetting.set('devices.io.inputs', outputs);
     yield put(ioActions.portsConfigChange(ioPorts));
 
-    const { inputs: prevInputs, outputs: prevOutputs } = prevIoPorts;
+    const {
+      [ioDirection.input]: prevInputs,
+      [ioDirection.output]: prevOutputs
+    } = prevIoPorts || {};
     const effects = [];
-    Object.keys(prevInputs).forEach((k) => {
-      if (prevInputs[k] !== inputs[k]) {
-        effects.push(put(ioActions.removeListener(k)));
-      }
-    });
-    Object.keys(inputs).forEach((k) => {
-      if (prevInputs[k] !== inputs[k]) {
-        effects.push(put(ioActions.addListener(k, ioFunctions[k])));
-      }
-    });
+    console.log(prevInputs, prevOutputs, inputs, outputs);
+    if (prevInputs) {
+      Object.keys(prevInputs).forEach((k) => {
+        if (prevInputs[k] !== inputs[k]) {
+          effects.push(put(ioActions.removeListener(k)));
+        }
+      });
+      Object.keys(inputs).forEach((k) => {
+        if (prevInputs[k] !== inputs[k]) {
+          effects.push(put(ioActions.addListener(k, ioFunctions[k])));
+        }
+      });
+    }
+
     const { ioOutStatus } = yield select(s => s.io);
-    Object.keys(prevOutputs).forEach((k) => {
-      if (prevOutputs[k] !== outputs[k]) {
-        effects.push(put(ioActions.set(prevOutputs[k], ioOutStatus[prevOutputs[k]])));
-      }
-    });
-    Object.keys(outputs).forEach((k) => {
-      if (prevOutputs[k] !== outputs[k]) {
-        effects.push(put(ioActions.set(outputs[k], ioOutStatus[outputs[k]])));
-      }
-    });
+    if (prevOutputs) {
+      Object.keys(prevOutputs).forEach((k) => {
+        if (prevOutputs[k] !== outputs[k]) {
+          effects.push(put(ioActions.set(prevOutputs[k], ioOutStatus[prevOutputs[k]])));
+        }
+      });
+      Object.keys(outputs).forEach((k) => {
+        if (prevOutputs[k] !== outputs[k]) {
+          effects.push(put(ioActions.set(outputs[k], ioOutStatus[outputs[k]])));
+        }
+      });
+    }
 
     yield all(effects);
   } catch (e) {
@@ -108,6 +126,7 @@ function removeIOListener(action) {
       defaultIOModule.removeListener(listeners[inputType]);
       delete listeners[inputType];
     }
+    console.log(listeners);
   } catch (e) {
     CommonLog.lError(e);
   }
@@ -133,6 +152,7 @@ function* bindIOListeners(action) {
         port === input.port && ioTriggerMode.falling === input.triggerMode,
       act
     );
+    console.log(listeners);
   } catch (e) {
     CommonLog.lError(e);
   }

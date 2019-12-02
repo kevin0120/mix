@@ -15,7 +15,7 @@ export default {
     inputType, action
   }),
   removeListener: (inputType) => ({
-    type: IO.ADD_LISTENER,
+    type: IO.REMOVE_LISTENER,
     inputType
   }),
   setPortsConfig: (ioPorts) => ({
