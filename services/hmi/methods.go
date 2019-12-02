@@ -1061,22 +1061,7 @@ func (m *Methods) getRoutingOpertions(ctx iris.Context) {
 		return
 	}
 
-	points := []RoutingOperationPoint{}
-	json.Unmarshal([]byte(ro.Points), &points)
-
-	rt_ro := RoutingOperation{}
-	rt_ro.Points = points
-	rt_ro.OperationID = ro.OperationID
-	rt_ro.Job = ro.Job
-	rt_ro.MaxOpTime = ro.MaxOpTime
-	rt_ro.Name = ro.Name
-	rt_ro.Img = ro.Img
-	rt_ro.ProductId = ro.ProductId
-	rt_ro.WorkcenterCode = ro.WorkcenterCode
-	rt_ro.VehicleTypeImg = ro.VehicleTypeImg
-	rt_ro.ProductType = ro.ProductType
-
-	body, _ := json.Marshal(rt_ro)
+	body, _ := json.Marshal(ro)
 	ctx.Header("content-type", "application/json")
 	ctx.Write(body)
 }

@@ -91,36 +91,10 @@ type CURObject struct {
 	OP   int    `json:"op"`
 }
 
-//type WSMsg struct {
-//	Type string      `json:"type"`
-//	Data interface{} `json:"data"`
-//}
-//
-//type WSRegist struct {
-//	Rush_SN string `json:"rush_sn"`
-//}
-
 type WSOpResult struct {
 	ResultID int64       `json:"result_id"`
 	Result   interface{} `json:"result"`
 	Port     string      `json:"port"`
-}
-
-type PSetDefine struct {
-	Strategy string  `json:"strategy"`
-	Mp       float64 `json:"M+"`
-	Mm       float64 `json:"M-"`
-	Ms       float64 `json:"MS"`
-	Ma       float64 `json:"MA"`
-	Wp       float64 `json:"W+"`
-	Wm       float64 `json:"W-"`
-	Wa       float64 `json:"WS"`
-}
-
-type ResultValue struct {
-	Mi float64 `json:"MI"`
-	Wi float64 `json:"WI"`
-	Ti float64 `json:"TI"`
 }
 
 type ResultPatch struct {
@@ -130,20 +104,6 @@ type ResultPatch struct {
 
 type ODOOStatus struct {
 	Status string `json:"status"`
-}
-
-type Step struct {
-	Name    string      `json:"name"`
-	Desc    string      `json:"desc"`
-	Type    string      `json:"type"`
-	Payload interface{} `json:"payload"`
-}
-
-type Workorder struct {
-	Name    string      `json:"name"`
-	Desc    string      `json:"desc"`
-	Steps   []Step      `json:"steps"`
-	Payload interface{} `json:"payload"`
 }
 
 type SystemStatus struct {

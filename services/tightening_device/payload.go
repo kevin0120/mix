@@ -8,6 +8,7 @@ import (
 
 const (
 	TIGHTENING_ERR_NOT_SUPPORTED = "Not Supported"
+	TIGHTENING_ERR_UNKNOWN       = "Error Unknown"
 )
 
 const (

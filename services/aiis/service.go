@@ -355,10 +355,10 @@ func (s *Service) putResult(body interface{}, url string, method string) error {
 
 func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error) {
 	aiisResult := AIISResult{}
-	resultValue := ResultValue{}
+	resultValue := tightening_device.ResultValue{}
 	json.Unmarshal([]byte(result.ResultValue), &resultValue)
 
-	psetDefine := PSetDefine{}
+	psetDefine := tightening_device.PSetDefine{}
 	json.Unmarshal([]byte(result.PSetDefine), &psetDefine)
 
 	dbWorkorder, err := s.DB.GetWorkorder(result.WorkorderID, true)

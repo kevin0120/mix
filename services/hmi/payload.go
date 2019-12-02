@@ -72,41 +72,10 @@ type JobManual struct {
 	CarType       string `json:"car_type"`
 	Vin           string `json:"vin"`
 	HmiSN         string `json:"hmi_sn"`
-	//ProductID     int64      `json:"product_id"`
-	//Points        []JobPoint `json:"points"`
-	//WorkcenterID  int64      `json:"workcenter_id"`
-	OperationID int64  `json:"operation_id"`
-	Skip        bool   `json:"skip"`
-	HasSet      bool   `json:"has_set"`
-	Mode        string `json:"mode"`
-}
-
-type JobPoint struct {
-	Seq                int     `json:"sequence"`
-	PSet               int     `json:"pset"`
-	X                  float64 `json:"offset_x"`
-	Y                  float64 `json:"offset_y"`
-	MaxRedoTimes       int     `json:"max_redo_times"`
-	GroupSeq           int     `json:"group_sequence"`
-	ConsuProductID     int64   `json:"consu_product_id"`
-	ToleranceMin       float64 `json:"tolerance_min"`
-	ToleranceMax       float64 `json:"tolerance_max"`
-	ToleranceMinDegree float64 `json:"tolerance_min_degree"`
-	ToleranceMaxDegree float64 `json:"tolerance_max_degree"`
-}
-
-type Point struct {
-	Seq          int     `json:"sequence"`
-	PSet         int     `json:"pset"`
-	X            float64 `json:"x"`
-	Y            float64 `json:"y"`
-	MaxRedoTimes int     `json:"maxRetryTimes"`
-	GroupSeq     int     `json:"group_sequence"`
-	ToolSN       string  `json:"toolSN"`
-}
-
-type ScrewPayload struct {
-	Points []Point
+	OperationID   int64  `json:"operation_id"`
+	Skip          bool   `json:"skip"`
+	HasSet        bool   `json:"has_set"`
+	Mode          string `json:"mode"`
 }
 
 type ControllerMode struct {
@@ -161,35 +130,6 @@ type NextWorkorder struct {
 type JobControl struct {
 	Controller_SN string `json:"controller_sn"`
 	Action        string `json:"action"`
-}
-
-type RoutingOperationPoint struct {
-	Seq                int     `json:"sequence"`
-	MaxRedoTimes       int     `json:"max_redo_times"`
-	PSet               int     `json:"pset"`
-	X                  float64 `json:"offset_x"`
-	Y                  float64 `json:"offset_y"`
-	GroupSequence      int     `json:"group_sequence"`
-	ConsuProductID     int64   `json:"consu_product_id"`
-	ToleranceMin       float64 `json:"tolerance_min"`
-	ToleranceMax       float64 `json:"tolerance_max"`
-	ToleranceMinDegree float64 `json:"tolerance_min_degree"`
-	ToleranceMaxDegree float64 `json:"tolerance_max_degree"`
-	GunSN              string  `json:"gun_sn"`
-	Controller_SN      string  `json:"controller_sn"`
-}
-
-type RoutingOperation struct {
-	OperationID    int64                   `json:"id"`
-	Job            int                     `json:"job"`
-	MaxOpTime      int                     `json:"max_op_time"`
-	Name           string                  `json:"name"`
-	Img            string                  `json:"img"`
-	ProductId      int64                   `json:"product_id"`
-	ProductType    string                  `json:"product_type"`
-	WorkcenterCode string                  `json:"workcenter_code"`
-	VehicleTypeImg string                  `json:"vehicleTypeImg"`
-	Points         []RoutingOperationPoint `json:"points"`
 }
 
 type LocalResults struct {
