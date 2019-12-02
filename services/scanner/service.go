@@ -179,14 +179,17 @@ func (s *Service) OnStatus(id string, status string) {
 	s.WS.WSSendScanner(string(barcode))
 }
 
-func (s *Service) OnRecv(id string, str string) {
-	s.diag.Debug(fmt.Sprintf("scanner %s recv: %s\n", id, str))
+func (s *Service) OnRecv(id string, data string) {
+	s.diag.Debug(fmt.Sprintf("Scanner %s Recv Raw Data: %s\n", id, data))
+	if data == "" {
+		return
+	}
 	barcode, _ := json.Marshal(wsnotify.WSMsg{
 		Type: WS_SCANNER_READ,
 		Data: ScannerRead{
 			Src:     device.DEVICE_TYPE_SCANNER,
 			SN:      id,
-			Barcode: str,
+			Barcode: data,
 		},
 	})
 
