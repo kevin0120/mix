@@ -10,6 +10,7 @@ import (
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
+	"github.com/masami10/rush/typeDef"
 	"strconv"
 	"strings"
 	"time"
@@ -596,7 +597,7 @@ func (m *Methods) insertResultsForJob(job *JobManual) (*storage.Workorders, erro
 	//	r.MaxRedoTimes = v.MaxRedoTimes
 	//	r.Stage = storage.RESULT_STAGE_INIT
 	//	r.Result = storage.RESULT_NONE
-	//	r.ControllerSN = job.Controller_SN
+	//	r.ControllerSN = job.ControllerSN
 	//	r.UserID = job.UserID
 	//	r.ToleranceMax = v.ToleranceMax
 	//	r.ToleranceMin = v.ToleranceMin
@@ -802,69 +803,12 @@ func (m *Methods) getHealthz(ctx iris.Context) {
 	return
 }
 
-func (m *Methods) getHmiResults(ctx iris.Context) {
-
-	result_id := ctx.URLParam("result_id")
-	count := ctx.URLParam("count")
-
-	if result_id == "" {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("result_id is required")
-		return
-	}
-
-	if count == "" {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("count is required")
-		return
-	}
-
-	n_result_id, err := strconv.Atoi(result_id)
-	if err != nil {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("result_id format error")
-		return
-	}
-
-	n_count, err := strconv.Atoi(count)
-	if err != nil {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("count format error")
-		return
-	}
-
-	db_result, err := m.service.DB.GetResult(int64(n_result_id), n_count)
-
-	if err != nil {
-		ctx.StatusCode(iris.StatusNotFound)
-		ctx.WriteString("result not found")
-		return
-	}
-
-	ws_result := wsnotify.WSResult{}
-	ws_result.Count = n_count
-	//ws_result.Result_id = int64(n_result_id)
-	ws_result.Result = db_result.Result
-
-	result_value := controller.ResultValue{}
-	json.Unmarshal([]byte(db_result.ResultValue), &result_value)
-
-	ws_result.TI = result_value.Ti
-	ws_result.MI = result_value.Mi
-	ws_result.WI = result_value.Wi
-
-	body, _ := json.Marshal(ws_result)
-	ctx.Header("content-type", "application/json")
-	ctx.Write(body)
-	ctx.StatusCode(iris.StatusOK)
-}
-
 func (m *Methods) getStatus(ctx iris.Context) {
 	// 返回控制器状态
 
 	sn := ctx.URLParam("controller_sn")
 
-	sns := []string{}
+	var sns []string
 	if sn != "" {
 		vs := strings.Split(sn, ",")
 		for _, v := range vs {
@@ -887,9 +831,13 @@ func (m *Methods) getStatus(ctx iris.Context) {
 	}
 }
 
+func init()  {
+
+}
+
 func (m *Methods) putIOSet(ctx iris.Context) {
-	io_set := IOSet{}
-	err := ctx.ReadJSON(&io_set)
+	var ioSet IOSet
+	err := ctx.ReadJSON(&ioSet)
 
 	if err != nil {
 		// 传输结构错误
@@ -898,14 +846,14 @@ func (m *Methods) putIOSet(ctx iris.Context) {
 		return
 	}
 
-	if io_set.Controller_SN == "" {
+	if ioSet.Controller_SN == "" {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("controller_sn is required")
 		return
 	}
 
 	// 通过控制器设定程序
-	c, exist := m.service.ControllerService.Controllers[io_set.Controller_SN]
+	c, exist := m.service.ControllerService.Controllers[ioSet.Controller_SN]
 	if !exist {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.WriteString("controller not found")
@@ -914,7 +862,7 @@ func (m *Methods) putIOSet(ctx iris.Context) {
 
 	switch c.Protocol() {
 	case controller.OPENPROTOCOL:
-		err = m.service.OpenProtocol.IOSet(io_set.Controller_SN, &io_set.IOStatus)
+		err = m.service.OpenProtocol.IOSet(ioSet.Controller_SN, &ioSet.IOStatus)
 		if err != nil {
 			ctx.StatusCode(iris.StatusBadRequest)
 			ctx.WriteString(err.Error())
@@ -1061,10 +1009,10 @@ func (m *Methods) getRoutingOpertions(ctx iris.Context) {
 		return
 	}
 
-	points := []RoutingOperationPoint{}
+	var points []typeDef.RoutingOperationPoint
 	json.Unmarshal([]byte(ro.Points), &points)
 
-	rt_ro := RoutingOperation{}
+	rt_ro := typeDef.RoutingOperation{}
 	rt_ro.Points = points
 	rt_ro.OperationID = ro.OperationID
 	rt_ro.Job = ro.Job
@@ -1072,7 +1020,7 @@ func (m *Methods) getRoutingOpertions(ctx iris.Context) {
 	rt_ro.Name = ro.Name
 	rt_ro.Img = ro.Img
 	rt_ro.ProductId = ro.ProductId
-	rt_ro.WorkcenterCode = ro.WorkcenterCode
+	rt_ro.WorkCenterCode = ro.WorkcenterCode
 	rt_ro.VehicleTypeImg = ro.VehicleTypeImg
 	rt_ro.ProductType = ro.ProductType
 

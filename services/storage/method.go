@@ -3,8 +3,66 @@ package storage
 import (
 	"encoding/json"
 	"github.com/go-xorm/xorm"
+	"github.com/masami10/rush/typeDef"
+	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
+	"time"
 )
+
+// TS004 国轩通过扫码创建工单
+func (s *Service) ts004CreateDummyWorkOrderFromTrackCode(trackCode string) []byte {
+	operation, err := s.getLastOperation()
+	if err != nil {
+		s.diag.Error("createDummyWorkOrderFromTrackCode Fetch Last Operation", err)
+		return nil
+	}
+	work := Workorders{
+		Code:                  utils.GenerateID(),
+		Status:                WORKORDER_STATUS_TODO,
+		Date_planned_start:    time.Now(),
+		Date_planned_complete: time.Now().Add(time.Duration(5 * 24 * time.Hour)), //当前时间后堆5天
+		Product_code:          operation.ProductType,                             // 此字段找到产品图片
+		WorkcenterCode:        operation.WorkcenterCode,
+	}
+
+	var operationPoints []typeDef.RoutingOperationPoint
+
+	if err := json.Unmarshal([]byte(operation.Points), &operationPoints); err != nil {
+		s.diag.Error("createDummyWorkOrderFromTrackCode Unmarshal Tightening Point Error", err)
+		return nil
+	}
+
+	payload := typeDef.StepTighteningPayload{
+		TighteningTotal: len(operationPoints),
+		TighteningPoint: operationPoints,
+	}
+
+	var d []byte
+
+	if d, err = json.Marshal(payload); err != nil {
+		s.diag.Error("createDummyWorkOrderFromTrackCode Marsh Tightening Step Payload", err)
+		return nil
+	}
+	// todo: 创建工步进行传递
+	_ = Steps{
+		Name:           operation.Tigntening_step_ref,
+		Step:           string(d),
+		Code:           operation.Tigntening_step_ref,
+		Testtype:       "tightening",
+		ImageRef:       operation.Tigntening_step_ref, // 根据此字段找到作业的图片
+		FailureMessage: "Tightening Fail",
+		Skippable:      false,
+		Undoable:       true,
+		Status:         STEP_STATUS_READY,
+	}
+
+	out, err := json.Marshal(work)
+	if err != nil {
+		s.diag.Error("createDummyWorkOrderFromTrackCode Marshal Error", err)
+		return nil
+	}
+	return out
+}
 
 //參考文檔
 //https://github.com/go-xorm/xorm/blob/master/README_CN.md
@@ -14,7 +72,6 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 
 	session := s.eng.NewSession()
 	defer session.Close()
-	session.Begin()
 	var work Workorders
 	var workPayload WorkorderPayload
 	err := json.Unmarshal(in, &work)
@@ -46,7 +103,8 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 		Date_planned_start:    work.Date_planned_start,
 		Date_planned_complete: work.Date_planned_start,
 	}
-	//
+	session.Begin()
+
 	s.DeleteWorkAndStep(session, work.Code)
 
 	//var hh map[string]interface{}
@@ -74,7 +132,7 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 		stepString, _ := json.Marshal(step[i])
 		var msg Steps
 		var stepText StepTextPayload
-		var stepTightening StepTighteningPayload
+		var stepTightening typeDef.StepTighteningPayload
 		var sp []byte
 		err = json.Unmarshal(stepString, &msg)
 
@@ -201,4 +259,14 @@ func (s *Service) findOrderPicture(ref string) (string, error) {
 		return "", e
 	}
 	return ro.ProductTypeImage, nil
+}
+
+func (s *Service) getLastOperation() (*RoutingOperations, error) {
+	var ro RoutingOperations
+	ss := s.eng.Alias("r").OrderBy("id desc").Limit(1)
+	_, e := ss.Get(&ro)
+	if e != nil {
+		return nil, e
+	}
+	return &ro, nil
 }
