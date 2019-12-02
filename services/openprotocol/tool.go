@@ -3,7 +3,6 @@ package openprotocol
 import (
 	"errors"
 	"fmt"
-	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/utils"
@@ -207,7 +206,7 @@ func (s *TighteningTool) GetPSetDetail(pset int) (*tightening_device.PSetDetail,
 		return &rt, nil
 	}
 
-	return nil, errors.New(controller.ERR_KNOWN)
+	return nil, errors.New(tightening_device.TIGHTENING_ERR_UNKNOWN)
 }
 
 // job列表
@@ -245,7 +244,7 @@ func (s *TighteningTool) GetJobDetail(job int) (*tightening_device.JobDetail, er
 		return &rt, nil
 	}
 
-	return nil, errors.New(controller.ERR_KNOWN)
+	return nil, errors.New(tightening_device.TIGHTENING_ERR_UNKNOWN)
 }
 
 func (s *TighteningTool) TraceSet(str string) error {

@@ -72,27 +72,10 @@ type JobManual struct {
 	CarType       string `json:"car_type"`
 	Vin           string `json:"vin"`
 	HmiSN         string `json:"hmi_sn"`
-	//ProductID     int64      `json:"product_id"`
-	//Points        []JobPoint `json:"points"`
-	//WorkcenterID  int64      `json:"workcenter_id"`
-	OperationID int64  `json:"operation_id"`
-	Skip        bool   `json:"skip"`
-	HasSet      bool   `json:"has_set"`
-	Mode        string `json:"mode"`
-}
-
-type Point struct {
-	Seq          int     `json:"sequence"`
-	PSet         int     `json:"pset"`
-	X            float64 `json:"x"`
-	Y            float64 `json:"y"`
-	MaxRedoTimes int     `json:"maxRetryTimes"`
-	GroupSeq     int     `json:"group_sequence"`
-	ToolSN       string  `json:"toolSN"`
-}
-
-type ScrewPayload struct {
-	Points []Point
+	OperationID   int64  `json:"operation_id"`
+	Skip          bool   `json:"skip"`
+	HasSet        bool   `json:"has_set"`
+	Mode          string `json:"mode"`
 }
 
 type ControllerMode struct {
