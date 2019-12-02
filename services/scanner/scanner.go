@@ -147,6 +147,7 @@ func (s *Scanner) open() (USBDevice, error) {
 		return nil, err
 	}
 	if err := di.NewReader(s.device); err != nil {
+		s.diag.Error("Scanner Open Error", err)
 		return nil, err
 	}
 
