@@ -3,6 +3,7 @@ package hmi
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"github.com/kataras/iris"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/odoo"
@@ -21,6 +22,12 @@ const (
 
 type Methods struct {
 	service *Service
+}
+
+var validate *validator.Validate
+
+func init() {
+	validate = validator.New()
 }
 
 func (m *Methods) putToolControl(ctx iris.Context) {
@@ -62,43 +69,11 @@ func (m *Methods) putPSets(ctx iris.Context) {
 		return
 	}
 
-	str, _ := json.Marshal(pset)
-	m.service.diag.Debug(fmt.Sprintf("new pset:%s", str))
+	m.service.diag.Debug(fmt.Sprintf("new pset: %#v", pset))
 
-	if pset.Controller_SN == "" {
+	if err := validate.Struct(pset); err != nil {
 		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("controller_sn is required")
-		return
-	}
-
-	if pset.GunSN == "" {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("gun_sn is required")
-		return
-	}
-
-	if pset.PSet == 0 {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("pset is required")
-		return
-	}
-
-	if pset.Count == 0 {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("count is required")
-		return
-	}
-
-	if pset.WorkorderID == 0 {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("workorder_id is required")
-		return
-	}
-
-	// 检测count
-	if pset.Count < 1 {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("tightening count should be greater than 0")
+		ctx.Writef("Validate Error: %s", err.Error())
 		return
 	}
 
@@ -114,7 +89,7 @@ func (m *Methods) putPSets(ctx iris.Context) {
 	json.Unmarshal([]byte(workorder.Consumes), &consumes)
 
 	err = m.service.TighteningService.Api.ToolPSetBatchSet(&tightening_device.PSetBatchSet{
-		ControllerSN: pset.Controller_SN,
+		ControllerSN: pset.ControllerSN,
 		ToolSN:       pset.GunSN,
 		PSet:         pset.PSet,
 		Batch:        1,
@@ -127,7 +102,7 @@ func (m *Methods) putPSets(ctx iris.Context) {
 	}
 
 	err = m.service.TighteningService.Api.ToolPSetSet(&tightening_device.PSetSet{
-		ControllerSN: pset.Controller_SN,
+		ControllerSN: pset.ControllerSN,
 		ToolSN:       pset.GunSN,
 		WorkorderID:  pset.WorkorderID,
 		UserID:       pset.UserID,
@@ -830,7 +805,7 @@ func (m *Methods) getStatus(ctx iris.Context) {
 	}
 }
 
-func init()  {
+func init() {
 
 }
 

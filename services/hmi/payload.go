@@ -21,14 +21,14 @@ const (
 )
 
 type PSet struct {
-	Controller_SN string `json:"controller_sn"`
-	GunSN         string `json:"gun_sn"`
-	PSet          int    `json:"pset"`
-	Result_id     int64  `json:"result_id"`
-	Count         int    `json:"count"`
-	UserID        int64  `json:"user_id"`
-	GroupSeq      int    `json:"group_sequence"`
-	WorkorderID   int64  `json:"workorder_id"`
+	ControllerSN string `json:"controller_sn" validate:"required"`
+	GunSN        string `json:"gun_sn" validate:"required"`
+	PSet         int    `json:"pset" validate:"required"`
+	Result_id    int64  `json:"result_id" validate:"-"`
+	Count        int    `json:"count" validate:"gte=1"` //必须大于等于1
+	UserID       int64  `json:"user_id" validate:"-"`
+	GroupSeq     int    `json:"group_sequence" validate:"gt=0"`
+	WorkorderID  int64  `json:"workorder_id" validate:"gt=0"` //必须大于0
 }
 
 type PSetManual struct {
