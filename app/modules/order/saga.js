@@ -45,6 +45,7 @@ import ClsScanner from '../device/scanner/ClsScanner';
 import type { tAnyStatus } from '../step/interface/typeDef';
 import type { IWorkable } from '../workable/IWorkable';
 import reworkActions from '../reworkPattern/action';
+import { workModes } from '../workCenterMode/constants';
 
 export default function* root(): Saga<void> {
   try {
@@ -159,9 +160,9 @@ function* tryWorkOnOrder({
       orderToDo = order;
     }
     const workCenterMode: tWorkCenterMode = yield select(s => sGetWorkCenterMode(s));
-    if (workCenterMode === trans.reworkWorkCenterMode) {
-      // go to rework when in rework mode
-      yield put(reworkActions.tryRework(orderToDo));
+    if (workCenterMode === workModes.reworkWorkCenterMode) {
+      // do nothing when rework
+      // yield put(reworkActions.tryRework(orderToDo));
       return;
     }
     const orderState = yield select(s => s.order);
@@ -314,6 +315,12 @@ function* viewOrder({ order }: { order: IOrder }) {
         ])) ||
       [];
 
+    const { workCenterMode } = yield select();
+    const isRework = workCenterMode === workModes.reworkWorkCenterMode;
+    const showStartButton =
+      !isRework &&
+      !WIPOrder &&
+      doable(order);
     yield put(
       dialogActions.dialogShow({
         buttons: [
@@ -321,8 +328,7 @@ function* viewOrder({ order }: { order: IOrder }) {
             label: 'Common.Close',
             color: 'warning'
           },
-          !WIPOrder &&
-          doable(order) && {
+          showStartButton && {
             label: 'Order.Start',
             color: 'info',
             action: orderActions.tryWorkOn(order)

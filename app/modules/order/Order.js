@@ -309,8 +309,10 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
             label: 'Common.Yes',
             color: 'info'
           };
+          const { workCenterMode } = yield select();
+          const isNormalMode = workCenterMode === workModes.normWorkCenterMode;
           let closeAction = push('/app');
-          if (reportFinish) {
+          if (reportFinish && isNormalMode) {
             const code = this._id;
             const trackCode = '';
             const workCenterCode = yield select(s => s.systemInfo.workcenter);
@@ -333,21 +335,23 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
               color: 'info'
             };
           }
-          yield put(
-            dialogActions.dialogShow({
-              buttons: [confirm],
-              closeAction,
-              title: i18n.t('Common.Result'),
-              content: (
-                <Table
-                  tableHeaderColor="info"
-                  tableHead={['工步名称', '耗时', '结果']}
-                  tableData={data}
-                  colorsColls={['info']}
-                />
-              )
-            })
-          );
+          if (isNormalMode) {
+            yield put(
+              dialogActions.dialogShow({
+                buttons: [confirm],
+                closeAction,
+                title: i18n.t('Common.Result'),
+                content: (
+                  <Table
+                    tableHeaderColor="info"
+                    tableHead={['工步名称', '耗时', '结果']}
+                    tableData={data}
+                    colorsColls={['info']}
+                  />
+                )
+              })
+            );
+          }
           yield put(orderActions.finishOrder(this));
         } catch (e) {
           CommonLog.lError(e, {
