@@ -40,27 +40,27 @@ function* redoOrder(step, point, orderActions) {
     if (!redoStep) {
       yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
     }
-    while (true) {
-      yield call(
-        [this, this.runSubStep],
-        redoStep,
-        {
-          onNext: () => {
-            console.warn('next');
-          },
-          onPrevious: () => {
-            console.warn('previous');
-          }
+    // while (true) {
+    yield call(
+      [this, this.runSubStep],
+      redoStep,
+      {
+        onNext: () => {
+          console.warn('next');
         },
-        STEP_STATUS.READY,
-        {
-          reworkConfig: {
-            point
-          }
+        onPrevious: () => {
+          console.warn('previous');
         }
-      );
-      yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
-    }
+      },
+      STEP_STATUS.READY,
+      {
+        reworkConfig: {
+          point
+        }
+      }
+    );
+    yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
+    // }
   } catch (e) {
     CommonLog.lError(e);
   }

@@ -352,12 +352,12 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
             if (workCenterMode === workModes.reworkWorkCenterMode) {
               if (redoPointClsObj && redoPointClsObj.isSuccess) {
-                // const canRedoPoint = this.points.find(p => p.canRedo);
-                // if (!canRedoPoint) {
-                yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
-                // } else {
-                //   this._pointsToActive = [canRedoPoint.start()];
-                // }
+                const canRedoPoint = this.points.find(p => p.canRedo);
+                if (!canRedoPoint) {
+                  yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
+                } else {
+                  yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL)); // 失败退出
+                }
               }
             } else {
               this._pointsToActive = this._pointsManager.start();
@@ -394,30 +394,34 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
       * [STEP_STATUS.FAIL](ORDER, orderActions, msg) {
         try {
           yield all(this._tools.map(t => call(t.Disable)));
-          yield put(
-            dialogActions.dialogShow({
-              buttons: [
-                {
-                  label: 'Common.Close',
-                  color: 'danger',
-                  action: screwStepActions.confirmFail()
-                },
-                {
-                  label: 'Order.Retry',
-                  color: 'info',
-                  action: orderActions.stepStatus(this, STEP_STATUS.READY)
-                },
-                {
-                  label: 'Order.Next',
-                  color: 'warning',
-                  action: screwStepActions.confirmFail()
-                }
-              ],
-              title: `工步失败：${this._code}`,
-              content: `${msg || this.failureMsg}`
-            })
-          );
-          yield take(SCREW_STEP.CONFIRM_FAIL);
+          const { workCenterMode } = yield select();
+          const isNormal = workCenterMode === workModes.normWorkCenterMode;
+          if (isNormal) {
+            yield put(
+              dialogActions.dialogShow({
+                buttons: [
+                  {
+                    label: 'Common.Close',
+                    color: 'danger',
+                    action: screwStepActions.confirmFail()
+                  },
+                  {
+                    label: 'Order.Retry',
+                    color: 'info',
+                    action: orderActions.stepStatus(this, STEP_STATUS.READY)
+                  },
+                  {
+                    label: 'Order.Next',
+                    color: 'warning',
+                    action: screwStepActions.confirmFail()
+                  }
+                ],
+                title: `工步失败：${this._code}`,
+                content: `${msg || this.failureMsg}`
+              })
+            );
+            yield take(SCREW_STEP.CONFIRM_FAIL);
+          }
           yield put(orderActions.finishStep(this));
         } catch (e) {
           CommonLog.lError(e, { at: 'screwStep FAIL' });
