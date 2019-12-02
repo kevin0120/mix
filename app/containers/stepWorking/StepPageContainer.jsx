@@ -56,7 +56,8 @@ const StepPageContainer = ({
                              bindParentAction,
                              timeLine,
                              description,
-                             bindParentDescription
+                             bindParentDescription,
+                             workingOrder
                            }: Props) => {
   const classes = makeStyles(styles.stepPageContainer)();
   if (step && stepTypes && stepTypes[step.type]?.component) {
@@ -69,6 +70,7 @@ const StepPageContainer = ({
               {(StepComponent && (
                 <StepComponent
                   step={step}
+                  workingOrder={workingOrder}
                   isCurrent={step === workingStep}
                   bindAction={bindParentAction}
                   bindDescription={bindParentDescription}

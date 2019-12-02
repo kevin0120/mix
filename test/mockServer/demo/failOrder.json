@@ -1,7 +1,7 @@
 {
-  "id": 2,
-  "code": "MO0003",
-  "track_code": "1x0002",
+  "id": 1,
+  "code": "MO0002",
+  "track_code": "",
   "product_code": "",
   "date_planned_start": "",
   "date_planned_complete": "",
@@ -54,21 +54,6 @@
   },
   "steps": [
     {
-      "code": "T0001",
-      "sequence": 1,
-      "test_type": "text",
-      "failure_msg": "测试文本工步失败消息",
-      "desc": "测试文本工步描述",
-      "image": "",
-      "skippable": true,
-      "undoable": true,
-      "data": "",
-      "status": "",
-      "payload": {
-        "text": "测试文本工步"
-      }
-    },
-    {
       "code": "T0002",
       "sequence": 2,
       "test_type": "tightening",
@@ -77,16 +62,16 @@
       "image": "",
       "skippable": true,
       "undoable": true,
-      "data": "",
-      "status": "",
+      "data": "{\"controllerMode\":\"pset\",\"tightening_points\":[{\"is_key\":true,\"pset\":\"1\",\"sequence\":1,\"y\":10,\"x\":10,\"key_num\":1,\"tightening_tool\":\"xx1233\",\"max_redo_times\":1,\"group_sequence\":1,\"nut_no\":\"\",\"status\":\"ERROR\",\"isActive\":false,\"canRedo\": true},{\"is_key\":true,\"pset\":\"1\",\"sequence\":2,\"y\":20,\"x\":20,\"key_num\":1,\"tightening_tool\":\"xx1233\",\"max_redo_times\":1,\"group_sequence\":2,\"nut_no\":\"\",\"status\":\"ERROR\",\"isActive\":false,\"canRedo\": true},{\"is_key\":true,\"pset\":\"1\",\"sequence\":3,\"y\":30,\"x\":30,\"key_num\":1,\"tightening_tool\":\"xx1233\",\"max_redo_times\":1,\"group_sequence\":3,\"nut_no\":\"\",\"status\":\"SUCCESS\",\"isActive\":false}],\"results\":[{\"tool_sn\":\"xx1233\",\"sequence\":1,\"ti\":1,\"mi\":1,\"wi\":1,\"result\":\"nok\",\"batch\":\"1/3\"},{\"tool_sn\":\"xx1233\",\"sequence\":2,\"ti\":1,\"mi\":1,\"wi\":1,\"result\":\"nok\",\"batch\":\"2/3\"},{\"tool_sn\":\"xx1233\",\"sequence\":3,\"ti\":1,\"mi\":1,\"wi\":1,\"result\":\"ok\",\"batch\":\"3/3\"}],\"timeLine\":[{\"title\":\"3/3\",\"color\":\"success\",\"footerTitle\":\"xx1233\",\"body\":\"OK: wi=1,mi=1,ti=1\"},{\"title\":\"2/3\",\"color\":\"danger\",\"footerTitle\":\"xx1233\",\"body\":\"NOK: wi=1,mi=1,ti=1\"},{\"title\":\"1/3\",\"color\":\"danger\",\"footerTitle\":\"xx1233\",\"body\":\"NOK: wi=1,mi=1,ti=1\"}]}",
+      "status": "fail",
       "payload": {
         "tightening_points": [
           {
             "is_key": true,
             "pset": "1",
             "sequence": 1,
-            "y": 0,
-            "x": 0,
+            "y": 10,
+            "x": 10,
             "key_num": 1,
             "tightening_tool": "xx1233",
             "max_redo_times": 1,
@@ -97,8 +82,8 @@
             "is_key": true,
             "pset": "1",
             "sequence": 2,
-            "y": 100,
-            "x": 10,
+            "y": 20,
+            "x": 20,
             "key_num": 1,
             "tightening_tool": "xx1233",
             "max_redo_times": 1,
@@ -109,8 +94,8 @@
             "is_key": true,
             "pset": "1",
             "sequence": 3,
-            "y": 20,
-            "x": 10,
+            "y": 30,
+            "x": 30,
             "key_num": 1,
             "tightening_tool": "xx1233",
             "max_redo_times": 1,

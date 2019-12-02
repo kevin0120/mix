@@ -1,7 +1,9 @@
 const { events } = require('../constants');
 const { demoOrder, demoOrderJson } = require('../demo/demoOrder');
 const orderDetailData = require('../demo/orderDetailData.json');
+const failOrder = require('../demo/failOrder.json');
 
+const demoOrderList = [orderDetailData, failOrder];
 const orderTypes = Object.freeze({
   LIST: 'WS_ORDER_LIST',
   DETAIL: 'WS_ORDER_DETAIL',
@@ -31,8 +33,7 @@ const orderHandlers = {
             workcenter: 'workcenter',
             date_planned_start: '2019-10-16T03:20:30Z',
             date_planned_complete: 'date_planned_complete',
-            product_type_image: 'this is an image',
-            status: 'todo'
+            status: 'fail'
           },
           {
             id: 2,
@@ -52,7 +53,7 @@ const orderHandlers = {
             workcenter: 'workcenter',
             date_planned_start: '2019-10-16T03:25:30Z',
             date_planned_complete: 'date_planned_complete',
-            status: 'pending',
+            status: 'pending'
           },
           {
             id: 4,
@@ -62,7 +63,7 @@ const orderHandlers = {
             workcenter: 'workcenter',
             date_planned_start: '2019-10-16T03:25:30Z',
             date_planned_complete: 'date_planned_complete',
-            status: 'done',
+            status: 'done'
           }
         ]
       },
@@ -88,11 +89,12 @@ const orderHandlers = {
     });
   },
   [orderTypes.DETAIL]: (data, reply) => {
+    const order = demoOrderList.find(d => d.id === data.data.id);
     reply(
       {
         sn: data.sn,
         type: orderTypes.DETAIL,
-        data: orderDetailData
+        data: order
       },
       events.order
     );
@@ -102,7 +104,7 @@ const orderHandlers = {
       {
         sn: data.sn,
         type: orderTypes.DETAIL,
-        data: orderDetailData
+        data: failOrder
       },
       events.reply
     );
@@ -132,7 +134,6 @@ const orderHandlers = {
     );
   },
   [orderTypes.UPDATE]: (data, reply) => {
-    demoOrder.status = data.status;
     reply(
       {
         sn: data.sn,
@@ -143,17 +144,17 @@ const orderHandlers = {
       },
       events.reply
     );
-  },
-  [orderTypes.NEW]: (data, reply) => {
-    reply(
-      {
-        sn: 0,
-        type: orderTypes.NEW,
-        data: [demoOrderJson]
-      },
-      events.order
-    );
   }
+  // [orderTypes.NEW]: (data, reply) => {
+  //   reply(
+  //     {
+  //       sn: 0,
+  //       type: orderTypes.NEW,
+  //       data: [demoOrderJson]
+  //     },
+  //     events.order
+  //   );
+  // }
 };
 
 module.exports = {

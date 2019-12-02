@@ -38,8 +38,7 @@ function limitIndex(order: ?IOrder, index: tOrderStepIdx): tOrderStepIdx {
 }
 
 const orderReducer: {
-  [key: tOrderActionTypes]: tReducer<
-    tOrderState,
+  [key: tOrderActionTypes]: tReducer<tOrderState,
     // eslint-disable-next-line flowtype/no-weak-types
     tAction<tOrderActionTypes, any>>
 } = {
@@ -59,13 +58,23 @@ const orderReducer: {
     viewingOrder: order || null,
     viewingIndex: 0 // first index
   }),
-  [ORDER.WORK_ON]: (state, { order }: { order: IOrder }) => ({
-    ...state,
-    workingOrder: order || null,
-    viewingOrder: order || null,
-    viewingIndex:
-      workingIndex(order) >= order.steps.length ? 0 : workingIndex(order)
-  }),
+  [ORDER.WORK_ON]: (state, { order, config }: { order: IOrder }) => {
+    const { step } = config || {};
+    let vIdx = workingIndex(order) >= order.steps.length ? 0 : workingIndex(order);
+    if (step) {
+      const stepIndex = order.steps.findIndex(s => s.code === step.code);
+      if (stepIndex >= 0) {
+        vIdx = stepIndex;
+      }
+    }
+    vIdx = limitIndex(viewingOrder(state), vIdx);
+    return {
+      ...state,
+      workingOrder: order || null,
+      viewingOrder: order || null,
+      viewingIndex: vIdx
+    };
+  },
   [ORDER.DID_FINISH]: state => ({
     ...state,
     workingOrder: null
@@ -85,7 +94,9 @@ const orderReducer: {
   [ORDER.STEP.FINISH](state, { step }) {
     const wOrder: ?IOrder = workingOrder(state);
     const newIndex = workingIndex(wOrder) + 1;
-    const vIndex = step === viewingStep(state) ? newIndex : viewingIndex(state);
+    const vIndex = limitIndex(viewingOrder(state),
+      step === viewingStep(state) ? newIndex : viewingIndex(state)
+    );
     return {
       ...state,
       viewingIndex: vIndex

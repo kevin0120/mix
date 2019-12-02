@@ -47,8 +47,8 @@ export function tNS(str, ns) {
   return i18n.t(str, { ns: ns || 'translations' });
 }
 
-export function withI18n(tComp,ns){
-  return <I18n ns={ns} >
+export function withI18n(tComp,ns, props){
+  return <I18n ns={ns} {...props}>
     {tComp}
   </I18n>
 }

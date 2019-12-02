@@ -65,7 +65,7 @@ export class ClsOperationPointGroup {
         .filter(p => p.isKey)
         .every(p => p.isPass) &&
       this._points.filter(p => p.isPass).length >=
-        this._keyNum
+      this._keyNum
     );
   }
 
@@ -76,6 +76,18 @@ export class ClsOperationPointGroup {
 
   get isFailed() {
     return this.points.some(p => p.isFinalFail);
+  }
+
+  start() {
+    // 返回所有被开始的点
+    const points = this._points.reduce((activedPoints, p) => {
+      const point = p.start();
+      if (point) {
+        activedPoints.push(point);
+      }
+      return activedPoints;
+    }, []);
+    return points;
   }
 
   newResult(result: tResult): Array<?ClsOperationPoint> {

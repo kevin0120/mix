@@ -6,7 +6,6 @@ import { call, put, select } from 'redux-saga/effects';
 import { some, filter } from 'lodash-es';
 import { ORDER_STATUS } from './constants';
 import { CommonLog, durationString } from '../../common/utils';
-import { orderActions } from './action';
 import { orderReportStartApi, orderUpdateApi } from '../../api/order';
 import dialogActions from '../dialog/action';
 import i18n from '../../i18n';
@@ -18,7 +17,7 @@ import notifyActions from '../Notifier/action';
 import type { tOrder, tOrderStatus } from './interface/typeDef';
 import type { IWorkable } from '../workable/IWorkable';
 import type { IWorkStep } from '../step/interface/IWorkStep';
-import {orderDataApi} from '../../api/order';
+import { workModes } from '../workCenterMode/constants';
 
 const stepStatus = status => {
   switch (status) {
@@ -30,6 +29,42 @@ const stepStatus = status => {
       return '未完成';
   }
 };
+
+function* redoOrder(step, point, orderActions) {
+  try {
+    console.warn('redo order', step, point);
+    let redoStep = step;
+    if (!redoStep) {
+      redoStep = this.steps.find(s => s.status === STEP_STATUS.FAIL);
+    }
+    if (!redoStep) {
+      yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
+    }
+    // while (true) {
+    yield call(
+      [this, this.runSubStep],
+      redoStep,
+      {
+        onNext: () => {
+          console.warn('next');
+        },
+        onPrevious: () => {
+          console.warn('previous');
+        }
+      },
+      STEP_STATUS.READY,
+      {
+        reworkConfig: {
+          point
+        }
+      }
+    );
+    yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
+    // }
+  } catch (e) {
+    CommonLog.lError(e);
+  }
+}
 
 const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
   class ClsOrder extends ClsBaseStep implements IOrder {
@@ -61,21 +96,6 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
 
     get productCode() {
       return this._productCode;
-    }
-
-    get failSteps(): Array<IWorkStep> {
-      const ret = filter(
-        this.steps,
-        (step: IWorkStep) => step.status === STEP_STATUS.FAIL
-      );
-      return ((ret: any): Array<IWorkStep>);
-    }
-
-    hasFailWorkStep(): boolean {
-      return some(
-        this.steps,
-        (step: IWorkable) => step.status === STEP_STATUS.FAIL
-      );
     }
 
     _workcenter: string = '';
@@ -149,9 +169,29 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       }
     }
 
+    get failSteps(): Array<IWorkStep> {
+      const ret = filter(
+        this.steps,
+        (step: IWorkStep) => step.status === STEP_STATUS.FAIL
+      );
+      return ((ret: any): Array<IWorkStep>);
+    }
+
+    hasFailWorkStep(): boolean {
+      return some(
+        this.steps,
+        (step: IWorkable) => step.status === STEP_STATUS.FAIL
+      );
+    }
+
     _statusTasks = {
-      * [ORDER_STATUS.TODO]() {
+      * [ORDER_STATUS.TODO](ORDER, orderActions, config) {
         try {
+          const { workCenterMode } = yield select();
+          if (workCenterMode === workModes.reworkWorkCenterMode) {
+            yield put(orderActions.stepStatus(this, ORDER_STATUS.WIP, config));
+            return;
+          }
           const { reportStart } = yield select(s => s.setting.systemSettings);
           // TODO 开工自检
 
@@ -187,10 +227,26 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           yield put(orderActions.stepStatus(this, ORDER_STATUS.PENDING));
         }
       },
-      * [ORDER_STATUS.WIP]() {
+      * [ORDER_STATUS.WIP](ORDER, orderActions, config = {}) {
         try {
           this._workingIndex =
             this._workingIndex >= this._steps.length ? 0 : this._workingIndex;
+          const { step } = config;
+          if (step) {
+            const stepIndex = this.steps.findIndex(s => s.code === step.code);
+            if (stepIndex >= 0) {
+              this._workingIndex = stepIndex;
+            }
+          }
+
+          const mode = yield select(s => s.workCenterMode);
+          if (mode === workModes.reworkWorkCenterMode) {
+            const reworkConfig = config?.reworkConfig || {};
+            const { point } = reworkConfig;
+            yield call([this, redoOrder], step, point, orderActions);
+            return;
+          }
+
           let status = null;
 
           const _onPrevious = () => {
@@ -225,6 +281,10 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
 
             } else {
               yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
+              if (this._steps.some(s => s.status === STEP_STATUS.FAIL)) {
+                yield put(orderActions.stepStatus(this, ORDER_STATUS.FAIL));
+
+              }
             }
           }
         } catch (e) {
@@ -235,7 +295,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           CommonLog.Info('order doing finished');
         }
       },
-      * [ORDER_STATUS.DONE]() {
+      * [ORDER_STATUS.DONE](ORDER, orderActions) {
         try {
           if (this._workingIndex > this._steps.length - 1) {
             this._workingIndex = this._steps.length - 1;
@@ -253,8 +313,10 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
             label: 'Common.Yes',
             color: 'info'
           };
+          const { workCenterMode } = yield select();
+          const isNormalMode = workCenterMode === workModes.normWorkCenterMode;
           let closeAction = push('/app');
-          if (reportFinish) {
+          if (reportFinish && isNormalMode) {
             const code = this._id;
             const trackCode = '';
             const workCenterCode = yield select(s => s.systemInfo.workcenter);
@@ -277,21 +339,23 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
               color: 'info'
             };
           }
-          yield put(
-            dialogActions.dialogShow({
-              buttons: [confirm],
-              closeAction,
-              title: i18n.t('Common.Result'),
-              content: (
-                <Table
-                  tableHeaderColor="info"
-                  tableHead={['工步名称', '耗时', '结果']}
-                  tableData={data}
-                  colorsColls={['info']}
-                />
-              )
-            })
-          );
+          if (isNormalMode) {
+            yield put(
+              dialogActions.dialogShow({
+                buttons: [confirm],
+                closeAction,
+                title: i18n.t('Common.Result'),
+                content: (
+                  <Table
+                    tableHeaderColor="info"
+                    tableHead={['工步名称', '耗时', '结果']}
+                    tableData={data}
+                    colorsColls={['info']}
+                  />
+                )
+              })
+            );
+          }
           yield put(orderActions.finishOrder(this));
         } catch (e) {
           CommonLog.lError(e, {
@@ -302,7 +366,17 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           CommonLog.Info('order done');
         }
       },
-      * [ORDER_STATUS.PENDING]() {
+      * [ORDER_STATUS.FAIL](ORDER, orderActions) {
+        try {
+
+          yield put(orderActions.finishOrder(this));
+        } catch (e) {
+          CommonLog.lError(e, {
+            at: 'ORDER_STATUS.PENDING'
+          });
+        }
+      },
+      * [ORDER_STATUS.PENDING](ORDER, orderActions) {
         try {
           yield put(orderActions.finishOrder(this));
         } catch (e) {
@@ -311,7 +385,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           });
         }
       },
-      * [ORDER_STATUS.CANCEL]() {
+      * [ORDER_STATUS.CANCEL](ORDER, orderActions) {
         try {
           yield put(orderActions.finishOrder(this));
         } catch (e) {

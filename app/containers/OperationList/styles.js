@@ -82,4 +82,7 @@ export default (theme) => ({
   statusPending:{
     backgroundColor:theme.palette.warning.main,
   },
+  statusFail:{
+    backgroundColor:theme.palette.danger.main,
+  },
 });

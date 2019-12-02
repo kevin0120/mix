@@ -21,16 +21,16 @@ type Props = {
   onPointClick?: ?(ClsOperationPoint)=>boolean
 };
 
-export default function ScrewImage({ twinkle, style = {}, image, points, focus, pointScale = 1, notifyInfo, enableReWork, onPointClick }: Props) {
+export default function ScrewImage({ twinkle, style = {}, image, points, selectedSequences, focus, pointScale = 1, notifyInfo, enableReWork, onPointClick }: Props) {
   const classes = makeStyles(styles.image)();
-  
+
   const imageRef = useRef(null);
   const containerRef = useRef(null);
   const [size, setSize] = useState({
     width: 100,
     height: 100
   });
-  
+
   const handleResize = useCallback(() => {
     const img = imageRef.current;
     const container = containerRef.current;
@@ -41,11 +41,11 @@ export default function ScrewImage({ twinkle, style = {}, image, points, focus, 
       });
     }
   }, []);
-  
+
   const [focusStyle, setFocusStyle] = useState({
     transform: `translate(${0}%,${0}%) scale(${1},${1})`
   });
-  
+
   useEffect(() => {
     // if (focus && points?.[activeIndex]) {
     //   const transformX = (50 - points?.[activeIndex]?.x || 0) * focus;
@@ -59,13 +59,13 @@ export default function ScrewImage({ twinkle, style = {}, image, points, focus, 
     //   });
     // }
   }, [focus, points]);
-  
-  
+
+
   useEffect(() => {
     window.addEventListener('resize', () => handleResize && handleResize());
     return () => window.removeEventListener('resize', () => handleResize && handleResize());
   }, [handleResize]);
-  
+
   return (
     <div
       className={classes.container}
@@ -95,16 +95,17 @@ export default function ScrewImage({ twinkle, style = {}, image, points, focus, 
           y={p.y}
           twinkle={twinkle && p.isActive}
           status={p.status}
+          selected={(selectedSequences || []).some(sp => sp === p?.sequence)}
           label={`${p?.sequence || ''}`}
           scale={pointScale}
           reworkModiBGColor
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            if (!enableReWork && notifyInfo) {
-              notifyInfo('Warn', '当前工作模式无法进行返工作业，请先切换至返工模式!');
-              return false;
-            }
+            // if (!enableReWork && notifyInfo) {
+            //   notifyInfo('Warn', '当前工作模式无法进行返工作业，请先切换至返工模式!');
+            //   return false;
+            // }
             if (onPointClick) {
               return onPointClick(p);
             }

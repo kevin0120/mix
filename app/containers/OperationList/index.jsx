@@ -70,7 +70,8 @@ function HomeOperationList(props: Props) {
     [ORDER_STATUS.WIP]: classes.statusWIP,
     [ORDER_STATUS.DONE]: classes.statusDone,
     [ORDER_STATUS.CANCEL]: classes.statusCancel,
-    [ORDER_STATUS.PENDING]: classes.statusPending
+    [ORDER_STATUS.PENDING]: classes.statusPending,
+    [ORDER_STATUS.FAIL]: classes.statusFail
   };
 
   useEffect(() => {
@@ -119,10 +120,10 @@ function HomeOperationList(props: Props) {
                       order.productCode,
                       order.workcenter,
                       order.datePlannedStart &&
-                        order.datePlannedStart.toLocaleString()
-                    ].map(d => (
+                      order.datePlannedStart.toLocaleString()
+                    ].map((d, idx) => (
                       <Typography
-                        key={d}
+                        key={`${d}-${idx}`}
                         variant="body2"
                         color="textSecondary"
                         align="left"
@@ -145,7 +146,7 @@ function HomeOperationList(props: Props) {
             </Grid>
           ) : null
         )) ||
-        null}
+      null}
     </React.Fragment>
   );
 

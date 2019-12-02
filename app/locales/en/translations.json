@@ -5,6 +5,7 @@
     "wip": "WIP",
     "cancel": "CANCEL",
     "pending": "PENDING",
+    "fail": "FAIL",
     "done": "DONE",
     "excp": "EXCEPT"
   },

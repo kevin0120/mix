@@ -2,7 +2,7 @@
 
 // NOTE: 拧紧点key定义,如果此点为key，此点必须拧紧结束同时此组的结果到达拧紧关键点个数才能进入下个拧紧组
 import { POINT_STATUS, RESULT_STATUS } from '../constants';
-import type { tPoint, tPointStatus, tResult, tResultStatus } from '../interface/typeDef';
+import type { tPoint, tPointStatus, tResult } from '../interface/typeDef';
 
 // eslint-disable-next-line import/prefer-default-export
 export class ClsOperationPoint {
@@ -22,6 +22,14 @@ export class ClsOperationPoint {
     this._results = [];
   }
 
+  start() {
+    if (!this._isActive) {
+      this.setActive(true);
+      return this;
+    }
+    return null;
+  }
+
   toString(): string {
     return JSON.stringify(
       {
@@ -39,9 +47,10 @@ export class ClsOperationPoint {
     //   this._results[rsCount - 1].result === RESULT_STATUS.nok
     // );
     return (
-      this._point.max_redo_times >= 0 &&
-      this._results.filter(r => r.result === RESULT_STATUS.nok)
+      this._point.max_redo_times >= 0
+      && this._results.filter(r => r.result === RESULT_STATUS.nok)
         .length >= this._point.max_redo_times
+      && this._results.slice(-1)[0].result === RESULT_STATUS.nok
     );
   }
 
@@ -56,6 +65,17 @@ export class ClsOperationPoint {
       lastResult.result === RESULT_STATUS.ak2
       || this.isFinalFail
       || lastResult.result === RESULT_STATUS.ok
+    );
+  }
+
+  get isSuccess(): boolean {
+    const rsCount = this._results.length;
+    const lastResult: tResult = this._results[rsCount - 1];
+    if (!lastResult) {
+      return false;
+    }
+    return (
+      lastResult.result === RESULT_STATUS.ok
     );
   }
 
@@ -142,7 +162,8 @@ export class ClsOperationPoint {
     return {
       ...this.point,
       status: this._status,
-      isActive: this._isActive
+      isActive: this._isActive,
+      canRedo: this.canRedo
     };
   }
 

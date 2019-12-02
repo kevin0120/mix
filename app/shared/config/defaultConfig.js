@@ -4,7 +4,8 @@ import { ioOutputs, ioInputs } from '../../modules/io/constants';
 
 const defaultConfigs = {
   version: 'v0.1',
-  appName: '智能装配系统-终端',
+  // appName: '智能装配系统-终端',
+  appName: '长安汽车智能装配系统-终端',
   devices: {
     io: {
       sn:'io1',
@@ -143,8 +144,8 @@ const defaultConfigs = {
     },
     connections: {
       // rush: 'http://192.168.4.32:8082',
-      rush: 'http://192.168.4.18:8082',
-      // rush: 'http://127.0.0.1:8082',
+      // rush: 'http://192.168.4.18:8082',
+      rush: 'http://127.0.0.1:8082',
       // rush: 'http://0da41704.ngrok.io:8082',//4.188//4.219//192.168.4.188//10.1.1.65//192.168.4.247//0.2
       rfid: 'tcp://127.0.0.1:2112',
       aiis: 'http://127.0.0.1:9092'
