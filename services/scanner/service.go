@@ -77,6 +77,12 @@ func (s *Service) search() {
 	ctx := gousb.NewContext()
 	defer ctx.Close()
 
+	if s.DeviceService == nil {
+		err := errors.New("Please Initial Device Service First")
+		s.diag.Error("Scanner Search", err)
+		return
+	}
+
 	label := s.config().EntityLabel
 	var vid, pid int64
 
