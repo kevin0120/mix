@@ -10,11 +10,50 @@ import (
 //https://github.com/go-xorm/xorm/blob/master/README_CN.md
 //http://gobook.io/read/github.com/go-xorm/manual-zh-CN/chapter-01/
 
-func (s *Service) WorkorderIn(in []byte) (string, error) {
+func (s *Service) WorkorderSync(work *Workorders) (string, error) {
 
 	session := s.eng.NewSession().ForUpdate()
 	defer session.Close()
 	session.Begin()
+
+	roll, err := s.DeleteWorkAndStep(session, work.Code, work.Unique_Num)
+	if roll {
+		session.Rollback()
+		return "", errors.Wrapf(err, "本地已有更新版本号对应的工单")
+	}
+
+	_, err = session.Insert(work)
+	if err != nil {
+		session.Rollback()
+		return "", errors.Wrapf(err, "store data fail")
+	}
+
+	if len(work.Steps) == 0 {
+		session.Rollback()
+		return "", errors.Wrapf(err, "loss steps information")
+	}
+
+	for i := 0; i < len(work.Steps); i++ {
+		work.Steps[i].WorkorderID = work.Id
+		_, err := session.Insert(work.Steps[i])
+
+		if err != nil {
+			session.Rollback()
+			return "", errors.Wrapf(err, "store data fail")
+		}
+
+	}
+
+	err = session.Commit()
+	if err != nil {
+		return "", errors.Wrapf(err, "commit fail")
+	}
+
+	return work.Code, nil
+}
+
+func (s *Service) WorkorderIn(in []byte) (string, error) {
+
 	var work Workorders
 	var workPayload WorkorderPayload
 	err := json.Unmarshal(in, &work)
@@ -26,44 +65,17 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 		return "", err
 	}
 
-	//删除已有公布工单,条件:收到的工单号比原有工单号大
-	roll, _ := s.DeleteWorkAndStep(session, work.Code, work.Unique_Num)
-	if roll {
-		session.Rollback()
-		return "", errors.Wrapf(err, "本地已有更新版本号对应的工单")
-	}
 	wp, err := json.Marshal(workPayload)
-	//dt := time.Now()
-	//if data.controllerResult.Dat != "" {
-	//	loc, _ := time.LoadLocation("Local")
-	//	dt, _ = time.ParseInLocation("2006-01-02 15:04:05", data.controllerResult.Dat, loc)
-	//}
-	//
-	//dbResult.UpdateTime = dt.UTC()
-	//
 
 	workorder1 := Workorders{
-		Workorder:    string(wp),
-		Code:         work.Code,
-		Track_code:   work.Track_code,
-		Product_code: work.Product_code,
-		//Workcenter:            work.Workcenter,
+		Workorder:             string(wp),
+		Code:                  work.Code,
+		Track_code:            work.Track_code,
+		Product_code:          work.Product_code,
 		Status:                "todo",
 		Date_planned_start:    work.Date_planned_start,
 		Date_planned_complete: work.Date_planned_complete,
 		Unique_Num:            work.Unique_Num,
-	}
-
-	//var hh map[string]interface{}
-	//
-	//err = json.Unmarshal(wor, &hh)
-	_, err = session.Insert(&workorder1)
-	// INSERT INTO struct () values ()
-	//engine.Ping()
-	//有的数据库超时断开ping可以重连。可以通过起一个定期Ping的Go程来保持连接鲜活。
-	if err != nil {
-		session.Rollback()
-		return "", errors.Wrapf(err, "store data fail")
 	}
 
 	var workorderMap map[string]interface{}
@@ -71,9 +83,10 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 
 	err = json.Unmarshal(in, &workorderMap)
 
-	steps, _ := json.Marshal(workorderMap["steps"])
-
-	err = json.Unmarshal(steps, &step)
+	if _, exist := workorderMap["steps"]; exist {
+		steps, _ := json.Marshal(workorderMap["steps"])
+		err = json.Unmarshal(steps, &step)
+	}
 
 	for i := 0; i < len(step); i++ {
 		stepString, _ := json.Marshal(step[i])
@@ -106,22 +119,9 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 			Data:           msg.Data,
 		}
 
-		_, err := session.Insert(&step)
-		// INSERT INTO struct () values ()
-		if err != nil {
-			session.Rollback()
-			return "", errors.Wrapf(err, "store data fail")
-		}
-
+		workorder1.Steps = append(workorder1.Steps, step)
 	}
-
-	err = session.Commit()
-	if err != nil {
-		return "", errors.Wrapf(err, "commit fail")
-	}
-
-	return workorder1.Code, nil
-
+	return s.WorkorderSync(&workorder1)
 }
 
 func (s *Service) WorkorderOut(order string, workorderID int64) (interface{}, error) {

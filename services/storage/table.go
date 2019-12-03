@@ -58,6 +58,8 @@ type Workorders struct {
 	Data       string    `xorm:"text 'data'" json:"data"`
 	Created    time.Time `xorm:"created" json:"-"`
 	Updated    time.Time `xorm:"updated" json:"-"`
+
+	Steps []Steps `json:"-"`
 }
 
 type Steps struct {
