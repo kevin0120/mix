@@ -82,6 +82,7 @@ type AIISResult struct {
 	WorkcenterCode string `json:"workcenter_code"`
 	Stage          string `json:"stage"`
 	WorkorderID    int64  `json:"workorder_id"`
+	WorkorderName  string `json:"workorder_name"`
 
 	Payload string `json:"payload"`
 }

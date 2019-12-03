@@ -141,9 +141,9 @@ device:
 tightening_device:
   enable: true
   devices:
-    - model: ModelDesoutterCvi3
+    - model: ModelDesoutterDeltaWrench
       protocol: OpenProtocol
-      endpoint: tcp://192.168.3.23:4545
+      endpoint: tcp://192.168.5.186:4545
       sn: c1
       tools:
         - sn: t1
