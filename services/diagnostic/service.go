@@ -42,6 +42,12 @@ func NewService(c Config, stdout, stderr io.Writer) *Service {
 	}
 }
 
+func (s *Service) NewCustomizeHandler(projectCode string) *CustomizeHandler {
+	return &CustomizeHandler{
+		l: s.Logger.With(String("service", projectCode)),
+	}
+}
+
 func (s *Service) NewServerHandler() *ServerHandler {
 	return &ServerHandler{
 		l: s.Logger.With(String("source", "srv")),
