@@ -1,7 +1,7 @@
 // @flow
 import type { Saga } from 'redux-saga';
 import { takeEvery, select, call, all, put, delay } from 'redux-saga/effects';
-import { IO } from './constants';
+import { IO, ioInputs } from './constants';
 import { newDevice } from '../deviceManager/devices';
 import { CommonLog } from '../../common/utils';
 import { ioDirection, ioTriggerMode } from '../device/io/constants';
@@ -14,7 +14,9 @@ let defaultIOModule = null;
 
 const listeners = {};
 
-const ioFunctions = {};
+const ioFunctions = {
+  // [ioInputs.resetKey]:
+};
 
 export default function* root(): Saga<void> {
   try {
@@ -41,6 +43,16 @@ function* initIO() {
       []
     );
     // TODO set init io status
+    // const { ioPorts } = yield select(s => s.io);
+    // const {
+    //   [ioDirection.input]: inputs,
+    //   [ioDirection.output]: outputs
+    // } = ioPorts || {};
+    // const effects = [];
+    // Object.keys(inputs).forEach((k) => {
+    //   effects.push(put(ioActions.addListener(k, ioFunctions[k])));
+    // });
+    // yield all(effects);
   } catch (e) {
     console.error(e);
   }
@@ -81,14 +93,15 @@ function* setPortsConfig(action) {
 
     const { ioOutStatus } = yield select(s => s.io);
     if (prevOutputs) {
+
       Object.keys(prevOutputs).forEach((k) => {
         if (prevOutputs[k] !== outputs[k]) {
-          effects.push(put(ioActions.set(prevOutputs[k], ioOutStatus[prevOutputs[k]])));
+          effects.push(put(ioActions.set([k], ioOutStatus[prevOutputs[k]])));
         }
       });
       Object.keys(outputs).forEach((k) => {
         if (prevOutputs[k] !== outputs[k]) {
-          effects.push(put(ioActions.set(outputs[k], ioOutStatus[outputs[k]])));
+          effects.push(put(ioActions.set([k], ioOutStatus[outputs[k]])));
         }
       });
     }
@@ -165,20 +178,23 @@ function* setIOOutput(action) {
     }
     const { group, status } = action;
     const { ioPorts } = yield select(s => s.io);
-    console.log(group);
+    console.log(group, status);
     const ports = group.map(
       o =>
         defaultIOModule &&
         defaultIOModule.getPort(
           ioDirection.output,
-          ioPorts[ioDirection.input][o]
+          ioPorts[ioDirection.output][o]
         )
     );
-    yield all(
-      ports.map(p => call(defaultIOModule && defaultIOModule.setIO(p, status)))
-    );
+    console.log(ports);
+    yield all(ports.map(p => call(
+      (defaultIOModule && defaultIOModule.setIO) || (() => {
+      }), p, status)
+    ));
 
   } catch (e) {
     CommonLog.lError(e);
   }
 }
+
