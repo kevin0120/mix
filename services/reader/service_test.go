@@ -32,7 +32,7 @@ func TestService(t *testing.T) {
 					break
 				}
 
-				fmt.Println("Connect to card")
+				fmt.Println("connect to card")
 				card, err := ctx.Connect(readers[index], scard.ShareExclusive, scard.ProtocolAny)
 				if err != nil {
 					time.Sleep(SEARCH_ITV)

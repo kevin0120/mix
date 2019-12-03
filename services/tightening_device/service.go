@@ -3,12 +3,12 @@ package tightening_device
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/kataras/iris/core/errors"
 	"github.com/kataras/iris/websocket"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
+	"github.com/pkg/errors"
 	"sync"
 	"sync/atomic"
 )
@@ -44,52 +44,61 @@ type Service struct {
 	requestDispatchers map[string]*utils.Dispatcher
 }
 
+func (s *Service) initGblDispatcher() {
+	s.dispatchers = map[string]*utils.Dispatcher{
+		DISPATCH_RESULT:            utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		DISPATCH_CONTROLLER_STATUS: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		DISPATCH_IO:                utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		DISPATCH_TOOL_STATUS:       utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		DISPATCH_CONTROLLER_ID:     utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		DISPATCH_NEW_TOOL:          utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+	}
+}
+
+func (s *Service) loadTighteningTool(c Config) {
+	for _, deviceConfig := range c.Devices {
+
+		c, err := s.protocols[deviceConfig.Protocol].CreateController(&deviceConfig)
+		if err != nil {
+			s.diag.Error("Create Controller Failed", err)
+			continue
+		}
+
+		c.GetDispatch(DISPATCH_RESULT).Register(s.OnResult)
+		c.GetDispatch(DISPATCH_TOOL_STATUS).Register(s.OnToolStatus)
+		c.GetDispatch(DISPATCH_CONTROLLER_STATUS).Register(s.OnControllerStatus)
+		c.GetDispatch(DISPATCH_IO).Register(s.OnIOInputs)
+		c.GetDispatch(DISPATCH_CONTROLLER_ID).Register(s.OnControllerBarcode)
+
+		// TODO: 如果控制器序列号没有配置，则通过探测加入设备列表。
+		s.addController(deviceConfig.SN, c)
+	}
+}
+
 func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol) (*Service, error) {
 
-	srv := &Service{
+	s := &Service{
 		diag:               d,
 		mtxDevices:         sync.Mutex{},
 		runningControllers: map[string]ITighteningController{},
 		protocols:          map[string]ITighteningProtocol{},
-		dispatchers: map[string]*utils.Dispatcher{
-			DISPATCH_RESULT:            utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-			DISPATCH_CONTROLLER_STATUS: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-			DISPATCH_IO:                utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-			DISPATCH_TOOL_STATUS:       utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-			DISPATCH_CONTROLLER_ID:     utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		},
 	}
 
-	srv.configValue.Store(c)
-	srv.Api = &Api{
-		service: srv,
+	s.initGblDispatcher()
+
+	s.configValue.Store(c)
+	s.Api = &Api{
+		s,
 	}
 
 	// 载入支持的协议
 	for _, protocol := range protocols {
-		srv.protocols[protocol.Name()] = protocol
+		s.protocols[protocol.Name()] = protocol
 	}
 
 	// 根据配置加载所有拧紧控制器
-	for _, deviceConfig := range c.Devices {
-
-		c, err := srv.protocols[deviceConfig.Protocol].CreateController(&deviceConfig)
-		if err != nil {
-			srv.diag.Error("Create Controller Failed", err)
-			continue
-		}
-
-		c.GetDispatch(DISPATCH_RESULT).Register(srv.OnResult)
-		c.GetDispatch(DISPATCH_TOOL_STATUS).Register(srv.OnToolStatus)
-		c.GetDispatch(DISPATCH_CONTROLLER_STATUS).Register(srv.OnControllerStatus)
-		c.GetDispatch(DISPATCH_IO).Register(srv.OnIOInputs)
-		c.GetDispatch(DISPATCH_CONTROLLER_ID).Register(srv.OnControllerBarcode)
-
-		// TODO: 如果控制器序列号没有配置，则通过探测加入设备列表。
-		srv.addController(deviceConfig.SN, c)
-	}
-
-	return srv, nil
+	s.loadTighteningTool(c)
+	return s, nil
 }
 
 func (s *Service) Open() error {
@@ -99,14 +108,23 @@ func (s *Service) Open() error {
 
 	s.WS.AddNotify(s)
 
-	for _, v := range s.dispatchers {
-		v.Start()
+	for name, v := range s.dispatchers {
+		if err := v.Start(); err != nil {
+			s.diag.Error(fmt.Sprintf("Start Dispatcher: %s Error", name), err)
+		}
 	}
 
 	// 启动所有拧紧控制器
 	s.startupControllers()
 
 	s.initRequestDispatchers()
+
+	controllers := s.GetControllers()
+	for _, c := range controllers {
+		for toolSN, _ := range c.Children() {
+			s.GetDispatcher(DISPATCH_NEW_TOOL).Dispatch(toolSN)
+		}
+	}
 
 	return nil
 }
@@ -286,7 +304,13 @@ func (s *Service) OnControllerBarcode(data interface{}) {
 }
 
 func (s *Service) GetDispatcher(name string) *utils.Dispatcher {
-	return s.dispatchers[name]
+	if d, ok := s.dispatchers[name]; ok {
+		return d
+	} else {
+		err := errors.Errorf("Dispatcher : %sIs Not Existed!", name)
+		s.diag.Error("GetDispatcher", err)
+		return nil
+	}
 }
 
 func (s *Service) GetControllers() map[string]ITighteningController {

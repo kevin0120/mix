@@ -191,15 +191,7 @@ func (s *Service) Open() error {
 		HandlerFunc: s.methods.getHealthz,
 	}
 	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "GET",
-		Pattern:     "/hmi-results",
-		HandlerFunc: s.methods.getHmiResults,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
+	
 	r = httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
 		Method:      "PUT",

@@ -326,13 +326,6 @@ func GenerateResult(sn uint64, wsType string, data interface{}) *WSMsg {
 	}
 }
 
-func GenerateMessage(sn uint64, wsType string, data interface{}) *WSMsg {
-	return &WSMsg{
-		SN:   sn,
-		Type: wsType,
-		Data: data,
-	}
-}
 
 func WSClientSend(c websocket.Connection, event string, payload interface{}) error {
 	if c == nil {
@@ -342,4 +335,12 @@ func WSClientSend(c websocket.Connection, event string, payload interface{}) err
 	//str, _ := json.Marshal(payload)
 	//fmt.Println(string(str))
 	return c.Emit(event, payload)
+}
+
+func GenerateMessage(sn uint64, wsType string, data interface{}) *WSMsg {
+	return &WSMsg{
+		SN:   sn,
+		Type: wsType,
+		Data: data,
+	}
 }
