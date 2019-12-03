@@ -532,3 +532,20 @@ func (h *DeviceHandler) Error(msg string, err error) {
 func (h *DeviceHandler) Debug(msg string) {
 	h.l.Debug(msg)
 }
+
+// 客制化项目模块使用的句柄
+type CustomizeHandler struct {
+	l Logger
+}
+
+func (h *CustomizeHandler) Info(msg string) {
+	h.l.Info(msg)
+}
+
+func (h *CustomizeHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+func (h *CustomizeHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}

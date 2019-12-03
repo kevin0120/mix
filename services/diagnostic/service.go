@@ -66,6 +66,12 @@ func (s *Service) NewAudiVWHandler() *AudiVWHandler {
 	}
 }
 
+func (s *Service) NewCustomizeHandler(projectCode string) *CustomizeHandler {
+	return &CustomizeHandler{
+		l: s.Logger.With(String("service", projectCode)),
+	}
+}
+
 func (s *Service) NewOpenProtocolHandler() *OpenProtocolHandler {
 	return &OpenProtocolHandler{
 		l: s.Logger.With(String("service", "OpenProtocol")),
