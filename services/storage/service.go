@@ -831,23 +831,39 @@ func (s *Service) GetRoutingOperations(op_id int64, model string) (RoutingOperat
 	}
 }
 
-func (s *Service) FindRoutingOperations(workcenter_code string, cartype string, job int) (RoutingOperations, error) {
+func (s *Service) GetRoutingOperationViaProductTypeCode(productTypeCode string) (*RoutingOperations, error) {
 
-	var ros []RoutingOperations
+	var ros RoutingOperations
+	// 工艺作业是按工位下发的,在当前工位看到的既是本工位的工艺信息
+	ss := s.eng.Alias("r").Where("r.product_type = ?", productTypeCode)
 
-	ss := s.eng.Alias("r").Where("r.workcenter_code = ?", workcenter_code).And("r.product_type = ? or r.job = ?", cartype, job)
-
-	e := ss.Find(&ros)
+	has, e := ss.Get(&ros) //自动增加 limit 1 限制
 
 	if e != nil {
-		return RoutingOperations{}, e
-	} else {
-		if len(ros) > 0 {
-			return ros[0], nil
-		} else {
-			return RoutingOperations{}, errors.New("result not found")
-		}
+		return nil, e
 	}
+	if !has {
+		return nil, errors.New("GetRoutingOperationViaProductTypeCode: Operation Is Not Found")
+	}
+	return &ros, nil
+}
+
+
+func (s *Service) FindRoutingOperations(workCenterCode string, cartype string, job int) (*RoutingOperations, error) {
+
+	var ros RoutingOperations
+
+	ss := s.eng.Alias("r").Where("r.workcenter_code = ?", workCenterCode).And("r.product_type = ? or r.job = ?", cartype, job)
+
+	has, e := ss.Get(&ros)
+
+	if e != nil {
+		return nil, e
+	}
+	if !has {
+		return nil, errors.New("GetRoutingOperationViaProductTypeCode: Operation Is Not Found")
+	}
+	return &ros, nil
 }
 
 func (s *Service) FindLocalResults(hmi_sn string, limit int) ([]ResultsWorkorders, error) {

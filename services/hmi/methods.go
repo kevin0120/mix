@@ -979,7 +979,7 @@ func (m *Methods) getRoutingOpertions(ctx iris.Context) {
 	ro, err := m.service.DB.FindRoutingOperations(code, carType, job)
 	if err != nil {
 		ctx.StatusCode(iris.StatusNotFound)
-		ctx.WriteString("can not find RoutingOpertions")
+		ctx.WriteString("can not find RoutingOperations")
 		return
 	}
 
@@ -1008,7 +1008,7 @@ func (m *Methods) getLocalResults(ctx iris.Context) {
 		return
 	}
 
-	rt := []LocalResults{}
+	var rt []LocalResults
 	sr := controller.ResultValue{}
 	for _, v := range results {
 		stime := v.Results.UpdateTime.Format("2006-01-02 15:04:05")
