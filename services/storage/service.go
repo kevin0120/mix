@@ -57,66 +57,50 @@ func (s *Service) Open() error {
 		return errors.Wrapf(err, "Create postgres engine fail")
 	}
 
-	exist, err := engine.IsTableExist("Workorders")
+	_, err = engine.IsTableExist("workorders")
 	if err == nil {
-		if !exist {
-			if err := engine.Sync2(new(Workorders)); err != nil {
-				return errors.Wrapf(err, "Create Table Workorders fail")
-			}
+		if err := engine.Sync2(new(Workorders)); err != nil {
+			return errors.Wrapf(err, "Create Table Workorders fail")
 		}
 	}
 
-	exist, err = engine.IsTableExist("Results")
+	_, err = engine.IsTableExist("results")
 	if err == nil {
-		if !exist {
-			if err := engine.Sync2(new(Results)); err != nil {
-				return errors.Wrapf(err, "Create Table Results fail")
-			}
+		if err := engine.Sync2(new(Results)); err != nil {
+			return errors.Wrapf(err, "Create Table Results fail")
 		}
 	}
 
-	exist, err = engine.IsTableExist("Curves")
+	_, err = engine.IsTableExist("curves")
 	if err == nil {
-		if !exist {
-			if err := engine.Sync2(new(Curves)); err != nil {
-				return errors.Wrapf(err, "Create Table Curves fail")
-			}
+		if err := engine.Sync2(new(Curves)); err != nil {
+			return errors.Wrapf(err, "Create Table Curves fail")
 		}
 	}
 
-	exist, err = engine.IsTableExist("Controllers")
+	_, err = engine.IsTableExist("controllers")
 	if err == nil {
-		if !exist {
-			if err := engine.Sync2(new(Controllers)); err != nil {
-				return errors.Wrapf(err, "Create Table Controllers fail")
-			}
+		if err := engine.Sync2(new(Controllers)); err != nil {
+			return errors.Wrapf(err, "Create Table Controllers fail")
 		}
 	}
 
-	exist, err = engine.IsTableExist("Guns")
+	_, err = engine.IsTableExist("guns")
 	if err == nil {
-		if !exist {
-			if err := engine.Sync2(new(Guns)); err != nil {
-				return errors.Wrapf(err, "Create Table Guns fail")
-			}
+		if err := engine.Sync2(new(Guns)); err != nil {
+			return errors.Wrapf(err, "Create Table Guns fail")
 		}
 	}
 
-	exist, err = engine.IsTableExist("RoutingOperations")
-	if err == nil {
-		if !exist {
-			if err := engine.Sync2(new(RoutingOperations)); err != nil {
-				return errors.Wrapf(err, "Create Table RoutingOperations fail")
-			}
-		}
+	_, err = engine.IsTableExist("routing_operations")
+	if err := engine.Sync2(new(RoutingOperations)); err != nil {
+		return errors.Wrapf(err, "Create Table RoutingOperations fail")
 	}
 
-	exist, err = engine.IsTableExist("Steps")
+	_, err = engine.IsTableExist("steps")
 	if err == nil {
-		if !exist {
-			if err := engine.Sync2(new(Steps)); err != nil {
-				return errors.Wrapf(err, "Create Table Steps fail")
-			}
+		if err := engine.Sync2(new(Steps)); err != nil {
+			return errors.Wrapf(err, "Create Table Steps fail")
 		}
 	}
 
