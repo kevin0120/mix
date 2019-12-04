@@ -8,7 +8,6 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
-	"gopkg.in/go-playground/validator.v9"
 	"sync/atomic"
 	"time"
 )
@@ -26,7 +25,7 @@ type Service struct {
 	diag        Diagnostic
 	configValue atomic.Value
 	eng         *xorm.Engine
-	validate    *validator.Validate
+	validator   *validator.Validate
 }
 
 func NewService(c Config, d Diagnostic) *Service {
@@ -36,7 +35,7 @@ func NewService(c Config, d Diagnostic) *Service {
 	}
 
 	s.configValue.Store(c)
-	s.validate = validator.New()
+	s.validator = validator.New()
 
 	return s
 }

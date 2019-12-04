@@ -13,7 +13,7 @@ import (
 
 func (s *Service) WorkorderSync(work *Workorders) (string, error) {
 
-	err := s.validate.Struct(work)
+	err := s.validator.Struct(work)
 	if err != nil {
 		return "", errors.Wrapf(err, "loss workorder-steps information")
 	}
