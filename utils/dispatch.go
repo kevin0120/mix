@@ -43,13 +43,12 @@ func (s *Dispatcher) setOpen(open bool) {
 	s.open = open
 }
 
-func (s *Dispatcher) Start() error {
+func (s *Dispatcher) Start() {
 	if !s.getOpen() {
 		go s.manage()
-
 		s.setOpen(true)
 	}
-	return nil
+	return
 }
 
 func (s *Dispatcher) Release() {

@@ -58,6 +58,7 @@ type Service struct {
 	WS                *wsnotify.Service
 	Aiis              *aiis.Service
 	workordersChannel chan interface{}
+	opened            bool
 	wg                sync.WaitGroup
 	closing           chan struct{}
 }
@@ -71,6 +72,7 @@ func NewService(c Config, d Diagnostic) *Service {
 		status:            ODOO_STATUS_OFFLINE,
 		workordersChannel: make(chan interface{}, c.Workers),
 		closing:           make(chan struct{}),
+		opened:            false,
 	}
 
 	s.methods.service = s
@@ -97,7 +99,7 @@ func (s *Service) PushStatus() {
 
 func (s *Service) GetEndpoints(name string) []Endpoint {
 
-	endpoints := []Endpoint{}
+	var endpoints []Endpoint
 	for _, v := range s.endpoints {
 		if v.name == name {
 			endpoints = append(endpoints, *v)
@@ -111,7 +113,10 @@ func (s *Service) Config() Config {
 	return s.configValue.Load().(Config)
 }
 
-func (s *Service) Open() error {
+func (s *Service) ensureHttpClient() *resty.Client {
+	if s.httpClient != nil {
+		return s.httpClient
+	}
 	c := s.Config()
 	client := resty.New()
 	client.SetRESTMode() // restful mode is default
@@ -124,6 +129,11 @@ func (s *Service) Open() error {
 		SetRetryMaxWaitTime(20 * time.Second)
 
 	s.httpClient = client
+	return client
+}
+
+func (s *Service) Open() error {
+	s.ensureHttpClient()
 
 	handler, err := s.HTTPDService.GetHandlerByName(httpd.BasePath)
 	if err != nil {
@@ -193,11 +203,14 @@ func (s *Service) Open() error {
 		s.wg.Add(1)
 		go s.taskSaveWorkorders()
 	}
-
+	s.opened = true
 	return nil
 }
 
 func (s *Service) Close() error {
+	if !s.opened {
+		return nil
+	}
 	for i := 0; i < s.Config().Workers; i++ {
 		s.closing <- struct{}{}
 	}
@@ -464,7 +477,7 @@ func (s *Service) taskSaveWorkorders() {
 			//s.handleSaveWorkorders(payload)
 			code, err := s.DB.WorkorderIn(payload.([]byte))
 			if err != nil {
-				s.diag.Error("收到下发工单本地化存储时出错",err)
+				s.diag.Error("收到下发工单本地化存储时出错", err)
 				break
 			}
 			orderOut, _ := s.DB.WorkorderOut(code, 0)

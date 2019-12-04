@@ -68,9 +68,9 @@ type Service struct {
 
 	TighteningService *tightening_device.Service
 	Broker            *broker.Service
-
-	toolCollector chan string
-	closing       chan struct{}
+	opened            bool
+	toolCollector     chan string
+	closing           chan struct{}
 }
 
 func NewService(c Config, d Diagnostic, rush_port string) *Service {
@@ -87,6 +87,7 @@ func NewService(c Config, d Diagnostic, rush_port string) *Service {
 		AiisStatusDispatcher: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		updateQueue:          map[int64]time.Time{},
 		mtx:                  sync.Mutex{},
+		opened:               false,
 		toolCollector:        make(chan string, 16),
 		closing:              make(chan struct{}, 1),
 	}
@@ -163,24 +164,31 @@ func (s *Service) RegisterTighteningResultHandler(name string, handler Tightenin
 	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_RESULT).Register(fn)
 }
 
-func (s *Service) Open() error {
-	s.RegisterTighteningResultHandler(tightening_device.DISPATCH_RESULT, s.OnTighteningResult)
-	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_NEW_TOOL).Register(s.onNewTool)
-	s.Broker.BrokerStatusDisptcher.Register(s.onBrokerStatus)
-
+func (s *Service) ensureHttpClient() *resty.Client {
+	if s.httpClient != nil {
+		return s.httpClient
+	}
 	c := s.Config()
 	client := resty.New()
 	client.SetRESTMode() // restful mode is default
 	client.SetTimeout(time.Duration(c.Timeout))
 	client.SetContentLength(true)
 	// Headers for all request
-	client.SetHeaders(c.Headers)
 	client.
 		SetRetryCount(c.MaxRetry).
 		SetRetryWaitTime(time.Duration(c.PushInterval)).
 		SetRetryMaxWaitTime(20 * time.Second)
 
 	s.httpClient = client
+	return client
+}
+
+func (s *Service) Open() error {
+	s.RegisterTighteningResultHandler(tightening_device.DISPATCH_RESULT, s.OnTighteningResult)
+	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_NEW_TOOL).Register(s.onNewTool)
+	s.Broker.BrokerStatusDisptcher.Register(s.onBrokerStatus)
+
+	s.ensureHttpClient()
 
 	//entry := strings.Split(s.Config().Urls[0], "://")[1]
 	//url := url.URL{Scheme: "ws", Host: entry, Path: s.Config().WSResultRoute}
@@ -205,11 +213,14 @@ func (s *Service) Open() error {
 	go s.ResultUploadManager()
 
 	s.rpc.Start()
-
+	s.opened = true
 	return nil
 }
 
 func (s *Service) Close() error {
+	if !s.opened {
+		return nil
+	}
 	s.OdooStatusDispatcher.Release()
 	s.AiisStatusDispatcher.Release()
 	s.closing <- struct{}{}

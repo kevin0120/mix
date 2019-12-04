@@ -239,7 +239,7 @@ func (m *Methods) putSyncRoutingOpertions(ctx iris.Context) {
 
 	points, _ := json.Marshal(ro.Points)
 
-	db_ro, err := m.service.DB.GetRoutingOperations(ro.OperationID, ro.ProductType)
+	db_ro, err := m.service.DB.GetRoutingOperations(ro.Name, ro.ProductType)
 
 	db_ro.Points = string(points)
 	db_ro.VehicleTypeImg = ro.VehicleTypeImg

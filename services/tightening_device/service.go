@@ -108,10 +108,8 @@ func (s *Service) Open() error {
 
 	s.WS.AddNotify(s)
 
-	for name, v := range s.dispatchers {
-		if err := v.Start(); err != nil {
-			s.diag.Error(fmt.Sprintf("Start Dispatcher: %s Error", name), err)
-		}
+	for _, v := range s.dispatchers {
+		v.Start()
 	}
 
 	// 启动所有拧紧控制器
