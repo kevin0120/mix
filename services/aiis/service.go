@@ -1,6 +1,7 @@
 package aiis
 
 import (
+	"github.com/masami10/rush/services/wsnotify"
 	"sync/atomic"
 	"time"
 
@@ -9,11 +10,9 @@ import (
 	"github.com/masami10/rush/services/broker"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
-	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"gopkg.in/resty.v1"
-	"net/http"
 	"strconv"
 	"strings"
 	"sync"
@@ -270,8 +269,24 @@ func (s *Service) OnRPCRecv(data interface{}) {
 
 		s.OdooStatusDispatcher.Dispatch(status.Status)
 		break
-	}
 
+	case TYPE_MES_STATUS:
+		// TODO: 收到mes状态更新, 通知HMI------doing
+		//s.WS.WSSend(wsnotify.WS_EVENT_MES,"MES在线")
+		body, _ := json.Marshal(wsnotify.GenerateResult(0, "", payload))
+		s.WS.WSSend(wsnotify.WS_EVENT_MES, string(body))
+		s.diag.Debug(fmt.Sprintf("收到mes状态并推送HMI: %s", payload))
+
+		//case TYPE_ORDER_START:
+		//	// TODO: 开工响应------doing
+		//	//s.WS.WSSendMes(wsnotify.WS_EVENT_MES,"123","mes允许开工")
+		//	break
+		//
+		//case TYPE_ORDER_FINISH:
+		//	// TODO: 完工响应------doing
+		//	//s.WS.WSSendMes(wsnotify.WS_EVENT_MES,"123","mes确认完工")
+		//	break
+	}
 }
 
 //func (s *Service) PutResult(msg *WSMsg) error {
@@ -323,45 +338,58 @@ func (s *Service) PutResult(resultId int64, body *AIISResult) error {
 	//return err
 }
 
-func (s *Service) putResult(body interface{}, url string, method string) error {
-	r := s.httpClient.R().SetBody(body).SetHeader("rush_port", s.rush_port)
-	var resp *resty.Response
-	var err error
+func (s *Service) PutMesOpenRequest(sn uint64, wsType string, code string, req interface{}, ch <-chan int) (interface{}, error) {
+	urlString := s.Config().MesOpenWorkUrl
+	url := fmt.Sprintf(urlString, code)
+	resp, err := s.httpClient.R().
+		SetBody(req).
+		Put(url)
 
-	switch method {
-	case "PATCH":
-		resp, err = r.Patch(url)
-		if err != nil {
-			return fmt.Errorf("Result Put fail: %s ", err.Error())
-		} else {
-			if resp.StatusCode() != http.StatusNoContent {
-				return fmt.Errorf("Result Put fail: %d ", resp.StatusCode())
-			}
-		}
-	case "PUT":
-		resp, err = r.Put(url)
-		if err != nil {
-			return fmt.Errorf("Result Put fail: %s ", err.Error())
-		} else {
-			if resp.StatusCode() != http.StatusNoContent {
-				return fmt.Errorf("Result Put fail: %d ", resp.StatusCode())
-			}
-		}
-	case "POST":
-		resp, err = r.Post(url)
-		if err != nil {
-			return fmt.Errorf("Result Put fail: %s ", err.Error())
-		} else {
-			if resp.StatusCode() != http.StatusNoContent {
-				return fmt.Errorf("Result Put fail: %d ", resp.StatusCode())
-			}
-		}
-	default:
-		return errors.New("Result Put :the Method is wrong")
-
+	if err != nil {
+		body, _ := json.Marshal(wsnotify.GenerateReply(sn, wsType, -2, err.Error()))
+		s.WS.WSSend(wsnotify.WS_EVENT_REPLY, string(body))
+		<-ch
+		return nil, err
 	}
-	s.diag.PutResultDone()
-	return nil
+	//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, resp.(string)))
+	body, _ := json.Marshal(wsnotify.GenerateResult(sn, wsType, resp.Body()))
+	s.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
+	<-ch
+	return resp.Body(), nil
+}
+
+func (s *Service) PutMesFinishRequest(sn uint64, wsType string, code string, req interface{}, ch <-chan int) (interface{}, error) {
+	url := fmt.Sprintf(s.Config().MesFinishWorkUrl, code)
+	resp, err := s.httpClient.R().
+		SetBody(req).
+		// or SetError(Error{}).
+		Put(url)
+
+	if err != nil {
+		body, _ := json.Marshal(wsnotify.GenerateReply(sn, wsType, -2, err.Error()))
+		s.WS.WSSend(wsnotify.WS_EVENT_REPLY, string(body))
+		<-ch
+		return nil, err
+	}
+	//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+	body, _ := json.Marshal(wsnotify.GenerateResult(sn, wsType, resp.Body()))
+	s.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
+	<-ch
+	return resp.Body(), nil
+}
+
+func (s *Service) PutOrderRequest(reqType string, body interface{}) error {
+	msg, _ := json.Marshal(RPCPayload{
+		Type: reqType,
+		Data: body,
+	})
+
+	err := s.rpc.RPCSend(string(msg))
+	if err != nil {
+		s.diag.Error("Grpc Err", err)
+	}
+
+	return err
 }
 
 func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error) {
@@ -408,7 +436,8 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	aiisResult.MO_NutNo = result.NutNo
 	aiisResult.MO_Model = dbWorkorder.MO_Model
 	aiisResult.Batch = result.Batch
-	aiisResult.Vin = dbWorkorder.Vin
+	aiisResult.Vin = dbWorkorder.Track_code
+	aiisResult.WorkorderName = dbWorkorder.Code
 	aiisResult.Mode = dbWorkorder.Mode
 	aiisResult.TighteningId, _ = strconv.ParseInt(result.TighteningID, 10, 64)
 	aiisResult.Lacking = "normal"

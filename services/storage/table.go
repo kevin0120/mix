@@ -47,7 +47,7 @@ type Workorders struct {
 	Workorder    string `xorm:"text 'workorder'" json:"-"`
 	Code         string `xorm:"pk unique varchar(128) 'code'"  json:"code"`
 	Track_code   string `xorm:"varchar(128) 'track_code'" json:"track_code"`
-	Product_code string `xorm:"varchar(128) 'product_code'" json:"product_code"`
+	Product_code string `xorm:"varchar(128) 'product_code'" json:"product_code"  validate:"required"`
 	//Workcenter            string    `xorm:"varchar(128) 'workcenter'" json:"workcenter"`
 	Date_planned_start    time.Time `xorm:"datetime 'date_planned_start'" json:"date_planned_start"`
 	Date_planned_complete time.Time `xorm:"datetime 'date_planned_complete'" json:"date_planned_complete"`
@@ -59,7 +59,7 @@ type Workorders struct {
 	Created    time.Time `xorm:"created" json:"-"`
 	Updated    time.Time `xorm:"updated" json:"-"`
 
-	Steps []Steps `json:"-"`
+	Steps []Steps `json:"-" validate:"required"`
 }
 
 type Steps struct {
@@ -90,12 +90,12 @@ type Steps struct {
 	Sequence       int64  `xorm:"bigint 'sequence'" json:"sequence"`
 	Testtype       string `xorm:"varchar(128) 'test_type'" json:"test_type"`
 	FailureMessage string `xorm:"varchar(128) 'failure_msg'" json:"failure_msg"`
-	Desc           string `xorm:"varchar(64) 'desc'" json:"desc"`
+	Desc           string `xorm:"varchar(128) 'desc'" json:"desc"`
 	Image          string `xorm:"-" json:"image"`
-	ImageRef       string `xorm:"varchar(128) 'tightening_image_by_step_code'" json:"tightening_image_by_step_code"`
+	ImageRef       string `xorm:"varchar(128) 'tightening_image_by_step_code'" json:"tightening_image_by_step_code" validate:"required"`
 	Skippable      bool   `xorm:"varchar(64) 'skippable'" json:"skippable"`
 	Undoable       bool   `xorm:"varchar(64) 'undoable'" json:"undoable"`
-	Data           string `xorm:"varchar(128) 'data'" json:"data"`
+	Data           string `xorm:"text 'data'" json:"data"`
 	Status         string `xorm:"varchar(32) default 'ready' 'status'" json:"status"`
 
 	Created time.Time `xorm:"created" json:"-"`
@@ -172,6 +172,7 @@ type Guns struct {
 	Total       int    `xorm:"int 'total'"`
 	Mode        string `xorm:"varchar(128) 'mode'"`
 	UserID      int64  `xorm:"bigint 'user_id'"`
+	StepID      int64  `xorm:"bigint 'step_id'"`
 }
 
 type RoutingOperations struct {

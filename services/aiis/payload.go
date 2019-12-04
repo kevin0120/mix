@@ -107,6 +107,7 @@ type ODOOStatus struct {
 	Status string `json:"status"`
 }
 
+
 type SystemStatus struct {
 	Name   string `json:"name"`
 	Status string `json:"status"`

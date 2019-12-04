@@ -1,8 +1,6 @@
 package storage
 
-import (
-	"time"
-)
+import "time"
 
 const (
 	RESULT_NONE = "NONE"

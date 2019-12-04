@@ -21,10 +21,6 @@ import (
 	"reflect"
 )
 
-const (
-	CH_LENGTH = 1024
-)
-
 type Diagnostic interface {
 	Error(msg string, err error)
 	Debug(msg string)
@@ -33,22 +29,27 @@ type Diagnostic interface {
 	Closed()
 }
 
-type Service struct {
-	diag              Diagnostic
-	methods           Methods
-	DB                *storage.Service
-	Httpd             *httpd.Service
-	ODOO              *odoo.Service
-	AudiVw            *audi_vw.Service
-	OpenProtocol      *openprotocol.Service
-	ControllerService *controller.Service
+const (
+	CH_LENGTH = 1024
+)
 
+type Service struct {
+	diag               Diagnostic
+	methods            Methods
+	DB                 *storage.Service
+	Httpd              *httpd.Service
+	ODOO               *odoo.Service
+	AudiVw             *audi_vw.Service
+	OpenProtocol       *openprotocol.Service
+	ControllerService  *controller.Service
+	Aiis               *aiis.Service
+	ChStart            chan int
+	ChFinish           chan int
+	ChWorkorder        chan int
 	SN                 string
 	WS                 *wsnotify.Service
 	TighteningService  *tightening_device.Service
 	requestDispatchers map[string]*utils.Dispatcher
-
-	ChWorkorder chan int
 }
 
 func NewService(d Diagnostic) *Service {
@@ -56,6 +57,8 @@ func NewService(d Diagnostic) *Service {
 	s := &Service{
 		diag:        d,
 		methods:     Methods{},
+		ChStart:     make(chan int, CH_LENGTH),
+		ChFinish:    make(chan int, CH_LENGTH),
 		ChWorkorder: make(chan int, CH_LENGTH),
 	}
 
@@ -494,6 +497,51 @@ func (s *Service) OnWSOrderStepUpdate(data interface{}) {
 	_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
 }
 
+// 开工请求
+func (s *Service) OnWS_ORDER_START_REQUEST(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	wsRequest := data.(*wsnotify.WSRequest)
+	sData, _ := json.Marshal(wsRequest.WSMsg.Data)
+	c := wsRequest.C
+	msg := wsRequest.WSMsg
+
+	orderReq := WSOrderReqCode{}
+	err := json.Unmarshal(sData, &orderReq)
+
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		return
+	}
+	s.ChStart <- 1
+	go s.Aiis.PutMesOpenRequest(msg.SN, msg.Type, orderReq.Code, sData, s.ChStart)
+}
+
+// 完工请求
+func (s *Service) OnWS_ORDER_FINISH_REQUEST(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	wsRequest := data.(*wsnotify.WSRequest)
+	sData, _ := json.Marshal(wsRequest.WSMsg.Data)
+	c := wsRequest.C
+	msg := wsRequest.WSMsg
+
+	orderReq := WSOrderReqCode{}
+	err := json.Unmarshal(sData, &orderReq)
+
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		return
+	}
+	s.ChFinish <- 1
+	go s.Aiis.PutMesFinishRequest(msg.SN, msg.Type, orderReq.Code, sData, s.ChFinish)
+
+}
+
 // 更新工步数据
 func (s *Service) OnWSOrderStepDataUpdate(data interface{}) {
 	if data == nil {
@@ -523,6 +571,37 @@ func (s *Service) OnWSOrderStepDataUpdate(data interface{}) {
 	}
 
 	_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+}
+
+// 更新工单数据
+func (s *Service) OnWS_WORKORDER_DATA_UPDATE(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	wsRequest := data.(*wsnotify.WSRequest)
+	sData, _ := json.Marshal(wsRequest.WSMsg.Data)
+	c := wsRequest.C
+	msg := wsRequest.WSMsg
+
+	orderReq := WSOrderReqData{}
+	err := json.Unmarshal(sData, &orderReq)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		return
+	}
+
+	_, err = s.DB.UpdateOrderData(&storage.Workorders{
+		Id:   orderReq.ID,
+		Data: orderReq.Data,
+	})
+
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+		return
+	}
+
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
 }
 
 // 根据CODE获取工单
@@ -648,11 +727,11 @@ func (s *Service) OnTighteningControllerIO(data interface{}) {
 		return
 	}
 
-	inputStatus := data.(*io.IoContact)
+	ioStatus := data.(*io.IoContact)
 
 	msg := wsnotify.WSMsg{
 		Type: io.WS_IO_CONTACT,
-		Data: inputStatus,
+		Data: ioStatus,
 	}
 	payload, _ := json.Marshal(msg)
 	s.WS.WSSend(wsnotify.WS_EVENT_IO, string(payload))

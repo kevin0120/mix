@@ -559,3 +559,23 @@ func (s *Service) GetConsumeBySeq(workorder *storage.Workorders, seq int) (*ODOO
 
 	return nil, errors.New("Consume Not Found")
 }
+
+func (s *Service) GetConsumeBySeqInStep(step *storage.Steps, seq int) (*StepComsume, error) {
+	if step == nil {
+		return nil, errors.New("Step Is Nil")
+	}
+
+	ts := TighteningStep{}
+	json.Unmarshal([]byte(step.Step), &ts)
+	if len(ts.TighteningPoints) == 0 {
+		return nil, errors.New("Consumes Is Empty")
+	}
+
+	for k, v := range ts.TighteningPoints {
+		if v.Seq == seq {
+			return &ts.TighteningPoints[k], nil
+		}
+	}
+
+	return nil, errors.New("Consume Not Found")
+}

@@ -8,6 +8,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
+	"gopkg.in/go-playground/validator.v9"
 	"sync/atomic"
 	"time"
 )

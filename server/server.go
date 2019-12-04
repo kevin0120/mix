@@ -296,6 +296,7 @@ func (s *Server) appendAiisService() error {
 	srv.TighteningService = s.TighteningDeviceService
 	srv.SN = s.config.SN
 	srv.DB = s.StorageServie
+	srv.WS = s.WSNotifyService
 	srv.Broker = s.BrokerService
 
 	s.AiisService = srv
@@ -346,7 +347,7 @@ func (s *Server) appendHMIService() error {
 	srv.OpenProtocol = s.OpenprotocolService
 	srv.TighteningService = s.TighteningDeviceService
 	srv.WS = s.WSNotifyService
-
+	srv.Aiis = s.AiisService
 	s.AppendService("hmi", srv)
 
 	return nil
