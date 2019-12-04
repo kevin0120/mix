@@ -200,11 +200,21 @@ func (s *Service) findStepPicture(ref string) (string, error) {
 }
 
 func (s *Service) findOrderPicture(ref string) (string, error) {
-	var ro RoutingOperations
-	ss := s.eng.Alias("r").Where("r.product_type = ?", ref).Limit(1)
-	_, e := ss.Get(&ro)
-	if e != nil {
-		return "", e
+	ro := s.GetRoutingOperationViaProductTypeCode(ref)
+	if ro == nil {
+		err := errors.Errorf("GetRoutingOperationViaProductTypeCode: %s Fail", ref)
+		s.diag.Error("findOrderPicture", err)
+		return "", err
 	}
 	return ro.ProductTypeImage, nil
+}
+
+func (s *Service)GetRoutingOperationViaProductTypeCode(ProductType string) *RoutingOperations {
+	var ro RoutingOperations
+	ss := s.eng.Alias("r").Where("r.product_type = ?", ProductType).Limit(1)
+	_, e := ss.Get(&ro)
+	if e != nil {
+		return nil
+	}
+	return &ro
 }
