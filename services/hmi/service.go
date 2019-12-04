@@ -368,7 +368,7 @@ func (s *Service) OnNewHmiConnect(conn websocket.Connection) {
 	msg := WSWorkcenter{
 		WorkCenter: s.WS.Config().Workcenter,
 	}
-	_ = s.commonSendWebSocketMsg(conn, wsnotify.WS_EVENT_REG, wsnotify.GenerateMessage(0, wsnotify.WS_RUSH_DATA, msg))
+	_ = s.commonSendWebSocketMsg(conn, wsnotify.WS_EVENT_REG, wsnotify.GenerateResult(0, wsnotify.WS_RUSH_DATA, msg))
 }
 
 func (s *Service) commonSendWebSocketMsg(c websocket.Connection, subject string, msg interface{}) error {
