@@ -180,7 +180,7 @@ func (s *Service) FindUnuploadResults(result_upload bool, result []string) ([]Re
 func (s *Service) ListUnuploadResults() ([]Results, error) {
 	var results []Results
 
-	ss := s.eng.Alias("r").Where("r.has_upload = ?", false).And("r.curve_file != ?", "")
+	ss := s.eng.Alias("r").Where("r.has_upload = ?", false)
 
 	e := ss.Find(&results)
 
