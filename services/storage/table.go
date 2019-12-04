@@ -47,7 +47,7 @@ type Workorders struct {
 	Workorder    string `xorm:"text 'workorder'" json:"-"`
 	Code         string `xorm:"pk unique varchar(128) 'code'"  json:"code"`
 	Track_code   string `xorm:"varchar(128) 'track_code'" json:"track_code"`
-	Product_code string `xorm:"varchar(128) 'product_code'" json:"product_code"`
+	Product_code string `xorm:"varchar(128) 'product_code'" json:"product_code"  validate:"required"`
 	//Workcenter            string    `xorm:"varchar(128) 'workcenter'" json:"workcenter"`
 	Date_planned_start    time.Time `xorm:"datetime 'date_planned_start'" json:"date_planned_start"`
 	Date_planned_complete time.Time `xorm:"datetime 'date_planned_complete'" json:"date_planned_complete"`
@@ -59,7 +59,7 @@ type Workorders struct {
 	Created    time.Time `xorm:"created" json:"-"`
 	Updated    time.Time `xorm:"updated" json:"-"`
 
-	Steps []Steps `json:"-"`
+	Steps []Steps `json:"-" validate:"required"`
 }
 
 type Steps struct {
@@ -92,7 +92,7 @@ type Steps struct {
 	FailureMessage string `xorm:"varchar(128) 'failure_msg'" json:"failure_msg"`
 	Desc           string `xorm:"varchar(128) 'desc'" json:"desc"`
 	Image          string `xorm:"-" json:"image"`
-	ImageRef       string `xorm:"varchar(128) 'tightening_image_by_step_code'" json:"tightening_image_by_step_code"`
+	ImageRef       string `xorm:"varchar(128) 'tightening_image_by_step_code'" json:"tightening_image_by_step_code" validate:"required"`
 	Skippable      bool   `xorm:"varchar(64) 'skippable'" json:"skippable"`
 	Undoable       bool   `xorm:"varchar(64) 'undoable'" json:"undoable"`
 	Data           string `xorm:"text 'data'" json:"data"`

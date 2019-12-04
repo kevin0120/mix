@@ -464,7 +464,7 @@ func (s *Service) taskSaveWorkorders() {
 			//s.handleSaveWorkorders(payload)
 			code, err := s.DB.WorkorderIn(payload.([]byte))
 			if err != nil {
-				s.diag.Error("收到下发工单本地化存储时出错",err)
+				s.diag.Error("收到下发工单本地化存储时出错", err)
 				break
 			}
 			orderOut, _ := s.DB.WorkorderOut(code, 0)

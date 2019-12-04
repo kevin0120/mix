@@ -70,6 +70,11 @@ func (s *Service) ts004CreateDummyWorkOrderFromTrackCode(trackCode string) []byt
 
 func (s *Service) WorkorderSync(work *Workorders) (string, error) {
 
+	err := s.validate.Struct(work)
+	if err != nil {
+		return "", errors.Wrapf(err, "loss workorder-steps information")
+	}
+
 	session := s.eng.NewSession().ForUpdate()
 	defer session.Close()
 	session.Begin()
@@ -84,11 +89,6 @@ func (s *Service) WorkorderSync(work *Workorders) (string, error) {
 	if err != nil {
 		session.Rollback()
 		return "", errors.Wrapf(err, "store data fail")
-	}
-
-	if len(work.Steps) == 0 {
-		session.Rollback()
-		return "", errors.Wrapf(err, "loss steps information")
 	}
 
 	for i := 0; i < len(work.Steps); i++ {
