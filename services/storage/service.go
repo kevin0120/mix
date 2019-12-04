@@ -3,11 +3,11 @@ package storage
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"github.com/go-xorm/xorm"
 	_ "github.com/lib/pq"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
-	"gopkg.in/go-playground/validator.v9"
 	"sync/atomic"
 	"time"
 )
@@ -851,7 +851,6 @@ func (s *Service) GetRoutingOperationViaProductTypeCode(productTypeCode string) 
 	}
 	return &ros, nil
 }
-
 
 func (s *Service) FindRoutingOperations(workCenterCode string, cartype string, job int) (*RoutingOperations, error) {
 
