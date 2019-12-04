@@ -33,11 +33,6 @@ func (s *Service) WorkorderSync(work *Workorders) (string, error) {
 		return "", errors.Wrapf(err, "store data fail")
 	}
 
-	if len(work.Steps) == 0 {
-		session.Rollback()
-		return "", errors.Wrapf(err, "loss steps information")
-	}
-
 	for i := 0; i < len(work.Steps); i++ {
 		work.Steps[i].WorkorderID = work.Id
 		_, err := session.Insert(work.Steps[i])
