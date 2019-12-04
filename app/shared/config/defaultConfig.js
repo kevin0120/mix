@@ -107,6 +107,7 @@ const defaultConfigs = {
   system: {
     workcenter: {
       // code: '1',
+      workcenterType: 'rework', // 'normal'
       rework_workcenter: 'qrk',
       hardware: {
         scanner: {

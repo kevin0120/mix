@@ -2,13 +2,9 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
-import CardActionArea from '@material-ui/core/CardActionArea';
-import CardMedia from '@material-ui/core/CardMedia';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import CardContent from '@material-ui/core/CardContent';
 import { sortBy } from 'lodash-es';
 import { orderActions } from '../../modules/order/action';
 import { ORDER_STATUS } from '../../modules/order/constants';
@@ -19,10 +15,12 @@ import {
   doingOrders
 } from '../../modules/order/selector';
 import styles from './styles';
-import settingImg from '../../../resources/imgs/setting.png';
 import type { Dispatch } from '../../modules/typeDef';
 import { withI18n } from '../../i18n';
 import type { IOrder } from '../../modules/order/interface/IOrder';
+import SelectCard from '../../components/SelectCard';
+
+const SelectCardComp = SelectCard();
 
 type tOP = {||};
 
@@ -90,59 +88,20 @@ function HomeOperationList(props: Props) {
         orders.map((order: IOrder) =>
           order ? (
             <Grid item xs={size} key={`${order.code}`}>
-              <Paper square className={classes.orderCardContainer}>
-                <CardActionArea
-                  className={classes.orderCard}
-                  onClick={() => onCardClick(order)}
-                >
-                  <div
-                    className={clsx(
-                      statusMap[order.status || ORDER_STATUS.TODO],
-                      classes.statusIndicator
-                    )}
-                  />
-                  <CardMedia
-                    className={classes.image}
-                    src={order.productTypeImage || settingImg}
-                    component="img"
-                    style={{ overflow: 'hidden' }}
-                    alt={order.productCode}
-                  />
-                  <CardContent className={classes.info}>
-                    <Typography
-                      variant="body1"
-                      align="left"
-                      className={classes.orderNameText}
-                    >
-                      {order.code}
-                    </Typography>
-                    {[
-                      order.productCode,
-                      order.workcenter,
-                      order.datePlannedStart &&
-                      order.datePlannedStart.toLocaleString()
-                    ].map((d, idx) => (
-                      <Typography
-                        key={`${d}-${idx}`}
-                        variant="body2"
-                        color="textSecondary"
-                        align="left"
-                        className={classes.orderInfoText}
-                      >
-                        {d}
-                      </Typography>
-                    ))}
-                    <Typography
-                      variant="body2"
-                      color="textSecondary"
-                      align="left"
-                      className={classes.orderStatusText}
-                    >
-                      {t(`OrderStatus.${order.status || ORDER_STATUS.TODO}`)}
-                    </Typography>
-                  </CardContent>
-                </CardActionArea>
-              </Paper>
+              <SelectCardComp
+                name={order.code}
+                status={t(`OrderStatus.${order.status || ORDER_STATUS.TODO}`)}
+                statusClass={statusMap[order.status || ORDER_STATUS.TODO]}
+                infoArr={[
+                  order.productCode,
+                  order.workcenter,
+                  order.datePlannedStart &&
+                  order.datePlannedStart.toLocaleString()
+                ]}
+                height={130}
+                item={order}
+                onClick={onCardClick}
+              />
             </Grid>
           ) : null
         )) ||

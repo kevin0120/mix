@@ -1,14 +1,15 @@
 // @flow
-
+import React from 'react';
 import {
   put,
   take,
   call,
   select,
-  takeEvery
+  takeEvery,
+  race
 } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
-import { doPoint } from '../step/screwStep/ScrewStep';
+import Grid from '@material-ui/core/Grid';
 import { CommonLog } from '../../common/utils';
 import type { tAction } from './interface/typeDef';
 import { orderActions } from '../order/action';
@@ -20,6 +21,9 @@ import notifierActions from '../Notifier/action';
 import actions from './action';
 import { workModes } from '../workCenterMode/constants';
 import { workingOrder } from '../order/selector';
+import { getDevicesByType } from '../deviceManager/devices';
+import { deviceType } from '../deviceManager/constants';
+import SelectCard from '../../components/SelectCard';
 
 function* tryRework(action: tAction = {}): Saga<void> {
   try {
@@ -50,28 +54,60 @@ function* tryRework(action: tAction = {}): Saga<void> {
     }
 
     if (canRework) {
-      const btnConfirm = {
-        label: tNS(dia.confirm, reworkNS),
-        color: 'info',
-        action: actions.doRework(order, step, point)
-      };
+      const { workcenterType } = yield select(s => s.setting.system.workcenter);
       const btnCancel = {
         label: tNS(dia.cancel, reworkNS),
         color: 'warning',
         action: actions.cancelRework()
       };
-      const title = point ? tNS(trans.redoSpecScrewPointTitle, reworkNS) :
-        tNS(trans.redoSpecScrewPointTitleNoPoint, reworkNS);
-      const content = point ? `${tNS(trans.redoSpecScrewPointContent, reworkNS)} ${JSON.stringify(
-        {
-          Bolt: point?.nut_no,
-          Sequence: point?.sequence
-        })}` : `${tNS(trans.redoSpecScrewPointContentNoPoint, reworkNS)}`;
-      yield put(dialogActions.dialogShow({
-        buttons: [btnCancel, btnConfirm],
-        title,
-        content
-      }));
+      if (workcenterType === 'normal') {
+        const btnConfirm = {
+          label: tNS(dia.confirm, reworkNS),
+          color: 'info',
+          action: actions.doRework(order, step, point)
+        };
+
+        const title = point ? tNS(trans.redoSpecScrewPointTitle, reworkNS) :
+          tNS(trans.redoSpecScrewPointTitleNoPoint, reworkNS);
+        const content = point ? `${tNS(trans.redoSpecScrewPointContent, reworkNS)} ${JSON.stringify(
+          {
+            Bolt: point?.nut_no,
+            Sequence: point?.sequence
+          })}` : `${tNS(trans.redoSpecScrewPointContentNoPoint, reworkNS)}`;
+        yield put(dialogActions.dialogShow({
+          buttons: [btnCancel, btnConfirm],
+          title,
+          content
+        }));
+      } else if (workcenterType === 'rework') {
+        const tools = getDevicesByType(deviceType.tool);
+        console.log(tools);
+        const ToolSelectCard = SelectCard(actions.selectTool);
+        yield put(dialogActions.dialogShow({
+          buttons: [btnCancel],
+          title: '选择工具',
+          content: (<Grid spacing={1} container>
+            {tools.map(t => <Grid item xs={6} key={`${t.serialNumber}`}>
+              <ToolSelectCard
+                name={t.Name}
+                status={t.Healthz ? '已连接' : '已断开'}
+                infoArr={[t.serialNumber]}
+                height={130}
+                item={t}
+              />
+            </Grid>)}
+          </Grid>)
+        }));
+        yield take(REWORK_PATTERN.SELECT_TOOL);
+        yield put(dialogActions.dialogClose());
+        console.log('tool selected');
+        // yield put(dialogActions.dialogShow({
+        //   buttons: [btnCancel],
+        //   title: '选择PSET',
+        //   content: null
+        // }));
+
+      }
     } else {
       yield put(actions.cancelRework());
     }
@@ -112,7 +148,10 @@ export default function* reworkPatternRoot(): Saga<void> {
   while (true) {
     try {
       const action = yield take(REWORK_PATTERN.TRY_REWORK);
-      yield call(tryRework, action);
+      yield race([
+        call(tryRework, action),
+        take(REWORK_PATTERN.CANCEL_REWORK)
+      ]);
     } catch (e) {
       CommonLog.lError(`switchWorkCenterModeRoot Error: ${e.toString()}`);
     }
