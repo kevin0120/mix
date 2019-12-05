@@ -533,6 +533,18 @@ func (h *DeviceHandler) Debug(msg string) {
 	h.l.Debug(msg)
 }
 
+type DispatcherBusHandler struct {
+	l Logger
+}
+
+func (h *DispatcherBusHandler) Error(msg string, err error) {
+	h.l.Error(msg, Error(err))
+}
+
+func (h *DispatcherBusHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}
+
 // 客制化项目模块使用的句柄
 type CustomizeHandler struct {
 	l Logger

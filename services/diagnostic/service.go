@@ -156,6 +156,12 @@ func (s *Service) NewDeviceHandler() *DeviceHandler {
 	}
 }
 
+func (s *Service) NewDispatcherBusHandler() *DispatcherBusHandler {
+	return &DispatcherBusHandler{
+		l: s.Logger.With(String("service", "dispatcher_bus")),
+	}
+}
+
 func BootstrapMainHandler() *CmdHandler {
 	s := NewService(NewConfig(), nil, os.Stderr)
 	// Should never error
