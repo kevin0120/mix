@@ -89,10 +89,10 @@ func (s *Service)createAndStartScannerDispatcher() error {
 		return err
 	}
 	err := s.dispatcher.Create(ScannerDispatcherKey, 20)
-	if err != nil {
-		return err
+	if err == nil || strings.HasPrefix(err.Error(), "Dispatcher Already Exist" ){
+		return s.dispatcher.Start(ScannerDispatcherKey)
 	}
-	return s.dispatcher.Start(ScannerDispatcherKey)
+	return err
 }
 
 func (s *Service) Close() error {
