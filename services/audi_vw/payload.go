@@ -336,7 +336,7 @@ func XML2Result(result *CVI3Result, rr *controller.ControllerResult) {
 
 	seq, _ := strconv.Atoi(result.PRC_SST.PAR.Result_id)
 	rr.Seq = seq
-	//rr.CurFile = fmt.Sprintf("%s_%d_%s_%s.json", rr.Controller_SN, rr.Workorder_ID, result_id, utils.GenerateID())
+	//rr.CurFile = fmt.Sprintf("%s_%d_%s_%s.json", rr.ControllerSN, rr.Workorder_ID, result_id, utils.GenerateID())
 
 	if result.PRC_SST.PAR.FAS.GRP.TIP.STA == "LSN" {
 		rr.PSetDefine.Strategy = controller.STRATEGY_LN

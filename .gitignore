@@ -6,7 +6,6 @@ tivan
 *~
 *#
 bin
-*.exe
 *.log
 *.orig
 .scannerwork

@@ -1,14 +1,15 @@
 name: Go
 on:
   push:
-    tags: 
-    - '*'
+    tags:
+    - 'customize-*'
 
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: windows-2016
     steps:
+
     - name: Set up Go 1.13
       uses: actions/setup-go@v1
       with:
@@ -18,37 +19,27 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v1
 
-#     - name: Get dependencies
-#       run: |
-#         go get -v -t -d ./...
-#         if [ -f Gopkg.toml ]; then
-#             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-#             dep ensure
-#         fi
-
     - name: Build
       run: |
-        # build for docker
-        CGO_ENABLED=0 go build -o ./build/rushd ./cmd/rushd/main.go
-
         # build for windows
-        GOOS=windows GOARCH=amd64 go build -o ./build/rush-${GITHUB_REF/refs\/tags\//}.exe ./cmd/rushd/main.go
+        $env:Path="$pwd\tools\pkg-config\exe;$env:Path"
+        $env:PKG_CONFIG_PATH="$pwd\libs\libusb\1.0.22"
+        which pkg-config
+        ls env:
+        go env
+        pkg-config --cflags  -- libusb-1.0
 
-    - name: Build and deploy docker image
-      run: |
-        docker login docker.pkg.github.com -u masami10 -p f6a12ade4d6724c9a180c0de7c0310d3ec5416c2
-        ./build_docker.sh ${GITHUB_REF/refs\/tags\//}
+        go build -o ./build/rush-${GITHUB_REF/refs\/tags\//}.exe ./cmd/rushd/main.go
 
     - name: Draft release
-      uses: softprops/action-gh-release@v0.1.0
+      uses: softprops/action-gh-release@v1
       with:
         # Note-worthy description of changes in release
         body: docker pull docker.pkg.github.com/masami10/rush/rush:${GITHUB_REF/refs\/tags\//}
-        # Path to load note-worthy description of changes in release from
+        # Path to load note-worthy description of changes in rsoftprops:actionelease from
         body-path: # optional, default is empty
         # Gives the release a custom name
         name: ${GITHUB_REF/refs\/tags\//}
         # Creates a draft release
-        draft: # optional, default is false
-        - ./build/rush-${GITHUB_REF/refs\/tags\//}.exe
+        draft: ./build/rush-${GITHUB_REF/refs\/tags\//}.exe
         files: # optional, default is empty

@@ -43,13 +43,12 @@ func (s *Dispatcher) setOpen(open bool) {
 	s.open = open
 }
 
-func (s *Dispatcher) Start() error {
+func (s *Dispatcher) Start() {
 	if !s.getOpen() {
 		go s.manage()
-
 		s.setOpen(true)
 	}
-	return nil
+	return
 }
 
 func (s *Dispatcher) Release() {
@@ -70,9 +69,10 @@ func (s *Dispatcher) Dispatch(data interface{}) {
 	s.buf <- data
 }
 
+//todo: 限制协程的数量
 func (s *Dispatcher) doDispatch(data interface{}) {
 	for _, v := range s.dispatchers {
-		v(data)
+		go v(data)
 	}
 }
 

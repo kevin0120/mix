@@ -80,7 +80,8 @@ type Service struct {
 
 	cors CorsConfig
 
-	diag Diagnostic
+	diag   Diagnostic
+	opened bool
 
 	DiagService interface {
 		SetLogLevelFromName(lvl string) error
@@ -108,6 +109,7 @@ func NewService(doc string, c Config, hostname string, d Diagnostic, disc *diagn
 		diag:                  d,
 		DiagService:           disc,
 		httpServerErrorLogger: d.NewHTTPServerErrorLogger(),
+		opened:                false,
 	}
 
 	s.methods.service = s
@@ -147,7 +149,7 @@ func (s *Service) manage() {
 func (s *Service) Close() error {
 	defer s.diag.StoppedService()
 	// If server is not set we were never started
-	if s.server == nil {
+	if s.server == nil || !s.opened {
 		return nil
 	}
 	// Signal to manage loop we are stopping
@@ -178,6 +180,7 @@ func (s *Service) Open() error {
 
 	go s.manage()
 	go s.serve()
+	s.opened = true
 	return nil
 }
 

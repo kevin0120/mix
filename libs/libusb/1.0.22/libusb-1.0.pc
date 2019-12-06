@@ -1,0 +1,5 @@
+Name: libusb
+Description:libusb pc file
+Version: 1.0
+Cflags:-I./include/libusb-1.0
+Libs:-L./MinGW64/dll -lusb-1.0.dll

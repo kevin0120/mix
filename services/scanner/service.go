@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/gousb"
+	"github.com/masami10/rush/services/DispatcherBus"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
@@ -24,10 +25,18 @@ const (
 	ServiceSearchItv = 2000 * time.Millisecond
 )
 
+const ScannerDispatcherKey = DispatcherBus.DISPATCHER_SCANNER_ON_RECV
+
 type Diagnostic interface {
 	Info(msg string)
 	Error(msg string, err error)
 	Debug(msg string)
+}
+
+type Dispatcher interface {
+	Create(name string, len int) error
+	Start(name string) error
+	Dispatch(name string, data interface{}) error
 }
 
 type Service struct {
@@ -37,17 +46,18 @@ type Service struct {
 
 	diag Diagnostic
 	Notify
-
+	dispatcher Dispatcher
 	WS            *wsnotify.Service
 	DeviceService *device.Service
 }
 
-func NewService(c Config, d Diagnostic) *Service {
+func NewService(c Config, d Diagnostic, dispatcher Dispatcher) *Service {
 
 	s := &Service{
 		diag:        d,
 		mtxScanners: sync.Mutex{},
 		scanners:    map[string]*Scanner{},
+		dispatcher: dispatcher,
 	}
 
 	s.configValue.Store(c)
@@ -63,10 +73,26 @@ func (s *Service) Open() error {
 	if !s.config().Enable {
 		return nil
 	}
-
 	go s.search()
-
+	err := s.createAndStartScannerDispatcher()
+	if err != nil {
+		s.diag.Error("Open", err)
+		return err
+	}
 	return nil
+}
+
+func (s *Service)createAndStartScannerDispatcher() error {
+	if s.dispatcher == nil {
+		err := errors.New("Please Inject DispatcherBus Service First")
+		s.diag.Error("createAndStartScannerDispatcher", err)
+		return err
+	}
+	err := s.dispatcher.Create(ScannerDispatcherKey, 20)
+	if err == nil || strings.HasPrefix(err.Error(), "Dispatcher Already Exist" ){
+		return s.dispatcher.Start(ScannerDispatcherKey)
+	}
+	return err
 }
 
 func (s *Service) Close() error {

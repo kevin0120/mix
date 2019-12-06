@@ -281,7 +281,7 @@ func (s *Nats) DoRequest(subject string, data []byte, timeOut time.Duration) (re
 		s.diag.Error("DoRequest Error", err)
 		return
 	}
-	if timeOut.Microseconds() == 0 {
+	if timeOut.Nanoseconds() == 0 {
 		timeOut = time.Second * 10
 	}
 

@@ -3,6 +3,7 @@ package storage
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"github.com/go-xorm/xorm"
 	_ "github.com/lib/pq"
 	"github.com/masami10/rush/utils"
@@ -24,6 +25,7 @@ type Service struct {
 	diag        Diagnostic
 	configValue atomic.Value
 	eng         *xorm.Engine
+	validator   *validator.Validate
 }
 
 func NewService(c Config, d Diagnostic) *Service {
@@ -33,6 +35,7 @@ func NewService(c Config, d Diagnostic) *Service {
 	}
 
 	s.configValue.Store(c)
+	s.validator = validator.New()
 
 	return s
 }
@@ -57,66 +60,50 @@ func (s *Service) Open() error {
 		return errors.Wrapf(err, "Create postgres engine fail")
 	}
 
-	exist, err := engine.IsTableExist("Workorders")
+	_, err = engine.IsTableExist("workorders")
 	if err == nil {
-		if !exist {
-			if err := engine.Sync2(new(Workorders)); err != nil {
-				return errors.Wrapf(err, "Create Table Workorders fail")
-			}
+		if err := engine.Sync2(new(Workorders)); err != nil {
+			return errors.Wrapf(err, "Create Table Workorders fail")
 		}
 	}
 
-	exist, err = engine.IsTableExist("Results")
+	_, err = engine.IsTableExist("results")
 	if err == nil {
-		if !exist {
-			if err := engine.Sync2(new(Results)); err != nil {
-				return errors.Wrapf(err, "Create Table Results fail")
-			}
+		if err := engine.Sync2(new(Results)); err != nil {
+			return errors.Wrapf(err, "Create Table Results fail")
 		}
 	}
 
-	exist, err = engine.IsTableExist("Curves")
+	_, err = engine.IsTableExist("curves")
 	if err == nil {
-		if !exist {
-			if err := engine.Sync2(new(Curves)); err != nil {
-				return errors.Wrapf(err, "Create Table Curves fail")
-			}
+		if err := engine.Sync2(new(Curves)); err != nil {
+			return errors.Wrapf(err, "Create Table Curves fail")
 		}
 	}
 
-	exist, err = engine.IsTableExist("Controllers")
+	_, err = engine.IsTableExist("controllers")
 	if err == nil {
-		if !exist {
-			if err := engine.Sync2(new(Controllers)); err != nil {
-				return errors.Wrapf(err, "Create Table Controllers fail")
-			}
+		if err := engine.Sync2(new(Controllers)); err != nil {
+			return errors.Wrapf(err, "Create Table Controllers fail")
 		}
 	}
 
-	exist, err = engine.IsTableExist("Guns")
+	_, err = engine.IsTableExist("guns")
 	if err == nil {
-		if !exist {
-			if err := engine.Sync2(new(Guns)); err != nil {
-				return errors.Wrapf(err, "Create Table Guns fail")
-			}
+		if err := engine.Sync2(new(Guns)); err != nil {
+			return errors.Wrapf(err, "Create Table Guns fail")
 		}
 	}
 
-	exist, err = engine.IsTableExist("RoutingOperations")
-	if err == nil {
-		if !exist {
-			if err := engine.Sync2(new(RoutingOperations)); err != nil {
-				return errors.Wrapf(err, "Create Table RoutingOperations fail")
-			}
-		}
+	_, err = engine.IsTableExist("routing_operations")
+	if err := engine.Sync2(new(RoutingOperations)); err != nil {
+		return errors.Wrapf(err, "Create Table RoutingOperations fail")
 	}
 
-	exist, err = engine.IsTableExist("Steps")
+	_, err = engine.IsTableExist("steps")
 	if err == nil {
-		if !exist {
-			if err := engine.Sync2(new(Steps)); err != nil {
-				return errors.Wrapf(err, "Create Table Steps fail")
-			}
+		if err := engine.Sync2(new(Steps)); err != nil {
+			return errors.Wrapf(err, "Create Table Steps fail")
 		}
 	}
 
@@ -132,8 +119,9 @@ func (s *Service) Open() error {
 
 func (s *Service) Close() error {
 	s.diag.Close()
-
-	s.eng.Close()
+	if s.eng != nil {
+		s.eng.Close()
+	}
 
 	s.diag.Closed()
 
@@ -193,7 +181,7 @@ func (s *Service) FindUnuploadResults(result_upload bool, result []string) ([]Re
 func (s *Service) ListUnuploadResults() ([]Results, error) {
 	var results []Results
 
-	ss := s.eng.Alias("r").Where("r.has_upload = ?", false)
+	ss := s.eng.Alias("r").Where("r.has_upload = ?", false).And("r.curve_file != ?", "")
 
 	e := ss.Find(&results)
 
@@ -509,6 +497,23 @@ func (s *Service) GetWorkorder(id int64, raw bool) (Workorders, error) {
 	}
 }
 
+func (s *Service) GetStep(id int64) (Steps, error) {
+
+	var step Steps
+
+	rt, err := s.eng.Alias("w").Where("w.id = ?", id).Get(&step)
+
+	if err != nil {
+		return step, err
+	} else {
+		if !rt {
+			return step, errors.New("Step does not exist")
+		} else {
+			return step, nil
+		}
+	}
+}
+
 func (s *Service) FindWorkorder(hmi_sn string, workcenter_code string, code string) (Workorders, error) {
 
 	var workorder Workorders
@@ -814,11 +819,11 @@ func (s *Service) UpdateRoutingOperations(ro *RoutingOperations) error {
 	}
 }
 
-func (s *Service) GetRoutingOperations(op_id int64, model string) (RoutingOperations, error) {
+func (s *Service) GetRoutingOperations(name string, model string) (RoutingOperations, error) {
 
 	var ro RoutingOperations
 
-	rt, err := s.eng.Alias("r").Where("r.operation_id = ?", op_id).And("r.product_type = ?", model).Get(&ro)
+	rt, err := s.eng.Alias("r").Where("r.name = ?", name).And("r.product_type = ?", model).Get(&ro)
 
 	if err != nil {
 		return ro, err
@@ -1050,15 +1055,18 @@ func (s *Service) WorkorderStep(workorderID int64) (*WorkorderStep, error) {
 	}, nil
 }
 
-func (s *Service) DeleteWorkAndStep(ss *xorm.Session, code string) error {
+func (s *Service) DeleteWorkAndStep(ss *xorm.Session, code string, uniqueNum int64) (bool, error) {
 	var workorder Workorders
 
 	bool, e := ss.Alias("r").Where("r.code = ?", code).Get(&workorder)
 	if e != nil {
-		return e
+		return false, e
 	}
 	if !bool {
-		return nil
+		return false, nil
+	}
+	if workorder.Unique_Num > uniqueNum {
+		return true, nil
 	}
 	sql1 := "delete from `workorders` where id = ?"
 	sql2 := "delete from `steps` where x_workorder_id = ?"
@@ -1066,7 +1074,7 @@ func (s *Service) DeleteWorkAndStep(ss *xorm.Session, code string) error {
 	_, err := ss.Exec(sql1, workorder.Id)
 
 	_, err = ss.Exec(sql2, workorder.Id)
-	return err
+	return false, err
 }
 
 func (s *Service) UpdateStep(step *Steps) (*Steps, error) {
@@ -1094,6 +1102,20 @@ func (s *Service) UpdateStepData(step *Steps) (*Steps, error) {
 		return step, err
 	} else {
 		return step, nil
+	}
+}
+
+func (s *Service) UpdateOrderData(order *Workorders) (*Workorders, error) {
+
+	sql := "update `workorders` set data = ? where id = ?"
+	_, err := s.eng.Exec(sql,
+		order.Data,
+		order.Id)
+
+	if err != nil {
+		return order, err
+	} else {
+		return order, nil
 	}
 }
 

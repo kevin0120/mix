@@ -8,7 +8,6 @@ import (
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
-	"io/ioutil"
 	"strconv"
 	"strings"
 	"time"
@@ -22,22 +21,23 @@ type Methods struct {
 // 创建工单
 func (m *Methods) postWorkorders(ctx iris.Context) {
 
-	orderData, _ := ioutil.ReadAll(ctx.Request().Body)
-	m.service.diag.Debug(fmt.Sprintf("收到下發的工单: %s", string(orderData)))
+	//orderData, _ := ioutil.ReadAll(ctx.Request().Body)
+
 	//return
 	//
-	//var workorders []ODOOWorkorder
-	//err := ctx.ReadJSON(&workorders)
-	//
-	//if err != nil {
-	//	// 传输结构错误
-	//	ctx.StatusCode(iris.StatusBadRequest)
-	//	ctx.WriteString(err.Error())
-	//
-	//	return
-	//}
-
-	m.service.HandleWorkorder(orderData)
+	var workorders []interface{}
+	err := ctx.ReadJSON(&workorders)
+	if err != nil {
+		// 传输结构错误
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+	for _, v1 := range workorders {
+		orderData, _ := json.Marshal(v1)
+		m.service.diag.Debug(fmt.Sprintf("收到下發的工单: %s", string(orderData)))
+		m.service.HandleWorkorder(orderData)
+	}
 	ctx.StatusCode(iris.StatusCreated)
 	return
 }
@@ -220,7 +220,6 @@ func (m *Methods) deleteAllRoutingOpertions(ctx iris.Context) {
 		ctx.WriteString(err.Error())
 		return
 	}
-
 	ctx.StatusCode(iris.StatusOK)
 }
 
@@ -239,7 +238,7 @@ func (m *Methods) putSyncRoutingOpertions(ctx iris.Context) {
 
 	points, _ := json.Marshal(ro.Points)
 
-	db_ro, err := m.service.DB.GetRoutingOperations(ro.OperationID, ro.ProductType)
+	db_ro, err := m.service.DB.GetRoutingOperations(ro.Name, ro.ProductType)
 
 	db_ro.Points = string(points)
 	db_ro.VehicleTypeImg = ro.VehicleTypeImg

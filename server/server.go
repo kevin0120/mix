@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/masami10/rush/command"
 	"github.com/masami10/rush/keyvalue"
+	"github.com/masami10/rush/services/DispatcherBus"
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/broker"
@@ -66,6 +67,7 @@ type Server struct {
 
 	TighteningDeviceService *tightening_device.Service
 	DeviceService           *device.Service
+	DispatcherBusService    *DispatcherBus.Service
 
 	BrokerService *broker.Service
 
@@ -117,6 +119,8 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 		return nil, errors.Wrap(err, "init OpenProtocol service")
 	}
 
+	s.appendDispatcherBus()
+
 	s.appendMinioService()
 
 	s.AppendBrokerService()
@@ -156,6 +160,21 @@ func (s *Server) AppendService(name string, srv Service) {
 	i := len(s.Services)
 	s.Services = append(s.Services, srv)
 	s.ServicesByName[name] = i
+}
+
+func (s *Server) appendDispatcherBus() error {
+	c := s.config.DispatcherBus
+	d := s.DiagService.NewDispatcherBusHandler()
+	srv, err := DispatcherBus.NewService(c, d)
+
+	if err != nil {
+		return errors.Wrap(err, "Append DispatcherBus Service Fail")
+	}
+
+	s.DispatcherBusService = srv
+	s.AppendService("dispatcher_bus", srv)
+
+	return nil
 }
 
 func (s *Server) initHTTPDService() error {
@@ -296,6 +315,7 @@ func (s *Server) appendAiisService() error {
 	srv.TighteningService = s.TighteningDeviceService
 	srv.SN = s.config.SN
 	srv.DB = s.StorageServie
+	srv.WS = s.WSNotifyService
 	srv.Broker = s.BrokerService
 
 	s.AiisService = srv
@@ -346,7 +366,7 @@ func (s *Server) appendHMIService() error {
 	srv.OpenProtocol = s.OpenprotocolService
 	srv.TighteningService = s.TighteningDeviceService
 	srv.WS = s.WSNotifyService
-
+	srv.Aiis = s.AiisService
 	s.AppendService("hmi", srv)
 
 	return nil
@@ -399,6 +419,7 @@ func (s *Server) AppendIOService() error {
 	srv := io.NewService(c, d)
 	srv.WS = s.WSNotifyService
 	srv.DeviceService = s.DeviceService
+	srv.DispatcherBus = s.DispatcherBusService
 
 	s.IOService = srv
 	s.AppendService("io", srv)

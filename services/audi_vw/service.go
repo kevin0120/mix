@@ -143,10 +143,10 @@ func (p *Service) Open() error {
 }
 
 func (p *Service) Close() error {
-	err := p.listener.Close()
-	if err != nil {
-		return errors.Wrapf(err, "Close Protocol %s Listener fail", p.name)
+	if p.listener == nil {
+		return nil
 	}
+	p.listener.Stop()
 
 	for _, w := range p.Parent.Controllers {
 		err := w.Close()

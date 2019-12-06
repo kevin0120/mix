@@ -17,10 +17,8 @@ import (
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
-)
-
-const (
-	CH_LENGTH = 1024
+	"github.com/pkg/errors"
+	"reflect"
 )
 
 type Diagnostic interface {
@@ -31,22 +29,27 @@ type Diagnostic interface {
 	Closed()
 }
 
-type Service struct {
-	diag              Diagnostic
-	methods           Methods
-	DB                *storage.Service
-	Httpd             *httpd.Service
-	ODOO              *odoo.Service
-	AudiVw            *audi_vw.Service
-	OpenProtocol      *openprotocol.Service
-	ControllerService *controller.Service
+const (
+	CH_LENGTH = 1024
+)
 
+type Service struct {
+	diag               Diagnostic
+	methods            Methods
+	DB                 *storage.Service
+	Httpd              *httpd.Service
+	ODOO               *odoo.Service
+	AudiVw             *audi_vw.Service
+	OpenProtocol       *openprotocol.Service
+	ControllerService  *controller.Service
+	Aiis               *aiis.Service
+	ChStart            chan int
+	ChFinish           chan int
+	ChWorkorder        chan int
 	SN                 string
 	WS                 *wsnotify.Service
 	TighteningService  *tightening_device.Service
 	requestDispatchers map[string]*utils.Dispatcher
-
-	ChWorkorder chan int
 }
 
 func NewService(d Diagnostic) *Service {
@@ -54,6 +57,8 @@ func NewService(d Diagnostic) *Service {
 	s := &Service{
 		diag:        d,
 		methods:     Methods{},
+		ChStart:     make(chan int, CH_LENGTH),
+		ChFinish:    make(chan int, CH_LENGTH),
 		ChWorkorder: make(chan int, CH_LENGTH),
 	}
 
@@ -64,7 +69,7 @@ func NewService(d Diagnostic) *Service {
 
 func (s *Service) Open() error {
 
-	s.ControllerService.WS.OnNewClient = s.OnNewHmiClient
+	s.ControllerService.WS.OnNewClient = s.OnNewHmiConnect
 	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_RESULT).Register(s.OnTighteningResult)
 	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_IO).Register(s.OnTighteningControllerIO)
 	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_CONTROLLER_STATUS).Register(s.OnTighteningControllerStatus)
@@ -191,14 +196,6 @@ func (s *Service) Open() error {
 
 	r = httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "GET",
-		Pattern:     "/hmi-results",
-		HandlerFunc: s.methods.getHmiResults,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
 		Method:      "PUT",
 		Pattern:     "/io-sets",
 		HandlerFunc: s.methods.putIOSet,
@@ -310,25 +307,35 @@ func (s *Service) Close() error {
 	return nil
 }
 
-func (s *Service) initRequestDispatchers() {
-	s.requestDispatchers = map[string]*utils.Dispatcher{
-		WS_ORDER_LIST:             utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		WS_ORDER_DETAIL:           utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		WS_ORDER_UPDATE:           utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		WS_ORDER_STEP_UPDATE:      utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		WS_ORDER_STEP_DATA_UPDATE: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		WS_ORDER_DETAIL_BY_CODE:   utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-	}
+var hmiDispatcherMap = map[string]string{
+	WS_ORDER_LIST:             "OnWSOrderList",
+	WS_ORDER_DETAIL:           "OnWSOrderDetail",
+	WS_ORDER_UPDATE:           "OnWSOrderUpdate",
+	WS_ORDER_STEP_UPDATE:      "OnWSOrderStepUpdate",
+	WS_ORDER_STEP_DATA_UPDATE: "OnWSOrderStepDataUpdate",
+	WS_ORDER_DETAIL_BY_CODE:   "OnWSOrderDetailByCode",
+}
 
-	s.requestDispatchers[WS_ORDER_LIST].Register(s.OnWS_ORDER_LIST)
-	s.requestDispatchers[WS_ORDER_DETAIL].Register(s.OnWS_ORDER_DETAIL)
-	s.requestDispatchers[WS_ORDER_UPDATE].Register(s.OnWS_ORDER_UPDATE)
-	s.requestDispatchers[WS_ORDER_STEP_UPDATE].Register(s.OnWS_ORDER_STEP_UPDATE)
-	s.requestDispatchers[WS_ORDER_STEP_DATA_UPDATE].Register(s.OnWS_ORDER_STEP_DATA_UPDATE)
-	s.requestDispatchers[WS_ORDER_DETAIL_BY_CODE].Register(s.OnWS_ORDER_DETAIL_BY_CODE)
+func (s *Service) initRequestDispatchers() {
+	dispatcher := map[string]*utils.Dispatcher{}
+	for event, method := range hmiDispatcherMap {
+		dispatcher[event] = utils.CreateDispatcher(utils.DEFAULT_BUF_LEN)
+		m := reflect.ValueOf(s).MethodByName(method)
+		dd := m.Interface().(func(data interface{}))
+		dispatcher[event].Register(dd)
+	}
+	s.requestDispatchers = dispatcher
+
+	//
+	//s.requestDispatchers[WS_ORDER_LIST].Register(s.OnWSOrderList)
+	//s.requestDispatchers[WS_ORDER_DETAIL].Register(s.OnWSOrderDetail)
+	//s.requestDispatchers[WS_ORDER_UPDATE].Register(s.OnWSOrderUpdate)
+	//s.requestDispatchers[WS_ORDER_STEP_UPDATE].Register(s.OnWSOrderStepUpdate)
+	//s.requestDispatchers[WS_ORDER_STEP_DATA_UPDATE].Register(s.OnWSOrderStepDataUpdate)
+	//s.requestDispatchers[WS_ORDER_DETAIL_BY_CODE].Register(s.OnWSOrderDetailByCode)
 
 	for _, v := range s.requestDispatchers {
-		v.Start()
+		v.Start() // always success
 	}
 }
 
@@ -336,6 +343,9 @@ func (s *Service) dispatchRequest(req *wsnotify.WSRequest) {
 	d, exist := s.requestDispatchers[req.WSMsg.Type]
 	if exist {
 		d.Dispatch(req)
+	} else {
+		err := errors.Errorf("Can Not Found Dispatcher: %s", req.WSMsg.Type)
+		s.diag.Error("dispatchRequest", err)
 	}
 }
 
@@ -351,21 +361,29 @@ func (s *Service) resetResult(id int64) error {
 	if err != nil {
 		return err
 	}
-
+	s.diag.Debug("reset Result Success")
 	return nil
 }
 
-func (s *Service) OnNewHmiClient(conn websocket.Connection) {
+func (s *Service) OnNewHmiConnect(conn websocket.Connection) {
 
 	//主动推送工位号
 	msg := WSWorkcenter{
 		WorkCenter: s.WS.Config().Workcenter,
 	}
-	_ = conn.Emit(wsnotify.WS_EVENT_REG, wsnotify.GenerateMessage(0, wsnotify.WS_RUSH_DATA, msg))
+	_ = s.commonSendWebSocketMsg(conn, wsnotify.WS_EVENT_REG, wsnotify.GenerateResult(0, wsnotify.WS_RUSH_DATA, msg))
+}
+
+func (s *Service) commonSendWebSocketMsg(c websocket.Connection, subject string, msg interface{}) error {
+	err := wsnotify.WSClientSend(c, subject, msg)
+	if err != nil {
+		s.diag.Error("commonSendWebSocketMsg Error", err)
+	}
+	return err
 }
 
 // 请求获取工单列表
-func (s *Service) OnWS_ORDER_LIST(data interface{}) {
+func (s *Service) OnWSOrderList(data interface{}) {
 	if data == nil {
 		return
 	}
@@ -375,17 +393,18 @@ func (s *Service) OnWS_ORDER_LIST(data interface{}) {
 	c := wsRequest.C
 	msg := wsRequest.WSMsg
 
-	workorders, err := s.DB.Workorders(sData)
+	workOrders, err := s.DB.Workorders(sData)
 	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		s.diag.Error("Get WorkOrder Error", err)
+		_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 		return
 	}
-	body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, workorders))
-	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_ORDER, string(body))
+	body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, workOrders))
+	_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_ORDER, string(body))
 }
 
 // 请求获取工单详情
-func (s *Service) OnWS_ORDER_DETAIL(data interface{}) {
+func (s *Service) OnWSOrderDetail(data interface{}) {
 	if data == nil {
 		return
 	}
@@ -398,25 +417,25 @@ func (s *Service) OnWS_ORDER_DETAIL(data interface{}) {
 	orderReq := WSOrderReq{}
 	err := json.Unmarshal(sData, &orderReq)
 	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 		return
 	}
 
 	w, err := s.DB.WorkorderOut("", orderReq.ID)
 	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+		_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
 		return
 	}
 	if w == nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -3, fmt.Sprintf("找不到對應Id=%d的工單", orderReq.ID)))
+		_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -3, fmt.Sprintf("找不到對應Id=%d的工單", orderReq.ID)))
 		return
 	}
 	body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, w))
-	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_ORDER, string(body))
+	_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_ORDER, string(body))
 }
 
 // 更新工单状态
-func (s *Service) OnWS_ORDER_UPDATE(data interface{}) {
+func (s *Service) OnWSOrderUpdate(data interface{}) {
 	if data == nil {
 		return
 	}
@@ -429,7 +448,7 @@ func (s *Service) OnWS_ORDER_UPDATE(data interface{}) {
 	orderReq := WSOrderReq{}
 	err := json.Unmarshal(sData, &orderReq)
 	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 		return
 	}
 
@@ -439,15 +458,15 @@ func (s *Service) OnWS_ORDER_UPDATE(data interface{}) {
 	})
 
 	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+		_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
 		return
 	}
 
-	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+	_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
 }
 
 // 更新工步状态
-func (s *Service) OnWS_ORDER_STEP_UPDATE(data interface{}) {
+func (s *Service) OnWSOrderStepUpdate(data interface{}) {
 
 	if data == nil {
 		return
@@ -461,7 +480,7 @@ func (s *Service) OnWS_ORDER_STEP_UPDATE(data interface{}) {
 	orderReq := WSOrderReq{}
 	err := json.Unmarshal(sData, &orderReq)
 	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 		return
 	}
 
@@ -471,15 +490,91 @@ func (s *Service) OnWS_ORDER_STEP_UPDATE(data interface{}) {
 	})
 
 	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+		_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
 		return
 	}
 
-	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+	_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+}
+
+// 开工请求
+func (s *Service) OnWS_ORDER_START_REQUEST(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	wsRequest := data.(*wsnotify.WSRequest)
+	sData, _ := json.Marshal(wsRequest.WSMsg.Data)
+	c := wsRequest.C
+	msg := wsRequest.WSMsg
+
+	orderReq := WSOrderReqCode{}
+	err := json.Unmarshal(sData, &orderReq)
+
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		return
+	}
+	s.ChStart <- 1
+	go s.Aiis.PutMesOpenRequest(msg.SN, msg.Type, orderReq.Code, sData, s.ChStart)
+}
+
+// 完工请求
+func (s *Service) OnWS_ORDER_FINISH_REQUEST(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	wsRequest := data.(*wsnotify.WSRequest)
+	sData, _ := json.Marshal(wsRequest.WSMsg.Data)
+	c := wsRequest.C
+	msg := wsRequest.WSMsg
+
+	orderReq := WSOrderReqCode{}
+	err := json.Unmarshal(sData, &orderReq)
+
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		return
+	}
+	s.ChFinish <- 1
+	go s.Aiis.PutMesFinishRequest(msg.SN, msg.Type, orderReq.Code, sData, s.ChFinish)
+
 }
 
 // 更新工步数据
-func (s *Service) OnWS_ORDER_STEP_DATA_UPDATE(data interface{}) {
+func (s *Service) OnWSOrderStepDataUpdate(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	wsRequest := data.(*wsnotify.WSRequest)
+	sData, _ := json.Marshal(wsRequest.WSMsg.Data)
+	c := wsRequest.C
+	msg := wsRequest.WSMsg
+
+	orderReq := WSOrderReqData{}
+	err := json.Unmarshal(sData, &orderReq)
+	if err != nil {
+		_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		return
+	}
+
+	_, err = s.DB.UpdateStepData(&storage.Steps{
+		Id:   orderReq.ID,
+		Data: orderReq.Data,
+	})
+
+	if err != nil {
+		_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+		return
+	}
+
+	_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+}
+
+// 更新工单数据
+func (s *Service) OnWS_WORKORDER_DATA_UPDATE(data interface{}) {
 	if data == nil {
 		return
 	}
@@ -496,7 +591,7 @@ func (s *Service) OnWS_ORDER_STEP_DATA_UPDATE(data interface{}) {
 		return
 	}
 
-	_, err = s.DB.UpdateStepData(&storage.Steps{
+	_, err = s.DB.UpdateOrderData(&storage.Workorders{
 		Id:   orderReq.ID,
 		Data: orderReq.Data,
 	})
@@ -510,7 +605,7 @@ func (s *Service) OnWS_ORDER_STEP_DATA_UPDATE(data interface{}) {
 }
 
 // 根据CODE获取工单
-func (s *Service) OnWS_ORDER_DETAIL_BY_CODE(data interface{}) {
+func (s *Service) OnWSOrderDetailByCode(data interface{}) {
 	if data == nil {
 		return
 	}
@@ -523,7 +618,7 @@ func (s *Service) OnWS_ORDER_DETAIL_BY_CODE(data interface{}) {
 	orderReq := WSOrderReqCode{}
 	err := json.Unmarshal(sData, &orderReq)
 	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 		return
 	}
 
@@ -534,18 +629,18 @@ func (s *Service) OnWS_ORDER_DETAIL_BY_CODE(data interface{}) {
 		go s.ODOO.GetWorkorder("", "", orderReq.Workcenter, orderReq.Code, s.ChWorkorder)
 	}
 	if err != nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+		_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
 		return
 	}
 
 	if w == nil {
-		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -3, "本地没有工单,正在向后台查询..."))
+		_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -3, "本地没有工单,正在向后台查询..."))
 		return
 	}
 
 	body, _ := json.Marshal(wsnotify.GenerateResult(msg.SN, msg.Type, w))
 	//fmt.Println(string(body))
-	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_ORDER, string(body))
+	_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_ORDER, string(body))
 }
 
 func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
@@ -632,11 +727,11 @@ func (s *Service) OnTighteningControllerIO(data interface{}) {
 		return
 	}
 
-	inputStatus := data.(*io.IoContact)
+	ioStatus := data.(*io.IoContact)
 
 	msg := wsnotify.WSMsg{
 		Type: io.WS_IO_CONTACT,
-		Data: inputStatus,
+		Data: ioStatus,
 	}
 	payload, _ := json.Marshal(msg)
 	s.WS.WSSend(wsnotify.WS_EVENT_IO, string(payload))

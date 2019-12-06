@@ -153,3 +153,13 @@ type Maintenance struct {
 	Name   string `json:"name"`
 	Expire string `json:"expire_time"`
 }
+
+type TighteningStep struct {
+	TighteningPoints []StepComsume `json:"tightening_points"`
+}
+
+type StepComsume struct {
+	Seq      int    `json:"sequence"`
+	GroupSeq int    `json:"group_sequence"`
+	NutNo    string `json:"nut_no"`
+}

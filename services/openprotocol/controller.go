@@ -312,7 +312,7 @@ func (c *TighteningController) handleResult(result *tightening_device.Tightening
 	//controllerResult.Dat = fmt.Sprintf("%s %s:%s:%s", dat_kvs[0], dat_kvs[1], dat_kvs[2], dat_kvs[3])
 	//
 	//controllerResult.PSet = result_data.PSetID
-	//controllerResult.Controller_SN = c.cfg.SN
+	//controllerResult.ControllerSN = c.cfg.SN
 	//if result_data.TighteningStatus == "0" {
 	//	controllerResult.Result = storage.RESULT_NOK
 	//} else {

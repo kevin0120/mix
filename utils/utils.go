@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"encoding/base64"
 	"github.com/kataras/iris/core/errors"
 	"github.com/satori/go.uuid"
 	"os"
@@ -40,7 +39,7 @@ func AppendByteSlice(s []byte, t []byte) []byte {
 
 func GenerateID() string {
 	u4 := uuid.NewV4()
-	return base64.RawURLEncoding.EncodeToString(u4.Bytes())
+	return u4.String()
 }
 
 func GetDateTime() (string, string) {

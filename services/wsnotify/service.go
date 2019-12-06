@@ -1,13 +1,12 @@
 package wsnotify
 
 import (
-	"github.com/kataras/iris/core/errors"
-	"github.com/kataras/iris/websocket"
-	"sync"
-
 	"encoding/json"
 	"fmt"
+	"github.com/kataras/iris/core/errors"
+	"github.com/kataras/iris/websocket"
 	"github.com/masami10/rush/services/httpd"
+	"sync"
 	"sync/atomic"
 )
 
@@ -29,6 +28,7 @@ const (
 	WS_EVENT_REPLY             = "reply"
 	WS_EVENT_DEVICE            = "device"
 	WS_EVENT_ORDER             = "order"
+	WS_EVENT_MES               = "mes"
 )
 
 type Diagnostic interface {
@@ -74,8 +74,6 @@ func (s *Service) Config() Config {
 func (s *Service) onConnect(c websocket.Connection) {
 
 	c.OnMessage(func(data []byte) {
-
-		s.diag.OnMessage(string(data))
 		msg := WSMsg{}
 		err := json.Unmarshal(data, &msg)
 		if err != nil {
@@ -111,6 +109,7 @@ func (s *Service) onConnect(c websocket.Connection) {
 
 				// 注册成功
 				_ = c.Emit(WS_EVENT_REPLY, GenerateReply(msg.SN, msg.Type, 0, ""))
+
 			}
 		} else {
 			s.postNotify(NotifyPackage{
@@ -223,6 +222,15 @@ func (s *Service) WSSendResult(sn string, payload string) {
 	}
 }
 
+// ws推送MES指示到显示ping
+//func (s *Service) WSSendMes(event string,sn string, payload string) {
+//
+//	c, exist := s.clientManager.GetClient(sn)
+//	if exist {
+//		c.Emit(event, payload)
+//	}
+//}
+
 func (s *Service) WSSend(evt string, payload string) {
 	s.clientManager.NotifyALL(evt, payload)
 }
@@ -318,6 +326,7 @@ func GenerateResult(sn uint64, wsType string, data interface{}) *WSMsg {
 	}
 }
 
+
 func WSClientSend(c websocket.Connection, event string, payload interface{}) error {
 	if c == nil {
 		return errors.New("conn is nil")
@@ -328,10 +337,3 @@ func WSClientSend(c websocket.Connection, event string, payload interface{}) err
 	return c.Emit(event, payload)
 }
 
-func GenerateMessage(sn uint64, wsType string, data interface{}) *WSMsg {
-	return &WSMsg{
-		SN:   sn,
-		Type: wsType,
-		Data: data,
-	}
-}

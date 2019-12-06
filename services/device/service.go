@@ -119,11 +119,18 @@ func (s *Service) fetchAllDevices() []DeviceStatus {
 	devices := []DeviceStatus{}
 	for k, v := range s.runningDevices {
 
+		children := []string{}
+		if v.Children() != nil {
+			for _, child := range reflect.ValueOf(v.Children()).MapKeys() {
+				children = append(children, child.String())
+			}
+		}
+
 		devices = append(devices, DeviceStatus{
 			SN:       k,
 			Type:     v.DeviceType(),
 			Status:   v.Status(),
-			Children: reflect.ValueOf(v.Children()).MapKeys(),
+			Children: children,
 			Config:   v.Config(),
 			Data:     v.Data(),
 		})
