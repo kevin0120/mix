@@ -1,7 +1,8 @@
 // @flow
-import type { Saga } from 'redux-saga';
 import { isNil, isEmpty } from 'lodash-es';
-import { call, put, take, all, actionChannel, race, select } from 'redux-saga/effects';
+import { call, put, take, all, actionChannel, race, select, delay } from 'redux-saga/effects';
+import React from 'react';
+import Grid from '@material-ui/core/Grid';
 import { STEP_STATUS } from '../constants';
 import type {
   tPoint,
@@ -13,7 +14,7 @@ import { CommonLog } from '../../../common/utils';
 import controllerModeTasks from './controllerModeTasks';
 import screwStepActions from './action';
 import { SCREW_STEP, controllerModes } from './constants';
-import { getDevice } from '../../deviceManager/devices';
+import { getDevice, getDevicesByType } from '../../deviceManager/devices';
 import dialogActions from '../../dialog/action';
 import type { IWorkStep } from '../interface/IWorkStep';
 import type { IScrewStep } from './interface/IScrewStep';
@@ -22,58 +23,34 @@ import type { ClsOperationPoint } from './classes/ClsOperationPoint';
 import { stepDataApi } from '../../../api/order';
 import type { IWorkable } from '../../workable/IWorkable';
 import { workModes } from '../../workCenterMode/constants';
+import { reworkDialogConstants as dia, reworkNS } from '../../reworkPattern/constants';
+import actions from '../../reworkPattern/action';
+import { tNS } from '../../../i18n';
+import { deviceType } from '../../deviceManager/constants';
+import SelectCard from '../../../components/SelectCard';
 
-export function* doPoint(
-  points: Array<ClsOperationPoint>,
-  isFirst: boolean,
-  // eslint-disable-next-line flowtype/no-weak-types
-  orderActions: Object
-): Saga<void> {
+function* getResult(activeConfigs, resultChannel, controllerMode, isFirst) {
   try {
-    const data = this._data;
-
-    if (
-      !(
-        data.controllerMode === controllerModes.pset ||
-        (data.controllerMode === controllerModes.job && isFirst)
-      )
-    ) {
+    if (controllerMode === controllerModes.job && !isFirst) {
       return;
     }
-    // eslint-disable-next-line no-restricted-syntax
-    for (const p of points) {
-      yield call([this, controllerModeTasks[data.controllerMode]], p.point);
-    }
-  } catch (e) {
-    CommonLog.lError(e, { at: 'doPoint', points });
-    yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, e));
-  }
-}
-
-function* getResult(pointsToActive, resultChannel, isFirst, orderActions) {
-  try {
-    if (pointsToActive && pointsToActive.length > 0) {
-      yield call(
-        [this, doPoint],
-        [...pointsToActive],
-        isFirst,
-        orderActions
-      );
+    const effects = activeConfigs.map(c => {
+      const { point, tool, controllerModeId } = c;
+      return call([this, controllerModeTasks[controllerMode]], point.point, tool, controllerModeId);
+    });
+    if (effects && effects.length > 0) {
+      yield all(effects);
     }
 
     // 先设置pset再enable
-    yield all(
-      pointsToActive.map(p =>
-        call(
-          getDevice(p.toolSN)?.Enable ||
-          (() => {
-            CommonLog.lError(
-              `tool ${p.toolSN}: no such tool or tool cannot be enabled.`
-            );
-          })
-        )
-      )
-    );
+    yield all(activeConfigs.map(c => {
+      const { tool } = c;
+      return call(tool?.Enable || (() => {
+        CommonLog.lError(
+          `tool ${tool?.Name}: no such tool or tool cannot be enabled.`
+        );
+      }));
+    }));
 
     const action = yield take(resultChannel);
     const { results } = action;
@@ -231,6 +208,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
       * [STEP_STATUS.ENTERING](ORDER, orderActions, config) {
         try {
           // init data
+          // check payload
           const payload: tScrewStepPayload = this._payload;
           if (isNil(payload) || isEmpty(payload)) {
             throw new Error(
@@ -239,35 +217,102 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               }, Payload: ${JSON.stringify(payload)}`
             );
           }
-
           const points = payload.tightening_points;
+          const { workcenterType } = yield select(s => s.setting.system.workcenter);
+          const { workCenterMode } = yield select();
+          switch (workCenterMode) {
+            case workModes.reworkWorkCenterMode: {
+              // is rework workcenter
+              // TODO judge by checking if the order belongs to current workcenter
+              if (workcenterType === 'rework') {
+                // do not check pset/job, set pest manually
+                const btnCancel = {
+                  label: tNS(dia.cancel, reworkNS),
+                  color: 'warning',
+                  action: actions.cancelRework()
+                };
+                const tools = getDevicesByType(deviceType.tool);
+                const ToolSelectCard = SelectCard(screwStepActions.selectTool);
 
-          if (!isNil(payload.jobID)) {
-            yield call(
-              this.updateData,
-              (data: tScrewStepData): tScrewStepData => ({
-                ...data,
-                controllerMode: controllerModes.job
-              })
-            );
-          } else if (points.every(p => !isNil(p.pset))) {
-            yield call(
-              this.updateData,
-              (data: tScrewStepData): tScrewStepData => ({
-                ...data,
-                controllerMode: controllerModes.pset
-              })
-            );
-          } else {
-            throw new Error('缺少JOB号或Pset号');
+                yield put(dialogActions.dialogShow({
+                  buttons: [btnCancel],
+                  title: '选择工具',
+                  content: (<Grid spacing={1} container>
+                    {tools.map(t => <Grid item xs={6} key={`${t.serialNumber}`}>
+                      <ToolSelectCard
+                        name={t.Name}
+                        status={t.Healthz ? '已连接' : '已断开'}
+                        infoArr={[t.serialNumber]}
+                        height={130}
+                        item={t}
+                      />
+                    </Grid>)}
+                  </Grid>)
+                }));
+                const { tool } = yield take(SCREW_STEP.SELECT_TOOL);
+                this._tools = [tool];
+                this._forceTool = tool;
+                yield put(dialogActions.dialogClose());
+                console.log('tool selected', tool);
+                const PsetSelect = SelectCard(screwStepActions.selectPset);
+
+                // TODO get tool psets
+                yield delay(300);
+                yield put(dialogActions.dialogShow({
+                  buttons: [btnCancel],
+                  title: '选择PSET',
+                  content: (<Grid spacing={1} container>
+                    {[1, 2, 3].map(p => <Grid item xs={6} key={`${p}`}>
+                      <PsetSelect
+                        name={p}
+                        height={130}
+                        item={p}
+                      />
+                    </Grid>)}
+                  </Grid>)
+                }));
+                const { pset } = yield take(SCREW_STEP.SELECT_PSET);
+                this._forcePset = pset;
+                yield put(dialogActions.dialogClose());
+              }
+              break;
+            }
+            case workModes.normWorkCenterMode: {
+              if (!isNil(payload.jobID)) {
+                yield call(
+                  this.updateData,
+                  (data: tScrewStepData): tScrewStepData => ({
+                    ...data,
+                    controllerMode: controllerModes.job
+                  })
+                );
+                points.reduce((tSN: string, p: tPoint): string => {
+                  if (tSN && p.tightening_tool !== tSN) {
+                    throw new Error('工具序列号不匹配');
+                  }
+                  return p.tightening_tool || tSN || '';
+                }, null);
+              } else if (points.every(p => !isNil(p.pset))) {
+                yield call(
+                  this.updateData,
+                  (data: tScrewStepData): tScrewStepData => ({
+                    ...data,
+                    controllerMode: controllerModes.pset
+                  })
+                );
+              } else {
+                throw new Error('缺少JOB号或Pset号');
+              }
+              this._tools = yield call(getTools, payload?.tightening_points || []);
+              this._forcePset = null;
+              this._forceTool = null;
+              break;
+            }
+            default:
+              break;
           }
 
-          this._pointsManager = new ClsOrderOperationPoints(
-            payload.tightening_points
-          );
-
           // eslint-disable-next-line camelcase
-          this._tools = yield call(getTools, payload?.tightening_points || []);
           this._tools.forEach(t => {
             this._listeners.push(
               t.addListener(
@@ -276,9 +321,14 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               )
             );
           });
+
+          this._pointsManager = new ClsOrderOperationPoints(
+            payload.tightening_points
+          );
           if (this._data && this._data.results) {
             this._pointsManager.newResult(this._data.results);
           }
+
           yield call(
             this.updateData,
             (data: tScrewStepData): tScrewStepData => ({
@@ -286,6 +336,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               tightening_points: this._pointsManager.points.map(p => p.data)
             })
           );
+          // goto doing
           yield put(orderActions.stepStatus(this, STEP_STATUS.DOING, config));
         } catch (e) {
           CommonLog.lError(e, { at: 'screwStep ENTERING' });
@@ -297,43 +348,60 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
           const { reworkConfig } = config || {};
           const { workCenterMode } = yield select();
           let redoPointClsObj = null;
-          if (workCenterMode === workModes.reworkWorkCenterMode) {
-            const { point } = reworkConfig;
-            if (point) {
-              redoPointClsObj = this.points.find(p => p.sequence === point.sequence);
-            } else {
-              redoPointClsObj = this.points.find(p => p.canRedo);
+
+          switch (workCenterMode) {
+            case workModes.reworkWorkCenterMode: {
+              const { point } = reworkConfig;
+              if (point) {
+                redoPointClsObj = this.points.find(p => p.sequence === point.sequence);
+              } else {
+                redoPointClsObj = this.points.find(p => p.canRedo);
+              }
+              console.warn('rework step with point', redoPointClsObj);
+              if (redoPointClsObj) {
+                this._pointsToActive = [redoPointClsObj.start()];
+              }
+              break;
             }
-            console.warn('rework step with point', redoPointClsObj);
-            if (redoPointClsObj) {
-              this._pointsToActive = [redoPointClsObj.start()];
+            case workModes.normWorkCenterMode: {
+              if (!this._pointsManager) {
+                throw new Error('拧紧点异常');
+              }
+              this._pointsToActive = this._pointsManager.start();
+              break;
             }
-          } else {
-            if (!this._pointsManager) {
-              throw new Error('拧紧点异常');
-            }
-            this._pointsToActive = this._pointsManager.start();
+            default:
+              break;
           }
 
-
-          let isFirst = true; // job只设置一次，记录状态
           const resultChannel = yield actionChannel([SCREW_STEP.RESULT]);
-          while (true) {
-            yield call(
-              this.updateData,
-              (data: tScrewStepData): tScrewStepData => ({
-                ...data,
-                tightening_points: this._pointsManager.points.map(p => p.data)
-              })
-            );
-            console.warn(this._pointsToActive);
+          const { controllerMode, jobID } = this._data;
+          let isFirst = true; // job只设置一次，记录状态
 
+
+          while (true) {
+            yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({
+              ...data,
+              tightening_points: this._pointsManager.points.map(p => p.data)
+            }));
+
+
+            const activeConfigs = this._pointsToActive.map(p => {
+              const cModeId = controllerMode === controllerModes.job ? jobID : this._forcePset || p.pset;
+              const tool = this._forceTool || getDevice(p.toolSN);// TODO use selected tool at rework workcenter
+              console.log(p);
+              return {
+                point: p,
+                tool,
+                controllerModeId: cModeId
+              };
+            });
             const results = yield call(
               [this, getResult],
-              this._pointsToActive,
+              activeConfigs,
               resultChannel,
-              isFirst,
-              orderActions
+              controllerMode,
+              isFirst
             );
 
             const { inactive } = this._pointsManager.newResult(results);
@@ -346,33 +414,39 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               })
             )));
 
-            if (workCenterMode === workModes.reworkWorkCenterMode) {
-              const canRedoPoint = this.points.find(p => p.canRedo);
-              const success = redoPointClsObj
-                && redoPointClsObj.isSuccess
-                && !canRedoPoint;
-              if (success) {
-                yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
-              } else {
-                yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL)); // 失败退出
+            switch (workCenterMode) {
+              case workModes.reworkWorkCenterMode: {
+                const canRedoPoint = this.points.find(p => p.canRedo);
+                const success = redoPointClsObj
+                  && redoPointClsObj.isSuccess
+                  && !canRedoPoint;
+                if (success) {
+                  yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
+                } else {
+                  yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL)); // 失败退出
+                }
+                break;
               }
-            } else {
-              const finalFailPoints = inactive.filter(
-                (p: ClsOperationPoint) => p.isFinalFail
-              );
-              yield call([this, byPassPoint], finalFailPoints, orderActions);
+              case workModes.normWorkCenterMode: {
+                const finalFailPoints = inactive.filter(
+                  (p: ClsOperationPoint) => p.isFinalFail
+                );
+                yield call([this, byPassPoint], finalFailPoints, orderActions);
 
-              this._pointsToActive = this._pointsManager.start();
-              if (
-                this._pointsManager.isFailed &&
-                this._pointsManager.points.filter(p => p.isActive).length === 0
-              ) {
-                yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL)); // 失败退出
-              } else if (this._pointsManager.isPass) {
-                yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
+                this._pointsToActive = this._pointsManager.start();
+                if (
+                  this._pointsManager.isFailed &&
+                  this._pointsManager.points.filter(p => p.isActive).length === 0
+                ) {
+                  yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL)); // 失败退出
+                } else if (this._pointsManager.isPass) {
+                  yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
+                }
+                break;
               }
+              default:
+                break;
             }
-
 
             if (isFirst) {
               isFirst = false;

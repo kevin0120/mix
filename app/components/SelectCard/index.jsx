@@ -56,7 +56,7 @@ function SelectCard(props) {
         >
           {name}
         </Typography>
-        {infoArr.map((i, idx) => (
+        {infoArr && infoArr.map((i, idx) => (
           <Typography
             key={`${i}-${idx}`}
             variant="body2"

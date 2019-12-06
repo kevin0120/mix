@@ -23,4 +23,12 @@ export default {
   byPassSpecPoint: () => ({
     type: SCREW_STEP.BYPASS_SPEC_POINT
   }),
+  selectTool: (tool) => ({
+    type: SCREW_STEP.SELECT_TOOL,
+    tool
+  }),
+  selectPset: (pset) => ({
+    type: SCREW_STEP.SELECT_PSET,
+    pset
+  }),
 };

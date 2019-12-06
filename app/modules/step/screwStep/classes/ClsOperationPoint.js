@@ -167,6 +167,10 @@ export class ClsOperationPoint {
     };
   }
 
+  get pset() {
+    return this._point.pset;
+  }
+
   redo() {
     this.setActive(true);
     this._results = [];

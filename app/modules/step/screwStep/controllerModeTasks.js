@@ -13,23 +13,22 @@ import type { IDevice } from '../../device/IDevice';
 
 // pset/job模式
 export default {
-  * [controllerModes.pset](point: tPoint): Saga<void> {
+  * [controllerModes.pset](point: tPoint, tool, pset): Saga<void> {
     try {
       const sData: tScrewStepData = this.data;
       const stepId = this.id;
       const { retryTimes } = sData;
       const { points } = this._pointsManager;
       const userIDs: Array<number> = yield select(s => s.users.map(u => u.uid));
-      const { tightening_tool: toolSN, pset, sequence } = point;
-      const tool = getDevice(toolSN);
+      const { sequence } = point;
       if (!tool) {
-        throw new Error(`未找到工具(${toolSN})`);
+        throw new Error(`未指定工具`);
       }
       const ControllerSN = ((tool.parent: any): IDevice)?.serialNumber;
       if (!ControllerSN) {
-        throw new Error(`工具(${toolSN})缺少控制器`);
+        throw new Error(`工具(${tool?.serialNumber})缺少控制器`);
       }
-      const total = points.length || 0;
+      const total = 1;
       const workorderID = yield select(s => workingOrder(s.order)?.id);
       if (isNil(pset)) {
         throw new Error('pset号为空');
@@ -40,7 +39,7 @@ export default {
       console.log(pset, typeof pset);
       yield call(
         psetApi,
-        toolSN || '',
+        tool?.serialNumber || '',
         ControllerSN || '',
         stepId,
         userIDs,
@@ -61,31 +60,21 @@ export default {
       throw new Error(msg);
     }
   },
-  
-  * [controllerModes.job](): Saga<void> {
+
+  * [controllerModes.job](point, tool, jobID): Saga<void> {
     try {
-      const { jobID, points }: tScrewStepData = this._data;
       const stepId = this._id;
-      const toolSN = points.reduce((tSN: string, p: tPoint): string => {
-        if (tSN && p.tightening_tool !== tSN) {
-          CommonLog.lError('结果中的toolSN不匹配');
-        }
-        return p.tightening_tool || tSN || '';
-      }, '');
-      
-      const userID = 1;
-      const tool = getDevice(toolSN);
+      const userIDs: Array<number> = yield select(s => s.users.map(u => u.uid));
       if (!tool) {
-        throw new Error(`未找到工具(${toolSN})`);
+        throw new Error(`未指定工具`);
       }
       const ControllerSN = ((tool.parent: any): IDevice)?.serialNumber;
       if (!ControllerSN) {
-        throw new Error(`工具(${toolSN})缺少控制器`);
+        throw new Error(`工具(${tool.Name})缺少控制器`);
       }
-      yield call(jobApi, toolSN, ControllerSN, stepId, userID, jobID);
+      yield call(jobApi, tool.serialNumber, ControllerSN, stepId, userIDs, jobID);
     } catch (e) {
       const msg = `程序号设置失败，${e.message}`;
-      
       yield put(
         notifierActions.enqueueSnackbar('Error', msg, {
           at: 'controllerModes.job'

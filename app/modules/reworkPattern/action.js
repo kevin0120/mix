@@ -18,9 +18,5 @@ export default {
   }),
   cancelRework: () => ({
     type: REWORK_PATTERN.CANCEL_REWORK
-  }),
-  selectTool: (tool) => ({
-    type: REWORK_PATTERN.SELECT_TOOL,
-    tool
   })
 };

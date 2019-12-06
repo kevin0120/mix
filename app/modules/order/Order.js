@@ -265,12 +265,12 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
             CommonLog.Info(
               `Doing Order (${this.code}),at ${this.workingIndex} step (${this.workingStep?.code}) `
             );
-            const step = this.workingStep;
-            if (step) {
+            const wStep = this.workingStep;
+            if (wStep) {
               console.log(status);
               const nextStatus = yield call(
                 [this, this.runSubStep],
-                step,
+                wStep,
                 {
                   onNext: _onNext,
                   onPrevious: _onPrevious
