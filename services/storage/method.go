@@ -194,11 +194,21 @@ func (s *Service) findStepPicture(ref string) (string, error) {
 }
 
 func (s *Service) findOrderPicture(ref string) (string, error) {
+	ro, err := s.GetRoutingOperationViaProductTypeCode(ref)
+	if err != nil {
+		err := errors.Errorf("GetRoutingOperationViaProductTypeCode: %s Fail", ref)
+		s.diag.Error("findOrderPicture", err)
+		return "", err
+	}
+	return ro.ProductTypeImage, nil
+}
+
+func (s *Service)GetRoutingOperationViaProductTypeCode(ProductType string) (*RoutingOperations, error) {
 	var ro RoutingOperations
 	ss := s.eng.Alias("r").Where("r.product_type = ?", ref).Limit(1)
 	_, e := ss.Get(&ro)
 	if e != nil {
-		return "", e
+		return nil, errors.Errorf("Operation For Product Type Code: %s Is Not Existed", ProductType)
 	}
-	return ro.ProductTypeImage, nil
+	return &ro, nil
 }
