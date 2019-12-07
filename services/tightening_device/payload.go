@@ -97,6 +97,9 @@ type TighteningResult struct {
 	// 控制器序列号
 	ControllerSN string `json:"controller_sn"`
 
+	// 错误代码
+	ErrorCode string `json:"errorCode"`
+
 	// 工具序列号
 	ToolSN string `json:"tool_sn"`
 

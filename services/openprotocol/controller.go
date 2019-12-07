@@ -208,7 +208,7 @@ func (c *TighteningController) ProcessRequest(mid string, noack string, station 
 	return reply, nil
 }
 
-func DataDecoding(original []byte, torqueCoefficient float64, angleCoefficient float64, d Diagnostic) (Torque []float64, Angle []float64) {
+func CurveDataDecoding(original []byte, torqueCoefficient float64, angleCoefficient float64, d Diagnostic) (Torque []float64, Angle []float64) {
 	lenO := len(original)
 	data := make([]byte, lenO, lenO) // 最大只会这些数据
 	writeOffset := 0
@@ -238,13 +238,13 @@ func DataDecoding(original []byte, torqueCoefficient float64, angleCoefficient f
 			step = 2 //跳过这个字节
 		default:
 			e := errors.New("Desoutter Protocol Curve Raw Data 0xff不能单独出现")
-			d.Error("DataDecoding", e)
+			d.Error("CurveDataDecoding", e)
 			// do nothing
 		}
 	}
 	if writeOffset%6 != 0 {
 		e := errors.New("Desoutter Protocol Curve Raw Data Convert Fail")
-		d.Error("DataDecoding Fail", e)
+		d.Error("CurveDataDecoding Fail", e)
 		return
 	}
 	// 所有位减1

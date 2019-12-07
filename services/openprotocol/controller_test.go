@@ -120,7 +120,7 @@ func Test_DataEncoding(t *testing.T) {
 		0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
 		0x01, 0x01, 0x01, 0x01, 0x01}
 	fmt.Println(fmt.Sprintf("Test Data: %# 20X", testData))
-	torques, angels := DataDecoding(testData, 0.000345, 0.00055, d)
+	torques, angels := CurveDataDecoding(testData, 0.000345, 0.00055, d)
 	assert.NotNil(t, torques)
 	assert.NotNil(t, angels)
 }
