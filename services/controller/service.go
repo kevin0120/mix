@@ -27,7 +27,7 @@ type Controller interface {
 	Inputs() string
 	LoadController(controller *storage.Controllers)
 	//Tools() map[string]string
-	device.IDevice
+	device.IBaseDevice
 }
 
 type Protocol interface {

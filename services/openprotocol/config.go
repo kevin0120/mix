@@ -6,6 +6,12 @@ import (
 	"time"
 )
 
+const (
+	OpenProtocolDefaultKeepAlivePeriod = toml.Duration(time.Second * 10)
+	OpenProtocolDefaultRequestTimeOut = toml.Duration(time.Second * 3)
+	OpenProtocolDefaultGetTollInfoPeriod = toml.Duration(time.Hour * 12)
+)
+
 type Config struct {
 	KeepAlivePeriod   toml.Duration `yaml:"keep_alive_period"`
 	ReadBufferSize    int           `yaml:"read_buf"`
@@ -21,14 +27,14 @@ type Config struct {
 func NewConfig() Config {
 
 	return Config{
-		KeepAlivePeriod:   toml.Duration(time.Second * 10), //keep alive周期
+		KeepAlivePeriod:   OpenProtocolDefaultKeepAlivePeriod,
 		ReadBufferSize:    65535,
-		ReqTimeout:        toml.Duration(time.Microsecond * 3000),
+		ReqTimeout:        OpenProtocolDefaultRequestTimeOut,
 		SkipJobs:          []int{250},
 		IOTrigger:         0,
 		DataIndex:         1,
 		VinIndex:          []int{0, 1},
-		GetToolInfoPeriod: toml.Duration(time.Hour * 12), // 半天
+		GetToolInfoPeriod: OpenProtocolDefaultGetTollInfoPeriod,
 		DefaultMode:       tightening_device.MODE_JOB,
 	}
 }

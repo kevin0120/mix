@@ -5,6 +5,7 @@ import (
 	"github.com/google/gousb"
 	"github.com/masami10/rush/services/device"
 	"github.com/pkg/errors"
+	uuid "github.com/satori/go.uuid"
 	"runtime"
 	"strconv"
 	"strings"
@@ -70,7 +71,7 @@ type Notify interface {
 type Scanner struct {
 	devInfo *DeviceInfo
 	device  USBDevice // maybe gousb, or serial
-
+	serialNumber string
 	diag   Diagnostic
 	notify Notify
 	status atomic.Value
@@ -83,7 +84,13 @@ type Scanner struct {
 func NewScanner(channel string, d Diagnostic, dev USBDevice) *Scanner {
 	di := NewDevice(channel, d)
 
-	return &Scanner{devInfo: di, diag: d, device: dev, debounceTrigger: false, init: true}
+	s := &Scanner{devInfo: di, diag: d, device: dev, debounceTrigger: false, init: true}
+	s.serialNumber = uuid.NewV4().String()
+	return s
+}
+
+func (s *Scanner)SerialNumber() string  {
+	return s.serialNumber
 }
 
 func (s *Scanner) Start() {
@@ -115,8 +122,8 @@ func (s *Scanner) DeviceType() string {
 	return "scanner"
 }
 
-func (s *Scanner) Children() map[string]device.IDevice {
-	return map[string]device.IDevice{}
+func (s *Scanner) Children() map[string]device.IBaseDevice {
+	return map[string]device.IBaseDevice{}
 }
 
 func (s *Scanner) open() (USBDevice, error) {

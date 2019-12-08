@@ -66,8 +66,8 @@ func (s *Service) Write(sn string, buf []byte) error {
 	return nil
 }
 
-func (s *Service) IsSupport(cfg *tightening_device.TighteningDeviceConfig) bool {
-	_, err := GetModel(cfg.Model)
+func (s *Service) IsSupport(model string) bool {
+	_, err := GetModel(model)
 	if err != nil {
 		return false
 	}
@@ -77,7 +77,7 @@ func (s *Service) IsSupport(cfg *tightening_device.TighteningDeviceConfig) bool 
 
 func (s *Service) CreateController(cfg *tightening_device.TighteningDeviceConfig) (tightening_device.ITighteningController, error) {
 	// 检测型号是否支持
-	if !s.IsSupport(cfg) {
+	if !s.IsSupport(cfg.Model) {
 		return nil, errors.New("Not Supported")
 	}
 
@@ -97,6 +97,11 @@ func (s *Service) Close() error {
 	return nil
 }
 
+func (s *Service)GetDefaultMode() string {
+	c := s.config()
+	return c.DefaultMode
+}
+
 // TODO: 对外接口统一在tightening服务中实现
 func (s *Service) ToolControl(sn string, tool_sn string, enable bool) error {
 	//// 判断控制器是否存在
@@ -110,7 +115,7 @@ func (s *Service) ToolControl(sn string, tool_sn string, enable bool) error {
 	//
 	//var toolExist = false
 	//
-	//for _, t := range c.cfg.Tools {
+	//for _, t := range c.deviceConf.Tools {
 	//	if t.SN == tool_sn {
 	//		toolExist = true
 	//		break
@@ -143,7 +148,7 @@ func (s *Service) PSet(sn string, tool_sn string, pset int, result_id int64, cou
 	//
 	//var toolExist = false
 	//var toolChannel int
-	//for _, t := range c.cfg.Tools {
+	//for _, t := range c.deviceConf.Tools {
 	//	if t.SN == tool_sn {
 	//		toolChannel = t.Channel
 	//		toolExist = true
@@ -179,7 +184,7 @@ func (s *Service) PSetManual(sn string, tool_sn string, pset int, user_id int64,
 	//
 	//var toolExist = false
 	//var toolChannel int
-	//for _, t := range c.cfg.Tools {
+	//for _, t := range c.deviceConf.Tools {
 	//	if t.SN == tool_sn {
 	//		toolChannel = t.Channel
 	//		toolExist = true
@@ -251,7 +256,7 @@ func (s *Service) JobSetManual(sn string, tool_sn string, job int, user_id int64
 	//
 	//var toolExist = false
 	//
-	//for _, t := range c.cfg.Tools {
+	//for _, t := range c.deviceConf.Tools {
 	//	if t.SN == tool_sn {
 	//		toolExist = true
 	//		break

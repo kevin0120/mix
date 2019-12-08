@@ -855,7 +855,7 @@ type AlarmStatus struct {
 }
 
 type CurveBody struct {
-	ToolNumber    int    `start:"3"  end:"4"`
+	ToolNumber    int    `start:"3"  end:"4"` // todo: 通道号更新名称
 	TorqueString  string `start:"28"  end:"41"`
 	AngleString   string `start:"44"  end:"57"`
 	MeasurePoints int    `start:"60"  end:"63"`

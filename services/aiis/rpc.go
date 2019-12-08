@@ -140,7 +140,7 @@ func (c *GRPCClient) updateStatus(status string) {
 		//}
 		//
 		//msg, _ := json.Marshal(s)
-		//c.Srv.WS.WSSendControllerStatus(string(msg))
+		//c.ProtocolService.WS.WSSendControllerStatus(string(msg))
 	}
 }
 

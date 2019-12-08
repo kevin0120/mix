@@ -10,7 +10,7 @@ import (
 	"sync/atomic"
 )
 
-type IDevice interface {
+type IBaseDevice interface {
 
 	// 设备状态
 	Status() string
@@ -19,13 +19,16 @@ type IDevice interface {
 	DeviceType() string
 
 	// 子设备
-	Children() map[string]IDevice
+	Children() map[string]IBaseDevice
 
 	// 设备配置
 	Config() interface{}
 
 	// 设备运行数据
 	Data() interface{}
+
+	//设备序列号唯一追踪号
+	SerialNumber() string
 }
 
 type Diagnostic interface {
@@ -36,7 +39,7 @@ type Diagnostic interface {
 type Service struct {
 	diag           Diagnostic
 	configValue    atomic.Value
-	runningDevices map[string]IDevice
+	runningDevices map[string]IBaseDevice
 	mtxDevices     sync.Mutex
 
 	WS *wsnotify.Service
@@ -49,7 +52,7 @@ func NewService(c Config, d Diagnostic) (*Service, error) {
 
 	srv := &Service{
 		diag:           d,
-		runningDevices: map[string]IDevice{},
+		runningDevices: map[string]IBaseDevice{},
 		mtxDevices:     sync.Mutex{},
 	}
 
@@ -100,7 +103,7 @@ func (s *Service) dispatchRequest(req *wsnotify.WSRequest) {
 	}
 }
 
-func (s *Service) AddDevice(sn string, d IDevice) {
+func (s *Service) AddDevice(sn string, d IBaseDevice) {
 	defer s.mtxDevices.Unlock()
 	s.mtxDevices.Lock()
 
@@ -116,7 +119,7 @@ func (s *Service) fetchAllDevices() []DeviceStatus {
 	defer s.mtxDevices.Unlock()
 	s.mtxDevices.Lock()
 
-	devices := []DeviceStatus{}
+	var devices []DeviceStatus
 	for k, v := range s.runningDevices {
 
 		children := []string{}

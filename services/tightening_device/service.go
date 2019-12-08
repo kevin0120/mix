@@ -55,10 +55,14 @@ func (s *Service) initGblDispatcher() {
 	}
 }
 
-func (s *Service) loadTighteningTool(c Config) {
+func (s *Service) loadTighteningController(c Config) {
 	for _, deviceConfig := range c.Devices {
-
-		c, err := s.protocols[deviceConfig.Protocol].CreateController(&deviceConfig)
+		p , err := s.getProtocol(deviceConfig.Protocol)
+		if err != nil {
+			s.diag.Error("loadTighteningController", err)
+			continue
+		}
+		c, err := p.CreateController(&deviceConfig)
 		if err != nil {
 			s.diag.Error("Create Controller Failed", err)
 			continue
@@ -97,8 +101,16 @@ func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol) (*Servi
 	}
 
 	// 根据配置加载所有拧紧控制器
-	s.loadTighteningTool(c)
+	s.loadTighteningController(c)
 	return s, nil
+}
+
+func (s *Service)getProtocol(protocolName string) (ITighteningProtocol, error) {
+	if p, ok := s.protocols[protocolName]; !ok {
+		return nil, errors.New("Protocol Is Not Support")
+	}else {
+		return p, nil
+	}
 }
 
 func (s *Service) Open() error {
@@ -348,7 +360,7 @@ func (s *Service) getTool(controllerSN string, toolSN string) (ITighteningTool, 
 		return nil, err
 	}
 
-	tool, err := controller.GetTool(toolSN)
+	tool, err := controller.GetToolViaSerialNumber(toolSN)
 	if err != nil {
 		return nil, err
 	}

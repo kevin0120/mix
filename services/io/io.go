@@ -43,6 +43,10 @@ type IOModule struct {
 	diag          Diagnostic
 }
 
+func (io *IOModule)SerialNumber() string  {
+	return io.cfg.SN
+}
+
 func (s *IOModule) Start(srv *Service) error {
 
 	s.flashes = map[uint16]uint16{}
@@ -103,8 +107,8 @@ func (s *IOModule) DeviceType() string {
 	return "io"
 }
 
-func (s *IOModule) Children() map[string]device.IDevice {
-	return map[string]device.IDevice{}
+func (s *IOModule) Children() map[string]device.IBaseDevice {
+	return map[string]device.IBaseDevice{}
 }
 
 func (s *IOModule) Data() interface{} {
