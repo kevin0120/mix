@@ -46,7 +46,7 @@ type Service struct {
 
 	diag Diagnostic
 	Notify
-	dispatcher Dispatcher
+	dispatcher    Dispatcher
 	WS            *wsnotify.Service
 	DeviceService *device.Service
 }
@@ -57,7 +57,7 @@ func NewService(c Config, d Diagnostic, dispatcher Dispatcher) *Service {
 		diag:        d,
 		mtxScanners: sync.Mutex{},
 		scanners:    map[string]*Scanner{},
-		dispatcher: dispatcher,
+		dispatcher:  dispatcher,
 	}
 
 	s.configValue.Store(c)
@@ -82,14 +82,14 @@ func (s *Service) Open() error {
 	return nil
 }
 
-func (s *Service)createAndStartScannerDispatcher() error {
+func (s *Service) createAndStartScannerDispatcher() error {
 	if s.dispatcher == nil {
 		err := errors.New("Please Inject DispatcherBus Service First")
 		s.diag.Error("createAndStartScannerDispatcher", err)
 		return err
 	}
 	err := s.dispatcher.Create(ScannerDispatcherKey, 20)
-	if err == nil || strings.HasPrefix(err.Error(), "Dispatcher Already Exist" ){
+	if err == nil || strings.HasPrefix(err.Error(), "Dispatcher Already Exist") {
 		return s.dispatcher.Start(ScannerDispatcherKey)
 	}
 	return err

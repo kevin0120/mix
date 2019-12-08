@@ -209,7 +209,7 @@ func (s *Service) findOrderPicture(ref string) (string, error) {
 	return ro.ProductTypeImage, nil
 }
 
-func (s *Service)GetRoutingOperationViaProductTypeCode(ProductType string) (*RoutingOperations, error) {
+func (s *Service) GetRoutingOperationViaProductTypeCode(ProductType string) (*RoutingOperations, error) {
 	var ro RoutingOperations
 	ss := s.eng.Alias("r").Where("r.product_type = ?", ProductType).Limit(1)
 	_, e := ss.Get(&ro)

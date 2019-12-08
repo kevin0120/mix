@@ -75,7 +75,7 @@ type TighteningController struct {
 	device.BaseDevice
 }
 
-func (c *TighteningController)SerialNumber() string {
+func (c *TighteningController) SerialNumber() string {
 	return c.BaseDevice.SerialNumber
 }
 
@@ -90,6 +90,7 @@ func defaultControllerGet() *TighteningController {
 		BaseDevice:        device.CreateBaseDevice(),
 		tempResultCurve:   map[int]*tightening_device.TighteningCurve{},
 		toolDispatches:    map[string]*ToolDispatch{},
+		sockClients:       map[string]*socket_writer.SocketWriter{},
 	}
 }
 
@@ -495,7 +496,7 @@ func (c *TighteningController) CloseTransport() {
 		if err := writer.Close(); err != nil {
 			e := errors.Wrapf(err, "Close Transport For %s Error", symbol)
 			c.diag.Error("CloseTransport", e)
-		}else {
+		} else {
 			isCloseTransportSymbols = append(isCloseTransportSymbols, symbol)
 		}
 	}
@@ -734,20 +735,19 @@ func (c *TighteningController) handlePackageOPPayload(src []byte, data []byte) e
 	return nil
 }
 
-func (c *TighteningController)getDefaultTransportClient() *socket_writer.SocketWriter {
+func (c *TighteningController) getDefaultTransportClient() *socket_writer.SocketWriter {
 	for _, sw := range c.sockClients {
 		return sw
 	}
 	return nil
 }
 
-
-func (c *TighteningController)getTransportClientBySymbol(symbol string) *socket_writer.SocketWriter {
+func (c *TighteningController) getTransportClientBySymbol(symbol string) *socket_writer.SocketWriter {
 	if sw, ok := c.sockClients[symbol]; !ok {
 		err := errors.Errorf("Can Not Found Transport For %s", symbol)
 		c.diag.Error("getTransportClientBySymbol", err)
 		return nil
-	}else {
+	} else {
 		return sw
 	}
 }

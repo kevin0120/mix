@@ -7,8 +7,8 @@ import (
 
 func CreateBaseDevice() BaseDevice {
 	c := BaseDevice{
-		children:    map[string]IBaseDevice{},
-		status:      atomic.Value{},
+		children: map[string]IBaseDevice{},
+		status:   atomic.Value{},
 	}
 
 	c.UpdateStatus(STATUS_OFFLINE)
@@ -16,14 +16,14 @@ func CreateBaseDevice() BaseDevice {
 }
 
 type BaseDevice struct {
-	status      atomic.Value
-	mtxChildren sync.Mutex
-	children    map[string]IBaseDevice
-	Cfg         interface{}
+	status       atomic.Value
+	mtxChildren  sync.Mutex
+	children     map[string]IBaseDevice
+	Cfg          interface{}
 	SerialNumber string
 }
 
-func (s *BaseDevice)SetSerialNumber(serialNumber string)  {
+func (s *BaseDevice) SetSerialNumber(serialNumber string) {
 	s.SerialNumber = serialNumber
 }
 

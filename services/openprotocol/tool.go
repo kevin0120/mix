@@ -35,7 +35,7 @@ type TighteningTool struct {
 	device.BaseDevice
 }
 
-func (s *TighteningTool)SerialNumber() string {
+func (s *TighteningTool) SerialNumber() string {
 	return s.BaseDevice.SerialNumber
 }
 

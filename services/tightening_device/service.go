@@ -23,6 +23,7 @@ type Diagnostic interface {
 	Debug(msg string)
 }
 
+// TODO: 修改服务中的DISPATCH相关方法
 type Service struct {
 	diag               Diagnostic
 	configValue        atomic.Value
@@ -57,7 +58,7 @@ func (s *Service) initGblDispatcher() {
 
 func (s *Service) loadTighteningController(c Config) {
 	for _, deviceConfig := range c.Devices {
-		p , err := s.getProtocol(deviceConfig.Protocol)
+		p, err := s.getProtocol(deviceConfig.Protocol)
 		if err != nil {
 			s.diag.Error("loadTighteningController", err)
 			continue
@@ -105,10 +106,10 @@ func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol) (*Servi
 	return s, nil
 }
 
-func (s *Service)getProtocol(protocolName string) (ITighteningProtocol, error) {
+func (s *Service) getProtocol(protocolName string) (ITighteningProtocol, error) {
 	if p, ok := s.protocols[protocolName]; !ok {
 		return nil, errors.New("Protocol Is Not Support")
-	}else {
+	} else {
 		return p, nil
 	}
 }

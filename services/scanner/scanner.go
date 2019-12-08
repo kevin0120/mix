@@ -69,12 +69,12 @@ type Notify interface {
 }
 
 type Scanner struct {
-	devInfo *DeviceInfo
-	device  USBDevice // maybe gousb, or serial
+	devInfo      *DeviceInfo
+	device       USBDevice // maybe gousb, or serial
 	serialNumber string
-	diag   Diagnostic
-	notify Notify
-	status atomic.Value
+	diag         Diagnostic
+	notify       Notify
+	status       atomic.Value
 
 	debounced       func(f func())
 	debounceTrigger bool
@@ -89,7 +89,7 @@ func NewScanner(channel string, d Diagnostic, dev USBDevice) *Scanner {
 	return s
 }
 
-func (s *Scanner)SerialNumber() string  {
+func (s *Scanner) SerialNumber() string {
 	return s.serialNumber
 }
 

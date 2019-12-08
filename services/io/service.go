@@ -21,6 +21,8 @@ type Dispatcher interface {
 	Create(name string, len int) error
 	Start(name string) error
 	Dispatch(name string, data interface{}) error
+	LaunchDispatchersByHandlerMap(dispatcherMap DispatcherBus.DispatcherMap)
+	Release(name string) error
 }
 
 type Service struct {
@@ -33,7 +35,7 @@ type Service struct {
 	IONotify
 	wsnotify.WSNotify
 
-	DispatcherBus *DispatcherBus.Service
+	//DispatcherBus *DispatcherBus.Service
 	dispatcherMap DispatcherBus.DispatcherMap
 }
 

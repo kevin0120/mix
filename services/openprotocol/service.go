@@ -19,6 +19,7 @@ type Diagnostic interface {
 	Debug(msg string)
 }
 
+// TODO: 修改服务中的DISPATCH相关方法
 type Service struct {
 	diag        Diagnostic
 	configValue atomic.Value
@@ -97,7 +98,7 @@ func (s *Service) Close() error {
 	return nil
 }
 
-func (s *Service)GetDefaultMode() string {
+func (s *Service) GetDefaultMode() string {
 	c := s.config()
 	return c.DefaultMode
 }

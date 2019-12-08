@@ -20,9 +20,10 @@ type Diagnostic interface {
 	Debug(msg string)
 }
 
+// TODO: 修改服务中的DISPATCH相关方法
 type Service struct {
-	configValue atomic.Value
-	serialNumber string
+	configValue   atomic.Value
+	serialNumber  string
 	diag          Diagnostic
 	ctx           *scard.Context
 	WS            *wsnotify.Service
@@ -30,14 +31,14 @@ type Service struct {
 }
 
 //fixme: 现在默认创建服务时自动创建一个UUID作为序列号
-func (s *Service)SerialNumber() string  {
+func (s *Service) SerialNumber() string {
 	return s.serialNumber
 }
 
 func NewService(c Config, d Diagnostic) *Service {
 
 	s := &Service{
-		diag: d,
+		diag:         d,
 		serialNumber: uuid.NewV4().String(),
 	}
 

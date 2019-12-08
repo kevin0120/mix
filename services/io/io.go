@@ -43,7 +43,7 @@ type IOModule struct {
 	diag          Diagnostic
 }
 
-func (io *IOModule)SerialNumber() string  {
+func (io *IOModule) SerialNumber() string {
 	return io.cfg.SN
 }
 

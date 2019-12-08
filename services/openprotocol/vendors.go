@@ -19,8 +19,8 @@ type IOpenProtocolController interface {
 	Connect() error                                                           //建立连接
 	handlerOldResults() error                                                 //处理未被处理的历史数据
 	Protocol() string
-	initSubscribeInfos()             //初始化需要订阅的信息
-	ProcessSubscribeControllerInfo() //执行订阅相关控制器信息
+	initSubscribeInfos()                                                                                                                      //初始化需要订阅的信息
+	ProcessSubscribeControllerInfo()                                                                                                          //执行订阅相关控制器信息
 	CurveDataDecoding(original []byte, torqueCoefficient float64, angleCoefficient float64, d Diagnostic) (Torque []float64, Angle []float64) //曲线解析
 }
 

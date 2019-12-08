@@ -44,6 +44,7 @@ func NewEndpoint(url string, headers map[string]string, method string, name stri
 	}
 }
 
+// TODO: 修改服务中的DISPATCH相关方法
 type Service struct {
 	diag         Diagnostic
 	methods      Methods
