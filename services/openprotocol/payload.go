@@ -231,7 +231,7 @@ func (iom *IOMonitor) ToTighteningControllerInput() *io.IoContact {
 	}
 }
 
-var result_errors = []string{
+var resultErrors = []string{
 	"Rundown angle max shut off",
 	"Rundown angle min shut off",
 	"Torque max shut off",
@@ -337,6 +337,19 @@ type ResultData struct {
 	StageResult string `start:"3"  end:"..."`
 }
 
+func parseOpenProtocolErrorCode(errors string) []string {
+	var ret []string
+	if errors == "" {
+		return ret
+	}
+	for idx, ss := range errors {
+		if strings.ContainsRune("1", ss) {
+			ret = append(ret, resultErrors[idx])
+		}
+	}
+	return ret
+}
+
 func (rd *ResultData) ToTighteningResult() *tightening_device.TighteningResult {
 	measureResult := tightening_device.RESULT_OK
 	if rd.TighteningStatus == "0" {
@@ -367,6 +380,9 @@ func (rd *ResultData) ToTighteningResult() *tightening_device.TighteningResult {
 	return &tightening_device.TighteningResult{
 		// 工具序列号
 		ToolSN: strings.TrimSpace(rd.ToolSerialNumber),
+
+		//错误信息解析
+		ErrorCode: strings.Join(parseOpenProtocolErrorCode(rd.TighteningErrorStatus), ","),
 
 		// 工具通道号
 		ChannelID: rd.ChannelID,
@@ -839,7 +855,7 @@ type AlarmStatus struct {
 }
 
 type CurveBody struct {
-	ToolNumber    int    `start:"3"  end:"4"`
+	ToolNumber    int    `start:"3"  end:"4"` // todo: 通道号更新名称
 	TorqueString  string `start:"28"  end:"41"`
 	AngleString   string `start:"44"  end:"57"`
 	MeasurePoints int    `start:"60"  end:"63"`

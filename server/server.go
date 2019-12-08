@@ -390,7 +390,7 @@ func (s *Server) AppendScannerService() error {
 	c := s.config.Scanner
 	d := s.DiagService.NewScannerHandler()
 
-	srv := scanner.NewService(c, d)
+	srv := scanner.NewService(c, d, s.DispatcherBusService)
 	srv.WS = s.WSNotifyService
 	srv.DeviceService = s.DeviceService
 

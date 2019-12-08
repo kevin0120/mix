@@ -7,8 +7,7 @@ import (
 
 func CreateBaseDevice() BaseDevice {
 	c := BaseDevice{
-		mtxChildren: sync.Mutex{},
-		children:    map[string]IDevice{},
+		children:    map[string]IBaseDevice{},
 		status:      atomic.Value{},
 	}
 
@@ -19,8 +18,13 @@ func CreateBaseDevice() BaseDevice {
 type BaseDevice struct {
 	status      atomic.Value
 	mtxChildren sync.Mutex
-	children    map[string]IDevice
+	children    map[string]IBaseDevice
 	Cfg         interface{}
+	SerialNumber string
+}
+
+func (s *BaseDevice)SetSerialNumber(serialNumber string)  {
+	s.SerialNumber = serialNumber
 }
 
 func (s *BaseDevice) UpdateStatus(status string) {
@@ -31,14 +35,14 @@ func (s *BaseDevice) Status() string {
 	return s.status.Load().(string)
 }
 
-func (s *BaseDevice) AddChildren(sn string, device IDevice) {
+func (s *BaseDevice) AddChildren(sn string, device IBaseDevice) {
 	s.mtxChildren.Lock()
 	defer s.mtxChildren.Unlock()
 
 	s.children[sn] = device
 }
 
-func (s *BaseDevice) Children() map[string]IDevice {
+func (s *BaseDevice) Children() map[string]IBaseDevice {
 	s.mtxChildren.Lock()
 	defer s.mtxChildren.Unlock()
 

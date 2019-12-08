@@ -142,6 +142,10 @@ func NewController(c Config) TighteningController {
 	return cont
 }
 
+func (c *TighteningController) SerialNumber() string {
+	return c.cfg.SN
+}
+
 func (c *TighteningController) Protocol() string {
 	return c.protocol
 }
@@ -265,7 +269,7 @@ func (c *TighteningController) Write(buf []byte, seq uint32) {
 //		v := <-c.buffer
 //		err := c.w.Write([]byte(v))
 //		if err != nil {
-//			c.Srv.diag.Error("Write data fail", err)
+//			c.ProtocolService.diag.Error("Write data fail", err)
 //			break
 //		}
 //
@@ -493,14 +497,15 @@ func (c *TighteningController) DeviceType() string {
 	return tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER
 }
 
-func (c *TighteningController) Children() map[string]device.IDevice {
-	return map[string]device.IDevice{}
+func (c *TighteningController) Children() map[string]device.IBaseDevice {
+	return map[string]device.IBaseDevice{}
 }
 
 func (s *TighteningController) Data() interface{} {
 	return nil
 }
 
+//fixme: 配置文件为空 后续强制转换都为错误
 func (s *TighteningController) Config() interface{} {
 	return nil
 }

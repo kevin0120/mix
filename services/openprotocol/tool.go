@@ -35,11 +35,15 @@ type TighteningTool struct {
 	device.BaseDevice
 }
 
+func (s *TighteningTool)SerialNumber() string {
+	return s.BaseDevice.SerialNumber
+}
+
 func (s *TighteningTool) SetMode(mode string) {
 	s.Mode.Store(mode)
 
-	//s.controller.Srv.DB.UpdateTool(&storage.Guns{
-	//	Serial: s.cfg.SN,
+	//s.controller.ProtocolService.DB.UpdateTool(&storage.Guns{
+	//	Serial: s.deviceConf.SN,
 	//	Mode:   mode,
 	//})
 }
@@ -252,7 +256,7 @@ func (s *TighteningTool) TraceSet(str string) error {
 		return errors.New(device.STATUS_OFFLINE)
 	}
 
-	id := s.controller.Srv.generateIDInfo(str)
+	id := s.controller.ProtocolService.generateIDInfo(str)
 	reply, err := s.controller.ProcessRequest(MID_0150_IDENTIFIER_SET, "", "", "", id)
 	if err != nil {
 		return err
@@ -303,7 +307,7 @@ func (s *TighteningTool) OnResult(result interface{}) {
 	}
 
 	tighteningResult := result.(*tightening_device.TighteningResult)
-	dbTool, err := s.controller.Srv.DB.GetGun(s.cfg.SN)
+	dbTool, err := s.controller.ProtocolService.DB.GetGun(s.cfg.SN)
 	if err == nil {
 		if s.Mode.Load().(string) == tightening_device.MODE_JOB {
 			tighteningResult.Seq, tighteningResult.Count = s.controller.calBatch(dbTool.WorkorderID)
@@ -316,13 +320,13 @@ func (s *TighteningTool) OnResult(result interface{}) {
 		tighteningResult.UserID = dbTool.UserID
 		tighteningResult.Batch = fmt.Sprintf("%d/%d", tighteningResult.Seq, dbTool.Total)
 
-		dbStep, err := s.controller.Srv.DB.GetStep(dbTool.StepID)
+		dbStep, err := s.controller.ProtocolService.DB.GetStep(dbTool.StepID)
 		if err != nil {
 			s.diag.Error("Get Step Failed", err)
 			return
 		}
 
-		consume, err := s.controller.Srv.Odoo.GetConsumeBySeqInStep(&dbStep, tighteningResult.Seq)
+		consume, err := s.controller.ProtocolService.Odoo.GetConsumeBySeqInStep(&dbStep, tighteningResult.Seq)
 		if err != nil {
 			s.diag.Error("Get Consume Failed", err)
 			return
@@ -334,7 +338,7 @@ func (s *TighteningTool) OnResult(result interface{}) {
 	dbResult := tighteningResult.ToDBResult()
 
 	// 尝试获取最近一条没有对应结果的曲线并更新, 同时缓存结果
-	err = s.controller.Srv.DB.UpdateIncompleteCurveAndSaveResult(dbResult)
+	err = s.controller.ProtocolService.DB.UpdateIncompleteCurveAndSaveResult(dbResult)
 	if err != nil {
 		s.diag.Error("Handle Result With Curve Failed", err)
 	}
@@ -355,7 +359,7 @@ func (s *TighteningTool) OnCurve(curve interface{}) {
 	dbCurves := tighteningCurve.ToDBCurve()
 
 	// 尝试获取最近一条没有对应曲线的结果并更新, 同时缓存曲线
-	err := s.controller.Srv.DB.UpdateIncompleteResultAndSaveCurve(dbCurves)
+	err := s.controller.ProtocolService.DB.UpdateIncompleteResultAndSaveCurve(dbCurves)
 	if err != nil {
 		s.diag.Error("Handle Curve With Result Failed", err)
 	}

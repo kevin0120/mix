@@ -5,15 +5,14 @@ import (
 	"context"
 	"encoding/binary"
 	"fmt"
-	"github.com/kataras/iris/core/errors"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/socket_writer"
 	"github.com/masami10/rush/utils"
+	"github.com/pkg/errors"
 	"net"
-	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -41,20 +40,15 @@ type handlerPkg struct {
 	Body   string
 }
 
-type handlerPkg_curve struct {
-	Header *OpenProtocolHeader
-	Body   []byte
-}
-
 type TighteningController struct {
-	sockClient           *socket_writer.SocketWriter
-	cfg                  *tightening_device.TighteningDeviceConfig
+	sockClients          map[string]*socket_writer.SocketWriter
+	deviceConf           *tightening_device.TighteningDeviceConfig
 	keepAliveCount       int32
 	keepPeriod           time.Duration
 	reqTimeout           time.Duration
 	getToolInfoPeriod    time.Duration
 	Response             ResponseQueue
-	Srv                  *Service
+	ProtocolService      *Service
 	dbController         *storage.Controllers
 	buffer               chan []byte
 	closing              chan chan struct{}
@@ -81,43 +75,34 @@ type TighteningController struct {
 	device.BaseDevice
 }
 
-// TODO: 如果工具序列号没有配置，则通过探测加入设备列表。
-func NewController(protocolConfig *Config, deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic, service *Service) *TighteningController {
+func (c *TighteningController)SerialNumber() string {
+	return c.BaseDevice.SerialNumber
+}
 
-	c := TighteningController{
-		diag:              d,
+func defaultControllerGet() *TighteningController {
+	return &TighteningController{
 		buffer:            make(chan []byte, 1024),
 		closing:           make(chan chan struct{}),
-		keepPeriod:        time.Duration(protocolConfig.KeepAlivePeriod),
-		reqTimeout:        time.Duration(protocolConfig.ReqTimeout),
-		getToolInfoPeriod: time.Duration(protocolConfig.GetToolInfoPeriod),
+		keepPeriod:        time.Duration(OpenProtocolDefaultKeepAlivePeriod),
+		reqTimeout:        time.Duration(OpenProtocolDefaultKeepAlivePeriod),
+		getToolInfoPeriod: time.Duration(OpenProtocolDefaultGetTollInfoPeriod),
 		protocol:          controller.OPENPROTOCOL,
-		mtxResult:         sync.Mutex{},
-		cfg:               deviceConfig,
 		BaseDevice:        device.CreateBaseDevice(),
 		tempResultCurve:   map[int]*tightening_device.TighteningCurve{},
-
-		toolDispatches: map[string]*ToolDispatch{},
-		Srv:            service,
+		toolDispatches:    map[string]*ToolDispatch{},
 	}
+}
 
-	c.BaseDevice.Cfg = VendorModels[c.cfg.Model][IO_CONFIG]
-
-	c.controllerSubscribes = []ControllerSubscribe{
-		//c.PSetSubscribe,
-		c.ResultSubcribe,
-		c.SelectorSubscribe,
-		c.JobInfoSubscribe,
-		c.IOInputSubscribe,
-		//c.MultiSpindleResultSubscribe,
-		c.VinSubscribe,
-		c.AlarmSubcribe,
-		c.CurveSubscribe,
+func (c *TighteningController) CreateToolsByConfig() error {
+	conf := c.deviceConf
+	d := c.diag
+	ps := c.ProtocolService
+	if conf == nil {
+		return errors.New("Device Config Is Empty")
 	}
-
-	for _, v := range deviceConfig.Tools {
-		tool := CreateTool(&c, v, d)
-		tool.SetMode(protocolConfig.DefaultMode)
+	for _, v := range conf.Tools {
+		tool := CreateTool(c, v, d)
+		tool.SetMode(ps.GetDefaultMode())
 		c.toolDispatches[v.SN] = &ToolDispatch{
 			resultDispatch: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 			curveDispatch:  utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
@@ -126,6 +111,24 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 		c.toolDispatches[v.SN].curveDispatch.Register(tool.OnCurve)
 
 		c.AddChildren(v.SN, tool)
+	}
+	return nil
+}
+
+// TODO: 如果工具序列号没有配置，则通过探测加入设备列表。
+func NewController(protocolConfig *Config, deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic, service *Service) *TighteningController {
+
+	c := defaultControllerGet()
+	c.diag = d
+	c.deviceConf = deviceConfig
+	c.ProtocolService = service
+
+	c.BaseDevice.Cfg = VendorModels[c.deviceConf.Model][IO_CONFIG]
+
+	c.initSubscribeInfos()
+
+	if err := c.CreateToolsByConfig(); err != nil {
+		d.Error("NewController CreateToolsByConfig Error", err)
 	}
 
 	c.externalDispatches = map[string]*utils.Dispatcher{
@@ -136,7 +139,7 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 		tightening_device.DISPATCH_CONTROLLER_ID:     utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 	}
 
-	return &c
+	return c
 }
 
 func (c *TighteningController) UpdateToolStatus(status string) {
@@ -154,14 +157,27 @@ func (c *TighteningController) UpdateToolStatus(status string) {
 	}
 }
 
-func (c *TighteningController) findToolSNByChannel(channel int) (string, error) {
-	for _, v := range c.cfg.Tools {
+func (c *TighteningController) GetToolViaSerialNumber(toolSN string) (tightening_device.ITighteningTool, error) {
+	return c.getToolViaSerialNumber(toolSN)
+}
+
+func (c *TighteningController) GetToolViaChannel(channel int) (tightening_device.ITighteningTool, error) {
+	var serialNumber = ""
+	for _, v := range c.deviceConf.Tools {
 		if v.Channel == channel {
-			return v.SN, nil
+			serialNumber = v.SN
+			break
+		}
+	}
+	if serialNumber != "" {
+		if tool, err := c.getToolViaSerialNumber(serialNumber); err != nil {
+			return nil, errors.New("GetToolViaChannel Error, Tool Not Found")
+		} else {
+			return tool, nil
 		}
 	}
 
-	return "", errors.New("Tool Not Found")
+	return nil, errors.New("GetToolViaChannel Tool Not Found")
 }
 
 func (c *TighteningController) LoadController(controller *storage.Controllers) {
@@ -172,11 +188,25 @@ func (c *TighteningController) Inputs() string {
 	return c.inputs
 }
 
-func (c *TighteningController) Subscribe() {
+func (c *TighteningController) initSubscribeInfos() {
+	c.controllerSubscribes = []ControllerSubscribe{
+		//c.PSetSubscribe,
+		c.ResultSubcribe,
+		c.SelectorSubscribe,
+		c.JobInfoSubscribe,
+		c.IOInputSubscribe,
+		//c.MultiSpindleResultSubscribe,
+		c.VinSubscribe,
+		c.AlarmSubcribe,
+		c.CurveSubscribe,
+	}
+}
+
+func (c *TighteningController) ProcessSubscribeControllerInfo() {
 	for _, subscribe := range c.controllerSubscribes {
 		err := subscribe()
 		if err != nil {
-			c.diag.Debug(fmt.Sprintf("OpenProtocol Subscribe Failed: %s", err.Error()))
+			c.diag.Debug(fmt.Sprintf("OpenProtocol SubscribeControllerInfo Failed: %s", err.Error()))
 		}
 	}
 }
@@ -208,7 +238,7 @@ func (c *TighteningController) ProcessRequest(mid string, noack string, station 
 	return reply, nil
 }
 
-func DataDecoding(original []byte, torqueCoefficient float64, angleCoefficient float64, d Diagnostic) (Torque []float64, Angle []float64) {
+func CurveDataDecoding(original []byte, torqueCoefficient float64, angleCoefficient float64, d Diagnostic) (Torque []float64, Angle []float64) {
 	lenO := len(original)
 	data := make([]byte, lenO, lenO) // 最大只会这些数据
 	writeOffset := 0
@@ -238,13 +268,13 @@ func DataDecoding(original []byte, torqueCoefficient float64, angleCoefficient f
 			step = 2 //跳过这个字节
 		default:
 			e := errors.New("Desoutter Protocol Curve Raw Data 0xff不能单独出现")
-			d.Error("DataDecoding", e)
+			d.Error("CurveDataDecoding", e)
 			// do nothing
 		}
 	}
 	if writeOffset%6 != 0 {
 		e := errors.New("Desoutter Protocol Curve Raw Data Convert Fail")
-		d.Error("DataDecoding Fail", e)
+		d.Error("CurveDataDecoding Fail", e)
 		return
 	}
 	// 所有位减1
@@ -266,7 +296,7 @@ func DataDecoding(original []byte, torqueCoefficient float64, angleCoefficient f
 }
 
 func (c *TighteningController) HandleMsg(pkg *handlerPkg) error {
-	c.Srv.diag.Debug(fmt.Sprintf("OpenProtocol Recv %s: %s%s\n", c.cfg.SN, pkg.Header.Serialize(), pkg.Body))
+	c.ProtocolService.diag.Debug(fmt.Sprintf("OpenProtocol Recv %s: %s%s\n", c.deviceConf.SN, pkg.Header.Serialize(), pkg.Body))
 
 	handler, err := GetMidHandler(pkg.Header.MID)
 	if err != nil {
@@ -277,122 +307,25 @@ func (c *TighteningController) HandleMsg(pkg *handlerPkg) error {
 }
 
 func (c *TighteningController) handleResult(result *tightening_device.TighteningResult) error {
-
-	//if utils.ArrayContains(c.Srv.config().SkipJobs, result_data.JobID) {
-	//	return nil
-	//}
-	//
-	//if c.dbController != nil {
-	//	c.Srv.DB.UpdateTightning(c.dbController.Id, result_data.TightingID)
-	//}
-	//
-	//controllerResult := controller.ControllerResult{}
-	//controllerResult.NeedPushHmi = true
-	//
-	//if c.Model() == tightening_device.ModelDesoutterDeltaWrench {
-	//	controllerResult.ToolSN = c.cfg.SN
-	//} else {
-	//	controllerResult.ToolSN = result_data.ToolSerialNumber
-	//}
-	//
-	//gun, err := c.Srv.DB.GetGun(controllerResult.ToolSN)
-	//if err != nil {
-	//	c.Srv.diag.Error("get gun failed", err)
-	//	return err
-	//}
-	//
-	//psetTrace := tightening_device.PSetSet{}
-	//_ = json.Unmarshal([]byte(gun.Trace), &psetTrace)
-	//
-	//controllerResult.TighteningID = result_data.TightingID
-	//controllerResult.Count = psetTrace.Count
-	//controllerResult.Batch = fmt.Sprintf("%d/%d", psetTrace.Sequence, psetTrace.Total)
-	//
-	//dat_kvs := strings.Split(result_data.TimeStamp, ":")
-	//controllerResult.Dat = fmt.Sprintf("%s %s:%s:%s", dat_kvs[0], dat_kvs[1], dat_kvs[2], dat_kvs[3])
-	//
-	//controllerResult.PSet = result_data.PSetID
-	//controllerResult.ControllerSN = c.cfg.SN
-	//if result_data.TighteningStatus == "0" {
-	//	controllerResult.Result = storage.RESULT_NOK
-	//} else {
-	//	controllerResult.Result = storage.RESULT_OK
-	//}
-	//
-	//controllerResult.ResultValue.Mi = result_data.Torque / 100
-	//controllerResult.ResultValue.Wi = result_data.Angle
-	////controllerResult.ResultValue.Ti = result_data.
-	//
-	//switch result_data.Strategy {
-	//case "01":
-	//	controllerResult.PSetDefine.Strategy = controller.STRATEGY_AW
-	//
-	//case "02":
-	//	controllerResult.PSetDefine.Strategy = controller.STRATEGY_AW
-	//
-	//case "03":
-	//	controllerResult.PSetDefine.Strategy = controller.STRATEGY_ADW
-	//
-	//case "04":
-	//	controllerResult.PSetDefine.Strategy = controller.STRATEGY_AD
-	//}
-	//
-	//if result_data.ResultType == "02" {
-	//	controllerResult.Result = storage.RESULT_LSN
-	//	controllerResult.NeedPushHmi = true
-	//	controllerResult.PSetDefine.Strategy = controller.STRATEGY_LN
-	//}
-	//
-	//controllerResult.PSetDefine.Mp = result_data.TorqueMax / 100
-	//controllerResult.PSetDefine.Mm = result_data.TorqueMin / 100
-	//controllerResult.PSetDefine.Ma = result_data.TorqueFinalTarget / 100
-	//
-	//controllerResult.PSetDefine.Wp = result_data.AngleMax
-	//controllerResult.PSetDefine.Wm = result_data.AngleMin
-	//controllerResult.PSetDefine.Wa = result_data.FinalAngleTarget
-	//
-	//controllerResult.ExceptionReason = result_data.TighteningErrorStatus
-
-	//targetID := result_data.VIN
-	//switch c.Srv.config().DataIndex {
-	//case 1:
-	//	targetID = result_data.ID2
-	//case 2:
-	//	targetID = result_data.ID3
-	//case 3:
-	//	targetID = result_data.ID4
-	//}
-
-	//controllerResult.Workorder_ID = psetTrace.WorkorderID
-	//controllerResult.NeedPushAiis = true
-
-	//controllerResult.Seq, controllerResult.Count = c.calBatch(controllerResult.Workorder_ID)
-
-	//c.result = &controllerResult
-
-	//c.Srv.Parent.Handlers.Handle(&controllerResult, c.result_CURVE)
-
-	//c.updateResult(&controllerResult, nil, result_data.ChannelID)
-	//	c.handleResultandClear(result_data.ChannelID)
-
-	//tighteningResult := result_data.ToTighteningResult()
-	result.ControllerSN = c.cfg.SN
-	toolSN, err := c.findToolSNByChannel(result.ChannelID)
+	result.ControllerSN = c.deviceConf.SN
+	tool, err := c.GetToolViaChannel(result.ChannelID)
 	if err != nil {
 		return err
 	}
 
-	result.ToolSN = toolSN
+	toolSerialNumber := tool.SerialNumber()
+
+	result.ToolSN = toolSerialNumber
 
 	// 分发结果到工具进行处理
-	c.toolDispatches[toolSN].resultDispatch.Dispatch(result)
+	c.toolDispatches[toolSerialNumber].resultDispatch.Dispatch(result)
 
 	return nil
 }
 
 // seq, count
 func (c *TighteningController) calBatch(workorderID int64) (int, int) {
-	result, err := c.Srv.DB.FindTargetResultForJobManual(workorderID)
+	result, err := c.ProtocolService.DB.FindTargetResultForJobManual(workorderID)
 	if err != nil {
 		return 1, 1
 	}
@@ -405,8 +338,8 @@ func (c *TighteningController) calBatch(workorderID int64) (int, int) {
 }
 
 func (c *TighteningController) Start() error {
-	for _, v := range c.cfg.Tools {
-		_ = c.Srv.DB.UpdateTool(&storage.Guns{
+	for _, v := range c.deviceConf.Tools {
+		_ = c.ProtocolService.DB.UpdateTool(&storage.Guns{
 			Serial: v.SN,
 			Mode:   "pset",
 		})
@@ -439,7 +372,7 @@ func (c *TighteningController) Stop() error {
 	return nil
 }
 
-func (c *TighteningController) GetTool(toolSN string) (tightening_device.ITighteningTool, error) {
+func (c *TighteningController) getToolViaSerialNumber(toolSN string) (tightening_device.ITighteningTool, error) {
 	tool, exist := c.Children()[toolSN]
 	if !exist {
 		return nil, errors.New("Not Found")
@@ -489,11 +422,85 @@ func (c *TighteningController) Protocol() string {
 }
 
 func (c *TighteningController) clearToolsResultAndCurve() {
-	for _, tool := range c.cfg.Tools {
-		err := c.Srv.DB.ClearToolResultAndCurve(tool.SN)
+	for _, tool := range c.deviceConf.Tools {
+		err := c.ProtocolService.DB.ClearToolResultAndCurve(tool.SN)
 		if err != nil {
 			c.diag.Error(fmt.Sprintf("Clear Tool: %s Result And Curve Failed", tool.SN), err)
 		}
+	}
+}
+
+func (c *TighteningController) initToolConnection() {
+	for _, tool := range c.deviceConf.Tools {
+		c.sockClients[tool.SN] = socket_writer.NewSocketWriter(c.deviceConf.Endpoint, c)
+	}
+}
+
+func (c *TighteningController) CreateTransports() {
+	for _, child := range c.Children() {
+		if child == nil {
+			continue
+		}
+		if writer := socket_writer.NewSocketWriter(c.deviceConf.Endpoint, c); writer != nil {
+			c.sockClients[child.SerialNumber()] = writer
+		}
+	}
+}
+
+func (c *TighteningController) doConnect(doConnectToolSymbol string, forceCreate bool) error {
+	if forceCreate {
+		//重新创建transport
+		if writer := socket_writer.NewSocketWriter(c.deviceConf.Endpoint, c); writer != nil {
+			c.sockClients[doConnectToolSymbol] = writer
+		} else {
+			err := errors.Errorf("Create Transport For %s Fail", doConnectToolSymbol)
+			c.diag.Error("doConnect", err)
+			return err
+		}
+	}
+	if writer, ok := c.sockClients[doConnectToolSymbol]; !ok {
+		err := errors.Errorf("Can Not Found Transport For %s", doConnectToolSymbol)
+		c.diag.Error("doConnect", err)
+		return err
+	} else {
+		for {
+			err := writer.Connect(DAIL_TIMEOUT)
+			if err != nil {
+				e := errors.Wrapf(err, "Connect To Tool %s", doConnectToolSymbol)
+				c.diag.Error("doConnect", e)
+			} else {
+				c.diag.Debug(fmt.Sprintf("doConnect Connect To %s Success", doConnectToolSymbol))
+				break
+			}
+
+			time.Sleep(time.Duration(c.reqTimeout))
+		}
+	}
+	return nil
+}
+
+//todo: 连接创建后做一下系统必要操作
+func (c *TighteningController) doConnectPart2(doConnectToolSymbol string) error {
+	// 处理不完整的结果和曲线
+	c.clearToolsResultAndCurve()
+
+	c.handleStatus(device.STATUS_ONLINE)
+
+	return c.startComm()
+}
+
+func (c *TighteningController) CloseTransport() {
+	var isCloseTransportSymbols []string
+	for symbol, writer := range c.sockClients {
+		if err := writer.Close(); err != nil {
+			e := errors.Wrapf(err, "Close Transport For %s Error", symbol)
+			c.diag.Error("CloseTransport", e)
+		}else {
+			isCloseTransportSymbols = append(isCloseTransportSymbols, symbol)
+		}
+	}
+	for _, isCloseSymbol := range isCloseTransportSymbols {
+		delete(c.sockClients, isCloseSymbol)
 	}
 }
 
@@ -508,24 +515,14 @@ func (c *TighteningController) Connect() error {
 		mtx:     sync.Mutex{},
 	}
 
-	c.sockClient = socket_writer.NewSocketWriter(c.cfg.Endpoint, c)
-	for {
-		err := c.sockClient.Connect(DAIL_TIMEOUT)
-		if err != nil {
-			c.Srv.diag.Error("connect Err", err)
-		} else {
-			break
+	c.CreateTransports() // always success
+
+	for _, tool := range c.Children() {
+		sn := tool.SerialNumber()
+		if err := c.doConnect(sn, false); err == nil {
+			c.doConnectPart2(sn)
 		}
-
-		time.Sleep(time.Duration(c.reqTimeout))
 	}
-
-	// 处理不完整的结果和曲线
-	c.clearToolsResultAndCurve()
-
-	c.handleStatus(device.STATUS_ONLINE)
-
-	c.startComm()
 
 	return nil
 }
@@ -584,30 +581,8 @@ func (c *TighteningController) ToolInfoReq() error {
 	return nil
 }
 
-func (c *TighteningController) SolveOldResults() {
-
-	if c.dbController == nil || c.dbController.LastID == "0" {
-		return
-	}
-
-	lastResult, err := c.getOldResult(0)
-	if err != nil {
-		return
-	}
-
-	if lastResult.TighteningID != c.dbController.LastID {
-		startId, _ := strconv.ParseInt(c.dbController.LastID, 10, 64)
-		endId, _ := strconv.ParseInt(lastResult.TighteningID, 10, 64)
-
-		for i := startId + 1; i <= endId; i++ {
-			result, err := c.getOldResult(i)
-			if err != nil {
-				c.diag.Error(fmt.Sprintf("Get Old Result Failed: %d", i), err)
-			} else {
-				c.handleResult(result)
-			}
-		}
-	}
+func (c *TighteningController) handlerOldResults() error {
+	return nil
 }
 
 func (c *TighteningController) KeepAliveCount() int32 {
@@ -653,14 +628,14 @@ func (c *TighteningController) startComm() error {
 }
 
 func (c *TighteningController) Write(buf []byte) {
-	c.diag.Debug(fmt.Sprintf("OpenProtocol Send %s: %s", c.cfg.SN, string(buf)))
+	c.diag.Debug(fmt.Sprintf("OpenProtocol Send %s: %s", c.deviceConf.SN, string(buf)))
 	c.buffer <- buf
 }
 
 func (c *TighteningController) handleStatus(status string) {
 
 	if status != c.Status() {
-		c.diag.Debug(fmt.Sprintf("OpenProtocol handleStatus %s:%s %s\n", c.Model(), c.cfg.SN, status))
+		c.diag.Debug(fmt.Sprintf("OpenProtocol handleStatus %s:%s %s\n", c.Model(), c.deviceConf.SN, status))
 
 		c.UpdateStatus(status)
 
@@ -674,7 +649,7 @@ func (c *TighteningController) handleStatus(status string) {
 		c.GetDispatch(tightening_device.DISPATCH_CONTROLLER_STATUS).Dispatch(&[]device.DeviceStatus{
 			{
 				Type:   tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER,
-				SN:     c.cfg.SN,
+				SN:     c.deviceConf.SN,
 				Status: status,
 				Config: c.Config(),
 			},
@@ -685,13 +660,13 @@ func (c *TighteningController) handleStatus(status string) {
 func (c *TighteningController) Read(conn net.Conn) {
 	defer conn.Close()
 
-	buffer := make([]byte, c.Srv.config().ReadBufferSize)
+	buffer := make([]byte, c.ProtocolService.config().ReadBufferSize)
 
 	for {
 		conn.SetReadDeadline(time.Now().Add(c.keepPeriod * MAX_KEEP_ALIVE_CHECK).Add(1 * time.Second))
 		n, err := conn.Read(buffer)
 		if err != nil {
-			c.Srv.diag.Error("read failed", err)
+			c.ProtocolService.diag.Error("read failed", err)
 			c.handleStatus(device.STATUS_OFFLINE)
 			break
 		}
@@ -724,14 +699,15 @@ func (c *TighteningController) Close() error {
 
 		<-closed
 	}
+	c.CloseTransport()
 
-	return c.sockClient.Close()
+	return nil
 }
 
 func (c *TighteningController) handlePackageOPPayload(src []byte, data []byte) error {
 	msg := append(src, data...)
 
-	//c.diag.Debug(fmt.Sprintf("%s op target buf: %s", c.cfg.SN, string(msg)))
+	//c.diag.Debug(fmt.Sprintf("%s op target buf: %s", c.deviceConf.SN, string(msg)))
 
 	lenMsg := len(msg)
 
@@ -758,8 +734,26 @@ func (c *TighteningController) handlePackageOPPayload(src []byte, data []byte) e
 	return nil
 }
 
+func (c *TighteningController)getDefaultTransportClient() *socket_writer.SocketWriter {
+	for _, sw := range c.sockClients {
+		return sw
+	}
+	return nil
+}
+
+
+func (c *TighteningController)getTransportClientBySymbol(symbol string) *socket_writer.SocketWriter {
+	if sw, ok := c.sockClients[symbol]; !ok {
+		err := errors.Errorf("Can Not Found Transport For %s", symbol)
+		c.diag.Error("getTransportClientBySymbol", err)
+		return nil
+	}else {
+		return sw
+	}
+}
+
 func (c *TighteningController) handleRecv() {
-	c.handleRecvBuf = make([]byte, c.Srv.config().ReadBufferSize)
+	c.handleRecvBuf = make([]byte, c.ProtocolService.config().ReadBufferSize)
 	c.receiveBuf = make(chan []byte, 65535)
 	lenBuf := len(c.handleRecvBuf)
 
@@ -822,13 +816,16 @@ func (c *TighteningController) manage() {
 				time.Sleep(time.Microsecond * 100)
 			}
 
-			if c.sockClient == nil {
+			//fixme 获取默认的transport，未来要根据发送的结构体获取真实的transport
+			sw := c.getDefaultTransportClient()
+
+			if sw == nil {
 				continue
 			}
 
-			err := c.sockClient.Write([]byte(v))
+			err := sw.Write([]byte(v))
 			if err != nil {
-				c.Srv.diag.Error("Write Data Fail", err)
+				c.ProtocolService.diag.Error("Write Data Fail", err)
 			} else {
 				c.updateKeepAliveDeadLine()
 			}
@@ -990,7 +987,7 @@ func (c *TighteningController) findIOByNo(no int, outputs []tightening_device.Co
 }
 
 func (c *TighteningController) Model() string {
-	return c.cfg.Model
+	return c.deviceConf.Model
 }
 
 func (c *TighteningController) DeviceType() string {

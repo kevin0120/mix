@@ -6,7 +6,7 @@ import (
 )
 
 type ITighteningDevice interface {
-	device.IDevice
+	device.IBaseDevice
 
 	GetDispatch(string) *utils.Dispatcher
 }
@@ -21,7 +21,7 @@ type ITighteningController interface {
 	Stop() error
 
 	// 定位工具
-	GetTool(toolSN string) (ITighteningTool, error)
+	GetToolViaSerialNumber(toolSN string) (ITighteningTool, error)
 
 	// 控制输出
 	SetOutput(outputs []ControllerOutput) error

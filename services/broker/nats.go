@@ -177,7 +177,7 @@ func (s *Nats) AppendWorkGroup(subject string, group string, handler SubscribeHa
 	nc := s.conn
 	if nc == nil {
 		err := errors.New("Nats Is Not Connected!")
-		s.diag.Error("Subscribe Error", err)
+		s.diag.Error("SubscribeControllerInfo Error", err)
 		return err
 	}
 	if group == "" {
@@ -210,12 +210,12 @@ func (s *Nats) subscribe(subject, group string, handler SubscribeHandler) (regis
 	nc := s.conn
 	if nc == nil {
 		err = errors.New("Nats Is Not Connected!")
-		s.diag.Error("Subscribe Error", err)
+		s.diag.Error("SubscribeControllerInfo Error", err)
 		return
 	}
 	if s.isExist(subject) {
 		err = errors.Errorf("Subject: %s Is Been Subscribed, Please Unsubscribe First", subject)
-		s.diag.Error("Subscribe Error", err)
+		s.diag.Error("SubscribeControllerInfo Error", err)
 		return
 	}
 
@@ -225,13 +225,13 @@ func (s *Nats) subscribe(subject, group string, handler SubscribeHandler) (regis
 			Header: map[string]string{HEADER_SUBJECT: msg.Subject, HEADER_REPLY: msg.Reply},
 		}
 		if resp, err := handler(d); err != nil {
-			s.diag.Error("Subscribe Handler Error", err)
+			s.diag.Error("SubscribeControllerInfo Handler Error", err)
 		} else {
 			if len(resp) == 0 {
 				return
 			}
 			if err := nc.Publish(msg.Reply, resp); err != nil {
-				s.diag.Error("Subscribe Handler Publish Error", err)
+				s.diag.Error("SubscribeControllerInfo Handler Publish Error", err)
 			}
 		}
 	}
@@ -267,7 +267,7 @@ func (s *Nats) Publish(subject string, data []byte) error {
 	nc := s.conn
 	if nc == nil {
 		err := errors.New("Nats Is Not Connected!")
-		s.diag.Error("Subscribe Error", err)
+		s.diag.Error("SubscribeControllerInfo Error", err)
 		return err
 	}
 

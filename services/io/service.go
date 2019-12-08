@@ -17,11 +17,18 @@ type Diagnostic interface {
 	Debug(msg string)
 }
 
+type Dispatcher interface {
+	Create(name string, len int) error
+	Start(name string) error
+	Dispatch(name string, data interface{}) error
+}
+
 type Service struct {
 	configValue   atomic.Value
 	ios           map[string]*IOModule
 	diag          Diagnostic
 	WS            *wsnotify.Service
+	DispatcherBus Dispatcher
 	DeviceService *device.Service
 	IONotify
 	wsnotify.WSNotify
