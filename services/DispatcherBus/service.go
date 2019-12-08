@@ -7,6 +7,9 @@ import (
 	"sync/atomic"
 )
 
+// name: handlerName
+type DispatcherMap map[string]utils.DispatchHandler
+
 type Diagnostic interface {
 	Error(msg string, err error)
 	Debug(msg string)
@@ -163,4 +166,16 @@ func (s *Service) Dispatch(name string, data interface{}) error {
 	dispatcher.Dispatch(data)
 
 	return nil
+}
+
+// create, register and start
+func (s *Service) LaunchDispatchersByHandlerMap(dispatcherMap DispatcherMap) {
+	for name, handler := range dispatcherMap {
+		err := s.Create(name, utils.DEFAULT_BUF_LEN)
+		if err != nil {
+			s.diag.Debug(err.Error())
+		}
+		s.Register(name, handler)
+		s.Start(name)
+	}
 }

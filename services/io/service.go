@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/kataras/iris/core/errors"
 	"github.com/kataras/iris/websocket"
+	"github.com/masami10/rush/services/DispatcherBus"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/wsnotify"
-	"github.com/masami10/rush/utils"
 	"sync/atomic"
 	"time"
 )
@@ -26,7 +26,8 @@ type Service struct {
 	IONotify
 	wsnotify.WSNotify
 
-	requestDispatchers map[string]*utils.Dispatcher
+	DispatcherBus *DispatcherBus.Service
+	dispatcherMap DispatcherBus.DispatcherMap
 }
 
 func NewService(c Config, d Diagnostic) *Service {
@@ -68,14 +69,19 @@ func (s *Service) Open() error {
 
 	s.WS.AddNotify(s)
 
-	s.initRequestDispatchers()
+	s.dispatcherMap = DispatcherBus.DispatcherMap{
+		DispatcherBus.DISPATCHER_WS_IO_STATUS:  s.OnWSIOStatus,
+		DispatcherBus.DISPATCHER_WS_IO_CONTACT: s.OnWSIOContact,
+		DispatcherBus.DISPATCHER_WS_IO_SET:     s.OnWSIOSet,
+	}
+	s.DispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
 
 	return nil
 }
 
 func (s *Service) Close() error {
-	for _, v := range s.requestDispatchers {
-		v.Release()
+	for name, _ := range s.dispatcherMap {
+		s.DispatcherBus.Release(name)
 	}
 
 	for _, dev := range s.ios {
@@ -85,24 +91,8 @@ func (s *Service) Close() error {
 	return nil
 }
 
-func (s *Service) initRequestDispatchers() {
-	s.requestDispatchers = map[string]*utils.Dispatcher{
-		WS_IO_STATUS:  utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		WS_IO_CONTACT: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		WS_IO_SET:     utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-	}
-
-	s.requestDispatchers[WS_IO_STATUS].Register(s.OnWS_IO_STATUS)
-	s.requestDispatchers[WS_IO_CONTACT].Register(s.OnWS_IO_CONTACT)
-	s.requestDispatchers[WS_IO_SET].Register(s.OnWS_IO_SET)
-
-	for _, v := range s.requestDispatchers {
-		v.Start()
-	}
-}
-
 // 获取连接状态
-func (s *Service) OnWS_IO_STATUS(data interface{}) {
+func (s *Service) OnWSIOStatus(data interface{}) {
 	if data == nil {
 		return
 	}
@@ -141,7 +131,7 @@ func (s *Service) OnWS_IO_STATUS(data interface{}) {
 }
 
 // 获取io状态
-func (s *Service) OnWS_IO_CONTACT(data interface{}) {
+func (s *Service) OnWSIOContact(data interface{}) {
 	if data == nil {
 		return
 	}
@@ -178,7 +168,7 @@ func (s *Service) OnWS_IO_CONTACT(data interface{}) {
 }
 
 // 控制输出
-func (s *Service) OnWS_IO_SET(data interface{}) {
+func (s *Service) OnWSIOSet(data interface{}) {
 	if data == nil {
 		return
 	}
@@ -205,9 +195,15 @@ func (s *Service) OnWS_IO_SET(data interface{}) {
 }
 
 func (s *Service) dispatchRequest(req *wsnotify.WSRequest) {
-	d, exist := s.requestDispatchers[req.WSMsg.Type]
-	if exist {
-		d.Dispatch(req)
+	switch req.WSMsg.Type {
+	case WS_IO_CONTACT:
+		s.DispatcherBus.Dispatch(DispatcherBus.DISPATCHER_WS_IO_CONTACT, req)
+
+	case WS_IO_SET:
+		s.DispatcherBus.Dispatch(DispatcherBus.DISPATCHER_WS_IO_SET, req)
+
+	case WS_IO_STATUS:
+		s.DispatcherBus.Dispatch(DispatcherBus.DISPATCHER_WS_IO_STATUS, req)
 	}
 }
 

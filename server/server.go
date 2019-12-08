@@ -281,6 +281,7 @@ func (s *Server) appendDeviceService() error {
 		return errors.Wrap(err, "append device service fail")
 	}
 	srv.WS = s.WSNotifyService
+	srv.DispatcherBus = s.DispatcherBusService
 
 	s.DeviceService = srv
 	s.AppendService("device", srv)
@@ -367,6 +368,7 @@ func (s *Server) appendHMIService() error {
 	srv.TighteningService = s.TighteningDeviceService
 	srv.WS = s.WSNotifyService
 	srv.Aiis = s.AiisService
+	srv.DispatcherBus = s.DispatcherBusService
 	s.AppendService("hmi", srv)
 
 	return nil

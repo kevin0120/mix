@@ -3,8 +3,8 @@ package device
 import (
 	"encoding/json"
 	"github.com/kataras/iris/websocket"
+	"github.com/masami10/rush/services/DispatcherBus"
 	"github.com/masami10/rush/services/wsnotify"
-	"github.com/masami10/rush/utils"
 	"reflect"
 	"sync"
 	"sync/atomic"
@@ -42,7 +42,8 @@ type Service struct {
 	WS *wsnotify.Service
 	wsnotify.WSNotify
 
-	requestDispatchers map[string]*utils.Dispatcher
+	DispatcherBus *DispatcherBus.Service
+	dispatcherMap DispatcherBus.DispatcherMap
 }
 
 func NewService(c Config, d Diagnostic) (*Service, error) {
@@ -64,14 +65,18 @@ func (s *Service) Open() error {
 	}
 
 	s.WS.AddNotify(s)
-	s.initRequestDispatchers()
+
+	s.dispatcherMap = DispatcherBus.DispatcherMap{
+		DispatcherBus.DISPATCHER_WS_DEVICE_STATUS: s.OnWSDeviceStatus,
+	}
+	s.DispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
 
 	return nil
 }
 
 func (s *Service) Close() error {
-	for _, v := range s.requestDispatchers {
-		v.Release()
+	for name, _ := range s.dispatcherMap {
+		s.DispatcherBus.Release(name)
 	}
 
 	return nil
@@ -81,22 +86,10 @@ func (s *Service) config() Config {
 	return s.configValue.Load().(Config)
 }
 
-func (s *Service) initRequestDispatchers() {
-	s.requestDispatchers = map[string]*utils.Dispatcher{
-		WS_DEVICE_STATUS: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-	}
-
-	s.requestDispatchers[WS_DEVICE_STATUS].Register(s.OnWS_DEVICE_STATUS)
-
-	for _, v := range s.requestDispatchers {
-		v.Start()
-	}
-}
-
 func (s *Service) dispatchRequest(req *wsnotify.WSRequest) {
-	d, exist := s.requestDispatchers[req.WSMsg.Type]
-	if exist {
-		d.Dispatch(req)
+	switch req.WSMsg.Type {
+	case WS_DEVICE_STATUS:
+		s.DispatcherBus.Dispatch(DispatcherBus.DISPATCHER_WS_DEVICE_STATUS, req)
 	}
 }
 
@@ -149,7 +142,7 @@ func (s *Service) fetchAllDevices() []DeviceStatus {
 	return devices
 }
 
-func (s *Service) OnWS_DEVICE_STATUS(data interface{}) {
+func (s *Service) OnWSDeviceStatus(data interface{}) {
 	if data == nil {
 		return
 	}

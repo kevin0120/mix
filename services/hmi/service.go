@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kataras/iris/websocket"
+	"github.com/masami10/rush/services/DispatcherBus"
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/controller"
@@ -16,9 +17,6 @@ import (
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
-	"github.com/masami10/rush/utils"
-	"github.com/pkg/errors"
-	"reflect"
 )
 
 type Diagnostic interface {
@@ -34,22 +32,24 @@ const (
 )
 
 type Service struct {
-	diag               Diagnostic
-	methods            Methods
-	DB                 *storage.Service
-	Httpd              *httpd.Service
-	ODOO               *odoo.Service
-	AudiVw             *audi_vw.Service
-	OpenProtocol       *openprotocol.Service
-	ControllerService  *controller.Service
-	Aiis               *aiis.Service
-	ChStart            chan int
-	ChFinish           chan int
-	ChWorkorder        chan int
-	SN                 string
-	WS                 *wsnotify.Service
-	TighteningService  *tightening_device.Service
-	requestDispatchers map[string]*utils.Dispatcher
+	diag              Diagnostic
+	methods           Methods
+	DB                *storage.Service
+	Httpd             *httpd.Service
+	ODOO              *odoo.Service
+	AudiVw            *audi_vw.Service
+	OpenProtocol      *openprotocol.Service
+	ControllerService *controller.Service
+	Aiis              *aiis.Service
+	ChStart           chan int
+	ChFinish          chan int
+	ChWorkorder       chan int
+	SN                string
+	WS                *wsnotify.Service
+	TighteningService *tightening_device.Service
+
+	DispatcherBus *DispatcherBus.Service
+	dispatcherMap DispatcherBus.DispatcherMap
 }
 
 func NewService(d Diagnostic) *Service {
@@ -78,7 +78,15 @@ func (s *Service) Open() error {
 	s.ODOO.Aiis.OdooStatusDispatcher.Register(s.OnOdooStatus)
 	s.ODOO.Aiis.AiisStatusDispatcher.Register(s.OnAiisStatus)
 
-	s.initRequestDispatchers()
+	s.dispatcherMap = DispatcherBus.DispatcherMap{
+		WS_ORDER_LIST:             s.OnWSOrderList,
+		WS_ORDER_DETAIL:           s.OnWSOrderDetail,
+		WS_ORDER_UPDATE:           s.OnWSOrderUpdate,
+		WS_ORDER_STEP_UPDATE:      s.OnWSOrderStepUpdate,
+		WS_ORDER_STEP_DATA_UPDATE: s.OnWSOrderStepDataUpdate,
+		WS_ORDER_DETAIL_BY_CODE:   s.OnWSOrderDetailByCode,
+	}
+	s.DispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
 
 	var r httpd.Route
 
@@ -300,52 +308,32 @@ func (s *Service) Close() error {
 	s.diag.Close()
 	s.diag.Closed()
 
-	for _, v := range s.requestDispatchers {
-		v.Release()
+	for name, _ := range s.dispatcherMap {
+		s.DispatcherBus.Release(name)
 	}
 
 	return nil
 }
 
-var hmiDispatcherMap = map[string]string{
-	WS_ORDER_LIST:             "OnWSOrderList",
-	WS_ORDER_DETAIL:           "OnWSOrderDetail",
-	WS_ORDER_UPDATE:           "OnWSOrderUpdate",
-	WS_ORDER_STEP_UPDATE:      "OnWSOrderStepUpdate",
-	WS_ORDER_STEP_DATA_UPDATE: "OnWSOrderStepDataUpdate",
-	WS_ORDER_DETAIL_BY_CODE:   "OnWSOrderDetailByCode",
-}
-
-func (s *Service) initRequestDispatchers() {
-	dispatcher := map[string]*utils.Dispatcher{}
-	for event, method := range hmiDispatcherMap {
-		dispatcher[event] = utils.CreateDispatcher(utils.DEFAULT_BUF_LEN)
-		m := reflect.ValueOf(s).MethodByName(method)
-		dd := m.Interface().(func(data interface{}))
-		dispatcher[event].Register(dd)
-	}
-	s.requestDispatchers = dispatcher
-
-	//
-	//s.requestDispatchers[WS_ORDER_LIST].Register(s.OnWSOrderList)
-	//s.requestDispatchers[WS_ORDER_DETAIL].Register(s.OnWSOrderDetail)
-	//s.requestDispatchers[WS_ORDER_UPDATE].Register(s.OnWSOrderUpdate)
-	//s.requestDispatchers[WS_ORDER_STEP_UPDATE].Register(s.OnWSOrderStepUpdate)
-	//s.requestDispatchers[WS_ORDER_STEP_DATA_UPDATE].Register(s.OnWSOrderStepDataUpdate)
-	//s.requestDispatchers[WS_ORDER_DETAIL_BY_CODE].Register(s.OnWSOrderDetailByCode)
-
-	for _, v := range s.requestDispatchers {
-		v.Start() // always success
-	}
-}
-
 func (s *Service) dispatchRequest(req *wsnotify.WSRequest) {
-	d, exist := s.requestDispatchers[req.WSMsg.Type]
-	if exist {
-		d.Dispatch(req)
-	} else {
-		err := errors.Errorf("Can Not Found Dispatcher: %s", req.WSMsg.Type)
-		s.diag.Error("dispatchRequest", err)
+	switch req.WSMsg.Type {
+	case WS_ORDER_LIST:
+		s.DispatcherBus.Dispatch(DispatcherBus.DISPATCHER_WS_ORDER_LIST, req)
+
+	case WS_ORDER_DETAIL:
+		s.DispatcherBus.Dispatch(DispatcherBus.DISPATCHER_WS_ORDER_LIST, req)
+
+	case WS_ORDER_UPDATE:
+		s.DispatcherBus.Dispatch(DispatcherBus.DISPATCHER_WS_ORDER_UPDATE, req)
+
+	case WS_ORDER_STEP_UPDATE:
+		s.DispatcherBus.Dispatch(DispatcherBus.DISPATCHER_WS_ORDER_STEP_UPDATE, req)
+
+	case WS_ORDER_STEP_DATA_UPDATE:
+		s.DispatcherBus.Dispatch(DispatcherBus.DISPATCHER_WS_ORDER_STEP_DATA_UPDATE, req)
+
+	case WS_ORDER_DETAIL_BY_CODE:
+		s.DispatcherBus.Dispatch(DispatcherBus.DISPATCHER_WS_ORDER_DETAIL_BY_CODE, req)
 	}
 }
 
