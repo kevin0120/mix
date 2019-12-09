@@ -320,18 +320,30 @@ func (s *Service) getController(controllerSN string) (ITighteningController, err
 	return td, nil
 }
 
+//func (s *Service) getTool(controllerSN string, toolSN string) (ITighteningTool, error) {
+//	controller, err := s.getController(controllerSN)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	tool, err := controller.GetTool(toolSN)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	return tool, nil
+//}
+
+//唐车项目重写 gettool方法,只根据显示屏传回的toolSn号进行查找工具.
 func (s *Service) getTool(controllerSN string, toolSN string) (ITighteningTool, error) {
-	controller, err := s.getController(controllerSN)
-	if err != nil {
-		return nil, err
+	for _, value := range s.runningControllers {
+		tool, err := value.GetTool(toolSN)
+		if err != nil {
+			return nil, err
+		}
+		return tool, nil
 	}
-
-	tool, err := controller.GetTool(toolSN)
-	if err != nil {
-		return nil, err
-	}
-
-	return tool, nil
+	return nil, nil
 }
 
 func (s *Service) startupControllers() {
