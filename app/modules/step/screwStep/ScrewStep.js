@@ -229,7 +229,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 const btnCancel = {
                   label: tNS(dia.cancel, reworkNS),
                   color: 'warning',
-                  action: actions.cancelRework()
+                  action: orderActions.stepStatus(this, STEP_STATUS.FAIL)
                 };
                 const tools = getDevicesByType(deviceType.tool);
                 const ToolSelectCard = SelectCard(screwStepActions.selectTool);

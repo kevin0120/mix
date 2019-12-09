@@ -28,7 +28,7 @@ export default {
       if (!ControllerSN) {
         throw new Error(`工具(${tool?.serialNumber})缺少控制器`);
       }
-      const total = 1;
+      const total = points.length;
       const workorderID = yield select(s => workingOrder(s.order)?.id);
       if (isNil(pset)) {
         throw new Error('pset号为空');
