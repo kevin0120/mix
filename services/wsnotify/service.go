@@ -326,7 +326,6 @@ func GenerateResult(sn uint64, wsType string, data interface{}) *WSMsg {
 	}
 }
 
-
 func WSClientSend(c websocket.Connection, event string, payload interface{}) error {
 	if c == nil {
 		return errors.New("conn is nil")

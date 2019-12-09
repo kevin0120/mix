@@ -57,6 +57,13 @@ func handleMID_0002_START_ACK(c *TighteningController, pkg *handlerPkg) error {
 	go c.Subscribe()
 	//go c.SolveOldResults()
 	//go c.getTighteningCount()
+	var controllersn = ControllerSn{}
+	err := ascii.Unmarshal(pkg.Body, &controllersn)
+	if err != nil {
+		c.diag.Error("ascii.Unmarshal", err)
+	}
+
+	c.controllerSn = strings.TrimSpace(controllersn.SN)
 
 	return nil
 }

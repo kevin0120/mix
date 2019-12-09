@@ -847,3 +847,7 @@ type CurveBody struct {
 	Id            string `start:"70"  end:"71"` //当前为第几段
 	Data          string `start:"72"  end:"..."`
 }
+
+type ControllerSn struct {
+	SN string `start:"134"  end:"143"` //SN
+}

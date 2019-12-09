@@ -79,6 +79,7 @@ type TighteningController struct {
 	writeOffset   int
 
 	device.BaseDevice
+	controllerSn string
 }
 
 // TODO: 如果工具序列号没有配置，则通过探测加入设备列表。
@@ -376,7 +377,10 @@ func (c *TighteningController) handleResult(result *tightening_device.Tightening
 	//	c.handleResultandClear(result_data.ChannelID)
 
 	//tighteningResult := result_data.ToTighteningResult()
-	result.ControllerSN = c.cfg.SN
+	//result.ControllerSN = c.cfg.SN
+
+	result.ControllerSN = c.controllerSn
+
 	toolSN, err := c.findToolSNByChannel(result.ChannelID)
 	if err != nil {
 		return err
