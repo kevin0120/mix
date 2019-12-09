@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"github.com/pkg/errors"
 	"log"
 	"sync"
 )
@@ -61,12 +62,14 @@ func (s *Dispatcher) Register(dispatcher DispatchHandler) {
 	s.dispatchers = append(s.dispatchers, dispatcher)
 }
 
-func (s *Dispatcher) Dispatch(data interface{}) {
+func (s *Dispatcher) Dispatch(data interface{}) error{
 	if !s.getOpen() {
-		log.Fatalf("Dispatcher Is Not Opened!!!")
-		return
+		msg := "Dispatcher Is Not Opened!!!"
+		log.Fatalf(msg)
+		return errors.New(msg)
 	}
 	s.buf <- data
+	return nil
 }
 
 //todo: 限制协程的数量

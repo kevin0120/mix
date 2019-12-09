@@ -163,9 +163,7 @@ func (s *Service) Dispatch(name string, data interface{}) error {
 		return err
 	}
 
-	dispatcher.Dispatch(data)
-
-	return nil
+	return dispatcher.Dispatch(data)
 }
 
 // create, register and start

@@ -82,6 +82,19 @@ func (s *Service) Open() error {
 	return nil
 }
 
+func (s *Service) dispatchRecvData(data string) {
+	if s.dispatcher == nil {
+		err := errors.New("Please Inject DispatcherBus Service First")
+		s.diag.Error("dispatchRecvData", err)
+		return
+	}
+	err := s.dispatcher.Dispatch(ScannerDispatcherKey, data)
+	if err != nil {
+		s.diag.Error("dispatchRecvData", err)
+	}
+	return
+}
+
 func (s *Service) createAndStartScannerDispatcher() error {
 	if s.dispatcher == nil {
 		err := errors.New("Please Inject DispatcherBus Service First")
@@ -218,6 +231,8 @@ func (s *Service) OnRecv(id string, data string) {
 			Barcode: data,
 		},
 	})
+
+	go s.dispatchRecvData(data) //协程分发扫码枪数据
 
 	s.WS.WSSendScanner(string(barcode))
 }
