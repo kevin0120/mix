@@ -72,11 +72,6 @@ type ODOOWorkorder struct {
 	MO_Model          string `json:"model"`
 }
 
-type ODOOPoints struct {
-	X float64 `json:"offset_x"`
-	Y float64 `json:"offset_y"`
-}
-
 type ODOOCurveAppend struct {
 	File string `json:"file"`
 	OP   int    `json:"op"`

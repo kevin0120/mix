@@ -6,7 +6,6 @@ import (
 	"github.com/masami10/rush/services/storage"
 	"github.com/minio/minio-go"
 	"strings"
-	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -25,7 +24,6 @@ type Service struct {
 	minio      *minio.Client
 	saveBuffer chan *ControllerCurve
 	closing    chan struct{}
-	wg         sync.WaitGroup
 }
 
 func (s *Service) config() Config {
@@ -36,6 +34,8 @@ func NewService(c Config, d Diagnostic) *Service {
 	s := &Service{
 		diag:       d,
 		saveBuffer: make(chan *ControllerCurve, 1024),
+		closing:    make(chan struct{}, 1),
+		minio:      nil,
 	}
 	s.configValue.Store(c)
 	s.bucket = c.Bucket
@@ -60,9 +60,9 @@ func (s *Service) Open() error {
 }
 
 func (s *Service) Close() error {
-	s.closing <- struct{}{}
-	s.wg.Wait()
-
+	if s.minio != nil {
+		s.closing <- struct{}{}
+	}
 	return nil
 }
 
@@ -78,7 +78,6 @@ func (s *Service) saveProcess() {
 			s.handleSave(data)
 
 		case <-s.closing:
-			s.wg.Done()
 			return
 		}
 	}

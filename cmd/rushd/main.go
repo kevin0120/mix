@@ -103,12 +103,13 @@ func (m *Main) Run(args ...string) error {
 		}
 
 		signalCh := make(chan os.Signal, 1)
-		signal.Notify(signalCh, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
+		signal.Notify(signalCh, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGPIPE)
 		m.Diag.Info("listening for signals")
 
 	Loop:
 		for s := range signalCh {
 			switch s.String() {
+			case syscall.SIGPIPE.String():
 			case syscall.SIGTERM.String():
 				m.Diag.Info("SIGTERM received, initializing clean shutdown...")
 				go func() {

@@ -45,21 +45,6 @@ const (
 	CONTROLLER_CVIL2 = "cvil2"
 )
 
-//type ControllerCurve struct {
-//	ResultID     int64
-//	CurveFile    string
-//	CurveContent ControllerCurveFile
-//	Count        int
-//	UpdateTime   string
-//}
-//
-//type ControllerCurveFile struct {
-//	Result string    `json:"result"`
-//	CUR_M  []float64 `json:"cur_m"`
-//	CUR_W  []float64 `json:"cur_w"`
-//	CUR_T  []float64 `json:"cur_t"`
-//}
-
 type ControllerResult struct {
 	Result_id     int64  `json:"result_id"`
 	Controller_SN string `json:"controller_sn"`
@@ -89,6 +74,7 @@ type ControllerResult struct {
 	StepID int64
 }
 
+//
 type PSetDefine struct {
 	Strategy string  `json:"strategy"`
 	Mp       float64 `json:"M+"`
@@ -109,21 +95,4 @@ type ResultValue struct {
 type CurveObject struct {
 	File  string
 	Count int
-}
-
-type Consume struct {
-	Seq                int     `json:"sequence"`
-	GroupSeq           int     `json:"group_sequence"`
-	ControllerSN       string  `json:"controller_sn"`
-	GunSN              string  `json:"gun_sn"`
-	ToleranceMinDegree float64 `json:"tolerance_min_degree"`
-	ToleranceMaxDegree float64 `json:"tolerance_max_degree"`
-	ToleranceMax       float64 `json:"tolerance_max"`
-	ToleranceMin       float64 `json:"tolerance_min"`
-	PSet               string  `json:"pset"`
-	NutNo              string  `json:"nut_no"`
-	Max_redo_times     int     `json:"max_redo_times"`
-	X                  float64 `json:"offset_x"`
-	Y                  float64 `json:"offset_y"`
-	ResultIDs          []int64 `json:"result_ids"`
 }

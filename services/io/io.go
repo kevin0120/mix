@@ -39,8 +39,8 @@ type IOModule struct {
 	closing       chan struct{}
 	flashes       map[uint16]uint16
 	mtx           sync.Mutex
-
-	diag Diagnostic
+	opened        bool
+	diag          Diagnostic
 }
 
 func (s *IOModule) Start(srv *Service) error {
@@ -63,14 +63,18 @@ func (s *IOModule) Start(srv *Service) error {
 	}
 
 	go s.flashProc()
+	s.opened = true
 
 	return s.client.Start()
 }
 
 func (s *IOModule) Stop() error {
-	s.closing <- struct{}{}
+	if s.opened {
+		s.closing <- struct{}{}
 
-	return s.client.Stop()
+		return s.client.Stop()
+	}
+	return nil
 }
 
 func (s *IOModule) Status() string {

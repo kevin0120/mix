@@ -60,7 +60,7 @@ func TestReader(t *testing.T) {
 			die(err)
 		}
 
-		// Connect to card
+		// connect to card
 		fmt.Println("Connecting to card in ", readers[index])
 		card, err := ctx.Connect(readers[index], scard.ShareExclusive, scard.ProtocolAny)
 		if err != nil {

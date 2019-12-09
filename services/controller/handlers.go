@@ -194,7 +194,7 @@ func (h *Handlers) handleSaveResult(data *SavePackage) {
 	aiisResult, err := h.controllerService.Aiis.ResultToAiisResult(data.dbResult)
 
 	if err == nil {
-		h.controllerService.Aiis.PutResult(data.dbResult.ResultId, aiisResult)
+		h.controllerService.Aiis.PutResult(data.dbResult.ResultId, &aiisResult)
 	}
 }
 
