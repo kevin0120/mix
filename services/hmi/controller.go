@@ -280,7 +280,7 @@ func (m *Methods) getPSetDetail(ctx iris.Context) {
 	//}
 
 	//var pset_detail openprotocol.PSetDetail
-	//switch c.Protocol() {
+	//switch c.IProtocol() {
 	//case controller.OPENPROTOCOL:
 	//	pset_detail, err = m.service.OpenProtocol.GetPSetDetail(controller_sn, v_pset)
 	//	if err != nil {
@@ -371,7 +371,7 @@ func (m *Methods) getJobDetail(ctx iris.Context) {
 	//}
 	//
 	//var job_detail openprotocol.JobDetail
-	//switch c.Protocol() {
+	//switch c.IProtocol() {
 	//case controller.OPENPROTOCOL:
 	//	job_detail, err = m.service.OpenProtocol.GetJobDetail(controller_sn, v_job)
 	//	if err != nil {
@@ -502,26 +502,26 @@ func (m *Methods) putManualJobs(ctx iris.Context) {
 	switch c.Protocol() {
 	case controller.OPENPROTOCOL:
 
-		var db_workorder *storage.Workorders
-		ex_info := ""
+		var workorder *storage.Workorders
+		exInfo := ""
 		if !job.Skip {
-			db_workorder, err = m.insertResultsForJob(&job)
+			workorder, err = m.insertResultsForJob(&job)
 			if err != nil {
 				ctx.StatusCode(iris.StatusBadRequest)
 				ctx.WriteString(err.Error())
 				return
 			}
 
-			workorderID = db_workorder.Id
+			workorderID = workorder.Id
 
 			//vin-cartype-hmisn-userid
-			//ex_info = m.service.OpenProtocol.generateIDInfo(fmt.Sprintf("%d", db_workorder.Id))
+			//exInfo = m.service.OpenProtocol.generateIDInfo(fmt.Sprintf("%d", workorder.Id))
 		}
 
 		if !job.HasSet {
-			err = m.service.OpenProtocol.JobSetManual(job.Controller_SN, job.GunSN, job.Job, job.UserID, ex_info, job.Skip)
+			err = m.service.OpenProtocol.JobSetManual(job.Controller_SN, job.GunSN, job.Job, job.UserID, exInfo, job.Skip)
 		} else {
-			m.service.OpenProtocol.IDSet(job.Controller_SN, ex_info)
+			m.service.OpenProtocol.IDSet(job.Controller_SN, exInfo)
 		}
 
 	default:
@@ -862,7 +862,12 @@ func (m *Methods) putBarcodeTest(ctx iris.Context) {
 	}
 
 	str, _ := json.Marshal(barcode)
-	m.service.OpenProtocol.WS.WSSendScanner(string(str))
+	if err := m.service.SendScannerInfo(string(str)); err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.WriteString(err.Error())
+		return
+	}
+	ctx.StatusCode(iris.StatusOK)
 }
 
 func (m *Methods) putIOInputTest(ctx iris.Context) {
@@ -892,7 +897,7 @@ func (m *Methods) putResultTest(ctx iris.Context) {
 	}
 
 	str, _ := json.Marshal(results)
-	m.service.OpenProtocol.WS.WSSend(wsnotify.WS_EVENT_RESULT, string(str))
+	m.service.OpenProtocol.WS.NotifyAll(wsnotify.WS_EVENT_RESULT, string(str))
 }
 
 func (m *Methods) postAK2(ctx iris.Context) {
@@ -1108,7 +1113,7 @@ func (m *Methods) wsTest(ctx iris.Context) {
 	}
 
 	//str, _ := json.Marshal(WS.Data)
-	//m.service.ControllerService.WS.WSSend(WS.Event, string(str))
+	//m.service.ControllerService.WS.WSNotifyAll(WS.Event, string(str))
 
 	payload, _ := json.Marshal(ws)
 	m.service.ControllerService.WS.WSTestRecv("", string(payload))

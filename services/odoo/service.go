@@ -95,7 +95,7 @@ func (s *Service) PushStatus() {
 	}
 
 	str, _ := json.Marshal(odooStatus)
-	s.WS.WSSend(wsnotify.WS_EVENT_ODOO, string(str))
+	s.WS.NotifyAll(wsnotify.WS_EVENT_ODOO, string(str))
 }
 
 func (s *Service) GetEndpoints(name string) []Endpoint {
@@ -490,7 +490,7 @@ func (s *Service) taskSaveWorkorders() {
 			//fmt.Println(orderHmi)
 			body, _ := json.Marshal(wsnotify.GenerateResult(0, WS_ORDER_NEW_ORDER, orderHmi))
 
-			s.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
+			s.WS.NotifyAll(wsnotify.WS_EVENT_ORDER, string(body))
 			s.diag.Debug(fmt.Sprintf("收到工单并推送HMI: %s", string(body)))
 
 		case <-s.closing:

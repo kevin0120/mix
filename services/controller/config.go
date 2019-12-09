@@ -70,16 +70,16 @@ func NewConfig() Config {
 
 func (c ControllerConfig) Validate() error {
 	if c.SN == "" {
-		return errors.New("Controller Serial Number must be configuration")
+		return errors.New("IController Serial Number must be configuration")
 	}
 	if c.RemoteIP == "" {
-		return errors.New("Controller Remote IP must be configuration")
+		return errors.New("IController Remote IP must be configuration")
 	}
 	if c.Protocol == "" {
-		return errors.New("Controller Protocol must be configuration")
+		return errors.New("IController IProtocol must be configuration")
 	}
 	if !utils.StringInSlice(c.Protocol, Protocols) {
-		return fmt.Errorf("Protocol %s not in support Protocols: %s ", c.Protocol, Protocols)
+		return fmt.Errorf("IProtocol %s not in support Protocols: %s ", c.Protocol, Protocols)
 	}
 	return nil
 }
@@ -92,7 +92,7 @@ func (cs Config) Validate() error {
 
 	for _, c := range cs.Configs {
 		err := c.Validate()
-		return errors.Wrap(err, "Validate Controllers Protocol Fail")
+		return errors.Wrap(err, "Validate Controllers IProtocol Fail")
 	}
 
 	return nil

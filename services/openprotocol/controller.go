@@ -71,13 +71,9 @@ type TighteningController struct {
 
 	handleRecvBuf []byte
 	writeOffset   int
-
 	device.BaseDevice
 }
 
-func (c *TighteningController) SerialNumber() string {
-	return c.BaseDevice.SerialNumber
-}
 
 func defaultControllerGet() *TighteningController {
 	return &TighteningController{
@@ -87,7 +83,6 @@ func defaultControllerGet() *TighteningController {
 		reqTimeout:        time.Duration(OpenProtocolDefaultKeepAlivePeriod),
 		getToolInfoPeriod: time.Duration(OpenProtocolDefaultGetTollInfoPeriod),
 		protocol:          controller.OPENPROTOCOL,
-		BaseDevice:        device.CreateBaseDevice(),
 		tempResultCurve:   map[int]*tightening_device.TighteningCurve{},
 		toolDispatches:    map[string]*ToolDispatch{},
 		sockClients:       map[string]*socket_writer.SocketWriter{},
@@ -120,6 +115,7 @@ func (c *TighteningController) CreateToolsByConfig() error {
 func NewController(protocolConfig *Config, deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic, service *Service) *TighteningController {
 
 	c := defaultControllerGet()
+	c.BaseDevice = device.CreateBaseDevice(deviceConfig.Model, d, service)
 	c.diag = d
 	c.deviceConf = deviceConfig
 	c.ProtocolService = service
@@ -218,8 +214,8 @@ func (c *TighteningController) ProcessRequest(mid string, noack string, station 
 		return nil, err
 	}
 
-	if c.Status() == device.STATUS_OFFLINE {
-		return nil, errors.New(device.STATUS_OFFLINE)
+	if c.Status() == device.BaseDeviceStatusOffline {
+		return nil, errors.New(device.BaseDeviceStatusOffline)
 	}
 
 	pkg := GeneratePackage(mid, rev, noack, station, spindle, data)
@@ -268,13 +264,13 @@ func CurveDataDecoding(original []byte, torqueCoefficient float64, angleCoeffici
 			writeOffset += 1
 			step = 2 //跳过这个字节
 		default:
-			e := errors.New("Desoutter Protocol Curve Raw Data 0xff不能单独出现")
+			e := errors.New("Desoutter IProtocol Curve Raw Data 0xff不能单独出现")
 			d.Error("CurveDataDecoding", e)
 			// do nothing
 		}
 	}
 	if writeOffset%6 != 0 {
-		e := errors.New("Desoutter Protocol Curve Raw Data Convert Fail")
+		e := errors.New("Desoutter IProtocol Curve Raw Data Convert Fail")
 		d.Error("CurveDataDecoding Fail", e)
 		return
 	}
@@ -485,7 +481,7 @@ func (c *TighteningController) doConnectPart2(doConnectToolSymbol string) error 
 	// 处理不完整的结果和曲线
 	c.clearToolsResultAndCurve()
 
-	c.handleStatus(device.STATUS_ONLINE)
+	c.handleStatus(device.BaseDeviceStatusOnline)
 
 	return c.startComm()
 }
@@ -506,7 +502,7 @@ func (c *TighteningController) CloseTransport() {
 }
 
 func (c *TighteningController) Connect() error {
-	c.UpdateStatus(device.STATUS_OFFLINE)
+	c.UpdateStatus(device.BaseDeviceStatusOffline)
 	c.handlerBuf = make(chan handlerPkg, 1024)
 	c.writeOffset = 0
 	c.requestChannel = make(chan uint32, 1024)
@@ -537,7 +533,7 @@ func (c *TighteningController) getTighteningCount() {
 				continue
 			}
 
-			if c.Status() == device.STATUS_OFFLINE {
+			if c.Status() == device.BaseDeviceStatusOffline {
 				continue
 			}
 			req := GeneratePackage(MID_0040_TOOL_INFO_REQUEST, rev, "", "", "", "")
@@ -574,9 +570,9 @@ func (c *TighteningController) ToolInfoReq() error {
 	//
 	//	c.tighteningDevice.AddDevice(ti.ControllerSN, c)
 	//	c.tighteningDevice.AddDevice(ti.ToolSN, c)
-	//	c.handleStatus(controller.STATUS_ONLINE)
+	//	c.handleStatus(controller.BaseDeviceStatusOnline)
 	//} else {
-	//	c.handleStatus(controller.STATUS_OFFLINE)
+	//	c.handleStatus(controller.BaseDeviceStatusOffline)
 	//}
 
 	return nil
@@ -607,7 +603,7 @@ func (c *TighteningController) KeepAliveDeadLine() time.Time {
 }
 
 func (c *TighteningController) sendKeepalive() {
-	if c.Status() == device.STATUS_OFFLINE {
+	if c.Status() == device.BaseDeviceStatusOffline {
 		return
 	}
 
@@ -640,7 +636,7 @@ func (c *TighteningController) handleStatus(status string) {
 
 		c.UpdateStatus(status)
 
-		if status == device.STATUS_OFFLINE {
+		if status == device.BaseDeviceStatusOffline {
 
 			// 断线重连
 			go c.Connect()
@@ -668,7 +664,7 @@ func (c *TighteningController) Read(conn net.Conn) {
 		n, err := conn.Read(buffer)
 		if err != nil {
 			c.ProtocolService.diag.Error("read failed", err)
-			c.handleStatus(device.STATUS_OFFLINE)
+			c.handleStatus(device.BaseDeviceStatusOffline)
 			break
 		}
 
@@ -801,7 +797,7 @@ func (c *TighteningController) manage() {
 	for {
 		select {
 		case <-time.After(c.keepPeriod):
-			if c.Status() == device.STATUS_OFFLINE {
+			if c.Status() == device.BaseDeviceStatusOffline {
 				continue
 			}
 
@@ -839,7 +835,7 @@ func (c *TighteningController) manage() {
 		case pkg := <-c.handlerBuf:
 			err := c.HandleMsg(&pkg)
 			if err != nil {
-				c.diag.Error("Open Protocol HandleMsg Fail", err)
+				c.diag.Error("Open IProtocol HandleMsg Fail", err)
 			}
 		}
 	}

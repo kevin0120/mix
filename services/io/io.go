@@ -2,21 +2,13 @@ package io
 
 import (
 	"fmt"
-	"github.com/kataras/iris/core/errors"
 	"github.com/masami10/rush/services/device"
+	"github.com/pkg/errors"
 	"sync"
 	"time"
 )
 
-const (
-	IO_STATUS_ONLINE  = "online"
-	IO_STATUS_OFFLINE = "offline"
 
-	IO_TYPE_INPUT  = "input"
-	IO_TYPE_OUTPUT = "output"
-
-	IO_MODBUSTCP = "modbustcp"
-)
 
 type IONotify interface {
 	OnStatus(sn string, status string)
@@ -32,7 +24,8 @@ type IO interface {
 }
 
 type IOModule struct {
-	cfg    ConfigIO
+	device.BaseDevice
+	config ConfigIO
 	client IO
 
 	flashInterval time.Duration
@@ -43,29 +36,51 @@ type IOModule struct {
 	diag          Diagnostic
 }
 
-func (io *IOModule) SerialNumber() string {
-	return io.cfg.SN
+func NewIOModule(flashInterval time.Duration, conf ConfigIO, d Diagnostic, service *Service) *IOModule {
+	s := &IOModule{
+		diag:          d,
+		config:        conf,
+		flashInterval: flashInterval,
+		opened:        false,
+		flashes:       map[uint16]uint16{},
+		closing:       make(chan struct{}, 1),
+	}
+	s.BaseDevice = device.CreateBaseDevice(device.BaseDeviceTypeScanner, d, service)
+	return s
 }
 
-func (s *IOModule) Start(srv *Service) error {
+func (io *IOModule) SetSerialNumber(sn string) {
+	io.BaseDevice.SetSerialNumber(sn)
+	io.config.SN = sn
+}
 
-	s.flashes = map[uint16]uint16{}
-	s.closing = make(chan struct{}, 1)
-	s.mtx = sync.Mutex{}
+func (s *IOModule) getIONotifyService() IONotify {
+	return s.BaseDevice.GetParentService().(IONotify)
+}
 
-	vendor := VENDOR_MODELS[s.cfg.Model]
-	switch vendor.Type() {
-	case IO_MODBUSTCP:
-		s.client = &ModbusTcp{
-			cfg:    s.cfg,
-			notify: srv,
-			vendor: vendor,
+func (s *IOModule) WillStart() error {
+	if vendor, ok := VENDOR_MODELS[s.config.Model]; !ok {
+		return errors.Errorf("Model: %s Is Not Support", s.config.Model)
+	} else {
+		switch vendor.Type() {
+		case IO_MODBUSTCP:
+			s.client = &ModbusTcp{
+				cfg:    s.config,
+				notify: s.getIONotifyService(),
+				vendor: vendor,
+			}
+		default:
+			return errors.New(fmt.Sprintf("invalid model type: %s", s.config.Model))
 		}
-
-	default:
-		return errors.New(fmt.Sprintf("invalid model type: %s", s.cfg.Model))
 	}
 
+	return s.BaseDevice.WillStart()
+}
+
+func (s *IOModule) Start() error {
+	if err := s.BaseDevice.Start(); err != nil {
+		return err
+	}
 	go s.flashProc()
 	s.opened = true
 
@@ -124,7 +139,7 @@ func (s *IOModule) Data() interface{} {
 }
 
 func (s *IOModule) Config() interface{} {
-	vendor := VENDOR_MODELS[s.cfg.Model]
+	vendor := VENDOR_MODELS[s.config.Model]
 
 	return IoConfig{
 		InputNum:  vendor.Cfg().InputNum,

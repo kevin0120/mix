@@ -20,8 +20,7 @@ type Diagnostic interface {
 	Debug(msg string)
 }
 
-type Controller interface {
-	Start() error
+type IController interface {
 	Close() error
 	Protocol() string
 	Inputs() string
@@ -30,11 +29,11 @@ type Controller interface {
 	device.IBaseDevice
 }
 
-type Protocol interface {
+type IProtocol interface {
 	Parse(msg string) ([]byte, error)
 	Write(sn string, buf []byte) error
-	//AddNewController(cfg ControllerConfig) Controller
-	//AddDevice(cfg DeviceConfig, ts interface{}) Controller
+	//AddNewController(cfg ControllerConfig) IController
+	//AddDevice(cfg DeviceConfig, ts interface{}) IController
 }
 
 type HandlerPackage struct {
@@ -45,8 +44,8 @@ type HandlerPackage struct {
 type Service struct {
 	config Config
 
-	protocols   map[string]Protocol //进行服务注入, serial_no : Protocol
-	Controllers map[string]Controller
+	protocols   map[string]IProtocol //进行服务注入, serial_no : IProtocol
+	Controllers map[string]IController
 
 	DB     *storage.Service
 	WS     *wsnotify.Service
@@ -63,12 +62,12 @@ type Service struct {
 	diag Diagnostic
 }
 
-func NewService(cs Config, d Diagnostic, pAudi Protocol, pOpenprotocol Protocol) (*Service, error) {
+func NewService(cs Config, d Diagnostic, pAudi IProtocol, pOpenprotocol IProtocol) (*Service, error) {
 	s := &Service{
 		config:          cs,
 		diag:            d,
-		Controllers:     map[string]Controller{},
-		protocols:       map[string]Protocol{},
+		Controllers:     map[string]IController{},
+		protocols:       map[string]IProtocol{},
 		Handlers:        Handlers{},
 		handlerPackages: make(chan *HandlerPackage, 1024),
 		wg:              sync.WaitGroup{},
@@ -78,7 +77,7 @@ func NewService(cs Config, d Diagnostic, pAudi Protocol, pOpenprotocol Protocol)
 	s.Handlers.controllerService = s
 
 	//for _, c := range cs.Configs {
-	//	switch c.Protocol {
+	//	switch c.IProtocol {
 	//	case AUDIPROTOCOL:
 	//		newController := pAudi.AddNewController(c)
 	//		s.Controllers[c.SN] = newController
@@ -160,6 +159,6 @@ func (s *Service) Close() error {
 	return nil
 }
 
-func (s *Service) GetControllers() *map[string]Controller {
+func (s *Service) GetControllers() *map[string]IController {
 	return &s.Controllers
 }

@@ -272,9 +272,9 @@ func (s *Service) OnRPCRecv(data interface{}) {
 
 	case TYPE_MES_STATUS:
 		// TODO: 收到mes状态更新, 通知HMI------doing
-		//s.WS.WSSend(wsnotify.WS_EVENT_MES,"MES在线")
+		//s.WS.WSNotifyAll(wsnotify.WS_EVENT_MES,"MES在线")
 		body, _ := json.Marshal(wsnotify.GenerateResult(0, "", payload))
-		s.WS.WSSend(wsnotify.WS_EVENT_MES, string(body))
+		s.WS.NotifyAll(wsnotify.WS_EVENT_MES, string(body))
 		s.diag.Debug(fmt.Sprintf("收到mes状态并推送HMI: %s", payload))
 
 		//case TYPE_ORDER_START:
@@ -347,13 +347,13 @@ func (s *Service) PutMesOpenRequest(sn uint64, wsType string, code string, req i
 
 	if err != nil {
 		body, _ := json.Marshal(wsnotify.GenerateReply(sn, wsType, -2, err.Error()))
-		s.WS.WSSend(wsnotify.WS_EVENT_REPLY, string(body))
+		s.WS.NotifyAll(wsnotify.WS_EVENT_REPLY, string(body))
 		<-ch
 		return nil, err
 	}
 	//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, resp.(string)))
 	body, _ := json.Marshal(wsnotify.GenerateResult(sn, wsType, resp.Body()))
-	s.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
+	s.WS.NotifyAll(wsnotify.WS_EVENT_ORDER, string(body))
 	<-ch
 	return resp.Body(), nil
 }
@@ -367,13 +367,13 @@ func (s *Service) PutMesFinishRequest(sn uint64, wsType string, code string, req
 
 	if err != nil {
 		body, _ := json.Marshal(wsnotify.GenerateReply(sn, wsType, -2, err.Error()))
-		s.WS.WSSend(wsnotify.WS_EVENT_REPLY, string(body))
+		s.WS.NotifyAll(wsnotify.WS_EVENT_REPLY, string(body))
 		<-ch
 		return nil, err
 	}
 	//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
 	body, _ := json.Marshal(wsnotify.GenerateResult(sn, wsType, resp.Body()))
-	s.WS.WSSend(wsnotify.WS_EVENT_ORDER, string(body))
+	s.WS.NotifyAll(wsnotify.WS_EVENT_ORDER, string(body))
 	<-ch
 	return resp.Body(), nil
 }

@@ -274,5 +274,5 @@ func (m *Methods) postMaintenance(ctx iris.Context) {
 	}
 
 	msg, _ := json.Marshal(maintanence)
-	m.service.WS.WSSend(wsnotify.WS_EVENT_MAINTENANCE, string(msg))
+	m.service.WS.NotifyAll(wsnotify.WS_EVENT_MAINTENANCE, string(msg))
 }

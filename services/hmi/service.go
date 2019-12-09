@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kataras/iris/websocket"
-	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/device"
+	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/io"
 	"github.com/masami10/rush/services/odoo"
@@ -17,6 +17,7 @@ import (
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
+	"github.com/pkg/errors"
 )
 
 type Diagnostic interface {
@@ -65,6 +66,14 @@ func NewService(d Diagnostic) *Service {
 	s.methods.service = s
 
 	return s
+}
+
+func (s *Service) SendScannerInfo(identification string) error {
+	if s.WS == nil {
+		return errors.New("Please Inject Notify Service First")
+	}
+	s.WS.NotifyAll(wsnotify.WS_EVENT_SCANNER, identification)
+	return nil
 }
 
 func (s *Service) Open() error {
@@ -671,7 +680,7 @@ func (s *Service) OnTighteningResult(data interface{}) {
 
 	payload, _ := json.Marshal(msg)
 
-	s.WS.WSSend(wsnotify.WS_EVENT_RESULT, string(payload))
+	s.WS.NotifyAll(wsnotify.WS_EVENT_RESULT, string(payload))
 	s.diag.Debug(fmt.Sprintf("拧紧结果推送HMI: %s", string(payload)))
 }
 
@@ -684,11 +693,11 @@ func (s *Service) OnTighteningControllerStatus(data interface{}) {
 	controllerStatus := data.(*[]device.DeviceStatus)
 
 	msg := wsnotify.WSMsg{
-		Type: device.WS_DEVICE_STATUS,
+		Type: wsnotify.NotifywsDeviceStatus,
 		Data: controllerStatus,
 	}
 	payload, _ := json.Marshal(msg)
-	s.WS.WSSend(wsnotify.WS_EVENT_DEVICE, string(payload))
+	s.WS.NotifyAll(wsnotify.WS_EVENT_DEVICE, string(payload))
 	s.diag.Debug(fmt.Sprintf("控制器状态推送HMI: %s", string(payload)))
 }
 
@@ -701,11 +710,11 @@ func (s *Service) OnTighteningToolStatus(data interface{}) {
 	toolStatus := data.(*[]device.DeviceStatus)
 
 	msg := wsnotify.WSMsg{
-		Type: device.WS_DEVICE_STATUS,
+		Type: wsnotify.NotifywsDeviceStatus,
 		Data: toolStatus,
 	}
 	payload, _ := json.Marshal(msg)
-	s.WS.WSSend(wsnotify.WS_EVENT_DEVICE, string(payload))
+	s.WS.NotifyAll(wsnotify.WS_EVENT_DEVICE, string(payload))
 	s.diag.Debug(fmt.Sprintf("工具状态推送HMI: %s", string(payload)))
 }
 
@@ -722,7 +731,7 @@ func (s *Service) OnTighteningControllerIO(data interface{}) {
 		Data: ioStatus,
 	}
 	payload, _ := json.Marshal(msg)
-	s.WS.WSSend(wsnotify.WS_EVENT_IO, string(payload))
+	s.WS.NotifyAll(wsnotify.WS_EVENT_IO, string(payload))
 	s.diag.Debug(fmt.Sprintf("控制器IO推送HMI: %s", string(payload)))
 }
 
@@ -740,7 +749,7 @@ func (s *Service) OnTighteningControllereID(data interface{}) {
 	}
 
 	payload, _ := json.Marshal(msg)
-	s.WS.WSSend(wsnotify.WS_EVENT_SCANNER, string(payload))
+	s.WS.NotifyAll(wsnotify.WS_EVENT_SCANNER, string(payload))
 	s.diag.Debug(fmt.Sprintf("控制器条码推送HMI: %s", string(payload)))
 }
 
@@ -761,7 +770,7 @@ func (s *Service) OnAiisStatus(data interface{}) {
 		},
 	})
 
-	s.WS.WSSend(wsnotify.WS_EVENT_AIIS, string(payload))
+	s.WS.NotifyAll(wsnotify.WS_EVENT_AIIS, string(payload))
 	s.diag.Debug(fmt.Sprintf("Aiis连接状态推送HMI: %s", string(payload)))
 }
 
@@ -781,7 +790,7 @@ func (s *Service) OnOdooStatus(data interface{}) {
 		},
 	})
 
-	s.WS.WSSend(wsnotify.WS_EVENT_ODOO, string(payload))
+	s.WS.NotifyAll(wsnotify.WS_EVENT_ODOO, string(payload))
 	s.diag.Debug(fmt.Sprintf("ODOO连接状态推送HMI: %s", string(payload)))
 }
 
@@ -798,6 +807,6 @@ func (s *Service) OnExSysStatus(data interface{}) {
 		Data: status,
 	})
 
-	s.WS.WSSend(wsnotify.WS_EVENT_EXSYS, string(payload))
+	s.WS.NotifyAll(wsnotify.WS_EVENT_EXSYS, string(payload))
 	s.diag.Debug(fmt.Sprintf("第三方系统连接状态推送HMI: %s", string(payload)))
 }

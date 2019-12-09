@@ -10,27 +10,6 @@ import (
 	"sync/atomic"
 )
 
-type IBaseDevice interface {
-
-	// 设备状态
-	Status() string
-
-	// 设备类型
-	DeviceType() string
-
-	// 子设备
-	Children() map[string]IBaseDevice
-
-	// 设备配置
-	Config() interface{}
-
-	// 设备运行数据
-	Data() interface{}
-
-	//设备序列号唯一追踪号
-	SerialNumber() string
-}
-
 type Diagnostic interface {
 	Error(msg string, err error)
 	Debug(msg string)
@@ -91,7 +70,7 @@ func (s *Service) config() Config {
 
 func (s *Service) dispatchRequest(req *wsnotify.WSRequest) {
 	switch req.WSMsg.Type {
-	case WS_DEVICE_STATUS:
+	case wsnotify.NotifywsDeviceStatus:
 		s.DispatcherBus.Dispatch(dispatcherBus.DISPATCHER_WS_DEVICE_STATUS, req)
 	}
 }
@@ -115,7 +94,7 @@ func (s *Service) fetchAllDevices() []DeviceStatus {
 	var devices []DeviceStatus
 	for k, v := range s.runningDevices {
 
-		children := []string{}
+		var children []string
 		if v.Children() != nil {
 			for _, child := range reflect.ValueOf(v.Children()).MapKeys() {
 				children = append(children, child.String())

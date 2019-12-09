@@ -14,12 +14,6 @@ type ITighteningDevice interface {
 type ITighteningController interface {
 	ITighteningDevice
 
-	// 启动
-	Start() error
-
-	// 停止
-	Stop() error
-
 	// 定位工具
 	GetToolViaSerialNumber(toolSN string) (ITighteningTool, error)
 

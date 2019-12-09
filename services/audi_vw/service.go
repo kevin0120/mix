@@ -96,7 +96,7 @@ func (s *Service) CreateController(cfg *tightening_device.TighteningDeviceConfig
 	return nil, nil
 }
 
-func (s *Service) AddNewController(cfg controller.ControllerConfig) controller.Controller {
+func (s *Service) AddNewController(cfg controller.ControllerConfig) controller.IController {
 	config := s.config()
 	c := NewController(config)
 	c.Srv = s //服务注入
@@ -105,7 +105,7 @@ func (s *Service) AddNewController(cfg controller.ControllerConfig) controller.C
 	return &c
 }
 
-func (s *Service) AddDevice(cfg controller.DeviceConfig, ts interface{}) controller.Controller {
+func (s *Service) AddDevice(cfg controller.DeviceConfig, ts interface{}) controller.IController {
 	return nil
 }
 
@@ -127,7 +127,7 @@ func (p *Service) Open() error {
 
 	err := p.listener.Start()
 	if err != nil {
-		return errors.Wrapf(err, "AudiVW XML Protocol %s Listener fail", p.name)
+		return errors.Wrapf(err, "AudiVW XML IProtocol %s Listener fail", p.name)
 	}
 
 	for _, w := range p.Parent.Controllers {
@@ -151,7 +151,7 @@ func (p *Service) Close() error {
 	for _, w := range p.Parent.Controllers {
 		err := w.Close()
 		if err != nil {
-			return errors.Wrapf(err, "Close Protocol %s Writer fail", p.name)
+			return errors.Wrapf(err, "Close IProtocol %s Writer fail", p.name)
 		}
 	}
 
@@ -181,7 +181,7 @@ func (p *Service) Read(c net.Conn) {
 		n, err := c.Read(buffer)
 		if err != nil {
 			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-				p.diag.Error("Timeout in plugin AduiVW Protocol: %s", err)
+				p.diag.Error("Timeout in plugin AduiVW IProtocol: %s", err)
 				continue
 			} else if netErr != nil && !strings.HasSuffix(err.Error(), ": use of closed network connection") {
 				p.diag.Error("using closing connection", err)

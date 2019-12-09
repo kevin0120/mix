@@ -179,7 +179,7 @@ func (h *Handlers) saveResult(data *SavePackage) {
 		}
 
 		str, _ := json.Marshal(msg)
-		h.controllerService.WS.WSSend(wsnotify.WS_EVENT_RESULT, string(str))
+		h.controllerService.WS.NotifyAll(wsnotify.WS_EVENT_RESULT, string(str))
 
 	}
 

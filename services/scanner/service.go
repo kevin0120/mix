@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/gousb"
-	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/device"
+	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
 	"github.com/tarm/serial"
@@ -152,7 +152,7 @@ func (s *Service) search() {
 			d, err := ctx.OpenDeviceWithVIDPID(ID(vid), ID(pid))
 			if err == nil && d != nil {
 				s.diag.Debug(fmt.Sprintf("Search Success: %s", label))
-				newScanner := NewScanner(label, s.diag, d)
+				newScanner := NewScanner(label, s.diag, d, s)
 				s.addScanner(newScanner)
 				s.DeviceService.AddDevice(fmt.Sprintf("%d:%d", vid, pid), newScanner)
 			} else if err != nil {
@@ -166,7 +166,7 @@ func (s *Service) search() {
 			d, err := serial.OpenPort(c)
 			if err == nil {
 				s.diag.Debug(fmt.Sprintf("Search Success: %s", label))
-				newScanner := NewScanner(label, s.diag, d)
+				newScanner := NewScanner(label, s.diag, d, s)
 				s.addScanner(newScanner)
 				s.DeviceService.AddDevice(fmt.Sprintf("%s", label), newScanner)
 			} else {
@@ -183,7 +183,6 @@ func (s *Service) addScanner(scanner *Scanner) {
 
 	if _, ok := s.scanners[scanner.Channel()]; !ok {
 		s.scanners[scanner.Channel()] = scanner
-		scanner.notify = s
 		scanner.Start()
 	}
 }
@@ -200,22 +199,26 @@ func (s *Service) removeScanner(id string) {
 	}
 }
 
+func (s *Service) sendScannerInfo(msg string) {
+	s.WS.NotifyAll(wsnotify.WS_EVENT_SCANNER, msg)
+}
+
 func (s *Service) OnStatus(id string, status string) {
-	s.diag.Debug(fmt.Sprintf("scanner %s status: %s\n", id, status))
+	s.diag.Debug(fmt.Sprintf("Scanner %s Status: %s\n", id, status))
 	if status == SCANNER_STATUS_OFFLINE {
 		s.removeScanner(id)
 	}
-	barcode, _ := json.Marshal(wsnotify.WSMsg{
-		Type: device.WS_DEVICE_STATUS,
+	ss, _ := json.Marshal(wsnotify.WSMsg{
+		Type: wsnotify.NotifywsDeviceStatus,
 		Data: []device.DeviceStatus{
 			{
 				SN:     id,
-				Type:   device.DEVICE_TYPE_SCANNER,
+				Type:   device.BaseDeviceTypeScanner,
 				Status: status,
 			},
 		},
 	})
-	s.WS.WSSendScanner(string(barcode))
+	s.sendScannerInfo(string(ss))
 }
 
 func (s *Service) OnRecv(id string, data string) {
@@ -226,7 +229,7 @@ func (s *Service) OnRecv(id string, data string) {
 	barcode, _ := json.Marshal(wsnotify.WSMsg{
 		Type: WS_SCANNER_READ,
 		Data: ScannerRead{
-			Src:     device.DEVICE_TYPE_SCANNER,
+			Src:     device.BaseDeviceTypeScanner,
 			SN:      id,
 			Barcode: data,
 		},
@@ -234,5 +237,5 @@ func (s *Service) OnRecv(id string, data string) {
 
 	go s.dispatchRecvData(data) //协程分发扫码枪数据
 
-	s.WS.WSSendScanner(string(barcode))
+	s.sendScannerInfo(string(barcode))
 }

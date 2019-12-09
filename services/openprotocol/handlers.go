@@ -293,7 +293,7 @@ func handleMID_0101_MULTI_SPINDLE_RESULT(c *TighteningController, pkg *handlerPk
 
 	wsStrs, err := json.Marshal(wsResults)
 	if err == nil {
-		c.ProtocolService.WS.WSSend(wsnotify.WS_EVENT_RESULT, string(wsStrs))
+		c.ProtocolService.WS.NotifyAll(wsnotify.WS_EVENT_RESULT, string(wsStrs))
 	}
 
 	return err
@@ -337,10 +337,10 @@ func handleMID_0071_ALARM(c *TighteningController, pkg *handlerPkg) error {
 
 	switch ai.ErrorCode {
 	case EVT_CONTROLLER_TOOL_CONNECT:
-		c.UpdateToolStatus(device.STATUS_ONLINE)
+		c.UpdateToolStatus(device.BaseDeviceStatusOnline)
 
 	case EVT_CONTROLLER_TOOL_DISCONNECT:
-		c.UpdateToolStatus(device.STATUS_OFFLINE)
+		c.UpdateToolStatus(device.BaseDeviceStatusOffline)
 	}
 
 	return nil
@@ -356,10 +356,10 @@ func handleMID_0076_ALARM_STATUS(c *TighteningController, pkg *handlerPkg) error
 
 	switch as.ErrorCode {
 	case EVT_CONTROLLER_NO_ERR:
-		c.UpdateToolStatus(device.STATUS_ONLINE)
+		c.UpdateToolStatus(device.BaseDeviceStatusOnline)
 
 	case EVT_CONTROLLER_TOOL_DISCONNECT:
-		c.UpdateToolStatus(device.STATUS_OFFLINE)
+		c.UpdateToolStatus(device.BaseDeviceStatusOffline)
 	}
 
 	return nil

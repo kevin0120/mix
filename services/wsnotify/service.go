@@ -231,7 +231,10 @@ func (s *Service) WSSendResult(sn string, payload string) {
 //	}
 //}
 
-func (s *Service) WSSend(evt string, payload string) {
+func (s *Service) NotifyAll(evt string, payload string) {
+	if s == nil || s.clientManager == nil {
+		return
+	}
 	s.clientManager.NotifyALL(evt, payload)
 }
 
@@ -248,14 +251,6 @@ func (s *Service) WSSendControllerSelectorStatus(payload string) {
 // ws群发job选择信息
 func (s *Service) WSSendJob(payload string) {
 	s.clientManager.NotifyALL(WS_EVENT_JOB, payload)
-}
-
-// ws群发扫码信息
-func (s *Service) WSSendScanner(payload string) {
-	if s == nil || s.clientManager == nil {
-		return
-	}
-	s.clientManager.NotifyALL(WS_EVENT_SCANNER, payload)
 }
 
 func (s *Service) WSSendIOInput(payload string) {

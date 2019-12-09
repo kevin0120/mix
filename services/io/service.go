@@ -3,16 +3,17 @@ package io
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/kataras/iris/core/errors"
 	"github.com/kataras/iris/websocket"
-	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/device"
+	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/wsnotify"
+	"github.com/pkg/errors"
 	"sync/atomic"
 	"time"
 )
 
 type Diagnostic interface {
+	Info(msg string)
 	Error(msg string, err error)
 	Debug(msg string)
 }
@@ -62,18 +63,15 @@ func (s *Service) Open() error {
 
 	cfgs := s.config().IOS
 	for _, v := range cfgs {
-		s.ios[v.SN] = &IOModule{
-			cfg:           v,
-			flashInterval: time.Duration(s.config().FlashInteval),
-			opened:        false,
-		}
+		io := NewIOModule(time.Duration(s.config().FlashInteval), v, s.diag, s)
 
-		s.DeviceService.AddDevice(v.SN, s.ios[v.SN])
+		s.DeviceService.AddDevice(v.SN, io)
 
-		err := s.ios[v.SN].Start(s)
+		err := io.Start()
 		if err != nil {
 			s.diag.Error("start io failed", err)
 		}
+		s.ios[v.SN] = io
 	}
 
 	s.WS.AddNotify(s)
@@ -130,7 +128,7 @@ func (s *Service) OnWSIOStatus(data interface{}) {
 		Data: []device.DeviceStatus{
 			{
 				SN:     ioStatus.SN,
-				Type:   device.DEVICE_TYPE_IO,
+				Type:   device.BaseDeviceTypeIO,
 				Status: m.Status(),
 			},
 		},
@@ -166,7 +164,7 @@ func (s *Service) OnWSIOContact(data interface{}) {
 	ioContacts, _ := json.Marshal(wsnotify.WSMsg{
 		Type: WS_IO_CONTACT,
 		Data: IoContact{
-			Src:     device.DEVICE_TYPE_IO,
+			Src:     device.BaseDeviceTypeIO,
 			SN:      ioContact.SN,
 			Inputs:  inputs,
 			Outputs: outputs,
@@ -247,11 +245,11 @@ func (s *Service) OnStatus(sn string, status string) {
 	s.diag.Debug(fmt.Sprintf("sn:%s status:%s", sn, status))
 
 	io, _ := json.Marshal(wsnotify.WSMsg{
-		Type: device.WS_DEVICE_STATUS,
+		Type: wsnotify.NotifywsDeviceStatus,
 		Data: []device.DeviceStatus{
 			{
 				SN:     sn,
-				Type:   device.DEVICE_TYPE_IO,
+				Type:   device.BaseDeviceTypeIO,
 				Status: status,
 			},
 		},
@@ -260,11 +258,15 @@ func (s *Service) OnStatus(sn string, status string) {
 	s.WS.WSSendIO(string(io))
 }
 
+func (s *Service)OnRecv(string, string){
+	s.diag.Error("OnRecv",errors.New("IO Service Not Support OnRecv"))
+}
+
 func (s *Service) OnIOStatus(sn string, t string, status string) {
 	s.diag.Debug(fmt.Sprintf("sn:%s type:%s status:%s", sn, t, status))
 
 	ioContact := IoContact{
-		Src: device.DEVICE_TYPE_IO,
+		Src: device.BaseDeviceTypeIO,
 		SN:  sn,
 	}
 

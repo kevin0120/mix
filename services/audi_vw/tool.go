@@ -13,20 +13,20 @@ func NewTool(c *TighteningController, cfg tightening_device.ToolConfig, d Diagno
 		diag:       d,
 		cfg:        cfg,
 		parent:     c,
-		BaseDevice: device.CreateBaseDevice(),
+		BaseDevice: device.CreateBaseDevice(device.BaseDeviceTighteningTool, d, c.GetParentService()),
 	}
 
-	tool.UpdateStatus(device.STATUS_ONLINE)
+	tool.UpdateStatus(device.BaseDeviceStatusOnline)
 	return &tool
 }
 
 type TighteningTool struct {
+	device.BaseDevice
 	diag   Diagnostic
 	cfg    tightening_device.ToolConfig
 	Mode   string
 	parent *TighteningController
 
-	device.BaseDevice
 }
 
 // 工具使能控制
@@ -85,8 +85,8 @@ func (s *TighteningTool) TraceSet(str string) error {
 }
 
 func (s *TighteningTool) Status() string {
-	if s.parent.Status() == device.STATUS_OFFLINE {
-		return device.STATUS_OFFLINE
+	if s.parent.Status() == device.BaseDeviceStatusOffline {
+		return device.BaseDeviceStatusOffline
 	}
 
 	return s.BaseDevice.Status()

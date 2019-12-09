@@ -19,10 +19,10 @@ func CreateTool(c *TighteningController, cfg tightening_device.ToolConfig, d Dia
 		diag:       d,
 		cfg:        cfg,
 		controller: c,
-		BaseDevice: device.CreateBaseDevice(),
+		BaseDevice: device.CreateBaseDevice(device.BaseDeviceTighteningTool,d, c.GetParentService()),
 	}
 
-	tool.UpdateStatus(device.STATUS_OFFLINE)
+	tool.UpdateStatus(device.BaseDeviceStatusOffline)
 	return &tool
 }
 
@@ -33,10 +33,6 @@ type TighteningTool struct {
 	controller *TighteningController
 
 	device.BaseDevice
-}
-
-func (s *TighteningTool) SerialNumber() string {
-	return s.BaseDevice.SerialNumber
 }
 
 func (s *TighteningTool) SetMode(mode string) {
@@ -54,8 +50,8 @@ func (s *TighteningTool) GetMode() string {
 
 // 工具使能控制
 func (s *TighteningTool) ToolControl(enable bool) error {
-	if s.controller.Status() == device.STATUS_OFFLINE {
-		return errors.New(device.STATUS_OFFLINE)
+	if s.controller.Status() == device.BaseDeviceStatusOffline {
+		return errors.New(device.BaseDeviceStatusOffline)
 	}
 
 	cmd := MID_0042_TOOL_DISABLE
@@ -77,8 +73,8 @@ func (s *TighteningTool) ToolControl(enable bool) error {
 
 // 设置PSet
 func (s *TighteningTool) SetPSet(pset int) error {
-	if s.controller.Status() == device.STATUS_OFFLINE {
-		return errors.New(device.STATUS_OFFLINE)
+	if s.controller.Status() == device.BaseDeviceStatusOffline {
+		return errors.New(device.BaseDeviceStatusOffline)
 	}
 
 	data := fmt.Sprintf("%03d", pset)
@@ -96,8 +92,8 @@ func (s *TighteningTool) SetPSet(pset int) error {
 
 // 设置Job
 func (s *TighteningTool) SetJob(job int) error {
-	if s.controller.Status() == device.STATUS_OFFLINE {
-		return errors.New(device.STATUS_OFFLINE)
+	if s.controller.Status() == device.BaseDeviceStatusOffline {
+		return errors.New(device.BaseDeviceStatusOffline)
 	}
 
 	data := fmt.Sprintf("%04d", job)
@@ -115,8 +111,8 @@ func (s *TighteningTool) SetJob(job int) error {
 
 // 模式选择: job/pset
 func (s *TighteningTool) ModeSelect(mode string) error {
-	if s.controller.Status() == device.STATUS_OFFLINE {
-		return errors.New(device.STATUS_OFFLINE)
+	if s.controller.Status() == device.BaseDeviceStatusOffline {
+		return errors.New(device.BaseDeviceStatusOffline)
 	}
 
 	flag := OPENPROTOCOL_MODE_PSET
@@ -140,8 +136,8 @@ func (s *TighteningTool) ModeSelect(mode string) error {
 
 // 取消job
 func (s *TighteningTool) AbortJob() error {
-	if s.controller.Status() == device.STATUS_OFFLINE {
-		return errors.New(device.STATUS_OFFLINE)
+	if s.controller.Status() == device.BaseDeviceStatusOffline {
+		return errors.New(device.BaseDeviceStatusOffline)
 	}
 
 	reply, err := s.controller.ProcessRequest(MID_0127_JOB_ABORT, "", "", "", "")
@@ -158,8 +154,8 @@ func (s *TighteningTool) AbortJob() error {
 
 // 设置pset次数
 func (s *TighteningTool) SetPSetBatch(pset int, batch int) error {
-	if s.controller.Status() == device.STATUS_OFFLINE {
-		return errors.New(device.STATUS_OFFLINE)
+	if s.controller.Status() == device.BaseDeviceStatusOffline {
+		return errors.New(device.BaseDeviceStatusOffline)
 	}
 
 	data := fmt.Sprintf("%03d%02d", pset, batch)
@@ -177,8 +173,8 @@ func (s *TighteningTool) SetPSetBatch(pset int, batch int) error {
 
 // pset列表
 func (s *TighteningTool) GetPSetList() ([]int, error) {
-	if s.controller.Status() == device.STATUS_OFFLINE {
-		return nil, errors.New(device.STATUS_OFFLINE)
+	if s.controller.Status() == device.BaseDeviceStatusOffline {
+		return nil, errors.New(device.BaseDeviceStatusOffline)
 	}
 
 	reply, err := s.controller.ProcessRequest(MID_0010_PSET_LIST_REQUEST, "", "", "", "")
@@ -191,8 +187,8 @@ func (s *TighteningTool) GetPSetList() ([]int, error) {
 
 // pset详情
 func (s *TighteningTool) GetPSetDetail(pset int) (*tightening_device.PSetDetail, error) {
-	if s.controller.Status() == device.STATUS_OFFLINE {
-		return nil, errors.New(device.STATUS_OFFLINE)
+	if s.controller.Status() == device.BaseDeviceStatusOffline {
+		return nil, errors.New(device.BaseDeviceStatusOffline)
 	}
 
 	data := fmt.Sprintf("%03d", pset)
@@ -215,8 +211,8 @@ func (s *TighteningTool) GetPSetDetail(pset int) (*tightening_device.PSetDetail,
 
 // job列表
 func (s *TighteningTool) GetJobList() ([]int, error) {
-	if s.controller.Status() == device.STATUS_OFFLINE {
-		return nil, errors.New(device.STATUS_OFFLINE)
+	if s.controller.Status() == device.BaseDeviceStatusOffline {
+		return nil, errors.New(device.BaseDeviceStatusOffline)
 	}
 
 	reply, err := s.controller.ProcessRequest(MID_0030_JOB_LIST_REQUEST, "", "", "", "")
@@ -229,8 +225,8 @@ func (s *TighteningTool) GetJobList() ([]int, error) {
 
 // job详情
 func (s *TighteningTool) GetJobDetail(job int) (*tightening_device.JobDetail, error) {
-	if s.controller.Status() == device.STATUS_OFFLINE {
-		return nil, errors.New(device.STATUS_OFFLINE)
+	if s.controller.Status() == device.BaseDeviceStatusOffline {
+		return nil, errors.New(device.BaseDeviceStatusOffline)
 	}
 
 	data := fmt.Sprintf("%04d", job)
@@ -252,8 +248,8 @@ func (s *TighteningTool) GetJobDetail(job int) (*tightening_device.JobDetail, er
 }
 
 func (s *TighteningTool) TraceSet(str string) error {
-	if s.controller.Status() == device.STATUS_OFFLINE {
-		return errors.New(device.STATUS_OFFLINE)
+	if s.controller.Status() == device.BaseDeviceStatusOffline {
+		return errors.New(device.BaseDeviceStatusOffline)
 	}
 
 	id := s.controller.ProtocolService.generateIDInfo(str)
@@ -275,7 +271,7 @@ func (s *TighteningTool) TraceSet(str string) error {
 //		return err
 //	}
 //
-//	if c.Status() == controller.STATUS_OFFLINE {
+//	if c.Status() == controller.BaseDeviceStatusOffline {
 //		return errors.New("status offline")
 //	}
 //
@@ -288,8 +284,8 @@ func (s *TighteningTool) TraceSet(str string) error {
 //}
 
 func (s *TighteningTool) Status() string {
-	if s.controller.Status() == device.STATUS_OFFLINE {
-		return device.STATUS_OFFLINE
+	if s.controller.Status() == device.BaseDeviceStatusOffline {
+		return device.BaseDeviceStatusOffline
 	}
 
 	return s.BaseDevice.Status()

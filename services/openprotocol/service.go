@@ -59,6 +59,14 @@ func (s *Service) Name() string {
 	return "OpenProtocol"
 }
 
+func (s *Service)SendIdentification(identification string) error  {
+	if s.WS == nil {
+		return errors.New("Please Inject Notify Service First")
+	}
+	s.WS.NotifyAll(wsnotify.WS_EVENT_SCANNER, identification)
+	return nil
+}
+
 func (s *Service) Parse(msg string) ([]byte, error) {
 	return nil, nil
 }
@@ -417,4 +425,12 @@ func (s *Service) generateIDInfo(info string) string {
 
 func (s *Service) TryCreateMaintenance(info ToolInfo) error {
 	return s.Odoo.TryCreateMaintenance(info)
+}
+
+func (s *Service)OnStatus(string, string) {
+	return
+}
+
+func (s *Service)OnRecv(string, string) {
+	return
 }

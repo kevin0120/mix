@@ -22,26 +22,20 @@ type Diagnostic interface {
 
 // TODO: 修改服务中的DISPATCH相关方法
 type Service struct {
+	device.BaseDevice
 	configValue   atomic.Value
-	serialNumber  string
 	diag          Diagnostic
 	ctx           *scard.Context
 	WS            *wsnotify.Service
 	DeviceService *device.Service
 }
 
-//fixme: 现在默认创建服务时自动创建一个UUID作为序列号
-func (s *Service) SerialNumber() string {
-	return s.serialNumber
-}
-
 func NewService(c Config, d Diagnostic) *Service {
 
 	s := &Service{
 		diag:         d,
-		serialNumber: uuid.NewV4().String(),
 	}
-
+	s.SetSerialNumber(uuid.NewV4().String())
 	s.configValue.Store(c)
 
 	return s

@@ -489,6 +489,10 @@ type IOHandler struct {
 	l Logger
 }
 
+func (h *IOHandler) Info(msg string) {
+	h.l.Info(msg)
+}
+
 func (h *IOHandler) Error(msg string, err error) {
 	h.l.Error(msg, Error(err))
 }

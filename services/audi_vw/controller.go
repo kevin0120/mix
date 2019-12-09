@@ -26,6 +26,7 @@ const (
 )
 
 type TighteningController struct {
+	device.BaseDevice
 	w           *socket_writer.SocketWriter
 	Srv         *Service
 	StatusValue atomic.Value
@@ -35,11 +36,11 @@ type TighteningController struct {
 	sequence          uint32 // 1~9999
 	buffer            chan []byte
 	Response          ResponseQueue
-	mux_seq           sync.Mutex
-	keep_period       time.Duration
-	toolInfo_period   time.Duration
-	req_timeout       time.Duration
-	recv_flag         bool
+	muxSequence       sync.Mutex
+	keepPeriod        time.Duration
+	toolInfoPeriod    time.Duration
+	writeTimeout      time.Duration
+	recvFlag          bool
 	keepaliveDeadLine atomic.Value
 	closing           chan chan struct{}
 	cfg               controller.ControllerConfig
@@ -64,8 +65,8 @@ func (c *TighteningController) addKeepAliveCount() {
 
 func (c *TighteningController) Sequence() uint32 {
 
-	c.mux_seq.Lock()
-	defer c.mux_seq.Unlock()
+	c.muxSequence.Lock()
+	defer c.muxSequence.Unlock()
 
 	seq := c.sequence
 
@@ -79,8 +80,8 @@ func (c *TighteningController) Sequence() uint32 {
 }
 
 func (c *TighteningController) setSequence(i uint32) {
-	c.mux_seq.Lock()
-	defer c.mux_seq.Unlock()
+	c.muxSequence.Lock()
+	defer c.muxSequence.Unlock()
 	if i >= MAXSEQUENCE {
 		c.sequence = MINSEQUENCE
 	} else {
@@ -126,15 +127,15 @@ func (c *TighteningController) updateStatus(status string) {
 func NewController(c Config) TighteningController {
 
 	cont := TighteningController{
-		buffer:          make(chan []byte, 1024),
-		response:        make(chan string),
-		closing:         make(chan chan struct{}),
-		sequence:        MINSEQUENCE,
-		mux_seq:         sync.Mutex{},
-		keep_period:     time.Duration(c.KeepAlivePeriod),
-		toolInfo_period: time.Duration(c.GetToolInfoPeriod),
-		req_timeout:     time.Duration(c.ReqTimeout),
-		protocol:        controller.AUDIPROTOCOL,
+		buffer:         make(chan []byte, 1024),
+		response:       make(chan string),
+		closing:        make(chan chan struct{}),
+		sequence:       MINSEQUENCE,
+		muxSequence:    sync.Mutex{},
+		keepPeriod:     time.Duration(c.KeepAlivePeriod),
+		toolInfoPeriod: time.Duration(c.GetToolInfoPeriod),
+		writeTimeout:   time.Duration(c.ReqTimeout),
+		protocol:       controller.AUDIPROTOCOL,
 	}
 
 	cont.StatusValue.Store(controller.STATUS_OFFLINE)
@@ -170,7 +171,7 @@ func (c *TighteningController) manage() {
 	nextWriteThreshold := time.Now()
 	for {
 		select {
-		case <-time.After(c.keep_period):
+		case <-time.After(c.keepPeriod):
 			if c.Status() == controller.STATUS_OFFLINE {
 				continue
 			}
@@ -185,7 +186,7 @@ func (c *TighteningController) manage() {
 				c.updateKeepAliveDeadLine() //更新keepalivedeadline
 				c.addKeepAliveCount()
 			}
-		case <-time.After(c.toolInfo_period):
+		case <-time.After(c.toolInfoPeriod):
 			if c.Status() == controller.STATUS_OFFLINE {
 				continue
 			}
@@ -201,7 +202,7 @@ func (c *TighteningController) manage() {
 			} else {
 				c.updateKeepAliveDeadLine()
 			}
-			nextWriteThreshold = time.Now().Add(c.req_timeout)
+			nextWriteThreshold = time.Now().Add(c.writeTimeout)
 		case stopDone := <-c.closing:
 			close(stopDone)
 			return //退出manage协程
@@ -231,19 +232,19 @@ func (c *TighteningController) sendKeepalive() {
 //func (c *TighteningController) keep_alive_check() {
 //
 //	for i := 0; i < MAX_KEEP_ALIVE_CHECK; i++ {
-//		if c.recv_flag == true {
-//			c.updateStatus(STATUS_ONLINE)
-//			c.recv_flag = false
-//			time.Sleep(c.keep_period)
+//		if c.recvFlag == true {
+//			c.updateStatus(BaseDeviceStatusOnline)
+//			c.recvFlag = false
+//			time.Sleep(c.keepPeriod)
 //
 //			break
 //		} else {
 //			if i == (MAX_KEEP_ALIVE_CHECK - 1) {
-//				c.updateStatus(STATUS_OFFLINE)
+//				c.updateStatus(BaseDeviceStatusOffline)
 //			}
 //		}
 //
-//		time.Sleep(c.keep_period)
+//		time.Sleep(c.keepPeriod)
 //	}
 //
 //}
@@ -273,7 +274,7 @@ func (c *TighteningController) Write(buf []byte, seq uint32) {
 //			break
 //		}
 //
-//		<-time.After(time.Duration(c.req_timeout)) //300毫秒发送一次信号
+//		<-time.After(time.Duration(c.writeTimeout)) //300毫秒发送一次信号
 //	}
 //}
 
@@ -310,7 +311,7 @@ func (c *TighteningController) Connect() error {
 }
 
 func (c *TighteningController) updateKeepAliveDeadLine() {
-	c.keepaliveDeadLine.Store(time.Now().Add(c.keep_period))
+	c.keepaliveDeadLine.Store(time.Now().Add(c.keepPeriod))
 }
 
 func (c *TighteningController) KeepAliveDeadLine() time.Time {
@@ -389,7 +390,7 @@ func (c *TighteningController) ToolControl(enable bool, channel int) error {
 		if header_str != "" {
 			break
 		}
-		time.Sleep(time.Duration(c.req_timeout))
+		time.Sleep(time.Duration(c.writeTimeout))
 	}
 
 	if header_str == "" {
@@ -437,7 +438,7 @@ func (c *TighteningController) PSet(pset int, workorder_id int64, reseult_id int
 		if header_str != "" {
 			break
 		}
-		time.Sleep(time.Duration(c.req_timeout))
+		time.Sleep(time.Duration(c.writeTimeout))
 	}
 
 	if header_str == "" {
