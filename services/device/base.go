@@ -54,3 +54,7 @@ func (s *BaseDevice) Config() interface{} {
 func (s *BaseDevice) Data() interface{} {
 	return nil
 }
+
+func (s *BaseDevice) Model() interface{} {
+	return nil
+}

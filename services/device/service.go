@@ -26,6 +26,8 @@ type IDevice interface {
 
 	// 设备运行数据
 	Data() interface{}
+
+	Model() interface{}
 }
 
 type Diagnostic interface {
@@ -124,6 +126,11 @@ func (s *Service) fetchAllDevices() []DeviceStatus {
 			for _, child := range reflect.ValueOf(v.Children()).MapKeys() {
 				children = append(children, child.String())
 			}
+		}
+
+		v1, bool := v.Model().(string)
+		if bool && v1 == "connect" {
+			continue
 		}
 
 		devices = append(devices, DeviceStatus{
