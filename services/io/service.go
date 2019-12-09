@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/kataras/iris/core/errors"
 	"github.com/kataras/iris/websocket"
-	"github.com/masami10/rush/services/DispatcherBus"
+	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/wsnotify"
 	"sync/atomic"
@@ -21,7 +21,7 @@ type Dispatcher interface {
 	Create(name string, len int) error
 	Start(name string) error
 	Dispatch(name string, data interface{}) error
-	LaunchDispatchersByHandlerMap(dispatcherMap DispatcherBus.DispatcherMap)
+	LaunchDispatchersByHandlerMap(dispatcherMap dispatcherBus.DispatcherMap)
 	Release(name string) error
 }
 
@@ -36,7 +36,7 @@ type Service struct {
 	wsnotify.WSNotify
 
 	//DispatcherBus *DispatcherBus.Service
-	dispatcherMap DispatcherBus.DispatcherMap
+	dispatcherMap dispatcherBus.DispatcherMap
 }
 
 func NewService(c Config, d Diagnostic) *Service {
@@ -78,10 +78,10 @@ func (s *Service) Open() error {
 
 	s.WS.AddNotify(s)
 
-	s.dispatcherMap = DispatcherBus.DispatcherMap{
-		DispatcherBus.DISPATCHER_WS_IO_STATUS:  s.OnWSIOStatus,
-		DispatcherBus.DISPATCHER_WS_IO_CONTACT: s.OnWSIOContact,
-		DispatcherBus.DISPATCHER_WS_IO_SET:     s.OnWSIOSet,
+	s.dispatcherMap = dispatcherBus.DispatcherMap{
+		dispatcherBus.DISPATCHER_WS_IO_STATUS:  s.OnWSIOStatus,
+		dispatcherBus.DISPATCHER_WS_IO_CONTACT: s.OnWSIOContact,
+		dispatcherBus.DISPATCHER_WS_IO_SET:     s.OnWSIOSet,
 	}
 	s.DispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
 
@@ -206,13 +206,13 @@ func (s *Service) OnWSIOSet(data interface{}) {
 func (s *Service) dispatchRequest(req *wsnotify.WSRequest) {
 	switch req.WSMsg.Type {
 	case WS_IO_CONTACT:
-		s.DispatcherBus.Dispatch(DispatcherBus.DISPATCHER_WS_IO_CONTACT, req)
+		s.DispatcherBus.Dispatch(dispatcherBus.DISPATCHER_WS_IO_CONTACT, req)
 
 	case WS_IO_SET:
-		s.DispatcherBus.Dispatch(DispatcherBus.DISPATCHER_WS_IO_SET, req)
+		s.DispatcherBus.Dispatch(dispatcherBus.DISPATCHER_WS_IO_SET, req)
 
 	case WS_IO_STATUS:
-		s.DispatcherBus.Dispatch(DispatcherBus.DISPATCHER_WS_IO_STATUS, req)
+		s.DispatcherBus.Dispatch(dispatcherBus.DISPATCHER_WS_IO_STATUS, req)
 	}
 }
 

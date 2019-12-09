@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/masami10/rush/command"
 	"github.com/masami10/rush/keyvalue"
-	"github.com/masami10/rush/services/DispatcherBus"
+	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/broker"
@@ -67,7 +67,7 @@ type Server struct {
 
 	TighteningDeviceService *tightening_device.Service
 	DeviceService           *device.Service
-	DispatcherBusService    *DispatcherBus.Service
+	DispatcherBusService    *dispatcherBus.Service
 
 	BrokerService *broker.Service
 
@@ -165,7 +165,7 @@ func (s *Server) AppendService(name string, srv Service) {
 func (s *Server) appendDispatcherBus() error {
 	c := s.config.DispatcherBus
 	d := s.DiagService.NewDispatcherBusHandler()
-	srv, err := DispatcherBus.NewService(c, d)
+	srv, err := dispatcherBus.NewService(c, d)
 
 	if err != nil {
 		return errors.Wrap(err, "Append DispatcherBus Service Fail")

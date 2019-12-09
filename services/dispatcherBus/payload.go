@@ -1,4 +1,4 @@
-package DispatcherBus
+package dispatcherBus
 
 //todo: 通过封装getattr, setattr 减少这种赋值代码
 const (

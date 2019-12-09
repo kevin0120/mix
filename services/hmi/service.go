@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kataras/iris/websocket"
-	"github.com/masami10/rush/services/DispatcherBus"
+	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/controller"
@@ -48,8 +48,8 @@ type Service struct {
 	WS                *wsnotify.Service
 	TighteningService *tightening_device.Service
 
-	DispatcherBus *DispatcherBus.Service
-	dispatcherMap DispatcherBus.DispatcherMap
+	DispatcherBus *dispatcherBus.Service
+	dispatcherMap dispatcherBus.DispatcherMap
 }
 
 func NewService(d Diagnostic) *Service {
@@ -78,7 +78,7 @@ func (s *Service) Open() error {
 	s.ODOO.Aiis.OdooStatusDispatcher.Register(s.OnOdooStatus)
 	s.ODOO.Aiis.AiisStatusDispatcher.Register(s.OnAiisStatus)
 
-	s.dispatcherMap = DispatcherBus.DispatcherMap{
+	s.dispatcherMap = dispatcherBus.DispatcherMap{
 		WS_ORDER_LIST:             s.OnWSOrderList,
 		WS_ORDER_DETAIL:           s.OnWSOrderDetail,
 		WS_ORDER_UPDATE:           s.OnWSOrderUpdate,
@@ -318,22 +318,22 @@ func (s *Service) Close() error {
 func (s *Service) dispatchRequest(req *wsnotify.WSRequest) {
 	switch req.WSMsg.Type {
 	case WS_ORDER_LIST:
-		s.DispatcherBus.Dispatch(DispatcherBus.DISPATCHER_WS_ORDER_LIST, req)
+		s.DispatcherBus.Dispatch(dispatcherBus.DISPATCHER_WS_ORDER_LIST, req)
 
 	case WS_ORDER_DETAIL:
-		s.DispatcherBus.Dispatch(DispatcherBus.DISPATCHER_WS_ORDER_LIST, req)
+		s.DispatcherBus.Dispatch(dispatcherBus.DISPATCHER_WS_ORDER_LIST, req)
 
 	case WS_ORDER_UPDATE:
-		s.DispatcherBus.Dispatch(DispatcherBus.DISPATCHER_WS_ORDER_UPDATE, req)
+		s.DispatcherBus.Dispatch(dispatcherBus.DISPATCHER_WS_ORDER_UPDATE, req)
 
 	case WS_ORDER_STEP_UPDATE:
-		s.DispatcherBus.Dispatch(DispatcherBus.DISPATCHER_WS_ORDER_STEP_UPDATE, req)
+		s.DispatcherBus.Dispatch(dispatcherBus.DISPATCHER_WS_ORDER_STEP_UPDATE, req)
 
 	case WS_ORDER_STEP_DATA_UPDATE:
-		s.DispatcherBus.Dispatch(DispatcherBus.DISPATCHER_WS_ORDER_STEP_DATA_UPDATE, req)
+		s.DispatcherBus.Dispatch(dispatcherBus.DISPATCHER_WS_ORDER_STEP_DATA_UPDATE, req)
 
 	case WS_ORDER_DETAIL_BY_CODE:
-		s.DispatcherBus.Dispatch(DispatcherBus.DISPATCHER_WS_ORDER_DETAIL_BY_CODE, req)
+		s.DispatcherBus.Dispatch(dispatcherBus.DISPATCHER_WS_ORDER_DETAIL_BY_CODE, req)
 	}
 }
 

@@ -3,7 +3,7 @@ package device
 import (
 	"encoding/json"
 	"github.com/kataras/iris/websocket"
-	"github.com/masami10/rush/services/DispatcherBus"
+	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/wsnotify"
 	"reflect"
 	"sync"
@@ -45,8 +45,8 @@ type Service struct {
 	WS *wsnotify.Service
 	wsnotify.WSNotify
 
-	DispatcherBus *DispatcherBus.Service
-	dispatcherMap DispatcherBus.DispatcherMap
+	DispatcherBus *dispatcherBus.Service
+	dispatcherMap dispatcherBus.DispatcherMap
 }
 
 func NewService(c Config, d Diagnostic) (*Service, error) {
@@ -69,8 +69,8 @@ func (s *Service) Open() error {
 
 	s.WS.AddNotify(s)
 
-	s.dispatcherMap = DispatcherBus.DispatcherMap{
-		DispatcherBus.DISPATCHER_WS_DEVICE_STATUS: s.OnWSDeviceStatus,
+	s.dispatcherMap = dispatcherBus.DispatcherMap{
+		dispatcherBus.DISPATCHER_WS_DEVICE_STATUS: s.OnWSDeviceStatus,
 	}
 	s.DispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
 
@@ -92,7 +92,7 @@ func (s *Service) config() Config {
 func (s *Service) dispatchRequest(req *wsnotify.WSRequest) {
 	switch req.WSMsg.Type {
 	case WS_DEVICE_STATUS:
-		s.DispatcherBus.Dispatch(DispatcherBus.DISPATCHER_WS_DEVICE_STATUS, req)
+		s.DispatcherBus.Dispatch(dispatcherBus.DISPATCHER_WS_DEVICE_STATUS, req)
 	}
 }
 

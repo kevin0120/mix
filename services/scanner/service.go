@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/gousb"
-	"github.com/masami10/rush/services/DispatcherBus"
+	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
@@ -25,7 +25,7 @@ const (
 	ServiceSearchItv = 2000 * time.Millisecond
 )
 
-const ScannerDispatcherKey = DispatcherBus.DISPATCHER_SCANNER_ON_RECV
+const ScannerDispatcherKey = dispatcherBus.DISPATCHER_SCANNER_ON_RECV
 
 type Diagnostic interface {
 	Info(msg string)

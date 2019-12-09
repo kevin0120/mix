@@ -1,4 +1,4 @@
-package DispatcherBus
+package dispatcherBus
 
 import (
 	"github.com/kataras/iris/core/errors"
