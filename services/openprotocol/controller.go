@@ -65,7 +65,6 @@ type TighteningController struct {
 	diag                 Diagnostic
 	tempResultCurve      map[int]*tightening_device.TighteningCurve
 	mtxResult            sync.Mutex
-	model                string
 	receiveBuf           chan []byte
 	controllerSubscribes []ControllerSubscribe
 
@@ -183,7 +182,7 @@ func (c *TighteningController) Subscribe() {
 }
 
 func (c *TighteningController) ProcessRequest(mid string, noack string, station string, spindle string, data string) (interface{}, error) {
-	rev, err := GetVendorMid(c.Model(), mid)
+	rev, err := GetVendorMid(c.model(), mid)
 	if err != nil {
 		return nil, err
 	}
@@ -378,8 +377,11 @@ func (c *TighteningController) handleResult(result *tightening_device.Tightening
 
 	//tighteningResult := result_data.ToTighteningResult()
 	//result.ControllerSN = c.cfg.SN
-
-	result.ControllerSN = c.controllerSn
+	if c.controllerSn != "" {
+		result.ControllerSN = c.controllerSn
+	} else {
+		result.ControllerSN = c.cfg.SN
+	}
 
 	toolSN, err := c.findToolSNByChannel(result.ChannelID)
 	if err != nil {
@@ -538,7 +540,7 @@ func (c *TighteningController) getTighteningCount() {
 	for {
 		select {
 		case <-time.After(c.getToolInfoPeriod):
-			rev, err := GetVendorMid(c.Model(), MID_0040_TOOL_INFO_REQUEST)
+			rev, err := GetVendorMid(c.model(), MID_0040_TOOL_INFO_REQUEST)
 			if err == nil {
 				continue
 			}
@@ -556,7 +558,7 @@ func (c *TighteningController) getTighteningCount() {
 }
 
 func (c *TighteningController) ToolInfoReq() error {
-	rev, err := GetVendorMid(c.Model(), MID_0040_TOOL_INFO_REQUEST)
+	rev, err := GetVendorMid(c.model(), MID_0040_TOOL_INFO_REQUEST)
 	if err != nil {
 		return err
 	}
@@ -664,7 +666,7 @@ func (c *TighteningController) Write(buf []byte) {
 func (c *TighteningController) handleStatus(status string) {
 
 	if status != c.Status() {
-		c.diag.Debug(fmt.Sprintf("OpenProtocol handleStatus %s:%s %s\n", c.Model(), c.cfg.SN, status))
+		c.diag.Debug(fmt.Sprintf("OpenProtocol handleStatus %s:%s %s\n", c.model(), c.cfg.SN, status))
 
 		c.UpdateStatus(status)
 
@@ -993,8 +995,11 @@ func (c *TighteningController) findIOByNo(no int, outputs []tightening_device.Co
 	return tightening_device.ControllerOutput{}, errors.New("Not Found")
 }
 
-func (c *TighteningController) Model() string {
+func (c *TighteningController) model() string {
 	return c.cfg.Model
+}
+func (c *TighteningController) Model() interface{} {
+	return c.model()
 }
 
 func (c *TighteningController) DeviceType() string {

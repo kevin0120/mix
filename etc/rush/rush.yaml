@@ -83,7 +83,7 @@ websocket:
 
 storage:
   db_url: 127.0.0.1:5432
-  db_name: rush_dev
+  db_name: rush_hardware
   db_user: odoo
   db_pwd: odoo
   max_connection: 60

@@ -39,6 +39,10 @@ func NewService(c Config, d Diagnostic) *Service {
 	return s
 }
 
+func (s *Service) Model() interface{} {
+	return nil
+}
+
 func (s *Service) config() Config {
 	return s.configValue.Load().(Config)
 }

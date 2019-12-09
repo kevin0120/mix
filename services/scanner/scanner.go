@@ -86,6 +86,10 @@ func NewScanner(channel string, d Diagnostic, dev USBDevice) *Scanner {
 	return &Scanner{devInfo: di, diag: d, device: dev, debounceTrigger: false, init: true}
 }
 
+func (s *Scanner) Model() interface{} {
+	return nil
+}
+
 func (s *Scanner) Start() {
 	s.status.Store(SCANNER_STATUS_OFFLINE)
 	go s.manage()

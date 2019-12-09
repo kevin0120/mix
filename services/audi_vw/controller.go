@@ -44,6 +44,7 @@ type TighteningController struct {
 	closing           chan chan struct{}
 	cfg               controller.ControllerConfig
 	protocol          string
+	device.BaseDevice
 }
 
 func (c *TighteningController) Inputs() string {

@@ -68,6 +68,10 @@ func (s *IOModule) Start(srv *Service) error {
 	return s.client.Start()
 }
 
+func (s *IOModule) Model() interface{} {
+	return nil
+}
+
 func (s *IOModule) Stop() error {
 	if s.opened {
 		s.closing <- struct{}{}
