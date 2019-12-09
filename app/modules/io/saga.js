@@ -1,7 +1,7 @@
 // @flow
 import type { Saga } from 'redux-saga';
 import { takeEvery, select, call, all, put, delay } from 'redux-saga/effects';
-import { IO, ioInputs } from './constants';
+import { IO, ioInputs, ioOutputGroups } from './constants';
 import { newDevice } from '../deviceManager/devices';
 import { CommonLog } from '../../common/utils';
 import { ioDirection, ioTriggerMode } from '../device/io/constants';
@@ -43,16 +43,8 @@ function* initIO() {
       []
     );
     // TODO set init io status
-    // const { ioPorts } = yield select(s => s.io);
-    // const {
-    //   [ioDirection.input]: inputs,
-    //   [ioDirection.output]: outputs
-    // } = ioPorts || {};
-    // const effects = [];
-    // Object.keys(inputs).forEach((k) => {
-    //   effects.push(put(ioActions.addListener(k, ioFunctions[k])));
-    // });
-    // yield all(effects);
+
+    yield put(ioActions.set(ioOutputGroups.ready, true));
   } catch (e) {
     console.error(e);
   }
@@ -165,7 +157,6 @@ function* bindIOListeners(action) {
         port === input.port && ioTriggerMode.falling === input.triggerMode,
       act
     );
-    console.log(listeners);
   } catch (e) {
     CommonLog.lError(e);
   }
@@ -179,6 +170,8 @@ function* setIOOutput(action) {
     const { group, status } = action;
     const { ioPorts } = yield select(s => s.io);
     console.log(group, status);
+
+
     const ports = group.map(
       o =>
         defaultIOModule &&
@@ -187,7 +180,17 @@ function* setIOOutput(action) {
           ioPorts[ioDirection.output][o]
         )
     );
+
     console.log(ports);
+    if (status) {
+      const otherPorts = defaultIOModule.ports
+        .filter(p => p.direction === ioDirection.output)
+        .filter(p => (ports || []).every(sp => sp.idx !== p.idx));
+      yield all(otherPorts.map(p => call(
+        (defaultIOModule && defaultIOModule.setIO) || (() => {
+        }), p, false)
+      ));
+    }
     yield all(ports.map(p => call(
       (defaultIOModule && defaultIOModule.setIO) || (() => {
       }), p, status)

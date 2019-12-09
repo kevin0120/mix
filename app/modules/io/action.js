@@ -5,7 +5,7 @@ export default {
     type: IO.SET_MODULE,
     io
   }),
-  set: (group, status) => ({
+  set: (group, status = true) => ({
     type: IO.SET,
     group,
     status

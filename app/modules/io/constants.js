@@ -3,7 +3,8 @@ export const ioOutputs = Object.freeze({
   red: 'red',
   green: 'green',
   white: 'white',
-  yellow: 'yellow'
+  yellow: 'yellow',
+  beep: 'beep'
 });
 
 // resetKey | byPass| modeSelect
