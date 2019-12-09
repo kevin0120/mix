@@ -22,6 +22,10 @@ export default class ClsIOModule extends Device implements IIOModule {
 
   _ports: Array<tIOPort> = [];
 
+  get ports() {
+    return this._ports;
+  }
+
   _maxInputs: number = 0;
 
   _maxOutputs: number = 0;
@@ -34,7 +38,7 @@ export default class ClsIOModule extends Device implements IIOModule {
     ...rest: Array<any>
   ) {
     super(name, serialNumber);
-    if(!config){
+    if (!config) {
       throw new Error(`io缺少配置(${name}, ${serialNumber})`);
     }
     const { input_num, output_num } = config;
@@ -144,7 +148,7 @@ export default class ClsIOModule extends Device implements IIOModule {
     return changes;
   }
 
-  *doDispatch(data: tIOContact): Saga<void> {
+  * doDispatch(data: tIOContact): Saga<void> {
     try {
       const ret = this.doValidate(data.contact);
       if (!ret) {
@@ -175,7 +179,7 @@ export default class ClsIOModule extends Device implements IIOModule {
     }
   }
 
-  *setIO(port: tIOPort, value: boolean): Saga<void> {
+  * setIO(port: tIOPort, value: boolean): Saga<void> {
     try {
       const status = value ? 1 : 0;
       // eslint-disable-next-line flowtype/no-weak-types
@@ -185,7 +189,7 @@ export default class ClsIOModule extends Device implements IIOModule {
     }
   }
 
-  *openIO(port: tIOPort | Array<tIOPort>): Saga<void> {
+  * openIO(port: tIOPort | Array<tIOPort>): Saga<void> {
     try {
       // eslint-disable-next-line flowtype/no-weak-types
       const openPort = p =>
@@ -200,7 +204,7 @@ export default class ClsIOModule extends Device implements IIOModule {
     }
   }
 
-  *closeIO(port: tIOPort | Array<tIOPort>): Saga<void> {
+  * closeIO(port: tIOPort | Array<tIOPort>): Saga<void> {
     try {
       // eslint-disable-next-line flowtype/no-weak-types
       const closePort = p =>
@@ -215,7 +219,7 @@ export default class ClsIOModule extends Device implements IIOModule {
     }
   }
 
-  *getStatus(): Saga<void> {
+  * getStatus(): Saga<void> {
     try {
       // eslint-disable-next-line flowtype/no-weak-types
       yield call((ioStatusApi: Function), this.serialNumber);
@@ -224,7 +228,7 @@ export default class ClsIOModule extends Device implements IIOModule {
     }
   }
 
-  *ioContact(): Saga<void> {
+  * ioContact(): Saga<void> {
     try {
       // eslint-disable-next-line flowtype/no-weak-types
       yield call((ioContactApi: Function), this.serialNumber);

@@ -18,6 +18,8 @@ import type { tOrder, tOrderStatus } from './interface/typeDef';
 import type { IWorkable } from '../workable/IWorkable';
 import type { IWorkStep } from '../step/interface/IWorkStep';
 import { workModes } from '../workCenterMode/constants';
+import ioActions from '../io/action';
+import { ioOutputGroups } from '../io/constants';
 
 const stepStatus = status => {
   switch (status) {
@@ -187,6 +189,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
     _statusTasks = {
       * [ORDER_STATUS.TODO](ORDER, orderActions, config) {
         try {
+          yield put(ioActions.set(ioOutputGroups.doing, true));
           const { workCenterMode } = yield select();
           if (workCenterMode === workModes.reworkWorkCenterMode) {
             yield put(orderActions.stepStatus(this, ORDER_STATUS.WIP, config));
@@ -339,6 +342,8 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
               color: 'info'
             };
           }
+          yield put(ioActions.set(ioOutputGroups.ready, true));
+
           if (isNormalMode) {
             yield put(
               dialogActions.dialogShow({
@@ -368,7 +373,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       },
       * [ORDER_STATUS.FAIL](ORDER, orderActions) {
         try {
-
+          yield put(ioActions.set(ioOutputGroups.error, true));
           yield put(orderActions.finishOrder(this));
         } catch (e) {
           CommonLog.lError(e, {
@@ -378,6 +383,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       },
       * [ORDER_STATUS.PENDING](ORDER, orderActions) {
         try {
+          yield put(ioActions.set(ioOutputGroups.warning, true));
           yield put(orderActions.finishOrder(this));
         } catch (e) {
           CommonLog.lError(e, {
@@ -387,6 +393,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
       },
       * [ORDER_STATUS.CANCEL](ORDER, orderActions) {
         try {
+          yield put(ioActions.set(ioOutputGroups.warning, true));
           yield put(orderActions.finishOrder(this));
         } catch (e) {
           CommonLog.lError(e, {

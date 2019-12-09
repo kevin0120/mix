@@ -18,6 +18,7 @@ import modelViewer from './modelViewer/saga';
 import notifier from './Notifier/saga';
 import workCenterMode from './workCenterMode/saga'
 import systemInfo from './systemInfo/saga';
+import io from './io/saga';
 import reworkPatternRoot from './reworkPattern/saga';
 
 export default function* rootSaga(): Saga<void> {
@@ -43,7 +44,8 @@ export default function* rootSaga(): Saga<void> {
       healthz,
       modelViewer,
       notifier,
-      systemInfo
+      systemInfo,
+      io
     ].filter(e => !!e).map(e => call(e || (() => {
     }))));
   } catch (e) {
