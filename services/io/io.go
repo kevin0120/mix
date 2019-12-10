@@ -8,8 +8,6 @@ import (
 	"time"
 )
 
-
-
 type IONotify interface {
 	OnStatus(sn string, status string)
 	OnIOStatus(sn string, t string, status string)

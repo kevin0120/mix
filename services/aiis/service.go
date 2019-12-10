@@ -442,7 +442,7 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	aiisResult.TighteningId, _ = strconv.ParseInt(result.TighteningID, 10, 64)
 	aiisResult.Lacking = "normal"
 
-	//gun, err := s.StorageService.GetGun(result.ToolSN)
+	//gun, err := s.StorageService.GetTool(result.ToolSN)
 	//if err != nil {
 	//	gid, err := s.SyncGun(result.ToolSN)
 	//	if err == nil {

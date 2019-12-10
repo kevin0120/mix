@@ -16,10 +16,9 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"github.com/masami10/rush/services/dispatcherBus"
+	"github.com/masami10/rush/services/DispatcherBus"
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/audi_vw"
-	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/openprotocol"
@@ -52,8 +51,6 @@ type Config struct {
 	AudiVW audi_vw.Config `yaml:"audi/vw"`
 
 	OpenProtocol openprotocol.Config `yaml:"openprotocol"`
-
-	Contollers controller.Config `yaml:"controller_service"`
 
 	Scanner scanner.Config `yaml:"scanner"`
 
@@ -96,8 +93,6 @@ func NewConfig() *Config {
 	c.Device = device.NewConfig()
 	c.Broker = broker.NewConfig()
 	c.DispatcherBus = dispatcherBus.NewConfig()
-
-	c.Contollers = controller.NewConfig()
 
 	return c
 }
@@ -152,10 +147,6 @@ func (c *Config) Validate() error {
 
 	if err := c.Storage.Validate(); err != nil {
 		return errors.Wrap(err, "storage")
-	}
-
-	if err := c.Contollers.Validate(); err != nil {
-		return errors.Wrap(err, "controller")
 	}
 
 	if err := c.Scanner.Validate(); err != nil {

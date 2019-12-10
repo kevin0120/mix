@@ -1,7 +1,5 @@
 package device
 
-
-
 type DeviceStatus struct {
 	SN       string      `json:"sn"`
 	Type     string      `json:"type"`

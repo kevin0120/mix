@@ -69,13 +69,13 @@ type Notify interface {
 
 type Scanner struct {
 	device.BaseDevice // 基类
-	devInfo         *DeviceInfo
-	usbDevice       USBDevice // maybe gousb, or serial
-	diag            Diagnostic
-	status          atomic.Value
-	debounced       func(f func())
-	debounceTrigger bool
-	init            bool
+	devInfo           *DeviceInfo
+	usbDevice         USBDevice // maybe gousb, or serial
+	diag              Diagnostic
+	status            atomic.Value
+	debounced         func(f func())
+	debounceTrigger   bool
+	init              bool
 }
 
 func NewScanner(channel string, d Diagnostic, dev USBDevice, service *Service) *Scanner {
@@ -86,11 +86,11 @@ func NewScanner(channel string, d Diagnostic, dev USBDevice, service *Service) *
 	return s
 }
 
-func (s *Scanner)DoOnDeviceStatus(symbol string, status string) error {
+func (s *Scanner) DoOnDeviceStatus(symbol string, status string) error {
 	return s.BaseDevice.DoOnDeviceStatus(s.Channel(), status)
 }
 
-func (s *Scanner) Start() error{
+func (s *Scanner) Start() error {
 	if err := s.BaseDevice.Start(); err != nil {
 		return err
 	}

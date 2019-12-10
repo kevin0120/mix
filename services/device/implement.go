@@ -45,7 +45,7 @@ func (s *BaseDevice) DeviceType() string {
 	return s.deviceType
 }
 
-func (s *BaseDevice)GetParentService() IParentService  {
+func (s *BaseDevice) GetParentService() IParentService {
 	return s.service
 }
 
@@ -54,7 +54,7 @@ func (s *BaseDevice) WillStart() error {
 	return nil
 }
 
-func (s *BaseDevice) Start() error{
+func (s *BaseDevice) Start() error {
 	return s.WillStart()
 }
 
@@ -86,7 +86,7 @@ func (s *BaseDevice) OnDeviceStatus(status string) {
 	}
 }
 
-func (s *BaseDevice)DoOnDeviceRecv(symbol, msg string) error {
+func (s *BaseDevice) DoOnDeviceRecv(symbol, msg string) error {
 	if s.service == nil {
 		return errors.New("Please Inject Device Parent Service First")
 	}
@@ -94,11 +94,11 @@ func (s *BaseDevice)DoOnDeviceRecv(symbol, msg string) error {
 	return nil
 }
 
-func (s *BaseDevice)OnDeviceRecv(msg string) error {
+func (s *BaseDevice) OnDeviceRecv(msg string) error {
 	return s.DoOnDeviceRecv(s.serialNumber, msg)
 }
 
-func (s *BaseDevice) SerialNumber() string{
+func (s *BaseDevice) SerialNumber() string {
 	return s.serialNumber
 }
 

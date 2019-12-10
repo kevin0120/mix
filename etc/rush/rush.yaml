@@ -171,7 +171,6 @@ tightening_device:
 #      sn: 0001
 
 
-# 协议类型: Audi/VW, OpenProtocol
 broker:
   enable: false
   connect-urls:
@@ -182,22 +181,3 @@ broker:
     name: Dummy Server
     token: Dummy Token
   provider: nats
-controller_service:
-  enable: false
-  workers: 1
-  controllers:
-#    - serial_no: 0001
-#      protocol: OpenProtocol
-#      remote_ip: 192.168.1.101
-#      port: 4546
-#      channel: 51
-#
-#    - serial_no: 27231800455
-#      protocol: Audi/VW
-#      remote_ip: 192.168.5.212
-#      port: 4700
-#      tools:
-#      - gun_serial: 15C92257 5.7.1
-#        channel: 1
-#      - gun_serial: 18G53917 5.8.2
-#        channel: 2

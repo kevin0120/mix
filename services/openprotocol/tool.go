@@ -19,7 +19,7 @@ func CreateTool(c *TighteningController, cfg tightening_device.ToolConfig, d Dia
 		diag:       d,
 		cfg:        cfg,
 		controller: c,
-		BaseDevice: device.CreateBaseDevice(device.BaseDeviceTighteningTool,d, c.GetParentService()),
+		BaseDevice: device.CreateBaseDevice(device.BaseDeviceTighteningTool, d, c.GetParentService()),
 	}
 
 	tool.UpdateStatus(device.BaseDeviceStatusOffline)
@@ -303,7 +303,7 @@ func (s *TighteningTool) OnResult(result interface{}) {
 	}
 
 	tighteningResult := result.(*tightening_device.TighteningResult)
-	dbTool, err := s.controller.ProtocolService.DB.GetGun(s.cfg.SN)
+	dbTool, err := s.controller.ProtocolService.DB.GetTool(s.cfg.SN)
 	if err == nil {
 		if s.Mode.Load().(string) == tightening_device.MODE_JOB {
 			tighteningResult.Seq, tighteningResult.Count = s.controller.calBatch(dbTool.WorkorderID)

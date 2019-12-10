@@ -62,7 +62,7 @@ func (s *Dispatcher) Register(dispatcher DispatchHandler) {
 	s.dispatchers = append(s.dispatchers, dispatcher)
 }
 
-func (s *Dispatcher) Dispatch(data interface{}) error{
+func (s *Dispatcher) Dispatch(data interface{}) error {
 	if !s.getOpen() {
 		msg := "Dispatcher Is Not Opened!!!"
 		log.Fatalf(msg)

@@ -3,7 +3,7 @@ package device
 import (
 	"encoding/json"
 	"github.com/kataras/iris/websocket"
-	"github.com/masami10/rush/services/dispatcherBus"
+	"github.com/masami10/rush/services/DispatcherBus"
 	"github.com/masami10/rush/services/wsnotify"
 	"reflect"
 	"sync"

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kataras/iris/websocket"
+	"github.com/masami10/rush/services/DispatcherBus"
 	"github.com/masami10/rush/services/device"
-	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
 	"sync/atomic"
@@ -258,8 +258,8 @@ func (s *Service) OnStatus(sn string, status string) {
 	s.WS.WSSendIO(string(io))
 }
 
-func (s *Service)OnRecv(string, string){
-	s.diag.Error("OnRecv",errors.New("IO Service Not Support OnRecv"))
+func (s *Service) OnRecv(string, string) {
+	s.diag.Error("OnRecv", errors.New("IO Service Not Support OnRecv"))
 }
 
 func (s *Service) OnIOStatus(sn string, t string, status string) {

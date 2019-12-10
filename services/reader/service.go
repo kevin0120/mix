@@ -33,7 +33,7 @@ type Service struct {
 func NewService(c Config, d Diagnostic) *Service {
 
 	s := &Service{
-		diag:         d,
+		diag: d,
 	}
 	s.SetSerialNumber(uuid.NewV4().String())
 	s.configValue.Store(c)

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/openprotocol"
 	"github.com/masami10/rush/services/storage"
@@ -43,7 +42,7 @@ type TighteningController struct {
 	recvFlag          bool
 	keepaliveDeadLine atomic.Value
 	closing           chan chan struct{}
-	cfg               controller.ControllerConfig
+	cfg               tightening_device.TighteningDeviceConfig
 	protocol          string
 }
 
@@ -103,7 +102,7 @@ func (c *TighteningController) updateStatus(status string) {
 
 		c.StatusValue.Store(status)
 
-		if status == controller.STATUS_OFFLINE {
+		if status == device.BaseDeviceStatusOffline {
 			c.Close()
 
 			// 断线重连
@@ -135,10 +134,10 @@ func NewController(c Config) TighteningController {
 		keepPeriod:     time.Duration(c.KeepAlivePeriod),
 		toolInfoPeriod: time.Duration(c.GetToolInfoPeriod),
 		writeTimeout:   time.Duration(c.ReqTimeout),
-		protocol:       controller.AUDIPROTOCOL,
+		protocol:       tightening_device.TIGHTENING_AUDIVW,
 	}
 
-	cont.StatusValue.Store(controller.STATUS_OFFLINE)
+	cont.StatusValue.Store(device.BaseDeviceStatusOffline)
 
 	return cont
 }
@@ -155,7 +154,7 @@ func (c *TighteningController) Start() error {
 
 	c.Srv.DB.ResetTightning(c.cfg.SN)
 
-	c.w = socket_writer.NewSocketWriter(fmt.Sprintf("tcp://%s:%d", c.cfg.RemoteIP, c.cfg.Port), c)
+	//c.w = socket_writer.NewSocketWriter(fmt.Sprintf("tcp://%s:%d", c.cfg.RemoteIP, c.cfg.Port), c)
 
 	// 启动心跳检测
 	//go c.keep_alive_check()
@@ -172,11 +171,11 @@ func (c *TighteningController) manage() {
 	for {
 		select {
 		case <-time.After(c.keepPeriod):
-			if c.Status() == controller.STATUS_OFFLINE {
+			if c.Status() == device.BaseDeviceStatusOffline {
 				continue
 			}
 			if c.KeepAliveCount() >= MAX_KEEP_ALIVE_CHECK {
-				go c.updateStatus(controller.STATUS_OFFLINE)
+				go c.updateStatus(device.BaseDeviceStatusOffline)
 				c.updateKeepAliveCount(0)
 				continue
 			}
@@ -187,7 +186,7 @@ func (c *TighteningController) manage() {
 				c.addKeepAliveCount()
 			}
 		case <-time.After(c.toolInfoPeriod):
-			if c.Status() == controller.STATUS_OFFLINE {
+			if c.Status() == device.BaseDeviceStatusOffline {
 				continue
 			}
 			c.getToolInfo()
@@ -218,7 +217,7 @@ func (c *TighteningController) getToolInfo() {
 }
 
 func (c *TighteningController) sendKeepalive() {
-	if c.Status() == controller.STATUS_OFFLINE {
+	if c.Status() == device.BaseDeviceStatusOffline {
 		return
 	}
 
@@ -279,7 +278,7 @@ func (c *TighteningController) Write(buf []byte, seq uint32) {
 //}
 
 func (c *TighteningController) Connect() error {
-	c.StatusValue.Store(controller.STATUS_OFFLINE)
+	c.StatusValue.Store(device.BaseDeviceStatusOffline)
 	c.setSequence(MINSEQUENCE)
 
 	c.Response = ResponseQueue{
@@ -302,7 +301,7 @@ func (c *TighteningController) Connect() error {
 		time.Sleep(time.Duration(c.Srv.config().KeepAlivePeriod * 3))
 	}
 
-	c.updateStatus(controller.STATUS_ONLINE)
+	c.updateStatus(device.BaseDeviceStatusOnline)
 
 	// 启动发送
 	go c.manage()
@@ -364,7 +363,7 @@ func (c *TighteningController) Read(conn net.Conn) {
 // 拧紧抢使能
 func (c *TighteningController) ToolControl(enable bool, channel int) error {
 	tool_channel := ""
-	if channel != controller.DEFAULT_TOOL_CHANNEL {
+	if channel != 1 {
 		tool_channel = fmt.Sprintf("<KNR>%d</KNR>", channel)
 	}
 
@@ -416,7 +415,7 @@ func (c *TighteningController) PSet(pset int, workorder_id int64, reseult_id int
 	//sdate, stime := utils.GetDateTime()
 
 	tool_channel := ""
-	if channel != controller.DEFAULT_TOOL_CHANNEL {
+	if channel != 1 {
 		tool_channel = fmt.Sprintf("<KNR>%d</KNR>", channel)
 	}
 
@@ -461,22 +460,22 @@ func (c *TighteningController) PSet(pset int, workorder_id int64, reseult_id int
 func (c *TighteningController) audiVW2OPToolInfo(ti toolInfoCNT) openprotocol.ToolInfo {
 	var info openprotocol.ToolInfo
 
-	var t controller.ToolConfig
+	//var t tightening_device.ToolConfig
 
 	var toolExist = false
 
-	for _, t = range c.cfg.Tools {
-		if t.ToolChannel == int(ti.MSL_MSG.KNR) {
-			toolExist = true
-			break
-		}
-	}
+	//for _, t = range c.cfg.Tools {
+	//	//if t.ToolChannel == int(ti.MSL_MSG.KNR) {
+	//	//	toolExist = true
+	//	//	break
+	//	//}
+	//}
 
 	if !toolExist {
-		c.Srv.diag.Error("audiVW2OPToolInfo", errors.New(fmt.Sprintf(" tool serial number:%s", t.SerialNO)))
+		//c.Srv.diag.Error("audiVW2OPToolInfo", errors.New(fmt.Sprintf(" tool serial number:%s", t.SerialNO)))
 	}
 
-	info.ToolSN = t.SerialNO
+	//info.ToolSN = t.SerialNO
 	info.CountSinLastService = int(ti.MSL_MSG.CSR)
 	info.TotalTighteningCount = int(ti.MSL_MSG.CLT)
 

@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/binary"
 	"fmt"
-	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
@@ -74,7 +73,6 @@ type TighteningController struct {
 	device.BaseDevice
 }
 
-
 func defaultControllerGet() *TighteningController {
 	return &TighteningController{
 		buffer:            make(chan []byte, 1024),
@@ -82,7 +80,7 @@ func defaultControllerGet() *TighteningController {
 		keepPeriod:        time.Duration(OpenProtocolDefaultKeepAlivePeriod),
 		reqTimeout:        time.Duration(OpenProtocolDefaultKeepAlivePeriod),
 		getToolInfoPeriod: time.Duration(OpenProtocolDefaultGetTollInfoPeriod),
-		protocol:          controller.OPENPROTOCOL,
+		protocol:          tightening_device.TIGHTENING_OPENPROTOCOL,
 		tempResultCurve:   map[int]*tightening_device.TighteningCurve{},
 		toolDispatches:    map[string]*ToolDispatch{},
 		sockClients:       map[string]*socket_writer.SocketWriter{},
@@ -229,7 +227,7 @@ func (c *TighteningController) ProcessRequest(mid string, noack string, station 
 	reply := c.Response.Get(seq, ctx)
 
 	if reply == nil {
-		return nil, errors.New(controller.ERR_CONTROLER_TIMEOUT)
+		return nil, errors.New(tightening_device.TIGHTENING_ERR_TIMEOUT)
 	}
 
 	return reply, nil
