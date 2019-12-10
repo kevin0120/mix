@@ -5,6 +5,7 @@ import (
 	"github.com/kataras/iris/websocket"
 	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/wsnotify"
+	"github.com/masami10/rush/utils"
 	"reflect"
 	"sync"
 	"sync/atomic"
@@ -49,7 +50,7 @@ func (s *Service) Open() error {
 	s.WS.AddNotify(s)
 
 	s.dispatcherMap = dispatcherBus.DispatcherMap{
-		dispatcherBus.DISPATCHER_WS_DEVICE_STATUS: s.OnWSDeviceStatus,
+		dispatcherBus.DISPATCHER_WS_DEVICE_STATUS: utils.CreateDispatchHandlerStruct(s.OnWSDeviceStatus),
 	}
 	s.DispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
 
@@ -57,8 +58,8 @@ func (s *Service) Open() error {
 }
 
 func (s *Service) Close() error {
-	for name, _ := range s.dispatcherMap {
-		s.DispatcherBus.Release(name)
+	for name, hs := range s.dispatcherMap {
+		s.DispatcherBus.Release(name, hs.ID)
 	}
 
 	return nil

@@ -2,15 +2,32 @@ package utils
 
 import (
 	"github.com/pkg/errors"
+	uuid "github.com/satori/go.uuid"
 	"log"
 	"sync"
 )
 
 const (
-	DEFAULT_BUF_LEN = 1024
+	DefaultDispatcherBufLen = 1024
 )
 
-type DispatchHandler func(data interface{})
+type dispatchHandler func(data interface{})
+
+type DispatchHandlerStruct struct {
+	ID      string
+	Handler dispatchHandler
+}
+
+func CreateDispatchHandlerStruct(h dispatchHandler) *DispatchHandlerStruct {
+	if h == nil {
+		log.Fatal("CreateDispatchHandlerStruct With Empty Handler")
+		return nil
+	}
+	return &DispatchHandlerStruct{
+		ID:      uuid.NewV4().String(),
+		Handler: h,
+	}
+}
 
 // bufLen: 缓冲长度
 func CreateDispatcher(bufLen int) *Dispatcher {
@@ -18,7 +35,7 @@ func CreateDispatcher(bufLen int) *Dispatcher {
 		open:        false,
 		buf:         make(chan interface{}, bufLen),
 		closing:     make(chan struct{}, 1),
-		dispatchers: []DispatchHandler{},
+		dispatchers: map[string]dispatchHandler{},
 	}
 }
 
@@ -28,7 +45,15 @@ type Dispatcher struct {
 	buf     chan interface{}
 	closing chan struct{}
 
-	dispatchers []DispatchHandler
+	dispatchers map[string]dispatchHandler
+}
+
+func (s *Dispatcher) removeHandler(handler string) {
+	if _, ok := s.dispatchers[handler]; ok {
+		s.mtx.Lock()
+		defer s.mtx.Unlock()
+		delete(s.dispatchers, handler)
+	}
 }
 
 func (s *Dispatcher) getOpen() bool {
@@ -52,17 +77,25 @@ func (s *Dispatcher) Start() {
 	return
 }
 
-func (s *Dispatcher) Release() {
-	if s.getOpen() {
+func (s *Dispatcher) Release(handler string) {
+	if !s.getOpen() {
+		return
+	}
+	s.removeHandler(handler)
+	if len(s.dispatchers) == 0 {
 		s.closing <- struct{}{}
 	}
 }
 
-func (s *Dispatcher) Register(dispatcher DispatchHandler) {
-	s.dispatchers = append(s.dispatchers, dispatcher)
+func (s *Dispatcher) Register(key string, dispatcher dispatchHandler) string {
+	if key == "" {
+		key = uuid.NewV4().String()
+	}
+	s.dispatchers[key] = dispatcher
+	return key
 }
 
-func (s *Dispatcher) Dispatch(data interface{}) error{
+func (s *Dispatcher) Dispatch(data interface{}) error {
 	if !s.getOpen() {
 		msg := "Dispatcher Is Not Opened!!!"
 		log.Fatalf(msg)

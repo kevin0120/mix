@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"github.com/masami10/rush/command"
 	"github.com/masami10/rush/keyvalue"
-	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/broker"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/diagnostic"
+	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/hmi"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/io"
@@ -102,6 +102,7 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 		err:            make(chan error),
 		Commander:      c.Commander,
 	}
+	s.appendDispatcherBus()
 
 	s.appendStorageService()
 
@@ -118,8 +119,6 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	if err := s.initOpenProtocolService(); err != nil {
 		return nil, errors.Wrap(err, "init OpenProtocol service")
 	}
-
-	s.appendDispatcherBus()
 
 	s.appendMinioService()
 
@@ -292,7 +291,8 @@ func (s *Server) appendDeviceService() error {
 func (s *Server) appendTighteningDeviceService() error {
 	c := s.config.TighteningDevice
 	d := s.DiagService.NewTighteningDeviceHandler()
-	srv, err := tightening_device.NewService(c, d, []tightening_device.ITighteningProtocol{s.OpenprotocolService, s.AudiVWService})
+	srv, err := tightening_device.NewService(c, d,
+		[]tightening_device.ITighteningProtocol{s.OpenprotocolService, s.AudiVWService}, s.DispatcherBusService)
 
 	if err != nil {
 		return errors.Wrap(err, "append tightening_device service fail")
@@ -311,10 +311,10 @@ func (s *Server) appendTighteningDeviceService() error {
 func (s *Server) appendAiisService() error {
 	c := s.config.Aiis
 	d := s.DiagService.NewAiisHandler()
-	srv := aiis.NewService(c, d, s.config.HTTP.BindAddress)
+	srv := aiis.NewService(c, d, s.config.HTTP.BindAddress, s.DispatcherBusService)
 
 	srv.TighteningService = s.TighteningDeviceService
-	srv.SN = s.config.SN
+	srv.SerialNumber = s.config.SN
 	srv.DB = s.StorageServie
 	srv.WS = s.WSNotifyService
 	srv.Broker = s.BrokerService
@@ -328,12 +328,11 @@ func (s *Server) appendAiisService() error {
 func (s *Server) appendOdooService() error {
 	c := s.config.Odoo
 	d := s.DiagService.NewOdooHandler()
-	srv := odoo.NewService(c, d)
+	srv := odoo.NewService(c, d, s.DispatcherBusService)
 
 	s.OdooService = srv
 	srv.DB = s.StorageServie
 	srv.HTTPDService = s.HTTPDService
-	srv.Aiis = s.AiisService
 	srv.WS = s.WSNotifyService
 
 	s.AppendService("odoo", srv)
@@ -356,7 +355,7 @@ func (s *Server) appendWebsocketService() error {
 
 func (s *Server) appendHMIService() error {
 	d := s.DiagService.NewHMIHandler()
-	srv := hmi.NewService(d)
+	srv := hmi.NewService(d, s.DispatcherBusService)
 
 	srv.ODOO = s.OdooService
 	srv.Httpd = s.HTTPDService //http 服务注入
@@ -418,10 +417,9 @@ func (s *Server) AppendIOService() error {
 	c := s.config.IO
 	d := s.DiagService.NewIOHandler()
 
-	srv := io.NewService(c, d)
+	srv := io.NewService(c, d, s.DispatcherBusService)
 	srv.WS = s.WSNotifyService
 	srv.DeviceService = s.DeviceService
-	srv.DispatcherBus = s.DispatcherBusService
 
 	s.IOService = srv
 	s.AppendService("io", srv)

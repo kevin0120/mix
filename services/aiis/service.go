@@ -1,6 +1,7 @@
 package aiis
 
 import (
+	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/wsnotify"
 	"sync/atomic"
 	"time"
@@ -18,52 +19,26 @@ import (
 	"sync"
 )
 
-type Diagnostic interface {
-	Error(msg string, err error)
-	Debug(msg string)
-	Info(msg string)
-	PutResultDone()
-}
-
-type Endpoint struct {
-	url     string
-	headers map[string]string
-	method  string
-}
-
-func NewEndpoint(url string, headers map[string]string, method string) *Endpoint {
-	return &Endpoint{
-		url:     url,
-		headers: headers,
-		method:  method,
-	}
-}
 
 type OnOdooStatus func(status string)
 
 type SyncGun func(string) (int64, error)
 
 type Service struct {
-	configValue atomic.Value
-	diag        Diagnostic
-	endpoints   []*Endpoint
-	httpClient  *resty.Client
-	rush_port   string
-	DB          *storage.Service
-	ws          utils.RecConn
-	//ws			websocket.Client
-	//LocalWSServer *wsnotify.Service
-	//Odoo 		*odoo.Service
-	//OnOdooStatus OnOdooStatus
-	WS          *wsnotify.Service
-	updateQueue map[int64]time.Time
-	mtx         sync.Mutex
-
-	OdooStatusDispatcher *utils.Dispatcher
-	AiisStatusDispatcher *utils.Dispatcher
-	SyncGun              SyncGun
-	SN                   string
-	rpc                  GRPCClient
+	configValue   atomic.Value
+	diag          Diagnostic
+	endpoints     []*Endpoint
+	httpClient    *resty.Client
+	rush_port     string
+	DB            *storage.Service
+	ws            utils.RecConn
+	DispatcherBus Dispatcher
+	WS            *wsnotify.Service
+	updateQueue   map[int64]time.Time
+	mtx           sync.Mutex
+	dispatcherMap dispatcherBus.DispatcherMap
+	SerialNumber  string
+	rpc           *GRPCClient
 
 	TighteningService *tightening_device.Service
 	Broker            *broker.Service
@@ -72,29 +47,35 @@ type Service struct {
 	closing           chan struct{}
 }
 
-func NewService(c Config, d Diagnostic, rush_port string) *Service {
+func NewService(c Config, d Diagnostic, port string, dp Dispatcher) *Service {
 	e, _ := c.index()
 	s := &Service{
 		diag:      d,
 		endpoints: e,
-		rush_port: rush_port,
-		rpc: GRPCClient{
-			RPCRecvDispatcher:   utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-			RPCStatusDispatcher: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		},
-		OdooStatusDispatcher: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		AiisStatusDispatcher: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		updateQueue:          map[int64]time.Time{},
-		mtx:                  sync.Mutex{},
-		opened:               false,
-		toolCollector:        make(chan string, 16),
-		closing:              make(chan struct{}, 1),
+		rush_port: port,
+		rpc: NewGRPCClient(d, dp),
+		DispatcherBus: dp,
+		updateQueue:   map[int64]time.Time{},
+		opened:        false,
+		toolCollector: make(chan string, 16),
+		closing:       make(chan struct{}, 1),
 	}
-	s.rpc.RPCRecvDispatcher.Register(s.OnRPCRecv)
-	s.rpc.RPCStatusDispatcher.Register(s.OnRPCStatus)
 	s.rpc.srv = s
 	s.configValue.Store(c)
+	s.initGlbDispatcher()
 	return s
+}
+
+func (s *Service) initGlbDispatcher() {
+	s.dispatcherMap = dispatcherBus.DispatcherMap{
+		//dispatcherBus.DISPATCH_ODOO_STATUS:   utils.CreateDispatchHandlerStruct(nil),
+		//dispatcherBus.DISPATCH_AIIS_STATUS:   utils.CreateDispatchHandlerStruct(nil),
+		dispatcherBus.DISPATCH_NEW_TOOL:      utils.CreateDispatchHandlerStruct(s.onNewTool),
+		dispatcherBus.DISPATCH_BROKER_STATUS: utils.CreateDispatchHandlerStruct(s.onBrokerStatus),
+		dispatcherBus.DISPATCH_RESULT:        utils.CreateDispatchHandlerStruct(s.OnTighteningResult),
+	}
+	s.rpc.AppendRPCGlbDispatch(dispatcherBus.DISPATCH_RPC_STATUS, utils.CreateDispatchHandlerStruct(s.OnRPCStatus))
+	s.rpc.AppendRPCGlbDispatch(dispatcherBus.DISPATCH_RPC_RECV, utils.CreateDispatchHandlerStruct(s.OnRPCRecv))
 }
 
 func (s *Service) AddToQueue(id int64) error {
@@ -117,7 +98,7 @@ func (s *Service) RemoveFromQueue(id int64) error {
 
 	_, e := s.updateQueue[id]
 	if !e {
-		return errors.New("not found")
+		return errors.Errorf("RemoveFromQueue Queue ID: %d Not Found", id)
 	}
 
 	delete(s.updateQueue, id)
@@ -129,7 +110,7 @@ func (s *Service) timeoutCheck() {
 	defer s.mtx.Unlock()
 	s.mtx.Lock()
 
-	wait4Delete := []int64{}
+	var wait4Delete []int64
 	for k, v := range s.updateQueue {
 		if time.Since(v) > time.Duration(s.Config().Timeout) {
 			wait4Delete = append(wait4Delete, k)
@@ -153,16 +134,6 @@ func (s *Service) Config() Config {
 	return s.configValue.Load().(Config)
 }
 
-type TighteningResultHandler = func(data *tightening_device.TighteningResult)
-
-func (s *Service) RegisterTighteningResultHandler(name string, handler TighteningResultHandler) {
-	fn := func(data interface{}) {
-		d := data.(*tightening_device.TighteningResult)
-		handler(d)
-	}
-	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_RESULT).Register(fn)
-}
-
 func (s *Service) ensureHttpClient() *resty.Client {
 	if s.httpClient != nil {
 		return s.httpClient
@@ -183,31 +154,8 @@ func (s *Service) ensureHttpClient() *resty.Client {
 }
 
 func (s *Service) Open() error {
-	s.RegisterTighteningResultHandler(tightening_device.DISPATCH_RESULT, s.OnTighteningResult)
-	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_NEW_TOOL).Register(s.onNewTool)
-	s.Broker.BrokerStatusDisptcher.Register(s.onBrokerStatus)
-
 	s.ensureHttpClient()
-
-	//entry := strings.Split(s.Config().Urls[0], "://")[1]
-	//url := url.URL{Scheme: "ws", Host: entry, Path: s.Config().WSResultRoute}
-	//s.ws = utils.RecConn{}
-	//s.ws.OnConnected = func() {
-	//	ws_msg := WSMsg{
-	//		Type: WS_REG,
-	//		Data: WSRegist{
-	//			Rush_SN: s.SN,
-	//		},
-	//	}
-	//
-	//	str, _ := json.Marshal(ws_msg)
-	//	s.ws.WriteMessage(websocket.TextMessage, str)
-	//}
-	//
-	//s.ws.Dial(url.String(), nil)
-
-	s.OdooStatusDispatcher.Start()
-	s.AiisStatusDispatcher.Start()
+	s.DispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
 	go s.taskUpdateTimeoutCheck()
 	go s.ResultUploadManager()
 
@@ -220,8 +168,9 @@ func (s *Service) Close() error {
 	if !s.opened {
 		return nil
 	}
-	s.OdooStatusDispatcher.Release()
-	s.AiisStatusDispatcher.Release()
+	for name, v := range s.dispatcherMap {
+		s.DispatcherBus.Release(name, v.ID)
+	}
 	s.closing <- struct{}{}
 	return s.rpc.Stop()
 }
@@ -234,10 +183,9 @@ func (s *Service) OnRPCStatus(data interface{}) {
 	status := data.(string)
 	// 如果RPC连接断开， 认为ODOO连接也断开
 	if status == RPC_OFFLINE {
-		s.OdooStatusDispatcher.Dispatch(ODOO_STATUS_OFFLINE)
+		s.DispatcherBus.Dispatch(dispatcherBus.DISPATCH_ODOO_STATUS, utils.STATUS_OFFLINE)
 	}
-
-	s.AiisStatusDispatcher.Dispatch(status)
+	s.DispatcherBus.Dispatch(dispatcherBus.DISPATCH_AIIS_STATUS, status)
 }
 
 func (s *Service) OnRPCRecv(data interface{}) {
@@ -247,13 +195,15 @@ func (s *Service) OnRPCRecv(data interface{}) {
 
 	payload := data.(string)
 	rpcPayload := RPCPayload{}
-	json.Unmarshal([]byte(payload), &rpcPayload)
-	str_data, _ := json.Marshal(rpcPayload.Data)
+	if err := json.Unmarshal([]byte(payload), &rpcPayload); err != nil {
+		s.diag.Error("OnRPCRecv", err)
+	}
+	strData, _ := json.Marshal(rpcPayload.Data)
 
 	switch rpcPayload.Type {
 	//case TYPE_RESULT:
 	//	rp := ResultPatch{}
-	//	json.Unmarshal(str_data, &rp)
+	//	json.Unmarshal(strData, &rp)
 	//	err := s.DB.UpdateResultByCount(rp.ID, 0, rp.HasUpload)
 	//	if err == nil {
 	//		s.RemoveFromQueue(rp.ID)
@@ -265,9 +215,8 @@ func (s *Service) OnRPCRecv(data interface{}) {
 
 	case TYPE_ODOO_STATUS:
 		status := ODOOStatus{}
-		json.Unmarshal(str_data, &status)
-
-		s.OdooStatusDispatcher.Dispatch(status.Status)
+		json.Unmarshal(strData, &status)
+		s.DispatcherBus.Dispatch(dispatcherBus.DISPATCH_ODOO_STATUS, status.Status)
 		break
 
 	case TYPE_MES_STATUS:
@@ -351,7 +300,7 @@ func (s *Service) PutMesOpenRequest(sn uint64, wsType string, code string, req i
 		<-ch
 		return nil, err
 	}
-	//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, resp.(string)))
+	//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SerialNumber, msg.Type, 0, resp.(string)))
 	body, _ := json.Marshal(wsnotify.GenerateResult(sn, wsType, resp.Body()))
 	s.WS.NotifyAll(wsnotify.WS_EVENT_ORDER, string(body))
 	<-ch
@@ -371,7 +320,7 @@ func (s *Service) PutMesFinishRequest(sn uint64, wsType string, code string, req
 		<-ch
 		return nil, err
 	}
-	//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+	//_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SerialNumber, msg.Type, 0, ""))
 	body, _ := json.Marshal(wsnotify.GenerateResult(sn, wsType, resp.Body()))
 	s.WS.NotifyAll(wsnotify.WS_EVENT_ORDER, string(body))
 	<-ch
@@ -514,12 +463,12 @@ func (s *Service) ResultUploadManager() error {
 }
 
 // 收到控制器结果
-func (s *Service) OnTighteningResult(data *tightening_device.TighteningResult) {
+func (s *Service) OnTighteningResult(data interface{}) {
 	if data == nil {
 		return
 	}
 
-	tighteningResult := data
+	tighteningResult := data.(*tightening_device.TighteningResult)
 	dbResult, err := s.DB.GetResultByID(tighteningResult.ID)
 	if err != nil {
 		s.diag.Error("Get Result Failed", err)

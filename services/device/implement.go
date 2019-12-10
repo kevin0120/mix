@@ -1,6 +1,7 @@
 package device
 
 import (
+	"fmt"
 	"github.com/pkg/errors"
 	"sync"
 	"sync/atomic"
@@ -38,14 +39,27 @@ type BaseDevice struct {
 	service      IParentService
 	children     map[string]IBaseDevice
 	Cfg          interface{}
+	manufacture  string // 设备厂商名
 	serialNumber string
+}
+
+func (s *BaseDevice) GenerateDispatcherNameBySerialNumber(base string) string {
+	return fmt.Sprintf("%s@%s@%s@%s", base, s.serialNumber, s.deviceType, s.manufacture)
+}
+
+func (s *BaseDevice) Manufacture() string {
+	return s.manufacture
+}
+
+func (s *BaseDevice) SetManufacture(m string) {
+	s.manufacture = m
 }
 
 func (s *BaseDevice) DeviceType() string {
 	return s.deviceType
 }
 
-func (s *BaseDevice)GetParentService() IParentService  {
+func (s *BaseDevice) GetParentService() IParentService {
 	return s.service
 }
 
@@ -54,7 +68,7 @@ func (s *BaseDevice) WillStart() error {
 	return nil
 }
 
-func (s *BaseDevice) Start() error{
+func (s *BaseDevice) Start() error {
 	return s.WillStart()
 }
 
@@ -86,7 +100,7 @@ func (s *BaseDevice) OnDeviceStatus(status string) {
 	}
 }
 
-func (s *BaseDevice)DoOnDeviceRecv(symbol, msg string) error {
+func (s *BaseDevice) DoOnDeviceRecv(symbol, msg string) error {
 	if s.service == nil {
 		return errors.New("Please Inject Device Parent Service First")
 	}
@@ -94,11 +108,11 @@ func (s *BaseDevice)DoOnDeviceRecv(symbol, msg string) error {
 	return nil
 }
 
-func (s *BaseDevice)OnDeviceRecv(msg string) error {
+func (s *BaseDevice) OnDeviceRecv(msg string) error {
 	return s.DoOnDeviceRecv(s.serialNumber, msg)
 }
 
-func (s *BaseDevice) SerialNumber() string{
+func (s *BaseDevice) SerialNumber() string {
 	return s.serialNumber
 }
 

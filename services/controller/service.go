@@ -80,13 +80,13 @@ func NewService(cs Config, d Diagnostic, pAudi IProtocol, pOpenprotocol IProtoco
 	//	switch c.IProtocol {
 	//	case AUDIPROTOCOL:
 	//		newController := pAudi.AddNewController(c)
-	//		s.Controllers[c.SN] = newController
-	//		s.protocols[c.SN] = pAudi
+	//		s.Controllers[c.SerialNumber] = newController
+	//		s.protocols[c.SerialNumber] = pAudi
 	//
 	//	case OPENPROTOCOL:
 	//		newController := pOpenprotocol.AddNewController(c)
-	//		s.Controllers[c.SN] = newController
-	//		s.protocols[c.SN] = pOpenprotocol
+	//		s.Controllers[c.SerialNumber] = newController
+	//		s.protocols[c.SerialNumber] = pOpenprotocol
 	//
 	//	default:
 	//

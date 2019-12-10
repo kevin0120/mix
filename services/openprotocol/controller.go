@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/device"
+	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/socket_writer"
@@ -28,10 +30,10 @@ const (
 	DEFAULT_TCP_KEEPALIVE = time.Duration(5 * time.Second)
 )
 
-type ToolDispatch struct {
-	resultDispatch *utils.Dispatcher
-	curveDispatch  *utils.Dispatcher
-}
+//type ToolDispatch struct {
+//	resultDispatch *utils.Dispatcher
+//	curveDispatch  *utils.Dispatcher
+//}
 
 type ControllerSubscribe func() error
 
@@ -62,9 +64,9 @@ type TighteningController struct {
 	model                string
 	receiveBuf           chan []byte
 	controllerSubscribes []ControllerSubscribe
-
-	toolDispatches     map[string]*ToolDispatch
-	externalDispatches map[string]*utils.Dispatcher
+	dispatcherBus        Dispatcher
+	dispatcherMap        map[string]dispatcherBus.DispatcherMap
+	externalDispatches   map[string]*utils.Dispatcher
 
 	requestChannel chan uint32
 	sequence       *utils.Sequence
@@ -74,7 +76,6 @@ type TighteningController struct {
 	device.BaseDevice
 }
 
-
 func defaultControllerGet() *TighteningController {
 	return &TighteningController{
 		buffer:            make(chan []byte, 1024),
@@ -83,74 +84,61 @@ func defaultControllerGet() *TighteningController {
 		reqTimeout:        time.Duration(OpenProtocolDefaultKeepAlivePeriod),
 		getToolInfoPeriod: time.Duration(OpenProtocolDefaultGetTollInfoPeriod),
 		protocol:          controller.OPENPROTOCOL,
+		dispatcherMap:     map[string]dispatcherBus.DispatcherMap{},
 		tempResultCurve:   map[int]*tightening_device.TighteningCurve{},
-		toolDispatches:    map[string]*ToolDispatch{},
 		sockClients:       map[string]*socket_writer.SocketWriter{},
 	}
 }
-
-func (c *TighteningController) CreateToolsByConfig() error {
+func (c *TighteningController) createToolsByConfig() error {
 	conf := c.deviceConf
 	d := c.diag
-	ps := c.ProtocolService
 	if conf == nil {
 		return errors.New("Device Config Is Empty")
 	}
 	for _, v := range conf.Tools {
 		tool := CreateTool(c, v, d)
-		tool.SetMode(ps.GetDefaultMode())
-		c.toolDispatches[v.SN] = &ToolDispatch{
-			resultDispatch: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-			curveDispatch:  utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		c.dispatcherMap[tool.SerialNumber()] = dispatcherBus.DispatcherMap{
+			tool.GenerateDispatcherNameBySerialNumber(dispatcherBus.DISPATCH_RESULT): utils.CreateDispatchHandlerStruct(tool.OnResult),
+			tool.GenerateDispatcherNameBySerialNumber(dispatcherBus.DISPATCH_CURVE):  utils.CreateDispatchHandlerStruct(tool.OnCurve),
 		}
-		c.toolDispatches[v.SN].resultDispatch.Register(tool.OnResult)
-		c.toolDispatches[v.SN].curveDispatch.Register(tool.OnCurve)
-
 		c.AddChildren(v.SN, tool)
 	}
 	return nil
 }
 
 // TODO: 如果工具序列号没有配置，则通过探测加入设备列表。
-func NewController(protocolConfig *Config, deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic, service *Service) *TighteningController {
+func NewController(deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic, service *Service, dp Dispatcher) *TighteningController {
 
 	c := defaultControllerGet()
 	c.BaseDevice = device.CreateBaseDevice(deviceConfig.Model, d, service)
 	c.diag = d
 	c.deviceConf = deviceConfig
 	c.ProtocolService = service
+	c.dispatcherBus = dp
 
 	c.BaseDevice.Cfg = VendorModels[c.deviceConf.Model][IO_CONFIG]
 
 	c.initSubscribeInfos()
 
-	if err := c.CreateToolsByConfig(); err != nil {
-		d.Error("NewController CreateToolsByConfig Error", err)
+	if err := c.createToolsByConfig(); err != nil {
+		d.Error("NewController createToolsByConfig Error", err)
 	}
-
-	c.externalDispatches = map[string]*utils.Dispatcher{
-		tightening_device.DISPATCH_RESULT:            utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		tightening_device.DISPATCH_IO:                utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		tightening_device.DISPATCH_CONTROLLER_STATUS: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		tightening_device.DISPATCH_TOOL_STATUS:       utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		tightening_device.DISPATCH_CONTROLLER_ID:     utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-	}
-
 	return c
 }
 
 func (c *TighteningController) UpdateToolStatus(status string) {
+	var ss []device.DeviceStatus
 	for sn, v := range c.Children() {
 		tool := v.(*TighteningTool)
 		tool.UpdateStatus(status)
-
-		c.GetDispatch(tightening_device.DISPATCH_TOOL_STATUS).Dispatch(&[]device.DeviceStatus{
-			{
-				Type:   tightening_device.TIGHTENING_DEVICE_TYPE_TOOL,
-				SN:     sn,
-				Status: status,
-			},
+		ss = append(ss, device.DeviceStatus{
+			Type:   tightening_device.TIGHTENING_DEVICE_TYPE_TOOL,
+			SN:     sn,
+			Status: status,
 		})
+	}
+	if data, err := json.Marshal(ss); err == nil {
+		c.dispatcherBus.Dispatch(dispatcherBus.DISPATCH_TOOL_STATUS_PREVIEW, data)
 	}
 }
 
@@ -315,7 +303,7 @@ func (c *TighteningController) handleResult(result *tightening_device.Tightening
 	result.ToolSN = toolSerialNumber
 
 	// 分发结果到工具进行处理
-	c.toolDispatches[toolSerialNumber].resultDispatch.Dispatch(result)
+	c.dispatcherBus.Dispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherBus.DISPATCH_RESULT), result)
 
 	return nil
 }
@@ -341,14 +329,8 @@ func (c *TighteningController) Start() error {
 			Mode:   "pset",
 		})
 	}
-
-	for _, dispatch := range c.toolDispatches {
-		dispatch.resultDispatch.Start()
-		dispatch.curveDispatch.Start()
-	}
-
-	for _, dispatch := range c.externalDispatches {
-		dispatch.Start()
+	for _, dd := range c.dispatcherMap {
+		c.dispatcherBus.LaunchDispatchersByHandlerMap(dd)
 	}
 
 	// 启动处理
@@ -361,9 +343,10 @@ func (c *TighteningController) Start() error {
 }
 
 func (c *TighteningController) Stop() error {
-	for _, dispatch := range c.toolDispatches {
-		dispatch.resultDispatch.Release()
-		dispatch.curveDispatch.Release()
+	for _, dd := range c.dispatcherMap {
+		for name, v := range dd {
+			c.dispatcherBus.Release(name, v.ID)
+		}
 	}
 
 	return nil
@@ -641,21 +624,25 @@ func (c *TighteningController) handleStatus(status string) {
 			// 断线重连
 			go c.Connect()
 		}
-
-		// 分发控制器状态
-		c.GetDispatch(tightening_device.DISPATCH_CONTROLLER_STATUS).Dispatch(&[]device.DeviceStatus{
+		ss := []device.DeviceStatus{
 			{
 				Type:   tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER,
 				SN:     c.deviceConf.SN,
 				Status: status,
 				Config: c.Config(),
 			},
-		})
+		}
+		// 分发控制器状态 -> tightening device
+		c.dispatcherBus.Dispatch(dispatcherBus.DISPATCH_CONTROLLER_STATUS_PREVIEW, ss)
 	}
 }
 
 func (c *TighteningController) Read(conn net.Conn) {
-	defer conn.Close()
+	defer func() {
+		if err := conn.Close(); err != nil {
+			c.diag.Error("Controller Close Error", err)
+		}
+	}()
 
 	buffer := make([]byte, c.ProtocolService.config().ReadBufferSize)
 
@@ -704,7 +691,7 @@ func (c *TighteningController) Close() error {
 func (c *TighteningController) handlePackageOPPayload(src []byte, data []byte) error {
 	msg := append(src, data...)
 
-	//c.diag.Debug(fmt.Sprintf("%s op target buf: %s", c.deviceConf.SN, string(msg)))
+	//c.diag.Debug(fmt.Sprintf("%s op target buf: %s", c.deviceConf.SerialNumber, string(msg)))
 
 	lenMsg := len(msg)
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/kataras/iris/websocket"
 	"github.com/masami10/rush/services/device"
+	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
@@ -18,11 +19,6 @@ const (
 	ModelDesoutterDeltaWrench = "ModelDesoutterDeltaWrench"
 )
 
-type Diagnostic interface {
-	Error(msg string, err error)
-	Debug(msg string)
-}
-
 // TODO: 修改服务中的DISPATCH相关方法
 type Service struct {
 	diag               Diagnostic
@@ -33,27 +29,12 @@ type Service struct {
 
 	WS             *wsnotify.Service
 	StorageService *storage.Service
-
-	DeviceService *device.Service
-
+	DispatcherBus  Dispatcher
+	DeviceService  *device.Service
 	wsnotify.WSNotify
-	utils.DispatchHandler
-
-	dispatchers map[string]*utils.Dispatcher
-	Api         *Api
-
-	requestDispatchers map[string]*utils.Dispatcher
-}
-
-func (s *Service) initGblDispatcher() {
-	s.dispatchers = map[string]*utils.Dispatcher{
-		DISPATCH_RESULT:            utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		DISPATCH_CONTROLLER_STATUS: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		DISPATCH_IO:                utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		DISPATCH_TOOL_STATUS:       utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		DISPATCH_CONTROLLER_ID:     utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		DISPATCH_NEW_TOOL:          utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-	}
+	dispatcherMap        dispatcherBus.DispatcherMap
+	Api                  *Api
+	requestDispatcherMap dispatcherBus.DispatcherMap
 }
 
 func (s *Service) loadTighteningController(c Config) {
@@ -63,27 +44,21 @@ func (s *Service) loadTighteningController(c Config) {
 			s.diag.Error("loadTighteningController", err)
 			continue
 		}
-		c, err := p.CreateController(&deviceConfig)
+		c, err := p.CreateController(&deviceConfig, s.DispatcherBus)
 		if err != nil {
 			s.diag.Error("Create Controller Failed", err)
 			continue
 		}
-
-		c.GetDispatch(DISPATCH_RESULT).Register(s.OnResult)
-		c.GetDispatch(DISPATCH_TOOL_STATUS).Register(s.OnToolStatus)
-		c.GetDispatch(DISPATCH_CONTROLLER_STATUS).Register(s.OnControllerStatus)
-		c.GetDispatch(DISPATCH_IO).Register(s.OnIOInputs)
-		c.GetDispatch(DISPATCH_CONTROLLER_ID).Register(s.OnControllerBarcode)
-
 		// TODO: 如果控制器序列号没有配置，则通过探测加入设备列表。
 		s.addController(deviceConfig.SN, c)
 	}
 }
 
-func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol) (*Service, error) {
+func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol, dp Dispatcher) (*Service, error) {
 
 	s := &Service{
 		diag:               d,
+		DispatcherBus: dp,
 		mtxDevices:         sync.Mutex{},
 		runningControllers: map[string]ITighteningController{},
 		protocols:          map[string]ITighteningProtocol{},
@@ -114,6 +89,18 @@ func (s *Service) getProtocol(protocolName string) (ITighteningProtocol, error) 
 	}
 }
 
+func (s *Service) initGblDispatcher() {
+
+	s.dispatcherMap = dispatcherBus.DispatcherMap{
+		dispatcherBus.DISPATCH_RESULT_PREVIEW:            utils.CreateDispatchHandlerStruct(s.OnResult),
+		dispatcherBus.DISPATCH_TOOL_STATUS_PREVIEW:       utils.CreateDispatchHandlerStruct(s.OnToolStatus),
+		dispatcherBus.DISPATCH_CONTROLLER_STATUS_PREVIEW: utils.CreateDispatchHandlerStruct(s.OnControllerStatus),
+		dispatcherBus.DISPATCH_IO_PREVIEW:                utils.CreateDispatchHandlerStruct(s.OnIOInputs),
+		dispatcherBus.DISPATCH_CONTROLLER_ID_PREVIEW:     utils.CreateDispatchHandlerStruct(s.OnControllerBarcode),
+	}
+
+}
+
 func (s *Service) Open() error {
 	if !s.config().Enable {
 		return nil
@@ -121,19 +108,17 @@ func (s *Service) Open() error {
 
 	s.WS.AddNotify(s)
 
-	for _, v := range s.dispatchers {
-		v.Start()
-	}
+	s.DispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
 
 	// 启动所有拧紧控制器
 	s.startupControllers()
 
-	s.initRequestDispatchers()
+	s.initAndStartRequestDispatchers()
 
 	controllers := s.GetControllers()
 	for _, c := range controllers {
 		for toolSN, _ := range c.Children() {
-			s.GetDispatcher(DISPATCH_NEW_TOOL).Dispatch(toolSN)
+			s.doDispatch(dispatcherBus.DISPATCH_NEW_TOOL, toolSN)
 		}
 	}
 
@@ -142,12 +127,12 @@ func (s *Service) Open() error {
 
 func (s *Service) Close() error {
 
-	for _, v := range s.dispatchers {
-		v.Release()
+	for name, v := range s.dispatcherMap {
+		s.DispatcherBus.Release(name, v.ID)
 	}
 
-	for _, v := range s.requestDispatchers {
-		v.Release()
+	for name, v := range s.requestDispatcherMap {
+		s.DispatcherBus.Release(name, v.ID)
 	}
 
 	// 关闭所有控制器
@@ -160,28 +145,20 @@ func (s *Service) config() Config {
 	return s.configValue.Load().(Config)
 }
 
-func (s *Service) initRequestDispatchers() {
-	s.requestDispatchers = map[string]*utils.Dispatcher{
-		WS_TOOL_MODE_SELECT: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		WS_TOOL_ENABLE:      utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		WS_TOOL_JOB:         utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		WS_TOOL_PSET:        utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+func (s *Service) initAndStartRequestDispatchers() {
+	s.requestDispatcherMap = dispatcherBus.DispatcherMap{
+		dispatcherBus.WS_TOOL_MODE_SELECT: utils.CreateDispatchHandlerStruct(s.OnWS_TOOL_MODE_SELECT),
+		dispatcherBus.WS_TOOL_ENABLE:      utils.CreateDispatchHandlerStruct(s.OnWS_TOOL_ENABLE),
+		dispatcherBus.WS_TOOL_JOB:         utils.CreateDispatchHandlerStruct(s.OnWS_TOOL_JOB),
+		dispatcherBus.WS_TOOL_PSET:        utils.CreateDispatchHandlerStruct(s.OnWS_TOOL_PSET),
 	}
 
-	s.requestDispatchers[WS_TOOL_MODE_SELECT].Register(s.OnWS_TOOL_MODE_SELECT)
-	s.requestDispatchers[WS_TOOL_ENABLE].Register(s.OnWS_TOOL_ENABLE)
-	s.requestDispatchers[WS_TOOL_JOB].Register(s.OnWS_TOOL_JOB)
-	s.requestDispatchers[WS_TOOL_PSET].Register(s.OnWS_TOOL_PSET)
-
-	for _, v := range s.requestDispatchers {
-		v.Start()
-	}
+	s.DispatcherBus.LaunchDispatchersByHandlerMap(s.requestDispatcherMap)
 }
 
 func (s *Service) dispatchRequest(req *wsnotify.WSRequest) {
-	d, exist := s.requestDispatchers[req.WSMsg.Type]
-	if exist {
-		d.Dispatch(req)
+	if err := s.DispatcherBus.Dispatch(req.WSMsg.Type, req); err != nil {
+		s.diag.Error(fmt.Sprintf("dispatchRequest Request Type: %s Error", req.WSMsg.Type), err)
 	}
 }
 
@@ -291,37 +268,34 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 
 // 收到结果
 func (s *Service) OnResult(data interface{}) {
-	s.GetDispatcher(DISPATCH_RESULT).Dispatch(data)
+	s.doDispatch(dispatcherBus.DISPATCH_RESULT, data)
 }
 
 // 控制器IO变化
 func (s *Service) OnIOInputs(data interface{}) {
-	s.GetDispatcher(DISPATCH_IO).Dispatch(data)
+	s.doDispatch(dispatcherBus.DISPATCH_IO, data)
 }
 
 // 控制器状态变化
 func (s *Service) OnControllerStatus(data interface{}) {
-	s.GetDispatcher(DISPATCH_CONTROLLER_STATUS).Dispatch(data)
+	s.doDispatch(dispatcherBus.DISPATCH_CONTROLLER_STATUS, data)
 }
 
 // 工具状态变化
 func (s *Service) OnToolStatus(data interface{}) {
-	s.GetDispatcher(DISPATCH_TOOL_STATUS).Dispatch(data)
+	s.doDispatch(dispatcherBus.DISPATCH_TOOL_STATUS, data)
 }
 
 // 控制器条码
 func (s *Service) OnControllerBarcode(data interface{}) {
-	s.GetDispatcher(DISPATCH_CONTROLLER_ID).Dispatch(data)
+	s.doDispatch(dispatcherBus.DISPATCH_CONTROLLER_ID, data)
 }
 
-func (s *Service) GetDispatcher(name string) *utils.Dispatcher {
-	if d, ok := s.dispatchers[name]; ok {
-		return d
-	} else {
-		err := errors.Errorf("Dispatcher : %sIs Not Existed!", name)
-		s.diag.Error("GetDispatcher", err)
-		return nil
+func (s *Service) doDispatch(name string, data interface{}) {
+	if err := s.DispatcherBus.Dispatch(name, data); err != nil {
+		s.diag.Error(fmt.Sprintf("doDispatch: %s", name), err)
 	}
+	return
 }
 
 func (s *Service) GetControllers() map[string]ITighteningController {

@@ -1,8 +1,9 @@
 package aiis
 
 import (
-	"github.com/kataras/iris/core/errors"
+	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/utils"
+	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"sync/atomic"
@@ -42,14 +43,36 @@ type GRPCClient struct {
 	stream    RPCAiis_RPCNodeClient
 	opts      []grpc.DialOption
 	rpcClient RPCAiisClient
+	diag      Diagnostic
 	//RPCRecv           OnRPCRecv
 	//OnRPCStatus       OnRPCStatus
-	RPCRecvDispatcher   *utils.Dispatcher
-	RPCStatusDispatcher *utils.Dispatcher
-	status              atomic.Value
-	keepAliveCount      int32
-	keepaliveDeadLine   atomic.Value
-	closing             chan chan struct{}
+	dispatcherMap dispatcherBus.DispatcherMap
+	DispatcherBus Dispatcher
+	//RPCRecvDispatcher   *utils.Dispatcher
+	//RPCStatusDispatcher *utils.Dispatcher
+	status            atomic.Value
+	keepAliveCount    int32
+	keepaliveDeadLine atomic.Value
+	closing           chan chan struct{}
+}
+
+func NewGRPCClient( d Diagnostic,  dp Dispatcher) *GRPCClient {
+	return &GRPCClient{
+		DispatcherBus:dp,
+		diag:d,
+		dispatcherMap: dispatcherBus.DispatcherMap{},
+	}
+}
+
+func (c *GRPCClient) AppendRPCGlbDispatch(name string, handler *utils.DispatchHandlerStruct) error {
+	if _, ok := c.dispatcherMap[name]; ok {
+		err := errors.Errorf("GRPC Dispatcher Map, Name: %s Is Existed", name)
+		c.diag.Error("AppendRPCGlbDispatch", err)
+		return err
+	}else {
+		c.dispatcherMap[name] = handler
+	}
+	return nil
 }
 
 func (c *GRPCClient) Start() error {
@@ -57,8 +80,7 @@ func (c *GRPCClient) Start() error {
 	c.closing = make(chan chan struct{})
 	c.updateKeepAliveDeadLine()
 
-	c.RPCRecvDispatcher.Start()
-	c.RPCStatusDispatcher.Start()
+	c.DispatcherBus.LaunchDispatchersByHandlerMap(c.dispatcherMap)
 
 	go c.Connect()
 	go c.manage()
@@ -74,11 +96,9 @@ func (c *GRPCClient) Stop() error {
 		c.stream.CloseSend()
 	}
 
-	c.RPCStatusDispatcher.Release()
-	c.RPCRecvDispatcher.Release()
-
-	c.RPCStatusDispatcher.Release()
-	c.RPCRecvDispatcher.Release()
+	for name, v := range c.dispatcherMap {
+		c.DispatcherBus.Release(name, v.ID)
+	}
 
 	closed := make(chan struct{})
 	c.closing <- closed
@@ -131,11 +151,11 @@ func (c *GRPCClient) updateStatus(status string) {
 			go c.Connect()
 		}
 
-		c.RPCStatusDispatcher.Dispatch(status)
+		c.DispatcherBus.Dispatch(dispatcherBus.DISPATCH_RPC_STATUS, status)
 
 		// 将最新状态推送给hmi
 		//s := wsnotify.WSStatus{
-		//	SN:     c.cfg.SN,
+		//	SerialNumber:     c.cfg.SerialNumber,
 		//	Status: string(status),
 		//}
 		//
@@ -212,7 +232,7 @@ func (c *GRPCClient) RecvProcess() {
 		}
 
 		c.updateKeepAliveCount(0)
-		c.RPCRecvDispatcher.Dispatch(in.Payload)
+		c.DispatcherBus.Dispatch(dispatcherBus.DISPATCH_RPC_RECV, in.Payload)
 	}
 }
 

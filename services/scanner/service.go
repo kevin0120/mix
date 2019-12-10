@@ -27,18 +27,6 @@ const (
 
 const ScannerDispatcherKey = dispatcherBus.DISPATCHER_SCANNER_ON_RECV
 
-type Diagnostic interface {
-	Info(msg string)
-	Error(msg string, err error)
-	Debug(msg string)
-}
-
-type Dispatcher interface {
-	Create(name string, len int) error
-	Start(name string) error
-	Dispatch(name string, data interface{}) error
-}
-
 type Service struct {
 	configValue atomic.Value
 	scanners    map[string]*Scanner

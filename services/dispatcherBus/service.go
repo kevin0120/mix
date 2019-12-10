@@ -1,14 +1,15 @@
 package dispatcherBus
 
 import (
-	"github.com/kataras/iris/core/errors"
 	"github.com/masami10/rush/utils"
+	"github.com/pkg/errors"
+	uuid "github.com/satori/go.uuid"
 	"sync"
 	"sync/atomic"
 )
 
 // name: handlerName
-type DispatcherMap map[string]utils.DispatchHandler
+type DispatcherMap map[string]*utils.DispatchHandlerStruct
 
 type Diagnostic interface {
 	Error(msg string, err error)
@@ -21,9 +22,6 @@ type Service struct {
 
 	dispatchers    map[string]*utils.Dispatcher
 	dispatchersMtx sync.Mutex
-
-	registers    map[string][]utils.DispatchHandler
-	registersMtx sync.Mutex
 }
 
 func NewService(c Config, d Diagnostic) (*Service, error) {
@@ -32,9 +30,6 @@ func NewService(c Config, d Diagnostic) (*Service, error) {
 		diag:           d,
 		dispatchers:    map[string]*utils.Dispatcher{},
 		dispatchersMtx: sync.Mutex{},
-
-		registers:    map[string][]utils.DispatchHandler{},
-		registersMtx: sync.Mutex{},
 	}
 
 	srv.configValue.Store(c)
@@ -47,9 +42,9 @@ func (s *Service) Open() error {
 }
 
 func (s *Service) Close() error {
-	for _, v := range s.dispatchers {
+	for key, v := range s.dispatchers {
 		if v != nil {
-			v.Release()
+			v.Release(key)
 		}
 	}
 
@@ -58,36 +53,6 @@ func (s *Service) Close() error {
 
 func (s *Service) config() Config {
 	return s.configValue.Load().(Config)
-}
-
-func (s *Service) getRegistersAndRemove(name string) ([]utils.DispatchHandler, error) {
-	s.registersMtx.Lock()
-	defer s.registersMtx.Unlock()
-
-	r, exist := s.registers[name]
-	if !exist {
-		return nil, errors.New("Registers Not Found")
-	}
-
-	delete(s.registers, name)
-
-	return r, nil
-}
-
-func (s *Service) appendRegisters(name string, handler utils.DispatchHandler) {
-	s.registersMtx.Lock()
-	defer s.registersMtx.Unlock()
-
-	r, exist := s.registers[name]
-	if !exist {
-		// 不存在则创建
-		s.registers[name] = []utils.DispatchHandler{handler}
-		return
-	}
-
-	// 存在则追加
-	r = append(r, handler)
-	s.registers[name] = r
 }
 
 func (s *Service) getDispatcher(name string) (*utils.Dispatcher, error) {
@@ -113,48 +78,41 @@ func (s *Service) Create(name string, len int) error {
 
 	s.dispatchers[name] = utils.CreateDispatcher(len)
 
-	// 追加注册handler
-	registers, err := s.getRegistersAndRemove(name)
-	if err == nil {
-		for _, handler := range registers {
-			s.dispatchers[name].Register(handler)
-		}
-	}
-
 	return nil
 }
 
-func (s *Service) Start(name string) error {
+func (s *Service) Start(name string) error{
 	dispatcher, err := s.getDispatcher(name)
 	if err != nil {
+		s.diag.Error("Start", err)
 		return err
 	}
-
 	dispatcher.Start()
-
 	return nil
 }
 
-func (s *Service) Release(name string) error {
+func (s *Service) Release(name string, handler string) error {
 	dispatcher, err := s.getDispatcher(name)
 	if err != nil {
 		return err
 	}
-
-	dispatcher.Release()
+	dispatcher.Release(handler)
 
 	return nil
 }
 
-func (s *Service) Register(name string, handler utils.DispatchHandler) {
+func (s *Service) Register(name string, handler *utils.DispatchHandlerStruct) {
 	dispatcher, err := s.getDispatcher(name)
 	if err != nil {
 		// 如果dispatcher还没创建， 将handler加入注册列表等待创建后注册
-		s.appendRegisters(name, handler)
+		s.diag.Error("Register", errors.Errorf("Please Create Dispatcher: %s First", name))
 		return
 	}
+	if handler.ID == "" {
+		handler.ID = uuid.NewV4().String()
+	}
 
-	dispatcher.Register(handler)
+	dispatcher.Register(handler.ID, handler.Handler)
 }
 
 func (s *Service) Dispatch(name string, data interface{}) error {
@@ -169,7 +127,7 @@ func (s *Service) Dispatch(name string, data interface{}) error {
 // create, register and start
 func (s *Service) LaunchDispatchersByHandlerMap(dispatcherMap DispatcherMap) {
 	for name, handler := range dispatcherMap {
-		err := s.Create(name, utils.DEFAULT_BUF_LEN)
+		err := s.Create(name, utils.DefaultDispatcherBufLen)
 		if err != nil {
 			s.diag.Debug(err.Error())
 		}
