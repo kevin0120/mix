@@ -103,7 +103,8 @@ func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
 		}
 
 		//本次曲线全部解析完毕后,降临时存储的数据清空
-		toolSN, err := c.findToolSNByChannel(curve.ToolNumber)
+		//toolSN, err := c.findToolSNByChannel(curve.ToolNumber)
+		toolSN, err := c.findToolSN()
 		if err != nil {
 			return err
 		}

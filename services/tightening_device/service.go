@@ -56,9 +56,9 @@ func (s *Service) initGblDispatcher() {
 }
 
 func (s *Service) loadTighteningTool(c Config) {
-	for _, deviceConfig := range c.Devices {
+	for k, deviceConfig := range c.Devices {
 
-		c, err := s.protocols[deviceConfig.Protocol].CreateController(&deviceConfig)
+		c, err := s.protocols[deviceConfig.Protocol].CreateController(&c.Devices[k])
 		if err != nil {
 			s.diag.Error("Create Controller Failed", err)
 			continue
@@ -252,12 +252,24 @@ func (s *Service) OnWS_TOOL_PSET(data interface{}) {
 		s.diag.Error("WS_TOOL_PSET Fail ", errors.New("Please Inject Storage Service First"))
 		return
 	}
+
 	req := PSetSet{}
 	_ = json.Unmarshal(byteData, &req)
 
-	err := s.Api.ToolPSetSet(&req)
+	err := s.Api.ToolPSetBatchSet(&PSetBatchSet{
+		ToolSN: req.ToolSN,
+		PSet:   req.PSet,
+		Batch:  1,
+	})
+
 	if err != nil {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
+		return
+	}
+
+	err = s.Api.ToolPSetSet(&req)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
 		return
 	}
 
@@ -361,13 +373,13 @@ func (s *Service) getController(controllerSN string) (ITighteningController, err
 //唐车项目重写 gettool方法,只根据显示屏传回的toolSn号进行查找工具.
 func (s *Service) getTool(controllerSN string, toolSN string) (ITighteningTool, error) {
 	for _, value := range s.runningControllers {
-		tool, err := value.GetTool(toolSN)
-		if err != nil {
-			return nil, err
+		tool, _ := value.GetTool(toolSN)
+		if tool != nil {
+			return tool, nil
 		}
-		return tool, nil
+		continue
 	}
-	return nil, nil
+	return nil, errors.New("Not Found")
 }
 
 func (s *Service) startupControllers() {

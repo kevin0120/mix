@@ -164,6 +164,20 @@ func (c *TighteningController) findToolSNByChannel(channel int) (string, error) 
 	return "", errors.New("Tool Not Found")
 }
 
+func (c *TighteningController) findToolSN() (string, error) {
+	var toolSN string
+	for _, value := range c.Children() {
+		toolSN = value.(*TighteningTool).cfg.SN
+		break
+	}
+
+	if toolSN == "" {
+		return "", errors.New("")
+	}
+
+	return toolSN, nil
+}
+
 func (c *TighteningController) LoadController(controller *storage.Controllers) {
 	c.dbController = controller
 }
@@ -383,11 +397,10 @@ func (c *TighteningController) handleResult(result *tightening_device.Tightening
 		result.ControllerSN = c.cfg.SN
 	}
 
-	toolSN, err := c.findToolSNByChannel(result.ChannelID)
+	toolSN, err := c.findToolSN()
 	if err != nil {
 		return err
 	}
-
 	result.ToolSN = toolSN
 
 	// 分发结果到工具进行处理

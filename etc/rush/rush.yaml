@@ -117,7 +117,7 @@ openprotocol:
   default_mode: pset
 
 scanner:
-  enable: true
+  enable: false
 #  entity_label: 3118:2305
 io:
   enable: true
@@ -153,13 +153,21 @@ tightening_device:
           channel: 1
         - sn: xx0011
           channel: 0
-
-#    - model: MODEL_DESOUTTER_CVI3
+#
+#    - model: ModelDesoutterCvi3
 #      protocol: OpenProtocol
-#      endpoint: tcp://192.168.127.109:4545
+#      endpoint: tcp://192.168.3.23:4545
 #      sn: 0002
 #      tools:
-#        - sn: 1234
+#        - sn: xx002221
+
+    - model: ModelDesoutterCvi3
+      protocol: OpenProtocol
+      endpoint: tcp://192.168.3.23:4546
+      sn: 0002
+      tools:
+        - sn: xx002221
+
 #
 #    - model: MODEL_DESOUTTER_CVI3
 #      protocol: Audi/VW
@@ -173,7 +181,7 @@ tightening_device:
 
 # 协议类型: Audi/VW, OpenProtocol
 broker:
-  enable: true
+  enable: false
   connect-urls:
     - nats://192.168.4.203:4222
     - nats://192.168.4.203:4223
