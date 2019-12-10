@@ -23,7 +23,7 @@ type JobSet struct {
 
 func (s *JobSet) Validate() error {
 	if s.ControllerSN == "" || s.ToolSN == "" {
-		return errors.New("Controller SN or Tool SN is required")
+		return errors.New("Controller SerialNumber or Tool SerialNumber is required")
 	}
 
 	if s.Job <= 0 {
@@ -54,7 +54,7 @@ type PSetSet struct {
 
 func (s *PSetSet) Validate() error {
 	if s.ControllerSN == "" || s.ToolSN == "" {
-		return errors.New("Controller SN or Tool SN is required")
+		return errors.New("Controller SerialNumber or Tool SerialNumber is required")
 	}
 
 	if s.PSet <= 0 {
@@ -72,7 +72,7 @@ type ToolControl struct {
 
 func (s *ToolControl) Validate() error {
 	if s.ControllerSN == "" || s.ToolSN == "" {
-		return errors.New("Controller SN or Tool SN is required")
+		return errors.New("Controller SerialNumber or Tool SerialNumber is required")
 	}
 
 	return nil
@@ -86,7 +86,7 @@ type ToolModeSelect struct {
 
 func (s *ToolModeSelect) Validate() error {
 	if s.ControllerSN == "" || s.ToolSN == "" {
-		return errors.New("Controller SN or Tool SN is required")
+		return errors.New("Controller SerialNumber or Tool SerialNumber is required")
 	}
 
 	return nil

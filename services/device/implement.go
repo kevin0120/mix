@@ -1,6 +1,7 @@
 package device
 
 import (
+	"fmt"
 	"github.com/pkg/errors"
 	"sync"
 	"sync/atomic"
@@ -38,7 +39,20 @@ type BaseDevice struct {
 	service      IParentService
 	children     map[string]IBaseDevice
 	Cfg          interface{}
+	manufacture  string // 设备厂商名
 	serialNumber string
+}
+
+func (s *BaseDevice) GenerateDispatcherNameBySerialNumber(base string) string {
+	return fmt.Sprintf("%s@%s@%s@%s", base, s.serialNumber, s.deviceType, s.manufacture)
+}
+
+func (s *BaseDevice) Manufacture() string {
+	return s.manufacture
+}
+
+func (s *BaseDevice) SetManufacture(m string) {
+	s.manufacture = m
 }
 
 func (s *BaseDevice) DeviceType() string {

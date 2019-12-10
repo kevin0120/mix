@@ -4,14 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/masami10/rush/services/device"
+	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/utils"
 	"sync/atomic"
-)
-
-const (
-	OPENPROTOCOL_MODE_JOB  = "1"
-	OPENPROTOCOL_MODE_PSET = "0"
 )
 
 func CreateTool(c *TighteningController, cfg tightening_device.ToolConfig, d Diagnostic) *TighteningTool {
@@ -21,31 +17,26 @@ func CreateTool(c *TighteningController, cfg tightening_device.ToolConfig, d Dia
 		controller: c,
 		BaseDevice: device.CreateBaseDevice(device.BaseDeviceTighteningTool, d, c.GetParentService()),
 	}
-
+	tool.SetSerialNumber(cfg.SN)
 	tool.UpdateStatus(device.BaseDeviceStatusOffline)
+	tool.SetMode(c.ProtocolService.GetDefaultMode())
 	return &tool
 }
 
 type TighteningTool struct {
+	device.BaseDevice
 	diag       Diagnostic
 	cfg        tightening_device.ToolConfig
-	Mode       atomic.Value
+	mode       atomic.Value
 	controller *TighteningController
-
-	device.BaseDevice
 }
 
 func (s *TighteningTool) SetMode(mode string) {
-	s.Mode.Store(mode)
-
-	//s.controller.ProtocolService.DB.UpdateTool(&storage.Guns{
-	//	Serial: s.deviceConf.SN,
-	//	Mode:   mode,
-	//})
+	s.mode.Store(mode)
 }
 
-func (s *TighteningTool) GetMode() string {
-	return s.Mode.Load().(string)
+func (s *TighteningTool) Mode() string {
+	return s.mode.Load().(string)
 }
 
 // 工具使能控制
@@ -298,14 +289,14 @@ func (s *TighteningTool) DeviceType() string {
 // 处理结果
 func (s *TighteningTool) OnResult(result interface{}) {
 	if result == nil {
-		s.diag.Error(fmt.Sprintf("Tool SN: %s", s.cfg.SN), errors.New("Result Is Nil"))
+		s.diag.Error(fmt.Sprintf("Tool SerialNumber: %s", s.cfg.SN), errors.New("Result Is Nil"))
 		return
 	}
 
 	tighteningResult := result.(*tightening_device.TighteningResult)
 	dbTool, err := s.controller.ProtocolService.DB.GetTool(s.cfg.SN)
 	if err == nil {
-		if s.Mode.Load().(string) == tightening_device.MODE_JOB {
+		if s.Mode() == tightening_device.MODE_JOB {
 			tighteningResult.Seq, tighteningResult.Count = s.controller.calBatch(dbTool.WorkorderID)
 		} else {
 			tighteningResult.Seq = dbTool.Seq
@@ -341,13 +332,13 @@ func (s *TighteningTool) OnResult(result interface{}) {
 
 	// 分发结果
 	tighteningResult.ID = dbResult.Id
-	s.controller.GetDispatch(tightening_device.DISPATCH_RESULT).Dispatch(tighteningResult)
+	s.controller.dispatcherBus.Dispatch(dispatcherBus.DISPATCH_RESULT_PREVIEW, tighteningResult)
 }
 
 // 处理曲线
 func (s *TighteningTool) OnCurve(curve interface{}) {
 	if curve == nil {
-		s.diag.Error(fmt.Sprintf("Tool SN: %s", s.cfg.SN), errors.New("Curve Is Nil"))
+		s.diag.Error(fmt.Sprintf("Tool SerialNumber: %s", s.cfg.SN), errors.New("Curve Is Nil"))
 		return
 	}
 

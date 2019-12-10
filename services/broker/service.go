@@ -1,6 +1,8 @@
 package broker
 
 import (
+	"fmt"
+	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"sync/atomic"
@@ -14,26 +16,28 @@ type Diagnostic interface {
 }
 
 type Service struct {
-	diag                  Diagnostic
-	configValue           atomic.Value
-	Provider              IBrokerProvider
-	opened                bool
-	BrokerStatusDisptcher *utils.Dispatcher
-	closing               chan struct{}
+	diag                Diagnostic
+	configValue         atomic.Value
+	Provider            IBrokerProvider
+	opened              bool
+	DispatcherBus       Dispatcher
+	BrokerDispatcherMap dispatcherBus.DispatcherMap
+	//BrokerStatusDisptcher *utils.Dispatcher
+	closing chan struct{}
 }
 
 func NewService(c Config, d Diagnostic) *Service {
 
 	s := &Service{
-		diag:                  d,
-		opened:                false,
-		BrokerStatusDisptcher: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		closing:               make(chan struct{}, 1),
+		diag:    d,
+		closing: make(chan struct{}, 1),
 	}
 	s.configValue.Store(c)
 
 	p := s.newBroker(c.Provider)
 	s.Provider = p
+
+	s.initGblDispatcher()
 
 	return s
 }
@@ -42,10 +46,17 @@ func (s *Service) Config() Config {
 	return s.configValue.Load().(Config)
 }
 
+func (s *Service) initGblDispatcher() {
+	s.BrokerDispatcherMap = dispatcherBus.DispatcherMap{
+		//dispatcherBus.DISPATCH_BROKER_STATUS: utils.CreateDispatchHandlerStruct(nil),
+	}
+}
+
 func (s *Service) Open() error {
 	c := s.Config()
+	s.doConnect(false) // 初始化所有连接状态为未连接
 	if c.Enable {
-		s.BrokerStatusDisptcher.Start()
+		s.DispatcherBus.LaunchDispatchersByHandlerMap(s.BrokerDispatcherMap)
 		go s.connectProc()
 	}
 	return nil
@@ -53,11 +64,24 @@ func (s *Service) Open() error {
 
 func (s *Service) Close() error {
 	s.closing <- struct{}{}
-	s.BrokerStatusDisptcher.Release()
+	//fixme: release
+	for _, h := range s.BrokerDispatcherMap {
+		s.DispatcherBus.Release(dispatcherBus.DISPATCH_BROKER_STATUS, h.ID)
+	}
 	if s.Provider != nil {
 		return s.Provider.Close()
 	}
 	return nil
+}
+
+func (s *Service) doConnect(opened bool) {
+	s.opened = true
+	s.diag.Debug(fmt.Sprintf("Broker Service Is Opened: %v", opened))
+	status := utils.STATUS_OFFLINE
+	if opened {
+		status = utils.STATUS_ONLINE
+	}
+	s.DispatcherBus.Dispatch(dispatcherBus.DISPATCH_BROKER_STATUS, status)
 }
 
 func (s *Service) connectProc() {
@@ -67,14 +91,12 @@ func (s *Service) connectProc() {
 			if err := s.Provider.Connect(s.Config().ConnectUrls); err != nil {
 				continue
 			} else {
-				s.opened = true
-				s.diag.Debug("Broker Service Started")
-				s.BrokerStatusDisptcher.Dispatch(s.opened)
+				s.doConnect(true)
 				return
 			}
 
 		case <-s.closing:
-			return
+			s.doConnect(false)
 		}
 	}
 }

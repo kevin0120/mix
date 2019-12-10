@@ -6,6 +6,8 @@ type IParentService interface {
 }
 
 type IBaseDevice interface {
+	GenerateDispatcherNameBySerialNumber(base string) string
+
 	GetParentService() IParentService
 
 	WillStart() error //即将启动

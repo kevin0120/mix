@@ -7,24 +7,13 @@ import (
 	"github.com/masami10/rush/services/DispatcherBus"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/wsnotify"
+	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"sync/atomic"
 	"time"
 )
 
-type Diagnostic interface {
-	Info(msg string)
-	Error(msg string, err error)
-	Debug(msg string)
-}
 
-type Dispatcher interface {
-	Create(name string, len int) error
-	Start(name string) error
-	Dispatch(name string, data interface{}) error
-	LaunchDispatchersByHandlerMap(dispatcherMap dispatcherBus.DispatcherMap)
-	Release(name string) error
-}
 
 type Service struct {
 	configValue   atomic.Value
@@ -40,10 +29,11 @@ type Service struct {
 	dispatcherMap dispatcherBus.DispatcherMap
 }
 
-func NewService(c Config, d Diagnostic) *Service {
+func NewService(c Config, d Diagnostic, dp Dispatcher) *Service {
 
 	s := &Service{
 		diag: d,
+		DispatcherBus: dp,
 		ios:  map[string]*IOModule{},
 	}
 
@@ -77,9 +67,9 @@ func (s *Service) Open() error {
 	s.WS.AddNotify(s)
 
 	s.dispatcherMap = dispatcherBus.DispatcherMap{
-		dispatcherBus.DISPATCHER_WS_IO_STATUS:  s.OnWSIOStatus,
-		dispatcherBus.DISPATCHER_WS_IO_CONTACT: s.OnWSIOContact,
-		dispatcherBus.DISPATCHER_WS_IO_SET:     s.OnWSIOSet,
+		dispatcherBus.DISPATCHER_WS_IO_STATUS:  utils.CreateDispatchHandlerStruct(s.OnWSIOStatus),
+		dispatcherBus.DISPATCHER_WS_IO_CONTACT: utils.CreateDispatchHandlerStruct(s.OnWSIOContact),
+		dispatcherBus.DISPATCHER_WS_IO_SET:     utils.CreateDispatchHandlerStruct(s.OnWSIOSet),
 	}
 	s.DispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
 
@@ -87,8 +77,8 @@ func (s *Service) Open() error {
 }
 
 func (s *Service) Close() error {
-	for name, _ := range s.dispatcherMap {
-		s.DispatcherBus.Release(name)
+	for name, v := range s.dispatcherMap {
+		s.DispatcherBus.Release(name, v.ID)
 	}
 
 	for _, dev := range s.ios {

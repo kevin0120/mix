@@ -98,7 +98,7 @@ func (s *TighteningTool) DeviceType() string {
 // 处理结果
 func (c *TighteningTool) OnResult(result interface{}) {
 	if result == nil {
-		c.diag.Error(fmt.Sprintf("Tool SN: %s", c.cfg.SN), errors.New("Result Is Nil"))
+		c.diag.Error(fmt.Sprintf("Tool SerialNumber: %s", c.cfg.SN), errors.New("Result Is Nil"))
 		return
 	}
 
@@ -107,7 +107,7 @@ func (c *TighteningTool) OnResult(result interface{}) {
 // 处理曲线
 func (c *TighteningTool) OnCurve(curve interface{}) {
 	if curve == nil {
-		c.diag.Error(fmt.Sprintf("Tool SN: %s", c.cfg.SN), errors.New("Curve Is Nil"))
+		c.diag.Error(fmt.Sprintf("Tool SerialNumber: %s", c.cfg.SN), errors.New("Curve Is Nil"))
 		return
 	}
 }

@@ -22,8 +22,8 @@ import (
 )
 
 const (
-	ERR_CVI3_NOT_FOUND      = "CIV3 SN is invalid"
-	ERR_CVI3_TOOL_NOT_FOUND = "CIV3 TOOL SN is invalid"
+	ERR_CVI3_NOT_FOUND      = "CIV3 SerialNumber is invalid"
+	ERR_CVI3_TOOL_NOT_FOUND = "CIV3 TOOL SerialNumber is invalid"
 	ERR_CVI3_OFFLINE        = "cvi3 offline"
 	ERR_CVI3_REQUEST        = "request to cvi3 failed"
 	ERR_CVI3_REPLY_TIMEOUT  = "cvi3 reply timeout"
@@ -91,7 +91,7 @@ func (s *Service) Name() string {
 	return tightening_device.TIGHTENING_AUDIVW
 }
 
-func (s *Service) CreateController(cfg *tightening_device.TighteningDeviceConfig) (tightening_device.ITighteningController, error) {
+func (s *Service) CreateController(cfg *tightening_device.TighteningDeviceConfig, dp tightening_device.Dispatcher) (tightening_device.ITighteningController, error) {
 	return nil, nil
 }
 
@@ -341,7 +341,7 @@ func (p *Service) HandleProcess() {
 				//if strings.Contains(msg, XML_NUT_KEY) {
 				//	// 将套筒信息推送hmi
 				//	ws := wsnotify.WSSelector{}
-				//	ws.SN = ""
+				//	ws.SerialNumber = ""
 				//	ws.Selectors = []int{}
 				//	for _, v := range evt.MSL_MSG.EVT.STS.ONC.NUT.NIDs {
 				//		ws.Selectors = append(ws.Selectors, nut_ids[v])

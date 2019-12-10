@@ -3,10 +3,11 @@ package odoo
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/masami10/rush/services/aiis"
+	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
+	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"gopkg.in/resty.v1"
 	"net/http"
@@ -57,29 +58,39 @@ type Service struct {
 	configValue       atomic.Value
 	status            string
 	WS                *wsnotify.Service
-	Aiis              *aiis.Service
+	dispatcherBus     Dispatcher
+	dispatcherMap     dispatcherBus.DispatcherMap
 	workordersChannel chan interface{}
 	opened            bool
 	wg                sync.WaitGroup
 	closing           chan struct{}
 }
 
-func NewService(c Config, d Diagnostic) *Service {
+func NewService(c Config, d Diagnostic, dp Dispatcher) *Service {
 	e, _ := c.index()
 	s := &Service{
 		diag:              d,
 		methods:           Methods{},
 		endpoints:         e,
-		status:            ODOO_STATUS_OFFLINE,
+		dispatcherBus:     dp,
+		status:            utils.STATUS_OFFLINE,
 		workordersChannel: make(chan interface{}, c.Workers),
 		closing:           make(chan struct{}),
 		opened:            false,
 	}
 
+	s.initGblDispatch()
+
 	s.methods.service = s
 	s.configValue.Store(c)
 
 	return s
+}
+
+func (s *Service)initGblDispatch()  {
+	s.dispatcherMap = dispatcherBus.DispatcherMap{
+		dispatcherBus.DISPATCH_ODOO_STATUS: utils.CreateDispatchHandlerStruct(s.OnStatus),
+	}
 }
 
 func (s *Service) UpdateStatus(status string) {
@@ -197,8 +208,7 @@ func (s *Service) Open() error {
 	}
 	handler.AddRoute(r)
 
-	s.Aiis.OdooStatusDispatcher.Register(s.OnStatus)
-	s.Aiis.SyncGun = s.GetGunID
+	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
 
 	for i := 0; i < s.Config().Workers; i++ {
 		s.wg.Add(1)
@@ -297,28 +307,6 @@ func (s *Service) GetGun(serial string) (ODOOGun, error) {
 	}
 
 	return gun, errors.Wrap(err, "Get gun fail")
-}
-
-func (s *Service) GetGunID(serial string) (int64, error) {
-
-	var err error
-	//var gun ODOOGun
-	endpoints := s.GetEndpoints("getGun")
-	for _, endpoint := range endpoints {
-		body, err := s.getGun(fmt.Sprintf(endpoint.url, serial), endpoint.method)
-		if err == nil {
-			// 如果第一次就成功，推出循环
-			var guns []ODOOGun
-			err = json.Unmarshal(body, &guns)
-			if err != nil || len(guns) == 0 {
-				return 0, errors.Wrap(err, "Get gun fail")
-			}
-
-			return guns[0].ID, nil
-		}
-	}
-
-	return 0, errors.Wrap(err, "Get gun fail")
 }
 
 func (s *Service) getGun(url string, method string) ([]byte, error) {

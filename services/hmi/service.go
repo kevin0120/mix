@@ -16,16 +16,11 @@ import (
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
+	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 )
 
-type Diagnostic interface {
-	Error(msg string, err error)
-	Debug(msg string)
-	Disconnect(id string)
-	Close()
-	Closed()
-}
+
 
 const (
 	CH_LENGTH = 1024
@@ -48,15 +43,15 @@ type Service struct {
 	WS                *wsnotify.Service
 	TighteningService *tightening_device.Service
 
-	DispatcherBus *dispatcherBus.Service
+	DispatcherBus Dispatcher
 	dispatcherMap dispatcherBus.DispatcherMap
 }
 
-func NewService(d Diagnostic) *Service {
+func NewService(d Diagnostic, dp Dispatcher) *Service {
 
 	s := &Service{
-		diag: d,
-		//methods:     Methods{},
+		diag:        d,
+		DispatcherBus: dp,
 		ChStart:     make(chan int, CH_LENGTH),
 		ChFinish:    make(chan int, CH_LENGTH),
 		ChWorkorder: make(chan int, CH_LENGTH),
@@ -76,23 +71,25 @@ func (s *Service) SendScannerInfo(identification string) error {
 }
 
 func (s *Service) Open() error {
-
+	//fixme: 嵌套那么深
 	//s.ControllerService.WS.OnNewClient = s.OnNewHmiConnect
-	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_RESULT).Register(s.OnTighteningResult)
-	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_IO).Register(s.OnTighteningControllerIO)
-	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_CONTROLLER_STATUS).Register(s.OnTighteningControllerStatus)
-	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_TOOL_STATUS).Register(s.OnTighteningToolStatus)
-	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_CONTROLLER_ID).Register(s.OnTighteningControllereID)
-	s.ODOO.Aiis.OdooStatusDispatcher.Register(s.OnOdooStatus)
-	s.ODOO.Aiis.AiisStatusDispatcher.Register(s.OnAiisStatus)
 
 	s.dispatcherMap = dispatcherBus.DispatcherMap{
-		WS_ORDER_LIST:             s.OnWSOrderList,
-		WS_ORDER_DETAIL:           s.OnWSOrderDetail,
-		WS_ORDER_UPDATE:           s.OnWSOrderUpdate,
-		WS_ORDER_STEP_UPDATE:      s.OnWSOrderStepUpdate,
-		WS_ORDER_STEP_DATA_UPDATE: s.OnWSOrderStepDataUpdate,
-		WS_ORDER_DETAIL_BY_CODE:   s.OnWSOrderDetailByCode,
+		dispatcherBus.DISPATCH_RESULT: utils.CreateDispatchHandlerStruct(s.OnTighteningResult),
+		dispatcherBus.DISPATCH_IO: utils.CreateDispatchHandlerStruct(s.OnTighteningControllerIO),
+		dispatcherBus.DISPATCH_CONTROLLER_STATUS: utils.CreateDispatchHandlerStruct(s.OnTighteningControllerStatus),
+		dispatcherBus.DISPATCH_TOOL_STATUS: utils.CreateDispatchHandlerStruct(s.OnTighteningToolStatus),
+		dispatcherBus.DISPATCH_CONTROLLER_ID: utils.CreateDispatchHandlerStruct(s.OnTighteningControllereID),
+		//order 相关
+		dispatcherBus.DISPATCHER_WS_ORDER_LIST:             utils.CreateDispatchHandlerStruct(s.OnWSOrderList),
+		dispatcherBus.DISPATCHER_WS_ORDER_DETAIL:           utils.CreateDispatchHandlerStruct(s.OnWSOrderDetail),
+		dispatcherBus.DISPATCHER_WS_ORDER_UPDATE:           utils.CreateDispatchHandlerStruct(s.OnWSOrderUpdate),
+		dispatcherBus.DISPATCHER_WS_ORDER_STEP_UPDATE:      utils.CreateDispatchHandlerStruct(s.OnWSOrderStepUpdate),
+		dispatcherBus.DISPATCHER_WS_ORDER_STEP_DATA_UPDATE: utils.CreateDispatchHandlerStruct(s.OnWSOrderStepDataUpdate),
+		dispatcherBus.DISPATCHER_WS_ORDER_DETAIL_BY_CODE:   utils.CreateDispatchHandlerStruct(s.OnWSOrderDetailByCode),
+		//服务的状态变化
+		dispatcherBus.DISPATCH_ODOO_STATUS: utils.CreateDispatchHandlerStruct(s.OnOdooStatus),
+		dispatcherBus.DISPATCH_AIIS_STATUS: utils.CreateDispatchHandlerStruct(s.OnAiisStatus),
 	}
 	s.DispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
 
@@ -106,33 +103,15 @@ func (s *Service) Close() error {
 	s.diag.Close()
 	s.diag.Closed()
 
-	for name, _ := range s.dispatcherMap {
-		s.DispatcherBus.Release(name)
+	for name, v := range s.dispatcherMap {
+		s.DispatcherBus.Release(name, v.ID)
 	}
 
 	return nil
 }
 
-func (s *Service) dispatchRequest(req *wsnotify.WSRequest) {
-	switch req.WSMsg.Type {
-	case WS_ORDER_LIST:
-		s.DispatcherBus.Dispatch(dispatcherBus.DISPATCHER_WS_ORDER_LIST, req)
-
-	case WS_ORDER_DETAIL:
-		s.DispatcherBus.Dispatch(dispatcherBus.DISPATCHER_WS_ORDER_LIST, req)
-
-	case WS_ORDER_UPDATE:
-		s.DispatcherBus.Dispatch(dispatcherBus.DISPATCHER_WS_ORDER_UPDATE, req)
-
-	case WS_ORDER_STEP_UPDATE:
-		s.DispatcherBus.Dispatch(dispatcherBus.DISPATCHER_WS_ORDER_STEP_UPDATE, req)
-
-	case WS_ORDER_STEP_DATA_UPDATE:
-		s.DispatcherBus.Dispatch(dispatcherBus.DISPATCHER_WS_ORDER_STEP_DATA_UPDATE, req)
-
-	case WS_ORDER_DETAIL_BY_CODE:
-		s.DispatcherBus.Dispatch(dispatcherBus.DISPATCHER_WS_ORDER_DETAIL_BY_CODE, req)
-	}
+func (s *Service) dispatchRequest(req *wsnotify.WSRequest) error{
+	return s.DispatcherBus.Dispatch(req.WSMsg.Type, req)
 }
 
 func (s *Service) resetResult(id int64) error {
@@ -463,7 +442,7 @@ func (s *Service) OnTighteningResult(data interface{}) {
 	}
 
 	msg := wsnotify.WSMsg{
-		Type: tightening_device.WS_TIGHTENING_RESULT,
+		Type: dispatcherBus.WS_TIGHTENING_RESULT,
 		Data: result,
 	}
 

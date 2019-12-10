@@ -80,14 +80,14 @@ func (s *Service) IsSupport(model string) bool {
 	return true
 }
 
-func (s *Service) CreateController(cfg *tightening_device.TighteningDeviceConfig) (tightening_device.ITighteningController, error) {
+func (s *Service) CreateController(cfg *tightening_device.TighteningDeviceConfig, dp tightening_device.Dispatcher) (tightening_device.ITighteningController, error) {
 	// 检测型号是否支持
 	if !s.IsSupport(cfg.Model) {
 		return nil, errors.New("Not Supported")
 	}
 
-	protocolConfig := s.config()
-	c := NewController(&protocolConfig, cfg, s.diag, s)
+	//protocolConfig := s.config()
+	c := NewController(cfg, s.diag, s, dp)
 
 	return c, nil
 }
@@ -121,7 +121,7 @@ func (s *Service) ToolControl(sn string, tool_sn string, enable bool) error {
 	//var toolExist = false
 	//
 	//for _, t := range c.deviceConf.Tools {
-	//	if t.SN == tool_sn {
+	//	if t.SerialNumber == tool_sn {
 	//		toolExist = true
 	//		break
 	//	}
@@ -154,7 +154,7 @@ func (s *Service) PSet(sn string, tool_sn string, pset int, result_id int64, cou
 	//var toolExist = false
 	//var toolChannel int
 	//for _, t := range c.deviceConf.Tools {
-	//	if t.SN == tool_sn {
+	//	if t.SerialNumber == tool_sn {
 	//		toolChannel = t.Channel
 	//		toolExist = true
 	//		break
@@ -190,7 +190,7 @@ func (s *Service) PSetManual(sn string, tool_sn string, pset int, user_id int64,
 	//var toolExist = false
 	//var toolChannel int
 	//for _, t := range c.deviceConf.Tools {
-	//	if t.SN == tool_sn {
+	//	if t.SerialNumber == tool_sn {
 	//		toolChannel = t.Channel
 	//		toolExist = true
 	//		break
@@ -262,7 +262,7 @@ func (s *Service) JobSetManual(sn string, tool_sn string, job int, user_id int64
 	//var toolExist = false
 	//
 	//for _, t := range c.deviceConf.Tools {
-	//	if t.SN == tool_sn {
+	//	if t.SerialNumber == tool_sn {
 	//		toolExist = true
 	//		break
 	//	}
