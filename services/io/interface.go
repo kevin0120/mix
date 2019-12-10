@@ -1,6 +1,6 @@
 package io
 
-import "github.com/masami10/rush/services/dispatcherBus"
+import "github.com/masami10/rush/services/DispatcherBus"
 
 type Diagnostic interface {
 	Info(msg string)

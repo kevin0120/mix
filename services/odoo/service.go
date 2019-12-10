@@ -3,7 +3,7 @@ package odoo
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/masami10/rush/services/dispatcherBus"
+	"github.com/masami10/rush/services/DispatcherBus"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"

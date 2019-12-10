@@ -10,7 +10,6 @@ import (
 	"github.com/masami10/rush/services/broker"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/diagnostic"
-	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/hmi"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/io"

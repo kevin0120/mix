@@ -1,6 +1,6 @@
 package hmi
 
-import "github.com/masami10/rush/services/dispatcherBus"
+import "github.com/masami10/rush/services/DispatcherBus"
 
 type Diagnostic interface {
 	Error(msg string, err error)

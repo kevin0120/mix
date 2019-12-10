@@ -2,7 +2,7 @@ package broker
 
 import (
 	"fmt"
-	"github.com/masami10/rush/services/dispatcherBus"
+	"github.com/masami10/rush/services/DispatcherBus"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"sync/atomic"

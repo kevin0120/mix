@@ -1,7 +1,7 @@
 package odoo
 
 import (
-	"github.com/masami10/rush/services/dispatcherBus"
+	"github.com/masami10/rush/services/DispatcherBus"
 )
 
 type Dispatcher interface {

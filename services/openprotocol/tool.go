@@ -3,8 +3,8 @@ package openprotocol
 import (
 	"errors"
 	"fmt"
+	"github.com/masami10/rush/services/DispatcherBus"
 	"github.com/masami10/rush/services/device"
-	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/utils"
 	"sync/atomic"

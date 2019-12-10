@@ -1,7 +1,7 @@
 package aiis
 
 import (
-	"github.com/masami10/rush/services/dispatcherBus"
+	"github.com/masami10/rush/services/DispatcherBus"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"

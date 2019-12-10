@@ -1,8 +1,8 @@
 package tightening_device
 
 import (
+	"github.com/masami10/rush/services/DispatcherBus"
 	"github.com/masami10/rush/services/device"
-	"github.com/masami10/rush/services/dispatcherBus"
 )
 
 type Diagnostic interface {

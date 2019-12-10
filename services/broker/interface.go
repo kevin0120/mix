@@ -1,6 +1,6 @@
 package broker
 
-import "github.com/masami10/rush/services/dispatcherBus"
+import "github.com/masami10/rush/services/DispatcherBus"
 
 type Dispatcher interface {
 	Create(name string, len int) error
