@@ -38,13 +38,13 @@ type Service struct {
 }
 
 func (s *Service) loadTighteningController(c Config) {
-	for _, deviceConfig := range c.Devices {
+	for k, deviceConfig := range c.Devices {
 		p, err := s.getProtocol(deviceConfig.Protocol)
 		if err != nil {
 			s.diag.Error("loadTighteningController", err)
 			continue
 		}
-		c, err := p.CreateController(&deviceConfig, s.DispatcherBus)
+		c, err := p.CreateController(&c.Devices[k], s.DispatcherBus)
 		if err != nil {
 			s.diag.Error("Create Controller Failed", err)
 			continue
