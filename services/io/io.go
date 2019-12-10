@@ -81,6 +81,11 @@ func (s *IOModule) Start() error {
 	if err := s.BaseDevice.Start(); err != nil {
 		return err
 	}
+
+	if err := s.WillStart(); err != nil {
+		return err
+	}
+
 	go s.flashProc()
 	s.opened = true
 

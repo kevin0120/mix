@@ -1,16 +1,14 @@
 package device
 
-
 type IParentService interface {
 	OnStatus(string, string)
 	OnRecv(string, string)
 }
 
 type IBaseDevice interface {
-
 	GetParentService() IParentService
 
-	WillStart() error//即将启动
+	WillStart() error //即将启动
 
 	Start() error
 
@@ -22,7 +20,7 @@ type IBaseDevice interface {
 
 	DoOnDeviceStatus(symbol string, status string) error //执行相应业务
 
-	OnDeviceRecv(string) error//接收到数据
+	OnDeviceRecv(string) error //接收到数据
 
 	DoOnDeviceRecv(symbol string, status string) error //执行相应业务
 
