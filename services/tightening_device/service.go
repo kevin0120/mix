@@ -56,9 +56,9 @@ func (s *Service) initGblDispatcher() {
 }
 
 func (s *Service) loadTighteningTool(c Config) {
-	for _, deviceConfig := range c.Devices {
+	for k, deviceConfig := range c.Devices {
 
-		c, err := s.protocols[deviceConfig.Protocol].CreateController(&deviceConfig)
+		c, err := s.protocols[deviceConfig.Protocol].CreateController(&c.Devices[k])
 		if err != nil {
 			s.diag.Error("Create Controller Failed", err)
 			continue
