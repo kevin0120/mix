@@ -86,6 +86,7 @@
                                         <field name="name"/>
                                         <field name="technician_user_id"/>
                                         <field name="category_id"/>
+                                        <field name="category_name" invisible="1" />
                                         <field name="mtbf"/>
                                         <field name="mttr"/>
                                         <field name="estimated_next_failure" string="Est. Next Failure"/>

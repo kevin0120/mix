@@ -118,6 +118,27 @@ class MaintenanceEquipment(models.Model):
         store=False,
     )
 
+    location_id = fields.Many2one('mrp.workcenter.loc', 'Used In Location(WorkCenter)')
+
+    @api.onchange('workcenter_id')
+    def _onchange_workcenter(self):
+        for equipment in self:
+            equipment.location_id = False
+
+    #
+    # @api.multi
+    # def button_mrp_workcenter(self):
+    #     self.ensure_one()
+    #     return {
+    #         'name': _('work centers'),
+    #         'view_type': 'form',
+    #         'view_mode': 'form',
+    #         'res_model': 'mrp.workcenter',
+    #         'view_id': self.env.ref('sa_base.sa_maintenance_equipment_view_form_inherit').id,
+    #         'type': 'ir.actions.act_window',
+    #         'res_id': self.workcenter_id.id
+    #     }
+
     @api.multi
     @api.depends('category_id')
     def _compute_parent_id_domain(self):
@@ -243,7 +264,6 @@ class MaintenanceEquipment(models.Model):
                 }
                 self.env['mrp.workcenter.group.tool'].sudo().create(val)
         return ret
-
 
     @api.model
     def create(self, vals):
