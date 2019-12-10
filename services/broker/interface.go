@@ -9,4 +9,3 @@ type Dispatcher interface {
 	LaunchDispatchersByHandlerMap(dispatcherMap dispatcherBus.DispatcherMap)
 	Release(name string, handler string) error
 }
-

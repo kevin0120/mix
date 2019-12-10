@@ -20,8 +20,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-
-
 const (
 	CH_LENGTH = 1024
 )
@@ -50,11 +48,11 @@ type Service struct {
 func NewService(d Diagnostic, dp Dispatcher) *Service {
 
 	s := &Service{
-		diag:        d,
+		diag:          d,
 		DispatcherBus: dp,
-		ChStart:     make(chan int, CH_LENGTH),
-		ChFinish:    make(chan int, CH_LENGTH),
-		ChWorkorder: make(chan int, CH_LENGTH),
+		ChStart:       make(chan int, CH_LENGTH),
+		ChFinish:      make(chan int, CH_LENGTH),
+		ChWorkorder:   make(chan int, CH_LENGTH),
 	}
 
 	//s.methods.service = s
@@ -75,11 +73,11 @@ func (s *Service) Open() error {
 	//s.ControllerService.WS.OnNewClient = s.OnNewHmiConnect
 
 	s.dispatcherMap = dispatcherBus.DispatcherMap{
-		dispatcherBus.DISPATCH_RESULT: utils.CreateDispatchHandlerStruct(s.OnTighteningResult),
-		dispatcherBus.DISPATCH_IO: utils.CreateDispatchHandlerStruct(s.OnTighteningControllerIO),
+		dispatcherBus.DISPATCH_RESULT:            utils.CreateDispatchHandlerStruct(s.OnTighteningResult),
+		dispatcherBus.DISPATCH_IO:                utils.CreateDispatchHandlerStruct(s.OnTighteningControllerIO),
 		dispatcherBus.DISPATCH_CONTROLLER_STATUS: utils.CreateDispatchHandlerStruct(s.OnTighteningControllerStatus),
-		dispatcherBus.DISPATCH_TOOL_STATUS: utils.CreateDispatchHandlerStruct(s.OnTighteningToolStatus),
-		dispatcherBus.DISPATCH_CONTROLLER_ID: utils.CreateDispatchHandlerStruct(s.OnTighteningControllereID),
+		dispatcherBus.DISPATCH_TOOL_STATUS:       utils.CreateDispatchHandlerStruct(s.OnTighteningToolStatus),
+		dispatcherBus.DISPATCH_CONTROLLER_ID:     utils.CreateDispatchHandlerStruct(s.OnTighteningControllereID),
 		//order 相关
 		dispatcherBus.DISPATCHER_WS_ORDER_LIST:             utils.CreateDispatchHandlerStruct(s.OnWSOrderList),
 		dispatcherBus.DISPATCHER_WS_ORDER_DETAIL:           utils.CreateDispatchHandlerStruct(s.OnWSOrderDetail),
@@ -110,7 +108,7 @@ func (s *Service) Close() error {
 	return nil
 }
 
-func (s *Service) dispatchRequest(req *wsnotify.WSRequest) error{
+func (s *Service) dispatchRequest(req *wsnotify.WSRequest) error {
 	return s.DispatcherBus.Dispatch(req.WSMsg.Type, req)
 }
 

@@ -13,8 +13,6 @@ import (
 	"time"
 )
 
-
-
 type Service struct {
 	configValue   atomic.Value
 	ios           map[string]*IOModule
@@ -32,9 +30,9 @@ type Service struct {
 func NewService(c Config, d Diagnostic, dp Dispatcher) *Service {
 
 	s := &Service{
-		diag: d,
+		diag:          d,
 		DispatcherBus: dp,
-		ios:  map[string]*IOModule{},
+		ios:           map[string]*IOModule{},
 	}
 
 	s.configValue.Store(c)

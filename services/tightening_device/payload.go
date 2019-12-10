@@ -48,7 +48,6 @@ const (
 	RESULT_EXCEPTION                  = "exception"
 )
 
-
 type PSetDefine struct {
 	Strategy string  `json:"strategy"`
 	Mp       float64 `json:"M+"`

@@ -58,7 +58,7 @@ func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol, dp Disp
 
 	s := &Service{
 		diag:               d,
-		DispatcherBus: dp,
+		DispatcherBus:      dp,
 		mtxDevices:         sync.Mutex{},
 		runningControllers: map[string]ITighteningController{},
 		protocols:          map[string]ITighteningProtocol{},

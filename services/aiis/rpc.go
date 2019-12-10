@@ -56,10 +56,10 @@ type GRPCClient struct {
 	closing           chan chan struct{}
 }
 
-func NewGRPCClient( d Diagnostic,  dp Dispatcher) *GRPCClient {
+func NewGRPCClient(d Diagnostic, dp Dispatcher) *GRPCClient {
 	return &GRPCClient{
-		DispatcherBus:dp,
-		diag:d,
+		DispatcherBus: dp,
+		diag:          d,
 		dispatcherMap: dispatcherBus.DispatcherMap{},
 	}
 }
@@ -69,7 +69,7 @@ func (c *GRPCClient) AppendRPCGlbDispatch(name string, handler *utils.DispatchHa
 		err := errors.Errorf("GRPC Dispatcher Map, Name: %s Is Existed", name)
 		c.diag.Error("AppendRPCGlbDispatch", err)
 		return err
-	}else {
+	} else {
 		c.dispatcherMap[name] = handler
 	}
 	return nil

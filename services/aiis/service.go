@@ -19,7 +19,6 @@ import (
 	"sync"
 )
 
-
 type OnOdooStatus func(status string)
 
 type SyncGun func(string) (int64, error)
@@ -50,10 +49,10 @@ type Service struct {
 func NewService(c Config, d Diagnostic, port string, dp Dispatcher) *Service {
 	e, _ := c.index()
 	s := &Service{
-		diag:      d,
-		endpoints: e,
-		rush_port: port,
-		rpc: NewGRPCClient(d, dp),
+		diag:          d,
+		endpoints:     e,
+		rush_port:     port,
+		rpc:           NewGRPCClient(d, dp),
 		DispatcherBus: dp,
 		updateQueue:   map[int64]time.Time{},
 		opened:        false,
