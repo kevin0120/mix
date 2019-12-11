@@ -1,8 +1,13 @@
 import { WORKCENTER_MODE, workModes } from './constants';
 import type { tWorkCenterMode, tAction } from './interface/typeDef';
 
+const eSetting = require('electron-settings');
 
-const initState: tWorkCenterMode = workModes.normWorkCenterMode;
+
+const workCenterType = eSetting.get('system.workcenter.workcenterType');
+const initState: tWorkCenterMode = workCenterType === 'rework' ?
+  workModes.reworkWorkCenterMode :
+  workModes.normWorkCenterMode;
 
 
 export default function(state: tWorkCenterMode = initState, action: tAction): tWorkCenterMode {

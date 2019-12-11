@@ -18,6 +18,12 @@ export default class CommonExternalEntity implements ICommonExternalEntity {
 
   _parent: ICommonExternalEntity;
 
+  _invisible: boolean = false;
+
+  get invisible() {
+    return this._invisible;
+  }
+
   setParent(parent: ICommonExternalEntity): void {
     this._parent = parent;
   }
@@ -28,9 +34,10 @@ export default class CommonExternalEntity implements ICommonExternalEntity {
 
   _healthzListener = makeListener();
 
-  constructor(name: string) {
+  constructor(name: string, config = {}) {
     this._name = name;
-
+    const { invisible } = config;
+    this._invisible = invisible || this._invisible || false;
     /* eslint-disable flowtype/no-weak-types */
     (this: any).Enable = this.Enable.bind(this);
     (this: any).Disable = this.Disable.bind(this);
@@ -108,13 +115,18 @@ export default class CommonExternalEntity implements ICommonExternalEntity {
       } Healthz Status Change: ${isHealthz.toString()}`;
       CommonLog.Info(msg);
 
-      yield all(actions.map(a => put(a)));
+      if (!this.invisible) {
+        yield all(actions.map(a => put(a)));
+      }
     } catch (e) {
       CommonLog.lError(e, { at: 'setHealthz', name: this._name });
     }
   }
 
   get Healthz(): boolean {
+    if (this.invisible) {
+      return true;
+    }
     return this._isHealthz;
   }
 

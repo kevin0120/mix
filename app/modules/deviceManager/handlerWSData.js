@@ -47,11 +47,14 @@ export function* deviceStatus(data: tRushData<any, any>): Saga<void> {
     // eslint-disable-next-line no-restricted-syntax
     for (const d of data.data) {
       try {
-        const { sn, type, children, status, dData, config } = d;
+        const { sn, type, children, status, dData, config, invisible } = d;
         let dv = getDevice(sn);
         // try make a new device if dv doesn't exist
         if (!dv) {
-          dv = newDevice(type, `${type}-${sn}`, sn, config, dData, children);
+          dv = newDevice(type, `${type}-${sn}`, sn, {
+            config,
+            invisible
+          }, dData, children);
           newDeviceActions = [
             ...newDeviceActions,
             ...newDeviceListener.check(dv)
@@ -78,7 +81,9 @@ export function* deviceStatus(data: tRushData<any, any>): Saga<void> {
     yield all(setHealthzEffects);
 
     const status = {};
-    getAllDevices().forEach((d: IDevice) => {
+    const devices = getAllDevices().filter(d => !d.invisible);
+    console.log(devices);
+    devices.forEach((d: IDevice) => {
       status[d.Name] = d.Healthz;
     });
     yield put(healthzActions.data(status));

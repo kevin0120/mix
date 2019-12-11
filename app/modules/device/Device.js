@@ -26,7 +26,7 @@ export default class Device extends CommonExternalEntity implements IDevice {
 
   // eslint-disable-next-line flowtype/no-weak-types,no-unused-vars
   constructor(name: string, sn: tDeviceSN, config: Object, data: any) {
-    super(name);
+    super(name, config);
     this._serialNumber = sn;
     // eslint-disable-next-line flowtype/no-weak-types
     (this: any).doDispatch = this.doDispatch.bind(this);

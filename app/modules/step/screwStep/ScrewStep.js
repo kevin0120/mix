@@ -24,7 +24,6 @@ import { stepDataApi } from '../../../api/order';
 import type { IWorkable } from '../../workable/IWorkable';
 import { workModes } from '../../workCenterMode/constants';
 import { reworkDialogConstants as dia, reworkNS } from '../../reworkPattern/constants';
-import actions from '../../reworkPattern/action';
 import { tNS } from '../../../i18n';
 import { deviceType } from '../../deviceManager/constants';
 import SelectCard from '../../../components/SelectCard';

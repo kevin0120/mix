@@ -15,10 +15,10 @@ class ClsController extends Device implements IController {
   constructor(
     name: string,
     serialNumber: string,
-    config: tIOConfig,
+    config: Object,
     ...rest: Array<any>
   ) {
-    super(name, serialNumber);
+    super(name, serialNumber, config);
     (this: IDevice)._serialNumber = serialNumber;
     this._io = new ClsIOModule(name, serialNumber, config);
   }

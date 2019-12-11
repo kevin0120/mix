@@ -37,7 +37,7 @@ export default class ClsIOModule extends Device implements IIOModule {
     // eslint-disable-next-line no-unused-vars,flowtype/no-weak-types
     ...rest: Array<any>
   ) {
-    super(name, serialNumber);
+    super(name, serialNumber, config);
     if (!config) {
       throw new Error(`io缺少配置(${name}, ${serialNumber})`);
     }

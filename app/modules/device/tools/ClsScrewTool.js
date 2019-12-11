@@ -9,8 +9,8 @@ import type { IScrewTool } from './interface/IScrewTool';
 import type { IDevice } from '../IDevice';
 
 export default class ClsScrewTool extends Device implements IScrewTool {
-  constructor(name: string, serialNumber: string, ...rest: Array<any>) {
-    super(name, serialNumber);
+  constructor(name: string, serialNumber: string, config: Object, ...rest: Array<any>) {
+    super(name, serialNumber, config);
     /* eslint-disable flowtype/no-weak-types */
     (this: any).Enable = this.Enable.bind(this);
     (this: any).Disable = this.Disable.bind(this);

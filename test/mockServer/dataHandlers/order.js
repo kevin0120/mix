@@ -1,5 +1,4 @@
 const { events } = require('../constants');
-const { demoOrder, demoOrderJson } = require('../demo/demoOrder');
 const orderDetailData = require('../demo/orderDetailData.json');
 const failOrder = require('../demo/failOrder.json');
 

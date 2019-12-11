@@ -4,7 +4,7 @@ import type { tArrayDevices, tDeviceType } from './interface/typeDef';
 import type { tDeviceSN } from '../device/typeDef';
 import type { IDevice } from '../device/IDevice';
 import type { ICommonExternalEntity } from '../external/ICommonExternalEntity';
-import ClsController from '../device/controller/model';
+import ClsController from '../device/controller/ClsController';
 import ClsScanner from '../device/scanner/ClsScanner';
 import ClsScrewTool from '../device/tools/ClsScrewTool';
 import ClsReader from '../device/reader/ClsReader';
