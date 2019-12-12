@@ -140,6 +140,10 @@ func NewController(protocolConfig *Config, deviceConfig *tightening_device.Tight
 }
 
 func (c *TighteningController) UpdateToolStatus(status string) {
+	//v1, bool := c.Model().(string)
+	//if bool && v1 != "ModelDesoutterDeltaWrench" {
+	//	return
+	//}
 	for sn, v := range c.Children() {
 		tool := v.(*TighteningTool)
 		tool.UpdateStatus(status)
@@ -690,6 +694,11 @@ func (c *TighteningController) handleStatus(status string) {
 		}
 
 		// 分发控制器状态
+		//v1, bool := c.Model().(string)
+		//if bool && v1 != "ModelDesoutterDeltaWrench" {
+		//	return
+		//}
+
 		c.GetDispatch(tightening_device.DISPATCH_CONTROLLER_STATUS).Dispatch(&[]device.DeviceStatus{
 			{
 				Type:   tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER,

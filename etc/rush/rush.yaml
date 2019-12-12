@@ -83,9 +83,9 @@ websocket:
 
 storage:
   db_url: 127.0.0.1:5432
-  db_name: rush_ts002
-  db_user: admin
-  db_pwd: admin
+  db_name: rush_hardware
+  db_user: odoo
+  db_pwd: odoo
   max_connection: 60
   vacuum_period: 2160h
   data_keep: 2160h
@@ -125,13 +125,13 @@ io:
   ios:
     - sn: 1
       model: MOXA_E1212
-      address: 192.168.127.201:502
+      address: 192.168.3.250:502
 #    - sn: 2
 #      model: MOXA_E1212
-#      address: 192.168.127.202:502
+#      address: 192.168.3.251:502
 #    - sn: 3
 #      model: MOXA_E1242
-#      address: 192.168.127.203:502
+#      address: 192.168.3.252:502
 
 reader:
   enable: true
@@ -146,7 +146,7 @@ tightening_device:
   devices:
     - model: ModelDesoutterDeltaWrench
       protocol: OpenProtocol
-      endpoint: tcp://192.168.5.187:4545
+      endpoint: tcp://192.168.5.186:4545
       sn: c1
       tools:
         - sn: xx0011

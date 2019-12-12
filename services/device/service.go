@@ -128,27 +128,30 @@ func (s *Service) fetchAllDevices() []DeviceStatus {
 			}
 		}
 
+		var invisi = false
 		v1, bool := v.Model().(string)
-		if bool && v1 == "connect" {
-			continue
+		if bool && v1 != "ModelDesoutterDeltaWrench" {
+			invisi = true
 		}
 
 		devices = append(devices, DeviceStatus{
-			SN:       k,
-			Type:     v.DeviceType(),
-			Status:   v.Status(),
-			Children: children,
-			Config:   v.Config(),
-			Data:     v.Data(),
+			SN:        k,
+			Type:      v.DeviceType(),
+			Status:    v.Status(),
+			Children:  children,
+			Config:    v.Config(),
+			Data:      v.Data(),
+			Invisible: invisi,
 		})
 
 		for cSN, c := range v.Children() {
 			devices = append(devices, DeviceStatus{
-				SN:     cSN,
-				Type:   c.DeviceType(),
-				Status: c.Status(),
-				Config: c.Config(),
-				Data:   c.Data(),
+				SN:        cSN,
+				Type:      c.DeviceType(),
+				Status:    c.Status(),
+				Config:    c.Config(),
+				Data:      c.Data(),
+				Invisible: invisi,
 			})
 		}
 	}
