@@ -31,7 +31,6 @@ type Service struct {
 	StorageService *storage.Service
 	DispatcherBus  Dispatcher
 	DeviceService  *device.Service
-	wsnotify.WSNotify
 	dispatcherMap        dispatcherBus.DispatcherMap
 	Api                  *Api
 	requestDispatcherMap dispatcherBus.DispatcherMap
@@ -105,8 +104,6 @@ func (s *Service) Open() error {
 	if !s.config().Enable {
 		return nil
 	}
-
-	s.WS.AddNotify(s)
 
 	s.DispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
 

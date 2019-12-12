@@ -21,8 +21,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-
-
 const (
 	CH_LENGTH = 1024
 )
@@ -51,12 +49,12 @@ type Service struct {
 func NewService(d Diagnostic, dp Dispatcher) *Service {
 
 	s := &Service{
-		diag:        d,
+		diag:          d,
 		DispatcherBus: dp,
-		methods:     Methods{},
-		ChStart:     make(chan int, CH_LENGTH),
-		ChFinish:    make(chan int, CH_LENGTH),
-		ChWorkorder: make(chan int, CH_LENGTH),
+		methods:       Methods{},
+		ChStart:       make(chan int, CH_LENGTH),
+		ChFinish:      make(chan int, CH_LENGTH),
+		ChWorkorder:   make(chan int, CH_LENGTH),
 	}
 
 	s.methods.service = s
@@ -77,18 +75,11 @@ func (s *Service) Open() error {
 	s.ControllerService.WS.OnNewClient = s.OnNewHmiConnect
 
 	s.dispatcherMap = dispatcherBus.DispatcherMap{
-		dispatcherBus.DISPATCH_RESULT: utils.CreateDispatchHandlerStruct(s.OnTighteningResult),
-		dispatcherBus.DISPATCH_IO: utils.CreateDispatchHandlerStruct(s.OnTighteningControllerIO),
+		dispatcherBus.DISPATCH_RESULT:            utils.CreateDispatchHandlerStruct(s.OnTighteningResult),
+		dispatcherBus.DISPATCH_IO:                utils.CreateDispatchHandlerStruct(s.OnTighteningControllerIO),
 		dispatcherBus.DISPATCH_CONTROLLER_STATUS: utils.CreateDispatchHandlerStruct(s.OnTighteningControllerStatus),
-		dispatcherBus.DISPATCH_TOOL_STATUS: utils.CreateDispatchHandlerStruct(s.OnTighteningToolStatus),
-		dispatcherBus.DISPATCH_CONTROLLER_ID: utils.CreateDispatchHandlerStruct(s.OnTighteningControllereID),
-		//order 相关
-		dispatcherBus.DISPATCHER_WS_ORDER_LIST:             utils.CreateDispatchHandlerStruct(s.OnWSOrderList),
-		dispatcherBus.DISPATCHER_WS_ORDER_DETAIL:           utils.CreateDispatchHandlerStruct(s.OnWSOrderDetail),
-		dispatcherBus.DISPATCHER_WS_ORDER_UPDATE:           utils.CreateDispatchHandlerStruct(s.OnWSOrderUpdate),
-		dispatcherBus.DISPATCHER_WS_ORDER_STEP_UPDATE:      utils.CreateDispatchHandlerStruct(s.OnWSOrderStepUpdate),
-		dispatcherBus.DISPATCHER_WS_ORDER_STEP_DATA_UPDATE: utils.CreateDispatchHandlerStruct(s.OnWSOrderStepDataUpdate),
-		dispatcherBus.DISPATCHER_WS_ORDER_DETAIL_BY_CODE:   utils.CreateDispatchHandlerStruct(s.OnWSOrderDetailByCode),
+		dispatcherBus.DISPATCH_TOOL_STATUS:       utils.CreateDispatchHandlerStruct(s.OnTighteningToolStatus),
+		dispatcherBus.DISPATCH_CONTROLLER_ID:     utils.CreateDispatchHandlerStruct(s.OnTighteningControllereID),
 		//服务的状态变化
 		dispatcherBus.DISPATCH_ODOO_STATUS: utils.CreateDispatchHandlerStruct(s.OnOdooStatus),
 		dispatcherBus.DISPATCH_AIIS_STATUS: utils.CreateDispatchHandlerStruct(s.OnAiisStatus),
@@ -305,25 +296,38 @@ func (s *Service) Open() error {
 	}
 	s.Httpd.Handler[0].AddRoute(r)
 
-	s.ODOO.WS.AddNotify(s)
-
 	return nil
 
 }
 
 func (s *Service) Close() error {
 	s.diag.Close()
-	s.diag.Closed()
-
 	for name, v := range s.dispatcherMap {
-		s.DispatcherBus.Release(name, v.ID)
+		if err := s.DispatcherBus.Release(name, v.ID); err != nil {
+			s.diag.Error(" DispatcherBus Release", err)
+		}
 	}
-
+	s.diag.Closed()
+	
 	return nil
 }
 
-func (s *Service) dispatchRequest(req *wsnotify.WSRequest) error{
-	return s.DispatcherBus.Dispatch(req.WSMsg.Type, req)
+func (s *Service) dispatchRequest(req *wsnotify.WSRequest) error {
+	switch req.WSMsg.Type {
+	case dispatcherBus.DISPATCHER_WS_ORDER_LIST:
+		s.OnWSOrderList(req)
+	case dispatcherBus.DISPATCHER_WS_ORDER_DETAIL:
+		s.OnWSOrderDetail(req)
+	case dispatcherBus.DISPATCHER_WS_ORDER_UPDATE:
+		s.OnWSOrderUpdate(req)
+	case dispatcherBus.DISPATCHER_WS_ORDER_STEP_UPDATE:
+		s.OnWSOrderStepUpdate(req)
+	case dispatcherBus.DISPATCHER_WS_ORDER_STEP_DATA_UPDATE:
+		s.OnWSOrderStepDataUpdate(req)
+	case dispatcherBus.DISPATCHER_WS_ORDER_DETAIL_BY_CODE:
+		s.OnWSOrderDetailByCode(req)
+	}
+	return nil
 }
 
 func (s *Service) resetResult(id int64) error {
@@ -620,18 +624,22 @@ func (s *Service) OnWSOrderDetailByCode(data interface{}) {
 	_ = s.commonSendWebSocketMsg(c, wsnotify.WS_EVENT_ORDER, string(body))
 }
 
-func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
+func (s *Service) OnWSMsg(p interface{}) {
+	n := p.(*wsnotify.DispatcherNotifyPackage)
 	msg := wsnotify.WSMsg{}
-	err := json.Unmarshal(data, &msg)
+	err := json.Unmarshal(n.Data, &msg)
 	if err != nil {
-		s.diag.Error(string(data), err)
+		s.diag.Error("OnWSMsg", err)
 		return
 	}
 
-	s.dispatchRequest(&wsnotify.WSRequest{
-		C:     c,
+	if err := s.dispatchRequest(&wsnotify.WSRequest{
+		C:     n.C,
 		WSMsg: &msg,
-	})
+	}); err != nil {
+		s.diag.Error("OnWSMsg", err)
+		return
+	}
 }
 
 // 收到控制器结果
@@ -704,11 +712,11 @@ func (s *Service) OnTighteningControllerIO(data interface{}) {
 		return
 	}
 
-	ioStatus := data.(*io.IoContact)
+	ioContact := data.(*io.IoContact)
 
 	msg := wsnotify.WSMsg{
-		Type: io.WS_IO_CONTACT,
-		Data: ioStatus,
+		Type: dispatcherBus.DISPATCHER_WS_IO_CONTACT,
+		Data: ioContact,
 	}
 	payload, _ := json.Marshal(msg)
 	s.WS.NotifyAll(wsnotify.WS_EVENT_IO, string(payload))

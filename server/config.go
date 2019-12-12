@@ -43,7 +43,7 @@ type Config struct {
 
 	Aiis aiis.Config `yaml:"aiis"`
 
-	Ws wsnotify.Config `yaml:"websocket"`
+	WSNotify wsnotify.Config `yaml:"websocket"`
 
 	Odoo odoo.Config `yaml:"odoo"`
 
@@ -83,7 +83,7 @@ func NewConfig() *Config {
 	c.HTTP = httpd.NewConfig()
 	c.Minio = minio.NewConfig()
 	c.Aiis = aiis.NewConfig()
-	c.Ws = wsnotify.NewConfig()
+	c.WSNotify = wsnotify.NewConfig()
 	c.Storage = storage.NewConfig()
 	c.Logging = diagnostic.NewConfig()
 	c.AudiVW = audi_vw.NewConfig()
@@ -146,7 +146,7 @@ func (c *Config) Validate() error {
 		return errors.Wrap(err, "odoo")
 	}
 
-	if err := c.Ws.Validate(); err != nil {
+	if err := c.WSNotify.Validate(); err != nil {
 		return errors.Wrap(err, "websocket")
 	}
 

@@ -15,3 +15,16 @@ type Dispatcher interface {
 	LaunchDispatchersByHandlerMap(dispatcherMap dispatcherBus.DispatcherMap)
 	Release(name string, handler string) error
 }
+
+type IONotify interface {
+	OnStatus(sn string, status string)
+	OnChangeIOStatus(sn string, t string, status string)
+}
+
+type IO interface {
+	Status() string
+	Start() error
+	Stop() error
+	Read() (string, string, error)
+	Write(uint16, uint16) error
+}

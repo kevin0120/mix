@@ -109,8 +109,8 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	if err := s.initHTTPDService(); err != nil {
 		return nil, errors.Wrap(err, "init httpd service")
 	}
-
 	s.appendWebsocketService()
+
 
 	if err := s.initAudiVWDService(); err != nil {
 		return nil, errors.Wrap(err, "init Audi/VW service")
@@ -279,8 +279,6 @@ func (s *Server) appendDeviceService() error {
 	if err != nil {
 		return errors.Wrap(err, "append device service fail")
 	}
-	srv.WS = s.WSNotifyService
-	srv.DispatcherBus = s.DispatcherBusService
 
 	s.DeviceService = srv
 	s.AppendService("device", srv)
@@ -341,9 +339,9 @@ func (s *Server) appendOdooService() error {
 }
 
 func (s *Server) appendWebsocketService() error {
-	c := s.config.Ws
+	c := s.config.WSNotify
 	d := s.DiagService.NewWebsocketHandler()
-	srv := wsnotify.NewService(c, d)
+	srv := wsnotify.NewService(c, d, s.DispatcherBusService)
 
 	srv.Httpd = s.HTTPDService //http 服务注入
 

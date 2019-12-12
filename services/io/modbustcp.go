@@ -145,12 +145,12 @@ func (s *ModbusTcp) Read() (string, string, error) {
 
 	if s.inputs.Load().(string) != inputs {
 		s.inputs.Store(inputs)
-		s.notify.OnIOStatus(s.cfg.SN, IO_TYPE_INPUT, inputs)
+		s.notify.OnChangeIOStatus(s.cfg.SN, IO_TYPE_INPUT, inputs)
 	}
 
 	if s.outputs.Load().(string) != outputs {
 		s.outputs.Store(outputs)
-		s.notify.OnIOStatus(s.cfg.SN, IO_TYPE_OUTPUT, outputs)
+		s.notify.OnChangeIOStatus(s.cfg.SN, IO_TYPE_OUTPUT, outputs)
 	}
 
 	return inputs, outputs, nil

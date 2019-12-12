@@ -8,21 +8,6 @@ import (
 	"time"
 )
 
-
-
-type IONotify interface {
-	OnStatus(sn string, status string)
-	OnIOStatus(sn string, t string, status string)
-}
-
-type IO interface {
-	Status() string
-	Start() error
-	Stop() error
-	Read() (string, string, error)
-	Write(uint16, uint16) error
-}
-
 type IOModule struct {
 	device.BaseDevice
 	config ConfigIO

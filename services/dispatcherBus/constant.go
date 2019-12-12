@@ -60,4 +60,7 @@ const (
 
 	//broker
 	DISPATCH_BROKER_STATUS = "DISPATCH_BROKER_STATUS"
+
+	//websocket notify
+	DISPATCH_WS_NOTIFY = "DISPATCH_WS_NOTIFY"
 )
