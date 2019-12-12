@@ -3,7 +3,6 @@ package openprotocol
 import (
 	"fmt"
 	"github.com/masami10/rush/services/aiis"
-	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/storage"
@@ -31,18 +30,15 @@ type Service struct {
 	Minio *minio.Service
 	Odoo  *odoo.Service
 
-	Parent *controller.Service
-
 	devices []*TighteningController
 	tightening_device.ITighteningProtocol
 }
 
-func NewService(c Config, d Diagnostic, parent *controller.Service) *Service {
+func NewService(c Config, d Diagnostic) *Service {
 
 	s := &Service{
-		name:    controller.OPENPROTOCOL,
+		name:    tightening_device.TIGHTENING_OPENPROTOCOL,
 		diag:    d,
-		Parent:  parent,
 		devices: []*TighteningController{},
 	}
 
@@ -56,10 +52,10 @@ func (s *Service) config() Config {
 }
 
 func (s *Service) Name() string {
-	return "OpenProtocol"
+	return s.name
 }
 
-func (s *Service)SendIdentification(identification string) error  {
+func (s *Service) SendIdentification(identification string) error {
 	if s.WS == nil {
 		return errors.New("Please Inject Notify Service First")
 	}
@@ -427,10 +423,10 @@ func (s *Service) TryCreateMaintenance(info ToolInfo) error {
 	return s.Odoo.TryCreateMaintenance(info)
 }
 
-func (s *Service)OnStatus(string, string) {
+func (s *Service) OnStatus(string, string) {
 	return
 }
 
-func (s *Service)OnRecv(string, string) {
+func (s *Service) OnRecv(string, string) {
 	return
 }

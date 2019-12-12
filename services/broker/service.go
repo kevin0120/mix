@@ -2,7 +2,7 @@ package broker
 
 import (
 	"fmt"
-	"github.com/masami10/rush/services/dispatcherBus"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"sync/atomic"
@@ -21,7 +21,7 @@ type Service struct {
 	Provider            IBrokerProvider
 	opened              bool
 	DispatcherBus       Dispatcher
-	BrokerDispatcherMap dispatcherBus.DispatcherMap
+	BrokerDispatcherMap dispatcherbus.DispatcherMap
 	//BrokerStatusDisptcher *utils.Dispatcher
 	closing chan struct{}
 }
@@ -47,7 +47,7 @@ func (s *Service) Config() Config {
 }
 
 func (s *Service) initGblDispatcher() {
-	s.BrokerDispatcherMap = dispatcherBus.DispatcherMap{
+	s.BrokerDispatcherMap = dispatcherbus.DispatcherMap{
 		//dispatcherBus.DISPATCH_BROKER_STATUS: utils.CreateDispatchHandlerStruct(nil),
 	}
 }
@@ -66,7 +66,7 @@ func (s *Service) Close() error {
 	s.closing <- struct{}{}
 	//fixme: release
 	for _, h := range s.BrokerDispatcherMap {
-		s.DispatcherBus.Release(dispatcherBus.DISPATCH_BROKER_STATUS, h.ID)
+		s.DispatcherBus.Release(dispatcherbus.DISPATCH_BROKER_STATUS, h.ID)
 	}
 	if s.Provider != nil {
 		return s.Provider.Close()
@@ -81,7 +81,7 @@ func (s *Service) doConnect(opened bool) {
 	if opened {
 		status = utils.STATUS_ONLINE
 	}
-	s.DispatcherBus.Dispatch(dispatcherBus.DISPATCH_BROKER_STATUS, status)
+	s.DispatcherBus.Dispatch(dispatcherbus.DISPATCH_BROKER_STATUS, status)
 }
 
 func (s *Service) connectProc() {

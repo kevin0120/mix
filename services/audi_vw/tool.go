@@ -26,7 +26,6 @@ type TighteningTool struct {
 	cfg    tightening_device.ToolConfig
 	Mode   string
 	parent *TighteningController
-
 }
 
 // 工具使能控制

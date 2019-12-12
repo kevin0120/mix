@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/device"
-	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/scanner"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
@@ -107,7 +107,7 @@ func handleMID_7410_LAST_CURVE(c *TighteningController, pkg *handlerPkg) error {
 		defer delete(c.tempResultCurve, curve.ToolNumber)
 		c.tempResultCurve[curve.ToolNumber].ToolSN = sn
 		c.tempResultCurve[curve.ToolNumber].UpdateTime = time.Now()
-		c.dispatcherBus.Dispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherBus.DISPATCH_CURVE), c.tempResultCurve[curve.ToolNumber])
+		c.dispatcherBus.Dispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCH_CURVE), c.tempResultCurve[curve.ToolNumber])
 	}
 	return nil
 }
@@ -273,7 +273,7 @@ func handleMID_0211_INPUT_MONITOR(c *TighteningController, pkg *handlerPkg) erro
 	c.inputs = inputs.Inputs
 
 	// 分发控制器输入状态
-	c.dispatcherBus.Dispatch(dispatcherBus.DISPATCH_IO_PREVIEW, inputs.ToTighteningControllerInput())
+	c.dispatcherBus.Dispatch(dispatcherbus.DISPATCH_IO_PREVIEW, inputs.ToTighteningControllerInput())
 
 	return nil
 }
@@ -317,7 +317,7 @@ func handleMID_0052_VIN(c *TighteningController, pkg *handlerPkg) error {
 		SN:      c.deviceConf.SN,
 		Barcode: bc,
 	}
-	c.dispatcherBus.Dispatch(dispatcherBus.DISPATCH_CONTROLLER_ID_PREVIEW, ss)
+	c.dispatcherBus.Dispatch(dispatcherbus.DISPATCH_CONTROLLER_ID_PREVIEW, ss)
 
 	return nil
 }

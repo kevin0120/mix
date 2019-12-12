@@ -1,4 +1,4 @@
-package dispatcherBus
+package dispatcherbus
 
 import (
 	"github.com/masami10/rush/utils"
@@ -81,7 +81,7 @@ func (s *Service) Create(name string, len int) error {
 	return nil
 }
 
-func (s *Service) Start(name string) error{
+func (s *Service) Start(name string) error {
 	dispatcher, err := s.getDispatcher(name)
 	if err != nil {
 		s.diag.Error("Start", err)

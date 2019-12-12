@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/kataras/iris"
 	"github.com/masami10/rush/services/aiis"
-	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
 	"strconv"
 	"strings"
@@ -107,40 +107,40 @@ func (m *Methods) getResults(ctx iris.Context) {
 			}
 		}
 
-		r := controller.ResultValue{}
+		r := tightening_device.ResultValue{}
 		json.Unmarshal([]byte(v.ResultValue), &r)
 
-		pset := controller.PSetDefine{}
+		pset := tightening_device.PSetDefine{}
 		json.Unmarshal([]byte(v.PSetDefine), &pset)
 
 		if v.Result == storage.RESULT_OK {
-			odooResultSync.Final_pass = controller.ODOO_RESULT_PASS
+			odooResultSync.Final_pass = tightening_device.RESULT_PASS
 			if v.Count == 1 {
-				odooResultSync.One_time_pass = controller.ODOO_RESULT_PASS
+				odooResultSync.One_time_pass = tightening_device.RESULT_PASS
 			} else {
-				odooResultSync.One_time_pass = controller.ODOO_RESULT_FAIL
+				odooResultSync.One_time_pass = tightening_device.RESULT_FAIL
 			}
 
 			if (r.Mi >= v.ToleranceMin && r.Mi <= v.ToleranceMax) &&
 				(r.Wi >= v.ToleranceMinDegree && r.Wi <= v.ToleranceMaxDegree) {
-				odooResultSync.QualityState = controller.QUALITY_STATE_PASS
+				odooResultSync.QualityState = tightening_device.RESULT_PASS
 				odooResultSync.ExceptionReason = ""
 			} else {
-				odooResultSync.QualityState = controller.QUALITY_STATE_EX
-				odooResultSync.ExceptionReason = controller.QUALITY_STATE_EX
+				odooResultSync.QualityState = tightening_device.RESULT_EXCEPTION
+				odooResultSync.ExceptionReason = tightening_device.RESULT_EXCEPTION
 			}
 
 		} else {
-			odooResultSync.Final_pass = controller.ODOO_RESULT_FAIL
-			odooResultSync.One_time_pass = controller.ODOO_RESULT_FAIL
+			odooResultSync.Final_pass = tightening_device.RESULT_FAIL
+			odooResultSync.One_time_pass = tightening_device.RESULT_FAIL
 
 			if (r.Mi >= v.ToleranceMin && r.Mi <= v.ToleranceMax) &&
 				(r.Wi >= v.ToleranceMinDegree && r.Wi <= v.ToleranceMaxDegree) {
 
-				odooResultSync.QualityState = controller.QUALITY_STATE_EX
-				odooResultSync.ExceptionReason = controller.QUALITY_STATE_EX
+				odooResultSync.QualityState = tightening_device.RESULT_EXCEPTION
+				odooResultSync.ExceptionReason = tightening_device.RESULT_EXCEPTION
 			} else {
-				odooResultSync.QualityState = controller.QUALITY_STATE_FAIL
+				odooResultSync.QualityState = tightening_device.RESULT_FAIL
 				odooResultSync.ExceptionReason = ""
 			}
 

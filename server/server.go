@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"github.com/masami10/rush/command"
 	"github.com/masami10/rush/keyvalue"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/broker"
-	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/diagnostic"
-	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/hmi"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/io"
@@ -49,8 +48,8 @@ type Server struct {
 	dataDir  string
 	hostname string
 
-	StorageServie     *storage.Service
-	ControllerService *controller.Service
+	StorageServie *storage.Service
+	//ControllerService *controller.Service
 
 	HTTPDService        *httpd.Service
 	OdooService         *odoo.Service
@@ -67,7 +66,7 @@ type Server struct {
 
 	TighteningDeviceService *tightening_device.Service
 	DeviceService           *device.Service
-	DispatcherBusService    *dispatcherBus.Service
+	DispatcherBusService    *dispatcherbus.Service
 
 	BrokerService *broker.Service
 
@@ -126,10 +125,6 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 
 	s.appendDeviceService()
 
-	if err := s.appendControllersService(); err != nil {
-		return nil, errors.Wrap(err, "Controllers service")
-	}
-
 	s.appendAudiVWService() //此服务必须在控制器服务后进行append
 
 	s.appendOpenProtocolService()
@@ -164,7 +159,7 @@ func (s *Server) AppendService(name string, srv Service) {
 func (s *Server) appendDispatcherBus() error {
 	c := s.config.DispatcherBus
 	d := s.DiagService.NewDispatcherBusHandler()
-	srv, err := dispatcherBus.NewService(c, d)
+	srv, err := dispatcherbus.NewService(c, d)
 
 	if err != nil {
 		return errors.Wrap(err, "Append DispatcherBus Service Fail")
@@ -194,7 +189,7 @@ func (s *Server) initHTTPDService() error {
 func (s *Server) initAudiVWDService() error {
 	c := s.config.AudiVW
 	d := s.DiagService.NewAudiVWHandler()
-	srv := audi_vw.NewService(c, d, s.ControllerService)
+	srv := audi_vw.NewService(c, d)
 
 	s.AudiVWService = srv
 
@@ -208,7 +203,6 @@ func (s *Server) appendAudiVWService() {
 	s.AudiVWService.WS = s.WSNotifyService
 	s.AudiVWService.DB = s.StorageServie
 	s.AudiVWService.Odoo = s.OdooService
-	s.AudiVWService.Parent = s.ControllerService
 
 	s.AppendService("audi/vw", s.AudiVWService)
 }
@@ -216,7 +210,7 @@ func (s *Server) appendAudiVWService() {
 func (s *Server) initOpenProtocolService() error {
 	c := s.config.OpenProtocol
 	d := s.DiagService.NewOpenProtocolHandler()
-	srv := openprotocol.NewService(c, d, s.ControllerService)
+	srv := openprotocol.NewService(c, d)
 
 	s.OpenprotocolService = srv
 
@@ -229,7 +223,6 @@ func (s *Server) appendOpenProtocolService() {
 	s.OpenprotocolService.Aiis = s.AiisService
 	s.OpenprotocolService.WS = s.WSNotifyService
 	s.OpenprotocolService.DB = s.StorageServie
-	s.OpenprotocolService.Parent = s.ControllerService
 	s.OpenprotocolService.Odoo = s.OdooService
 
 	s.AppendService("openprotocol", s.OpenprotocolService)
@@ -247,26 +240,6 @@ func (s *Server) appendMinioService() error {
 
 	s.MinioService = srv
 	s.AppendService("minio", srv)
-
-	return nil
-}
-
-func (s *Server) appendControllersService() error {
-	c := s.config.Contollers
-	d := s.DiagService.NewControllerHandler()
-	srv, err := controller.NewService(c, d, s.AudiVWService, s.OpenprotocolService)
-
-	if err != nil {
-		return errors.Wrap(err, "append TighteningController service fail")
-	}
-
-	srv.DB = s.StorageServie
-	srv.WS = s.WSNotifyService
-	srv.Aiis = s.AiisService
-	srv.Minio = s.MinioService
-	srv.Device = s.DeviceService
-	s.ControllerService = srv
-	s.AppendService("controller", srv)
 
 	return nil
 }
@@ -360,7 +333,6 @@ func (s *Server) appendHMIService() error {
 	srv.DB = s.StorageServie   // stroage 服务注入
 	srv.AudiVw = s.AudiVWService
 	srv.SN = s.config.SN
-	srv.ControllerService = s.ControllerService
 	srv.OpenProtocol = s.OpenprotocolService
 	srv.TighteningService = s.TighteningDeviceService
 	srv.WS = s.WSNotifyService

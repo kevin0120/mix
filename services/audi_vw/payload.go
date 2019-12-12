@@ -4,9 +4,9 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/storage"
+	"github.com/masami10/rush/services/tightening_device"
 	"strconv"
 	"strings"
 )
@@ -315,65 +315,65 @@ func XML2Curve(result *CVI3Result, cur_result *minio.ControllerCurve) {
 
 }
 
-func XML2Result(result *CVI3Result, rr *controller.ControllerResult) {
+func XML2Result(result *CVI3Result, rr *tightening_device.TighteningResult) {
 
-	blcs := result.PRC_SST.PAR.FAS.GRP.TIP.BLC
+	//blcs := result.PRC_SST.PAR.FAS.GRP.TIP.BLC
 
-	rr.TighteningID = result.PRC_SST.PAR.FAS.GRP.TIP.TID
-	rr.Controller_SN = result.PRC_SST.PAR.SN
-	rr.GunSN = result.PRC_SST.PAR.FAS.GRP.TIP.ToolSN
-	rr.Result = result.PRC_SST.PAR.Result
-	if rr.Result == "IO" {
-		rr.Result = storage.RESULT_OK
-	} else if rr.Result == "NIO" {
-		rr.Result = storage.RESULT_NOK
-	}
-
-	rr.PSet = result.PRC_SST.PAR.FAS.GRP.TIP.PSet
-	rr.Workorder_ID = result.PRC_SST.PAR.Workorder_id
-	rr.UserID = result.PRC_SST.PAR.FAS.UserID
-	rr.Dat = fmt.Sprintf("%s %s", result.PRC_SST.PAR.FAS.GRP.TIP.Date, result.PRC_SST.PAR.FAS.GRP.TIP.Time)
+	//rr.TighteningID = result.PRC_SST.PAR.FAS.GRP.TIP.TID
+	//rr.Controller_SN = result.PRC_SST.PAR.SN
+	//rr.GunSN = result.PRC_SST.PAR.FAS.GRP.TIP.ToolSN
+	//rr.Result = result.PRC_SST.PAR.Result
+	//if rr.Result == "IO" {
+	//	rr.Result = storage.RESULT_OK
+	//} else if rr.Result == "NIO" {
+	//	rr.Result = storage.RESULT_NOK
+	//}
+	//
+	//rr.PSet = result.PRC_SST.PAR.FAS.GRP.TIP.PSet
+	//rr.Workorder_ID = result.PRC_SST.PAR.Workorder_id
+	//rr.UserID = result.PRC_SST.PAR.FAS.UserID
+	//rr.Dat = fmt.Sprintf("%s %s", result.PRC_SST.PAR.FAS.GRP.TIP.Date, result.PRC_SST.PAR.FAS.GRP.TIP.Time)
 
 	seq, _ := strconv.Atoi(result.PRC_SST.PAR.Result_id)
 	rr.Seq = seq
 	//rr.CurFile = fmt.Sprintf("%s_%d_%s_%s.json", rr.ControllerSN, rr.Workorder_ID, result_id, utils.GenerateID())
 
-	if result.PRC_SST.PAR.FAS.GRP.TIP.STA == "LSN" {
-		rr.PSetDefine.Strategy = controller.STRATEGY_LN
-		rr.Result = "LSN"
-	} else {
-		rr.PSetDefine.Strategy = blcs[len(blcs)-1].PRO.Strategy
-	}
+	//if result.PRC_SST.PAR.FAS.GRP.TIP.STA == "LSN" {
+	//	rr.PSetDefine.Strategy = controller.STRATEGY_LN
+	//	rr.Result = "LSN"
+	//} else {
+	//	rr.PSetDefine.Strategy = blcs[len(blcs)-1].PRO.Strategy
+	//}
 
 	rr.Count = result.PRC_SST.PAR.Count
 
-	result_values := blcs[len(blcs)-1].PRO.Values
-	for i := range result_values {
-		switch result_values[i].Name {
-		case "M+":
-			rr.PSetDefine.Mp = result_values[i].Value
-		case "M-":
-			rr.PSetDefine.Mm = result_values[i].Value
-		case "MS":
-			rr.PSetDefine.Ms = result_values[i].Value
-		case "MA":
-			rr.PSetDefine.Ma = result_values[i].Value
-		case "W+":
-			rr.PSetDefine.Wp = result_values[i].Value
-		case "W-":
-			rr.PSetDefine.Wm = result_values[i].Value
-		case "WA":
-			rr.PSetDefine.Wa = result_values[i].Value
-		case "MI":
-			rr.ResultValue.Mi = result_values[i].Value
-		case "WI":
-			rr.ResultValue.Wi = result_values[i].Value
-		case "tI":
-			if result_values[i].Unit == "s" {
-				rr.ResultValue.Ti = result_values[i].Value * 1000
-			} else {
-				rr.ResultValue.Ti = result_values[i].Value
-			}
-		}
-	}
+	//result_values := blcs[len(blcs)-1].PRO.Values
+	//for i := range result_values {
+	//	switch result_values[i].Name {
+	//	case "M+":
+	//		rr.PSetDefine.Mp = result_values[i].Value
+	//	case "M-":
+	//		rr.PSetDefine.Mm = result_values[i].Value
+	//	case "MS":
+	//		rr.PSetDefine.Ms = result_values[i].Value
+	//	case "MA":
+	//		rr.PSetDefine.Ma = result_values[i].Value
+	//	case "W+":
+	//		rr.PSetDefine.Wp = result_values[i].Value
+	//	case "W-":
+	//		rr.PSetDefine.Wm = result_values[i].Value
+	//	case "WA":
+	//		rr.PSetDefine.Wa = result_values[i].Value
+	//	case "MI":
+	//		rr.ResultValue.Mi = result_values[i].Value
+	//	case "WI":
+	//		rr.ResultValue.Wi = result_values[i].Value
+	//	case "tI":
+	//		if result_values[i].Unit == "s" {
+	//			rr.ResultValue.Ti = result_values[i].Value * 1000
+	//		} else {
+	//			rr.ResultValue.Ti = result_values[i].Value
+	//		}
+	//	}
+	//}
 }

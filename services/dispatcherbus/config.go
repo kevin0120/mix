@@ -1,4 +1,4 @@
-package dispatcherBus
+package dispatcherbus
 
 type Config struct {
 }

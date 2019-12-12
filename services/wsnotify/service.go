@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/kataras/iris/core/errors"
 	"github.com/kataras/iris/websocket"
-	"github.com/masami10/rush/services/dispatcherBus"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/utils"
 	"sync/atomic"
@@ -69,7 +69,7 @@ func (s *Service) Config() Config {
 
 func (s *Service) NewWebSocketRecvHandler(handler func(interface{})) {
 	fn := utils.CreateDispatchHandlerStruct(handler)
-	s.dispatcherBus.Register(dispatcherBus.DISPATCH_WS_NOTIFY, fn)
+	s.dispatcherBus.Register(dispatcherbus.DISPATCH_WS_NOTIFY, fn)
 }
 
 func (s *Service) onConnect(c websocket.Connection) {
@@ -156,15 +156,15 @@ func NewService(c Config, d Diagnostic, dp Dispatcher) *Service {
 }
 
 func (s *Service) createAndStartWebSocketNotifyDispatcher() error{
-	if err := s.dispatcherBus.Create(dispatcherBus.DISPATCH_WS_NOTIFY, utils.DefaultDispatcherBufLen); err != nil {
+	if err := s.dispatcherBus.Create(dispatcherbus.DISPATCH_WS_NOTIFY, utils.DefaultDispatcherBufLen); err != nil {
 		return err
 	}else {
-		return s.dispatcherBus.Start(dispatcherBus.DISPATCH_WS_NOTIFY)
+		return s.dispatcherBus.Start(dispatcherbus.DISPATCH_WS_NOTIFY)
 	}
 }
 
 func (s *Service) postNotify(msg *DispatcherNotifyPackage) {
-	if err := s.dispatcherBus.Dispatch(dispatcherBus.DISPATCH_WS_NOTIFY, msg); err != nil {
+	if err := s.dispatcherBus.Dispatch(dispatcherbus.DISPATCH_WS_NOTIFY, msg); err != nil {
 		s.diag.Error("notify", err)
 	}
 }

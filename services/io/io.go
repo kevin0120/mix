@@ -2,10 +2,11 @@ package io
 
 import (
 	"fmt"
-	"github.com/masami10/rush/services/device"
-	"github.com/pkg/errors"
 	"sync"
 	"time"
+
+	"github.com/masami10/rush/services/device"
+	"github.com/pkg/errors"
 )
 
 type IOModule struct {

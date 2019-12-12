@@ -6,9 +6,8 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	"github.com/masami10/rush/services/controller"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/device"
-	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/socket_writer"
@@ -65,7 +64,7 @@ type TighteningController struct {
 	receiveBuf           chan []byte
 	controllerSubscribes []ControllerSubscribe
 	dispatcherBus        Dispatcher
-	dispatcherMap        map[string]dispatcherBus.DispatcherMap
+	dispatcherMap        map[string]dispatcherbus.DispatcherMap
 	externalDispatches   map[string]*utils.Dispatcher
 
 	requestChannel chan uint32
@@ -83,8 +82,8 @@ func defaultControllerGet() *TighteningController {
 		keepPeriod:        time.Duration(OpenProtocolDefaultKeepAlivePeriod),
 		reqTimeout:        time.Duration(OpenProtocolDefaultKeepAlivePeriod),
 		getToolInfoPeriod: time.Duration(OpenProtocolDefaultGetTollInfoPeriod),
-		protocol:          controller.OPENPROTOCOL,
-		dispatcherMap:     map[string]dispatcherBus.DispatcherMap{},
+		protocol:          tightening_device.TIGHTENING_OPENPROTOCOL,
+		dispatcherMap:     map[string]dispatcherbus.DispatcherMap{},
 		tempResultCurve:   map[int]*tightening_device.TighteningCurve{},
 		sockClients:       map[string]*socket_writer.SocketWriter{},
 	}
@@ -97,9 +96,9 @@ func (c *TighteningController) createToolsByConfig() error {
 	}
 	for _, v := range conf.Tools {
 		tool := CreateTool(c, v, d)
-		c.dispatcherMap[tool.SerialNumber()] = dispatcherBus.DispatcherMap{
-			tool.GenerateDispatcherNameBySerialNumber(dispatcherBus.DISPATCH_RESULT): utils.CreateDispatchHandlerStruct(tool.OnResult),
-			tool.GenerateDispatcherNameBySerialNumber(dispatcherBus.DISPATCH_CURVE):  utils.CreateDispatchHandlerStruct(tool.OnCurve),
+		c.dispatcherMap[tool.SerialNumber()] = dispatcherbus.DispatcherMap{
+			tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCH_RESULT): utils.CreateDispatchHandlerStruct(tool.OnResult),
+			tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCH_CURVE):  utils.CreateDispatchHandlerStruct(tool.OnCurve),
 		}
 		c.AddChildren(v.SN, tool)
 	}
@@ -138,7 +137,7 @@ func (c *TighteningController) UpdateToolStatus(status string) {
 		})
 	}
 	if data, err := json.Marshal(ss); err == nil {
-		c.dispatcherBus.Dispatch(dispatcherBus.DISPATCH_TOOL_STATUS_PREVIEW, data)
+		c.dispatcherBus.Dispatch(dispatcherbus.DISPATCH_TOOL_STATUS_PREVIEW, data)
 	}
 }
 
@@ -217,7 +216,7 @@ func (c *TighteningController) ProcessRequest(mid string, noack string, station 
 	reply := c.Response.Get(seq, ctx)
 
 	if reply == nil {
-		return nil, errors.New(controller.ERR_CONTROLER_TIMEOUT)
+		return nil, errors.New(tightening_device.TIGHTENING_ERR_TIMEOUT)
 	}
 
 	return reply, nil
@@ -303,7 +302,7 @@ func (c *TighteningController) handleResult(result *tightening_device.Tightening
 	result.ToolSN = toolSerialNumber
 
 	// 分发结果到工具进行处理
-	c.dispatcherBus.Dispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherBus.DISPATCH_RESULT), result)
+	c.dispatcherBus.Dispatch(tool.GenerateDispatcherNameBySerialNumber(dispatcherbus.DISPATCH_RESULT), result)
 
 	return nil
 }
@@ -633,7 +632,7 @@ func (c *TighteningController) handleStatus(status string) {
 			},
 		}
 		// 分发控制器状态 -> tightening device
-		c.dispatcherBus.Dispatch(dispatcherBus.DISPATCH_CONTROLLER_STATUS_PREVIEW, ss)
+		c.dispatcherBus.Dispatch(dispatcherbus.DISPATCH_CONTROLLER_STATUS_PREVIEW, ss)
 	}
 }
 

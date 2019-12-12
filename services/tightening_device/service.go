@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kataras/iris/websocket"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/device"
-	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
@@ -27,13 +27,13 @@ type Service struct {
 	mtxDevices         sync.Mutex
 	protocols          map[string]ITighteningProtocol
 
-	WS             *wsnotify.Service
-	StorageService *storage.Service
-	DispatcherBus  Dispatcher
-	DeviceService  *device.Service
-	dispatcherMap        dispatcherBus.DispatcherMap
+	WS                   *wsnotify.Service
+	StorageService       *storage.Service
+	DispatcherBus        Dispatcher
+	DeviceService        *device.Service
+	dispatcherMap        dispatcherbus.DispatcherMap
 	Api                  *Api
-	requestDispatcherMap dispatcherBus.DispatcherMap
+	requestDispatcherMap dispatcherbus.DispatcherMap
 }
 
 func (s *Service) loadTighteningController(c Config) {
@@ -57,7 +57,7 @@ func NewService(c Config, d Diagnostic, protocols []ITighteningProtocol, dp Disp
 
 	s := &Service{
 		diag:               d,
-		DispatcherBus: dp,
+		DispatcherBus:      dp,
 		mtxDevices:         sync.Mutex{},
 		runningControllers: map[string]ITighteningController{},
 		protocols:          map[string]ITighteningProtocol{},
@@ -90,12 +90,12 @@ func (s *Service) getProtocol(protocolName string) (ITighteningProtocol, error) 
 
 func (s *Service) initGblDispatcher() {
 
-	s.dispatcherMap = dispatcherBus.DispatcherMap{
-		dispatcherBus.DISPATCH_RESULT_PREVIEW:            utils.CreateDispatchHandlerStruct(s.OnResult),
-		dispatcherBus.DISPATCH_TOOL_STATUS_PREVIEW:       utils.CreateDispatchHandlerStruct(s.OnToolStatus),
-		dispatcherBus.DISPATCH_CONTROLLER_STATUS_PREVIEW: utils.CreateDispatchHandlerStruct(s.OnControllerStatus),
-		dispatcherBus.DISPATCH_IO_PREVIEW:                utils.CreateDispatchHandlerStruct(s.OnIOInputs),
-		dispatcherBus.DISPATCH_CONTROLLER_ID_PREVIEW:     utils.CreateDispatchHandlerStruct(s.OnControllerBarcode),
+	s.dispatcherMap = dispatcherbus.DispatcherMap{
+		dispatcherbus.DISPATCH_RESULT_PREVIEW:            utils.CreateDispatchHandlerStruct(s.OnResult),
+		dispatcherbus.DISPATCH_TOOL_STATUS_PREVIEW:       utils.CreateDispatchHandlerStruct(s.OnToolStatus),
+		dispatcherbus.DISPATCH_CONTROLLER_STATUS_PREVIEW: utils.CreateDispatchHandlerStruct(s.OnControllerStatus),
+		dispatcherbus.DISPATCH_IO_PREVIEW:                utils.CreateDispatchHandlerStruct(s.OnIOInputs),
+		dispatcherbus.DISPATCH_CONTROLLER_ID_PREVIEW:     utils.CreateDispatchHandlerStruct(s.OnControllerBarcode),
 	}
 
 }
@@ -115,7 +115,7 @@ func (s *Service) Open() error {
 	controllers := s.GetControllers()
 	for _, c := range controllers {
 		for toolSN, _ := range c.Children() {
-			s.doDispatch(dispatcherBus.DISPATCH_NEW_TOOL, toolSN)
+			s.doDispatch(dispatcherbus.DISPATCH_NEW_TOOL, toolSN)
 		}
 	}
 
@@ -143,11 +143,11 @@ func (s *Service) config() Config {
 }
 
 func (s *Service) initAndStartRequestDispatchers() {
-	s.requestDispatcherMap = dispatcherBus.DispatcherMap{
-		dispatcherBus.WS_TOOL_MODE_SELECT: utils.CreateDispatchHandlerStruct(s.OnWS_TOOL_MODE_SELECT),
-		dispatcherBus.WS_TOOL_ENABLE:      utils.CreateDispatchHandlerStruct(s.OnWS_TOOL_ENABLE),
-		dispatcherBus.WS_TOOL_JOB:         utils.CreateDispatchHandlerStruct(s.OnWS_TOOL_JOB),
-		dispatcherBus.WS_TOOL_PSET:        utils.CreateDispatchHandlerStruct(s.OnWS_TOOL_PSET),
+	s.requestDispatcherMap = dispatcherbus.DispatcherMap{
+		dispatcherbus.WS_TOOL_MODE_SELECT: utils.CreateDispatchHandlerStruct(s.OnWS_TOOL_MODE_SELECT),
+		dispatcherbus.WS_TOOL_ENABLE:      utils.CreateDispatchHandlerStruct(s.OnWS_TOOL_ENABLE),
+		dispatcherbus.WS_TOOL_JOB:         utils.CreateDispatchHandlerStruct(s.OnWS_TOOL_JOB),
+		dispatcherbus.WS_TOOL_PSET:        utils.CreateDispatchHandlerStruct(s.OnWS_TOOL_PSET),
 	}
 
 	s.DispatcherBus.LaunchDispatchersByHandlerMap(s.requestDispatcherMap)
@@ -265,27 +265,27 @@ func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {
 
 // 收到结果
 func (s *Service) OnResult(data interface{}) {
-	s.doDispatch(dispatcherBus.DISPATCH_RESULT, data)
+	s.doDispatch(dispatcherbus.DISPATCH_RESULT, data)
 }
 
 // 控制器IO变化
 func (s *Service) OnIOInputs(data interface{}) {
-	s.doDispatch(dispatcherBus.DISPATCH_IO, data)
+	s.doDispatch(dispatcherbus.DISPATCH_IO, data)
 }
 
 // 控制器状态变化
 func (s *Service) OnControllerStatus(data interface{}) {
-	s.doDispatch(dispatcherBus.DISPATCH_CONTROLLER_STATUS, data)
+	s.doDispatch(dispatcherbus.DISPATCH_CONTROLLER_STATUS, data)
 }
 
 // 工具状态变化
 func (s *Service) OnToolStatus(data interface{}) {
-	s.doDispatch(dispatcherBus.DISPATCH_TOOL_STATUS, data)
+	s.doDispatch(dispatcherbus.DISPATCH_TOOL_STATUS, data)
 }
 
 // 控制器条码
 func (s *Service) OnControllerBarcode(data interface{}) {
-	s.doDispatch(dispatcherBus.DISPATCH_CONTROLLER_ID, data)
+	s.doDispatch(dispatcherbus.DISPATCH_CONTROLLER_ID, data)
 }
 
 func (s *Service) doDispatch(name string, data interface{}) {

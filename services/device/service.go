@@ -2,10 +2,11 @@ package device
 
 import (
 	"encoding/json"
-	"github.com/masami10/rush/services/wsnotify"
 	"reflect"
 	"sync"
 	"sync/atomic"
+
+	"github.com/masami10/rush/services/wsnotify"
 )
 
 type Diagnostic interface {

@@ -3,7 +3,7 @@ package odoo
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/masami10/rush/services/dispatcherBus"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/wsnotify"
@@ -59,7 +59,7 @@ type Service struct {
 	status            string
 	WS                *wsnotify.Service
 	dispatcherBus     Dispatcher
-	dispatcherMap     dispatcherBus.DispatcherMap
+	dispatcherMap     dispatcherbus.DispatcherMap
 	workordersChannel chan interface{}
 	opened            bool
 	wg                sync.WaitGroup
@@ -87,9 +87,9 @@ func NewService(c Config, d Diagnostic, dp Dispatcher) *Service {
 	return s
 }
 
-func (s *Service)initGblDispatch()  {
-	s.dispatcherMap = dispatcherBus.DispatcherMap{
-		dispatcherBus.DISPATCH_ODOO_STATUS: utils.CreateDispatchHandlerStruct(s.OnStatus),
+func (s *Service) initGblDispatch() {
+	s.dispatcherMap = dispatcherbus.DispatcherMap{
+		dispatcherbus.DISPATCH_ODOO_STATUS: utils.CreateDispatchHandlerStruct(s.OnStatus),
 	}
 }
 

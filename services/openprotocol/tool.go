@@ -3,8 +3,8 @@ package openprotocol
 import (
 	"errors"
 	"fmt"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/device"
-	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/utils"
 	"sync/atomic"
@@ -294,7 +294,7 @@ func (s *TighteningTool) OnResult(result interface{}) {
 	}
 
 	tighteningResult := result.(*tightening_device.TighteningResult)
-	dbTool, err := s.controller.ProtocolService.DB.GetGun(s.cfg.SN)
+	dbTool, err := s.controller.ProtocolService.DB.GetTool(s.cfg.SN)
 	if err == nil {
 		if s.Mode() == tightening_device.MODE_JOB {
 			tighteningResult.Seq, tighteningResult.Count = s.controller.calBatch(dbTool.WorkorderID)
@@ -332,7 +332,7 @@ func (s *TighteningTool) OnResult(result interface{}) {
 
 	// 分发结果
 	tighteningResult.ID = dbResult.Id
-	s.controller.dispatcherBus.Dispatch(dispatcherBus.DISPATCH_RESULT_PREVIEW, tighteningResult)
+	s.controller.dispatcherBus.Dispatch(dispatcherbus.DISPATCH_RESULT_PREVIEW, tighteningResult)
 }
 
 // 处理曲线

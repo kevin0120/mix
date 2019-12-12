@@ -1,7 +1,7 @@
 package aiis
 
 import (
-	"github.com/masami10/rush/services/dispatcherBus"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/wsnotify"
 	"sync/atomic"
 	"time"
@@ -19,7 +19,6 @@ import (
 	"sync"
 )
 
-
 type OnOdooStatus func(status string)
 
 type SyncGun func(string) (int64, error)
@@ -36,7 +35,7 @@ type Service struct {
 	WS            *wsnotify.Service
 	updateQueue   map[int64]time.Time
 	mtx           sync.Mutex
-	dispatcherMap dispatcherBus.DispatcherMap
+	dispatcherMap dispatcherbus.DispatcherMap
 	SerialNumber  string
 	rpc           *GRPCClient
 
@@ -50,10 +49,10 @@ type Service struct {
 func NewService(c Config, d Diagnostic, port string, dp Dispatcher) *Service {
 	e, _ := c.index()
 	s := &Service{
-		diag:      d,
-		endpoints: e,
-		rush_port: port,
-		rpc: NewGRPCClient(d, dp),
+		diag:          d,
+		endpoints:     e,
+		rush_port:     port,
+		rpc:           NewGRPCClient(d, dp),
 		DispatcherBus: dp,
 		updateQueue:   map[int64]time.Time{},
 		opened:        false,
@@ -67,15 +66,15 @@ func NewService(c Config, d Diagnostic, port string, dp Dispatcher) *Service {
 }
 
 func (s *Service) initGlbDispatcher() {
-	s.dispatcherMap = dispatcherBus.DispatcherMap{
+	s.dispatcherMap = dispatcherbus.DispatcherMap{
 		//dispatcherBus.DISPATCH_ODOO_STATUS:   utils.CreateDispatchHandlerStruct(nil),
 		//dispatcherBus.DISPATCH_AIIS_STATUS:   utils.CreateDispatchHandlerStruct(nil),
-		dispatcherBus.DISPATCH_NEW_TOOL:      utils.CreateDispatchHandlerStruct(s.onNewTool),
-		dispatcherBus.DISPATCH_BROKER_STATUS: utils.CreateDispatchHandlerStruct(s.onBrokerStatus),
-		dispatcherBus.DISPATCH_RESULT:        utils.CreateDispatchHandlerStruct(s.OnTighteningResult),
+		dispatcherbus.DISPATCH_NEW_TOOL:      utils.CreateDispatchHandlerStruct(s.onNewTool),
+		dispatcherbus.DISPATCH_BROKER_STATUS: utils.CreateDispatchHandlerStruct(s.onBrokerStatus),
+		dispatcherbus.DISPATCH_RESULT:        utils.CreateDispatchHandlerStruct(s.OnTighteningResult),
 	}
-	s.rpc.AppendRPCGlbDispatch(dispatcherBus.DISPATCH_RPC_STATUS, utils.CreateDispatchHandlerStruct(s.OnRPCStatus))
-	s.rpc.AppendRPCGlbDispatch(dispatcherBus.DISPATCH_RPC_RECV, utils.CreateDispatchHandlerStruct(s.OnRPCRecv))
+	s.rpc.AppendRPCGlbDispatch(dispatcherbus.DISPATCH_RPC_STATUS, utils.CreateDispatchHandlerStruct(s.OnRPCStatus))
+	s.rpc.AppendRPCGlbDispatch(dispatcherbus.DISPATCH_RPC_RECV, utils.CreateDispatchHandlerStruct(s.OnRPCRecv))
 }
 
 func (s *Service) AddToQueue(id int64) error {
@@ -183,9 +182,9 @@ func (s *Service) OnRPCStatus(data interface{}) {
 	status := data.(string)
 	// 如果RPC连接断开， 认为ODOO连接也断开
 	if status == RPC_OFFLINE {
-		s.DispatcherBus.Dispatch(dispatcherBus.DISPATCH_ODOO_STATUS, utils.STATUS_OFFLINE)
+		s.DispatcherBus.Dispatch(dispatcherbus.DISPATCH_ODOO_STATUS, utils.STATUS_OFFLINE)
 	}
-	s.DispatcherBus.Dispatch(dispatcherBus.DISPATCH_AIIS_STATUS, status)
+	s.DispatcherBus.Dispatch(dispatcherbus.DISPATCH_AIIS_STATUS, status)
 }
 
 func (s *Service) OnRPCRecv(data interface{}) {
@@ -216,7 +215,7 @@ func (s *Service) OnRPCRecv(data interface{}) {
 	case TYPE_ODOO_STATUS:
 		status := ODOOStatus{}
 		json.Unmarshal(strData, &status)
-		s.DispatcherBus.Dispatch(dispatcherBus.DISPATCH_ODOO_STATUS, status.Status)
+		s.DispatcherBus.Dispatch(dispatcherbus.DISPATCH_ODOO_STATUS, status.Status)
 		break
 
 	case TYPE_MES_STATUS:
@@ -391,7 +390,7 @@ func (s *Service) ResultToAiisResult(result *storage.Results) (AIISResult, error
 	aiisResult.TighteningId, _ = strconv.ParseInt(result.TighteningID, 10, 64)
 	aiisResult.Lacking = "normal"
 
-	//gun, err := s.StorageService.GetGun(result.ToolSN)
+	//gun, err := s.StorageService.GetTool(result.ToolSN)
 	//if err != nil {
 	//	gid, err := s.SyncGun(result.ToolSN)
 	//	if err == nil {

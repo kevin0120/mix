@@ -3,12 +3,12 @@ package hmi
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/kataras/iris/websocket"
+	dispatcherBus "github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/audi_vw"
-	"github.com/masami10/rush/services/controller"
 	"github.com/masami10/rush/services/device"
-	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/io"
 	"github.com/masami10/rush/services/odoo"
@@ -26,14 +26,14 @@ const (
 )
 
 type Service struct {
-	diag              Diagnostic
-	methods           Methods
-	DB                *storage.Service
-	Httpd             *httpd.Service
-	ODOO              *odoo.Service
-	AudiVw            *audi_vw.Service
-	OpenProtocol      *openprotocol.Service
-	ControllerService *controller.Service
+	diag Diagnostic
+	//methods           Methods
+	DB           *storage.Service
+	Httpd        *httpd.Service
+	ODOO         *odoo.Service
+	AudiVw       *audi_vw.Service
+	OpenProtocol *openprotocol.Service
+	//ControllerService *controller.Service
 	Aiis              *aiis.Service
 	ChStart           chan int
 	ChFinish          chan int
@@ -51,13 +51,12 @@ func NewService(d Diagnostic, dp Dispatcher) *Service {
 	s := &Service{
 		diag:          d,
 		DispatcherBus: dp,
-		methods:       Methods{},
 		ChStart:       make(chan int, CH_LENGTH),
 		ChFinish:      make(chan int, CH_LENGTH),
 		ChWorkorder:   make(chan int, CH_LENGTH),
 	}
 
-	s.methods.service = s
+	//s.methods.service = s
 
 	return s
 }
@@ -72,7 +71,7 @@ func (s *Service) SendScannerInfo(identification string) error {
 
 func (s *Service) Open() error {
 	//fixme: 嵌套那么深
-	s.ControllerService.WS.OnNewClient = s.OnNewHmiConnect
+	//s.ControllerService.WS.OnNewClient = s.OnNewHmiConnect
 
 	s.dispatcherMap = dispatcherBus.DispatcherMap{
 		dispatcherBus.DISPATCH_RESULT:            utils.CreateDispatchHandlerStruct(s.OnTighteningResult),
@@ -85,217 +84,7 @@ func (s *Service) Open() error {
 		dispatcherBus.DISPATCH_AIIS_STATUS: utils.CreateDispatchHandlerStruct(s.OnAiisStatus),
 	}
 	s.DispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
-
-	var r httpd.Route
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "PUT",
-		Pattern:     "/tool-enable",
-		HandlerFunc: s.methods.putToolControl,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "PUT",
-		Pattern:     "/psets",
-		HandlerFunc: s.methods.putPSets,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "PUT",
-		Pattern:     "/psets-manual",
-		HandlerFunc: s.methods.putManualPSets,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "GET",
-		Pattern:     "/psets",
-		HandlerFunc: s.methods.getPSetList,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "GET",
-		Pattern:     "/pset-detail",
-		HandlerFunc: s.methods.getPSetDetail,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "GET",
-		Pattern:     "/jobs",
-		HandlerFunc: s.methods.getJobList,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "GET",
-		Pattern:     "/job-detail",
-		HandlerFunc: s.methods.getJobDetail,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "PUT",
-		Pattern:     "/jobs",
-		HandlerFunc: s.methods.putJobs,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "PUT",
-		Pattern:     "/jobs-manual",
-		HandlerFunc: s.methods.putManualJobs,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "PUT",
-		Pattern:     "/controller-mode",
-		HandlerFunc: s.methods.enableJobMode,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "GET",
-		Pattern:     "/workorder",
-		HandlerFunc: s.methods.getWorkorder,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "GET",
-		Pattern:     "/next-workorder",
-		HandlerFunc: s.methods.getNextWorkorder,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "GET",
-		Pattern:     "/controller-status",
-		HandlerFunc: s.methods.getStatus,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "GET",
-		Pattern:     "/healthz",
-		HandlerFunc: s.methods.getHealthz,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "PUT",
-		Pattern:     "/io-sets",
-		HandlerFunc: s.methods.putIOSet,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "PUT",
-		Pattern:     "/scanner",
-		HandlerFunc: s.methods.putBarcodeTest,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "PUT",
-		Pattern:     "/input-test",
-		HandlerFunc: s.methods.putIOInputTest,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "PUT",
-		Pattern:     "/result-test",
-		HandlerFunc: s.methods.putResultTest,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "PUT",
-		Pattern:     "/job-control",
-		HandlerFunc: s.methods.putJobAbort,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "GET",
-		Pattern:     "/operation/{code:string}",
-		HandlerFunc: s.methods.getRoutingOpertions,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "GET",
-		Pattern:     "/local-results",
-		HandlerFunc: s.methods.getLocalResults,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "GET",
-		Pattern:     "/workorders",
-		HandlerFunc: s.methods.listWorkorders,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "POST",
-		Pattern:     "/ak2",
-		HandlerFunc: s.methods.postAK2,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	//r = httpd.Route{
-	//	RouteType:   httpd.ROUTE_TYPE_HTTP,
-	//	Method:      "PUT",
-	//	Pattern:     "/test-protocol",
-	//	HandlerFunc: s.methods.testProtocol,
-	//}
-	//s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "PUT",
-		Pattern:     "/WS-test",
-		HandlerFunc: s.methods.wsTest,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "GET",
-		Pattern:     "/storage",
-		HandlerFunc: s.methods.getStorage,
-	}
-	s.Httpd.Handler[0].AddRoute(r)
-
+	
 	return nil
 
 }
@@ -308,7 +97,7 @@ func (s *Service) Close() error {
 		}
 	}
 	s.diag.Closed()
-	
+
 	return nil
 }
 

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/gousb"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/device"
-	"github.com/masami10/rush/services/dispatcherBus"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
 	"github.com/tarm/serial"
@@ -25,7 +25,7 @@ const (
 	ServiceSearchItv = 2000 * time.Millisecond
 )
 
-const ScannerDispatcherKey = dispatcherBus.DISPATCHER_SCANNER_ON_RECV
+const ScannerDispatcherKey = dispatcherbus.DISPATCHER_SCANNER_ON_RECV
 
 type Service struct {
 	configValue atomic.Value

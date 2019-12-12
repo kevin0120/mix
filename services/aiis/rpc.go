@@ -1,7 +1,7 @@
 package aiis
 
 import (
-	"github.com/masami10/rush/services/dispatcherBus"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
@@ -46,7 +46,7 @@ type GRPCClient struct {
 	diag      Diagnostic
 	//RPCRecv           OnRPCRecv
 	//OnRPCStatus       OnRPCStatus
-	dispatcherMap dispatcherBus.DispatcherMap
+	dispatcherMap dispatcherbus.DispatcherMap
 	DispatcherBus Dispatcher
 	//RPCRecvDispatcher   *utils.Dispatcher
 	//RPCStatusDispatcher *utils.Dispatcher
@@ -56,11 +56,11 @@ type GRPCClient struct {
 	closing           chan chan struct{}
 }
 
-func NewGRPCClient( d Diagnostic,  dp Dispatcher) *GRPCClient {
+func NewGRPCClient(d Diagnostic, dp Dispatcher) *GRPCClient {
 	return &GRPCClient{
-		DispatcherBus:dp,
-		diag:d,
-		dispatcherMap: dispatcherBus.DispatcherMap{},
+		DispatcherBus: dp,
+		diag:          d,
+		dispatcherMap: dispatcherbus.DispatcherMap{},
 	}
 }
 
@@ -69,7 +69,7 @@ func (c *GRPCClient) AppendRPCGlbDispatch(name string, handler *utils.DispatchHa
 		err := errors.Errorf("GRPC Dispatcher Map, Name: %s Is Existed", name)
 		c.diag.Error("AppendRPCGlbDispatch", err)
 		return err
-	}else {
+	} else {
 		c.dispatcherMap[name] = handler
 	}
 	return nil
@@ -151,7 +151,7 @@ func (c *GRPCClient) updateStatus(status string) {
 			go c.Connect()
 		}
 
-		c.DispatcherBus.Dispatch(dispatcherBus.DISPATCH_RPC_STATUS, status)
+		c.DispatcherBus.Dispatch(dispatcherbus.DISPATCH_RPC_STATUS, status)
 
 		// 将最新状态推送给hmi
 		//s := wsnotify.WSStatus{
@@ -232,7 +232,7 @@ func (c *GRPCClient) RecvProcess() {
 		}
 
 		c.updateKeepAliveCount(0)
-		c.DispatcherBus.Dispatch(dispatcherBus.DISPATCH_RPC_RECV, in.Payload)
+		c.DispatcherBus.Dispatch(dispatcherbus.DISPATCH_RPC_RECV, in.Payload)
 	}
 }
 

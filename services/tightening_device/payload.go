@@ -7,8 +7,13 @@ import (
 )
 
 const (
+	TIGHTENING_OPENPROTOCOL = "OpenProtocol"
+	TIGHTENING_AUDIVW       = "Audi/VW"
+)
+const (
 	TIGHTENING_ERR_NOT_SUPPORTED = "Not Supported"
 	TIGHTENING_ERR_UNKNOWN       = "Error Unknown"
+	TIGHTENING_ERR_TIMEOUT       = "Timeout"
 )
 
 const (
@@ -38,8 +43,10 @@ const (
 	TIGHTENING_DEVICE_TYPE_TOOL       = "tool"
 	MODE_PSET                         = "pset"
 	MODE_JOB                          = "job"
+	RESULT_PASS                       = "pass"
+	RESULT_FAIL                       = "fail"
+	RESULT_EXCEPTION                  = "exception"
 )
-
 
 type PSetDefine struct {
 	Strategy string  `json:"strategy"`
