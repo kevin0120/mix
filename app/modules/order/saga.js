@@ -148,7 +148,8 @@ function* watchOrderTrigger() {
 
 function* tryWorkOnOrder({
                            order,
-                           code
+                           code,
+                           config
                          }: {
   order: IOrder,
   code: string | number
@@ -177,8 +178,16 @@ function* tryWorkOnOrder({
     if (workingOrder(orderState)) {
       canWorkOnOrder = false;
     }
+    const { list } = orderState;
+    const wOrder = list.find(o => o.status === ORDER_STATUS.WIP);
+    if (wOrder && wOrder !== order) {
+      canWorkOnOrder = false;
+    }
     if (canWorkOnOrder) {
-      yield put(orderActions.workOn((orderToDo: IOrder)));
+      yield put(orderActions.workOn(orderToDo, config));
+    } else {
+      yield put(notifierActions.enqueueSnackbar('Warn', `无法开始新工单：当前有正在进行的工单`));
+
     }
   } catch (e) {
     CommonLog.lError(e, { at: 'tryWorkOnOrder' });
@@ -317,9 +326,12 @@ function* viewOrder({ order }: { order: IOrder }) {
 
     const { workCenterMode } = yield select();
     const isRework = workCenterMode === workModes.reworkWorkCenterMode;
+    const oList = yield select(s => s.order.list);
+    const wOrder = oList.find(o => o.status === ORDER_STATUS.WIP);
     const showStartButton =
       !isRework &&
       !WIPOrder &&
+      (!wOrder || (wOrder === order)) &&
       doable(order);
     yield put(
       dialogActions.dialogShow({

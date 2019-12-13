@@ -53,6 +53,8 @@ const dataHandlers: rushHandlerMap<tOrderWSTypes,
       const newOrder = newList.find(o => o.code === data.code);
       if (newOrder) {
         newOrder.update(data);
+      } else {
+        newList.push(new (OrderMixin(Workable))(data));
       }
       yield put(orderActions.newList(newList));
       yield put(orderActions.getDetailSuccess());
@@ -76,10 +78,9 @@ const dataHandlers: rushHandlerMap<tOrderWSTypes,
       });
 
       // make new orders
-      newList = newList.concat(
-        data
-          .filter(newO => !newList.find(o => o.code === newO.code))
-          .map(oD => new (OrderMixin(Workable))(oD))
+      newList = newList.concat(data
+        .filter(newO => !newList.find(o => o.code === newO.code))
+        .map(oD => new (OrderMixin(Workable))(oD))
       );
 
       yield put(orderActions.newList(newList));

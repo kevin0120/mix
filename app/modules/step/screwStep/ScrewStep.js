@@ -410,8 +410,6 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                   yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
                 }
                 this._pointsToActive = this._pointsManager.start();
-                console.warn('active', this._pointsToActive);
-
                 break;
               }
               default:
@@ -442,7 +440,6 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
             );
 
             this._newInactivePoints = this._pointsManager.newResult(results);
-            console.warn('inactive', this._newInactivePoints);
             // disable tools before bypass point
             yield all(this._newInactivePoints.map(p => call(
               getDevice(p.toolSN)?.Disable || (() => {

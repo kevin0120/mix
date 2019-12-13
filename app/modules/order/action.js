@@ -56,8 +56,12 @@ export const orderActions = Object.freeze({
     code
   }),
   // order status
-  tryWorkOn: (order: IOrder): tActOrderTrigger => ({
+  tryWorkOn: (order: IOrder, config): tActOrderTrigger => ({
     type: ORDER.TRY_WORK_ON,
+    order, config
+  }),
+  setWorking: (order: IOrder): tActOrderTrigger => ({
+    type: ORDER.SET_WORKING,
     order
   }),
   tryWorkOnCode: (code: string | number) => ({

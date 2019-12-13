@@ -28,6 +28,7 @@ export const ORDER_WS_TYPES = Object.freeze({
 export const ORDER = Object.freeze({
   TRY_WORK_ON: 'ORDER_TRY_WORK_ON',
   WORK_ON: 'ORDER_WORK_ON',
+  SET_WORKING: 'ORDER_SET_WORKING',
   TRY_VIEW: 'ORDER_TRY_VIEW',
   VIEW: 'ORDER_VIEW',
   FINISH: 'ORDER_FINISH',
