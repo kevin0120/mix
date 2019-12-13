@@ -210,9 +210,6 @@ class OperationPoints(models.Model):
         for point in self:
             msg = _("#%s operation point has been delete") % (point.id)
             point.operation_id.message_post(body=msg, subject=msg, message_type='comment')
-        lines = self.env['mrp.bom.line'].search([('operation_point_id', 'in', self.ids)])
-        if lines:
-            lines.unlink()
         qcp_ids = self.env['sa.quality.point'].search([('id', 'in', self.mapped('qcp_id').ids)])
         if qcp_ids:
             qcp_ids.unlink()
