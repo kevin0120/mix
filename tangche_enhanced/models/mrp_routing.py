@@ -74,7 +74,7 @@ class MrpRoutingWorkcenter(models.Model):
                 })
             val = {
                 # "id": operation_id.id,
-                'tightening_step_ref': tightening_step_id.ref,
+                'tightening_step_ref': tightening_step_id.ref or tightening_step_id.name,  #fixme：考虑ref已经为空
                 'tightening_step_name': tightening_step_id.name,
                 "workcenter_id": operation_id.workcenter_id.id,
                 "job": int(operation_id.op_job_id.code) if operation_id.op_job_id else 0,
