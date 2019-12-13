@@ -17,7 +17,7 @@ import systemInfoActions from '../systemInfo/action';
 import healthzActions from '../healthz/action';
 
 const registerHandlers = {
-  *[WS_RUSH.RUSH_DATA]({ workcenter }) {
+  * [WS_RUSH.RUSH_DATA]({ workcenter }) {
     try {
       // const { workcenter } = data;
       if (workcenter) {
@@ -29,7 +29,7 @@ const registerHandlers = {
   }
 };
 
-export default function*(payload: string): Saga<void> {
+export default function* (payload: string): Saga<void> {
   try {
     if (!payload) {
       return;
@@ -62,7 +62,10 @@ const handleData = dataHandlers =>
   function* _handleData(rushData: tRushData<any, any>): Saga<void> {
     try {
       const { type, data } = rushData;
-      yield call(dataHandlers[type], data);
+      const handler = dataHandlers[type];
+      if (handler) {
+        yield call(handler, data);
+      }
     } catch (e) {
       CommonLog.lError(e);
     }
@@ -71,7 +74,7 @@ const handleData = dataHandlers =>
 const rushDataHandlers: {
   [tWebSocketEvent]: (tRushData<any, any>) => void | Saga<void>
 } = {
-  *[wse.maintenance](data: tRushData<string, { name: string }>) {
+  * [wse.maintenance](data: tRushData<string, { name: string }>) {
     try {
       yield put(
         notifierActions.enqueueSnackbar(
@@ -91,7 +94,7 @@ const rushDataHandlers: {
   [wse.device]: deviceStatus,
   [wse.order]: handleData(orderWSDataHandlers),
   [wse.register]: handleData(registerHandlers),
-  *[wse.odoo]({ type, data }) {
+  * [wse.odoo]({ type, data }) {
     try {
       if (type === 'WS_ODOO_STATUS') {
         const { name, status } = data;
@@ -101,7 +104,7 @@ const rushDataHandlers: {
       CommonLog.lError(e);
     }
   },
-  *[wse.aiis]({ type, data }) {
+  * [wse.aiis]({ type, data }) {
     try {
       if (type === 'WS_AIIS_STATUS') {
         const { name, status } = data;
@@ -111,7 +114,7 @@ const rushDataHandlers: {
       CommonLog.lError(e);
     }
   },
-  *[wse.exsys]({ type, data }) {
+  * [wse.exsys]({ type, data }) {
     try {
       if (type === 'WS_EXSYS_STATUS') {
         const { name, status } = data;
@@ -121,8 +124,15 @@ const rushDataHandlers: {
       CommonLog.lError(e);
     }
   },
-  *[wse.controller]() {
+  * [wse.controller]() {
     // 控制器状态推送在设备列表中处理
+  },
+  * [wse.debug]({ type, data }) {
+    try {
+      yield put(notifierActions.enqueueSnackbar('test message'));
+    } catch (e) {
+      CommonLog.lError(e);
+    }
   }
 };
 

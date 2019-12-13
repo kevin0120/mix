@@ -10,10 +10,10 @@ import type { rushHandlerMap } from '../../rush/type';
 
 // eslint-disable-next-line flowtype/no-weak-types
 const handlers: rushHandlerMap<tIOWSMsgType, any> = {
-  *[IO_WS_TYPES.CONTACT](data: { data: tIOWSDataContact }): Saga<void> {
+  * [IO_WS_TYPES.CONTACT](data: { data: tIOWSDataContact }): Saga<void> {
     try {
       // TODO: test it
-      const { sn, inputs, outputs } = data.data;
+      const { sn, inputs, outputs } = data;
       if (isNil(sn)) {
         throw new Error(`io contact with invalid sn: ${sn}`);
       }

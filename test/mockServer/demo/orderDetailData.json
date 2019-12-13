@@ -89,7 +89,7 @@
             "x": 0,
             "key_num": 1,
             "tightening_tool": "xx1233",
-            "max_redo_times": 1,
+            "max_redo_times": 3,
             "group_sequence": 1,
             "nut_no": ""
           },

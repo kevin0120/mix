@@ -23,7 +23,7 @@ export class ClsOperationPoint {
   }
 
   start() {
-    if (!this._isActive) {
+    if (!this._isActive && !this.isPass) {
       this.setActive(true);
       return this;
     }

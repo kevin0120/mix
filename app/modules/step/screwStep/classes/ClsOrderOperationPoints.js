@@ -104,17 +104,13 @@ export class ClsOrderOperationPoints {
       // newActivePoints = newActivePoints.concat(nextGroup.points);
     });
 
-    return {
-      // active: newActivePoints,
-      inactive: newInactivePoints
-    };
+    return newInactivePoints;
   }
 
   start(): Array<ClsOperationPoint> {
     // 开始可被最先开始的的组，并返回所有被开始的点
     return this.nextActiveGroups().reduce((activatedPoints, g) => {
       const points = g.start();
-      console.warn('points', points);
       return activatedPoints.concat(points);
     }, []);
   }
@@ -144,7 +140,6 @@ export class ClsOrderOperationPoints {
         break;
       }
     }
-    console.warn('groups', groups);
     return groups;
   }
 
@@ -155,7 +150,7 @@ export class ClsOrderOperationPoints {
       .filter(s => s > groupSequence);
     return Math.min(...sequencesAfter);
   }
-  
+
 
   get points() {
     // eslint-disable-next-line radix

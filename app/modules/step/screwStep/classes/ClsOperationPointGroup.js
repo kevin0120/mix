@@ -80,14 +80,13 @@ export class ClsOperationPointGroup {
 
   start() {
     // 返回所有被开始的点
-    const points = this._points.reduce((activedPoints, p) => {
+    return this._points.reduce((activedPoints, p) => {
       const point = p.start();
       if (point) {
         activedPoints.push(point);
       }
       return activedPoints;
     }, []);
-    return points;
   }
 
   newResult(result: tResult): Array<?ClsOperationPoint> {

@@ -102,7 +102,6 @@ export function stepDataApi(id: number, data: Object): Promise<any> {
     idNum = parseInt(id, 10);
   }
   const json = JSON.stringify(data);
-  console.warn(json);
   return rushSendApi(ORDER_WS_TYPES.STEP_DATA, { id: idNum, data: json });
 }
 

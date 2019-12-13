@@ -37,7 +37,7 @@ function* initIO() {
     defaultIOModule = newDevice(
       deviceType.io,
       'defaultIO',
-      'defaultIO',
+      eSetting.get('devices.io.sn'),
       { input_num: 8, output_num: 8 },
       {},
       []

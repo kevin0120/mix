@@ -232,7 +232,10 @@ export default class Workable implements IWorkable {
           // yield fork(updateStatus, action);
           yield fork(runStatusTask, {
             status: action.status,
-            config
+            config: {
+              ...config,
+              ...action.config
+            }
           });
         }
       } catch (e) {

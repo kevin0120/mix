@@ -30,6 +30,9 @@ import SelectCard from '../../../components/SelectCard';
 
 function* getResult(activeConfigs, resultChannel, controllerMode, isFirst) {
   try {
+    // if (!activeConfigs || activeConfigs.length === 0) {
+    //   return;
+    // }
     if (controllerMode === controllerModes.job && !isFirst) {
       return;
     }
@@ -100,7 +103,7 @@ function* byPassPoint(finalFailPoints, orderActions) {
         fail: take(SCREW_STEP.CONFIRM_FAIL_SPEC_POINT)
       });
       if (fail) {
-        yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL)); // 失败退出
+        yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, { error: '拧紧失败' })); // 失败退出
       }
     }
   } catch (e) {
@@ -198,7 +201,6 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
     _statusTasks = {
       * [STEP_STATUS.READY](ORDER, orderActions, config) {
         try {
-          console.warn(config);
           yield put(orderActions.stepStatus(this, STEP_STATUS.ENTERING, config));
         } catch (e) {
           CommonLog.lError(e);
@@ -339,7 +341,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
           yield put(orderActions.stepStatus(this, STEP_STATUS.DOING, config));
         } catch (e) {
           CommonLog.lError(e, { at: 'screwStep ENTERING' });
-          yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, e));
+          yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, { error: e }));
         }
       },
       * [STEP_STATUS.DOING](ORDER, orderActions, config) {
@@ -356,7 +358,6 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               } else {
                 redoPointClsObj = this.points.find(p => p.canRedo);
               }
-              console.warn('rework step with point', redoPointClsObj);
               if (redoPointClsObj) {
                 this._pointsToActive = [redoPointClsObj.start()];
               }
@@ -366,7 +367,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               if (!this._pointsManager) {
                 throw new Error('拧紧点异常');
               }
-              this._pointsToActive = this._pointsManager.start();
+              // this._pointsToActive = this._pointsManager.start();
               break;
             }
             default:
@@ -379,11 +380,48 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
 
           while (true) {
+
+
+            switch (workCenterMode) {
+              case workModes.reworkWorkCenterMode: {
+                const canRedoPoint = this.points.find(p => p.canRedo);
+                const success = redoPointClsObj
+                  && redoPointClsObj.isSuccess
+                  && !canRedoPoint;
+                if (success) {
+                  yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
+                } else {
+                  yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, { error: '返工失败' })); // 失败退出
+                }
+                break;
+              }
+              case workModes.normWorkCenterMode: {
+                const finalFailPoints = (this._newInactivePoints || []).filter(
+                  (p: ClsOperationPoint) => p.isFinalFail
+                );
+                yield call([this, byPassPoint], finalFailPoints, orderActions);
+
+                if (
+                  this._pointsManager.isFailed &&
+                  this._pointsManager.points.filter(p => p.isActive).length === 0
+                ) {
+                  yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, { error: '拧紧失败' })); // 失败退出
+                } else if (this._pointsManager.isPass) {
+                  yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
+                }
+                this._pointsToActive = this._pointsManager.start();
+                console.warn('active', this._pointsToActive);
+
+                break;
+              }
+              default:
+                break;
+            }
+
             yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({
               ...data,
               tightening_points: this._pointsManager.points.map(p => p.data)
             }));
-
 
             const activeConfigs = this._pointsToActive.map(p => {
               const cModeId = controllerMode === controllerModes.job ? jobID : this._forcePset || p.pset;
@@ -403,9 +441,10 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               isFirst
             );
 
-            const { inactive } = this._pointsManager.newResult(results);
+            this._newInactivePoints = this._pointsManager.newResult(results);
+            console.warn('inactive', this._newInactivePoints);
             // disable tools before bypass point
-            yield all(inactive.map(p => call(
+            yield all(this._newInactivePoints.map(p => call(
               getDevice(p.toolSN)?.Disable || (() => {
                 CommonLog.lError(
                   `tool ${p.toolSN}: no such tool or tool cannot be disabled.`
@@ -413,47 +452,14 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               })
             )));
 
-            switch (workCenterMode) {
-              case workModes.reworkWorkCenterMode: {
-                const canRedoPoint = this.points.find(p => p.canRedo);
-                const success = redoPointClsObj
-                  && redoPointClsObj.isSuccess
-                  && !canRedoPoint;
-                if (success) {
-                  yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
-                } else {
-                  yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL)); // 失败退出
-                }
-                break;
-              }
-              case workModes.normWorkCenterMode: {
-                const finalFailPoints = inactive.filter(
-                  (p: ClsOperationPoint) => p.isFinalFail
-                );
-                yield call([this, byPassPoint], finalFailPoints, orderActions);
-
-                this._pointsToActive = this._pointsManager.start();
-                if (
-                  this._pointsManager.isFailed &&
-                  this._pointsManager.points.filter(p => p.isActive).length === 0
-                ) {
-                  yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL)); // 失败退出
-                } else if (this._pointsManager.isPass) {
-                  yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
-                }
-                break;
-              }
-              default:
-                break;
-            }
-
             if (isFirst) {
               isFirst = false;
             }
           }
         } catch (e) {
           CommonLog.lError(e, { at: 'screwStep DOING' });
-          yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, e));
+          console.log(e);
+          yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, { error: e }));
         }
       },
 
@@ -462,12 +468,13 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
           yield put(orderActions.finishStep(this));
         } catch (e) {
           CommonLog.lError(e, { at: 'screwStep FINISHED' });
-          yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, e));
+          yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, { error: e }));
         }
       },
 
-      * [STEP_STATUS.FAIL](ORDER, orderActions, msg) {
+      * [STEP_STATUS.FAIL](ORDER, orderActions, config) {
         try {
+          const { error } = config;
           yield all(this._tools.map(t => call(t.Disable)));
           const { workCenterMode } = yield select();
           const isNormal = workCenterMode === workModes.normWorkCenterMode;
@@ -492,7 +499,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                   }
                 ],
                 title: `工步失败：${this._code}`,
-                content: `${msg || this.failureMsg}`
+                content: `${error || this.failureMsg}`
               })
             );
             yield take(SCREW_STEP.CONFIRM_FAIL);

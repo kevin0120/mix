@@ -17,7 +17,8 @@ export const WEBSOCKET_EVENTS = Object.freeze({
   reply: 'reply',
   order: 'order',
   device: 'device',
-  mes: 'mes'
+  mes: 'mes',
+  debug: 'debug'
 });
 
 export const WS_RUSH = Object.freeze({

@@ -15,7 +15,6 @@ export default function(state = initState, action: tAction) {
 
 const reducers = {
   [REWORK_PATTERN.TRY_REWORK]: (state, action: tAction) => {
-    console.warn(action);
     if (!action.point) {
       return state;
     }

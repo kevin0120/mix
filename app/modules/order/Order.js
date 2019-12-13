@@ -34,7 +34,6 @@ const stepStatus = status => {
 
 function* redoOrder(step, point, orderActions) {
   try {
-    console.warn('redo order', step, point);
     let redoStep = step;
     if (!redoStep) {
       redoStep = this.steps.find(s => s.status === STEP_STATUS.FAIL);
@@ -48,10 +47,8 @@ function* redoOrder(step, point, orderActions) {
       redoStep,
       {
         onNext: () => {
-          console.warn('next');
         },
         onPrevious: () => {
-          console.warn('previous');
         }
       },
       STEP_STATUS.READY,
