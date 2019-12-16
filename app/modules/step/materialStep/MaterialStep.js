@@ -166,7 +166,6 @@ const MaterialStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
       },
       *[STEP_STATUS.FAIL](ORDER, orderActions, msg) {
         try {
-          // todo: fix empty msg on retry
           yield put(
             dialogActions.dialogShow({
               buttons: [

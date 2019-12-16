@@ -3,7 +3,7 @@ import type { Saga } from 'redux-saga';
 import React from 'react';
 import { push } from 'connected-react-router';
 import { call, put, select } from 'redux-saga/effects';
-import { some, filter } from 'lodash-es';
+import { filter, some } from 'lodash-es';
 import { ORDER_STATUS } from './constants';
 import { CommonLog, durationString } from '../../common/utils';
 import { orderReportStartApi, orderUpdateApi } from '../../api/order';
@@ -67,6 +67,13 @@ function* redoOrder(step, point, orderActions) {
 
 const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
   class ClsOrder extends ClsBaseStep implements IOrder {
+    // eslint-disable-next-line flowtype/no-weak-types
+    constructor(dataObj: ?$Shape<tOrder>): void {
+      // eslint-disable-next-line prefer-rest-params
+      super(dataObj);
+      this.update.call(this, dataObj);
+    }
+
     _workingIndex = 0;
 
     get workingIndex() {
@@ -95,92 +102,6 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
 
     get productCode() {
       return this._productCode;
-    }
-
-    _workcenter: string = '';
-
-    get workcenter() {
-      return this._workcenter;
-    }
-
-    _datePlannedStart = null;
-
-    get datePlannedStart() {
-      return this._datePlannedStart;
-    }
-
-    _datePlannedComplete = null;
-
-    get datePlannedComplete() {
-      return this._datePlannedComplete;
-    }
-
-    _productTypeImage: string = '';
-
-    get productTypeImage() {
-      return this._productTypeImage;
-    }
-
-    // eslint-disable-next-line flowtype/no-weak-types
-    constructor(dataObj: ?$Shape<tOrder>): void {
-      // eslint-disable-next-line prefer-rest-params
-      super(dataObj);
-      this.update.call(this, dataObj);
-    }
-
-    update(dataObj: ?$Shape<tOrder>) {
-      super.update.call(this, dataObj);
-      const {
-        status,
-        track_code: trackCode,
-        product_code: productCode,
-        workcenter,
-        date_planned_start: datePlannedStart,
-        date_planned_complete: datePlannedComplete,
-        product_type_image: productTypeImage,
-        payload
-      } = dataObj || {};
-
-      this._status = status || ORDER_STATUS.TODO;
-      this._trackCode = trackCode || '';
-      this._productCode = productCode || '';
-      this._workcenter = workcenter || '';
-      this._datePlannedStart = datePlannedStart
-        ? new Date(datePlannedStart)
-        : null;
-      this._datePlannedComplete = datePlannedComplete
-        ? new Date(datePlannedComplete)
-        : null;
-      this._productTypeImage = productTypeImage || '';
-      (this: IWorkable)._desc = payload?.operation?.desc || '';
-    }
-
-    get workingStep() {
-      return (((this: IWorkable)._steps[this._workingIndex]: any): IWorkStep);
-    }
-
-    * updateStatus({ status }: { status: tOrderStatus }): Saga<void> {
-      try {
-        yield call([this, super.updateStatus], { status });
-        yield call(orderUpdateApi, this.id, status);
-      } catch (e) {
-        CommonLog.lError(e);
-      }
-    }
-
-    get failSteps(): Array<IWorkStep> {
-      const ret = filter(
-        this.steps,
-        (step: IWorkStep) => step.status === STEP_STATUS.FAIL
-      );
-      return ((ret: any): Array<IWorkStep>);
-    }
-
-    hasFailWorkStep(): boolean {
-      return some(
-        this.steps,
-        (step: IWorkable) => step.status === STEP_STATUS.FAIL
-      );
     }
 
     _statusTasks = {
@@ -267,7 +188,9 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
             );
             const wStep = this.workingStep;
             if (wStep) {
-              console.log(status);
+              if (wStep.status === STEP_STATUS.FAIL) {
+                status = STEP_STATUS.READY;
+              }
               const nextStatus = yield call(
                 [this, this.runSubStep],
                 wStep,
@@ -280,10 +203,10 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
               status = nextStatus || null;
 
             } else {
-              yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
               if (this._steps.some(s => s.status === STEP_STATUS.FAIL)) {
                 yield put(orderActions.stepStatus(this, ORDER_STATUS.FAIL));
-
+              } else {
+                yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
               }
             }
           }
@@ -399,6 +322,85 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
         }
       }
     };
+
+    _workcenter: string = '';
+
+    get workcenter() {
+      return this._workcenter;
+    }
+
+    _datePlannedStart = null;
+
+    get datePlannedStart() {
+      return this._datePlannedStart;
+    }
+
+    _datePlannedComplete = null;
+
+    get datePlannedComplete() {
+      return this._datePlannedComplete;
+    }
+
+    _productTypeImage: string = '';
+
+    get productTypeImage() {
+      return this._productTypeImage;
+    }
+
+    get workingStep() {
+      return (((this: IWorkable)._steps[this._workingIndex]: any): IWorkStep);
+    }
+
+    get failSteps(): Array<IWorkStep> {
+      const ret = filter(
+        this.steps,
+        (step: IWorkStep) => step.status === STEP_STATUS.FAIL
+      );
+      return ((ret: any): Array<IWorkStep>);
+    }
+
+    update(dataObj: ?$Shape<tOrder>) {
+      super.update.call(this, dataObj);
+      const {
+        status,
+        track_code: trackCode,
+        product_code: productCode,
+        workcenter,
+        date_planned_start: datePlannedStart,
+        date_planned_complete: datePlannedComplete,
+        product_type_image: productTypeImage,
+        payload
+      } = dataObj || {};
+
+      this._status = status || ORDER_STATUS.TODO;
+      this._trackCode = trackCode || '';
+      this._productCode = productCode || '';
+      this._workcenter = workcenter || '';
+      this._datePlannedStart = datePlannedStart
+        ? new Date(datePlannedStart)
+        : null;
+      this._datePlannedComplete = datePlannedComplete
+        ? new Date(datePlannedComplete)
+        : null;
+      this._productTypeImage = productTypeImage || '';
+      (this: IWorkable)._desc = payload?.operation?.desc || '';
+    }
+
+    * updateStatus({ status }: { status: tOrderStatus }): Saga<void> {
+      try {
+        yield call([this, super.updateStatus], { status });
+        yield call(orderUpdateApi, this.id, status);
+      } catch (e) {
+        CommonLog.lError(e);
+      }
+    }
+
+    hasFailWorkStep(): boolean {
+      return some(
+        this.steps,
+        (step: IWorkable) => step.status === STEP_STATUS.FAIL
+      );
+    }
   };
 
 export default OrderMixin;

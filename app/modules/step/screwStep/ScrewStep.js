@@ -1,19 +1,15 @@
 // @flow
-import { isNil, isEmpty } from 'lodash-es';
-import { call, put, take, all, actionChannel, race, select, delay } from 'redux-saga/effects';
+import { isEmpty, isNil } from 'lodash-es';
+import { actionChannel, all, call, delay, put, race, select, take } from 'redux-saga/effects';
 import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import { STEP_STATUS } from '../constants';
-import type {
-  tPoint,
-  tScrewStepData,
-  tScrewStepPayload
-} from './interface/typeDef';
+import type { tPoint, tScrewStepData, tScrewStepPayload } from './interface/typeDef';
 import { ClsOrderOperationPoints } from './classes/ClsOrderOperationPoints';
 import { CommonLog } from '../../../common/utils';
 import controllerModeTasks from './controllerModeTasks';
 import screwStepActions from './action';
-import { SCREW_STEP, controllerModes } from './constants';
+import { controllerModes, SCREW_STEP } from './constants';
 import { getDevice, getDevicesByType } from '../../deviceManager/devices';
 import dialogActions from '../../dialog/action';
 import type { IWorkStep } from '../interface/IWorkStep';
@@ -151,53 +147,6 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
     _pointsToActive = [];
 
     _listeners = [];
-
-    * _onLeave() {
-      try {
-        yield call(
-          this.updateData,
-          (data: tScrewStepData): tScrewStepData => ({
-            ...data,
-            tightening_points: this._pointsManager.points.map(p => p.data)
-          })
-        );
-        yield call(stepDataApi, this.id, this._data);
-        yield all(
-          this._tools.map(t => (t.isEnable ? call(t.Disable) : call(() => {
-          })))
-        );
-        this._tools.forEach(t => {
-          this._listeners.forEach(l => {
-            t.removeListener(l);
-          });
-        });
-
-        this._tools = [];
-        this._listeners = [];
-        CommonLog.Info('tools cleared', {
-          at: `screwStep(${String((this: IWorkable)._code)})._onLeave`
-        });
-      } catch (e) {
-        CommonLog.lError(e, {
-          at: `screwStep(${String((this: IWorkable)._code)})._onLeave`
-        });
-      }
-    }
-
-    // eslint-disable-next-line flowtype/no-weak-types
-    constructor(...args: Array<any>) {
-      super(...args);
-      this.isValid = true; // 设置此工步是合法的
-      this._onLeave = this._onLeave.bind(this);
-    }
-
-    get points() {
-      if (this._pointsManager) {
-        return this._pointsManager.points;
-      }
-      return [];
-    }
-
     _statusTasks = {
       * [STEP_STATUS.READY](ORDER, orderActions, config) {
         try {
@@ -380,8 +329,6 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
 
           while (true) {
-
-
             switch (workCenterMode) {
               case workModes.reworkWorkCenterMode: {
                 const canRedoPoint = this.points.find(p => p.canRedo);
@@ -400,6 +347,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                   (p: ClsOperationPoint) => p.isFinalFail
                 );
                 yield call([this, byPassPoint], finalFailPoints, orderActions);
+                this._pointsToActive = this._pointsManager.start();
 
                 if (
                   this._pointsManager.isFailed &&
@@ -409,7 +357,6 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 } else if (this._pointsManager.isPass) {
                   yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
                 }
-                this._pointsToActive = this._pointsManager.start();
                 break;
               }
               default:
@@ -423,8 +370,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
             const activeConfigs = this._pointsToActive.map(p => {
               const cModeId = controllerMode === controllerModes.job ? jobID : this._forcePset || p.pset;
-              const tool = this._forceTool || getDevice(p.toolSN);// TODO use selected tool at rework workcenter
-              console.log(p);
+              const tool = this._forceTool || getDevice(p.toolSN);
               return {
                 point: p,
                 tool,
@@ -439,6 +385,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               isFirst
             );
 
+
             this._newInactivePoints = this._pointsManager.newResult(results);
             // disable tools before bypass point
             yield all(this._newInactivePoints.map(p => call(
@@ -448,6 +395,13 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 );
               })
             )));
+            yield call(
+              this.updateData,
+              (data: tScrewStepData): tScrewStepData => ({
+                ...data,
+                tightening_points: this._pointsManager.points.map(p => p.data)
+              })
+            );
 
             if (isFirst) {
               isFirst = false;
@@ -508,5 +462,44 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
         }
       }
     };
+
+    // eslint-disable-next-line flowtype/no-weak-types
+    constructor(...args: Array<any>) {
+      super(...args);
+      this.isValid = true; // 设置此工步是合法的
+      this._onLeave = this._onLeave.bind(this);
+    }
+
+    get points() {
+      if (this._pointsManager) {
+        return this._pointsManager.points;
+      }
+      return [];
+    }
+
+    * _onLeave() {
+      try {
+        yield call(stepDataApi, this.id, this._data);
+        yield all(
+          this._tools.map(t => (t.isEnable ? call(t.Disable) : call(() => {
+          })))
+        );
+        this._tools.forEach(t => {
+          this._listeners.forEach(l => {
+            t.removeListener(l);
+          });
+        });
+
+        this._tools = [];
+        this._listeners = [];
+        CommonLog.Info('tools cleared', {
+          at: `screwStep(${String((this: IWorkable)._code)})._onLeave`
+        });
+      } catch (e) {
+        CommonLog.lError(e, {
+          at: `screwStep(${String((this: IWorkable)._code)})._onLeave`
+        });
+      }
+    }
   };
 export default ScrewStepMixin;

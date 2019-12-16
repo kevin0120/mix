@@ -12,7 +12,6 @@ import type { rushHandlerMap } from '../../rush/type';
 const handlers: rushHandlerMap<tIOWSMsgType, any> = {
   * [IO_WS_TYPES.CONTACT](data: { data: tIOWSDataContact }): Saga<void> {
     try {
-      // TODO: test it
       const { sn, inputs, outputs } = data;
       if (isNil(sn)) {
         throw new Error(`io contact with invalid sn: ${sn}`);

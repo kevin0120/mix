@@ -225,7 +225,6 @@ function* DebounceViewStep(d, action: tCommonActionType) {
   }
 }
 
-// TODO: auto set wip order working
 function* getOrderDetail({ order }) {
   try {
     yield put(loadingActions.start());
@@ -282,7 +281,6 @@ function* tryViewOrder({
       order = data;
     }
 
-    // TODO: check no-trigger conditions
     if (!order) {
       yield put(loadingActions.stop());
       yield put(notifierActions.enqueueSnackbar('Warn', `工单不存在: ${code}`));

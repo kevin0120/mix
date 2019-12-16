@@ -32,7 +32,7 @@ export const todoOrders = (orderList: Array<IOrder>): Array<IOrder> =>
 export const doingOrders = (orderList: Array<IOrder>): Array<IOrder> =>
   orderList && orderList.filter(o => o?.status === ORDER_STATUS.WIP);
 
-// fixme: 将fail的工单也在Done列显示
+
 export const doneOrders = (orderList: Array<IOrder>): Array<IOrder> =>
   orderList && orderList.filter(o => o?.status === ORDER_STATUS.DONE || o?.status === ORDER_STATUS.FAIL);
 
@@ -64,6 +64,7 @@ export const doable = (order: ?IOrder): boolean =>
   order?.status === ORDER_STATUS.WIP ||
   order?.status === ORDER_STATUS.TODO ||
   order?.status === ORDER_STATUS.DONE ||
+  order?.status === ORDER_STATUS.FAIL ||
   (order && !order.status) ||
   false;
 

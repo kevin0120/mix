@@ -245,7 +245,6 @@ export default class Workable implements IWorkable {
       }
     }
 
-    // TODO deal with when stateToRun is fail / redo step
     try {
       const step = yield fork([this, runStep]);
       yield put(orderActions.stepStatus(this, statusToRun));

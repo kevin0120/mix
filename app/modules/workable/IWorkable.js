@@ -10,57 +10,57 @@ import type { tWorkableData } from './typeDef';
 export type tWorkableDataReducer = Function;
 
 export interface IWorkable {
-  _id: number;
-  +id: number;
+  _id: number,
+  +id: number,
 
-  _code: string;
-  +code: string;
+  _code: string,
+  +code: string,
 
-  _status: tAnyStatus;
-  +status: tAnyStatus;
+  _status: tAnyStatus,
+  +status: tAnyStatus,
 
-  _payload: ?tStepPayload;
-  +payload: ?tStepPayload;
+  _payload: ?tStepPayload,
+  +payload: ?tStepPayload,
 
-  _data: any;
-  +data: any;
+  _data: any,
+  +data: any,
 
-  _desc: string;
-  +desc: string;
+  _desc: string,
+  +desc: string,
 
-  _steps: Array<IWorkable>;
-  +steps: Array<IWorkable>;
+  _steps: Array<IWorkable>,
+  +steps: Array<IWorkable>,
 
-  _statusTasks: { [key: string]: (...Array<any>) => any };
-  _runningStatusTask: ?Task<any>;
+  _statusTasks: { [key: string]: (...Array<any>) => any },
+  _runningStatusTask: ?Task<any>,
 
-  _times: Array<Date>; // to calculate time lost & time cost
+  _times: Array<Date>, // to calculate time lost & time cost
 
-  constructor(?tWorkableData): void;
+  constructor(?tWorkableData): void,
 
-  update(?tWorkableData): void;
+  update(?tWorkableData): void,
 
-  timeLost(): number;
+  timeLost(): number,
 
-  timeCost(): number;
+  timeCost(): number,
 
-  timerStart(): void;
+  timerStart(): void,
 
-  timerStop(): void;
+  timerStop(): void,
 
-  _runStatusTask({ status: string, msg: string }): any;
+  _runStatusTask({ status: string, msg: string }): any,
 
-  updateStatus({ status: tAnyStatus }): any;
+  updateStatus({ status: tAnyStatus }): any,
 
-  run(any): any;
+  run(any): any,
 
   runSubStep(
     step: IWorkable,
     callbacks: tRunSubStepCallbacks,
     status: tAnyStatus
-  ): Saga<void>;
+  ): Saga<void>,
 
-  updateData(tWorkableDataReducer): Saga<void>;
+  updateData(tWorkableDataReducer): Saga<void>,
 
-  _onLeave(any): any;
+  _onLeave(any): any
 }
