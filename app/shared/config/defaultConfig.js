@@ -1,5 +1,5 @@
 // @flow
-import { ioOutputs, ioInputs } from '../../modules/io/constants';
+import { ioInputs, ioOutputs } from '../../modules/io/constants';
 
 
 const defaultConfigs = {
@@ -8,7 +8,7 @@ const defaultConfigs = {
   appName: '长安汽车智能装配系统-终端',
   devices: {
     io: {
-      sn:'1',
+      sn: '1',
       enable: true,
       config: { input_num: 8, output_num: 8 },
       inputs: {
@@ -17,10 +17,10 @@ const defaultConfigs = {
         [ioInputs.modeSelect]: 2
       },
       outputs: {
-        [ioOutputs.red]: 0,
-        [ioOutputs.green]: 1,
-        [ioOutputs.white]: 2,
-        [ioOutputs.yellow]: 3
+        [ioOutputs.white]: 0,
+        [ioOutputs.yellow]: 1,
+        [ioOutputs.green]: 2,
+        [ioOutputs.red]: 3
       }
     }
   },

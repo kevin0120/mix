@@ -170,6 +170,11 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
           const points = payload.tightening_points;
           const { workcenterType } = yield select(s => s.setting.system.workcenter);
           const { workCenterMode } = yield select();
+
+          this._pointsManager = new ClsOrderOperationPoints(
+            payload.tightening_points
+          );
+
           switch (workCenterMode) {
             case workModes.reworkWorkCenterMode: {
               // is rework workcenter
@@ -224,6 +229,10 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 const { pset } = yield take(SCREW_STEP.SELECT_PSET);
                 this._forcePset = pset;
                 yield put(dialogActions.dialogClose());
+              } else {
+                this._tools = yield call(getTools, payload?.tightening_points || []);
+                this._forcePset = null;
+                this._forceTool = null;
               }
               break;
             }
@@ -256,12 +265,14 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               this._tools = yield call(getTools, payload?.tightening_points || []);
               this._forcePset = null;
               this._forceTool = null;
+              if (this._data && this._data.results) {
+                this._pointsManager.newResult(this._data.results);
+              }
               break;
             }
             default:
               break;
           }
-
           // eslint-disable-next-line camelcase
           this._tools.forEach(t => {
             this._listeners.push(
@@ -271,13 +282,6 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               )
             );
           });
-
-          this._pointsManager = new ClsOrderOperationPoints(
-            payload.tightening_points
-          );
-          if (this._data && this._data.results) {
-            this._pointsManager.newResult(this._data.results);
-          }
 
           yield call(
             this.updateData,
@@ -307,8 +311,10 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               } else {
                 redoPointClsObj = this.points.find(p => p.canRedo);
               }
+              console.warn(point, redoPointClsObj);
               if (redoPointClsObj) {
-                this._pointsToActive = [redoPointClsObj.start()];
+                this._pointsToActive = [redoPointClsObj.start(true)];
+                console.warn(this._pointsToActive);
               }
               break;
             }
@@ -316,7 +322,6 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               if (!this._pointsManager) {
                 throw new Error('拧紧点异常');
               }
-              // this._pointsToActive = this._pointsManager.start();
               break;
             }
             default:
@@ -331,6 +336,9 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
           while (true) {
             switch (workCenterMode) {
               case workModes.reworkWorkCenterMode: {
+                if (this._pointsToActive && this._pointsToActive.length > 0) {
+                  break;
+                }
                 const canRedoPoint = this.points.find(p => p.canRedo);
                 const success = redoPointClsObj
                   && redoPointClsObj.isSuccess
@@ -385,6 +393,8 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               isFirst
             );
 
+            console.warn(results);
+
 
             this._newInactivePoints = this._pointsManager.newResult(results);
             // disable tools before bypass point
@@ -429,32 +439,35 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
           yield all(this._tools.map(t => call(t.Disable)));
           const { workCenterMode } = yield select();
           const isNormal = workCenterMode === workModes.normWorkCenterMode;
+          let buttons = [
+            {
+              label: 'Common.Close',
+              color: 'danger',
+              action: screwStepActions.confirmFail()
+            }
+          ];
           if (isNormal) {
-            yield put(
-              dialogActions.dialogShow({
-                buttons: [
-                  {
-                    label: 'Common.Close',
-                    color: 'danger',
-                    action: screwStepActions.confirmFail()
-                  },
-                  {
-                    label: 'Order.Retry',
-                    color: 'info',
-                    action: orderActions.stepStatus(this, STEP_STATUS.READY)
-                  },
-                  {
-                    label: 'Order.Next',
-                    color: 'warning',
-                    action: screwStepActions.confirmFail()
-                  }
-                ],
-                title: `工步失败：${this._code}`,
-                content: `${error || this.failureMsg}`
-              })
-            );
-            yield take(SCREW_STEP.CONFIRM_FAIL);
+            buttons = buttons.concat([
+              {
+                label: 'Order.Retry',
+                color: 'info',
+                action: orderActions.stepStatus(this, STEP_STATUS.READY)
+              },
+              {
+                label: 'Order.Next',
+                color: 'warning',
+                action: screwStepActions.confirmFail()
+              }
+            ]);
           }
+          yield put(
+            dialogActions.dialogShow({
+              buttons,
+              title: `工步失败：${this._code}`,
+              content: `${error || this.failureMsg}`
+            })
+          );
+          yield take(SCREW_STEP.CONFIRM_FAIL);
           yield put(orderActions.finishStep(this));
         } catch (e) {
           CommonLog.lError(e, { at: 'screwStep FAIL' });

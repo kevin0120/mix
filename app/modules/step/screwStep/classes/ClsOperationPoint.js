@@ -22,8 +22,8 @@ export class ClsOperationPoint {
     this._results = [];
   }
 
-  start() {
-    if (!this._isActive && !this.isPass) {
+  start(forceStart) {
+    if (forceStart || !this._isActive && !this.isPass) {
       this.setActive(true);
       return this;
     }
