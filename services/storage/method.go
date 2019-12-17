@@ -150,7 +150,7 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 		stepString, _ := json.Marshal(step[i])
 		var msg Steps
 		var stepText StepTextPayload
-		var stepTightening typeDef.StepTighteningPayload
+		var stepTightening StepTighteningPayload
 		var sp []byte
 		err = json.Unmarshal(stepString, &msg)
 

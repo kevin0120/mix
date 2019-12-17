@@ -149,9 +149,9 @@ tightening_device:
       endpoint: tcp://192.168.5.186:4545
       sn: c1
       tools:
-        - sn: xx0011
+        - sn: xx4443
           channel: 1
-        - sn: xx0011
+        - sn: xx4443
           channel: 0
 #
 #    - model: ModelDesoutterCvi3
@@ -166,7 +166,7 @@ tightening_device:
       endpoint: tcp://192.168.3.23:4546
       sn: 0002
       tools:
-        - sn: xx002221
+        - sn: xx0011
 
 #
 #    - model: MODEL_DESOUTTER_CVI3

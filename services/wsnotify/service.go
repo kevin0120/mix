@@ -29,6 +29,12 @@ const (
 	WS_EVENT_DEVICE            = "device"
 	WS_EVENT_ORDER             = "order"
 	WS_EVENT_MES               = "mes"
+
+	WS_EVENT_ERROR = "err"
+)
+
+const (
+	WS_TYPE_ERROR = "new_error"
 )
 
 type Diagnostic interface {
