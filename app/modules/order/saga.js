@@ -1,35 +1,30 @@
 // @flow
 import {
-  call,
-  select,
-  put,
+  actionChannel,
   all,
-  takeEvery,
-  takeLeading,
+  call,
   delay,
-  take,
-  race,
   fork,
   join,
-  actionChannel
+  put,
+  race,
+  select,
+  take,
+  takeEvery,
+  takeLeading
 } from 'redux-saga/effects';
 import React from 'react';
 import type { Saga } from 'redux-saga';
 import { isNil } from 'lodash-es';
 import { push } from 'connected-react-router';
 import { orderActions } from './action';
-import { workingOrder, orderSteps, doable, viewingOrder } from './selector';
+import { doable, orderSteps, viewingOrder, workingOrder } from './selector';
 import dialogActions from '../dialog/action';
 import i18n from '../../i18n';
 import Table from '../../components/Table/Table';
 import { CommonLog } from '../../common/utils';
 import type { tCommonActionType } from '../../common/type';
-import {
-  orderDetailApi,
-  orderDetailByCodeApi,
-  orderListApi,
-  orderReportFinishApi
-} from '../../api/order';
+import { orderDetailByCodeApi, orderListApi, orderReportFinishApi } from '../../api/order';
 import { ORDER, ORDER_STATUS } from './constants';
 import { bindRushAction } from '../rush/rushHealthz';
 import loadingActions from '../loading/action';
@@ -38,13 +33,11 @@ import type { IOrder } from './interface/IOrder';
 import notifierActions from '../Notifier/action';
 import { bindNewDeviceListener } from '../deviceManager/handlerWSData';
 import { sGetWorkCenterMode } from '../workCenterMode/selector';
-import { translation as trans } from '../../components/NavBar/local';
 import type { tWorkCenterMode } from '../workCenterMode/interface/typeDef';
 
 import ClsScanner from '../device/scanner/ClsScanner';
 import type { tAnyStatus } from '../step/interface/typeDef';
 import type { IWorkable } from '../workable/IWorkable';
-import reworkActions from '../reworkPattern/action';
 import { workModes } from '../workCenterMode/constants';
 
 export default function* root(): Saga<void> {
@@ -155,7 +148,7 @@ function* tryWorkOnOrder({
   code: string | number
 }) {
   try {
-
+    console.warn('try work on', order, code);
     let orderToDo = null;
     if (order) {
       orderToDo = order;
@@ -225,23 +218,28 @@ function* DebounceViewStep(d, action: tCommonActionType) {
   }
 }
 
-function* getOrderDetail({ order }) {
+function* getOrderDetail({ code }) {
   try {
     yield put(loadingActions.start());
     const detailResult = yield fork(function* detailResult() {
       yield race([take(ORDER.DETAIL.SUCCESS), take(ORDER.DETAIL.FAIL)]);
     });
-    yield call(orderDetailApi, order.id);
+    const workCenterCode = yield select(s => s.systemInfo.workcenter);
+    yield call(orderDetailByCodeApi, code, workCenterCode);
     // if (resp.result !== 0) {
     //   yield put(orderActions.getDetailFail());
     // }
+    console.warn('order detail called');
     yield join(detailResult);
+    const orderList = yield select(s => s.order.list);
+    const order = orderList.find(o => o.code === code);
+    yield put(orderActions.view(order));
     yield put(loadingActions.stop());
   } catch (e) {
     yield put(loadingActions.stop());
     CommonLog.lError(e, {
       at: 'getOrderDetail',
-      code: order.code
+      code
     });
   }
 }
@@ -259,7 +257,7 @@ function* getOrderList() {
 }
 
 function* tryViewOrder({
-                         order: orderRec,
+                         order,
                          code
                        }: {
   order: IOrder,
@@ -267,33 +265,28 @@ function* tryViewOrder({
 }) {
   try {
     yield put(loadingActions.start());
-
-    const orderList = yield select(s => s.order.list);
-    let order = orderRec;
-
-    if (isNil(order) && !isNil(code)) {
-      order = orderList.find(o => o.code === code);
-    }
-
-    if (!order) {
-      const workcenterCode = yield select(s => s.systemInfo.workcenter);
-      const { data } = yield call(orderDetailByCodeApi, code, workcenterCode);
-      order = data;
-    }
-
-    if (!order) {
+    if (isNil(order) && isNil(code)) {
       yield put(loadingActions.stop());
-      yield put(notifierActions.enqueueSnackbar('Warn', `工单不存在: ${code}`));
       return;
     }
+
+    let triggerCode = '';
+    if (!isNil(code)) {
+      triggerCode = code;
+    }
+    if (!isNil(order)) {
+      triggerCode = order.code;
+    }
+    // if (!order) {
+    //   yield put(loadingActions.stop());
+    //   yield put(notifierActions.enqueueSnackbar('Warn', `工单不存在: ${code}`));
+    //   return;
+    // }
     yield put(push('/app/working'));
-
-    yield call(getOrderDetail, { order });
-
-    yield put(orderActions.view(order));
+    yield call(getOrderDetail, { code: triggerCode });
   } catch (e) {
     yield put(loadingActions.stop());
-    CommonLog.lError(e, { at: 'tryViewOrder', orderRec, code });
+    CommonLog.lError(e, { at: 'tryViewOrder', order, code });
   }
 }
 

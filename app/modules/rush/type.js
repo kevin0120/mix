@@ -6,7 +6,8 @@ import type { tAction } from '../typeDef';
 export type tWebSocketEvent = string; // $Values<typeof WEBSOCKET_EVENTS>;
 
 export type tBarcode = {
-  +id: string,
+  +sn: string,
+  src: string,
   +barcode: string
 };
 

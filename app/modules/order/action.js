@@ -33,9 +33,9 @@ export const orderActions = Object.freeze({
   getListFail: () => ({
     type: ORDER.LIST.FAIL
   }),
-  getDetail: (order: tOrder) => ({
+  getDetail: (code: string) => ({
     type: ORDER.DETAIL.GET,
-    order
+    code
   }),
   getDetailSuccess: () => ({
     type: ORDER.DETAIL.SUCCESS

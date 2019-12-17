@@ -99,13 +99,24 @@ const orderHandlers = {
     );
   },
   [orderTypes.ORDER_DETAIL_BY_CODE]: (data, reply) => {
+    const order = demoOrderList.find(d => d.code === data.data.code);
+    reply(
+      {
+        sn: data.sn,
+        type: data.type,
+        data: {
+          result: 0
+        }
+      },
+      events.reply
+    );
     reply(
       {
         sn: data.sn,
         type: orderTypes.DETAIL,
-        data: failOrder
+        data: order
       },
-      events.reply
+      events.order
     );
   },
   [orderTypes.STEP_UPDATE]: (data, reply) => {

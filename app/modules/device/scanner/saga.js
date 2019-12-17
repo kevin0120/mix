@@ -15,7 +15,7 @@ export default function* scannerNewData(data: tScannerRushData): Saga<void> {
   try {
     const d = data.data;
     CommonLog.Info(` Scanner receive data: ${d.barcode}`);
-    const scanner = getDevice(d.id);
+    const scanner = getDevice(d.sn);
     if (scanner) {
       yield call(scanner.doDispatch, d.barcode);
     }

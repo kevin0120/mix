@@ -10,7 +10,7 @@ const scannerHandlers = {
       {
         sn: 0,
         data: {
-          id: '3',
+          sn: '3',
           barcode: 1
         }
       },
