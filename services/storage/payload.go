@@ -81,3 +81,8 @@ type WorkorderPayload struct {
 
 type StepTextPayload struct {
 }
+
+type StepTighteningPayload struct {
+	TighteningTotal int           `json:"tightening_total"`
+	TighteningPoint []interface{} `json:"tightening_points"`
+}
