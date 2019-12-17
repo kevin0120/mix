@@ -23,6 +23,7 @@ import { reworkDialogConstants as dia, reworkNS } from '../../reworkPattern/cons
 import { tNS } from '../../../i18n';
 import { deviceType } from '../../deviceManager/constants';
 import SelectCard from '../../../components/SelectCard';
+import { getPestListApi } from '../../../api/tools';
 
 function* getResult(activeConfigs, resultChannel, controllerMode, isFirst) {
   try {
@@ -212,12 +213,14 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 const PsetSelect = SelectCard(screwStepActions.selectPset);
 
                 // TODO get tool psets
+                const psets = (yield call(getPestListApi, tool.serialNumber))?.data?.pset_list || [];
+                console.warn('psets', psets);
                 yield delay(300);
                 yield put(dialogActions.dialogShow({
                   buttons: [btnCancel],
                   title: '选择PSET',
                   content: (<Grid spacing={1} container>
-                    {[1, 2, 3].map(p => <Grid item xs={6} key={`${p}`}>
+                    {psets.map(p => <Grid item xs={6} key={`${p}`}>
                       <PsetSelect
                         name={p}
                         height={130}
@@ -265,9 +268,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               this._tools = yield call(getTools, payload?.tightening_points || []);
               this._forcePset = null;
               this._forceTool = null;
-              if (this._data && this._data.results) {
-                this._pointsManager.newResult(this._data.results);
-              }
+
               break;
             }
             default:
@@ -282,6 +283,9 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               )
             );
           });
+          if (this._data && this._data.results) {
+            this._pointsManager.newResult(this._data.results);
+          }
 
           yield call(
             this.updateData,
@@ -346,7 +350,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 if (success) {
                   yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED)); // 成功退出
                 } else {
-                  yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, { error: '返工失败' })); // 失败退出
+                  yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, { silent: true })); // 失败退出
                 }
                 break;
               }
@@ -392,9 +396,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               controllerMode,
               isFirst
             );
-
-            console.warn(results);
-
+            this._pointsToActive = [];
 
             this._newInactivePoints = this._pointsManager.newResult(results);
             // disable tools before bypass point
@@ -405,13 +407,10 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 );
               })
             )));
-            yield call(
-              this.updateData,
-              (data: tScrewStepData): tScrewStepData => ({
-                ...data,
-                tightening_points: this._pointsManager.points.map(p => p.data)
-              })
-            );
+            yield call(this.updateData, (data: tScrewStepData): tScrewStepData => ({
+              ...data,
+              tightening_points: this._pointsManager.points.map(p => p.data)
+            }));
 
             if (isFirst) {
               isFirst = false;
@@ -435,39 +434,41 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
       * [STEP_STATUS.FAIL](ORDER, orderActions, config) {
         try {
-          const { error } = config;
+          const { error, silent } = config;
           yield all(this._tools.map(t => call(t.Disable)));
-          const { workCenterMode } = yield select();
-          const isNormal = workCenterMode === workModes.normWorkCenterMode;
-          let buttons = [
-            {
-              label: 'Common.Close',
-              color: 'danger',
-              action: screwStepActions.confirmFail()
-            }
-          ];
-          if (isNormal) {
-            buttons = buttons.concat([
+          if (!silent) {
+            const { workCenterMode } = yield select();
+            const isNormal = workCenterMode === workModes.normWorkCenterMode;
+            let buttons = [
               {
-                label: 'Order.Retry',
-                color: 'info',
-                action: orderActions.stepStatus(this, STEP_STATUS.READY)
-              },
-              {
-                label: 'Order.Next',
-                color: 'warning',
+                label: 'Common.Close',
+                color: 'danger',
                 action: screwStepActions.confirmFail()
               }
-            ]);
+            ];
+            if (isNormal) {
+              buttons = buttons.concat([
+                {
+                  label: 'Order.Retry',
+                  color: 'info',
+                  action: orderActions.stepStatus(this, STEP_STATUS.READY)
+                },
+                {
+                  label: 'Order.Next',
+                  color: 'warning',
+                  action: screwStepActions.confirmFail()
+                }
+              ]);
+            }
+            yield put(
+              dialogActions.dialogShow({
+                buttons,
+                title: `工步失败：${this._code}`,
+                content: `${error || this.failureMsg}`
+              })
+            );
+            yield take(SCREW_STEP.CONFIRM_FAIL);
           }
-          yield put(
-            dialogActions.dialogShow({
-              buttons,
-              title: `工步失败：${this._code}`,
-              content: `${error || this.failureMsg}`
-            })
-          );
-          yield take(SCREW_STEP.CONFIRM_FAIL);
           yield put(orderActions.finishStep(this));
         } catch (e) {
           CommonLog.lError(e, { at: 'screwStep FAIL' });

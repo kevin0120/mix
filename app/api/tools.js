@@ -40,3 +40,8 @@ export function jobApi(toolSN: string = '', ControllerSN: string = '', stepID: n
     job
   });
 }
+export function getPestListApi(toolSN): Promise<any> {
+  return rushSendApi('WS_PSET_LIST', {
+    tool_sn: toolSN,
+  });
+}

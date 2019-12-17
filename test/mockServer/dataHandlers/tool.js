@@ -2,7 +2,8 @@ const { events } = require('../constants');
 
 const toolTypes = {
   ENABLE: 'WS_TOOL_ENABLE',
-  PSET: 'WS_TOOL_PSET'
+  PSET: 'WS_TOOL_PSET',
+  PSET_LIST: 'WS_PSET_LIST'
 };
 
 function getRandomArbitrary(min, max) {
@@ -10,7 +11,19 @@ function getRandomArbitrary(min, max) {
 }
 
 const toolHandlers = {
-  [toolTypes.ENABLE]: (data, reply) => {
+  [toolTypes.PSET_LIST]: (data, reply) => {
+    reply(
+      {
+        sn: data.sn,
+        data: {
+          tool_sn: data.data.tool_sn,
+          pset_list: [1, 2, 3, 4]
+        },
+        type: toolTypes.ENABLE
+      },
+      events.reply
+    );
+  }, [toolTypes.ENABLE]: (data, reply) => {
     reply(
       {
         sn: data.sn,
@@ -55,7 +68,7 @@ const toolHandlers = {
         },
         events.result
       );
-    }, 3000);
+    }, 1000);
   }
 };
 

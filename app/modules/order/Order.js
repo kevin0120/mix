@@ -58,8 +58,11 @@ function* redoOrder(step, point, orderActions) {
         }
       }
     );
-    yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
-    // }
+    if (this._steps.some(s => s.status === STEP_STATUS.FAIL)) {
+      yield put(orderActions.stepStatus(this, ORDER_STATUS.FAIL));
+    } else {
+      yield put(orderActions.stepStatus(this, ORDER_STATUS.DONE));
+    }    // }
   } catch (e) {
     CommonLog.lError(e);
   }

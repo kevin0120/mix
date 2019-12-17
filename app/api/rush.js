@@ -29,7 +29,7 @@ if (!isNil(ipcRenderer)) {
   });
 }
 
-
+// send message to rush and receives response
 // eslint-disable-next-line flowtype/no-weak-types
 export function rushSendApi(msgType: string, data: any, timeout: number = defaultTimeout): Promise<tRushData<any, any>> {
   const sn = getSN();
