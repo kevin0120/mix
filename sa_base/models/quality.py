@@ -54,6 +54,11 @@ class QualityPoint(models.Model):
     _sql_constraints = [
         ('product_bom_line_id_uniq', 'unique(bom_line_id)', 'Only one quality point per product bom line is allowed')]
 
+    @api.onchange('ref')
+    def onchange_ref(self):
+        for point in self:
+            point.name = point.ref
+
     @api.multi
     def button_resequence(self):
         self.ensure_one()
