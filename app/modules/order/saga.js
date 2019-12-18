@@ -148,7 +148,6 @@ function* tryWorkOnOrder({
   code: string | number
 }) {
   try {
-    console.warn('try work on', order, code);
     let orderToDo = null;
     if (order) {
       orderToDo = order;
@@ -229,7 +228,6 @@ function* getOrderDetail({ code }) {
     // if (resp.result !== 0) {
     //   yield put(orderActions.getDetailFail());
     // }
-    console.warn('order detail called');
     yield join(detailResult);
     const orderList = yield select(s => s.order.list);
     const order = orderList.find(o => o.code === code);

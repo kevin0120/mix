@@ -33,6 +33,9 @@ function* getResult(activeConfigs, resultChannel, controllerMode, isFirst) {
     if (controllerMode === controllerModes.job && !isFirst) {
       return;
     }
+    if (!controllerModeTasks[controllerMode]) {
+      throw new Error(`未识别的控制器模式:${controllerMode}`);
+    }
     const effects = activeConfigs.map(c => {
       const { point, tool, controllerModeId } = c;
       return call([this, controllerModeTasks[controllerMode]], point.point, tool, controllerModeId);
@@ -148,6 +151,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
     _pointsToActive = [];
 
     _listeners = [];
+
     _statusTasks = {
       * [STEP_STATUS.READY](ORDER, orderActions, config) {
         try {
@@ -169,12 +173,12 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
             );
           }
           const points = payload.tightening_points;
-          const { workcenterType } = yield select(s => s.setting.system.workcenter);
-          const { workCenterMode } = yield select();
-
           this._pointsManager = new ClsOrderOperationPoints(
             payload.tightening_points
           );
+
+          const { workcenterType } = yield select(s => s.setting.system.workcenter);
+          const { workCenterMode } = yield select();
 
           switch (workCenterMode) {
             case workModes.reworkWorkCenterMode: {
@@ -214,7 +218,6 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
                 // TODO get tool psets
                 const psets = (yield call(getPestListApi, tool.serialNumber))?.data?.pset_list || [];
-                console.warn('psets', psets);
                 yield delay(300);
                 yield put(dialogActions.dialogShow({
                   buttons: [btnCancel],
@@ -313,12 +316,10 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
               if (point) {
                 redoPointClsObj = this.points.find(p => p.sequence === point.sequence);
               } else {
-                redoPointClsObj = this.points.find(p => p.canRedo);
+                redoPointClsObj = this.points.find(p => !p.noRedo);
               }
-              console.warn(point, redoPointClsObj);
               if (redoPointClsObj) {
                 this._pointsToActive = [redoPointClsObj.start(true)];
-                console.warn(this._pointsToActive);
               }
               break;
             }
@@ -343,7 +344,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 if (this._pointsToActive && this._pointsToActive.length > 0) {
                   break;
                 }
-                const canRedoPoint = this.points.find(p => p.canRedo);
+                const canRedoPoint = this.points.find(p => !p.noRedo);
                 const success = redoPointClsObj
                   && redoPointClsObj.isSuccess
                   && !canRedoPoint;
@@ -360,7 +361,6 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 );
                 yield call([this, byPassPoint], finalFailPoints, orderActions);
                 this._pointsToActive = this._pointsManager.start();
-
                 if (
                   this._pointsManager.isFailed &&
                   this._pointsManager.points.filter(p => p.isActive).length === 0
@@ -494,6 +494,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
     * _onLeave() {
       try {
         yield call(stepDataApi, this.id, this._data);
+        this._pointsManager.stop();
         yield all(
           this._tools.map(t => (t.isEnable ? call(t.Disable) : call(() => {
           })))

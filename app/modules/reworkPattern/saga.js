@@ -43,7 +43,7 @@ function* tryRework(action: tAction = {}): Saga<void> {
       yield put(notifierActions.enqueueSnackbar('Error', '当前工单没有可返工的工步'));
       canRework = false;
     }
-    if (point && !point.canRedo) {
+    if (point && point.noRedo) {
       yield put(notifierActions.enqueueSnackbar('Error', '此拧紧点不具备返工条件!'));
       canRework = false;
     }

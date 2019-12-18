@@ -3,7 +3,7 @@ const { events } = require('../constants');
 const toolTypes = {
   ENABLE: 'WS_TOOL_ENABLE',
   PSET: 'WS_TOOL_PSET',
-  PSET_LIST: 'WS_PSET_LIST'
+  PSET_LIST: 'WS_TOOL_PSET_LIST'
 };
 
 function getRandomArbitrary(min, max) {

@@ -76,15 +76,7 @@ function ScrewStep({ order, step, isCurrent, image, points, workCenterMode, noti
       notifyInfo={notify}
       selectedSequences={selectedSequences}
       onPointClick={(point: ClsOperationPoint) => {
-        console.log(point);
-        // if (!point.canRedo) {
-        //   notify('Error', '此拧紧点不具备返工条件!');
-        //   return false;
-        // }
         redoPointSpecPoint(order, step, point);
-        // setShowRedoScrewPointDiag(true);
-        // setRedoScrewPoint(point);
-
         return true;
       }}
     />

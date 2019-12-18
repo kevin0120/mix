@@ -6,14 +6,6 @@ import type { tPoint, tPointStatus, tResult } from '../interface/typeDef';
 
 // eslint-disable-next-line import/prefer-default-export
 export class ClsOperationPoint {
-  _point: tPoint;
-
-  _toolSN: string;
-
-  _isActive: boolean = false;
-
-  _status: tPointStatus = POINT_STATUS.WAITING;
-
   _results: Array<tResult>;
 
   constructor(p: tPoint) {
@@ -22,20 +14,28 @@ export class ClsOperationPoint {
     this._results = [];
   }
 
-  start(forceStart) {
-    if (forceStart || !this._isActive && !this.isPass) {
-      this.setActive(true);
-      return this;
-    }
-    return null;
+  _point: tPoint;
+
+  get point(): tPoint {
+    return this._point;
   }
 
-  toString(): string {
-    return JSON.stringify(
-      {
-        Bolt: this.point.nut_no,
-        Sequence: this.point.sequence
-      });
+  _toolSN: string;
+
+  get toolSN(): string {
+    return this._toolSN;
+  }
+
+  _isActive: boolean = false;
+
+  get isActive(): boolean {
+    return this._isActive;
+  }
+
+  _status: tPointStatus = POINT_STATUS.WAITING;
+
+  get status(): tPointStatus {
+    return this._status;
   }
 
   get isFinalFail(): boolean {
@@ -83,20 +83,8 @@ export class ClsOperationPoint {
     return this._point.sequence;
   }
 
-  get status(): tPointStatus {
-    return this._status;
-  }
-
-  get isActive(): boolean {
-    return this._isActive;
-  }
-
-  get canRedo(): boolean {
-    return !this.isActive && this.status === POINT_STATUS.ERROR;
-  }
-
-  get toolSN(): string {
-    return this._toolSN;
+  get noRedo(): boolean {
+    return this.status === POINT_STATUS.SUCCESS;
   }
 
   get x() {
@@ -112,16 +100,41 @@ export class ClsOperationPoint {
     return this._point.group_sequence;
   }
 
-  setActive(active: boolean) {
-    this._isActive = active;
-  }
-
-  get point(): tPoint {
-    return this._point;
-  }
-
   get isKey(): boolean {
     return this._point.is_key;
+  }
+
+  get data() {
+    return {
+      ...this.point,
+      status: this._status,
+      isActive: this._isActive,
+      noRedo: this.noRedo
+    };
+  }
+
+  get pset() {
+    return this._point.pset;
+  }
+
+  start(forceStart) {
+    if (forceStart || !this.isPass) {
+      this.setActive(true);
+      return this;
+    }
+    return null;
+  }
+
+  toString(): string {
+    return JSON.stringify(
+      {
+        Bolt: this.point.nut_no,
+        Sequence: this.point.sequence
+      });
+  }
+
+  setActive(active: boolean) {
+    this._isActive = active;
   }
 
   newResult(result: tResult): ?ClsOperationPoint {
@@ -156,19 +169,6 @@ export class ClsOperationPoint {
     if (this.isPass) {
       this.setActive(false);
     }
-  }
-
-  get data() {
-    return {
-      ...this.point,
-      status: this._status,
-      isActive: this._isActive,
-      canRedo: this.canRedo
-    };
-  }
-
-  get pset() {
-    return this._point.pset;
   }
 
   redo() {

@@ -20,6 +20,7 @@ import type { IWorkStep } from '../step/interface/IWorkStep';
 import { workModes } from '../workCenterMode/constants';
 import ioActions from '../io/action';
 import { ioOutputGroups } from '../io/constants';
+import { orderActions } from './action';
 
 const stepStatus = status => {
   switch (status) {
@@ -229,61 +230,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           if (this._workingIndex < 0) {
             this._workingIndex = 0;
           }
-          const data = this._steps.map(s => [
-            s.code,
-            durationString(s.timeCost()),
-            stepStatus(s.status)
-          ]);
-          const { reportFinish } = yield select(s => s.setting.systemSettings);
-          let confirm = {
-            label: 'Common.Yes',
-            color: 'info'
-          };
-          const { workCenterMode } = yield select();
-          const isNormalMode = workCenterMode === workModes.normWorkCenterMode;
-          let closeAction = push('/app');
-          if (reportFinish && isNormalMode) {
-            const code = this._id;
-            const trackCode = '';
-            const workCenterCode = yield select(s => s.systemInfo.workcenter);
-            const productCode = '';
-            const dateComplete = new Date();
-            const { operation } = this.payload;
-            closeAction = [
-              orderActions.reportFinish(
-                code,
-                trackCode,
-                productCode,
-                workCenterCode,
-                dateComplete,
-                operation
-              ),
-              push('/app')
-            ];
-            confirm = {
-              label: '完工',
-              color: 'info'
-            };
-          }
           yield put(ioActions.set(ioOutputGroups.ready, true));
-
-          if (isNormalMode) {
-            yield put(
-              dialogActions.dialogShow({
-                buttons: [confirm],
-                closeAction,
-                title: i18n.t('Common.Result'),
-                content: (
-                  <Table
-                    tableHeaderColor="info"
-                    tableHead={['工步名称', '耗时', '结果']}
-                    tableData={data}
-                    colorsColls={['info']}
-                  />
-                )
-              })
-            );
-          }
           yield put(orderActions.finishOrder(this));
         } catch (e) {
           CommonLog.lError(e, {
@@ -360,6 +307,74 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
         (step: IWorkStep) => step.status === STEP_STATUS.FAIL
       );
       return ((ret: any): Array<IWorkStep>);
+    }
+
+    * _onLeave() {
+      try {
+        const { workCenterMode } = yield select();
+        switch (workCenterMode) {
+          case workModes.normWorkCenterMode: {
+            const { reportFinish } = yield select(s => s.setting.systemSettings);
+
+            let closeAction = push('/app');
+            let confirm = {
+              label: 'Common.Yes',
+              color: 'info'
+            };
+            const data = this._steps.map(s => [
+              s.code,
+              durationString(s.timeCost()),
+              stepStatus(s.status)
+            ]);
+            if (reportFinish) {
+              const code = this._id;
+              const trackCode = '';
+              const workCenterCode = yield select(s => s.systemInfo.workcenter);
+              const productCode = '';
+              const dateComplete = new Date();
+              const { operation } = this.payload;
+              closeAction = [
+                orderActions.reportFinish(
+                  code,
+                  trackCode,
+                  productCode,
+                  workCenterCode,
+                  dateComplete,
+                  operation
+                ),
+                push('/app')
+              ];
+              confirm = {
+                label: '完工',
+                color: 'info'
+              };
+            }
+            yield put(
+              dialogActions.dialogShow({
+                buttons: [confirm],
+                closeAction,
+                title: i18n.t('Common.Result'),
+                content: (
+                  <Table
+                    tableHeaderColor="info"
+                    tableHead={['工步名称', '耗时', '结果']}
+                    tableData={data}
+                    colorsColls={['info']}
+                  />
+                )
+              })
+            );
+            break;
+          }
+          case workModes.reworkWorkCenterMode: {
+            break;
+          }
+          default:
+            break;
+        }
+      } catch (e) {
+        CommonLog.lError(e, { at: 'order onLeave', code: this._code });
+      }
     }
 
     update(dataObj: ?$Shape<tOrder>) {
