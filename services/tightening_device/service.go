@@ -155,12 +155,15 @@ func (s *Service) initRequestDispatchers() {
 		WS_TOOL_ENABLE:      utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		WS_TOOL_JOB:         utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		WS_TOOL_PSET:        utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		WS_TOOL_PSET_LIST:        utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 	}
 
 	s.requestDispatchers[WS_TOOL_MODE_SELECT].Register(s.OnWS_TOOL_MODE_SELECT)
 	s.requestDispatchers[WS_TOOL_ENABLE].Register(s.OnWS_TOOL_ENABLE)
 	s.requestDispatchers[WS_TOOL_JOB].Register(s.OnWS_TOOL_JOB)
 	s.requestDispatchers[WS_TOOL_PSET].Register(s.OnWS_TOOL_PSET)
+	s.requestDispatchers[WS_TOOL_PSET_LIST].Register(s.OnWS_TOOL_PSET_LIST)
+
 
 	for _, v := range s.requestDispatchers {
 		v.Start()
@@ -274,6 +277,35 @@ func (s *Service) OnWS_TOOL_PSET(data interface{}) {
 	}
 
 	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
+}
+
+func (s *Service) OnWS_TOOL_PSET_LIST(data interface{}) {
+	if data == nil {
+		return
+	}
+
+	wsRequest := data.(*wsnotify.WSRequest)
+	byteData, _ := json.Marshal(wsRequest.WSMsg.Data)
+	c := wsRequest.C
+	msg := wsRequest.WSMsg
+
+	ds := s.StorageService
+	if ds == nil {
+		s.diag.Error("WS_TOOL_PSET List Fail ", errors.New("Please Inject Storage Service First"))
+		return
+	}
+
+	req := PSetList{}
+	_ = json.Unmarshal(byteData, &req)
+
+
+	err := s.Api.ToolPSetList(&req)
+	if err != nil {
+		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -2, err.Error()))
+		return
+	}
+
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateResult(msg.SN, msg.Type, req))
 }
 
 func (s *Service) OnWSMsg(c websocket.Connection, data []byte) {

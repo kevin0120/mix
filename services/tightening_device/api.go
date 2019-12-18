@@ -52,6 +52,21 @@ type PSetSet struct {
 	Total        int    `json:"total"`
 }
 
+type PSetList struct {
+	ToolSN       string `json:"tool_sn"`
+	PSetList []int      `json:"pset_list"`
+}
+
+func (s *PSetList) Validate() error {
+	if s.ToolSN == "" {
+		return errors.New("Controller SN or Tool SN is required")
+	}
+	return nil
+}
+
+
+
+
 func (s *PSetSet) Validate() error {
 	if s.ControllerSN == "" || s.ToolSN == "" {
 		return errors.New("Controller SN or Tool SN is required")
@@ -186,6 +201,25 @@ func (s *Api) ToolPSetSet(req *PSetSet) error {
 	})
 
 	return tool.SetPSet(req.PSet)
+}
+
+//GetPSetList
+func (s *Api) ToolPSetList(req *PSetList)(error) {
+	if req == nil {
+		return errors.New("Req Is Nil")
+	}
+
+	err := req.Validate()
+	if err != nil {
+		return err
+	}
+
+	tool, err := s.getTool("", req.ToolSN)
+	if err != nil {
+		return err
+	}
+	req.PSetList,err=tool.GetPSetList()
+	return err
 }
 
 func (s *Api) ToolModeSelect(req *ToolModeSelect) error {
