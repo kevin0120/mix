@@ -9,7 +9,7 @@ export default {
       overflow: 'hidden',
       position: 'relative',
       padding: 'auto',
-      objectFit: 'contain',
+      // objectFit: 'contain',
       backgroundColor: 'inherit'
     },
     image: {
@@ -18,8 +18,8 @@ export default {
       textAlign: 'center',
       objectFit: 'contain',
       resize: 'both',
-      margin: 0
-      // flex: 1
+      margin: 0,
+      flex: 0,
     }
   },
   point: (circleRadius, scale) => theme => ({

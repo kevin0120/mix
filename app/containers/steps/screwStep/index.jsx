@@ -71,6 +71,7 @@ function ScrewStep({ order, step, isCurrent, image, points, workCenterMode, noti
       // activeIndex={isCurrent ? activeIndex : -1}
       focus={0}
       scale={1}
+      menu={true}
       twinkle={isCurrent}
       enableReWork={enableReWork}
       notifyInfo={notify}
@@ -80,29 +81,6 @@ function ScrewStep({ order, step, isCurrent, image, points, workCenterMode, noti
         return true;
       }}
     />
-    {/*<Alert*/}
-    {/*  warning*/}
-    {/*  show={showRedoScrewPointDiag}*/}
-    {/*  title={t(trans.redoSpecScrewPointTitle)}*/}
-    {/*  onConfirm={() => {*/}
-    {/*    redoPointSpecPoint(step, redoScrewPoint);*/}
-    {/*    setShowRedoScrewPointDiag(false);*/}
-    {/*  }}*/}
-    {/*  onCancel={() => {*/}
-    {/*    setShowRedoScrewPointDiag(false);*/}
-    {/*  }}*/}
-    {/*  confirmBtnCssClass={`${screwImgClasses.button} ${*/}
-    {/*    screwImgClasses.success*/}
-    {/*  } ${screwImgClasses.buttonTxt}`}*/}
-    {/*  cancelBtnCssClass={`${screwImgClasses.button} ${*/}
-    {/*    screwImgClasses.danger*/}
-    {/*  } ${screwImgClasses.buttonTxt}`}*/}
-    {/*  confirmBtnText={t(trans.confirm)}*/}
-    {/*  cancelBtnText={t(trans.cancel)}*/}
-    {/*  showCancel*/}
-    {/*>*/}
-    {/*  {`${t(trans.redoSpecScrewPointContent)} ${redoScrewPoint?.toString() || ''}`}*/}
-    {/*</Alert>*/}
     <Paper
       square
       className={screwImgClasses.thumbPaper}

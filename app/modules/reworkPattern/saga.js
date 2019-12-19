@@ -1,12 +1,5 @@
 // @flow
-import {
-  put,
-  take,
-  call,
-  select,
-  takeEvery,
-  race
-} from 'redux-saga/effects';
+import { call, put, race, select, take, takeEvery } from 'redux-saga/effects';
 import type { Saga } from 'redux-saga';
 import { CommonLog } from '../../common/utils';
 import type { tAction } from './interface/typeDef';
@@ -26,24 +19,20 @@ function* tryRework(action: tAction = {}): Saga<void> {
     const { order, step, point } = action;
     let canRework = true;         // check if point can rework
     const { workCenterMode } = yield select();
+    const wOrder = yield select(s => workingOrder(s.order));
     if (workCenterMode !== workModes.reworkWorkCenterMode) {
       yield put(notifierActions.enqueueSnackbar('Warn', '当前工作模式无法进行返工作业，请先切换至返工模式!'));
       canRework = false;
-    }
-    const wOrder = yield select(s => workingOrder(s.order));
-    if (wOrder) {
+    } else if (wOrder) {
       yield put(notifierActions.enqueueSnackbar('Error', '当前工位有正在执行的工单,不能切换工单模式'));
       canRework = false;
-    }
-    if (!order) {
+    } else if (!order) {
       yield put(notifierActions.enqueueSnackbar('Error', '没有指定返工工单!'));
       canRework = false;
-    }
-    if (order && !order.hasFailWorkStep()) {
+    } else if (order && !order.hasFailWorkStep()) {
       yield put(notifierActions.enqueueSnackbar('Error', '当前工单没有可返工的工步'));
       canRework = false;
-    }
-    if (point && point.noRedo) {
+    } else if (point && point.noRedo) {
       yield put(notifierActions.enqueueSnackbar('Error', '此拧紧点不具备返工条件!'));
       canRework = false;
     }

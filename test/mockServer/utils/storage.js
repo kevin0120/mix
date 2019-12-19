@@ -1,6 +1,11 @@
 const fs = require('fs'); // 引入fs模块
 
-const storageDir = './test/mockServer/storage';
+let storageDir = './test/mockServer/storage';
+
+function setDir(dir) {
+  storageDir = dir;
+}
+
 
 function write(key, name, data) {
   return new Promise((resolve, reject) => {
@@ -34,5 +39,5 @@ function list(key) {
 }
 
 module.exports = {
-  read, write, list
+  read, write, list, setDir
 };

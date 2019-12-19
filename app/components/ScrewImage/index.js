@@ -1,10 +1,10 @@
 // @flow
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import styles from './style';
 import Point from './point';
 import type { tAction } from '../../modules/typeDef';
-
+import { withI18n } from '../../i18n';
 import { ClsOperationPoint } from '../../modules/step/screwStep/classes/ClsOperationPoint';
 import type { CommonLogLvl } from '../../common/utils';
 
@@ -21,7 +21,7 @@ type Props = {
   onPointClick?: ?(ClsOperationPoint)=>boolean
 };
 
-export default function ScrewImage({ twinkle, style = {}, image, points, selectedSequences, focus, pointScale = 1, notifyInfo, enableReWork, onPointClick }: Props) {
+export default function ScrewImage({ menu, twinkle, style = {}, image, points, selectedSequences, focus, pointScale = 1, notifyInfo, enableReWork, onPointClick }: Props) {
   const classes = makeStyles(styles.image)();
 
   const imageRef = useRef(null);
@@ -66,54 +66,51 @@ export default function ScrewImage({ twinkle, style = {}, image, points, selecte
     return () => window.removeEventListener('resize', () => handleResize && handleResize());
   }, [handleResize]);
 
-  return (
+  return withI18n(t => <div
+    className={classes.container}
+    ref={containerRef}
+    style={style}
+  >
+    <img
+      ref={imageRef}
+      src={image || ''}
+      className={classes.image}
+      alt="job"
+      onLoad={() => handleResize && handleResize()}
+      style={{ ...focusStyle, transition: 'transform 1s' }}
+    />
     <div
-      className={classes.container}
-      ref={containerRef}
-      style={style}
+      style={{
+        width: `${size.width || 100}%`,
+        height: `${size.height || 100}%`,
+        position: 'absolute',
+        ...(focusStyle || {}),
+        transition: 'transform 1s'
+      }}
     >
-      <img
-        ref={imageRef}
-        src={image || ''}
-        className={classes.image}
-        alt="job"
-        onLoad={() => handleResize && handleResize()}
-        style={{ ...focusStyle, transition: 'transform 1s' }}
-      />
-      <div
-        style={{
-          width: `${size.width || 100}%`,
-          height: `${size.height || 100}%`,
-          position: 'absolute',
-          ...(focusStyle || {}),
-          transition: 'transform 1s'
+      {points && points.map((p) => <Point
+        key={`${p.sequence}`}
+        x={p.x}
+        y={p.y}
+        menu={menu}
+        twinkle={twinkle && p.isActive}
+        status={p.status}
+        selected={(selectedSequences || []).some(sp => sp === p?.sequence)}
+        label={`${p?.sequence || ''}`}
+        scale={pointScale}
+        info={{ [t('tool')]: t(p.tightening_tool) }}
+        reworkModiBGColor
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (onPointClick) {
+            return onPointClick(p);
+          }
+          return false;
         }}
-      >
-        {points && points.map((p) => <Point
-          key={`${p.sequence}`}
-          x={p.x}
-          y={p.y}
-          twinkle={twinkle && p.isActive}
-          status={p.status}
-          selected={(selectedSequences || []).some(sp => sp === p?.sequence)}
-          label={`${p?.sequence || ''}`}
-          scale={pointScale}
-          reworkModiBGColor
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            // if (!enableReWork && notifyInfo) {
-            //   notifyInfo('Warn', '当前工作模式无法进行返工作业，请先切换至返工模式!');
-            //   return false;
-            // }
-            if (onPointClick) {
-              return onPointClick(p);
-            }
-            return false;
-          }}
-        />) || null}
-      </div>
-    </div>);
+      />) || null}
+    </div>
+  </div>,'point');
 }
 
 ScrewImage.defaultProps = {

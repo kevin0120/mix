@@ -361,6 +361,7 @@ const ScrewStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
                 );
                 yield call([this, byPassPoint], finalFailPoints, orderActions);
                 this._pointsToActive = this._pointsManager.start();
+                console.warn(this._pointsToActive);
                 if (
                   this._pointsManager.isFailed &&
                   this._pointsManager.points.filter(p => p.isActive).length === 0
