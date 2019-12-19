@@ -1,8 +1,6 @@
 const { events } = require('../constants');
-const orderDetailData = require('../demo/orderDetailData.json');
-const failOrder = require('../demo/failOrder.json');
+const { read, write, list } = require('../utils/storage');
 
-const demoOrderList = [orderDetailData, failOrder];
 const orderTypes = Object.freeze({
   LIST: 'WS_ORDER_LIST',
   DETAIL: 'WS_ORDER_DETAIL',
@@ -16,58 +14,55 @@ const orderTypes = Object.freeze({
   ORDER_STEP_DATA_UPDATE: 'WS_ORDER_STEP_DATA_UPDATE'
 });
 
+const demoOrdersObj = {};
+
+const getListInfo = (order) => {
+  const { id, code, track_code, product_code, workcenter, date_planned_start, date_planned_complete, status } = order;
+  return {
+    id,
+    code,
+    track_code,
+    product_code,
+    workcenter,
+    date_planned_start,
+    date_planned_complete,
+    status
+  };
+};
+
+const orderNames = list('order');
+Promise.all(
+  orderNames.map(n => read('order', n))
+).then((resp) => {
+  resp.forEach(r => {
+    const { name, data: order } = r;
+    demoOrdersObj[name] = order;
+  });
+  const orders = Object.values(demoOrdersObj);
+  orders.forEach((o, idx) => {
+    orders[idx].id = idx;
+  });
+  let stepId = 0;
+  orders.forEach((o) => {
+    (o.steps || []).forEach((s, idx) => {
+      // eslint-disable-next-line no-param-reassign
+      o.steps[idx].id = stepId;
+      stepId += 1;
+    });
+  });
+}).catch(console.error);
+
 const orderHandlers = {
   [orderTypes.LIST]: (data, reply) => {
     reply(
       {
         sn: data.sn,
         type: orderTypes.LIST,
-        data: [
-          // demoOrder
-          {
-            id: 1,
-            code: 'MO0002',
-            track_code: '1x0001',
-            product_code: 'demo_product_code',
-            workcenter: 'workcenter',
-            date_planned_start: '2019-10-16T03:20:30Z',
-            date_planned_complete: 'date_planned_complete',
-            status: 'fail'
-          },
-          {
-            id: 2,
-            code: 'MO0003',
-            track_code: '1x0002',
-            product_code: 'product_code',
-            workcenter: 'workcenter',
-            date_planned_start: '2019-10-16T03:25:30Z',
-            date_planned_complete: 'date_planned_complete',
-            status: 'todo'
-          },
-          {
-            id: 3,
-            code: 'MO0004',
-            track_code: '1x0004',
-            product_code: 'product_code',
-            workcenter: 'workcenter',
-            date_planned_start: '2019-10-16T03:25:30Z',
-            date_planned_complete: 'date_planned_complete',
-            status: 'pending'
-          },
-          {
-            id: 4,
-            code: 'MO0005',
-            track_code: '1x0005',
-            product_code: 'product_code',
-            workcenter: 'workcenter',
-            date_planned_start: '2019-10-16T03:25:30Z',
-            date_planned_complete: 'date_planned_complete',
-            status: 'done'
-          }
-        ]
+        data: Object.values(demoOrdersObj).map(getListInfo)
       },
       events.order
     );
+
   },
   [orderTypes.START_REQUEST]: (data, reply) => {
     reply({
@@ -87,19 +82,19 @@ const orderHandlers = {
       type: orderTypes.FINISH_REQUEST
     });
   },
-  [orderTypes.DETAIL]: (data, reply) => {
-    const order = demoOrderList.find(d => d.id === data.data.id);
-    reply(
-      {
-        sn: data.sn,
-        type: orderTypes.DETAIL,
-        data: order
-      },
-      events.order
-    );
-  },
+  // [orderTypes.DETAIL]: (data, reply) => {
+  //   const order = demoOrderList.find(d => d.id === data.data.id);
+  //   reply(
+  //     {
+  //       sn: data.sn,
+  //       type: orderTypes.DETAIL,
+  //       data: order
+  //     },
+  //     events.order
+  //   );
+  // },
   [orderTypes.ORDER_DETAIL_BY_CODE]: (data, reply) => {
-    const order = demoOrderList.find(d => d.code === data.data.code);
+    const order = Object.values(demoOrdersObj).find(d => d.code === data.data.code);
     reply(
       {
         sn: data.sn,
@@ -144,6 +139,34 @@ const orderHandlers = {
     );
   },
   [orderTypes.UPDATE]: (data, reply) => {
+    const { data: { id, status } } = data;
+    console.log(Object.values(demoOrdersObj));
+    const order = Object.values(demoOrdersObj).find(o => o.id === id);
+    if (order) {
+      order.status = status;
+      reply(
+        {
+          sn: data.sn,
+          type: orderTypes.UPDATE,
+          data: {
+            result: 0
+          }
+        },
+        events.reply
+      );
+      return;
+    }
+    reply({
+        sn: data.sn,
+        type: orderTypes.UPDATE,
+        data: {
+          result: -1,
+          msg: `cannot find order with id: ${id}`
+        }
+      },
+      events.reply);
+  },
+  [orderTypes.ORDER_STEP_DATA_UPDATE]: (data, reply) => {
     reply(
       {
         sn: data.sn,

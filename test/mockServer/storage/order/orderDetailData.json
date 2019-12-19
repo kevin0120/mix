@@ -1,11 +1,11 @@
 {
-  "id": 2,
+  "id": 3,
   "code": "MO0003",
   "track_code": "1x0002",
-  "product_code": "",
-  "date_planned_start": "",
-  "date_planned_complete": "",
-  "status": "",
+  "product_code": "demo_product_code",
+  "date_planned_start": "date_planned_start",
+  "date_planned_complete": "date_planned_complete",
+  "status": "todo",
   "product_type_image": "",
   "payload": {
     "product": {

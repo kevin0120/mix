@@ -1,11 +1,11 @@
 {
-  "id": 1,
+  "id": 2,
   "code": "MO0002",
-  "track_code": "",
-  "product_code": "",
-  "date_planned_start": "",
-  "date_planned_complete": "",
-  "status": "",
+  "track_code": "1x0001",
+  "product_code": "demo_product_code",
+  "date_planned_start": "date_planned_start",
+  "date_planned_complete": "date_planned_complete",
+  "status": "fail",
   "product_type_image": "",
   "payload": {
     "product": {
@@ -35,12 +35,8 @@
     "operation": {
       "code": "G0C",
       "resources": {
-        "equipments": [
-          "xx0011"
-        ],
-        "users": [
-          "112233"
-        ]
+        "equipments": ["xx0011"],
+        "users": ["112233"]
       },
       "desc": "测试工艺作业"
     },

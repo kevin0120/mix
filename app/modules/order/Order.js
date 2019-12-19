@@ -172,14 +172,11 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
             return;
           }
 
-          let status = null;
 
           const _onPrevious = () => {
-            console.log('on previous');
             if (this._workingIndex - 1 >= 0) {
               this._workingIndex -= 1;
             }
-            return STEP_STATUS.READY;
           };
 
           const _onNext = () => {
@@ -192,19 +189,15 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
             );
             const wStep = this.workingStep;
             if (wStep) {
-              if (wStep.status === STEP_STATUS.FAIL) {
-                status = STEP_STATUS.READY;
-              }
-              const nextStatus = yield call(
+              yield call(
                 [this, this.runSubStep],
                 wStep,
                 {
                   onNext: _onNext,
                   onPrevious: _onPrevious
                 },
-                status
+                STEP_STATUS.READY
               );
-              status = nextStatus || null;
 
             } else {
               if (this._steps.some(s => s.status === STEP_STATUS.FAIL)) {
