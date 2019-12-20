@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import { withStyles } from '@material-ui/core/styles';
-import { get, cloneDeep } from 'lodash';
+import { cloneDeep, get } from 'lodash';
 
 import Paper from '@material-ui/core/Paper';
 import Divider from '@material-ui/core/Divider';
@@ -20,7 +20,7 @@ import { systemInit } from '../../modules/systemInit/action';
 
 import { toggleRFID } from '../../modules/device/rfid/action';
 
-import { sortObj, defaultClient } from '../../common/utils';
+import { defaultClient, sortObj } from '../../common/utils';
 import Test from './Test';
 import styles from './styles';
 import withKeyboard from '../../components/Keyboard';
@@ -29,10 +29,10 @@ import Typography from '@material-ui/core/Typography';
 const lodash = require('lodash');
 
 const mapStateToProps = (state, ownProps) => ({
+  ...ownProps,
   storedConfigs: state.setting.page.odooConnection,
   connInfo: state.setting.system.connections,
-  rfidEnabled: state.setting.systemSettings.rfidEnabled,
-  ...ownProps
+  rfidEnabled: state.setting.systemSettings.rfidEnabled
 });
 
 const mapDispatchToProps = {
@@ -109,42 +109,37 @@ class ConnectedConnect extends React.Component {
     const { classes, systemInit, saveConfigs, toggleRFID, rfidEnabled } = this.props;
     const { data, isDataValid, connInfoData } = this.state;
 
-    const baseItems = t =>
-      sortObj(data, 'displayOrder').map(({ key, value: item }) => (
-        <div key={key}>
-          <ListItem className={classes.inputItem}>
-            <InputLabel className={classes.inputLabel} htmlFor={key}>
-              <Typography variant="body1">
-                {t(item.displayTitle)}
-              </Typography>
-            </InputLabel>
-            <Input
-              id={key}
-              placeholder={t('Common.isRequired')}
-              className={classes.input}
-              value={item.value}
-              // onChange={e => this.handleChange(e, key)}
-              onClick={() => {
-                this.props.keyboardInput({
-                  onSubmit: text => {
-                    const tempData = cloneDeep(this.state.data);
-                    tempData[key].value = text;
-                    this.setState({
-                      data: tempData
-                    });
-                  },
-                  text: item.value,
-                  title: item.displayTitle,
-                  label: item.displayTitle
+    const baseItems = (t, key, item) => <React.Fragment>
+      <ListItem className={classes.inputItem} key={key}>
+        <InputLabel className={classes.inputLabel} htmlFor={key}>
+          <Typography variant="body1">
+            {t(item.displayTitle)}
+          </Typography>
+        </InputLabel>
+        <Input
+          id={key}
+          placeholder={t('Common.isRequired')}
+          className={classes.input}
+          value={item.value}
+          // onChange={e => this.handleChange(e, key)}
+          onClick={() => {
+            this.props.keyboardInput({
+              onSubmit: text => {
+                const tempData = cloneDeep(this.state.data);
+                tempData[key].value = text;
+                this.setState({
+                  data: tempData
                 });
-              }}
-            />
-          </ListItem>
-          <li>
-            <Divider/>
-          </li>
-        </div>
-      ));
+              },
+              text: item.value,
+              title: item.displayTitle,
+              label: item.displayTitle
+            });
+          }}
+        />
+      </ListItem>
+      <Divider/>
+    </React.Fragment>;
 
     return (
       <I18n ns="translations">
@@ -154,7 +149,10 @@ class ConnectedConnect extends React.Component {
               {t('Configuration.connections.name')}
             </h3>
             <Paper className={classes.paperWrap} elevation={1}>
-              <List>{baseItems(t)}</List>
+              <List>{
+                sortObj(data, 'displayOrder')
+                  .map(({ key, value: item }) => baseItems(t, key, item))
+              }</List>
               <Button
                 disabled={!isDataValid}
                 color="info"

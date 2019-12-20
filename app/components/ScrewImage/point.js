@@ -48,9 +48,6 @@ function Point({ info, twinkle, x, y, status, label, scale, reworkModiBGColor, o
           [classes.active]: twinkle || false,
           [classes.selected]: selected
         })}
-      style={{
-        zIndex: 2
-      }}
       onClick={(e) => {
         if (onClick) {
           onClick(e);
@@ -65,7 +62,6 @@ function Point({ info, twinkle, x, y, status, label, scale, reworkModiBGColor, o
     {menu && !!twinkle && info && Object.keys(info).length > 0 ? <List style={{
       width: 200,
       // minHeight: pointRadius * 2,
-      zIndex: 1,
       left: x <= 80 ? pointRadius * 2 + 10 : -200 - 10,
       top: 5,
       position: 'absolute',

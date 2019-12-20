@@ -110,11 +110,11 @@ class ConnectedTest extends React.Component {
     const { rfidEnabled } = this.props;
     return {
       masterPcUrl: {
-        key: 'masterpc',
+        key: 'rush',
         displayOrder: 0,
         disabled: false,
-        value: String(connInfo.masterpc),
-        displayTitle: 'MasterPC URL',
+        value: String(connInfo.rush),
+        displayTitle: 'RUSH URL',
         test: this.testMasterPC
       },
       aiisUrl: {
