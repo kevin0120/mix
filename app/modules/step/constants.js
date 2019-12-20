@@ -15,9 +15,9 @@ export const stepTypeKeys=Object.freeze({
   instruction: 'text',
   text: 'text',
   screw: 'tightening',
-  material: 'material',
-  check: 'check',
-  video: 'video'
+  material: 'register_consumed_materials',
+  check: 'pass_fail',
+  video: 'video',
 });
 
 export default STEP_STATUS;

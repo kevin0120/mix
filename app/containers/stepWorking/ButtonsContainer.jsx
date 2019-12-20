@@ -1,7 +1,7 @@
 // @flow
 
-import React, { useState } from 'react';
 import type { Node } from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import { Menu } from '@material-ui/icons';
@@ -9,19 +9,19 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import Button from '../../components/CustomButtons/Button';
 import styles from './styles';
-import { translation as trans, stepWorkingNS } from './local';
+import { stepWorkingNS, translation as trans } from './local';
 import * as oSel from '../../modules/order/selector';
+import type { tActOrderTrigger, tActUpdateState } from '../../modules/order/action';
 import { orderActions } from '../../modules/order/action';
 import dialogActions from '../../modules/dialog/action';
 import { tNS, withI18n } from '../../i18n';
 import Table from '../../components/Table/Table';
 import modelViewerActions from '../../modules/modelViewer/action';
 import type { IOrder } from '../../modules/order/interface/IOrder';
-import type {
-  tActOrderTrigger,
-  tActUpdateState
-} from '../../modules/order/action';
 import type { IWorkStep } from '../../modules/step/interface/IWorkStep';
+import PDFViewer from '../../components/PDFViewer';
+
+const demoPDF = 'http://www.pdf995.com/samples/pdf.pdf';
 
 const mapState = (state, props) => {
   const vOrder = oSel.viewingOrder(state.order);
@@ -47,7 +47,7 @@ const mapDispatch = {
   cancelOrder: orderActions.cancelOrder,
   pendingOrder: orderActions.pendingOrder,
   tryWorkOn: orderActions.tryWorkOn,
-  viewModelDialog: dialogActions.dialogShow,
+  showDialog: dialogActions.dialogShow,
   viewModel: modelViewerActions.open
 };
 
@@ -76,25 +76,25 @@ type ButtonsContainerProps = {
 /* eslint-enable flowtype/no-weak-types */
 
 const ButtonsContainer: ButtonsContainerProps => Node = ({
-  viewingOrder,
-  viewingStep,
-  workingStep,
-  next,
-  steps,
-  viewingIndex,
-  action,
-  previous,
-  finishStep,
-  doPreviousStep,
-  cancelOrder,
-  pendingOrder,
-  isPending,
-  pendingable,
-  cancelable,
-  tryWorkOn,
-  viewModel,
-  viewModelDialog
-}: ButtonsContainerProps) => {
+                                                           viewingOrder,
+                                                           viewingStep,
+                                                           workingStep,
+                                                           next,
+                                                           steps,
+                                                           viewingIndex,
+                                                           action,
+                                                           previous,
+                                                           finishStep,
+                                                           doPreviousStep,
+                                                           cancelOrder,
+                                                           pendingOrder,
+                                                           isPending,
+                                                           pendingable,
+                                                           cancelable,
+                                                           tryWorkOn,
+                                                           viewModel,
+                                                           showDialog
+                                                         }: ButtonsContainerProps) => {
   const classes = makeStyles(styles.buttonsContainer)();
   const noPrevious = steps.length <= 0 || viewingIndex <= 0;
   const noNext = steps.length <= 0 || viewingIndex >= steps.length - 1;
@@ -142,6 +142,14 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
       stepWorkingNS
     )
   };
+  const fileDialog = {
+    buttons: [{
+      label: 'Common.Close',
+      color: 'warning'
+    }],
+    title: tNS(trans.viewFile, stepWorkingNS),
+    content: <PDFViewer file={demoPDF} page={0}/>
+  };
 
   return withI18n(
     t => (
@@ -155,7 +163,7 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
                 color="github"
                 onClick={() => setDialogOpen(true)}
               >
-                <Menu fontSize="inherit" className={classes.menuIcon} />
+                <Menu fontSize="inherit" className={classes.menuIcon}/>
               </Button>
               <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
                 <div style={{ backgroundColor: 'white' }}>
@@ -211,9 +219,16 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
           <Button
             color="primary"
             type="button"
-            onClick={() => viewModelDialog(modelsTableDialog)}
+            onClick={() => showDialog(modelsTableDialog)}
           >
             {t(trans.viewModel)}
+          </Button>
+          <Button
+            color="primary"
+            type="button"
+            onClick={() => showDialog(fileDialog)}
+          >
+            {t(trans.viewFile)}
           </Button>
           <Button
             color="primary"

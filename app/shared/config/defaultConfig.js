@@ -68,7 +68,7 @@ const defaultConfigs = {
         avatar: ''
       }
     },
-    // verify: 'local',//'online
+    verify: 'online',//'online'
     maxUsers: 0 // 0:no limit
   },
 
@@ -109,7 +109,7 @@ const defaultConfigs = {
     odooConnection: {
       odooUrl: {
         displayOrder: 1,
-        value: 'http://192.168.127.118:8069/api/v1',
+        value: 'http://192.168.4.42:8069/api/v1',
         displayTitle: 'Configuration.connections.Odoo'
       },
       hmiSn: {
