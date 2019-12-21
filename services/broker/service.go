@@ -14,21 +14,21 @@ type Diagnostic interface {
 }
 
 type Service struct {
-	diag                  Diagnostic
-	configValue           atomic.Value
-	Provider              IBrokerProvider
-	opened                bool
-	BrokerStatusDisptcher *utils.Dispatcher
-	closing               chan struct{}
+	diag                   Diagnostic
+	configValue            atomic.Value
+	Provider               IBrokerProvider
+	opened                 bool
+	BrokerStatusDispatcher *utils.Dispatcher
+	closing                chan struct{}
 }
 
 func NewService(c Config, d Diagnostic) *Service {
 
 	s := &Service{
-		diag:                  d,
-		opened:                false,
-		BrokerStatusDisptcher: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		closing:               make(chan struct{}, 1),
+		diag:                   d,
+		opened:                 false,
+		BrokerStatusDispatcher: utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		closing:                make(chan struct{}, 1),
 	}
 	s.configValue.Store(c)
 
@@ -45,7 +45,7 @@ func (s *Service) Config() Config {
 func (s *Service) Open() error {
 	c := s.Config()
 	if c.Enable {
-		s.BrokerStatusDisptcher.Start()
+		s.BrokerStatusDispatcher.Start()
 		go s.connectProc()
 	}
 	return nil
@@ -53,7 +53,7 @@ func (s *Service) Open() error {
 
 func (s *Service) Close() error {
 	s.closing <- struct{}{}
-	s.BrokerStatusDisptcher.Release()
+	s.BrokerStatusDispatcher.Release()
 	if s.Provider != nil {
 		return s.Provider.Close()
 	}
@@ -69,7 +69,7 @@ func (s *Service) connectProc() {
 			} else {
 				s.opened = true
 				s.diag.Debug("Broker Service Started")
-				s.BrokerStatusDisptcher.Dispatch(s.opened)
+				s.BrokerStatusDispatcher.Dispatch(s.opened)
 				return
 			}
 

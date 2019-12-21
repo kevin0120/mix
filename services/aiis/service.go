@@ -185,7 +185,7 @@ func (s *Service) ensureHttpClient() *resty.Client {
 func (s *Service) Open() error {
 	s.RegisterTighteningResultHandler(tightening_device.DISPATCH_RESULT, s.OnTighteningResult)
 	s.TighteningService.GetDispatcher(tightening_device.DISPATCH_NEW_TOOL).Register(s.onNewTool)
-	s.Broker.BrokerStatusDisptcher.Register(s.onBrokerStatus)
+	s.Broker.BrokerStatusDispatcher.Register(s.onBrokerStatus)
 
 	s.ensureHttpClient()
 

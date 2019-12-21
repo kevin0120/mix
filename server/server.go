@@ -49,7 +49,7 @@ type Server struct {
 	dataDir  string
 	hostname string
 
-	StorageServie     *storage.Service
+	StorageService    *storage.Service
 	ControllerService *controller.Service
 
 	HTTPDService        *httpd.Service
@@ -76,7 +76,7 @@ type Server struct {
 	Services []Service
 
 	ServicesByName map[string]int
-	err            chan error ``
+	err            chan error
 
 	BuildInfo   BuildInfo
 	Commander   command.Commander
@@ -103,15 +103,15 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 		Commander:      c.Commander,
 	}
 
-	s.appendStorageService()
-
 	if err := s.initHTTPDService(); err != nil {
 		return nil, errors.Wrap(err, "init httpd service")
 	}
 
+	s.appendStorageService()
+
 	s.appendWebsocketService()
 
-	if err := s.initAudiVWDService(); err != nil {
+	if err := s.initAudiVWProtocolService(); err != nil {
 		return nil, errors.Wrap(err, "init Audi/VW service")
 	}
 
@@ -150,6 +150,15 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	s.appendHTTPDService()
 
 	return s, nil
+}
+
+func (s *Server) GetServiceByName(name string) Service {
+	if idx, ok := s.ServicesByName[name]; !ok {
+		// Should be unreachable code
+		return nil
+	}else {
+		return s.Services[idx]
+	}
 }
 
 func (s *Server) AppendService(name string, srv Service) {
@@ -192,7 +201,7 @@ func (s *Server) initHTTPDService() error {
 	return nil
 }
 
-func (s *Server) initAudiVWDService() error {
+func (s *Server) initAudiVWProtocolService() error {
 	c := s.config.AudiVW
 	d := s.DiagService.NewAudiVWHandler()
 	srv := audi_vw.NewService(c, d, s.ControllerService)
@@ -207,7 +216,7 @@ func (s *Server) appendAudiVWService() {
 	s.AudiVWService.Minio = s.MinioService
 	s.AudiVWService.Aiis = s.AiisService
 	s.AudiVWService.WS = s.WSNotifyService
-	s.AudiVWService.DB = s.StorageServie
+	s.AudiVWService.DB = s.StorageService
 	s.AudiVWService.Odoo = s.OdooService
 	s.AudiVWService.Parent = s.ControllerService
 
@@ -229,7 +238,7 @@ func (s *Server) appendOpenProtocolService() {
 	s.OpenprotocolService.Minio = s.MinioService
 	s.OpenprotocolService.Aiis = s.AiisService
 	s.OpenprotocolService.WS = s.WSNotifyService
-	s.OpenprotocolService.DB = s.StorageServie
+	s.OpenprotocolService.DB = s.StorageService
 	s.OpenprotocolService.Parent = s.ControllerService
 	s.OpenprotocolService.Odoo = s.OdooService
 
@@ -244,7 +253,7 @@ func (s *Server) appendMinioService() error {
 	c := s.config.Minio
 	d := s.DiagService.NewMinioHandler()
 	srv := minio.NewService(c, d)
-	srv.DB = s.StorageServie
+	srv.DB = s.StorageService
 
 	s.MinioService = srv
 	s.AppendService("minio", srv)
@@ -261,7 +270,7 @@ func (s *Server) appendControllersService() error {
 		return errors.Wrap(err, "append TighteningController service fail")
 	}
 
-	srv.DB = s.StorageServie
+	srv.DB = s.StorageService
 	srv.WS = s.WSNotifyService
 	srv.Aiis = s.AiisService
 	srv.Minio = s.MinioService
@@ -298,7 +307,7 @@ func (s *Server) appendTighteningDeviceService() error {
 	}
 
 	srv.WS = s.WSNotifyService
-	srv.StorageService = s.StorageServie
+	srv.StorageService = s.StorageService
 	srv.DeviceService = s.DeviceService
 
 	s.TighteningDeviceService = srv
@@ -314,7 +323,7 @@ func (s *Server) appendAiisService() error {
 
 	srv.TighteningService = s.TighteningDeviceService
 	srv.SN = s.config.SN
-	srv.DB = s.StorageServie
+	srv.DB = s.StorageService
 	srv.WS = s.WSNotifyService
 	srv.Broker = s.BrokerService
 
@@ -330,7 +339,7 @@ func (s *Server) appendOdooService() error {
 	srv := odoo.NewService(c, d)
 
 	s.OdooService = srv
-	srv.DB = s.StorageServie
+	srv.DB = s.StorageService
 	srv.HTTPDService = s.HTTPDService
 	srv.Aiis = s.AiisService
 	srv.WS = s.WSNotifyService
@@ -359,7 +368,7 @@ func (s *Server) appendHMIService() error {
 
 	srv.ODOO = s.OdooService
 	srv.Httpd = s.HTTPDService //http 服务注入
-	srv.DB = s.StorageServie   // stroage 服务注入
+	srv.DB = s.StorageService  // stroage 服务注入
 	srv.AudiVw = s.AudiVWService
 	srv.SN = s.config.SN
 	srv.ControllerService = s.ControllerService
@@ -377,7 +386,7 @@ func (s *Server) appendStorageService() error {
 	d := s.DiagService.NewStorageHandler()
 	srv := storage.NewService(c, d)
 
-	s.StorageServie = srv
+	s.StorageService = srv
 
 	s.AppendService("storage", srv)
 
