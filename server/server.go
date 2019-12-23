@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"github.com/masami10/rush/command"
 	"github.com/masami10/rush/keyvalue"
-	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/audi_vw"
 	"github.com/masami10/rush/services/broker"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/diagnostic"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/hmi"
 	"github.com/masami10/rush/services/httpd"
 	"github.com/masami10/rush/services/io"
@@ -109,7 +109,6 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 		return nil, errors.Wrap(err, "init httpd service")
 	}
 	s.appendWebsocketService()
-
 
 	if err := s.initAudiVWDService(); err != nil {
 		return nil, errors.Wrap(err, "init Audi/VW service")
@@ -248,10 +247,12 @@ func (s *Server) appendDeviceService() error {
 	c := s.config.Device
 	d := s.DiagService.NewDeviceHandler()
 	srv, err := device.NewService(c, d)
-
 	if err != nil {
 		return errors.Wrap(err, "append device service fail")
 	}
+
+	srv.DispatcherBus = s.DispatcherBusService
+	srv.WS = s.WSNotifyService
 
 	s.DeviceService = srv
 	s.AppendService("device", srv)
@@ -269,7 +270,7 @@ func (s *Server) appendTighteningDeviceService() error {
 		return errors.Wrap(err, "append tightening_device service fail")
 	}
 
-	srv.WS = s.WSNotifyService
+	//srv.WS = s.WSNotifyService
 	srv.StorageService = s.StorageServie
 	srv.DeviceService = s.DeviceService
 
@@ -331,10 +332,7 @@ func (s *Server) appendHMIService() error {
 	srv.ODOO = s.OdooService
 	srv.Httpd = s.HTTPDService //http 服务注入
 	srv.DB = s.StorageServie   // stroage 服务注入
-	srv.AudiVw = s.AudiVWService
 	srv.SN = s.config.SN
-	srv.OpenProtocol = s.OpenprotocolService
-	srv.TighteningService = s.TighteningDeviceService
 	srv.WS = s.WSNotifyService
 	srv.Aiis = s.AiisService
 	srv.DispatcherBus = s.DispatcherBusService

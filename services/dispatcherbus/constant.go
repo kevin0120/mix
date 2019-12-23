@@ -2,65 +2,44 @@ package dispatcherbus
 
 //todo: 通过封装getattr, setattr 减少这种赋值代码
 const (
-	DISPATCHER_WS_IO_STATUS  = "WS_IO_STATUS"
-	DISPATCHER_WS_IO_CONTACT = "WS_IO_CONTACT"
-	DISPATCHER_WS_IO_SET     = "WS_IO_SET"
+	// ********************************Device***********************************
+	// 设备(包括IO，条码枪，读卡器，拧紧控制器，拧紧工具等)状态发送变化时，会通过此分发器进行状态分发
+	DISPATCHER_DEVICE_STATUS = "DEVICE_STATUS"
 
-	DISPATCHER_WS_DEVICE_STATUS = "WS_DEVICE_STATUS"
+	// ********************************Scanner***********************************
+	// 当收到条码数据时(来自条码枪，拧紧控制器条码等)，会通过此分发器进行条码分发
+	DISPATCHER_SCANNER_DATA = "DISPATCHER_SCANNER_DATA"
 
-	DISPATCHER_WS_ORDER_LIST             = "WS_ORDER_LIST"
-	DISPATCHER_WS_ORDER_DETAIL           = "WS_ORDER_DETAIL"
-	DISPATCHER_WS_ORDER_UPDATE           = "WS_ORDER_UPDATE"
-	DISPATCHER_WS_ORDER_STEP_UPDATE      = "WS_ORDER_STEP_UPDATE"
-	DISPATCHER_WS_ORDER_STEP_DATA_UPDATE = "WS_ORDER_STEP_DATA_UPDATE"
-	DISPATCHER_WS_ORDER_DETAIL_BY_CODE   = "WS_ORDER_DETAIL_BY_CODE"
+	// ********************************IO***********************************
+	// 当收到IO输入输出状态变化时(IO模块或拧紧控制器IO等)，会通过此分发器进行IO状态分发
+	DISPATCH_IO = "DISPATCH_IO"
 
-	//SCANNER
-	DISPATCHER_SCANNER_ON_RECV = "SCANNER_ON_RECV"
+	// ********************************Reader***********************************
+	// 当收到读卡器数据时，会通过此分发器进行读卡器数据分发
+	DISPATCHER_READER_DATA = "DISPATCHER_READER_DATA"
 
-	//tightening Device
-	DISPATCH_RESULT_PREVIEW            = "DISPATCH_RESULT_PREVIEW"
-	DISPATCH_RESULT                    = "DISPATCH_RESULT"
-	DISPATCH_CURVE                     = "DISPATCH_CURVE"
-	DISPATCH_IO_PREVIEW                = "DISPATCH_IO_PREVIEW"
-	DISPATCH_IO                        = "DISPATCH_IO"
-	DISPATCH_CONTROLLER_STATUS_PREVIEW = "DISPATCH_CONTROLLER_STATUS_PREVIEW"
-	DISPATCH_CONTROLLER_STATUS         = "DISPATCH_CONTROLLER_STATUS"
-	DISPATCH_TOOL_STATUS_PREVIEW       = "DISPATCH_TOOL_STATUS_PREVIEW"
-	DISPATCH_TOOL_STATUS               = "DISPATCH_TOOL_STATUS"
-	DISPATCH_CONTROLLER_ID_PREVIEW     = "DISPATCH_CONTROLLER_ID_PREVIEW"
-	DISPATCH_CONTROLLER_ID             = "DISPATCH_CONTROLLER_ID"
-	DISPATCH_NEW_TOOL                  = "DISPATCH_NEW_TOOL"
+	// ********************************Tightening***********************************
+	// 当收到拧紧结果时，会通过此分发器进行拧紧结果分发
+	DISPATCH_RESULT = "DISPATCH_RESULT"
 
-	// tightening tool
-	WS_TIGHTENING_DEVICE = "WS_TIGHTENING_DEVICE"
+	// 当收到拧紧曲线时，会通过此分发器进行拧紧曲线分发
+	DISPATCH_CURVE = "DISPATCH_CURVE"
 
-	WS_TOOL_JOB         = "WS_TOOL_JOB"
-	WS_TOOL_PSET        = "WS_TOOL_PSET"
-	WS_TOOL_RESULT      = "WS_TOOL_RESULT"
-	WS_TOOL_ENABLE      = "WS_TOOL_ENABLE"
-	WS_TOOL_MODE_SELECT = "WS_TOOL_MODE_SELECT"
-	WS_TOOL_PSET_LIST   = "WS_TOOL_PSET_LIST"
-	WS_TOOL_PSET_DETAIL = "WS_TOOL_PSET_DETAIL"
-	WS_TOOL_JOB_LIST    = "WS_TOOL_JOB_LIST"
-	WS_TOOL_JOB_DETAIL  = "WS_TOOL_JOB_DETAIL"
+	// 当检测到新工具时，会通过此分发器进行新工具分发
+	DISPATCH_NEW_TOOL = "DISPATCH_NEW_TOOL"
 
-	WS_TIGHTENING_RESULT             = "WS_TIGHTENING_RESULT"
-	WS_TIGHTENING_CONTROLLER_STATUS  = "WS_TIGHTENING_CONTROLLER_STATUS"
-	WS_TIGHTENING_CONTROLLER_IO      = "WS_TIGHTENING_CONTROLLER_IO"
-	WS_TIGHTENING_CONTROLLER_BARCODE = "WS_TIGHTENING_CONTROLLER_BARCODE"
-	WS_TIGHTENING_TOOL_STATUS        = "WS_TIGHTENING_TOOL_STATUS"
-
-	// aiis
+	// ********************************AIIS***********************************
 	DISPATCH_ODOO_STATUS = "DISPATCH_ODOO_STATUS"
 	DISPATCH_AIIS_STATUS = "DISPATCH_AIIS_STATUS"
 
 	DISPATCH_RPC_STATUS = "DISPATCH_RPC_STATUS"
 	DISPATCH_RPC_RECV   = "DISPATCH_RPC_RECV"
 
-	//broker
+	// ********************************BROKER***********************************
+	// 当Broker(MQ)服务状态变化时， 会通过此分发器进行状态分发
 	DISPATCH_BROKER_STATUS = "DISPATCH_BROKER_STATUS"
 
-	//websocket notify
+	// ********************************WEBSOCKET***********************************
+	// 当收到WebSocket请求时， 会通过此分发器进行请求分发
 	DISPATCH_WS_NOTIFY = "DISPATCH_WS_NOTIFY"
 )

@@ -6,8 +6,8 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/device"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/socket_writer"
@@ -137,7 +137,7 @@ func (c *TighteningController) UpdateToolStatus(status string) {
 		})
 	}
 	if data, err := json.Marshal(ss); err == nil {
-		c.dispatcherBus.Dispatch(dispatcherbus.DISPATCH_TOOL_STATUS_PREVIEW, data)
+		c.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_DEVICE_STATUS, data)
 	}
 }
 
@@ -632,7 +632,7 @@ func (c *TighteningController) handleStatus(status string) {
 			},
 		}
 		// 分发控制器状态 -> tightening device
-		c.dispatcherBus.Dispatch(dispatcherbus.DISPATCH_CONTROLLER_STATUS_PREVIEW, ss)
+		c.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_DEVICE_STATUS, ss)
 	}
 }
 

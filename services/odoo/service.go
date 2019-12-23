@@ -476,7 +476,7 @@ func (s *Service) taskSaveWorkorders() {
 			orderHmi = append(orderHmi, orderOut)
 			//fmt.Println(string(orderOut))
 			//fmt.Println(orderHmi)
-			body, _ := json.Marshal(wsnotify.GenerateResult(0, WS_ORDER_NEW_ORDER, orderHmi))
+			body, _ := json.Marshal(wsnotify.GenerateWSMsg(0, WS_ORDER_NEW_ORDER, orderHmi))
 
 			s.WS.NotifyAll(wsnotify.WS_EVENT_ORDER, string(body))
 			s.diag.Debug(fmt.Sprintf("收到工单并推送HMI: %s", string(body)))

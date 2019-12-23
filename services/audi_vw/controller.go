@@ -1,14 +1,12 @@
 package audi_vw
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/openprotocol"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
-	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/socket_writer"
 	"net"
 	"sync"
@@ -110,13 +108,13 @@ func (c *TighteningController) updateStatus(status string) {
 		}
 
 		// 将最新状态推送给hmi
-		s := wsnotify.WSStatus{
-			SN:     c.cfg.SN,
-			Status: string(status),
-		}
+		//s := wsnotify.WSStatus{
+		//	SN:     c.cfg.SN,
+		//	Status: string(status),
+		//}
 
-		msg, _ := json.Marshal(s)
-		c.Srv.WS.WSSendControllerStatus(string(msg))
+		//msg, _ := json.Marshal(s)
+		//c.Srv.WS.WSSendControllerStatus(string(msg))
 
 		c.Srv.diag.Debug(fmt.Sprintf("CVI3:%s %s\n", c.cfg.SN, status))
 

@@ -20,7 +20,6 @@ type DispatchHandlerStruct struct {
 
 func CreateDispatchHandlerStruct(h dispatchHandler) *DispatchHandlerStruct {
 	if h == nil {
-		log.Fatal("CreateDispatchHandlerStruct With Empty Handler")
 		return nil
 	}
 	return &DispatchHandlerStruct{

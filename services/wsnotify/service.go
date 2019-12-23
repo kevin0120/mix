@@ -60,7 +60,6 @@ type Service struct {
 	dispatcherBus Dispatcher
 
 	dispatcherArray []*utils.DispatchHandlerStruct
-
 }
 
 func (s *Service) Config() Config {
@@ -143,7 +142,7 @@ func NewService(c Config, d Diagnostic, dp Dispatcher) *Service {
 			MaxMessageSize:  int64(c.WriteBufferSize),
 			ReadTimeout:     websocket.DefaultWebsocketPongTimeout, //此作为readtimeout, 默认 如果有ping没有发送也成为read time out
 		}),
-		clientManager: &WSClientManager{},
+		clientManager:   &WSClientManager{},
 		dispatcherArray: []*utils.DispatchHandlerStruct{},
 	}
 
@@ -155,10 +154,10 @@ func NewService(c Config, d Diagnostic, dp Dispatcher) *Service {
 
 }
 
-func (s *Service) createAndStartWebSocketNotifyDispatcher() error{
+func (s *Service) createAndStartWebSocketNotifyDispatcher() error {
 	if err := s.dispatcherBus.Create(dispatcherbus.DISPATCH_WS_NOTIFY, utils.DefaultDispatcherBufLen); err != nil {
 		return err
-	}else {
+	} else {
 		return s.dispatcherBus.Start(dispatcherbus.DISPATCH_WS_NOTIFY)
 	}
 }
@@ -169,11 +168,11 @@ func (s *Service) postNotify(msg *DispatcherNotifyPackage) {
 	}
 }
 
-func (s *Service)addNewHttpHandler(r httpd.Route)  {
-	if  s.Httpd == nil {
+func (s *Service) addNewHttpHandler(r httpd.Route) {
+	if s.Httpd == nil {
 		return
 	}
-	h, err :=s.Httpd.GetHandlerByName(httpd.BasePath)
+	h, err := s.Httpd.GetHandlerByName(httpd.BasePath)
 	if err != nil {
 		return
 	}
@@ -218,13 +217,13 @@ func (s *Service) Close() error {
 }
 
 // ws推送结果到指定控制器
-func (s *Service) WSSendResult(sn string, payload string) {
-
-	c, exist := s.clientManager.GetClient(sn)
-	if exist {
-		c.Emit(WS_EVENT_RESULT, payload)
-	}
-}
+//func (s *Service) WSSendResult(sn string, payload string) {
+//
+//	c, exist := s.clientManager.GetClient(sn)
+//	if exist {
+//		c.Emit(WS_EVENT_RESULT, payload)
+//	}
+//}
 
 // ws推送MES指示到显示ping
 //func (s *Service) WSSendMes(event string,sn string, payload string) {
@@ -243,64 +242,78 @@ func (s *Service) NotifyAll(evt string, payload string) {
 }
 
 // ws群发控制器状态
-func (s *Service) WSSendControllerStatus(payload string) {
-	s.clientManager.NotifyALL(WS_EVENT_CONTROLLER, payload)
-}
+//func (s *Service) WSSendControllerStatus(payload string) {
+//	s.clientManager.NotifyALL(WS_EVENT_CONTROLLER, payload)
+//}
 
 // ws群发控制器套筒状态
-func (s *Service) WSSendControllerSelectorStatus(payload string) {
-	s.clientManager.NotifyALL(WS_EVENT_SELECTOR, payload)
-}
+//func (s *Service) WSSendControllerSelectorStatus(payload string) {
+//	s.clientManager.NotifyALL(WS_EVENT_SELECTOR, payload)
+//}
 
 // ws群发job选择信息
-func (s *Service) WSSendJob(payload string) {
-	s.clientManager.NotifyALL(WS_EVENT_JOB, payload)
-}
+//func (s *Service) WSSendJob(payload string) {
+//	s.clientManager.NotifyALL(WS_EVENT_JOB, payload)
+//}
 
-func (s *Service) WSSendIOInput(payload string) {
-	if s == nil || s.clientManager == nil {
-		return
-	}
-	s.clientManager.NotifyALL(WS_EVENT_IO, payload)
-}
+//func (s *Service) WSSendIOInput(payload string) {
+//	if s == nil || s.clientManager == nil {
+//		return
+//	}
+//	s.clientManager.NotifyALL(WS_EVENT_IO, payload)
+//}
 
-func (s *Service) WSSendIO(payload string) {
-	if s == nil || s.clientManager == nil {
-		return
-	}
-	s.clientManager.NotifyALL(WS_EVENT_IO, payload)
-}
+//func (s *Service) WSSendIOContact(sn string, ioType string, contactStatus string) {
+//	wsMsg := GenerateWSMsg(0, WS_IO_CONTACT, WSReaderUID{
+//		UID: uid,
+//	})
+//
+//	s.clientManager.NotifyALL(WS_EVENT_IO, payload)
+//}
 
-func (s *Service) WSSendReader(payload string) {
-	if s == nil || s.clientManager == nil {
-		return
-	}
-	s.clientManager.NotifyALL(WS_EVENT_READER, payload)
-}
+//func (s *Service) WSSendReader(uid string) {
+//	wsMsg := GenerateWSMsg(0, WS_READER_UID, WSReaderUID{
+//		UID: uid,
+//	})
+//
+//	body, _ := json.Marshal(wsMsg)
+//	s.NotifyAll(WS_EVENT_READER, string(body))
+//}
 
-func (s *Service) WSSendTightening(payload string) {
-	if s == nil || s.clientManager == nil {
-		return
-	}
-	s.clientManager.NotifyALL(WS_EVENT_TIGHTENING_DEVICE, payload)
-}
+//func (s *Service) WSSendBarcode(src string, sn string, barcode string) {
+//	wsMsg := GenerateWSMsg(0, WS_READER_UID, WSScannerRead{
+//		Src: src,
+//		SN: sn,
+//		Barcode: barcode,
+//	})
+//
+//	body, _ := json.Marshal(wsMsg)
+//	s.NotifyAll(WS_EVENT_SCANNER, string(body))
+//}
 
-func (s *Service) WSSendReply(reply *WSMsg) {
-	if s == nil || s.clientManager == nil {
-		return
-	}
+//func (s *Service) WSSendTightening(payload string) {
+//	if s == nil || s.clientManager == nil {
+//		return
+//	}
+//	s.clientManager.NotifyALL(WS_EVENT_TIGHTENING_DEVICE, payload)
+//}
 
-	body, _ := json.Marshal(reply)
-	s.clientManager.NotifyALL(WS_EVENT_REPLY, string(body))
-}
+//func (s *Service) WSSendReply(reply *WSMsg) {
+//	if s == nil || s.clientManager == nil {
+//		return
+//	}
+//
+//	body, _ := json.Marshal(reply)
+//	s.clientManager.NotifyALL(WS_EVENT_REPLY, string(body))
+//}
 
-func (s *Service) WSSendOrder(payload []byte) {
-	if s == nil || s.clientManager == nil {
-		return
-	}
-
-	s.clientManager.NotifyALL(WS_EVENT_ORDER, string(payload))
-}
+//func (s *Service) WSSendOrder(payload []byte) {
+//	if s == nil || s.clientManager == nil {
+//		return
+//	}
+//
+//	s.clientManager.NotifyALL(WS_EVENT_ORDER, string(payload))
+//}
 
 func (s *Service) WSTestRecv(evt string, payload string) {
 	go s.postNotify(&DispatcherNotifyPackage{nil, []byte(payload)})
@@ -317,7 +330,7 @@ func GenerateReply(sn uint64, wsType string, result int, msg string) *WSMsg {
 	}
 }
 
-func GenerateResult(sn uint64, wsType string, data interface{}) *WSMsg {
+func GenerateWSMsg(sn uint64, wsType string, data interface{}) *WSMsg {
 	return &WSMsg{
 		SN:   sn,
 		Type: wsType,

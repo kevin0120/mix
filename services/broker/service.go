@@ -48,7 +48,7 @@ func (s *Service) Config() Config {
 
 func (s *Service) initGblDispatcher() {
 	s.BrokerDispatcherMap = dispatcherbus.DispatcherMap{
-		//dispatcherBus.DISPATCH_BROKER_STATUS: utils.CreateDispatchHandlerStruct(nil),
+		dispatcherbus.DISPATCH_BROKER_STATUS: utils.CreateDispatchHandlerStruct(nil),
 	}
 }
 

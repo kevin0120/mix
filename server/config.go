@@ -16,9 +16,9 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/aiis"
 	"github.com/masami10/rush/services/audi_vw"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/minio"
 	"github.com/masami10/rush/services/odoo"
 	"github.com/masami10/rush/services/openprotocol"

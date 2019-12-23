@@ -3,8 +3,9 @@ package wsnotify
 import "github.com/kataras/iris/websocket"
 
 const (
-	WS_REG       = "WS_REG"
-	WS_RUSH_DATA = "WS_RUSH_DATA"
+	WS_REG        = "WS_REG"
+	WS_RUSH_DATA  = "WS_RUSH_DATA"
+	WS_READER_UID = "WS_READER_UID"
 )
 
 type WSRegist struct {
@@ -80,4 +81,8 @@ type WSRequest struct {
 type WSReply struct {
 	Result int    `json:"result"`
 	Msg    string `json:"msg"`
+}
+
+type WSReaderUID struct {
+	UID string `json:"uid"`
 }

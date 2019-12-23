@@ -1,12 +1,11 @@
 package reader
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/ebfe/scard"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/wsnotify"
-	uuid "github.com/satori/go.uuid"
+	"github.com/satori/go.uuid"
 	"sync/atomic"
 	"time"
 )
@@ -110,14 +109,7 @@ func (s *Service) Data() interface{} {
 }
 
 func (s *Service) notifyUID(uid string) {
-	barcode, _ := json.Marshal(wsnotify.WSMsg{
-		Type: WS_READER_UID,
-		Data: ReaderUID{
-			UID: uid,
-		},
-	})
-
-	s.WS.WSSendReader(string(barcode))
+	//s.WS.WSSendReader(uid)
 }
 
 func (s *Service) search() {

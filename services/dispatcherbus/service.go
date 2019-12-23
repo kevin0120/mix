@@ -131,7 +131,10 @@ func (s *Service) LaunchDispatchersByHandlerMap(dispatcherMap DispatcherMap) {
 		if err != nil {
 			s.diag.Debug(err.Error())
 		}
-		s.Register(name, handler)
+
+		if handler != nil {
+			s.Register(name, handler)
+		}
 		s.Start(name)
 	}
 }

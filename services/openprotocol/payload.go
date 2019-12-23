@@ -223,7 +223,7 @@ func (iom *IOMonitor) Deserialize(str string) error {
 	return nil
 }
 
-func (iom *IOMonitor) ToTighteningControllerInput() *io.IoContact {
+func (iom *IOMonitor) ToIOInput() *io.IoContact {
 	return &io.IoContact{
 		Src:    tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER,
 		SN:     iom.ControllerSN,

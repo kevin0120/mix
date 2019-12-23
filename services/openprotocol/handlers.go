@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/device"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/scanner"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/services/wsnotify"
@@ -253,7 +253,8 @@ func handleMID_0035_JOB_INFO(c *TighteningController, pkg *handlerPkg) error {
 
 		ws_str, _ := json.Marshal(job_select)
 		c.ProtocolService.diag.Debug(fmt.Sprintf("push job to hmi: %s", string(ws_str)))
-		c.ProtocolService.WS.WSSendJob(string(ws_str))
+		//c.ProtocolService.WS.WSSendJob(string(ws_str))
+		// TODO: 推送控制器job
 	}
 
 	return nil
@@ -273,7 +274,7 @@ func handleMID_0211_INPUT_MONITOR(c *TighteningController, pkg *handlerPkg) erro
 	c.inputs = inputs.Inputs
 
 	// 分发控制器输入状态
-	c.dispatcherBus.Dispatch(dispatcherbus.DISPATCH_IO_PREVIEW, inputs.ToTighteningControllerInput())
+	c.dispatcherBus.Dispatch(dispatcherbus.DISPATCH_IO, inputs.ToIOInput())
 
 	return nil
 }
@@ -317,7 +318,7 @@ func handleMID_0052_VIN(c *TighteningController, pkg *handlerPkg) error {
 		SN:      c.deviceConf.SN,
 		Barcode: bc,
 	}
-	c.dispatcherBus.Dispatch(dispatcherbus.DISPATCH_CONTROLLER_ID_PREVIEW, ss)
+	c.dispatcherBus.Dispatch(dispatcherbus.DISPATCHER_SCANNER_DATA, ss)
 
 	return nil
 }

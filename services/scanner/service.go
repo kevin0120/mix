@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/gousb"
-	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/device"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/pkg/errors"
 	"github.com/tarm/serial"
@@ -25,7 +25,7 @@ const (
 	ServiceSearchItv = 2000 * time.Millisecond
 )
 
-const ScannerDispatcherKey = dispatcherbus.DISPATCHER_SCANNER_ON_RECV
+const ScannerDispatcherKey = dispatcherbus.DISPATCHER_SCANNER_DATA
 
 type Service struct {
 	configValue atomic.Value
@@ -196,17 +196,14 @@ func (s *Service) OnStatus(id string, status string) {
 	if status == SCANNER_STATUS_OFFLINE {
 		s.removeScanner(id)
 	}
-	ss, _ := json.Marshal(wsnotify.WSMsg{
-		Type: wsnotify.NotifywsDeviceStatus,
-		Data: []device.DeviceStatus{
-			{
-				SN:     id,
-				Type:   device.BaseDeviceTypeScanner,
-				Status: status,
-			},
-		},
-	})
-	s.sendScannerInfo(string(ss))
+
+	scannerStatus := device.DeviceStatus{
+		SN:     id,
+		Type:   device.BaseDeviceTypeScanner,
+		Status: status,
+	}
+
+	s.dispatcher.Dispatch(dispatcherbus.DISPATCHER_DEVICE_STATUS, &scannerStatus)
 }
 
 func (s *Service) OnRecv(id string, data string) {
@@ -214,16 +211,23 @@ func (s *Service) OnRecv(id string, data string) {
 	if data == "" {
 		return
 	}
-	barcode, _ := json.Marshal(wsnotify.WSMsg{
-		Type: WS_SCANNER_READ,
-		Data: ScannerRead{
-			Src:     device.BaseDeviceTypeScanner,
-			SN:      id,
-			Barcode: data,
-		},
+
+	barcodeData := ScannerRead{
+		Src:     device.BaseDeviceTypeScanner,
+		SN:      id,
+		Barcode: data,
+	}
+
+	s.dispatcher.Dispatch(dispatcherbus.DISPATCHER_SCANNER_DATA, &barcodeData)
+}
+
+func (s *Service) SendBarcode(src string, sn string, barcode string) {
+	wsMsg := wsnotify.GenerateWSMsg(0, WS_SCANNER_READ, ScannerRead{
+		Src:     src,
+		SN:      sn,
+		Barcode: barcode,
 	})
 
-	go s.dispatchRecvData(data) //协程分发扫码枪数据
-
-	s.sendScannerInfo(string(barcode))
+	body, _ := json.Marshal(wsMsg)
+	s.WS.NotifyAll(wsnotify.WS_EVENT_SCANNER, string(body))
 }

@@ -1,7 +1,6 @@
 package io
 
 const (
-
 	OUTPUT_STATUS_OFF   = 0
 	OUTPUT_STATUS_ON    = 1
 	OUTPUT_STATUS_FLASH = 2

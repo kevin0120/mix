@@ -3,9 +3,11 @@ package io
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/kataras/iris/websocket"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/wsnotify"
+	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"sync/atomic"
 	"time"
@@ -19,6 +21,9 @@ type Service struct {
 	DispatcherBus Dispatcher
 	DeviceService *device.Service
 	IONotify
+
+	// websocket请求处理器
+	wsnotify.WSRequestHandlers
 }
 
 func NewService(c Config, d Diagnostic, dp Dispatcher) *Service {
@@ -30,6 +35,12 @@ func NewService(c Config, d Diagnostic, dp Dispatcher) *Service {
 	}
 
 	s.configValue.Store(c)
+
+	s.WSRequestHandlers = wsnotify.WSRequestHandlers{
+		Diag: s.diag,
+	}
+
+	s.initWSRequestHandlers()
 
 	return s
 }
@@ -56,6 +67,9 @@ func (s *Service) Open() error {
 		s.ios[v.SN] = io
 	}
 
+	// 注册websocket请求
+	s.DispatcherBus.Register(dispatcherbus.DISPATCH_WS_NOTIFY, utils.CreateDispatchHandlerStruct(s.HandleWSRequest))
+
 	return nil
 }
 
@@ -68,19 +82,20 @@ func (s *Service) Close() error {
 	return nil
 }
 
-// 获取连接状态
-func (s *Service) OnWSIOStatus(data interface{}) {
-	if data == nil {
-		return
-	}
+func (s *Service) initWSRequestHandlers() {
+	s.SetupHandlers(wsnotify.WSRequestHandlerMap{
+		wsnotify.WS_IO_CONTACT: s.OnWSIOContact,
+		wsnotify.WS_IO_STATUS:  s.OnWSIOStatus,
+		wsnotify.WS_IO_SET:     s.OnWSIOSet,
+	})
+}
 
-	wsRequest := data.(*wsnotify.WSRequest)
-	msgData, _ := json.Marshal(wsRequest.WSMsg.Data)
-	c := wsRequest.C
-	msg := wsRequest.WSMsg
+// 获取连接状态
+func (s *Service) OnWSIOStatus(c websocket.Connection, msg *wsnotify.WSMsg) {
+	byteData, _ := json.Marshal(msg.Data)
 
 	ioStatus := IoStatus{}
-	err := json.Unmarshal(msgData, &ioStatus)
+	err := json.Unmarshal(byteData, &ioStatus)
 	if err != nil {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 		return
@@ -92,34 +107,23 @@ func (s *Service) OnWSIOStatus(data interface{}) {
 		return
 	}
 
-	io, _ := json.Marshal(wsnotify.WSMsg{
-		Type: dispatcherbus.DISPATCHER_WS_IO_STATUS,
-		SN:   msg.SN,
-		Data: []device.DeviceStatus{
-			{
-				SN:     ioStatus.SN,
-				Type:   device.BaseDeviceTypeIO,
-				Status: m.Status(),
-			},
+	wsMsg := wsnotify.GenerateWSMsg(msg.SN, wsnotify.WS_IO_STATUS, []device.DeviceStatus{
+		{
+			SN:     ioStatus.SN,
+			Type:   device.BaseDeviceTypeIO,
+			Status: m.Status(),
 		},
 	})
 
-	s.WS.WSSendIO(string(io))
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_IO, wsMsg)
 }
 
 // 获取io状态
-func (s *Service) OnWSIOContact(data interface{}) {
-	if data == nil {
-		return
-	}
-
-	wsRequest := data.(*wsnotify.WSRequest)
-	msgData, _ := json.Marshal(wsRequest.WSMsg.Data)
-	c := wsRequest.C
-	msg := wsRequest.WSMsg
+func (s *Service) OnWSIOContact(c websocket.Connection, msg *wsnotify.WSMsg) {
+	byteData, _ := json.Marshal(msg.Data)
 
 	ioContact := IoContact{}
-	err := json.Unmarshal(msgData, &ioContact)
+	err := json.Unmarshal(byteData, &ioContact)
 	if err != nil {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 		return
@@ -131,32 +135,21 @@ func (s *Service) OnWSIOContact(data interface{}) {
 		return
 	}
 
-	ioContacts, _ := json.Marshal(wsnotify.WSMsg{
-		Type: dispatcherbus.DISPATCHER_WS_IO_CONTACT,
-		Data: IoContact{
-			Src:     device.BaseDeviceTypeIO,
-			SN:      ioContact.SN,
-			Inputs:  inputs,
-			Outputs: outputs,
-		},
+	wsMsg := wsnotify.GenerateWSMsg(msg.SN, wsnotify.WS_IO_CONTACT, IoContact{
+		Src:     device.BaseDeviceTypeIO,
+		Inputs:  inputs,
+		Outputs: outputs,
 	})
 
-	s.WS.WSSendIO(string(ioContacts))
+	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_IO, wsMsg)
 }
 
 // 控制输出
-func (s *Service) OnWSIOSet(data interface{}) {
-	if data == nil {
-		return
-	}
-
-	wsRequest := data.(*wsnotify.WSRequest)
-	msgData, _ := json.Marshal(wsRequest.WSMsg.Data)
-	c := wsRequest.C
-	msg := wsRequest.WSMsg
+func (s *Service) OnWSIOSet(c websocket.Connection, msg *wsnotify.WSMsg) {
+	byteData, _ := json.Marshal(msg.Data)
 
 	ioSet := IoSet{}
-	err := json.Unmarshal(msgData, &ioSet)
+	err := json.Unmarshal(byteData, &ioSet)
 	if err != nil {
 		_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, -1, err.Error()))
 		return
@@ -169,17 +162,6 @@ func (s *Service) OnWSIOSet(data interface{}) {
 	}
 
 	_ = wsnotify.WSClientSend(c, wsnotify.WS_EVENT_REPLY, wsnotify.GenerateReply(msg.SN, msg.Type, 0, ""))
-}
-
-func (s *Service) dispatchRequest(req *wsnotify.WSRequest) {
-	switch req.WSMsg.Type {
-	case dispatcherbus.DISPATCHER_WS_IO_STATUS:
-		s.OnWSIOStatus(req)
-	case dispatcherbus.DISPATCHER_WS_IO_CONTACT:
-		s.OnWSIOContact(req)
-	case dispatcherbus.DISPATCHER_WS_IO_SET:
-		s.OnWSIOSet(req)
-	}
 }
 
 func (s *Service) Read(sn string) (string, string, error) {
@@ -212,18 +194,28 @@ func (s *Service) getIO(sn string) (*IOModule, error) {
 func (s *Service) OnStatus(sn string, status string) {
 	s.diag.Debug(fmt.Sprintf("sn:%s status:%s", sn, status))
 
-	io, _ := json.Marshal(wsnotify.WSMsg{
-		Type: wsnotify.NotifywsDeviceStatus,
-		Data: []device.DeviceStatus{
-			{
-				SN:     sn,
-				Type:   device.BaseDeviceTypeIO,
-				Status: status,
-			},
+	ioStatus := []device.DeviceStatus{
+		{
+			SN:     sn,
+			Type:   device.BaseDeviceTypeIO,
+			Status: status,
 		},
-	})
+	}
 
-	s.WS.WSSendIO(string(io))
+	s.DispatcherBus.Dispatch(dispatcherbus.DISPATCHER_DEVICE_STATUS, ioStatus)
+
+	//io, _ := json.Marshal(wsnotify.WSMsg{
+	//	Type: wsnotify.WS_IO_STATUS,
+	//	Data: []device.DeviceStatus{
+	//		{
+	//			SN:     sn,
+	//			Type:   device.BaseDeviceTypeIO,
+	//			Status: status,
+	//		},
+	//	},
+	//})
+	//
+	//s.WS.WSSendIO(string(io))
 }
 
 func (s *Service) OnRecv(string, string) {
@@ -244,25 +236,12 @@ func (s *Service) OnChangeIOStatus(sn string, t string, status string) {
 		ioContact.Outputs = status
 	}
 
-	io, _ := json.Marshal(wsnotify.WSMsg{
-		Type: dispatcherbus.DISPATCHER_WS_IO_CONTACT,
-		Data: ioContact,
-	})
+	s.DispatcherBus.Dispatch(dispatcherbus.DISPATCH_IO, &ioContact)
 
-	s.WS.WSSendIO(string(io))
-}
-
-func (s *Service) OnWSMsg(p interface{}) {
-	n := p.(*wsnotify.DispatcherNotifyPackage)
-	msg := wsnotify.WSMsg{}
-	err := json.Unmarshal(n.Data, &msg)
-	if err != nil {
-		s.diag.Error("OnWSMsg", err)
-		return
-	}
-
-	s.dispatchRequest(&wsnotify.WSRequest{
-		C:     n.C,
-		WSMsg: &msg,
-	})
+	//io, _ := json.Marshal(wsnotify.WSMsg{
+	//	Type: wsnotify.WS_IO_CONTACT,
+	//	Data: ioContact,
+	//})
+	//
+	//s.WS.WSSendIO(string(io))
 }

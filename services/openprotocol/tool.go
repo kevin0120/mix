@@ -3,8 +3,8 @@ package openprotocol
 import (
 	"errors"
 	"fmt"
-	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/device"
+	"github.com/masami10/rush/services/dispatcherbus"
 	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/utils"
 	"sync/atomic"
@@ -332,7 +332,7 @@ func (s *TighteningTool) OnResult(result interface{}) {
 
 	// 分发结果
 	tighteningResult.ID = dbResult.Id
-	s.controller.dispatcherBus.Dispatch(dispatcherbus.DISPATCH_RESULT_PREVIEW, tighteningResult)
+	s.controller.dispatcherBus.Dispatch(dispatcherbus.DISPATCH_RESULT, tighteningResult)
 }
 
 // 处理曲线
@@ -350,6 +350,9 @@ func (s *TighteningTool) OnCurve(curve interface{}) {
 	if err != nil {
 		s.diag.Error("Handle Curve With Result Failed", err)
 	}
+
+	// 分发曲线
+	s.controller.dispatcherBus.Dispatch(dispatcherbus.DISPATCH_CURVE, tighteningCurve)
 }
 
 func (s *TighteningTool) GetDispatch(name string) *utils.Dispatcher {
