@@ -24,15 +24,6 @@ import { stepDataApi } from '../../../api/order';
 import type { IWorkable } from '../../workable/IWorkable';
 import { getResult } from './getResult';
 
-
-function* readyState(config) {
-  try {
-    yield put(orderActions.stepStatus(this, STEP_STATUS.ENTERING, config));
-  } catch (e) {
-    CommonLog.lError(e);
-  }
-}
-
 function* enteringState(config) {
   try {
     // init data
@@ -298,15 +289,6 @@ function* doingState(config) {
   }
 }
 
-function* finishState() {
-  try {
-    yield put(orderActions.finishStep(this));
-  } catch (e) {
-    CommonLog.lError(e, { at: 'screwStep FINISHED' });
-    yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, { error: e }));
-  }
-}
-
 function* failState(config) {
   try {
     const { error, silent } = config;
@@ -351,13 +333,12 @@ function* failState(config) {
   }
 }
 
-export const screwStepStatusTasks = {
-  [STEP_STATUS.READY]: readyState,
+export const screwStepStatusTasksMixin = (superTasks) => ({
+  ...superTasks,
   [STEP_STATUS.ENTERING]: enteringState,
   [STEP_STATUS.DOING]: doingState,
-  [STEP_STATUS.FINISHED]: finishState,
   [STEP_STATUS.FAIL]: failState
-};
+});
 
 export function* onLeave() {
   try {

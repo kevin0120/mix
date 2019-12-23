@@ -6,22 +6,9 @@ import type { IWorkStep } from '../interface/IWorkStep';
 import { CommonLog } from '../../../common/utils';
 import {orderActions} from '../../order/action';
 
-const InputStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsInputStep extends ClsBaseStep {
-  _statusTasks = {
-    *[STEP_STATUS.READY](){
-      try {
-        yield put(orderActions.stepStatus(this, STEP_STATUS.ENTERING));
-      } catch (e) {
-        CommonLog.lError(e);
-      }
-    },
-    *[STEP_STATUS.ENTERING]() {
-      try {
-        yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
-      } catch (e) {
-        console.error(e);
-      }
-    },
+function inputStepStatusMixin(superTasks){
+  return{
+    ...superTasks,
     *[STEP_STATUS.DOING]() {
       try {
         while (true) {
@@ -35,23 +22,15 @@ const InputStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsInputStep ext
           }
         }
       } catch (e) {
-        console.error(e);
+        CommonLog.lError(e, {at:'input step doing'});
       }
     },
-    *[STEP_STATUS.FINISHED]() {
-      try {
-        yield put(orderActions.finishStep(this));
-      } catch (e) {
-        console.error(e);
-      }
-    },
-    *[STEP_STATUS.FAIL]() {
-      try {
-        yield put(orderActions.finishStep(this));
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  };
+  }
+}
+const InputStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsInputStep extends ClsBaseStep {
+  constructor(...args) {
+    super(...args);
+    this._statusTasks=inputStepStatusMixin(this._statusTasks);
+  }
 };
 export default InputStepMixin;

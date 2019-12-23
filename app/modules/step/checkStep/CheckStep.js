@@ -6,22 +6,10 @@ import { CommonLog } from '../../../common/utils';
 import type { IWorkStep } from '../interface/IWorkStep';
 import {orderActions} from '../../order/action';
 
-const CheckStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsCheckStep extends ClsBaseStep {
-  _statusTasks = {
-    *[STEP_STATUS.READY](){
-      try {
-        yield put(orderActions.stepStatus(this, STEP_STATUS.ENTERING));
-      } catch (e) {
-        CommonLog.lError(e);
-      }
-    },
-    *[STEP_STATUS.ENTERING]() {
-      try {
-        yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
-      } catch (e) {
-        CommonLog.lError(`CheckStep Entering Error: ${e}`);
-      }
-    },
+
+function checkStepStatusMixin(superTasks){
+  return{
+    ...superTasks,
     *[STEP_STATUS.DOING]() {
       try {
         const { submit, cancel } = yield race({
@@ -38,20 +26,14 @@ const CheckStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsCheckStep ext
         CommonLog.lError(`CheckStep DOING Error: ${e}`);
       }
     },
-    *[STEP_STATUS.FINISHED]() {
-      try {
-        yield put(orderActions.finishStep(this));
-      } catch (e) {
-        console.error(e);
-      }
-    },
-    *[STEP_STATUS.FAIL]() {
-      try {
-        yield put(orderActions.finishStep(this));
-      } catch (e) {
-        CommonLog.lError(`CheckStep FAIL Error: ${e}`);
-      }
-    }
-  };
+  }
+}
+
+const CheckStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsCheckStep extends ClsBaseStep {
+  constructor(...args) {
+    super(...args);
+    this._statusTasks=checkStepStatusMixin(this._statusTasks);
+  }
 };
+
 export default CheckStepMixin;

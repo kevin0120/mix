@@ -7,6 +7,7 @@ import type { IWorkable } from '../workable/IWorkable';
 import { orderStepUpdateApi } from '../../api/order';
 import type { tStep, tStepStatus } from './interface/typeDef';
 import { STEP_STATUS, stepTypeKeys } from './constants';
+import { stepStatusTasks } from './stepStatusTasks';
 
 const StepMixin = (ClsWorkable: Class<IWorkable>) =>
   class Step extends ClsWorkable implements IWorkStep {
@@ -63,6 +64,8 @@ const StepMixin = (ClsWorkable: Class<IWorkable>) =>
     get sequence() {
       return this._sequence;
     }
+
+    _statusTasks = stepStatusTasks;
 
     constructor(stepData: ?$Shape<tStep>) {
       super(stepData);
