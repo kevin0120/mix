@@ -1,7 +1,6 @@
 // @flow
 import { ORDER_STATUS, ORDER_WS_TYPES } from '../constants';
 import type { IOrder } from './IOrder';
-import type { tStep } from '../../step/interface/typeDef';
 import type { tRushData } from '../../rush/type';
 import type { tWorkableData } from '../../workable/typeDef';
 
@@ -63,7 +62,7 @@ export type tEnvironments = {
   desc: string
 };
 
-export type tComponents = {
+export type tComponent = {
   is_key: boolean,
   code: string
 };
@@ -83,6 +82,6 @@ export type tOrderPayload = {
   product: tProduct,
   worksheet: tWorksheet,
   environments: tEnvironments,
-  components: tComponents,
+  components: Array<tComponent>,
   operation: tOperation
-}
+};

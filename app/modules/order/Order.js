@@ -33,7 +33,7 @@ const stepStatus = status => {
   }
 };
 
-function* redoOrder(step, point, orderActions) {
+function* redoOrder(step, point) {
   try {
     let redoStep = step;
     if (!redoStep) {
@@ -109,7 +109,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
     }
 
     _statusTasks = {
-      * [ORDER_STATUS.TODO](ORDER, orderActions, config) {
+      * [ORDER_STATUS.TODO](config) {
         try {
           yield put(ioActions.set(ioOutputGroups.doing, true));
           const { workCenterMode } = yield select();
@@ -152,7 +152,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           yield put(orderActions.stepStatus(this, ORDER_STATUS.PENDING));
         }
       },
-      * [ORDER_STATUS.WIP](ORDER, orderActions, config = {}) {
+      * [ORDER_STATUS.WIP](config = {}) {
         try {
           this._workingIndex =
             this._workingIndex >= this._steps.length ? 0 : this._workingIndex;
@@ -168,7 +168,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           if (mode === workModes.reworkWorkCenterMode) {
             const reworkConfig = config?.reworkConfig || {};
             const { point } = reworkConfig;
-            yield call([this, redoOrder], step, point, orderActions);
+            yield call([this, redoOrder], step, point);
             return;
           }
 
@@ -215,7 +215,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           CommonLog.Info('order doing finished');
         }
       },
-      * [ORDER_STATUS.DONE](ORDER, orderActions) {
+      * [ORDER_STATUS.DONE]() {
         try {
           if (this._workingIndex > this._steps.length - 1) {
             this._workingIndex = this._steps.length - 1;
@@ -234,7 +234,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           CommonLog.Info('order done');
         }
       },
-      * [ORDER_STATUS.FAIL](ORDER, orderActions) {
+      * [ORDER_STATUS.FAIL]() {
         try {
           yield put(ioActions.set(ioOutputGroups.error, true));
           yield put(orderActions.finishOrder(this));
@@ -244,7 +244,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           });
         }
       },
-      * [ORDER_STATUS.PENDING](ORDER, orderActions) {
+      * [ORDER_STATUS.PENDING]() {
         try {
           yield put(ioActions.set(ioOutputGroups.warning, true));
           yield put(orderActions.finishOrder(this));
@@ -254,7 +254,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
           });
         }
       },
-      * [ORDER_STATUS.CANCEL](ORDER, orderActions) {
+      * [ORDER_STATUS.CANCEL]() {
         try {
           yield put(ioActions.set(ioOutputGroups.warning, true));
           yield put(orderActions.finishOrder(this));
@@ -265,6 +265,12 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
         }
       }
     };
+
+    _components: [];
+
+    get components() {
+      return this._components;
+    }
 
     _workcenter: string = '';
 

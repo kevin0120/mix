@@ -1,17 +1,13 @@
 // @flow
-import { call, put, select, take, all } from 'redux-saga/effects';
+import { all, call, put, select, take } from 'redux-saga/effects';
 import { STEP_STATUS } from '../constants';
-import {
-  stepData,
-  stepPayload,
-  workingOrder,
-  workingStep
-} from '../../order/selector';
+import { stepData, stepPayload, workingOrder, workingStep } from '../../order/selector';
 import { SCANNER_STEP, scannerStepAction } from './action';
 import { getDevicesByType } from '../../deviceManager/devices';
 import { CommonLog } from '../../../common/utils';
 import type { IWorkStep } from '../interface/IWorkStep';
 import { deviceType } from '../../deviceManager/constants';
+import { orderActions } from '../../order/action';
 
 const ScannerStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
   class ClsScannerStep extends ClsBaseStep {
@@ -19,25 +15,15 @@ const ScannerStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
 
     _listeners = [];
 
-    _onLeave = () => {
-      this._scanners.forEach(s => {
-        this._listeners.forEach(l => {
-          s.removeListener(l);
-        });
-      });
-      this._scanners = [];
-      this._listeners = [];
-    };
-
     _statusTasks = {
-      *[STEP_STATUS.READY](ORDER, orderActions){
+      * [STEP_STATUS.READY]() {
         try {
           yield put(orderActions.stepStatus(this, STEP_STATUS.ENTERING));
         } catch (e) {
           CommonLog.lError(e);
         }
       },
-      *[STEP_STATUS.ENTERING](ORDER, orderActions) {
+      * [STEP_STATUS.ENTERING]() {
         try {
           this._scanners = getDevicesByType(deviceType.scanner);
           const scanners = this._scanners;
@@ -55,7 +41,7 @@ const ScannerStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
           CommonLog.lError(e);
         }
       },
-      *[STEP_STATUS.DOING](ORDER, orderActions) {
+      * [STEP_STATUS.DOING]() {
         try {
           while (true) {
             const action = yield take([
@@ -115,13 +101,23 @@ const ScannerStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
           );
         }
       },
-      *[STEP_STATUS.FINISHED](ORDER, orderActions) {
+      * [STEP_STATUS.FINISHED]() {
         try {
           yield put(orderActions.finishStep(this));
         } catch (e) {
           CommonLog.lError(e);
         }
       }
+    };
+
+    _onLeave = () => {
+      this._scanners.forEach(s => {
+        this._listeners.forEach(l => {
+          s.removeListener(l);
+        });
+      });
+      this._scanners = [];
+      this._listeners = [];
     };
   };
 export default ScannerStepMixin;

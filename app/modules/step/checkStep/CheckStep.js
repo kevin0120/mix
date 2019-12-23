@@ -4,25 +4,25 @@ import {STEP_STATUS} from '../constants';
 import { CHECK_STEP } from './action';
 import { CommonLog } from '../../../common/utils';
 import type { IWorkStep } from '../interface/IWorkStep';
-
+import {orderActions} from '../../order/action';
 
 const CheckStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsCheckStep extends ClsBaseStep {
   _statusTasks = {
-    *[STEP_STATUS.READY](ORDER, orderActions){
+    *[STEP_STATUS.READY](){
       try {
         yield put(orderActions.stepStatus(this, STEP_STATUS.ENTERING));
       } catch (e) {
         CommonLog.lError(e);
       }
     },
-    *[STEP_STATUS.ENTERING](ORDER, orderActions) {
+    *[STEP_STATUS.ENTERING]() {
       try {
         yield put(orderActions.stepStatus(this, STEP_STATUS.DOING));
       } catch (e) {
         CommonLog.lError(`CheckStep Entering Error: ${e}`);
       }
     },
-    *[STEP_STATUS.DOING](ORDER, orderActions) {
+    *[STEP_STATUS.DOING]() {
       try {
         const { submit, cancel } = yield race({
           submit: take(CHECK_STEP.SUBMIT),
@@ -38,14 +38,14 @@ const CheckStepMixin = (ClsBaseStep: Class<IWorkStep>) => class ClsCheckStep ext
         CommonLog.lError(`CheckStep DOING Error: ${e}`);
       }
     },
-    *[STEP_STATUS.FINISHED](ORDER, orderActions) {
+    *[STEP_STATUS.FINISHED]() {
       try {
         yield put(orderActions.finishStep(this));
       } catch (e) {
         console.error(e);
       }
     },
-    *[STEP_STATUS.FAIL](ORDER, orderActions) {
+    *[STEP_STATUS.FAIL]() {
       try {
         yield put(orderActions.finishStep(this));
       } catch (e) {

@@ -5,10 +5,8 @@ import { isNil } from 'lodash-es';
 import { controllerModes } from './constants';
 import notifierActions from '../../Notifier/action';
 import type { tPoint, tScrewStepData } from './interface/typeDef';
-import { CommonLog } from '../../../common/utils';
 import { jobApi, psetApi } from '../../../api/tools';
 import { workingOrder } from '../../order/selector';
-import { getDevice } from '../../deviceManager/devices';
 import type { IDevice } from '../../device/IDevice';
 
 // pset/job模式

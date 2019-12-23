@@ -12,6 +12,7 @@ import type { IMaterialStep } from './interface/IMaterialStep';
 import type { IDevice } from '../../device/IDevice';
 import ClsIOModule from '../../device/io/ClsIOModule';
 import dialogActions from '../../dialog/action';
+import {orderActions} from '../../order/action';
 
 const items = payload => payload?.items;
 
@@ -42,14 +43,14 @@ const MaterialStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
     }
 
     _statusTasks = {
-      *[STEP_STATUS.READY](ORDER, orderActions) {
+      *[STEP_STATUS.READY]() {
         try {
           yield put(orderActions.stepStatus(this, STEP_STATUS.ENTERING));
         } catch (e) {
           CommonLog.lError(e);
         }
       },
-      *[STEP_STATUS.ENTERING](ORDER, orderActions) {
+      *[STEP_STATUS.ENTERING]() {
         try {
           const sPayload = yield select(s =>
             stepPayload(workingStep(workingOrder(s.order)))
@@ -109,7 +110,7 @@ const MaterialStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
           yield put(orderActions.stepStatus(this, STEP_STATUS.FAIL, e.message));
         }
       },
-      *[STEP_STATUS.DOING](ORDER, orderActions) {
+      *[STEP_STATUS.DOING]() {
         try {
           const listeners = [];
           [...this._items].forEach(i => {
@@ -157,14 +158,14 @@ const MaterialStepMixin = (ClsBaseStep: Class<IWorkStep>) =>
           CommonLog.lError(e);
         }
       },
-      *[STEP_STATUS.FINISHED](ORDER, orderActions) {
+      *[STEP_STATUS.FINISHED]() {
         try {
           yield put(orderActions.finishStep(this));
         } catch (e) {
           CommonLog.lError(e);
         }
       },
-      *[STEP_STATUS.FAIL](ORDER, orderActions, msg) {
+      *[STEP_STATUS.FAIL](msg) {
         try {
           yield put(
             dialogActions.dialogShow({

@@ -5,16 +5,31 @@ import { CommonLog } from '../../common/utils';
 import { orderActions } from '../order/action';
 import { ORDER } from '../order/constants';
 import stepTypes from '../step/stepTypes';
-import type {
-  tStep,
-  tAnyStatus,
-  tRunSubStepCallbacks,
-  tStepType
-} from '../step/interface/typeDef';
+import type { tAnyStatus, tRunSubStepCallbacks, tStep, tStepType } from '../step/interface/typeDef';
 import type { IWorkable } from './IWorkable';
 import type { tWorkableData } from './typeDef';
 
 export default class Workable implements IWorkable {
+  _statusTasks = {};
+
+  _runningStatusTask = null;
+
+  _times = [];
+
+  // eslint-disable-next-line flowtype/no-weak-types,no-unused-vars
+  constructor(workableData: ?tWorkableData) {
+    const { code, id } = workableData || {};
+    this._code = code || this._code;
+    this._id = id || this._id;
+    this.update(workableData);
+    /* eslint-disable flowtype/no-weak-types */
+    (this: any).run = this.run.bind(this);
+    (this: any).timerStart = this.timerStart.bind(this);
+    (this: any).timerStop = this.timerStop.bind(this);
+    (this: any).updateData = this.updateData.bind(this);
+    /* eslint-enable flowtype/no-weak-types */
+  }
+
   _id = 0;
 
   get id() {
@@ -58,26 +73,6 @@ export default class Workable implements IWorkable {
 
   get desc() {
     return this._desc;
-  }
-
-  _statusTasks = {};
-
-  _runningStatusTask = null;
-
-  _times = [];
-
-  // eslint-disable-next-line flowtype/no-weak-types,no-unused-vars
-  constructor(workableData: ?tWorkableData) {
-    const { code, id } = workableData || {};
-    this._code = code || this._code;
-    this._id = id || this._id;
-    this.update(workableData);
-    /* eslint-disable flowtype/no-weak-types */
-    (this: any).run = this.run.bind(this);
-    (this: any).timerStart = this.timerStart.bind(this);
-    (this: any).timerStop = this.timerStop.bind(this);
-    (this: any).updateData = this.updateData.bind(this);
-    /* eslint-enable flowtype/no-weak-types */
   }
 
   // eslint-disable-next-line flowtype/no-weak-types
@@ -208,7 +203,7 @@ export default class Workable implements IWorkable {
         throw new Error(`trying to run invalid status ${status}`);
       }
       const taskToRun = this._statusTasks[status].bind(this);
-      this._runningStatusTask = yield fork(taskToRun, ORDER, orderActions, config);
+      this._runningStatusTask = yield fork(taskToRun, config);
     } catch (e) {
       CommonLog.lError(e);
     }
@@ -270,7 +265,10 @@ export default class Workable implements IWorkable {
   ): Saga<void> {
     try {
       const { exit, next, previous } = yield race({
-        exit: call([step, step.run], status, config),
+        exit: call([step, step.run], status, {
+          ...config,
+          parent: this
+        }),
         next: take(
           action => action.type === ORDER.STEP.FINISH && action.step === step
         ),

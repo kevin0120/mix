@@ -5,8 +5,8 @@ import { stepPayload, viewingStep } from '../../../modules/order/selector';
 import checkStepActions from '../../../modules/step/checkStep/action';
 import type { tStepProps } from '../types';
 import Button from '../../../components/CustomButtons/Button';
-import Qualitative from './Qualitative';
-import Quantitative from './Quantitative';
+import PassFail from './PassFail';
+import Measure from './Measure';
 import { checkStepTypes } from '../../../modules/step/checkStep/constants';
 import type { Dispatch } from '../../../modules/typeDef';
 import type { tStepPayload } from '../../../modules/step/interface/typeDef';
@@ -26,8 +26,8 @@ type tDP = {|
 |};
 
 const Contents = {
-  [checkStepTypes.measurement]: Quantitative,
-  [checkStepTypes.passFail]: Qualitative
+  [checkStepTypes.measurement]: Measure,
+  [checkStepTypes.passFail]: PassFail
 };
 
 const mapState = (state, props: tOP): tSP => ({
