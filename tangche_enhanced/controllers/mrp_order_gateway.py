@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import api, SUPERUSER_ID
+from odoo import api, SUPERUSER_ID,fields
 from odoo.http import request, Response, Controller, route
 from odoo.exceptions import ValidationError
 from odoo.addons.common_sa_utils.http import sa_success_resp, sa_fail_response
@@ -19,6 +19,8 @@ schema = "http"
 ORDER_REQUIRED_FIELDS = ['code', 'product_code', 'track_code', 'workcenter', 'worksheet', 'product', 'operation',
                          'steps']
 
+# ORDER_REQUIRED_FIELDS = ['WIPORDERNO', 'PRODUCTNO']
+
 headers = {'Content-Type': 'application/json'}
 
 HAVE_SOME_REQUIRED_FIELDS = {
@@ -32,6 +34,9 @@ HAVE_SOME_REQUIRED_FIELDS = {
 
 _logger = logging.getLogger(__name__)
 
+def str_time_to_rfc3339(s_time):
+    sp = s_time.split(' ')
+    return sp[0] + 'T' + sp[1] + 'Z'
 
 def validate_ts002_order_req_vals(vals):
     for field in ORDER_REQUIRED_FIELDS:
@@ -109,41 +114,123 @@ def package_tightening_points(tightening_points):
 #     if not product_id:
 #         raise ValidationError("Can Not Get Finished Product By Code:{0}".format(code))
 
-def convert_ts002_order(env, vals):
-    ret = vals
-    mes_work_steps = vals.get('steps')
-    if not mes_work_steps:
-        raise ValidationError("Can Not Get Work Step From External System")
-    work_steps = list(itertools.chain.from_iterable(mes_work_steps))  # flat array make sure
-    vals['steps'] = work_steps
-    tightening_steps = filter(lambda step: step.get('test_type') == 'tightening', work_steps)
-    if not tightening_steps:
-        return vals
-    for ts in tightening_steps:
-        tc = ts.get('code')
-        ws = env['sa.quality.point'].search(['|', ('ref', '=', tc), ('name', '=', tc)])
-        if not ws:
-            _logger.error("Can Not Found Tightening Step By Code:{0}".format(tc))
-            continue
-        rws = ws
-        if len(ws) != 1:
-            _logger.error("Tightening Step By Code:{0} Is Not Unique".format(tc))
-            rws = ws[0]
-        expect_tightening_total = ts.get('tightening_total', 0)
-        if not expect_tightening_total:
-            raise ValidationError('Can Not Found Tightening Total Within The Tightening Step: {0}'.format(tc))
-        if len(rws.operation_point_ids) != expect_tightening_total:
-            _logger.error(
-                "Tightening Count Is Not Equal Within Tightening System By Code:{0}. "
-                "Except:{1}, Real:{2}".format(tc, expect_tightening_total, len(rws.operation_point_ids)))
+def pack_step_payload(env, consum_lines):
+    payloads = []
 
-        if not rws.worksheet_img:
-            raise ValidationError('Can Not Found Tightening Image Within The Tightening Step: {0}'.format(tc))
-        ts.update({'tightening_image_by_step_code': tc})
-        val = package_tightening_points(rws.operation_point_ids)
-        ts.update({'tightening_points': val})  # 将拧紧点的包包裹进去
+    type_tightening_id = env.ref('quality.test_type_tightening').id
+    type_tightening_point_id = env.ref('quality.test_type_tightening_point').id
+    for idx, step in enumerate(consum_lines.filtered(lambda t: t.test_type_id.id != type_tightening_point_id)):
+        ts = {
+            "code": step.name or step.ref,
+            "desc": step.note or '',
+            "failure_msg": step.failure_message or '',
+            "sequence": idx + 1,
+            "skippable": step.can_do_skip,
+            "undoable": step.can_do_redo,
+            "test_type": step.test_type_id.technical_name,
+            "consume_product": '',
+        }
+        ts.update({'tightening_image_by_step_code': step.name or step.ref})
+        if step.test_type_id.id ==type_tightening_id:
+            val = package_tightening_points(step.operation_point_ids)
+            ts.update({'tightening_points': val})  # 将拧紧点的包包裹进去
+            ts.update({'tightening_total': len(step.operation_point_ids)})  # 将拧紧点的包包裹进去
+        payloads.append(ts)
+
+    return payloads
+
+
+def convert_ts002_order(env, vals):
+    code = vals.get('requestInfo').get('MOMWIPORDER').get('WIPORDERNO')
+    mom_productno = vals.get('requestInfo').get('MOMWIPORDER').get('PRODUCTNO')
+    worksection = vals.get('requestInfo').get('MOMWIPORDER').get('MOMWIPORDEROPR').get('WORKCENTER')
+    date_planned_start = vals.get('requestInfo').get('MOMWIPORDER').get('SCHEDULEDSTARTDATE')
+    date_planned_complete = vals.get('requestInfo').get('MOMWIPORDER').get('SCHEDULEDCOMPLETIONDATE')
+    worksheet = {
+                "name": vals.get('requestInfo').get('MOMWIPORDER').get('WIDOCS').get('WIDOC').get('DESCRIPT'),
+                "revision": vals.get('requestInfo').get('MOMWIPORDER').get('WIDOCS').get('WIDOC').get('DOCVR'),
+                "url": vals.get('requestInfo').get('MOMWIPORDER').get('WIDOCS').get('WIDOC').get('DOCURL'),
+            }
+    modeldoc = vals.get('requestInfo').get('MOMWIPORDER').get('MODELDOCS').get('MODELDOC')
+    products = list()
+    for mo in modeldoc:
+        product = {
+            'code': mo.get('PRODUCTNO'),
+            'url': mo.get('URLLOCATION'),
+        }
+        products.append(product)
+
+
+
+
+    ret = list()
+    ws = env['mrp.worksection'].search([('code', '=', worksection)])
+    for ts in ws.workcenter_ids:
+        pro = env['product.product'].search([('default_code', '=', mom_productno)])
+        bom = env['mrp.bom'].search([('product_id', '=', pro.id)])
+
+        mrw = env['mrp.routing.workcenter'].search([('workcenter_id', '=', ts.id),('routing_id', '=', bom.routing_id.id)])
+
+        _steps = pack_step_payload(env,mrw.sa_step_ids)
+        vals = {
+            'code': code,
+            'track_no': mom_productno,
+            'product_code': mom_productno,
+            'workcenter': ts.code,
+            'date_planned_start': str_time_to_rfc3339(date_planned_start) if date_planned_start else str_time_to_rfc3339(fields.Datetime.now()),
+            'date_planned_complete': str_time_to_rfc3339(date_planned_complete) if date_planned_complete else str_time_to_rfc3339(fields.Datetime.now()),
+            'worksheet': worksheet,
+            'products': products,
+            'operation': {
+                'code': mrw.name or mrw.ref,
+                'desc': '',
+            },
+            "resources": {
+                "users": [],
+                "equipments": [],
+            },
+            'components': [],
+            'environments': [],
+            'steps': _steps,
+        }
+        ret.append(vals)
+        return ret
     return ret
 
+# def convert_ts002_order(env, vals):
+#     ret = vals
+#     mes_work_steps = vals.get('steps')
+#     if not mes_work_steps:
+#         raise ValidationError("Can Not Get Work Step From External System")
+#     work_steps = list(itertools.chain.from_iterable(mes_work_steps))  # flat array make sure
+#     vals['steps'] = work_steps
+#     tightening_steps = filter(lambda step: step.get('test_type') == 'tightening', work_steps)
+#     if not tightening_steps:
+#         return vals
+#     for ts in tightening_steps:
+#         tc = ts.get('code')
+#         ws = env['sa.quality.point'].search(['|', ('ref', '=', tc), ('name', '=', tc)])
+#         if not ws:
+#             _logger.error("Can Not Found Tightening Step By Code:{0}".format(tc))
+#             continue
+#         rws = ws
+#         if len(ws) != 1:
+#             _logger.error("Tightening Step By Code:{0} Is Not Unique".format(tc))
+#             rws = ws[0]
+#         expect_tightening_total = ts.get('tightening_total', 0)
+#         if not expect_tightening_total:
+#             raise ValidationError('Can Not Found Tightening Total Within The Tightening Step: {0}'.format(tc))
+#         if len(rws.operation_point_ids) != expect_tightening_total:
+#             _logger.error(
+#                 "Tightening Count Is Not Equal Within Tightening System By Code:{0}. "
+#                 "Except:{1}, Real:{2}".format(tc, expect_tightening_total, len(rws.operation_point_ids)))
+#
+#         if not rws.worksheet_img:
+#             raise ValidationError('Can Not Found Tightening Image Within The Tightening Step: {0}'.format(tc))
+#         ts.update({'tightening_image_by_step_code': tc})
+#         val = package_tightening_points(rws.operation_point_ids)
+#         ts.update({'tightening_points': val})  # 将拧紧点的包包裹进去
+#     return ret
 
 def package_workcenter_location_data(workcenter_id, val):
     ret = []
@@ -193,10 +280,8 @@ def get_masterpc_order_url_and_package(env, vals):
 def post_order_2_masterpc(master_url, data):
     resp = requests.post(master_url, data=json.dumps(data), headers=headers)
     if resp.status_code != 201:
-        msg = 'TS002 Post WorkOrder To MasterPC Fail'
-        return sa_fail_response(msg=msg)
-    msg = "Tightening System Create Work Order Success"
-    return sa_success_resp(status_code=201, msg=msg)
+        return False
+    return True
 
 
 @retry(wait=wait_exponential(multiplier=1, min=1, max=3), stop=stop_after_delay(5), retry=retry_if_exception_type())
@@ -215,17 +300,21 @@ def query_order_from_mes(order_code, workcenter_code):
 
 
 def _convert_orders_info(env, values):
-    validate_ts002_order_req_vals(values)  # make sure field is all in request body
-    validate_ts002_req_val_by_entry(values)
-    payload = convert_ts002_order(env, values)
-    workcenter_id, master_url = get_masterpc_order_url_and_package(env, payload)
-    package_workcenter_location_data(workcenter_id, payload)
-    _logger.debug("TS002 Get Order: {0}".format(pprint.pformat(payload)))
+    # validate_ts002_order_req_vals(values)  # make sure field is all in request body
+    # validate_ts002_req_val_by_entry(values)
+    payloads = convert_ts002_order(env, values)
+    result_list = list()
+    for payload in payloads:
 
-    resp = post_order_2_masterpc(master_url, [payload])
-    if resp:
-        return resp
+        workcenter_id, master_url = get_masterpc_order_url_and_package(env, payload)
+        package_workcenter_location_data(workcenter_id, payload)
+        _logger.debug("TS002 Get Order: {0}".format(pprint.pformat(payload)))
 
+        resp = post_order_2_masterpc(master_url, [payload])
+        result_list.append(resp)
+    if False in result_list:
+        msg = 'TS002 Post WorkOrder To MasterPC Fail'
+        return sa_fail_response(msg=msg)
     msg = "Tightening System Create Work Order Success"
     return sa_success_resp(status_code=201, msg=msg)
 

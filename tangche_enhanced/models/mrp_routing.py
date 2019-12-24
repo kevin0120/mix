@@ -30,6 +30,9 @@ class MrpRoutingWorkcenter(models.Model):
 
     workcenter_group_id = fields.Many2one('mrp.workcenter.group', compute=_compute_workcenter_group, store=True)
 
+    _sql_constraints = [('routing_workcenter_uniq', 'unique(routing_id, workcenter_id)',
+                         'Per Routing only has one unique Routing Work Center!')]
+
     @api.model
     def create(self, vals):
         if 'workcenter_id' in vals:
