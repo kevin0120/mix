@@ -39,7 +39,7 @@ type Props = {|
   ...tDP
 |};
 
-function CheckStep({ isCurrent, submit }: Props) {
+function PassFailStep({ isCurrent, submit }: Props) {
   const classes = makeStyles(styles)();
 
   return (
@@ -69,4 +69,4 @@ function CheckStep({ isCurrent, submit }: Props) {
 export default connect<Props, tOP, tSP, tDP, _, _>(
   mapState,
   mapDispatch
-)(CheckStep);
+)(PassFailStep);

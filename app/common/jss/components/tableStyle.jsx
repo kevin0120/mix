@@ -45,7 +45,8 @@ const tableStyle = theme => ({
   },
   tableHeadCell: {
     color: 'rgba(0, 0, 0, 0.87)',
-    border: 'none !important'
+    border: 'none !important',
+    minWidth: '80px',
   },
   tableCell: {
     fontFamily:theme.typography.fontFamily,
@@ -57,6 +58,7 @@ const tableStyle = theme => ({
     borderBottom: 'none',
     borderTop: '1px solid #ddd',
     position: 'relative',
+    minWidth: '80px',
     [theme.breakpoints.down('sm')]: {
       minHeight: '24px',
       minWidth: '32px'

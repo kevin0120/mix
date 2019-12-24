@@ -65,6 +65,7 @@ function* failState(msg) {
   try {
     yield put(
       dialogActions.dialogShow({
+        maxWidth:'md',
         buttons: [
           {
             label: 'Common.Close',

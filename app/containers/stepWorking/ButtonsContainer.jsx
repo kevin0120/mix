@@ -123,6 +123,7 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
       ])) ||
     [];
   const modelsTableDialog = {
+    maxWidth: 'md',
     buttons: [
       {
         label: 'Common.Close',
@@ -143,6 +144,7 @@ const ButtonsContainer: ButtonsContainerProps => Node = ({
     )
   };
   const fileDialog = {
+    maxWidth: 'lg',
     buttons: [{
       label: 'Common.Close',
       color: 'warning'

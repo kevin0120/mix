@@ -350,6 +350,7 @@ const OrderMixin = (ClsBaseStep: Class<IWorkable>) =>
             }
             yield put(
               dialogActions.dialogShow({
+                maxWidth:'md',
                 buttons: [confirm],
                 closeAction,
                 title: i18n.t('Common.Result'),

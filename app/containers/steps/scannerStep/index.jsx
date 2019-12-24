@@ -4,19 +4,16 @@ import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import TextField from '@material-ui/core/TextField';
 import makeStyles from '@material-ui/core/styles/makeStyles';
-import QRcode from 'qrcode.react';
+// import QRcode from 'qrcode.react';
 import Button from '../../../components/CustomButtons/Button';
 import styles from './styles';
 import { scannerStepAction } from '../../../modules/step/scannerStep/action';
 import type { tStepProps } from '../types';
 import withKeyboard from '../../../components/Keyboard';
 import type { Dispatch } from '../../../modules/typeDef';
-import {
-  stepData,
-  stepPayload,
-  viewingStep
-} from '../../../modules/order/selector';
+import { stepData, stepPayload, viewingStep } from '../../../modules/order/selector';
 import type { tKeyboardBinder } from '../../../components/Keyboard/typeDef';
+import ScanIcon from './barcode-scan.svg';
 
 type tDP = {|
   submit: Dispatch,
@@ -72,12 +69,15 @@ function ScannerStep({
 
   return (
     <div className={classes.root}>
-      <QRcode value="This Is Demo QR Code" size={400}/>
+      {/*<QRcode value="This Is Demo QR Code" size={400}/>*/}
+      <ScanIcon width="200" height="200" viewBox="0 0 24 24" fill="#424242"/>
       <TextField
-        label={label}
+        className={classes.input}
+        label={label || '请扫描或输入条码'}
         disabled={!isCurrent}
         margin="normal"
         value={result?.[label] || ''}
+        variant="outlined"
         onClick={() => {
           if (isCurrent) {
             keyboardInput({

@@ -53,7 +53,7 @@ const Transition = React.forwardRef((props, ref) => (
 function customDialog(props: Props) {
   const { config, open, buttonAction, closeAction } = props;
   const classes = makeStyles(styles)();
-  const { buttons, title, content } = config;
+  const { buttons, title, content, maxWidth = 'sm' } = config;
 
   const onButton = (idx) => {
     buttonAction(idx);
@@ -73,6 +73,7 @@ function customDialog(props: Props) {
           }}
           TransitionComponent={Transition}
           keepMounted
+          maxWidth
           open={open}
           onClose={onClose}
           aria-labelledby="form-dialog-title"
@@ -87,7 +88,8 @@ function customDialog(props: Props) {
           <DialogActions>
             {
               buttons && buttons.map((b, idx) => b ?
-                <Button key={b.label} onClick={() => onButton(idx)} color={b.color || 'info'} regular size='lg' className={classes.diagButton} fullWidth>
+                <Button key={b.label} onClick={() => onButton(idx)} color={b.color || 'info'} regular size='lg'
+                        className={classes.diagButton} fullWidth>
                   {t(b.label || '')}
                 </Button> : null) || null
             }

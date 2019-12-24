@@ -71,7 +71,7 @@ function ScrewStep({ order, step, isCurrent, image, points, workCenterMode, noti
       // activeIndex={isCurrent ? activeIndex : -1}
       focus={0}
       scale={1}
-      menu={true}
+      menu
       twinkle={isCurrent}
       enableReWork={enableReWork}
       notifyInfo={notify}
