@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import api, SUPERUSER_ID,fields
+from odoo import api, SUPERUSER_ID, fields
 from odoo.http import request, Response, Controller, route
 from odoo.exceptions import ValidationError
 from odoo.addons.common_sa_utils.http import sa_success_resp, sa_fail_response
@@ -34,9 +34,11 @@ HAVE_SOME_REQUIRED_FIELDS = {
 
 _logger = logging.getLogger(__name__)
 
+
 def str_time_to_rfc3339(s_time):
     sp = s_time.split(' ')
     return sp[0] + 'T' + sp[1] + 'Z'
+
 
 def validate_ts002_order_req_vals(vals):
     for field in ORDER_REQUIRED_FIELDS:
@@ -131,7 +133,7 @@ def pack_step_payload(env, consum_lines):
             "consume_product": '',
         }
         ts.update({'tightening_image_by_step_code': step.name or step.ref})
-        if step.test_type_id.id ==type_tightening_id:
+        if step.test_type_id.id == type_tightening_id:
             val = package_tightening_points(step.operation_point_ids)
             ts.update({'tightening_points': val})  # 将拧紧点的包包裹进去
             ts.update({'tightening_total': len(step.operation_point_ids)})  # 将拧紧点的包包裹进去
@@ -147,10 +149,10 @@ def convert_ts002_order(env, vals):
     date_planned_start = vals.get('requestInfo').get('MOMWIPORDER').get('SCHEDULEDSTARTDATE')
     date_planned_complete = vals.get('requestInfo').get('MOMWIPORDER').get('SCHEDULEDCOMPLETIONDATE')
     worksheet = {
-                "name": vals.get('requestInfo').get('MOMWIPORDER').get('WIDOCS').get('WIDOC').get('DESCRIPT'),
-                "revision": vals.get('requestInfo').get('MOMWIPORDER').get('WIDOCS').get('WIDOC').get('DOCVR'),
-                "url": vals.get('requestInfo').get('MOMWIPORDER').get('WIDOCS').get('WIDOC').get('DOCURL'),
-            }
+        "name": vals.get('requestInfo').get('MOMWIPORDER').get('WIDOCS').get('WIDOC').get('DESCRIPT'),
+        "revision": vals.get('requestInfo').get('MOMWIPORDER').get('WIDOCS').get('WIDOC').get('DOCVR'),
+        "url": vals.get('requestInfo').get('MOMWIPORDER').get('WIDOCS').get('WIDOC').get('DOCURL'),
+    }
     modeldoc = vals.get('requestInfo').get('MOMWIPORDER').get('MODELDOCS').get('MODELDOC')
     products = list()
     for mo in modeldoc:
@@ -160,25 +162,25 @@ def convert_ts002_order(env, vals):
         }
         products.append(product)
 
-
-
-
     ret = list()
     ws = env['mrp.worksection'].search([('code', '=', worksection)])
     for ts in ws.workcenter_ids:
         pro = env['product.product'].search([('default_code', '=', mom_productno)])
         bom = env['mrp.bom'].search([('product_id', '=', pro.id)])
 
-        mrw = env['mrp.routing.workcenter'].search([('workcenter_id', '=', ts.id),('routing_id', '=', bom.routing_id.id)])
+        mrw = env['mrp.routing.workcenter'].search(
+            [('workcenter_id', '=', ts.id), ('routing_id', '=', bom.routing_id.id)])
 
-        _steps = pack_step_payload(env,mrw.sa_step_ids)
+        _steps = pack_step_payload(env, mrw.sa_step_ids)
         vals = {
             'code': code,
             'track_no': mom_productno,
             'product_code': mom_productno,
             'workcenter': ts.code,
-            'date_planned_start': str_time_to_rfc3339(date_planned_start) if date_planned_start else str_time_to_rfc3339(fields.Datetime.now()),
-            'date_planned_complete': str_time_to_rfc3339(date_planned_complete) if date_planned_complete else str_time_to_rfc3339(fields.Datetime.now()),
+            'date_planned_start': str_time_to_rfc3339(
+                date_planned_start) if date_planned_start else str_time_to_rfc3339(fields.Datetime.now()),
+            'date_planned_complete': str_time_to_rfc3339(
+                date_planned_complete) if date_planned_complete else str_time_to_rfc3339(fields.Datetime.now()),
             'worksheet': worksheet,
             'products': products,
             'operation': {
@@ -194,8 +196,10 @@ def convert_ts002_order(env, vals):
             'steps': _steps,
         }
         ret.append(vals)
+        # fixme: 当前demo数据还没补全，提前返回
         return ret
     return ret
+
 
 # def convert_ts002_order(env, vals):
 #     ret = vals
@@ -305,7 +309,6 @@ def _convert_orders_info(env, values):
     payloads = convert_ts002_order(env, values)
     result_list = list()
     for payload in payloads:
-
         workcenter_id, master_url = get_masterpc_order_url_and_package(env, payload)
         package_workcenter_location_data(workcenter_id, payload)
         _logger.debug("TS002 Get Order: {0}".format(pprint.pformat(payload)))
