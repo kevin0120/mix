@@ -81,7 +81,13 @@ func (s *Service) Open() error {
 
 	s.TighteningDevice.GetDispatcher(tightening_device.DISPATCH_RESULT).Register(s.onTighteningResult)
 
+	go s.doHealthCheck()
+
 	return nil
+}
+
+func (s *Service) doHealthCheck() {
+	s.mesAPI.healthCheck()
 }
 
 func (s *Service) Close() error {
@@ -134,7 +140,7 @@ func (s *Service) validateRequestPayload(req interface{}) error {
 }
 
 func (s *Service) ioONDuration(sn string, idx int, duration time.Duration) {
-	if err := s.IO.Write(sn, uint16(idx), io.OUTPUT_STATUS_ON); err != nil {
+	if err := s.ioDoAction(sn, idx, io.OUTPUT_STATUS_ON); err != nil {
 		s.diag.Error("Write ON Error", err)
 		return
 	}
@@ -149,6 +155,15 @@ func (s *Service) ioONDuration(sn string, idx int, duration time.Duration) {
 			return
 		}
 	}
+}
+
+func (s *Service) ioDoAction(sn string, idx int, status uint16) error {
+	if err := s.IO.Write(sn, uint16(idx), status); err != nil {
+		e := errors.Wrapf(err, "Write IO Serial Number: %s, Idx: %d Error", sn, idx)
+		s.diag.Error("Write ON Error", e)
+		return err
+	}
+	return nil
 }
 
 // 报警控制
@@ -200,6 +215,23 @@ func (s *Service) ioControl(req *RushIOControlReq) error {
 
 	if err := s.validateRequestPayload(req); err != nil {
 		return err
+	}
+
+	if err := s.validateRequestPayload(req); err != nil {
+		return err
+	}
+	if _, existed := mapMESStatusIO[req.Status]; !existed {
+		return errors.Errorf("ioControl: Status:%s Is Not Support", req.Status)
+	}
+	iList := req.Outputs
+
+	for _, IOIdx := range iList {
+		idx := IOIdx / 8 //IO模块索引
+		rr := IOIdx % 8  // 真实IO的位数
+		sn := s.IO.GetIOSerialNumberByIdx(idx)
+		if err := s.ioDoAction(sn, rr, mapMESStatusIO[req.Status]); err != nil {
+			return err
+		}
 	}
 
 	return nil

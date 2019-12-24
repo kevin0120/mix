@@ -27,15 +27,17 @@ type MesApiConfig struct {
 	RetryCount           int           `yaml:"retry_count"`
 	EndpointCardInfo     string        `yaml:"endpoint_cardinfo"`
 	EndpointResultUpload string        `yaml:"endpoint_result_upload"`
+	EndpointHealthzCheck string        `yaml:"endpoint_healthz_check"`
 }
 
 func NewMesApiConfig() MesApiConfig {
 	return MesApiConfig{
-		APIUrl:               "http://127.0.0:1:8000",
+		APIUrl:               "http://127.0.0:1:8000/api/v1",
 		Timeout:              toml.Duration(time.Duration(10 * time.Second)),
 		RetryCount:           5,
-		EndpointCardInfo:     "/api/v1/cardinfo",
-		EndpointResultUpload: "/api/v1/results",
+		EndpointCardInfo:     "/cardinfo",
+		EndpointResultUpload: "/results",
+		EndpointHealthzCheck: "/healthz",
 	}
 }
 

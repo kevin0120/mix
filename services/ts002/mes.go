@@ -45,6 +45,28 @@ func (s *MesAPI) Config() MesApiConfig {
 	return s.cfg.Load().(MesApiConfig)
 }
 
+func (s *MesAPI) healthCheck() {
+	c := s.Config()
+	cc := s.ensureHttpClient()
+	r := cc.R()
+	url := fmt.Sprintf("%s%s", c.APIUrl, c.EndpointHealthzCheck)
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			if resp, err := r.Get(url); err != nil {
+				s.diag.Error("MES healzCheck", err)
+			} else {
+				if resp.StatusCode() != iris.StatusNoContent {
+					e := errors.New("MES healzCheck Fail")
+					s.diag.Error("healzCheck", e)
+				}
+			}
+		}
+	}
+}
+
 func (s *MesAPI) ensureHttpClient() *resty.Client {
 	c := s.Config()
 	if s.client != nil {
@@ -55,6 +77,8 @@ func (s *MesAPI) ensureHttpClient() *resty.Client {
 		s.diag.Error("ensureHttpClient", err)
 		return nil
 	} else {
+		client.SetHeader("Project", "TS002")
+		client.SetHeader("Service", "MES")
 		s.client = client
 		return client
 	}

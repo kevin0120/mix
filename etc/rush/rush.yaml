@@ -226,8 +226,8 @@ ts002:
 
   # MES接口配置
   mes_api:
-    api_url: http://127.0.0:1:8000
+    api_url: http://127.0.0:1:8000/api/v1
     timeout: 10s
     retry_count: 3
-    endpoint_cardinfo: /api/v1/cardinfo
-    endpoint_result_upload: /api/v1/results
+    endpoint_cardinfo: /cardinfo
+    endpoint_result_upload: /results
