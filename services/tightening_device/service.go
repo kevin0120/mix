@@ -155,7 +155,7 @@ func (s *Service) initRequestDispatchers() {
 		WS_TOOL_ENABLE:      utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		WS_TOOL_JOB:         utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 		WS_TOOL_PSET:        utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
-		WS_TOOL_PSET_LIST:        utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
+		WS_TOOL_PSET_LIST:   utils.CreateDispatcher(utils.DEFAULT_BUF_LEN),
 	}
 
 	s.requestDispatchers[WS_TOOL_MODE_SELECT].Register(s.OnWS_TOOL_MODE_SELECT)
@@ -163,7 +163,6 @@ func (s *Service) initRequestDispatchers() {
 	s.requestDispatchers[WS_TOOL_JOB].Register(s.OnWS_TOOL_JOB)
 	s.requestDispatchers[WS_TOOL_PSET].Register(s.OnWS_TOOL_PSET)
 	s.requestDispatchers[WS_TOOL_PSET_LIST].Register(s.OnWS_TOOL_PSET_LIST)
-
 
 	for _, v := range s.requestDispatchers {
 		v.Start()
@@ -297,7 +296,6 @@ func (s *Service) OnWS_TOOL_PSET_LIST(data interface{}) {
 
 	req := PSetList{}
 	_ = json.Unmarshal(byteData, &req)
-
 
 	err := s.Api.ToolPSetList(&req)
 	if err != nil {

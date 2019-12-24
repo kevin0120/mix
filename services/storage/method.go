@@ -175,6 +175,12 @@ func (s *Service) WorkorderIn(in []byte) (string, error) {
 			Skippable:      msg.Skippable,
 			Undoable:       msg.Undoable,
 			Data:           msg.Data,
+
+			Text:           msg.Text,
+			ToleranceMin:   msg.ToleranceMin,
+			ToleranceMax:   msg.ToleranceMax,
+			Target:         msg.Target,
+			ConsumeProduct: msg.ConsumeProduct,
 		}
 
 		workorder1.Steps = append(workorder1.Steps, step)

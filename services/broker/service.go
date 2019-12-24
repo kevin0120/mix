@@ -31,10 +31,10 @@ func NewService(c Config, d Diagnostic) *Service {
 		closing:               make(chan struct{}, 1),
 	}
 	s.configValue.Store(c)
-
-	p := s.newBroker(c.Provider)
-	s.Provider = p
-
+	if c.Enable {
+		p := s.newBroker(c.Provider)
+		s.Provider = p
+	}
 	return s
 }
 
