@@ -1031,3 +1031,7 @@ func (c *TighteningController) DeviceType() string {
 func (c *TighteningController) GetDispatch(name string) *utils.Dispatcher {
 	return c.externalDispatches[name]
 }
+
+func (c *TighteningController) GetIP() string {
+	return c.sockClient.Address
+}

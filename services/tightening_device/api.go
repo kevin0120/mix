@@ -53,8 +53,8 @@ type PSetSet struct {
 }
 
 type PSetList struct {
-	ToolSN       string `json:"tool_sn"`
-	PSetList []int      `json:"pset_list"`
+	ToolSN   string `json:"tool_sn"`
+	PSetList []int  `json:"pset_list"`
 }
 
 func (s *PSetList) Validate() error {
@@ -63,9 +63,6 @@ func (s *PSetList) Validate() error {
 	}
 	return nil
 }
-
-
-
 
 func (s *PSetSet) Validate() error {
 	if s.ControllerSN == "" || s.ToolSN == "" {
@@ -204,7 +201,7 @@ func (s *Api) ToolPSetSet(req *PSetSet) error {
 }
 
 //GetPSetList
-func (s *Api) ToolPSetList(req *PSetList)(error) {
+func (s *Api) ToolPSetList(req *PSetList) error {
 	if req == nil {
 		return errors.New("Req Is Nil")
 	}
@@ -218,7 +215,7 @@ func (s *Api) ToolPSetList(req *PSetList)(error) {
 	if err != nil {
 		return err
 	}
-	req.PSetList,err=tool.GetPSetList()
+	req.PSetList, err = tool.GetPSetList()
 	return err
 }
 

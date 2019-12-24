@@ -304,7 +304,7 @@ func (s *TighteningTool) OnResult(result interface{}) {
 
 	tighteningResult := result.(*tightening_device.TighteningResult)
 	dbTool, err := s.controller.Srv.DB.GetGun(s.cfg.SN)
-	if err == nil {
+	if err == nil && dbTool.WorkorderID != 0 {
 		if s.Mode.Load().(string) == tightening_device.MODE_JOB {
 			tighteningResult.Seq, tighteningResult.Count = s.controller.calBatch(dbTool.WorkorderID)
 		} else {

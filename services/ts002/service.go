@@ -92,3 +92,10 @@ func (s *Service) SendNFCData() error {
 	//r := client.R()
 	return nil
 }
+// 收到拧紧结果
+func (s Service) onTighteningResult(data interface{}) {
+	if data == nil {
+		return
+	}
+
+}
