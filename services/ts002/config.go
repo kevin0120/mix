@@ -1,6 +1,9 @@
 package ts002
 
-import "github.com/masami10/rush/toml"
+import (
+	"github.com/masami10/rush/toml"
+	"time"
+)
 
 type Config struct {
 	Enable bool `yaml:"enable"`
@@ -15,10 +18,10 @@ type Config struct {
 	IOAlarmLast toml.Duration `yaml:"io_alarm_last"`
 
 	// Mes接口配置
-	MesApiConifg MesApiConifg `yaml:"mes_api"`
+	MesApiConfig MesApiConfig `yaml:"mes_api"`
 }
 
-type MesApiConifg struct {
+type MesApiConfig struct {
 	APIUrl               string        `yaml:"api_url"`
 	Timeout              toml.Duration `yaml:"timeout"`
 	RetryCount           int           `yaml:"retry_count"`
@@ -26,11 +29,22 @@ type MesApiConifg struct {
 	EndpointResultUpload string        `yaml:"endpoint_result_upload"`
 }
 
+func NewMesApiConfig() MesApiConfig {
+	return MesApiConfig{
+		APIUrl:  "http://127.0.0:1:8000",
+		Timeout: toml.Duration(time.Duration(10 * time.Second)),
+		RetryCount: 5,
+		EndpointCardInfo: "/api/v1/cardinfo",
+		EndpointResultUpload: "/api/v1/results",
+	}
+}
+
 func NewConfig() Config {
 	return Config{
-		Enable:   true,
-		IOLocker: []int{1},
-		IOAlarm:  []int{1},
+		Enable:       true,
+		IOLocker:     []int{1},
+		IOAlarm:      []int{1},
+		MesApiConfig: NewMesApiConfig(),
 	}
 }
 

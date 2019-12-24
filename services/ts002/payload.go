@@ -45,3 +45,9 @@ type RushIOControlReq struct {
 	Outputs []int  `json:"outputs" validate:"required"`
 	Status  string `json:"status" validate:"required"`
 }
+
+// Mes->Rush 读卡器信息
+type RushCardInfoReq struct {
+	CardCode  string `json:"cardCode" validate:"required"`
+}
+
