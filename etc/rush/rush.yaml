@@ -209,3 +209,14 @@ controller_service:
 #        channel: 1
 #      - gun_serial: 18G53917 5.8.2
 #        channel: 2
+
+ts002:
+  enable: true
+
+  # 柜锁控制（当收刷卡登录成功时，控制相关IO输出）
+  io_locker:
+    - 1
+
+  # 报警控制（当收到MES报警请求或拧紧NOK时，控制相关IO输出，持续5秒）
+  io_alarm:
+    - 1

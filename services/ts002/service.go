@@ -30,3 +30,11 @@ func (s *Service) Open() error {
 func (s *Service) Close() error {
 	return nil
 }
+
+// 收到拧紧结果
+func (s Service) onTighteningResult(data interface{}) {
+	if data == nil {
+		return
+	}
+
+}

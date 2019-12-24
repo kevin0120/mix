@@ -25,6 +25,9 @@ type ITighteningController interface {
 
 	// 控制输出
 	SetOutput(outputs []ControllerOutput) error
+
+	// 获取IP
+	GetIP() string
 }
 
 type ITighteningTool interface {
