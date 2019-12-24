@@ -11,6 +11,7 @@ import (
 	"github.com/masami10/rush/services/reader"
 	"github.com/masami10/rush/services/scanner"
 	"github.com/masami10/rush/services/tightening_device"
+	"github.com/masami10/rush/services/ts002"
 	"github.com/masami10/rush/utils"
 	"os"
 	"os/user"
@@ -66,6 +67,8 @@ type Config struct {
 
 	Device device.Config `yaml:"device"`
 
+	TS002 ts002.Config `yaml:"ts002"`
+
 	Commander command.Commander `yaml:"-"`
 }
 
@@ -92,6 +95,7 @@ func NewConfig() *Config {
 	c.TighteningDevice = tightening_device.NewConfig()
 	c.Device = device.NewConfig()
 	c.Broker = broker.NewConfig()
+	c.TS002 = ts002.NewConfig()
 
 	c.Contollers = controller.NewConfig()
 
@@ -175,6 +179,10 @@ func (c *Config) Validate() error {
 	}
 	if err := c.Broker.Validate(); err != nil {
 		return errors.Wrap(err, "broker")
+	}
+
+	if err := c.TS002.Validate(); err != nil {
+		return errors.Wrap(err, "ts002")
 	}
 
 	return nil

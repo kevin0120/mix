@@ -20,6 +20,7 @@ import (
 	"github.com/masami10/rush/services/scanner"
 	"github.com/masami10/rush/services/storage"
 	"github.com/masami10/rush/services/tightening_device"
+	"github.com/masami10/rush/services/ts002"
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
@@ -66,6 +67,8 @@ type Server struct {
 
 	TighteningDeviceService *tightening_device.Service
 	DeviceService           *device.Service
+
+	TS002Service *ts002.Service
 
 	BrokerService *broker.Service
 
@@ -143,9 +146,24 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 	s.AppendIOService()
 	s.AppendReaderService()
 
+	//客制化项目在这里append
+	s.appendTS002Service("ts002")
+
 	s.appendHTTPDService()
 
 	return s, nil
+}
+
+func (s *Server) appendTS002Service(projectCode string) {
+	c := s.config.TS002
+	d := s.DiagService.NewCustomizeHandler(projectCode)
+	srv := ts002.NewService(c, d, s.HTTPDService, s.ReaderService, s.IOService)
+	srv.IO = s.IOService
+	srv.TighteningDevice = s.TighteningDeviceService
+
+	s.TS002Service = srv
+	s.AppendService(projectCode, srv)
+	return
 }
 
 func (s *Server) AppendService(name string, srv Service) {

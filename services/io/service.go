@@ -45,6 +45,17 @@ func (s *Service) config() Config {
 	return s.configValue.Load().(Config)
 }
 
+func (s *Service) GetIOSerialNumberByIdx(index int) string {
+	ii := 0
+	for sn := range s.ios {
+		if ii == index {
+			return sn
+		}
+		ii++
+	}
+	return ""
+}
+
 func (s *Service) Open() error {
 	if !s.config().Enable {
 		return nil

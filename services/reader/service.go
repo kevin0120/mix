@@ -6,6 +6,7 @@ import (
 	"github.com/ebfe/scard"
 	"github.com/masami10/rush/services/device"
 	"github.com/masami10/rush/services/wsnotify"
+	"github.com/masami10/rush/utils"
 	"sync/atomic"
 	"time"
 )
@@ -26,6 +27,21 @@ type Service struct {
 	ctx           *scard.Context
 	WS            *wsnotify.Service
 	DeviceService *device.Service
+	nfcDispatcher *utils.Dispatcher
+}
+
+func (s *Service) initNFCDispatchers() {
+	s.nfcDispatcher = utils.CreateDispatcher(utils.DEFAULT_BUF_LEN)
+	s.nfcDispatcher.Start()
+}
+
+func (s *Service) RegisterNFCDispatcher(dispatcher utils.DispatchHandler) error {
+	s.nfcDispatcher.Register(dispatcher)
+	return nil
+}
+
+func (s *Service) StopNFCDispatcher() {
+	s.nfcDispatcher.Release()
 }
 
 func NewService(c Config, d Diagnostic) *Service {
@@ -33,6 +49,8 @@ func NewService(c Config, d Diagnostic) *Service {
 	s := &Service{
 		diag: d,
 	}
+
+	s.initNFCDispatchers()
 
 	s.configValue.Store(c)
 
@@ -118,6 +136,9 @@ func (s *Service) notifyUID(uid string) {
 			UID: uid,
 		},
 	})
+
+	//ts002 接收nfc数据
+	s.nfcDispatcher.Dispatch(uid)
 
 	s.WS.WSSendReader(string(barcode))
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/masami10/rush/services/wsnotify"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
+	"strings"
 	"sync"
 	"sync/atomic"
 )
@@ -410,6 +411,29 @@ func (s *Service) getTool(controllerSN string, toolSN string) (ITighteningTool, 
 		continue
 	}
 	return nil, errors.New("Not Found")
+}
+
+// **唐车中车数字接口** 根据IP定位工具
+func (s *Service) findToolbyIP(ip string) (ITighteningTool, error) {
+	for _, controller := range s.runningControllers {
+		if strings.Contains(controller.GetIP(), ip) {
+			return s.getFirstTool(controller)
+		}
+	}
+
+	return nil, errors.New("findToolbyIP: Not Found")
+}
+
+func (s *Service) getFirstTool(controller ITighteningController) (ITighteningTool, error) {
+	if controller == nil {
+		return nil, errors.New("getFirstTool: Controller Is Nil")
+	}
+
+	for _, v := range controller.Children() {
+		return v.(ITighteningTool), nil
+	}
+
+	return nil, errors.New("getFirstTool: Controller's Tool Not Found")
 }
 
 func (s *Service) startupControllers() {

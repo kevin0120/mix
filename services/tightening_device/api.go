@@ -50,6 +50,8 @@ type PSetSet struct {
 	Sequence     uint   `json:"sequence"`
 	Count        int    `json:"count"`
 	Total        int    `json:"total"`
+	IP           string `json:"ip"`
+	PointID      string `json:"point_id"`
 }
 
 type PSetList struct {
@@ -195,6 +197,39 @@ func (s *Api) ToolPSetSet(req *PSetSet) error {
 		UserID:      req.UserID,
 		Total:       req.Total,
 		StepID:      req.StepID,
+	})
+
+	return tool.SetPSet(req.PSet)
+}
+
+func (s *Api) ToolPSetByIP(req *PSetSet) error {
+	if req == nil {
+		return errors.New("Req Is Nil")
+	}
+
+	tool, err := s.findToolbyIP(req.IP)
+	if err != nil {
+		return err
+	}
+
+	if req.UserID == 0 {
+		req.UserID = 1
+	}
+
+	err = tool.SetPSetBatch(req.PSet, 1)
+	if err != nil {
+		return err
+	}
+
+	_ = s.StorageService.UpdateTool(&storage.Guns{
+		Serial:      req.ToolSN,
+		WorkorderID: req.WorkorderID,
+		Seq:         int(req.Sequence),
+		Count:       req.Count,
+		UserID:      req.UserID,
+		Total:       req.Total,
+		StepID:      req.StepID,
+		PointID:     req.PointID,
 	})
 
 	return tool.SetPSet(req.PSet)
