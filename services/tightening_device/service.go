@@ -413,7 +413,7 @@ func (s *Service) getTool(controllerSN string, toolSN string) (ITighteningTool, 
 	return nil, errors.New("Not Found")
 }
 
-// **唐车中车数字接口** 更具IP定位工具
+// **唐车中车数字接口** 根据IP定位工具
 func (s *Service) findToolbyIP(ip string) (ITighteningTool, error) {
 	for _, controller := range s.runningControllers {
 		if strings.Contains(controller.GetIP(), ip) {

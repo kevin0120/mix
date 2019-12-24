@@ -173,6 +173,7 @@ type Guns struct {
 	Mode        string `xorm:"varchar(128) 'mode'"`
 	UserID      int64  `xorm:"bigint 'user_id'"`
 	StepID      int64  `xorm:"bigint 'step_id'"`
+	PointID     string `xorm:"varchar(128) 'point_id'"`
 }
 
 type RoutingOperations struct {

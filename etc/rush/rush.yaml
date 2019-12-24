@@ -83,9 +83,9 @@ websocket:
 
 storage:
   db_url: 127.0.0.1:5432
-  db_name: rush_hardware
-  db_user: odoo
-  db_pwd: odoo
+  db_name: rush_dev
+  db_user: admin
+  db_pwd: admin
   max_connection: 60
   vacuum_period: 2160h
   data_keep: 2160h
@@ -220,3 +220,14 @@ ts002:
   # 报警控制（当收到MES报警请求或拧紧NOK时，控制相关IO输出，持续5秒）
   io_alarm:
     - 1
+
+  # 报警持续时间
+  io_alarm_last: 5s
+
+  # MES接口配置
+  mes_api:
+    api_url: http://127.0.0:1:8000
+    timeout: 10s
+    retry_count: 3
+    endpoint_cardinfo: /api/v1/cardinfo
+    endpoint_result_upload: /api/v1/results

@@ -174,6 +174,9 @@ type TighteningResult struct {
 
 	// 结果id
 	ID int64 `json:"id"`
+
+	// 点位ID
+	PointID string `json:"point_id"`
 }
 
 func (r *TighteningResult) ToDBResult() *storage.Results {

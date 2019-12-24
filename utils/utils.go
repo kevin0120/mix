@@ -1,8 +1,10 @@
 package utils
 
 import (
+	"crypto/tls"
 	"github.com/kataras/iris/core/errors"
 	"github.com/satori/go.uuid"
+	"gopkg.in/resty.v1"
 	"os"
 	"strings"
 	"sync"
@@ -27,6 +29,21 @@ func StringInSlice(a string, list []string) bool {
 		}
 	}
 	return false
+}
+
+func CreateRetryClient(timeout time.Duration, maxRetry int) (*resty.Client, error) {
+
+	r := resty.New()
+
+	r.SetTimeout(timeout)
+	r.SetContentLength(true)
+	r.
+		SetRetryCount(maxRetry).
+		SetRetryMaxWaitTime(40 * time.Second).
+		//SetHeader("Content-Type", "application/json").
+		SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+
+	return r, nil
 }
 
 func AppendByteSlice(s []byte, t []byte) []byte {
