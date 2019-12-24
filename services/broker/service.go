@@ -61,7 +61,7 @@ func (s *Service) Open() error {
 	}
 
 	s.dispatcherBus.LaunchDispatchersByHandlerMap(s.dispatcherMap)
-	s.doConnect(false) // 初始化所有连接状态为未连接
+	s.doConnect(false)
 	go s.connectProc()
 	return nil
 }

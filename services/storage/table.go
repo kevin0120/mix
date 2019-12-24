@@ -98,6 +98,12 @@ type Steps struct {
 	Data           string `xorm:"text 'data'" json:"data"`
 	Status         string `xorm:"varchar(32) default 'ready' 'status'" json:"status"`
 
+	Text           string `xorm:"text 'text'" json:"text"`
+	ToleranceMin   int64  `xorm:"bigint 'tolerance_min'" json:"tolerance_min"`
+	ToleranceMax   int64  `xorm:"bigint 'tolerance_max'" json:"tolerance_max"`
+	Target         int64  `xorm:"bigint 'target'" json:"target"`
+	ConsumeProduct string `xorm:"varchar(64) 'consume_product'" json:"consume_product"`
+
 	Created time.Time `xorm:"created" json:"-"`
 	Updated time.Time `xorm:"updated" json:"-"`
 }
