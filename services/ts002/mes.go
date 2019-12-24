@@ -70,6 +70,8 @@ func (s *MesAPI) ensureHttpClient() *resty.Client {
 		s.diag.Error("ensureHttpClient", err)
 		return nil
 	} else {
+		client.SetHeader("Project", "TS002")
+		client.SetHeader("Service", "MES")
 		s.client = client
 		return client
 	}
