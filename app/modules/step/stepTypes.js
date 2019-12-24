@@ -2,7 +2,6 @@
 import { stepTypeKeys as s } from './constants';
 import InputStepMixin from './inputStep/InputStep';
 import ScannerStepMixin from './scannerStep/ScannerStep';
-import InstructionStepMixin from './instructionStep/InstructionStep';
 import ScrewStepMixin from './screwStep/ScrewStep';
 import MaterialStepMixin from './materialStep/MaterialStep';
 import MeasureStepMixin from './MeasureStep/MeasureStep';
@@ -13,7 +12,7 @@ import type { IWorkable } from '../workable/IWorkable';
 export default {
   [s.input]: (ClsWorkable: Class<IWorkable>) => InputStepMixin(StepMixin(ClsWorkable)),
   [s.scanner]: (ClsWorkable: Class<IWorkable>) => ScannerStepMixin(StepMixin(ClsWorkable)),
-  [s.instruction]: (ClsWorkable: Class<IWorkable>) => InstructionStepMixin(StepMixin(ClsWorkable)),
+  [s.instruction]: (ClsWorkable: Class<IWorkable>) => StepMixin(ClsWorkable),
   [s.text]: (ClsWorkable: Class<IWorkable>) => StepMixin(ClsWorkable),
   [s.screw]: (ClsWorkable: Class<IWorkable>) => ScrewStepMixin(StepMixin(ClsWorkable)),
   [s.material]: (ClsWorkable: Class<IWorkable>) => MaterialStepMixin(StepMixin(ClsWorkable)),

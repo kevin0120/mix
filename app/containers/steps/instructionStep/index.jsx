@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { Document, Page } from 'react-pdf/dist/entry.webpack';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Button from '../../../components/CustomButtons/Button';
-import { instructionStepActions } from '../../../modules/step/instructionStep/action';
+import stepActions from '../../../modules/step/actions';
 import type { tStepProps } from '../types';
 import { stepPayload, viewingStep } from '../../../modules/order/selector';
 import styles from './styles';
@@ -32,7 +32,7 @@ const mapState = (state, props: tOP): tSP => ({
 });
 
 const mapDispatch: tDP = {
-  submit: instructionStepActions.submit
+  submit: stepActions.submit
 };
 
 type Props = {|
@@ -61,7 +61,7 @@ function InstructionStep({ step, isCurrent, submit, bindAction, url, page }: Pro
   const [pdfUrl, setPdfUrl] = useState('');
 
   useEffect(() => {
-    const response = defaultClient
+    defaultClient
       .get(url)
       .then(resp => {
         setPdfUrl(resp.request._redirectable._currentUrl);
