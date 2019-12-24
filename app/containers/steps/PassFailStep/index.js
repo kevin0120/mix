@@ -1,12 +1,14 @@
 // @flow
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
+import { makeStyles } from '@material-ui/core';
 import { stepPayload, viewingStep } from '../../../modules/order/selector';
 import checkStepActions from '../../../modules/step/checkStep/action';
 import type { tStepProps } from '../types';
 import Button from '../../../components/CustomButtons/Button';
 import type { Dispatch } from '../../../modules/typeDef';
 import type { tStepPayload } from '../../../modules/step/interface/typeDef';
+import styles from './styles';
 
 type tOP = {|
   ...tStepProps
@@ -37,48 +39,32 @@ type Props = {|
   ...tDP
 |};
 
-function CheckStep({
-                     step,
-                     isCurrent,
-                     submit,
-                     bindAction,
-                   }: Props) {
-  const [value, setValue] = useState('');
+function CheckStep({ isCurrent, submit }: Props) {
+  const classes = makeStyles(styles)();
 
-  useEffect(
-    () => {
-      const onSubmit = v => {
-        submit(v);
-      };
-      bindAction(
-        <Button
-          type="button"
-          color="primary"
-          onClick={() => {
-            onSubmit(value);
-          }}
-          disabled={!isCurrent}
-        >
-          完成
-        </Button>
-      );
-      return () => bindAction(null);
-    },
-    [step, bindAction, isCurrent, value, submit]
+  return (
+    <div className={classes.root}>
+      <Button
+        variant="contained"
+        color="danger"
+        className={classes.button}
+        disabled={!isCurrent}
+        onClick={() => submit(false)}
+      >
+        Fail
+      </Button>
+      <Button
+        variant="contained"
+        color="info"
+        className={classes.button}
+        disabled={!isCurrent}
+        onClick={() => submit(true)}
+      >
+        Pass
+      </Button>
+    </div>
   );
-
-  useEffect(
-    () => {
-      setValue('');
-    },
-    [step]
-  );
-
-  return <div>
-    PassFail
-  </div>;
 }
-
 
 export default connect<Props, tOP, tSP, tDP, _, _>(
   mapState,
