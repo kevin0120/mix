@@ -1,6 +1,7 @@
 package ts002
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/kataras/iris"
 	"github.com/masami10/rush/services/io"
@@ -74,7 +75,21 @@ func (s *MesAPI) sendNFCData(data string) error {
 		err := errors.New(resp.String())
 		s.diag.Error("sendNFCData Error", err)
 		return err
+	} else {
+		body := resp.Body()
+		var respData MesCardInfoResp
+		err := json.Unmarshal(body, &respData)
+		if err != nil {
+			return err
+		}
+
+		if respData.ResultStatus == MES_CARDINFO_FAIL {
+			err := errors.New(respData.ResultMsg)
+			s.diag.Error("sendNFCData Error", err)
+			return err
+		}
 	}
+
 	return nil
 }
 

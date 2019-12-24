@@ -1,6 +1,10 @@
 package ts002
 
 // ************************************************Mes提供的接口Payload************************************************
+const (
+	MES_CARDINFO_FAIL = "E"
+)
+
 // Mes->Rush 结果响应
 type MesCardInfoResp struct {
 	ResultStatus string `json:"resultStatus"`
