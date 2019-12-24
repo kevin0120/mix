@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/kataras/iris"
 	"github.com/masami10/rush/services/io"
+	"github.com/masami10/rush/services/tightening_device"
 	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"gopkg.in/resty.v1"
@@ -11,9 +12,14 @@ import (
 	"time"
 )
 
-var mapMESStatusIO = map[string]uint16 {
-	"on": io.OUTPUT_STATUS_ON,
+var mapMESStatusIO = map[string]uint16{
+	"on":  io.OUTPUT_STATUS_ON,
 	"off": io.OUTPUT_STATUS_OFF,
+}
+
+var mapMeasureResult = map[string]string{
+	tightening_device.RESULT_OK:  "0",
+	tightening_device.RESULT_NOK: "1",
 }
 
 func NewMesAPI(cfg MesApiConfig, diag Diagnostic) (*MesAPI, error) {
@@ -34,7 +40,7 @@ type MesAPI struct {
 	diag   Diagnostic
 }
 
-func (s *MesAPI)Config() MesApiConfig  {
+func (s *MesAPI) Config() MesApiConfig {
 	return s.cfg.Load().(MesApiConfig)
 }
 
@@ -64,10 +70,29 @@ func (s *MesAPI) sendNFCData(data string) error {
 	if resp, err := r.SetBody(payload).Post(url); err != nil {
 		s.diag.Error("sendNFCData Error", err)
 		return err
-	}else if resp.StatusCode() != iris.StatusOK {
+	} else if resp.StatusCode() != iris.StatusOK {
 		err := errors.New(resp.String())
 		s.diag.Error("sendNFCData Error", err)
 		return err
 	}
+	return nil
+}
+
+func (s *MesAPI) sendResultData(result *MesResultUploadReq) error {
+	//todo: 发送拧紧结果
+	c := s.Config()
+	client := s.ensureHttpClient()
+	r := client.R()
+
+	url := fmt.Sprintf("%s%s", c.APIUrl, c.EndpointResultUpload)
+	if resp, err := r.SetBody(result).Post(url); err != nil {
+		s.diag.Error("sendResultData Error", err)
+		return err
+	} else if resp.StatusCode() != iris.StatusOK {
+		err := errors.New(resp.String())
+		s.diag.Error("sendResultData Error", err)
+		return err
+	}
+
 	return nil
 }

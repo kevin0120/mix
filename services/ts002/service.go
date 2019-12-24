@@ -62,6 +62,10 @@ func (s *Service) registerNFCHandler() {
 
 func (s *Service) Open() error {
 	c := s.Config()
+	if !c.Enable {
+		return nil
+	}
+
 	if err := s.addTS002HTTPHandlers(); err != nil {
 		s.diag.Error("Open Error", err)
 		return err
@@ -74,6 +78,8 @@ func (s *Service) Open() error {
 	} else {
 		s.mesAPI = mes
 	}
+
+	s.TighteningDevice.GetDispatcher(tightening_device.DISPATCH_RESULT).Register(s.onTighteningResult)
 
 	return nil
 }
@@ -134,7 +140,7 @@ func (s *Service) ioONDuration(sn string, idx int, duration time.Duration) {
 	}
 	ticker := time.NewTicker(duration)
 	defer ticker.Stop()
-	for ; ; {
+	for {
 		select {
 		case <-ticker.C:
 			if err := s.IO.Write(sn, uint16(idx), io.OUTPUT_STATUS_OFF); err != nil {
@@ -161,7 +167,7 @@ func (s *Service) alarmControl(req *RushAlarmReq) error {
 
 	for _, IOIdx := range iList {
 		idx := IOIdx / 8 //IO模块索引
-		rr := IOIdx % 8 // 真实IO的位数
+		rr := IOIdx % 8  // 真实IO的位数
 		sn := s.IO.GetIOSerialNumberByIdx(idx)
 		go s.ioONDuration(sn, rr, time.Duration(c.IOAlarmLast))
 	}
@@ -191,6 +197,7 @@ func (s *Service) ioControl(req *RushIOControlReq) error {
 	if req == nil {
 		return errors.New("ioControl: Req Is Nil")
 	}
+
 	if err := s.validateRequestPayload(req); err != nil {
 		return err
 	}
@@ -207,6 +214,26 @@ func (s *Service) onTighteningResult(data interface{}) {
 	tighteningResult := data.(*tightening_device.TighteningResult)
 	if tighteningResult.MeasureResult == tightening_device.RESULT_NOK {
 		// 如果结果NOK，则触发报警
+		err := s.alarmControl(&RushAlarmReq{
+			Status: "on",
+		})
+
+		if err != nil {
+			s.diag.Error("Trigger Alarm Failed", err)
+		}
+	}
+
+	result := MesResultUploadReq{
+		UUID:         tighteningResult.PointID,
+		ActualAngle:  tighteningResult.MeasureAngle,
+		ActualTorque: tighteningResult.MeasureTorque,
+		Flag:         mapMeasureResult[tighteningResult.MeasureResult],
+	}
+
+	// 上传拧紧结果
+	err := s.mesAPI.sendResultData(&result)
+	if err != nil {
+		s.diag.Error("Upload Result Failed", err)
 	}
 }
 
@@ -223,5 +250,18 @@ func (s *Service) onNFCData(data interface{}) {
 	}
 	if err := s.mesAPI.sendNFCData(code); err != nil {
 		s.diag.Error("sendNFCData Error", err)
+		return
+	}
+
+	// 如果成功则开锁
+	iList := s.Config().IOLocker
+	for _, IOIdx := range iList {
+		idx := IOIdx / 8 //IO模块索引
+		rr := IOIdx % 8  // 真实IO的位数
+		sn := s.IO.GetIOSerialNumberByIdx(idx)
+		err := s.IO.Write(sn, uint16(rr), io.OUTPUT_STATUS_ON)
+		if err != nil {
+			s.diag.Error(fmt.Sprintf("Locker Control Error SN:%s Output:%d", sn, rr), err)
+		}
 	}
 }

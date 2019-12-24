@@ -48,6 +48,5 @@ type RushIOControlReq struct {
 
 // Mes->Rush 读卡器信息
 type RushCardInfoReq struct {
-	CardCode  string `json:"cardCode" validate:"required"`
+	CardCode string `json:"cardCode" validate:"required"`
 }
-

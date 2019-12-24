@@ -20,7 +20,6 @@ type IIOService interface {
 	Write(sn string, index uint16, status uint16) error
 }
 
-
 type INFCService interface {
 	RegisterNFCDispatcher(dispatcher utils.DispatchHandler) error
 	StopNFCDispatcher()

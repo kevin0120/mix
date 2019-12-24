@@ -40,7 +40,7 @@ func (s *Service) RegisterNFCDispatcher(dispatcher utils.DispatchHandler) error 
 	return nil
 }
 
-func (s *Service) StopNFCDispatcher()  {
+func (s *Service) StopNFCDispatcher() {
 	s.nfcDispatcher.Release()
 }
 

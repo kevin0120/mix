@@ -31,10 +31,10 @@ type MesApiConfig struct {
 
 func NewMesApiConfig() MesApiConfig {
 	return MesApiConfig{
-		APIUrl:  "http://127.0.0:1:8000",
-		Timeout: toml.Duration(time.Duration(10 * time.Second)),
-		RetryCount: 5,
-		EndpointCardInfo: "/api/v1/cardinfo",
+		APIUrl:               "http://127.0.0:1:8000",
+		Timeout:              toml.Duration(time.Duration(10 * time.Second)),
+		RetryCount:           5,
+		EndpointCardInfo:     "/api/v1/cardinfo",
 		EndpointResultUpload: "/api/v1/results",
 	}
 }
