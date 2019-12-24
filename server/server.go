@@ -157,7 +157,7 @@ func New(c *Config, buildInfo BuildInfo, diagService *diagnostic.Service) (*Serv
 func (s *Server) appendTS002Service(projectCode string) {
 	c := s.config.TS002
 	d := s.DiagService.NewCustomizeHandler(projectCode)
-	srv := ts002.NewService(c, d)
+	srv := ts002.NewService(c, d, s.HTTPDService)
 
 	s.TS002Service = srv
 	s.AppendService(projectCode, srv)
