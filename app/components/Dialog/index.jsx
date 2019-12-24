@@ -73,7 +73,7 @@ function customDialog(props: Props) {
           }}
           TransitionComponent={Transition}
           keepMounted
-          maxWidth
+          maxWidth={maxWidth}
           open={open}
           onClose={onClose}
           aria-labelledby="form-dialog-title"

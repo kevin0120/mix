@@ -2,6 +2,7 @@
 import InputStep from './InputStep';
 import ScannerStep from './scannerStep';
 import InstructionStep from './instructionStep';
+import TextStep from './TextStep';
 import ScrewStep from './screwStep';
 import MaterialStep from './materialStep';
 import PassFailStep from './PassFailStep';
@@ -18,6 +19,9 @@ export default {
   },
   [s.instruction]: {
     component: InstructionStep
+  },
+  [s.text]: {
+    component: TextStep
   },
   [s.screw]: {
     component: ScrewStep

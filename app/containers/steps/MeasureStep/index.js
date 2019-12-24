@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core';
 import TextField from '@material-ui/core/TextField';
 import { stepPayload, viewingStep } from '../../../modules/order/selector';
-import checkStepActions from '../../../modules/step/checkStep/action';
+import stepActions from '../../../modules/step/actions';
 import type { tStepProps } from '../types';
 import Button from '../../../components/CustomButtons/Button';
 import type { Dispatch } from '../../../modules/typeDef';
@@ -33,7 +33,7 @@ const mapState = (state, props: tOP): tSP => ({
 });
 
 const mapDispatch: tDP = {
-  submit: checkStepActions.submit
+  submit: stepActions.submit
 };
 
 type Props = {|
@@ -55,15 +55,12 @@ function MeasureStep({
   const classes = makeStyles(styles)();
   useEffect(
     () => {
-      const onSubmit = v => {
-        submit(v);
-      };
       bindAction(
         <Button
           type="button"
           color="primary"
           onClick={() => {
-            onSubmit(value);
+            submit(value);
           }}
           disabled={!isCurrent}
         >

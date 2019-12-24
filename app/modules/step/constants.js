@@ -12,7 +12,7 @@ export const STEP_STATUS = Object.freeze({
 export const stepTypeKeys=Object.freeze({
   input: 'input',
   scanner: 'register_byproducts',
-  instruction: 'text',
+  instruction: 'instruction',
   text: 'text',
   screw: 'tightening',
   material: 'register_consumed_materials',
@@ -20,5 +20,9 @@ export const stepTypeKeys=Object.freeze({
   measure: 'measure',
   video: 'video',
 });
+
+export const STEP_ACTIONS={
+  SUBMIT:'STEP_SUBMIT'
+};
 
 export default STEP_STATUS;

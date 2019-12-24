@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Button from '../../../components/CustomButtons/Button';
-import stepActions from '../../../modules/step/actions';
+import stepActions  from '../../../modules/step/actions';
 import type { tStepProps } from '../types';
 import { stepPayload, viewingStep } from '../../../modules/order/selector';
 import styles from './styles';
@@ -15,19 +15,19 @@ type tOP = {|
 
 type tSP = {|
   ...tOP,
-  video: string
+  url: string,
+  page: number
 |};
 
 type tDP = {|
   submit: Dispatch
 |};
-const mapState = (state, props: tOP): tSP => {
-  // console.log(stepPayload(viewingStep(state.order)));
-  return ({
-    ...props,
-    video: stepPayload(viewingStep(state.order))?.url || ''
-  });
-};
+
+const mapState = (state, props: tOP): tSP => ({
+  ...props,
+  url: stepPayload(viewingStep(state.order))?.url || '',
+  page: stepPayload(viewingStep(state.order))?.page || 0
+});
 
 const mapDispatch: tDP = {
   submit: stepActions.submit
@@ -38,7 +38,7 @@ type Props = {|
   ...tDP
 |};
 
-function InstructionStep({ step, isCurrent, submit, bindAction, video }: Props) {
+function InstructionStep({ step, isCurrent, submit, bindAction }: Props) {
   const classes = makeStyles(styles)();
   useEffect(() => {
     bindAction(
@@ -58,7 +58,7 @@ function InstructionStep({ step, isCurrent, submit, bindAction, video }: Props) 
 
   return (
     <div className={classes.container}>
-      <video src={video} className={classes.video} autoPlay loop controls/>
+      text
     </div>
 
   );

@@ -1,6 +1,6 @@
-import { put } from 'redux-saga/effects';
+import { put, take } from 'redux-saga/effects';
 import { orderActions } from '../order/action';
-import { STEP_STATUS } from './constants';
+import { STEP_ACTIONS, STEP_STATUS } from './constants';
 import { CommonLog } from '../../common/utils';
 
 function* readyState(config) {
@@ -21,7 +21,8 @@ function* enteringState(config) {
 
 function* doingState(config) {
   try {
-    yield put(orderActions.stepStatus(this, STEP_STATUS.DOING, config));
+    yield take(STEP_ACTIONS.SUBMIT);
+    yield put(orderActions.stepStatus(this, STEP_STATUS.FINISHED, config));
   } catch (e) {
     CommonLog.lError(e);
   }
@@ -34,6 +35,7 @@ function* finishState(config) {
     CommonLog.lError(e);
   }
 }
+
 function* failState(config) {
   try {
     yield put(orderActions.finishStep(this));

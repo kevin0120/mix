@@ -2,12 +2,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { makeStyles } from '@material-ui/core';
-import { stepPayload, viewingStep } from '../../../modules/order/selector';
-import checkStepActions from '../../../modules/step/checkStep/action';
+import stepActions from '../../../modules/step/actions';
 import type { tStepProps } from '../types';
 import Button from '../../../components/CustomButtons/Button';
 import type { Dispatch } from '../../../modules/typeDef';
-import type { tStepPayload } from '../../../modules/step/interface/typeDef';
 import styles from './styles';
 
 type tOP = {|
@@ -15,9 +13,7 @@ type tOP = {|
 |};
 
 type tSP = {|
-  ...tOP,
-  type: string,
-  payload: ?tStepPayload
+  ...tOP
 |};
 
 type tDP = {|
@@ -26,12 +22,10 @@ type tDP = {|
 
 const mapState = (state, props: tOP): tSP => ({
   ...props,
-  type: stepPayload(viewingStep(state.order))?.type || '',
-  payload: stepPayload(viewingStep(state.order))
 });
 
 const mapDispatch: tDP = {
-  submit: checkStepActions.submit
+  submit: stepActions.submit
 };
 
 type Props = {|
